@@ -1,0 +1,61 @@
+name: Live Smoketest — K-Plan × K-Mail 캠페인 위임
+
+# 2026-09-02 신설 — K-Mail(트랙 A~F) 메일 배포 계획을 상위 개념인 K-Plan에
+# 위임해, K-Intent→K-Compose→K-Execute 체인으로 실제 검증받는 최초 라이브
+# 스모크테스트. prompts/k-plan_v1_0.md는 "아직 실제 서비스 백엔드에
+# 연결되지 않았다"고 명시된 설계 단계 문서이므로, 이 워크플로가 그
+# 프롬프트를 실제 DeepSeek API로 호출하는 첫 라이브 검증이다.
+#
+# 기존 live-smoketest-expert-persona.yml과 동일한 관례(workflow_dispatch,
+# DEEPSEEK_API_KEY, results 브랜치 커밋, artifact 업로드)를 따르되, 채점
+# 기준은 K-Plan 전용으로 kplan_mail_campaign_smoketest.py에 별도 정의했다
+# (EXPERT류 STEP D 채점은 여기 적용되지 않음).
+#
+# 필요 GitHub Secrets:
+#   DEEPSEEK_API_KEY — 이미 등록됨(다른 live-smoketest-* 워크플로와 공용).
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run-kplan-mail-campaign-smoketest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install requests
+
+      - name: Run K-Plan × K-Mail campaign live smoketest
+        working-directory: tests/live_smoketest
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          python3 kplan_mail_campaign_smoketest.py \
+            --scenarios kplan_mail_campaign_scenario.json \
+            --out ../../results/kplan-mail-campaign
+
+      - name: Commit results to results branch
+        run: |
+          git config user.name "hondi-live-smoketest-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout -B results/live-smoketest-kplan-mail-campaign
+          git add -f results/
+          git diff --cached --quiet || git commit -m "chore: K-Plan x K-Mail campaign live smoketest results ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+          git push --force origin HEAD:results/live-smoketest-kplan-mail-campaign
+
+      - name: Upload artifact (backup)
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-smoketest-kplan-mail-campaign-results
+          path: results/
