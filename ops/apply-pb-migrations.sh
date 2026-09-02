@@ -1,6 +1,25 @@
 #!/usr/bin/env bash
 # GitHub Actions 전용 강제 커맨드로만 실행됨.
 #
+# ★ 2026-09-02 — 이 파일은 그동안 hanlim 서버(/opt/gopang/ops/)에만
+# 존재하고 저장소엔 없었다(git 이력 없음). K-Plan↔K-Mail 파이프라인
+# 배포 중 deploy-pb-migrations.yml이 404로 계속 실패해 원인을 추적한
+# 끝에 발견 — gopang/gopang_v2를 hondi로 통합할 때 이 서버 전용
+# 스크립트는 통합 대상에서 빠져 있었고, RAW_BASE가 여전히 아카이브된
+# 옛 저장소(Openhash-Gopang/gopang)를 가리키고 있었다. 서버에서 직접
+# `sed`로 급한 불을 끄고, 이번에 그 결과를 저장소에 정본으로 편입한다
+# (아래 RAW_BASE가 이미 hondi로 수정된 상태).
+#
+# ⚠️ 알려진 한계: 이 스크립트를 배포하는 SSH 키(L1_SSH_PRIVATE_KEY)는
+# authorized_keys에 강제 커맨드(command="/opt/gopang/ops/apply-pb-migrations.sh")로
+# 제한되어 있어, 그 키로는 이 스크립트 자신을 포함해 어떤 파일도
+# 서버에 새로 옮길 수 없다(오직 pb_migrations/*.js만 받아 적용 가능).
+# 즉 이 파일이 저장소에서 바뀌어도 **자동으로 서버에 반영되지 않는다**
+# — 지금은 이 파일이 바뀌면 사람이 SSH로 직접 접속해 수동으로
+# 덮어써야 한다. 자동 동기화가 필요해지면 별도의(더 넓은 권한을 가진)
+# 배포 키와 워크플로 단계를 새로 설계해야 한다 — 이번 편입 작업의
+# 범위 밖으로 남겨둔다.
+#
 # 2026-07-16 재설계: 폴더 전체 동기화(codeload tarball) 대신, 클라이언트가
 # SSH_ORIGINAL_COMMAND로 넘긴 "이번 push에서 실제로 바뀐 pb_migrations
 # 파일 목록"만 개별 검증 후 받는다. 이렇게 해야:
@@ -18,10 +37,10 @@
 # (2) migrate up 자체가 실패하면 여전히 스크립트를 실패시키되(진짜 실패),
 # 재시작 후 헬스체크는 "몇 초 늦게 뜨는 것"을 정상 범위로 보고 재시도 끝에도
 # 안 되면 그때만 경고로 남긴다(구버전의 `|| echo [WARN]` 안전장치를 재시도
-# 로직과 함께 복원 — 이 안전장치가 재설계 과정에서 빠졌던 것으로 보임).
+# 로직과 함께 복원 — 이 안전장치가 재설계 과정에서 빠졌던 것으로 보인다).
 set -euo pipefail
 cd /opt/gopang
-RAW_BASE="https://raw.githubusercontent.com/Openhash-Gopang/gopang/main/pb_migrations"
+RAW_BASE="https://raw.githubusercontent.com/Openhash-Gopang/hondi/main/pb_migrations"
 FILES="${SSH_ORIGINAL_COMMAND:-}"
 if [ -z "$FILES" ]; then
   echo "[SKIP] 변경된 파일 목록이 비어있음 — 아무 작업도 하지 않음."

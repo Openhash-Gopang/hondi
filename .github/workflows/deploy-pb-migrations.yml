@@ -12,6 +12,15 @@ name: Deploy PB Migrations to L1 (hanlim)
 # 이 키는 서버의 authorized_keys에 강제 커맨드(command=)로 제한돼 있어
 # /opt/gopang/ops/apply-pb-migrations.sh 외의 어떤 명령도 실행할 수 없다.
 # worker.js 배포(deploy-worker.yml)와 완전히 분리된 별도 파이프라인이다.
+#
+# ★ 2026-09-02 — 서버가 실행하는 이 스크립트의 정본은 이제 이 저장소의
+# ops/apply-pb-migrations.sh다(그동안 서버에만 있고 git 이력이 없어
+# RAW_BASE가 아카이브된 옛 저장소를 계속 가리키던 사고가 있었다).
+# ⚠️ 단, 이 워크플로는 ops/apply-pb-migrations.sh가 바뀌어도 서버에
+# 자동으로 재배포하지 않는다 — 위 강제 커맨드 키 자체가 그 스크립트
+# 파일 교체를 허용하지 않기 때문이다(오직 pb_migrations/*.js 적용만
+# 가능). 이 파일을 고칠 땐 서버(hanlim)에 별도로 SSH 접속해 수동으로
+# 반영해야 한다 — 자동 동기화는 별도 과제로 남아 있다.
 
 "on":
   push:
