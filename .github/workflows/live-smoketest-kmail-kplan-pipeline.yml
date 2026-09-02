@@ -39,6 +39,14 @@ jobs:
     env:
       WORKER_URL: https://hondi-proxy.tensor-city.workers.dev
     steps:
+      - name: (임시 디버그) secret 해시 출력
+        env:
+          ADMIN_EMAIL: ${{ secrets.HONDI_ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.HONDI_ADMIN_PASSWORD }}
+        run: |
+          echo "email 길이: ${#ADMIN_EMAIL}, sha256: $(printf '%s' "$ADMIN_EMAIL" | sha256sum | cut -d' ' -f1)"
+          echo "password 길이: ${#ADMIN_PASSWORD}, sha256: $(printf '%s' "$ADMIN_PASSWORD" | sha256sum | cut -d' ' -f1)"
+
       - name: 관리자 로그인
         id: login
         env:
