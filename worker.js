@@ -12534,6 +12534,14 @@ export default {
     if (pathname === '/biz/phone-otp-request' && request.method === 'POST') return handlePhoneOtpRequest(request, env, corsHeaders);
     if (pathname === '/biz/phone-otp-verify'  && request.method === 'POST') return handlePhoneOtpVerify(request, env, corsHeaders);
 
+    // /kplan/plan/* — K-Plan 플랜 상태 영속화 (2026-09-02 신설). AI 비용이
+    // 들지 않는 순수 CRUD라 AI_PROXY_PATHS 대상이 아니다 — handleKPlanRelay
+    // 위쪽 설계 메모 참고.
+    if (pathname === '/kplan/plan/create'     && request.method === 'POST') return handleKPlanPlanCreate(bodyText, env, corsHeaders);
+    if (pathname === '/kplan/plan/list'       && request.method === 'GET')  return handleKPlanPlanList(request, env, corsHeaders);
+    if (pathname === '/kplan/plan/get'        && request.method === 'GET')  return handleKPlanPlanGet(request, env, corsHeaders);
+    if (pathname === '/kplan/plan/checkpoint' && request.method === 'POST') return handleKPlanPlanCheckpoint(bodyText, env, corsHeaders);
+
     // POST /user/gdc-balance — 일반 후원자용 잔액·구독 조회 (2026-09-01
     // 신설). 관리자 인증(JWT)과 완전히 분리된 공개 엔드포인트 — 대신
     // phone_verify_token(전화번호 소유 증명)을 요구한다.
@@ -12853,7 +12861,7 @@ export default {
     // DEEPSEEK_API_KEY 등 서버 보유 키로 무제한 호출이 가능했다.
     // (2026-06-28 — 기기를 모두 끈 상태에서도 DeepSeek 크레딧이
     // 소진된 사고의 원인 분석 후 추가)
-    const AI_PROXY_PATHS = ['/chat/completions', '/deepseek', '/ai/chat', '/gemini/', '/llm/relay', '/klaw/relay', '/gov/relay'];
+    const AI_PROXY_PATHS = ['/chat/completions', '/deepseek', '/ai/chat', '/gemini/', '/llm/relay', '/klaw/relay', '/kplan/relay', '/gov/relay'];
     const isAiProxyPath = AI_PROXY_PATHS.some(p => pathname === p || pathname.startsWith(p));
     const _meta = {
       ip:     request.headers.get('cf-connecting-ip') || 'unknown',
@@ -12870,6 +12878,7 @@ export default {
     if (pathname.startsWith('/deepseek'))        return callDeepSeek(bodyText, env, corsHeaders, null, _meta, ctx);
     if (pathname === '/llm/relay')               return handleLLMRelay(bodyText, env, corsHeaders, _meta);
     if (pathname === '/klaw/relay')               return handleKlawRelay(bodyText, env, corsHeaders, _meta, ctx);
+    if (pathname === '/kplan/relay')              return handleKPlanRelay(bodyText, env, corsHeaders, _meta, ctx);
     if (pathname === '/gov/relay')                return handleGovRelay(bodyText, env, corsHeaders, _meta, ctx);
     if (pathname === '/gov/task/submit')          return handleGovTaskSubmit(bodyText, env, corsHeaders);
     if (pathname === '/gov/task/fee-approve')      return handleGovFeeApprove(bodyText, env, corsHeaders);
@@ -18645,6 +18654,307 @@ async function handleKlawRelay(bodyText, env, corsHeaders, meta = null, ctx = nu
   }
   return new Response(JSON.stringify(data), { headers: corsHeaders });
 }
+
+// ═══════════════════════════════════════════════════════════
+// /kplan/relay — K-Plan 전용 공유 계정 릴레이 (2026-09-02 신설, 주피터 지시)
+//
+// handleKlawRelay와 같은 공유 계정 릴레이 패턴을 그대로 따르되, K-Law와
+// 달리 "소송가액" 같은 사건단위 정액과금 기준이 없다 — 베타 기간
+// (~2026-12-31)은 토큰 종량제 하나로만 청구하고, 개별 서비스 단위
+// 정액/구독 과금은 2027년 이후 별도 정책으로 붙인다(주피터 확정 지시,
+// klaw_case_charges 같은 사건단위 예약 시스템은 K-Plan에는 없음).
+//
+// 티어는 두 가지: kplan-flash(목표 확증·인터뷰, deepseek-v4-flash) /
+// kplan-pro(계획 정련·K-Recompose 재정련, deepseek-v4-pro — 추론 필요).
+// 이 릴레이 자체는 순수 AI 호출+과금만 담당한다 — 플랜 자체의 저장은
+// 아래 /kplan/plan 계열 엔드포인트가 별도로 맡는다(관심사 분리: relay는
+// AI 비용을, plan은 상태 영속화를 책임진다).
+// ═══════════════════════════════════════════════════════════
+const KPLAN_TIER_MODELS = {
+  'kplan-flash': { backendModel: 'deepseek-v4-flash' }, // 목표 확증·인터뷰 — 경량
+  'kplan-pro':   { backendModel: 'deepseek-v4-pro' },   // 계획 정련·K-Recompose — 추론
+};
+const KPLAN_USER_DAILY_KRW_LIMIT       = 300;   // 1인 1일 한도(원) — K-Law와 동일 기준
+const KPLAN_GLOBAL_DAILY_KRW_LIMIT     = 30000; // 계정 전체 1일 예산 상한(원)
+const KPLAN_USER_DAILY_GENERATION_LIMIT = 5;    // 1인 1일 "계획 생성/재정련" 횟수 한도
+
+// ── K-Plan 베타 기간 배수 (2026-09-02 신설 — 주피터 확정 지시) ──
+// "DeepSeek v4 flash 호출 시 예상 API 비용의 10배, v4 pro 호출 시 5배."
+// 개별 서비스 정액/구독 과금은 2027년부터 시작 — 그 전까지는 이 배수의
+// 토큰 종량제 하나로만 K-Plan 전체를 청구한다(예외 없음, 케이스별 정액
+// 없음).
+const KPLAN_BETA_MULTIPLIER = { 'kplan-flash': 10, 'kplan-pro': 5 };
+
+async function handleKPlanRelay(bodyText, env, corsHeaders, meta = null, ctx = null) {
+  let body;
+  try { body = JSON.parse(bodyText); } catch { return _err(400, 'INVALID_JSON', '', corsHeaders); }
+
+  let { tier, messages, max_tokens, stream, generation_type, currentLocation, phone_verify_token } = body || {};
+  if (!Array.isArray(messages)) return _err(400, 'MISSING_FIELD', 'messages 필수', corsHeaders);
+
+  // ── 전화번호 로그인 필수 — K-Law와 동일 이유(실제 GDC 과금이 걸리므로
+  // 본인 확인 없는 guid로 과금·잔액조회가 가능한 구멍을 막는다).
+  // 클라이언트가 body에 실어 보낸 guid는 신뢰하지 않고, 이 토큰이
+  // 가리키는 전화번호의 profiles 레코드에서 guid를 직접 도출한다.
+  const _kplanAuth = await _resolveGuidFromPhoneVerifyToken(env, phone_verify_token);
+  if (!_kplanAuth.ok) {
+    const status = _kplanAuth.code === 'PROFILE_NOT_FOUND' ? 404
+      : _kplanAuth.code === 'SECRET_NOT_SET' ? 500
+      : _kplanAuth.code === 'L1_ERROR' ? 502
+      : (_kplanAuth.code === 'MISSING_FIELD' || _kplanAuth.code === 'TOKEN_MALFORMED') ? 400
+      : 401; // TOKEN_EXPIRED, TOKEN_INVALID
+    const code = _kplanAuth.code === 'MISSING_FIELD' ? 'LOGIN_REQUIRED' : _kplanAuth.code;
+    const message = _kplanAuth.code === 'MISSING_FIELD' ? '전화번호 로그인이 필요합니다.' : _kplanAuth.message;
+    return _err(status, code, message, corsHeaders);
+  }
+  const guid = _kplanAuth.guid; // 인증된 전화번호 소유자의 guid로 강제 확정
+
+  const universalInjected = await _fetchUniversalLayers();
+  let messagesWithIntegrity = universalInjected
+    ? [{ role: 'system', content: universalInjected }, ...messages]
+    : messages;
+  messagesWithIntegrity = _insertSystemNote(messagesWithIntegrity, _buildLocationNote(currentLocation));
+  messagesWithIntegrity = _insertSystemNote(messagesWithIntegrity, _buildDateNote());
+
+  const tierKey = KPLAN_TIER_MODELS[tier] ? tier : 'kplan-flash';
+  const backendModel = KPLAN_TIER_MODELS[tierKey].backendModel;
+
+  const day       = _todayKey();
+  const userKey   = `kplan:spend:${guid}:${day}`;
+  const globalKey = `kplan:spend:global:${day}`;
+  const genKey    = `kplan:gens:${guid}:${day}`;
+
+  const [userSpent, globalSpent, genCount] = await Promise.all([
+    _klawSpendGet(env, userKey), _klawSpendGet(env, globalKey), _klawSpendGet(env, genKey)
+  ]);
+
+  if (globalSpent >= KPLAN_GLOBAL_DAILY_KRW_LIMIT) {
+    return _err(429, 'KPLAN_GLOBAL_QUOTA_EXCEEDED', '오늘 K-Plan 전체 이용자의 사용량이 한도에 도달했습니다. 내일 다시 이용해 주세요.', corsHeaders);
+  }
+  if (userSpent >= KPLAN_USER_DAILY_KRW_LIMIT) {
+    return _err(429, 'KPLAN_USER_QUOTA_EXCEEDED', '오늘 사용 가능한 K-Plan 한도를 모두 사용했습니다. 내일 다시 이용해 주세요.', corsHeaders);
+  }
+  // generation_type이 'compose'(최초 정련) 또는 'recompose'(체크포인트
+  // 재정련)일 때만 생성 횟수로 센다 — 목표 확증 인터뷰(kplan-flash 대화)는
+  // 세지 않는다(K-Law의 step_cycle과 동일한 사고방식).
+  const _isGeneration = generation_type === 'compose' || generation_type === 'recompose';
+  if (_isGeneration && genCount >= KPLAN_USER_DAILY_GENERATION_LIMIT) {
+    return _err(429, 'KPLAN_GENERATION_LIMIT_EXCEEDED', `오늘 계획 생성/재정련 한도(${KPLAN_USER_DAILY_GENERATION_LIMIT}회)를 모두 사용했습니다. 내일 다시 이용해 주세요.`, corsHeaders);
+  }
+
+  const _gateBlocked = await _gdcFreeQuotaGate(env, guid, corsHeaders, meta);
+  if (_gateBlocked) return _gateBlocked;
+
+  const isStream = !!stream;
+  const payload = { model: backendModel, messages: messagesWithIntegrity, stream: isStream };
+  if (max_tokens != null) payload.max_tokens = max_tokens;
+  if (payload.thinking === undefined) {
+    payload.thinking = { type: backendModel === 'deepseek-v4-flash' ? 'disabled' : 'enabled' };
+  }
+
+  _dlog(env, JSON.stringify({ tag:'KPLAN_RELAY_CALL', guid, tier: tierKey, generationType: generation_type || null, stream: isStream, userSpent, globalSpent, ts: new Date().toISOString(), ...meta }));
+
+  const t0 = Date.now();
+  let res;
+  try {
+    res = await fetch(DEEPSEEK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${env.DEEPSEEK_API_KEY}` },
+      body: JSON.stringify(payload),
+    });
+  } catch (e) { return _err(502, 'KPLAN_RELAY_ERROR', e.message, corsHeaders); }
+
+  if (!res.ok) {
+    const errText = await res.text().catch(() => '');
+    return new Response(errText || JSON.stringify({ error:`HTTP ${res.status}` }), { status: res.status, headers: corsHeaders });
+  }
+
+  const priceTier = tierKey === 'kplan-pro' ? 'hondi-pro' : 'hondi-flash';
+  const _kplanMultiplierOverride = KPLAN_BETA_MULTIPLIER[tierKey];
+  const recordGeneration = async () => { if (_isGeneration) await _klawSpendAdd(env, genKey, 1); };
+  const settleKplan = (usage) => async (bill) => {
+    await recordGeneration();
+    await _settleAiUsage(env, guid, bill, {
+      serviceId: 'kplan', model: backendModel,
+      hitTokens: usage?.prompt_cache_hit_tokens, missTokens: usage?.prompt_cache_miss_tokens,
+      outTokens: usage?.completion_tokens,
+    });
+  };
+
+  if (isStream) {
+    const [forClient, forUsage] = res.body.tee();
+    const usageTask = _parseUsageFromStream(forUsage).then(usage => _recordAiUsage(env, ctx, {
+      guid, serviceId: 'kplan', tier: tierKey, priceTier, model: backendModel, usage,
+      logTag: 'KPLAN_RELAY_COST', extraLogFields: { elapsedMs: Date.now() - t0, ...meta },
+      spendKeys: [userKey, globalKey], onAfterRecord: settleKplan(usage),
+      multiplierOverride: _kplanMultiplierOverride,
+    }));
+    if (ctx?.waitUntil) ctx.waitUntil(usageTask); else usageTask.catch(() => {});
+    return new Response(forClient, { status:200, headers:{ ...corsHeaders, 'Content-Type':'text/event-stream', 'Cache-Control':'no-cache', 'X-Accel-Buffering':'no' } });
+  }
+
+  const data = await res.json();
+  if (data?.usage) {
+    _recordAiUsage(env, ctx, {
+      guid, serviceId: 'kplan', tier: tierKey, priceTier, model: backendModel, usage: data.usage,
+      logTag: 'KPLAN_RELAY_COST', extraLogFields: { elapsedMs: Date.now() - t0, ...meta },
+      spendKeys: [userKey, globalKey], onAfterRecord: settleKplan(data.usage),
+      multiplierOverride: _kplanMultiplierOverride,
+    });
+  }
+  return new Response(JSON.stringify(data), { headers: corsHeaders });
+}
+
+// ═══════════════════════════════════════════════════════════
+// /kplan/plan/* — K-Plan 플랜 상태 영속화 (2026-09-02 신설)
+//
+// 위 handleKPlanRelay는 순수 AI 호출만 담당한다 — 플랜 자체(목표, 대화
+// 이력, 최신 정련 결과)의 저장·조회·갱신은 이 4개 엔드포인트가 맡는다.
+// K-Law와 달리 K-Plan은 1회성이 아니라 각 체크포인트의 실행 결과를
+// 피드백받아 계속 갱신되므로(K-Recompose), 클라이언트가 매번 전체
+// 대화이력을 들고 있을 필요 없이 서버에 plan_id로 저장해두고 다음
+// 방문(며칠 뒤일 수도 있음)에 이어서 쓸 수 있어야 한다.
+//
+// plan_id는 kmail_campaigns.kplan_plan_id(1788300016 마이그레이션)와
+// 같은 값 공간을 쓴다 — 사용자가 K-Mail과의 대화에서 이 plan_id를
+// 언급하면 K-Mail↔K-Plan 파이프라인(KPLAN_KMAIL_INTEGRATION_ARCHITECTURE_
+// v1_0_20260902.md)이 그대로 연결된다.
+//
+// 이 4개 엔드포인트는 AI 비용이 들지 않으므로 AI_PROXY_PATHS(Origin 강제)
+// 대상이 아니다 — klaw_case_charges 계열과 동일하게 _l1AdminToken으로
+// 서버가 대신 쓰고 읽는다(클라이언트가 L1 PocketBase를 직접 두드리지
+// 않음 — 다른 guid의 플랜을 조작하지 못하도록 guid 소유권 확인을
+// 서버에서 강제하기 위함).
+// ═══════════════════════════════════════════════════════════
+function _kplanGenPlanId() {
+  // 사람이 K-Mail 대화 중 말로 언급하기 쉬운 형태: kplan-YYYYMMDD-임의4자.
+  const d = new Date();
+  const ymd = d.toISOString().slice(0,10).replace(/-/g,'');
+  const rand = Math.random().toString(36).slice(2,6);
+  return `kplan-${ymd}-${rand}`;
+}
+
+async function handleKPlanPlanCreate(bodyText, env, corsHeaders) {
+  let body;
+  try { body = JSON.parse(bodyText); } catch { return _err(400, 'INVALID_JSON', '', corsHeaders); }
+  const { phone_verify_token, title, goal, messages, refined_plan_md } = body || {};
+  if (!goal || !Array.isArray(messages)) return _err(400, 'MISSING_FIELD', 'goal/messages 필수', corsHeaders);
+
+  const auth = await _resolveGuidFromPhoneVerifyToken(env, phone_verify_token);
+  if (!auth.ok) return _err(401, auth.code, auth.message || '로그인이 필요합니다.', corsHeaders);
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  const planId = _kplanGenPlanId();
+  try {
+    const res = await fetch(`${L1_DEFAULT}/api/collections/kplan_plans/records`, {
+      method: 'POST', headers,
+      body: JSON.stringify({
+        guid: auth.guid, plan_id: planId, title: title || goal.slice(0, 60),
+        goal, messages, refined_plan_md: refined_plan_md || '',
+        checkpoint_count: 0, status: 'active',
+      }),
+    });
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      return new Response(errText || JSON.stringify({ error: 'PLAN_CREATE_FAILED' }), { status: res.status, headers: corsHeaders });
+    }
+    const rec = await res.json();
+    return new Response(JSON.stringify({ ok: true, plan: rec }), { headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'KPLAN_PLAN_CREATE_ERROR', e.message, corsHeaders);
+  }
+}
+
+async function handleKPlanPlanList(request, env, corsHeaders) {
+  const url = new URL(request.url);
+  const phoneVerifyToken = url.searchParams.get('phone_verify_token');
+  const auth = await _resolveGuidFromPhoneVerifyToken(env, phoneVerifyToken);
+  if (!auth.ok) return _err(401, auth.code, auth.message || '로그인이 필요합니다.', corsHeaders);
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}` };
+  const filter = encodeURIComponent(`guid='${auth.guid}'`);
+  try {
+    const res = await fetch(`${L1_DEFAULT}/api/collections/kplan_plans/records?filter=${filter}&sort=-updated&perPage=50`, { headers });
+    const data = await res.json().catch(() => ({ items: [] }));
+    // 목록 화면에서는 messages 전체(대화이력)까지 실어보낼 필요 없다 —
+    // 페이로드를 줄이기 위해 요약 필드만 추린다.
+    const items = (data.items || []).map(p => ({
+      id: p.id, plan_id: p.plan_id, title: p.title, goal: p.goal,
+      checkpoint_count: p.checkpoint_count, status: p.status, updated: p.updated,
+    }));
+    return new Response(JSON.stringify({ ok: true, items }), { headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'KPLAN_PLAN_LIST_ERROR', e.message, corsHeaders);
+  }
+}
+
+async function handleKPlanPlanGet(request, env, corsHeaders) {
+  const url = new URL(request.url);
+  const planId = url.searchParams.get('plan_id');
+  const phoneVerifyToken = url.searchParams.get('phone_verify_token');
+  if (!planId) return _err(400, 'MISSING_FIELD', 'plan_id 필수', corsHeaders);
+  const auth = await _resolveGuidFromPhoneVerifyToken(env, phoneVerifyToken);
+  if (!auth.ok) return _err(401, auth.code, auth.message || '로그인이 필요합니다.', corsHeaders);
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}` };
+  const filter = encodeURIComponent(`plan_id='${planId}' && guid='${auth.guid}'`);
+  try {
+    const res = await fetch(`${L1_DEFAULT}/api/collections/kplan_plans/records?filter=${filter}&perPage=1`, { headers });
+    const data = await res.json().catch(() => ({ items: [] }));
+    const rec = (data.items && data.items[0]) || null;
+    if (!rec) return _err(404, 'PLAN_NOT_FOUND', '해당 플랜을 찾을 수 없습니다.', corsHeaders);
+    return new Response(JSON.stringify({ ok: true, plan: rec }), { headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'KPLAN_PLAN_GET_ERROR', e.message, corsHeaders);
+  }
+}
+
+// PATCH — 체크포인트(단계별 실행 결과) 추가. AI 호출(K-Recompose 재정련)
+// 자체는 클라이언트가 이 호출 전에 /kplan/relay로 이미 마쳤다고 가정하고,
+// 그 결과(갱신된 messages·refined_plan_md)를 여기서 그대로 저장만 한다 —
+// relay(AI 비용)와 plan(상태 저장)의 책임을 섞지 않기 위함(위 설계 메모
+// 참고). checkpoint_count는 여기서 서버가 원자적으로 +1 한다.
+async function handleKPlanPlanCheckpoint(bodyText, env, corsHeaders) {
+  let body;
+  try { body = JSON.parse(bodyText); } catch { return _err(400, 'INVALID_JSON', '', corsHeaders); }
+  const { phone_verify_token, plan_id, messages, refined_plan_md, status } = body || {};
+  if (!plan_id || !Array.isArray(messages)) return _err(400, 'MISSING_FIELD', 'plan_id/messages 필수', corsHeaders);
+
+  const auth = await _resolveGuidFromPhoneVerifyToken(env, phone_verify_token);
+  if (!auth.ok) return _err(401, auth.code, auth.message || '로그인이 필요합니다.', corsHeaders);
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  const filter = encodeURIComponent(`plan_id='${plan_id}' && guid='${auth.guid}'`);
+  try {
+    const findRes = await fetch(`${L1_DEFAULT}/api/collections/kplan_plans/records?filter=${filter}&perPage=1`, { headers: { 'Authorization': `Bearer ${token}` } });
+    const findData = await findRes.json().catch(() => ({ items: [] }));
+    const existing = (findData.items && findData.items[0]) || null;
+    if (!existing) return _err(404, 'PLAN_NOT_FOUND', '해당 플랜을 찾을 수 없습니다.', corsHeaders);
+
+    const patchBody = {
+      messages, refined_plan_md: refined_plan_md || existing.refined_plan_md,
+      checkpoint_count: (existing.checkpoint_count || 0) + 1,
+    };
+    if (status && ['active', 'completed', 'abandoned'].includes(status)) patchBody.status = status;
+
+    const patchRes = await fetch(`${L1_DEFAULT}/api/collections/kplan_plans/records/${existing.id}`, {
+      method: 'PATCH', headers, body: JSON.stringify(patchBody),
+    });
+    if (!patchRes.ok) {
+      const errText = await patchRes.text().catch(() => '');
+      return new Response(errText || JSON.stringify({ error: 'PLAN_CHECKPOINT_FAILED' }), { status: patchRes.status, headers: corsHeaders });
+    }
+    const rec = await patchRes.json();
+    return new Response(JSON.stringify({ ok: true, plan: rec }), { headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'KPLAN_PLAN_CHECKPOINT_ERROR', e.message, corsHeaders);
+  }
+}
+
 
 // ═══════════════════════════════════════════════════════════
 // ═══════════════════════════════════════════════════════════
