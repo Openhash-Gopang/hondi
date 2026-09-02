@@ -30397,7 +30397,14 @@ const KMAIL_CAMPAIGN_MAX_RECIPIENTS = 200; // 한 캠페인 최대 수신자 —
 
 // POST /kmail/campaigns/create
 // body: { guid, pubkey, signature, ts, subject, body, contact_ids,
-//         send_at?, collect_replies_until?, digest_at? }
+//         send_at?, collect_replies_until?, digest_at?,
+//         kplan_plan_id?, kplan_checkpoint_label? }
+// kplan_plan_id/kplan_checkpoint_label(2026-09-02 신설): 이 캠페인이
+// K-Plan이 설계한 플랜의 한 체크포인트일 때만 채운다 — 예: 사용자가
+// K-Plan과의 대화에서 "이 캠페인은 hondi-kmail-campaign-2026-09 플랜의
+// 트랙 B 체크포인트야"라고 알려주면 그 값을 그대로 여기 실어 보낸다.
+// 비우면 K-Plan과 무관한 일반 캠페인으로, 다이제스트 생성 후
+// K-Recompose가 트리거되지 않는다(_kmailGenerateDigest 참고).
 // contact_ids는 전부 owner_user_guid=guid && status='confirmed'여야
 // 한다 — 하나라도 아니면 캠페인 자체를 만들지 않고 어떤 id가 문제인지
 // 돌려준다(설계 §2 "확인 단계는 생략 불가" 원칙을 여기서도 강제).
@@ -30405,7 +30412,8 @@ async function handleKmailCampaignCreate(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
   const { guid, pubkey, signature, ts, subject, body: mailBody, contact_ids,
-          send_at, collect_replies_until, digest_at, attachment_ids } = body;
+          send_at, collect_replies_until, digest_at, attachment_ids,
+          kplan_plan_id, kplan_checkpoint_label } = body;
   if (!guid || !pubkey || !signature || !ts) {
     return _err(400, 'MISSING_FIELD', 'guid, pubkey, signature, ts 필수', corsHeaders);
   }
@@ -30470,6 +30478,13 @@ async function handleKmailCampaignCreate(request, env, corsHeaders) {
     digest_at: digest_at ? new Date(digest_at).toISOString() : null,
     digest_status: digest_at ? 'pending' : 'none',
     attachment_ids: validAttachmentIds,
+    // 2026-09-02 신설 — K-Mail↔K-Plan 데이터 파이프라인. 둘 다 optional
+    // 문자열 그대로 저장(형식 검증 없음 — K-Plan과의 대화에서 사용자가
+    // 붙인 임의 라벨이라 서버가 구조를 강제할 이유가 없다). kplan_plan_id가
+    // 없으면 이 캠페인은 K-Recompose 트리거 대상이 아니다(_kmailGenerateDigest
+    // 참고) — 기존 일반 캠페인 동작에는 영향 없음.
+    kplan_plan_id: typeof kplan_plan_id === 'string' ? kplan_plan_id.slice(0, 200) : '',
+    kplan_checkpoint_label: typeof kplan_checkpoint_label === 'string' ? kplan_checkpoint_label.slice(0, 200) : '',
   };
   const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_campaigns/records`, {
     method: 'POST', headers, body: JSON.stringify(record),
@@ -30610,6 +30625,92 @@ async function _kmailGenerateDigest(env, campaign) {
     method: 'PATCH', headers: { ...headers, 'Content-Type': 'application/json' },
     body: JSON.stringify({ digest_status: 'sent' }),
   }).catch(e => console.error('[K-Mail Digest] campaign 상태 갱신 실패:', e.message));
+
+  // 2026-09-02 신설 — K-Mail↔K-Plan 데이터 파이프라인의 진입점. 이
+  // 캠페인이 K-Plan 플랜의 체크포인트로 태그돼 있으면(kplan_plan_id),
+  // 방금 만든 다이제스트를 K-Recompose(k-plan_v1_1.md 신설 단계)에
+  // 넘긴다. fire-and-forget — 실패해도 다이제스트 자체(위에서 이미
+  // ai_messages에 기록·digest_status='sent' 완료)에는 영향 없다.
+  if (campaign.kplan_plan_id) {
+    await _kmailTriggerKPlanRecompose(env, campaign, digestText)
+      .catch(e => console.error('[K-Mail→K-Plan] K-Recompose 트리거 실패:', campaign.id, e.message));
+  }
+}
+
+// K-Mail↔K-Plan 데이터 파이프라인 — K-Recompose 트리거 (2026-09-02 신설)
+//
+// 배경: k-plan_v1_1.md가 K-Execute와 K-Deliver 사이에 K-Recompose(중간
+// 재평가) 단계를 신설했지만, 그 문서 자체가 명시했듯 "K-Recompose가
+// 참조할 실제 결과를 자동으로 수집하는 기능"은 범위 밖으로 남겨뒀다
+// (k-plan_v1_1.md "아직 없는 것" 참고). 이 함수가 그 공백을 메우는
+// 파이프라인의 실제 구현이다 — K-Mail이 다이제스트를 만들 때마다,
+// 그 캠페인이 K-Plan 플랜에 속해 있으면 다이제스트를 K-Recompose
+// 형식의 질의로 감싸 K-Plan에 넘기고, 응답을 사용자의 메시지함
+// (ai_messages)에 그대로 남긴다.
+//
+// AC-PRO-CORE 태그 디스패치([CALL_KPLAN: query=...], 사용자 대화
+// 도중 AC가 라우팅하는 경로)를 거치지 않고 DeepSeek를 직접 호출하는
+// 이유: K-Mail의 /kmail/chat 계열 엔드포인트는 원래부터 그 태그
+// 디스패치 체계와 격리되어 있다(pages/k-services.html #kmail 탭 문서
+// 참고 — "관제탑 3종 원칙을 다른 K-서비스처럼 상속받지 않는 격리된
+// 경로"). 이 함수는 그 격리 경계를 억지로 허무는 대신, 바로 위
+// _kmailGenerateDigest가 다이제스트 요약에 이미 쓰고 있는 것과 동일한
+// 방식(deepseekChatText 직접 호출)을 그대로 재사용한다 — 새 경로를
+// 만들지 않고 검증된 기존 패턴을 확장하는 쪽을 택했다.
+async function _kmailTriggerKPlanRecompose(env, campaign, digestText) {
+  if (!env.DEEPSEEK_API_KEY) return; // 요약 자체를 못 만드므로 조용히 반환(위 digest 로직과 동일 원칙)
+
+  // K-Plan 시스템 프롬프트 조립 — _fetchUniversalLayers()(UNIVERSAL-
+  // INTEGRITY+UNIVERSAL-common+CONTROL-TOWER-PRINCIPLE, 모든 SP 예외
+  // 없이 강제)에 k-plan 레이어를 이어붙인다. k-plan_v1_1.md 자신의
+  // 조립 순서 주석은 "UNIVERSAL-INTEGRITY → UNIVERSAL-common → k-plan"
+  // 까지만 언급하지만, CONTROL-TOWER-PRINCIPLE은 "모든 SP 제1원칙,
+  // 예외 없이"로 이미 서버 전역에 강제되어 있어(18817행 주석 참고)
+  // _fetchUniversalLayers() 표준 헬퍼를 그대로 쓴다 — k-plan 문서의
+  // 개별 주석이 이 전역 원칙보다 우선할 이유가 없다.
+  const universalLayers = await _fetchUniversalLayers();
+  let kplanLayer = '';
+  try {
+    kplanLayer = await _fetchByManifestKeyFromGithub('k-plan');
+  } catch (e) {
+    console.error('[K-Mail→K-Plan] k-plan SP 로드 실패, 트리거 중단:', e.message);
+    return;
+  }
+  const systemPrompt = [universalLayers, kplanLayer].filter(Boolean).join('\n\n---\n\n');
+
+  const recomposeQuery =
+    `K-Recompose 체크포인트 도달 — 플랜 "${campaign.kplan_plan_id}"` +
+    (campaign.kplan_checkpoint_label ? ` / 체크포인트 "${campaign.kplan_checkpoint_label}"` : '') +
+    `.\n\n캠페인 "${campaign.subject}"의 회신 마감(collect_replies_until)이 지나 다이제스트가 생성됐습니다. ` +
+    `다이제스트 내용:\n\n${digestText}\n\n` +
+    `이 플랜에서 아직 실행되지 않은 나머지 단계가 있다면, 위 결과를 근거로 그 단계들의 순서·시점·문구를 ` +
+    `재평가해 조정 사항을 알려주세요. 이미 완료·확정된 단계는 다시 열지 마세요. 조정할 게 없다고 판단되면 ` +
+    `그 판단과 이유를 그대로 알려주세요 — 매번 뭔가를 바꿔야 하는 것은 아닙니다.`;
+
+  const recomposeResult = await deepseekChatText({
+    env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-chat'),
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: recomposeQuery },
+    ],
+    max_tokens: 3000, temperature: 0, timeoutMs: 60000, fallbackText: '',
+  });
+  if (!recomposeResult) {
+    console.error('[K-Mail→K-Plan] K-Recompose 응답 없음(빈 응답 또는 타임아웃):', campaign.id);
+    return;
+  }
+
+  // K-Plan의 K-Recompose 판단을 사용자 메시지함에 그대로 남긴다 — digest와
+  // 동일한 경로(_writeAiMessage)를 쓰되 session_id는 캠페인이 아니라
+  // 플랜 단위(kplan:<plan_id>)로 묶어, 같은 플랜의 여러 체크포인트가
+  // 한 대화 흐름으로 이어지게 한다.
+  await _writeAiMessage(env, {
+    session_id: `kplan:${campaign.kplan_plan_id}`,
+    sender_guid: 'hondi-ai',
+    receiver_guid: campaign.owner_user_guid,
+    content_original: `[K-Recompose] ${campaign.kplan_checkpoint_label || campaign.subject} 체크포인트 재평가 결과\n\n${recomposeResult}`,
+    content_type: 'kplan_recompose',
+  }).catch(e => console.error('[K-Mail→K-Plan] K-Recompose 결과 기록 실패:', e.message));
 }
 
 // Cron 진입점 — digest_at이 지났고 아직 pending인 캠페인을 찾아

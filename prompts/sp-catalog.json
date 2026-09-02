@@ -563,7 +563,7 @@
   "SP-23_kreport": "SP-23_kreport_v1.2.txt",
   "SP-23_ktelecom": "SP-23_ktelecom_v1.0.txt",
   "SP-24_kestate": "SP-24_kestate_v1.0.txt",
-  "SP-25_kmail": "SP-25_kmail_v1_5.txt",
+  "SP-25_kmail": "SP-25_kmail_v1_6.txt",
   "AGENT-SUPPLIER-01": "AGENT-SUPPLIER-01_agriculture_v3.0.txt",
   "AGENT-SUPPLIER-02": "AGENT-SUPPLIER-02_forestry_v3.0.txt",
   "AGENT-SUPPLIER-03": "AGENT-SUPPLIER-03_fisheries_v3.0.txt",
@@ -646,6 +646,6 @@
   "SP-INDUSTRY-TRANSFORM-10": "SP-INDUSTRY-TRANSFORM-10_food-manufacturing_v1.0.txt",
   "SP-INDUSTRY-TRANSFORM-56": "SP-INDUSTRY-TRANSFORM-56_restaurants-bars_v1.0.txt",
   "k-job": "k-job_v1_0.md",
-  "k-plan": "k-plan_v1_0.md",
+  "k-plan": "k-plan_v1_1.md",
   "k-watch": "k-watch_v1_0.md"
 }
