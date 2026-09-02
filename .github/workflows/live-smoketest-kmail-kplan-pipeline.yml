@@ -44,10 +44,16 @@ jobs:
         env:
           ADMIN_EMAIL: ${{ secrets.HONDI_ADMIN_EMAIL }}
           ADMIN_PASSWORD: ${{ secrets.HONDI_ADMIN_PASSWORD }}
+        # jq --arg로 JSON을 조립한다 — 이전엔 "{\"email\":\"$ADMIN_EMAIL\"...}"
+        # 문자열 보간 방식이라, 비밀번호에 "/$/`/\ 같은 문자가 섞이면 bash가
+        # 깨뜨려 실제로는 다른 값이 전송됐다(2026-09-02 실패로 발견 —
+        # 로컬 PowerShell ConvertTo-Json 테스트는 이 문제가 없어 통과했는데
+        # CI에서만 재현됐다). --arg는 값을 이스케이프 걱정 없이 그대로 넣는다.
         run: |
-          RES=$(curl -s -X POST "$WORKER_URL/admin/login" \
-            -H "Content-Type: application/json" \
-            -d "{\"email\":\"$ADMIN_EMAIL\",\"password\":\"$ADMIN_PASSWORD\"}")
+          RES=$(jq -n --arg email "$ADMIN_EMAIL" --arg password "$ADMIN_PASSWORD" \
+            '{email: $email, password: $password}' | \
+            curl -s -X POST "$WORKER_URL/admin/login" \
+            -H "Content-Type: application/json" -d @-)
           TOKEN=$(echo "$RES" | jq -r '.token // empty')
           if [ -z "$TOKEN" ]; then
             echo "::error::관리자 로그인 실패 — HONDI_ADMIN_EMAIL/PASSWORD secret을 확인하세요. 응답: $RES"
@@ -66,10 +72,12 @@ jobs:
         run: |
           PLAN_ID="ci-smoketest-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           echo "plan_id=$PLAN_ID" >> "$GITHUB_OUTPUT"
-          RES=$(curl -s -X POST "$WORKER_URL/admin/kmail/seed-test-campaign" \
+          RES=$(jq -n --arg plan_id "$PLAN_ID" --arg checkpoint_label "라이브 스모크테스트" \
+            --arg test_email "$TEST_EMAIL" --arg test_name "$TEST_NAME" \
+            '{plan_id: $plan_id, checkpoint_label: $checkpoint_label, test_email: $test_email, test_name: $test_name}' | \
+            curl -s -X POST "$WORKER_URL/admin/kmail/seed-test-campaign" \
             -H "Content-Type: application/json" \
-            -H "Authorization: Bearer $ADMIN_TOKEN" \
-            -d "{\"plan_id\":\"$PLAN_ID\",\"checkpoint_label\":\"라이브 스모크테스트\",\"test_email\":\"$TEST_EMAIL\",\"test_name\":\"$TEST_NAME\"}")
+            -H "Authorization: Bearer $ADMIN_TOKEN" -d @-)
           OK=$(echo "$RES" | jq -r '.ok')
           if [ "$OK" != "true" ]; then
             echo "::error::캠페인 시딩 실패. 응답: $RES"
