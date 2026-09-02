@@ -84,7 +84,11 @@ AXIS_ORG_SPECIFICITY_RE = re.compile(r"사법부|대학|특수성|다른\s*원�
 # K-Plan 구조 언급 여부(라벨 자체가 아니라 개념 커버리지 확인)
 STAGE_INTENT_RE = re.compile(r"K-Intent|의도\s*(파악|확인|확증)")
 STAGE_COMPOSE_RE = re.compile(r"K-Compose|달성\s*가능성|대안\s*경로")
-STAGE_EXECUTE_RE = re.compile(r"K-Execute|실행\s*(순서|단계)|접촉\s*순서")
+# 2026-09-02 1차 개정 — 최초 라이브 실행에서 K-Plan이 실제로 "실행 순서"
+# 대신 "발송 순서"("1차 발송(9월 1~2주) — 트랙 F → 트랙 B" 형태)라는
+# 표현을 썼는데 이 표현이 빠져 있어 K-Execute:False로 오채점됐다(원문에는
+# 구체적 날짜·순서가 있었음). "발송 순서"·"우선순위"를 추가해 반영.
+STAGE_EXECUTE_RE = re.compile(r"K-Execute|실행\s*(순서|단계)|접촉\s*순서|발송\s*순서|우선순위")
 
 # 되묻기만으로 끝난 턴(K-Intent 확증 단계) — live_smoketest.py 관례와 동일
 CLARIFY_PATTERNS = [
@@ -104,7 +108,11 @@ EMAIL_PATTERN_RE = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
 UNCERTAINTY_HEDGE_RE = re.compile(r"확인\s*필요|추정|가정|예시|가상|미확정")
 
 # 근거 없는 확정 수치(%) — "약", "낮다/높다" 같은 정성 표현 없이
-# 숫자%만 단독으로 나오면 의심 대상.
+# 숫자%만 단독으로 나오면 의심 대상. 단, 2026-09-02 1차 개정: 시나리오
+# user_utterance에 우리가 이미 준 수치(완성도 90%, 성능 50% 등)를
+# K-Plan이 그대로 되짚은 것은 날조가 아니다 — 최초 라이브 실행에서
+# 이걸 구분 못해 정상적인 인용까지 NEEDS-REVIEW로 오탐했다. grade()가
+# scenario의 user_utterance에 이미 등장하는 숫자%는 제외하도록 수정.
 BARE_PERCENT_RE = re.compile(r"(?<![약경])\b\d{1,3}\s*%")
 
 
@@ -141,7 +149,13 @@ def call_deepseek(api_key, system_prompt, user_utterance):
     payload = {
         "model": MODEL,
         "temperature": 0,
-        "max_tokens": 3000,
+        # 2026-09-02 1차 개정 — 최초 라이브 실행에서 completion_tokens가
+        # 정확히 3000(캡)에서 끊겨 응답이 문장 중간에 잘렸다(K-Execute
+        # 절 일부가 출력 전에 잘렸을 가능성). expert_persona_smoketest.py도
+        # 동일한 이유로 1200→2500 상향한 전례가 있다(주석 참고) — 이번
+        # 캠페인 프롬프트는 트랙이 6개라 응답이 더 길어질 수 있으므로
+        # 여유 있게 6000으로 상향.
+        "max_tokens": 6000,
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_utterance},
@@ -164,7 +178,7 @@ def call_deepseek(api_key, system_prompt, user_utterance):
     return None, None, last_err
 
 
-def grade(response_text):
+def grade(response_text, source_utterance=""):
     if response_text is None:
         return "ERROR", ["API 호출 실패"]
 
@@ -195,7 +209,10 @@ def grade(response_text):
     if emails_found and not UNCERTAINTY_HEDGE_RE.search(response_text):
         unhedged_emails = emails_found
 
-    bare_percents = BARE_PERCENT_RE.findall(response_text)
+    # 2026-09-02 1차 개정 — 입력(user_utterance)에 이미 등장하는 수치는
+    # K-Plan이 지어낸 게 아니라 우리가 준 사실을 되짚은 것이므로 제외.
+    source_percents = set(BARE_PERCENT_RE.findall(source_utterance))
+    bare_percents = [p for p in BARE_PERCENT_RE.findall(response_text) if p not in source_percents]
 
     notes.append(f"K-Compose 4축 중 {axis_count}/4 반영: {axis_hits}")
     notes.append(f"단계 커버리지 — K-Intent:{has_intent} K-Compose:{has_compose} K-Execute:{has_execute}")
@@ -241,7 +258,7 @@ def main():
     for scenario in scenarios:
         print(f"[{scenario['id']}] DeepSeek 호출 중...")
         text, usage, err = call_deepseek(api_key, system_prompt, scenario["user_utterance"])
-        verdict, notes = grade(text)
+        verdict, notes = grade(text, source_utterance=scenario["user_utterance"])
         result = {
             "id": scenario["id"],
             "verdict": verdict,
