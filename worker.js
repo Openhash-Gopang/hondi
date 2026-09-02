@@ -31012,6 +31012,16 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   }).format(new Date()).replace(' ', 'T') + '+09:00';
   const systemPrompt = sp.replace(/\{\{NOW\}\}/g, nowKST).replace(/\{\{GUID\}\}/g, guid);
 
+  // UNIVERSAL-INTEGRITY·UNIVERSAL-common·CONTROL-TOWER-PRINCIPLE 서버측
+  // 강제 주입(2026-09-02 추가) — /kmail/chat은 handleLLMRelay를 거치지
+  // 않는 완전히 격리된 전용 엔드포인트라 UNIVERSAL_FORCED_K_SERVICES
+  // 화이트리스트의 적용을 받지 못하고 있었다(2026-09-02 K-Mail 프론트엔드
+  // 노출 감사 중 발견 — 다른 모든 K-서비스와 달리 이 세 원칙이 한 번도
+  // 상속된 적이 없었다). K-Law(handleKlawRelay)와 동일한 패턴으로,
+  // SP 자체의 system 메시지를 대체하지 않고 그 앞에 별도 system
+  // 메시지로 추가한다.
+  const kmailUniversalInjected = await _fetchUniversalLayers();
+
   const cleanMessages = messages
     .filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
     .slice(-30)
@@ -31022,7 +31032,9 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   try {
     reply = await deepseekChatText({
       env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
-      messages: [{ role: 'system', content: systemPrompt }, ...cleanMessages],
+      messages: kmailUniversalInjected
+        ? [{ role: 'system', content: kmailUniversalInjected }, { role: 'system', content: systemPrompt }, ...cleanMessages]
+        : [{ role: 'system', content: systemPrompt }, ...cleanMessages],
       max_tokens: 800, temperature: 0.4, timeoutMs: 20000, fallbackText: '',
     });
   } catch (e) {
