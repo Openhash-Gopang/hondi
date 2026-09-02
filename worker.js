@@ -12808,6 +12808,22 @@ export default {
     // send_email 바인딩) + ai_messages/official_letters 기록.
     if (pathname === '/admin/letters/send-email' && request.method === 'POST')
       return handleAdminLetterSendEmail(request, env, corsHeaders);
+    // 2026-09-02 신설 — K-Mail↔K-Plan 파이프라인 라이브 스모크테스트용
+    // 관리자 엔드포인트 3종. gov-mail 스모크테스트와 동일한 관리자
+    // 인증(_requireAdmin, HONDI_ADMIN_EMAIL/PASSWORD)만 쓰고, K-Mail
+    // 본연의 사용자 서명(Ed25519) 계층은 우회한다 — CI가 실사용자의
+    // 개인키를 가질 이유가 없고, 애초에 이 세 엔드포인트는 테스트용
+    // 시딩·수동 스윕·결과 조회만 하지 실제 발송을 하지 않는다(seed가
+    // 만드는 캠페인은 status='sent'로 바로 채워 넣어 발송 스윕 대상이
+    // 되지 않는다 — 아래 handleAdminKmailSeedTestCampaign 참고).
+    // 크론이 매시 정각(wrangler.toml [triggers])에만 도는 문제를 우회해
+    // 테스트가 최대 1시간을 기다리지 않게 한다.
+    if (pathname === '/admin/kmail/seed-test-campaign' && request.method === 'POST')
+      return handleAdminKmailSeedTestCampaign(request, env, corsHeaders);
+    if (pathname === '/admin/kmail/sweep-digests' && request.method === 'POST')
+      return handleAdminKmailSweepDigests(request, env, corsHeaders);
+    if (pathname === '/admin/kmail/recompose-result' && request.method === 'GET')
+      return handleAdminKmailRecomposeResult(request, env, corsHeaders);
     // (2026-07-14: /free-quota-status 재도입 — "가입자당 100원 무료 한도"
     //  정책으로 복귀. 한도값은 FREE_QUOTA_KRW_LIMIT=100 참조.)
     if (pathname === '/free-quota-status' && request.method === 'GET')
@@ -30549,6 +30565,103 @@ async function _kmailSendCampaign(env, campaign) {
     tag: 'KMAIL_CAMPAIGN_SENT', campaign_id: campaign.id, owner: campaign.owner_user_guid,
     success: successCount, fail: failCount, ts: new Date().toISOString(),
   }));
+}
+
+// ═══════════════════════════════════════════════════════════
+// K-Mail↔K-Plan 파이프라인 라이브 스모크테스트용 관리자 엔드포인트 3종
+// (2026-09-02 신설, 상세 배경은 라우팅 테이블의 주석 참고)
+// ═══════════════════════════════════════════════════════════
+
+// POST /admin/kmail/seed-test-campaign
+// body: { plan_id, checkpoint_label?, test_email, test_name? }
+// confirmed 연락처 1건 + digest_at이 이미 지난(즉시 스윕 대상) 캠페인
+// 1건을 직접 만든다. status를 처음부터 'sent'로 채워 넣어(_kmailSweepDueCampaigns
+// 의 발송 스윕 대상 조건 status='scheduled'에 안 걸리게) 실제 이메일이
+// 나가지 않는다 — 이 엔드포인트는 다이제스트→K-Recompose 경로만 검증한다.
+async function handleAdminKmailSeedTestCampaign(request, env, corsHeaders) {
+  const admin = await _requireAdmin(request, env);
+  if (!admin) return _err(401, 'UNAUTHORIZED', '관리자 인증이 필요합니다', corsHeaders);
+
+  const body = await request.json().catch(() => null);
+  const planId = body?.plan_id;
+  const checkpointLabel = body?.checkpoint_label || '';
+  const testEmail = body?.test_email;
+  const testName = body?.test_name || 'CI 스모크테스트';
+  if (!planId || !testEmail) return _err(400, 'MISSING_FIELD', 'plan_id, test_email 필수', corsHeaders);
+
+  const ownerGuid = `ci-smoketest:${planId}`;
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+  const contactRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records`, {
+    method: 'POST', headers,
+    body: JSON.stringify({
+      owner_user_guid: ownerGuid, name: testName, email: testEmail,
+      status: 'confirmed', added_via_query: `[CI] seed-test-campaign(${planId})`,
+    }),
+  });
+  if (!contactRes.ok) {
+    return _err(502, 'CONTACT_SEED_FAILED', 'L1 연락처 시딩 실패: ' + (await contactRes.text().catch(() => '')).slice(0, 200), corsHeaders);
+  }
+  const contact = await contactRes.json();
+
+  const pastDigestAt = new Date(Date.now() - 60 * 1000).toISOString(); // 이미 지난 시각 — 스윕이 즉시 집는다
+  const campaignRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_campaigns/records`, {
+    method: 'POST', headers,
+    body: JSON.stringify({
+      owner_user_guid: ownerGuid, subject: `[CI] K-Recompose 파이프라인 테스트 (${planId})`,
+      body: '이 캠페인은 라이브 스모크테스트가 자동 생성했습니다. 실제로 발송되지 않습니다.',
+      send_at: pastDigestAt, status: 'sent', // 발송 스윕 대상에서 제외(위 주석 참고)
+      contact_ids: [contact.id], collect_replies_until: pastDigestAt,
+      digest_at: pastDigestAt, digest_status: 'pending',
+      kplan_plan_id: planId, kplan_checkpoint_label: checkpointLabel,
+    }),
+  });
+  if (!campaignRes.ok) {
+    return _err(502, 'CAMPAIGN_SEED_FAILED', 'L1 캠페인 시딩 실패: ' + (await campaignRes.text().catch(() => '')).slice(0, 200), corsHeaders);
+  }
+  const campaign = await campaignRes.json();
+
+  return new Response(JSON.stringify({ ok: true, contact_id: contact.id, campaign_id: campaign.id, owner_user_guid: ownerGuid }),
+    { status: 200, headers: corsHeaders });
+}
+
+// POST /admin/kmail/sweep-digests — digest_status='pending'이고 digest_at이
+// 지난 캠페인을 즉시 1회 스윕한다(_kmailSweepDueDigests 직접 호출). 매시
+// 정각 크론을 기다리지 않고 테스트·운영 양쪽에서 "지금 당장" 돌릴 때 쓴다.
+async function handleAdminKmailSweepDigests(request, env, corsHeaders) {
+  const admin = await _requireAdmin(request, env);
+  if (!admin) return _err(401, 'UNAUTHORIZED', '관리자 인증이 필요합니다', corsHeaders);
+
+  try {
+    await _kmailSweepDueDigests(env);
+  } catch (e) {
+    return _err(502, 'SWEEP_FAILED', '다이제스트 스윕 실패: ' + e.message, corsHeaders);
+  }
+  return new Response(JSON.stringify({ ok: true, swept_at: new Date().toISOString() }), { status: 200, headers: corsHeaders });
+}
+
+// GET /admin/kmail/recompose-result?plan_id=...
+// ai_messages에서 session_id='kplan:<plan_id>' && content_type='kplan_recompose'
+// 최신 레코드를 반환한다. 없으면 found:false(아직 안 왔거나 트리거가
+// 실패한 것 — 실패 자체를 이 엔드포인트가 구분해주진 않는다, 로그로 확인 필요).
+async function handleAdminKmailRecomposeResult(request, env, corsHeaders) {
+  const admin = await _requireAdmin(request, env);
+  if (!admin) return _err(401, 'UNAUTHORIZED', '관리자 인증이 필요합니다', corsHeaders);
+
+  const url = new URL(request.url);
+  const planId = url.searchParams.get('plan_id');
+  if (!planId) return _err(400, 'MISSING_FIELD', 'plan_id 필수', corsHeaders);
+
+  const token = await _l1AdminToken(env);
+  const filter = encodeURIComponent(`session_id='kplan:${planId}' && content_type='kplan_recompose'`);
+  const res = await fetch(`${L1_DEFAULT}/api/collections/ai_messages/records?filter=${filter}&sort=-created&perPage=1`,
+    { headers: { 'Authorization': `Bearer ${token}` } });
+  if (!res.ok) return _err(502, 'L1_ERROR', `L1 조회 실패 (HTTP ${res.status})`, corsHeaders);
+  const data = await res.json().catch(() => ({ items: [] }));
+  const item = (data.items || [])[0] || null;
+
+  return new Response(JSON.stringify({ ok: true, found: !!item, result: item }), { status: 200, headers: corsHeaders });
 }
 
 // Cron이 호출하는 진입점 — send_at이 지났고 아직 scheduled인 캠페인을
