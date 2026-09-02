@@ -199,6 +199,7 @@ table.svc-table td.svc-hondi { color: var(--brand-dk); font-weight: 600; }
     <div class="svc-tab" data-svc="kplan">K-Plan</div>
     <div class="svc-tab" data-svc="kwatch">K-Watch</div>
     <div class="svc-tab" data-svc="kjob">K-Job</div>
+    <div class="svc-tab" data-svc="kmail">K-Mail</div>
   </div>
 
   <div class="svc-content" id="svcContent">
@@ -1619,6 +1620,31 @@ var SVC_CONTENT = {
       </div>
       <p class="svc-note" style="margin-top:14px;color:var(--text4);font-size:12px;">이 탭의 정본(source of truth)은 <code>prompts/k-job_v1_0.md</code>입니다 — 이 문서를 고칠 때는 반드시 그 문서를 먼저 갱신하세요.</p>
     </div>
+  `,
+  kmail: `
+    <div class="svc-detail">
+      <h2>K-Mail — 혼디 사용자 간 메일 발송·주소록</h2>
+      <span class="svc-badge svc-badge-partial">부분 가동</span>
+      <p class="svc-lead">사용자 고유 주소(<code>&lt;guid&gt;@hondi.kr</code>)로 외부 이메일을 발송하고, 수신자를 대화로 확정해 예약 발송·다이제스트·주소록·자동삭제 규칙까지 처리하는 개인용 메일 비서입니다. 관리자 전용 공문 시스템(gov-mail, hondi.org)과는 도메인·인증·목적이 완전히 분리되어 있습니다.</p>
+
+      <h3>할 수 있는 일 (3종)</h3>
+      <ol class="svc-flow">
+        <li><b>메일 발송</b> — 즉시 또는 예약, 한 명 또는 여러 명에게. 회신을 특정 시각까지 모아 다이제스트로 정리 가능. 발송 대상은 자동으로 주소록에도 등록됩니다.</li>
+        <li><b>주소록 관리</b> — 이름·이메일·직업·소속·전공·관계·그룹(태그)으로 저장·검색, 그룹 부여/해제, 중복 연락처 병합.</li>
+        <li><b>자동삭제 규칙</b> — "불필요한 메일은 도착 즉시 삭제해" 같은 인바운드 필터 규칙 등록.</li>
+      </ol>
+
+      <h3>정직한 한계 — 수신자를 지어내지 않습니다</h3>
+      <p class="svc-note">K-Mail은 이메일 주소를 스스로 알지 못합니다. 수신자를 확보하는 방법은 (a) 사용자가 대화 중 이름과 이메일을 직접 알려주거나, (b) "서울대 컴퓨터 관련 학과 교수들"처럼 모호하게 서술하면 실제 웹 검색을 거쳐 검색 결과에서 실제로 확인되는 이름·이메일만 후보로 제시하는 두 경로뿐입니다. 검색 결과에 이메일이 안 보이면 지어내지 않고 직접 알려달라고 요청합니다.</p>
+
+      <h3>진입 경로 — 두 갈래로 나뉘어 있습니다</h3>
+      <p class="svc-note">좌측 메뉴 "메일 보내기"(<code>/mail.html</code>)는 발송 전용 단순 폼입니다 — 수신함(받은 메일 확인) 기능은 아직 없고, 답장은 상대방의 실제 이메일로 직접 받아야 합니다. 대화형 비서(<code>/pages/kmail-assistant.html</code>, 주소록은 <code>/pages/kmail-contacts.html</code>)는 "메일 보내줘"·"주소록 검색" 등 발화 시 gwp-registry.js가 새 탭으로 연결하며, AC-PRO-CORE 태그 체계와 격리된 자체 프로토콜(KMAIL_SEND_CAMPAIGN 등)로 동작합니다. 현재 좌측 메뉴는 단순 폼으로만 연결되어 있고, 대화형 비서 탭은 직접 URL 진입만 가능합니다.</p>
+
+      <div class="svc-callout important">
+        아직 없는 기능 — 좌측 메뉴에서 대화형 비서(kmail-assistant.html)로 바로 들어가는 진입점, 수신함(받은 메일 열람) UI는 아직 없습니다. 서버(worker.js)의 <code>/kmail/chat</code> 전용 엔드포인트는 UNIVERSAL-INTEGRITY·CONTROL-TOWER-PRINCIPLE 등 관제탑 3종 원칙을 다른 K-서비스처럼 상속받지 않는 격리된 경로이며, SP 매니페스트(prompts/sp-catalog.json)가 가리키는 버전이 실제 최신 SP 파일(v1.5)보다 뒤처져 있어 확인이 필요합니다.
+      </div>
+      <p class="svc-note" style="margin-top:14px;color:var(--text4);font-size:12px;">이 탭의 정본(source of truth)은 <code>prompts/SP-25_kmail_v1_5.txt</code>입니다 — 이 문서를 고칠 때는 반드시 그 문서를 먼저 갱신하세요.</p>
+    </div>
   `
 };
 var SVC_LABEL = {
@@ -1626,7 +1652,7 @@ var SVC_LABEL = {
   khealth: 'K-Health', kschool: 'K-School', gdc: 'GDC', kstock: 'K-Stock',
   kinsurance: 'K-Insurance', ktax: 'K-Tax', kmarket: 'K-Market', ktraffic: 'K-Traffic',
   klogistics: 'K-Logistics', kcleaner: 'K-Cleaner', kpublic: 'K-Public', kdemocracy: 'K-Democracy',
-  ktelecom: 'K-Telecom', ksearch: 'K-Search', kbiz: 'K-Biz', kplan: 'K-Plan', kwatch: 'K-Watch', kjob: 'K-Job'
+  ktelecom: 'K-Telecom', ksearch: 'K-Search', kbiz: 'K-Biz', kplan: 'K-Plan', kwatch: 'K-Watch', kjob: 'K-Job', kmail: 'K-Mail'
 };
 
 function renderSvc(key) {
