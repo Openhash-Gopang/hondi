@@ -63,6 +63,17 @@ const ALLOWED_ORIGINS = [
   'https://stock.hondi.net',
   'https://traffic.hondi.net',
   'https://logistics.hondi.net',
+  // 2026-09-03 CORS 누락 발견(K-Plan phone-otp-request "Failed to fetch" 신고) —
+  // 최근 추가된 6개 서비스가 이 화이트리스트에 등록이 안 돼 있었다.
+  // *.hondi.net 와일드카드가 아니라 서브도메인을 하나씩 명시하는 구조라,
+  // 신규 서비스 오픈 시 이 배열에 추가하는 걸 빠뜨리면 매번 재발한다.
+  'https://plan.hondi.net',
+  'https://telecom.hondi.net',
+  'https://search.hondi.net',
+  'https://biz.hondi.net',
+  'https://watch.hondi.net',
+  'https://job.hondi.net',
+  'https://mail.hondi.net',
 
   'https://users.hondi.net',
   'https://l1-hanlim.hondi.net',
@@ -244,6 +255,15 @@ function _normalizePhoneE164(raw) {
   if (!raw) return null;
   let digits = String(raw).replace(/[^\d]/g, ''); // 대시·공백·+ 전부 제거
   if (!digits) return null;
+
+  // 2026-09-03 신설 — K-Plan "Failed to fetch" 신고 대응 중 발견: webapp.html의
+  // 실제 회원가입 팝업(src/gopang/core/auth.js)은 한국 휴대폰을 "010" 없이
+  // 뒷 8자리만 받는다(COUNTRIES.KR.prefix='010', digits=8) — 그런데 이 함수는
+  // "0"으로 시작하는 입력만 처리해서, 8자리 순수 숫자만 오면 검증에 실패했다.
+  // buildE164()와 동일한 규칙으로 맞춘다: 8자리 숫자만 오면 앞에 "010"을 붙인다.
+  if (digits.length === 8 && !digits.startsWith('0') && !digits.startsWith('82')) {
+    digits = '010' + digits;
+  }
 
   if (digits.startsWith('0')) {
     // 010-9662-7170 / 01096627170 → 82 붙이고 0은 그대로 유지
