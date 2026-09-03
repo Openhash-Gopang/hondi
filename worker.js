@@ -19130,13 +19130,33 @@ async function handleKPlanTaskBulkCreate(bodyText, env, corsHeaders) {
   try { body = JSON.parse(bodyText); } catch { return _err(400, 'INVALID_JSON', '', corsHeaders); }
   const { phone_verify_token, plan_id, tasks } = body || {};
   if (!plan_id || !Array.isArray(tasks) || !tasks.length) return _err(400, 'MISSING_FIELD', 'plan_id/tasks 필수', corsHeaders);
-  if (tasks.length > 100) return _err(400, 'TOO_MANY_TASKS', '한 번에 100개까지만 생성할 수 있습니다.', corsHeaders);
+  // 2026-09-03 사고실험으로 발견 — 서브리퀘스트 1개당 fetch 1번이라,
+  // Cloudflare Workers의 요청당 서브리퀘스트 한도(플랜에 따라 50~1000)를
+  // 넘길 위험이 있었다. 100 → 40으로 낮춰 여유를 둠(_l1AdminToken 호출
+  // 등 다른 서브리퀘스트도 같은 요청 안에서 소비되므로).
+  if (tasks.length > 40) return _err(400, 'TOO_MANY_TASKS', '한 번에 40개까지만 생성할 수 있습니다.', corsHeaders);
 
   const auth = await _resolveGuidFromPhoneVerifyToken(env, phone_verify_token);
   if (!auth.ok) return _err(401, auth.code, auth.message || '로그인이 필요합니다.', corsHeaders);
 
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+  // 2026-09-03 사고실험으로 발견 — plan_id 소유권을 전혀 확인하지
+  // 않고 있었다(임의의 plan_id 문자열에 무제한 작업 생성 가능한
+  // 검증 공백). handleKPlanPlanCheckpoint와 동일하게, 이 plan_id가
+  // 실제로 이 guid 소유인지 먼저 확인한다.
+  const planFilter = encodeURIComponent(`plan_id='${plan_id}' && guid='${auth.guid}'`);
+  try {
+    const planCheckRes = await fetch(`${L1_DEFAULT}/api/collections/kplan_plans/records?filter=${planFilter}&perPage=1`, { headers: { 'Authorization': `Bearer ${token}` } });
+    const planCheckData = await planCheckRes.json().catch(() => ({ items: [] }));
+    if (!planCheckData.items || !planCheckData.items.length) {
+      return _err(404, 'PLAN_NOT_FOUND', '본인 소유의 해당 플랜을 찾을 수 없습니다.', corsHeaders);
+    }
+  } catch (e) {
+    return _err(502, 'KPLAN_TASK_PLAN_CHECK_ERROR', e.message, corsHeaders);
+  }
+
   const VALID_STATUS = ['backlog', 'todo', 'in_progress', 'in_review', 'done'];
   const VALID_PRIORITY = ['low', 'medium', 'high', 'urgent'];
 
