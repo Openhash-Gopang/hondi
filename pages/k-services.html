@@ -200,6 +200,8 @@ table.svc-table td.svc-hondi { color: var(--brand-dk); font-weight: 600; }
     <div class="svc-tab" data-svc="kwatch">K-Watch</div>
     <div class="svc-tab" data-svc="kjob">K-Job</div>
     <div class="svc-tab" data-svc="kmail">K-Mail</div>
+    <div class="svc-tab" data-svc="kjit">K-JIT</div>
+    <div class="svc-tab" data-svc="kcity">K-City</div>
   </div>
 
   <div class="svc-content" id="svcContent">
@@ -1684,13 +1686,113 @@ var SVC_CONTENT = {
       <p class="svc-note" style="margin-top:14px;color:var(--text4);font-size:12px;">이 탭의 정본(source of truth)은 <code>prompts/SP-25_kmail_v1_9.txt</code>이고, K-Plan과의 관계는 <code>docs/KPLAN_KMAIL_AGENT_TO_AGENT_ARCHITECTURE_v1_0_20260903.md</code>가 정본입니다 — 이 문서들을 고칠 때는 반드시 그 문서를 먼저 갱신하세요.</p>
     </div>
   `
+  kjit: `
+    <div class="svc-detail">
+      <h2>K-JIT — 사회효용 우선 적시조달 메커니즘</h2>
+      <p class="svc-lead">가계·기업·기관이 필요로 하는 물자·인원·서비스의 조달을 계획합니다. 기존 JIT(Just-In-Time)과 달리 개별 주체의 비용 최소화가 아니라 사회 전체의 효용 극대화·총비용 최소화를 기준으로 계획을 세웁니다.</p>
+
+      <div class="svc-callout important">
+        K-JIT는 아직 초안(v0.1) 단계입니다. 실제 배차·배송 실행은 K-Logistics·K-Market이 맡고, K-JIT는 그 위의 계획 레이어만 담당합니다.
+      </div>
+
+      <h3>기존 JIT과 무엇이 다른가</h3>
+      <p class="svc-note">예를 들어 A기업이 원재료를 조달하는 비용이 1만원인데, 사회 전체 관점(물류 혼잡·재고 낭비·탄소배출 등을 포함한 총비용)에서 최적인 경로의 비용이 1.1만원이라면, K-JIT는 후자를 선택합니다. 이때 A기업이 부담하는 차액은 보상 메커니즘으로 상쇄되며, 보상을 반영해도 손해라면 참여를 강제하지 않습니다.</p>
+
+      <h3>처리 흐름</h3>
+      <ol class="svc-flow">
+        <li><b>수요 집계</b> — 사용자들이 등록한 물자·인원·서비스 조달 요청(양·시점·위치·긴급도)을 모읍니다.</li>
+        <li><b>사회적 최적 계획 수립</b> — 개별 비용이 아니라 사회 전체 총비용을 기준으로 누가, 언제, 어떤 경로로 조달할지 계획합니다.</li>
+        <li><b>실행 위임</b> — 확정된 계획을 K-Logistics(물자 배차)·K-Market(인력·서비스 매칭)·GDC(보상 정산)에 넘깁니다.</li>
+        <li><b>피드백 반영</b> — 실행 결과(지연·초과비용·품질 이슈)를 지속적으로 모아 다음 계획에 반영합니다.</li>
+      </ol>
+
+      <h3>다른 서비스와의 자동 연계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>상황</th><th>자동 연동</th></tr></thead>
+          <tbody>
+            <tr><td>물자 실행 배차</td><td class="svc-hondi">K-Logistics 자동 연동 — 실시간 배차·배송</td></tr>
+            <tr><td>인력·용역 매칭</td><td class="svc-hondi">K-Market 자동 연동 — 실시간 매칭</td></tr>
+            <tr><td>보상·차액 정산</td><td class="svc-hondi">GDC 자동 연동 — 보상액 지급</td></tr>
+            <tr><td>긴급 의료·재난 물자</td><td class="svc-hondi">K-119·K-Health 신호 시 일반 조달 큐를 건너뛰어 최우선 배정</td></tr>
+            <tr><td>도시 시설 신설 시 장기 수요</td><td class="svc-hondi">K-City 설계안을 장기 조달 계획의 입력값으로 반영</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>기존 조달 방식과 무엇이 다른가</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>구분</th><th>기존 JIT</th><th>혼디 K-JIT</th></tr></thead>
+          <tbody>
+            <tr><td>최적화 기준</td><td>개별 주체의 비용·재고 최소화</td><td class="svc-hondi">사회 전체 총비용 최소화(외부효과 포함)</td></tr>
+            <tr><td>손해 발생 시</td><td>해당 주체가 그대로 부담</td><td class="svc-hondi">차등보상으로 상쇄, 그래도 손해면 참여 강제 안 함</td></tr>
+            <tr><td>실행 범위</td><td>개별 기업 내부 시스템</td><td class="svc-hondi">계획만 수립, 실행은 K-Logistics·K-Market에 위임</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="svc-callout">
+        참여는 원칙적으로 옵트인입니다. 사회적 최적 계획이 보상을 반영해도 개별 주체에게 불리하면, K-JIT는 계획을 강제하지 않고 차선책(개별 최적안)을 함께 제시합니다.
+      </div>
+    </div>
+  `,
+  kcity: `
+    <div class="svc-detail">
+      <h2>K-City — 시민 복지 총합 최적 도시 설계</h2>
+      <p class="svc-lead">도시(읍·면·동 단위 포함) 전체의 시민 복지 총합(주거·의료·교육·금융·교통·통신·레저 등)이 최상이 되도록, 각 시설의 물리적 조합(입지·규모·용량 배분)을 설계합니다.</p>
+
+      <div class="svc-callout important">
+        K-City는 아직 초안(v0.1) 단계입니다. 산출물은 자문 설계안이며, 실제 도시계획 결정·건축 인허가는 언제나 해당 지자체·국가기관의 법정 권한입니다.
+      </div>
+
+      <h3>처리 흐름</h3>
+      <ol class="svc-flow">
+        <li><b>현황·수요 데이터 집계</b> — 인구·연령 분포, 기존 시설 위치·용량, 접근성(이동시간·거리)을 모읍니다.</li>
+        <li><b>부문별 효용 모델링</b> — 주거·의료·교육·금융·교통·통신·레저 각 부문의 접근성·충족도를 계산합니다.</li>
+        <li><b>통합 최적화</b> — 예산·토지·인허가 제약 안에서 복지 총합을 최대화하는 시설 조합(신설·증설·이전·통폐합)을 찾습니다.</li>
+        <li><b>시나리오 비교</b> — 예산 수준·우선순위별로 최소 2개 이상의 대안을 나란히 제시합니다.</li>
+        <li><b>단계적 실행안 제시</b> — 우선순위와 예산 배분을 담은 초안을 작성합니다.</li>
+        <li><b>시민 피드백 반영</b> — 실행 이후 실측 이용률·만족도를 다음 설계 주기에 반영합니다.</li>
+      </ol>
+
+      <h3>다른 서비스와의 자동 연계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>상황</th><th>자동 연동</th></tr></thead>
+          <tbody>
+            <tr><td>신설 시설의 장기 조달 예측</td><td class="svc-hondi">K-JIT 자동 연동 — 장기 수요 데이터로 전달</td></tr>
+            <tr><td>시공 단계 자재 조달</td><td class="svc-hondi">K-Logistics 자동 연동</td></tr>
+            <tr><td>시민 심의·의사결정</td><td class="svc-hondi">K-Democracy 자동 연동 — 설계안을 심의 절차에 전달</td></tr>
+            <tr><td>교통·의료·교육 현황 데이터</td><td class="svc-hondi">K-Traffic·K-Health·K-School과 데이터 교환</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>기존 도시계획 방식과 무엇이 다른가</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 K-City</th></tr></thead>
+          <tbody>
+            <tr><td>부문 검토</td><td>부문별로 별도 용역·개별 검토</td><td class="svc-hondi">7개 부문 통합 최적화를 한 번에 계산</td></tr>
+            <tr><td>대안 비교</td><td>단일안 위주로 제시</td><td class="svc-hondi">예산·우선순위별 복수 시나리오 병렬 제시</td></tr>
+            <tr><td>가중치 산정</td><td>담당 부서 내부 판단</td><td class="svc-hondi">인구 구성·시민 참여 절차를 반영해 조정</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="svc-callout">
+        복지 총합 계산에 쓰인 가중치·전제·트레이드오프는 시민이 검토할 수 있도록 투명하게 공개됩니다. 최종 채택 여부는 K-Democracy의 절차(공청회 등)를 거칩니다.
+      </div>
+    </div>
+  `,
 };
 var SVC_LABEL = {
   k119: 'K-119', klaw: 'K-Law', kpolice: 'K-Police', ksecurity: 'K-Security',
   khealth: 'K-Health', kschool: 'K-School', gdc: 'GDC', kstock: 'K-Stock',
   kinsurance: 'K-Insurance', ktax: 'K-Tax', kmarket: 'K-Market', ktraffic: 'K-Traffic',
   klogistics: 'K-Logistics', kcleaner: 'K-Cleaner', kpublic: 'K-Public', kdemocracy: 'K-Democracy',
-  ktelecom: 'K-Telecom', ksearch: 'K-Search', kbiz: 'K-Biz', kplan: 'K-Plan', kwatch: 'K-Watch', kjob: 'K-Job', kmail: 'K-Mail'
+  ktelecom: 'K-Telecom', ksearch: 'K-Search', kbiz: 'K-Biz', kplan: 'K-Plan', kwatch: 'K-Watch', kjob: 'K-Job', kmail: 'K-Mail', kjit: 'K-JIT', kcity: 'K-City'
 };
 
 function renderSvc(key) {
