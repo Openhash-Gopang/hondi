@@ -12604,6 +12604,9 @@ export default {
     if (pathname === '/kplan/plan/list'       && request.method === 'GET')  return handleKPlanPlanList(request, env, corsHeaders);
     if (pathname === '/kplan/plan/get'        && request.method === 'GET')  return handleKPlanPlanGet(request, env, corsHeaders);
     if (pathname === '/kplan/plan/checkpoint' && request.method === 'POST') return handleKPlanPlanCheckpoint(bodyText, env, corsHeaders);
+    if (pathname === '/kplan/task/bulk-create' && request.method === 'POST') return handleKPlanTaskBulkCreate(bodyText, env, corsHeaders);
+    if (pathname === '/kplan/task/list' && request.method === 'GET')  return handleKPlanTaskList(request, env, corsHeaders);
+    if (pathname === '/kplan/task/update' && request.method === 'PATCH') return handleKPlanTaskUpdate(bodyText, env, corsHeaders);
 
     // POST /user/gdc-balance — 일반 후원자용 잔액·구독 조회 (2026-09-01
     // 신설). 관리자 인증(JWT)과 완전히 분리된 공개 엔드포인트 — 대신
@@ -19108,6 +19111,132 @@ async function handleKPlanPlanCheckpoint(bodyText, env, corsHeaders) {
     return _err(502, 'KPLAN_PLAN_CHECKPOINT_ERROR', e.message, corsHeaders);
   }
 }
+
+// ═══════════════════════════════════════════════════════════
+// /kplan/task/* — K-Plan 작업 보드(kplan_tasks) 순수 CRUD (2026-09-03 신설)
+//
+// 범위: 순수 태스크 관리만. K-Mail 연동은 포함하지 않는다(주피터 지시
+// — K-Mail은 별도 프로젝트, 필요한 작업은 별도 지시서로 넘김). AI
+// 비용이 들지 않는 CRUD라 kplan_plans 계열과 동일하게 _l1AdminToken으로
+// 서버가 대신 쓰고 읽는다 — 클라이언트가 다른 guid의 작업을 조작하지
+// 못하도록 소유권 확인을 서버에서 강제.
+// ═══════════════════════════════════════════════════════════
+
+// POST /kplan/task/bulk-create { phone_verify_token, plan_id, tasks: [{title, description?, status?, priority?, labels?, due_date?, progress?}] }
+// K-Plan 응답(마크다운 계획서)을 실행 가능한 작업 목록으로 변환한 뒤
+// 한 번에 여러 건을 만들 때 씀 — "작업 보드로 변환" 버튼이 호출.
+async function handleKPlanTaskBulkCreate(bodyText, env, corsHeaders) {
+  let body;
+  try { body = JSON.parse(bodyText); } catch { return _err(400, 'INVALID_JSON', '', corsHeaders); }
+  const { phone_verify_token, plan_id, tasks } = body || {};
+  if (!plan_id || !Array.isArray(tasks) || !tasks.length) return _err(400, 'MISSING_FIELD', 'plan_id/tasks 필수', corsHeaders);
+  if (tasks.length > 100) return _err(400, 'TOO_MANY_TASKS', '한 번에 100개까지만 생성할 수 있습니다.', corsHeaders);
+
+  const auth = await _resolveGuidFromPhoneVerifyToken(env, phone_verify_token);
+  if (!auth.ok) return _err(401, auth.code, auth.message || '로그인이 필요합니다.', corsHeaders);
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  const VALID_STATUS = ['backlog', 'todo', 'in_progress', 'in_review', 'done'];
+  const VALID_PRIORITY = ['low', 'medium', 'high', 'urgent'];
+
+  const created = [];
+  try {
+    for (let i = 0; i < tasks.length; i++) {
+      const t = tasks[i] || {};
+      if (!t.title) continue; // 제목 없는 항목은 조용히 건너뜀(부분 실패로 전체를 막지 않음)
+      const rec = {
+        guid: auth.guid, plan_id,
+        title: String(t.title).slice(0, 200),
+        description: t.description ? String(t.description).slice(0, 4000) : '',
+        status: VALID_STATUS.includes(t.status) ? t.status : 'backlog',
+        priority: VALID_PRIORITY.includes(t.priority) ? t.priority : 'medium',
+        labels: Array.isArray(t.labels) ? t.labels.slice(0, 10).map(String) : [],
+        due_date: t.due_date || null,
+        progress: Number.isFinite(t.progress) ? Math.max(0, Math.min(100, t.progress)) : 0,
+        order_index: i,
+      };
+      const res = await fetch(`${L1_DEFAULT}/api/collections/kplan_tasks/records`, {
+        method: 'POST', headers, body: JSON.stringify(rec),
+      });
+      if (res.ok) created.push(await res.json());
+    }
+    return new Response(JSON.stringify({ ok: true, created, count: created.length }), { headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'KPLAN_TASK_BULK_CREATE_ERROR', e.message, corsHeaders);
+  }
+}
+
+// GET /kplan/task/list?plan_id=...&phone_verify_token=...
+async function handleKPlanTaskList(request, env, corsHeaders) {
+  const url = new URL(request.url);
+  const planId = url.searchParams.get('plan_id');
+  const phoneVerifyToken = url.searchParams.get('phone_verify_token');
+  if (!planId) return _err(400, 'MISSING_FIELD', 'plan_id 필수', corsHeaders);
+
+  const auth = await _resolveGuidFromPhoneVerifyToken(env, phoneVerifyToken);
+  if (!auth.ok) return _err(401, auth.code, auth.message || '로그인이 필요합니다.', corsHeaders);
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}` };
+  const filter = encodeURIComponent(`plan_id='${planId}' && guid='${auth.guid}'`);
+  try {
+    const res = await fetch(`${L1_DEFAULT}/api/collections/kplan_tasks/records?filter=${filter}&sort=status,order_index&perPage=200`, { headers });
+    const data = await res.json().catch(() => ({ items: [] }));
+    return new Response(JSON.stringify({ ok: true, items: data.items || [] }), { headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'KPLAN_TASK_LIST_ERROR', e.message, corsHeaders);
+  }
+}
+
+// PATCH /kplan/task/update { phone_verify_token, task_id, status?, priority?, progress?, title?, description?, due_date?, order_index? }
+// 소유권 확인 후에만 갱신 — task_id로 바로 PATCH하지 않고, 먼저 guid
+// 일치를 확인한다(다른 사용자의 작업을 못 건드리게).
+async function handleKPlanTaskUpdate(bodyText, env, corsHeaders) {
+  let body;
+  try { body = JSON.parse(bodyText); } catch { return _err(400, 'INVALID_JSON', '', corsHeaders); }
+  const { phone_verify_token, task_id, ...patch } = body || {};
+  if (!task_id) return _err(400, 'MISSING_FIELD', 'task_id 필수', corsHeaders);
+
+  const auth = await _resolveGuidFromPhoneVerifyToken(env, phone_verify_token);
+  if (!auth.ok) return _err(401, auth.code, auth.message || '로그인이 필요합니다.', corsHeaders);
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}` };
+  try {
+    const findRes = await fetch(`${L1_DEFAULT}/api/collections/kplan_tasks/records/${task_id}`, { headers });
+    if (!findRes.ok) return _err(404, 'TASK_NOT_FOUND', '해당 작업을 찾을 수 없습니다.', corsHeaders);
+    const existing = await findRes.json();
+    if (existing.guid !== auth.guid) return _err(403, 'FORBIDDEN', '본인의 작업만 수정할 수 있습니다.', corsHeaders);
+
+    const VALID_STATUS = ['backlog', 'todo', 'in_progress', 'in_review', 'done'];
+    const VALID_PRIORITY = ['low', 'medium', 'high', 'urgent'];
+    const patchBody = {};
+    if (patch.status && VALID_STATUS.includes(patch.status)) patchBody.status = patch.status;
+    if (patch.priority && VALID_PRIORITY.includes(patch.priority)) patchBody.priority = patch.priority;
+    if (patch.title) patchBody.title = String(patch.title).slice(0, 200);
+    if (patch.description !== undefined) patchBody.description = String(patch.description).slice(0, 4000);
+    if (patch.due_date !== undefined) patchBody.due_date = patch.due_date;
+    if (Number.isFinite(patch.progress)) patchBody.progress = Math.max(0, Math.min(100, patch.progress));
+    if (Number.isFinite(patch.order_index)) patchBody.order_index = patch.order_index;
+    if (Array.isArray(patch.labels)) patchBody.labels = patch.labels.slice(0, 10).map(String);
+
+    const patchRes = await fetch(`${L1_DEFAULT}/api/collections/kplan_tasks/records/${task_id}`, {
+      method: 'PATCH', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify(patchBody),
+    });
+    if (!patchRes.ok) {
+      const errText = await patchRes.text().catch(() => '');
+      return new Response(errText || JSON.stringify({ error: 'TASK_UPDATE_FAILED' }), { status: patchRes.status, headers: corsHeaders });
+    }
+    const rec = await patchRes.json();
+    return new Response(JSON.stringify({ ok: true, task: rec }), { headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'KPLAN_TASK_UPDATE_ERROR', e.message, corsHeaders);
+  }
+}
+
+// DELETE는 별도 엔드포인트 없이 status:'done' 처리로 충분하다고 보고
+// 이번 범위에서는 만들지 않음(필요해지면 후속 추가).
 
 
 // ═══════════════════════════════════════════════════════════
