@@ -231,7 +231,7 @@ const SOLAPI_SEND_URL = 'https://api.solapi.com/messages/v4/send';
 const OTP_TTL_SECONDS = 300;              // 5분
 const OTP_MAX_ATTEMPTS = 5;
 const OTP_RESEND_COOLDOWN_SECONDS = 60;   // 같은 번호 재발송 최소 간격
-const PHONE_VERIFY_TOKEN_TTL_MS = 10 * 60 * 1000; // 검증 토큰 유효 10분
+const PHONE_VERIFY_TOKEN_TTL_MS = 60 * 60 * 1000; // 검증 토큰 유효 60분 (2026-09-03, 주피터 지시 — K-Plan pro 최종검토가 최대 5분씩 걸려 10분 TTL이 너무 짧았음. K-Law·GDC 잔액 조회 등 phone_verify_token을 쓰는 모든 서비스가 공유하는 값이라 다 함께 늘어남 — 클라이언트가 sessionStorage(브라우저 재시작 시 자동 소거)에 토큰을 저장하므로, 세션 내 재사용 기간만 늘어날 뿐 "브라우저를 새로 열면 다시 인증"이라는 성질은 그대로 유지됨.
 
 function _generateOtpCode() {
   const buf = new Uint32Array(1);
