@@ -12296,6 +12296,7 @@ export default {
     if (pathname === '/kmail/settings' && request.method === 'POST') return handleKmailSettingsSet(request, env, corsHeaders);
     if (pathname === '/kmail/attachments/upload' && request.method === 'POST') return handleKmailAttachmentUpload(request, env, corsHeaders);
     if (pathname.startsWith('/kmail/attachments/') && request.method === 'GET') return handleKmailAttachmentGet(request, url, env, corsHeaders);
+    if (pathname.startsWith('/r/') && request.method === 'GET') return handleKmailTrackingRedirect(request, url, env, corsHeaders, ctx);
     if (pathname === '/kmail/campaigns/create' && request.method === 'POST') return handleKmailCampaignCreate(request, env, corsHeaders);
     // 2026-09-03 신설 — mail.hondi.net/webapp.html "캠페인 목록/상태" 화면
     // 요구사항 대응. 지금까지 캠페인 생성(create) API만 있고 조회 API가
@@ -29777,6 +29778,54 @@ async function handleKmailAttachmentUpload(request, env, corsHeaders) {
 // GET /kmail/attachments/{id}?guid=...&pubkey=...&signature=...&ts=...
 // 프로필 사진과 달리 인증 필요 — 개인 문서일 수 있는 첨부를 공개로
 // 열어두면 안 된다.
+// GET /r/<token> — 2026-09-04 신설. 캠페인 본문의 {{TRACKING_LINK}}가
+// 발송 시점에 이 URL(https://hondi.net/r/<token>)로 치환된다(아래
+// _kmailSendCampaign 참고). 이 엔드포인트는 인증이 필요 없다 — 수신자
+// (외부인)가 클릭하는 링크라 로그인 상태를 요구할 수 없다. 토큰 자체가
+// 추측 불가능한 무작위 문자열이라 그 자체로 접근 통제 역할을 한다.
+// User-Agent로 PC/모바일을 가르고, 클릭 즉시 302 리다이렉트 —
+// kmail_campaign_recipients 갱신은 응답을 막지 않도록 fire-and-forget.
+async function handleKmailTrackingRedirect(request, url, env, corsHeaders, ctx) {
+  const token = url.pathname.replace(/^\/r\//, '').trim();
+  const PC_DEST = 'https://hondi.net/';
+  const MOBILE_DEST = 'https://hondi.net/desktop.html#k-services';
+  if (!token || !/^[a-zA-Z0-9_-]{8,64}$/.test(token)) {
+    return Response.redirect(PC_DEST, 302);
+  }
+
+  const ua = (request.headers.get('user-agent') || '').toLowerCase();
+  const isMobile = /iphone|ipad|android|mobile/.test(ua);
+  const device = isMobile ? 'mobile' : 'pc';
+  const dest = isMobile ? MOBILE_DEST : PC_DEST;
+
+  // 응답(리다이렉트)은 즉시 나가고, 로그는 ctx.waitUntil로 백그라운드
+  // 처리한다 — waitUntil 없이 fire-and-forget하면 Worker가 응답을 보낸
+  // 뒤 곧바로 격리를 종료시켜 이 fetch가 중간에 끊길 수 있다.
+  if (ctx?.waitUntil) {
+    ctx.waitUntil((async () => {
+      try {
+        const adminToken = await _l1AdminToken(env);
+        const headers = { 'Authorization': `Bearer ${adminToken}` };
+        const filter = encodeURIComponent(`tracking_token='${token.replace(/'/g, "\\'")}'`);
+        const findRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_campaign_recipients/records?filter=${filter}&perPage=1`, { headers });
+        const findData = await findRes.json().catch(() => ({ items: [] }));
+        const row = (findData.items && findData.items[0]) || null;
+        if (!row) return;
+        const patch = { click_count: (row.click_count || 0) + 1 };
+        if (!row.first_click_at) {
+          patch.first_click_at = new Date().toISOString();
+          patch.first_click_device = device;
+        }
+        await fetch(`${L1_DEFAULT}/api/collections/kmail_campaign_recipients/records/${row.id}`, {
+          method: 'PATCH', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify(patch),
+        });
+      } catch (e) { console.warn('[K-Mail 추적링크] 클릭 로그 실패(리다이렉트는 이미 진행):', e.message); }
+    })());
+  }
+
+  return Response.redirect(dest, 302);
+}
+
 async function handleKmailAttachmentGet(request, url, env, corsHeaders) {
   if (!env.KMAIL_ATTACHMENTS) return _err(503, 'ATTACHMENT_STORAGE_UNAVAILABLE', 'R2 바인딩이 설정되지 않았습니다', corsHeaders);
 
@@ -30163,7 +30212,7 @@ function _kmailAggregateByOrg(recipRows) {
   const byOrg = new Map();
   for (const r of recipRows) {
     const org = (r.recipient_org || '').trim() || '(미상)';
-    if (!byOrg.has(org)) byOrg.set(org, { org, sent: 0, replied: 0, pending: 0, classifications: {} });
+    if (!byOrg.has(org)) byOrg.set(org, { org, sent: 0, replied: 0, pending: 0, classifications: {}, visited_pc: 0, visited_mobile: 0, not_visited: 0 });
     const g = byOrg.get(org);
     if (r.delivery_status === 'sent') g.sent++;
     else if (r.delivery_status === 'pending') g.pending++;
@@ -30172,10 +30221,18 @@ function _kmailAggregateByOrg(recipRows) {
       const cls = r.reply_classification || '미분류';
       g.classifications[cls] = (g.classifications[cls] || 0) + 1;
     }
+    // 2026-09-04 신설 — 회신뿐 아니라 접속(클릭) 여부도 기관별로
+    // 집계한다. first_click_device는 최초 클릭 시점 값만 저장하므로
+    // 이후 다른 기기로 또 접속해도 이 집계엔 안 잡힌다 — "이 기관이
+    // 처음 어떤 경로로 반응했는가"를 보는 지표다.
+    if (r.first_click_device === 'mobile') g.visited_mobile++;
+    else if (r.first_click_device === 'pc') g.visited_pc++;
+    else if (r.delivery_status === 'sent') g.not_visited++;
   }
   return Array.from(byOrg.values()).map(g => ({
     ...g,
     response_rate: g.sent > 0 ? Math.round((g.replied / g.sent) * 1000) / 10 : 0,
+    visit_rate: g.sent > 0 ? Math.round(((g.visited_pc + g.visited_mobile) / g.sent) * 1000) / 10 : 0,
   }));
 }
 
@@ -31352,9 +31409,18 @@ async function _kmailSendCampaign(env, campaign) {
       if (!cRes.ok) { failCount++; continue; }
       const contact = await cRes.json();
       if (contact.status !== 'confirmed' || contact.owner_user_guid !== campaign.owner_user_guid) { failCount++; continue; }
+      // 2026-09-04 신설 — {{TRACKING_LINK}}를 이 수신자의 실제 추적
+      // URL로 치환. tracking_token이 없는 캠페인(v1.9 이전 생성분)은
+      // 플레이스홀더가 있어도 그대로 남는다 — 조용히 빈 문자열로
+      // 지우면 "링크가 사라졌는데 왜인지 모르는" 상황이 되므로, 차라리
+      // 눈에 띄게 원문 그대로 두어 문제를 바로 알아챌 수 있게 한다.
+      let sendText = (recipRow?.body_override || '').trim() || campaign.body;
+      if (recipRow?.tracking_token) {
+        sendText = sendText.replace(/\{\{TRACKING_LINK\}\}/g, `https://hondi.net/r/${recipRow.tracking_token}`);
+      }
       await _kmailSendOneEmail(env, {
         guid: campaign.owner_user_guid, to: contact.email,
-        subject: campaign.subject, text: (recipRow?.body_override || '').trim() || campaign.body,
+        subject: campaign.subject, text: sendText,
         sessionId: `kmail:${campaign.id}`,
         replyTo: `kmail-${campaign.id}@hondi.kr`,
         signature: settings.signature, senderName: settings.sender_display_name,
@@ -32347,6 +32413,11 @@ async function _kmailChatCreateCampaign(env, guid, parsed) {
         recipient_name: r.name || '', recipient_email: r.email, recipient_org: r.org || '',
         body_override: typeof r.body_override === 'string' ? r.body_override.trim() : '',
         delivery_status: 'pending',
+        // 2026-09-04 신설 — 수신자별 접속 추적 토큰. 본문에
+        // {{TRACKING_LINK}}가 있으면 발송 시점에 이 토큰 기반 URL로
+        // 치환된다(_kmailSendCampaign). 안 쓰는 캠페인은 그냥 무시된다.
+        tracking_token: crypto.randomUUID().replace(/-/g, ''),
+        click_count: 0,
       }),
     }).catch(e => console.warn('[K-Mail Campaign] 수신자 추적행 생성 실패(계속 진행):', r.email, e.message));
   }));
@@ -32837,10 +32908,11 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
       total_recipients: recipRows.length,
       total_sent: recipRows.filter(r => r.delivery_status === 'sent').length,
       total_replied: recipRows.filter(r => r.replied_at).length,
+      total_visited: recipRows.filter(r => r.first_click_device).length,
       by_org: byOrg,
     };
-    const reportText = `[캠페인 보고서] ${reportPayload.title}\n수신 ${reportPayload.total_recipients}명 / 발송완료 ${reportPayload.total_sent}명 / 회신 ${reportPayload.total_replied}건\n\n기관·카테고리별:\n` +
-      byOrg.map(g => `- ${g.org}: 발송 ${g.sent} / 회신 ${g.replied} (응답률 ${g.response_rate}%) — ${Object.entries(g.classifications).map(([k, v]) => `${k} ${v}`).join(', ') || '분류 없음'}`).join('\n');
+    const reportText = `[캠페인 보고서] ${reportPayload.title}\n수신 ${reportPayload.total_recipients}명 / 발송완료 ${reportPayload.total_sent}명 / 회신 ${reportPayload.total_replied}건 / 접속 ${reportPayload.total_visited}건\n\n기관·카테고리별:\n` +
+      byOrg.map(g => `- ${g.org}: 발송 ${g.sent} / 회신 ${g.replied}(${g.response_rate}%) / 접속 PC ${g.visited_pc}·모바일 ${g.visited_mobile}(방문율 ${g.visit_rate}%) — ${Object.entries(g.classifications).map(([k, v]) => `${k} ${v}`).join(', ') || '분류 없음'}`).join('\n');
 
     const token = await _l1AdminToken(env);
     const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
