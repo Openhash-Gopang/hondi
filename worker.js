@@ -1021,6 +1021,23 @@ async function handleDeviceLinkDeliver(request, env, corsHeaders) {
 // GET /auth/device-link/poll?sessionId=...
 // PC가 호출 — 봉투가 도착했는지 짧은 간격으로 확인. 가져가면 즉시 삭제
 // (재사용 방지 — 한 세션당 봉투는 한 번만 소비된다).
+//
+// ── 2026-09-03 신설 — sign_request 서버측 검증 + phone_verify_token 발급 ──
+// 원래 이 엔드포인트는 폰이 보낸 signature/publicKeyB64u를 그대로 중계만
+// 했다 — "이게 진짜 그 guid의 서명인지"는 호출부(PC)가 알아서 검증한다는
+// 가정이었다. 그런데 K-Plan처럼 이 결과를 실제 GDC 과금 인증으로 쓰려는
+// 소비처가 생기면서, 서버가 직접 검증하지 않으면 위조된 pubkey/서명을
+// 걸러낼 방법이 없다는 게 드러났다(주피터 지시로 정리).
+// 그래서 여기서 두 가지를 새로 확인한다:
+//   ① profile.pubkey_ed25519(가입 시 등록된 공개키)와 폰이 보낸
+//      publicKeyB64u가 일치하는지 — 다른 키로 바꿔치기 방지
+//   ② 그 공개키로 sigMsg에 대한 서명이 실제로 유효한지
+// 둘 다 통과하면, handlePhoneOtpVerify와 완전히 동일한 형식(e164:exp.sig,
+// PHONE_VERIFY_SECRET으로 HMAC)의 phone_verify_token을 여기서도 발급한다
+// — 형식이 같으므로 _resolveGuidFromPhoneVerifyToken 등 기존 모든 소비처
+// (handleKlawRelay, handleKPlanRelay, handleUserGdcBalance, /kplan/plan/*)를
+// 단 한 줄도 안 고치고 그대로 쓸 수 있다. SMS 없이도(웹푸시만으로) 같은
+// 자격의 토큰을 얻는 대체 로그인 경로가 되는 셈이다.
 async function handleDeviceLinkPoll(request, env, corsHeaders) {
   const url = new URL(request.url);
   const sessionId = url.searchParams.get('sessionId');
@@ -1041,6 +1058,31 @@ async function handleDeviceLinkPoll(request, env, corsHeaders) {
       // "누구"의 서명인지 알 방법이 이것뿐이다 — 개인키가 아니라 guid만
       // (이미 공개적으로 조회 가능한 식별자) 돌려준다.
       payload.guid = record.guid;
+
+      // ── 서버측 검증 + phone_verify_token 발급 ──────────────────────
+      let verified = false;
+      try {
+        const profile = await _l1FindProfileByGuid(env, record.guid);
+        if (profile?.pubkey_ed25519 && profile.pubkey_ed25519 === record.publicKeyB64u) {
+          verified = await _verifyEd25519Simple(record.publicKeyB64u, record.signature, record.sigMsg);
+        }
+      } catch (e) {
+        _dlog(env, JSON.stringify({ tag: 'DEVICE_LINK_VERIFY_ERROR', sessionId, guid: record.guid, error: e.message }));
+      }
+      payload.verified = verified;
+
+      if (verified && record.e164 && env.PHONE_VERIFY_SECRET) {
+        const exp = Date.now() + PHONE_VERIFY_TOKEN_TTL_MS;
+        const tokenPayload = `${record.e164}:${exp}`;
+        const signature = await _hmacSha256Hex(env.PHONE_VERIFY_SECRET, tokenPayload);
+        payload.phone_verify_token = tokenPayload + '.' + signature;
+        payload.expires_at = new Date(exp).toISOString();
+      } else if (!verified) {
+        // 위조·불일치 — 클라이언트가 guid/서명을 그대로 신뢰하지 않도록
+        // 명시적으로 실패를 알린다. 세션은 이미 삭제됐으니 재사용은
+        // 불가능하다(재사용 방지 자체는 유지).
+        payload.state = 'verification_failed';
+      }
     } else {
       payload.sealed = record.sealed;
     }
