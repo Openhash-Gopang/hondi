@@ -18737,9 +18737,22 @@ const KPLAN_TIER_MODELS = {
   'kplan-flash': { backendModel: 'deepseek-v4-flash' }, // 목표 확증·인터뷰 — 경량
   'kplan-pro':   { backendModel: 'deepseek-v4-pro' },   // 계획 정련·K-Recompose — 추론
 };
-const KPLAN_USER_DAILY_KRW_LIMIT       = 300;   // 1인 1일 한도(원) — K-Law와 동일 기준
-const KPLAN_GLOBAL_DAILY_KRW_LIMIT     = 30000; // 계정 전체 1일 예산 상한(원)
-const KPLAN_USER_DAILY_GENERATION_LIMIT = 5;    // 1인 1일 "계획 생성/재정련" 횟수 한도
+const KPLAN_GLOBAL_DAILY_KRW_LIMIT     = 30000; // 계정 전체 1일 예산 상한(원) — 공유 계정 폭주 방지용, 개별 사용자 한도가 아님
+
+// ── 2026-09-03 수정 — 주피터 지시: "한도는 사용자의 GDC 잔고 내에서
+// 무제한". K-Plan 출시 초기 K-Law를 본떠 KPLAN_USER_DAILY_KRW_LIMIT(300원)
+// ·KPLAN_USER_DAILY_GENERATION_LIMIT(5회)라는 별도 하드캡을 걸어뒀었는데,
+// 이게 실제 GDC 잔액과 무관하게 먼저 터졌다(pro 티어 1회 정련만 해도
+// max_tokens 16000 × 5배 배율로 300원을 넘기기 쉬움 — 잔액이 충분히
+// 남아있어도 "오늘 한도 소진"으로 막히는 설계 결함). 개별 사용자 과금
+// 한도는 실제 GDC 잔액 하나로만 판단해야 한다는 게 원래 의도이므로, 그
+// 두 하드캡은 완전히 제거한다. 남기는 건 아래 두 가지뿐:
+//   ① KPLAN_GLOBAL_DAILY_KRW_LIMIT — 계정 전체 공유 예산 폭주 방지(모든
+//      사용자 몫을 보호하는 목적이지, 특정 유저 개인 한도가 아님)
+//   ② _gdcFreeQuotaGate — 매 호출 전 실제 GDC 잔액을 확인해 최소 예약금
+//      (3원) 미만이면 차단하는, 진짜 잔액 기반 게이트
+// userKey·genKey 스펜드 기록 자체는 과금 모델 튜닝을 위한 계측 용도로
+// 남겨두되(analytics), 더 이상 429로 차단하는 데는 쓰지 않는다.
 
 // ── K-Plan 베타 기간 배수 (2026-09-02 신설 — 주피터 확정 지시) ──
 // "DeepSeek v4 flash 호출 시 예상 API 비용의 10배, v4 pro 호출 시 5배."
@@ -18803,16 +18816,10 @@ async function handleKPlanRelay(bodyText, env, corsHeaders, meta = null, ctx = n
   if (globalSpent >= KPLAN_GLOBAL_DAILY_KRW_LIMIT) {
     return _err(429, 'KPLAN_GLOBAL_QUOTA_EXCEEDED', '오늘 K-Plan 전체 이용자의 사용량이 한도에 도달했습니다. 내일 다시 이용해 주세요.', corsHeaders);
   }
-  if (userSpent >= KPLAN_USER_DAILY_KRW_LIMIT) {
-    return _err(429, 'KPLAN_USER_QUOTA_EXCEEDED', '오늘 사용 가능한 K-Plan 한도를 모두 사용했습니다. 내일 다시 이용해 주세요.', corsHeaders);
-  }
-  // generation_type이 'compose'(최초 정련) 또는 'recompose'(체크포인트
-  // 재정련)일 때만 생성 횟수로 센다 — 목표 확증 인터뷰(kplan-flash 대화)는
-  // 세지 않는다(K-Law의 step_cycle과 동일한 사고방식).
+  // 개별 사용자 한도는 실제 GDC 잔액(_gdcFreeQuotaGate, 아래)만으로 판단한다
+  // — userSpent·genCount는 더 이상 여기서 차단 조건으로 쓰지 않고, 과금
+  // 모델 튜닝을 위한 계측치로만 기록에 남긴다(주피터 지시, 2026-09-03).
   const _isGeneration = generation_type === 'compose' || generation_type === 'recompose';
-  if (_isGeneration && genCount >= KPLAN_USER_DAILY_GENERATION_LIMIT) {
-    return _err(429, 'KPLAN_GENERATION_LIMIT_EXCEEDED', `오늘 계획 생성/재정련 한도(${KPLAN_USER_DAILY_GENERATION_LIMIT}회)를 모두 사용했습니다. 내일 다시 이용해 주세요.`, corsHeaders);
-  }
 
   const _gateBlocked = await _gdcFreeQuotaGate(env, guid, corsHeaders, meta);
   if (_gateBlocked) return _gateBlocked;
