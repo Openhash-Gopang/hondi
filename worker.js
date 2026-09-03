@@ -425,13 +425,15 @@ async function _resolveGuidFromPhoneVerifyToken(env, phoneVerifyToken) {
   const expectedSig = await _hmacSha256Hex(env.PHONE_VERIFY_SECRET, payload);
   if (expectedSig !== sig) return { ok: false, code: 'TOKEN_INVALID', message: '전화번호 인증 토큰 서명이 유효하지 않습니다' };
 
-  const domesticPhone = e164.replace(/^\+82/, '');
-  const phoneDigits    = domesticPhone.replace(/\D/g, '');
-  if (!phoneDigits) return { ok: false, code: 'TOKEN_MALFORMED', message: 'phone_verify_token의 전화번호가 올바르지 않습니다' };
-
   try {
     const l1Token = await _l1AdminToken(env);
-    const filter  = encodeURIComponent(`phone='${phoneDigits}'`);
+    // 2026-09-03 수정 — profiles 컬렉션 실제 스키마는 e164 필드다(phone
+    // 필드는 존재하지 않음, pb_migrations/1781467666_updated_profiles.js
+    // 확인). 잘못된 필드명으로 필터링해 PocketBase가 HTTP 400을 반환하던
+    // 버그 — device-link sign_request 로그인이 이 경로를 실제 데이터로
+    // 처음 타면서 발견(주피터 실사 재현). _l1FindProfileByE164와 동일한
+    // 필터 패턴으로 정정.
+    const filter  = encodeURIComponent(`e164='${e164}'`);
     const res = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${filter}&perPage=1`, {
       headers: { 'Authorization': `Bearer ${l1Token}` },
       signal: AbortSignal.timeout(8000),
@@ -488,17 +490,16 @@ async function handleUserGdcBalance(request, env, corsHeaders) {
   const expectedSig = await _hmacSha256Hex(env.PHONE_VERIFY_SECRET, payload);
   if (expectedSig !== sig) return _err(401, 'TOKEN_INVALID', '전화번호 인증 토큰 서명이 유효하지 않습니다', corsHeaders);
 
-  // handlePhoneOtpRequest·handleProfileClaim과 동일 관례 — e164는
-  // '+82' + 국내번호(맨 앞 0 포함) 형태. profiles.phone은 그 국내
-  // 형식(하이픈 없는 숫자열)으로 저장돼 있다(handleProfileClaim의
-  // existingPhoneDigits 비교 로직 참고).
-  const domesticPhone = e164.replace(/^\+82/, '');
-  const phoneDigits    = domesticPhone.replace(/\D/g, '');
-  if (!phoneDigits) return _err(400, 'TOKEN_MALFORMED', 'phone_verify_token의 전화번호가 올바르지 않습니다', corsHeaders);
+  // 2026-09-03 수정 — profiles 컬렉션 실제 스키마는 e164 필드다(phone
+  // 필드는 존재하지 않음, pb_migrations/1781467666_updated_profiles.js
+  // 확인). 아래 주석은 예전에 이 함수를 작성할 때의 착각이었다 — 잘못된
+  // 필드명으로 필터링해 PocketBase가 HTTP 400을 반환하던 버그.
+  // device-link sign_request 로그인이 이 경로를 실제 데이터로 처음
+  // 타면서 발견(주피터 실사 재현).
 
   try {
     const l1Token = await _l1AdminToken(env);
-    const filter  = encodeURIComponent(`phone='${phoneDigits}'`);
+    const filter  = encodeURIComponent(`e164='${e164}'`);
     const res = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${filter}&perPage=1`, {
       headers: { 'Authorization': `Bearer ${l1Token}` },
       signal: AbortSignal.timeout(8000),
