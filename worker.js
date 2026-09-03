@@ -18748,6 +18748,14 @@ const KPLAN_USER_DAILY_GENERATION_LIMIT = 5;    // 1인 1일 "계획 생성/재�
 // 없음).
 const KPLAN_BETA_MULTIPLIER = { 'kplan-flash': 10, 'kplan-pro': 5 };
 
+// ── 2026-09-03 신설 — K-Plan 웹검색 연결 ──────────────────────────
+// K-Search RULE-07·K-Mail(_kmailWebSearch)이 이미 쓰는 [WEB_SEARCH:
+// query=검색어] 태그 패턴을 그대로 재사용한다(_performWebSearchCore,
+// Serper.dev 기반 — 새 검색 인프라 안 만듦, 기존 캐시·일일예산 공유).
+const KPLAN_WEB_SEARCH_MAX_ROUNDS = 3; // 무한 검색 방지 — 최대 왕복 횟수
+const KPLAN_WEB_SEARCH_TAG_RE = /\[WEB_SEARCH:\s*query=([^\]]+)\]\s*$/;
+const KPLAN_WEB_SEARCH_TAG_STRIP_RE = /\[WEB_SEARCH:[^\]]*\]\s*$/;
+
 async function handleKPlanRelay(bodyText, env, corsHeaders, meta = null, ctx = null) {
   let body;
   try { body = JSON.parse(bodyText); } catch { return _err(400, 'INVALID_JSON', '', corsHeaders); }
@@ -18778,6 +18786,7 @@ async function handleKPlanRelay(bodyText, env, corsHeaders, meta = null, ctx = n
     : messages;
   messagesWithIntegrity = _insertSystemNote(messagesWithIntegrity, _buildLocationNote(currentLocation));
   messagesWithIntegrity = _insertSystemNote(messagesWithIntegrity, _buildDateNote());
+  messagesWithIntegrity = _insertSystemNote(messagesWithIntegrity, _buildNoToolsNote());
 
   const tierKey = KPLAN_TIER_MODELS[tier] ? tier : 'kplan-flash';
   const backendModel = KPLAN_TIER_MODELS[tierKey].backendModel;
@@ -18818,20 +18827,6 @@ async function handleKPlanRelay(bodyText, env, corsHeaders, meta = null, ctx = n
   _dlog(env, JSON.stringify({ tag:'KPLAN_RELAY_CALL', guid, tier: tierKey, generationType: generation_type || null, stream: isStream, userSpent, globalSpent, ts: new Date().toISOString(), ...meta }));
 
   const t0 = Date.now();
-  let res;
-  try {
-    res = await fetch(DEEPSEEK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${env.DEEPSEEK_API_KEY}` },
-      body: JSON.stringify(payload),
-    });
-  } catch (e) { return _err(502, 'KPLAN_RELAY_ERROR', e.message, corsHeaders); }
-
-  if (!res.ok) {
-    const errText = await res.text().catch(() => '');
-    return new Response(errText || JSON.stringify({ error:`HTTP ${res.status}` }), { status: res.status, headers: corsHeaders });
-  }
-
   const priceTier = tierKey === 'kplan-pro' ? 'hondi-pro' : 'hondi-flash';
   const _kplanMultiplierOverride = KPLAN_BETA_MULTIPLIER[tierKey];
   const recordGeneration = async () => { if (_isGeneration) await _klawSpendAdd(env, genKey, 1); };
@@ -18845,6 +18840,23 @@ async function handleKPlanRelay(bodyText, env, corsHeaders, meta = null, ctx = n
   };
 
   if (isStream) {
+    // 2026-09-03 — 웹검색(KPLAN_WEB_SEARCH_TAG) 왕복은 스트리밍과 함께
+    // 구현하지 않는다(SSE 스트림 중간에 별도 검색 호출을 끼워 넣는 건
+    // 클라이언트 파싱 계약을 깨뜨림). plan.hondi.net/webapp.html은 이미
+    // stream:false만 쓰므로 실사용에 지장 없음 — 스트리밍 호출부가 검색이
+    // 필요해지면 그때 별도로 설계.
+    let res;
+    try {
+      res = await fetch(DEEPSEEK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${env.DEEPSEEK_API_KEY}` },
+        body: JSON.stringify(payload),
+      });
+    } catch (e) { return _err(502, 'KPLAN_RELAY_ERROR', e.message, corsHeaders); }
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      return new Response(errText || JSON.stringify({ error:`HTTP ${res.status}` }), { status: res.status, headers: corsHeaders });
+    }
     const [forClient, forUsage] = res.body.tee();
     const usageTask = _parseUsageFromStream(forUsage).then(usage => _recordAiUsage(env, ctx, {
       guid, serviceId: 'kplan', tier: tierKey, priceTier, model: backendModel, usage,
@@ -18856,16 +18868,74 @@ async function handleKPlanRelay(bodyText, env, corsHeaders, meta = null, ctx = n
     return new Response(forClient, { status:200, headers:{ ...corsHeaders, 'Content-Type':'text/event-stream', 'Cache-Control':'no-cache', 'X-Accel-Buffering':'no' } });
   }
 
-  const data = await res.json();
-  if (data?.usage) {
+  // ── 비스트리밍 경로 — 웹검색(Serper.dev) 왕복 루프 (2026-09-03 신설) ──
+  // K-Search RULE-07·K-Mail(_kmailWebSearch)과 동일한 [WEB_SEARCH:
+  // query=검색어] 태그 패턴 재사용 — 새 검색 인프라를 만들지 않고 기존
+  // 캐시·일일예산이 이미 걸린 _performWebSearchCore를 그대로 씀. 최대
+  // KPLAN_WEB_SEARCH_MAX_ROUNDS회까지 왕복하고, 각 라운드의 토큰 사용량을
+  // 합산해 한 번만 정산한다(라운드마다 따로 청구하지 않음 — 사용자가
+  // 예측 가능한 단일 비용을 보게 하기 위함).
+  let loopMessages = messagesWithIntegrity;
+  let finalData = null;
+  const usageAcc = { prompt_tokens: 0, completion_tokens: 0, prompt_cache_hit_tokens: 0, prompt_cache_miss_tokens: 0 };
+
+  for (let round = 0; round < KPLAN_WEB_SEARCH_MAX_ROUNDS; round++) {
+    let res;
+    try {
+      res = await fetch(DEEPSEEK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${env.DEEPSEEK_API_KEY}` },
+        body: JSON.stringify({ ...payload, messages: loopMessages }),
+      });
+    } catch (e) { return _err(502, 'KPLAN_RELAY_ERROR', e.message, corsHeaders); }
+
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      return new Response(errText || JSON.stringify({ error:`HTTP ${res.status}` }), { status: res.status, headers: corsHeaders });
+    }
+
+    const data = await res.json();
+    if (data?.usage) {
+      usageAcc.prompt_tokens               += data.usage.prompt_tokens || 0;
+      usageAcc.completion_tokens           += data.usage.completion_tokens || 0;
+      usageAcc.prompt_cache_hit_tokens     += data.usage.prompt_cache_hit_tokens || 0;
+      usageAcc.prompt_cache_miss_tokens    += data.usage.prompt_cache_miss_tokens || 0;
+    }
+
+    const text = data.choices?.[0]?.message?.content || '';
+    const searchMatch = text.match(KPLAN_WEB_SEARCH_TAG_RE);
+    if (searchMatch && round < KPLAN_WEB_SEARCH_MAX_ROUNDS - 1) {
+      const query = searchMatch[1].trim();
+      const searchResult = await _performWebSearchCore(env, ctx, query).catch(e => ({ ok: false, message: e.message }));
+      loopMessages = [
+        ...loopMessages,
+        { role: 'assistant', content: text },
+        { role: 'user', content: `[검색 결과]\n${JSON.stringify(searchResult).slice(0, 3000)}` },
+      ];
+      continue;
+    }
+
+    // 최종 응답 — 남은 [WEB_SEARCH] 태그 흔적 제거 후 확정.
+    if (data.choices?.[0]?.message) {
+      data.choices[0].message.content = text.replace(KPLAN_WEB_SEARCH_TAG_STRIP_RE, '').trim();
+    }
+    finalData = data;
+    break;
+  }
+
+  if (!finalData) {
+    return _err(502, 'KPLAN_SEARCH_ROUNDS_EXHAUSTED', `웹검색 왕복 한도(${KPLAN_WEB_SEARCH_MAX_ROUNDS}회)를 넘었습니다.`, corsHeaders);
+  }
+
+  if (usageAcc.prompt_tokens || usageAcc.completion_tokens) {
     _recordAiUsage(env, ctx, {
-      guid, serviceId: 'kplan', tier: tierKey, priceTier, model: backendModel, usage: data.usage,
+      guid, serviceId: 'kplan', tier: tierKey, priceTier, model: backendModel, usage: usageAcc,
       logTag: 'KPLAN_RELAY_COST', extraLogFields: { elapsedMs: Date.now() - t0, ...meta },
-      spendKeys: [userKey, globalKey], onAfterRecord: settleKplan(data.usage),
+      spendKeys: [userKey, globalKey], onAfterRecord: settleKplan(usageAcc),
       multiplierOverride: _kplanMultiplierOverride,
     });
   }
-  return new Response(JSON.stringify(data), { headers: corsHeaders });
+  return new Response(JSON.stringify(finalData), { headers: corsHeaders });
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -23221,6 +23291,25 @@ async function handleGovTaskBatchStatus(bodyText, env, corsHeaders) {
 // ★ 2026-07-30 신설 — 날짜 강제 주입. 클라이언트 데이터 없이 서버가
 // 항상 정확히 아는 사실이므로 무조건 주입한다(법정기한 계산 등 정확성이
 // 중요한 SP에서 LLM이 날짜를 잘못 아는 위험 제거).
+// 2026-09-03 신설 — K-Plan 실사 테스트 중 발견: 사용자가 "bash_tool로
+// 저장소를 클론하라" 같은 문구를 실행 방법 입력에 적으면, DeepSeek이
+// 실제 도구가 있는 척 <bash_tool>...</bash_tool> 같은 가짜 태그를 텍스트로
+// 흉내만 내고 아무것도 실행하지 않은 채 끝나버렸다(주피터 실사 재현).
+// /kplan/relay는 순수 chat completion 호출이라 bash_tool·web_fetch 같은
+// 실행 도구는 여전히 없다 — 다만 같은 날 웹검색(Serper.dev, [WEB_SEARCH:
+// query=...] 태그)은 실제로 연결했으므로(K-Search RULE-07·K-Mail과 동일
+// 인프라 재사용, handleKPlanRelay 하단 왕복 루프 참고), 이 노트는 "웹검색만
+// 진짜"라는 구분을 명확히 알려준다 — 안 그러면 모델이 웹검색 요청까지도
+// 가짜로 흉내 낼 위험이 있다.
+function _buildNoToolsNote() {
+  return `\n\n---\n\n[시스템 — 실행 환경 안내]\n이 세션에는 bash_tool·code execution 같은 코드 실행 도구는 연결돼 ` +
+    `있지 않습니다 — 저장소를 직접 클론하거나 파일을 실행할 방법이 없으니, <bash_tool> 같은 가짜 도구 호출 ` +
+    `구문을 절대 만들어내지 마십시오. 다만 실제 웹 검색은 가능합니다 — 최신 정보나 확인되지 않은 사실이 ` +
+    `필요하면 응답 맨 끝에 [WEB_SEARCH: query=검색어] 태그를 내십시오(다음 턴에 진짜 검색 결과가 주어집니다, ` +
+    `최대 ${KPLAN_WEB_SEARCH_MAX_ROUNDS}회). 검색이 필요 없으면 이 태그 없이 사용자가 대화 중 제공한 정보만으로 ` +
+    `곧바로 실질적인 답변(계획서 등)을 작성하십시오.`;
+}
+
 function _buildDateNote() {
   const now = new Date();
   const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000); // UTC+9 고정(한국 서비스 전용)
