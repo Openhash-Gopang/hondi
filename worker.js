@@ -12621,6 +12621,7 @@ export default {
     if (pathname === '/kplan/plan/list'       && request.method === 'GET')  return handleKPlanPlanList(request, env, corsHeaders);
     if (pathname === '/kplan/plan/get'        && request.method === 'GET')  return handleKPlanPlanGet(request, env, corsHeaders);
     if (pathname === '/kplan/plan/checkpoint' && request.method === 'POST') return handleKPlanPlanCheckpoint(bodyText, env, corsHeaders);
+    if (pathname === '/kplan/plan/state/set'  && request.method === 'POST') return handleKPlanPlanStateSet(bodyText, env, corsHeaders);
     if (pathname === '/kplan/task/bulk-create' && request.method === 'POST') return handleKPlanTaskBulkCreate(bodyText, env, corsHeaders);
     if (pathname === '/kplan/task/list' && request.method === 'GET')  return handleKPlanTaskList(request, env, corsHeaders);
     if (pathname === '/kplan/task/update' && request.method === 'PATCH') return handleKPlanTaskUpdate(bodyText, env, corsHeaders);
@@ -19126,8 +19127,67 @@ async function handleKPlanPlanCheckpoint(bodyText, env, corsHeaders) {
   }
 }
 
-// ═══════════════════════════════════════════════════════════
-// /kplan/task/* — K-Plan 작업 보드(kplan_tasks) 순수 CRUD (2026-09-03 신설)
+// POST /kplan/plan/state/set { phone_verify_token, plan_id, state_key, state_value, source? }
+// 2026-09-04 신설 — docs/KPLAN_KMAIL_AGENT_TO_AGENT_ARCHITECTURE §7-3
+// (실시간 상태, 예: 재고·영업시간) 최소 구현. 같은 plan_id+state_key면
+// upsert(있으면 갱신, 없으면 생성) — 매번 새로 만들지 않는다.
+async function handleKPlanPlanStateSet(bodyText, env, corsHeaders) {
+  let body;
+  try { body = JSON.parse(bodyText); } catch { return _err(400, 'INVALID_JSON', '', corsHeaders); }
+  const { phone_verify_token, plan_id, state_key, state_value, source } = body || {};
+  if (!plan_id || !state_key || typeof state_value !== 'string') {
+    return _err(400, 'MISSING_FIELD', 'plan_id/state_key/state_value 필수', corsHeaders);
+  }
+  const auth = await _resolveGuidFromPhoneVerifyToken(env, phone_verify_token);
+  if (!auth.ok) return _err(401, auth.code, auth.message || '로그인이 필요합니다.', corsHeaders);
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  const esc = s => String(s).replace(/'/g, "\\'");
+  try {
+    const filter = encodeURIComponent(`plan_id='${esc(plan_id)}' && state_key='${esc(state_key)}' && owner_user_guid='${esc(auth.guid)}'`);
+    const findRes = await fetch(`${L1_DEFAULT}/api/collections/kplan_plan_state/records?filter=${filter}&perPage=1`, { headers: { Authorization: headers.Authorization } });
+    const findData = await findRes.json().catch(() => ({ items: [] }));
+    const existing = (findData.items && findData.items[0]) || null;
+
+    let rec;
+    if (existing) {
+      const patchRes = await fetch(`${L1_DEFAULT}/api/collections/kplan_plan_state/records/${existing.id}`, {
+        method: 'PATCH', headers, body: JSON.stringify({ state_value, source: source || existing.source || '' }),
+      });
+      if (!patchRes.ok) return _err(502, 'KPLAN_STATE_UPDATE_FAILED', await patchRes.text().catch(() => ''), corsHeaders);
+      rec = await patchRes.json();
+    } else {
+      const createRes = await fetch(`${L1_DEFAULT}/api/collections/kplan_plan_state/records`, {
+        method: 'POST', headers, body: JSON.stringify({
+          owner_user_guid: auth.guid, plan_id, state_key, state_value, source: source || 'user',
+        }),
+      });
+      if (!createRes.ok) return _err(502, 'KPLAN_STATE_CREATE_FAILED', await createRes.text().catch(() => ''), corsHeaders);
+      rec = await createRes.json();
+    }
+    return new Response(JSON.stringify({ ok: true, state: rec }), { headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'KPLAN_STATE_ERROR', e.message, corsHeaders);
+  }
+}
+
+// 2026-09-04 신설 — _kplanDecideForKMail이 판단 근거로 참조할 현재
+// 상태를 전부 불러온다. 값이 없으면(대부분의 플랜) 빈 객체 —
+// 프롬프트에 "등록된 실시간 상태 없음"으로만 표시되고 기존 동작과
+// 동일하게 계획서 맥락만으로 판단한다.
+async function _kplanFetchPlanState(env, guid, planId) {
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}` };
+  const filter = encodeURIComponent(`plan_id='${planId}' && owner_user_guid='${guid.replace(/'/g, "\\'")}'`);
+  const res = await fetch(`${L1_DEFAULT}/api/collections/kplan_plan_state/records?filter=${filter}&perPage=100`, { headers });
+  const data = await res.json().catch(() => ({ items: [] }));
+  const map = {};
+  for (const r of (data.items || [])) map[r.state_key] = r.state_value;
+  return map;
+}
+
+
 //
 // 범위: 순수 태스크 관리만. K-Mail 연동은 포함하지 않는다(주피터 지시
 // — K-Mail은 별도 프로젝트, 필요한 작업은 별도 지시서로 넘김). AI
@@ -31677,7 +31737,7 @@ async function _kmailTriggerKPlanRecompose(env, campaign, digestText) {
 // K-Plan 스스로 escalate로 답하고 hold_message까지 함께 준다(설계
 // 문서 §4-B의 "응답 지연 시 처리는 K-Plan이 사안별로 판단" 원칙을
 // "질문 자체를 없앤다"로 구현 — 비동기로 기다리는 대신 매번 즉답).
-async function _kplanDecideForKMail(env, { ownerGuid, planId, checkpointLabel, subject, bodyText }) {
+async function _kplanDecideForKMail(env, { ownerGuid, planId, checkpointLabel, subject, bodyText, threadHistoryText }) {
   if (!env.DEEPSEEK_API_KEY) return { decision: 'escalate', reason: 'DEEPSEEK_API_KEY 미설정' };
 
   const token = await _l1AdminToken(env);
@@ -31694,20 +31754,32 @@ async function _kplanDecideForKMail(env, { ownerGuid, planId, checkpointLabel, s
   catch (e) { return { decision: 'escalate', reason: 'k-plan SP 로드 실패: ' + e.message }; }
   const systemPrompt = [universalLayers, kplanLayer].filter(Boolean).join('\n\n---\n\n');
 
+  // 2026-09-04 신설 — §7-3 "재고·영업시간 같은 실시간 상태"를 이제
+  // 참조한다. kplan_plan_state에 값이 없으면(대부분) 기존과 동일하게
+  // 계획서 맥락만으로 판단한다 — 새 컬렉션이 있다고 판단 방식이
+  // 강제로 바뀌지 않는다.
+  const stateMap = await _kplanFetchPlanState(env, ownerGuid, planId).catch(() => ({}));
+  const stateText = Object.keys(stateMap).length > 0
+    ? Object.entries(stateMap).map(([k, v]) => `- ${k}: ${v}`).join('\n')
+    : '(등록된 실시간 상태 없음 — 계획서 맥락만으로 판단)';
+
   const decideQuery =
     `실시간 사전 질의 — 플랜 "${planId}"` + (checkpointLabel ? ` / 체크포인트 "${checkpointLabel}"` : '') +
     `의 실행 채널(K-Mail)로 인바운드 메일이 도착했습니다. 이 요청을 지금 이 플랜의 범위 안에서 사람 확인 ` +
     `없이 K-Mail이 바로 처리(회신)해도 되는지 판단해주세요.\n\n` +
     `플랜 목표: ${plan.goal || ''}\n계획서: ${(plan.refined_plan_md || '').slice(0, 2000)}\n\n` +
+    `현재 상태:\n${stateText}\n\n` +
+    (threadHistoryText ? `이 상대와의 과거 대화 이력(최근 순):\n${threadHistoryText}\n\n` : '') +
     `인바운드 메일 제목: ${subject}\n인바운드 메일 본문(일부): ${bodyText.slice(0, 1000)}\n\n` +
     `반드시 이 형식의 JSON만 답하세요(설명 없이):\n` +
     `{"verdict":"APPROVE 또는 ESCALATE","reply_guidance":"APPROVE면 회신에 담을 내용 한두 문장, 아니면 빈 문자열",` +
-    `"urgent":true 또는 false,"hold_message":"ESCALATE이면서 urgent일 때만: 사람 확인 전 임시로 상대에게 보낼 대기 응답 문구, 아니면 빈 문자열"}`;
+    `"urgent":true 또는 false,"hold_message":"ESCALATE이면서 urgent일 때만: 사람 확인 전 임시로 상대에게 보낼 대기 응답 문구, 아니면 빈 문자열",` +
+    `"suggest_delegation":true 또는 false,"rule_text":"suggest_delegation이 true일 때만: 이번과 같은 유형의 요청을 앞으로 K-Plan에 안 물어보고 K-Mail이 바로 처리해도 되는 조건을 자연어 한 문장으로. 이 플랜/체크포인트에서 안정적으로 반복될 패턴이라고 판단될 때만 true — 한 번뿐인 예외적 요청이면 false"}`;
 
   const raw = await deepseekChatText({
     env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-chat'),
     messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: decideQuery }],
-    max_tokens: 500, temperature: 0, timeoutMs: 20000, fallbackText: '',
+    max_tokens: 600, temperature: 0, timeoutMs: 20000, fallbackText: '',
   });
 
   let parsed = null;
@@ -31732,7 +31804,32 @@ async function _kplanDecideForKMail(env, { ownerGuid, planId, checkpointLabel, s
   }
 
   if (parsed?.verdict === 'APPROVE') {
-    return { decision: 'approve', replyGuidance: (parsed.reply_guidance || '').trim() };
+    const result = { decision: 'approve', replyGuidance: (parsed.reply_guidance || '').trim() };
+    // 2026-09-04 신설 — §7-3 "위임 정책 자동 승격" 최소 구현. K-Plan이
+    // 이번 승인을 반복 가능한 패턴이라고 스스로 판단했을 때만(매번
+    // 묻지 않고), 그 판단을 즉시 kmail_rules(action:delegate_execute)
+    // 로 승격한다 — "개발 초기엔 위임 문구를 단순하게" 원칙에 따라
+    // N회 반복을 세지 않고 K-Plan의 판단 1회를 그대로 신뢰한다(과한
+    // 일반화로 드러나면 사람이 나중에 그 규칙을 지우거나 고치면
+    // 된다 — "사람이 추후에 수정"이라는 위임 원칙과 일관).
+    if (parsed?.suggest_delegation === true && (parsed.rule_text || '').trim()) {
+      result.suggestedRuleText = parsed.rule_text.trim();
+      try {
+        const dupFilter = encodeURIComponent(`owner_user_guid='${ownerGuid.replace(/'/g, "\\'")}' && action='delegate_execute' && kplan_plan_id='${planId.replace(/'/g, "\\'")}' && rule_text='${result.suggestedRuleText.replace(/'/g, "\\'")}'`);
+        const dupRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_rules/records?filter=${dupFilter}&perPage=1`, { headers });
+        const dupData = await dupRes.json().catch(() => ({ items: [] }));
+        if (!(dupData.items && dupData.items[0])) {
+          const newRuleId = await _kmailChatCreateRule(env, ownerGuid, result.suggestedRuleText, {
+            action: 'delegate_execute', kplanPlanId: planId, kplanCheckpointLabel: checkpointLabel || '',
+          });
+          result.delegationPromoted = true;
+          result.newRuleId = newRuleId;
+        }
+      } catch (e) {
+        console.error('[K-Mail↔K-Plan 사전질의] 위임 규칙 자동 승격 실패(승인 자체는 계속 진행):', e.message);
+      }
+    }
+    return result;
   }
   return {
     decision: 'escalate',
@@ -31781,6 +31878,29 @@ async function _kmailSweepDueDigests(env) {
 // 은 아직 여기 없다 — 이 패치는 "회신이 ai_messages에 올바르게
 // 쌓이는 것"까지만 구현한다. 다이제스트 크론은 다음 패치.
 // ═══════════════════════════════════════════════════════════
+// 2026-09-04 신설 — docs/KPLAN_KMAIL_AGENT_TO_AGENT_ARCHITECTURE_v1_0_
+// 20260903.md §6-2(스레드 단위 상태 모델) 최소 구현. handleKmailMailboxList의
+// box='thread' 필터와 동일한 조회를 내부 함수로 분리해, 인바운드 처리
+// 파이프라인(사람이 API를 호출하는 게 아니라 email() 핸들러 내부)에서도
+// 같은 상대와의 과거 왕복을 참조할 수 있게 한다. 이번 인바운드 자체는
+// 아직 ai_messages에 안 쓰여 있으므로 자동으로 제외된다(중복 없음).
+async function _kmailFetchThreadHistory(env, ownerGuid, counterpartEmail, limit = 8) {
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}` };
+  const esc = s => String(s).replace(/'/g, "\\'");
+  const guidEsc = esc(ownerGuid);
+  const slugEsc = esc(_slugifyEmailAddr(counterpartEmail));
+  const filter = `((sender_guid='ext:${slugEsc}' && receiver_guid='${guidEsc}') || (sender_guid='${guidEsc}' && receiver_guid='ext:${slugEsc}')) && (content_type='kmail_outbound' || content_type='kmail_auto_reply' || content_type='kmail_inbound' || content_type='kmail_delegated_reply')`;
+  const res = await fetch(`${L1_DEFAULT}/api/collections/ai_messages/records?filter=${encodeURIComponent(filter)}&sort=-created&perPage=${limit}`, { headers });
+  const data = await res.json().catch(() => ({ items: [] }));
+  const items = (data.items || []).reverse(); // 오래된 것부터 보이게
+  if (items.length === 0) return '';
+  return items.map(m => {
+    const who = m.sender_guid === ownerGuid ? '(우리 쪽 발신)' : '(상대 발신)';
+    return `${who} ${m.content_original.slice(0, 300)}`;
+  }).join('\n---\n');
+}
+
 async function _handleKmailInboundEmail(message, env, ctx) {
   const toAddr = (message.to || '').toLowerCase();
   const localPart = toAddr.split('@')[0];
@@ -31868,6 +31988,24 @@ async function _handleKmailInboundEmail(message, env, ctx) {
       console.warn('[K-Mail email] 필터 규칙 판정 실패(KEEP으로 폴백):', e.message);
     }
 
+    // 2026-09-04 신설 — §6-2 스레드 단위 상태. 이 상대(recipient_email)에
+    // 해당하는 kmail_campaign_recipients 행을 찾아 thread_status를
+    // 갱신할 준비를 하고, 과거 왕복 이력을 함께 불러와 판단 근거로
+    // 쓴다. 캠페인이 아니거나(즉시발송 답장 등) recipRow가 없으면
+    // (v1.7 이전 캠페인) 조용히 건너뛴다 — 기존 동작과 동일.
+    const emailMatchForThread = fromAddr.match(/[^\s<>]+@[^\s<>]+/);
+    const fromEmailForThread = emailMatchForThread ? emailMatchForThread[0] : fromAddr;
+    let recipRowForThread = null;
+    if (campaignObj) {
+      try {
+        const rrFilter = encodeURIComponent(`campaign_id='${campaignObj.id}' && recipient_email='${fromEmailForThread.replace(/'/g, "\\'")}'`);
+        const rrRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_campaign_recipients/records?filter=${rrFilter}&perPage=1`, { headers: { Authorization: `Bearer ${token}` } });
+        const rrData = await rrRes.json().catch(() => ({ items: [] }));
+        recipRowForThread = (rrData.items && rrData.items[0]) || null;
+      } catch (e) { console.warn('[K-Mail email] 수신자 추적행 조회 실패(스레드 상태 갱신 생략):', e.message); }
+    }
+    const threadHistoryText = await _kmailFetchThreadHistory(env, ownerGuid, fromEmailForThread).catch(() => '');
+
     // 2026-09-03 신설 — docs/KPLAN_KMAIL_AGENT_TO_AGENT_ARCHITECTURE_v1_0_20260903.md
     // §4-B/§4-C. 차단·자동삭제 대상이 아닌 메일에 한해 위임 판정을
     // 돌린다. 위임 규칙을 등록한 적 없는 사용자(절대다수)는
@@ -31885,11 +32023,25 @@ async function _handleKmailInboundEmail(message, env, ctx) {
       // 가능하다. K-Plan 소관이 아닌 개인 메일(kplan_plan_id 없음)은
       // 이 단계를 거치지 않고 기존처럼 바로 escalate/none 그대로 간다.
       if (delegation.decision !== 'approve' && campaignObj?.kplan_plan_id) {
+        if (recipRowForThread) {
+          await fetch(`${L1_DEFAULT}/api/collections/kmail_campaign_recipients/records/${recipRowForThread.id}`, {
+            method: 'PATCH', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ thread_status: 'pending_kplan' }),
+          }).catch(() => {});
+        }
         delegation = await _kplanDecideForKMail(env, {
           ownerGuid, planId: campaignObj.kplan_plan_id, checkpointLabel: campaignObj.kplan_checkpoint_label,
-          subject, bodyText,
+          subject, bodyText, threadHistoryText,
         }).catch(e => { console.warn('[K-Mail email] K-Plan 사전질의 실패(escalate로 폴백):', e.message); return { decision: 'escalate' }; });
       }
+    }
+    if (recipRowForThread) {
+      const nextThreadStatus = delegation.decision === 'approve' ? 'resolved'
+        : (delegation.decision === 'escalate' ? 'pending_human' : 'open');
+      await fetch(`${L1_DEFAULT}/api/collections/kmail_campaign_recipients/records/${recipRowForThread.id}`, {
+        method: 'PATCH', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ thread_status: nextThreadStatus }),
+      }).catch(e => console.warn('[K-Mail email] thread_status 갱신 실패(계속 진행):', e.message));
     }
 
     if (delegation.decision === 'escalate' && delegation.holdMessage) {
@@ -31946,7 +32098,8 @@ async function _handleKmailInboundEmail(message, env, ctx) {
         });
         await _writeAiMessage(env, {
           session_id: sessionId, sender_guid: 'hondi-ai', receiver_guid: ownerGuid,
-          content_original: `[위임 범위 내 자동 처리] "${subject}"에 자동으로 회신했습니다.\n\n회신 내용: ${replyBody}`,
+          content_original: `[위임 범위 내 자동 처리] "${subject}"에 자동으로 회신했습니다.\n\n회신 내용: ${replyBody}` +
+            (delegation.delegationPromoted ? `\n\n(K-Plan이 이 유형의 요청을 앞으로 물어보지 않고 처리해도 되는 패턴으로 판단해, 새 위임 규칙을 등록했습니다: "${delegation.suggestedRuleText}")` : ''),
           content_type: 'kmail_delegated_reply',
         }).catch(e => console.error('[K-Mail email] 위임처리 기록 실패:', e.message));
       } catch (e) {
