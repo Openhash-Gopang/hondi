@@ -30037,6 +30037,24 @@ async function _kmailQueryContacts(env, guid, { status = 'confirmed', q = '', re
   return data.items || [];
 }
 
+// 2026-09-03 신설(v1.7) — 캠페인 이력 조회. KMAIL_LOOKUP_CAMPAIGNS가
+// 이 함수를 통해 과거 캠페인을 검색한다(§2-10). _kmailQueryContacts와
+// 동일한 패턴(부분일치 필터 조합) 재사용 — 새 검색 방식을 만들지 않음.
+async function _kmailQueryCampaigns(env, guid, { q = '', status = '', kplan_plan_id = '' } = {}) {
+  const esc = s => String(s).replace(/'/g, "\\'");
+  const clauses = [`owner_user_guid='${esc(guid)}'`];
+  if (q) clauses.push(`(subject~'${esc(q)}' || recipient_query~'${esc(q)}')`);
+  if (status) clauses.push(`status='${esc(status)}'`);
+  if (kplan_plan_id) clauses.push(`kplan_plan_id='${esc(kplan_plan_id)}'`);
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}` };
+  const filter = encodeURIComponent(clauses.join(' && '));
+  const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_campaigns/records?filter=${filter}&sort=-created&perPage=50`, { headers });
+  const data = await res.json().catch(() => ({ items: [] }));
+  return data.items || [];
+}
+
 async function handleKmailContactsList(request, url, env, corsHeaders) {
   // 2026-09-03 — 공용 인증 게이트(src/worker/k-service-auth.js)로 위임.
   // GET이라 body가 없으므로 쿼리스트링을 plain object로 바꿔서 넘긴다
@@ -31915,6 +31933,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   const sendMatch = reply.match(/KMAIL_SEND_CAMPAIGN\s*(\{[\s\S]*\})\s*$/);
   const ruleMatch = reply.match(/KMAIL_CREATE_RULE\s*(\{[\s\S]*\})\s*$/);
   const lookupMatch = reply.match(/KMAIL_LOOKUP_CONTACTS\s*(\{[\s\S]*\})\s*$/);
+  const campaignLookupMatch = reply.match(/KMAIL_LOOKUP_CAMPAIGNS\s*(\{[\s\S]*\})?\s*$/);
   const tagMatch = reply.match(/KMAIL_TAG_CONTACTS\s*(\{[\s\S]*\})\s*$/);
   const mergeMatch = reply.match(/KMAIL_MERGE_CONTACTS\s*(\{[\s\S]*\})\s*$/);
   const threadStateMatch = reply.match(/KMAIL_THREAD_STATE\s*(\{[\s\S]*\})\s*$/);
@@ -32153,6 +32172,56 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     }
 
     return new Response(JSON.stringify({ ok: true, reply: followUpReply, action: { type: 'looked_up_contacts', count: items.length } }),
+      { status: 200, headers: corsHeaders });
+  }
+
+  // ── ⓪-6 캠페인 이력 조회 태그 (2026-09-03 신설, v1.7) ──────────
+  // "저번에 보낸 캠페인 뭐였지", "그 캠페인 아직 회신 취합 안 됐어?"처럼
+  // 과거 캠페인을 찾아 다시 보여달라는 요청. §2-10 참고 — 모든 캠페인은
+  // 발송 즉시 kmail_campaigns에 기록되므로(§2-2), 이 태그 하나로 항상
+  // 검색·인출이 가능하다(생애주기 마지막 단계 "기록·조회").
+  if (campaignLookupMatch) {
+    let parsed = null;
+    try { parsed = JSON.parse(campaignLookupMatch[1] || '{}'); } catch (e) { /* 아래에서 빈 조건으로 처리 */ }
+    const cleanReplyText = reply.slice(0, campaignLookupMatch.index).trim();
+
+    const items = await _kmailQueryCampaigns(env, guid, {
+      q: (parsed?.q || '').trim(),
+      status: (parsed?.status || '').trim(),
+      kplan_plan_id: (parsed?.kplan_plan_id || '').trim(),
+    }).catch(() => []);
+
+    const summarized = items.map(c => ({
+      subject: c.subject,
+      status: c.status,
+      recipient_count: Array.isArray(c.contact_ids) ? c.contact_ids.length : 0,
+      send_at: c.send_at,
+      collect_replies_until: c.collect_replies_until,
+      digest_at: c.digest_at,
+      digest_status: c.digest_status,
+      kplan_plan_id: c.kplan_plan_id || '',
+      kplan_checkpoint_label: c.kplan_checkpoint_label || '',
+      created: c.created,
+    }));
+
+    const lookupContext = `[캠페인 이력 조회 결과]\n${JSON.stringify(summarized)}\n\n위 목록을 사용자에게 자연스럽게 정리해서 보여주세요. digest_status가 'sent'면 회신 취합·보고까지 끝나 사실상 종료된 캠페인이라고 알려주고, 'none'/'pending'이면 아직 진행 중(회신 취합 전)이라고 알려주세요. 결과가 없으면 없다고 솔직히 말하세요. (이 메시지 자체는 사용자에게 보이지 않습니다.)`;
+    let followUpReply;
+    try {
+      followUpReply = await deepseekChatText({
+        env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
+        messages: [
+          { role: 'system', content: systemPrompt }, ...cleanMessages,
+          { role: 'assistant', content: cleanReplyText || '캠페인 이력을 확인하고 있습니다...' },
+          { role: 'user', content: lookupContext },
+        ],
+        max_tokens: 800, temperature: 0.4, timeoutMs: 20000,
+        fallbackText: '캠페인 조회는 완료됐지만 결과 정리에 실패했습니다. 다시 시도해 주세요.',
+      });
+    } catch (e) {
+      followUpReply = '캠페인 조회 중 오류가 발생했습니다: ' + e.message;
+    }
+
+    return new Response(JSON.stringify({ ok: true, reply: followUpReply, action: { type: 'looked_up_campaigns', count: items.length } }),
       { status: 200, headers: corsHeaders });
   }
 
