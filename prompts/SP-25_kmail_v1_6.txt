@@ -4,8 +4,8 @@
 설계한 플랜(예: 여러 트랙을 순서대로 발송하는 캠페인)의 한 체크포인트로
 이 캠페인을 발송할 때, 사용자가 그렇게 알려주면 KMAIL_SEND_CAMPAIGN에
 kplan_plan_id/kplan_checkpoint_label을 실어 보내도록 §2-2 확장.
-worker.js가 다이제스트 생성 시 이 두 필드를 보고 K-Plan의
-K-Recompose(k-plan_v1_1.md 신설 단계)를 자동 트리거한다 — 이 SP는
+worker.js가 다이제스트 생성 시 이 두 필드를 보고 K-Plan(SP-TREE-REGISTRY
+참조)의 K-Recompose(신설 단계)를 자동 트리거한다 — 이 SP는
 그 값을 사용자 발화에서 확인해 실어 보내는 역할까지만 하고, 이후
 처리는 worker.js/K-Plan 쪽 책임이다.]
 
