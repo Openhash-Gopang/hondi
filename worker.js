@@ -12296,6 +12296,7 @@ export default {
     if (pathname === '/kmail/settings' && request.method === 'POST') return handleKmailSettingsSet(request, env, corsHeaders);
     if (pathname === '/kmail/attachments/upload' && request.method === 'POST') return handleKmailAttachmentUpload(request, env, corsHeaders);
     if (pathname.startsWith('/kmail/attachments/') && request.method === 'GET') return handleKmailAttachmentGet(request, url, env, corsHeaders);
+    if (pathname.startsWith('/r/') && request.method === 'GET') return handleKmailTrackingRedirect(request, url, env, corsHeaders, ctx);
     if (pathname === '/kmail/campaigns/create' && request.method === 'POST') return handleKmailCampaignCreate(request, env, corsHeaders);
     // 2026-09-03 신설 — mail.hondi.net/webapp.html "캠페인 목록/상태" 화면
     // 요구사항 대응. 지금까지 캠페인 생성(create) API만 있고 조회 API가
@@ -12621,6 +12622,7 @@ export default {
     if (pathname === '/kplan/plan/list'       && request.method === 'GET')  return handleKPlanPlanList(request, env, corsHeaders);
     if (pathname === '/kplan/plan/get'        && request.method === 'GET')  return handleKPlanPlanGet(request, env, corsHeaders);
     if (pathname === '/kplan/plan/checkpoint' && request.method === 'POST') return handleKPlanPlanCheckpoint(bodyText, env, corsHeaders);
+    if (pathname === '/kplan/plan/state/set'  && request.method === 'POST') return handleKPlanPlanStateSet(bodyText, env, corsHeaders);
     if (pathname === '/kplan/task/bulk-create' && request.method === 'POST') return handleKPlanTaskBulkCreate(bodyText, env, corsHeaders);
     if (pathname === '/kplan/task/list' && request.method === 'GET')  return handleKPlanTaskList(request, env, corsHeaders);
     if (pathname === '/kplan/task/update' && request.method === 'PATCH') return handleKPlanTaskUpdate(bodyText, env, corsHeaders);
@@ -19076,6 +19078,33 @@ async function handleKPlanPlanGet(request, env, corsHeaders) {
   }
 }
 
+// 2026-09-04 신설 — handleKPlanPlanCheckpoint의 저장 로직을 함수로
+// 분리. HTTP 엔드포인트(사람이 plan.hondi.net에서 체크포인트를 찍을
+// 때)와, K-Mail이 트리거하는 자동 K-Recompose(아래 _kplanRecomposeAndPersist)
+// 양쪽에서 동일한 저장 경로를 타게 하기 위함 — 저장 로직이 두 곳에서
+// 따로 구현되면 한쪽만 고쳐지는 drift가 생긴다.
+async function _kplanPersistCheckpoint(env, { guid, planId, messages, refinedPlanMd, status }) {
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  const filter = encodeURIComponent(`plan_id='${planId}' && guid='${guid}'`);
+  const findRes = await fetch(`${L1_DEFAULT}/api/collections/kplan_plans/records?filter=${filter}&perPage=1`, { headers: { 'Authorization': `Bearer ${token}` } });
+  const findData = await findRes.json().catch(() => ({ items: [] }));
+  const existing = (findData.items && findData.items[0]) || null;
+  if (!existing) throw new Error('PLAN_NOT_FOUND');
+
+  const patchBody = {
+    messages, refined_plan_md: refinedPlanMd || existing.refined_plan_md,
+    checkpoint_count: (existing.checkpoint_count || 0) + 1,
+  };
+  if (status && ['active', 'completed', 'abandoned'].includes(status)) patchBody.status = status;
+
+  const patchRes = await fetch(`${L1_DEFAULT}/api/collections/kplan_plans/records/${existing.id}`, {
+    method: 'PATCH', headers, body: JSON.stringify(patchBody),
+  });
+  if (!patchRes.ok) throw new Error('PLAN_CHECKPOINT_FAILED: ' + (await patchRes.text().catch(() => '')).slice(0, 200));
+  return await patchRes.json();
+}
+
 // PATCH — 체크포인트(단계별 실행 결과) 추가. AI 호출(K-Recompose 재정련)
 // 자체는 클라이언트가 이 호출 전에 /kplan/relay로 이미 마쳤다고 가정하고,
 // 그 결과(갱신된 messages·refined_plan_md)를 여기서 그대로 저장만 한다 —
@@ -19090,37 +19119,76 @@ async function handleKPlanPlanCheckpoint(bodyText, env, corsHeaders) {
   const auth = await _resolveGuidFromPhoneVerifyToken(env, phone_verify_token);
   if (!auth.ok) return _err(401, auth.code, auth.message || '로그인이 필요합니다.', corsHeaders);
 
-  const token = await _l1AdminToken(env);
-  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-  const filter = encodeURIComponent(`plan_id='${plan_id}' && guid='${auth.guid}'`);
   try {
-    const findRes = await fetch(`${L1_DEFAULT}/api/collections/kplan_plans/records?filter=${filter}&perPage=1`, { headers: { 'Authorization': `Bearer ${token}` } });
-    const findData = await findRes.json().catch(() => ({ items: [] }));
-    const existing = (findData.items && findData.items[0]) || null;
-    if (!existing) return _err(404, 'PLAN_NOT_FOUND', '해당 플랜을 찾을 수 없습니다.', corsHeaders);
-
-    const patchBody = {
-      messages, refined_plan_md: refined_plan_md || existing.refined_plan_md,
-      checkpoint_count: (existing.checkpoint_count || 0) + 1,
-    };
-    if (status && ['active', 'completed', 'abandoned'].includes(status)) patchBody.status = status;
-
-    const patchRes = await fetch(`${L1_DEFAULT}/api/collections/kplan_plans/records/${existing.id}`, {
-      method: 'PATCH', headers, body: JSON.stringify(patchBody),
-    });
-    if (!patchRes.ok) {
-      const errText = await patchRes.text().catch(() => '');
-      return new Response(errText || JSON.stringify({ error: 'PLAN_CHECKPOINT_FAILED' }), { status: patchRes.status, headers: corsHeaders });
-    }
-    const rec = await patchRes.json();
+    const rec = await _kplanPersistCheckpoint(env, { guid: auth.guid, planId: plan_id, messages, refinedPlanMd: refined_plan_md, status });
     return new Response(JSON.stringify({ ok: true, plan: rec }), { headers: corsHeaders });
   } catch (e) {
-    return _err(502, 'KPLAN_PLAN_CHECKPOINT_ERROR', e.message, corsHeaders);
+    const httpStatus = e.message.startsWith('PLAN_NOT_FOUND') ? 404 : 502;
+    return _err(httpStatus, e.message.startsWith('PLAN_NOT_FOUND') ? 'PLAN_NOT_FOUND' : 'KPLAN_PLAN_CHECKPOINT_ERROR', e.message, corsHeaders);
   }
 }
 
-// ═══════════════════════════════════════════════════════════
-// /kplan/task/* — K-Plan 작업 보드(kplan_tasks) 순수 CRUD (2026-09-03 신설)
+// POST /kplan/plan/state/set { phone_verify_token, plan_id, state_key, state_value, source? }
+// 2026-09-04 신설 — docs/KPLAN_KMAIL_AGENT_TO_AGENT_ARCHITECTURE §7-3
+// (실시간 상태, 예: 재고·영업시간) 최소 구현. 같은 plan_id+state_key면
+// upsert(있으면 갱신, 없으면 생성) — 매번 새로 만들지 않는다.
+async function handleKPlanPlanStateSet(bodyText, env, corsHeaders) {
+  let body;
+  try { body = JSON.parse(bodyText); } catch { return _err(400, 'INVALID_JSON', '', corsHeaders); }
+  const { phone_verify_token, plan_id, state_key, state_value, source } = body || {};
+  if (!plan_id || !state_key || typeof state_value !== 'string') {
+    return _err(400, 'MISSING_FIELD', 'plan_id/state_key/state_value 필수', corsHeaders);
+  }
+  const auth = await _resolveGuidFromPhoneVerifyToken(env, phone_verify_token);
+  if (!auth.ok) return _err(401, auth.code, auth.message || '로그인이 필요합니다.', corsHeaders);
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  const esc = s => String(s).replace(/'/g, "\\'");
+  try {
+    const filter = encodeURIComponent(`plan_id='${esc(plan_id)}' && state_key='${esc(state_key)}' && owner_user_guid='${esc(auth.guid)}'`);
+    const findRes = await fetch(`${L1_DEFAULT}/api/collections/kplan_plan_state/records?filter=${filter}&perPage=1`, { headers: { Authorization: headers.Authorization } });
+    const findData = await findRes.json().catch(() => ({ items: [] }));
+    const existing = (findData.items && findData.items[0]) || null;
+
+    let rec;
+    if (existing) {
+      const patchRes = await fetch(`${L1_DEFAULT}/api/collections/kplan_plan_state/records/${existing.id}`, {
+        method: 'PATCH', headers, body: JSON.stringify({ state_value, source: source || existing.source || '' }),
+      });
+      if (!patchRes.ok) return _err(502, 'KPLAN_STATE_UPDATE_FAILED', await patchRes.text().catch(() => ''), corsHeaders);
+      rec = await patchRes.json();
+    } else {
+      const createRes = await fetch(`${L1_DEFAULT}/api/collections/kplan_plan_state/records`, {
+        method: 'POST', headers, body: JSON.stringify({
+          owner_user_guid: auth.guid, plan_id, state_key, state_value, source: source || 'user',
+        }),
+      });
+      if (!createRes.ok) return _err(502, 'KPLAN_STATE_CREATE_FAILED', await createRes.text().catch(() => ''), corsHeaders);
+      rec = await createRes.json();
+    }
+    return new Response(JSON.stringify({ ok: true, state: rec }), { headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'KPLAN_STATE_ERROR', e.message, corsHeaders);
+  }
+}
+
+// 2026-09-04 신설 — _kplanDecideForKMail이 판단 근거로 참조할 현재
+// 상태를 전부 불러온다. 값이 없으면(대부분의 플랜) 빈 객체 —
+// 프롬프트에 "등록된 실시간 상태 없음"으로만 표시되고 기존 동작과
+// 동일하게 계획서 맥락만으로 판단한다.
+async function _kplanFetchPlanState(env, guid, planId) {
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}` };
+  const filter = encodeURIComponent(`plan_id='${planId}' && owner_user_guid='${guid.replace(/'/g, "\\'")}'`);
+  const res = await fetch(`${L1_DEFAULT}/api/collections/kplan_plan_state/records?filter=${filter}&perPage=100`, { headers });
+  const data = await res.json().catch(() => ({ items: [] }));
+  const map = {};
+  for (const r of (data.items || [])) map[r.state_key] = r.state_value;
+  return map;
+}
+
+
 //
 // 범위: 순수 태스크 관리만. K-Mail 연동은 포함하지 않는다(주피터 지시
 // — K-Mail은 별도 프로젝트, 필요한 작업은 별도 지시서로 넘김). AI
@@ -29710,6 +29778,54 @@ async function handleKmailAttachmentUpload(request, env, corsHeaders) {
 // GET /kmail/attachments/{id}?guid=...&pubkey=...&signature=...&ts=...
 // 프로필 사진과 달리 인증 필요 — 개인 문서일 수 있는 첨부를 공개로
 // 열어두면 안 된다.
+// GET /r/<token> — 2026-09-04 신설. 캠페인 본문의 {{TRACKING_LINK}}가
+// 발송 시점에 이 URL(https://hondi.net/r/<token>)로 치환된다(아래
+// _kmailSendCampaign 참고). 이 엔드포인트는 인증이 필요 없다 — 수신자
+// (외부인)가 클릭하는 링크라 로그인 상태를 요구할 수 없다. 토큰 자체가
+// 추측 불가능한 무작위 문자열이라 그 자체로 접근 통제 역할을 한다.
+// User-Agent로 PC/모바일을 가르고, 클릭 즉시 302 리다이렉트 —
+// kmail_campaign_recipients 갱신은 응답을 막지 않도록 fire-and-forget.
+async function handleKmailTrackingRedirect(request, url, env, corsHeaders, ctx) {
+  const token = url.pathname.replace(/^\/r\//, '').trim();
+  const PC_DEST = 'https://hondi.net/';
+  const MOBILE_DEST = 'https://hondi.net/desktop.html#k-services';
+  if (!token || !/^[a-zA-Z0-9_-]{8,64}$/.test(token)) {
+    return Response.redirect(PC_DEST, 302);
+  }
+
+  const ua = (request.headers.get('user-agent') || '').toLowerCase();
+  const isMobile = /iphone|ipad|android|mobile/.test(ua);
+  const device = isMobile ? 'mobile' : 'pc';
+  const dest = isMobile ? MOBILE_DEST : PC_DEST;
+
+  // 응답(리다이렉트)은 즉시 나가고, 로그는 ctx.waitUntil로 백그라운드
+  // 처리한다 — waitUntil 없이 fire-and-forget하면 Worker가 응답을 보낸
+  // 뒤 곧바로 격리를 종료시켜 이 fetch가 중간에 끊길 수 있다.
+  if (ctx?.waitUntil) {
+    ctx.waitUntil((async () => {
+      try {
+        const adminToken = await _l1AdminToken(env);
+        const headers = { 'Authorization': `Bearer ${adminToken}` };
+        const filter = encodeURIComponent(`tracking_token='${token.replace(/'/g, "\\'")}'`);
+        const findRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_campaign_recipients/records?filter=${filter}&perPage=1`, { headers });
+        const findData = await findRes.json().catch(() => ({ items: [] }));
+        const row = (findData.items && findData.items[0]) || null;
+        if (!row) return;
+        const patch = { click_count: (row.click_count || 0) + 1 };
+        if (!row.first_click_at) {
+          patch.first_click_at = new Date().toISOString();
+          patch.first_click_device = device;
+        }
+        await fetch(`${L1_DEFAULT}/api/collections/kmail_campaign_recipients/records/${row.id}`, {
+          method: 'PATCH', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify(patch),
+        });
+      } catch (e) { console.warn('[K-Mail 추적링크] 클릭 로그 실패(리다이렉트는 이미 진행):', e.message); }
+    })());
+  }
+
+  return Response.redirect(dest, 302);
+}
+
 async function handleKmailAttachmentGet(request, url, env, corsHeaders) {
   if (!env.KMAIL_ATTACHMENTS) return _err(503, 'ATTACHMENT_STORAGE_UNAVAILABLE', 'R2 바인딩이 설정되지 않았습니다', corsHeaders);
 
@@ -30096,7 +30212,7 @@ function _kmailAggregateByOrg(recipRows) {
   const byOrg = new Map();
   for (const r of recipRows) {
     const org = (r.recipient_org || '').trim() || '(미상)';
-    if (!byOrg.has(org)) byOrg.set(org, { org, sent: 0, replied: 0, pending: 0, classifications: {} });
+    if (!byOrg.has(org)) byOrg.set(org, { org, sent: 0, replied: 0, pending: 0, classifications: {}, visited_pc: 0, visited_mobile: 0, not_visited: 0 });
     const g = byOrg.get(org);
     if (r.delivery_status === 'sent') g.sent++;
     else if (r.delivery_status === 'pending') g.pending++;
@@ -30105,10 +30221,18 @@ function _kmailAggregateByOrg(recipRows) {
       const cls = r.reply_classification || '미분류';
       g.classifications[cls] = (g.classifications[cls] || 0) + 1;
     }
+    // 2026-09-04 신설 — 회신뿐 아니라 접속(클릭) 여부도 기관별로
+    // 집계한다. first_click_device는 최초 클릭 시점 값만 저장하므로
+    // 이후 다른 기기로 또 접속해도 이 집계엔 안 잡힌다 — "이 기관이
+    // 처음 어떤 경로로 반응했는가"를 보는 지표다.
+    if (r.first_click_device === 'mobile') g.visited_mobile++;
+    else if (r.first_click_device === 'pc') g.visited_pc++;
+    else if (r.delivery_status === 'sent') g.not_visited++;
   }
   return Array.from(byOrg.values()).map(g => ({
     ...g,
     response_rate: g.sent > 0 ? Math.round((g.replied / g.sent) * 1000) / 10 : 0,
+    visit_rate: g.sent > 0 ? Math.round(((g.visited_pc + g.visited_mobile) / g.sent) * 1000) / 10 : 0,
   }));
 }
 
@@ -31285,9 +31409,18 @@ async function _kmailSendCampaign(env, campaign) {
       if (!cRes.ok) { failCount++; continue; }
       const contact = await cRes.json();
       if (contact.status !== 'confirmed' || contact.owner_user_guid !== campaign.owner_user_guid) { failCount++; continue; }
+      // 2026-09-04 신설 — {{TRACKING_LINK}}를 이 수신자의 실제 추적
+      // URL로 치환. tracking_token이 없는 캠페인(v1.9 이전 생성분)은
+      // 플레이스홀더가 있어도 그대로 남는다 — 조용히 빈 문자열로
+      // 지우면 "링크가 사라졌는데 왜인지 모르는" 상황이 되므로, 차라리
+      // 눈에 띄게 원문 그대로 두어 문제를 바로 알아챌 수 있게 한다.
+      let sendText = (recipRow?.body_override || '').trim() || campaign.body;
+      if (recipRow?.tracking_token) {
+        sendText = sendText.replace(/\{\{TRACKING_LINK\}\}/g, `https://hondi.net/r/${recipRow.tracking_token}`);
+      }
       await _kmailSendOneEmail(env, {
         guid: campaign.owner_user_guid, to: contact.email,
-        subject: campaign.subject, text: (recipRow?.body_override || '').trim() || campaign.body,
+        subject: campaign.subject, text: sendText,
         sessionId: `kmail:${campaign.id}`,
         replyTo: `kmail-${campaign.id}@hondi.kr`,
         signature: settings.signature, senderName: settings.sender_display_name,
@@ -31615,6 +31748,37 @@ async function _kmailTriggerKPlanRecompose(env, campaign, digestText) {
     return;
   }
 
+  // 2026-09-04 신설 — 지금까지 K-Recompose 결과는 사용자 메시지함에만
+  // 쓰였고, kplan_plans 레코드(messages·checkpoint_count·refined_plan_md)
+  // 자체는 갱신되지 않았다(docs/KPLAN_KMAIL_AGENT_TO_AGENT_ARCHITECTURE
+  // 후속 조사로 발견한 공백). plan.hondi.net에서 이 플랜을 다시 열어도
+  // 방금 일어난 재평가가 대화 이력에도, 체크포인트 카운트에도 전혀
+  // 반영 안 되는 상태였다. _kplanPersistCheckpoint(HTTP 핸들러와 공유)로
+  // 실제 상태를 갱신한다 — 사람이 plan.hondi.net에서 체크포인트를 찍는
+  // 것과 정확히 같은 저장 경로를 탄다.
+  try {
+    const token = await _l1AdminToken(env);
+    const headers = { 'Authorization': `Bearer ${token}` };
+    const filter = encodeURIComponent(`plan_id='${campaign.kplan_plan_id}' && guid='${campaign.owner_user_guid}'`);
+    const findRes = await fetch(`${L1_DEFAULT}/api/collections/kplan_plans/records?filter=${filter}&perPage=1`, { headers });
+    const findData = await findRes.json().catch(() => ({ items: [] }));
+    const existingPlan = (findData.items && findData.items[0]) || null;
+    if (existingPlan) {
+      const updatedMessages = [
+        ...(Array.isArray(existingPlan.messages) ? existingPlan.messages : []),
+        { role: 'user', content: recomposeQuery },
+        { role: 'assistant', content: recomposeResult },
+      ];
+      await _kplanPersistCheckpoint(env, {
+        guid: campaign.owner_user_guid, planId: campaign.kplan_plan_id, messages: updatedMessages,
+      });
+    } else {
+      console.warn('[K-Mail→K-Plan] kplan_plans 레코드를 못 찾아 체크포인트 저장 생략(메시지함 기록만 진행):', campaign.kplan_plan_id);
+    }
+  } catch (e) {
+    console.error('[K-Mail→K-Plan] 체크포인트 저장 실패(메시지함 기록은 계속 진행):', e.message);
+  }
+
   // K-Plan의 K-Recompose 판단을 사용자 메시지함에 그대로 남긴다 — digest와
   // 동일한 경로(_writeAiMessage)를 쓰되 session_id는 캠페인이 아니라
   // 플랜 단위(kplan:<plan_id>)로 묶어, 같은 플랜의 여러 체크포인트가
@@ -31626,6 +31790,118 @@ async function _kmailTriggerKPlanRecompose(env, campaign, digestText) {
     content_original: `[K-Recompose] ${campaign.kplan_checkpoint_label || campaign.subject} 체크포인트 재평가 결과\n\n${recomposeResult}`,
     content_type: 'kplan_recompose',
   }).catch(e => console.error('[K-Mail→K-Plan] K-Recompose 결과 기록 실패:', e.message));
+}
+
+// 2026-09-04 신설 — docs/KPLAN_KMAIL_AGENT_TO_AGENT_ARCHITECTURE_v1_0_
+// 20260903.md §4-B(사전 질의) 구현. K-Mail 인바운드 메일이 로컬 위임
+// 규칙(kmail_rules, §4-C)만으로는 판정이 안 서고, 그 캠페인이 K-Plan
+// 플랜에 속해 있을 때(kplan_plan_id 존재) 호출한다. K-Plan과 K-Mail이
+// 같은 Worker 안에 있으므로 실제 HTTP 왕복 없이 함수 호출로 "API"를
+// 구현한다 — _kmailTriggerKPlanRecompose가 이미 쓰는 것과 동일한 패턴
+// (k-plan SP를 그 자리에서 불러와 즉시 판정). 응답 지연 문제 자체가
+// 없다 — LLM 호출 1회로 즉답하며, 사람 승인이 진짜 필요한 사안이면
+// K-Plan 스스로 escalate로 답하고 hold_message까지 함께 준다(설계
+// 문서 §4-B의 "응답 지연 시 처리는 K-Plan이 사안별로 판단" 원칙을
+// "질문 자체를 없앤다"로 구현 — 비동기로 기다리는 대신 매번 즉답).
+async function _kplanDecideForKMail(env, { ownerGuid, planId, checkpointLabel, subject, bodyText, threadHistoryText }) {
+  if (!env.DEEPSEEK_API_KEY) return { decision: 'escalate', reason: 'DEEPSEEK_API_KEY 미설정' };
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}` };
+  const filter = encodeURIComponent(`plan_id='${planId}' && guid='${ownerGuid}'`);
+  const findRes = await fetch(`${L1_DEFAULT}/api/collections/kplan_plans/records?filter=${filter}&perPage=1`, { headers });
+  const findData = await findRes.json().catch(() => ({ items: [] }));
+  const plan = (findData.items && findData.items[0]) || null;
+  if (!plan) return { decision: 'escalate', reason: '해당 플랜을 찾을 수 없음' };
+
+  const universalLayers = await _fetchUniversalLayers();
+  let kplanLayer = '';
+  try { kplanLayer = await _fetchByManifestKeyFromGithub('k-plan'); }
+  catch (e) { return { decision: 'escalate', reason: 'k-plan SP 로드 실패: ' + e.message }; }
+  const systemPrompt = [universalLayers, kplanLayer].filter(Boolean).join('\n\n---\n\n');
+
+  // 2026-09-04 신설 — §7-3 "재고·영업시간 같은 실시간 상태"를 이제
+  // 참조한다. kplan_plan_state에 값이 없으면(대부분) 기존과 동일하게
+  // 계획서 맥락만으로 판단한다 — 새 컬렉션이 있다고 판단 방식이
+  // 강제로 바뀌지 않는다.
+  const stateMap = await _kplanFetchPlanState(env, ownerGuid, planId).catch(() => ({}));
+  const stateText = Object.keys(stateMap).length > 0
+    ? Object.entries(stateMap).map(([k, v]) => `- ${k}: ${v}`).join('\n')
+    : '(등록된 실시간 상태 없음 — 계획서 맥락만으로 판단)';
+
+  const decideQuery =
+    `실시간 사전 질의 — 플랜 "${planId}"` + (checkpointLabel ? ` / 체크포인트 "${checkpointLabel}"` : '') +
+    `의 실행 채널(K-Mail)로 인바운드 메일이 도착했습니다. 이 요청을 지금 이 플랜의 범위 안에서 사람 확인 ` +
+    `없이 K-Mail이 바로 처리(회신)해도 되는지 판단해주세요.\n\n` +
+    `플랜 목표: ${plan.goal || ''}\n계획서: ${(plan.refined_plan_md || '').slice(0, 2000)}\n\n` +
+    `현재 상태:\n${stateText}\n\n` +
+    (threadHistoryText ? `이 상대와의 과거 대화 이력(최근 순):\n${threadHistoryText}\n\n` : '') +
+    `인바운드 메일 제목: ${subject}\n인바운드 메일 본문(일부): ${bodyText.slice(0, 1000)}\n\n` +
+    `반드시 이 형식의 JSON만 답하세요(설명 없이):\n` +
+    `{"verdict":"APPROVE 또는 ESCALATE","reply_guidance":"APPROVE면 회신에 담을 내용 한두 문장, 아니면 빈 문자열",` +
+    `"urgent":true 또는 false,"hold_message":"ESCALATE이면서 urgent일 때만: 사람 확인 전 임시로 상대에게 보낼 대기 응답 문구, 아니면 빈 문자열",` +
+    `"suggest_delegation":true 또는 false,"rule_text":"suggest_delegation이 true일 때만: 이번과 같은 유형의 요청을 앞으로 K-Plan에 안 물어보고 K-Mail이 바로 처리해도 되는 조건을 자연어 한 문장으로. 이 플랜/체크포인트에서 안정적으로 반복될 패턴이라고 판단될 때만 true — 한 번뿐인 예외적 요청이면 false"}`;
+
+  const raw = await deepseekChatText({
+    env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-chat'),
+    messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: decideQuery }],
+    max_tokens: 600, temperature: 0, timeoutMs: 20000, fallbackText: '',
+  });
+
+  let parsed = null;
+  try {
+    const jsonMatch = (raw || '').match(/\{[\s\S]*\}/);
+    if (jsonMatch) parsed = JSON.parse(jsonMatch[0]);
+  } catch (e) { /* 아래 escalate 폴백 */ }
+
+  // 이 왕복도 하나의 체크포인트다 — plan.hondi.net에서 다시 열었을 때
+  // "이런 문의가 왔고 K-Plan이 이렇게 판단했다"가 대화 이력에 남도록
+  // 저장한다(위 K-Recompose와 동일 원칙 — 판단이 발생했는데 plan 쪽
+  // 상태에 안 남으면 living document가 아니게 된다).
+  try {
+    const updatedMessages = [
+      ...(Array.isArray(plan.messages) ? plan.messages : []),
+      { role: 'user', content: decideQuery },
+      { role: 'assistant', content: raw || '(응답 없음)' },
+    ];
+    await _kplanPersistCheckpoint(env, { guid: ownerGuid, planId, messages: updatedMessages });
+  } catch (e) {
+    console.error('[K-Mail↔K-Plan 사전질의] 체크포인트 저장 실패(판정 자체는 계속 진행):', e.message);
+  }
+
+  if (parsed?.verdict === 'APPROVE') {
+    const result = { decision: 'approve', replyGuidance: (parsed.reply_guidance || '').trim() };
+    // 2026-09-04 신설 — §7-3 "위임 정책 자동 승격" 최소 구현. K-Plan이
+    // 이번 승인을 반복 가능한 패턴이라고 스스로 판단했을 때만(매번
+    // 묻지 않고), 그 판단을 즉시 kmail_rules(action:delegate_execute)
+    // 로 승격한다 — "개발 초기엔 위임 문구를 단순하게" 원칙에 따라
+    // N회 반복을 세지 않고 K-Plan의 판단 1회를 그대로 신뢰한다(과한
+    // 일반화로 드러나면 사람이 나중에 그 규칙을 지우거나 고치면
+    // 된다 — "사람이 추후에 수정"이라는 위임 원칙과 일관).
+    if (parsed?.suggest_delegation === true && (parsed.rule_text || '').trim()) {
+      result.suggestedRuleText = parsed.rule_text.trim();
+      try {
+        const dupFilter = encodeURIComponent(`owner_user_guid='${ownerGuid.replace(/'/g, "\\'")}' && action='delegate_execute' && kplan_plan_id='${planId.replace(/'/g, "\\'")}' && rule_text='${result.suggestedRuleText.replace(/'/g, "\\'")}'`);
+        const dupRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_rules/records?filter=${dupFilter}&perPage=1`, { headers });
+        const dupData = await dupRes.json().catch(() => ({ items: [] }));
+        if (!(dupData.items && dupData.items[0])) {
+          const newRuleId = await _kmailChatCreateRule(env, ownerGuid, result.suggestedRuleText, {
+            action: 'delegate_execute', kplanPlanId: planId, kplanCheckpointLabel: checkpointLabel || '',
+          });
+          result.delegationPromoted = true;
+          result.newRuleId = newRuleId;
+        }
+      } catch (e) {
+        console.error('[K-Mail↔K-Plan 사전질의] 위임 규칙 자동 승격 실패(승인 자체는 계속 진행):', e.message);
+      }
+    }
+    return result;
+  }
+  return {
+    decision: 'escalate',
+    urgent: !!parsed?.urgent,
+    holdMessage: parsed?.urgent ? (parsed.hold_message || '').trim() : '',
+  };
 }
 
 // Cron 진입점 — digest_at이 지났고 아직 pending인 캠페인을 찾아
@@ -31668,6 +31944,29 @@ async function _kmailSweepDueDigests(env) {
 // 은 아직 여기 없다 — 이 패치는 "회신이 ai_messages에 올바르게
 // 쌓이는 것"까지만 구현한다. 다이제스트 크론은 다음 패치.
 // ═══════════════════════════════════════════════════════════
+// 2026-09-04 신설 — docs/KPLAN_KMAIL_AGENT_TO_AGENT_ARCHITECTURE_v1_0_
+// 20260903.md §6-2(스레드 단위 상태 모델) 최소 구현. handleKmailMailboxList의
+// box='thread' 필터와 동일한 조회를 내부 함수로 분리해, 인바운드 처리
+// 파이프라인(사람이 API를 호출하는 게 아니라 email() 핸들러 내부)에서도
+// 같은 상대와의 과거 왕복을 참조할 수 있게 한다. 이번 인바운드 자체는
+// 아직 ai_messages에 안 쓰여 있으므로 자동으로 제외된다(중복 없음).
+async function _kmailFetchThreadHistory(env, ownerGuid, counterpartEmail, limit = 8) {
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}` };
+  const esc = s => String(s).replace(/'/g, "\\'");
+  const guidEsc = esc(ownerGuid);
+  const slugEsc = esc(_slugifyEmailAddr(counterpartEmail));
+  const filter = `((sender_guid='ext:${slugEsc}' && receiver_guid='${guidEsc}') || (sender_guid='${guidEsc}' && receiver_guid='ext:${slugEsc}')) && (content_type='kmail_outbound' || content_type='kmail_auto_reply' || content_type='kmail_inbound' || content_type='kmail_delegated_reply')`;
+  const res = await fetch(`${L1_DEFAULT}/api/collections/ai_messages/records?filter=${encodeURIComponent(filter)}&sort=-created&perPage=${limit}`, { headers });
+  const data = await res.json().catch(() => ({ items: [] }));
+  const items = (data.items || []).reverse(); // 오래된 것부터 보이게
+  if (items.length === 0) return '';
+  return items.map(m => {
+    const who = m.sender_guid === ownerGuid ? '(우리 쪽 발신)' : '(상대 발신)';
+    return `${who} ${m.content_original.slice(0, 300)}`;
+  }).join('\n---\n');
+}
+
 async function _handleKmailInboundEmail(message, env, ctx) {
   const toAddr = (message.to || '').toLowerCase();
   const localPart = toAddr.split('@')[0];
@@ -31755,6 +32054,24 @@ async function _handleKmailInboundEmail(message, env, ctx) {
       console.warn('[K-Mail email] 필터 규칙 판정 실패(KEEP으로 폴백):', e.message);
     }
 
+    // 2026-09-04 신설 — §6-2 스레드 단위 상태. 이 상대(recipient_email)에
+    // 해당하는 kmail_campaign_recipients 행을 찾아 thread_status를
+    // 갱신할 준비를 하고, 과거 왕복 이력을 함께 불러와 판단 근거로
+    // 쓴다. 캠페인이 아니거나(즉시발송 답장 등) recipRow가 없으면
+    // (v1.7 이전 캠페인) 조용히 건너뛴다 — 기존 동작과 동일.
+    const emailMatchForThread = fromAddr.match(/[^\s<>]+@[^\s<>]+/);
+    const fromEmailForThread = emailMatchForThread ? emailMatchForThread[0] : fromAddr;
+    let recipRowForThread = null;
+    if (campaignObj) {
+      try {
+        const rrFilter = encodeURIComponent(`campaign_id='${campaignObj.id}' && recipient_email='${fromEmailForThread.replace(/'/g, "\\'")}'`);
+        const rrRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_campaign_recipients/records?filter=${rrFilter}&perPage=1`, { headers: { Authorization: `Bearer ${token}` } });
+        const rrData = await rrRes.json().catch(() => ({ items: [] }));
+        recipRowForThread = (rrData.items && rrData.items[0]) || null;
+      } catch (e) { console.warn('[K-Mail email] 수신자 추적행 조회 실패(스레드 상태 갱신 생략):', e.message); }
+    }
+    const threadHistoryText = await _kmailFetchThreadHistory(env, ownerGuid, fromEmailForThread).catch(() => '');
+
     // 2026-09-03 신설 — docs/KPLAN_KMAIL_AGENT_TO_AGENT_ARCHITECTURE_v1_0_20260903.md
     // §4-B/§4-C. 차단·자동삭제 대상이 아닌 메일에 한해 위임 판정을
     // 돌린다. 위임 규칙을 등록한 적 없는 사용자(절대다수)는
@@ -31763,6 +32080,53 @@ async function _handleKmailInboundEmail(message, env, ctx) {
     if (!isBlocked && !matchedDelete) {
       delegation = await _kmailDecideDelegation(env, ownerGuid, campaignObj, { subject, bodyText })
         .catch(e => { console.warn('[K-Mail email] 위임 판정 실패(escalate로 폴백):', e.message); return { decision: 'escalate' }; });
+
+      // 2026-09-04 신설 — §4-B 사전 질의. 로컬 위임 규칙(§4-C)이 이
+      // 메일을 확정적으로 승인하지 못했고(none/escalate), 이 캠페인이
+      // K-Plan 플랜에 속해 있으면(kplan_plan_id) 사람에게 곧장 올리기
+      // 전에 K-Plan에 한 번 더 물어본다 — K-Plan은 이 플랜의 목표·
+      // 계획서 맥락을 알고 있어 로컬 규칙보다 더 정확한 판단이
+      // 가능하다. K-Plan 소관이 아닌 개인 메일(kplan_plan_id 없음)은
+      // 이 단계를 거치지 않고 기존처럼 바로 escalate/none 그대로 간다.
+      if (delegation.decision !== 'approve' && campaignObj?.kplan_plan_id) {
+        if (recipRowForThread) {
+          await fetch(`${L1_DEFAULT}/api/collections/kmail_campaign_recipients/records/${recipRowForThread.id}`, {
+            method: 'PATCH', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ thread_status: 'pending_kplan' }),
+          }).catch(() => {});
+        }
+        delegation = await _kplanDecideForKMail(env, {
+          ownerGuid, planId: campaignObj.kplan_plan_id, checkpointLabel: campaignObj.kplan_checkpoint_label,
+          subject, bodyText, threadHistoryText,
+        }).catch(e => { console.warn('[K-Mail email] K-Plan 사전질의 실패(escalate로 폴백):', e.message); return { decision: 'escalate' }; });
+      }
+    }
+    if (recipRowForThread) {
+      const nextThreadStatus = delegation.decision === 'approve' ? 'resolved'
+        : (delegation.decision === 'escalate' ? 'pending_human' : 'open');
+      await fetch(`${L1_DEFAULT}/api/collections/kmail_campaign_recipients/records/${recipRowForThread.id}`, {
+        method: 'PATCH', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ thread_status: nextThreadStatus }),
+      }).catch(e => console.warn('[K-Mail email] thread_status 갱신 실패(계속 진행):', e.message));
+    }
+
+    if (delegation.decision === 'escalate' && delegation.holdMessage) {
+      // §4-B "응답 지연 시 처리는 K-Plan이 사안별로 판단" — K-Plan이
+      // urgent로 판단하고 대기 문구까지 줬을 때만 즉시 발송한다. 이
+      // 발송 자체는 승인/거절 판단이 아니라 "확인 중" 안내일 뿐이라
+      // 위임 승인과 달리 사람 에스컬레이션(아래)을 대체하지 않는다.
+      try {
+        const settings = await _kmailGetUserSettings(env, ownerGuid).catch(() => ({ signature: '', sender_display_name: '혼디 K-Mail' }));
+        const emailMatch = fromAddr.match(/[^\s<>]+@[^\s<>]+/);
+        const replyToEmail = emailMatch ? emailMatch[0] : fromAddr;
+        await _kmailSendOneEmail(env, {
+          guid: ownerGuid, to: replyToEmail, subject: `Re: ${subject}`, text: delegation.holdMessage,
+          sessionId, replyTo: campaignObj ? `kmail-${campaignObj.id}@hondi.kr` : `${ownerGuid}@hondi.kr`,
+          signature: settings.signature, senderName: settings.sender_display_name,
+        });
+      } catch (e) {
+        console.error('[K-Mail email] 대기 응답 발송 실패(에스컬레이션은 계속 진행):', e.message);
+      }
     }
 
     const writtenMsg = await _writeAiMessage(env, {
@@ -31800,7 +32164,8 @@ async function _handleKmailInboundEmail(message, env, ctx) {
         });
         await _writeAiMessage(env, {
           session_id: sessionId, sender_guid: 'hondi-ai', receiver_guid: ownerGuid,
-          content_original: `[위임 범위 내 자동 처리] "${subject}"에 자동으로 회신했습니다.\n\n회신 내용: ${replyBody}`,
+          content_original: `[위임 범위 내 자동 처리] "${subject}"에 자동으로 회신했습니다.\n\n회신 내용: ${replyBody}` +
+            (delegation.delegationPromoted ? `\n\n(K-Plan이 이 유형의 요청을 앞으로 물어보지 않고 처리해도 되는 패턴으로 판단해, 새 위임 규칙을 등록했습니다: "${delegation.suggestedRuleText}")` : ''),
           content_type: 'kmail_delegated_reply',
         }).catch(e => console.error('[K-Mail email] 위임처리 기록 실패:', e.message));
       } catch (e) {
@@ -31809,9 +32174,12 @@ async function _handleKmailInboundEmail(message, env, ctx) {
       }
     }
     if (!isBlocked && !matchedDelete && delegation.decision === 'escalate') {
+      const holdNote = delegation.holdMessage
+        ? `\n\n(K-Plan 판단으로 급한 사안이라 상대에게 "확인 후 회신드리겠습니다" 성격의 대기 응답을 먼저 보냈습니다: "${delegation.holdMessage}")`
+        : '';
       await _writeAiMessage(env, {
         session_id: sessionId, sender_guid: 'hondi-ai', receiver_guid: ownerGuid,
-        content_original: `[확인 필요] "${subject}" — 위임 범위 밖이거나 새로운 유형의 요청이라 직접 확인이 필요합니다.`,
+        content_original: `[확인 필요] "${subject}" — 위임 범위 밖이거나 새로운 유형의 요청이라 직접 확인이 필요합니다.${holdNote}`,
         content_type: 'kmail_escalation',
       }).catch(e => console.error('[K-Mail email] 에스컬레이션 기록 실패:', e.message));
     }
@@ -32045,6 +32413,11 @@ async function _kmailChatCreateCampaign(env, guid, parsed) {
         recipient_name: r.name || '', recipient_email: r.email, recipient_org: r.org || '',
         body_override: typeof r.body_override === 'string' ? r.body_override.trim() : '',
         delivery_status: 'pending',
+        // 2026-09-04 신설 — 수신자별 접속 추적 토큰. 본문에
+        // {{TRACKING_LINK}}가 있으면 발송 시점에 이 토큰 기반 URL로
+        // 치환된다(_kmailSendCampaign). 안 쓰는 캠페인은 그냥 무시된다.
+        tracking_token: crypto.randomUUID().replace(/-/g, ''),
+        click_count: 0,
       }),
     }).catch(e => console.warn('[K-Mail Campaign] 수신자 추적행 생성 실패(계속 진행):', r.email, e.message));
   }));
@@ -32535,10 +32908,11 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
       total_recipients: recipRows.length,
       total_sent: recipRows.filter(r => r.delivery_status === 'sent').length,
       total_replied: recipRows.filter(r => r.replied_at).length,
+      total_visited: recipRows.filter(r => r.first_click_device).length,
       by_org: byOrg,
     };
-    const reportText = `[캠페인 보고서] ${reportPayload.title}\n수신 ${reportPayload.total_recipients}명 / 발송완료 ${reportPayload.total_sent}명 / 회신 ${reportPayload.total_replied}건\n\n기관·카테고리별:\n` +
-      byOrg.map(g => `- ${g.org}: 발송 ${g.sent} / 회신 ${g.replied} (응답률 ${g.response_rate}%) — ${Object.entries(g.classifications).map(([k, v]) => `${k} ${v}`).join(', ') || '분류 없음'}`).join('\n');
+    const reportText = `[캠페인 보고서] ${reportPayload.title}\n수신 ${reportPayload.total_recipients}명 / 발송완료 ${reportPayload.total_sent}명 / 회신 ${reportPayload.total_replied}건 / 접속 ${reportPayload.total_visited}건\n\n기관·카테고리별:\n` +
+      byOrg.map(g => `- ${g.org}: 발송 ${g.sent} / 회신 ${g.replied}(${g.response_rate}%) / 접속 PC ${g.visited_pc}·모바일 ${g.visited_mobile}(방문율 ${g.visit_rate}%) — ${Object.entries(g.classifications).map(([k, v]) => `${k} ${v}`).join(', ') || '분류 없음'}`).join('\n');
 
     const token = await _l1AdminToken(env);
     const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
