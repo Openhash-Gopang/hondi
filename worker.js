@@ -30199,9 +30199,13 @@ async function handleKmailMailboxList(request, url, env, corsHeaders) {
       : `(content_type='kmail_outbound' || content_type='kmail_auto_reply' || content_type='kmail_inbound')`;
     filter = `((sender_guid='ext:${slugEsc}' && receiver_guid='${guidEsc}') || (sender_guid='${guidEsc}' && receiver_guid='ext:${slugEsc}')) && ${typeFilter}`;
   } else {
+    // 2026-09-03 — kmail_escalation(§3 "3단계", 확인 필요)·
+    // kmail_delegated_reply(§3 "2단계", 자동처리 결과 보고)도 digest와
+    // 같은 자리(받은편지함)에 노출한다. docs/KPLAN_KMAIL_AGENT_TO_AGENT_
+    // ARCHITECTURE_v1_0_20260903.md §4 참고.
     filter = includeDeleted
-      ? `receiver_guid='${guidEsc}' && (content_type='kmail_inbound' || content_type='kmail_inbound_deleted' || content_type='kmail_inbound_blocked' || content_type='kmail_digest')`
-      : `receiver_guid='${guidEsc}' && (content_type='kmail_inbound' || content_type='kmail_digest')`;
+      ? `receiver_guid='${guidEsc}' && (content_type='kmail_inbound' || content_type='kmail_inbound_deleted' || content_type='kmail_inbound_blocked' || content_type='kmail_digest' || content_type='kmail_escalation' || content_type='kmail_delegated_reply')`
+      : `receiver_guid='${guidEsc}' && (content_type='kmail_inbound' || content_type='kmail_digest' || content_type='kmail_escalation' || content_type='kmail_delegated_reply')`;
   }
   const res = await fetch(`${L1_DEFAULT}/api/collections/ai_messages/records?filter=${encodeURIComponent(filter)}&sort=-created&perPage=200`, { headers });
   const data = await res.json().catch(() => ({ items: [] }));
@@ -31681,6 +31685,7 @@ async function _handleKmailInboundEmail(message, env, ctx) {
     const token = await _l1AdminToken(env);
     let ownerGuid = null;
     let sessionId = null;
+    let campaignObj = null;
 
     if (campaignMatch) {
       const campaignId = campaignMatch[1];
@@ -31689,8 +31694,8 @@ async function _handleKmailInboundEmail(message, env, ctx) {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (cRes.ok) {
-          const campaign = await cRes.json();
-          ownerGuid = campaign.owner_user_guid;
+          campaignObj = await cRes.json();
+          ownerGuid = campaignObj.owner_user_guid;
           sessionId = `kmail:${campaignId}`;
         }
       } catch (e) { console.error('[K-Mail email] 캠페인 조회 실패:', e.message); }
@@ -31750,6 +31755,16 @@ async function _handleKmailInboundEmail(message, env, ctx) {
       console.warn('[K-Mail email] 필터 규칙 판정 실패(KEEP으로 폴백):', e.message);
     }
 
+    // 2026-09-03 신설 — docs/KPLAN_KMAIL_AGENT_TO_AGENT_ARCHITECTURE_v1_0_20260903.md
+    // §4-B/§4-C. 차단·자동삭제 대상이 아닌 메일에 한해 위임 판정을
+    // 돌린다. 위임 규칙을 등록한 적 없는 사용자(절대다수)는
+    // decision이 항상 'none'이라 아래 로직이 사실상 스킵된다.
+    let delegation = { decision: 'none' };
+    if (!isBlocked && !matchedDelete) {
+      delegation = await _kmailDecideDelegation(env, ownerGuid, campaignObj, { subject, bodyText })
+        .catch(e => { console.warn('[K-Mail email] 위임 판정 실패(escalate로 폴백):', e.message); return { decision: 'escalate' }; });
+    }
+
     const writtenMsg = await _writeAiMessage(env, {
       session_id: sessionId,
       sender_guid: `ext:${_slugifyEmailAddr(fromAddr)}`,
@@ -31757,6 +31772,49 @@ async function _handleKmailInboundEmail(message, env, ctx) {
       content_original: `[제목] ${subject}\n\n${bodyText}`,
       content_type: isBlocked ? 'kmail_inbound_blocked' : (matchedDelete ? 'kmail_inbound_deleted' : 'kmail_inbound'),
     }).catch(e => { console.error('[K-Mail email] ai_messages 기록 실패:', e.message); return null; });
+
+    // §3 "2단계: 위임 범위 내 실행" — 사람 확인 없이 즉시 회신하고,
+    // 처리 결과를 kmail_delegated_reply로 남긴다(K-Plan/사람이 나중에
+    // §2-10/§2-11로 다시 찾아볼 수 있도록 — 지금은 다이제스트와 같은
+    // 자리에 기록만 하고, K-Plan 쪽 실시간 수신 엔드포인트는 후속 과제).
+    // §3 "3단계: 신규 판단 필요" — kmail_escalation으로 표시해 사람
+    // 눈에 바로 띄게 한다. 자동삭제·차단이 이미 아닌 메일이므로 원본
+    // (kmail_inbound)은 이미 정상적으로 보이는 채로 남아있다 — 이
+    // 태그는 "이건 특히 봐주세요"라는 덧표시다.
+    if (!isBlocked && !matchedDelete && delegation.decision === 'approve') {
+      try {
+        const settings = await _kmailGetUserSettings(env, ownerGuid).catch(() => ({ signature: '', sender_display_name: '혼디 K-Mail' }));
+        const emailMatch = fromAddr.match(/[^\s<>]+@[^\s<>]+/);
+        const replyToEmail = emailMatch ? emailMatch[0] : fromAddr;
+        const replyBody = await deepseekChatText({
+          env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
+          messages: [{ role: 'user', content:
+            `다음 메일에 대한 답장을 정중한 업무 메일 톤으로 작성하세요. 담을 내용: ${delegation.replyGuidance || '요청을 수락한다는 내용'}\n\n원 메일 제목: ${subject}\n원 메일 본문(일부): ${bodyText.slice(0, 500)}\n\n본문만 작성하세요(제목·서명 제외, 3~5문장).` }],
+          max_tokens: 400, temperature: 0.4, timeoutMs: 15000,
+          fallbackText: delegation.replyGuidance || '요청 확인했습니다. 진행하겠습니다.',
+        });
+        await _kmailSendOneEmail(env, {
+          guid: ownerGuid, to: replyToEmail, subject: `Re: ${subject}`, text: replyBody,
+          sessionId, replyTo: campaignObj ? `kmail-${campaignObj.id}@hondi.kr` : `${ownerGuid}@hondi.kr`,
+          signature: settings.signature, senderName: settings.sender_display_name,
+        });
+        await _writeAiMessage(env, {
+          session_id: sessionId, sender_guid: 'hondi-ai', receiver_guid: ownerGuid,
+          content_original: `[위임 범위 내 자동 처리] "${subject}"에 자동으로 회신했습니다.\n\n회신 내용: ${replyBody}`,
+          content_type: 'kmail_delegated_reply',
+        }).catch(e => console.error('[K-Mail email] 위임처리 기록 실패:', e.message));
+      } catch (e) {
+        console.error('[K-Mail email] 위임 자동회신 실패(escalate로 강등):', e.message);
+        delegation = { decision: 'escalate' };
+      }
+    }
+    if (!isBlocked && !matchedDelete && delegation.decision === 'escalate') {
+      await _writeAiMessage(env, {
+        session_id: sessionId, sender_guid: 'hondi-ai', receiver_guid: ownerGuid,
+        content_original: `[확인 필요] "${subject}" — 위임 범위 밖이거나 새로운 유형의 요청이라 직접 확인이 필요합니다.`,
+        content_type: 'kmail_escalation',
+      }).catch(e => console.error('[K-Mail email] 에스컬레이션 기록 실패:', e.message));
+    }
 
     // 첨부 추출 — 차단/자동삭제 대상이어도 첨부는 그대로 저장한다(소프트
     // 삭제 원칙과 동일 — 규칙 판정이 틀렸을 때 파일까지 같이 날아가면
@@ -31994,17 +32052,68 @@ async function _kmailChatCreateCampaign(env, guid, parsed) {
   return { campaignId: campaign.id, recipientCount: contactIds.length, sendAt: record.send_at, newContactCount };
 }
 
-async function _kmailChatCreateRule(env, guid, ruleText) {
+async function _kmailChatCreateRule(env, guid, ruleText, opts = {}) {
   const trimmed = ruleText.trim().slice(0, KMAIL_RULE_TEXT_MAX_LEN);
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
   const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_rules/records`, {
     method: 'POST', headers,
-    body: JSON.stringify({ owner_user_guid: guid, rule_text: trimmed, action: 'auto_delete', enabled: true }),
+    body: JSON.stringify({
+      owner_user_guid: guid, rule_text: trimmed,
+      action: opts.action === 'delegate_execute' ? 'delegate_execute' : 'auto_delete',
+      kplan_plan_id: (opts.kplanPlanId || '').trim(),
+      kplan_checkpoint_label: (opts.kplanCheckpointLabel || '').trim(),
+      enabled: true,
+    }),
   });
   if (!res.ok) throw new Error('규칙 생성 실패');
   const created = await res.json();
   return created.id;
+}
+
+// 2026-09-03 신설 — docs/KPLAN_KMAIL_AGENT_TO_AGENT_ARCHITECTURE_v1_0_20260903.md
+// §4-B/§4-C의 구현. 인바운드 메일 하나가 왔을 때, 이미 등록된
+// delegate_execute 위임 규칙 범위 안에 들어오면(§3 "2단계: 위임 범위
+// 내 실행") 사람 확인 없이 K-Mail이 직접 회신까지 보낸다. 범위 밖이면
+// "escalate"로 사람에게 올린다(§3 "3단계"). 위임 규칙이 아예 없으면
+// (절대다수) 'none'을 반환해 기존 흐름을 그대로 탄다 — 이 기능을
+// 켜지 않은 사용자에게는 아무 비용도, 동작 변화도 없다.
+async function _kmailDecideDelegation(env, ownerGuid, campaign, { subject, bodyText }) {
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}` };
+  const ownerEsc = ownerGuid.replace(/'/g, "\\'");
+  const filter = encodeURIComponent(`owner_user_guid='${ownerEsc}' && enabled=true && action='delegate_execute'`);
+  const rRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_rules/records?filter=${filter}&perPage=50`, { headers });
+  const rData = await rRes.json().catch(() => ({ items: [] }));
+  let rules = rData.items || [];
+  if (rules.length === 0) return { decision: 'none' };
+
+  // 캠페인이 특정 K-Plan 플랜에 속해 있으면, 그 플랜/체크포인트로
+  // 좁혀둔 규칙을 전역 규칙보다 우선한다(더 구체적인 위임이므로).
+  const planId = campaign?.kplan_plan_id || '';
+  const checkpoint = campaign?.kplan_checkpoint_label || '';
+  const scoped = rules.filter(r => r.kplan_plan_id && r.kplan_plan_id === planId &&
+    (!r.kplan_checkpoint_label || r.kplan_checkpoint_label === checkpoint));
+  const global = rules.filter(r => !r.kplan_plan_id);
+  rules = scoped.length > 0 ? scoped : global;
+  if (rules.length === 0) return { decision: 'none' };
+  if (!env.DEEPSEEK_API_KEY) return { decision: 'escalate', reason: 'DEEPSEEK_API_KEY 미설정으로 위임 판정 불가' };
+
+  const ruleList = rules.map((r, i) => `${i + 1}. ${r.rule_text}`).join('\n');
+  const verdictRaw = await deepseekChatText({
+    env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
+    messages: [{ role: 'user', content:
+      `다음은 사용자가 K-Mail에게 미리 위임해둔 처리 범위입니다. 이 메일이 그 범위 안에 명확히 들어오면 APPROVE, 조금이라도 애매하거나 범위 밖이면(금액·계약·확정적 약속이 걸리거나 전례 없는 사안 등) ESCALATE로 판정하세요.\n\n반드시 이 형식의 JSON만 답하세요(설명 없이):\n{"verdict":"APPROVE 또는 ESCALATE","reply_guidance":"APPROVE일 때 회신에 담을 내용 한두 문장(ESCALATE면 빈 문자열)"}\n\n위임 범위:\n${ruleList}\n\n메일 제목: ${subject}\n메일 본문(일부): ${bodyText.slice(0, 1000)}` }],
+    max_tokens: 300, temperature: 0, timeoutMs: 15000, fallbackText: '',
+  });
+  try {
+    const jsonMatch = (verdictRaw || '').match(/\{[\s\S]*\}/);
+    const parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
+    if (parsed?.verdict === 'APPROVE') {
+      return { decision: 'approve', replyGuidance: (parsed.reply_guidance || '').trim() };
+    }
+  } catch (e) { /* 파싱 실패 — 아래 escalate로 안전하게 폴백 */ }
+  return { decision: 'escalate' };
 }
 
 // POST /kmail/chat — body: { guid, pubkey, signature, ts, messages: [{role,content},...] }
@@ -32542,7 +32651,9 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
       return new Response(JSON.stringify({ ok: true, reply: cleanReplyText || reply, action: null }), { status: 200, headers: corsHeaders });
     }
     try {
-      const ruleId = await _kmailChatCreateRule(env, guid, ruleText);
+      const ruleId = await _kmailChatCreateRule(env, guid, ruleText, {
+        action: parsed?.action, kplanPlanId: parsed?.kplan_plan_id, kplanCheckpointLabel: parsed?.kplan_checkpoint_label,
+      });
       return new Response(JSON.stringify({
         ok: true, reply: `${cleanReplyText}\n\n✅ 규칙을 등록했습니다.`, action: { type: 'rule_created', rule_id: ruleId },
       }), { status: 200, headers: corsHeaders });
