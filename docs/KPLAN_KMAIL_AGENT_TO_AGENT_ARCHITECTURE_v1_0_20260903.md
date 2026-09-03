@@ -86,12 +86,37 @@ K-Mail (front line, 실무 담당)
 - **위임 정책 저장소가 필요하다.** 지금 `kmail_rules`(자동삭제 규칙)와 유사하지만, 삭제 여부가 아니라 "K-Plan에 안 물어보고 실행해도 되는 조건"을 담는 새 컬렉션 또는 `kmail_rules`의 확장이 필요하다.
 - **K-Plan 쪽에도 "K-Mail로부터의 사전 질의를 받는 창구"가 신설돼야 한다** — 지금 K-Plan은 K-Mail의 다이제스트(완료 보고)만 받는 수신자였지, 실시간 질의에 답하는 역할은 없었다.
 
-## 6. 열린 질문 (다음 설계 세션에서 다룰 것)
+## 6. 열린 질문 — 진행 상황 (2026-09-04 갱신)
 
-1. 위임 정책 저장 위치 — `kmail_rules` 확장인지 별도 컬렉션인지
-2. 스레드 단위 상태 모델 — 인바운드 도착 시 즉시 트리거되는 구조로 `kmail_campaign_recipients`를 확장할지, 별도 `kmail_threads` 컬렉션을 신설할지
-3. K-Plan 쪽 "사전 질의 수신" 엔드포인트의 구체적 형태(K-Plan SP에 새 액션 태그로 추가하는 것이 자연스러워 보이나 K-Plan SP 검토 필요)
-4. B 경로(사전 질의)의 타임아웃 — K-Plan이 답을 안 주면 K-Mail은 무한정 기다리는지, 일정 시간 후 기본 동작(예: 대기 응답 자동 발송)으로 넘어가는지
+1. ~~위임 정책 저장 위치~~ → **해소(SP v1.9)**: `kmail_rules` 확장. `action`에 `delegate_execute` 추가, `kplan_plan_id`/`kplan_checkpoint_label`로 체크포인트 단위 범위 지정 가능(비우면 전역).
+2. **미해결** — 스레드 단위 상태 모델. `kmail_campaign_recipients`(SP v1.8)가 초기 형태이지만, 인바운드 도착 즉시 트리거되는 구조로의 확장은 아직.
+3. ~~K-Plan 쪽 "사전 질의 수신" 엔드포인트~~ → **해소(§7)**: 별도 HTTP 엔드포인트가 아니라 함수 수준 API로 구현. `_kmailTriggerKPlanRecompose`가 이미 쓰던 패턴(k-plan SP를 그 자리에서 불러와 즉시 LLM 호출)을 재사용.
+4. ~~B 경로 타임아웃~~ → **해소**: "K-Plan이 답을 안 주는" 상황 자체가 없다 — 매 호출이 LLM 동기 호출 1회로 즉답한다. 사람 승인이 정말 필요한 사안은 K-Plan이 즉시 `escalate`로 답하고, 급하면 대기 응답 문구(`hold_message`)까지 함께 준다(§7).
+
+## 7. K-Plan↔K-Mail 함수 수준 API (2026-09-04 구현)
+
+두 모듈이 같은 Cloudflare Worker(`worker.js`) 안에 있으므로, 실제 HTTP 왕복이 필요 없다 — 함수 호출 자체가 API 경계다. 기존 상향 경로(`_kmailTriggerKPlanRecompose`)와 신설 사전 질의 경로(`_kplanDecideForKMail`) 둘 다 "K-Plan SP를 그 자리에서 로드해 즉시 LLM 호출" 패턴을 공유한다.
+
+### 7-1. 기존 경로의 수정 — `_kmailTriggerKPlanRecompose` (상향, A)
+캠페인 다이제스트 생성 시 트리거. **수정 사항**: 지금까지 K-Recompose 결과가 사용자 메시지함(`ai_messages`)에만 쓰이고, `kplan_plans` 레코드(대화 이력·`checkpoint_count`) 자체는 갱신되지 않던 공백을 메웠다 — `_kplanPersistCheckpoint`(HTTP 핸들러 `handleKPlanPlanCheckpoint`와 저장 로직 공유)로 실제 plan 레코드에 반영한다. plan.hondi.net에서 이 플랜을 다시 열면 이제 이 재평가가 대화 이력에 그대로 보인다.
+
+### 7-2. 신설 — `_kplanDecideForKMail` (하향/사전 질의, B)
+K-Mail 인바운드 메일이 로컬 위임 규칙(§4-C)만으로 판정이 안 서고(`none`/`escalate`), 그 캠페인이 K-Plan 플랜에 속해 있을 때(`kplan_plan_id` 존재) 호출된다.
+
+```
+입력: { ownerGuid, planId, checkpointLabel, subject, bodyText }
+출력: { decision: 'approve' | 'escalate', replyGuidance?, urgent?, holdMessage? }
+```
+
+- K-Plan은 그 플랜의 `goal`·`refined_plan_md`(계획서 맥락)를 근거로 판단한다 — 로컬 위임 규칙(문장 하나)보다 풍부한 맥락으로 판단 가능.
+- `approve`면 K-Mail이 `reply_guidance`를 근거로 사람 확인 없이 즉시 회신한다(§4-C의 위임승인 흐름과 동일 실행 경로 재사용).
+- `escalate`면 K-Mail 인바운드가 `kmail_escalation`으로 사람에게 올라간다. `urgent:true`면 K-Plan이 함께 준 `hold_message`를 K-Mail이 즉시 발송한 뒤 에스컬레이션한다(예: 짜장면집이 새 식재료 공급업체의 첫 제안 메일을 받았을 때 — 즉답은 못 하지만 "검토 후 회신드리겠습니다"는 바로 보낼 수 있는 경우). `urgent:false`면 대기 응답 없이 그냥 에스컬레이션만 한다.
+- 이 왕복도 체크포인트로 `kplan_plans`에 기록된다(§7-1과 동일 원칙) — 나중에 plan.hondi.net에서 "이런 문의가 왔고 K-Plan이 이렇게 판단했다"를 그대로 볼 수 있다.
+
+### 7-3. 아직 이 API가 다루지 않는 것
+- **위임 정책 자동 생성** — B 경로에서 K-Plan이 반복적으로 같은 유형을 승인하더라도, 그걸 스스로 `kmail_rules`의 `delegate_execute` 규칙으로 승격시키는 학습 경로는 없다(매번 새로 판단). 반복 패턴이 확인되면 사람이 직접 위임 규칙을 등록해야 한다.
+- **재고·영업시간 같은 실시간 상태 조회(K-JIT 등 연동)** — `refined_plan_md`에 이미 적힌 정적 계획 맥락으로만 판단한다. 짜장면 사례의 "지금 재고가 있는가"처럼 진짜 실시간 상태가 필요한 판단은 이 API 범위 밖이다(§6-2 스레드 모델과 함께 후속 과제).
+- §6-2(스레드 단위 상태 모델)는 여전히 미해결 — 이 API는 인바운드 1건 단위로 판단하지, 같은 상대와의 대화 전체 맥락(과거 왕복)을 아직 참조하지 않는다.
 
 ---
 *이 문서는 설계 확정 기록이며, 코드 구현은 §6의 질문들이 정리된 뒤 별도 PR로 진행한다.*
