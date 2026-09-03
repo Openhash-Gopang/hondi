@@ -30043,7 +30043,7 @@ async function _kmailQueryContacts(env, guid, { status = 'confirmed', q = '', re
 async function _kmailQueryCampaigns(env, guid, { q = '', status = '', kplan_plan_id = '' } = {}) {
   const esc = s => String(s).replace(/'/g, "\\'");
   const clauses = [`owner_user_guid='${esc(guid)}'`];
-  if (q) clauses.push(`(subject~'${esc(q)}' || recipient_query~'${esc(q)}')`);
+  if (q) clauses.push(`(title~'${esc(q)}' || subject~'${esc(q)}' || recipient_query~'${esc(q)}')`);
   if (status) clauses.push(`status='${esc(status)}'`);
   if (kplan_plan_id) clauses.push(`kplan_plan_id='${esc(kplan_plan_id)}'`);
 
@@ -30053,6 +30053,63 @@ async function _kmailQueryCampaigns(env, guid, { q = '', status = '', kplan_plan
   const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_campaigns/records?filter=${filter}&sort=-created&perPage=50`, { headers });
   const data = await res.json().catch(() => ({ items: [] }));
   return data.items || [];
+}
+
+// 2026-09-03 신설(v1.8) — 캠페인 하나를 이름/제목/최근순으로 특정해
+// "그 캠페인" 하나를 고른다. q가 title/subject 둘 다에 부분일치하면
+// title을 우선 노출한다(사용자가 붙인 이름이 더 구체적인 지칭이므로).
+// 여러 건이 매치되면 가장 최근 것 하나를 반환 — 모호하면 상위 호출부가
+// "여러 건 있는데 어느 캠페인이요?" 라고 되묻도록 개수를 함께 넘긴다.
+async function _kmailResolveOneCampaign(env, guid, { campaign_id = '', q = '' } = {}) {
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}` };
+  if (campaign_id) {
+    const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_campaigns/records/${campaign_id}`, { headers });
+    if (!res.ok) return { campaign: null, matchCount: 0 };
+    const c = await res.json();
+    if (c.owner_user_guid !== guid) return { campaign: null, matchCount: 0 };
+    return { campaign: c, matchCount: 1 };
+  }
+  const items = await _kmailQueryCampaigns(env, guid, { q });
+  return { campaign: items[0] || null, matchCount: items.length };
+}
+
+// 캠페인 하나의 수신자별 상세(이름·기관·발송본문·회신여부·분류)를
+// 조회 — KMAIL_LOOKUP_CAMPAIGNS가 특정 캠페인 하나로 좁혀졌을 때
+// 함께 붙여서, "명단과 메일 내용 보여줘" 같은 요청에 실제 이름·내용을
+// 답할 수 있게 한다.
+async function _kmailFetchCampaignRecipients(env, campaignId) {
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}` };
+  const res = await fetch(
+    `${L1_DEFAULT}/api/collections/kmail_campaign_recipients/records?filter=${encodeURIComponent(`campaign_id='${campaignId}'`)}&perPage=200`,
+    { headers }
+  );
+  const data = await res.json().catch(() => ({ items: [] }));
+  return data.items || [];
+}
+
+// 기관/카테고리(recipient_org)별로 발송·회신·분류를 집계 — §2-11
+// KMAIL_CAMPAIGN_REPORT의 핵심 로직. org가 비어있는 수신자는 "(미상)"
+// 그룹으로 묶는다(집계에서 조용히 누락시키지 않기 위함).
+function _kmailAggregateByOrg(recipRows) {
+  const byOrg = new Map();
+  for (const r of recipRows) {
+    const org = (r.recipient_org || '').trim() || '(미상)';
+    if (!byOrg.has(org)) byOrg.set(org, { org, sent: 0, replied: 0, pending: 0, classifications: {} });
+    const g = byOrg.get(org);
+    if (r.delivery_status === 'sent') g.sent++;
+    else if (r.delivery_status === 'pending') g.pending++;
+    if (r.replied_at) {
+      g.replied++;
+      const cls = r.reply_classification || '미분류';
+      g.classifications[cls] = (g.classifications[cls] || 0) + 1;
+    }
+  }
+  return Array.from(byOrg.values()).map(g => ({
+    ...g,
+    response_rate: g.sent > 0 ? Math.round((g.replied / g.sent) * 1000) / 10 : 0,
+  }));
 }
 
 async function handleKmailContactsList(request, url, env, corsHeaders) {
@@ -30142,9 +30199,13 @@ async function handleKmailMailboxList(request, url, env, corsHeaders) {
       : `(content_type='kmail_outbound' || content_type='kmail_auto_reply' || content_type='kmail_inbound')`;
     filter = `((sender_guid='ext:${slugEsc}' && receiver_guid='${guidEsc}') || (sender_guid='${guidEsc}' && receiver_guid='ext:${slugEsc}')) && ${typeFilter}`;
   } else {
+    // 2026-09-03 — kmail_escalation(§3 "3단계", 확인 필요)·
+    // kmail_delegated_reply(§3 "2단계", 자동처리 결과 보고)도 digest와
+    // 같은 자리(받은편지함)에 노출한다. docs/KPLAN_KMAIL_AGENT_TO_AGENT_
+    // ARCHITECTURE_v1_0_20260903.md §4 참고.
     filter = includeDeleted
-      ? `receiver_guid='${guidEsc}' && (content_type='kmail_inbound' || content_type='kmail_inbound_deleted' || content_type='kmail_inbound_blocked' || content_type='kmail_digest')`
-      : `receiver_guid='${guidEsc}' && (content_type='kmail_inbound' || content_type='kmail_digest')`;
+      ? `receiver_guid='${guidEsc}' && (content_type='kmail_inbound' || content_type='kmail_inbound_deleted' || content_type='kmail_inbound_blocked' || content_type='kmail_digest' || content_type='kmail_escalation' || content_type='kmail_delegated_reply')`
+      : `receiver_guid='${guidEsc}' && (content_type='kmail_inbound' || content_type='kmail_digest' || content_type='kmail_escalation' || content_type='kmail_delegated_reply')`;
   }
   const res = await fetch(`${L1_DEFAULT}/api/collections/ai_messages/records?filter=${encodeURIComponent(filter)}&sort=-created&perPage=200`, { headers });
   const data = await res.json().catch(() => ({ items: [] }));
@@ -31179,9 +31240,10 @@ async function handleKmailCampaignsList(request, url, env, corsHeaders) {
   const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_campaigns/records?filter=${filter}&sort=-created&perPage=100`, { headers });
   const data = await res.json().catch(() => ({ items: [] }));
   const items = (data.items || []).map(c => ({
-    id: c.id, subject: c.subject, status: c.status, send_at: c.send_at,
+    id: c.id, title: c.title || '', subject: c.subject, status: c.status, send_at: c.send_at,
     recipients: Array.isArray(c.contact_ids) ? c.contact_ids.length : 0,
     collect_replies_until: c.collect_replies_until, digest_at: c.digest_at, digest_status: c.digest_status,
+    closed_at: c.closed_at || '',
     kplan_plan_id: c.kplan_plan_id || '', kplan_checkpoint_label: c.kplan_checkpoint_label || '',
     created: c.created,
   }));
@@ -31202,9 +31264,22 @@ async function _kmailSendCampaign(env, campaign) {
     return [];
   });
 
+  // 2026-09-03 신설 — 수신자별 추적행(kmail_campaign_recipients)을 미리
+  // 한 번에 읽어 contact_id로 맵핑해둔다. body_override가 있으면 캠페인
+  // 공통 body 대신 그 사람만의 맞춤 본문을 보낸다(§0-1 ④ 수신자별 초안).
+  // 이 캠페인이 v1.7 이전에 만들어졌다면 추적행이 아예 없을 수 있다 —
+  // 그 경우 recipRows가 빈 배열이라 아래 로직은 자동으로 옛 방식(공통
+  // body만 사용, 상태 갱신 스킵)과 동일하게 동작한다.
+  const recipRows = await fetch(
+    `${L1_DEFAULT}/api/collections/kmail_campaign_recipients/records?filter=${encodeURIComponent(`campaign_id='${campaign.id}'`)}&perPage=200`,
+    { headers: { Authorization: headers.Authorization } }
+  ).then(r => r.json()).then(d => d.items || []).catch(() => []);
+  const recipByContact = new Map(recipRows.map(r => [r.contact_id, r]));
+
   const contactIds = Array.isArray(campaign.contact_ids) ? campaign.contact_ids : [];
   let successCount = 0, failCount = 0;
   for (const cid of contactIds) {
+    const recipRow = recipByContact.get(cid);
     try {
       const cRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records/${cid}`, { headers: { Authorization: headers.Authorization } });
       if (!cRes.ok) { failCount++; continue; }
@@ -31212,16 +31287,26 @@ async function _kmailSendCampaign(env, campaign) {
       if (contact.status !== 'confirmed' || contact.owner_user_guid !== campaign.owner_user_guid) { failCount++; continue; }
       await _kmailSendOneEmail(env, {
         guid: campaign.owner_user_guid, to: contact.email,
-        subject: campaign.subject, text: campaign.body,
+        subject: campaign.subject, text: (recipRow?.body_override || '').trim() || campaign.body,
         sessionId: `kmail:${campaign.id}`,
         replyTo: `kmail-${campaign.id}@hondi.kr`,
         signature: settings.signature, senderName: settings.sender_display_name,
         preResolvedAttachments,
       });
       successCount++;
+      if (recipRow) {
+        await fetch(`${L1_DEFAULT}/api/collections/kmail_campaign_recipients/records/${recipRow.id}`, {
+          method: 'PATCH', headers, body: JSON.stringify({ delivery_status: 'sent', sent_at: new Date().toISOString() }),
+        }).catch(e => console.warn('[K-Mail Campaign] 수신자 추적행 갱신 실패(계속 진행):', cid, e.message));
+      }
     } catch (e) {
       console.error('[K-Mail Campaign] 수신자 발송 실패:', cid, e.message);
       failCount++;
+      if (recipRow) {
+        await fetch(`${L1_DEFAULT}/api/collections/kmail_campaign_recipients/records/${recipRow.id}`, {
+          method: 'PATCH', headers, body: JSON.stringify({ delivery_status: 'failed' }),
+        }).catch(() => {});
+      }
     }
   }
 
@@ -31364,16 +31449,28 @@ async function _kmailGenerateDigest(env, campaign) {
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}` };
 
-  // 원 수신자 이메일 목록(참석/미회신 집계용) — 연락처가 그새 지워졌거나
-  // 조회 실패해도 다이제스트 자체는 계속 생성한다(집계 정확도만 저하).
+  // 2026-09-03 확장 — 수신자별 추적행(kmail_campaign_recipients)이 있으면
+  // recipient_email이 이미 발송 시점 값으로 저장돼 있어 재조회가 필요
+  // 없다. 없으면(v1.7 이전에 만들어진 캠페인) 옛 방식대로 contact_ids를
+  // 매번 재조회한다 — 하위호환.
+  const recipRows = await fetch(
+    `${L1_DEFAULT}/api/collections/kmail_campaign_recipients/records?filter=${encodeURIComponent(`campaign_id='${campaign.id}'`)}&perPage=200`,
+    { headers }
+  ).then(r => r.json()).then(d => d.items || []).catch(() => []);
+
   const contactIds = Array.isArray(campaign.contact_ids) ? campaign.contact_ids : [];
-  const recipientEmails = [];
-  for (const cid of contactIds) {
-    try {
-      const cRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records/${cid}`, { headers });
-      if (cRes.ok) { const c = await cRes.json(); if (c.email) recipientEmails.push(c.email); }
-    } catch (e) { /* 무시 */ }
+  let recipientEmails = [];
+  if (recipRows.length > 0) {
+    recipientEmails = recipRows.map(r => r.recipient_email).filter(Boolean);
+  } else {
+    for (const cid of contactIds) {
+      try {
+        const cRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records/${cid}`, { headers });
+        if (cRes.ok) { const c = await cRes.json(); if (c.email) recipientEmails.push(c.email); }
+      } catch (e) { /* 무시 */ }
+    }
   }
+  const recipBySlug = new Map(recipRows.map(r => [_slugifyEmailAddr(r.recipient_email || ''), r]));
 
   const filter = encodeURIComponent(`session_id='kmail:${campaign.id}' && content_type='kmail_inbound'`);
   const mRes = await fetch(`${L1_DEFAULT}/api/collections/ai_messages/records?filter=${filter}&sort=created&perPage=200`, { headers });
@@ -31384,6 +31481,7 @@ async function _kmailGenerateDigest(env, campaign) {
   const notRepliedCount = recipientEmails.filter(e => !repliedSlugs.has(_slugifyEmailAddr(e))).length;
 
   let digestText;
+  let classifications = [];
   if (replies.length === 0) {
     digestText = `[${campaign.subject}] 수신자 ${recipientEmails.length}명 중 아직 회신이 없습니다.`;
   } else if (env.DEEPSEEK_API_KEY) {
@@ -31395,6 +31493,20 @@ async function _kmailGenerateDigest(env, campaign) {
       max_tokens: 500, temperature: 0.3, timeoutMs: 20000, fallbackText: '',
     });
     digestText = `[${campaign.subject}] 회신 ${replies.length}건 / 미회신 ${notRepliedCount}건\n\n${summary || '(요약 생성 실패 — 회신 원문을 직접 확인해 주세요)'}`;
+
+    // 2026-09-03 신설 — 수신자별 reply_classification 저장용 별도 호출.
+    // 위 요약과 분리해뒀다 — 이 파싱이 실패해도 다이제스트 요약 자체
+    // (사용자에게 보이는 부분)엔 영향이 없다.
+    const classRaw = await deepseekChatText({
+      env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
+      messages: [{ role: 'user', content:
+        `다음 회신들 각각을 "참석","불참","문의","기타" 중 하나로 분류해서, 반드시 이 형식의 JSON 배열만 답하세요(설명 없이): [{"index":1,"classification":"참석"}]\n\n${replyText}` }],
+      max_tokens: 400, temperature: 0, timeoutMs: 15000, fallbackText: '',
+    });
+    try {
+      const jsonMatch = (classRaw || '').match(/\[[\s\S]*\]/);
+      if (jsonMatch) classifications = JSON.parse(jsonMatch[0]);
+    } catch (e) { /* 분류 파싱 실패 — reply_classification 없이 진행 */ }
   } else {
     digestText = `[${campaign.subject}] 회신 ${replies.length}건 / 미회신 ${notRepliedCount}건 (DEEPSEEK_API_KEY 미설정으로 AI 요약 생략)`;
   }
@@ -31406,6 +31518,23 @@ async function _kmailGenerateDigest(env, campaign) {
     content_original: digestText,
     content_type: 'kmail_digest',
   }).catch(e => console.error('[K-Mail Digest] ai_messages 기록 실패:', e.message));
+
+  // 2026-09-03 신설 — 수신자별 추적행에 회신 매칭 결과 저장
+  // (docs/HANDOFF_2026-09-03_kmail-campaign-recipients-taskbrief.md §4-2).
+  if (recipRows.length > 0 && replies.length > 0) {
+    const classByIndex = new Map((Array.isArray(classifications) ? classifications : []).map(c => [c.index, c.classification]));
+    await Promise.all(replies.map((reply, i) => {
+      const slug = (reply.sender_guid || '').replace(/^ext:/, '');
+      const row = recipBySlug.get(slug);
+      if (!row) return null;
+      const patch = { replied_at: reply.created, reply_message_id: reply.id };
+      const cls = classByIndex.get(i + 1);
+      if (typeof cls === 'string' && ['참석', '불참', '문의', '기타', '무응답'].includes(cls)) patch.reply_classification = cls;
+      return fetch(`${L1_DEFAULT}/api/collections/kmail_campaign_recipients/records/${row.id}`, {
+        method: 'PATCH', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify(patch),
+      }).catch(e => console.warn('[K-Mail Digest] 수신자 회신매칭 저장 실패(계속 진행):', row.id, e.message));
+    }));
+  }
 
   await fetch(`${L1_DEFAULT}/api/collections/kmail_campaigns/records/${campaign.id}`, {
     method: 'PATCH', headers: { ...headers, 'Content-Type': 'application/json' },
@@ -31556,6 +31685,7 @@ async function _handleKmailInboundEmail(message, env, ctx) {
     const token = await _l1AdminToken(env);
     let ownerGuid = null;
     let sessionId = null;
+    let campaignObj = null;
 
     if (campaignMatch) {
       const campaignId = campaignMatch[1];
@@ -31564,8 +31694,8 @@ async function _handleKmailInboundEmail(message, env, ctx) {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (cRes.ok) {
-          const campaign = await cRes.json();
-          ownerGuid = campaign.owner_user_guid;
+          campaignObj = await cRes.json();
+          ownerGuid = campaignObj.owner_user_guid;
           sessionId = `kmail:${campaignId}`;
         }
       } catch (e) { console.error('[K-Mail email] 캠페인 조회 실패:', e.message); }
@@ -31625,6 +31755,16 @@ async function _handleKmailInboundEmail(message, env, ctx) {
       console.warn('[K-Mail email] 필터 규칙 판정 실패(KEEP으로 폴백):', e.message);
     }
 
+    // 2026-09-03 신설 — docs/KPLAN_KMAIL_AGENT_TO_AGENT_ARCHITECTURE_v1_0_20260903.md
+    // §4-B/§4-C. 차단·자동삭제 대상이 아닌 메일에 한해 위임 판정을
+    // 돌린다. 위임 규칙을 등록한 적 없는 사용자(절대다수)는
+    // decision이 항상 'none'이라 아래 로직이 사실상 스킵된다.
+    let delegation = { decision: 'none' };
+    if (!isBlocked && !matchedDelete) {
+      delegation = await _kmailDecideDelegation(env, ownerGuid, campaignObj, { subject, bodyText })
+        .catch(e => { console.warn('[K-Mail email] 위임 판정 실패(escalate로 폴백):', e.message); return { decision: 'escalate' }; });
+    }
+
     const writtenMsg = await _writeAiMessage(env, {
       session_id: sessionId,
       sender_guid: `ext:${_slugifyEmailAddr(fromAddr)}`,
@@ -31632,6 +31772,49 @@ async function _handleKmailInboundEmail(message, env, ctx) {
       content_original: `[제목] ${subject}\n\n${bodyText}`,
       content_type: isBlocked ? 'kmail_inbound_blocked' : (matchedDelete ? 'kmail_inbound_deleted' : 'kmail_inbound'),
     }).catch(e => { console.error('[K-Mail email] ai_messages 기록 실패:', e.message); return null; });
+
+    // §3 "2단계: 위임 범위 내 실행" — 사람 확인 없이 즉시 회신하고,
+    // 처리 결과를 kmail_delegated_reply로 남긴다(K-Plan/사람이 나중에
+    // §2-10/§2-11로 다시 찾아볼 수 있도록 — 지금은 다이제스트와 같은
+    // 자리에 기록만 하고, K-Plan 쪽 실시간 수신 엔드포인트는 후속 과제).
+    // §3 "3단계: 신규 판단 필요" — kmail_escalation으로 표시해 사람
+    // 눈에 바로 띄게 한다. 자동삭제·차단이 이미 아닌 메일이므로 원본
+    // (kmail_inbound)은 이미 정상적으로 보이는 채로 남아있다 — 이
+    // 태그는 "이건 특히 봐주세요"라는 덧표시다.
+    if (!isBlocked && !matchedDelete && delegation.decision === 'approve') {
+      try {
+        const settings = await _kmailGetUserSettings(env, ownerGuid).catch(() => ({ signature: '', sender_display_name: '혼디 K-Mail' }));
+        const emailMatch = fromAddr.match(/[^\s<>]+@[^\s<>]+/);
+        const replyToEmail = emailMatch ? emailMatch[0] : fromAddr;
+        const replyBody = await deepseekChatText({
+          env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
+          messages: [{ role: 'user', content:
+            `다음 메일에 대한 답장을 정중한 업무 메일 톤으로 작성하세요. 담을 내용: ${delegation.replyGuidance || '요청을 수락한다는 내용'}\n\n원 메일 제목: ${subject}\n원 메일 본문(일부): ${bodyText.slice(0, 500)}\n\n본문만 작성하세요(제목·서명 제외, 3~5문장).` }],
+          max_tokens: 400, temperature: 0.4, timeoutMs: 15000,
+          fallbackText: delegation.replyGuidance || '요청 확인했습니다. 진행하겠습니다.',
+        });
+        await _kmailSendOneEmail(env, {
+          guid: ownerGuid, to: replyToEmail, subject: `Re: ${subject}`, text: replyBody,
+          sessionId, replyTo: campaignObj ? `kmail-${campaignObj.id}@hondi.kr` : `${ownerGuid}@hondi.kr`,
+          signature: settings.signature, senderName: settings.sender_display_name,
+        });
+        await _writeAiMessage(env, {
+          session_id: sessionId, sender_guid: 'hondi-ai', receiver_guid: ownerGuid,
+          content_original: `[위임 범위 내 자동 처리] "${subject}"에 자동으로 회신했습니다.\n\n회신 내용: ${replyBody}`,
+          content_type: 'kmail_delegated_reply',
+        }).catch(e => console.error('[K-Mail email] 위임처리 기록 실패:', e.message));
+      } catch (e) {
+        console.error('[K-Mail email] 위임 자동회신 실패(escalate로 강등):', e.message);
+        delegation = { decision: 'escalate' };
+      }
+    }
+    if (!isBlocked && !matchedDelete && delegation.decision === 'escalate') {
+      await _writeAiMessage(env, {
+        session_id: sessionId, sender_guid: 'hondi-ai', receiver_guid: ownerGuid,
+        content_original: `[확인 필요] "${subject}" — 위임 범위 밖이거나 새로운 유형의 요청이라 직접 확인이 필요합니다.`,
+        content_type: 'kmail_escalation',
+      }).catch(e => console.error('[K-Mail email] 에스컬레이션 기록 실패:', e.message));
+    }
 
     // 첨부 추출 — 차단/자동삭제 대상이어도 첨부는 그대로 저장한다(소프트
     // 삭제 원칙과 동일 — 규칙 판정이 틀렸을 때 파일까지 같이 날아가면
@@ -31835,6 +32018,7 @@ async function _kmailChatCreateCampaign(env, guid, parsed) {
 
   const record = {
     owner_user_guid: guid, recipient_query: '', contact_ids: contactIds,
+    title: (parsed?.title || '').trim().slice(0, 200),
     subject, body: mailBody, send_at: sendAtDate.toISOString(), status: 'scheduled',
     collect_replies_until: parsed?.collect_replies_until ? new Date(parsed.collect_replies_until).toISOString() : null,
     digest_at: parsed?.digest_at ? new Date(parsed.digest_at).toISOString() : null,
@@ -31846,20 +32030,90 @@ async function _kmailChatCreateCampaign(env, guid, parsed) {
   if (!campRes.ok) throw new Error('캠페인 생성 실패');
   const campaign = await campRes.json();
 
+  // 2026-09-03 신설 — 수신자별 발송·회신 추적 행을 캠페인 생성과 동시에
+  // 미리 만들어둔다(delivery_status:'pending' — 실제 발송은 _kmailSendCampaign이
+  // send_at 도달 시 처리하고 그때 'sent'로 갱신). validRecipients와
+  // contactIds는 위 루프에서 같은 순서로 push됐으므로 인덱스로 zip한다.
+  // 이 단계가 실패해도(예: L1 순간 장애) 캠페인 자체는 이미 만들어졌으니
+  // 조용히 넘어간다 — 수신자별 집계 정확도만 낮아질 뿐 발송 자체는 안 막는다.
+  await Promise.all(validRecipients.map((r, i) => {
+    const cid = contactIds[i];
+    if (!cid) return null;
+    return fetch(`${L1_DEFAULT}/api/collections/kmail_campaign_recipients/records`, {
+      method: 'POST', headers, body: JSON.stringify({
+        campaign_id: campaign.id, contact_id: cid,
+        recipient_name: r.name || '', recipient_email: r.email, recipient_org: r.org || '',
+        body_override: typeof r.body_override === 'string' ? r.body_override.trim() : '',
+        delivery_status: 'pending',
+      }),
+    }).catch(e => console.warn('[K-Mail Campaign] 수신자 추적행 생성 실패(계속 진행):', r.email, e.message));
+  }));
+
   return { campaignId: campaign.id, recipientCount: contactIds.length, sendAt: record.send_at, newContactCount };
 }
 
-async function _kmailChatCreateRule(env, guid, ruleText) {
+async function _kmailChatCreateRule(env, guid, ruleText, opts = {}) {
   const trimmed = ruleText.trim().slice(0, KMAIL_RULE_TEXT_MAX_LEN);
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
   const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_rules/records`, {
     method: 'POST', headers,
-    body: JSON.stringify({ owner_user_guid: guid, rule_text: trimmed, action: 'auto_delete', enabled: true }),
+    body: JSON.stringify({
+      owner_user_guid: guid, rule_text: trimmed,
+      action: opts.action === 'delegate_execute' ? 'delegate_execute' : 'auto_delete',
+      kplan_plan_id: (opts.kplanPlanId || '').trim(),
+      kplan_checkpoint_label: (opts.kplanCheckpointLabel || '').trim(),
+      enabled: true,
+    }),
   });
   if (!res.ok) throw new Error('규칙 생성 실패');
   const created = await res.json();
   return created.id;
+}
+
+// 2026-09-03 신설 — docs/KPLAN_KMAIL_AGENT_TO_AGENT_ARCHITECTURE_v1_0_20260903.md
+// §4-B/§4-C의 구현. 인바운드 메일 하나가 왔을 때, 이미 등록된
+// delegate_execute 위임 규칙 범위 안에 들어오면(§3 "2단계: 위임 범위
+// 내 실행") 사람 확인 없이 K-Mail이 직접 회신까지 보낸다. 범위 밖이면
+// "escalate"로 사람에게 올린다(§3 "3단계"). 위임 규칙이 아예 없으면
+// (절대다수) 'none'을 반환해 기존 흐름을 그대로 탄다 — 이 기능을
+// 켜지 않은 사용자에게는 아무 비용도, 동작 변화도 없다.
+async function _kmailDecideDelegation(env, ownerGuid, campaign, { subject, bodyText }) {
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}` };
+  const ownerEsc = ownerGuid.replace(/'/g, "\\'");
+  const filter = encodeURIComponent(`owner_user_guid='${ownerEsc}' && enabled=true && action='delegate_execute'`);
+  const rRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_rules/records?filter=${filter}&perPage=50`, { headers });
+  const rData = await rRes.json().catch(() => ({ items: [] }));
+  let rules = rData.items || [];
+  if (rules.length === 0) return { decision: 'none' };
+
+  // 캠페인이 특정 K-Plan 플랜에 속해 있으면, 그 플랜/체크포인트로
+  // 좁혀둔 규칙을 전역 규칙보다 우선한다(더 구체적인 위임이므로).
+  const planId = campaign?.kplan_plan_id || '';
+  const checkpoint = campaign?.kplan_checkpoint_label || '';
+  const scoped = rules.filter(r => r.kplan_plan_id && r.kplan_plan_id === planId &&
+    (!r.kplan_checkpoint_label || r.kplan_checkpoint_label === checkpoint));
+  const global = rules.filter(r => !r.kplan_plan_id);
+  rules = scoped.length > 0 ? scoped : global;
+  if (rules.length === 0) return { decision: 'none' };
+  if (!env.DEEPSEEK_API_KEY) return { decision: 'escalate', reason: 'DEEPSEEK_API_KEY 미설정으로 위임 판정 불가' };
+
+  const ruleList = rules.map((r, i) => `${i + 1}. ${r.rule_text}`).join('\n');
+  const verdictRaw = await deepseekChatText({
+    env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
+    messages: [{ role: 'user', content:
+      `다음은 사용자가 K-Mail에게 미리 위임해둔 처리 범위입니다. 이 메일이 그 범위 안에 명확히 들어오면 APPROVE, 조금이라도 애매하거나 범위 밖이면(금액·계약·확정적 약속이 걸리거나 전례 없는 사안 등) ESCALATE로 판정하세요.\n\n반드시 이 형식의 JSON만 답하세요(설명 없이):\n{"verdict":"APPROVE 또는 ESCALATE","reply_guidance":"APPROVE일 때 회신에 담을 내용 한두 문장(ESCALATE면 빈 문자열)"}\n\n위임 범위:\n${ruleList}\n\n메일 제목: ${subject}\n메일 본문(일부): ${bodyText.slice(0, 1000)}` }],
+    max_tokens: 300, temperature: 0, timeoutMs: 15000, fallbackText: '',
+  });
+  try {
+    const jsonMatch = (verdictRaw || '').match(/\{[\s\S]*\}/);
+    const parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
+    if (parsed?.verdict === 'APPROVE') {
+      return { decision: 'approve', replyGuidance: (parsed.reply_guidance || '').trim() };
+    }
+  } catch (e) { /* 파싱 실패 — 아래 escalate로 안전하게 폴백 */ }
+  return { decision: 'escalate' };
 }
 
 // POST /kmail/chat — body: { guid, pubkey, signature, ts, messages: [{role,content},...] }
@@ -31934,6 +32188,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   const ruleMatch = reply.match(/KMAIL_CREATE_RULE\s*(\{[\s\S]*\})\s*$/);
   const lookupMatch = reply.match(/KMAIL_LOOKUP_CONTACTS\s*(\{[\s\S]*\})\s*$/);
   const campaignLookupMatch = reply.match(/KMAIL_LOOKUP_CAMPAIGNS\s*(\{[\s\S]*\})?\s*$/);
+  const campaignReportMatch = reply.match(/KMAIL_CAMPAIGN_REPORT\s*(\{[\s\S]*\})?\s*$/);
   const tagMatch = reply.match(/KMAIL_TAG_CONTACTS\s*(\{[\s\S]*\})\s*$/);
   const mergeMatch = reply.match(/KMAIL_MERGE_CONTACTS\s*(\{[\s\S]*\})\s*$/);
   const threadStateMatch = reply.match(/KMAIL_THREAD_STATE\s*(\{[\s\S]*\})\s*$/);
@@ -32192,6 +32447,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     }).catch(() => []);
 
     const summarized = items.map(c => ({
+      title: c.title || '',
       subject: c.subject,
       status: c.status,
       recipient_count: Array.isArray(c.contact_ids) ? c.contact_ids.length : 0,
@@ -32199,12 +32455,35 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
       collect_replies_until: c.collect_replies_until,
       digest_at: c.digest_at,
       digest_status: c.digest_status,
+      closed_at: c.closed_at || '',
       kplan_plan_id: c.kplan_plan_id || '',
       kplan_checkpoint_label: c.kplan_checkpoint_label || '',
       created: c.created,
     }));
 
-    const lookupContext = `[캠페인 이력 조회 결과]\n${JSON.stringify(summarized)}\n\n위 목록을 사용자에게 자연스럽게 정리해서 보여주세요. digest_status가 'sent'면 회신 취합·보고까지 끝나 사실상 종료된 캠페인이라고 알려주고, 'none'/'pending'이면 아직 진행 중(회신 취합 전)이라고 알려주세요. 결과가 없으면 없다고 솔직히 말하세요. (이 메시지 자체는 사용자에게 보이지 않습니다.)`;
+    // 2026-09-03 신설(v1.8) — 조회 결과가 1~3건으로 충분히 좁혀졌으면
+    // "명단과 메일 내용 보여줘" 같은 상세 요청에도 바로 답할 수 있도록
+    // 수신자별 이름·기관·본문·회신여부를 함께 붙인다. 결과가 많으면
+    // (목록 전체 조회처럼 범위가 넓으면) 상세를 안 붙인다 — 토큰 낭비
+    // 방지 및 요약이 더 맞는 상황이므로.
+    let detailContext = '';
+    if (items.length >= 1 && items.length <= 3) {
+      const detailBlocks = [];
+      for (const c of items) {
+        const rows = await _kmailFetchCampaignRecipients(env, c.id).catch(() => []);
+        detailBlocks.push({
+          title: c.title || c.subject, subject: c.subject, body: c.body,
+          recipients: rows.map(r => ({
+            name: r.recipient_name, email: r.recipient_email, org: r.recipient_org,
+            delivery_status: r.delivery_status, replied: !!r.replied_at, classification: r.reply_classification || '',
+            body_override: r.body_override || '',
+          })),
+        });
+      }
+      detailContext = `\n\n[수신자 상세]\n${JSON.stringify(detailBlocks)}`;
+    }
+
+    const lookupContext = `[캠페인 이력 조회 결과]\n${JSON.stringify(summarized)}${detailContext}\n\n위 목록을 사용자에게 자연스럽게 정리해서 보여주세요. 사용자가 명단·수신자·메일 내용을 물었다면 [수신자 상세]의 이름·이메일·기관·본문을 그대로 알려주세요. digest_status가 'sent'면 회신 취합·보고까지 끝난 것이고, closed_at이 있으면 사용자가 명시적으로 종료 처리한 캠페인입니다 — 그렇게 알려주세요. 결과가 없으면 없다고 솔직히 말하세요. (이 메시지 자체는 사용자에게 보이지 않습니다.)`;
     let followUpReply;
     try {
       followUpReply = await deepseekChatText({
@@ -32214,7 +32493,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
           { role: 'assistant', content: cleanReplyText || '캠페인 이력을 확인하고 있습니다...' },
           { role: 'user', content: lookupContext },
         ],
-        max_tokens: 800, temperature: 0.4, timeoutMs: 20000,
+        max_tokens: detailContext ? 1400 : 800, temperature: 0.4, timeoutMs: 20000,
         fallbackText: '캠페인 조회는 완료됐지만 결과 정리에 실패했습니다. 다시 시도해 주세요.',
       });
     } catch (e) {
@@ -32223,6 +32502,79 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
 
     return new Response(JSON.stringify({ ok: true, reply: followUpReply, action: { type: 'looked_up_campaigns', count: items.length } }),
       { status: 200, headers: corsHeaders });
+  }
+
+  // ── ⓪-7 캠페인 보고서 작성·종료 태그 (2026-09-03 신설, v1.8) ────
+  // "누구한테 언제 어떤 메일을 보냈고 회신은 어땠는지 기관별로 정리해줘"
+  // (close 없이 — 진행 중 상태 점검), "보고서와 함께 캠페인 종료해줘"
+  // (close:true — §0-1 ⑦의 명시적 종료) 둘 다 이 태그 하나로 처리한다.
+  // §2-11 참고.
+  if (campaignReportMatch) {
+    let parsed = null;
+    try { parsed = JSON.parse(campaignReportMatch[1] || '{}'); } catch (e) { /* 아래에서 처리 */ }
+    const cleanReplyText = reply.slice(0, campaignReportMatch.index).trim();
+
+    const { campaign, matchCount } = await _kmailResolveOneCampaign(env, guid, {
+      campaign_id: (parsed?.campaign_id || '').trim(),
+      q: (parsed?.q || '').trim(),
+    }).catch(() => ({ campaign: null, matchCount: 0 }));
+
+    if (!campaign) {
+      const note = matchCount > 1
+        ? '어느 캠페인인지 특정하지 못했습니다 — 캠페인 제목을 조금 더 구체적으로 말씀해 주시겠어요?'
+        : '해당하는 캠페인을 찾지 못했습니다.';
+      return new Response(JSON.stringify({ ok: true, reply: `${cleanReplyText}\n\n(${note})`, action: null }), { status: 200, headers: corsHeaders });
+    }
+
+    const recipRows = await _kmailFetchCampaignRecipients(env, campaign.id).catch(() => []);
+    const byOrg = _kmailAggregateByOrg(recipRows);
+    const shouldClose = parsed?.close === true;
+
+    const reportPayload = {
+      title: campaign.title || campaign.subject, subject: campaign.subject,
+      total_recipients: recipRows.length,
+      total_sent: recipRows.filter(r => r.delivery_status === 'sent').length,
+      total_replied: recipRows.filter(r => r.replied_at).length,
+      by_org: byOrg,
+    };
+    const reportText = `[캠페인 보고서] ${reportPayload.title}\n수신 ${reportPayload.total_recipients}명 / 발송완료 ${reportPayload.total_sent}명 / 회신 ${reportPayload.total_replied}건\n\n기관·카테고리별:\n` +
+      byOrg.map(g => `- ${g.org}: 발송 ${g.sent} / 회신 ${g.replied} (응답률 ${g.response_rate}%) — ${Object.entries(g.classifications).map(([k, v]) => `${k} ${v}`).join(', ') || '분류 없음'}`).join('\n');
+
+    const token = await _l1AdminToken(env);
+    const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+
+    await _writeAiMessage(env, {
+      session_id: `kmail:${campaign.id}`, sender_guid: 'hondi-ai', receiver_guid: guid,
+      content_original: reportText, content_type: 'kmail_campaign_report',
+    }).catch(e => console.error('[K-Mail Report] ai_messages 기록 실패:', e.message));
+
+    if (shouldClose) {
+      await fetch(`${L1_DEFAULT}/api/collections/kmail_campaigns/records/${campaign.id}`, {
+        method: 'PATCH', headers, body: JSON.stringify({ closed_at: new Date().toISOString() }),
+      }).catch(e => console.error('[K-Mail Report] 캠페인 종료 처리 실패:', e.message));
+    }
+
+    const reportContext = `[캠페인 보고서 데이터]\n${JSON.stringify(reportPayload)}\n\n위 데이터를 기관/카테고리별 응답률 중심으로 사용자에게 정리해서 보여주세요.${shouldClose ? ' 이 캠페인은 방금 종료 처리됐다고 알려주고, 나중에 "저번에 보낸 캠페인 뭐였지" 같은 식으로 다시 찾아볼 수 있다는 것도 짧게 언급하세요.' : ''} (이 메시지 자체는 사용자에게 보이지 않습니다.)`;
+    let followUpReply;
+    try {
+      followUpReply = await deepseekChatText({
+        env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
+        messages: [
+          { role: 'system', content: systemPrompt }, ...cleanMessages,
+          { role: 'assistant', content: cleanReplyText || '보고서를 정리하고 있습니다...' },
+          { role: 'user', content: reportContext },
+        ],
+        max_tokens: 1000, temperature: 0.4, timeoutMs: 20000,
+        fallbackText: '보고서 생성은 완료됐지만 정리에 실패했습니다. 다시 시도해 주세요.',
+      });
+    } catch (e) {
+      followUpReply = '보고서 생성 중 오류가 발생했습니다: ' + e.message;
+    }
+
+    return new Response(JSON.stringify({
+      ok: true, reply: followUpReply,
+      action: { type: shouldClose ? 'campaign_reported_and_closed' : 'campaign_reported', campaign_id: campaign.id },
+    }), { status: 200, headers: corsHeaders });
   }
 
   // ── ① 웹 검색 요청 태그 ──────────────────────────────────────
@@ -32299,7 +32651,9 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
       return new Response(JSON.stringify({ ok: true, reply: cleanReplyText || reply, action: null }), { status: 200, headers: corsHeaders });
     }
     try {
-      const ruleId = await _kmailChatCreateRule(env, guid, ruleText);
+      const ruleId = await _kmailChatCreateRule(env, guid, ruleText, {
+        action: parsed?.action, kplanPlanId: parsed?.kplan_plan_id, kplanCheckpointLabel: parsed?.kplan_checkpoint_label,
+      });
       return new Response(JSON.stringify({
         ok: true, reply: `${cleanReplyText}\n\n✅ 규칙을 등록했습니다.`, action: { type: 'rule_created', rule_id: ruleId },
       }), { status: 200, headers: corsHeaders });
