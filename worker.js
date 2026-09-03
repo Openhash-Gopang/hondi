@@ -18880,12 +18880,23 @@ async function handleKPlanRelay(bodyText, env, corsHeaders, meta = null, ctx = n
   const usageAcc = { prompt_tokens: 0, completion_tokens: 0, prompt_cache_hit_tokens: 0, prompt_cache_miss_tokens: 0 };
 
   for (let round = 0; round < KPLAN_WEB_SEARCH_MAX_ROUNDS; round++) {
+    const isLastRound = round === KPLAN_WEB_SEARCH_MAX_ROUNDS - 1;
+    // 2026-09-03 버그 수정 — 실사 재현: 마지막 라운드에도 모델이
+    // [WEB_SEARCH] 태그만 내고 답변 본문을 안 쓰는 경우가 있었다. 그러면
+    // 태그를 지운 뒤 남는 게 빈 문자열이라 "다듬은 계획서" 칸이 통째로
+    // 비어버렸다(에러 없이 조용히 실패 — 발견하기 어려운 유형). 마지막
+    // 라운드 직전에 "더 검색하지 말고 지금 있는 정보로 답하라"고 명시
+    // 지시해 애초에 빈 태그만 내는 상황 자체를 막는다.
+    const requestMessages = isLastRound
+      ? [...loopMessages, { role: 'user', content: '[시스템] 이번이 마지막 응답 기회입니다. 더 이상 [WEB_SEARCH] 태그로 검색을 요청하지 말고, 지금까지 확인한 정보만으로 실질적인 최종 답변(계획서 등)을 작성하십시오.' }]
+      : loopMessages;
+
     let res;
     try {
       res = await fetch(DEEPSEEK_URL, {
         method: 'POST',
         headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${env.DEEPSEEK_API_KEY}` },
-        body: JSON.stringify({ ...payload, messages: loopMessages }),
+        body: JSON.stringify({ ...payload, messages: requestMessages }),
       });
     } catch (e) { return _err(502, 'KPLAN_RELAY_ERROR', e.message, corsHeaders); }
 
@@ -18904,7 +18915,7 @@ async function handleKPlanRelay(bodyText, env, corsHeaders, meta = null, ctx = n
 
     const text = data.choices?.[0]?.message?.content || '';
     const searchMatch = text.match(KPLAN_WEB_SEARCH_TAG_RE);
-    if (searchMatch && round < KPLAN_WEB_SEARCH_MAX_ROUNDS - 1) {
+    if (searchMatch && !isLastRound) {
       const query = searchMatch[1].trim();
       const searchResult = await _performWebSearchCore(env, ctx, query).catch(e => ({ ok: false, message: e.message }));
       loopMessages = [
@@ -18915,9 +18926,12 @@ async function handleKPlanRelay(bodyText, env, corsHeaders, meta = null, ctx = n
       continue;
     }
 
-    // 최종 응답 — 남은 [WEB_SEARCH] 태그 흔적 제거 후 확정.
+    // 최종 응답 — 남은 [WEB_SEARCH] 태그 흔적 제거 후 확정. 위 강제 지시
+    // 이후에도 모델이 끝내 빈 답변만 내는 극단적 경우를 대비해, 결과가
+    // 비어있으면 빈 칸 대신 명확한 안내 문구로 대체한다(조용한 실패 방지).
     if (data.choices?.[0]?.message) {
-      data.choices[0].message.content = text.replace(KPLAN_WEB_SEARCH_TAG_STRIP_RE, '').trim();
+      const stripped = text.replace(KPLAN_WEB_SEARCH_TAG_STRIP_RE, '').trim();
+      data.choices[0].message.content = stripped || '죄송합니다 — 검색을 반복하는 과정에서 최종 계획서를 완성하지 못했습니다. 다시 한 번 시도해 주세요.';
     }
     finalData = data;
     break;
