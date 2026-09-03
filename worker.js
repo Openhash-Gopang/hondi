@@ -28,6 +28,15 @@ import { resolveGovFee, extractCityCodeFromTrace } from './src/gopang/gov/gov-fe
 // 2026-07-14: 레거시 별칭 안전망 — HONDI_TIER_MODELS에 없는 model이
 // 클라이언트에서 그대로 들어와도(레거시 호출 등) 여기서 한 번 더 정규화한다.
 import { resolveDeepseekModel, deepseekChatText } from './src/gopang/core/deepseek-client.js';
+// 2026-09-03 신설 — K-서비스 공용 인증 게이트. "phone_verify_token 또는
+// 지갑 서명으로 guid를 확정한다"는 판정 로직이 K-Plan/K-Law/K-Gov/
+// K-Business relay 4곳 + K-Mail 8개 엔드포인트에 각자 손으로 반복
+// 구현돼 있던 것을 하나로 모음(주피터 지시, mail.hondi.net/webapp.html
+// 작업 중 발견 — 상세 배경은 src/worker/k-service-auth.js 헤더 참고).
+// _kAuth 인스턴스는 이 파일 하단에서 _resolveGuidFromPhoneVerifyToken·
+// _verifyClaimsRequester가 정의된 뒤(둘 다 function 선언이라 호이스팅
+// 되므로 여기서 미리 참조해도 안전) 아래에서 생성한다.
+import { makeKServiceAuthGate, mapPhoneAuthError } from './src/worker/k-service-auth.js';
 // 2026-07-18 신설 — GDC 상거래 완성 계획서 Phase 4. src/profile2.0/ledger.js(M10)
 // 는 이 저장소 어디서도 호출되지 않던 죽은 코드였다(2026-07-18 실사로 발견) —
 // 순수 계산 함수만 재사용한다(marketPurchaseRPC/Supabase 관련 함수는 legacy라
@@ -447,6 +456,14 @@ async function _resolveGuidFromPhoneVerifyToken(env, phoneVerifyToken) {
     return { ok: false, code: 'L1_ERROR', message: '전화번호 인증 조회 실패: ' + e.message };
   }
 }
+
+// K-서비스 공용 인증 게이트 인스턴스 — _verifyClaimsRequester는 이
+// 파일 하단에서 정의되지만 function 선언이라 호이스팅되므로 여기서
+// 참조해도 안전하다(모듈 최상위 코드가 실행되는 시점엔 이미 정의됨).
+const _kAuth = makeKServiceAuthGate({
+  resolveGuidFromPhoneVerifyToken: _resolveGuidFromPhoneVerifyToken,
+  verifyClaimsRequester: _verifyClaimsRequester,
+});
 
 // POST /user/gdc-balance { phone_verify_token } — 일반 후원자용 GDC 잔액·
 // 구독 조회 (2026-09-01 신설, 주피터 지시). desktop.html의 "함께
@@ -4052,14 +4069,9 @@ async function handleKlawQuota(request, url, env, corsHeaders) {
   const phoneVerifyToken = (url.searchParams.get('phone_verify_token') || '').trim();
   const resolved = await _resolveGuidFromPhoneVerifyToken(env, phoneVerifyToken);
   if (!resolved.ok) {
-    const status = resolved.code === 'PROFILE_NOT_FOUND' ? 404
-      : resolved.code === 'SECRET_NOT_SET' ? 500
-      : resolved.code === 'L1_ERROR' ? 502
-      : (resolved.code === 'MISSING_FIELD' || resolved.code === 'TOKEN_MALFORMED') ? 400
-      : 401;
-    // 2026-09-02 — _err()가 이제 message도 함께 반환하므로(위 _err 선언부
-    // 참고) 더 이상 커스텀 Response를 만들 필요가 없다.
-    return _err(status, resolved.code, resolved.message, corsHeaders);
+    // 2026-09-03 — 공용 게이트로 위임(src/worker/k-service-auth.js)
+    const { status, code, message } = mapPhoneAuthError(resolved);
+    return _err(status, code, message, corsHeaders);
   }
   const guid = resolved.guid;
   try {
@@ -12285,6 +12297,11 @@ export default {
     if (pathname === '/kmail/attachments/upload' && request.method === 'POST') return handleKmailAttachmentUpload(request, env, corsHeaders);
     if (pathname.startsWith('/kmail/attachments/') && request.method === 'GET') return handleKmailAttachmentGet(request, url, env, corsHeaders);
     if (pathname === '/kmail/campaigns/create' && request.method === 'POST') return handleKmailCampaignCreate(request, env, corsHeaders);
+    // 2026-09-03 신설 — mail.hondi.net/webapp.html "캠페인 목록/상태" 화면
+    // 요구사항 대응. 지금까지 캠페인 생성(create) API만 있고 조회 API가
+    // 없었다(handleKmailContactsList의 캠페인판이 빠져있던 것 — 작업
+    // 지시서 §3-4 구현 중 발견).
+    if (pathname === '/kmail/campaigns/list' && request.method === 'GET') return handleKmailCampaignsList(request, url, env, corsHeaders);
     if (pathname === '/kmail/rules/create' && request.method === 'POST') return handleKmailRuleCreate(request, env, corsHeaders);
     if (pathname === '/kmail/rules' && request.method === 'GET') return handleKmailRuleList(request, url, env, corsHeaders);
     if (pathname === '/kmail/rules/toggle' && request.method === 'POST') return handleKmailRuleToggle(request, env, corsHeaders);
@@ -18389,17 +18406,12 @@ async function handleKlawRelay(bodyText, env, corsHeaders, meta = null, ctx = nu
   // ★ 프런트엔드(klaw 저장소 webapp.html)가 아직 OTP 로그인 UI를 붙이기
   // 전에 이 백엔드만 먼저 배포하면 모든 K-Law 호출이 401로 막힌다 —
   // 반드시 프런트 로그인 플로우와 함께 배포할 것.
+  // 2026-09-03 — 상태코드 매핑을 공용 게이트(mapPhoneAuthError)로 위임
+  // (src/worker/k-service-auth.js 참고, 이전엔 이 블록이 klaw/kplan/
+  // business/gov 4곳에 그대로 복붙돼 있었다).
   const _klawAuth = await _resolveGuidFromPhoneVerifyToken(env, phone_verify_token);
   if (!_klawAuth.ok) {
-    const status = _klawAuth.code === 'PROFILE_NOT_FOUND' ? 404
-      : _klawAuth.code === 'SECRET_NOT_SET' ? 500
-      : _klawAuth.code === 'L1_ERROR' ? 502
-      : (_klawAuth.code === 'MISSING_FIELD' || _klawAuth.code === 'TOKEN_MALFORMED') ? 400
-      : 401; // TOKEN_EXPIRED, TOKEN_INVALID
-    const code = _klawAuth.code === 'MISSING_FIELD' ? 'LOGIN_REQUIRED' : _klawAuth.code;
-    const message = _klawAuth.code === 'MISSING_FIELD' ? '전화번호 로그인이 필요합니다.' : _klawAuth.message;
-    // 2026-09-02 — _err()가 이제 message도 함께 반환하므로(위 _err 선언부
-    // 참고) 더 이상 커스텀 Response를 만들 필요가 없다.
+    const { status, code, message } = mapPhoneAuthError(_klawAuth);
     return _err(status, code, message, corsHeaders);
   }
   guid = _klawAuth.guid; // 인증된 전화번호 소유자의 guid로 강제 치환
@@ -18783,15 +18795,10 @@ async function handleKPlanRelay(bodyText, env, corsHeaders, meta = null, ctx = n
   // 본인 확인 없는 guid로 과금·잔액조회가 가능한 구멍을 막는다).
   // 클라이언트가 body에 실어 보낸 guid는 신뢰하지 않고, 이 토큰이
   // 가리키는 전화번호의 profiles 레코드에서 guid를 직접 도출한다.
+  // 2026-09-03 — 공용 게이트로 위임(src/worker/k-service-auth.js)
   const _kplanAuth = await _resolveGuidFromPhoneVerifyToken(env, phone_verify_token);
   if (!_kplanAuth.ok) {
-    const status = _kplanAuth.code === 'PROFILE_NOT_FOUND' ? 404
-      : _kplanAuth.code === 'SECRET_NOT_SET' ? 500
-      : _kplanAuth.code === 'L1_ERROR' ? 502
-      : (_kplanAuth.code === 'MISSING_FIELD' || _kplanAuth.code === 'TOKEN_MALFORMED') ? 400
-      : 401; // TOKEN_EXPIRED, TOKEN_INVALID
-    const code = _kplanAuth.code === 'MISSING_FIELD' ? 'LOGIN_REQUIRED' : _kplanAuth.code;
-    const message = _kplanAuth.code === 'MISSING_FIELD' ? '전화번호 로그인이 필요합니다.' : _kplanAuth.message;
+    const { status, code, message } = mapPhoneAuthError(_kplanAuth);
     return _err(status, code, message, corsHeaders);
   }
   const guid = _kplanAuth.guid; // 인증된 전화번호 소유자의 guid로 강제 확정
@@ -29947,10 +29954,7 @@ const KMAIL_CONTACTS_PROPOSE_MAX = 50; // 한 번에 스테이징 가능한 후�
 async function handleKmailContactsPropose(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
-  const { guid, pubkey, signature, ts, recipient_query, candidates } = body;
-  if (!guid || !pubkey || !signature || !ts) {
-    return _err(400, 'MISSING_FIELD', 'guid, pubkey, signature, ts 필수', corsHeaders);
-  }
+  const { recipient_query, candidates } = body;
   if (!Array.isArray(candidates) || candidates.length === 0) {
     return _err(400, 'MISSING_FIELD', 'candidates 배열(1개 이상) 필수', corsHeaders);
   }
@@ -29958,9 +29962,10 @@ async function handleKmailContactsPropose(request, env, corsHeaders) {
     return _err(400, 'TOO_MANY_CANDIDATES', `한 번에 최대 ${KMAIL_CONTACTS_PROPOSE_MAX}건까지만 스테이징할 수 있습니다`, corsHeaders);
   }
 
-  const sigMsg = `kmail-contacts-propose:${guid}:${ts}`;
-  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
-  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+  // 2026-09-03 — 공용 인증 게이트로 위임(src/worker/k-service-auth.js)
+  const auth = await _kAuth.resolveGuid(env, body, { sigMsg: `kmail-contacts-propose:${body.guid}:${body.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
 
   const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const valid = candidates.filter(c => c && typeof c.email === 'string' && emailRe.test(c.email));
@@ -30033,26 +30038,24 @@ async function _kmailQueryContacts(env, guid, { status = 'confirmed', q = '', re
 }
 
 async function handleKmailContactsList(request, url, env, corsHeaders) {
-  const guid = url.searchParams.get('guid');
-  const pubkey = url.searchParams.get('pubkey');
-  const signature = url.searchParams.get('signature');
-  const ts = url.searchParams.get('ts');
-  const status = url.searchParams.get('status') || 'pending_review';
-  const q = (url.searchParams.get('q') || '').trim();
-  const relationship = (url.searchParams.get('relationship') || '').trim();
-  const occupation = (url.searchParams.get('occupation') || '').trim();
-  const org = (url.searchParams.get('org') || '').trim();
-  const tag = (url.searchParams.get('tag') || '').trim();
-  if (!guid || !pubkey || !signature || !ts) {
-    return _err(400, 'MISSING_FIELD', 'guid, pubkey, signature, ts 필수', corsHeaders);
-  }
+  // 2026-09-03 — 공용 인증 게이트(src/worker/k-service-auth.js)로 위임.
+  // GET이라 body가 없으므로 쿼리스트링을 plain object로 바꿔서 넘긴다
+  // — phone_verify_token(K-Plan과 동일 로그인)과 기존 지갑 서명(guid/
+  // pubkey/signature/ts) 둘 다 쿼리 파라미터로 받는다.
+  const qp = Object.fromEntries(url.searchParams.entries());
+  const status = qp.status || 'pending_review';
+  const q = (qp.q || '').trim();
+  const relationship = (qp.relationship || '').trim();
+  const occupation = (qp.occupation || '').trim();
+  const org = (qp.org || '').trim();
+  const tag = (qp.tag || '').trim();
   if (!['pending_review', 'confirmed', 'rejected', 'all'].includes(status)) {
     return _err(400, 'INVALID_STATUS', "status는 pending_review/confirmed/rejected/all 중 하나여야 합니다", corsHeaders);
   }
 
-  const sigMsg = `kmail-contacts-list:${guid}:${ts}`;
-  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
-  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+  const auth = await _kAuth.resolveGuid(env, qp, { sigMsg: `kmail-contacts-list:${qp.guid}:${qp.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
 
   const items = await _kmailQueryContacts(env, guid, { status, q, relationship, occupation, org, tag });
   return new Response(JSON.stringify({ ok: true, items }), { status: 200, headers: corsHeaders });
@@ -30178,17 +30181,15 @@ async function handleKmailMailboxList(request, url, env, corsHeaders) {
 async function handleKmailContactsDecide(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
-  const { guid, pubkey, signature, ts, contact_id, decision, occupation, relationship } = body;
-  if (!guid || !pubkey || !signature || !ts) {
-    return _err(400, 'MISSING_FIELD', 'guid, pubkey, signature, ts 필수', corsHeaders);
-  }
+  const { contact_id, decision, occupation, relationship } = body;
   if (!contact_id || (decision !== 'confirm' && decision !== 'reject')) {
     return _err(400, 'MISSING_FIELD', "contact_id 필수, decision은 'confirm' 또는 'reject'여야 합니다", corsHeaders);
   }
 
-  const sigMsg = `kmail-contacts-decide:${guid}:${contact_id}:${decision}:${ts}`;
-  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
-  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+  // 2026-09-03 — 공용 인증 게이트로 위임(src/worker/k-service-auth.js)
+  const auth = await _kAuth.resolveGuid(env, body, { sigMsg: `kmail-contacts-decide:${body.guid}:${contact_id}:${decision}:${body.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
 
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
@@ -30224,15 +30225,13 @@ async function handleKmailContactsDecide(request, env, corsHeaders) {
 async function handleKmailContactsUpdate(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
-  const { guid, pubkey, signature, ts, contact_id, name, org, dept, occupation, relationship, add_tags, remove_tags } = body;
-  if (!guid || !pubkey || !signature || !ts) {
-    return _err(400, 'MISSING_FIELD', 'guid, pubkey, signature, ts 필수', corsHeaders);
-  }
+  const { contact_id, name, org, dept, occupation, relationship, add_tags, remove_tags } = body;
   if (!contact_id) return _err(400, 'MISSING_FIELD', 'contact_id 필수', corsHeaders);
 
-  const sigMsg = `kmail-contacts-update:${guid}:${contact_id}:${ts}`;
-  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
-  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+  // 2026-09-03 — 공용 인증 게이트로 위임(src/worker/k-service-auth.js)
+  const auth = await _kAuth.resolveGuid(env, body, { sigMsg: `kmail-contacts-update:${body.guid}:${contact_id}:${body.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
 
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
@@ -30275,10 +30274,7 @@ async function handleKmailContactsUpdate(request, env, corsHeaders) {
 async function handleKmailContactsTag(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
-  const { guid, pubkey, signature, ts, emails, add_tags, remove_tags } = body;
-  if (!guid || !pubkey || !signature || !ts) {
-    return _err(400, 'MISSING_FIELD', 'guid, pubkey, signature, ts 필수', corsHeaders);
-  }
+  const { emails, add_tags, remove_tags } = body;
   if (!Array.isArray(emails) || emails.length === 0) {
     return _err(400, 'MISSING_FIELD', 'emails 배열(1개 이상) 필수', corsHeaders);
   }
@@ -30286,9 +30282,10 @@ async function handleKmailContactsTag(request, env, corsHeaders) {
     return _err(400, 'MISSING_FIELD', 'add_tags 또는 remove_tags 중 하나는 필수', corsHeaders);
   }
 
-  const sigMsg = `kmail-contacts-tag:${guid}:${ts}`;
-  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
-  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+  // 2026-09-03 — 공용 인증 게이트로 위임(src/worker/k-service-auth.js)
+  const auth = await _kAuth.resolveGuid(env, body, { sigMsg: `kmail-contacts-tag:${body.guid}:${body.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
 
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
@@ -30388,16 +30385,14 @@ async function _kmailMergeContactsCore(env, guid, keepId, mergeId) {
 async function handleKmailContactsMerge(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
-  const { guid, pubkey, signature, ts, keep_id, merge_id } = body;
-  if (!guid || !pubkey || !signature || !ts) {
-    return _err(400, 'MISSING_FIELD', 'guid, pubkey, signature, ts 필수', corsHeaders);
-  }
+  const { keep_id, merge_id } = body;
   if (!keep_id || !merge_id) return _err(400, 'MISSING_FIELD', 'keep_id, merge_id 필수', corsHeaders);
   if (keep_id === merge_id) return _err(400, 'SAME_CONTACT', 'keep_id와 merge_id가 같습니다', corsHeaders);
 
-  const sigMsg = `kmail-contacts-merge:${guid}:${keep_id}:${merge_id}:${ts}`;
-  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
-  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+  // 2026-09-03 — 공용 인증 게이트로 위임(src/worker/k-service-auth.js)
+  const auth = await _kAuth.resolveGuid(env, body, { sigMsg: `kmail-contacts-merge:${body.guid}:${keep_id}:${merge_id}:${body.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
 
   const result = await _kmailMergeContactsCore(env, guid, keep_id, merge_id);
   if (!result.ok) {
@@ -31059,12 +31054,9 @@ const KMAIL_CAMPAIGN_MAX_RECIPIENTS = 200; // 한 캠페인 최대 수신자 —
 async function handleKmailCampaignCreate(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
-  const { guid, pubkey, signature, ts, subject, body: mailBody, contact_ids,
+  const { subject, body: mailBody, contact_ids,
           send_at, collect_replies_until, digest_at, attachment_ids,
           kplan_plan_id, kplan_checkpoint_label } = body;
-  if (!guid || !pubkey || !signature || !ts) {
-    return _err(400, 'MISSING_FIELD', 'guid, pubkey, signature, ts 필수', corsHeaders);
-  }
   if (!subject || !mailBody) return _err(400, 'MISSING_FIELD', 'subject, body 필수', corsHeaders);
   if (!Array.isArray(contact_ids) || contact_ids.length === 0) {
     return _err(400, 'MISSING_FIELD', 'contact_ids 배열(1개 이상) 필수', corsHeaders);
@@ -31073,9 +31065,12 @@ async function handleKmailCampaignCreate(request, env, corsHeaders) {
     return _err(400, 'TOO_MANY_RECIPIENTS', `한 캠페인 최대 수신자는 ${KMAIL_CAMPAIGN_MAX_RECIPIENTS}명입니다`, corsHeaders);
   }
 
-  const sigMsg = `kmail-campaign-create:${guid}:${ts}`;
-  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
-  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+  // 2026-09-03 — phone_verify_token(K-Plan과 동일 로그인) 또는 기존
+  // 지갑 서명 둘 다 지원하도록 공용 게이트로 위임(src/worker/k-service-auth.js).
+  // sigMsg는 지갑 서명 경로를 쓸 때만 실제로 검증에 쓰인다.
+  const auth = await _kAuth.resolveGuid(env, body, { sigMsg: `kmail-campaign-create:${body.guid}:${body.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
 
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
@@ -31145,6 +31140,34 @@ async function handleKmailCampaignCreate(request, env, corsHeaders) {
 
   return new Response(JSON.stringify({ ok: true, campaign_id: created.id, send_at: sendAtISO, recipients: contact_ids.length }),
     { status: 200, headers: corsHeaders });
+}
+
+// GET /kmail/campaigns/list?phone_verify_token=... (또는 지갑 서명)
+// 2026-09-03 신설 — 본인 소유(owner_user_guid=guid) 캠페인 전체를 최신순
+// 으로 돌려준다. mail.hondi.net/webapp.html "캠페인 목록/상태" 화면
+// 전용 — 회신 수까지는 포함하지 않는다(kmail_campaign_recipients가
+// 아직 없어 별도 지시서(HANDOFF_2026-09-03_kmail-campaign-recipients-taskbrief.md)
+// 대상, 이 응답은 캠페인 레코드 자체의 status/digest_status만 보여준다).
+async function handleKmailCampaignsList(request, url, env, corsHeaders) {
+  const qp = Object.fromEntries(url.searchParams.entries());
+  const auth = await _kAuth.resolveGuid(env, qp, { sigMsg: `kmail-campaigns-list:${qp.guid}:${qp.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}` };
+  const guidEsc = guid.replace(/'/g, "\\'");
+  const filter = encodeURIComponent(`owner_user_guid='${guidEsc}'`);
+  const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_campaigns/records?filter=${filter}&sort=-created&perPage=100`, { headers });
+  const data = await res.json().catch(() => ({ items: [] }));
+  const items = (data.items || []).map(c => ({
+    id: c.id, subject: c.subject, status: c.status, send_at: c.send_at,
+    recipients: Array.isArray(c.contact_ids) ? c.contact_ids.length : 0,
+    collect_replies_until: c.collect_replies_until, digest_at: c.digest_at, digest_status: c.digest_status,
+    kplan_plan_id: c.kplan_plan_id || '', kplan_checkpoint_label: c.kplan_checkpoint_label || '',
+    created: c.created,
+  }));
+  return new Response(JSON.stringify({ ok: true, items }), { status: 200, headers: corsHeaders });
 }
 
 // 캠페인 하나를 실제로 발송 — 저장된 subject/body를 confirmed 수신자
@@ -31828,10 +31851,7 @@ async function _kmailChatCreateRule(env, guid, ruleText) {
 async function handleKmailChat(request, env, corsHeaders, ctx) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
-  const { guid, pubkey, signature, ts, messages } = body;
-  if (!guid || !pubkey || !signature || !ts) {
-    return _err(400, 'MISSING_FIELD', 'guid, pubkey, signature, ts 필수', corsHeaders);
-  }
+  const { messages } = body;
   if (!Array.isArray(messages) || messages.length === 0) {
     return _err(400, 'MISSING_FIELD', 'messages 배열(1개 이상) 필수', corsHeaders);
   }
@@ -31839,9 +31859,12 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     return _err(400, 'TOO_MANY_MESSAGES', '대화가 너무 깁니다 — 새 대화로 시작해 주세요', corsHeaders);
   }
 
-  const sigMsg = `kmail-chat:${guid}:${ts}`;
-  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
-  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+  // 2026-09-03 — 공용 인증 게이트(src/worker/k-service-auth.js)로 위임.
+  // phone_verify_token(K-Plan과 동일 로그인)을 우선하고, 기존 지갑
+  // 서명 클라이언트도 하위호환으로 계속 동작한다.
+  const auth = await _kAuth.resolveGuid(env, body, { sigMsg: `kmail-chat:${body.guid}:${body.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
 
   if (!env.DEEPSEEK_API_KEY) return _err(500, 'DEEPSEEK_KEY_MISSING', 'DEEPSEEK_API_KEY secret 미설정', corsHeaders);
 
