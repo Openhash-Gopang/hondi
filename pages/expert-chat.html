@@ -232,16 +232,31 @@ async function composeExpertPrompt() {
     .catch(e => { throw new Error('EXPERT_BASE 로드 실패: ' + e.message); }));
 
   if (def.parentKey) {
-    const parentDef = EXPERT_REGISTRY[def.parentKey];
-    if (!parentDef) {
-      throw new Error(`parentKey 미등록: ${def.parentKey} (${def.label})`);
+    // 2026-09-04 수정(사고실험으로 발견한 결함 시정) — 예전엔 "부모의
+    // 부모까지는 안 실음(3단까지만 규정)"으로 하드코딩돼 있어서, 교수
+    // 세부전공처럼 3단(교수→중계열→소계열) 이상인 174개 페르소나가
+    // 중간 계층(중계열 SP — 예: 재료 중계열의 고온공정 안전지침)을 조용히
+    // 누락한 채 구동되고 있었다. 부모 체인을 끝까지 재귀적으로 따라가
+    // 중간 계층을 하나도 빠뜨리지 않는다. 0~1단 체인(기존 60여 개
+    // 페르소나)은 아래 while 루프가 한 번 만에 끝나므로 동작이 그대로다.
+    const ancestors = [];
+    let cursorKey = def.parentKey;
+    const seen = new Set();
+    while (cursorKey) {
+      if (seen.has(cursorKey)) {
+        throw new Error(`parentKey 순환 참조 감지: ${cursorKey}`);
+      }
+      seen.add(cursorKey);
+      const ancestorDef = EXPERT_REGISTRY[cursorKey];
+      if (!ancestorDef) {
+        throw new Error(`parentKey 미등록: ${cursorKey} (${def.label})`);
+      }
+      ancestors.unshift(ancestorDef); // 최상위가 배열 맨 앞에 오도록 역순 삽입
+      cursorKey = ancestorDef.parentKey;
     }
-    if (parentDef.parentKey) {
-      console.warn(`[Expert] 부모 SP(${def.parentKey})가 또 parentKey를 가짐 — ` +
-        `SP_EXPERT_BASE §5는 3단(EXPERT_BASE→부모→자식)까지만 규정. 2단째 부모 로드는 건너뜀.`);
-    } else {
-      parts.push(await _loadSpRawByKey(parentDef.key, `${parentDef.label}(부모 SP)`)
-        .catch(e => { throw new Error(`부모 SP(${parentDef.label}) 로드 실패: ` + e.message); }));
+    for (const ancestorDef of ancestors) {
+      parts.push(await _loadSpRawByKey(ancestorDef.key, `${ancestorDef.label}(상위 SP)`)
+        .catch(e => { throw new Error(`상위 SP(${ancestorDef.label}) 로드 실패: ` + e.message); }));
     }
   }
 
