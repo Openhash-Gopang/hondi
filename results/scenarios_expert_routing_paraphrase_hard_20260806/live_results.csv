@@ -1,0 +1,109 @@
+no,utterance,expected_type,expected_id,category,static_verdict,live_verdict,live_note,raw_response,call_error
+1,"회사에서 부당하게 잘린 것 같은데, 제 편에서 이 상황을 어떻게 다퉈볼 수 있을지 직접 봐주실 분 있을까요",EXPERT,labor-attorney,정상경로(패러프레이즈 — trigger 문자열 미사용),PASS,LIVE-PASS,[EXPERT: labor-attorney] 일치,"[EXPERT: labor-attorney]
+
+{USER_NAME}님, 공인노무사를 호출하겠습니다.",
+2,아버지 명의로 돼 있는 집을 제 앞으로 넘기는 서류 작업을 대신 처리해주실 분이 필요해요,EXPERT,judicial-scrivener,정상경로(패러프레이즈 — trigger 문자열 미사용),PASS,LIVE-PASS,[EXPERT: judicial-scrivener] 일치,"[EXPERT: judicial-scrivener]
+
+{USER_NAME}님, 법무사를 호출하겠습니다. 부동산 명의이전(증여·매매) 등기 서류는 법무사의 전속 업무 영역이라, 정확한 절차 안내와 서류 작성을 도와드릴 수 있습니다.",
+3,작년 소득 신고를 잘못한 것 같아서 세금을 돌려받을 수 있는지 제 상황 보고 판단해주실 분 필요해요,EXPERT,tax-accountant,정상경로(패러프레이즈 — trigger 문자열 미사용),PASS,LIVE-PASS,[EXPERT: tax-accountant] 일치,"[EXPERT: tax-accountant]
+
+{USER_NAME}님, 세무사(전문가)를 호출하겠습니다.",
+4,저희 회사 재무제표에 이상한 부분이 있는지 외부에서 꼼꼼히 들여다봐 줄 전문가가 필요한데요,EXPERT,accountant,정상경로(패러프레이즈 — trigger 문자열 미사용),PASS,LIVE-PASS,[EXPERT: accountant] 일치,"[EXPERT: accountant]
+
+{USER_NAME}님, 공인회계사를 호출하겠습니다.",
+5,은퇴하고 나서도 생활이 안정되게 미리 자산을 어떻게 굴려야 할지 제 상황에 맞춰 짜주실 분 있나요,EXPERT,financial-planner,정상경로(패러프레이즈 — trigger 문자열 미사용),PASS,LIVE-PASS,[EXPERT: financial-planner] 일치,"[EXPERT: financial-planner]
+
+{USER_NAME}님, 재무설계 전문가를 호출하겠습니다.",
+6,요즘 계속 소화가 안 되고 속이 불편한데 제 증상을 보고 진료해주실 분과 얘기해보고 싶어요,EXPERT,physician,정상경로(패러프레이즈 — trigger 문자열 미사용),PASS,LIVE-PASS,[EXPERT: physician] 일치,"[EXPERT: physician]
+
+{USER_NAME}님, 의사 선생님을 호출하겠습니다.",
+7,요즘 이가 시려서 밥 먹기가 힘든데 왜 그런 건지 직접 봐주실 분한테 여쭤보고 싶어요,EXPERT,dentist,정상경로(패러프레이즈 — trigger 문자열 미사용),PASS,LIVE-PASS,[EXPERT: dentist] 일치,"[EXPERT: dentist]
+
+{USER_NAME}님, 치과의사를 호출하겠습니다.",
+8,지금 먹고 있는 약들을 같이 먹어도 괜찮은 건지 전문가한테 직접 확인받고 싶어요,EXPERT,pharmacist,정상경로(패러프레이즈 — trigger 문자열 미사용),WARN,LIVE-PASS,[EXPERT: pharmacist] 일치,"[EXPERT: pharmacist]
+
+{USER_NAME}님, 약사 전문가를 호출하겠습니다.",
+9,저희 강아지가 요 며칠 밥을 잘 안 먹는데 왜 그런지 직접 봐주실 분과 얘기하고 싶어요,EXPERT,veterinarian,정상경로(패러프레이즈 — trigger 문자열 미사용),PASS,LIVE-PASS,[EXPERT: veterinarian] 일치,"[EXPERT: veterinarian]
+
+{USER_NAME}님, 수의사 전문가를 호출하겠습니다.",
+10,퇴원하고 나서 집에서 상처 관리를 어떻게 해야 하는지 물어볼 수 있는 분 있을까요,EXPERT,nurse,정상경로(패러프레이즈 — trigger 문자열 미사용),WARN,LIVE-PASS,[EXPERT: nurse] 일치,"[EXPERT: nurse]
+
+{USER_NAME}님, 간호사 전문가를 호출하겠습니다.",
+11,당뇨 진단을 받았는데 앞으로 뭘 어떻게 먹어야 할지 제 상황 보고 짜주실 분이 필요해요,EXPERT,dietitian,정상경로(패러프레이즈 — trigger 문자열 미사용),PASS,LIVE-PASS,[EXPERT: dietitian] 일치,"[EXPERT: dietitian]
+
+{USER_NAME}님, 영양사(전문가)를 호출하겠습니다.",
+12,저희 애가 요즘 학교에서 자꾸 친구들이랑 다투는 것 같은데 반을 맡고 계신 선생님께 직접 여쭤보고 싶어요,EXPERT,teacher,정상경로(패러프레이즈 — trigger 문자열 미사용),WARN,LIVE-PASS,[EXPERT: teacher] 일치,"[EXPERT: teacher]
+
+{USER_NAME}님, 담임 선생님을 호출하겠습니다.",
+13,"요즘 마음이 계속 힘든데 검사를 받아보면 제 상태를 좀 더 정확히 알 수 있을까요, 그런 걸 봐주실 분과 얘기하고 싶어요",EXPERT,clinical-psychologist,정상경로(패러프레이즈 — trigger 문자열 미사용),WARN,LIVE-PASS,[EXPERT: clinical-psychologist] 일치,"[EXPERT: clinical-psychologist]
+
+{USER_NAME}님, 임상심리사 선생님을 호출하겠습니다.",
+14,생활이 너무 어려운데 나라에서 받을 수 있는 지원이 있는지 제 사정 보고 알려주실 분 있나요,EXPERT,social-worker,정상경로(패러프레이즈 — trigger 문자열 미사용),WARN,LIVE-FAIL,기대 [EXPERT: social-worker] vs 실제 [GWP: kgov],"[GWP: kgov]
+
+{USER_NAME}님, 복지 지원 상담을 위해 K-Public을 호출하겠습니다.",
+15,낡은 집을 허물고 새로 짓고 싶은데 어떻게 짓는 게 좋을지 도면부터 같이 봐주실 분이 필요해요,EXPERT,architect,정상경로(패러프레이즈 — trigger 문자열 미사용),PASS,LIVE-FAIL,기대된 라우팅 태그가 없고 되묻지도 않음 (직접 답변으로 종료),"[CALL_KINTENT: query=낡은 집을 허물고 새로 짓고 싶은데 어떻게 짓는 게 좋을지 도면부터 같이 봐주실 분이 필요해요]
+
+{USER_NAME}님, 건축 설계부터 허가 절차까지 함께 진행해 드릴 수 있도록 관련 기관과 전문가를 연결하겠습니다.",
+16,지금 살고 있는 전셋집을 내놓고 새로 이사 갈 집을 알아봐 주실 분과 직접 얘기하고 싶어요,EXPERT,real-estate-agent,정상경로(패러프레이즈 — trigger 문자열 미사용),WARN,LIVE-FAIL,기대된 라우팅 태그가 없고 되묻지도 않음 (직접 답변으로 종료),"[CALL_KINTENT: query=지금 살고 있는 전셋집을 내놓고 새로 이사 갈 집을 알아봐 주실 분과 직접 얘기하고 싶어요]
+
+{USER_NAME}님, 전세 매물 등록과 새 집 탐색을 함께 처리해 드릴 수 있는 전문가 연결을 시작하겠습니다.",
+17,누가 제 개인정보를 무단으로 이용한 것 같은데 이게 실제로 문제가 되는 상황인지 봐주실 전문가가 필요해요,EXPERT,security-engineer,정상경로(패러프레이즈 — trigger 문자열 미사용),WARN,LIVE-FAIL,기대 [EXPERT: security-engineer] vs 실제 [GWP: ksecurity],"[GWP: ksecurity]
+
+{USER_NAME}님, 개인정보 무단 이용 관련 전문가를 호출하겠습니다.",
+18,외국에서 온 계약서인데 내용을 정확하게 우리말로 옮겨주실 분이 필요해요,EXPERT,translator-interpreter,정상경로(패러프레이즈 — trigger 문자열 미사용),PASS,LIVE-FAIL,기대된 라우팅 태그가 없고 되묻지도 않음 (직접 답변으로 종료),"[CALL_KINTENT: query=외국에서 온 계약서인데 내용을 정확하게 우리말로 옮겨주실 분이 필요해요]
+
+{USER_NAME}님, 계약서 번역 전문가를 찾아 연결해 드리겠습니다.",
+19,머리 스타일을 확 바꿔보고 싶은데 저한테 어떤 게 어울릴지 직접 봐주실 분과 얘기하고 싶어요,EXPERT,hairdresser,정상경로(패러프레이즈 — trigger 문자열 미사용),PASS,LIVE-PASS,[EXPERT: hairdresser] 일치,"[EXPERT: hairdresser]
+
+{USER_NAME}님, 미용 전문가를 호출하겠습니다.",
+20,집들이 때 손님상에 낼 만한 요리를 제 상황(재료·인원)에 맞춰 같이 짜주실 분이 필요해요,EXPERT,chef,정상경로(패러프레이즈 — trigger 문자열 미사용),WARN,LIVE-FAIL,기대된 라우팅 태그가 없고 되묻지도 않음 (직접 답변으로 종료),[CALL_KINTENT: query=집들이 때 손님상에 낼 만한 요리를 제 상황(재료·인원)에 맞춰 같이 짜주실 분이 필요해요],
+21,이번에 이혼 절차를 밟으려고 하는데 법적으로 어떻게 진행되는 건지 전반적인 흐름이 궁금해요,GWP,klaw,"부정테스트(GWP 우선 — 제도 정보 관점, 패러프레이즈)",PASS,LIVE-PASS,[GWP: klaw] 일치,"[GWP: klaw]
+
+{USER_NAME}님, K-Law를 호출하겠습니다.",
+22,누가 인터넷에 저에 대해 안 좋은 글을 올렸는데 이게 처벌받을 수 있는 일인지 알아보고 싶어요,GWP,klaw,"부정테스트(GWP 우선 — 제도 정보 관점, 패러프레이즈)",WARN,LIVE-PASS,[GWP: klaw] 일치,"[GWP: klaw]
+
+{USER_NAME}님, K-Law를 호출하겠습니다.",
+23,회사 상사가 갑자기 내일부터 나오지 말라고 했는데 이게 법적으로 정당한 건지 판단해줄 수 있어요,GWP,klaw,"부정테스트(GWP 우선 — 제도 정보 관점, 패러프레이즈)",WARN,LIVE-FAIL,기대 [GWP: klaw] vs 실제 [GWP: kbusiness],"[GWP: kbusiness]
+
+{USER_NAME}님, K-Business를 호출하겠습니다.",
+24,정말 답답하고 억울한데 이 상황을 누구한테 이야기하면 좋을지 모르겠어요,GWP,klaw,부정테스트(과잉발동 회귀 재확인 — 원본 트랩의 패러프레이즈),WARN,LIVE-CLARIFY,"태그 없이 되물음 — §CORE 되묻기 지침에 따른 정상 동작일 수 있음 (1턴 테스트 한계, 사람 검토 필요)","{USER_NAME}님, 답답하고 억울한 마음이 크시겠어요. 어떤 상황인지 조금 더 자세히 말씀해 주시면, 그 상황에 가장 적합한 기관이나 전문가를 찾아 연결해 드리겠습니다.
+
+예를 들어, 다음과 같은 경우가 있을 수 있어요:
+
+- **법적 분쟁이나 억울한 일** (예: 계약 문제, 부당한 대우 등) → 법률 전문가나 관련 기관
+- **소비자 피해** (예: 물건이나 서비스 관련 문제) → K-Market 또는 소비자 보호 기관
+- **직장 내 문제** (예: 부당 해고, 임금 체불 등) → 고용노동 관련 기관
+- **개인 간 갈등** (예: 이웃, 가족 문제 등) → 상담 서비스나 관련 기관
+
+어떤 상황인지 조금만 더 알려주시겠어요? 그래야 정확한 도움을 드릴 수 있습니다.",
+25,"변호사라는 직업이 정확히 어떤 일을 하는지, 그리고 의사가 되려면 보통 얼마나 공부해야 하는지 궁금해요",PLATFORM,direct-response,부정테스트(라우팅 오발동 방지 — 복합 일반지식),WARN,LIVE-FAIL,라우팅 불필요 상황인데 [GWP: kedu] 오발동,"[GWP: kedu]
+
+{USER_NAME}님, K-School을 호출하겠습니다.",
+26,요즘 여기저기서 다들 재테크 얘기하던데 저도 뭔가 준비를 좀 해야 하나 싶긴 한데 딱히 급한 건 아니에요,PLATFORM,direct-response,부정테스트(라우팅 오발동 방지 — 약한 신호),WARN,LIVE-PASS,태그 없이 직접 응답 (기대대로),"사용자님이 재테크에 대해 막연한 관심은 있지만 급하지 않다고 하셨네요. 아직 구체적인 목표나 상황이 없어서 바로 특정 서비스로 연결하기보다는, 어떤 준비를 원하시는지 조금 더 알아보는 게 좋겠습니다.
+
+혹시 지금 재테크 준비라고 하면 어떤 걸 염두에 두고 계신가요? 예를 들어:
+
+- **여유 자금을 굴려서 수익**을 내는 투자(주식·펀드 등)에 관심이 있으신 건지
+- **노후 대비나 목돈 마련**처럼 장기적인 재무 계획을 세우고 싶으신 건지
+- 아니면 **현재 내 재무 상태를 점검**받고 싶으신 건지
+
+어떤 쪽에 가까운지 말씀해 주시면, 그에 맞는 서비스나 전문가를 연결해 드리겠습니다.",
+27,옆집 강아지가 어제부터 계속 짖어서 시끄러운데 이거 원래 이 시기에 그런 건가요?,PLATFORM,direct-response,부정테스트(라우팅 오발동 방지 — 도메인 인접 함정),PASS,LIVE-FAIL,라우팅 불필요 상황인데 [GWP: kpolice] 오발동,"[GWP: kpolice]  
+{USER_NAME}님, K-Police를 호출하겠습니다.",
+28,예전에 지었다는 그 유명한 건물들은 보통 설계하는 데 시간이 얼마나 걸리나요?,PLATFORM,direct-response,부정테스트(라우팅 오발동 방지 — 도메인 인접 함정),PASS,LIVE-PASS,태그 없이 직접 응답 (기대대로),"§CATALOG·§CATALOG-EXPERT에 이 주제를 다루는 GWP/EXPERT가 없으므로, §INFO 경로1(공개정보)에 따라 검색하겠습니다.
+
+[WEB_SEARCH: query=유명한 건축물 설계 기간 사례]",
+29,전세랑 월세 중에 요즘 사람들은 대체로 어느 쪽을 더 선호하나요?,PLATFORM,direct-response,부정테스트(라우팅 오발동 방지 — 도메인 인접 함정),PASS,LIVE-PASS,태그 없이 직접 응답 (기대대로),"전세와 월세 선호도는 지역, 시기, 경제 상황에 따라 달라지는 변동성이 큰 주제라서, 제가 단정적으로 답변드리기보다는 최신 자료를 확인해 드리는 게 정확하겠습니다.
+
+잠시만 기다려 주시면, 최근 부동산 시장 동향을 검색해서 알려드리겠습니다.
+
+[WEB_SEARCH: query=전세 월세 선호도 2026 부동산 시장 동향]",
+30,다른 나라 사람들은 요리할 때 우리보다 향신료를 훨씬 많이 쓴다던데 진짜인가요?,PLATFORM,direct-response,부정테스트(라우팅 오발동 방지 — 도메인 인접 함정),PASS,LIVE-PASS,태그 없이 직접 응답 (기대대로),"향신료 사용량에 대한 국가별 비교는 일반화하기 어렵습니다. 다만 몇 가지 참고할 만한 사실이 있습니다:
+
+- **기후와의 연관성**: 더운 기후 지역(남아시아, 동남아시아, 중동 등)은 음식이 상하기 쉬워 향신료를 보존제처럼 활용해 온 역사가 깊습니다.
+- **무역과 역사**: 향신료 무역로가 발달한 지역은 다양한 향신료에 접근성이 높았습니다.
+- **문화적 취향**: 한국 음식도 고추, 마늘, 생강, 참깨 등을 적극적으로 사용하지만, 카레 가루나 큐민처럼 ""향신료""로 분류되는 재료의 종류와 양은 지역마다 다릅니다.
+
+정확한 수치 비교는 어렵지만, ""우리보다 훨씬 많이 쓴다""는 인식은 특정 지역(인도, 태국, 멕시코 등)의 요리를 기준으로 한 일반화일 가능성이 높습니다. 각 나라의 요리 스타일과 재료 접근성이 다르기 때문입니다.
+
+더 구체적인 궁금증이 있으시면 말씀해 주세요!",
