@@ -441,8 +441,16 @@ function _renderProvinceTemplate(template, rec) {
     // 같이 갱신할 것).
     .replaceAll('{고유사무_문구}', rec.고유사무_문구 || '(아직 실사되지 않음 — 이 도청 고유 사무 목록은 조사 중)');
 }
-async function _loadDoSp() {
-  const provinceCode = _resolveProvinceCode();
+async function _loadDoSp(explicitProvinceCode) {
+  // ★ 2026-09-05 수정 — directCode(도가 이미 확정된 경로)에서 호출할 때는
+  // _resolveProvinceCode()가 window.HONDI_PROVINCE_CODE(사용자의 실제
+  // 위치)를 최우선으로 보는 바람에, 다른 도 링크를 눌러도 항상 접속자의
+  // 실제 위치(예: 제주) 도청 정체성이 로드되는 버그가 있었다(K-정부
+  // 카탈로그에서 서울 부서를 눌러도 제주로 응답하는 문제로 사고실험 발견).
+  // directCode 경로는 이미 도가 확정돼 있으므로, 그 값을 명시적으로
+  // 받으면 window 값보다 우선한다. 인자를 안 넘기면(기존 호출부·평소
+  // 대화 흐름) 예전과 동일하게 _resolveProvinceCode()를 그대로 쓴다.
+  const provinceCode = explicitProvinceCode || _resolveProvinceCode();
   if (_doSpCacheByProvince.has(provinceCode)) return _doSpCacheByProvince.get(provinceCode);
   let result;
   try {
@@ -5303,7 +5311,7 @@ async function _assembleGovSystemPromptRaw(userText, pdvLocationHint = null, cla
         : _findEntryAcrossProvinces('l2', e => e.code === actualCode);
       if (found) {
         _currentResolvedProvinceCode = found.provinceCode;
-        const doSp = await _loadDoSp();
+        const doSp = await _loadDoSp(found.provinceCode);
         parts.push(doSp);
         trace.push('SP-DO-000');
         const divText = await _fetchDeptText(found.entry);
@@ -5326,7 +5334,7 @@ async function _assembleGovSystemPromptRaw(userText, pdvLocationHint = null, cla
       if (divEntry) {
         const parentEntry = _l2Table().find(e => e.domain === divEntry.domain);
         if (parentEntry) {
-          const doSp = await _loadDoSp();
+          const doSp = await _loadDoSp('jeju');
           parts.push(doSp);
           trace.push('SP-DO-000');
           const parentText = await _fetchDeptText(parentEntry);
@@ -5354,7 +5362,7 @@ async function _assembleGovSystemPromptRaw(userText, pdvLocationHint = null, cla
         : _findEntryAcrossProvinces('agency', e => e.code === actualCode);
       if (found) {
         _currentResolvedProvinceCode = found.provinceCode;
-        const doSp = await _loadDoSp();
+        const doSp = await _loadDoSp(found.provinceCode);
         parts.push(doSp);
         trace.push('SP-DO-000');
         const agencyText = await _fetchAgencyText(found.entry);
@@ -5370,7 +5378,7 @@ async function _assembleGovSystemPromptRaw(userText, pdvLocationHint = null, cla
       if (divEntry) {
         const parentEntry = _agencyTable().find(e => e.code === divEntry.institution);
         if (parentEntry) {
-          const doSp = await _loadDoSp();
+          const doSp = await _loadDoSp('jeju');
           parts.push(doSp);
           trace.push('SP-DO-000');
           const agencyText = await _fetchAgencyText(parentEntry);
@@ -5387,7 +5395,7 @@ async function _assembleGovSystemPromptRaw(userText, pdvLocationHint = null, cla
       const found = _findEntryAcrossProvinces('org', e => e.code === code);
       if (found) {
         _currentResolvedProvinceCode = found.provinceCode;
-        const doSp = await _loadDoSp();
+        const doSp = await _loadDoSp(found.provinceCode);
         parts.push(doSp);
         trace.push('SP-DO-000');
         const orgText = await _fetchOrgText(found.entry);
@@ -5403,7 +5411,7 @@ async function _assembleGovSystemPromptRaw(userText, pdvLocationHint = null, cla
       if (divEntry) {
         const parentEntry = _orgTable().find(e => e.code === divEntry.institution);
         if (parentEntry) {
-          const doSp = await _loadDoSp();
+          const doSp = await _loadDoSp('jeju');
           parts.push(doSp);
           trace.push('SP-DO-000');
           const orgText = await _fetchOrgText(parentEntry);
@@ -5495,7 +5503,7 @@ async function _assembleGovSystemPromptRaw(userText, pdvLocationHint = null, cla
       const rec = records.find(r => r.도코드 === code);
       if (rec) {
         _currentResolvedProvinceCode = code;
-        const doSp = await _loadDoSp();
+        const doSp = await _loadDoSp(code);
         parts.push(doSp);
         trace.push(`SP-DO-000(${code}, directCode)`);
         return { systemPrompt: parts.join('\n\n---\n\n'), trace };
