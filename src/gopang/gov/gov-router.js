@@ -5285,9 +5285,22 @@ async function _assembleGovSystemPromptRaw(userText, pdvLocationHint = null, cla
       return { systemPrompt: parts.join('\n\n---\n\n'), trace };
     }
     if (tier === 'do-dept' && code) {
-      // ★ 2026-08-04 수정 — 도 하드코딩 제거(위 _findEntryAcrossProvinces
-      // 주석 참조). 코드가 실제로 속한 도를 찾아서 그 도로 확정한다.
-      const found = _findEntryAcrossProvinces('l2', e => e.code === code);
+      // ★ 2026-09-05 수정 — code에 "{도코드}:{실제코드}" 형식으로 도를
+      // 명시할 수 있게 확장. 여러 도가 같은 도메인 코드(예: SP-DO-PLAN)를
+      // 공유하기 때문에, 도를 안 정하면 _findEntryAcrossProvinces가 항상
+      // 첫 번째로 매칭되는 도(제주)로만 연결되는 문제가 있었다(K-정부
+      // 카탈로그에서 서울 등 다른 도 부서를 직접 링크하려다 사고실험으로
+      // 발견). 도가 명시되면 그 도 테이블만 보고, 안 되면 기존 동작(전체
+      // 도 검색) 그대로 유지해 하위 호환한다.
+      const colonIdx = code.indexOf(':');
+      const explicitProvince = colonIdx >= 0 ? code.slice(0, colonIdx) : null;
+      const actualCode = colonIdx >= 0 ? code.slice(colonIdx + 1) : code;
+      const found = (explicitProvince && PROVINCE_TABLES[explicitProvince])
+        ? (() => {
+            const entry = (PROVINCE_TABLES[explicitProvince].l2 || []).find(e => e.code === actualCode);
+            return entry ? { provinceCode: explicitProvince, entry } : null;
+          })()
+        : _findEntryAcrossProvinces('l2', e => e.code === actualCode);
       if (found) {
         _currentResolvedProvinceCode = found.provinceCode;
         const doSp = await _loadDoSp();
@@ -5309,7 +5322,7 @@ async function _assembleGovSystemPromptRaw(userText, pdvLocationHint = null, cla
       // 기존 동작을 그대로 보존한다(제주 division만 존재하는 현재
       // 상태에서는 안전).
       _currentResolvedProvinceCode = 'jeju';
-      const divEntry = DO_DEPT_DIVISION_TABLE.find(e => e.code === code);
+      const divEntry = DO_DEPT_DIVISION_TABLE.find(e => e.code === actualCode);
       if (divEntry) {
         const parentEntry = _l2Table().find(e => e.domain === divEntry.domain);
         if (parentEntry) {
@@ -5328,8 +5341,17 @@ async function _assembleGovSystemPromptRaw(userText, pdvLocationHint = null, cla
       // 코드) 실패로 취급하지 않고 조용히 아래 텍스트 추측 경로로 폴백.
     }
     if (tier === 'do-agency' && code) {
-      // ★ 2026-08-04 수정 — 도 하드코딩 제거.
-      const found = _findEntryAcrossProvinces('agency', e => e.code === code);
+      // ★ 2026-09-05 수정 — do-dept와 동일하게 "{도코드}:{실제코드}" 형식
+      // 지원(기관 코드는 보통 도별로 고유하지만, 방어적으로 동일 패턴 적용).
+      const colonIdx = code.indexOf(':');
+      const explicitProvince = colonIdx >= 0 ? code.slice(0, colonIdx) : null;
+      const actualCode = colonIdx >= 0 ? code.slice(colonIdx + 1) : code;
+      const found = (explicitProvince && PROVINCE_TABLES[explicitProvince])
+        ? (() => {
+            const entry = (PROVINCE_TABLES[explicitProvince].agency || []).find(e => e.code === actualCode);
+            return entry ? { provinceCode: explicitProvince, entry } : null;
+          })()
+        : _findEntryAcrossProvinces('agency', e => e.code === actualCode);
       if (found) {
         _currentResolvedProvinceCode = found.provinceCode;
         const doSp = await _loadDoSp();
@@ -5344,7 +5366,7 @@ async function _assembleGovSystemPromptRaw(userText, pdvLocationHint = null, cla
       // ★ 2026-08-04 — JEJU_AGENCY_DIVISION_TABLE도 아직 제주 전용
       // 단일 테이블이다(위 do-dept division과 동일한 이유로 보존).
       _currentResolvedProvinceCode = 'jeju';
-      const divEntry = JEJU_AGENCY_DIVISION_TABLE.find(e => e.code === code);
+      const divEntry = JEJU_AGENCY_DIVISION_TABLE.find(e => e.code === actualCode);
       if (divEntry) {
         const parentEntry = _agencyTable().find(e => e.code === divEntry.institution);
         if (parentEntry) {
