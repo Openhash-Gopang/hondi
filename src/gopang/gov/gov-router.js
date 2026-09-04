@@ -5251,6 +5251,39 @@ async function _assembleGovSystemPromptRaw(userText, pdvLocationHint = null, cla
       trace.push(`SP-POLICY-LAZY(${code}/${resolved.source}, directCode)`);
       return { systemPrompt: parts.join('\n\n---\n\n'), trace };
     }
+    // ★ 2026-09-04 신설 — qgov/enterprise/other 3개 tier 추가. 함수
+    // (resolveQgovLazy/resolveEnterpriseLazy/resolveOtherLazy)는 이미
+    // 있었는데 directCode 분기가 policy tier만 있고 이 셋은 빠져 있어서
+    // 자연어로만 닿고 링크로 직행이 안 됐다(전문가 페르소나 카탈로그와
+    // 동일한 방식의 K-정부 카탈로그 제작 중 발견) — policy tier와 완전히
+    // 동일한 패턴으로 3개를 추가한다.
+    if (tier === 'qgov' && code) {
+      const nationalSp = await _loadNationalSp();
+      parts.push(nationalSp);
+      trace.push('JEJU-NATIONAL-SP');
+      const resolved = await resolveQgovLazy(code, onProgress);
+      parts.push(resolved.text);
+      trace.push(`SP-QGOV-LAZY(${code}/${resolved.source}, directCode)`);
+      return { systemPrompt: parts.join('\n\n---\n\n'), trace };
+    }
+    if (tier === 'enterprise' && code) {
+      const nationalSp = await _loadNationalSp();
+      parts.push(nationalSp);
+      trace.push('JEJU-NATIONAL-SP');
+      const resolved = await resolveEnterpriseLazy(code, onProgress);
+      parts.push(resolved.text);
+      trace.push(`SP-ENT-LAZY(${code}/${resolved.source}, directCode)`);
+      return { systemPrompt: parts.join('\n\n---\n\n'), trace };
+    }
+    if (tier === 'other' && code) {
+      const nationalSp = await _loadNationalSp();
+      parts.push(nationalSp);
+      trace.push('JEJU-NATIONAL-SP');
+      const resolved = await resolveOtherLazy(code, onProgress);
+      parts.push(resolved.text);
+      trace.push(`SP-OTHER-LAZY(${code}/${resolved.source}, directCode)`);
+      return { systemPrompt: parts.join('\n\n---\n\n'), trace };
+    }
     if (tier === 'do-dept' && code) {
       // ★ 2026-08-04 수정 — 도 하드코딩 제거(위 _findEntryAcrossProvinces
       // 주석 참조). 코드가 실제로 속한 도를 찾아서 그 도로 확정한다.
