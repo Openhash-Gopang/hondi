@@ -12946,7 +12946,7 @@ export default {
     // DEEPSEEK_API_KEY 등 서버 보유 키로 무제한 호출이 가능했다.
     // (2026-06-28 — 기기를 모두 끈 상태에서도 DeepSeek 크레딧이
     // 소진된 사고의 원인 분석 후 추가)
-    const AI_PROXY_PATHS = ['/chat/completions', '/deepseek', '/ai/chat', '/gemini/', '/llm/relay', '/klaw/relay', '/kplan/relay', '/gov/relay'];
+    const AI_PROXY_PATHS = ['/chat/completions', '/deepseek', '/ai/chat', '/gemini/', '/llm/relay', '/klaw/relay', '/kplan/relay', '/kjit/relay', '/kcity/relay', '/gov/relay'];
     const isAiProxyPath = AI_PROXY_PATHS.some(p => pathname === p || pathname.startsWith(p));
     const _meta = {
       ip:     request.headers.get('cf-connecting-ip') || 'unknown',
@@ -12964,6 +12964,8 @@ export default {
     if (pathname === '/llm/relay')               return handleLLMRelay(bodyText, env, corsHeaders, _meta);
     if (pathname === '/klaw/relay')               return handleKlawRelay(bodyText, env, corsHeaders, _meta, ctx);
     if (pathname === '/kplan/relay')              return handleKPlanRelay(bodyText, env, corsHeaders, _meta, ctx);
+    if (pathname === '/kjit/relay')                return handleKjitRelay(bodyText, env, corsHeaders, _meta, ctx);
+    if (pathname === '/kcity/relay')               return handleKcityRelay(bodyText, env, corsHeaders, _meta, ctx);
     if (pathname === '/gov/relay')                return handleGovRelay(bodyText, env, corsHeaders, _meta, ctx);
     if (pathname === '/gov/task/submit')          return handleGovTaskSubmit(bodyText, env, corsHeaders);
     if (pathname === '/gov/task/fee-approve')      return handleGovFeeApprove(bodyText, env, corsHeaders);
@@ -18785,6 +18787,137 @@ const KPLAN_BETA_MULTIPLIER = { 'kplan-flash': 10, 'kplan-pro': 5 };
 const KPLAN_WEB_SEARCH_MAX_ROUNDS = 3; // 무한 검색 방지 — 최대 왕복 횟수
 const KPLAN_WEB_SEARCH_TAG_RE = /\[WEB_SEARCH:\s*query=([^\]]+)\]\s*$/;
 const KPLAN_WEB_SEARCH_TAG_STRIP_RE = /\[WEB_SEARCH:[^\]]*\]\s*$/;
+
+
+// ═══════════════════════════════════════════════════════════
+// /kjit/relay, /kcity/relay — K-JIT · K-City 전용 릴레이 (2026-09-04 신설)
+//
+// SP-26_kjit_v0_1.txt · SP-27_kcity_v0_1.txt(둘 다 초안, Openhash-Gopang/jit
+// ·/city 저장소) §OBJECTIVE-FUNCTION·§WELFARE-FUNCTION 요지를 압축해
+// 서버 측 system 프롬프트로 직접 주입한다 — K-Plan처럼 클라이언트가 보낸
+// system 메시지를 신뢰하지 않고, K-Law와 동일하게 서버가 조립한 내용만
+// 쓴다(클라이언트가 임의로 system 메시지를 조작해 과금 로직을 우회하지
+// 못하도록). 웹검색 왕복 루프는 아직 붙이지 않았다 — v0.1 최소 구현이며,
+// 필요해지면 K-Plan의 KPLAN_WEB_SEARCH_* 패턴을 그대로 재사용하면 된다.
+// 두 서비스 다 아직 단일 티어(flash)만 지원 — pro 티어는 실사용 데이터가
+// 쌓인 뒤 필요성이 확인되면 추가한다(주피터 확인 필요).
+// ═══════════════════════════════════════════════════════════
+const KJIT_SYSTEM_PROMPT = `당신은 혼디넷의 K-JIT입니다. 가계·기업·기관이 필요로 하는 물자·인원·서비스의 조달을 계획합니다.
+
+기존 JIT(Just-In-Time)과 달리, 개별 주체의 비용·재고 최소화가 아니라 사회 전체의 효용 극대화·총비용 최소화(물류 혼잡·재고 낭비·탄소배출 등 외부효과 포함)를 기준으로 조달 계획을 제안하세요.
+
+예: 조달 비용이 개별 최적으로는 1만원인데 사회적 최적 경로가 1.1만원이라면, 후자를 제안하되 그 차액이 차등보상으로 상쇄될 수 있음을 함께 안내하세요.
+
+지켜야 할 것:
+- 실제 배차·매칭 실행은 K-Logistics·K-Market이 담당합니다. 당신은 계획만 제시하고, 실행을 직접 수행하는 것처럼 말하지 마세요.
+- 참여는 원칙적으로 옵트인입니다 — 사회적 최적 계획이 사용자에게 불리하면 강제하지 말고 차선책(개별 최적안)도 함께 제시하세요.
+- 아직 초안(v0.1) 단계이므로, 확정된 통계·재원 구조가 있는 것처럼 지어내지 마세요. 모르는 것은 모른다고 말하세요.`;
+
+const KCITY_SYSTEM_PROMPT = `당신은 혼디넷의 K-City입니다. 도시(읍·면·동 단위 포함) 전체의 시민 복지 총합(주거·의료·교육·금융·교통·통신·레저 등)이 최상이 되도록 시설의 물리적 조합(입지·규모·용량 배분)을 설계하는 자문 서비스입니다.
+
+부문마다 따로 검토하지 말고, 예산·토지 제약 안에서 여러 부문을 함께 고려한 통합적인 조합을 제안하세요. 가능하면 예산·우선순위별로 최소 2개 이상의 대안을 나란히 제시하세요.
+
+지켜야 할 것:
+- 당신의 산출물은 자문 설계안입니다. 실제 도시계획시설 결정·건축 인허가는 언제나 해당 지자체·국가기관의 법정 권한이라는 점을 답변에서 분명히 하세요 — 마치 당신이 결정 권한을 가진 것처럼 말하지 마세요.
+- 매몰비용·전환비용(기존 시설 통폐합·이전 시 드는 비용)을 무시하지 마세요.
+- 아직 초안(v0.1) 단계이므로, 확정된 통계·가중치가 있는 것처럼 지어내지 마세요. 모르는 것은 모른다고 말하세요.`;
+
+const KJIT_KCITY_TIER_MODELS = {
+  'kjit-flash':  { backendModel: 'deepseek-v4-flash' },
+  'kcity-flash': { backendModel: 'deepseek-v4-flash' },
+};
+const KJIT_KCITY_GLOBAL_DAILY_KRW_LIMIT = 10000; // 계정 전체 1일 예산 상한(원) — 초안 단계라 K-Plan(30000원)보다 보수적으로 시작
+const KJIT_KCITY_BETA_MULTIPLIER = 10; // K-Plan flash와 동일 배수(예상 API 비용의 10배) — 별도 근거 생기기 전까지 동일 적용
+
+async function _handleKjitKcityRelay(bodyText, env, corsHeaders, meta, ctx, { serviceId, systemPrompt, tierKey }) {
+  let body;
+  try { body = JSON.parse(bodyText); } catch { return _err(400, 'INVALID_JSON', '', corsHeaders); }
+
+  const { messages, max_tokens, phone_verify_token, currentLocation } = body || {};
+  if (!Array.isArray(messages)) return _err(400, 'MISSING_FIELD', 'messages 필수', corsHeaders);
+
+  // ── 전화번호 로그인 필수 — K-Law·K-Plan과 동일 이유(실제 GDC 과금이
+  // 걸리므로 본인 확인 없는 guid로 과금·잔액조회가 가능한 구멍을 막는다).
+  const _auth = await _resolveGuidFromPhoneVerifyToken(env, phone_verify_token);
+  if (!_auth.ok) {
+    const { status, code, message } = mapPhoneAuthError(_auth);
+    return _err(status, code, message, corsHeaders);
+  }
+  const guid = _auth.guid;
+
+  // 클라이언트가 보낸 system 메시지는 전부 제거 — 서버가 조립한
+  // 내용(universal layers + 위 KJIT/KCITY_SYSTEM_PROMPT)만 유효하다
+  // (K-Law와 동일 원칙 — kplan처럼 클라이언트를 신뢰하지 않는다).
+  const dialogOnly = (messages || []).filter(m => m.role !== 'system');
+
+  const universalInjected = await _fetchUniversalLayers();
+  const systemParts = [universalInjected, systemPrompt, _buildLocationNote(currentLocation), _buildDateNote(), _buildNoToolsNote()].filter(Boolean);
+  const messagesWithIntegrity = [{ role: 'system', content: systemParts.join('\n\n---\n\n') }, ...dialogOnly];
+
+  const backendModel = KJIT_KCITY_TIER_MODELS[tierKey].backendModel;
+
+  const day       = _todayKey();
+  const userKey   = `${serviceId}:spend:${guid}:${day}`;
+  const globalKey = `${serviceId}:spend:global:${day}`;
+  const globalSpent = await _klawSpendGet(env, globalKey);
+  if (globalSpent >= KJIT_KCITY_GLOBAL_DAILY_KRW_LIMIT) {
+    return _err(429, 'GLOBAL_QUOTA_EXCEEDED', `오늘 ${serviceId} 전체 이용자의 사용량이 한도에 도달했습니다. 내일 다시 이용해 주세요.`, corsHeaders);
+  }
+
+  const _gateBlocked = await _gdcFreeQuotaGate(env, guid, corsHeaders, meta);
+  if (_gateBlocked) return _gateBlocked;
+
+  const payload = { model: backendModel, messages: messagesWithIntegrity, stream: false };
+  if (max_tokens != null) payload.max_tokens = max_tokens;
+  if (payload.thinking === undefined) {
+    payload.thinking = { type: backendModel === 'deepseek-v4-flash' ? 'disabled' : 'enabled' };
+  }
+
+  _dlog(env, JSON.stringify({ tag: `${serviceId.toUpperCase()}_RELAY_CALL`, guid, tier: tierKey, globalSpent, ts: new Date().toISOString(), ...meta }));
+
+  const t0 = Date.now();
+  const priceTier = 'hondi-flash';
+  let res;
+  try {
+    res = await fetch(DEEPSEEK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${env.DEEPSEEK_API_KEY}` },
+      body: JSON.stringify(payload),
+    });
+  } catch (e) { return _err(502, `${serviceId.toUpperCase()}_RELAY_ERROR`, e.message, corsHeaders); }
+  if (!res.ok) {
+    const errText = await res.text().catch(() => '');
+    return new Response(errText || JSON.stringify({ error: `HTTP ${res.status}` }), { status: res.status, headers: corsHeaders });
+  }
+
+  const data = await res.json();
+  if (data?.usage) {
+    _recordAiUsage(env, ctx, {
+      guid, serviceId, tier: tierKey, priceTier, model: backendModel, usage: data.usage,
+      logTag: `${serviceId.toUpperCase()}_RELAY_COST`, extraLogFields: { elapsedMs: Date.now() - t0, ...meta },
+      spendKeys: [userKey, globalKey],
+      onAfterRecord: (bill) => _settleAiUsage(env, guid, bill, {
+        serviceId, model: backendModel,
+        hitTokens: data.usage?.prompt_cache_hit_tokens, missTokens: data.usage?.prompt_cache_miss_tokens,
+        outTokens: data.usage?.completion_tokens,
+      }),
+      multiplierOverride: KJIT_KCITY_BETA_MULTIPLIER,
+    });
+  }
+  return new Response(JSON.stringify(data), { headers: corsHeaders });
+}
+
+async function handleKjitRelay(bodyText, env, corsHeaders, meta = null, ctx = null) {
+  return _handleKjitKcityRelay(bodyText, env, corsHeaders, meta, ctx, {
+    serviceId: 'kjit', systemPrompt: KJIT_SYSTEM_PROMPT, tierKey: 'kjit-flash',
+  });
+}
+
+async function handleKcityRelay(bodyText, env, corsHeaders, meta = null, ctx = null) {
+  return _handleKjitKcityRelay(bodyText, env, corsHeaders, meta, ctx, {
+    serviceId: 'kcity', systemPrompt: KCITY_SYSTEM_PROMPT, tierKey: 'kcity-flash',
+  });
+}
 
 async function handleKPlanRelay(bodyText, env, corsHeaders, meta = null, ctx = null) {
   let body;
