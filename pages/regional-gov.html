@@ -535,13 +535,27 @@ async function _callAI(latestUserText, typingEl) {
   // 문제가 있었다(실사로 지적됨). 확정 안 된 이름을 보여주느니 아예
   // 보여주지 않는다 — GWP_CTX가 있으면 일반 인사말 없이 곧바로 실제
   // 응답(그 시점엔 올바른 기관명이 반영됨)으로 넘어간다.
-  if (!GWP_CTX) {
+  // ★ 2026-09-05 수정(사고실험으로 발견) — GWP_CTX뿐 아니라 K-정부
+  // 카탈로그가 쓰는 _govDirectCode(특정 기관 직행 링크)로 들어온
+  // 경우도 이미 기관이 확정돼 있으므로, 확정 안 된 "전국 지방행정
+  // AI입니다" 일반 인사말을 보여줄 이유가 없다 — 그동안 이 조건이
+  // GWP_CTX만 확인해서, 카탈로그에서 특정 부서를 직접 눌러도 일반
+  // 인사말이 먼저 뜨는 버그가 있었다. directCode만 있는 경우엔
+  // 사용자가 실제로 입력한 발화가 없으므로, 자기소개를 요청하는 시드
+  // 발화를 GWP_CTX와 동일한 방식(공용 chat-input에 채워 넣고 전송)으로
+  // 대신 보낸다 — 그 응답에는 이제 올바른 기관명이 반영된다.
+  if (!GWP_CTX && !_govDirectCode) {
     appendBubble('ai',
       '안녕하세요, 전국 지방행정 AI입니다. 광역시도청·시군구청·읍면동사무소 관련 무엇이든 말씀해 주세요.'
     );
-  } else {
+  } else if (GWP_CTX) {
     setTimeout(() => {
       ci.setText('(AI 비서로부터 전달됨)\n' + GWP_CTX);
+      ci.el.sendBtn.click();
+    }, 200);
+  } else {
+    setTimeout(() => {
+      ci.setText('안녕하세요. 어느 기관인지, 어떤 업무를 도와줄 수 있는지 소개해 주세요.');
       ci.el.sendBtn.click();
     }, 200);
   }
