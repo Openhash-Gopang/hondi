@@ -19,7 +19,7 @@
 //      못해 깨져 있었음 — resolveSpUrls() 호출 시 sp_url이 null이 되는 버그)
 // ═══════════════════════════════════════════════════════════
 
-const _RAW = 'https://raw.githubusercontent.com/Openhash-Gopang/gopang/main/prompts/';
+const _RAW = 'https://raw.githubusercontent.com/Openhash-Gopang/hondi/main/prompts/';
 
 // ── manifest 기반 SP URL resolver ──────────────────────────
 // prompts/sp-catalog.json 은 CI 빌드 시 tools/build_manifest.py 가 자동 생성.
