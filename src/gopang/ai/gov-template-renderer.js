@@ -37,7 +37,7 @@
 //      정확히 구분해야 하기 때문).
 // ═══════════════════════════════════════════════════════════
 
-const _RAW = 'https://raw.githubusercontent.com/Openhash-Gopang/gopang/main/';
+const _RAW = 'https://raw.githubusercontent.com/Openhash-Gopang/hondi/main/';
 
 const TIER_CONFIG = {
   // 2026-07-10 신설 — 과(課) 계층. 도청 실·국(do-dept)/시청 국(city-dept)

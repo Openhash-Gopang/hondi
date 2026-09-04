@@ -48,7 +48,16 @@
 // (prompts/gov-tree/** 실제 파일 이동)이 끝나기 *전에* 채우면 프로덕션에서
 // 조용히 404가 난다 — repo 필드를 채우는 커밋과 데이터 이관 완료 확인은
 // 반드시 순서를 맞출 것(마이그레이션 계획서 Phase 4 참조).
-const _DEFAULT_REPO = 'Openhash-Gopang/gopang';
+// ★ 2026-09-05 수정(사고실험으로 발견) — 이 상수가 'Openhash-Gopang/gopang'
+// (폐기된 구 허브 저장소, 주피터 확인)을 그대로 가리키고 있어서, hondi로
+// 통합·이전한 뒤에 hondi에만 반영한 콘텐츠 수정(예: 강원·대구 도 부서
+// 데이터)이 실제 서비스에는 전혀 반영되지 않고 있었다 — 워커 코드(이
+// 함수 자체)는 hondi에서 배포되지만, 이 함수가 런타임에 데이터를 fetch할
+// 저장소는 gopang 그대로였던 것. 파일 목록 전수 대조 결과 hondi가 gopang의
+// 완전한 상위집합(2,808개 전부 포함 + 7개 추가)이고 sp-catalog.json 등
+// 내용도 hondi 쪽이 최신이라 안전하게 전환한다. gopang 저장소 자체는
+// 이제 폐기(archived) 상태이며 더 이상 갱신되지 않는다.
+const _DEFAULT_REPO = 'Openhash-Gopang/hondi';
 function _rawBase(repo) {
   return `https://raw.githubusercontent.com/${repo || _DEFAULT_REPO}/main`;
 }
@@ -133,7 +142,7 @@ let _sigunguListCache = null;
 async function _loadSigunguListForProvinceGuess() {
   if (_sigunguListCache) return _sigunguListCache;
   try {
-    const r = await fetch('https://raw.githubusercontent.com/Openhash-Gopang/gopang/main/'
+    const r = await fetch('https://raw.githubusercontent.com/Openhash-Gopang/hondi/main/'
       + 'src/gopang/gov/sigungu-national-list.json?t=' + Math.floor(Date.now() / 3600000));
     const data = await r.json();
     _sigunguListCache = data.시군구목록 || [];

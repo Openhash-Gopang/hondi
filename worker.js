@@ -6894,7 +6894,7 @@ function _validateGovDraftSP(content) {
 // 낮을 수 있음을 인지하고 사람 검토에서 우선순위를 높게 둔다(아래
 // validation_notes에 tier_hint 없음을 명시).
 async function _generateGovDraftSP(env, institution, task, tierHint, ctx) {
-  const REPO_RAW = 'https://raw.githubusercontent.com/Openhash-Gopang/gopang/main';
+  const REPO_RAW = 'https://raw.githubusercontent.com/Openhash-Gopang/hondi/main';
   // SP-AUTHOR 최신본을 정본으로 매번 fetch(하드코딩 사본 금지 원칙 유지).
   const authorRes = await fetch(`${REPO_RAW}/prompts/SP-AUTHOR_v1_15.md`, { cache: 'no-cache' });
   if (!authorRes.ok) throw new Error(`SP-AUTHOR 정본 fetch 실패 (HTTP ${authorRes.status})`);
@@ -7148,7 +7148,7 @@ function _validateGovTreeInstanceSP(tier, content) {
 // 실제로 지킨 조사 규율(나무위키 우선 → 공식 홈페이지 교차검증 → 신뢰도
 // 낮으면 TBD 명시)을 재현하게 한다 — 새 판단 기준을 발명하는 게 아니라
 // 사람이 43개 동에 대해 실제로 했던 절차를 그대로 시켜보는 것.
-const REPO_RAW_GOV_TREE = 'https://raw.githubusercontent.com/Openhash-Gopang/gopang/main';
+const REPO_RAW_GOV_TREE = 'https://raw.githubusercontent.com/Openhash-Gopang/hondi/main';
 
 async function _fetchSiblingRealRecordsForFewShot(env, tier, 도코드, 시코드, 국코드) {
   // 실패해도(레포 fetch 문제 등) few-shot 없이 생성을 계속 진행 — 이건
@@ -7458,7 +7458,7 @@ async function _l1CreateSpTreeGuardianRun(env, record) {
 // sp_tree_audit_findings에 status='pending_review'로 쌓기만 한다.
 // SP-TREE-REGISTRY나 어떤 SP 파일도 이 함수가 직접 수정하지 않는다.
 async function _runSpTreeGuardianAudit(env, ctx) {
-  const REPO_RAW = 'https://raw.githubusercontent.com/Openhash-Gopang/gopang/main';
+  const REPO_RAW = 'https://raw.githubusercontent.com/Openhash-Gopang/hondi/main';
   const repoBase = `${GITHUB_API}/repos/${GITHUB_OWNER}/${GITHUB_REPO_NAME}`;
   const ghHeaders = _ghHeaders(env);
 
@@ -9350,7 +9350,7 @@ async function _generateIndustryTransformSP(env, schemaId, ksicLabel, ctx) {
   // 스코프에도 지역으로 선언한다(기존 코드와 동일한 패턴, 전역으로 승격해서
   // 다른 함수에 영향 주지 않기 위해). 2026-07-23 hotfix — 이 버그 때문에
   // 실시간 생성이 배포 직후부터 100% 실패하고 있었다(격리 테스트로 발견).
-  const REPO_RAW = 'https://raw.githubusercontent.com/Openhash-Gopang/gopang/main';
+  const REPO_RAW = 'https://raw.githubusercontent.com/Openhash-Gopang/hondi/main';
   const manifestRes = await fetch(`${REPO_RAW}/prompts/sp-catalog.json`, { cache: 'no-cache' });
   const manifest = await manifestRes.json();
   const commonFile = manifest['SP-INDUSTRY-TRANSFORM-COMMON'];
@@ -16938,7 +16938,7 @@ async function handleProjectStateQuery(request,env,corsHeaders){
 // REPO_RAW에서 대상 SP 원문을 실시간으로 받아온 뒤 DeepSeek V4 Flash에 초안을
 // 맡긴다. 새 LLM 호출 체계를 또 만들지 않는다.
 async function _draftFeedbackPatch(env, { sp_id, quotes, category, context_sps }) {
-  const REPO_RAW = 'https://raw.githubusercontent.com/Openhash-Gopang/gopang/main';
+  const REPO_RAW = 'https://raw.githubusercontent.com/Openhash-Gopang/hondi/main';
   const manifestRes = await fetch(`${REPO_RAW}/prompts/sp-catalog.json`, { cache: 'no-cache' });
   const manifest = await manifestRes.json();
   const fname = manifest[sp_id];
@@ -19586,7 +19586,7 @@ const PROFESSIONAL_IDENTITY_AGENCIES = new Set(['health']);
 // 파일을 가져오도록 바꾼다 — UNIVERSAL-INTEGRITY는 지금 버전이 1개뿐이라
 // 당장 깨진 상태는 아니었지만, v2가 생기는 순간 조용히 stale해질
 // 뻔한 걸 미리 막는다.
-const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/Openhash-Gopang/gopang/main';
+const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/Openhash-Gopang/hondi/main';
 let _githubManifestCache = null;
 let _githubManifestCacheAt = 0;
 const _GITHUB_MANIFEST_TTL_MS = 10 * 60 * 1000;
@@ -20286,12 +20286,12 @@ async function _fetchDelegationPrompt(regKey, provinceCode) {
 
   let url;
   if (entry.via === 'manifest') {
-    const manifestRes = await fetch('https://raw.githubusercontent.com/Openhash-Gopang/gopang/main/prompts/sp-catalog.json', { cache: 'no-cache' });
+    const manifestRes = await fetch('https://raw.githubusercontent.com/Openhash-Gopang/hondi/main/prompts/sp-catalog.json', { cache: 'no-cache' });
     if (!manifestRes.ok) throw new Error(`manifest fetch 실패: ${manifestRes.status}`);
     const manifest = await manifestRes.json();
     const fname = manifest[entry.key];
     if (!fname) throw new Error(`manifest에 ${entry.key} 키 없음`);
-    url = `https://raw.githubusercontent.com/Openhash-Gopang/gopang/main/prompts/${fname}`;
+    url = `https://raw.githubusercontent.com/Openhash-Gopang/hondi/main/prompts/${fname}`;
   } else {
     url = entry.url;
   }
@@ -25978,7 +25978,7 @@ async function _deriveAgentGuid(principalGuid) {
 //   - 합성 실패 시 null 반환(그림자 생성을 막지 않는다)
 //   - 향후 industry_fields 변경 시 /profile/sync-sp 엔드포인트로 재합성 가능하게 설계
 async function _compileAgentSP(env, principalProfile) {
-  const REPO_RAW = 'https://raw.githubusercontent.com/Openhash-Gopang/gopang/main';
+  const REPO_RAW = 'https://raw.githubusercontent.com/Openhash-Gopang/hondi/main';
   const headers  = { 'User-Agent': 'gopang-worker/4.9', 'Cache-Control': 'no-cache' };
 
   // 0) 실시간 공개 범위 판단 안내문 — 2026-06-30 재설계: 가입 시점에
@@ -29204,7 +29204,7 @@ async function handleFeedbackPatch(request, env, corsHeaders) {
 // 필요 secret (wrangler secret put):
 //   ADMIN_MASTER_KEY — admin 토큰 서명용 HMAC 키. GOPANG_MASTER_KEY와는
 //                      별개 키를 쓴다(사용자 세션 토큰 위조 경로와 완전히 분리).
-//   GITHUB_TOKEN     — Openhash-Gopang/gopang repo로 한정한 fine-grained PAT.
+//   GITHUB_TOKEN     — Openhash-Gopang/hondi repo로 한정한 fine-grained PAT.
 //                      권한: Contents (Read and write), Pull requests (Read and write).
 //
 // 필요 L1 PocketBase 설정 (Admin UI에서 1회 수동 작업):

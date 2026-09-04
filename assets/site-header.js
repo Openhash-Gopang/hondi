@@ -57,7 +57,7 @@
       '</div>' +
     '</div>' +
     '<div class="site-strip">' +
-      '<a class="site-strip-text" href="https://github.com/Openhash-Gopang/gopang" target="_blank">2026년 9월 1일 테스트 시작 · 2027년 완전한 AI 정부 구현 목표 · 오픈소스 코드 공개</a>' +
+      '<a class="site-strip-text" href="https://github.com/Openhash-Gopang/hondi" target="_blank">2026년 9월 1일 테스트 시작 · 2027년 완전한 AI 정부 구현 목표 · 오픈소스 코드 공개</a>' +
       '<a class="site-strip-support-btn" href="/pages/project-support.html">혼디 프로젝트 지원</a>' +
     '</div>';
 
