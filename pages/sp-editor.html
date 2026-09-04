@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<title>SP 편집기 — 혼디</title>
+<meta name="description" content="기존 SP 문서를 대화로 개정하는 관리자용 도구">
+<link rel="icon" href="data:,">
+
+<!-- 로그인 여부만 가볍게 확인한다(SP-EDITOR §5 — 접근 자체를 막는 인증
+     체계는 아직 없음). 필수는 아니므로 data-required="false". -->
+<script type="module" src="https://hondi.net/auth/subsystem-auth.js" data-required="false"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root {
+  --ink: #14181f; --ink-dim: #4b5563; --panel: #f6f7f9; --line: #c7ccd4; --line-strong: #9aa2ad;
+  --brand: #3157d0; --brand-dk: #1f3d99;
+  --surface: #ffffff; --text: #1a202c; --text3: #475569; --text4: #64748b;
+  --mono: 'SFMono-Regular', 'Consolas', 'JetBrains Mono', 'Menlo', monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'Pretendard',-apple-system,'Malgun Gothic',sans-serif;font-size:14px;color:var(--text);
+  background:#fff;display:flex;flex-direction:column;
+}
+a{text-decoration:none;color:inherit}
+button{font-family:inherit;cursor:pointer}
+
+header{
+  display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);
+  flex-shrink:0;background:var(--ink);color:#fff;
+}
+header h1{font-size:14px;font-weight:700;flex:1}
+header .sub{font-size:11.5px;color:rgba(255,255,255,.6);font-family:var(--mono)}
+.back-link{font-size:12px;color:rgba(255,255,255,.75);padding:5px 10px;border-radius:4px}
+.back-link:hover{background:rgba(255,255,255,.1)}
+
+.notice{background:#fef3e2;border-bottom:1px solid #f0c98a;color:#7a4b0e;font-size:12px;padding:8px 16px;line-height:1.6;flex-shrink:0}
+
+main{flex:1;display:flex;min-height:0}
+.pane{display:flex;flex-direction:column;min-height:0}
+.pane-editor{flex:1.1;border-right:1px solid var(--line)}
+.pane-chat{flex:1;min-width:280px}
+
+.pane-toolbar{
+  display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);
+  background:var(--panel);flex-shrink:0;flex-wrap:wrap;
+}
+.pane-toolbar .path-label{font-size:11.5px;color:var(--ink-dim);font-family:var(--mono);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tb-btn{
+  font-size:11.5px;font-weight:600;color:var(--ink-dim);background:#fff;border:1px solid var(--line);
+  border-radius:3px;padding:5px 10px;
+}
+.tb-btn:hover{background:var(--panel);color:var(--ink)}
+.tb-btn.primary{background:var(--brand);color:#fff;border-color:var(--brand)}
+.tb-btn.primary:hover{background:var(--brand-dk)}
+input[type=file]{display:none}
+
+#editorArea{
+  flex:1;border:none;outline:none;resize:none;padding:14px 16px;font-family:var(--mono);
+  font-size:12.5px;line-height:1.65;color:var(--text);background:#fff;white-space:pre;
+}
+#editorArea::placeholder{color:var(--text4);font-family:'Pretendard',sans-serif}
+#editorStatus{font-size:11px;color:var(--ink-dim);padding:4px 12px;border-top:1px solid var(--line);flex-shrink:0}
+
+#chatThread{flex:1;overflow-y:auto;padding:14px 14px 8px;display:flex;flex-direction:column;gap:10px;background:var(--panel)}
+.msg{max-width:100%;padding:10px 13px;border-radius:8px;font-size:13px;line-height:1.65;white-space:pre-wrap}
+.msg.ai{background:#fff;border:1px solid var(--line)}
+.msg.user{background:var(--brand);color:#fff;align-self:flex-end;max-width:88%}
+.msg.sys{background:#fff7ed;border:1px solid #f0c98a;color:#7a4b0e;font-size:11.5px;align-self:center}
+.msg pre{background:#0f1420;color:#d7e0f0;padding:10px;border-radius:6px;overflow-x:auto;font-family:var(--mono);font-size:11.5px;margin-top:6px;white-space:pre}
+.apply-btn{margin-top:8px;font-size:11.5px;font-weight:700;color:#fff;background:var(--brand);border:none;border-radius:4px;padding:6px 12px}
+.apply-btn:hover{background:var(--brand-dk)}
+
+.composer{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);background:#fff;flex-shrink:0}
+.composer textarea{flex:1;resize:none;border:1px solid var(--line);border-radius:6px;padding:9px 11px;font-family:inherit;font-size:13px;max-height:100px;min-height:38px}
+.composer textarea:focus{outline:none;border-color:var(--brand)}
+.composer button{background:var(--brand);color:#fff;border:none;border-radius:6px;padding:0 16px;height:38px;font-weight:700;font-size:12.5px;flex-shrink:0}
+.composer button:disabled{opacity:.5}
+
+@media (max-width: 760px) {
+  main{flex-direction:column}
+  .pane-editor{border-right:none;border-bottom:1px solid var(--line);flex:1}
+  .pane-chat{flex:1}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back-link" href="javascript:history.back()">← 뒤로</a>
+  <h1>SP 편집기</h1>
+  <span class="sub" id="pathBadge"></span>
+</header>
+
+<div class="notice">
+  이 화면은 관리자용 도구입니다. AI가 제안하는 개정본은 참고용 초안이며, 실제로 저장소에 반영하려면 언제나 사람이 직접 검토 후 커밋해야 합니다 — 이 화면 자체는 파일을 저장하거나 GitHub에 반영하지 않습니다.
+</div>
+
+<main>
+  <div class="pane pane-editor">
+    <div class="pane-toolbar">
+      <span class="path-label" id="pathLabel">편집할 SP 원문을 불러오거나 첨부해 주세요</span>
+      <button class="tb-btn" id="attachBtn" type="button">파일 첨부</button>
+      <input type="file" id="fileInput" accept=".md,.txt">
+      <button class="tb-btn" id="copyBtn" type="button">복사</button>
+      <button class="tb-btn primary" id="downloadBtn" type="button">다운로드</button>
+    </div>
+    <textarea id="editorArea" placeholder="여기에 SP 원문이 표시됩니다. 직접 타이핑해서 고칠 수도 있고, 오른쪽 채팅으로 AI에게 요청할 수도 있습니다."></textarea>
+    <div id="editorStatus"></div>
+  </div>
+
+  <div class="pane pane-chat">
+    <div class="pane-toolbar"><span class="path-label">SP-EDITOR와 대화</span></div>
+    <div id="chatThread"></div>
+    <div class="composer">
+      <textarea id="chatInput" placeholder="예: 콜센터 번호를 053-120으로 바꿔줘" rows="1"></textarea>
+      <button id="sendBtn">전송</button>
+    </div>
+  </div>
+</main>
+
+<script>
+const PROXY = 'https://hondi-proxy.tensor-city.workers.dev';
+const REPO_RAW = 'https://raw.githubusercontent.com/Openhash-Gopang/hondi/main/';
+
+const _qs = new URLSearchParams(location.search);
+const _initialPath = _qs.get('path') || '';
+const _initialRepo = _qs.get('repo') || 'Openhash-Gopang/hondi';
+
+let spEditorPrompt = null;
+let editorUser = null;
+let messages = [];
+let currentPath = _initialPath;
+
+window._onGopangAuth = function (user) { editorUser = user; };
+
+function setStatus(text) { document.getElementById('editorStatus').textContent = text; }
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+async function loadSpEditorPrompt() {
+  const res = await fetch(REPO_RAW + 'prompts/SP-EDITOR_v1_0.md');
+  if (!res.ok) throw new Error('SP-EDITOR 원문 로드 실패(HTTP ' + res.status + ')');
+  spEditorPrompt = await res.text();
+}
+
+async function loadTargetFile(repo, path) {
+  if (!path) return;
+  setStatus('불러오는 중… ' + path);
+  try {
+    const url = 'https://raw.githubusercontent.com/' + repo + '/main/' + path;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    document.getElementById('editorArea').value = text;
+    currentPath = path;
+    document.getElementById('pathLabel').textContent = repo + ' / ' + path;
+    document.getElementById('pathBadge').textContent = path.split('/').pop();
+    setStatus('불러옴 — ' + repo + '/' + path);
+  } catch (e) {
+    setStatus('불러오기 실패: ' + e.message + ' — 파일 첨부로 직접 올려주세요.');
+  }
+}
+
+document.getElementById('attachBtn').addEventListener('click', () => document.getElementById('fileInput').click());
+document.getElementById('fileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    document.getElementById('editorArea').value = reader.result;
+    currentPath = file.name;
+    document.getElementById('pathLabel').textContent = '(첨부됨) ' + file.name;
+    document.getElementById('pathBadge').textContent = file.name;
+    setStatus('첨부한 파일을 불러왔습니다 — ' + file.name);
+  };
+  reader.readAsText(file);
+});
+
+document.getElementById('copyBtn').addEventListener('click', async () => {
+  await navigator.clipboard.writeText(document.getElementById('editorArea').value);
+  setStatus('편집창 내용을 클립보드에 복사했습니다.');
+});
+document.getElementById('downloadBtn').addEventListener('click', () => {
+  const text = document.getElementById('editorArea').value;
+  const blob = new Blob([text], { type: 'text/markdown' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (currentPath.split('/').pop() || 'sp-edit.md');
+  a.click();
+});
+
+function addBubble(role, text, isHtml) {
+  const thread = document.getElementById('chatThread');
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  if (isHtml) div.innerHTML = text; else div.textContent = text;
+  thread.appendChild(div);
+  thread.scrollTop = thread.scrollHeight;
+  return div;
+}
+
+// AI 응답의 첫 번째 코드블록(```...```)을 찾아 "이 내용으로 편집창 교체" 버튼을 붙인다.
+function renderAiReply(text) {
+  const m = text.match(/```[a-zA-Z]*\n([\s\S]*?)```/);
+  if (!m) { addBubble('ai', text); return; }
+  const before = text.slice(0, m.index).trim();
+  const after = text.slice(m.index + m[0].length).trim();
+  const codeContent = m[1];
+  const div = addBubble('ai', '', true);
+  let html = '';
+  if (before) html += escHtml(before) + '<br><br>';
+  html += '<pre>' + escHtml(codeContent.slice(0, 600)) + (codeContent.length > 600 ? '\n…(미리보기 일부만 표시, 전체는 편집창에 적용됨)' : '') + '</pre>';
+  if (after) html += '<br>' + escHtml(after);
+  div.innerHTML = html;
+  const btn = document.createElement('button');
+  btn.className = 'apply-btn';
+  btn.textContent = '이 개정본으로 편집창 교체';
+  btn.addEventListener('click', () => {
+    document.getElementById('editorArea').value = codeContent;
+    setStatus('AI가 제안한 개정본을 편집창에 적용했습니다 — 저장소 반영은 직접 해주세요.');
+  });
+  div.appendChild(document.createElement('br'));
+  div.appendChild(btn);
+}
+
+async function sendToEditor(userText) {
+  const editorText = document.getElementById('editorArea').value;
+  const systemParts = [spEditorPrompt];
+  systemParts.push(editorText.trim()
+    ? '[현재 편집창에 로드된 SP 원문 — 경로: ' + (currentPath || '(미상)') + ']\n\n```\n' + editorText + '\n```'
+    : '[편집창이 비어 있습니다 — 아직 아무 SP도 로드되지 않았습니다]');
+  const system = systemParts.join('\n\n---\n\n');
+
+  messages.push({ role: 'user', content: userText });
+  const thinking = addBubble('sys', '검토하는 중…');
+  try {
+    const res = await fetch(PROXY + '/ai/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ system, messages, max_tokens: 4000 }),
+    });
+    const data = await res.json();
+    thinking.remove();
+    if (!res.ok || !data.content) throw new Error(data.message || ('HTTP ' + res.status));
+    messages.push({ role: 'assistant', content: data.content });
+    renderAiReply(data.content);
+  } catch (e) {
+    thinking.remove();
+    addBubble('ai', '요청 처리 중 오류가 발생했습니다: ' + e.message);
+  }
+}
+
+async function handleSend() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text || !spEditorPrompt) return;
+  input.value = '';
+  addBubble('user', text);
+  await sendToEditor(text);
+}
+
+document.getElementById('sendBtn').addEventListener('click', handleSend);
+document.getElementById('chatInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+});
+
+(async function init() {
+  try {
+    await loadSpEditorPrompt();
+  } catch (e) {
+    addBubble('ai', 'SP-EDITOR 원문을 불러오지 못해 이 화면이 정상 동작하지 않습니다: ' + e.message);
+    return;
+  }
+  if (_initialPath) {
+    await loadTargetFile(_initialRepo, _initialPath);
+    addBubble('ai', (currentPath ? currentPath.split('/').pop() : '이 문서') + ' 원문을 불러왔습니다. 무엇을 고칠지 말씀해 주세요.');
+  } else {
+    addBubble('ai', '편집할 SP를 카탈로그의 "SP" 아이콘으로 불러오거나, 왼쪽 위 "파일 첨부"로 직접 올려주세요.');
+  }
+})();
+</script>
+</body>
+</html>
