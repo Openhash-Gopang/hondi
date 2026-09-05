@@ -1008,6 +1008,12 @@ body.mm-lock-scroll { overflow: hidden; }
 .db-page-btn.active { background: var(--navy, #0e1c3f); border-color: var(--navy, #0e1c3f); color: #fff; }
 .db-page { max-width: 1160px; margin: 0 auto; padding: 0 24px 40px; }
 
+/* 2026-09-05 신설 — 히어로 알약 버튼 5번째("버그 신고")의 점(dot) 대신
+   들어가는 버그 모양 SVG 아이콘. 공용 site-header.css의 .site-hero-actions
+   a는 이미 display:flex; align-items:center라 별도 정렬 없이 자연스럽게
+   맞는다 — flex-shrink만 추가해 찌그러지지 않게 한다. */
+.hero-bug-icon { flex-shrink: 0; }
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <script>mermaid.initialize({startOnLoad:false, theme:"neutral", fontFamily:"inherit"});</script>
@@ -1192,7 +1198,7 @@ document.addEventListener('keydown', function (e) {
   <h1 id="hero-title" style="transition:opacity .25s ease"><span class="l1">사람 간의 업무를</span><br><span class="l2">혼디 간의 소통으로 보강합니다.</span> <a class="hero-more" href="./highlights/hondi-communication.html">더보기<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a></h1>
 
   <div class="site-hero-actions">
-    <a href="./integrated-system.html" class="outline"><span class="dot"></span><span class="label-text">AI 정부 + 법치 국가</span></a>
+    <a href="./integrated-system.html" class="outline"><span class="dot"></span><span class="label-text">법치 국가</span></a>
     <a href="./docs/hondi_interactive_manual.html" class="outline"><span class="dot"></span><span class="label-text">사용법</span></a>
     <!-- 2026-08-31 신설 — 사용자 발화가 어떻게 특정 SP 호출로 이어지는지
          보여주는 라우팅 아키텍처 페이지 진입점. 다른 두 개(입법·사법·행정
@@ -1200,6 +1206,10 @@ document.addEventListener('keydown', function (e) {
          독립 standalone 페이지라 일반 href로 연결한다. -->
     <a href="./pages/routing-architecture.html" class="outline"><span class="dot"></span><span class="label-text">라우팅</span></a>
     <a href="/feedback.html" class="outline"><span class="dot"></span><span class="label-text">제안</span></a>
+    <!-- 2026-09-05 신설 — feedback.html이 이미 'bug: 버그 신고' 카테고리를
+         갖고 있어(카테고리 사전 선택 파라미터는 없음), 같은 페이지로
+         연결하고 다른 버튼과 구분되도록 점 대신 버그 모양 SVG 아이콘을 쓴다. -->
+    <a href="/feedback.html" class="outline"><svg class="hero-bug-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="6" width="8" height="14" rx="4"/><path d="M19 7l-3 2M19 19l-3-2M5 7l3 2M5 19l3-2M3 13h4M17 13h4M12 20v-6M9 6l1-3M15 6l-1-3"/></svg><span class="label-text">버그 신고</span></a>
   </div>
 
   <!-- 2026-08-27 — 헤더 하단 탭(입법~계획 11개, 공익 K-서비스 4개, 전문가
