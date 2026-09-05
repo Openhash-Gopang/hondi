@@ -236,13 +236,19 @@ mark { background: #ffe58a; color: var(--ink); border-radius: 0; padding: 0 1px;
   display: flex; flex-wrap: wrap; gap: 1px; padding: 10px 12px 12px;
   background: var(--line); border: 1px solid var(--line);
 }
-.persona-chip {
-  display: inline-flex; align-items: center; font-size: 12px; color: var(--ink-dim);
-  background: var(--panel); border: none; border-radius: 0; padding: 6px 12px;
-  text-decoration: none;
-  transition: background .1s, color .1s;
+.persona-chip-wrap {
+  display: inline-flex; align-items: stretch; background: var(--panel);
 }
-.persona-chip:hover { background: var(--cat-c); color: #fff; }
+.persona-chip-main {
+  display: inline-flex; align-items: center; font-size: 12px; color: var(--ink-dim);
+  padding: 6px 10px 6px 12px; text-decoration: none; transition: background .1s, color .1s;
+}
+.persona-chip-wrap:hover .persona-chip-main { background: var(--cat-c); color: #fff; }
+.persona-chip-edit {
+  display: flex; align-items: center; justify-content: center; padding: 0 8px;
+  color: var(--ink-dim); opacity: .5; transition: opacity .1s, color .1s, background .1s;
+}
+.persona-chip-edit:hover { background: var(--cat-c); color: #fff; opacity: 1; }
 .persona-chip-hint { font-size: 11px; opacity: .65; margin-left: 4px; }
 .no-match { font-size: 12px; color: var(--text4); padding: 4px 0; }
 
@@ -422,9 +428,19 @@ function buildPanelHtml(sec, q){
       matchedTrigger = p.triggers.filter(function(t){ return t.toLowerCase().indexOf(ql) !== -1; })[0] || null;
     }
     var hint = matchedTrigger ? ' <span class="persona-chip-hint">— ' + hl(matchedTrigger, q) + '</span>' : '';
-    // 세부분야 칩은 실제 그 세부분야 페르소나로 곧장 들어간다(부모의
-    // spUrl이 아니라 자기 자신의 id로 expert-chat.html을 연다).
-    return '<a class="persona-chip" href="' + esc(expertChatUrl(p.id)) + '" target="_blank" rel="noopener">' + labelHtml + hint + '</a>';
+    // 최말단(세부분야) 칩도 상위 섹션 버튼과 동일하게, 채팅으로 들어가는
+    // 화살표와 SP 편집기로 여는 아이콘을 각각 따로 붙인다 — 부모의 spUrl이
+    // 아니라 자기 자신의 id로 각각 expert-chat.html / sp-editor.html을 연다.
+    var editUrl = expertSpEditUrl(p.id);
+    var editIco = editUrl
+      ? '<a class="persona-chip-edit" href="' + esc(editUrl) + '" target="_blank" rel="noopener" title="SP 원문 편집">' +
+          '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="11" x2="13" y2="11"/></svg>' +
+        '</a>'
+      : '';
+    return '<span class="persona-chip-wrap">' +
+        '<a class="persona-chip-main" href="' + esc(expertChatUrl(p.id)) + '" target="_blank" rel="noopener">' + labelHtml + hint + '</a>' +
+        editIco +
+      '</span>';
   }).join('');
   var editUrlSec = expertSpEditUrl(sec.id) || (sec.personas[0] && expertSpEditUrl(sec.personas[0].id));
   var editLinkHtml = editUrlSec
