@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<!--
+  이 문서가 다루는 범위: 2026-09-05 하루 세션 전체 요약.
+  ① K-JIT·K-City 신규 K-서비스 — SP-26/27 초안, jit/city 저장소·사이트·
+     relay 백엔드 신설, SSO 무한루프·K-서비스 탭 먹통 버그 수정
+  ② 전문가 페르소나 카탈로그(505명) 전면 재설계 — 검색+아코디언, 제어반
+     UI, 자연어 트리거 검색, 실제 상담 연결로 링크 교체
+  ③ expert-chat.html 정체성 조립 결함 발견·수정 — 교수 세부전공 174명이
+     정체성 없이 대화하던 3단 이상 상속 버그
+  ④ K-정부 카탈로그 신설(648→701개) — 출자출연기관 268개 오분류 시정,
+     강원·대구 부서 데이터 신규 작성
+  ⑤ gopang(폐기)→hondi 저장소 이관 사고 — 5개 파일 15곳 하드코딩 발견,
+     이번 세션 콘텐츠 수정이 서비스에 미반영되고 있었을 가능성 확인·수정
+  ⑥ 입법부(6)·사법부(5) 카탈로그 신설 + 스크립트 실행 순서 버그 수정
+  ⑦ 지역 정체성 라우팅 버그 3종 — window.HONDI_PROVINCE_CODE 누수,
+     do-dept/do-agency 도 코드 충돌, directCode 무시 정적 인사말
+  ⑧ SP 편집기(sp-editor.html) + SP-EDITOR 메타-SP 신설 — 기존 SP 문서를
+     대화로 개정, 카탈로그 전체에 편집 아이콘 연결
+  (desktop.html 좌측 사이드바 "🛠 개발자 문서" 섹션에서 링크됨)
+  v1.0(2026-09-05): 신설
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K-JIT·K-City부터 저장소 이관까지 — 혼디 개발자 문서(0905)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+:root {
+  --ink:      #111111;
+  --ink-2:    #3a3a3a;
+  --ink-3:    #6b6b6b;
+  --ink-4:    #9a9a9a;
+  --line:     #e2e2e2;
+  --line-2:   #cfcfcf;
+  --bg:       #ffffff;
+  --bg-2:     #fafafa;
+  --bg-3:     #f2f2f2;
+  --accent:   #34495e;
+  --accent-lt:#eef1f4;
+  --good:     #2e7d4f;
+  --good-lt:  #eaf6ef;
+  --bad:      #b3392c;
+  --bad-lt:   #fbeceb;
+  --mono:     'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  --radius:   4px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Pretendard', -apple-system, 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.doc-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,0.94);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.doc-header-inner {
+  max-width: 1040px; margin: 0 auto;
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.doc-logo {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 14px; font-weight: 700; color: var(--ink);
+  text-decoration: none; letter-spacing: -0.2px;
+}
+.doc-logo svg { color: var(--ink-3); }
+.doc-header-sub {
+  font-size: 12px; color: var(--ink-4); font-weight: 400;
+  padding-left: 9px; border-left: 1px solid var(--line-2); margin-left: 2px;
+}
+.doc-back {
+  font-size: 12px; color: var(--ink-3); text-decoration: none;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.doc-back:hover { color: var(--ink); }
+.doc-back svg { flex-shrink: 0; }
+
+.doc-layout {
+  max-width: 1200px; margin: 0 auto;
+  padding: 40px 24px 100px;
+  display: grid;
+  grid-template-columns: 216px 1fr;
+  gap: 44px;
+  align-items: start;
+}
+@media (max-width: 860px) {
+  .doc-layout { grid-template-columns: 1fr; }
+  .doc-toc { display: none; }
+}
+.doc-toc { position: sticky; top: 72px; }
+.doc-toc-title {
+  font-size: 12px; font-weight: 700; letter-spacing: .8px;
+  text-transform: uppercase; color: var(--ink-4);
+  margin-bottom: 10px;
+}
+.doc-toc a {
+  display: block;
+  font-size: 12px; color: var(--ink-3);
+  text-decoration: none;
+  padding: 5px 0 5px 11px;
+  border-left: 2px solid var(--line);
+  line-height: 1.4;
+  transition: color .12s, border-color .12s;
+}
+.doc-toc a:hover, .doc-toc a.active {
+  color: var(--ink);
+  border-left-color: var(--accent);
+  font-weight: 600;
+}
+
+.doc-content { min-width: 0; }
+
+.gs {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+.gs-head {
+  padding: 22px 28px 16px;
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.gs-icon {
+  width: 34px; height: 34px; border-radius: var(--radius);
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; color: var(--ink-2);
+}
+.gs-icon svg { width: 18px; height: 18px; }
+.gs-head-text { flex: 1; }
+.gs-num {
+  font-family: var(--mono);
+  font-size: 12px; font-weight: 500; letter-spacing: .6px;
+  text-transform: uppercase; color: var(--ink-4);
+  margin-bottom: 3px;
+}
+.gs-title {
+  font-size: 17px; font-weight: 700;
+  color: var(--ink); letter-spacing: -0.2px; line-height: 1.35;
+}
+.gs-subtitle { font-size: 12px; color: var(--ink-4); margin-top: 4px; }
+
+.gs-body { padding: 20px 28px 26px; }
+.gs-body p { font-size: 14px; color: var(--ink-2); line-height: 1.85; margin-bottom: 13px; }
+.gs-body p:last-child { margin-bottom: 0; }
+.gs-body strong { color: var(--ink); font-weight: 700; }
+.gs-body h4 {
+  font-size: 14px; font-weight: 700; color: var(--ink);
+  margin: 22px 0 10px; letter-spacing: -0.1px;
+  display: flex; align-items: center; gap: 7px;
+}
+.gs-body h4 svg { width: 15px; height: 15px; color: var(--ink-3); flex-shrink: 0; }
+.gs-body h4:first-child { margin-top: 0; }
+.gs-body ul, .gs-body ol { margin: 4px 0 14px 20px; }
+.gs-body li { font-size: 14px; color: var(--ink-2); line-height: 1.8; margin-bottom: 4px; }
+.gs-body code {
+  font-family: var(--mono); font-size: 12px;
+  background: var(--bg-3); border: 1px solid var(--line);
+  border-radius: 4px; padding: 1px 6px; color: var(--ink-2);
+}
+
+.callout {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--ink);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 13px 17px; margin: 15px 0;
+  font-size: 14px; color: var(--ink-2); line-height: 1.8;
+  background: var(--bg-2);
+}
+.callout-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+  color: var(--ink-3); margin-bottom: 6px;
+}
+.callout-label svg { width: 13px; height: 13px; }
+.callout.warn { border-left-style: dashed; }
+.callout.good { border-left-color: var(--good); background: var(--good-lt); }
+.callout.bad { border-left-color: var(--bad); background: var(--bad-lt); }
+.callout strong { color: var(--ink); }
+
+.gs-table-wrap { margin: 15px 0; overflow-x: auto; }
+.gs-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.gs-table th, .gs-table td {
+  padding: 9px 12px; border: 1px solid var(--line); text-align: left; vertical-align: top;
+}
+.gs-table th { background: var(--bg-2); font-weight: 700; color: var(--ink); font-size: 12px; }
+.gs-table td { color: var(--ink-2); }
+.gs-table td strong, .gs-table td code { color: var(--ink); }
+.gs-table td code { font-family: var(--mono); font-size: 12px; background: var(--bg-3); padding: 1px 5px; border-radius: 4px; }
+
+.badge {
+  display: inline-block; font-family: var(--mono); font-size: 11px; font-weight: 700;
+  padding: 2px 7px; border-radius: 3px; letter-spacing: .3px;
+}
+.badge.pass { background: var(--good-lt); color: var(--good); border: 1px solid var(--good); }
+.badge.fail { background: var(--bad-lt); color: var(--bad); border: 1px solid var(--bad); }
+.badge.skip { background: var(--bg-3); color: var(--ink-3); border: 1px solid var(--line-2); }
+
+.reveal { opacity: 0; transform: translateY(10px); transition: opacity .4s ease, transform .4s ease; }
+.reveal.in { opacity: 1; transform: translateY(0); }
+
+.doc-hero {
+  padding: 8px 0 30px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 28px;
+}
+.doc-hero-eyebrow {
+  font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .6px;
+  text-transform: uppercase; color: var(--ink-4); margin-bottom: 12px;
+}
+.doc-hero-title {
+  font-size: 26px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.4;
+  color: var(--ink); margin-bottom: 14px;
+}
+.doc-hero-title em { font-style: normal; border-bottom: 2px solid var(--ink); }
+.doc-hero-desc { font-size: 14px; color: var(--ink-2); line-height: 1.85; max-width: 74ch; }
+.doc-hero-meta {
+  display: flex; flex-wrap: wrap; gap: 16px;
+  margin-top: 18px; font-size: 12px; color: var(--ink-4);
+}
+.doc-hero-meta strong { color: var(--ink-2); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header class="doc-header">
+  <div class="doc-header-inner">
+    <a class="doc-logo" href="../desktop.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      혼디 · Gopang
+      <span class="doc-header-sub">개발자 문서</span>
+    </a>
+    <a class="doc-back" href="../desktop.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      데스크톱으로 돌아가기
+    </a>
+  </div>
+</header>
+<div class="doc-layout">
+
+  <nav class="doc-toc">
+    <div class="doc-toc-title">목차</div>
+    <a href="#overview">개요 — 이 문서가 왜 있는가</a>
+    <a href="#kjit-kcity">① K-JIT·K-City 신규 K-서비스</a>
+    <a href="#expert-catalog">② 전문가 페르소나 카탈로그 전면 재설계</a>
+    <a href="#expert-identity-bug">③ 교수 세부전공 174명 — 정체성 조립 결함</a>
+    <a href="#kgov-catalog">④ K-정부 카탈로그 신설(648→701개)</a>
+    <a href="#repo-migration">⑤ gopang→hondi 저장소 이관 사고(15곳 하드코딩)</a>
+    <a href="#legis-judic">⑥ 입법부·사법부 카탈로그 + 초기화 순서 버그</a>
+    <a href="#province-identity-bugs">⑦ 지역 정체성 라우팅 버그 3종</a>
+    <a href="#sp-editor">⑧ SP 편집기(sp-editor.html) 신설</a>
+    <a href="#defects">발견된 실제 결함 총정리</a>
+    <a href="#lessons">교훈</a>
+    <a href="#related">관련 문서</a>
+  </nav>
+
+  <main class="doc-content">
+
+    <div class="doc-hero reveal">
+      <div class="doc-hero-eyebrow">SESSION SUMMARY — 2026-09-05</div>
+      <h1 class="doc-hero-title">K-JIT·K-City 초안 하나로 시작해,<br><em>정부 카탈로그와 저장소 이관 사고</em>까지 이어진 하루</h1>
+      <p class="doc-hero-desc">
+        신규 K-서비스(K-JIT·K-City) SP 초안과 사이트 신설에서 출발해,
+        전문가 페르소나 카탈로그(제어반 UI·검색·아코디언) 전면 재설계,
+        교수 세부전공 174명이 정체성 없이 대화하고 있던 결함 발견,
+        K-정부 카탈로그를 648개→701개 기관·16개 지역 탭으로 확장,
+        그 과정에서 <strong>gopang(폐기된 구 저장소)을 여전히 콘텐츠
+        허브로 참조하던 15곳의 하드코딩</strong>을 발견해 hondi로 전환,
+        입법부·사법부 카탈로그 신설과 초기화 순서 버그, 지역 정체성이
+        접속 위치로 새던 라우팅 버그 3종 수정, 마지막으로 SP 문서를
+        대화로 직접 개정하는 SP 편집기(sp-editor.html)까지 — 각 단계에서
+        <strong>실제로 무엇이 고쳐졌고, 무엇이 사실이 아니었는지</strong>
+        위주로 정리한다.
+      </p>
+      <div class="doc-hero-meta">
+        <span><strong>대상 저장소</strong> Openhash-Gopang/hondi</span>
+        <span><strong>작성</strong> 2026-09-05</span>
+        <span><strong>핵심 변경</strong> worker.js · gov-router.js · expert-chat.html · k-government.html · expert-personas.html · regional-gov.html · sp-editor.html</span>
+      </div>
+    </div>
+
+    <section class="gs reveal" id="overview">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">Overview</div>
+          <div class="gs-title">이 문서가 왜 있는가</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          오늘 세션은 "K-JIT·K-City라는 신규 K-서비스 두 개를 추가한다"는
+          비교적 좁은 요청에서 시작해, 이미 있는 두 개의 대형 카탈로그
+          페이지(전문가 페르소나·K-정부)를 전면 재설계하는 데까지
+          번졌다. 공통점은 <strong>매번 "이게 실제로 반영되고 있는 게
+          맞나?"라고 한 번 더 확인했더니, 코드나 데이터가 실제로는 다른
+          곳을 보고 있었거나 조용히 실패하고 있었다는 것</strong>이다 —
+          교수 세부전공 174명이 자기가 "교수"라는 정체성도 모른 채
+          대화하고 있었던 것, 이번 세션 내내 <code>hondi</code>에
+          커밋한 콘텐츠 수정이 실제로는 폐기된 <code>gopang</code>
+          저장소를 계속 가리키던 코드 때문에 서비스에 반영되지 않고
+          있었던 것, 특정 도(道)의 부서를 눌러도 접속자의 실제 위치로
+          응답이 새고 있었던 것, 입법 탭이 스크립트 실행 순서 문제로
+          영원히 빈 채로 남아있었던 것. 다음에 이 영역을 다시 건드릴
+          사람이 같은 과정을 반복하지 않도록 정리한다.
+        </p>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="kjit-kcity">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">① 신규 K-서비스</div>
+          <div class="gs-title">K-JIT·K-City — SP 초안부터 사이트·백엔드까지</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          <strong>K-JIT</strong>(사회효용 우선 적시조달 메커니즘, SP-26)와
+          <strong>K-City</strong>(시민 복지 총합 최적 도시 설계, SP-27)
+          초안을 작성하고, <code>Openhash-Gopang/jit</code>·
+          <code>/city</code> 저장소를 신설했다. 각각 <code>index.html</code>
+          (소개 페이지)·<code>webapp.html</code>(로그인+채팅 앱, 공용
+          <code>subsystem-auth.js</code> 인증 모듈 사용)을 구축하고,
+          <code>worker.js</code>에 <code>/kjit/relay</code>·
+          <code>/kcity/relay</code> 백엔드 핸들러를 신설했다.
+        </p>
+        <h4>발견·수정한 결함</h4>
+        <ul>
+          <li><strong>SSO 무한 리다이렉트 루프</strong> — <code>subsystem-auth.js</code>를
+            필수 모드로 두면, 오프너 창 없이 URL을 직접 열었을 때
+            <code>silent-auth.html</code>과 무한 루프에 빠지는 플랫폼
+            공용 버그에 걸렸다. <code>data-required="false"</code>로
+            전환해 해결(K-Plan이 이미 같은 이유로 이렇게 쓰고 있었음).</li>
+          <li><strong>K-서비스 탭 전체 먹통</strong> — <code>k-services.html</code>에
+            K-JIT·K-City 탭을 추가하며 <code>SVC_CONTENT</code> 객체
+            리터럴에 쉼표 하나를 빠뜨려, 그 스크립트 블록 전체가
+            파싱조차 안 되고 있었다. 원인 진단 중 애초에 <code>&lt;script&gt;</code>
+            태그가 3개인 파일에서 첫 번째(무관한) 블록만 문법 검증하고
+            있었던 검증 방식 자체의 결함도 함께 발견.</li>
+        </ul>
+        <div class="callout warn">
+          <div class="callout-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+            미완료
+          </div>
+          <code>jit.hondi.net</code>·<code>city.hondi.net</code> DNS·GitHub
+          Pages 연결까지는 완료했으나, HTTPS 인증서 발급은 시간이
+          걸리는 자동 절차(Let's Encrypt)라 세션 종료 시점에 완료
+          여부 미확인.
+        </div>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="expert-catalog">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">② 전문가 페르소나</div>
+          <div class="gs-title">카탈로그 전면 재설계 — 505명을 검색+아코디언으로</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          <code>pages/expert-personas.html</code>이 63개 직업군 중
+          대표 예시만 정적으로 나열하던 것을, 레지스트리(<code>expert-registry-*.js</code>)를
+          직접 파싱해 <strong>505개 페르소나 전부를 검색+아코디언
+          카탈로그로 표시</strong>하도록 재구축했다. 반복적으로
+          디자인 방향이 바뀌었다 — Material Design(카테고리별 tonal
+          color) → 원자로/MRI 제어반 스타일(헤어라인 격자·모노스페이스
+          숫자·절제된 인디케이터 색) 순으로 재작업.
+        </p>
+        <h4>부가 기능</h4>
+        <ul>
+          <li><strong>자연어 트리거 검색</strong> — 레지스트리에 이미 있던
+            <code>triggers</code> 배열(자연어 호출 문구)을 검색에
+            반영, 새 AI 호출 없이 순수 문자열 매칭으로 "직업명을 몰라도
+            관련 문구로 찾기" 지원.</li>
+          <li><strong>세부분야 1개 섹션의 직행 링크화</strong> — 세부분야가
+            자기 자신뿐인 섹션(치과의사 등 58개)은 아코디언 대신 곧바로
+            상담으로 이동하는 링크로 전환.</li>
+          <li><strong>실제 상담 연결 + SP 편집 아이콘</strong> — 처음엔
+            모든 링크가 GitHub SP 원문(정적 문서)으로 연결되고 있었다
+            (실제 채팅이 시작되지 않는 상태). <code>expert-chat.html?persona=</code>로
+            교체하고, 최말단 세부분야 칩까지 채팅/SP편집 아이콘을
+            각각 따로 붙였다.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="expert-identity-bug">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">③ 실결함</div>
+          <div class="gs-title">교수 세부전공 174명 — 정체성 없이 구동되던 결함</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          <code>expert-chat.html</code>의 <code>composeExpertPrompt()</code>가
+          "EXPERT_BASE → 부모 1단계 → 본인" 3단까지만 상속을 지원하도록
+          하드코딩돼 있었다. 그런데 교수 세부전공(예: 반도체공학)은
+          실제로 <strong>"교수 → 중계열(재료 중계열) → 소계열(반도체공학)"
+          4단 체인</strong>이라, 부모(중계열)가 "또 부모(교수)를
+          가지고 있으면" 조용히 건너뛰는 코드 때문에 <strong>174명
+          전원이 최상위 정체성(교수라는 자각·핵심 원칙)을 아예 못
+          받은 채 세부전공 지식만 가지고 대화</strong>하고 있었다.
+        </p>
+        <div class="callout bad">
+          <div class="callout-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            수정
+          </div>
+          부모 체인을 하드코딩된 2단이 아니라 <strong>끝까지 재귀적으로
+          따라가도록</strong> 고쳤다. 0~1단 체인(기존 60여 개
+          페르소나)은 동작이 그대로이고, 3단 이상인 경우도 중간
+          계층을 하나도 빠뜨리지 않는다. 독립 시뮬레이션으로
+          (교수→재료 중계열→반도체공학 순서) 검증 완료.
+        </div>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="kgov-catalog">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4 8 4v14"/><path d="M9 9v.01M9 13v.01M9 17v.01M15 9v.01M15 13v.01M15 17v.01"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">④ K-정부</div>
+          <div class="gs-title">카탈로그 신설 — 행정부 648개→701개, 16개 지역 탭</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          전문가 페르소나와 같은 방식으로 <code>k-government.html</code>에
+          행정부 기관 카탈로그를 신설했다. 정책기구·공공기관·공기업·
+          출자출연기관·기타 총 648개로 시작해, division-tables.js를
+          추가로 뒤져 26개를 더 발견(701개), 강원·대구 도 부서 데이터를
+          실제 조직도 검색으로 신규 작성해 채웠다. 이후 사용자 지시로
+          "중앙정부 + 16개 지역" 탭 구조로 재구성했다.
+        </p>
+        <h4>바로잡은 오분류</h4>
+        <p>
+          "출자출연기관" 268개를 전부 중앙정부 카테고리에 뭉뚱그려
+          넣었던 게 실제로는 전부 <strong>지역 소속</strong>이었다
+          (부산경제진흥원은 부산 것이지 중앙정부 것이 아님) — 지역
+          탭으로 재배치하며 자연히 바로잡혔다.
+        </p>
+        <div class="gs-table-wrap">
+          <table class="gs-table">
+            <thead><tr><th>단계</th><th>개수</th></tr></thead>
+            <tbody>
+              <tr><td>최초 국가기관 4종(정책기구·공공기관·공기업·기타)</td><td>412</td></tr>
+              <tr><td>출자출연기관(07-org, 전국)</td><td>268</td></tr>
+              <tr><td>제주 지방자치기관(부서+직속기관)</td><td>27</td></tr>
+              <tr><td>강원·대구 신규 작성 부서</td><td>29</td></tr>
+              <tr><td><strong>최종 합계</strong></td><td><strong>701</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="repo-migration">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20l-5.5-5.5a2.121 2.121 0 0 1 0-3l1.5-1.5a2.121 2.121 0 0 1 3 0L20 22"/><path d="M14 6l5 5"/><path d="M2 21l3-3"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">⑤ 가장 중대한 발견</div>
+          <div class="gs-title">gopang(폐기)을 여전히 콘텐츠 허브로 참조하던 15곳</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          SP 편집기를 만들던 중, <code>gov-router.js</code>의 파일
+          fetch 기본 저장소가 <code>Openhash-Gopang/hondi</code>가
+          아니라 <strong>폐기된 <code>Openhash-Gopang/gopang</code></strong>으로
+          하드코딩돼 있는 것을 발견했다. 확인해보니 <code>worker.js</code>
+          10곳을 포함해 총 <strong>5개 파일 15곳</strong>이 같은
+          문제였다 — 즉 이번 세션 내내 <code>hondi</code>에 커밋한
+          gov-tree 콘텐츠 수정(강원·대구 데이터 등)이 <strong>실제
+          서비스에는 전혀 반영되지 않고 있었을 가능성</strong>이 있었다.
+        </p>
+        <h4>안전하게 전환한 절차</h4>
+        <ol>
+          <li><code>gopang</code>과 <code>hondi</code>의 <code>prompts/</code>
+            전체(2,808개 파일)를 전수 대조 — 0건 누락 확인(hondi가
+            완전한 상위집합).</li>
+          <li><code>sp-catalog.json</code> 내용 비교 — <code>gopang</code>은
+            <code>SP-25_kmail_v1_0</code>에 멈춰있고 <code>hondi</code>는
+            <code>v1_10</code>으로 최신임을 확인.</li>
+          <li>5개 파일 15곳을 <code>Openhash-Gopang/hondi</code>로 일괄
+            치환 후, <code>raw.githubusercontent.com</code>으로 실제
+            강원 데이터가 응답하는 것까지 직접 재확인.</li>
+        </ol>
+        <div class="callout bad">
+          <div class="callout-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+            영향 범위
+          </div>
+          이번 세션에서 만든 K-JIT/K-City SP, 전문가 페르소나 확장,
+          K-정부 도별 데이터, 국가기관 카탈로그 등 — <code>hondi</code>에만
+          반영하고 배포했던 콘텐츠 전부가 이 수정 전까지는 실제로
+          서빙되지 않고 있었을 가능성이 있다.
+        </div>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="legis-judic">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">⑥ 입법·사법</div>
+          <div class="gs-title">카탈로그 신설 + 초기화 순서 버그</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          정책기구 폴더를 다시 뒤져 입법 6개(국회 및 소속기관)·사법
+          5개(법원 계통)를 찾아 별도 탭으로 분리했다. 이 과정에서
+          코드명 혼동(<code>JPRI</code>≠<code>JRTI</code>)으로 사법연수원
+          1건이 계속 "중앙정부"에 잘못 남아있던 것도 함께 바로잡았다.
+        </p>
+        <div class="callout bad">
+          <div class="callout-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+            발견된 버그 — 입법 탭이 항상 비어 있었음
+          </div>
+          <code>&lt;script&gt;</code> 블록이 3개로 나뉜 파일에서, 초기
+          렌더 호출(<code>renderBranch('legislative')</code>)이 두
+          번째 블록 끝에 있었고 그 렌더가 참조하는 데이터
+          (<code>GOV_LEGISLATIVE</code> 등)는 세 번째 블록에 있었다.
+          <code>var</code> 선언은 끌어올려져도 값 할당은 실행 순서를
+          따르므로, 페이지 로드 시 <code>undefined</code>를 참조하며
+          조용히 실패하고 있었다. 초기 호출을 모든 정의가 끝나는
+          지점으로 옮겨 해결 — 두 블록을 이어붙여 Node로 실행
+          시뮬레이션까지 해서 검증했다.
+        </div>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="province-identity-bugs">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 13 8 13s8-7.75 8-13a8 8 0 0 0-8-8z"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">⑦ 라우팅 결함</div>
+          <div class="gs-title">지역 정체성이 접속 위치로 새던 버그 3종</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          "서울 기획조정실을 눌러도 제주로 응답한다"는 사용자 보고를
+          추적해 세 가지 독립된 원인을 찾았다.
+        </p>
+        <h4>1) <code>window.HONDI_PROVINCE_CODE</code> 우선순위 누수</h4>
+        <p>
+          <code>_resolveProvinceCode()</code>가 접속자의 실제 위치
+          기반 전역값을 최우선으로 보는 바람에, <code>directCode</code>로
+          이미 도가 확정된 경로에서도 <code>_loadDoSp()</code>가 그
+          값을 무시하고 접속 위치로 도청 정체성을 로드하고 있었다.
+          <code>_loadDoSp(explicitProvinceCode)</code>로 명시적 인자를
+          받게 고치고, directCode 경로의 7개 호출부 전부를 수정했다.
+        </p>
+        <h4>2) do-dept/do-agency 코드 충돌</h4>
+        <p>
+          여러 도가 같은 도메인 코드(<code>SP-DO-PLAN</code> 등)를
+          공유해, 도를 명시하지 않으면 항상 첫 번째로 등록된 도(제주)로만
+          연결되는 구조였다. <code>{도코드}:{code}</code> 형식을
+          지원하도록 확장해 카탈로그에서 특정 도의 특정 부서로 정확히
+          연결되게 했다.
+        </p>
+        <h4>3) directCode를 무시하던 정적 인사말</h4>
+        <p>
+          <code>regional-gov.html</code>의 초기 인사말 조건이
+          <code>GWP_CTX</code>만 확인하고 카탈로그가 쓰는
+          <code>_govDirectCode</code>는 안 봐서, 특정 기관이 이미
+          확정된 상태로 들어와도 "전국 지방행정 AI입니다"라는 일반
+          인사말이 먼저 떴다. <code>expert-chat.html</code>에서 이미
+          쓰던 방식과 동일하게, 자기소개를 요청하는 시드 발화를 조용히
+          대신 보내도록 바꿨다.
+        </p>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="sp-editor">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">⑧ 신규 도구</div>
+          <div class="gs-title">SP 편집기 — SP-EDITOR 메타-SP + 전용 화면</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          기존 <code>SP-AUTHOR</code>는 "아직 없는 기관 SP를 처음부터
+          조사해 만드는" 용도이며 문서 자체에 "실제 조사·작성은 여전히
+          사람이 수행한다"고 명시돼 있어, "이미 있는 SP를 대화로
+          고치는" 워크플로우와는 맞지 않았다. 그 공백을 메우기 위해
+          <code>SP-EDITOR</code>(신규 메타-SP)와 <code>pages/sp-editor.html</code>
+          (파일 첨부+편집기+대화창)을 신설했다.
+        </p>
+        <ul>
+          <li>AI가 개정안을 코드블록으로 내면 "이 개정본으로 편집창
+            교체" 버튼으로 즉시 반영 — 단, 저장·GitHub 반영은 이
+            화면이 하지 않으며 언제나 사람이 patch+PR로 한다.</li>
+          <li>K-정부·전문가 페르소나 카탈로그 양쪽에 편집 아이콘(✎)을
+            채팅 화살표(↗)와 별도로 추가 — <code>sp-catalog.json</code>과
+            디렉터리 인덱싱으로 715개(K-정부)·351개(전문가 페르소나)
+            경로를 전부 자동 매핑했다.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="defects">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">Defects</div>
+          <div class="gs-title">발견된 실제 결함 총정리</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <div class="gs-table-wrap">
+          <table class="gs-table">
+            <thead><tr><th>결함</th><th>영향 범위</th><th>상태</th></tr></thead>
+            <tbody>
+              <tr><td>K-JIT/K-City SSO 무한 리다이렉트 루프</td><td>신규 사이트 2곳</td><td><span class="badge pass">수정</span></td></tr>
+              <tr><td>k-services.html SVC_CONTENT 쉼표 누락(탭 전체 먹통)</td><td>K-서비스 탭 전체</td><td><span class="badge pass">수정</span></td></tr>
+              <tr><td>전문가 페르소나 카탈로그 링크가 채팅이 아닌 GitHub 원문으로 연결</td><td>505명 전체</td><td><span class="badge pass">수정</span></td></tr>
+              <tr><td>교수 세부전공 174명 — 3단 이상 상속 시 정체성 누락</td><td>174명</td><td><span class="badge pass">수정</span></td></tr>
+              <tr><td>K-정부 출자출연기관 268개 오분류(전부 중앙정부로)</td><td>268개 기관</td><td><span class="badge pass">수정</span></td></tr>
+              <tr><td>gopang(폐기) 하드코딩 15곳 — 콘텐츠 미반영</td><td>gov-tree 전체</td><td><span class="badge pass">수정</span></td></tr>
+              <tr><td>입법 탭 스크립트 실행 순서 버그(영구 빈 목록)</td><td>입법 탭</td><td><span class="badge pass">수정</span></td></tr>
+              <tr><td>_loadDoSp 접속 위치 우선순위 누수</td><td>directCode 전체(정책·qgov·기업·기타·org·do-dept)</td><td><span class="badge pass">수정</span></td></tr>
+              <tr><td>do-dept/do-agency 도 코드 충돌(항상 제주로 연결)</td><td>13개 도 부서 전체</td><td><span class="badge pass">수정</span></td></tr>
+              <tr><td>regional-gov.html directCode 무시 정적 인사말</td><td>K-정부 전체</td><td><span class="badge pass">수정</span></td></tr>
+              <tr><td>jit/city HTTPS 인증서 발급 완료 여부</td><td>신규 사이트 2곳</td><td><span class="badge skip">미확인</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="lessons">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">Lessons</div>
+          <div class="gs-title">교훈</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <ul>
+          <li><strong>"만들었다"와 "반영됐다"는 다른 문장이다.</strong>
+            코드를 올바른 저장소에 커밋해도, 그 코드가 런타임에 데이터를
+            fetch하는 대상 저장소 자체가 다르면 아무 의미가 없다 —
+            의심스러우면 <code>raw.githubusercontent.com</code>으로
+            직접 실물을 확인한다.</li>
+          <li><strong>여러 <code>&lt;script&gt;</code> 블록이 있는 파일은
+            정의 순서를 반드시 눈으로 추적한다.</strong> <code>var</code>
+            호이스팅은 선언만 끌어올리지 값 할당까지 끌어올리지 않는다
+            — 초기 실행 호출은 항상 그 호출이 참조하는 모든 것의
+            정의보다 뒤에 있어야 한다.</li>
+          <li><strong>여러 계층을 상속하는 구조는 "몇 단까지"를 하드코딩하지
+            않는다.</strong> 지금 데이터가 2단이라고 코드도 2단으로
+            고정하면, 나중에 3단 데이터가 추가되는 순간 조용히
+            깨진다 — 재귀로 짜면 깊이가 늘어도 안전하다.</li>
+          <li><strong>전역 상태(접속 위치 등)를 우선하는 함수는, 이미
+            결정된 값이 있는 호출 경로에서는 명시적으로 그 값을
+            넘겨 우회할 수 있게 만든다.</strong> 그렇지 않으면 "이미
+            정해진 답이 있는데 굳이 다시 추측해서 틀리는" 상황이
+            반복된다.</li>
+          <li><strong>사고실험(가상의 클릭 경로를 코드로 추적하는 것)은
+            실제 클릭만큼 신뢰하되 완전히 대체하지는 않는다.</strong>
+            로직 추적으로 대부분의 버그를 잡았지만, 실제 최종 확인은
+            결국 사용자의 스크린샷과 클릭이었다.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="related">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">Related</div>
+          <div class="gs-title">관련 문서</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <ul>
+          <li>저장소 내 <code>pages/expert-personas.html</code> · <code>pages/expert-chat.html</code> — ②③의 최종 코드</li>
+          <li>저장소 내 <code>pages/k-government.html</code> · <code>src/gopang/gov/gov-router.js</code> — ④⑥⑦의 최종 코드</li>
+          <li>저장소 내 <code>pages/sp-editor.html</code> · <code>prompts/SP-EDITOR_v1_0.md</code> — ⑧의 신규 문서</li>
+          <li>저장소 내 <code>worker.js</code> · <code>gwp-registry.js</code> · <code>assets/site-header.js</code> · <code>src/gopang/ai/gov-template-renderer.js</code> — ⑤에서 전환한 저장소 참조 5곳</li>
+          <li>저장소 내 <code>prompts/gov-tree/02-do-dept/templates/do-dept-master-data.json</code> — ④에서 신설한 강원·대구 부서 데이터</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  var revealEls = document.querySelectorAll('.reveal');
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.06 });
+  revealEls.forEach(function (el) { io.observe(el); });
+
+  var tocLinks = document.querySelectorAll('.doc-toc a');
+  var sections = Array.prototype.map.call(tocLinks, function (a) {
+    return document.querySelector(a.getAttribute('href'));
+  });
+  function setActive() {
+    var idx = 0;
+    var y = window.scrollY + 110;
+    sections.forEach(function (sec, i) { if (sec && sec.offsetTop <= y) idx = i; });
+    tocLinks.forEach(function (a, i) { a.classList.toggle('active', i === idx); });
+  }
+  window.addEventListener('scroll', setActive, { passive: true });
+  setActive();
+</script>
+</body>
+</html>
