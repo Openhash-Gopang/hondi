@@ -1160,6 +1160,34 @@ document.addEventListener('keydown', function (e) {
   </div>
 </div>
 
+<div class="site-strip">
+  <a class="site-strip-text" href="https://github.com/Openhash-Gopang/gopang" target="_blank">2026년 9월 1일 테스트 시작 · 2027년 완전한 AI 정부 구현 목표 · 오픈소스 코드 공개</a>
+  <a class="site-strip-support-btn" href="/pages/project-support.html">혼디 프로젝트를 지원하는 방법</a>
+</div>
+
+<!-- 2026-09-05 신설 — 상단 우측에 있던 K-서비스·전문가 페르소나·K-정부·
+     프롬프트 4개를 필(pill)이 아니라 사각형 Material Design 버튼으로,
+     최상단 공지 바(site-strip) 바로 아래에 배치해 방문자가 스크롤 없이
+     바로 보고 누를 수 있게 한다. -->
+<div class="hero-top-actions">
+  <a class="hero-top-btn" href="#" onclick="loadPage('k-services');return false;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    <span>K-서비스</span>
+  </a>
+  <a class="hero-top-btn" href="#" onclick="loadPage('expert-personas');return false;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 2.5 3 6 3s6-1.5 6-3v-5"/></svg>
+    <span>전문가 페르소나</span>
+  </a>
+  <a class="hero-top-btn" href="#" onclick="loadPage('k-government');return false;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+    <span>K-정부</span>
+  </a>
+  <a class="hero-top-btn" href="pages/prompts.html">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+    <span>프롬프트</span>
+  </a>
+</div>
+
 <section class="site-hero" id="top">
   <div id="hero-illustration" class="site-hero-illustration" role="img" aria-label="사람 간 소통(느림) → 혼디가 반복 업무를 대신함(문구) → 혼디 간 소통(빛의 속도) → 체제 비용·처리 시간 절감(문구) 순으로 진행되는 애니메이션"></div>
   <h1 id="hero-title" style="transition:opacity .25s ease"><span class="l1">사람 간의 업무를</span><br><span class="l2">혼디 간의 소통으로 보강합니다.</span> <a class="hero-more" href="./highlights/hondi-communication.html">더보기<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a></h1>
@@ -1202,13 +1230,13 @@ document.addEventListener('keydown', function (e) {
     <h2 class="section-title">전자동 AI 정부는 <strong>어떻게 작동할까요?</strong></h2>
     <p class="bh-lede"><strong>혼디</strong>가 정부 업무를 자동화한다는 것, 그리고 사람보다 훨씬 빠르다는 것까지는 지난 안내에서 전해 드렸습니다. 이번에는 그 안쪽 — <strong>어떤 원리로</strong> 이 일이 가능한지를 최대한 쉬운 말로 설명합니다.</p>
 
-    <h2 class="bh-h2"><span class="bh-n">1</span>전자동 AI 정부란 무엇인가</h2>
+    <h2 class="bh-h2"><span class="bh-n">1</span><span class="bh-h2-text">전자동 AI 정부란 무엇인가</span></h2>
     <p class="bh-p">전자동 AI 정부는 중앙 정부와 지방자치단체(도청·시청·읍면동 복지센터 등), 그리고 공기업 각 부서의 업무 중에서 <strong>반복적이고 단순한 행정 업무</strong>를 AI 기술로 자동화한 것입니다. 민원인을 직접 상대하던 업무를, 정교하게 설계된 AI 시스템이 대신 처리합니다.</p>
 
-    <h2 class="bh-h2"><span class="bh-n">2</span>AI는 방정식을 푸는 소프트웨어입니다</h2>
+    <h2 class="bh-h2"><span class="bh-n">2</span><span class="bh-h2-text">AI는 방정식을 푸는 소프트웨어입니다</span></h2>
     <p class="bh-p">학창 시절 1차 방정식, 2차 방정식, 3차 방정식을 풀어본 기억이 있을 것입니다. 답을 찾는 미지수가 하나면 1차, x와 y 둘이면 2차, x·y·z 셋이면 3차입니다. AI가 푸는 방정식은 이런 미지수가 많으면 1조 개가 넘습니다. 사람은 상상조차 할 수 없는 규모의 방정식이지만, AI는 이것을 뚝딱뚝딱 풀어냅니다.</p>
 
-    <h2 class="bh-h2"><span class="bh-n">3</span><strong>혼디</strong>는 무엇이 다른가 — 짜장면만 배달하는 로봇</h2>
+    <h2 class="bh-h2"><span class="bh-n">3</span><span class="bh-h2-text"><strong>혼디</strong>는 무엇이 다른가 — 짜장면만 배달하는 로봇</span></h2>
     <p class="bh-p"><strong>혼디</strong>는 기존 AI(ChatGPT, Claude, Gemini 등)와 비슷하면서도 다릅니다. 먼저, <strong>혼디</strong>는 자체 거대 언어모델(LLM)이 없습니다. LG, 카카오 등 국내에서 개발한 소형 LLM을 사용합니다. 그런데도 해외 거대 LLM과는 비교할 수 없을 만큼 우수한 성능을 냅니다.</p>
     <p class="bh-p">그 방법은 콜럼버스의 달걀처럼 단순합니다.</p>
     <p class="bh-p">어떤 질문에도 답하려 드는 거대 LLM과 달리, <strong>혼디</strong>는 거대 LLM을 업무별로 잘게 쪼갰습니다. 변호사 <strong>혼디</strong>는 법률만, 의사 <strong>혼디</strong>는 의학만 다룹니다. 더 잘게 쪼개면, 민법 <strong>혼디</strong>는 민법만, 영상의학 <strong>혼디</strong>는 MRI·CT·X-ray 등 영상 데이터만 다룹니다. 이렇게 업무와 기능별로 나눈 수천 개의 조각 하나하나를, 국내 소형 LLM이 그 업무 하나만큼은 가장 잘 수행하도록 훈련합니다. 이 훈련 과정을 <strong>파인튜닝(Fine-tuning)</strong>이라 부릅니다.</p>
@@ -1220,10 +1248,10 @@ document.addEventListener('keydown', function (e) {
     <h3 class="bh-h3">카톡보다 100배 나은 <strong>혼디</strong></h3>
     <p class="bh-p">카톡은 사람과 사람이 메시지를 주고받는 데 그치지만, <strong>혼디</strong>는 메시지를 주고받는 동시에 그 안의 지시를 실제로 실행합니다. 등본 발급, 예약, 결제, 인허가 신청까지 — 카톡이라면 사람이 일일이 처리해야 할 일들을, <strong>혼디</strong>는 AI와 AI가 직접 대화하며 자동으로 끝냅니다. 같은 메신저라도, <strong>혼디</strong>는 카톡이 하지 못하는 일까지 해내는 메신저를 지향합니다.</p>
 
-    <h2 class="bh-h2"><span class="bh-n">4</span><strong>혼디</strong>, 개인용 AI 비서</h2>
+    <h2 class="bh-h2"><span class="bh-n">4</span><span class="bh-h2-text"><strong>혼디</strong>, 개인용 AI 비서</span></h2>
     <p class="bh-p"><strong>혼디</strong>는 또한 개인의 전속 AI입니다. 개인용 <strong>혼디</strong>는 해당 개인의 적성, 능력, 경험 등을 파악한 뒤, 그/그녀의 지능을 비유하자면, IQ 200으로 높입니다. 나만의 AI 비서 <strong>혼디</strong>에 의한 여러분의 지능과 능력 확장을 직접 경험해 보세요.</p>
 
-    <h2 class="bh-h2"><span class="bh-n">5</span>사람과 사람, 사람과 AI, AI와 AI</h2>
+    <h2 class="bh-h2"><span class="bh-n">5</span><span class="bh-h2-text">사람과 사람, 사람과 AI, AI와 AI</span></h2>
     <p class="bh-p">개인파산과 건축 인허가 과정을 예로 들어보겠습니다. 기존 방식은 사람과 사람이 만나 일을 진행합니다. 개인파산은 열 곳이 넘는 기관을 방문해 서류를 발급받고, 변호사의 도움을 받아 신청서를 작성해야 합니다. 건축 인허가는 이보다는 단순하지만 역시 만만치 않습니다. 사람과 사람이 만나 처리하면 수 주가 걸리는 일을, AI의 도움을 받으면 수 일 만에 마칠 수 있습니다. 사람이 아예 개입하지 않고 AI와 AI가 직접 대화하며 처리하면, 길어야 수 분입니다.</p>
 
     <div class="bh-stat-row">
@@ -1234,13 +1262,13 @@ document.addEventListener('keydown', function (e) {
 
     <p class="bh-p">수만 개의 초소형 AI 엔진이 서로 소통하며 업무를 처리하므로, 기존에 수 년이 걸리던 개인파산 업무를 이론적으로는 3분 안에 끝낼 수 있습니다. "이론적"이라고 말씀드리는 이유는, 법원·시청·국세청·은행 등이 아직 <strong>혼디</strong>를 받아들이지 않았기 때문입니다.</p>
 
-    <h2 class="bh-h2"><span class="bh-n">6</span>제주 토산품에서, 한국을 거쳐 세계로</h2>
+    <h2 class="bh-h2"><span class="bh-n">6</span><span class="bh-h2-text">제주 토산품에서, 한국을 거쳐 세계로</span></h2>
     <p class="bh-p"><strong>혼디</strong>는 제주도에서, 제주 사람이 만든 제주의 토산품이자 특산품입니다. 제주도에서 <strong>혼디</strong>가 성공적으로 런칭하면 한국이 뒤따르고, 한국이 해내면 세계가 뒤따를 것입니다.</p>
 
-    <h2 class="bh-h2"><span class="bh-n">7</span>지금은 현장 테스트 단계입니다</h2>
+    <h2 class="bh-h2"><span class="bh-n">7</span><span class="bh-h2-text">지금은 현장 테스트 단계입니다</span></h2>
     <p class="bh-p">2026년 9월 1일부터 12월 31일까지, <strong>혼디</strong>의 수만 개 AI 엔진 하나하나를 현장에서 테스트합니다. 기존 설계의 미비점을 보완하고 장점을 강화해, 2027년 상반기에 전자동 AI 정부·대학·병원·교통물류·금융·시장·산업·기업 등을 정식으로 출시할 예정입니다.</p>
 
-    <h2 class="bh-h2"><span class="bh-n">8</span><strong>혼디</strong>는 '<b>함께</b>'라는 뜻입니다</h2>
+    <h2 class="bh-h2"><span class="bh-n">8</span><span class="bh-h2-text"><strong>혼디</strong>는 '<b>함께</b>'라는 뜻입니다</span></h2>
     <p class="bh-p">'<strong>혼디</strong>'는 제주 토속어로 '<b>함께</b>'라는 뜻입니다. <strong>혼디</strong>는 저희가 개발했지만, 여러분이 '<b>함께</b>' 하셔야 비로소 완성할 수 있습니다. 그 방법은 유료 회원 가입입니다.</p>
     <div class="bh-analogy">1만 명이 <strong>혼디</strong>에 가입하면, 제주도에 <strong>혼디</strong> 자체 AI 서버를 구축할 수 있습니다.</div>
 
@@ -1340,34 +1368,6 @@ document.addEventListener('keydown', function (e) {
   runStage();
 })();
 </script>
-
-<div class="site-strip">
-  <a class="site-strip-text" href="https://github.com/Openhash-Gopang/gopang" target="_blank">2026년 9월 1일 테스트 시작 · 2027년 완전한 AI 정부 구현 목표 · 오픈소스 코드 공개</a>
-  <a class="site-strip-support-btn" href="/pages/project-support.html">혼디 프로젝트를 지원하는 방법</a>
-</div>
-
-<!-- 2026-09-05 신설 — 상단 우측에 있던 K-서비스·전문가 페르소나·K-정부·
-     프롬프트 4개를 필(pill)이 아니라 사각형 Material Design 버튼으로,
-     최상단 공지 바(site-strip) 바로 아래에 배치해 방문자가 스크롤 없이
-     바로 보고 누를 수 있게 한다. -->
-<div class="hero-top-actions">
-  <a class="hero-top-btn" href="#" onclick="loadPage('k-services');return false;">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-    <span>K-서비스</span>
-  </a>
-  <a class="hero-top-btn" href="#" onclick="loadPage('expert-personas');return false;">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 2.5 3 6 3s6-1.5 6-3v-5"/></svg>
-    <span>전문가 페르소나</span>
-  </a>
-  <a class="hero-top-btn" href="#" onclick="loadPage('k-government');return false;">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
-    <span>K-정부</span>
-  </a>
-  <a class="hero-top-btn" href="pages/prompts.html">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
-    <span>프롬프트</span>
-  </a>
-</div>
 
 <!-- 2026-08-29 — 상단 통계 카드 5개(99%·16개·1,000원·100%·500여)를
      삭제하고, 각 카드의 본문(펼침 패널)을 주제가 겹치는 하단 본문
