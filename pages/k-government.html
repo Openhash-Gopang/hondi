@@ -323,6 +323,16 @@ var BRANCH_CONTENT = {
   legislative: `
     <div class="svc-detail">
       <div class="svc-eyebrow">입법 · K-Democracy</div>
+
+      <h3>기관 목록</h3>
+      <p style="font-size:13px; color:var(--text3); margin-bottom:4px;">국회 및 그 소속기관 6곳입니다. 행정부 카탈로그와 동일한 방식이며, 규모가 작아 지역 구분 없이 하나로 나열합니다.</p>
+      <div class="search-bar">
+        <svg class="search-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="legisSearch" type="text" placeholder="기관명 검색 (예: 국회도서관)" autocomplete="off">
+        <button id="legisSearchClear" class="search-clear" type="button" aria-label="지우기">✕</button>
+      </div>
+      <div class="search-status" id="legisSearchStatus"></div>
+      <div id="legisCatGroups"></div>
       <h2>DAWN — 국민동의청원 확산 허브이자 내부 거버넌스</h2>
       <p class="svc-lead">DAWN(Democracy Is All We Need)은 고팡 시스템 자체의 변경 사항을 이용자 투표로 결정하는 거버넌스 메커니즘이며, 동시에 국민동의청원을 널리 알리는 확산 허브 역할을 합니다.</p>
       <a class="svc-link-btn" href="https://democracy.hondi.net" target="_blank" rel="noopener">
@@ -389,21 +399,22 @@ var BRANCH_CONTENT = {
         DAWN 투표로 결정되는 것은 혼디/고팡 생태계 내부 정책이며, 실제 법률의 제·개정 권한은 언제나 국회에 있습니다.
       </div>
 
-      <h3>기관 목록</h3>
-      <p style="font-size:13px; color:var(--text3); margin-bottom:4px;">국회 및 그 소속기관 6곳입니다. 행정부 카탈로그와 동일한 방식이며, 규모가 작아 지역 구분 없이 하나로 나열합니다.</p>
-      <div class="search-bar">
-        <svg class="search-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input id="legisSearch" type="text" placeholder="기관명 검색 (예: 국회도서관)" autocomplete="off">
-        <button id="legisSearchClear" class="search-clear" type="button" aria-label="지우기">✕</button>
-      </div>
-      <div class="search-status" id="legisSearchStatus"></div>
-      <div id="legisCatGroups"></div>
     </div>
   `,
 
   judicial: `
     <div class="svc-detail">
       <div class="svc-eyebrow">사법 · K-Law</div>
+
+      <h3>기관 목록</h3>
+      <p style="font-size:13px; color:var(--text3); margin-bottom:4px;">법원 및 사법행정기관 5곳입니다. 헌법재판소는 엄밀히는 입법·사법·행정 어디에도 속하지 않는 별도 헌법기관이지만, 통상 사법 영역으로 함께 다뤄 이 탭에 포함했습니다.</p>
+      <div class="search-bar">
+        <svg class="search-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="judicSearch" type="text" placeholder="기관명 검색 (예: 헌법재판소)" autocomplete="off">
+        <button id="judicSearchClear" class="search-clear" type="button" aria-label="지우기">✕</button>
+      </div>
+      <div class="search-status" id="judicSearchStatus"></div>
+      <div id="judicCatGroups"></div>
       <h2>가상 판결 시뮬레이션</h2>
       <p class="svc-lead">사실관계와 관련 판례를 근거로 3분 만에 가상 판결문을 작성합니다. 당사자 양측이 그 결론에 합의하면 민법상 화해계약(제731·732조)으로서 즉시 법적 구속력이 발생합니다.</p>
       <a class="svc-link-btn" href="https://klaw.hondi.net" target="_blank" rel="noopener">
@@ -464,15 +475,6 @@ var BRANCH_CONTENT = {
         K-Law는 실제 법원의 재판 절차를 대체하지 않습니다. 화해계약이 성립하지 않으면 당사자는 언제든 정식 소송 절차를 이용할 수 있으며, 최종 법적 판단 권한은 언제나 법원에 있습니다.
       </div>
 
-      <h3>기관 목록</h3>
-      <p style="font-size:13px; color:var(--text3); margin-bottom:4px;">법원 및 사법행정기관 5곳입니다. 헌법재판소는 엄밀히는 입법·사법·행정 어디에도 속하지 않는 별도 헌법기관이지만, 통상 사법 영역으로 함께 다뤄 이 탭에 포함했습니다.</p>
-      <div class="search-bar">
-        <svg class="search-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input id="judicSearch" type="text" placeholder="기관명 검색 (예: 헌법재판소)" autocomplete="off">
-        <button id="judicSearchClear" class="search-clear" type="button" aria-label="지우기">✕</button>
-      </div>
-      <div class="search-status" id="judicSearchStatus"></div>
-      <div id="judicCatGroups"></div>
     </div>
   `,
 
