@@ -881,8 +881,14 @@ body.mm-lock-scroll { overflow: hidden; }
 .db-card-grid {
   /* Material Design 반응형 그리드 브레이크포인트 — Compact(<600px)도
      최소 2열은 나란히 배열한다(카드 1개가 화면 전체를 차지하던 문제 수정,
-     2026-09-05). 폭이 넓어질수록 열 개수가 늘어난다. */
-  display: grid; grid-template-columns: repeat(2, 1fr);
+     2026-09-05). 폭이 넓어질수록 열 개수가 늘어난다.
+     grid-auto-flow: dense — 카드 바로 다음에 오는 전체폭 패널
+     (.db-panel, grid-column:1/-1)이 접혀 있어도 "이번 줄을 통째로 쓰는
+     항목"으로 계산되어, 기본 배치 방식(sparse)에서는 그 뒤 카드가 남은
+     빈칸을 못 채우고 매번 새 줄로 밀려 카드가 전부 세로 1열로 쌓이는
+     문제가 있었다(2026-09-05 발견) — dense로 바꿔 빈칸을 다시 채우게
+     한다. */
+  display: grid; grid-template-columns: repeat(2, 1fr); grid-auto-flow: dense;
   gap: 10px; margin-top: 8px;
 }
 @media (min-width: 480px) {
@@ -1160,34 +1166,6 @@ document.addEventListener('keydown', function (e) {
   </div>
 </div>
 
-<div class="site-strip">
-  <a class="site-strip-text" href="https://github.com/Openhash-Gopang/gopang" target="_blank">2026년 9월 1일 테스트 시작 · 2027년 완전한 AI 정부 구현 목표 · 오픈소스 코드 공개</a>
-  <a class="site-strip-support-btn" href="/pages/project-support.html">혼디 프로젝트를 지원하는 방법</a>
-</div>
-
-<!-- 2026-09-05 신설 — 상단 우측에 있던 K-서비스·전문가 페르소나·K-정부·
-     프롬프트 4개를 필(pill)이 아니라 사각형 Material Design 버튼으로,
-     최상단 공지 바(site-strip) 바로 아래에 배치해 방문자가 스크롤 없이
-     바로 보고 누를 수 있게 한다. -->
-<div class="hero-top-actions">
-  <a class="hero-top-btn" href="#" onclick="loadPage('k-services');return false;">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-    <span>K-서비스</span>
-  </a>
-  <a class="hero-top-btn" href="#" onclick="loadPage('expert-personas');return false;">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 2.5 3 6 3s6-1.5 6-3v-5"/></svg>
-    <span>전문가 페르소나</span>
-  </a>
-  <a class="hero-top-btn" href="#" onclick="loadPage('k-government');return false;">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
-    <span>K-정부</span>
-  </a>
-  <a class="hero-top-btn" href="pages/prompts.html">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
-    <span>프롬프트</span>
-  </a>
-</div>
-
 <section class="site-hero" id="top">
   <div id="hero-illustration" class="site-hero-illustration" role="img" aria-label="사람 간 소통(느림) → 혼디가 반복 업무를 대신함(문구) → 혼디 간 소통(빛의 속도) → 체제 비용·처리 시간 절감(문구) 순으로 진행되는 애니메이션"></div>
   <h1 id="hero-title" style="transition:opacity .25s ease"><span class="l1">사람 간의 업무를</span><br><span class="l2">혼디 간의 소통으로 보강합니다.</span> <a class="hero-more" href="./highlights/hondi-communication.html">더보기<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a></h1>
@@ -1223,6 +1201,34 @@ document.addEventListener('keydown', function (e) {
          인터랙티브 시뮬레이터 링크를 추가하고 personas/law.html은 보존
        상세 커밋 이력은 feature/nav-consolidation-phase1 브랜치 참고. -->
 </section>
+
+<div class="site-strip">
+  <a class="site-strip-text" href="https://github.com/Openhash-Gopang/gopang" target="_blank">2026년 9월 1일 테스트 시작 · 2027년 완전한 AI 정부 구현 목표 · 오픈소스 코드 공개</a>
+  <a class="site-strip-support-btn" href="/pages/project-support.html">혼디 프로젝트를 지원하는 방법</a>
+</div>
+
+<!-- 2026-09-05 신설 — 상단 우측에 있던 K-서비스·전문가 페르소나·K-정부·
+     프롬프트 4개를 필(pill)이 아니라 사각형 Material Design 버튼으로,
+     최상단 공지 바(site-strip) 바로 아래에 배치해 방문자가 스크롤 없이
+     바로 보고 누를 수 있게 한다. -->
+<div class="hero-top-actions">
+  <a class="hero-top-btn" href="#" onclick="loadPage('k-services');return false;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    <span>K-서비스</span>
+  </a>
+  <a class="hero-top-btn" href="#" onclick="loadPage('expert-personas');return false;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 2.5 3 6 3s6-1.5 6-3v-5"/></svg>
+    <span>전문가 페르소나</span>
+  </a>
+  <a class="hero-top-btn" href="#" onclick="loadPage('k-government');return false;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+    <span>K-정부</span>
+  </a>
+  <a class="hero-top-btn" href="pages/prompts.html">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+    <span>프롬프트</span>
+  </a>
+</div>
 
 <section class="section bh-section" id="ai-gov-how">
   <div class="bh-wrap">
