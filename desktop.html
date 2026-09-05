@@ -1389,20 +1389,17 @@ document.addEventListener('keydown', function (e) {
     <a class="doc-link" href="./reports/hondi-example.html" target="_blank" rel="noopener">더 자세히<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
   </div>
 </section>
+
+
+<div class="db-pagination db-pagination-bottom">
+  <button type="button" class="db-page-btn" data-page="1">1</button>
+  <button type="button" class="db-page-btn" data-page="2">2</button>
+  <button type="button" class="db-page-btn" data-page="3">3</button>
+  <button type="button" class="db-page-btn" data-page="4">4</button>
+</div>
 </div>
 
 <div class="db-page" id="db-page-3" style="display:none">
-<section class="section db-cards-section" id="db-group-philosophy" style="--db-accent:#4338CA">
-  <div class="section-inner">
-    <span class="section-tag">더 알아보기</span>
-    <h2 class="section-title">혼디의 철학과 정체성</h2>
-    <div class="db-card-grid">
-      <button type="button" class="db-card" data-panel="db-panel-hondi-net" aria-expanded="false">
-  <span class="db-card-icon" style="color:#4338CA"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></span>
-  <span class="db-card-title">5천만 AI 비서의 나라</span>
-  <span class="db-card-summary">한국은 5천만 한국인과 수백만 기업·기관들로 구성된 나라입니다. 혼디넷은 5천만 AI 비서와 수백만 기업·기관 AI로 구성된 …</span>
-  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-</button><div class="db-panel" id="db-panel-hondi-net"><div class="db-panel-inner">
 <section class="section" id="hondi-net">
   <div class="section-inner">
     <span class="section-tag">혼디넷</span>
@@ -1414,12 +1411,7 @@ document.addEventListener('keydown', function (e) {
     </div>
   </div>
 </section>
-</div></div><button type="button" class="db-card" data-panel="db-panel-separation-of-powers" aria-expanded="false">
-  <span class="db-card-icon" style="color:#4338CA"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 8l-3 6a4 4 0 0 0 8 0zM19 8l-3 6a4 4 0 0 0 8 0zM3 8h6M15 8h6M7 21h10"/></svg></span>
-  <span class="db-card-title">판결·입법·집행이 하나의 순환을 이룹니다</span>
-  <span class="db-card-summary">다툼이 생기면, 미래의 대법원 판결 예측을 혼디에게 물어보세요.</span>
-  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-</button><div class="db-panel" id="db-panel-separation-of-powers"><div class="db-panel-inner">
+
 <section class="section" id="separation-of-powers">
   <div class="section-inner">
     <div style="background:var(--bg-subtle,#f8f9fa); border:1px solid var(--border,#e5e7eb); border-left:4px solid var(--brand); border-radius:0 12px 12px 0; padding:12px 18px; margin:-124px 0 20px;">
@@ -1446,12 +1438,7 @@ document.addEventListener('keydown', function (e) {
     <p style="font-size:14px; font-weight:600; color:#0b57a4; margin:8px 0 0; line-height:1.75;">사건의 개요를 정확히 입력하면(누가 언제 어디서 무엇을 어떻게 왜), 5분 내에 대법원 예상 판결문을 생성합니다.<br>혼디가 작성한 예상 판결문의 정교한 법리를 인간 법조인이 깰 수 있을까요?<br>시간과 비용은 차치하고, 기나 긴 법원 소송의 막대한 수고를 감내할 필요가 있을까요?</p>
   </div>
 </section>
-</div></div><button type="button" class="db-card" data-panel="db-panel-core-philosophy" aria-expanded="false">
-  <span class="db-card-icon" style="color:#4338CA"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></span>
-  <span class="db-card-title">지능의 상향 평준화</span>
-  <span class="db-card-summary">사람마다 성격, 지능, 경험이 제각각입니다. 훌륭한 교사가 있는 반면, 그렇지 않은 사람도 적지 않고, 의사도 화타같은 명의가…</span>
-  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-</button><div class="db-panel" id="db-panel-core-philosophy"><div class="db-panel-inner">
+
 <section class="section" id="core-philosophy">
   <div class="section-inner">
     <span class="section-tag">혼디의 핵심 사상</span>
@@ -1466,12 +1453,7 @@ document.addEventListener('keydown', function (e) {
     </div>
   </div>
 </section>
-</div></div><button type="button" class="db-card" data-panel="db-panel-control-tower-principle" aria-expanded="false">
-  <span class="db-card-icon" style="color:#4338CA"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="12 7 13.5 10.5 17 11 14.3 13.4 15 17 12 15.2 9 17 9.7 13.4 7 11 10.5 10.5 12 7"/></svg></span>
-  <span class="db-card-title">한 번에 하나씩, 끝까지 안내합니다</span>
-  <span class="db-card-summary">한국 정부는 8월 3일 AI 정부 시범 서비스를 시작했습니다. 정부 소속 모든 기관이 데이터가 오가는 문호를 완전히 열면, 혼…</span>
-  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-</button><div class="db-panel" id="db-panel-control-tower-principle"><div class="db-panel-inner">
+
 <section class="section" id="control-tower-principle">
   <div class="section-inner">
     <span class="section-tag">관제탑 원칙</span>
@@ -1483,12 +1465,7 @@ document.addEventListener('keydown', function (e) {
     </div>
   </div>
 </section>
-</div></div><button type="button" class="db-card" data-panel="db-panel-half-performance" aria-expanded="false">
-  <span class="db-card-icon" style="color:#4338CA"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="7" width="18" height="10" rx="2"/><line x1="23" y1="10" x2="23" y2="14"/><rect x="3" y="9" width="7" height="6" fill="currentColor" stroke="none"/></svg></span>
-  <span class="db-card-title">혼디, 왜 절반의 성능인가</span>
-  <span class="db-card-summary">혼디는 사용자의 지시를 직접 이행하도록 설계되었지만, 그 성능은 목표치의 절반 수준에 그칩니다. 그 이유는 둘입니다.</span>
-  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-</button><div class="db-panel" id="db-panel-half-performance"><div class="db-panel-inner">
+
 <section class="section" id="half-performance">
   <div class="section-inner">
     <span class="section-tag">절반의 성능</span>
@@ -1501,24 +1478,16 @@ document.addEventListener('keydown', function (e) {
     </div>
   </div>
 </section>
-</div></div>
-    </div>
-  </div>
-</section>
+
+<div class="db-pagination db-pagination-bottom">
+  <button type="button" class="db-page-btn" data-page="1">1</button>
+  <button type="button" class="db-page-btn" data-page="2">2</button>
+  <button type="button" class="db-page-btn active" data-page="3">3</button>
+  <button type="button" class="db-page-btn" data-page="4">4</button>
+</div>
 </div>
 
 <div class="db-page" id="db-page-4" style="display:none">
-<section class="section db-cards-section" id="db-group-practical" style="--db-accent:#0e8f83">
-  <div class="section-inner">
-    <span class="section-tag">더 알아보기</span>
-    <h2 class="section-title">실용 정보 — 이용방법·비용·기능</h2>
-    <div class="db-card-grid">
-      <button type="button" class="db-card" data-panel="db-panel-usage-guide" aria-expanded="false">
-  <span class="db-card-icon" style="color:#0e8f83"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
-  <span class="db-card-title">만인(萬人)의 AI 비서</span>
-  <span class="db-card-summary">상상해 보십시오. 여러분의 지능(IQ)이 200이 되고, 세상의 모든 지식을 얻게 된다면?나 자신뿐 아니라, 나와 대화하는 모…</span>
-  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-</button><div class="db-panel" id="db-panel-usage-guide"><div class="db-panel-inner">
 <section class="section" id="usage-guide">
   <div class="section-inner">
     <span class="section-tag">혼디, 어디에 쓰는 물건인고?</span>
@@ -1586,12 +1555,7 @@ document.addEventListener('keydown', function (e) {
     <a class="doc-link doc-link-emphasis" href="./highlights/all-examples.html" target="_blank" rel="noopener">전체 예시 보기 — 주피터의 하루<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
   </div>
 </section>
-</div></div><button type="button" class="db-card" data-panel="db-panel-cost-comparison" aria-expanded="false">
-  <span class="db-card-icon" style="color:#0e8f83"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
-  <span class="db-card-title">시간과 비용 비교</span>
-  <span class="db-card-summary">혼디의 목표는 업무 처리 시간과 행정 비용을 기존 대비 최대 99%까지 단축하는 것입니다(2027년 목표 기준). 아래는 혼디…</span>
-  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-</button><div class="db-panel" id="db-panel-cost-comparison"><div class="db-panel-inner">
+
 <section class="section" id="cost-comparison" style="background:var(--bg-alt)">
   <div class="section-inner">
     <span class="section-tag">비용 비교</span>
@@ -1618,12 +1582,7 @@ document.addEventListener('keydown', function (e) {
     <p class="cmp-summary">혼디의 업무 수행 프로세스: 사용자가 혼디에게 지시 → 정부24(data.go.kr)에서 서류 발급 → 사용자 승인 → 정부 전자문서망(gdoc.go.kr)에 제출 → 관련 기관 전달 → 기관(사람)이 승인. <strong>MoTE</strong>(수백 개 System Prompt로 조율한 AI 엔진), <strong>PDV</strong>(개인 데이터 금고, Openhash로 위변조 방지)가 이 과정을 뒷받침합니다.</p>
   </div>
 </section>
-</div></div><button type="button" class="db-card" data-panel="db-panel-feature-summary" aria-expanded="false">
-  <span class="db-card-icon" style="color:#0e8f83"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>
-  <span class="db-card-title">혼디의 기능과 적용 범위</span>
-  <span class="db-card-summary">K-서비스는 공익을 위한 인프라입니다. 사용자 개인의 사적 이익을 위해 복무하는 전문가 페르소나와 달리, K-서비스는 특정 개…</span>
-  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-</button><div class="db-panel" id="db-panel-feature-summary"><div class="db-panel-inner">
+
 <section class="section" id="feature-summary">
   <div class="section-inner">
     <span class="section-tag">기능 요약</span>
@@ -1714,12 +1673,7 @@ document.addEventListener('keydown', function (e) {
     </div>
   </div>
 </section>
-</div></div><button type="button" class="db-card" data-panel="db-panel-pricing" aria-expanded="false">
-  <span class="db-card-icon" style="color:#0e8f83"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
-  <span class="db-card-title">월 기본료 1,000원</span>
-  <span class="db-card-summary">사람과 사람 간의 대화(카카오톡 대체 용도)는 무제한 무료입니다. AI 비서 혼디를 단순 지시에 하루 10분씩 이용할 경우 월…</span>
-  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-</button><div class="db-panel" id="db-panel-pricing"><div class="db-panel-inner">
+
 <section class="section" id="pricing" style="background:var(--bg-alt)">
   <div class="section-inner">
     <span class="section-tag">혼디 이용료</span>
@@ -1766,22 +1720,7 @@ document.addEventListener('keydown', function (e) {
     </div>
   </div>
 </section>
-</div></div>
-    </div>
-  </div>
-</section>
 
-<section class="section db-cards-section" id="db-group-join" style="--db-accent:#b3790a">
-  <div class="section-inner">
-    <span class="section-tag">더 알아보기</span>
-    <h2 class="section-title">함께 만들어가기</h2>
-    <div class="db-card-grid">
-      <button type="button" class="db-card" data-panel="db-panel-join-completion" aria-expanded="false">
-  <span class="db-card-icon" style="color:#b3790a"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
-  <span class="db-card-title">혼디 완성에 동참해 주세요</span>
-  <span class="db-card-summary">혼디는 한국 개발자들(총괄 도영민)의 지원과 참여 결과이며, 2026년 9월 현재 완성도 90% 수준입니다. 혼디는 LLM이라…</span>
-  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-</button><div class="db-panel" id="db-panel-join-completion"><div class="db-panel-inner">
 <section class="section" id="join-completion" style="background:var(--bg-alt)">
   <div class="section-inner">
     <span class="section-tag">함께 완성하기</span>
@@ -1794,12 +1733,7 @@ document.addEventListener('keydown', function (e) {
     </div>
   </div>
 </section>
-</div></div><button type="button" class="db-card" data-panel="db-panel-dev-team" aria-expanded="false">
-  <span class="db-card-icon" style="color:#b3790a"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M2 21v-1a6 6 0 0 1 12 0v1"/><circle cx="18" cy="9" r="2.5"/><path d="M15.5 21v-1a4 4 0 0 1 6.2-3.3"/></svg></span>
-  <span class="db-card-title">혼디를 만든 사람들</span>
-  <span class="db-card-summary">혼디는 한국인 개발자 50여 명과 제주 시청의 지원으로 완성됐습니다. 개발 책임자는 한림읍에 거주하는 도 영민이며, 미국 MI…</span>
-  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-</button><div class="db-panel" id="db-panel-dev-team"><div class="db-panel-inner">
+
 <section class="section" id="dev-team">
   <div class="section-inner">
     <h2 class="section-title">혼디를 <strong>만든 사람들</strong></h2>
@@ -1810,10 +1744,13 @@ document.addEventListener('keydown', function (e) {
     </div>
   </div>
 </section>
-</div></div>
-    </div>
-  </div>
-</section>
+
+<div class="db-pagination db-pagination-bottom">
+  <button type="button" class="db-page-btn" data-page="1">1</button>
+  <button type="button" class="db-page-btn" data-page="2">2</button>
+  <button type="button" class="db-page-btn" data-page="3">3</button>
+  <button type="button" class="db-page-btn active" data-page="4">4</button>
+</div>
 </div>
 
 
