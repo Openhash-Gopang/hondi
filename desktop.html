@@ -874,6 +874,93 @@ body.mm-lock-scroll { overflow: hidden; }
   .hero-top-btn { flex: 1 1 42%; font-size: 14.5px; padding: 10px 12px; }
 }
 
+/* ── 2026-09-05 신설 — 섹션이 너무 많아 카드+slide-out으로 압축.
+   사례 2개(case-bankruptcy·case-permit)는 그대로 두고, 나머지 11개를
+   성격별 3그룹으로 묶어 카드화했다. 카드를 누르면 원본 섹션 전체를
+   글자 하나 손실 없이 그 자리에서 펼친다(요약이 아니라 원문 그대로). ── */
+.db-card-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px; margin-top: 8px;
+}
+.db-card {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+  text-align: left; font-family: inherit; cursor: pointer;
+  background: #fff; border: 1px solid var(--border, #e5e7eb); border-radius: 12px;
+  padding: 18px 18px 16px; box-shadow: 0 1px 2px rgba(0,0,0,.05);
+  transition: box-shadow .18s ease, transform .12s ease, border-color .15s ease;
+}
+.db-card:hover {
+  box-shadow: 0 4px 14px rgba(0,0,0,.10); transform: translateY(-2px);
+  border-color: var(--db-accent, #4338CA);
+}
+.db-card[aria-expanded="true"] { border-color: var(--db-accent, #4338CA); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.db-card-icon {
+  width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--db-accent, #4338CA) 12%, white);
+}
+.db-card-title { font-size: 15px; font-weight: 700; color: var(--text, #1a1a2e); line-height: 1.4; }
+.db-card-summary { font-size: 12.5px; color: var(--text3, #6b7280); line-height: 1.55; }
+.db-card-cta {
+  display: flex; align-items: center; gap: 4px; margin-top: auto; padding-top: 6px;
+  font-size: 12px; font-weight: 700; color: var(--db-accent, #4338CA);
+}
+.db-card-chevron { transition: transform .25s ease; }
+.db-card[aria-expanded="true"] .db-card-chevron { transform: rotate(180deg); }
+
+.db-panel {
+  grid-column: 1 / -1; display: grid; grid-template-rows: 0fr;
+  transition: grid-template-rows .32s cubic-bezier(.4,0,.2,1);
+  background: var(--bg-alt, #f8f9fa); border-radius: 12px; border: 1px solid var(--border, #e5e7eb);
+  border-top: 3px solid var(--db-accent, #4338CA);
+}
+.db-panel.open { grid-template-rows: 1fr; }
+.db-panel-inner { overflow: hidden; padding: 4px 8px; }
+.db-panel-inner > section.section { padding: 20px 8px; background: transparent !important; }
+.db-panel-inner > section.section .section-inner { padding: 0; max-width: none; }
+
+/* ── 2026-09-05 신설 — 첨부 브로슈어("전자동 AI 정부는 어떻게
+   작동할까요?")를 desktop.html 메인 콘텐츠로 이식. 원본은 인쇄용
+   A4 두 장(.sheet, page-num, @page) 레이아웃이라, 그 틀은 걷어내고
+   내용·박스 스타일(notice/analogy/stat-row/cta-box)만 연속 스크롤
+   웹 섹션에 맞게 옮긴다 — 문구 자체는 원문 그대로 사용. ── */
+.bh-section { background: #fff; }
+.bh-wrap { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+.bh-lede { font-size: 15px; color: var(--text3, #4d4d4d); line-height: 1.7; margin-bottom: 22px; }
+.bh-h2 { font-size: 18px; font-weight: 800; margin: 30px 0 10px; color: var(--navy, #0B2545); display: flex; align-items: center; gap: 10px; }
+.bh-h2:first-of-type { margin-top: 0; }
+.bh-h2 .bh-n {
+  width: 26px; height: 26px; border-radius: 50%; background: #14181f; color: #fff;
+  display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0;
+}
+.bh-h3 { font-size: 15.5px; font-weight: 700; margin: 16px 0 8px; color: var(--text, #1a1a1a); }
+.bh-p { font-size: 14.5px; line-height: 1.75; margin: 0 0 10px; color: var(--text, #1a1a1a); }
+.bh-notice {
+  padding: 10px 16px; margin: 10px 0 14px; font-size: 13.5px; line-height: 1.6; color: var(--text3, #4d4d4d);
+  border: 1px solid var(--border, #ddd); border-left: 3px solid #000; border-radius: 0 6px 6px 0;
+}
+.bh-notice .bh-h { font-weight: 700; color: var(--navy, #0B2545); margin-bottom: 5px; display: block; }
+.bh-analogy {
+  background: #f6f4ee; border: 1px solid #e4dfd2; border-left: 3px solid #C99A2E;
+  padding: 10px 16px; margin: 10px 0; font-size: 14.5px; line-height: 1.6; color: var(--text, #1a1a1a); border-radius: 0 6px 6px 0;
+}
+.bh-analogy b { color: var(--navy, #0B2545); }
+.bh-stat-row { display: flex; gap: 10px; margin: 18px 0; padding: 14px 0; border-top: 1px solid #C7D4E6; border-bottom: 1px solid #C7D4E6; }
+.bh-stat-row .bh-item { flex: 1; padding: 0 8px; text-align: center; }
+.bh-stat-row .bh-item + .bh-item { border-left: 1px solid #C7D4E6; }
+.bh-stat-row .bh-item .bh-num { display: block; font-size: 16px; font-weight: 800; color: #205295; margin-bottom: 4px; }
+.bh-stat-row .bh-item .bh-lbl { font-size: 12px; color: var(--text3, #4d4d4d); line-height: 1.5; }
+@media (max-width: 640px) {
+  .bh-stat-row { flex-direction: column; gap: 12px; }
+  .bh-stat-row .bh-item + .bh-item { border-left: none; border-top: 1px solid #C7D4E6; padding-top: 12px; }
+}
+.bh-cta-box { border: 1px solid #999; border-radius: 8px; padding: 18px 22px; margin: 20px 0; background: #fafafa; }
+.bh-cta-box h3 { font-size: 16px; color: var(--navy, #0B2545); margin-bottom: 10px; font-weight: 800; }
+.bh-cta-box ul { margin: 6px 0 8px 18px; }
+.bh-cta-box li { font-size: 14px; line-height: 1.7; margin-bottom: 6px; }
+.bh-footer { margin-top: 22px; padding-top: 14px; border-top: 1px solid #999; font-size: 12px; color: #666; line-height: 1.6; }
+.bh-footer-meta { margin-top: 10px; font-size: 13px; color: #333; text-align: center; }
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <script>mermaid.initialize({startOnLoad:false, theme:"neutral", fontFamily:"inherit"});</script>
@@ -1089,6 +1176,76 @@ document.addEventListener('keydown', function (e) {
        상세 커밋 이력은 feature/nav-consolidation-phase1 브랜치 참고. -->
 </section>
 
+<section class="section bh-section" id="ai-gov-how">
+  <div class="bh-wrap">
+    <span class="section-tag">혼디 소개</span>
+    <h2 class="section-title">전자동 AI 정부는 <strong>어떻게 작동할까요?</strong></h2>
+    <p class="bh-lede"><strong>혼디</strong>가 정부 업무를 자동화한다는 것, 그리고 사람보다 훨씬 빠르다는 것까지는 지난 안내에서 전해 드렸습니다. 이번에는 그 안쪽 — <strong>어떤 원리로</strong> 이 일이 가능한지를 최대한 쉬운 말로 설명합니다.</p>
+
+    <h2 class="bh-h2"><span class="bh-n">1</span>전자동 AI 정부란 무엇인가</h2>
+    <p class="bh-p">전자동 AI 정부는 중앙 정부와 지방자치단체(도청·시청·읍면동 복지센터 등), 그리고 공기업 각 부서의 업무 중에서 <strong>반복적이고 단순한 행정 업무</strong>를 AI 기술로 자동화한 것입니다. 민원인을 직접 상대하던 업무를, 정교하게 설계된 AI 시스템이 대신 처리합니다.</p>
+
+    <h2 class="bh-h2"><span class="bh-n">2</span>AI는 방정식을 푸는 소프트웨어입니다</h2>
+    <p class="bh-p">학창 시절 1차 방정식, 2차 방정식, 3차 방정식을 풀어본 기억이 있을 것입니다. 답을 찾는 미지수가 하나면 1차, x와 y 둘이면 2차, x·y·z 셋이면 3차입니다. AI가 푸는 방정식은 이런 미지수가 많으면 1조 개가 넘습니다. 사람은 상상조차 할 수 없는 규모의 방정식이지만, AI는 이것을 뚝딱뚝딱 풀어냅니다.</p>
+
+    <h2 class="bh-h2"><span class="bh-n">3</span><strong>혼디</strong>는 무엇이 다른가 — 짜장면만 배달하는 로봇</h2>
+    <p class="bh-p"><strong>혼디</strong>는 기존 AI(ChatGPT, Claude, Gemini 등)와 비슷하면서도 다릅니다. 먼저, <strong>혼디</strong>는 자체 거대 언어모델(LLM)이 없습니다. LG, 카카오 등 국내에서 개발한 소형 LLM을 사용합니다. 그런데도 해외 거대 LLM과는 비교할 수 없을 만큼 우수한 성능을 냅니다.</p>
+    <p class="bh-p">그 방법은 콜럼버스의 달걀처럼 단순합니다.</p>
+    <p class="bh-p">어떤 질문에도 답하려 드는 거대 LLM과 달리, <strong>혼디</strong>는 거대 LLM을 업무별로 잘게 쪼갰습니다. 변호사 <strong>혼디</strong>는 법률만, 의사 <strong>혼디</strong>는 의학만 다룹니다. 더 잘게 쪼개면, 민법 <strong>혼디</strong>는 민법만, 영상의학 <strong>혼디</strong>는 MRI·CT·X-ray 등 영상 데이터만 다룹니다. 이렇게 업무와 기능별로 나눈 수천 개의 조각 하나하나를, 국내 소형 LLM이 그 업무 하나만큼은 가장 잘 수행하도록 훈련합니다. 이 훈련 과정을 <strong>파인튜닝(Fine-tuning)</strong>이라 부릅니다.</p>
+    <div class="bh-analogy">비유하자면, 해외 거대 LLM은 짜장면 한 그릇을 배달하는 데도 테슬라 자율주행 트럭을 보내는 셈입니다. <b><strong>혼디</strong>는 딱 짜장면만 담은 작은 자율주행 로봇을 보냅니다.</b></div>
+    <div class="bh-notice"><span class="bh-h">법률 분야 자체 테스트</span>대법원 공개 판례 300건으로 테스트한 결과, 거대 AI가 예상한 판결문과 1심·2심 판결문의 대법원 판결문 일치도는 45%, <strong>혼디</strong>(K-Law)의 일치도는 90%였습니다. <strong>혼디</strong>는 소송을 접수하기도 전에, 수년 뒤 나올 대법원 판결문을 90%의 정확도로 예측할 수 있습니다(자체 테스트).</div>
+    <p class="bh-p">이렇게 <strong>혼디</strong>는 정부 기관 각각, 기관 안의 부서 각각, 부서 안의 직책 각각은 물론, 은행·증권·보험·대학·초중고·교통·물류·시장·산업 등 우리 사회 전체 부문 각각에도 저마다의 분신을 만들고, 수만 개의 <strong>혼디</strong> AI를 하나의 네트워크 — <strong>혼디</strong>넷 — 으로 연결하였습니다. 이 네트워크가 <strong>혼디</strong>의 가장 큰 강점 중 하나입니다.</p>
+    <div class="bh-notice"><span class="bh-h">현장 테스트 기간 중 안내</span>현재 베타 테스트 기간 동안에는, <strong>혼디</strong> 각 모듈의 시뮬레이션 과정에 DeepSeek을 활용하고 있습니다.</div>
+
+    <h3 class="bh-h3">카톡보다 100배 나은 <strong>혼디</strong></h3>
+    <p class="bh-p">카톡은 사람과 사람이 메시지를 주고받는 데 그치지만, <strong>혼디</strong>는 메시지를 주고받는 동시에 그 안의 지시를 실제로 실행합니다. 등본 발급, 예약, 결제, 인허가 신청까지 — 카톡이라면 사람이 일일이 처리해야 할 일들을, <strong>혼디</strong>는 AI와 AI가 직접 대화하며 자동으로 끝냅니다. 같은 메신저라도, <strong>혼디</strong>는 카톡이 하지 못하는 일까지 해내는 메신저를 지향합니다.</p>
+
+    <h2 class="bh-h2"><span class="bh-n">4</span><strong>혼디</strong>, 개인용 AI 비서</h2>
+    <p class="bh-p"><strong>혼디</strong>는 또한 개인의 전속 AI입니다. 개인용 <strong>혼디</strong>는 해당 개인의 적성, 능력, 경험 등을 파악한 뒤, 그/그녀의 지능을 비유하자면, IQ 200으로 높입니다. 나만의 AI 비서 <strong>혼디</strong>에 의한 여러분의 지능과 능력 확장을 직접 경험해 보세요.</p>
+
+    <h2 class="bh-h2"><span class="bh-n">5</span>사람과 사람, 사람과 AI, AI와 AI</h2>
+    <p class="bh-p">개인파산과 건축 인허가 과정을 예로 들어보겠습니다. 기존 방식은 사람과 사람이 만나 일을 진행합니다. 개인파산은 열 곳이 넘는 기관을 방문해 서류를 발급받고, 변호사의 도움을 받아 신청서를 작성해야 합니다. 건축 인허가는 이보다는 단순하지만 역시 만만치 않습니다. 사람과 사람이 만나 처리하면 수 주가 걸리는 일을, AI의 도움을 받으면 수 일 만에 마칠 수 있습니다. 사람이 아예 개입하지 않고 AI와 AI가 직접 대화하며 처리하면, 길어야 수 분입니다.</p>
+
+    <div class="bh-stat-row">
+      <div class="bh-item"><span class="bh-num">사람 &lt;=&gt; 사람</span><span class="bh-lbl">수 주(weeks)</span></div>
+      <div class="bh-item"><span class="bh-num">사람+AI &lt;=&gt; 사람+AI</span><span class="bh-lbl">수 일(days)</span></div>
+      <div class="bh-item"><span class="bh-num">AI &lt;=&gt; AI</span><span class="bh-lbl">수 초 ~ 수 분</span></div>
+    </div>
+
+    <p class="bh-p">수만 개의 초소형 AI 엔진이 서로 소통하며 업무를 처리하므로, 기존에 수 년이 걸리던 개인파산 업무를 이론적으로는 3분 안에 끝낼 수 있습니다. "이론적"이라고 말씀드리는 이유는, 법원·시청·국세청·은행 등이 아직 <strong>혼디</strong>를 받아들이지 않았기 때문입니다.</p>
+
+    <h2 class="bh-h2"><span class="bh-n">6</span>제주 토산품에서, 한국을 거쳐 세계로</h2>
+    <p class="bh-p"><strong>혼디</strong>는 제주도에서, 제주 사람이 만든 제주의 토산품이자 특산품입니다. 제주도에서 <strong>혼디</strong>가 성공적으로 런칭하면 한국이 뒤따르고, 한국이 해내면 세계가 뒤따를 것입니다.</p>
+
+    <h2 class="bh-h2"><span class="bh-n">7</span>지금은 현장 테스트 단계입니다</h2>
+    <p class="bh-p">2026년 9월 1일부터 12월 31일까지, <strong>혼디</strong>의 수만 개 AI 엔진 하나하나를 현장에서 테스트합니다. 기존 설계의 미비점을 보완하고 장점을 강화해, 2027년 상반기에 전자동 AI 정부·대학·병원·교통물류·금융·시장·산업·기업 등을 정식으로 출시할 예정입니다.</p>
+
+    <h2 class="bh-h2"><span class="bh-n">8</span><strong>혼디</strong>는 '<b>함께</b>'라는 뜻입니다</h2>
+    <p class="bh-p">'<strong>혼디</strong>'는 제주 토속어로 '<b>함께</b>'라는 뜻입니다. <strong>혼디</strong>는 저희가 개발했지만, 여러분이 '<b>함께</b>' 하셔야 비로소 완성할 수 있습니다. 그 방법은 유료 회원 가입입니다.</p>
+    <div class="bh-analogy">1만 명이 <strong>혼디</strong>에 가입하면, 제주도에 <strong>혼디</strong> 자체 AI 서버를 구축할 수 있습니다.</div>
+
+    <div class="bh-cta-box">
+      <h3><strong>혼디</strong> 베타 테스트에 참여해 주십시오</h3>
+      <p class="bh-p">이미 90%를 완성했습니다. 나머지 10%는 현장 테스트를 통해 함께 완성해 나가겠습니다.</p>
+      <ul>
+        <li>PC로 hondi.net에 접속하면 <strong>혼디</strong> 시스템 전반을 구석구석 살펴볼 수 있습니다.</li>
+        <li>폰으로 hondi.net에 접속하면 <strong>혼디</strong>넷을 직접 시뮬레이션해 볼 수 있습니다.</li>
+        <li>현재는 정식 앱이 아니라 필드 테스트용 WebApp(스마트폰 앱처럼 보이는 웹페이지)입니다. 카톡과 비슷한 화면이지만 아직은 웹페이지입니다.</li>
+        <li>필드 테스트가 끝나면 아이폰·안드로이드 정식 앱으로 출시되며, 그때는 온전한 AI 정부·AI 대학·AI 병원·AI 은행을 이용할 수 있습니다.</li>
+      </ul>
+      <p class="bh-p" style="margin-top:8px">지금 hondi.net에 접속해, 월 1,000원 기본료+사용량만큼 지불 / 월 10,000원 정액제 / 연 100,000원 회원 중 하나로 가입해 주십시오.</p>
+      <p class="bh-p" style="margin-top:6px">가입은 전화번호만으로 즉시 가능하며, <strong>혼디</strong>의 다양한 기능을 남보다 한발 앞서 테스트해 볼 수 있습니다.</p>
+    </div>
+
+    <div class="bh-footer">
+      ※ 위 처리 시간 비교(사람·사람 / 사람+AI · 사람+AI / AI·AI)는 개인파산·건축 인허가 등 실제 처리 사례를 바탕으로 한 자체 추산이며, 기관·절차별로 차이가 있을 수 있습니다.<br>
+      ※ <strong>혼디</strong>는 현재 베타(필드 테스트) 단계이며, 그 성능·정확도·결과물이 실제 환경에서 동일하게 재현됨을 보장하지 않습니다.
+      <div class="bh-footer-meta"><strong>혼디</strong> 개발 총괄 도영민 · 제주시 한림읍 · ceo@hondi.net</div>
+    </div>
+  </div>
+</section>
+
+
 <script>
 (function () {
   var heroTitles = [
@@ -1222,6 +1379,17 @@ document.addEventListener("DOMContentLoaded", function () {
      재사용해 사이트 전체 톤을 유지한다.
      ══════════════════════════════════════════════════════════════ -->
 
+<section class="section db-cards-section" id="db-group-philosophy" style="--db-accent:#4338CA">
+  <div class="section-inner">
+    <span class="section-tag">더 알아보기</span>
+    <h2 class="section-title">혼디의 철학과 정체성</h2>
+    <div class="db-card-grid">
+      <button type="button" class="db-card" data-panel="db-panel-hondi-net" aria-expanded="false">
+  <span class="db-card-icon" style="color:#4338CA"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></span>
+  <span class="db-card-title">5천만 AI 비서의 나라</span>
+  <span class="db-card-summary">한국은 5천만 한국인과 수백만 기업·기관들로 구성된 나라입니다. 혼디넷은 5천만 AI 비서와 수백만 기업·기관 AI로 구성된 …</span>
+  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+</button><div class="db-panel" id="db-panel-hondi-net"><div class="db-panel-inner">
 <section class="section" id="hondi-net">
   <div class="section-inner">
     <span class="section-tag">혼디넷</span>
@@ -1233,7 +1401,12 @@ document.addEventListener("DOMContentLoaded", function () {
     </div>
   </div>
 </section>
-
+</div></div><button type="button" class="db-card" data-panel="db-panel-separation-of-powers" aria-expanded="false">
+  <span class="db-card-icon" style="color:#4338CA"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 8l-3 6a4 4 0 0 0 8 0zM19 8l-3 6a4 4 0 0 0 8 0zM3 8h6M15 8h6M7 21h10"/></svg></span>
+  <span class="db-card-title">판결·입법·집행이 하나의 순환을 이룹니다</span>
+  <span class="db-card-summary">다툼이 생기면, 미래의 대법원 판결 예측을 혼디에게 물어보세요.</span>
+  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+</button><div class="db-panel" id="db-panel-separation-of-powers"><div class="db-panel-inner">
 <section class="section" id="separation-of-powers">
   <div class="section-inner">
     <div style="background:var(--bg-subtle,#f8f9fa); border:1px solid var(--border,#e5e7eb); border-left:4px solid var(--brand); border-radius:0 12px 12px 0; padding:12px 18px; margin:-124px 0 20px;">
@@ -1260,86 +1433,62 @@ document.addEventListener("DOMContentLoaded", function () {
     <p style="font-size:14px; font-weight:600; color:#0b57a4; margin:8px 0 0; line-height:1.75;">사건의 개요를 정확히 입력하면(누가 언제 어디서 무엇을 어떻게 왜), 5분 내에 대법원 예상 판결문을 생성합니다.<br>혼디가 작성한 예상 판결문의 정교한 법리를 인간 법조인이 깰 수 있을까요?<br>시간과 비용은 차치하고, 기나 긴 법원 소송의 막대한 수고를 감내할 필요가 있을까요?</p>
   </div>
 </section>
-
-<section class="section" id="usage-guide">
-  <div class="section-inner">
-    <span class="section-tag">혼디, 어디에 쓰는 물건인고?</span>
-    <h2 class="section-title has-doc-link">만인(萬人)의 <strong>AI 비서</strong></h2>
-    <div class="section-body">
-      <p>상상해 보십시오. 여러분의 지능(IQ)이 300이 되고, 세상의 모든 지식을 얻게 된다면?<br>나 자신뿐 아니라, 나와 대화하는 모든 이들의 지능이 300이 된다면?<br>혼디가 그 비결입니다.</p>
-      <p>혼디는 5천만 한국인 각각의 AI 비서이자, 입법·사법·행정·교육·의료·문화·시장 등 우리 사회의 모든 기관·부서를 위한 "AI 비서"입니다.</p>
-      <p>나의 혼디가 다른 사람이나 기관/부서의 혼디와 직접 소통하여, 사람들의 서류 준비·제출·확인 및 결제 업무를 혼디들이 대행합니다. 시범적으로 제주 지역의 법원, 도청·시청·읍면동 행정복지센터, 중앙 정부 기관, 교육, 의료, 금융 등 제반 사회 인프라를 혼디로 재구성한 전자동 AI 정부 및 국가 인프라 시스템을 <strong>9월 1일부터</strong> 제주 지역에서 서비스합니다. 물론, 각 기관의 최종 의사 결정은 언제나 사람의 몫입니다. <a class="doc-link doc-link-inline" href="./integrated-system.html" target="_blank" rel="noopener">더 자세히<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a></p>
-
-      <p>겉보기에 혼디는 카톡에 AI를 입힌 것처럼 보이지만, 카톡과 달리, 혼디는 사람 뿐 아니라, 세상의 모든 기관과 부서의 AI와 대화하며, 나의 AI와 너의 AI가 대화합니다. 그런데, 그 AI는 여러분이 알던 AI와 사뭇 다릅니다. 가령, 혼디 사용자인 주피터는 AI 비서(혼디)에게 이런 저런 업무를 지시할 수 있습니다.</p>
-    </div>
-
-    <div class="hondi-dialogue">
-      <p><strong>주피터</strong> "혼디야, 등본 두 통 발급해 줘."</p>
-      <p><strong>주피터의 혼디</strong> 피터님의 주소지인 한림읍 AI에게 요청하겠습니다. 잠깐요.</p>
-      <p><strong>한림읍의 혼디</strong> 여기 있습니다. 수수료는 800원 되겠습니다.</p>
-      <p><strong>주피터의 혼디</strong> 무려 800원씩이나. 작년보다 올랐군요. 800원 결제하였습니다.</p>
-      <p><strong>주피터의 혼디</strong> 피터님, 등본을 발급받아 프라이빗 데이터 금고(PDV)에 저장하였습니다.</p>
-      <p><strong>주피터</strong> "응, 수고핸."</p>
-      <p class="last"><strong>주피터의 혼디</strong> my pleasure마씸.</p>
-    </div>
-
-    <div class="section-body">
-      <p>혼디의 업무 수행 범위는 행정 기관 외에도 법원, 병원, 대학, 업체 등 다양합니다. 사실, 여러분이 상상할 수 있는 모든 업무를 처리합니다. 가령,</p>
-    </div>
-
-    <span class="hondi-scenario-tag">법원 AI</span>
-    <div class="hondi-dialogue">
-      <p><strong>주피터</strong> "혼디야, 지난달 이웃과 있었던 담장 경계 분쟁 말인데, 소송을 제기하면 대법원까지 갔을 때 어떤 판결이 나올지 법리 분석해서 예상 판결문을 작성해 줘."</p>
-      <p class="last"><strong>혼디</strong> 확인하겠습니다. 경계확정소송 관련 대법원 확정판결 342건과 대조한 결과, 99% 신뢰도로 초안을 작성했습니다. 법리상 원고 승소 가능성은 96%로 예상되며, 초등학생도 이해할 수 있도록 쉬운 문장으로 예상 판결문을 준비했습니다.</p>
-    </div>
-
-    <span class="hondi-scenario-tag">병원 AI</span>
-    <div class="hondi-dialogue">
-      <p><strong>주피터</strong> "302호 환자, 입원 3일차인데 공복혈당이 계속 올라가네. 스테로이드 병용 중인 건 감안해도 패턴이 이상해. EMR 데이터 기반으로 원인 분석해 봐."</p>
-      <p class="last"><strong>혼디</strong> 확인하겠습니다. 입원 당일 대비 공복혈당이 138 → 196mg/dL로 상승했고, 시점상 스테로이드 증량 시점과 겹칩니다. 다만 최근 식이 섭취량 저하와 야간 저혈당 이후 반동(Somogyi 현상) 가능성도 배제할 수 없어, 최근 72시간 혈당 로그·투약 기록·식이량을 교차 분석하겠습니다. 잠시만 기다려 주세요.</p>
-    </div>
-
-    <span class="hondi-scenario-tag">대학 AI</span>
-    <div class="hondi-dialogue">
-      <p><strong>주피터</strong> "중고교 때 수학을 소홀히 해서 지금 AI개론 수업의 선형대수 파트를 따라가기가 벅차. 기초부터 체계적으로 다시 잡고 싶은데, 커리큘럼을 짜 줘."</p>
-      <p class="last"><strong>혼디</strong> 지난 학기 성적과 최근 과제 오답 패턴을 보면 벡터·행렬 연산에서 특히 취약점이 보입니다. 하루 1시간씩 8주 커리큘럼으로 기초 대수부터 선형대수까지 단계별로 구성하고, 관련 학습 자료도 함께 준비하겠습니다. 매주 간단한 진단평가로 진도를 점검하고, 질문은 언제든 답변드릴게요.</p>
-    </div>
-
-    <span class="hondi-scenario-tag">시장 AI</span>
-    <div class="hondi-dialogue">
-      <p><strong>주피터</strong> "어제 시내에서 본 스쿠터 그거 기억하지? 나도 타보게 가격이랑 성능, 장단점 좀 알아봐 줄래?"</p>
-      <p class="last"><strong>혼디</strong> 가격·성능 조사는 어렵지 않지만, 피터님껜 이륜차 운전을 권해드리기 어렵습니다. 지난달에도 자전거로 낙상하신 이력이 있으시니까요. 참고용으로만 봐 주세요 — 상세 카탈로그와 동급 기종 성능·장단점 비교표를 준비했습니다.</p>
-    </div>
-
-    <span class="hondi-scenario-tag">중앙 정부 AI</span>
-    <div class="hondi-dialogue">
-      <p><strong>주피터</strong> "이번 종합소득세, 너무 많이 나온 거 아냐? 절세 방안 좀 찾아봐."</p>
-      <p class="last"><strong>혼디</strong> 신고 시점에 적용 가능한 공제·감면 항목을 이미 전부 반영해 최적 세액으로 산출했습니다. 즉, 피터님도 다른 납세자도 법정 기준보다 단 1원도 더 내거나 덜 내지 않습니다. 그래도 최신 세법 개정 사항까지 다시 한번 검토해 보겠습니다. 잠시만 기다려 주세요.</p>
-    </div>
-
-    <span class="hondi-scenario-tag">사교 AI</span>
-    <div class="hondi-dialogue">
-      <p><strong>주피터</strong> "이번 주말에 사람들이랑 좀 어울리고 싶은데, 나한테 맞을 만한 모임 있는지 알아봐 줄래?"</p>
-      <p><strong>혼디</strong> 피터님 성향에 맞을 만한 모임이 두 곳 보이네요. 제주 올레길·오름을 함께 걷는 "나올레"랑, 가볍게 노래와 춤을 곁들이는 "바라던 바다" — 이번 주말 일정으로 참가 신청서를 넣어드릴까요?</p>
-      <p><strong>주피터</strong> "뚜껑열리는 나이트 어때?"</p>
-      <p><strong>혼디</strong> 심정은 이해가지만, 권하지는 않습니다. 작년에도 와이프에게 걸려서...</p>
-      <p class="last"><strong>주피터</strong> "아, 됐고."</p>
-    </div>
-    <a class="doc-link doc-link-emphasis" href="./highlights/all-examples.html" target="_blank" rel="noopener">전체 예시 보기 — 주피터의 하루<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
-  </div>
-</section>
-
+</div></div><button type="button" class="db-card" data-panel="db-panel-core-philosophy" aria-expanded="false">
+  <span class="db-card-icon" style="color:#4338CA"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg></span>
+  <span class="db-card-title">지능의 상향 평준화</span>
+  <span class="db-card-summary">사람마다 성격, 지능, 경험이 제각각입니다. 훌륭한 교사가 있는 반면, 그렇지 않은 사람도 적지 않고, 의사도 화타같은 명의가…</span>
+  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+</button><div class="db-panel" id="db-panel-core-philosophy"><div class="db-panel-inner">
 <section class="section" id="core-philosophy">
   <div class="section-inner">
     <span class="section-tag">혼디의 핵심 사상</span>
     <h2 class="section-title">지능의 <strong>상향 평준화</strong></h2>
     <div class="section-body">
-      <p>사람마다 성격, 지능, 경험이 제각각입니다. 훌륭한 교사가 있는 반면, 그렇지 않은 사람도 적지 않고, 의사도 화타같은 명의가 있는 반면, 과거 "돌팔이"라 불리는 사람도 있었으며, 포청천같은 판사도 그 반대의 경우도 있습니다. 그게 사람이라는 존재의 매력이긴 하지만, 인간 사회와 조직에서, 사람과 사람 간의 소통으로 업무를 수행할 때는 그러한 격차가 불편할 수 있습니다. 혼디는 <strong>'모든 사람의 지능을 노벨상 수상자 급으로 상향 평준화하는 인위적 장치'</strong>입니다. IQ가 100인 사람과 200인 사람이 깊은 대화를 나누기는 어렵지만, 혼디를 통해 둘 다 IQ 300이 됩니다.</p>
+      <p>사람마다 성격, 지능, 경험이 제각각입니다. 훌륭한 교사가 있는 반면, 그렇지 않은 사람도 적지 않고, 의사도 화타같은 명의가 있는 반면, 과거 "돌팔이"라 불리는 사람도 있었으며, 포청천같은 판사도 그 반대의 경우도 있습니다. 그게 사람이라는 존재의 매력이긴 하지만, 인간 사회와 조직에서, 사람과 사람 간의 소통으로 업무를 수행할 때는 그러한 격차가 불편할 수 있습니다. 혼디는 <strong>'모든 사람의 지능을 노벨상 수상자 급으로 상향 평준화하는 인위적 장치'</strong>입니다. IQ가 80인 사람과 150인 사람이 깊은 대화를 나누기는 어렵지만, 혼디를 통해 둘 다 IQ 200이 됩니다(실제 지능검사 점수가 아니라, 정보와 판단력의 격차가 사라진다는 뜻의 비유입니다).</p>
       <p>혼디는 5천만 한국인을 예외없이 <strong>천재로 업그레이드</strong>하고, 모든 기관과 부서의 업무를 <strong>원칙과 상식으로 재구성</strong>합니다.</p>
       <p>다만, 두 가지 전제가 있습니다. 첫째, 이들 개인과 조직 각각은 맞춤형 혹은 전용 AI 비서를 가져야 합니다. 이 AI 비서(혼디)는 오직 한 사람 만을 위해 복무해야 하며, 그러기 위해서는 자신의 사용자를 정확히 이해해야 합니다. 혼디의 프라이빗 데이터 금고(PDV, Private Data Vault)는 개인/기관/부서의 일상과 업무를 기록하고, 그로써 혼디가 자신의 주인을 정확히 이해할 수 있게 됩니다. 혼디가 <strong>'쓰면 쓸수록 똑똑해 지는 이유'</strong>입니다.<br>
       둘째, AI 스스로 특정 개인이나 기관/부서의 맞춤형 AI로 진화해야 합니다. 이 페이지 상단 오른쪽에 있는 '프롬프트' 메뉴는 그러한 맞춤형 +진화형 AI를 구현하는 방법을 자세히 기술합니다.<br>
-      전술한 두 가지 조건을 충족할 때, 비로소 5천만 인구와 수백 만 기관/부서의 지능이 IQ 300이 되며, 혼디가 그 첫 걸음입니다.</p>
+      전술한 두 가지 조건을 충족할 때, 비로소 5천만 인구와 수백 만 기관/부서의 지능이 IQ 200이 되며(실제 지능검사 점수가 아니라 비유적 표현입니다), 혼디가 그 첫 걸음입니다.</p>
       <p><strong>'쓰면 쓸수록 똑똑해지는 나만의 AI 비서'</strong>. 멋지지 않나요? <a class="doc-link doc-link-inline" href="./highlights/hondi-network.html" target="_blank" rel="noopener">더보기<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a></p>
+    </div>
+  </div>
+</section>
+</div></div><button type="button" class="db-card" data-panel="db-panel-control-tower-principle" aria-expanded="false">
+  <span class="db-card-icon" style="color:#4338CA"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="12 7 13.5 10.5 17 11 14.3 13.4 15 17 12 15.2 9 17 9.7 13.4 7 11 10.5 10.5 12 7"/></svg></span>
+  <span class="db-card-title">한 번에 하나씩, 끝까지 안내합니다</span>
+  <span class="db-card-summary">한국 정부는 8월 3일 AI 정부 시범 서비스를 시작했습니다. 정부 소속 모든 기관이 데이터가 오가는 문호를 완전히 열면, 혼…</span>
+  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+</button><div class="db-panel" id="db-panel-control-tower-principle"><div class="db-panel-inner">
+<section class="section" id="control-tower-principle">
+  <div class="section-inner">
+    <span class="section-tag">관제탑 원칙</span>
+    <h2 class="section-title">한 번에 <strong>하나씩</strong>, 끝까지 안내합니다</h2>
+    <div class="section-body">
+      <p>한국 정부는 8월 3일 AI 정부 시범 서비스를 시작했습니다. 정부 소속 모든 기관이 데이터가 오가는 문호를 완전히 열면, 혼디 사용자는 말 한마디로 모든 공공 서비스를 이용할 수 있게 됩니다. 가령 "사업자 등록해 줘", "법인 인감 두 통 발급해 줘", "세금 신고해 줘" 같은 지시만으로 충분해집니다.</p>
+      <p>그 때까지 혼디 사용자는 등본 발급을 비롯한 대개의 공공 서비스를 직접 수행해야 하며, 혼디는 사용자가 쉽게 따라할 수 있도록 한 번에 하나의 절차만 지시합니다. 가령 "정부24 앱을 설치하십시오", "공동인증서로 로그인하세요", "좌측 상단 검색창에 '등본 발급'을 입력한 뒤 검색하세요" 같은 순서입니다.</p>
+      <p>이때 혼디는 <strong>관제탑 원칙</strong>에 따라 사용자를 이끕니다. 불의의 사고로 조종사가 조종할 수 없게 된 상황에서 조종간을 잡은 승객에게, 관제탑이 비상 착륙을 위해 절차를 하나씩 지시하는 것처럼 — 혼디는 사용자가 공공 서비스를 온라인으로 처리할 수 있도록 한 번에 하나씩, 끝까지 그 절차를 안내합니다.</p>
+    </div>
+  </div>
+</section>
+</div></div><button type="button" class="db-card" data-panel="db-panel-half-performance" aria-expanded="false">
+  <span class="db-card-icon" style="color:#4338CA"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="7" width="18" height="10" rx="2"/><line x1="23" y1="10" x2="23" y2="14"/><rect x="3" y="9" width="7" height="6" fill="currentColor" stroke="none"/></svg></span>
+  <span class="db-card-title">혼디, 왜 절반의 성능인가</span>
+  <span class="db-card-summary">혼디는 사용자의 지시를 직접 이행하도록 설계되었지만, 그 성능은 목표치의 절반 수준에 그칩니다. 그 이유는 둘입니다.</span>
+  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+</button><div class="db-panel" id="db-panel-half-performance"><div class="db-panel-inner">
+<section class="section" id="half-performance">
+  <div class="section-inner">
+    <span class="section-tag">절반의 성능</span>
+    <h2 class="section-title">혼디, 왜 <strong>절반의 성능</strong>인가</h2>
+    <div class="section-body">
+      <p>혼디는 사용자의 지시를 직접 이행하도록 설계되었지만, 그 성능은 목표치의 절반 수준에 그칩니다. 그 이유는 둘입니다.</p>
+      <p><strong>첫째, AI 엔진이 해외에 있습니다.</strong> 혼디가 이용하는 AI 엔진들(챗GPT 등)의 서버가 모두 해외에 있습니다. 최근 국내 AI 엔진들(Exaone 등)의 성능이 크게 향상되었지만, 아직 탑 클래스에는 못 미칩니다. AI 서버가 해외에 있으므로, 우리 맘대로 손볼 수 없는 점이 첫째 이유입니다. 페이지 하단의 국내 AI 서버 구축 계획을 참고하십시오.</p>
+      <p><strong>둘째, 기관 API가 없거나 미비합니다.</strong> 최근들어 정부24, data.go.kr, dpaper.kr를 비롯한 정부 API 공개가 활발하지만, 아직은 기대에 못 미치는 수준이며, 2030년경에 완전한 AI 정부의 문이 열릴 것으로 예상됩니다.</p>
+      <p>이 두 가지 제약에 대한 우리의 대응책은 <strong>첫째, 국내 AI 서버 구축</strong>이고, <strong>둘째, 기관 API를 우리가 직접 만드는 것</strong>입니다. 가령, 혼디는 한국의 모든 중앙 정부와 모든 지방 행정 기관 및 그 부서의 AI 비서를 포함합니다. 이러한 수천 개 AI 비서의 용도가 바로 정부 API입니다.</p>
+    </div>
+  </div>
+</section>
+</div></div>
     </div>
   </div>
 </section>
@@ -1404,6 +1553,90 @@ document.addEventListener("DOMContentLoaded", function () {
   </div>
 </section>
 
+<section class="section db-cards-section" id="db-group-practical" style="--db-accent:#0e8f83">
+  <div class="section-inner">
+    <span class="section-tag">더 알아보기</span>
+    <h2 class="section-title">실용 정보 — 이용방법·비용·기능</h2>
+    <div class="db-card-grid">
+      <button type="button" class="db-card" data-panel="db-panel-usage-guide" aria-expanded="false">
+  <span class="db-card-icon" style="color:#0e8f83"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+  <span class="db-card-title">만인(萬人)의 AI 비서</span>
+  <span class="db-card-summary">상상해 보십시오. 여러분의 지능(IQ)이 200이 되고, 세상의 모든 지식을 얻게 된다면?나 자신뿐 아니라, 나와 대화하는 모…</span>
+  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+</button><div class="db-panel" id="db-panel-usage-guide"><div class="db-panel-inner">
+<section class="section" id="usage-guide">
+  <div class="section-inner">
+    <span class="section-tag">혼디, 어디에 쓰는 물건인고?</span>
+    <h2 class="section-title has-doc-link">만인(萬人)의 <strong>AI 비서</strong></h2>
+    <div class="section-body">
+      <p>상상해 보십시오. 여러분의 지능(IQ)이 200이 되고, 세상의 모든 지식을 얻게 된다면?<br>나 자신뿐 아니라, 나와 대화하는 모든 이들의 지능이 200이 된다면?<br>혼디가 그 비결입니다. <small style="opacity:.7;font-weight:400">(여기서 'IQ 200'은 실제 지능검사 점수가 아니라, 정보 접근력과 판단 속도가 그만큼 크게 향상된 상태를 빗댄 비유적 표현입니다.)</small></p>
+      <p>혼디는 5천만 한국인 각각의 AI 비서이자, 입법·사법·행정·교육·의료·문화·시장 등 우리 사회의 모든 기관·부서를 위한 "AI 비서"입니다.</p>
+      <p>나의 혼디가 다른 사람이나 기관/부서의 혼디와 직접 소통하여, 사람들의 서류 준비·제출·확인 및 결제 업무를 혼디들이 대행합니다. 시범적으로 제주 지역의 법원, 도청·시청·읍면동 행정복지센터, 중앙 정부 기관, 교육, 의료, 금융 등 제반 사회 인프라를 혼디로 재구성한 전자동 AI 정부 및 국가 인프라 시스템을 <strong>9월 1일부터</strong> 제주 지역에서 서비스합니다. 물론, 각 기관의 최종 의사 결정은 언제나 사람의 몫입니다. <a class="doc-link doc-link-inline" href="./integrated-system.html" target="_blank" rel="noopener">더 자세히<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a></p>
+
+      <p>겉보기에 혼디는 카톡에 AI를 입힌 것처럼 보이지만, 카톡과 달리, 혼디는 사람 뿐 아니라, 세상의 모든 기관과 부서의 AI와 대화하며, 나의 AI와 너의 AI가 대화합니다. 그런데, 그 AI는 여러분이 알던 AI와 사뭇 다릅니다. 가령, 혼디 사용자인 주피터는 AI 비서(혼디)에게 이런 저런 업무를 지시할 수 있습니다.</p>
+    </div>
+
+    <div class="hondi-dialogue">
+      <p><strong>주피터</strong> "혼디야, 등본 두 통 발급해 줘."</p>
+      <p><strong>주피터의 혼디</strong> 피터님의 주소지인 한림읍 AI에게 요청하겠습니다. 잠깐요.</p>
+      <p><strong>한림읍의 혼디</strong> 여기 있습니다. 수수료는 800원 되겠습니다.</p>
+      <p><strong>주피터의 혼디</strong> 무려 800원씩이나. 작년보다 올랐군요. 800원 결제하였습니다.</p>
+      <p><strong>주피터의 혼디</strong> 피터님, 등본을 발급받아 프라이빗 데이터 금고(PDV)에 저장하였습니다.</p>
+      <p><strong>주피터</strong> "응, 수고핸."</p>
+      <p class="last"><strong>주피터의 혼디</strong> my pleasure마씸.</p>
+    </div>
+
+    <div class="section-body">
+      <p>혼디의 업무 수행 범위는 행정 기관 외에도 법원, 병원, 대학, 업체 등 다양합니다. 사실, 여러분이 상상할 수 있는 모든 업무를 처리합니다. 가령,</p>
+    </div>
+
+    <span class="hondi-scenario-tag">법원 AI</span>
+    <div class="hondi-dialogue">
+      <p><strong>주피터</strong> "혼디야, 지난달 이웃과 있었던 담장 경계 분쟁 말인데, 소송을 제기하면 대법원까지 갔을 때 어떤 판결이 나올지 법리 분석해서 예상 판결문을 작성해 줘."</p>
+      <p class="last"><strong>혼디</strong> 확인하겠습니다. 경계확정소송 관련 대법원 확정판결 342건과 대조한 결과, 99% 신뢰도로 초안을 작성했습니다. 법리상 원고 승소 가능성은 96%로 예상되며, 초등학생도 이해할 수 있도록 쉬운 문장으로 예상 판결문을 준비했습니다.</p>
+    </div>
+
+    <span class="hondi-scenario-tag">병원 AI</span>
+    <div class="hondi-dialogue">
+      <p><strong>주피터</strong> "302호 환자, 입원 3일차인데 공복혈당이 계속 올라가네. 스테로이드 병용 중인 건 감안해도 패턴이 이상해. EMR 데이터 기반으로 원인 분석해 봐."</p>
+      <p class="last"><strong>혼디</strong> 확인하겠습니다. 입원 당일 대비 공복혈당이 138 → 196mg/dL로 상승했고, 시점상 스테로이드 증량 시점과 겹칩니다. 다만 최근 식이 섭취량 저하와 야간 저혈당 이후 반동(Somogyi 현상) 가능성도 배제할 수 없어, 최근 72시간 혈당 로그·투약 기록·식이량을 교차 분석하겠습니다. 잠시만 기다려 주세요.</p>
+    </div>
+
+    <span class="hondi-scenario-tag">대학 AI</span>
+    <div class="hondi-dialogue">
+      <p><strong>주피터</strong> "중고교 때 수학을 소홀히 해서 지금 AI개론 수업의 선형대수 파트를 따라가기가 벅차. 기초부터 체계적으로 다시 잡고 싶은데, 커리큘럼을 짜 줘."</p>
+      <p class="last"><strong>혼디</strong> 지난 학기 성적과 최근 과제 오답 패턴을 보면 벡터·행렬 연산에서 특히 취약점이 보입니다. 하루 1시간씩 8주 커리큘럼으로 기초 대수부터 선형대수까지 단계별로 구성하고, 관련 학습 자료도 함께 준비하겠습니다. 매주 간단한 진단평가로 진도를 점검하고, 질문은 언제든 답변드릴게요.</p>
+    </div>
+
+    <span class="hondi-scenario-tag">시장 AI</span>
+    <div class="hondi-dialogue">
+      <p><strong>주피터</strong> "어제 시내에서 본 스쿠터 그거 기억하지? 나도 타보게 가격이랑 성능, 장단점 좀 알아봐 줄래?"</p>
+      <p class="last"><strong>혼디</strong> 가격·성능 조사는 어렵지 않지만, 피터님껜 이륜차 운전을 권해드리기 어렵습니다. 지난달에도 자전거로 낙상하신 이력이 있으시니까요. 참고용으로만 봐 주세요 — 상세 카탈로그와 동급 기종 성능·장단점 비교표를 준비했습니다.</p>
+    </div>
+
+    <span class="hondi-scenario-tag">중앙 정부 AI</span>
+    <div class="hondi-dialogue">
+      <p><strong>주피터</strong> "이번 종합소득세, 너무 많이 나온 거 아냐? 절세 방안 좀 찾아봐."</p>
+      <p class="last"><strong>혼디</strong> 신고 시점에 적용 가능한 공제·감면 항목을 이미 전부 반영해 최적 세액으로 산출했습니다. 즉, 피터님도 다른 납세자도 법정 기준보다 단 1원도 더 내거나 덜 내지 않습니다. 그래도 최신 세법 개정 사항까지 다시 한번 검토해 보겠습니다. 잠시만 기다려 주세요.</p>
+    </div>
+
+    <span class="hondi-scenario-tag">사교 AI</span>
+    <div class="hondi-dialogue">
+      <p><strong>주피터</strong> "이번 주말에 사람들이랑 좀 어울리고 싶은데, 나한테 맞을 만한 모임 있는지 알아봐 줄래?"</p>
+      <p><strong>혼디</strong> 피터님 성향에 맞을 만한 모임이 두 곳 보이네요. 제주 올레길·오름을 함께 걷는 "나올레"랑, 가볍게 노래와 춤을 곁들이는 "바라던 바다" — 이번 주말 일정으로 참가 신청서를 넣어드릴까요?</p>
+      <p><strong>주피터</strong> "뚜껑열리는 나이트 어때?"</p>
+      <p><strong>혼디</strong> 심정은 이해가지만, 권하지는 않습니다. 작년에도 와이프에게 걸려서...</p>
+      <p class="last"><strong>주피터</strong> "아, 됐고."</p>
+    </div>
+    <a class="doc-link doc-link-emphasis" href="./highlights/all-examples.html" target="_blank" rel="noopener">전체 예시 보기 — 주피터의 하루<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+  </div>
+</section>
+</div></div><button type="button" class="db-card" data-panel="db-panel-cost-comparison" aria-expanded="false">
+  <span class="db-card-icon" style="color:#0e8f83"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+  <span class="db-card-title">시간과 비용 비교</span>
+  <span class="db-card-summary">혼디의 목표는 업무 처리 시간과 행정 비용을 기존 대비 최대 99%까지 단축하는 것입니다(2027년 목표 기준). 아래는 혼디…</span>
+  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+</button><div class="db-panel" id="db-panel-cost-comparison"><div class="db-panel-inner">
 <section class="section" id="cost-comparison" style="background:var(--bg-alt)">
   <div class="section-inner">
     <span class="section-tag">비용 비교</span>
@@ -1430,7 +1663,12 @@ document.addEventListener("DOMContentLoaded", function () {
     <p class="cmp-summary">혼디의 업무 수행 프로세스: 사용자가 혼디에게 지시 → 정부24(data.go.kr)에서 서류 발급 → 사용자 승인 → 정부 전자문서망(gdoc.go.kr)에 제출 → 관련 기관 전달 → 기관(사람)이 승인. <strong>MoTE</strong>(수백 개 System Prompt로 조율한 AI 엔진), <strong>PDV</strong>(개인 데이터 금고, Openhash로 위변조 방지)가 이 과정을 뒷받침합니다.</p>
   </div>
 </section>
-
+</div></div><button type="button" class="db-card" data-panel="db-panel-feature-summary" aria-expanded="false">
+  <span class="db-card-icon" style="color:#0e8f83"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span>
+  <span class="db-card-title">혼디의 기능과 적용 범위</span>
+  <span class="db-card-summary">K-서비스는 공익을 위한 인프라입니다. 사용자 개인의 사적 이익을 위해 복무하는 전문가 페르소나와 달리, K-서비스는 특정 개…</span>
+  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+</button><div class="db-panel" id="db-panel-feature-summary"><div class="db-panel-inner">
 <!-- ── 활용 시나리오 추가 카드 3개 (2026-08-25 추가) ──
      본문에 대응 섹션이 없던 세 문서(AI 도청·시청·읍면동, 법치 사회,
      금융권 CBDC 대비)를 case-permit과 feature-summary 사이에
@@ -1525,7 +1763,12 @@ document.addEventListener("DOMContentLoaded", function () {
     </div>
   </div>
 </section>
-
+</div></div><button type="button" class="db-card" data-panel="db-panel-pricing" aria-expanded="false">
+  <span class="db-card-icon" style="color:#0e8f83"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+  <span class="db-card-title">월 기본료 1,000원</span>
+  <span class="db-card-summary">사람과 사람 간의 대화(카카오톡 대체 용도)는 무제한 무료입니다. AI 비서 혼디를 단순 지시에 하루 10분씩 이용할 경우 월…</span>
+  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+</button><div class="db-panel" id="db-panel-pricing"><div class="db-panel-inner">
 <section class="section" id="pricing" style="background:var(--bg-alt)">
   <div class="section-inner">
     <span class="section-tag">혼디 이용료</span>
@@ -1572,32 +1815,22 @@ document.addEventListener("DOMContentLoaded", function () {
     </div>
   </div>
 </section>
-
-<section class="section" id="control-tower-principle">
-  <div class="section-inner">
-    <span class="section-tag">관제탑 원칙</span>
-    <h2 class="section-title">한 번에 <strong>하나씩</strong>, 끝까지 안내합니다</h2>
-    <div class="section-body">
-      <p>한국 정부는 8월 3일 AI 정부 시범 서비스를 시작했습니다. 정부 소속 모든 기관이 데이터가 오가는 문호를 완전히 열면, 혼디 사용자는 말 한마디로 모든 공공 서비스를 이용할 수 있게 됩니다. 가령 "사업자 등록해 줘", "법인 인감 두 통 발급해 줘", "세금 신고해 줘" 같은 지시만으로 충분해집니다.</p>
-      <p>그 때까지 혼디 사용자는 등본 발급을 비롯한 대개의 공공 서비스를 직접 수행해야 하며, 혼디는 사용자가 쉽게 따라할 수 있도록 한 번에 하나의 절차만 지시합니다. 가령 "정부24 앱을 설치하십시오", "공동인증서로 로그인하세요", "좌측 상단 검색창에 '등본 발급'을 입력한 뒤 검색하세요" 같은 순서입니다.</p>
-      <p>이때 혼디는 <strong>관제탑 원칙</strong>에 따라 사용자를 이끕니다. 불의의 사고로 조종사가 조종할 수 없게 된 상황에서 조종간을 잡은 승객에게, 관제탑이 비상 착륙을 위해 절차를 하나씩 지시하는 것처럼 — 혼디는 사용자가 공공 서비스를 온라인으로 처리할 수 있도록 한 번에 하나씩, 끝까지 그 절차를 안내합니다.</p>
+</div></div>
     </div>
   </div>
 </section>
 
-<section class="section" id="half-performance">
+<section class="section db-cards-section" id="db-group-join" style="--db-accent:#b3790a">
   <div class="section-inner">
-    <span class="section-tag">절반의 성능</span>
-    <h2 class="section-title">혼디, 왜 <strong>절반의 성능</strong>인가</h2>
-    <div class="section-body">
-      <p>혼디는 사용자의 지시를 직접 이행하도록 설계되었지만, 그 성능은 목표치의 절반 수준에 그칩니다. 그 이유는 둘입니다.</p>
-      <p><strong>첫째, AI 엔진이 해외에 있습니다.</strong> 혼디가 이용하는 AI 엔진들(챗GPT 등)의 서버가 모두 해외에 있습니다. 최근 국내 AI 엔진들(Exaone 등)의 성능이 크게 향상되었지만, 아직 탑 클래스에는 못 미칩니다. AI 서버가 해외에 있으므로, 우리 맘대로 손볼 수 없는 점이 첫째 이유입니다. 페이지 하단의 국내 AI 서버 구축 계획을 참고하십시오.</p>
-      <p><strong>둘째, 기관 API가 없거나 미비합니다.</strong> 최근들어 정부24, data.go.kr, dpaper.kr를 비롯한 정부 API 공개가 활발하지만, 아직은 기대에 못 미치는 수준이며, 2030년경에 완전한 AI 정부의 문이 열릴 것으로 예상됩니다.</p>
-      <p>이 두 가지 제약에 대한 우리의 대응책은 <strong>첫째, 국내 AI 서버 구축</strong>이고, <strong>둘째, 기관 API를 우리가 직접 만드는 것</strong>입니다. 가령, 혼디는 한국의 모든 중앙 정부와 모든 지방 행정 기관 및 그 부서의 AI 비서를 포함합니다. 이러한 수천 개 AI 비서의 용도가 바로 정부 API입니다.</p>
-    </div>
-  </div>
-</section>
-
+    <span class="section-tag">더 알아보기</span>
+    <h2 class="section-title">함께 만들어가기</h2>
+    <div class="db-card-grid">
+      <button type="button" class="db-card" data-panel="db-panel-join-completion" aria-expanded="false">
+  <span class="db-card-icon" style="color:#b3790a"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
+  <span class="db-card-title">혼디 완성에 동참해 주세요</span>
+  <span class="db-card-summary">혼디는 한국 개발자들(총괄 도영민)의 지원과 참여 결과이며, 2026년 9월 현재 완성도 90% 수준입니다. 혼디는 LLM이라…</span>
+  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+</button><div class="db-panel" id="db-panel-join-completion"><div class="db-panel-inner">
 <section class="section" id="join-completion" style="background:var(--bg-alt)">
   <div class="section-inner">
     <span class="section-tag">함께 완성하기</span>
@@ -1610,7 +1843,12 @@ document.addEventListener("DOMContentLoaded", function () {
     </div>
   </div>
 </section>
-
+</div></div><button type="button" class="db-card" data-panel="db-panel-dev-team" aria-expanded="false">
+  <span class="db-card-icon" style="color:#b3790a"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M2 21v-1a6 6 0 0 1 12 0v1"/><circle cx="18" cy="9" r="2.5"/><path d="M15.5 21v-1a4 4 0 0 1 6.2-3.3"/></svg></span>
+  <span class="db-card-title">혼디를 만든 사람들</span>
+  <span class="db-card-summary">혼디는 한국인 개발자 50여 명과 제주 시청의 지원으로 완성됐습니다. 개발 책임자는 한림읍에 거주하는 도 영민이며, 미국 MI…</span>
+  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+</button><div class="db-panel" id="db-panel-dev-team"><div class="db-panel-inner">
 <section class="section" id="dev-team">
   <div class="section-inner">
     <h2 class="section-title">혼디를 <strong>만든 사람들</strong></h2>
@@ -1618,6 +1856,10 @@ document.addEventListener("DOMContentLoaded", function () {
       <div class="section-body">
         <p>혼디는 한국인 개발자 50여 명과 제주 시청의 지원으로 완성됐습니다. 개발 책임자는 한림읍에 거주하는 <strong>도 영민</strong>이며, 미국 MIT 공대의 olpc 프로젝트에 시스템 개발자로 수 년간 참여하였습니다.</p>
       </div>
+    </div>
+  </div>
+</section>
+</div></div>
     </div>
   </div>
 </section>
@@ -4140,6 +4382,21 @@ window.closeHondiZoom = function() {
     input.focus();
   };
 })();
+</script>
+
+<script>
+// 2026-09-05 신설 — 섹션 카드화(db-card/db-panel) 토글. 클릭한 카드
+// 바로 아래(같은 grid) 패널이 열리고, 다시 누르면 닫힌다. 여러 개
+// 동시에 열어도 서로 방해하지 않는다(배타적 아코디언 아님).
+document.addEventListener('click', function (e) {
+  var card = e.target.closest('.db-card');
+  if (!card) return;
+  var panel = document.getElementById(card.getAttribute('data-panel'));
+  if (!panel) return;
+  var willOpen = !panel.classList.contains('open');
+  panel.classList.toggle('open', willOpen);
+  card.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+});
 </script>
 
 </body>
