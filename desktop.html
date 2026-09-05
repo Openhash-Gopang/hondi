@@ -879,23 +879,23 @@ body.mm-lock-scroll { overflow: hidden; }
    성격별 3그룹으로 묶어 카드화했다. 카드를 누르면 원본 섹션 전체를
    글자 하나 손실 없이 그 자리에서 펼친다(요약이 아니라 원문 그대로). ── */
 .db-card-grid {
-  /* Material Design 반응형 그리드 브레이크포인트 — Compact(<600px)도
-     최소 2열은 나란히 배열한다(카드 1개가 화면 전체를 차지하던 문제 수정,
-     2026-09-05). 폭이 넓어질수록 열 개수가 늘어난다.
-     grid-auto-flow: dense — 카드 바로 다음에 오는 전체폭 패널
-     (.db-panel, grid-column:1/-1)이 접혀 있어도 "이번 줄을 통째로 쓰는
-     항목"으로 계산되어, 기본 배치 방식(sparse)에서는 그 뒤 카드가 남은
-     빈칸을 못 채우고 매번 새 줄로 밀려 카드가 전부 세로 1열로 쌓이는
-     문제가 있었다(2026-09-05 발견) — dense로 바꿔 빈칸을 다시 채우게
-     한다. */
-  display: grid; grid-template-columns: repeat(2, 1fr); grid-auto-flow: dense;
-  gap: 10px; margin-top: 8px;
+  /* ── 2026-09-05 전면 교체 — CSS Grid(auto-fill/dense)를 버리고, K-정부·
+     전문가 페르소나 카탈로그에서 이미 검증된 flex-wrap 방식으로 통일한다.
+     Grid는 "카드 바로 다음에 오는 전체폭 패널"이 접혀 있어도 줄 배치
+     계산에 끼어들어(dense로 고쳐도 접힌 패널의 border가 빈 상자처럼
+     계속 보이는 문제가 남음), 카드가 어긋나거나 빈 테두리 줄이 쌓이는
+     문제가 반복됐다. flex-wrap은 패널을 flex-basis:100%로 강제
+     줄바꿈시키는 것뿐이라 이런 부작용이 없다. ── */
+  display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px;
 }
+.db-card { flex: 1 1 calc(50% - 5px); }
 @media (min-width: 480px) {
-  .db-card-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+  .db-card-grid { gap: 12px; }
+  .db-card { flex: 1 1 calc(33.333% - 8px); }
 }
 @media (min-width: 860px) {
-  .db-card-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+  .db-card-grid { gap: 14px; }
+  .db-card { flex: 1 1 calc(25% - 11px); }
 }
 .db-card {
   display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
@@ -935,12 +935,17 @@ body.mm-lock-scroll { overflow: hidden; }
 .db-card[aria-expanded="true"] .db-card-chevron { transform: rotate(180deg); }
 
 .db-panel {
-  grid-column: 1 / -1; display: grid; grid-template-rows: 0fr;
-  transition: grid-template-rows .32s cubic-bezier(.4,0,.2,1);
-  background: var(--bg-alt, #f8f9fa); border-radius: 12px; border: 1px solid var(--border, #e5e7eb);
-  border-top: 3px solid var(--db-accent, #4338CA);
+  /* flex-basis:100% — flex-wrap 컨테이너 안에서 이 항목만 강제로 한
+     줄 전체를 차지하게 해 줄바꿈을 일으킨다(grid-column:1/-1의 flex
+     버전). 닫혀 있을 때는 border-color를 투명하게 둬서, 내용이
+     0높이로 접혀도 테두리 사각형이 빈 줄처럼 계속 보이던 문제를
+     없앤다(2026-09-05 발견·수정) — 열렸을 때만 실제 테두리 색이 켜진다. */
+  flex: 1 1 100%; display: grid; grid-template-rows: 0fr;
+  transition: grid-template-rows .32s cubic-bezier(.4,0,.2,1), border-color .1s ease;
+  background: var(--bg-alt, #f8f9fa); border-radius: 12px;
+  border: 1px solid transparent; border-top: 3px solid transparent;
 }
-.db-panel.open { grid-template-rows: 1fr; }
+.db-panel.open { grid-template-rows: 1fr; border-color: var(--border, #e5e7eb); border-top-color: var(--db-accent, #4338CA); }
 .db-panel-inner { overflow: hidden; padding: 4px 8px; }
 .db-panel-inner > section.section { padding: 20px 8px; background: transparent !important; }
 .db-panel-inner > section.section .section-inner { padding: 0; max-width: none; }
@@ -1405,28 +1410,6 @@ document.addEventListener("DOMContentLoaded", function () {
      재사용해 사이트 전체 톤을 유지한다.
      ══════════════════════════════════════════════════════════════ -->
 
-<section class="section db-cards-section" id="db-group-philosophy" style="--db-accent:#4338CA">
-  <div class="section-inner">
-    <span class="section-tag">더 알아보기</span>
-    <h2 class="section-title">혼디의 철학과 정체성</h2>
-    <div class="db-card-grid">
-      <button type="button" class="db-card" data-panel="db-panel-hondi-net" aria-expanded="false">
-  <span class="db-card-icon" style="color:#4338CA"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></span>
-  <span class="db-card-title">5천만 AI 비서의 나라</span>
-  <span class="db-card-summary">한국은 5천만 한국인과 수백만 기업·기관들로 구성된 나라입니다. 혼디넷은 5천만 AI 비서와 수백만 기업·기관 AI로 구성된 …</span>
-  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-</button><div class="db-panel" id="db-panel-hondi-net"><div class="db-panel-inner">
-<section class="section" id="hondi-net">
-  <div class="section-inner">
-    <span class="section-tag">혼디넷</span>
-    <h2 class="section-title">5천만 <strong>AI 비서</strong>의 나라</h2>
-    <div class="section-body">
-      <p>한국은 5천만 한국인과 수백만 기업·기관들로 구성된 나라입니다. 혼디넷은 5천만 AI 비서와 수백만 기업·기관 AI로 구성된 네트워크입니다.</p>
-      <p>그동안의 한국은 사람과 사람이 만나 업무를 진행했습니다. 모든 조직은 부서와 직책이 있고, 사람과 사람이 만나 일합니다. 혼디넷은 그 일을 AI에게 맡기고, AI와 AI가 만나 대화하며 업무를 수행하고, 사람은 최종 승인합니다. 기존 AI를 그러한 목적과 용도에 맞게 만든 것이 <strong>혼디</strong>입니다.</p>
-      <p>사람과 사람이 주고받는 전화 통화를 혼디와 혼디가 주고받고, 사람과 사람이 주고받는 메일과 문서를 혼디와 혼디가 주고받습니다. 사람과 다른 점은 혼디는 세상의 모든 지식을 갖추고 빛의 속도로 업무를 처리하는 점이며, 사람과 같은 점은 <strong>거짓말</strong>을 아주 잘하는 점입니다. 혼디넷이 종래의 AI와 다른 점은 AI가 거짓말하지 못할 매우 강력한 안전 장치를 제공합니다. 그것이 <strong>오픈해시</strong>입니다.</p>
-    </div>
-  </div>
-</section>
 </div></div><button type="button" class="db-card" data-panel="db-panel-separation-of-powers" aria-expanded="false">
   <span class="db-card-icon" style="color:#4338CA"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 8l-3 6a4 4 0 0 0 8 0zM19 8l-3 6a4 4 0 0 0 8 0zM3 8h6M15 8h6M7 21h10"/></svg></span>
   <span class="db-card-title">판결·입법·집행이 하나의 순환을 이룹니다</span>
@@ -1576,6 +1559,29 @@ document.addEventListener("DOMContentLoaded", function () {
     </div>
     <p class="cmp-summary">준공 검사(사용승인)도 동일한 원칙을 따릅니다 — 착공 신고부터 서류 심사·현장 실사 일정 조율까지 혼디가 대행하되, <strong>현장 실사와 최종 승인은 언제나 담당 공무원(사람)</strong>이 수행합니다. 혼디가 준비한 검토 의견은 참고 자료일 뿐, 법적 책임과 최종 결재권은 전적으로 인간 공무원에게 있습니다.</p>
     <a class="doc-link" href="./reports/hondi-example.html" target="_blank" rel="noopener">더 자세히<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+  </div>
+</section>
+
+<section class="section db-cards-section" id="db-group-philosophy" style="--db-accent:#4338CA">
+  <div class="section-inner">
+    <span class="section-tag">더 알아보기</span>
+    <h2 class="section-title">혼디의 철학과 정체성</h2>
+    <div class="db-card-grid">
+      <button type="button" class="db-card" data-panel="db-panel-hondi-net" aria-expanded="false">
+  <span class="db-card-icon" style="color:#4338CA"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></span>
+  <span class="db-card-title">5천만 AI 비서의 나라</span>
+  <span class="db-card-summary">한국은 5천만 한국인과 수백만 기업·기관들로 구성된 나라입니다. 혼디넷은 5천만 AI 비서와 수백만 기업·기관 AI로 구성된 …</span>
+  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+</button><div class="db-panel" id="db-panel-hondi-net"><div class="db-panel-inner">
+<section class="section" id="hondi-net">
+  <div class="section-inner">
+    <span class="section-tag">혼디넷</span>
+    <h2 class="section-title">5천만 <strong>AI 비서</strong>의 나라</h2>
+    <div class="section-body">
+      <p>한국은 5천만 한국인과 수백만 기업·기관들로 구성된 나라입니다. 혼디넷은 5천만 AI 비서와 수백만 기업·기관 AI로 구성된 네트워크입니다.</p>
+      <p>그동안의 한국은 사람과 사람이 만나 업무를 진행했습니다. 모든 조직은 부서와 직책이 있고, 사람과 사람이 만나 일합니다. 혼디넷은 그 일을 AI에게 맡기고, AI와 AI가 만나 대화하며 업무를 수행하고, 사람은 최종 승인합니다. 기존 AI를 그러한 목적과 용도에 맞게 만든 것이 <strong>혼디</strong>입니다.</p>
+      <p>사람과 사람이 주고받는 전화 통화를 혼디와 혼디가 주고받고, 사람과 사람이 주고받는 메일과 문서를 혼디와 혼디가 주고받습니다. 사람과 다른 점은 혼디는 세상의 모든 지식을 갖추고 빛의 속도로 업무를 처리하는 점이며, 사람과 같은 점은 <strong>거짓말</strong>을 아주 잘하는 점입니다. 혼디넷이 종래의 AI와 다른 점은 AI가 거짓말하지 못할 매우 강력한 안전 장치를 제공합니다. 그것이 <strong>오픈해시</strong>입니다.</p>
+    </div>
   </div>
 </section>
 
