@@ -2401,43 +2401,49 @@ document.addEventListener('keydown', function (e) {
 ══════════════════════════════════════════════════════════ -->
 <style>
   #user-dash-overlay{
-    --ud-bg:#26282d; --ud-panel:#2b2e34; --ud-panel2:#33363c;
-    --ud-line:#3c3f46; --ud-line-strong:#4a4e56;
-    --ud-text:#d7d9dd; --ud-dim:#9aa0a8; --ud-faint:#6e737a;
-    --ud-warn:#d6a04a; --ud-crit:#d16054;
+    /* 2026-09-05 수정 — plan.hondi.net(K-Plan)의 인증 UI 톤·색상과 통일.
+       어두운 네이비 팔레트를 K-Plan의 흰 배경+인디고 팔레트로 교체했다.
+       실제 인증 로직(전체 전화번호→OTP 6자리 흐름)은 그대로 두고
+       겉모습만 맞춘다. */
+    --ud-bg:#ffffff; --ud-panel:#ffffff; --ud-panel2:#ffffff;
+    --ud-line:#DFE2ED; --ud-line-strong:#C7D2FE;
+    --ud-text:#1A202C; --ud-dim:#4A5568; --ud-faint:#718096;
+    --ud-warn:#b3790a; --ud-crit:#C01C28;
     --ud-mono:'SFMono-Regular','Consolas',monospace;
+    --ud-pri:#4338CA; --ud-pri-bg:#EEF2FF;
   }
-  #user-dash-overlay .ud-card{background:var(--ud-bg);border-radius:12px;width:100%;max-width:560px;
-    box-shadow:0 12px 48px rgba(0,0,0,.4);overflow:hidden;margin:auto;color:var(--ud-text);
-    font-family:'Pretendard','Noto Sans KR',sans-serif;}
+  #user-dash-overlay .ud-card{background:var(--ud-bg);border-radius:14px;width:100%;max-width:560px;
+    box-shadow:0 12px 32px rgba(0,0,0,.18);overflow:hidden;margin:auto;color:var(--ud-text);
+    font-family:'Pretendard','Noto Sans KR',sans-serif;border:1px solid var(--ud-line);}
   #user-dash-overlay .ud-head{display:flex;align-items:center;justify-content:space-between;
     padding:16px 20px;border-bottom:1px solid var(--ud-line);background:var(--ud-panel);}
-  #user-dash-overlay .ud-head span{font-size:14px;font-weight:500;color:var(--ud-text);}
-  #user-dash-overlay .ud-close{background:none;border:none;cursor:pointer;color:var(--ud-dim);font-size:20px;line-height:1;padding:2px 6px;}
-  #user-dash-overlay input{width:100%;padding:10px 12px;border:1px solid var(--ud-line);
-    border-radius:4px;font-size:15px;outline:none;font-family:inherit;box-sizing:border-box;
-    display:block;margin-bottom:10px;background:var(--ud-panel2);color:var(--ud-text);}
+  #user-dash-overlay .ud-head span{font-size:14px;font-weight:700;color:var(--ud-text);}
+  #user-dash-overlay .ud-close{background:none;border:none;cursor:pointer;color:var(--ud-faint);font-size:20px;line-height:1;padding:2px 6px;}
+  #user-dash-overlay input{width:100%;padding:11px 12px;border:1px solid var(--ud-line);
+    border-radius:8px;font-size:15px;outline:none;font-family:inherit;box-sizing:border-box;
+    display:block;margin-bottom:10px;background:#fff;color:var(--ud-text);}
+  #user-dash-overlay input:focus{border-color:var(--ud-pri);}
   #user-dash-overlay .ud-err{display:none;color:var(--ud-crit);font-size:12px;margin-bottom:10px;}
-  #user-dash-overlay .ud-btn{width:100%;padding:11px;background:var(--ud-panel2);color:var(--ud-text);
-    border:1px solid var(--ud-line-strong);border-radius:4px;font-size:13.5px;font-weight:500;cursor:pointer;}
-  #user-dash-overlay .ud-btn.primary{background:#3b6ea8;border-color:#3b6ea8;color:#fff;}
+  #user-dash-overlay .ud-btn{width:100%;padding:11px;background:#fff;color:var(--ud-dim);
+    border:1px solid var(--ud-line-strong);border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer;}
+  #user-dash-overlay .ud-btn.primary{background:var(--ud-pri);border-color:var(--ud-pri);color:#fff;font-weight:700;}
   #user-dash-overlay .ud-btn + .ud-btn{margin-top:8px;}
-  #user-dash-overlay .ud-balance{border:1px solid var(--ud-line);border-radius:4px;padding:14px 16px;
+  #user-dash-overlay .ud-balance{border:1px solid var(--ud-line);border-radius:8px;padding:14px 16px;
     display:flex;justify-content:space-between;align-items:baseline;margin:16px 20px 0;}
   #user-dash-overlay .ud-balance .l{font-size:11px;color:var(--ud-faint);}
   #user-dash-overlay .ud-balance .v{font-family:var(--ud-mono);font-size:22px;color:var(--ud-text);}
   #user-dash-overlay .ud-sub{font-size:11px;color:var(--ud-faint);padding:0 16px 12px;margin:0 20px 16px;
-    border:1px solid var(--ud-line);border-top:none;border-radius:0 0 4px 4px;}
+    border:1px solid var(--ud-line);border-top:none;border-radius:0 0 8px 8px;}
   #user-dash-overlay .ud-tabs{display:flex;border-bottom:1px solid var(--ud-line);margin:0 20px 14px;gap:2px;}
   #user-dash-overlay .ud-tab{padding:9px 12px;font-size:12px;color:var(--ud-faint);cursor:pointer;
     border-bottom:2px solid transparent;}
-  #user-dash-overlay .ud-tab.active{color:var(--ud-text);border-bottom-color:var(--ud-dim);}
+  #user-dash-overlay .ud-tab.active{color:var(--ud-pri);border-bottom-color:var(--ud-pri);font-weight:700;}
   #user-dash-overlay .ud-body{padding:0 20px 20px;}
   #user-dash-overlay .ud-pane{display:none;}
   #user-dash-overlay .ud-pane.active{display:block;}
-  #user-dash-overlay .ud-rows{border:1px solid var(--ud-line);border-radius:4px;overflow:hidden;}
+  #user-dash-overlay .ud-rows{border:1px solid var(--ud-line);border-radius:8px;overflow:hidden;}
   #user-dash-overlay .ud-txn{display:grid;grid-template-columns:12px 1fr auto;align-items:center;gap:10px;
-    padding:10px 12px;border-bottom:1px solid var(--ud-line);background:var(--ud-panel);}
+    padding:10px 12px;border-bottom:1px solid var(--ud-line);background:#fff;}
   #user-dash-overlay .ud-txn:last-child{border-bottom:none;}
   #user-dash-overlay .ud-dot{width:6px;height:6px;border-radius:50%;background:var(--ud-dim);}
   #user-dash-overlay .ud-title{color:var(--ud-text);font-size:12.5px;}
@@ -2462,10 +2468,17 @@ document.addEventListener('keydown', function (e) {
     </div>
 
     <div id="user-dash-lookup" style="padding:28px 24px">
-      <div style="font-size:12.5px;color:var(--ud-dim);margin-bottom:14px;line-height:1.6">
-        GDC 충전 시 사용한 전화번호로 본인 확인 후 잔액과 이용 내역을 확인할 수 있습니다.
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <span style="font-size:18px;line-height:1;flex-shrink:0">🧭</span>
+        <div style="font-size:13px;color:var(--ud-text);line-height:1.5">
+          GDC 충전 시 사용한 전화번호 뒷자리 8자를 입력하십시오.
+        </div>
       </div>
-      <input id="user-dash-phone" type="tel" placeholder="010-0000-0000" autocomplete="tel">
+      <div style="display:flex;align-items:stretch;border:1px solid var(--ud-line);border-radius:8px;background:#fff;overflow:hidden;margin-bottom:10px">
+        <span style="padding:0 10px;height:44px;display:flex;align-items:center;font-size:14px;color:var(--ud-dim);border-right:1px solid var(--ud-line);flex-shrink:0;background:#fafafa">010-</span>
+        <input id="user-dash-phone" type="tel" maxlength="8" inputmode="numeric" placeholder="전화번호 뒷 8자리" autocomplete="tel"
+               style="flex:1;min-width:0;border:none;margin:0;border-radius:0;height:44px;letter-spacing:2px;text-align:center">
+      </div>
       <div id="user-dash-err" class="ud-err"></div>
       <button id="user-dash-btn" class="ud-btn primary" onclick="_userDashRequestOtp()">인증번호 받기</button>
     </div>
@@ -2548,7 +2561,11 @@ function _toE164(raw) {
   return '+82' + digits;
 }
 async function _userDashRequestOtp() {
-  const raw = document.getElementById('user-dash-phone').value.trim();
+  var last8 = document.getElementById('user-dash-phone').value.trim();
+  // 2026-09-05 수정 — 입력창을 K-Plan과 통일해 뒷자리 8자리만 받는다.
+  // 기존 _toE164()는 전체 번호 문자열을 기대하므로, 010- 프리픽스를
+  // 붙여 조합한 뒤 그대로 넘긴다 — 그 아래 로직·엔드포인트는 그대로다.
+  const raw = last8 ? ('010-' + last8) : '';
   const err = document.getElementById('user-dash-err');
   const btn = document.getElementById('user-dash-btn');
   const e164 = _toE164(raw);
