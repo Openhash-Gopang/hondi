@@ -18923,7 +18923,7 @@ async function handleKPlanRelay(bodyText, env, corsHeaders, meta = null, ctx = n
   let body;
   try { body = JSON.parse(bodyText); } catch { return _err(400, 'INVALID_JSON', '', corsHeaders); }
 
-  let { tier, messages, max_tokens, stream, generation_type, currentLocation, phone_verify_token } = body || {};
+  let { tier, messages, max_tokens, stream, generation_type, currentLocation, phone_verify_token, plan_id } = body || {};
   if (!Array.isArray(messages)) return _err(400, 'MISSING_FIELD', 'messages 필수', corsHeaders);
 
   // ── 전화번호 로그인 필수 — K-Law와 동일 이유(실제 GDC 과금이 걸리므로
@@ -19101,7 +19101,93 @@ async function handleKPlanRelay(bodyText, env, corsHeaders, meta = null, ctx = n
       multiplierOverride: _kplanMultiplierOverride,
     });
   }
+
+  // ── K-Plan→K-Mail 브리프 핸드오프 태그 (2026-09-05 신설) ──────────────
+  // docs/KPLAN_KMAIL_AGENT_TO_AGENT_ARCHITECTURE_v1_0_20260903.md §9가
+  // "같은 Worker 내 함수 호출로 K-Mail에 전달된다"고 명시했지만 실제
+  // 구현이 없었다(K-Mail→K-Plan 방향만 있었음) — K-Plan이 "K-Mail에
+  // 접속할 수 없다"며 스스로 전술(메일 문구 등)까지 작성해버리는 §9
+  // 위반이 실사로 재현됨(주피터 지시로 발견). k-plan SP(v1.3)가 브리프가
+  // 완성되면 이 태그를 내도록 지시받으며, 여기서 그 태그를 감지해
+  // kplan_plans에 저장한다 — 사용자가 mail.hondi.net에서 새 K-Mail
+  // 대화를 시작하면 handleKmailChat이 자동으로 읽어간다(아래 참고).
+  // plan_id가 아직 없으면(플랜을 한 번도 저장 안 한 극초반 대화) 조용히
+  // 건너뛴다 — 사용자에게 보이는 응답 자체는 항상 정상적으로 나간다.
+  const finalMsg = finalData.choices?.[0]?.message;
+  if (finalMsg && typeof finalMsg.content === 'string') {
+    const briefMatch = finalMsg.content.match(/KPLAN_ISSUE_BRIEF_TO_KMAIL\s*(\{[\s\S]*\})\s*$/);
+    if (briefMatch) {
+      let parsed = null;
+      try { parsed = JSON.parse(briefMatch[1]); } catch (e) { /* 아래에서 처리 */ }
+      const cleanContent = finalMsg.content.slice(0, briefMatch.index).trim();
+      const briefText = (parsed?.brief || '').trim();
+      if (briefText && plan_id) {
+        try {
+          await _kplanIssueBriefToKMail(env, { guid, planId: plan_id, briefText });
+          finalMsg.content = cleanContent + '\n\n---\n✅ 위 브리프를 K-Mail로 전달했습니다. [mail.hondi.net](https://mail.hondi.net)에서 새 대화를 시작하시면 K-Mail이 이어받아 구체적인 실행(대상 검색·발송 회차·문구·보고)을 설계합니다.';
+        } catch (e) {
+          _dlog(env, JSON.stringify({ tag: 'KPLAN_ISSUE_BRIEF_TO_KMAIL_FAILED', guid, planId: plan_id, error: e.message }));
+          finalMsg.content = cleanContent + '\n\n(K-Mail로 브리프 전달에 실패했습니다 — 잠시 후 다시 시도해 주세요.)';
+        }
+      } else {
+        // brief 없이 태그만 나왔거나 plan_id 미확보 — 사용자에게는 태그
+        // 흔적만 지운 정상 텍스트를 보여준다(조용한 실패, 재시도 유도 없음).
+        finalMsg.content = cleanContent;
+      }
+    }
+  }
+
   return new Response(JSON.stringify(finalData), { headers: corsHeaders });
+}
+
+// K-Plan→K-Mail 브리프 저장 — kplan_plans 레코드에 pending 브리프를
+// 적어둔다. handleKmailChat이 새 대화 첫 턴에 조회해 소비한다.
+async function _kplanIssueBriefToKMail(env, { guid, planId, briefText }) {
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  const filter = encodeURIComponent(`plan_id='${planId}' && guid='${guid}'`);
+  const findRes = await fetch(`${L1_DEFAULT}/api/collections/kplan_plans/records?filter=${filter}&perPage=1`, { headers: { 'Authorization': `Bearer ${token}` } });
+  const findData = await findRes.json().catch(() => ({ items: [] }));
+  const existing = (findData.items && findData.items[0]) || null;
+  if (!existing) throw new Error('PLAN_NOT_FOUND');
+
+  const patchRes = await fetch(`${L1_DEFAULT}/api/collections/kplan_plans/records/${existing.id}`, {
+    method: 'PATCH', headers,
+    body: JSON.stringify({
+      kmail_brief_text: briefText.slice(0, 8000),
+      kmail_brief_status: 'pending',
+      kmail_brief_issued_at: new Date().toISOString(),
+    }),
+  });
+  if (!patchRes.ok) throw new Error('BRIEF_SAVE_FAILED: ' + (await patchRes.text().catch(() => '')).slice(0, 200));
+  return await patchRes.json();
+}
+
+// K-Mail이 새 대화 첫 턴에 조회 — 이 guid 앞으로 아직 안 읽은(pending)
+// K-Plan 브리프 중 가장 최근 것 하나를 돌려준다.
+async function _kmailFetchPendingKplanBrief(env, guid) {
+  const token = await _l1AdminToken(env);
+  const filter = encodeURIComponent(`guid='${guid}' && kmail_brief_status='pending'`);
+  const res = await fetch(`${L1_DEFAULT}/api/collections/kplan_plans/records?filter=${filter}&sort=-kmail_brief_issued_at&perPage=1`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!res.ok) return null;
+  const data = await res.json().catch(() => ({ items: [] }));
+  const rec = data.items?.[0];
+  if (!rec || !rec.kmail_brief_text) return null;
+  return { id: rec.id, plan_id: rec.plan_id, kmail_brief_text: rec.kmail_brief_text };
+}
+
+// 위 브리프를 읽어 대화에 주입한 뒤 호출 — 같은 브리프가 다음 새 대화에
+// 또 주입되지 않도록 'consumed'로 표시한다(재주입 방지, 재발송 아님 —
+// 사용자가 원하면 K-Plan에서 다시 브리프를 발행하면 됨).
+async function _kmailMarkKplanBriefConsumed(env, recordId) {
+  const token = await _l1AdminToken(env);
+  await fetch(`${L1_DEFAULT}/api/collections/kplan_plans/records/${recordId}`, {
+    method: 'PATCH',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ kmail_brief_status: 'consumed' }),
+  }).catch(() => {}); // 소비 표시 실패는 치명적이지 않음 — 최악의 경우 다음 새 대화에 한 번 더 보임
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -32675,13 +32761,38 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     .map(m => ({ role: m.role, content: m.content.slice(0, 4000) }));
   if (cleanMessages.length === 0) return _err(400, 'MISSING_FIELD', '유효한 메시지가 없습니다', corsHeaders);
 
+  // ── K-Plan→K-Mail 브리프 자동 주입 (2026-09-05 신설) ─────────────────
+  // /kmail/chat은 세션 상태를 안 가지므로(주석 참고) "새 대화 시작"을
+  // 판별할 유일한 신호는 클라이언트가 보낸 원본 messages가 딱 1개(사용자의
+  // 첫 턴)인 경우다. 이때만 이 guid 앞으로 K-Plan이 남겨둔 미소비 브리프를
+  // 확인해 있으면 대화에 주입하고 즉시 소비 처리한다 — 사용자가 아무것도
+  // 복사·붙여넣기 하지 않아도 K-Plan의 전략 브리프가 그대로 전달된다
+  // (docs/KPLAN_KMAIL_AGENT_TO_AGENT_ARCHITECTURE_v1_0_20260903.md §9,
+  // handleKPlanRelay의 KPLAN_ISSUE_BRIEF_TO_KMAIL 처리와 짝을 이룸).
+  let kplanBriefNote = '';
+  if (messages.length === 1) {
+    try {
+      const pendingBrief = await _kmailFetchPendingKplanBrief(env, guid);
+      if (pendingBrief) {
+        kplanBriefNote = `[K-Plan으로부터 전달된 캠페인 브리프 — plan_id: ${pendingBrief.plan_id}]\n${pendingBrief.kmail_brief_text}\n\n위 브리프는 전략(누가·언제·어디서·무엇을·왜) 수준까지만 정해져 있습니다. 회차 수·일정·문구 등 구체적인 실행 설계와 그 보고는 당신(K-Mail)의 책임입니다 — 이 SP의 캠페인 생애주기(§0-1)에 따라 대상 검색부터 시작해, 실행 계획을 사용자에게 먼저 제시하고 확인받으세요.`;
+        await _kmailMarkKplanBriefConsumed(env, pendingBrief.id);
+      }
+    } catch (e) {
+      console.warn('[K-Mail] K-Plan 브리프 조회 실패(치명적 아님):', e.message);
+    }
+  }
+
+  const systemMessages = [
+    ...(kmailUniversalInjected ? [{ role: 'system', content: kmailUniversalInjected }] : []),
+    { role: 'system', content: systemPrompt },
+    ...(kplanBriefNote ? [{ role: 'system', content: kplanBriefNote }] : []),
+  ];
+
   let reply;
   try {
     reply = await deepseekChatText({
       env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
-      messages: kmailUniversalInjected
-        ? [{ role: 'system', content: kmailUniversalInjected }, { role: 'system', content: systemPrompt }, ...cleanMessages]
-        : [{ role: 'system', content: systemPrompt }, ...cleanMessages],
+      messages: [...systemMessages, ...cleanMessages],
       max_tokens: 800, temperature: 0.4, timeoutMs: 20000, fallbackText: '',
     });
   } catch (e) {
