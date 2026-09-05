@@ -992,6 +992,22 @@ body.mm-lock-scroll { overflow: hidden; }
 .bh-footer { margin-top: 22px; padding-top: 14px; border-top: 1px solid #999; font-size: 12px; color: #666; line-height: 1.6; }
 .bh-footer-meta { margin-top: 10px; font-size: 13px; color: #333; text-align: center; }
 
+/* ── 2026-09-05 신설 — 한 화면에 예시 대화+카드 11장을 전부 몰아넣던
+   방식을 버리고 페이지로 분리한다(1: 브로슈어, 2: 예시 대화 2건,
+   3: 철학·정체성 카드, 4: 실용정보+참여 카드). 페이지마다 적은 분량만
+   보이므로 레이아웃이 훨씬 안정적이다. */
+.db-pagination {
+  display: flex; justify-content: center; gap: 8px; margin: 28px auto 0; max-width: 760px; padding: 0 24px;
+}
+.db-page-btn {
+  width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border, #d0d5dc);
+  background: #fff; color: var(--text3, #4d4d4d); font-family: inherit; font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.db-page-btn:hover { border-color: var(--brand, #0c6cc3); color: var(--brand, #0c6cc3); }
+.db-page-btn.active { background: var(--navy, #0e1c3f); border-color: var(--navy, #0e1c3f); color: #fff; }
+.db-page { max-width: 1160px; margin: 0 auto; padding: 0 24px 40px; }
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <script>mermaid.initialize({startOnLoad:false, theme:"neutral", fontFamily:"inherit"});</script>
@@ -1305,111 +1321,99 @@ document.addEventListener('keydown', function (e) {
 </section>
 
 
-<script>
-(function () {
-  var heroTitles = [
-    { l1: '사람 간의 업무를', l2: '혼디 간의 소통으로 보강합니다.', href: './highlights/hondi-communication.html' },
-    { l1: '세계 1등 한국, 한국 1등 제주', l2: '혼디는 제주 특산품입니다.', href: './highlights/jeju-specialty.html' },
-    { l1: '혼디는 연간 수십 조 원의 AI 비용을', l2: '절반 이하로 줄입니다.', href: './highlights/ai-cost-half.html' },
-    { l1: '카톡을 혼디로 바꾸면,', l2: '한국 GDP를 10% 높일 수 있습니다.', href: './highlights/gdp-growth.html' },
-    { l1: '공공재 혼디,', l2: '혼디는 공공의 이익을 우선합니다.', href: './highlights/public-good.html' },
-    { l1: '쓰면 쓸수록 똑똑해지는', l2: '나만의 AI 비서, 혼디', href: '#core-philosophy' },
-    { l1: '혼디넷', l2: '수많은 혼디들의 네트워크', href: './highlights/hondi-network.html' }
-  ];
-  var heroIdx = 0;
-  var heroEl = document.getElementById('hero-title');
-  if (!heroEl) return;
-  var arrowSvg = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
-  setInterval(function () {
-    heroIdx = (heroIdx + 1) % heroTitles.length;
-    heroEl.style.opacity = '0';
-    setTimeout(function () {
-      var t = heroTitles[heroIdx];
-      heroEl.innerHTML = '<span class="l1">' + t.l1 + '</span><br><span class="l2">' + t.l2 + '</span> <a class="hero-more" href="' + t.href + '">더보기' + arrowSvg + '</a>';
-      heroEl.style.opacity = '1';
-    }, 250);
-  }, 5000);
-})();
-</script>
+<div class="db-pagination" id="dbPagination">
+  <button type="button" class="db-page-btn active" data-page="1">1</button>
+  <button type="button" class="db-page-btn" data-page="2">2</button>
+  <button type="button" class="db-page-btn" data-page="3">3</button>
+  <button type="button" class="db-page-btn" data-page="4">4</button>
+</div>
 
-<script>
-(function () {
-  var illustEl = document.getElementById('hero-illustration');
-  if (!illustEl) return;
-  var frameUrls = { frame1: '/assets/hondi-human-slow.svg', frame3: '/assets/hondi-hondi-light-speed.svg' };
-  var cache = {};
-  var blankSvg = '<svg width="680" height="340" viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg" role="img"><title>전환 여백</title><rect width="680" height="340" fill="#0E1B3A"/></svg>';
-  var phraseSvg = '<svg width="680" height="340" viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg" role="img"><title>사람들 간의 단순 반복적인 일상을 혼디가 대신합니다</title><rect width="680" height="340" fill="#0E1B3A"/><text x="340" y="154" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="600" fill="#E7EAF5" font-family="sans-serif">사람들 간의 단순 반복적인 일상을</text><text x="340" y="192" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="600" fill="#E7EAF5" font-family="sans-serif">혼디가 대신합니다.</text></svg>';
-  // 2026-08-30 신설 — 4번째 콘텐츠 프레임. phraseSvg와 동일한 레이아웃·폰트로
-  // "혼디의 목표는 국가의 체제 비용과 업무의 처리 시간을 최대 99% 줄이는
-  // 것입니다." 문구(기존 site-nav-highlight-sub 텍스트, 이번에 상단에서
-  // 삭제)를 애니메이션 프레임으로 이전.
-  var phraseSvg2 = '<svg width="680" height="340" viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg" role="img"><title>국가의 체제 비용과 업무의 처리 시간을 최대 99% 줄입니다</title><rect width="680" height="340" fill="#0E1B3A"/><text x="340" y="154" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="600" fill="#E7EAF5" font-family="sans-serif">국가의 체제 비용과 업무의 처리 시간을</text><text x="340" y="192" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="600" fill="#E7EAF5" font-family="sans-serif">최대 99% 줄입니다.</text></svg>';
 
-  function renderUrl(key) {
-    var url = frameUrls[key];
-    if (cache[url]) {
-      illustEl.innerHTML = cache[url];
-      return;
-    }
-    fetch(url).then(function (res) { return res.text(); }).then(function (svgText) {
-      cache[url] = svgText;
-      illustEl.innerHTML = svgText;
-    });
-  }
+<div class="db-page" id="db-page-2" style="display:none">
+<section class="section" id="case-bankruptcy" style="background:var(--bg-alt)">
+  <div class="section-inner">
+    <span class="section-tag">혼디 예시 01</span>
+    <h2 class="section-title has-doc-link">개인파산 및 면책 절차</h2>
+    <div class="section-body">
+      <p>빚을 갚을 능력을 완전히 잃은 사람이 법적으로 재기하는 절차인 개인파산·면책은 신청부터 결정까지 <strong>6~24개월</strong>이 걸리며, 그 사이 신청인은 여러 기관을 오가며 같은 사연과 서류를 반복 설명·제출해야 합니다. 신청인의 혼디가 각 기관의 혼디와 소통하여 이 긴 여정을 처리합니다.</p>
+    </div>
+    <div class="cmp-table-wrap">
+      <table class="cmp-table">
+        <thead><tr><th>단계</th><th>기관</th><th>기존 방식</th><th class="cmp-hondi">혼디 방식</th></tr></thead>
+        <tbody>
+          <tr><td class="cmp-axis">1</td><td>행정복지센터<br>(등본·가족관계증명서)</td><td>방문 또는 개별 온라인 신청</td><td class="cmp-hondi">혼디가 발급 요청 — 1초</td></tr>
+          <tr><td class="cmp-axis">2</td><td>국세청 홈택스<br>(소득금액증명원)</td><td>별도 로그인·서류 저장</td><td class="cmp-hondi">혼디가 수집·정리 — 10초</td></tr>
+          <tr><td class="cmp-axis">3</td><td>대한법률구조공단<br>(상담·서류 작성)</td><td>예약 후 대면 상담</td><td class="cmp-hondi">혼디와 혼디 간 사전 조율 — 10초</td></tr>
+          <tr><td class="cmp-axis">4</td><td>회생법원<br>(파산·면책 신청 접수)</td><td>전자소송 사이트 개별 제출</td><td class="cmp-hondi">혼디가 서류 묶음 제출 — 1초</td></tr>
+          <tr><td class="cmp-axis">5~7</td><td>채권신고·채권자집회·채권조사기일</td><td>우편·문자 개별 확인, 서면 대응</td><td class="cmp-hondi">혼디가 일정 캘린더화·쟁점 브리핑</td></tr>
+          <tr><td class="cmp-axis">8</td><td>면책심문기일·면책 결정</td><td>결과 통지 대기</td><td class="cmp-hondi">혼디 초안 + 인간 판사 최종 결정</td></tr>
+          <tr><td class="cmp-axis">9</td><td>신용정보원<br>(연체 정보 말소)</td><td>기관별 개별 문의</td><td class="cmp-hondi">혼디가 말소 여부 일괄 확인 — 1초</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="cmp-summary">혼디의 수백 개 AI 기능 중 하나인 <strong>K-Law</strong>는 사실관계와 헌법·법률·판례를 근거로 가상의 대법원 판결문을 3~5분 만에 작성합니다. 대법원 공개 판례 대상 자체 측정 기준, K-Law 가상 판결문의 대법원 실제 판결 일치도는 약 75~90%로, 공개 판례의 1~2심 법원 일치도(45~48%)보다 현저히 높습니다. 파산·면책 절차에도 같은 방식을 적용해 K-Law가 진행안 초안을 작성하고, 사람 판사가 검증해 최종 결정을 내립니다. 바로가기(링크 <a href="https://klaw.hondi.net" target="_blank" style="color:inherit;text-decoration:underline;text-decoration-color:var(--brand);text-underline-offset:2px">klaw.hondi.kr</a>)</p>
+    <div class="doc-link-row">
+      <a class="doc-link" href="./reports/hondi-bankruptcy-automation-scenario.html" target="_blank" rel="noopener">개인파산 시나리오 더 자세히<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+      <a class="doc-link" href="./reports/hondi-legal-arbitration-scenario.html" target="_blank" rel="noopener">K-Law 화해계약 사례 더 자세히<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+    </div>
+  </div>
+</section>
 
-  var stages = [
-    { render: function () { renderUrl('frame1'); }, duration: 5000 },
-    { render: function () { illustEl.innerHTML = blankSvg; }, duration: 1000 },
-    { render: function () { illustEl.innerHTML = phraseSvg; }, duration: 5000 },
-    { render: function () { illustEl.innerHTML = blankSvg; }, duration: 1000 },
-    { render: function () { renderUrl('frame3'); }, duration: 8000 },
-    { render: function () { illustEl.innerHTML = blankSvg; }, duration: 1000 },
-    { render: function () { illustEl.innerHTML = phraseSvg2; }, duration: 5000 },
-    { render: function () { illustEl.innerHTML = blankSvg; }, duration: 1000 }
-  ];
-  var stageIdx = 0;
-  function runStage() {
-    stages[stageIdx].render();
-    setTimeout(function () {
-      stageIdx = (stageIdx + 1) % stages.length;
-      runStage();
-    }, stages[stageIdx].duration);
-  }
-  runStage();
-})();
-</script>
+<section class="section" id="case-permit">
+  <div class="section-inner">
+    <span class="section-tag">혼디 예시 02</span>
+    <h2 class="section-title has-doc-link">건축 인허가부터 준공 검사까지</h2>
+    <div class="section-body">
+      <p>건축물을 지으려면 통상 시·군·구 건축과에 신청서·설계도서·구조계산서 등 수십 종의 서류를 준비해 제출하고, 심사·보완·재제출을 여러 차례 거쳐야 합니다. 혼디에서는 사용자가 "건축 인허가 신청해 줘"라고 지시하면, 사용자의 혼디가 관할 부서를 검색하고 부서의 혼디를 호출해 필요 서류 확인부터 준비·제출·심사·보완까지 대행합니다.</p>
+    </div>
 
-<!-- 2026-08-29 — 상단 통계 카드 5개(99%·16개·1,000원·100%·500여)를
-     삭제하고, 각 카드의 본문(펼침 패널)을 주제가 겹치는 하단 본문
-     섹션으로 융합했다: 99%→#cost-comparison, 16개 K-서비스와
-     500여 전문가 페르소나→#feature-summary, 1,000원 월기본료→#pricing,
-     100% 내 데이터 소유권→#feature-summary의 PDV 카드. -->
+    <div style="background:var(--bg-subtle);border-radius:var(--radius-lg);padding:20px 24px;margin:20px 0;font-size:13.5px;line-height:1.9">
+      <p style="margin:0 0 8px"><strong>이용자</strong> "혼디야, ○○동 000-00번지에 근린생활시설 신축 인허가 신청해 줘."</p>
+      <p style="margin:0 0 8px;color:var(--text2)"><strong>사용자 혼디</strong> 제주시 건축과에 인허가 신청을 시작합니다. 관할 부서의 혼디를 호출합니다.</p>
+      <p style="margin:0 0 8px;color:var(--text2)"><strong>부서 혼디(건축과)</strong> 도면을 검토한 결과, 주차대수 산정이 관계 법령 기준에 못 미칩니다. 보완이 필요합니다.</p>
+      <p style="margin:0;color:var(--text2)"><strong>사용자 혼디</strong> 주차 대수를 조정한 수정 도면을 첨부해 재제출합니다. — 처리 시간: 접수부터 승인까지 <strong>3일</strong>(기존 평균 20일 대비 대폭 단축)</p>
+    </div>
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-  var links = document.querySelectorAll("#site-nav-links a[data-tab-target]");
-  links.forEach(function (a) {
-    a.addEventListener("click", function (e) {
-      e.preventDefault();
-      links.forEach(function (x) { x.classList.remove("active"); });
-      a.classList.add("active");
-      var target = document.getElementById(a.getAttribute("data-tab-target"));
-      if (target) target.scrollIntoView({ block: "start", behavior: "smooth" });
-    });
-  });
-});
-</script>
+    <div class="cmp-table-wrap">
+      <table class="cmp-table">
+        <thead><tr><th>구분</th><th>기존 방식</th><th class="cmp-hondi">혼디 방식</th></tr></thead>
+        <tbody>
+          <tr><td class="cmp-axis">처리 기간</td><td>접수~허가 평균 20일 내외(보완 시 수 주 추가)</td><td class="cmp-hondi">접수~허가 평균 1~3일, 서류가 완전하면 10초 내외</td></tr>
+          <tr><td class="cmp-axis">수수료</td><td>동일(약 9,000원, 지자체 조례에 따라 상이)</td><td class="cmp-hondi">동일 금액을 혼디가 전자결제로 즉시 납부</td></tr>
+          <tr><td class="cmp-axis">보완 대응</td><td>우편·전화 통지, 재방문·재제출</td><td class="cmp-hondi">부서 혼디와 즉시 보완요청·재제출</td></tr>
+          <tr><td class="cmp-axis">서류 준비</td><td>개인이 발급기관마다 직접 방문·신청</td><td class="cmp-hondi">혼디가 PDV·정부24에서 자동 인출·발급</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="cmp-summary">준공 검사(사용승인)도 동일한 원칙을 따릅니다 — 착공 신고부터 서류 심사·현장 실사 일정 조율까지 혼디가 대행하되, <strong>현장 실사와 최종 승인은 언제나 담당 공무원(사람)</strong>이 수행합니다. 혼디가 준비한 검토 의견은 참고 자료일 뿐, 법적 책임과 최종 결재권은 전적으로 인간 공무원에게 있습니다.</p>
+    <a class="doc-link" href="./reports/hondi-example.html" target="_blank" rel="noopener">더 자세히<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+  </div>
+</section>
+</div>
 
-<!-- ══════════════════════════════════════════════════════════════
-     BODY CONTENT (2026-08-21 신설) — 기존 desktop.html 본문(가로
-     탭 24개 체계)을 docs/legacy_overview_20260821.html로 옮기고,
-     대신 사용자가 업로드한 두 PDF(혼디_통합요약, 혼디_건축인허가)
-     내용을 간결한 전문 레이아웃으로 새로 작성했다. 기존 .section/
-     .section-inner/.cmp-table/.step-card 등 공용 클래스를 그대로
-     재사용해 사이트 전체 톤을 유지한다.
-     ══════════════════════════════════════════════════════════════ -->
-
+<div class="db-page" id="db-page-3" style="display:none">
+<section class="section db-cards-section" id="db-group-philosophy" style="--db-accent:#4338CA">
+  <div class="section-inner">
+    <span class="section-tag">더 알아보기</span>
+    <h2 class="section-title">혼디의 철학과 정체성</h2>
+    <div class="db-card-grid">
+      <button type="button" class="db-card" data-panel="db-panel-hondi-net" aria-expanded="false">
+  <span class="db-card-icon" style="color:#4338CA"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></span>
+  <span class="db-card-title">5천만 AI 비서의 나라</span>
+  <span class="db-card-summary">한국은 5천만 한국인과 수백만 기업·기관들로 구성된 나라입니다. 혼디넷은 5천만 AI 비서와 수백만 기업·기관 AI로 구성된 …</span>
+  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+</button><div class="db-panel" id="db-panel-hondi-net"><div class="db-panel-inner">
+<section class="section" id="hondi-net">
+  <div class="section-inner">
+    <span class="section-tag">혼디넷</span>
+    <h2 class="section-title">5천만 <strong>AI 비서</strong>의 나라</h2>
+    <div class="section-body">
+      <p>한국은 5천만 한국인과 수백만 기업·기관들로 구성된 나라입니다. 혼디넷은 5천만 AI 비서와 수백만 기업·기관 AI로 구성된 네트워크입니다.</p>
+      <p>그동안의 한국은 사람과 사람이 만나 업무를 진행했습니다. 모든 조직은 부서와 직책이 있고, 사람과 사람이 만나 일합니다. 혼디넷은 그 일을 AI에게 맡기고, AI와 AI가 만나 대화하며 업무를 수행하고, 사람은 최종 승인합니다. 기존 AI를 그러한 목적과 용도에 맞게 만든 것이 <strong>혼디</strong>입니다.</p>
+      <p>사람과 사람이 주고받는 전화 통화를 혼디와 혼디가 주고받고, 사람과 사람이 주고받는 메일과 문서를 혼디와 혼디가 주고받습니다. 사람과 다른 점은 혼디는 세상의 모든 지식을 갖추고 빛의 속도로 업무를 처리하는 점이며, 사람과 같은 점은 <strong>거짓말</strong>을 아주 잘하는 점입니다. 혼디넷이 종래의 AI와 다른 점은 AI가 거짓말하지 못할 매우 강력한 안전 장치를 제공합니다. 그것이 <strong>오픈해시</strong>입니다.</p>
+    </div>
+  </div>
+</section>
 </div></div><button type="button" class="db-card" data-panel="db-panel-separation-of-powers" aria-expanded="false">
   <span class="db-card-icon" style="color:#4338CA"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 8l-3 6a4 4 0 0 0 8 0zM19 8l-3 6a4 4 0 0 0 8 0zM3 8h6M15 8h6M7 21h10"/></svg></span>
   <span class="db-card-title">판결·입법·집행이 하나의 순환을 이룹니다</span>
@@ -1501,90 +1505,9 @@ document.addEventListener("DOMContentLoaded", function () {
     </div>
   </div>
 </section>
+</div>
 
-<section class="section" id="case-bankruptcy" style="background:var(--bg-alt)">
-  <div class="section-inner">
-    <span class="section-tag">혼디 예시 01</span>
-    <h2 class="section-title has-doc-link">개인파산 및 면책 절차</h2>
-    <div class="section-body">
-      <p>빚을 갚을 능력을 완전히 잃은 사람이 법적으로 재기하는 절차인 개인파산·면책은 신청부터 결정까지 <strong>6~24개월</strong>이 걸리며, 그 사이 신청인은 여러 기관을 오가며 같은 사연과 서류를 반복 설명·제출해야 합니다. 신청인의 혼디가 각 기관의 혼디와 소통하여 이 긴 여정을 처리합니다.</p>
-    </div>
-    <div class="cmp-table-wrap">
-      <table class="cmp-table">
-        <thead><tr><th>단계</th><th>기관</th><th>기존 방식</th><th class="cmp-hondi">혼디 방식</th></tr></thead>
-        <tbody>
-          <tr><td class="cmp-axis">1</td><td>행정복지센터<br>(등본·가족관계증명서)</td><td>방문 또는 개별 온라인 신청</td><td class="cmp-hondi">혼디가 발급 요청 — 1초</td></tr>
-          <tr><td class="cmp-axis">2</td><td>국세청 홈택스<br>(소득금액증명원)</td><td>별도 로그인·서류 저장</td><td class="cmp-hondi">혼디가 수집·정리 — 10초</td></tr>
-          <tr><td class="cmp-axis">3</td><td>대한법률구조공단<br>(상담·서류 작성)</td><td>예약 후 대면 상담</td><td class="cmp-hondi">혼디와 혼디 간 사전 조율 — 10초</td></tr>
-          <tr><td class="cmp-axis">4</td><td>회생법원<br>(파산·면책 신청 접수)</td><td>전자소송 사이트 개별 제출</td><td class="cmp-hondi">혼디가 서류 묶음 제출 — 1초</td></tr>
-          <tr><td class="cmp-axis">5~7</td><td>채권신고·채권자집회·채권조사기일</td><td>우편·문자 개별 확인, 서면 대응</td><td class="cmp-hondi">혼디가 일정 캘린더화·쟁점 브리핑</td></tr>
-          <tr><td class="cmp-axis">8</td><td>면책심문기일·면책 결정</td><td>결과 통지 대기</td><td class="cmp-hondi">혼디 초안 + 인간 판사 최종 결정</td></tr>
-          <tr><td class="cmp-axis">9</td><td>신용정보원<br>(연체 정보 말소)</td><td>기관별 개별 문의</td><td class="cmp-hondi">혼디가 말소 여부 일괄 확인 — 1초</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="cmp-summary">혼디의 수백 개 AI 기능 중 하나인 <strong>K-Law</strong>는 사실관계와 헌법·법률·판례를 근거로 가상의 대법원 판결문을 3~5분 만에 작성합니다. 대법원 공개 판례 대상 자체 측정 기준, K-Law 가상 판결문의 대법원 실제 판결 일치도는 약 75~90%로, 공개 판례의 1~2심 법원 일치도(45~48%)보다 현저히 높습니다. 파산·면책 절차에도 같은 방식을 적용해 K-Law가 진행안 초안을 작성하고, 사람 판사가 검증해 최종 결정을 내립니다. 바로가기(링크 <a href="https://klaw.hondi.net" target="_blank" style="color:inherit;text-decoration:underline;text-decoration-color:var(--brand);text-underline-offset:2px">klaw.hondi.kr</a>)</p>
-    <div class="doc-link-row">
-      <a class="doc-link" href="./reports/hondi-bankruptcy-automation-scenario.html" target="_blank" rel="noopener">개인파산 시나리오 더 자세히<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
-      <a class="doc-link" href="./reports/hondi-legal-arbitration-scenario.html" target="_blank" rel="noopener">K-Law 화해계약 사례 더 자세히<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="case-permit">
-  <div class="section-inner">
-    <span class="section-tag">혼디 예시 02</span>
-    <h2 class="section-title has-doc-link">건축 인허가부터 준공 검사까지</h2>
-    <div class="section-body">
-      <p>건축물을 지으려면 통상 시·군·구 건축과에 신청서·설계도서·구조계산서 등 수십 종의 서류를 준비해 제출하고, 심사·보완·재제출을 여러 차례 거쳐야 합니다. 혼디에서는 사용자가 "건축 인허가 신청해 줘"라고 지시하면, 사용자의 혼디가 관할 부서를 검색하고 부서의 혼디를 호출해 필요 서류 확인부터 준비·제출·심사·보완까지 대행합니다.</p>
-    </div>
-
-    <div style="background:var(--bg-subtle);border-radius:var(--radius-lg);padding:20px 24px;margin:20px 0;font-size:13.5px;line-height:1.9">
-      <p style="margin:0 0 8px"><strong>이용자</strong> "혼디야, ○○동 000-00번지에 근린생활시설 신축 인허가 신청해 줘."</p>
-      <p style="margin:0 0 8px;color:var(--text2)"><strong>사용자 혼디</strong> 제주시 건축과에 인허가 신청을 시작합니다. 관할 부서의 혼디를 호출합니다.</p>
-      <p style="margin:0 0 8px;color:var(--text2)"><strong>부서 혼디(건축과)</strong> 도면을 검토한 결과, 주차대수 산정이 관계 법령 기준에 못 미칩니다. 보완이 필요합니다.</p>
-      <p style="margin:0;color:var(--text2)"><strong>사용자 혼디</strong> 주차 대수를 조정한 수정 도면을 첨부해 재제출합니다. — 처리 시간: 접수부터 승인까지 <strong>3일</strong>(기존 평균 20일 대비 대폭 단축)</p>
-    </div>
-
-    <div class="cmp-table-wrap">
-      <table class="cmp-table">
-        <thead><tr><th>구분</th><th>기존 방식</th><th class="cmp-hondi">혼디 방식</th></tr></thead>
-        <tbody>
-          <tr><td class="cmp-axis">처리 기간</td><td>접수~허가 평균 20일 내외(보완 시 수 주 추가)</td><td class="cmp-hondi">접수~허가 평균 1~3일, 서류가 완전하면 10초 내외</td></tr>
-          <tr><td class="cmp-axis">수수료</td><td>동일(약 9,000원, 지자체 조례에 따라 상이)</td><td class="cmp-hondi">동일 금액을 혼디가 전자결제로 즉시 납부</td></tr>
-          <tr><td class="cmp-axis">보완 대응</td><td>우편·전화 통지, 재방문·재제출</td><td class="cmp-hondi">부서 혼디와 즉시 보완요청·재제출</td></tr>
-          <tr><td class="cmp-axis">서류 준비</td><td>개인이 발급기관마다 직접 방문·신청</td><td class="cmp-hondi">혼디가 PDV·정부24에서 자동 인출·발급</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="cmp-summary">준공 검사(사용승인)도 동일한 원칙을 따릅니다 — 착공 신고부터 서류 심사·현장 실사 일정 조율까지 혼디가 대행하되, <strong>현장 실사와 최종 승인은 언제나 담당 공무원(사람)</strong>이 수행합니다. 혼디가 준비한 검토 의견은 참고 자료일 뿐, 법적 책임과 최종 결재권은 전적으로 인간 공무원에게 있습니다.</p>
-    <a class="doc-link" href="./reports/hondi-example.html" target="_blank" rel="noopener">더 자세히<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
-  </div>
-</section>
-
-<section class="section db-cards-section" id="db-group-philosophy" style="--db-accent:#4338CA">
-  <div class="section-inner">
-    <span class="section-tag">더 알아보기</span>
-    <h2 class="section-title">혼디의 철학과 정체성</h2>
-    <div class="db-card-grid">
-      <button type="button" class="db-card" data-panel="db-panel-hondi-net" aria-expanded="false">
-  <span class="db-card-icon" style="color:#4338CA"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg></span>
-  <span class="db-card-title">5천만 AI 비서의 나라</span>
-  <span class="db-card-summary">한국은 5천만 한국인과 수백만 기업·기관들로 구성된 나라입니다. 혼디넷은 5천만 AI 비서와 수백만 기업·기관 AI로 구성된 …</span>
-  <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-</button><div class="db-panel" id="db-panel-hondi-net"><div class="db-panel-inner">
-<section class="section" id="hondi-net">
-  <div class="section-inner">
-    <span class="section-tag">혼디넷</span>
-    <h2 class="section-title">5천만 <strong>AI 비서</strong>의 나라</h2>
-    <div class="section-body">
-      <p>한국은 5천만 한국인과 수백만 기업·기관들로 구성된 나라입니다. 혼디넷은 5천만 AI 비서와 수백만 기업·기관 AI로 구성된 네트워크입니다.</p>
-      <p>그동안의 한국은 사람과 사람이 만나 업무를 진행했습니다. 모든 조직은 부서와 직책이 있고, 사람과 사람이 만나 일합니다. 혼디넷은 그 일을 AI에게 맡기고, AI와 AI가 만나 대화하며 업무를 수행하고, 사람은 최종 승인합니다. 기존 AI를 그러한 목적과 용도에 맞게 만든 것이 <strong>혼디</strong>입니다.</p>
-      <p>사람과 사람이 주고받는 전화 통화를 혼디와 혼디가 주고받고, 사람과 사람이 주고받는 메일과 문서를 혼디와 혼디가 주고받습니다. 사람과 다른 점은 혼디는 세상의 모든 지식을 갖추고 빛의 속도로 업무를 처리하는 점이며, 사람과 같은 점은 <strong>거짓말</strong>을 아주 잘하는 점입니다. 혼디넷이 종래의 AI와 다른 점은 AI가 거짓말하지 못할 매우 강력한 안전 장치를 제공합니다. 그것이 <strong>오픈해시</strong>입니다.</p>
-    </div>
-  </div>
-</section>
-
+<div class="db-page" id="db-page-4" style="display:none">
 <section class="section db-cards-section" id="db-group-practical" style="--db-accent:#0e8f83">
   <div class="section-inner">
     <span class="section-tag">더 알아보기</span>
@@ -1701,10 +1624,6 @@ document.addEventListener("DOMContentLoaded", function () {
   <span class="db-card-summary">K-서비스는 공익을 위한 인프라입니다. 사용자 개인의 사적 이익을 위해 복무하는 전문가 페르소나와 달리, K-서비스는 특정 개…</span>
   <span class="db-card-cta">자세히 보기<svg class="db-card-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
 </button><div class="db-panel" id="db-panel-feature-summary"><div class="db-panel-inner">
-<!-- ── 활용 시나리오 추가 카드 3개 (2026-08-25 추가) ──
-     본문에 대응 섹션이 없던 세 문서(AI 도청·시청·읍면동, 법치 사회,
-     금융권 CBDC 대비)를 case-permit과 feature-summary 사이에
-     step-card 3개로 요약 배치. -->
 <section class="section" id="feature-summary">
   <div class="section-inner">
     <span class="section-tag">기능 요약</span>
@@ -1895,6 +1814,10 @@ document.addEventListener("DOMContentLoaded", function () {
     </div>
   </div>
 </section>
+</div>
+
+
+
 
 <!-- ── FOOTER (2026-08-21 복원) — 원본 저장소에서 </footer> 닫는 태그만
      남고 여는 <footer> 태그가 유실돼 있던 걸 발견(전수 검사 결과 이
@@ -4428,6 +4351,33 @@ document.addEventListener('click', function (e) {
   var willOpen = !panel.classList.contains('open');
   panel.classList.toggle('open', willOpen);
   card.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+});
+</script>
+
+<script>
+// 2026-09-05 신설 — 1~4페이지 전환. 1페이지(브로슈어)는 원래 문서
+// 흐름 그대로 두고, 2~4페이지는 각각 db-page-N 안에 있다가 해당
+// 번호를 누를 때만 보인다. 페이지를 옮기면 이전 페이지에서 열어뒀던
+// 카드 패널은 자동으로 닫아 다음에 다시 봐도 항상 접힌 상태로 시작한다.
+document.getElementById('dbPagination').addEventListener('click', function (e) {
+  var btn = e.target.closest('.db-page-btn');
+  if (!btn) return;
+  var page = btn.getAttribute('data-page');
+
+  document.querySelectorAll('.db-page-btn').forEach(function (b) {
+    b.classList.toggle('active', b === btn);
+  });
+
+  [2, 3, 4].forEach(function (n) {
+    var el = document.getElementById('db-page-' + n);
+    if (el) el.style.display = (String(n) === page) ? 'block' : 'none';
+  });
+  document.getElementById('ai-gov-how').style.display = (page === '1') ? '' : 'none';
+
+  document.querySelectorAll('.db-panel.open').forEach(function (p) { p.classList.remove('open'); });
+  document.querySelectorAll('.db-card[aria-expanded="true"]').forEach(function (c) { c.setAttribute('aria-expanded', 'false'); });
+
+  document.getElementById('dbPagination').scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 </script>
 
