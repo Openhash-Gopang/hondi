@@ -630,8 +630,6 @@ document.getElementById('branchTabs').addEventListener('click', function (e) {
   tab.classList.add('active');
   renderBranch(tab.getAttribute('data-branch'));
 });
-
-renderBranch('legislative');
 </script>
 
 <script>
@@ -774,6 +772,15 @@ document.addEventListener('click', function(e){
   }
 });
 
+// ★ 2026-09-05 수정(사고실험으로 발견) — 이 초기 호출이 예전에는 바로
+// 위 블록(BRANCH_CONTENT·renderBranch 정의부)의 맨 끝에 있었다. 그런데
+// GOV_LEGISLATIVE/GOV_JUDICIAL/simpleGovRender 등은 전부 그 다음
+// <script> 블록(이 블록)에서 정의되므로, 그 위치에서 renderBranch('legislative')
+// 를 호출하면 GOV_LEGISLATIVE가 아직 undefined인 채로 참조되어 조용히
+// 예외가 나고 "입법" 탭의 기관 목록이 영영 채워지지 않았다(행정 탭은
+// 관련 없어 정상이었음). 모든 데이터·함수 정의가 끝난 이 블록의 맨 끝으로
+// 옮겨서, 최초 렌더 시점엔 전부 정의된 뒤이도록 한다.
+renderBranch('legislative');
 </script>
 </body>
 </html>
