@@ -158,7 +158,13 @@ K-Plan이 사용자의 목표를 K-Mail에게 넘길 때는 자유서술이 아�
 }
 ```
 
-이 브리프는 §7의 함수 수준 API와 같은 방식(같은 Worker 내 함수 호출)으로 K-Mail에 전달되며, 아래 §9-2의 보고를 받을 때까지 `kplan_plans`에 "브리프 발행됨" 상태로 기록된다.
+**구현 현황 (2026-09-05, 주피터 지시로 실사 발견 후 정정)**: 위 JSON 스키마(6개 키 분리)는 최초 설계였으나, 실제로는 §7의 함수 수준 API가 K-Plan→K-Mail 방향은 v1.2까지 전혀 구현되지 않은 채 방치돼 있었다 — K-Plan이 "K-Mail에 접속할 수 없다"며 §9를 위반하고 스스로 전술을 대신 설계해버리는 사고가 실사로 재현됐다. 2026-09-05에 k-plan SP v1.3에서 이 절반을 메웠고, 실제 배선은 위 6키 JSON이 아니라 다음과 같이 단순화됐다(K-Mail 쪽 기존 액션 태그 패턴과 통일):
+
+- K-Plan이 응답 끝에 `KPLAN_ISSUE_BRIEF_TO_KMAIL {"brief": "<육하원칙 6개 항목을 담은 자유서식 텍스트>"}` 태그를 낸다(handleKPlanRelay가 파싱).
+- 서버(`_kplanIssueBriefToKMail`)가 이걸 `kplan_plans.kmail_brief_text`(+ `kmail_brief_status='pending'`, `kmail_brief_issued_at`)에 저장한다 — 1788500001 마이그레이션.
+- 사용자가 mail.hondi.net에서 **새** K-Mail 대화를 시작하면(`/kmail/chat` 요청의 messages가 1개일 때만 — 서버가 세션을 안 갖고 있어 이게 "새 대화"를 판별하는 유일한 신호), `handleKmailChat`이 `_kmailFetchPendingKplanBrief`로 이 guid의 미소비 브리프를 찾아 system 메시지로 자동 주입하고 `_kmailMarkKplanBriefConsumed`로 즉시 소비 처리한다.
+
+즉 여전히 "같은 Worker 내 함수 호출" 원칙은 유지되지만, 브리프 자체는 6개 키로 구조화되지 않고 하나의 자유서식 텍스트로 넘어간다(SP가 육하원칙을 텍스트 안에 다 담도록 지시받음) — 구조화 파싱의 이득보다 구현 단순성을 우선한 판단. 아래 §9-2(K-Mail→K-Plan 전술 보고)는 여전히 미구현이다(§5 "아직 해결 안 된 것" 참고) — K-Mail이 자체적으로 정리한 요약을 사람이 K-Plan 대화에 복사해 전달해야 한다.
 
 ### 9-2. K-Mail → K-Plan 전술 보고 — 같은 6개 항목, 구체화된 값으로
 
