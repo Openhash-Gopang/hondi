@@ -1,0 +1,75 @@
+name: Live Smoketest — GDC 대출·신용평가 목업
+
+# 2026-09-07 신설 — GDC 대출·신용평가 목업(gdc-credit.js/gdc-bank.js
+# LEGAL-HOLD를 금융기관 종사자 필드테스터 한정으로 재개한 그 기능)의
+# register-key → 관리자 재무제표 시나리오 등록 → applyLoan → repayLoan
+# 전 구간을 실제 hondi-proxy에 대고 검증한다.
+#
+# 이 워크플로를 만든 이유 — 로컬 PowerShell에서 admin 자격증명을 직접
+# 입력해 실행하다가 평문 비밀번호를 다루게 되는 걸 피하기 위해서다.
+# HONDI_ADMIN_EMAIL/PASSWORD는 이미 이 저장소 Actions secret으로
+# 등록돼 있고(live-smoketest-kmail-kplan-pipeline.yml 등에서 이미 같은
+# 용도로 씀), GitHub Secrets는 설계상 어느 워크플로 실행 로그에도, API
+# 응답에도, 다른 저장소에서도 평문으로 다시 노출되지 않는다 — 오직
+# 이렇게 워크플로 실행 "안"에서 ${{ secrets.* }}로 주입될 때만 쓸 수
+# 있다. 그래서 이 스모크테스트는 로컬 실행 대신 이 워크플로로 돌린다.
+#
+# 테스트 로직 자체(서명 방식, tx 구조)는 tools/gdc_loan_credit_live_test.cjs
+# 에 있다 — gopang-wallet.js의 buildTxWithPrevHash/signTx 원본을 순수
+# 로직만 그대로 포팅한 것이라, 로컬 CLI로 돌리고 싶으면 그 파일을 직접
+# 실행해도 된다(그 경우 ADMIN_EMAIL/ADMIN_PASSWORD를 직접 알아야 함).
+#
+# 필요 GitHub Secrets:
+#   HONDI_ADMIN_EMAIL, HONDI_ADMIN_PASSWORD — 이미 등록됨(다른
+#     live-smoketest-* 워크플로와 공용). 아직 없으면 로그인 단계에서
+#     바로 실패한다.
+#
+# 매 실행마다 register-key로 새 테스트 계정을 만든다 — 기존 데이터에
+# 영향 없음(gdc_test_financial_statements/gdc_test_loans는 그 guid
+# 전용 레코드만 생긴다).
+
+on:
+  workflow_dispatch:
+    inputs:
+      loan_principal:
+        description: '대출 신청 원금(₮)'
+        required: false
+        type: string
+        default: '50'
+      repay_amount:
+        description: '1차 상환액(₮)'
+        required: false
+        type: string
+        default: '20'
+
+jobs:
+  gdc-loan-credit-smoketest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 라이브 스모크테스트 실행
+        env:
+          WORKER_URL: https://hondi-proxy.tensor-city.workers.dev
+          ADMIN_EMAIL: ${{ secrets.HONDI_ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.HONDI_ADMIN_PASSWORD }}
+          LOAN_PRINCIPAL: ${{ inputs.loan_principal }}
+          REPAY_AMOUNT: ${{ inputs.repay_amount }}
+        run: node tools/gdc_loan_credit_live_test.cjs
+
+      - name: 결과 요약
+        if: always()
+        run: |
+          {
+            echo "## GDC 대출·신용평가 목업 — 라이브 스모크테스트"
+            echo ""
+            echo "- 대출 원금: ₮${{ inputs.loan_principal }}, 1차 상환액: ₮${{ inputs.repay_amount }}"
+            echo "- 결과: 위 'Live Smoketest — GDC 대출·신용평가 목업 / 라이브 스모크테스트 실행' 스텝 로그 참고"
+          } >> "$GITHUB_STEP_SUMMARY"
