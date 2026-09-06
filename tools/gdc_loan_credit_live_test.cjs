@@ -113,6 +113,28 @@ async function main() {
     log('[PASS] register-key 성공:', JSON.stringify(data));
   }
 
+  // ── 1-1) POST /profile — profiles.pubkey_ed25519 TOFU 바인딩 ───────
+  // register-key는 gdc_keys 컬렉션에만 기록한다(P2P 이체 서명 검증용).
+  // applyLoan/repayLoan이 재사용하는 _verifyClaimsRequester는 별도로
+  // profiles.pubkey_ed25519를 확인하므로, 이 단계 없이는 계정이 있어도
+  // "본인 서명 인증이 필요합니다"(403 AUTH_REQUIRED)로 막힌다 — 오늘
+  // 처음 실행해서 발견한 부분(gdc_keys와 profiles가 별도 TOFU 지점).
+  {
+    const ts = Date.now().toString();
+    const sigMsg = `${guid}:${pubkeyB64u}:${ts}`;
+    const signature = await signText(privateKey, sigMsg);
+    const res = await fetch(`${WORKER_URL}/profile`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        guid, pubkey: pubkeyB64u, signature, ts,
+        entity_type: 'person', name: 'GDC 필드테스트 계정',
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) fail(`POST /profile 실패 (HTTP ${res.status}): ${JSON.stringify(data)}`);
+    log('[PASS] 프로필 등록(pubkey_ed25519 TOFU 바인딩) 성공');
+  }
+
   // ── 2) 가입 축하 잔액 확인 (신용평가의 bs-cash 입력이 될 값) ───────
   let balanceBefore;
   {
