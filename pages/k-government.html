@@ -8,21 +8,6 @@
 <title>K-정부 — 혼디</title>
 </head>
 <body>
-<script>
-window.PAGE_HERO = {
-  badge: 'K-정부',
-  l1: '입법 · 사법 · 행정',
-  l2: '대한민국 통치기구의 AI 비서화',
-  sub: '사법(법원·관재인의 결정)과 행정(인허가 관청의 결정)에서 시민의 서류 준비·제출·확인 업무를 AI 비서가 대행합니다.',
-  actions: []
-};
-</script>
-<link rel="stylesheet" href="/assets/site-header.css">
-<script src="/assets/site-header.js"></script>
-
-
-
-
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
@@ -292,7 +277,16 @@ table.svc-table td.svc-hondi { color: var(--brand-dk); font-weight: 600; }
 
 </style>
 
-<div id="site-hero-mount"></div>
+<script>
+window.PAGE_HEADER = {
+  active: 'k-government',
+  badge: 'K-정부',
+  h1: '입법 · 사법 · 행정<br>대한민국 통치기구의 AI 비서화',
+  sub: '사법(법원·관재인의 결정)과 행정(인허가 관청의 결정)에서 시민의 서류 준비·제출·확인 업무를 AI 비서가 대행합니다.'
+};
+</script>
+<link rel="stylesheet" href="/assets/ph-header.css">
+<script src="/assets/ph-header.js"></script>
 
 <div class="ug-doc">
 
