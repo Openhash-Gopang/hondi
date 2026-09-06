@@ -1,27 +1,32 @@
 /* ══════════════════════════════════════════════════════════════════
-   k-service-auth-client.js — K-서비스 공용 전화번호 인증 모듈 (v1.0)
+   k-service-auth-client.js — K-서비스 공용 전화번호 인증 모듈 (v2.0)
 
    배포 위치: https://hondi.net/auth/k-service-auth-client.js
 
-   배경(2026-09-06): K-Plan·K-Law·K-Mail이 phone_verify_token(SMS OTP)
-   로그인을 각자 독자적으로 복붙 구현했고, 토큰을 sessionStorage에
-   서비스별로 다른 키(kplan_, klaw_, kmail_ 접두사)로 저장해 완전히
-   격리돼 있었다 — 한 서비스에 로그인해도 다른 서비스는 몰랐다(SSO 없음).
-   이 모듈은 그 셋을 대체하는 단일 소스이며, 토큰을 sessionStorage
-   대신 `.hondi.net` 도메인 쿠키에 저장해 모든 서브도메인이 같은
-   로그인 세션을 자동으로 공유하게 한다(iframe·postMessage 릴레이
-   불필요 — 표준 브라우저 쿠키 도메인 상속만으로 충분).
+   v2.0(2026-09-06 저녁, 주피터 지시로 긴급 수정): v1.0은 SMS 인증번호를
+   직접 입력받는 UI(받기→인증번호 입력→확인)를 기본/대체 경로로
+   제공했으나, 이는 잘못된 이해였다. plan.hondi.net의 실제 최종 설계
+   (git 커밋 17acc3d "로그인 팝업에서 문자 인증 대체 버튼 삭제 -
+   device-link 단일 경로로 정리")를 확인한 결과, SMS 인증번호 직접
+   입력은 가입 시점에만(다른 채널에서) 쓰이고, 이 로그인 팝업에서는
+   device-link(웹푸시 승인) 단 하나의 경로만 제공해야 한다 — 전화번호를
+   입력하고 이 버튼을 누르면 폰에 알림이 가고, 폰에서 "본인 확인"
+   버튼을 탭하는 것으로 끝난다. 이 페이지에는 인증번호를 손으로
+   입력하는 UI 자체가 없다(가입 안 된/기기 연결 안 된 번호는 서버가
+   /auth/device-link/init 응답의 hasMobileDevice 여부로 판단해 별도
+   채널로 처리한다 — 클라이언트는 그저 폴링만 한다). v1.0의 SMS 입력
+   UI는 완전히 제거했다.
 
-   구 시스템(고팡 Ed25519 지갑 SSO — subsystem-auth.js/silent-auth.html/
-   gopang-sso.js)은 이 모듈과 별개로 당분간 유지하되 신규 게이트는
-   전부 이 모듈로 만든다(주피터 지시, 2026-09-06).
+   대상: plan.hondi.net(webapp.html) · klaw.hondi.net(webapp.html) ·
+   mail.hondi.net(webapp.html) · hondi.net(desktop.html GDC 대시보드).
+   ※ /assets/site-header.js(다른 19개 페이지가 쓰는 기존 공용 모듈)와는
+     별개의 모듈이다.
 
-   사용법 — 각 K-서비스 페이지의 <body> 시작 부분에 한 줄:
+   사용법 — 각 페이지의 <body> 시작 부분에 한 줄:
 
      <script>
        window.K_AUTH_CONFIG = {
-         serviceLabel: 'K-Law',        // 로그인 UI에 표시될 서비스명(선택)
-         enableDeviceLink: false,      // 웹푸시 승인 로그인 지원 여부(선택, 기본 true)
+         serviceLabel: 'K-Law',   // 로그인 UI에 표시될 서비스명(선택)
        };
      </script>
      <script src="https://hondi.net/auth/k-service-auth-client.js"></script>
@@ -36,10 +41,6 @@
                                              만료/무효일 때만 재로그인 오버레이 표시
                                              (GET/HEAD는 쿼리스트링에, 그 외는 JSON
                                              body에 phone_verify_token 필드로 첨부)
-
-   이 모듈에 넣지 않은 것: 서버측 판정 로직(worker.js의
-   _resolveGuidFromPhoneVerifyToken, src/worker/k-service-auth.js) — 그건
-   이미 여러 K-서비스가 공유하는 별도 서버 모듈이라 그대로 둔다.
    ══════════════════════════════════════════════════════════════════ */
 
 (function (global) {
@@ -52,7 +53,6 @@
 
   var cfg = Object.assign({
     serviceLabel: document.title || 'K-서비스',
-    enableDeviceLink: true,
     icon: '🧭',
   }, global.K_AUTH_CONFIG || {});
 
@@ -72,7 +72,6 @@
   // ── 토큰 상태 ────────────────────────────────────────────────
   var token = null, tokenExp = 0;
   var waiters = [];
-  var pendingE164 = '';
 
   function loadFromCookie() {
     var t = readCookie(COOKIE_TOKEN);
@@ -94,6 +93,8 @@
   function hasValidLogin() { return !!token && Date.now() < tokenExp - 30000; }
 
   // ── 오버레이 UI (자체 주입 — 페이지에 마크업 불필요) ────────────
+  // device-link(웹푸시 승인) 단일 경로만 제공한다 — SMS 인증번호를
+  // 손으로 입력하는 화면은 없다(v2.0, 위 헤더 주석 참고).
   var els = {};
   function injectStyle() {
     if (document.getElementById('ksa-style')) return;
@@ -107,10 +108,10 @@
       '.ksa-icon{font-size:20px}' +
       '.ksa-desc{font-size:13px;color:#1a202c;line-height:1.5}' +
       '.ksa-input-wrap{display:flex;gap:6px}' +
-      '.ksa-input-wrap input,.ksa-row input{flex:1;padding:10px 12px;border:1px solid #dfe2ed;border-radius:8px;font-size:14px;font-family:inherit}' +
-      '.ksa-input-icon-btn{border:1px solid #dfe2ed;background:#f5f6fa;border-radius:8px;padding:0 12px;font-size:16px;cursor:pointer}' +
-      '.ksa-row{display:flex;gap:6px;margin-top:2px}' +
-      '.ksa-row button,.ksa-input-wrap button.ksa-send-btn{border:none;background:#4338CA;color:#fff;border-radius:8px;padding:0 14px;font-size:13px;font-weight:600;cursor:pointer}' +
+      '.ksa-input-wrap input{flex:1;padding:10px 12px;border:1px solid #dfe2ed;border-radius:8px;font-size:14px;font-family:inherit}' +
+      '.ksa-input-icon-btn{border:none;background:#4338CA;color:#fff;border-radius:8px;width:42px;height:42px;flex-shrink:0;font-size:17px;cursor:pointer;transition:opacity .12s,transform .08s}' +
+      '.ksa-input-icon-btn:disabled{opacity:.5;cursor:not-allowed}' +
+      '.ksa-input-icon-btn:not(:disabled):hover{transform:scale(1.05)}' +
       '.ksa-devlink-wait{padding:6px 0}' +
       '.ksa-spinner{width:22px;height:22px;border:3px solid #e5e7eb;border-top-color:#4338CA;border-radius:50%;margin:0 auto 12px;animation:ksa-spin .8s linear infinite}' +
       '@keyframes ksa-spin{to{transform:rotate(360deg)}}' +
@@ -133,9 +134,7 @@
         '<div id="ksa-step-phone">' +
           '<div class="ksa-input-wrap">' +
             '<input type="tel" id="ksa-phone" placeholder="전화번호 뒷 8자리" inputmode="numeric" maxlength="8" autocomplete="tel">' +
-            (cfg.enableDeviceLink
-              ? '<button type="button" class="ksa-input-icon-btn" id="ksa-devlink-btn" title="폰으로 승인받기">📱</button>'
-              : '<button type="button" class="ksa-send-btn" id="ksa-send-btn">받기</button>') +
+            '<button type="button" class="ksa-input-icon-btn" id="ksa-devlink-btn" aria-label="폰으로 승인받기" title="폰으로 승인받기">📱</button>' +
           '</div>' +
         '</div>' +
         '<div id="ksa-step-devlink" style="display:none">' +
@@ -146,12 +145,6 @@
           '</div>' +
           '<div class="ksa-resend" id="ksa-resend-phone">번호를 다시 입력할게요</div>' +
         '</div>' +
-        '<div id="ksa-step-code" style="display:none">' +
-          '<div class="ksa-row">' +
-            '<input type="text" id="ksa-code" placeholder="인증번호 6자리" inputmode="numeric" maxlength="6" autocomplete="one-time-code">' +
-            '<button type="button" id="ksa-verify-btn">확인</button>' +
-          '</div>' +
-        '</div>' +
         '<div class="ksa-msg" id="ksa-msg"></div>' +
       '</div>';
     document.body.appendChild(wrap);
@@ -159,24 +152,17 @@
     els.desc         = wrap.querySelector('#ksa-desc');
     els.stepPhone    = wrap.querySelector('#ksa-step-phone');
     els.stepDevlink  = wrap.querySelector('#ksa-step-devlink');
-    els.stepCode     = wrap.querySelector('#ksa-step-code');
     els.phone        = wrap.querySelector('#ksa-phone');
-    els.code         = wrap.querySelector('#ksa-code');
     els.msg          = wrap.querySelector('#ksa-msg');
     els.devlinkBtn   = wrap.querySelector('#ksa-devlink-btn');
-    els.sendBtn      = wrap.querySelector('#ksa-send-btn');
-    els.verifyBtn    = wrap.querySelector('#ksa-verify-btn');
     els.devlinkStatus= wrap.querySelector('#ksa-devlink-status');
     els.devlinkTimer = wrap.querySelector('#ksa-devlink-timer');
     els.resendPhone  = wrap.querySelector('#ksa-resend-phone');
 
     els.desc.textContent = (cfg.serviceLabel ? cfg.serviceLabel + ' — ' : '') + '휴대폰 번호 뒷자리 8자를 입력하십시오.';
-    if (els.devlinkBtn) els.devlinkBtn.onclick = startDeviceLink;
-    if (els.sendBtn) els.sendBtn.onclick = sendOtp;
-    els.verifyBtn.onclick = verifyOtp;
+    els.devlinkBtn.onclick = startDeviceLink;
     els.resendPhone.onclick = resetToPhoneStep;
-    els.code.addEventListener('keydown', function (e) { if (e.key === 'Enter') verifyOtp(); });
-    els.phone.addEventListener('keydown', function (e) { if (e.key === 'Enter') (cfg.enableDeviceLink ? startDeviceLink() : sendOtp()); });
+    els.phone.addEventListener('keydown', function (e) { if (e.key === 'Enter') startDeviceLink(); });
   }
 
   function setMsg(text, kind) {
@@ -185,10 +171,8 @@
   }
   function resetToPhoneStep() {
     stopDevlinkPolling();
-    els.stepCode.style.display = 'none';
     els.stepDevlink.style.display = 'none';
     els.stepPhone.style.display = '';
-    els.code.value = '';
     setMsg('', '');
   }
   function showOverlay() { ensureOverlay(); els.overlay.classList.add('show'); }
@@ -199,57 +183,10 @@
     w.forEach(function (resolve) { resolve(token); });
   }
 
-  // ── OTP 흐름 ─────────────────────────────────────────────────
-  async function sendOtp() {
-    var phone = els.phone.value.trim();
-    if (!phone) { setMsg('전화번호를 입력해 주세요.', 'err'); return; }
-    var btn = els.sendBtn || els.devlinkBtn;
-    if (btn) btn.disabled = true;
-    setMsg('인증번호 발송 중…', '');
-    try {
-      var res = await fetch(PROXY + '/biz/phone-otp-request', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ e164: phone }),
-      });
-      var data = await res.json().catch(function () { return {}; });
-      if (!res.ok || !data.ok) throw new Error(data.message || '인증번호 발송에 실패했습니다.');
-      pendingE164 = phone;
-      els.stepPhone.style.display = 'none';
-      els.stepCode.style.display = '';
-      els.code.focus();
-      setMsg('인증번호를 문자로 보내드렸습니다.', 'ok');
-    } catch (e) {
-      setMsg(e.message || '인증번호 발송에 실패했습니다.', 'err');
-    } finally {
-      if (btn) btn.disabled = false;
-    }
-  }
-
-  async function verifyOtp() {
-    var code = els.code.value.trim();
-    if (!code) { setMsg('인증번호를 입력해 주세요.', 'err'); return; }
-    els.verifyBtn.disabled = true;
-    setMsg('확인 중…', '');
-    try {
-      var res = await fetch(PROXY + '/biz/phone-otp-verify', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ e164: pendingE164, code: code }),
-      });
-      var data = await res.json().catch(function () { return {}; });
-      if (!res.ok || !data.ok || !data.phone_verify_token) throw new Error(data.message || '인증번호가 일치하지 않습니다.');
-      persist(data.phone_verify_token, new Date(data.expires_at).getTime());
-      hideOverlay();
-      setMsg('', '');
-      resolveWaiters();
-    } catch (e) {
-      setMsg(e.message || '인증번호가 일치하지 않습니다.', 'err');
-    } finally {
-      els.verifyBtn.disabled = false;
-    }
-  }
-
-  // ── device-link(웹푸시 승인) 흐름 ────────────────────────────
+  // ── device-link(웹푸시 승인) 흐름 — 유일한 인증 경로 ────────────
   var devlinkPollTimer = null, devlinkCountdownTimer = null;
   var devlinkAutoResendTimer = null, devlinkAutoResendCount = 0, devlinkSessionId = null;
+  var pendingE164 = '';
   var DEVLINK_AUTORESEND_DELAY_MS = 10000, DEVLINK_AUTORESEND_MAX = 3;
 
   function stopDevlinkPolling() {
@@ -293,7 +230,7 @@
       els.stepPhone.style.display = 'none';
       els.stepDevlink.style.display = '';
       els.devlinkStatus.textContent = data.hasMobileDevice === false
-        ? '이 번호로 연결된 스마트폰이 없습니다 — 아래에서 문자로 받아 주세요.'
+        ? '이 번호로 연결된 스마트폰이 없습니다 — 문자로 안내해 드립니다.'
         : '스마트폰 알림을 확인해 주세요…';
 
       startDevlinkCountdown(data.expires_in || 90);
@@ -330,7 +267,7 @@
       if (devlinkCountdownTimer) { clearInterval(devlinkCountdownTimer); devlinkCountdownTimer = null; }
       devlinkSessionId = data.sessionId;
       els.devlinkStatus.textContent = data.hasMobileDevice === false
-        ? '이 번호로 연결된 스마트폰이 없습니다 — 아래에서 문자로 받아 주세요.'
+        ? '이 번호로 연결된 스마트폰이 없습니다 — 문자로 안내해 드립니다.'
         : '알림을 다시 보냈습니다 — 스마트폰을 확인해 주세요…';
       startDevlinkCountdown(data.expires_in || 90);
       devlinkPollTimer = setInterval(devlinkPollOnce, 2000);
@@ -353,7 +290,7 @@
       }
       if (data.state === 'verification_failed') {
         stopDevlinkPolling();
-        els.devlinkStatus.textContent = '승인을 확인하지 못했습니다 — 문자 인증으로 진행해 주세요.';
+        els.devlinkStatus.textContent = '승인을 확인하지 못했습니다 — 번호를 다시 확인해 주세요.';
         return;
       }
       if (data.state === 'delivered' && data.verified && data.phone_verify_token) {
