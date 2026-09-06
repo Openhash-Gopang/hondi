@@ -1204,6 +1204,18 @@ function ed25519Verify(msgBytes, sigBytes, pubkeyBytes) {
   })();
 
 routerAdd("POST", "/api/tx", (c) => {
+  // 2026-09-06 임시 진단 패치: 원인 미상의 "Something went wrong" 400을
+  // 잡기 위해 /api/mint(2026-07-07)에 적용했던 것과 동일한 패턴으로
+  // 핸들러 전체를 하나의 try/catch로 감싼다. 이 핸들러 안의 개별
+  // try/catch들은 각 단계만 국소적으로 보호하고 있어서, 그 사이(특히
+  // computeBalance() 호출부, totalOutput 계산, buyerClaim/sellerClaim
+  // 생성부)에서 예외가 나면 PocketBase(jsvm) 상위 레벨이 그걸 잡아
+  // "Something went wrong while processing your request." 라는 정본
+  // 에러 메시지로 뭉개버린다 — 실제 e.message/e.stack이 응답에도, 서버
+  // 로그(/opt/gopang/logs/hanlim.log)에도 전혀 남지 않는다. 원인을
+  // 특정하면 이 바깥 try/catch는 제거하거나 최소한으로 축소할 것.
+  try {
+  console.log("[TX] 진입");
   const body = $apis.requestInfo(c).data;
   const { tx, tx_hash, buyer_sig, buyer_public_key, purpose, skip_ledger } = body;
 
@@ -1713,6 +1725,11 @@ const NODE_CONFIG = {
     balance_after: actualBalance - totalOutput,
     bridge: bridgeTarget ? { target_node: bridgeTarget, status: "pending" } : null,
   });
+  } catch (e) {
+    // 임시 진단용 — 위 큰 주석 참고. 원인 파악 후 제거/축소할 것.
+    console.log("[TX] UNCAUGHT_EXCEPTION:", e.message, "| stack:", e.stack);
+    return c.json(500, { ok: false, error: "UNCAUGHT_EXCEPTION", detail: e.message, stack: e.stack });
+  }
 });
 
 // ── 2026-07-07 신설: 초기 GDC 지급(개발 전용) ──────────────────────────
