@@ -541,14 +541,33 @@ export async function _sha256(str) {
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
-// ── E.164 → IPv6 형식 GUID ───────────────────────────────
-async function _e164ToIPv6(e164) {
-  const hash = await _sha256('gopang-phone:' + e164);
-  const groups = [];
-  for (let i = 0; i < 8; i++) groups.push(hash.slice(i*4, i*4+4));
-  groups[0] = '2601';
-  groups[1] = 'db80';
+// ── 신규/재가입 시 GUID 생성 — 2026-09-06 변경: 전화번호 결정론적 해시 폐기 ──
+// 기존 _e164ToIPv6(e164)는 SHA-256('gopang-phone:'+e164)로 guid를 만들어서,
+// "같은 전화번호로 가입하면 항상 같은 guid"가 나왔다. 문제: 한국 통신사는
+// 해지된 번호를 통상 3~6개월 뒤 다른 사람에게 재배정한다 — 그 경우 새
+// 소유자가 이전 소유자와 완전히 동일한 guid를 계산해내서, ledger/blocks에
+// 남아있던 이전 소유자의 GDC 잔액·거래이력·K-Law 상담기록을 그대로
+// 물려받는 계정 탈취급 결함이 있었다(2026-09-06 실사로 발견·수정).
+//
+// 수정: guid를 전화번호와 무관한 CSPRNG(암호학적으로 안전한 난수)로 생성한다.
+// IPv6 8그룹 형식은 하위 시스템(GDUDA 라우팅 등)과의 호환을 위해 유지하되,
+// 앞 2그룹(2601:db80:)은 여전히 "고팡 발급 주소"임을 나타내는 고정 프리픽스로
+// 남겨두고, 나머지 6그룹(96비트)을 crypto.getRandomValues()로 채운다.
+// 96비트 난수 공간이면 생일역설을 감안해도 실질적으로 충돌 가능성이 없다.
+async function _generateRandomGuid() {
+  const randBytes = crypto.getRandomValues(new Uint8Array(12)); // 96비트
+  const hex = Array.from(randBytes).map(b => b.toString(16).padStart(2, '0')).join('');
+  const groups = ['2601', 'db80'];
+  for (let i = 0; i < 6; i++) groups.push(hex.slice(i * 4, i * 4 + 4));
   return groups.join(':');
+}
+
+// 하위 호환용 별칭 — 기존 호출부(_e164ToIPv6(e164))를 전부 바꾸는 대신,
+// 같은 이름으로 시그니처만 유지하고 내부적으로 무작위 생성을 쓴다.
+// e164 인자는 더 이상 guid 계산에 쓰이지 않는다(의도적으로 무시함 — 실수로
+// 다시 해시에 섞어 넣지 않도록 아래에서 인자명을 _unusedE164로 명시).
+async function _e164ToIPv6(_unusedE164) {
+  return _generateRandomGuid();
 }
 
 // ── window.gopangWallet 준비 대기 ────────────────────────
