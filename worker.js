@@ -12588,6 +12588,7 @@ export default {
     if (pathname === '/biz/fee-rate' && request.method === 'GET') return handleFeeRate(request, env, corsHeaders);
     if (pathname === '/biz/gdc-deposit-close' && request.method === 'POST') return handleGdcDepositClose(request, env, corsHeaders);
     if (pathname === '/biz/gdc-test-financial-statement' && request.method === 'GET') return handleGdcTestFinancialStatementGet(request, env, corsHeaders);
+    if (pathname === '/biz/gdc-test-financial-statement' && request.method === 'POST') return handleGdcTestFinancialStatementUpsert(request, env, corsHeaders);
     if (pathname === '/biz/gdc-test-loan-apply' && request.method === 'POST') return handleGdcTestLoanApply(request, env, corsHeaders);
     if (pathname === '/biz/gdc-test-loan-repay' && request.method === 'POST') return handleGdcTestLoanRepay(request, env, corsHeaders);
     if (pathname === '/biz/balance-status' && request.method === 'GET') return handleBalanceStatus(request, env, corsHeaders);
@@ -14400,6 +14401,52 @@ async function _gdcFindTestFsByGuid(env, userGuid) {
     { headers: { 'Authorization': `Bearer ${token}` } });
   const data = await res.json().catch(() => ({ items: [] }));
   return data.items?.[0] || null;
+}
+
+// POST /biz/gdc-test-financial-statement — 관리자 전용(_requireAdmin,
+// /admin/login 재사용). 현직 금융기관 종사자 필드테스터의 재무제표
+// 시나리오(bs-ar/ap/debt/equity/inventory, pl-*, cf-op)를 등록·갱신한다.
+// 이 레코드가 생기는 순간 그 user_guid는 evaluateCredit()/applyLoan()을
+// 쓸 수 있게 된다 — 그래서 일반 회원가입 경로가 아니라 관리자 인증이
+// 필요한 이 엔드포인트로만 만들 수 있게 막아뒀다.
+async function handleGdcTestFinancialStatementUpsert(request, env, corsHeaders) {
+  const admin = await _requireAdmin(request, env);
+  if (!admin) return _err(401, 'ADMIN_AUTH_REQUIRED', '관리자 인증이 필요합니다(/admin/login)', corsHeaders);
+
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+  const { user_guid, tester_org, bs_ar, bs_ap, bs_debt, bs_equity, bs_inventory,
+          pl_revenue, pl_cogs, pl_opex, cf_op, note } = body;
+  if (!user_guid) return _err(400, 'MISSING_FIELD', 'user_guid 필수', corsHeaders);
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+  const payload = {
+    user_guid, tester_org: tester_org || '', note: note || '',
+    bs_ar: bs_ar || 0, bs_ap: bs_ap || 0, bs_debt: bs_debt || 0,
+    bs_equity: bs_equity || 0, bs_inventory: bs_inventory || 0,
+    pl_revenue: pl_revenue || 0, pl_cogs: pl_cogs || 0, pl_opex: pl_opex || 0,
+    cf_op: cf_op || 0,
+  };
+
+  try {
+    const existing = await _gdcFindTestFsByGuid(env, user_guid);
+    let res;
+    if (existing) {
+      res = await fetch(`${L1_DEFAULT}/api/collections/gdc_test_financial_statements/records/${encodeURIComponent(existing.id)}`, {
+        method: 'PATCH', headers, body: JSON.stringify(payload),
+      });
+    } else {
+      res = await fetch(`${L1_DEFAULT}/api/collections/gdc_test_financial_statements/records`, {
+        method: 'POST', headers, body: JSON.stringify(payload),
+      });
+    }
+    if (!res.ok) return _err(500, 'SAVE_FAILED', await res.text(), corsHeaders);
+    const row = await res.json().catch(() => null);
+    return new Response(JSON.stringify({ ok: true, id: row?.id, updated: !!existing }), { status: 200, headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'L1_UNREACHABLE', 'L1 저장 실패: ' + e.message, corsHeaders);
+  }
 }
 
 // GET /biz/gdc-test-financial-statement?user_guid=... — 존재하지 않으면
