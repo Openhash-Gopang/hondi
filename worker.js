@@ -13136,22 +13136,39 @@ async function handleBizOrder(request, env, corsHeaders, ctx) {
   // LCAT과 requires_geo는 완전히 독립 — PLSM 계층 라우팅 전용 입력
   console.log(`[BizOrder] score=${importance_score.toFixed(2)} mode=${importance_mode} lcat=${lcat}`);
 
-  // L1에는 순수 UTXO만 전달 (items/memo 등 제거)
-  const txPayload = {
-    version: tx?.version || 1,
-    input: tx?.input || {
+  // [2026-09-06 근본 수정 — TX_HASH_MISMATCH] 여기서 예전엔 {version, input,
+  // outputs} 세 필드만 뽑아 새 객체를 만들어("L1에는 순수 UTXO만 전달")
+  // L1로 보냈다. 그런데 L1의 /api/tx는 tx_hash를 sha256(sortedStringify(tx))
+  // 로 재계산해서 클라이언트가 서명 시점에 만든 tx_hash와 비교한다 — 클라
+  // 지갑(gopang-wallet.js buildTxWithPrevHash)은 {version, input, outputs,
+  // items, nonce, timestamp} 6개 필드 전체로 서명한다. 여기서 필드를
+  // 3개로 줄여 새 객체를 만드는 순간, L1이 재계산한 해시는 클라이언트가
+  // 서명한 해시와 절대 같아질 수 없다(items/nonce/timestamp가 빠졌으니) —
+  // 게다가 한때는 score/lcat까지 끼워 넣어서 이중으로 어긋났었다. 실사용
+  // 이체(register-key→mint→transfer)가 여기까지 도달한 게 이번이 처음이라
+  // 지금까지 발견되지 않았다. "L1이 unknown field 무시" 가정은
+  // destructuring(`const {input, outputs} = tx`)에는 맞지만 해시 검증에는
+  // 적용되지 않는다 — 그래서 애초에 필드를 골라내지 않고 클라이언트가
+  // 서명한 tx 객체를 있는 그대로 L1에 전달해야 한다(L1도 tx.items/
+  // tx.score/tx.lcat 등은 어디서도 참조하지 않는 걸 확인했으므로 안전).
+  // tx가 없는 예외적 호출(실제로는 L1의 MISSING_FIELD로 걸러지는 경로)
+  // 대비 최소 폴백만 남긴다.
+  const txPayload = tx || {
+    version: 1,
+    input: {
       owner_guid:        from_guid,
       prev_settle_hash:  prev_settle_hash || null,
       balance_claimed:   balance_claimed  || 0,
     },
-    outputs: tx?.outputs || outputs || [
+    outputs: outputs || [
       { recipient_guid: seller_guid,        amount: seller_net || 0 },
       { recipient_guid: 'gopang-platform',  amount: fee        || 0 },
     ],
-    // PLSM 입력값 — L1이 아직 미수신해도 unknown field 무시, 거래 흐름 미차단
-    score: importance_score,
-    lcat,
   };
+  // PLSM 입력값(중요도 점수/LCAT) — tx_hash 서명 대상이 아니므로 tx 밖,
+  // 바깥 요청 바디의 형제 필드로 보낸다. L1은 아직 안 읽지만(unknown
+  // field 무시) 나중에 body.score/body.lcat으로 소비하면 된다.
+  const plsmFields = { score: importance_score, lcat };
   // §5 브릿지 트리거 — cross-L1일 때만 넘긴다(같은 L1이면 undefined로 두어
   // L1의 기존 로컬 처리 경로를 그대로 탄다).
   const bridgeBody = isCrossL1 ? { seller_home_node: sellerHomeNode } : {};
@@ -13169,7 +13186,7 @@ async function handleBizOrder(request, env, corsHeaders, ctx) {
     const l1Res = await fetch(l1Url, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: (() => { const p = { tx: txPayload, tx_hash, buyer_sig, buyer_public_key, purpose, ...bridgeBody }; console.log('[L1] tx:', JSON.stringify(p.tx)); return JSON.stringify(p); })(),
+      body: (() => { const p = { tx: txPayload, tx_hash, buyer_sig, buyer_public_key, purpose, ...plsmFields, ...bridgeBody }; console.log('[L1] tx:', JSON.stringify(p.tx)); return JSON.stringify(p); })(),
     });
     l1Result = await l1Res.json().catch(() => ({ ok: false, error: 'L1_PARSE_FAILED' }));
   } catch (e) {
