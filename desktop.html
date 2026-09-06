@@ -958,6 +958,22 @@ body.mm-lock-scroll { overflow: hidden; }
 .bh-section { background: #fff; }
 .bh-wrap { max-width: 760px; margin: 0 auto; padding: 0 24px; }
 .bh-lede { font-size: 15px; color: var(--text3, #4d4d4d); line-height: 1.7; margin-bottom: 22px; }
+/* 2026-09-05 신설 — 베타 가입 혜택 배너(팝업 대신 소개 섹션 상단에 고정). */
+.bh-promo-banner {
+  position: relative; background: #fff7e2; border: 1px solid #f0c98a; border-radius: 10px;
+  padding: 16px 40px 14px 18px; margin-bottom: 20px;
+}
+.bh-promo-close {
+  position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; border-radius: 50%;
+  border: none; background: transparent; color: #9a7a3a; font-size: 13px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: background .12s;
+}
+.bh-promo-close:hover { background: rgba(0,0,0,.06); }
+.bh-promo-head { font-size: 14px; font-weight: 800; color: #7a4b0e; margin-bottom: 8px; }
+.bh-promo-list { margin: 0 0 10px 18px; }
+.bh-promo-list li { font-size: 13.5px; line-height: 1.65; color: #5c3d0e; margin-bottom: 4px; }
+.bh-promo-hide { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #8a6a2a; cursor: pointer; user-select: none; }
+.bh-promo-hide input { margin: 0; cursor: pointer; }
 .bh-h2 { font-size: 18px; font-weight: 800; margin: 30px 0 10px; color: var(--navy, #0B2545); display: flex; align-items: center; gap: 10px; }
 .bh-h2:first-of-type { margin-top: 0; }
 .bh-h2 .bh-n {
@@ -1263,6 +1279,23 @@ document.addEventListener('keydown', function (e) {
 
 <section class="section bh-section" id="ai-gov-how">
   <div class="bh-wrap">
+    <!-- 2026-09-05 신설 — 베타 가입 혜택 배너. 팝업 대신 소개 섹션
+         최상단에 배치하고(팝업은 브라우저 팝업 허용 설정에 걸릴 수
+         있어 배제), "다시 보지 않기" 체크박스로 사용자가 직접 지울 수
+         있게 한다. 체크 후 닫으면 localStorage에 남겨 다음 방문부터는
+         아예 렌더링하지 않는다. -->
+    <div class="bh-promo-banner" id="bhPromoBanner">
+      <button type="button" class="bh-promo-close" id="bhPromoClose" aria-label="배너 닫기">✕</button>
+      <div class="bh-promo-head">🎁 베타 테스트 기간(9.1~12.31) 가입자 혜택</div>
+      <ul class="bh-promo-list">
+        <li><strong>K-Law 서비스 월 10회 무료 이용권</strong>을 1년간 제공합니다.</li>
+        <li><strong>혼디</strong> 사업화를 위한 기업 설립 시점에, 지분 참여 기회를 우선적으로 알려드립니다.</li>
+      </ul>
+      <label class="bh-promo-hide">
+        <input type="checkbox" id="bhPromoHideChk"> 다시 보지 않기
+      </label>
+    </div>
+
     <span class="section-tag">혼디 소개</span>
     <h2 class="section-title">전자동 AI 정부는 <strong>어떻게 작동할까요?</strong></h2>
     <p class="bh-lede"><strong>혼디</strong>가 정부 업무를 자동화한다는 것, 그리고 사람보다 훨씬 빠르다는 것까지는 지난 안내에서 전해 드렸습니다. 이번에는 그 안쪽 — <strong>어떤 원리로</strong> 이 일이 가능한지를 최대한 쉬운 말로 설명합니다.</p>
@@ -4351,6 +4384,29 @@ document.addEventListener('click', function (e) {
     : document.getElementById('db-page-' + page);
   if (scrollTarget) scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
+</script>
+
+<script>
+// 2026-09-05 신설 — 베타 가입 혜택 배너의 "다시 보지 않기".
+// 페이지 로드 시 이전에 체크하고 닫은 적 있으면 아예 렌더링하지 않고,
+// 닫기(✕) 버튼을 누르면 그 순간 체크박스 상태를 보고 localStorage에
+// 남길지 결정한다 — 체크 안 하고 닫으면 이번 방문에서만 숨겨지고
+// 다음 방문엔 다시 보인다.
+(function () {
+  var KEY = 'hondi_hide_beta_promo';
+  var banner = document.getElementById('bhPromoBanner');
+  if (!banner) return;
+  if (localStorage.getItem(KEY) === '1') {
+    banner.style.display = 'none';
+    return;
+  }
+  document.getElementById('bhPromoClose').addEventListener('click', function () {
+    if (document.getElementById('bhPromoHideChk').checked) {
+      localStorage.setItem(KEY, '1');
+    }
+    banner.style.display = 'none';
+  });
+})();
 </script>
 
 </body>
