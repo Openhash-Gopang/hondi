@@ -3347,6 +3347,47 @@ onRecordBeforeCreateRequest((e) => {
     // 방어이며, TOFU(pubkey 최초 등록)가 여전히 최소한의 방어선이다.
     console.log(`[PHONE-RECLAIM] 처리 중 오류(무시하고 가입 계속): ${err.message}`);
   }
+
+  // ── 서버측 pubkey 재사용 탐지 (2026-09-06 신설, §2.4) ────────────────
+  // 정상적인 새 키페어는 이 세상에 유일해야 한다 — 클라이언트가 매번
+  // crypto.getRandomValues()로 새로 생성하기 때문이다(auth.js
+  // _generateRandomGuid와 별개로, Ed25519 키페어 자체도 매 기기·매
+  // 가입마다 새로 만들어지는 게 정상). 그런데 이 pubkey가 이미 "다른"
+  // guid에 등록된 적이 있다면, 그건 새 키페어가 아니라 이 기기에 남아있던
+  // 누군가의 기존 키를 그대로 재사용했다는 뜻이다 — 중고폰에 이전
+  // 소유자의 지갑이 남아있는 상태에서 신규가입한 경우가 대표적이다
+  // (실사로 확인된 시나리오: wallet.load()가 "이 기기엔 이미 지갑이
+  // 있다"고 판단해 이전 소유자의 키페어를 그대로 재사용하고, 그 위에
+  // 새 신원만 얹는 결함 — docs/BIOMETRIC_WALLET_SECURITY_REDESIGN_
+  // 2026-09-06.md §2.2가 클라이언트 쪽 근본 해법이고, 이건 그게 뚫려도
+  // (구버전 캐시된 JS, 버그 등) 걸리는 마지막 안전망이다).
+  //
+  // 이 검사는 정상적인 새 키페어라면 이론상 절대 안 걸린다 — 걸린다는
+  // 사실 자체가 강한 이상 신호다. superseded된 과거 레코드도 포함해서
+  // 검사한다(superseded라고 그 pubkey가 안전해지는 건 아니다 — 그
+  // 키를 쥔 사람이 여전히 서명 가능하다는 사실은 안 바뀐다).
+  try {
+    const newPubkey = e.record.getString("pubkey_ed25519");
+    if (newPubkey) {
+      const newGuid = e.record.getString("guid");
+      const dupPubkey = $app.dao().findRecordsByFilter(
+        "profiles",
+        `pubkey_ed25519 = '${newPubkey}' && guid != '${newGuid}'`,
+        "", 1, 0
+      );
+      if (dupPubkey.length > 0) {
+        throw new BadRequestError(
+          "이 공개키는 이미 다른 계정에 등록된 적이 있습니다(REUSED_PUBKEY) — " +
+          "이 기기에 이전 사용자의 지갑이 남아있을 수 있습니다. 앱에서 기기를 " +
+          "초기화한 뒤 다시 시도해 주세요."
+        );
+      }
+    }
+  } catch (err) {
+    if (err instanceof BadRequestError) throw err;
+    // 조회 자체가 실패한 경우는 best-effort 원칙대로 가입을 막지 않는다.
+    console.log(`[PUBKEY-REUSE-CHECK] 처리 중 오류(무시하고 가입 계속): ${err.message}`);
+  }
 }, "profiles");
 
 // ── 잔액/거래이력 공용 유틸 (2026-09-06 신설) ───────────────────────
