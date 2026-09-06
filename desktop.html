@@ -1033,6 +1033,13 @@ body.mm-lock-scroll { overflow: hidden; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <script>mermaid.initialize({startOnLoad:false, theme:"neutral", fontFamily:"inherit"});</script>
+<!-- K-서비스 공용 전화번호 인증 모듈 (2026-09-06) — 내 GDC 대시보드가
+     여기 의존한다. plan.hondi.net·klaw.hondi.net 등에서 이미 로그인했으면
+     .hondi.net 쿠키로 여기서도 다시 전화번호를 묻지 않는다(SSO). -->
+<script>
+window.K_AUTH_CONFIG = { serviceLabel: '혼디', enableDeviceLink: false };
+</script>
+<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
 </head>
 <body>
 
@@ -2510,31 +2517,8 @@ document.addEventListener('keydown', function (e) {
       <button class="ud-close" onclick="closeUserDashboard()">✕</button>
     </div>
 
-    <div id="user-dash-lookup" style="padding:28px 24px">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
-        <span style="font-size:18px;line-height:1;flex-shrink:0">🧭</span>
-        <div style="font-size:13px;color:var(--ud-text);line-height:1.5">
-          GDC 충전 시 사용한 전화번호 뒷자리 8자를 입력하십시오.
-        </div>
-      </div>
-      <div style="display:flex;align-items:stretch;border:1px solid var(--ud-line);border-radius:8px;background:#fff;overflow:hidden;margin-bottom:10px">
-        <span style="padding:0 10px;height:44px;display:flex;align-items:center;font-size:14px;color:var(--ud-dim);border-right:1px solid var(--ud-line);flex-shrink:0;background:#fafafa">010-</span>
-        <input id="user-dash-phone" type="tel" maxlength="8" inputmode="numeric" placeholder="전화번호 뒷 8자리" autocomplete="tel"
-               style="flex:1;min-width:0;border:none;margin:0;border-radius:0;height:44px;letter-spacing:2px;text-align:center">
-      </div>
-      <div id="user-dash-err" class="ud-err"></div>
-      <button id="user-dash-btn" class="ud-btn primary" onclick="_userDashRequestOtp()">인증번호 받기</button>
-    </div>
-
-    <div id="user-dash-otp" style="display:none;padding:28px 24px">
-      <div style="font-size:12.5px;color:var(--ud-dim);margin-bottom:14px;line-height:1.6">
-        <span id="user-dash-otp-phone"></span>로 전송된 인증번호 6자리를 입력하세요.
-      </div>
-      <input id="user-dash-code" type="text" inputmode="numeric" maxlength="6" placeholder="123456" autocomplete="one-time-code"
-             style="letter-spacing:4px;text-align:center;">
-      <div id="user-dash-otp-err" class="ud-err"></div>
-      <button id="user-dash-otp-btn" class="ud-btn primary" onclick="_userDashVerifyOtp()">확인</button>
-      <button class="ud-btn" onclick="_userDashReset()">다른 번호로 다시 시작</button>
+    <div id="user-dash-loading" style="padding:40px 24px;text-align:center;color:var(--ud-faint);font-size:13px">
+      확인 중…
     </div>
 
     <div id="user-dash-result" style="display:none;padding-bottom:24px">
@@ -2565,7 +2549,7 @@ document.addEventListener('keydown', function (e) {
         </div>
       </div>
       <div style="padding:0 20px">
-        <button class="ud-btn" onclick="_userDashReset()">다른 번호로 조회</button>
+        <button class="ud-btn" onclick="_userDashSwitchAccount()">다른 번호로 조회</button>
       </div>
     </div>
 
@@ -2573,120 +2557,58 @@ document.addEventListener('keydown', function (e) {
 </div>
 
 <script>
-function _openUserDashboard() {
+async function _openUserDashboard() {
   document.getElementById('user-dash-overlay').style.display = 'flex';
   document.body.style.overflow = 'hidden';
   _userDashReset();
-  setTimeout(() => document.getElementById('user-dash-phone')?.focus(), 100);
+  await KAuth.ensureLogin();
+  await _userDashLoadBalance();
 }
 function closeUserDashboard() {
   document.getElementById('user-dash-overlay').style.display = 'none';
   document.body.style.overflow = '';
 }
 function _userDashReset() {
-  document.getElementById('user-dash-lookup').style.display = 'block';
-  document.getElementById('user-dash-otp').style.display = 'none';
+  document.getElementById('user-dash-loading').style.display = 'block';
+  document.getElementById('user-dash-loading').textContent = '확인 중…';
   document.getElementById('user-dash-result').style.display = 'none';
-  document.getElementById('user-dash-err').style.display = 'none';
-  document.getElementById('user-dash-otp-err').style.display = 'none';
-  document.getElementById('user-dash-phone').value = '';
-  document.getElementById('user-dash-code').value = '';
   document.getElementById('ud-charge-rows').innerHTML = '';
   document.getElementById('ud-usage-rows').innerHTML = '';
   document.querySelectorAll('#user-dash-overlay .ud-tab').forEach((t, i) => t.classList.toggle('active', i === 0));
   document.querySelectorAll('#user-dash-overlay .ud-pane').forEach((p, i) => p.classList.toggle('active', i === 0));
 }
-// 국내 전화번호(010-0000-0000 등)를 +82 e164로 변환 — handlePhoneOtpRequest가
-// 기대하는 형식과 동일한 관례(맨 앞 0을 유지한 채 +82를 붙임).
-function _toE164(raw) {
-  const digits = raw.replace(/\D/g, '');
-  if (!digits) return null;
-  return '+82' + digits;
+// 다른 번호로 조회 — KAuth 로그인을 지우고 다시 인증받은 뒤 잔액을 새로 불러온다.
+async function _userDashSwitchAccount() {
+  KAuth.logout();
+  _userDashReset();
+  await KAuth.ensureLogin();
+  await _userDashLoadBalance();
 }
-async function _userDashRequestOtp() {
-  var last8 = document.getElementById('user-dash-phone').value.trim();
-  // 2026-09-05 수정 — 입력창을 K-Plan과 통일해 뒷자리 8자리만 받는다.
-  // 기존 _toE164()는 전체 번호 문자열을 기대하므로, 010- 프리픽스를
-  // 붙여 조합한 뒤 그대로 넘긴다 — 그 아래 로직·엔드포인트는 그대로다.
-  const raw = last8 ? ('010-' + last8) : '';
-  const err = document.getElementById('user-dash-err');
-  const btn = document.getElementById('user-dash-btn');
-  const e164 = _toE164(raw);
-  if (!e164) { err.textContent = '전화번호를 입력해 주세요.'; err.style.display = 'block'; return; }
-  err.style.display = 'none';
-  btn.disabled = true; btn.textContent = '전송 중…';
+// 공용 인증 모듈(KAuth)이 이미 확보한 phone_verify_token으로 잔액·구독을
+// 조회한다 — plan.hondi.net·klaw.hondi.net 등에서 이미 로그인했으면
+// 여기서 다시 전화번호를 묻지 않는다(2026-09-06, SSO 통합).
+async function _userDashLoadBalance() {
+  const loading = document.getElementById('user-dash-loading');
   try {
-    const res  = await fetch(`${WORKER_URL}/biz/phone-otp-request`, {
+    const balRes = await fetch(`${WORKER_URL}/user/gdc-balance`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ e164 }),
-    });
-    const data = await res.json().catch(() => null);
-    if (!res.ok || !data?.ok) {
-      err.textContent = data?.message || '인증번호 발송에 실패했습니다.';
-      err.style.display = 'block';
-      return;
-    }
-    _userDashState = { e164 };
-    document.getElementById('user-dash-otp-phone').textContent = raw;
-    document.getElementById('user-dash-lookup').style.display = 'none';
-    document.getElementById('user-dash-otp').style.display = 'block';
-    setTimeout(() => document.getElementById('user-dash-code')?.focus(), 100);
-  } catch (e) {
-    err.textContent = '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.';
-    err.style.display = 'block';
-  } finally {
-    btn.disabled = false; btn.textContent = '인증번호 받기';
-  }
-}
-let _userDashState = null;
-async function _userDashVerifyOtp() {
-  const code = document.getElementById('user-dash-code').value.trim();
-  const err  = document.getElementById('user-dash-otp-err');
-  const btn  = document.getElementById('user-dash-otp-btn');
-  if (!_userDashState?.e164) { _userDashReset(); return; }
-  if (!code) { err.textContent = '인증번호를 입력해 주세요.'; err.style.display = 'block'; return; }
-  err.style.display = 'none';
-  btn.disabled = true; btn.textContent = '확인 중…';
-  try {
-    // 1단계 — OTP 검증, phone_verify_token 발급 (guid 없는 2필드 토큰:
-    // 이 흐름은 claim이 아니라 "이 번호를 내가 통제한다"는 증명만 필요).
-    const verifyRes  = await fetch(`${WORKER_URL}/biz/phone-otp-verify`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ e164: _userDashState.e164, code }),
-    });
-    const verifyData = await verifyRes.json().catch(() => null);
-    if (!verifyRes.ok || !verifyData?.phone_verify_token) {
-      err.textContent = verifyData?.message || '인증번호가 일치하지 않습니다.';
-      err.style.display = 'block';
-      return;
-    }
-    // 2단계 — 검증된 토큰으로 잔액·구독 조회 (관리자 인증과 무관한
-    // 공개 엔드포인트, 토큰이 전화번호 소유를 증명하는 유일한 근거).
-    const balRes  = await fetch(`${WORKER_URL}/user/gdc-balance`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone_verify_token: verifyData.phone_verify_token }),
+      body: JSON.stringify({ phone_verify_token: KAuth.getToken() }),
     });
     const balData = await balRes.json().catch(() => null);
     if (!balRes.ok || !balData?.ok) {
-      err.textContent = balData?.message || '이 전화번호로 등록된 프로필을 찾을 수 없습니다.';
-      err.style.display = 'block';
+      loading.textContent = balData?.message || '이 전화번호로 등록된 프로필을 찾을 수 없습니다.';
       return;
     }
     document.getElementById('user-dash-balance').textContent = (balData.balance ?? 0).toLocaleString();
     const subLabel = balData.subscribed ? (balData.tier_name || balData.tier || '구독중') : '미구독';
     document.getElementById('user-dash-renew').textContent =
       subLabel + (balData.renews_at ? ` · 다음 결제 ${balData.renews_at}` : '');
-    document.getElementById('user-dash-otp').style.display = 'none';
+    loading.style.display = 'none';
     document.getElementById('user-dash-result').style.display = 'block';
     if (balData.guid) _userDashLoadHistory(balData.guid);
   } catch (e) {
-    err.textContent = '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.';
-    err.style.display = 'block';
-  } finally {
-    btn.disabled = false; btn.textContent = '확인';
+    loading.textContent = '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.';
   }
 }
 
