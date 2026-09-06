@@ -8,21 +8,6 @@
 <title>K-서비스 — 혼디</title>
 </head>
 <body>
-<script>
-window.PAGE_HERO = {
-  badge: 'K-서비스',
-  l1: '법률·세무·의료·교육 등',
-  l2: '20개 공익 서비스를 한 플랫폼에서',
-  sub: '사고나 응급 상황이 감지되면, 혼디가 신고 접수와 동시에 중증도 분류·출동 배차·응급처치 안내까지 자동으로 진행합니다.',
-  actions: []
-};
-</script>
-<link rel="stylesheet" href="/assets/site-header.css">
-<script src="/assets/site-header.js"></script>
-
-
-
-
 <style>
 /* ── RESET ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -170,7 +155,16 @@ table.svc-table td.svc-hondi { color: var(--brand-dk); font-weight: 600; }
 .ug-footer { text-align: center; font-size: 12px; color: var(--text4); border-top: 1px solid var(--border); padding-top: 18px; margin-top: 40px; }
 </style>
 
-<div id="site-hero-mount"></div>
+<script>
+window.PAGE_HEADER = {
+  active: 'k-services',
+  badge: 'K-서비스',
+  h1: '법률·세무·의료·교육 등<br>20개 공익 서비스를 한 플랫폼에서',
+  sub: '사고나 응급 상황이 감지되면, 혼디가 신고 접수와 동시에 중증도 분류·출동 배차·응급처치 안내까지 자동으로 진행합니다.'
+};
+</script>
+<link rel="stylesheet" href="/assets/ph-header.css">
+<script src="/assets/ph-header.js"></script>
 
 <div class="ug-doc">
 

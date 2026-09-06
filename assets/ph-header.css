@@ -1,0 +1,46 @@
+/* ══════════════════════════════════════════════════════════════════
+   ph-header.css — 혼디 "4대 메뉴" 공용 헤더 스타일 (단일 소스)
+
+   대상: K-서비스 · 전문가 페르소나 · K-정부 · 프롬프트
+   (desktop.html 히어로 상단 4개 버튼과 1:1 대응하는 4개 페이지)
+
+   전문가 페르소나 페이지가 2026-09-04에 plan.hondi.net 스타일로
+   하드코딩했던 topnav+hero 마크업을 그 원형(原形)으로 삼아 이 4개
+   페이지가 공유하는 단일 모듈로 추출했다(2026-09-06).
+
+   사용법은 ph-header.js 상단 주석을 참고하십시오.
+   ══════════════════════════════════════════════════════════════════ */
+
+:root {
+  --ph-header: #14113B; --ph-nav: #241C6B;
+  --ph-primary: #4338CA; --ph-primary-lt: #6366F1;
+  --ph-ink: #14181f;
+}
+
+/* ── 상단 내비게이션 바 ── */
+.topnav { background: var(--ph-ink); position: sticky; top: 0; z-index: 200; border-bottom: 1px solid #000; }
+.topnav-inner { max-width: 1160px; margin: 0 auto; padding: 0 24px; display: flex; align-items: stretch; height: 48px; }
+.topnav-logo { display: flex; align-items: center; gap: 9px; font-size: 15px; font-weight: 700; color: #fff; letter-spacing: -.2px; padding-right: 18px; border-right: 1px solid rgba(255,255,255,.15); flex-shrink: 0; margin-right: 6px; text-decoration: none; }
+.topnav-logo-icon { width: 26px; height: 26px; background: var(--ph-primary-lt); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; color: #fff; }
+.topnav-links { display: flex; flex: 1; overflow-x: auto; }
+.topnav-links a { display: flex; align-items: center; padding: 0 15px; font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,.65); transition: background .1s, color .1s; white-space: nowrap; border-right: 1px solid rgba(255,255,255,.08); text-decoration: none; }
+.topnav-links a:hover, .topnav-links a.active { background: rgba(255,255,255,.06); color: #fff; }
+.topnav-right { display: flex; align-items: center; gap: 10px; margin-left: auto; padding-left: 16px; flex-shrink: 0; }
+.topnav-status { display: flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 600; color: rgba(255,255,255,.55); white-space: nowrap; }
+.status-dot-green { width: 6px; height: 6px; border-radius: 50%; background: #34d399; box-shadow: 0 0 4px #34d399; }
+
+/* ── 보조 탭 줄 — 상단 탭 바로 아래, 페이지 자체 하위 메뉴용(선택적) ── */
+.topsubnav { background: #1c2029; border-bottom: 1px solid #000; }
+.topsubnav-inner { max-width: 1160px; margin: 0 auto; padding: 0 24px; display: flex; align-items: stretch; height: 34px; overflow-x: auto; }
+.topsubnav-inner a { display: flex; align-items: center; padding: 0 13px; font-size: 11.5px; font-weight: 600; color: rgba(255,255,255,.5); white-space: nowrap; text-decoration: none; transition: color .1s, background .1s; }
+.topsubnav-inner a:hover, .topsubnav-inner a.active { color: #fff; background: rgba(255,255,255,.05); }
+.topsubnav-inner a.active { box-shadow: inset 0 -2px 0 var(--ph-primary-lt); }
+
+/* ── 히어로 배너 ── */
+.ph-hero { background: var(--ph-ink); color: #fff; padding: 28px 0 26px; border-bottom: 2px solid var(--ph-primary-lt); }
+.ph-hero-inner { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+.ph-hero-tag { display: inline-flex; align-items: center; gap: 7px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.16); border-radius: 2px; padding: 3px 10px; font-size: 10.5px; font-weight: 700; color: rgba(255,255,255,.75); letter-spacing: .3px; margin-bottom: 14px; }
+.ph-hero-tag-dot { width: 5px; height: 5px; border-radius: 50%; background: #f0b429; }
+.ph-hero h1 { font-size: 21px; font-weight: 700; letter-spacing: -.3px; line-height: 1.4; margin-bottom: 10px; max-width: 760px; }
+.ph-hero-instruction { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.6; max-width: 700px; margin-bottom: 6px; }
+.ph-hero p { font-size: 12.5px; color: rgba(255,255,255,.60); line-height: 1.65; max-width: 700px; }
