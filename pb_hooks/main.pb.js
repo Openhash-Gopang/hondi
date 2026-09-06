@@ -1,6 +1,12 @@
 /// <reference path="../pb_data/types.d.ts" />
 
-const NODE_ID = "KR-JEJU-JEJU-HANLIM";
+// [2026-09-06] 여기 있던 const NODE_ID = "KR-JEJU-JEJU-HANLIM"는 레거시
+// routerAdd("POST", "/tx", ...) 하나에서만 쓰였다 — 그 라우트를 삭제하며
+// (바로 아래 큰 주석 참고) 완전히 죽은 코드가 돼 같이 제거했다. 참고로
+// 파일 전체를 AST로 감사한 결과, 이 감사 시점 기준 콜백 바깥 최상위
+// 선언은 이거 하나뿐이었다 — _sigVerify/_balanceUtils(둘 다 지역 선언으로
+// 이미 전환됨)를 포함해 이제 이 파일에 "콜백 밖 최상위 선언을 콜백 안에서
+// 참조"하는 패턴은 남아있지 않다.
 
 
 // ── 서명 암호학적 검증 공유 유틸 (2026-07-19, 모듈 최상단으로 승격) ──────
@@ -4328,55 +4334,20 @@ routerAdd("GET", "/merkle", (c) => {
   return c.json(200, { ok: true, chain_length: chainLength, merkle_root: myRoot, recent, timestamp: new Date().toISOString() });
 });
 
-routerAdd("POST", "/tx", (c) => {
-  const body = $apis.requestInfo(c).data;
-  const { tx_id, leaf_hash, from_guid, tx_type, signature, pubkey } = body;
-  if (!tx_id || !leaf_hash) return c.json(400, { ok: false, error: "MISSING_FIELD" });
-  let rec;
-  try {
-    const col = $app.dao().findCollectionByNameOrId("l1_ledger");
-    rec = new Record(col);
-    rec.set("tx_id",      tx_id);
-    rec.set("tx_type",    tx_type   || "TX");
-    rec.set("from_guid",  from_guid || "");
-    rec.set("leaf_hash",  leaf_hash);
-    rec.set("signature",  signature || "");
-    rec.set("pubkey",     pubkey    || "");
-    rec.set("l1_node",    NODE_ID);
-    rec.set("parent_root", "");
-    $app.dao().saveRecord(rec);
-  } catch(e) {
-    return c.json(500, { ok: false, error: "l1_ledger 저장 실패: " + e.message });
-  }
-  let myRoot = leaf_hash;
-  try {
-    const all = $app.dao().findRecordsByFilter("l1_ledger", "leaf_hash != ''", "-created", 10000, 0);
-    let layer = all.map(r => r.getString("leaf_hash")).filter(Boolean);
-    if (layer.length > 1) {
-      while (layer.length > 1) {
-        const next = [];
-        for (let i = 0; i < layer.length; i += 2)
-          next.push($security.md5(layer[i] + (layer[i+1] || layer[i])));
-        layer = next;
-      }
-    }
-    myRoot = layer[0] || leaf_hash;
-  } catch(e) { console.log("[L1] Merkle 실패:", e.message); }
-  let parentRoot = null;
-  try {
-    const resp = $http.send({
-      url: "http://127.0.0.1:8092/push_root",
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ child_node: NODE_ID, child_root: myRoot }),
-    });
-    parentRoot = JSON.parse(resp.raw).parent_root || null;
-  } catch(e) { console.log("[L1] L2 전파 실패:", e.message); }
-  if (parentRoot && rec) {
-    try { rec.set("parent_root", parentRoot); $app.dao().saveRecord(rec); } catch(e) {}
-  }
-  return c.json(200, { ok: true, node: NODE_ID, tx_id, leaf_hash, merkle_root: myRoot, parent_root: parentRoot });
-});
+// [2026-09-06 삭제] 여기 있던 레거시 routerAdd("POST", "/tx", ...) 를
+// 제거했다 — /api/tx(서명 검증·잔액 재계산·블록/청구권·l1_ledger 앵커링을
+// 전부 하는 정식 경로)로 완전히 대체된 초기 버전이었다. nginx
+// access.log(hanlim, seogwipo 양쪽) 전수 확인 결과 "POST /tx "(정확히
+// 이 경로, /api/tx 제외) 요청이 단 한 건도 없었고, worker.js/
+// gopang-wallet.js를 포함한 저장소 전체에서도 이 경로를 호출하는 곳이
+// 없었다 — 완전한 죽은 코드였다. 참고로 이 코드는 파일 최상단 const
+// NODE_ID를 콜백 안에서 지역 재선언 없이 그대로 참조하고 있어서, 살아
+// 있었다면 이번에 찾은 것과 같은 Goja 스코프 버그(_sigVerify/
+// _balanceUtils 참고)를 그대로 안고 있었을 것이고, 게다가 NODE_ID가
+// "KR-JEJU-JEJU-HANLIM"으로 하드코딩돼 있어 다른 42개 L1 노드에
+// 배포됐다면 전부 잘못된 node id를 응답했을 것이다 — 두 문제 다 실제
+// 영향은 없었다(호출자가 없었으므로). 필요해지면 git 히스토리에서
+// 그대로 복원 가능하다.
 
 routerAdd("POST", "/push_root", (c) => {
   const body = $apis.requestInfo(c).data;
