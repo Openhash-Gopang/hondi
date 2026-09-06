@@ -784,7 +784,7 @@
       // 유효한 챌린지를 받기 위함, 사고실험에서 지적된 미비점 수정).
       let stepUpThreshold = null;
       try {
-        const thRes = await fetch(`${CFG.endpoint}/account/step-up-threshold?guid=${encodeURIComponent(this.guid)}`);
+        const thRes = await fetch(`${WORKER_URL}/account/step-up-threshold?guid=${encodeURIComponent(this.guid)}`);
         const thData = await thRes.json().catch(() => null);
         stepUpThreshold = (thRes.ok && thData?.ok) ? thData.threshold : null;
       } catch (e) {
@@ -832,7 +832,7 @@
       }
 
       // 3) 서버 호출 — /biz/order가 아니라 전용 엔드포인트로
-      const res = await fetch(`${CFG.endpoint}/wallet/gdc-transfer`, {
+      const res = await fetch(`${WORKER_URL}/wallet/gdc-transfer`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tx: signed.tx, tx_hash: signed.tx_hash,
