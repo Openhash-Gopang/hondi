@@ -2572,12 +2572,31 @@ async function _saveStepUpThreshold() {
 
   const amount = parseFloat(input.value);
   if (!(amount >= 0)) { if (status) status.textContent = '0 이상의 숫자를 입력해 주세요.'; return; }
+  // 서버와 동일한 상한 — 여기서 먼저 걸러 왕복 없이 바로 안내한다
+  // (서버가 최종 검증하므로 이건 UX 개선일 뿐, 보안 경계는 서버 쪽).
+  if (amount > 1000000) {
+    if (status) status.textContent = '생체인증 문턱값은 최대 1,000,000원까지만 설정할 수 있습니다.';
+    return;
+  }
 
+  // 2026-09-06 신설 — 서버가 이제 본인 서명을 요구한다(guid만으로 아무나
+  // 남의 생체인증 문턱값을 바꿀 수 있던 인증 부재 취약점 수정). 다른
+  // 계정 설정 변경과 동일하게 지갑으로 서명해서 보낸다(window.gopangWallet
+  // 직접 접근 — 이 파일의 기존 관례, _checkPendingClaims 참고).
   if (status) status.textContent = '저장 중...';
   try {
+    const wallet = window.gopangWallet;
+    const pubkey = wallet?.publicKeyB64u || wallet?.publicKeyB64 || '';
+    if (!wallet?.signPayload || !pubkey) {
+      throw new Error('보안 키가 아직 준비되지 않았습니다. 잠시 후 다시 시도해 주세요.');
+    }
+    const ts = Date.now();
+    const sigMsg = `step-up-threshold-set:${guid}:${amount}:${ts}`;
+    const signature = await wallet.signPayload(sigMsg);
+
     const res = await fetch(`${_STEP_UP_WORKER}/account/step-up-threshold`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ guid, amount }),
+      body: JSON.stringify({ guid, amount, pubkey, signature, ts }),
     });
     const data = await res.json();
     if (!res.ok || !data.ok) throw new Error(data.detail || data.error || '저장 실패');

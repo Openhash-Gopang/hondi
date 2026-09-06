@@ -3300,6 +3300,176 @@ onRecordBeforeCreateRequest((e) => {
   if (!exp || Date.now() > exp) {
     throw new BadRequestError("인증 토큰이 만료됐습니다. 인증번호를 다시 요청해 주세요");
   }
+
+  // ── 번호 재활용(재클레임) 시 "덮어쓰기" 처리 (2026-09-06 신설) ──────
+  // 전화번호 소유는 방금 phone_verify_token으로 검증됐다. 하지만 이 번호로
+  // 이미 클레임된 profiles 레코드가 있을 수 있다 — 통신사가 해지된 번호를
+  // 다른 사람에게 재배정한 경우가 대표적이다.
+  //
+  // 배경: 기존엔 guid = SHA-256('gopang-phone:'+e164)로 전화번호에서
+  // 결정론적으로 계산됐다 — 같은 번호로 재가입하면 항상 같은 guid가
+  // 나왔고, 그 guid에 연결된 ledger/blocks의 예전 잔액·거래이력을 새
+  // 소유자가 그대로 물려받는 결함이 있었다(2026-09-06 실사로 발견).
+  // 클라이언트(src/gopang/core/auth.js의 _e164ToIPv6)는 이제 전화번호와
+  // 무관한 CSPRNG로 guid를 생성하도록 고쳤다 — 이 훅은 그 짝으로,
+  // "같은 e164를 가리키는 레코드는 항상 최신 클레임 하나만"을 보장한다.
+  //
+  // 처리: 기존 레코드가 있으면 삭제하지 않고 claim_status를
+  // "superseded"로 표시하고 e164/handle을 비워 더 이상 로그인 조회에
+  // 안 걸리게 한다 — 예전 guid에 연결된 ledger/blocks 등 이력은 감사
+  // 추적용으로 그대로 남지만, 새로 클레임한 사람에게 자동으로 다시
+  // 연결되지는 않는다(이게 이번 수정의 핵심 — 데이터를 지우는 게 아니라
+  // "더 이상 이 전화번호로는 못 찾게" 끊어내는 것).
+  try {
+    const dupes = $app.dao().findRecordsByFilter(
+      "profiles",
+      `e164 = '${e164}' && claim_status != 'superseded'`,
+      "",
+      10,
+      0
+    );
+    for (const old of dupes) {
+      const oldGuid = old.getString("guid");
+      old.set("claim_status", "superseded");
+      old.set("e164", "");
+      old.set("handle", (old.getString("handle") || "") + "_superseded_" + Date.now());
+      let extra = {};
+      try { extra = JSON.parse(old.getString("extra") || "{}"); } catch (_) {}
+      extra.superseded_at = new Date().toISOString();
+      extra.superseded_reason = "phone_reclaimed";
+      extra.superseded_guid = oldGuid;
+      old.set("extra", JSON.stringify(extra));
+      $app.dao().saveRecord(old);
+      console.log(`[PHONE-RECLAIM] e164=${e164} 이전 guid=${oldGuid} → superseded 처리 완료`);
+    }
+  } catch (err) {
+    // 조회/저장이 실패해도 신규 가입 자체를 막지는 않는다 — best-effort
+    // 방어이며, TOFU(pubkey 최초 등록)가 여전히 최소한의 방어선이다.
+    console.log(`[PHONE-RECLAIM] 처리 중 오류(무시하고 가입 계속): ${err.message}`);
+  }
+}, "profiles");
+
+// ── 잔액/거래이력 공용 유틸 (2026-09-06 신설) ───────────────────────
+// computeBalance 로직을 여러 훅(삭제 방어, PATCH 최초 바인딩 방어)에서
+// 재사용하기 위해 여기로 뺐다. 주의: 이 프로젝트의 PocketBase Goja
+// 엔진은 콜백 바깥의 "최상위 function 이름(){} 선언"을 조용히 무시하는
+// 제약이 실사로 확인됐다(파일 상단 _sigVerify 관련 기존 주석 참고) —
+// 하지만 "최상위 var에 즉시실행함수(IIFE)의 반환값(객체)을 담는" 패턴은
+// 실제로 동작한다(_sigVerify 자체가 그 증거). 그래서 같은 패턴으로
+// 감싼다 — bare function 선언이 아니라 var 대입이라는 게 핵심이다.
+var _balanceUtils = (function() {
+  function computeBalance(guid) {
+    const allBlocks = $app.dao().findRecordsByFilter("blocks", "block_type != ''", "", 10000, 0);
+    let balance = 0;
+    for (const b of allBlocks) {
+      let blkOutputs;
+      try { blkOutputs = JSON.parse(b.getString("outputs") || "[]"); } catch (_) { continue; }
+      for (const o of blkOutputs) {
+        if (o.recipient_guid === guid) balance += (o.amount || 0);
+      }
+      if (b.getString("buyer_guid") === guid) {
+        const total = blkOutputs.reduce((s, o) => s + (o.amount || 0), 0);
+        balance -= total;
+      }
+    }
+    return balance;
+  }
+
+  function hasHistory(guid) {
+    const anyBlock = $app.dao().findRecordsByFilter(
+      "blocks",
+      `buyer_guid = '${guid}' || seller_guid = '${guid}'`,
+      "",
+      1,
+      0
+    );
+    return anyBlock.length > 0;
+  }
+
+  // 삭제/PATCH 훅 둘 다 "잔액도 확인하고 이력도 확인"하는 동일한 순회를
+  // 두 번(computeBalance + hasHistory 각각 findRecordsByFilter 전체
+  // 스캔) 하게 되는 비효율을 피하려고, 한 번의 순회로 둘 다 구하는
+  // 조합 함수도 같이 제공한다. 호출부는 필요에 맞게 골라 쓰면 된다.
+  function computeBalanceAndHistory(guid) {
+    const allBlocks = $app.dao().findRecordsByFilter("blocks", "block_type != ''", "", 10000, 0);
+    let balance = 0;
+    let hasHist = false;
+    for (const b of allBlocks) {
+      let blkOutputs;
+      try { blkOutputs = JSON.parse(b.getString("outputs") || "[]"); } catch (_) { continue; }
+      for (const o of blkOutputs) {
+        if (o.recipient_guid === guid) balance += (o.amount || 0);
+      }
+      const buyerGuid = b.getString("buyer_guid");
+      const sellerGuid = b.getString("seller_guid");
+      if (buyerGuid === guid) {
+        const total = blkOutputs.reduce((s, o) => s + (o.amount || 0), 0);
+        balance -= total;
+      }
+      if (buyerGuid === guid || sellerGuid === guid) hasHist = true;
+    }
+    return { balance: balance, hasHistory: hasHist };
+  }
+
+  return {
+    computeBalance: computeBalance,
+    hasHistory: hasHistory,
+    computeBalanceAndHistory: computeBalanceAndHistory,
+  };
+})();
+
+// ── 프로필 하드 삭제 방어 훅 (2026-09-06 신설) ──────────────────────
+// 배경: 테스트/봇 계정 정리 스크립트가 profiles를 DELETE API로 직접
+// 지우는 걸 실사로 확인했는데, 이 API는 guid에 잔액이나 거래이력이
+// 있는지 전혀 확인하지 않는다 — 실사용자 계정이 실수로 같은 방식으로
+// 지워지면, ledger/blocks엔 그 guid의 거래 기록이 계속 남아있는데
+// 정작 신원(프로필) 레코드만 사라지는 상태가 된다(오늘 실제로 겪은
+// "레코드가 통째로 사라진" 사고와 같은 유형의 위험).
+//
+// 처리: 잔액이 0이 아니거나 blocks에 거래이력이 있는 계정은 하드
+// 삭제를 거부한다. 정말 지워야 한다면(예: 사용자 본인 요청에 의한
+// 계정 삭제) 요청 바디/쿼리에 force_delete=true를 명시해야 한다 —
+// 이 경우에도 삭제 자체를 막지는 않지만, 최소한 "잔액/이력이 있는
+// 걸 알고도 삭제한다"는 명시적 의사표시를 요구한다.
+//
+// admin(superuser) 인증 요청은 예외 없이 이 검사를 그대로 받는다 —
+// 오늘 사고가 정확히 admin 토큰으로 실행된 스크립트였기 때문이다.
+onRecordBeforeDeleteRequest((e) => {
+  if (e.collection.name !== "profiles") return;
+
+  const info = $apis.requestInfo(e.httpContext);
+  const guid = e.record.getString("guid");
+  if (!guid) return; // guid 없는(비정상) 레코드는 기존 동작 유지
+
+  const forced = info.data.force_delete === true || info.data.force_delete === "true"
+    || info.query.force_delete === "true";
+
+  // computeBalance/hasHistory는 이제 파일 상단의 _balanceUtils(top-level
+  // var + IIFE 패턴)로 공용화했다 — 이 콜백 안에서 중복 재정의하지 않는다.
+  let balance = 0;
+  let hasHistory = false;
+  try {
+    const result = _balanceUtils.computeBalanceAndHistory(guid);
+    balance = result.balance;
+    hasHistory = result.hasHistory;
+  } catch (err) {
+    // 조회 자체가 실패하면 안전한 쪽(삭제 차단)으로 판단한다 —
+    // "확인 못 했으니 통과시킨다"가 아니라 "확인 못 했으니 막는다".
+    if (!forced) {
+      throw new BadRequestError(
+        `삭제 전 잔액/이력 확인에 실패했습니다(${err.message}). ` +
+        `그래도 삭제하려면 force_delete=true를 명시하세요.`
+      );
+    }
+    return;
+  }
+
+  if (!forced && (balance !== 0 || hasHistory)) {
+    throw new BadRequestError(
+      `이 계정은 잔액(${balance}) 또는 거래이력이 있어 하드 삭제할 수 없습니다. ` +
+      `정말 삭제해야 한다면 요청에 force_delete=true를 명시하세요(비가역 — 신중히 결정하세요).`
+    );
+  }
 }, "profiles");
 
 // ── 프로필 수정(PATCH) 서명 검증 훅 (2026-07-19 신설) ───────────────
@@ -3359,6 +3529,53 @@ onRecordBeforeUpdateRequest((e) => {
   const registeredPubkey = original.getString("pubkey_ed25519");
   if (registeredPubkey && registeredPubkey !== pubkey) {
     throw new BadRequestError("공개키가 이 계정에 등록된 키와 일치하지 않습니다(PUBKEY_MISMATCH)");
+  }
+
+  // ── 최초 키 바인딩 추가 방어 (2026-09-06 신설) ─────────────────────
+  // registeredPubkey가 비어있으면 위 TOFU 검사는 그냥 통과한다 — "아직
+  // 아무도 이 프로필의 키를 등록 안 한 상태"이기 때문이다. 문제: guid는
+  // 공개 정보다(GET /profile?guid=는 인증 불필요, 부록 A 참고). 이
+  // guid에 이미 잔액/거래이력이 쌓여 있는데 pubkey만 비어있다면, 그
+  // 사실을 아는 누구나 자기 키페어로 서명만 만들어 PATCH를 보내 최초
+  // 바인딩을 가로챌 수 있다 — 전화번호 소유 검증이 전혀 없다(TOFU는
+  // "키 연속성"만 보장하지 "이 사람이 원래 신청자인가"는 보장 못 함).
+  // → 잔액/이력이 있는 guid의 최초 바인딩은 phone_verify_token으로
+  //   전화번호 소유까지 재확인해야 통과하도록 막는다.
+  if (!registeredPubkey) {
+    let balance = 0;
+    let hasHistory = false;
+    try {
+      const result = _balanceUtils.computeBalanceAndHistory(guid);
+      balance = result.balance;
+      hasHistory = result.hasHistory;
+    } catch (_) {
+      // 확인 자체가 실패하면 안전한 쪽(재확인 요구)으로 판단한다.
+      hasHistory = true;
+    }
+
+    if (balance !== 0 || hasHistory) {
+      const e164 = original.getString("e164");
+      const secret = $os.getenv("PHONE_VERIFY_SECRET");
+      const token = info.data.phone_verify_token;
+      let phoneOk = false;
+      if (e164 && secret && token && typeof token === "string" && token.indexOf(".") !== -1) {
+        const dotIdx = token.indexOf(".");
+        const payload = token.substring(0, dotIdx);
+        const tokenSig = token.substring(dotIdx + 1);
+        const expectedSig = $security.hs256(payload, secret);
+        if ($security.equal(expectedSig, tokenSig)) {
+          const segs = payload.split(":");
+          const tokenE164 = segs[0];
+          const exp = parseInt(segs[segs.length - 1], 10);
+          if (tokenE164 === e164 && exp && Date.now() <= exp) phoneOk = true;
+        }
+      }
+      if (!phoneOk) {
+        throw new BadRequestError(
+          "이 계정은 잔액 또는 거래이력이 있어 최초 키 등록 시 전화번호 재인증이 필요합니다(phone_verify_token 필요)"
+        );
+      }
+    }
   }
 
   const sigMsg = `${guid}:${pubkey}:${ts}`;

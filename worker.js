@@ -13560,6 +13560,13 @@ const GDC_STEP_UP_DEFAULT_THRESHOLD = 100000;
 const STEP_UP_CHALLENGE_TTL_SECONDS = 120;
 const STEP_UP_TOKEN_TTL_MS = 2 * 60 * 1000;
 
+// 사용자가 개인화할 수 있는 상한선 — 이 값을 넘는 상향 조정은 거부한다.
+// L3(1,000만원 이상 — 부동산·되돌릴 수 없는 행위)는 절대 문턱값 개인화로
+// 우회할 수 없어야 하므로, 그보다 한참 낮게 잡는다. 사용자는 이 범위
+// 안에서 "얼마부터 생체인증을 요구할지"만 조절할 수 있다 — 생체인증
+// 자체를 없애거나 L3 방어선에 구멍을 낼 수는 없다.
+const GDC_STEP_UP_MAX_USER_THRESHOLD = 1000000; // 100만원
+
 async function handleStepUpThresholdGet(request, env, corsHeaders) {
   const url = new URL(request.url);
   const guid = url.searchParams.get('guid');
@@ -13576,14 +13583,39 @@ async function handleStepUpThresholdGet(request, env, corsHeaders) {
   }), { status: 200, headers: corsHeaders });
 }
 
+// ── 2026-09-06 긴급 수정 — 인증 검증 완전 부재 발견 ─────────────────
+// 이 엔드포인트는 지금까지 guid만 body에 넣으면 누구나 아무 계정의
+// 생체인증 문턱값을 마음대로 바꿀 수 있었다(실사로 확인 — 서명 검증이
+// 코드 어디에도 없었음). guid는 공개 정보라(GET /profile?guid=는 인증
+// 불필요) 사실상 전 계정이 노출된 상태였다. 공격자가 threshold를 매우
+// 크게 올려버리면, 그 계정의 고액 거래 생체인증 방어(§L2/L3) 자체가
+// 조용히 무력화된다 — 이 기능이 존재하는 이유 자체를 없애는 구멍이었다.
+//
+// 수정: (1) 다른 계정 설정 변경 엔드포인트와 동일한 패턴으로 Ed25519
+// 서명 검증을 추가한다. (2) 사용자가 문턱값을 아무리 올려도
+// GDC_STEP_UP_MAX_USER_THRESHOLD를 넘지 못하게 상한을 강제한다 —
+// "생체인증이 필요한 시점을 개인화"할 수는 있어도 "생체인증을 사실상
+// 없앨" 수는 없어야 한다.
 async function handleStepUpThresholdSet(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
-  const { guid, amount } = body;
+  const { guid, amount, pubkey, signature, ts } = body;
   if (!guid) return _err(400, 'MISSING_FIELD', 'guid 필수', corsHeaders);
   if (!(typeof amount === 'number' && amount >= 0 && Number.isFinite(amount))) {
     return _err(400, 'INVALID_AMOUNT', 'amount는 0 이상의 숫자여야 합니다', corsHeaders);
   }
+  if (amount > GDC_STEP_UP_MAX_USER_THRESHOLD) {
+    return _err(
+      400, 'THRESHOLD_TOO_HIGH',
+      `생체인증 문턱값은 최대 ${GDC_STEP_UP_MAX_USER_THRESHOLD.toLocaleString()}원까지만 설정할 수 있습니다`,
+      corsHeaders
+    );
+  }
+
+  const sigMsg = `step-up-threshold-set:${guid}:${amount}:${ts}`;
+  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
+  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+
   let profile;
   try { profile = await _l1FindProfileByGuid(env, guid); }
   catch (e) { return _err(502, 'L1_UNREACHABLE', 'L1 연결 실패: ' + e.message, corsHeaders); }
