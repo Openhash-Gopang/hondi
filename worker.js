@@ -12224,6 +12224,7 @@ export default {
 
     // ── 지오코딩 / 카카오 ─────────────────────────────────
     if (pathname.startsWith('/geocode'))         return handleGeocode(url, env, corsHeaders);
+    if (pathname === '/geo-ip-fallback')         return handleGeoIpFallback(request, corsHeaders);
     if (pathname === '/kakao/appkey')            return handleKakaoAppKey(request, env, corsHeaders);
 
     // ── search (v4.7) ────────────────────────────────────
@@ -18030,6 +18031,25 @@ async function handleSvcRegister(request,env,corsHeaders){
   return new Response(JSON.stringify({ok:true,svc_id,domain,trust_level:isGopangSub?1:0,status:isGopangSub?'auto_approved':'pending_review',message:isGopangSub?'*.hondi.net 서브도메인으로 자동 승인됐습니다. (Level 1)':'등록 신청이 접수됐습니다.'}),{status:200,headers:corsHeaders});
 }
 async function handleSvcVerify(request,env,corsHeaders){const url=new URL(request.url);const svcId=url.searchParams.get('svc_id');const origin=request.headers.get('Origin')||'';if(!svcId)return _err(400,'MISSING_FIELD','svc_id 파라미터 필수',corsHeaders);const reg=_getSvcRegistration(origin,svcId);if(!reg)return new Response(JSON.stringify({ok:false,registered:false,svc_id:svcId,message:'등록되지 않은 서비스입니다.'}),{status:200,headers:corsHeaders});return new Response(JSON.stringify({ok:true,registered:true,svc_id:svcId,trust_level:reg.level,pdv_allowed:reg.pdv,min_auth:reg.minAuth,message:`등록된 서비스 (Level ${reg.level})`}),{status:200,headers:corsHeaders});}
+// GET /geo-ip-fallback — 2026-09-06 신설. GPS 권한 거부·미지원 시의 최종
+// 폴백. Cloudflare Workers가 요청마다 엣지에서 자동으로 채워주는
+// request.cf(IP 기반 대략 위치)를 그대로 돌려준다 — 별도 API 키·외부 호출
+// 불필요. 도시 단위 정확도라 location.js는 GPS보다 낮은 우선순위(최후
+// 수단)로만 쓴다(실사 리포트: "위치 미확인 시 카카오맵 호출 자체가 없음"
+// 버그 수정).
+function handleGeoIpFallback(request, corsHeaders) {
+  const cf = request.cf || {};
+  const lat = cf.latitude != null ? parseFloat(cf.latitude) : null;
+  const lng = cf.longitude != null ? parseFloat(cf.longitude) : null;
+  return new Response(JSON.stringify({
+    city: cf.city || null,
+    region: cf.region || null,
+    country: cf.country || null,
+    lat: Number.isFinite(lat) ? lat : null,
+    lng: Number.isFinite(lng) ? lng : null,
+  }), { headers: corsHeaders });
+}
+
 async function handleGeocode(url,env,corsHeaders){const lat=url.searchParams.get('lat');const lng=url.searchParams.get('lng');if(!lat||!lng)return _err(400,'MISSING_FIELD','lat, lng required',corsHeaders);try{const res=await fetch(`${KAKAO_BASE}?x=${lng}&y=${lat}&input_coord=WGS84`,{headers:{'Authorization':`KakaoAK ${env.KAKAO_REST_KEY}`}});const data=await res.json();return new Response(JSON.stringify(data),{headers:corsHeaders});}catch(e){return _err(502,'GEOCODE_ERROR',e.message,corsHeaders);}}
 
 // 2026-07-13 신설 — 정방향 지오코딩(주소→좌표). handleGeocode(위)는

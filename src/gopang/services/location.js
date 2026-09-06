@@ -14,6 +14,25 @@ export function _initLocation() {
   if (_locationPending || _locationReady) return;
   setLocationPending(true);
   _resolveLocation();
+
+  // ── 고착 방지 워치독 (2026-09-06 신설 — 사고실험으로 발견) ─────────
+  // navigator.geolocation.watchPosition()은 네이티브 권한 다이얼로그를
+  // 사용자가 방치(응답 안 함)하면 성공·실패 콜백 어느 쪽도 영원히 호출
+  // 하지 않는다(PositionOptions.timeout은 권한 허용 "이후" 좌표 획득에만
+  // 적용되는 값이라 여기 소용없음). 이 경우 _locationPending이 true로
+  // 영구 고착되고, 새로 배선한 _waitForLocationReady()(호출부: call-ai.js)가
+  // 그 세션의 모든 후속 턴마다 4초씩 낭비하게 된다 — _resolveLocation()과
+  // 무관하게, 10초 뒤에도 여전히 pending이면 강제로 IP 폴백/UNKNOWN으로
+  // 정착시켜 이 고착을 원천 차단한다. _resolveLocation()이 먼저 정상
+  // 완료됐으면(_locationPending이 이미 false) 아무 것도 하지 않는다.
+  setTimeout(async () => {
+    if (!_locationPending) return;
+    const ipLoc = await _tryIpFallback();
+    if (!_locationPending) return; // 대기 중 다른 경로가 먼저 끝났으면 덮어쓰지 않음
+    setUserLocation(ipLoc || { source: 'UNKNOWN', address: null, lat: null, lng: null });
+    _updateLocationInPrompt();
+    setLocationPending(false); setLocationReady(true);
+  }, 10000);
 }
 
 // ── 위치 확보 순서 재설계 (2026-07-23 — 실사로 발견한 문제 수정) ──────────
@@ -29,6 +48,35 @@ export function _initLocation() {
 // 엔드포인트 — register-flow.js가 가입 화면에서 쓰는 것과 동일)으로
 // 행정주소를 도출한다. 기존 코드는 GPS 성공 시에도 좌표만 쓰고 이
 // Kakao 변환을 아예 하지 않았다.
+// ── IP 기반 최종 폴백 (2026-09-06 신설) ────────────────────────────
+// 실사 리포트: "위치를 모르면 즉시 카카오맵 API를 호출해야 하는데 안
+// 한다" — 기존 코드는 GPS가 거부/불가능하면 곧장 UNKNOWN으로 떨어지고
+// 끝이었다(카카오 역지오코딩은 GPS 좌표가 있을 때만 호출됐음). 이제
+// worker.js의 /geo-ip-fallback(Cloudflare 엣지의 request.cf, 키 불필요)로
+// 도시 단위 좌표를 얻은 뒤, 좌표가 있으면 기존 카카오 역지오코딩에 그대로
+// 태워 행정주소까지 도출한다. GPS보다 정확도가 낮으므로 source로 구분한다.
+async function _tryIpFallback() {
+  try {
+    const res = await fetch(`${PROXY}/geo-ip-fallback`, { cache: 'no-cache' });
+    if (!res.ok) return null;
+    const geo = await res.json().catch(() => null);
+    if (!geo) return null;
+    if (geo.lat != null && geo.lng != null) {
+      const addr = await _reverseGeocodeViaKakao(geo.lat, geo.lng);
+      return {
+        source: 'IP+KAKAO',
+        address: addr || [geo.city, geo.region].filter(Boolean).join(' ') || null,
+        lat: geo.lat, lng: geo.lng,
+      };
+    }
+    const coarse = [geo.city, geo.region, geo.country].filter(Boolean).join(' ');
+    return coarse ? { source: 'IP', address: coarse, lat: null, lng: null } : null;
+  } catch (e) {
+    console.warn('[Location] IP 폴백 실패(무시):', e.message);
+    return null;
+  }
+}
+
 async function _resolveLocation() {
   const profileAddr = await _loadProfileAddressFromServer();
   if (profileAddr) {
@@ -39,7 +87,9 @@ async function _resolveLocation() {
   }
 
   if (!navigator.geolocation) {
-    setUserLocation({ source: 'UNKNOWN', address: null, lat: null, lng: null });
+    const ipLoc = await _tryIpFallback();
+    setUserLocation(ipLoc || { source: 'UNKNOWN', address: null, lat: null, lng: null });
+    _updateLocationInPrompt();
     setLocationPending(false); setLocationReady(true);
     return;
   }
@@ -62,7 +112,15 @@ async function _resolveLocation() {
       (err) => {
         navigator.geolocation.clearWatch(watchId); watchId = null;
         if (!hi && err.code !== err.PERMISSION_DENIED) startWatch(true);
-        else { setLocationPending(false); setUserLocation({ source: 'UNKNOWN', address: null, lat: null, lng: null }); setLocationReady(true); }
+        else {
+          (async () => {
+            const ipLoc = await _tryIpFallback();
+            setLocationPending(false);
+            setUserLocation(ipLoc || { source: 'UNKNOWN', address: null, lat: null, lng: null });
+            _updateLocationInPrompt();
+            setLocationReady(true);
+          })();
+        }
       },
       { enableHighAccuracy: hi, timeout: hi ? 8000 : 5000, maximumAge: 0 }
     );
