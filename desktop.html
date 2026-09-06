@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <link rel="icon" href="data:,">
@@ -846,200 +846,9 @@ body.mm-lock-scroll { overflow: hidden; }
   .mobile-topbar { padding-left: 58px; }
 }
 
-/* ── 2026-09-05 신설 — 상단 필(pill) 4개를 히어로 위 사각형 Material
-   버튼으로 이전. 접근성을 높이려는 목적이라, 터치 타깃을 넉넉히
-   키우고(48px+) elevation으로 눌러볼 수 있음을 분명히 드러낸다. ── */
-.hero-top-actions {
-  display: flex; flex-wrap: wrap; gap: 10px;
-  max-width: 1160px; margin: 18px auto 0; padding: 0 24px;
-}
-.hero-top-btn {
-  display: flex; align-items: center; gap: 9px;
-  flex: 1 1 200px; min-height: 48px;
-  background: #fff; color: var(--ink, #0e1b3a);
-  border-radius: 6px; padding: 12px 16px;
-  font-size: 15.5px; font-weight: 700; text-decoration: none;
-  box-shadow: 0 1px 2px rgba(0,0,0,.12), 0 2px 6px rgba(0,0,0,.10);
-  transition: box-shadow .18s ease, transform .12s ease, background .12s ease;
-}
-.hero-top-btn svg { flex-shrink: 0; color: #1a56db; }
-.hero-top-btn:hover {
-  box-shadow: 0 3px 6px rgba(0,0,0,.16), 0 5px 14px rgba(0,0,0,.14);
-  transform: translateY(-2px);
-  background: #f7f9fc;
-}
-.hero-top-btn:active { transform: translateY(0); box-shadow: 0 1px 2px rgba(0,0,0,.14); }
-@media (max-width: 680px) {
-  .hero-top-actions { gap: 8px; padding: 0 14px; margin-top: 12px; }
-  .hero-top-btn { flex: 1 1 42%; font-size: 14.5px; padding: 10px 12px; }
-}
-
-/* ── 2026-09-05 신설 — 섹션이 너무 많아 카드+slide-out으로 압축.
-   사례 2개(case-bankruptcy·case-permit)는 그대로 두고, 나머지 11개를
-   성격별 3그룹으로 묶어 카드화했다. 카드를 누르면 원본 섹션 전체를
-   글자 하나 손실 없이 그 자리에서 펼친다(요약이 아니라 원문 그대로). ── */
-.db-card-grid {
-  /* ── 2026-09-05 전면 교체 — CSS Grid(auto-fill/dense)를 버리고, K-정부·
-     전문가 페르소나 카탈로그에서 이미 검증된 flex-wrap 방식으로 통일한다.
-     Grid는 "카드 바로 다음에 오는 전체폭 패널"이 접혀 있어도 줄 배치
-     계산에 끼어들어(dense로 고쳐도 접힌 패널의 border가 빈 상자처럼
-     계속 보이는 문제가 남음), 카드가 어긋나거나 빈 테두리 줄이 쌓이는
-     문제가 반복됐다. flex-wrap은 패널을 flex-basis:100%로 강제
-     줄바꿈시키는 것뿐이라 이런 부작용이 없다. ── */
-  display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px;
-}
-.db-card { flex: 1 1 calc(50% - 5px); }
-@media (min-width: 480px) {
-  .db-card-grid { gap: 12px; }
-  .db-card { flex: 1 1 calc(33.333% - 8px); }
-}
-@media (min-width: 860px) {
-  .db-card-grid { gap: 14px; }
-  .db-card { flex: 1 1 calc(25% - 11px); }
-}
-.db-card {
-  display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
-  text-align: left; font-family: inherit; cursor: pointer; min-width: 0;
-  background: #fff; border: 1px solid var(--border, #e5e7eb); border-radius: 12px;
-  padding: 14px 14px 12px; box-shadow: 0 1px 2px rgba(0,0,0,.05);
-  transition: box-shadow .18s ease, transform .12s ease, border-color .15s ease;
-}
-@media (min-width: 860px) {
-  .db-card { padding: 18px 18px 16px; gap: 8px; }
-}
-.db-card:hover {
-  box-shadow: 0 4px 14px rgba(0,0,0,.10); transform: translateY(-2px);
-  border-color: var(--db-accent, #4338CA);
-}
-.db-card[aria-expanded="true"] { border-color: var(--db-accent, #4338CA); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
-.db-card-icon {
-  width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: color-mix(in srgb, var(--db-accent, #4338CA) 12%, white);
-}
-.db-card-title { font-size: 13.5px; font-weight: 700; color: var(--text, #1a1a2e); line-height: 1.4; }
-.db-card-summary {
-  font-size: 11.5px; color: var(--text3, #6b7280); line-height: 1.5;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-}
-@media (min-width: 860px) {
-  .db-card-title { font-size: 15px; }
-  .db-card-summary { font-size: 12.5px; line-height: 1.55; -webkit-line-clamp: 3; }
-}
-.db-card-cta {
-  display: flex; align-items: center; gap: 4px; margin-top: auto; padding-top: 6px;
-  font-size: 11px; font-weight: 700; color: var(--db-accent, #4338CA); white-space: nowrap;
-}
-@media (min-width: 860px) { .db-card-cta { font-size: 12px; } }
-.db-card-chevron { transition: transform .25s ease; }
-.db-card[aria-expanded="true"] .db-card-chevron { transform: rotate(180deg); }
-
-.db-panel {
-  /* flex-basis:100% — flex-wrap 컨테이너 안에서 이 항목만 강제로 한
-     줄 전체를 차지하게 해 줄바꿈을 일으킨다(grid-column:1/-1의 flex
-     버전). 닫혀 있을 때는 border-color를 투명하게 둬서, 내용이
-     0높이로 접혀도 테두리 사각형이 빈 줄처럼 계속 보이던 문제를
-     없앤다(2026-09-05 발견·수정) — 열렸을 때만 실제 테두리 색이 켜진다. */
-  flex: 1 1 100%; display: grid; grid-template-rows: 0fr;
-  transition: grid-template-rows .32s cubic-bezier(.4,0,.2,1), border-color .1s ease;
-  background: var(--bg-alt, #f8f9fa); border-radius: 12px;
-  border: 1px solid transparent; border-top: 3px solid transparent;
-}
-.db-panel.open { grid-template-rows: 1fr; border-color: var(--border, #e5e7eb); border-top-color: var(--db-accent, #4338CA); }
-.db-panel-inner { overflow: hidden; padding: 4px 8px; }
-.db-panel-inner > section.section { padding: 20px 8px; background: transparent !important; }
-.db-panel-inner > section.section .section-inner { padding: 0; max-width: none; }
-
-/* ── 2026-09-05 신설 — 첨부 브로슈어("전자동 AI 정부는 어떻게
-   작동할까요?")를 desktop.html 메인 콘텐츠로 이식. 원본은 인쇄용
-   A4 두 장(.sheet, page-num, @page) 레이아웃이라, 그 틀은 걷어내고
-   내용·박스 스타일(notice/analogy/stat-row/cta-box)만 연속 스크롤
-   웹 섹션에 맞게 옮긴다 — 문구 자체는 원문 그대로 사용. ── */
-.bh-section { background: #fff; }
-.bh-wrap { max-width: 760px; margin: 0 auto; padding: 0 24px; }
-.bh-lede { font-size: 15px; color: var(--text3, #4d4d4d); line-height: 1.7; margin-bottom: 22px; }
-/* 2026-09-05 신설 — 베타 가입 혜택 배너(팝업 대신 소개 섹션 상단에 고정). */
-.bh-promo-banner {
-  position: relative; background: #fff7e2; border: 1px solid #f0c98a; border-radius: 10px;
-  padding: 16px 40px 14px 18px; margin-bottom: 20px;
-}
-.bh-promo-close {
-  position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; border-radius: 50%;
-  border: none; background: transparent; color: #9a7a3a; font-size: 13px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; transition: background .12s;
-}
-.bh-promo-close:hover { background: rgba(0,0,0,.06); }
-.bh-promo-head { font-size: 14px; font-weight: 800; color: #7a4b0e; margin-bottom: 8px; }
-.bh-promo-list { margin: 0 0 10px 18px; }
-.bh-promo-list li { font-size: 13.5px; line-height: 1.65; color: #5c3d0e; margin-bottom: 4px; }
-.bh-promo-hide { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #8a6a2a; cursor: pointer; user-select: none; }
-.bh-promo-hide input { margin: 0; cursor: pointer; }
-.bh-h2 { font-size: 18px; font-weight: 800; margin: 30px 0 10px; color: var(--navy, #0B2545); display: flex; align-items: center; gap: 10px; }
-.bh-h2:first-of-type { margin-top: 0; }
-.bh-h2 .bh-n {
-  width: 26px; height: 26px; border-radius: 50%; background: #14181f; color: #fff;
-  display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0;
-}
-.bh-h3 { font-size: 15.5px; font-weight: 700; margin: 16px 0 8px; color: var(--text, #1a1a1a); }
-.bh-p { font-size: 14.5px; line-height: 1.75; margin: 0 0 10px; color: var(--text, #1a1a1a); }
-.bh-notice {
-  padding: 10px 16px; margin: 10px 0 14px; font-size: 13.5px; line-height: 1.6; color: var(--text3, #4d4d4d);
-  border: 1px solid var(--border, #ddd); border-left: 3px solid #000; border-radius: 0 6px 6px 0;
-}
-.bh-notice .bh-h { font-weight: 700; color: var(--navy, #0B2545); margin-bottom: 5px; display: block; }
-.bh-analogy {
-  background: #f6f4ee; border: 1px solid #e4dfd2; border-left: 3px solid #C99A2E;
-  padding: 10px 16px; margin: 10px 0; font-size: 14.5px; line-height: 1.6; color: var(--text, #1a1a1a); border-radius: 0 6px 6px 0;
-}
-.bh-analogy b { color: var(--navy, #0B2545); }
-.bh-stat-row { display: flex; gap: 10px; margin: 18px 0; padding: 14px 0; border-top: 1px solid #C7D4E6; border-bottom: 1px solid #C7D4E6; }
-.bh-stat-row .bh-item { flex: 1; padding: 0 8px; text-align: center; }
-.bh-stat-row .bh-item + .bh-item { border-left: 1px solid #C7D4E6; }
-.bh-stat-row .bh-item .bh-num { display: block; font-size: 16px; font-weight: 800; color: #205295; margin-bottom: 4px; }
-.bh-stat-row .bh-item .bh-lbl { font-size: 12px; color: var(--text3, #4d4d4d); line-height: 1.5; }
-@media (max-width: 640px) {
-  .bh-stat-row { flex-direction: column; gap: 12px; }
-  .bh-stat-row .bh-item + .bh-item { border-left: none; border-top: 1px solid #C7D4E6; padding-top: 12px; }
-}
-.bh-cta-box { border: 1px solid #999; border-radius: 8px; padding: 18px 22px; margin: 20px 0; background: #fafafa; }
-.bh-cta-box h3 { font-size: 16px; color: var(--navy, #0B2545); margin-bottom: 10px; font-weight: 800; }
-.bh-cta-box ul { margin: 6px 0 8px 18px; }
-.bh-cta-box li { font-size: 14px; line-height: 1.7; margin-bottom: 6px; }
-.bh-footer { margin-top: 22px; padding-top: 14px; border-top: 1px solid #999; font-size: 12px; color: #666; line-height: 1.6; }
-.bh-footer-meta { margin-top: 10px; font-size: 13px; color: #333; text-align: center; }
-
-/* ── 2026-09-05 신설 — 한 화면에 예시 대화+카드 11장을 전부 몰아넣던
-   방식을 버리고 페이지로 분리한다(1: 브로슈어, 2: 예시 대화 2건,
-   3: 철학·정체성 카드, 4: 실용정보+참여 카드). 페이지마다 적은 분량만
-   보이므로 레이아웃이 훨씬 안정적이다. */
-.db-pagination {
-  display: flex; justify-content: center; gap: 8px; margin: 28px auto 0; max-width: 760px; padding: 0 24px;
-}
-.db-page-btn {
-  width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border, #d0d5dc);
-  background: #fff; color: var(--text3, #4d4d4d); font-family: inherit; font-size: 14px; font-weight: 700;
-  cursor: pointer; transition: background .15s ease, color .15s ease, border-color .15s ease;
-}
-.db-page-btn:hover { border-color: var(--brand, #0c6cc3); color: var(--brand, #0c6cc3); }
-.db-page-btn.active { background: var(--navy, #0e1c3f); border-color: var(--navy, #0e1c3f); color: #fff; }
-.db-page { max-width: 1160px; margin: 0 auto; padding: 0 24px 40px; }
-
-/* 2026-09-05 신설 — 히어로 알약 버튼 5번째("버그 신고")의 점(dot) 대신
-   들어가는 버그 모양 SVG 아이콘. 공용 site-header.css의 .site-hero-actions
-   a는 이미 display:flex; align-items:center라 별도 정렬 없이 자연스럽게
-   맞는다 — flex-shrink만 추가해 찌그러지지 않게 한다. */
-.hero-bug-icon { flex-shrink: 0; }
-
 </style>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <script>mermaid.initialize({startOnLoad:false, theme:"neutral", fontFamily:"inherit"});</script>
-<!-- K-서비스 공용 전화번호 인증 모듈 (2026-09-06) — 내 GDC 대시보드가
-     여기 의존한다. plan.hondi.net·klaw.hondi.net 등에서 이미 로그인했으면
-     .hondi.net 쿠키로 여기서도 다시 전화번호를 묻지 않는다(SSO). -->
-<script>
-window.K_AUTH_CONFIG = { serviceLabel: '혼디', enableDeviceLink: false };
-</script>
-<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
 </head>
 <body>
 
@@ -1059,7 +868,7 @@ window.K_AUTH_CONFIG = { serviceLabel: '혼디', enableDeviceLink: false };
 // 2026-08-29 신설 — 메가메뉴 데이터. 메뉴 항목 추가/삭제는 이 배열만
 // 수정하면 된다(렌더링은 buildMegaMenu()가 전담, HTML 수동 편집 불필요).
 var MEGA_MENU_PINNED = {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<rect height=\"4\" rx=\"1\" width=\"18\" x=\"3\" y=\"4\"></rect><rect height=\"4\" rx=\"1\" width=\"18\" x=\"3\" y=\"10\"></rect><rect height=\"4\" rx=\"1\" width=\"10\" x=\"3\" y=\"16\"></rect>\n</svg>", "label": "혼디 시스템 개요 ↗", "href": "./docs/legacy_overview_20260821.html"};
-var MEGA_MENU_SECTIONS = [{"label": "탐색", "collapsible": false, "items": [{"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<line x1=\"4\" x2=\"20\" y1=\"9\" y2=\"9\"></line><line x1=\"4\" x2=\"20\" y1=\"15\" y2=\"15\"></line>\n<line x1=\"10\" x2=\"8\" y1=\"3\" y2=\"21\"></line><line x1=\"16\" x2=\"14\" y1=\"3\" y2=\"21\"></line>\n</svg>", "label": "혼디 숫자 코드", "href": "#", "onclick": "loadPage('scenarios');return false;", "id": "nav-scenarios"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"9\" cy=\"7\" r=\"3\"></circle><path d=\"M2 21v-1a6 6 0 0 1 12 0v1\"></path>\n<circle cx=\"18\" cy=\"9\" r=\"2.5\"></circle><path d=\"M15.5 21v-1a4 4 0 0 1 6.2-3.3\"></path>\n</svg>", "label": "나만의 AI 비서", "href": "#", "onclick": "loadPage('ai-types');return false;", "id": "nav-ai-types"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"12\" cy=\"8\" r=\"4\"></circle><path d=\"M6 20v-2a6 6 0 0 1 12 0v2\"></path>\n</svg>", "label": "에이전트", "href": "#", "onclick": "loadPage('agents');return false;", "id": "nav-agents"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<rect height=\"11\" rx=\"2\" ry=\"2\" width=\"18\" x=\"3\" y=\"11\"></rect>\n<path d=\"M7 11V7a5 5 0 0 1 10 0v4\"></path>\n</svg>", "label": "OpenHash", "href": "#", "onclick": "loadPage('openhash');return false;", "id": "nav-openhash"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M22 10v6M2 10l10-5 10 5-10 5z\"></path><path d=\"M6 12v5c3 3 9 3 12 0v-5\"></path>\n</svg>", "label": "전문 분야 AI", "href": "#", "onclick": "loadPage('professional-ai');return false;", "id": "nav-professional-ai"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path>\n</svg>", "label": "시나리오 테스트", "href": "#", "onclick": "loadPage('scenario-test');return false;", "id": "nav-scenario-test"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M3 9l1.5-5h15L21 9\"></path><path d=\"M3 9h18v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z\"></path><path d=\"M8 13a3 3 0 0 0 6 0\"></path>\n</svg>", "label": "혼디장", "href": "#", "onclick": "loadPage('hondi-market');return false;", "id": "nav-hondi-market"}]}, {"label": "📖 이용 안내", "collapsible": false, "items": [{"icon": "<svg fill=\"none\" height=\"16\" stroke=\"currentColor\" stroke-width=\"1.5\" viewbox=\"0 0 24 24\" width=\"16\"><path d=\"M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.966 8.966 0 00-6 2.292m0-14.25v14.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "label": "사용자 매뉴얼", "href": "./docs/hondi_user_manual.html"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M13 2L3 14h9l-1 8 10-12h-9l1-8z\"></path>\n</svg>", "label": "시작하기", "href": "./docs/user-guide.html"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M4 19.5A2.5 2.5 0 0 1 6.5 17H20\"></path><path d=\"M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z\"></path>\n</svg>", "label": "용어집", "href": "./docs/hondi_glossary.html"}]}, {"label": "🎓 배움터 — 학년별 가이드", "collapsible": false, "items": [{"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"12\" cy=\"8\" r=\"4\"></circle><path d=\"M4 21v-1a8 8 0 0 1 16 0v1\"></path>\n</svg>", "label": "초등학생 가이드", "href": "./docs/hondi_kids_guide.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z\"></path><path d=\"M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z\"></path>\n</svg>", "label": "중학생 가이드", "href": "./docs/hondi_teens_guide.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"12\" cy=\"12\" r=\"9\"></circle><polygon points=\"12 7 13.5 10.5 17 11 14.3 13.4 15 17 12 15.2 9 17 9.7 13.4 7 11 10.5 10.5 12 7\"></polygon>\n</svg>", "label": "고등학생 가이드 · 1일차", "href": "./docs/hondi_highschool_guide_day1.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z\"></path>\n</svg>", "label": "고등학생 가이드 · 2일차(SP 작성)", "href": "./docs/hondi_highschool_guide_day2.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M22 10L12 5 2 10l10 5 10-5z\"></path><path d=\"M6 12v5c0 1.5 2.5 3 6 3s6-1.5 6-3v-5\"></path>\n</svg>", "label": "대학생 가이드 · 1일차", "href": "./docs/hondi_college_guide_day1.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7\"></path><path d=\"M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z\"></path>\n</svg>", "label": "대학생 가이드 · 2일차(SP 작성)", "href": "./docs/hondi_college_guide_day2.html", "target": "_blank"}]}, {"label": "서비스", "collapsible": false, "items": [{"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M3 6l3 1m0 0-3 9a5.002 5.002 0 0 0 6.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1-3 9a5.002 5.002 0 0 0 6.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3\"></path>\n</svg>", "label": "K-Law 체험하기 ↗", "href": "https://klaw.hondi.net", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path>\n</svg>", "label": "K-Plan 체험하기 ↗", "href": "https://plan.hondi.net", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z\"></path><polyline points=\"22 6 12 13 2 6\"></polyline>\n</svg>", "label": "K-Mail 체험하기 ↗", "href": "https://mail.hondi.net", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<rect x=\"2\" y=\"4\" width=\"20\" height=\"16\" rx=\"2\"></rect><path d=\"M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h8M8 16h4\"></path>\n</svg>", "label": "K-Telecom 체험하기 ↗", "href": "https://telecom.hondi.net", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"11\" cy=\"11\" r=\"8\"></circle><line x1=\"21\" x2=\"16.65\" y1=\"21\" y2=\"16.65\"></line>\n</svg>", "label": "K-Search 체험하기 ↗", "href": "https://search.hondi.net", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M3 21h18\"></path><path d=\"M5 21V7l8-4 8 4v14\"></path><path d=\"M9 9v.01M9 13v.01M9 17v.01M15 9v.01M15 13v.01M15 17v.01\"></path>\n</svg>", "label": "K-Biz 체험하기 ↗", "href": "https://biz.hondi.net", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"></path><circle cx=\"12\" cy=\"12\" r=\"3\"></circle>\n</svg>", "label": "K-Watch 체험하기 ↗", "href": "https://watch.hondi.net", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<rect x=\"2\" y=\"7\" width=\"20\" height=\"14\" rx=\"2\"></rect><path d=\"M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16\"></path>\n</svg>", "label": "K-Job 체험하기 ↗", "href": "https://job.hondi.net", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"></path>\n<polyline points=\"9 22 9 12 15 12 15 22\"></polyline>\n</svg>", "label": "K-Democracy ↗", "href": "https://democracy.hondi.net/desktop.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"12\" cy=\"10\" r=\"3\"></circle>\n<path d=\"M12 2a8 8 0 0 0-8 8c0 5.25 8 13 8 13s8-7.75 8-13a8 8 0 0 0-8-8z\"></path>\n</svg>", "label": "한림읍", "href": "./docs/hallim_masterplan.html"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"></path>\n</svg>", "label": "제안 현황", "href": "/feedback.html"}]}, {"label": "🔬 실증 실험", "collapsible": false, "items": [{"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M9 2v6.343L4.4 17.4A2 2 0 0 0 6.2 20h11.6a2 2 0 0 0 1.8-2.6L15 8.343V2\"></path>\n<line x1=\"8\" x2=\"16\" y1=\"2\" y2=\"2\"></line><line x1=\"7\" x2=\"17\" y1=\"14\" y2=\"14\"></line>\n</svg>", "label": "실증 실험 방법론 ↗", "href": "./docs/empirical_methodology_2026_07_31.html", "target": "_blank"}]}, {"label": "🗂 사용자 문서", "collapsible": false, "items": [{"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline>\n<line x1=\"9\" x2=\"15\" y1=\"13\" y2=\"13\"></line><line x1=\"9\" x2=\"15\" y1=\"17\" y2=\"17\"></line>\n</svg>", "label": "정부 수수료 기준표 · 시맨틱 검색 배선 ↗", "href": "./docs/SESSION_SUMMARY_GOV_FEE_SCHEDULE_20260815_v1_0.html", "target": "_blank"}]}, {"label": "🛠 개발자 문서", "collapsible": true, "icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<polyline points=\"16 18 22 12 16 6\"></polyline><polyline points=\"8 6 2 12 8 18\"></polyline>\n</svg>", "items": [{"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><rect x=\"3\" y=\"11\" width=\"18\" height=\"11\" rx=\"2\"></rect><path d=\"M7 11V7a5 5 0 0 1 10 0v4\"></path></svg>", "label": "K-서비스 로그인 SSO 통합 — K-Plan/K-Law/K-Mail/GDC 대시보드 4곳 복붙 인증을 공용 모듈로, .hondi.net 쿠키 기반 크로스 도메인 SSO(0906) \u2197", "href": "./docs/SESSION_SUMMARY_K_SERVICE_SSO_INTEGRATION_20260906_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 7v10M9.5 9.5a2.5 2.5 0 0 1 2.5-1h.5a2 2 0 1 1 0 4h-1a2 2 0 1 0 0 4h.5a2.5 2.5 0 0 0 2.5-1\"></path></svg>", "label": "GDC 이체 최초 성공 + Goja 스코프 버그 실전 교훈 매뉴얼 — _sigVerify/tx_hash 두 근본원인 순차발견·AST 전수감사·죽은 코드 삭제(0906) ↗", "href": "./docs/SESSION_LESSONS_GDC_TRANSFER_GOJA_SCOPE_20260906_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 7v10M9.5 9.5a2.5 2.5 0 0 1 2.5-1h.5a2 2 0 1 1 0 4h-1a2 2 0 1 0 0 4h.5a2.5 2.5 0 0 0 2.5-1\"></path></svg>", "label": "GDC 과금(AI 사용료) 개발자 매뉴얼 — 파이프라인 구조·시크릿 짝·진단 플레이북·놓치기 쉬운 실패 6가지(0903) \u2197", "href": "./docs/GDC_BILLING_DEVELOPER_MANUAL_v1_0_20260903.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 7v5l3 2\"></path></svg>", "label": "K-Plan\u2194K-Mail 연동 아키텍처 — K-Recompose 파이프라인 종합 정리(0902) \u2197", "href": "./docs/KPLAN_KMAIL_INTEGRATION_ARCHITECTURE_v1_0_20260902.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 7v5l3 2\"></path></svg>", "label": "인수인계서 — K-Mail 캠페인\u2192K-Plan\u2192K-Recompose 파이프라인(0902) \u2197", "href": "./docs/HANDOFF_20260902.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><circle cx=\"7.5\" cy=\"15.5\" r=\"5.5\"></circle><path d=\"M21 2l-9.6 9.6M15.5 7.5L18 5M18 5l2 2M18 5l3 3\"></path></svg>", "label": "혼디 사용자 인증 및 로그인 백서 — 지갑 기반 인증·device-link·Web Push·세션 TTL·남용 방지(0829) ↗", "href": "./docs/AUTH_LOGIN_WHITEPAPER_v1_0_20260829.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><rect height=\"11\" rx=\"2\" width=\"18\" x=\"3\" y=\"11\"></rect><path d=\"M7 11V7a5 5 0 0110 0v4\"></path></svg>", "label": "전자증명서 지갑용(+신청용) API 자격 확보 추진계획(초안) — ISMS-P·행안부 개별인정 병행 트랙(0828) ↗", "href": "./docs/PLAN_DPAPER_WALLET-ELIGIBILITY_ISMS-P-MOIS-RECOGNITION_20260828_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><path d=\"M4 19.5A2.5 2.5 0 016.5 17H20\"></path><path d=\"M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z\"></path></svg>", "label": "GDC 인프라 종합 백서 v2.0 — 전화번호 매칭키 충전·Web Push 근본수정(ctx.waitUntil)·통합 회계원장·Wallet UI 재설계(0828) ↗", "href": "./docs/GDC_WHITEPAPER_v2_0_20260828.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><path d=\"M17 1l4 4-4 4\"></path><path d=\"M3 11V9a4 4 0 0 1 4-4h14\"></path><path d=\"M7 23l-4-4 4-4\"></path><path d=\"M21 13v2a4 4 0 0 1-4 4H3\"></path></svg>", "label": "혼디 라우팅 지침서 — 구조적 정상화 세션 작업자 실수 복기(0823, BUG-023~035·DECISION-01) ↗", "href": "./docs/SESSION_LESSONS_ROUTING_STRUCTURAL_NORMALIZATION_20260823_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 7v5l3 2\"></path></svg>", "label": "혼디 라우팅 근본적 정상화 — BUG-023~035(계층충돌 통합판단·시청 국 LLM 구제망·키워드 매칭 어절경계·EMD 비대칭 제거) + 정부24 350건 라이브 검증 ↗", "href": "./docs/SESSION_SUMMARY_GOV_ROUTER_STRUCTURAL_NORMALIZATION_20260823_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 7v5l3 2\"></path></svg>", "label": "제주대학교 구상 — 시나리오 추적·실결함 발견(school 죽은 Supabase 등)·1단계 마이그레이션 ↗", "href": "./docs/SESSION_SUMMARY_JEJU_UNIVERSITY_SCENARIO_GAP_20260820_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 7v5l3 2\"></path></svg>", "label": "L1 서버 유료 전환·마이그레이션 + 온디맨드 기동 시스템(0820, shape 리사이즈 불가·마이그레이션 중복 버그 등) ↗", "href": "./docs/SESSION_SUMMARY_L1_SERVER_MIGRATION_ONDEMAND_20260820_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><rect height=\"11\" rx=\"2\" width=\"18\" x=\"3\" y=\"11\"></rect><path d=\"M7 11V7a5 5 0 0110 0v4\"></path></svg>", "label": "신뢰점수(trust-score) 인프라 구현 + 라이브 검증(0820, maxSize 누락 등 실수 4건) ↗", "href": "./docs/SESSION_SUMMARY_TRUST_SCORE_SMOKE_TEST_20260820_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 7v5l3 3\"></path></svg>", "label": "카톡→혼디 2030 컴퓨팅·사회적비용 절감 사고실험(0816, 시장규모 교차검증) ↗", "href": "./docs/THOUGHT_EXPERIMENT_kakaotalk-to-hondi-2030-cost-estimate.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><rect height=\"11\" rx=\"2\" width=\"18\" x=\"3\" y=\"11\"></rect><path d=\"M7 11V7a5 5 0 0110 0v4\"></path></svg>", "label": "kgov IDV·자율과금·요금체계 재설계(0814, 실결함 8건 발견·수정) ↗", "href": "./docs/SESSION_SUMMARY_KGOV_IDV_BILLING_PRICING_20260814_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<rect height=\"11\" rx=\"2\" width=\"18\" x=\"3\" y=\"11\"></rect><path d=\"M7 11V7a5 5 0 0110 0v4\"></path>\n</svg>", "label": "K-Law GDC 과금 사고실험 + 라이브 검증(0813, 실결함 3건 발견·수정) ↗", "href": "./docs/SESSION_SUMMARY_KLAW_GDC_BILLING_20260813_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"11\" cy=\"11\" r=\"8\"></circle><line x1=\"21\" x2=\"16.65\" y1=\"21\" y2=\"16.65\"></line>\n</svg>", "label": "Pathfinder ↔ AI비서 통합 + 라이브 검증(0813, 실결함 3건 발견·수정)", "href": "./docs/SESSION_SUMMARY_PATHFINDER_GOVTASK_LIVE_VERIFY_20260813_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path>\n</svg>", "label": "혼디 시스템 테스트 방법론 + 상세 케이스(0811, 786항목 전수파싱) ↗", "href": "./docs/HONDI_TEST_PLAN_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 7v5l3 2\"></path></svg>", "label": "테스트 매뉴얼 — 설계 변경과 테스트 노후화 방지(0830, 77개 유닛테스트 전수 실행·실버그 7건 발견수정) ↗", "href": "./docs/HONDI_TEST_STALENESS_PREVENTION_MANUAL_v1_0.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<rect height=\"8\" rx=\"2\" width=\"20\" x=\"2\" y=\"2\"></rect><rect height=\"8\" rx=\"2\" width=\"20\" x=\"2\" y=\"14\"></rect><line x1=\"6\" x2=\"6.01\" y1=\"6\" y2=\"6\"></line><line x1=\"6\" x2=\"6.01\" y1=\"18\" y2=\"18\"></line>\n</svg>", "label": "PocketBase 인프라 현황 + GDC 충전 시스템 정리(0810, 전국확장 참조용) ↗", "href": "./docs/POCKETBASE_INFRA_GDC_STATUS_20260810_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<polyline points=\"9 11 12 14 22 4\"></polyline><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path>\n</svg>", "label": "GDC 충전 자동화 연동 체크리스트(오픈뱅킹·PG) ↗", "href": "./docs/GDC_AUTO_CHARGE_INTEGRATION_CHECKLIST_20260810_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\"></path>\n</svg>", "label": "professor 트리 3배 확장 + PDV 기록 원칙 완성(0810)", "href": "./docs/SESSION_SUMMARY_PROFESSOR_EXPANSION_PDV_20260810.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\"></path>\n</svg>", "label": "관제탑 원칙 라이브 재검증 실전 교훈 매뉴얼(0809, 원문자.Tier.max_tokens)", "href": "./docs/SESSION_LESSONS_CONTROL_TOWER_LIVE_VERIFY_20260809_v2_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z\"></path>\n</svg>", "label": "subject-gate max_tokens 결함 규명 실전 교훈 매뉴얼(§0809) ↗", "href": "./docs/SESSION_LESSONS_SUBJECT_GATE_MAX_TOKENS_20260809_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M3 3v18h18\"></path><path d=\"M7 14l4-4 3 3 5-6\"></path>\n</svg>", "label": "라우팅 통합 + UNIVERSAL 원칙 전수감사 실전 교훈 매뉴얼(§0808) ↗", "href": "./docs/SESSION_LESSONS_UNIVERSAL_AUDIT_ROUTING_20260808_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M17 1l4 4-4 4\"></path><path d=\"M3 11V9a4 4 0 0 1 4-4h14\"></path><path d=\"M7 23l-4-4 4-4\"></path><path d=\"M21 13v2a4 4 0 0 1-4 4H3\"></path>\n</svg>", "label": "라우팅 수정 3건 + 인프라 실전 교훈 매뉴얼(§0807) ↗", "href": "./docs/SESSION_LESSONS_ROUTING_FIXES_20260807_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"11\" cy=\"11\" r=\"8\"></circle><line x1=\"21\" x2=\"16.65\" y1=\"21\" y2=\"16.65\"></line><line x1=\"8\" x2=\"14\" y1=\"11\" y2=\"11\"></line>\n</svg>", "label": "라우팅 아키텍처 실전 교훈 매뉴얼(R1/R2·하이브리드 검증) ↗", "href": "./docs/SESSION_LESSONS_ROUTING_ARCHITECTURE_20260806_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"12\" cy=\"12\" r=\"3\"></circle><path d=\"M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z\"></path>\n</svg>", "label": "AC↔SP 통신 아키텍처(3대 시나리오) ↗", "href": "./docs/AC_SP_COMMUNICATION_ARCHITECTURE_MANUAL_v1_0.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path>\n</svg>", "label": "전문가 페르소나 K-Law 업그레이드 실전 교훈 매뉴얼 ↗", "href": "./docs/SESSION_LESSONS_EXPERT_PERSONA_KLAW_UPGRADE_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<rect height=\"7\" width=\"7\" x=\"3\" y=\"3\"></rect><rect height=\"7\" width=\"7\" x=\"14\" y=\"3\"></rect><rect height=\"7\" width=\"7\" x=\"3\" y=\"14\"></rect><rect height=\"7\" width=\"7\" x=\"14\" y=\"14\"></rect>\n</svg>", "label": "개발 문서 전체 지도 ↗", "href": "./docs/MANUAL_INDEX.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<polyline points=\"16 18 22 12 16 6\"></polyline><polyline points=\"8 6 2 12 8 18\"></polyline>\n</svg>", "label": "Worker API 레퍼런스 ↗", "href": "./docs/API_REFERENCE_worker_v1_0.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<polyline points=\"23 4 23 10 17 10\"></polyline><polyline points=\"1 20 1 14 7 14\"></polyline>\n<path d=\"M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15\"></path>\n</svg>", "label": "자동 갱신 매뉴얼(SP tier·미등록태그·피드백취합) ↗", "href": "./docs/AUTO_REFRESH_MANUAL_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<ellipse cx=\"12\" cy=\"5\" rx=\"9\" ry=\"3\"></ellipse><path d=\"M21 12c0 1.66-4.03 3-9 3s-9-1.34-9-3\"></path><path d=\"M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5\"></path>\n</svg>", "label": "L1 PocketBase 매뉴얼 ↗", "href": "./docs/L1_POCKETBASE_MANUAL_v1_0.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<rect height=\"20\" rx=\"2\" width=\"14\" x=\"5\" y=\"2\"></rect><line x1=\"12\" x2=\"12.01\" y1=\"18\" y2=\"18\"></line>\n</svg>", "label": "기기 간 지갑 이전(PC 로그인) 매뉴얼 ↗", "href": "./docs/DEVICE_LINK_MANUAL_v1_0.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M3 3v18h18\"></path><path d=\"M7 14l4-4 3 3 5-6\"></path>\n</svg>", "label": "K-서비스·페르소나 거버넌스(owner_pdv) 매뉴얼 ↗", "href": "./docs/OWNER_PDV_GOVERNANCE_MANUAL_v1_0.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"></path><path d=\"M9 22V12h6v10\"></path>\n</svg>", "label": "전국 지방행정 AC(도청·시청·읍면동·국가기관) 매뉴얼 ↗", "href": "./docs/GOV_REGIONAL_AC_MANUAL_v1_0.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"11\" cy=\"11\" r=\"8\"></circle><line x1=\"21\" x2=\"16.65\" y1=\"21\" y2=\"16.65\"></line><line x1=\"8\" x2=\"14\" y1=\"11\" y2=\"11\"></line>\n</svg>", "label": "Vectorize·gov-tree 실전 교훈 매뉴얼 ↗", "href": "./docs/SESSION_LESSONS_VECTORIZE_GOVTREE_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M9 9l6 6M15 9l-6 6\"></path><circle cx=\"12\" cy=\"12\" r=\"10\"></circle>\n</svg>", "label": "gov-tree 지연 인스턴스화·배포 실전 교훈 매뉴얼 ↗", "href": "./docs/SESSION_LESSONS_GOVTREE_LAZY_INSTANCING_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M9 20l-5.5-5.5a2.121 2.121 0 0 1 0-3l1.5-1.5a2.121 2.121 0 0 1 3 0L20 22\"></path><path d=\"M14 6l5 5\"></path><path d=\"M2 21l3-3\"></path>\n</svg>", "label": "gov-tree 전국 확대 실전 교훈 매뉴얼 ↗", "href": "./docs/GOVTREE_NATIONWIDE_EXPANSION_LESSONS_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"6\" cy=\"6\" r=\"3\"></circle><circle cx=\"6\" cy=\"18\" r=\"3\"></circle><path d=\"M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12\"></path>\n</svg>", "label": "라이브 스모크테스트 디버깅 실전 교훈 매뉴얼 ↗", "href": "./docs/SESSION_LESSONS_LIVE_SMOKETEST_LATENCY_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 7v10M9.5 9.5a2.5 2.5 0 0 1 2.5-1h.5a2 2 0 1 1 0 4h-1a2 2 0 1 0 0 4h.5a2.5 2.5 0 0 0 2.5-1\"></path>\n</svg>", "label": "GDC 가입충전·차감·저잔액 알림 매뉴얼 ↗", "href": "./docs/GDC_CHARGE_MANUAL_v1_0.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path>\n</svg>", "label": "K-Law·K-School 개별 유료화 가격정책 ↗", "href": "./docs/K_SERVICE_MONETIZATION_v1_0.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"12\" cy=\"4\" r=\"2\"></circle><circle cx=\"6\" cy=\"14\" r=\"2\"></circle><circle cx=\"18\" cy=\"14\" r=\"2\"></circle><circle cx=\"6\" cy=\"21\" r=\"1.5\"></circle><circle cx=\"18\" cy=\"21\" r=\"1.5\"></circle>\n<path d=\"M12 6v3M12 9l-6 5M12 9l6 5M6 16v3M18 16v3\"></path>\n</svg>", "label": "SP-TREE 거버넌스(상속·CI가드·SP-TREE-GUARDIAN) ↗", "href": "./docs/SP_TREE_GOVERNANCE_MANUAL_v1_0.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path>\n<polyline points=\"14 2 14 8 20 8\"></polyline>\n</svg>", "label": "기술 백서 ↗", "href": "/docs/gopang_whitepaper.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\"></path>\n</svg>", "label": "OpenHash 백서 ↗", "href": "./docs/openhash_whitepaper.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<polyline points=\"4 7 4 4 20 4 20 7\"></polyline>\n<line x1=\"9\" x2=\"15\" y1=\"20\" y2=\"20\"></line>\n<line x1=\"12\" x2=\"12\" y1=\"4\" y2=\"20\"></line>\n</svg>", "label": "OFP 표준", "href": "./docs/ofp_standard.html"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<line x1=\"12\" x2=\"12\" y1=\"1\" y2=\"23\"></line>\n<path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path>\n</svg>", "label": "사업화(보관)", "href": "./docs/archive/bizplan.html"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M3 3v18h18\"></path><path d=\"M18.7 8l-5.1 5.1-2.8-2.8L7 14\"></path>\n</svg>", "label": "비즈니스 플랜(원가·수익 모델) ↗", "href": "./docs/business-plan/BUSINESS-PLAN.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<rect height=\"14\" rx=\"2\" width=\"20\" x=\"2\" y=\"7\"></rect><path d=\"M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16\"></path>\n</svg>", "label": "요금제 다단계화·마케팅 플랜 ↗", "href": "./docs/business-plan/PRICING_TIER_MARKETING_PLAN_v1_0_2026-07-25.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\"></path>\n<path d=\"M9 12l2 2 4-4\"></path>\n</svg>", "label": "ID·인증 안내 ↗", "href": "./docs/gopang-id-auth-guide.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01\"></path>\n</svg>", "label": "작업 이력 (전체) ↗", "href": "./docs/WORKLOG_INDEX.md", "target": "_blank"}, {"icon": "<svg fill=\"currentColor\" height=\"15\" viewbox=\"0 0 24 24\" width=\"15\"><path d=\"M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z\"></path></svg>", "label": "GitHub ↗", "href": "https://github.com/Openhash-Gopang/gopang", "target": "_blank"}]}, {"label": "⚠ 주의", "collapsible": true, "icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "items": [{"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "K-Plan GDC 실차감 3주 무발생 — systemd EnvironmentFile 누락·market-proxy admin 계정 불일치·개인별 하드캡 3건 (2026-09-03) \u2197", "href": "./docs/AI_CHARGE_SECRET_DRIFT_INCIDENT_2026_09_03.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "K-Mail↔K-Plan 라이브 테스트 사고 5건 — 파이프 개행 3연속 재발·GH/Worker secret 혼동·_admins 재설정 부작용·Error 1101·서버전용 스크립트 방치 (2026-09-02) ↗", "href": "./docs/KMAIL_KPLAN_PIPELINE_LIVE_TEST_INCIDENT_2026_09_02.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "PC 로그인(device-link) 전체 체인 — 도메인·지갑암호화·KV일관성·15초폴링 등 근본원인 8건 (2026-07-28) ↗", "href": "./docs/DEVICE_LINK_FULL_CHAIN_INCIDENT_2026_07_28.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "device-link 알림이 PC로 가는 문제 — 기기별 구독 배열로 근본 수정 (2026-07-23) ↗", "href": "./docs/PUSH_SUBSCRIPTION_MULTIDEVICE_2026_07_23.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "gdc 저장소 wrangler 배포 시 .git 폴더 전체 공개 노출 (2026-07-23) ↗", "href": "./docs/GDC_GIT_EXPOSURE_INCIDENT_2026_07_23.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "GWP 채팅 탭 3곳이 입력창을 각자 새로 만들던 문제 — chat-shell 공용화 (2026-07-22) ↗", "href": "./docs/CHAT_SHELL_UNIFICATION_2026_07_22.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "device-link 승인 Failed to fetch — KV TTL 30초가 60초 미만이라 매번 확정적 실패 (2026-07-22) ↗", "href": "./docs/DEVICELINK_KV_TTL_MINIMUM_2026_07_22.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "재가입 직후 push 구독이 곧바로 410 — 두 경로 동시 호출 경쟁 상태 (2026-07-22) ↗", "href": "./docs/PUSH_SUBSCRIBE_RACE_CONDITION_2026_07_22.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "\"제주도청\" 탭 안 열림 진짜 원인 — 오리진 이전 커밋이 안전망 별칭 삭제 (2026-07-22) ↗", "href": "./docs/JEJU_SVC_ID_ALIAS_REGRESSION_2026_07_22.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "device-link 웹푸시 조용히 안 옴 — 옛 VAPID 키 구독 미검증 재사용 (2026-07-22) ↗", "href": "./docs/STALE_VAPID_PUSH_SUBSCRIPTION_2026_07_22.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "등록 화면 네트워크 오류 — state.js/p2p-chat.js가 폐기된 구 도메인 참조 (2026-07-22) ↗", "href": "./docs/LEGACY_L1_DOMAIN_CORS_INCIDENT_2026_07_22.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "모바일 GWP 새 탭 안 열림 — GPS 권한 프롬프트가 window.open 가로챔 (2026-07-22) ↗", "href": "./docs/MOBILE_GWP_POPUP_GEO_RACE_2026_07_22.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "device-link 알림이 PC로 옴 — 지갑 키 없는 기기 push 가로채기 (2026-07-21) ↗", "href": "./docs/PUSH_SUBSCRIPTION_HIJACK_2026_07_21.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "wrangler secret put — 파이프(|) 절대 금지, <로 리다이렉션 (2026-07-21) ↗", "href": "./docs/L1_ADMIN_AUTH_INCIDENT_2026_07_21.md", "target": "_blank"}]}, {"label": "서비스", "collapsible": false, "items": [{"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<line x1=\"18\" x2=\"18\" y1=\"20\" y2=\"10\"></line><line x1=\"12\" x2=\"12\" y1=\"20\" y2=\"4\"></line><line x1=\"6\" x2=\"6\" y1=\"20\" y2=\"14\"></line>\n</svg>", "label": "내 GDC 대시보드", "href": "#", "onclick": "_openUserDashboard();return false;", "id": "nav-user-dashboard"}]}];
+var MEGA_MENU_SECTIONS = [{"label": "탐색", "collapsible": false, "items": [{"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<line x1=\"4\" x2=\"20\" y1=\"9\" y2=\"9\"></line><line x1=\"4\" x2=\"20\" y1=\"15\" y2=\"15\"></line>\n<line x1=\"10\" x2=\"8\" y1=\"3\" y2=\"21\"></line><line x1=\"16\" x2=\"14\" y1=\"3\" y2=\"21\"></line>\n</svg>", "label": "혼디 숫자 코드", "href": "#", "onclick": "loadPage('scenarios');return false;", "id": "nav-scenarios"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"9\" cy=\"7\" r=\"3\"></circle><path d=\"M2 21v-1a6 6 0 0 1 12 0v1\"></path>\n<circle cx=\"18\" cy=\"9\" r=\"2.5\"></circle><path d=\"M15.5 21v-1a4 4 0 0 1 6.2-3.3\"></path>\n</svg>", "label": "나만의 AI 비서", "href": "#", "onclick": "loadPage('ai-types');return false;", "id": "nav-ai-types"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"12\" cy=\"8\" r=\"4\"></circle><path d=\"M6 20v-2a6 6 0 0 1 12 0v2\"></path>\n</svg>", "label": "에이전트", "href": "#", "onclick": "loadPage('agents');return false;", "id": "nav-agents"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<rect height=\"11\" rx=\"2\" ry=\"2\" width=\"18\" x=\"3\" y=\"11\"></rect>\n<path d=\"M7 11V7a5 5 0 0 1 10 0v4\"></path>\n</svg>", "label": "OpenHash", "href": "#", "onclick": "loadPage('openhash');return false;", "id": "nav-openhash"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M22 10v6M2 10l10-5 10 5-10 5z\"></path><path d=\"M6 12v5c3 3 9 3 12 0v-5\"></path>\n</svg>", "label": "전문 분야 AI", "href": "#", "onclick": "loadPage('professional-ai');return false;", "id": "nav-professional-ai"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path>\n</svg>", "label": "시나리오 테스트", "href": "#", "onclick": "loadPage('scenario-test');return false;", "id": "nav-scenario-test"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M3 9l1.5-5h15L21 9\"></path><path d=\"M3 9h18v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z\"></path><path d=\"M8 13a3 3 0 0 0 6 0\"></path>\n</svg>", "label": "혼디장", "href": "#", "onclick": "loadPage('hondi-market');return false;", "id": "nav-hondi-market"}]}, {"label": "📖 이용 안내", "collapsible": false, "items": [{"icon": "<svg fill=\"none\" height=\"16\" stroke=\"currentColor\" stroke-width=\"1.5\" viewbox=\"0 0 24 24\" width=\"16\"><path d=\"M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.966 8.966 0 00-6 2.292m0-14.25v14.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg>", "label": "사용자 매뉴얼", "href": "./docs/hondi_user_manual.html"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M13 2L3 14h9l-1 8 10-12h-9l1-8z\"></path>\n</svg>", "label": "시작하기", "href": "./docs/user-guide.html"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M4 19.5A2.5 2.5 0 0 1 6.5 17H20\"></path><path d=\"M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z\"></path>\n</svg>", "label": "용어집", "href": "./docs/hondi_glossary.html"}]}, {"label": "🎓 배움터 — 학년별 가이드", "collapsible": false, "items": [{"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"12\" cy=\"8\" r=\"4\"></circle><path d=\"M4 21v-1a8 8 0 0 1 16 0v1\"></path>\n</svg>", "label": "초등학생 가이드", "href": "./docs/hondi_kids_guide.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z\"></path><path d=\"M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z\"></path>\n</svg>", "label": "중학생 가이드", "href": "./docs/hondi_teens_guide.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"12\" cy=\"12\" r=\"9\"></circle><polygon points=\"12 7 13.5 10.5 17 11 14.3 13.4 15 17 12 15.2 9 17 9.7 13.4 7 11 10.5 10.5 12 7\"></polygon>\n</svg>", "label": "고등학생 가이드 · 1일차", "href": "./docs/hondi_highschool_guide_day1.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z\"></path>\n</svg>", "label": "고등학생 가이드 · 2일차(SP 작성)", "href": "./docs/hondi_highschool_guide_day2.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M22 10L12 5 2 10l10 5 10-5z\"></path><path d=\"M6 12v5c0 1.5 2.5 3 6 3s6-1.5 6-3v-5\"></path>\n</svg>", "label": "대학생 가이드 · 1일차", "href": "./docs/hondi_college_guide_day1.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7\"></path><path d=\"M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z\"></path>\n</svg>", "label": "대학생 가이드 · 2일차(SP 작성)", "href": "./docs/hondi_college_guide_day2.html", "target": "_blank"}]}, {"label": "서비스", "collapsible": false, "items": [{"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M3 6l3 1m0 0-3 9a5.002 5.002 0 0 0 6.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1-3 9a5.002 5.002 0 0 0 6.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3\"></path>\n</svg>", "label": "K-Law 체험하기 ↗", "href": "https://klaw.hondi.net", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"></path>\n<polyline points=\"9 22 9 12 15 12 15 22\"></polyline>\n</svg>", "label": "K-Democracy ↗", "href": "https://democracy.hondi.net/desktop.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"12\" cy=\"10\" r=\"3\"></circle>\n<path d=\"M12 2a8 8 0 0 0-8 8c0 5.25 8 13 8 13s8-7.75 8-13a8 8 0 0 0-8-8z\"></path>\n</svg>", "label": "한림읍", "href": "./docs/hallim_masterplan.html"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"></path>\n</svg>", "label": "제안 현황", "href": "/feedback.html"}]}, {"label": "🔬 실증 실험", "collapsible": false, "items": [{"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M9 2v6.343L4.4 17.4A2 2 0 0 0 6.2 20h11.6a2 2 0 0 0 1.8-2.6L15 8.343V2\"></path>\n<line x1=\"8\" x2=\"16\" y1=\"2\" y2=\"2\"></line><line x1=\"7\" x2=\"17\" y1=\"14\" y2=\"14\"></line>\n</svg>", "label": "실증 실험 방법론 ↗", "href": "./docs/empirical_methodology_2026_07_31.html", "target": "_blank"}]}, {"label": "🗂 사용자 문서", "collapsible": false, "items": [{"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline>\n<line x1=\"9\" x2=\"15\" y1=\"13\" y2=\"13\"></line><line x1=\"9\" x2=\"15\" y1=\"17\" y2=\"17\"></line>\n</svg>", "label": "정부 수수료 기준표 · 시맨틱 검색 배선 ↗", "href": "./docs/SESSION_SUMMARY_GOV_FEE_SCHEDULE_20260815_v1_0.html", "target": "_blank"}]}, {"label": "🛠 개발자 문서", "collapsible": true, "icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<polyline points=\"16 18 22 12 16 6\"></polyline><polyline points=\"8 6 2 12 8 18\"></polyline>\n</svg>", "items": [{"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><circle cx=\"7.5\" cy=\"15.5\" r=\"5.5\"></circle><path d=\"M21 2l-9.6 9.6M15.5 7.5L18 5M18 5l2 2M18 5l3 3\"></path></svg>", "label": "혼디 사용자 인증 및 로그인 백서 — 지갑 기반 인증·device-link·Web Push·세션 TTL·남용 방지(0829) ↗", "href": "./docs/AUTH_LOGIN_WHITEPAPER_v1_0_20260829.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><rect height=\"11\" rx=\"2\" width=\"18\" x=\"3\" y=\"11\"></rect><path d=\"M7 11V7a5 5 0 0110 0v4\"></path></svg>", "label": "전자증명서 지갑용(+신청용) API 자격 확보 추진계획(초안) — ISMS-P·행안부 개별인정 병행 트랙(0828) ↗", "href": "./docs/PLAN_DPAPER_WALLET-ELIGIBILITY_ISMS-P-MOIS-RECOGNITION_20260828_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><path d=\"M4 19.5A2.5 2.5 0 016.5 17H20\"></path><path d=\"M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z\"></path></svg>", "label": "GDC 인프라 종합 백서 v2.0 — 전화번호 매칭키 충전·Web Push 근본수정(ctx.waitUntil)·통합 회계원장·Wallet UI 재설계(0828) ↗", "href": "./docs/GDC_WHITEPAPER_v2_0_20260828.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><path d=\"M17 1l4 4-4 4\"></path><path d=\"M3 11V9a4 4 0 0 1 4-4h14\"></path><path d=\"M7 23l-4-4 4-4\"></path><path d=\"M21 13v2a4 4 0 0 1-4 4H3\"></path></svg>", "label": "혼디 라우팅 지침서 — 구조적 정상화 세션 작업자 실수 복기(0823, BUG-023~035·DECISION-01) ↗", "href": "./docs/SESSION_LESSONS_ROUTING_STRUCTURAL_NORMALIZATION_20260823_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 7v5l3 2\"></path></svg>", "label": "혼디 라우팅 근본적 정상화 — BUG-023~035(계층충돌 통합판단·시청 국 LLM 구제망·키워드 매칭 어절경계·EMD 비대칭 제거) + 정부24 350건 라이브 검증 ↗", "href": "./docs/SESSION_SUMMARY_GOV_ROUTER_STRUCTURAL_NORMALIZATION_20260823_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 7v5l3 2\"></path></svg>", "label": "제주대학교 구상 — 시나리오 추적·실결함 발견(school 죽은 Supabase 등)·1단계 마이그레이션 ↗", "href": "./docs/SESSION_SUMMARY_JEJU_UNIVERSITY_SCENARIO_GAP_20260820_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 7v5l3 2\"></path></svg>", "label": "L1 서버 유료 전환·마이그레이션 + 온디맨드 기동 시스템(0820, shape 리사이즈 불가·마이그레이션 중복 버그 등) ↗", "href": "./docs/SESSION_SUMMARY_L1_SERVER_MIGRATION_ONDEMAND_20260820_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><rect height=\"11\" rx=\"2\" width=\"18\" x=\"3\" y=\"11\"></rect><path d=\"M7 11V7a5 5 0 0110 0v4\"></path></svg>", "label": "신뢰점수(trust-score) 인프라 구현 + 라이브 검증(0820, maxSize 누락 등 실수 4건) ↗", "href": "./docs/SESSION_SUMMARY_TRUST_SCORE_SMOKE_TEST_20260820_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 7v5l3 3\"></path></svg>", "label": "카톡→혼디 2030 컴퓨팅·사회적비용 절감 사고실험(0816, 시장규모 교차검증) ↗", "href": "./docs/THOUGHT_EXPERIMENT_kakaotalk-to-hondi-2030-cost-estimate.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><rect height=\"11\" rx=\"2\" width=\"18\" x=\"3\" y=\"11\"></rect><path d=\"M7 11V7a5 5 0 0110 0v4\"></path></svg>", "label": "kgov IDV·자율과금·요금체계 재설계(0814, 실결함 8건 발견·수정) ↗", "href": "./docs/SESSION_SUMMARY_KGOV_IDV_BILLING_PRICING_20260814_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<rect height=\"11\" rx=\"2\" width=\"18\" x=\"3\" y=\"11\"></rect><path d=\"M7 11V7a5 5 0 0110 0v4\"></path>\n</svg>", "label": "K-Law GDC 과금 사고실험 + 라이브 검증(0813, 실결함 3건 발견·수정) ↗", "href": "./docs/SESSION_SUMMARY_KLAW_GDC_BILLING_20260813_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"11\" cy=\"11\" r=\"8\"></circle><line x1=\"21\" x2=\"16.65\" y1=\"21\" y2=\"16.65\"></line>\n</svg>", "label": "Pathfinder ↔ AI비서 통합 + 라이브 검증(0813, 실결함 3건 발견·수정)", "href": "./docs/SESSION_SUMMARY_PATHFINDER_GOVTASK_LIVE_VERIFY_20260813_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path>\n</svg>", "label": "혼디 시스템 테스트 방법론 + 상세 케이스(0811, 786항목 전수파싱) ↗", "href": "./docs/HONDI_TEST_PLAN_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 7v5l3 2\"></path></svg>", "label": "테스트 매뉴얼 — 설계 변경과 테스트 노후화 방지(0830, 77개 유닛테스트 전수 실행·실버그 7건 발견수정) ↗", "href": "./docs/HONDI_TEST_STALENESS_PREVENTION_MANUAL_v1_0.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<rect height=\"8\" rx=\"2\" width=\"20\" x=\"2\" y=\"2\"></rect><rect height=\"8\" rx=\"2\" width=\"20\" x=\"2\" y=\"14\"></rect><line x1=\"6\" x2=\"6.01\" y1=\"6\" y2=\"6\"></line><line x1=\"6\" x2=\"6.01\" y1=\"18\" y2=\"18\"></line>\n</svg>", "label": "PocketBase 인프라 현황 + GDC 충전 시스템 정리(0810, 전국확장 참조용) ↗", "href": "./docs/POCKETBASE_INFRA_GDC_STATUS_20260810_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<polyline points=\"9 11 12 14 22 4\"></polyline><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path>\n</svg>", "label": "GDC 충전 자동화 연동 체크리스트(오픈뱅킹·PG) ↗", "href": "./docs/GDC_AUTO_CHARGE_INTEGRATION_CHECKLIST_20260810_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\"></path>\n</svg>", "label": "professor 트리 3배 확장 + PDV 기록 원칙 완성(0810)", "href": "./docs/SESSION_SUMMARY_PROFESSOR_EXPANSION_PDV_20260810.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\"></path>\n</svg>", "label": "관제탑 원칙 라이브 재검증 실전 교훈 매뉴얼(0809, 원문자.Tier.max_tokens)", "href": "./docs/SESSION_LESSONS_CONTROL_TOWER_LIVE_VERIFY_20260809_v2_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z\"></path>\n</svg>", "label": "subject-gate max_tokens 결함 규명 실전 교훈 매뉴얼(§0809) ↗", "href": "./docs/SESSION_LESSONS_SUBJECT_GATE_MAX_TOKENS_20260809_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M3 3v18h18\"></path><path d=\"M7 14l4-4 3 3 5-6\"></path>\n</svg>", "label": "라우팅 통합 + UNIVERSAL 원칙 전수감사 실전 교훈 매뉴얼(§0808) ↗", "href": "./docs/SESSION_LESSONS_UNIVERSAL_AUDIT_ROUTING_20260808_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M17 1l4 4-4 4\"></path><path d=\"M3 11V9a4 4 0 0 1 4-4h14\"></path><path d=\"M7 23l-4-4 4-4\"></path><path d=\"M21 13v2a4 4 0 0 1-4 4H3\"></path>\n</svg>", "label": "라우팅 수정 3건 + 인프라 실전 교훈 매뉴얼(§0807) ↗", "href": "./docs/SESSION_LESSONS_ROUTING_FIXES_20260807_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"11\" cy=\"11\" r=\"8\"></circle><line x1=\"21\" x2=\"16.65\" y1=\"21\" y2=\"16.65\"></line><line x1=\"8\" x2=\"14\" y1=\"11\" y2=\"11\"></line>\n</svg>", "label": "라우팅 아키텍처 실전 교훈 매뉴얼(R1/R2·하이브리드 검증) ↗", "href": "./docs/SESSION_LESSONS_ROUTING_ARCHITECTURE_20260806_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"12\" cy=\"12\" r=\"3\"></circle><path d=\"M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z\"></path>\n</svg>", "label": "AC↔SP 통신 아키텍처(3대 시나리오) ↗", "href": "./docs/AC_SP_COMMUNICATION_ARCHITECTURE_MANUAL_v1_0.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path>\n</svg>", "label": "전문가 페르소나 K-Law 업그레이드 실전 교훈 매뉴얼 ↗", "href": "./docs/SESSION_LESSONS_EXPERT_PERSONA_KLAW_UPGRADE_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<rect height=\"7\" width=\"7\" x=\"3\" y=\"3\"></rect><rect height=\"7\" width=\"7\" x=\"14\" y=\"3\"></rect><rect height=\"7\" width=\"7\" x=\"3\" y=\"14\"></rect><rect height=\"7\" width=\"7\" x=\"14\" y=\"14\"></rect>\n</svg>", "label": "개발 문서 전체 지도 ↗", "href": "./docs/MANUAL_INDEX.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<polyline points=\"16 18 22 12 16 6\"></polyline><polyline points=\"8 6 2 12 8 18\"></polyline>\n</svg>", "label": "Worker API 레퍼런스 ↗", "href": "./docs/API_REFERENCE_worker_v1_0.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<polyline points=\"23 4 23 10 17 10\"></polyline><polyline points=\"1 20 1 14 7 14\"></polyline>\n<path d=\"M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15\"></path>\n</svg>", "label": "자동 갱신 매뉴얼(SP tier·미등록태그·피드백취합) ↗", "href": "./docs/AUTO_REFRESH_MANUAL_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<ellipse cx=\"12\" cy=\"5\" rx=\"9\" ry=\"3\"></ellipse><path d=\"M21 12c0 1.66-4.03 3-9 3s-9-1.34-9-3\"></path><path d=\"M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5\"></path>\n</svg>", "label": "L1 PocketBase 매뉴얼 ↗", "href": "./docs/L1_POCKETBASE_MANUAL_v1_0.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<rect height=\"20\" rx=\"2\" width=\"14\" x=\"5\" y=\"2\"></rect><line x1=\"12\" x2=\"12.01\" y1=\"18\" y2=\"18\"></line>\n</svg>", "label": "기기 간 지갑 이전(PC 로그인) 매뉴얼 ↗", "href": "./docs/DEVICE_LINK_MANUAL_v1_0.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M3 3v18h18\"></path><path d=\"M7 14l4-4 3 3 5-6\"></path>\n</svg>", "label": "K-서비스·페르소나 거버넌스(owner_pdv) 매뉴얼 ↗", "href": "./docs/OWNER_PDV_GOVERNANCE_MANUAL_v1_0.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"></path><path d=\"M9 22V12h6v10\"></path>\n</svg>", "label": "전국 지방행정 AC(도청·시청·읍면동·국가기관) 매뉴얼 ↗", "href": "./docs/GOV_REGIONAL_AC_MANUAL_v1_0.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"11\" cy=\"11\" r=\"8\"></circle><line x1=\"21\" x2=\"16.65\" y1=\"21\" y2=\"16.65\"></line><line x1=\"8\" x2=\"14\" y1=\"11\" y2=\"11\"></line>\n</svg>", "label": "Vectorize·gov-tree 실전 교훈 매뉴얼 ↗", "href": "./docs/SESSION_LESSONS_VECTORIZE_GOVTREE_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M9 9l6 6M15 9l-6 6\"></path><circle cx=\"12\" cy=\"12\" r=\"10\"></circle>\n</svg>", "label": "gov-tree 지연 인스턴스화·배포 실전 교훈 매뉴얼 ↗", "href": "./docs/SESSION_LESSONS_GOVTREE_LAZY_INSTANCING_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M9 20l-5.5-5.5a2.121 2.121 0 0 1 0-3l1.5-1.5a2.121 2.121 0 0 1 3 0L20 22\"></path><path d=\"M14 6l5 5\"></path><path d=\"M2 21l3-3\"></path>\n</svg>", "label": "gov-tree 전국 확대 실전 교훈 매뉴얼 ↗", "href": "./docs/GOVTREE_NATIONWIDE_EXPANSION_LESSONS_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"6\" cy=\"6\" r=\"3\"></circle><circle cx=\"6\" cy=\"18\" r=\"3\"></circle><path d=\"M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12\"></path>\n</svg>", "label": "라이브 스모크테스트 디버깅 실전 교훈 매뉴얼 ↗", "href": "./docs/SESSION_LESSONS_LIVE_SMOKETEST_LATENCY_v1_0.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 7v10M9.5 9.5a2.5 2.5 0 0 1 2.5-1h.5a2 2 0 1 1 0 4h-1a2 2 0 1 0 0 4h.5a2.5 2.5 0 0 0 2.5-1\"></path>\n</svg>", "label": "GDC 가입충전·차감·저잔액 알림 매뉴얼 ↗", "href": "./docs/GDC_CHARGE_MANUAL_v1_0.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path>\n</svg>", "label": "K-Law·K-School 개별 유료화 가격정책 ↗", "href": "./docs/K_SERVICE_MONETIZATION_v1_0.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<circle cx=\"12\" cy=\"4\" r=\"2\"></circle><circle cx=\"6\" cy=\"14\" r=\"2\"></circle><circle cx=\"18\" cy=\"14\" r=\"2\"></circle><circle cx=\"6\" cy=\"21\" r=\"1.5\"></circle><circle cx=\"18\" cy=\"21\" r=\"1.5\"></circle>\n<path d=\"M12 6v3M12 9l-6 5M12 9l6 5M6 16v3M18 16v3\"></path>\n</svg>", "label": "SP-TREE 거버넌스(상속·CI가드·SP-TREE-GUARDIAN) ↗", "href": "./docs/SP_TREE_GOVERNANCE_MANUAL_v1_0.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path>\n<polyline points=\"14 2 14 8 20 8\"></polyline>\n</svg>", "label": "기술 백서 ↗", "href": "/docs/gopang_whitepaper.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\"></path>\n</svg>", "label": "OpenHash 백서 ↗", "href": "./docs/openhash_whitepaper.html", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<polyline points=\"4 7 4 4 20 4 20 7\"></polyline>\n<line x1=\"9\" x2=\"15\" y1=\"20\" y2=\"20\"></line>\n<line x1=\"12\" x2=\"12\" y1=\"4\" y2=\"20\"></line>\n</svg>", "label": "OFP 표준", "href": "./docs/ofp_standard.html"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<line x1=\"12\" x2=\"12\" y1=\"1\" y2=\"23\"></line>\n<path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path>\n</svg>", "label": "사업화(보관)", "href": "./docs/archive/bizplan.html"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M3 3v18h18\"></path><path d=\"M18.7 8l-5.1 5.1-2.8-2.8L7 14\"></path>\n</svg>", "label": "비즈니스 플랜(원가·수익 모델) ↗", "href": "./docs/business-plan/BUSINESS-PLAN.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<rect height=\"14\" rx=\"2\" width=\"20\" x=\"2\" y=\"7\"></rect><path d=\"M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16\"></path>\n</svg>", "label": "요금제 다단계화·마케팅 플랜 ↗", "href": "./docs/business-plan/PRICING_TIER_MARKETING_PLAN_v1_0_2026-07-25.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z\"></path>\n<path d=\"M9 12l2 2 4-4\"></path>\n</svg>", "label": "ID·인증 안내 ↗", "href": "./docs/gopang-id-auth-guide.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01\"></path>\n</svg>", "label": "작업 이력 (전체) ↗", "href": "./docs/WORKLOG_INDEX.md", "target": "_blank"}, {"icon": "<svg fill=\"currentColor\" height=\"15\" viewbox=\"0 0 24 24\" width=\"15\"><path d=\"M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z\"></path></svg>", "label": "GitHub ↗", "href": "https://github.com/Openhash-Gopang/gopang", "target": "_blank"}]}, {"label": "⚠ 주의", "collapsible": true, "icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "items": [{"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "PC 로그인(device-link) 전체 체인 — 도메인·지갑암호화·KV일관성·15초폴링 등 근본원인 8건 (2026-07-28) ↗", "href": "./docs/DEVICE_LINK_FULL_CHAIN_INCIDENT_2026_07_28.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "device-link 알림이 PC로 가는 문제 — 기기별 구독 배열로 근본 수정 (2026-07-23) ↗", "href": "./docs/PUSH_SUBSCRIPTION_MULTIDEVICE_2026_07_23.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "gdc 저장소 wrangler 배포 시 .git 폴더 전체 공개 노출 (2026-07-23) ↗", "href": "./docs/GDC_GIT_EXPOSURE_INCIDENT_2026_07_23.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "GWP 채팅 탭 3곳이 입력창을 각자 새로 만들던 문제 — chat-shell 공용화 (2026-07-22) ↗", "href": "./docs/CHAT_SHELL_UNIFICATION_2026_07_22.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "device-link 승인 Failed to fetch — KV TTL 30초가 60초 미만이라 매번 확정적 실패 (2026-07-22) ↗", "href": "./docs/DEVICELINK_KV_TTL_MINIMUM_2026_07_22.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "재가입 직후 push 구독이 곧바로 410 — 두 경로 동시 호출 경쟁 상태 (2026-07-22) ↗", "href": "./docs/PUSH_SUBSCRIBE_RACE_CONDITION_2026_07_22.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "\"제주도청\" 탭 안 열림 진짜 원인 — 오리진 이전 커밋이 안전망 별칭 삭제 (2026-07-22) ↗", "href": "./docs/JEJU_SVC_ID_ALIAS_REGRESSION_2026_07_22.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "device-link 웹푸시 조용히 안 옴 — 옛 VAPID 키 구독 미검증 재사용 (2026-07-22) ↗", "href": "./docs/STALE_VAPID_PUSH_SUBSCRIPTION_2026_07_22.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "등록 화면 네트워크 오류 — state.js/p2p-chat.js가 폐기된 구 도메인 참조 (2026-07-22) ↗", "href": "./docs/LEGACY_L1_DOMAIN_CORS_INCIDENT_2026_07_22.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "모바일 GWP 새 탭 안 열림 — GPS 권한 프롬프트가 window.open 가로챔 (2026-07-22) ↗", "href": "./docs/MOBILE_GWP_POPUP_GEO_RACE_2026_07_22.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "device-link 알림이 PC로 옴 — 지갑 키 없는 기기 push 가로채기 (2026-07-21) ↗", "href": "./docs/PUSH_SUBSCRIPTION_HIJACK_2026_07_21.md", "target": "_blank"}, {"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<path d=\"M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z\"></path>\n</svg>", "label": "wrangler secret put — 파이프(|) 절대 금지, <로 리다이렉션 (2026-07-21) ↗", "href": "./docs/L1_ADMIN_AUTH_INCIDENT_2026_07_21.md", "target": "_blank"}]}, {"label": "서비스", "collapsible": false, "items": [{"icon": "<svg fill=\"none\" height=\"15\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.8\" viewbox=\"0 0 24 24\" width=\"15\">\n<line x1=\"18\" x2=\"18\" y1=\"20\" y2=\"10\"></line><line x1=\"12\" x2=\"12\" y1=\"20\" y2=\"4\"></line><line x1=\"6\" x2=\"6\" y1=\"20\" y2=\"14\"></line>\n</svg>", "label": "내 GDC 대시보드", "href": "#", "onclick": "_openUserDashboard();return false;", "id": "nav-user-dashboard"}]}];
 
 /* ── 메가메뉴 렌더링 (데이터 → DOM) ──
    항목 추가/삭제는 MEGA_MENU_PINNED / MEGA_MENU_SECTIONS 배열만 고치면
@@ -1199,20 +1008,25 @@ document.addEventListener('keydown', function (e) {
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="16" width="10" height="4" rx="1"/></svg>
       대시보드
     </a>
+    <!-- 2026-09-06 이동 — 원래 우측 site-nav-highlight 4번째 항목이었던
+         프롬프트 진입점을 대시보드 바로 오른쪽으로 재배치. SPA loadPage()가
+         아니라 독립 standalone 페이지라 일반 href로 연결한다(이동 전과 동일). -->
+    <a href="pages/prompts.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+      프롬프트
+    </a>
     <a href="#" onclick="loadPage('ai-engine');return false;">AI 엔진</a>
     <a href="#" onclick="loadPage('openhash');return false;">오픈해시</a>
     <a href="#" onclick="loadPage('hondi-market');return false;">혼디마켓</a>
   </nav>
   <div class="site-nav-highlight">
-    <!-- 2026-09-05 수정 — 기존 필(pill) 형태의 K-서비스·전문가 페르소나·
-         K-정부·프롬프트 4개 버튼을 히어로 상단(사각형 Material 버튼)으로
-         이전했다. 이 자리(비워진 우측 공간)에는 사용자 인증 후 자신의
-         GDC 대시보드를 보는 진입점을 대신 놓는다 — 이미 있던
-         _openUserDashboard()(전화번호 OTP 인증) 그대로 재사용. -->
-    <a href="#" onclick="_openUserDashboard();return false;" class="site-nav-dashboard-btn">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      대시보드
-    </a>
+    <a href="#" onclick="loadPage('k-services');return false;"><span class="dot"></span><span class="label-text">K-서비스</span></a>
+    <a href="#" onclick="loadPage('expert-personas');return false;"><span class="dot"></span><span class="label-text">전문가 페르소나</span></a>
+    <a href="#" onclick="loadPage('k-government');return false;"><span class="dot"></span><span class="label-text">K-정부</span></a>
+    <!-- 2026-09-06 신설 — 프롬프트 진입점이 헤더 상단 대시보드 옆으로
+         이동한 자리에, OpenHash가 AI 상호 검증으로 거짓말을 차단하는
+         원리를 설명하는 하이라이트 페이지 진입점을 신설. -->
+    <a href="./highlights/ai-lie-detector.html"><span class="dot"></span><span class="label-text">오픈해시: AI의 거짓말 탐지기</span></a>
   </div>
 </div>
 
@@ -1221,7 +1035,7 @@ document.addEventListener('keydown', function (e) {
   <h1 id="hero-title" style="transition:opacity .25s ease"><span class="l1">사람 간의 업무를</span><br><span class="l2">혼디 간의 소통으로 보강합니다.</span> <a class="hero-more" href="./highlights/hondi-communication.html">더보기<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a></h1>
 
   <div class="site-hero-actions">
-    <a href="./integrated-system.html" class="outline"><span class="dot"></span><span class="label-text">법치 국가</span></a>
+    <a href="./integrated-system.html" class="outline"><span class="dot"></span><span class="label-text">AI 정부 + 법치 국가</span></a>
     <a href="./docs/hondi_interactive_manual.html" class="outline"><span class="dot"></span><span class="label-text">사용법</span></a>
     <!-- 2026-08-31 신설 — 사용자 발화가 어떻게 특정 SP 호출로 이어지는지
          보여주는 라우팅 아키텍처 페이지 진입점. 다른 두 개(입법·사법·행정
@@ -1229,10 +1043,6 @@ document.addEventListener('keydown', function (e) {
          독립 standalone 페이지라 일반 href로 연결한다. -->
     <a href="./pages/routing-architecture.html" class="outline"><span class="dot"></span><span class="label-text">라우팅</span></a>
     <a href="/feedback.html" class="outline"><span class="dot"></span><span class="label-text">제안</span></a>
-    <!-- 2026-09-05 신설 — feedback.html이 이미 'bug: 버그 신고' 카테고리를
-         갖고 있어(카테고리 사전 선택 파라미터는 없음), 같은 페이지로
-         연결하고 다른 버튼과 구분되도록 점 대신 버그 모양 SVG 아이콘을 쓴다. -->
-    <a href="/feedback.html" class="outline"><svg class="hero-bug-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="6" width="8" height="14" rx="4"/><path d="M19 7l-3 2M19 19l-3-2M5 7l3 2M5 19l3-2M3 13h4M17 13h4M12 20v-6M9 6l1-3M15 6l-1-3"/></svg><span class="label-text">버그 신고</span></a>
   </div>
 
   <!-- 2026-08-27 — 헤더 하단 탭(입법~계획 11개, 공익 K-서비스 4개, 전문가
@@ -1256,136 +1066,161 @@ document.addEventListener('keydown', function (e) {
        상세 커밋 이력은 feature/nav-consolidation-phase1 브랜치 참고. -->
 </section>
 
+<script>
+(function () {
+  var heroTitles = [
+    { l1: '사람 간의 업무를', l2: '혼디 간의 소통으로 보강합니다.', href: './highlights/hondi-communication.html' },
+    { l1: '세계 1등 한국, 한국 1등 제주', l2: '혼디는 제주 특산품입니다.', href: './highlights/jeju-specialty.html' },
+    { l1: '혼디는 연간 수십 조 원의 AI 비용을', l2: '절반 이하로 줄입니다.', href: './highlights/ai-cost-half.html' },
+    { l1: '카톡을 혼디로 바꾸면,', l2: '한국 GDP를 10% 높일 수 있습니다.', href: './highlights/gdp-growth.html' },
+    { l1: '공공재 혼디,', l2: '혼디는 공공의 이익을 우선합니다.', href: './highlights/public-good.html' },
+    { l1: '쓰면 쓸수록 똑똑해지는', l2: '나만의 AI 비서, 혼디', href: '#core-philosophy' },
+    { l1: '혼디넷', l2: '수많은 혼디들의 네트워크', href: './highlights/hondi-network.html' }
+  ];
+  var heroIdx = 0;
+  var heroEl = document.getElementById('hero-title');
+  if (!heroEl) return;
+  var arrowSvg = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+  setInterval(function () {
+    heroIdx = (heroIdx + 1) % heroTitles.length;
+    heroEl.style.opacity = '0';
+    setTimeout(function () {
+      var t = heroTitles[heroIdx];
+      heroEl.innerHTML = '<span class="l1">' + t.l1 + '</span><br><span class="l2">' + t.l2 + '</span> <a class="hero-more" href="' + t.href + '">더보기' + arrowSvg + '</a>';
+      heroEl.style.opacity = '1';
+    }, 250);
+  }, 5000);
+})();
+</script>
+
+<script>
+(function () {
+  var illustEl = document.getElementById('hero-illustration');
+  if (!illustEl) return;
+  var frameUrls = { frame1: '/assets/hondi-human-slow.svg', frame3: '/assets/hondi-hondi-light-speed.svg' };
+  var cache = {};
+  var blankSvg = '<svg width="680" height="340" viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg" role="img"><title>전환 여백</title><rect width="680" height="340" fill="#0E1B3A"/></svg>';
+  var phraseSvg = '<svg width="680" height="340" viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg" role="img"><title>사람들 간의 단순 반복적인 일상을 혼디가 대신합니다</title><rect width="680" height="340" fill="#0E1B3A"/><text x="340" y="154" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="600" fill="#E7EAF5" font-family="sans-serif">사람들 간의 단순 반복적인 일상을</text><text x="340" y="192" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="600" fill="#E7EAF5" font-family="sans-serif">혼디가 대신합니다.</text></svg>';
+  // 2026-08-30 신설 — 4번째 콘텐츠 프레임. phraseSvg와 동일한 레이아웃·폰트로
+  // "혼디의 목표는 국가의 체제 비용과 업무의 처리 시간을 최대 99% 줄이는
+  // 것입니다." 문구(기존 site-nav-highlight-sub 텍스트, 이번에 상단에서
+  // 삭제)를 애니메이션 프레임으로 이전.
+  var phraseSvg2 = '<svg width="680" height="340" viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg" role="img"><title>국가의 체제 비용과 업무의 처리 시간을 최대 99% 줄입니다</title><rect width="680" height="340" fill="#0E1B3A"/><text x="340" y="154" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="600" fill="#E7EAF5" font-family="sans-serif">국가의 체제 비용과 업무의 처리 시간을</text><text x="340" y="192" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="600" fill="#E7EAF5" font-family="sans-serif">최대 99% 줄입니다.</text></svg>';
+
+  function renderUrl(key) {
+    var url = frameUrls[key];
+    if (cache[url]) {
+      illustEl.innerHTML = cache[url];
+      return;
+    }
+    fetch(url).then(function (res) { return res.text(); }).then(function (svgText) {
+      cache[url] = svgText;
+      illustEl.innerHTML = svgText;
+    });
+  }
+
+  var stages = [
+    { render: function () { renderUrl('frame1'); }, duration: 5000 },
+    { render: function () { illustEl.innerHTML = blankSvg; }, duration: 1000 },
+    { render: function () { illustEl.innerHTML = phraseSvg; }, duration: 5000 },
+    { render: function () { illustEl.innerHTML = blankSvg; }, duration: 1000 },
+    { render: function () { renderUrl('frame3'); }, duration: 8000 },
+    { render: function () { illustEl.innerHTML = blankSvg; }, duration: 1000 },
+    { render: function () { illustEl.innerHTML = phraseSvg2; }, duration: 5000 },
+    { render: function () { illustEl.innerHTML = blankSvg; }, duration: 1000 }
+  ];
+  var stageIdx = 0;
+  function runStage() {
+    stages[stageIdx].render();
+    setTimeout(function () {
+      stageIdx = (stageIdx + 1) % stages.length;
+      runStage();
+    }, stages[stageIdx].duration);
+  }
+  runStage();
+})();
+</script>
+
 <div class="site-strip">
-  <a class="site-strip-text" href="https://github.com/Openhash-Gopang/gopang" target="_blank">혼디 현장 테스트(2026.09.01 ~ 12.31) · 2027년 상반기 완전한 AI 정부 출시 예정 · 오픈소스 프로젝트</a>
+  <a class="site-strip-text" href="https://github.com/Openhash-Gopang/gopang" target="_blank">2026년 9월 1일 테스트 시작 · 2027년 완전한 AI 정부 구현 목표 · 오픈소스 코드 공개</a>
   <a class="site-strip-support-btn" href="/pages/project-support.html">혼디 프로젝트를 지원하는 방법</a>
 </div>
 
-<!-- 2026-09-05 신설 — 상단 우측에 있던 K-서비스·전문가 페르소나·K-정부·
-     프롬프트 4개를 필(pill)이 아니라 사각형 Material Design 버튼으로,
-     최상단 공지 바(site-strip) 바로 아래에 배치해 방문자가 스크롤 없이
-     바로 보고 누를 수 있게 한다. -->
-<div class="hero-top-actions">
-  <a class="hero-top-btn" href="#" onclick="loadPage('k-services');return false;">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-    <span>인프라: 은행, 대학 등</span>
-  </a>
-  <a class="hero-top-btn" href="#" onclick="loadPage('expert-personas');return false;">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 2.5 3 6 3s6-1.5 6-3v-5"/></svg>
-    <span>전문가: 의사, 변호사 등</span>
-  </a>
-  <a class="hero-top-btn" href="#" onclick="loadPage('k-government');return false;">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
-    <span>정부: 입법 사법 행정 등</span>
-  </a>
-  <a class="hero-top-btn" href="pages/prompts.html">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
-    <span>프롬프트</span>
-  </a>
-</div>
+<!-- 2026-08-29 — 상단 통계 카드 5개(99%·16개·1,000원·100%·500여)를
+     삭제하고, 각 카드의 본문(펼침 패널)을 주제가 겹치는 하단 본문
+     섹션으로 융합했다: 99%→#cost-comparison, 16개 K-서비스와
+     500여 전문가 페르소나→#feature-summary, 1,000원 월기본료→#pricing,
+     100% 내 데이터 소유권→#feature-summary의 PDV 카드. -->
 
-<section class="section bh-section" id="ai-gov-how">
-  <div class="bh-wrap">
-    <!-- 2026-09-05 신설 — 베타 가입 혜택 배너. 팝업 대신 소개 섹션
-         최상단에 배치하고(팝업은 브라우저 팝업 허용 설정에 걸릴 수
-         있어 배제), "다시 보지 않기" 체크박스로 사용자가 직접 지울 수
-         있게 한다. 체크 후 닫으면 localStorage에 남겨 다음 방문부터는
-         아예 렌더링하지 않는다. -->
-    <div class="bh-promo-banner" id="bhPromoBanner">
-      <button type="button" class="bh-promo-close" id="bhPromoClose" aria-label="배너 닫기">✕</button>
-      <div class="bh-promo-head">🎁 베타 테스트 기간(9.1~12.31) 가입자 혜택</div>
-      <ul class="bh-promo-list">
-        <li><strong>K-Law 서비스 월 10회 무료 이용권</strong>을 1년간 제공합니다.</li>
-        <li><strong>혼디</strong> 사업화를 위한 기업 설립 시점에, 지분 참여 기회를 우선적으로 알려드립니다.</li>
-      </ul>
-      <label class="bh-promo-hide">
-        <input type="checkbox" id="bhPromoHideChk"> 다시 보지 않기
-      </label>
-    </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var links = document.querySelectorAll("#site-nav-links a[data-tab-target]");
+  links.forEach(function (a) {
+    a.addEventListener("click", function (e) {
+      e.preventDefault();
+      links.forEach(function (x) { x.classList.remove("active"); });
+      a.classList.add("active");
+      var target = document.getElementById(a.getAttribute("data-tab-target"));
+      if (target) target.scrollIntoView({ block: "start", behavior: "smooth" });
+    });
+  });
+});
+</script>
 
-    <span class="section-tag">혼디 소개</span>
-    <h2 class="section-title">전자동 AI 정부는 <strong>어떻게 작동할까요?</strong></h2>
-    <p class="bh-lede"><strong>혼디</strong>가 정부 업무를 자동화한다는 것, 그리고 사람보다 훨씬 빠르다는 것까지는 지난 안내에서 전해 드렸습니다. 이번에는 그 안쪽 — <strong>어떤 원리로</strong> 이 일이 가능한지를 최대한 쉬운 말로 설명합니다.</p>
+<!-- ══════════════════════════════════════════════════════════════
+     BODY CONTENT (2026-08-21 신설) — 기존 desktop.html 본문(가로
+     탭 24개 체계)을 docs/legacy_overview_20260821.html로 옮기고,
+     대신 사용자가 업로드한 두 PDF(혼디_통합요약, 혼디_건축인허가)
+     내용을 간결한 전문 레이아웃으로 새로 작성했다. 기존 .section/
+     .section-inner/.cmp-table/.step-card 등 공용 클래스를 그대로
+     재사용해 사이트 전체 톤을 유지한다.
+     ══════════════════════════════════════════════════════════════ -->
 
-    <h2 class="bh-h2"><span class="bh-n">1</span><span class="bh-h2-text">전자동 AI 정부란 무엇인가</span></h2>
-    <p class="bh-p">전자동 AI 정부는 중앙 정부와 지방자치단체(도청·시청·읍면동 복지센터 등), 그리고 공기업 각 부서의 업무 중에서 <strong>반복적이고 단순한 행정 업무</strong>를 AI 기술로 자동화한 것입니다. 민원인을 직접 상대하던 업무를, 정교하게 설계된 AI 시스템이 대신 처리합니다.</p>
-
-    <h2 class="bh-h2"><span class="bh-n">2</span><span class="bh-h2-text">AI는 방정식을 푸는 소프트웨어입니다</span></h2>
-    <p class="bh-p">학창 시절 1차 방정식, 2차 방정식, 3차 방정식을 풀어본 기억이 있을 것입니다. 답을 찾는 미지수가 하나면 1차, x와 y 둘이면 2차, x·y·z 셋이면 3차입니다. AI가 푸는 방정식은 이런 미지수가 많으면 1조 개가 넘습니다. 사람은 상상조차 할 수 없는 규모의 방정식이지만, AI는 이것을 뚝딱뚝딱 풀어냅니다.</p>
-
-    <h2 class="bh-h2"><span class="bh-n">3</span><span class="bh-h2-text"><strong>혼디</strong>는 무엇이 다른가 — 짜장면만 배달하는 로봇</span></h2>
-    <p class="bh-p"><strong>혼디</strong>는 기존 AI(ChatGPT, Claude, Gemini 등)와 비슷하면서도 다릅니다. 먼저, <strong>혼디</strong>는 자체 거대 언어모델(LLM)이 없습니다. LG, 카카오 등 국내에서 개발한 소형 LLM을 사용합니다. 그런데도 해외 거대 LLM과는 비교할 수 없을 만큼 우수한 성능을 냅니다.</p>
-    <p class="bh-p">그 방법은 콜럼버스의 달걀처럼 단순합니다.</p>
-    <p class="bh-p">어떤 질문에도 답하려 드는 거대 LLM과 달리, <strong>혼디</strong>는 거대 LLM을 업무별로 잘게 쪼갰습니다. 변호사 <strong>혼디</strong>는 법률만, 의사 <strong>혼디</strong>는 의학만 다룹니다. 더 잘게 쪼개면, 민법 <strong>혼디</strong>는 민법만, 영상의학 <strong>혼디</strong>는 MRI·CT·X-ray 등 영상 데이터만 다룹니다. 이렇게 업무와 기능별로 나눈 수천 개의 조각 하나하나를, 국내 소형 LLM이 그 업무 하나만큼은 가장 잘 수행하도록 훈련합니다. 이 훈련 과정을 <strong>파인튜닝(Fine-tuning)</strong>이라 부릅니다.</p>
-    <div class="bh-analogy">비유하자면, 해외 거대 LLM은 짜장면 한 그릇을 배달하는 데도 테슬라 자율주행 트럭을 보내는 셈입니다. <b><strong>혼디</strong>는 딱 짜장면만 담은 작은 자율주행 로봇을 보냅니다.</b></div>
-    <div class="bh-notice"><span class="bh-h">법률 분야 자체 테스트</span>대법원 공개 판례 300건으로 테스트한 결과, 거대 AI가 예상한 판결문과 1심·2심 판결문의 대법원 판결문 일치도는 45%, <strong>혼디</strong>(K-Law)의 일치도는 90%였습니다. <strong>혼디</strong>는 소송을 접수하기도 전에, 수년 뒤 나올 대법원 판결문을 90%의 정확도로 예측할 수 있습니다(자체 테스트).</div>
-    <p class="bh-p">이렇게 <strong>혼디</strong>는 정부 기관 각각, 기관 안의 부서 각각, 부서 안의 직책 각각은 물론, 은행·증권·보험·대학·초중고·교통·물류·시장·산업 등 우리 사회 전체 부문 각각에도 저마다의 분신을 만들고, 수만 개의 <strong>혼디</strong> AI를 하나의 네트워크 — <strong>혼디</strong>넷 — 으로 연결하였습니다. 이 네트워크가 <strong>혼디</strong>의 가장 큰 강점 중 하나입니다.</p>
-    <div class="bh-notice"><span class="bh-h">현장 테스트 기간 중 안내</span>현재 베타 테스트 기간 동안에는, <strong>혼디</strong> 각 모듈의 시뮬레이션 과정에 DeepSeek을 활용하고 있습니다.</div>
-
-    <h3 class="bh-h3">카톡보다 100배 나은 <strong>혼디</strong></h3>
-    <p class="bh-p">카톡은 사람과 사람이 메시지를 주고받는 데 그치지만, <strong>혼디</strong>는 메시지를 주고받는 동시에 그 안의 지시를 실제로 실행합니다. 등본 발급, 예약, 결제, 인허가 신청까지 — 카톡이라면 사람이 일일이 처리해야 할 일들을, <strong>혼디</strong>는 AI와 AI가 직접 대화하며 자동으로 끝냅니다. 같은 메신저라도, <strong>혼디</strong>는 카톡이 하지 못하는 일까지 해내는 메신저를 지향합니다.</p>
-
-    <h2 class="bh-h2"><span class="bh-n">4</span><span class="bh-h2-text"><strong>혼디</strong>, 개인용 AI 비서</span></h2>
-    <p class="bh-p"><strong>혼디</strong>는 또한 개인의 전속 AI입니다. 개인용 <strong>혼디</strong>는 해당 개인의 적성, 능력, 경험 등을 파악한 뒤, 그/그녀의 지능을 비유하자면, IQ 200으로 높입니다. 나만의 AI 비서 <strong>혼디</strong>에 의한 여러분의 지능과 능력 확장을 직접 경험해 보세요.</p>
-
-    <h2 class="bh-h2"><span class="bh-n">5</span><span class="bh-h2-text">사람과 사람, 사람과 AI, AI와 AI</span></h2>
-    <p class="bh-p">개인파산과 건축 인허가 과정을 예로 들어보겠습니다. 기존 방식은 사람과 사람이 만나 일을 진행합니다. 개인파산은 열 곳이 넘는 기관을 방문해 서류를 발급받고, 변호사의 도움을 받아 신청서를 작성해야 합니다. 건축 인허가는 이보다는 단순하지만 역시 만만치 않습니다. 사람과 사람이 만나 처리하면 수 주가 걸리는 일을, AI의 도움을 받으면 수 일 만에 마칠 수 있습니다. 사람이 아예 개입하지 않고 AI와 AI가 직접 대화하며 처리하면, 길어야 수 분입니다.</p>
-
-    <div class="bh-stat-row">
-      <div class="bh-item"><span class="bh-num">사람 &lt;=&gt; 사람</span><span class="bh-lbl">수 주(weeks)</span></div>
-      <div class="bh-item"><span class="bh-num">사람+AI &lt;=&gt; 사람+AI</span><span class="bh-lbl">수 일(days)</span></div>
-      <div class="bh-item"><span class="bh-num">AI &lt;=&gt; AI</span><span class="bh-lbl">수 초 ~ 수 분</span></div>
-    </div>
-
-    <p class="bh-p">수만 개의 초소형 AI 엔진이 서로 소통하며 업무를 처리하므로, 기존에 수 년이 걸리던 개인파산 업무를 이론적으로는 3분 안에 끝낼 수 있습니다. "이론적"이라고 말씀드리는 이유는, 법원·시청·국세청·은행 등이 아직 <strong>혼디</strong>를 받아들이지 않았기 때문입니다.</p>
-
-    <h2 class="bh-h2"><span class="bh-n">6</span><span class="bh-h2-text">제주 토산품에서, 한국을 거쳐 세계로</span></h2>
-    <p class="bh-p"><strong>혼디</strong>는 제주도에서, 제주 사람이 만든 제주의 토산품이자 특산품입니다. 제주도에서 <strong>혼디</strong>가 성공적으로 런칭하면 한국이 뒤따르고, 한국이 해내면 세계가 뒤따를 것입니다.</p>
-
-    <h2 class="bh-h2"><span class="bh-n">7</span><span class="bh-h2-text">지금은 현장 테스트 단계입니다</span></h2>
-    <p class="bh-p">2026년 9월 1일부터 12월 31일까지, <strong>혼디</strong>의 수만 개 AI 엔진 하나하나를 현장에서 테스트합니다. 기존 설계의 미비점을 보완하고 장점을 강화해, 2027년 상반기에 전자동 AI 정부·대학·병원·교통물류·금융·시장·산업·기업 등을 정식으로 출시할 예정입니다.</p>
-
-    <h2 class="bh-h2"><span class="bh-n">8</span><span class="bh-h2-text"><strong>혼디</strong>는 '<b>함께</b>'라는 뜻입니다</span></h2>
-    <p class="bh-p">'<strong>혼디</strong>'는 제주 토속어로 '<b>함께</b>'라는 뜻입니다. <strong>혼디</strong>는 저희가 개발했지만, 여러분이 '<b>함께</b>' 하셔야 비로소 완성할 수 있습니다. 그 방법은 유료 회원 가입입니다.</p>
-    <div class="bh-analogy">1만 명이 <strong>혼디</strong>에 가입하면, 제주도에 <strong>혼디</strong> 자체 AI 서버를 구축할 수 있습니다.</div>
-
-    <div class="bh-cta-box">
-      <h3><strong>혼디</strong> 베타 테스트에 참여해 주십시오</h3>
-      <p class="bh-p">이미 90%를 완성했습니다. 나머지 10%는 현장 테스트를 통해 함께 완성해 나가겠습니다.</p>
-      <ul>
-        <li>PC로 hondi.net에 접속하면 <strong>혼디</strong> 시스템 전반을 구석구석 살펴볼 수 있습니다.</li>
-        <li>폰으로 hondi.net에 접속하면 <strong>혼디</strong>넷을 직접 시뮬레이션해 볼 수 있습니다.</li>
-        <li>현재는 정식 앱이 아니라 필드 테스트용 WebApp(스마트폰 앱처럼 보이는 웹페이지)입니다. 카톡과 비슷한 화면이지만 아직은 웹페이지입니다.</li>
-        <li>필드 테스트가 끝나면 아이폰·안드로이드 정식 앱으로 출시되며, 그때는 온전한 AI 정부·AI 대학·AI 병원·AI 은행을 이용할 수 있습니다.</li>
-      </ul>
-      <p class="bh-p" style="margin-top:8px">지금 hondi.net에 접속해, 월 1,000원 기본료+사용량만큼 지불 / 월 10,000원 정액제 / 연 100,000원 회원 중 하나로 가입해 주십시오.</p>
-      <p class="bh-p" style="margin-top:6px">가입은 전화번호만으로 즉시 가능하며, <strong>혼디</strong>의 다양한 기능을 남보다 한발 앞서 테스트해 볼 수 있습니다.</p>
-    </div>
-
-    <div class="bh-footer">
-      ※ 위 처리 시간 비교(사람·사람 / 사람+AI · 사람+AI / AI·AI)는 개인파산·건축 인허가 등 실제 처리 사례를 바탕으로 한 자체 추산이며, 기관·절차별로 차이가 있을 수 있습니다.<br>
-      ※ <strong>혼디</strong>는 현재 베타(필드 테스트) 단계이며, 그 성능·정확도·결과물이 실제 환경에서 동일하게 재현됨을 보장하지 않습니다.
-      <div class="bh-footer-meta"><strong>혼디</strong> 개발 총괄 도영민 · 제주시 한림읍 · ceo@hondi.net</div>
+<section class="section" id="hondi-net">
+  <div class="section-inner">
+    <span class="section-tag">혼디넷</span>
+    <h2 class="section-title">5천만 <strong>AI 비서</strong>의 나라</h2>
+    <div class="section-body">
+      <p>한국은 5천만 한국인과 수백만 기업·기관들로 구성된 나라입니다. 혼디넷은 5천만 AI 비서와 수백만 기업·기관 AI로 구성된 네트워크입니다.</p>
+      <p>그동안의 한국은 사람과 사람이 만나 업무를 진행했습니다. 모든 조직은 부서와 직책이 있고, 사람과 사람이 만나 일합니다. 혼디넷은 그 일을 AI에게 맡기고, AI와 AI가 만나 대화하며 업무를 수행하고, 사람은 최종 승인합니다. 기존 AI를 그러한 목적과 용도에 맞게 만든 것이 <strong>혼디</strong>입니다.</p>
+      <p>사람과 사람이 주고받는 전화 통화를 혼디와 혼디가 주고받고, 사람과 사람이 주고받는 메일과 문서를 혼디와 혼디가 주고받습니다. 사람과 다른 점은 혼디는 세상의 모든 지식을 갖추고 빛의 속도로 업무를 처리하는 점이며, 사람과 같은 점은 <strong>거짓말</strong>을 아주 잘하는 점입니다. 혼디넷이 종래의 AI와 다른 점은 AI가 거짓말하지 못할 매우 강력한 안전 장치를 제공합니다. 그것이 <strong>오픈해시</strong>입니다.</p>
     </div>
   </div>
 </section>
 
+<section class="section" id="separation-of-powers">
+  <div class="section-inner">
+    <div style="background:var(--bg-subtle,#f8f9fa); border:1px solid var(--border,#e5e7eb); border-left:4px solid var(--brand); border-radius:0 12px 12px 0; padding:12px 18px; margin:-124px 0 20px;">
+      <p style="font-size:calc((clamp(22px, 3vw, 30px) - 5px) * 0.7 - 2px); color:var(--text3); margin:0; line-height:1.5;">2026.09.01 현재, <strong>혼디</strong>는 약 90%를 완성했으며, 현장 테스트 단계입니다. 우리가 이룬 성과를 직접 확인하고, 나머지 10%를 마무리짓는데 동참해 주십시오. <a class="doc-link doc-link-inline" href="./reports/hondi-field-test-v2.html" target="_blank" rel="noopener">더 보기<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a></p>
+    </div>
+    <span class="section-tag">삼권분립, 혼디가 하나로 잇습니다</span>
+    <h2 class="section-title">판결·입법·집행이 <strong>하나의 순환</strong>을 이룹니다</h2>
+    <p style="font-size:calc((clamp(22px, 3vw, 30px) - 5px) * 0.9); color:var(--text3); margin:-4px 0 18px; line-height:1.5;">다툼이 생기면, 미래의 대법원 판결 예측을 <strong>혼디</strong>에게 물어보세요.</p>
+    <div class="steps-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="step-card">
+        <h3>사법</h3>
+        <p>혼디의 사법 모듈(K-Law)은 사건 발생 시점의 데이터를 기반으로 미래 대법원 판결을 예측하는 실험에서 97.0%의 예측 정확도를 나타냈습니다. (99% 신뢰수준, 오차범위 ±2.5%)</p>
+      </div>
+      <div class="step-card">
+        <h3>입법</h3>
+        <p>사법 절차나 결과에 대한 이의는 자동적으로 해당 법과 규정의 수정 갱신을 위한 입법 청원 절차로 연결됩니다.</p>
+      </div>
+      <div class="step-card">
+        <h3>행정</h3>
+        <p>전자동 AI 정부의 모든 기관과 부서는 오직 법과 규정에 따라 업무를 수행하며, 혼디 AI가 그 중심입니다.</p>
+      </div>
+    </div>
+    <p style="font-size:14px; font-weight:600; color:#0b57a4; margin:calc(18px + 1cm) 0 0; line-height:1.75;">혼디의 성능을 직접 확인하십시오. <a href="https://klaw.hondi.net" target="_blank" rel="noopener" style="display:inline-block; vertical-align:middle; background:#0b57a4; color:#fff; font-weight:600; text-decoration:none; padding:3px 14px; border-radius:20px; margin-left:6px;">K-Law 바로가기</a></p>
+    <p style="font-size:14px; font-weight:600; color:#0b57a4; margin:8px 0 0; line-height:1.75;">사건의 개요를 정확히 입력하면(누가 언제 어디서 무엇을 어떻게 왜), 5분 내에 대법원 예상 판결문을 생성합니다.<br>혼디가 작성한 예상 판결문의 정교한 법리를 인간 법조인이 깰 수 있을까요?<br>시간과 비용은 차치하고, 기나 긴 법원 소송의 막대한 수고를 감내할 필요가 있을까요?</p>
+  </div>
+</section>
 
-<div class="db-pagination" id="dbPagination">
-  <button type="button" class="db-page-btn active" data-page="1">1</button>
-  <button type="button" class="db-page-btn" data-page="2">2</button>
-  <button type="button" class="db-page-btn" data-page="3">3</button>
-  <button type="button" class="db-page-btn" data-page="4">4</button>
-</div>
-
-
-<div class="db-page" id="db-page-2" style="display:none">
 <section class="section" id="usage-guide">
   <div class="section-inner">
     <span class="section-tag">혼디, 어디에 쓰는 물건인고?</span>
     <h2 class="section-title has-doc-link">만인(萬人)의 <strong>AI 비서</strong></h2>
     <div class="section-body">
-      <p>상상해 보십시오. 여러분의 지능(IQ)이 200이 되고, 세상의 모든 지식을 얻게 된다면?<br>나 자신뿐 아니라, 나와 대화하는 모든 이들의 지능이 200이 된다면?<br>혼디가 그 비결입니다. <small style="opacity:.7;font-weight:400">(여기서 'IQ 200'은 실제 지능검사 점수가 아니라, 정보 접근력과 판단 속도가 그만큼 크게 향상된 상태를 빗댄 비유적 표현입니다.)</small></p>
+      <p>상상해 보십시오. 여러분의 지능(IQ)이 300이 되고, 세상의 모든 지식을 얻게 된다면?<br>나 자신뿐 아니라, 나와 대화하는 모든 이들의 지능이 300이 된다면?<br>혼디가 그 비결입니다.</p>
       <p>혼디는 5천만 한국인 각각의 AI 비서이자, 입법·사법·행정·교육·의료·문화·시장 등 우리 사회의 모든 기관·부서를 위한 "AI 비서"입니다.</p>
       <p>나의 혼디가 다른 사람이나 기관/부서의 혼디와 직접 소통하여, 사람들의 서류 준비·제출·확인 및 결제 업무를 혼디들이 대행합니다. 시범적으로 제주 지역의 법원, 도청·시청·읍면동 행정복지센터, 중앙 정부 기관, 교육, 의료, 금융 등 제반 사회 인프라를 혼디로 재구성한 전자동 AI 정부 및 국가 인프라 시스템을 <strong>9월 1일부터</strong> 제주 지역에서 서비스합니다. 물론, 각 기관의 최종 의사 결정은 언제나 사람의 몫입니다. <a class="doc-link doc-link-inline" href="./integrated-system.html" target="_blank" rel="noopener">더 자세히<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a></p>
 
@@ -1448,6 +1283,81 @@ document.addEventListener('keydown', function (e) {
   </div>
 </section>
 
+<section class="section" id="core-philosophy">
+  <div class="section-inner">
+    <span class="section-tag">혼디의 핵심 사상</span>
+    <h2 class="section-title">지능의 <strong>상향 평준화</strong></h2>
+    <div class="section-body">
+      <p>사람마다 성격, 지능, 경험이 제각각입니다. 훌륭한 교사가 있는 반면, 그렇지 않은 사람도 적지 않고, 의사도 화타같은 명의가 있는 반면, 과거 "돌팔이"라 불리는 사람도 있었으며, 포청천같은 판사도 그 반대의 경우도 있습니다. 그게 사람이라는 존재의 매력이긴 하지만, 인간 사회와 조직에서, 사람과 사람 간의 소통으로 업무를 수행할 때는 그러한 격차가 불편할 수 있습니다. 혼디는 <strong>'모든 사람의 지능을 노벨상 수상자 급으로 상향 평준화하는 인위적 장치'</strong>입니다. IQ가 100인 사람과 200인 사람이 깊은 대화를 나누기는 어렵지만, 혼디를 통해 둘 다 IQ 300이 됩니다.</p>
+      <p>혼디는 5천만 한국인을 예외없이 <strong>천재로 업그레이드</strong>하고, 모든 기관과 부서의 업무를 <strong>원칙과 상식으로 재구성</strong>합니다.</p>
+      <p>다만, 두 가지 전제가 있습니다. 첫째, 이들 개인과 조직 각각은 맞춤형 혹은 전용 AI 비서를 가져야 합니다. 이 AI 비서(혼디)는 오직 한 사람 만을 위해 복무해야 하며, 그러기 위해서는 자신의 사용자를 정확히 이해해야 합니다. 혼디의 프라이빗 데이터 금고(PDV, Private Data Vault)는 개인/기관/부서의 일상과 업무를 기록하고, 그로써 혼디가 자신의 주인을 정확히 이해할 수 있게 됩니다. 혼디가 <strong>'쓰면 쓸수록 똑똑해 지는 이유'</strong>입니다.<br>
+      둘째, AI 스스로 특정 개인이나 기관/부서의 맞춤형 AI로 진화해야 합니다. 이 페이지 상단 오른쪽에 있는 '프롬프트' 메뉴는 그러한 맞춤형 +진화형 AI를 구현하는 방법을 자세히 기술합니다.<br>
+      전술한 두 가지 조건을 충족할 때, 비로소 5천만 인구와 수백 만 기관/부서의 지능이 IQ 300이 되며, 혼디가 그 첫 걸음입니다.</p>
+      <p><strong>'쓰면 쓸수록 똑똑해지는 나만의 AI 비서'</strong>. 멋지지 않나요? <a class="doc-link doc-link-inline" href="./highlights/hondi-network.html" target="_blank" rel="noopener">더보기<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a></p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="case-bankruptcy" style="background:var(--bg-alt)">
+  <div class="section-inner">
+    <span class="section-tag">혼디 예시 01</span>
+    <h2 class="section-title has-doc-link">개인파산 및 면책 절차</h2>
+    <div class="section-body">
+      <p>빚을 갚을 능력을 완전히 잃은 사람이 법적으로 재기하는 절차인 개인파산·면책은 신청부터 결정까지 <strong>6~24개월</strong>이 걸리며, 그 사이 신청인은 여러 기관을 오가며 같은 사연과 서류를 반복 설명·제출해야 합니다. 신청인의 혼디가 각 기관의 혼디와 소통하여 이 긴 여정을 처리합니다.</p>
+    </div>
+    <div class="cmp-table-wrap">
+      <table class="cmp-table">
+        <thead><tr><th>단계</th><th>기관</th><th>기존 방식</th><th class="cmp-hondi">혼디 방식</th></tr></thead>
+        <tbody>
+          <tr><td class="cmp-axis">1</td><td>행정복지센터<br>(등본·가족관계증명서)</td><td>방문 또는 개별 온라인 신청</td><td class="cmp-hondi">혼디가 발급 요청 — 1초</td></tr>
+          <tr><td class="cmp-axis">2</td><td>국세청 홈택스<br>(소득금액증명원)</td><td>별도 로그인·서류 저장</td><td class="cmp-hondi">혼디가 수집·정리 — 10초</td></tr>
+          <tr><td class="cmp-axis">3</td><td>대한법률구조공단<br>(상담·서류 작성)</td><td>예약 후 대면 상담</td><td class="cmp-hondi">혼디와 혼디 간 사전 조율 — 10초</td></tr>
+          <tr><td class="cmp-axis">4</td><td>회생법원<br>(파산·면책 신청 접수)</td><td>전자소송 사이트 개별 제출</td><td class="cmp-hondi">혼디가 서류 묶음 제출 — 1초</td></tr>
+          <tr><td class="cmp-axis">5~7</td><td>채권신고·채권자집회·채권조사기일</td><td>우편·문자 개별 확인, 서면 대응</td><td class="cmp-hondi">혼디가 일정 캘린더화·쟁점 브리핑</td></tr>
+          <tr><td class="cmp-axis">8</td><td>면책심문기일·면책 결정</td><td>결과 통지 대기</td><td class="cmp-hondi">혼디 초안 + 인간 판사 최종 결정</td></tr>
+          <tr><td class="cmp-axis">9</td><td>신용정보원<br>(연체 정보 말소)</td><td>기관별 개별 문의</td><td class="cmp-hondi">혼디가 말소 여부 일괄 확인 — 1초</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="cmp-summary">혼디의 수백 개 AI 기능 중 하나인 <strong>K-Law</strong>는 사실관계와 헌법·법률·판례를 근거로 가상의 대법원 판결문을 3~5분 만에 작성합니다. 대법원 공개 판례 대상 자체 측정 기준, K-Law 가상 판결문의 대법원 실제 판결 일치도는 약 75~90%로, 공개 판례의 1~2심 법원 일치도(45~48%)보다 현저히 높습니다. 파산·면책 절차에도 같은 방식을 적용해 K-Law가 진행안 초안을 작성하고, 사람 판사가 검증해 최종 결정을 내립니다. 바로가기(링크 <a href="https://klaw.hondi.net" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:var(--brand);text-underline-offset:2px">klaw.hondi.kr</a>)</p>
+    <div class="doc-link-row">
+      <a class="doc-link" href="./reports/hondi-bankruptcy-automation-scenario.html" target="_blank" rel="noopener">개인파산 시나리오 더 자세히<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+      <a class="doc-link" href="./reports/hondi-legal-arbitration-scenario.html" target="_blank" rel="noopener">K-Law 화해계약 사례 더 자세히<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="case-permit">
+  <div class="section-inner">
+    <span class="section-tag">혼디 예시 02</span>
+    <h2 class="section-title has-doc-link">건축 인허가부터 준공 검사까지</h2>
+    <div class="section-body">
+      <p>건축물을 지으려면 통상 시·군·구 건축과에 신청서·설계도서·구조계산서 등 수십 종의 서류를 준비해 제출하고, 심사·보완·재제출을 여러 차례 거쳐야 합니다. 혼디에서는 사용자가 "건축 인허가 신청해 줘"라고 지시하면, 사용자의 혼디가 관할 부서를 검색하고 부서의 혼디를 호출해 필요 서류 확인부터 준비·제출·심사·보완까지 대행합니다.</p>
+    </div>
+
+    <div style="background:var(--bg-subtle);border-radius:var(--radius-lg);padding:20px 24px;margin:20px 0;font-size:13.5px;line-height:1.9">
+      <p style="margin:0 0 8px"><strong>이용자</strong> "혼디야, ○○동 000-00번지에 근린생활시설 신축 인허가 신청해 줘."</p>
+      <p style="margin:0 0 8px;color:var(--text2)"><strong>사용자 혼디</strong> 제주시 건축과에 인허가 신청을 시작합니다. 관할 부서의 혼디를 호출합니다.</p>
+      <p style="margin:0 0 8px;color:var(--text2)"><strong>부서 혼디(건축과)</strong> 도면을 검토한 결과, 주차대수 산정이 관계 법령 기준에 못 미칩니다. 보완이 필요합니다.</p>
+      <p style="margin:0;color:var(--text2)"><strong>사용자 혼디</strong> 주차 대수를 조정한 수정 도면을 첨부해 재제출합니다. — 처리 시간: 접수부터 승인까지 <strong>3일</strong>(기존 평균 20일 대비 대폭 단축)</p>
+    </div>
+
+    <div class="cmp-table-wrap">
+      <table class="cmp-table">
+        <thead><tr><th>구분</th><th>기존 방식</th><th class="cmp-hondi">혼디 방식</th></tr></thead>
+        <tbody>
+          <tr><td class="cmp-axis">처리 기간</td><td>접수~허가 평균 20일 내외(보완 시 수 주 추가)</td><td class="cmp-hondi">접수~허가 평균 1~3일, 서류가 완전하면 10초 내외</td></tr>
+          <tr><td class="cmp-axis">수수료</td><td>동일(약 9,000원, 지자체 조례에 따라 상이)</td><td class="cmp-hondi">동일 금액을 혼디가 전자결제로 즉시 납부</td></tr>
+          <tr><td class="cmp-axis">보완 대응</td><td>우편·전화 통지, 재방문·재제출</td><td class="cmp-hondi">부서 혼디와 즉시 보완요청·재제출</td></tr>
+          <tr><td class="cmp-axis">서류 준비</td><td>개인이 발급기관마다 직접 방문·신청</td><td class="cmp-hondi">혼디가 PDV·정부24에서 자동 인출·발급</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="cmp-summary">준공 검사(사용승인)도 동일한 원칙을 따릅니다 — 착공 신고부터 서류 심사·현장 실사 일정 조율까지 혼디가 대행하되, <strong>현장 실사와 최종 승인은 언제나 담당 공무원(사람)</strong>이 수행합니다. 혼디가 준비한 검토 의견은 참고 자료일 뿐, 법적 책임과 최종 결재권은 전적으로 인간 공무원에게 있습니다.</p>
+    <a class="doc-link" href="./reports/hondi-example.html" target="_blank" rel="noopener">더 자세히<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+  </div>
+</section>
+
 <section class="section" id="cost-comparison" style="background:var(--bg-alt)">
   <div class="section-inner">
     <span class="section-tag">비용 비교</span>
@@ -1475,6 +1385,10 @@ document.addEventListener('keydown', function (e) {
   </div>
 </section>
 
+<!-- ── 활용 시나리오 추가 카드 3개 (2026-08-25 추가) ──
+     본문에 대응 섹션이 없던 세 문서(AI 도청·시청·읍면동, 법치 사회,
+     금융권 CBDC 대비)를 case-permit과 feature-summary 사이에
+     step-card 3개로 요약 배치. -->
 <section class="section" id="feature-summary">
   <div class="section-inner">
     <span class="section-tag">기능 요약</span>
@@ -1484,7 +1398,7 @@ document.addEventListener('keydown', function (e) {
     <p class="pw-svc-note"><b>K-서비스는 공익을 위한 인프라입니다.</b> 사용자 개인의 사적 이익을 위해 복무하는 전문가 페르소나와 달리, K-서비스는 특정 개인의 편이 아니라 사회 전체를 향한 공적 기능을 수행합니다. 법률·세무·의료·교육 등 16개 공공 서비스를 한 곳에서 제공합니다.</p>
     <div class="pw-svc-list">
       <div class="pw-svc-item"><span class="pw-svc-name">K-119</span><span class="pw-svc-desc">응급 신고·구조 자동화</span><a class="pw-svc-link" href="https://911.hondi.net" target="_blank" rel="noopener">911.hondi.net</a></div>
-      <div class="pw-svc-item"><span class="pw-svc-name">K-Law</span><span class="pw-svc-desc">사법, 가상 판결 시뮬레이션</span><a class="pw-svc-link" href="https://klaw.hondi.net" target="_blank">klaw.hondi.net</a></div>
+      <div class="pw-svc-item"><span class="pw-svc-name">K-Law</span><span class="pw-svc-desc">사법, 가상 판결 시뮬레이션</span><a class="pw-svc-link" href="https://klaw.hondi.net" target="_blank" rel="noopener">klaw.hondi.net</a></div>
       <div class="pw-svc-item"><span class="pw-svc-name">K-Police</span><span class="pw-svc-desc">치안 신고·접수 자동화</span><a class="pw-svc-link" href="https://police.hondi.net" target="_blank" rel="noopener">police.hondi.net</a></div>
       <div class="pw-svc-item"><span class="pw-svc-name">K-Security</span><span class="pw-svc-desc">보안 위협 대응</span><a class="pw-svc-link" href="https://security.hondi.net" target="_blank" rel="noopener">security.hondi.net</a></div>
       <div class="pw-svc-item"><span class="pw-svc-name">K-Health</span><span class="pw-svc-desc">의료 분야 전문 진단 보조</span><a class="pw-svc-link" href="https://health.hondi.net" target="_blank" rel="noopener">health.hondi.net</a></div>
@@ -1613,163 +1527,6 @@ document.addEventListener('keydown', function (e) {
   </div>
 </section>
 
-<section class="section" id="join-completion" style="background:var(--bg-alt)">
-  <div class="section-inner">
-    <span class="section-tag">함께 완성하기</span>
-    <h2 class="section-title has-doc-link">혼디 완성에 <strong>동참해 주세요</strong></h2>
-    <div class="section-body">
-      <p>혼디는 한국 개발자들(총괄 도영민)의 지원과 참여 결과이며, 2026년 9월 현재 완성도 90% 수준입니다. 혼디는 LLM이라 불리는 AI 엔진(챗GPT 같은) 위에서 작동하며, 현재 해외 LLM들을 이용하는 구조적 한계로 혼디의 설계 성능을 50%밖에 발휘할 수 없습니다. 혼디가 온전히 작동하려면, 코드가 공개된(오픈소스라 불림) LLM을 국내 AI 클러스터에 설치한 뒤, 혼디 목적에 맞게 튜닝해야 합니다(Fine-tuning이라 불림).</p>
-      <p><a href="./reports/hondi-server-cost-analysis.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:var(--brand);text-underline-offset:2px">국내 AI 서버 구축 비용</a>은 10억원 안팎으로, 1년 구독자 1만 명이면 혼디 성능을 100% 발휘할 환경을 마련할 수 있습니다.</p>
-      <p>1천원 이상의 GDC(혼디 디지털 화폐) 충전, 월 1만원 정기 구독 또는 1년 구독(10만원 선납)으로 혼디의 완성에 동참해 주십시오. 1년 구독자에게 혼디 개발 상황을 수시로 알려드리며, 기업 설립 및 공개(Hondi Inc.) 시점에 우선적으로 고지합니다.</p>
-      <p>대시보드 페이지의 혼디 계좌에 입금 후, <a href="#" onclick="_openUserDashboard();return false;" style="color:inherit;text-decoration:underline;text-decoration-color:var(--brand);text-underline-offset:2px">내 대시보드</a>에서 충전 잔액 갱신 또는 구독 방법과 기간 갱신을 확인하세요.</p>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="dev-team">
-  <div class="section-inner">
-    <h2 class="section-title">혼디를 <strong>만든 사람들</strong></h2>
-    <div style="margin-top:16px">
-      <div class="section-body">
-        <p>혼디는 한국인 개발자 50여 명과 제주 시청의 지원으로 완성됐습니다. 개발 책임자는 한림읍에 거주하는 <strong>도 영민</strong>이며, 미국 MIT 공대의 olpc 프로젝트에 시스템 개발자로 수 년간 참여하였습니다.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="db-pagination db-pagination-bottom">
-  <button type="button" class="db-page-btn" data-page="1">1</button>
-  <button type="button" class="db-page-btn active" data-page="2">2</button>
-  <button type="button" class="db-page-btn" data-page="3">3</button>
-  <button type="button" class="db-page-btn" data-page="4">4</button>
-</div>
-</div>
-
-<div class="db-page" id="db-page-3" style="display:none">
-<section class="section" id="case-bankruptcy" style="background:var(--bg-alt)">
-  <div class="section-inner">
-    <span class="section-tag">혼디 예시 01</span>
-    <h2 class="section-title has-doc-link">개인파산 및 면책 절차</h2>
-    <div class="section-body">
-      <p>빚을 갚을 능력을 완전히 잃은 사람이 법적으로 재기하는 절차인 개인파산·면책은 신청부터 결정까지 <strong>6~24개월</strong>이 걸리며, 그 사이 신청인은 여러 기관을 오가며 같은 사연과 서류를 반복 설명·제출해야 합니다. 신청인의 혼디가 각 기관의 혼디와 소통하여 이 긴 여정을 처리합니다.</p>
-    </div>
-    <div class="cmp-table-wrap">
-      <table class="cmp-table">
-        <thead><tr><th>단계</th><th>기관</th><th>기존 방식</th><th class="cmp-hondi">혼디 방식</th></tr></thead>
-        <tbody>
-          <tr><td class="cmp-axis">1</td><td>행정복지센터<br>(등본·가족관계증명서)</td><td>방문 또는 개별 온라인 신청</td><td class="cmp-hondi">혼디가 발급 요청 — 1초</td></tr>
-          <tr><td class="cmp-axis">2</td><td>국세청 홈택스<br>(소득금액증명원)</td><td>별도 로그인·서류 저장</td><td class="cmp-hondi">혼디가 수집·정리 — 10초</td></tr>
-          <tr><td class="cmp-axis">3</td><td>대한법률구조공단<br>(상담·서류 작성)</td><td>예약 후 대면 상담</td><td class="cmp-hondi">혼디와 혼디 간 사전 조율 — 10초</td></tr>
-          <tr><td class="cmp-axis">4</td><td>회생법원<br>(파산·면책 신청 접수)</td><td>전자소송 사이트 개별 제출</td><td class="cmp-hondi">혼디가 서류 묶음 제출 — 1초</td></tr>
-          <tr><td class="cmp-axis">5~7</td><td>채권신고·채권자집회·채권조사기일</td><td>우편·문자 개별 확인, 서면 대응</td><td class="cmp-hondi">혼디가 일정 캘린더화·쟁점 브리핑</td></tr>
-          <tr><td class="cmp-axis">8</td><td>면책심문기일·면책 결정</td><td>결과 통지 대기</td><td class="cmp-hondi">혼디 초안 + 인간 판사 최종 결정</td></tr>
-          <tr><td class="cmp-axis">9</td><td>신용정보원<br>(연체 정보 말소)</td><td>기관별 개별 문의</td><td class="cmp-hondi">혼디가 말소 여부 일괄 확인 — 1초</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="cmp-summary">혼디의 수백 개 AI 기능 중 하나인 <strong>K-Law</strong>는 사실관계와 헌법·법률·판례를 근거로 가상의 대법원 판결문을 3~5분 만에 작성합니다. 대법원 공개 판례 대상 자체 측정 기준, K-Law 가상 판결문의 대법원 실제 판결 일치도는 약 75~90%로, 공개 판례의 1~2심 법원 일치도(45~48%)보다 현저히 높습니다. 파산·면책 절차에도 같은 방식을 적용해 K-Law가 진행안 초안을 작성하고, 사람 판사가 검증해 최종 결정을 내립니다. 바로가기(링크 <a href="https://klaw.hondi.net" target="_blank" style="color:inherit;text-decoration:underline;text-decoration-color:var(--brand);text-underline-offset:2px">klaw.hondi.kr</a>)</p>
-    <div class="doc-link-row">
-      <a class="doc-link" href="./reports/hondi-bankruptcy-automation-scenario.html" target="_blank" rel="noopener">개인파산 시나리오 더 자세히<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
-      <a class="doc-link" href="./reports/hondi-legal-arbitration-scenario.html" target="_blank" rel="noopener">K-Law 화해계약 사례 더 자세히<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="case-permit">
-  <div class="section-inner">
-    <span class="section-tag">혼디 예시 02</span>
-    <h2 class="section-title has-doc-link">건축 인허가부터 준공 검사까지</h2>
-    <div class="section-body">
-      <p>건축물을 지으려면 통상 시·군·구 건축과에 신청서·설계도서·구조계산서 등 수십 종의 서류를 준비해 제출하고, 심사·보완·재제출을 여러 차례 거쳐야 합니다. 혼디에서는 사용자가 "건축 인허가 신청해 줘"라고 지시하면, 사용자의 혼디가 관할 부서를 검색하고 부서의 혼디를 호출해 필요 서류 확인부터 준비·제출·심사·보완까지 대행합니다.</p>
-    </div>
-
-    <div style="background:var(--bg-subtle);border-radius:var(--radius-lg);padding:20px 24px;margin:20px 0;font-size:13.5px;line-height:1.9">
-      <p style="margin:0 0 8px"><strong>이용자</strong> "혼디야, ○○동 000-00번지에 근린생활시설 신축 인허가 신청해 줘."</p>
-      <p style="margin:0 0 8px;color:var(--text2)"><strong>사용자 혼디</strong> 제주시 건축과에 인허가 신청을 시작합니다. 관할 부서의 혼디를 호출합니다.</p>
-      <p style="margin:0 0 8px;color:var(--text2)"><strong>부서 혼디(건축과)</strong> 도면을 검토한 결과, 주차대수 산정이 관계 법령 기준에 못 미칩니다. 보완이 필요합니다.</p>
-      <p style="margin:0;color:var(--text2)"><strong>사용자 혼디</strong> 주차 대수를 조정한 수정 도면을 첨부해 재제출합니다. — 처리 시간: 접수부터 승인까지 <strong>3일</strong>(기존 평균 20일 대비 대폭 단축)</p>
-    </div>
-
-    <div class="cmp-table-wrap">
-      <table class="cmp-table">
-        <thead><tr><th>구분</th><th>기존 방식</th><th class="cmp-hondi">혼디 방식</th></tr></thead>
-        <tbody>
-          <tr><td class="cmp-axis">처리 기간</td><td>접수~허가 평균 20일 내외(보완 시 수 주 추가)</td><td class="cmp-hondi">접수~허가 평균 1~3일, 서류가 완전하면 10초 내외</td></tr>
-          <tr><td class="cmp-axis">수수료</td><td>동일(약 9,000원, 지자체 조례에 따라 상이)</td><td class="cmp-hondi">동일 금액을 혼디가 전자결제로 즉시 납부</td></tr>
-          <tr><td class="cmp-axis">보완 대응</td><td>우편·전화 통지, 재방문·재제출</td><td class="cmp-hondi">부서 혼디와 즉시 보완요청·재제출</td></tr>
-          <tr><td class="cmp-axis">서류 준비</td><td>개인이 발급기관마다 직접 방문·신청</td><td class="cmp-hondi">혼디가 PDV·정부24에서 자동 인출·발급</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="cmp-summary">준공 검사(사용승인)도 동일한 원칙을 따릅니다 — 착공 신고부터 서류 심사·현장 실사 일정 조율까지 혼디가 대행하되, <strong>현장 실사와 최종 승인은 언제나 담당 공무원(사람)</strong>이 수행합니다. 혼디가 준비한 검토 의견은 참고 자료일 뿐, 법적 책임과 최종 결재권은 전적으로 인간 공무원에게 있습니다.</p>
-    <a class="doc-link" href="./reports/hondi-example.html" target="_blank" rel="noopener">더 자세히<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
-  </div>
-</section>
-
-
-<div class="db-pagination db-pagination-bottom">
-  <button type="button" class="db-page-btn" data-page="1">1</button>
-  <button type="button" class="db-page-btn" data-page="2">2</button>
-  <button type="button" class="db-page-btn active" data-page="3">3</button>
-  <button type="button" class="db-page-btn" data-page="4">4</button>
-</div>
-</div>
-
-<div class="db-page" id="db-page-4" style="display:none">
-<section class="section" id="hondi-net">
-  <div class="section-inner">
-    <span class="section-tag">혼디넷</span>
-    <h2 class="section-title">5천만 <strong>AI 비서</strong>의 나라</h2>
-    <div class="section-body">
-      <p>한국은 5천만 한국인과 수백만 기업·기관들로 구성된 나라입니다. 혼디넷은 5천만 AI 비서와 수백만 기업·기관 AI로 구성된 네트워크입니다.</p>
-      <p>그동안의 한국은 사람과 사람이 만나 업무를 진행했습니다. 모든 조직은 부서와 직책이 있고, 사람과 사람이 만나 일합니다. 혼디넷은 그 일을 AI에게 맡기고, AI와 AI가 만나 대화하며 업무를 수행하고, 사람은 최종 승인합니다. 기존 AI를 그러한 목적과 용도에 맞게 만든 것이 <strong>혼디</strong>입니다.</p>
-      <p>사람과 사람이 주고받는 전화 통화를 혼디와 혼디가 주고받고, 사람과 사람이 주고받는 메일과 문서를 혼디와 혼디가 주고받습니다. 사람과 다른 점은 혼디는 세상의 모든 지식을 갖추고 빛의 속도로 업무를 처리하는 점이며, 사람과 같은 점은 <strong>거짓말</strong>을 아주 잘하는 점입니다. 혼디넷이 종래의 AI와 다른 점은 AI가 거짓말하지 못할 매우 강력한 안전 장치를 제공합니다. 그것이 <strong>오픈해시</strong>입니다.</p>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="separation-of-powers">
-  <div class="section-inner">
-    <div style="background:var(--bg-subtle,#f8f9fa); border:1px solid var(--border,#e5e7eb); border-left:4px solid var(--brand); border-radius:0 12px 12px 0; padding:12px 18px; margin:-124px 0 20px;">
-      <p style="font-size:calc((clamp(22px, 3vw, 30px) - 5px) * 0.7 - 2px); color:var(--text3); margin:0; line-height:1.5;">2026.09.01 현재, <strong>혼디</strong>는 약 90%를 완성했으며, 현장 테스트 단계입니다. 우리가 이룬 성과를 직접 확인하고, 나머지 10%를 마무리짓는데 동참해 주십시오. <a class="doc-link doc-link-inline" href="./reports/hondi-field-test-v2.html" target="_blank" rel="noopener">더 보기<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a></p>
-    </div>
-    <span class="section-tag">삼권분립, 혼디가 하나로 잇습니다</span>
-    <h2 class="section-title">판결·입법·집행이 <strong>하나의 순환</strong>을 이룹니다</h2>
-    <p style="font-size:calc((clamp(22px, 3vw, 30px) - 5px) * 0.9); color:var(--text3); margin:-4px 0 18px; line-height:1.5;">다툼이 생기면, 미래의 대법원 판결 예측을 <strong>혼디</strong>에게 물어보세요.</p>
-    <div class="steps-grid" style="grid-template-columns:repeat(3,1fr)">
-      <div class="step-card">
-        <h3>사법</h3>
-        <p>혼디의 사법 모듈(K-Law)은 사건 발생 시점의 데이터를 기반으로 미래 대법원 판결을 예측하는 실험에서 97.0%의 예측 정확도를 나타냈습니다. (99% 신뢰수준, 오차범위 ±2.5%)</p>
-      </div>
-      <div class="step-card">
-        <h3>입법</h3>
-        <p>사법 절차나 결과에 대한 이의는 자동적으로 해당 법과 규정의 수정 갱신을 위한 입법 청원 절차로 연결됩니다.</p>
-      </div>
-      <div class="step-card">
-        <h3>행정</h3>
-        <p>전자동 AI 정부의 모든 기관과 부서는 오직 법과 규정에 따라 업무를 수행하며, 혼디 AI가 그 중심입니다.</p>
-      </div>
-    </div>
-    <p style="font-size:14px; font-weight:600; color:#0b57a4; margin:calc(18px + 1cm) 0 0; line-height:1.75;">혼디의 성능을 직접 확인하십시오. <a href="https://klaw.hondi.net" target="_blank" style="display:inline-block; vertical-align:middle; background:#0b57a4; color:#fff; font-weight:600; text-decoration:none; padding:3px 14px; border-radius:20px; margin-left:6px;">K-Law 바로가기</a></p>
-    <p style="font-size:14px; font-weight:600; color:#0b57a4; margin:8px 0 0; line-height:1.75;">사건의 개요를 정확히 입력하면(누가 언제 어디서 무엇을 어떻게 왜), 5분 내에 대법원 예상 판결문을 생성합니다.<br>혼디가 작성한 예상 판결문의 정교한 법리를 인간 법조인이 깰 수 있을까요?<br>시간과 비용은 차치하고, 기나 긴 법원 소송의 막대한 수고를 감내할 필요가 있을까요?</p>
-  </div>
-</section>
-
-<section class="section" id="core-philosophy">
-  <div class="section-inner">
-    <span class="section-tag">혼디의 핵심 사상</span>
-    <h2 class="section-title">지능의 <strong>상향 평준화</strong></h2>
-    <div class="section-body">
-      <p>사람마다 성격, 지능, 경험이 제각각입니다. 훌륭한 교사가 있는 반면, 그렇지 않은 사람도 적지 않고, 의사도 화타같은 명의가 있는 반면, 과거 "돌팔이"라 불리는 사람도 있었으며, 포청천같은 판사도 그 반대의 경우도 있습니다. 그게 사람이라는 존재의 매력이긴 하지만, 인간 사회와 조직에서, 사람과 사람 간의 소통으로 업무를 수행할 때는 그러한 격차가 불편할 수 있습니다. 혼디는 <strong>'모든 사람의 지능을 노벨상 수상자 급으로 상향 평준화하는 인위적 장치'</strong>입니다. IQ가 80인 사람과 150인 사람이 깊은 대화를 나누기는 어렵지만, 혼디를 통해 둘 다 IQ 200이 됩니다(실제 지능검사 점수가 아니라, 정보와 판단력의 격차가 사라진다는 뜻의 비유입니다).</p>
-      <p>혼디는 5천만 한국인을 예외없이 <strong>천재로 업그레이드</strong>하고, 모든 기관과 부서의 업무를 <strong>원칙과 상식으로 재구성</strong>합니다.</p>
-      <p>다만, 두 가지 전제가 있습니다. 첫째, 이들 개인과 조직 각각은 맞춤형 혹은 전용 AI 비서를 가져야 합니다. 이 AI 비서(혼디)는 오직 한 사람 만을 위해 복무해야 하며, 그러기 위해서는 자신의 사용자를 정확히 이해해야 합니다. 혼디의 프라이빗 데이터 금고(PDV, Private Data Vault)는 개인/기관/부서의 일상과 업무를 기록하고, 그로써 혼디가 자신의 주인을 정확히 이해할 수 있게 됩니다. 혼디가 <strong>'쓰면 쓸수록 똑똑해 지는 이유'</strong>입니다.<br>
-      둘째, AI 스스로 특정 개인이나 기관/부서의 맞춤형 AI로 진화해야 합니다. 이 페이지 상단 오른쪽에 있는 '프롬프트' 메뉴는 그러한 맞춤형 +진화형 AI를 구현하는 방법을 자세히 기술합니다.<br>
-      전술한 두 가지 조건을 충족할 때, 비로소 5천만 인구와 수백 만 기관/부서의 지능이 IQ 200이 되며(실제 지능검사 점수가 아니라 비유적 표현입니다), 혼디가 그 첫 걸음입니다.</p>
-      <p><strong>'쓰면 쓸수록 똑똑해지는 나만의 AI 비서'</strong>. 멋지지 않나요? <a class="doc-link doc-link-inline" href="./highlights/hondi-network.html" target="_blank" rel="noopener">더보기<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a></p>
-    </div>
-  </div>
-</section>
-
 <section class="section" id="control-tower-principle">
   <div class="section-inner">
     <span class="section-tag">관제탑 원칙</span>
@@ -1795,16 +1552,29 @@ document.addEventListener('keydown', function (e) {
   </div>
 </section>
 
-<div class="db-pagination db-pagination-bottom">
-  <button type="button" class="db-page-btn" data-page="1">1</button>
-  <button type="button" class="db-page-btn" data-page="2">2</button>
-  <button type="button" class="db-page-btn" data-page="3">3</button>
-  <button type="button" class="db-page-btn active" data-page="4">4</button>
-</div>
-</div>
+<section class="section" id="join-completion" style="background:var(--bg-alt)">
+  <div class="section-inner">
+    <span class="section-tag">함께 완성하기</span>
+    <h2 class="section-title has-doc-link">혼디 완성에 <strong>동참해 주세요</strong></h2>
+    <div class="section-body">
+      <p>혼디는 한국 개발자들(총괄 도영민)의 지원과 참여 결과이며, 2026년 9월 현재 완성도 90% 수준입니다. 혼디는 LLM이라 불리는 AI 엔진(챗GPT 같은) 위에서 작동하며, 현재 해외 LLM들을 이용하는 구조적 한계로 혼디의 설계 성능을 50%밖에 발휘할 수 없습니다. 혼디가 온전히 작동하려면, 코드가 공개된(오픈소스라 불림) LLM을 국내 AI 클러스터에 설치한 뒤, 혼디 목적에 맞게 튜닝해야 합니다(Fine-tuning이라 불림).</p>
+      <p><a href="./reports/hondi-server-cost-analysis.html" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;text-decoration-color:var(--brand);text-underline-offset:2px">국내 AI 서버 구축 비용</a>은 10억원 안팎으로, 1년 구독자 1만 명이면 혼디 성능을 100% 발휘할 환경을 마련할 수 있습니다.</p>
+      <p>1천원 이상의 GDC(혼디 디지털 화폐) 충전, 월 1만원 정기 구독 또는 1년 구독(10만원 선납)으로 혼디의 완성에 동참해 주십시오. 1년 구독자에게 혼디 개발 상황을 수시로 알려드리며, 기업 설립 및 공개(Hondi Inc.) 시점에 우선적으로 고지합니다.</p>
+      <p>대시보드 페이지의 혼디 계좌에 입금 후, <a href="#" onclick="_openUserDashboard();return false;" style="color:inherit;text-decoration:underline;text-decoration-color:var(--brand);text-underline-offset:2px">내 대시보드</a>에서 충전 잔액 갱신 또는 구독 방법과 기간 갱신을 확인하세요.</p>
+    </div>
+  </div>
+</section>
 
-
-
+<section class="section" id="dev-team">
+  <div class="section-inner">
+    <h2 class="section-title">혼디를 <strong>만든 사람들</strong></h2>
+    <div style="margin-top:16px">
+      <div class="section-body">
+        <p>혼디는 한국인 개발자 50여 명과 제주 시청의 지원으로 완성됐습니다. 개발 책임자는 한림읍에 거주하는 <strong>도 영민</strong>이며, 미국 MIT 공대의 olpc 프로젝트에 시스템 개발자로 수 년간 참여하였습니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- ── FOOTER (2026-08-21 복원) — 원본 저장소에서 </footer> 닫는 태그만
      남고 여는 <footer> 태그가 유실돼 있던 걸 발견(전수 검사 결과 이
@@ -2194,47 +1964,6 @@ document.addEventListener('keydown', function (e) {
         </div>
       </div>
 
-      <!-- ①-c GDC 충전 내역 (2026-09-06 신설 — /admin/charge-list 연동)
-           위 ①-b가 월별 합계라면, 이건 건별 상세 목록이다. 관리자 수동
-           확인·오픈뱅킹 폴링·PG 웹훅·폰 알림캡처, 확정 채널이 뭐였든
-           charge_requests에 기록되는 건 전부 이 목록에 뜬다. -->
-      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:4px;padding:16px 18px;margin-bottom:16px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-          <div style="font-size:12px;color:var(--ad-faint,#6e737a);letter-spacing:.3px">GDC 충전 내역</div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <select id="charge-list-status" onchange="_loadChargeList()"
-                    style="padding:5px 8px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
-                           border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
-                           font-size:11.5px;font-family:inherit">
-              <option value="matched">확정됨</option>
-              <option value="pending">대기 중</option>
-            </select>
-            <button onclick="_loadChargeList()" id="charge-list-reload-btn"
-                    style="padding:5px 12px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
-                           border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
-                           font-size:11.5px;font-weight:500;cursor:pointer;font-family:inherit">새로고침</button>
-          </div>
-        </div>
-        <div style="overflow-x:auto">
-          <table style="width:100%;border-collapse:collapse;font-size:11.5px;min-width:720px">
-            <thead>
-              <tr style="text-align:left;color:var(--ad-faint,#6e737a)">
-                <th style="padding:0 8px 8px 0;font-weight:400;min-width:220px">GUID</th>
-                <th style="padding:0 8px 8px 0;font-weight:400;width:100px">매칭키</th>
-                <th style="padding:0 8px 8px 0;font-weight:400;width:90px;text-align:right">금액(원)</th>
-                <th style="padding:0 8px 8px 0;font-weight:400;width:140px">채널</th>
-                <th style="padding:0 8px 8px 0;font-weight:400;width:90px">상태</th>
-                <th style="padding:0 0 8px;width:150px">시각</th>
-              </tr>
-            </thead>
-            <tbody id="charge-list-body"></tbody>
-          </table>
-        </div>
-        <div id="charge-list-empty" style="font-size:12.5px;color:var(--ad-faint,#6e737a);text-align:center;padding:18px">
-          불러오는 중…
-        </div>
-      </div>
-
       <!-- ② 무료 체험 기간 -->
       <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:4px;padding:16px 18px;margin-bottom:16px">
         <div style="font-size:12px;color:var(--ad-faint,#6e737a);letter-spacing:.3px;margin-bottom:12px">무료 체험 기간</div>
@@ -2492,49 +2221,43 @@ document.addEventListener('keydown', function (e) {
 ══════════════════════════════════════════════════════════ -->
 <style>
   #user-dash-overlay{
-    /* 2026-09-05 수정 — plan.hondi.net(K-Plan)의 인증 UI 톤·색상과 통일.
-       어두운 네이비 팔레트를 K-Plan의 흰 배경+인디고 팔레트로 교체했다.
-       실제 인증 로직(전체 전화번호→OTP 6자리 흐름)은 그대로 두고
-       겉모습만 맞춘다. */
-    --ud-bg:#ffffff; --ud-panel:#ffffff; --ud-panel2:#ffffff;
-    --ud-line:#DFE2ED; --ud-line-strong:#C7D2FE;
-    --ud-text:#1A202C; --ud-dim:#4A5568; --ud-faint:#718096;
-    --ud-warn:#b3790a; --ud-crit:#C01C28;
+    --ud-bg:#26282d; --ud-panel:#2b2e34; --ud-panel2:#33363c;
+    --ud-line:#3c3f46; --ud-line-strong:#4a4e56;
+    --ud-text:#d7d9dd; --ud-dim:#9aa0a8; --ud-faint:#6e737a;
+    --ud-warn:#d6a04a; --ud-crit:#d16054;
     --ud-mono:'SFMono-Regular','Consolas',monospace;
-    --ud-pri:#4338CA; --ud-pri-bg:#EEF2FF;
   }
-  #user-dash-overlay .ud-card{background:var(--ud-bg);border-radius:14px;width:100%;max-width:560px;
-    box-shadow:0 12px 32px rgba(0,0,0,.18);overflow:hidden;margin:auto;color:var(--ud-text);
-    font-family:'Pretendard','Noto Sans KR',sans-serif;border:1px solid var(--ud-line);}
+  #user-dash-overlay .ud-card{background:var(--ud-bg);border-radius:12px;width:100%;max-width:560px;
+    box-shadow:0 12px 48px rgba(0,0,0,.4);overflow:hidden;margin:auto;color:var(--ud-text);
+    font-family:'Pretendard','Noto Sans KR',sans-serif;}
   #user-dash-overlay .ud-head{display:flex;align-items:center;justify-content:space-between;
     padding:16px 20px;border-bottom:1px solid var(--ud-line);background:var(--ud-panel);}
-  #user-dash-overlay .ud-head span{font-size:14px;font-weight:700;color:var(--ud-text);}
-  #user-dash-overlay .ud-close{background:none;border:none;cursor:pointer;color:var(--ud-faint);font-size:20px;line-height:1;padding:2px 6px;}
-  #user-dash-overlay input{width:100%;padding:11px 12px;border:1px solid var(--ud-line);
-    border-radius:8px;font-size:15px;outline:none;font-family:inherit;box-sizing:border-box;
-    display:block;margin-bottom:10px;background:#fff;color:var(--ud-text);}
-  #user-dash-overlay input:focus{border-color:var(--ud-pri);}
+  #user-dash-overlay .ud-head span{font-size:14px;font-weight:500;color:var(--ud-text);}
+  #user-dash-overlay .ud-close{background:none;border:none;cursor:pointer;color:var(--ud-dim);font-size:20px;line-height:1;padding:2px 6px;}
+  #user-dash-overlay input{width:100%;padding:10px 12px;border:1px solid var(--ud-line);
+    border-radius:4px;font-size:15px;outline:none;font-family:inherit;box-sizing:border-box;
+    display:block;margin-bottom:10px;background:var(--ud-panel2);color:var(--ud-text);}
   #user-dash-overlay .ud-err{display:none;color:var(--ud-crit);font-size:12px;margin-bottom:10px;}
-  #user-dash-overlay .ud-btn{width:100%;padding:11px;background:#fff;color:var(--ud-dim);
-    border:1px solid var(--ud-line-strong);border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer;}
-  #user-dash-overlay .ud-btn.primary{background:var(--ud-pri);border-color:var(--ud-pri);color:#fff;font-weight:700;}
+  #user-dash-overlay .ud-btn{width:100%;padding:11px;background:var(--ud-panel2);color:var(--ud-text);
+    border:1px solid var(--ud-line-strong);border-radius:4px;font-size:13.5px;font-weight:500;cursor:pointer;}
+  #user-dash-overlay .ud-btn.primary{background:#3b6ea8;border-color:#3b6ea8;color:#fff;}
   #user-dash-overlay .ud-btn + .ud-btn{margin-top:8px;}
-  #user-dash-overlay .ud-balance{border:1px solid var(--ud-line);border-radius:8px;padding:14px 16px;
+  #user-dash-overlay .ud-balance{border:1px solid var(--ud-line);border-radius:4px;padding:14px 16px;
     display:flex;justify-content:space-between;align-items:baseline;margin:16px 20px 0;}
   #user-dash-overlay .ud-balance .l{font-size:11px;color:var(--ud-faint);}
   #user-dash-overlay .ud-balance .v{font-family:var(--ud-mono);font-size:22px;color:var(--ud-text);}
   #user-dash-overlay .ud-sub{font-size:11px;color:var(--ud-faint);padding:0 16px 12px;margin:0 20px 16px;
-    border:1px solid var(--ud-line);border-top:none;border-radius:0 0 8px 8px;}
+    border:1px solid var(--ud-line);border-top:none;border-radius:0 0 4px 4px;}
   #user-dash-overlay .ud-tabs{display:flex;border-bottom:1px solid var(--ud-line);margin:0 20px 14px;gap:2px;}
   #user-dash-overlay .ud-tab{padding:9px 12px;font-size:12px;color:var(--ud-faint);cursor:pointer;
     border-bottom:2px solid transparent;}
-  #user-dash-overlay .ud-tab.active{color:var(--ud-pri);border-bottom-color:var(--ud-pri);font-weight:700;}
+  #user-dash-overlay .ud-tab.active{color:var(--ud-text);border-bottom-color:var(--ud-dim);}
   #user-dash-overlay .ud-body{padding:0 20px 20px;}
   #user-dash-overlay .ud-pane{display:none;}
   #user-dash-overlay .ud-pane.active{display:block;}
-  #user-dash-overlay .ud-rows{border:1px solid var(--ud-line);border-radius:8px;overflow:hidden;}
+  #user-dash-overlay .ud-rows{border:1px solid var(--ud-line);border-radius:4px;overflow:hidden;}
   #user-dash-overlay .ud-txn{display:grid;grid-template-columns:12px 1fr auto;align-items:center;gap:10px;
-    padding:10px 12px;border-bottom:1px solid var(--ud-line);background:#fff;}
+    padding:10px 12px;border-bottom:1px solid var(--ud-line);background:var(--ud-panel);}
   #user-dash-overlay .ud-txn:last-child{border-bottom:none;}
   #user-dash-overlay .ud-dot{width:6px;height:6px;border-radius:50%;background:var(--ud-dim);}
   #user-dash-overlay .ud-title{color:var(--ud-text);font-size:12.5px;}
@@ -2558,8 +2281,24 @@ document.addEventListener('keydown', function (e) {
       <button class="ud-close" onclick="closeUserDashboard()">✕</button>
     </div>
 
-    <div id="user-dash-loading" style="padding:40px 24px;text-align:center;color:var(--ud-faint);font-size:13px">
-      확인 중…
+    <div id="user-dash-lookup" style="padding:28px 24px">
+      <div style="font-size:12.5px;color:var(--ud-dim);margin-bottom:14px;line-height:1.6">
+        GDC 충전 시 사용한 전화번호로 본인 확인 후 잔액과 이용 내역을 확인할 수 있습니다.
+      </div>
+      <input id="user-dash-phone" type="tel" placeholder="010-0000-0000" autocomplete="tel">
+      <div id="user-dash-err" class="ud-err"></div>
+      <button id="user-dash-btn" class="ud-btn primary" onclick="_userDashRequestOtp()">인증번호 받기</button>
+    </div>
+
+    <div id="user-dash-otp" style="display:none;padding:28px 24px">
+      <div style="font-size:12.5px;color:var(--ud-dim);margin-bottom:14px;line-height:1.6">
+        <span id="user-dash-otp-phone"></span>로 전송된 인증번호 6자리를 입력하세요.
+      </div>
+      <input id="user-dash-code" type="text" inputmode="numeric" maxlength="6" placeholder="123456" autocomplete="one-time-code"
+             style="letter-spacing:4px;text-align:center;">
+      <div id="user-dash-otp-err" class="ud-err"></div>
+      <button id="user-dash-otp-btn" class="ud-btn primary" onclick="_userDashVerifyOtp()">확인</button>
+      <button class="ud-btn" onclick="_userDashReset()">다른 번호로 다시 시작</button>
     </div>
 
     <div id="user-dash-result" style="display:none;padding-bottom:24px">
@@ -2590,7 +2329,7 @@ document.addEventListener('keydown', function (e) {
         </div>
       </div>
       <div style="padding:0 20px">
-        <button class="ud-btn" onclick="_userDashSwitchAccount()">다른 번호로 조회</button>
+        <button class="ud-btn" onclick="_userDashReset()">다른 번호로 조회</button>
       </div>
     </div>
 
@@ -2598,58 +2337,116 @@ document.addEventListener('keydown', function (e) {
 </div>
 
 <script>
-async function _openUserDashboard() {
+function _openUserDashboard() {
   document.getElementById('user-dash-overlay').style.display = 'flex';
   document.body.style.overflow = 'hidden';
   _userDashReset();
-  await KAuth.ensureLogin();
-  await _userDashLoadBalance();
+  setTimeout(() => document.getElementById('user-dash-phone')?.focus(), 100);
 }
 function closeUserDashboard() {
   document.getElementById('user-dash-overlay').style.display = 'none';
   document.body.style.overflow = '';
 }
 function _userDashReset() {
-  document.getElementById('user-dash-loading').style.display = 'block';
-  document.getElementById('user-dash-loading').textContent = '확인 중…';
+  document.getElementById('user-dash-lookup').style.display = 'block';
+  document.getElementById('user-dash-otp').style.display = 'none';
   document.getElementById('user-dash-result').style.display = 'none';
+  document.getElementById('user-dash-err').style.display = 'none';
+  document.getElementById('user-dash-otp-err').style.display = 'none';
+  document.getElementById('user-dash-phone').value = '';
+  document.getElementById('user-dash-code').value = '';
   document.getElementById('ud-charge-rows').innerHTML = '';
   document.getElementById('ud-usage-rows').innerHTML = '';
   document.querySelectorAll('#user-dash-overlay .ud-tab').forEach((t, i) => t.classList.toggle('active', i === 0));
   document.querySelectorAll('#user-dash-overlay .ud-pane').forEach((p, i) => p.classList.toggle('active', i === 0));
 }
-// 다른 번호로 조회 — KAuth 로그인을 지우고 다시 인증받은 뒤 잔액을 새로 불러온다.
-async function _userDashSwitchAccount() {
-  KAuth.logout();
-  _userDashReset();
-  await KAuth.ensureLogin();
-  await _userDashLoadBalance();
+// 국내 전화번호(010-0000-0000 등)를 +82 e164로 변환 — handlePhoneOtpRequest가
+// 기대하는 형식과 동일한 관례(맨 앞 0을 유지한 채 +82를 붙임).
+function _toE164(raw) {
+  const digits = raw.replace(/\D/g, '');
+  if (!digits) return null;
+  return '+82' + digits;
 }
-// 공용 인증 모듈(KAuth)이 이미 확보한 phone_verify_token으로 잔액·구독을
-// 조회한다 — plan.hondi.net·klaw.hondi.net 등에서 이미 로그인했으면
-// 여기서 다시 전화번호를 묻지 않는다(2026-09-06, SSO 통합).
-async function _userDashLoadBalance() {
-  const loading = document.getElementById('user-dash-loading');
+async function _userDashRequestOtp() {
+  const raw = document.getElementById('user-dash-phone').value.trim();
+  const err = document.getElementById('user-dash-err');
+  const btn = document.getElementById('user-dash-btn');
+  const e164 = _toE164(raw);
+  if (!e164) { err.textContent = '전화번호를 입력해 주세요.'; err.style.display = 'block'; return; }
+  err.style.display = 'none';
+  btn.disabled = true; btn.textContent = '전송 중…';
   try {
-    const balRes = await fetch(`${WORKER_URL}/user/gdc-balance`, {
+    const res  = await fetch(`${WORKER_URL}/biz/phone-otp-request`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone_verify_token: KAuth.getToken() }),
+      body: JSON.stringify({ e164 }),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data?.ok) {
+      err.textContent = data?.message || '인증번호 발송에 실패했습니다.';
+      err.style.display = 'block';
+      return;
+    }
+    _userDashState = { e164 };
+    document.getElementById('user-dash-otp-phone').textContent = raw;
+    document.getElementById('user-dash-lookup').style.display = 'none';
+    document.getElementById('user-dash-otp').style.display = 'block';
+    setTimeout(() => document.getElementById('user-dash-code')?.focus(), 100);
+  } catch (e) {
+    err.textContent = '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.';
+    err.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = '인증번호 받기';
+  }
+}
+let _userDashState = null;
+async function _userDashVerifyOtp() {
+  const code = document.getElementById('user-dash-code').value.trim();
+  const err  = document.getElementById('user-dash-otp-err');
+  const btn  = document.getElementById('user-dash-otp-btn');
+  if (!_userDashState?.e164) { _userDashReset(); return; }
+  if (!code) { err.textContent = '인증번호를 입력해 주세요.'; err.style.display = 'block'; return; }
+  err.style.display = 'none';
+  btn.disabled = true; btn.textContent = '확인 중…';
+  try {
+    // 1단계 — OTP 검증, phone_verify_token 발급 (guid 없는 2필드 토큰:
+    // 이 흐름은 claim이 아니라 "이 번호를 내가 통제한다"는 증명만 필요).
+    const verifyRes  = await fetch(`${WORKER_URL}/biz/phone-otp-verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ e164: _userDashState.e164, code }),
+    });
+    const verifyData = await verifyRes.json().catch(() => null);
+    if (!verifyRes.ok || !verifyData?.phone_verify_token) {
+      err.textContent = verifyData?.message || '인증번호가 일치하지 않습니다.';
+      err.style.display = 'block';
+      return;
+    }
+    // 2단계 — 검증된 토큰으로 잔액·구독 조회 (관리자 인증과 무관한
+    // 공개 엔드포인트, 토큰이 전화번호 소유를 증명하는 유일한 근거).
+    const balRes  = await fetch(`${WORKER_URL}/user/gdc-balance`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone_verify_token: verifyData.phone_verify_token }),
     });
     const balData = await balRes.json().catch(() => null);
     if (!balRes.ok || !balData?.ok) {
-      loading.textContent = balData?.message || '이 전화번호로 등록된 프로필을 찾을 수 없습니다.';
+      err.textContent = balData?.message || '이 전화번호로 등록된 프로필을 찾을 수 없습니다.';
+      err.style.display = 'block';
       return;
     }
     document.getElementById('user-dash-balance').textContent = (balData.balance ?? 0).toLocaleString();
     const subLabel = balData.subscribed ? (balData.tier_name || balData.tier || '구독중') : '미구독';
     document.getElementById('user-dash-renew').textContent =
       subLabel + (balData.renews_at ? ` · 다음 결제 ${balData.renews_at}` : '');
-    loading.style.display = 'none';
+    document.getElementById('user-dash-otp').style.display = 'none';
     document.getElementById('user-dash-result').style.display = 'block';
     if (balData.guid) _userDashLoadHistory(balData.guid);
   } catch (e) {
-    loading.textContent = '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.';
+    err.textContent = '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.';
+    err.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = '확인';
   }
 }
 
@@ -2873,7 +2670,6 @@ function _showAdminBody() {
   _loadTrialSettings();
   _loadStats();
   _loadGdcSummary();
-  _loadChargeList();
   _loadCFCredentials();
   _renderSubdomainList();
   _loadAutoRefreshStatus();
@@ -2951,52 +2747,6 @@ async function _loadGdcSummary() {
     }
     ['gdc-signup-bonus','gdc-manual-charge','gdc-ai-usage'].forEach(id=>{ document.getElementById(id).textContent='—'; });
     console.warn('[gdc-summary]', e.message);
-  }
-}
-
-// ── GDC 충전 내역 (2026-09-06 신설) ──────────────────────────────
-// /admin/charge-list(worker.js handleAdminChargeList) 연동 — charge_requests
-// 컬렉션을 status별로 그대로 보여준다. /biz/charge-list와 조회 로직은
-// 동일하지만, 저 엔드포인트는 정적 시크릿을 ?secret=으로 받는 머신용
-// 인증이라 브라우저 대시보드에 그대로 못 쓴다(개발자도구로 시크릿 노출).
-// 여기서는 이미 이 대시보드가 쓰고 있는 단기만료 Bearer 토큰
-// (_adminAuthHeaders)으로 인증한다.
-async function _loadChargeList() {
-  const tbody  = document.getElementById('charge-list-body');
-  const empty  = document.getElementById('charge-list-empty');
-  const status = document.getElementById('charge-list-status').value;
-  empty.style.display = 'block';
-  empty.textContent = '불러오는 중…';
-  tbody.innerHTML = '';
-  try {
-    const res  = await fetch(`${WORKER_URL}/admin/charge-list?status=${encodeURIComponent(status)}&limit=100`,
-      {signal:AbortSignal.timeout(10000), headers:_adminAuthHeaders()});
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.message || 'API_ERROR');
-    const reqs = data.requests || [];
-    if (reqs.length === 0) {
-      empty.textContent = status === 'pending' ? '대기 중인 신청이 없습니다.' : '확정된 충전 내역이 없습니다.';
-      return;
-    }
-    empty.style.display = 'none';
-    const statusLabel = { matched: '확정됨', pending: '대기 중', expired: '만료됨' };
-    tbody.innerHTML = reqs.map(r => {
-      const amount = r.status === 'matched' ? (r.matched_krw ?? r.requested_krw) : r.requested_krw;
-      const when   = r.status === 'matched' ? (r.matched_at || r.created) : r.created;
-      const whenFmt = when ? new Date(when).toLocaleString('ko-KR', {timeZone:'Asia/Seoul', month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'}) : '—';
-      return `<tr style="border-top:1px solid var(--ad-line,#3c3f46)">
-        <td style="padding:7px 8px 7px 0;font-family:var(--ad-mono);word-break:break-all">${_esc(r.guid || '—')}</td>
-        <td style="padding:7px 8px 7px 0;font-family:var(--ad-mono)">${_esc(r.match_code || '—')}</td>
-        <td style="padding:7px 8px 7px 0;text-align:right;font-family:var(--ad-mono)">${(amount ?? 0).toLocaleString('ko-KR')}</td>
-        <td style="padding:7px 8px 7px 0;color:var(--ad-dim,#9aa0a8)">${_esc(r.channel || '—')}</td>
-        <td style="padding:7px 8px 7px 0">${statusLabel[r.status] || _esc(r.status || '—')}</td>
-        <td style="padding:7px 0;color:var(--ad-faint,#6e737a);font-family:var(--ad-mono)">${whenFmt}</td>
-      </tr>`;
-    }).join('');
-  } catch(e) {
-    empty.style.display = 'block';
-    empty.textContent = '조회 실패: ' + e.message;
-    console.warn('[charge-list]', e.message);
   }
 }
 
@@ -4343,79 +4093,6 @@ window.closeHondiZoom = function() {
     sendBtn.disabled = false;
     input.focus();
   };
-})();
-</script>
-
-<script>
-// 2026-09-05 신설 — 섹션 카드화(db-card/db-panel) 토글. 클릭한 카드
-// 바로 아래(같은 grid) 패널이 열리고, 다시 누르면 닫힌다. 여러 개
-// 동시에 열어도 서로 방해하지 않는다(배타적 아코디언 아님).
-document.addEventListener('click', function (e) {
-  var card = e.target.closest('.db-card');
-  if (!card) return;
-  var panel = document.getElementById(card.getAttribute('data-panel'));
-  if (!panel) return;
-  var willOpen = !panel.classList.contains('open');
-  panel.classList.toggle('open', willOpen);
-  card.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
-});
-</script>
-
-<script>
-// 2026-09-05 신설 — 1~4페이지 전환. 1페이지(브로슈어)는 원래 문서
-// 흐름 그대로 두고, 2~4페이지는 각각 db-page-N 안에 있다가 해당
-// 번호를 누를 때만 보인다. 페이지를 옮기면 이전 페이지에서 열어뒀던
-// 카드 패널은 자동으로 닫아 다음에 다시 봐도 항상 접힌 상태로 시작한다.
-document.addEventListener('click', function (e) {
-  var btn = e.target.closest('.db-page-btn');
-  if (!btn) return;
-  var page = btn.getAttribute('data-page');
-
-  document.querySelectorAll('.db-page-btn').forEach(function (b) {
-    b.classList.toggle('active', b.getAttribute('data-page') === page);
-  });
-
-  [2, 3, 4].forEach(function (n) {
-    var el = document.getElementById('db-page-' + n);
-    if (el) el.style.display = (String(n) === page) ? 'block' : 'none';
-  });
-  document.getElementById('ai-gov-how').style.display = (page === '1') ? '' : 'none';
-
-  document.querySelectorAll('.db-panel.open').forEach(function (p) { p.classList.remove('open'); });
-  document.querySelectorAll('.db-card[aria-expanded="true"]').forEach(function (c) { c.setAttribute('aria-expanded', 'false'); });
-
-  // ★ 2026-09-05 수정 — 항상 상단 페이지네이션 바(dbPagination) 위치로
-  // 스크롤하던 것을, 실제로 방금 보여진 페이지 콘텐츠의 "맨 위"로
-  // 바꿨다. dbPagination은 1페이지(브로슈어) 콘텐츠 끝(=2페이지 시작
-  // 직전)에 고정된 위치라, "1"을 눌러 1페이지로 돌아와도 그 지점으로
-  // 스크롤되어 1페이지의 맨 아래만 보이는 문제가 있었다.
-  var scrollTarget = (page === '1')
-    ? document.getElementById('ai-gov-how')
-    : document.getElementById('db-page-' + page);
-  if (scrollTarget) scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
-});
-</script>
-
-<script>
-// 2026-09-05 신설 — 베타 가입 혜택 배너의 "다시 보지 않기".
-// 페이지 로드 시 이전에 체크하고 닫은 적 있으면 아예 렌더링하지 않고,
-// 닫기(✕) 버튼을 누르면 그 순간 체크박스 상태를 보고 localStorage에
-// 남길지 결정한다 — 체크 안 하고 닫으면 이번 방문에서만 숨겨지고
-// 다음 방문엔 다시 보인다.
-(function () {
-  var KEY = 'hondi_hide_beta_promo';
-  var banner = document.getElementById('bhPromoBanner');
-  if (!banner) return;
-  if (localStorage.getItem(KEY) === '1') {
-    banner.style.display = 'none';
-    return;
-  }
-  document.getElementById('bhPromoClose').addEventListener('click', function () {
-    if (document.getElementById('bhPromoHideChk').checked) {
-      localStorage.setItem(KEY, '1');
-    }
-    banner.style.display = 'none';
-  });
 })();
 </script>
 
