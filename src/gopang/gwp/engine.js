@@ -20,23 +20,6 @@ import { GWP_ALLOWED_ORIGINS } from './allowed-origins.js';
 // 스스로 계산해서 baseline으로 깔고, 호출부가 넘긴 값은 그 위에
 // 덮어쓰는 방식으로 바꾼다 — 호출부가 깜빡해도 항상 실린다.
 import { _buildRoutingFacts } from '../services/location.js';
-// 2026-07-30 신설 — SSO 경로1(gwp_token) 발급용. auth/gopang-sso.js가
-// 이미 export하고 있던 issueToken()을 여기서 처음으로 실제 호출한다
-// (지금까지 이 저장소 어디에서도 import된 적이 없었다 — 경로1이 항상
-// 스킵되고 매번 opener postMessage 왕복에만 의존하던 근본원인).
-import { issueToken } from '../../../auth/gopang-sso.js';
-
-// gopang-sso.js의 _detectServiceId()와 동일한 규칙 — 대상 서비스
-// hostname으로부터 svc id를 뽑는다(발급 토큰의 svc 필드가 수신 측
-// 검증과 정확히 일치해야 하므로, 로직을 새로 짜지 않고 그대로 미러링).
-function _detectSvcIdForUrl(urlStr) {
-  try {
-    const host = new URL(urlStr).hostname;
-    if (host === 'hondi.net' || host === 'www.hondi.net') return 'gopang';
-    const sub = host.replace(/\.hondi\.net$/, '');
-    return sub !== host ? sub : 'unknown';
-  } catch { return 'unknown'; }
-}
 
 // ★ 2026-07-11 Phase 0 신설(파이프라인 사고실험 미비점4) — PDV 기록과
 // 함께 gwp_registry.call_count_30d를 증분한다. 정기 갱신 방법론
@@ -144,19 +127,11 @@ export async function _gwpLaunch(service, context, _preTab = null, facts = null)
   svcUrl.searchParams.set('ctx',      safeCtx);
   svcUrl.searchParams.set('ctx_enc',  'b64');  // 수신 측에 인코딩 방식 명시
 
-  // gwp_token 발급 (2026-07-30 신설 — SSO 경로1 활성화)
-  // 실패해도 치명적이지 않음 — 기존처럼 경로2B'(opener)로 자연스럽게
-  // 폴백된다. 여기서 막히면 안 되므로 try/catch로 감싼다.
-  try {
-    if (_USER) {
-      const svcId = _detectSvcIdForUrl(service.url);
-      const { payload, sig } = await issueToken(_USER, svcId);
-      const gwpToken = btoa(unescape(encodeURIComponent(JSON.stringify({ payload, sig }))));
-      svcUrl.searchParams.set('gwp_token', gwpToken);
-    }
-  } catch (e) {
-    console.warn('[GWP] gwp_token 발급 실패 (opener 인증 경로로 자동 폴백됨):', e.message);
-  }
+  // 2026-09-07: 여기 있던 gwp_token 발급(SSO 경로1, gopang-sso.js
+  // issueToken() 호출) 블록 제거 — 모든 K-서비스가 k-service-auth-client.js
+  // 단독 체제로 전환되면서 gwp_token을 읽는 수신 측이 하나도 남지 않아
+  // 죽은 코드가 됐다. 위 token 파라미터(GWP_TOKEN, PDV 로깅용 식별자)는
+  // 여전히 쓰이므로 그대로 둔다.
 
   // facts: 메인 비서가 이미 확보한 부가 정보(현재는 currentLocation만) —
   // ctx와 동일한 이유로 base64 인코딩. null/빈 객체면 아예 파라미터를
