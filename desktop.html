@@ -1363,13 +1363,19 @@ document.addEventListener('keydown', function (e) {
 
     <p class="bh-p">수만 개의 초소형 AI 엔진이 서로 소통하며 업무를 처리하므로, 기존에 수 년이 걸리던 개인파산 업무를 이론적으로는 3분 안에 끝낼 수 있습니다. "이론적"이라고 말씀드리는 이유는, 법원·시청·국세청·은행 등이 아직 <strong>혼디</strong>를 받아들이지 않았기 때문입니다.</p>
 
-    <h2 class="bh-h2"><span class="bh-n">6</span><span class="bh-h2-text">제주 토산품에서, 한국을 거쳐 세계로</span></h2>
+    <h2 class="bh-h2"><span class="bh-n">6</span><span class="bh-h2-text">오픈해시: 위변조 불가능한 기록</span></h2>
+    <p class="bh-p">완전한 AI 정부로 전환하려면, 한 가지 빠진 게 있는데, 무엇인지 짐작하시나요?</p>
+    <p class="bh-p">사람과 사람 간의 소통은 일을 진행하는 데 필수적이지만, 온갖 분쟁의 씨앗이기도 합니다. 그러한 다툼은 대개 누가 언제 어디서 어떤 말과 문서를 주고받았는지에 관한 사실의 다툼입니다. 특히 정부 관련 업무에서 민원인과 부서 직원 간의 마찰과 다툼이 그러하며, 책임 소재를 정하는 핵심입니다.</p>
+    <p class="bh-p"><strong>오픈해시</strong>는 모든 소통을 6하 원칙에 따라 기록하며, 이 기록은 결코 위변조될 수 없습니다. 사람과 사람 간, 사람과 기관 간, 기관과 기관 간의 모든 소통이 6하 원칙에 따라 기록되고, 그 기록이 결코 위변조될 수 없는 세상을 상상해 보십시오.</p>
+    <p class="bh-p">더욱이 <strong>오픈해시</strong> 기록은 오직 그 주인만 볼 수 있습니다. 오직 데이터의 소유자만 볼 수 있는 기록이 우리 사회의 갈등과 다툼을 어떻게 차단할 수 있을까요? 바로 <strong>'자기 증명'</strong>입니다 — 누구든 자신의 말이 진실임을 기술적으로 입증할 수 있기 때문입니다.</p>
+
+    <h2 class="bh-h2"><span class="bh-n">7</span><span class="bh-h2-text">제주 토산품에서, 한국을 거쳐 세계로</span></h2>
     <p class="bh-p"><strong>혼디</strong>는 제주도에서, 제주 사람이 만든 제주의 토산품이자 특산품입니다. 제주도에서 <strong>혼디</strong>가 성공적으로 런칭하면 한국이 뒤따르고, 한국이 해내면 세계가 뒤따를 것입니다.</p>
 
-    <h2 class="bh-h2"><span class="bh-n">7</span><span class="bh-h2-text">지금은 현장 테스트 단계입니다</span></h2>
+    <h2 class="bh-h2"><span class="bh-n">8</span><span class="bh-h2-text">지금은 현장 테스트 단계입니다</span></h2>
     <p class="bh-p">2026년 9월 1일부터 12월 31일까지, <strong>혼디</strong>의 수만 개 AI 엔진 하나하나를 현장에서 테스트합니다. 기존 설계의 미비점을 보완하고 장점을 강화해, 2027년 상반기에 전자동 AI 정부·대학·병원·교통물류·금융·시장·산업·기업 등을 정식으로 출시할 예정입니다.</p>
 
-    <h2 class="bh-h2"><span class="bh-n">8</span><span class="bh-h2-text"><strong>혼디</strong>는 '<b>함께</b>'라는 뜻입니다</span></h2>
+    <h2 class="bh-h2"><span class="bh-n">9</span><span class="bh-h2-text"><strong>혼디</strong>는 '<b>함께</b>'라는 뜻입니다</span></h2>
     <p class="bh-p">'<strong>혼디</strong>'는 제주 토속어로 '<b>함께</b>'라는 뜻입니다. <strong>혼디</strong>는 저희가 개발했지만, 여러분이 '<b>함께</b>' 하셔야 비로소 완성할 수 있습니다. 그 방법은 유료 회원 가입입니다.</p>
     <div class="bh-analogy">1만 명이 <strong>혼디</strong>에 가입하면, 제주도에 <strong>혼디</strong> 자체 AI 서버를 구축할 수 있습니다.</div>
 
@@ -4338,13 +4344,26 @@ window.closeHondiZoom = function() {
       // check_no_embedded_sp.py가 80줄 넘는 리터럴을 오탐 방지 차원에서
       // 건너뛰는 사각지대에 이 SP(약 220줄)가 걸려 있었다.
       const HONDI_VISITOR_SP = await _loadVisitorSP();
+
+      // ── 2026-09-06(#2-1): 현재 화면 컨텍스트 주입 ────────────────
+      // 베이스 SP는 세션당 1회 fetch해 캐시하지만(_visitorSPCache),
+      // 화면 컨텍스트는 페이지마다 달라지므로 캐시하지 않고 매 전송
+      // 시점에 새로 조립한다 — window.HONDI_CURRENT_CONTEXT는
+      // openStandalone()/closeStandalone()/loadPage('overview')가
+      // 페이지 전환 시점에 미리 갱신해둔 값이다.
+      const _ctxKey  = window.HONDI_CURRENT_CONTEXT || 'overview';
+      const _ctxText = (window.HONDI_PAGE_CONTEXT || {})[_ctxKey] || '';
+      const composedSP = _ctxText
+        ? HONDI_VISITOR_SP + '\n\n---\n[현재 화면 컨텍스트]\n' + _ctxText
+        : HONDI_VISITOR_SP;
+
       const res = await fetch(WORKER_URL + '/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           provider: 'deepseek',
           model: 'deepseek-v4-flash',
-          system: HONDI_VISITOR_SP,
+          system: composedSP,
           messages: history,
           max_tokens: 1000
         })
@@ -4494,6 +4513,56 @@ const PAGES = {
   'k-government':    '/pages/k-government.html',
 };
 
+// ── 2026-09-06(#2-1): 페이지별 채팅 컨텍스트 레지스트리 ──────────────
+// "혼디 사이트 전반을 이해하는 채팅"의 1단계: 페이지 전환 시점에
+// window.HONDI_CURRENT_CONTEXT만 갱신해두고, 실제 프롬프트 조립은
+// 사용자가 채팅을 호출하는 시점(cpSend())에 한다 — 매 전환마다
+// LLM을 부르거나 무거운 컨텍스트를 미리 굽지 않기 위함이다.
+// 값은 짧게(각 2~4문장) 유지한다 — 매 채팅 요청마다 system 프롬프트에
+// 그대로 얹히므로, 길어지면 토큰 비용과 응답 지연이 늘어난다.
+window.HONDI_CURRENT_CONTEXT = 'overview';
+
+window.HONDI_PAGE_CONTEXT = {
+  'overview': '사용자는 지금 혼디(hondi.net) 메인 랜딩 화면(개요)에 있습니다. ' +
+    'AI 비서 간 업무 자동화, PDV(개인 데이터 금고), OpenHash 원장, GDC 등 ' +
+    '혼디 전체를 소개하는 첫 화면입니다.',
+  'klaw': '사용자는 지금 K-Law 소개 섹션에 있습니다. K-Law는 법무법인과 ' +
+    '공동 운영하는 AI 법률 자문·중재 플랫폼입니다. 대법원 판결 시뮬레이션은 ' +
+    '참고용이며 법적 효력이 없다는 점, 정식 중재만 법적 집행력을 갖는다는 ' +
+    '점을 답변 시 함께 안내하세요.',
+  'agents': '사용자는 지금 "에이전트"(AI 비서) 소개 섹션에 있습니다. 각 ' +
+    '이용자의 AI 비서가 어떻게 학습·진화하며 다른 이용자의 AI 비서와 ' +
+    '업무를 자동으로 조율하는지가 이 섹션의 핵심 주제입니다.',
+  'openhash': '사용자는 지금 OpenHash(오픈해시) 기술 소개 섹션에 있습니다. ' +
+    'OpenHash는 혼디 전체의 위변조 방지 분산 원장 기술입니다 — GDC 거래, ' +
+    'K-Law 증거, PDV 기록이 모두 이 위에서 검증됩니다.',
+  'teasers': '사용자는 지금 서비스 티저 모음 섹션에 있습니다. 아직 정식 ' +
+    '출시 전이거나 예고 단계인 기능들을 간단히 소개하는 화면입니다.',
+  'ai-types': '사용자는 지금 "나만의 AI 비서" 유형 소개 섹션에 있습니다. ' +
+    '직업·상황별로 AI 비서가 어떻게 다르게 구성되는지를 설명합니다.',
+  'hondi-market': '사용자는 지금 혼디장(K-Market) 소개 섹션에 있습니다. ' +
+    'AI 비서 간 거래가 이뤄지는 시장 기능과 GDC 결제 연동을 설명합니다.',
+  'scenarios': '사용자는 지금 "혼디 숫자 코드" 시나리오 섹션에 있습니다. ' +
+    '실생활 상황별로 혼디를 어떻게 쓰는지 구체적 사례를 보여줍니다.',
+  'professional-ai': '사용자는 지금 "전문 분야 AI" 섹션에 있습니다. 의사· ' +
+    '변호사·공무원·회계사 등 직업별 전문가 AI 페르소나를 소개합니다.',
+  'scenario-test': '사용자는 지금 "시나리오 테스트" 섹션에 있습니다. 혼디 ' +
+    '기능을 실제로 미리 체험해볼 수 있는 테스트 화면입니다.',
+  'usage-guide': '사용자는 지금 이용 안내 섹션에 있습니다. 회원가입, 지갑 ' +
+    '생성, 기본 사용법 등 온보딩 정보를 다룹니다.',
+  'ai-assistant': '사용자는 지금 AI 비서 상세 설명 섹션에 있습니다.',
+  'ai-engine': '사용자는 지금 AI 엔진(내부 동작 원리) 설명 섹션에 있습니다.',
+  'rule-of-law': '사용자는 지금 법치·거버넌스 설명 섹션에 있습니다. 혼디의 ' +
+    '헌법적 원칙과 이용자 보호 장치를 다룹니다.',
+  'k-services': '사용자는 지금 K-서비스 전체 목록 섹션에 있습니다. K-Law, ' +
+    'K-Tax, K-Market, GDC 등 16개 K-서비스 위성 저장소를 개괄합니다.',
+  'expert-personas': '사용자는 지금 전문가 페르소나(SP) 체계 설명 섹션에 ' +
+    '있습니다. 각 분야 전문가 AI가 어떻게 문서(SP)로 정의되고 관리되는지를 ' +
+    '다룹니다.',
+  'k-government': '사용자는 지금 K-Government(전자정부 연동) 설명 섹션에 ' +
+    '있습니다. 지자체·중앙부처 서비스와의 연동 방향을 다룹니다.',
+};
+
 // 로드 상태 추적
 const loaded   = new Set();   // 이미 DOM에 삽입된 섹션
 let   loading  = false;       // 현재 fetch 진행 중 여부
@@ -4622,6 +4691,7 @@ async function openStandalone(name) {
   overlay.style.display = 'block';
   document.body.style.overflow = 'hidden';
   history.pushState({ page: name, standalone: true }, '', '#' + name);
+  window.HONDI_CURRENT_CONTEXT = name; // #2-1: 채팅 컨텍스트 주입용
 
   // 사이드바 active
   document.querySelectorAll('.sb-item').forEach(el => el.classList.remove('active'));
@@ -4647,6 +4717,7 @@ function closeStandalone() {
   if (overlay) overlay.style.display = 'none';
   document.body.style.overflow = '';
   history.back();
+  window.HONDI_CURRENT_CONTEXT = 'overview'; // #2-1: 채팅 컨텍스트 주입용
 }
 
 async function loadPage(name) {
@@ -4662,6 +4733,7 @@ async function loadPage(name) {
 
     history.pushState({ page: 'overview' }, '', '#overview');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.HONDI_CURRENT_CONTEXT = 'overview'; // #2-1: 채팅 컨텍스트 주입용
     return;
   }
 
