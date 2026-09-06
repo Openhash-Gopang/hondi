@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<!--
+  이 문서가 다루는 범위: 2026-09-06 세션(GDC P2P 이체 라이브 테스트가
+  register-key→mint까지는 통과하는데 실제 서명 이체 단계에서 매번
+  "Something went wrong" 제네릭 오류로 막히던 문제 → 진단용 try/catch로
+  실제 예외 노출 → 서로 다른 두 개의 근본 원인(Goja 스코프 버그,
+  Worker의 tx 재구성으로 인한 서명 불일치) 순차 발견·수정 → 라이브
+  테스트 최초 성공 → 같은 버그 패턴이 파일에 더 있는지 AST 감사 →
+  예방적 수정 + 죽은 코드 삭제)에서 실제로 밟은 디버깅 과정과 확인된
+  사실을 다룹니다. 특정 기능의 사용법이 아니라 "다음에 같은 부류의
+  버그를 마주쳤을 때 반복하지 말아야 할 시행착오와, 먼저 의심해봐야
+  할 것" 모음입니다.
+  관련 문서: MANUAL_INDEX.html 에서 전체 문서 지도 확인
+  (desktop.html 좌측 사이드바 "🛠 개발자 문서" 섹션에서 링크됨)
+  v1.0(2026-09-06): 신설
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GDC 이체 최초 성공 + Goja 스코프 버그 실전 교훈 매뉴얼 — Gopang</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+:root {
+  --ink:      #111111;
+  --ink-2:    #3a3a3a;
+  --ink-3:    #6b6b6b;
+  --ink-4:    #9a9a9a;
+  --line:     #e2e2e2;
+  --line-2:   #cfcfcf;
+  --bg:       #ffffff;
+  --bg-2:     #fafafa;
+  --bg-3:     #f2f2f2;
+  --accent:   #34495e;
+  --accent-lt:#eef1f4;
+  --good:     #2e7d4f;
+  --good-lt:  #eaf6ef;
+  --mono:     'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  --radius:   4px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Pretendard', -apple-system, 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.doc-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,0.94);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.doc-header-inner {
+  max-width: 1040px; margin: 0 auto;
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.doc-logo {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 14px; font-weight: 700; color: var(--ink);
+  text-decoration: none; letter-spacing: -0.2px;
+}
+.doc-logo svg { color: var(--ink-3); }
+.doc-header-sub {
+  font-size: 12px; color: var(--ink-4); font-weight: 400;
+  padding-left: 9px; border-left: 1px solid var(--line-2); margin-left: 2px;
+}
+.doc-back {
+  font-size: 12px; color: var(--ink-3); text-decoration: none;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.doc-back:hover { color: var(--ink); }
+.doc-back svg { flex-shrink: 0; }
+
+.doc-layout {
+  max-width: 1200px; margin: 0 auto;
+  padding: 40px 24px 100px;
+  display: grid;
+  grid-template-columns: 216px 1fr;
+  gap: 44px;
+  align-items: start;
+}
+@media (max-width: 860px) {
+  .doc-layout { grid-template-columns: 1fr; }
+  .doc-toc { display: none; }
+}
+.doc-toc { position: sticky; top: 72px; }
+.doc-toc-title {
+  font-size: 12px; font-weight: 700; letter-spacing: .8px;
+  text-transform: uppercase; color: var(--ink-4);
+  margin-bottom: 10px;
+}
+.doc-toc a {
+  display: block;
+  font-size: 12px; color: var(--ink-3);
+  text-decoration: none;
+  padding: 5px 0 5px 11px;
+  border-left: 2px solid var(--line);
+  line-height: 1.4;
+  transition: color .12s, border-color .12s;
+}
+.doc-toc a:hover, .doc-toc a.active {
+  color: var(--ink);
+  border-left-color: var(--accent);
+  font-weight: 600;
+}
+
+.doc-content { min-width: 0; }
+
+.gs {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+  overflow: hidden;
+  opacity: 0; transform: translateY(10px);
+  transition: opacity .4s ease, transform .4s ease;
+}
+.gs.in { opacity: 1; transform: none; }
+.gs-head {
+  display: flex; align-items: flex-start; gap: 13px;
+  padding: 20px 24px;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--line);
+}
+.gs-icon {
+  flex-shrink: 0; width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent);
+  background: var(--accent-lt);
+  border-radius: var(--radius);
+}
+.gs-icon.good { color: var(--good); background: var(--good-lt); }
+.gs-icon svg { width: 16px; height: 16px; }
+.gs-head-text { flex: 1; }
+.gs-num {
+  font-size: 11px; font-weight: 700; letter-spacing: .6px;
+  text-transform: uppercase; color: var(--ink-4);
+  margin-bottom: 2px;
+}
+.gs-title { font-size: 16px; font-weight: 700; color: var(--ink); }
+.gs-subtitle { font-size: 12.5px; color: var(--ink-3); margin-top: 3px; }
+.gs-body { padding: 22px 24px 24px; }
+.gs-body p { margin-bottom: 14px; color: var(--ink-2); }
+.gs-body p:last-child { margin-bottom: 0; }
+.gs-body ul, .gs-body ol { margin: 0 0 14px 20px; color: var(--ink-2); }
+.gs-body li { margin-bottom: 7px; }
+.gs-body li:last-child { margin-bottom: 0; }
+.gs-body h4 { font-size: 13px; font-weight: 700; color: var(--ink); margin: 18px 0 8px; }
+.gs-body h4:first-child { margin-top: 0; }
+.gs-body code {
+  font-family: var(--mono); font-size: 12.5px;
+  background: var(--bg-3); border: 1px solid var(--line);
+  border-radius: 3px; padding: 1px 5px;
+}
+.gs-body pre {
+  background: #1c1c1c; color: #e8e8e8;
+  border-radius: var(--radius);
+  padding: 14px 16px; overflow-x: auto;
+  font-family: var(--mono); font-size: 12px; line-height: 1.6;
+  margin-bottom: 14px;
+}
+.gs-body pre code { background: none; border: none; padding: 0; color: inherit; }
+
+.callout {
+  border-left: 3px solid var(--accent);
+  background: var(--accent-lt);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 13px 16px;
+  font-size: 13px; color: var(--ink-2);
+  margin-bottom: 14px;
+}
+.callout-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11.5px; font-weight: 700; color: var(--ink);
+  text-transform: uppercase; letter-spacing: .4px;
+  margin-bottom: 6px;
+}
+.callout-label svg { width: 13px; height: 13px; }
+.callout.warn { border-left-style: dashed; }
+.callout.good { border-left-color: var(--good); background: var(--good-lt); }
+.callout strong { color: var(--ink); }
+
+.doc-hero { margin-bottom: 32px; }
+.doc-hero-eyebrow {
+  font-size: 11.5px; font-weight: 700; letter-spacing: .5px;
+  color: var(--ink-4); text-transform: uppercase; margin-bottom: 10px;
+}
+.doc-hero-title {
+  font-size: 25px; font-weight: 800; line-height: 1.4; color: var(--ink);
+  margin-bottom: 14px; letter-spacing: -0.3px;
+}
+.doc-hero-title em { color: var(--accent); font-style: normal; }
+.doc-hero-desc { font-size: 14px; color: var(--ink-2); margin-bottom: 18px; max-width: 760px; }
+.doc-hero-meta {
+  display: flex; flex-wrap: wrap; gap: 16px;
+  font-size: 12px; color: var(--ink-3);
+  border-top: 1px solid var(--line); padding-top: 14px;
+}
+.doc-hero-meta strong { color: var(--ink-2); font-weight: 600; }
+
+table.evidence { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 12.5px; }
+table.evidence th, table.evidence td { border: 1px solid var(--line); padding: 7px 10px; text-align: left; }
+table.evidence th { background: var(--bg-3); font-weight: 700; color: var(--ink); }
+table.evidence td { color: var(--ink-2); }
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.in { opacity: 1; transform: translateY(0); }
+
+.badge {
+  display: inline-block; font-size: 11px; font-weight: 700;
+  padding: 2px 7px; border-radius: 3px;
+  background: var(--bg-3); color: var(--ink-3); border: 1px solid var(--line);
+  font-family: var(--mono);
+}
+.badge.merged { background: var(--good-lt); color: var(--good); border-color: var(--good); }
+</style>
+</head>
+<body>
+
+<header class="doc-header">
+  <div class="doc-header-inner">
+    <a class="doc-logo" href="../desktop.html">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+      혼디 · Gopang
+      <span class="doc-header-sub">개발자 문서</span>
+    </a>
+    <a class="doc-back" href="../desktop.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      데스크톱으로 돌아가기
+    </a>
+  </div>
+</header>
+
+<div class="doc-layout">
+
+  <nav class="doc-toc">
+    <div class="doc-toc-title">목차</div>
+    <a href="#overview">개요 — 이 문서가 왜 있는가</a>
+    <a href="#goal">오늘 세션의 목표와 흐름</a>
+    <a href="#lesson-genericerr">① PocketBase 제네릭 오류는 원인을 숨긴다 — 통째로 감싸서 노출시켜라</a>
+    <a href="#lesson-gojascope">② Goja는 콜백 바깥 최상위 선언을 콜백 안에서 못 본다(반복 재발 버그)</a>
+    <a href="#lesson-txhash">③ 서명 대상 객체는 다단계를 거치며 재구성하면 안 된다</a>
+    <a href="#lesson-deadcode">④ 죽은 코드는 고치지 말고, 로그로 확인한 뒤 지워라</a>
+    <a href="#outcome">결과 — 병합된 PR과 라이브 검증</a>
+    <a href="#followup">후속 과제 — 아직 병합 안 된 예방적 패치</a>
+    <a href="#checklist">다음에 비슷한 버그를 마주쳤을 때 체크리스트</a>
+    <a href="#related">관련 문서</a>
+  </nav>
+
+  <main class="doc-content">
+
+    <div class="doc-hero reveal">
+      <div class="doc-hero-eyebrow">SESSION LESSONS — 2026-09-06 세션 발견 정리</div>
+      <h1 class="doc-hero-title">GDC P2P 이체가 <em>단 한 번도 끝까지 성공한 적이 없었다</em> — 그래서 아무도 이 두 버그를 본 적이 없었다</h1>
+      <p class="doc-hero-desc">
+        register-key → mint(가입 축하금 발급)까지는 몇 주째 잘 동작하고
+        있었지만, 실제 서명이 붙은 GDC P2P 이체(<code>/wallet/gdc-transfer</code>
+        → <code>/api/tx</code>)는 매번 PocketBase의 제네릭 오류
+        <code>"Something went wrong while processing your request."</code>
+        로 막혔다. 원인을 노출시키자 서로 완전히 무관해 보이는 두 개의
+        근본 원인이 순서대로 드러났다 — 둘 다 <strong>"이 코드 경로가
+        실사용 조건으로 끝까지 실행된 게 이번이 처음이라 지금까지 발견되지
+        않았던"</strong> 버그였다. 이 문서는 그 진단·수정 과정과, 같은
+        버그 패턴을 파일 전체에서 선제적으로 찾아 없앤 후속 감사를
+        정리한 것이다.
+      </p>
+      <div class="doc-hero-meta">
+        <span><strong>대상 저장소</strong> Openhash-Gopang/hondi</span>
+        <span><strong>관련 PR</strong> #72 · #73 · #74 · #75</span>
+        <span><strong>작성</strong> 2026-09-06</span>
+      </div>
+    </div>
+
+    <section class="gs reveal" id="overview">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">Overview</div>
+          <div class="gs-title">이 문서가 왜 있는가</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          이 문서는 GDC 이체 자체의 사용법을 다루지 않는다. "실사용
+          조건으로 한 번도 실행돼 본 적 없는 코드 경로는, 겉보기에
+          아무리 안전해 보여도(try/catch로 감싸져 있어도, 이미 검증됐다는
+          주석이 달려 있어도) 실제로 검증된 게 아니다"라는, 오늘 세션에서
+          반복적으로 확인된 하나의 패턴을 기록해두기 위한 것이다.
+        </p>
+        <div class="callout">
+          <div class="callout-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            이 문서를 읽어야 하는 상황
+          </div>
+          PocketBase(Goja) 훅에서 원인 불명의 <code>"Something went
+          wrong"</code> 400/500을 마주쳤을 때 / 서명 검증·해시 재계산이
+          클라이언트-서버 간에 어긋나는 버그를 디버깅할 때 / 최상위
+          모듈 스코프에 유틸리티 함수나 객체를 선언해 여러 훅에서
+          공유하려 할 때 / 오래돼 보이는 라우트나 코드를 지워도 되는지
+          판단해야 할 때.
+        </div>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="goal">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">Goal</div>
+          <div class="gs-title">오늘 세션의 목표와 흐름</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <ol>
+          <li><strong>출발점</strong> — 이전 세션에서 GDC P2P 이체
+              라이브 테스트(<code>gdc_transfer_live_test.cjs</code>)가
+              구매자/판매자 계정 생성·가입 축하금 mint까지는 성공하지만,
+              실제 서명 이체(<code>sendGdc</code>)에서
+              <code>"Something went wrong while processing your
+              request."</code>(정본 400)로 막힌 채 크레딧이 소진돼
+              중단된 상태로 이어받음.</li>
+          <li><strong>1단계 — 원인 노출</strong> — nginx 로그·journalctl로
+              먼저 확인했으나 실패(hanlim 노드 로그는 journald가 아니라
+              <code>/opt/gopang/logs/hanlim.log</code> 파일에 쓰인다는
+              걸 놓쳤던 게 원인). <code>/api/mint</code>가 2026-07-07에
+              같은 문제를 겪었을 때 썼던 패턴(핸들러 전체를 try/catch로
+              감싸 <code>e.message</code>를 응답에 노출)을 <code>/api/tx</code>에도
+              적용(#72) → 진짜 예외가 드러남.</li>
+          <li><strong>2단계 — 근본 원인 ①</strong> —
+              <code>"_sigVerify is not defined"</code> ReferenceError.
+              2026-07-19에 "여러 훅에서 재사용하기 위해" 파일 최상단
+              모듈 스코프로 승격했다고 기록된 서명 검증 유틸이, 실제
+              운영 환경(PocketBase Goja)에서는 콜백 안에서 참조가
+              안 됐다(#73으로 콜백 내부 지역 재선언으로 수정).</li>
+          <li><strong>3단계 — 근본 원인 ②</strong> — 재시도했더니 이번엔
+              <code>TX_HASH_MISMATCH</code>. Worker(<code>worker.js</code>의
+              <code>handleBizOrder</code>)가 L1에 보낼 <code>tx</code>
+              객체를 "순수 UTXO만 전달"한다는 의도로 <code>{version,
+              input, outputs}</code> 3개 필드만 재구성해서 보내고
+              있었는데, 클라이언트 지갑은 <code>{..., items, nonce,
+              timestamp}</code> 6개 필드 전체로 서명했었다 — 필드가
+              하나라도 다르면 L1의 해시 재계산이 100% 어긋난다(#74로
+              재구성 없이 클라 서명 원본을 그대로 전달하도록 수정).</li>
+          <li><strong>4단계 — 최초 성공</strong> — 두 수정을 모두 배포한
+              뒤 재테스트, <code>[PASS] GDC 이체가 실제 서명으로 정상
+              처리됨</code> 확인(구매자 100→90, 판매자 100→110).</li>
+          <li><strong>5단계 — 선제 감사</strong> — ①과 같은 부류의 Goja
+              스코프 버그가 더 있는지 acorn(AST 파서)으로 파일 전체를
+              구조적으로 감사. <code>_balanceUtils</code>(삭제/PATCH
+              방어 훅 2곳)와 죽은 레거시 라우트
+              <code>routerAdd("POST","/tx",...)</code>의
+              <code>NODE_ID</code>까지 같은 패턴을 발견 →
+              <code>_balanceUtils</code>는 예방적으로 지역 선언 전환,
+              레거시 <code>/tx</code>는 nginx 로그·저장소 전체 검색으로
+              호출자 0건 확인 후 삭제(#75).</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="lesson-genericerr">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5a2.5 2.5 0 0 1 2.5-1h.5a2 2 0 1 1 0 4h-1a2 2 0 1 0 0 4h.5a2.5 2.5 0 0 0 2.5-1"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">① · Diagnostics</div>
+          <div class="gs-title">PocketBase 제네릭 오류는 원인을 숨긴다 — 통째로 감싸서 노출시켜라</div>
+          <div class="gs-subtitle">국소적 try/catch만으로는 그 사이(gap)에서 나는 예외를 못 잡는다</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          PocketBase의 jsvm(Goja) 바인딩은, 훅 콜백 안에서 어디서도
+          잡히지 않은 예외가 발생하면 그걸 뭉개서
+          <code>"Something went wrong while processing your
+          request."</code>라는 정본 메시지의 400으로 바꿔버린다. 실제
+          <code>e.message</code>/<code>e.stack</code>은 HTTP 응답에도,
+          서버 로그 파일에도 전혀 남지 않는다.
+        </p>
+        <p>
+          <code>/api/tx</code> 핸들러 안에는 이미 여러 개의 국소적
+          try/catch가 있었지만(2단계 공개키 확인, 3단계 블록 조회,
+          블록 저장, 원장 기록 등), 그 <em>사이 구간</em>(서명 검증,
+          <code>computeBalance()</code> 호출, <code>buyerClaim</code>/
+          <code>sellerClaim</code> 생성 등)은 감싸져 있지 않았다 — 바로
+          이 사이 구간에서 오늘 발견된 두 버그가 둘 다 터졌다.
+        </p>
+        <div class="callout">
+          <div class="callout-label">핵심 교훈</div>
+          국소적 try/catch를 촘촘히 박아뒀다는 사실 자체가 안전하다는
+          증거가 아니다. 핸들러 전체를 감싸는 바깥 try/catch 하나가
+          "사이 구간"의 예외까지 모두 잡아 실제 원인을 즉시 응답에
+          노출시켜준다 — <code>/api/mint</code>가 2026-07-07에 같은
+          문제로 이미 이 패턴을 쓰고 있었고, 오늘 <code>/api/tx</code>에도
+          적용해 두 근본 원인을 순서대로 잡아냈다. 단, 클라이언트
+          응답에 <code>e.stack</code>을 그대로 넣는 건 운영 단계
+          정보 노출 리스크이므로, 스택은 서버 로그에만 남기고 응답에는
+          <code>e.message</code>만 담는다.
+        </div>
+        <pre><code>} catch (e) {
+  // 클라이언트 응답에는 stack을 넣지 않는다(운영 단계 노출 방지) —
+  // 서버 로그(/opt/gopang/logs/hanlim.log)에는 그대로 남긴다.
+  console.log("[TX] UNCAUGHT_EXCEPTION:", e.message, "| stack:", e.stack);
+  return c.json(500, { ok: false, error: "UNCAUGHT_EXCEPTION", detail: e.message });
+}</code></pre>
+        <p>
+          디버깅 도중 흔한 함정도 하나 있었다: hanlim 노드는
+          <code>journald</code>가 아니라 <code>/opt/gopang/logs/hanlim.log</code>
+          파일에 로그를 쓴다(<code>EnvironmentFile</code>/로그 경로
+          설정이 다른 systemd 유닛들과 다름). <code>journalctl -u
+          gopang-pb-hanlim -f</code>로 기다렸다가 아무것도 안 찍혀서
+          "핸들러 진입 자체가 실패했다"고 잘못 판단할 뻔했다 — 실제로는
+          핸들러가 정상 실행되고 있었고, 단지 로그가 다른 파일에
+          쌓이고 있었을 뿐이다.
+        </p>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="lesson-gojascope">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">② · Goja Scoping</div>
+          <div class="gs-title">Goja는 콜백 바깥 최상위 선언을 콜백 안에서 못 본다 — 이 프로젝트에서 이미 여섯 번째 재발</div>
+          <div class="gs-subtitle">"top-level var + IIFE 패턴은 안전하다"는 이전 기록 자체가 검증되지 않은 가정이었다</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          <code>main.pb.js</code>의 <code>routerAdd</code>/
+          <code>onRecordBefore*</code> 콜백 바깥(모듈 최상위 스코프)에
+          선언한 것을 콜백 안에서 참조하면, 이 프로젝트가 배포하는
+          PocketBase(Goja) 환경에서는 <strong><code>"X is not
+          defined"</code> ReferenceError가 난다</strong>. 이건 오늘 처음
+          발견된 게 아니라, 이 파일에서 이미 여러 번 재발한 패턴이다:
+        </p>
+        <table class="evidence">
+          <tr><th>발견 시점</th><th>대상</th><th>결과</th></tr>
+          <tr><td>2026-07-07 이전</td><td><code>computeBalance</code>(bare function 선언), <code>MINT_SECRET</code>, <code>NODE_CONFIG</code></td><td>콜백 내부 지역 선언으로 이미 수정된 상태로 발견</td></tr>
+          <tr><td>2026-07-18</td><td><code>sha256hex</code></td><td>콜백마다 복붙(주석에 "5곳에 복붙됐다가 UTF-8 버그가 5중으로 재발" 기록)</td></tr>
+          <tr><td><strong>2026-09-06(오늘, #73)</strong></td><td><code>_sigVerify</code>(2026-07-19 "모듈 최상단 승격" 기록) — <code>/api/tx</code></td><td>실사용 이체가 처음 이 경로를 탄 순간 ReferenceError로 발각</td></tr>
+          <tr><td><strong>2026-09-06(오늘, 예방수정)</strong></td><td><code>_balanceUtils</code> — 삭제 방어·PATCH 방어 훅 2곳</td><td>try/catch로 감싸져 있어 크래시는 아니었으나 같은 버그를 안고 있었음(미확인 상태였음)</td></tr>
+          <tr><td><strong>2026-09-06(오늘, #75)</strong></td><td><code>NODE_ID</code> — 죽은 레거시 <code>/tx</code> 라우트</td><td>호출자 없어 실제 영향 없음, AST 감사로 발견 후 라우트째 삭제</td></tr>
+        </table>
+        <p>
+          흥미로운 부분은 <code>_balanceUtils</code>를 도입할 때 남긴
+          주석이다: "top-level <code>var</code>에 IIFE의 반환값(객체)을
+          담는 패턴은 실제로 동작한다(<code>_sigVerify</code> 자체가 그
+          증거)"라고 적혀 있었다 — 그런데 그 <code>_sigVerify</code>가
+          바로 오늘 실사용 조건에서 처음 크래시를 낸 대상이었다. 즉
+          "동작 확인된 선례"로 인용됐던 코드 자체가, 사실은 <strong>실사용
+          조건으로 한 번도 실행돼 본 적이 없어서 검증된 적이 없었을
+          뿐</strong>이었다.
+        </p>
+        <div class="callout warn">
+          <div class="callout-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+            왜 이제껏 안 걸렸나
+          </div>
+          register-key→mint→transfer 전체 플로우 중 서명 검증(<code>_sigVerify</code>
+          사용)까지 실제로 도달한 게 오늘이 처음이었다. 그 전까지의
+          모든 테스트 시도는 매번 더 앞 단계(잘못된 CFG 참조, mint
+          시크릿 불일치, 잔액 부족 등)에서 먼저 막혔다 — "여러 번
+          테스트했는데 안 터졌다"는 "이 코드가 안전하다"의 증거가
+          아니라 "이 코드에 아직 도달한 적이 없다"의 증거일 수 있다.
+        </div>
+        <h4>수정 방법 — 이미 검증된 워크어라운드</h4>
+        <p>
+          전역/모듈 스코프에 선언하지 말고, 그 값을 쓰는 <strong>각
+          콜백 내부에</strong> 지역 변수로 다시 선언한다(필요하면 코드
+          복붙이 되더라도). <code>/api/tx</code>, 삭제 방어 훅, PATCH
+          방어 훅 세 곳 모두 이 방식으로 고쳤다. 참고로 정확한 내부
+          메커니즘(왜 Goja가 이렇게 동작하는지)은 이번에도 확인하지
+          못했다 — 재현되는 증상과, 이미 여러 번 통한 워크어라운드만
+          확정했다.
+        </p>
+        <p>
+          오늘 세션 종료 시점 기준, <code>main.pb.js</code> 전체를
+          acorn으로 AST 파싱해 "콜백 밖 최상위 선언을 콜백 안에서
+          참조"하는 패턴이 더 남아있지 않은지 확인했다 — 남은 사례는
+          없다(레거시 <code>/tx</code> 라우트 삭제로 마지막 하나까지
+          제거됨).
+        </p>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="lesson-txhash">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">③ · Signing Pipeline</div>
+          <div class="gs-title">서명 대상 객체는 다단계를 거치며 재구성하면 안 된다</div>
+          <div class="gs-subtitle">"필요한 필드만 골라 새 객체를 만들기" ≠ "원본 그대로 전달하기"</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          클라이언트 지갑(<code>gopang-wallet.js</code>의
+          <code>buildTxWithPrevHash</code>)은 <code>{version, input,
+          outputs, items, nonce, timestamp}</code> 6개 필드 전체를
+          <code>sortedStringify()</code>로 정규화한 뒤 그 결과를
+          해시(<code>tx_hash</code>)해서 서명한다. Worker의
+          <code>handleBizOrder</code>는 이 <code>tx_hash</code>를 L1에
+          그대로 전달하면서도, L1로 보낼 <code>tx</code> 본체는
+          "L1에는 순수 UTXO만 전달"한다는 의도로 <code>{version, input,
+          outputs}</code> 3개 필드만 골라 <strong>새 객체를 만들어서</strong>
+          보내고 있었다.
+        </p>
+        <p>
+          L1의 <code>/api/tx</code>는 받은 <code>tx</code>로
+          <code>sha256(sortedStringify(tx))</code>를 다시 계산해 클라이언트가
+          보낸 <code>tx_hash</code>와 대조한다 — 필드 구성이 다르면
+          <code>sortedStringify</code> 결과 문자열 자체가 달라지므로,
+          해시는 절대 같아질 수 없다. 즉 이 경로로는 <strong>실제 지갑
+          서명 거래가 구조적으로 단 한 번도 통과할 수 없었다</strong>.
+        </p>
+        <div class="callout">
+          <div class="callout-label">핵심 교훈</div>
+          "이 필드는 수신 측에서 안 쓰니까 빼도 된다"는 판단은 함수
+          호출 인자를 줄이는 것과 서명 검증 대상 객체를 줄이는 것 사이에서
+          완전히 다르게 작동한다. 후자는 <strong>수신 측이 그 필드를
+          쓰든 안 쓰든, 서명 시점의 바이트 구성과 정확히 일치해야</strong>
+          검증이 통과한다. 수신 측(L1)이 특정 필드(<code>tx.items</code>,
+          <code>tx.score</code>, <code>tx.lcat</code> 등)를 실제로 참조하는지
+          여부는 완전히 별개의 질문이다 — "L1이 unknown field를
+          무시한다"는 사실은 <code>const {input, outputs} = tx</code>
+          같은 구조 분해에는 맞는 말이지만, <code>tx_hash</code> 재계산에는
+          전혀 적용되지 않는다.
+        </div>
+        <h4>수정 방법</h4>
+        <p>
+          L1에 보낼 <code>tx</code>는 재구성하지 않고 클라이언트가
+          서명한 원본을 그대로 전달한다(<code>tx || 최소 폴백</code>).
+          Worker가 L1 라우팅을 위해 추가로 계산한 값(<code>score</code>,
+          <code>lcat</code> — PLSM 중요도 점수·LCAT)은 <code>tx</code>
+          객체 안이 아니라 바깥 요청 바디의 형제 필드로 보낸다 — L1이
+          나중에 이 값을 실제로 쓰게 되더라도 서명 검증 대상과는
+          분리된 채로 유지된다.
+        </p>
+        <pre><code>// 틀렸던 방식 — 재구성하며 필드 누락 + score/lcat을 tx 안에 주입
+const txPayload = {
+  version: tx?.version || 1,
+  input: tx?.input || {...},
+  outputs: tx?.outputs || outputs || [...],
+  score: importance_score,   // tx_hash 서명 대상 오염
+  lcat,                      // tx_hash 서명 대상 오염
+};
+
+// 고친 방식 — 원본 그대로 전달, PLSM 입력값은 밖으로
+const txPayload = tx || {...최소 폴백...};
+const plsmFields = { score: importance_score, lcat };
+body: JSON.stringify({ tx: txPayload, tx_hash, buyer_sig, buyer_public_key,
+                        purpose, ...plsmFields, ...bridgeBody })</code></pre>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="lesson-deadcode">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">④ · Dead Code</div>
+          <div class="gs-title">죽은 코드는 고치지 말고, 로그로 확인한 뒤 지워라</div>
+          <div class="gs-subtitle">호출자 없는 코드에 예방적 패치를 넣는 건 안전망이 아니라 함정을 다시 묻어두는 것</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          AST 감사에서 발견한 마지막 사례(레거시 <code>routerAdd("POST",
+          "/tx", ...)</code>의 <code>NODE_ID</code>)는 처음엔 ②와 같은
+          방식으로 그냥 지역 선언으로 고치는 게 후보안이었다. 하지만
+          확인해보니 이 라우트를 부르는 곳이 저장소 어디에도
+          없었다(<code>worker.js</code>, <code>gopang-wallet.js</code>
+          포함 전체 검색 0건) — 그리고 nginx 접속 로그(hanlim·seogwipo
+          양쪽) 전수 확인 결과도 <code>"POST /tx "</code>(정확히 이
+          경로) 요청 0건이었다.
+        </p>
+        <div class="callout">
+          <div class="callout-label">핵심 교훈</div>
+          호출자가 없는 죽은 코드를 "혹시 모르니" 패치해두면, 겉보기엔
+          더 안전해 보이지만 실제로는 아무것도 더 안전해지지 않는다 —
+          아무도 안 부르니까. 오히려 "고쳐서 멀쩡해 보이게" 만들어두면
+          나중에 누군가 이걸 되살려 쓸 때 오늘과 똑같은 버그를 처음부터
+          다시 만나게 된다(이 경우 Goja 스코프 버그뿐 아니라, 43개
+          L1 노드 중 hanlim에만 맞는 <code>NODE_ID</code> 하드코딩까지
+          두 번째 버그가 숨어 있었다). <strong>대체된 코드는 지우는
+          게 낫다</strong> — git 히스토리에 그대로 남으므로 필요하면
+          언제든 복원 가능하다. 삭제 전에는 반드시 (1) 저장소 전체
+          텍스트 검색, (2) 실제 프로덕션 접속 로그, 두 가지로 호출자
+          부재를 확인한다.
+        </div>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="outcome">
+      <div class="gs-head">
+        <div class="gs-icon good">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">Outcome</div>
+          <div class="gs-title">결과 — 병합된 PR과 라이브 검증</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <table class="evidence">
+          <tr><th>PR</th><th>내용</th><th>파일</th><th>상태</th></tr>
+          <tr><td>#72</td><td><code>/api/tx</code> 핸들러 전체를 try/catch로 감싸 실제 예외 노출(진단용, 이후 영구 안전망으로 채택)</td><td><code>pb_hooks/main.pb.js</code></td><td><span class="badge merged">merged</span></td></tr>
+          <tr><td>#73</td><td>전역 <code>_sigVerify</code> ReferenceError 수정 — 콜백 내부 지역 선언</td><td><code>pb_hooks/main.pb.js</code></td><td><span class="badge merged">merged</span></td></tr>
+          <tr><td>#74</td><td>TX_HASH_MISMATCH 근본 수정 — L1 전달용 tx 재구성 제거, 클라 서명 원본 그대로 전달</td><td><code>worker.js</code></td><td><span class="badge merged">merged</span></td></tr>
+          <tr><td>#75</td><td>죽은 레거시 <code>/tx</code> 라우트 및 미사용 <code>NODE_ID</code> 삭제</td><td><code>pb_hooks/main.pb.js</code></td><td><span class="badge merged">merged</span></td></tr>
+        </table>
+        <p>
+          #74 배포 직후 <code>gdc_transfer_live_test.cjs</code> 최종
+          실행 결과:
+        </p>
+        <pre><code>=== GDC 이체 테스트: 구매자 → 판매자, ₮10 ===
+[DEBUG gdc-transfer raw response] 200 {"ok":true, "tx_hash":"c9229be4...", ...}
+[이체] 성공: {...}
+=== 이체 후 양쪽 잔액 재확인 ===
+[구매자] 이체 후 잔액: 90 (기대값: 90)
+[판매자] 이체 후 잔액: 110 (기대값: 110)
+[PASS] GDC 이체가 실제 서명으로 정상 처리됨</code></pre>
+        <p>
+          #75 배포 후 재실행에서도 동일하게 <code>[PASS]</code> 재확인
+          — 죽은 코드 삭제가 실이체 흐름에 아무 영향을 주지 않았음을
+          검증했다.
+        </p>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="followup">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">Follow-up</div>
+          <div class="gs-title">후속 과제 — 아직 병합 안 된 예방적 패치</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          아래 두 건은 이 세션에서 패치까지 만들어뒀지만(<code>git
+          am</code>용 패치 파일 전달됨), 이 문서 작성 시점 기준
+          <code>main</code>에 병합 여부가 확인되지 않았다 — 다음
+          세션에서 저장소 브랜치/PR 목록을 확인하고 이어서 처리할 것.
+        </p>
+        <ul>
+          <li><strong>진단용 try/catch 정리</strong> — #72의 바깥
+              try/catch를 "임시"가 아니라 영구 안전망으로 문서화하고,
+              클라이언트 응답에서 <code>e.stack</code> 노출을 제거.</li>
+          <li><strong><code>_balanceUtils</code>/기타 <code>_sigVerify</code>
+              예방적 지역화</strong> — <code>onRecordBeforeDeleteRequest</code>
+              (하드 삭제 방어)와 <code>onRecordBeforeUpdateRequest</code>
+              (최초 키 바인딩 방어 + PATCH 서명 검증) 두 훅에 남아있던
+              전역 <code>_balanceUtils</code>/<code>_sigVerify</code> 참조를
+              콜백 내부 지역 선언으로 교체하고, 완전히 죽은 전역 선언
+              (<code>_sigVerify</code> ~1,195줄, <code>_balanceUtils</code>
+              ~68줄) 삭제. 이 두 훅은 실사용 조건(잔액 있는 계정 삭제
+              시도, 등록된 키로 프로필 PATCH)으로 아직 한 번도 트리거된
+              적이 없어 미확인 상태다 — 병합 전이라면 여전히 잠재
+              위험으로 남아있다.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="checklist">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">Checklist</div>
+          <div class="gs-title">다음에 비슷한 버그를 마주쳤을 때</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <h4>"Something went wrong" 류의 제네릭 오류를 만났을 때</h4>
+        <ul>
+          <li>해당 훅 전체가 바깥 try/catch로 감싸져 있는가 — 없으면
+              먼저 감싸서(<code>/api/mint</code>·<code>/api/tx</code> 패턴)
+              실제 <code>e.message</code>부터 확보했는가</li>
+          <li>서버 로그가 <code>journald</code>가 아니라 파일로 가는
+              노드는 아닌지(<code>/opt/gopang/logs/*.log</code>) 먼저
+              확인했는가</li>
+        </ul>
+        <h4>최상위 모듈 스코프에 유틸을 선언하려 할 때</h4>
+        <ul>
+          <li>이 파일이 PocketBase(Goja) 훅 파일이라면, 콜백 안에서
+              그 최상위 선언을 실제 요청으로 실행해서 검증했는가 — "그럴듯한
+              패턴"이나 "예전에 비슷하게 했더니 됐다"는 근거만으로
+              안전하다고 단정하지 않았는가</li>
+          <li>여러 훅에서 재사용해야 한다면, 공유 대신 각 콜백에 지역
+              재선언하는 이 프로젝트의 기존 워크어라운드를 따랐는가</li>
+        </ul>
+        <h4>서명/해시 검증 파이프라인을 여러 홉(클라 → Worker → L1 등)으로
+            설계할 때</h4>
+        <ul>
+          <li>중간 홉에서 "필요한 필드만 추린 새 객체"를 만들어 다음
+              홉에 넘기고 있지는 않은가 — 그 객체가 서명·해시 검증
+              대상이라면 원본과 바이트 단위로 동일해야 한다</li>
+          <li>중간 홉이 추가하는 값(라우팅 스코어 등)을 서명 대상 객체
+              "안"이 아니라 "형제 필드"로 분리했는가</li>
+        </ul>
+        <h4>오래된 코드를 지워도 될지 판단할 때</h4>
+        <ul>
+          <li>저장소 전체 텍스트 검색으로 호출자를 찾아봤는가</li>
+          <li>실제 프로덕션 접속 로그(nginx 등)로 최근 호출 이력이
+              0건인지 확인했는가</li>
+          <li>둘 다 확인됐다면, 패치보다 삭제를 우선했는가(git 히스토리로
+              복원 가능하므로)</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="related">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 6.5l4 4L7 21H3v-4z"/><path d="M14.5 4.5l5 5"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-title">관련 문서</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <ul>
+          <li>저장소 내 <code>pb_hooks/main.pb.js</code> — <code>/api/tx</code>,
+              <code>/api/mint</code>, 삭제/PATCH 방어 훅의 주석에 오늘
+              세션 관련 상세 기록이 남아있다.</li>
+          <li>저장소 내 <code>worker.js</code>의 <code>handleBizOrder</code>
+              — L1 전달용 tx 구성 로직과 관련 주석.</li>
+          <li><a href="./POCKETBASE_INFRA_GDC_STATUS_20260810_v1_0.html" target="_blank">PocketBase 인프라 현황 + GDC 충전 시스템 정리</a></li>
+          <li><a href="./MANUAL_INDEX.html" target="_blank">개발 문서 전체 지도</a></li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  var revealEls = document.querySelectorAll('.reveal');
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.06 });
+  revealEls.forEach(function (el) { io.observe(el); });
+
+  var tocLinks = document.querySelectorAll('.doc-toc a');
+  var sections = Array.prototype.map.call(tocLinks, function (a) {
+    return document.querySelector(a.getAttribute('href'));
+  });
+  function setActive() {
+    var idx = 0;
+    var y = window.scrollY + 110;
+    sections.forEach(function (sec, i) { if (sec && sec.offsetTop <= y) idx = i; });
+    tocLinks.forEach(function (a, i) { a.classList.toggle('active', i === idx); });
+  }
+  window.addEventListener('scroll', setActive, { passive: true });
+  setActive();
+</script>
+</body>
+</html>
