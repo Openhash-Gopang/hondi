@@ -12587,6 +12587,9 @@ export default {
     if (pathname === '/biz/gdc-deposits' && request.method === 'GET') return handleGdcDepositList(request, env, corsHeaders);
     if (pathname === '/biz/fee-rate' && request.method === 'GET') return handleFeeRate(request, env, corsHeaders);
     if (pathname === '/biz/gdc-deposit-close' && request.method === 'POST') return handleGdcDepositClose(request, env, corsHeaders);
+    if (pathname === '/biz/gdc-test-financial-statement' && request.method === 'GET') return handleGdcTestFinancialStatementGet(request, env, corsHeaders);
+    if (pathname === '/biz/gdc-test-loan-apply' && request.method === 'POST') return handleGdcTestLoanApply(request, env, corsHeaders);
+    if (pathname === '/biz/gdc-test-loan-repay' && request.method === 'POST') return handleGdcTestLoanRepay(request, env, corsHeaders);
     if (pathname === '/biz/balance-status' && request.method === 'GET') return handleBalanceStatus(request, env, corsHeaders);
     if (pathname === '/biz/admin/signup-bonus-retry' && request.method === 'POST') return handleSignupBonusRetry(request, env, corsHeaders);
     if (pathname === '/biz/gdc-dao/proposal'  && request.method === 'POST') return handleGdcDaoProposalCreate(request, env, corsHeaders);
@@ -14341,6 +14344,235 @@ async function handleGdcDepositClose(request, env, corsHeaders) {
 
   return new Response(JSON.stringify({
     ok: true, tx_hash: contentHash, amount: principal, block_id: blockRow?.id,
+  }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+}
+
+// ═══════════════════════════════════════════════════════════
+// 2026-09-06 신설 — GDC 대출·신용평가 목업 (필드테스트 승인 범위:
+// 현직 금융기관 종사자 필드테스터 한정. js/gdc-credit.js,
+// js/gdc-bank.js 상단 승인 문구 참고). 신용평가 점수식은
+// js/gdc-credit.js의 evaluateCredit()과 반드시 동일하게 유지할 것 —
+// 로직이 갈라지면 클라이언트가 보여주는 등급과 서버가 실제로 적용하는
+// 금리가 달라지는 사고가 난다.
+// ═══════════════════════════════════════════════════════════
+const GDC_LOAN_VAULT_GUID = 'gdc-loan-vault';
+
+const GDC_TEST_GRADE_RATES = { AAA: 0.005, AA: 0.01, A: 0.015, BBB: 0.025, BB: 0.035, C: 0.05 };
+const GDC_TEST_GRADE_THRESHOLDS = [
+  { min: 90, grade: 'AAA' }, { min: 78, grade: 'AA' }, { min: 65, grade: 'A' },
+  { min: 50, grade: 'BBB' }, { min: 35, grade: 'BB' }, { min: 0, grade: 'C' },
+];
+function _gdcScoreToGrade(score) {
+  for (const t of GDC_TEST_GRADE_THRESHOLDS) if (score >= t.min) return t.grade;
+  return 'C';
+}
+function _gdcSafeRatio(n, d) { return (d > 0) ? n / d : null; }
+function _gdcScoreLiquidity(r) { if (r == null) return 0; if (r >= 2.0) return 100; if (r >= 1.5) return 80; if (r >= 1.0) return 60; if (r >= 0.5) return 30; return 10; }
+function _gdcScoreDebt(r) { if (r == null) return 50; if (r <= 0.3) return 100; if (r <= 0.7) return 80; if (r <= 1.5) return 55; if (r <= 3.0) return 25; return 5; }
+function _gdcScoreMargin(r) { if (r == null) return 0; if (r >= 0.20) return 100; if (r >= 0.10) return 75; if (r >= 0.05) return 50; if (r >= 0) return 25; return 0; }
+function _gdcScoreCashFlow(r) { if (r == null) return 50; if (r >= 0.5) return 100; if (r >= 0.25) return 75; if (r >= 0.1) return 50; if (r >= 0) return 20; return 0; }
+
+// evaluateCredit()의 서버측 등가 구현. bsCash는 호출부에서 전달.
+function _gdcEvaluateCreditServer(bsCash, fs) {
+  const liquidity = _gdcSafeRatio(bsCash + (fs.bs_ar || 0), fs.bs_ap);
+  const debtRatio = _gdcSafeRatio(fs.bs_debt || 0, fs.bs_equity);
+  const operatingMargin = fs.pl_revenue > 0
+    ? (fs.pl_revenue - (fs.pl_cogs || 0) - (fs.pl_opex || 0)) / fs.pl_revenue
+    : null;
+  const cashFlowRatio = _gdcSafeRatio(fs.cf_op, fs.bs_debt || 0);
+
+  const score =
+    _gdcScoreLiquidity(liquidity) * 0.25 +
+    _gdcScoreDebt(debtRatio) * 0.25 +
+    _gdcScoreMargin(operatingMargin) * 0.30 +
+    _gdcScoreCashFlow(cashFlowRatio) * 0.20;
+
+  const grade = _gdcScoreToGrade(score);
+  return { grade, annualRate: GDC_TEST_GRADE_RATES[grade], score: Math.round(score * 10) / 10,
+           ratios: { liquidity, debtRatio, operatingMargin, cashFlowRatio } };
+}
+
+async function _gdcFindTestFsByGuid(env, userGuid) {
+  const token = await _l1AdminToken(env);
+  const filter = encodeURIComponent(`user_guid='${String(userGuid).replace(/'/g, "\\'")}'`);
+  const res = await fetch(
+    `${L1_DEFAULT}/api/collections/gdc_test_financial_statements/records?filter=${filter}&perPage=1`,
+    { headers: { 'Authorization': `Bearer ${token}` } });
+  const data = await res.json().catch(() => ({ items: [] }));
+  return data.items?.[0] || null;
+}
+
+// GET /biz/gdc-test-financial-statement?user_guid=... — 존재하지 않으면
+// 404(TESTER_ONLY 게이트의 근거 — 일반 계정은 레코드가 없다).
+async function handleGdcTestFinancialStatementGet(request, env, corsHeaders) {
+  const url = new URL(request.url);
+  const userGuid = url.searchParams.get('user_guid');
+  if (!userGuid) return _err(400, 'MISSING_FIELD', 'user_guid 필수', corsHeaders);
+  try {
+    const fs = await _gdcFindTestFsByGuid(env, userGuid);
+    if (!fs) return _err(404, 'NOT_A_TESTER', '필드테스터로 등록된 계정이 아닙니다', corsHeaders);
+    return new Response(JSON.stringify({ ok: true, record: fs }), { status: 200, headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'L1_UNREACHABLE', 'L1 조회 실패: ' + e.message, corsHeaders);
+  }
+}
+
+// POST /biz/gdc-test-loan-apply — 서명 검증 → 테스터 게이트 → 서버측
+// 신용평가 재계산(클라이언트 값을 신뢰하지 않음) → 대출금고에서 사용자로
+// 지급 블록 생성(관리자 서명, handleGdcDepositClose와 동일 패턴) →
+// gdc_test_loans 레코드 생성.
+async function handleGdcTestLoanApply(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+  const { user_guid, principal, pubkey, signature, ts } = body;
+  if (!user_guid) return _err(400, 'MISSING_FIELD', 'user_guid 필수', corsHeaders);
+  if (!(principal > 0)) return _err(400, 'INVALID_AMOUNT', 'principal은 0보다 커야 합니다', corsHeaders);
+
+  const authOk = await _verifyClaimsRequester(env, {
+    guid: user_guid, pubkey, signature, ts,
+    sigMsg: `gdc-test-loan-apply:${user_guid}:${principal}:${pubkey}:${ts}`,
+  });
+  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+
+  const fs = await _gdcFindTestFsByGuid(env, user_guid).catch(() => null);
+  if (!fs) return _err(403, 'NOT_A_TESTER', '필드테스터로 등록된 계정만 대출을 신청할 수 있습니다', corsHeaders);
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+
+  // 신용평가는 서버가 재계산한다 — 클라이언트가 등급/금리를 조작해
+  // 보낼 수 없도록, 요청 바디의 grade/rate는 아예 받지 않는다.
+  const balRes = await fetch(`${L1_DEFAULT}/api/balance?guid=${encodeURIComponent(user_guid)}`);
+  const balData = await balRes.json().catch(() => ({ balance: 0 }));
+  const bsCash = Number(balData.balance) || 0;
+  const credit = _gdcEvaluateCreditServer(bsCash, fs);
+
+  // 지급 블록 생성 — vault → user (mint/deposit-close와 동일 패턴,
+  // vault는 실제 개인키가 없는 시스템 계정이라 관리자 권한으로 직접 생성).
+  const contentHash = await _sha256Hex(`gdc-test-loan-apply:${user_guid}:${principal}:${Date.now()}`);
+  const blockBody = {
+    block_type: 'loan_disbursement', tx_hash: contentHash,
+    buyer_guid: GDC_LOAN_VAULT_GUID, seller_guid: user_guid, buyer_sig: '',
+    outputs: JSON.stringify([{ recipient_guid: user_guid, amount: principal }]),
+    prev_block_hash: '', content_hash: contentHash, height: 0, prev_settle_hash: '',
+  };
+  let blockRow;
+  try {
+    const blockRes = await fetch(`${L1_DEFAULT}/api/collections/blocks/records`, {
+      method: 'POST', headers, body: JSON.stringify(blockBody),
+    });
+    if (!blockRes.ok) return _err(502, 'L1_WRITE_FAILED', await blockRes.text(), corsHeaders);
+    blockRow = await blockRes.json().catch(() => null);
+  } catch (e) {
+    return _err(502, 'L1_UNREACHABLE', 'L1 지급 블록 생성 실패: ' + e.message, corsHeaders);
+  }
+
+  let loanRow;
+  try {
+    const loanRes = await fetch(`${L1_DEFAULT}/api/collections/gdc_test_loans/records`, {
+      method: 'POST', headers,
+      body: JSON.stringify({
+        user_guid, principal, outstanding_principal: principal,
+        grade: credit.grade, annual_rate: credit.annualRate, status: 'active',
+        disbursed_tx_hash: contentHash, credit_snapshot: credit,
+      }),
+    });
+    if (!loanRes.ok) return _err(500, 'SAVE_FAILED', await loanRes.text(), corsHeaders);
+    loanRow = await loanRes.json().catch(() => null);
+  } catch (e) {
+    // 지급 블록은 이미 생성됐으므로 자금은 이동한 상태 — 레코드 실패는
+    // 수동 확인이 필요하다는 걸 로그로 남긴다(deposit-close와 동일 원칙).
+    console.warn('[GDC Test Loan] 대출 레코드 저장 실패(지급 블록은 생성됨, 수동 확인 필요):', e.message);
+    return _err(500, 'LOAN_RECORD_FAILED', '지급은 완료됐으나 대출 레코드 저장에 실패했습니다: ' + e.message, corsHeaders);
+  }
+
+  return new Response(JSON.stringify({
+    ok: true, loan_id: loanRow?.id, tx_hash: contentHash,
+    grade: credit.grade, annual_rate: credit.annualRate, credit_snapshot: credit,
+  }), { status: 200, headers: corsHeaders });
+}
+
+// POST /biz/gdc-test-loan-repay — vault_tx_hash(사용자→대출금고 실이체)
+// 검증 → 경과일 기준 단순이자로 원금/이자 분리 → 잔액 갱신 → 상환기록.
+async function handleGdcTestLoanRepay(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+  const { user_guid, loan_id, amount, vault_tx_hash } = body;
+  if (!user_guid) return _err(400, 'MISSING_FIELD', 'user_guid 필수', corsHeaders);
+  if (!loan_id) return _err(400, 'MISSING_FIELD', 'loan_id 필수', corsHeaders);
+  if (!(amount > 0)) return _err(400, 'INVALID_AMOUNT', 'amount는 0보다 커야 합니다', corsHeaders);
+  if (!vault_tx_hash) return _err(400, 'MISSING_FIELD', 'vault_tx_hash 필수', corsHeaders);
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+
+  // vault_tx_hash 검증 — handleGdcDepositCreate와 동일한 원칙(클라이언트가
+  // 임의의 tx_hash로 가짜 상환을 기록하지 못하게).
+  try {
+    const filter = encodeURIComponent(`tx_hash='${String(vault_tx_hash).replace(/'/g, "\\'")}'`);
+    const blockRes = await fetch(`${L1_DEFAULT}/api/collections/blocks/records?filter=${filter}&perPage=1`, { headers });
+    const blockData = await blockRes.json().catch(() => ({ items: [] }));
+    const block = blockData.items?.[0];
+    if (!block || block.buyer_guid !== user_guid) {
+      return _err(403, 'TX_VERIFICATION_FAILED', '해당 tx_hash가 이 사용자의 유효한 상환 거래가 아닙니다', corsHeaders);
+    }
+    let outputs; try { outputs = JSON.parse(block.outputs || '[]'); } catch { outputs = []; }
+    const vaultOutput = outputs.find(o => o.recipient_guid === GDC_LOAN_VAULT_GUID);
+    if (!vaultOutput || vaultOutput.amount < amount) {
+      return _err(403, 'TX_VERIFICATION_FAILED', '거래 금액이 상환액과 일치하지 않습니다', corsHeaders);
+    }
+  } catch (e) {
+    return _err(502, 'L1_UNREACHABLE', 'L1 검증 실패: ' + e.message, corsHeaders);
+  }
+
+  let loan;
+  try {
+    const loanRes = await fetch(`${L1_DEFAULT}/api/collections/gdc_test_loans/records/${encodeURIComponent(loan_id)}`, { headers });
+    if (!loanRes.ok) return _err(404, 'LOAN_NOT_FOUND', '대출 기록을 찾을 수 없습니다', corsHeaders);
+    loan = await loanRes.json();
+  } catch (e) {
+    return _err(502, 'L1_UNREACHABLE', 'L1 조회 실패: ' + e.message, corsHeaders);
+  }
+  if (loan.user_guid !== user_guid) return _err(403, 'NOT_OWNER', '본인 대출이 아닙니다', corsHeaders);
+  if (loan.status !== 'active') return _err(409, 'LOAN_NOT_ACTIVE', `이미 ${loan.status} 상태입니다`, corsHeaders);
+
+  // 단순이자 — 마지막 이벤트(최초 지급 또는 직전 상환) 이후 경과일 기준.
+  const lastEventAt = new Date(loan.updated || loan.created).getTime();
+  const daysElapsed = Math.max(0, (Date.now() - lastEventAt) / (24 * 60 * 60 * 1000));
+  const outstanding = Number(loan.outstanding_principal);
+  const interestDue = outstanding * Number(loan.annual_rate) * (daysElapsed / 365);
+
+  const interestPortion = Math.min(amount, interestDue);
+  const principalPortion = Math.min(amount - interestPortion, outstanding);
+  const newOutstanding = Math.max(0, outstanding - principalPortion);
+  const newStatus = newOutstanding <= 0 ? 'repaid' : 'active';
+
+  try {
+    const patchRes = await fetch(`${L1_DEFAULT}/api/collections/gdc_test_loans/records/${encodeURIComponent(loan_id)}`, {
+      method: 'PATCH', headers,
+      body: JSON.stringify({ outstanding_principal: newOutstanding, status: newStatus }),
+    });
+    if (!patchRes.ok) console.warn('[GDC Test Loan] 잔액 갱신 실패(상환 블록은 이미 생성됨):', await patchRes.text());
+  } catch (e) {
+    console.warn('[GDC Test Loan] 잔액 갱신 예외(상환 블록은 이미 생성됨):', e.message);
+  }
+
+  try {
+    await fetch(`${L1_DEFAULT}/api/collections/gdc_test_loan_repayments/records`, {
+      method: 'POST', headers,
+      body: JSON.stringify({
+        loan_id, user_guid, amount,
+        principal_portion: principalPortion, interest_portion: interestPortion,
+        tx_hash: vault_tx_hash,
+      }),
+    });
+  } catch (e) {
+    console.warn('[GDC Test Loan] 상환 기록 저장 실패(자금·잔액 갱신은 이미 반영됨):', e.message);
+  }
+
+  return new Response(JSON.stringify({
+    ok: true, principal_portion: principalPortion, interest_portion: interestPortion,
+    outstanding_principal: newOutstanding, status: newStatus,
   }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 }
 
