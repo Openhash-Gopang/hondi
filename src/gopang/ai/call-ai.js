@@ -22,7 +22,7 @@ import { aiActive, history, _userLocation,
          _gwpLiveProgress, _paHandoffPending, setPaHandoffPending } from '../core/state.js';
 import { appendBubble, showTyping, hideTyping,
          _createStreamBubble, _updateStreamBubble, setBubbleTarget } from '../ui/bubble.js';
-import { _buildLocNote, _buildRoutingFacts } from '../services/location.js';
+import { _buildLocNote, _buildRoutingFacts, _waitForLocationReady } from '../services/location.js';
 import { _injectAuthConfirmButton } from '../core/auth.js';
 import { _klawReview } from '../services/klaw.js';
 import { openSearch } from '../ui/p2p-search.js';
@@ -3438,6 +3438,15 @@ async function _buildEnhancedUserContent(userContent) {
     }
   } catch {}
 
+  // ★ 2026-09-06 버그 수정 — _waitForLocationReady()는 2026-08-22에
+  // "AI 비서는 항상 사용자의 현재 위치를 알고 있어야 한다"(주피터 지시)를
+  // 지키기 위해 만들어졌으나, 정작 이 함수(매 턴 프롬프트 조립부)가 한
+  // 번도 호출하지 않고 있었다 — 즉 GPS/프로필 조회가 끝나기 전에 이미
+  // _buildLocNote()가 빈 값으로 지나가 버리는 사고가 실사로 확인됐다
+  // (사용자 리포트: "혼디가 내 위치를 모른다고 함"). 최대 4초까지만
+  // 대기하므로(services/location.js), 위치 권한을 거부한 사용자도 무한정
+  // 멈추지 않는다.
+  await _waitForLocationReady();
   const locNote = _buildLocNote();
   if (locNote) parts.push(locNote.trim());
 
@@ -5286,6 +5295,22 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
     // [WEB_SEARCH: query=...]는 다른 태그와 이름이 겹치지 않는다.
     const _webSearchHandled = await _handleWebSearchTag(fullReply, bubble, callAI, userText);
     if (_webSearchHandled) return;
+
+    // ── 진단 로그 (2026-09-06 신설) ──────────────────────────
+    // 실사 리포트: "검색해서 알려드릴게요"라고 말해놓고 그대로 멈춤.
+    // 태그 파서(_handleWebSearchTag) 자체는 정상 동작하므로, 원인은 SP가
+    // 사람이 읽는 문장만 내고 기계용 [WEB_SEARCH: query=...] 태그를
+    // 빠뜨렸거나(케이스 A), 태그는 냈지만 형식이 깨져(query= 누락 등)
+    // 파서 정규식과 안 맞는 경우(케이스 B)로 추정된다 — 두 경우 원인이
+    // 다르므로(SP 프롬프트 문제 vs 모델의 태그 문법 실수) 구분해서 남긴다.
+    // 사용자에게는 아무 영향 없음(콘솔 로그만).
+    if (/검색해\s*(서|드리|드릴게요|보겠습니다)|확인해\s*보겠습니다|알아보겠습니다|찾아드릴게요/.test(fullReply)) {
+      if (/\[WEB_SEARCH:/.test(fullReply)) {
+        console.warn('[Diag] [WEB_SEARCH: 태그는 있으나 파서 정규식과 불일치(형식 깨짐 추정):', fullReply);
+      } else if (!/\[BALANCE_CHECK\]|\[GWP:|\[EXPERT:|\[GOV_TASK|\[DEPT_TASK/.test(fullReply)) {
+        console.warn('[Diag] 검색/확인 의도 문구는 있으나 태그 자체가 없음 — SP가 태그를 빠뜨렸을 가능성:', fullReply);
+      }
+    }
 
     // ── 재무제표 실시간 조회 태그 처리 (2026-07-13 신설) ──────
     const _balanceCheckHandled = await _handleBalanceCheckTag(fullReply, bubble, callAI, userText);
