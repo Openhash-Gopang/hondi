@@ -12835,6 +12835,12 @@ export default {
     if (pathname === '/admin/gdc-summary' && request.method === 'GET')
       return handleAdminGdcSummary(request, env, corsHeaders);
 
+    // GET /admin/charge-list?status=&limit= — 관리자 대시보드용 GDC 충전
+    // 내역(charge_requests) 조회. /biz/charge-list와 동일 로직, 인증만
+    // admin/stats와 동일한 Bearer 토큰 관례로 교체 (2026-09-06 신설)
+    if (pathname === '/admin/charge-list' && request.method === 'GET')
+      return handleAdminChargeList(request, env, corsHeaders);
+
     // GET /admin/gov-task-drafts — 대기중 GOV_TASK draft 목록 (2026-07-12 위치 정정
     // — 기존엔 POST 전용 게이트 뒤에 있어서 GET 요청이 그 게이트에서 먼저
     // 405로 막히는 죽은 코드였다. admin/stats와 동일하게 게이트 앞으로 이동)
@@ -15053,6 +15059,49 @@ async function handleChargeList(request, env, corsHeaders) {
     const headers = { 'Authorization': `Bearer ${token}` };
     const filter = encodeURIComponent(`status='${status}'`);
     const res = await fetch(`${L1_DEFAULT}/api/collections/charge_requests/records?filter=${filter}&sort=-created&perPage=200`, { headers });
+    if (!res.ok) return _err(502, 'L1_ERROR', '목록 조회 실패', corsHeaders);
+    const data = await res.json().catch(() => ({ items: [] }));
+    return new Response(JSON.stringify({ ok: true, requests: data.items || [] }), { status: 200, headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'L1_UNREACHABLE', 'L1 연결 실패: ' + e.message, corsHeaders);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// GET /admin/charge-list?status=&limit= — 관리자 대시보드용 GDC 충전
+// 내역 조회 (2026-09-06 신설)
+//
+// handleChargeList(/biz/charge-list)와 완전히 동일한 조회 로직이지만,
+// 인증 방식이 다르다 — /biz/charge-list는 정적 시크릿(_adminActionSecret,
+// 폰 알림캡처 앱 같은 머신-투-머신 호출 전용)을 ?secret= 쿼리파라미터로
+// 받는데, 이 값을 브라우저 대시보드 JS/localStorage에 그대로 넣으면
+// 개발자도구·네트워크탭으로 누구나 볼 수 있어 노출 위험이 크다.
+// admin/stats·admin/gdc-summary 등 이미 이 대시보드의 다른 모든 조회가
+// 쓰고 있는 단기만료 Bearer 토큰(_requireAdmin) 인증을 그대로 재사용해,
+// 정적 시크릿은 계속 머신 클라이언트 전용으로만 남긴다.
+//
+// status='matched'인 레코드는 확정 채널(관리자 수동·오픈뱅킹·PG
+// 웹훅·알림캡처) 어느 쪽으로 왔든 전부 charge_requests에 기록되므로
+// (_mintAndRecordCharge 참고 — 사전 신청 없이 전화번호 역조회로 확정된
+// 건도 감사 기록용 레코드가 새로 생성된다), 이 하나의 목록으로 실제
+// 입금·발행 이력 전체를 커버한다.
+// ═══════════════════════════════════════════════════════════
+async function handleAdminChargeList(request, env, corsHeaders) {
+  const admin = await _requireAdmin(request, env);
+  if (!admin) return _err(401, 'UNAUTHORIZED', '관리자 인증이 필요합니다', corsHeaders);
+
+  const url = new URL(request.url);
+  const status = url.searchParams.get('status') || 'matched';
+  let limit = parseInt(url.searchParams.get('limit') || '50', 10);
+  if (!Number.isFinite(limit) || limit <= 0) limit = 50;
+  if (limit > 200) limit = 200;
+
+  try {
+    const token = await _l1AdminToken(env);
+    const headers = { 'Authorization': `Bearer ${token}` };
+    const filter = encodeURIComponent(`status='${status}'`);
+    const sortField = status === 'pending' ? '-created' : '-matched_at';
+    const res = await fetch(`${L1_DEFAULT}/api/collections/charge_requests/records?filter=${filter}&sort=${sortField}&perPage=${limit}`, { headers });
     if (!res.ok) return _err(502, 'L1_ERROR', '목록 조회 실패', corsHeaders);
     const data = await res.json().catch(() => ({ items: [] }));
     return new Response(JSON.stringify({ ok: true, requests: data.items || [] }), { status: 200, headers: corsHeaders });
