@@ -8,8 +8,13 @@
 <link rel="icon" href="data:,">
 
 <!-- 로그인 여부만 가볍게 확인한다(SP-EDITOR §5 — 접근 자체를 막는 인증
-     체계는 아직 없음). 필수는 아니므로 data-required="false". -->
-<script type="module" src="https://hondi.net/auth/subsystem-auth.js" data-required="false"></script>
+     체계는 아직 없음). 2026-09-07: 구 고팡 지갑 SSO(subsystem-auth.js,
+     크로스 도메인 릴레이 버그로 고장난 상태였음)를 K-서비스 공용
+     전화번호 인증 모듈로 교체. -->
+<script>
+window.K_AUTH_CONFIG = { serviceLabel: 'SP 편집기' };
+</script>
+<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
