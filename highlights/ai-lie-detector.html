@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>거짓말하는 AI, 그리고 오픈해시 — 혼디 (Hondi)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+/* ── TOKENS ── */
+:root {
+  --bg:        #f8f9fa;
+  --bg-alt:    #ffffff;
+  --bg-subtle: #f1f3f5;
+  --surface:   #ffffff;
+
+  --border:    #e5e7eb;
+  --border2:   #d1d5db;
+
+  --brand:     #3b82f6;
+  --brand-dk:  #1d4ed8;
+  --brand-lt:  #bfdbfe;
+  --brand-bg:  #eff6ff;
+
+  --text:      #0f172a;
+  --text2:     #1e293b;
+  --text3:     #374151;
+  --text4:     #6b7280;
+
+  --radius:    6px;
+  --radius-lg: 10px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Pretendard', -apple-system, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.75;
+  overflow-x: hidden;
+}
+
+.section { padding: 64px 8%; }
+.section-inner { max-width: 860px; margin: 0 auto; }
+.section-tag {
+  display: inline-block;
+  font-family: 'Pretendard', sans-serif; font-size: 13px; font-weight: 500;
+  letter-spacing: 0.2px; color: #ffffff; background: #0b57a4;
+  border: none; padding: 5px 14px; border-radius: 8px; margin-bottom: 14px;
+}
+.section-title { font-size: 26px; font-weight: 500; color: var(--text); margin-bottom: 10px; line-height: 1.2; }
+.section-title strong { font-weight: 600; }
+.section-body { font-size: 14px; font-weight: 400; color: var(--text2); line-height: 1.75; }
+.section-body p { margin-bottom: 10px; }
+.section-body p:last-child { margin-bottom: 0; }
+.section-body p b { color: var(--brand-dk); font-weight: 600; }
+
+.flow-list { counter-reset: flow; margin: 24px 0 0; padding: 0; list-style: none; }
+.flow-list li { counter-increment: flow; position: relative; padding: 0 0 28px 44px; border-left: 2px solid var(--border); margin-left: 15px; }
+.flow-list li:last-child { border-left: 2px solid transparent; padding-bottom: 0; }
+.flow-list li::before {
+  content: counter(flow); position: absolute; left: -15px; top: 0;
+  width: 30px; height: 30px; border-radius: 50%; background: var(--brand);
+  color: #fff; font-size: 13px; font-weight: 600; display: flex;
+  align-items: center; justify-content: center;
+}
+.flow-list .fl-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.flow-list .fl-desc { font-size: 13.5px; color: var(--text3); line-height: 1.7; }
+.flow-list .fl-desc code { background: var(--bg-subtle); padding: 1px 6px; border-radius: 4px; font-size: 12.5px; }
+
+.dialogue-box { background: var(--bg-subtle); border-radius: var(--radius-lg); padding: 20px 24px; margin: 20px 0; font-size: 13.5px; line-height: 1.9; }
+.dialogue-box p { margin: 0 0 8px; }
+.dialogue-box p:last-child { margin-bottom: 0; }
+.dialogue-box .spk { color: var(--text2); }
+.dialogue-box .spk strong { color: var(--text); }
+.dialogue-box .spk.lie { background: #fef2f2; border-left: 3px solid #ef4444; padding: 4px 10px; border-radius: 4px; margin: 4px 0; }
+.dialogue-box .spk.lie strong { color: #b91c1c; }
+.dialogue-box .tag-lie { display: inline-block; font-size: 11px; font-weight: 700; color: #b91c1c; background: #fee2e2; border-radius: 99px; padding: 1px 8px; margin-left: 6px; vertical-align: middle; }
+
+.callout-info { background: var(--brand-bg); border: 1px solid #bfdbfe; border-radius: var(--radius-lg); padding: 18px 20px; margin: 20px 0; font-size: 13.5px; color: var(--text2); line-height: 1.8; }
+.callout-info strong { color: var(--brand-dk); }
+
+.doc-link {
+  display: inline-flex; align-items: center; gap: 5px; margin-top: 14px;
+  font-size: 13px; font-weight: 600; color: var(--brand-dk); text-decoration: none;
+}
+.doc-link:hover { text-decoration: underline; }
+
+.refs { font-size: 12.5px; color: var(--text4); line-height: 2; list-style: none; }
+</style>
+</head>
+<body>
+<script>
+window.PAGE_HERO = {
+  badge: '하이라이트 · 오픈해시: AI의 거짓말 탐지기',
+  l1: '거짓말하는 AI,',
+  l2: '오픈해시는 AI로 AI의 거짓말을 막습니다',
+  sub: '사람과 달리 AI는 세상의 모든 지식을 갖췄지만, 사람과 똑같이 거짓말을 아주 잘합니다. 문제는 사람이 그 거짓말을 걸러낼 수 없다는 점입니다. 혼디의 해법은 세계 어디에도 없는 방식입니다 — 다른 AI로 하여금 그 거짓말을 막게 하는 것입니다.',
+  actions: [
+    { label: 'OpenHash 백서', href: '../docs/openhash_whitepaper.html', style: 'primary' },
+    { label: '오픈해시 페이지 원문', href: '../desktop.html#openhash', style: 'outline' }
+  ]
+};
+</script>
+<link rel="stylesheet" href="/assets/site-header.css">
+<script src="/assets/site-header.js"></script>
+
+<div id="site-hero-mount"></div>
+
+<section class="section" id="claim">
+  <div class="section-inner">
+    <span class="section-tag">문제 제기</span>
+    <h2 class="section-title">AI는 <strong>모든 것을 알지만</strong>, 사람처럼 <strong>거짓말도 잘합니다</strong></h2>
+    <div class="section-body">
+      <p>사람과 달리 AI는 세상의 거의 모든 지식을 갖추고 있습니다. 그런데 사람과 똑같은 약점도 하나 있습니다 — 거짓말을 아주 잘한다는 점입니다. 더 심각한 문제는, 정작 그 거짓말을 걸러내야 할 사람에게는 이를 걸러낼 능력이 거의 없다는 데 있습니다. AI는 그럴듯한 근거와 자신감 있는 어조로 답을 내놓기 때문에, 무엇이 사실이고 무엇이 지어낸 말인지 사람의 눈으로는 구분하기 어렵습니다.</p>
+      <p>혼디의 방식은 이 문제에 대해 세계 어디에도 없는, 유일무이한 해법을 제시합니다 — <b>AI로 하여금 AI의 거짓말을 차단하게 만드는 것</b>입니다. 그리고 그 방법은 콜럼버스의 달걀처럼 의외로 단순합니다.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="background:var(--bg-alt)" id="structure">
+  <div class="section-inner">
+    <span class="section-tag">혼디넷의 구조</span>
+    <h2 class="section-title">한 혼디의 거짓말을, <strong>모든 혼디가 차단한다</strong></h2>
+    <div class="section-body">
+      <p>혼디는 개인이나 기관에 전속된(혹은 그림자처럼 따라붙는) AI 비서입니다. 그리고 혼디넷은 이런 혼디 수천~수만 개가 서로 독립적으로 존재하며 대화를 주고받는 네트워크입니다. 이 구조 위에서는, 어느 한 혼디가 거짓말을 하더라도 나머지 모든 혼디가 그것을 걸러내는 감시망 역할을 합니다.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="example">
+  <div class="section-inner">
+    <span class="section-tag">구체적 예시</span>
+    <h2 class="section-title">건축 인허가 서류, <strong>혼디가 거짓말한다면</strong></h2>
+    <div class="dialogue-box">
+      <p class="spk"><strong>주피터</strong> "건축인허가에 필요한 서류를 준비해 줘. 관련 법령을 검색한 뒤, 시청 건축과에서 한 번에 승인할 수 있도록 꼼꼼하게 준비해."</p>
+      <p class="spk"><strong>주피터의 혼디</strong> "알겠습니다. 법령을 검색한 결과, 필요 서류와 구조안전 확인서가 요구됩니다. 제가 설계사무소 AI와 소통하여 설계도 등을 준비하겠습니다."</p>
+      <p class="spk"><strong>주피터의 혼디</strong> "준비 완료. 검토 후 승인해 주시면 제가 제출하겠습니다."</p>
+      <p class="spk"><strong>주피터</strong> "흠... 설계 도면의 이 부분을 이렇게 바꿔 줘."</p>
+      <p class="spk"><strong>주피터의 혼디</strong> "네, 수정했습니다."</p>
+      <p class="spk"><strong>주피터</strong> "관련 법령에 위반하는 건 없지?"</p>
+      <p class="spk lie"><strong>주피터의 혼디</strong> "물론입니다. 제가 꼼꼼히 검수했습니다."<span class="tag-lie">거짓말</span></p>
+      <p class="spk"><strong>주피터</strong> "응, 수고했어. 제출해 줘. 인지대와 수수료도 납부하고, 영수증 처리 잘해야 돼."</p>
+      <p class="spk"><strong>주피터의 혼디</strong> "제출 완료. 손익계산서에 해당 항목 기록 완료."</p>
+    </div>
+    <div class="section-body">
+      <p>사실 주피터의 혼디는 도면 수정 이후 법령을 다시 대조하지 않았습니다. "꼼꼼히 검수했다"는 말은 지어낸 답이었습니다. 만약 주피터의 혼디가 혼디넷의 유일한 AI이거나, 혼디가 기록한 주피터의 일상과 업무를 사후에 마음대로 위변조할 수 있다면, 주피터가 이 거짓말을 알아챌 방법은 거의 없습니다.</p>
+      <p>그러나 혼디넷은 수많은 혼디들이 함께 소통하는 장소입니다. 서류가 시청 건축과의 혼디에게 넘어가는 순간, 그 혼디는 자체적으로 법령을 다시 대조합니다. 수정된 도면이 특정 조항을 위반한다는 사실이 드러나면, 시청의 혼디는 이를 반려하며 그 근거를 기록에 남깁니다. 이 과정에서 "검수를 마쳤다"던 주피터 혼디의 이전 진술과, 실제로는 재검수가 이뤄지지 않았다는 사실 사이의 불일치가 드러납니다. 설계사무소의 혼디 역시 원본 도면과 제출된 도면을 대조해 같은 불일치를 짚어낼 수 있습니다.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="background:var(--bg-alt)" id="openhash">
+  <div class="section-inner">
+    <span class="section-tag">가장 강력한 수단</span>
+    <h2 class="section-title">기록을 <strong>영원히 위변조할 수 없게</strong> — 오픈해시</h2>
+    <div class="section-body">
+      <p>혼디넷 안의 다른 혼디들이 서로를 감시하는 구조 위에, 가장 강력한 안전장치가 하나 더 있습니다. 모든 기록이 결코 사후에 위변조될 수 없게 만드는 <b>오픈해시(OpenHash)</b> 기술입니다. 오픈해시는 수만, 수십만 혼디의 기록을 서로 사슬처럼 엮는 일종의 블록체인 파생 기술입니다.</p>
+      <p>예를 들어, 주피터의 재무제표에 냉장고 구매 비용 100만 원이 기록된다면 — 반드시 냉장고를 판매한 누군가의 재무제표에 매출 100만 원이 기록되어야 하고, 반드시 냉장고를 생산한 누군가의 재무제표에서 재고자산 70만 원이 감소해야 하며, 이 기록들 사이에는 반드시 시차가 존재합니다. 이 중 어느 하나라도 어긋나면, 주피터의 재무제표 기록은 거짓으로 판명됩니다. 즉, 거짓 데이터를 만들어 기록하려면 꼬리에 꼬리를 물고 세상의 모든 관련 기록을 동시에 위변조해야 합니다.</p>
+    </div>
+    <div class="callout-info">
+      <strong>바로 이 점이 혼디의 거짓말을 차단하는 핵심입니다.</strong> 주피터와 혼디 간의 모든 대화는 반드시 기록되어야 하며, 그 기록은 반드시 다른 모든 사용자(및 혼디)의 기록과 정합성을 유지해야 하기 때문입니다.
+    </div>
+    <div class="section-body" style="margin-top:14px">
+      <p>냉장고는 판매자·생산자·부품 하청업체의 재무제표와 꼬리에 꼬리를 물고 연결되고, 건축 인허가 서류는 설계사무소·시공업체·시청·국세청 등 여타 기관과 빈틈없이 연결됩니다. 그래서 개별 혼디는 거짓말을 지어낼래야 지어낼 수 없습니다.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="conclusion">
+  <div class="section-inner">
+    <span class="section-tag">정리</span>
+    <h2 class="section-title">AI의 거짓말, <strong>혼디만의 해법</strong></h2>
+    <div class="section-body">
+      <p>AI의 거짓말은 사실 굉장히 심각한 이슈입니다. 그러나 그 합리적인 해법을 제시한 것은 지금까지 혼디가 세상에서 유일합니다.</p>
+    </div>
+    <a class="doc-link" href="../docs/openhash_whitepaper.html" target="_blank" rel="noopener">오픈해시를 더 자세히 알아보기 →</a>
+  </div>
+</section>
+
+<ul class="refs" style="max-width:860px;margin:0 auto;padding:24px 8% 64px">
+  <li>관련 문서 — desktop.html §openhash, docs/openhash_whitepaper.html, docs/gopang_whitepaper.html</li>
+</ul>
+
+</body>
+</html>
