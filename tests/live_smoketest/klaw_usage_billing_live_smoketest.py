@@ -36,14 +36,30 @@ _deepseekUsageToKRW + computeBilledKRW 공식을 이 스크립트 안에서 동�
   구간의 시작/끝 잔액 차이를 (매 호출 usage로 계산한) 누적 기대 청구액
   합계와 비교한다 — 개별 호출 단위가 아니라 누적 단위로 채점한다.
 
+★ 2026-09-07 수정(#104) — /klaw/relay가 2026-09-02부터 클라이언트가 보낸
+guid를 신뢰하지 않고 phone_verify_token만 받도록 바뀌면서(handleKlawRelay,
+worker.js 18811행 주석 참고), 이 스크립트가 --funded-guid만 보내던 이전
+버전은 매 실행 첫 호출부터 LOGIN_REQUIRED로 막혔다(실사 재현, 2026-09-07
+01:11 라이브 실행 결과 참고). SMS OTP 왕복을 CI에서 자동화하기보다,
+서버가 실제 OTP 검증 성공 시 발급하는 것과 동일한 서명 방식
+(HMAC-SHA256(PHONE_VERIFY_SECRET, "{e164}:{exp_ms}"), worker.js 392행
+_hmacSha256Hex 그대로)을 이 스크립트가 오프라인으로 재현해 토큰을 직접
+발급한다 — SMS 발송이라는 UX만 건너뛰고, 서명 검증이라는 인증 자체는
+그대로 통과한다. guid는 더 이상 CLI 인자로 받지 않는다 — 발급한 토큰으로
+POST /user/gdc-balance를 먼저 호출해(guid 없이 phone_verify_token만
+요구) 실제 guid와 시작 잔액을 서버로부터 직접 얻는다(handleUserGdcBalance,
+worker.js 489행).
+
 Usage:
-  python3 klaw_usage_billing_live_smoketest.py \
+  PHONE_VERIFY_SECRET=... python3 klaw_usage_billing_live_smoketest.py \
       --scenarios scenarios_klaw_usage_billing_beta_20260907.json \
       --out ../../results/klaw_usage_billing_beta \
-      --funded-guid <잔액 충분한 테스트 guid>
+      --funded-e164 "+8201096627170"
 """
 import argparse
 import csv
+import hashlib
+import hmac
 import json
 import os
 import sys
@@ -64,6 +80,37 @@ KLAW_BETA_MULTIPLIER_FLASH = 10  # worker.js KLAW_BETA_MULTIPLIER['klaw-flash']
 EXCHANGE_RATE_KRW_PER_GDC = 1  # worker.js EXCHANGE_RATE_KRW_PER_GDC (테스트 기간 한정)
 
 
+def make_phone_verify_token(secret, e164, ttl_ms=5 * 60 * 1000):
+    """worker.js handlePhoneOtpVerify(392행)가 실제 OTP 검증 성공 시 발급하는
+    것과 동일한 형식/서명 방식을 오프라인으로 재현한다. guid 없는 2필드
+    payload("{e164}:{exp}")만 쓴다 — _resolveGuidFromPhoneVerifyToken은 어차피
+    guid를 payload에서 읽지 않고 e164로 profiles를 직접 조회해 도출한다."""
+    exp = int(time.time() * 1000) + ttl_ms
+    payload = f"{e164}:{exp}"
+    sig = hmac.new(secret.encode("utf-8"), payload.encode("utf-8"), hashlib.sha256).hexdigest()
+    return f"{payload}.{sig}"
+
+
+def resolve_guid_and_balance(worker_base, phone_verify_token):
+    """POST /user/gdc-balance — phone_verify_token만으로 guid·잔액을 직접
+    조회한다(handleUserGdcBalance, worker.js 489행). --funded-guid를 CLI에서
+    안 받아도 되게 해주는 핵심 호출."""
+    try:
+        res = requests.post(
+            f"{worker_base}/user/gdc-balance",
+            json={"phone_verify_token": phone_verify_token},
+            timeout=15,
+        )
+        data = res.json()
+        if res.status_code != 200 or not data.get("ok"):
+            print(f"    [guid resolve error] HTTP {res.status_code} — {json.dumps(data, ensure_ascii=False)[:300]}", file=sys.stderr)
+            return None, None
+        return data.get("guid"), data.get("balance")
+    except Exception as e:
+        print(f"    [guid resolve error] {e}", file=sys.stderr)
+        return None, None
+
+
 def get_balance_krw(worker_base, guid):
     try:
         res = requests.get(f"{worker_base}/biz/balance-status", params={"guid": guid}, timeout=15)
@@ -76,9 +123,11 @@ def get_balance_krw(worker_base, guid):
         return None
 
 
-def call_klaw_relay(worker_base, guid, case_id, claim_amount_krw, step_cycle):
+def call_klaw_relay(worker_base, guid, phone_verify_token, case_id, claim_amount_krw, step_cycle):
     body = {
-        "guid": guid,
+        "guid": guid,  # handleKlawRelay가 실제로 신뢰하는 건 아니지만(2026-09-02부터
+        # phone_verify_token으로 강제 치환됨), 하위호환을 위해 계속 실어 보낸다.
+        "phone_verify_token": phone_verify_token,
         "tier": "klaw-flash",
         "messages": [
             {"role": "system", "content": "You are a test harness call. Reply with exactly one short sentence."},
@@ -188,9 +237,25 @@ def main():
     ap.add_argument("--scenarios", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--worker-base", default=DEFAULT_WORKER_BASE)
-    ap.add_argument("--funded-guid", required=True, help="잔액 충분한 테스트 guid (모든 시나리오가 requires_funded_guid)")
+    ap.add_argument("--funded-e164", required=True,
+                     help='잔액 충분한 테스트 계정의 전화번호, 내부 표준 형식(예: "+8201096627170")')
+    ap.add_argument("--phone-verify-secret", default=os.environ.get("PHONE_VERIFY_SECRET"),
+                     help="worker.js PHONE_VERIFY_SECRET과 동일한 값(HMAC 서명용). 생략 시 PHONE_VERIFY_SECRET 환경변수 사용")
     ap.add_argument("--resume", action="store_true")
     args = ap.parse_args()
+
+    if not args.phone_verify_secret:
+        print("PHONE_VERIFY_SECRET이 없습니다 — --phone-verify-secret 또는 환경변수로 넘겨주세요.", file=sys.stderr)
+        sys.exit(2)
+
+    # TTL 30분 — 두 시나리오 × repeat 30회 순차 호출이 여유 있게 끝나도록
+    # 넉넉히 잡는다(서버 쪽 상한은 PHONE_VERIFY_TOKEN_TTL_MS=60분).
+    phone_verify_token = make_phone_verify_token(args.phone_verify_secret, args.funded_e164, ttl_ms=30 * 60 * 1000)
+    guid, balance_gdc = resolve_guid_and_balance(args.worker_base, phone_verify_token)
+    if not guid:
+        print(f"guid 조회 실패 — {args.funded_e164}로 등록된 프로필이 없거나 PHONE_VERIFY_SECRET이 Cloudflare 쪽과 다릅니다.", file=sys.stderr)
+        sys.exit(2)
+    print(f"[auth] e164={args.funded_e164} → guid={guid} (현재 잔액 {balance_gdc} GDC)")
 
     with open(args.scenarios, encoding="utf-8") as f:
         scenarios = json.load(f)
@@ -225,7 +290,6 @@ def main():
 
         print(f"[{no}] {sc['title']}")
 
-        guid = args.funded_guid
         repeat = max(1, int(sc.get("repeat", 1)))
         base_case_id = sc.get("case_id")
 
@@ -236,7 +300,7 @@ def main():
         for i in range(repeat):
             case_id = f"smoketest-usage-{uuid.uuid4()}" if base_case_id == "auto" else base_case_id
             result = call_klaw_relay(
-                args.worker_base, guid, case_id,
+                args.worker_base, guid, phone_verify_token, case_id,
                 sc.get("claim_amount_krw"), sc.get("step_cycle", False),
             )
             call_results.append(result)

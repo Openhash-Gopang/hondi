@@ -7,8 +7,8 @@ on:
         description: "Scenario file name in tests/live_smoketest/ (blank = scenarios_klaw_usage_billing_beta_20260907.json)"
         required: false
         default: ""
-      funded_guid:
-        description: "GDC 잔액 보유한 테스트 guid (필수 — 모든 시나리오가 실제 과금을 발생시킴)"
+      funded_e164:
+        description: "GDC 잔액 보유한 테스트 계정 전화번호, 내부 표준 형식 (예: +8201096627170) — 필수, 모든 시나리오가 실제 과금을 발생시킴"
         required: true
       worker_base:
         description: "worker.js(hondi-proxy) base URL"
@@ -36,6 +36,8 @@ jobs:
 
       - name: Run K-Law beta usage-billing live smoketest
         working-directory: tests/live_smoketest
+        env:
+          PHONE_VERIFY_SECRET: ${{ secrets.PHONE_VERIFY_SECRET }}
         run: |
           SCEN="${{ github.event.inputs.scenarios_file }}"
           if [ -z "$SCEN" ]; then SCEN="scenarios_klaw_usage_billing_beta_20260907.json"; fi
@@ -45,7 +47,7 @@ jobs:
           python3 klaw_usage_billing_live_smoketest.py \
             --scenarios "$SCEN" --out "$OUT" \
             --worker-base "${{ github.event.inputs.worker_base || 'https://hondi-proxy.tensor-city.workers.dev' }}" \
-            --funded-guid "${{ github.event.inputs.funded_guid }}" \
+            --funded-e164 "${{ github.event.inputs.funded_e164 }}" \
             --resume
 
       - name: Commit results to results branch
