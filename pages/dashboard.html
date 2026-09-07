@@ -418,6 +418,10 @@ code, pre, kbd, samp, input, button, textarea, select {
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>
       <span>재무제표</span>
     </button>
+    <button class="dash-tab" data-tab="tax">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2v6.343L4.4 17.4A2 2 0 0 0 6.2 20h11.6a2 2 0 0 0 1.8-2.6L15 8.343V2"></path><line x1="8" y1="2" x2="16" y2="2"></line><line x1="7" y1="14" x2="17" y2="14"></line></svg>
+      <span>세무</span>
+    </button>
     <button class="dash-tab" data-tab="profile">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg>
       <span>프로필 관리</span>
@@ -636,6 +640,38 @@ code, pre, kbd, samp, input, button, textarea, select {
         </div>
       </div>
 
+      <!-- 세무 — 2026-09-07 신설 (SP_tax-accountant_v2_4 확장) -->
+      <div class="dash-panel" id="panel-tax">
+        <div class="panel">
+          <div class="panel-head"><h2>세무사 AI 상담</h2></div>
+          <div class="row">
+            <div class="row-body">
+              <div class="row-title">재무제표를 그대로 넘겨 절세 전략을 상담합니다</div>
+              <div class="row-desc">매출·매입·순이익을 다시 입력할 필요 없이, "재무제표" 탭 데이터가 세션에 자동으로 실립니다.</div>
+            </div>
+            <button class="mini-btn" id="taxAdvisorBtn">상담 시작</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h2>경정청구 후보</h2><span class="result-meta" style="margin:0">재무제표 기반 1차 스크리닝 — 최종 판단은 상담에서</span></div>
+          <div id="taxOpportunities"><div class="result-meta">불러오는 중…</div></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h2>세무 자동 집행 위임 (G8-TAX)</h2>
+            <label class="toggle"><input type="checkbox" id="taxDelegationToggle"><span class="toggle-sl"></span></label>
+          </div>
+          <p class="pdv-footnote" id="taxDelegationNote">꺼져 있으면 상담 결과는 항상 초안까지만 — 켜면 종합확신도 🟢이고 제척기간 내인 경정청구에 한해 실제 실행을 시도합니다. 국세청 최초 신고서 제출·세무조사 대응·기장대리·세무조정계산서 등은 이 위임과 무관하게 자동화되지 않습니다.</p>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h2>홈택스 연동 상태</h2><button class="mini-btn" id="hometaxQueryBtn">지금 조회</button></div>
+          <div id="hometaxStatus" class="pdv-footnote">사업자등록번호를 입력하면 상태를 조회합니다.</div>
+        </div>
+      </div>
+
       <!-- 프로필 -->
       <div class="dash-panel" id="panel-profile">
         <div class="profile-grid">
@@ -745,6 +781,7 @@ var TITLES = {
   home: ['홈', '오늘 혼디가 나를 위해 한 일'],
   pdv: ['내 기록 검색', '24시간 기록된 PDV에서 검색합니다'],
   financials: ['재무제표', '손익계산서 · 대차대조표 · 현금흐름표'],
+  tax: ['세무', '재무제표를 근거로 한 절세 전략 수립 · 실행'],
   profile: ['프로필 관리', '내 프로필 웹앱을 바로 수정합니다'],
   contacts: ['대화상대 관리', '전문가 페르소나·친구·가족을 관리합니다'],
   settings: ['비서 설정', 'AI 비서 자율성과 알림을 설정합니다']
@@ -1357,6 +1394,109 @@ document.getElementById('fsVerifyBtn')?.addEventListener('click', async () => {
     }
   } catch (e) {
     resultEl.textContent = '검증 실패: ' + e.message;
+  }
+});
+</script>
+
+<!-- ══════ 세무 — 2026-09-07 신설 (SP_tax-accountant_v2_4 확장, STEP C-2) ══════ -->
+<script type="module">
+import {
+  fetchTaxDelegation, setTaxDelegation, fetchCorrectionOpportunities,
+  queryHometax, buildTaxAdvisorChatUrl,
+} from '/src/gopang/gdc/tax-execution.js';
+import { fetchBalanceSheet, fetchIncomeStatement, fetchCashFlow } from '/src/gopang/gdc/financial-statements.js';
+
+async function _getTaxWallet() {
+  if (!window.GopangWallet) return null;
+  return window.GopangWallet.load().catch(() => null);
+}
+
+let _taxLoaded = false;
+
+async function loadTaxTab() {
+  const wallet = await _getTaxWallet();
+  const oppEl = document.getElementById('taxOpportunities');
+  const toggle = document.getElementById('taxDelegationToggle');
+  if (!wallet?.guid) {
+    if (oppEl) oppEl.innerHTML = '<div class="result-meta">로그인 후 조회할 수 있습니다.</div>';
+    return;
+  }
+
+  // 경정청구 후보
+  try {
+    const items = await fetchCorrectionOpportunities(wallet);
+    oppEl.innerHTML = items.length
+      ? items.map((it) => `
+          <div class="row">
+            <div class="row-body"><div class="row-title">${it.title}</div><div class="row-desc">${it.detail}</div></div>
+            <span class="status-tag ${it.confidence_hint === 'low' ? 'gray' : 'amber'}">${it.confidence_hint === 'low' ? '확인 필요' : '검토 권장'}</span>
+          </div>`).join('')
+      : '<div class="result-meta">현재 재무제표 기준으로 발견된 후보가 없습니다.</div>';
+  } catch (e) {
+    oppEl.innerHTML = '<div class="result-meta">조회 실패: ' + e.message + '</div>';
+  }
+
+  // G8-TAX 위임 상태
+  try {
+    const enabled = await fetchTaxDelegation(wallet);
+    if (toggle) toggle.checked = enabled;
+  } catch (e) {
+    console.warn('[대시보드] 세무 위임 상태 조회 실패:', e.message);
+  }
+
+  _taxLoaded = true;
+}
+
+document.querySelector('.dash-tab[data-tab="tax"]')?.addEventListener('click', () => {
+  if (!_taxLoaded) loadTaxTab();
+}, { once: true });
+
+document.getElementById('taxDelegationToggle')?.addEventListener('change', async (e) => {
+  const wallet = await _getTaxWallet();
+  const note = document.getElementById('taxDelegationNote');
+  if (!wallet?.guid) { e.target.checked = false; return; }
+  try {
+    await setTaxDelegation(wallet, e.target.checked);
+  } catch (err) {
+    e.target.checked = !e.target.checked; // 실패 시 원복
+    if (note) note.textContent = '설정 실패: ' + err.message;
+  }
+});
+
+document.getElementById('taxAdvisorBtn')?.addEventListener('click', async () => {
+  const wallet = await _getTaxWallet();
+  if (!wallet?.guid) return;
+  // "재무제표" 탭 데이터를 그대로 넘긴다 — 없으면 빈 컨텍스트로 진입(SP 하위호환).
+  const [pl, bs, cf] = await Promise.allSettled([
+    fetchIncomeStatement(wallet, { refresh: false }),
+    fetchBalanceSheet(wallet),
+    fetchCashFlow(wallet),
+  ]);
+  const url = buildTaxAdvisorChatUrl({
+    pl: pl.status === 'fulfilled' ? pl.value : null,
+    bs: bs.status === 'fulfilled' ? bs.value : null,
+    cf: cf.status === 'fulfilled' ? cf.value : null,
+  }, location.href);
+  window.open(url, '_blank', 'noopener');
+});
+
+document.getElementById('hometaxQueryBtn')?.addEventListener('click', async () => {
+  const wallet = await _getTaxWallet();
+  const statusEl = document.getElementById('hometaxStatus');
+  if (!wallet?.guid) { statusEl.textContent = '로그인 후 조회할 수 있습니다.'; return; }
+  const bizNo = prompt('사업자등록번호를 입력하세요 (예: 123-45-67890) — 개인 소득만 있다면 취소해도 됩니다.');
+  statusEl.textContent = '조회 중…';
+  try {
+    const r = await queryHometax(wallet, bizNo || '');
+    if (r.status === 'pending_credential') {
+      statusEl.textContent = '⏳ ' + r.message;
+    } else if (r.status === 'live') {
+      statusEl.textContent = '✅ 조회 완료 — ' + JSON.stringify(r.data);
+    } else {
+      statusEl.textContent = '조회 결과를 확인할 수 없습니다.';
+    }
+  } catch (e) {
+    statusEl.textContent = '조회 실패: ' + e.message;
   }
 });
 </script>

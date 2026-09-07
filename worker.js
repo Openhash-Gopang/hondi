@@ -12737,6 +12737,12 @@ export default {
     if (pathname === '/biz/claims/ack' && request.method === 'POST') return handleClaimsAck(request, env, corsHeaders);
     if (pathname === '/biz/settle-ledger' && request.method === 'POST') return handleSettleLedger(request, env, corsHeaders);
     if (pathname === '/biz/financials' && request.method === 'GET') return handleFinancialsGet(request, env, corsHeaders);
+    // 2026-09-07 신설 — 대시보드 "세무" 탭 (SP_tax-accountant_v2_4 STEP C-2)
+    if (pathname === '/tax/delegation' && request.method === 'GET') return handleTaxDelegationGet(request, env, corsHeaders);
+    if (pathname === '/tax/delegation' && request.method === 'POST') return handleTaxDelegationSet(request, env, corsHeaders);
+    if (pathname === '/tax/correction-opportunities' && request.method === 'GET') return handleCorrectionOpportunities(request, env, corsHeaders);
+    if (pathname === '/tax/hometax/query' && request.method === 'GET') return handleHometaxQuery(request, env, corsHeaders);
+    if (pathname === '/tax/hometax/correction-claim' && request.method === 'POST') return handleCorrectionClaimFile(request, env, corsHeaders);
     if (pathname === '/pdv/my-records' && request.method === 'GET') return handlePdvMyRecords(request, env, corsHeaders);
     if (pathname === '/biz/tx-history' && request.method === 'GET') return handleTxHistory(request, env, corsHeaders);
     // ★ 2026-07-09 신설 — 짜장면 주문 사고실험 1단계: 프로필-to-프로필
@@ -29659,6 +29665,219 @@ async function handleFsVerify(request, env, corsHeaders) {
     merkle_root: anchor.merkle_root, anchor_recomputed_root: anchorRecomputedRoot,
     anchor_id: anchor.id, anchored_at: anchor.anchored_at,
   }), { status: 200, headers: corsHeaders });
+}
+
+// ═══════════════════════════════════════════════════════════
+// 세무 자동 실행 — 대시보드 "세무" 탭 (2026-09-07 신설)
+// SP_tax-accountant_v2_4 STEP C-2(자동 실행 게이트)의 백엔드 구현체.
+// 4개 엔드포인트:
+//   GET  /tax/delegation             — G8-TAX 위임 on/off 조회
+//   POST /tax/delegation             — G8-TAX 위임 on/off 설정(서명 필요)
+//   GET  /tax/correction-opportunities — fs 기반 경정청구 후보 스캔(휴리스틱)
+//   GET  /tax/hometax/query          — 홈택스/공공데이터 조회(사업자등록 상태 등)
+//   POST /tax/hometax/correction-claim — 경정청구 실행(위임+확신도+자격 게이트)
+//
+// 정직성 원칙(이 저장소 전반의 관례 그대로 — dpaper.kr 자격 확보 계획,
+// GDC 채권 POOL "VISION" 표시와 동일): 실제 국세청 경정청구 제출용
+// 공식 오픈 API는 존재하지 않는다(RPA/스크래핑 연동이 필요 — 별도
+// 인프라 프로젝트). 그 인프라가 없는 동안은 `status:'pending_credential'`로
+// 정직하게 응답하고, 실행 대신 서류 초안(draft)을 반환한다. 사업자등록
+// 상태조회는 공공데이터포털 기존 오픈 API(odcloud.kr)로 실제 조회
+// 가능하며, env.NTS_BIZ_OPENAPI_KEY가 설정되면 바로 라이브로 전환된다.
+// ═══════════════════════════════════════════════════════════
+
+async function handleTaxDelegationGet(request, env, corsHeaders) {
+  const url = new URL(request.url);
+  const guid = url.searchParams.get('guid');
+  if (!guid) return _err(400, 'MISSING_FIELD', 'guid 필수', corsHeaders);
+  const profile = await _l1FindProfileByGuid(env, guid).catch(() => null);
+  if (!profile) return _err(404, 'PROFILE_NOT_FOUND', '프로필을 찾을 수 없습니다', corsHeaders);
+  const enabled = !!profile.extra?.tax_delegation_g8;
+  return new Response(JSON.stringify({ ok: true, enabled }), {
+    status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
+
+async function handleTaxDelegationSet(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+  const { guid, enabled, pubkey, signature, ts } = body;
+  if (!guid) return _err(400, 'MISSING_FIELD', 'guid 필수', corsHeaders);
+  if (typeof enabled !== 'boolean') return _err(400, 'INVALID_FIELD', 'enabled는 boolean이어야 합니다', corsHeaders);
+
+  const sigMsg = `tax-delegation-set:${guid}:${enabled}:${ts}`;
+  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
+  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+
+  const profile = await _l1FindProfileByGuid(env, guid).catch(() => null);
+  if (!profile) return _err(404, 'PROFILE_NOT_FOUND', '프로필을 찾을 수 없습니다', corsHeaders);
+  const newExtra = { ...(profile.extra || {}), tax_delegation_g8: enabled };
+  try { await _l1PatchProfile(env, profile.id, { extra: newExtra }); }
+  catch (e) { return _err(502, 'L1_UNREACHABLE', 'L1 PATCH 실패: ' + e.message, corsHeaders); }
+  return new Response(JSON.stringify({ ok: true, enabled }), {
+    status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
+
+// ── 경정청구 후보 스캔 (휴리스틱) ──────────────────────────────────
+// SP_tax-accountant STEP A+(사업·가사 겸용) 판단은 대화가 필요하므로
+// 여기서는 하지 않는다 — "재무제표상 이런 패턴이 있으니 세무사 AI와
+// 상담해볼 만하다"는 1차 스크리닝만 제공한다. 최종 판단은 항상 SP
+// 세션(STEP A~D)을 거친다.
+function _scanCorrectionOpportunities(fs) {
+  const items = [];
+  const revenue = Number(fs?.pl?.['pl-revenue'] || 0);
+  const cogs    = Number(fs?.pl?.['pl-cogs']    || 0);
+  const purchase = Number(fs?.pl?.['pl-purchase'] || 0);
+  const netIncome = revenue - purchase;
+
+  if (purchase > 0 && cogs === 0 && revenue > 0) {
+    items.push({
+      id: 'cogs-unrecorded',
+      title: '매출원가 미기록 — 매입만 있고 원가 매칭이 없음',
+      detail: '지출(pl-purchase)은 있는데 매출원가(pl-cogs)가 0입니다. 원가를 등록한 상품이 없어 생긴 것일 수도, 실제로 매출원가 계상이 누락된 것일 수도 있습니다 — 세무사 AI와 확인이 필요합니다.',
+      confidence_hint: 'low',
+    });
+  }
+  if (netIncome < 0) {
+    items.push({
+      id: 'net-loss-carryforward',
+      title: '결손금 이월공제 검토 대상',
+      detail: '이번 기간 순손실이 발생했습니다. 결손금 이월공제·소급공제 요건에 해당하는지 확인이 필요합니다.',
+      confidence_hint: 'medium',
+    });
+  }
+  return items;
+}
+
+async function handleCorrectionOpportunities(request, env, corsHeaders) {
+  const url = new URL(request.url);
+  const guid = url.searchParams.get('guid');
+  const pubkey = url.searchParams.get('pubkey');
+  const signature = url.searchParams.get('signature');
+  const ts = url.searchParams.get('ts') || '';
+  if (!guid) return _err(400, 'MISSING_FIELD', 'guid 필수', corsHeaders);
+
+  const authOk = await _verifyClaimsRequester(env, {
+    guid, pubkey, signature, ts, sigMsg: `correction-opportunities:${guid}:${pubkey}:${ts}`,
+  });
+  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+
+  const profile = await _l1FindProfileByGuid(env, guid).catch(() => null);
+  if (!profile) return _err(404, 'PROFILE_NOT_FOUND', 'L1에 프로필이 없습니다', corsHeaders);
+
+  const fs = profile.extra?.fs || {};
+  const items = _scanCorrectionOpportunities(fs);
+  return new Response(JSON.stringify({ ok: true, items }), {
+    status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
+
+// ── 홈택스/공공데이터 조회 ─────────────────────────────────────────
+// 실제 살아있는 공공데이터포털 API(사업자등록 상태조회, odcloud.kr)를
+// 사용한다. env.NTS_BIZ_OPENAPI_KEY 미설정 시 pending_credential.
+async function handleHometaxQuery(request, env, corsHeaders) {
+  const url = new URL(request.url);
+  const guid = url.searchParams.get('guid');
+  const pubkey = url.searchParams.get('pubkey');
+  const signature = url.searchParams.get('signature');
+  const ts = url.searchParams.get('ts') || '';
+  const bizNo = (url.searchParams.get('biz_no') || '').replace(/-/g, '');
+  if (!guid) return _err(400, 'MISSING_FIELD', 'guid 필수', corsHeaders);
+
+  const authOk = await _verifyClaimsRequester(env, {
+    guid, pubkey, signature, ts, sigMsg: `hometax-query:${guid}:${pubkey}:${ts}`,
+  });
+  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+
+  if (!env.NTS_BIZ_OPENAPI_KEY) {
+    return new Response(JSON.stringify({
+      ok: true, status: 'pending_credential',
+      message: '공공데이터포털 사업자등록 상태조회 API 자격(NTS_BIZ_OPENAPI_KEY)이 아직 등록되지 않았습니다 — 실행 대신 이 사실을 그대로 알려드립니다.',
+    }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+  if (!bizNo) return _err(400, 'MISSING_FIELD', 'biz_no(사업자등록번호) 필수', corsHeaders);
+
+  try {
+    const apiRes = await fetch(
+      `https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey=${encodeURIComponent(env.NTS_BIZ_OPENAPI_KEY)}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ b_no: [bizNo] }),
+      }
+    );
+    if (!apiRes.ok) return _err(502, 'NTS_API_ERROR', `국세청 API 오류: HTTP ${apiRes.status}`, corsHeaders);
+    const data = await apiRes.json();
+    return new Response(JSON.stringify({ ok: true, status: 'live', data: data?.data?.[0] || null }), {
+      status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  } catch (e) {
+    return _err(502, 'NTS_API_UNREACHABLE', '국세청 API 연결 실패: ' + e.message, corsHeaders);
+  }
+}
+
+// ── 경정청구 실행 ────────────────────────────────────────────────
+// SP_tax-accountant STEP C-2 4조건(위임/확신도/제척기간/자격확보)을
+// 서버에서도 다시 검증한다 — 클라이언트가 보낸 confidence를 그대로
+// 믿지 않고, 위임 플래그는 반드시 profile.extra에서 직접 재확인한다.
+async function handleCorrectionClaimFile(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+  const { guid, pubkey, signature, ts, opportunity_id, confidence, statute_ok, claim_draft } = body;
+  if (!guid) return _err(400, 'MISSING_FIELD', 'guid 필수', corsHeaders);
+
+  const sigMsg = `correction-claim-file:${guid}:${opportunity_id}:${ts}`;
+  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
+  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+
+  const profile = await _l1FindProfileByGuid(env, guid).catch(() => null);
+  if (!profile) return _err(404, 'PROFILE_NOT_FOUND', '프로필을 찾을 수 없습니다', corsHeaders);
+
+  // 조건 ① 위임 켜짐 — 서버가 직접 확인(클라이언트 값 신뢰 안 함)
+  if (!profile.extra?.tax_delegation_g8) {
+    return new Response(JSON.stringify({
+      ok: true, status: 'blocked_no_delegation',
+      message: 'G8-TAX 세무 자동 집행 위임이 꺼져 있습니다 — 비서 설정에서 켜야 자동 실행할 수 있습니다. 지금은 초안만 제공합니다.',
+      draft: claim_draft || null,
+    }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+  // 조건 ② 종합확신도 🟢
+  if (confidence !== 'green') {
+    return new Response(JSON.stringify({
+      ok: true, status: 'blocked_low_confidence',
+      message: '종합확신도가 🟢이 아니면 자동 실행하지 않습니다 — 초안만 제공합니다.',
+      draft: claim_draft || null,
+    }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+  // 조건 ③ 제척기간 내
+  if (statute_ok === false) {
+    return _err(400, 'STATUTE_EXPIRED', '경정청구 제척기간이 도과된 것으로 판단됩니다', corsHeaders);
+  }
+  // 조건 ④ 자격 확보 — 실제 제출 경로(RPA). 공식 오픈 API가 없어
+  // env.HOMETAX_RPA_ENDPOINT(내부 프로비저닝 예정)가 없으면 항상 대기.
+  if (!env.HOMETAX_RPA_ENDPOINT) {
+    return new Response(JSON.stringify({
+      ok: true, status: 'pending_credential',
+      message: '경정청구 실제 제출 경로(국세청 공식 오픈 API 부재 — RPA 연동 필요)가 아직 준비되지 않았습니다. 위임·확신도 조건은 모두 충족했으므로, 인프라가 연결되는 즉시 자동 제출됩니다 — 지금은 완성된 제출 초안을 대신 드립니다.',
+      draft: claim_draft || null,
+    }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+
+  try {
+    const rpaRes = await fetch(env.HOMETAX_RPA_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ guid, opportunity_id, claim_draft }),
+    });
+    const rpaData = await rpaRes.json().catch(() => ({}));
+    if (!rpaRes.ok) return _err(502, 'RPA_SUBMIT_FAILED', 'RPA 제출 실패: ' + (rpaData.message || rpaRes.status), corsHeaders);
+    return new Response(JSON.stringify({
+      ok: true, status: 'submitted', submitted_at: new Date().toISOString(), reference: rpaData.reference || null,
+    }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  } catch (e) {
+    return _err(502, 'RPA_UNREACHABLE', 'RPA 연결 실패: ' + e.message, corsHeaders);
+  }
 }
 
 

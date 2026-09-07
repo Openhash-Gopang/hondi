@@ -4607,7 +4607,7 @@
       ]
     },
     {
-      "file": "prompts/SP_tax-accountant_v2_3.md",
+      "file": "prompts/SP_tax-accountant_v2_4.md",
       "name": "세무사",
       "cat": "prof-tax-accountant",
       "cat_label": "전문직 페르소나 · 세무사",
