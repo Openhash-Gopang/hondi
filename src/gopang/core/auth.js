@@ -37,6 +37,24 @@ const DEV_MODE = false;
 const STORE_KEY = 'gopang_user_v4';
 const DEFAULT_COUNTRY = 'KR';
 
+// ── Base64URL 헬퍼 (2026-09-07 신설) ────────────────────────────────
+// gopang-wallet.js의 동명 내부 함수와 동일한 인코딩 — 이 파일에서도
+// 재클레임 흐름의 WebAuthn 챌린지/assertion을 다뤄야 해서 여기 별도로
+// 둔다(gopang-wallet.js는 IIFE 내부 비공개 함수라 import 불가).
+function _b64uToBuf(b64u) {
+  const b64 = b64u.replace(/-/g, '+').replace(/_/g, '/');
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes.buffer;
+}
+function _bufToB64u(buf) {
+  const bytes = new Uint8Array(buf);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
 // ── 모바일 기기 판별 (보수적: 확실한 모바일 키워드가 없으면 PC로 간주) ──
 // 목적: 암호키(GDC Wallet) 생성은 휴대폰에서만 — PC가 먼저 키를 만들어
 //       가입 시점의 진짜 키와 어긋나는 사고(부록 A-1)를 원천 차단.
@@ -1732,6 +1750,13 @@ function _showPhonePopup(resolve) {
   function _requestAndVerifyPhoneOtp(e164) {
     return new Promise((resolve) => {
       (async () => {
+        // 2026-09-07 신설(사용자 지시) — 이 번호가 이미 지문(WebAuthn)을
+        // 쓰는 계정에 클레임돼 있으면, handlePhoneOtpRequest가 그 계정
+        // guid 앞으로 생체 인증 챌린지를 함께 내려준다. SMS 코드가
+        // 맞더라도 이 챌린지를 이 기기로 통과 못 하면(=이 기기가 그
+        // 계정을 등록한 물리적 기기가 아니면) 재가입을 진행시키지 않는다.
+        let existingAccountChallenge = null;
+
         try {
           const reqRes = await fetch(`${PROXY}/biz/phone-otp-request`, {
             method: 'POST',
@@ -1744,6 +1769,7 @@ function _showPhonePopup(resolve) {
             resolve(null);
             return;
           }
+          existingAccountChallenge = reqData.existingAccountBiometricChallenge || null;
         } catch (e) {
           alert('인증번호 발송 중 네트워크 오류가 발생했습니다: ' + e.message);
           resolve(null);
@@ -1822,8 +1848,52 @@ function _showPhonePopup(resolve) {
             });
             const verData = await verRes.json().catch(() => ({}));
             if (verRes.ok && verData.ok) {
-              finish(verData.phone_verify_token);
-              return;
+              if (!existingAccountChallenge) {
+                finish({ phoneVerifyToken: verData.phone_verify_token, stepUpToken: null });
+                return;
+              }
+              // ── 생체 인증 필수 구간 (2026-09-07 신설) ────────────────
+              // SMS 코드는 맞았지만, 이 번호로 이미 등록된 계정이 지문을
+              // 쓴다. 이 기기가 그 계정을 등록한 물리적 기기가 아니면
+              // navigator.credentials.get()이 자연스럽게 실패한다(해당
+              // credential이 이 기기에 없으므로) — 이게 방어의 핵심이다.
+              verifyBtn.textContent = '지문/Face ID 확인 중...';
+              try {
+                const assertion = await navigator.credentials.get({
+                  publicKey: {
+                    challenge: _b64uToBuf(existingAccountChallenge.challengeB64u),
+                    rpId: existingAccountChallenge.rpId || 'hondi.net',
+                    allowCredentials: (existingAccountChallenge.credentialIds || []).map(id => ({
+                      id: _b64uToBuf(id), type: 'public-key',
+                    })),
+                    userVerification: 'required',
+                  },
+                });
+                const stepUpRes = await fetch(`${PROXY}/account/step-up-verify`, {
+                  method: 'POST', headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    guid: existingAccountChallenge.guid,
+                    sessionId: existingAccountChallenge.sessionId,
+                    credentialId: _bufToB64u(assertion.rawId),
+                    authenticatorDataB64u: _bufToB64u(assertion.response.authenticatorData),
+                    clientDataJSONB64u: _bufToB64u(assertion.response.clientDataJSON),
+                    signatureB64u: _bufToB64u(assertion.response.signature),
+                  }),
+                });
+                const stepUpData = await stepUpRes.json().catch(() => ({}));
+                if (!stepUpRes.ok || !stepUpData.ok) {
+                  throw new Error(stepUpData.detail || '생체 인증 확인에 실패했습니다.');
+                }
+                finish({ phoneVerifyToken: verData.phone_verify_token, stepUpToken: stepUpData.step_up_token });
+                return;
+              } catch (bioErr) {
+                otpErr.textContent = '이 번호로 등록된 계정은 지문 인증이 필요합니다 — 이 기기는 그 계정을 등록한 기기가 아닌 것 같습니다(' +
+                  (bioErr.message || bioErr) + '). 본인 계정이 맞다면 그 계정을 등록했던 기기에서 다시 시도해 주세요.';
+                otpErr.style.display = 'block';
+                verifyBtn.disabled = false;
+                verifyBtn.textContent = '확인';
+                return;
+              }
             }
             attempts += 1;
             if (attempts >= 5) {
@@ -1880,7 +1950,7 @@ function _showPhonePopup(resolve) {
   }
 
   // ── 실제 신규 가입 처리 (기존 _register 로직 그대로, 지역 필드는 제거) ──
-  async function _completeRegistration({ ipv6, handle, e164, nickname, digits, phoneVerifyToken }) {
+  async function _completeRegistration({ ipv6, handle, e164, nickname, digits, phoneVerifyToken, stepUpToken }) {
     const nickname_hash = await _sha256('phone:' + e164);
     const region = '';
 
@@ -1951,6 +2021,10 @@ function _showPhonePopup(resolve) {
         // 요구한다(없으면 프로필 생성 자체가 거부됨). 아래 케이스 C에서
         // _requestAndVerifyPhoneOtp()로 발급받은 값을 그대로 전달.
         phone_verify_token: phoneVerifyToken,
+        // 2026-09-07 신설 — 이 번호로 등록된 기존 계정이 지문(WebAuthn)을
+        // 쓰는 경우에만 의미가 있다(_requestAndVerifyPhoneOtp가 그 경우에만
+        // 채워서 돌려줌). pb_hooks가 그 계정 guid 앞으로 독립 검증한다.
+        step_up_token: stepUpToken || null,
       })
     });
     let _l1Res = await _postL1Profile().catch(e => { console.warn('[가입][L1] 1차 요청 실패(네트워크):', e.message); return null; });
@@ -2138,8 +2212,8 @@ function _showPhonePopup(resolve) {
       }
 
       btn.textContent = '인증번호 확인 중...';
-      const phoneVerifyToken = await _requestAndVerifyPhoneOtp(e164);
-      if (!phoneVerifyToken) {
+      const otpResult = await _requestAndVerifyPhoneOtp(e164);
+      if (!otpResult?.phoneVerifyToken) {
         phoneErr.textContent = '전화번호 인증이 완료되지 않아 가입을 진행할 수 없습니다.';
         phoneErr.style.display = 'block';
         btn.style.opacity = '1'; btn.style.pointerEvents = '';
@@ -2149,7 +2223,10 @@ function _showPhonePopup(resolve) {
 
       btn.textContent = '등록 중...';
       const ipv6 = await _e164ToIPv6(e164);
-      await _completeRegistration({ ipv6, handle, e164, nickname, digits, phoneVerifyToken });
+      await _completeRegistration({
+        ipv6, handle, e164, nickname, digits,
+        phoneVerifyToken: otpResult.phoneVerifyToken, stepUpToken: otpResult.stepUpToken,
+      });
 
     } catch(e) {
       phoneErr.textContent = '네트워크 오류. 다시 시도해 주세요.';

@@ -4507,6 +4507,30 @@ onRecordBeforeCreateRequest((e) => {
     throw new BadRequestError("인증 토큰이 만료됐습니다. 인증번호를 다시 요청해 주세요");
   }
 
+  // ── step_up_token(생체 인증 결과) 독립 검증 — 2026-09-07 신설 ────────
+  // worker.js의 handleStepUpVerify가 발급하는 것과 완전히 같은 형식
+  // (payload는 [guid, tx_hash, exp] JSON 배열 + HMAC-SHA256)이라 같은
+  // PHONE_VERIFY_SECRET으로 여기서도 독립 검증할 수 있다. 이 파일은
+  // 콜백 바깥의 최상위 함수 선언이 조용히 무시되는 제약이 있어(파일
+  // 상단 주석 참고), 이 콜백 지역 함수로 정의한다.
+  function _verifyStepUpTokenPB(stepUpToken, expectedGuid, expectedTxHash) {
+    if (!stepUpToken || typeof stepUpToken !== "string") return { ok: false, reason: "MISSING_TOKEN" };
+    const dot = stepUpToken.lastIndexOf(".");
+    if (dot === -1) return { ok: false, reason: "MALFORMED" };
+    const suPayload = stepUpToken.substring(0, dot);
+    const suSig = stepUpToken.substring(dot + 1);
+    const suExpectedSig = $security.hs256(suPayload, secret);
+    if (!$security.equal(suExpectedSig, suSig)) return { ok: false, reason: "BAD_SIGNATURE" };
+    let parsed;
+    try { parsed = JSON.parse(suPayload); } catch (_) { return { ok: false, reason: "MALFORMED_PAYLOAD" }; }
+    if (!Array.isArray(parsed) || parsed.length !== 3) return { ok: false, reason: "MALFORMED_PAYLOAD" };
+    const [tokGuid, tokTxHash, tokExp] = parsed;
+    if (!tokExp || Date.now() > tokExp) return { ok: false, reason: "EXPIRED" };
+    if (tokGuid !== expectedGuid) return { ok: false, reason: "GUID_MISMATCH" };
+    if (tokTxHash !== expectedTxHash) return { ok: false, reason: "TX_HASH_MISMATCH" };
+    return { ok: true };
+  }
+
   // ── 번호 재활용(재클레임) 시 "덮어쓰기" 처리 (2026-09-06 신설) ──────
   // 전화번호 소유는 방금 phone_verify_token으로 검증됐다. 하지만 이 번호로
   // 이미 클레임된 profiles 레코드가 있을 수 있다 — 통신사가 해지된 번호를
@@ -4536,11 +4560,36 @@ onRecordBeforeCreateRequest((e) => {
     );
     for (const old of dupes) {
       const oldGuid = old.getString("guid");
+
+      // ── 2026-09-07 신설(사용자 지시) — 지문(WebAuthn)을 쓰는 계정은
+      // SMS 인증만으로 재클레임(대체)할 수 없게 막는다. 불법 취득한
+      // 폰으로도 SMS는 받을 수 있지만, 그 계정에 등록된 물리적
+      // 인증기(지문 등록 당시의 특정 기기)를 재현할 수는 없다는 사실을
+      // 이용한다. 클라이언트는 handlePhoneOtpRequest가 함께 내려준
+      // 챌린지로 이 guid 앞으로 생체 인증을 먼저 통과하고, 그 결과로
+      // 받은 step_up_token을 이 요청(info.data.step_up_token)에 실어야
+      // 한다 — worker.js의 handleStepUpVerify가 발급하는 것과 완전히
+      // 같은 형식(payload는 [guid, tx_hash, exp] JSON 배열 + HMAC)이라
+      // 여기서도 같은 PHONE_VERIFY_SECRET로 독립 검증 가능하다.
+      let oldExtra = {};
+      try { oldExtra = JSON.parse(old.getString("extra") || "{}"); } catch (_) {}
+      const oldCreds = Array.isArray(oldExtra.webauthn_credentials) ? oldExtra.webauthn_credentials : [];
+      if (oldCreds.length > 0) {
+        const stepUpToken = info.data.step_up_token;
+        const stepUpOk = _verifyStepUpTokenPB(stepUpToken, oldGuid, `phone-reclaim:${e164}`);
+        if (!stepUpOk.ok) {
+          throw new BadRequestError(
+            `이 번호로 등록된 계정은 지문(WebAuthn) 인증을 사용 중입니다 — SMS 인증만으로는 재가입할 수 없습니다(BIOMETRIC_REQUIRED: ${stepUpOk.reason}). ` +
+            `본인이 맞다면 그 계정을 등록한 기기에서 지문 인증을 먼저 완료해 주세요.`
+          );
+        }
+        console.log(`[PHONE-RECLAIM] e164=${e164} guid=${oldGuid} 생체 인증 통과 확인 완료`);
+      }
+
       old.set("claim_status", "superseded");
       old.set("e164", "");
       old.set("handle", (old.getString("handle") || "") + "_superseded_" + Date.now());
-      let extra = {};
-      try { extra = JSON.parse(old.getString("extra") || "{}"); } catch (_) {}
+      let extra = oldExtra;
       extra.superseded_at = new Date().toISOString();
       extra.superseded_reason = "phone_reclaimed";
       extra.superseded_guid = oldGuid;
@@ -4549,8 +4598,9 @@ onRecordBeforeCreateRequest((e) => {
       console.log(`[PHONE-RECLAIM] e164=${e164} 이전 guid=${oldGuid} → superseded 처리 완료`);
     }
   } catch (err) {
-    // 조회/저장이 실패해도 신규 가입 자체를 막지는 않는다 — best-effort
-    // 방어이며, TOFU(pubkey 최초 등록)가 여전히 최소한의 방어선이다.
+    if (err instanceof BadRequestError) throw err; // 생체인증 요구 위반은 가입을 막아야 함 — best-effort 대상 아님
+    // 그 외 조회/저장 실패는 best-effort 방어이므로 신규 가입 자체를
+    // 막지는 않는다 — TOFU(pubkey 최초 등록)가 여전히 최소한의 방어선이다.
     console.log(`[PHONE-RECLAIM] 처리 중 오류(무시하고 가입 계속): ${err.message}`);
   }
 

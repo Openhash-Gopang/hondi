@@ -2394,12 +2394,8 @@ function _savePushSound(val) {
   navigator.serviceWorker?.ready.then(reg =>
     reg.pushManager.getSubscription().then(sub => {
       if (!sub) return;
-      import('/src/gopang/services/push.js').then(({ getOrCreateDeviceId }) => {
-        fetch('https://hondi-proxy.tensor-city.workers.dev/push/subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ guid: user.ipv6, subscription: sub.toJSON(), sound: val, deviceId: getOrCreateDeviceId() }),
-        });
+      import('/src/gopang/services/push.js').then(({ getOrCreateDeviceId, postPushSubscribe }) => {
+        postPushSubscribe({ guid: user.ipv6, subscription: sub.toJSON(), sound: val, deviceId: getOrCreateDeviceId() });
       });
     })
   );
@@ -2467,11 +2463,8 @@ async function _togglePush(on) {
       if (sub) await sub.unsubscribe();
       // 서버에서도 삭제 — 이 기기의 구독 항목만 제거(다른 기기는 보존)
       if (user?.ipv6) {
-        const { getOrCreateDeviceId } = await import('/src/gopang/services/push.js');
-        await fetch('https://hondi-proxy.tensor-city.workers.dev/push/subscribe', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ guid: user.ipv6, subscription: null, sound: 'none', unsubscribe: true, deviceId: getOrCreateDeviceId() }),
-        }).catch(()=>{});
+        const { getOrCreateDeviceId, postPushSubscribe } = await import('/src/gopang/services/push.js');
+        await postPushSubscribe({ guid: user.ipv6, subscription: null, sound: 'none', unsubscribe: true, deviceId: getOrCreateDeviceId() }).catch(()=>{});
       }
       _setPushToggle(false);
     } catch(e) {
@@ -2506,11 +2499,11 @@ async function _refreshBiometricUI() {
   if (GopangWallet.isStepUpEnrolled()) {
     btn.textContent = '해제';
     btn.style.background = '#f3f4f6'; btn.style.color = '#374151';
-    if (status) status.textContent = '등록됨 — 문턱 이상 거래 시 지문/얼굴 인증을 요청합니다.';
+    if (status) status.textContent = '등록됨 — 고액 거래 재인증, 새 기기 로그인 승인, 전화번호 재등록 모두 이 지문/얼굴 인증을 사용합니다.';
   } else {
     btn.textContent = '등록';
     btn.style.background = '#0057A8'; btn.style.color = '#fff';
-    if (status) status.textContent = '등록 안 됨 — 등록해야 고액 거래 재인증이 실제로 동작합니다.';
+    if (status) status.textContent = '등록 안 됨 — 등록하지 않으면 고액 거래 재인증뿐 아니라, 다른 기기에서 로그인을 승인하거나 전화번호를 다시 등록할 때도 진행할 수 없습니다.';
   }
 }
 
@@ -2521,6 +2514,17 @@ async function _toggleBiometric() {
 
   try {
     if (GopangWallet.isStepUpEnrolled()) {
+      // 2026-09-07 신설 — 이제 이 인증이 고액 거래뿐 아니라 새 기기
+      // 로그인 승인·전화번호 재등록에도 쓰이므로, 해제 전에 그 영향을
+      // 분명히 알린다(로컬 해제일 뿐 서버 등록은 안 지워지지만, 이
+      // 기기에서 다시 쓰려면 재등록이 필요해진다는 점이 사용자에게
+      // 중요한 정보).
+      const confirmed = confirm(
+        '지문/Face ID 인증을 해제하면 고액 거래 재인증뿐 아니라, 이 기기에서 ' +
+        '다른 기기의 로그인을 승인하거나 전화번호를 재등록하는 것도 다시 ' +
+        '등록하기 전까지는 할 수 없게 됩니다. 그래도 해제하시겠습니까?'
+      );
+      if (!confirmed) { btn.disabled = false; return; }
       const result = GopangWallet.disableStepUpBiometric();
       if (!result.ok) throw new Error(result.reason || '해제 실패');
       if (status) status.textContent = '해제됐습니다.';
@@ -2536,7 +2540,7 @@ async function _toggleBiometric() {
             : `등록에 실패했습니다(${result.reason}).`;
         throw new Error(msg);
       }
-      if (status) status.textContent = '등록 완료 — 다음 고액 거래부터 적용됩니다.';
+      if (status) status.textContent = '등록 완료 — 고액 거래 재인증뿐 아니라, 이제 새 기기 로그인 승인과 전화번호 재등록도 이 지문/얼굴로 진행할 수 있습니다.';
     }
   } catch (e) {
     if (status) status.textContent = e.message;
