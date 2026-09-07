@@ -24215,7 +24215,24 @@ async function handleGovRelay(bodyText, env, corsHeaders, meta = null, ctx = nul
   // 빼지 않고 받되 밑에서 안 쓴다 — 2026-08-14부터 서버가 직접
   // 재계산하므로(아래 tierKey), 구버전 클라이언트가 이 필드를 여전히
   // 보내도 조용히 무시된다(하위호환, 에러 없음).
-  const { guid, agency, agencyPrompt, messages, max_tokens, stream, tier: _clientTierIgnored, provinceCode, currentLocation, task_key, gov_task_roundtrips } = body || {};
+  let { guid, agency, agencyPrompt, messages, max_tokens, stream, tier: _clientTierIgnored, provinceCode, currentLocation, task_key, gov_task_roundtrips, phone_verify_token } = body || {};
+
+  // 2026-09-07 신설 — regional-gov.html처럼 지갑 없는 기기(새 기기·
+  // 시크릿 모드 등)에서 phone_verify_token(k-service-auth-client.js)만
+  // 들고 오는 세션을 위한 경로. klaw/kplan/kjit·kcity와 동일 패턴
+  // (_resolveGuidFromPhoneVerifyToken)으로 guid를 서버에서 직접
+  // 도출한다 — 클라이언트가 보낸 guid는 이 경우 무시하고 치환한다.
+  // phone_verify_token이 없으면(기존 GWP_TOKEN/지갑 guid 경로) 기존
+  // 동작 그대로 하위호환 유지 — K-Public 등 기존 흐름은 안 깨진다.
+  if (phone_verify_token) {
+    const _govAuth = await _resolveGuidFromPhoneVerifyToken(env, phone_verify_token);
+    if (!_govAuth.ok) {
+      const { status, code, message } = mapPhoneAuthError(_govAuth);
+      return _err(status, code, message, corsHeaders);
+    }
+    guid = _govAuth.guid;
+  }
+
   if (!guid || !agency || !Array.isArray(messages)) return _err(400, 'MISSING_FIELD', 'guid/agency/messages 필수', corsHeaders);
   if (!GOV_AGENCIES.has(agency)) return _err(400, 'UNKNOWN_AGENCY', `등록되지 않은 기관: ${agency}`, corsHeaders);
   // provinceCode는 선택 필드(2026-07-21 신설) — gov_do/gov_national 위임

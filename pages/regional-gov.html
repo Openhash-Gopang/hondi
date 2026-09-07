@@ -72,6 +72,17 @@
   --gov:#06C755; --pri:#06C755; --pri-bg:#E9FBF0;
 }
 </style>
+<!-- 2026-09-07 신설 — 이 페이지는 원래 "같은 오리진이라 SSO 불필요"
+     전제로 gopang_user_v4(지갑, 기기 종속) 직접 읽기만 했다. 하지만
+     k-service-auth-client.js(전화번호 인증, 기기 무관) 도입 이후로는
+     지갑이 없는 새 기기·시크릿 모드에서 "로그인했는데도 로그인
+     안 됐다"고 오판하는 간극이 생겼다(주피터 지적, 2026-09-07).
+     지갑이 있으면 기존 경로 그대로 쓰고, 없으면 이 위젯으로 즉시
+     전화번호 인증을 띄운다 — /webapp.html로 보내는 정적 안내문 대신. -->
+<script>
+window.K_AUTH_CONFIG = { serviceLabel: '전국 지방행정 AI' };
+</script>
+<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
 </head>
 <body>
 
@@ -337,6 +348,11 @@ function _recordRequesterPdv(userText, replyText, agency, provinceCode, trace) {
 // 오리진과 무관한 순수 서버 호출이라 그대로 재사용한다. ──────────────
 async function _govRelayCompletion(agencyPrompt, msgs, agency, provinceCode, taskKey, taskRoundtrips, tier) {
   const user = _loadUser();
+  // 2026-09-07 신설 — 지갑(ipv6)이 없는 세션(KAuth 전화번호 인증만
+  // 완료한 새 기기·시크릿 모드)에서는 KAuth.getToken()을 함께 보내
+  // handleGovRelay가 직접 guid를 도출하게 한다. 지갑이 있으면 기존
+  // guid 경로를 그대로 우선 사용(하위호환, 동작 변경 없음).
+  const _pvt = (!user?.ipv6 && window.KAuth && KAuth.hasValidLogin()) ? KAuth.getToken() : null;
   try {
     const r = await fetch(`${PROXY}/gov/relay`, {
       method: 'POST',
@@ -344,6 +360,7 @@ async function _govRelayCompletion(agencyPrompt, msgs, agency, provinceCode, tas
       body: JSON.stringify({
         guid: user?.ipv6 || null, agency, agencyPrompt, messages: msgs, provinceCode,
         max_tokens: 2000, stream: false, tier: tier || 'gov-flash',
+        phone_verify_token: _pvt || undefined,
         // 2026-08-13 신설 — 자율 과금 제안 시스템(worker.js billGovCall)이
         // task_key 단위로 신호를 쌓으려면 클라이언트가 알려줘야 한다.
         // 서버는 대화 1턴=1호출 구조라 task_key를 스스로 알 방법이 없음
@@ -515,16 +532,22 @@ async function _callAI(latestUserText, typingEl) {
 }
 
 // ── 초기화 ─────────────────────────────────────────────────────
-(function init() {
-  const user = _loadUser();
+(async function init() {
+  let user = _loadUser();
   if (!user?.ipv6) {
-    // 같은 오리진이라 SSO 자체가 필요 없다 — 여기서 "로그인 안 됨"은
-    // 정말로 이 브라우저에 로그인 기록이 없다는 뜻이다(교차 오리진
-    // 타이밍 문제가 아니다). 정직하게 안내한다.
-    const banner = document.getElementById('err-banner');
-    banner.style.display = 'block';
-    banner.innerHTML = '먼저 <a href="/webapp.html" style="color:#991B1B;text-decoration:underline">AI 비서 화면</a>에서 로그인해 주세요.';
-    return;
+    // 2026-09-07 이전: 여기서 곧바로 "다른 페이지에서 로그인하고
+    // 오세요" 정적 안내만 띄우고 끝냈다 — 지갑(기기 종속)이 없으면
+    // 무조건 로그인 안 된 것으로 취급했기 때문. 이제 기기 무관
+    // 전화번호 인증(k-service-auth-client.js)이 있으므로, 먼저 그
+    // 위젯으로 실제 로그인을 시도한다 — 시크릿 모드·새 기기라도
+    // 여기서 바로 인증을 마칠 수 있다. ensureLogin()은 사용자가
+    // 실제로 로그인을 마칠 때까지 오버레이를 띄운 채 계속 대기한다
+    // (reject하지 않음 — 취소 개념이 없는 모달).
+    await KAuth.ensureLogin();
+    // KAuth 로그인은 성공했지만 이 브라우저엔 여전히 지갑(ipv6)이
+    // 없다 — 정상이다. 아래 _govRelayCompletion()이 guid 대신
+    // KAuth.getToken()(phone_verify_token)을 보내 서버가 직접 guid를
+    // 도출하도록 한다(handleGovRelay 2026-09-07 갱신 참고).
   }
 
   // ★ 2026-07-23 수정 — 어느 기관인지 이 시점엔 아직 확정되지 않는다
