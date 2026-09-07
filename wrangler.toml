@@ -171,3 +171,14 @@ new_sqlite_classes = ["DeviceLinkSessionDO"]
 #   건드리지 않는다 — gov-mail 서브도메인에만 별도 MX가 붙는다.
 [[send_email]]
 name = "EMAIL"
+
+# 2026-09-07 신설(실사로 발견) — worker.js의 scheduled(event, env, ctx)
+# 핸들러(anchorL1MerkleRoot: PDV 머클 앵커링, 2026-07-14 신설 /
+# anchorFsSnapshotsMerkleRoot: 재무제표 스냅샷 앵커링, 2026-09-07 신설)가
+# 둘 다 "10분마다 돈다"는 주석과 함께 코드에 있었지만, 이 파일에
+# [triggers]/crons 선언이 아예 없어 Cloudflare가 이 워커를 스케줄 실행
+# 대상으로 인식하지 못하고 있었다 — 즉 배포 이후 지금까지 이 두 함수는
+# 대시보드에 별도 수동 Cron Trigger 설정이 없었다면 단 한 번도 자동
+# 호출된 적이 없다(코드 존재 == 실행 보장이 아님을 실사로 확인).
+[triggers]
+crons = ["*/10 * * * *"]
