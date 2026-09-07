@@ -13,6 +13,9 @@
   관련 문서: MANUAL_INDEX.html 에서 전체 문서 지도 확인
   (desktop.html 좌측 사이드바 "🛠 개발자 문서" 섹션에서 링크됨)
   v1.0(2026-09-07): 신설
+  v1.1(2026-09-07): 재고자산(bs-inventory) 실제 도입(Lesson ⑦)과
+    그 과정에서 터진 L1 인프라 장애·복구(Lesson ⑧) 반영. 결과/후속
+    과제 섹션 갱신 — 매입·매출원가 인식시점 TODO는 해소 처리.
 -->
 <html lang="ko">
 <head>
@@ -254,6 +257,8 @@ table.evidence td { color: var(--ink-2); }
     <a href="#lesson-cron">④ scheduled()가 코드에 있어도 cron 선언이 없으면 절대 안 돈다</a>
     <a href="#lesson-negative">⑤ "쉽게 통과"를 믿지 말고 네거티브 테스트로 검증 로직 자체를 검증하라</a>
     <a href="#lesson-branch">⑥ 브랜치 작업 전 git status 확인 — 무관한 커밋이 반복해서 묶여 들어간 사고</a>
+    <a href="#lesson-inventory">⑦ 재고자산(bs-inventory) 실제 도입 — 매입·매출원가 인식시점 불일치 해소</a>
+    <a href="#lesson-outage">⑧ 인프라 장애 — 마이그레이션 하나가 30개 노드 중 29개를 전멸시키다</a>
     <a href="#outcome">결과 — 검증된 사실</a>
     <a href="#followup">후속 과제 — 아직 안 끝난 것</a>
     <a href="#repro">재현 방법 — 스모크 테스트 스크립트</a>
@@ -669,6 +674,178 @@ crons = ["*/10 * * * *"]</code></pre>
       </div>
     </section>
 
+    <section class="gs reveal" id="lesson-inventory">
+      <div class="gs-head">
+        <div class="gs-icon good">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">Lesson ⑦</div>
+          <div class="gs-title">재고자산(bs-inventory) 실제 도입 — 매입·매출원가 인식시점 불일치 해소</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          앞서 <a href="#lesson-asymmetric">Lesson ①</a>에서 구매자
+          매입(<code>pl-purchase</code>)을 서버에 반영하도록 고쳤지만,
+          그때는 매입을 <strong>즉시 비용</strong> 처리했다. 그런데
+          "모든 사업자는 재료를 사고 상품을 판다"는 지시를 다시 짚어보면,
+          재판매 목적 매입은 비용이 아니라 <strong>자산</strong>이어야
+          하고(K-IFRS 1002호 재고자산), 비용(매출원가) 인식은 <strong>판
+          시점</strong>이어야 한다 — 이 시점 불일치가 남아있었다.
+        </p>
+        <h4>독립 SP 대신 기존 회계 SP 상속</h4>
+        <p>
+          이 문제를 다루는 <code>SP-FS-COMPOSER</code>를 처음엔 독립
+          문서로 설계했으나, "이미 있는 회계 SP를 활용하는 게 낫다"는
+          지적에 따라 v1.1에서 기존 <code>accountant</code>/
+          <code>accountant-ifrs</code> SP 계보를 <strong>상속</strong>하는
+          구조로 재설계했다 — 회계 지식·정직성 원칙·감사의견 금지는
+          그쪽 것을 그대로 쓰고, 이 문서는 "재무제표 탭 자동 생성"이라는
+          좁은 역할 하나만 얹는다.
+        </p>
+        <h4>실제 구현 — 4개 파일에 걸친 대칭 처리</h4>
+        <table class="evidence">
+          <tr><th>파일</th><th>변경</th></tr>
+          <tr><td><code>pb_hooks/main.pb.js</code></td><td><code>purpose='inventory_purchase'</code>일 때 <code>buyerClaim.fs_account</code>를 <code>pl-purchase</code> 대신 <code>bs-inventory</code>(자산)로 분기</td></tr>
+          <tr><td><code>worker.js</code></td><td>판매 시 매출원가(<code>pl-cogs</code>) 인식과 동시에 <code>bs-inventory</code> 감소 클레임을 대칭 발행; <code>handleSettleLedger</code>가 재고자산 순잔액을 집계해 <code>profiles.extra.fs.bs</code>에 저장</td></tr>
+          <tr><td><code>gopang-wallet.js</code></td><td><code>redeemClaim()</code>이 <code>bs-inventory</code>를 방향별로 다르게 처리 — 매입(debit)은 자산증가+현금동기화, 매출원가 소진(credit)은 자산감소+현금비동기화. 4개 시나리오(정상 매입/COGS 소진/일반 소비지출/매출인식)로 직접 시뮬레이션해 회귀 없음을 확인했다</td></tr>
+          <tr><td><code>financial-statements.js</code>/<code>dashboard.html</code></td><td>대차대조표에 재고자산 실데이터 라인 추가</td></tr>
+        </table>
+        <h4>100건 규모 이후 3자 미니 테스트로 최종 검증</h4>
+        <p>
+          vendor가 supplier로부터 1000T를 <code>purpose='inventory_purchase'</code>로
+          사입 → vendor 상품(price=500, cost_price=300) 등록 → customer가
+          1개 구매. 결과:
+        </p>
+        <table class="evidence">
+          <tr><th>항목</th><th>기대값</th><th>실제값</th></tr>
+          <tr><td>매출(pl-revenue, 수수료 3% 제외)</td><td>485</td><td>485 ✅</td></tr>
+          <tr><td>매출원가(pl-cogs)</td><td>300</td><td>300 ✅</td></tr>
+          <tr><td>재고자산(bs-inventory) = 1000 − 300</td><td>700</td><td>700 ✅</td></tr>
+        </table>
+        <div class="callout warn">
+          <div class="callout-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+            이 미니 테스트 자체에서 나온 2가지 사소하지만 실제인 버그
+          </div>
+          <code>seller_products</code>에 <code>category</code>·<code>product_id</code>
+          필수 필드가 빠져 있었고(테스트 엔드포인트 <code>/admin/test-create-product</code>
+          작성 시 스키마를 다 몰랐던 탓), <code>stock_qty</code>를 생략하면
+          PocketBase가 <code>null</code>이 아니라 <strong>0으로 기본값
+          처리</strong>해 <code>INSUFFICIENT_STOCK</code>로 막혔다 — 둘 다
+          "필드를 생략하면 안전하게 비워질 것"이라는 가정이 틀렸던 경우다.
+        </div>
+        <h4>일반화되는 교훈</h4>
+        <p>
+          매입·매출원가 인식시점 불일치처럼 "알려진 한계"로 문서에만
+          적어두고 넘어갈 수도 있었던 문제를, 실제 코드 수정 + 4가지
+          시뮬레이션 + 3자 실거래 테스트까지 끝내고서야 "해소됐다"고
+          말할 수 있었다 — 회계 로직처럼 정확성이 중요한 코드는 특히
+          "말로 설명 가능"과 "숫자로 재현 가능"의 간극이 크다.
+        </p>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="lesson-outage">
+      <div class="gs-head">
+        <div class="gs-icon warn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">Lesson ⑧</div>
+          <div class="gs-title">인프라 장애 — 마이그레이션 하나가 30개 노드 중 29개를 전멸시키다</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          재고자산 미니 테스트 중 <code>/biz/order</code>가 45초씩 4회
+          재시도해도 응답이 없는 현상이 발생했다. 코드를 아무리 봐도
+          원인을 못 찾아 <code>wrangler tail</code>로 실시간 로그를
+          보니, Worker는 정상적으로 요청을 L1에 전달하고 있었고 문제는
+          <strong>L1(hanlim) 서버 자체</strong>에 있었다.
+        </p>
+        <h4>연쇄 원인</h4>
+        <ol>
+          <li>다른 세션에서(Lesson ⑥의 "묶여 들어간 무관한 커밋" 계열)
+              <code>1793900200_backfill_existing_e164_hash_enc_last8.js</code>
+              마이그레이션이 배포됐는데, <code>PHONE_VERIFY_SECRET</code>
+              환경변수가 없으면 실패하도록 짜여 있었다.</li>
+          <li>이 L1 서버에는 <strong>PocketBase 인스턴스가 30개</strong>
+              (hanlim + L2~L5 상시가동 6개 + 리프 L1 39개 중 실행 중이던
+              것들) 떠 있는데, <code>hanlim</code>을 제외한 29개는
+              <strong>서비스 파일에 <code>EnvironmentFile=/opt/gopang/gopang.env</code>
+              선언 자체가 없어서</strong> 환경변수 파일을 아예 읽지 않고
+              있었다 — <code>PHONE_VERIFY_SECRET</code>이 그 파일에 이미
+              존재했는데도 소용없었다.</li>
+          <li>PocketBase는 대기 중인 마이그레이션이 하나라도 실패하면
+              완전히 기동을 못 하고 무한 재시도한다 — <code>systemctl
+              status</code>엔 <code>active (running)</code>으로 보이지만
+              (프로세스는 떠 있음) <strong>HTTP 포트를 절대 못 열어</strong>
+              모든 요청이 응답 없이 멈췄다. 재시도 자체도 CPU 40%
+              이상을 계속 태우고 있었다.</li>
+          <li>정확히 같은 시각(20:50~20:51)에 29개가 한꺼번에
+              재시작됐던 것도 이 사고의 일부였다 — 재시작될 때마다
+              같은 마이그레이션이 다시 시도되고 다시 실패했다.</li>
+        </ol>
+        <h4>복구 순서</h4>
+        <ol>
+          <li>마이그레이션 파일을 임시로 <code>.disabled</code> 처리해
+              출혈(CPU 40%, 계속 증가하는 메모리)부터 멈춤.</li>
+          <li><code>gopang.env</code>의 <code>PHONE_VERIFY_SECRET</code>
+              값을 확인·교체(<code>gopang2026</code>→<code>hondi2026</code>).</li>
+          <li>영향받은 서비스마다 <code>systemctl edit</code>으로
+              <code>EnvironmentFile=/opt/gopang/gopang.env</code> 드롭인
+              추가 — <strong>공유 마이그레이션 디렉터리
+              (<code>/opt/gopang/pb/pb_migrations/</code> 하나를 30개
+              프로세스가 전부 참조)</strong>라는 걸 뒤늦게 알게 돼,
+              마이그레이션 파일 자체는 한 곳만 되돌리면 됐다.</li>
+          <li>동시 재시작으로 인한 자원 스파이크를 피하려고 상시가동
+              6개(hanlim, L2-jeju, L2-seogwipo, L3-jejudo, L4-kr,
+              L5-global)만 <strong>하나씩 간격을 두고</strong> 재시작 —
+              전부 마이그레이션 정상 통과, <code>200</code> 확인.</li>
+          <li>리프 L1 39개는 강제로 켜지 않고, 기존 <code>wake-gateway.js</code>
+              온디맨드 기동 구조 그대로 둠 — 다음에 깨어날 때 이미
+              고쳐진 설정으로 자연스럽게 정상 기동될 것.</li>
+        </ol>
+        <h4>용량 계획 — 자원 제약 재확인</h4>
+        <table class="evidence">
+          <tr><th>항목</th><th>값</th></tr>
+          <tr><td>총 메모리 / 가용</td><td>7.8GiB / (정상화 후) available 3.7GiB</td></tr>
+          <tr><td>CPU 코어</td><td><strong>2개</strong> — 메모리보다 더 강한 병목</td></tr>
+          <tr><td>PocketBase 노드 1개 평균 RSS(정상 기동 시)</td><td>~114MB</td></tr>
+          <tr><td>권장: 동시 "적재(idle)" 가능 노드</td><td>~10~15개</td></tr>
+          <tr><td>권장: 동시 "요청 처리 중" 가능 노드</td><td>~2~3개(코어 수 기준)</td></tr>
+        </table>
+        <div class="callout">
+          <div class="callout-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            일반화되는 교훈
+          </div>
+          <ul>
+            <li>"프로세스가 떠 있다(<code>active (running)</code>)"는
+                "서비스가 정상이다"의 증거가 아니다 — 마이그레이션
+                재시도 루프처럼 겉보기엔 살아있지만 실제로는 아무
+                요청도 처리 못 하는 상태가 있다. 반드시 실제 헬스체크
+                엔드포인트로 확인할 것.</li>
+            <li>환경변수를 여러 인스턴스가 나눠 쓰는 구조에서는,
+                "값이 파일에 있다"와 "그 인스턴스가 그 파일을 읽고
+                있다"를 따로 확인해야 한다 — 이번 사고의 진짜 원인은
+                값이 없어서가 아니라 <code>EnvironmentFile</code> 선언
+                자체가 빠진 것이었다.</li>
+            <li>공유 자원(이번엔 마이그레이션 디렉터리)을 여러
+                인스턴스가 나눠 쓰는지 먼저 확인하면, "29곳에 각각
+                적용"이 아니라 "1곳만 고치면 끝"으로 작업량이 줄어들
+                수 있다.</li>
+            <li>자원 제약이 있는 환경에서 장애 복구 시, 한꺼번에
+                전부 재시작하지 말고 하나씩 간격을 두고 올리는 것이
+                안전하다 — 동시 재시작 자체가 자원 스파이크를 유발해
+                2차 장애로 이어질 수 있다.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
     <section class="gs reveal" id="outcome">
       <div class="gs-head">
         <div class="gs-icon good">
@@ -700,6 +877,15 @@ crons = ["*/10 * * * *"]</code></pre>
               <code>wrangler.toml</code>에 cron 트리거
               (<code>*/10 * * * *</code>) 선언 추가 + 재배포로 반영
               확인.</li>
+          <li><span class="badge merged">검증됨</span> 재고자산
+              (<code>bs-inventory</code>) 도입 — 매입은 자산으로
+              계상되고 판매 시점에만 매출원가로 전입됨을 3자 실거래
+              (매출 485 / 매출원가 300 / 재고자산 700) 및 지갑 클라이언트
+              4개 시나리오 시뮬레이션으로 확인.</li>
+          <li><span class="badge merged">복구됨</span> L1 인프라 장애
+              — 마이그레이션 실패로 30개 노드 중 29개가 다운됐던 것을
+              원인 규명(<code>EnvironmentFile</code> 누락) 후 전면
+              복구, 상시가동 6개 노드 전부 <code>200</code> 확인.</li>
         </ul>
       </div>
     </section>
@@ -718,31 +904,44 @@ crons = ["*/10 * * * *"]</code></pre>
           <li><span class="badge todo">TODO</span>
               <code>ADMIN_ACTION_SECRET</code>이 현재 추측 가능한
               임시값(<code>hondi2026</code>)으로 설정돼 있다 — 이
-              시크릿을 아는 사람은 <code>/admin/test-register-profile</code>로
-              임의 guid를 "본인인증 완료"로 등록할 수 있으므로, 반드시
-              무작위 값으로 교체하거나(<code>wrangler secret put
-              ADMIN_ACTION_SECRET</code>) 해당 라우트를 주석 처리할 것.</li>
+              시크릿을 아는 사람은 <code>/admin/test-register-profile</code>·
+              <code>/admin/test-create-product</code>로 임의 guid/상품을
+              만들 수 있으므로, 반드시 무작위 값으로 교체하거나
+              (<code>wrangler secret put ADMIN_ACTION_SECRET</code>)
+              해당 라우트들을 주석 처리할 것.</li>
           <li><span class="badge todo">TODO</span> 스모크 테스트로
-              생성한 mockup 계정(<code>fd00:smoketest:buyer:...</code>,
-              <code>fd00:smoketest:seller:...</code>)이 실서비스
+              생성한 mockup 계정(<code>fd00:smoketest:...</code>,
+              <code>fd00:invtest:...</code>)과 테스트 상품이 실서비스
               데이터와 섞여 있다 — 정리 필요 여부 확인.</li>
           <li><span class="badge todo">TODO</span> Lesson ④에서
               언급한 대로, <code>anchorL1MerkleRoot</code>(PDV 머클
               앵커링)가 이번 cron 선언 추가 이전까지 실제로 자동
               실행되고 있었는지 별도 점검 필요 — 그렇지 않았다면
               그동안 앵커링 안 된 PDV 레코드가 누적돼 있을 수 있다.</li>
-          <li><span class="badge todo">TODO</span> 손익계산서의
-              매입(<code>pl-purchase</code>)과 매출원가(<code>pl-cogs</code>)가
-              서로 다른 인식 시점(구매 시점 전액 vs 판매 시점 매칭분)을
-              쓰는 문제 — 정식 재고자산(<code>bs-inventory</code>)
-              계정을 통한 발생주의 매칭은 범위가 훨씬 큰 별도
-              후속 작업으로 의도적으로 남겨둠.</li>
+          <li><span class="badge todo">TODO</span> Lesson ⑧의 인프라
+              장애가 재발하지 않도록, <code>1793900200</code> 외의
+              기존 마이그레이션들도 30개 노드 전부에서 실제로 통과했는지
+              전수 점검 필요 — 이번엔 우연히 이 하나만 걸렸지만,
+              같은 <code>EnvironmentFile</code> 누락 상태에서 다른
+              환경변수 의존 마이그레이션이 배포됐다면 똑같이 전멸했을
+              것이다.</li>
+          <li><span class="badge todo">TODO</span> 재고자산은
+              <code>purpose='inventory_purchase'</code>로 명시 태깅된
+              매입에만 적용된다 — 실제 K-Market 등 재판매 채널들이
+              이 태그를 넘기고 있는지 호출부 실사가 필요하다. 태깅
+              안 하면 조용히 기존처럼(즉시 비용) 처리되므로 티가
+              안 난다.</li>
           <li><span class="badge todo">TODO</span> GDC 클라이언트
               (<code>gopang-wallet.js</code>)의 실제 결제 흐름에
               간헐적 <code>TX_HASH_MISMATCH</code>(약 15~28% 빈도,
               재시도 시 항상 성공)가 관찰됨 — 근본 원인 미규명. 실서비스
               결제 흐름에도 "실패 시 새 서명으로 1회 이상 재시도" 방어
               로직 추가를 검토할 것.</li>
+          <li><span class="badge todo">TODO</span> 리스회계
+              (<code>bs-rou-asset</code>/<code>bs-lease-liability</code>)는
+              계정명만 예약돼 있고 미구현 — 이 플랫폼에 리스 거래를
+              발생시키는 상품 자체가 아직 없어서, 실제 리스 상품/거래유형이
+              설계돼야 다음 단계로 진행 가능하다(SP-FS-COMPOSER §5-3).</li>
         </ul>
       </div>
     </section>
