@@ -12065,6 +12065,7 @@ export default {
   // ── Cron 트리거 (10분마다 머클 앵커링 + 브릿지 아웃박스 스윕) ────────
   async scheduled(event, env, ctx) {
     ctx.waitUntil(anchorL1MerkleRoot(env));
+    ctx.waitUntil(anchorFsSnapshotsMerkleRoot(env).catch(e => console.error('[FS Merkle] 전체 실패:', e.message)));
     ctx.waitUntil(_sweepBridgeOutbox(env).catch(e => console.error('[BridgeSweep] 전체 실패:', e.message)));
     // 2026-08-10 신설 — 방식A(오픈뱅킹) 자동 확정 폴링. 기존 10분 주기
     // 크론에 편승 — 별도 wrangler.toml 트리거 불필요. env.AUTO_CONFIRM_
@@ -12561,6 +12562,7 @@ export default {
 
     // ── merkle (T10) ─────────────────────────────────────────
     if (pathname === '/merkle/verify')           return handleMerkleVerify(request, env, corsHeaders);
+    if (pathname === '/fs/verify')                return handleFsVerify(request, env, corsHeaders);
 
     // ── OpenHash 앵커링 프록시 ────────────────────────────────
     // buildout_plan_v2 Phase 1: 클라이언트가 GitHub 토큰 직접 보유 금지
@@ -28502,11 +28504,73 @@ async function handleSettleLedger(request, env, corsHeaders) {
     return _err(502, 'L1_PATCH_FAILED', 'L1 재무제표 갱신 실패: ' + e.message, corsHeaders);
   }
 
+  // ═══════════════════════════════════════════════════════════
+  // 2026-09-07 신설(사용자 지시) — 재무제표 변동 시점마다 git commit과
+  // 동일한 구조로 스냅샷을 남긴다: content_hash(이번 pl+bs 내용) +
+  // prev_hash(직전 스냅샷의 commit_hash, 체이닝) → commit_hash. 이 스냅샷은
+  // anchorFsSnapshotsMerkleRoot(아래, 기존 anchorL1MerkleRoot와 동일한
+  // 10분 주기 크론에 편승)가 OpenHash에 앵커링한다. 검증은
+  // GET /fs/verify가 담당 — (a) 저장된 commit_hash == 앵커링된 해시,
+  // (b) 그 해시가 실제 snapshot 데이터에서 재계산돼 나오는지, 둘 다 확인.
+  // 원장(blocks)이 아니라 여기서 실패해도 결제 자체(handleBizOrder/
+  // L1 /api/tx)는 이미 끝난 뒤이므로, 스냅샷 기록 실패가 결제를 막지는
+  // 않는다 — best-effort로 시도하고 실패는 로그만 남긴다.
+  let fsSnapshot = null;
+  try {
+    const balRes = await fetch(`${L1_DEFAULT}/api/balance?guid=${encodeURIComponent(guid)}`);
+    const balData = await balRes.json().catch(() => null);
+    const cash = Number(balData?.balance ?? 0);
+
+    const token = await _l1AdminToken(env);
+    const headers = { 'Authorization': `Bearer ${token}` };
+
+    // 직전 스냅샷 조회(체이닝용 prev_hash + seq 증가)
+    let prevHash = null, nextSeq = 1;
+    const prevRes = await fetch(
+      `${L1_DEFAULT}/api/collections/fs_snapshots/records?filter=${encodeURIComponent(`guid='${guid}'`)}&sort=-seq&perPage=1`,
+      { headers }
+    );
+    if (prevRes.ok) {
+      const prevData = await prevRes.json().catch(() => ({ items: [] }));
+      const prev = (prevData.items || [])[0];
+      if (prev) { prevHash = prev.commit_hash || null; nextSeq = (prev.seq || 0) + 1; }
+    }
+
+    const snapshotContent = {
+      guid, seq: nextSeq,
+      pl: { revenue, cogs, gross_profit: grossProfit, opex, net_income: netIncome },
+      bs: { cash },
+      computed_at: new Date().toISOString(),
+    };
+    const snapshotJson = JSON.stringify(snapshotContent);
+    const contentHash = await _sha256Hex(snapshotJson);
+    const commitHash  = await _sha256Hex(`${contentHash}|${prevHash || ''}|${guid}|${nextSeq}`);
+
+    const insRes = await fetch(`${L1_DEFAULT}/api/collections/fs_snapshots/records`, {
+      method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        guid, seq: nextSeq, snapshot: snapshotJson,
+        content_hash: contentHash, prev_hash: prevHash, commit_hash: commitHash,
+        openhash_anchored: false,
+      }),
+    });
+    if (insRes.ok) {
+      const insResult = await insRes.json().catch(() => null);
+      fsSnapshot = { id: insResult?.id || null, seq: nextSeq, commit_hash: commitHash };
+      console.log('[FS Snapshot] 기록 완료 | guid:', guid, '| seq:', nextSeq, '| commit_hash:', commitHash.slice(0, 8));
+    } else {
+      console.warn('[FS Snapshot] fs_snapshots INSERT 실패:', insRes.status);
+    }
+  } catch (e) {
+    console.warn('[FS Snapshot] 스냅샷 기록 오류(무시, 재무제표 자체는 갱신됨):', e.message);
+  }
+
   return new Response(JSON.stringify({
     ok: true,
     pl: { revenue, cogs, gross_profit: grossProfit, opex, net_income: netIncome },
     truncated,
     l1_updated: l1Ok,
+    fs_snapshot: fsSnapshot,
   }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 }
 
@@ -29218,6 +29282,147 @@ async function handleMerkleVerify(request, env, corsHeaders) {
     anchor_id:   anchor.id,
     anchored_at: anchor.anchored_at,
     block_count: anchor.block_count,
+  }), { status: 200, headers: corsHeaders });
+}
+
+// ═══════════════════════════════════════════════════════════
+// 2026-09-07 신설(사용자 지시) — 재무제표 스냅샷 OpenHash 앵커링.
+// 위 handleSettleLedger가 fs_snapshots에 남긴 commit_hash(=content_hash+
+// prev_hash 체이닝, git commit과 동일 구조)들을 anchorL1MerkleRoot와
+// 완전히 동일한 패턴으로 배치 앵커링한다 — 새 메커니즘을 만들지 않고
+// 검증된 기존 패턴을 그대로 복제했다. 차이는 leaf가 pdv의 block_hash가
+// 아니라 fs_snapshots의 commit_hash라는 점뿐이다.
+// ═══════════════════════════════════════════════════════════
+async function anchorFsSnapshotsMerkleRoot(env) {
+  try {
+    const token = await _l1AdminToken(env);
+    const headers = { 'Authorization': 'Bearer ' + token };
+
+    const filter = encodeURIComponent('openhash_anchored = false');
+    const listRes = await fetch(
+      `${L1_DEFAULT}/api/collections/fs_snapshots/records?filter=${filter}&sort=created&perPage=100`,
+      { headers }
+    );
+    if (!listRes.ok) { console.warn('[FS Merkle] fs_snapshots 조회 실패:', listRes.status); return; }
+    const listData = await listRes.json().catch(() => ({ items: [] }));
+    const rows = listData.items || [];
+    if (!rows.length) { console.log('[FS Merkle] 미앵커링 fs_snapshots 없음 — 스킵'); return; }
+
+    const leaves = rows.map(r => r.commit_hash);
+    const merkleRoot = await _computeMerkleRoot(leaves);
+    const snapshotIds = rows.map(r => r.id);
+    const now = new Date().toISOString();
+
+    const insRes = await fetch(`${L1_DEFAULT}/api/collections/fs_merkle_anchors/records`, {
+      method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        merkle_root: merkleRoot, anchored_at: now,
+        block_count: rows.length, snapshot_ids: JSON.stringify(snapshotIds), status: 'confirmed',
+      }),
+    });
+    const insResult = await insRes.json().catch(() => null);
+    const anchorId = insResult?.id || null;
+
+    for (const id of snapshotIds) {
+      await fetch(`${L1_DEFAULT}/api/collections/fs_snapshots/records/${id}`, {
+        method: 'PATCH', headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ openhash_anchored: true }),
+      }).catch(() => {});
+    }
+
+    console.log(`[FS Merkle] 앵커링 완료 | root=${merkleRoot.slice(0,8)} | count=${rows.length} | anchor_id=${anchorId}`);
+  } catch (e) {
+    console.error('[FS Merkle] anchorFsSnapshotsMerkleRoot 실패:', e.message);
+  }
+}
+
+/**
+ * GET /fs/verify?guid=...&seq=... (seq 생략 시 최신 스냅샷)
+ *
+ * 두 가지를 모두 확인한다(사용자 지시 그대로):
+ *   (a) ANCHOR 무결성 — OpenHash에 앵커링된 머클 루트를 그 배치의
+ *       commit_hash 목록에서 재계산해도 같은 값이 나오는지.
+ *   (b) 데이터 자기무결성 — 지금 저장된 snapshot(JSON 원본)으로 content_hash를
+ *       다시 계산하고, prev_hash와 합쳐 commit_hash를 다시 계산했을 때
+ *       실제 저장된 값과 일치하는지 — "해시가 재무제표 데이터에서
+ *       인출되는지"를 직접 재현해서 확인하는 부분이다.
+ */
+async function handleFsVerify(request, env, corsHeaders) {
+  const url  = new URL(request.url);
+  const guid = url.searchParams.get('guid');
+  const seq  = url.searchParams.get('seq');
+  if (!guid) return _err(400, 'MISSING_PARAM', 'guid 필수', corsHeaders);
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': 'Bearer ' + token };
+
+  const filter = seq
+    ? `guid='${guid}' && seq=${parseInt(seq, 10) || 0}`
+    : `guid='${guid}'`;
+  const snapRes = await fetch(
+    `${L1_DEFAULT}/api/collections/fs_snapshots/records?filter=${encodeURIComponent(filter)}&sort=-seq&perPage=1`,
+    { headers }
+  );
+  if (!snapRes.ok) return _err(502, 'L1_UNREACHABLE', 'fs_snapshots 조회 실패', corsHeaders);
+  const snapData = await snapRes.json().catch(() => ({ items: [] }));
+  const snap = (snapData.items || [])[0];
+  if (!snap) return _err(404, 'FS_SNAPSHOT_NOT_FOUND', '재무제표 스냅샷이 없습니다', corsHeaders);
+
+  // (b) 데이터 자기무결성 — 저장된 snapshot 원본에서 해시를 다시 계산
+  const recomputedContentHash = await _sha256Hex(snap.snapshot || '');
+  const recomputedCommitHash  = await _sha256Hex(
+    `${recomputedContentHash}|${snap.prev_hash || ''}|${snap.guid}|${snap.seq}`
+  );
+  const selfConsistent =
+    recomputedContentHash === snap.content_hash &&
+    recomputedCommitHash  === snap.commit_hash;
+
+  // (a) 앵커 무결성 — 아직 앵커링 전이면 여기서 멈추고 그대로 알려준다.
+  if (!snap.openhash_anchored) {
+    return new Response(JSON.stringify({
+      valid: false, reason: 'NOT_ANCHORED_YET',
+      self_consistent: selfConsistent,
+      guid, seq: snap.seq, commit_hash: snap.commit_hash,
+    }), { status: 200, headers: corsHeaders });
+  }
+
+  const anchorListRes = await fetch(
+    `${L1_DEFAULT}/api/collections/fs_merkle_anchors/records?sort=-anchored_at&perPage=500`,
+    { headers }
+  );
+  if (!anchorListRes.ok) return _err(502, 'L1_UNREACHABLE', '앵커 목록 조회 실패', corsHeaders);
+  const anchorListData = await anchorListRes.json().catch(() => ({ items: [] }));
+  const anchor = (anchorListData.items || []).find(a => {
+    try { return JSON.parse(a.snapshot_ids || '[]').includes(snap.id); } catch { return false; }
+  });
+  if (!anchor) {
+    return new Response(JSON.stringify({
+      valid: false, reason: 'ANCHOR_NOT_FOUND', self_consistent: selfConsistent,
+      guid, seq: snap.seq, commit_hash: snap.commit_hash,
+    }), { status: 200, headers: corsHeaders });
+  }
+
+  const anchorLeafIds = JSON.parse(anchor.snapshot_ids || '[]');
+  const anchorRecomputedRoot = await _computeMerkleRoot(
+    await Promise.all(anchorLeafIds.map(async (id) => {
+      if (id === snap.id) return snap.commit_hash; // 이미 조회한 레코드는 재요청하지 않는다
+      const r = await fetch(`${L1_DEFAULT}/api/collections/fs_snapshots/records/${id}`, { headers });
+      if (!r.ok) return id;
+      const row = await r.json().catch(() => null);
+      return row?.commit_hash || id;
+    }))
+  );
+  const anchorValid = anchorRecomputedRoot === anchor.merkle_root;
+
+  return new Response(JSON.stringify({
+    valid: anchorValid && selfConsistent,
+    self_consistent: selfConsistent,       // (b) 데이터 → 해시 재현 여부
+    anchor_valid: anchorValid,              // (a) 앵커 → 머클루트 재현 여부
+    guid, seq: snap.seq,
+    content_hash: snap.content_hash, prev_hash: snap.prev_hash, commit_hash: snap.commit_hash,
+    recomputed_content_hash: recomputedContentHash, recomputed_commit_hash: recomputedCommitHash,
+    merkle_root: anchor.merkle_root, anchor_recomputed_root: anchorRecomputedRoot,
+    anchor_id: anchor.id, anchored_at: anchor.anchored_at,
   }), { status: 200, headers: corsHeaders });
 }
 
