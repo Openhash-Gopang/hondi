@@ -908,8 +908,21 @@
         // 이미 매입 시점(pl-purchase)에 지출된 현금을 사후적으로 매출과
         // 대응시키는 정보성 재분류일 뿐이다. bs-cash를 또 건드리면 같은
         // 지출을 두 번 차감하는 이중계상이 된다 — 반드시 제외해야 한다.
+        //
+        // 2026-09-07 확장(사용자 지시 — 재고자산 도입) — bs-inventory는
+        // pl-cogs와 달리 방향에 따라 현금 동기화 여부가 갈린다:
+        //   debit(매입, purpose='inventory_purchase')  → 실제 현금 유출 있음 → bs-cash 동기화 필요
+        //   credit(판매로 원가 소진, pl-cogs와 동시 발행) → 현금 흐름 아님 → bs-cash 동기화 제외
+        // 그래서 bs-inventory는 NON_CASH_ACCOUNTS(방향 무관 고정 제외)에
+        // 넣을 수 없고, 아래에서 direction별로 따로 처리한다.
         const NON_CASH_ACCOUNTS = new Set(['pl-cogs']);
-        if (claim.direction === 'credit') {
+        if (acc === 'bs-inventory') {
+          if (claim.direction === 'debit') {
+            fs[acc] = cur + (claim.amount || 0); // 재고자산 증가
+          } else {
+            fs[acc] = cur - (claim.amount || 0); // 매출원가로 소진 — 재고자산 감소
+          }
+        } else if (claim.direction === 'credit') {
           fs[acc] = cur + (claim.amount || 0);
         } else if (claim.direction === 'debit') {
           // pl-purchase·pl-cogs: 누적 비용(양수) — cur + amount
@@ -920,8 +933,11 @@
             fs[acc] = cur - (claim.amount || 0);
           }
         }
-        // bs-cash 동기화 (pl 계정 변동 시) — 비현금 계정은 제외
-        if (acc !== 'bs-cash' && !NON_CASH_ACCOUNTS.has(acc)) {
+        // bs-cash 동기화 (pl 계정 변동 시) — 비현금 계정은 제외.
+        // bs-inventory는 credit(매출원가 소진)일 때만 비현금 처리한다 —
+        // debit(매입)은 실제 현금이 나갔으므로 동기화해야 한다.
+        const inventoryNonCash = acc === 'bs-inventory' && claim.direction === 'credit';
+        if (acc !== 'bs-cash' && !NON_CASH_ACCOUNTS.has(acc) && !inventoryNonCash) {
           const bsCash = parseFloat(fs['bs-cash'] ?? '0') || 0;
           if (claim.direction === 'credit') fs['bs-cash'] = bsCash + (claim.amount || 0);
           else                              fs['bs-cash'] = bsCash - (claim.amount || 0);

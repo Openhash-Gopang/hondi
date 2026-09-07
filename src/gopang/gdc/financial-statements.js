@@ -37,19 +37,46 @@ async function _sign(wallet, prefix) {
  * 대차대조표 — 자산(현금) 조회. /biz/balance는 서명 없이 guid만으로
  * 조회되는 공개 잔액 엔드포인트다(기존 설계 그대로).
  */
+/**
+ * 대차대조표 — 자산(현금 + 재고자산) 조회.
+ * 현금은 /biz/balance(서명 불필요, 공개 잔액 조회)에서, 재고자산은
+ * 2026-09-07 신설된 profiles.extra.fs.bs['bs-inventory']를 담고 있는
+ * /biz/financials(서명 필요)에서 가져온다 — 두 값의 출처가 다르므로
+ * 병렬로 조회해 합친다.
+ */
 export async function fetchBalanceSheet(wallet) {
   if (!wallet?.guid) throw new Error('[fs] wallet.guid 없음 — 로그인 필요');
-  const res = await fetch(`${WORKER_URL}/biz/balance?guid=${encodeURIComponent(wallet.guid)}`);
-  if (!res.ok) throw new Error(`[fs] 잔액 조회 실패: HTTP ${res.status}`);
-  const data = await res.json();
-  if (!data.ok) throw new Error(data.error || '[fs] 잔액 조회 실패');
-  const cash = Number(data.balance ?? data.balance_gdc ?? 0);
+
+  const cashPromise = (async () => {
+    const res = await fetch(`${WORKER_URL}/biz/balance?guid=${encodeURIComponent(wallet.guid)}`);
+    if (!res.ok) throw new Error(`[fs] 잔액 조회 실패: HTTP ${res.status}`);
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || '[fs] 잔액 조회 실패');
+    return Number(data.balance ?? data.balance_gdc ?? 0);
+  })();
+
+  // 재고자산은 서명 인증이 필요한 /biz/financials에서만 조회 가능하다 —
+  // wallet에 서명 정보(publicKeyB64u)가 없으면(예: 비로그인) 0으로 폴백한다.
+  const inventoryPromise = (async () => {
+    if (!wallet?.publicKeyB64u) return 0;
+    try {
+      const { ts, signature } = await _sign(wallet, 'financials');
+      const qs = new URLSearchParams({ guid: wallet.guid, pubkey: wallet.publicKeyB64u, signature, ts });
+      const res = await fetch(`${WORKER_URL}/biz/financials?${qs.toString()}`);
+      if (!res.ok) return 0;
+      const data = await res.json();
+      return Number(data?.fs?.bs?.['bs-inventory'] ?? 0);
+    } catch { return 0; }
+  })();
+
+  const [cash, inventory] = await Promise.all([cashPromise, inventoryPromise]);
+  const totalAssets = cash + inventory;
   return {
-    assets:       { cash },
+    assets:       { cash, inventory },
     liabilities:  {}, // 아직 모델링된 부채 계정 없음
-    equity:       { retained_earnings: cash },
-    total_assets: cash,
-    total_liabilities_and_equity: cash,
+    equity:       { retained_earnings: totalAssets },
+    total_assets: totalAssets,
+    total_liabilities_and_equity: totalAssets,
   };
 }
 
