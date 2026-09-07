@@ -295,19 +295,6 @@ async function _hmacSha256Hex(secret, message) {
   return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// ── e164 정확일치 조회용 해시 (2026-09-07 신설) ─────────────────────
-// profiles.e164 평문 저장을 없애면서(pb_hooks/main.pb.js의
-// onRecordBeforeCreateRequest 참고), 정확일치 조회(중복탐지, 프로필
-// 검색)는 이제 e164_hash 필드로 한다. pb_hooks가 레코드 생성 시 계산하는
-// 것과 정확히 같은 도메인 분리 접두어("e164-lookup:")를 써야 같은 값이
-// 나온다 — 한쪽만 고치면 서버·워커가 서로 다른 해시를 만들어 조회가
-// 전부 조용히 실패(0건)하니 반드시 pb_hooks와 이 함수를 같이 바꿔야
-// 한다.
-async function _e164Hash(env, e164) {
-  if (!env.PHONE_VERIFY_SECRET) throw new Error('PHONE_VERIFY_SECRET이 설정되지 않았습니다');
-  return await _hmacSha256Hex(env.PHONE_VERIFY_SECRET, 'e164-lookup:' + e164);
-}
-
 // 솔라피 HMAC-SHA256 인증 스킴으로 SMS 1건 발송.
 async function _sendSolapiSms(env, toE164, text) {
   if (!env.SOLAPI_API_KEY || !env.SOLAPI_API_SECRET || !env.SOLAPI_SENDER_NUMBER) {
@@ -481,10 +468,13 @@ async function _resolveGuidFromPhoneVerifyToken(env, phoneVerifyToken) {
 
   try {
     const l1Token = await _l1AdminToken(env);
-    // 2026-09-07 수정 — profiles.e164 평문 저장이 없어지면서(pb_hooks
-    // 참고) e164_hash로 조회한다. _l1FindProfileByE164와 동일 패턴.
-    const e164Hash = await _e164Hash(env, e164);
-    const filter  = encodeURIComponent(`e164_hash='${e164Hash}'`);
+    // 2026-09-03 수정 — profiles 컬렉션 실제 스키마는 e164 필드다(phone
+    // 필드는 존재하지 않음, pb_migrations/1781467666_updated_profiles.js
+    // 확인). 잘못된 필드명으로 필터링해 PocketBase가 HTTP 400을 반환하던
+    // 버그 — device-link sign_request 로그인이 이 경로를 실제 데이터로
+    // 처음 타면서 발견(주피터 실사 재현). _l1FindProfileByE164와 동일한
+    // 필터 패턴으로 정정.
+    const filter  = encodeURIComponent(`e164='${e164}'`);
     const res = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${filter}&perPage=1`, {
       headers: { 'Authorization': `Bearer ${l1Token}` },
       signal: AbortSignal.timeout(8000),
@@ -549,13 +539,16 @@ async function handleUserGdcBalance(request, env, corsHeaders) {
   const expectedSig = await _hmacSha256Hex(env.PHONE_VERIFY_SECRET, payload);
   if (expectedSig !== sig) return _err(401, 'TOKEN_INVALID', '전화번호 인증 토큰 서명이 유효하지 않습니다', corsHeaders);
 
-  // 2026-09-07 수정 — profiles.e164 평문 저장이 없어지면서 e164_hash로
-  // 조회한다(pb_hooks/main.pb.js, _e164Hash 참고).
+  // 2026-09-03 수정 — profiles 컬렉션 실제 스키마는 e164 필드다(phone
+  // 필드는 존재하지 않음, pb_migrations/1781467666_updated_profiles.js
+  // 확인). 아래 주석은 예전에 이 함수를 작성할 때의 착각이었다 — 잘못된
+  // 필드명으로 필터링해 PocketBase가 HTTP 400을 반환하던 버그.
+  // device-link sign_request 로그인이 이 경로를 실제 데이터로 처음
+  // 타면서 발견(주피터 실사 재현).
 
   try {
     const l1Token = await _l1AdminToken(env);
-    const e164Hash = await _e164Hash(env, e164);
-    const filter  = encodeURIComponent(`e164_hash='${e164Hash}'`);
+    const filter  = encodeURIComponent(`e164='${e164}'`);
     const res = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${filter}&perPage=1`, {
       headers: { 'Authorization': `Bearer ${l1Token}` },
       signal: AbortSignal.timeout(8000),
@@ -712,11 +705,9 @@ function _deviceLinkTtl(record) {
 
 // L1 profiles 컬렉션에서 e164(전화번호)로 레코드 조회 — device-link 전용
 // 신설. _l1FindProfileByGuid/_l1FindProfileByHandle과 동일 패턴.
-// 2026-09-07 수정 — profiles.e164 평문 저장 제거에 맞춰 e164_hash로 조회.
 async function _l1FindProfileByE164(env, e164) {
   const token = await _l1AdminToken(env);
-  const e164Hash = await _e164Hash(env, e164);
-  const filter = encodeURIComponent(`e164_hash='${e164Hash}'`);
+  const filter = encodeURIComponent(`e164='${e164}'`);
   const res = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${filter}&perPage=1`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
@@ -12673,6 +12664,7 @@ export default {
     if (pathname === '/biz/charge-status'  && request.method === 'GET')  return handleChargeStatus(request, env, corsHeaders);
     if (pathname === '/biz/charge-list'    && request.method === 'GET')  return handleChargeList(request, env, corsHeaders);
     if (pathname === '/biz/charge-confirm' && request.method === 'POST') return handleChargeConfirm(request, env, corsHeaders, ctx);
+    if (pathname === '/admin/test-register-profile' && request.method === 'POST') return handleTestRegisterProfile(request, env, corsHeaders);
     // 2026-08-10 신설 — 방식B(PG 가상계좌) 자동 확정 웹훅.
     if (pathname === '/biz/charge-webhook-pg' && request.method === 'POST') return handleChargeWebhookPG(request, env, corsHeaders, ctx);
     // 2026-08-12 신설 — 방식C(관리자 폰 알림 캡처) 자동 확정.
@@ -13384,6 +13376,35 @@ async function handleBizOrder(request, env, corsHeaders, ctx) {
   // pending_claims에 저장해두면, 판매자가 다음에 앱을 열 때
   // GET /biz/claims로 조회해 직접 redeemClaim()할 수 있다. 이 저장이
   // 실패해도 결제 자체는 이미 끝났으므로 주문을 되돌리지 않는다.
+  //
+  // 2026-09-07 수정(사용자 지시, 설계 오류 수정) — 지금까지 이 블록은
+  // seller_claim만 pending_claims에 적재하고 buyer_claim(fs_account
+  // 'pl-purchase', L1이 이미 만들어서 응답에 실어 보내는 값)은 그냥
+  // 버려지고 있었다. 그 결과 handleSettleLedger가 "판매자 매출만 있고
+  // 구매자 지출은 없는" 손익계산서를 만들 수밖에 없었다 — 모든 사업자는
+  // 재료를 사고 상품을 팔므로, 파는 쪽만 기록하는 장부는 존재할 수 없다.
+  // seller_claim과 완전히 대칭으로 buyer_claim도 별도 pending_claims
+  // 레코드(claimant=from_guid)에 적재한다.
+  if (buyer_claim) {
+    try {
+      const claimToken = await _l1AdminToken(env);
+      await fetch(`${L1_DEFAULT}/api/collections/pending_claims/records`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${claimToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          claimant: from_guid,
+          claim_data: [buyer_claim],
+          block_hash, block_id, tx_hash,
+          session_id: session_id || null,
+          source: reporter_svc || 'kmarket_order',
+          redeemed: false,
+        }),
+      });
+    } catch (e) {
+      console.warn('[Claims] buyer pending_claims 적재 실패(무시, 결제 자체는 정상 처리됨):', e.message);
+    }
+  }
+
   if (seller_claim) {
     try {
       // 2026-07-13 신설 — GDC-재무제표-재고 연동 4단계(매출원가 인식).
@@ -15295,14 +15316,12 @@ async function handleBizSupply(request, env, corsHeaders) {
 // 완벽한 자동 대사가 아니라 관리자가 금액까지 함께 대조하는 1차
 // 단서라는 원 설계 전제는 그대로 유지한다(_findPendingByMatchKey
 // 참고) — 극히 드문 뒷 8자리 충돌은 관리자 수동 확인으로 감수한다.
-// 2026-09-07 수정 — profiles.e164 평문 저장이 없어지면서, 이미 정확히
-// 뒷 8자리만 담아두는 e164_last8 필드를 그대로 쓴다(pb_hooks 참고) —
-// 재계산할 필요 자체가 없어졌다.
 async function _phoneMatchKey(env, guid) {
   const profile = await _l1FindProfileByGuid(env, guid).catch(() => null);
-  const last8 = profile?.e164_last8 || '';
-  if (last8.length < 8) return null; // 전화번호 미인증/미보유 — 폴백 필요
-  return last8;
+  const e164 = profile?.e164 || '';
+  const digits = e164.replace(/\D/g, '');
+  if (digits.length < 8) return null; // 전화번호 미인증/미보유 — 폴백 필요
+  return digits.slice(-8);
 }
 
 const CHARGE_MIN_KRW = 1000;    // 너무 작은 신청은 매칭 단서(전화번호 뒷자리)만으로 은행 명세서 대조가 더 번거로워짐
@@ -15657,7 +15676,96 @@ function _chargeCoreResultToResponse(result, corsHeaders) {
 // POST /biz/charge-confirm — 관리자 전용. 은행 명세서에서 입금을 직접
 // 확인한 뒤 호출 → GDC 발행(L1 /api/mint) + charge_requests 확정 갱신.
 // (2026-08-10: 코어 로직을 _mintAndRecordCharge로 이관 — 이 함수는 이제
-//  "관리자 인증 + 파라미터 정리" 얇은 래퍼다.)
+// ═══════════════════════════════════════════════════════════
+// 2026-09-07 신설(사용자 지시) — POST /admin/test-register-profile
+//
+// 스모크 테스트(가상 거래 100건 등)를 위해 "휴대폰 SMS 인증 없이" 테스트
+// 계정을 만드는 전용 통로. 반드시 알아야 할 것:
+//   - 이건 정식 가입 플로우(_l1UpsertProfile을 거치는 phone-OTP 경로)가
+//     하는 두 가지 등록을 대신 해준다: ① profiles.pubkey_ed25519 등록
+//     (재무제표 조회 계열 /biz/settle-ledger·/biz/financials·/biz/tx-history
+//     가 _verifyClaimsRequester로 이 값을 대조함), ② gdc_keys 등록
+//     (L1 /api/tx가 buyer_public_key 검증 시 이 컬렉션을 조회함).
+//     이 둘이 갖춰져야 스모크 테스트 계정이 실제 결제·재무제표 흐름을
+//     전부 통과할 수 있다.
+//   - ADMIN_ACTION_SECRET(fail-closed — 미설정 시 이 엔드포인트는 항상
+//     거부됨, _adminActionSecret 참고)로만 보호된다. 이 시크릿을 아는
+//     사람은 임의의 guid를 "본인인증 완료"로 만들 수 있으므로, 테스트가
+//     끝나면 이 라우트 자체를 주석 처리하거나 ADMIN_ACTION_SECRET을
+//     교체하는 걸 권장한다 — 상시 운영 코드에 남겨두지 말 것.
+//   - mint_krw를 주면 L1 /api/mint로 소액 GDC도 함께 충전한다(선택,
+//     기본 0 — 안 주면 잔액 0으로 등록만 되고 결제는 INSUFFICIENT_BALANCE
+//     로 막힌다. 스모크 테스트 buyer에게는 amount*n_tx보다 넉넉히 줄 것).
+// ═══════════════════════════════════════════════════════════
+async function handleTestRegisterProfile(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+  const { secret, guid, pubkey, handle, mint_krw } = body;
+
+  const expected = _adminActionSecret(env);
+  if (!expected || secret !== expected) {
+    return _err(403, 'FORBIDDEN', 'ADMIN_ACTION_SECRET이 설정돼 있어야 하며, 일치해야 합니다', corsHeaders);
+  }
+  if (!guid)   return _err(400, 'MISSING_FIELD', 'guid 필수', corsHeaders);
+  if (!pubkey) return _err(400, 'MISSING_FIELD', 'pubkey 필수', corsHeaders);
+
+  // ① profiles.pubkey_ed25519 — 재무제표 조회 계열이 대조하는 값
+  try {
+    await _l1UpsertProfile(env, {
+      guid,
+      handle: handle || ('test-' + guid.slice(-8)),
+      entityType: 'person',
+      nativeLang: 'ko',
+      isPublic: false,
+      pubkey,
+      extra: {},
+      core: { name: '스모크테스트 계정' },
+    });
+  } catch (e) {
+    return _err(502, 'PROFILE_UPSERT_FAILED', 'profiles 등록 실패: ' + e.message, corsHeaders);
+  }
+
+  // ② gdc_keys — L1 /api/tx가 buyer_public_key 조회 시 참조하는 값
+  //    (/gwp/register-key와 동일 컬렉션·형식, 가입 보너스는 지급하지 않음
+  //    — 아래 mint_krw로 필요한 만큼만 직접 충전한다)
+  try {
+    const token = await _l1AdminToken(env);
+    const filter = encodeURIComponent(`guid='${guid}'`);
+    const existingRes = await fetch(
+      `${L1_DEFAULT}/api/collections/gdc_keys/records?filter=${filter}&perPage=1`,
+      { headers: { 'Authorization': `Bearer ${token}` } }
+    );
+    const existingData = await existingRes.json().catch(() => ({ items: [] }));
+    if (!existingData.items?.length) {
+      await fetch(`${L1_DEFAULT}/api/collections/gdc_keys/records`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guid, public_key: pubkey, created_at: new Date().toISOString() }),
+      });
+    }
+  } catch (e) {
+    return _err(502, 'GDC_KEYS_REGISTER_FAILED', 'gdc_keys 등록 실패: ' + e.message, corsHeaders);
+  }
+
+  // ③ 선택 — 소액 mint (지정 안 하면 잔액 0으로 등록만 됨)
+  let mintResult = null;
+  if (mint_krw && mint_krw > 0) {
+    try {
+      const mintRes = await fetch(`${L1_DEFAULT}/api/mint`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guid, krw_amount: mint_krw, secret: _mintSecret(env), memo: 'smoketest:test-register-profile' }),
+      });
+      mintResult = await mintRes.json().catch(() => ({ ok: false, error: 'L1_PARSE_FAILED' }));
+    } catch (e) {
+      mintResult = { ok: false, error: 'L1_UNREACHABLE', detail: e.message };
+    }
+  }
+
+  return new Response(JSON.stringify({
+    ok: true, guid, pubkey_registered: true, gdc_key_registered: true, mint: mintResult,
+  }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+}
+
 async function handleChargeConfirm(request, env, corsHeaders, ctx) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
@@ -15779,21 +15887,19 @@ function _extractKrwAmountFromText(text) {
 // 번호 중간에 우연히 낀 경우까지 오매칭하는 걸 막기 위함. 결과가
 // 정확히 1건이 아니면(0건 또는 충돌 2건 이상) 자동 처리를 포기하고
 // 관리자 수동 확인으로 넘긴다 — 자동 오발행보다 훨씬 안전하다.
-// 2026-09-07 수정 — profiles.e164 평문 저장이 없어지면서, 이미 정확히
-// 뒷 8자리만 담긴 e164_last8 필드에 정확일치로 바로 조회한다 — 예전엔
-// e164 저장 형식이 국가마다 자릿수가 달라 '~'(LIKE) 부분포함으로 넓게
-// 뽑은 뒤 애플리케이션에서 재확인해야 했는데, e164_last8은 애초에
-// 정확히 8자리만 담기므로 그 2단계가 통째로 필요 없어졌다.
 async function _findGuidByPhoneMatchKey(env, code) {
   if (!/^\d{8}$/.test(code)) return null;
   const token = await _l1AdminToken(env);
-  const filter = encodeURIComponent(`e164_last8='${code}'`);
+  const filter = encodeURIComponent(`e164~'${code}'`);
   const res = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${filter}&perPage=5`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   if (!res.ok) return null;
   const data = await res.json().catch(() => ({ items: [] }));
-  const exact = data.items || [];
+  const exact = (data.items || []).filter(p => {
+    const digits = String(p.e164 || '').replace(/\D/g, '');
+    return digits.slice(-8) === code;
+  });
   return (exact.length === 1) ? exact[0].guid : null;
 }
 
@@ -28457,7 +28563,15 @@ async function handleSettleLedger(request, env, corsHeaders) {
   // 누적 집계에 포함돼야 한다). 안전판: 최대 20페이지(2,000건)까지만
   // 순회한다 — 그 이상이면 truncated:true로 응답에 표시한다(완전한
   // 커서 기반 페이지네이션은 후속 작업).
-  let revenue = 0, cogs = 0;
+  //
+  // 2026-09-07 수정(사용자 지시, 설계 오류 수정) — 이 guid가 "판매자"로서
+  // claimant인 레코드(pl-revenue/pl-cogs)만 집계하고, "구매자"로서
+  // claimant인 레코드(pl-purchase, 위 handleBizOrder가 이번에 새로 함께
+  // 적재하기 시작함)는 무시하고 있었다. filter 자체는 이미 claimant=guid
+  // 하나뿐이라 판매자용/구매자용 레코드가 같은 쿼리로 함께 잡힌다 —
+  // 아래 루프에 pl-purchase 분기만 추가하면 된다(모든 사업자는 사고
+  // 팔므로, 한 계정의 pending_claims에 두 종류가 섞여 있는 게 정상이다).
+  let revenue = 0, cogs = 0, purchases = 0;
   let page = 1, truncated = false;
   const PER_PAGE = 100, MAX_PAGES = 20;
   const filter = encodeURIComponent(`claimant='${guid}'`);
@@ -28476,6 +28590,7 @@ async function handleSettleLedger(request, env, corsHeaders) {
         const amt = parseFloat(c.amount) || 0;
         if (c.fs_account === 'pl-revenue' && c.direction === 'credit') revenue += amt;
         else if (c.fs_account === 'pl-cogs' && c.direction === 'debit') cogs += amt;
+        else if (c.fs_account === 'pl-purchase' && c.direction === 'debit') purchases += amt;
       }
     }
     if (page >= (data.totalPages || 1)) break;
@@ -28489,15 +28604,25 @@ async function handleSettleLedger(request, env, corsHeaders) {
   // 손실도 그대로 보여준다 — 이전 클라이언트 구현(Math.max(0,...))은
   // 적자를 항상 ₮0으로 지워서 실제 손실이 재무제표에서 사라졌었다
   // (2026-07-14 검증에서 발견, 함께 수정).
+  //
+  // 2026-09-07 수정(사용자 지시) — purchases(구매자로서 지출한 매입액)를
+  // 당기순이익에서 함께 차감한다. 참고: pl-cogs는 "판매 시점에 원가를
+  // 아는 항목만" 매출과 대응시킨 값이고, pl-purchase는 "구매 시점에
+  // 실제로 나간 현금" 전체다 — 같은 재고를 나중에 되팔면 두 계정에
+  // 걸쳐 보일 수 있다는 뜻이며, 이는 이 시스템이 아직 재고자산
+  // (bs-inventory) 계정을 통한 정식 발생주의 매칭을 하지 않기 때문에
+  // 생기는 의도적 단순화다(위 판매자 매출원가 계산 주석과 동일한 범위
+  // 제한 — 정식 재고자산 계정 도입은 범위가 훨씬 큰 후속 작업이다).
   const grossProfit = revenue - cogs;
   const opex = 0; // TODO: pl-opex claim 발행 경로가 생기면 여기 합산
-  const netIncome = grossProfit - opex;
+  const netIncome = grossProfit - opex - purchases;
 
   const plPatch = {
     'pl-revenue':      String(revenue),
     'pl-cogs':          String(cogs),
     'pl-gross-profit':  String(grossProfit),
     'pl-opex':          String(opex),
+    'pl-purchase':      String(purchases),
     'pl-net-income':    String(netIncome),
   };
 
@@ -28551,7 +28676,7 @@ async function handleSettleLedger(request, env, corsHeaders) {
 
     const snapshotContent = {
       guid, seq: nextSeq,
-      pl: { revenue, cogs, gross_profit: grossProfit, opex, net_income: netIncome },
+      pl: { revenue, cogs, purchases, gross_profit: grossProfit, opex, net_income: netIncome },
       bs: { cash },
       computed_at: new Date().toISOString(),
     };
@@ -28580,7 +28705,7 @@ async function handleSettleLedger(request, env, corsHeaders) {
 
   return new Response(JSON.stringify({
     ok: true,
-    pl: { revenue, cogs, gross_profit: grossProfit, opex, net_income: netIncome },
+    pl: { revenue, cogs, purchases, gross_profit: grossProfit, opex, net_income: netIncome },
     truncated,
     l1_updated: l1Ok,
     fs_snapshot: fsSnapshot,
@@ -29438,6 +29563,8 @@ async function handleFsVerify(request, env, corsHeaders) {
     anchor_id: anchor.id, anchored_at: anchor.anchored_at,
   }), { status: 200, headers: corsHeaders });
 }
+
+
 
 // ═══════════════════════════════════════════════════════════
 // Push 알림 — VAPID Web Push
