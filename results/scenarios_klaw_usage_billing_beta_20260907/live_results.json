@@ -1,0 +1,78 @@
+[
+  {
+    "no": 1,
+    "title": "일반 상담(case_id 없음) — 순수 토큰 종량제 × 10배(klaw-flash) 차감 검증",
+    "verdict": "LIVE-PASS",
+    "reason": "30회 누적 토큰 794752h/3728m/888o → 기대 누적 차감 44.9380원, 실제 차감 45원 (허용오차 15.0원 이내)",
+    "guid": "2601:db80:c342:fd1b:bc4a:2dce:9ed8:04b6",
+    "repeat": 30,
+    "calls": 30,
+    "http_statuses": [
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200
+    ],
+    "cumulative_expected": {
+      "hit_tokens": 794752,
+      "miss_tokens": 3728,
+      "out_tokens": 888,
+      "api_cost_krw": 4.493792999999999,
+      "billed_krw": 44.93798399999999
+    },
+    "balance_before_krw": 3257,
+    "balance_after_krw": 3212,
+    "balance_delta_krw": 45
+  },
+  {
+    "no": 2,
+    "title": "사건단위 필드(case_id+claim_amount_krw+step_cycle) 동반 — 베타 중엔 여전히 토큰 종량제여야 함(정액 폴백 회귀 방지)",
+    "verdict": "LIVE-FAIL",
+    "reason": "4번째 호출 HTTP 429 (기대 200) — body: {\"ok\": false, \"error\": \"KLAW_STEP_LIMIT_EXCEEDED\", \"message\": \"오늘 판결 시뮬레이션 생성 한도(3회)를 모두 사용했습니다. 내일 다시 이용해 주세요.\", \"detail\": \"오늘 판결 시뮬레이션 생성 한도(3회)를 모두 사용했습니다. 내일 다시 이용해 주세요.\"}",
+    "guid": "2601:db80:c342:fd1b:bc4a:2dce:9ed8:04b6",
+    "repeat": 30,
+    "calls": 4,
+    "http_statuses": [
+      200,
+      200,
+      200,
+      429
+    ],
+    "cumulative_expected": {
+      "hit_tokens": 79488,
+      "miss_tokens": 360,
+      "out_tokens": 92,
+      "api_cost_krw": 0.448089,
+      "billed_krw": 4.4808959999999995
+    },
+    "balance_before_krw": 3212,
+    "balance_after_krw": null,
+    "balance_delta_krw": null
+  }
+]
