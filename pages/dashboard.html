@@ -525,6 +525,11 @@ code, pre, kbd, samp, input, button, textarea, select {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
           <input type="text" id="pdvSearchInput" placeholder="언제·어디서·무엇을 했는지 검색 — 예: 짜장면, 임대차, 지난주">
         </div>
+        <div class="chip-row" id="pdvPeriodRow">
+          <button class="chip active" data-period="day">일간</button>
+          <button class="chip" data-period="week">주간</button>
+          <button class="chip" data-period="month">월간</button>
+        </div>
         <div class="chip-row">
           <button class="chip active" data-filter="all">전체</button>
           <button class="chip" data-filter="k-services">K-서비스</button>
@@ -533,6 +538,7 @@ code, pre, kbd, samp, input, button, textarea, select {
           <button class="chip" data-filter="location">위치</button>
         </div>
         <div class="result-meta" id="pdvResultCount">24시간 기록 128건 중 최근 6건 표시</div>
+        <div class="result-meta" id="pdvCategoryCount" style="display:none"></div>
         <div class="panel" id="pdvResults">
           <div class="row" data-cat="k-services payment">
             <span class="activity-mark"></span>
@@ -1091,5 +1097,94 @@ import { L1_URL, setUser } from '/src/gopang/core/state.js';
     phoneInput.focus();
   });
 })();
+</script>
+
+<!-- ══════ 일간/주간/월간 사용 내역(서비스 카테고리 포함) — 2026-09-07 신설 ══════
+     로그인 성공 후(completeLogin 실행 시점 이후) 실제 GDC 사용자에 한해
+     /pdv/my-records(from/to·카테고리 확장판)를 조회해 PDV 탭을 채운다.
+     비로그인 상태이거나 조회 실패 시에는 기존 정적 예시 행(위 pdvResults의
+     하드코딩된 6건)을 그대로 두어 화면이 비지 않게 한다.
+     한계: 서버는 2026-08-20부터 각 기록의 콘텐츠 해시만 갖고 있어
+     "무엇을 했는지"는 재구성할 수 없다 — 아래 행은 시각·서비스 종류
+     (K-Law/K-정부/전문가 페르소나 등)까지만 보여준다. -->
+<script type="module">
+import { fetchUsageHistory, enrichWithLocalDetail } from '/src/gopang/pdv/usage-summary.js';
+
+const CATEGORY_TO_FILTER = {
+  expert: 'persona', klaw: 'k-services', gov: 'k-services', general: 'k-services',
+};
+
+function _fmtWhen(iso) {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+  } catch { return iso || ''; }
+}
+
+function _renderUsageRows(data) {
+  const list = document.getElementById('pdvResults');
+  const countEl = document.getElementById('pdvResultCount');
+  const catEl = document.getElementById('pdvCategoryCount');
+  if (!list || !data?.items) return;
+
+  if (!data.items.length) {
+    countEl.textContent = '해당 기간에 기록된 사용 내역이 없습니다.';
+    catEl.style.display = 'none';
+    return;
+  }
+
+  list.innerHTML = data.items.map((it) => {
+    const filterTag = CATEGORY_TO_FILTER[it.category] || 'k-services';
+    const personaNote = it.persona_key ? ` (${it.persona_key})` : '';
+    const titleHtml = it.local_detail
+      ? '<b>' + it.category_label + '</b>' + personaNote + ' — ' + it.local_detail
+      : '<b>' + it.category_label + '</b>' + personaNote + ' 이용';
+    return (
+      '<div class="row" data-cat="' + filterTag + '">' +
+        '<span class="activity-mark"></span>' +
+        '<div class="row-body">' +
+          '<div class="row-title" style="font-weight:500;">' + titleHtml + '</div>' +
+          '<div class="meta-row"><span>' + _fmtWhen(it.created_at) + '</span></div>' +
+        '</div>' +
+      '</div>'
+    );
+  }).join('');
+
+  countEl.textContent = (data.truncated ? '조회 상한 도달 — 최근 ' : '해당 기간 ') + data.items.length + '건 표시';
+
+  const parts = Object.entries(data.counts_by_category || {}).map(([label, n]) => label + ' ' + n + '건');
+  if (parts.length) {
+    catEl.textContent = '서비스별: ' + parts.join(' · ');
+    catEl.style.display = '';
+  } else {
+    catEl.style.display = 'none';
+  }
+}
+
+async function loadUsagePeriod(period) {
+  try {
+    if (!window.GopangWallet) return; // gopang-wallet.js 미로딩 — 정적 예시 유지
+    const wallet = await window.GopangWallet.load().catch(() => null);
+    if (!wallet?.guid) return; // 비로그인 — 정적 예시 유지
+    const data = await fetchUsageHistory(wallet, { granularity: period });
+    data.items = enrichWithLocalDetail(data.items);
+    _renderUsageRows(data);
+  } catch (e) {
+    console.warn('[대시보드] 사용 내역 조회 실패(정적 예시 유지):', e.message);
+  }
+}
+
+document.getElementById('pdvPeriodRow')?.addEventListener('click', (e) => {
+  const btn = e.target.closest('.chip[data-period]');
+  if (!btn) return;
+  document.querySelectorAll('#pdvPeriodRow .chip').forEach((b) => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadUsagePeriod(btn.getAttribute('data-period'));
+});
+
+// 페이지 진입 시 이미 로그인돼 있는 경우(재방문)를 위해 1회 시도.
+// 로그인 화면이 떠 있는 첫 방문에서는 wallet.guid가 없어 조용히 스킵되고,
+// completeLogin() 이후에는 사용자가 PDV 탭을 열 때 위 클릭 핸들러가 갱신한다.
+loadUsagePeriod('day');
 </script>
 </body></html>
