@@ -4507,6 +4507,33 @@ onRecordBeforeCreateRequest((e) => {
     throw new BadRequestError("인증 토큰이 만료됐습니다. 인증번호를 다시 요청해 주세요");
   }
 
+  // ── e164 평문 저장 제거 (2026-09-07 신설, 사용자 지시) ────────────────
+  // "혼디는 서버에 개인정보를 저장하지 않는다"는 로컬 우선 원칙과 이
+  // 컬렉션의 e164 평문 저장이 충돌한다는 지적에서 시작된 변경. e164는
+  // 세 가지 용도로 쓰이는데(①재가입 시 동일 번호 중복탐지, ②device-link
+  // SMS 재발송에 필요한 실제 번호, ③"숫자코드" 기능의 뒷자리 부분일치
+  // 검색) 세 용도가 서로 다른 저장 형태를 요구해서 단순 해시 하나로는
+  // 대체가 안 된다(SMS 발송엔 원문이 필요하고, 부분일치는 해시로 원천
+  // 불가능). 그래서 세 필드로 쪼갠다 — pb_migrations/
+  // 1793900100_add_e164_hash_enc_last8_to_profiles.js 참고.
+  const encKey = $os.getenv("PHONE_ENC_KEY");
+  if (!encKey || encKey.length !== 32) {
+    throw new BadRequestError("PHONE_ENC_KEY 미설정/형식 오류(정확히 32자여야 함) — 관리자에게 문의하세요");
+  }
+  // 해시에 쓰는 도메인 접두어("e164-lookup:")는 phone_verify_token
+  // 서명(위 expectedSig)과 같은 PHONE_VERIFY_SECRET을 재사용하되 용도를
+  // 분리하기 위함이다 — 같은 키로 서로 다른 두 목적에 서명하는 것보다,
+  // 최소한 도메인 분리를 둬서 한쪽 해시가 다른 쪽 서명 위조에 그대로
+  // 쓰이지 않게 한다.
+  const e164Hash  = $security.hs256("e164-lookup:" + e164, secret);
+  const e164Enc   = $security.encrypt(e164, encKey);
+  const e164Last8 = e164.slice(-8);
+
+  e.record.set("e164_hash", e164Hash);
+  e.record.set("e164_enc", e164Enc);
+  e.record.set("e164_last8", e164Last8);
+  e.record.set("e164", ""); // 평문은 애초에 저장하지 않는다
+
   // ── step_up_token(생체 인증 결과) 독립 검증 — 2026-09-07 신설 ────────
   // worker.js의 handleStepUpVerify가 발급하는 것과 완전히 같은 형식
   // (payload는 [guid, tx_hash, exp] JSON 배열 + HMAC-SHA256)이라 같은
@@ -4550,10 +4577,12 @@ onRecordBeforeCreateRequest((e) => {
   // 추적용으로 그대로 남지만, 새로 클레임한 사람에게 자동으로 다시
   // 연결되지는 않는다(이게 이번 수정의 핵심 — 데이터를 지우는 게 아니라
   // "더 이상 이 전화번호로는 못 찾게" 끊어내는 것).
+  //
+  // 2026-09-07 수정 — 조회를 평문 e164 대신 e164_hash로 바꿨다(위 참고).
   try {
     const dupes = $app.dao().findRecordsByFilter(
       "profiles",
-      `e164 = '${e164}' && claim_status != 'superseded'`,
+      `e164_hash = '${e164Hash}' && claim_status != 'superseded'`,
       "",
       10,
       0
@@ -4583,11 +4612,14 @@ onRecordBeforeCreateRequest((e) => {
             `본인이 맞다면 그 계정을 등록한 기기에서 지문 인증을 먼저 완료해 주세요.`
           );
         }
-        console.log(`[PHONE-RECLAIM] e164=${e164} guid=${oldGuid} 생체 인증 통과 확인 완료`);
+        console.log(`[PHONE-RECLAIM] e164_hash=${e164Hash} guid=${oldGuid} 생체 인증 통과 확인 완료`);
       }
 
       old.set("claim_status", "superseded");
       old.set("e164", "");
+      old.set("e164_hash", "");
+      old.set("e164_enc", "");
+      old.set("e164_last8", "");
       old.set("handle", (old.getString("handle") || "") + "_superseded_" + Date.now());
       let extra = oldExtra;
       extra.superseded_at = new Date().toISOString();
@@ -4595,7 +4627,7 @@ onRecordBeforeCreateRequest((e) => {
       extra.superseded_guid = oldGuid;
       old.set("extra", JSON.stringify(extra));
       $app.dao().saveRecord(old);
-      console.log(`[PHONE-RECLAIM] e164=${e164} 이전 guid=${oldGuid} → superseded 처리 완료`);
+      console.log(`[PHONE-RECLAIM] e164_hash=${e164Hash} 이전 guid=${oldGuid} → superseded 처리 완료`);
     }
   } catch (err) {
     if (err instanceof BadRequestError) throw err; // 생체인증 요구 위반은 가입을 막아야 함 — best-effort 대상 아님
@@ -4851,11 +4883,14 @@ onRecordBeforeUpdateRequest((e) => {
     }
 
     if (balance !== 0 || hasHistory) {
-      const e164 = original.getString("e164");
+      // 2026-09-07 수정 — profiles.e164 평문 저장이 없어지면서, 저장된
+      // e164_hash와 phone_verify_token의 e164를 같은 해시로 변환해
+      // 비교한다(평문끼리 비교하던 것 → 해시끼리 비교).
+      const e164Hash = original.getString("e164_hash");
       const secret = $os.getenv("PHONE_VERIFY_SECRET");
       const token = info.data.phone_verify_token;
       let phoneOk = false;
-      if (e164 && secret && token && typeof token === "string" && token.indexOf(".") !== -1) {
+      if (e164Hash && secret && token && typeof token === "string" && token.indexOf(".") !== -1) {
         const dotIdx = token.indexOf(".");
         const payload = token.substring(0, dotIdx);
         const tokenSig = token.substring(dotIdx + 1);
@@ -4864,7 +4899,8 @@ onRecordBeforeUpdateRequest((e) => {
           const segs = payload.split(":");
           const tokenE164 = segs[0];
           const exp = parseInt(segs[segs.length - 1], 10);
-          if (tokenE164 === e164 && exp && Date.now() <= exp) phoneOk = true;
+          const tokenE164Hash = $security.hs256("e164-lookup:" + tokenE164, secret);
+          if (tokenE164Hash === e164Hash && exp && Date.now() <= exp) phoneOk = true;
         }
       }
       if (!phoneOk) {

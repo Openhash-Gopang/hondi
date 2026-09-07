@@ -103,6 +103,16 @@ function toB64u(bytes) {
   for (const b of new Uint8Array(bytes)) bin += String.fromCharCode(b);
   return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
+// 2026-09-07 신설 — profiles.e164 평문 저장 제거로 조회가 e164_hash
+// 기준이 됐다(worker.js _e164Hash와 완전히 동일한 알고리즘/도메인 접두어
+// 여야 같은 값이 나온다).
+async function e164HashFor(e164) {
+  const key = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode('test-secret-key'), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode('e164-lookup:' + e164));
+  return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
 // WebCrypto의 ECDSA sign()은 raw(r||s, 각 32바이트) 포맷을 낸다 — 실제
 // WebAuthn 인증기가 내려주는 서명은 DER 포맷이라 서버(_derToRawEcdsaSig)가
 // 그걸 raw로 변환하는 구조다. 테스트에서 진짜 인증기 없이 이를 흉내내려면
@@ -250,7 +260,7 @@ describe('P30-3: handlePhoneOtpRequest — 기존 지문 계정이 있으면 생
   it('지문을 쓰는 기존 계정이 있으면 existingAccountBiometricChallenge가 채워진다', async () => {
     const e164 = '+8201099998888';
     seedProfile({
-      guid: 'owner-guid', e164, claim_status: 'active',
+      guid: 'owner-guid', e164_hash: await e164HashFor(e164), claim_status: 'active',
       extra: { webauthn_credentials: [{ credentialId: 'cred-1', publicKeySpkiB64u: 'x' }] },
     });
 
