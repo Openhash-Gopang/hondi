@@ -28555,6 +28555,32 @@ async function handleFinancialsGet(request, env, corsHeaders) {
 // 있다는 걸 명시한다(truncated 플래그로 알림).
 // ═══════════════════════════════════════════════════════════
 // ═══════════════════════════════════════════════════════════
+// 2026-09-07 신설 — 대시보드 일간/주간/월간 사용 내역의 "서비스 종류"
+// 표시를 위한 카테고리 판별. svc 하나만으로는 부족한 두 가지 실사 확인
+// 사례를 보완한다:
+//   ① 전문가 페르소나 상담은 reporter_svc가 K-서비스와 같을 수 있어
+//      persona_key 유무를 svc보다 먼저 확인해야 한다.
+//   ② 행정기관 SP 직접 상담(kregionalgov)은 전용 서브도메인이 폐지되어
+//      svc='gopang'으로 남는다(SVC_ALIAS 참고) — svc만 보면 일반 대화와
+//      구분이 안 되므로, type이 'gov_task_submission'류일 때만 K-정부로
+//      승격한다. 그 외 svc='gopang'은 '일반 대화'로 남긴다(과다분류 방지).
+const _K_SVC_LABELS = {
+  market:'K-Market', school:'K-School', security:'K-Security', health:'K-Health',
+  tax:'K-Tax', gdc:'K-GDC', democracy:'K-Democracy', '911':'K-119',
+  police:'K-Police', insurance:'K-Insurance', stock:'K-Stock',
+  traffic:'K-Traffic', logistics:'K-Logistics', qna:'K-QnA', users:'K-Users',
+};
+function _pdvCategoryLabel(rec) {
+  if (rec.persona_key) return { category: 'expert', label: '전문가 페르소나' };
+  const svc = rec.svc || rec.reporter_svc || '';
+  if (svc === 'klaw' || svc === 'klaw-ext') return { category: 'klaw', label: 'K-Law' };
+  if (svc === 'public') return { category: 'gov', label: 'K-정부' };
+  if (svc === 'gopang' && /^gov_/.test(rec.type || '')) return { category: 'gov', label: 'K-정부' };
+  if (_K_SVC_LABELS[svc]) return { category: svc, label: _K_SVC_LABELS[svc] };
+  return { category: 'general', label: '일반 대화' };
+}
+
+// ═══════════════════════════════════════════════════════════
 // GET /pdv/my-records — 본인 PDV 기록 조회 (2026-08-12 신설)
 // K-Market webapp.html의 pdv_log 화면(Supabase 직접조회)을 대체.
 // pdv_records는 이미 존재하는 플랫폼 전역 PDV 저장소(/pdv/report가
@@ -28569,7 +28595,15 @@ async function handlePdvMyRecords(request, env, corsHeaders) {
   const pubkey    = url.searchParams.get('pubkey');
   const signature = url.searchParams.get('signature');
   const ts        = url.searchParams.get('ts') || '';
-  const limit     = Math.min(Math.max(parseInt(url.searchParams.get('limit') || '20', 10) || 20, 1), 50);
+  // 2026-09-07 — 대시보드 일간/주간/월간 뷰는 하루에도 수십~백여 건이
+  // 쌓일 수 있어(실사: "24시간 128건") 기존 50건 상한으로는 하루치도
+  // 못 채우는 경우가 있었다. 상한을 1000으로 올리되, from/to 기간
+  // 필터를 새로 받아 실제로는 그 기간에 맞는 만큼만 가져오게 한다.
+  const limit = Math.min(Math.max(parseInt(url.searchParams.get('limit') || '20', 10) || 20, 1), 1000);
+  // ISO 8601 문자열(예: 2026-09-01T00:00:00Z). 생략하면 기존과 동일하게
+  // 최신순 limit개만 반환 — 기존 호출부와 하위호환.
+  const from = url.searchParams.get('from');
+  const to   = url.searchParams.get('to');
   if (!guid) return _err(400, 'MISSING_FIELD', 'guid 필수', corsHeaders);
 
   const authOk = await _verifyClaimsRequester(env, {
@@ -28579,29 +28613,60 @@ async function handlePdvMyRecords(request, env, corsHeaders) {
 
   try {
     const token = await _l1AdminToken(env);
-    const filter = encodeURIComponent(`guid='${guid}'`);
-    const res = await fetch(
-      `${L1_DEFAULT}/api/collections/pdv_records/records?filter=${filter}&sort=-created&perPage=${limit}`,
-      { headers: { 'Authorization': `Bearer ${token}` } }
-    );
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json().catch(() => ({ items: [] }));
-    const items = (data.items || []).map(rec => {
-      let sixw = {};
-      try { sixw = JSON.parse(rec.summary_6w || '{}'); } catch { sixw = {}; }
-      return {
-        id:           rec.id,
-        created_at:   rec.created,
-        report_id:    rec.report_id,
-        service_id:   rec.svc || rec.reporter_svc || '',
-        record_type:  rec.type || '',
-        summary:      rec.summary || '',
-        location:     sixw.where || '',
-        how:          sixw.how   || '',
-        why:          sixw.why   || '',
-      };
-    });
-    return new Response(JSON.stringify({ ok: true, guid, items }), { headers: corsHeaders });
+    let filter = `guid='${guid}'`;
+    if (from) filter += ` && created >= '${from.replace(/'/g, "\\'")}'`;
+    if (to)   filter += ` && created <= '${to.replace(/'/g, "\\'")}'`;
+
+    // 기간 지정 조회는 limit 하나로 안 끝날 수 있어 handleTxHistory와
+    // 동일한 안전판(최대 페이지 수 제한)으로 여러 페이지를 스캔한다.
+    const PER_PAGE = 200, MAX_PAGES = 10;
+    const items = [];
+    let page = 1, truncated = false, totalPages = 1;
+    while (page <= MAX_PAGES && items.length < limit) {
+      const res = await fetch(
+        `${L1_DEFAULT}/api/collections/pdv_records/records?filter=${encodeURIComponent(filter)}&sort=-created&page=${page}&perPage=${PER_PAGE}`,
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json().catch(() => ({ items: [], totalPages: 0 }));
+      totalPages = data.totalPages || 1;
+      for (const rec of (data.items || [])) {
+        if (items.length >= limit) break;
+        let sixw = {};
+        try { sixw = JSON.parse(rec.summary_6w || '{}'); } catch { sixw = {}; }
+        const cat = _pdvCategoryLabel(rec);
+        items.push({
+          id:             rec.id,
+          created_at:     rec.created,
+          report_id:      rec.report_id,
+          session_id:     rec.session_id || null,
+          service_id:     rec.svc || rec.reporter_svc || '',
+          record_type:    rec.type || '',
+          category:       cat.category,
+          category_label: cat.label,
+          persona_key:    rec.persona_key || null,
+          location:       sixw.where || '',
+          how:            sixw.how   || '',
+          why:            sixw.why   || '',
+        });
+      }
+      if (page >= totalPages) break;
+      page++;
+    }
+    if (page > MAX_PAGES && page < totalPages) truncated = true;
+
+    // 서비스 종류별 집계 — 대시보드가 재계산 없이 바로 쓸 수 있도록
+    // 서버에서 한 번만 카운트한다(원본 items도 함께 반환하므로 프론트가
+    // 일간/주간/월간 구간별로 다시 묶어 쓸 수도 있다).
+    const counts_by_category = {};
+    for (const it of items) {
+      counts_by_category[it.category_label] = (counts_by_category[it.category_label] || 0) + 1;
+    }
+
+    return new Response(JSON.stringify({
+      ok: true, guid, items, counts_by_category, truncated,
+      range: { from: from || null, to: to || null },
+    }), { headers: corsHeaders });
   } catch (e) {
     return _err(502, 'PDV_MY_RECORDS_FAILED', e.message, corsHeaders);
   }
