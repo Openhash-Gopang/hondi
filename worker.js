@@ -12681,6 +12681,7 @@ export default {
     if (pathname === '/biz/charge-list'    && request.method === 'GET')  return handleChargeList(request, env, corsHeaders);
     if (pathname === '/biz/charge-confirm' && request.method === 'POST') return handleChargeConfirm(request, env, corsHeaders, ctx);
     if (pathname === '/admin/test-register-profile' && request.method === 'POST') return handleTestRegisterProfile(request, env, corsHeaders);
+    if (pathname === '/admin/test-create-product' && request.method === 'POST') return handleTestCreateProduct(request, env, corsHeaders);
     // 2026-08-10 신설 — 방식B(PG 가상계좌) 자동 확정 웹훅.
     if (pathname === '/biz/charge-webhook-pg' && request.method === 'POST') return handleChargeWebhookPG(request, env, corsHeaders, ctx);
     // 2026-08-12 신설 — 방식C(관리자 폰 알림 캡처) 자동 확정.
@@ -16054,6 +16055,58 @@ async function handleTestRegisterProfile(request, env, corsHeaders) {
   return new Response(JSON.stringify({
     ok: true, guid, pubkey_registered: true, gdc_key_registered: true, mint: mintResult,
   }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+}
+
+// ═══════════════════════════════════════════════════════════
+// 2026-09-07 신설(사용자 지시) — POST /admin/test-create-product
+//
+// 재고자산(bs-inventory) 스모크 테스트를 위한 것. handleSetProductCostPrice
+// 는 상품이 "이미 있어야" cost_price를 바꿀 수 있는데, 정식 상품 등록
+// 경로는 K-Market 자체 백엔드(별도 레포)를 거치므로 이 저장소만으로는
+// 재현할 수 없다 — 그래서 seller_products 레코드를 직접 만드는 테스트
+// 전용 통로를 둔다. handleTestRegisterProfile과 동일하게
+// ADMIN_ACTION_SECRET(fail-closed)로만 보호된다. 실사용 상품 등록에는
+// 쓰지 않는다 — price/cost_price/stock_qty를 검증 없이 그대로 저장한다.
+// ═══════════════════════════════════════════════════════════
+async function handleTestCreateProduct(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+  const { secret, seller_guid, name, price, cost_price, stock_qty } = body;
+
+  const expected = _adminActionSecret(env);
+  if (!expected || secret !== expected) {
+    return _err(403, 'FORBIDDEN', 'ADMIN_ACTION_SECRET이 설정돼 있어야 하며, 일치해야 합니다', corsHeaders);
+  }
+  if (!seller_guid) return _err(400, 'MISSING_FIELD', 'seller_guid 필수', corsHeaders);
+  if (typeof price !== 'number') return _err(400, 'MISSING_FIELD', 'price(숫자) 필수', corsHeaders);
+
+  try {
+    const token = await _l1AdminToken(env);
+    const rec = {
+      seller_guid,
+      name: name || '테스트 상품',
+      price,
+      is_public: true,
+    };
+    if (typeof cost_price === 'number') rec.cost_price = cost_price;
+    if (typeof stock_qty === 'number') rec.stock_qty = stock_qty;
+
+    const res = await fetch(`${L1_DEFAULT}/api/collections/seller_products/records`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(rec),
+    });
+    if (!res.ok) {
+      const errBody = await res.text().catch(() => '');
+      return _err(502, 'PRODUCT_CREATE_FAILED', `seller_products 생성 실패: HTTP ${res.status} ${errBody.slice(0, 200)}`, corsHeaders);
+    }
+    const created = await res.json();
+    return new Response(JSON.stringify({ ok: true, product: created }), {
+      status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  } catch (e) {
+    return _err(502, 'PRODUCT_CREATE_FAILED', e.message, corsHeaders);
+  }
 }
 
 async function handleChargeConfirm(request, env, corsHeaders, ctx) {
