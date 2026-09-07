@@ -10482,6 +10482,104 @@ async function _performWebSearchCore(env, ctx, query) {
   return { ok: true, ...result };
 }
 
+// K-Mail 전용 — 검색 스니펫에 이메일이 안 보일 때, 검색으로 이미 확인된
+// 링크(organic[].link) 중 하나를 SP가 지정하면 실제로 열어서 본문에서
+// 이메일을 찾아준다(2026-09-08 신설, 주피터님 지시 — 기존엔 이 기능이
+// 아예 없어서 SP가 스니펫만 보고 사용자에게 URL을 되물었다).
+//
+// 임의 프록시/SSRF 통로가 되지 않도록: (1) http/https만, (2) 사설/루프백/
+// 링크로컬 대역 및 known 클라우드 메타데이터 호스트 차단, (3) 응답 크기·
+// 시간 상한, (4) 웹검색과 동일한 일일 예산(WEB_SEARCH_DAILY_CAP)을 같이
+// 소모(검색+열람을 합쳐 "웹 리서치" 하나의 예산으로 취급 — 별도 KV 안 늘림).
+const _KMAIL_FETCH_BLOCKED_HOST_RE = /^(localhost|127\.|0\.|10\.|192\.168\.|169\.254\.|::1$|100\.64\.)|^172\.(1[6-9]|2\d|3[01])\./i;
+
+function _kmailExtractEmails(text) {
+  const found = (text.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g) || [])
+    .map(e => e.toLowerCase())
+    .filter(e => !/\.(png|jpg|jpeg|gif|svg|webp)$/i.test(e)); // 이미지 파일명 오탐 제거(예: pixel@2x.png)
+  return [...new Set(found)].slice(0, 30);
+}
+
+function _kmailStripHtmlToText(html) {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+async function _performPageFetchForEmail(env, ctx, url) {
+  let parsed;
+  try { parsed = new URL(url); } catch { return { ok: false, status: 400, error: 'INVALID_URL', message: 'URL 형식이 올바르지 않습니다' }; }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    return { ok: false, status: 400, error: 'INVALID_SCHEME', message: 'http/https만 허용됩니다' };
+  }
+  if (_KMAIL_FETCH_BLOCKED_HOST_RE.test(parsed.hostname)) {
+    return { ok: false, status: 403, error: 'HOST_BLOCKED', message: '내부/사설 주소는 열람할 수 없습니다' };
+  }
+
+  // 검색과 같은 일일 예산을 공유(웹검색 예산이 남아있어야 열람도 가능)
+  const today = _todayKST();
+  const cap = Number(env.WEB_SEARCH_DAILY_CAP) || 500;
+  let usage;
+  try { usage = await _l1GetWebSearchUsage(env, today); } catch { usage = null; }
+  if (usage && Number(usage.count) >= cap) {
+    return { ok: false, status: 429, error: 'DAILY_BUDGET_EXCEEDED', message: `오늘 웹 리서치 한도(${cap}회)를 초과했습니다.` };
+  }
+
+  let res;
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    res = await fetch(parsed.toString(), {
+      redirect: 'follow',
+      signal: controller.signal,
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; HondiKMailBot/1.0; +https://hondi.net)' },
+    });
+    clearTimeout(timeout);
+  } catch (e) {
+    return { ok: false, status: 502, error: 'FETCH_FAILED', message: e.message };
+  }
+  ctx?.waitUntil?.(_l1IncrementWebSearchUsage(env, today).catch(() => {}));
+
+  if (!res.ok) {
+    return { ok: false, status: 502, error: 'PAGE_FETCH_ERROR', message: `대상 페이지가 ${res.status}를 반환했습니다` };
+  }
+  const contentType = res.headers.get('content-type') || '';
+  if (!/text|html/i.test(contentType)) {
+    return { ok: false, status: 415, error: 'UNSUPPORTED_CONTENT_TYPE', message: '텍스트/HTML 페이지만 열람할 수 있습니다' };
+  }
+
+  const MAX_BYTES = 1_500_000; // 1.5MB 상한(대학 교수진 페이지 등 통상 크기면 충분)
+  const reader = res.body?.getReader?.();
+  let raw = '';
+  if (reader) {
+    let received = 0;
+    const decoder = new TextDecoder();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      received += value.length;
+      raw += decoder.decode(value, { stream: true });
+      if (received > MAX_BYTES) { try { await reader.cancel(); } catch {} break; }
+    }
+  } else {
+    raw = await res.text();
+  }
+
+  const text = _kmailStripHtmlToText(raw);
+  const emails = _kmailExtractEmails(raw); // 원본(mailto: 링크 등 포함)에서 뽑는 게 정확도가 높음
+
+  return {
+    ok: true,
+    url: parsed.toString(),
+    emails,
+    text_snippet: text.slice(0, 4000),
+  };
+}
+
 async function handleWebSearch(request, env, corsHeaders, ctx) {
   let payload;
   try { payload = await request.json(); } catch { return new Response(JSON.stringify({ error: 'invalid json' }), { status: 400, headers: corsHeaders }); }
@@ -33986,8 +34084,20 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   if (!Array.isArray(messages) || messages.length === 0) {
     return _err(400, 'MISSING_FIELD', 'messages 배열(1개 이상) 필수', corsHeaders);
   }
-  if (messages.length > 40) {
+  // 2026-09-08 — 기존 "메시지 40개" 컷은 deepseek-v4-flash의 실제
+  // 컨텍스트 한도(1M 토큰)와 무관한 임의 상수였다(짧은 메시지 40개와
+  // 긴 메시지 40개를 똑같이 취급). 메시지 개수 상한을 넉넉히 올리고,
+  // 실제 위험(토큰 폭주로 인한 과금·지연)은 총 문자 수 기준 대략치로
+  // 별도 방어한다 — 정확한 토크나이저 없이도 "1토큰 ≈ 한국어 2자,
+  // 영어 4자" 정도의 보수적 근사로 충분히 안전.
+  const KMAIL_MAX_MESSAGES = 200;
+  const KMAIL_MAX_APPROX_CHARS = 300000; // 대략 150K 토큰 상당(보수적 근사)
+  if (messages.length > KMAIL_MAX_MESSAGES) {
     return _err(400, 'TOO_MANY_MESSAGES', '대화가 너무 깁니다 — 새 대화로 시작해 주세요', corsHeaders);
+  }
+  const approxChars = messages.reduce((sum, m) => sum + (typeof m?.content === 'string' ? m.content.length : 0), 0);
+  if (approxChars > KMAIL_MAX_APPROX_CHARS) {
+    return _err(400, 'CONTEXT_TOO_LARGE', '대화 내용이 너무 많습니다 — 새 대화로 시작해 주세요', corsHeaders);
   }
 
   // 2026-09-03 — 공용 인증 게이트(src/worker/k-service-auth.js)로 위임.
@@ -34068,6 +34178,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   if (!reply) return _err(502, 'AI_EMPTY_REPLY', 'AI 응답이 비어있습니다', corsHeaders);
 
   const searchMatch = reply.match(/KMAIL_SEARCH_CONTACTS\s*(\{[\s\S]*\})\s*$/);
+  const fetchPageMatch = reply.match(/KMAIL_FETCH_PAGE\s*(\{[\s\S]*\})\s*$/);
   const sendMatch = reply.match(/KMAIL_SEND_CAMPAIGN\s*(\{[\s\S]*\})\s*$/);
   const ruleMatch = reply.match(/KMAIL_CREATE_RULE\s*(\{[\s\S]*\})\s*$/);
   const lookupMatch = reply.match(/KMAIL_LOOKUP_CONTACTS\s*(\{[\s\S]*\})\s*$/);
@@ -34497,6 +34608,42 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     }
 
     return new Response(JSON.stringify({ ok: true, reply: followUpReply, action: { type: 'searched_contacts', queries } }),
+      { status: 200, headers: corsHeaders });
+  }
+
+  // ── ①-b 검색 결과 링크 열람(이메일 확인) 태그 (2026-09-08 신설) ──────
+  if (fetchPageMatch) {
+    let parsed = null;
+    try { parsed = JSON.parse(fetchPageMatch[1]); } catch (e) { /* 아래에서 처리 */ }
+    const cleanReplyText = reply.slice(0, fetchPageMatch.index).trim();
+    const url = (parsed?.url || '').trim();
+
+    if (!url) {
+      return new Response(JSON.stringify({ ok: true, reply: cleanReplyText || reply, action: null }), { status: 200, headers: corsHeaders });
+    }
+
+    const pageResult = await _performPageFetchForEmail(env, ctx, url).catch(e => ({ ok: false, error: 'EXCEPTION', message: e.message }));
+    const pageContext = pageResult.ok
+      ? `[페이지 열람 결과]\n${JSON.stringify({ url: pageResult.url, emails_found: pageResult.emails, text_snippet: pageResult.text_snippet })}\n\n위에서 실제로 발견된 이메일만 후보로 제시하세요(emails_found가 비어있으면 이 페이지에서도 못 찾은 것이니 지어내지 말고 정직하게 말하세요). text_snippet에서 이름과 이메일을 짝지을 수 있으면 짝지어 보여주세요. (이 메시지 자체는 사용자에게 보이지 않습니다.)`
+      : `[페이지 열람 실패]\n${JSON.stringify({ url, error: pageResult.error, message: pageResult.message })}\n\n페이지를 열람하지 못했습니다. 정직하게 실패했다고 말하고, 필요하면 사용자에게 직접 이메일을 알려달라고 요청하세요. (이 메시지 자체는 사용자에게 보이지 않습니다.)`;
+
+    let followUpReply;
+    try {
+      followUpReply = await deepseekChatText({
+        env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
+        messages: [
+          { role: 'system', content: systemPrompt }, ...cleanMessages,
+          { role: 'assistant', content: cleanReplyText || '페이지를 확인하고 있습니다...' },
+          { role: 'user', content: pageContext },
+        ],
+        max_tokens: 800, temperature: 0.4, timeoutMs: 20000,
+        fallbackText: '페이지 열람은 완료됐지만 결과 정리에 실패했습니다. 다시 시도해 주세요.',
+      });
+    } catch (e) {
+      followUpReply = '페이지 열람 결과 정리 중 오류가 발생했습니다: ' + e.message;
+    }
+
+    return new Response(JSON.stringify({ ok: true, reply: followUpReply, action: { type: 'fetched_page', url } }),
       { status: 200, headers: corsHeaders });
   }
 
