@@ -1033,29 +1033,13 @@ async function handleDeviceLinkVerify(request, env, corsHeaders) {
     return _err(400, 'CODE_MISMATCH', `코드가 일치하지 않습니다(남은 시도 ${DEVICE_LINK_MAX_ATTEMPTS - record.attempts}회)`, corsHeaders);
   }
 
-  // 2026-09-07 신설(주피터 지시) — device-link 지문 필수 여부를 사용자가
-  // 스스로 끌 수 있게 됨(§PROTECTIVE_SETTINGS
-  // 'device_link_biometric_required', 기본값 true). 끄는 행위 자체는
-  // "완화"라 그쪽 엔드포인트에서 이미 지문+24시간 유예를 거쳤으므로,
-  // 여기서는 그 값을 그대로 존중하면 된다 — 꺼져 있으면 코드 일치만으로
-  // 승인을 완료한다(2026-09-07 이전 동작으로 되돌아가되, 그건 사용자가
-  // 위험을 고지받고 스스로 선택한 결과다).
-  let deviceLinkProfile;
-  try { deviceLinkProfile = await _l1FindProfileByGuid(env, record.guid); }
-  catch (e) { return _err(502, 'L1_UNREACHABLE', 'L1 연결 실패: ' + e.message, corsHeaders); }
-  const biometricRequired = deviceLinkProfile
-    ? await _readAndPersistProtectiveSetting(env, deviceLinkProfile, 'device_link_biometric_required')
-    : true; // 프로필 조회 실패 시 안전한 쪽(필수)으로 기본 처리
-
-  if (biometricRequired) {
-    const stepUpCheck = await _verifyStepUpToken(env, step_up_token, record.guid, `device-link:${sessionId}`);
-    if (!stepUpCheck.ok) {
-      return _err(
-        403, 'BIOMETRIC_REQUIRED',
-        `이 기기에서 지문/Face ID 인증을 통과해야 승인이 완료됩니다(${stepUpCheck.reason})`,
-        corsHeaders
-      );
-    }
+  const stepUpCheck = await _verifyStepUpToken(env, step_up_token, record.guid, `device-link:${sessionId}`);
+  if (!stepUpCheck.ok) {
+    return _err(
+      403, 'BIOMETRIC_REQUIRED',
+      `이 기기에서 지문/Face ID 인증을 통과해야 승인이 완료됩니다(${stepUpCheck.reason})`,
+      corsHeaders
+    );
   }
 
   record.state = 'approved';
@@ -6227,8 +6211,20 @@ async function _resolveHomeL1Node(env, guid) {
   try {
     const token = await _l1AdminTokenFor(env, L3_BASE);
     const filter = encodeURIComponent(`guid='${guid}'`);
-    const res = await fetch(`${L3_BASE}/api/collections/guid_home_l1/records?filter=${filter}&perPage=1`,
-      { headers: { 'Authorization': `Bearer ${token}` } });
+    // 2026-09-07 신설(실사 대응) — 이 fetch에 타임아웃이 없어, L3가
+    // 느려지거나 무응답이면 handleBizOrder 전체가 응답 없이 멈춰버렸다
+    // (재고자산 스모크 테스트 중 /biz/order가 45초×4회 재시도에도
+    // 전혀 응답이 없는 현상으로 발견). AbortController로 8초 상한을
+    // 둬서, L3 문제가 있어도 최소한 명확한 에러로 실패하게 한다.
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    let res;
+    try {
+      res = await fetch(`${L3_BASE}/api/collections/guid_home_l1/records?filter=${filter}&perPage=1`,
+        { headers: { 'Authorization': `Bearer ${token}` }, signal: controller.signal });
+    } finally {
+      clearTimeout(timeoutId);
+    }
     const data = await res.json().catch(() => ({ items: [] }));
     return data.items?.[0]?.node_id || null;
   } catch (e) {
@@ -12727,11 +12723,6 @@ export default {
     if (pathname === '/pdv/relay/pull'            && request.method === 'GET')  return handlePdvRelayPull(request, env, corsHeaders);
     if (pathname === '/account/step-up-threshold' && request.method === 'GET')  return handleStepUpThresholdGet(request, env, corsHeaders);
     if (pathname === '/account/step-up-threshold' && request.method === 'POST') return handleStepUpThresholdSet(request, env, corsHeaders);
-    // 2026-09-07 신설 — 공용 "보호 설정"(K-서비스 결제 문턱값, device-link
-    // 지문 필수 여부 등). §PROTECTIVE_SETTINGS 참고.
-    if (pathname === '/account/protective-setting' && request.method === 'GET')  return handleProtectiveSettingGet(request, env, corsHeaders);
-    if (pathname === '/account/protective-setting/set' && request.method === 'POST') return handleProtectiveSettingSet(request, env, corsHeaders);
-    if (pathname === '/account/protective-setting/cancel-pending' && request.method === 'POST') return handleProtectiveSettingCancelPending(request, env, corsHeaders);
     if (pathname === '/auth/webauthn/register-key' && request.method === 'POST') return handleWebAuthnRegisterKey(request, env, corsHeaders);
     if (pathname === '/account/step-up-challenge'  && request.method === 'POST') return handleStepUpChallenge(request, env, corsHeaders);
     if (pathname === '/account/step-up-verify'     && request.method === 'POST') return handleStepUpVerify(request, env, corsHeaders);
@@ -13216,31 +13207,6 @@ async function handleBizOrder(request, env, corsHeaders, ctx) {
   // importanceVerifier.js와 동일 공식(단일 정의 원칙) — refactor_plan_v2 §Phase1 참조
   const _txAmount = (tx?.input?.balance_claimed ?? balance_claimed ?? 0);
   const _actualAmount = (seller_net || 0) + (fee || 0) || _txAmount;
-
-  // ── 2026-09-07 신설(주피터 지시) — K-서비스 결제에도 생체인증 문턱값
-  // 적용. 지금까지 이 경로엔 어떤 지문 체크도 없었다(GDC P2P 이체에만
-  // 있었음). "1만원 미만은 소액이고 회복이 쉽다"는 판단으로 기본
-  // 문턱값을 GDC 이체(10만원)보다 낮게 잡았다 — §PROTECTIVE_SETTINGS
-  // 'biz_step_up_threshold' 참고. 건별 판정만 한다(누적/쪼개기 탐지는
-  // GDC 이상거래 감지의 몫으로 명시적으로 범위 밖).
-  {
-    let buyerProfile;
-    try { buyerProfile = await _l1FindProfileByGuid(env, from_guid); }
-    catch (e) { return _err(502, 'L1_UNREACHABLE', 'L1 연결 실패: ' + e.message, corsHeaders); }
-    if (!buyerProfile) return _err(404, 'PROFILE_NOT_FOUND', '구매자 프로필을 찾을 수 없습니다', corsHeaders);
-    const bizThreshold = await _readAndPersistProtectiveSetting(env, buyerProfile, 'biz_step_up_threshold');
-    if (_actualAmount >= bizThreshold) {
-      const stepUpCheck = await _verifyStepUpToken(env, body.step_up_token, from_guid, `biz-order:${tx_hash}`);
-      if (!stepUpCheck.ok) {
-        return _err(
-          403, 'BIOMETRIC_REQUIRED',
-          `이 결제(₩${_actualAmount.toLocaleString()})는 지문 인증이 필요합니다 — 설정에서 문턱값(현재 ₩${bizThreshold.toLocaleString()})을 조정할 수 있습니다(${stepUpCheck.reason})`,
-          corsHeaders
-        );
-      }
-    }
-  }
-
   const importance_score = _computeImportanceScore(_actualAmount, asset_type, contract_type);
   const importance_mode  = _selectImportanceMode(importance_score);
   const lcat             = computeLCAT(buyer_region, seller_region);
@@ -13737,6 +13703,22 @@ const STEP_UP_TOKEN_TTL_MS = 2 * 60 * 1000;
 // 자체를 없애거나 L3 방어선에 구멍을 낼 수는 없다.
 const GDC_STEP_UP_MAX_USER_THRESHOLD = 1000000; // 100만원
 
+async function handleStepUpThresholdGet(request, env, corsHeaders) {
+  const url = new URL(request.url);
+  const guid = url.searchParams.get('guid');
+  if (!guid) return _err(400, 'MISSING_FIELD', 'guid 필수', corsHeaders);
+  let profile;
+  try { profile = await _l1FindProfileByGuid(env, guid); }
+  catch (e) { return _err(502, 'L1_UNREACHABLE', 'L1 연결 실패: ' + e.message, corsHeaders); }
+  if (!profile) return _err(404, 'PROFILE_NOT_FOUND', '프로필을 찾을 수 없습니다', corsHeaders);
+  const threshold = profile.extra?.gdc_step_up_threshold;
+  return new Response(JSON.stringify({
+    ok: true,
+    threshold: (typeof threshold === 'number' && threshold >= 0) ? threshold : GDC_STEP_UP_DEFAULT_THRESHOLD,
+    is_default: !(typeof threshold === 'number'),
+  }), { status: 200, headers: corsHeaders });
+}
+
 // ── 2026-09-06 긴급 수정 — 인증 검증 완전 부재 발견 ─────────────────
 // 이 엔드포인트는 지금까지 guid만 body에 넣으면 누구나 아무 계정의
 // 생체인증 문턱값을 마음대로 바꿀 수 있었다(실사로 확인 — 서명 검증이
@@ -13750,243 +13732,14 @@ const GDC_STEP_UP_MAX_USER_THRESHOLD = 1000000; // 100만원
 // GDC_STEP_UP_MAX_USER_THRESHOLD를 넘지 못하게 상한을 강제한다 —
 // "생체인증이 필요한 시점을 개인화"할 수는 있어도 "생체인증을 사실상
 // 없앨" 수는 없어야 한다.
-// ═══════════════════════════════════════════════════════════
-// "보호 설정" 공용 모듈 — 지문 인증을 요구하는 조건(문턱값·필수 여부)을
-// 사용자가 스스로 조절하게 하되, "완화"(보호를 약하게 하는 방향)는
-// 반드시 지문 확인 + 24시간 유예 + 사전 알림을 거치게 강제한다.
-// (2026-09-07 신설, 주피터 지시)
-//
-// 배경: 문턱값을 "즉시" 올려버릴 수 있으면, 폰을 잠깐 손에 넣은
-// 공격자가 보호 수준을 영구히 낮춰놓고 돌려줄 수 있다 — 원래 주인은
-// 눈치도 못 챈다. "낮추는 행위"(강화)는 안전하니 즉시 반영하고,
-// "높이는 행위"(완화)만 지연·확인을 거치게 한다 — 실제 금융권(거래소
-// 출금한도 상향 유예 등)의 통상적 관행과 같은 방향.
-//
-// 저장 형식: profile.extra[key] = { value, pending: {value, effective_at} | null }
-// 하위호환: extra[key]가 옛날처럼 순수 값(number/boolean)이면 그대로
-// 읽되 pending 없음으로 취급 — 기존 gdc_step_up_threshold 데이터와 호환.
-// ═══════════════════════════════════════════════════════════
-const PROTECTIVE_SETTING_LOOSEN_DELAY_MS = 24 * 60 * 60 * 1000; // 24시간
-
-const PROTECTIVE_SETTINGS = {
-  gdc_step_up_threshold: {
-    default: GDC_STEP_UP_DEFAULT_THRESHOLD,      // 10만원
-    maxLoosen: GDC_STEP_UP_MAX_USER_THRESHOLD,   // 100만원
-    isLoosening: (cur, next) => next > cur,
-    label: 'GDC 개인 간 송금 생체인증 문턱값',
-    describe: (v) => `₩${Number(v).toLocaleString()} 미만은 지문 없이 송금 가능`,
-  },
-  biz_step_up_threshold: {
-    // 2026-09-07 신설 — K-서비스 결제(handleBizOrder)에 처음 붙는 문턱값.
-    // "1만원 미만은 소액이고 회복이 쉽다"는 사용자 판단으로 기본값을
-    // GDC 이체(10만원)보다 낮게 잡는다 — 상한은 GDC 이체와 동일하게
-    // 100만원. L3(1천만원 이상) 방어선은 이 개인화와 무관하게 별도.
-    default: 10000,        // 1만원
-    maxLoosen: 1000000,    // 100만원
-    isLoosening: (cur, next) => next > cur,
-    label: 'K-서비스 결제 생체인증 문턱값',
-    describe: (v) => `₩${Number(v).toLocaleString()} 미만은 지문 없이 결제 가능`,
-  },
-  device_link_biometric_required: {
-    // 2026-09-07 신설 — device-link(다른 기기 로그인 승인)에 지문을
-    // 강제해온 것을, 사용자가 스스로 끌 수 있게 연다. 끄는 행위 자체가
-    // "완화"이므로 지문 확인 + 24시간 유예가 그대로 적용된다.
-    default: true,
-    maxLoosen: false, // "꺼짐"이 완화의 끝 — 그 이상 더 낮출 값이 없음
-    isLoosening: (cur, next) => cur === true && next === false,
-    label: '다른 기기 로그인 승인 지문 인증',
-    describe: (v) => v ? '다른 기기 로그인 승인 시 지문 필수' : '다른 기기 로그인 승인 시 지문 생략 가능',
-  },
-};
-
-function _readProtectiveSetting(extra, key) {
-  const def = PROTECTIVE_SETTINGS[key];
-  const raw = extra?.[key];
-  let current = def.default;
-  let pending = null;
-  if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
-    current = (raw.value !== undefined) ? raw.value : def.default;
-    pending = raw.pending || null;
-  } else if (raw !== undefined && raw !== null) {
-    current = raw; // 옛 포맷(순수 값) — gdc_step_up_threshold 기존 데이터 호환
-  }
-  let promoted = false;
-  if (pending && Date.now() >= pending.effective_at) {
-    current = pending.value;
-    pending = null;
-    promoted = true;
-  }
-  return { current, pending, promoted };
-}
-
-// 유예가 끝난 pending을 실제로 저장까지 반영한다 — 호출부가 신경 안
-// 써도 되게 read+persist를 한 번에 처리하고, 넘겨받은 profile 객체의
-// extra도 갱신해서 이어지는 로직이 최신 값을 쓰게 한다.
-async function _readAndPersistProtectiveSetting(env, profile, key) {
-  const { current, promoted } = _readProtectiveSetting(profile.extra, key);
-  if (promoted) {
-    const newExtra = { ...(profile.extra || {}), [key]: { value: current, pending: null } };
-    try {
-      await _l1PatchProfile(env, profile.id, { extra: newExtra });
-      profile.extra = newExtra;
-    } catch (e) {
-      console.warn('[ProtectiveSetting] 유예 종료 승격 저장 실패(다음 조회 때 재시도됨):', e.message);
-    }
-  }
-  return current;
-}
-
-// GET /account/protective-setting?guid=...&key=...
-async function handleProtectiveSettingGet(request, env, corsHeaders) {
-  const url = new URL(request.url);
-  const guid = url.searchParams.get('guid');
-  const key = url.searchParams.get('key');
-  if (!guid || !key) return _err(400, 'MISSING_FIELD', 'guid, key 필수', corsHeaders);
-  if (!PROTECTIVE_SETTINGS[key]) return _err(400, 'UNKNOWN_KEY', '알 수 없는 설정 키입니다', corsHeaders);
-
-  let profile;
-  try { profile = await _l1FindProfileByGuid(env, guid); }
-  catch (e) { return _err(502, 'L1_UNREACHABLE', 'L1 연결 실패: ' + e.message, corsHeaders); }
-  if (!profile) return _err(404, 'PROFILE_NOT_FOUND', '프로필을 찾을 수 없습니다', corsHeaders);
-
-  const current = await _readAndPersistProtectiveSetting(env, profile, key);
-  const { pending } = _readProtectiveSetting(profile.extra, key);
-  return new Response(JSON.stringify({
-    ok: true, key, value: current,
-    pending: pending ? { value: pending.value, effective_at: pending.effective_at } : null,
-  }), { status: 200, headers: corsHeaders });
-}
-
-// POST /account/protective-setting/set
-// body: { guid, key, value, pubkey, signature, ts, step_up_token? }
-// 강화(또는 동일값)는 즉시 반영. 완화는 step_up_token 필수 + 24시간 유예
-// + 완화 예정 사실을 다른 기기로도 알린다(_sendPushToGuid, best-effort).
-async function handleProtectiveSettingSet(request, env, corsHeaders) {
-  const body = await request.json().catch(() => null);
-  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
-  const { guid, key, value, pubkey, signature, ts, step_up_token } = body;
-  if (!guid || !key) return _err(400, 'MISSING_FIELD', 'guid, key 필수', corsHeaders);
-  const def = PROTECTIVE_SETTINGS[key];
-  if (!def) return _err(400, 'UNKNOWN_KEY', '알 수 없는 설정 키입니다', corsHeaders);
-
-  if (typeof def.default === 'boolean') {
-    if (typeof value !== 'boolean') return _err(400, 'INVALID_VALUE', 'value는 boolean이어야 합니다', corsHeaders);
-  } else {
-    if (!(typeof value === 'number' && Number.isFinite(value) && value >= 0)) {
-      return _err(400, 'INVALID_VALUE', 'value는 0 이상의 숫자여야 합니다', corsHeaders);
-    }
-    if (value > def.maxLoosen) {
-      return _err(400, 'VALUE_TOO_HIGH', `이 설정은 최대 ${Number(def.maxLoosen).toLocaleString()}까지만 허용됩니다`, corsHeaders);
-    }
-  }
-
-  // 지갑 서명은 방향과 무관하게 항상 요구(본인 확인의 최소선).
-  const sigMsg = `protective-setting-set:${guid}:${key}:${JSON.stringify(value)}:${ts}`;
-  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
-  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
-
-  let profile;
-  try { profile = await _l1FindProfileByGuid(env, guid); }
-  catch (e) { return _err(502, 'L1_UNREACHABLE', 'L1 연결 실패: ' + e.message, corsHeaders); }
-  if (!profile) return _err(404, 'PROFILE_NOT_FOUND', '프로필을 찾을 수 없습니다', corsHeaders);
-
-  const current = await _readAndPersistProtectiveSetting(env, profile, key);
-  const loosening = def.isLoosening(current, value);
-
-  if (!loosening) {
-    const newExtra = { ...(profile.extra || {}), [key]: { value, pending: null } };
-    try { await _l1PatchProfile(env, profile.id, { extra: newExtra }); }
-    catch (e) { return _err(502, 'L1_UNREACHABLE', 'L1 PATCH 실패: ' + e.message, corsHeaders); }
-    return new Response(JSON.stringify({ ok: true, key, value, pending: null, applied: 'immediate' }), { status: 200, headers: corsHeaders });
-  }
-
-  const stepUpCheck = await _verifyStepUpToken(env, step_up_token, guid, `protective-setting-loosen:${key}`);
-  if (!stepUpCheck.ok) {
-    return _err(403, 'BIOMETRIC_REQUIRED',
-      `보호 수준을 낮추려면 지문 인증이 필요합니다(${stepUpCheck.reason})`, corsHeaders);
-  }
-
-  const effective_at = Date.now() + PROTECTIVE_SETTING_LOOSEN_DELAY_MS;
-  const newExtra = { ...(profile.extra || {}), [key]: { value: current, pending: { value, effective_at } } };
-  try { await _l1PatchProfile(env, profile.id, { extra: newExtra }); }
-  catch (e) { return _err(502, 'L1_UNREACHABLE', 'L1 PATCH 실패: ' + e.message, corsHeaders); }
-
-  _sendPushToGuid(env, guid, {
-    title: '🔓 보안 설정 완화 예약됨',
-    body: `${def.label}: ${def.describe(value)} — 24시간 뒤 적용됩니다. 본인이 요청한 게 아니라면 지금 취소해 주세요.`,
-    tag: `protective-setting-${key}`,
-    url: '/webapp.html',
-  }).catch(() => {});
-
-  return new Response(JSON.stringify({
-    ok: true, key, value: current,
-    pending: { value, effective_at }, applied: 'pending_24h',
-  }), { status: 200, headers: corsHeaders });
-}
-
-// POST /account/protective-setting/cancel-pending
-// body: { guid, key, pubkey, signature, ts } — 지문 불필요(취소는 강화
-// 방향이므로 즉시·조건 없이 허용).
-async function handleProtectiveSettingCancelPending(request, env, corsHeaders) {
-  const body = await request.json().catch(() => null);
-  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
-  const { guid, key, pubkey, signature, ts } = body;
-  if (!guid || !key) return _err(400, 'MISSING_FIELD', 'guid, key 필수', corsHeaders);
-  if (!PROTECTIVE_SETTINGS[key]) return _err(400, 'UNKNOWN_KEY', '알 수 없는 설정 키입니다', corsHeaders);
-
-  const sigMsg = `protective-setting-cancel-pending:${guid}:${key}:${ts}`;
-  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
-  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
-
-  let profile;
-  try { profile = await _l1FindProfileByGuid(env, guid); }
-  catch (e) { return _err(502, 'L1_UNREACHABLE', 'L1 연결 실패: ' + e.message, corsHeaders); }
-  if (!profile) return _err(404, 'PROFILE_NOT_FOUND', '프로필을 찾을 수 없습니다', corsHeaders);
-
-  const current = await _readAndPersistProtectiveSetting(env, profile, key);
-  const newExtra = { ...(profile.extra || {}), [key]: { value: current, pending: null } };
-  try { await _l1PatchProfile(env, profile.id, { extra: newExtra }); }
-  catch (e) { return _err(502, 'L1_UNREACHABLE', 'L1 PATCH 실패: ' + e.message, corsHeaders); }
-
-  return new Response(JSON.stringify({ ok: true, key, value: current, pending: null }), { status: 200, headers: corsHeaders });
-}
-
-// ── 하위호환 래퍼 — 기존 /account/step-up-threshold(GET/POST)를 쓰는
-// webapp.html이 안 바뀌어도 계속 동작하게, 내부적으로 위 공용 로직에
-// key='gdc_step_up_threshold'로 위임한다. 응답 모양(threshold,
-// is_default)은 그대로 유지하고 pending 정보만 덧붙인다.
-async function handleStepUpThresholdGet(request, env, corsHeaders) {
-  const url = new URL(request.url);
-  const guid = url.searchParams.get('guid');
-  if (!guid) return _err(400, 'MISSING_FIELD', 'guid 필수', corsHeaders);
-  let profile;
-  try { profile = await _l1FindProfileByGuid(env, guid); }
-  catch (e) { return _err(502, 'L1_UNREACHABLE', 'L1 연결 실패: ' + e.message, corsHeaders); }
-  if (!profile) return _err(404, 'PROFILE_NOT_FOUND', '프로필을 찾을 수 없습니다', corsHeaders);
-
-  const threshold = await _readAndPersistProtectiveSetting(env, profile, 'gdc_step_up_threshold');
-  const { pending } = _readProtectiveSetting(profile.extra, 'gdc_step_up_threshold');
-  return new Response(JSON.stringify({
-    ok: true, threshold,
-    is_default: threshold === GDC_STEP_UP_DEFAULT_THRESHOLD,
-    pending: pending ? { value: pending.value, effective_at: pending.effective_at } : null,
-  }), { status: 200, headers: corsHeaders });
-}
-
 async function handleStepUpThresholdSet(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
-  const { guid, amount, ts } = body;
+  const { guid, amount, pubkey, signature, ts } = body;
   if (!guid) return _err(400, 'MISSING_FIELD', 'guid 필수', corsHeaders);
   if (!(typeof amount === 'number' && amount >= 0 && Number.isFinite(amount))) {
     return _err(400, 'INVALID_AMOUNT', 'amount는 0 이상의 숫자여야 합니다', corsHeaders);
   }
-  // 기존 클라이언트가 보내는 sigMsg('step-up-threshold-set:...')는 새
-  // 공용 sigMsg('protective-setting-set:...')와 다르므로, 이 래퍼에서
-  // 그대로 _verifyClaimsRequester를 한 번 더 태우지 않고
-  // handleProtectiveSettingSet에 위임하려면 body 형태를 맞춰 재호출하는
-  // 대신, 이 엔드포인트만의 서명 검증을 유지한 뒤 저장 로직을 공용
-  // 모듈로 넘긴다(sigMsg 하위호환 유지가 목적).
   if (amount > GDC_STEP_UP_MAX_USER_THRESHOLD) {
     return _err(
       400, 'THRESHOLD_TOO_HIGH',
@@ -13994,37 +13747,19 @@ async function handleStepUpThresholdSet(request, env, corsHeaders) {
       corsHeaders
     );
   }
+
   const sigMsg = `step-up-threshold-set:${guid}:${amount}:${ts}`;
-  const authOk = await _verifyClaimsRequester(env, { guid, pubkey: body.pubkey, signature: body.signature, sigMsg, ts });
+  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
   if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
 
   let profile;
   try { profile = await _l1FindProfileByGuid(env, guid); }
   catch (e) { return _err(502, 'L1_UNREACHABLE', 'L1 연결 실패: ' + e.message, corsHeaders); }
   if (!profile) return _err(404, 'PROFILE_NOT_FOUND', '프로필을 찾을 수 없습니다', corsHeaders);
-
-  const key = 'gdc_step_up_threshold';
-  const def = PROTECTIVE_SETTINGS[key];
-  const current = await _readAndPersistProtectiveSetting(env, profile, key);
-  const loosening = def.isLoosening(current, amount);
-
-  if (!loosening) {
-    const newExtra = { ...(profile.extra || {}), [key]: { value: amount, pending: null } };
-    try { await _l1PatchProfile(env, profile.id, { extra: newExtra }); }
-    catch (e) { return _err(502, 'L1_UNREACHABLE', 'L1 PATCH 실패: ' + e.message, corsHeaders); }
-    return new Response(JSON.stringify({ ok: true, threshold: amount, pending: null, applied: 'immediate' }), { status: 200, headers: corsHeaders });
-  }
-
-  // 완화(문턱값 올림) — 이 하위호환 엔드포인트는 옛 클라이언트가
-  // step_up_token을 보낼 줄 모르므로, 여기서 막지 않고 안내만 하면
-  // 옛 UI가 "저장됐다"고 잘못 표시할 위험이 있다 — 그래서 명시적으로
-  // 403을 반환해 새 엔드포인트(/account/protective-setting/set)로
-  // 유도한다. webapp.html은 이번 커밋에서 그쪽을 쓰도록 같이 바뀐다.
-  return _err(
-    409, 'USE_PROTECTIVE_SETTING_ENDPOINT',
-    '문턱값을 올리려면(완화) 지문 인증이 필요합니다 — 최신 앱 화면으로 다시 시도해 주세요.',
-    corsHeaders
-  );
+  const newExtra = { ...(profile.extra || {}), gdc_step_up_threshold: amount };
+  try { await _l1PatchProfile(env, profile.id, { extra: newExtra }); }
+  catch (e) { return _err(502, 'L1_UNREACHABLE', 'L1 PATCH 실패: ' + e.message, corsHeaders); }
+  return new Response(JSON.stringify({ ok: true, threshold: amount }), { status: 200, headers: corsHeaders });
 }
 
 function _derToRawEcdsaSig(der) {
@@ -29032,8 +28767,7 @@ async function handleSettleLedger(request, env, corsHeaders) {
     const snapshotContent = {
       guid, seq: nextSeq,
       pl: { revenue, cogs, purchases, gross_profit: grossProfit, opex, net_income: netIncome },
-    bs: { inventory },
-      bs: { cash },
+      bs: { cash, inventory },
       computed_at: new Date().toISOString(),
     };
     const snapshotJson = JSON.stringify(snapshotContent);
