@@ -57,6 +57,31 @@ function req(path, body) {
   return new Request(`${ORIGIN}${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 }
 
+// ── 2026-09-07 신설 — /push/subscribe 서명 인증 요구 반영(phase10과 동일 헬퍼) ──
+function toB64u(bytes) {
+  let bin = '';
+  for (const b of new Uint8Array(bytes)) bin += String.fromCharCode(b);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+async function genEd25519() {
+  const kp = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+  const rawPub = await crypto.subtle.exportKey('raw', kp.publicKey);
+  return { privateKey: kp.privateKey, pubkeyB64u: toB64u(rawPub) };
+}
+async function signEd25519(privateKey, message) {
+  const sig = await crypto.subtle.sign('Ed25519', privateKey, new TextEncoder().encode(message));
+  return toB64u(sig);
+}
+async function pushSubscribeSigned({ guid, deviceId = 'legacy', unsubscribe = false, keyPair, ...rest }) {
+  const ts = Date.now();
+  const sigMsg = `push-subscribe:${guid}:${deviceId}:${unsubscribe ? 'unsub' : 'sub'}:${ts}`;
+  const signature = await signEd25519(keyPair.privateKey, sigMsg);
+  return req('/push/subscribe', {
+    guid, deviceId, unsubscribe, ...rest,
+    pubkey: keyPair.pubkeyB64u, signature, ts,
+  });
+}
+
 let originalFetch;
 beforeEach(() => { originalFetch = globalThis.fetch; });
 afterEach(()  => { globalThis.fetch = originalFetch; });
@@ -64,13 +89,14 @@ afterEach(()  => { globalThis.fetch = originalFetch; });
 describe('PM: push 구독 기기별 분리 (2026-07-23 — device-link 알림이 PC로 가던 사고 근본 수정)', () => {
 
   it('PM-01: 두 기기(PC, 폰)가 각자 구독하면 서로 덮어쓰지 않고 둘 다 저장된다', async () => {
+    const keyPair = await genEd25519();
     let stored = ''; // L1에 저장된 push_subscription 값(순차적으로 갱신됨)
     globalThis.fetch = async (u, init = {}) => {
       const url = typeof u === 'string' ? u : u.url;
       if (url === `${L1_BASE}/api/admins/auth-with-password`)
         return new Response(JSON.stringify({ token: 't' }), { status: 200 });
       if (url.startsWith(`${L1_BASE}/api/collections/profiles/records`) && !url.includes('/records/'))
-        return new Response(JSON.stringify({ items: [{ id: 'r1', push_subscription: stored }] }), { status: 200 });
+        return new Response(JSON.stringify({ items: [{ id: 'r1', guid: 'g1', pubkey_ed25519: keyPair.pubkeyB64u, push_subscription: stored }] }), { status: 200 });
       if (url.includes('/records/r1')) {
         stored = JSON.parse(init.body).push_subscription;
         return new Response(JSON.stringify({ ok: true }), { status: 200 });
@@ -79,13 +105,13 @@ describe('PM: push 구독 기기별 분리 (2026-07-23 — device-link 알림이
     };
 
     // 1) PC가 먼저 구독
-    await worker.fetch(req('/push/subscribe', {
-      guid: 'g1', deviceId: 'pc-1', subscription: { endpoint: 'https://fake/pc' }, sound: 'ping',
+    await worker.fetch(await pushSubscribeSigned({
+      guid: 'g1', deviceId: 'pc-1', subscription: { endpoint: 'https://fake/pc' }, sound: 'ping', keyPair,
     }), await makeVapidEnv());
 
     // 2) 폰이 나중에 구독 — 이전(PC) 구독을 덮어쓰면 안 됨
-    await worker.fetch(req('/push/subscribe', {
-      guid: 'g1', deviceId: 'phone-1', subscription: { endpoint: 'https://fake/phone' }, sound: 'ping',
+    await worker.fetch(await pushSubscribeSigned({
+      guid: 'g1', deviceId: 'phone-1', subscription: { endpoint: 'https://fake/phone' }, sound: 'ping', keyPair,
     }), await makeVapidEnv());
 
     const devices = JSON.parse(stored);
@@ -136,6 +162,7 @@ describe('PM: push 구독 기기별 분리 (2026-07-23 — device-link 알림이
   });
 
   it('PM-03: 구독 취소는 그 기기 항목만 제거하고 다른 기기는 그대로 남는다', async () => {
+    const keyPair = await genEd25519();
     let stored = JSON.stringify([
       { deviceId: 'pc-1',    subscription: { endpoint: 'https://fake/pc' },    sound: 'ping', updatedAt: 2000 },
       { deviceId: 'phone-1', subscription: { endpoint: 'https://fake/phone' }, sound: 'ping', updatedAt: 1000 },
@@ -145,7 +172,7 @@ describe('PM: push 구독 기기별 분리 (2026-07-23 — device-link 알림이
       if (url === `${L1_BASE}/api/admins/auth-with-password`)
         return new Response(JSON.stringify({ token: 't' }), { status: 200 });
       if (url.startsWith(`${L1_BASE}/api/collections/profiles/records`) && !url.includes('/records/'))
-        return new Response(JSON.stringify({ items: [{ id: 'r1', push_subscription: stored }] }), { status: 200 });
+        return new Response(JSON.stringify({ items: [{ id: 'r1', guid: 'g1', pubkey_ed25519: keyPair.pubkeyB64u, push_subscription: stored }] }), { status: 200 });
       if (url.includes('/records/r1')) {
         stored = JSON.parse(init.body).push_subscription;
         return new Response(JSON.stringify({ ok: true }), { status: 200 });
@@ -153,7 +180,7 @@ describe('PM: push 구독 기기별 분리 (2026-07-23 — device-link 알림이
       throw new Error('unexpected fetch: ' + url);
     };
 
-    await worker.fetch(req('/push/subscribe', { guid: 'g1', deviceId: 'pc-1', unsubscribe: true }), await makeVapidEnv());
+    await worker.fetch(await pushSubscribeSigned({ guid: 'g1', deviceId: 'pc-1', unsubscribe: true, keyPair }), await makeVapidEnv());
 
     const devices = JSON.parse(stored);
     assert.equal(devices.length, 1, 'pc-1만 제거되고 phone-1은 남아야 함');
@@ -180,13 +207,14 @@ describe('PM: push 구독 기기별 분리 (2026-07-23 — device-link 알림이
   });
 
   it('PM-05: 같은 deviceId로 재구독하면 교체될 뿐 중복 추가되지 않는다', async () => {
+    const keyPair = await genEd25519();
     let stored = '';
     globalThis.fetch = async (u, init = {}) => {
       const url = typeof u === 'string' ? u : u.url;
       if (url === `${L1_BASE}/api/admins/auth-with-password`)
         return new Response(JSON.stringify({ token: 't' }), { status: 200 });
       if (url.startsWith(`${L1_BASE}/api/collections/profiles/records`) && !url.includes('/records/'))
-        return new Response(JSON.stringify({ items: [{ id: 'r1', push_subscription: stored }] }), { status: 200 });
+        return new Response(JSON.stringify({ items: [{ id: 'r1', guid: 'g1', pubkey_ed25519: keyPair.pubkeyB64u, push_subscription: stored }] }), { status: 200 });
       if (url.includes('/records/r1')) {
         stored = JSON.parse(init.body).push_subscription;
         return new Response(JSON.stringify({ ok: true }), { status: 200 });
@@ -194,8 +222,8 @@ describe('PM: push 구독 기기별 분리 (2026-07-23 — device-link 알림이
       throw new Error('unexpected fetch: ' + url);
     };
     const env = await makeVapidEnv();
-    await worker.fetch(req('/push/subscribe', { guid: 'g1', deviceId: 'pc-1', subscription: { endpoint: 'https://fake/pc-old' } }), env);
-    await worker.fetch(req('/push/subscribe', { guid: 'g1', deviceId: 'pc-1', subscription: { endpoint: 'https://fake/pc-new' } }), env);
+    await worker.fetch(await pushSubscribeSigned({ guid: 'g1', deviceId: 'pc-1', subscription: { endpoint: 'https://fake/pc-old' }, keyPair }), env);
+    await worker.fetch(await pushSubscribeSigned({ guid: 'g1', deviceId: 'pc-1', subscription: { endpoint: 'https://fake/pc-new' }, keyPair }), env);
 
     const devices = JSON.parse(stored);
     assert.equal(devices.length, 1, '같은 deviceId는 추가가 아니라 교체여야 함');

@@ -1566,13 +1566,27 @@
         return { ok: false, reason: 'GETPUBLICKEY_UNSUPPORTED(브라우저가 너무 오래됨)' };
       }
       const spki = cred.response.getPublicKey();
+      const credentialId = bufToB64u(cred.rawId);
+      const publicKeySpkiB64u = bufToB64u(spki);
+
+      // 2026-09-07 신설 — 서버가 이제 이 계정 지갑의 서명을 요구한다
+      // (register-key 인증 부재 수정 참고). 이 기기에 그 guid의 지갑이
+      // 로드돼 있어야만 등록이 가능하다 — 즉 "이 지문을 이 계정에 붙이는
+      // 행위" 자체가 그 계정 지갑 소유자만 할 수 있다.
+      const wallet = await GopangWallet.load().catch(() => null);
+      if (!wallet || !wallet.publicKeyB64u) {
+        return { ok: false, reason: 'WALLET_NOT_READY(이 기기에 이 계정 지갑이 아직 없습니다)' };
+      }
+      const ts = Date.now();
+      const sigMsg = `webauthn-register-key:${guid}:${credentialId}:${ts}`;
+      const signature = await wallet.signPayload(sigMsg);
 
       try {
         const res = await fetch(`${WORKER_URL}/auth/webauthn/register-key`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            guid, credentialId: bufToB64u(cred.rawId),
-            publicKeySpkiB64u: bufToB64u(spki),
+            guid, credentialId, publicKeySpkiB64u,
+            pubkey: wallet.publicKeyB64u, signature, ts,
           }),
         });
         const data = await res.json();

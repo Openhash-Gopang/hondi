@@ -355,7 +355,39 @@ async function handlePhoneOtpRequest(request, env, corsHeaders) {
     return _err(502, 'SMS_SEND_FAILED', '인증번호 발송에 실패했습니다: ' + e.message, corsHeaders);
   }
 
-  return new Response(JSON.stringify({ ok: true, expires_in: OTP_TTL_SECONDS }), { status: 200, headers: corsHeaders });
+  // ── 2026-09-07 신설(사용자 지시) — 이 번호가 이미 지문(WebAuthn)을 쓰는
+  // 계정에 클레임돼 있으면, SMS 인증번호만으로는 그 계정을 재가입/재클레임
+  // 하기에 부족하다(불법 취득한 폰으로도 SMS는 받을 수 있으므로). 그런
+  // 경우 여기서 그 계정(guid) 앞으로 생체 인증 챌린지를 함께 발급해준다
+  // — 이 챌린지로 유효한 assertion을 만들 수 있는 사람은 그 계정에 등록된
+  // 물리적 인증기(지문 등록 당시의 특정 기기)를 실제로 쥐고 있는 사람뿐
+  // 이다. 이 번호로 등록된 계정이 없거나 지문을 안 쓰면 challenge는 그냥
+  // null — 기존과 동일하게 SMS만으로 진행한다.
+  let existingAccountChallenge = null;
+  try {
+    const existing = await _l1FindProfileByE164(env, e164);
+    const hasWebAuthn = Array.isArray(existing?.extra?.webauthn_credentials) && existing.extra.webauthn_credentials.length > 0;
+    if (existing && existing.claim_status !== 'superseded' && hasWebAuthn) {
+      const challenge = await _issueStepUpChallenge(env, existing.guid, `phone-reclaim:${e164}`);
+      if (challenge) {
+        existingAccountChallenge = {
+          ...challenge,
+          guid: existing.guid,
+          credentialIds: existing.extra.webauthn_credentials.map(c => c.credentialId),
+        };
+      }
+    }
+  } catch (e) {
+    // best-effort — 이 조회가 실패해도 SMS 발송 자체는 이미 끝났으므로
+    // 인증 흐름을 막지 않는다. (client가 step_up_token 없이 재가입을
+    // 시도하면 pb_hooks가 별도로 다시 한 번 막는다 — 아래 참고.)
+    console.warn('[PhoneOTP] 기존 계정 생체인증 여부 조회 실패(무시):', e.message);
+  }
+
+  return new Response(JSON.stringify({
+    ok: true, expires_in: OTP_TTL_SECONDS,
+    existingAccountBiometricChallenge: existingAccountChallenge,
+  }), { status: 200, headers: corsHeaders });
 }
 
 // POST /biz/phone-otp-verify { e164, code, guid? } — 성공 시 서명된 검증
@@ -970,12 +1002,21 @@ async function handleDeviceLinkSession(request, env, corsHeaders) {
   }), { status: 200, headers: corsHeaders });
 }
 
-// POST /auth/device-link/verify { sessionId, code }
-// PC가 호출 — 폰 화면의 코드를 맞게 입력했는지 확인.
+// POST /auth/device-link/verify { sessionId, code, step_up_token }
+// 폰(승인 페이지, device-link-approve.html)이 호출 — 코드가 맞는지 확인한다.
+// 2026-09-07 신설(사용자 지시) — 코드 일치만으로 승인이 완료되던 것을 막는다.
+// 불법 취득한(도난 등) 폰이 이미 로그인/잠금해제된 상태라면, 이 페이지가
+// 열려 push든 SMS 링크든 어느 경로로 도착했든 상관없이 "본인이 맞습니다"를
+// 누르는 것만으로 계정 전체(또는 서명)를 넘겨주던 것이 문제였다 — 특히
+// 지갑이 PRF(생체) 보호 없이 device-secret로만 암호화돼 있으면 지문 확인이
+// 전혀 없었다. 이 계정에 등록된 고액거래 재인증용 생체(step-up) credential로
+// 이 세션에만 유효한 챌린지에 서명해야만 승인이 완료되도록 강제한다
+// (WYSIWYS — 다른 세션 토큰 재사용 불가). 불법 취득한 폰을 쥔 사람이 그
+// 계정 소유자의 지문을 재현할 수 없다는 사실이 이 방어의 핵심이다.
 async function handleDeviceLinkVerify(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
-  const { sessionId, code } = body;
+  const { sessionId, code, step_up_token } = body;
   if (!sessionId || !code) return _err(400, 'MISSING_FIELD', 'sessionId, code 필수', corsHeaders);
   if (!env.DEVICE_LINK_SESSIONS) return _err(500, 'DO_NOT_BOUND', 'device-link 세션 저장소가 설정되지 않았습니다', corsHeaders);
 
@@ -990,6 +1031,15 @@ async function handleDeviceLinkVerify(request, env, corsHeaders) {
     record.attempts += 1;
     await _dlPut(env, sessionId, record, _deviceLinkTtl(record));
     return _err(400, 'CODE_MISMATCH', `코드가 일치하지 않습니다(남은 시도 ${DEVICE_LINK_MAX_ATTEMPTS - record.attempts}회)`, corsHeaders);
+  }
+
+  const stepUpCheck = await _verifyStepUpToken(env, step_up_token, record.guid, `device-link:${sessionId}`);
+  if (!stepUpCheck.ok) {
+    return _err(
+      403, 'BIOMETRIC_REQUIRED',
+      `이 기기에서 지문/Face ID 인증을 통과해야 승인이 완료됩니다(${stepUpCheck.reason})`,
+      corsHeaders
+    );
   }
 
   record.state = 'approved';
@@ -13674,12 +13724,32 @@ function _derToRawEcdsaSig(der) {
   return _concatBytes(_trimAndPad(r, 32), _trimAndPad(s, 32));
 }
 
+// ── 2026-09-07 긴급 수정 — 인증 검증 완전 부재 발견(사고실험) ──────────
+// handleStepUpThresholdSet(09-06)과 동일한 결함군: guid만 body에 넣으면
+// 누구나 "다른 사람의" 계정에 자기 지문(WebAuthn) credential을 등록할 수
+// 있었다 — 서명 검증이 전혀 없었음. guid는 공개 정보(GET /profile?guid=
+// 인증 불필요)라 사실상 전 계정이 노출된 상태였다. 이 credential은 이후
+// handleStepUpVerify에서 고액 거래 재인증 통과 여부를 좌우하므로, 이
+// 구멍은 "누구든 guid만 알면 그 계정의 고액 거래 생체인증 방어를 자기
+// 지문으로 통과시킬 수 있다"는 뜻이었다 — §L2/L3 방어선 전체 무력화.
+// 수정: handleStepUpThresholdSet과 동일한 패턴으로 그 계정 지갑의
+// Ed25519 개인키 서명을 요구한다(_verifyClaimsRequester) — 원격
+// 공격자는 그 개인키가 없으므로 서명을 위조할 수 없다.
 async function handleWebAuthnRegisterKey(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
-  const { guid, credentialId, publicKeySpkiB64u } = body;
+  const { guid, credentialId, publicKeySpkiB64u, pubkey, signature, ts } = body;
   if (!guid || !credentialId || !publicKeySpkiB64u) {
     return _err(400, 'MISSING_FIELD', 'guid, credentialId, publicKeySpkiB64u 필수', corsHeaders);
+  }
+  const sigMsg = `webauthn-register-key:${guid}:${credentialId}:${ts}`;
+  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
+  if (!authOk) {
+    return _err(
+      403, 'AUTH_REQUIRED',
+      '본인 서명 인증이 필요합니다 — 이 계정 지갑의 서명 없이는 지문(WebAuthn) 키를 등록할 수 없습니다',
+      corsHeaders
+    );
   }
   try {
     await crypto.subtle.importKey('spki', _b64uToBytes(publicKeySpkiB64u), { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']);
@@ -13699,17 +13769,23 @@ async function handleWebAuthnRegisterKey(request, env, corsHeaders) {
   return new Response(JSON.stringify({ ok: true, registered: filtered.length }), { status: 200, headers: corsHeaders });
 }
 
+async function _issueStepUpChallenge(env, guid, tx_hash) {
+  if (!env.QR_SESSIONS_KV) return null;
+  const challengeBytes = crypto.getRandomValues(new Uint8Array(32));
+  const challengeB64u = _b64uEncode(String.fromCharCode(...challengeBytes));
+  const sessionId = crypto.randomUUID();
+  await env.QR_SESSIONS_KV.put(`stepup:${sessionId}`, JSON.stringify({ guid, tx_hash, challengeB64u, used: false }), { expirationTtl: STEP_UP_CHALLENGE_TTL_SECONDS });
+  return { sessionId, challengeB64u, rpId: 'hondi.net', expires_in: STEP_UP_CHALLENGE_TTL_SECONDS };
+}
+
 async function handleStepUpChallenge(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
   const { guid, tx_hash } = body;
   if (!guid || !tx_hash) return _err(400, 'MISSING_FIELD', 'guid, tx_hash 필수', corsHeaders);
   if (!env.QR_SESSIONS_KV) return _err(500, 'KV_NOT_BOUND', '세션 저장소가 설정되지 않았습니다', corsHeaders);
-  const challengeBytes = crypto.getRandomValues(new Uint8Array(32));
-  const challengeB64u = _b64uEncode(String.fromCharCode(...challengeBytes));
-  const sessionId = crypto.randomUUID();
-  await env.QR_SESSIONS_KV.put(`stepup:${sessionId}`, JSON.stringify({ guid, tx_hash, challengeB64u, used: false }), { expirationTtl: STEP_UP_CHALLENGE_TTL_SECONDS });
-  return new Response(JSON.stringify({ ok: true, sessionId, challengeB64u, rpId: 'hondi.net', expires_in: STEP_UP_CHALLENGE_TTL_SECONDS }), { status: 200, headers: corsHeaders });
+  const challenge = await _issueStepUpChallenge(env, guid, tx_hash);
+  return new Response(JSON.stringify({ ok: true, ...challenge }), { status: 200, headers: corsHeaders });
 }
 
 async function handleStepUpVerify(request, env, corsHeaders) {
@@ -13762,7 +13838,11 @@ async function handleStepUpVerify(request, env, corsHeaders) {
   session.used = true;
   await env.QR_SESSIONS_KV.put(sessKey, JSON.stringify(session), { expirationTtl: STEP_UP_CHALLENGE_TTL_SECONDS });
   const exp = Date.now() + STEP_UP_TOKEN_TTL_MS;
-  const payload = `${guid}:${session.tx_hash}:${exp}`;
+  // 2026-09-07 수정 — guid(IPv6 형식, 콜론 7개 포함)와 tx_hash 둘 다
+  // 콜론을 포함할 수 있어 콜론 join/split으로는 경계 복원이 근본적으로
+  // 불가능하다(사고실험 발견 — _verifyStepUpToken 주석 참고). JSON
+  // 배열로 인코딩해 구분자 문제를 없앤다.
+  const payload = JSON.stringify([guid, session.tx_hash, exp]);
   const signature = await _hmacSha256Hex(env.PHONE_VERIFY_SECRET, payload);
   const step_up_token = payload + '.' + signature;
   return new Response(JSON.stringify({ ok: true, step_up_token, expires_at: new Date(exp).toISOString() }), { status: 200, headers: corsHeaders });
@@ -13776,10 +13856,21 @@ async function _verifyStepUpToken(env, token, expectedGuid, expectedTxHash) {
   const sig = token.slice(dotIdx + 1);
   const expectedSig = await _hmacSha256Hex(env.PHONE_VERIFY_SECRET, payload);
   if (sig !== expectedSig) return { ok: false, reason: 'BAD_SIGNATURE' };
-  const parts = payload.split(':');
-  if (parts.length !== 3) return { ok: false, reason: 'MALFORMED_PAYLOAD' };
-  const [tokGuid, txHash, expStr] = parts;
-  const exp = parseInt(expStr, 10);
+  // 2026-09-07 수정 — 원래는 `${guid}:${tx_hash}:${exp}`를 콜론으로
+  // split해 정확히 3조각을 기대했는데, guid 자체가 IPv6 형식이라
+  // 콜론을 7개나 포함한다(_generateRandomGuid 참고) — 거기에 이번에
+  // 새로 쓰는 tx_hash 값들(예: 'device-link:세션ID')까지 콜론을 더
+  // 포함하면서, 애초에 콜론 join/split 방식 자체가 guid 형식과 근본적
+  // 으로 안 맞았다(사고실험 중 발견 — 순수 콜론 기법으로는 guid와
+  // tx_hash 경계를 구분할 방법이 없다). payload를 JSON 배열로 바꿔
+  // 구분자 문제를 원천적으로 없앤다 — HMAC 서명 대상 문자열이 무엇이든
+  // 상관없으므로 안전한 변경이다.
+  let tokGuid, txHash, exp;
+  try {
+    [tokGuid, txHash, exp] = JSON.parse(payload);
+  } catch (e) {
+    return { ok: false, reason: 'MALFORMED_PAYLOAD' };
+  }
   if (!Number.isFinite(exp) || Date.now() > exp) return { ok: false, reason: 'EXPIRED' };
   if (tokGuid !== expectedGuid) return { ok: false, reason: 'GUID_MISMATCH' };
   if (txHash !== expectedTxHash) return { ok: false, reason: 'TX_HASH_MISMATCH' };
@@ -29167,6 +29258,16 @@ async function handlePushBroadcast(request, env, corsHeaders) {
 }
 
 // POST /push/subscribe — 구독 정보 저장 (2026-07-23 — 기기별 upsert로 변경)
+// ── 2026-09-07 긴급 수정 — 인증 검증 완전 부재 발견(사고실험) ──────────
+// handleWebAuthnRegisterKey와 동일한 결함군: guid만 알면 누구나 임의의
+// 기기를 그 계정의 "신뢰 기기" 목록(push_subscription)에 몰래 추가할 수
+// 있었다. 이 배열은 device-link 승인 요청·재가입 판별(웹푸시 신호) 등
+// "이 기기가 계정 소유자의 것"이라는 전제로 쓰이므로, 구멍이 막히지
+// 않으면 그 전제 자체가 무너진다. 서명 검증을 추가해 guid의 지갑
+// 개인키 없이는 구독을 추가/해제할 수 없게 한다.
+// (deviceId가 없는 구버전 클라이언트('legacy')는 서명도 못 보내므로
+// 이 경로에서 자동으로 거부된다 — 구버전 클라이언트는 업데이트가
+// 필요하다는 뜻이며, 이 엔드포인트를 열어두는 것보다 안전하다.)
 async function handlePushSubscribe(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body?.guid)
@@ -29179,6 +29280,18 @@ async function handlePushSubscribe(request, env, corsHeaders) {
   // 기기가 동시에 있으면 서로 덮어쓸 수 있지만(기존 동작과 동일), 최소한
   // deviceId를 보내는 기기(이 커밋 이후 배포분)는 서로 침범하지 않는다.
   const deviceId = (typeof body.deviceId === 'string' && body.deviceId) ? body.deviceId : 'legacy';
+
+  const sigMsg = `push-subscribe:${body.guid}:${deviceId}:${body.unsubscribe ? 'unsub' : 'sub'}:${body.ts}`;
+  const authOk = await _verifyClaimsRequester(env, {
+    guid: body.guid, pubkey: body.pubkey, signature: body.signature, sigMsg, ts: body.ts,
+  });
+  if (!authOk) {
+    return _err(
+      403, 'AUTH_REQUIRED',
+      '본인 서명 인증이 필요합니다 — 이 계정 지갑의 서명 없이는 이 기기를 등록/해제할 수 없습니다',
+      corsHeaders
+    );
+  }
 
   let record;
   try { record = await _l1FindProfileByGuid(env, body.guid); }

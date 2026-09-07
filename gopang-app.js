@@ -199,7 +199,8 @@ try {
   }
 })();
 
-// ── 고액 거래 재인증(생체인증)도 기본값으로 유도 — 2026-07-20 신설 ────
+// ── 고액 거래 재인증(생체인증)도 기본값으로 유도 — 2026-07-20 신설,
+// 2026-09-07 개정(사용자 지시) ──────────────────────────────────────
 // (사용자 지시: "지문·얼굴 등 생체인식을 사용자 선택이 아니라 디폴트로
 // 활성화") 다만 웹푸시 권한과 달리 WebAuthn 등록(navigator.credentials
 // .create())은 브라우저가 사용자 제스처 없는 호출을 거부한다 — 완전히
@@ -209,6 +210,15 @@ try {
 // 앱을 열 때 "원탭이면 바로 등록되는" 배너를 띄운다 — 이게 이 플랫폼에서
 // "디폴트"에 가장 가깝게 갈 수 있는 방법이다. 24시간 쿨다운으로 매번
 // 뜨는 걸 막는다(웹푸시 배너와 동일한 정책).
+//
+// ★ 2026-09-07 개정 — 지문(step-up) 인증이 이제 "고액 거래 보호"뿐 아니라
+// device-link 승인(다른 기기 로그인 확인)과 전화번호 재클레임(번호를
+// 다시 등록할 때)에도 필수로 바뀌었다(불법 취득한 폰으로 SMS·웹푸시만
+// 받아 본인 인증을 우회하는 걸 막기 위함). 기존 가입자는 이 변경 이전에
+// 지문 등록을 건너뛰었을 수 있는데, 그대로 두면 나중에 다른 기기(새 폰
+// 등)에서 로그인을 승인하려는 순간 갑자기 막혀서 당황하게 된다 — 그래서
+// 배너 문구를 "있으면 좋은 보안 기능"에서 "지금 등록해야 나중에 새 기기
+// 승인·번호 재등록이 막히지 않는다"로 바꾼다.
 (async () => {
   try {
     if (typeof window.GopangWallet === 'undefined' || !window.PublicKeyCredential) return;
@@ -224,11 +234,14 @@ try {
 
     localStorage.setItem('gopang_stepup_nudge_last', String(Date.now()));
     appendBubble('ai',
-      '🔒 고액 거래를 더 안전하게 지키려면 생체인증(지문·얼굴)을 등록하세요. ' +
-      '등록해두면 큰 금액을 보낼 때 한 번 더 본인 확인을 요청해요.' +
+      '🔒 <strong>지문·Face ID 등록이 꼭 필요해요.</strong><br>' +
+      '이제 새 기기에서 로그인을 승인하거나, 전화번호를 다시 등록할 때도 ' +
+      '지문 인증이 반드시 있어야 해요 — 등록해두지 않으면 나중에 폰을 ' +
+      '바꾸거나 다른 기기를 쓸 때 계정을 못 옮길 수 있어요. ' +
+      '(물론 고액 거래를 지키는 데도 계속 쓰여요.)' +
       '<br><button onclick="this.disabled=true;this.textContent=\'등록 중...\';' +
       'window.GopangWallet.enrollStepUpBiometric(JSON.parse(localStorage.getItem(\'gopang_user_v4\')).ipv6)' +
-      '.then(r=>{this.textContent=r.ok?\'✅ 등록 완료\':\'등록 실패(\'+r.reason+\')\';})' +
+      '.then(r=>{this.textContent=r.ok?\'✅ 등록 완료\':\'등록 실패(\'+r.reason+\') — 설정에서 다시 시도해 주세요\';})' +
       '.catch(e=>{this.textContent=\'등록 실패: \'+e.message;this.disabled=false;});" ' +
       'style="margin-top:8px;padding:8px 14px;border:none;border-radius:8px;' +
       'background:#0057A8;color:#fff;font-size:13px;font-weight:700;cursor:pointer">' +

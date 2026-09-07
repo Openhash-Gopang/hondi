@@ -48,6 +48,34 @@ function req(path, body) {
   return new Request(`${ORIGIN}${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 }
 
+// ── 2026-09-07 신설 — /push/subscribe 서명 인증 요구 반영 ─────────────
+// handlePushSubscribe가 guid만으로 아무나 기기를 등록할 수 있던 결함이
+// 수정되면서, 이 계정 지갑의 Ed25519 서명 없이는 통과하지 않는다.
+// phase25_security_regression.test.mjs와 동일한 헬퍼로 서명한다.
+function toB64u(bytes) {
+  let bin = '';
+  for (const b of new Uint8Array(bytes)) bin += String.fromCharCode(b);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+async function genEd25519() {
+  const kp = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+  const rawPub = await crypto.subtle.exportKey('raw', kp.publicKey);
+  return { privateKey: kp.privateKey, pubkeyB64u: toB64u(rawPub) };
+}
+async function signEd25519(privateKey, message) {
+  const sig = await crypto.subtle.sign('Ed25519', privateKey, new TextEncoder().encode(message));
+  return toB64u(sig);
+}
+async function pushSubscribeSigned({ guid, deviceId = 'legacy', unsubscribe = false, keyPair, ...rest }) {
+  const ts = Date.now();
+  const sigMsg = `push-subscribe:${guid}:${deviceId}:${unsubscribe ? 'unsub' : 'sub'}:${ts}`;
+  const signature = await signEd25519(keyPair.privateKey, sigMsg);
+  return req('/push/subscribe', {
+    guid, deviceId, unsubscribe, ...rest,
+    pubkey: keyPair.pubkeyB64u, signature, ts,
+  });
+}
+
 let originalFetch;
 beforeEach(() => { originalFetch = globalThis.fetch; });
 afterEach(()  => { globalThis.fetch = originalFetch; });
@@ -101,20 +129,24 @@ describe('PL: push 구독 L1 전용 동작(2026-07-14 Supabase 완전 폐기 이
   });
 
   it('PL-04: handlePushSubscribe는 L1에만 저장한다(Supabase 미러링 없음) — 2026-07-23: 기기별 배열 형식', async () => {
+    const keyPair = await genEd25519();
     let patchedBody = null;
     globalThis.fetch = async (u, init = {}) => {
       const url = typeof u === 'string' ? u : u.url;
       if (url === `${L1_BASE}/api/admins/auth-with-password`)
         return new Response(JSON.stringify({ token: 't' }), { status: 200 });
       if (url.startsWith(`${L1_BASE}/api/collections/profiles/records`) && !url.includes('/records/'))
-        return new Response(JSON.stringify({ items: [{ id: 'r1' }] }), { status: 200 });
+        return new Response(JSON.stringify({ items: [{ id: 'r1', guid: 'g1', pubkey_ed25519: keyPair.pubkeyB64u }] }), { status: 200 });
       if (url.includes('/records/r1')) {
         patchedBody = JSON.parse(init.body);
         return new Response(JSON.stringify({ ok: true }), { status: 200 });
       }
       throw new Error('unexpected fetch: ' + url);
     };
-    const res = await worker.fetch(req('/push/subscribe', { guid: 'g1', deviceId: 'dev-pc-1', subscription: { endpoint: 'https://fake/z' }, sound: 'drop' }), await makeVapidEnv());
+    const signedReq = await pushSubscribeSigned({
+      guid: 'g1', deviceId: 'dev-pc-1', subscription: { endpoint: 'https://fake/z' }, sound: 'drop', keyPair,
+    });
+    const res = await worker.fetch(signedReq, await makeVapidEnv());
     assert.equal(res.status, 200);
     assert.ok(patchedBody, 'L1 PATCH가 호출돼야 함');
     const devices = JSON.parse(patchedBody.push_subscription);
@@ -127,6 +159,13 @@ describe('PL: push 구독 L1 전용 동작(2026-07-14 Supabase 완전 폐기 이
   });
 
   it('PL-05: handlePushSubscribe는 가입(L1 프로필)이 없으면 404 PROFILE_NOT_FOUND', async () => {
+    // (2026-09-07 갱신) — 서명 인증이 프로필 존재 확인보다 먼저 검사되므로
+    // (동일 guid에 실제로 등록된 pubkey가 없으면 _verifyClaimsRequester가
+    // 이미 false), 유효한 키페어로 서명해서 "인증은 통과했지만 프로필이
+    // 없는" 상황을 별도로 재현할 수 없다 — 그 자체가 이번 수정의 목적
+    // (guid 존재 여부를 공격자에게 구분해서 알려주지 않음)이므로, 이제는
+    // 서명 없는 요청이 404가 아니라 403 AUTH_REQUIRED로 먼저 막히는 것이
+    // 올바른 동작이다.
     globalThis.fetch = async (u) => {
       const url = typeof u === 'string' ? u : u.url;
       if (url === `${L1_BASE}/api/admins/auth-with-password`)
@@ -136,8 +175,8 @@ describe('PL: push 구독 L1 전용 동작(2026-07-14 Supabase 완전 폐기 이
       throw new Error('unexpected fetch: ' + url);
     };
     const res = await worker.fetch(req('/push/subscribe', { guid: 'no-such-guid', subscription: { endpoint: 'https://fake/z' } }), await makeVapidEnv());
-    assert.equal(res.status, 404);
+    assert.equal(res.status, 403);
     const data = await res.json();
-    assert.equal(data.error, 'PROFILE_NOT_FOUND');
+    assert.equal(data.error, 'AUTH_REQUIRED');
   });
 });

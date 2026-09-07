@@ -65,6 +65,45 @@ export function getOrCreateDeviceId() {
 // subscribe/unsubscribe를 또 트리거하지 않고 같은 결과를 기다린다.
 let _inFlight = null;
 
+// ── 2026-09-07 신설 — /push/subscribe 인증 부재 수정 ────────────────
+// 지금까지 guid만 body에 넣으면 누구나 임의의 기기를 그 계정의
+// "신뢰 기기" 목록에 몰래 추가할 수 있었다(사고실험 발견 — worker.js
+// handlePushSubscribe 주석 참고). 이 배열은 device-link 승인·재가입
+// 판별의 "다른 신뢰 기기" 신호로 쓰이므로, 구멍이 막히지 않으면 그
+// 전제 자체가 무너진다. 이 계정 지갑(GopangWallet, window 전역)의
+// Ed25519 서명을 매 요청에 실어 보낸다 — 지갑이 없거나 잠겨있으면
+// 조용히 { ok:false, reason:'wallet_not_ready' }를 반환하고 서버
+// 호출 자체를 시도하지 않는다(호출해봐야 403이므로).
+// 모든 /push/subscribe 호출부(이 파일, webapp.html 설정 화면)가
+// 반드시 이 함수를 통해서만 호출하도록 한다 — 직접 fetch 금지.
+export async function postPushSubscribe(payload) {
+  if (!payload?.guid) return { ok: false, reason: 'guid_missing' };
+  let wallet = null;
+  try { wallet = await window.GopangWallet?.load?.(); } catch (_) { wallet = null; }
+  if (!wallet || !wallet.publicKeyB64u) {
+    return { ok: false, reason: 'wallet_not_ready' };
+  }
+  const deviceId = payload.deviceId || 'legacy';
+  const ts = Date.now();
+  const sigMsg = `push-subscribe:${payload.guid}:${deviceId}:${payload.unsubscribe ? 'unsub' : 'sub'}:${ts}`;
+  let signature;
+  try { signature = await wallet.signPayload(sigMsg); }
+  catch (e) { return { ok: false, reason: '서명 실패: ' + e.message }; }
+
+  try {
+    const res  = await fetch(`${WORKER_URL}/push/subscribe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...payload, deviceId, pubkey: wallet.publicKeyB64u, signature, ts }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) return { ok: false, reason: data.detail || 'server_error' };
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, reason: e.message };
+  }
+}
+
 export function requestPushSubscription(guid) {
   if (_inFlight) return _inFlight;
   _inFlight = _requestPushSubscriptionImpl(guid).finally(() => { _inFlight = null; });
@@ -121,13 +160,9 @@ async function _requestPushSubscriptionImpl(guid) {
     // 자신의 구독이 성공으로 잡혀도 폰이 못 받은 걸 알 방법이 없었다.
     const deviceType = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '')
       ? 'mobile' : 'desktop';
-    await fetch(`${WORKER_URL}/push/subscribe`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ guid, subscription: sub.toJSON(), sound, deviceId: getOrCreateDeviceId(), deviceType }),
+    return await postPushSubscribe({
+      guid, subscription: sub.toJSON(), sound, deviceId: getOrCreateDeviceId(), deviceType,
     });
-
-    return { ok: true };
   } catch (e) {
     return { ok: false, reason: e.message };
   }
