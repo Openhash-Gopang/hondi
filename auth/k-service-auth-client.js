@@ -184,8 +184,22 @@
   }
 
   // ── device-link(웹푸시 승인) 흐름 — 유일한 인증 경로 ────────────
+  //
+  // ★ 2026-09-08 근본 수정 (레이스 컨디션) — 예전엔 devlinkAutoResend()가
+  // 10초마다 완전히 새 세션을 만들면서 옛 sessionId 폴링을 그냥 버렸다.
+  // 그런데 서버는 옛 세션을 무효화하지 않으므로, 폰이 옛 세션에 대해
+  // (예: 지문/Face ID 인증에 10초 넘게 걸려서) 늦게 승인을 완료해도
+  // 서버는 정상 처리하지만 PC는 이미 그 세션을 버린 뒤라 영원히 못
+  // 받는 사고가 있었다 — 지문 인증 강제화(2026-09-07)로 폰 쪽 승인
+  // 소요시간이 늘면서 이 레이스가 훨씬 자주 발생하게 됨(주피터 실사로
+  // 재현). 수정: sessionId를 교체하지 않고 배열에 누적해 전부 병행
+  // 폴링한다 — 어느 세션이든 먼저 승인되는 쪽을 채택하고 나머지는
+  // 그때 정리한다. 개별 세션이 만료되면 그 세션만 배열에서 제거하고
+  // (전체 폴링을 멈추지 않음), verification_failed(서명 위조/불일치)는
+  // 실제 보안 실패 신호이므로 그 즉시 전체를 중단한다.
   var devlinkPollTimer = null, devlinkCountdownTimer = null;
-  var devlinkAutoResendTimer = null, devlinkAutoResendCount = 0, devlinkSessionId = null;
+  var devlinkAutoResendTimer = null, devlinkAutoResendCount = 0;
+  var devlinkSessionIds = []; // 동시에 유효할 수 있는 모든 pending 세션
   var pendingE164 = '';
   var DEVLINK_AUTORESEND_DELAY_MS = 10000, DEVLINK_AUTORESEND_MAX = 3;
 
@@ -194,10 +208,10 @@
     if (devlinkCountdownTimer) { clearInterval(devlinkCountdownTimer); devlinkCountdownTimer = null; }
     if (devlinkAutoResendTimer) { clearTimeout(devlinkAutoResendTimer); devlinkAutoResendTimer = null; }
     devlinkAutoResendCount = 0;
-    devlinkSessionId = null;
+    devlinkSessionIds = [];
     document.removeEventListener('visibilitychange', onVisibilityPoll);
   }
-  function onVisibilityPoll() { if (!document.hidden && devlinkPollTimer) devlinkPollOnce(); }
+  function onVisibilityPoll() { if (!document.hidden && devlinkSessionIds.length) devlinkPollOnce(); }
 
   function startDevlinkCountdown(seconds) {
     var remain = seconds;
@@ -225,7 +239,7 @@
       if (!res.ok || !data.ok) throw new Error(data.message || data.detail || '요청에 실패했습니다.');
 
       pendingE164 = phone;
-      devlinkSessionId = data.sessionId;
+      devlinkSessionIds = [data.sessionId];
       devlinkAutoResendCount = 0;
       els.stepPhone.style.display = 'none';
       els.stepDevlink.style.display = '';
@@ -250,9 +264,12 @@
     devlinkAutoResendTimer = setTimeout(devlinkAutoResend, DEVLINK_AUTORESEND_DELAY_MS);
   }
 
+  // 새 세션을 추가로 만들어 푸시를 다시 보내되, 기존 세션(들)의 폴링은
+  // 계속 유지한다 — 먼저 승인되는 쪽이 이긴다. 배열이 무한히 자라지
+  // 않도록 DEVLINK_AUTORESEND_MAX + 1개로 자연히 상한(재전송 횟수 제한).
   async function devlinkAutoResend() {
     devlinkAutoResendTimer = null;
-    if (!devlinkSessionId || !pendingE164) return;
+    if (!devlinkSessionIds.length || !pendingE164) return;
     if (devlinkAutoResendCount >= DEVLINK_AUTORESEND_MAX) return;
     devlinkAutoResendCount += 1;
     var sigMsg = 'kauth-login:' + (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)) + ':' + Date.now();
@@ -263,14 +280,12 @@
       });
       var data = await res.json().catch(function () { return {}; });
       if (!res.ok || !data.ok) { scheduleDevlinkAutoResend(); return; }
-      if (devlinkPollTimer) { clearInterval(devlinkPollTimer); devlinkPollTimer = null; }
-      if (devlinkCountdownTimer) { clearInterval(devlinkCountdownTimer); devlinkCountdownTimer = null; }
-      devlinkSessionId = data.sessionId;
+      // 옛 세션(들) 폴링은 그대로 두고 새 세션을 추가만 한다 — 폴링
+      // 타이머·카운트다운은 이미 돌고 있으므로 다시 만들지 않는다.
+      devlinkSessionIds.push(data.sessionId);
       els.devlinkStatus.textContent = data.hasMobileDevice === false
         ? '이 번호로 연결된 스마트폰이 없습니다 — 문자로 안내해 드립니다.'
-        : '알림을 다시 보냈습니다 — 스마트폰을 확인해 주세요…';
-      startDevlinkCountdown(data.expires_in || 90);
-      devlinkPollTimer = setInterval(devlinkPollOnce, 2000);
+        : '알림을 다시 보냈습니다 — 스마트폰을 확인해 주세요… (이전 알림도 계속 유효합니다)';
       scheduleDevlinkAutoResend();
     } catch (e) {
       scheduleDevlinkAutoResend();
@@ -278,29 +293,42 @@
   }
 
   async function devlinkPollOnce() {
-    if (!devlinkSessionId) return;
-    try {
-      var res = await fetch(PROXY + '/auth/device-link/poll?sessionId=' + encodeURIComponent(devlinkSessionId));
-      var data = await res.json().catch(function () { return {}; });
-      if (!data.ok) return;
-      if (data.state === 'expired') {
-        stopDevlinkPolling();
-        els.devlinkStatus.textContent = '요청이 만료됐습니다.';
-        return;
-      }
-      if (data.state === 'verification_failed') {
-        stopDevlinkPolling();
-        els.devlinkStatus.textContent = '승인을 확인하지 못했습니다 — 번호를 다시 확인해 주세요.';
-        return;
-      }
-      if (data.state === 'delivered' && data.verified && data.phone_verify_token) {
-        stopDevlinkPolling();
-        persist(data.phone_verify_token, new Date(data.expires_at).getTime());
-        hideOverlay();
-        setMsg('', '');
-        resolveWaiters();
-      }
-    } catch (e) { /* 일시적 오류 무시, 다음 polling에서 재시도 */ }
+    if (!devlinkSessionIds.length) return;
+    // 현재 배열의 스냅샷을 병행 폴링 — 콜백 중 배열이 바뀌어도(성공/만료
+    // 처리) 안전하도록 id 값 자체로 다음 tick에 반영한다.
+    var ids = devlinkSessionIds.slice();
+    await Promise.all(ids.map(async function (sessionId) {
+      if (devlinkSessionIds.indexOf(sessionId) === -1) return; // 이미 정리됨(다른 세션이 먼저 성공 등)
+      try {
+        var res = await fetch(PROXY + '/auth/device-link/poll?sessionId=' + encodeURIComponent(sessionId));
+        var data = await res.json().catch(function () { return {}; });
+        if (!data.ok) return;
+
+        if (data.state === 'expired') {
+          // 이 세션만 목록에서 제거 — 다른 세션이 아직 pending이면 계속 기다린다.
+          var idx = devlinkSessionIds.indexOf(sessionId);
+          if (idx !== -1) devlinkSessionIds.splice(idx, 1);
+          if (devlinkSessionIds.length === 0) {
+            stopDevlinkPolling();
+            els.devlinkStatus.textContent = '요청이 만료됐습니다.';
+          }
+          return;
+        }
+        if (data.state === 'verification_failed') {
+          // 서명 위조/불일치 — 실제 보안 실패이므로 다른 세션 대기 없이 즉시 중단.
+          stopDevlinkPolling();
+          els.devlinkStatus.textContent = '승인을 확인하지 못했습니다 — 번호를 다시 확인해 주세요.';
+          return;
+        }
+        if (data.state === 'delivered' && data.verified && data.phone_verify_token) {
+          stopDevlinkPolling();
+          persist(data.phone_verify_token, new Date(data.expires_at).getTime());
+          hideOverlay();
+          setMsg('', '');
+          resolveWaiters();
+        }
+      } catch (e) { /* 일시적 오류 무시, 다음 polling에서 재시도 */ }
+    }));
   }
 
   // ── 공개 API ─────────────────────────────────────────────────
