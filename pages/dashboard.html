@@ -414,6 +414,10 @@ code, pre, kbd, samp, input, button, textarea, select {
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
       <span>내 기록 검색</span>
     </button>
+    <button class="dash-tab" data-tab="financials">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>
+      <span>재무제표</span>
+    </button>
     <button class="dash-tab" data-tab="profile">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg>
       <span>프로필 관리</span>
@@ -568,6 +572,69 @@ code, pre, kbd, samp, input, button, textarea, select {
         <p class="pdv-footnote">PDV 기록은 내 기기에만 저장되며, 해시값만 OpenHash에 앵커링되어 위변조를 막습니다.</p>
       </div>
 
+      <!-- 재무제표 — 2026-09-07 신설 -->
+      <div class="dash-panel" id="panel-financials">
+        <div class="chip-row" id="fsPeriodRow">
+          <button class="chip active" data-fs="pl">손익계산서</button>
+          <button class="chip" data-fs="bs">대차대조표</button>
+          <button class="chip" data-fs="cf">현금흐름표</button>
+        </div>
+
+        <div id="fsResultMeta" class="result-meta">불러오는 중…</div>
+
+        <!-- 손익계산서 -->
+        <div class="fs-view" id="fsView-pl">
+          <div class="kpi-strip">
+            <div class="kpi-cell"><div class="kpi-label">매출</div><div class="kpi-value" id="plRevenue">–</div></div>
+            <div class="kpi-cell"><div class="kpi-label">매출원가</div><div class="kpi-value" id="plCogs">–</div></div>
+            <div class="kpi-cell"><div class="kpi-label">매출총이익</div><div class="kpi-value" id="plGrossProfit">–</div></div>
+            <div class="kpi-cell"><div class="kpi-label">당기순이익</div><div class="kpi-value" id="plNetIncome">–</div></div>
+          </div>
+          <div class="panel">
+            <div class="row"><div class="row-body"><div class="row-title">매출</div></div><b id="plRow-revenue">–</b></div>
+            <div class="row"><div class="row-body"><div class="row-title">(-) 매출원가</div></div><b id="plRow-cogs">–</b></div>
+            <div class="row"><div class="row-body"><div class="row-title"><b>매출총이익</b></div></div><b id="plRow-gross">–</b></div>
+            <div class="row"><div class="row-body"><div class="row-title">(-) 판매관리비</div></div><b id="plRow-opex">–</b></div>
+            <div class="row"><div class="row-body"><div class="row-title">(-) 매입(구매자 지출)</div></div><b id="plRow-purchase">–</b></div>
+            <div class="row"><div class="row-body"><div class="row-title"><b>당기순이익</b></div></div><b id="plRow-net">–</b></div>
+          </div>
+          <p class="pdv-footnote">매입(pl-purchase)은 구매 시점 지출 전체, 매출원가(pl-cogs)는 판매 시점에 매칭된 원가만입니다 — 같은 재고를 사고 되팔면 두 계정에 걸쳐 보일 수 있습니다(정식 재고자산 회계는 아직 없음).</p>
+          <div class="panel">
+            <div class="panel-head"><h2>무결성 검증</h2><button class="mini-btn" id="fsVerifyBtn">지금 검증</button></div>
+            <div id="fsVerifyResult" class="pdv-footnote">이 재무제표 스냅샷이 OpenHash에 정확히 앵커링돼 있고, 그 해시가 실제 데이터로부터 재계산되는지 확인합니다.</div>
+          </div>
+        </div>
+
+        <!-- 대차대조표 -->
+        <div class="fs-view" id="fsView-bs" style="display:none">
+          <div class="kpi-strip">
+            <div class="kpi-cell"><div class="kpi-label">자산총계</div><div class="kpi-value" id="bsTotalAssets">–</div></div>
+            <div class="kpi-cell"><div class="kpi-label">부채총계</div><div class="kpi-value">0 T</div></div>
+            <div class="kpi-cell"><div class="kpi-label">자본총계</div><div class="kpi-value" id="bsTotalEquity">–</div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h2>자산</h2></div>
+            <div class="row"><div class="row-body"><div class="row-title">현금(GDC)</div></div><b id="bsRow-cash">–</b></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h2>자본</h2></div>
+            <div class="row"><div class="row-body"><div class="row-title">이익잉여금</div></div><b id="bsRow-equity">–</b></div>
+          </div>
+          <p class="pdv-footnote">아직 부채·현금 외 자산 계정이 없어, 자본(이익잉여금)을 자산(현금)과 동일하게 표시합니다.</p>
+        </div>
+
+        <!-- 현금흐름표 -->
+        <div class="fs-view" id="fsView-cf" style="display:none">
+          <div class="kpi-strip">
+            <div class="kpi-cell"><div class="kpi-label">영업활동</div><div class="kpi-value" id="cfOperating">–</div></div>
+            <div class="kpi-cell"><div class="kpi-label">투자활동</div><div class="kpi-value" id="cfInvesting">–</div></div>
+            <div class="kpi-cell"><div class="kpi-label">재무활동</div><div class="kpi-value" id="cfFinancing">–</div></div>
+            <div class="kpi-cell"><div class="kpi-label">현금 순증감</div><div class="kpi-value" id="cfNetChange">–</div></div>
+          </div>
+          <p class="pdv-footnote">계정과목이 아니라 거래유형으로 분류합니다 — 서비스 이용료(ai_usage_charge)는 영업활동, GDC 충전·출금·대출 실행은 재무활동으로 집계합니다. 투자활동에 해당하는 거래유형은 아직 없습니다.</p>
+        </div>
+      </div>
+
       <!-- 프로필 -->
       <div class="dash-panel" id="panel-profile">
         <div class="profile-grid">
@@ -676,6 +743,7 @@ code, pre, kbd, samp, input, button, textarea, select {
 var TITLES = {
   home: ['홈', '오늘 혼디가 나를 위해 한 일'],
   pdv: ['내 기록 검색', '24시간 기록된 PDV에서 검색합니다'],
+  financials: ['재무제표', '손익계산서 · 대차대조표 · 현금흐름표'],
   profile: ['프로필 관리', '내 프로필 웹앱을 바로 수정합니다'],
   contacts: ['대화상대 관리', '전문가 페르소나·친구·가족을 관리합니다'],
   settings: ['비서 설정', 'AI 비서 자율성과 알림을 설정합니다']
@@ -1186,5 +1254,108 @@ document.getElementById('pdvPeriodRow')?.addEventListener('click', (e) => {
 // 로그인 화면이 떠 있는 첫 방문에서는 wallet.guid가 없어 조용히 스킵되고,
 // completeLogin() 이후에는 사용자가 PDV 탭을 열 때 위 클릭 핸들러가 갱신한다.
 loadUsagePeriod('day');
+</script>
+
+<!-- ══════ 재무제표(손익계산서/대차대조표/현금흐름표) — 2026-09-07 신설 ══════
+     기존 GDC 재무 인프라(/biz/balance, /biz/financials, /biz/settle-ledger,
+     /biz/tx-history)를 그대로 재사용한다 — 새 백엔드 엔드포인트 없음. -->
+<script type="module">
+import { fetchBalanceSheet, fetchIncomeStatement, fetchCashFlow, verifyFinancialStatement } from '/src/gopang/gdc/financial-statements.js';
+
+const _fsLoaded = { pl: false, bs: false, cf: false };
+const _fmtT = (n) => (Number(n) || 0).toLocaleString('ko-KR') + ' T';
+
+async function _getWallet() {
+  if (!window.GopangWallet) return null;
+  return window.GopangWallet.load().catch(() => null);
+}
+
+function _setFsMeta(text) {
+  const el = document.getElementById('fsResultMeta');
+  if (el) el.textContent = text;
+}
+
+async function loadFsView(kind) {
+  const wallet = await _getWallet();
+  if (!wallet?.guid) { _setFsMeta('로그인 후 조회할 수 있습니다.'); return; }
+
+  try {
+    if (kind === 'pl') {
+      _setFsMeta('손익계산서 불러오는 중…');
+      const pl = await fetchIncomeStatement(wallet, { refresh: true });
+      document.getElementById('plRevenue').textContent = _fmtT(pl.revenue);
+      document.getElementById('plCogs').textContent = _fmtT(pl.cogs);
+      document.getElementById('plGrossProfit').textContent = _fmtT(pl.gross_profit);
+      document.getElementById('plNetIncome').textContent = _fmtT(pl.net_income);
+      document.getElementById('plRow-revenue').textContent = _fmtT(pl.revenue);
+      document.getElementById('plRow-cogs').textContent = '-' + _fmtT(pl.cogs);
+      document.getElementById('plRow-gross').textContent = _fmtT(pl.gross_profit);
+      document.getElementById('plRow-opex').textContent = '-' + _fmtT(pl.opex);
+      document.getElementById('plRow-purchase').textContent = '-' + _fmtT(pl.purchases);
+      document.getElementById('plRow-net').textContent = _fmtT(pl.net_income);
+      _setFsMeta('판매자 매출 기준 · 방금 재집계됨');
+    } else if (kind === 'bs') {
+      _setFsMeta('대차대조표 불러오는 중…');
+      const bs = await fetchBalanceSheet(wallet);
+      document.getElementById('bsTotalAssets').textContent = _fmtT(bs.total_assets);
+      document.getElementById('bsTotalEquity').textContent = _fmtT(bs.equity.retained_earnings);
+      document.getElementById('bsRow-cash').textContent = _fmtT(bs.assets.cash);
+      document.getElementById('bsRow-equity').textContent = _fmtT(bs.equity.retained_earnings);
+      _setFsMeta('L1 원장 재생 기준 현재 잔액');
+    } else if (kind === 'cf') {
+      _setFsMeta('현금흐름표 불러오는 중…');
+      const cf = await fetchCashFlow(wallet);
+      document.getElementById('cfOperating').textContent = _fmtT(cf.operating);
+      document.getElementById('cfInvesting').textContent = _fmtT(cf.investing);
+      document.getElementById('cfFinancing').textContent = _fmtT(cf.financing);
+      document.getElementById('cfNetChange').textContent = _fmtT(cf.net_change);
+      _setFsMeta((cf.truncated ? '조회 상한 도달 — 최근 ' : '최근 ') + cf.item_count + '건 거래 기준');
+    }
+    _fsLoaded[kind] = true;
+  } catch (e) {
+    console.warn('[대시보드] 재무제표(' + kind + ') 조회 실패:', e.message);
+    _setFsMeta('조회 실패: ' + e.message);
+  }
+}
+
+document.getElementById('fsPeriodRow')?.addEventListener('click', (e) => {
+  const btn = e.target.closest('.chip[data-fs]');
+  if (!btn) return;
+  const kind = btn.getAttribute('data-fs');
+  document.querySelectorAll('#fsPeriodRow .chip').forEach((b) => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.fs-view').forEach((v) => { v.style.display = 'none'; });
+  document.getElementById('fsView-' + kind).style.display = '';
+  loadFsView(kind); // 매번 새로고침 — 특히 pl은 settle-ledger 재집계를 겸함
+});
+
+// 재무제표 탭을 처음 열 때 손익계산서를 기본으로 불러온다.
+document.querySelector('.dash-tab[data-tab="financials"]')?.addEventListener('click', () => {
+  if (!_fsLoaded.pl) loadFsView('pl');
+}, { once: true });
+
+document.getElementById('fsVerifyBtn')?.addEventListener('click', async () => {
+  const resultEl = document.getElementById('fsVerifyResult');
+  const wallet = await _getWallet();
+  if (!wallet?.guid) { resultEl.textContent = '로그인 후 검증할 수 있습니다.'; return; }
+  resultEl.textContent = '검증 중…';
+  try {
+    const r = await verifyFinancialStatement(wallet);
+    if (r.reason === 'NOT_ANCHORED_YET') {
+      resultEl.textContent = '데이터 자기무결성: ' + (r.self_consistent ? '일치' : '불일치')
+        + ' · 아직 OpenHash 앵커링 전입니다(최대 10분 이내 자동 앵커링).';
+    } else if (r.reason === 'ANCHOR_NOT_FOUND') {
+      resultEl.textContent = '앵커 기록을 찾을 수 없습니다 — seq: ' + r.seq;
+    } else {
+      resultEl.textContent =
+        (r.valid ? '✅ 검증 통과' : '⚠️ 검증 실패')
+        + ' · 데이터↔해시 일치: ' + (r.self_consistent ? '예' : '아니오')
+        + ' · 앵커↔머클루트 일치: ' + (r.anchor_valid ? '예' : '아니오')
+        + ' · commit_hash: ' + (r.commit_hash || '').slice(0, 12) + '…';
+    }
+  } catch (e) {
+    resultEl.textContent = '검증 실패: ' + e.message;
+  }
+});
 </script>
 </body></html>
