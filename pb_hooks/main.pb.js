@@ -2806,7 +2806,16 @@ const NODE_CONFIG = {
     // 지금까지는 Worker가 이 claim을 무시하고 자체 생성한(올바른 값의)
     // claim을 썼어서 이 결함이 가려져 있었는데, 이제 Worker가 L1의
     // claim을 그대로 신뢰하므로 여기서 고쳐야 한다.
-    fs_account: "pl-purchase",
+    //
+    // 2026-09-07 확장(사용자 지시 — 재고자산 미도입 문제 해소) — 지금까지
+    // 모든 매입을 무조건 pl-purchase(즉시 비용)로 잡아, 재고자산 없이
+    // 매입 시점과 매출원가 인식 시점이 어긋나는 문제가 있었다(§SP-FS
+    // 참고). purpose==='inventory_purchase'로 명시된 매입(예: K-Market
+    // 판매자가 재판매 목적으로 상품을 사입하는 경우)만 자산(bs-inventory)
+    // 으로 잡고, 그 외(일반 소비성 지출)는 기존과 동일하게 즉시 비용
+    // 처리한다 — 호출부가 명시하지 않으면 자산으로 과대계상하지 않도록
+    // 보수적으로 기본값(pl-purchase)을 유지한다.
+    fs_account: (purpose === 'inventory_purchase') ? 'bs-inventory' : 'pl-purchase',
     balance_after: actualBalance - totalOutput,
     block_id:   blockId,
     block_hash: blockHash,
