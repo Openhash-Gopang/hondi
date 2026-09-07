@@ -295,6 +295,19 @@ async function _hmacSha256Hex(secret, message) {
   return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+// ── e164 정확일치 조회용 해시 (2026-09-07 신설) ─────────────────────
+// profiles.e164 평문 저장을 없애면서(pb_hooks/main.pb.js의
+// onRecordBeforeCreateRequest 참고), 정확일치 조회(중복탐지, 프로필
+// 검색)는 이제 e164_hash 필드로 한다. pb_hooks가 레코드 생성 시 계산하는
+// 것과 정확히 같은 도메인 분리 접두어("e164-lookup:")를 써야 같은 값이
+// 나온다 — 한쪽만 고치면 서버·워커가 서로 다른 해시를 만들어 조회가
+// 전부 조용히 실패(0건)하니 반드시 pb_hooks와 이 함수를 같이 바꿔야
+// 한다.
+async function _e164Hash(env, e164) {
+  if (!env.PHONE_VERIFY_SECRET) throw new Error('PHONE_VERIFY_SECRET이 설정되지 않았습니다');
+  return await _hmacSha256Hex(env.PHONE_VERIFY_SECRET, 'e164-lookup:' + e164);
+}
+
 // 솔라피 HMAC-SHA256 인증 스킴으로 SMS 1건 발송.
 async function _sendSolapiSms(env, toE164, text) {
   if (!env.SOLAPI_API_KEY || !env.SOLAPI_API_SECRET || !env.SOLAPI_SENDER_NUMBER) {
@@ -468,13 +481,10 @@ async function _resolveGuidFromPhoneVerifyToken(env, phoneVerifyToken) {
 
   try {
     const l1Token = await _l1AdminToken(env);
-    // 2026-09-03 수정 — profiles 컬렉션 실제 스키마는 e164 필드다(phone
-    // 필드는 존재하지 않음, pb_migrations/1781467666_updated_profiles.js
-    // 확인). 잘못된 필드명으로 필터링해 PocketBase가 HTTP 400을 반환하던
-    // 버그 — device-link sign_request 로그인이 이 경로를 실제 데이터로
-    // 처음 타면서 발견(주피터 실사 재현). _l1FindProfileByE164와 동일한
-    // 필터 패턴으로 정정.
-    const filter  = encodeURIComponent(`e164='${e164}'`);
+    // 2026-09-07 수정 — profiles.e164 평문 저장이 없어지면서(pb_hooks
+    // 참고) e164_hash로 조회한다. _l1FindProfileByE164와 동일 패턴.
+    const e164Hash = await _e164Hash(env, e164);
+    const filter  = encodeURIComponent(`e164_hash='${e164Hash}'`);
     const res = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${filter}&perPage=1`, {
       headers: { 'Authorization': `Bearer ${l1Token}` },
       signal: AbortSignal.timeout(8000),
@@ -539,16 +549,13 @@ async function handleUserGdcBalance(request, env, corsHeaders) {
   const expectedSig = await _hmacSha256Hex(env.PHONE_VERIFY_SECRET, payload);
   if (expectedSig !== sig) return _err(401, 'TOKEN_INVALID', '전화번호 인증 토큰 서명이 유효하지 않습니다', corsHeaders);
 
-  // 2026-09-03 수정 — profiles 컬렉션 실제 스키마는 e164 필드다(phone
-  // 필드는 존재하지 않음, pb_migrations/1781467666_updated_profiles.js
-  // 확인). 아래 주석은 예전에 이 함수를 작성할 때의 착각이었다 — 잘못된
-  // 필드명으로 필터링해 PocketBase가 HTTP 400을 반환하던 버그.
-  // device-link sign_request 로그인이 이 경로를 실제 데이터로 처음
-  // 타면서 발견(주피터 실사 재현).
+  // 2026-09-07 수정 — profiles.e164 평문 저장이 없어지면서 e164_hash로
+  // 조회한다(pb_hooks/main.pb.js, _e164Hash 참고).
 
   try {
     const l1Token = await _l1AdminToken(env);
-    const filter  = encodeURIComponent(`e164='${e164}'`);
+    const e164Hash = await _e164Hash(env, e164);
+    const filter  = encodeURIComponent(`e164_hash='${e164Hash}'`);
     const res = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${filter}&perPage=1`, {
       headers: { 'Authorization': `Bearer ${l1Token}` },
       signal: AbortSignal.timeout(8000),
@@ -705,9 +712,11 @@ function _deviceLinkTtl(record) {
 
 // L1 profiles 컬렉션에서 e164(전화번호)로 레코드 조회 — device-link 전용
 // 신설. _l1FindProfileByGuid/_l1FindProfileByHandle과 동일 패턴.
+// 2026-09-07 수정 — profiles.e164 평문 저장 제거에 맞춰 e164_hash로 조회.
 async function _l1FindProfileByE164(env, e164) {
   const token = await _l1AdminToken(env);
-  const filter = encodeURIComponent(`e164='${e164}'`);
+  const e164Hash = await _e164Hash(env, e164);
+  const filter = encodeURIComponent(`e164_hash='${e164Hash}'`);
   const res = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${filter}&perPage=1`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
@@ -15286,12 +15295,14 @@ async function handleBizSupply(request, env, corsHeaders) {
 // 완벽한 자동 대사가 아니라 관리자가 금액까지 함께 대조하는 1차
 // 단서라는 원 설계 전제는 그대로 유지한다(_findPendingByMatchKey
 // 참고) — 극히 드문 뒷 8자리 충돌은 관리자 수동 확인으로 감수한다.
+// 2026-09-07 수정 — profiles.e164 평문 저장이 없어지면서, 이미 정확히
+// 뒷 8자리만 담아두는 e164_last8 필드를 그대로 쓴다(pb_hooks 참고) —
+// 재계산할 필요 자체가 없어졌다.
 async function _phoneMatchKey(env, guid) {
   const profile = await _l1FindProfileByGuid(env, guid).catch(() => null);
-  const e164 = profile?.e164 || '';
-  const digits = e164.replace(/\D/g, '');
-  if (digits.length < 8) return null; // 전화번호 미인증/미보유 — 폴백 필요
-  return digits.slice(-8);
+  const last8 = profile?.e164_last8 || '';
+  if (last8.length < 8) return null; // 전화번호 미인증/미보유 — 폴백 필요
+  return last8;
 }
 
 const CHARGE_MIN_KRW = 1000;    // 너무 작은 신청은 매칭 단서(전화번호 뒷자리)만으로 은행 명세서 대조가 더 번거로워짐
@@ -15768,19 +15779,21 @@ function _extractKrwAmountFromText(text) {
 // 번호 중간에 우연히 낀 경우까지 오매칭하는 걸 막기 위함. 결과가
 // 정확히 1건이 아니면(0건 또는 충돌 2건 이상) 자동 처리를 포기하고
 // 관리자 수동 확인으로 넘긴다 — 자동 오발행보다 훨씬 안전하다.
+// 2026-09-07 수정 — profiles.e164 평문 저장이 없어지면서, 이미 정확히
+// 뒷 8자리만 담긴 e164_last8 필드에 정확일치로 바로 조회한다 — 예전엔
+// e164 저장 형식이 국가마다 자릿수가 달라 '~'(LIKE) 부분포함으로 넓게
+// 뽑은 뒤 애플리케이션에서 재확인해야 했는데, e164_last8은 애초에
+// 정확히 8자리만 담기므로 그 2단계가 통째로 필요 없어졌다.
 async function _findGuidByPhoneMatchKey(env, code) {
   if (!/^\d{8}$/.test(code)) return null;
   const token = await _l1AdminToken(env);
-  const filter = encodeURIComponent(`e164~'${code}'`);
+  const filter = encodeURIComponent(`e164_last8='${code}'`);
   const res = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${filter}&perPage=5`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   if (!res.ok) return null;
   const data = await res.json().catch(() => ({ items: [] }));
-  const exact = (data.items || []).filter(p => {
-    const digits = String(p.e164 || '').replace(/\D/g, '');
-    return digits.slice(-8) === code;
-  });
+  const exact = data.items || [];
   return (exact.length === 1) ? exact[0].guid : null;
 }
 

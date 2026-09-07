@@ -44,6 +44,10 @@ async function makeVapidEnv(overrides = {}) {
     VAPID_PRIVATE_KEY: jwkPriv.d.replace(/=+$/, ''),
     VAPID_SUBJECT: 'mailto:a@a.com',
     DEVICE_LINK_SESSIONS: deviceLinkSessionsStub,
+    // 2026-09-07 추가 — profiles.e164 평문 저장 제거(_e164Hash 신설)로
+    // handleDeviceLinkInit이 _l1FindProfileByE164 경유로 이제 이 값을
+    // 필요로 한다 — 없으면 PM-02가 조용히 500으로 실패한다.
+    PHONE_VERIFY_SECRET: 'test-phone-verify-secret',
     ...overrides,
   };
 }
