@@ -1671,13 +1671,13 @@ var SVC_CONTENT = {
       <h3>정직한 한계 — 수신자를 지어내지 않습니다</h3>
       <p class="svc-note">K-Mail은 이메일 주소를 스스로 알지 못합니다. 수신자를 확보하는 방법은 (a) 사용자가 대화 중 이름과 이메일을 직접 알려주거나, (b) "서울대 컴퓨터 관련 학과 교수들"처럼 모호하게 서술하면 실제 웹 검색을 거쳐 검색 결과에서 실제로 확인되는 이름·이메일만 후보로 제시하는 두 경로뿐입니다. 검색 결과에 이메일이 안 보이면 지어내지 않고 직접 알려달라고 요청합니다.</p>
 
-      <h3>진입 경로 — 두 갈래로 나뉘어 있습니다</h3>
-      <p class="svc-note">좌측 메뉴 "메일 보내기"(<code>/mail.html</code>)는 발송 전용 단순 폼입니다. 대화형 비서(<code>/pages/kmail-assistant.html</code>, 주소록은 <code>/pages/kmail-contacts.html</code>)는 "메일 보내줘"·"주소록 검색" 등 발화 시 gwp-registry.js가 새 탭으로 연결하며, AC-PRO-CORE 태그 체계와 격리된 자체 프로토콜(KMAIL_SEND_CAMPAIGN 등)로 동작합니다.</p>
+      <h3>진입 경로 — mail.hondi.net으로 일원화</h3>
+      <p class="svc-note">K-Law·K-Plan과 동일하게 전용 서브도메인 <code>mail.hondi.net</code>(<a href="https://mail.hondi.net/webapp.html" target="_blank">webapp.html</a>)로 통합됐습니다(2026-09-08). 발송 전용 단순 폼("빠른 발송" 탭)과 대화형 비서·주소록·캠페인 관리가 한 웹앱 안에 공존하며, 로그인은 공용 인증 모듈(<code>k-service-auth-client.js</code>)로 plan.hondi.net·klaw.hondi.net과 세션을 공유합니다. 좌측 메뉴 "메일 보내기"와 "메일 보내줘"·"주소록 검색" 등 대화 발화 모두 이 웹앱으로 연결되며(gwp-registry.js, <code>id:'kmail'</code>), AC-PRO-CORE 태그 체계와 격리된 자체 프로토콜(KMAIL_SEND_CAMPAIGN 등)로 동작합니다. 기존 <code>/mail.html</code>·<code>/pages/kmail-assistant.html</code>·<code>/pages/kmail-contacts.html</code>는 폐기됐습니다 — 백엔드(<code>/mail/send</code>, <code>/kmail/*</code>)는 그대로 hondi Worker에 남아 있고 프론트만 이관됐습니다.</p>
 
       <div class="svc-callout important">
-        아직 없는 기능 — 좌측 메뉴에서 대화형 비서로 바로 들어가는 진입점, 수신함(받은 메일 열람) UI는 아직 없습니다. 위임 규칙 자동 승격에 대한 사후 검토 절차, 재고·영업시간 같은 실시간 상태의 자동 연동(K-JIT 등)은 아직 사람이 수동으로 입력해야 합니다. 실사용자 채팅 경로에서의 K-Plan 사전 질의는 관리자 시딩 경로로만 검증됐고 라이브 트래픽 검증은 아직입니다.
+        아직 없는 기능 — 수신함(받은 메일 열람) UI는 아직 없습니다. 위임 규칙 자동 승격에 대한 사후 검토 절차, 재고·영업시간 같은 실시간 상태의 자동 연동(K-JIT 등)은 아직 사람이 수동으로 입력해야 합니다. 실사용자 채팅 경로에서의 K-Plan 사전 질의는 관리자 시딩 경로로만 검증됐고 라이브 트래픽 검증은 아직입니다.
       </div>
-      <p class="svc-note" style="margin-top:14px;color:var(--text4);font-size:12px;">이 탭의 정본(source of truth)은 <code>prompts/SP-25_kmail_v1_9.txt</code>이고, K-Plan과의 관계는 <code>docs/KPLAN_KMAIL_AGENT_TO_AGENT_ARCHITECTURE_v1_0_20260903.md</code>가 정본입니다 — 이 문서들을 고칠 때는 반드시 그 문서를 먼저 갱신하세요.</p>
+      <p class="svc-note" style="margin-top:14px;color:var(--text4);font-size:12px;">이 웹앱의 정본(source of truth)은 <code>prompts/SP-25_kmail_v1_11.txt</code>이고, K-Plan과의 관계는 <code>docs/KPLAN_KMAIL_AGENT_TO_AGENT_ARCHITECTURE_v1_0_20260903.md</code>가 정본입니다 — 이 문서들을 고칠 때는 반드시 그 문서를 먼저 갱신하세요.</p>
     </div>
   `,
   kjit: `
