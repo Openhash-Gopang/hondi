@@ -30961,15 +30961,13 @@ async function handleKmailAttachmentUpload(request, env, corsHeaders) {
   }
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
-  const { guid, pubkey, signature, ts, file_base64, filename, content_type } = body;
-  if (!guid || !pubkey || !signature || !ts) {
-    return _err(400, 'MISSING_FIELD', 'guid, pubkey, signature, ts 필수', corsHeaders);
-  }
+  const { file_base64, filename, content_type } = body;
   if (!file_base64 || !filename) return _err(400, 'MISSING_FIELD', 'file_base64, filename 필수', corsHeaders);
 
-  const sigMsg = `kmail-attachment-upload:${guid}:${filename}:${ts}`;
-  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
-  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+  // 2026-09-08 — 공용 인증 게이트로 전환(handleUserMailSend와 동일한 이유)
+  const auth = await _kAuth.resolveGuid(env, body, { sigMsg: `kmail-attachment-upload:${body.guid}:${filename}:${body.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
 
   let bytes;
   try {
@@ -31273,17 +31271,17 @@ async function _kmailSendOneEmail(env, { guid, to, subject, text, sessionId, rep
 async function handleUserMailSend(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
-  const { guid, pubkey, signature, ts, to, subject, text, attachment_ids } = body;
-  if (!guid || !pubkey || !signature || !ts) {
-    return _err(400, 'MISSING_FIELD', 'guid, pubkey, signature, ts 필수', corsHeaders);
-  }
+  const { to, subject, text, attachment_ids } = body;
   if (!to || !subject || !text) {
     return _err(400, 'MISSING_FIELD', 'to, subject, text 필수', corsHeaders);
   }
 
-  const sigMsg = `kmail-send:${guid}:${to}:${ts}`;
-  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
-  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+  // 2026-09-08 — 다른 /kmail/* 엔드포인트와 동일한 공용 인증 게이트로 전환
+  // (mail.hondi.net webapp.html의 "빠른 발송" 탭이 phone_verify_token으로
+  // 호출; 옛 지갑 서명 클라이언트도 하위호환으로 계속 지원됨).
+  const auth = await _kAuth.resolveGuid(env, body, { sigMsg: `kmail-send:${body.guid}:${to}:${body.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
 
   if (!env.EMAIL) {
     return _err(500, 'EMAIL_BINDING_MISSING',
@@ -33532,9 +33530,10 @@ async function _kmailSendAutoReply(env, guid, toEmail, replyText, sessionId, sen
 }
 
 // ═══════════════════════════════════════════════════════════
-// K-Mail 대화형 비서 (2026-09-01 신설, SP-25_kmail) — "메일" 발화 시
-// gwp-registry.js가 새 탭(pages/kmail-assistant.html)으로 연결하고,
-// 그 탭이 이 엔드포인트로 대화를 이어간다. AC-PRO-CORE 본문·call-ai.js
+// K-Mail 대화형 비서 (2026-09-01 신설, SP-25_kmail; 2026-09-08부터
+// mail.hondi.net/webapp.html로 이관) — "메일" 발화 시 gwp-registry.js가
+// mail.hondi.net으로 연결하고, 그 웹앱이 이 엔드포인트로 대화를
+// 이어간다. AC-PRO-CORE 본문·call-ai.js
 // 태그 체계와는 완전히 격리된 자체 프로토콜(KMAIL_SEARCH_CONTACTS/
 // KMAIL_SEND_CAMPAIGN/KMAIL_CREATE_RULE 태그, 이 파일 안에서만 파싱) —
 // 메인 채팅 라우팅을 조금도 건드리지 않기 위한 의도적 설계.
