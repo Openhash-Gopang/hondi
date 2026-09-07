@@ -18382,7 +18382,21 @@ try{const res=await fetch(OPENAI_URL,{method:'POST',headers:{'Content-Type':'app
 async function callDeepSeek(bodyText,env,corsHeaders,fallbackFrom=null,meta=null,ctx=null){try{
   let parsedBody = null; try { parsedBody = JSON.parse(bodyText); } catch {}
   const isStream = !!parsedBody?.stream;
-  const guid = parsedBody?.guid || null;
+  let guid = parsedBody?.guid || null;
+
+  // 2026-09-07 신설 — market/school/stock 등 지갑 없는(전화번호 인증만
+  // 한) 세션이 guid 없이(또는 'anonymous'로) 호출하면 _gdcFreeQuotaGate와
+  // _chargeGdcForAiUsage가 둘 다 조용히 통과시켜(guid 없으면 무료 게이트
+  // 자체를 건너뜀) 완전히 무과금·무기록으로 새고 있었다(주피터 지적,
+  // 2026-09-07 원칙: "모든 사용은 개별 사용자별로 과금"). guid가 없거나
+  // 'anonymous'인데 phone_verify_token이 있으면 그걸로 실제 guid를
+  // 도출한다. 실패해도 기존처럼(guid 없음 취급) 계속 진행 — 이 경로는
+  // desktop.html 방문자 데모 위젯처럼 원래 비로그인 허용 호출도 섞여
+  // 있어 여기서 강제 차단하지 않는다(하드 필수화는 별도 결정 필요).
+  if ((!guid || guid === 'anonymous') && parsedBody?.phone_verify_token) {
+    const _dsAuth = await _resolveGuidFromPhoneVerifyToken(env, parsedBody.phone_verify_token);
+    if (_dsAuth.ok) guid = _dsAuth.guid;
+  }
 
   // ── 티어 해석(2026-08-14 개정) — 클라이언트가 보낸 model 값은 더 이상
   // 신뢰하지 않는다. "hondi-flash"/"hondi-pro" 같은 알려진 티어명이든,
@@ -24215,7 +24229,24 @@ async function handleGovRelay(bodyText, env, corsHeaders, meta = null, ctx = nul
   // 빼지 않고 받되 밑에서 안 쓴다 — 2026-08-14부터 서버가 직접
   // 재계산하므로(아래 tierKey), 구버전 클라이언트가 이 필드를 여전히
   // 보내도 조용히 무시된다(하위호환, 에러 없음).
-  const { guid, agency, agencyPrompt, messages, max_tokens, stream, tier: _clientTierIgnored, provinceCode, currentLocation, task_key, gov_task_roundtrips } = body || {};
+  let { guid, agency, agencyPrompt, messages, max_tokens, stream, tier: _clientTierIgnored, provinceCode, currentLocation, task_key, gov_task_roundtrips, phone_verify_token } = body || {};
+
+  // 2026-09-07 신설 — regional-gov.html처럼 지갑 없는 기기(새 기기·
+  // 시크릿 모드 등)에서 phone_verify_token(k-service-auth-client.js)만
+  // 들고 오는 세션을 위한 경로. klaw/kplan/kjit·kcity와 동일 패턴
+  // (_resolveGuidFromPhoneVerifyToken)으로 guid를 서버에서 직접
+  // 도출한다 — 클라이언트가 보낸 guid는 이 경우 무시하고 치환한다.
+  // phone_verify_token이 없으면(기존 GWP_TOKEN/지갑 guid 경로) 기존
+  // 동작 그대로 하위호환 유지 — K-Public 등 기존 흐름은 안 깨진다.
+  if (phone_verify_token) {
+    const _govAuth = await _resolveGuidFromPhoneVerifyToken(env, phone_verify_token);
+    if (!_govAuth.ok) {
+      const { status, code, message } = mapPhoneAuthError(_govAuth);
+      return _err(status, code, message, corsHeaders);
+    }
+    guid = _govAuth.guid;
+  }
+
   if (!guid || !agency || !Array.isArray(messages)) return _err(400, 'MISSING_FIELD', 'guid/agency/messages 필수', corsHeaders);
   if (!GOV_AGENCIES.has(agency)) return _err(400, 'UNKNOWN_AGENCY', `등록되지 않은 기관: ${agency}`, corsHeaders);
   // provinceCode는 선택 필드(2026-07-21 신설) — gov_do/gov_national 위임
