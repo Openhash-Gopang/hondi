@@ -1,0 +1,22 @@
+[
+  {
+    "no": 1,
+    "title": "일반 상담(case_id 없음) — 순수 토큰 종량제 × 10배(klaw-flash) 차감 검증",
+    "requires_funded_guid": true,
+    "case_id": null,
+    "claim_amount_krw": null,
+    "step_cycle": false,
+    "notes": "베타 기간(~2026-12-31) K-Law 사용량 과금의 가장 단순한 경로. worker.js의 KLAW_TIER_MODELS['klaw-flash'].price(cacheHit 0.0028 / cacheMiss 0.14 / output 0.28, $/1M) × USD_TO_KRW(1500) × KLAW_BETA_MULTIPLIER['klaw-flash'](10)를 응답에 포함된 실제 usage로 재계산해, /biz/balance-status 전후 차감액과 일치하는지 확인한다.",
+    "repeat": 30
+  },
+  {
+    "no": 2,
+    "title": "사건단위 필드(case_id+claim_amount_krw+step_cycle) 동반 — 베타 중엔 여전히 토큰 종량제여야 함(정액 폴백 회귀 방지)",
+    "requires_funded_guid": true,
+    "case_id": "auto",
+    "claim_amount_krw": 12000000,
+    "step_cycle": true,
+    "notes": "worker.js 18896-18898행: _klawBetaActive가 true인 동안은 _klawFlatFee/_klawIsCaseFlow가 항상 null/false로 강제된다 — 즉 사건단위 필드를 전부 채워 보내도 베타 기간에는 정액과금(예: 12,000,000원 구간 10,000원)이 아니라 여전히 순수 토큰 종량제 × 10배로 청구돼야 한다. 시나리오 1과 같은 방식으로 검증하되, 정액표 폴백이 실수로 살아나는 회귀를 잡는 것이 목적.",
+    "repeat": 30
+  }
+]
