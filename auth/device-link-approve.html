@@ -306,27 +306,51 @@
       // credential로 이 세션 전용 챌린지에 서명해야만 다음 단계로 진행한다.
       // 아직 등록 안 된 기기라면(이 지문 인증은 지갑 자체 PRF와 별개
       // credential이라 가입 시 자동등록이 실패했을 수도 있음) 여기서
-      // 바로 등록을 유도한다 — 지문 인증 없이는 승인 자체가 불가능하다.
-      setStatus('지문/Face ID 확인이 필요합니다...');
-      dlog('생체(step-up) 인증 시도');
-      let stepUp = await GopangWallet.requireStepUpBiometric(wallet.guid, `device-link:${sessionId}`);
-      if (!stepUp.ok && stepUp.reason === 'NOT_ENROLLED') {
-        dlog('생체인증 미등록 — 지금 등록을 시도합니다');
-        const enrollResult = await GopangWallet.enrollStepUpBiometric(wallet.guid);
-        if (!enrollResult.ok) {
-          throw new Error(
-            '지문/Face ID 등록에 실패했습니다(' + enrollResult.reason + ') — ' +
-            '보안을 위해 지문 인증 없이는 다른 기기의 로그인을 승인할 수 없습니다. ' +
-            '지문·Face ID를 지원하는 기기/브라우저에서 다시 시도해 주세요.'
-          );
-        }
-        dlog('생체인증 등록 완료 — 재시도', 'ok');
+      // 바로 등록을 유도한다.
+      //
+      // 2026-09-07 추가 개정 — 사용자가 설정에서 이 필수 요구를 스스로
+      // 끌 수 있게 됐다(§PROTECTIVE_SETTINGS 'device_link_biometric_required',
+      // 위험 고지 + 지문 확인 + 24시간 유예를 거쳐야만 꺼짐). 서버가
+      // 최종 판단을 하므로(handleDeviceLinkVerify) 여기서 꺼져 있다고
+      // 잘못 판단해도 안전하게 막히지만, 꺼진 사용자에게 불필요한 지문
+      // 프롬프트를 안 띄우기 위해 여기서도 먼저 확인한다.
+      let biometricRequired = true;
+      try {
+        const settingRes = await fetch(
+          `${WORKER}/account/protective-setting?guid=${encodeURIComponent(wallet.guid)}&key=device_link_biometric_required`
+        );
+        const settingData = await settingRes.json();
+        if (settingRes.ok && settingData.ok && settingData.value === false) biometricRequired = false;
+      } catch (e) {
+        dlog('보호 설정 조회 실패(안전한 쪽으로 진행): ' + e.message);
+      }
+
+      let stepUp = { ok: true, step_up_token: null };
+      if (biometricRequired) {
+        setStatus('지문/Face ID 확인이 필요합니다...');
+        dlog('생체(step-up) 인증 시도');
         stepUp = await GopangWallet.requireStepUpBiometric(wallet.guid, `device-link:${sessionId}`);
+        if (!stepUp.ok && stepUp.reason === 'NOT_ENROLLED') {
+          dlog('생체인증 미등록 — 지금 등록을 시도합니다');
+          const enrollResult = await GopangWallet.enrollStepUpBiometric(wallet.guid);
+          if (!enrollResult.ok) {
+            throw new Error(
+              '지문/Face ID 등록에 실패했습니다(' + enrollResult.reason + ') — ' +
+              '보안을 위해 지문 인증 없이는 다른 기기의 로그인을 승인할 수 없습니다. ' +
+              '지문·Face ID를 지원하는 기기/브라우저에서 다시 시도해 주세요. ' +
+              '(설정에서 이 요구를 끌 수도 있습니다 — 위험을 감수하는 선택입니다.)'
+            );
+          }
+          dlog('생체인증 등록 완료 — 재시도', 'ok');
+          stepUp = await GopangWallet.requireStepUpBiometric(wallet.guid, `device-link:${sessionId}`);
+        }
+        if (!stepUp.ok) {
+          throw new Error('지문/Face ID 인증에 실패했습니다(' + stepUp.reason + ') — 본인 확인을 위해 반드시 필요합니다.');
+        }
+        dlog('생체 인증 완료', 'ok');
+      } else {
+        dlog('설정에서 지문 인증을 생략하도록 돼 있음 — 건너뜀');
       }
-      if (!stepUp.ok) {
-        throw new Error('지문/Face ID 인증에 실패했습니다(' + stepUp.reason + ') — 본인 확인을 위해 반드시 필요합니다.');
-      }
-      dlog('생체 인증 완료', 'ok');
 
       const verifyRes = await fetch(`${WORKER}/auth/device-link/verify`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },

@@ -13410,11 +13410,18 @@ async function handleBizOrder(request, env, corsHeaders, ctx) {
       // 2026-07-13 신설 — GDC-재무제표-재고 연동 4단계(매출원가 인식).
       // 판매된 항목 중 cost_price(매입원가)가 알려진 것만 골라 매출원가
       // (pl-cogs)를 계산한다 — 모르면(cost_price=null) 그 항목은 그냥
-      // 제외한다(억지로 추정하지 않음). 재고자산(bs-inventory) 계정으로
-      // 매입 단계부터 자산 계상하는 정식 발생주의 회계는 매입 쪽에
-      // "재고용 매입 의도" 추적이 별도로 필요해 범위가 훨씬 커진다 —
-      // 이번 단계는 "판매 시점에 원가를 얼마나 아는가"만으로 매출총이익
-      // (매출-매출원가) 가시성을 주는 것으로 의도적으로 범위를 좁혔다.
+      // 제외한다(억지로 추정하지 않음).
+      //
+      // 2026-09-07 확장(사용자 지시 — 재고자산 도입) — 이 매출원가만큼
+      // 판매자의 재고자산(bs-inventory)도 함께 줄여야 매입-재고-매출원가가
+      // 발생주의로 맞물린다(purpose='inventory_purchase'로 매입한 만큼
+      // 쌓인 재고를 판매 시점에 정확히 소진 처리). 한계: 판매자가 해당
+      // 상품을 재고 매입(purpose='inventory_purchase')으로 태깅해
+      // 사입한 적이 없으면(예: 매입 기록 없이 상품만 등록) 이 차감으로
+      // bs-inventory가 음수가 될 수 있다 — 실제 사입 이력 없이 판매가
+      // 발생한 경우이므로, handleSettleLedger가 그 음수를 그대로 노출해
+      // 실사(재고 태깅 누락)를 유도한다(억지로 0에서 멈추지 않음 — 숨기지
+      // 않는 게 원칙).
       let totalCogs = 0;
       if (orderCatalog && txItems.length) {
         const byIdForCogs = new Map(orderCatalog.map(r => [r.id, r]));
@@ -13431,6 +13438,12 @@ async function handleBizOrder(request, env, corsHeaders, ctx) {
           claimant: seller_guid,
           fs_account: 'pl-cogs',
           direction: 'debit',
+          amount: totalCogs,
+        });
+        claimsToStore.push({
+          claimant: seller_guid,
+          fs_account: 'bs-inventory',
+          direction: 'credit', // 재고자산 감소(매출원가로 소진)
           amount: totalCogs,
         });
       }
@@ -28571,7 +28584,7 @@ async function handleSettleLedger(request, env, corsHeaders) {
   // 하나뿐이라 판매자용/구매자용 레코드가 같은 쿼리로 함께 잡힌다 —
   // 아래 루프에 pl-purchase 분기만 추가하면 된다(모든 사업자는 사고
   // 팔므로, 한 계정의 pending_claims에 두 종류가 섞여 있는 게 정상이다).
-  let revenue = 0, cogs = 0, purchases = 0;
+  let revenue = 0, cogs = 0, purchases = 0, inventory = 0;
   let page = 1, truncated = false;
   const PER_PAGE = 100, MAX_PAGES = 20;
   const filter = encodeURIComponent(`claimant='${guid}'`);
@@ -28591,6 +28604,12 @@ async function handleSettleLedger(request, env, corsHeaders) {
         if (c.fs_account === 'pl-revenue' && c.direction === 'credit') revenue += amt;
         else if (c.fs_account === 'pl-cogs' && c.direction === 'debit') cogs += amt;
         else if (c.fs_account === 'pl-purchase' && c.direction === 'debit') purchases += amt;
+        // 2026-09-07 신설(사용자 지시 — 재고자산 도입) — purpose='inventory_purchase'로
+        // 태깅된 매입(debit, 자산 증가)과 판매 시 매출원가로 소진되는 만큼
+        // (credit, 자산 감소)을 상계해 재고자산 잔액을 낸다. 순수 net 값이라
+        // 실제 사입 이력 없이 판매만 발생하면 음수가 될 수 있다 — 그대로 노출한다.
+        else if (c.fs_account === 'bs-inventory' && c.direction === 'debit') inventory += amt;
+        else if (c.fs_account === 'bs-inventory' && c.direction === 'credit') inventory -= amt;
       }
     }
     if (page >= (data.totalPages || 1)) break;
@@ -28625,6 +28644,11 @@ async function handleSettleLedger(request, env, corsHeaders) {
     'pl-purchase':      String(purchases),
     'pl-net-income':    String(netIncome),
   };
+  // 2026-09-07 신설 — 재고자산은 손익계산서 계정이 아니라 재무상태표
+  // (bs) 계정이므로 ex.fs.pl이 아니라 ex.fs.bs에 별도로 PATCH한다.
+  const bsPatch = {
+    'bs-inventory': String(inventory),
+  };
 
   // L1 profiles.extra.fs.pl PATCH — 유일한 쓰기 대상(Supabase 미사용).
   const profile = await _l1FindProfileByGuid(env, guid);
@@ -28635,6 +28659,7 @@ async function handleSettleLedger(request, env, corsHeaders) {
     const ex = profile.extra || {};
     ex.fs = ex.fs || {};
     ex.fs.pl = { ...(ex.fs.pl || {}), ...plPatch };
+    ex.fs.bs = { ...(ex.fs.bs || {}), ...bsPatch };
     await _l1PatchProfile(env, profile.id, { extra: ex });
     l1Ok = true;
   } catch (e) {
@@ -28677,6 +28702,7 @@ async function handleSettleLedger(request, env, corsHeaders) {
     const snapshotContent = {
       guid, seq: nextSeq,
       pl: { revenue, cogs, purchases, gross_profit: grossProfit, opex, net_income: netIncome },
+    bs: { inventory },
       bs: { cash },
       computed_at: new Date().toISOString(),
     };
@@ -28706,6 +28732,7 @@ async function handleSettleLedger(request, env, corsHeaders) {
   return new Response(JSON.stringify({
     ok: true,
     pl: { revenue, cogs, purchases, gross_profit: grossProfit, opex, net_income: netIncome },
+    bs: { inventory },
     truncated,
     l1_updated: l1Ok,
     fs_snapshot: fsSnapshot,
