@@ -301,6 +301,17 @@ def main():
     print("\n=== SUMMARY ===")
     print(json.dumps(summary, ensure_ascii=False, indent=2))
 
+    # ★ 2026-09-07 수정 — 이전 버전은 채점 결과와 무관하게 항상 exit 0으로
+    # 끝나, LIVE-FAIL/LIVE-ERROR가 있어도 CI 단계가 초록불로 표시되는
+    # 결함이 있었다(라이브 실행에서 실제로 재현됨 — funded_guid 오류로
+    # 두 시나리오 모두 LIVE-FAIL이었는데 워크플로는 success였음). 이제
+    # LIVE-FAIL 또는 LIVE-ERROR가 하나라도 있으면 비정상 종료해 CI 단계
+    # 자체를 실패로 표시한다. LIVE-PASS/LIVE-SKIPPED만 있으면 0으로 종료.
+    bad = counts.get("LIVE-FAIL", 0) + counts.get("LIVE-ERROR", 0)
+    if bad > 0:
+        print(f"\n{bad}개 시나리오가 LIVE-FAIL/LIVE-ERROR — 비정상 종료(exit 1)", file=sys.stderr)
+        sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
