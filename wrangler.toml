@@ -1,4 +1,4 @@
-# hondi-proxy Cloudflare Worker 배포 설정
+﻿# hondi-proxy Cloudflare Worker 배포 설정
 # 2026-07-12 — CI/CD 자동배포 구축(수동 복사-붙여넣기 방식 근본 해결).
 #
 # 바인딩은 Cloudflare 대시보드(Workers & Pages > hondi-proxy > Bindings)
@@ -47,7 +47,7 @@ id = "cf1dc69a346747ac8319a6cab85640cf"
 #   실사 확인한 값으로 교체할 것 — 다른 바인딩들과 동일 원칙(추측 금지).
 [[kv_namespaces]]
 binding = "HONDI_SEARCH_HISTORY"
-id = "REPLACE_WITH_REAL_KV_ID"
+id = "1f4830905eb34e4abc65451b62d4e19b"
 
 [[services]]
 binding = "AGENT_SIGNER"
