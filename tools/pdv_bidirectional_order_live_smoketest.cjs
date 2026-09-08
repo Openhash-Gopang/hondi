@@ -61,6 +61,17 @@ if (!PB_ADMIN_EMAIL || !PB_ADMIN_PASSWORD) {
 function log(...args) { console.log('[TEST]', ...args); }
 function fail(msg) { console.error('\n[FAIL]', msg); process.exit(1); }
 
+// PocketBase의 summary_6w는 (schema type이 'json'이라) API 응답에서 이미
+// 파싱된 객체/배열로 돌아온다 — 문자열로 가정하고 JSON.parse()를 그대로
+// 걸면 "[object Object]"를 파싱하려다 조용히 실패해(catch가 삼킴) 빈
+// 객체로 남는다(실사로 발견 — who/what/why가 전부 undefined로 보였던
+// 원인이 실제 기록 문제가 아니라 이 파싱 가정 오류였다). 문자열이면
+// 그대로 파싱하고, 이미 객체면 그대로 쓴다.
+function parse6w(raw) {
+  if (raw && typeof raw === 'object') return raw;
+  try { return JSON.parse(raw || '{}'); } catch { return {}; }
+}
+
 // ── gopang-wallet.js sortedStringify 원본 포팅 ──────────────────────
 function sortedStringify(obj) {
   if (obj === null || typeof obj !== 'object' || Array.isArray(obj)) {
@@ -222,24 +233,20 @@ async function main() {
   const pbToken = await pbAdminLogin();
   {
     const buyerRecs = await pbFind(pbToken, 'pdv_records', `guid='${buyer.guid}' && block_hash='${block_hash}'`);
-    log('[DEBUG] 구매자 pdv_records 원본:', JSON.stringify(buyerRecs));
     if (buyerRecs.length !== 1) fail(`구매자 pdv_records 레코드 개수 이상 — 기대 1, 실제 ${buyerRecs.length}`);
     const buyerRec = buyerRecs[0];
     if (buyerRec.type !== 'tx_2party') fail(`구매자 pdv_records.type 불일치: ${buyerRec.type}`);
-    let buyerSixw = {};
-    try { buyerSixw = JSON.parse(buyerRec.summary_6w || '{}'); } catch {}
+    let buyerSixw = parse6w(buyerRec.summary_6w);
     if (!/^buyer\(/.test(buyerSixw.who || '')) fail(`구매자 who 필드 불일치: ${JSON.stringify(buyerSixw.who)}`);
     if (!/^구매:/.test(buyerSixw.what || ''))   fail(`구매자 what 필드 불일치: ${JSON.stringify(buyerSixw.what)}`);
     if (buyerSixw.why !== '상품 구매 거래')      fail(`구매자 why 필드 불일치: ${JSON.stringify(buyerSixw.why)}`);
     log('[PASS] 구매자 PDV 거래명세서 확인 —', JSON.stringify({ who: buyerSixw.who, what: buyerSixw.what, why: buyerSixw.why }));
 
     const sellerRecs = await pbFind(pbToken, 'pdv_records', `guid='${seller.guid}' && block_hash='${block_hash}'`);
-    log('[DEBUG] 판매자 pdv_records 원본:', JSON.stringify(sellerRecs));
     if (sellerRecs.length !== 1) fail(`판매자 pdv_records 레코드 개수 이상(양방향화 회귀!) — 기대 1, 실제 ${sellerRecs.length}`);
     const sellerRec = sellerRecs[0];
     if (sellerRec.type !== 'tx_2party') fail(`판매자 pdv_records.type 불일치: ${sellerRec.type}`);
-    let sellerSixw = {};
-    try { sellerSixw = JSON.parse(sellerRec.summary_6w || '{}'); } catch {}
+    let sellerSixw = parse6w(sellerRec.summary_6w);
     if (!/^seller\(/.test(sellerSixw.who || '')) fail(`판매자 who 필드 불일치: ${JSON.stringify(sellerSixw.who)}`);
     if (!/^판매:/.test(sellerSixw.what || ''))    fail(`판매자 what 필드 불일치: ${JSON.stringify(sellerSixw.what)}`);
     if (sellerSixw.why !== '상품 판매 거래')       fail(`판매자 why 필드 불일치: ${JSON.stringify(sellerSixw.why)}`);
