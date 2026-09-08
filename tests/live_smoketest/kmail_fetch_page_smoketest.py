@@ -83,9 +83,23 @@ FETCH_TAG_RE = re.compile(r"KMAIL_FETCH_PAGE\s*(\{[\s\S]*\})\s*$")
 EMAIL_RE = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
 
 # 사용자에게 직접 이메일/URL을 되묻는 패턴 — 실사례 회귀의 핵심 신호.
+# 2026-09-08 1차 개정: 최초 버전은 "직접\s*(접속|열람)"만 봐서 "제가
+# 직접 열람하겠습니다"(자기 자신이 하겠다는 말)까지 오탐(사용자에게
+# 되묻는 것으로 오판)했다 — 실제 사용자에게 요청하는 존댓말 종결
+# ("~주시겠어요/주세요/주시면")이 함께 있어야만 진짜 되묻기로 판정하도록
+# 좁혔다.
 ASK_USER_RE = re.compile(
-    r"(URL\s*을?\s*(알려|보내)|직접\s*(접속|열람)|(이메일|메일\s*주소).{0,10}(알려|보내)\s*주(시겠|세요|시면))",
+    r"(URL|이메일|메일\s*주소|링크).{0,15}(알려|보내|말씀).{0,8}주(시겠|시면|세요)"
+    r"|직접\s*(접속|열람)\s*하(셔서|시고).{0,15}(알려|말씀).{0,8}주(시겠|시면|세요)",
     re.IGNORECASE,
+)
+
+# "확인해보겠습니다"류 의도 서술만 하고 실제 태그를 안 내는 패턴
+# (2026-09-08 라이브 스모크테스트 1차 실행에서 실제로 발견됨 — SP
+# v1.13에서 이걸 막는 경고를 추가했다. 이 하네스는 그 회귀가 재발하면
+# 다시 잡아내야 한다).
+DECLARED_INTENT_RE = re.compile(
+    r"(확인해\s*보겠습니다|열람해(서|\s*보겠습니다)|찾아보겠습니다|검색해\s*보겠습니다|확인하겠습니다|열어\s*보겠습니다)"
 )
 
 
@@ -141,21 +155,42 @@ def call_deepseek(api_key, system_prompt, turns):
 
 
 def build_search_context(mock_search_results):
-    """worker.js 34193행 부근 searchContext 문자열과 동일한 포맷.
-    (worker.js가 바뀌면 이 문자열도 같이 갱신할 것.)"""
+    """worker.js searchContext 문자열과 동일한 포맷(2026-09-08 v1.13
+    갱신 — '말만 하고 태그 누락' 방지 문구 포함. worker.js가 바뀌면
+    이 문자열도 같이 갱신할 것.)"""
     return (
         f"[검색 결과]\n{json.dumps(mock_search_results, ensure_ascii=False)}\n\n"
         "위 검색 결과를 바탕으로, 실제로 확인되는 이름·소속만 사용자에게 후보로 "
         "제시하세요. 스니펫에 이메일이 안 보이면 절대 바로 사용자에게 묻지 마세요 "
         "— organic 결과 중 학과·연구실 공식 홈페이지나 교수진 명단으로 보이는 "
         "링크가 있으면 KMAIL_FETCH_PAGE 태그로 먼저 열람해 보세요. 적절한 링크가 "
-        "없을 때만 정직하게 말하고 사용자에게 직접 물어보세요. (이 메시지 자체는 "
-        "사용자에게 보이지 않습니다 — 자연스러운 답변만 작성하세요.)"
+        "없을 때만 정직하게 말하고 사용자에게 직접 물어보세요. 페이지를 열람하겠다고 "
+        '"말만" 하고 실제 KMAIL_FETCH_PAGE 태그를 안 내면 아무 일도 일어나지 '
+        "않습니다 — 열람하기로 했으면 이번 응답 끝에 반드시 그 태그를 실제로 "
+        "출력하세요. (이 메시지 자체는 사용자에게 보이지 않습니다 — 자연스러운 "
+        "답변만 작성하세요.)"
     )
 
 
-def build_page_context(mock_fetch_result):
-    """worker.js _kmailRunFetchPageChain의 pageContext 문자열과 동일한 포맷."""
+def build_page_context(mock_fetch_result, rounds_left_after_this=1):
+    """worker.js _kmailRunFetchPageChain의 pageContext 문자열과 동일한
+    포맷(2026-09-08 v1.13 갱신 — retryNote/tagReminder 반영). 이 하네스는
+    첫 페이지 열람만 시뮬레이션하므로 rounds_left_after_this 기본값을
+    실제(KMAIL_FETCH_PAGE_MAX_ROUNDS=2에서 1회 소모 후 남는 값)와 맞춰
+    1로 둔다."""
+    retry_note = (
+        "이메일을 못 찾았으면, 검색 결과에 다른 유력한 링크가 남아있을 때만 "
+        "KMAIL_FETCH_PAGE로 한 번 더 시도해볼 수 있습니다(단, 없으면 바로 §1-(d)로)."
+        if rounds_left_after_this > 0
+        else "이제 더 이상 다른 링크는 시도할 수 없습니다 — 정 안 되면 §1-(d)대로 "
+        "정직하게 실패를 알리고 사용자에게 물어보세요."
+    )
+    tag_reminder = (
+        ' 다른 링크로 다시 시도하기로 했다면, "다시 확인해보겠습니다" 같은 말만 '
+        "하지 말고 이번 응답 끝에 실제 KMAIL_FETCH_PAGE 태그를 출력하세요."
+        if rounds_left_after_this > 0
+        else ""
+    )
     if mock_fetch_result.get("ok"):
         payload = {
             "url": mock_fetch_result.get("url", ""),
@@ -167,16 +202,14 @@ def build_page_context(mock_fetch_result):
             "위에서 실제로 발견된 이메일만 후보로 제시하세요(emails_found가 "
             "비어있으면 이 페이지에서도 못 찾은 것이니 지어내지 말고 정직하게 "
             "말하세요). text_snippet에서 이름과 이메일을 짝지을 수 있으면 짝지어 "
-            "보여주세요. 정 안 되면 §1-(d)대로 정직하게 실패를 알리고 사용자에게 "
-            "물어보세요(더 이상 다른 링크는 시도할 수 없습니다). (이 메시지 자체는 "
-            "사용자에게 보이지 않습니다.)"
+            f"보여주세요. {retry_note}{tag_reminder} (이 메시지 자체는 사용자에게 "
+            "보이지 않습니다.)"
         )
     payload = {"error": mock_fetch_result.get("error"), "message": mock_fetch_result.get("message")}
     return (
         f"[페이지 열람 실패]\n{json.dumps(payload, ensure_ascii=False)}\n\n"
-        "페이지를 열람하지 못했습니다. §1-(d)대로 정직하게 실패했다고 말하고 "
-        "사용자에게 직접 이메일을 알려달라고 요청하세요(더 이상 다른 링크는 "
-        "시도할 수 없습니다). (이 메시지 자체는 사용자에게 보이지 않습니다.)"
+        f"페이지를 열람하지 못했습니다. {retry_note}{tag_reminder} (이 메시지 "
+        "자체는 사용자에게 보이지 않습니다.)"
     )
 
 
@@ -201,6 +234,8 @@ def run_scenario(api_key, system_prompt, scenario):
 
     search_match = SEARCH_TAG_RE.search(text1)
     if not search_match:
+        if DECLARED_INTENT_RE.search(text1):
+            return "FAIL", ["라운드1에서 검색하겠다고 말만 하고 KMAIL_SEARCH_CONTACTS 태그를 안 냄 — '말만 하고 태그 누락' 회귀(SP v1.13 이후 재발하면 안 됨)"], transcript, usage_total
         return "NEEDS-REVIEW", ["라운드1에서 KMAIL_SEARCH_CONTACTS를 호출하지 않음 — 시나리오 설계상 검색이 필요한 상황인데 다른 경로로 샜을 수 있음(사람 확인 필요)"], transcript, usage_total
 
     clean1 = text1[: search_match.start()].strip()
@@ -228,6 +263,9 @@ def run_scenario(api_key, system_prompt, scenario):
         clean2 = text2.strip()
         if ASK_USER_RE.search(clean2):
             notes.append("⚠ 페이지 열람을 시도하지 않고 바로 사용자에게 URL/이메일을 되물음 — 실사례 회귀(FAIL)")
+            return "FAIL", notes, transcript, usage_total
+        if DECLARED_INTENT_RE.search(clean2):
+            notes.append("⚠ 페이지를 열람하겠다고 말만 하고 실제 KMAIL_FETCH_PAGE 태그를 안 냄 — '말만 하고 태그 누락' 회귀(FAIL, SP v1.13 이후 재발하면 안 됨)")
             return "FAIL", notes, transcript, usage_total
         notes.append("페이지 열람도 안 하고 사용자에게 되묻지도 않음 — 예상 밖 경로(사람 확인 필요)")
         return "NEEDS-REVIEW", notes, transcript, usage_total
@@ -280,6 +318,10 @@ def run_scenario(api_key, system_prompt, scenario):
     transcript.append({"round": 3, "role": "assistant", "content": text3})
     if err3 or text3 is None:
         return "ERROR", notes + [f"라운드3 API 호출 실패: {err3}"], transcript, usage_total
+
+    if FETCH_TAG_RE.search(text3):
+        notes.append("라운드3에서 두 번째 KMAIL_FETCH_PAGE를 다시 시도함 — 이 하네스는 4라운드까지 시뮬레이션하지 않으므로 사람이 raw_response를 직접 확인할 것(2번째 링크 자체가 시나리오에 없다면 URL을 지어냈을 위험도 같이 볼 것)")
+        return "NEEDS-REVIEW", notes, transcript, usage_total
 
     expected_email = scenario.get("expect_final_email_present")
     found_emails = EMAIL_RE.findall(text3)
