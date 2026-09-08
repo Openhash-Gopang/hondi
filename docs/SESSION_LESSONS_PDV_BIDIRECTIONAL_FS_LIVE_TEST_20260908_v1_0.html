@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<!--
+  이 문서가 다루는 범위: 2026-09-08 세션(_recordOrderPdv가 구매자
+  거래명세서만 기록하고 판매자 몫을 버리던 편측 기록 발견·양방향화 →
+  이를 검증하는 라이브 스모크테스트 신규 작성 → 검증 과정에서 만난
+  세 가지 순수 테스트 하네스 버그(PocketBase json 필드 재파싱,
+  응답 구조 오독, TX_HASH_MISMATCH 오인) → 최종 전 구간 PASS) 에서
+  실제로 밟은 과정과 확인된 사실을 다룹니다. 특정 기능의 사용법이
+  아니라 "다음에 같은 부류의 문제를 마주쳤을 때 반복하지 말아야 할
+  시행착오"를 기록해두기 위한 것입니다.
+  관련 문서: MANUAL_INDEX.html 에서 전체 문서 지도 확인
+  (desktop.html 좌측 사이드바 "🛠 개발자 문서" 섹션에서 링크됨)
+  v1.0(2026-09-08): 신설
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDV 양방향 거래명세서 + 재무제표 검증 실전 교훈 매뉴얼 — Gopang</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+:root {
+  --ink:      #111111;
+  --ink-2:    #3a3a3a;
+  --ink-3:    #6b6b6b;
+  --ink-4:    #9a9a9a;
+  --line:     #e2e2e2;
+  --line-2:   #cfcfcf;
+  --bg:       #ffffff;
+  --bg-2:     #fafafa;
+  --bg-3:     #f2f2f2;
+  --accent:   #34495e;
+  --accent-lt:#eef1f4;
+  --good:     #2e7d4f;
+  --good-lt:  #eaf6ef;
+  --warn:     #9a6b1f;
+  --warn-lt:  #fbf3e6;
+  --mono:     'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  --radius:   4px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Pretendard', -apple-system, 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.doc-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,0.94);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.doc-header-inner {
+  max-width: 1040px; margin: 0 auto;
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.doc-logo {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 14px; font-weight: 700; color: var(--ink);
+  text-decoration: none; letter-spacing: -0.2px;
+}
+.doc-logo svg { color: var(--ink-3); }
+.doc-header-sub {
+  font-size: 12px; color: var(--ink-4); font-weight: 400;
+  padding-left: 9px; border-left: 1px solid var(--line-2); margin-left: 2px;
+}
+.doc-back {
+  font-size: 12px; color: var(--ink-3); text-decoration: none;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.doc-back:hover { color: var(--ink); }
+.doc-back svg { flex-shrink: 0; }
+
+.doc-layout {
+  max-width: 1200px; margin: 0 auto;
+  padding: 40px 24px 100px;
+  display: grid;
+  grid-template-columns: 216px 1fr;
+  gap: 44px;
+  align-items: start;
+}
+@media (max-width: 860px) {
+  .doc-layout { grid-template-columns: 1fr; }
+  .doc-toc { display: none; }
+}
+.doc-toc { position: sticky; top: 72px; }
+.doc-toc-title {
+  font-size: 12px; font-weight: 700; letter-spacing: .8px;
+  text-transform: uppercase; color: var(--ink-4);
+  margin-bottom: 10px;
+}
+.doc-toc a {
+  display: block;
+  font-size: 12px; color: var(--ink-3);
+  text-decoration: none;
+  padding: 5px 0 5px 11px;
+  border-left: 2px solid var(--line);
+  line-height: 1.4;
+  transition: color .12s, border-color .12s;
+}
+.doc-toc a:hover, .doc-toc a.active {
+  color: var(--ink);
+  border-left-color: var(--accent);
+  font-weight: 600;
+}
+
+.doc-content { min-width: 0; }
+
+.gs {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+  overflow: hidden;
+  opacity: 0; transform: translateY(10px);
+  transition: opacity .4s ease, transform .4s ease;
+}
+.gs.in { opacity: 1; transform: none; }
+.gs-head {
+  display: flex; align-items: flex-start; gap: 13px;
+  padding: 20px 24px;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--line);
+}
+.gs-icon {
+  flex-shrink: 0; width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent);
+  background: var(--accent-lt);
+  border-radius: var(--radius);
+}
+.gs-icon.good { color: var(--good); background: var(--good-lt); }
+.gs-icon.warn { color: var(--warn); background: var(--warn-lt); }
+.gs-icon svg { width: 16px; height: 16px; }
+.gs-head-text { flex: 1; }
+.gs-num {
+  font-size: 11px; font-weight: 700; letter-spacing: .6px;
+  text-transform: uppercase; color: var(--ink-4);
+  margin-bottom: 2px;
+}
+.gs-title { font-size: 16px; font-weight: 700; color: var(--ink); }
+.gs-subtitle { font-size: 12.5px; color: var(--ink-3); margin-top: 3px; }
+.gs-body { padding: 22px 24px 24px; }
+.gs-body p { margin-bottom: 14px; color: var(--ink-2); }
+.gs-body p:last-child { margin-bottom: 0; }
+.gs-body ul, .gs-body ol { margin: 0 0 14px 20px; color: var(--ink-2); }
+.gs-body li { margin-bottom: 7px; }
+.gs-body li:last-child { margin-bottom: 0; }
+.gs-body h4 { font-size: 13px; font-weight: 700; color: var(--ink); margin: 18px 0 8px; }
+.gs-body h4:first-child { margin-top: 0; }
+.gs-body code {
+  font-family: var(--mono); font-size: 12.5px;
+  background: var(--bg-3); border: 1px solid var(--line);
+  border-radius: 3px; padding: 1px 5px;
+}
+.gs-body pre {
+  background: #1c1c1c; color: #e8e8e8;
+  border-radius: var(--radius);
+  padding: 14px 16px; overflow-x: auto;
+  font-family: var(--mono); font-size: 12px; line-height: 1.6;
+  margin-bottom: 14px;
+}
+.gs-body pre code { background: none; border: none; padding: 0; color: inherit; }
+
+.callout {
+  border-left: 3px solid var(--accent);
+  background: var(--accent-lt);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 13px 16px;
+  font-size: 13px; color: var(--ink-2);
+  margin-bottom: 14px;
+}
+.callout-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11.5px; font-weight: 700; color: var(--ink);
+  text-transform: uppercase; letter-spacing: .4px;
+  margin-bottom: 6px;
+}
+.callout-label svg { width: 13px; height: 13px; }
+.callout.warn { border-left-color: var(--warn); background: var(--warn-lt); }
+.callout.good { border-left-color: var(--good); background: var(--good-lt); }
+.callout strong { color: var(--ink); }
+
+.doc-hero { margin-bottom: 32px; }
+.doc-hero-eyebrow {
+  font-size: 11.5px; font-weight: 700; letter-spacing: .5px;
+  color: var(--ink-4); text-transform: uppercase; margin-bottom: 10px;
+}
+.doc-hero-title {
+  font-size: 25px; font-weight: 800; line-height: 1.4; color: var(--ink);
+  margin-bottom: 14px; letter-spacing: -0.3px;
+}
+.doc-hero-title em { color: var(--accent); font-style: normal; }
+.doc-hero-desc { font-size: 14px; color: var(--ink-2); margin-bottom: 18px; max-width: 760px; }
+.doc-hero-meta {
+  display: flex; flex-wrap: wrap; gap: 16px;
+  font-size: 12px; color: var(--ink-3);
+  border-top: 1px solid var(--line); padding-top: 14px;
+}
+.doc-hero-meta strong { color: var(--ink-2); font-weight: 600; }
+
+table.evidence { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 12.5px; }
+table.evidence th, table.evidence td { border: 1px solid var(--line); padding: 7px 10px; text-align: left; }
+table.evidence th { background: var(--bg-3); font-weight: 700; color: var(--ink); }
+table.evidence td { color: var(--ink-2); }
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.in { opacity: 1; transform: translateY(0); }
+
+.badge {
+  display: inline-block; font-size: 11px; font-weight: 700;
+  padding: 2px 7px; border-radius: 3px;
+  background: var(--bg-3); color: var(--ink-3); border: 1px solid var(--line);
+  font-family: var(--mono);
+}
+.badge.merged { background: var(--good-lt); color: var(--good); border-color: var(--good); }
+.badge.todo { background: var(--warn-lt); color: var(--warn); border-color: var(--warn); }
+</style>
+</head>
+<body>
+
+<header class="doc-header">
+  <div class="doc-header-inner">
+    <a class="doc-logo" href="../desktop.html">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+      혼디 · Gopang
+      <span class="doc-header-sub">개발자 문서</span>
+    </a>
+    <a class="doc-back" href="../desktop.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      데스크톱으로 돌아가기
+    </a>
+  </div>
+</header>
+
+<div class="doc-layout">
+
+  <nav class="doc-toc">
+    <div class="doc-toc-title">목차</div>
+    <a href="#overview">개요 — 이 문서가 왜 있는가</a>
+    <a href="#goal">오늘 세션의 목표와 흐름</a>
+    <a href="#lesson-asymmetric">① 판매자만 기록되던 거래명세서 — _recordOrderPdv 편측 기록</a>
+    <a href="#lesson-jsonfield">② PocketBase json 필드를 문자열로 오인 — 이미 파싱된 값 재파싱</a>
+    <a href="#lesson-respshape">③ API 응답 구조를 추측하지 말 것 — pl 하위 객체를 최상위로 오독</a>
+    <a href="#lesson-txhash">④ 간헐적 실패를 코드 결함으로 오인하기 전에 — TX_HASH_MISMATCH 재확인</a>
+    <a href="#outcome">결과 — 검증된 사실</a>
+    <a href="#followup">후속 과제 — 아직 안 끝난 것</a>
+    <a href="#repro">재현 방법 — 라이브 스모크테스트</a>
+    <a href="#related">관련 문서</a>
+  </nav>
+
+  <main class="doc-content">
+
+    <div class="doc-hero reveal">
+      <div class="doc-hero-eyebrow">SESSION LESSONS — 2026-09-08 세션 발견 정리</div>
+      <h1 class="doc-hero-title">거래명세서는 <em>구매자</em> 몫만 있었다 — 검증 도구 자체도 세 번 틀렸다</h1>
+      <p class="doc-hero-desc">
+        "두 사람이 거래하면 양쪽 다 6하원칙 거래명세서를 남기고, 재무제표에도
+        양쪽 다 반영돼야 한다"는 지시에서 시작했다. 코드를 보니
+        <code>_recordOrderPdv</code>가 <code>seller_guid</code>를 인자로 받고도
+        실제로는 구매자 쪽 <code>pdv_records</code>만 기록하고 있었다 — 재무제표
+        쪽(<code>pending_claims</code>)은 이미 2026-09-07에 양방향화됐는데
+        PDV만 편측으로 남아있던 비대칭이었다. 고쳐서 라이브 스모크테스트로
+        검증하는 과정에서, 코드는 멀쩡한데 검증 스크립트 자체가 세 번 잘못된
+        결론(가짜 실패 2건, 진짜 원인 오인 1건)을 낼 뻔했다 — 그 세 가지를
+        구분해내는 과정 자체가 이 문서의 핵심이다.
+      </p>
+      <div class="doc-hero-meta">
+        <span><strong>대상 저장소</strong> Openhash-Gopang/hondi</span>
+        <span><strong>관련 PR</strong> #137 · #138 · #140 · #141 · #142</span>
+        <span><strong>작성</strong> 2026-09-08</span>
+      </div>
+    </div>
+
+    <section class="gs reveal" id="overview">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">Overview</div>
+          <div class="gs-title">이 문서가 왜 있는가</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          이 문서는 PDV나 재무제표 API 사용법을 다루지 않는다. 오늘 세션에서
+          반복적으로 확인된 패턴 — <strong>"두 당사자 거래를 한쪽 관점에서만
+          기록하는 코드는 절반의 진실만 말한다"</strong>와 <strong>"라이브
+          테스트가 실패했을 때, 대상 코드가 틀렸다고 단정하기 전에 검증 스크립트
+          자신의 가정부터 의심하라"</strong>는 두 교훈을 기록해두기 위한 것이다.
+        </p>
+        <div class="callout">
+          <div class="callout-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            이 문서를 읽어야 하는 상황
+          </div>
+          두 당사자(구매자/판매자, 발신자/수신자 등)가 관여하는 기록을 한쪽
+          관점에서만 남기는 코드를 리뷰할 때 / PocketBase의 <code>json</code>
+          타입 필드를 다루는 클라이언트·테스트 코드를 새로 짤 때 / 라이브
+          스모크테스트가 실패했는데 원인이 대상 코드인지 테스트 코드인지
+          확신이 안 설 때 / 간헐적으로만 실패하는 API 호출을 마주쳤을 때.
+        </div>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="goal">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">Goal</div>
+          <div class="gs-title">오늘 세션의 목표와 흐름</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          출발점은 "PDV는 사용자의 일상과 업무를 6하원칙으로 기록하고,
+          금전 거래는 재무제표에도 반영돼야 한다"는 요구였다. 조사 결과
+          거래명세서를 작성하는 코드(<code>_recordOrderPdv</code>)가 실제로
+          존재했지만, <code>seller_guid</code>를 인자로 받고도 본문 어디서도
+          쓰지 않는다는 게 드러났다 — 구매자 쪽만 <code>pdv_records</code>에
+          기록되고 판매자는 자기 거래 내역을 PDV에서 볼 수 없는 구조였다.
+          재무제표 쪽(<code>pending_claims</code> → <code>buyer_claim</code>/
+          <code>seller_claim</code>)은 2026-09-07에 이미 양방향화가 끝나 있었으니,
+          PDV만 뒤늦게 비대칭이 남아있던 셈이다.
+        </p>
+        <p>
+          흐름은: ① <code>_recordOrderPdv</code> 양방향화 → ② 이를 검증하는
+          라이브 스모크테스트(<code>pdv_bidirectional_order_live_smoketest.cjs</code>)
+          신규 작성 → ③ 실행·디버깅 반복(5회) → ④ 전 구간 PASS 확인, 순서로
+          진행됐다. ③ 단계에서 나온 실패 세 가지가 전부 검증 스크립트 자체의
+          버그였다는 게 오늘의 핵심 교훈이다.
+        </p>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="lesson-asymmetric">
+      <div class="gs-head">
+        <div class="gs-icon warn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">Lesson ①</div>
+          <div class="gs-title">판매자만 기록되던 거래명세서 — _recordOrderPdv 편측 기록</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          <code>worker.js</code>의 <code>_recordOrderPdv(env, { from_guid,
+          seller_guid, ... })</code>는 함수 시그니처에 <code>seller_guid</code>를
+          받으면서도, 본문에서는 <code>guid: from_guid</code> 한 줄만 써서
+          구매자 쪽 <code>pdv_records</code>에만 6하원칙 명세서를 남겼다.
+          <code>seller_guid</code>는 인자로 넘어오고도 함수 어디에서도
+          참조되지 않았다 — 죽은 매개변수가 곧 죽은 기능이었던 사례다.
+        </p>
+        <div class="callout warn">
+          <div class="callout-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+            증상
+          </div>
+          판매자가 혼디마켓에서 아무리 많이 팔아도, 자신의 PDV(대시보드
+          "나의 기록 금고" 등)에서는 그 거래 기록을 전혀 볼 수 없었다.
+          재무제표 쪽은 이미 정상이었으므로("돈은 들어오는데 기록은 없다"),
+          두 시스템이 서로 다른 사실을 말하는 상태였다.
+        </div>
+        <h4>수정</h4>
+        <ul>
+          <li>동일 거래의 6하원칙 명세서를 구매자용/판매자용 두 벌로 만들어
+              각자의 <code>pdv_records</code>에 기록. <code>when</code>·
+              <code>where</code>·<code>how</code>·<code>raw_hash</code> 등
+              원장 메타데이터는 공유하고, <code>who</code>/<code>what</code>/
+              <code>why</code>만 구매/판매 관점에 따라 분기.</li>
+          <li><code>report_id</code>는 <code>pdv_records.report_id</code>의
+              UNIQUE 인덱스 때문에 그대로 재사용할 수 없어(기존
+              <code>handlePdvReport</code>의 <code>sessionId:reporterSvc</code>
+              관례와 동일하게) <code>:buyer</code>/<code>:seller</code>
+              접미사로 분리했다.</li>
+          <li>두 기록은 <code>Promise.all</code> + 개별 <code>catch</code>로
+              서로 독립시켜, 한쪽 기록 실패가 다른 쪽을 막지 않게 했다.</li>
+        </ul>
+        <h4>검증</h4>
+        <p>
+          라이브 스모크테스트에서 실제 P2P 매매 1건 후 <code>guid+block_hash</code>로
+          <code>pdv_records</code>를 조회해, 구매자·판매자 양쪽에 정확히 1건씩,
+          <code>type='tx_2party'</code>로 존재하며 <code>who</code>/
+          <code>what</code>/<code>why</code>가 구매/판매 관점으로 정확히 갈리는지
+          확인했다 — 전부 통과.
+        </p>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="lesson-jsonfield">
+      <div class="gs-head">
+        <div class="gs-icon warn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">Lesson ②</div>
+          <div class="gs-title">PocketBase json 필드를 문자열로 오인 — 이미 파싱된 값 재파싱</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          스모크테스트 첫 실행에서 <code>구매자 who 필드 불일치: undefined</code>로
+          실패했다. 진단 로그를 찍어 원본 레코드를 그대로 출력해보니
+          <code>summary_6w</code> 필드는 이미 <code>{"who": "buyer(...)",
+          "what": "...", ...}</code> 형태의 <strong>파싱된 객체</strong>로
+          들어 있었다 — <code>pdv_records</code> 컬렉션의 <code>summary_6w</code>가
+          PocketBase <code>json</code> 타입 필드라, API 응답에서 자동으로
+          객체/배열로 역직렬화되기 때문이다.
+        </p>
+        <div class="callout warn">
+          <div class="callout-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+            증상
+          </div>
+          테스트 코드가 <code>JSON.parse(rec.summary_6w)</code>를 그대로
+          걸었다 — 인자가 이미 객체이므로 <code>String(value)</code>로
+          <code>"[object Object]"</code>가 되고, 그 문자열을 다시 JSON으로
+          파싱하려다 <code>SyntaxError</code>가 나서 <code>catch</code>에
+          조용히 삼켜져 빈 객체 <code>{}</code>로 남았다. 그 결과
+          <code>who</code>/<code>what</code>/<code>why</code>가 전부
+          <code>undefined</code>로 보여, 마치 실제 기록이 비어있는 것처럼
+          오인하기 쉬운 상태였다 — 실제로는 데이터가 완벽하게 정상이었다.
+        </div>
+        <h4>수정</h4>
+        <pre><code>function parse6w(raw) {
+  if (raw && typeof raw === 'object') return raw;
+  try { return JSON.parse(raw || '{}'); } catch { return {}; }
+}</code></pre>
+        <p>
+          문자열이면 그대로 파싱하고, 이미 객체면 그대로 반환하도록 바꿔
+          문자열/객체 양쪽을 다 안전하게 처리하게 했다.
+        </p>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="lesson-respshape">
+      <div class="gs-head">
+        <div class="gs-icon warn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">Lesson ③</div>
+          <div class="gs-title">API 응답 구조를 추측하지 말 것 — pl 하위 객체를 최상위로 오독</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          두 번째 실패는 <code>구매자 재무제표 pl-purchase 미반영 — 기대
+          &gt;= 30, 실제 undefined</code>였다. 이번에도 재무제표 자체는
+          정상 반영돼 있었다 — 테스트 코드가 <code>handleSettleLedger</code>의
+          실제 응답 구조를 확인하지 않고 <code>buyerFs.purchases</code>로
+          바로 읽었는데, 실제 응답은 <code>{ pl: { revenue, purchases, ... },
+          bs: { inventory } }</code>처럼 <code>pl</code> 객체 아래 중첩돼
+          있었다.
+        </p>
+        <div class="callout warn">
+          <div class="callout-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+            근본 원인
+          </div>
+          응답 구조를 실제 서버 코드(<code>worker.js</code>의
+          <code>handleSettleLedger</code> 반환문)를 다시 확인하지 않고
+          "아마 이렇게 생겼을 것"이라는 가정으로 짰다. Lesson ②와 근본
+          원인이 같다 — 서버가 실제로 돌려주는 형태를 직접 확인하지 않고
+          추측한 대가였다.
+        </div>
+        <h4>수정</h4>
+        <p>
+          <code>buyerFs.pl?.purchases</code>, <code>sellerFs.pl?.revenue</code>로
+          경로를 정정했다. 이번에도 재무제표 반영 자체는 처음부터 정상이었다 —
+          <code>purchases=30</code>, <code>revenue=30</code>이 <code>ORDER_AMOUNT</code>와
+          정확히 일치함을 확인했다.
+        </p>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="lesson-txhash">
+      <div class="gs-head">
+        <div class="gs-icon warn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">Lesson ④</div>
+          <div class="gs-title">간헐적 실패를 코드 결함으로 오인하기 전에 — TX_HASH_MISMATCH 재확인</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          위 두 버그를 고친 뒤에도 실행이 <code>TX_HASH_MISMATCH</code>로
+          두 번 실패했다. 처음엔 이번 패치가 원인인가 의심했지만, 클라이언트
+          (<code>gopang-wallet.js</code>)·서버 두 곳(<code>pb_hooks/main.pb.js</code>)의
+          <code>sortedStringify</code> 구현 세 곳을 전부 직접 대조한 결과
+          코드상 완전히 동일했다 — 이번 세션에서 건드린 부분과 무관한,
+          이미 <a href="./SESSION_LESSONS_FS_SYMMETRIC_OPENHASH_ANCHORING_20260907_v1_0.html">2026-09-07
+          문서</a>의 후속 과제에 "약 15~28% 빈도, 재시도 시 항상 성공"으로
+          기록돼 있던 알려진 L1 인프라 산발적 문제였다.
+        </p>
+        <div class="callout">
+          <div class="callout-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            판단 기준
+          </div>
+          결정론적 버그라면 매번 재현돼야 한다. 같은 코드로 5번 실행해서
+          3번 성공·2번 실패했다면, 그건 "이번에 건드린 로직의 버그"가
+          아니라 외부 의존성의 산발적 문제일 가능성이 훨씬 높다 — 코드를
+          더 파기 전에 먼저 재현율부터 확인해야 한다.
+        </div>
+        <h4>대응</h4>
+        <p>
+          이 문제의 근본 원인 규명은 이번 세션 범위 밖으로 남겨두고, 테스트
+          하네스에는 매 시도마다 새 <code>nonce</code>/<code>timestamp</code>로
+          최대 3회까지 재시도하는 로직만 추가했다. 재시도는 거래 성사
+          여부에만 영향을 주고, 그 뒤에 실행되는 실제 검증(PDV 양방향
+          기록·재무제표 반영)의 판정 기준은 전혀 느슨하게 하지 않았다.
+        </p>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="outcome">
+      <div class="gs-head">
+        <div class="gs-icon good">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-title">결과 — 검증된 사실</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <ul>
+          <li><span class="badge merged">검증됨</span> <code>_recordOrderPdv</code>
+              양방향화 — 실거래 1건 후 구매자·판매자 양쪽 <code>pdv_records</code>에
+              정확한 관점(who/what/why)의 6하원칙 명세서가 남는 것을 확인.</li>
+          <li><span class="badge merged">검증됨</span> <code>pending_claims</code>
+              양방향 적재 — 구매자 <code>pl-purchase</code>, 판매자
+              <code>pl-revenue</code> 둘 다 적재 확인.</li>
+          <li><span class="badge merged">검증됨</span> 재무제표 실반영 —
+              <code>/biz/settle-ledger</code> 호출 결과 <code>purchases=30</code>,
+              <code>revenue=30</code>이 거래액과 정확히 일치.</li>
+          <li><span class="badge merged">수정됨</span> 스모크테스트 자체의
+              버그 3건(json 필드 재파싱, 응답 구조 오독, TX_HASH_MISMATCH
+              재시도 부재) — 전부 대상 코드가 아니라 검증 스크립트 쪽 결함이었음.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="followup">
+      <div class="gs-head">
+        <div class="gs-icon warn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-title">후속 과제 — 아직 안 끝난 것</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <ul>
+          <li><span class="badge todo">TODO</span> <code>TX_HASH_MISMATCH</code>의
+              근본 원인 규명 — 2026-09-07 문서에서도 미해결로 남았고, 이번
+              세션에서도 sortedStringify 구현 일치만 확인했을 뿐 실제 원인은
+              못 찾았다. 실서비스 결제 흐름에도 재시도 방어 로직 도입을
+              검토할 것.</li>
+          <li><span class="badge todo">TODO</span> <code>PDV_QUERY_PROTOCOL_v1_0.md</code>가
+              여전히 2026-08-20 이후 죽은 코드가 된 <code>/pdv/query</code>를
+              현행 사양처럼 서술하고 있다 — 문서 자체의 최신화는 이번
+              범위에 포함하지 않았다.</li>
+          <li><span class="badge todo">TODO</span> 이번에 만든
+              <code>pdv_bidirectional_order_live_smoketest.cjs</code>는
+              <code>/wallet/gdc-transfer</code> P2P 경로만 검증한다 —
+              카탈로그 기반 <code>/biz/order</code>(K-Market 구매,
+              매출원가·재고자산 소진 포함)의 양방향 PDV 기록은 별도 검증
+              필요.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="repro">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">Reproduce</div>
+          <div class="gs-title">재현 방법 — 라이브 스모크테스트</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          <code>tools/pdv_bidirectional_order_live_smoketest.cjs</code>를
+          GitHub Actions 워크플로(<code>live-smoketest-pdv-bidirectional-order.yml</code>)로
+          실행한다. 구매자·판매자 계정을 register-key로 새로 만들고, 실제
+          P2P 매매 1건을 실행한 뒤 PDV·pending_claims·재무제표 전 구간을
+          순서대로 확인한다.
+        </p>
+        <div class="callout">
+          <div class="callout-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            필요 GitHub Secrets
+          </div>
+          <code>PB_ADMIN_EMAIL</code>/<code>PB_ADMIN_PASSWORD</code> — L1(hanlim)
+          PocketBase 슈퍼관리자 자격(worker.js의 Cloudflare 시크릿
+          <code>L1_ADMIN_EMAIL</code>/<code>L1_ADMIN_PASSWORD</code>와 동일 값).
+          <code>/admin/login</code>용 <code>HONDI_ADMIN_EMAIL</code>과는
+          다른 자격증명이라 혼동하지 말 것.
+        </div>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="related">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 6.5l4 4L7 21H3v-4z"/><path d="M14.5 4.5l5 5"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-title">관련 문서</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <ul>
+          <li>저장소 내 <code>worker.js</code> — <code>_recordOrderPdv</code>
+              (양방향화), <code>handleBizOrder</code>(buyer_claim/seller_claim
+              적재), <code>handleSettleLedger</code> 주석에 오늘 세션 상세
+              기록이 남아있다.</li>
+          <li>저장소 내 <code>tools/pdv_bidirectional_order_live_smoketest.cjs</code> —
+              이 문서가 다루는 라이브 스모크테스트 본체.</li>
+          <li><a href="./SESSION_LESSONS_FS_SYMMETRIC_OPENHASH_ANCHORING_20260907_v1_0.html" target="_blank">재무제표 대칭 기록 + OpenHash 앵커링 실전 교훈 매뉴얼</a> —
+              재무제표 쪽 양방향화(2026-09-07)와 TX_HASH_MISMATCH 최초 관찰 기록.</li>
+          <li><a href="./MANUAL_INDEX.html" target="_blank">개발 문서 전체 지도</a></li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  var revealEls = document.querySelectorAll('.reveal');
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.06 });
+  revealEls.forEach(function (el) { io.observe(el); });
+
+  var tocLinks = document.querySelectorAll('.doc-toc a');
+  var sections = Array.prototype.map.call(tocLinks, function (a) {
+    return document.querySelector(a.getAttribute('href'));
+  });
+  function setActive() {
+    var idx = 0;
+    var y = window.scrollY + 110;
+    sections.forEach(function (sec, i) { if (sec && sec.offsetTop <= y) idx = i; });
+    tocLinks.forEach(function (a, i) { a.classList.toggle('active', i === idx); });
+  }
+  window.addEventListener('scroll', setActive, { passive: true });
+  setActive();
+</script>
+</body>
+</html>
