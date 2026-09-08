@@ -34594,7 +34594,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
       searchResults.push(r?.ok ? { query: q, organic: r.organic, answer_box: r.answer_box } : { query: q, error: true });
     }
 
-    const searchContext = `[검색 결과]\n${JSON.stringify(searchResults)}\n\n위 검색 결과를 바탕으로, 실제로 확인되는 이름·소속만 사용자에게 후보로 제시하세요. 스니펫에 이메일이 안 보이면 절대 바로 사용자에게 묻지 마세요 — organic 결과 중 학과·연구실 공식 홈페이지나 교수진 명단으로 보이는 링크가 있으면 KMAIL_FETCH_PAGE 태그로 먼저 열람해 보세요. 적절한 링크가 없을 때만 정직하게 말하고 사용자에게 직접 물어보세요. (이 메시지 자체는 사용자에게 보이지 않습니다 — 자연스러운 답변만 작성하세요.)`;
+    const searchContext = `[검색 결과]\n${JSON.stringify(searchResults)}\n\n위 검색 결과를 바탕으로, 실제로 확인되는 이름·소속만 사용자에게 후보로 제시하세요. 스니펫에 이메일이 안 보이면 절대 바로 사용자에게 묻지 마세요 — organic 결과 중 학과·연구실 공식 홈페이지나 교수진 명단으로 보이는 링크가 있으면 KMAIL_FETCH_PAGE 태그로 먼저 열람해 보세요. 적절한 링크가 없을 때만 정직하게 말하고 사용자에게 직접 물어보세요. 페이지를 열람하겠다고 "말만" 하고 실제 KMAIL_FETCH_PAGE 태그를 안 내면 아무 일도 일어나지 않습니다 — 열람하기로 했으면 이번 응답 끝에 반드시 그 태그를 실제로 출력하세요. (이 메시지 자체는 사용자에게 보이지 않습니다 — 자연스러운 답변만 작성하세요.)`;
     let followUpReply;
     try {
       followUpReply = await deepseekChatText({
@@ -34647,9 +34647,16 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     let latestReply = '';
     while (roundsLeft > 0 && url) {
       const pageResult = await _performPageFetchForEmail(env, ctx, url).catch(e => ({ ok: false, error: 'EXCEPTION', message: e.message }));
+      const roundsLeftAfterThis = roundsLeft - 1; // 이번 시도를 차감한 뒤 실제로 남는 횟수(문구를 이 값 기준으로 정확히 안내)
+      const retryNote = roundsLeftAfterThis > 0
+        ? '이메일을 못 찾았으면, 검색 결과에 다른 유력한 링크가 남아있을 때만 KMAIL_FETCH_PAGE로 한 번 더 시도해볼 수 있습니다(단, 없으면 바로 §1-(d)로).'
+        : '이제 더 이상 다른 링크는 시도할 수 없습니다 — 정 안 되면 §1-(d)대로 정직하게 실패를 알리고 사용자에게 물어보세요.';
+      const tagReminder = roundsLeftAfterThis > 0
+        ? ' 다른 링크로 다시 시도하기로 했다면, "다시 확인해보겠습니다" 같은 말만 하지 말고 이번 응답 끝에 실제 KMAIL_FETCH_PAGE 태그를 출력하세요.'
+        : '';
       const pageContext = pageResult.ok
-        ? `[페이지 열람 결과]\n${JSON.stringify({ url: pageResult.url, emails_found: pageResult.emails, text_snippet: pageResult.text_snippet })}\n\n위에서 실제로 발견된 이메일만 후보로 제시하세요(emails_found가 비어있으면 이 페이지에서도 못 찾은 것이니 지어내지 말고 정직하게 말하세요). text_snippet에서 이름과 이메일을 짝지을 수 있으면 짝지어 보여주세요. 정 안 되면 §1-(d)대로 정직하게 실패를 알리고 사용자에게 물어보세요(더 이상 다른 링크는 시도할 수 없습니다). (이 메시지 자체는 사용자에게 보이지 않습니다.)`
-        : `[페이지 열람 실패]\n${JSON.stringify({ url, error: pageResult.error, message: pageResult.message })}\n\n페이지를 열람하지 못했습니다. §1-(d)대로 정직하게 실패했다고 말하고 사용자에게 직접 이메일을 알려달라고 요청하세요(더 이상 다른 링크는 시도할 수 없습니다). (이 메시지 자체는 사용자에게 보이지 않습니다.)`;
+        ? `[페이지 열람 결과]\n${JSON.stringify({ url: pageResult.url, emails_found: pageResult.emails, text_snippet: pageResult.text_snippet })}\n\n위에서 실제로 발견된 이메일만 후보로 제시하세요(emails_found가 비어있으면 이 페이지에서도 못 찾은 것이니 지어내지 말고 정직하게 말하세요). text_snippet에서 이름과 이메일을 짝지을 수 있으면 짝지어 보여주세요. ${retryNote}${tagReminder} (이 메시지 자체는 사용자에게 보이지 않습니다.)`
+        : `[페이지 열람 실패]\n${JSON.stringify({ url, error: pageResult.error, message: pageResult.message })}\n\n페이지를 열람하지 못했습니다. ${retryNote}${tagReminder} (이 메시지 자체는 사용자에게 보이지 않습니다.)`;
 
       roundsLeft -= 1;
       try {
