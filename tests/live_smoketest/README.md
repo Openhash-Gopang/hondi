@@ -124,7 +124,40 @@ python3 expert_persona_smoketest.py --resume
 없는 별종 페르소나) / `ERROR`(API 호출 실패).
 
 
-## 라우팅 결정 트리 커버리지 세트 (scenarios_branch_coverage_20260806.json)
+## K-Mail KMAIL_FETCH_PAGE 전용 하네스 (2026-09-08 신설)
+
+SP-25_kmail v1.12에서 신설한 §1-(c)/(d)·§2-1b 흐름("검색 스니펫에
+이메일이 없으면 사용자에게 묻기 전에 먼저 유력한 링크를 열람한다")이
+실제로 지켜지는지 검증합니다 — 실사례(서울대 기계공학부 검색에서
+페이지 열람 없이 바로 사용자에게 URL을 되물은 회귀) 재발 방지용입니다.
+`kmail_fetch_page_smoketest.py` 상단 docstring에 상세 설계가 있습니다.
+검색·페이지열람 자체는 실제 API를 호출하지 않고 mock 데이터를
+주입합니다(비용 없음, 모델의 판단 순서만 검증).
+
+**실행(GitHub Actions, 권장)**: Actions 탭 →
+`Live Smoketest — K-Mail KMAIL_FETCH_PAGE` → `Run workflow`.
+완료되면 `results/kmail-fetch-page/`에 결과가 커밋됩니다.
+
+**로컬에서**:
+```bash
+cd tests/live_smoketest
+export DEEPSEEK_API_KEY=sk-xxxx
+python3 kmail_fetch_page_smoketest.py \
+  --scenarios kmail_fetch_page_scenario.json \
+  --out ../../results/kmail-fetch-page
+```
+
+**채점 규칙**: `PASS`(정상 흐름) / `FAIL`(페이지 열람 없이 바로
+사용자에게 되물음, 지어낸 URL, 열람 결과에 없는 이메일 날조 중 하나
+이상) / `NEEDS-REVIEW`(예상 밖 경로 — 사람이 `transcript` 직접 확인)
+/ `ERROR`(API 호출 실패).
+
+**한계**: mock 데이터 기반이라 `_performPageFetchForEmail`의 실제
+SSRF 차단·HTML 파싱 정확도는 검증하지 못합니다(별도 실 URL 통합
+테스트 필요). UNIVERSAL 계층 조립도 kplan 하네스와 동일하게
+근사치입니다(실제 worker.js는 control-tower를 거쳐 별도 주입).
+
+
 
 `scenarios.json`(300건 실제 발화 샘플)과는 목적이 다릅니다 — 이건
 `prompts/ROUTING-BRANCH-REFERENCE_v1_0.md`에 정리된 **결정 트리 각
