@@ -1,0 +1,44 @@
+[
+  {
+    "no": 1,
+    "name": "domain 필드 생략 -> personal 기본값",
+    "report_overrides": {},
+    "expect": { "http_ok": true, "domain": "personal", "affiliation_org_id": null }
+  },
+  {
+    "no": 2,
+    "name": "domain=work + affiliation_org_id 정상 지정",
+    "report_overrides": { "domain": "work", "affiliation_org_id": "org:test-agency" },
+    "expect": { "http_ok": true, "domain": "work", "affiliation_org_id": "org:test-agency" }
+  },
+  {
+    "no": 3,
+    "name": "domain=work 이지만 affiliation_org_id 누락 -> null로 저장(과소노출 원칙)",
+    "report_overrides": { "domain": "work" },
+    "expect": { "http_ok": true, "domain": "work", "affiliation_org_id": null }
+  },
+  {
+    "no": 4,
+    "name": "domain에 오탈자/미정의 값 -> personal로 안전 기본 처리",
+    "report_overrides": { "domain": "wrok", "affiliation_org_id": "org:should-be-ignored" },
+    "expect": { "http_ok": true, "domain": "personal", "affiliation_org_id": null }
+  },
+  {
+    "no": 5,
+    "name": "content_hash 누락 -> 400 CONTENT_HASH_REQUIRED (평문 미수신 가드)",
+    "report_overrides": { "_omit_content_hash": true },
+    "expect": { "http_ok": false, "http_status": 400, "error_code": "CONTENT_HASH_REQUIRED" }
+  },
+  {
+    "no": 6,
+    "name": "session_id 중복 재전송 -> skipped:true DUPLICATE_SESSION (멱등성)",
+    "report_overrides": { "_reuse_session_from": 1 },
+    "expect": { "http_ok": true, "skipped": true, "reason": "DUPLICATE_SESSION" }
+  },
+  {
+    "no": 7,
+    "name": "/pdv/query 회귀 가드 -> 여전히 410 FEATURE_REMOVED_HASH_ONLY_REDESIGN",
+    "is_pdv_query_regression_guard": true,
+    "expect": { "http_ok": false, "http_status": 410, "error_code": "FEATURE_REMOVED_HASH_ONLY_REDESIGN" }
+  }
+]
