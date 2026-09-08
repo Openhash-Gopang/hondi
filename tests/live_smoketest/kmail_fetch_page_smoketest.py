@@ -290,6 +290,14 @@ def run_scenario(api_key, system_prompt, scenario):
         return "NEEDS-REVIEW", notes, transcript, usage_total
 
     # ── 라운드 3: 페이지 열람 요청이 있었던 경우 — URL 검증 + 열람 결과 주입
+    # (2026-09-08 실 라이브 실행에서 발견) 스니펫에 이미 이메일이 있어
+    # mock_fetch_result 자체를 준비 안 해둔 시나리오에서도, 모델이 불필요하게
+    # KMAIL_FETCH_PAGE를 호출해버릴 수 있다 — 이 경우 시뮬레이션할 mock 데이터가
+    # 없으므로 KeyError로 죽는 대신 NEEDS-REVIEW로 안전하게 처리한다.
+    if "mock_fetch_result" not in scenario:
+        notes.append("이 시나리오는 원래 페이지 열람이 필요 없는데(이미 스니펫에 이메일 있음) 모델이 예상 밖으로 KMAIL_FETCH_PAGE를 호출함 — mock 데이터가 없어 3라운드는 시뮬레이션 못함(사람이 raw_response 직접 확인)")
+        return "NEEDS-REVIEW", notes, transcript, usage_total
+
     fetch_parsed = None
     try:
         fetch_parsed = json.loads(fetch_match.group(1))
