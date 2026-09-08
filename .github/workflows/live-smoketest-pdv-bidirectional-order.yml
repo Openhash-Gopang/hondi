@@ -1,0 +1,49 @@
+name: Live Smoketest — PDV Bidirectional Order (거래명세서 → PDV + 재무제표)
+
+# 2026-09-08 신설 — _recordOrderPdv 양방향화 패치(구매자+판매자 6하원칙
+# 거래명세서)와, 이미 2026-09-07에 양방향화된 pending_claims(buyer_claim/
+# seller_claim) → /biz/settle-ledger 재무제표 반영 경로를 실제 hondi-proxy에
+# 대고 함께 검증한다. 두 계정을 새로 만들어 실제 P2P 매매(/wallet/gdc-transfer,
+# purpose='purchase')를 한 번 실행하고, 그 부수효과(pdv_records 양쪽 레코드,
+# pending_claims 양쪽 레코드, settle-ledger 결과)를 PocketBase에서 직접
+# 대조한다.
+#
+# 필요 GitHub Secrets:
+#   PB_ADMIN_EMAIL / PB_ADMIN_PASSWORD — L1(hanlim) PocketBase 슈퍼관리자
+#     자격(worker.js의 Cloudflare 시크릿 L1_ADMIN_EMAIL/PASSWORD와 같은 값).
+#     HONDI_ADMIN_EMAIL(/admin/login, prompt_admins)과는 다른 자격증명이다 —
+#     아직 등록 안 됐다면 이 워크플로 실행 전에 먼저 등록해야 한다.
+#
+# 매 실행마다 register-key로 구매자·판매자 계정을 새로 만든다 — 기존
+# 데이터에 영향 없음.
+
+on:
+  workflow_dispatch:
+    inputs:
+      order_amount:
+        description: '거래 금액(₮)'
+        required: false
+        type: string
+        default: '30'
+
+jobs:
+  pdv-bidirectional-order-smoketest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 라이브 스모크테스트 실행
+        env:
+          WORKER_URL: https://hondi-proxy.tensor-city.workers.dev
+          PB_BASE: https://l1-hanlim.hondi.net
+          PB_ADMIN_EMAIL: ${{ secrets.PB_ADMIN_EMAIL }}
+          PB_ADMIN_PASSWORD: ${{ secrets.PB_ADMIN_PASSWORD }}
+          ORDER_AMOUNT: ${{ inputs.order_amount }}
+        run: node tools/pdv_bidirectional_order_live_smoketest.cjs
