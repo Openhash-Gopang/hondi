@@ -1,0 +1,229 @@
+<!--
+  혼디 검색 위젯 (Hondi Search)
+  desktop.html 상단 헤더 안에 <div id="hondi-search-root"></div> 를 넣고
+  이 파일의 <style>과 <script>를 그대로 포함하면 동작합니다.
+  API 엔드포인트: POST /api/hondi-search (백엔드 계약은 HONDI_SEARCH_DESIGN.md 참고)
+-->
+
+<div id="hondi-search-root" class="hondi-search-root">
+  <div class="hondi-search-box">
+    <input
+      id="hondi-search-input"
+      type="text"
+      placeholder="혼디에게 무엇을 찾는지 물어보세요…"
+      autocomplete="off"
+    />
+    <button id="hondi-search-send" aria-label="검색">→</button>
+  </div>
+
+  <div id="hondi-search-panel" class="hondi-search-panel" hidden>
+    <div id="hondi-search-messages" class="hondi-search-messages"></div>
+    <div id="hondi-search-candidates" class="hondi-search-candidates"></div>
+  </div>
+</div>
+
+<style>
+  .hondi-search-root {
+    position: relative;
+    width: min(480px, 90vw);
+    font-family: inherit;
+  }
+  .hondi-search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid #d9e2ec;
+    border-radius: 999px;
+    padding: 8px 14px;
+  }
+  .hondi-search-box input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 14px;
+  }
+  .hondi-search-box button {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 16px;
+    color: #1e3a8a; /* navy, klaw 헤더 톤과 맞춤 - 실제 site 변수로 교체 권장 */
+  }
+  .hondi-search-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 100%;
+    background: #fff;
+    border: 1px solid #d9e2ec;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    padding: 12px;
+    z-index: 50;
+  }
+  .hondi-search-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 240px;
+    overflow-y: auto;
+  }
+  .hondi-search-msg {
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 8px 10px;
+    border-radius: 10px;
+    max-width: 90%;
+  }
+  .hondi-search-msg.user {
+    align-self: flex-end;
+    background: #e8f0fe;
+  }
+  .hondi-search-msg.bot {
+    align-self: flex-start;
+    background: #f3f4f6;
+  }
+  .hondi-search-candidates {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .hondi-search-candidate {
+    text-align: left;
+    border: 1px solid #d9e2ec;
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .hondi-search-candidate:hover {
+    background: #f3f4f6;
+  }
+</style>
+
+<script>
+(function () {
+  const root = document.getElementById("hondi-search-root");
+  const input = document.getElementById("hondi-search-input");
+  const sendBtn = document.getElementById("hondi-search-send");
+  const panel = document.getElementById("hondi-search-panel");
+  const messagesEl = document.getElementById("hondi-search-messages");
+  const candidatesEl = document.getElementById("hondi-search-candidates");
+
+  let conversationId = null;
+  let history = [];
+
+  function uuid() {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === "x" ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
+
+  function appendMessage(role, text) {
+    const div = document.createElement("div");
+    div.className = "hondi-search-msg " + (role === "user" ? "user" : "bot");
+    div.textContent = text;
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function renderCandidates(candidates) {
+    candidatesEl.innerHTML = "";
+    (candidates || []).forEach((c) => {
+      const btn = document.createElement("button");
+      btn.className = "hondi-search-candidate";
+      btn.textContent = c.label;
+      btn.addEventListener("click", () => {
+        window.open(c.url, "_blank");
+        closePanel();
+      });
+      candidatesEl.appendChild(btn);
+    });
+  }
+
+  function openPanel() {
+    panel.hidden = false;
+  }
+
+  function closePanel() {
+    panel.hidden = true;
+    messagesEl.innerHTML = "";
+    candidatesEl.innerHTML = "";
+    history = [];
+    conversationId = null;
+    input.value = "";
+  }
+
+  async function sendQuery() {
+    const text = input.value.trim();
+    if (!text) return;
+
+    if (!conversationId) conversationId = uuid();
+
+    appendMessage("user", text);
+    history.push({ role: "user", content: text });
+    input.value = "";
+    openPanel();
+    candidatesEl.innerHTML = "";
+
+    let res;
+    try {
+      res = await fetch("/api/hondi-search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          conversation_id: conversationId,
+          message: text,
+          history,
+        }),
+      });
+    } catch (e) {
+      appendMessage("bot", "검색 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+
+    if (!res.ok) {
+      appendMessage("bot", "검색 중 오류가 발생했습니다.");
+      return;
+    }
+
+    const data = await res.json();
+    history.push({ role: "assistant", content: data.message || "" });
+
+    switch (data.type) {
+      case "clarify":
+        appendMessage("bot", data.message);
+        break;
+      case "navigate":
+        appendMessage("bot", data.message);
+        window.open(data.url, "_blank");
+        setTimeout(closePanel, 800);
+        break;
+      case "candidates":
+        appendMessage("bot", data.message);
+        renderCandidates(data.candidates);
+        break;
+      case "delegate_ksearch":
+        appendMessage("bot", data.message);
+        // 필요 시 K-Search 진입 버튼을 candidates 형태로 재사용 가능
+        break;
+      default:
+        appendMessage("bot", "응답을 이해하지 못했습니다.");
+    }
+  }
+
+  sendBtn.addEventListener("click", sendQuery);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") sendQuery();
+    if (e.key === "Escape") closePanel();
+  });
+  document.addEventListener("click", (e) => {
+    if (!root.contains(e.target)) closePanel();
+  });
+})();
+</script>
