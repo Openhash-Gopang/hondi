@@ -1319,15 +1319,21 @@ document.addEventListener('keydown', function (e) {
          배너를 오른쪽으로 옮기고 두 배너를 같은 크기의 2열로 배치했다
          (bh-promo-row). 안내 배너는 바로 위 hero-top-actions의 "전문가:
          의사, 변호사 등" 버튼을 가리키므로 그 문구를 그대로 인용한다.
-         SP 총 개수(552개)는 pages/expert-personas.html의 CAT_TOTALS
-         합계에서 가져온 값 — 레지스트리가 늘어나면 같이 갱신 필요. -->
+         전문가 AI 280개 / 정부 기관 AI 552개는 사용자 제공 수치.
+         안내 배너에도 "다시 보지 않기" 체크박스를 달았다 — 이쪽은 별도
+         닫기(✕) 버튼 없이 체크와 동시에 바로 숨김(hondi_hide_info_banner
+         localStorage 키, bhPromoBanner와는 별개 키라 서로 독립적으로
+         숨겨진다). -->
     <div class="bh-promo-row">
       <div class="bh-promo-banner bh-info-banner" id="bhInfoBanner">
         <div class="bh-promo-head">🩺⚖️ 전문가 AI에게 바로 상담하기</div>
         <ul class="bh-promo-list">
           <li>바로 위 <strong>전문가: 의사, 변호사 등</strong> 버튼을 눌러 페이지를 열고, 아무 페르소나(예: "내과")를 클릭하면 그 분야 전문가 AI와 바로 상담을 시작할 수 있습니다.</li>
-          <li><strong>혼디</strong>는 그러한 전문가·기관 등의 SP가 2026년 9월 현재 <strong>552개</strong> 준비되어 있습니다.</li>
+          <li><strong>혼디</strong>는 모든 직종 전문가 AI <strong>280개</strong>와 모든 정부 기관 AI <strong>552개</strong>를 준비했습니다.</li>
         </ul>
+        <label class="bh-promo-hide">
+          <input type="checkbox" id="bhInfoHideChk"> 다시 보지 않기
+        </label>
       </div>
       <div class="bh-promo-banner" id="bhPromoBanner">
         <button type="button" class="bh-promo-close" id="bhPromoClose" aria-label="배너 닫기">✕</button>
@@ -4487,6 +4493,28 @@ document.addEventListener('click', function (e) {
       localStorage.setItem(KEY, '1');
     }
     banner.style.display = 'none';
+  });
+})();
+
+// 2026-09-08 신설 — 전문가 SP 안내 배너의 "다시 보지 않기". 위 혜택
+// 배너와 달리 별도 닫기(✕) 버튼이 없어, 체크하는 즉시 숨기고
+// localStorage에 남긴다(hondi_hide_info_banner — bhPromoBanner의
+// hondi_hide_beta_promo 키와는 무관하게 독립적으로 동작).
+(function () {
+  var KEY = 'hondi_hide_info_banner';
+  var banner = document.getElementById('bhInfoBanner');
+  if (!banner) return;
+  if (localStorage.getItem(KEY) === '1') {
+    banner.style.display = 'none';
+    return;
+  }
+  var chk = document.getElementById('bhInfoHideChk');
+  if (!chk) return;
+  chk.addEventListener('change', function () {
+    if (chk.checked) {
+      localStorage.setItem(KEY, '1');
+      banner.style.display = 'none';
+    }
   });
 })();
 </script>
