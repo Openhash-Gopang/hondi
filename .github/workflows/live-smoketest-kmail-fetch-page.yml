@@ -1,0 +1,63 @@
+name: Live Smoketest — K-Mail KMAIL_FETCH_PAGE
+
+# 2026-09-08 신설 — SP-25_kmail v1.12(§1-(a)~(d), §2-1b)에서 신설한
+# KMAIL_FETCH_PAGE 흐름("검색 스니펫에 이메일이 없으면 사용자에게 묻기
+# 전에 먼저 유력한 링크를 열람한다")이 실제로 지켜지는지 라이브
+# DeepSeek 호출로 검증한다. 실사례(서울대 기계공학부 검색 — 페이지
+# 열람 없이 바로 사용자에게 URL을 되물은 회귀)를 다시 만들지 않기
+# 위한 회귀 방지 테스트.
+#
+# 기존 live-smoketest-kplan-mail-campaign.yml과 동일한 관례
+# (workflow_dispatch, DEEPSEEK_API_KEY, results 브랜치 커밋, artifact
+# 업로드)를 따르되, 검색/페이지열람 자체는 실제 호출하지 않고 mock
+# 데이터를 주입한다(kmail_fetch_page_smoketest.py 상단 docstring 참고
+# — 비용·네트워크 의존성 없이 "모델의 판단 순서"만 검증).
+#
+# 필요 GitHub Secrets:
+#   DEEPSEEK_API_KEY — 이미 등록됨(다른 live-smoketest-* 워크플로와 공용).
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run-kmail-fetch-page-smoketest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install requests
+
+      - name: Run K-Mail KMAIL_FETCH_PAGE live smoketest
+        working-directory: tests/live_smoketest
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          python3 kmail_fetch_page_smoketest.py \
+            --scenarios kmail_fetch_page_scenario.json \
+            --out ../../results/kmail-fetch-page
+
+      - name: Commit results to results branch
+        run: |
+          git config user.name "hondi-live-smoketest-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout -B results/live-smoketest-kmail-fetch-page
+          git add -f results/
+          git diff --cached --quiet || git commit -m "chore: K-Mail KMAIL_FETCH_PAGE live smoketest results ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+          git push --force origin HEAD:results/live-smoketest-kmail-fetch-page
+
+      - name: Upload artifact (backup)
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-smoketest-kmail-fetch-page-results
+          path: results/

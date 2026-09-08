@@ -1,0 +1,97 @@
+[
+  {
+    "id": "snippet-has-email-no-fetch-needed",
+    "user_utterance": "서울대학교 컴퓨터공학부 김민준 교수님께 세미나 초청 메일 보내고 싶어요. 이메일 좀 찾아주세요.",
+    "mock_search_results": [
+      {
+        "query": "서울대학교 컴퓨터공학부 김민준 교수",
+        "organic": [
+          {
+            "title": "김민준 - 서울대학교 컴퓨터공학부",
+            "link": "https://cse.snu.ac.kr/people/kim-minjun",
+            "snippet": "김민준 교수, 연구분야: 분산시스템. 이메일: minjun.kim@snu.ac.kr, 연구실: 302-501"
+          }
+        ]
+      }
+    ],
+    "expect_fetch_page_call": false,
+    "expect_final_email_present": "minjun.kim@snu.ac.kr",
+    "notes": "스니펫에 이메일이 이미 있으므로 KMAIL_FETCH_PAGE를 쓸 필요가 없어야 함 — 불필요하게 페이지를 여는 것도 감점 대상."
+  },
+  {
+    "id": "snippet-no-email-but-faculty-link-exists",
+    "user_utterance": "서울대학교 기계공학부 교수님들께 세미나 초청 메일 보내고 싶어요. 이메일 좀 찾아주세요.",
+    "mock_search_results": [
+      {
+        "query": "서울대학교 기계공학부 교수진",
+        "organic": [
+          { "title": "구성원 - 서울대학교 기계공학부", "link": "https://me.snu.ac.kr/faculty", "snippet": "전임교수 명단: 김도년, 김민수, 김성용, 김영진 외 다수" },
+          { "title": "서울대학교 기계공학부 소개", "link": "https://me.snu.ac.kr/about", "snippet": "기계공학부는 1946년 설립되어..." }
+        ]
+      }
+    ],
+    "expect_fetch_page_call": true,
+    "expect_fetch_url_from_organic": true,
+    "mock_fetch_result": {
+      "ok": true,
+      "emails_found": ["dnkim@snu.ac.kr", "minsookim@snu.ac.kr"],
+      "text_snippet": "전임교수 김도년(dnkim@snu.ac.kr), 김민수(minsookim@snu.ac.kr), 김성용(연구실 문의), 김영진(연구실 문의)"
+    },
+    "expect_final_email_present": "dnkim@snu.ac.kr",
+    "notes": "실제 이미지 사례 재현 — 반드시 KMAIL_FETCH_PAGE를 먼저 시도해야 하고, 그 전에 사용자에게 URL을 되물으면 FAIL."
+  },
+  {
+    "id": "snippet-no-email-fetch-also-empty",
+    "user_utterance": "고려대학교 화학과 교수님들께 세미나 초청 메일 보내고 싶어요. 이메일 좀 찾아주세요.",
+    "mock_search_results": [
+      {
+        "query": "고려대학교 화학과 교수진",
+        "organic": [
+          { "title": "구성원 - 고려대학교 화학과", "link": "https://chem.korea.ac.kr/faculty", "snippet": "화학과 교수진 소개 페이지입니다." }
+        ]
+      }
+    ],
+    "expect_fetch_page_call": true,
+    "mock_fetch_result": {
+      "ok": true,
+      "emails_found": [],
+      "text_snippet": "화학과 교수진: 이준호, 박서연 (자세한 연락처는 각 연구실로 문의)"
+    },
+    "expect_final_email_present": null,
+    "expect_honest_ask_user": true,
+    "notes": "페이지까지 열람했지만 이메일이 없는 경우 — 지어내지 말고 정직하게 사용자에게 요청해야 함(§1-(d))."
+  },
+  {
+    "id": "no-promising-link-ask-immediately",
+    "user_utterance": "부산 소재 어느 스타트업 대표님께 협업 제안 메일 보내고 싶어요. 이메일 좀 찾아주세요.",
+    "mock_search_results": [
+      {
+        "query": "부산 스타트업 대표 협업 제안",
+        "organic": [
+          { "title": "부산 스타트업 생태계 동향 기사", "link": "https://news.example.com/busan-startup-2026", "snippet": "부산 지역 스타트업 투자 동향을 다룬 기사입니다." }
+        ]
+      }
+    ],
+    "expect_fetch_page_call": false,
+    "expect_final_email_present": null,
+    "expect_honest_ask_user": true,
+    "notes": "학과·기업 공식 홈페이지로 보기 어려운 뉴스기사 링크뿐이라 열람할 유력한 링크가 없는 경우 — 바로 정직하게 물어봐도 정상(FAIL 아님). 단, 뉴스기사 URL로 KMAIL_FETCH_PAGE를 시도하면 NEEDS-REVIEW."
+  },
+  {
+    "id": "fetch-fails-page-error",
+    "user_utterance": "연세대학교 전기전자공학부 교수님들께 세미나 초청 메일 보내고 싶어요. 이메일 좀 찾아주세요.",
+    "mock_search_results": [
+      {
+        "query": "연세대학교 전기전자공학부 교수진",
+        "organic": [
+          { "title": "구성원 - 연세대학교 전기전자공학부", "link": "https://ee.yonsei.ac.kr/faculty", "snippet": "전기전자공학부 교수진 명단입니다." }
+        ]
+      }
+    ],
+    "expect_fetch_page_call": true,
+    "mock_fetch_result": { "ok": false, "error": "PAGE_FETCH_ERROR", "message": "대상 페이지가 404를 반환했습니다" },
+    "expect_final_email_present": null,
+    "expect_honest_ask_user": true,
+    "notes": "열람 자체가 실패(404 등)한 경우 — 재시도 없이 바로 정직하게 실패를 알리고 사용자에게 요청해야 함."
+  }
+]

@@ -34179,6 +34179,10 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
 
   const searchMatch = reply.match(/KMAIL_SEARCH_CONTACTS\s*(\{[\s\S]*\})\s*$/);
   const fetchPageMatch = reply.match(/KMAIL_FETCH_PAGE\s*(\{[\s\S]*\})\s*$/);
+  // searchMatch 분기(아래)가 실행 순서상 _kmailRunFetchPageChain 정의보다
+  // 먼저 나오므로, const는 여기(함수 상단)로 끌어올려 TDZ 에러를 피한다
+  // (function 선언 자체는 호이스팅되어 문제없지만 const는 안 된다).
+  const KMAIL_FETCH_PAGE_MAX_ROUNDS = 2;
   const sendMatch = reply.match(/KMAIL_SEND_CAMPAIGN\s*(\{[\s\S]*\})\s*$/);
   const ruleMatch = reply.match(/KMAIL_CREATE_RULE\s*(\{[\s\S]*\})\s*$/);
   const lookupMatch = reply.match(/KMAIL_LOOKUP_CONTACTS\s*(\{[\s\S]*\})\s*$/);
@@ -34590,7 +34594,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
       searchResults.push(r?.ok ? { query: q, organic: r.organic, answer_box: r.answer_box } : { query: q, error: true });
     }
 
-    const searchContext = `[검색 결과]\n${JSON.stringify(searchResults)}\n\n위 검색 결과를 바탕으로, 실제로 확인되는 이름·이메일·소속만 사용자에게 후보로 제시하세요. 이메일을 못 찾았으면 정직하게 말하고 사용자에게 직접 물어보세요. (이 메시지 자체는 사용자에게 보이지 않습니다 — 자연스러운 답변만 작성하세요.)`;
+    const searchContext = `[검색 결과]\n${JSON.stringify(searchResults)}\n\n위 검색 결과를 바탕으로, 실제로 확인되는 이름·소속만 사용자에게 후보로 제시하세요. 스니펫에 이메일이 안 보이면 절대 바로 사용자에게 묻지 마세요 — organic 결과 중 학과·연구실 공식 홈페이지나 교수진 명단으로 보이는 링크가 있으면 KMAIL_FETCH_PAGE 태그로 먼저 열람해 보세요. 적절한 링크가 없을 때만 정직하게 말하고 사용자에게 직접 물어보세요. (이 메시지 자체는 사용자에게 보이지 않습니다 — 자연스러운 답변만 작성하세요.)`;
     let followUpReply;
     try {
       followUpReply = await deepseekChatText({
@@ -34607,8 +34611,79 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
       followUpReply = '검색은 완료됐지만 결과 정리 중 오류가 발생했습니다: ' + e.message;
     }
 
+    // 검색 후속 응답이 KMAIL_FETCH_PAGE로 끝나면(§1-(c) 정상 동작),
+    // 여기서 바로 처리하지 않으면 태그 원문이 그대로 사용자에게
+    // 노출된다 — _kmailRunFetchPageChain 정의는 아래(①-b)에 있지만
+    // 함수 선언이라 호이스팅되어 여기서도 호출 가능하다.
+    const chainedFetchMatch = followUpReply.match(/KMAIL_FETCH_PAGE\s*(\{[\s\S]*\})\s*$/);
+    if (chainedFetchMatch) {
+      let chainedParsed = null;
+      try { chainedParsed = JSON.parse(chainedFetchMatch[1]); } catch (e) { /* 아래에서 url='' 처리 */ }
+      const chainedAssistantText = followUpReply.slice(0, chainedFetchMatch.index).trim();
+      const chainedUrl = (chainedParsed?.url || '').trim();
+      if (chainedUrl) {
+        followUpReply = await _kmailRunFetchPageChain(chainedAssistantText, chainedUrl, KMAIL_FETCH_PAGE_MAX_ROUNDS);
+      } else {
+        followUpReply = chainedAssistantText || followUpReply;
+      }
+      return new Response(JSON.stringify({ ok: true, reply: followUpReply, action: { type: 'searched_contacts_then_fetched_page', queries } }),
+        { status: 200, headers: corsHeaders });
+    }
+
     return new Response(JSON.stringify({ ok: true, reply: followUpReply, action: { type: 'searched_contacts', queries } }),
       { status: 200, headers: corsHeaders });
+  }
+
+  // ── 검색 결과 링크 열람(이메일 확인) 라운드 실행 헬퍼 (2026-09-08 신설)
+  // ── §1-(c)/(d), §2-1b — 검색 스니펫에 이메일이 없을 때 SP가 지정한
+  // 링크를 열람하고, 그 결과를 반영한 후속 응답을 생성한다. 최대
+  // KMAIL_FETCH_PAGE_MAX_ROUNDS번까지 연쇄 호출을 허용(SP가 "1~2개
+  // 링크로 안 되면 포기"라고 스스로 판단하게 하되, 서버도 무한루프/
+  // 과금 폭주를 막기 위해 하드 캡을 건다). 상수 선언은 함수 상단으로
+  // 옮겼음(TDZ 방지, 위 주석 참고) — 여기서는 함수 선언만.
+  async function _kmailRunFetchPageChain(priorAssistantText, initialUrl, roundsLeft) {
+    let assistantText = priorAssistantText;
+    let url = initialUrl;
+    let latestReply = '';
+    while (roundsLeft > 0 && url) {
+      const pageResult = await _performPageFetchForEmail(env, ctx, url).catch(e => ({ ok: false, error: 'EXCEPTION', message: e.message }));
+      const pageContext = pageResult.ok
+        ? `[페이지 열람 결과]\n${JSON.stringify({ url: pageResult.url, emails_found: pageResult.emails, text_snippet: pageResult.text_snippet })}\n\n위에서 실제로 발견된 이메일만 후보로 제시하세요(emails_found가 비어있으면 이 페이지에서도 못 찾은 것이니 지어내지 말고 정직하게 말하세요). text_snippet에서 이름과 이메일을 짝지을 수 있으면 짝지어 보여주세요. 정 안 되면 §1-(d)대로 정직하게 실패를 알리고 사용자에게 물어보세요(더 이상 다른 링크는 시도할 수 없습니다). (이 메시지 자체는 사용자에게 보이지 않습니다.)`
+        : `[페이지 열람 실패]\n${JSON.stringify({ url, error: pageResult.error, message: pageResult.message })}\n\n페이지를 열람하지 못했습니다. §1-(d)대로 정직하게 실패했다고 말하고 사용자에게 직접 이메일을 알려달라고 요청하세요(더 이상 다른 링크는 시도할 수 없습니다). (이 메시지 자체는 사용자에게 보이지 않습니다.)`;
+
+      roundsLeft -= 1;
+      try {
+        latestReply = await deepseekChatText({
+          env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
+          messages: [
+            { role: 'system', content: systemPrompt }, ...cleanMessages,
+            { role: 'assistant', content: assistantText || '페이지를 확인하고 있습니다...' },
+            { role: 'user', content: pageContext },
+          ],
+          max_tokens: 800, temperature: 0.4, timeoutMs: 20000,
+          fallbackText: '페이지 열람은 완료됐지만 결과 정리에 실패했습니다. 다시 시도해 주세요.',
+        });
+      } catch (e) {
+        latestReply = '페이지 열람 결과 정리 중 오류가 발생했습니다: ' + e.message;
+        break;
+      }
+
+      const nextFetchMatch = roundsLeft > 0 ? latestReply.match(/KMAIL_FETCH_PAGE\s*(\{[\s\S]*\})\s*$/) : null;
+      if (!nextFetchMatch) {
+        // 태그 없이 끝났으면(정상 최종 응답) 그대로 반환. 혹시 남은
+        // 라운드가 없는데 태그가 또 붙어 나온 경우엔 안전하게 태그
+        // 텍스트를 잘라내고 반환(사용자에게 raw 태그 노출 방지).
+        const strayMatch = latestReply.match(/KMAIL_FETCH_PAGE\s*(\{[\s\S]*\})\s*$/);
+        if (strayMatch) latestReply = latestReply.slice(0, strayMatch.index).trim()
+          || '이메일까지는 확인하지 못했습니다 — 직접 알려주시겠어요?';
+        return latestReply;
+      }
+      let nextParsed = null;
+      try { nextParsed = JSON.parse(nextFetchMatch[1]); } catch (e) { /* 아래에서 url='' 처리 */ }
+      assistantText = latestReply.slice(0, nextFetchMatch.index).trim();
+      url = (nextParsed?.url || '').trim();
+    }
+    return latestReply || assistantText;
   }
 
   // ── ①-b 검색 결과 링크 열람(이메일 확인) 태그 (2026-09-08 신설) ──────
@@ -34622,26 +34697,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
       return new Response(JSON.stringify({ ok: true, reply: cleanReplyText || reply, action: null }), { status: 200, headers: corsHeaders });
     }
 
-    const pageResult = await _performPageFetchForEmail(env, ctx, url).catch(e => ({ ok: false, error: 'EXCEPTION', message: e.message }));
-    const pageContext = pageResult.ok
-      ? `[페이지 열람 결과]\n${JSON.stringify({ url: pageResult.url, emails_found: pageResult.emails, text_snippet: pageResult.text_snippet })}\n\n위에서 실제로 발견된 이메일만 후보로 제시하세요(emails_found가 비어있으면 이 페이지에서도 못 찾은 것이니 지어내지 말고 정직하게 말하세요). text_snippet에서 이름과 이메일을 짝지을 수 있으면 짝지어 보여주세요. (이 메시지 자체는 사용자에게 보이지 않습니다.)`
-      : `[페이지 열람 실패]\n${JSON.stringify({ url, error: pageResult.error, message: pageResult.message })}\n\n페이지를 열람하지 못했습니다. 정직하게 실패했다고 말하고, 필요하면 사용자에게 직접 이메일을 알려달라고 요청하세요. (이 메시지 자체는 사용자에게 보이지 않습니다.)`;
-
-    let followUpReply;
-    try {
-      followUpReply = await deepseekChatText({
-        env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
-        messages: [
-          { role: 'system', content: systemPrompt }, ...cleanMessages,
-          { role: 'assistant', content: cleanReplyText || '페이지를 확인하고 있습니다...' },
-          { role: 'user', content: pageContext },
-        ],
-        max_tokens: 800, temperature: 0.4, timeoutMs: 20000,
-        fallbackText: '페이지 열람은 완료됐지만 결과 정리에 실패했습니다. 다시 시도해 주세요.',
-      });
-    } catch (e) {
-      followUpReply = '페이지 열람 결과 정리 중 오류가 발생했습니다: ' + e.message;
-    }
+    const followUpReply = await _kmailRunFetchPageChain(cleanReplyText, url, KMAIL_FETCH_PAGE_MAX_ROUNDS);
 
     return new Response(JSON.stringify({ ok: true, reply: followUpReply, action: { type: 'fetched_page', url } }),
       { status: 200, headers: corsHeaders });
