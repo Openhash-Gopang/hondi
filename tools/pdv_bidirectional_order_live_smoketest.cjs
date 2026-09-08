@@ -222,6 +222,7 @@ async function main() {
   const pbToken = await pbAdminLogin();
   {
     const buyerRecs = await pbFind(pbToken, 'pdv_records', `guid='${buyer.guid}' && block_hash='${block_hash}'`);
+    log('[DEBUG] 구매자 pdv_records 원본:', JSON.stringify(buyerRecs));
     if (buyerRecs.length !== 1) fail(`구매자 pdv_records 레코드 개수 이상 — 기대 1, 실제 ${buyerRecs.length}`);
     const buyerRec = buyerRecs[0];
     if (buyerRec.type !== 'tx_2party') fail(`구매자 pdv_records.type 불일치: ${buyerRec.type}`);
@@ -233,6 +234,7 @@ async function main() {
     log('[PASS] 구매자 PDV 거래명세서 확인 —', JSON.stringify({ who: buyerSixw.who, what: buyerSixw.what, why: buyerSixw.why }));
 
     const sellerRecs = await pbFind(pbToken, 'pdv_records', `guid='${seller.guid}' && block_hash='${block_hash}'`);
+    log('[DEBUG] 판매자 pdv_records 원본:', JSON.stringify(sellerRecs));
     if (sellerRecs.length !== 1) fail(`판매자 pdv_records 레코드 개수 이상(양방향화 회귀!) — 기대 1, 실제 ${sellerRecs.length}`);
     const sellerRec = sellerRecs[0];
     if (sellerRec.type !== 'tx_2party') fail(`판매자 pdv_records.type 불일치: ${sellerRec.type}`);
