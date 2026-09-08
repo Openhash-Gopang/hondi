@@ -87,6 +87,19 @@ while (!_isRegistered()) {
 document.getElementById('gopang-auth-gate')?.remove();
 document.body.classList.add('gopang-authed');
 
+// ★ 2026-0X-XX 신설 — 외부 페이지(대시보드 등)가 ?open=profile-composer
+// 쿼리로 프로필 작성 패널을 곧바로 열 수 있게 한다(대시보드 profile 탭의
+// 임베드 대화창 ↔ 실제 profile-assistant SP 연동). 인증(위 while 루프)이
+// 끝난 뒤에만 실행해야 지갑·가입 상태가 준비돼 있다 — openProfileComposer()
+// 자체가 handle 미등록 시 alert 후 조용히 반환하므로 이중 안전망도 있다.
+// 값이 없는 일반 경로(webapp.html 직접 방문)에는 전혀 영향 없다.
+if (new URLSearchParams(location.search).get('open') === 'profile-composer') {
+  setTimeout(() => {
+    try { openProfileComposer(); }
+    catch (e) { console.warn('[Dashboard-link] openProfileComposer 자동 실행 실패:', e.message); }
+  }, 300);
+}
+
 // ★ 2026-07-21 신설 — 실사로 발견한 버그: _isRegistered()는 localStorage만
 // 보고 판단하므로(서버 재확인 없음), 관리자가 서버에서 계정을 지워도 이
 // while 루프 자체가 한 번도 안 돌아 initAuth() 내부의 서버 존재 확인

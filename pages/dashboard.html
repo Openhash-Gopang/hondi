@@ -227,6 +227,22 @@ code, pre, kbd, samp, input, button, textarea, select {
 .profile-side h2 { font-size: 15px; font-weight: 600; color: var(--navy); margin-bottom: 3px; }
 .profile-side .sub { font-size: 12px; color: var(--text4); margin-bottom: 14px; }
 
+/* 프로필 — AI 대화창 연동 (실제 profile-assistant SP) */
+.pf-sync-note { font-size: 10px; color: var(--text4); text-align: center; margin-top: 2px; }
+.pf-edit-btn {
+  width: 100%; background: var(--brand); color: #fff; border: none; border-radius: var(--r-full);
+  padding: 8px; font-size: 10.5px; font-weight: 700; margin-top: 4px; box-shadow: var(--sh-1); cursor: pointer;
+}
+.pf-edit-btn:hover { box-shadow: var(--sh-2); }
+.pf-composer-panel { margin-top: 16px; }
+.pf-composer-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; }
+.pf-composer-head h2 { font-size: 14px; font-weight: 600; color: var(--navy); }
+.pf-composer-body { display: none; border-top: 1px solid var(--border); }
+.pf-composer-body.open { display: block; }
+.pf-composer-body iframe { width: 100%; height: 560px; border: none; display: block; background: #f9fafb; }
+.pf-refresh-btn { font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: var(--r-full); border: none; background: var(--surface-container); color: var(--text3); cursor: pointer; }
+.pf-refresh-btn:hover { background: var(--brand-bg); color: var(--brand-dk); }
+
 /* 대화상대 */
 .toolbar { display: flex; gap: 10px; margin-bottom: 16px; }
 .toolbar input { flex: 1; border: none; border-radius: var(--r-full); padding: 10px 18px; font-size: 13px; font-family: inherit; background: var(--surface); box-shadow: var(--sh-1); }
@@ -679,15 +695,14 @@ code, pre, kbd, samp, input, button, textarea, select {
             <div class="phone-notch"><span></span></div>
             <div class="phone-screen">
               <div class="miniapp">
-                <div class="miniapp-bar"><span>← 프로필</span><span>수정</span></div>
+                <div class="miniapp-bar"><span>← 프로필</span><span id="pfSyncBadge">동기화 중…</span></div>
                 <div class="miniapp-body">
-                  <div class="miniapp-avatar">주</div>
-                  <div class="mf"><label>이름</label><input type="text" value="주피터"></div>
-                  <div class="mf"><label>한마디</label><input type="text" value="카톡보다 혼디, 제주 출신 혼디"></div>
-                  <div class="mf"><label>거주 지역</label><input type="text" value="제주특별자치도 제주시 한림읍"></div>
-                  <div class="mf"><label>AI 비서 호칭</label><input type="text" value="혼디"></div>
-                  <div class="mf"><label>알림 수신</label><select><option>전체 수신</option><option>중요 알림만</option></select></div>
-                  <button class="mf-save">저장</button>
+                  <div class="miniapp-avatar" id="pfAvatar">-</div>
+                  <div class="mf"><label>이름</label><input type="text" id="pfName" value="" readonly></div>
+                  <div class="mf"><label>한마디</label><input type="text" id="pfNickname" value="" readonly></div>
+                  <div class="mf"><label>거주 지역</label><input type="text" id="pfRegion" value="" readonly></div>
+                  <div class="mf"><label>AI 비서 호칭</label><input type="text" id="pfAssistantName" value="" readonly></div>
+                  <button class="mf-save pf-edit-btn" id="pfOpenComposerBtn">AI와 대화로 수정하기</button>
                 </div>
               </div>
             </div>
@@ -696,12 +711,25 @@ code, pre, kbd, samp, input, button, textarea, select {
 
           <div class="profile-side">
             <h2>프로필 웹앱</h2>
-            <div class="sub">왼쪽 화면에서 바로 수정할 수 있습니다 — profile-assistant 웹앱을 그대로 불러온 시뮬레이션입니다.</div>
+            <div class="sub">실제 사용자 프로필(profile-assistant SP가 관리하는 값)을 그대로 불러와 보여줍니다 — 수정은 아래 대화창에서 진행됩니다.</div>
             <div class="panel">
-              <div class="row"><div class="row-body"><div class="row-title">공개 범위</div><div class="row-desc">대화상대에게 이름·한마디만 공개</div></div></div>
-              <div class="row"><div class="row-body"><div class="row-title">프로필 변경 이력</div><div class="row-desc">최근 변경: 2026-08-19</div></div></div>
-              <div class="row"><div class="row-body"><div class="row-title">연동 계정</div><div class="row-desc">정부24 인증 완료 · 은행 계좌 미연동</div></div></div>
+              <div class="row"><div class="row-body"><div class="row-title">공개 범위</div><div class="row-desc" id="pfVisibility">불러오는 중…</div></div></div>
+              <div class="row"><div class="row-body"><div class="row-title">프로필 변경 이력</div><div class="row-desc" id="pfLastUpdated">불러오는 중…</div></div></div>
+              <div class="row"><div class="row-body"><div class="row-title">연동 계정</div><div class="row-desc" id="pfLinkedAccounts">불러오는 중…</div></div></div>
+              <div class="row"><div class="row-body"><div class="row-title">불러오기</div><div class="row-desc">지갑·서버 상태에 따라 최신 값이 늦게 반영될 수 있어요</div></div><button class="pf-refresh-btn" id="pfRefreshBtn">새로고침</button></div>
             </div>
+            <div class="pf-sync-note" id="pfSyncNote"></div>
+          </div>
+        </div>
+
+        <!-- AI 대화로 프로필 수정 — 실제 profile-assistant SP를 그대로 불러오는 임베드 대화창 -->
+        <div class="panel pf-composer-panel">
+          <div class="pf-composer-head">
+            <h2>AI와 대화로 프로필 수정</h2>
+            <button class="mini-btn" id="pfComposerToggle">대화 시작</button>
+          </div>
+          <div class="pf-composer-body" id="pfComposerBody">
+            <iframe id="pfComposerFrame" title="프로필 작성 대화" src="about:blank"></iframe>
           </div>
         </div>
       </div>
@@ -1202,6 +1230,161 @@ import { L1_URL, setUser } from '/src/gopang/core/state.js';
     resetToStep1();
     phoneInput.focus();
   });
+})();
+</script>
+
+<script type="module">
+// ══════════════════════════════════════════════════════════════
+// 프로필 탭 ↔ 실제 사용자 프로필(profile-assistant SP) 연동
+// ══════════════════════════════════════════════════════════════
+// 읽기: 이 페이지가 로그인 시 이미 확보한 지갑(window.gopangWallet)으로
+// GET /profile을 서명 조회한다 — call-ai.js의 _loadOwnJobContext가 쓰는
+// 것과 동일한 서명 프로토콜(worker.js _isAuthenticatedOwnerRequest가
+// 기대하는 view:{guid}:{pubkey}:{ts} 서명 형식 그대로)이라 별도 백엔드
+// 변경 없이 그대로 재사용 가능하다.
+// 쓰기: 이 페이지 안에서 call-ai.js 전체(GWP·전문가 세션 등과 뒤얽힌
+// 무거운 의존 그래프)를 새로 부트스트랩하지 않는다 — 대신 이미 완성된
+// 실제 채팅 엔진이 도는 webapp.html을 그대로 iframe으로 불러온다
+// (?open=profile-composer, gopang-app.js가 인증 완료 직후 자동으로
+// openProfileComposer()를 호출하도록 배선해 둠). 같은 오리진이라
+// localStorage를 공유하므로, 대화 중 [PARTIAL_SAVE]/PROFILE_SUBMIT이
+// 그 안에서 기록되는 즉시 이 페이지의 'storage' 이벤트로 감지해
+// 대시보드 표시를 새로고침한다.
+(() => {
+  const PF_PROXY = 'https://hondi-proxy.tensor-city.workers.dev';
+  const $ = (id) => document.getElementById(id);
+
+  function pfReadLocalSnapshot() {
+    let reg = {};
+    try { reg = JSON.parse(localStorage.getItem('gopang_user_v4') || '{}'); } catch {}
+    let partial = {};
+    try { partial = JSON.parse(localStorage.getItem('hondi_profile_partial') || '{}'); } catch {}
+    return Object.assign({
+      name: reg.nickname || reg.name || reg.handle || '',
+      region: reg.region || '',
+      assistant_name: localStorage.getItem('hondi_assistant_name') || '혼디',
+    }, partial);
+  }
+
+  function pfRenderLocal(snap) {
+    $('pfAvatar').textContent = (snap.name || '?').trim().charAt(0) || '?';
+    $('pfName').value = snap.name || '';
+    $('pfNickname').value = snap.description || snap.nickname || '';
+    $('pfRegion').value = snap.address || snap.region || '';
+    $('pfAssistantName').value = snap.assistant_name || '혼디';
+  }
+
+  async function pfFetchServerProfile() {
+    try {
+      const reg = JSON.parse(localStorage.getItem('gopang_user_v4') || '{}');
+      const guid = reg.ipv6 || reg.guid;
+      const wallet = window.gopangWallet;
+      if (!guid || !wallet?.signPayload) {
+        $('pfSyncBadge').textContent = '로그인 필요';
+        $('pfVisibility').textContent = '지갑이 아직 준비되지 않았어요';
+        $('pfLastUpdated').textContent = '-';
+        $('pfLinkedAccounts').textContent = '-';
+        return;
+      }
+      const ts = String(Math.floor(Date.now() / 1000));
+      const pubkey = wallet.publicKeyB64u || '';
+      const sigMsg = `view:${guid}:${pubkey}:${ts}`;
+      const signature = await wallet.signPayload(sigMsg);
+      const qs = new URLSearchParams({ guid, viewer_guid: guid, viewer_pubkey: pubkey, viewer_sig: signature, viewer_ts: ts });
+      const res = await fetch(`${PF_PROXY}/profile?${qs.toString()}`, { cache: 'no-cache' });
+      const data = await res.json().catch(() => null);
+      if (!data?.ok || !data.profile) {
+        $('pfSyncBadge').textContent = '프로필 없음';
+        $('pfVisibility').textContent = '아직 등록된 프로필이 없어요 — 아래 대화로 시작해 보세요';
+        $('pfLastUpdated').textContent = '-';
+        $('pfLinkedAccounts').textContent = '-';
+        return;
+      }
+      const p = data.profile;
+      $('pfSyncBadge').textContent = '동기화됨';
+      if (p.name) $('pfName').value = p.name;
+      if (p.address) $('pfRegion').value = p.address;
+      $('pfVisibility').textContent = p.is_public
+        ? '공개 프로필 — 검색·대화상대에게 노출됩니다'
+        : '비공개 프로필 — 본인만 볼 수 있어요';
+      $('pfLastUpdated').textContent = p.updated_at
+        ? `최근 변경: ${new Date(p.updated_at).toLocaleString('ko-KR')}`
+        : '변경 이력 없음';
+      const linked = [];
+      if (p.phone) linked.push('휴대폰 연동');
+      if (p.address) linked.push('주소 등록');
+      $('pfLinkedAccounts').textContent = linked.length ? linked.join(' · ') : '연동된 계정 정보 없음';
+      $('pfSyncNote').textContent = '';
+    } catch (e) {
+      $('pfSyncBadge').textContent = '조회 실패';
+      $('pfSyncNote').textContent = '서버 조회 중 오류: ' + e.message;
+    }
+  }
+
+  function pfRefreshAll() {
+    pfRenderLocal(pfReadLocalSnapshot());
+    pfFetchServerProfile();
+  }
+
+  $('pfRefreshBtn')?.addEventListener('click', pfRefreshAll);
+
+  // 최초 진입 + 프로필 탭 클릭 시 새로고침
+  document.getElementById('sideNav')?.addEventListener('click', (e) => {
+    if (e.target.closest('.dash-tab[data-tab="profile"]')) pfRefreshAll();
+  });
+  pfRefreshAll();
+
+  // 로그인 완료(loginScreen → dashboardApp 전환) 즉시 한 번 더 새로고침 —
+  // 로그인 전에는 지갑/계정이 없어 위 최초 호출이 "로그인 필요"로 끝나므로.
+  const dashboardAppEl = $('dashboardApp');
+  if (dashboardAppEl) {
+    new MutationObserver(() => {
+      if (dashboardAppEl.style.display !== 'none') pfRefreshAll();
+    }).observe(dashboardAppEl, { attributes: true, attributeFilter: ['style'] });
+  }
+
+  // ── 대화창(iframe) 토글 — 실제 profile-assistant SP를 그대로 불러온다 ──
+  const pfToggleBtn = $('pfComposerToggle');
+  const pfBody = $('pfComposerBody');
+  const pfFrame = $('pfComposerFrame');
+
+  function pfOpenComposer() {
+    pfBody.classList.add('open');
+    pfToggleBtn.textContent = '대화 닫기';
+    if (pfFrame.getAttribute('src') === 'about:blank') {
+      pfFrame.src = '../webapp.html?open=profile-composer';
+    }
+    pfBody.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  pfToggleBtn?.addEventListener('click', () => {
+    const opening = !pfBody.classList.contains('open');
+    if (opening) { pfOpenComposer(); return; }
+    pfBody.classList.remove('open');
+    pfToggleBtn.textContent = '대화 시작';
+  });
+  $('pfOpenComposerBtn')?.addEventListener('click', pfOpenComposer);
+
+  // ── 대화 중 실제 프로필이 갱신되는 즉시(iframe → localStorage 기록) 감지 ──
+  // 같은 오리진 iframe이 localStorage.setItem을 호출하면 그걸 실행한
+  // iframe 자신이 아니라 부모 창(이 페이지)에 'storage' 이벤트가 발생한다
+  // — 별도 postMessage 배선 없이 그대로 활용할 수 있다.
+  window.addEventListener('storage', (e) => {
+    if (['gopang_user_v4', 'hondi_profile_partial', 'hondi_profile_done', 'hondi_assistant_name'].includes(e.key)) {
+      pfRefreshAll();
+    }
+  });
+
+  // 일부 브라우저/웹뷰에서 storage 이벤트가 유실될 수 있어, 대화창이 열려
+  // 있는 동안만 가벼운 폴백 폴링을 함께 둔다(닫히면 즉시 정리).
+  let pfPollTimer = null;
+  new MutationObserver(() => {
+    if (pfBody.classList.contains('open') && !pfPollTimer) {
+      pfPollTimer = setInterval(pfRefreshAll, 4000);
+    } else if (!pfBody.classList.contains('open') && pfPollTimer) {
+      clearInterval(pfPollTimer); pfPollTimer = null;
+    }
+  }).observe(pfBody, { attributes: true, attributeFilter: ['class'] });
 })();
 </script>
 
