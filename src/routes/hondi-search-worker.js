@@ -89,7 +89,7 @@ const FALLBACK_MANIFEST = [
 ];
 
 async function fetchManifestFromOrigin(env) {
-  const url = env.SITE_MANIFEST_URL || 'https://hondi.net/site-manifest.json';
+  const url = env.SITE_MANIFEST_URL || 'https://hondi.net/site-manifest.json' /* 리포 루트에 위치 - public/ 아님, GitHub Pages가 루트를 그대로 미러링하므로 */;
   const res = await fetch(url);
   if (!res.ok) {
     throw new Error(`site-manifest fetch failed: ${res.status}`);

@@ -48,7 +48,9 @@
 
 ## 3. 사이트 매니페스트 소스
 
-- 정본은 `site-manifest.json` (리포 루트/public에 배치, `https://hondi.net/site-manifest.json`으로 정적 서빙).
+- 정본은 `site-manifest.json` (**리포 루트**에 배치 — `public/` 아님. GitHub Pages가 hondi.net을
+  리포 트리 그대로 미러링하므로 `public/`에 두면 `hondi.net/public/site-manifest.json`으로 서빙되어
+  Worker가 찾는 `https://hondi.net/site-manifest.json`과 어긋난다 — 2026-09-08 실사로 발견/수정).
   desktop.html의 11개 정책 도메인 탭(/domains/*), /highlights/*, 각 K-service 랜딩 페이지,
   사용법 매뉴얼 등 22개 항목을 1차로 채워둠 — 페이지 추가/개편 시 이 파일을 갱신하는 것이 원칙.
 - 장기적으로는 SP-TREE-REGISTRY(기존 SP 아키텍처의 단일 출처)에서 자동 생성하도록 전환 가능.
