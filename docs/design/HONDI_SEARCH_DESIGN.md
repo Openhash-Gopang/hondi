@@ -48,11 +48,14 @@
 
 ## 3. 사이트 매니페스트 소스
 
-- SP-TREE-REGISTRY(기존 SP 아키텍처의 단일 출처)를 재사용하거나,
-  desktop.html의 11개 정책 도메인 탭 + /domains/ + /highlights/ + 각 K-service 랜딩 페이지를
-  별도 `site-manifest.json`으로 관리 (경로, 설명, 키워드 배열).
-- 매니페스트는 빌드 타임에 생성하거나, Worker에서 KV/PocketBase 캐시로 관리 후
-  요청마다 SP에 주입.
+- 정본은 `site-manifest.json` (리포 루트/public에 배치, `https://hondi.net/site-manifest.json`으로 정적 서빙).
+  desktop.html의 11개 정책 도메인 탭(/domains/*), /highlights/*, 각 K-service 랜딩 페이지,
+  사용법 매뉴얼 등 22개 항목을 1차로 채워둠 — 페이지 추가/개편 시 이 파일을 갱신하는 것이 원칙.
+- 장기적으로는 SP-TREE-REGISTRY(기존 SP 아키텍처의 단일 출처)에서 자동 생성하도록 전환 가능.
+- Worker(`hondi-search-worker.js`)는 `loadManifest()`에서:
+  1. KV 캐시(`site-manifest`, TTL 1시간)를 먼저 확인
+  2. 없으면 `site-manifest.json`을 원본에서 fetch해 캐시에 저장
+  3. 원본 fetch까지 실패하면 코드 내 `FALLBACK_MANIFEST`(최소 4개 항목)로 저하 운영
 
 예시 항목:
 ```json
