@@ -168,7 +168,7 @@ window.PAGE_HEADER = {
 
 <div class="ug-doc">
 
-  
+
 
   <div class="svc-tabs" id="svcTabs">
     <div class="svc-tab active" data-svc="k119">응급 신고</div>
@@ -196,6 +196,14 @@ window.PAGE_HEADER = {
     <div class="svc-tab" data-svc="kmail">메일</div>
     <div class="svc-tab" data-svc="kjit">조달</div>
     <div class="svc-tab" data-svc="kcity">도시 설계</div>
+    <div class="svc-tab" data-svc="kintent">의도 파악(내부)</div>
+    <div class="svc-tab" data-svc="kcompose">실행계획 조합(내부)</div>
+    <div class="svc-tab" data-svc="kexecute">오케스트레이션 실행(내부)</div>
+    <div class="svc-tab" data-svc="kdeliver">결과 전달(내부)</div>
+    <div class="svc-tab" data-svc="kreport">이해당사자 통지(내부)</div>
+    <div class="svc-tab" data-svc="kcase">복합 사안 총괄</div>
+    <div class="svc-tab" data-svc="kestate">부동산</div>
+    <div class="svc-tab" data-svc="ksocial">사교 모임 추천</div>
   </div>
 
   <div class="svc-content" id="svcContent">
@@ -1780,13 +1788,124 @@ var SVC_CONTENT = {
       </div>
     </div>
   `,
+  kintent: `
+    <div class="svc-detail">
+      <h2>K-Intent — 의도·목표 구조화<span class="svc-badge svc-badge-partial">내부 전용</span></h2>
+      <p class="svc-lead">AC(에이전트 코어)가 다기관·다절차 오케스트레이션이 필요하다고 판별한 요청을 넘겨받아, 이용자가 실제로 손에 쥐고 싶은 최종 결과가 무엇인지 구조화합니다. 도메인은 가리지 않습니다 — 주문이든 소송이든 동일한 절차로 처리합니다.</p>
+
+      <div class="svc-callout">
+        K-Intent → K-Compose → K-Execute → K-Deliver → K-Report는 사용자가 개별적으로 선택하는 서비스가 아니라, 혼디가 다기관·다절차 요청을 처리할 때마다 내부적으로 항상 이 순서로 실행하는 5단계 오케스트레이션 파이프라인입니다. 아래는 각 단계가 실제로 하는 일을 투명하게 공개한 것이며, 별도의 진입 채팅창은 없습니다.
+      </div>
+      <h3>하는 일</h3>
+      <p class="svc-note">어떻게 실현할지(어느 기관·어느 절차)는 판단하지 않습니다 — 그 이후 판단은 K-Compose의 몫입니다. K-Intent는 오직 "무엇을 원하는가"만 구조화합니다.</p>
+
+      <p class="svc-note"><b>다음 단계</b>: K-Compose(실행계획 조합)</p>
+    </div>
+  `,
+  kcompose: `
+    <div class="svc-detail">
+      <h2>K-Compose — 실행계획 조합<span class="svc-badge svc-badge-partial">내부 전용</span></h2>
+      <p class="svc-lead">K-Intent가 확정한 목표를 받아, gwp-registry에 등록된 어떤 서비스·기관·사업자·개인을 어떤 순서로 조합해야 그 목표가 실현되는지 결정합니다.</p>
+
+      <div class="svc-callout">
+        K-Intent → K-Compose → K-Execute → K-Deliver → K-Report는 사용자가 개별적으로 선택하는 서비스가 아니라, 혼디가 다기관·다절차 요청을 처리할 때마다 내부적으로 항상 이 순서로 실행하는 5단계 오케스트레이션 파이프라인입니다. 아래는 각 단계가 실제로 하는 일을 투명하게 공개한 것이며, 별도의 진입 채팅창은 없습니다.
+      </div>
+      <h3>하는 일</h3>
+      <p class="svc-note">실행 계획(어느 atom_id·org_id를 어느 순서로·조건부로·병렬로 실행할지)을 확정해 K-Execute에게 넘깁니다.</p>
+      <p class="svc-note"><b>이전 단계</b>: K-Intent(의도·목표 구조화)</p>
+      <p class="svc-note"><b>다음 단계</b>: K-Execute(오케스트레이션 실행)</p>
+    </div>
+  `,
+  kexecute: `
+    <div class="svc-detail">
+      <h2>K-Execute — 오케스트레이션 실행<span class="svc-badge svc-badge-partial">내부 전용</span></h2>
+      <p class="svc-lead">K-Compose가 확정한 실행 계획을 받아, AI Agent로서 그 계획을 실제로 수행합니다.</p>
+
+      <div class="svc-callout">
+        K-Intent → K-Compose → K-Execute → K-Deliver → K-Report는 사용자가 개별적으로 선택하는 서비스가 아니라, 혼디가 다기관·다절차 요청을 처리할 때마다 내부적으로 항상 이 순서로 실행하는 5단계 오케스트레이션 파이프라인입니다. 아래는 각 단계가 실제로 하는 일을 투명하게 공개한 것이며, 별도의 진입 채팅창은 없습니다.
+      </div>
+      <h3>하는 일</h3>
+      <p class="svc-note">"무엇을 할지"는 이미 K-Compose가 정했습니다 — K-Execute는 "지금 이것을 한다"는 행위 자체에 집중합니다.</p>
+      <p class="svc-note"><b>이전 단계</b>: K-Compose(실행계획 조합)</p>
+      <p class="svc-note"><b>다음 단계</b>: K-Deliver(결과 정리·전달)</p>
+    </div>
+  `,
+  kdeliver: `
+    <div class="svc-detail">
+      <h2>K-Deliver — 결과 정리·전달<span class="svc-badge svc-badge-partial">내부 전용</span></h2>
+      <p class="svc-lead">K-Execute가 실행한 결과를 받아, 이용자가 실제로 받아볼 수 있는 최종 산출물로 정리합니다.</p>
+
+      <div class="svc-callout">
+        K-Intent → K-Compose → K-Execute → K-Deliver → K-Report는 사용자가 개별적으로 선택하는 서비스가 아니라, 혼디가 다기관·다절차 요청을 처리할 때마다 내부적으로 항상 이 순서로 실행하는 5단계 오케스트레이션 파이프라인입니다. 아래는 각 단계가 실제로 하는 일을 투명하게 공개한 것이며, 별도의 진입 채팅창은 없습니다.
+      </div>
+      <h3>하는 일</h3>
+      <p class="svc-note">본인인증이 필요한 마지막 단계 등 인간 전속 경계를 명확히 안내하고, 같은 목표가 재사용될 수 있도록 처리 이력을 갱신한 뒤 AC에 요약을 돌려줍니다.</p>
+      <p class="svc-note"><b>이전 단계</b>: K-Execute(오케스트레이션 실행)</p>
+      <p class="svc-note"><b>다음 단계</b>: K-Report(이해당사자 통지)</p>
+    </div>
+  `,
+  kreport: `
+    <div class="svc-detail">
+      <h2>K-Report — 이해당사자 통지<span class="svc-badge svc-badge-partial">내부 전용</span></h2>
+      <p class="svc-lead">K-Deliver가 이용자에게 전달을 마친 결과를 받아, 이 사건과 관련해 법적·행정적으로 통지·신고 의무가 있는 이해당사자를 식별합니다.</p>
+
+      <div class="svc-callout">
+        K-Intent → K-Compose → K-Execute → K-Deliver → K-Report는 사용자가 개별적으로 선택하는 서비스가 아니라, 혼디가 다기관·다절차 요청을 처리할 때마다 내부적으로 항상 이 순서로 실행하는 5단계 오케스트레이션 파이프라인입니다. 아래는 각 단계가 실제로 하는 일을 투명하게 공개한 것이며, 별도의 진입 채팅창은 없습니다.
+      </div>
+      <h3>하는 일</h3>
+      <p class="svc-note">각 당사자별로 실제 제출(가능한 경우) 또는 제출용 초안(불가능한 경우)을 만드는 것이 임무이며, 오케스트레이션의 마지막 단계로 AC에 최종 반환합니다.</p>
+      <p class="svc-note"><b>이전 단계</b>: K-Deliver(결과 정리·전달)</p>
+
+    </div>
+  `,
+  kcase: `
+    <div class="svc-detail">
+      <h2>K-Case — 복합 사안 총괄 조정 AI<span class="svc-badge svc-badge-design">설계 단계</span></h2>
+      <p class="svc-lead">개인파산·상속·창업처럼 여러 기관·여러 절차에 걸치는 복합 목표를 받아, 어떤 기관과 어떤 절차의 SP를 어떤 순서로 호출할지 계획만 세우는 "지휘자" 역할의 AI입니다. 계획을 직접 실행하지는 않습니다.</p>
+      <div class="svc-callout important">
+        이 SP는 문서 자체에 <code>status: pending_review</code>로 명시되어 있고, HUMAN-AUTHORITY-GATE-SCHEMA 원칙("사람 승인 전 active 전환 금지")을 스스로 적용하고 있습니다. 즉 아직 사람의 최종 승인 전 단계이며, 실제 실행(각 기관과의 GOV_TASK 왕복, PDV 전송)은 사용자의 AI 비서와 각 기관 SP가 직접 수행합니다 — K-Case는 PDV를 취급하지 않습니다.
+      </div>
+      <h3>검증된 사례</h3>
+      <p class="svc-note">개인파산(법원+세무서+시청+읍면동+국민연금공단+보험사)처럼 다기관이 얽힌 사안으로 설계·검증되었습니다.</p>
+    </div>
+  `,
+  kestate: `
+    <div class="svc-detail">
+      <h2>K-Estate — 부동산 매물 안내<span class="svc-badge svc-badge-design">설계 단계</span></h2>
+      <p class="svc-lead">부동산 매물(전세/월세/매매)을 대신 탐색·비교하고, 매물을 내놓으려는 이용자의 등록을 돕고, 임대차 계약 진행(공인중개사 연결, 계약 갱신 신청, 관리비·월세 자동이체 안내)을 지원합니다.</p>
+      <div class="svc-callout important">
+        이 SP는 문서 자체에 <code>상태: pending_review — 실제 배포 저장소(estate.hondi.net) 미생성, 승인 전까지 이용자에게 서빙되지 않음</code>이라고 명시되어 있습니다. 아직 정식 서비스가 아닙니다.
+      </div>
+      <h3>범위 경계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>요청</th><th>실제 담당</th></tr></thead>
+          <tbody>
+            <tr><td>계약서 법적 조항 검토·분쟁</td><td class="svc-hondi">K-Law 또는 변호사 전문가 페르소나</td></tr>
+            <tr><td>취득세·재산세 신고/납부</td><td class="svc-hondi">K-Tax</td></tr>
+            <tr><td>전입신고·확정일자·등기부등본</td><td class="svc-hondi">K-Public(행정)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `,
+  ksocial: `
+    <div class="svc-detail">
+      <h2>K-Social-Match — 사교 모임 추천<span class="svc-badge svc-badge-design">설계 단계</span></h2>
+      <p class="svc-lead">혼디에 등록된 열려있는 모임 목록을 사용자의 성향·취미와 대조해, 관련성 높아 보이는 후보를 추천하는 보조 AI입니다. 알고리즘 매칭 엔진이 아니라 이미 존재하는 모임 데이터를 사용자 맥락에 맞게 정리해 보여주는 역할이며, "이 사람과 잘 맞습니다" 같은 확정적 궁합 판정은 내리지 않습니다.</p>
+      <div class="svc-callout important">
+        문서 자체가 "설계 단계 초안"이며 "아직 실제 서비스 백엔드의 표준 페르소나 파이프라인에 연결되지 않았다"고 명시합니다. 실시간 데모(<code>/social/demo-match</code>)는 이 SP로 DeepSeek를 직접 호출하지만, PDV 조회는 시뮬레이션(사용자가 입력한 텍스트를 PDV 요약 대신 사용)입니다 — 실제 PDV 자동 조회는 아직 연결되지 않았습니다.
+      </div>
+    </div>
+  `,
 };
 var SVC_LABEL = {
   k119: '응급 신고', klaw: '법률 상담', kpolice: '치안 신고', ksecurity: '보안 감시',
   khealth: '의료 상담', kschool: '교육', gdc: '금융', kstock: '투자',
   kinsurance: '보험', ktax: '세무', kmarket: '쇼핑·거래', ktraffic: '교통',
   klogistics: '물류·배송', kcleaner: '환경 신고', kpublic: '행정 민원', kdemocracy: '입법·정책',
-  ktelecom: '통신', ksearch: '통합 검색', kbiz: '사업자', kplan: '목표·기획', kwatch: '신고', kjob: '구직·취업', kmail: '메일', kjit: '조달', kcity: '도시 설계'
+  ktelecom: '통신', ksearch: '통합 검색', kbiz: '사업자', kplan: '목표·기획', kwatch: '신고', kjob: '구직·취업', kmail: '메일', kjit: '조달', kcity: '도시 설계',
+  kintent: '의도 파악(내부)', kcompose: '실행계획 조합(내부)', kexecute: '오케스트레이션 실행(내부)', kdeliver: '결과 전달(내부)', kreport: '이해당사자 통지(내부)', kcase: '복합 사안 총괄', kestate: '부동산', ksocial: '사교 모임 추천'
 };
 
 function renderSvc(key) {
