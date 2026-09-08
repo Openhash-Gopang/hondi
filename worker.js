@@ -16397,16 +16397,26 @@ async function _recordOrderPdv(env, {
   //  동일 관례 — pdv_records 스키마에 없는 필드(raw_hash·openhash_block_id·
   //  openhash_anchored_at·importance_score 등)는 summary_6w(JSON) 안에
   //  같이 보존한다.)
+  //
+  // 2026-09-08 수정(사용자 지시 — 양방향 거래명세서) — 지금까지 이 함수는
+  // seller_guid를 인자로 받고도 실제로는 구매자(from_guid) 쪽 pdv_records만
+  // 기록했다(실사로 발견 — 판매자는 자기 거래 내역을 PDV에서 볼 수 없는
+  // 구조였음). 재무제표 쪽(pending_claims → buyer_claim/seller_claim,
+  // 2026-09-07 수정)은 이미 양방향인데 PDV만 편측이었던 비대칭을 없앤다.
+  // 같은 거래의 6하원칙 명세서를 구매자용/판매자용 두 벌로 만들어 각자의
+  // pdv_records에 기록한다 — who/what/why만 시점(구매/판매)에 따라
+  // 다르고, when/where/how와 원장 메타데이터(raw_hash 등)는 공유한다.
+  // report_id는 pdv_records.report_id UNIQUE 인덱스 때문에 그대로 재사용할
+  // 수 없어(handlePdvReport의 `${sessionId}:${reporterSvc}` 관례와 동일하게)
+  // ':buyer'/':seller' 접미사로 분리한다 — 이 report_id 포맷을 참조하는
+  // 다른 호출부는 없음을 확인했다.
   const reportId = session_id || `RPT-kmarket-${Date.now()}`;
   const now      = new Date().toISOString();
 
-  const summary6wFull = JSON.stringify({
-    who:   `buyer(${from_guid.slice(0, 20)}...)`,
+  const sharedFields = {
     when:  now,
     where: 'https://market.hondi.net',
-    what:  `구매: ${item_name} ₮${total}`,
     how:   'Ed25519 서명 + L1 4단계 검증',
-    why:   '상품 구매 거래',
     raw_hash:             tx_hash,
     openhash_block_id:    block_id,
     openhash_anchored_at: now,
@@ -16415,35 +16425,68 @@ async function _recordOrderPdv(env, {
     lcat,
     risk_tier,
     consistency_check,
-  });
+  };
 
   // risk_level: PDV 표준 필드. importance 기반으로 매핑
   const pdvRiskLevel = risk_tier === 'high' ? 'high'
                      : importance_mode === 'STANDARD' ? 'medium'
                      : 'low';
 
+  let token;
   try {
-    const token = await _l1AdminToken(env);
-    await fetch(`${L1_DEFAULT}/api/collections/pdv_records/records`, {
-      method:  'POST',
-      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        guid:              from_guid,
-        report_id:         reportId,
-        reporter_svc:      'hondi-proxy',
-        svc:               'market',
-        type:              'tx_2party',
-        summary:           `구매: ${item_name} ₮${total}`,
-        summary_6w:        summary6wFull,
-        block_hash:        block_hash,
-        risk_level:        pdvRiskLevel,
-        source:            'market',
-        openhash_anchored: true, // STEP 09: 동기 앵커링 — L1 응답 수신 즉시 true
-        domain:            'personal',
-        affiliation_org_id: null,
-      }),
-    });
-  } catch (e) { console.warn('[PDV] 기록 실패:', e.message); }
+    token = await _l1AdminToken(env);
+  } catch (e) {
+    console.warn('[PDV] admin token 발급 실패, 양측 기록 모두 건너뜀:', e.message);
+    return;
+  }
+
+  const _writeSide = async (guid, side, summary6w, summaryText) => {
+    try {
+      const res = await fetch(`${L1_DEFAULT}/api/collections/pdv_records/records`, {
+        method:  'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          guid,
+          report_id:         `${reportId}:${side}`,
+          reporter_svc:      'hondi-proxy',
+          svc:               'market',
+          type:              'tx_2party',
+          summary:           summaryText,
+          summary_6w:        summary6w,
+          block_hash:        block_hash,
+          risk_level:        pdvRiskLevel,
+          source:            'market',
+          openhash_anchored: true, // STEP 09: 동기 앵커링 — L1 응답 수신 즉시 true
+          domain:            'personal',
+          affiliation_org_id: null,
+        }),
+      });
+      if (!res.ok) console.warn(`[PDV] ${side} 기록 실패(HTTP ${res.status}):`, await res.text().catch(() => ''));
+    } catch (e) { console.warn(`[PDV] ${side} 기록 실패:`, e.message); }
+  };
+
+  const buyerSummaryText = `구매: ${item_name} ₮${total}`;
+  const buyerSummary6w = JSON.stringify({
+    ...sharedFields,
+    who:  `buyer(${from_guid.slice(0, 20)}...)`,
+    what: buyerSummaryText,
+    why:  '상품 구매 거래',
+  });
+
+  const sellerSummaryText = `판매: ${item_name} ₮${total}`;
+  const sellerSummary6w = JSON.stringify({
+    ...sharedFields,
+    who:  `seller(${seller_guid.slice(0, 20)}...)`,
+    what: sellerSummaryText,
+    why:  '상품 판매 거래',
+  });
+
+  // 두 기록은 서로 독립적 — 한쪽이 실패해도(예: 네트워크 순간 오류) 다른
+  // 쪽 기록을 막지 않는다(_writeSide 내부에서 개별적으로 catch).
+  await Promise.all([
+    _writeSide(from_guid,   'buyer',  buyerSummary6w,  buyerSummaryText),
+    _writeSide(seller_guid, 'seller', sellerSummary6w, sellerSummaryText),
+  ]);
 }
 
 // (2026-07-15 삭제 — handlePdvPage(/pdv/page/{identifier}), _generatePdvHtml.
