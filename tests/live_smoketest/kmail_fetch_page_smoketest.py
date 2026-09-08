@@ -252,6 +252,14 @@ def run_scenario(api_key, system_prompt, scenario):
 
     search_match = SEARCH_TAG_RE.search(text1)
     if not search_match:
+        # 2026-09-08 4차 라이브 실행에서 발견: 대상 자체가 특정 안 된 시나리오
+        # (예: "부산 스타트업 대표"처럼 회사명이 없음)에서는 검색 없이 먼저
+        # 명확한 정보를 되묻는 게 정답이다 — 그 문장 안에 "찾아보겠습니다"류
+        # 조건부/미래형 언급이 섞여도 DECLARED_INTENT_RE로 오탐(FAIL)하면 안
+        # 된다. expect_honest_ask_user 시나리오에 한해 되묻기 패턴을 먼저
+        # 확인해 정당한 응답으로 인정한다.
+        if scenario.get("expect_honest_ask_user") and HONEST_ASK_RE.search(text1):
+            return "PASS", ["라운드1에서 검색 없이 바로 명확한 정보를 되물음 — 이 시나리오는 대상이 특정 안 돼 있어 정당한 되묻기(정상)"], transcript, usage_total
         if DECLARED_INTENT_RE.search(text1):
             return "FAIL", ["라운드1에서 검색하겠다고 말만 하고 KMAIL_SEARCH_CONTACTS 태그를 안 냄 — '말만 하고 태그 누락' 회귀(SP v1.13 이후 재발하면 안 됨)"], transcript, usage_total
         return "NEEDS-REVIEW", ["라운드1에서 KMAIL_SEARCH_CONTACTS를 호출하지 않음 — 시나리오 설계상 검색이 필요한 상황인데 다른 경로로 샜을 수 있음(사람 확인 필요)"], transcript, usage_total
