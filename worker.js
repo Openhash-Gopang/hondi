@@ -51,6 +51,7 @@ import { reconstructBalances } from './src/profile2.0/ledger.js';
 import { createLawApiClient } from './src/gopang/gov/regulation-pipeline/law-api-client.js';
 import { passesRegexFilter, classifyRegulation, extractChecklistItems } from './src/gopang/gov/regulation-pipeline/regulation-classifier-extractor.js';
 import { enqueueForReview } from './src/gopang/gov/regulation-pipeline/review-gate-and-drift.js';
+import { handleHondiSearch } from './src/routes/hondi-search-worker.js';
 
 const ALLOWED_ORIGINS = [
   'https://hondi.net',
@@ -12390,6 +12391,11 @@ export default {
 
     // ── search (v4.7) ────────────────────────────────────
     if (pathname === '/search' && request.method === 'POST') return handleSearch(request, env, corsHeaders);
+
+    // 2026-09-08 신설 — 혼디 검색(Hondi Search): 사이트 내 페이지 내비게이션 대화형 검색.
+    // '/search'(위, K-Search/엔티티 검색)와 이름이 비슷하지만 역할이 다르다 — 혼동 주의.
+    if (pathname === '/hondi-search' && request.method === 'POST')
+      return handleHondiSearch(request, env, corsHeaders, { _err });
 
     // ── 정체성 템플릿 참조 조회 (2026-07-17 신설) ─────────
     // profile-assistant SP의 [INDUSTRY_TEMPLATE_LOOKUP]/[PERSON_TEMPLATE_LOOKUP]

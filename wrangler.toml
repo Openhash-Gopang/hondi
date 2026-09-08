@@ -39,6 +39,16 @@ id = "af7cad0be99e4072bbca8d81d71edd98"
 binding = "GOV_DATA_KV"
 id = "cf1dc69a346747ac8319a6cab85640cf"
 
+# 2026-09-08 신설 — 혼디 검색(Hondi Search) 대화 세션(conv:*)과
+# site-manifest 캐시(site-manifest) 저장용. src/routes/hondi-search-worker.js 참고.
+# ★ 배포 전 필수 — 아래 id는 실제 값이 아니다. 배포 권한 있는 쪽에서
+#   `wrangler kv namespace create HONDI_SEARCH_HISTORY`로 발급 후,
+#   Cloudflare 대시보드(Workers & Pages > hondi-proxy > Bindings)에서
+#   실사 확인한 값으로 교체할 것 — 다른 바인딩들과 동일 원칙(추측 금지).
+[[kv_namespaces]]
+binding = "HONDI_SEARCH_HISTORY"
+id = "REPLACE_WITH_REAL_KV_ID"
+
 [[services]]
 binding = "AGENT_SIGNER"
 service = "gopang-agent-signer"

@@ -75,7 +75,7 @@
 
 ## 4. API 계약 (프런트 → Worker → deepseek v4 flash)
 
-**POST /api/hondi-search**
+**POST /hondi-search**
 ```json
 // request
 {
@@ -101,7 +101,7 @@ Worker 책임:
 ## 5. 프런트엔드 동작 (desktop.html)
 
 - 상단 검색 필드 클릭 시 대화형 팝오버 오픈.
-- 사용자가 입력 → `/api/hondi-search` 호출 → 응답 type에 따라:
+- 사용자가 입력 → `/hondi-search` 호출 → 응답 type에 따라:
   - `clarify`: 봇 메시지 표시, 입력 계속.
   - `navigate`: 봇 메시지 짧게 보여준 뒤 `window.open(url, "_blank")`.
   - `candidates`: 클릭 가능한 카드 3개 렌더링, 클릭 시 새 탭 이동.
