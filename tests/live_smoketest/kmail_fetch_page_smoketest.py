@@ -78,8 +78,8 @@ CATALOG_PATH = os.path.join(PROMPTS_DIR, "sp-catalog.json")
 MAX_RETRIES = 4
 RETRY_BASE_SLEEP = 3  # seconds, exponential backoff
 
-SEARCH_TAG_RE = re.compile(r"KMAIL_SEARCH_CONTACTS\s*(\{[\s\S]*\})\s*$")
-FETCH_TAG_RE = re.compile(r"KMAIL_FETCH_PAGE\s*(\{[\s\S]*\})\s*$")
+SEARCH_TAG_RE = re.compile(r"[\[\(]?KMAIL_SEARCH_CONTACTS\s*(\{[\s\S]*\})\s*[\]\)]?\s*$")
+FETCH_TAG_RE = re.compile(r"[\[\(]?KMAIL_FETCH_PAGE\s*(\{[\s\S]*\})\s*[\]\)]?\s*$")
 EMAIL_RE = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
 
 # 사용자에게 직접 이메일/URL을 되묻는 패턴 — 실사례 회귀의 핵심 신호.
