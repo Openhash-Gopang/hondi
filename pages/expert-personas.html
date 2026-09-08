@@ -213,10 +213,18 @@ mark { background: #ffe58a; color: var(--ink); border-radius: 0; padding: 0 1px;
   display: inline-flex; align-items: stretch; background: var(--panel);
 }
 .persona-chip-main {
-  display: inline-flex; align-items: center; font-size: 12px; color: var(--ink-dim);
+  display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--ink-dim);
   padding: 6px 10px 6px 12px; text-decoration: none; transition: background .1s, color .1s;
 }
 .persona-chip-wrap:hover .persona-chip-main { background: var(--cat-c); color: #fff; }
+/* 2026-09-08 신설 — 이 칩이 "이 SP와 채팅 시작" 링크임을 한눈에 알 수
+   있도록 앞에 채팅 아이콘을 붙인다(chat-widget.js FAB와 같은 말풍선
+   모양, 브랜드 일관성). title 속성(hl()이 아니라 buildPanelHtml에서
+   직접 채워 넣음)에는 "상위 분류 · 세부분야 — 상담 시작" 형태의 전체
+   이름이 들어가 마우스오버 시 어떤 SP인지 명확히 보인다. */
+.chat-ico-inline { flex-shrink: 0; opacity: .55; transition: opacity .1s; }
+.persona-chip-wrap:hover .chat-ico-inline,
+.section-row-link-main:hover .chat-ico-inline { opacity: 1; }
 .persona-chip-edit {
   display: flex; align-items: center; justify-content: center; padding: 0 8px;
   color: var(--ink-dim); opacity: .5; transition: opacity .1s, color .1s, background .1s;
@@ -353,6 +361,15 @@ function sectionMatches(sec, q){
 function expertChatUrl(personaId){
   return '/pages/expert-chat.html?persona=' + encodeURIComponent(personaId);
 }
+// 2026-09-08 신설 — 채팅 링크마다 붙일 작은 말풍선 아이콘(assets/chat-widget.js
+// 의 FAB 아이콘과 동일한 모양, 브랜드 일관성 유지) + 마우스오버 시 보일
+// 전체 이름("상위 분류 · 세부분야 — 상담 시작"). 세부분야 라벨이 상위
+// 분류 라벨과 같으면(단일 페르소나 섹션) 중복 표기하지 않는다.
+var CHAT_ICO_SVG = '<svg class="chat-ico-inline" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+function personaChatTitle(secLabel, personaLabel){
+  var full = (personaLabel && personaLabel !== secLabel) ? (secLabel + ' · ' + personaLabel) : secLabel;
+  return full + ' — 상담 시작';
+}
 function expertSpEditUrl(personaId){
   var path = EXPERT_SP_PATH_INDEX[personaId];
   if (!path) return null;
@@ -373,7 +390,8 @@ function buildButtonHtml(sec, q, isOpen){
         '</a>'
       : '';
     return '<span class="section-row section-row-link-wrap' + hiddenCls + '" data-id="' + sec.id + '">' +
-        '<a class="section-row-link-main" href="' + esc(expertChatUrl(sec.personas[0].id)) + '" target="_blank" rel="noopener">' +
+        '<a class="section-row-link-main" href="' + esc(expertChatUrl(sec.personas[0].id)) + '" target="_blank" rel="noopener" title="' + esc(personaChatTitle(sec.label, null)) + '">' +
+          CHAT_ICO_SVG +
           '<span class="section-label">' + hl(sec.label, q) + '</span>' +
           '<svg class="section-link-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>' +
         '</a>' +
@@ -410,7 +428,9 @@ function buildPanelHtml(sec, q){
         '</a>'
       : '';
     return '<span class="persona-chip-wrap">' +
-        '<a class="persona-chip-main" href="' + esc(expertChatUrl(p.id)) + '" target="_blank" rel="noopener">' + labelHtml + hint + '</a>' +
+        '<a class="persona-chip-main" href="' + esc(expertChatUrl(p.id)) + '" target="_blank" rel="noopener" title="' + esc(personaChatTitle(sec.label, p.label)) + '">' +
+          CHAT_ICO_SVG + labelHtml + hint +
+        '</a>' +
         editIco +
       '</span>';
   }).join('');
