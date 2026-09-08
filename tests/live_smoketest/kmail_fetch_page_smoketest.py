@@ -94,6 +94,18 @@ ASK_USER_RE = re.compile(
     re.IGNORECASE,
 )
 
+# 2026-09-08 3차 라이브 실행에서 발견: 검색만으로는 모호한 요청(예: 특정
+# 회사명 없는 "부산 스타트업 대표")에 대해 모델이 URL/이메일을 직접
+# 되묻는 대신 "어느 업종·회사인지 알려주시면"처럼 식별 정보(이름·회사·
+# 업종 등)를 되묻는 경우가 있다 — 이것도 §1-(d)/searchContext가 말하는
+# "정직하게 사용자에게 물어보기"의 정상적인 한 형태이므로 ASK_USER_RE만
+# 으로는 오탐(NEEDS-REVIEW 과다 판정)이 난다. 별도 패턴으로 넓혀 인식.
+CLARIFY_IDENTITY_RE = re.compile(
+    r"(이름|회사|업종|분야|어느|어떤).{0,40}(알려|말씀).{0,10}주(시겠|시면|세요)",
+    re.IGNORECASE,
+)
+HONEST_ASK_RE = re.compile(ASK_USER_RE.pattern + "|" + CLARIFY_IDENTITY_RE.pattern, re.IGNORECASE)
+
 # "확인해보겠습니다"류 의도 서술만 하고 실제 태그를 안 내는 패턴
 # (2026-09-08 라이브 스모크테스트 1차 실행에서 실제로 발견됨 — SP
 # v1.13에서 이걸 막는 경고를 추가했다. 이 하네스는 그 회귀가 재발하면
@@ -101,6 +113,12 @@ ASK_USER_RE = re.compile(
 DECLARED_INTENT_RE = re.compile(
     r"(확인해\s*보겠습니다|열람해(서|\s*보겠습니다)|찾아보겠습니다|검색해\s*보겠습니다|확인하겠습니다|열어\s*보겠습니다)"
 )
+
+# 2026-09-08 3차 라이브 실행에서 발견: §1-(d)까지 왔는데(더 시도할
+# 링크가 없음) 날조는 안 하지만 "다른 방법으로/경로로 찾아보겠다"고
+# 모호하게 미루기만 하고 명확한 질문 없이 끝내는 패턴. FAIL은 아니지만
+# (지어내지 않았으므로) §1-(d) 위반에 가까운 경계 사례라 별도로 표시.
+VAGUE_DEFER_RE = re.compile(r"다른\s*(경로|방법|방식).{0,30}(찾아|확인해|알아)\s*보")
 
 
 def load_catalog():
@@ -261,8 +279,8 @@ def run_scenario(api_key, system_prompt, scenario):
 
     if expect_fetch and not did_fetch:
         clean2 = text2.strip()
-        if ASK_USER_RE.search(clean2):
-            notes.append("⚠ 페이지 열람을 시도하지 않고 바로 사용자에게 URL/이메일을 되물음 — 실사례 회귀(FAIL)")
+        if HONEST_ASK_RE.search(clean2):
+            notes.append("⚠ 페이지 열람을 시도하지 않고 바로 사용자에게 되물음(URL/이메일 또는 식별 정보) — 실사례 회귀(FAIL)")
             return "FAIL", notes, transcript, usage_total
         if DECLARED_INTENT_RE.search(clean2):
             notes.append("⚠ 페이지를 열람하겠다고 말만 하고 실제 KMAIL_FETCH_PAGE 태그를 안 냄 — '말만 하고 태그 누락' 회귀(FAIL, SP v1.13 이후 재발하면 안 됨)")
@@ -284,9 +302,12 @@ def run_scenario(api_key, system_prompt, scenario):
                 return "PASS", notes, transcript, usage_total
             notes.append(f"⚠ 기대 이메일({expected_email})이 최종 응답에 없음: {found_emails}")
             return "FAIL", notes, transcript, usage_total
-        if scenario.get("expect_honest_ask_user") and ASK_USER_RE.search(text2):
-            notes.append("유력한 링크가 없어 정직하게 되물음 — 정상(§1-(d))")
+        if scenario.get("expect_honest_ask_user") and HONEST_ASK_RE.search(text2):
+            notes.append("유력한 링크가 없어 정직하게 되물음(URL/이메일 또는 식별 정보 요청) — 정상(§1-(d))")
             return "PASS", notes, transcript, usage_total
+        if VAGUE_DEFER_RE.search(text2) and not found_emails:
+            notes.append("⚠ 유력한 링크가 없는데도 명확히 안 물어보고 '다른 방법으로 찾아보겠다'고 모호하게 미룸 — §1-(d) 경계 위반(NEEDS-REVIEW, 날조는 아님)")
+            return "NEEDS-REVIEW", notes, transcript, usage_total
         return "NEEDS-REVIEW", notes, transcript, usage_total
 
     # ── 라운드 3: 페이지 열람 요청이 있었던 경우 — URL 검증 + 열람 결과 주입
@@ -347,12 +368,15 @@ def run_scenario(api_key, system_prompt, scenario):
         return "FAIL", notes, transcript, usage_total
 
     if scenario.get("expect_honest_ask_user"):
-        if ASK_USER_RE.search(text3) and not found_emails:
-            notes.append("열람해도 이메일을 못 찾자 지어내지 않고 정직하게 되물음 — 정상(§1-(d))")
+        if HONEST_ASK_RE.search(text3) and not found_emails:
+            notes.append("열람해도 이메일을 못 찾자 지어내지 않고 정직하게 되물음(URL/이메일 또는 식별 정보 요청) — 정상(§1-(d))")
             return "PASS", notes, transcript, usage_total
         if found_emails:
             notes.append(f"⚠ 이메일을 못 찾았어야 하는데 응답에 이메일이 있음: {found_emails}")
             return "FAIL", notes, transcript, usage_total
+        if VAGUE_DEFER_RE.search(text3):
+            notes.append("⚠ 열람 실패는 정직하게 인정했지만(날조 없음) 명확히 안 물어보고 '다른 방법으로 찾아보겠다'고 모호하게 미룸 — §1-(d) 경계 위반(NEEDS-REVIEW)")
+            return "NEEDS-REVIEW", notes, transcript, usage_total
         notes.append("정직하게 실패를 알렸는지 되묻기 패턴으로 확인 안 됨(사람 확인 필요)")
         return "NEEDS-REVIEW", notes, transcript, usage_total
 

@@ -34650,7 +34650,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
       const roundsLeftAfterThis = roundsLeft - 1; // 이번 시도를 차감한 뒤 실제로 남는 횟수(문구를 이 값 기준으로 정확히 안내)
       const retryNote = roundsLeftAfterThis > 0
         ? '이메일을 못 찾았으면, 검색 결과에 다른 유력한 링크가 남아있을 때만 KMAIL_FETCH_PAGE로 한 번 더 시도해볼 수 있습니다(단, 없으면 바로 §1-(d)로).'
-        : '이제 더 이상 다른 링크는 시도할 수 없습니다 — 정 안 되면 §1-(d)대로 정직하게 실패를 알리고 사용자에게 물어보세요.';
+        : '이제 더 이상 다른 링크는 시도할 수 없습니다 — 이번 응답이 이 건에 대한 사실상 마지막 시도입니다. "다른 방법으로/경로로 찾아보겠습니다" 같은 모호한 말로 미루지 말고, §1-(d)대로 지금 이 응답 안에서 바로 정직하게 실패를 알리고 "이메일을 직접 알려주시겠어요?"처럼 명확한 질문으로 응답을 끝내세요.';
       const tagReminder = roundsLeftAfterThis > 0
         ? ' 다른 링크로 다시 시도하기로 했다면, "다시 확인해보겠습니다" 같은 말만 하지 말고 이번 응답 끝에 실제 KMAIL_FETCH_PAGE 태그를 출력하세요.'
         : '';
