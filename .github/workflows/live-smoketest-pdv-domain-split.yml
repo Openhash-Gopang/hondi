@@ -1,0 +1,70 @@
+name: Live Smoketest — PDV Domain Split (personal/work)
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenarios_file:
+        description: "Scenario file name in tests/live_smoketest/ (blank = scenarios_pdv_domain_split_20260908.json)"
+        required: false
+        default: ""
+      worker_base:
+        description: "worker.js(hondi-proxy) base URL"
+        required: false
+        default: "https://hondi-proxy.tensor-city.workers.dev"
+      pb_base:
+        description: "PocketBase(L1 hanlim) base URL"
+        required: false
+        default: "https://l1-hanlim.hondi.net"
+
+permissions:
+  contents: write
+
+jobs:
+  run-pdv-domain-split-smoketest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install requests
+
+      - name: Run PDV domain split live smoketest
+        working-directory: tests/live_smoketest
+        env:
+          PB_ADMIN_EMAIL: ${{ secrets.L1_PB_ADMIN_EMAIL }}
+          PB_ADMIN_PASSWORD: ${{ secrets.L1_PB_ADMIN_PASSWORD }}
+        run: |
+          SCEN="${{ github.event.inputs.scenarios_file }}"
+          if [ -z "$SCEN" ]; then SCEN="scenarios_pdv_domain_split_20260908.json"; fi
+          BASE=$(basename "$SCEN" .json)
+          OUT="../../results/${BASE}"
+          echo "scenarios=$SCEN out=$OUT"
+          python3 pdv_domain_split_live_smoketest.py \
+            --scenarios "$SCEN" --out "$OUT" \
+            --worker-base "${{ github.event.inputs.worker_base || 'https://hondi-proxy.tensor-city.workers.dev' }}" \
+            --pb-base "${{ github.event.inputs.pb_base || 'https://l1-hanlim.hondi.net' }}" \
+            --resume
+
+      - name: Commit results to results branch
+        if: always()
+        run: |
+          git config user.name "hondi-live-smoketest-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout -B results/live-smoketest-pdv-domain-split
+          git add -f results/
+          git diff --cached --quiet || git commit -m "chore: PDV domain split live smoketest results ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+          git push --force origin HEAD:results/live-smoketest-pdv-domain-split
+
+      - name: Upload artifact (backup)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-smoketest-pdv-domain-split-results
+          path: results/
