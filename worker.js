@@ -34177,8 +34177,8 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   }
   if (!reply) return _err(502, 'AI_EMPTY_REPLY', 'AI 응답이 비어있습니다', corsHeaders);
 
-  const searchMatch = reply.match(/KMAIL_SEARCH_CONTACTS\s*(\{[\s\S]*\})\s*$/);
-  const fetchPageMatch = reply.match(/KMAIL_FETCH_PAGE\s*(\{[\s\S]*\})\s*$/);
+  const searchMatch = reply.match(/[\[\(]?KMAIL_SEARCH_CONTACTS\s*(\{[\s\S]*\})\s*[\]\)]?\s*$/);
+  const fetchPageMatch = reply.match(/[\[\(]?KMAIL_FETCH_PAGE\s*(\{[\s\S]*\})\s*[\]\)]?\s*$/);
   // searchMatch 분기(아래)가 실행 순서상 _kmailRunFetchPageChain 정의보다
   // 먼저 나오므로, const는 여기(함수 상단)로 끌어올려 TDZ 에러를 피한다
   // (function 선언 자체는 호이스팅되어 문제없지만 const는 안 된다).
@@ -34615,7 +34615,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     // 여기서 바로 처리하지 않으면 태그 원문이 그대로 사용자에게
     // 노출된다 — _kmailRunFetchPageChain 정의는 아래(①-b)에 있지만
     // 함수 선언이라 호이스팅되어 여기서도 호출 가능하다.
-    const chainedFetchMatch = followUpReply.match(/KMAIL_FETCH_PAGE\s*(\{[\s\S]*\})\s*$/);
+    const chainedFetchMatch = followUpReply.match(/[\[\(]?KMAIL_FETCH_PAGE\s*(\{[\s\S]*\})\s*[\]\)]?\s*$/);
     if (chainedFetchMatch) {
       let chainedParsed = null;
       try { chainedParsed = JSON.parse(chainedFetchMatch[1]); } catch (e) { /* 아래에서 url='' 처리 */ }
@@ -34675,12 +34675,12 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
         break;
       }
 
-      const nextFetchMatch = roundsLeft > 0 ? latestReply.match(/KMAIL_FETCH_PAGE\s*(\{[\s\S]*\})\s*$/) : null;
+      const nextFetchMatch = roundsLeft > 0 ? latestReply.match(/[\[\(]?KMAIL_FETCH_PAGE\s*(\{[\s\S]*\})\s*[\]\)]?\s*$/) : null;
       if (!nextFetchMatch) {
         // 태그 없이 끝났으면(정상 최종 응답) 그대로 반환. 혹시 남은
         // 라운드가 없는데 태그가 또 붙어 나온 경우엔 안전하게 태그
         // 텍스트를 잘라내고 반환(사용자에게 raw 태그 노출 방지).
-        const strayMatch = latestReply.match(/KMAIL_FETCH_PAGE\s*(\{[\s\S]*\})\s*$/);
+        const strayMatch = latestReply.match(/[\[\(]?KMAIL_FETCH_PAGE\s*(\{[\s\S]*\})\s*[\]\)]?\s*$/);
         if (strayMatch) latestReply = latestReply.slice(0, strayMatch.index).trim()
           || '이메일까지는 확인하지 못했습니다 — 직접 알려주시겠어요?';
         return latestReply;
