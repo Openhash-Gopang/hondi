@@ -289,14 +289,14 @@ async function main() {
 
   {
     const buyerFs = await settleAndFetch(buyer);
-    if (!(Number(buyerFs.purchases) >= ORDER_AMOUNT))
-      fail(`구매자 재무제표 pl-purchase 미반영 — 기대 >= ${ORDER_AMOUNT}, 실제 ${buyerFs.purchases}`);
-    log(`[PASS] 구매자 재무제표 반영 확인 — purchases=${buyerFs.purchases}`);
+    if (!(Number(buyerFs.pl?.purchases) >= ORDER_AMOUNT))
+      fail(`구매자 재무제표 pl-purchase 미반영 — 기대 >= ${ORDER_AMOUNT}, 실제 ${buyerFs.pl?.purchases}`);
+    log(`[PASS] 구매자 재무제표 반영 확인 — purchases=${buyerFs.pl?.purchases}`);
 
     const sellerFs = await settleAndFetch(seller);
-    if (!(Number(sellerFs.revenue) >= ORDER_AMOUNT))
-      fail(`판매자 재무제표 pl-revenue 미반영 — 기대 >= ${ORDER_AMOUNT}, 실제 ${sellerFs.revenue}`);
-    log(`[PASS] 판매자 재무제표 반영 확인 — revenue=${sellerFs.revenue}`);
+    if (!(Number(sellerFs.pl?.revenue) >= ORDER_AMOUNT))
+      fail(`판매자 재무제표 pl-revenue 미반영 — 기대 >= ${ORDER_AMOUNT}, 실제 ${sellerFs.pl?.revenue}`);
+    log(`[PASS] 판매자 재무제표 반영 확인 — revenue=${sellerFs.pl?.revenue}`);
   }
 
   log('\n=== 전 구간 [PASS] — 계정 준비 → P2P 매매 → 잔액이동 → PDV 양방향 6하원칙 기록 → pending_claims 양방향 적재 → 재무제표 반영 전부 정상 확인 ===');
