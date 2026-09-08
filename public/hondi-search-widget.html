@@ -2,7 +2,7 @@
   혼디 검색 위젯 (Hondi Search)
   desktop.html 상단 헤더 안에 <div id="hondi-search-root"></div> 를 넣고
   이 파일의 <style>과 <script>를 그대로 포함하면 동작합니다.
-  API 엔드포인트: POST /api/hondi-search (백엔드 계약은 HONDI_SEARCH_DESIGN.md 참고)
+  API 엔드포인트: POST /hondi-search (백엔드 계약은 HONDI_SEARCH_DESIGN.md 참고)
 -->
 
 <div id="hondi-search-root" class="hondi-search-root">
@@ -173,7 +173,7 @@
 
     let res;
     try {
-      res = await fetch("/api/hondi-search", {
+      res = await fetch("/hondi-search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
