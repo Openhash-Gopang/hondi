@@ -44,6 +44,14 @@ header .sub{font-size:11.5px;color:rgba(255,255,255,.6);font-family:var(--mono)}
 
 .notice{background:#fef3e2;border-bottom:1px solid #f0c98a;color:#7a4b0e;font-size:12px;padding:8px 16px;line-height:1.6;flex-shrink:0}
 
+/* 2026-09-09 신설 - 이 SP가 어떤 전문가 페르소나/K-서비스에 해당하는지
+   설명하고, 실제로 대화해볼 수 있는 expert-chat.html 링크를 보여준다.
+   data/expert-persona-index.json에서 path 일치로 찾아 매칭된 경우에만 표시. */
+.persona-info{background:#eef4ff;border-bottom:1px solid #c7d7fa;color:#1f3d99;font-size:12.5px;padding:10px 16px;line-height:1.6;flex-shrink:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.persona-info strong{font-weight:700}
+.persona-info a{color:#1f3d99;font-weight:700;text-decoration:underline;white-space:nowrap}
+.persona-info a:hover{color:var(--brand-dk)}
+
 main{flex:1;display:flex;min-height:0}
 .pane{display:flex;flex-direction:column;min-height:0}
 .pane-editor{flex:1.1;border-right:1px solid var(--line)}
@@ -104,6 +112,8 @@ input[type=file]{display:none}
   이 화면은 관리자용 도구입니다. AI가 제안하는 개정본은 참고용 초안이며, 실제로 저장소에 반영하려면 언제나 사람이 직접 검토 후 커밋해야 합니다 — 이 화면 자체는 파일을 저장하거나 GitHub에 반영하지 않습니다.
 </div>
 
+<div class="persona-info" id="personaInfo" hidden></div>
+
 <main>
   <div class="pane pane-editor">
     <div class="pane-toolbar">
@@ -139,6 +149,31 @@ let spEditorPrompt = null;
 let editorUser = null;
 let messages = [];
 let currentPath = _initialPath;
+
+// 2026-09-09 신설 - 이 SP 경로가 어떤 전문가 페르소나에 해당하는지
+// data/expert-persona-index.json에서 역방향 조회(spPath 기준)해서
+// 상단에 설명 + 실제 대화 링크(expert-chat.html)를 보여준다.
+// 매칭 안 되면(K-서비스 등 페르소나 목록에 없는 SP) 조용히 넘어간다 -
+// 이 화면의 기본 기능(SP 원문 편집)에는 영향 없음.
+(async function showPersonaInfoIfMatched() {
+  if (!_initialPath) return;
+  try {
+    const res = await fetch('/data/expert-persona-index.json');
+    if (!res.ok) return;
+    const index = await res.json();
+    const entry = Object.values(index).find((p) => p.spPath === _initialPath);
+    if (!entry) return;
+
+    const box = document.getElementById('personaInfo');
+    box.innerHTML =
+      `이 SP는 혼디 전문가 페르소나 <strong>${entry.parentLabel} — ${entry.label}</strong>입니다. ` +
+      `<a href="${entry.chatUrl}" target="_blank" rel="noopener">이 AI와 바로 대화하기 ↗</a>`;
+    box.hidden = false;
+  } catch (e) {
+    // 인덱스 로드 실패는 이 화면의 핵심 기능이 아니므로 조용히 무시.
+    console.warn('[sp-editor] 페르소나 정보 조회 실패:', e);
+  }
+})();
 
 window._onGopangAuth = function (user) { editorUser = user; };
 
