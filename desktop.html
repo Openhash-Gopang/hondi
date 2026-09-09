@@ -1277,6 +1277,36 @@ document.addEventListener('keydown', function (e) {
        상세 커밋 이력은 feature/nav-consolidation-phase1 브랜치 참고. -->
 </section>
 
+<!-- 2026-09-10 복원 — PR #61(4페이지 구조 전면 개편)에서 히어로 제목
+     로테이션 스크립트도 일러스트 스크립트와 함께 삭제됨(#hero-title에
+     첫 문구만 정적으로 남고 5초 간격 문구 전환이 멈춘 버그). 삭제 직전
+     버전(커밋 6ead669c)의 스크립트를 그대로 복원한다. -->
+<script>
+(function () {
+  var heroTitles = [
+    { l1: '사람 간의 업무를', l2: '혼디 간의 소통으로 보강합니다.', href: './highlights/hondi-communication.html' },
+    { l1: '세계 1등 한국, 한국 1등 제주', l2: '혼디는 제주 특산품입니다.', href: './highlights/jeju-specialty.html' },
+    { l1: '혼디는 연간 수십 조 원의 AI 비용을', l2: '절반 이하로 줄입니다.', href: './highlights/ai-cost-half.html' },
+    { l1: '카톡을 혼디로 바꾸면,', l2: '한국 GDP를 10% 높일 수 있습니다.', href: './highlights/gdp-growth.html' },
+    { l1: '공공재 혼디,', l2: '혼디는 공공의 이익을 우선합니다.', href: './highlights/public-good.html' },
+    { l1: '쓰면 쓸수록 똑똑해지는', l2: '나만의 AI 비서, 혼디', href: '#core-philosophy' }
+  ];
+  var heroIdx = 0;
+  var heroEl = document.getElementById('hero-title');
+  if (!heroEl) return;
+  var arrowSvg = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+  setInterval(function () {
+    heroIdx = (heroIdx + 1) % heroTitles.length;
+    heroEl.style.opacity = '0';
+    setTimeout(function () {
+      var t = heroTitles[heroIdx];
+      heroEl.innerHTML = '<span class="l1">' + t.l1 + '</span><br><span class="l2">' + t.l2 + '</span> <a class="hero-more" href="' + t.href + '">더보기' + arrowSvg + '</a>';
+      heroEl.style.opacity = '1';
+    }, 250);
+  }, 5000);
+})();
+</script>
+
 <!-- 2026-09-10 복원 — PR #61(4페이지 구조 전면 개편)에서 파일 전체를
      리라이트하면서 히어로 일러스트 애니메이션 주입 스크립트가 실수로
      함께 삭제됨(껍데기 <div id="hero-illustration">과 CSS만 남고 JS가
