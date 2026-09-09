@@ -253,6 +253,7 @@ table.evidence td { color: var(--ink-2); }
     <a href="#lesson-appraiser">③ 새로 만들지 않고 위임 — 이미 있던 감정평가사 페르소나(SP_appraiser) 재사용</a>
     <a href="#lesson-encoding">④ Windows 인코딩 3종 세트 — CRLF, UTF-8 BOM, PowerShell 함수 스코프</a>
     <a href="#lesson-archived">⑤ 아카이브된 저장소에 계속 PR을 시도할 뻔함 — gopang → hondi 이관</a>
+    <a href="#lesson-cache">⑥ 배포는 됐는데 404 — Cloudflare 부정 캐싱</a>
     <a href="#outcome">결과 — 확인된 사실</a>
     <a href="#followup">후속 과제 — 아직 안 끝난 것</a>
     <a href="#related">관련 문서</a>
@@ -587,6 +588,49 @@ table.evidence td { color: var(--ink-2); }
       </div>
     </section>
 
+    <section class="gs reveal" id="lesson-cache">
+      <div class="gs-head">
+        <div class="gs-icon good">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">Lesson ⑥</div>
+          <div class="gs-title">배포는 됐는데 404 — Cloudflare 부정 캐싱</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          이 문서 자체를 배포한 직후 겪은 일이다. <code>gh api
+          repos/.../pages/builds/latest</code>로 빌드가 <code>"built"</code>
+          상태이고 <code>last-modified</code>가 방금 커밋 시각과 일치하는 것까지
+          확인했는데도, 실제 URL은 계속 <code>404</code>였다. GitHub Pages
+          원본(<code>openhash-gopang.github.io/hondi/...</code>)을 직접 찔러보니
+          <code>301</code>로 <code>hondi.net</code>으로 정상 리다이렉트됐다 —
+          즉 GitHub Pages 쪽엔 파일이 확실히 있었다. 원인은 그 사이에 있는
+          Cloudflare 캐시였다: 파일이 생기기 전에 그 URL을 요청한 적이 있으면
+          Cloudflare가 그 <code>404</code> 응답 자체를 캐싱해두고, 파일이
+          생긴 뒤에도 한동안 캐시된 404를 계속 돌려준다. 쿼리스트링을 하나
+          붙여서(<code>?cachebust=1</code>) 캐시를 우회하니 바로
+          <code>200</code>이 나왔고, 잠시 후 원래 URL도 자연스럽게 캐시가
+          갱신되며 <code>200</code>으로 바뀌었다.
+        </p>
+        <div class="callout good">
+          <div class="callout-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            재발 방지
+          </div>
+          새로 추가한 파일이 배포 직후 <code>404</code>면, 빌드 상태(<code>"built"</code>)를
+          확인했다고 바로 "실패"로 단정하지 않는다 — ①GitHub Pages 원본 도메인
+          (<code>&lt;org&gt;.github.io/&lt;repo&gt;/...</code>)으로 직접 확인해
+          Pages 자체엔 있는지 먼저 가른다 ②있는데도 커스텀 도메인에서만
+          404면 캐시버스팅 쿼리(<code>?t=...</code>)로 우회 확인한다 ③그걸로
+          200이 뜨면 그냥 시간이 지나면 풀리는 부정 캐싱이니 기다리거나
+          필요하면 Cloudflare에서 해당 URL만 Purge한다 — 배포 자체를 되짚어
+          고칠 필요는 없다.
+        </div>
+      </div>
+    </section>
+
     <section class="gs reveal" id="outcome">
       <div class="gs-head">
         <div class="gs-icon good">
@@ -604,6 +648,7 @@ table.evidence td { color: var(--ink-2); }
           <li>SP-27b는 자체 로직 없이 기존 <code>SP_appraiser</code> 전문가 페르소나를 호출하는 어댑터로 설계됨.</li>
           <li><code>hondi</code> 저장소 <code>worker.js</code>의 <code>/kcity/relay</code>(기존 동작)가 쓰는 <code>KCITY_SYSTEM_PROMPT</code>에 두 하위 모듈 원칙이 반영됨(hondi#163, 머지 완료).</li>
           <li><code>hondi.net</code> 서비스 메뉴에 "K-City 체험하기" 링크 추가됨(hondi#149).</li>
+          <li>본 문서 자체가 개발자 문서 메뉴에 추가됨(hondi#165) — 배포 직후 Cloudflare 부정 캐싱으로 잠깐 404였다가 정상화 확인됨(Lesson ⑥).</li>
         </ul>
       </div>
     </section>
