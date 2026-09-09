@@ -1217,236 +1217,6 @@ document.addEventListener('keydown', function (e) {
     <a href="#" onclick="loadPage('hondi-market');return false;">혼디마켓</a>
   </nav>
 
-  <!-- 2026-09-08 신설 — 혼디 검색(Hondi Search): 사이트 내 페이지를 자연어로
-       찾아 이동하는 대화형 검색. K-Search(사용자 데이터 검색)와 역할이 다름.
-       메뉴 탭과 우측 대시보드/프롬프트 버튼 사이에 배치. 상세 설계는
-       docs/design/HONDI_SEARCH_DESIGN.md, 백엔드는 src/routes/hondi-search-worker.js 참고.
-       원본 위젯 파일: public/hondi-search-widget.html (이 블록과 항상 동기화할 것). -->
-  <div class="site-nav-search" style="flex:0 1 auto;margin:0 12px;">
-    <div id="hondi-search-root" class="hondi-search-root">
-      <div class="hondi-search-box">
-        <input
-          id="hondi-search-input"
-          type="text"
-          placeholder="혼디에게 무엇을 찾는지 물어보세요…"
-          autocomplete="off"
-        />
-        <button id="hondi-search-send" aria-label="검색">→</button>
-      </div>
-
-      <div id="hondi-search-panel" class="hondi-search-panel" hidden>
-        <div id="hondi-search-messages" class="hondi-search-messages"></div>
-        <div id="hondi-search-candidates" class="hondi-search-candidates"></div>
-      </div>
-    </div>
-
-    <style>
-      .hondi-search-root {
-        position: relative;
-        width: min(360px, 32vw);
-        font-family: inherit;
-      }
-      .hondi-search-box {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        background: #fff;
-        border: 1px solid #d9e2ec;
-        border-radius: 999px;
-        padding: 6px 12px;
-      }
-      .hondi-search-box input {
-        flex: 1;
-        border: none;
-        outline: none;
-        font-size: 13px;
-        background: transparent;
-      }
-      .hondi-search-box button {
-        border: none;
-        background: transparent;
-        cursor: pointer;
-        font-size: 15px;
-        color: #1e3a8a;
-      }
-      .hondi-search-panel {
-        position: absolute;
-        top: calc(100% + 8px);
-        left: 0;
-        width: max(360px, 100%);
-        background: #fff;
-        border: 1px solid #d9e2ec;
-        border-radius: 12px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-        padding: 12px;
-        z-index: 50;
-      }
-      .hondi-search-messages {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        max-height: 240px;
-        overflow-y: auto;
-      }
-      .hondi-search-msg {
-        font-size: 13px;
-        line-height: 1.5;
-        padding: 8px 10px;
-        border-radius: 10px;
-        max-width: 90%;
-      }
-      .hondi-search-msg.user {
-        align-self: flex-end;
-        background: #e8f0fe;
-      }
-      .hondi-search-msg.bot {
-        align-self: flex-start;
-        background: #f3f4f6;
-      }
-      .hondi-search-candidates {
-        margin-top: 8px;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-      }
-      .hondi-search-candidate {
-        text-align: left;
-        border: 1px solid #d9e2ec;
-        border-radius: 8px;
-        padding: 8px 10px;
-        background: #fff;
-        cursor: pointer;
-        font-size: 13px;
-      }
-      .hondi-search-candidate:hover {
-        background: #f3f4f6;
-      }
-    </style>
-
-    <script>
-    (function () {
-      const root = document.getElementById("hondi-search-root");
-      const input = document.getElementById("hondi-search-input");
-      const sendBtn = document.getElementById("hondi-search-send");
-      const panel = document.getElementById("hondi-search-panel");
-      const messagesEl = document.getElementById("hondi-search-messages");
-      const candidatesEl = document.getElementById("hondi-search-candidates");
-
-      let conversationId = null;
-      let history = [];
-
-      function uuid() {
-        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-          const r = (Math.random() * 16) | 0;
-          const v = c === "x" ? r : (r & 0x3) | 0x8;
-          return v.toString(16);
-        });
-      }
-
-      function appendMessage(role, text) {
-        const div = document.createElement("div");
-        div.className = "hondi-search-msg " + (role === "user" ? "user" : "bot");
-        div.textContent = text;
-        messagesEl.appendChild(div);
-        messagesEl.scrollTop = messagesEl.scrollHeight;
-      }
-
-      function renderCandidates(candidates) {
-        candidatesEl.innerHTML = "";
-        (candidates || []).forEach((c) => {
-          const btn = document.createElement("button");
-          btn.className = "hondi-search-candidate";
-          btn.textContent = c.label;
-          btn.addEventListener("click", () => {
-            window.open(c.url, "_blank");
-            closePanel();
-          });
-          candidatesEl.appendChild(btn);
-        });
-      }
-
-      function openPanel() {
-        panel.hidden = false;
-      }
-
-      function closePanel() {
-        panel.hidden = true;
-        messagesEl.innerHTML = "";
-        candidatesEl.innerHTML = "";
-        history = [];
-        conversationId = null;
-        input.value = "";
-      }
-
-      async function sendQuery() {
-        const text = input.value.trim();
-        if (!text) return;
-
-        if (!conversationId) conversationId = uuid();
-
-        appendMessage("user", text);
-        history.push({ role: "user", content: text });
-        input.value = "";
-        openPanel();
-        candidatesEl.innerHTML = "";
-
-        let res;
-        try {
-          res = await fetch("/hondi-search", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              conversation_id: conversationId,
-              message: text,
-              history,
-            }),
-          });
-        } catch (e) {
-          appendMessage("bot", "검색 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.");
-          return;
-        }
-
-        if (!res.ok) {
-          appendMessage("bot", "검색 중 오류가 발생했습니다.");
-          return;
-        }
-
-        const data = await res.json();
-        history.push({ role: "assistant", content: data.message || "" });
-
-        switch (data.type) {
-          case "clarify":
-            appendMessage("bot", data.message);
-            break;
-          case "navigate":
-            appendMessage("bot", data.message);
-            window.open(data.url, "_blank");
-            setTimeout(closePanel, 800);
-            break;
-          case "candidates":
-            appendMessage("bot", data.message);
-            renderCandidates(data.candidates);
-            break;
-          case "delegate_ksearch":
-            appendMessage("bot", data.message);
-            break;
-          default:
-            appendMessage("bot", "응답을 이해하지 못했습니다.");
-        }
-      }
-
-      sendBtn.addEventListener("click", sendQuery);
-      input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") sendQuery();
-        if (e.key === "Escape") closePanel();
-      });
-      document.addEventListener("click", (e) => {
-        if (!root.contains(e.target)) closePanel();
-      });
-    })();
-    </script>
-  </div>
-
   <div class="site-nav-highlight">
     <!-- 2026-09-05 수정 — 기존 필(pill) 형태의 K-서비스·전문가 페르소나·
          K-정부·프롬프트 4개 버튼을 히어로 상단(사각형 Material 버튼)으로
@@ -1537,6 +1307,428 @@ document.addEventListener('keydown', function (e) {
     <span><strong>오픈해시</strong><span class="hero-top-btn-sub">: AI의 거짓말 탐지기</span></span>
   </a>
 </div>
+
+<!-- 2026-09-09 이동 — 혼디 검색(Hondi Search)을 헤더에서 이 자리(4버튼
+     아래, 카드 섹션 위, 중앙 정렬)로 이동. Claude 스타일 pill 입력창 +
+     파일첨부 지원으로 재설계. 원본: public/hondi-search-widget.html
+     (이 블록과 항상 동기화할 것). -->
+<!--
+  혼디 검색 위젯 (Hondi Search) - v2 (Claude 스타일 pill 입력창 + 파일 첨부)
+  desktop.html의 hero-top-actions(4버튼) 아래, ai-gov-how(카드 섹션) 위에 배치.
+  API 엔드포인트: POST /hondi-search (백엔드 계약은 HONDI_SEARCH_DESIGN.md 참고)
+
+  파일 첨부 범위(의도적으로 제한):
+  - 텍스트 계열 파일(.txt/.md/.json/.csv, 300KB 이하)은 내용 일부를 읽어
+    질의에 함께 첨부한다.
+  - 이미지 등 그 외 파일은 파일명/타입만 전달한다 - 현재 백엔드
+    deepseekChat 헬퍼가 텍스트 메시지만 지원하므로 이미지 내용 자체를
+    분석하지는 않는다.
+  - "+" 메뉴에는 실제로 동작하는 항목(파일/사진 추가)만 넣는다. Claude
+    자체 UI를 그대로 베낀 스킬/커넥터/웹검색 등 항목은 여기서 아무 기능도
+    없으므로 일부러 넣지 않았다 - 존재하지도 않는 기능처럼 보이는 건
+    사용자를 속이는 것과 같다.
+-->
+
+<div class="hondi-search-center-wrap">
+  <div id="hondi-search-root" class="hondi-search-root">
+    <div id="hondi-search-attachment-chip" class="hondi-search-chip" hidden>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+      <span id="hondi-search-attachment-name"></span>
+      <button id="hondi-search-attachment-remove" type="button" aria-label="첨부 제거">&times;</button>
+    </div>
+
+    <div class="hondi-search-box">
+      <button id="hondi-search-plus" class="hondi-search-icon-btn" type="button" aria-label="추가" aria-haspopup="true" aria-expanded="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+
+      <input
+        id="hondi-search-input"
+        type="text"
+        placeholder="혼디에게 무엇을 찾는지 물어보세요…"
+        autocomplete="off"
+      />
+
+      <button id="hondi-search-mic" class="hondi-search-icon-btn" type="button" aria-label="음성 입력(준비 중)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
+    </div>
+
+    <div id="hondi-search-plus-menu" class="hondi-search-plus-menu" hidden>
+      <button type="button" class="hondi-search-menu-item" id="hondi-search-attach-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        파일 또는 사진 추가
+      </button>
+    </div>
+    <input type="file" id="hondi-search-file-input" hidden accept=".txt,.md,.json,.csv,image/*" />
+
+    <div id="hondi-search-panel" class="hondi-search-panel" hidden>
+      <div id="hondi-search-messages" class="hondi-search-messages"></div>
+      <div id="hondi-search-candidates" class="hondi-search-candidates"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .hondi-search-center-wrap {
+    max-width: 760px;
+    margin: 20px auto 0;
+    padding: 0 24px;
+    display: flex;
+    justify-content: center;
+  }
+  .hondi-search-root {
+    position: relative;
+    width: min(640px, 100%);
+    font-family: inherit;
+  }
+  .hondi-search-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    border: 1px solid #d9e2ec;
+    border-radius: 999px;
+    padding: 8px 10px 8px 14px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+  .hondi-search-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: #55606b;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .hondi-search-icon-btn:hover {
+    background: #f0f2f5;
+  }
+  .hondi-search-box input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    background: transparent;
+    min-width: 0;
+  }
+  .hondi-search-plus-menu {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    background: #fff;
+    border: 1px solid #d9e2ec;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    padding: 6px;
+    min-width: 220px;
+    z-index: 60;
+  }
+  .hondi-search-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 9px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #1f2937;
+    cursor: pointer;
+    text-align: left;
+  }
+  .hondi-search-menu-item:hover {
+    background: #f0f2f5;
+  }
+  .hondi-search-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f0f2f5;
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-size: 12px;
+    color: #374151;
+    margin-bottom: 8px;
+  }
+  .hondi-search-chip button {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    color: #6b7280;
+    padding: 0 0 0 4px;
+  }
+  .hondi-search-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 100%;
+    background: #fff;
+    border: 1px solid #d9e2ec;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    padding: 12px;
+    z-index: 50;
+  }
+  .hondi-search-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 240px;
+    overflow-y: auto;
+  }
+  .hondi-search-msg {
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 8px 10px;
+    border-radius: 10px;
+    max-width: 90%;
+  }
+  .hondi-search-msg.user {
+    align-self: flex-end;
+    background: #e8f0fe;
+  }
+  .hondi-search-msg.bot {
+    align-self: flex-start;
+    background: #f3f4f6;
+  }
+  .hondi-search-candidates {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .hondi-search-candidate {
+    text-align: left;
+    border: 1px solid #d9e2ec;
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .hondi-search-candidate:hover {
+    background: #f3f4f6;
+  }
+</style>
+
+<script>
+(function () {
+  const root = document.getElementById("hondi-search-root");
+  const input = document.getElementById("hondi-search-input");
+  const micBtn = document.getElementById("hondi-search-mic");
+  const plusBtn = document.getElementById("hondi-search-plus");
+  const plusMenu = document.getElementById("hondi-search-plus-menu");
+  const attachBtn = document.getElementById("hondi-search-attach-btn");
+  const fileInput = document.getElementById("hondi-search-file-input");
+  const chip = document.getElementById("hondi-search-attachment-chip");
+  const chipName = document.getElementById("hondi-search-attachment-name");
+  const chipRemove = document.getElementById("hondi-search-attachment-remove");
+  const panel = document.getElementById("hondi-search-panel");
+  const messagesEl = document.getElementById("hondi-search-messages");
+  const candidatesEl = document.getElementById("hondi-search-candidates");
+
+  const MAX_ATTACHMENT_BYTES = 300 * 1024; // 300KB
+  const TEXT_LIKE_EXT = [".txt", ".md", ".json", ".csv"];
+
+  let conversationId = null;
+  let history = [];
+  let pendingAttachment = null; // { name, mimeType, content? }
+
+  function uuid() {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === "x" ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
+
+  function isTextLike(file) {
+    const lower = file.name.toLowerCase();
+    return TEXT_LIKE_EXT.some((ext) => lower.endsWith(ext));
+  }
+
+  function closePlusMenu() {
+    plusMenu.hidden = true;
+    plusBtn.setAttribute("aria-expanded", "false");
+  }
+
+  function togglePlusMenu() {
+    const willOpen = plusMenu.hidden;
+    plusMenu.hidden = !willOpen;
+    plusBtn.setAttribute("aria-expanded", String(willOpen));
+  }
+
+  function setAttachment(att) {
+    pendingAttachment = att;
+    if (att) {
+      chipName.textContent = att.name;
+      chip.hidden = false;
+    } else {
+      chip.hidden = true;
+    }
+  }
+
+  plusBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    togglePlusMenu();
+  });
+
+  attachBtn.addEventListener("click", () => {
+    closePlusMenu();
+    fileInput.click();
+  });
+
+  chipRemove.addEventListener("click", () => setAttachment(null));
+
+  micBtn.addEventListener("click", () => {
+    appendMessage("bot", "음성 입력은 아직 지원되지 않습니다.");
+    openPanel();
+  });
+
+  fileInput.addEventListener("change", () => {
+    const file = fileInput.files && fileInput.files[0];
+    fileInput.value = "";
+    if (!file) return;
+
+    if (file.size > MAX_ATTACHMENT_BYTES) {
+      appendMessage("bot", "파일이 너무 큽니다. 300KB 이하 파일만 첨부할 수 있어요.");
+      openPanel();
+      return;
+    }
+
+    if (isTextLike(file)) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const text = String(reader.result || "").slice(0, 4000);
+        setAttachment({ name: file.name, mimeType: file.type || "text/plain", content: text });
+      };
+      reader.onerror = () => {
+        setAttachment({ name: file.name, mimeType: file.type || "application/octet-stream" });
+      };
+      reader.readAsText(file);
+    } else {
+      // 이미지 등 - 파일명/타입만 전달, 내용 자체는 분석하지 않음
+      setAttachment({ name: file.name, mimeType: file.type || "application/octet-stream" });
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!plusMenu.hidden && !plusMenu.contains(e.target) && e.target !== plusBtn) {
+      closePlusMenu();
+    }
+    if (!root.contains(e.target)) closePanel();
+  });
+
+  function appendMessage(role, text) {
+    const div = document.createElement("div");
+    div.className = "hondi-search-msg " + (role === "user" ? "user" : "bot");
+    div.textContent = text;
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function renderCandidates(candidates) {
+    candidatesEl.innerHTML = "";
+    (candidates || []).forEach((c) => {
+      const btn = document.createElement("button");
+      btn.className = "hondi-search-candidate";
+      btn.textContent = c.label;
+      btn.addEventListener("click", () => {
+        window.open(c.url, "_blank");
+        closePanel();
+      });
+      candidatesEl.appendChild(btn);
+    });
+  }
+
+  function openPanel() {
+    panel.hidden = false;
+  }
+
+  function closePanel() {
+    panel.hidden = true;
+    messagesEl.innerHTML = "";
+    candidatesEl.innerHTML = "";
+    history = [];
+    conversationId = null;
+    input.value = "";
+    setAttachment(null);
+  }
+
+  async function sendQuery() {
+    const text = input.value.trim();
+    if (!text && !pendingAttachment) return;
+
+    if (!conversationId) conversationId = uuid();
+
+    appendMessage("user", text || `(첨부: ${pendingAttachment.name})`);
+    history.push({ role: "user", content: text });
+    const attachmentToSend = pendingAttachment;
+    input.value = "";
+    setAttachment(null);
+    openPanel();
+    candidatesEl.innerHTML = "";
+
+    let res;
+    try {
+      res = await fetch("/hondi-search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          conversation_id: conversationId,
+          message: text || "이 파일에 대해 알려줘",
+          attachment: attachmentToSend || undefined,
+        }),
+      });
+    } catch (e) {
+      appendMessage("bot", "검색 서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+
+    if (!res.ok) {
+      appendMessage("bot", "검색 중 오류가 발생했습니다.");
+      return;
+    }
+
+    const data = await res.json();
+    history.push({ role: "assistant", content: data.message || "" });
+
+    switch (data.type) {
+      case "clarify":
+        appendMessage("bot", data.message);
+        break;
+      case "navigate":
+        appendMessage("bot", data.message);
+        window.open(data.url, "_blank");
+        setTimeout(closePanel, 800);
+        break;
+      case "candidates":
+        appendMessage("bot", data.message);
+        renderCandidates(data.candidates);
+        break;
+      case "delegate_ksearch":
+        appendMessage("bot", data.message);
+        break;
+      default:
+        appendMessage("bot", "응답을 이해하지 못했습니다.");
+    }
+  }
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") sendQuery();
+    if (e.key === "Escape") closePanel();
+  });
+})();
+</script>
+
 
 <div id="ai-gov-how">
 <section class="section bh-section" id="hondi-intro">
