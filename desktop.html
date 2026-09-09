@@ -1277,6 +1277,57 @@ document.addEventListener('keydown', function (e) {
        상세 커밋 이력은 feature/nav-consolidation-phase1 브랜치 참고. -->
 </section>
 
+<!-- 2026-09-10 복원 — PR #61(4페이지 구조 전면 개편)에서 파일 전체를
+     리라이트하면서 히어로 일러스트 애니메이션 주입 스크립트가 실수로
+     함께 삭제됨(껍데기 <div id="hero-illustration">과 CSS만 남고 JS가
+     사라져 우측 공간이 빈 채로 렌더링되던 버그). 삭제 직전 버전
+     (커밋 6ead669c)의 스크립트를 그대로 복원한다. 참조 에셋
+     /assets/hondi-human-slow.svg, /assets/hondi-hondi-light-speed.svg는
+     삭제되지 않고 그대로 남아있어 그대로 재사용 가능. -->
+<script>
+(function () {
+  var illustEl = document.getElementById('hero-illustration');
+  if (!illustEl) return;
+  var frameUrls = { frame1: '/assets/hondi-human-slow.svg', frame3: '/assets/hondi-hondi-light-speed.svg' };
+  var cache = {};
+  var blankSvg = '<svg width="680" height="340" viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg" role="img"><title>전환 여백</title><rect width="680" height="340" fill="#0E1B3A"/></svg>';
+  var phraseSvg = '<svg width="680" height="340" viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg" role="img"><title>사람들 간의 단순 반복적인 일상을 혼디가 대신합니다</title><rect width="680" height="340" fill="#0E1B3A"/><text x="340" y="154" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="600" fill="#E7EAF5" font-family="sans-serif">사람들 간의 단순 반복적인 일상을</text><text x="340" y="192" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="600" fill="#E7EAF5" font-family="sans-serif">혼디가 대신합니다.</text></svg>';
+  var phraseSvg2 = '<svg width="680" height="340" viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg" role="img"><title>국가의 체제 비용과 업무의 처리 시간을 최대 99% 줄입니다</title><rect width="680" height="340" fill="#0E1B3A"/><text x="340" y="154" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="600" fill="#E7EAF5" font-family="sans-serif">국가의 체제 비용과 업무의 처리 시간을</text><text x="340" y="192" text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="600" fill="#E7EAF5" font-family="sans-serif">최대 99% 줄입니다.</text></svg>';
+
+  function renderUrl(key) {
+    var url = frameUrls[key];
+    if (cache[url]) {
+      illustEl.innerHTML = cache[url];
+      return;
+    }
+    fetch(url).then(function (res) { return res.text(); }).then(function (svgText) {
+      cache[url] = svgText;
+      illustEl.innerHTML = svgText;
+    });
+  }
+
+  var stages = [
+    { render: function () { renderUrl('frame1'); }, duration: 5000 },
+    { render: function () { illustEl.innerHTML = blankSvg; }, duration: 1000 },
+    { render: function () { illustEl.innerHTML = phraseSvg; }, duration: 5000 },
+    { render: function () { illustEl.innerHTML = blankSvg; }, duration: 1000 },
+    { render: function () { renderUrl('frame3'); }, duration: 8000 },
+    { render: function () { illustEl.innerHTML = blankSvg; }, duration: 1000 },
+    { render: function () { illustEl.innerHTML = phraseSvg2; }, duration: 5000 },
+    { render: function () { illustEl.innerHTML = blankSvg; }, duration: 1000 }
+  ];
+  var stageIdx = 0;
+  function runStage() {
+    stages[stageIdx].render();
+    setTimeout(function () {
+      stageIdx = (stageIdx + 1) % stages.length;
+      runStage();
+    }, stages[stageIdx].duration);
+  }
+  runStage();
+})();
+</script>
+
 <div class="site-strip">
   <a class="site-strip-text" href="https://github.com/Openhash-Gopang/gopang" target="_blank">혼디 현장 테스트(2026.09.01 ~ 12.31) · 2027년 상반기 완전한 AI 정부 출시 예정 · 오픈소스 프로젝트</a>
   <a class="site-strip-support-btn" href="/pages/project-support.html">혼디 프로젝트를 지원하는 방법</a>
