@@ -25,9 +25,10 @@ compatibility_date = "2026-07-12"
 # hondi.net/* 와일드카드는 쓰지 않는다 — 그러면 desktop.html 같은 정적
 # 페이지 요청까지 이 Worker가 가로채버려 GitHub Pages 서빙과 충돌한다.
 # 필요한 API 경로만 개별로 추가할 것.
-[[routes]]
-pattern = "hondi.net/hondi-search"
-zone_name = "hondi.net"
+# 2026-09-09 임시 제거 - Cloudflare Error 1042(zone-Origin workers.dev 차단) 원인으로 확정, 사이트 전역 정상화 위해 되돌림. 참고: docs/HANDOFF_SITEWIDE_1042_CORS_BLOCK_20260909_v1_0.md
+# [[routes]]
+# pattern = "hondi.net/hondi-search"
+# zone_name = "hondi.net"
 
 [[kv_namespaces]]
 binding = "AI_SETUP_SEALS_KV"
