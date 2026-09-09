@@ -1,5 +1,11 @@
 # 인수인계서 — expert-chat.html "Failed to fetch" 버그 (2026-09-09)
 
+> **⚠ 업데이트 (같은 날, 나중)**: 원인이 확인됐다 — `expert-chat.html`만의
+> 문제가 아니라 **사이트 전역**에 영향을 주는 Cloudflare Error 1042 문제였다.
+> 자세한 내용과 다음 단계는
+> `docs/HANDOFF_SITEWIDE_1042_CORS_BLOCK_20260909_v1_0.md` 참고 —
+> 이 문서보다 그쪽을 먼저 읽을 것.
+
 **작성 목적**: 혼디 검색(Hondi Search) 세션 도중 우연히 발견한, `expert-chat.html`
 자체의 기존 버그. 혼디 검색과는 무관하며 별도 세션에서 이어서 조사한다.
 
