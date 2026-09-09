@@ -31,8 +31,16 @@
  *   --label1=...       기본값 'Chrome(테스트)'
  *   --label2=...       기본값 'Edge(테스트)'
  *   --interval=...     두 요청 사이 대기 시간(초). 기본값 10
- *   --purpose=...       기본값 'key_transfer' (다른 값: sign_request — 이 경우 --sigMsg 필요)
- *   --sigMsg=...       purpose=sign_request일 때만 사용
+ *   --purpose=...       기본값 'sign_request' (pcPubKeyB64u 불필요 — 이
+ *                       테스트는 실제 키 이전이 필요 없고 알림·승인 화면만
+ *                       확인하면 되므로 더 가벼운 쪽을 기본값으로 삼는다.
+ *                       'key_transfer'로 바꾸려면 PC가 실제로 생성한 32바이트
+ *                       X25519 공개키를 --pcPubKeyB64u=...로 별도로 줘야 한다
+ *                       — DB에 저장된 값이 아니라 그 순간 로컬에서 생성하는
+ *                       값이라 이 스크립트가 대신 지어낼 수 없다.)
+ *   --sigMsg=...       purpose=sign_request일 때 서명 대상 문자열.
+ *                       생략하면 스크립트가 타임스탬프로 자동 생성한다.
+ *   --pcPubKeyB64u=... purpose=key_transfer일 때만 필수.
  *
  * 종료 코드: 요청 두 건 모두 pushSentToMobile:true면 0, 아니면 1.
  * (알림을 탭했을 때 팝업이 새로 떴는지 자체는 사람이 눈으로 판정 —
@@ -60,9 +68,10 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function initDeviceLink({ e164, pcLabel, purpose, sigMsg }) {
+async function initDeviceLink({ e164, pcLabel, purpose, sigMsg, pcPubKeyB64u }) {
   const body = { e164, pcLabel, purpose };
   if (purpose === 'sign_request') body.sigMsg = sigMsg;
+  else body.pcPubKeyB64u = pcPubKeyB64u;
   const res = await fetch(`${PROXY}/auth/device-link/init`, {
     method: 'POST',
     // 브라우저에서 온 요청인 척해야 worker.js의 Origin 검사를 통과한다
@@ -82,7 +91,15 @@ async function main() {
     process.exitCode = 2;
     return;
   }
-  const purpose = args.purpose || 'key_transfer';
+  const purpose = args.purpose === 'key_transfer' ? 'key_transfer' : 'sign_request';
+  const sigMsg = args.sigMsg || `devicelink-race-test-${Date.now()}`;
+  if (purpose === 'key_transfer' && !args.pcPubKeyB64u) {
+    console.error('purpose=key_transfer는 실제 PC가 생성한 32바이트 X25519 공개키가 필요합니다.');
+    console.error('(DB에 저장된 값이 아니라 그 순간 로컬에서 생성하는 값이라 자동으로 지어낼 수 없습니다.)');
+    console.error('--pcPubKeyB64u=... 를 직접 주거나, 기본값(sign_request)을 그대로 쓰세요.');
+    process.exitCode = 2;
+    return;
+  }
   const label1 = args.label1 || 'Chrome(테스트)';
   const label2 = args.label2 || 'Edge(테스트)';
   const intervalSec = Number(args.interval || 10);
@@ -95,7 +112,7 @@ async function main() {
   console.log('(chrome://inspect로 원격 콘솔을 열어두면 진단 로그도 함께 볼 수 있습니다.)\n');
 
   console.log(`[1/2] "${label1}" 요청 발송 중...`);
-  const r1 = await initDeviceLink({ e164: args.e164, pcLabel: label1, purpose, sigMsg: args.sigMsg });
+  const r1 = await initDeviceLink({ e164: args.e164, pcLabel: label1, purpose, sigMsg, pcPubKeyB64u: args.pcPubKeyB64u });
   if (r1.status !== 200 || !r1.data?.ok) {
     console.error('요청 실패:', r1.status, r1.data);
     process.exitCode = 1;
@@ -108,7 +125,7 @@ async function main() {
   await sleep(intervalSec * 1000);
 
   console.log(`\n[2/2] "${label2}" 요청 발송 중...`);
-  const r2 = await initDeviceLink({ e164: args.e164, pcLabel: label2, purpose, sigMsg: args.sigMsg });
+  const r2 = await initDeviceLink({ e164: args.e164, pcLabel: label2, purpose, sigMsg, pcPubKeyB64u: args.pcPubKeyB64u });
   if (r2.status !== 200 || !r2.data?.ok) {
     console.error('요청 실패:', r2.status, r2.data);
     process.exitCode = 1;
