@@ -26,6 +26,10 @@ compatibility_date = "2026-07-12"
 # 페이지 요청까지 이 Worker가 가로채버려 GitHub Pages 서빙과 충돌한다.
 # 필요한 API 경로만 개별로 추가할 것.
 # 2026-09-09 임시 제거 - Cloudflare Error 1042(zone-Origin workers.dev 차단) 원인으로 확정, 사이트 전역 정상화 위해 되돌림. 참고: docs/HANDOFF_SITEWIDE_1042_CORS_BLOCK_20260909_v1_0.md
+# 2026-09-09 — 영구 이관 완료. 혼디 검색은 이제 별개 저장소/Worker
+# (Openhash-Gopang/hondi-search-relay)에서 서빙된다. 이 Route를 절대
+# 다시 켜지 말 것 — 켜면 위 1042 사고가 그대로 재발한다. 상세:
+# docs/HANDOFF_HONDI_SEARCH_RELAY_MIGRATION_20260909_v1_0.md
 # [[routes]]
 # pattern = "hondi.net/hondi-search"
 # zone_name = "hondi.net"
