@@ -17,6 +17,18 @@ main = "worker.js"
 account_id = "8897e584cfc42457b462f76fdcf6e157"
 compatibility_date = "2026-07-12"
 
+# 2026-09-08 신설 — hondi.net 루트 도메인에 Worker Route가 단 하나도 없었다
+# (대시보드 실사로 발견 - Workers Routes 목록이 비어있었고, hondi.net Overview는
+# "No Workers connected" 상태였다). 그래서 /hondi-search뿐 아니라 기존 /search
+# 등도 전부 GitHub Pages(정적 호스팅, Fastly)로만 가고 이 Worker엔 한 번도
+# 도달하지 못했다 — DNS는 이미 Proxied(주황)라 원인이 아니었다.
+# hondi.net/* 와일드카드는 쓰지 않는다 — 그러면 desktop.html 같은 정적
+# 페이지 요청까지 이 Worker가 가로채버려 GitHub Pages 서빙과 충돌한다.
+# 필요한 API 경로만 개별로 추가할 것.
+[[routes]]
+pattern = "hondi.net/hondi-search"
+zone_name = "hondi.net"
+
 [[kv_namespaces]]
 binding = "AI_SETUP_SEALS_KV"
 id = "e1ae4dd08b344f9c9208ea4235e17d3e"
