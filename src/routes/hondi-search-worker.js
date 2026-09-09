@@ -1,4 +1,11 @@
 /**
+ * ⚠ 참고용 사본 — 실제 서빙에는 관여하지 않음 (2026-09-09부터).
+ * 혼디 검색은 별개 저장소/Worker(Openhash-Gopang/hondi-search-relay)로
+ * 이관됐다 — 이유는 docs/HANDOFF_HONDI_SEARCH_RELAY_MIGRATION_20260909_v1_0.md
+ * (Cloudflare Error 1042, zone-Route가 workers.dev 직접호출을 막는 문제).
+ * 이 파일을 고쳐도 라이브 동작에 영향 없다 — 실제 수정은 저 저장소의
+ * 동일 파일에서 해야 한다.
+ *
  * 혼디 검색 (Hondi Search) 백엔드 릴레이 - Cloudflare Worker 라우트
  *
  * worker.js 라우터 등록:
