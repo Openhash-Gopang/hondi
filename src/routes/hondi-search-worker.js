@@ -258,6 +258,17 @@ export async function handleHondiSearch(request, env, corsHeaders, { _err }) {
   // 전문가 페르소나 로컬 매칭 - 첨부파일이 없는 순수 텍스트 질의에만 적용.
   // 매칭되면 deepseek 호출 없이 바로 navigate (더 빠르고, id 추측으로 인한
   // 잘못된 링크 위험도 없음).
+  //
+  // 2026-09-09 수정 - 목적지를 persona.chatUrl(expert-chat.html, 실제
+  // 대화창)에서 SP 문서 편집기(sp-editor.html)로 변경. 이 /hondi-search
+  // 경로는 desktop.html 상단 검색 전용이므로, 여기서 매칭됐다는 것 자체가
+  // "desktop.html 검색으로 찾아온 것"이라는 뜻이다. 원래 의도는 전문가
+  // 페르소나 목록의 "SP 프롬프트 원문 보기" 아이콘과 동일하게, 페르소나
+  // 설명 + 실제 대화로 이어지는 링크가 있는 sp-editor.html로 먼저 보내는
+  // 것 — 대화창으로 바로 꽂는 건 K-서비스/webapp.html이 자체 경로
+  // (gwp-registry.js/expert-registry.js)로 이미 처리하고 있고, 여긴 손대면
+  // 안 된다. sp-editor.html의 URL 패턴은 expert-personas.html의
+  // expertSpEditUrl()과 동일하게 맞춘다.
   if (!attachment) {
     const personaIndex = await loadPersonaIndex(env);
     const persona = matchPersonaByQuery(message, personaIndex);
@@ -265,11 +276,16 @@ export async function handleHondiSearch(request, env, corsHeaders, { _err }) {
       if (conversation_id) {
         await env.HONDI_SEARCH_HISTORY.delete(`conv:${conversation_id}`);
       }
+      // spPath가 비어있는 항목은(현재는 552개 전부 채워져 있음을 확인했으나
+      // 방어적으로) 기존 대화창 URL로 폴백한다.
+      const url = persona.spPath
+        ? '/pages/sp-editor.html?repo=Openhash-Gopang/hondi&path=' + encodeURIComponent(persona.spPath)
+        : persona.chatUrl;
       return new Response(
         JSON.stringify({
           type: 'navigate',
-          url: persona.chatUrl,
-          message: `${persona.parentLabel} 중 ${persona.label} 페르소나로 안내해 드릴게요.`,
+          url,
+          message: `${persona.parentLabel} 중 ${persona.label} 페르소나의 SP 문서로 안내해 드릴게요.`,
         }),
         { status: 200, headers: corsHeaders }
       );

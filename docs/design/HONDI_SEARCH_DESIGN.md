@@ -115,10 +115,21 @@
 ```
 
 Worker 책임:
-0. **(2026-09-09 신설) 전문가 페르소나 로컬 매칭 우선 시도** — `data/expert-persona-index.json`
-   (552개 페르소나, `expert-personas.html`의 SECTIONS/EXPERT_SP_PATH_INDEX에서 생성한
-   정본)에서 질의를 트리거/라벨과 문자열 매칭한다. 정확히 하나만 매칭되면 deepseek
-   호출 없이 바로 `navigate`(목적지: `/pages/expert-chat.html?persona=<id>`)로 응답한다.
+0. **(2026-09-09 신설, 같은 날 목적지 재수정) 전문가 페르소나 로컬 매칭 우선 시도** —
+   `data/expert-persona-index.json`(552개 페르소나, `expert-personas.html`의
+   SECTIONS/EXPERT_SP_PATH_INDEX에서 생성한 정본)에서 질의를 트리거/라벨과 문자열
+   매칭한다. 정확히 하나만 매칭되면 deepseek 호출 없이 바로 `navigate`로 응답한다.
+   목적지는 **`persona.chatUrl`(대화창, `expert-chat.html?persona=<id>`)이 아니라
+   `/pages/sp-editor.html?repo=Openhash-Gopang/hondi&path=<spPath>`** — `expert-personas.html`의
+   `expertSpEditUrl()`과 동일한 URL 패턴이다. `/hondi-search`는 desktop.html 상단
+   검색 전용 경로이므로, 여기서 매칭됐다는 것 자체가 "desktop.html 검색으로 찾아온
+   것"이라는 뜻이다. 대화창으로 바로 보내지 않는 이유: 원래 의도가 "페르소나를
+   설명하는 페이지"(SP 편집기 상단에 붙인 설명+대화 링크 배너, §4 마지막 항목 참고)로
+   안내하는 것이었기 때문 — 처음엔 실수로 `chatUrl`을 반환해서 대화창으로 바로
+   꽂아버렸다가(실사로 발견, 0909) 정정했다. `webapp.html`이 자체 경로
+   (`gwp-registry.js`/`expert-registry.js`)로 페르소나를 호출해 대화창을 여는 흐름은
+   이것과 완전히 별개이며 건드리지 않는다. `spPath`가 없는 항목은(현재 552개 전부
+   채워져 있음을 확인했으나 방어적으로) `chatUrl`로 폴백한다.
    이 인덱스는 크기(~150KB) 때문에 site-manifest.json에는 넣지 않고 별도 파일로
    분리했다 — 매 요청마다 deepseek에 전체를 넘기면 토큰 비용이 커진다. 둘 이상
    매칭(모호)되거나 매칭이 없으면 아래 1~5단계로 진행한다.
@@ -128,9 +139,10 @@ Worker 책임:
 4. 응답 검증(JSON 스키마) 후 그대로 프런트에 반환, 히스토리에 turn 추가.
 5. `type: navigate`가 나오면 대화 세션 종료(TTL 만료 또는 명시적 clear).
 
-**참고**: `webapp.html`은 전문가 페르소나 채팅 목적지가 아니다 — 실제 목적지는
-`expert-chat.html?persona=<id>`. 초기 버전에서 이 구분이 없어 deepseek가
-`webapp.html`을 잘못 추측해 navigate하는 버그가 있었다(실사로 발견, 0909).
+**참고**: `webapp.html`은 전문가 페르소나 채팅 목적지가 아니다 — deepseek가 site-manifest
+기반 일반 질의에 대해 `webapp.html`을 잘못 추측해 navigate하는 버그가 초기 버전에
+있었다(실사로 발견, 0909). 페르소나 매칭 자체는 0단계 로컬 매칭이 전담하므로
+deepseek는 이 경로에 관여하지 않는다.
 
 ## 5. 프런트엔드 동작 (desktop.html)
 
