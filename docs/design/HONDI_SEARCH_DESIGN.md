@@ -115,11 +115,22 @@
 ```
 
 Worker 책임:
+0. **(2026-09-09 신설) 전문가 페르소나 로컬 매칭 우선 시도** — `data/expert-persona-index.json`
+   (552개 페르소나, `expert-personas.html`의 SECTIONS/EXPERT_SP_PATH_INDEX에서 생성한
+   정본)에서 질의를 트리거/라벨과 문자열 매칭한다. 정확히 하나만 매칭되면 deepseek
+   호출 없이 바로 `navigate`(목적지: `/pages/expert-chat.html?persona=<id>`)로 응답한다.
+   이 인덱스는 크기(~150KB) 때문에 site-manifest.json에는 넣지 않고 별도 파일로
+   분리했다 — 매 요청마다 deepseek에 전체를 넘기면 토큰 비용이 커진다. 둘 이상
+   매칭(모호)되거나 매칭이 없으면 아래 1~5단계로 진행한다.
 1. `conversation_id`로 히스토리 로드(짧은 TTL, PocketBase 또는 KV).
 2. 사이트 매니페스트 로드(캐시).
 3. SP + 매니페스트 + 히스토리 + 신규 메시지로 deepseek v4 flash 호출, `response_format: json`.
 4. 응답 검증(JSON 스키마) 후 그대로 프런트에 반환, 히스토리에 turn 추가.
 5. `type: navigate`가 나오면 대화 세션 종료(TTL 만료 또는 명시적 clear).
+
+**참고**: `webapp.html`은 전문가 페르소나 채팅 목적지가 아니다 — 실제 목적지는
+`expert-chat.html?persona=<id>`. 초기 버전에서 이 구분이 없어 deepseek가
+`webapp.html`을 잘못 추측해 navigate하는 버그가 있었다(실사로 발견, 0909).
 
 ## 5. 프런트엔드 동작 (desktop.html)
 

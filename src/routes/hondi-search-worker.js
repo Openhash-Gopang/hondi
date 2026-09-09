@@ -107,6 +107,65 @@ async function fetchManifestFromOrigin(env) {
   return res.json();
 }
 
+// 2026-09-09 신설 — 전문가 페르소나(552개) 로컬 매칭.
+// 이 인덱스를 deepseek에 매번 통째로 넘기면 요청당 수만 토큰이 들어가므로,
+// site-manifest.json에는 넣지 않고 Worker에서 문자열 매칭만으로 먼저
+// 처리한다. "내과 의사"처럼 트리거 문구와 정확히 안 겹쳐도 라벨
+// 부분일치로 잡히도록 한다. 정확히 한 명만 매칭되면 deepseek 호출 없이
+// 바로 navigate, 둘 이상 매칭(모호)되면 매칭 안 된 것으로 보고 기존
+// deepseek 경로(명확화 등)로 넘긴다.
+const PERSONA_INDEX_KV_KEY = 'expert-persona-index';
+const PERSONA_INDEX_CACHE_TTL_SECONDS = 60 * 60; // 1시간
+
+async function fetchPersonaIndexFromOrigin(env) {
+  const url = env.PERSONA_INDEX_URL || 'https://hondi.net/data/expert-persona-index.json';
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`expert-persona-index fetch failed: ${res.status}`);
+  }
+  return res.json();
+}
+
+async function loadPersonaIndex(env) {
+  const cached = await env.HONDI_SEARCH_HISTORY.get(PERSONA_INDEX_KV_KEY, 'json');
+  if (cached) return cached;
+
+  let index;
+  try {
+    index = await fetchPersonaIndexFromOrigin(env);
+  } catch (err) {
+    console.error('[hondi-search] expert-persona-index 로드 실패, 페르소나 매칭 스킵:', err);
+    index = {}; // 실패해도 검색 자체는 계속 동작해야 하므로 빈 인덱스로 저하
+  }
+
+  await env.HONDI_SEARCH_HISTORY.put(PERSONA_INDEX_KV_KEY, JSON.stringify(index), {
+    expirationTtl: PERSONA_INDEX_CACHE_TTL_SECONDS,
+  });
+
+  return index;
+}
+
+function matchPersonaByQuery(message, personaIndex) {
+  const q = (message || '').trim();
+  if (!q) return null;
+
+  const matches = [];
+  for (const [pid, p] of Object.entries(personaIndex)) {
+    const candidates = [
+      ...(p.triggers || []),
+      p.label,
+      `${p.label} ${p.parentLabel}`,
+      `${p.parentLabel} ${p.label}`,
+    ].filter(Boolean);
+
+    const hit = candidates.some((c) => q.includes(c) || c.includes(q));
+    if (hit) matches.push({ id: pid, ...p });
+  }
+
+  // 하나만 매칭되면 확정. 둘 이상이면 모호하므로 deepseek 경로로 넘긴다.
+  return matches.length === 1 ? matches[0] : null;
+}
+
 async function loadManifest(env) {
   const cached = await env.HONDI_SEARCH_HISTORY.get(MANIFEST_KV_KEY, 'json');
   if (cached) return cached;
@@ -194,6 +253,27 @@ export async function handleHondiSearch(request, env, corsHeaders, { _err }) {
   const { conversation_id, message, attachment } = body;
   if (!message || typeof message !== 'string') {
     return _err(400, 'message_required', 'message 필드가 필요합니다', corsHeaders);
+  }
+
+  // 전문가 페르소나 로컬 매칭 - 첨부파일이 없는 순수 텍스트 질의에만 적용.
+  // 매칭되면 deepseek 호출 없이 바로 navigate (더 빠르고, id 추측으로 인한
+  // 잘못된 링크 위험도 없음).
+  if (!attachment) {
+    const personaIndex = await loadPersonaIndex(env);
+    const persona = matchPersonaByQuery(message, personaIndex);
+    if (persona) {
+      if (conversation_id) {
+        await env.HONDI_SEARCH_HISTORY.delete(`conv:${conversation_id}`);
+      }
+      return new Response(
+        JSON.stringify({
+          type: 'navigate',
+          url: persona.chatUrl,
+          message: `${persona.parentLabel} 중 ${persona.label} 페르소나로 안내해 드릴게요.`,
+        }),
+        { status: 200, headers: corsHeaders }
+      );
+    }
   }
 
   const [manifest, history] = await Promise.all([

@@ -277,7 +277,11 @@
     candidatesEl.innerHTML = "";
     history = [];
     conversationId = null;
-    input.value = "";
+    // 2026-09-09 버그 수정 - 여기서 input.value를 지우면, 사용자가 검색어를
+    // 입력만 하고 바깥을 클릭했을 때(아직 전송도 안 했는데) 입력 내용이
+    // 사라져버렸다. 입력창 비우기는 sendQuery()가 실제로 전송할 때만
+    // 하고, 여기서는 건드리지 않는다 - 사용자가 직접 지우거나 전송하기
+    // 전까지는 입력한 내용이 보존되어야 한다.
     setAttachment(null);
   }
 
