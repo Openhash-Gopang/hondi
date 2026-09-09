@@ -271,7 +271,11 @@ export async function handleHondiSearch(request, env, corsHeaders, { _err }) {
   // expertSpEditUrl()과 동일하게 맞춘다.
   if (!attachment) {
     const personaIndex = await loadPersonaIndex(env);
+    console.log(
+      `[hondi-search][DEBUG] personaIndex 항목 수=${Object.keys(personaIndex).length}, query=${JSON.stringify(message)}`
+    );
     const persona = matchPersonaByQuery(message, personaIndex);
+    console.log(`[hondi-search][DEBUG] 매칭 결과=${persona ? persona.id : 'null'}`);
     if (persona) {
       if (conversation_id) {
         await env.HONDI_SEARCH_HISTORY.delete(`conv:${conversation_id}`);
