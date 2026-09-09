@@ -293,11 +293,26 @@ self.addEventListener('notificationclick', (event) => {
   const isDeviceLink = tag.startsWith('gopang-device-link-');
 
   if (isDeviceLink) {
+    // ★ 2026-09-10 임시 진단 로그 — Edge/Chrome 등 서로 다른 브라우저에서
+    // 순차적으로 device-link 요청을 보낼 때, 두 번째 요청의 알림을 열어도
+    // device-link-approve.html이 아니라 이미 열려있던 webapp.html이 그대로
+    // 보이는 증상 원인 확인용. PWA가 단일 창만 허용해 openWindow()가 새
+    // 페이지를 못 열고 기존 창을 재사용하는지 여기서 확인한다. 원인이
+    // 확정되면 이 로그 블록은 제거한다.
     event.waitUntil(
-      Promise.all([
-        _reportConsentReceipt(tag, 'acknowledged'),
-        clients.openWindow(url + (url.includes('?') ? '&' : '?') + 'playSound=' + encodeURIComponent(sound)),
-      ])
+      clients.matchAll({ type: 'window', includeUncontrolled: true }).then(before => {
+        console.info('[DeviceLink diag] 요청 url:', url, '| 클릭 시점 기존 열린 창:', before.map(c => c.url));
+        return Promise.all([
+          _reportConsentReceipt(tag, 'acknowledged'),
+          clients.openWindow(url + (url.includes('?') ? '&' : '?') + 'playSound=' + encodeURIComponent(sound))
+            .then(win => {
+              console.info('[DeviceLink diag] openWindow 결과 url:', win ? win.url : null);
+              if (win && !win.url.includes('device-link-approve.html')) {
+                console.warn('[DeviceLink diag] ⚠ 단일 창 재사용 의심 — 요청한 승인 화면이 아니라 기존 창이 열렸습니다.');
+              }
+            }),
+        ]);
+      })
     );
     return;
   }
