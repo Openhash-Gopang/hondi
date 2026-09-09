@@ -99,7 +99,12 @@
 {
   "conversation_id": "uuid",
   "message": "메일 검색",
-  "history": [{"role": "user"|"assistant", "content": "..."}]
+  "history": [{"role": "user"|"assistant", "content": "..."}],
+  "attachment": {                 // 선택 - 2026-09-09 신설
+    "name": "notes.txt",
+    "mimeType": "text/plain",
+    "content": "텍스트 계열 파일만 - 최대 4000자, 이미지 등은 생략"
+  }
 }
 
 // response (Worker가 deepseek 응답을 그대로 릴레이)
@@ -118,7 +123,15 @@ Worker 책임:
 
 ## 5. 프런트엔드 동작 (desktop.html)
 
-- 상단 검색 필드 클릭 시 대화형 팝오버 오픈.
+- 위치: 헤더가 아니라 hero-top-actions(인프라/전문가/정부/오픈해시 4버튼) 아래,
+  카드 섹션(ai-gov-how) 위, 중앙 정렬 (2026-09-09 이동).
+- UI 스타일: Claude 채팅 입력창과 동일한 pill 형태 — "+" 버튼(파일/사진 첨부),
+  텍스트 입력, 마이크 아이콘(현재는 준비 중 안내만 표시).
+- 파일 첨부: 텍스트 계열 파일(.txt/.md/.json/.csv, 300KB 이하)은 내용 일부를
+  질의에 첨부해 함께 전송. 이미지 등 그 외 파일은 파일명/타입만 전달 —
+  deepseekChat이 텍스트만 지원하므로 이미지 내용 자체는 분석하지 않는다.
+  "+" 메뉴에는 실제로 동작하는 항목만 넣는다(Claude 자체 UI의 스킬/커넥터/
+  웹검색 등 비활성 항목은 넣지 않음 — 없는 기능을 있는 것처럼 보이면 안 됨).
 - 사용자가 입력 → `/hondi-search` 호출 → 응답 type에 따라:
   - `clarify`: 봇 메시지 표시, 입력 계속.
   - `navigate`: 봇 메시지 짧게 보여준 뒤 `window.open(url, "_blank")`.

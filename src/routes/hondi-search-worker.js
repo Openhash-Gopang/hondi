@@ -141,6 +141,23 @@ async function saveHistory(env, conversationId, history) {
   );
 }
 
+// 첨부파일 정보(있다면)를 사용자 질의 텍스트에 덧붙인다.
+// 텍스트 계열 파일은 내용 일부까지, 그 외(이미지 등)는 파일명/타입만 —
+// deepseekChat이 텍스트 메시지만 지원하므로 이미지 자체를 분석하지는 않는다.
+const MAX_ATTACHMENT_CONTENT_CHARS = 4000;
+
+function buildUserContentWithAttachment(message, attachment) {
+  if (!attachment || typeof attachment !== 'object' || !attachment.name) {
+    return message;
+  }
+  let note = `\n\n[사용자가 파일을 첨부함: ${attachment.name} (${attachment.mimeType || '알 수 없음'})]`;
+  if (typeof attachment.content === 'string' && attachment.content.length > 0) {
+    const snippet = attachment.content.slice(0, MAX_ATTACHMENT_CONTENT_CHARS);
+    note += `\n--- 첨부 파일 내용(일부) ---\n${snippet}\n---`;
+  }
+  return `${message}${note}`;
+}
+
 function buildMessages(sp, manifest, history, message) {
   const systemPrompt = sp
     .replace('{{SITE_MANIFEST_JSON}}', JSON.stringify(manifest))
@@ -174,7 +191,7 @@ export async function handleHondiSearch(request, env, corsHeaders, { _err }) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
 
-  const { conversation_id, message } = body;
+  const { conversation_id, message, attachment } = body;
   if (!message || typeof message !== 'string') {
     return _err(400, 'message_required', 'message 필드가 필요합니다', corsHeaders);
   }
@@ -184,7 +201,8 @@ export async function handleHondiSearch(request, env, corsHeaders, { _err }) {
     loadHistory(env, conversation_id),
   ]);
 
-  const messages = buildMessages(HONDI_SEARCH_SP, manifest, history, message);
+  const userContent = buildUserContentWithAttachment(message, attachment);
+  const messages = buildMessages(HONDI_SEARCH_SP, manifest, history, userContent);
 
   let parsed;
   try {
