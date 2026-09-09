@@ -1,37 +1,40 @@
 <!--
-  혼디 검색 위젯 (Hondi Search) - v2 (Claude 스타일 pill 입력창 + 파일 첨부)
+  혼디 검색 위젯 (Hondi Search) - v3
   desktop.html의 hero-top-actions(4버튼) 아래, ai-gov-how(카드 섹션) 위에 배치.
   API 엔드포인트: POST /hondi-search (백엔드 계약은 HONDI_SEARCH_DESIGN.md 참고)
 
-  파일 첨부 범위(의도적으로 제한):
+  v2 → v3 변경 (2026-09-09):
+  - "+" 버튼 + 드롭다운 메뉴(항목 1개뿐이었음) 제거. 파일 첨부가 유일한
+    "+" 기능이었으므로 pill 왼쪽 버튼 자체를 클립(파일첨부) 아이콘으로
+    바꾸고 클릭 시 바로 파일 선택기가 뜨도록 단순화.
+  - 입력창 위에 떠 있던 별도 첨부 칩(hondi-search-attachment-chip)을
+    제거. (부수 발견: 그 칩은 CSS에 display:inline-flex가 박혀있어
+    hidden 속성이 무시되고 항상 떠 있던 버그였다 - 클래스에 명시적
+    display를 주면 [hidden] 상속 규칙보다 우선해버린다.) 첨부 상태는
+    이제 클립 버튼 자체의 색상 변화 + title 텍스트로만 표시하고,
+    같은 버튼을 다시 누르면 첨부가 해제된다(토글).
+  - placeholder 문구를 "혼디 사이트에서 찾는 페이지나 내용을
+    입력하세요."로 변경.
+
+  파일 첨부 범위(의도적으로 제한, v2와 동일):
   - 텍스트 계열 파일(.txt/.md/.json/.csv, 300KB 이하)은 내용 일부를 읽어
     질의에 함께 첨부한다.
   - 이미지 등 그 외 파일은 파일명/타입만 전달한다 - 현재 백엔드
     deepseekChat 헬퍼가 텍스트 메시지만 지원하므로 이미지 내용 자체를
     분석하지는 않는다.
-  - "+" 메뉴에는 실제로 동작하는 항목(파일/사진 추가)만 넣는다. Claude
-    자체 UI를 그대로 베낀 스킬/커넥터/웹검색 등 항목은 여기서 아무 기능도
-    없으므로 일부러 넣지 않았다 - 존재하지도 않는 기능처럼 보이는 건
-    사용자를 속이는 것과 같다.
 -->
 
 <div class="hondi-search-center-wrap">
   <div id="hondi-search-root" class="hondi-search-root">
-    <div id="hondi-search-attachment-chip" class="hondi-search-chip" hidden>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-      <span id="hondi-search-attachment-name"></span>
-      <button id="hondi-search-attachment-remove" type="button" aria-label="첨부 제거">&times;</button>
-    </div>
-
     <div class="hondi-search-box">
-      <button id="hondi-search-plus" class="hondi-search-icon-btn" type="button" aria-label="추가" aria-haspopup="true" aria-expanded="false">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <button id="hondi-search-attach" class="hondi-search-icon-btn" type="button" aria-label="파일 또는 사진 첨부">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
       </button>
 
       <input
         id="hondi-search-input"
         type="text"
-        placeholder="혼디에게 무엇을 찾는지 물어보세요…"
+        placeholder="혼디 사이트에서 찾는 페이지나 내용을 입력하세요."
         autocomplete="off"
       />
 
@@ -40,12 +43,6 @@
       </button>
     </div>
 
-    <div id="hondi-search-plus-menu" class="hondi-search-plus-menu" hidden>
-      <button type="button" class="hondi-search-menu-item" id="hondi-search-attach-btn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-        파일 또는 사진 추가
-      </button>
-    </div>
     <input type="file" id="hondi-search-file-input" hidden accept=".txt,.md,.json,.csv,image/*" />
 
     <div id="hondi-search-panel" class="hondi-search-panel" hidden>
@@ -75,7 +72,7 @@
     background: #fff;
     border: 1px solid #d9e2ec;
     border-radius: 999px;
-    padding: 8px 10px 8px 14px;
+    padding: 8px 10px 8px 10px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   }
   .hondi-search-icon-btn {
@@ -94,6 +91,10 @@
   .hondi-search-icon-btn:hover {
     background: #f0f2f5;
   }
+  .hondi-search-icon-btn.has-attachment {
+    color: #1e3a8a;
+    background: #e8f0fe;
+  }
   .hondi-search-box input {
     flex: 1;
     border: none;
@@ -101,55 +102,6 @@
     font-size: 14px;
     background: transparent;
     min-width: 0;
-  }
-  .hondi-search-plus-menu {
-    position: absolute;
-    bottom: calc(100% + 8px);
-    left: 0;
-    background: #fff;
-    border: 1px solid #d9e2ec;
-    border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-    padding: 6px;
-    min-width: 220px;
-    z-index: 60;
-  }
-  .hondi-search-menu-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    border: none;
-    background: transparent;
-    padding: 9px 10px;
-    border-radius: 8px;
-    font-size: 13px;
-    color: #1f2937;
-    cursor: pointer;
-    text-align: left;
-  }
-  .hondi-search-menu-item:hover {
-    background: #f0f2f5;
-  }
-  .hondi-search-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: #f0f2f5;
-    border-radius: 999px;
-    padding: 5px 10px;
-    font-size: 12px;
-    color: #374151;
-    margin-bottom: 8px;
-  }
-  .hondi-search-chip button {
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    font-size: 14px;
-    line-height: 1;
-    color: #6b7280;
-    padding: 0 0 0 4px;
   }
   .hondi-search-panel {
     position: absolute;
@@ -210,13 +162,8 @@
   const root = document.getElementById("hondi-search-root");
   const input = document.getElementById("hondi-search-input");
   const micBtn = document.getElementById("hondi-search-mic");
-  const plusBtn = document.getElementById("hondi-search-plus");
-  const plusMenu = document.getElementById("hondi-search-plus-menu");
-  const attachBtn = document.getElementById("hondi-search-attach-btn");
+  const attachBtn = document.getElementById("hondi-search-attach");
   const fileInput = document.getElementById("hondi-search-file-input");
-  const chip = document.getElementById("hondi-search-attachment-chip");
-  const chipName = document.getElementById("hondi-search-attachment-name");
-  const chipRemove = document.getElementById("hondi-search-attachment-remove");
   const panel = document.getElementById("hondi-search-panel");
   const messagesEl = document.getElementById("hondi-search-messages");
   const candidatesEl = document.getElementById("hondi-search-candidates");
@@ -241,38 +188,26 @@
     return TEXT_LIKE_EXT.some((ext) => lower.endsWith(ext));
   }
 
-  function closePlusMenu() {
-    plusMenu.hidden = true;
-    plusBtn.setAttribute("aria-expanded", "false");
-  }
-
-  function togglePlusMenu() {
-    const willOpen = plusMenu.hidden;
-    plusMenu.hidden = !willOpen;
-    plusBtn.setAttribute("aria-expanded", String(willOpen));
-  }
-
   function setAttachment(att) {
     pendingAttachment = att;
     if (att) {
-      chipName.textContent = att.name;
-      chip.hidden = false;
+      attachBtn.classList.add("has-attachment");
+      attachBtn.setAttribute("aria-label", `첨부됨: ${att.name} (다시 누르면 제거)`);
+      attachBtn.title = `첨부됨: ${att.name} (다시 누르면 제거)`;
     } else {
-      chip.hidden = true;
+      attachBtn.classList.remove("has-attachment");
+      attachBtn.setAttribute("aria-label", "파일 또는 사진 첨부");
+      attachBtn.title = "";
     }
   }
 
-  plusBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    togglePlusMenu();
-  });
-
   attachBtn.addEventListener("click", () => {
-    closePlusMenu();
-    fileInput.click();
+    if (pendingAttachment) {
+      setAttachment(null); // 이미 첨부돼 있으면 토글로 제거
+    } else {
+      fileInput.click();
+    }
   });
-
-  chipRemove.addEventListener("click", () => setAttachment(null));
 
   micBtn.addEventListener("click", () => {
     appendMessage("bot", "음성 입력은 아직 지원되지 않습니다.");
@@ -307,9 +242,6 @@
   });
 
   document.addEventListener("click", (e) => {
-    if (!plusMenu.hidden && !plusMenu.contains(e.target) && e.target !== plusBtn) {
-      closePlusMenu();
-    }
     if (!root.contains(e.target)) closePanel();
   });
 
@@ -355,9 +287,12 @@
 
     if (!conversationId) conversationId = uuid();
 
-    appendMessage("user", text || `(첨부: ${pendingAttachment.name})`);
-    history.push({ role: "user", content: text });
     const attachmentToSend = pendingAttachment;
+    const userLabel = attachmentToSend
+      ? `${text || "(첨부 파일에 대해 질문)"} 📎 ${attachmentToSend.name}`
+      : text;
+    appendMessage("user", userLabel);
+    history.push({ role: "user", content: text });
     input.value = "";
     setAttachment(null);
     openPanel();
