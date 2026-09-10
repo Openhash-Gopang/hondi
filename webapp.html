@@ -3636,9 +3636,16 @@ window.closePDV = closePDV;
   // 마이크 로직 자체가 chat-input.js로 이전되며 내용 변경 없이 이 위치로
   // 옮겨졌다. 마이크와 무관한 로직이라 옮겨도 동작에 영향 없음.)
   setTimeout(() => {
-    // 가입 직후: 튜토리얼 단계 0으로 초기화 후 AI 패널 열기
+    // ★ 2026-09-10 수정(주피터님 지시) — 단계별 앱 사용법 튜토리얼
+    // 진행을 폐지한다. 대신 call-ai.js의 [FIRST_CONTACT] 문구에 "언제든
+    // 물어보세요" 한 줄 안내를 넣는 것으로 갈음한다. hondi_tutorial_done을
+    // 가입 직후 곧바로 '1'로 세팅해, 튜토리얼이 "미완료" 상태로 남지
+    // 않게 한다 — 이렇게 하면 재방문자에게 "이어서 하시겠어요?"를
+    // 되묻던 로직(아래 openAIPanel의 _tutDone 분기, _tutorialSignal)이
+    // 자연히 발동하지 않는다. 관련 코드 자체는 나중에 선택적(opt-in)
+    // 튜토리얼로 되살릴 수 있도록 남겨뒀다 — 이 한 줄만 원복하면 된다.
     if (!localStorage.getItem('hondi_tutorial_done')) {
-      localStorage.setItem('hondi_tutorial_step', '0');
+      localStorage.setItem('hondi_tutorial_done', '1');
     }
     openAIPanel();
   }, 300);
