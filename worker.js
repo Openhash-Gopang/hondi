@@ -34182,6 +34182,58 @@ async function _kmailAppendCampaignMessages(env, campaignId, guid, entries) {
   }
 }
 
+// 2026-09-10 신설 — 캠페인(발송)과 완전히 무관하게 주소록에 연락처를
+// 바로 등록한다. /kmail/contacts/propose(REST, §웹앱 수동 입력 폼이
+// 이미 씀)와 같은 kmail_contacts 컬렉션·같은 검증 로직을 쓰지만, 두
+// 가지가 다르다: (1) 여기는 대화에서 사용자가 이미 직접 불러준/확정한
+// 명단이라는 전제이므로 status를 기본 'confirmed'로 바로 등록한다
+// (propose REST 엔드포인트는 리서치 결과를 사람이 검토하기 전 단계라
+// 'pending_review' 고정) — 사용자가 "검토 후 등록해줘"처럼 명시하면
+// SP가 status:'pending_review'를 실어 보낼 수 있게 옵션으로 남겨둔다.
+// (2) 상한을 훨씬 넉넉하게 둔다(대화 하나로 수백 명을 부를 수 있음 —
+// 실사용 사례: 대학 25곳 로스쿨 교수진 383명).
+const KMAIL_CHAT_SAVE_CONTACTS_MAX = 1000;
+async function _kmailChatSaveContacts(env, guid, parsed) {
+  const candidates = Array.isArray(parsed?.candidates) ? parsed.candidates : [];
+  if (candidates.length === 0) throw new Error('candidates 배열(1개 이상) 필수');
+  if (candidates.length > KMAIL_CHAT_SAVE_CONTACTS_MAX) {
+    throw new Error(`한 번에 최대 ${KMAIL_CHAT_SAVE_CONTACTS_MAX}건까지만 등록할 수 있습니다 — 나눠서 요청해 주세요`);
+  }
+  const status = parsed?.status === 'pending_review' ? 'pending_review' : 'confirmed';
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const valid = candidates.filter(c => c && typeof c.email === 'string' && emailRe.test(c.email));
+  const invalidCount = candidates.length - valid.length;
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  let created = 0, skippedDup = 0;
+  for (const c of valid) {
+    const esc = s => String(s).replace(/'/g, "\\'");
+    // 같은 사용자가 같은 이메일을 이미 confirmed로 갖고 있으면 중복
+    // 생성하지 않고 건너뛴다(조용히 — 이미 주소록에 있다는 뜻이므로
+    // 오류가 아니다).
+    const filter = encodeURIComponent(`owner_user_guid='${esc(guid)}' && email='${esc(c.email)}' && status!='rejected'`);
+    const findRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records?filter=${filter}&perPage=1`, { headers: { Authorization: headers.Authorization } });
+    const findData = await findRes.json().catch(() => ({ items: [] }));
+    if (findData.items && findData.items.length > 0) { skippedDup++; continue; }
+
+    const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records`, {
+      method: 'POST', headers,
+      body: JSON.stringify({
+        owner_user_guid: guid,
+        name: c.name || '', org: c.org || '', dept: c.dept || '',
+        occupation: c.occupation || '', relationship: c.relationship || '',
+        email: c.email, tags: c.tags || [],
+        source_url: c.source_url || '', confidence: typeof c.confidence === 'number' ? c.confidence : null,
+        status,
+        added_via_query: parsed?.note || '(K-Mail 대화에서 직접 등록)',
+      }),
+    });
+    if (res.ok) created++;
+  }
+  return { created, skippedDup, invalidCount, status };
+}
+
 async function _kmailChatCreateRule(env, guid, ruleText, opts = {}) {
   const trimmed = ruleText.trim().slice(0, KMAIL_RULE_TEXT_MAX_LEN);
   const token = await _l1AdminToken(env);
@@ -34377,6 +34429,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   const KMAIL_FETCH_PAGE_MAX_ROUNDS = 2;
   const sendMatch = reply.match(/KMAIL_SEND_CAMPAIGN\s*(\{[\s\S]*\})\s*$/);
   const campaignStartMatch = reply.match(/KMAIL_CAMPAIGN_START\s*(\{[\s\S]*\})?\s*$/);
+  const saveContactsMatch = reply.match(/KMAIL_SAVE_CONTACTS\s*(\{[\s\S]*\})\s*$/);
   const ruleMatch = reply.match(/KMAIL_CREATE_RULE\s*(\{[\s\S]*\})\s*$/);
   const lookupMatch = reply.match(/KMAIL_LOOKUP_CONTACTS\s*(\{[\s\S]*\})\s*$/);
   const campaignLookupMatch = reply.match(/KMAIL_LOOKUP_CAMPAIGNS\s*(\{[\s\S]*\})?\s*$/);
@@ -34396,7 +34449,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   // 블록에서 별도로 기록한다.)
   const _kmailLogCampaignId = typeof body.campaign_id === 'string' ? body.campaign_id.trim() : '';
   if (_kmailLogCampaignId) {
-    const _kmailAnyTagMatch = searchMatch || fetchPageMatch || sendMatch || campaignStartMatch ||
+    const _kmailAnyTagMatch = searchMatch || fetchPageMatch || sendMatch || campaignStartMatch || saveContactsMatch ||
       ruleMatch || lookupMatch || campaignLookupMatch || campaignReportMatch || tagMatch ||
       mergeMatch || threadStateMatch || statsMatch || settingsMatch;
     const _kmailReplyForLog = _kmailAnyTagMatch ? reply.slice(0, _kmailAnyTagMatch.index).trim() : reply;
@@ -34951,6 +35004,34 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     } catch (e) {
       return new Response(JSON.stringify({
         ok: true, reply: `${cleanReplyText}\n\n(캠페인 시작 기록 중 오류: ${e.message})`, action: null,
+      }), { status: 200, headers: corsHeaders });
+    }
+  }
+
+  // ── ①-d 주소록 독립 등록 태그 (2026-09-10 신설) ────────────────
+  // 캠페인·발송과 완전히 무관하게 지금 바로 주소록에 등록한다.
+  // "메일은 제외하고 주소록만 저장" 같은 명시적 지시가 있을 때만
+  // 쓰는 태그 — 그냥 수신자를 검색·나열하는 것과는 다르다.
+  if (saveContactsMatch) {
+    let parsed = null;
+    try { parsed = JSON.parse(saveContactsMatch[1]); } catch (e) { /* 아래에서 처리 */ }
+    const cleanReplyText = reply.slice(0, saveContactsMatch.index).trim();
+    if (!parsed) {
+      return new Response(JSON.stringify({ ok: true, reply: cleanReplyText || reply, action: null }), { status: 200, headers: corsHeaders });
+    }
+    try {
+      const result = await _kmailChatSaveContacts(env, guid, parsed);
+      const statusNote = result.status === 'pending_review' ? '승인 대기(주소록 탭에서 검토 후 승인 필요)' : '주소록에 바로 등록됨';
+      const skipNote = result.skippedDup > 0 ? ` (이미 있던 ${result.skippedDup}건은 중복이라 건너뜀)` : '';
+      const invalidNote = result.invalidCount > 0 ? ` (이메일 형식이 잘못된 ${result.invalidCount}건은 제외)` : '';
+      return new Response(JSON.stringify({
+        ok: true,
+        reply: `${cleanReplyText}\n\n✅ ${result.created}건 ${statusNote}${skipNote}${invalidNote}`,
+        action: { type: 'contacts_saved', created: result.created },
+      }), { status: 200, headers: corsHeaders });
+    } catch (e) {
+      return new Response(JSON.stringify({
+        ok: true, reply: `${cleanReplyText}\n\n(주소록 등록 중 오류: ${e.message})`, action: null,
       }), { status: 200, headers: corsHeaders });
     }
   }
