@@ -34263,14 +34263,21 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   // 실제 위험(토큰 폭주로 인한 과금·지연)은 총 문자 수 기준 대략치로
   // 별도 방어한다 — 정확한 토크나이저 없이도 "1토큰 ≈ 한국어 2자,
   // 영어 4자" 정도의 보수적 근사로 충분히 안전.
+  // 2026-09-10 — 실사용(여러 대학 교수진 이메일을 원문째 붙여넣어
+  // 누적하는 캠페인 준비 대화)에서 300K자 한도에 실제로 걸려 대화가
+  // 막히는 사례가 나왔다. 모델 자체 한도(1M 토큰 ≈ 대략 2백만자
+  // 안팎)에는 한참 못 미치므로, 과금·지연 방어 목적은 유지하되
+  // 한도를 2배로 늘려 여유를 둔다. 근본 원인(매 턴마다 누적 표를
+  // 통째로 다시 출력하는 습관)은 SP §0-2에서 별도로 손봤다 — 이
+  // 숫자만으로 완전히 해결되진 않지만, 급한 병목은 없앤다.
   const KMAIL_MAX_MESSAGES = 200;
-  const KMAIL_MAX_APPROX_CHARS = 300000; // 대략 150K 토큰 상당(보수적 근사)
+  const KMAIL_MAX_APPROX_CHARS = 600000; // 대략 300K 토큰 상당(보수적 근사)
   if (messages.length > KMAIL_MAX_MESSAGES) {
-    return _err(400, 'TOO_MANY_MESSAGES', '대화가 너무 깁니다 — 새 대화로 시작해 주세요', corsHeaders);
+    return _err(400, 'TOO_MANY_MESSAGES', '대화가 너무 깁니다 — "내 캠페인" 탭에서 이 캠페인을 다시 열어 "이어서 대화하기"로 정리하며 계속해 주세요(지금까지 내용은 안전하게 보존돼 있습니다).', corsHeaders);
   }
   const approxChars = messages.reduce((sum, m) => sum + (typeof m?.content === 'string' ? m.content.length : 0), 0);
   if (approxChars > KMAIL_MAX_APPROX_CHARS) {
-    return _err(400, 'CONTEXT_TOO_LARGE', '대화 내용이 너무 많습니다 — 새 대화로 시작해 주세요', corsHeaders);
+    return _err(400, 'CONTEXT_TOO_LARGE', '대화 내용이 너무 많습니다 — "내 캠페인" 탭에서 이 캠페인을 다시 열어 "이어서 대화하기"로 정리하며 계속해 주세요(지금까지 내용은 안전하게 보존돼 있습니다).', corsHeaders);
   }
 
   // 2026-09-03 — 공용 인증 게이트(src/worker/k-service-auth.js)로 위임.
