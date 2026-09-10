@@ -1648,6 +1648,15 @@ document.addEventListener('keydown', function (e) {
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
+  // 2026-09-10 신설 — desktop.html은 PC 전용 화면이므로, 이 검색이 반환하는
+  // 어떤 URL도 webapp.html(모바일 UI)로 끝나서는 안 된다. 백엔드가 URL을
+  // 만들지 않고 매니페스트 pc_url을 그대로 채우도록 이미 고쳤지만, 프런트
+  // 마지막 방어선으로 여기서도 한 번 더 확인한다.
+  function isSafeDesktopUrl(url) {
+    if (!url || typeof url !== "string") return false;
+    return !/\/webapp\.html(\?|#|$)/i.test(url);
+  }
+
   function renderCandidates(candidates) {
     candidatesEl.innerHTML = "";
     (candidates || []).forEach((c) => {
@@ -1727,12 +1736,20 @@ document.addEventListener('keydown', function (e) {
         break;
       case "navigate":
         appendMessage("bot", data.message);
-        window.open(data.url, "_blank");
+        // 2026-09-10 방어 코드 — 이 검색창은 desktop.html(PC) 전용이므로
+        // webapp.html(모바일 UI)로는 절대 이동시키지 않는다. 백엔드가
+        // 매니페스트의 pc_url을 직접 채워 보내도록 고쳤지만(hondi-search-relay
+        // 참고), 프런트에서도 마지막 안전장치로 한 번 더 걸러낸다.
+        if (isSafeDesktopUrl(data.url)) {
+          window.open(data.url, "_blank");
+        } else {
+          appendMessage("bot", "이 페이지의 PC 버전 주소를 찾지 못했습니다. 다시 한번 말씀해주시겠어요?");
+        }
         setTimeout(closePanel, 800);
         break;
       case "candidates":
         appendMessage("bot", data.message);
-        renderCandidates(data.candidates);
+        renderCandidates((data.candidates || []).filter((c) => isSafeDesktopUrl(c.url)));
         break;
       case "delegate_ksearch":
         appendMessage("bot", data.message);
