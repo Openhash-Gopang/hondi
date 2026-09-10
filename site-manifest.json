@@ -3,138 +3,285 @@
     "path": "/domains/legislation",
     "title": "입법",
     "description": "입법 관련 정책 도메인 허브 페이지",
-    "keywords": ["입법", "법안", "국회", "법률 제정"]
+    "keywords": [
+      "입법",
+      "법안",
+      "국회",
+      "법률 제정"
+    ],
+    "pc_url": "https://hondi.net/domains/legislation"
   },
   {
     "path": "/domains/judicial",
     "title": "사법",
     "description": "사법 관련 정책 도메인 허브 페이지",
-    "keywords": ["사법", "재판", "법원", "판결"]
+    "keywords": [
+      "사법",
+      "재판",
+      "법원",
+      "판결"
+    ],
+    "pc_url": "https://hondi.net/domains/judicial"
   },
   {
     "path": "/domains/administration",
     "title": "행정",
     "description": "행정 관련 정책 도메인 허브 페이지",
-    "keywords": ["행정", "민원", "행정기관", "행정절차"]
+    "keywords": [
+      "행정",
+      "민원",
+      "행정기관",
+      "행정절차"
+    ],
+    "pc_url": "https://hondi.net/domains/administration"
   },
   {
     "path": "/domains/education",
     "title": "교육",
     "description": "교육 관련 정책 도메인 허브 페이지",
-    "keywords": ["교육", "학교", "학사", "교육정책"]
+    "keywords": [
+      "교육",
+      "학교",
+      "학사",
+      "교육정책"
+    ],
+    "pc_url": "https://hondi.net/domains/education"
   },
   {
     "path": "/domains/health",
     "title": "의료",
     "description": "의료 관련 정책 도메인 허브 페이지",
-    "keywords": ["의료", "보건", "건강보험", "병원"]
+    "keywords": [
+      "의료",
+      "보건",
+      "건강보험",
+      "병원"
+    ],
+    "pc_url": "https://hondi.net/domains/health"
   },
   {
     "path": "/domains/transport-logistics",
     "title": "교통물류",
     "description": "교통·물류 관련 정책 도메인 허브 페이지",
-    "keywords": ["교통", "물류", "도로", "대중교통"]
+    "keywords": [
+      "교통",
+      "물류",
+      "도로",
+      "대중교통"
+    ],
+    "pc_url": "https://hondi.net/domains/transport-logistics"
   },
   {
     "path": "/domains/finance",
     "title": "금융",
     "description": "금융 관련 정책 도메인 허브 페이지",
-    "keywords": ["금융", "세금", "금융정책", "GDC"]
+    "keywords": [
+      "금융",
+      "세금",
+      "금융정책",
+      "GDC"
+    ],
+    "pc_url": "https://hondi.net/domains/finance"
   },
   {
     "path": "/domains/market",
     "title": "시장",
     "description": "시장(K-Market) 관련 정책 도메인 허브 페이지",
-    "keywords": ["시장", "K-Market", "거래", "상거래"]
+    "keywords": [
+      "시장",
+      "K-Market",
+      "거래",
+      "상거래"
+    ],
+    "pc_url": "https://hondi.net/domains/market"
   },
   {
     "path": "/domains/industry",
     "title": "산업",
     "description": "산업 관련 정책 도메인 허브 페이지",
-    "keywords": ["산업", "제조", "산업정책", "기업지원"]
+    "keywords": [
+      "산업",
+      "제조",
+      "산업정책",
+      "기업지원"
+    ],
+    "pc_url": "https://hondi.net/domains/industry"
   },
   {
     "path": "/domains/social",
     "title": "사교",
     "description": "사교 관련 정책 도메인 허브 페이지",
-    "keywords": ["사교", "커뮤니티", "복지", "사회활동"]
+    "keywords": [
+      "사교",
+      "커뮤니티",
+      "복지",
+      "사회활동"
+    ],
+    "pc_url": "https://hondi.net/domains/social"
   },
   {
     "path": "/domains/planning",
     "title": "계획",
     "description": "국토·지역 계획 관련 정책 도메인 허브 페이지",
-    "keywords": ["계획", "국토계획", "지역개발", "도시계획"]
+    "keywords": [
+      "계획",
+      "국토계획",
+      "지역개발",
+      "도시계획"
+    ],
+    "pc_url": "https://hondi.net/domains/planning"
   },
   {
     "path": "/services/kmail",
     "title": "K-Mail",
     "description": "자연어 명령으로 메일을 보내고 받는 혼디 사용자 메일 기능",
-    "keywords": ["메일", "이메일", "K-Mail", "발신", "수신", "메일 보내기", "메일 받기"]
+    "keywords": [
+      "메일",
+      "이메일",
+      "K-Mail",
+      "발신",
+      "수신",
+      "메일 보내기",
+      "메일 받기"
+    ],
+    "pc_url": "https://mail.hondi.net"
   },
   {
     "path": "/docs/kmail-intro",
     "title": "K-Mail 소개",
     "description": "K-Mail 시스템 자체의 개념, 요금 정책, 사용법을 설명하는 소개 문서",
-    "keywords": ["메일 시스템", "K-Mail이란", "메일 기능 소개", "혼디 메일 시스템", "메일 요금"]
+    "keywords": [
+      "메일 시스템",
+      "K-Mail이란",
+      "메일 기능 소개",
+      "혼디 메일 시스템",
+      "메일 요금"
+    ],
+    "pc_url": "https://mail.hondi.net"
   },
   {
     "path": "/services/klaw",
     "title": "K-Law",
     "description": "판례 시뮬레이션 기반 법률 상담 AI 서비스",
-    "keywords": ["법률", "K-Law", "판례", "법률 상담", "소송", "변호사"]
+    "keywords": [
+      "법률",
+      "K-Law",
+      "판례",
+      "법률 상담",
+      "소송",
+      "변호사"
+    ],
+    "pc_url": "https://klaw.hondi.net"
   },
   {
     "path": "/services/kplan",
     "title": "K-Plan",
     "description": "일정 및 계획 관리를 도와주는 AI 서비스",
-    "keywords": ["일정", "계획", "스케줄", "K-Plan"]
+    "keywords": [
+      "일정",
+      "계획",
+      "스케줄",
+      "K-Plan"
+    ],
+    "pc_url": "https://plan.hondi.net"
   },
   {
     "path": "/services/ktelecom",
     "title": "K-Telecom",
     "description": "통신 관련 민원·상담을 처리하는 AI 서비스",
-    "keywords": ["통신", "K-Telecom", "통신사", "요금제"]
+    "keywords": [
+      "통신",
+      "K-Telecom",
+      "통신사",
+      "요금제"
+    ],
+    "pc_url": "https://telecom.hondi.net"
   },
   {
     "path": "/services/kwatch",
     "title": "K-Watch",
     "description": "모니터링·알림 기반 AI 서비스",
-    "keywords": ["모니터링", "알림", "K-Watch", "감시"]
+    "keywords": [
+      "모니터링",
+      "알림",
+      "K-Watch",
+      "감시"
+    ],
+    "pc_url": "https://watch.hondi.net"
   },
   {
     "path": "/services/ksearch",
     "title": "K-Search",
     "description": "사용자 소유 데이터(메일함, 문서함 등)를 검색하는 서비스",
-    "keywords": ["내 데이터 검색", "K-Search", "문서 검색", "메일 찾기"]
+    "keywords": [
+      "내 데이터 검색",
+      "K-Search",
+      "문서 검색",
+      "메일 찾기"
+    ],
+    "pc_url": "https://search.hondi.net"
   },
   {
     "path": "/services/kbiz",
     "title": "K-Biz",
     "description": "사업자 대상 행정·세무 지원 AI 서비스",
-    "keywords": ["사업자", "K-Biz", "세무", "창업"]
+    "keywords": [
+      "사업자",
+      "K-Biz",
+      "세무",
+      "창업"
+    ],
+    "pc_url": "https://biz.hondi.net"
   },
   {
     "path": "/services/kjob",
     "title": "K-Job",
     "description": "구인·구직 및 업무 오케스트레이션 서비스",
-    "keywords": ["구직", "구인", "일자리", "K-Job", "채용"]
+    "keywords": [
+      "구직",
+      "구인",
+      "일자리",
+      "K-Job",
+      "채용"
+    ],
+    "pc_url": "https://job.hondi.net"
   },
   {
     "path": "/docs/hondi_interactive_manual.html",
     "title": "혼디 사용법 튜토리얼",
     "description": "25개 챕터, 초급/중급/고급 단계별 혼디 사용법 인터랙티브 매뉴얼",
-    "keywords": ["사용법", "튜토리얼", "매뉴얼", "혼디 사용법", "가이드"]
+    "keywords": [
+      "사용법",
+      "튜토리얼",
+      "매뉴얼",
+      "혼디 사용법",
+      "가이드"
+    ],
+    "pc_url": "https://hondi.net/docs/hondi_interactive_manual.html"
   },
   {
     "path": "/highlights/1",
     "title": "혼디 하이라이트 1",
     "description": "혼디 메인 페이지 순환 태그라인 연결 하이라이트 페이지",
-    "keywords": ["하이라이트", "소개", "혼디란"]
+    "keywords": [
+      "하이라이트",
+      "소개",
+      "혼디란"
+    ],
+    "pc_url": "https://hondi.net/highlights/1"
   },
   {
     "path": "/pages/expert-personas.html",
     "title": "전문가 페르소나 목록",
     "description": "의사, 변호사, 교수 등 552개 전문가 AI 페르소나를 분야별로 찾아볼 수 있는 목록 페이지 (직업·증상·상황 검색 기능 포함)",
-    "keywords": ["전문가", "전문가 페르소나", "의사", "변호사", "교수", "전문가 AI 목록"]
+    "keywords": [
+      "전문가",
+      "전문가 페르소나",
+      "의사",
+      "변호사",
+      "교수",
+      "전문가 AI 목록"
+    ],
+    "pc_url": "https://hondi.net/pages/expert-personas.html"
   }
 ]
