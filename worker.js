@@ -34262,6 +34262,65 @@ async function _kmailChatReportCapabilityGap(env, corsHeaders, ctx, { gap, reque
   await handleSPAuthorQueue(fakeReq, env, corsHeaders, ctx);
 }
 
+// 2026-09-11 신설 — 발송 없이 메일 초안(제목·요약·날짜·전문)만 저장.
+// 실제 사고 경위: 사용자가 "초안을 저장하세요"라고 명시적으로
+// 요청했는데, K-Mail은 저장 태그가 없다는 걸 알면서도 "이 대화에
+// 남겨두겠습니다"라는 말로 마치 저장된 것처럼 답했다 — 실제로는
+// 아무 태그도 안 냈고 아무것도 저장되지 않았다(§1(e) 위반). 조사
+// 결과 서버엔 이미 /kmail/drafts REST 엔드포인트(kmail_drafts
+// 컬렉션, 2026-09-01 신설)가 있었으나 K-Mail 채팅에 연결된 적이
+// 없었다 — /kmail/contacts/propose 때와 완전히 같은 패턴의 공백.
+// kmail_drafts 스키마엔 title/summary/date 전용 필드가 없어서,
+// subject를 제목으로 쓰고 body에 "작성일 → 요약 → 전문" 구조로
+// 합쳐 담는다(스키마 변경 없이 바로 쓸 수 있도록).
+async function _kmailChatSaveDraft(env, guid, parsed) {
+  const title = (parsed?.title || '').trim().slice(0, 200);
+  const summary = (parsed?.summary || '').trim();
+  const fullBody = (parsed?.body || '').trim();
+  if (!fullBody) throw new Error('body(전문) 필수');
+  const dateLine = parsed?.date ? `작성일: ${parsed.date}\n\n` : '';
+  const summaryBlock = summary ? `## 요약\n${summary}\n\n` : '';
+  const composedBody = `${dateLine}${summaryBlock}## 전문\n${fullBody}`.slice(0, 500000);
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  const draftId = typeof parsed?.draft_id === 'string' ? parsed.draft_id.trim() : '';
+  const record = { subject: title, body: composedBody };
+
+  if (draftId) {
+    const getRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_drafts/records/${draftId}`, { headers: { Authorization: headers.Authorization } });
+    if (!getRes.ok) throw new Error('해당 초안(draft_id)을 찾을 수 없습니다');
+    const draft = await getRes.json().catch(() => null);
+    if (!draft || draft.owner_user_guid !== guid) throw new Error('본인 초안이 아닙니다');
+    const patchRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_drafts/records/${draftId}`, { method: 'PATCH', headers, body: JSON.stringify(record) });
+    if (!patchRes.ok) throw new Error('초안 수정 실패');
+    return { draftId, updated: true };
+  }
+  const createRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_drafts/records`, {
+    method: 'POST', headers, body: JSON.stringify({ owner_user_guid: guid, recipients: [], ...record }),
+  });
+  if (!createRes.ok) throw new Error('초안 생성 실패');
+  const created = await createRes.json();
+  return { draftId: created.id, updated: false };
+}
+
+// 2026-09-11 신설 — 저장된 초안 목록/검색. 저장만 되고 다시 못 찾으면
+// 반쪽짜리 기능이므로 함께 만든다.
+async function _kmailChatLookupDrafts(env, guid, parsed) {
+  const q = (parsed?.q || '').trim();
+  const esc = s => String(s).replace(/'/g, "\\'");
+  const token = await _l1AdminToken(env);
+  const headers = { Authorization: `Bearer ${token}` };
+  let filter = `owner_user_guid='${esc(guid)}'`;
+  if (q) filter += ` && subject~'${esc(q)}'`;
+  const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_drafts/records?filter=${encodeURIComponent(filter)}&sort=-updated&perPage=50`, { headers });
+  const data = await res.json().catch(() => ({ items: [] }));
+  return (data.items || []).map(d => ({
+    draft_id: d.id, title: d.subject || '(제목 없음)', updated: d.updated,
+    preview: (d.body || '').slice(0, 200),
+  }));
+}
+
 async function _kmailChatCreateRule(env, guid, ruleText, opts = {}) {
   const trimmed = ruleText.trim().slice(0, KMAIL_RULE_TEXT_MAX_LEN);
   const token = await _l1AdminToken(env);
@@ -34469,6 +34528,8 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   const campaignStartMatch = reply.match(/KMAIL_CAMPAIGN_START\s*(\{[\s\S]*\})?\s*$/);
   const saveContactsMatch = reply.match(/KMAIL_SAVE_CONTACTS\s*(\{[\s\S]*\})\s*$/);
   const capabilityGapMatch = reply.match(/KMAIL_CAPABILITY_GAP\s*(\{[\s\S]*\})\s*$/);
+  const saveDraftMatch = reply.match(/KMAIL_SAVE_DRAFT\s*(\{[\s\S]*\})\s*$/);
+  const lookupDraftsMatch = reply.match(/KMAIL_LOOKUP_DRAFTS\s*(\{[\s\S]*\})?\s*$/);
   const ruleMatch = reply.match(/KMAIL_CREATE_RULE\s*(\{[\s\S]*\})\s*$/);
   const lookupMatch = reply.match(/KMAIL_LOOKUP_CONTACTS\s*(\{[\s\S]*\})\s*$/);
   const campaignLookupMatch = reply.match(/KMAIL_LOOKUP_CAMPAIGNS\s*(\{[\s\S]*\})?\s*$/);
@@ -34488,7 +34549,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   // 흔적(여는 중괄호까지 나온 것)이 있으면, 그 텍스트를 사용자에게
   // 그대로 흘려보내지 않고 명확한 오류로 처리한다 — 조용히 실패하고
   // "된 것처럼" 보이는 것보다, 실패를 실패로 보여주는 게 훨씬 안전.
-  const _kmailAnyTagMatch = searchMatch || fetchPageMatch || sendMatch || campaignStartMatch || saveContactsMatch || capabilityGapMatch ||
+  const _kmailAnyTagMatch = searchMatch || fetchPageMatch || sendMatch || campaignStartMatch || saveContactsMatch || capabilityGapMatch || saveDraftMatch || lookupDraftsMatch ||
     ruleMatch || lookupMatch || campaignLookupMatch || campaignReportMatch || tagMatch ||
     mergeMatch || threadStateMatch || statsMatch || settingsMatch;
   if (!_kmailAnyTagMatch && /KMAIL_[A-Z_]+\s*\{/.test(reply)) {
@@ -35110,6 +35171,61 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
       reply: cleanReplyText || reply,
       action: { type: 'capability_gap_reported' },
     }), { status: 200, headers: corsHeaders });
+  }
+
+  // ── ①-f 메일 초안 저장 태그 (2026-09-11 신설) ──────────────────
+  // 발송과 무관하게 제목·요약·날짜·전문을 저장만 한다. 사용자가
+  // "초안으로 저장해줘"/"발송 말고 저장만"처럼 명시적으로 요청했을
+  // 때만 — 그냥 본문을 써달라는 것과는 다릅니다.
+  if (saveDraftMatch) {
+    let parsed = null;
+    try { parsed = JSON.parse(saveDraftMatch[1]); } catch (e) { /* 아래에서 처리 */ }
+    const cleanReplyText = reply.slice(0, saveDraftMatch.index).trim();
+    if (!parsed) {
+      return new Response(JSON.stringify({ ok: true, reply: cleanReplyText || reply, action: null }), { status: 200, headers: corsHeaders });
+    }
+    try {
+      const result = await _kmailChatSaveDraft(env, guid, parsed);
+      const verb = result.updated ? '수정 저장' : '새로 저장';
+      return new Response(JSON.stringify({
+        ok: true,
+        reply: `${cleanReplyText}\n\n✅ 초안이 ${verb}됐습니다 (draft_id: ${result.draftId}) — 나중에 "초안 찾아줘"라고 하시면 다시 불러올 수 있습니다.`,
+        action: { type: 'draft_saved', draft_id: result.draftId },
+      }), { status: 200, headers: corsHeaders });
+    } catch (e) {
+      return new Response(JSON.stringify({
+        ok: true, reply: `${cleanReplyText}\n\n(초안 저장 중 오류: ${e.message} — 저장되지 않았습니다)`, action: null,
+      }), { status: 200, headers: corsHeaders });
+    }
+  }
+
+  // ── ①-g 저장된 초안 조회 태그 (2026-09-11 신설) ─────────────────
+  if (lookupDraftsMatch) {
+    let parsed = null;
+    try { parsed = lookupDraftsMatch[1] ? JSON.parse(lookupDraftsMatch[1]) : {}; } catch (e) { parsed = {}; }
+    const cleanReplyText = reply.slice(0, lookupDraftsMatch.index).trim();
+
+    const items = await _kmailChatLookupDrafts(env, guid, parsed).catch(() => []);
+
+    const draftLookupContext = `[초안 조회 결과]\n${JSON.stringify(items)}\n\n위 목록을 사용자에게 자연스럽게 정리해서 보여주세요(제목·언제 수정됐는지·간단한 미리보기). 특정 초안을 다시 열람하고 싶어하면 draft_id를 언급해 다음 요청에 쓸 수 있게 하세요. 결과가 없으면 없다고 솔직히 말하세요. (이 메시지 자체는 사용자에게 보이지 않습니다.)`;
+    let followUpReply;
+    try {
+      followUpReply = await deepseekChatText({
+        env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
+        messages: [
+          { role: 'system', content: systemPrompt }, ...cleanMessages,
+          { role: 'assistant', content: cleanReplyText || '초안을 확인하고 있습니다...' },
+          { role: 'user', content: draftLookupContext },
+        ],
+        max_tokens: 2000, temperature: 0.4, timeoutMs: 20000,
+        fallbackText: '초안 조회는 완료됐지만 결과 정리에 실패했습니다. 다시 시도해 주세요.',
+      });
+    } catch (e) {
+      followUpReply = '초안 조회 중 오류가 발생했습니다: ' + e.message;
+    }
+
+    return new Response(JSON.stringify({ ok: true, reply: followUpReply, action: { type: 'drafts_looked_up', count: items.length } }),
+      { status: 200, headers: corsHeaders });
   }
 
   // ── ② 캠페인 확정 태그 ───────────────────────────────────────
