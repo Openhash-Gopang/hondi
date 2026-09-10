@@ -31326,8 +31326,11 @@ async function _kmailCheckAndChargeQuota(env, guid) {
 
 const KMAIL_ATTACHMENT_MAX_BYTES = 25 * 1024 * 1024; // 25MB — 이메일 관례상 일반적인 상한
 
-// POST /kmail/attachments/upload — body: { guid, pubkey, signature, ts,
-//   file_base64, filename, content_type }
+// POST /kmail/attachments/upload — body: { phone_verify_token,
+//   file_base64, filename, content_type } 또는 하위호환으로
+//   { guid, pubkey, signature, ts, file_base64, filename, content_type }
+// 2026-09-10부터 handleKmailChat과 동일한 공용 인증 게이트(_kAuth.resolveGuid)
+// 사용 — phone_verify_token과 지갑 서명 둘 다 지원.
 // → { ok:true, attachment_id } — message_id는 아직 비어있다(발송 시점에
 // _kmailLinkAttachmentsToMessage로 연결). 초안 단계에서 미리 올려두고
 // 나중에 발송에 붙이는 흐름을 지원하기 위함.
@@ -31337,15 +31340,17 @@ async function handleKmailAttachmentUpload(request, env, corsHeaders) {
   }
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
-  const { guid, pubkey, signature, ts, file_base64, filename, content_type } = body;
-  if (!guid || !pubkey || !signature || !ts) {
-    return _err(400, 'MISSING_FIELD', 'guid, pubkey, signature, ts 필수', corsHeaders);
-  }
+  const { file_base64, filename, content_type } = body;
   if (!file_base64 || !filename) return _err(400, 'MISSING_FIELD', 'file_base64, filename 필수', corsHeaders);
 
-  const sigMsg = `kmail-attachment-upload:${guid}:${filename}:${ts}`;
-  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
-  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+  // 2026-09-10 — mail.hondi.net/webapp.html은 지갑 SSO를 쓰지 않고
+  // phone_verify_token만 보내는데, 이 핸들러는 그동안 지갑 서명
+  // (guid/pubkey/signature/ts)만 받아 캠페인 작성 중 첨부가 항상
+  // 400(MISSING_FIELD)으로 실패했다. handleKmailChat과 동일한 공용
+  // 인증 게이트로 교체 — phone_verify_token과 지갑 서명 둘 다 지원.
+  const auth = await _kAuth.resolveGuid(env, body, { sigMsg: `kmail-attachment-upload:${body.guid}:${filename}:${body.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
 
   let bytes;
   try {
@@ -31641,25 +31646,26 @@ async function _kmailSendOneEmail(env, { guid, to, subject, text, sessionId, rep
 }
 
 // POST /mail/send — K-Mail 사용자 발신(관리자 gov-mail과 별개 경로).
-// body: { guid, pubkey, signature, ts, to, subject, text }
-// Ed25519 지갑 서명 인증(_verifyClaimsRequester와 동일 패턴 — 이
-// 엔드포인트도 사용자 본인만 자기 주소로 발송할 수 있어야 하므로
-// 재사용). from 주소는 항상 <guid>@hondi.kr 로 고정 — 사용자가 임의
-// 발신자명을 지정할 수 없게 해 스푸핑을 원천 차단한다.
+// body: { phone_verify_token, to, subject, text } 또는 하위호환으로
+// { guid, pubkey, signature, ts, to, subject, text }
+// 2026-09-10부터 handleKmailChat과 동일한 공용 인증 게이트(_kAuth.resolveGuid)
+// 사용 — phone_verify_token과 지갑 서명(Ed25519) 둘 다 지원. from 주소는
+// 항상 <guid>@hondi.kr 로 고정 — 사용자가 임의 발신자명을 지정할 수
+// 없게 해 스푸핑을 원천 차단한다.
 async function handleUserMailSend(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
-  const { guid, pubkey, signature, ts, to, subject, text, attachment_ids } = body;
-  if (!guid || !pubkey || !signature || !ts) {
-    return _err(400, 'MISSING_FIELD', 'guid, pubkey, signature, ts 필수', corsHeaders);
-  }
+  const { to, subject, text, attachment_ids } = body;
   if (!to || !subject || !text) {
     return _err(400, 'MISSING_FIELD', 'to, subject, text 필수', corsHeaders);
   }
 
-  const sigMsg = `kmail-send:${guid}:${to}:${ts}`;
-  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
-  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+  // 2026-09-10 — handleKmailAttachmentUpload와 같은 이유로 동일하게
+  // 교체: mail.hondi.net/webapp.html(빠른 발송 탭)은 phone_verify_token만
+  // 보내므로, handleKmailChat과 같은 공용 인증 게이트로 맞춘다.
+  const auth = await _kAuth.resolveGuid(env, body, { sigMsg: `kmail-send:${body.guid}:${to}:${body.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
 
   if (!env.EMAIL) {
     return _err(500, 'EMAIL_BINDING_MISSING',
