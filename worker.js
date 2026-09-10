@@ -12471,6 +12471,10 @@ export default {
     // 없었다(handleKmailContactsList의 캠페인판이 빠져있던 것 — 작업
     // 지시서 §3-4 구현 중 발견).
     if (pathname === '/kmail/campaigns/list' && request.method === 'GET') return handleKmailCampaignsList(request, url, env, corsHeaders);
+    // 2026-09-10 신설 — 캠페인 대화 전문(일자·시간별) 조회. "내 캠페인"
+    // 탭에서 특정 캠페인을 열었을 때 그 캠페인이 어떻게 논의됐는지
+    // 전체 히스토리를 보여주기 위함.
+    if (pathname === '/kmail/campaigns/messages' && request.method === 'GET') return handleKmailCampaignMessagesList(request, url, env, corsHeaders);
     if (pathname === '/kmail/rules/create' && request.method === 'POST') return handleKmailRuleCreate(request, env, corsHeaders);
     if (pathname === '/kmail/rules' && request.method === 'GET') return handleKmailRuleList(request, url, env, corsHeaders);
     if (pathname === '/kmail/rules/toggle' && request.method === 'POST') return handleKmailRuleToggle(request, env, corsHeaders);
@@ -33017,7 +33021,30 @@ async function handleKmailCampaignsList(request, url, env, corsHeaders) {
   return new Response(JSON.stringify({ ok: true, items }), { status: 200, headers: corsHeaders });
 }
 
-// 캠페인 하나를 실제로 발송 — 저장된 subject/body를 confirmed 수신자
+// GET /kmail/campaigns/messages?campaign_id=...&phone_verify_token=...
+// (또는 하위호환 지갑 서명) — 캠페인 대화 전문을 시간순으로 반환.
+// 2026-09-10 신설.
+async function handleKmailCampaignMessagesList(request, url, env, corsHeaders) {
+  const qp = Object.fromEntries(url.searchParams.entries());
+  const auth = await _kAuth.resolveGuid(env, qp, { sigMsg: `kmail-campaign-messages:${qp.guid}:${qp.campaign_id}:${qp.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
+
+  const campaignId = (qp.campaign_id || '').trim();
+  if (!campaignId) return _err(400, 'MISSING_FIELD', 'campaign_id 필수', corsHeaders);
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}` };
+  const guidEsc = guid.replace(/'/g, "\\'");
+  const campEsc = campaignId.replace(/'/g, "\\'");
+  const filter = encodeURIComponent(`campaign_id='${campEsc}' && owner_user_guid='${guidEsc}'`);
+  const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_campaign_messages/records?filter=${filter}&sort=sent_at&perPage=500`, { headers });
+  const data = await res.json().catch(() => ({ items: [] }));
+  const items = (data.items || []).map(m => ({ role: m.role, content: m.content, sent_at: m.sent_at }));
+  return new Response(JSON.stringify({ ok: true, items }), { status: 200, headers: corsHeaders });
+}
+
+
 // 전원에게 _kmailSendOneEmail로 보낸다. 발송 도중 소유권/상태가 바뀐
 // 연락처(예: 그 사이 거부로 바뀜)는 건너뛴다 — 캠페인 생성 시점엔
 // confirmed였어도 발송 시점엔 아닐 수 있으므로 재검증한다.
@@ -33958,6 +33985,37 @@ async function _fetchKmailSp(env) {
 // 거치지 않음 — 설계 §2 "확인 단계는 생략 불가" 원칙은 유지하되,
 // 이번엔 채팅 확인이 그 역할을 한다). 이미 같은 이메일로 confirmed된
 // 연락처가 있으면 새로 만들지 않고 재사용한다(중복 방지).
+// 캠페인 "시작"만 먼저 기록(2026-09-10 신설) — 사용자가 수신자·제목·
+// 본문이 다 정해지기 전에 "이 캠페인을 시작하십시오" 같은 명시적
+// 의사를 밝히면, §2-2(최종 발송 확정)까지 기다리지 않고 이 시점에
+// status='draft'인 kmail_campaigns 레코드를 바로 만든다. recipients/
+// subject/body/send_at은 전부 비워두거나 null — 이후 §2-2에서
+// campaign_id를 실어 보내면 이 드래프트 레코드를 "업그레이드"한다
+// (_kmailChatCreateCampaign 참고). status='draft'는 발송 스윕 필터
+// (status='scheduled' && send_at<=now)에 걸리지 않으므로 실수로
+// 발송될 위험이 없고, handleKmailCampaignsList는 status 무관하게
+// 전부 보여주므로 "내 캠페인" 탭에 즉시 나타난다.
+async function _kmailChatStartCampaignDraft(env, guid, parsed) {
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  const record = {
+    owner_user_guid: guid, recipient_query: (parsed?.purpose_note || '').trim().slice(0, 500),
+    contact_ids: [], title: (parsed?.title || '').trim().slice(0, 200),
+    subject: '', body: '', send_at: null, status: 'draft',
+    collect_replies_until: null, digest_at: null, digest_status: 'none',
+    kplan_plan_id: (parsed?.kplan_plan_id || '').trim(),
+    kplan_checkpoint_label: (parsed?.kplan_checkpoint_label || '').trim(),
+  };
+  const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_campaigns/records`, {
+    method: 'POST', headers, body: JSON.stringify(record),
+  });
+  if (!res.ok) throw new Error('캠페인 시작 기록 실패');
+  const created = await res.json();
+  return { campaignId: created.id };
+}
+
+// 2026-09-10 — campaign_id가 실려오면(=이 캠페인이 KMAIL_CAMPAIGN_START로
+// 이미 draft 기록돼 있음) 새로 만들지 않고 그 드래프트를 업그레이드한다.
 async function _kmailChatCreateCampaign(env, guid, parsed) {
   const recipients = Array.isArray(parsed?.recipients) ? parsed.recipients : [];
   const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -34035,11 +34093,34 @@ async function _kmailChatCreateCampaign(env, guid, parsed) {
     digest_at: parsed?.digest_at ? new Date(parsed.digest_at).toISOString() : null,
     digest_status: parsed?.digest_at ? 'pending' : 'none',
   };
-  const campRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_campaigns/records`, {
-    method: 'POST', headers, body: JSON.stringify(record),
-  });
-  if (!campRes.ok) throw new Error('캠페인 생성 실패');
-  const campaign = await campRes.json();
+
+  // campaign_id가 실려있으면 KMAIL_CAMPAIGN_START로 만든 draft를 그대로
+  // 업그레이드(PATCH) — 새 레코드를 또 만들면 "내 캠페인"에 draft/scheduled
+  // 두 줄이 중복으로 남는다. 소유권·상태를 먼저 확인해 남의 캠페인이거나
+  // 이미 draft가 아니면(중복 호출 등) 명확한 에러로 드러내고 새로 만들지
+  // 않는다.
+  const existingCampaignId = typeof parsed?.campaign_id === 'string' ? parsed.campaign_id.trim() : '';
+  let campaign;
+  if (existingCampaignId) {
+    const getRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_campaigns/records/${existingCampaignId}`, { headers: { Authorization: headers.Authorization } });
+    if (!getRes.ok) throw new Error('campaign_id로 지정된 캠페인을 찾을 수 없습니다');
+    const existing = await getRes.json().catch(() => null);
+    if (!existing || existing.owner_user_guid !== guid) throw new Error('본인 캠페인이 아닙니다');
+    if (existing.status !== 'draft') throw new Error(`이미 '${existing.status}' 상태인 캠페인입니다 — 중복 확정으로 보입니다`);
+    // title은 §2-2에서 새로 안 줬으면(빈 문자열) 시작 시점에 붙인 제목을 유지한다.
+    if (!record.title && existing.title) record.title = existing.title;
+    const patchRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_campaigns/records/${existingCampaignId}`, {
+      method: 'PATCH', headers, body: JSON.stringify(record),
+    });
+    if (!patchRes.ok) throw new Error('캠페인 업그레이드 실패');
+    campaign = await patchRes.json();
+  } else {
+    const campRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_campaigns/records`, {
+      method: 'POST', headers, body: JSON.stringify(record),
+    });
+    if (!campRes.ok) throw new Error('캠페인 생성 실패');
+    campaign = await campRes.json();
+  }
 
   // 2026-09-03 신설 — 수신자별 발송·회신 추적 행을 캠페인 생성과 동시에
   // 미리 만들어둔다(delivery_status:'pending' — 실제 발송은 _kmailSendCampaign이
@@ -34066,6 +34147,28 @@ async function _kmailChatCreateCampaign(env, guid, parsed) {
   }));
 
   return { campaignId: campaign.id, recipientCount: contactIds.length, sendAt: record.send_at, newContactCount };
+}
+
+// 2026-09-10 신설 — 캠페인 대화 전문 기록(주피터 지시). campaign_id가
+// 확정된 이후의 모든 턴을 일자·시간별로 남긴다. 한 번의 실패가 채팅
+// 응답 자체를 막으면 안 되므로, 호출부는 이 함수를 항상 .catch()로
+// 감싸 "기록 실패해도 대화는 계속 진행"되게 한다.
+async function _kmailAppendCampaignMessages(env, campaignId, guid, entries) {
+  if (!campaignId || !Array.isArray(entries) || entries.length === 0) return;
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  for (const e of entries) {
+    if (!e || !e.content) continue;
+    await fetch(`${L1_DEFAULT}/api/collections/kmail_campaign_messages/records`, {
+      method: 'POST', headers,
+      body: JSON.stringify({
+        campaign_id: campaignId, owner_user_guid: guid,
+        role: e.role === 'assistant' ? 'assistant' : 'user',
+        content: String(e.content).slice(0, 8000),
+        sent_at: (e.sentAt instanceof Date ? e.sentAt : new Date()).toISOString(),
+      }),
+    });
+  }
 }
 
 async function _kmailChatCreateRule(env, guid, ruleText, opts = {}) {
@@ -34243,6 +34346,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   // (function 선언 자체는 호이스팅되어 문제없지만 const는 안 된다).
   const KMAIL_FETCH_PAGE_MAX_ROUNDS = 2;
   const sendMatch = reply.match(/KMAIL_SEND_CAMPAIGN\s*(\{[\s\S]*\})\s*$/);
+  const campaignStartMatch = reply.match(/KMAIL_CAMPAIGN_START\s*(\{[\s\S]*\})?\s*$/);
   const ruleMatch = reply.match(/KMAIL_CREATE_RULE\s*(\{[\s\S]*\})\s*$/);
   const lookupMatch = reply.match(/KMAIL_LOOKUP_CONTACTS\s*(\{[\s\S]*\})\s*$/);
   const campaignLookupMatch = reply.match(/KMAIL_LOOKUP_CAMPAIGNS\s*(\{[\s\S]*\})?\s*$/);
@@ -34252,6 +34356,26 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   const threadStateMatch = reply.match(/KMAIL_THREAD_STATE\s*(\{[\s\S]*\})\s*$/);
   const statsMatch = reply.match(/KMAIL_GET_STATS\s*(\{[\s\S]*\})?\s*$/);
   const settingsMatch = reply.match(/KMAIL_SET_SETTINGS\s*(\{[\s\S]*\})\s*$/);
+
+  // ── 캠페인 대화 전문 기록(2026-09-10 신설) ────────────────────────
+  // 클라이언트가 이번 요청에 campaign_id를 실어 보냈다는 건 = 이
+  // 대화가 이미 시작된(KMAIL_CAMPAIGN_START) 캠페인에 속한다는 뜻이다.
+  // 어떤 태그가 걸리든(검색·평범한 대화 포함) 이번 턴을 그대로 기록한다.
+  // (KMAIL_CAMPAIGN_START 자체로 새로 만들어지는 캠페인의 "시작 턴"은
+  // 이 시점엔 campaign_id를 아직 모르므로, 그 한 턴만 해당 dispatch
+  // 블록에서 별도로 기록한다.)
+  const _kmailLogCampaignId = typeof body.campaign_id === 'string' ? body.campaign_id.trim() : '';
+  if (_kmailLogCampaignId) {
+    const _kmailAnyTagMatch = searchMatch || fetchPageMatch || sendMatch || campaignStartMatch ||
+      ruleMatch || lookupMatch || campaignLookupMatch || campaignReportMatch || tagMatch ||
+      mergeMatch || threadStateMatch || statsMatch || settingsMatch;
+    const _kmailReplyForLog = _kmailAnyTagMatch ? reply.slice(0, _kmailAnyTagMatch.index).trim() : reply;
+    const _kmailLastUserMsg = cleanMessages[cleanMessages.length - 1];
+    await _kmailAppendCampaignMessages(env, _kmailLogCampaignId, guid, [
+      ...(_kmailLastUserMsg && _kmailLastUserMsg.role === 'user' ? [{ role: 'user', content: _kmailLastUserMsg.content }] : []),
+      { role: 'assistant', content: _kmailReplyForLog || '(빈 응답)' },
+    ]).catch(e => console.warn('[K-Mail] 캠페인 대화 기록 실패(계속 진행):', e.message));
+  }
 
   // ── ⓪-5 계정 설정 변경 태그 ────────────────────────────────
   if (settingsMatch) {
@@ -34769,6 +34893,38 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
       { status: 200, headers: corsHeaders });
   }
 
+  // ── ①-c 캠페인 시작(draft 기록) 태그 (2026-09-10 신설) ────────────
+  // 사용자가 수신자·제목·본문이 다 정해지기 전에 "이 캠페인을
+  // 시작하세요" 같은 명시적 의사를 밝혔을 때만 쓰는 태그 — status='draft'
+  // 레코드를 바로 만들어 "내 캠페인" 탭에 즉시 나타나게 한다. 이후
+  // §2-2(KMAIL_SEND_CAMPAIGN)에서 이 campaign_id를 실어 보내면 같은
+  // 레코드를 업그레이드한다(중복 생성 아님).
+  if (campaignStartMatch) {
+    let parsed = null;
+    try { parsed = campaignStartMatch[1] ? JSON.parse(campaignStartMatch[1]) : {}; } catch (e) { parsed = {}; }
+    const cleanReplyText = reply.slice(0, campaignStartMatch.index).trim();
+    try {
+      const result = await _kmailChatStartCampaignDraft(env, guid, parsed);
+      const replyText = `${cleanReplyText}\n\n📌 캠페인을 시작했습니다 — 이제부터 이 대화는 "내 캠페인" 탭에서 진행 중(draft) 상태로 보입니다. 수신자·제목·본문이 정리되면 발송을 확정해 드릴게요. (campaign_id: ${result.campaignId})`;
+      // 이 턴은 campaign_id가 이번에 막 생겼으므로 위 공용 로깅(pre-dispatch)이
+      // 못 잡는다 — 여기서 첫 기록을 직접 남긴다.
+      const _startLastUserMsg = cleanMessages[cleanMessages.length - 1];
+      await _kmailAppendCampaignMessages(env, result.campaignId, guid, [
+        ...(_startLastUserMsg && _startLastUserMsg.role === 'user' ? [{ role: 'user', content: _startLastUserMsg.content }] : []),
+        { role: 'assistant', content: cleanReplyText || '(빈 응답)' },
+      ]).catch(e => console.warn('[K-Mail] 캠페인 대화 기록 실패(계속 진행):', e.message));
+      return new Response(JSON.stringify({
+        ok: true,
+        reply: replyText,
+        action: { type: 'campaign_started', campaign_id: result.campaignId },
+      }), { status: 200, headers: corsHeaders });
+    } catch (e) {
+      return new Response(JSON.stringify({
+        ok: true, reply: `${cleanReplyText}\n\n(캠페인 시작 기록 중 오류: ${e.message})`, action: null,
+      }), { status: 200, headers: corsHeaders });
+    }
+  }
+
   // ── ② 캠페인 확정 태그 ───────────────────────────────────────
   if (sendMatch) {
     const cleanReplyText = reply.slice(0, sendMatch.index).trim();
@@ -34783,9 +34939,22 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
       const addressBookNote = result.newContactCount > 0
         ? ` (신규 ${result.newContactCount}명은 주소록에도 등록했습니다)`
         : '';
+      const replyText = `${cleanReplyText}\n\n✅ 예약 완료 — 수신자 ${result.recipientCount}명, 발송 예정: ${result.sendAt}${addressBookNote}`;
+      // campaign_id를 클라이언트가 이번 요청에 실어 보내지 않았다면(=
+      // 사전에 KMAIL_CAMPAIGN_START 없이 바로 확정한 단발성 캠페인)
+      // 위 공용 로깅(pre-dispatch)이 이 턴을 못 잡았으므로 여기서 남긴다.
+      // 이미 campaign_id를 보냈던 경우(draft를 업그레이드한 경우)는
+      // 공용 로깅이 이미 기록했으니 중복 기록하지 않는다.
+      if (!_kmailLogCampaignId) {
+        const _sendLastUserMsg = cleanMessages[cleanMessages.length - 1];
+        await _kmailAppendCampaignMessages(env, result.campaignId, guid, [
+          ...(_sendLastUserMsg && _sendLastUserMsg.role === 'user' ? [{ role: 'user', content: _sendLastUserMsg.content }] : []),
+          { role: 'assistant', content: cleanReplyText || '(빈 응답)' },
+        ]).catch(e => console.warn('[K-Mail] 캠페인 대화 기록 실패(계속 진행):', e.message));
+      }
       return new Response(JSON.stringify({
         ok: true,
-        reply: `${cleanReplyText}\n\n✅ 예약 완료 — 수신자 ${result.recipientCount}명, 발송 예정: ${result.sendAt}${addressBookNote}`,
+        reply: replyText,
         action: { type: 'campaign_created', campaign_id: result.campaignId },
       }), { status: 200, headers: corsHeaders });
     } catch (e) {
