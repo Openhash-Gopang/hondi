@@ -34270,8 +34270,15 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   // 한도를 2배로 늘려 여유를 둔다. 근본 원인(매 턴마다 누적 표를
   // 통째로 다시 출력하는 습관)은 SP §0-2에서 별도로 손봤다 — 이
   // 숫자만으로 완전히 해결되진 않지만, 급한 병목은 없앤다.
-  const KMAIL_MAX_MESSAGES = 200;
-  const KMAIL_MAX_APPROX_CHARS = 600000; // 대략 300K 토큰 상당(보수적 근사)
+  // 2026-09-10(2차) — 주피터 지시: PDF·DOC·XLS 첨부를 브라우저에서
+  // 텍스트로 뽑아 대화에 넣는 기능을 추가하면서 "토큰 한도를 여유
+  // 있게" 요청. 600K자도 여전히 모델 한도(1M 토큰)의 1/3 수준에
+  // 불과했으므로, 문서 첨부(특히 다중 시트 엑셀·긴 논문 PDF)가
+  // 한 번에 수십만 자를 차지해도 여유가 남도록 1,500,000자
+  // (대략 750K 토큰 상당, 실제 1M 토큰 한도 대비 여전히 25% 여유를
+  // 남겨 system prompt·응답 생성 몫을 확보)로 상향한다.
+  const KMAIL_MAX_MESSAGES = 400;
+  const KMAIL_MAX_APPROX_CHARS = 1500000; // 대략 750K 토큰 상당(보수적 근사) — 모델 한도 1M 토큰 대비 25% 여유
   if (messages.length > KMAIL_MAX_MESSAGES) {
     return _err(400, 'TOO_MANY_MESSAGES', '대화가 너무 깁니다 — "내 캠페인" 탭에서 이 캠페인을 다시 열어 "이어서 대화하기"로 정리하며 계속해 주세요(지금까지 내용은 안전하게 보존돼 있습니다).', corsHeaders);
   }
@@ -34347,10 +34354,15 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
 
   let reply;
   try {
+    // 2026-09-10 — timeoutMs를 20s→60s로 상향. 위에서 입력 한도를
+    // 600K자→1.5M자로 크게 늘렸는데, 프롬프트가 길수록 첫 토큰이
+    // 나오기까지(prefill) 걸리는 시간도 비례해서 늘어난다 — 20초
+    // 한도로는 큰 첨부(PDF·엑셀 원문)가 낀 요청이 완료 전에
+    // 타임아웃날 위험이 있다.
     reply = await deepseekChatText({
       env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
       messages: [...systemMessages, ...cleanMessages],
-      max_tokens: 800, temperature: 0.4, timeoutMs: 20000, fallbackText: '',
+      max_tokens: 800, temperature: 0.4, timeoutMs: 60000, fallbackText: '',
     });
   } catch (e) {
     return _err(502, 'AI_CALL_FAILED', 'AI 호출 실패: ' + e.message, corsHeaders);
