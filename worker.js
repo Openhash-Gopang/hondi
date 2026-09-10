@@ -34234,6 +34234,34 @@ async function _kmailChatSaveContacts(env, guid, parsed) {
   return { created, skippedDup, invalidCount, status };
 }
 
+// 2026-09-10 신설 — 기능 공백 보고. "태그 목록에 없다"를 곧바로
+// "시스템 전체에서 불가능하다"로 잘못 결론 내리는 사고가 실제로
+// 있었다(주소록 독립 등록 요청 — 서버엔 이미 관련 엔드포인트가
+// 있었는데 K-Mail 채팅에 연결만 안 돼 있었음, KMAIL_SAVE_CONTACTS로
+// 그 건 자체는 해결됨). 재발 방지 장치 — K-Mail이 정말로 방법이
+// 없다고 판단하면 이 함수로 SP-Author 큐에 신호를 남긴다. 다른
+// SP들이 이미 쓰는 [SP_DRAFT_REQUEST]/[GOV_SP_DRAFT_REQUEST] 메커니즘과
+// 같은 큐(POST /sp-author/queue)를 공유하지만, K-Mail은 AC-PRO-CORE·
+// call-ai.js 태그 체계와 완전히 격리된 자체 프로토콜이라(주석 참고,
+// 이 파일 상단) call-ai.js가 대신 파싱해주지 않는다 — 그래서 여기서
+// 직접 handleSPAuthorQueue를 내부 호출한다(HTTP 왕복 없이 같은
+// 워커 안에서 함수로 직접 호출 — 실패해도 채팅 응답 자체는 막지 않음).
+async function _kmailChatReportCapabilityGap(env, corsHeaders, ctx, { gap, requestSummary }) {
+  const payload = {
+    request_type: 'kmail_capability_gap',
+    signal_source: 'kmail_chat',
+    target_sp_id: 'SP-25_kmail',
+    task: String(gap || '').slice(0, 1000),
+    source_conversation: String(requestSummary || '').slice(0, 2000),
+    priority: 'low', // K-Mail은 항상 지금 가능한 선에서 먼저 답한 뒤 보고만 남기므로 사용자를 막아세우지 않음 — low로 충분
+  };
+  const fakeReq = new Request('https://internal/sp-author/queue', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  await handleSPAuthorQueue(fakeReq, env, corsHeaders, ctx);
+}
+
 async function _kmailChatCreateRule(env, guid, ruleText, opts = {}) {
   const trimmed = ruleText.trim().slice(0, KMAIL_RULE_TEXT_MAX_LEN);
   const token = await _l1AdminToken(env);
@@ -34430,6 +34458,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   const sendMatch = reply.match(/KMAIL_SEND_CAMPAIGN\s*(\{[\s\S]*\})\s*$/);
   const campaignStartMatch = reply.match(/KMAIL_CAMPAIGN_START\s*(\{[\s\S]*\})?\s*$/);
   const saveContactsMatch = reply.match(/KMAIL_SAVE_CONTACTS\s*(\{[\s\S]*\})\s*$/);
+  const capabilityGapMatch = reply.match(/KMAIL_CAPABILITY_GAP\s*(\{[\s\S]*\})\s*$/);
   const ruleMatch = reply.match(/KMAIL_CREATE_RULE\s*(\{[\s\S]*\})\s*$/);
   const lookupMatch = reply.match(/KMAIL_LOOKUP_CONTACTS\s*(\{[\s\S]*\})\s*$/);
   const campaignLookupMatch = reply.match(/KMAIL_LOOKUP_CAMPAIGNS\s*(\{[\s\S]*\})?\s*$/);
@@ -34449,7 +34478,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   // 블록에서 별도로 기록한다.)
   const _kmailLogCampaignId = typeof body.campaign_id === 'string' ? body.campaign_id.trim() : '';
   if (_kmailLogCampaignId) {
-    const _kmailAnyTagMatch = searchMatch || fetchPageMatch || sendMatch || campaignStartMatch || saveContactsMatch ||
+    const _kmailAnyTagMatch = searchMatch || fetchPageMatch || sendMatch || campaignStartMatch || saveContactsMatch || capabilityGapMatch ||
       ruleMatch || lookupMatch || campaignLookupMatch || campaignReportMatch || tagMatch ||
       mergeMatch || threadStateMatch || statsMatch || settingsMatch;
     const _kmailReplyForLog = _kmailAnyTagMatch ? reply.slice(0, _kmailAnyTagMatch.index).trim() : reply;
@@ -35034,6 +35063,28 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
         ok: true, reply: `${cleanReplyText}\n\n(주소록 등록 중 오류: ${e.message})`, action: null,
       }), { status: 200, headers: corsHeaders });
     }
+  }
+
+  // ── ①-e 기능 공백 보고 태그 (2026-09-10 신설) ──────────────────
+  // "제가 가진 태그로는 이걸 할 수 없습니다"라고 정말로 결론 내릴
+  // 때(§0-3 참고 — 지어낸 태그를 내는 것도, 그냥 포기하는 것도 둘 다
+  // 안 됨) 반드시 이 태그를 함께 내세요. 사용자에게 보여줄 답변은
+  // 평소처럼 먼저 쓰고(지금 가능한 선에서 최선을 다한 답 + 정직한
+  // 한계 설명), 그 뒤에 이 태그를 붙이면 됩니다 — 사용자를 기다리게
+  // 하지 않습니다, 보고는 백그라운드에서 조용히 남습니다.
+  if (capabilityGapMatch) {
+    let parsed = null;
+    try { parsed = JSON.parse(capabilityGapMatch[1]); } catch (e) { parsed = {}; }
+    const cleanReplyText = reply.slice(0, capabilityGapMatch.index).trim();
+    _kmailChatReportCapabilityGap(env, corsHeaders, ctx, {
+      gap: parsed?.gap || '',
+      requestSummary: parsed?.user_request_summary || '',
+    }).catch(e => console.warn('[K-Mail] 기능 공백 보고 실패(계속 진행):', e.message));
+    return new Response(JSON.stringify({
+      ok: true,
+      reply: cleanReplyText || reply,
+      action: { type: 'capability_gap_reported' },
+    }), { status: 200, headers: corsHeaders });
   }
 
   // ── ② 캠페인 확정 태그 ───────────────────────────────────────
