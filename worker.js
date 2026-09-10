@@ -34439,10 +34439,20 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     // 나오기까지(prefill) 걸리는 시간도 비례해서 늘어난다 — 20초
     // 한도로는 큰 첨부(PDF·엑셀 원문)가 낀 요청이 완료 전에
     // 타임아웃날 위험이 있다.
+    // 2026-09-11 — max_tokens를 800→2000으로 상향(주피터 지시,
+    // 실사용 중 발견된 심각한 사고 재발 방지). KMAIL_SAVE_CONTACTS의
+    // candidates 배열은 항목당 40~60토큰인데, 800토큰으로는 대략
+    // 10~15건만 넘어도 JSON이 중간에서 끊긴다 — 끊긴 태그는 끝
+    // 앵커($) 매칭에 실패해 디스패치가 안 되고, 깨진 JSON이 그대로
+    // 사용자에게 노출됐다. 더 심각하게는, 이후 턴에서 모델이 이
+    // 실패를 보고 태그 자체를 생략한 채 "✅ N건 등록됨"이라고 결과만
+    // 서술하는(완료 연출, U7 위반) 패턴으로 변질됐다 — 실제로는
+    // 0건 저장. SP §2-1e에도 배치 크기 권장치(25건/회)를 추가했으니
+    // 두 조치가 함께 적용돼야 한다.
     reply = await deepseekChatText({
       env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
       messages: [...systemMessages, ...cleanMessages],
-      max_tokens: 800, temperature: 0.4, timeoutMs: 60000, fallbackText: '',
+      max_tokens: 2000, temperature: 0.4, timeoutMs: 60000, fallbackText: '',
     });
   } catch (e) {
     return _err(502, 'AI_CALL_FAILED', 'AI 호출 실패: ' + e.message, corsHeaders);
@@ -34469,6 +34479,24 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   const statsMatch = reply.match(/KMAIL_GET_STATS\s*(\{[\s\S]*\})?\s*$/);
   const settingsMatch = reply.match(/KMAIL_SET_SETTINGS\s*(\{[\s\S]*\})\s*$/);
 
+  // ── 깨진/잘린 태그 감지 (2026-09-11 신설, 재발 방지) ──────────────
+  // 실제 사고: KMAIL_SAVE_CONTACTS의 candidates 배열이 max_tokens에
+  // 걸려 중간에서 잘리면, 끝 앵커($) 매칭에 실패해 아래 태그 분기
+  // 전부가 통과되고, 잘린 JSON이 "그냥 텍스트"로 사용자에게 그대로
+  // 노출됐다(아무 것도 저장되지 않았는데도). 알려진 정규식 14종 중
+  // 아무것도 안 맞았는데 reply에 "KMAIL_뭔가 {"처럼 태그를 시도한
+  // 흔적(여는 중괄호까지 나온 것)이 있으면, 그 텍스트를 사용자에게
+  // 그대로 흘려보내지 않고 명확한 오류로 처리한다 — 조용히 실패하고
+  // "된 것처럼" 보이는 것보다, 실패를 실패로 보여주는 게 훨씬 안전.
+  const _kmailAnyTagMatch = searchMatch || fetchPageMatch || sendMatch || campaignStartMatch || saveContactsMatch || capabilityGapMatch ||
+    ruleMatch || lookupMatch || campaignLookupMatch || campaignReportMatch || tagMatch ||
+    mergeMatch || threadStateMatch || statsMatch || settingsMatch;
+  if (!_kmailAnyTagMatch && /KMAIL_[A-Z_]+\s*\{/.test(reply)) {
+    return _err(502, 'AI_MALFORMED_TAG',
+      '응답이 중간에 잘렸거나 태그 형식이 깨졌습니다 — 아무것도 저장/실행되지 않았습니다. 다시 시도해 주세요(요청 범위를 좀 더 잘게 나누면 도움이 됩니다).',
+      corsHeaders);
+  }
+
   // ── 캠페인 대화 전문 기록(2026-09-10 신설) ────────────────────────
   // 클라이언트가 이번 요청에 campaign_id를 실어 보냈다는 건 = 이
   // 대화가 이미 시작된(KMAIL_CAMPAIGN_START) 캠페인에 속한다는 뜻이다.
@@ -34478,9 +34506,6 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   // 블록에서 별도로 기록한다.)
   const _kmailLogCampaignId = typeof body.campaign_id === 'string' ? body.campaign_id.trim() : '';
   if (_kmailLogCampaignId) {
-    const _kmailAnyTagMatch = searchMatch || fetchPageMatch || sendMatch || campaignStartMatch || saveContactsMatch || capabilityGapMatch ||
-      ruleMatch || lookupMatch || campaignLookupMatch || campaignReportMatch || tagMatch ||
-      mergeMatch || threadStateMatch || statsMatch || settingsMatch;
     const _kmailReplyForLog = _kmailAnyTagMatch ? reply.slice(0, _kmailAnyTagMatch.index).trim() : reply;
     const _kmailLastUserMsg = cleanMessages[cleanMessages.length - 1];
     await _kmailAppendCampaignMessages(env, _kmailLogCampaignId, guid, [
