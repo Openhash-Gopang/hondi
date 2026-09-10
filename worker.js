@@ -241,7 +241,18 @@ const SOLAPI_SEND_URL = 'https://api.solapi.com/messages/v4/send';
 const OTP_TTL_SECONDS = 300;              // 5분
 const OTP_MAX_ATTEMPTS = 5;
 const OTP_RESEND_COOLDOWN_SECONDS = 60;   // 같은 번호 재발송 최소 간격
-const PHONE_VERIFY_TOKEN_TTL_MS = 60 * 60 * 1000; // 검증 토큰 유효 60분 (2026-09-03, 주피터 지시 — K-Plan pro 최종검토가 최대 5분씩 걸려 10분 TTL이 너무 짧았음. K-Law·GDC 잔액 조회 등 phone_verify_token을 쓰는 모든 서비스가 공유하는 값이라 다 함께 늘어남 — 클라이언트가 sessionStorage(브라우저 재시작 시 자동 소거)에 토큰을 저장하므로, 세션 내 재사용 기간만 늘어날 뿐 "브라우저를 새로 열면 다시 인증"이라는 성질은 그대로 유지됨.
+const PHONE_VERIFY_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 검증 토큰 유효 30일 (2026-09-10, 주피터 지시 — 같은 브라우저로 재접속하면 Gmail처럼 재인증 없이 바로 들어가야 한다는 요구. K-Law·K-Plan·GDC 잔액 조회 등 phone_verify_token을 쓰는 모든 서비스가 공유하는 값이라 다 함께 늘어남.
+// ── 2026-09-03에 60분으로 늘렸을 때 남겨둔 주석이 사실과 달랐다 —
+// "클라이언트가 sessionStorage에 저장하므로 브라우저 재시작 시
+// 자동 소거된다"고 적혀 있었지만, 실제 k-service-auth-client.js
+// (auth/k-service-auth-client.js)는 처음부터 sessionStorage가 아니라
+// document.cookie(도메인 .hondi.net, secure, samesite=lax)에 저장하고
+// 있었다 — 쿠키는 max-age를 명시하면 브라우저를 껐다 켜도 그대로
+// 남는다. 즉 "브라우저를 새로 열면 다시 인증해야 한다"는 성질은
+// 애초에 구현된 적이 없었고, 그래서 60분 TTL 동안은 이미 재인증 없이
+// 재접속이 됐어야 정상이다(안 됐다면 그건 이 TTL과 무관한 별개
+// 버그). 이번 30일 연장은 그 지속 기간을 Gmail 수준으로 늘리는
+// 것뿐 — 저장 방식 자체는 바뀌지 않는다.
 
 function _generateOtpCode() {
   const buf = new Uint32Array(1);
