@@ -190,12 +190,54 @@ function _mintSecret(env) {
 // (2026-07-14: GDC 충전 — "고정계좌 + 입금자명 매칭" 방식. PG·카드 배제
 //  확정(사고실험 세션 2026-07-14 "혼디의 GDC 환전 및 판매 체계 설계"
 //  참고) — 은행 API 없이 지금 코드만으로 구현 가능한 옵션을 택했다.
-//  ⚠️ 아래 계좌번호는 플레이스홀더다 — 실제 배포 전 반드시
-//  env.CHARGE_BANK_ACCOUNT_INFO(wrangler secret)로 실제 회사 계좌
-//  정보로 교체할 것. 지금 값 그대로 배포하면 사용자가 존재하지 않는
-//  계좌로 입금을 시도하게 된다.)
+//  2026-09-12 개편 — 계좌번호만 정확히 복사할 수 있어야 해서(usage.html
+//  "계좌번호 복사" 버튼) 문자열 하나가 아니라 필드별로 분리해 반환한다.
+//  기존 CHARGE_BANK_ACCOUNT_INFO 시크릿은 더 이상 쓰지 않는다.
+//  ⚠️ 아래 세 시크릿이 전부 설정돼 있어야 한다 — 실제 배포 전 반드시
+//  wrangler secret put CHARGE_BANK_NAME
+//  wrangler secret put CHARGE_BANK_ACCOUNT_NUMBER   (하이픈 없이 숫자만)
+//  wrangler secret put CHARGE_BANK_HOLDER_NAME
+//  하나라도 비어 있으면 configured:false로 반환되며, 화면에는 "미설정"이
+//  그대로 노출된다 — 사용자가 존재하지 않는 계좌로 입금을 시도하는
+//  사고를 막기 위해 일부러 그럴듯한 값으로 채우지 않는다.
 function _chargeBankAccountInfo(env) {
-  return env.CHARGE_BANK_ACCOUNT_INFO || '(관리자 설정 필요) 은행명 미설정 / 계좌번호 미설정 / 예금주 미설정';
+  const bankName = env.CHARGE_BANK_NAME || '';
+  const accountNumber = env.CHARGE_BANK_ACCOUNT_NUMBER || '';
+  const holderName = env.CHARGE_BANK_HOLDER_NAME || '';
+  return {
+    bank_name: bankName || '은행명 미설정',
+    account_number: accountNumber,                    // 복사 버튼용 — 하이픈 없는 순수 숫자
+    account_number_display: accountNumber
+      ? accountNumber.replace(/(\d{3})(\d{2,3})(\d{4,6})$/, '$1-$2-$3')
+      : '계좌번호 미설정',
+    holder_name: holderName || '예금주 미설정',
+    configured: !!(bankName && accountNumber && holderName),
+  };
+}
+
+// (2026-09-12 신설, 주피터 지시) — 1회 입금액에 따라 지급 GDC에 보너스
+// 배율을 적용한다. "카드 자동결제 없이 계좌이체만"이라는 원칙(위 §)은
+// 그대로 유지하면서, 큰 금액을 한 번에 넣을수록 유리하게 한다.
+// ⚠️ "월간/연간 요금제"가 아니다 — 만료·기간 개념 자체가 없다(A안,
+// 2026-09-12 확정). 실체는 오직 "1회 입금액 구간별 보너스 배율"뿐이며,
+// 사용량에 따라 그냥 차감되는 단일 GDC 잔액에 합산된다. 화면(usage.html)
+// 에도 "요금제"라는 이름 없이 금액 구간과 배율만 노출한다 — 이름이
+// 아직 붙어 있으면 나중에 "진짜 기간제 상품이 있나?"라는 오해를 부른다.
+//   - 10,000원 미만: 기본료, ×1.0 (보너스 없음)
+//   - 10,000원 ~ 49,999원: 구간2 보너스, ×1.6
+//   - 50,000원 ~ 99,999원: 구간3 보너스, ×1.8
+//   - 100,000원 이상: 구간4 보너스, ×2.0
+// 분할 입금은 합산되지 않는다 — 5,000원을 두 번 나눠 넣어도 각 건은
+// 여전히 ×1.0으로 계산된다(이 함수가 건별 확정 금액만 입력받으므로
+// 구조적으로 합산이 불가능하다). 만료·기간 제한 없음(A안 채택,
+// 2026-09-12) — 지급된 GDC는 일반 잔액과 동일하게 소진될 때까지
+// 유지되며 K-Law·전문가 페르소나·모든 K-서비스에 공용으로 쓰인다.
+function _computeChargeBonusGdc(confirmedKrw) {
+  const krw = Number(confirmedKrw) || 0;
+  if (krw >= 100000) return Math.round(krw * 2.0);
+  if (krw >= 50000)  return Math.round(krw * 1.8);
+  if (krw >= 10000)  return Math.round(krw * 1.6);
+  return krw;
 }
 
 // (2026-07-14: 관리자 전용 액션 — /biz/charge-list, /biz/charge-confirm
@@ -12854,6 +12896,11 @@ export default {
     if (pathname === '/biz/balance' && request.method === 'GET')  return handleBizBalance(request, env, corsHeaders);
     if (pathname === '/biz/supply'  && request.method === 'GET')  return handleBizSupply(request, env, corsHeaders);
     // (2026-07-14 신설: GDC 충전 파이프라인 — "고정계좌 + 입금자명 매칭")
+    // 2026-09-12 신설 — 전화번호 인증 사용자는 매칭키가 고정값이라 "신청"
+    // 없이 계좌 정보만 조회하면 된다(신청 레코드를 만들지 않음). 미인증
+    // 사용자(드묾)는 requires_request:true를 받고 기존 /biz/charge-request
+    // 흐름(임시 코드 발급)으로 폴백한다.
+    if (pathname === '/biz/charge-info'    && request.method === 'GET')  return handleChargeInfo(request, env, corsHeaders);
     if (pathname === '/biz/charge-request' && request.method === 'POST') return handleChargeRequest(request, env, corsHeaders);
     if (pathname === '/biz/charge-status'  && request.method === 'GET')  return handleChargeStatus(request, env, corsHeaders);
     if (pathname === '/biz/charge-list'    && request.method === 'GET')  return handleChargeList(request, env, corsHeaders);
@@ -15513,6 +15560,37 @@ async function handleBizSupply(request, env, corsHeaders) {
 // 트레이드오프다(가상계좌 자동화는 은행 API 계약이 필요해 별도 TODO).
 // ═══════════════════════════════════════════════════════════
 
+// GET /biz/charge-info?guid=... — 2026-09-12 신설. 전화번호 인증을 마친
+// 사용자는 매칭키(전화번호 뒷 8자리)가 고정돼 있고, 사전 신청 없이
+// 입금해도 _findGuidByPhoneMatchKey 역조회로 이미 자동 매칭된다
+// (2026-08-28 신설 기능 — 아래 handleChargeConfirmNotification 참고).
+// 그러므로 "얼마 넣을지 미리 선언하는" /biz/charge-request 신청 단계
+// 자체가 필요 없고, 계좌 정보 + 고정 매칭키만 조회하면 충분하다.
+// 이 엔드포인트는 조회 전용이라 charge_requests 레코드를 만들지 않고,
+// 그래서 만료·정리 로직도 필요 없다.
+async function handleChargeInfo(request, env, corsHeaders) {
+  const url = new URL(request.url);
+  const guid = url.searchParams.get('guid');
+  if (!guid) return _err(400, 'MISSING_FIELD', 'guid 필수', corsHeaders);
+
+  const matchCode = await _phoneMatchKey(env, guid).catch(() => null);
+  if (!matchCode) {
+    // 전화번호 미인증 — 고정 매칭키를 만들 수 없다. 프론트엔드는 이
+    // 응답을 받으면 기존 /biz/charge-request(임시 코드 발급 + 신청
+    // 레코드 생성) 흐름으로 폴백해야 한다.
+    return new Response(JSON.stringify({
+      ok: true, match_code_is_phone: false, requires_request: true,
+      bank_account_info: _chargeBankAccountInfo(env),
+    }), { status: 200, headers: corsHeaders });
+  }
+
+  return new Response(JSON.stringify({
+    ok: true, match_code_is_phone: true, requires_request: false,
+    match_code: matchCode,
+    bank_account_info: _chargeBankAccountInfo(env),
+  }), { status: 200, headers: corsHeaders });
+}
+
 // 2026-08-28 재설계(주피터 지시) — 기존 방식(_generateChargeMatchCode로
 // 무작위 HD+6자리 코드를 새로 발급해 사용자가 "보내는 분 표시"에
 // 직접 타이핑)이 실사용 테스트에서 완전히 깨졌다: 은행이 예금주
@@ -15789,14 +15867,25 @@ async function _mintAndRecordCharge(env, {
   const finalGuid = guid || (rec ? rec.guid : null);
   if (!finalGuid) return { ok: false, status: 400, error: 'MISSING_GUID', detail: 'guid 필요' };
 
+  // 2026-09-12 신설 — 실제 입금액(finalKrw, 회계·감사 기록용)과 실지급
+  // GDC(bonusGdcAmount, 보너스 배율 적용됨)를 분리한다. L1 /api/mint는
+  // krw_amount 파라미터를 고정환율 1:1로 그대로 GDC 발행량으로 삼으므로
+  // (기존 GDC_ANCHOR 전제), 보너스를 적용하려면 mint 호출에는
+  // bonusGdcAmount를 넘기고 charge_requests 레코드에는 finalKrw를 실제
+  // 입금액으로 남긴다. 이 함수(_mintAndRecordCharge)는 확정 채널 4종이
+  // 전부 공유하는 단일 코어라, 여기 한 곳만 고치면 어떤 경로로
+  // 확정되든(관리자 수동·오픈뱅킹·PG 웹훅·알림캡처) 항상 동일하게
+  // 보너스가 적용된다.
+  const bonusGdcAmount = _computeChargeBonusGdc(finalKrw);
+
   const mintMemoTag = existingRequestId ? `charge_request:${existingRequestId}` : `charge_auto:${channel}:${externalTxId || 'no-tx-id'}`;
   let mintData;
   try {
     const mintRes = await fetch(`${L1_DEFAULT}/api/mint`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        guid: finalGuid, krw_amount: finalKrw, secret: _mintSecret(env),
-        memo: `${mintMemoTag}${depositorName ? ' / 입금자:' + depositorName : ''}${memo ? ' / ' + memo : ''}`,
+        guid: finalGuid, krw_amount: bonusGdcAmount, secret: _mintSecret(env),
+        memo: `${mintMemoTag}${depositorName ? ' / 입금자:' + depositorName : ''}${memo ? ' / ' + memo : ''}${bonusGdcAmount !== finalKrw ? ` / 실입금:${finalKrw}원→보너스지급:${bonusGdcAmount}T` : ''}`,
       }),
     });
     mintData = await mintRes.json().catch(() => ({ ok: false, error: 'L1_PARSE_FAILED' }));
@@ -15809,7 +15898,7 @@ async function _mintAndRecordCharge(env, {
   }
 
   const patchBody = {
-    status: 'matched', matched_krw: finalKrw,
+    status: 'matched', matched_krw: finalKrw, bonus_gdc_amount: bonusGdcAmount,
     depositor_name: depositorName || '', memo: memo || '',
     mint_content_hash: mintData.content_hash, matched_at: new Date().toISOString(),
     channel, confirmed_by: confirmedBy,
@@ -15874,7 +15963,9 @@ async function _mintAndRecordCharge(env, {
   // 응답이 나가기 전까지는 완료를 보장한다.
   const pushPromise = _sendPushToGuid(env, finalGuid, {
     title: 'GDC 충전 완료',
-    body:  `${finalKrw.toLocaleString('ko-KR')}원 입금이 확인되어 GDC가 충전됐어요.`,
+    body:  bonusGdcAmount > finalKrw
+      ? `${finalKrw.toLocaleString('ko-KR')}원 입금 확인 — 보너스가 적용되어 GDC ${bonusGdcAmount.toLocaleString('ko-KR')}T가 충전됐어요.`
+      : `${finalKrw.toLocaleString('ko-KR')}원 입금이 확인되어 GDC가 충전됐어요.`,
     tag:   'gdc-charge-confirmed',
     url:   'https://hondi.net/usage.html',
   }).catch(e => console.warn('[ChargeConfirm] 푸시 발송 실패(무시):', e.message));
