@@ -35200,7 +35200,15 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit',
     hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
   }).format(new Date()).replace(' ', 'T') + '+09:00';
-  const systemPrompt = sp.replace(/\{\{NOW\}\}/g, nowKST).replace(/\{\{GUID\}\}/g, guid);
+  // 2026-09-12 신설 — mail_id(가입 시 자동배정되거나 사용자가 지정한
+  // hondi.kr 로컬파트 별칭)를 SP에 주입한다. AI가 "내 메일 주소가 뭐야"
+  // 같은 질문에 그동안 날것의 guid(IPv6 형태 문자열)를 그대로 답하고
+  // 있었던 문제(2026-09-12 실사로 발견)의 수정 — SP §2-8 참고.
+  // 아직 mail_id가 없는(과거 가입자, 자동배정 실패 등) 경우 빈 문자열이
+  // 그대로 들어가고, SP가 그 경우를 분기해 설정을 권유하도록 되어있다.
+  const kmailSettingsForChat = await _kmailGetUserSettings(env, guid).catch(() => ({ mail_id: '' }));
+  const systemPrompt = sp.replace(/\{\{NOW\}\}/g, nowKST).replace(/\{\{GUID\}\}/g, guid)
+    .replace(/\{\{MAIL_ID\}\}/g, kmailSettingsForChat.mail_id || '');
 
   // UNIVERSAL-INTEGRITY·UNIVERSAL-common·CONTROL-TOWER-PRINCIPLE 서버측
   // 강제 주입(2026-09-02 추가) — /kmail/chat은 handleLLMRelay를 거치지
@@ -35314,6 +35322,9 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   const threadStateMatch = reply.match(/KMAIL_THREAD_STATE\s*(\{[\s\S]*\})\s*$/);
   const statsMatch = reply.match(/KMAIL_GET_STATS\s*(\{[\s\S]*\})?\s*$/);
   const settingsMatch = reply.match(/KMAIL_SET_SETTINGS\s*(\{[\s\S]*\})\s*$/);
+  // 2026-09-12 신설 — §2-14. 아무것도 저장/조회하지 않는 순수 UI
+  // 신호 태그라 파라미터 파싱이 필요 없다(있어도 무시).
+  const mailIdPromptMatch = reply.match(/KMAIL_PROMPT_MAIL_ID_SETUP\s*(\{[\s\S]*\})?\s*$/);
 
   // ── 깨진/잘린 태그 감지 (2026-09-11 신설, 재발 방지) ──────────────
   // 실제 사고: KMAIL_SAVE_CONTACTS의 candidates 배열이 max_tokens에
@@ -35326,7 +35337,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   // "된 것처럼" 보이는 것보다, 실패를 실패로 보여주는 게 훨씬 안전.
   const _kmailAnyTagMatch = searchMatch || fetchPageMatch || sendMatch || campaignStartMatch || saveContactsMatch || capabilityGapMatch || saveDraftMatch || lookupDraftsMatch || updateCampaignDraftMatch ||
     ruleMatch || lookupMatch || campaignLookupMatch || campaignReportMatch || lookupThreadMatch || filterRepliesMatch || tagMatch ||
-    mergeMatch || threadStateMatch || statsMatch || settingsMatch;
+    mergeMatch || threadStateMatch || statsMatch || settingsMatch || mailIdPromptMatch;
   if (!_kmailAnyTagMatch && /KMAIL_[A-Z_]+\s*\{/.test(reply)) {
     return _err(502, 'AI_MALFORMED_TAG',
       '응답이 중간에 잘렸거나 태그 형식이 깨졌습니다 — 아무것도 저장/실행되지 않았습니다. 다시 시도해 주세요(요청 범위를 좀 더 잘게 나누면 도움이 됩니다).',
@@ -35379,8 +35390,6 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
       return new Response(JSON.stringify({ ok: true, reply: cleanReplyText || reply, action: null }), { status: 200, headers: corsHeaders });
     }
 
-    const token = await _l1AdminToken(env);
-    const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
     const patch = {};
     if (typeof parsed.signature_text === 'string') patch.signature = parsed.signature_text.slice(0, 1000);
     if (typeof parsed.sender_display_name === 'string') patch.sender_display_name = parsed.sender_display_name.slice(0, 100);
@@ -35388,26 +35397,65 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     if (typeof parsed.auto_reply_text === 'string') patch.auto_reply_text = parsed.auto_reply_text.slice(0, 2000);
     if ('auto_reply_until' in parsed) patch.auto_reply_until = parsed.auto_reply_until ? new Date(parsed.auto_reply_until).toISOString() : null;
 
+    // 2026-09-12 신설 — 채팅으로 메일 ID도 바꿀 수 있게(예: "메일 ID를
+    // jupiter로 해줘"). REST 경로(handleKmailSettingsSet)와 완전히 같은
+    // 검증·중복확인 헬퍼(_kmailNormalizeMailId/_kmailValidateMailId/
+    // _kmailFindMailIdOwner)를 그대로 재사용한다 — 두 경로가 따로
+    // 놀면 한쪽만 검증하는 사고가 나기 쉽다(§공용 헬퍼 원칙, 파일 상단
+    // _kmailSendOneEmail 주석과 동일한 이유).
+    if (typeof parsed.mail_id === 'string' && parsed.mail_id.length > 0) {
+      const normalized = _kmailNormalizeMailId(parsed.mail_id);
+      if (!_kmailValidateMailId(normalized)) {
+        return new Response(JSON.stringify({
+          ok: true,
+          reply: `${cleanReplyText}\n\n죄송합니다, 메일 ID는 3~30자의 영문 소문자·숫자·-·_ 조합이어야 하고 영숫자로 시작·끝나야 합니다. 다른 ID로 다시 말씀해 주세요.`,
+          action: null,
+        }), { status: 200, headers: corsHeaders });
+      }
+      const owner = await _kmailFindMailIdOwner(env, normalized);
+      if (owner && owner !== guid) {
+        return new Response(JSON.stringify({
+          ok: true,
+          reply: `${cleanReplyText}\n\n"${normalized}"는 이미 다른 분이 쓰고 있는 메일 ID입니다. 다른 ID로 다시 말씀해 주세요.`,
+          action: null,
+        }), { status: 200, headers: corsHeaders });
+      }
+      patch.mail_id = normalized;
+    }
+
     if (Object.keys(patch).length === 0) {
       return new Response(JSON.stringify({ ok: true, reply: cleanReplyText || reply, action: null }), { status: 200, headers: corsHeaders });
     }
 
-    const guidEsc = guid.replace(/'/g, "\\'");
-    const filter = encodeURIComponent(`owner_user_guid='${guidEsc}'`);
-    const findRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_user_settings/records?filter=${filter}&perPage=1`, { headers: { Authorization: headers.Authorization } });
-    const findData = await findRes.json().catch(() => ({ items: [] }));
     let ok2 = false;
-    if (findData.items && findData.items[0]) {
-      const r = await fetch(`${L1_DEFAULT}/api/collections/kmail_user_settings/records/${findData.items[0].id}`, { method: 'PATCH', headers, body: JSON.stringify(patch) });
-      ok2 = r.ok;
-    } else {
-      const r = await fetch(`${L1_DEFAULT}/api/collections/kmail_user_settings/records`, { method: 'POST', headers, body: JSON.stringify({ owner_user_guid: guid, ...patch }) });
-      ok2 = r.ok;
+    let conflictMsg = '';
+    try {
+      await _kmailUpsertUserSettings(env, guid, patch);
+      ok2 = true;
+    } catch (e) {
+      if (patch.mail_id && /unique|mail_id/i.test(e.message || '')) {
+        conflictMsg = `\n\n"${patch.mail_id}"는 방금 사이에 다른 분이 먼저 선점했습니다(동시 요청). 다른 ID로 다시 말씀해 주세요.`;
+      }
+      ok2 = false;
     }
 
     return new Response(JSON.stringify({
-      ok: true, reply: ok2 ? `${cleanReplyText}\n\n✅ 설정을 저장했습니다.` : `${cleanReplyText}\n\n(설정 저장 중 오류가 발생했습니다.)`,
+      ok: true,
+      reply: ok2 ? `${cleanReplyText}\n\n✅ 설정을 저장했습니다.` : `${cleanReplyText}${conflictMsg || '\n\n(설정 저장 중 오류가 발생했습니다.)'}`,
       action: ok2 ? { type: 'settings_updated', updated: Object.keys(patch) } : null,
+    }), { status: 200, headers: corsHeaders });
+  }
+
+  // 2026-09-12 신설 — §2-14. 아무것도 저장/조회하지 않는 순수 UI 신호 —
+  // 프론트엔드가 이 action.type을 보고 "메일 ID 설정하시겠어요?" 팝업을
+  // 띄운 뒤, 수락하면 "메일" 탭의 "내 메일 ID" 서브탭으로 전환한다
+  // (webapp.html _cmpChat 응답 처리부 참고, KMAIL_SAVE_DRAFT의
+  // switchTo 패턴과 동일한 방식).
+  if (mailIdPromptMatch) {
+    const cleanReplyText = reply.slice(0, mailIdPromptMatch.index).trim();
+    return new Response(JSON.stringify({
+      ok: true, reply: cleanReplyText || reply,
+      action: { type: 'mail_id_setup_prompt' },
     }), { status: 200, headers: corsHeaders });
   }
 
