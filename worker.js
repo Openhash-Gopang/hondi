@@ -31753,6 +31753,28 @@ async function handleUserMailSend(request, env, corsHeaders) {
 
 const KMAIL_CONTACTS_PROPOSE_MAX = 50; // 한 번에 스테이징 가능한 후보 상한 — 무분별한 대량 생성 방지
 
+// 2026-09-11 신설 — 같은 주소가 반복 등록되는 사고 재발 방지(주피터
+// 지시: "저장 전에 반드시 일치하는 주소가 이미 존재하는지 확인"). 지금
+// 까지 이메일 중복 검사가 CSV 업로드·K-Address 대화 저장 두 곳에만
+// 있었고, 수동 등록(propose, 웹앱 "새 연락처 등록" 폼이 씀)엔 전혀
+// 없었다 — 그 경로로 등록할 때마다 중복이 계속 쌓일 수 있었다. 또한
+// 세 곳 모두 이메일을 대소문자 그대로 비교해서(예: A@X.com vs a@x.com)
+// 같은 주소인데 다른 문자열로 취급해 중복을 놓치는 경우도 있었다.
+// 이제 이메일은 항상 소문자로 정규화한 뒤 저장·비교하고, 세 등록
+// 경로(propose/csv-import/chat-save) 전부 이 함수 하나로 중복을
+// 확인한다.
+function _kmailNormalizeEmail(email) {
+  return String(email || '').trim().toLowerCase();
+}
+async function _kmailFindExistingContact(env, guid, email) {
+  const token = await _l1AdminToken(env);
+  const esc = s => String(s).replace(/'/g, "\\'");
+  const filter = encodeURIComponent(`owner_user_guid='${esc(guid)}' && email='${esc(_kmailNormalizeEmail(email))}' && status!='rejected'`);
+  const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records?filter=${filter}&perPage=1`, { headers: { Authorization: `Bearer ${token}` } });
+  const data = await res.json().catch(() => ({ items: [] }));
+  return (data.items && data.items[0]) || null;
+}
+
 // POST /kmail/contacts/propose
 // body: { guid, pubkey, signature, ts, recipient_query, candidates: [{name, org, dept, email, source_url, confidence, tags}] }
 async function handleKmailContactsPropose(request, env, corsHeaders) {
@@ -31780,15 +31802,21 @@ async function handleKmailContactsPropose(request, env, corsHeaders) {
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
   const created = [];
+  let skippedDup = 0;
   for (const c of valid) {
     try {
+      // 2026-09-11 신설 — 지금까지 이 경로(수동 등록 포함)엔 중복 검사가
+      // 아예 없었다. 등록 전 반드시 같은 이메일이 이미 있는지 먼저 확인.
+      const existing = await _kmailFindExistingContact(env, guid, c.email);
+      if (existing) { skippedDup++; continue; }
+
       const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records`, {
         method: 'POST', headers,
         body: JSON.stringify({
           owner_user_guid: guid,
           name: c.name || '', org: c.org || '', dept: c.dept || '',
           occupation: c.occupation || '', relationship: c.relationship || '',
-          email: c.email, phone: c.phone || '', address: c.address || '', website: c.website || '', notes: c.notes || '', category: c.category || '', tags: c.tags || [],
+          email: _kmailNormalizeEmail(c.email), phone: c.phone || '', address: c.address || '', website: c.website || '', notes: c.notes || '', category: c.category || '', tags: c.tags || [],
           source_url: c.source_url || '', confidence: typeof c.confidence === 'number' ? c.confidence : null,
           status: 'pending_review',
           added_via_query: recipient_query || '',
@@ -31801,7 +31829,7 @@ async function handleKmailContactsPropose(request, env, corsHeaders) {
     }
   }
 
-  return new Response(JSON.stringify({ ok: true, staged: created.length, skipped: candidates.length - valid.length, ids: created }),
+  return new Response(JSON.stringify({ ok: true, staged: created.length, skippedDup, skipped: candidates.length - valid.length, ids: created }),
     { status: 200, headers: corsHeaders });
 }
 
@@ -31920,7 +31948,6 @@ async function handleKmailContactsCsvImport(request, env, corsHeaders) {
 
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-  const esc = s => String(s).replace(/'/g, "\\'");
   let created = 0, skippedDup = 0, autoCategorized = 0;
   // 2026-09-11 신설 — 지금까지 레코드 생성이 실패해도(예: category가
   // select 옵션과 안 맞아 검증 거부되는 경우) 아무 로그도 안 남아서
@@ -31932,11 +31959,9 @@ async function handleKmailContactsCsvImport(request, env, corsHeaders) {
   const FAILED_SAMPLE_MAX = 20;
 
   for (const c of valid) {
-    const email = c.email.trim();
-    const filter = encodeURIComponent(`owner_user_guid='${esc(guid)}' && email='${esc(email)}' && status!='rejected'`);
-    const findRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records?filter=${filter}&perPage=1`, { headers: { Authorization: headers.Authorization } });
-    const findData = await findRes.json().catch(() => ({ items: [] }));
-    if (findData.items && findData.items.length > 0) { skippedDup++; continue; }
+    const email = _kmailNormalizeEmail(c.email);
+    const existing = await _kmailFindExistingContact(env, guid, email);
+    if (existing) { skippedDup++; continue; }
 
     let category = typeof c.category === 'string' ? c.category.trim() : '';
     if (!category) {
@@ -34654,14 +34679,9 @@ async function _kmailChatSaveContacts(env, guid, parsed) {
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
   let created = 0, skippedDup = 0;
   for (const c of valid) {
-    const esc = s => String(s).replace(/'/g, "\\'");
-    // 같은 사용자가 같은 이메일을 이미 confirmed로 갖고 있으면 중복
-    // 생성하지 않고 건너뛴다(조용히 — 이미 주소록에 있다는 뜻이므로
-    // 오류가 아니다).
-    const filter = encodeURIComponent(`owner_user_guid='${esc(guid)}' && email='${esc(c.email)}' && status!='rejected'`);
-    const findRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records?filter=${filter}&perPage=1`, { headers: { Authorization: headers.Authorization } });
-    const findData = await findRes.json().catch(() => ({ items: [] }));
-    if (findData.items && findData.items.length > 0) { skippedDup++; continue; }
+    // 2026-09-11 — 공용 헬퍼로 통일(이메일 대소문자 정규화 포함).
+    const existing = await _kmailFindExistingContact(env, guid, c.email);
+    if (existing) { skippedDup++; continue; }
 
     const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records`, {
       method: 'POST', headers,
@@ -34669,7 +34689,7 @@ async function _kmailChatSaveContacts(env, guid, parsed) {
         owner_user_guid: guid,
         name: c.name || '', org: c.org || '', dept: c.dept || '',
         occupation: c.occupation || '', relationship: c.relationship || '',
-        email: c.email, phone: c.phone || '', address: c.address || '', website: c.website || '', notes: c.notes || '', category: c.category || '', tags: c.tags || [],
+        email: _kmailNormalizeEmail(c.email), phone: c.phone || '', address: c.address || '', website: c.website || '', notes: c.notes || '', category: c.category || '', tags: c.tags || [],
         source_url: c.source_url || '', confidence: typeof c.confidence === 'number' ? c.confidence : null,
         status,
         added_via_query: parsed?.note || '(K-Mail 대화에서 직접 등록)',
