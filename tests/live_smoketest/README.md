@@ -220,3 +220,65 @@ sanity check용)과 별개로, **오직 라우팅 분기 검증만을 목적으�
 
 실행법은 위 branch-coverage 세트와 동일(`--scenarios
 scenarios_routing_branches_20260806.json`으로 파일명만 교체).
+
+## K-Address 주소록 등록/중복방지/분류 전용 하네스 (2026-09-11 신설)
+
+이번 세션에 고친 것들의 회귀 방지 가드입니다 — LLM 판단이 아니라
+worker.js REST 엔드포인트 자체의 동작(카테고리 자동분류, 중복 방지,
+인증 이관, 카운트 정확도)을 검증하는 하네스라, 위의 다른 하네스들과
+달리 DeepSeek를 전혀 호출하지 않습니다(비용 없음, 대신 실제
+kmail_contacts에 쓰기가 일어남).
+
+**검증 대상**:
+1. CSV 업로드(`/kmail/contacts/csv-import`) 소속명 자동분류가
+   `kmail_contacts.category` select 필드(21개 고정값)와 정확히 일치
+   하는 문자열을 만드는지 — 실사 사고: 코드 한 글자(`'P'`)만 넣어
+   레코드 생성 자체가 조용히 실패했던 것의 재발 방지.
+2. `propose`(수동 등록)·`csv-import`·chat-save(K-Address 대화 저장)
+   세 등록 경로 전부 저장 전 이메일 중복을 확인하는지, 이메일
+   대소문자를 정규화해서 비교하는지 — 실사 사고: `propose` 경로엔
+   중복 검사가 아예 없었던 것의 재발 방지.
+3. `GET /kmail/mailbox`·`GET/POST /kmail/drafts`·
+   `GET/POST /kmail/messages/state`가 phone_verify_token 인증을
+   받아들이는지 — 실사 사고: 지갑 서명만 지원해서 지갑 SSO를 안 쓰는
+   mail.hondi.net 웹앱("메일" 탭)에서 호출 자체가 막혀 있었던 것의
+   재발 방지.
+4. `GET /kmail/contacts/category-counts`가 실제 PocketBase 카운트와
+   정확히 일치하는지(생성 전후 델타 비교).
+
+**실계정 주의**: `--test-e164`는 실제 등록된 계정(주소록 소유자)의
+전화번호입니다 — PDV 하네스처럼 매번 새로 만드는 합성 guid를 쓸 수
+없습니다(kmail_contacts 엔드포인트는 실제 등록된 프로필의
+phone_verify_token만 받으므로). 그래서 이 하네스가 만드는 모든 테스트
+연락처는 `status=pending_review`로만 생성되고("확인됨" 목록엔 안 섞임),
+실행이 끝나면 자동으로 `rejected` 처리해 치웁니다. 중간에 실패해서
+정리가 안 된 채 남으면, 주소록의 "승인 대기" 필터에서
+`smoketest-`로 시작하는 이메일을 검색해 수동으로 거부 처리하세요.
+
+**실행(GitHub Actions, 권장)**: Actions 탭 →
+`Live Smoketest — K-Address 주소록 등록/중복방지/분류` → `Run workflow`
+→ `test_e164`에 테스트 계정 전화번호 입력.
+
+**로컬에서**:
+```bash
+cd tests/live_smoketest
+export PHONE_VERIFY_SECRET=...
+export PB_ADMIN_EMAIL=...
+export PB_ADMIN_PASSWORD=...
+python3 kaddress_contacts_live_smoketest.py \
+  --scenarios scenarios_kaddress_contacts_20260911.json \
+  --out ../../results/kaddress-contacts \
+  --test-e164 "+8201096627170"
+```
+
+**채점 규칙**: `LIVE-PASS` / `LIVE-FAIL`(카테고리 불일치, 중복 생성,
+건수 불일치, 인증 거부 중 하나 이상) / `LIVE-ERROR`(HTTP 호출 자체
+실패).
+
+**한계**: 계정이 실제로 공유 상태(다른 사람이 동시에 같은 계정으로
+주소록을 조작 중)라면 `category_counts_delta` 시나리오가 그 사이의
+다른 변경과 겹쳐 드물게 오탐할 수 있습니다(델타 비교 방식의 근본
+한계) — 재실행으로 확인하세요. K-Mail 대화("새 캠페인" 탭)의
+`KMAIL_SAVE_DRAFT`/`KMAIL_UPDATE_CAMPAIGN_DRAFT` → "메일" 탭 편지쓰기
+반영 기능은 이 하네스의 검증 범위 밖입니다(AI가 실제로 그 태그를
+내는지는 LLM 판단이라 별도의 대화형 하네스가 필요 — 아직 없음).
