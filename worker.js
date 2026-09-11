@@ -452,6 +452,50 @@ async function handlePhoneOtpVerify(request, env, corsHeaders) {
   }), { status: 200, headers: corsHeaders });
 }
 
+// POST /auth/refresh-token — body: { phone_verify_token }
+// 2026-09-12 신설(주피터 지시) — "K-Law에서 인증하면 K-Mail도 같이
+// 로그인되고, 브라우저를 껐다 켜도 Gmail처럼 계속 로그인 상태"를 위한
+// 마지막 조각. 쿠키 공유(.hondi.net)와 30일 TTL(PHONE_VERIFY_TOKEN_TTL_MS,
+// 2026-09-10 이미 적용)까지는 있었지만, 만료 임박 시 조용히 갱신하는
+// 경로가 없어서 "30일째 되는 순간 활동 중이어도 강제 재인증"되는
+// 간극이 있었다 — 이 엔드포인트가 그 간극을 메운다.
+//
+// 서버는 "언제 갱신을 허용할지" 임계값을 강제하지 않는다 — 유효한
+// 토큰이기만 하면 매번 새 30일 창으로 갱신해 준다(stateless HMAC 서명
+// 재발급일 뿐이라 비용이 사실상 없음). "언제 갱신을 요청할지"는
+// 클라이언트(k-service-auth-client.js의 REFRESH_WINDOW_MS)가 판단한다.
+//
+// guid-바인딩 3필드 토큰(handleProfileClaim 전용, e164:guid:exp)은
+// 갱신 대상에서 제외한다 — 그건 claim 1회용으로 발급되는 토큰이라
+// 슬라이딩 세션의 대상이 아니다(계속 살려두면 claim 경로의 시간 제한
+// 목적 자체가 무의미해짐).
+async function handleAuthRefreshToken(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+  const { phone_verify_token } = body;
+  if (!phone_verify_token) return _err(400, 'MISSING_FIELD', 'phone_verify_token 필수', corsHeaders);
+
+  const dotIdx = String(phone_verify_token).lastIndexOf('.');
+  if (dotIdx < 0) return _err(400, 'TOKEN_MALFORMED', 'phone_verify_token 형식 오류', corsHeaders);
+  const payload = phone_verify_token.slice(0, dotIdx);
+  const colonCount = (payload.match(/:/g) || []).length;
+  if (colonCount >= 2) {
+    return _err(400, 'NOT_REFRESHABLE', 'claim 전용 토큰은 갱신할 수 없습니다', corsHeaders);
+  }
+
+  const resolved = await _resolveGuidFromPhoneVerifyToken(env, phone_verify_token);
+  if (!resolved.ok) return _err(401, resolved.code || 'TOKEN_INVALID', resolved.message || '토큰이 유효하지 않습니다', corsHeaders);
+
+  const exp = Date.now() + PHONE_VERIFY_TOKEN_TTL_MS;
+  const newPayload = `${resolved.e164}:${exp}`;
+  const signature = await _hmacSha256Hex(env.PHONE_VERIFY_SECRET, newPayload);
+  const newToken = newPayload + '.' + signature;
+
+  return new Response(JSON.stringify({
+    ok: true, phone_verify_token: newToken, expires_at: new Date(exp).toISOString(),
+  }), { status: 200, headers: corsHeaders });
+}
+
 // ── phone_verify_token → guid 해석 (2026-09-02 신설) ────────────────
 // handleUserGdcBalance(2026-09-01)가 이미 쓰던 "토큰 파싱·서명 검증 →
 // profiles를 전화번호로 조회해 guid 도출" 로직과 사실상 동일한 필요가
@@ -12857,6 +12901,10 @@ export default {
     if (pathname === '/auth/device-link/resend-sms' && request.method === 'POST') return handleDeviceLinkResendSms(request, env, corsHeaders);
     if (pathname === '/auth/device-link/deliver'  && request.method === 'POST') return handleDeviceLinkDeliver(request, env, corsHeaders);
     if (pathname === '/auth/device-link/poll'     && request.method === 'GET')  return handleDeviceLinkPoll(request, env, corsHeaders);
+    // 2026-09-12 신설 — 슬라이딩 세션 갱신(주피터 지시: Gmail처럼 활동
+    // 중엔 재인증 없이 유지). k-service-auth-client.js가 만료 임박 시
+    // 조용히 이 엔드포인트를 호출해 30일 창을 새로 연다.
+    if (pathname === '/auth/refresh-token'        && request.method === 'POST') return handleAuthRefreshToken(request, env, corsHeaders);
     if (pathname === '/pdv/relay/push'            && request.method === 'POST') return handlePdvRelayPush(request, env, corsHeaders);
     if (pathname === '/pdv/relay/pull'            && request.method === 'GET')  return handlePdvRelayPull(request, env, corsHeaders);
     if (pathname === '/account/step-up-threshold' && request.method === 'GET')  return handleStepUpThresholdGet(request, env, corsHeaders);
