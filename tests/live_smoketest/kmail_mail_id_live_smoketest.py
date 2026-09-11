@@ -214,7 +214,7 @@ def run_scenario(scn, ctx):
                                           {"mail_id": scn["bad_mail_id"]})
         if err:
             return "LIVE-ERROR", err, {}, cleanup
-        if status != 400 or (body or {}).get("code") != "INVALID_MAIL_ID":
+        if status != 400 or (body or {}).get("error") != "INVALID_MAIL_ID":
             return "LIVE-FAIL", f"잘못된 형식({scn['bad_mail_id']!r})이 거부되지 않음: status={status} body={body}", \
                 {"http_status": status, "http_body": body}, cleanup
         return "LIVE-PASS", "", {"http_status": status}, cleanup
@@ -224,7 +224,7 @@ def run_scenario(scn, ctx):
                                           {"mail_id": scn["reserved_word"]})
         if err:
             return "LIVE-ERROR", err, {}, cleanup
-        if status != 400 or (body or {}).get("code") != "INVALID_MAIL_ID":
+        if status != 400 or (body or {}).get("error") != "INVALID_MAIL_ID":
             return "LIVE-FAIL", f"예약어({scn['reserved_word']!r})가 거부되지 않음: status={status} body={body}", \
                 {"http_status": status, "http_body": body}, cleanup
         return "LIVE-PASS", "", {"http_status": status}, cleanup
@@ -267,7 +267,7 @@ def run_scenario(scn, ctx):
         sstatus, sbody, _, serr = post_json(worker_base, "/kmail/settings", token, {"mail_id": taken})
         if serr:
             return "LIVE-ERROR", serr, {}, cleanup
-        set_rejected = sstatus == 409 and (sbody or {}).get("code") == "MAIL_ID_TAKEN"
+        set_rejected = sstatus == 409 and (sbody or {}).get("error") == "MAIL_ID_TAKEN"
 
         reasons = []
         if not check_ok:
