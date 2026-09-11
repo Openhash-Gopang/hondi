@@ -31922,6 +31922,14 @@ async function handleKmailContactsCsvImport(request, env, corsHeaders) {
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
   const esc = s => String(s).replace(/'/g, "\\'");
   let created = 0, skippedDup = 0, autoCategorized = 0;
+  // 2026-09-11 신설 — 지금까지 레코드 생성이 실패해도(예: category가
+  // select 옵션과 안 맞아 검증 거부되는 경우) 아무 로그도 안 남아서
+  // "왜 0건만 등록됐는지" 진단할 방법이 없었다(실사 발견 — 767건짜리
+  // 업로드가 흔적도 없이 사라진 사고). 실패한 건은 이메일+PocketBase가
+  // 돌려준 에러를 최대 20건까지 모아 응답에 실어 보내고, 서버 로그에도
+  // 남긴다.
+  const failed = [];
+  const FAILED_SAMPLE_MAX = 20;
 
   for (const c of valid) {
     const email = c.email.trim();
@@ -31949,11 +31957,18 @@ async function handleKmailContactsCsvImport(request, env, corsHeaders) {
         added_via_query: '(CSV/엑셀 일괄 업로드)',
       }),
     });
-    if (res.ok) created++;
+    if (res.ok) { created++; continue; }
+    const errBody = await res.json().catch(() => null);
+    const errMsg = errBody?.message || `HTTP ${res.status}`;
+    console.error('[K-Address CSV Import] 레코드 생성 실패:', email, errMsg, JSON.stringify(errBody?.data || {}));
+    if (failed.length < FAILED_SAMPLE_MAX) failed.push({ email, error: errMsg });
   }
 
-  return new Response(JSON.stringify({ ok: true, created, skippedDup, invalidCount, autoCategorized, status }),
-    { status: 200, headers: corsHeaders });
+  return new Response(JSON.stringify({
+    ok: true, created, skippedDup, invalidCount, autoCategorized, status,
+    failedCount: failed.length < FAILED_SAMPLE_MAX ? failed.length : `${failed.length}+`,
+    failedSample: failed,
+  }), { status: 200, headers: corsHeaders });
 }
 
 // GET /kmail/contacts?guid=...&pubkey=...&signature=...&ts=...&status=pending_review
