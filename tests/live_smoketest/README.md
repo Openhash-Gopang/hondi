@@ -282,3 +282,68 @@ python3 kaddress_contacts_live_smoketest.py \
 `KMAIL_SAVE_DRAFT`/`KMAIL_UPDATE_CAMPAIGN_DRAFT` → "메일" 탭 편지쓰기
 반영 기능은 이 하네스의 검증 범위 밖입니다(AI가 실제로 그 태그를
 내는지는 LLM 판단이라 별도의 대화형 하네스가 필요 — 아직 없음).
+
+## K-Mail ID(mail_id)/설정/임시보관함/자가발송 왕복 전용 하네스 (2026-09-12 신설)
+
+이번 세션에 새로 만든 K-Mail 기능(mail_id 전역 별칭, 서명/발신자
+표시이름/부재중 자동응답 REST 경로, 그리고 그 REST 경로가 지갑서명
+전용이라 실제로는 호출이 막혀 있었던 버그 수정)의 회귀 방지 가드입니다.
+K-Address 하네스와 마찬가지로 DeepSeek를 호출하지 않고 worker.js REST
+엔드포인트 자체의 동작을 검증합니다.
+
+**검증 대상**:
+1. `mail_id` 형식 검증(3~30자, 영문 소문자·숫자·-·_, 영숫자로 시작/끝)과
+   예약어(admin/postmaster/noreply 등) 거부.
+2. `mail_id`가 저장 전 소문자로 정규화되는지(대문자 입력 → 소문자 저장).
+3. `mail_id` 전역 유일성 — 다른 사용자가 이미 쓰는 값을 설정하려 하면
+   409 `MAIL_ID_TAKEN`으로 거부되는지. 실계정을 두 개 만드는 대신
+   PocketBase Admin API로 합성 guid의 `kmail_user_settings` 행을 하나
+   심어 "이미 있는 사용자" 역할을 재현합니다(PDV 하네스의 합성 guid
+   관례와 동일).
+4. `GET /kmail/mail-id/check`가 실제 점유 상태와 일치하는 답을 주는지.
+5. `POST /kmail/mail-id/auto`가 8자리 hex를 만들고, 두 번 연속 호출해도
+   같은 값을 반환하는지(멱등성).
+6. 서명·발신자 표시 이름·부재중 자동응답이 실제로 저장·조회되는지.
+7. 임시보관함(저장/목록/삭제) 왕복.
+8. ★ 자기 자신의 `<guid>@hondi.kr`로 실제 발송한 뒤, Cloudflare Email
+   Routing catch-all이 받아 `_handleKmailInboundEmail`로 되돌아와
+   받은함에 실제로 도착하는지 — 외부 메일 인프라를 실제로 왕복하는
+   유일한 시나리오입니다(자기 자신 앞으로만 보내므로 제3자에게 아무
+   것도 발송되지 않아 스팸 위험이 없습니다).
+
+**실계정 주의**: `--test-e164`는 K-Mail을 실제로 쓰는 등록된 계정입니다
+— 이 계정의 `kmail_user_settings`(서명/발신자 표시이름/mail_id 등)를
+실제로 덮어씁니다. 실행 전 기존 값을 백업해두고, 실행이 끝나면
+(`--no-restore`를 안 준 이상) 원래 값으로 복원합니다. 자가발송으로
+생기는 발신함/수신함 메일 1건은 정리하지 않습니다(실사용 흔적과 동일한
+정상 데이터라 삭제 전용 엔드포인트 자체가 없음).
+
+**실행(GitHub Actions, 권장)**: Actions 탭 →
+`Live Smoketest — K-Mail ID/설정/임시보관함/자가발송 왕복` → `Run workflow`
+→ `test_e164`에 테스트 계정 전화번호 입력. 빠른 재실행이 필요하면
+`skip_self_send`를 `true`로 주면 외부 메일 인프라 왕복 대기(최대 90초)
+없이 나머지 15건만 돌립니다.
+
+**로컬에서**:
+```bash
+cd tests/live_smoketest
+export PHONE_VERIFY_SECRET=...
+export PB_ADMIN_EMAIL=...
+export PB_ADMIN_PASSWORD=...
+python3 kmail_mail_id_live_smoketest.py \
+  --scenarios scenarios_kmail_mail_id_20260912.json \
+  --out ../../results/kmail-mail-id \
+  --test-e164 "+8201096627170"
+```
+
+**채점 규칙**: `LIVE-PASS` / `LIVE-FAIL`(형식·예약어·유일성 검증 실패,
+정규화 안 됨, 멱등성 깨짐, 설정 미반영, 임시보관 불일치, 자가발송 왕복
+실패 중 하나 이상) / `LIVE-ERROR`(HTTP 호출 자체 실패).
+
+**한계**: 자가발송 왕복 시나리오는 외부 메일 인프라(Cloudflare Email
+Routing)의 실제 지연에 의존하므로 최대 90초까지 폴링합니다 — 그 안에
+안 오면 FAIL 처리되지만, 실제로는 그보다 늦게(드물게) 도착하는
+일시적 지연일 수도 있습니다(재실행으로 확인). K-Mail 대화("새 캠페인"
+탭)가 실제로 mail_id를 인지하고 guid를 노출하지 않는지는 LLM 판단이라
+이 하네스의 검증 범위 밖입니다(SP-25_kmail §2-8/§2-14 — 별도의 대화형
+하네스가 필요, 아직 없음).
