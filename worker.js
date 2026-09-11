@@ -35629,10 +35629,18 @@ async function handleKaddressChat(request, env, corsHeaders, ctx) {
 
   let reply;
   try {
+    // 2026-09-11 — max_tokens 4000→8000 상향. K-Mail 사고 이후 이걸
+    // 처음부터 넉넉히 잡았다고 생각했는데, 실사용에서 SP 권장 범위
+    // (candidates 40건 이하)를 그대로 지켰는데도 잘렸다 — K-Address의
+    // candidate 스키마가 K-Mail보다 필드가 많아서(소속·부서·직위·
+    // 태그까지) 항목당 토큰이 더 든다는 걸 반영 못 했다. 40건 ×
+    // 최악의 경우 ~100토큰(전 필드 채움 + 한국어) = 약 4000토큰 —
+    // 프롬프트 서두까지 더하면 정확히 한도에 걸렸을 것. 8000토큰이면
+    // 같은 계산으로 70건 이상까지 여유.
     reply = await deepseekChatText({
       env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
       messages: [...systemMessages, ...cleanMessages],
-      max_tokens: 4000, temperature: 0.3, timeoutMs: 30000, fallbackText: '',
+      max_tokens: 8000, temperature: 0.3, timeoutMs: 45000, fallbackText: '',
     });
   } catch (e) {
     return _err(502, 'AI_CALL_FAILED', 'AI 호출 실패: ' + e.message, corsHeaders);
@@ -35698,7 +35706,7 @@ async function handleKaddressChat(request, env, corsHeaders, ctx) {
           { role: 'assistant', content: cleanReplyText || '주소록을 확인하고 있습니다...' },
           { role: 'user', content: lookupContext },
         ],
-        max_tokens: 4000, temperature: 0.3, timeoutMs: 20000,
+        max_tokens: 8000, temperature: 0.3, timeoutMs: 20000,
         fallbackText: '조회는 완료됐지만 결과 정리에 실패했습니다. 다시 시도해 주세요.',
       });
     } catch (e) {
