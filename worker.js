@@ -31765,7 +31765,7 @@ async function handleKmailContactsPropose(request, env, corsHeaders) {
           owner_user_guid: guid,
           name: c.name || '', org: c.org || '', dept: c.dept || '',
           occupation: c.occupation || '', relationship: c.relationship || '',
-          email: c.email, tags: c.tags || [],
+          email: c.email, phone: c.phone || '', address: c.address || '', website: c.website || '', notes: c.notes || '', tags: c.tags || [],
           source_url: c.source_url || '', confidence: typeof c.confidence === 'number' ? c.confidence : null,
           status: 'pending_review',
           added_via_query: recipient_query || '',
@@ -31813,7 +31813,7 @@ async function _kmailQueryContacts(env, guid, { status = 'confirmed', q = '', re
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}` };
   const filter = encodeURIComponent(clauses.join(' && '));
-  const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records?filter=${filter}&sort=-created&perPage=200`, { headers });
+  const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records?filter=${filter}&sort=org,name&perPage=200`, { headers });
   const data = await res.json().catch(() => ({ items: [] }));
   return data.items || [];
 }
@@ -32213,7 +32213,7 @@ async function _kmailMergeContactsCore(env, guid, keepId, mergeId) {
   // 빈 필드만 채움(기존 값 보존 — 다른 자동 갱신 로직과 동일 원칙),
   // 태그는 합집합.
   const patch = {};
-  for (const f of ['name', 'org', 'dept', 'occupation', 'relationship']) {
+  for (const f of ['name', 'org', 'dept', 'occupation', 'relationship', 'phone', 'address', 'website', 'notes']) {
     if (!keepContact[f] && mergeContact[f]) patch[f] = mergeContact[f];
   }
   const mergedTags = Array.from(new Set([...(keepContact.tags || []), ...(mergeContact.tags || [])]));
@@ -34309,7 +34309,7 @@ async function _kaddressBulkUpdate(env, guid, parsed) {
 
     const patch = {};
     const overwrite = u?.overwrite === true;
-    for (const f of ['name', 'org', 'dept', 'occupation', 'relationship']) {
+    for (const f of ['name', 'org', 'dept', 'occupation', 'relationship', 'phone', 'address', 'website', 'notes']) {
       if (typeof u?.[f] === 'string' && u[f].trim() && (overwrite || !contact[f])) patch[f] = u[f].trim();
     }
     if (Array.isArray(u?.add_tags) || Array.isArray(u?.remove_tags)) {
@@ -34416,7 +34416,7 @@ async function _kmailChatSaveContacts(env, guid, parsed) {
         owner_user_guid: guid,
         name: c.name || '', org: c.org || '', dept: c.dept || '',
         occupation: c.occupation || '', relationship: c.relationship || '',
-        email: c.email, tags: c.tags || [],
+        email: c.email, phone: c.phone || '', address: c.address || '', website: c.website || '', notes: c.notes || '', tags: c.tags || [],
         source_url: c.source_url || '', confidence: typeof c.confidence === 'number' ? c.confidence : null,
         status,
         added_via_query: parsed?.note || '(K-Mail 대화에서 직접 등록)',
