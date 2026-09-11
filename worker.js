@@ -34786,7 +34786,16 @@ async function _kmailChatUpdateCampaignDraft(env, guid, parsed) {
 
   const patchRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_campaigns/records/${campaignId}`, { method: 'PATCH', headers, body: JSON.stringify(patch) });
   if (!patchRes.ok) throw new Error('체크포인트 저장 실패');
-  return { campaignId, recipientCount: (patch.contact_ids || existing.contact_ids || []).length };
+  // 2026-09-11 신설 — "메일" 탭 편지쓰기 화면에 이 초안을 반영하려면
+  // (주피터 지시: "Mail SP에게 메일 작성을 지시하면 그 초안을 메일
+  // 편집기 화면에 표시해야 합니다") 이번에 patch로 새로 채운 값이든
+  // 이전 체크포인트에서 이미 있던 값이든 상관없이 "지금 이 캠페인의
+  // 최종 제목/본문"을 함께 돌려줘야 한다.
+  return {
+    campaignId, recipientCount: (patch.contact_ids || existing.contact_ids || []).length,
+    subject: patch.subject ?? existing.subject ?? '',
+    body: patch.body ?? existing.body ?? '',
+  };
 }
 
 // 2026-09-11 신설 — 발송 없이 메일 초안(제목·요약·날짜·전문)만 저장.
@@ -34821,14 +34830,14 @@ async function _kmailChatSaveDraft(env, guid, parsed) {
     if (!draft || draft.owner_user_guid !== guid) throw new Error('본인 초안이 아닙니다');
     const patchRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_drafts/records/${draftId}`, { method: 'PATCH', headers, body: JSON.stringify(record) });
     if (!patchRes.ok) throw new Error('초안 수정 실패');
-    return { draftId, updated: true };
+    return { draftId, updated: true, subject: record.subject, body: record.body };
   }
   const createRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_drafts/records`, {
     method: 'POST', headers, body: JSON.stringify({ owner_user_guid: guid, recipients: [], ...record }),
   });
   if (!createRes.ok) throw new Error('초안 생성 실패');
   const created = await createRes.json();
-  return { draftId: created.id, updated: false };
+  return { draftId: created.id, updated: false, subject: record.subject, body: record.body };
 }
 
 // 2026-09-11 신설 — 저장된 초안 목록/검색. 저장만 되고 다시 못 찾으면
@@ -35879,7 +35888,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
       return new Response(JSON.stringify({
         ok: true,
         reply: `${cleanReplyText}\n\n✅ 초안이 ${verb}됐습니다 (draft_id: ${result.draftId}) — 나중에 "초안 찾아줘"라고 하시면 다시 불러올 수 있습니다.`,
-        action: { type: 'draft_saved', draft_id: result.draftId },
+        action: { type: 'draft_saved', draft_id: result.draftId, subject: result.subject, body: result.body },
       }), { status: 200, headers: corsHeaders });
     } catch (e) {
       return new Response(JSON.stringify({
@@ -35937,7 +35946,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
       return new Response(JSON.stringify({
         ok: true,
         reply: `${cleanReplyText}\n\n📌 캠페인 진행 상태를 저장했습니다(현재 수신자 ${result.recipientCount}명). 나중에 "내 캠페인"에서 이 캠페인을 열면 대화 전체를 다시 읽지 않고도 이 상태부터 이어갈 수 있습니다.`,
-        action: { type: 'campaign_draft_updated', campaign_id: result.campaignId },
+        action: { type: 'campaign_draft_updated', campaign_id: result.campaignId, subject: result.subject, body: result.body },
       }), { status: 200, headers: corsHeaders });
     } catch (e) {
       return new Response(JSON.stringify({
