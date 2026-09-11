@@ -12505,6 +12505,7 @@ export default {
     // 완전히 격리된 별도 엔드포인트.
     if (pathname === '/kaddress/chat' && request.method === 'POST') return handleKaddressChat(request, env, corsHeaders, ctx);
     if (pathname === '/kmail/messages/state' && request.method === 'POST') return handleKmailMessageStateSet(request, env, corsHeaders);
+    if (pathname === '/kmail/messages/state' && request.method === 'GET') return handleKmailMessageStatesList(request, url, env, corsHeaders);
     if (pathname === '/kmail/blocklist' && request.method === 'POST') return handleKmailBlocklistAdd(request, env, corsHeaders);
     if (pathname === '/kmail/blocklist' && request.method === 'GET') return handleKmailBlocklistList(request, url, env, corsHeaders);
     if (pathname === '/kmail/blocklist/remove' && request.method === 'POST') return handleKmailBlocklistRemove(request, env, corsHeaders);
@@ -32220,10 +32221,6 @@ function _kmailSplitSubjectBody(contentOriginal) {
 // 남아있지만, 평소 받은함/스레드 UX에서는 안 보이는 게 맞다.
 async function handleKmailMailboxList(request, url, env, corsHeaders) {
   const box = url.searchParams.get('box');
-  const guid = url.searchParams.get('guid');
-  const pubkey = url.searchParams.get('pubkey');
-  const signature = url.searchParams.get('signature');
-  const ts = url.searchParams.get('ts');
   const includeDeleted = url.searchParams.get('include_deleted') === 'true';
   const includeMuted = url.searchParams.get('include_muted') === 'true';
   const includeSnoozed = url.searchParams.get('include_snoozed') === 'true';
@@ -32235,13 +32232,15 @@ async function handleKmailMailboxList(request, url, env, corsHeaders) {
   if (box === 'thread' && !withEmail) {
     return _err(400, 'MISSING_FIELD', "box=thread일 때는 with(상대방 이메일)가 필수입니다", corsHeaders);
   }
-  if (!guid || !pubkey || !signature || !ts) {
-    return _err(400, 'MISSING_FIELD', 'guid, pubkey, signature, ts 필수', corsHeaders);
-  }
 
-  const sigMsg = `kmail-mailbox:${guid}:${box}:${ts}`;
-  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
-  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+  // 2026-09-11 — mail.hondi.net 웹앱(지갑 SSO 미사용, "메일" 탭 신설)이
+  // phone_verify_token만 보내므로 handleUserMailSend와 같은 공용
+  // 인증 게이트로 맞춘다. GET이라 body가 없어 쿼리스트링을 plain
+  // object로 바꿔서 넘긴다.
+  const qp = Object.fromEntries(url.searchParams.entries());
+  const auth = await _kAuth.resolveGuid(env, qp, { sigMsg: `kmail-mailbox:${qp.guid}:${box}:${qp.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
 
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}` };
@@ -32934,15 +32933,12 @@ async function handleKmailRuleToggle(request, env, corsHeaders) {
 async function handleKmailMessageStateSet(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
-  const { guid, pubkey, signature, ts, message_id, labels, starred, mark_read } = body;
-  if (!guid || !pubkey || !signature || !ts) {
-    return _err(400, 'MISSING_FIELD', 'guid, pubkey, signature, ts 필수', corsHeaders);
-  }
+  const { message_id, labels, starred, mark_read } = body;
   if (!message_id) return _err(400, 'MISSING_FIELD', 'message_id 필수', corsHeaders);
 
-  const sigMsg = `kmail-message-state:${guid}:${message_id}:${ts}`;
-  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
-  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+  const auth = await _kAuth.resolveGuid(env, body, { sigMsg: `kmail-message-state:${body.guid}:${message_id}:${body.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
 
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
@@ -32980,6 +32976,33 @@ async function handleKmailMessageStateSet(request, env, corsHeaders) {
   }
 
   return new Response(JSON.stringify({ ok: true, message_id, state_id: stateId }), { status: 200, headers: corsHeaders });
+}
+
+// GET /kmail/messages/state?guid=...&pubkey=...&signature=...&ts=... (또는 phone_verify_token)
+// 2026-09-11 신설 — "메일" 탭의 태그별 보관함 기능용. 라벨/별표/읽음
+// 상태가 붙은 메시지는 kmail_message_state에만 행이 있고(대부분의
+// 메시지는 행 자체가 없는 게 정상 — 위 handleKmailMessageStateSet 주석
+// 참고), 지금까지 이걸 목록으로 가져오는 GET이 없어서 프론트엔드가
+// "어떤 라벨들이 있는지", "이 메시지가 무슨 라벨인지"를 알 방법이
+// 없었다. 이 owner의 상태 행 전체를 한 번에 내려줘서, 프론트엔드가
+// /kmail/mailbox 결과(메시지 본문)와 message_id로 조인해 라벨별로
+// 묶을 수 있게 한다.
+async function handleKmailMessageStatesList(request, url, env, corsHeaders) {
+  const qp = Object.fromEntries(url.searchParams.entries());
+  const auth = await _kAuth.resolveGuid(env, qp, { sigMsg: `kmail-message-states-list:${qp.guid}:${qp.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}` };
+  const filter = encodeURIComponent(`owner_user_guid='${guid.replace(/'/g, "\\'")}'`);
+  const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_message_state/records?filter=${filter}&perPage=500`, { headers });
+  const data = await res.json().catch(() => ({ items: [] }));
+  const items = (data.items || []).map(s => ({
+    message_id: s.message_id, labels: Array.isArray(s.labels) ? s.labels : [],
+    starred: !!s.starred, read_at: s.read_at || null,
+  }));
+  return new Response(JSON.stringify({ ok: true, items }), { status: 200, headers: corsHeaders });
 }
 
 // POST /kmail/blocklist — body: { guid, pubkey, signature, ts, email }
@@ -33074,14 +33097,13 @@ async function handleKmailBlocklistRemove(request, env, corsHeaders) {
 async function handleKmailDraftSave(request, env, corsHeaders) {
   const reqBody = await request.json().catch(() => null);
   if (!reqBody) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
-  const { guid, pubkey, signature, ts, draft_id, recipients, subject, body: mailBody } = reqBody;
-  if (!guid || !pubkey || !signature || !ts) {
-    return _err(400, 'MISSING_FIELD', 'guid, pubkey, signature, ts 필수', corsHeaders);
-  }
+  const { draft_id, recipients, subject, body: mailBody } = reqBody;
 
-  const sigMsg = `kmail-draft-save:${guid}:${draft_id || 'new'}:${ts}`;
-  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
-  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+  // 2026-09-11 — mail.hondi.net "메일" 탭(지갑 SSO 미사용)에서 쓸 수
+  // 있도록 공용 인증 게이트로 이관.
+  const auth = await _kAuth.resolveGuid(env, reqBody, { sigMsg: `kmail-draft-save:${reqBody.guid}:${draft_id || 'new'}:${reqBody.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
 
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
@@ -33108,18 +33130,12 @@ async function handleKmailDraftSave(request, env, corsHeaders) {
   return new Response(JSON.stringify({ ok: true, draft_id: created.id }), { status: 200, headers: corsHeaders });
 }
 
-// GET /kmail/drafts?guid=...&pubkey=...&signature=...&ts=...
+// GET /kmail/drafts?guid=...&pubkey=...&signature=...&ts=... (또는 phone_verify_token)
 async function handleKmailDraftsList(request, url, env, corsHeaders) {
-  const guid = url.searchParams.get('guid');
-  const pubkey = url.searchParams.get('pubkey');
-  const signature = url.searchParams.get('signature');
-  const ts = url.searchParams.get('ts');
-  if (!guid || !pubkey || !signature || !ts) {
-    return _err(400, 'MISSING_FIELD', 'guid, pubkey, signature, ts 필수', corsHeaders);
-  }
-  const sigMsg = `kmail-drafts-list:${guid}:${ts}`;
-  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
-  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+  const qp = Object.fromEntries(url.searchParams.entries());
+  const auth = await _kAuth.resolveGuid(env, qp, { sigMsg: `kmail-drafts-list:${qp.guid}:${qp.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
 
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}` };
@@ -33134,15 +33150,12 @@ async function handleKmailDraftsList(request, url, env, corsHeaders) {
 async function handleKmailDraftDelete(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
-  const { guid, pubkey, signature, ts, draft_id } = body;
-  if (!guid || !pubkey || !signature || !ts) {
-    return _err(400, 'MISSING_FIELD', 'guid, pubkey, signature, ts 필수', corsHeaders);
-  }
+  const { draft_id } = body;
   if (!draft_id) return _err(400, 'MISSING_FIELD', 'draft_id 필수', corsHeaders);
 
-  const sigMsg = `kmail-draft-delete:${guid}:${draft_id}:${ts}`;
-  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
-  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+  const auth = await _kAuth.resolveGuid(env, body, { sigMsg: `kmail-draft-delete:${body.guid}:${draft_id}:${body.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
 
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
