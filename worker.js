@@ -12464,6 +12464,7 @@ export default {
     // → list(사용자 확인) → decide(승인/거부). confirmed만 캠페인 발송 대상.
     if (pathname === '/kmail/contacts/propose' && request.method === 'POST') return handleKmailContactsPropose(request, env, corsHeaders);
     if (pathname === '/kmail/contacts' && request.method === 'GET') return handleKmailContactsList(request, url, env, corsHeaders);
+    if (pathname === '/kmail/contacts/category-counts' && request.method === 'GET') return handleKmailContactsCategoryCounts(request, url, env, corsHeaders);
     if (pathname === '/kmail/mailbox' && request.method === 'GET') return handleKmailMailboxList(request, url, env, corsHeaders);
     if (pathname === '/kmail/contacts/decide' && request.method === 'POST') return handleKmailContactsDecide(request, env, corsHeaders);
     if (pathname === '/kmail/contacts/update' && request.method === 'POST') return handleKmailContactsUpdate(request, env, corsHeaders);
@@ -31814,6 +31815,26 @@ async function handleKmailContactsPropose(request, env, corsHeaders) {
 // 순서가 중요 — 위에서부터 먼저 매칭되는 키워드가 우선한다(예: "대학"이
 // "대학병원"보다 먼저 오면 병원을 교육기관으로 잘못 분류하게 되므로
 // 더 구체적인 키워드를 앞에 둔다).
+// kmail_contacts.category는 자유 텍스트가 아니라 PocketBase select
+// 필드(21개 값 중 정확히 하나만 허용 — pb_migrations/1793960000_add_category_to_kmail_contacts.js
+// 참고). 값이 정확히 일치하지 않으면 레코드 생성 자체가 실패하므로,
+// 여기서 코드(A~U)로 매칭한 뒤 반드시 이 표로 정식 문자열로 변환해서
+// 넣는다 — 절대 코드 한 글자만 넣지 않는다.
+const KADDRESS_KSIC_CODE_TO_LABEL = {
+  A: 'A 농업,임업 및 어업', B: 'B 광업', C: 'C 제조업',
+  D: 'D 전기,가스,증기 및 공기조절 공급업', E: 'E 수도,하수 및 폐기물 처리,원료 재생업',
+  F: 'F 건설업', G: 'G 도매 및 소매업', H: 'H 운수 및 창고업', I: 'I 숙박 및 음식점업',
+  J: 'J 정보통신업', K: 'K 금융 및 보험업', L: 'L 부동산업', M: 'M 전문,과학 및 기술 서비스업',
+  N: 'N 사업시설 관리,사업 지원 및 임대 서비스업', O: 'O 공공행정,국방 및 사회보장 행정',
+  P: 'P 교육 서비스업', Q: 'Q 보건업 및 사회복지 서비스업', R: 'R 예술,스포츠 및 여가관련 서비스업',
+  S: 'S 협회 및 단체,수리 및 기타 개인 서비스업', T: 'T 가구내 고용활동 및 자가소비 생산활동',
+  U: 'U 국제 및 외국기관',
+};
+// GET /kmail/contacts/category-counts용 — select 필드가 고정 21개
+// 값이므로 kmail_contacts에서 실제로 쓰이는 category 전체 목록도
+// 이 표에서 그대로 파생시킨다(따로 하드코딩하면 나중에 위 표만 고치고
+// 여길 놓치는 사고가 남).
+const KSIC_CONTACT_CATEGORIES = Object.values(KADDRESS_KSIC_CODE_TO_LABEL);
 const KADDRESS_ORG_CATEGORY_KEYWORDS = [
   // 의료·복지(Q) — "대학병원"처럼 대학 키워드와 겹치는 경우가 있어
   // 교육(P) 판정보다 먼저 검사한다.
@@ -31850,19 +31871,23 @@ const KADDRESS_EMAIL_DOMAIN_SUFFIX_CATEGORY = [
 ];
 function _kaddressClassifyCategory(org, email) {
   const orgStr = String(org || '').trim();
+  let code = '';
   if (orgStr) {
-    for (const [kw, code] of KADDRESS_ORG_CATEGORY_KEYWORDS) {
-      if (orgStr.includes(kw)) return code;
+    for (const [kw, c] of KADDRESS_ORG_CATEGORY_KEYWORDS) {
+      if (orgStr.includes(kw)) { code = c; break; }
     }
   }
-  const emailStr = String(email || '').trim().toLowerCase();
-  if (emailStr.includes('@')) {
-    const domain = emailStr.slice(emailStr.indexOf('@') + 1);
-    for (const [suffix, code] of KADDRESS_EMAIL_DOMAIN_SUFFIX_CATEGORY) {
-      if (domain.endsWith(suffix)) return code;
+  if (!code) {
+    const emailStr = String(email || '').trim().toLowerCase();
+    if (emailStr.includes('@')) {
+      const domain = emailStr.slice(emailStr.indexOf('@') + 1);
+      for (const [suffix, c] of KADDRESS_EMAIL_DOMAIN_SUFFIX_CATEGORY) {
+        if (domain.endsWith(suffix)) { code = c; break; }
+      }
     }
   }
-  return ''; // 애매하면 빈 값 — 억지로 틀리게 채우지 않는다
+  if (!code) return ''; // 애매하면 빈 값 — 억지로 틀리게 채우지 않는다
+  return KADDRESS_KSIC_CODE_TO_LABEL[code] || ''; // select 필드에 없는 값은 절대 넣지 않음
 }
 
 // POST /kmail/contacts/csv-import
@@ -31953,7 +31978,9 @@ async function _kmailQueryContacts(env, guid, { status = 'confirmed', q = '', re
   // 그 텍스트에 부분일치한다 — ["세미나초청대상"] 안에 "세미나초청대상"이
   // 있는지는 이 방식으로 충분히 잡힌다(태그명에 흔치 않은 특수문자가
   // 없는 한 오탐 위험 낮음, 이 규모에서 전용 JSON 연산자까진 불필요).
-  if (q) clauses.push(`(name~'${esc(q)}' || org~'${esc(q)}' || dept~'${esc(q)}' || occupation~'${esc(q)}' || relationship~'${esc(q)}' || email~'${esc(q)}' || tags~'${esc(q)}')`);
+  // 2026-09-11 — 상세 검색에 주소(address)도 포함(주피터 지시 — 주소록이
+  // 커질수록 이름/이메일만으로는 못 찾는 경우가 늘어남).
+  if (q) clauses.push(`(name~'${esc(q)}' || org~'${esc(q)}' || dept~'${esc(q)}' || occupation~'${esc(q)}' || relationship~'${esc(q)}' || email~'${esc(q)}' || address~'${esc(q)}' || tags~'${esc(q)}')`);
   if (relationship) clauses.push(`relationship~'${esc(relationship)}'`);
   if (occupation) clauses.push(`occupation~'${esc(occupation)}'`);
   if (org) clauses.push(`org~'${esc(org)}'`);
@@ -31962,7 +31989,11 @@ async function _kmailQueryContacts(env, guid, { status = 'confirmed', q = '', re
   // 부분일치(~)를 쓰는 이유: category 값은 "J 정보통신업"처럼
   // 코드+이름이 붙어있는데, 사용자는 "정보통신업만"처럼 이름만
   // 말하는 경우가 많다.
-  if (category) clauses.push(`category~'${esc(category)}'`);
+  // category='__NONE__'는 프론트엔드가 "미분류"(카테고리 값이 비어있는
+  // 연락처) 버킷을 요청할 때 쓰는 예약어 — 빈 문자열을 그냥 넘기면
+  // "필터 없음"과 구분이 안 되므로 별도 처리한다.
+  if (category === '__NONE__') clauses.push(`category=''`);
+  else if (category) clauses.push(`category~'${esc(category)}'`);
 
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}` };
@@ -32056,6 +32087,47 @@ function _kmailAggregateByOrg(recipRows) {
     response_rate: g.sent > 0 ? Math.round((g.replied / g.sent) * 1000) / 10 : 0,
     visit_rate: g.sent > 0 ? Math.round(((g.visited_pc + g.visited_mobile) / g.sent) * 1000) / 10 : 0,
   }));
+}
+
+// GET /kmail/contacts/category-counts?status=&guid=...&pubkey=...&signature=...&ts=...
+// 2026-09-11 신설 — 주소록이 수천~수만 건으로 늘어날 걸 대비해(주피터
+// 지적) 전체 목록을 한 번에 내려주는 대신 카테고리별 건수만 먼저
+// 보여주기 위한 전용 엔드포인트. PocketBase list 응답의 totalItems는
+// perPage=1이어도 전체 매치 건수를 정확히 담고 있으므로, 실제 레코드는
+// 안 받아오고 카테고리(KSIC 21개 고정값 + 미분류)마다 이 필드만 읽어
+// 건수를 센다 — 조회 자체는 병렬로 실행.
+async function handleKmailContactsCategoryCounts(request, url, env, corsHeaders) {
+  const qp = Object.fromEntries(url.searchParams.entries());
+  const status = qp.status || 'confirmed';
+  if (!['pending_review', 'confirmed', 'rejected', 'all'].includes(status)) {
+    return _err(400, 'INVALID_STATUS', "status는 pending_review/confirmed/rejected/all 중 하나여야 합니다", corsHeaders);
+  }
+  const auth = await _kAuth.resolveGuid(env, qp, { sigMsg: `kmail-contacts-category-counts:${qp.guid}:${qp.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
+
+  const token = await _l1AdminToken(env);
+  const headers = { Authorization: `Bearer ${token}` };
+  const esc = s => String(s).replace(/'/g, "\\'");
+  const baseClause = `owner_user_guid='${esc(guid)}'` + (status !== 'all' ? ` && status='${esc(status)}'` : '');
+
+  async function countFor(extraClause) {
+    const filter = encodeURIComponent(extraClause ? `${baseClause} && ${extraClause}` : baseClause);
+    const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records?filter=${filter}&perPage=1`, { headers });
+    const data = await res.json().catch(() => ({ totalItems: 0 }));
+    return data.totalItems || 0;
+  }
+
+  const [total, uncategorized, ...perCategory] = await Promise.all([
+    countFor(''),
+    countFor(`category=''`),
+    ...KSIC_CONTACT_CATEGORIES.map(cat => countFor(`category='${esc(cat)}'`)),
+  ]);
+  const categories = KSIC_CONTACT_CATEGORIES
+    .map((cat, i) => ({ category: cat, count: perCategory[i] }))
+    .filter(c => c.count > 0);
+
+  return new Response(JSON.stringify({ ok: true, total, uncategorized, categories }), { status: 200, headers: corsHeaders });
 }
 
 async function handleKmailContactsList(request, url, env, corsHeaders) {
