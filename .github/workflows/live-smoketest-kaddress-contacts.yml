@@ -37,7 +37,7 @@ on:
         required: false
         default: ""
       test_e164:
-        description: "주소록을 실제로 소유한 등록된 테스트 계정 전화번호, 내부 표준 형식 (예: +8201096627170) — 필수"
+        description: "주소록을 실제로 소유한 등록된 테스트 계정 전화번호 — 어떤 형식이든(뒷자리 8자리만도 가능, 예: 96627170) 자동 정규화됨 — 필수"
         required: true
       worker_base:
         description: "worker.js(hondi-proxy) base URL"
