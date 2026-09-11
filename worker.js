@@ -34789,10 +34789,18 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     // 38만 토큰)에 비하면 20000은 여전히 5% 수준이라 API 자체 상한에
     // 걸릴 위험도 없다. §2-1e의 "25건/회 권장"은 안전을 위해 그대로
     // 유지 — 한도를 늘렸다고 배치 크기 제한을 없앤 건 아니다.
+    // 2026-09-11(3차) — 20000→60000, timeoutMs 60000→90000으로 재상향.
+    // §2-1d 권장치(25건/회)가 있었음에도 실사용에서 165건을 한 번에
+    // 등록하려다 20000토큰도 초과했다 — 프롬프트 지침만으로는 AI가
+    // 스스로 배치를 안 나눌 수 있다는 걸 재확인. 60000은 deepseek-v4-
+    // flash 실제 최대 출력(약 38만 토큰)의 약 16% 수준이라 여전히
+    // 안전하고, 출력이 늘어난 만큼 생성 시간도 늘어날 수 있어 timeout도
+    // 비례해서 늘렸다. SP §2-1d의 배치 상한(60건)도 이 한도에 맞춰
+    // 같이 올렸다 — 숫자만 올리고 끝내지 않기 위해.
     reply = await deepseekChatText({
       env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
       messages: [...systemMessages, ...cleanMessages],
-      max_tokens: 20000, temperature: 0.4, timeoutMs: 60000, fallbackText: '',
+      max_tokens: 60000, temperature: 0.4, timeoutMs: 90000, fallbackText: '',
     });
   } catch (e) {
     return _err(502, 'AI_CALL_FAILED', 'AI 호출 실패: ' + e.message, corsHeaders);
@@ -35811,10 +35819,13 @@ async function handleKaddressChat(request, env, corsHeaders, ctx) {
     // 수준이라 API 자체 상한 초과 위험은 없다(K-Mail 때 확인한 것과
     // 동일 근거). max_tokens는 상한일 뿐 실제 과금은 생성량에 비례하므로
     // 짧은 응답의 비용에는 영향 없음.
+    // 2026-09-11(3차) — 20000→60000, timeoutMs 45000→90000으로 재상향
+    // (K-Mail과 동일 조치, 같은 사고: 165건 한 번에 등록 시도로 재발).
+    // SP §1(c)의 배치 상한(60건)도 이 한도에 맞춰 같이 올렸다.
     reply = await deepseekChatText({
       env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
       messages: [...systemMessages, ...cleanMessages],
-      max_tokens: 20000, temperature: 0.3, timeoutMs: 45000, fallbackText: '',
+      max_tokens: 60000, temperature: 0.3, timeoutMs: 90000, fallbackText: '',
     });
   } catch (e) {
     return _err(502, 'AI_CALL_FAILED', 'AI 호출 실패: ' + e.message, corsHeaders);
