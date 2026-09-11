@@ -31765,7 +31765,7 @@ async function handleKmailContactsPropose(request, env, corsHeaders) {
           owner_user_guid: guid,
           name: c.name || '', org: c.org || '', dept: c.dept || '',
           occupation: c.occupation || '', relationship: c.relationship || '',
-          email: c.email, phone: c.phone || '', address: c.address || '', website: c.website || '', notes: c.notes || '', tags: c.tags || [],
+          email: c.email, phone: c.phone || '', address: c.address || '', website: c.website || '', notes: c.notes || '', category: c.category || '', tags: c.tags || [],
           source_url: c.source_url || '', confidence: typeof c.confidence === 'number' ? c.confidence : null,
           status: 'pending_review',
           added_via_query: recipient_query || '',
@@ -31796,7 +31796,7 @@ async function handleKmailContactsPropose(request, env, corsHeaders) {
 // API)와 K-Mail 채팅의 KMAIL_LOOKUP_CONTACTS(§ handleKmailChat 하단)
 // 양쪽이 공유한다. 이스케이프 로직을 두 곳에 복붙하면 한쪽만 고치고
 // 다른 쪽을 놓치는 사고가 나기 쉬워 묶었다.
-async function _kmailQueryContacts(env, guid, { status = 'confirmed', q = '', relationship = '', occupation = '', org = '', tag = '' } = {}) {
+async function _kmailQueryContacts(env, guid, { status = 'confirmed', q = '', relationship = '', occupation = '', org = '', tag = '', category = '' } = {}) {
   const esc = s => String(s).replace(/'/g, "\\'");
   const clauses = [`owner_user_guid='${esc(guid)}'`];
   if (status !== 'all') clauses.push(`status='${esc(status)}'`);
@@ -31809,6 +31809,11 @@ async function _kmailQueryContacts(env, guid, { status = 'confirmed', q = '', re
   if (occupation) clauses.push(`occupation~'${esc(occupation)}'`);
   if (org) clauses.push(`org~'${esc(org)}'`);
   if (tag) clauses.push(`tags~'${esc(tag)}'`);
+  // 2026-09-11 신설 — KSIC 대분류(category 필드) 기준 그룹 조회.
+  // 부분일치(~)를 쓰는 이유: category 값은 "J 정보통신업"처럼
+  // 코드+이름이 붙어있는데, 사용자는 "정보통신업만"처럼 이름만
+  // 말하는 경우가 많다.
+  if (category) clauses.push(`category~'${esc(category)}'`);
 
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}` };
@@ -31877,7 +31882,7 @@ function _kmailAggregateByOrg(recipRows) {
   const byOrg = new Map();
   for (const r of recipRows) {
     const org = (r.recipient_org || '').trim() || '(미상)';
-    if (!byOrg.has(org)) byOrg.set(org, { org, sent: 0, replied: 0, pending: 0, classifications: {}, visited_pc: 0, visited_mobile: 0, not_visited: 0 });
+    if (!byOrg.has(org)) byOrg.set(org, { org, sent: 0, replied: 0, pending: 0, classifications: {}, sentiments: {}, visited_pc: 0, visited_mobile: 0, not_visited: 0 });
     const g = byOrg.get(org);
     if (r.delivery_status === 'sent') g.sent++;
     else if (r.delivery_status === 'pending') g.pending++;
@@ -31885,6 +31890,9 @@ function _kmailAggregateByOrg(recipRows) {
       g.replied++;
       const cls = r.reply_classification || '미분류';
       g.classifications[cls] = (g.classifications[cls] || 0) + 1;
+      // 2026-09-11 신설 — classification과 별도로 sentiment도 집계.
+      const sent = r.reply_sentiment || '미분류';
+      g.sentiments[sent] = (g.sentiments[sent] || 0) + 1;
     }
     // 2026-09-04 신설 — 회신뿐 아니라 접속(클릭) 여부도 기관별로
     // 집계한다. first_click_device는 최초 클릭 시점 값만 저장하므로
@@ -31913,6 +31921,7 @@ async function handleKmailContactsList(request, url, env, corsHeaders) {
   const occupation = (qp.occupation || '').trim();
   const org = (qp.org || '').trim();
   const tag = (qp.tag || '').trim();
+  const category = (qp.category || '').trim();
   if (!['pending_review', 'confirmed', 'rejected', 'all'].includes(status)) {
     return _err(400, 'INVALID_STATUS', "status는 pending_review/confirmed/rejected/all 중 하나여야 합니다", corsHeaders);
   }
@@ -31921,7 +31930,7 @@ async function handleKmailContactsList(request, url, env, corsHeaders) {
   if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
   const guid = auth.guid;
 
-  const items = await _kmailQueryContacts(env, guid, { status, q, relationship, occupation, org, tag });
+  const items = await _kmailQueryContacts(env, guid, { status, q, relationship, occupation, org, tag, category });
   return new Response(JSON.stringify({ ok: true, items }), { status: 200, headers: corsHeaders });
 }
 
@@ -32213,7 +32222,7 @@ async function _kmailMergeContactsCore(env, guid, keepId, mergeId) {
   // 빈 필드만 채움(기존 값 보존 — 다른 자동 갱신 로직과 동일 원칙),
   // 태그는 합집합.
   const patch = {};
-  for (const f of ['name', 'org', 'dept', 'occupation', 'relationship', 'phone', 'address', 'website', 'notes']) {
+  for (const f of ['name', 'org', 'dept', 'occupation', 'relationship', 'phone', 'address', 'website', 'notes', 'category']) {
     if (!keepContact[f] && mergeContact[f]) patch[f] = mergeContact[f];
   }
   const mergedTags = Array.from(new Set([...(keepContact.tags || []), ...(mergeContact.tags || [])]));
@@ -33359,11 +33368,16 @@ async function _kmailGenerateDigest(env, campaign) {
     // 2026-09-03 신설 — 수신자별 reply_classification 저장용 별도 호출.
     // 위 요약과 분리해뒀다 — 이 파싱이 실패해도 다이제스트 요약 자체
     // (사용자에게 보이는 부분)엔 영향이 없다.
+    // 2026-09-11 신설 — classification(참석/불참/문의/기타, 행사 초대
+    // 캠페인 전용 어휘)과 별도로 sentiment(긍정/부정/중립)도 같은
+    // 호출에서 함께 뽑는다. sentiment는 캠페인 종류와 무관하게 항상
+    // 채워지는 범용 축이라, "저번 캠페인 회신 중 긍정적인 것만
+    // 보여줘" 같은 질의(§ Mail SP ↔ 주소록 SP 설계)를 이걸로 answer.
     const classRaw = await deepseekChatText({
       env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
       messages: [{ role: 'user', content:
-        `다음 회신들 각각을 "참석","불참","문의","기타" 중 하나로 분류해서, 반드시 이 형식의 JSON 배열만 답하세요(설명 없이): [{"index":1,"classification":"참석"}]\n\n${replyText}` }],
-      max_tokens: 400, temperature: 0, timeoutMs: 15000, fallbackText: '',
+        `다음 회신들 각각에 대해 두 가지를 답하세요: (1) classification — "참석","불참","문의","기타" 중 하나(행사 초대가 아닌 메일이면 "기타"), (2) sentiment — "긍정","부정","중립" 중 하나(회신의 전반적 어조). 반드시 이 형식의 JSON 배열만 답하세요(설명 없이): [{"index":1,"classification":"참석","sentiment":"긍정"}]\n\n${replyText}` }],
+      max_tokens: 500, temperature: 0, timeoutMs: 15000, fallbackText: '',
     });
     try {
       const jsonMatch = (classRaw || '').match(/\[[\s\S]*\]/);
@@ -33385,6 +33399,7 @@ async function _kmailGenerateDigest(env, campaign) {
   // (docs/HANDOFF_2026-09-03_kmail-campaign-recipients-taskbrief.md §4-2).
   if (recipRows.length > 0 && replies.length > 0) {
     const classByIndex = new Map((Array.isArray(classifications) ? classifications : []).map(c => [c.index, c.classification]));
+    const sentByIndex = new Map((Array.isArray(classifications) ? classifications : []).map(c => [c.index, c.sentiment]));
     await Promise.all(replies.map((reply, i) => {
       const slug = (reply.sender_guid || '').replace(/^ext:/, '');
       const row = recipBySlug.get(slug);
@@ -33392,6 +33407,8 @@ async function _kmailGenerateDigest(env, campaign) {
       const patch = { replied_at: reply.created, reply_message_id: reply.id };
       const cls = classByIndex.get(i + 1);
       if (typeof cls === 'string' && ['참석', '불참', '문의', '기타', '무응답'].includes(cls)) patch.reply_classification = cls;
+      const sent = sentByIndex.get(i + 1);
+      if (typeof sent === 'string' && ['긍정', '부정', '중립'].includes(sent)) patch.reply_sentiment = sent;
       return fetch(`${L1_DEFAULT}/api/collections/kmail_campaign_recipients/records/${row.id}`, {
         method: 'PATCH', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify(patch),
       }).catch(e => console.warn('[K-Mail Digest] 수신자 회신매칭 저장 실패(계속 진행):', row.id, e.message));
@@ -34309,7 +34326,7 @@ async function _kaddressBulkUpdate(env, guid, parsed) {
 
     const patch = {};
     const overwrite = u?.overwrite === true;
-    for (const f of ['name', 'org', 'dept', 'occupation', 'relationship', 'phone', 'address', 'website', 'notes']) {
+    for (const f of ['name', 'org', 'dept', 'occupation', 'relationship', 'phone', 'address', 'website', 'notes', 'category']) {
       if (typeof u?.[f] === 'string' && u[f].trim() && (overwrite || !contact[f])) patch[f] = u[f].trim();
     }
     if (Array.isArray(u?.add_tags) || Array.isArray(u?.remove_tags)) {
@@ -34416,7 +34433,7 @@ async function _kmailChatSaveContacts(env, guid, parsed) {
         owner_user_guid: guid,
         name: c.name || '', org: c.org || '', dept: c.dept || '',
         occupation: c.occupation || '', relationship: c.relationship || '',
-        email: c.email, phone: c.phone || '', address: c.address || '', website: c.website || '', notes: c.notes || '', tags: c.tags || [],
+        email: c.email, phone: c.phone || '', address: c.address || '', website: c.website || '', notes: c.notes || '', category: c.category || '', tags: c.tags || [],
         source_url: c.source_url || '', confidence: typeof c.confidence === 'number' ? c.confidence : null,
         status,
         added_via_query: parsed?.note || '(K-Mail 대화에서 직접 등록)',
@@ -34776,6 +34793,11 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   const lookupMatch = reply.match(/KMAIL_LOOKUP_CONTACTS\s*(\{[\s\S]*\})\s*$/);
   const campaignLookupMatch = reply.match(/KMAIL_LOOKUP_CAMPAIGNS\s*(\{[\s\S]*\})?\s*$/);
   const campaignReportMatch = reply.match(/KMAIL_CAMPAIGN_REPORT\s*(\{[\s\S]*\})?\s*$/);
+  // 2026-09-11 신설 — Mail SP ↔ 주소록 SP 협업 설계에서 나온 두 요청
+  // 패턴("홍길동과 주고받은 메일만 뽑아줘", "저번 캠페인 회신 중
+  // 긍정적인 것만 보여줘")에 대응.
+  const lookupThreadMatch = reply.match(/KMAIL_LOOKUP_THREAD\s*(\{[\s\S]*\})\s*$/);
+  const filterRepliesMatch = reply.match(/KMAIL_FILTER_REPLIES\s*(\{[\s\S]*\})\s*$/);
   const tagMatch = reply.match(/KMAIL_TAG_CONTACTS\s*(\{[\s\S]*\})\s*$/);
   const mergeMatch = reply.match(/KMAIL_MERGE_CONTACTS\s*(\{[\s\S]*\})\s*$/);
   const threadStateMatch = reply.match(/KMAIL_THREAD_STATE\s*(\{[\s\S]*\})\s*$/);
@@ -34792,7 +34814,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   // 그대로 흘려보내지 않고 명확한 오류로 처리한다 — 조용히 실패하고
   // "된 것처럼" 보이는 것보다, 실패를 실패로 보여주는 게 훨씬 안전.
   const _kmailAnyTagMatch = searchMatch || fetchPageMatch || sendMatch || campaignStartMatch || saveContactsMatch || capabilityGapMatch || saveDraftMatch || lookupDraftsMatch || updateCampaignDraftMatch ||
-    ruleMatch || lookupMatch || campaignLookupMatch || campaignReportMatch || tagMatch ||
+    ruleMatch || lookupMatch || campaignLookupMatch || campaignReportMatch || lookupThreadMatch || filterRepliesMatch || tagMatch ||
     mergeMatch || threadStateMatch || statsMatch || settingsMatch;
   if (!_kmailAnyTagMatch && /KMAIL_[A-Z_]+\s*\{/.test(reply)) {
     return _err(502, 'AI_MALFORMED_TAG',
@@ -35198,6 +35220,127 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
       ok: true, reply: followUpReply,
       action: { type: shouldClose ? 'campaign_reported_and_closed' : 'campaign_reported', campaign_id: campaign.id },
     }), { status: 200, headers: corsHeaders });
+  }
+
+  // ── ⓪-8 특정 인물과 주고받은 메일 전부 조회 (2026-09-11 신설) ────
+  // "홍길동과 주고받은 메일만 뽑아줘" 같은 요청. KMAIL_THREAD_STATE
+  // (뮤트/스누즈)가 이미 쓰던 것과 같은 패턴(상대 이메일을 슬러그화해
+  // sender_guid='ext:<slug>' 또는 receiver_guid='ext:<slug>'로
+  // ai_messages를 찾는다)을 그대로 재사용 — 다만 그쪽은 "가장 최근
+  // 1건"만 봤고 이건 전체 이력을 시간순으로 다 가져온다는 차이.
+  if (lookupThreadMatch) {
+    let parsed = null;
+    try { parsed = JSON.parse(lookupThreadMatch[1]); } catch (e) { /* 아래에서 처리 */ }
+    const cleanReplyText = reply.slice(0, lookupThreadMatch.index).trim();
+    const withEmail = (parsed?.with_email || '').trim();
+    if (!withEmail) {
+      return new Response(JSON.stringify({ ok: true, reply: cleanReplyText || reply, action: null }), { status: 200, headers: corsHeaders });
+    }
+
+    const token = await _l1AdminToken(env);
+    const headers = { 'Authorization': `Bearer ${token}` };
+    const guidEsc = guid.replace(/'/g, "\\'");
+    const slugEsc = _slugifyEmailAddr(withEmail).replace(/'/g, "\\'");
+    const msgFilter = encodeURIComponent(`((sender_guid='ext:${slugEsc}' && receiver_guid='${guidEsc}') || (sender_guid='${guidEsc}' && receiver_guid='ext:${slugEsc}'))`);
+    const msgRes = await fetch(`${L1_DEFAULT}/api/collections/ai_messages/records?filter=${msgFilter}&sort=created&perPage=100`, { headers });
+    const msgData = await msgRes.json().catch(() => ({ items: [] }));
+    const msgs = msgData.items || [];
+
+    if (msgs.length === 0) {
+      return new Response(JSON.stringify({
+        ok: true, reply: `${cleanReplyText}\n\n${withEmail}와(과) 주고받은 메일을 찾지 못했습니다.`, action: { type: 'looked_up_thread', count: 0 },
+      }), { status: 200, headers: corsHeaders });
+    }
+
+    const threadPayload = msgs.map(m => ({
+      direction: m.sender_guid === guid ? '보냄' : '받음',
+      content: m.content_original, sent_at: m.created,
+    }));
+    const threadContext = `[${withEmail}와(과) 주고받은 메일 ${msgs.length}건 — 시간순]\n${JSON.stringify(threadPayload)}\n\n사용자 질문에 맞춰 위 내용을 정리해서 답하세요(예: 요약, 특정 시점 내용, 전체 나열 등). 지어내지 말고 위 데이터에 있는 내용만 쓰세요. (이 메시지 자체는 사용자에게 보이지 않습니다.)`;
+    let followUpReply;
+    try {
+      followUpReply = await deepseekChatText({
+        env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
+        messages: [
+          { role: 'system', content: systemPrompt }, ...cleanMessages,
+          { role: 'assistant', content: cleanReplyText || '메일함을 확인하고 있습니다...' },
+          { role: 'user', content: threadContext },
+        ],
+        max_tokens: 1200, temperature: 0.4, timeoutMs: 20000,
+        fallbackText: '조회는 완료됐지만 정리에 실패했습니다. 다시 시도해 주세요.',
+      });
+    } catch (e) {
+      followUpReply = '메일 이력 조회 중 오류가 발생했습니다: ' + e.message;
+    }
+
+    return new Response(JSON.stringify({ ok: true, reply: followUpReply, action: { type: 'looked_up_thread', count: msgs.length } }),
+      { status: 200, headers: corsHeaders });
+  }
+
+  // ── ⓪-9 캠페인 회신을 분류/감정으로 필터링 (2026-09-11 신설) ────
+  // "저번에 보낸 캠페인에 회신한 사람들 중 긍정적 반응만 보여줘" 같은
+  // 요청. §2-11 KMAIL_CAMPAIGN_REPORT가 기관별 집계라면, 이건 개인별
+  // 필터링 — reply_classification(행사 전용 어휘)과 reply_sentiment
+  // (범용 긍정/부정/중립) 중 사용자가 말한 축으로 거른다.
+  if (filterRepliesMatch) {
+    let parsed = null;
+    try { parsed = JSON.parse(filterRepliesMatch[1]); } catch (e) { /* 아래에서 처리 */ }
+    const cleanReplyText = reply.slice(0, filterRepliesMatch.index).trim();
+
+    const { campaign, matchCount } = await _kmailResolveOneCampaign(env, guid, {
+      campaign_id: (parsed?.campaign_id || '').trim(),
+      q: (parsed?.q || '').trim(),
+    }).catch(() => ({ campaign: null, matchCount: 0 }));
+
+    if (!campaign) {
+      const note = matchCount > 1
+        ? '어느 캠페인인지 특정하지 못했습니다 — 캠페인 제목을 조금 더 구체적으로 말씀해 주시겠어요?'
+        : '해당하는 캠페인을 찾지 못했습니다.';
+      return new Response(JSON.stringify({ ok: true, reply: `${cleanReplyText}\n\n(${note})`, action: null }), { status: 200, headers: corsHeaders });
+    }
+
+    const recipRows = await _kmailFetchCampaignRecipients(env, campaign.id).catch(() => []);
+    const sentiment = (parsed?.sentiment || '').trim();
+    const classification = (parsed?.classification || '').trim();
+    let filtered = recipRows.filter(r => r.replied_at);
+    if (sentiment) filtered = filtered.filter(r => r.reply_sentiment === sentiment);
+    if (classification) filtered = filtered.filter(r => r.reply_classification === classification);
+
+    // 필터링된 사람들의 실제 회신 본문을 붙여서, "내용도 보여줘"에
+    // 답할 수 있게 한다 — reply_message_id로 ai_messages를 조인.
+    const withBody = await Promise.all(filtered.map(async r => {
+      let body = '';
+      if (r.reply_message_id) {
+        const mRes = await fetch(`${L1_DEFAULT}/api/collections/ai_messages/records/${r.reply_message_id}`, {
+          headers: { Authorization: `Bearer ${await _l1AdminToken(env)}` },
+        }).catch(() => null);
+        if (mRes && mRes.ok) { const m = await mRes.json().catch(() => null); if (m) body = m.content_original || ''; }
+      }
+      return {
+        name: r.recipient_name, email: r.recipient_email, org: r.recipient_org,
+        classification: r.reply_classification || '', sentiment: r.reply_sentiment || '', reply_body: body,
+      };
+    }));
+
+    const filterContext = `[캠페인 "${campaign.title || campaign.subject}" 회신 필터링 결과 — 조건: sentiment=${sentiment || '(무관)'}, classification=${classification || '(무관)'}]\n총 회신 ${recipRows.filter(r => r.replied_at).length}건 중 ${withBody.length}건이 조건에 맞습니다.\n${JSON.stringify(withBody)}\n\n위 결과를 사용자에게 자연스럽게 정리해서 보여주세요(이름·소속·회신 요지). 0건이면 없다고 솔직히 말하세요. (이 메시지 자체는 사용자에게 보이지 않습니다.)`;
+    let followUpReply;
+    try {
+      followUpReply = await deepseekChatText({
+        env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
+        messages: [
+          { role: 'system', content: systemPrompt }, ...cleanMessages,
+          { role: 'assistant', content: cleanReplyText || '회신을 확인하고 있습니다...' },
+          { role: 'user', content: filterContext },
+        ],
+        max_tokens: 1200, temperature: 0.4, timeoutMs: 20000,
+        fallbackText: '필터링은 완료됐지만 정리에 실패했습니다. 다시 시도해 주세요.',
+      });
+    } catch (e) {
+      followUpReply = '회신 필터링 중 오류가 발생했습니다: ' + e.message;
+    }
+
+    return new Response(JSON.stringify({ ok: true, reply: followUpReply, action: { type: 'filtered_replies', campaign_id: campaign.id, count: withBody.length } }),
+      { status: 200, headers: corsHeaders });
   }
 
   // ── ① 웹 검색 요청 태그 ──────────────────────────────────────
@@ -35695,8 +35838,9 @@ async function handleKaddressChat(request, env, corsHeaders, ctx) {
       occupation: (parsed?.occupation || '').trim(),
       org: (parsed?.org || '').trim(),
       tag: (parsed?.tag || '').trim(),
+      category: (parsed?.category || '').trim(),
     }).catch(() => []);
-    const lookupContext = `[주소록 조회 결과 — ${items.length}건]\n${JSON.stringify(items.map(c => ({ name: c.name, email: c.email, org: c.org, occupation: c.occupation, status: c.status, tags: c.tags })))}\n\n위 목록을 사용자에게 자연스럽게 정리해서 보여주세요. 결과가 없으면 없다고 솔직히 말하세요. (이 메시지 자체는 사용자에게 보이지 않습니다.)`;
+    const lookupContext = `[주소록 조회 결과 — ${items.length}건]\n${JSON.stringify(items.map(c => ({ name: c.name, email: c.email, org: c.org, occupation: c.occupation, category: c.category, status: c.status, tags: c.tags })))}\n\n위 목록을 사용자에게 자연스럽게 정리해서 보여주세요. 결과가 없으면 없다고 솔직히 말하세요. (이 메시지 자체는 사용자에게 보이지 않습니다.)`;
     let followUpReply;
     try {
       followUpReply = await deepseekChatText({
