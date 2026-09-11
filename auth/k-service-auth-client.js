@@ -40,7 +40,11 @@
                                              일시적 인증 오류는 조용히 재시도, 진짜
                                              만료/무효일 때만 재로그인 오버레이 표시
                                              (GET/HEAD는 쿼리스트링에, 그 외는 JSON
-                                             body에 phone_verify_token 필드로 첨부)
+                                             body에 phone_verify_token 필드로 첨부).
+                                             만료가 7.5일 이내로 남았으면 요청 전에
+                                             /auth/refresh-token으로 조용히 30일 창을
+                                             새로 연다(2026-09-12 신설 — Gmail처럼
+                                             활동 중엔 재인증 없이 유지, 주피터 지시).
    ══════════════════════════════════════════════════════════════════ */
 
 (function (global) {
@@ -50,6 +54,12 @@
   var COOKIE_DOMAIN = (global.K_AUTH_CONFIG && global.K_AUTH_CONFIG.cookieDomain) || '.hondi.net';
   var COOKIE_TOKEN  = 'hondi_pvt';
   var COOKIE_EXP    = 'hondi_pvt_exp';
+  // 2026-09-12 신설 — 슬라이딩 세션 갱신 임계값(주피터 지시: Gmail처럼
+  // 활동 중엔 재인증 없이 유지). 만료까지 이 시간 이하로 남으면
+  // fetchWithAuth가 요청 직전에 조용히 /auth/refresh-token을 불러 30일
+  // 창을 새로 연다. 30일 TTL의 1/4 지점(7.5일 전)부터 갱신을 시도해
+  // 두면, 그 사이 한 번이라도 접속이 있으면 절대 만료되지 않는다.
+  var REFRESH_WINDOW_MS = 7.5 * 24 * 60 * 60 * 1000;
 
   var cfg = Object.assign({
     serviceLabel: document.title || 'K-서비스',
@@ -91,6 +101,35 @@
     clearCookie(COOKIE_EXP);
   }
   function hasValidLogin() { return !!token && Date.now() < tokenExp - 30000; }
+
+  // ── 슬라이딩 세션 갱신 (2026-09-12 신설) ─────────────────────
+  // in-flight 갱신 요청을 하나로 합친다 — 같은 페이지에서 여러
+  // fetchWithAuth 호출이 동시에 임계값을 넘기면(예: 탭을 여러 개 열어둔
+  // 상태로 복귀), 갱신 요청이 N번 중복 발사되는 대신 하나만 나가고
+  // 나머지는 그 결과를 같이 기다린다.
+  var refreshing = null;
+  function maybeRefresh() {
+    if (!token || !tokenExp) return Promise.resolve();
+    if (tokenExp - Date.now() > REFRESH_WINDOW_MS) return Promise.resolve(); // 아직 여유 있음
+    if (refreshing) return refreshing;
+    refreshing = fetch(PROXY + '/auth/refresh-token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone_verify_token: token }),
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; });
+    }).then(function (data) {
+      if (data.ok && data.phone_verify_token) {
+        persist(data.phone_verify_token, new Date(data.expires_at).getTime());
+      }
+      // 실패해도 조용히 무시한다 — 기존 토큰이 아직 유효하니(임계값을
+      // 막 넘긴 시점일 뿐 만료된 건 아님) 지금 이 요청은 그대로 진행되고,
+      // 다음 fetchWithAuth 호출 때 다시 시도된다. 일시적 네트워크 오류로
+      // 세션이 끊기는 걸 막기 위해 실패를 사용자에게 노출하지 않는다.
+    }).catch(function () { /* 네트워크 오류 — 다음 호출 때 재시도 */ })
+      .finally(function () { refreshing = null; });
+    return refreshing;
+  }
 
   // ── 오버레이 UI (자체 주입 — 페이지에 마크업 불필요) ────────────
   // device-link(웹푸시 승인) 단일 경로만 제공한다 — SMS 인증번호를
@@ -350,6 +389,7 @@
   async function fetchWithAuth(url, options) {
     options = options || {};
     await ensureLogin();
+    await maybeRefresh(); // 만료 임박이면 실제 요청 전에 조용히 30일 창을 새로 연다
 
     function build() {
       var method = (options.method || 'GET').toUpperCase();
