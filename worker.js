@@ -12469,6 +12469,12 @@ export default {
     if (pathname === '/kmail/contacts/update' && request.method === 'POST') return handleKmailContactsUpdate(request, env, corsHeaders);
     if (pathname === '/kmail/contacts/tag' && request.method === 'POST') return handleKmailContactsTag(request, env, corsHeaders);
     if (pathname === '/kmail/contacts/merge' && request.method === 'POST') return handleKmailContactsMerge(request, env, corsHeaders);
+    // 2026-09-11 신설 — CSV/엑셀 일괄 업로드(mail 저장소 §주소록). AI를
+    // 전혀 거치지 않는 순수 REST 등록 경로 — 태그 잘림·거짓 완료·배치
+    // 크기 초과 같은 AI 호출 특유의 사고가 구조적으로 발생할 수 없다.
+    // category만 예외로 AI가 아닌 결정적(deterministic) 키워드 매칭으로
+    // 채운다(아래 handleKmailContactsCsvImport 참고).
+    if (pathname === '/kmail/contacts/csv-import' && request.method === 'POST') return handleKmailContactsCsvImport(request, env, corsHeaders);
     if (pathname === '/kmail/threads/state' && request.method === 'POST') return handleKmailThreadStateSet(request, env, corsHeaders);
     if (pathname === '/kmail/stats' && request.method === 'GET') return handleKmailStats(request, url, env, corsHeaders);
     if (pathname === '/kmail/settings' && request.method === 'GET') return handleKmailSettingsGet(request, url, env, corsHeaders);
@@ -31795,6 +31801,133 @@ async function handleKmailContactsPropose(request, env, corsHeaders) {
   }
 
   return new Response(JSON.stringify({ ok: true, staged: created.length, skipped: candidates.length - valid.length, ids: created }),
+    { status: 200, headers: corsHeaders });
+}
+
+// 2026-09-11 신설 — CSV/엑셀 일괄 업로드 전용 category(KSIC 대분류)
+// 자동 분류. CSV 경로엔 AI가 전혀 끼지 않으므로(대화형 K-Address와
+// 달리 소속명을 보고 판단해줄 존재가 없음), 이걸 대체할 결정적
+// 키워드 매칭을 둔다 — LLM 추측이 아니라 규칙 기반이라 CSV 업로드의
+// "AI 호출 없음" 원칙이 그대로 지켜진다. 애매한 경우는 빈 값으로
+// 남겨(억지로 틀리게 채우지 않음) 사용자가 나중에 K-Address 대화나
+// 수동 수정으로 채울 수 있게 한다.
+// 순서가 중요 — 위에서부터 먼저 매칭되는 키워드가 우선한다(예: "대학"이
+// "대학병원"보다 먼저 오면 병원을 교육기관으로 잘못 분류하게 되므로
+// 더 구체적인 키워드를 앞에 둔다).
+const KADDRESS_ORG_CATEGORY_KEYWORDS = [
+  // 의료·복지(Q) — "대학병원"처럼 대학 키워드와 겹치는 경우가 있어
+  // 교육(P) 판정보다 먼저 검사한다.
+  ['병원', 'Q'], ['의원', 'Q'], ['한의원', 'Q'], ['치과', 'Q'], ['보건소', 'Q'],
+  ['요양원', 'Q'], ['요양병원', 'Q'], ['복지관', 'Q'], ['어린이집', 'Q'], ['재활원', 'Q'],
+  // 교육(P)
+  ['대학교', 'P'], ['대학원', 'P'], ['대학', 'P'], ['고등학교', 'P'], ['중학교', 'P'],
+  ['초등학교', 'P'], ['유치원', 'P'], ['학원', 'P'], ['교육청', 'P'], ['교육지원청', 'P'],
+  ['평생교육', 'P'],
+  // 전문·과학·기술(연구소, M) — "부설연구소"처럼 대학 소속인 경우는
+  // 위에서 이미 '대학'으로 먼저 걸리므로 여기선 독립 연구기관만 남는다.
+  ['연구원', 'M'], ['연구소', 'M'], ['과학기술원', 'M'], ['출연연', 'M'],
+  ['법무법인', 'M'], ['회계법인', 'M'], ['특허법인', 'M'], ['컨설팅', 'M'],
+  // 공공 행정(O)
+  ['특별자치도청', 'O'], ['도청', 'O'], ['시청', 'O'], ['군청', 'O'], ['구청', 'O'],
+  ['읍사무소', 'O'], ['면사무소', 'O'], ['동주민센터', 'O'], ['주민센터', 'O'],
+  ['국세청', 'O'], ['관세청', 'O'], ['경찰청', 'O'], ['소방서', 'O'], ['법원', 'O'],
+  ['검찰청', 'O'], ['위원회', 'O'], ['공무원', 'O'], ['정부', 'O'], ['국회', 'O'], ['청와대', 'O'],
+  // 협회·단체(S)
+  ['협회', 'S'], ['조합', 'S'], ['연합회', 'S'], ['총연합회', 'S'], ['재단법인', 'S'],
+  ['사단법인', 'S'], ['비영리', 'S'], ['NGO', 'S'],
+  // 금융·보험(K)
+  ['은행', 'K'], ['증권', 'K'], ['보험', 'K'], ['캐피탈', 'K'], ['카드', 'K'], ['저축은행', 'K'],
+  // 정보통신(J)
+  ['방송', 'J'], ['신문사', 'J'], ['통신사', 'J'], ['소프트웨어', 'J'], ['정보통신', 'J'],
+  // 국제·외국기관(U)
+  ['대사관', 'U'], ['영사관', 'U'], ['국제기구', 'U'],
+];
+// 조직명 키워드로 못 잡는 경우(개인 이메일 등)를 위한 이메일 도메인
+// 보조 판정. 조직명 매칭이 있으면 그게 우선하고, 이건 org가 비어있거나
+// 매칭 실패했을 때만 쓴다.
+const KADDRESS_EMAIL_DOMAIN_SUFFIX_CATEGORY = [
+  ['.ac.kr', 'P'], ['.go.kr', 'O'], ['.re.kr', 'M'], ['.or.kr', 'S'],
+];
+function _kaddressClassifyCategory(org, email) {
+  const orgStr = String(org || '').trim();
+  if (orgStr) {
+    for (const [kw, code] of KADDRESS_ORG_CATEGORY_KEYWORDS) {
+      if (orgStr.includes(kw)) return code;
+    }
+  }
+  const emailStr = String(email || '').trim().toLowerCase();
+  if (emailStr.includes('@')) {
+    const domain = emailStr.slice(emailStr.indexOf('@') + 1);
+    for (const [suffix, code] of KADDRESS_EMAIL_DOMAIN_SUFFIX_CATEGORY) {
+      if (domain.endsWith(suffix)) return code;
+    }
+  }
+  return ''; // 애매하면 빈 값 — 억지로 틀리게 채우지 않는다
+}
+
+// POST /kmail/contacts/csv-import
+// body: { phone_verify_token (또는 guid/pubkey/signature/ts), contacts: [
+//   {name, org, dept, email, phone, occupation, relationship, address,
+//    website, notes, category?, tags?}, ... ], status? }
+// mail 저장소(§주소록)에서 CSV/엑셀을 프론트엔드가 직접 파싱해 구조화된
+// contacts 배열로 보내면, 여기선 AI 호출 없이 그대로 kmail_contacts에
+// 등록한다(_kmailChatSaveContacts와 같은 저장 로직·같은 상한을 쓰되,
+// AI 대화가 아닌 REST 경로라는 점만 다르다). category를 명시하지
+// 않은 행은 위 결정적 키워드 매칭으로 자동 분류한다.
+async function handleKmailContactsCsvImport(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
+
+  const auth = await _kAuth.resolveGuid(env, body, { sigMsg: `kmail-contacts-csv-import:${body.guid}:${body.ts}` });
+  if (!auth.ok) return _err(auth.status || 401, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
+
+  const rows = Array.isArray(body.contacts) ? body.contacts : [];
+  if (rows.length === 0) return _err(400, 'MISSING_FIELD', 'contacts 배열(1개 이상) 필수', corsHeaders);
+  if (rows.length > KMAIL_CHAT_SAVE_CONTACTS_MAX) {
+    return _err(400, 'TOO_MANY_CANDIDATES', `한 번에 최대 ${KMAIL_CHAT_SAVE_CONTACTS_MAX}건까지만 업로드할 수 있습니다 — 파일을 나눠서 올려주세요`, corsHeaders);
+  }
+  const status = body.status === 'pending_review' ? 'pending_review' : 'confirmed';
+
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const valid = rows.filter(c => c && typeof c.email === 'string' && emailRe.test(c.email.trim()));
+  const invalidCount = rows.length - valid.length;
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  const esc = s => String(s).replace(/'/g, "\\'");
+  let created = 0, skippedDup = 0, autoCategorized = 0;
+
+  for (const c of valid) {
+    const email = c.email.trim();
+    const filter = encodeURIComponent(`owner_user_guid='${esc(guid)}' && email='${esc(email)}' && status!='rejected'`);
+    const findRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records?filter=${filter}&perPage=1`, { headers: { Authorization: headers.Authorization } });
+    const findData = await findRes.json().catch(() => ({ items: [] }));
+    if (findData.items && findData.items.length > 0) { skippedDup++; continue; }
+
+    let category = typeof c.category === 'string' ? c.category.trim() : '';
+    if (!category) {
+      category = _kaddressClassifyCategory(c.org, email);
+      if (category) autoCategorized++;
+    }
+
+    const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records`, {
+      method: 'POST', headers,
+      body: JSON.stringify({
+        owner_user_guid: guid,
+        name: c.name || '', org: c.org || '', dept: c.dept || '',
+        occupation: c.occupation || '', relationship: c.relationship || '',
+        email, phone: c.phone || '', address: c.address || '', website: c.website || '', notes: c.notes || '',
+        category, tags: Array.isArray(c.tags) ? c.tags : [],
+        source_url: '', confidence: null,
+        status,
+        added_via_query: '(CSV/엑셀 일괄 업로드)',
+      }),
+    });
+    if (res.ok) created++;
+  }
+
+  return new Response(JSON.stringify({ ok: true, created, skippedDup, invalidCount, autoCategorized, status }),
     { status: 200, headers: corsHeaders });
 }
 
