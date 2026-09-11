@@ -35787,10 +35787,18 @@ async function handleKaddressChat(request, env, corsHeaders, ctx) {
     // 최악의 경우 ~100토큰(전 필드 채움 + 한국어) = 약 4000토큰 —
     // 프롬프트 서두까지 더하면 정확히 한도에 걸렸을 것. 8000토큰이면
     // 같은 계산으로 70건 이상까지 여유.
+    // 2026-09-11(2차) — 8000→20000으로 재상향(주피터 지시, K-Mail과
+    // 동일 조치). 실사용에서 139건(SP 권장 40건/회를 훌쩍 넘는 배치)을
+    // 한 번에 등록하려다 8000토큰이 다시 부족해졌다 — 8000 기준
+    // 70건선이었으니 139건이면 애초에 부족했을 계산. deepseek-v4-flash
+    // 실제 최대 출력(공식 문서 기준 약 38만 토큰) 대비 20000은 5%
+    // 수준이라 API 자체 상한 초과 위험은 없다(K-Mail 때 확인한 것과
+    // 동일 근거). max_tokens는 상한일 뿐 실제 과금은 생성량에 비례하므로
+    // 짧은 응답의 비용에는 영향 없음.
     reply = await deepseekChatText({
       env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
       messages: [...systemMessages, ...cleanMessages],
-      max_tokens: 8000, temperature: 0.3, timeoutMs: 45000, fallbackText: '',
+      max_tokens: 20000, temperature: 0.3, timeoutMs: 45000, fallbackText: '',
     });
   } catch (e) {
     return _err(502, 'AI_CALL_FAILED', 'AI 호출 실패: ' + e.message, corsHeaders);
