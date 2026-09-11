@@ -406,7 +406,12 @@ def run_scenario(scn, ctx):
     if kind == "self_send_and_inbound_roundtrip":
         marker = uuid.uuid4().hex[:10]
         subject = f"[스모크테스트] 자가발송 왕복 {marker}"
-        to_addr = f"{guid}@hondi.kr"
+        # worker.js _guidToEmailLocalPart와 동일 — 실제 이메일 프로토콜에
+        # 쓰는 주소는 콜론이 아니라 하이픈 형태여야 한다(콜론은 이메일
+        # 로컬파트에서 무효 문자 — fix/kmail-guid-email-address-invalid
+        # 참고). ctx["guid"]는 PocketBase 조회용 원본(콜론) 형태이므로
+        # 여기서만 별도로 변환한다.
+        to_addr = f"{guid.replace(':', '-')}@hondi.kr"
         status, body, _, err = post_json(worker_base, "/mail/send", token, {
             "to": to_addr, "subject": subject, "text": f"자가발송 왕복 테스트 본문 {marker}",
         })
@@ -511,7 +516,14 @@ def main():
         print(f"\n사전 점검 실패 — {e164}로 등록된 프로필을 찾지 못했거나 인증에 실패했습니다.", file=sys.stderr)
         print(f"  status={sanity_status} body={sanity_body} err={sanity_err}", file=sys.stderr)
         sys.exit(1)
-    guid = sanity_body["kmail_address"].split("@")[0]
+    # 2026-09-12 수정 — worker.js 긴급 수정(fix/kmail-guid-email-address-invalid)
+    # 이후 kmail_address는 이메일 프로토콜에 실제로 넣을 수 있는 하이픈
+    # 형태(2601-db80-...)로 응답한다. 그런데 PocketBase의
+    # kmail_user_settings.owner_user_guid 등 내부 저장값은 여전히 원래
+    # guid(콜론 형태, 2601:db80:...)이므로, PB 직접 조회에 쓰려면
+    # 하이픈을 다시 콜론으로 되돌려야 한다(worker.js
+    # _emailLocalPartToGuid와 동일한 변환).
+    guid = sanity_body["kmail_address"].split("@")[0].replace("-", ":")
     print(f"사전 점검 통과 — guid={guid}\n")
 
     # ★ 실계정 오염 방지 — 실행 전 현재 kmail_user_settings 값을 백업.
