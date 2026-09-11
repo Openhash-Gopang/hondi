@@ -55,6 +55,7 @@ import hashlib
 import hmac
 import json
 import os
+import re
 import sys
 import time
 import uuid
@@ -64,6 +65,34 @@ import requests
 DEFAULT_WORKER_BASE = "https://hondi-proxy.tensor-city.workers.dev"
 DEFAULT_PB_BASE = "https://l1-hanlim.hondi.net"
 WRITE_PROPAGATION_WAIT_S = 2
+
+
+def normalize_kr_e164(raw):
+    """전화번호를 어떤 형식으로 입력해도(대시/공백 포함, +82 유무, 010
+    유무, 뒷자리만 등) 실제 profiles.e164와 맞는 표준 형식으로 정규화
+    한다 — 실사 사고: --test-e164에 "96627170"(뒷자리 8자리만)을 넣었더니
+    그 문자열 그대로 조회해 PROFILE_NOT_FOUND로 20개 시나리오가 전부
+    연쇄 실패했다.
+
+    ★ 이 저장소의 e164 표기 — 표준 E.164라면 앞자리 0을 떼야 하지만
+    (+82 10 9662 7170), 이 코드베이스는 klaw_usage_billing_live_smoketest.py
+    의 실제 예시("+8201096627170")가 보여주듯 국내 앞자리 0을 그대로
+    유지한 채 "+82" 뒤에 "010..."을 붙인다(+82 + 0 + 10 9662 7170).
+    아래도 그 실제 관례를 그대로 따른다 — "+8210..."으로 정규화하면
+    (표준 E.164 방식) profiles.e164와 안 맞아 또 PROFILE_NOT_FOUND가
+    난다.
+
+    한국 휴대폰 번호는 마지막 8자리(국번+가입자번호)만 있으면 사람
+    하나를 특정하기 충분하므로, 입력에서 숫자만 남긴 뒤 마지막 8자리를
+    취해 "+82010" + 8자리로 항상 재구성한다. "+8201096627170",
+    "01096627170", "010-9662-7170", "9662-7170", "96627170" 전부
+    동일하게 "+8201096627170"으로 정규화됨.
+    """
+    digits = re.sub(r"\D", "", raw or "")
+    if len(digits) < 8:
+        raise ValueError(f"전화번호에서 숫자가 8자리 미만입니다: {raw!r}")
+    last8 = digits[-8:]
+    return f"+82010{last8}"
 
 
 def make_phone_verify_token(secret, e164, ttl_ms=10 * 60 * 1000):
@@ -418,8 +447,23 @@ def main():
                 except Exception:
                     pass
 
-    token = make_phone_verify_token(args.phone_verify_secret, args.test_e164)
+    e164 = normalize_kr_e164(args.test_e164)
+    print(f"입력된 전화번호({args.test_e164!r})를 정규화: {e164}")
+    token = make_phone_verify_token(args.phone_verify_secret, e164)
     pb_token = pb_admin_login(args.pb_base, args.pb_admin_email, args.pb_admin_password)
+
+    # 2026-09-11 신설 — 실사 사고: 정규화 전 잘못된 번호 하나 때문에
+    # PROFILE_NOT_FOUND가 20개 시나리오 전부에서 반복 발생하며 조용히
+    # 낭비됐다. 본 실행 전에 가벼운 호출 하나로 이 번호가 실제 등록된
+    # 프로필과 맞는지 먼저 확인하고, 안 맞으면 즉시 중단한다.
+    sanity_status, sanity_body, _, sanity_err = get_json(args.worker_base, "/kmail/mailbox", token, {"box": "sent"})
+    if sanity_err or sanity_status != 200 or not (sanity_body or {}).get("ok"):
+        print(f"\n사전 점검 실패 — {e164}로 등록된 프로필을 찾지 못했거나 인증에 실패했습니다.", file=sys.stderr)
+        print(f"  status={sanity_status} body={sanity_body} err={sanity_err}", file=sys.stderr)
+        print("  --test-e164에 실제 등록된 계정 전화번호(뒷자리 8자리만 있어도 됨)를 넣었는지 확인해 주세요.", file=sys.stderr)
+        sys.exit(1)
+    print("사전 점검 통과 — 등록된 프로필 확인됨.\n")
+
     ctx = {
         "worker_base": args.worker_base, "phone_verify_token": token,
         "pb_base": args.pb_base, "pb_token": pb_token,
