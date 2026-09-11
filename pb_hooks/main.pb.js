@@ -4687,6 +4687,73 @@ onRecordBeforeCreateRequest((e) => {
   }
 }, "profiles");
 
+// ── K-Mail ID(mail_id) 가입 시 기본값 자동배정 (2026-09-12 신설, 주피터
+// 지시 — "K-Mail 주소가 IPv6 형태 guid라 실생활에 쓰기 어렵다. 아이디
+// 지정이 언제 이뤄져야 하는지" 논의 끝에, 가입 시점에 항상 기본값이
+// 있게 만들기로 결정) ──────────────────────────────────────────
+//
+// worker.js _kmailGenerateMailIdCandidate와 완전히 동일한 알고리즘
+// (HMAC-SHA256(MAIL_ID_SECRET, "mail-id-seed:"+guid+":"+counter)의 앞
+// 8자리 hex)을 여기서도 그대로 재현한다 — 두 곳이 달라지면 나중에
+// 사용자가 "내 메일 ID" 화면에서 "자동으로 만들기"를 다시 눌렀을 때
+// 이미 배정된 값과 다른 값이 나올 수 있어 혼란을 준다.
+//
+// 필요한 환경변수: MAIL_ID_SECRET — worker.js의 wrangler secret
+//   MAIL_ID_SECRET과 반드시 동일한 값으로 이 L1 서버에도 등록해야 한다
+//   (PHONE_VERIFY_SECRET이 이미 Worker·PocketBase 양쪽에 같은 값을
+//   따로 등록해 쓰는 것과 동일한 패턴 — systemd unit
+//   Environment=MAIL_ID_SECRET=... 로 추가).
+//
+// Before가 아니라 After 훅을 쓰는 이유: kmail_user_settings는 profiles와
+// 별개 컬렉션이다. profiles 생성 자체가 (재클레임 검증 등으로) 이후에
+// 실패할 여지가 있는 Before 훅에서 미리 만들어두면, "프로필은
+// 안 만들어졌는데 mail_id 레코드만 남는" 고아 레코드가 생길 수 있다.
+// After 훅은 profiles 레코드가 실제로 커밋된 뒤에만 실행되므로 이
+// 위험이 없다.
+//
+// 실패(시크릿 미설정, 10회 연속 충돌 등)해도 가입 자체를 막지 않는다
+// — best-effort. 배정에 실패한 사용자는 "내 메일 ID" 설정 탭에서
+// 수동 지정하거나 자동생성 버튼으로 다시 시도할 수 있다.
+onRecordAfterCreateRequest((e) => {
+  if (e.collection.name !== "profiles") return;
+
+  try {
+    const guid = e.record.getString("guid");
+    if (!guid) return;
+
+    const secret = $os.getenv("MAIL_ID_SECRET");
+    if (!secret) {
+      console.log("[MAIL-ID-DEFAULT] MAIL_ID_SECRET 미설정 — 기본값 배정 스킵(가입은 정상 진행)");
+      return;
+    }
+
+    const MAX_TRIES = 10;
+    for (let counter = 0; counter < MAX_TRIES; counter++) {
+      const hash = $security.hs256(`mail-id-seed:${guid}:${counter}`, secret);
+      const candidate = hash.substring(0, 8);
+
+      const existing = $app.dao().findRecordsByFilter(
+        "kmail_user_settings",
+        `mail_id = '${candidate}'`,
+        "", 1, 0
+      );
+      if (existing.length > 0) continue; // 충돌 — 다음 counter로 재시도
+
+      const collection = $app.dao().findCollectionByNameOrId("kmail_user_settings");
+      const rec = new Record(collection);
+      rec.set("owner_user_guid", guid);
+      rec.set("mail_id", candidate);
+      rec.set("sender_display_name", "혼디 K-Mail");
+      $app.dao().saveRecord(rec);
+      console.log(`[MAIL-ID-DEFAULT] guid=${guid} → mail_id=${candidate} 자동배정 완료(${counter + 1}회 시도)`);
+      return;
+    }
+    console.log(`[MAIL-ID-DEFAULT] guid=${guid} — ${MAX_TRIES}회 연속 충돌, 기본값 배정 실패(가입은 정상 진행)`);
+  } catch (err) {
+    console.log("[MAIL-ID-DEFAULT] 배정 중 오류(가입은 정상 진행): " + err.message);
+  }
+}, "profiles");
+
 // ── 잔액/거래이력 공용 유틸 (2026-09-06 신설) ───────────────────────
 // computeBalance 로직을 여러 훅(삭제 방어, PATCH 최초 바인딩 방어)에서
 // 재사용하기 위해 여기로 뺐다. 주의: 이 프로젝트의 PocketBase Goja
