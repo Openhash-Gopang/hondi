@@ -32011,7 +32011,11 @@ async function handleKmailContactsCsvImport(request, env, corsHeaders) {
 // API)와 K-Mail 채팅의 KMAIL_LOOKUP_CONTACTS(§ handleKmailChat 하단)
 // 양쪽이 공유한다. 이스케이프 로직을 두 곳에 복붙하면 한쪽만 고치고
 // 다른 쪽을 놓치는 사고가 나기 쉬워 묶었다.
-async function _kmailQueryContacts(env, guid, { status = 'confirmed', q = '', relationship = '', occupation = '', org = '', tag = '', category = '' } = {}) {
+// 2026-09-11 신설 — _kmailQueryContacts와 신설 _kmailCountContacts가
+// 필터 절 구성 로직을 공유하기 위해 뺐다. 한쪽만 고치고 다른 쪽을
+// 놓치는 사고를 막기 위함(예: q에 address 필드를 추가했는데 카운트
+// 쪽엔 반영이 안 되는 식의 드리프트).
+function _kmailContactsFilterString(guid, { status = 'confirmed', q = '', relationship = '', occupation = '', org = '', tag = '', category = '' } = {}) {
   const esc = s => String(s).replace(/'/g, "\\'");
   const clauses = [`owner_user_guid='${esc(guid)}'`];
   if (status !== 'all') clauses.push(`status='${esc(status)}'`);
@@ -32019,26 +32023,43 @@ async function _kmailQueryContacts(env, guid, { status = 'confirmed', q = '', re
   // 그 텍스트에 부분일치한다 — ["세미나초청대상"] 안에 "세미나초청대상"이
   // 있는지는 이 방식으로 충분히 잡힌다(태그명에 흔치 않은 특수문자가
   // 없는 한 오탐 위험 낮음, 이 규모에서 전용 JSON 연산자까진 불필요).
-  // 2026-09-11 — 상세 검색에 주소(address)도 포함(주피터 지시 — 주소록이
-  // 커질수록 이름/이메일만으로는 못 찾는 경우가 늘어남).
   if (q) clauses.push(`(name~'${esc(q)}' || org~'${esc(q)}' || dept~'${esc(q)}' || occupation~'${esc(q)}' || relationship~'${esc(q)}' || email~'${esc(q)}' || address~'${esc(q)}' || tags~'${esc(q)}')`);
   if (relationship) clauses.push(`relationship~'${esc(relationship)}'`);
   if (occupation) clauses.push(`occupation~'${esc(occupation)}'`);
   if (org) clauses.push(`org~'${esc(org)}'`);
   if (tag) clauses.push(`tags~'${esc(tag)}'`);
-  // 2026-09-11 신설 — KSIC 대분류(category 필드) 기준 그룹 조회.
-  // 부분일치(~)를 쓰는 이유: category 값은 "J 정보통신업"처럼
-  // 코드+이름이 붙어있는데, 사용자는 "정보통신업만"처럼 이름만
-  // 말하는 경우가 많다.
+  // KSIC 대분류(category 필드) 기준 그룹 조회. 부분일치(~)를 쓰는
+  // 이유: category 값은 "J 정보통신업"처럼 코드+이름이 붙어있는데,
+  // 사용자는 "정보통신업만"처럼 이름만 말하는 경우가 많다.
   // category='__NONE__'는 프론트엔드가 "미분류"(카테고리 값이 비어있는
   // 연락처) 버킷을 요청할 때 쓰는 예약어 — 빈 문자열을 그냥 넘기면
   // "필터 없음"과 구분이 안 되므로 별도 처리한다.
   if (category === '__NONE__') clauses.push(`category=''`);
   else if (category) clauses.push(`category~'${esc(category)}'`);
+  return clauses.join(' && ');
+}
 
+// 2026-09-11 신설 — K-Address가 "주소록에 몇 명이나 등록됐어?" 같은
+// 총 건수 질문에 부정확하게 답하던 문제 수정(실사 발견: 실제 769건인데
+// "총 200건"이라고 답함). 원인: KADDR_LOOKUP_CONTACTS가
+// _kmailQueryContacts(perPage=200 캡)로 가져온 샘플의 items.length를
+// 그대로 "총 건수"로 말해버렸다. 이 함수는 실제 레코드는 안 가져오고
+// (perPage=1) PocketBase가 항상 돌려주는 totalItems만 읽어 정확한
+// 전체 건수를 구한다 — /kmail/contacts/category-counts에서 쓴 것과
+// 같은 패턴.
+async function _kmailCountContacts(env, guid, opts = {}) {
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}` };
-  const filter = encodeURIComponent(clauses.join(' && '));
+  const filter = encodeURIComponent(_kmailContactsFilterString(guid, opts));
+  const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records?filter=${filter}&perPage=1`, { headers });
+  const data = await res.json().catch(() => ({ totalItems: 0 }));
+  return data.totalItems || 0;
+}
+
+async function _kmailQueryContacts(env, guid, { status = 'confirmed', q = '', relationship = '', occupation = '', org = '', tag = '', category = '' } = {}) {
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}` };
+  const filter = encodeURIComponent(_kmailContactsFilterString(guid, { status, q, relationship, occupation, org, tag, category }));
   const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records?filter=${filter}&sort=org,name&perPage=200`, { headers });
   const data = await res.json().catch(() => ({ items: [] }));
   return data.items || [];
@@ -35357,16 +35378,27 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     try { parsed = JSON.parse(lookupMatch[1]); } catch (e) { /* 아래에서 빈 조건으로 처리 */ }
     const cleanReplyText = reply.slice(0, lookupMatch.index).trim();
 
-    const items = await _kmailQueryContacts(env, guid, {
+    const lookupOpts = {
       status: 'confirmed',
       q: (parsed?.q || '').trim(),
       relationship: (parsed?.relationship || '').trim(),
       occupation: (parsed?.occupation || '').trim(),
       org: (parsed?.org || '').trim(),
       tag: (parsed?.tag || '').trim(),
-    }).catch(() => []);
+    };
+    // 2026-09-11 — K-Address 쪽과 같은 사고(200건 캡 샘플 크기를 총
+    // 건수인 것처럼 답함)를 여기서도 같이 고친다 — 정확한 총 건수를
+    // 별도로 병렬 조회.
+    const [items, totalCount] = await Promise.all([
+      _kmailQueryContacts(env, guid, lookupOpts).catch(() => []),
+      _kmailCountContacts(env, guid, lookupOpts).catch(() => null),
+    ]);
 
-    const lookupContext = `[주소록 조회 결과]\n${JSON.stringify(items.map(c => ({ name: c.name, email: c.email, org: c.org, occupation: c.occupation, relationship: c.relationship, tags: c.tags })))}\n\n위 목록을 사용자에게 자연스럽게 정리해서 보여주세요. 결과가 없으면 없다고 솔직히 말하세요. (이 메시지 자체는 사용자에게 보이지 않습니다.)`;
+    const totalNote = totalCount !== null ? `정확한 총 건수: ${totalCount}건.` : '(정확한 총 건수 조회 실패 — 샘플 건수로만 답하지 말고 조회에 실패했다고 밝히세요.)';
+    const cappedNote = items.length >= 200 && totalCount !== null && totalCount > items.length
+      ? ` 아래 목록은 그중 처음 ${items.length}건 샘플입니다 — 이 샘플 크기를 총 건수로 말하지 마세요.`
+      : '';
+    const lookupContext = `[주소록 조회 결과] ${totalNote}${cappedNote}\n\n샘플 ${items.length}건:\n${JSON.stringify(items.map(c => ({ name: c.name, email: c.email, org: c.org, occupation: c.occupation, relationship: c.relationship, tags: c.tags })))}\n\n위 정보를 사용자에게 자연스럽게 정리해서 보여주세요. "총 건수"를 말할 땐 반드시 위 정확한 총 건수를 쓰세요. 결과가 없으면 없다고 솔직히 말하세요. (이 메시지 자체는 사용자에게 보이지 않습니다.)`;
     let followUpReply;
     try {
       followUpReply = await deepseekChatText({
@@ -35383,7 +35415,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
       followUpReply = '주소록 조회 중 오류가 발생했습니다: ' + e.message;
     }
 
-    return new Response(JSON.stringify({ ok: true, reply: followUpReply, action: { type: 'looked_up_contacts', count: items.length } }),
+    return new Response(JSON.stringify({ ok: true, reply: followUpReply, action: { type: 'looked_up_contacts', count: totalCount !== null ? totalCount : items.length } }),
       { status: 200, headers: corsHeaders });
   }
 
@@ -36178,7 +36210,7 @@ async function handleKaddressChat(request, env, corsHeaders, ctx) {
     let parsed = null;
     try { parsed = kaddrLookupMatch[1] ? JSON.parse(kaddrLookupMatch[1]) : {}; } catch (e) { parsed = {}; }
     const cleanReplyText = reply.slice(0, kaddrLookupMatch.index).trim();
-    const items = await _kmailQueryContacts(env, guid, {
+    const lookupOpts = {
       status: (parsed?.status || 'confirmed').trim(),
       q: (parsed?.q || '').trim(),
       relationship: (parsed?.relationship || '').trim(),
@@ -36186,8 +36218,21 @@ async function handleKaddressChat(request, env, corsHeaders, ctx) {
       org: (parsed?.org || '').trim(),
       tag: (parsed?.tag || '').trim(),
       category: (parsed?.category || '').trim(),
-    }).catch(() => []);
-    const lookupContext = `[주소록 조회 결과 — ${items.length}건]\n${JSON.stringify(items.map(c => ({ name: c.name, email: c.email, org: c.org, occupation: c.occupation, category: c.category, status: c.status, tags: c.tags })))}\n\n위 목록을 사용자에게 자연스럽게 정리해서 보여주세요. 결과가 없으면 없다고 솔직히 말하세요. (이 메시지 자체는 사용자에게 보이지 않습니다.)`;
+    };
+    // 2026-09-11 — items(최대 200건 샘플)와 별개로 정확한 총 건수를
+    // 함께 구한다(실사 발견: "몇 건이냐" 질문에 200건 캡에 걸린 샘플
+    // 크기를 그대로 총 건수인 것처럼 답한 사고). 둘 다 병렬로 조회.
+    const [items, totalCount] = await Promise.all([
+      _kmailQueryContacts(env, guid, lookupOpts).catch(() => []),
+      _kmailCountContacts(env, guid, lookupOpts).catch(() => null),
+    ]);
+    const totalNote = totalCount !== null
+      ? `정확한 총 건수: ${totalCount}건.`
+      : '(정확한 총 건수 조회 실패 — 샘플 건수로만 답하지 말고 조회에 실패했다고 밝히세요.)';
+    const cappedNote = items.length >= 200 && totalCount !== null && totalCount > items.length
+      ? ` 아래 목록은 그중 처음 ${items.length}건 샘플입니다 — 이 샘플 크기를 총 건수로 말하지 마세요. 구성(소속별 비율 등)을 답할 때도 샘플 밖 데이터가 있을 수 있다는 걸 밝히세요.`
+      : '';
+    const lookupContext = `[주소록 조회 결과] ${totalNote}${cappedNote}\n\n샘플 ${items.length}건:\n${JSON.stringify(items.map(c => ({ name: c.name, email: c.email, org: c.org, occupation: c.occupation, category: c.category, status: c.status, tags: c.tags })))}\n\n위 정보를 사용자에게 자연스럽게 정리해서 보여주세요. "총 건수"를 말할 땐 반드시 위 정확한 총 건수를 쓰고, 샘플 크기와 헷갈리지 마세요. 결과가 없으면 없다고 솔직히 말하세요. (이 메시지 자체는 사용자에게 보이지 않습니다.)`;
     let followUpReply;
     try {
       followUpReply = await deepseekChatText({
@@ -36203,7 +36248,7 @@ async function handleKaddressChat(request, env, corsHeaders, ctx) {
     } catch (e) {
       followUpReply = '조회 중 오류가 발생했습니다: ' + e.message;
     }
-    return new Response(JSON.stringify({ ok: true, reply: followUpReply, action: { type: 'kaddr_looked_up', count: items.length } }), { status: 200, headers: corsHeaders });
+    return new Response(JSON.stringify({ ok: true, reply: followUpReply, action: { type: 'kaddr_looked_up', count: totalCount !== null ? totalCount : items.length } }), { status: 200, headers: corsHeaders });
   }
 
   if (kaddrUpdateMatch) {
