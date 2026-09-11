@@ -12494,6 +12494,9 @@ export default {
     if (pathname === '/kmail/rules' && request.method === 'GET') return handleKmailRuleList(request, url, env, corsHeaders);
     if (pathname === '/kmail/rules/toggle' && request.method === 'POST') return handleKmailRuleToggle(request, env, corsHeaders);
     if (pathname === '/kmail/chat' && request.method === 'POST') return handleKmailChat(request, env, corsHeaders, ctx);
+    // 2026-09-11 신설 — K-Address(SP-26) 대화형 주소록 관리, K-Mail과
+    // 완전히 격리된 별도 엔드포인트.
+    if (pathname === '/kaddress/chat' && request.method === 'POST') return handleKaddressChat(request, env, corsHeaders, ctx);
     if (pathname === '/kmail/messages/state' && request.method === 'POST') return handleKmailMessageStateSet(request, env, corsHeaders);
     if (pathname === '/kmail/blocklist' && request.method === 'POST') return handleKmailBlocklistAdd(request, env, corsHeaders);
     if (pathname === '/kmail/blocklist' && request.method === 'GET') return handleKmailBlocklistList(request, url, env, corsHeaders);
@@ -34015,6 +34018,42 @@ let _kmailSpCacheAt = 0;
 let _kmailSpFailedAt = 0;
 const _KMAIL_SP_TTL_MS = 10 * 60 * 1000;
 
+// ═══════════════════════════════════════════════════════════
+// K-Address 대화형 주소록 관리 SP(2026-09-11 신설, SP-26_kaddress) —
+// 주피터 지시: "주소록에 하나씩 등록하는 게 아니라 대화로 일괄
+// 생성·수정·갱신·보완할 수 있어야 한다". K-Mail(SP-25)과 완전히
+// 격리된 별도 SP·별도 엔드포인트다 — 주소록 관리를 K-Mail SP에
+// 계속 얹으면 그 SP가 한없이 비대해지고(이미 §2가 매우 길다),
+// "메일 발송"이라는 K-Mail의 본래 목적과 "주소록 그 자체를 정리"
+// 하는 목적이 섞여 혼란을 키운다. kmail_contacts 컬렉션은 그대로
+// 공유하므로(주소록 데이터 자체는 하나), K-Mail의 검증된 내부
+// 함수(_kmailChatSaveContacts, _kmailQueryContacts,
+// _kmailMergeContactsCore)를 그대로 재사용한다 — 로직을 복제하지
+// 않는다.
+let _kaddressSpCache = null;
+let _kaddressSpCacheAt = 0;
+let _kaddressSpFailedAt = 0;
+const _KADDRESS_SP_TTL_MS = 10 * 60 * 1000;
+
+async function _fetchKaddressSp(env) {
+  const now = Date.now();
+  if (_kaddressSpCache && (now - _kaddressSpCacheAt) < _KADDRESS_SP_TTL_MS) return _kaddressSpCache;
+  if (_kaddressSpFailedAt && (now - _kaddressSpFailedAt) < _MANIFEST_FAIL_RETRY_MS) {
+    if (_kaddressSpCache) return _kaddressSpCache;
+    throw new Error('SP-26_kaddress 로드 실패(최근 재시도 쿨다운 중)');
+  }
+  try {
+    _kaddressSpCache = await _fetchByManifestKeyFromGithub('SP-26_kaddress');
+    _kaddressSpCacheAt = now;
+    _kaddressSpFailedAt = 0;
+    return _kaddressSpCache;
+  } catch (e) {
+    _kaddressSpFailedAt = now;
+    if (_kaddressSpCache) return _kaddressSpCache;
+    throw e;
+  }
+}
+
 async function _fetchKmailSp(env) {
   const now = Date.now();
   if (_kmailSpCache && (now - _kmailSpCacheAt) < _KMAIL_SP_TTL_MS) return _kmailSpCache;
@@ -34238,6 +34277,115 @@ async function _kmailAppendCampaignMessages(env, campaignId, guid, entries) {
 // (2) 상한을 훨씬 넉넉하게 둔다(대화 하나로 수백 명을 부를 수 있음 —
 // 실사용 사례: 대학 25곳 로스쿨 교수진 383명).
 const KMAIL_CHAT_SAVE_CONTACTS_MAX = 1000;
+// ── K-Address(SP-26) 전용 헬퍼 4종 — 아래는 K-Mail(SP-25)에 없던
+// 진짜 신규 기능이라 여기서 새로 만든다. 저장(_kmailChatSaveContacts)·
+// 조회(_kmailQueryContacts)·병합(_kmailMergeContactsCore)은 K-Mail
+// 것을 그대로 재사용(위 참고) — 로직 중복을 피한다.
+
+// 이미 confirmed로 등록된 연락처를 이메일로 찾아 필드를 보완/갱신한다
+// ("보완"). 명시적으로 준 필드만 덮어쓴다 — 안 준 필드는 그대로 둔다.
+// tags는 add_tags/remove_tags로 다루고(별도 태그 함수와 동일 개념),
+// 다른 필드(org/dept/occupation/relationship/name)는 overwrite=true일
+// 때만 기존 값을 덮어쓴다(기본값 false — 빈 값만 채움, 이미 있는
+// 정보를 실수로 지우지 않기 위함).
+async function _kaddressBulkUpdate(env, guid, parsed) {
+  const updates = Array.isArray(parsed?.updates) ? parsed.updates : [];
+  if (updates.length === 0) throw new Error('updates 배열(1개 이상) 필수');
+  if (updates.length > 200) throw new Error('한 번에 최대 200건까지만 수정할 수 있습니다 — 나눠서 요청해 주세요');
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  const esc = s => String(s).replace(/'/g, "\\'");
+  let updated = 0; const notFound = [];
+
+  for (const u of updates) {
+    const email = (u?.email || '').trim();
+    if (!email) continue;
+    const filter = encodeURIComponent(`owner_user_guid='${esc(guid)}' && email='${esc(email)}' && status='confirmed'`);
+    const findRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records?filter=${filter}&perPage=1`, { headers: { Authorization: headers.Authorization } });
+    const findData = await findRes.json().catch(() => ({ items: [] }));
+    const contact = findData.items && findData.items[0];
+    if (!contact) { notFound.push(email); continue; }
+
+    const patch = {};
+    const overwrite = u?.overwrite === true;
+    for (const f of ['name', 'org', 'dept', 'occupation', 'relationship']) {
+      if (typeof u?.[f] === 'string' && u[f].trim() && (overwrite || !contact[f])) patch[f] = u[f].trim();
+    }
+    if (Array.isArray(u?.add_tags) || Array.isArray(u?.remove_tags)) {
+      const current = new Set(contact.tags || []);
+      for (const t of (u.add_tags || [])) if (typeof t === 'string' && t.trim()) current.add(t.trim());
+      for (const t of (u.remove_tags || [])) current.delete(t);
+      patch.tags = Array.from(current);
+    }
+    if (Object.keys(patch).length === 0) continue;
+    const patchRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records/${contact.id}`, { method: 'PATCH', headers, body: JSON.stringify(patch) });
+    if (patchRes.ok) updated++;
+  }
+  return { updated, notFound };
+}
+
+// pending_review 상태인 후보를 일괄 승인(confirmed)/거부(rejected)한다.
+// 이메일 목록으로 지정하거나, q(검색어)로 걸리는 pending_review 전체를
+// 한 번에 처리할 수도 있다(emails가 비어있고 q만 있으면 전체 적용).
+async function _kaddressBulkDecide(env, guid, parsed) {
+  const decision = parsed?.decision === 'rejected' ? 'rejected' : 'confirmed';
+  const emails = Array.isArray(parsed?.emails) ? parsed.emails.filter(e => typeof e === 'string' && e.trim()) : [];
+  const q = (parsed?.q || '').trim();
+  if (emails.length === 0 && !q) throw new Error('emails 배열 또는 q(검색어) 중 하나는 있어야 합니다');
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  const esc = s => String(s).replace(/'/g, "\\'");
+  let candidates = [];
+
+  if (emails.length > 0) {
+    const orClause = emails.map(e => `email='${esc(e.trim())}'`).join(' || ');
+    const filter = encodeURIComponent(`owner_user_guid='${esc(guid)}' && status='pending_review' && (${orClause})`);
+    const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records?filter=${filter}&perPage=500`, { headers: { Authorization: headers.Authorization } });
+    const data = await res.json().catch(() => ({ items: [] }));
+    candidates = data.items || [];
+  } else {
+    let filter = `owner_user_guid='${esc(guid)}' && status='pending_review'`;
+    if (q) filter += ` && (name~'${esc(q)}' || email~'${esc(q)}' || org~'${esc(q)}')`;
+    const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records?filter=${encodeURIComponent(filter)}&perPage=500`, { headers: { Authorization: headers.Authorization } });
+    const data = await res.json().catch(() => ({ items: [] }));
+    candidates = data.items || [];
+  }
+  if (candidates.length > 300) throw new Error(`한 번에 처리할 후보가 ${candidates.length}건으로 너무 많습니다 — q를 더 좁혀서 나눠 처리해 주세요`);
+
+  let processed = 0;
+  for (const c of candidates) {
+    const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records/${c.id}`, { method: 'PATCH', headers, body: JSON.stringify({ status: decision }) });
+    if (res.ok) processed++;
+  }
+  return { processed, decision };
+}
+
+// 확인된(confirmed) 연락처를 이메일로 지정해 삭제(soft: rejected로
+// 전환 — 완전 삭제는 하지 않는다. 캠페인 contact_ids가 참조 중일 수
+// 있어 물리 삭제는 위험하고, "관리"는 정리이지 파기가 아니다).
+async function _kaddressBulkDelete(env, guid, parsed) {
+  const emails = Array.isArray(parsed?.emails) ? parsed.emails.filter(e => typeof e === 'string' && e.trim()) : [];
+  if (emails.length === 0) throw new Error('emails 배열(1개 이상) 필수');
+  if (emails.length > 200) throw new Error('한 번에 최대 200건까지만 처리할 수 있습니다 — 나눠서 요청해 주세요');
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  const esc = s => String(s).replace(/'/g, "\\'");
+  let removed = 0; const notFound = [];
+  for (const email of emails) {
+    const filter = encodeURIComponent(`owner_user_guid='${esc(guid)}' && email='${esc(email.trim())}' && status!='rejected'`);
+    const findRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records?filter=${filter}&perPage=1`, { headers: { Authorization: headers.Authorization } });
+    const findData = await findRes.json().catch(() => ({ items: [] }));
+    const contact = findData.items && findData.items[0];
+    if (!contact) { notFound.push(email); continue; }
+    const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records/${contact.id}`, { method: 'PATCH', headers, body: JSON.stringify({ status: 'rejected' }) });
+    if (res.ok) removed++;
+  }
+  return { removed, notFound };
+}
+
 async function _kmailChatSaveContacts(env, guid, parsed) {
   const candidates = Array.isArray(parsed?.candidates) ? parsed.candidates : [];
   if (candidates.length === 0) throw new Error('candidates 배열(1개 이상) 필수');
@@ -35417,7 +35565,258 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   return new Response(JSON.stringify({ ok: true, reply, action: null }), { status: 200, headers: corsHeaders });
 }
 
-// GET /default-key?guid=...&registered_at=ISO8601
+// ═══════════════════════════════════════════════════════════
+// K-Address 대화형 주소록 관리(2026-09-11 신설, SP-26_kaddress) —
+// K-Mail(SP-25)과 완전히 격리된 별도 SP·별도 엔드포인트(/kaddress/chat).
+// kmail_contacts 컬렉션은 공유하지만, 태그 이름(KADDR_ 접두사)과
+// 시스템 프롬프트는 K-Mail과 전혀 다르다 — "메일 발송"이 아니라
+// "주소록 자체를 대화로 관리"만이 목적이다.
+// 입력 한도는 주피터 지시로 2만 토큰(≈4만자, "1토큰≈한국어2자"
+// 근사)으로 K-Mail보다 훨씬 작게 잡는다 — 이 SP는 한 화면에서
+// 끝나는 짧고 반복적인 작업(등록·수정·승인·병합)이 대부분이라,
+// K-Mail 같은 초장문 캠페인 대화가 필요 없다.
+async function handleKaddressChat(request, env, corsHeaders, ctx) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
+  const { messages } = body;
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return _err(400, 'MISSING_FIELD', 'messages 배열(1개 이상) 필수', corsHeaders);
+  }
+  const KADDR_MAX_MESSAGES = 60;
+  const KADDR_MAX_APPROX_CHARS = 40000; // 대략 2만 토큰 상당(보수적 근사) — 주피터 지시
+  if (messages.length > KADDR_MAX_MESSAGES) {
+    return _err(400, 'TOO_MANY_MESSAGES', '대화가 너무 깁니다 — "+ 새 대화"로 다시 시작해 주세요(이미 등록·수정된 내용은 안전하게 보존돼 있습니다).', corsHeaders);
+  }
+  const approxChars = messages.reduce((sum, m) => sum + (typeof m?.content === 'string' ? m.content.length : 0), 0);
+  if (approxChars > KADDR_MAX_APPROX_CHARS) {
+    return _err(400, 'CONTEXT_TOO_LARGE', '대화 내용이 너무 많습니다 — "+ 새 대화"로 다시 시작해 주세요(이미 등록·수정된 내용은 안전하게 보존돼 있습니다). 한 번에 등록/수정할 인원을 좀 더 작은 단위로 나눠 주시면 도움이 됩니다.', corsHeaders);
+  }
+
+  const auth = await _kAuth.resolveGuid(env, body, { sigMsg: `kaddress-chat:${body.guid}:${body.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
+
+  if (!env.DEEPSEEK_API_KEY) return _err(500, 'DEEPSEEK_KEY_MISSING', 'DEEPSEEK_API_KEY secret 미설정', corsHeaders);
+
+  let sp;
+  try {
+    sp = await _fetchKaddressSp(env);
+  } catch (e) {
+    return _err(502, 'SP_LOAD_FAILED', 'K-Address SP 로드 실패: ' + e.message, corsHeaders);
+  }
+
+  const nowKST = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+  }).format(new Date()).replace(' ', 'T') + '+09:00';
+  const systemPrompt = sp.replace(/\{\{NOW\}\}/g, nowKST).replace(/\{\{GUID\}\}/g, guid);
+
+  // K-Mail과 동일하게 UNIVERSAL 계층을 강제 주입한다(격리된 전용
+  // 엔드포인트는 handleLLMRelay를 거치지 않아 화이트리스트 적용을
+  // 못 받으므로, K-Mail 때와 같은 이유로 여기서도 직접 넣는다).
+  const kaddressUniversalInjected = await _fetchUniversalLayers();
+
+  const cleanMessages = messages
+    .filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+    .slice(-40)
+    .map(m => ({ role: m.role, content: m.content.slice(0, 20000) }));
+  if (cleanMessages.length === 0) return _err(400, 'MISSING_FIELD', '유효한 메시지가 없습니다', corsHeaders);
+
+  const systemMessages = [
+    ...(kaddressUniversalInjected ? [{ role: 'system', content: kaddressUniversalInjected }] : []),
+    { role: 'system', content: systemPrompt },
+  ];
+
+  let reply;
+  try {
+    reply = await deepseekChatText({
+      env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
+      messages: [...systemMessages, ...cleanMessages],
+      max_tokens: 4000, temperature: 0.3, timeoutMs: 30000, fallbackText: '',
+    });
+  } catch (e) {
+    return _err(502, 'AI_CALL_FAILED', 'AI 호출 실패: ' + e.message, corsHeaders);
+  }
+  if (!reply) return _err(502, 'AI_EMPTY_REPLY', 'AI 응답이 비어있습니다', corsHeaders);
+
+  const kaddrSaveMatch = reply.match(/KADDR_SAVE_CONTACTS\s*(\{[\s\S]*\})\s*$/);
+  const kaddrLookupMatch = reply.match(/KADDR_LOOKUP_CONTACTS\s*(\{[\s\S]*\})?\s*$/);
+  const kaddrUpdateMatch = reply.match(/KADDR_UPDATE_CONTACTS\s*(\{[\s\S]*\})\s*$/);
+  const kaddrDecideMatch = reply.match(/KADDR_DECIDE_CONTACTS\s*(\{[\s\S]*\})\s*$/);
+  const kaddrMergeMatch = reply.match(/KADDR_MERGE_CONTACTS\s*(\{[\s\S]*\})\s*$/);
+  const kaddrTagMatch = reply.match(/KADDR_TAG_CONTACTS\s*(\{[\s\S]*\})\s*$/);
+  const kaddrDeleteMatch = reply.match(/KADDR_DELETE_CONTACTS\s*(\{[\s\S]*\})\s*$/);
+
+  const _kaddrAnyTagMatch = kaddrSaveMatch || kaddrLookupMatch || kaddrUpdateMatch || kaddrDecideMatch || kaddrMergeMatch || kaddrTagMatch || kaddrDeleteMatch;
+  // 2026-09-11 — K-Mail 쪽 사고(잘린 태그가 그대로 노출됨)에서 배운
+  // 안전장치를 처음부터 넣는다.
+  if (!_kaddrAnyTagMatch && /KADDR_[A-Z_]+\s*\{/.test(reply)) {
+    return _err(502, 'AI_MALFORMED_TAG',
+      '응답이 중간에 잘렸거나 태그 형식이 깨졌습니다 — 아무것도 저장/실행되지 않았습니다. 더 작은 단위로 나눠서 다시 시도해 주세요.',
+      corsHeaders);
+  }
+
+  if (kaddrSaveMatch) {
+    let parsed = null;
+    try { parsed = JSON.parse(kaddrSaveMatch[1]); } catch (e) { /* 처리 아래 */ }
+    const cleanReplyText = reply.slice(0, kaddrSaveMatch.index).trim();
+    if (!parsed) return new Response(JSON.stringify({ ok: true, reply: cleanReplyText || reply, action: null }), { status: 200, headers: corsHeaders });
+    try {
+      if (!parsed.note) parsed.note = '(K-Address 대화에서 직접 등록)';
+      const result = await _kmailChatSaveContacts(env, guid, parsed);
+      const statusNote = result.status === 'pending_review' ? '승인 대기(주소록에서 검토 후 승인 필요)' : '주소록에 바로 등록됨';
+      const skipNote = result.skippedDup > 0 ? ` (이미 있던 ${result.skippedDup}건은 중복이라 건너뜀)` : '';
+      const invalidNote = result.invalidCount > 0 ? ` (이메일 형식이 잘못된 ${result.invalidCount}건은 제외)` : '';
+      return new Response(JSON.stringify({
+        ok: true, reply: `${cleanReplyText}\n\n✅ ${result.created}건 ${statusNote}${skipNote}${invalidNote}`,
+        action: { type: 'kaddr_saved', created: result.created },
+      }), { status: 200, headers: corsHeaders });
+    } catch (e) {
+      return new Response(JSON.stringify({ ok: true, reply: `${cleanReplyText}\n\n(등록 중 오류: ${e.message})`, action: null }), { status: 200, headers: corsHeaders });
+    }
+  }
+
+  if (kaddrLookupMatch) {
+    let parsed = null;
+    try { parsed = kaddrLookupMatch[1] ? JSON.parse(kaddrLookupMatch[1]) : {}; } catch (e) { parsed = {}; }
+    const cleanReplyText = reply.slice(0, kaddrLookupMatch.index).trim();
+    const items = await _kmailQueryContacts(env, guid, {
+      status: (parsed?.status || 'confirmed').trim(),
+      q: (parsed?.q || '').trim(),
+      relationship: (parsed?.relationship || '').trim(),
+      occupation: (parsed?.occupation || '').trim(),
+      org: (parsed?.org || '').trim(),
+      tag: (parsed?.tag || '').trim(),
+    }).catch(() => []);
+    const lookupContext = `[주소록 조회 결과 — ${items.length}건]\n${JSON.stringify(items.map(c => ({ name: c.name, email: c.email, org: c.org, occupation: c.occupation, status: c.status, tags: c.tags })))}\n\n위 목록을 사용자에게 자연스럽게 정리해서 보여주세요. 결과가 없으면 없다고 솔직히 말하세요. (이 메시지 자체는 사용자에게 보이지 않습니다.)`;
+    let followUpReply;
+    try {
+      followUpReply = await deepseekChatText({
+        env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
+        messages: [
+          { role: 'system', content: systemPrompt }, ...cleanMessages,
+          { role: 'assistant', content: cleanReplyText || '주소록을 확인하고 있습니다...' },
+          { role: 'user', content: lookupContext },
+        ],
+        max_tokens: 4000, temperature: 0.3, timeoutMs: 20000,
+        fallbackText: '조회는 완료됐지만 결과 정리에 실패했습니다. 다시 시도해 주세요.',
+      });
+    } catch (e) {
+      followUpReply = '조회 중 오류가 발생했습니다: ' + e.message;
+    }
+    return new Response(JSON.stringify({ ok: true, reply: followUpReply, action: { type: 'kaddr_looked_up', count: items.length } }), { status: 200, headers: corsHeaders });
+  }
+
+  if (kaddrUpdateMatch) {
+    let parsed = null;
+    try { parsed = JSON.parse(kaddrUpdateMatch[1]); } catch (e) { /* 처리 아래 */ }
+    const cleanReplyText = reply.slice(0, kaddrUpdateMatch.index).trim();
+    if (!parsed) return new Response(JSON.stringify({ ok: true, reply: cleanReplyText || reply, action: null }), { status: 200, headers: corsHeaders });
+    try {
+      const result = await _kaddressBulkUpdate(env, guid, parsed);
+      const notFoundNote = result.notFound.length > 0 ? ` (주소록에 없어서 건너뛴 이메일: ${result.notFound.join(', ')})` : '';
+      return new Response(JSON.stringify({
+        ok: true, reply: `${cleanReplyText}\n\n✅ ${result.updated}건 수정했습니다.${notFoundNote}`,
+        action: { type: 'kaddr_updated', updated: result.updated },
+      }), { status: 200, headers: corsHeaders });
+    } catch (e) {
+      return new Response(JSON.stringify({ ok: true, reply: `${cleanReplyText}\n\n(수정 중 오류: ${e.message})`, action: null }), { status: 200, headers: corsHeaders });
+    }
+  }
+
+  if (kaddrDecideMatch) {
+    let parsed = null;
+    try { parsed = JSON.parse(kaddrDecideMatch[1]); } catch (e) { /* 처리 아래 */ }
+    const cleanReplyText = reply.slice(0, kaddrDecideMatch.index).trim();
+    if (!parsed) return new Response(JSON.stringify({ ok: true, reply: cleanReplyText || reply, action: null }), { status: 200, headers: corsHeaders });
+    try {
+      const result = await _kaddressBulkDecide(env, guid, parsed);
+      const verb = result.decision === 'rejected' ? '거부' : '승인';
+      return new Response(JSON.stringify({
+        ok: true, reply: `${cleanReplyText}\n\n✅ ${result.processed}건 ${verb}했습니다.`,
+        action: { type: 'kaddr_decided', processed: result.processed },
+      }), { status: 200, headers: corsHeaders });
+    } catch (e) {
+      return new Response(JSON.stringify({ ok: true, reply: `${cleanReplyText}\n\n(처리 중 오류: ${e.message})`, action: null }), { status: 200, headers: corsHeaders });
+    }
+  }
+
+  if (kaddrMergeMatch) {
+    let parsed = null;
+    try { parsed = JSON.parse(kaddrMergeMatch[1]); } catch (e) { /* 처리 아래 */ }
+    const cleanReplyText = reply.slice(0, kaddrMergeMatch.index).trim();
+    const keepEmail = (parsed?.keep_email || '').trim();
+    const mergeEmail = (parsed?.merge_email || '').trim();
+    if (!keepEmail || !mergeEmail) return new Response(JSON.stringify({ ok: true, reply: cleanReplyText || reply, action: null }), { status: 200, headers: corsHeaders });
+    try {
+      const token = await _l1AdminToken(env);
+      const headers = { Authorization: `Bearer ${token}` };
+      const guidEsc = guid.replace(/'/g, "\\'");
+      const [keepFound, mergeFound] = await Promise.all([
+        fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records?filter=${encodeURIComponent(`owner_user_guid='${guidEsc}' && email='${keepEmail.replace(/'/g, "\\'")}' && status='confirmed'`)}&perPage=1`, { headers }).then(r => r.json()).catch(() => ({ items: [] })),
+        fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records?filter=${encodeURIComponent(`owner_user_guid='${guidEsc}' && email='${mergeEmail.replace(/'/g, "\\'")}' && status='confirmed'`)}&perPage=1`, { headers }).then(r => r.json()).catch(() => ({ items: [] })),
+      ]);
+      const keepContact = keepFound.items && keepFound.items[0];
+      const mergeContact = mergeFound.items && mergeFound.items[0];
+      if (!keepContact || !mergeContact) {
+        return new Response(JSON.stringify({ ok: true, reply: `${cleanReplyText}\n\n(두 이메일 중 하나를 주소록에서 찾지 못했습니다.)`, action: null }), { status: 200, headers: corsHeaders });
+      }
+      const mergeResult = await _kmailMergeContactsCore(env, guid, keepContact.id, mergeContact.id).catch(() => ({ ok: false }));
+      if (!mergeResult?.ok) {
+        return new Response(JSON.stringify({ ok: true, reply: `${cleanReplyText}\n\n(병합 처리 중 오류가 발생했습니다.)`, action: null }), { status: 200, headers: corsHeaders });
+      }
+      return new Response(JSON.stringify({
+        ok: true, reply: `${cleanReplyText}\n\n✅ 두 연락처를 합쳤습니다 — ${keepEmail}로 통합됐습니다.`,
+        action: { type: 'kaddr_merged', keep_id: keepContact.id },
+      }), { status: 200, headers: corsHeaders });
+    } catch (e) {
+      return new Response(JSON.stringify({ ok: true, reply: `${cleanReplyText}\n\n(병합 중 오류: ${e.message})`, action: null }), { status: 200, headers: corsHeaders });
+    }
+  }
+
+  if (kaddrTagMatch) {
+    let parsed = null;
+    try { parsed = JSON.parse(kaddrTagMatch[1]); } catch (e) { /* 처리 아래 */ }
+    const cleanReplyText = reply.slice(0, kaddrTagMatch.index).trim();
+    const emails = Array.isArray(parsed?.emails) ? parsed.emails.filter(e => typeof e === 'string') : [];
+    const addTags = Array.isArray(parsed?.add_tags) ? parsed.add_tags : [];
+    const removeTags = Array.isArray(parsed?.remove_tags) ? parsed.remove_tags : [];
+    if (emails.length === 0 || (addTags.length === 0 && removeTags.length === 0)) {
+      return new Response(JSON.stringify({ ok: true, reply: cleanReplyText || reply, action: null }), { status: 200, headers: corsHeaders });
+    }
+    try {
+      const result = await _kaddressBulkUpdate(env, guid, { updates: emails.map(email => ({ email, add_tags: addTags, remove_tags: removeTags })) });
+      const notFoundNote = result.notFound.length > 0 ? ` (주소록에 없어서 건너뛴 이메일: ${result.notFound.join(', ')})` : '';
+      return new Response(JSON.stringify({
+        ok: true, reply: `${cleanReplyText}\n\n✅ ${result.updated}명에게 적용했습니다.${notFoundNote}`,
+        action: { type: 'kaddr_tagged', tagged_count: result.updated },
+      }), { status: 200, headers: corsHeaders });
+    } catch (e) {
+      return new Response(JSON.stringify({ ok: true, reply: `${cleanReplyText}\n\n(태그 적용 중 오류: ${e.message})`, action: null }), { status: 200, headers: corsHeaders });
+    }
+  }
+
+  if (kaddrDeleteMatch) {
+    let parsed = null;
+    try { parsed = JSON.parse(kaddrDeleteMatch[1]); } catch (e) { /* 처리 아래 */ }
+    const cleanReplyText = reply.slice(0, kaddrDeleteMatch.index).trim();
+    if (!parsed) return new Response(JSON.stringify({ ok: true, reply: cleanReplyText || reply, action: null }), { status: 200, headers: corsHeaders });
+    try {
+      const result = await _kaddressBulkDelete(env, guid, parsed);
+      const notFoundNote = result.notFound.length > 0 ? ` (이미 없거나 못 찾은 이메일: ${result.notFound.join(', ')})` : '';
+      return new Response(JSON.stringify({
+        ok: true, reply: `${cleanReplyText}\n\n✅ ${result.removed}건 주소록에서 제거했습니다.${notFoundNote}`,
+        action: { type: 'kaddr_deleted', removed: result.removed },
+      }), { status: 200, headers: corsHeaders });
+    } catch (e) {
+      return new Response(JSON.stringify({ ok: true, reply: `${cleanReplyText}\n\n(삭제 중 오류: ${e.message})`, action: null }), { status: 200, headers: corsHeaders });
+    }
+  }
+
+  return new Response(JSON.stringify({ ok: true, reply, action: null }), { status: 200, headers: corsHeaders });
+}
+
+
 // 체험기간 내이면 활성 키 중 첫 번째 반환 (key 값은 마스킹 안 함 — HTTPS 전용)
 // 체험기간 만료이면 expired_msg 반환
 //
