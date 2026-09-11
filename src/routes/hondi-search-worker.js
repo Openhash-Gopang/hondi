@@ -28,6 +28,10 @@
 
 import { deepseekChat } from '../gopang/core/deepseek-client.js';
 
+// ALLOW-EMBEDDED-SP: 이 파일 자체가 위 헤더에 적혀있듯 실제 서빙에는
+// 관여하지 않는 참고용 사본이다(2026-09-09부터 hondi-search-relay
+// 저장소로 완전히 이관됨) — 이 리터럴을 고쳐도 라이브 동작에 영향
+// 없는 죽은 코드라 SP 사본 중복 문제에 해당하지 않는다.
 const HONDI_SEARCH_SP = `당신은 혼디(hondi.net)의 사이트 내 검색 도우미 "혼디 검색"입니다.
 
 역할:

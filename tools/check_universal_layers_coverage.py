@@ -77,6 +77,15 @@ DEDICATED_RELAY_SERVICES = {
 # 대상이 아닌 이유가 정당한 경우.
 CLIENT_LOADER_EXCEPTIONS = {"profile-assistant"}
 
+# 2026-09-11 추가 — kmail은 handleLLMRelay를 거치지 않는 완전히 격리된
+# 전용 엔드포인트(/kmail/chat, handleKmailChat)라 위 두 패턴(화이트리스트/
+# DEDICATED_RELAY_SERVICES) 어디에도 안 걸려 FAIL로 오탐되고 있었다.
+# 실제로는 handleKmailChat 본문이 _fetchUniversalLayers()를 무조건
+# 호출한다(2026-09-02 감사로 이미 확인·수정된 지 오래됨) — K-Law의
+# handleKlawRelay와 완전히 같은 검증 방식(relay_calls_universal)을
+# 그대로 재사용할 수 있어 DEDICATED_RELAY_SERVICES에 추가한다.
+DEDICATED_RELAY_SERVICES["kmail"] = "handleKmailChat"
+
 
 def load_gwp_registry():
     """gwp-registry.js를 Node vm으로 실행해 GWP_REGISTRY 배열을 얻는다."""
