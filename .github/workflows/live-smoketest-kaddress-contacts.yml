@@ -1,0 +1,105 @@
+name: Live Smoketest — K-Address 주소록 등록/중복방지/분류
+
+# 2026-09-11 신설 — 이번 세션에 고친 것들의 회귀 방지 가드:
+#   1) CSV 업로드 category 자동분류가 kmail_contacts.category select
+#      필드 21개 값과 정확히 일치하는지(실사 사고: 코드 한 글자만
+#      넣어 레코드 생성이 조용히 실패했던 것).
+#   2) propose/csv-import/chat-save 세 등록 경로 전부 저장 전 이메일
+#      중복(대소문자 무시)을 확인하는지(실사 사고: propose엔 중복
+#      검사가 아예 없었음).
+#   3) mailbox/drafts/message-state가 phone_verify_token 인증을
+#      받아들이는지(실사 사고: 지갑 서명만 지원해 지갑 SSO를 안 쓰는
+#      "메일" 탭에서 호출 자체가 막혀 있었음).
+#   4) GET /kmail/contacts/category-counts가 실제 PocketBase 값과
+#      일치하는지.
+#
+# 기존 live-smoketest-klaw-usage-billing-beta.yml과 동일한 관례
+# (workflow_dispatch, phone_verify_token 오프라인 재현, PocketBase
+# Admin API로 실제 저장 결과 검증, results 브랜치 커밋, artifact 업로드).
+#
+# ★ 실계정 주의 — test_e164는 실제 등록된 계정(주소록을 실제로 갖고
+#   있는 계정)이어야 한다. 스크립트가 만드는 테스트 연락처는 전부
+#   status=pending_review로 생성되고 테스트가 끝나면 rejected로 정리
+#   되지만(kaddress_contacts_live_smoketest.py 상단 docstring 참고),
+#   실행 중간에 실패해서 정리가 안 되면 pending_review로 남을 수
+#   있다 — 그 경우 "주소록 → 승인 대기" 필터에서 "smoketest-"로
+#   시작하는 이메일을 검색해 수동으로 거부 처리하면 된다.
+#
+# 필요 GitHub Secrets:
+#   PHONE_VERIFY_SECRET — 이미 등록됨(klaw-usage-billing-beta와 공용).
+#   PB_ADMIN_EMAIL / PB_ADMIN_PASSWORD — 이미 등록됨(pdv-domain-split와 공용).
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenarios_file:
+        description: "Scenario file name in tests/live_smoketest/ (blank = scenarios_kaddress_contacts_20260911.json)"
+        required: false
+        default: ""
+      test_e164:
+        description: "주소록을 실제로 소유한 등록된 테스트 계정 전화번호, 내부 표준 형식 (예: +8201096627170) — 필수"
+        required: true
+      worker_base:
+        description: "worker.js(hondi-proxy) base URL"
+        required: false
+        default: ""
+      no_cleanup:
+        description: "true면 테스트 연락처를 rejected 처리하지 않고 남겨둠(디버깅용)"
+        required: false
+        default: "false"
+
+permissions:
+  contents: write
+
+jobs:
+  run-kaddress-contacts-smoketest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install requests
+
+      - name: Run K-Address contacts live smoketest
+        working-directory: tests/live_smoketest
+        env:
+          PHONE_VERIFY_SECRET: ${{ secrets.PHONE_VERIFY_SECRET }}
+          PB_ADMIN_EMAIL: ${{ secrets.PB_ADMIN_EMAIL }}
+          PB_ADMIN_PASSWORD: ${{ secrets.PB_ADMIN_PASSWORD }}
+        run: |
+          SCEN="${{ github.event.inputs.scenarios_file }}"
+          if [ -z "$SCEN" ]; then SCEN="scenarios_kaddress_contacts_20260911.json"; fi
+          BASE=$(basename "$SCEN" .json)
+          OUT="../../results/${BASE}"
+          echo "scenarios=$SCEN out=$OUT"
+          EXTRA_ARGS=""
+          if [ "${{ github.event.inputs.no_cleanup }}" = "true" ]; then EXTRA_ARGS="--no-cleanup"; fi
+          python3 kaddress_contacts_live_smoketest.py \
+            --scenarios "$SCEN" --out "$OUT" \
+            --worker-base "${{ github.event.inputs.worker_base || 'https://hondi-proxy.tensor-city.workers.dev' }}" \
+            --test-e164 "${{ github.event.inputs.test_e164 }}" \
+            --resume $EXTRA_ARGS
+
+      - name: Commit results to results branch
+        if: always()
+        run: |
+          git config user.name "hondi-live-smoketest-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout -B results/live-smoketest-kaddress-contacts
+          git add -f results/
+          git diff --cached --quiet || git commit -m "chore: K-Address contacts live smoketest results ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+          git push --force origin HEAD:results/live-smoketest-kaddress-contacts
+
+      - name: Upload artifact (backup)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-smoketest-kaddress-contacts-results
+          path: results/

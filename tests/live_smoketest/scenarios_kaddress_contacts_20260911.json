@@ -1,0 +1,22 @@
+[
+  {"no": 1, "kind": "category_classify", "name": "university_law_school", "org": "국립스모크대학교 법학전문대학원", "expect_category": "P 교육 서비스업"},
+  {"no": 2, "kind": "category_classify", "name": "university_hospital_not_education", "org": "스모크대학교병원", "expect_category": "Q 보건업 및 사회복지 서비스업"},
+  {"no": 3, "kind": "category_classify", "name": "city_hall", "org": "스모크특별자치도청", "expect_category": "O 공공행정,국방 및 사회보장 행정"},
+  {"no": 4, "kind": "category_classify", "name": "audit_committee", "org": "스모크시 감사위원회", "expect_category": "O 공공행정,국방 및 사회보장 행정"},
+  {"no": 5, "kind": "category_classify", "name": "research_institute", "org": "스모크과학기술원", "expect_category": "M 전문,과학 및 기술 서비스업"},
+  {"no": 6, "kind": "category_classify", "name": "association", "org": "스모크협회", "expect_category": "S 협회 및 단체,수리 및 기타 개인 서비스업"},
+  {"no": 7, "kind": "category_classify", "name": "bank", "org": "스모크은행", "expect_category": "K 금융 및 보험업"},
+  {"no": 8, "kind": "category_classify", "name": "broadcaster", "org": "스모크방송국", "expect_category": "J 정보통신업"},
+  {"no": 9, "kind": "category_classify", "name": "embassy", "org": "스모크대사관", "expect_category": "U 국제 및 외국기관"},
+  {"no": 10, "kind": "category_classify", "name": "no_keyword_match_stays_empty", "org": "스모크상사", "expect_category": ""},
+  {"no": 11, "kind": "category_classify_email_domain", "name": "ac_kr_domain_fallback_when_org_empty", "email_domain": "ac.kr", "expect_category": "P 교육 서비스업"},
+  {"no": 12, "kind": "category_classify_email_domain", "name": "go_kr_domain_fallback_when_org_empty", "email_domain": "go.kr", "expect_category": "O 공공행정,국방 및 사회보장 행정"},
+  {"no": 13, "kind": "dedup_same_call", "name": "csv_import_dedup_within_same_batch"},
+  {"no": 14, "kind": "dedup_across_calls", "name": "csv_import_dedup_across_separate_uploads"},
+  {"no": 15, "kind": "dedup_case_insensitive", "name": "csv_import_dedup_ignores_email_case"},
+  {"no": 16, "kind": "propose_dedup", "name": "propose_endpoint_dedup_regression_guard"},
+  {"no": 17, "kind": "category_counts_delta", "name": "category_counts_reflects_new_contact_immediately", "category": "J 정보통신업"},
+  {"no": 18, "kind": "auth_phone_token_mailbox", "name": "mailbox_get_accepts_phone_verify_token"},
+  {"no": 19, "kind": "auth_phone_token_drafts", "name": "drafts_get_accepts_phone_verify_token"},
+  {"no": 20, "kind": "auth_phone_token_message_state", "name": "message_state_get_accepts_phone_verify_token"}
+]
