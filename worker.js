@@ -12480,6 +12480,10 @@ export default {
     if (pathname === '/kmail/stats' && request.method === 'GET') return handleKmailStats(request, url, env, corsHeaders);
     if (pathname === '/kmail/settings' && request.method === 'GET') return handleKmailSettingsGet(request, url, env, corsHeaders);
     if (pathname === '/kmail/settings' && request.method === 'POST') return handleKmailSettingsSet(request, env, corsHeaders);
+    // 2026-09-12 신설 — K-Mail ID(mail_id, hondi.kr 로컬파트 별칭). 실제
+    // 발신 주소(<guid>@hondi.kr)는 그대로 두고 그 위에 얹는 조회용 별칭.
+    if (pathname === '/kmail/mail-id/check' && request.method === 'GET') return handleKmailMailIdCheck(request, url, env, corsHeaders);
+    if (pathname === '/kmail/mail-id/auto' && request.method === 'POST') return handleKmailMailIdAuto(request, env, corsHeaders);
     if (pathname === '/kmail/attachments/upload' && request.method === 'POST') return handleKmailAttachmentUpload(request, env, corsHeaders);
     if (pathname.startsWith('/kmail/attachments/') && request.method === 'GET') return handleKmailAttachmentGet(request, url, env, corsHeaders);
     if (pathname.startsWith('/r/') && request.method === 'GET') return handleKmailTrackingRedirect(request, url, env, corsHeaders, ctx);
@@ -31614,6 +31618,92 @@ async function _kmailLinkAttachmentsToMessage(env, attachmentIds, messageId) {
 }
 
 
+// ═══════════════════════════════════════════════════════════
+// K-Mail ID(mail_id) — 2026-09-12 신설(주피터 지시). 전화번호가
+// 혼디의 유일 식별자이지만 전화번호 자체는 타인에게 노출하면 안 되므로,
+// "검색/호출용" + "메일 로컬파트"를 겸하는 별도 식별자를 둔다.
+//
+// 설계 원칙(대화 기록 참고):
+//   1. 실제 발신 주소(<guid>@hondi.kr, 스푸핑 방지용)는 절대 건드리지
+//      않는다 — mail_id는 그 위에 얹는 "조회용 별칭"일 뿐이다.
+//   2. 시드로 전화번호(e164)를 쓰지 않는다 — e164 복호화는 팀 원칙상
+//      "극소수 내부 전용 라우트에서만"(1793900100 마이그레이션 주석
+//      참고)으로 이미 좁혀놨는데, 그 경로를 새로 여는 대신 이미
+//      인증된 guid를 시드로 써도 충분히 예측 불가능하다(HMAC
+//      비밀키가 없으면 guid를 알아도 후보를 못 만든다).
+//   3. 자릿수는 이론적 충돌방지 최솟값(12~18 hex)을 쓰지 않는다 —
+//      DB unique index + 충돌 시 카운터 재시도로 무결성을 보장하므로,
+//      실사용성을 위해 8자리로 시작한다.
+//   4. 자동생성/수동입력 모두 같은 검증·가용성 확인 경로를 통과한다.
+// ═══════════════════════════════════════════════════════════
+const KMAIL_MAIL_ID_PATTERN = /^[a-z0-9](?:[a-z0-9_-]{1,28}[a-z0-9])?$/; // 3~30자, 영숫자로 시작/끝
+const KMAIL_MAIL_ID_RESERVED = new Set([
+  'admin', 'root', 'postmaster', 'support', 'help', 'info', 'contact',
+  'no-reply', 'noreply', 'kmail', 'k-mail', 'hondi', 'system', 'security',
+  'abuse', 'webmaster', 'mail', 'test',
+]);
+
+function _kmailNormalizeMailId(raw) {
+  return String(raw || '').trim().toLowerCase();
+}
+
+function _kmailValidateMailId(normalized) {
+  if (!KMAIL_MAIL_ID_PATTERN.test(normalized)) return false;
+  if (KMAIL_MAIL_ID_RESERVED.has(normalized)) return false;
+  return true;
+}
+
+// HMAC(MAIL_ID_SECRET, "mail-id-seed:<guid>:<counter>")의 앞 8자리(hex).
+// counter는 충돌 시 재시도용 — 같은 guid라도 counter가 다르면 완전히
+// 다른 후보가 나온다(카운터를 늘려도 길이는 항상 8자리로 고정 — UX상
+// "먼저 가입한 사람일수록 ID가 짧다" 같은 인상을 주지 않기 위함).
+async function _kmailGenerateMailIdCandidate(env, guid, counter) {
+  const secret = env.MAIL_ID_SECRET || 'hondi-dev-mail-id-2026'; // 운영 전환 시 wrangler secret put MAIL_ID_SECRET 필수
+  const hash = await _hmacSha256Hex(secret, `mail-id-seed:${guid}:${counter}`);
+  return hash.slice(0, 8);
+}
+
+// mail_id를 쓰고 있는 owner_user_guid를 반환(없으면 null). 대소문자는
+// 저장 전에 항상 정규화하므로 여기서도 정규화된 값 기준으로만 비교한다.
+async function _kmailFindMailIdOwner(env, normalizedMailId) {
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}` };
+  const filter = encodeURIComponent(`mail_id='${normalizedMailId.replace(/'/g, "\\'")}'`);
+  const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_user_settings/records?filter=${filter}&perPage=1`, { headers });
+  const data = await res.json().catch(() => ({ items: [] }));
+  const row = data.items && data.items[0];
+  return row ? row.owner_user_guid : null;
+}
+
+// kmail_user_settings 행을 find-or-create 후 patch — handleKmailSettingsSet과
+// handleKmailMailIdAuto가 공유(두 곳에 복붙하면 한쪽만 고치는 사고가
+// 나기 쉬워 묶었다 — _kmailSendOneEmail과 동일한 이유).
+async function _kmailUpsertUserSettings(env, guid, patch) {
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  const filter = encodeURIComponent(`owner_user_guid='${guid.replace(/'/g, "\\'")}'`);
+  const findRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_user_settings/records?filter=${filter}&perPage=1`, { headers: { Authorization: headers.Authorization } });
+  const findData = await findRes.json().catch(() => ({ items: [] }));
+
+  if (findData.items && findData.items[0]) {
+    const patchRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_user_settings/records/${findData.items[0].id}`, {
+      method: 'PATCH', headers, body: JSON.stringify(patch),
+    });
+    if (!patchRes.ok) {
+      const errBody = await patchRes.json().catch(() => ({}));
+      throw new Error(errBody?.message || `설정 갱신 실패(HTTP ${patchRes.status})`);
+    }
+  } else {
+    const createRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_user_settings/records`, {
+      method: 'POST', headers, body: JSON.stringify({ owner_user_guid: guid, ...patch }),
+    });
+    if (!createRes.ok) {
+      const errBody = await createRes.json().catch(() => ({}));
+      throw new Error(errBody?.message || `설정 생성 실패(HTTP ${createRes.status})`);
+    }
+  }
+}
+
 // 사용자별 K-Mail 설정 조회 — 없으면(아직 한 번도 설정 안 한 사용자)
 // 안전한 기본값을 반환한다. 서명/발신표시명은 발송 경로마다(즉시발송,
 // 캠페인 루프) 매번 조회하면 N+1이 되므로, 호출부가 발신 시작 전에
@@ -31631,6 +31721,7 @@ async function _kmailGetUserSettings(env, guid) {
     auto_reply_enabled: row?.auto_reply_enabled || false,
     auto_reply_text: row?.auto_reply_text || '',
     auto_reply_until: row?.auto_reply_until || null,
+    mail_id: row?.mail_id || '',
   };
 }
 
@@ -32774,18 +32865,17 @@ async function handleKmailStats(request, url, env, corsHeaders) {
   return new Response(JSON.stringify({ ok: true, ...stats }), { status: 200, headers: corsHeaders });
 }
 
-// GET /kmail/settings?guid=...&pubkey=...&signature=...&ts=...
+// GET /kmail/settings?phone_verify_token=... (또는 하위호환 guid/pubkey/signature/ts)
+// 2026-09-12 수정 — mail.hondi.net 웹앱은 지갑 SSO를 쓰지 않고
+// phone_verify_token만 보내는데, 이 엔드포인트는 여태 _verifyClaimsRequester
+// (지갑 서명 전용)만 받고 있어 실제로는 화면에서 호출이 불가능한
+// 상태였다(내 메일 ID 화면을 만들며 발견). handleUserMailSend와 동일한
+// 공용 인증 게이트(_kAuth.resolveGuid)로 맞춘다.
 async function handleKmailSettingsGet(request, url, env, corsHeaders) {
-  const guid = url.searchParams.get('guid');
-  const pubkey = url.searchParams.get('pubkey');
-  const signature = url.searchParams.get('signature');
-  const ts = url.searchParams.get('ts');
-  if (!guid || !pubkey || !signature || !ts) {
-    return _err(400, 'MISSING_FIELD', 'guid, pubkey, signature, ts 필수', corsHeaders);
-  }
-  const sigMsg = `kmail-settings-get:${guid}:${ts}`;
-  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
-  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+  const qp = Object.fromEntries(url.searchParams.entries());
+  const auth = await _kAuth.resolveGuid(env, qp, { sigMsg: `kmail-settings-get:${qp.guid}:${qp.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
 
   const settings = await _kmailGetUserSettings(env, guid);
   return new Response(JSON.stringify({ ok: true, ...settings, kmail_address: `${guid}@hondi.kr`, daily_quota_reference: KMAIL_QUOTA_5D_AVG_LIMIT }), { status: 200, headers: corsHeaders });
@@ -32798,14 +32888,13 @@ async function handleKmailSettingsGet(request, url, env, corsHeaders) {
 async function handleKmailSettingsSet(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
-  const { guid, pubkey, signature, ts, signature_text, sender_display_name, auto_reply_enabled, auto_reply_text, auto_reply_until } = body;
-  if (!guid || !pubkey || !signature || !ts) {
-    return _err(400, 'MISSING_FIELD', 'guid, pubkey, signature, ts 필수', corsHeaders);
-  }
+  const { signature_text, sender_display_name, auto_reply_enabled, auto_reply_text, auto_reply_until, mail_id } = body;
 
-  const sigMsg = `kmail-settings-set:${guid}:${ts}`;
-  const authOk = await _verifyClaimsRequester(env, { guid, pubkey, signature, sigMsg, ts });
-  if (!authOk) return _err(403, 'AUTH_REQUIRED', '본인 서명 인증이 필요합니다', corsHeaders);
+  // 2026-09-12 수정 — handleKmailSettingsGet과 동일한 이유로
+  // _kAuth.resolveGuid(phone_verify_token/지갑 서명 겸용)로 교체.
+  const auth = await _kAuth.resolveGuid(env, body, { sigMsg: `kmail-settings-set:${body.guid}:${body.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
 
   const patch = {};
   if (typeof signature_text === 'string') patch.signature = signature_text.slice(0, 1000);
@@ -32815,27 +32904,87 @@ async function handleKmailSettingsSet(request, env, corsHeaders) {
   if (typeof auto_reply_until === 'string' || auto_reply_until === null) {
     patch.auto_reply_until = auto_reply_until ? new Date(auto_reply_until).toISOString() : null;
   }
+
+  // mail_id(수동 지정) — 자동생성은 별도 엔드포인트(POST /kmail/mail-id/auto)를
+  // 쓰지만, 검증·가용성 확인 경로는 완전히 동일하게 통과시킨다(대화 기록
+  // §설계원칙 4 참고 — 자동/수동을 다른 경로로 만들면 한쪽만 고치는 사고가 남).
+  if (typeof mail_id === 'string' && mail_id.length > 0) {
+    const normalized = _kmailNormalizeMailId(mail_id);
+    if (!_kmailValidateMailId(normalized)) {
+      return _err(400, 'INVALID_MAIL_ID', '메일 ID는 3~30자의 영문 소문자·숫자·-·_ 조합이어야 하고 영숫자로 시작·끝나야 합니다', corsHeaders);
+    }
+    const owner = await _kmailFindMailIdOwner(env, normalized);
+    if (owner && owner !== guid) {
+      return _err(409, 'MAIL_ID_TAKEN', '이미 사용 중인 메일 ID입니다', corsHeaders);
+    }
+    patch.mail_id = normalized;
+  }
+
   if (Object.keys(patch).length === 0) return _err(400, 'NOTHING_TO_UPDATE', '수정할 필드가 하나도 없습니다', corsHeaders);
 
-  const token = await _l1AdminToken(env);
-  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-  const filter = encodeURIComponent(`owner_user_guid='${guid.replace(/'/g, "\\'")}'`);
-  const findRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_user_settings/records?filter=${filter}&perPage=1`, { headers: { Authorization: headers.Authorization } });
-  const findData = await findRes.json().catch(() => ({ items: [] }));
-
-  if (findData.items && findData.items[0]) {
-    const patchRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_user_settings/records/${findData.items[0].id}`, {
-      method: 'PATCH', headers, body: JSON.stringify(patch),
-    });
-    if (!patchRes.ok) return _err(502, 'UPDATE_FAILED', '설정 갱신 실패', corsHeaders);
-  } else {
-    const createRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_user_settings/records`, {
-      method: 'POST', headers, body: JSON.stringify({ owner_user_guid: guid, ...patch }),
-    });
-    if (!createRes.ok) return _err(502, 'CREATE_FAILED', '설정 생성 실패', corsHeaders);
+  try {
+    await _kmailUpsertUserSettings(env, guid, patch);
+  } catch (e) {
+    // PocketBase unique index가 마지막 방어선 — 위에서 이미 확인했지만
+    // 동시 요청(race condition)으로 그 사이 다른 사용자가 선점했을 수
+    // 있다. 이 경우 DB가 거부하며 에러 메시지에 unique/mail_id가 담긴다.
+    if (patch.mail_id && /unique|mail_id/i.test(e.message || '')) {
+      return _err(409, 'MAIL_ID_TAKEN', '이미 사용 중인 메일 ID입니다(동시 요청)', corsHeaders);
+    }
+    return _err(502, 'UPDATE_FAILED', e.message || '설정 갱신 실패', corsHeaders);
   }
 
   return new Response(JSON.stringify({ ok: true, updated: Object.keys(patch) }), { status: 200, headers: corsHeaders });
+}
+
+// GET /kmail/mail-id/check?candidate=...&guid=...&pubkey=...&signature=...&ts=...
+// 화면에서 사용자가 입력하는 동안 실시간 중복확인용(로그인 필요 —
+// 비로그인으로 전체 네임스페이스를 긁어보는 걸 막기 위해 인증을 그대로 건다).
+async function handleKmailMailIdCheck(request, url, env, corsHeaders) {
+  const candidate = url.searchParams.get('candidate');
+  if (!candidate) return _err(400, 'MISSING_FIELD', 'candidate 필수', corsHeaders);
+
+  const qp = Object.fromEntries(url.searchParams.entries());
+  const auth = await _kAuth.resolveGuid(env, qp, { sigMsg: `kmail-mail-id-check:${qp.guid}:${qp.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
+
+  const normalized = _kmailNormalizeMailId(candidate);
+  if (!_kmailValidateMailId(normalized)) {
+    return new Response(JSON.stringify({ ok: true, normalized, valid: false, available: false }), { status: 200, headers: corsHeaders });
+  }
+  const owner = await _kmailFindMailIdOwner(env, normalized);
+  const available = !owner || owner === guid;
+  return new Response(JSON.stringify({ ok: true, normalized, valid: true, available }), { status: 200, headers: corsHeaders });
+}
+
+// POST /kmail/mail-id/auto — body: { guid, pubkey, signature, ts }
+// HMAC(MAIL_ID_SECRET, guid+counter) 후보를 만들어 처음 비어있는 것으로
+// 확정한다(최대 10회 재시도 — 8자리 hex 네임스페이스에서 10연속 충돌은
+// 사실상 불가능한 확률이라, 10회를 넘기면 설정 자체 이상으로 보고 중단).
+async function handleKmailMailIdAuto(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
+
+  const auth = await _kAuth.resolveGuid(env, body, { sigMsg: `kmail-mail-id-auto:${body.guid}:${body.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
+
+  const MAX_TRIES = 10;
+  for (let counter = 0; counter < MAX_TRIES; counter++) {
+    const candidate = await _kmailGenerateMailIdCandidate(env, guid, counter);
+    const owner = await _kmailFindMailIdOwner(env, candidate);
+    if (owner && owner !== guid) continue; // 충돌 — 다음 counter로 재시도
+
+    try {
+      await _kmailUpsertUserSettings(env, guid, { mail_id: candidate });
+      return new Response(JSON.stringify({ ok: true, mail_id: candidate, tries: counter + 1 }), { status: 200, headers: corsHeaders });
+    } catch (e) {
+      if (/unique|mail_id/i.test(e.message || '')) continue; // race condition — 다음 counter로 재시도
+      return _err(502, 'CREATE_FAILED', e.message || '메일 ID 생성 실패', corsHeaders);
+    }
+  }
+  return _err(500, 'MAIL_ID_GEN_EXHAUSTED', `${MAX_TRIES}회 연속 충돌 — 수동으로 메일 ID를 지정해 주세요`, corsHeaders);
 }
 
 // _handleKmailInboundEmail(email() 핸들러)이 하고, 여기는 규칙
