@@ -31785,8 +31785,39 @@ async function _kmailGetUserSettings(env, guid) {
 // signature/senderName: 호출부가 _kmailGetUserSettings로 한 번만
 // 불러서 넘긴다(위 주석 참고) — 생략하면 서명 없이, 이름은
 // '혼디 K-Mail'로 발송된다.
+// ═══════════════════════════════════════════════════════════
+// guid ↔ 이메일 로컬파트 안전 변환 (2026-09-12 긴급 수정, 주피터 지시)
+//
+// guid는 src/gopang/core/auth.js _generateRandomGuid()가 항상
+// "2601:db80:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx"(콜론으로 이어진 8그룹)
+// 형식으로 생성한다 — 예외 없이 전 사용자가 이 형식이다. 그런데
+// 콜론(:)은 이메일 로컬파트에서 따옴표(") 없이는 쓸 수 없는 문자라,
+// `${guid}@hondi.kr`을 그대로 env.EMAIL.send()의 from/replyTo에
+// 넘기면 Cloudflare가 "Invalid email address: Invalid input"으로
+// 매번 거부한다 — 즉시발송·캠페인 발송·부재중 자동응답까지 K-Mail의
+// 모든 실제 발송 경로가 이 때문에 처음부터 한 번도 성공한 적이
+// 없었을 가능성이 높다(2026-09-12 라이브 스모크테스트로 실사 확인,
+// kmail_mail_id_live_smoketest.py 시나리오 16).
+//
+// 콜론을 하이픈(-)으로 바꾸면 유효한 로컬파트가 된다(하이픈은 이메일
+// atext에서 허용되는 문자). guid가 항상 4자리 hex 8그룹 고정 형식이라
+// 하이픈↔콜론 변환은 모호성 없이 100% 무손실 왕복 가능하다 — 그래서
+// 값 자체를 다른 인코딩(해시 등)으로 바꾸지 않고 구분자만 치환한다.
+//
+// ★ 이 두 함수를 쓰는 모든 지점을 반드시 쌍으로 맞춰야 한다 —
+// 발신(_kmailSendOneEmail/_kmailSendAutoReply/replyTo 구성)은
+// guidToEmailLocalPart로 "내보내고", 수신(_handleKmailInboundEmail의
+// 비캠페인 분기)은 emailLocalPartToGuid로 "되돌려야" 회신 라우팅이
+// 깨지지 않는다.
+function _guidToEmailLocalPart(guid) {
+  return String(guid).replace(/:/g, '-');
+}
+function _emailLocalPartToGuid(localPart) {
+  return String(localPart).replace(/-/g, ':');
+}
+
 async function _kmailSendOneEmail(env, { guid, to, subject, text, sessionId, replyTo, signature, senderName, attachmentIds, preResolvedAttachments }) {
-  const fromAddr = `${guid}@hondi.kr`;
+  const fromAddr = `${_guidToEmailLocalPart(guid)}@hondi.kr`;
   const finalText = signature ? `${text}\n\n${signature}` : text;
   const sendParams = { to, from: { email: fromAddr, name: senderName || '혼디 K-Mail' }, subject, text: finalText };
   if (replyTo) sendParams.replyTo = replyTo;
@@ -32926,7 +32957,7 @@ async function handleKmailSettingsGet(request, url, env, corsHeaders) {
   const guid = auth.guid;
 
   const settings = await _kmailGetUserSettings(env, guid);
-  return new Response(JSON.stringify({ ok: true, ...settings, kmail_address: `${guid}@hondi.kr`, daily_quota_reference: KMAIL_QUOTA_5D_AVG_LIMIT }), { status: 200, headers: corsHeaders });
+  return new Response(JSON.stringify({ ok: true, ...settings, kmail_address: `${_guidToEmailLocalPart(guid)}@hondi.kr`, daily_quota_reference: KMAIL_QUOTA_5D_AVG_LIMIT }), { status: 200, headers: corsHeaders });
 }
 
 // POST /kmail/settings — body: { guid, pubkey, signature, ts, signature_text?,
@@ -34241,8 +34272,14 @@ async function _handleKmailInboundEmail(message, env, ctx) {
         return;
       }
     } else {
-      // 캠페인이 아니면 로컬파트를 guid로 취급(즉시발송에 대한 답장 등)
-      ownerGuid = localPart;
+      // 캠페인이 아니면 로컬파트를 guid로 취급(즉시발송에 대한 답장 등).
+      // 2026-09-12 긴급수정 — 발신 시 콜론을 하이픈으로 바꿔서 내보냈으므로
+      // (_guidToEmailLocalPart), 회신으로 돌아온 로컬파트도 하이픈 형태다.
+      // 실제 guid(ai_messages.receiver_guid, kmail_user_settings 조회 등에
+      // 쓰이는 콜론 형식)로 반드시 되돌려야 한다 — 안 그러면 이 시점부터
+      // 소유자 조회·설정 조회·쿼터 조회가 전부 엉뚱한(존재하지 않는) guid로
+      // 나가 조용히 실패한다.
+      ownerGuid = _emailLocalPartToGuid(localPart);
       sessionId = `kmail:direct:${ownerGuid}`;
     }
 
@@ -34359,7 +34396,7 @@ async function _handleKmailInboundEmail(message, env, ctx) {
         const replyToEmail = emailMatch ? emailMatch[0] : fromAddr;
         await _kmailSendOneEmail(env, {
           guid: ownerGuid, to: replyToEmail, subject: `Re: ${subject}`, text: delegation.holdMessage,
-          sessionId, replyTo: campaignObj ? `kmail-${campaignObj.id}@hondi.kr` : `${ownerGuid}@hondi.kr`,
+          sessionId, replyTo: campaignObj ? `kmail-${campaignObj.id}@hondi.kr` : `${_guidToEmailLocalPart(ownerGuid)}@hondi.kr`,
           signature: settings.signature, senderName: settings.sender_display_name,
         });
       } catch (e) {
@@ -34397,7 +34434,7 @@ async function _handleKmailInboundEmail(message, env, ctx) {
         });
         await _kmailSendOneEmail(env, {
           guid: ownerGuid, to: replyToEmail, subject: `Re: ${subject}`, text: replyBody,
-          sessionId, replyTo: campaignObj ? `kmail-${campaignObj.id}@hondi.kr` : `${ownerGuid}@hondi.kr`,
+          sessionId, replyTo: campaignObj ? `kmail-${campaignObj.id}@hondi.kr` : `${_guidToEmailLocalPart(ownerGuid)}@hondi.kr`,
           signature: settings.signature, senderName: settings.sender_display_name,
         });
         await _writeAiMessage(env, {
@@ -34497,7 +34534,7 @@ async function _handleKmailInboundEmail(message, env, ctx) {
 // 일반 발송과 구분되고, 위 24시간 스팸 방지 체크도 이 태그를 본다.
 async function _kmailSendAutoReply(env, guid, toEmail, replyText, sessionId, senderDisplayName) {
   if (!env.EMAIL) return;
-  const fromAddr = `${guid}@hondi.kr`;
+  const fromAddr = `${_guidToEmailLocalPart(guid)}@hondi.kr`;
   await env.EMAIL.send({ to: toEmail, from: { email: fromAddr, name: senderDisplayName || '혼디 K-Mail' }, subject: '자동 응답: 부재중 안내', text: replyText });
   await _writeAiMessage(env, {
     session_id: sessionId,
