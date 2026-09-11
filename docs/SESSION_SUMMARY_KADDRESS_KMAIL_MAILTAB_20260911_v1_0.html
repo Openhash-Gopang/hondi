@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<!--
+  이 문서가 다루는 범위: 지난 세션(0910)과 이번 세션(0911) — K-Address
+  주소록 대량 등록·K-Mail "메일" 탭 신설.
+  ① 지난 세션(0910) — KAIST 165명 벌크 등록 사고(20000토큰도 재초과),
+     배치 크기 60000 재상향 + SP 지침 강제화, K-Address 자동 스크롤
+     버그 수정, CSV 업로드 기획 착수
+  ② 이번 세션(0911) — CSV/엑셀 일괄 업로드 완성, category select 필드
+     불일치 버그 발견·수정, 등록 경로 3곳 중복 방지 통일(propose 누락
+     발견), 주소록 카테고리 요약 UI, "메일" 탭 신설(편지쓰기·임시
+     보관함·보낸메일함·받은메일함·태그별 보관함) + 백엔드 인증 이관,
+     Quill 리치 텍스트 에디터 + Pretendard 폰트 강제, K-Mail 대화→
+     편집기 반영 브릿지, 주소록 총 건수 200건 캡 오류 수정, 조회 결과
+     배지 표시, 라이브 스모크테스트 20개 시나리오 신설(20/20 PASS)
+  (desktop.html 좌측 사이드바 "🛠 개발자 문서" 섹션에서 링크됨)
+  v1.0(2026-09-11): 신설
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K-Address 대량 등록 · K-Mail "메일" 탭 신설 — 혼디 개발자 문서(0911)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+:root {
+  --ink:      #111111;
+  --ink-2:    #3a3a3a;
+  --ink-3:    #6b6b6b;
+  --ink-4:    #9a9a9a;
+  --line:     #e2e2e2;
+  --line-2:   #cfcfcf;
+  --bg:       #ffffff;
+  --bg-2:     #fafafa;
+  --bg-3:     #f2f2f2;
+  --accent:   #34495e;
+  --accent-lt:#eef1f4;
+  --good:     #2e7d4f;
+  --good-lt:  #eaf6ef;
+  --bad:      #b3392c;
+  --bad-lt:   #fbeceb;
+  --mono:     'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  --radius:   4px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Pretendard', -apple-system, 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.doc-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,0.94);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.doc-header-inner {
+  max-width: 1040px; margin: 0 auto;
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.doc-logo {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 14px; font-weight: 700; color: var(--ink);
+  text-decoration: none; letter-spacing: -0.2px;
+}
+.doc-logo svg { color: var(--ink-3); }
+.doc-header-sub {
+  font-size: 12px; color: var(--ink-4); font-weight: 400;
+  padding-left: 9px; border-left: 1px solid var(--line-2); margin-left: 2px;
+}
+.doc-back {
+  font-size: 12px; color: var(--ink-3); text-decoration: none;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.doc-back:hover { color: var(--ink); }
+.doc-back svg { flex-shrink: 0; }
+
+.doc-layout {
+  max-width: 1200px; margin: 0 auto;
+  padding: 40px 24px 100px;
+  display: grid;
+  grid-template-columns: 216px 1fr;
+  gap: 44px;
+  align-items: start;
+}
+@media (max-width: 860px) {
+  .doc-layout { grid-template-columns: 1fr; }
+  .doc-toc { display: none; }
+}
+.doc-toc { position: sticky; top: 72px; }
+.doc-toc-title {
+  font-size: 12px; font-weight: 700; letter-spacing: .8px;
+  text-transform: uppercase; color: var(--ink-4);
+  margin-bottom: 10px;
+}
+.doc-toc a {
+  display: block;
+  font-size: 12px; color: var(--ink-3);
+  text-decoration: none;
+  padding: 5px 0 5px 11px;
+  border-left: 2px solid var(--line);
+  line-height: 1.4;
+  transition: color .12s, border-color .12s;
+}
+.doc-toc a:hover, .doc-toc a.active {
+  color: var(--ink);
+  border-left-color: var(--accent);
+  font-weight: 600;
+}
+
+.doc-content { min-width: 0; }
+
+.gs {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+.gs-head {
+  padding: 22px 28px 16px;
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.gs-icon {
+  width: 34px; height: 34px; border-radius: var(--radius);
+  background: var(--bg-3);
+  border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; color: var(--ink-2);
+}
+.gs-icon svg { width: 18px; height: 18px; }
+.gs-head-text { flex: 1; }
+.gs-num {
+  font-family: var(--mono);
+  font-size: 12px; font-weight: 500; letter-spacing: .6px;
+  text-transform: uppercase; color: var(--ink-4);
+  margin-bottom: 3px;
+}
+.gs-title {
+  font-size: 17px; font-weight: 700;
+  color: var(--ink); letter-spacing: -0.2px; line-height: 1.35;
+}
+.gs-subtitle { font-size: 12px; color: var(--ink-4); margin-top: 4px; }
+
+.gs-body { padding: 20px 28px 26px; }
+.gs-body p { font-size: 14px; color: var(--ink-2); line-height: 1.85; margin-bottom: 13px; }
+.gs-body p:last-child { margin-bottom: 0; }
+.gs-body strong { color: var(--ink); font-weight: 700; }
+.gs-body h4 {
+  font-size: 14px; font-weight: 700; color: var(--ink);
+  margin: 22px 0 10px; letter-spacing: -0.1px;
+  display: flex; align-items: center; gap: 7px;
+}
+.gs-body h4 svg { width: 15px; height: 15px; color: var(--ink-3); flex-shrink: 0; }
+.gs-body h4:first-child { margin-top: 0; }
+.gs-body ul, .gs-body ol { margin: 4px 0 14px 20px; }
+.gs-body li { font-size: 14px; color: var(--ink-2); line-height: 1.8; margin-bottom: 4px; }
+.gs-body code {
+  font-family: var(--mono); font-size: 12px;
+  background: var(--bg-3); border: 1px solid var(--line);
+  border-radius: 4px; padding: 1px 6px; color: var(--ink-2);
+}
+.gs-body pre {
+  background: var(--bg-3); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 12px 14px; margin: 10px 0 16px; overflow-x: auto;
+}
+.gs-body pre code { background: none; border: none; padding: 0; font-size: 12.5px; line-height: 1.7; color: var(--ink-2); }
+
+.callout {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--ink);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 13px 17px; margin: 15px 0;
+  font-size: 14px; color: var(--ink-2); line-height: 1.8;
+  background: var(--bg-2);
+}
+.callout-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+  color: var(--ink-3); margin-bottom: 6px;
+}
+.callout-label svg { width: 13px; height: 13px; }
+.callout.warn { border-left-style: dashed; }
+.callout.good { border-left-color: var(--good); background: var(--good-lt); }
+.callout.bad { border-left-color: var(--bad); background: var(--bad-lt); }
+.callout strong { color: var(--ink); }
+
+.gs-table-wrap { margin: 15px 0; overflow-x: auto; }
+.gs-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.gs-table th, .gs-table td {
+  padding: 9px 12px; border: 1px solid var(--line); text-align: left; vertical-align: top;
+}
+.gs-table th { background: var(--bg-2); font-weight: 700; color: var(--ink); font-size: 12px; }
+.gs-table td { color: var(--ink-2); }
+.gs-table td strong, .gs-table td code { color: var(--ink); }
+.gs-table td code { font-family: var(--mono); font-size: 12px; background: var(--bg-3); padding: 1px 5px; border-radius: 4px; }
+
+.badge {
+  display: inline-block; font-family: var(--mono); font-size: 11px; font-weight: 700;
+  padding: 2px 7px; border-radius: 3px; letter-spacing: .3px;
+}
+.badge.pass { background: var(--good-lt); color: var(--good); border: 1px solid var(--good); }
+.badge.fail { background: var(--bad-lt); color: var(--bad); border: 1px solid var(--bad); }
+.badge.skip { background: var(--bg-3); color: var(--ink-3); border: 1px solid var(--line-2); }
+
+.reveal { opacity: 0; transform: translateY(10px); transition: opacity .4s ease, transform .4s ease; }
+.reveal.in { opacity: 1; transform: translateY(0); }
+
+.doc-hero {
+  padding: 8px 0 30px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 28px;
+}
+.doc-hero-eyebrow {
+  font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .6px;
+  text-transform: uppercase; color: var(--ink-4); margin-bottom: 12px;
+}
+.doc-hero-title {
+  font-size: 26px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.4;
+  color: var(--ink); margin-bottom: 14px;
+}
+.doc-hero-title em { font-style: normal; border-bottom: 2px solid var(--ink); }
+.doc-hero-desc { font-size: 14px; color: var(--ink-2); line-height: 1.85; max-width: 74ch; }
+.doc-hero-meta {
+  display: flex; flex-wrap: wrap; gap: 16px;
+  margin-top: 18px; font-size: 12px; color: var(--ink-4);
+}
+.doc-hero-meta strong { color: var(--ink-2); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header class="doc-header">
+  <div class="doc-header-inner">
+    <a class="doc-logo" href="../desktop.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      혼디 · Gopang
+      <span class="doc-header-sub">개발자 문서</span>
+    </a>
+    <a class="doc-back" href="../desktop.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      데스크톱으로 돌아가기
+    </a>
+  </div>
+</header>
+<div class="doc-layout">
+
+  <nav class="doc-toc">
+    <div class="doc-toc-title">목차</div>
+    <a href="#overview">개요 — 이 문서가 왜 있는가</a>
+    <a href="#prev-session">지난 세션(0910) — 사고와 기획 착수</a>
+    <a href="#csv-import">① CSV/엑셀 일괄 업로드 완성</a>
+    <a href="#category-bug">② category select 필드 불일치 버그</a>
+    <a href="#dedup">③ 등록 경로 3곳 중복 방지 통일</a>
+    <a href="#mail-tab">④ "메일" 탭 신설</a>
+    <a href="#quill">⑤ Quill 리치 텍스트 에디터</a>
+    <a href="#bridge">⑥ K-Mail 대화 → 편집기 반영 브릿지</a>
+    <a href="#count-accuracy">⑦ 총 건수 정확도 · 조회 결과 배지</a>
+    <a href="#smoketest">⑧ 라이브 스모크테스트</a>
+    <a href="#defects">발견·수정한 것 총정리</a>
+    <a href="#lessons">교훈</a>
+    <a href="#related">관련 문서·PR</a>
+  </nav>
+
+  <main class="doc-content">
+
+    <div class="doc-hero reveal">
+      <div class="doc-hero-eyebrow">SESSION SUMMARY — 2026-09-10 ~ 2026-09-11</div>
+      <h1 class="doc-hero-title">주소록 165명 등록 사고에서<br><em>"메일" 탭 신설까지</em></h1>
+      <p class="doc-hero-desc">
+        지난 세션(0910)은 KAIST 165명을 K-Address 대화로 한 번에
+        등록하려다 20000토큰도 초과하는 사고에서 시작해, 배치 크기
+        재상향과 CSV 업로드 기획 착수로 끝났다. 이번 세션(0911)은 그
+        CSV 업로드를 실제로 완성하는 과정에서 <strong>category가
+        PocketBase select 필드인 걸 모르고 코드 한 글자만 넣어 레코드
+        생성이 조용히 실패하던 버그</strong>, <strong>연락처 등록
+        경로 세 곳 중 한 곳(수동 등록 폼)엔 중복 검사가 아예 없던
+        구멍</strong>, <strong>"메일" 탭이 필요로 하는 다섯 개
+        엔드포인트가 전부 지갑 서명만 지원해 호출 자체가 막혀 있던
+        문제</strong>를 실사로 차례로 발견·수정했다. 그 위에 편지쓰기·
+        임시보관함·보낸메일함·받은메일함·태그별 보관함을 갖춘 "메일"
+        탭을 새로 만들고, Quill 리치 텍스트 에디터를 붙이고, K-Mail
+        대화에서 작성한 초안이 그 편집기에 바로 반영되게 연결했다.
+        마지막으로 이 모든 회귀를 실제 계정으로 검증하는 라이브
+        스모크테스트를 만들어 20개 시나리오 전부 통과를 확인했다.
+      </p>
+      <div class="doc-hero-meta">
+        <span><strong>대상 저장소</strong> hondi · mail</span>
+        <span><strong>작성</strong> 2026-09-11</span>
+        <span><strong>핵심 변경</strong> worker.js(K-Address/K-Mail 라우트 다수) · mail/webapp.html · tests/live_smoketest/kaddress_contacts_live_smoketest.py(신설)</span>
+        <span><strong>PR</strong> hondi#187~#195</span>
+      </div>
+    </div>
+
+    <section class="gs reveal" id="overview">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">Overview</div>
+          <div class="gs-title">이 문서가 왜 있는가</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          겉보기엔 "CSV 업로드 기능 하나 만들기"였지만, 실제로 손댄
+          범위는 K-Address 연락처 등록 경로 전체(수동/CSV/대화 저장)와
+          K-Mail의 새 "메일" 탭, 그리고 그 둘을 잇는 다리까지
+          걸쳐 있었다. 이 문서는 (1) 지난 세션에서 넘어온 배경,
+          (2) 이번 세션에 실제로 찾아낸 버그 세 가지와 각각의
+          재발 방지 조치, (3) 새로 만든 기능들, (4) 이걸 검증하는
+          라이브 스모크테스트까지 순서대로 기록한다. 다음에 K-Address/
+          K-Mail 영역을 다시 건드릴 사람은 이 문서 하나로 전체 그림을
+          파악할 수 있어야 한다는 목표로 썼다.
+        </p>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="prev-session">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">지난 세션(2026-09-10)</div>
+          <div class="gs-title">165명 벌크 등록 사고와 CSV 업로드 기획 착수</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          KAIST 전산학부(139명) + AI대학원(26명), 합쳐 165명을
+          K-Address 대화로 한 번에 등록하려던 시도가 20000토큰
+          한도로도 부족해 재차 실패했다. SP 지침에 "40건 넘으면
+          나눠서"가 이미 있었는데도 AI가 이를 무시하고 165건을 한
+          번에 밀어넣으려 한 것이 원인이었다.
+        </p>
+        <p>
+          조치는 두 갈래였다: ① 배치 한도를 20000→60000 토큰으로
+          재상향, ② SP 지침 자체를 "60건 넘으면 반드시 나눠서"로
+          더 강하게 못박음. 같은 세션에서 K-Address 채팅 UI의
+          자동 스크롤 버그(긴 메시지를 보내면 로딩 표시·입력창이
+          화면 밖에 남는 문제)도 함께 고쳤다.
+        </p>
+        <p>
+          세션 막바지에 "AI 호출 자체가 필요 없는" CSV 업로드
+          경로를 만들기로 방향을 잡았다 — 이번 세션이 그 완성판이다.
+        </p>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="csv-import">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">① CSV/엑셀 일괄 업로드</div>
+          <div class="gs-title">AI를 거치지 않는 순수 REST 등록 경로</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          <code>POST /kmail/contacts/csv-import</code> 신설 — 프론트엔드가
+          CSV/엑셀 파일을 직접 파싱해 구조화된 <code>contacts</code>
+          배열로 보내면, K-Address 대화를 전혀 거치지 않고 그대로
+          <code>kmail_contacts</code>에 등록한다. 태그 잘림·거짓 완료
+          서술·배치 크기 초과처럼 AI 호출 특유의 사고가 구조적으로
+          발생할 수 없는 경로다.
+        </p>
+        <p>
+          소속명 자동 분류(<code>_kaddressClassifyCategory</code>)는
+          결정적(deterministic) 키워드 매칭으로 처리한다 — 대학교/
+          병원/시청/연구소/협회/은행/방송/대사관 등 키워드 그룹과
+          이메일 도메인(.ac.kr/.go.kr/.re.kr/.or.kr) 폴백, 무매칭
+          시 빈 값 유지. "대학병원"처럼 키워드가 겹치는 경우를 위해
+          의료(Q) 그룹을 교육(P) 그룹보다 먼저 검사한다.
+        </p>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="category-bug">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">② 실사 발견 버그</div>
+          <div class="gs-title">category가 select 필드인데 코드 한 글자만 넣던 문제</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          <code>kmail_contacts.category</code>는 자유 텍스트가 아니라
+          PocketBase select 필드로, 21개 고정값
+          (<code>"P 교육 서비스업"</code>처럼 코드+정식명칭이 붙은
+          문자열) 중 정확히 하나만 허용한다. 그런데 첫 구현은
+          <code>'P'</code>처럼 코드 한 글자만 넣고 있었다 — 값이
+          select 옵션과 정확히 일치하지 않으면 <strong>레코드 생성
+          자체가 조용히 실패</strong>한다.
+        </p>
+        <div class="callout bad">
+          <div class="callout-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            실사 사례
+          </div>
+          767명짜리 KAIST/법학전문대학원/제주대 CSV를 업로드했는데
+          실제 DB엔 8건(영문 소속이라 키워드가 안 걸린 것들)만 남고
+          나머지가 흔적도 없이 사라졌다. 화면에는 "완료"만 뜨고
+          실패 원인을 알 방법이 없었다 — <code>handleKmailContactsCsvImport</code>가
+          개별 레코드 생성 실패를 전혀 로그하지 않았기 때문이다.
+        </div>
+        <p>
+          수정: <code>KADDRESS_KSIC_CODE_TO_LABEL</code> 표를 신설해
+          코드(A~U) → 정식 select 값 변환을 반드시 거치도록 고쳤고,
+          레코드 생성 실패마다 <code>console.error</code>로 이메일+
+          PocketBase 에러 메시지를 남기고 응답에도
+          <code>failedCount</code>/<code>failedSample</code>(최대
+          20건)을 실어 프론트엔드가 바로 보여줄 수 있게 했다.
+        </p>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="dedup">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">③ 실사 발견 버그</div>
+          <div class="gs-title">등록 경로 3곳 중 수동 등록 폼엔 중복 검사가 아예 없었다</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          연락처를 저장하는 경로는 세 곳이다: 수동 등록 폼
+          (<code>/kmail/contacts/propose</code>), CSV 업로드
+          (<code>/kmail/contacts/csv-import</code>), K-Address 대화
+          저장(<code>_kmailChatSaveContacts</code>). CSV 업로드와
+          대화 저장 두 곳엔 이미 이메일 중복 검사가 있었는데,
+          <strong>propose 경로엔 처음부터 중복 검사가 없었다</strong> —
+          "새 연락처 등록" 폼으로 이미 있는 이메일을 다시 등록할
+          때마다 중복이 계속 쌓일 수 있는 구조였다.
+        </p>
+        <p>
+          추가로 세 곳 모두 이메일을 대소문자 그대로 비교하고 있어서
+          <code>A@X.com</code>과 <code>a@x.com</code>처럼 대소문자만
+          다른 주소는 중복으로 못 잡는 문제도 있었다.
+        </p>
+        <p>
+          수정: <code>_kmailNormalizeEmail</code>(소문자 정규화)·
+          <code>_kmailFindExistingContact</code>(중복 조회) 공용
+          헬퍼를 신설해 세 경로 전부 저장 직전 이 헬퍼로 확인하도록
+          통일했다. 저장되는 이메일 자체도 항상 정규화한 값으로
+          남긴다.
+        </p>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="mail-tab">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6z"/><polyline points="22 6 12 13 2 6"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">④ 프론트엔드 신설</div>
+          <div class="gs-title">"메일" 탭 — 전형적인 메일 클라이언트 메뉴 구성</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          mail.hondi.net에 편지쓰기·임시보관함·보낸메일함·받은메일함·
+          태그별 보관함 다섯 서브탭을 갖춘 "메일" 탭을 신설했다.
+          백엔드는 대부분 이미 있던 것(mailbox/drafts/message-state)을
+          재사용하되, 아래 표의 다섯 엔드포인트가 <strong>전부 지갑
+          서명 인증만 지원</strong>하고 있었다는 걸 실사로 발견했다 —
+          지갑 SSO를 안 쓰는 이 웹앱에서는 호출 자체가 막혀 있었던
+          것이다. 공용 인증 게이트(<code>_kAuth.resolveGuid</code>)로
+          전부 이관해 phone_verify_token을 받아들이게 했다(지갑
+          서명 하위호환은 유지).
+        </p>
+        <div class="gs-table-wrap">
+          <table class="gs-table">
+            <thead><tr><th>엔드포인트</th><th>용도</th><th>이관 전</th></tr></thead>
+            <tbody>
+              <tr><td><code>GET /kmail/mailbox</code></td><td>보낸메일함/받은메일함 목록</td><td>지갑 서명만</td></tr>
+              <tr><td><code>GET/POST /kmail/drafts</code></td><td>임시보관함 조회·저장</td><td>지갑 서명만</td></tr>
+              <tr><td><code>POST /kmail/drafts/delete</code></td><td>임시보관함 삭제</td><td>지갑 서명만</td></tr>
+              <tr><td><code>GET/POST /kmail/messages/state</code></td><td>라벨(태그)·별표·읽음 상태</td><td>POST만 있었고 GET 자체가 없었음(신설)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          태그별 보관함은 <code>GET /kmail/messages/state</code>로
+          이 owner의 라벨 상태 전체를 한 번에 가져와, 라벨별 건수
+          칩으로 요약해 보여주고 클릭하면 그 라벨이 붙은 메일만
+          모아 보여준다. 받은메일함에서 라벨을 직접 추가할 수 있다.
+        </p>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="quill">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">⑤ 편지쓰기 편집기</div>
+          <div class="gs-title">Quill(오픈소스 리치 텍스트 에디터) + Pretendard 폰트 강제</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          편지쓰기 본문을 일반 <code>&lt;textarea&gt;</code>에서
+          Quill 2.0.3(BSD-3-Clause, 4만+ GitHub star)로 교체했다 —
+          공식 CDN(jsdelivr) 사용, 굵게·기울임·밑줄·목록·링크 툴바.
+        </p>
+        <p>
+          Quill 기본 테마(snow)는 자체 폰트를 강제로 깔고 들어와서,
+          <code>.ql-toolbar</code>/<code>.ql-container</code>/
+          <code>.ql-editor</code>/<code>.ql-picker</code> 전부
+          <code>!important</code>로 Pretendard(사이트가 이미 쓰던
+          <code>--font</code> 변수)를 덮어써야 실제로 적용됐다.
+        </p>
+        <div class="callout warn">
+          <div class="callout-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            의도적으로 보수적으로 남겨둔 부분
+          </div>
+          서식(굵게·목록 등)은 편집 중 가독성 용도로만 쓰고, 임시저장·
+          발송 시엔 <code>Quill.getText()</code>로 일반 텍스트 변환해
+          보낸다. 실제 이메일 발송 파이프라인(<code>env.EMAIL.send</code>)이
+          HTML 본문을 지원하는지 코드만으로는 확인할 방법이 없어서,
+          그 경로를 건드려 발송 자체가 깨질 위험을 피했다.
+        </div>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="bridge">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">⑥ K-Mail 대화 → 편집기 반영</div>
+          <div class="gs-title">이미 있던 KMAIL_SAVE_DRAFT를 "메일" 탭과 연결</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          K-Mail 채팅("새 캠페인" 탭)에는 이미 <code>KMAIL_SAVE_DRAFT</code>
+          초안 저장 태그가 있었고, 이게 "메일" 탭의 임시보관함과
+          <strong>같은 <code>kmail_drafts</code> 컬렉션</strong>을 쓴다는
+          걸 확인했다. 다만 지금까지는 <code>draft_id</code>만 돌려주고
+          정작 방금 쓴 제목·본문 자체를 안 줘서 화면에 바로 못 띄우고
+          있었다 — <code>draft_saved</code>/<code>campaign_draft_updated</code>
+          두 액션 응답에 <code>subject</code>/<code>body</code>를 실어
+          보내도록 고쳤다.
+        </p>
+        <p>
+          프론트엔드는 사용자가 명시적으로 "초안으로 저장해줘"라고
+          요청한 경우(<code>draft_saved</code>)만 편지쓰기 화면으로
+          직접 전환한다. K-Mail이 대화 도중 스스로 자주 체크포인트
+          하는 배경 동작(<code>campaign_draft_updated</code>)은 화면
+          전환 없이 내용만 조용히 채워둔다 — 매번 화면을 뺏으면 대화에
+          방해가 되기 때문이다. 이미 확정·예약된 캠페인
+          (<code>campaign_created</code>/<code>campaign_started</code>)은
+          의도적으로 제외했다 — 편집기에 다시 채우면 실수로 "보내기"를
+          눌러 중복 발송할 위험이 있다.
+        </p>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="count-accuracy">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">⑦ 실사 발견 버그</div>
+          <div class="gs-title">총 건수 질문에 200건 캡 샘플 크기를 답하던 문제</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          "주소록에 등록된 주소 숫자는?"이라고 물으면 실제로는 769건인데
+          K-Address가 "총 200건"이라고 답했다. 원인: 조회 기능
+          (<code>_kmailQueryContacts</code>)이 최대 200건까지만
+          가져오도록 캡이 걸려 있는데, AI가 이 <strong>샘플 크기를
+          그대로 총 건수인 것처럼</strong> 대답해버린 것이었다.
+        </p>
+        <p>
+          <code>/kmail/contacts/category-counts</code>에서 썼던 것과
+          같은 방식(<code>perPage=1</code>로 실제 레코드는 안 가져오고
+          <code>totalItems</code>만 읽음)으로 정확한 총 건수를 구하는
+          <code>_kmailCountContacts</code>를 신설해, K-Address·K-Mail
+          조회 기능 둘 다 "샘플 200건"과 "정확한 총 건수"를 분리해
+          AI에게 넘기도록 고쳤다.
+        </p>
+        <p>
+          다만 AI가 문장 속에서 숫자를 말로 옮기는 방식은 정확한
+          값을 넘겨줘도 다시 틀릴 여지가 남는다 — 그래서 조회 결과
+          배지 자체에 서버가 준 정확한 건수를 AI 문장을 거치지 않고
+          직접 붙였다("🔍 조회 결과 (769건)").
+        </p>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="smoketest">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">⑧ 검증</div>
+          <div class="gs-title">라이브 스모크테스트 — 20개 시나리오, 20/20 PASS</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <p>
+          <code>tests/live_smoketest/kaddress_contacts_live_smoketest.py</code>
+          신설 — <code>klaw_usage_billing_live_smoketest.py</code>와
+          동일한 원칙으로, phone_verify_token을 오프라인으로 재현해
+          실제 worker.js 엔드포인트를 HTTP로 호출하고 PocketBase
+          Admin API로 실제 저장 결과를 검증한다. LLM 호출이 없어
+          비용은 0원이다.
+        </p>
+        <ul>
+          <li>카테고리 자동분류 10건(대학/병원/시청/감사위원회/연구소/협회/은행/방송/대사관 + 무매칭 빈 값 유지)</li>
+          <li>이메일 도메인 폴백 2건(.ac.kr→P, .go.kr→O)</li>
+          <li>중복 방지 4건(배치 내/배치 간/대소문자 무시/propose 회귀 가드)</li>
+          <li>category-counts 델타 정확도 1건</li>
+          <li>phone_verify_token 인증 3건(mailbox/drafts/message-state)</li>
+        </ul>
+        <p>
+          실계정(주소록을 실제로 갖고 있는 테스트 계정)을 쓰므로
+          모든 테스트 연락처는 <code>pending_review</code>로만 생성하고
+          종료 시 자동으로 <code>rejected</code> 처리해 정리한다.
+          첫 실행은 <code>--test-e164</code>에 형식이 안 맞는 번호를
+          넣어 20/20 <span class="badge fail">FAIL</span>이 났으나
+          (뒷자리 8자리만 입력 → PocketBase profiles와 안 맞음),
+          입력을 어떤 형식으로 넣어도 자동 정규화하도록 스크립트를
+          고친 뒤 재실행해 <span class="badge pass">20/20 PASS</span>를
+          확인했다.
+        </p>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="defects">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">Summary</div>
+          <div class="gs-title">발견·수정한 것 총정리</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <div class="gs-table-wrap">
+          <table class="gs-table">
+            <thead><tr><th>발견 시점</th><th>버그/구멍</th><th>조치</th></tr></thead>
+            <tbody>
+              <tr><td>0910</td><td>165명 벌크 등록이 20000토큰도 초과</td><td>배치 한도 60000 재상향 + SP 지침 강제화</td></tr>
+              <tr><td>0910</td><td>K-Address 긴 메시지 전송 시 자동 스크롤이 로딩 표시까지 안 감</td><td>스크롤 대상을 메시지가 아닌 화면 맨 아래로 수정</td></tr>
+              <tr><td>0911</td><td>CSV 자동분류가 category 코드 한 글자만 넣어 레코드 생성 실패</td><td>코드→정식 select 값 변환 표 신설 + 실패 로깅/응답 신설</td></tr>
+              <tr><td>0911</td><td>propose(수동 등록) 경로에 중복 검사가 아예 없음</td><td>세 경로 공용 중복 확인·이메일 정규화 헬퍼로 통일</td></tr>
+              <tr><td>0911</td><td>mailbox/drafts/message-state 5개 엔드포인트가 지갑 서명만 지원</td><td>공용 인증 게이트로 이관(phone_verify_token 지원)</td></tr>
+              <tr><td>0911</td><td>주소록 총 건수 질문에 200건 캡 샘플 크기를 답함</td><td>count-only 조회 신설 + 배지에 정확한 값 직접 표시</td></tr>
+              <tr><td>0911</td><td>스모크테스트 --test-e164에 형식 안 맞는 번호 입력 시 전량 실패</td><td>입력을 뒷자리 8자리 기준으로 항상 정규화 + 사전 점검 추가</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="lessons">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">Lessons</div>
+          <div class="gs-title">교훈</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <ul>
+          <li><strong>select 필드는 값 자체를 검증하라</strong> — HTTP 200(ok:true)은 "의도한 대로 저장됐다"와 무관하다. 개별 레코드 생성 실패를 조용히 넘기지 말고 반드시 로그·응답에 남겨야 다음 사고를 빨리 잡는다.</li>
+          <li><strong>"경로가 여러 개면 전부 같은 규칙을 지키는지 확인하라"</strong> — 같은 컬렉션에 쓰는 경로가 세 곳이면, 그중 하나가 다른 두 곳의 방어 로직을 안 갖고 있을 수 있다. 공용 헬퍼로 통일하면 이런 드리프트를 원천 차단한다.</li>
+          <li><strong>인증 방식 이관은 "쓰는 쪽"이 생기기 전까진 안 드러난다</strong> — mailbox/drafts/message-state는 오래전부터 있었지만 지갑 서명만 지원한 채 아무도 몰랐다. 새 프론트엔드를 붙이려는 순간에야 발견됐다.</li>
+          <li><strong>"샘플"과 "총계"는 반드시 분리해서 전달하라</strong> — 캡이 걸린 목록 조회 결과를 총 건수 질문에 그대로 재사용하면, LLM이든 사람이든 착각하기 쉽다. count-only 쿼리를 따로 두는 게 싸고 정확하다.</li>
+          <li><strong>테스트 하네스의 입력 검증도 실사로 걸린다</strong> — 스모크테스트 자체가 "전화번호 형식"이라는 흔한 실수로 20/20 실패한 뒤에야 정규화·사전 점검을 넣었다. 하네스도 사용자 입력을 받는 도구라는 걸 잊지 말 것.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="gs reveal" id="related">
+      <div class="gs-head">
+        <div class="gs-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="3" width="7" height="7"/></svg>
+        </div>
+        <div class="gs-head-text">
+          <div class="gs-num">Related</div>
+          <div class="gs-title">관련 문서·PR</div>
+        </div>
+      </div>
+      <div class="gs-body">
+        <ul>
+          <li>hondi PR #187~#195 — CSV 업로드부터 스모크테스트 전화번호 정규화까지 이번 세션 전체</li>
+          <li>mail 저장소 <code>webapp.html</code> — "메일" 탭·Quill 에디터·카테고리 요약·조회 결과 배지의 실제 코드</li>
+          <li><code>tests/live_smoketest/kaddress_contacts_live_smoketest.py</code> · <code>scenarios_kaddress_contacts_20260911.json</code> — 이 문서 ⑧의 실제 하네스</li>
+          <li><code>tests/live_smoketest/README.md</code> "K-Address 주소록 등록/중복방지/분류 전용 하네스" 절 — 실행법·채점 규칙·한계</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  var revealEls = document.querySelectorAll('.reveal');
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.06 });
+  revealEls.forEach(function (el) { io.observe(el); });
+
+  var tocLinks = document.querySelectorAll('.doc-toc a');
+  var sections = Array.prototype.map.call(tocLinks, function (a) {
+    return document.querySelector(a.getAttribute('href'));
+  });
+  function setActive() {
+    var idx = 0;
+    var y = window.scrollY + 110;
+    sections.forEach(function (sec, i) { if (sec && sec.offsetTop <= y) idx = i; });
+    tocLinks.forEach(function (a, i) { a.classList.toggle('active', i === idx); });
+  }
+  window.addEventListener('scroll', setActive, { passive: true });
+  setActive();
+</script>
+</body>
+</html>
