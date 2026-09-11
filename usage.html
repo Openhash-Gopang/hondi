@@ -97,6 +97,13 @@ body{font-family:'Pretendard',-apple-system,'Helvetica Neue',sans-serif;
   padding:4px 0;border-bottom:1px dashed #e5e7eb}
 .charge-result-box .cr-row:last-child{border-bottom:none}
 .charge-warn{font-size:12px;color:#dc2626;margin-top:10px;line-height:1.6}
+.charge-manual-notice{background:#EEF6FF;border-left:3px solid #1A73E8;border-radius:8px;
+  padding:12px 14px;font-size:12.5px;line-height:1.6;color:#1c3a5e;margin-bottom:14px}
+.charge-bonus-box{background:#FFFBEB;border-radius:12px;padding:12px 14px;margin-top:14px;
+  font-size:12.5px;line-height:1.7;color:#78350f}
+.charge-bonus-box .cr-row{display:flex;justify-content:space-between;gap:10px;padding:2px 0}
+.btn-copy-inline{border:none;background:#e8f0fe;color:#1A73E8;border-radius:6px;
+  padding:3px 8px;font-size:12px;cursor:pointer;margin-left:6px;font-family:inherit}
 .charge-status-pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;
   font-weight:600}
 .charge-status-pill.pending{background:#FFF4E5;color:#B45309}
@@ -210,28 +217,45 @@ body{font-family:'Pretendard',-apple-system,'Helvetica Neue',sans-serif;
       <button class="modal-close" onclick="closeChargeModal()">&times;</button>
     </div>
 
-    <div id="charge-step-input">
-      <div style="font-size:13px;color:#6b7280;line-height:1.6">
-        신용카드·PG 없이 계좌 입금으로만 충전할 수 있어요. 금액을 입력하면
-        입금 계좌와, 입금 시 꼭 포함해야 할 코드를 알려드려요.
-      </div>
-      <div class="modal-label">충전 금액 (원)</div>
-      <input class="modal-input" id="charge-amount-input" type="number" min="1000" step="1000" placeholder="예: 10000" inputmode="numeric">
-      <button class="modal-primary-btn" id="charge-submit-btn" onclick="submitChargeRequest()">충전 신청하기</button>
+    <div class="charge-manual-notice">
+      <b>혼디는 정기 자동결제를 쓰지 않습니다.</b><br>
+      월 정액 자동이체는 판매자에게는 유리하지만, 사용자도 모르게 결제가 계속
+      이어질 수 있습니다. 혼디는 오직 사용자가 직접 은행 앱에서 계좌 이체를
+      실행하는 방식만 사용합니다 — 필요한 만큼만, 필요할 때만 충전하시면 됩니다.
     </div>
 
-    <div id="charge-step-result" style="display:none">
+    <div id="charge-info-loading" style="padding:24px 0;text-align:center;color:#9ca3af;font-size:13px">불러오는 중...</div>
+    <div id="charge-info-error" style="display:none;color:#dc2626;font-size:12.5px;line-height:1.6"></div>
+
+    <div id="charge-info-body" style="display:none">
       <div class="charge-result-box">
-        <div class="cr-row"><span>입금 은행/계좌</span><span id="cr-account"></span></div>
-        <div class="cr-row"><span>충전 금액</span><span id="cr-amount"></span></div>
-        <div style="margin-top:10px" id="cr-code-label">보내는 분 표시에 아래 코드를 꼭 포함해 입금해 주세요</div>
-        <div class="cr-code" id="cr-code"></div>
+        <div class="cr-row"><span>입금 은행</span><span id="ci-bank-name"></span></div>
+        <div class="cr-row">
+          <span>계좌번호</span>
+          <span>
+            <span id="ci-account-number-display"></span><button class="btn-copy-inline" id="btn-copy-charge-account" onclick="_copyChargeAccountNumber()">📋</button>
+          </span>
+        </div>
+        <div class="cr-row"><span>예금주</span><span id="ci-holder-name"></span></div>
       </div>
-      <div class="charge-warn" id="cr-warn-text">
-        관리자가 입금을 확인하는 대로 GDC가 지급돼요(자동 처리가 아니라 보통
-        수 시간 정도 걸릴 수 있어요). 코드를 빠뜨리면 확인이 늦어질 수 있어요.
+
+      <div class="modal-label">보내는 분 표시에 아래 번호를 꼭 포함해 입금해 주세요</div>
+      <div class="cr-code" id="ci-match-code"></div>
+      <div style="font-size:12px;color:#6b7280;margin-top:2px">본인 휴대폰 번호 뒷 8자리이며, 항상 같은 번호예요.</div>
+
+      <div class="charge-bonus-box">
+        <div style="font-weight:700;margin-bottom:4px">한 번에 많이 넣을수록 더 받아요</div>
+        <div class="cr-row"><span>10,000원 ~ 49,999원</span><span>×1.6배</span></div>
+        <div class="cr-row"><span>50,000원 ~ 99,999원</span><span>×1.8배</span></div>
+        <div class="cr-row"><span>100,000원 이상</span><span>×2.0배</span></div>
+        <div style="font-size:11px;color:#9ca3af;margin-top:6px">나눠서 여러 번 입금하면 각 건별로 계산돼요(합산되지 않아요).</div>
       </div>
-      <div id="cr-poll-status" style="display:none;margin-top:10px;font-size:13px;color:#0F9D58;font-weight:600"></div>
+
+      <div class="charge-warn">
+        원하시는 금액을 자유롭게 입금해 주세요. 관리자가 입금을 확인하는 대로
+        GDC가 지급돼요(자동 처리가 아니라 보통 수 시간 정도 걸릴 수 있어요).
+        이번 이체 이후 추가로 자동 청구되는 금액은 없습니다.
+      </div>
       <button class="modal-primary-btn" onclick="closeChargeModal()">확인했어요</button>
     </div>
   </div>
@@ -386,141 +410,68 @@ function escapeHtml(s) {
 }
 
 // ── 충전 모달 ──────────────────────────────────────────────
-function openChargeModal() {
-  document.getElementById('charge-step-input').style.display = 'block';
-  document.getElementById('charge-step-result').style.display = 'none';
-  document.getElementById('charge-amount-input').value = '';
+// 2026-09-12 재설계(주피터 지시) — "얼마 넣을지 미리 신청"하는 단계
+// 자체를 없앴다. 전화번호 인증 사용자는 매칭키(전화번호 뒷 8자리)가
+// 고정값이고, 사전 신청 없이 입금해도 서버가 이미 역조회로 자동
+// 매칭한다(worker.js _findGuidByPhoneMatchKey, 2026-08-28 신설). 그래서
+// 이 모달은 "얼마를 넣을지 물어보는 폼"이 아니라 "계좌 정보 + 내 고정
+// 코드"만 보여주는 조회 화면이 됐다 — 신청 레코드가 없으니 폴링도
+// 필요 없고, 완료 알림은 기존 웹 푸시(_mintAndRecordCharge의 GDC 충전
+// 완료 push)가 그대로 처리한다.
+let _chargeAccountNumberRaw = '';
+
+async function openChargeModal() {
   document.getElementById('charge-modal-backdrop').classList.add('open');
-}
-function closeChargeModal() {
-  document.getElementById('charge-modal-backdrop').classList.remove('open');
-  _stopChargePolling();
-  // 모달을 닫을 때(신청을 완료했든 취소했든) 내역을 새로고침해 최신 상태를 보여준다.
-  loadChargeHistory();
-}
+  document.getElementById('charge-info-loading').style.display = 'block';
+  document.getElementById('charge-info-body').style.display = 'none';
+  document.getElementById('charge-info-error').style.display = 'none';
 
-// 2026-08-28 신설 — 지금까지는 신청 후 매칭코드만 보여주고 그대로
-// 끝이었다: 관리자가 입금 알림을 캡처해(방식 C, worker.js
-// handleChargeConfirmNotification) GDC를 실제로 발행해도, 이 모달을
-// 열어둔 사용자는 직접 모달을 닫았다 다시 열어야만(=loadChargeHistory
-// 재호출) 확정 여부를 알 수 있었다. 여기서는 신청 직후부터 짧은
-// 주기로 charge-status를 직접 폴링해, 확정되는 즉시 이 화면에서 바로
-// 보여주고 GDC 잔액 표시(balance-value)도 함께 새로고침한다.
-let _chargePollTimer = null;
-let _chargePollRequestId = null; // 2026-08-28 추가 — 아래 visibilitychange 핸들러가 참조
-const CHARGE_POLL_INTERVAL_MS = 5000;
-const CHARGE_POLL_MAX_TRIES = 120; // 5초 × 120 = 최대 10분간만 자동 폴링(그 이상은 수동 새로고침 안내로 충분)
-
-function _stopChargePolling() {
-  if (_chargePollTimer) { clearInterval(_chargePollTimer); _chargePollTimer = null; }
-  _chargePollRequestId = null;
-}
-
-// 2026-08-28 신설 — 실사용(모바일) 재현 테스트로 발견한 문제: 사용자가
-// 은행 앱으로 전환해 실제 이체를 하는 몇십 초~몇 분 동안, 브라우저
-// 탭이 백그라운드로 밀리면 모바일 OS/브라우저가 배터리 절약을 위해
-// setInterval 타이머 자체를 멈추거나 크게 늦춘다(iOS Safari·Android
-// Chrome 공통). 그래서 실제로는 서버가 정상 확정했는데도, 사용자가
-// 은행 앱에서 브라우저로 돌아왔을 때 화면엔 아무 반응이 없는
-// 사례가 실측 확인됐다 — 이건 은행 앱을 오가는 게 정상적인 사용
-// 흐름인 만큼 테스트 환경만의 문제가 아니라 모든 실사용자가 겪을
-// 문제다. document의 visibilitychange 이벤트로 탭이 다시 보이는
-// 순간 정기 폴링과 별개로 즉시 한 번 더 확인해, 백그라운드 동안
-// 멈춰있던 시간과 무관하게 최신 상태를 곧바로 반영한다.
-async function _checkChargeStatusOnce(requestId) {
   const guid = getGuid();
-  if (!guid || !requestId) return;
-  const statusEl = document.getElementById('cr-poll-status');
   try {
-    const res = await fetch(`${WORKER_URL}/biz/charge-status?guid=${encodeURIComponent(guid)}&request_id=${encodeURIComponent(requestId)}`);
+    const res = await fetch(`${WORKER_URL}/biz/charge-info?guid=${encodeURIComponent(guid)}`);
     const data = await res.json();
-    const status = data?.request?.status;
-    if (status === 'matched') {
-      _stopChargePolling();
-      if (statusEl) {
-        statusEl.style.display = 'block';
-        statusEl.textContent = '✅ 입금이 확인되어 GDC가 충전됐어요!';
-      }
-      loadUsage();        // 상단 GDC 잔액 표시 즉시 갱신
-      loadChargeHistory();
-    } else if (status === 'expired' || status === 'cancelled') {
-      _stopChargePolling();
-    }
-  } catch (e) {
-    // 네트워크 일시 오류는 다음 주기에 재시도 — 폴링 자체를 멈추지 않는다.
-  }
-}
+    if (!res.ok || !data.ok) throw new Error(data.message || data.error || `HTTP ${res.status}`);
 
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && _chargePollRequestId) {
-    _checkChargeStatusOnce(_chargePollRequestId);
-  }
-});
-
-function _startChargePolling(requestId) {
-  _stopChargePolling();
-  const guid = getGuid();
-  if (!guid || !requestId) return;
-  _chargePollRequestId = requestId;
-  let tries = 0;
-  _chargePollTimer = setInterval(() => {
-    tries++;
-    if (tries > CHARGE_POLL_MAX_TRIES) { _stopChargePolling(); return; }
-    _checkChargeStatusOnce(requestId);
-
-  }, CHARGE_POLL_INTERVAL_MS);
-}
-
-async function submitChargeRequest() {
-  const guid = getGuid();
-  const amountInput = document.getElementById('charge-amount-input');
-  const amount = parseInt(amountInput.value, 10);
-  if (!amount || amount < 1000) {
-    alert('최소 1,000원 이상 입력해 주세요.');
-    return;
-  }
-  const btn = document.getElementById('charge-submit-btn');
-  btn.disabled = true;
-  btn.textContent = '신청 중...';
-  try {
-    const res = await fetch(`${WORKER_URL}/biz/charge-request`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ guid, krw_amount: amount }),
-    });
-    const data = await res.json();
-    if (!res.ok || !data.ok) {
-      alert('충전 신청 실패: ' + (data.message || data.error || `HTTP ${res.status}`));
+    if (!data.match_code_is_phone) {
+      // 드문 경우 — 전화번호 인증이 안 된 계정. 고정 매칭키를 만들 수
+      // 없으므로 계좌 정보 조회 화면 자체를 보여줄 수 없다.
+      document.getElementById('charge-info-error').textContent =
+        '전화번호 인증이 필요합니다. 설정에서 전화번호 인증을 먼저 완료해 주세요.';
+      document.getElementById('charge-info-error').style.display = 'block';
+      document.getElementById('charge-info-loading').style.display = 'none';
       return;
     }
-    document.getElementById('cr-account').textContent = data.bank_account_info;
-    document.getElementById('cr-amount').textContent = fmt(data.requested_krw) + '원';
-    document.getElementById('cr-code').textContent = data.match_code;
-    // 2026-08-28 신설 — 서버가 전화번호 기반 매칭키를 발급했는지
-    // (match_code_is_phone)에 따라 안내 문구를 다르게 보여준다.
-    // 전화번호 방식이면 "코드 발급받았으니 그대로 입력"이 아니라
-    // "본인 번호 뒷 8자리를 직접 입력"이라고 정확히 안내해야, 사용자가
-    // 기존 습관대로 예금주 실명까지 같이 적어 다시 10자 제한을
-    // 넘기는 실수를 막을 수 있다.
-    const codeLabelEl = document.getElementById('cr-code-label');
-    const warnEl = document.getElementById('cr-warn-text');
-    if (data.match_code_is_phone) {
-      codeLabelEl.textContent = '보내는 분 표시에 본인 휴대폰 번호 뒷 8자리를 입력해 주세요 (예금주 이름은 지우고 숫자만)';
-      warnEl.textContent = '관리자가 입금을 확인하는 대로 GDC가 지급돼요(자동 처리가 아니라 보통 수 시간 정도 걸릴 수 있어요). 예금주 이름이 함께 표시되면 글자 수 제한 때문에 번호가 잘릴 수 있으니, 이름은 지우고 숫자 8자리만 남겨주세요.';
-    } else {
-      codeLabelEl.textContent = '보내는 분 표시에 아래 코드를 꼭 포함해 입금해 주세요';
-      warnEl.textContent = '관리자가 입금을 확인하는 대로 GDC가 지급돼요(자동 처리가 아니라 보통 수 시간 정도 걸릴 수 있어요). 코드를 빠뜨리면 확인이 늦어질 수 있어요.';
-    }
-    document.getElementById('charge-step-input').style.display = 'none';
-    document.getElementById('charge-step-result').style.display = 'block';
-    document.getElementById('cr-poll-status').style.display = 'none';
-    _startChargePolling(data.request_id);
+
+    const info = data.bank_account_info;
+    document.getElementById('ci-bank-name').textContent = info.bank_name;
+    document.getElementById('ci-account-number-display').textContent = info.account_number_display;
+    document.getElementById('ci-holder-name').textContent = info.holder_name;
+    document.getElementById('ci-match-code').textContent = data.match_code;
+    _chargeAccountNumberRaw = info.account_number || '';
+
+    document.getElementById('charge-info-loading').style.display = 'none';
+    document.getElementById('charge-info-body').style.display = 'block';
   } catch (e) {
-    alert('충전 신청 중 오류가 발생했습니다: ' + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '충전 신청하기';
+    document.getElementById('charge-info-loading').style.display = 'none';
+    document.getElementById('charge-info-error').textContent = '계좌 정보를 불러오지 못했습니다: ' + e.message;
+    document.getElementById('charge-info-error').style.display = 'block';
   }
+}
+
+function _copyChargeAccountNumber() {
+  const btn = document.getElementById('btn-copy-charge-account');
+  if (!_chargeAccountNumberRaw) return;
+  navigator.clipboard?.writeText(_chargeAccountNumberRaw).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✅';
+    setTimeout(() => { btn.textContent = orig; }, 1500);
+  }).catch(() => alert('복사 실패 — 직접 입력해주세요: ' + _chargeAccountNumberRaw));
+}
+
+function closeChargeModal() {
+  document.getElementById('charge-modal-backdrop').classList.remove('open');
+  // 모달을 닫을 때 내역을 새로고침해 최신 상태(그 사이 확정된 입금 등)를 보여준다.
+  loadChargeHistory();
 }
 
 async function loadChargeHistory() {
