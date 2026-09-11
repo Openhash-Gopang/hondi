@@ -34766,10 +34766,17 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     // 서술하는(완료 연출, U7 위반) 패턴으로 변질됐다 — 실제로는
     // 0건 저장. SP §2-1e에도 배치 크기 권장치(25건/회)를 추가했으니
     // 두 조치가 함께 적용돼야 한다.
+    // 2026-09-11(2차) — 2000→20000으로 재상향(주피터 지시). max_tokens는
+    // 상한일 뿐 실제 과금은 생성된 토큰量에 비례하므로, 짧은 응답엔
+    // 비용 영향이 없다 — 큰 배치(수십~수백 건)를 한 번에 등록하려 할
+    // 때만 여유가 필요하다. deepseek-v4-flash의 실제 최대 출력(약
+    // 38만 토큰)에 비하면 20000은 여전히 5% 수준이라 API 자체 상한에
+    // 걸릴 위험도 없다. §2-1e의 "25건/회 권장"은 안전을 위해 그대로
+    // 유지 — 한도를 늘렸다고 배치 크기 제한을 없앤 건 아니다.
     reply = await deepseekChatText({
       env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
       messages: [...systemMessages, ...cleanMessages],
-      max_tokens: 2000, temperature: 0.4, timeoutMs: 60000, fallbackText: '',
+      max_tokens: 20000, temperature: 0.4, timeoutMs: 60000, fallbackText: '',
     });
   } catch (e) {
     return _err(502, 'AI_CALL_FAILED', 'AI 호출 실패: ' + e.message, corsHeaders);
