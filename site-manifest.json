@@ -1413,6 +1413,18 @@
     "source": "menu"
   },
   {
+    "path": "/about-hondi",
+    "title": "about-hondi",
+    "description": "about-hondi",
+    "keywords": [
+      "about",
+      "hondi"
+    ],
+    "pc_url": "https://hondi.net/desktop.html#about-hondi",
+    "audience": "user",
+    "source": "standalone"
+  },
+  {
     "path": "/agents",
     "title": "에이전트",
     "description": "에이전트",
