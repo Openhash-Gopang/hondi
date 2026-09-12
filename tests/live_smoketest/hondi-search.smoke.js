@@ -91,7 +91,13 @@ async function testMissingMessage() {
 }
 
 // 4. 모호한 질의 → clarify, 이후 명확화 응답 → navigate (대화 세션 연속성 검증)
-async function testClarifyThenNavigate() {
+//
+// 2026-09-13 수정 — "navigate URL이 실제 매니페스트에 존재하는 경로임" 체크가
+// json.url(=pc_url, 예: "https://mail.hondi.net")을 path 값 목록
+// (["/docs/kmail-intro", "/services/kmail"])과 비교하고 있어 항상 실패할
+// 수밖에 없던 조건이었다(#5 수정과 동일한 계보의 결함). 매니페스트에서
+// pc_url 집합을 직접 뽑아 비교하도록 고쳤다.
+async function testClarifyThenNavigate(manifest) {
   const conversationId = uuid();
 
   const turn1 = await postSearch({
@@ -122,8 +128,10 @@ async function testClarifyThenNavigate() {
   );
 
   if (turn2Ok) {
-    const knownManifestPaths = ["/docs/kmail-intro", "/services/kmail"];
-    const matchesKnownManifestEntry = knownManifestPaths.includes(turn2.json.url);
+    const knownPcUrls = new Set(
+      manifest.filter((m) => m.path.includes("kmail")).map((m) => m.pc_url)
+    );
+    const matchesKnownManifestEntry = knownPcUrls.has(turn2.json.url);
     record(
       "navigate URL이 실제 매니페스트에 존재하는 경로임",
       matchesKnownManifestEntry,
@@ -133,17 +141,30 @@ async function testClarifyThenNavigate() {
 }
 
 // 5. 명확한 단건 질의는 명확화 없이 바로 navigate 되어야 함
-async function testDirectQueryNavigatesImmediately() {
+//
+// 2026-09-13 수정 — 기존엔 json.url을 매니페스트 path 값("/services/klaw")과
+// 직접 비교했는데, 실제 워커는 url 필드에 path가 아니라 resolveManifestUrl()이
+// 채운 pc_url(예: "https://klaw.hondi.net")을 반환한다(hondi-search-relay
+// worker.js §resolveManifestUrl 참고). 즉 이 assertion은 애초에 통과할 수
+// 없는 조건이었다 — 매니페스트를 직접 조회해 기대값을 동적으로 구하도록
+// 고쳐, 매니페스트 내용이 바뀌어도(오늘 같은 전면 갱신 포함) 테스트가
+// 다시 낡지 않게 한다.
+async function testDirectQueryNavigatesImmediately(manifest) {
   const conversationId = uuid();
   const { status, json } = await postSearch({
     conversation_id: conversationId,
     message: "K-Law 페이지 열어줘",
   });
-  const ok = status === 200 && json?.type === "navigate" && json?.url === "/services/klaw";
+  const expected = manifest.find((m) => m.path === "/services/klaw");
+  const ok =
+    status === 200 &&
+    json?.type === "navigate" &&
+    !!expected &&
+    json?.url === expected.pc_url;
   record(
     "명확한 질의 → 1턴만에 navigate",
     ok,
-    `status=${status}, type=${json?.type}, url=${json?.url}`
+    `status=${status}, type=${json?.type}, url=${json?.url}, 기대 pc_url=${expected?.pc_url}`
   );
 }
 
@@ -162,15 +183,80 @@ async function testDelegatesToKSearch() {
   );
 }
 
+// 7. 회귀 테스트(2026-09-13) — "혼디 숫자 코드" 페이지가 desktop.html
+// 메가메뉴엔 있었지만 손으로 쓴 site-manifest.json엔 등록되지 않아,
+// 전혀 무관한 "하이라이트 번호" 후보를 제시하던 사고. tools/
+// generate_site_manifest.py로 매니페스트를 자동 생성한 뒤에도 이
+// 회귀가 재발하지 않는지 라이브로 확인한다.
+async function testHondiDigitCodeRegression(manifest) {
+  const conversationId = uuid();
+  const { status, json } = await postSearch({
+    conversation_id: conversationId,
+    message: "혼디 사이트에서 혼디 숫자 코드 페이지를 찾아주세요",
+    scope: "user",
+  });
+  const expected = manifest.find((m) => m.path === "/scenarios");
+  const ok =
+    status === 200 &&
+    json?.type === "navigate" &&
+    !!expected &&
+    json?.url === expected.pc_url;
+  record(
+    "회귀: '혼디 숫자 코드' 질의 → 정확한 navigate (2026-09-13 사고 재발 확인)",
+    ok,
+    `status=${status}, type=${json?.type}, url=${json?.url}, 기대 pc_url=${expected?.pc_url}` +
+      (json?.type === "clarify" || json?.type === "candidates"
+        ? " ※ clarify/candidates로 나왔다면 배포가 아직 안 됐거나(패치 미병합) 회귀 재발 신호입니다"
+        : "")
+  );
+}
+
+// 8. scope 격리 테스트(2026-09-13 신설) — dev 전용 문서를 scope=user로
+// 물었을 때 그 문서로 새지 않아야 한다. hondi-search-relay의
+// filterManifestByScope()가 실제로 배포·작동 중인지 확인하는 테스트.
+async function testScopeIsolation(manifest) {
+  const devOnlyDoc = manifest.find(
+    (m) => m.audience === "dev" && m.path.includes("SESSION_LESSONS")
+  );
+  if (!devOnlyDoc) {
+    record("scope 격리: dev 문서 목록 확보", false, "매니페스트에 audience='dev' 항목이 없음 — 매니페스트 자체가 아직 갱신 전일 수 있음");
+    return;
+  }
+
+  const conversationId = uuid();
+  const { status, json } = await postSearch({
+    conversation_id: conversationId,
+    message: devOnlyDoc.title,
+    scope: "user",
+  });
+  const leaked = json?.url === devOnlyDoc.pc_url;
+  record(
+    "scope 격리: user 스코프에서 dev 문서로 새지 않음",
+    status === 200 && !leaked,
+    `질의="${devOnlyDoc.title}", scope=user, 실제 url=${json?.url}` +
+      (leaked ? " ※ dev 전용 문서로 유출됨 — scope 필터링 미작동" : "")
+  );
+}
+
 async function main() {
   console.log(`혼디 검색 라이브 스모크 테스트 시작 (BASE_URL=${BASE_URL})\n`);
 
   await testManifestIsLive();
+
+  let manifest = [];
+  try {
+    manifest = await fetch(MANIFEST_URL).then((r) => r.json());
+  } catch (e) {
+    console.error("매니페스트를 불러오지 못해 일부 테스트를 건너뜁니다:", e.message);
+  }
+
   await testMethodNotAllowed();
   await testMissingMessage();
-  await testClarifyThenNavigate();
-  await testDirectQueryNavigatesImmediately();
+  await testClarifyThenNavigate(manifest);
+  await testDirectQueryNavigatesImmediately(manifest);
   await testDelegatesToKSearch();
+  await testHondiDigitCodeRegression(manifest);
+  await testScopeIsolation(manifest);
 
   const failed = results.filter((r) => !r.pass);
   console.log(`\n총 ${results.length}건 중 실패 ${failed.length}건`);
