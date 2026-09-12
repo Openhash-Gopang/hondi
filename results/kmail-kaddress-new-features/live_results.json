@@ -1,0 +1,26 @@
+[
+  {
+    "no": 5,
+    "name": "K-Mail: 이름 붙은 그룹 언급 시 되묻기 전에 주소록 조회",
+    "kind": "kmail_group_lookup_first",
+    "verdict": "LIVE-PASS",
+    "reason": "되묻지 않고 KMAIL_LOOKUP_CONTACTS를 먼저 시도함",
+    "raw_response": "주피터님, K-Mail입니다. 팀 주피터 멤버 명단부터 주소록에서 확인하겠습니다.\n\nKMAIL_LOOKUP_CONTACTS {\"q\": \"\", \"relationship\": \"\", \"occupation\": \"\", \"org\": \"\", \"tag\": \"팀 주피터\", \"category\": \"\"}"
+  },
+  {
+    "no": 6,
+    "name": "K-Mail: URL 요약 요청에 FETCH_CONTENT 사용(FETCH_PAGE 오용 금지)",
+    "kind": "kmail_fetch_content_not_fetch_page",
+    "verdict": "LIVE-PASS",
+    "reason": "KMAIL_FETCH_CONTENT를 정확히 사용함(FETCH_PAGE 오용 없음)",
+    "raw_response": "저장소를 직접 조회해서 최근 진행 상황을 파악하겠습니다.\n\nKMAIL_FETCH_CONTENT {\"url\": \"https://github.com/Openhash-Gopang/hondi/\"}"
+  },
+  {
+    "no": 7,
+    "name": "K-Address: 발송 요청에 안내만 하지 않고 K-Mail 직접 호출",
+    "kind": "kaddress_handoff_not_guide_only",
+    "verdict": "LIVE-PASS",
+    "reason": "KADDR_HANDOFF_TO_KMAIL로 실제 호출을 시도함",
+    "raw_response": "K-Mail로 넘겨서 이어서 진행하겠습니다. 대상과 내용을 그대로 전달할게요.\n\nKADDR_HANDOFF_TO_KMAIL {\"instruction\": \"팀 주피터 멤버들에게 혼디 최근 개발 상황을 요약해서 보내줘\"}"
+  }
+]
