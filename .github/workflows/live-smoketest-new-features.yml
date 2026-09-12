@@ -1,0 +1,80 @@
+name: Live Smoketest — K-Mail/K-Address 신규 기능(FETCH_CONTENT/핸드오프)
+
+# 2026-09-12 신설 — 이번 세션에 새로 만든 3가지 기능의 회귀 방지 가드:
+#   1) KMAIL_FETCH_CONTENT 실제 조회(GitHub REST API 우회 포함) — REST
+#   2) K-Mail: 이름 붙은 그룹 언급 시 주소록 우선 조회 — AI 행동
+#   3) K-Mail: URL 요약 요청에 FETCH_CONTENT(FETCH_PAGE 오용 금지) — AI 행동
+#   4) K-Address: 발송 요청에 안내만 하지 않고 K-Mail 직접 호출 — AI 행동
+#
+# AI 행동 시나리오는 DeepSeek API를 직접 호출한다(kmail_fetch_page_
+# smoketest.py와 동일 패턴) — 확률적 응답이라 결과가 매번 다를 수
+# 있고, NEEDS-REVIEW가 나오면 raw_response를 사람이 직접 봐야 한다.
+#
+# 필요 GitHub Secrets: PHONE_VERIFY_SECRET(이미 등록됨), DEEPSEEK_API_KEY
+# (이미 등록됨 — kmail_fetch_page_smoketest.py가 이미 쓰고 있음).
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_e164:
+        description: "REST 시나리오용 실제 등록된 테스트 계정 전화번호 (AI 시나리오만 돌리려면 skip_rest=true로 두고 아무 값이나)"
+        required: true
+      skip_rest:
+        description: "true면 REST(GitHub API 우회) 시나리오 건너뜀"
+        required: false
+        default: "false"
+      skip_ai:
+        description: "true면 AI 행동(DeepSeek 직접 호출) 시나리오 건너뜀"
+        required: false
+        default: "false"
+
+permissions:
+  contents: write
+
+jobs:
+  run-new-features-smoketest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install requests
+
+      - name: Run new-features live smoketest
+        working-directory: tests/live_smoketest
+        env:
+          PHONE_VERIFY_SECRET: ${{ secrets.PHONE_VERIFY_SECRET }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          EXTRA_ARGS=""
+          if [ "${{ github.event.inputs.skip_rest }}" = "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --skip-rest"; fi
+          if [ "${{ github.event.inputs.skip_ai }}" = "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --skip-ai"; fi
+          python3 kmail_kaddress_new_features_live_smoketest.py \
+            --out "../../results/kmail-kaddress-new-features" \
+            --worker-base "https://hondi-proxy.tensor-city.workers.dev" \
+            --test-e164 "${{ github.event.inputs.test_e164 }}" \
+            $EXTRA_ARGS
+
+      - name: Commit results to results branch
+        if: always()
+        run: |
+          git config user.name "hondi-live-smoketest-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout -B results/live-smoketest-new-features
+          git add -f results/
+          git diff --cached --quiet || git commit -m "chore: K-Mail/K-Address new-features live smoketest results ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+          git push --force origin HEAD:results/live-smoketest-new-features
+
+      - name: Upload artifact (backup)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-smoketest-new-features-results
+          path: results/
