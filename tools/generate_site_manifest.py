@@ -7,17 +7,34 @@ tools/generate_site_manifest.py
 구조적으로 누락이 발생한다(2026-09-13, "혼디 숫자 코드" 페이지 검색
 실패 사고가 그 증거: 메가메뉴엔 있었지만 수기 매니페스트엔 없었음).
 
-소스 3곳을 통합한다:
+소스 4곳을 통합한다:
   1. desktop.html의 MEGA_MENU_SECTIONS(JS 변수, JSON으로 파싱)
   2. desktop.html의 STANDALONE_PAGES 배열(메가메뉴에 링크가 없는
      SPA 오버레이 페이지 — 예: klaw, usage-guide, expert-personas 등)
-  3. K-서비스 서브도메인 레지스트리(메가메뉴 "서비스" 섹션에서 자동
-     추출되므로 별도 목록 불필요 — 현재는 1과 겹침)
+  3. desktop.html의 MEGA_MENU_PINNED(단일 객체 — 메가메뉴 상단에 고정
+     표시되는 항목 1개. 2026-09-13 v1.1에서 추가 — 배열이 아니라 별도
+     변수라 처음엔 놓쳤다. 이런 "또 다른 소스"가 계속 나올 수 있다는
+     전제로 ④를 안전망으로 둔다)
+  4. desktop.html 본문에 흩어진 순수 `<a href="...">` 앵커(메가메뉴 밖,
+     예: 하단 지원 배너 "혼디 프로젝트를 지원하는 방법", 헤더의 "사용법"
+     링크). JS 구조가 아니라 정규식으로 전체 문서를 훑으며, 이미 ①~③에서
+     찾은 것과 겹치면 add()의 중복 방지로 자동 무시된다. .css/.js/이미지
+     등 페이지가 아닌 링크는 확장자로 걸러낸다.
 
 audience 분류 원칙:
   "🛠 개발자 문서" / "⚠ 주의" 섹션 → dev
-  그 외 전부 → user
+  그 외 전부(④의 순수 앵커 포함) → user
 (desktop.html 섹션 라벨이 바뀌면 DEV_SECTION_LABELS만 갱신하면 된다.)
+
+⚠ 2026-09-13 실전 교훈: ①②만 파싱하고 "이걸로 전수 커버했다"고
+간주했다가, 50개 스모크테스트 질의를 준비하는 과정에서 ③④ 소스에만
+있던 실제 페이지 3개(legacy_overview_20260821.html,
+hondi_interactive_manual.html, project-support.html)가 통째로 빠진
+채 방치돼 있었던 걸 발견했다. "메가메뉴 JSON을 파싱했다"와 "desktop.html
+안의 페이지 링크를 전수 확인했다"는 다른 이야기라는 게 이번에 확인된
+교훈이다 — 다음에 또 새로운 소스(예: 다른 JS 변수, 다른 페이지 파일
+안의 앵커)가 발견되면 이 파일의 소스 목록에 추가하고 위 경고 문단도
+갱신한다.
 
 사용법:
   python3 tools/generate_site_manifest.py            # site-manifest.json 갱신
@@ -34,6 +51,18 @@ DESKTOP_HTML = REPO_ROOT / "desktop.html"
 MANIFEST_PATH = REPO_ROOT / "site-manifest.json"
 
 DEV_SECTION_LABELS = {"🛠 개발자 문서", "⚠ 주의"}
+
+# ④ 순수 앵커 스캔 대상 확장자 — 페이지로 볼 수 있는 것만. 자산(css/js/
+# 이미지 등)은 여기 없으므로 자동으로 제외된다.
+PAGE_LIKE_EXTENSIONS = (".html", ".md")
+# 순수 앵커에서 라벨을 못 뽑을 때(예: 아이콘만 있는 링크) 대비한 안전망 —
+# href의 파일명을 그대로 title로 쓰기 전에, 사람이 읽을 만한 라벨을 알고
+# 있으면 여기 채운다. 모르면 비워두고 자동 초안(파일명)을 그대로 둔다.
+KNOWN_ANCHOR_LABELS = {
+    "./docs/legacy_overview_20260821.html": "혼디 시스템 개요",
+    "./docs/hondi_interactive_manual.html": "혼디 사용법",
+    "/pages/project-support.html": "혼디 프로젝트를 지원하는 방법",
+}
 
 # loadPage() 이외의 onclick 핸들러 — 페이지 이동이 아니라 같은 화면의
 # 오버레이를 여는 함수라 자동 파싱으로는 목적지를 알 수 없다. 발견될
@@ -73,6 +102,28 @@ def load_standalone_pages():
     if not m:
         raise RuntimeError("STANDALONE_PAGES를 desktop.html에서 찾지 못했습니다")
     return json.loads(m.group(1).replace("'", '"'))
+
+
+def load_mega_menu_pinned():
+    """MEGA_MENU_PINNED — 배열이 아니라 단일 객체인 별도 변수. 없어도
+    치명적이지 않으므로(과거엔 없었을 수 있음) 못 찾으면 None을 반환."""
+    text = DESKTOP_HTML.read_text(encoding="utf-8")
+    m = re.search(r"var MEGA_MENU_PINNED = (\{.*?\});", text)
+    return json.loads(m.group(1)) if m else None
+
+
+ANCHOR_HREF_RE = re.compile(r'<a\s[^>]*href="(\.\/docs\/[^"]+|\/pages\/[^"]+|\/[a-zA-Z][a-zA-Z0-9_\-\.]*\.html)"')
+
+
+def find_loose_anchor_hrefs():
+    """desktop.html 전체 본문에서 메가메뉴/STANDALONE_PAGES/PINNED 밖에
+    흩어진 순수 <a href="..."> 링크를 찾는다. 이미 다른 소스에서 찾은
+    항목과 겹치면 build_entries()의 add()가 중복을 알아서 무시하므로,
+    여기서는 페이지처럼 보이는 확장자(PAGE_LIKE_EXTENSIONS)만 걸러
+    과대 수집을 막는다."""
+    text = DESKTOP_HTML.read_text(encoding="utf-8")
+    hrefs = sorted(set(ANCHOR_HREF_RE.findall(text)))
+    return [h for h in hrefs if h.lower().endswith(PAGE_LIKE_EXTENSIONS)]
 
 
 def extract_date(label: str):
@@ -128,6 +179,8 @@ def href_to_pc_url(href: str):
 def build_entries():
     sections = load_mega_menu_sections()
     standalone_ids = load_standalone_pages()
+    pinned = load_mega_menu_pinned()
+    loose_anchor_hrefs = find_loose_anchor_hrefs()
 
     entries = {}  # path -> entry, dict라서 중복 href 자동 dedup
 
@@ -200,6 +253,25 @@ def build_entries():
         if path not in entries:
             add(path, page_id, f"https://hondi.net/desktop.html#{page_id}", "user",
                 derive_keywords(page_id), "standalone")
+
+    # ③ MEGA_MENU_PINNED — 단일 고정 항목.
+    if pinned and pinned.get("href") and pinned["href"] != "#":
+        label = pinned.get("label", "")
+        path = normalize_href_path(pinned["href"])
+        add(path, label, href_to_pc_url(pinned["href"]), "user",
+            derive_keywords(label), "pinned", label)
+
+    # ④ 메가메뉴/STANDALONE_PAGES/PINNED 어디에도 없던 순수 앵커.
+    # 2026-09-13 실전 교훈(파일 상단 경고 참고) — 이 소스를 놓쳤던 사고를
+    # 재발 방지하기 위한 안전망. 라벨을 알면 KNOWN_ANCHOR_LABELS에서
+    # 가져오고, 모르면 파일명을 그대로 자동 초안으로 쓴다(사람 검수 필요).
+    for href in loose_anchor_hrefs:
+        path = normalize_href_path(href)
+        if path in entries:
+            continue  # 이미 다른 소스에서 찾음
+        label = KNOWN_ANCHOR_LABELS.get(href) or Path(href).stem
+        add(path, label, href_to_pc_url(href), "user",
+            derive_keywords(label), "loose_anchor", label)
 
     return list(entries.values())
 
