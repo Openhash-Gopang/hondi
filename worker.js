@@ -12551,6 +12551,11 @@ export default {
     if (pathname === '/kmail/contacts/propose' && request.method === 'POST') return handleKmailContactsPropose(request, env, corsHeaders);
     if (pathname === '/kmail/contacts' && request.method === 'GET') return handleKmailContactsList(request, url, env, corsHeaders);
     if (pathname === '/kmail/contacts/category-counts' && request.method === 'GET') return handleKmailContactsCategoryCounts(request, url, env, corsHeaders);
+    // 2026-09-12 신설(주피터 지시 — 주소록을 카테고리뿐 아니라
+    // 태그별로도 표시). tags는 KSIC처럼 고정 21개가 아니라 자유
+    // 값이라 category-counts와 같은 perPage=1 트릭을 못 쓴다 —
+    // handleKmailContactsTagCounts 주석 참고.
+    if (pathname === '/kmail/contacts/tag-counts' && request.method === 'GET') return handleKmailContactsTagCounts(request, url, env, corsHeaders);
     if (pathname === '/kmail/mailbox' && request.method === 'GET') return handleKmailMailboxList(request, url, env, corsHeaders);
     if (pathname === '/kmail/contacts/decide' && request.method === 'POST') return handleKmailContactsDecide(request, env, corsHeaders);
     if (pathname === '/kmail/contacts/update' && request.method === 'POST') return handleKmailContactsUpdate(request, env, corsHeaders);
@@ -32451,6 +32456,66 @@ async function handleKmailContactsCategoryCounts(request, url, env, corsHeaders)
     .filter(c => c.count > 0);
 
   return new Response(JSON.stringify({ ok: true, total, uncategorized, categories }), { status: 200, headers: corsHeaders });
+}
+
+// GET /kmail/contacts/tag-counts?status=&guid=...&pubkey=...&signature=...&ts=...
+// 2026-09-12 신설(주피터 지시) — category-counts와 나란히, 태그별로도
+// 주소록을 눌러서 볼 수 있게 한다. category는 KSIC 21개 고정값이라
+// "각 값마다 perPage=1로 건수만 조회"하는 트릭이 통했지만, tags는
+// 사용자가 자유롭게 붙이는 값이라 그 목록 자체를 미리 알 수 없다 —
+// 그래서 tags 필드만(fields=tags로 최소 payload) 페이지네이션해서
+// 가져와 여기서 직접 집계한다. category-counts의 "레코드 자체는 안
+// 가져온다"는 설계 취지(주소록이 수천~수만 건까지 늘어날 걸 대비)는
+// 못 지키지만, tags만 뽑으면 레코드당 payload가 매우 작아(문자열
+// 배열 하나) perPage=500 기준 수만 건 규모까지도 페이지 몇 장이면
+// 충분하다.
+async function handleKmailContactsTagCounts(request, url, env, corsHeaders) {
+  const qp = Object.fromEntries(url.searchParams.entries());
+  const status = qp.status || 'confirmed';
+  if (!['pending_review', 'confirmed', 'rejected', 'all'].includes(status)) {
+    return _err(400, 'INVALID_STATUS', "status는 pending_review/confirmed/rejected/all 중 하나여야 합니다", corsHeaders);
+  }
+  const auth = await _kAuth.resolveGuid(env, qp, { sigMsg: `kmail-contacts-tag-counts:${qp.guid}:${qp.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
+
+  const token = await _l1AdminToken(env);
+  const headers = { Authorization: `Bearer ${token}` };
+  const esc = s => String(s).replace(/'/g, "\\'");
+  const baseClause = `owner_user_guid='${esc(guid)}'` + (status !== 'all' ? ` && status='${esc(status)}'` : '');
+  const filter = encodeURIComponent(baseClause);
+
+  const PAGE_SIZE = 500;
+  const MAX_PAGES = 200; // 안전장치 — 이론상 최대 10만 건까지 커버, 그 이상은 이상 상황으로 보고 중단
+  let page = 1;
+  let total = 0;
+  let noTags = 0;
+  const tagCounts = new Map();
+  for (;;) {
+    const res = await fetch(
+      `${L1_DEFAULT}/api/collections/kmail_contacts/records?filter=${filter}&fields=tags&page=${page}&perPage=${PAGE_SIZE}`,
+      { headers }
+    );
+    const data = await res.json().catch(() => ({ items: [], totalItems: 0, totalPages: 0 }));
+    if (page === 1) total = data.totalItems || 0;
+    for (const rec of (data.items || [])) {
+      const tags = Array.isArray(rec.tags) ? rec.tags : [];
+      if (tags.length === 0) { noTags++; continue; }
+      for (const raw of tags) {
+        const t = String(raw).trim();
+        if (!t) continue;
+        tagCounts.set(t, (tagCounts.get(t) || 0) + 1);
+      }
+    }
+    if (page >= (data.totalPages || 1) || page >= MAX_PAGES) break;
+    page++;
+  }
+
+  const tags = Array.from(tagCounts.entries())
+    .map(([tag, count]) => ({ tag, count }))
+    .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
+
+  return new Response(JSON.stringify({ ok: true, total, no_tags: noTags, tags }), { status: 200, headers: corsHeaders });
 }
 
 async function handleKmailContactsList(request, url, env, corsHeaders) {
