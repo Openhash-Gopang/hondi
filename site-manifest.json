@@ -1578,6 +1578,19 @@
     "source": "menu"
   },
   {
+    "path": "/docs/hondi_interactive_manual.html",
+    "title": "혼디 사용법",
+    "description": "혼디 사용법",
+    "keywords": [
+      "혼디 사용법",
+      "혼디",
+      "사용법"
+    ],
+    "pc_url": "https://hondi.net/docs/hondi_interactive_manual.html",
+    "audience": "user",
+    "source": "loose_anchor"
+  },
+  {
     "path": "/docs/hondi_kids_guide.html",
     "title": "초등학생 가이드",
     "description": "초등학생 가이드",
@@ -1615,6 +1628,20 @@
     "pc_url": "https://hondi.net/docs/hondi_user_manual.html",
     "audience": "user",
     "source": "menu"
+  },
+  {
+    "path": "/docs/legacy_overview_20260821.html",
+    "title": "혼디 시스템 개요 ↗",
+    "description": "혼디 시스템 개요 ↗",
+    "keywords": [
+      "혼디 시스템 개요",
+      "혼디",
+      "시스템",
+      "개요"
+    ],
+    "pc_url": "https://hondi.net/docs/legacy_overview_20260821.html",
+    "audience": "user",
+    "source": "pinned"
   },
   {
     "path": "/docs/user-guide.html",
@@ -1706,6 +1733,21 @@
     "pc_url": "https://hondi.net/desktop.html#openhash",
     "audience": "user",
     "source": "menu"
+  },
+  {
+    "path": "/pages/project-support.html",
+    "title": "혼디 프로젝트를 지원하는 방법",
+    "description": "혼디 프로젝트를 지원하는 방법",
+    "keywords": [
+      "혼디 프로젝트를 지원하는 방법",
+      "혼디",
+      "프로젝트를",
+      "지원하는",
+      "방법"
+    ],
+    "pc_url": "https://hondi.net/pages/project-support.html",
+    "audience": "user",
+    "source": "loose_anchor"
   },
   {
     "path": "/professional-ai",

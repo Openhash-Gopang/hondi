@@ -194,6 +194,37 @@ def grade(case, response):
     return True, "OK"
 
 
+def load_query_suite(path, manifest_by_path):
+    """50개 큐레이션 질의 파일(hondi_search_50_query_suite.json 등)을
+    런타임 케이스 형식으로 변환한다. expected_path/forbidden_path를
+    매니페스트에서 조회해 실제 pc_url로 치환 — 하드코딩된 URL 대신
+    항상 최신 매니페스트를 기준으로 채점한다(과거 hondi-search.smoke.js가
+    겪은 것과 같은 유형의 결함을 피하기 위함)."""
+    raw = json.loads(Path(path).read_text(encoding="utf-8"))
+    cases = []
+    for c in raw["cases"]:
+        case = {
+            "id": c["id"],
+            "category": c.get("category", "suite"),
+            "scope": c.get("override_scope", c["scope"]),
+            "message": c["message"],
+            "expected_type": c.get("expected_type"),
+        }
+        if c.get("expected_path"):
+            entry = manifest_by_path.get(c["expected_path"])
+            if not entry:
+                print(f"[경고] {c['id']}: expected_path={c['expected_path']!r}가 "
+                      f"현재 매니페스트에 없습니다 — 케이스를 건너뜁니다", file=sys.stderr)
+                continue
+            case["expected_url"] = entry["pc_url"]
+        if c.get("forbidden_path"):
+            entry = manifest_by_path.get(c["forbidden_path"])
+            if entry:
+                case["forbidden_url"] = entry["pc_url"]
+        cases.append(case)
+    return cases
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--manifest", default="../../site-manifest.json")
@@ -203,16 +234,22 @@ def main():
                      help="전수 커버리지 케이스를 스코프별 N개로 제한(디버깅용)")
     ap.add_argument("--category", default=None,
                      help="쉼표로 구분된 카테고리만 실행 (예: regression,scope_isolation)")
+    ap.add_argument("--query-suite", default=None,
+                     help="큐레이션 질의 파일 경로(예: hondi_search_50_query_suite.json). "
+                          "지정하면 전수 커버리지 대신 이 파일의 케이스만 실행한다.")
     args = ap.parse_args()
 
     manifest = json.loads(Path(args.manifest).read_text(encoding="utf-8"))
     manifest_by_path = {e["path"]: e for e in manifest}
 
-    cases = (
-        fixed_cases(manifest_by_path)
-        + coverage_cases(manifest, "user", args.sample)
-        + coverage_cases(manifest, "dev", args.sample)
-    )
+    if args.query_suite:
+        cases = load_query_suite(args.query_suite, manifest_by_path)
+    else:
+        cases = (
+            fixed_cases(manifest_by_path)
+            + coverage_cases(manifest, "user", args.sample)
+            + coverage_cases(manifest, "dev", args.sample)
+        )
 
     if args.category:
         wanted = set(args.category.split(","))
