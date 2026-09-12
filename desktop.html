@@ -4470,27 +4470,23 @@ window.closeHondiZoom = function() {
 <!-- ── "혼디란?" 소개 자료실 안내 플로팅 버튼 (2026-09-13 신설) ──
      처음 방문하는 사람 모두에게 뜨고, 확인 후 체크박스로 숨기면
      localStorage에 기억되어 다음 방문부터는 뜨지 않는다.
-     "무엇이든 버블"(#ask-bubble, 우측 하단) 바로 위에 같은 우측 정렬로 쌓는다. -->
+     "무엇이든 버블"(#ask-bubble, 우측 하단) 바로 위에 같은 우측 정렬로 쌓는다.
+     2026-09-13 수정 — "숨기기" 체크박스를 버튼 바깥 별도 필에서
+     버튼 내부(혼디란? 문구 바로 아래)로 이동. 버튼 전체가 한 덩어리로
+     보이도록 클릭 영역을 두 행(상단 이동, 하단 숨기기)으로 나눴다. -->
 <style>
 #about-fab-wrap {
   position: fixed;
   bottom: 100px;
   right: 28px;
   z-index: 8990;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
 }
 #about-fab-btn {
-  display: flex; align-items: center; gap: 8px;
+  display: flex;
+  flex-direction: column;
   background: var(--brand, #3b82f6);
-  color: #fff;
-  font-family: 'Pretendard', sans-serif;
-  font-size: 14px; font-weight: 700;
-  padding: 12px 20px 12px 16px;
-  border: none; border-radius: 999px;
-  cursor: pointer;
+  border-radius: 16px;
+  overflow: hidden;
   box-shadow: 0 4px 20px rgba(59,130,246,0.35);
   animation: about-fab-in 0.4s cubic-bezier(.34,1.56,.64,1) both;
   transition: transform 0.15s, box-shadow 0.15s;
@@ -4499,41 +4495,48 @@ window.closeHondiZoom = function() {
   transform: translateY(-2px);
   box-shadow: 0 8px 26px rgba(59,130,246,0.45);
 }
-#about-fab-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+#about-fab-main {
+  display: flex; align-items: center; gap: 8px;
+  color: #fff;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 14px; font-weight: 700;
+  padding: 12px 20px 12px 16px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+#about-fab-main svg { width: 18px; height: 18px; flex-shrink: 0; }
 @keyframes about-fab-in {
   from { opacity: 0; transform: scale(0.7) translateY(16px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 #about-fab-hide-row {
   display: flex; align-items: center; gap: 6px;
-  background: rgba(255,255,255,0.92);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  padding: 5px 10px 5px 8px;
-  border-radius: 999px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 7px 16px 9px 16px;
+  border-top: 1px solid rgba(255,255,255,0.22);
   font-family: 'Pretendard', sans-serif;
   font-size: 11.5px;
-  color: var(--text3, #374151);
+  color: rgba(255,255,255,0.88);
   cursor: pointer;
   user-select: none;
 }
-#about-fab-hide-row input { cursor: pointer; margin: 0; }
+#about-fab-hide-row input { cursor: pointer; margin: 0; accent-color: #fff; }
 @media (max-width: 600px) {
   #about-fab-wrap { bottom: 82px; right: 16px; }
-  #about-fab-btn { font-size: 13px; padding: 10px 16px 10px 14px; }
+  #about-fab-main { font-size: 13px; padding: 10px 16px 10px 14px; }
 }
 </style>
 
 <div id="about-fab-wrap">
-  <button id="about-fab-btn" onclick="loadPage('about-hondi')" title="혼디란? — 소개 자료 모음 보기">
-    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-    혼디란?
-  </button>
-  <label id="about-fab-hide-row">
-    <input type="checkbox" id="about-fab-hide-checkbox" onchange="_aboutFabHideToggle(this)">
-    숨기기
-  </label>
+  <div id="about-fab-btn">
+    <div id="about-fab-main" onclick="loadPage('about-hondi')" title="혼디란? — 소개 자료 모음 보기">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      혼디란?
+    </div>
+    <label id="about-fab-hide-row" onclick="event.stopPropagation()">
+      <input type="checkbox" id="about-fab-hide-checkbox" onclick="event.stopPropagation()" onchange="_aboutFabHideToggle(this)">
+      숨기기
+    </label>
+  </div>
 </div>
 
 <script>
