@@ -1215,6 +1215,7 @@ document.addEventListener('keydown', function (e) {
     <a href="#" onclick="loadPage('ai-engine');return false;">AI 엔진</a>
     <a href="#" onclick="loadPage('openhash');return false;">오픈해시</a>
     <a href="#" onclick="loadPage('hondi-market');return false;">혼디마켓</a>
+    <a href="#" onclick="loadPage('about-hondi');return false;">혼디란?</a>
   </nav>
 
   <div class="site-nav-highlight">
@@ -4466,6 +4467,94 @@ window.closeHondiZoom = function() {
 </div>
 
 
+<!-- ── "혼디란?" 소개 자료실 안내 플로팅 버튼 (2026-09-13 신설) ──
+     처음 방문하는 사람 모두에게 뜨고, 확인 후 체크박스로 숨기면
+     localStorage에 기억되어 다음 방문부터는 뜨지 않는다.
+     "무엇이든 버블"(#ask-bubble, 우측 하단) 바로 위에 같은 우측 정렬로 쌓는다. -->
+<style>
+#about-fab-wrap {
+  position: fixed;
+  bottom: 100px;
+  right: 28px;
+  z-index: 8990;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+#about-fab-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--brand, #3b82f6);
+  color: #fff;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 14px; font-weight: 700;
+  padding: 12px 20px 12px 16px;
+  border: none; border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(59,130,246,0.35);
+  animation: about-fab-in 0.4s cubic-bezier(.34,1.56,.64,1) both;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+#about-fab-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 26px rgba(59,130,246,0.45);
+}
+#about-fab-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+@keyframes about-fab-in {
+  from { opacity: 0; transform: scale(0.7) translateY(16px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+#about-fab-hide-row {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  padding: 5px 10px 5px 8px;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  font-family: 'Pretendard', sans-serif;
+  font-size: 11.5px;
+  color: var(--text3, #374151);
+  cursor: pointer;
+  user-select: none;
+}
+#about-fab-hide-row input { cursor: pointer; margin: 0; }
+@media (max-width: 600px) {
+  #about-fab-wrap { bottom: 82px; right: 16px; }
+  #about-fab-btn { font-size: 13px; padding: 10px 16px 10px 14px; }
+}
+</style>
+
+<div id="about-fab-wrap">
+  <button id="about-fab-btn" onclick="loadPage('about-hondi')" title="혼디란? — 소개 자료 모음 보기">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+    혼디란?
+  </button>
+  <label id="about-fab-hide-row">
+    <input type="checkbox" id="about-fab-hide-checkbox" onchange="_aboutFabHideToggle(this)">
+    숨기기
+  </label>
+</div>
+
+<script>
+(function () {
+  var ABOUT_FAB_KEY = 'hondi_about_fab_hidden';
+  try {
+    if (localStorage.getItem(ABOUT_FAB_KEY) === '1') {
+      var w = document.getElementById('about-fab-wrap');
+      if (w) w.style.display = 'none';
+    }
+  } catch (e) {}
+})();
+function _aboutFabHideToggle(cb) {
+  if (!cb.checked) return;
+  try { localStorage.setItem('hondi_about_fab_hidden', '1'); } catch (e) {}
+  var w = document.getElementById('about-fab-wrap');
+  if (w) w.style.display = 'none';
+}
+</script>
+
+
 <!-- ── AI 채팅 패널 ── -->
 <style>
 /* 오버레이: 배경 터치로 닫기 위한 투명 레이어 (body scroll은 유지) */
@@ -5118,7 +5207,7 @@ function toggleSubmenu(id, btnEl) {
 // ── SPA 라우터 ────────────────────────────────────────────
 // overview는 desktop.html에 정적으로 포함되어 있으므로 더 이상 fetch 대상이 아님
 const PAGE_ORDER = [];
-const STANDALONE_PAGES = ['klaw','openhash','agents','ai-types','teasers','hondi-market','scenarios','professional-ai','scenario-test','usage-guide','ai-assistant','ai-engine','rule-of-law','k-services','expert-personas','k-government'];  // 모두 단독 오버레이로 표시
+const STANDALONE_PAGES = ['klaw','openhash','agents','ai-types','teasers','hondi-market','scenarios','professional-ai','scenario-test','usage-guide','ai-assistant','ai-engine','rule-of-law','k-services','expert-personas','k-government','about-hondi'];  // 모두 단독 오버레이로 표시
 const PAGES = {
   klaw:           '/pages/klaw.html',
   agents:         '/pages/agents.html',
@@ -5136,6 +5225,7 @@ const PAGES = {
   'k-services':      '/pages/k-services.html',
   'expert-personas': '/pages/expert-personas.html',
   'k-government':    '/pages/k-government.html',
+  'about-hondi':     '/pages/about-hondi.html',
 };
 
 // ── 2026-09-06(#2-1): 페이지별 채팅 컨텍스트 레지스트리 ──────────────
@@ -5186,6 +5276,10 @@ window.HONDI_PAGE_CONTEXT = {
     '다룹니다.',
   'k-government': '사용자는 지금 K-Government(전자정부 연동) 설명 섹션에 ' +
     '있습니다. 지자체·중앙부처 서비스와의 연동 방향을 다룹니다.',
+  'about-hondi': '사용자는 지금 "혼디란?" 소개 자료실에 있습니다. 혼디를 ' +
+    '소개하는 자료 19편을 카드 형태로 모아둔 화면이며, 소상공인·정책· ' +
+    '금융·기술 원리·실증 테스트·법률(K-Law)·GDC 등 대상과 주제별 자료를 ' +
+    '쉬운 것부터 전문적인 것 순으로 배치했습니다.',
 };
 
 // 로드 상태 추적
