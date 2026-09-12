@@ -3216,6 +3216,26 @@ async function _userDashLoadBalance() {
   }
 }
 
+// 2026-09-12 신설(주피터 지시: "AI 사용료로 일괄하지 말고 가능한 상세
+// 내용을 표시") — webapp.html(모바일)과 동일한 매핑을 그대로 복제.
+// 두 화면 라벨이 갈라지지 않도록 매핑을 바꿀 때 항상 같이 맞춰줄 것.
+const _AI_SERVICE_LABEL = {
+  'hondi-chat': 'AI 비서 사용료', 'klaw': 'K-Law 사용료', 'klaw-verdict': 'K-Law 판결 조회 사용료',
+  'kplan': 'K-Plan 사용료', 'kjit': 'K-JIT 사용료', 'kcity': 'K-City 사용료',
+  'kmail-quota-overage': 'K-Mail 발송 한도 초과 사용료', 'kmail-storage-overage': 'K-Mail 저장공간 초과 사용료',
+  'hondi-subscription': '혼디 구독료', 'expert-persona-subscription': '전문가 페르소나 구독료',
+};
+function _aiUsageLabel(serviceId, model) {
+  if (serviceId) {
+    if (_AI_SERVICE_LABEL[serviceId]) return _AI_SERVICE_LABEL[serviceId];
+    if (serviceId.startsWith('biz:')) return `K-Biz(${serviceId.slice(4)}) 사용료`;
+    if (serviceId.startsWith('gov-fee:')) return `정부 수수료(${serviceId.slice(8)})`;
+    if (serviceId.startsWith('gov:')) return `지방행정(${serviceId.slice(4)}) 사용료`;
+    return `AI 사용료 (${serviceId})`;
+  }
+  return model ? `AI 사용 (${model})` : 'AI 사용료';
+}
+
 // 3단계 — guid로 충전·이용료 내역 조회 (공개 조회 엔드포인트, /balance-status·
 // /subscription/status와 같은 관례). 구매·판매(P2P)는 아직 백엔드에
 // 연결되지 않아 화면에 안내 문구만 둔다.
@@ -3247,7 +3267,7 @@ async function _userDashLoadHistory(guid) {
     usageBox.innerHTML = usages.length ? usages.map(h => `
       <div class="ud-txn">
         <div class="ud-dot"></div>
-        <div><div class="ud-title">${h.model ? `AI 사용 (${h.model})` : 'AI 사용료'}</div>
+        <div><div class="ud-title">${_aiUsageLabel(h.service_id, h.model)}</div>
              <div class="ud-meta">${fmtDate(h.created)}</div></div>
         <div class="ud-amt">−${Math.trunc(h.amount_gdc ?? 0).toLocaleString()}</div>
       </div>`).join('') : '<div class="ud-empty">이용료 내역이 없습니다.</div>';

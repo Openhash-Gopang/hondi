@@ -729,6 +729,50 @@ export function openHashChain() {
   _openSheet('Hash Chain', html);
 }
 
+// 2026-09-12 신설(주피터 지시: "AI 사용료로 일괄하지 말고 가능한 상세
+// 내용을 표시") — ledger_entries에는 이미 service_id가 서비스별로
+// 정확히 구분돼 기록되고 있었다(_settleAiUsage → _chargeGdcForAiUsage
+// → L1 /api/ai-charge, worker.js 확인). 지금까지 화면(Gopang Wallet)만
+// source==='ai_usage'인 모든 건을 "AI 사용료" 한 줄로 뭉뚱그려 보여주고
+// 있었을 뿐 — 백엔드·데이터 변경 없이 이 라벨 매핑만 추가하면 된다.
+// worker.js 전체에서 실제 쓰이는 serviceId 값을 기준으로 작성했다.
+const _AI_SERVICE_LABEL = {
+  'hondi-chat': 'AI 비서 사용료',
+  'klaw': 'K-Law 사용료',
+  'klaw-verdict': 'K-Law 판결 조회 사용료',
+  'kplan': 'K-Plan 사용료',
+  'kjit': 'K-JIT 사용료',
+  'kcity': 'K-City 사용료',
+  'kmail-quota-overage': 'K-Mail 발송 한도 초과 사용료',
+  'kmail-storage-overage': 'K-Mail 저장공간 초과 사용료',
+  'hondi-subscription': '혼디 구독료',
+  'expert-persona-subscription': '전문가 페르소나 구독료',
+};
+const _AI_SERVICE_ICON = {
+  'hondi-chat': '🤖', klaw: '⚖️', 'klaw-verdict': '⚖️', kplan: '📝',
+  kjit: '⚡', kcity: '🏙️', 'kmail-quota-overage': '📧', 'kmail-storage-overage': '📧',
+  'hondi-subscription': '📅', 'expert-persona-subscription': '📅',
+};
+// service_id가 'biz:<이름>'/'gov:<기관>'/'gov-fee:<기관>'처럼 동적으로
+// 만들어지는 경우(worker.js의 `biz:${bizKey}`, `gov:${agency}` 등)까지
+// 대비한 접두어 매칭 — 알려진 서비스가 아니어도 최소한 service_id
+// 원문은 그대로 노출해, "AI 사용료"보다는 항상 더 구체적으로 보여준다.
+function _aiUsageLabel(serviceId) {
+  if (!serviceId) return 'AI 사용료';
+  if (_AI_SERVICE_LABEL[serviceId]) return _AI_SERVICE_LABEL[serviceId];
+  if (serviceId.startsWith('biz:')) return `K-Biz(${serviceId.slice(4)}) 사용료`;
+  if (serviceId.startsWith('gov-fee:')) return `정부 수수료(${serviceId.slice(8)})`;
+  if (serviceId.startsWith('gov:')) return `지방행정(${serviceId.slice(4)}) 사용료`;
+  return `AI 사용료 (${serviceId})`;
+}
+function _aiUsageIcon(serviceId) {
+  if (!serviceId) return '🤖';
+  if (_AI_SERVICE_ICON[serviceId]) return _AI_SERVICE_ICON[serviceId];
+  if (serviceId.startsWith('biz:')) return '🛒';
+  if (serviceId.startsWith('gov')) return '🏛️';
+  return '🤖';
+}
+
 // ══════════════════════════════════════════════════════════════
 // ③ Gopang Wallet
 // ══════════════════════════════════════════════════════════════
@@ -815,8 +859,8 @@ export async function openGopangWallet() {
       })),
       ...ledgerEntries.map(r => ({
         kind: 'ledger', raw: r,
-        label: _SOURCE_LABEL[r.source] || r.source || '거래',
-        icon: _SOURCE_ICON[r.source] || '📄',
+        label: r.source === 'ai_usage' ? _aiUsageLabel(r.service_id) : (_SOURCE_LABEL[r.source] || r.source || '거래'),
+        icon: r.source === 'ai_usage' ? _aiUsageIcon(r.service_id) : (_SOURCE_ICON[r.source] || '📄'),
         direction: r.direction === 'credit' ? 'income' : 'expense',
         amount: r.amount || 0,
         timestamp: r.created,
@@ -937,9 +981,9 @@ window._openTxDetail = function(idx) {
       ['누가', whoLine],
       ['언제', r.created ? new Date(r.created).toLocaleString('ko-KR') : '-'],
       ['어디서', r.l1_node ? `${r.l1_node} 원장에 기록` : '-'],
-      ['무엇을', _LEDGER_SOURCE_WHAT[r.source] || r.source || '-'],
+      ['무엇을', r.source === 'ai_usage' ? _aiUsageLabel(r.service_id) : (_LEDGER_SOURCE_WHAT[r.source] || r.source || '-')],
       ['어떻게', `${r.direction === 'credit' ? '입금(credit)' : '출금(debit)'} · ${Math.trunc(r.amount || 0).toLocaleString()}원 · 계정과목: ${r.fs_account || '-'}`],
-      ['왜', _LEDGER_SOURCE_WHY[r.source] || '-'],
+      ['왜', r.source === 'ai_usage' ? `무료 한도 초과분 ${_aiUsageLabel(r.service_id)} 정산` : (_LEDGER_SOURCE_WHY[r.source] || '-')],
     ];
     if (r.tx_id) hashLine = r.tx_id;
   }
