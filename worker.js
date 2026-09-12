@@ -10684,6 +10684,138 @@ async function _performPageFetchForEmail(env, ctx, url) {
   };
 }
 
+// ═══════════════════════════════════════════════════════════
+// 2026-09-12 신설(주피터 지시) — 범용 URL 콘텐츠 조회(요약용).
+// _performPageFetchForEmail과 완전히 별개다 — 그건 "수신자 이메일
+// 찾기" 전용으로 이미 굳어진 함수라(SP-25 §2-1b 경고 참고), 여기에
+// 일반 요약 기능을 얹으면 두 용도가 뒤섞여 또 헷갈린다. 실사고:
+// "저장소 URL 요약해줘" 요청에 이메일찾기 전용 도구를 오용하다 엉뚱한
+// 결과가 났다 — 그래서 아예 새 함수·새 태그(KMAIL_FETCH_CONTENT)로
+// 분리한다.
+//
+// GitHub 저장소 URL은 특별 취급 — github.com/{owner}/{repo} 화면은
+// 자바스크립트로 렌더링되는 SPA라 일반 HTML fetch로는 커밋·최근 활동이
+// 안 잡힌다(실사고로 확인). api.github.com은 순수 JSON이라 렌더링과
+// 무관하게 항상 실제 데이터를 준다 — 그래서 GitHub URL을 감지하면
+// REST API로 우회한다.
+async function _performUrlFetchForSummary(env, ctx, url) {
+  let parsed;
+  try { parsed = new URL(url); } catch { return { ok: false, error: 'INVALID_URL', message: 'URL 형식이 올바르지 않습니다' }; }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    return { ok: false, error: 'INVALID_SCHEME', message: 'http/https만 허용됩니다' };
+  }
+  if (_KMAIL_FETCH_BLOCKED_HOST_RE.test(parsed.hostname)) {
+    return { ok: false, error: 'HOST_BLOCKED', message: '내부/사설 주소는 열람할 수 없습니다' };
+  }
+
+  // 웹검색·이메일찾기 열람과 동일한 일일 예산 카운터를 공유한다.
+  const today = _todayKST();
+  const cap = Number(env.WEB_SEARCH_DAILY_CAP) || 500;
+  let usage;
+  try { usage = await _l1GetWebSearchUsage(env, today); } catch { usage = null; }
+  if (usage && Number(usage.count) >= cap) {
+    return { ok: false, error: 'DAILY_BUDGET_EXCEEDED', message: `오늘 웹 리서치 한도(${cap}회)를 초과했습니다.` };
+  }
+  ctx?.waitUntil?.(_l1IncrementWebSearchUsage(env, today).catch(() => {}));
+
+  const hostname = parsed.hostname.replace(/^www\./, '');
+  if (hostname === 'github.com') {
+    const ghMatch = parsed.pathname.match(/^\/([^\/]+)\/([^\/]+?)\/?$/);
+    if (ghMatch) return await _fetchGithubRepoSummary(env, ghMatch[1], ghMatch[2]);
+    // /owner/repo 형태가 아니면(이슈·PR 상세 등) 일반 페이지로 폴백 —
+    // 아래로 그대로 진행.
+  }
+
+  let res;
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    res = await fetch(parsed.toString(), {
+      redirect: 'follow',
+      signal: controller.signal,
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; HondiKMailBot/1.0; +https://hondi.net)' },
+    });
+    clearTimeout(timeout);
+  } catch (e) {
+    return { ok: false, error: 'FETCH_FAILED', message: e.message };
+  }
+  if (!res.ok) {
+    return { ok: false, error: 'PAGE_FETCH_ERROR', message: `대상 페이지가 ${res.status}를 반환했습니다` };
+  }
+  const contentType = res.headers.get('content-type') || '';
+  if (!/text|html/i.test(contentType)) {
+    return { ok: false, error: 'UNSUPPORTED_CONTENT_TYPE', message: '텍스트/HTML 페이지만 열람할 수 있습니다' };
+  }
+
+  const MAX_BYTES = 1_500_000;
+  const reader = res.body?.getReader?.();
+  let raw = '';
+  if (reader) {
+    let received = 0;
+    const decoder = new TextDecoder();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      received += value.length;
+      raw += decoder.decode(value, { stream: true });
+      if (received > MAX_BYTES) { try { await reader.cancel(); } catch {} break; }
+    }
+  } else {
+    raw = await res.text();
+  }
+  const text = _kmailStripHtmlToText(raw);
+  // 요약 목적이라 이메일찾기(4000자)보다 넉넉히 잡는다 — 그래도
+  // max_tokens 예산 안에서 안전하게 끝나도록 상한을 둔다.
+  return { ok: true, url: parsed.toString(), kind: 'generic_page', text_snippet: text.slice(0, 12000) };
+}
+
+// GitHub REST API(api.github.com)로 저장소 개요 + 최근 커밋을 가져온다.
+// 비인증 요청은 시간당 60건 제한 — env.GITHUB_TOKEN(선택)이 설정돼
+// 있으면 그걸 써서 5000건/시간으로 올린다(fine-grained PAT, public
+// repo 읽기 권한만 있으면 충분).
+async function _fetchGithubRepoSummary(env, owner, repo) {
+  const headers = { 'User-Agent': 'HondiKMailBot/1.0', Accept: 'application/vnd.github+json' };
+  if (env.GITHUB_TOKEN) headers['Authorization'] = `Bearer ${env.GITHUB_TOKEN}`;
+  try {
+    const [repoRes, commitsRes] = await Promise.all([
+      fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers, signal: AbortSignal.timeout(8000) }),
+      fetch(`https://api.github.com/repos/${owner}/${repo}/commits?per_page=20`, { headers, signal: AbortSignal.timeout(8000) }),
+    ]);
+    if (repoRes.status === 404) {
+      return { ok: false, error: 'REPO_NOT_FOUND', message: `${owner}/${repo} 저장소를 찾을 수 없습니다(비공개이거나 이름이 다를 수 있습니다)` };
+    }
+    if (repoRes.status === 403 || commitsRes.status === 403) {
+      return { ok: false, error: 'GITHUB_RATE_LIMITED', message: 'GitHub API 요청 한도에 걸렸습니다(비인증 요청은 시간당 60건) — 잠시 후 다시 시도해 주세요' };
+    }
+    if (!repoRes.ok || !commitsRes.ok) {
+      return { ok: false, error: 'GITHUB_API_ERROR', message: `GitHub API 오류(repo:${repoRes.status}, commits:${commitsRes.status})` };
+    }
+    const repoData = await repoRes.json();
+    const commits = await commitsRes.json();
+    const commitLines = (Array.isArray(commits) ? commits : []).map(c => {
+      const msg = (c.commit?.message || '').split('\n')[0].slice(0, 120);
+      const author = c.commit?.author?.name || c.author?.login || '(알수없음)';
+      const date = c.commit?.author?.date || '';
+      return `- [${date.slice(0, 10)}] ${author}: ${msg}`;
+    }).join('\n');
+    return {
+      ok: true, url: `https://github.com/${owner}/${repo}`, kind: 'github_repo',
+      text_snippet: [
+        `저장소: ${owner}/${repo}`,
+        repoData.description ? `설명: ${repoData.description}` : '',
+        `기본 브랜치: ${repoData.default_branch || '(정보없음)'}`,
+        `마지막 업데이트: ${repoData.pushed_at || repoData.updated_at || '(정보없음)'}`,
+        `언어: ${repoData.language || '(정보없음)'}`,
+        '',
+        `최근 커밋 ${Array.isArray(commits) ? commits.length : 0}건:`,
+        commitLines || '(커밋 없음)',
+      ].filter(Boolean).join('\n'),
+    };
+  } catch (e) {
+    return { ok: false, error: 'FETCH_FAILED', message: e.message };
+  }
+}
+
 async function handleWebSearch(request, env, corsHeaders, ctx) {
   let payload;
   try { payload = await request.json(); } catch { return new Response(JSON.stringify({ error: 'invalid json' }), { status: 400, headers: corsHeaders }); }
@@ -35496,6 +35628,9 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
 
   const searchMatch = reply.match(/[\[\(]?KMAIL_SEARCH_CONTACTS\s*(\{[\s\S]*\})\s*[\]\)]?\s*$/);
   const fetchPageMatch = reply.match(/[\[\(]?KMAIL_FETCH_PAGE\s*(\{[\s\S]*\})\s*[\]\)]?\s*$/);
+  // 2026-09-12 신설 — 본문 작성용 범용 콘텐츠 조회(수신자 이메일
+  // 찾기와 완전히 별개, _performUrlFetchForSummary 주석 참고).
+  const fetchContentMatch = reply.match(/[\[\(]?KMAIL_FETCH_CONTENT\s*(\{[\s\S]*\})\s*[\]\)]?\s*$/);
   // searchMatch 분기(아래)가 실행 순서상 _kmailRunFetchPageChain 정의보다
   // 먼저 나오므로, const는 여기(함수 상단)로 끌어올려 TDZ 에러를 피한다
   // (function 선언 자체는 호이스팅되어 문제없지만 const는 안 된다).
@@ -35534,7 +35669,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   // 흔적(여는 중괄호까지 나온 것)이 있으면, 그 텍스트를 사용자에게
   // 그대로 흘려보내지 않고 명확한 오류로 처리한다 — 조용히 실패하고
   // "된 것처럼" 보이는 것보다, 실패를 실패로 보여주는 게 훨씬 안전.
-  const _kmailAnyTagMatch = searchMatch || fetchPageMatch || sendMatch || campaignStartMatch || saveContactsMatch || capabilityGapMatch || saveDraftMatch || lookupDraftsMatch || updateCampaignDraftMatch ||
+  const _kmailAnyTagMatch = searchMatch || fetchPageMatch || fetchContentMatch || sendMatch || campaignStartMatch || saveContactsMatch || capabilityGapMatch || saveDraftMatch || lookupDraftsMatch || updateCampaignDraftMatch ||
     ruleMatch || lookupMatch || campaignLookupMatch || campaignReportMatch || lookupThreadMatch || filterRepliesMatch || tagMatch ||
     mergeMatch || threadStateMatch || statsMatch || settingsMatch || mailIdPromptMatch;
   if (!_kmailAnyTagMatch && /KMAIL_[A-Z_]+\s*\{/.test(reply)) {
@@ -36263,6 +36398,48 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
 
     return new Response(JSON.stringify({ ok: true, reply: followUpReply, action: { type: 'fetched_page', url } }),
       { status: 200, headers: corsHeaders });
+  }
+
+  // 2026-09-12 신설 — 본문 작성용 범용 콘텐츠 조회. fetchPageMatch(위,
+  // 수신자 이메일 찾기 전용)와 완전히 별개 경로다 — 실사고(저장소 URL
+  // 요약 요청에 이메일찾기 도구를 오용) 재발방지를 위해 처음부터 다른
+  // 함수·다른 후속 프롬프트로 분리했다(_performUrlFetchForSummary
+  // 주석 참고). GitHub 저장소 URL은 그 함수 안에서 REST API로
+  // 자동 우회된다.
+  if (fetchContentMatch) {
+    let parsed = null;
+    try { parsed = JSON.parse(fetchContentMatch[1]); } catch (e) { /* 아래에서 처리 */ }
+    const cleanReplyText = reply.slice(0, fetchContentMatch.index).trim();
+    const url = (parsed?.url || '').trim();
+    if (!url) {
+      return new Response(JSON.stringify({ ok: true, reply: cleanReplyText || reply, action: null }), { status: 200, headers: corsHeaders });
+    }
+
+    const fetchResult = await _performUrlFetchForSummary(env, ctx, url).catch(e => ({ ok: false, error: 'EXCEPTION', message: e.message }));
+    const contentContext = fetchResult.ok
+      ? `[콘텐츠 조회 결과]\n${JSON.stringify({ url: fetchResult.url, kind: fetchResult.kind, content: fetchResult.text_snippet })}\n\n위 내용을 바탕으로 사용자가 요청한 대로 자연스럽게 정리·요약해서 답하세요(예: 메일 본문 초안에 반영). 실제로 조회된 내용에 근거해서만 답하고, 없는 내용을 지어내지 마세요. (이 메시지 자체는 사용자에게 보이지 않습니다.)`
+      : `[콘텐츠 조회 실패]\n${JSON.stringify({ url, error: fetchResult.error, message: fetchResult.message })}\n\n조회에 실패했습니다. 실패 사실과 이유를 사용자에게 정직하게 안내하고, 대안(관련 자료를 직접 붙여넣어 달라는 요청 등)을 제시하세요. (이 메시지 자체는 사용자에게 보이지 않습니다.)`;
+
+    let followUpReply;
+    try {
+      followUpReply = await deepseekChatText({
+        env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
+        messages: [
+          { role: 'system', content: systemPrompt }, ...cleanMessages,
+          { role: 'assistant', content: cleanReplyText || '내용을 확인하고 있습니다...' },
+          { role: 'user', content: contentContext },
+        ],
+        max_tokens: 3000, temperature: 0.4, timeoutMs: 30000,
+        fallbackText: '콘텐츠 조회는 완료됐지만 정리에 실패했습니다. 다시 시도해 주세요.',
+      });
+    } catch (e) {
+      followUpReply = '콘텐츠 조회 결과 정리 중 오류가 발생했습니다: ' + e.message;
+    }
+
+    return new Response(JSON.stringify({
+      ok: true, reply: followUpReply,
+      action: { type: 'fetched_content', url, fetch_ok: fetchResult.ok },
+    }), { status: 200, headers: corsHeaders });
   }
 
   // ── ①-c 캠페인 시작(draft 기록) 태그 (2026-09-10 신설) ────────────
