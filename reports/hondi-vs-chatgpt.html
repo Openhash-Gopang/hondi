@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>혼디 Hondi — 혼디는 챗지피티(ChatGPT)와 무엇이 어떻게 다를까요?</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --ink:#1a1a1a; --ink-soft:#4d4d4d; --paper:#ffffff;
+    --line:#c8c8c8; --line-strong:#1a1a1a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{background:#fff;font-family:'Pretendard',sans-serif;color:var(--ink);}
+  @page{ size:A4; margin:10mm 12mm; }
+  .sheet{ width:210mm; margin:10mm auto; background:var(--paper); padding:12mm 15mm; position:relative; border:1px solid #ddd; }
+  @media print{ body{background:none;} .sheet{ box-shadow:none; margin:0 auto; width:auto; border:none; padding:0; } .avoid-break{ break-inside:avoid; page-break-inside:avoid; } }
+
+  .page-num-badge{ position:absolute; top:6mm; right:8mm; font-size:22px; font-weight:800; color:var(--ink); z-index:10; }
+
+  .brand{ display:flex; align-items:center; gap:12px; border-bottom:2px solid var(--ink); padding-bottom:10px; margin-bottom:14px; }
+  .brand-mark{ width:34px; height:34px; border-radius:50%; border:2px solid var(--ink); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex-shrink:0; }
+  .brand-name{ font-size:19px; font-weight:800; }
+  .brand-tag{ font-size:10px; color:var(--ink-soft); margin-top:1px; }
+
+  h1{ font-size:22px; font-weight:800; margin:8px 0 6px; line-height:1.35; }
+  .subtitle{ font-size:13.5px; font-weight:600; color:var(--ink-soft); margin:0 0 12px; }
+  p{ font-size:14px; line-height:1.75; margin:0 0 9px; color:var(--ink); }
+  .lede{ font-size:14px; line-height:1.8; margin:0 0 12px; color:var(--ink); }
+
+  h2{ font-size:15.5px; font-weight:800; margin:16px 0 8px; display:flex; align-items:center; gap:7px; }
+  h2 .n{ width:23px; height:23px; border-radius:50%; border:1.5px solid var(--ink); display:inline-flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0; }
+
+  table{ width:100%; border-collapse:collapse; margin:11px 0 12px; font-size:13.5px; }
+  thead th{ text-align:left; font-weight:700; padding:10px 11px; border-bottom:1.5px solid var(--ink); }
+  tbody td{ padding:12px 11px; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.7; }
+  tbody td:first-child{ font-weight:700; width:30%; }
+
+  .drow{ display:flex; gap:12px; border-top:1px dashed var(--line); padding:9px 0; }
+  .drow:first-of-type{ border-top:none; }
+  .drow .who{ width:150px; flex-shrink:0; font-size:13px; font-weight:700; }
+  .drow .txt{ font-size:13.5px; line-height:1.6; }
+  .dbox{ border:1.5px solid var(--ink); margin:11px 0; padding:11px 15px; }
+  .dbox .steph{ font-size:13.5px; font-weight:800; margin-bottom:5px; }
+
+  .note{ border:1px solid var(--line); padding:12px 15px; margin:11px 0; font-size:12.5px; color:var(--ink-soft); line-height:1.7; }
+  .stat{ font-weight:700; color:var(--ink); }
+
+  .cta-box{ border:1.5px solid var(--ink); border-radius:4px; padding:12px 17px; margin:10px 0; text-align:center; }
+  .cta-box .cta-line1{ font-size:11.5px; line-height:1.6; color:var(--ink-soft); margin:0 0 5px; }
+  .cta-box .cta-price{ font-size:13px; font-weight:700; line-height:1.4; margin:0 0 4px; }
+  .cta-box .cta-sub{ font-size:10.5px; font-weight:700; margin:0; }
+  .highlight-line{ border:1.5px solid #1c3fae; border-radius:4px; padding:10px 14px; margin:10px 0; text-align:center; font-size:13.5px; font-weight:700; color:#14204f; }
+
+  .dev-report-note{ font-size:9.5px; color:var(--ink-soft); text-align:center; border-top:1px solid var(--line); padding-top:6px; margin-top:9px; }
+  .kt-badge{ font-size:14px; font-weight:800; color:var(--ink); letter-spacing:.02em; margin-bottom:8px; }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+  <div class="page-num-badge">12</div>
+
+  <div class="kt-badge">카톡대신 혼디</div>
+
+  <h1>혼디는 챗지피티(ChatGPT)와 무엇이 어떻게 다를까요?</h1>
+  <p class="subtitle">소상공인 사장님과 이용자를 위한 안내 — 혼디의 정체성과 성능을 8가지로 설명드립니다</p>
+
+  <p class="lede">많은 분들이 혼디를 "또 하나의 챗봇"으로 오해합니다. 하지만 혼디는 ChatGPT·Claude·Gemini 같은 범용 AI와 경쟁하는 서비스가 아니라, 그 위에서 작동하는 전혀 다른 층위의 기술입니다. 아래 8가지 항목으로 그 차이를 정확히 설명해 드립니다.</p>
+
+  <h2><span class="n">1</span> 혼디의 성능</h2>
+  <p>대법원이 공개한 판례 300건을 대상으로, 혼디의 판결 예측 모델(MoTE)에게 사건 개요만으로 실제 대법원 판결을 예측하게 하는 자체 테스트를 3회 반복(총 900회) 진행한 결과, 평균 일치도는 약 85%였습니다. 이는 외부 기관의 검증을 거치지 않은 자체 테스트 결과입니다. 참고로, 같은 대법원 공개 판례에서 1심·2심 판결문이 최종 대법원 판결과 일치한 비율은 평균 45% 수준에 그친다는 점에서 85%는 상당히 높은 수치입니다.</p>
+
+  <table>
+    <thead><tr><th>구분</th><th>일치도</th></tr></thead>
+    <tbody>
+      <tr><td>MoTE 자체 테스트 평균 일치도<br><span style="font-weight:400;color:var(--ink-soft);font-size:12px;">(대법원 판례 300건 × 3회, 총 900회)</span></td><td class="stat">약 85%</td></tr>
+      <tr><td>동일 판례에서 1심·2심 판결이<br><span style="font-weight:400;color:var(--ink-soft);font-size:12px;">대법원 판결과 일치한 비율</span></td><td class="stat">약 45%</td></tr>
+    </tbody>
+  </table>
+
+  <div class="highlight-line">혼디의 대법원 판결문 예측 능력을 klaw.hondi.net에서 직접 확인해 보십시오.</div>
+
+  <p>대법원 공개 판례는 대부분 법리가 복잡한 사건입니다. 이런 사건에서도 자체 테스트 기준 85%의 예측 일치도를 보인다면, 법리가 비교적 단순한 일반 사건에서는 어떤 결과가 나올지 짐작할 수 있습니다.</p>
+
+  <h2><span class="n">2</span> 혼디는 자체 LLM이 없습니다</h2>
+  <p>혼디는 기존 AI보다 성능이 월등히 뛰어나지만, 놀랍게도 자체 언어모델을 새로 만들지 않고 ChatGPT 등 기존 LLM을 그대로 활용합니다. 혼디는 언어모델을 만드는 회사가 아니라, 기존 언어모델이 더 정확한 답에 도달하도록 설계하는 회사이기 때문입니다.</p>
+
+  <table>
+    <thead><tr><th>구분</th><th>비유</th></tr></thead>
+    <tbody>
+      <tr><td>ChatGPT</td><td>내비게이션 없이 운행하는 자동차</td></tr>
+      <tr><td>혼디</td><td>자동차에 얹는 내비게이션</td></tr>
+    </tbody>
+  </table>
+
+  <p>혼디를 기존 AI 모델에 더하면, 목적지까지 더 빠르고 정확한 경로로 도달할 수 있습니다.</p>
+
+  <h2><span class="n">3</span> 혼디는 법률 전용 AI가 아닙니다</h2>
+  <p>혼디의 판결 예측 모델(MoTE)은 사건 개요만으로도 대법원 판결이나 헌법재판소 결정을 높은 일치도로 예측합니다. 그러나 법원 업무를 보조하는 것은 혼디의 개발 목적이 아니며, 대법원 판결문 예측 실험은 어디까지나 혼디의 성능을 검증하기 위한 자체 테스트 방법일 뿐입니다.</p>
+
+  <div class="note">혼디가 대법원 판결문이나 헌법재판소 결정문의 법리 구성까지 정확히 예측할 수 있다면, 의료·교육·행정 등 우리 사회 전반의 다른 분야에서도 비슷한 성능을 기대할 수 있지 않을까요?</div>
+
+  <h2><span class="n">4</span> 300여 개 전문가 AI, 목표를 향해 구축 중</h2>
+  <p>혼디는 의사·변호사·회계사·교수 등 전문직 각각의 업무를 보조하는 전문가 AI를 순차적으로 구축하고 있으며, 최종적으로 300여 개 세부 전문 분야를 목표로 합니다. 물론 전문직은 다시 세부 분야로 나뉘며, 의사만 해도 내과·외과·정형외과 등 수십 개 분야로 세분화됩니다. 현재는 이 중 일부 분야가 우선 구현되어 있으며, 나머지 분야는 계속 확장해 나가고 있습니다.</p>
+  <p>혼디 이용자는 향후 이 300여 전문가 AI를 자신의 전담 비서로 이용하게 됩니다. 5천만 국민 개개인에게 박사 학위를 가진 비서를 수백 명씩 붙여줄 수는 없지만, AI라면 가능합니다. 노벨상 수상자급 전문가 AI 수백 명을 모든 개인에게 할당하는 것이 혼디가 그리는 목표입니다.</p>
+
+</div>
+
+<div class="sheet">
+
+  <h2><span class="n">5</span> 중앙 정부 AI와 지방 정부 AI</h2>
+  <p>혼디는 제주특별자치도청·제주시청 등 지방 행정 기관과 국세청 등 중앙 정부 기관을 AI로 구현했으며, 이 제주 모델을 전국 광역자치단체로 순차 확장하고 있습니다. 확장이 완료되면 도청이나 시청을 직접 방문하지 않아도, 해당 기관을 대표하는 AI를 호출해 각종 민원 업무를 처리할 수 있게 됩니다.</p>
+
+  <div class="note">다만 이 기능은 한국 정부가 dpaper·문서24 등의 API(데이터를 주고받는 통로)를 혼디에 제공해야 비로소 현실화됩니다. 현재 정부는 일부 대기업과 금융기관에 한해서만 이 API를 제공하고 있습니다.</div>
+
+  <h2><span class="n">6</span> 나만의 AI 비서</h2>
+  <p>전문직과 정부 기관을 아무리 AI로 구현해도, 그 AI를 이용하는 주체는 결국 여러분 자신, 즉 "사람"입니다. 그런데 사람의 업무 수행 능력은 AI에 미치지 못합니다. 그래서 혼디는 여러분의 제반 업무를 대신 처리할 <b>나만의 AI 비서</b>를 제공합니다. 이 AI 비서가 의사·변호사 등 전문가 AI와 소통하고, 도청·시청 등 정부 AI와도 직접 소통하며 업무를 처리하는 것입니다.</p>
+
+  <div class="dbox avoid-break">
+    <div class="steph">예: 기업 파산 및 회생 절차</div>
+    <div class="drow"><div class="who">사람 ↔ 사람</div><div class="txt">1~2년</div></div>
+    <div class="drow"><div class="who">사람 + AI 도움</div><div class="txt">1~2개월</div></div>
+    <div class="drow"><div class="who">AI 비서 ↔ AI 비서</div><div class="txt"><span class="stat">1~2시간</span></div></div>
+  </div>
+
+  <h2><span class="n">7</span> 자체 평가 기준 90% 완성</h2>
+  <p>혼디는 제주 사람이 제주에서 개발한 제주 토산품이며, 개발 전 과정에서 정부 지원은 단 10원도 받지 않았습니다. 정확히 말하면, 받지 못했습니다. 그럼에도 자체 평가 기준으로 이미 90%를 완성했다고 보고 있으며, 나머지 10%를 채우기 위한 필드 테스트를 9월부터 시작했습니다.</p>
+
+  <table>
+    <thead><tr><th style="width:26%">남은 과제</th><th>내용</th></tr></thead>
+    <tbody>
+      <tr><td>정부 API 접근권</td><td>dpaper API 등 정부 데이터를 주고받는 통로 접근권 확보(정부 인허가 사항)</td></tr>
+      <tr><td>자체 서버</td><td>혼디의 국내 자체 AI 서버 구축</td></tr>
+    </tbody>
+  </table>
+
+  <p>현재 혼디는 DeepSeek을 기반으로 베타 테스트 중이라 설계 성능의 절반밖에 발휘하지 못합니다. 자체 서버를 갖추면 그 성능을 100% 발휘할 수 있게 됩니다.</p>
+
+  <h2><span class="n">8</span> 유료 이용자</h2>
+  <p>지금 혼디 유료 이용자로 가입해 주십시오. 유료 이용자 1만 명 확보는 제주도에 혼디 자체 서버를 구축해 앞서 소개한 서비스를 온전히 구현하기 위한 목표이며, 확보 시점이나 서버 구축 완료를 확정적으로 보장하지는 않습니다. 이용료는 어디까지나 서비스 이용에 대한 대가이며, 투자금이나 후원금이 아닙니다. 또한 지금은 대기업과 금융기관만 받을 수 있는 dpaper API 등 정부 데이터 통로 접근권을 혼디가 확보하는 데 함께하게 됩니다. 다만 접근권 확보는 관계 법령과 소관 부처의 승인에 달려 있어 시기와 가능 여부가 유동적입니다.</p>
+
+  <table>
+    <thead><tr><th>요금제</th><th>내용</th></tr></thead>
+    <tbody>
+      <tr><td>월 1,000원</td><td>기본료 + 사용량</td></tr>
+      <tr><td>월 10,000원</td><td>정액제</td></tr>
+      <tr><td>연 100,000원</td><td>소상공인 특별 혜택 포함</td></tr>
+    </tbody>
+  </table>
+
+  <div class="highlight-line">hondi.net에서 전화번호만으로 가입하고, 혼디의 지금 모습을 만나보세요.</div>
+
+  <div class="note">
+    ※ 혼디는 베타(필드 테스트) 단계로, 성능·정확도·결과물이 실제 환경에서 동일하게 재현됨을 보장하지 않습니다. 본 문서의 성능 수치(85%·45%)는 외부 검증 없는 자체 테스트 결과입니다. ChatGPT·Claude·Gemini·DeepSeek은 각 개발사(OpenAI·Anthropic·Google·DeepSeek)의 상표로, 기술 설명을 위한 인용일 뿐 제휴·보증을 의미하지 않습니다. 전문가 AI의 답변은 참고용 정보이며 자격을 갖춘 전문가의 자문·진단·소송대리를 대체하지 않으니, 중요한 판단은 반드시 전문가와 상담하십시오. 정부 기관 연동은 소관 부처 승인에 따라 시점·범위가 변경·지연되거나 승인되지 않을 수 있습니다. 300여 전문가 AI, 자체 서버 구축 등은 향후 목표이며 결과나 시점을 보장하지 않습니다. 서비스 방식·절차·가격·혜택은 예고 없이 조정될 수 있습니다.
+  </div>
+
+  <div class="cta-box">
+    <div class="cta-line1">혼디 MoTE 기술의 압도적인 성능을 기존 AI들(ChatGPT, Claude, Gemini, DeepSeek 등)의 일반적인 모드와 비교해 보십시오.</div>
+    <div class="cta-price">평균 월 5~8천원으로, 기존의 값비싼 AI(Claude, Gemini, ChatGPT, DeepSeek 등)를 훨씬 더 똑똑한 혼디로 대체하십시오.</div>
+    <div class="cta-sub">PC와 폰으로 각기 hondi.net에 접속해 보세요</div>
+  </div>
+
+  <div class="dev-report-note">혼디 개발자 대표 도 영민, 제주시 한림읍, tensor.city@gmail.com</div>
+
+</div>
+
+</body>
+</html>
