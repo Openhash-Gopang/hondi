@@ -1,287 +1,1909 @@
 [
   {
-    "path": "/domains/legislation",
-    "title": "입법",
-    "description": "입법 관련 정책 도메인 허브 페이지",
+    "path": "/docs/AC_SP_COMMUNICATION_ARCHITECTURE_MANUAL_v1_0.md",
+    "title": "AC↔SP 통신 아키텍처(3대 시나리오) ↗",
+    "description": "AC↔SP 통신 아키텍처(3대 시나리오) ↗",
     "keywords": [
-      "입법",
-      "법안",
-      "국회",
-      "법률 제정"
-    ],
-    "pc_url": "https://hondi.net/domains/legislation"
-  },
-  {
-    "path": "/domains/judicial",
-    "title": "사법",
-    "description": "사법 관련 정책 도메인 허브 페이지",
-    "keywords": [
-      "사법",
-      "재판",
-      "법원",
-      "판결"
-    ],
-    "pc_url": "https://hondi.net/domains/judicial"
-  },
-  {
-    "path": "/domains/administration",
-    "title": "행정",
-    "description": "행정 관련 정책 도메인 허브 페이지",
-    "keywords": [
-      "행정",
-      "민원",
-      "행정기관",
-      "행정절차"
-    ],
-    "pc_url": "https://hondi.net/domains/administration"
-  },
-  {
-    "path": "/domains/education",
-    "title": "교육",
-    "description": "교육 관련 정책 도메인 허브 페이지",
-    "keywords": [
-      "교육",
-      "학교",
-      "학사",
-      "교육정책"
-    ],
-    "pc_url": "https://hondi.net/domains/education"
-  },
-  {
-    "path": "/domains/health",
-    "title": "의료",
-    "description": "의료 관련 정책 도메인 허브 페이지",
-    "keywords": [
-      "의료",
-      "보건",
-      "건강보험",
-      "병원"
-    ],
-    "pc_url": "https://hondi.net/domains/health"
-  },
-  {
-    "path": "/domains/transport-logistics",
-    "title": "교통물류",
-    "description": "교통·물류 관련 정책 도메인 허브 페이지",
-    "keywords": [
-      "교통",
-      "물류",
-      "도로",
-      "대중교통"
-    ],
-    "pc_url": "https://hondi.net/domains/transport-logistics"
-  },
-  {
-    "path": "/domains/finance",
-    "title": "금융",
-    "description": "금융 관련 정책 도메인 허브 페이지",
-    "keywords": [
-      "금융",
-      "세금",
-      "금융정책",
-      "GDC"
-    ],
-    "pc_url": "https://hondi.net/domains/finance"
-  },
-  {
-    "path": "/domains/market",
-    "title": "시장",
-    "description": "시장(K-Market) 관련 정책 도메인 허브 페이지",
-    "keywords": [
-      "시장",
-      "K-Market",
-      "거래",
-      "상거래"
-    ],
-    "pc_url": "https://hondi.net/domains/market"
-  },
-  {
-    "path": "/domains/industry",
-    "title": "산업",
-    "description": "산업 관련 정책 도메인 허브 페이지",
-    "keywords": [
-      "산업",
-      "제조",
-      "산업정책",
-      "기업지원"
-    ],
-    "pc_url": "https://hondi.net/domains/industry"
-  },
-  {
-    "path": "/domains/social",
-    "title": "사교",
-    "description": "사교 관련 정책 도메인 허브 페이지",
-    "keywords": [
-      "사교",
-      "커뮤니티",
-      "복지",
-      "사회활동"
-    ],
-    "pc_url": "https://hondi.net/domains/social"
-  },
-  {
-    "path": "/domains/planning",
-    "title": "계획",
-    "description": "국토·지역 계획 관련 정책 도메인 허브 페이지",
-    "keywords": [
-      "계획",
-      "국토계획",
-      "지역개발",
-      "도시계획"
-    ],
-    "pc_url": "https://hondi.net/domains/planning"
-  },
-  {
-    "path": "/services/kmail",
-    "title": "K-Mail",
-    "description": "자연어 명령으로 메일을 보내고 받는 혼디 사용자 메일 기능",
-    "keywords": [
-      "메일",
-      "이메일",
-      "K-Mail",
-      "발신",
-      "수신",
-      "메일 보내기",
-      "메일 받기"
-    ],
-    "pc_url": "https://mail.hondi.net"
-  },
-  {
-    "path": "/docs/kmail-intro",
-    "title": "K-Mail 소개",
-    "description": "K-Mail 시스템 자체의 개념, 요금 정책, 사용법을 설명하는 소개 문서",
-    "keywords": [
-      "메일 시스템",
-      "K-Mail이란",
-      "메일 기능 소개",
-      "혼디 메일 시스템",
-      "메일 요금"
-    ],
-    "pc_url": "https://mail.hondi.net"
-  },
-  {
-    "path": "/services/klaw",
-    "title": "K-Law",
-    "description": "판례 시뮬레이션 기반 법률 상담 AI 서비스",
-    "keywords": [
-      "법률",
-      "K-Law",
-      "판례",
-      "법률 상담",
-      "소송",
-      "변호사"
-    ],
-    "pc_url": "https://klaw.hondi.net"
-  },
-  {
-    "path": "/services/kplan",
-    "title": "K-Plan",
-    "description": "일정 및 계획 관리를 도와주는 AI 서비스",
-    "keywords": [
-      "일정",
-      "계획",
-      "스케줄",
-      "K-Plan"
-    ],
-    "pc_url": "https://plan.hondi.net"
-  },
-  {
-    "path": "/services/ktelecom",
-    "title": "K-Telecom",
-    "description": "통신 관련 민원·상담을 처리하는 AI 서비스",
-    "keywords": [
+      "AC↔SP 통신 아키텍처 3대 시나리오",
+      "AC↔SP",
       "통신",
-      "K-Telecom",
-      "통신사",
-      "요금제"
+      "아키텍처",
+      "3대",
+      "시나리오"
     ],
-    "pc_url": "https://telecom.hondi.net"
+    "pc_url": "https://hondi.net/docs/AC_SP_COMMUNICATION_ARCHITECTURE_MANUAL_v1_0.md",
+    "audience": "dev",
+    "source": "menu"
   },
   {
-    "path": "/services/kwatch",
-    "title": "K-Watch",
-    "description": "모니터링·알림 기반 AI 서비스",
+    "path": "/docs/AI_CHARGE_SECRET_DRIFT_INCIDENT_2026_09_03.md",
+    "title": "K-Plan GDC 실차감 3주 무발생 — systemd EnvironmentFile 누락·market-proxy admin 계정 불일치·개인별 하드캡 3건 (2026-09-03) ↗",
+    "description": "K-Plan GDC 실차감 3주 무발생 — systemd EnvironmentFile 누락·market-proxy admin 계정 불일치·개인별 하드캡 3건 (2026-09-03) ↗",
     "keywords": [
-      "모니터링",
-      "알림",
-      "K-Watch",
-      "감시"
+      "Plan GDC 실차감 3주 무발생",
+      "systemd EnvironmentFile 누락 market",
+      "proxy admin 계정 불일치 개인별 하드캡 3건",
+      "Plan",
+      "GDC",
+      "실차감",
+      "3주",
+      "무발생"
     ],
-    "pc_url": "https://watch.hondi.net"
+    "pc_url": "https://hondi.net/docs/AI_CHARGE_SECRET_DRIFT_INCIDENT_2026_09_03.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-03"
   },
   {
-    "path": "/services/ksearch",
-    "title": "K-Search",
-    "description": "사용자 소유 데이터(메일함, 문서함 등)를 검색하는 서비스",
+    "path": "/docs/API_REFERENCE_worker_v1_0.md",
+    "title": "Worker API 레퍼런스 ↗",
+    "description": "Worker API 레퍼런스 ↗",
     "keywords": [
-      "내 데이터 검색",
-      "K-Search",
-      "문서 검색",
-      "메일 찾기"
+      "Worker API 레퍼런스",
+      "Worker",
+      "API",
+      "레퍼런스"
     ],
-    "pc_url": "https://search.hondi.net"
+    "pc_url": "https://hondi.net/docs/API_REFERENCE_worker_v1_0.md",
+    "audience": "dev",
+    "source": "menu"
   },
   {
-    "path": "/services/kbiz",
-    "title": "K-Biz",
-    "description": "사업자 대상 행정·세무 지원 AI 서비스",
+    "path": "/docs/AUTH_LOGIN_WHITEPAPER_v1_0_20260829.html",
+    "title": "혼디 사용자 인증 및 로그인 백서 — 지갑 기반 인증·device-link·Web Push·세션 TTL·남용 방지(0829) ↗",
+    "description": "혼디 사용자 인증 및 로그인 백서 — 지갑 기반 인증·device-link·Web Push·세션 TTL·남용 방지(0829) ↗",
     "keywords": [
-      "사업자",
-      "K-Biz",
-      "세무",
-      "창업"
+      "혼디 사용자 인증 및 로그인 백서",
+      "지갑 기반 인증 device",
+      "link Web Push 세션 TTL 남용 방지 0829",
+      "혼디",
+      "사용자",
+      "인증",
+      "로그인",
+      "백서"
     ],
-    "pc_url": "https://biz.hondi.net"
+    "pc_url": "https://hondi.net/docs/AUTH_LOGIN_WHITEPAPER_v1_0_20260829.html",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-08-29"
   },
   {
-    "path": "/services/kjob",
-    "title": "K-Job",
-    "description": "구인·구직 및 업무 오케스트레이션 서비스",
+    "path": "/docs/AUTO_REFRESH_MANUAL_v1_0.html",
+    "title": "자동 갱신 매뉴얼(SP tier·미등록태그·피드백취합) ↗",
+    "description": "자동 갱신 매뉴얼(SP tier·미등록태그·피드백취합) ↗",
     "keywords": [
-      "구직",
-      "구인",
-      "일자리",
-      "K-Job",
-      "채용"
-    ],
-    "pc_url": "https://job.hondi.net"
-  },
-  {
-    "path": "/docs/hondi_interactive_manual.html",
-    "title": "혼디 사용법 튜토리얼",
-    "description": "25개 챕터, 초급/중급/고급 단계별 혼디 사용법 인터랙티브 매뉴얼",
-    "keywords": [
-      "사용법",
-      "튜토리얼",
+      "자동 갱신 매뉴얼 SP tier 미등록태그 피드백취합",
+      "자동",
+      "갱신",
       "매뉴얼",
-      "혼디 사용법",
+      "SP",
+      "tier",
+      "미등록태그",
+      "피드백취합"
+    ],
+    "pc_url": "https://hondi.net/docs/AUTO_REFRESH_MANUAL_v1_0.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/CHAT_SHELL_UNIFICATION_2026_07_22.md",
+    "title": "GWP 채팅 탭 3곳이 입력창을 각자 새로 만들던 문제 — chat-shell 공용화 (2026-07-22) ↗",
+    "description": "GWP 채팅 탭 3곳이 입력창을 각자 새로 만들던 문제 — chat-shell 공용화 (2026-07-22) ↗",
+    "keywords": [
+      "GWP 채팅 탭 3곳이 입력창을 각자 새로 만들던 문제",
+      "chat",
+      "shell 공용화",
+      "GWP",
+      "채팅",
+      "3곳이",
+      "입력창을",
+      "각자"
+    ],
+    "pc_url": "https://hondi.net/docs/CHAT_SHELL_UNIFICATION_2026_07_22.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-07-22"
+  },
+  {
+    "path": "/docs/DEVICELINK_KV_TTL_MINIMUM_2026_07_22.md",
+    "title": "device-link 승인 Failed to fetch — KV TTL 30초가 60초 미만이라 매번 확정적 실패 (2026-07-22) ↗",
+    "description": "device-link 승인 Failed to fetch — KV TTL 30초가 60초 미만이라 매번 확정적 실패 (2026-07-22) ↗",
+    "keywords": [
+      "device",
+      "link 승인 Failed to fetch",
+      "KV TTL 30초가 60초 미만이라 매번 확정적 실패",
+      "link",
+      "승인",
+      "Failed",
+      "to",
+      "fetch"
+    ],
+    "pc_url": "https://hondi.net/docs/DEVICELINK_KV_TTL_MINIMUM_2026_07_22.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-07-22"
+  },
+  {
+    "path": "/docs/DEVICE_LINK_FULL_CHAIN_INCIDENT_2026_07_28.md",
+    "title": "PC 로그인(device-link) 전체 체인 — 도메인·지갑암호화·KV일관성·15초폴링 등 근본원인 8건 (2026-07-28) ↗",
+    "description": "PC 로그인(device-link) 전체 체인 — 도메인·지갑암호화·KV일관성·15초폴링 등 근본원인 8건 (2026-07-28) ↗",
+    "keywords": [
+      "PC 로그인 device",
+      "link",
+      "전체 체인",
+      "도메인 지갑암호화 KV일관성 15초폴링 등 근본원인 8건",
+      "PC",
+      "로그인",
+      "device",
+      "전체"
+    ],
+    "pc_url": "https://hondi.net/docs/DEVICE_LINK_FULL_CHAIN_INCIDENT_2026_07_28.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-07-28"
+  },
+  {
+    "path": "/docs/DEVICE_LINK_MANUAL_v1_0.md",
+    "title": "기기 간 지갑 이전(PC 로그인) 매뉴얼 ↗",
+    "description": "기기 간 지갑 이전(PC 로그인) 매뉴얼 ↗",
+    "keywords": [
+      "기기 간 지갑 이전 PC 로그인",
+      "매뉴얼",
+      "기기",
+      "지갑",
+      "이전",
+      "PC",
+      "로그인"
+    ],
+    "pc_url": "https://hondi.net/docs/DEVICE_LINK_MANUAL_v1_0.md",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/GDC_AUTO_CHARGE_INTEGRATION_CHECKLIST_20260810_v1_0.html",
+    "title": "GDC 충전 자동화 연동 체크리스트(오픈뱅킹·PG) ↗",
+    "description": "GDC 충전 자동화 연동 체크리스트(오픈뱅킹·PG) ↗",
+    "keywords": [
+      "GDC 충전 자동화 연동 체크리스트 오픈뱅킹 PG",
+      "GDC",
+      "충전",
+      "자동화",
+      "연동",
+      "체크리스트",
+      "오픈뱅킹",
+      "PG"
+    ],
+    "pc_url": "https://hondi.net/docs/GDC_AUTO_CHARGE_INTEGRATION_CHECKLIST_20260810_v1_0.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/GDC_BILLING_DEVELOPER_MANUAL_v1_0_20260903.md",
+    "title": "GDC 과금(AI 사용료) 개발자 매뉴얼 — 파이프라인 구조·시크릿 짝·진단 플레이북·놓치기 쉬운 실패 6가지(0903) ↗",
+    "description": "GDC 과금(AI 사용료) 개발자 매뉴얼 — 파이프라인 구조·시크릿 짝·진단 플레이북·놓치기 쉬운 실패 6가지(0903) ↗",
+    "keywords": [
+      "GDC 과금 AI 사용료",
+      "개발자 매뉴얼",
+      "파이프라인 구조 시크릿 짝 진단 플레이북 놓치기 쉬운 실패 6가지 0903",
+      "GDC",
+      "과금",
+      "AI",
+      "사용료",
+      "개발자"
+    ],
+    "pc_url": "https://hondi.net/docs/GDC_BILLING_DEVELOPER_MANUAL_v1_0_20260903.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-03"
+  },
+  {
+    "path": "/docs/GDC_CHARGE_MANUAL_v1_0.md",
+    "title": "GDC 가입충전·차감·저잔액 알림 매뉴얼 ↗",
+    "description": "GDC 가입충전·차감·저잔액 알림 매뉴얼 ↗",
+    "keywords": [
+      "GDC 가입충전 차감 저잔액 알림 매뉴얼",
+      "GDC",
+      "가입충전",
+      "차감",
+      "저잔액",
+      "알림",
+      "매뉴얼"
+    ],
+    "pc_url": "https://hondi.net/docs/GDC_CHARGE_MANUAL_v1_0.md",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/GDC_GIT_EXPOSURE_INCIDENT_2026_07_23.md",
+    "title": "gdc 저장소 wrangler 배포 시 .git 폴더 전체 공개 노출 (2026-07-23) ↗",
+    "description": "gdc 저장소 wrangler 배포 시 .git 폴더 전체 공개 노출 (2026-07-23) ↗",
+    "keywords": [
+      "gdc 저장소 wrangler 배포 시 .git 폴더 전체 공개 노출",
+      "gdc",
+      "저장소",
+      "wrangler",
+      "배포",
+      ".git",
+      "폴더",
+      "전체"
+    ],
+    "pc_url": "https://hondi.net/docs/GDC_GIT_EXPOSURE_INCIDENT_2026_07_23.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-07-23"
+  },
+  {
+    "path": "/docs/GDC_WHITEPAPER_v2_0_20260828.html",
+    "title": "GDC 인프라 종합 백서 v2.0 — 전화번호 매칭키 충전·Web Push 근본수정(ctx.waitUntil)·통합 회계원장·Wallet UI 재설계(0828) ↗",
+    "description": "GDC 인프라 종합 백서 v2.0 — 전화번호 매칭키 충전·Web Push 근본수정(ctx.waitUntil)·통합 회계원장·Wallet UI 재설계(0828) ↗",
+    "keywords": [
+      "GDC 인프라 종합 백서 v2.0",
+      "전화번호 매칭키 충전 Web Push 근본수정 ctx.waitUntil",
+      "통합 회계원장 Wallet UI 재설계 0828",
+      "GDC",
+      "인프라",
+      "종합",
+      "백서",
+      "v2.0"
+    ],
+    "pc_url": "https://hondi.net/docs/GDC_WHITEPAPER_v2_0_20260828.html",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-08-28"
+  },
+  {
+    "path": "/docs/GOVTREE_NATIONWIDE_EXPANSION_LESSONS_v1_0.html",
+    "title": "gov-tree 전국 확대 실전 교훈 매뉴얼 ↗",
+    "description": "gov-tree 전국 확대 실전 교훈 매뉴얼 ↗",
+    "keywords": [
+      "gov",
+      "tree 전국 확대 실전 교훈 매뉴얼",
+      "tree",
+      "전국",
+      "확대",
+      "실전",
+      "교훈",
+      "매뉴얼"
+    ],
+    "pc_url": "https://hondi.net/docs/GOVTREE_NATIONWIDE_EXPANSION_LESSONS_v1_0.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/GOV_REGIONAL_AC_MANUAL_v1_0.md",
+    "title": "전국 지방행정 AC(도청·시청·읍면동·국가기관) 매뉴얼 ↗",
+    "description": "전국 지방행정 AC(도청·시청·읍면동·국가기관) 매뉴얼 ↗",
+    "keywords": [
+      "전국 지방행정 AC 도청 시청 읍면동 국가기관",
+      "매뉴얼",
+      "전국",
+      "지방행정",
+      "AC",
+      "도청",
+      "시청",
+      "읍면동"
+    ],
+    "pc_url": "https://hondi.net/docs/GOV_REGIONAL_AC_MANUAL_v1_0.md",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/HANDOFF_20260902.md",
+    "title": "인수인계서 — K-Mail 캠페인→K-Plan→K-Recompose 파이프라인(0902) ↗",
+    "description": "인수인계서 — K-Mail 캠페인→K-Plan→K-Recompose 파이프라인(0902) ↗",
+    "keywords": [
+      "인수인계서",
+      "Mail 캠페인→K",
+      "Plan→K",
+      "Recompose 파이프라인 0902",
+      "Mail",
+      "캠페인→K",
+      "Recompose",
+      "파이프라인"
+    ],
+    "pc_url": "https://hondi.net/docs/HANDOFF_20260902.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-02"
+  },
+  {
+    "path": "/docs/HANDOFF_EXPERT_CHAT_FAILED_TO_FETCH_20260909_v1_0.md",
+    "title": "인수인계서 — expert-chat.html Failed to fetch 버그(0909, 라우트/CORS 화이트리스트/OPTIONS는 확인 완료·원인 미확정, 다음 세션 네트워크탭+wrangler tail부터) ↗",
+    "description": "인수인계서 — expert-chat.html Failed to fetch 버그(0909, 라우트/CORS 화이트리스트/OPTIONS는 확인 완료·원인 미확정, 다음 세션 네트워크탭+wrangler tail부터) ↗",
+    "keywords": [
+      "인수인계서",
+      "expert",
+      "chat.html Failed to fetch 버그 0909",
+      "라우트",
+      "CORS 화이트리스트",
+      "OPTIONS는 확인 완료 원인 미확정",
+      "다음 세션 네트워크탭+wrangler tail부터",
+      "chat.html"
+    ],
+    "pc_url": "https://hondi.net/docs/HANDOFF_EXPERT_CHAT_FAILED_TO_FETCH_20260909_v1_0.md",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/HANDOFF_HONDI_SEARCH_RELAY_MIGRATION_20260909_v1_0.md",
+    "title": "인수인계서 — 혼디 검색이 hondi-search-relay 전용 Worker/저장소로 이관 완료(0909, 1042 원인 재확인·D안 실증 검증·라이브 재검증까지) ↗",
+    "description": "인수인계서 — 혼디 검색이 hondi-search-relay 전용 Worker/저장소로 이관 완료(0909, 1042 원인 재확인·D안 실증 검증·라이브 재검증까지) ↗",
+    "keywords": [
+      "인수인계서",
+      "혼디 검색이 hondi",
+      "search",
+      "relay 전용 Worker",
+      "저장소로 이관 완료 0909",
+      "1042 원인 재확인 D안 실증 검증 라이브 재검증까지",
+      "혼디",
+      "검색이"
+    ],
+    "pc_url": "https://hondi.net/docs/HANDOFF_HONDI_SEARCH_RELAY_MIGRATION_20260909_v1_0.md",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/HANDOFF_INFRA_AUDIT_SUBDOMAINS_20260909_v1_0.md",
+    "title": "인수인계서 — K-서비스 서브도메인 인프라 전수 점검(0909, klaw/mail/plan/telecom/city Route 미등록·search/biz/watch/job SSL 문제 1차 스크리닝) ↗",
+    "description": "인수인계서 — K-서비스 서브도메인 인프라 전수 점검(0909, klaw/mail/plan/telecom/city Route 미등록·search/biz/watch/job SSL 문제 1차 스크리닝) ↗",
+    "keywords": [
+      "인수인계서",
+      "서비스 서브도메인 인프라 전수 점검 0909",
+      "klaw",
+      "mail",
+      "plan",
+      "telecom",
+      "city Route 미등록 search",
+      "biz"
+    ],
+    "pc_url": "https://hondi.net/docs/HANDOFF_INFRA_AUDIT_SUBDOMAINS_20260909_v1_0.md",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/HANDOFF_SITEWIDE_1042_CORS_BLOCK_20260909_v1_0.md",
+    "title": "⚠ 심각 — 사이트 전역 API가 Cloudflare Error 1042로 차단됨(0909, webapp.html·지갑·인증·결제 등 workers.dev 직접호출 전부 영향, 원인 확인·영향 파일 50개 목록·다음 단계 정리) ↗",
+    "description": "⚠ 심각 — 사이트 전역 API가 Cloudflare Error 1042로 차단됨(0909, webapp.html·지갑·인증·결제 등 workers.dev 직접호출 전부 영향, 원인 확인·영향 파일 50개 목록·다음 단계 정리) ↗",
+    "keywords": [
+      "⚠ 심각",
+      "사이트 전역 API가 Cloudflare Error 1042로 차단됨 0909",
+      "webapp.html 지갑 인증 결제 등 workers.dev 직접호출 전부 영향",
+      "원인 확인 영향 파일 50개 목록 다음 단계 정리",
+      "심각",
+      "사이트",
+      "전역",
+      "API가"
+    ],
+    "pc_url": "https://hondi.net/docs/HANDOFF_SITEWIDE_1042_CORS_BLOCK_20260909_v1_0.md",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/HONDI_TEST_PLAN_v1_0.html",
+    "title": "혼디 시스템 테스트 방법론 + 상세 케이스(0811, 786항목 전수파싱) ↗",
+    "description": "혼디 시스템 테스트 방법론 + 상세 케이스(0811, 786항목 전수파싱) ↗",
+    "keywords": [
+      "혼디 시스템 테스트 방법론 + 상세 케이스 0811",
+      "786항목 전수파싱",
+      "혼디",
+      "시스템",
+      "테스트",
+      "방법론",
+      "상세",
+      "케이스"
+    ],
+    "pc_url": "https://hondi.net/docs/HONDI_TEST_PLAN_v1_0.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/HONDI_TEST_STALENESS_PREVENTION_MANUAL_v1_0.md",
+    "title": "테스트 매뉴얼 — 설계 변경과 테스트 노후화 방지(0830, 77개 유닛테스트 전수 실행·실버그 7건 발견수정) ↗",
+    "description": "테스트 매뉴얼 — 설계 변경과 테스트 노후화 방지(0830, 77개 유닛테스트 전수 실행·실버그 7건 발견수정) ↗",
+    "keywords": [
+      "테스트 매뉴얼",
+      "설계 변경과 테스트 노후화 방지 0830",
+      "77개 유닛테스트 전수 실행 실버그 7건 발견수정",
+      "테스트",
+      "매뉴얼",
+      "설계",
+      "변경과",
+      "노후화"
+    ],
+    "pc_url": "https://hondi.net/docs/HONDI_TEST_STALENESS_PREVENTION_MANUAL_v1_0.md",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/JEJU_SVC_ID_ALIAS_REGRESSION_2026_07_22.md",
+    "title": "\"제주도청\" 탭 안 열림 진짜 원인 — 오리진 이전 커밋이 안전망 별칭 삭제 (2026-07-22) ↗",
+    "description": "\"제주도청\" 탭 안 열림 진짜 원인 — 오리진 이전 커밋이 안전망 별칭 삭제 (2026-07-22) ↗",
+    "keywords": [
+      "\"제주도청\" 탭 안 열림 진짜 원인",
+      "오리진 이전 커밋이 안전망 별칭 삭제",
+      "\"제주도청\"",
+      "열림",
+      "진짜",
+      "원인",
+      "오리진",
+      "이전"
+    ],
+    "pc_url": "https://hondi.net/docs/JEJU_SVC_ID_ALIAS_REGRESSION_2026_07_22.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-07-22"
+  },
+  {
+    "path": "/docs/KMAIL_KPLAN_PIPELINE_LIVE_TEST_INCIDENT_2026_09_02.md",
+    "title": "K-Mail↔K-Plan 라이브 테스트 사고 5건 — 파이프 개행 3연속 재발·GH/Worker secret 혼동·_admins 재설정 부작용·Error 1101·서버전용 스크립트 방치 (2026-09-02) ↗",
+    "description": "K-Mail↔K-Plan 라이브 테스트 사고 5건 — 파이프 개행 3연속 재발·GH/Worker secret 혼동·_admins 재설정 부작용·Error 1101·서버전용 스크립트 방치 (2026-09-02) ↗",
+    "keywords": [
+      "Mail↔K",
+      "Plan 라이브 테스트 사고 5건",
+      "파이프 개행 3연속 재발 GH",
+      "Worker secret 혼동 _admins 재설정 부작용 Error 1101 서버전용 스크립트 방치",
+      "Plan",
+      "라이브",
+      "테스트",
+      "사고"
+    ],
+    "pc_url": "https://hondi.net/docs/KMAIL_KPLAN_PIPELINE_LIVE_TEST_INCIDENT_2026_09_02.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-02"
+  },
+  {
+    "path": "/docs/KPLAN_KMAIL_INTEGRATION_ARCHITECTURE_v1_0_20260902.md",
+    "title": "K-Plan↔K-Mail 연동 아키텍처 — K-Recompose 파이프라인 종합 정리(0902) ↗",
+    "description": "K-Plan↔K-Mail 연동 아키텍처 — K-Recompose 파이프라인 종합 정리(0902) ↗",
+    "keywords": [
+      "Plan↔K",
+      "Mail 연동 아키텍처",
+      "Recompose 파이프라인 종합 정리 0902",
+      "Mail",
+      "연동",
+      "아키텍처",
+      "Recompose",
+      "파이프라인"
+    ],
+    "pc_url": "https://hondi.net/docs/KPLAN_KMAIL_INTEGRATION_ARCHITECTURE_v1_0_20260902.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-02"
+  },
+  {
+    "path": "/docs/K_SERVICE_MONETIZATION_v1_0.md",
+    "title": "K-Law·K-School 개별 유료화 가격정책 ↗",
+    "description": "K-Law·K-School 개별 유료화 가격정책 ↗",
+    "keywords": [
+      "Law K",
+      "School 개별 유료화 가격정책",
+      "Law",
+      "School",
+      "개별",
+      "유료화",
+      "가격정책"
+    ],
+    "pc_url": "https://hondi.net/docs/K_SERVICE_MONETIZATION_v1_0.md",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/L1_ADMIN_AUTH_INCIDENT_2026_07_21.md",
+    "title": "wrangler secret put — 파이프(|) 절대 금지, <로 리다이렉션 (2026-07-21) ↗",
+    "description": "wrangler secret put — 파이프(|) 절대 금지, <로 리다이렉션 (2026-07-21) ↗",
+    "keywords": [
+      "wrangler secret put",
+      "파이프 |",
+      "절대 금지",
+      "<로 리다이렉션",
+      "wrangler",
+      "secret",
+      "put",
+      "파이프"
+    ],
+    "pc_url": "https://hondi.net/docs/L1_ADMIN_AUTH_INCIDENT_2026_07_21.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-07-21"
+  },
+  {
+    "path": "/docs/L1_POCKETBASE_MANUAL_v1_0.md",
+    "title": "L1 PocketBase 매뉴얼 ↗",
+    "description": "L1 PocketBase 매뉴얼 ↗",
+    "keywords": [
+      "L1 PocketBase 매뉴얼",
+      "L1",
+      "PocketBase",
+      "매뉴얼"
+    ],
+    "pc_url": "https://hondi.net/docs/L1_POCKETBASE_MANUAL_v1_0.md",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/LEGACY_L1_DOMAIN_CORS_INCIDENT_2026_07_22.md",
+    "title": "등록 화면 네트워크 오류 — state.js/p2p-chat.js가 폐기된 구 도메인 참조 (2026-07-22) ↗",
+    "description": "등록 화면 네트워크 오류 — state.js/p2p-chat.js가 폐기된 구 도메인 참조 (2026-07-22) ↗",
+    "keywords": [
+      "등록 화면 네트워크 오류",
+      "state.js",
+      "p2p",
+      "chat.js가 폐기된 구 도메인 참조",
+      "등록",
+      "화면",
+      "네트워크",
+      "오류"
+    ],
+    "pc_url": "https://hondi.net/docs/LEGACY_L1_DOMAIN_CORS_INCIDENT_2026_07_22.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-07-22"
+  },
+  {
+    "path": "/docs/MANUAL_INDEX.html",
+    "title": "개발 문서 전체 지도 ↗",
+    "description": "개발 문서 전체 지도 ↗",
+    "keywords": [
+      "개발 문서 전체 지도",
+      "개발",
+      "문서",
+      "전체",
+      "지도"
+    ],
+    "pc_url": "https://hondi.net/docs/MANUAL_INDEX.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/MOBILE_GWP_POPUP_GEO_RACE_2026_07_22.md",
+    "title": "모바일 GWP 새 탭 안 열림 — GPS 권한 프롬프트가 window.open 가로챔 (2026-07-22) ↗",
+    "description": "모바일 GWP 새 탭 안 열림 — GPS 권한 프롬프트가 window.open 가로챔 (2026-07-22) ↗",
+    "keywords": [
+      "모바일 GWP 새 탭 안 열림",
+      "GPS 권한 프롬프트가 window.open 가로챔",
+      "모바일",
+      "GWP",
+      "열림",
+      "GPS",
+      "권한",
+      "프롬프트가"
+    ],
+    "pc_url": "https://hondi.net/docs/MOBILE_GWP_POPUP_GEO_RACE_2026_07_22.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-07-22"
+  },
+  {
+    "path": "/docs/OWNER_PDV_GOVERNANCE_MANUAL_v1_0.md",
+    "title": "K-서비스·페르소나 거버넌스(owner_pdv) 매뉴얼 ↗",
+    "description": "K-서비스·페르소나 거버넌스(owner_pdv) 매뉴얼 ↗",
+    "keywords": [
+      "서비스 페르소나 거버넌스 owner_pdv",
+      "매뉴얼",
+      "서비스",
+      "페르소나",
+      "거버넌스",
+      "owner_pdv"
+    ],
+    "pc_url": "https://hondi.net/docs/OWNER_PDV_GOVERNANCE_MANUAL_v1_0.md",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/PLAN_DPAPER_WALLET-ELIGIBILITY_ISMS-P-MOIS-RECOGNITION_20260828_v1_0.html",
+    "title": "전자증명서 지갑용(+신청용) API 자격 확보 추진계획(초안) — ISMS-P·행안부 개별인정 병행 트랙(0828) ↗",
+    "description": "전자증명서 지갑용(+신청용) API 자격 확보 추진계획(초안) — ISMS-P·행안부 개별인정 병행 트랙(0828) ↗",
+    "keywords": [
+      "전자증명서 지갑용 +신청용",
+      "API 자격 확보 추진계획 초안",
+      "ISMS",
+      "P 행안부 개별인정 병행 트랙 0828",
+      "전자증명서",
+      "지갑용",
+      "+신청용",
+      "API"
+    ],
+    "pc_url": "https://hondi.net/docs/PLAN_DPAPER_WALLET-ELIGIBILITY_ISMS-P-MOIS-RECOGNITION_20260828_v1_0.html",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-08-28"
+  },
+  {
+    "path": "/docs/POCKETBASE_INFRA_GDC_STATUS_20260810_v1_0.html",
+    "title": "PocketBase 인프라 현황 + GDC 충전 시스템 정리(0810, 전국확장 참조용) ↗",
+    "description": "PocketBase 인프라 현황 + GDC 충전 시스템 정리(0810, 전국확장 참조용) ↗",
+    "keywords": [
+      "PocketBase 인프라 현황 + GDC 충전 시스템 정리 0810",
+      "전국확장 참조용",
+      "PocketBase",
+      "인프라",
+      "현황",
+      "GDC",
+      "충전",
+      "시스템"
+    ],
+    "pc_url": "https://hondi.net/docs/POCKETBASE_INFRA_GDC_STATUS_20260810_v1_0.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/PUSH_SUBSCRIBE_RACE_CONDITION_2026_07_22.md",
+    "title": "재가입 직후 push 구독이 곧바로 410 — 두 경로 동시 호출 경쟁 상태 (2026-07-22) ↗",
+    "description": "재가입 직후 push 구독이 곧바로 410 — 두 경로 동시 호출 경쟁 상태 (2026-07-22) ↗",
+    "keywords": [
+      "재가입 직후 push 구독이 곧바로 410",
+      "두 경로 동시 호출 경쟁 상태",
+      "재가입",
+      "직후",
+      "push",
+      "구독이",
+      "곧바로",
+      "410"
+    ],
+    "pc_url": "https://hondi.net/docs/PUSH_SUBSCRIBE_RACE_CONDITION_2026_07_22.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-07-22"
+  },
+  {
+    "path": "/docs/PUSH_SUBSCRIPTION_HIJACK_2026_07_21.md",
+    "title": "device-link 알림이 PC로 옴 — 지갑 키 없는 기기 push 가로채기 (2026-07-21) ↗",
+    "description": "device-link 알림이 PC로 옴 — 지갑 키 없는 기기 push 가로채기 (2026-07-21) ↗",
+    "keywords": [
+      "device",
+      "link 알림이 PC로 옴",
+      "지갑 키 없는 기기 push 가로채기",
+      "link",
+      "알림이",
+      "PC로",
+      "지갑",
+      "없는"
+    ],
+    "pc_url": "https://hondi.net/docs/PUSH_SUBSCRIPTION_HIJACK_2026_07_21.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-07-21"
+  },
+  {
+    "path": "/docs/PUSH_SUBSCRIPTION_MULTIDEVICE_2026_07_23.md",
+    "title": "device-link 알림이 PC로 가는 문제 — 기기별 구독 배열로 근본 수정 (2026-07-23) ↗",
+    "description": "device-link 알림이 PC로 가는 문제 — 기기별 구독 배열로 근본 수정 (2026-07-23) ↗",
+    "keywords": [
+      "device",
+      "link 알림이 PC로 가는 문제",
+      "기기별 구독 배열로 근본 수정",
+      "link",
+      "알림이",
+      "PC로",
+      "가는",
+      "문제"
+    ],
+    "pc_url": "https://hondi.net/docs/PUSH_SUBSCRIPTION_MULTIDEVICE_2026_07_23.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-07-23"
+  },
+  {
+    "path": "/docs/SESSION_LESSONS_BIOMETRIC_E164_DEPLOYMENT_20260907_v1_0.html",
+    "title": "지문 인증 강화 + e164 평문 제거 + 배포 사고 — device-link/전화번호 재클레임 생체인증 필수화, profiles.e164 해시/암호화 분리, 배포 파이프라인 재발견 및 사고 5건 실전 교훈(0907) ↗",
+    "description": "지문 인증 강화 + e164 평문 제거 + 배포 사고 — device-link/전화번호 재클레임 생체인증 필수화, profiles.e164 해시/암호화 분리, 배포 파이프라인 재발견 및 사고 5건 실전 교훈(0907) ↗",
+    "keywords": [
+      "지문 인증 강화 + e164 평문 제거 + 배포 사고",
+      "device",
+      "link",
+      "전화번호 재클레임 생체인증 필수화",
+      "profiles.e164 해시",
+      "암호화 분리",
+      "배포 파이프라인 재발견 및 사고 5건 실전 교훈 0907",
+      "지문"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_BIOMETRIC_E164_DEPLOYMENT_20260907_v1_0.html",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-07"
+  },
+  {
+    "path": "/docs/SESSION_LESSONS_CONTROL_TOWER_LIVE_VERIFY_20260809_v2_0.html",
+    "title": "관제탑 원칙 라이브 재검증 실전 교훈 매뉴얼(0809, 원문자.Tier.max_tokens)",
+    "description": "관제탑 원칙 라이브 재검증 실전 교훈 매뉴얼(0809, 원문자.Tier.max_tokens)",
+    "keywords": [
+      "관제탑 원칙 라이브 재검증 실전 교훈 매뉴얼 0809",
+      "원문자.Tier.max_tokens",
+      "관제탑",
+      "원칙",
+      "라이브",
+      "재검증",
+      "실전",
+      "교훈"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_CONTROL_TOWER_LIVE_VERIFY_20260809_v2_0.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/SESSION_LESSONS_EXPERT_PERSONA_KLAW_UPGRADE_v1_0.html",
+    "title": "전문가 페르소나 K-Law 업그레이드 실전 교훈 매뉴얼 ↗",
+    "description": "전문가 페르소나 K-Law 업그레이드 실전 교훈 매뉴얼 ↗",
+    "keywords": [
+      "전문가 페르소나 K",
+      "Law 업그레이드 실전 교훈 매뉴얼",
+      "전문가",
+      "페르소나",
+      "Law",
+      "업그레이드",
+      "실전",
+      "교훈"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_EXPERT_PERSONA_KLAW_UPGRADE_v1_0.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/SESSION_LESSONS_FS_SYMMETRIC_OPENHASH_ANCHORING_20260907_v1_0.html",
+    "title": "재무제표 대칭 기록 + OpenHash 앵커링 — 구매자 매입 누락 설계오류 수정, git-commit식 해시체이닝, PocketBase 마이그레이션·cron 트리거 누락 실전 교훈(0907) ↗",
+    "description": "재무제표 대칭 기록 + OpenHash 앵커링 — 구매자 매입 누락 설계오류 수정, git-commit식 해시체이닝, PocketBase 마이그레이션·cron 트리거 누락 실전 교훈(0907) ↗",
+    "keywords": [
+      "재무제표 대칭 기록 + OpenHash 앵커링",
+      "구매자 매입 누락 설계오류 수정",
+      "git",
+      "commit식 해시체이닝",
+      "PocketBase 마이그레이션 cron 트리거 누락 실전 교훈 0907",
+      "재무제표",
+      "대칭",
+      "기록"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_FS_SYMMETRIC_OPENHASH_ANCHORING_20260907_v1_0.html",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-07"
+  },
+  {
+    "path": "/docs/SESSION_LESSONS_GDC_TRANSFER_GOJA_SCOPE_20260906_v1_0.html",
+    "title": "GDC 이체 최초 성공 + Goja 스코프 버그 실전 교훈 매뉴얼 — _sigVerify/tx_hash 두 근본원인 순차발견·AST 전수감사·죽은 코드 삭제(0906) ↗",
+    "description": "GDC 이체 최초 성공 + Goja 스코프 버그 실전 교훈 매뉴얼 — _sigVerify/tx_hash 두 근본원인 순차발견·AST 전수감사·죽은 코드 삭제(0906) ↗",
+    "keywords": [
+      "GDC 이체 최초 성공 + Goja 스코프 버그 실전 교훈 매뉴얼",
+      "_sigVerify",
+      "tx_hash 두 근본원인 순차발견 AST 전수감사 죽은 코드 삭제 0906",
+      "GDC",
+      "이체",
+      "최초",
+      "성공",
+      "Goja"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_GDC_TRANSFER_GOJA_SCOPE_20260906_v1_0.html",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-06"
+  },
+  {
+    "path": "/docs/SESSION_LESSONS_GOVTREE_LAZY_INSTANCING_v1_0.html",
+    "title": "gov-tree 지연 인스턴스화·배포 실전 교훈 매뉴얼 ↗",
+    "description": "gov-tree 지연 인스턴스화·배포 실전 교훈 매뉴얼 ↗",
+    "keywords": [
+      "gov",
+      "tree 지연 인스턴스화 배포 실전 교훈 매뉴얼",
+      "tree",
+      "지연",
+      "인스턴스화",
+      "배포",
+      "실전",
+      "교훈"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_GOVTREE_LAZY_INSTANCING_v1_0.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/SESSION_LESSONS_HONDI_SEARCH_RELAY_1042_ISOLATION_20260909_v1_0.html",
+    "title": "혼디 검색 hondi-search-relay 분리 · 1042 격리 실전 교훈 매뉴얼 — Worker 단위 격리 실증, 테스트 프로브 방법론, Windows Application Data 배포 함정, curl 한글 인코딩 재발, 코드 추적 습관(0909) ↗",
+    "description": "혼디 검색 hondi-search-relay 분리 · 1042 격리 실전 교훈 매뉴얼 — Worker 단위 격리 실증, 테스트 프로브 방법론, Windows Application Data 배포 함정, curl 한글 인코딩 재발, 코드 추적 습관(0909) ↗",
+    "keywords": [
+      "혼디 검색 hondi",
+      "search",
+      "relay 분리",
+      "1042 격리 실전 교훈 매뉴얼",
+      "Worker 단위 격리 실증",
+      "테스트 프로브 방법론",
+      "Windows Application Data 배포 함정",
+      "curl 한글 인코딩 재발"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_HONDI_SEARCH_RELAY_1042_ISOLATION_20260909_v1_0.html",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-09"
+  },
+  {
+    "path": "/docs/SESSION_LESSONS_HONDI_SEARCH_ROUTING_DNS_20260909_v1_0.html",
+    "title": "혼디 검색 라우팅·DNS·git 작업 실전 교훈 매뉴얼 — GitHub Pages 미러링 함정, Route/DNS 구분법, git 브랜치 사고, PowerShell 한글 인코딩 함정, PR 제목-내용 불일치 재발까지(0909) ↗",
+    "description": "혼디 검색 라우팅·DNS·git 작업 실전 교훈 매뉴얼 — GitHub Pages 미러링 함정, Route/DNS 구분법, git 브랜치 사고, PowerShell 한글 인코딩 함정, PR 제목-내용 불일치 재발까지(0909) ↗",
+    "keywords": [
+      "혼디 검색 라우팅 DNS git 작업 실전 교훈 매뉴얼",
+      "GitHub Pages 미러링 함정",
+      "Route",
+      "DNS 구분법",
+      "git 브랜치 사고",
+      "PowerShell 한글 인코딩 함정",
+      "PR 제목",
+      "내용 불일치 재발까지 0909"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_HONDI_SEARCH_ROUTING_DNS_20260909_v1_0.html",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-09"
+  },
+  {
+    "path": "/docs/SESSION_LESSONS_KCITY_SUBMODULES_REPO_RECOVERY_20260909_v1_0.html",
+    "title": "K-City 하위 모듈 신설 + 저장소 오식별 복구 — 도시정비(재개발)·감정평가 SP 신설, 실서비스 오버라이트 사고 복구, gopang 아카이브 발견·hondi 이관, 전문가 페르소나(SP_appraiser) 위임 재설계 실전 교훈(0909) ↗",
+    "description": "K-City 하위 모듈 신설 + 저장소 오식별 복구 — 도시정비(재개발)·감정평가 SP 신설, 실서비스 오버라이트 사고 복구, gopang 아카이브 발견·hondi 이관, 전문가 페르소나(SP_appraiser) 위임 재설계 실전 교훈(0909) ↗",
+    "keywords": [
+      "City 하위 모듈 신설 + 저장소 오식별 복구",
+      "도시정비 재개발",
+      "감정평가 SP 신설",
+      "실서비스 오버라이트 사고 복구",
+      "gopang 아카이브 발견 hondi 이관",
+      "전문가 페르소나 SP_appraiser",
+      "위임 재설계 실전 교훈 0909",
+      "City"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_KCITY_SUBMODULES_REPO_RECOVERY_20260909_v1_0.html",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-09"
+  },
+  {
+    "path": "/docs/SESSION_LESSONS_LIVE_SMOKETEST_LATENCY_v1_0.html",
+    "title": "라이브 스모크테스트 디버깅 실전 교훈 매뉴얼 ↗",
+    "description": "라이브 스모크테스트 디버깅 실전 교훈 매뉴얼 ↗",
+    "keywords": [
+      "라이브 스모크테스트 디버깅 실전 교훈 매뉴얼",
+      "라이브",
+      "스모크테스트",
+      "디버깅",
+      "실전",
+      "교훈",
+      "매뉴얼"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_LIVE_SMOKETEST_LATENCY_v1_0.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/SESSION_LESSONS_PDV_BIDIRECTIONAL_FS_LIVE_TEST_20260908_v1_0.html",
+    "title": "PDV 양방향 거래명세서 + 재무제표 검증 — _recordOrderPdv 편측 기록 발견·수정, 라이브 스모크테스트 신규 작성·디버깅 실전 교훈(0908) ↗",
+    "description": "PDV 양방향 거래명세서 + 재무제표 검증 — _recordOrderPdv 편측 기록 발견·수정, 라이브 스모크테스트 신규 작성·디버깅 실전 교훈(0908) ↗",
+    "keywords": [
+      "PDV 양방향 거래명세서 + 재무제표 검증",
+      "_recordOrderPdv 편측 기록 발견 수정",
+      "라이브 스모크테스트 신규 작성 디버깅 실전 교훈 0908",
+      "PDV",
+      "양방향",
+      "거래명세서",
+      "재무제표",
+      "검증"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_PDV_BIDIRECTIONAL_FS_LIVE_TEST_20260908_v1_0.html",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-08"
+  },
+  {
+    "path": "/docs/SESSION_LESSONS_ROUTING_ARCHITECTURE_20260806_v1_0.html",
+    "title": "라우팅 아키텍처 실전 교훈 매뉴얼(R1/R2·하이브리드 검증) ↗",
+    "description": "라우팅 아키텍처 실전 교훈 매뉴얼(R1/R2·하이브리드 검증) ↗",
+    "keywords": [
+      "라우팅 아키텍처 실전 교훈 매뉴얼 R1",
+      "R2 하이브리드 검증",
+      "라우팅",
+      "아키텍처",
+      "실전",
+      "교훈",
+      "매뉴얼",
+      "R1"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_ROUTING_ARCHITECTURE_20260806_v1_0.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/SESSION_LESSONS_ROUTING_FIXES_20260807_v1_0.html",
+    "title": "라우팅 수정 3건 + 인프라 실전 교훈 매뉴얼(§0807) ↗",
+    "description": "라우팅 수정 3건 + 인프라 실전 교훈 매뉴얼(§0807) ↗",
+    "keywords": [
+      "라우팅 수정 3건 + 인프라 실전 교훈 매뉴얼 §0807",
+      "라우팅",
+      "수정",
+      "3건",
+      "인프라",
+      "실전",
+      "교훈",
+      "매뉴얼"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_ROUTING_FIXES_20260807_v1_0.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/SESSION_LESSONS_ROUTING_STRUCTURAL_NORMALIZATION_20260823_v1_0.html",
+    "title": "혼디 라우팅 지침서 — 구조적 정상화 세션 작업자 실수 복기(0823, BUG-023~035·DECISION-01) ↗",
+    "description": "혼디 라우팅 지침서 — 구조적 정상화 세션 작업자 실수 복기(0823, BUG-023~035·DECISION-01) ↗",
+    "keywords": [
+      "혼디 라우팅 지침서",
+      "구조적 정상화 세션 작업자 실수 복기 0823",
+      "BUG",
+      "023~035 DECISION",
+      "01",
+      "혼디",
+      "라우팅",
+      "지침서"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_ROUTING_STRUCTURAL_NORMALIZATION_20260823_v1_0.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/SESSION_LESSONS_SUBJECT_GATE_MAX_TOKENS_20260809_v1_0.html",
+    "title": "subject-gate max_tokens 결함 규명 실전 교훈 매뉴얼(§0809) ↗",
+    "description": "subject-gate max_tokens 결함 규명 실전 교훈 매뉴얼(§0809) ↗",
+    "keywords": [
+      "subject",
+      "gate max_tokens 결함 규명 실전 교훈 매뉴얼 §0809",
+      "gate",
+      "max_tokens",
+      "결함",
+      "규명",
+      "실전",
+      "교훈"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_SUBJECT_GATE_MAX_TOKENS_20260809_v1_0.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/SESSION_LESSONS_UNIVERSAL_AUDIT_ROUTING_20260808_v1_0.html",
+    "title": "라우팅 통합 + UNIVERSAL 원칙 전수감사 실전 교훈 매뉴얼(§0808) ↗",
+    "description": "라우팅 통합 + UNIVERSAL 원칙 전수감사 실전 교훈 매뉴얼(§0808) ↗",
+    "keywords": [
+      "라우팅 통합 + UNIVERSAL 원칙 전수감사 실전 교훈 매뉴얼 §0808",
+      "라우팅",
+      "통합",
+      "UNIVERSAL",
+      "원칙",
+      "전수감사",
+      "실전",
+      "교훈"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_UNIVERSAL_AUDIT_ROUTING_20260808_v1_0.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/SESSION_LESSONS_VECTORIZE_GOVTREE_v1_0.html",
+    "title": "Vectorize·gov-tree 실전 교훈 매뉴얼 ↗",
+    "description": "Vectorize·gov-tree 실전 교훈 매뉴얼 ↗",
+    "keywords": [
+      "Vectorize gov",
+      "tree 실전 교훈 매뉴얼",
+      "Vectorize",
+      "gov",
+      "tree",
+      "실전",
+      "교훈",
+      "매뉴얼"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_VECTORIZE_GOVTREE_v1_0.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/SESSION_SUMMARY_GDC_LOAN_CREDIT_LIVE_TEST_20260906_v1_0.html",
+    "title": "GDC 대출·신용평가 라이브 테스트 — LEGAL-HOLD 조건부 재개·재무제표 스키마 신설·credit_snapshot maxSize 누락 등 실결함 5건 발견·수정, 전 구간 [PASS](0906) ↗",
+    "description": "GDC 대출·신용평가 라이브 테스트 — LEGAL-HOLD 조건부 재개·재무제표 스키마 신설·credit_snapshot maxSize 누락 등 실결함 5건 발견·수정, 전 구간 [PASS](0906) ↗",
+    "keywords": [
+      "GDC 대출 신용평가 라이브 테스트",
+      "LEGAL",
+      "HOLD 조건부 재개 재무제표 스키마 신설 credit_snapshot maxSize 누락 등 실결함 5건 발견 수정",
+      "전 구간 [PASS] 0906",
+      "GDC",
+      "대출",
+      "신용평가",
+      "라이브"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_GDC_LOAN_CREDIT_LIVE_TEST_20260906_v1_0.html",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-06"
+  },
+  {
+    "path": "/docs/SESSION_SUMMARY_GOV_ROUTER_STRUCTURAL_NORMALIZATION_20260823_v1_0.html",
+    "title": "혼디 라우팅 근본적 정상화 — BUG-023~035(계층충돌 통합판단·시청 국 LLM 구제망·키워드 매칭 어절경계·EMD 비대칭 제거) + 정부24 350건 라이브 검증 ↗",
+    "description": "혼디 라우팅 근본적 정상화 — BUG-023~035(계층충돌 통합판단·시청 국 LLM 구제망·키워드 매칭 어절경계·EMD 비대칭 제거) + 정부24 350건 라이브 검증 ↗",
+    "keywords": [
+      "혼디 라우팅 근본적 정상화",
+      "BUG",
+      "023~035 계층충돌 통합판단 시청 국 LLM 구제망 키워드 매칭 어절경계 EMD 비대칭 제거",
+      "+ 정부24 350건 라이브 검증",
+      "혼디",
+      "라우팅",
+      "근본적",
+      "정상화"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_GOV_ROUTER_STRUCTURAL_NORMALIZATION_20260823_v1_0.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/SESSION_SUMMARY_JEJU_UNIVERSITY_SCENARIO_GAP_20260820_v1_0.html",
+    "title": "제주대학교 구상 — 시나리오 추적·실결함 발견(school 죽은 Supabase 등)·1단계 마이그레이션 ↗",
+    "description": "제주대학교 구상 — 시나리오 추적·실결함 발견(school 죽은 Supabase 등)·1단계 마이그레이션 ↗",
+    "keywords": [
+      "제주대학교 구상",
+      "시나리오 추적 실결함 발견 school 죽은 Supabase 등",
+      "1단계 마이그레이션",
+      "제주대학교",
+      "구상",
+      "시나리오",
+      "추적",
+      "실결함"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_JEJU_UNIVERSITY_SCENARIO_GAP_20260820_v1_0.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/SESSION_SUMMARY_KADDRESS_KMAIL_MAILTAB_20260911_v1_0.html",
+    "title": "K-Address 대량 등록 · K-Mail \"메일\" 탭 신설 — CSV 업로드 category 버그·중복방지 3곳 통일·인증 이관·Quill 에디터·라이브 스모크테스트(20/20 PASS)(0911) ↗",
+    "description": "K-Address 대량 등록 · K-Mail \"메일\" 탭 신설 — CSV 업로드 category 버그·중복방지 3곳 통일·인증 이관·Quill 에디터·라이브 스모크테스트(20/20 PASS)(0911) ↗",
+    "keywords": [
+      "Address 대량 등록",
+      "Mail \"메일\" 탭 신설",
+      "CSV 업로드 category 버그 중복방지 3곳 통일 인증 이관 Quill 에디터 라이브 스모크테스트 20",
+      "20 PASS",
+      "0911",
+      "Address",
+      "대량",
+      "등록"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_KADDRESS_KMAIL_MAILTAB_20260911_v1_0.html",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-11"
+  },
+  {
+    "path": "/docs/SESSION_SUMMARY_KGOV_IDV_BILLING_PRICING_20260814_v1_0.html",
+    "title": "kgov IDV·자율과금·요금체계 재설계(0814, 실결함 8건 발견·수정) ↗",
+    "description": "kgov IDV·자율과금·요금체계 재설계(0814, 실결함 8건 발견·수정) ↗",
+    "keywords": [
+      "kgov IDV 자율과금 요금체계 재설계 0814",
+      "실결함 8건 발견 수정",
+      "kgov",
+      "IDV",
+      "자율과금",
+      "요금체계",
+      "재설계",
+      "0814"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_KGOV_IDV_BILLING_PRICING_20260814_v1_0.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/SESSION_SUMMARY_KLAW_GDC_BILLING_20260813_v1_0.html",
+    "title": "K-Law GDC 과금 사고실험 + 라이브 검증(0813, 실결함 3건 발견·수정) ↗",
+    "description": "K-Law GDC 과금 사고실험 + 라이브 검증(0813, 실결함 3건 발견·수정) ↗",
+    "keywords": [
+      "Law GDC 과금 사고실험 + 라이브 검증 0813",
+      "실결함 3건 발견 수정",
+      "Law",
+      "GDC",
+      "과금",
+      "사고실험",
+      "라이브",
+      "검증"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_KLAW_GDC_BILLING_20260813_v1_0.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/SESSION_SUMMARY_KMAIL_MAILID_COLONFIX_HANDOFF_FETCHCONTENT_20260912_v1_0.html",
+    "title": "K-Mail ID·발신주소 콜론 버그(발송 전면 장애 가능성)·세션 슬라이딩 갱신·주소록 태그 브라우징·UNIVERSAL-INTEGRITY U0 항목(11)+K-Address→K-Mail 직접 호출·FETCH_CONTENT(GitHub API 우회)·라이브 스모크테스트 2종(0912) ↗",
+    "description": "K-Mail ID·발신주소 콜론 버그(발송 전면 장애 가능성)·세션 슬라이딩 갱신·주소록 태그 브라우징·UNIVERSAL-INTEGRITY U0 항목(11)+K-Address→K-Mail 직접 호출·FETCH_CONTENT(GitHub API 우회)·라이브 스모크테스트 2종(0912) ↗",
+    "keywords": [
+      "Mail ID 발신주소 콜론 버그 발송 전면 장애 가능성",
+      "세션 슬라이딩 갱신 주소록 태그 브라우징 UNIVERSAL",
+      "INTEGRITY U0 항목 11 +K",
+      "Address→K",
+      "Mail 직접 호출 FETCH_CONTENT GitHub API 우회",
+      "라이브 스모크테스트 2종 0912",
+      "Mail",
+      "ID"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_KMAIL_MAILID_COLONFIX_HANDOFF_FETCHCONTENT_20260912_v1_0.html",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-12"
+  },
+  {
+    "path": "/docs/SESSION_SUMMARY_K_SERVICE_SSO_INTEGRATION_20260906_v1_0.html",
+    "title": "K-서비스 로그인 SSO 통합 — K-Plan/K-Law/K-Mail/GDC 대시보드 4곳 복붙 인증을 공용 모듈로, .hondi.net 쿠키 기반 크로스 도메인 SSO(0906) ↗",
+    "description": "K-서비스 로그인 SSO 통합 — K-Plan/K-Law/K-Mail/GDC 대시보드 4곳 복붙 인증을 공용 모듈로, .hondi.net 쿠키 기반 크로스 도메인 SSO(0906) ↗",
+    "keywords": [
+      "서비스 로그인 SSO 통합",
+      "Plan",
+      "Law",
+      "Mail",
+      "GDC 대시보드 4곳 복붙 인증을 공용 모듈로",
+      ".hondi.net 쿠키 기반 크로스 도메인 SSO 0906",
+      "서비스",
+      "로그인"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_K_SERVICE_SSO_INTEGRATION_20260906_v1_0.html",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-06"
+  },
+  {
+    "path": "/docs/SESSION_SUMMARY_L1_SERVER_MIGRATION_ONDEMAND_20260820_v1_0.html",
+    "title": "L1 서버 유료 전환·마이그레이션 + 온디맨드 기동 시스템(0820, shape 리사이즈 불가·마이그레이션 중복 버그 등) ↗",
+    "description": "L1 서버 유료 전환·마이그레이션 + 온디맨드 기동 시스템(0820, shape 리사이즈 불가·마이그레이션 중복 버그 등) ↗",
+    "keywords": [
+      "L1 서버 유료 전환 마이그레이션 + 온디맨드 기동 시스템 0820",
+      "shape 리사이즈 불가 마이그레이션 중복 버그 등",
+      "L1",
+      "서버",
+      "유료",
+      "전환",
+      "마이그레이션",
+      "온디맨드"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_L1_SERVER_MIGRATION_ONDEMAND_20260820_v1_0.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/SESSION_SUMMARY_PATHFINDER_GOVTASK_LIVE_VERIFY_20260813_v1_0.html",
+    "title": "Pathfinder ↔ AI비서 통합 + 라이브 검증(0813, 실결함 3건 발견·수정)",
+    "description": "Pathfinder ↔ AI비서 통합 + 라이브 검증(0813, 실결함 3건 발견·수정)",
+    "keywords": [
+      "Pathfinder ↔ AI비서 통합 + 라이브 검증 0813",
+      "실결함 3건 발견 수정",
+      "Pathfinder",
+      "AI비서",
+      "통합",
+      "라이브",
+      "검증",
+      "0813"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_PATHFINDER_GOVTASK_LIVE_VERIFY_20260813_v1_0.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/SESSION_SUMMARY_PROFESSOR_EXPANSION_PDV_20260810.html",
+    "title": "professor 트리 3배 확장 + PDV 기록 원칙 완성(0810)",
+    "description": "professor 트리 3배 확장 + PDV 기록 원칙 완성(0810)",
+    "keywords": [
+      "professor 트리 3배 확장 + PDV 기록 원칙 완성 0810",
+      "professor",
+      "트리",
+      "3배",
+      "확장",
+      "PDV",
+      "기록",
+      "원칙"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_PROFESSOR_EXPANSION_PDV_20260810.html",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-08-10"
+  },
+  {
+    "path": "/docs/SESSION_SUMMARY_TRUST_SCORE_SMOKE_TEST_20260820_v1_0.html",
+    "title": "신뢰점수(trust-score) 인프라 구현 + 라이브 검증(0820, maxSize 누락 등 실수 4건) ↗",
+    "description": "신뢰점수(trust-score) 인프라 구현 + 라이브 검증(0820, maxSize 누락 등 실수 4건) ↗",
+    "keywords": [
+      "신뢰점수 trust",
+      "score",
+      "인프라 구현 + 라이브 검증 0820",
+      "maxSize 누락 등 실수 4건",
+      "신뢰점수",
+      "trust",
+      "인프라",
+      "구현"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_TRUST_SCORE_SMOKE_TEST_20260820_v1_0.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/SP_TREE_GOVERNANCE_MANUAL_v1_0.md",
+    "title": "SP-TREE 거버넌스(상속·CI가드·SP-TREE-GUARDIAN) ↗",
+    "description": "SP-TREE 거버넌스(상속·CI가드·SP-TREE-GUARDIAN) ↗",
+    "keywords": [
+      "SP",
+      "TREE 거버넌스 상속 CI가드 SP",
+      "TREE",
+      "GUARDIAN",
+      "거버넌스",
+      "상속",
+      "CI가드"
+    ],
+    "pc_url": "https://hondi.net/docs/SP_TREE_GOVERNANCE_MANUAL_v1_0.md",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/STALE_VAPID_PUSH_SUBSCRIPTION_2026_07_22.md",
+    "title": "device-link 웹푸시 조용히 안 옴 — 옛 VAPID 키 구독 미검증 재사용 (2026-07-22) ↗",
+    "description": "device-link 웹푸시 조용히 안 옴 — 옛 VAPID 키 구독 미검증 재사용 (2026-07-22) ↗",
+    "keywords": [
+      "device",
+      "link 웹푸시 조용히 안 옴",
+      "옛 VAPID 키 구독 미검증 재사용",
+      "link",
+      "웹푸시",
+      "조용히",
+      "VAPID",
+      "구독"
+    ],
+    "pc_url": "https://hondi.net/docs/STALE_VAPID_PUSH_SUBSCRIPTION_2026_07_22.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-07-22"
+  },
+  {
+    "path": "/docs/THOUGHT_EXPERIMENT_kakaotalk-to-hondi-2030-cost-estimate.html",
+    "title": "카톡→혼디 2030 컴퓨팅·사회적비용 절감 사고실험(0816, 시장규모 교차검증) ↗",
+    "description": "카톡→혼디 2030 컴퓨팅·사회적비용 절감 사고실험(0816, 시장규모 교차검증) ↗",
+    "keywords": [
+      "카톡→혼디 2030 컴퓨팅 사회적비용 절감 사고실험 0816",
+      "시장규모 교차검증",
+      "카톡→혼디",
+      "2030",
+      "컴퓨팅",
+      "사회적비용",
+      "절감",
+      "사고실험"
+    ],
+    "pc_url": "https://hondi.net/docs/THOUGHT_EXPERIMENT_kakaotalk-to-hondi-2030-cost-estimate.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/WORKLOG_INDEX.md",
+    "title": "작업 이력 (전체) ↗",
+    "description": "작업 이력 (전체) ↗",
+    "keywords": [
+      "작업 이력",
+      "전체",
+      "작업",
+      "이력"
+    ],
+    "pc_url": "https://hondi.net/docs/WORKLOG_INDEX.md",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/archive/bizplan.html",
+    "title": "사업화(보관)",
+    "description": "사업화(보관)",
+    "keywords": [
+      "사업화 보관",
+      "사업화",
+      "보관"
+    ],
+    "pc_url": "https://hondi.net/docs/archive/bizplan.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/business-plan/BUSINESS-PLAN.md",
+    "title": "비즈니스 플랜(원가·수익 모델) ↗",
+    "description": "비즈니스 플랜(원가·수익 모델) ↗",
+    "keywords": [
+      "비즈니스 플랜 원가 수익 모델",
+      "비즈니스",
+      "플랜",
+      "원가",
+      "수익",
+      "모델"
+    ],
+    "pc_url": "https://hondi.net/docs/business-plan/BUSINESS-PLAN.md",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/business-plan/PRICING_TIER_MARKETING_PLAN_v1_0_2026-07-25.md",
+    "title": "요금제 다단계화·마케팅 플랜 ↗",
+    "description": "요금제 다단계화·마케팅 플랜 ↗",
+    "keywords": [
+      "요금제 다단계화 마케팅 플랜",
+      "요금제",
+      "다단계화",
+      "마케팅",
+      "플랜"
+    ],
+    "pc_url": "https://hondi.net/docs/business-plan/PRICING_TIER_MARKETING_PLAN_v1_0_2026-07-25.md",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/gopang-id-auth-guide.md",
+    "title": "ID·인증 안내 ↗",
+    "description": "ID·인증 안내 ↗",
+    "keywords": [
+      "ID 인증 안내",
+      "ID",
+      "인증",
+      "안내"
+    ],
+    "pc_url": "https://hondi.net/docs/gopang-id-auth-guide.md",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/gopang_whitepaper.html",
+    "title": "기술 백서 ↗",
+    "description": "기술 백서 ↗",
+    "keywords": [
+      "기술 백서",
+      "기술",
+      "백서"
+    ],
+    "pc_url": "https://hondi.net/docs/gopang_whitepaper.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/ofp_standard.html",
+    "title": "OFP 표준",
+    "description": "OFP 표준",
+    "keywords": [
+      "OFP 표준",
+      "OFP",
+      "표준"
+    ],
+    "pc_url": "https://hondi.net/docs/ofp_standard.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/openhash_whitepaper.html",
+    "title": "OpenHash 백서 ↗",
+    "description": "OpenHash 백서 ↗",
+    "keywords": [
+      "OpenHash 백서",
+      "OpenHash",
+      "백서"
+    ],
+    "pc_url": "https://hondi.net/docs/openhash_whitepaper.html",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "https://github.com/Openhash-Gopang/gopang",
+    "title": "GitHub ↗",
+    "description": "GitHub ↗",
+    "keywords": [
+      "GitHub"
+    ],
+    "pc_url": "https://github.com/Openhash-Gopang/gopang",
+    "audience": "dev",
+    "source": "menu"
+  },
+  {
+    "path": "/agents",
+    "title": "에이전트",
+    "description": "에이전트",
+    "keywords": [
+      "에이전트"
+    ],
+    "pc_url": "https://hondi.net/desktop.html#agents",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "/ai-assistant",
+    "title": "ai-assistant",
+    "description": "ai-assistant",
+    "keywords": [
+      "ai",
+      "assistant"
+    ],
+    "pc_url": "https://hondi.net/desktop.html#ai-assistant",
+    "audience": "user",
+    "source": "standalone"
+  },
+  {
+    "path": "/ai-engine",
+    "title": "ai-engine",
+    "description": "ai-engine",
+    "keywords": [
+      "ai",
+      "engine"
+    ],
+    "pc_url": "https://hondi.net/desktop.html#ai-engine",
+    "audience": "user",
+    "source": "standalone"
+  },
+  {
+    "path": "/ai-types",
+    "title": "나만의 AI 비서",
+    "description": "나만의 AI 비서",
+    "keywords": [
+      "나만의 AI 비서",
+      "나만의",
+      "AI",
+      "비서"
+    ],
+    "pc_url": "https://hondi.net/desktop.html#ai-types",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/SESSION_SUMMARY_GOV_FEE_SCHEDULE_20260815_v1_0.html",
+    "title": "정부 수수료 기준표 · 시맨틱 검색 배선 ↗",
+    "description": "정부 수수료 기준표 · 시맨틱 검색 배선 ↗",
+    "keywords": [
+      "정부 수수료 기준표",
+      "시맨틱 검색 배선",
+      "정부",
+      "수수료",
+      "기준표",
+      "시맨틱",
+      "검색",
+      "배선"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_GOV_FEE_SCHEDULE_20260815_v1_0.html",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/empirical_methodology_2026_07_31.html",
+    "title": "실증 실험 방법론 ↗",
+    "description": "실증 실험 방법론 ↗",
+    "keywords": [
+      "실증 실험 방법론",
+      "실증",
+      "실험",
+      "방법론"
+    ],
+    "pc_url": "https://hondi.net/docs/empirical_methodology_2026_07_31.html",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/hallim_masterplan.html",
+    "title": "한림읍",
+    "description": "한림읍",
+    "keywords": [
+      "한림읍"
+    ],
+    "pc_url": "https://hondi.net/docs/hallim_masterplan.html",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/hondi_college_guide_day1.html",
+    "title": "대학생 가이드 · 1일차",
+    "description": "대학생 가이드 · 1일차",
+    "keywords": [
+      "대학생 가이드",
+      "1일차",
+      "대학생",
       "가이드"
     ],
-    "pc_url": "https://hondi.net/docs/hondi_interactive_manual.html"
+    "pc_url": "https://hondi.net/docs/hondi_college_guide_day1.html",
+    "audience": "user",
+    "source": "menu"
   },
   {
-    "path": "/highlights/1",
-    "title": "혼디 하이라이트 1",
-    "description": "혼디 메인 페이지 순환 태그라인 연결 하이라이트 페이지",
+    "path": "/docs/hondi_college_guide_day2.html",
+    "title": "대학생 가이드 · 2일차(SP 작성)",
+    "description": "대학생 가이드 · 2일차(SP 작성)",
     "keywords": [
-      "하이라이트",
-      "소개",
-      "혼디란"
+      "대학생 가이드",
+      "2일차 SP 작성",
+      "대학생",
+      "가이드",
+      "2일차",
+      "SP",
+      "작성"
     ],
-    "pc_url": "https://hondi.net/highlights/1"
+    "pc_url": "https://hondi.net/docs/hondi_college_guide_day2.html",
+    "audience": "user",
+    "source": "menu"
   },
   {
-    "path": "/pages/expert-personas.html",
-    "title": "전문가 페르소나 목록",
-    "description": "의사, 변호사, 교수 등 552개 전문가 AI 페르소나를 분야별로 찾아볼 수 있는 목록 페이지 (직업·증상·상황 검색 기능 포함)",
+    "path": "/docs/hondi_glossary.html",
+    "title": "용어집",
+    "description": "용어집",
     "keywords": [
-      "전문가",
-      "전문가 페르소나",
-      "의사",
-      "변호사",
-      "교수",
-      "전문가 AI 목록"
+      "용어집"
     ],
-    "pc_url": "https://hondi.net/pages/expert-personas.html"
+    "pc_url": "https://hondi.net/docs/hondi_glossary.html",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/hondi_highschool_guide_day1.html",
+    "title": "고등학생 가이드 · 1일차",
+    "description": "고등학생 가이드 · 1일차",
+    "keywords": [
+      "고등학생 가이드",
+      "1일차",
+      "고등학생",
+      "가이드"
+    ],
+    "pc_url": "https://hondi.net/docs/hondi_highschool_guide_day1.html",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/hondi_highschool_guide_day2.html",
+    "title": "고등학생 가이드 · 2일차(SP 작성)",
+    "description": "고등학생 가이드 · 2일차(SP 작성)",
+    "keywords": [
+      "고등학생 가이드",
+      "2일차 SP 작성",
+      "고등학생",
+      "가이드",
+      "2일차",
+      "SP",
+      "작성"
+    ],
+    "pc_url": "https://hondi.net/docs/hondi_highschool_guide_day2.html",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/hondi_kids_guide.html",
+    "title": "초등학생 가이드",
+    "description": "초등학생 가이드",
+    "keywords": [
+      "초등학생 가이드",
+      "초등학생",
+      "가이드"
+    ],
+    "pc_url": "https://hondi.net/docs/hondi_kids_guide.html",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/hondi_teens_guide.html",
+    "title": "중학생 가이드",
+    "description": "중학생 가이드",
+    "keywords": [
+      "중학생 가이드",
+      "중학생",
+      "가이드"
+    ],
+    "pc_url": "https://hondi.net/docs/hondi_teens_guide.html",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/hondi_user_manual.html",
+    "title": "사용자 매뉴얼",
+    "description": "사용자 매뉴얼",
+    "keywords": [
+      "사용자 매뉴얼",
+      "사용자",
+      "매뉴얼"
+    ],
+    "pc_url": "https://hondi.net/docs/hondi_user_manual.html",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "/docs/user-guide.html",
+    "title": "시작하기",
+    "description": "시작하기",
+    "keywords": [
+      "시작하기"
+    ],
+    "pc_url": "https://hondi.net/docs/user-guide.html",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "/expert-personas",
+    "title": "expert-personas",
+    "description": "expert-personas",
+    "keywords": [
+      "expert",
+      "personas"
+    ],
+    "pc_url": "https://hondi.net/desktop.html#expert-personas",
+    "audience": "user",
+    "source": "standalone"
+  },
+  {
+    "path": "/feedback.html",
+    "title": "제안 현황",
+    "description": "제안 현황",
+    "keywords": [
+      "제안 현황",
+      "제안",
+      "현황"
+    ],
+    "pc_url": "https://hondi.net/feedback.html",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "/hondi-market",
+    "title": "혼디장",
+    "description": "혼디장",
+    "keywords": [
+      "혼디장"
+    ],
+    "pc_url": "https://hondi.net/desktop.html#hondi-market",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "/k-government",
+    "title": "k-government",
+    "description": "k-government",
+    "keywords": [
+      "government"
+    ],
+    "pc_url": "https://hondi.net/desktop.html#k-government",
+    "audience": "user",
+    "source": "standalone"
+  },
+  {
+    "path": "/k-services",
+    "title": "k-services",
+    "description": "k-services",
+    "keywords": [
+      "services"
+    ],
+    "pc_url": "https://hondi.net/desktop.html#k-services",
+    "audience": "user",
+    "source": "standalone"
+  },
+  {
+    "path": "/klaw",
+    "title": "klaw",
+    "description": "klaw",
+    "keywords": [
+      "klaw"
+    ],
+    "pc_url": "https://hondi.net/desktop.html#klaw",
+    "audience": "user",
+    "source": "standalone"
+  },
+  {
+    "path": "/openhash",
+    "title": "OpenHash",
+    "description": "OpenHash",
+    "keywords": [
+      "OpenHash"
+    ],
+    "pc_url": "https://hondi.net/desktop.html#openhash",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "/professional-ai",
+    "title": "전문 분야 AI",
+    "description": "전문 분야 AI",
+    "keywords": [
+      "전문 분야 AI",
+      "전문",
+      "분야",
+      "AI"
+    ],
+    "pc_url": "https://hondi.net/desktop.html#professional-ai",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "/rule-of-law",
+    "title": "rule-of-law",
+    "description": "rule-of-law",
+    "keywords": [
+      "rule",
+      "of",
+      "law"
+    ],
+    "pc_url": "https://hondi.net/desktop.html#rule-of-law",
+    "audience": "user",
+    "source": "standalone"
+  },
+  {
+    "path": "/scenario-test",
+    "title": "시나리오 테스트",
+    "description": "시나리오 테스트",
+    "keywords": [
+      "시나리오 테스트",
+      "시나리오",
+      "테스트"
+    ],
+    "pc_url": "https://hondi.net/desktop.html#scenario-test",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "/scenarios",
+    "title": "혼디 숫자 코드",
+    "description": "혼디 숫자 코드",
+    "keywords": [
+      "혼디 숫자 코드",
+      "혼디",
+      "숫자",
+      "코드"
+    ],
+    "pc_url": "https://hondi.net/desktop.html#scenarios",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "/teasers",
+    "title": "teasers",
+    "description": "teasers",
+    "keywords": [
+      "teasers"
+    ],
+    "pc_url": "https://hondi.net/desktop.html#teasers",
+    "audience": "user",
+    "source": "standalone"
+  },
+  {
+    "path": "/usage-guide",
+    "title": "usage-guide",
+    "description": "usage-guide",
+    "keywords": [
+      "usage",
+      "guide"
+    ],
+    "pc_url": "https://hondi.net/desktop.html#usage-guide",
+    "audience": "user",
+    "source": "standalone"
+  },
+  {
+    "path": "/user-dashboard",
+    "title": "내 GDC 대시보드",
+    "description": "내 GDC 대시보드 (로그인 필요 — 페이지 이동 후 우측 상단 대시보드 버튼을 다시 눌러야 함)",
+    "keywords": [
+      "내 GDC 대시보드",
+      "GDC",
+      "대시보드"
+    ],
+    "pc_url": "https://hondi.net/desktop.html",
+    "audience": "user",
+    "source": "menu_special"
+  },
+  {
+    "path": "https://biz.hondi.net",
+    "title": "K-Biz 체험하기 ↗",
+    "description": "K-Biz 체험하기 ↗",
+    "keywords": [
+      "Biz 체험하기",
+      "Biz",
+      "체험하기"
+    ],
+    "pc_url": "https://biz.hondi.net",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "https://city.hondi.net",
+    "title": "K-City 체험하기 ↗",
+    "description": "K-City 체험하기 ↗",
+    "keywords": [
+      "City 체험하기",
+      "City",
+      "체험하기"
+    ],
+    "pc_url": "https://city.hondi.net",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "https://democracy.hondi.net/desktop.html",
+    "title": "K-Democracy ↗",
+    "description": "K-Democracy ↗",
+    "keywords": [
+      "Democracy"
+    ],
+    "pc_url": "https://democracy.hondi.net/desktop.html",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "https://job.hondi.net",
+    "title": "K-Job 체험하기 ↗",
+    "description": "K-Job 체험하기 ↗",
+    "keywords": [
+      "Job 체험하기",
+      "Job",
+      "체험하기"
+    ],
+    "pc_url": "https://job.hondi.net",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "https://klaw.hondi.net",
+    "title": "K-Law 체험하기 ↗",
+    "description": "K-Law 체험하기 ↗",
+    "keywords": [
+      "Law 체험하기",
+      "Law",
+      "체험하기"
+    ],
+    "pc_url": "https://klaw.hondi.net",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "https://mail.hondi.net",
+    "title": "K-Mail 체험하기 ↗",
+    "description": "K-Mail 체험하기 ↗",
+    "keywords": [
+      "Mail 체험하기",
+      "Mail",
+      "체험하기"
+    ],
+    "pc_url": "https://mail.hondi.net",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "https://plan.hondi.net",
+    "title": "K-Plan 체험하기 ↗",
+    "description": "K-Plan 체험하기 ↗",
+    "keywords": [
+      "Plan 체험하기",
+      "Plan",
+      "체험하기"
+    ],
+    "pc_url": "https://plan.hondi.net",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "https://search.hondi.net",
+    "title": "K-Search 체험하기 ↗",
+    "description": "K-Search 체험하기 ↗",
+    "keywords": [
+      "Search 체험하기",
+      "Search",
+      "체험하기"
+    ],
+    "pc_url": "https://search.hondi.net",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "https://telecom.hondi.net",
+    "title": "K-Telecom 체험하기 ↗",
+    "description": "K-Telecom 체험하기 ↗",
+    "keywords": [
+      "Telecom 체험하기",
+      "Telecom",
+      "체험하기"
+    ],
+    "pc_url": "https://telecom.hondi.net",
+    "audience": "user",
+    "source": "menu"
+  },
+  {
+    "path": "https://watch.hondi.net",
+    "title": "K-Watch 체험하기 ↗",
+    "description": "K-Watch 체험하기 ↗",
+    "keywords": [
+      "Watch 체험하기",
+      "Watch",
+      "체험하기"
+    ],
+    "pc_url": "https://watch.hondi.net",
+    "audience": "user",
+    "source": "menu"
   }
 ]

@@ -1421,6 +1421,10 @@ document.addEventListener('keydown', function (e) {
 
 <div class="hondi-search-center-wrap">
   <div id="hondi-search-root" class="hondi-search-root">
+    <div class="hondi-search-scope-toggle" role="tablist" aria-label="검색 범위">
+      <button id="hondi-search-scope-user" class="hondi-search-scope-btn active" type="button" role="tab" aria-selected="true">사용자 안내</button>
+      <button id="hondi-search-scope-dev" class="hondi-search-scope-btn" type="button" role="tab" aria-selected="false">개발자 문서</button>
+    </div>
     <div class="hondi-search-box">
       <button id="hondi-search-attach" class="hondi-search-icon-btn" type="button" aria-label="파일 또는 사진 첨부">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
@@ -1550,6 +1554,35 @@ document.addEventListener('keydown', function (e) {
   .hondi-search-candidate:hover {
     background: #f3f4f6;
   }
+  /* Phase 4 신설 — 검색 범위 토글(사용자 안내 / 개발자 문서).
+     기본 선택은 "사용자 안내"(scope=user) — Phase 0 결정: "전체" 옵션 없음. */
+  .hondi-search-scope-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin: 0 0 8px;
+    padding: 3px;
+    background: #f0f2f5;
+    border-radius: 999px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hondi-search-scope-btn {
+    border: none;
+    background: transparent;
+    color: #55606b;
+    font-size: 12px;
+    padding: 5px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .hondi-search-scope-btn.active {
+    background: #fff;
+    color: #1e3a8a;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    font-weight: 600;
+  }
 </style>
 
 <script>
@@ -1562,6 +1595,8 @@ document.addEventListener('keydown', function (e) {
   const panel = document.getElementById("hondi-search-panel");
   const messagesEl = document.getElementById("hondi-search-messages");
   const candidatesEl = document.getElementById("hondi-search-candidates");
+  const scopeUserBtn = document.getElementById("hondi-search-scope-user");
+  const scopeDevBtn = document.getElementById("hondi-search-scope-dev");
 
   const MAX_ATTACHMENT_BYTES = 300 * 1024; // 300KB
   const TEXT_LIKE_EXT = [".txt", ".md", ".json", ".csv"];
@@ -1569,6 +1604,21 @@ document.addEventListener('keydown', function (e) {
   let conversationId = null;
   let history = [];
   let pendingAttachment = null; // { name, mimeType, content? }
+  let scope = "user"; // Phase 0 결정: 기본값 "사용자 안내", "전체" 옵션 없음
+
+  function setScope(next) {
+    if (next === scope) return;
+    scope = next;
+    scopeUserBtn.classList.toggle("active", scope === "user");
+    scopeDevBtn.classList.toggle("active", scope === "dev");
+    // 스코프가 바뀌면 새 대화로 취급 — 이전 turn이 다른 범위의 매니페스트를
+    // 전제로 한 대화라 그대로 이어가면 백엔드/모델이 혼동할 수 있다
+    // (hondi-search-relay의 handleHondiSearch 주석 참조).
+    closePanel();
+  }
+
+  scopeUserBtn.addEventListener("click", () => setScope("user"));
+  scopeDevBtn.addEventListener("click", () => setScope("dev"));
 
   function uuid() {
     return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
@@ -1715,6 +1765,7 @@ document.addEventListener('keydown', function (e) {
           conversation_id: conversationId,
           message: text || "이 파일에 대해 알려줘",
           attachment: attachmentToSend || undefined,
+          scope: scope,
         }),
       });
     } catch (e) {
