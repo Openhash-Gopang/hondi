@@ -14,5 +14,5 @@
   {"no": 13, "name": "발신자 표시 이름·서명 저장/조회 왕복", "kind": "settings_display_name_signature_roundtrip"},
   {"no": 14, "name": "부재중 자동응답 켜기/끄기(문구는 유지)", "kind": "settings_auto_reply_toggle"},
   {"no": 15, "name": "임시보관함 저장/목록/삭제 왕복", "kind": "drafts_roundtrip"},
-  {"no": 16, "name": "자기 자신에게 실제 발송 후 받은함 도착 확인(외부 메일 인프라 실왕복)", "kind": "self_send_and_inbound_roundtrip"}
+  {"no": 16, "name": "자기 자신에게 실제 발송 \u2192 반송 알림이 받은함에 도착(인바운드 파이프라인 왕복 확인)", "kind": "self_send_and_inbound_roundtrip"}
 ]

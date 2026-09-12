@@ -63,6 +63,7 @@ import re
 import sys
 import time
 import uuid
+from datetime import datetime
 
 import requests
 
@@ -196,6 +197,20 @@ def post_json(worker_base, path, phone_verify_token, extra_body=None):
 
 
 MAIL_ID_PATTERN = re.compile(r"^[a-z0-9](?:[a-z0-9_-]{1,28}[a-z0-9])?$")
+
+
+def _parse_pb_created(created_str):
+    """PocketBase의 created 필드(예: '2026-09-12 08:02:00.123Z')를 UTC
+    epoch 초로 변환. 형식이 안 맞으면 None(호출부가 recency 판단을
+    건너뛰고 그냥 매칭시킨다 — 못 판별한다고 시나리오 자체가
+    깨지면 안 되므로 관대하게 처리)."""
+    if not created_str:
+        return None
+    s = created_str.strip().replace("Z", "+00:00").replace(" ", "T", 1)
+    try:
+        return datetime.fromisoformat(s).timestamp()
+    except Exception:
+        return None
 
 
 def run_scenario(scn, ctx):
@@ -412,6 +427,7 @@ def run_scenario(scn, ctx):
         # 참고). ctx["guid"]는 PocketBase 조회용 원본(콜론) 형태이므로
         # 여기서만 별도로 변환한다.
         to_addr = f"{guid.replace(':', '-')}@hondi.kr"
+        send_started_at = time.time()
         status, body, _, err = post_json(worker_base, "/mail/send", token, {
             "to": to_addr, "subject": subject, "text": f"자가발송 왕복 테스트 본문 {marker}",
         })
@@ -431,9 +447,24 @@ def run_scenario(scn, ctx):
             return "LIVE-FAIL", f"방금 보낸 메일이 보낸함에 안 보임: subject={subject!r}", \
                 {"sent_body": sbody}, cleanup
 
-        # 받은함 확인(실제 외부 메일 인프라 왕복 — 폴링 필요)
+        # 받은함 확인 — 2026-09-12 실사로 확인된 사실(라이브 스모크테스트
+        # + Cloudflare 대시보드 실제 확인): 같은 도메인 안에서 자기
+        # 자신에게 보내는 메일은 Cloudflare가 정책적으로 반송하며(버그
+        # 아님 — 외부 실주소 발송은 정상 도착까지 확인됨), 그 반송
+        # 알림(bounces@cfbounce.hondi.kr)은 인바운드 파이프라인
+        # (Cloudflare Email Routing catch-all → Worker →
+        # _handleKmailInboundEmail → ai_messages 기록 → 받은함 표시)을
+        # 그대로 통과해 정상적으로 받은함에 나타난다. 그래서 "원본
+        # 메일이 도착"이 아니라 "그 직후 반송 알림이 도착"을 성공
+        # 조건으로 삼는다 — 인바운드 전체 왕복을 그대로 검증하면서도,
+        # 알려진 반송 정책 때문에 매번 오탐 FAIL이 나는 문제를 없앤다.
+        # (제목 문자열 매칭 대신 counterparty로 판별하는 이유: 반송
+        # 메일 본문 안의 원본 제목은 RFC 2047 base64로 인코딩된 채
+        # 그대로 실려 있어 평문 marker 문자열이 노출되지 않는다 —
+        # 실제 반송 샘플로 확인함.)
         inbox_found = False
         inbox_body = None
+        matched_item = None
         deadline = time.time() + INBOUND_POLL_TIMEOUT_S
         while time.time() < deadline:
             istatus, ibody, _, ierr = get_json(worker_base, "/kmail/mailbox", token, {"box": "inbox"})
@@ -441,18 +472,25 @@ def run_scenario(scn, ctx):
                 time.sleep(INBOUND_POLL_INTERVAL_S)
                 continue
             inbox_body = ibody
-            if any(subject in (m.get("content_original") or m.get("subject") or "")
-                   for m in (ibody or {}).get("items", [])):
+            for m in (ibody or {}).get("items", []):
+                if "cfbounce" not in (m.get("counterparty") or ""):
+                    continue
+                created_ts = _parse_pb_created(m.get("created"))
+                if created_ts is not None and created_ts < send_started_at - 5:
+                    continue  # 이번 발송 이전부터 있던 오래된 반송 알림 — 무시
+                matched_item = m
                 inbox_found = True
+                break
+            if inbox_found:
                 break
             time.sleep(INBOUND_POLL_INTERVAL_S)
 
         if not inbox_found:
             return "LIVE-FAIL", (
-                f"자가발송한 메일이 {INBOUND_POLL_TIMEOUT_S}초 안에 받은함에 안 들어옴 — "
-                f"Cloudflare Email Routing catch-all 또는 _handleKmailInboundEmail 경로 확인 필요"
+                f"자가발송에 대한 반송 알림(bounces@cfbounce.hondi.kr)이 {INBOUND_POLL_TIMEOUT_S}초 안에 "
+                f"받은함에 안 들어옴 — Cloudflare Email Routing catch-all 또는 _handleKmailInboundEmail 경로 확인 필요"
             ), {"inbox_body": inbox_body}, cleanup
-        return "LIVE-PASS", "", {"to": to_addr}, cleanup
+        return "LIVE-PASS", "", {"to": to_addr, "bounce_item_id": (matched_item or {}).get("id")}, cleanup
 
     if kind == "external_send_delivery_check":
         marker = uuid.uuid4().hex[:10]
