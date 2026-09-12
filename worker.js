@@ -721,6 +721,12 @@ async function handleUserGdcHistory(request, url, env, corsHeaders) {
       amount_gdc: out.amount ?? null,
       krw_amount: out.krw_amount ?? null,
       model: !isDeposit ? (out.model || null) : null,
+      // 2026-09-12 신설(주피터 지시: "AI 사용료로 일괄하지 말고 가능한
+      // 상세 내용을 표시") — outputs JSON엔 이미 service_id가 들어있었다
+      // (main.pb.js /api/ai-charge 확인) — 여기서 그냥 안 내려주고 있었을
+      // 뿐이다. webapp.html/desktop.html 대시보드가 이 값으로 K-Law/
+      // K-Mail/AI 비서 등 서비스별 라벨을 만든다.
+      service_id: !isDeposit ? (out.service_id || null) : null,
       memo: out.memo || null,
     };
   });
