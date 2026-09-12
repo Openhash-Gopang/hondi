@@ -12712,6 +12712,11 @@ export default {
     // 2026-09-12 신설 — K-Mail ID(mail_id, hondi.kr 로컬파트 별칭). 실제
     // 발신 주소(<guid>@hondi.kr)는 그대로 두고 그 위에 얹는 조회용 별칭.
     if (pathname === '/kmail/mail-id/check' && request.method === 'GET') return handleKmailMailIdCheck(request, url, env, corsHeaders);
+    // 2026-09-12 신설 — KMAIL_FETCH_CONTENT의 실제 조회 메커니즘(GitHub
+    // API 우회 포함)을 LLM 판단과 분리해서 직접 검증하기 위한 테스트용
+    // 엔드포인트. 다른 kmail 엔드포인트와 동일한 인증(phone_verify_token)
+    // 을 쓴다 — 관리자 전용 별도 시크릿을 새로 요구하지 않기 위함.
+    if (pathname === '/kmail/fetch-content-check' && request.method === 'GET') return handleKmailFetchContentCheck(request, url, env, corsHeaders, ctx);
     if (pathname === '/kmail/mail-id/auto' && request.method === 'POST') return handleKmailMailIdAuto(request, env, corsHeaders);
     if (pathname === '/kmail/attachments/upload' && request.method === 'POST') return handleKmailAttachmentUpload(request, env, corsHeaders);
     if (pathname.startsWith('/kmail/attachments/') && request.method === 'GET') return handleKmailAttachmentGet(request, url, env, corsHeaders);
@@ -33329,6 +33334,23 @@ async function handleKmailMailIdCheck(request, url, env, corsHeaders) {
   const owner = await _kmailFindMailIdOwner(env, normalized);
   const available = !owner || owner === guid;
   return new Response(JSON.stringify({ ok: true, normalized, valid: true, available }), { status: 200, headers: corsHeaders });
+}
+
+// GET /kmail/fetch-content-check?url=...&phone_verify_token=...
+// 2026-09-12 신설 — _performUrlFetchForSummary(KMAIL_FETCH_CONTENT의
+// 실제 조회 로직, GitHub REST API 우회 포함)를 LLM 판단 없이 직접
+// 호출해서 검증하기 위한 라이브 스모크테스트 전용 엔드포인트. 다른
+// kmail 엔드포인트와 동일한 인증(phone_verify_token)을 쓴다.
+async function handleKmailFetchContentCheck(request, url, env, corsHeaders, ctx) {
+  const targetUrl = url.searchParams.get('url');
+  if (!targetUrl) return _err(400, 'MISSING_FIELD', 'url 필수', corsHeaders);
+
+  const qp = Object.fromEntries(url.searchParams.entries());
+  const auth = await _kAuth.resolveGuid(env, qp, { sigMsg: `kmail-fetch-content-check:${qp.guid}:${qp.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+
+  const result = await _performUrlFetchForSummary(env, ctx, targetUrl).catch(e => ({ ok: false, error: 'EXCEPTION', message: e.message }));
+  return new Response(JSON.stringify({ ok: true, result }), { status: 200, headers: corsHeaders });
 }
 
 // POST /kmail/mail-id/auto — body: { guid, pubkey, signature, ts }
