@@ -454,6 +454,27 @@ def run_scenario(scn, ctx):
             ), {"inbox_body": inbox_body}, cleanup
         return "LIVE-PASS", "", {"to": to_addr}, cleanup
 
+    if kind == "external_send_delivery_check":
+        marker = uuid.uuid4().hex[:10]
+        subject = f"[스모크테스트] 외부 발송 확인 {marker}"
+        external_to = scn["external_to"]
+        status, body, _, err = post_json(worker_base, "/mail/send", token, {
+            "to": external_to, "subject": subject,
+            "text": f"hondi.kr 발신이 외부 주소로 정상 도착하는지 확인하는 테스트입니다. marker={marker}",
+        })
+        if err:
+            return "LIVE-ERROR", err, {}, cleanup
+        if status != 200 or not (body or {}).get("ok"):
+            return "LIVE-FAIL", f"외부 주소로 발송 API 자체가 실패: status={status} body={body}", \
+                {"http_status": status, "http_body": body}, cleanup
+        # Gmail 등 외부 메일함 실제 도착 여부는 API로 확인할 수 없다 —
+        # API 호출 성공만 이 스크립트가 검증하고, 실제 도착은 사람이
+        # 눈으로 확인해야 한다(제목의 marker로 찾을 것).
+        return "LIVE-PASS", (
+            f"API 호출 성공 — {external_to} 받은편지함(스팸함 포함)에서 "
+            f"제목에 '{marker}'가 포함된 메일이 실제로 도착했는지 직접 확인 필요"
+        ), {"to": external_to, "from": (body or {}).get("from"), "marker": marker}, cleanup
+
     return "LIVE-ERROR", f"알 수 없는 kind: {kind}", {}, cleanup
 
 
@@ -477,6 +498,10 @@ def main():
     ap.add_argument("--resume", action="store_true")
     ap.add_argument("--skip-self-send", action="store_true",
                      help="실제 발송/수신 왕복 시나리오를 건너뜀(빠른 재실행용 — 외부 메일 인프라 지연이 없어짐)")
+    ap.add_argument("--external-recipient", default=None,
+                     help="지정하면 이 실제 이메일 주소로도 발송 API를 호출하는 시나리오를 추가로 실행"
+                          "(자기발송 특유의 루프/스팸 방지 정책과 무관한 결과를 확인하기 위함 — "
+                          "실제 도착 여부는 사람이 눈으로 확인해야 함, API 성공 여부만 자동 채점)")
     ap.add_argument("--no-restore", action="store_true",
                      help="실행 전 kmail_user_settings 값을 백업했다가 끝나고 복원하지 않음(디버깅용)")
     args = ap.parse_args()
@@ -493,6 +518,14 @@ def main():
         scenarios = json.load(f)
     if args.skip_self_send:
         scenarios = [s for s in scenarios if s["kind"] != "self_send_and_inbound_roundtrip"]
+    if args.external_recipient:
+        next_no = max((s["no"] for s in scenarios), default=0) + 1
+        scenarios.append({
+            "no": next_no,
+            "name": f"외부 실주소({args.external_recipient})로 발송 API 성공 확인",
+            "kind": "external_send_delivery_check",
+            "external_to": args.external_recipient,
+        })
 
     os.makedirs(args.out, exist_ok=True)
     results_path = os.path.join(args.out, "live_results.jsonl")
