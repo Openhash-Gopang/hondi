@@ -796,6 +796,25 @@
     "source": "menu"
   },
   {
+    "path": "/docs/SESSION_LESSONS_HONDI_SEARCH_MANIFEST_SCOPE_20260913_v1_0.html",
+    "title": "혼디 검색 매니페스트 전면 갱신 + scope 분리 — '혼디 숫자 코드' 오매칭 사고 근본원인(수기 매니페스트 23개 vs 실제 119개)·자동 생성기/CI가드 신설·검색범위(user/dev) 토글·기존 스모크테스트 assertion 버그 발견수정·배포 실전 함정(0913) ↗",
+    "description": "혼디 검색 매니페스트 전면 갱신 + scope 분리 — '혼디 숫자 코드' 오매칭 사고 근본원인(수기 매니페스트 23개 vs 실제 119개)·자동 생성기/CI가드 신설·검색범위(user/dev) 토글·기존 스모크테스트 assertion 버그 발견수정·배포 실전 함정(0913) ↗",
+    "keywords": [
+      "혼디 검색 매니페스트 전면 갱신 + scope 분리",
+      "'혼디 숫자 코드' 오매칭 사고 근본원인 수기 매니페스트 23개 vs 실제 119개",
+      "자동 생성기",
+      "CI가드 신설 검색범위 user",
+      "dev",
+      "토글 기존 스모크테스트 assertion 버그 발견수정 배포 실전 함정 0913",
+      "혼디",
+      "검색"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_HONDI_SEARCH_MANIFEST_SCOPE_20260913_v1_0.html",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-13"
+  },
+  {
     "path": "/docs/SESSION_LESSONS_HONDI_SEARCH_RELAY_1042_ISOLATION_20260909_v1_0.html",
     "title": "혼디 검색 hondi-search-relay 분리 · 1042 격리 실전 교훈 매뉴얼 — Worker 단위 격리 실증, 테스트 프로브 방법론, Windows Application Data 배포 함정, curl 한글 인코딩 재발, 코드 추적 습관(0909) ↗",
     "description": "혼디 검색 hondi-search-relay 분리 · 1042 격리 실전 교훈 매뉴얼 — Worker 단위 격리 실증, 테스트 프로브 방법론, Windows Application Data 배포 함정, curl 한글 인코딩 재발, 코드 추적 습관(0909) ↗",
