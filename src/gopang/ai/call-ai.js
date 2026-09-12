@@ -687,6 +687,7 @@ export const _stripInternalTags = (text) => _stripBracketTag(
   .replace(/\[SHARE_DOC_REJECTED\]/g, '')          // 공유문서 거부 태그
   .replace(/\[PANEL_ACTION:close\]/g, '')      // AI 패널 닫기 지시 태그 (2026-07-02 신설)
   .replace(/\[PDV_DOMAIN_SET:[^\]]*\]/g, '')    // PDV 일상/업무 전환 태그 (2026-07-13 신설)
+  .replace(/\[KCOMPOSE_AWAIT_USER:[^\]]*\]/g, '')  // 2026-09-12 신설 — K-Compose 정상 대기 신호(§ K-Compose 프로토콜 가드 참고), 사용자에겐 안 보여야 함
   .replace(/\[TEMPLATE_LOOKUP:[^\]]*\]/g, '')   // 정체성 템플릿 참조 조회 태그 (2026-07-17 신설, 방어적 — 정상 경로는 _handleProfileTags가 먼저 소비)
   .replace(/\[INDUSTRY_TEMPLATE_LOOKUP:[^\]]*\]/g, '') // 구 태그명(v2.3~) — SP 갱신 유예기간 동안 방어적으로 함께 제거
   .replace(/\[TEMPLATE_CANDIDATE:[^\]]*\]/g, '') // 템플릿 후보 큐잉 태그 (2026-07-17 신설 — 100인 사고실험 케이스 #52에서 strip 누락 발견, 그 즉시 추가)
@@ -1902,6 +1903,21 @@ export async function _handleOrchestrationTags(fullReply, bubble, sendFn = callA
   // 알리고 AC로 안전 복귀시킨다 — "성공한 것처럼 보이는 미완료 응답"을
   // 침묵 속에 화면에 내보내는 것보다 훨씬 안전하다.
   if (CFG.system?.includes('K-Compose')) {
+    // 2026-09-12 신설(주피터 지시 — 실사 원인 조사 결과) — SP-20 STEP 2
+    // (적합성 확인 결과 안내)·STEP 3(무료/유료 선택 게이트) 등은 설계상
+    // 정상적으로 사용자 응답을 기다리며 멈춰야 하는 지점이다. 지금까지
+    // 이 가드는 HANDOFF_TO_KEXECUTE/KDELIVER가 없으면 이유를 구분하지
+    // 않고 전부 "위반"으로 판정해, 정상적인 되묻기까지 재시도·AC 강제
+    // 복귀 대상이 됐다(실사 재현, 2026-09-12 — 헤드리스 스모크테스트로
+    // 처음 확인됐으나, 이 가드 자체가 2026-08-06에 만들어진 이유였던
+    // 실사용 사례와 근본 원인이 같다). SP-20에 신설한
+    // [KCOMPOSE_AWAIT_USER: reason=...] 태그가 있으면 정상 대기로
+    // 인정하고 일반 응답과 동일하게 처리한다(아래로 폴스루 —
+    // _stripInternalTags가 태그 자체는 화면에서 지운다).
+    if (fullReply.includes('[KCOMPOSE_AWAIT_USER:')) {
+      CFG._kcomposeHandoffRetried = false;
+      return false;
+    }
     if (!CFG._kcomposeHandoffRetried) {
       console.warn('[Orchestration] ⚠️ K-Compose 프로토콜 위반 감지 — HANDOFF_TO_KEXECUTE/KDELIVER 없이 응답 종료. 1회 정정 요청.');
       CFG._kcomposeHandoffRetried = true;
