@@ -1,0 +1,17 @@
+no,name,kind,verdict,reason
+1,너무 짧은 mail_id(2자) 거부,mail_id_invalid_format,LIVE-PASS,
+2,특수문자로 시작하는 mail_id 거부,mail_id_invalid_format,LIVE-PASS,
+3,특수문자로 끝나는 mail_id 거부,mail_id_invalid_format,LIVE-PASS,
+4,공백 포함 mail_id 거부,mail_id_invalid_format,LIVE-PASS,
+5,31자(상한 초과) mail_id 거부,mail_id_invalid_format,LIVE-PASS,
+6,예약어 'admin' 거부,mail_id_reserved_word,LIVE-PASS,
+7,예약어 'postmaster' 거부,mail_id_reserved_word,LIVE-PASS,
+8,예약어 'noreply' 거부,mail_id_reserved_word,LIVE-PASS,
+9,대문자 mail_id가 소문자로 정규화되어 저장됨,mail_id_normalize_and_persist,LIVE-PASS,
+10,다른 사용자가 이미 쓰는 mail_id는 check에서 available=false,mail_id_collision_cross_user,LIVE-PASS,
+11,새로 만든 후보는 check에서 available=true,mail_id_check_available,LIVE-PASS,
+12,자동생성이 8자리 hex를 만들고 재호출해도 멱등적,mail_id_auto_generate_idempotent,LIVE-PASS,
+13,발신자 표시 이름·서명 저장/조회 왕복,settings_display_name_signature_roundtrip,LIVE-PASS,
+14,부재중 자동응답 켜기/끄기(문구는 유지),settings_auto_reply_toggle,LIVE-PASS,
+15,임시보관함 저장/목록/삭제 왕복,drafts_roundtrip,LIVE-PASS,
+16,외부 실주소(tensor.city@gmail.com)로 발송 API 성공 확인,external_send_delivery_check,LIVE-PASS,API 호출 성공 — tensor.city@gmail.com 받은편지함(스팸함 포함)에서 제목에 '6d8528e925'가 포함된 메일이 실제로 도착했는지 직접 확인 필요
