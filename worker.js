@@ -36591,8 +36591,12 @@ async function handleKaddressChat(request, env, corsHeaders, ctx) {
   const kaddrMergeMatch = reply.match(/KADDR_MERGE_CONTACTS\s*(\{[\s\S]*\})\s*$/);
   const kaddrTagMatch = reply.match(/KADDR_TAG_CONTACTS\s*(\{[\s\S]*\})\s*$/);
   const kaddrDeleteMatch = reply.match(/KADDR_DELETE_CONTACTS\s*(\{[\s\S]*\})\s*$/);
+  // 2026-09-12 신설 — §2-8. UNIVERSAL-INTEGRITY U0 항목(11)에 따른
+  // 조치: K-Address가 "제 소관이 아니니 K-Mail 탭에서 직접 하세요"
+  // 라고 안내만 하고 끝내지 않고, K-Mail을 실제로 호출하는 경로.
+  const kaddrHandoffMatch = reply.match(/KADDR_HANDOFF_TO_KMAIL\s*(\{[\s\S]*\})\s*$/);
 
-  const _kaddrAnyTagMatch = kaddrSaveMatch || kaddrLookupMatch || kaddrUpdateMatch || kaddrDecideMatch || kaddrMergeMatch || kaddrTagMatch || kaddrDeleteMatch;
+  const _kaddrAnyTagMatch = kaddrSaveMatch || kaddrLookupMatch || kaddrUpdateMatch || kaddrDecideMatch || kaddrMergeMatch || kaddrTagMatch || kaddrDeleteMatch || kaddrHandoffMatch;
   // 2026-09-11 — K-Mail 쪽 사고(잘린 태그가 그대로 노출됨)에서 배운
   // 안전장치를 처음부터 넣는다.
   if (!_kaddrAnyTagMatch && /KADDR_[A-Z_]+\s*\{/.test(reply)) {
@@ -36793,6 +36797,27 @@ async function handleKaddressChat(request, env, corsHeaders, ctx) {
     } catch (e) {
       return new Response(JSON.stringify({ ok: true, reply: `${cleanReplyText}\n\n(삭제 중 오류: ${e.message})`, action: null }), { status: 200, headers: corsHeaders });
     }
+  }
+
+  // 2026-09-12 신설 — §2-8. UNIVERSAL-INTEGRITY U0 항목(11)에 따른
+  // 조치. K-Address 자신은 아무것도 저장/조회/발송하지 않는다 —
+  // instruction 문자열을 그대로 프론트엔드에 넘겨서, 프론트가 "메일"
+  // 화면(K-Mail 채팅)으로 전환한 뒤 그 문자열을 새 메시지로 대신
+  // 보내게 한다(webapp.html _kaddrSend의 action 처리부 참고). K-Mail은
+  // 자신의 KMAIL_LOOKUP_CONTACTS로 대상을 다시 조회하므로, 여기서
+  // 이메일 목록을 미리 뽑아 넘기지 않는다.
+  if (kaddrHandoffMatch) {
+    let parsed = null;
+    try { parsed = JSON.parse(kaddrHandoffMatch[1]); } catch (e) { /* 처리 아래 */ }
+    const cleanReplyText = reply.slice(0, kaddrHandoffMatch.index).trim();
+    const instruction = (parsed && typeof parsed.instruction === 'string') ? parsed.instruction.trim() : '';
+    if (!instruction) {
+      return new Response(JSON.stringify({ ok: true, reply: cleanReplyText || reply, action: null }), { status: 200, headers: corsHeaders });
+    }
+    return new Response(JSON.stringify({
+      ok: true, reply: cleanReplyText || reply,
+      action: { type: 'handoff_to_kmail', instruction },
+    }), { status: 200, headers: corsHeaders });
   }
 
   return new Response(JSON.stringify({ ok: true, reply, action: null }), { status: 200, headers: corsHeaders });
