@@ -3241,7 +3241,7 @@ async function _userDashLoadHistory(guid) {
         <div class="ud-dot"></div>
         <div><div class="ud-title">${(h.memo || '').startsWith('signup_bonus:') ? '가입 축하 충전' : '유상 충전'}</div>
              <div class="ud-meta">${fmtDate(h.created)}</div></div>
-        <div class="ud-amt">+${(h.amount_gdc ?? 0).toLocaleString()}</div>
+        <div class="ud-amt">+${Math.trunc(h.amount_gdc ?? 0).toLocaleString()}</div>
       </div>`).join('') : '<div class="ud-empty">충전 내역이 없습니다.</div>';
 
     usageBox.innerHTML = usages.length ? usages.map(h => `
@@ -3249,7 +3249,7 @@ async function _userDashLoadHistory(guid) {
         <div class="ud-dot"></div>
         <div><div class="ud-title">${h.model ? `AI 사용 (${h.model})` : 'AI 사용료'}</div>
              <div class="ud-meta">${fmtDate(h.created)}</div></div>
-        <div class="ud-amt">−${(h.amount_gdc ?? 0).toLocaleString()}</div>
+        <div class="ud-amt">−${Math.trunc(h.amount_gdc ?? 0).toLocaleString()}</div>
       </div>`).join('') : '<div class="ud-empty">이용료 내역이 없습니다.</div>';
   } catch (e) {
     chargeBox.innerHTML = '<div class="ud-empty">서버에 연결할 수 없습니다.</div>';

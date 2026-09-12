@@ -1060,7 +1060,7 @@
           if (!el) continue;
           // 기존 표시 문법(헤더: "1,234 GDC", 설정 카드: "1,234 GDC")을
           // 그대로 유지 — 두 곳 다 같은 포맷이라 분기 불필요.
-          el.textContent = `${balance.toLocaleString('ko-KR')} GDC`;
+          el.textContent = `${Math.trunc(balance).toLocaleString('ko-KR')} GDC`;
         }
         return { drift: result.drift, balance };
       } catch (e) {

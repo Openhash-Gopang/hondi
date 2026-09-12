@@ -1561,13 +1561,13 @@ async function openGdcDashboard() {
       <div class="gd-txn"><div class="gd-dot"></div>
         <div><div class="gd-title">${(h.memo || '').startsWith('signup_bonus:') ? '가입 축하 충전' : '유상 충전'}</div>
              <div class="gd-meta">${fmtDate(h.created)}</div></div>
-        <div class="gd-amt">+${(h.amount_gdc ?? 0).toLocaleString()}</div></div>`).join('')
+        <div class="gd-amt">+${Math.trunc(h.amount_gdc ?? 0).toLocaleString()}</div></div>`).join('')
       : '<div class="gd-empty">충전 내역이 없습니다.</div>';
     usageBox.innerHTML = usages.length ? usages.map(h => `
       <div class="gd-txn"><div class="gd-dot"></div>
         <div><div class="gd-title">${h.model ? `AI 사용 (${h.model})` : 'AI 사용료'}</div>
              <div class="gd-meta">${fmtDate(h.created)}</div></div>
-        <div class="gd-amt">−${(h.amount_gdc ?? 0).toLocaleString()}</div></div>`).join('')
+        <div class="gd-amt">−${Math.trunc(h.amount_gdc ?? 0).toLocaleString()}</div></div>`).join('')
       : '<div class="gd-empty">이용료 내역이 없습니다.</div>';
   } catch (e) {
     document.getElementById('gd-charge-rows').innerHTML = '<div class="gd-empty">서버에 연결할 수 없습니다.</div>';

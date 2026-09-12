@@ -3676,6 +3676,24 @@ export async function callAI(userText, imageFile = null, _preTab = null, modelTi
   _setSendBtnGenerating(true);
   try {
     await _callAIInner(userText, imageFile, _preTab, modelTier, onFailure);
+  } catch (e) {
+    // 2026-09-12 신설(주피터 지시: "어떤 경우에도 혼디가 응답하지 않으면
+    // 안 됩니다") — 지금까지 이 바깥쪽 wrapper는 try/finally만 있고
+    // catch가 없었다. _callAIInner 내부의 거의 모든 실패 경로는 자체적
+    // 으로 appendBubble을 호출해 처리하지만, 그 방어망을 통과하는 예외
+    // (네트워크 완전 단절, 코드 상의 예상 못한 TypeError 등)가 하나라도
+    // 발생하면 이 함수가 그대로 reject되고, 호출부(send-message.js의
+    // 세 지점)엔 이걸 받는 catch가 없어 조용히 사라졌다 — 사용자에게는
+    // "입력 중..." 표시나 빈 말풍선만 남고 아무 응답도 오지 않는 것으로
+    // 보였다(2026-09-12 실사용 재현). 원인이 무엇이든 최후의 안전망으로
+    // 여기서 반드시 사용자에게 보이는 응답을 하나 남긴다.
+    console.error('[callAI] 처리되지 않은 오류 — 최후 안전망으로 대체 응답 표시:', e);
+    try { hideTyping(); } catch {}
+    try {
+      appendBubble('ai',
+        '⚠️ 잠시 응답을 생성하지 못했습니다. 네트워크 상태를 확인하시고 다시 시도해 주세요.',
+        true);
+    } catch {}
   } finally {
     _setSendBtnGenerating(false);
     if (_currentAbort === myAbort) {

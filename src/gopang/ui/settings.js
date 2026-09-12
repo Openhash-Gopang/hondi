@@ -843,16 +843,16 @@ export async function openGopangWallet() {
 
     const html = `
       <div style="padding:20px 16px;border-bottom:1px solid #f2f2f7;text-align:center">
-        <div style="font-size:32px;font-weight:700;color:#111827">₮${balance.toLocaleString()}</div>
+        <div style="font-size:32px;font-weight:700;color:#111827">₮${Math.trunc(balance).toLocaleString()}</div>
         <div style="font-size:13px;color:#9ca3af;margin-top:4px">GDC 잔액</div>
         <div style="display:flex;gap:16px;margin-top:12px;justify-content:center">
           <div style="text-align:center">
-            <div style="font-size:16px;font-weight:600;color:#dc2626">-₮${expenseTotal.toLocaleString()}</div>
+            <div style="font-size:16px;font-weight:600;color:#dc2626">-₮${Math.trunc(expenseTotal).toLocaleString()}</div>
             <div style="font-size:11px;color:#9ca3af">지출</div>
           </div>
           <div style="width:1px;background:#f2f2f7"></div>
           <div style="text-align:center">
-            <div style="font-size:16px;font-weight:600;color:#007b8b">+₮${incomeTotal.toLocaleString()}</div>
+            <div style="font-size:16px;font-weight:600;color:#007b8b">+₮${Math.trunc(incomeTotal).toLocaleString()}</div>
             <div style="font-size:11px;color:#9ca3af">수입</div>
           </div>
         </div>
@@ -871,7 +871,7 @@ export async function openGopangWallet() {
             <div style="font-size:14px;color:#111827">${t.label}</div>
             <div style="font-size:12px;color:#9ca3af">${t.timestamp ? new Date(t.timestamp).toLocaleString('ko-KR') : ''}</div>
           </div>
-          <span style="font-size:13px;font-weight:600;color:${amountColor}">${statusText || `${amountPrefix}₮${t.amount.toLocaleString()}`}</span>
+          <span style="font-size:13px;font-weight:600;color:${amountColor}">${statusText || `${amountPrefix}₮${Math.trunc(t.amount).toLocaleString()}`}</span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c7c7cc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </div>`;
         }).join('')}
@@ -938,7 +938,7 @@ window._openTxDetail = function(idx) {
       ['언제', r.created ? new Date(r.created).toLocaleString('ko-KR') : '-'],
       ['어디서', r.l1_node ? `${r.l1_node} 원장에 기록` : '-'],
       ['무엇을', _LEDGER_SOURCE_WHAT[r.source] || r.source || '-'],
-      ['어떻게', `${r.direction === 'credit' ? '입금(credit)' : '출금(debit)'} · ${(r.amount || 0).toLocaleString()}원 · 계정과목: ${r.fs_account || '-'}`],
+      ['어떻게', `${r.direction === 'credit' ? '입금(credit)' : '출금(debit)'} · ${Math.trunc(r.amount || 0).toLocaleString()}원 · 계정과목: ${r.fs_account || '-'}`],
       ['왜', _LEDGER_SOURCE_WHY[r.source] || '-'],
     ];
     if (r.tx_id) hashLine = r.tx_id;
