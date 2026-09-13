@@ -22,12 +22,23 @@
  * federated/not_yet_built 분류는 prompts/sp-catalog.json과 대조해 검증됨 —
  * 이 파일이 REGISTRY_PATH를 통해 갱신되면 이 모듈도 자동으로 반영된다).
  *
- * 통합 지점 제안 (아직 실제로 배선하지 않음 — 팀 리뷰 필요):
- *   call-ai.js의 callAI() 진입부, LLM 호출 직전에
+ * 통합 지점 (2026-09-13 실제 배선 완료 — call-ai.js _callAIInner 참고):
+ *   call-ai.js의 _callAIInner() 진입부, AC-PRO-CORE 로드 이전에
  *     const preRoute = classifyIntent(userText, registry);
- *     if (preRoute.confidence === 'high') { ... SP 하나만 로드하거나 바로 navigate ... }
- *   식으로 넣는 걸 제안한다. call-ai.js가 12,000줄 이상이라 이번 세션에서
- *   직접 수정하지 않고, 독립 모듈 + 유닛테스트로만 제공한다.
+ *   를 호출해, confidence='high'인 아래 두 경우만 LLM 판단을 건너뛴다 —
+ *   그 외(FEDERATED/NOT_YET_BUILT/QNA/DEV_DOCS/K_SEARCH/EXPERT_PERSONA/
+ *   UNKNOWN)는 기존 LLM 카탈로그 판단으로 그대로 폴백한다(이번 배선의
+ *   의도적 범위 제한 — navigate 대상 상태 체크·엔티티 해석 등 기존
+ *   LLM 경로가 이미 갖춘 안전장치를 이번 패치에서 다시 만들지 않았다):
+ *     - SERVICE_SP_INTERNAL + runtime_type='switch'(K-Job/K-Plan/K-Watch/
+ *       K-Telecom, 4개) → 기존 _forwardSwitchSP(loader, label) 그대로 재사용,
+ *       AC-PRO-CORE 추론 자체를 생략하고 곧장 그 SP로 전환.
+ *     - SERVICE_SP_INTERNAL + runtime_type='gwp_launch'(나머지 8개,
+ *       K-Search는 orchestration_subtask라 제외) → 기존 [GWP: id] LLM
+ *       경로가 쓰는 _gwpLaunch()를 그대로 재사용해 새 탭을 연다(단, 이
+ *       경로는 status==='active' 확인 후에만 탄다 — 그 외에는 폴백).
+ *   AC_CORE는 이미 기본 경로이므로 별도 분기 없이 그대로 AC-PRO-CORE로
+ *   이어진다.
  */
 
 const ROUTE_TYPES = Object.freeze({
@@ -154,6 +165,8 @@ function classifyIntent(userText, registry, scope) {
     return {
       type: ROUTE_TYPES.SERVICE_SP_INTERNAL,
       target: info.catalog_key,
+      gwp_id: info.gwp_id || null,
+      runtime_type: info.runtime_type || null,
       confidence: "high",
       reason: `${name}은 sp-catalog.json의 '${info.catalog_key}'(${info.catalog_file})를 직접 로드`,
     };
