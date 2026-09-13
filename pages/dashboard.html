@@ -784,16 +784,17 @@ code, pre, kbd, samp, input, button, textarea, select {
           <div class="phone">
             <div class="phone-notch"><span></span></div>
             <div class="phone-screen">
-              <div class="miniapp">
-                <div class="miniapp-bar"><span>← 프로필</span><span id="pfSyncBadge">동기화 중…</span></div>
-                <div class="miniapp-body">
-                  <div class="miniapp-avatar" id="pfAvatar">-</div>
-                  <div class="mf"><label>이름</label><input type="text" id="pfName" value="" readonly></div>
-                  <div class="mf"><label>한마디</label><input type="text" id="pfNickname" value="" readonly></div>
-                  <div class="mf"><label>거주 지역</label><input type="text" id="pfRegion" value="" readonly></div>
-                  <div class="mf"><label>AI 비서 호칭</label><input type="text" id="pfAssistantName" value="" readonly></div>
-                </div>
-              </div>
+              <!-- 2026-09-13 재작성 — 이전엔 이름/한마디/거주지역/AI 비서
+                   호칭 같은, 실제 공개 프로필(profile.html)과 무관한
+                   필드를 직접 그려서 보여주고 있었다(영업시간·메뉴·소개·
+                   이용안내·사진·영상 등 고객이 실제로 보는 내용은 전혀
+                   없었음 — 실사용자 지적으로 확인). 이 미리보기는 이제
+                   실제 profile.html을 그대로 iframe으로 띄운다 — 고객이
+                   실제로 보는 화면과 항상 정확히 같아야 하고, 별도로
+                   유지하면 반드시 어긋나게 되기 때문이다(이 저장소에서
+                   반복적으로 발견된 문제 패턴과 동일). -->
+              <iframe id="pfPreviewFrame" title="프로필 미리보기" src="about:blank"
+                      style="width:100%;height:100%;border:none;display:block"></iframe>
             </div>
             <div class="phone-home"><span></span></div>
           </div>
@@ -1419,25 +1420,12 @@ import { L1_URL, setUser } from '/src/gopang/core/state.js';
   const PF_PROXY = 'https://hondi-proxy.tensor-city.workers.dev';
   const $ = (id) => document.getElementById(id);
 
-  function pfReadLocalSnapshot() {
-    let reg = {};
-    try { reg = JSON.parse(localStorage.getItem('gopang_user_v4') || '{}'); } catch {}
-    let partial = {};
-    try { partial = JSON.parse(localStorage.getItem('hondi_profile_partial') || '{}'); } catch {}
-    return Object.assign({
-      name: reg.nickname || reg.name || reg.handle || '',
-      region: reg.region || '',
-      assistant_name: localStorage.getItem('hondi_assistant_name') || '혼디',
-    }, partial);
-  }
-
-  function pfRenderLocal(snap) {
-    $('pfAvatar').textContent = (snap.name || '?').trim().charAt(0) || '?';
-    $('pfName').value = snap.name || '';
-    $('pfNickname').value = snap.description || snap.nickname || '';
-    $('pfRegion').value = snap.address || snap.region || '';
-    $('pfAssistantName').value = snap.assistant_name || '혼디';
-  }
+  // 2026-09-13 삭제 — pfReadLocalSnapshot()/pfRenderLocal()은 이전
+  // 미리보기(직접 그린 이름/한마디/거주지역/AI 비서 호칭 필드)를 위한
+  // "서버 응답 오기 전 임시 표시" 용도였다. 지금은 실제 profile.html을
+  // iframe으로 띄우므로(handle이 있어야만 의미가 있는 URL), 로컬
+  // 스냅샷만으로 미리 그릴 수 있는 게 없다 — 그냥 서버 조회 하나로
+  // 충분하다.
 
   async function pfFetchServerProfile() {
     try {
@@ -1452,7 +1440,6 @@ import { L1_URL, setUser } from '/src/gopang/core/state.js';
       // "지갑이 아직 준비되지 않았어요"로 빠지고 있었다.
       const wallet = await window.GopangWallet.load().catch(() => null);
       if (!guid || !wallet?.signPayload) {
-        $('pfSyncBadge').textContent = '로그인 필요';
         $('pfVisibility').textContent = '지갑이 아직 준비되지 않았어요';
         $('pfLastUpdated').textContent = '-';
         $('pfLinkedAccounts').textContent = '-';
@@ -1466,16 +1453,22 @@ import { L1_URL, setUser } from '/src/gopang/core/state.js';
       const res = await fetch(`${PF_PROXY}/profile?${qs.toString()}`, { cache: 'no-cache' });
       const data = await res.json().catch(() => null);
       if (!data?.ok || !data.profile) {
-        $('pfSyncBadge').textContent = '프로필 없음';
         $('pfVisibility').textContent = '아직 등록된 프로필이 없어요 — 아래 대화로 시작해 보세요';
         $('pfLastUpdated').textContent = '-';
         $('pfLinkedAccounts').textContent = '-';
         return;
       }
       const p = data.profile;
-      $('pfSyncBadge').textContent = '동기화됨';
-      if (p.name) $('pfName').value = p.name;
-      if (p.address) $('pfRegion').value = p.address;
+      // 2026-09-13 재작성 — 미리보기는 고객이 실제로 보는 화면이어야 한다는
+      // 지적에 따라, 직접 그린 필드 대신 실제 profile.html을 그대로
+      // iframe으로 띄운다(단일 소스 — 여기서 값을 옮겨 적을수록 실제
+      // 화면과 어긋날 여지만 늘어난다). handle이 있어야만 실제 공개
+      // 페이지가 존재하므로, 없으면 안내만 하고 iframe은 비워둔다.
+      if (p.handle) {
+        const frame = $('pfPreviewFrame');
+        const targetSrc = `../profile.html?handle=${encodeURIComponent(p.handle.replace(/^@/, ''))}`;
+        if (frame.src !== targetSrc) frame.src = targetSrc;
+      }
       $('pfVisibility').textContent = p.is_public
         ? '공개 프로필 — 검색·대화상대에게 노출됩니다'
         : '비공개 프로필 — 본인만 볼 수 있어요';
@@ -1491,13 +1484,11 @@ import { L1_URL, setUser } from '/src/gopang/core/state.js';
       // 미리보기와 동일한 데이터 소스를 공유해 불일치가 생기지 않게 함).
       if (typeof pfPopulateForm === 'function') pfPopulateForm(p);
     } catch (e) {
-      $('pfSyncBadge').textContent = '조회 실패';
       $('pfSyncNote').textContent = '서버 조회 중 오류: ' + e.message;
     }
   }
 
   function pfRefreshAll() {
-    pfRenderLocal(pfReadLocalSnapshot());
     pfFetchServerProfile();
   }
 
