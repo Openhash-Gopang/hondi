@@ -1,0 +1,46 @@
+name: Check profile-assistant entity_type coverage registry
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/ENTITY_TYPE_COVERAGE_REGISTRY_v1_0.md'
+      - 'tools/check_entity_type_coverage.py'
+      - 'prompts/profile-assistant/**'
+      - 'worker.js'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/ENTITY_TYPE_COVERAGE_REGISTRY_v1_0.md'
+      - 'tools/check_entity_type_coverage.py'
+      - 'prompts/profile-assistant/**'
+      - 'worker.js'
+  schedule:
+    # check-capabilities-registry.yml과 동일한 철학 — 위 paths와 무관한
+    # 변경(예: 새 entity_type 서버 화이트리스트 추가를 worker.js가 아닌
+    # 다른 파일에서 하는 경우)으로도 조용히 드리프트가 생길 수 있으므로
+    # 매일 1회 별도로도 돈다.
+    - cron: '35 21 * * *'  # 매일 06:35 KST
+  workflow_dispatch:
+
+jobs:
+  check-entity-type-coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # ── entity_type 8종(worker.js 화이트리스트)이 profile-assistant SP
+      # 안에서 실제로 트리거예시·카드포맷을 갖췄는지 매 push·PR·매일
+      # 스케줄마다 직접 대조한다. 2026-09-13 라이브 스모크테스트에서
+      # institution·platform·consumer 세 값의 트리거예시와 consumer의
+      # 카드포맷이 누락된 채 서버 화이트리스트에만 존재했던 게 실측
+      # 확인된 뒤 신설(docs/ENTITY_TYPE_COVERAGE_REGISTRY_v1_0.md 참조).
+      - name: Run entity_type coverage check
+        run: python3 tools/check_entity_type_coverage.py
