@@ -792,7 +792,6 @@ code, pre, kbd, samp, input, button, textarea, select {
                   <div class="mf"><label>한마디</label><input type="text" id="pfNickname" value="" readonly></div>
                   <div class="mf"><label>거주 지역</label><input type="text" id="pfRegion" value="" readonly></div>
                   <div class="mf"><label>AI 비서 호칭</label><input type="text" id="pfAssistantName" value="" readonly></div>
-                  <button class="mf-save pf-edit-btn" id="pfOpenComposerBtn">AI와 대화로 수정하기</button>
                 </div>
               </div>
             </div>
@@ -1539,7 +1538,11 @@ import { L1_URL, setUser } from '/src/gopang/core/state.js';
     pfBody.classList.remove('open');
     pfToggleBtn.textContent = '대화 시작';
   });
-  $('pfOpenComposerBtn')?.addEventListener('click', pfOpenComposer);
+  // 2026-09-13 수정 — 고객이 실제로 보는 화면을 흉내낸 휴대폰 목업
+  // 안에 "AI와 대화로 수정하기"(관리자 전용 동작) 버튼이 같이 들어가
+  // 있던 걸 제거했다(실사용자 지적: 미리보기는 고객용이라 편집 메뉴가
+  // 섞여 있으면 안 됨) — 대화 시작은 아래 관리자용 패널의
+  // pfComposerToggle 버튼 하나로 통일한다.
 
   // ── 대화 중 실제 프로필이 갱신되는 즉시(iframe → localStorage 기록) 감지 ──
   // 같은 오리진 iframe이 localStorage.setItem을 호출하면 그걸 실행한
