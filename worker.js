@@ -28116,9 +28116,21 @@ async function handleProfileDocumentScan(request, env, corsHeaders) {
           { type: 'image_url', image_url: { url: dataUrl } },
         ],
       }],
-      max_tokens: 1000, temperature: 0.2, timeoutMs: 20000,
+      // 2026-09-13 수정 — max_tokens: 1000이었는데, 항목이 많은 메뉴판
+      // (실사고: 20개 항목짜리 중식 메뉴판)에서 products_structured 배열이
+      // 다 나오기 전에 응답이 잘려 JSON이 깨지는 게 실측 의심됨. 넉넉하게
+      // 2500으로 상향(품목 수가 아주 많은 사진까지 감안).
+      max_tokens: 2500, temperature: 0.2, timeoutMs: 25000,
     });
     raw = data.choices?.[0]?.message?.content || '';
+    // 2026-09-13 신설 — finish_reason='length'면 max_tokens를 다 썼는데도
+    // 못 끝냈다는 뜻 — 이 경우 아래 JSON.parse가 거의 확실히 실패하므로,
+    // 그 실패를 "형식이 이상함"이 아니라 "항목이 너무 많아 잘림"으로
+    // 정확히 구분해서 알려준다.
+    if (data.choices?.[0]?.finish_reason === 'length') {
+      console.warn('[Profile/DocumentScan] 응답이 max_tokens 한도로 잘림. 길이:', raw.length);
+      return _err(502, 'VISION_TRUNCATED', 'AI가 사진 내용이 많아 답변을 끝까지 못 냈어요 — 사진을 나눠서(예: 메뉴판을 반으로) 다시 시도해 주세요', corsHeaders);
+    }
   } catch (e) {
     return _err(502, 'VISION_CALL_FAILED', 'AI 판독 실패: ' + e.message, corsHeaders);
   }
