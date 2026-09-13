@@ -1,0 +1,68 @@
+[
+  {
+    "no": 5,
+    "entity_type_expected": "business",
+    "opening_line": "제주시청 근처에서 변호사 사무실 하고 있어요, 이름은 한라law.",
+    "persona_facts": {
+      "code": "71",
+      "code_label": "전문 서비스업",
+      "tier": "Tier3",
+      "age_gender": "40대/남성"
+    },
+    "edge_case_tags": [
+      "TIER3_REGULATED",
+      "GDC_N_ACCT_Y",
+      "RESV_Y",
+      "PUBLIC_FALSE"
+    ],
+    "persona_directives": [
+      "GDC는 필요 없고 계좌이체만 등록하고 싶다고 답하세요.",
+      "예약(상담 예약) 기능은 켜고 싶다고 답하세요.",
+      "프로필은 비공개로 하고 싶다고 답하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "전문서비스업(71, TIER3) — STEP3C 스킵 확인, job_ksco(변호사)와 entity_type=business 동시 처리"
+  },
+  {
+    "no": 11,
+    "entity_type_expected": "business",
+    "opening_line": "저 사업자예요, 한림읍에서 목공방 하고 있어요.",
+    "persona_facts": {
+      "code": "16",
+      "code_label": "목재 및 나무제품 제조업(공방)",
+      "tier": "Tier1",
+      "age_gender": "30대/남성"
+    },
+    "edge_case_tags": [
+      "ESCALATE_REASON2",
+      "CONTRADICTION"
+    ],
+    "persona_directives": [
+      "대화가 몇 턴 진행된 뒤, 갑자기 '아 사실 저는 그냥 개인이고 취미로 하는 거예요, 사업자 아니에요'라고 앞서 한 말을 번복하세요.",
+      "AI가 확인 질문을 하면 자연스럽게 답하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "이미 확정 저장된 entity_type=business와 이후 발화의 직접 모순 — [ESCALATE_TO_PRO: reason=2] 발동 여부"
+  },
+  {
+    "no": 18,
+    "entity_type_expected": "consumer",
+    "opening_line": "저는 사업 같은 거 안 해요, 그냥 물건 사려고 가입했어요.",
+    "persona_facts": {
+      "code": null,
+      "code_label": "단순 소비자",
+      "tier": null,
+      "age_gender": "20대/남성"
+    },
+    "edge_case_tags": [
+      "CONSUMER_ENTITY",
+      "PAYMENT_SKIP_LIKELY"
+    ],
+    "persona_directives": [
+      "직업이나 사업을 물으면 특별히 내세울 게 없다고 답하세요.",
+      "그냥 구매자로서만 프로필을 쓰고 싶다는 태도를 유지하세요."
+    ],
+    "skip_payment_steps_expected": true,
+    "verify_points": "사업 성격이 전혀 없는 순수 소비자가 person이 아니라 consumer로 분류되는지(화이트리스트 8종 구분)"
+  }
+]

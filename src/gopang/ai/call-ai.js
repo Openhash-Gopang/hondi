@@ -586,6 +586,24 @@ export function _buildProfileContext() {
   if (ctx.industry_fields) lines.push(`industry_fields: ${JSON.stringify(ctx.industry_fields)}`);
   if (ctx.gdc_accepted !== undefined) lines.push(`gdc_accepted: ${ctx.gdc_accepted}`);
   if (ctx.is_public !== undefined)    lines.push(`is_public: ${ctx.is_public}`);
+
+  // 2026-09-13 신설 — PARTIAL_SAVE 핸들러(위 "진행 중 필드 저장" 블록)가
+  // entity_type 모순을 결정론적으로 감지해 남겨둔 신호를 여기서 한 번만
+  // 소비한다. profile-assistant SP v2.32 §ESCALATE-TO-PRO는 이 줄이 보이면
+  // 조건2가 자동 성립한 것으로 보고 반드시 [ESCALATE_TO_PRO: reason=2]를
+  // 내야 한다 — "one-shot"으로 설계한 이유: 이 줄을 지우지 않고 매 턴
+  // 계속 주입하면 사용자가 승격 절차에 답한 뒤에도(=모순이 이미 해소된
+  // 뒤에도) 다음 턴에 또 같은 신호가 보여 불필요한 재확인을 반복 요구하게
+  // 된다. 딱 한 번, 모순이 감지된 바로 다음 요청에만 실어 보낸다.
+  try {
+    const conflictRaw = localStorage.getItem('hondi_profile_entity_type_conflict');
+    if (conflictRaw) {
+      const conflict = JSON.parse(conflictRaw);
+      lines.push(`entity_type_conflict: ${conflict.previous}->${conflict.next}`);
+      localStorage.removeItem('hondi_profile_entity_type_conflict');
+    }
+  } catch {}
+
   lines.push('[/CONTEXT]');
 
   return lines.join('\n');
@@ -933,6 +951,35 @@ export async function _handleProfileTags(fullReply, bubble, sendFn = callAI, use
       try {
         const incoming = JSON.parse(partialMatch[1]);
         const existing = JSON.parse(localStorage.getItem('hondi_profile_partial') || '{}');
+
+        // 2026-09-13 신설 — entity_type 모순 감지를 profile-assistant SP(모델)의
+        // 자기 신고(§ESCALATE-TO-PRO 조건2)에만 맡기지 않는다. 라이브
+        // 스모크테스트 diverse-industries #11에서 실측: 사용자가 "사업자예요"
+        // →"사실 개인이에요"로 명백히 번복했는데도 flash가 승격 태그를 내지
+        // 않고 조용히 자체 판단만으로 person으로 넘어간 사례 확인. 판단(자연어
+        // 응대)은 여전히 SP가 하되, "이미 확정 저장된 값과 다른 값이 다시
+        // 저장되려 한다"는 사실 자체의 감지는 결정론적으로 코드가 책임진다
+        // (TIER3 게이트를 서버가 모델 판단과 무관하게 강제하는 것과 동일한
+        // 원칙 — 판단과 판단의 검증을 같은 층에 전부 맡기지 않는다).
+        // incoming 값으로 그대로 덮어쓰는 건 유지한다(최신 발화를 반영하는
+        // 게 기존 병합 원칙과 일치) — 다만 그 사실을 별도로 기록해 다음 턴
+        // [CONTEXT]에 실어 보내고, SP가 반드시 명시적으로 확인하게 만든다.
+        if (
+          incoming.entity_type &&
+          existing.entity_type &&
+          incoming.entity_type !== existing.entity_type
+        ) {
+          localStorage.setItem('hondi_profile_entity_type_conflict', JSON.stringify({
+            previous: existing.entity_type,
+            next: incoming.entity_type,
+            at: new Date().toISOString(),
+          }));
+          console.warn(
+            '[Profile] entity_type 모순 감지(결정론적 가드, §ESCALATE-TO-PRO 조건2 강제 발동 예정):',
+            existing.entity_type, '->', incoming.entity_type
+          );
+        }
+
         localStorage.setItem('hondi_profile_partial', JSON.stringify(Object.assign(existing, incoming)));
       } catch {}
     }
