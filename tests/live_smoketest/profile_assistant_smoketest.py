@@ -47,7 +47,17 @@ MODEL = "deepseek-v4-flash"  # 2026-0X-XX 교정 — worker.js HONDI_TIER_MODELS
 # 경우). Pro 호출에는 여유 있는 예산을 별도로 준다.
 MODEL_PRO = "deepseek-v4-pro"
 PRO_MAX_TOKENS = 6000
-MAX_TURNS = 14  # STEP1~STEP-FINAL이 정상이면 이 안에 끝나야 함(무한루프 방지)
+MAX_TURNS = 20  # STEP1~STEP-FINAL이 정상이면 이 안에 끝나야 함(무한루프 방지).
+# 2026-09-13 수정(14 → 20) — diverse-industries #10(복합업종)·
+# industry-inference #102(한의원, TIER3) 두 건 모두 무한루프가 아니라
+# 정상 흐름인 채로 STEP-FINAL 확인 직후(사용자가 "네, 맞아요"까지 답한
+# 뒤) MAX_TURNS(14)에 걸려 PROFILE_SUBMIT 직전에 하네스가 강제 종료시킨
+# 게 트랜스크립트로 실측 확인됨. TIER3·복합업종은 진료시간/서비스 상세·
+# GDC+계좌(은행·계좌번호·예금주 3턴 분리) 등 §ONE-AT-A-TIME(한 턴 한 질문)
+# 원칙상 정상적으로도 14턴을 넘기기 쉽다 — 실제 프로덕션(pages/
+# profile-assistant.html)엔 이 턴 상한이 없으므로 사용자에게 영향 없는
+# 하네스 전용 여유값 문제. 20은 잠정치이며, 더 복잡한 업종 실측이
+# 쌓이면 재조정 필요.
 MAX_WORKERS = 4  # 시나리오당 최대 2*MAX_TURNS 호출이 걸릴 수 있어 AC-PRO-CORE보다 낮춤
 MAX_RETRIES = 4
 RETRY_BASE_SLEEP = 3
