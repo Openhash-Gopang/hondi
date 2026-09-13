@@ -104,6 +104,10 @@ body{font-family:'Pretendard',-apple-system,sans-serif;background:#f9fafb;color:
 .profile-handle{font-size:12.5px;color:#9ca3af;font-weight:500}
 .profile-handle b{color:var(--accent-teal);font-weight:600}
 .profile-badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.translation-toggle{display:inline-block;margin-top:8px;padding:4px 10px;border:1px solid #e5e7eb;
+  border-radius:999px;background:#f9fafb;color:#374151;font-size:12px;font-weight:600;cursor:pointer;
+  user-select:none}
+.translation-toggle:hover{background:#f3f4f6}
 .badge{padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
 .badge-type{background:#eafcff;color:var(--accent-teal-dk);border:1px solid #b9eaf2}
 .badge-gdc{background:#fef3c7;color:#92400e;border:1px solid #fde68a}
@@ -349,6 +353,7 @@ watchHondiSkin({
       <div class="profile-type-sub" id="p-type-sub"></div>
       <div class="profile-handle" id="p-handle"></div>
       <div class="profile-badges" id="p-badges"></div>
+      <div class="translation-toggle hidden" id="translation-toggle" onclick="window._toggleProfileTranslation && window._toggleProfileTranslation()"></div>
     </div>
     <div class="profile-desc hidden" id="p-desc"></div>
     <div class="profile-tags hidden" id="p-tags"></div>
@@ -749,7 +754,17 @@ async function loadProfile() {
   if (!_handle) { showError(); return; }
   try {
     const viewerAuthQuery = await _buildViewerAuthQuery();
-    const res  = await fetch(`${PROXY}/profile/@${_handle}?_=1${viewerAuthQuery}`);
+    // 2026-09-13 신설 — 프로필 다국어 자동 번역. 열람 기기 언어(navigator.
+    // language)가 서버 지원 목록(en/ja/zh)에 있을 때만 ?lang=을 보낸다 —
+    // 지원 안 하는 언어(예: 'ko', 'fr')는 보내봤자 서버가 무시하므로
+    // 굳이 쿼리를 붙이지 않는다(worker.js PROFILE_TRANSLATION_LANGS와
+    // 동일한 목록을 유지해야 함 — 한쪽만 바뀌면 그냥 조용히 번역이 안
+    // 나가는 정도라 기능 손상은 없지만, 목록을 바꿀 땐 양쪽 다 확인).
+    const SUPPORTED_PROFILE_TRANSLATION_LANGS = ['en', 'ja', 'zh'];
+    const deviceLang = (navigator.language || '').toLowerCase().slice(0, 2);
+    const langQuery = SUPPORTED_PROFILE_TRANSLATION_LANGS.includes(deviceLang)
+      ? `&lang=${deviceLang}` : '';
+    const res  = await fetch(`${PROXY}/profile/@${_handle}?_=1${viewerAuthQuery}${langQuery}`);
     const data = await res.json();
     if (!res.ok || !data.ok) { await renderBasicOrError(); return; }
     _profile = data.profile;
@@ -827,6 +842,52 @@ function render(p) {
   const hrs   = pub.activity?.hours || {};
   const cont  = pub.contact  || {};
   const aiCfg = pub.ai_assistant || p.ai_assistant || null;
+
+  // ── 다국어 자동 번역(초안) — 2026-09-13 신설 ──────────────────
+  // p.translation은 핸들 조회(?lang=)가 서버 지원 언어와 실제로 다르고
+  // 번역 대상 entity_type일 때만 채워진다(worker.js
+  // _getOrGenerateProfileTranslation). 있으면 기본으로 번역본을 보여주고,
+  // "원문 보기" 토글로 언제든 한국어 원문으로 되돌릴 수 있게 한다 —
+  // 번역은 항상 초안이라는 원칙(SP_translator-interpreter와 동일)을
+  // 화면에서도 지킨다.
+  let _showingTranslation = !!p.translation;
+  const _origName = p.name || '';
+  const _origDesc = ident.description || p.description || '';
+  const _origNotice = pub.industry_fields?.notice_text || '';
+  const _t = p.translation || null;
+
+  window._toggleProfileTranslation = () => {
+    _showingTranslation = !_showingTranslation && !!_t;
+    _applyTranslationDisplay();
+  };
+
+  function _applyTranslationDisplay() {
+    const useT = _showingTranslation && _t;
+    const displayName = useT ? (_t.display_name || _origName) : _origName;
+    document.getElementById('top-title').textContent = displayName || '프로필';
+    document.getElementById('p-name').textContent    = displayName || '';
+
+    const descEl = document.getElementById('p-desc');
+    const displayDesc = useT ? (_t.description || _origDesc) : _origDesc;
+    if (displayDesc) {
+      descEl.textContent = displayDesc;
+      descEl.classList.remove('hidden');
+    } else {
+      descEl.classList.add('hidden');
+    }
+
+    const noticeEl = document.getElementById('notice-text');
+    if (noticeEl) {
+      const displayNotice = useT ? (_t.notice_text || _origNotice) : _origNotice;
+      if (displayNotice) noticeEl.textContent = displayNotice;
+    }
+
+    const badge = document.getElementById('translation-toggle');
+    if (badge) {
+      badge.classList.toggle('hidden', !_t);
+      badge.textContent = useT ? '🌐 AI 번역(초안) · 원문 보기' : '🌐 번역 보기';
+    }
+  }
 
   // ── 본인 프로필 여부 ──
   let stored = null;
@@ -1095,6 +1156,11 @@ function render(p) {
   renderMissingInfo(p, ident, pub, cont, loc, tags, _isOwner);
   renderWalletSecurity(_isOwner);
   renderPayoutAccount(p, _isOwner);
+
+  // ── 다국어 번역 표시 적용 — 위 원문 렌더링(이름·소개·이용안내)이
+  // 전부 끝난 뒤 마지막에 한 번 덮어쓴다. p.translation이 없으면
+  // _applyTranslationDisplay 내부에서 그냥 원문 그대로 유지된다.
+  _applyTranslationDisplay();
 
   // ── SEO ──
   injectSEO(p, ident, tags);

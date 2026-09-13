@@ -27124,6 +27124,121 @@ async function handleProfileVerifyOwner(request, env, corsHeaders) {
     { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
 }
 
+// ═══════════════════════════════════════════════════════════
+// 2026-09-13 신설 — 프로필 페이지 다국어 자동 번역
+// ═══════════════════════════════════════════════════════════
+// 배경: 대화 중 "다국어 통역 기능"을 요청받아 확인한 결과, 실시간 통역
+// (handleAiChat의 대화 메시지 번역)과 handleInterpret(문서 구조에만
+// 존재하고 실제 코드가 없던 죽은 참조, docs/gopang_repo_structure_v1_0.html)
+// 은 있었거나 없었지만, "프로필 페이지 자체를 열람 기기 언어에 맞게
+// 표시"하는 기능은 어디에도 없었다(HONDI-CAPABILITIES-COMMON 확인 결과도
+// 동일 — §32 다국어·접근성이 "부분"으로 표시돼 있었을 뿐). 이 블록은
+// 그 결여를 메운다 — 대화형 통역이 아니라 정적 표시 번역.
+//
+// 설계 원칙:
+//   1. 번역 대상은 방문객이 실제로 보게 되는(field_visibility를 이미
+//      통과한) 필드만이다 — l1Record.extra를 직접 쓰지 않고, 이 함수를
+//      부르는 handleProfileGet이 넘겨주는 filtered profile 객체를 쓴다.
+//      비공개 필드를 번역이라는 우회로로 노출시키지 않기 위함.
+//   2. 번역은 항상 초안이다(SP_translator-interpreter의 "모든 번역은
+//      초안" 원칙과 동일) — 원문(한국어)을 지우거나 덮어쓰지 않고
+//      profile.translation이라는 별도 블록으로만 얹는다. 클라이언트가
+//      원문/번역 전환 UI를 만들 수 있게 하기 위함.
+//   3. 캐시는 l1Record.updated(원문 최종 수정 시각)를 기준으로 무효화한다
+//      — 원문이 그 뒤에 바뀌었으면 캐시를 버리고 재생성한다.
+//   4. 대상 entity_type은 UNCLAIMED_ALLOWED_ENTITY_TYPES와 동일한
+//      business/org/institution/platform만이다(person/consumer/thing/
+//      concept은 낯선 방문객이 번역까지 필요할 정도로 열람하는 공개
+//      페이지 성격이 아니라고 보고 이번 범위에서 제외 — STEP3~3C
+//      결제/자동화 스킵 대상과 동일 집합).
+//   5. DeepSeek 호출 실패·JSON 파싱 실패 등 어떤 이유로든 번역이
+//      안 되면 조용히 null을 반환한다 — 원문 표시가 항상 안전한
+//      폴백이므로 이 기능의 실패가 프로필 열람 자체를 막아선 안 된다.
+
+const PROFILE_TRANSLATION_LANGS = ['en', 'ja', 'zh']; // 제주 관광객 다빈도 언어 3종(잠정) — 필요시 조정
+const PROFILE_TRANSLATION_LANG_NAMES = { en: 'English', ja: '日本語', zh: '简体中文' };
+
+// filtered(방문객 시야 기준) profile 객체에서 번역 대상 텍스트만 추출.
+// profile.name은 core.name(항상 공개)이라 filtered 필터링과 무관하게
+// 그대로 쓴다 — handleProfileGet의 profile 객체 조립 규칙과 동일.
+function _extractTranslatableProfileText(profile) {
+  const pub = profile.extra?.public || {};
+  const products = Array.isArray(pub.products) ? pub.products : [];
+  return {
+    display_name: profile.name || null,
+    description:  pub.identity?.description || null,
+    notice_text:  pub.industry_fields?.notice_text || null,
+    products: products.map(p => ({
+      name:        p?.name || null,
+      description: p?.description || null,
+    })),
+  };
+}
+
+async function _getOrGenerateProfileTranslation(env, l1Record, profile, lang) {
+  if (!PROFILE_TRANSLATION_LANGS.includes(lang)) return null;
+  if (!UNCLAIMED_ALLOWED_ENTITY_TYPES.has(l1Record.entity_type)) return null;
+  const nativeLang = l1Record.native_lang || 'ko';
+  if (lang === nativeLang) return null; // 원문과 같은 언어면 번역 불필요
+
+  const prevExtra = l1Record.extra || {};
+  const cached = prevExtra.translations?.[lang];
+  if (cached && cached.source_updated_at === l1Record.updated) {
+    return cached;
+  }
+
+  const sourceFields = _extractTranslatableProfileText(profile);
+  const hasText = sourceFields.display_name || sourceFields.description || sourceFields.notice_text
+    || sourceFields.products.some(p => p.name || p.description);
+  if (!hasText) return null;
+
+  const langName = PROFILE_TRANSLATION_LANG_NAMES[lang] || lang;
+  const prompt = `다음은 한 사업자/기관 프로필 항목의 JSON입니다. 이 JSON을 ${langName}로 ` +
+    `번역해서, 정확히 같은 키 구조의 JSON 객체 하나만 출력하세요. 설명·코드블록·` +
+    `추가 문구 없이 JSON만 출력합니다. 값이 null이면 null 그대로 두고, 지어내지 ` +
+    `마세요.\n\n${JSON.stringify(sourceFields)}`;
+
+  const raw = await deepseekChatText({
+    env, model: resolveDeepseekModel('deepseek-v4-flash'),
+    messages: [{ role: 'user', content: prompt }],
+    max_tokens: 800, temperature: 0.2, timeoutMs: 15000, fallbackText: '',
+  });
+  if (!raw) return null; // deepseekChatText 자체가 실패를 삼키므로 빈 문자열이 곧 실패 신호
+
+  let translated;
+  try {
+    translated = JSON.parse(raw.replace(/^```(?:json)?\s*|\s*```$/g, '').trim());
+  } catch (e) {
+    console.warn('[Profile/Translation] 응답 JSON 파싱 실패(원문으로 폴백):', e.message);
+    return null;
+  }
+
+  const result = {
+    display_name: translated.display_name ?? sourceFields.display_name,
+    description:  translated.description  ?? sourceFields.description,
+    notice_text:  translated.notice_text  ?? sourceFields.notice_text,
+    products: Array.isArray(translated.products) ? translated.products : sourceFields.products,
+    lang,
+    is_ai_draft: true, // 모든 번역은 초안 — SP_translator-interpreter와 동일 원칙
+    generated_at: new Date().toISOString(),
+    source_updated_at: l1Record.updated,
+    model: 'deepseek-v4-flash',
+  };
+
+  // 캐시 저장은 best-effort — 실패해도 이번 요청의 번역 응답 자체는 그대로 돌려준다.
+  try {
+    const newExtra = {
+      ...prevExtra,
+      translations: { ...(prevExtra.translations || {}), [lang]: result },
+    };
+    await _l1PatchProfile(env, l1Record.id, { extra: newExtra });
+  } catch (e) {
+    console.warn('[Profile/Translation] 캐시 저장 실패(응답은 계속 진행):', e.message);
+  }
+
+  return result;
+}
+
 async function handleProfileGet(request, env, corsHeaders) {
   const url = new URL(request.url);
 
@@ -27182,6 +27297,23 @@ async function handleProfileGet(request, env, corsHeaders) {
       updated_at: l1Record.updated,
       created_at: l1Record.created,
     };
+
+    // 2026-09-13 신설 — 프로필 다국어 자동 번역. 방문객(비소유자)만
+    // 대상이고, ?lang= 쿼리로 원문과 다른 언어를 요청했을 때만 시도한다.
+    // 실패해도(미지원 언어, 대상 아닌 entity_type, DeepSeek 오류 등)
+    // profile.translation은 그냥 null로 남고 원문 응답 자체는 그대로
+    // 나간다 — 번역은 항상 부가 기능, 원문 열람을 막지 않는다.
+    let translation = null;
+    const requestedLang = (url.searchParams.get('lang') || '').toLowerCase().slice(0, 2);
+    if (!isOwnerRequest && requestedLang) {
+      try {
+        translation = await _getOrGenerateProfileTranslation(env, l1Record, profile, requestedLang);
+      } catch (e) {
+        console.warn('[Profile/Translation] 생성 중 예외(원문으로 폴백):', e.message);
+      }
+    }
+    profile.translation = translation; // null이면 클라이언트가 원문만 표시
+
     return new Response(JSON.stringify({
       ok: true, profile,
       identity_source: 'l1', detail_source: 'l1',
