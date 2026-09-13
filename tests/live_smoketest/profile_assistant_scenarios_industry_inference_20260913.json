@@ -1,0 +1,224 @@
+[
+  {
+    "no": 101,
+    "entity_type_expected": "business",
+    "opening_line": "손님들 머리 감겨드리고, 파마도 해드리고 그래요. 요즘은 염색도 많이 하세요.",
+    "persona_facts": {
+      "code": "96",
+      "code_label": "미용업(직접 언급 없음 — 행위 묘사로만 추론해야 함)",
+      "tier": "Tier1",
+      "age_gender": "40대/여성"
+    },
+    "edge_case_tags": [
+      "NO_LABEL_INFERENCE",
+      "SCHEMA_FROM_ACTIVITY"
+    ],
+    "persona_directives": [
+      "'미용실', '헤어샵' 같은 업종명을 스스로는 절대 먼저 말하지 마세요.",
+      "AI가 업종을 물으면 '그냥 하던 대로 머리 만져드리는 거예요'처럼 계속 행위로만 답하세요.",
+      "장소를 물으면 '한림읍에서요'라고만 답하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "업종명을 한 번도 직접 말하지 않아도 '머리 감기기·파마·염색' 행위만으로 schema_id를 미용업(96)으로 정확히 추론하는지, 사용자에게 '어느 업종이세요?'라고 객관식/직접 되묻지 않고 스스로 판단하는지"
+  },
+  {
+    "no": 102,
+    "entity_type_expected": "business",
+    "opening_line": "동네 어르신들 오시면 침 놔드리고 뜸도 떠드려요, 저희 한의원에서요.",
+    "persona_facts": {
+      "code": "86",
+      "code_label": "보건업(한의원)",
+      "tier": "Tier3",
+      "age_gender": "50대/남성"
+    },
+    "edge_case_tags": [
+      "TIER3_REGULATED",
+      "JOB_VS_BUSINESS_AMBIGUOUS"
+    ],
+    "persona_directives": [
+      "'저희 한의원'이라는 표현으로 개인이 아니라 사업장을 운영 중임을 이미 밝혔다는 점을 유지하세요.",
+      "직업을 물으면 '한의사예요'라고 답하되, 사업장 자체의 프로필임을 분명히 하세요.",
+      "예약 기능은 켜고 싶다고 답하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "'저희 한의원'이라는 단서로 entity_type=business(institution 아님), schema_id=보건업(86, TIER3)으로 정확히 잡는지, 동시에 job_ksco(한의사)도 함께 채워지는지, STEP3C가 TIER3라 조용히 스킵되는지"
+  },
+  {
+    "no": 103,
+    "entity_type_expected": "business",
+    "opening_line": "매일 새벽에 배 들어오면 나가서 생선 좀 떼다가 팔아요. 갈치, 고등어 이런 거요.",
+    "persona_facts": {
+      "code": "46",
+      "code_label": "수산물 도매 및 중개업(직접 언급 없음)",
+      "tier": "Tier1",
+      "age_gender": "60대 이상/남성"
+    },
+    "edge_case_tags": [
+      "NO_LABEL_INFERENCE",
+      "SCHEMA_FROM_ACTIVITY"
+    ],
+    "persona_directives": [
+      "'수산업', '도매업' 같은 단어를 스스로 쓰지 마세요.",
+      "장소를 물으면 '한림항 근처요'라고 답하세요.",
+      "GDC 결제만 받고 싶다고 답하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "'새벽에 생선 떼다가 판다'는 행위 묘사만으로 수산물 도소매업 계열 schema_id를 추론하는지, products에 '갈치, 고등어' 등이 자연스러운 문장으로 정리되는지"
+  },
+  {
+    "no": 104,
+    "entity_type_expected": "person",
+    "opening_line": "저는 그냥 하루 종일 노트북으로 코드 짜는 사람이에요. 집에서 일해요.",
+    "persona_facts": {
+      "code": null,
+      "code_label": "소프트웨어 개발자(직접 언급 없음)",
+      "tier": null,
+      "age_gender": "30대/남성"
+    },
+    "edge_case_tags": [
+      "NO_LABEL_INFERENCE",
+      "JOB_KSCO_FROM_ACTIVITY",
+      "PAYMENT_SKIP"
+    ],
+    "persona_directives": [
+      "'개발자', '프로그래머' 같은 직함을 스스로는 말하지 마세요.",
+      "회사 소속인지 프리랜서인지 물으면 '회사 소속이에요, 재택근무만 하는 거예요'라고 답하세요."
+    ],
+    "skip_payment_steps_expected": true,
+    "verify_points": "'노트북으로 코드 짜는 사람'이라는 간접 표현만으로 job_ksco를 소프트웨어 개발 계열로 추론하는지(추론이 애매하면 세분류 없이 더 상위 코드로만 채우는 U2 원칙을 지키는지), entity_type이 business로 잘못 넘어가지 않고 person(회사원)으로 유지되는지"
+  },
+  {
+    "no": 105,
+    "entity_type_expected": "business",
+    "opening_line": "사람들 모아서 요가 알려주고 스트레칭 도와드려요, 저희 스튜디오에서요. 몸 쓰는 일이라 재밌어요.",
+    "persona_facts": {
+      "code": "91",
+      "code_label": "스포츠 서비스업(요가 스튜디오)",
+      "tier": "Tier1",
+      "age_gender": "30대/여성"
+    },
+    "edge_case_tags": [
+      "NO_LABEL_INFERENCE",
+      "JOB_VS_BUSINESS_AMBIGUOUS"
+    ],
+    "persona_directives": [
+      "'요가원', '요가 학원' 같은 명칭을 스스로 쓰지 말고 '스튜디오'라고만 하세요.",
+      "예약(수업 예약) 기능은 켜고 싶다고 답하세요.",
+      "GDC 결제만 받고 싶다고 답하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "'저희 스튜디오'라는 단서로 entity_type=business로 정확히 판단하는지, schema_id를 스포츠·오락 서비스업 계열로 추론하는지, 요가 강사라는 개인 job_ksco와 헷갈려 person으로 새지 않는지"
+  },
+  {
+    "no": 106,
+    "entity_type_expected": "business",
+    "opening_line": "한림이랑 애월 쪽에 뽑기 기계 몇 대 놔두고, 가끔 돌면서 물건 채워 넣으러 다녀요.",
+    "persona_facts": {
+      "code": "47",
+      "code_label": "무인 소매업 계열(뽑기방 운영, 다수 지점)",
+      "tier": "Tier1",
+      "age_gender": "40대/남성"
+    },
+    "edge_case_tags": [
+      "THING_VS_BUSINESS_BOUNDARY",
+      "MULTI_LOCATION"
+    ],
+    "persona_directives": [
+      "기계 하나가 아니라 여러 대를 운영·관리하는 사람(운영 주체)임을 유지하세요.",
+      "'뽑기방', '인형뽑기' 같은 명칭을 스스로 먼저 쓰지 말고 '뽑기 기계'라고만 하세요.",
+      "GDC 결제만 받고 싶다고 답하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "이전 실사고(#14)의 '무인 자판기=thing' 규칙과 이 케이스를 정확히 구분하는지 — 여기서는 사용자 자신이 여러 기계를 소유·운영하는 사업 주체이므로 thing이 아니라 business로 등록해야 함. entity_type이 thing으로 잘못 넘어가는지가 핵심 검증 포인트"
+  },
+  {
+    "no": 107,
+    "entity_type_expected": "platform",
+    "opening_line": "동네 사람들끼리 안 쓰는 물건 나눔하는 앱을 저희가 만들어서 운영해요. 그거 프로필 만들려고요.",
+    "persona_facts": {
+      "code": null,
+      "code_label": "플랫폼(직접 언급 없음)",
+      "tier": null,
+      "age_gender": null
+    },
+    "edge_case_tags": [
+      "NO_LABEL_INFERENCE",
+      "PLATFORM_ENTITY",
+      "PAYMENT_SKIP"
+    ],
+    "persona_directives": [
+      "'플랫폼'이라는 단어를 스스로는 쓰지 말고 '앱', '서비스'라고만 하세요.",
+      "앱 자체의 프로필을 만드는 것이지 회사(운영 주체)를 등록하려는 게 아님을 유지하세요.",
+      "이름을 물으면 '동네나눔'이라고 답하세요."
+    ],
+    "skip_payment_steps_expected": true,
+    "verify_points": "'플랫폼'이라는 단어 없이 '앱을 운영한다'는 설명만으로 entity_type=platform을 추론하는지, business(운영 회사)로 잘못 넘어가지 않는지, platform_type 필드가 적절히 채워지는지"
+  },
+  {
+    "no": 108,
+    "entity_type_expected": "person",
+    "opening_line": "저 원래 식당에서 요리했었는데, 요즘은 그만두고 유튜브에 레시피 영상만 올려요.",
+    "persona_facts": {
+      "code": null,
+      "code_label": "전직 요리사 + 현재 콘텐츠 제작(직접 언급 없음)",
+      "tier": null,
+      "age_gender": "30대/여성"
+    },
+    "edge_case_tags": [
+      "NO_LABEL_INFERENCE",
+      "JOB_TRANSITION",
+      "PAYMENT_SKIP"
+    ],
+    "persona_directives": [
+      "'유튜버', '크리에이터' 같은 직함을 스스로 쓰지 말고 '영상 올리는 거'라고만 하세요.",
+      "현재는 식당에서 일하지 않는다는 점(과거형)을 분명히 하세요.",
+      "사업자 등록은 안 했다고 답하세요."
+    ],
+    "skip_payment_steps_expected": true,
+    "verify_points": "과거 직업(요리사)이 아니라 현재 활동(영상 제작)을 기준으로 job_ksco/work_domain을 잡는지, 사업자 등록이 없다는 명시적 진술을 존중해 business로 넘기지 않고 person으로 유지하는지"
+  },
+  {
+    "no": 109,
+    "entity_type_expected": "org",
+    "opening_line": "저희 동네에 작은 도서관이 하나 있는데, 주민들이 자원봉사로 돌아가면서 운영해요. 그거 등록하려고요.",
+    "persona_facts": {
+      "code": null,
+      "code_label": "주민 자율 운영 작은도서관(공공기관 아님)",
+      "tier": null,
+      "age_gender": null
+    },
+    "edge_case_tags": [
+      "INSTITUTION_VS_ORG_AMBIGUOUS",
+      "NO_LABEL_INFERENCE"
+    ],
+    "persona_directives": [
+      "공공기관이 아니라 주민들이 자발적으로 운영하는 곳임을 유지하세요.",
+      "'도서관'이라는 단어 때문에 공공기관처럼 보일 수 있지만, 시·구청 소속이 아니라고 명확히 답하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "'도서관'이라는 단어의 공공기관 연상에도 불구하고, 실제 운영 주체(주민 자원봉사, 비공식)를 근거로 institution이 아니라 org로 정확히 판단하는지 — institution/org 애매성 규칙이 '협회' 외 다른 도메인에도 일반화되는지"
+  },
+  {
+    "no": 110,
+    "entity_type_expected": "business",
+    "opening_line": "논에서 벼농사 짓고, 겨울엔 감귤도 좀 키워요. 이게 제 본업이에요.",
+    "persona_facts": {
+      "code": "01",
+      "code_label": "농업(벼+감귤 복합영농)",
+      "tier": "Tier1",
+      "age_gender": "60대 이상/남성"
+    },
+    "edge_case_tags": [
+      "NO_LABEL_INFERENCE",
+      "MULTI_CROP",
+      "PRIMARY_OCCUPATION_SIGNAL"
+    ],
+    "persona_directives": [
+      "'농업', '농사업' 같은 업종명을 스스로 먼저 대지 말고 '벼농사', '감귤 키운다'는 활동으로만 답하세요.",
+      "'이게 제 본업이에요'라는 말로 부업이 아니라 정체성/본업임을 분명히 하세요.",
+      "GDC는 필요 없고 계좌이체만 받고 싶다고 답하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "'본업이에요'라는 신호로 person의 부차적 겸업(work_domain.statuses)이 아니라 entity_type=business(농업)로 정확히 판단하는지, 벼농사·감귤 두 작물이 products에 자연스러운 문장으로 함께 정리되는지, 단일 schema_id로 무리하게 좁히지 않고 적절히 처리하는지"
+  }
+]
