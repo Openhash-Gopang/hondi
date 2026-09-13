@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/Openhash-Gopang/gopang/issues"
   },
-  "homepage": "https://github.com/Openhash-Gopang/gopang#readme"
+  "homepage": "https://github.com/Openhash-Gopang/gopang#readme",
+  "dependencies": {
+    "playwright": "^1.63.0"
+  }
 }
