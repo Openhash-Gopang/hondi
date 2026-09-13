@@ -22,12 +22,23 @@
  * federated/not_yet_built 분류는 prompts/sp-catalog.json과 대조해 검증됨 —
  * 이 파일이 REGISTRY_PATH를 통해 갱신되면 이 모듈도 자동으로 반영된다).
  *
- * 통합 지점 제안 (아직 실제로 배선하지 않음 — 팀 리뷰 필요):
- *   call-ai.js의 callAI() 진입부, LLM 호출 직전에
+ * 통합 지점 (2026-09-13 실제 배선 완료 — call-ai.js _callAIInner 참고):
+ *   call-ai.js의 _callAIInner() 진입부, AC-PRO-CORE 로드 이전에
  *     const preRoute = classifyIntent(userText, registry);
- *     if (preRoute.confidence === 'high') { ... SP 하나만 로드하거나 바로 navigate ... }
- *   식으로 넣는 걸 제안한다. call-ai.js가 12,000줄 이상이라 이번 세션에서
- *   직접 수정하지 않고, 독립 모듈 + 유닛테스트로만 제공한다.
+ *   를 호출해, confidence='high'인 아래 두 경우만 LLM 판단을 건너뛴다 —
+ *   그 외(FEDERATED/NOT_YET_BUILT/QNA/DEV_DOCS/K_SEARCH/EXPERT_PERSONA/
+ *   UNKNOWN)는 기존 LLM 카탈로그 판단으로 그대로 폴백한다(이번 배선의
+ *   의도적 범위 제한 — navigate 대상 상태 체크·엔티티 해석 등 기존
+ *   LLM 경로가 이미 갖춘 안전장치를 이번 패치에서 다시 만들지 않았다):
+ *     - SERVICE_SP_INTERNAL + runtime_type='switch'(K-Job/K-Plan/K-Watch/
+ *       K-Telecom, 4개) → 기존 _forwardSwitchSP(loader, label) 그대로 재사용,
+ *       AC-PRO-CORE 추론 자체를 생략하고 곧장 그 SP로 전환.
+ *     - SERVICE_SP_INTERNAL + runtime_type='gwp_launch'(나머지 8개,
+ *       K-Search는 orchestration_subtask라 제외) → 기존 [GWP: id] LLM
+ *       경로가 쓰는 _gwpLaunch()를 그대로 재사용해 새 탭을 연다(단, 이
+ *       경로는 status==='active' 확인 후에만 탄다 — 그 외에는 폴백).
+ *   AC_CORE는 이미 기본 경로이므로 별도 분기 없이 그대로 AC-PRO-CORE로
+ *   이어진다.
  */
 
 const ROUTE_TYPES = Object.freeze({
@@ -60,7 +71,7 @@ function buildKeywordMatcher(keywords) {
 }
 
 /**
- * classifyIntent(userText, registry) -> { type, target, confidence, reason }
+ * classifyIntent(userText, registry, scope) -> { type, target, confidence, reason, ... }
  *
  * confidence: 'high' | 'low'
  *   - 'high': 이 결과를 그대로 신뢰해 LLM 카탈로그 판단을 생략해도 된다고
@@ -68,8 +79,28 @@ function buildKeywordMatcher(keywords) {
  *   - 'low' : 규칙이 애매하게 걸렸거나 UNKNOWN인 경우 — 호출부는 반드시
  *             기존 LLM 판단으로 폴백해야 한다.
  *
+ * scope: 'user' | 'dev' | undefined (2026-09-13 추가)
+ *   호출부가 "이 발화가 나온 맥락 자체가 이미 개발자용인지"를 알 때만
+ *   넘긴다(예: hondi-search의 scope=dev 토글이 켜진 상태) — 모르면
+ *   생략한다. 기존에 알려진 한계(dev-0798): K-JIT/K-Const 같은 초안
+ *   서비스에 대해 "사용자가 쓸 수 있냐고 묻는 것"(NOT_YET_BUILT가 맞음)과
+ *   "개발자가 설계 리스크·오판 시 대응을 묻는 것"(DEV_DOCS가 맞음)을
+ *   구분하지 못하던 문제를 scope='dev'일 때만 좁게 해소한다 — scope가
+ *   없으면 기존 동작(NOT_YET_BUILT) 그대로 유지한다(과잉교정 방지).
+ *
+ * SERVICE_SP_INTERNAL 결과에는 target(=sp-catalog.json 키) 외에
+ * gwp_id·runtime_type도 함께 실어보낸다 — call-ai.js가 "이 서비스가
+ * 시스템 프롬프트 교체(switch)로 같은 탭에서 답하는지, 아니면 별도
+ * 서브도메인 웹앱을 새 탭으로 여는지(gwp_launch)"를 판단하는 데 쓴다
+ * (2026-09-13 실측: internal 13개 중 4개만 switch, 나머지는 gwp_launch —
+ * ac-routing-registry.json _comment 참고).
+ *
  * 이 함수는 순수 함수다(외부 상태 없음) — 유닛테스트하기 쉽게 설계했다.
  */
+// 2026-09-13 추가 — dev-0798 재현 사례("K-Const가 실제 헌재 결정과 다른
+// 결론을 낼 경우 오해를 부를 위험을 어떻게 관리하나요?")처럼, 초안
+// 서비스의 실존 여부가 아니라 설계·리스크·한계·대응 방식을 묻는 어휘.
+const DEV_DESIGN_QUESTION_RE = /위험.*관리|오판|오해를\s*부를|한계.*(관리|대응)|설계.*(근거|의도)|아키텍처|리스크.*대응|오류\s*처리|장애\s*시나리오/;
 // 2026-09-13 추가 — "job 레포", "telecom 레포"처럼 소문자 저장소명 뒤에
 // "레포"/"저장소"가 붙는 건 실제 사용자는 쓰지 않는 개발자 특유의 표현이다
 // (사용자는 "K-Job"이라고 하지 "job 레포"라고 하지 않는다). 이 패턴이 있으면
@@ -78,7 +109,7 @@ function buildKeywordMatcher(keywords) {
 // 거르나요?" 같은 레포 구현 질문이 K-Job 사용법 질문으로 잘못 넘어간다.
 const DEV_REPO_MENTION_RE = /\b(hondi|gopang|klaw|mail|plan|job|biz|watch|telecom|search|democracy|market|tax|health|security|school|stock|public|police|911|insurance|traffic|logistics|qna|gdc|users)\s*(레포|저장소)/i;
 
-function classifyIntent(userText, registry) {
+function classifyIntent(userText, registry, scope) {
   const q = (userText || "").trim();
   if (!q) return { type: ROUTE_TYPES.UNKNOWN, target: null, confidence: "low", reason: "빈 입력" };
 
@@ -101,6 +132,16 @@ function classifyIntent(userText, registry) {
   if (serviceHits.length === 1) {
     const { name, info } = serviceHits[0];
     if (info.type === "not_yet_built") {
+      // scope='dev' + 설계/리스크 어휘가 함께 있을 때만 DEV_DOCS로 넘긴다
+      // (dev-0798 재발 방지) — scope가 없으면 기존 동작 그대로 유지.
+      if (scope === "dev" && DEV_DESIGN_QUESTION_RE.test(q)) {
+        return {
+          type: ROUTE_TYPES.DEV_DOCS,
+          target: "hondi-search(scope=dev)",
+          confidence: "high",
+          reason: `${name}은 초안 서비스이지만 scope=dev + 설계/리스크 어휘 매칭 — "쓸 수 있냐"가 아니라 "어떻게 관리하냐"를 묻는 개발자 질문으로 판단(dev-0798 사례)`,
+        };
+      }
       return {
         type: ROUTE_TYPES.NOT_YET_BUILT,
         target: name,
@@ -120,6 +161,8 @@ function classifyIntent(userText, registry) {
     return {
       type: ROUTE_TYPES.SERVICE_SP_INTERNAL,
       target: info.catalog_key,
+      gwp_id: info.gwp_id || null,
+      runtime_type: info.runtime_type || null,
       confidence: "high",
       reason: `${name}은 sp-catalog.json의 '${info.catalog_key}'(${info.catalog_file})를 직접 로드`,
     };

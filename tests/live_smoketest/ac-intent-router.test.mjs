@@ -58,11 +58,18 @@ function main() {
     { q: "K-JIT은 왜 아직 sp-catalog.json에 등록되지 않았나요?", expectType: ROUTE_TYPES.NOT_YET_BUILT, expectHigh: true },
     { q: "GDC 지갑 충전 한도가 얼마인가요?", expectType: ROUTE_TYPES.AC_CORE, expectHigh: true },
     { q: "K-Mail이랑 K-Job 중에 어느 쪽이 먼저 나왔나요?", expectType: ROUTE_TYPES.UNKNOWN, expectHigh: false },
+    // 2026-09-13 추가 — dev-0798 재발 방지 회귀 테스트. scope 없이는
+    // 기존 동작(NOT_YET_BUILT) 그대로여야 과잉교정이 아니다.
+    { q: "K-Const가 실제 헌재 결정과 다른 결론을 낼 경우 오해를 부를 위험을 어떻게 관리하나요?", expectType: ROUTE_TYPES.NOT_YET_BUILT, expectHigh: true },
+    // scope='dev'일 때만 DEV_DOCS로 넘어가야 한다(같은 질문, scope만 다름).
+    { q: "K-Const가 실제 헌재 결정과 다른 결론을 낼 경우 오해를 부를 위험을 어떻게 관리하나요?", expectType: ROUTE_TYPES.DEV_DOCS, expectHigh: true, scope: "dev" },
+    // scope='dev'라도 설계 어휘가 없으면(단순 존재 여부 질문) 그대로 NOT_YET_BUILT.
+    { q: "K-Const 지금 쓸 수 있나요?", expectType: ROUTE_TYPES.NOT_YET_BUILT, expectHigh: true, scope: "dev" },
   ];
 
   let fixedPass = 0;
   for (const c of fixedCases) {
-    const r = classifyIntent(c.q, registry);
+    const r = classifyIntent(c.q, registry, c.scope);
     const typeOk = r.type === c.expectType;
     const confOk = (r.confidence === "high") === c.expectHigh;
     const ok = typeOk && confOk;
