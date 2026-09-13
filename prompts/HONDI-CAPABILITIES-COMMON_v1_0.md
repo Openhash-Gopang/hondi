@@ -60,6 +60,44 @@ PR·매일 스케줄로 이 줄들을 실제 코드와 대조한다(gopang-walle
 검증-클라이언트: profile.html::photo-gallery
 확인일: 2026-07-27
 
+### 영상 업로드/게시
+설명: 사업자·기관·단체·플랫폼이 짧은 영상(mp4/webm/mov, 최대 50MB)을
+업로드하면 공개 프로필에 영상 갤러리로 게시된다. 사진과 동일한 R2
+버킷·URL 화이트리스트 원칙을 쓴다(외부 URL은 절대 그대로 노출하지
+않음). 갤러리 상한 5개(사진보다 낮음 — 용량 부담 고려).
+검증-서버: worker.js::/profile/video-upload
+검증-서버: worker.js::/media/profile-video/
+검증-클라이언트: profile.html::video-gallery
+확인일: 2026-09-13
+
+### 문서/메뉴판/이용안내 사진 자동 판독(대화 밖 — 대시보드용)
+설명: §IMAGE-SCAN(대화 중 사진 판독)과 동일한 판독 규칙을 대시보드의
+폼 편집기에서도 쓸 수 있게 한 것. 사진 한 장을 올리면 종류(메뉴판/
+간판/사업자등록증/이용안내)를 스스로 판단해 이름·주소·업종·메뉴·
+이용안내 초안을 구조화해 돌려준다. 이 엔드포인트 자체는 프로필을
+쓰지 않는다 — 사람이 확인 후 기존 POST /profile로 확정해야 실제
+반영된다(모든 AI 판독은 초안).
+검증-서버: worker.js::handleProfileDocumentScan
+확인일: 2026-09-13
+
+### 대시보드 폼 편집기(대화 없이 직접 수정)
+설명: PC 대시보드(pages/dashboard.html) "프로필 관리" 탭에 대화 없이
+필드를 직접 보고 고칠 수 있는 폼을 추가했다 — 상호명·주소·전화·소개·
+이용안내·영업시간(요일별)·메뉴 목록·공개여부, 사진·영상 업로드, 그리고
+"사진으로 자동 채우기"(위 문서 자동 판독 호출)까지 이 폼 하나에서
+처리한다. 백엔드는 새로 만들지 않고 기존 POST /profile을 그대로
+재사용 — 이 폼이 직접 다루지 않는 필드(website·tags·holidays·
+sns_public·languages_spoken·region·directions·parking·phone_visible·
+field_visibility·job_ksco·affiliation·work_domain·avatar_url·
+data_sources)는 저장 시 마지막으로 불러온 값을 그대로 되돌려 보내
+실수로 지우지 않는다. gdc_accepted/currencies/price_range/
+payout_account는 아예 보내지 않아 worker.js의 'in body' 보존 로직에
+맡긴다. 여기서 편집한 영업시간·메뉴·소개·이용안내는 AI 점원 채팅
+(buildSystemPrompt)이 그대로 근거 자료로 쓴다 — 별도 배선 불필요.
+검증-클라이언트: pages/dashboard.html::pfSaveForm
+검증-클라이언트: pages/dashboard.html::pfPopulateForm
+확인일: 2026-09-13
+
 ### GDC 지갑 결제
 설명: 모든 가입자가 자동으로 갖는 gopang wallet으로 실시간 결제를
 받는다.
@@ -101,11 +139,18 @@ PR·매일 스케줄로 이 줄들을 실제 코드와 대조한다(gopang-walle
 
 ### AI 점원 채팅 (다국어 문의응답 + 사람 연결 에스컬레이션)
 설명: 방문객이 프로필에서 메시지를 보내면, 사업자가 등록한 LLM 키로
-그 사업자의 메뉴·영업시간·위치 정보에 근거해서만 답하는 AI가 응대한다
-(그 외 정보는 "제공하기 어렵다"고 답함 — 할루시네이션 방지). 방문객
-언어와 사업자 언어(기본 한국어)가 달라도 양방향 자동 번역된다. 반복
-실패·특정 키워드("사람 연결" 등, 6개 언어 지원)·사업자가 AI를 꺼둔
-경우엔 사람에게 자동으로 넘어간다.
+그 사업자의 메뉴·영업시간·위치·소개·이용안내에 근거해서만 답하는 AI가
+응대한다(그 외 정보는 "제공하기 어렵다"고 답함 — 할루시네이션 방지).
+방문객 언어와 사업자 언어(기본 한국어)가 달라도 양방향 자동 번역된다.
+반복 실패·특정 키워드("사람 연결" 등, 6개 언어 지원)·사업자가 AI를
+꺼둔 경우엔 사람에게 자동으로 넘어간다. K-Market 상품(seller_products)
+이 등록돼 있으면 그 메뉴로 주문 접수(ORDER_DRAFT)까지 가능하고, 없으면
+PA가 수집한 메뉴(products)를 정보 제공 전용으로 대신 보여준다(주문
+접수는 가격 위변조 방지를 위해 K-Market 등록 상품에만 허용).
+2026-09-13 확장 — 영업시간이 아무도 쓰지 않는 죽은 필드(extra.
+business_hours)를 읽고 있어 실제로는 항상 "정보 없음"으로 나오던 결함
+수정(실제 경로 extra.public.activity.hours로 교체), K-Market 미등록
+업체의 메뉴 정보 제공 폴백 추가, 소개·이용안내를 답변 근거에 포함.
 2026-09-13 확인 — 이 항목은 원래 src/profile2.0/ai_assistant.js(Supabase
 기반 초안)에만 있었고 이 문서(HONDI-CAPABILITIES-COMMON)에 등록된 적이
 없었다. 실제 라이브 코드는 src/worker/ai-chat-handler.js(L1 PocketBase

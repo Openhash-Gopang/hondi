@@ -240,6 +240,32 @@ code, pre, kbd, samp, input, button, textarea, select {
 .pf-composer-body { display: none; border-top: 1px solid var(--border); }
 .pf-composer-body.open { display: block; }
 .pf-composer-body iframe { width: 100%; height: 560px; border: none; display: block; background: #f9fafb; }
+
+/* 폼으로 직접 수정 (2026-09-13 신설) */
+.pf-form-panel { margin-top: 16px; padding: 16px 20px 20px; }
+.pf-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; margin-top: 8px; }
+.pf-form-grid .mf { grid-column: span 1; }
+.pf-form-grid .mf textarea { grid-column: span 2; width: 100%; }
+.pf-form-grid textarea { border: 1px solid var(--border); border-radius: var(--r-sm); padding: 6px 8px; font-size: 12px; font-family: inherit; resize: vertical; }
+.pf-visibility-row { display: flex; align-items: center; gap: 8px; }
+.pf-visibility-row label { margin-bottom: 0; }
+.pf-subhead { font-size: 12.5px; font-weight: 700; color: var(--navy); margin: 18px 0 6px; }
+.pf-hours-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.pf-hours-day { text-align: center; }
+.pf-hours-day .day-label { font-size: 11px; font-weight: 600; color: var(--text3); margin-bottom: 3px; }
+.pf-hours-day input[type="time"] { width: 100%; font-size: 10.5px; padding: 3px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 2px; }
+.pf-hours-day .closed-toggle { font-size: 10px; color: var(--text4); }
+.pf-product-row { display: grid; grid-template-columns: 2fr 1fr 2fr auto; gap: 6px; margin-bottom: 6px; align-items: center; }
+.pf-product-row input { border: 1px solid var(--border); border-radius: var(--r-sm); padding: 5px 7px; font-size: 11.5px; font-family: inherit; }
+.pf-product-row .pf-remove-btn { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 16px; line-height: 1; }
+.pf-media-gallery { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.pf-media-item { position: relative; width: 80px; height: 80px; border-radius: 8px; overflow: hidden; background: var(--surface-container); }
+.pf-media-item img, .pf-media-item video { width: 100%; height: 100%; object-fit: cover; }
+.pf-media-item .pf-media-remove { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,.6); color: #fff; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; cursor: pointer; line-height: 1; }
+.pf-scan-result { margin-top: 10px; padding: 10px 12px; background: var(--brand-bg); border-radius: var(--r-sm); font-size: 12px; color: var(--text2); white-space: pre-wrap; }
+.pf-form-actions { margin-top: 18px; display: flex; align-items: center; gap: 12px; }
+.pf-form-actions .mf-save { width: auto; padding: 9px 24px; }
+
 .pf-refresh-btn { font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: var(--r-full); border: none; background: var(--surface-container); color: var(--text3); cursor: pointer; }
 .pf-refresh-btn:hover { background: var(--brand-bg); color: var(--brand-dk); }
 
@@ -732,7 +758,58 @@ code, pre, kbd, samp, input, button, textarea, select {
             <iframe id="pfComposerFrame" title="프로필 작성 대화" src="about:blank"></iframe>
           </div>
         </div>
+
+        <!-- 폼으로 직접 수정 (2026-09-13 신설) — 대화 없이 필드를 바로 보고
+             고칠 수 있는 편집기. 백엔드는 POST /profile 그대로 재사용,
+             새로 필요한 건 이 UI뿐이다. -->
+        <div class="panel pf-form-panel">
+          <div class="pf-composer-head">
+            <h2>폼으로 직접 수정</h2>
+            <span class="row-desc" id="pfFormStatus"></span>
+          </div>
+
+          <div class="pf-form-grid">
+            <div class="mf"><label>상호명 / 이름</label><input type="text" id="pfFormName"></div>
+            <div class="mf"><label>주소</label><input type="text" id="pfFormAddress"></div>
+            <div class="mf"><label>전화번호</label><input type="text" id="pfFormPhone"></div>
+            <div class="mf"><label>소개</label><textarea id="pfFormDescription" rows="2"></textarea></div>
+            <div class="mf"><label>이용 안내(주차·연령제한 등)</label><textarea id="pfFormNotice" rows="2"></textarea></div>
+            <div class="mf pf-visibility-row">
+              <label>공개 프로필</label>
+              <input type="checkbox" id="pfFormIsPublic">
+            </div>
+          </div>
+
+          <h3 class="pf-subhead">영업시간</h3>
+          <div class="pf-hours-grid" id="pfHoursGrid"></div>
+
+          <h3 class="pf-subhead">메뉴 / 판매 상품</h3>
+          <div id="pfProductsList"></div>
+          <button class="mini-btn" id="pfAddProductBtn" type="button">+ 항목 추가</button>
+
+          <h3 class="pf-subhead">사진</h3>
+          <div class="pf-media-gallery" id="pfPhotoList"></div>
+          <input type="file" id="pfPhotoInput" accept="image/jpeg,image/png,image/webp" multiple hidden>
+          <button class="mini-btn" id="pfPhotoAddBtn" type="button">+ 사진 추가</button>
+
+          <h3 class="pf-subhead">영상</h3>
+          <div class="pf-media-gallery" id="pfVideoList"></div>
+          <input type="file" id="pfVideoInput" accept="video/mp4,video/webm,video/quicktime" hidden>
+          <button class="mini-btn" id="pfVideoAddBtn" type="button">+ 영상 추가</button>
+
+          <h3 class="pf-subhead">사진으로 자동 채우기</h3>
+          <div class="row-desc">메뉴판·간판·이용약관 사진을 올리면 AI가 읽어 위 항목들을 미리 채워드려요(초안 — 저장 전에 꼭 확인해 주세요).</div>
+          <input type="file" id="pfScanInput" accept="image/jpeg,image/png,image/webp" hidden>
+          <button class="mini-btn" id="pfScanBtn" type="button">사진으로 자동 채우기</button>
+          <div class="pf-scan-result hidden" id="pfScanResult"></div>
+
+          <div class="pf-form-actions">
+            <button class="mf-save" id="pfFormSaveBtn" type="button">저장</button>
+            <span class="row-desc" id="pfFormSaveMsg"></span>
+          </div>
+        </div>
       </div>
+
 
       <!-- 대화상대 -->
       <div class="dash-panel" id="panel-contacts">
@@ -1315,6 +1392,9 @@ import { L1_URL, setUser } from '/src/gopang/core/state.js';
       if (p.address) linked.push('주소 등록');
       $('pfLinkedAccounts').textContent = linked.length ? linked.join(' · ') : '연동된 계정 정보 없음';
       $('pfSyncNote').textContent = '';
+      // 2026-09-13 신설 — 폼 편집기도 같은 조회 결과로 채운다(대화창
+      // 미리보기와 동일한 데이터 소스를 공유해 불일치가 생기지 않게 함).
+      if (typeof pfPopulateForm === 'function') pfPopulateForm(p);
     } catch (e) {
       $('pfSyncBadge').textContent = '조회 실패';
       $('pfSyncNote').textContent = '서버 조회 중 오류: ' + e.message;
@@ -1385,6 +1465,338 @@ import { L1_URL, setUser } from '/src/gopang/core/state.js';
       clearInterval(pfPollTimer); pfPollTimer = null;
     }
   }).observe(pfBody, { attributes: true, attributeFilter: ['class'] });
+
+  // ══════════════════════════════════════════════════════════════
+  // 폼으로 직접 수정 (2026-09-13 신설)
+  // ══════════════════════════════════════════════════════════════
+  // 설계 원칙: 이 폼이 다루지 않는 필드(website·tags·holidays·
+  // sns_public·languages_spoken·region·directions·parking·
+  // phone_visible·field_visibility 등)는 저장 시 반드시 마지막으로
+  // 불러온 값을 그대로 되돌려 보낸다 — handleProfilePost의 대부분
+  // 필드는 "안 보내면 기본값으로 리셋"이지("이전 값 보존"이 아니라)
+  // gdc_accepted/payout_account/products_structured/industry_fields/
+  // job_ksco/affiliation/work_domain/photo_urls/video_urls/avatar_url
+  // 처럼 'in body' 존재 여부로 보존 여부를 가리는 소수 필드만 예외다
+  // (worker.js 실제 코드 확인 결과). 이 폼은 그 예외 목록에 기대지
+  // 않고, 원칙적으로 "내가 편집하는 필드만 바꾸고 나머지는 그대로
+  // 되돌린다"를 지킨다 — 어느 필드가 어느 쪽인지 매번 worker.js를
+  // 다시 확인하는 것보다 안전하다.
+  const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+  const DAY_LABELS = { mon: '월', tue: '화', wed: '수', thu: '목', fri: '금', sat: '토', sun: '일' };
+
+  let pfFullProfile = null; // 마지막으로 불러온 본인 프로필 원본(owner view, 필터 없음)
+  let pfPhotoUrls = [];
+  let pfVideoUrls = [];
+
+  function pfGetAuth() {
+    let reg = {};
+    try { reg = JSON.parse(localStorage.getItem('gopang_user_v4') || '{}'); } catch {}
+    const guid = reg.ipv6 || reg.guid;
+    const wallet = window.gopangWallet;
+    if (!guid || !wallet?.signPayload) return null;
+    return { guid, pubkey: wallet.publicKeyB64u || '', wallet };
+  }
+
+  // ── 영업시간 그리드 ──────────────────────────────────────
+  function pfBuildHoursGrid() {
+    const grid = $('pfHoursGrid');
+    grid.innerHTML = DAY_KEYS.map(day => `
+      <div class="pf-hours-day" data-day="${day}">
+        <div class="day-label">${DAY_LABELS[day]}</div>
+        <input type="time" class="pf-hours-open" value="09:00">
+        <input type="time" class="pf-hours-close" value="18:00">
+        <label class="closed-toggle"><input type="checkbox" class="pf-hours-closed"> 휴무</label>
+      </div>
+    `).join('');
+  }
+
+  function pfSetHoursFromData(hours) {
+    const h = (hours && typeof hours === 'object') ? hours : {};
+    for (const day of DAY_KEYS) {
+      const dayEl = $('pfHoursGrid').querySelector(`[data-day="${day}"]`);
+      if (!dayEl) continue;
+      const v = h[day];
+      const closedBox = dayEl.querySelector('.pf-hours-closed');
+      const openInput = dayEl.querySelector('.pf-hours-open');
+      const closeInput = dayEl.querySelector('.pf-hours-close');
+      if (v && v.open && v.close) {
+        closedBox.checked = false;
+        openInput.value = v.open;
+        closeInput.value = v.close;
+      } else {
+        closedBox.checked = true;
+      }
+    }
+  }
+
+  function pfGetHoursFromGrid() {
+    const result = {};
+    for (const day of DAY_KEYS) {
+      const dayEl = $('pfHoursGrid').querySelector(`[data-day="${day}"]`);
+      if (!dayEl) continue;
+      if (dayEl.querySelector('.pf-hours-closed').checked) {
+        result[day] = null;
+      } else {
+        result[day] = {
+          open: dayEl.querySelector('.pf-hours-open').value || '09:00',
+          close: dayEl.querySelector('.pf-hours-close').value || '18:00',
+        };
+      }
+    }
+    return result;
+  }
+
+  // ── 메뉴/판매 상품 목록 ──────────────────────────────────
+  function pfAddProductRow(product) {
+    const row = document.createElement('div');
+    row.className = 'pf-product-row';
+    row.innerHTML = `
+      <input type="text" class="pf-prod-name" placeholder="이름" value="${(product?.name || '').replace(/"/g, '&quot;')}">
+      <input type="number" class="pf-prod-price" placeholder="가격" value="${typeof product?.price === 'number' ? product.price : ''}">
+      <input type="text" class="pf-prod-desc" placeholder="설명(선택)" value="${(product?.description || '').replace(/"/g, '&quot;')}">
+      <button type="button" class="pf-remove-btn" title="삭제">×</button>
+    `;
+    row.querySelector('.pf-remove-btn').addEventListener('click', () => row.remove());
+    $('pfProductsList').appendChild(row);
+  }
+
+  function pfGetProductsFromRows() {
+    return Array.from($('pfProductsList').querySelectorAll('.pf-product-row')).map(row => {
+      const name = row.querySelector('.pf-prod-name').value.trim();
+      const priceRaw = row.querySelector('.pf-prod-price').value.trim();
+      const description = row.querySelector('.pf-prod-desc').value.trim();
+      return {
+        name,
+        price: priceRaw === '' ? null : Number(priceRaw),
+        description,
+      };
+    }).filter(p => p.name);
+  }
+
+  $('pfAddProductBtn')?.addEventListener('click', () => pfAddProductRow({}));
+
+  // ── 사진/영상 업로드 ─────────────────────────────────────
+  function pfFileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function pfRenderMediaThumb(container, url, kind, urlArrayRef) {
+    const item = document.createElement('div');
+    item.className = 'pf-media-item';
+    item.innerHTML = kind === 'video'
+      ? `<video src="${url}" muted></video><button type="button" class="pf-media-remove">×</button>`
+      : `<img src="${url}"><button type="button" class="pf-media-remove">×</button>`;
+    item.querySelector('.pf-media-remove').addEventListener('click', () => {
+      const idx = urlArrayRef.indexOf(url);
+      if (idx >= 0) urlArrayRef.splice(idx, 1);
+      item.remove();
+    });
+    container.appendChild(item);
+  }
+
+  async function pfUploadPhoto(file) {
+    const auth = pfGetAuth();
+    if (!auth) { $('pfFormStatus').textContent = '로그인이 필요해요'; return; }
+    const MIME_OK = { 'image/jpeg': 1, 'image/jpg': 1, 'image/png': 1, 'image/webp': 1 };
+    if (!MIME_OK[file.type]) { $('pfFormStatus').textContent = '지원하지 않는 이미지 형식이에요'; return; }
+    $('pfFormStatus').textContent = '사진 업로드 중…';
+    try {
+      const base64 = await pfFileToBase64(file);
+      const ts = String(Math.floor(Date.now() / 1000));
+      const signature = await auth.wallet.signPayload(`${auth.guid}:${auth.pubkey}:${ts}`);
+      const res = await fetch(`${PF_PROXY}/profile/photo-upload`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guid: auth.guid, pubkey: auth.pubkey, signature, ts, image_base64: base64, mime_type: file.type }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) throw new Error(data?.message || `HTTP ${res.status}`);
+      pfPhotoUrls.push(data.url);
+      pfRenderMediaThumb($('pfPhotoList'), data.url, 'image', pfPhotoUrls);
+      $('pfFormStatus').textContent = '';
+    } catch (e) {
+      $('pfFormStatus').textContent = '사진 업로드 실패: ' + e.message;
+    }
+  }
+
+  async function pfUploadVideo(file) {
+    const auth = pfGetAuth();
+    if (!auth) { $('pfFormStatus').textContent = '로그인이 필요해요'; return; }
+    const MIME_OK = { 'video/mp4': 1, 'video/webm': 1, 'video/quicktime': 1 };
+    if (!MIME_OK[file.type]) { $('pfFormStatus').textContent = '지원하지 않는 영상 형식이에요'; return; }
+    if (file.size > 50 * 1024 * 1024) { $('pfFormStatus').textContent = '영상이 너무 커요(최대 50MB)'; return; }
+    $('pfFormStatus').textContent = '영상 업로드 중… (용량에 따라 시간이 걸릴 수 있어요)';
+    try {
+      const base64 = await pfFileToBase64(file);
+      const ts = String(Math.floor(Date.now() / 1000));
+      const signature = await auth.wallet.signPayload(`${auth.guid}:${auth.pubkey}:${ts}`);
+      const res = await fetch(`${PF_PROXY}/profile/video-upload`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guid: auth.guid, pubkey: auth.pubkey, signature, ts, video_base64: base64, mime_type: file.type }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) throw new Error(data?.message || `HTTP ${res.status}`);
+      pfVideoUrls.push(data.url);
+      pfRenderMediaThumb($('pfVideoList'), data.url, 'video', pfVideoUrls);
+      $('pfFormStatus').textContent = '';
+    } catch (e) {
+      $('pfFormStatus').textContent = '영상 업로드 실패: ' + e.message;
+    }
+  }
+
+  $('pfPhotoAddBtn')?.addEventListener('click', () => $('pfPhotoInput').click());
+  $('pfPhotoInput')?.addEventListener('change', (e) => {
+    Array.from(e.target.files || []).forEach(pfUploadPhoto);
+    e.target.value = '';
+  });
+  $('pfVideoAddBtn')?.addEventListener('click', () => $('pfVideoInput').click());
+  $('pfVideoInput')?.addEventListener('change', (e) => {
+    const f = e.target.files?.[0];
+    if (f) pfUploadVideo(f);
+    e.target.value = '';
+  });
+
+  // ── 사진으로 자동 채우기(문서 판독, 초안) ────────────────
+  $('pfScanBtn')?.addEventListener('click', () => $('pfScanInput').click());
+  $('pfScanInput')?.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    const auth = pfGetAuth();
+    if (!auth) { $('pfFormStatus').textContent = '로그인이 필요해요'; return; }
+
+    const resultEl = $('pfScanResult');
+    resultEl.classList.remove('hidden');
+    resultEl.textContent = 'AI가 사진을 읽고 있어요…';
+    try {
+      const base64 = await pfFileToBase64(file);
+      const ts = String(Math.floor(Date.now() / 1000));
+      const signature = await auth.wallet.signPayload(`${auth.guid}:${auth.pubkey}:${ts}`);
+      const res = await fetch(`${PF_PROXY}/profile/document-scan`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guid: auth.guid, pubkey: auth.pubkey, signature, ts, image_base64: base64, mime_type: file.type }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) throw new Error(data?.message || `HTTP ${res.status}`);
+
+      const ex = data.extracted || {};
+      const filled = [];
+      if (ex.name) { $('pfFormName').value = ex.name; filled.push('상호명'); }
+      if (ex.address) { $('pfFormAddress').value = ex.address; filled.push('주소'); }
+      if (ex.notice_text) { $('pfFormNotice').value = ex.notice_text; filled.push('이용안내'); }
+      if (Array.isArray(ex.products_structured) && ex.products_structured.length) {
+        ex.products_structured.forEach(p => pfAddProductRow(p));
+        filled.push(`메뉴 ${ex.products_structured.length}건`);
+      }
+      resultEl.textContent = filled.length
+        ? `읽은 내용을 아래 폼에 미리 채웠어요(${filled.join(', ')}) — 저장 전에 꼭 확인해 주세요. 이 결과는 AI 판독 초안입니다.`
+        : '사진에서 프로필에 반영할 만한 내용을 찾지 못했어요.';
+    } catch (e) {
+      resultEl.textContent = '판독 실패: ' + e.message;
+    }
+  });
+
+  // ── 폼 데이터 채우기(서버에서 불러온 값으로) ─────────────
+  function pfPopulateForm(profile) {
+    pfFullProfile = profile;
+    const pub = profile.extra?.public || {};
+
+    $('pfFormName').value = profile.name || '';
+    $('pfFormAddress').value = profile.address || '';
+    $('pfFormPhone').value = profile.phone || '';
+    $('pfFormDescription').value = pub.identity?.description || '';
+    $('pfFormNotice').value = pub.industry_fields?.notice_text || '';
+    $('pfFormIsPublic').checked = !!profile.is_public;
+
+    pfSetHoursFromData(pub.activity?.hours);
+
+    $('pfProductsList').innerHTML = '';
+    (Array.isArray(pub.products) ? pub.products : []).forEach(pfAddProductRow);
+
+    pfPhotoUrls = Array.isArray(pub.photo_urls) ? [...pub.photo_urls] : [];
+    $('pfPhotoList').innerHTML = '';
+    pfPhotoUrls.forEach(url => pfRenderMediaThumb($('pfPhotoList'), url, 'image', pfPhotoUrls));
+
+    pfVideoUrls = Array.isArray(pub.video_urls) ? [...pub.video_urls] : [];
+    $('pfVideoList').innerHTML = '';
+    pfVideoUrls.forEach(url => pfRenderMediaThumb($('pfVideoList'), url, 'video', pfVideoUrls));
+  }
+
+  // ── 저장 ─────────────────────────────────────────────────
+  async function pfSaveForm() {
+    const auth = pfGetAuth();
+    if (!auth) { $('pfFormSaveMsg').textContent = '로그인이 필요해요.'; return; }
+    if (!pfFullProfile) { $('pfFormSaveMsg').textContent = '먼저 프로필을 불러와 주세요(새로고침).'; return; }
+
+    const pub = pfFullProfile.extra?.public || {};
+
+    const bodyNoAuth = {
+      entity_type: pfFullProfile.entity_type,
+      native_lang: pfFullProfile.native_lang || 'ko',
+      name: $('pfFormName').value.trim(),
+      address: $('pfFormAddress').value.trim(),
+      phone: $('pfFormPhone').value.trim() || null,
+      is_public: $('pfFormIsPublic').checked,
+      description: $('pfFormDescription').value.trim(),
+      hours: pfGetHoursFromGrid(),
+      products_structured: pfGetProductsFromRows(),
+      industry_fields: { ...(pub.industry_fields || {}), notice_text: $('pfFormNotice').value.trim() || null },
+      photo_urls: pfPhotoUrls,
+      video_urls: pfVideoUrls,
+      // 이 폼이 다루지 않는 필드 — 마지막으로 불러온 값을 그대로 되돌린다.
+      website: pub.contact?.website || '',
+      tags: pub.identity?.tags || [],
+      holidays: pub.activity?.holidays || [],
+      sns_public: pub.contact?.sns_public || {},
+      languages_spoken: pub.contact?.languages_spoken || [],
+      region: pub.location?.region || '',
+      directions: pub.location?.directions || '',
+      parking: pub.location?.parking || false,
+      phone_visible: pub.contact?.phone_visible || false,
+      field_visibility: pub.field_visibility || {},
+      job_ksco: pub.identity?.job_ksco ?? null,
+      affiliation: pub.identity?.affiliation ?? null,
+      work_domain: pub.identity?.work_domain ?? null,
+      avatar_url: pub.avatar_url ?? null,
+      data_sources: pub.data_sources || {},
+      // gdc_accepted/currencies/price_range/payout_account은 일부러 안 보낸다
+      // — worker.js가 'in body' 존재 여부로 보존하므로, 이 폼이 안 건드리는
+      // 결제 설정은 보내지 않는 쪽이 더 안전하다(값을 잘못 옮겨 적을 여지 자체를 없앰).
+    };
+
+    const ts = String(Math.floor(Date.now() / 1000));
+    let signature;
+    try {
+      signature = await auth.wallet.signPayload(`${auth.guid}:${auth.pubkey}:${ts}`);
+    } catch (e) {
+      $('pfFormSaveMsg').textContent = '서명 실패: ' + e.message;
+      return;
+    }
+
+    $('pfFormSaveBtn').disabled = true;
+    $('pfFormSaveMsg').textContent = '저장 중…';
+    try {
+      const res = await fetch(`${PF_PROXY}/profile`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...bodyNoAuth, guid: auth.guid, pubkey: auth.pubkey, signature, ts }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) throw new Error(data?.message || `HTTP ${res.status}`);
+      $('pfFormSaveMsg').textContent = '저장됐어요 ✓';
+      pfFetchServerProfile();
+    } catch (e) {
+      $('pfFormSaveMsg').textContent = '저장 실패: ' + e.message;
+    } finally {
+      $('pfFormSaveBtn').disabled = false;
+    }
+  }
+
+  $('pfFormSaveBtn')?.addEventListener('click', pfSaveForm);
+  pfBuildHoursGrid();
 })();
 </script>
 

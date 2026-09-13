@@ -13230,6 +13230,22 @@ export default {
     if (pathname.startsWith('/media/profile-photo/') && request.method === 'GET')
       return handleMediaGet(request, env, corsHeaders);
 
+    // 2026-09-13 신설 — 프로필 영상 업로드/서빙(대시보드 폼 편집기 지원).
+    // 사진 업로드와 완전히 동일한 이유로 generic startsWith('/profile')보다
+    // 먼저 체크해야 한다.
+    if (pathname === '/profile/video-upload' && request.method === 'POST')
+      return handleProfileVideoUpload(request, env, corsHeaders);
+    if (pathname.startsWith('/media/profile-video/') && request.method === 'GET')
+      return handleMediaVideoGet(request, env, corsHeaders);
+
+    // 2026-09-13 신설 — 문서/메뉴판/이용안내 사진을 업로드하면 DeepSeek
+    // 비전으로 즉시 분석해 구조화 필드(초안)를 돌려준다(§IMAGE-SCAN과
+    // 동일 원칙을 대화 밖에서도 쓸 수 있게 한 것 — 대시보드 폼 편집기가
+    // 이 결과를 미리 채워 보여주고, 최종 저장은 여전히 사람이 확인 후
+    // POST /profile로 확정한다. 이 엔드포인트 자체는 프로필을 쓰지 않는다).
+    if (pathname === '/profile/document-scan' && request.method === 'POST')
+      return handleProfileDocumentScan(request, env, corsHeaders);
+
     // 2026-07-12 — SP-18_ksearch STEP3 선행조건 (c): claim(정식 전환) 절차.
     // /profile POST보다 먼저 체크해야 한다 — startsWith('/profile')이
     // '/profile/claim'도 매칭해버리므로, 더 구체적인 경로를 먼저 분기.
@@ -27616,13 +27632,6 @@ ${JSON.stringify(iFields, null, 2)}
  * _mergeIndividualSP(개인 전용 통합 기록)로 나뉘어 있었으나, 이 함수
  * 하나로 합쳤다 — 기관도 더 이상 별도 행을 만들지 않는다.
  */
-// ⚠️ 호출 계약: principalProfile.extra.core가 이미 채워진 상태로 넘겨야
-// 한다(2026-09-13 버그 참조 — handleProfilePost가 core 없는 record를
-// 넘겨서 발생). 이 함수는 principalProfile.extra를 그대로 이어받아
-// _l1UpsertProfile에 넘기므로, core가 비어 있으면 방금 저장된 core가
-// 이 함수의 PATCH로 조용히 지워진다. 새 호출부를 추가할 때 반드시
-// L1에서 방금 조회/저장한 레코드(extra.core 포함)를 그대로 넘길 것 —
-// 로컬에서 새로 조립한 record 리터럴을 넘기지 말 것.
 async function _mergeAgentSP(env, principalProfile) {
   const compiled = await _compileAgentSP(env, principalProfile).catch(() => null);
   if (!compiled) return { ok: false, error: 'COMPILE_FAILED' };
@@ -27953,6 +27962,171 @@ async function handleMediaGet(request, env, corsHeaders) {
   return new Response(obj.body, { status: 200, headers });
 }
 
+// ═══════════════════════════════════════════════════════════
+// 2026-09-13 신설 — 프로필 영상 업로드 (대시보드 폼 편집기 지원)
+// ═══════════════════════════════════════════════════════════
+// handleProfilePhotoUpload/handleMediaGet과 완전히 동일한 패턴(같은 R2
+// 버킷 PROFILE_MEDIA를 'video/' 접두 key로 재사용, 같은 서명 방식) —
+// 새 바인딩을 늘리지 않기 위해 버킷은 공유하고 key 네임스페이스만
+// 분리한다. 영상은 사진보다 훨씬 크므로 상한을 별도로 둔다(50MB —
+// Cloudflare Workers 요청 본문 상한을 고려한 잠정치. base64 인코딩 시
+// 원본의 약 1.33배가 되므로 실제 HTTP 요청 크기는 이보다 커진다는 점을
+// 감안해 필요시 조정).
+const PROFILE_VIDEO_MAX_BYTES = 50 * 1024 * 1024; // 50MB — 디코딩된 원본 기준
+const PROFILE_VIDEO_MIME_EXT = {
+  'video/mp4': 'mp4', 'video/webm': 'webm', 'video/quicktime': 'mov',
+};
+
+// POST /profile/video-upload
+// body: { guid, pubkey, signature, ts, video_base64, mime_type }
+// → { ok:true, url, key }
+async function handleProfileVideoUpload(request, env, corsHeaders) {
+  if (!env.PROFILE_MEDIA) {
+    return _err(503, 'VIDEO_STORAGE_UNAVAILABLE', 'R2 바인딩(PROFILE_MEDIA)이 설정되지 않았습니다', corsHeaders);
+  }
+
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+
+  const { guid, pubkey, signature, ts, video_base64, mime_type } = body;
+  if (!guid)         return _err(400, 'MISSING_FIELD', 'guid 필수', corsHeaders);
+  if (!pubkey)       return _err(400, 'MISSING_FIELD', 'pubkey 필수', corsHeaders);
+  if (!signature)    return _err(400, 'MISSING_FIELD', 'signature 필수', corsHeaders);
+  if (!video_base64) return _err(400, 'MISSING_FIELD', 'video_base64 필수', corsHeaders);
+
+  const sigMsg = `${guid}:${pubkey}:${ts || ''}`;
+  const sigOk = await _verifyEd25519Simple(pubkey, signature, sigMsg);
+  if (!sigOk) return _err(401, 'INVALID_SIGNATURE', '서명 검증 실패', corsHeaders);
+
+  const ext = PROFILE_VIDEO_MIME_EXT[mime_type];
+  if (!ext) return _err(400, 'INVALID_MIME_TYPE', `지원하지 않는 영상 형식입니다: ${JSON.stringify(mime_type)} (허용: mp4/webm/mov)`, corsHeaders);
+
+  let bytes;
+  try {
+    bytes = _base64ToBytes(video_base64);
+  } catch (e) {
+    return _err(400, 'INVALID_BASE64', 'video_base64 디코딩 실패: ' + e.message, corsHeaders);
+  }
+  if (bytes.byteLength > PROFILE_VIDEO_MAX_BYTES) {
+    return _err(400, 'FILE_TOO_LARGE', `영상이 너무 큽니다(${Math.round(bytes.byteLength / 1024 / 1024)}MB, 최대 ${PROFILE_VIDEO_MAX_BYTES / 1024 / 1024}MB)`, corsHeaders);
+  }
+
+  const safeGuid = encodeURIComponent(guid);
+  const key = `video/${safeGuid}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
+
+  try {
+    await env.PROFILE_MEDIA.put(key, bytes, {
+      httpMetadata: { contentType: mime_type, cacheControl: 'public, max-age=31536000, immutable' },
+    });
+  } catch (e) {
+    return _err(502, 'R2_WRITE_FAILED', 'R2 저장 실패: ' + e.message, corsHeaders);
+  }
+
+  const url = `https://hondi-proxy.tensor-city.workers.dev/media/profile-video/${key}`;
+  return new Response(JSON.stringify({ ok: true, url, key }), { status: 200, headers: corsHeaders });
+}
+
+// ═══════════════════════════════════════════════════════════
+// 2026-09-13 신설 — 문서/메뉴판/이용안내 사진 → 구조화 필드 추출(초안)
+// ═══════════════════════════════════════════════════════════
+// profile-assistant SP의 [§IMAGE-SCAN](대화 중 사진 판독) 원칙을 대화
+// 밖(대시보드 폼 편집기)에서도 쓸 수 있게 한 것 — 판독 규칙 자체는
+// SP 문서와 동일하게 유지한다(메뉴판→products_structured, 이용약관/
+// 안전수칙→notice_text+age_limit, 사업자등록증/간판→name/address/
+// entity_subtype). 이 엔드포인트는 프로필을 직접 쓰지 않는다 — 추출
+// 결과를 초안으로 돌려주기만 하고, 최종 반영은 사람이 확인 후 기존
+// POST /profile로 확정한다(모든 AI 판독은 초안이라는 원칙 — 번역·
+// AI 점원과 동일).
+async function handleProfileDocumentScan(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+
+  const { guid, pubkey, signature, ts, image_base64, mime_type } = body;
+  if (!guid)         return _err(400, 'MISSING_FIELD', 'guid 필수', corsHeaders);
+  if (!pubkey)       return _err(400, 'MISSING_FIELD', 'pubkey 필수', corsHeaders);
+  if (!signature)    return _err(400, 'MISSING_FIELD', 'signature 필수', corsHeaders);
+  if (!image_base64) return _err(400, 'MISSING_FIELD', 'image_base64 필수', corsHeaders);
+
+  const sigMsg = `${guid}:${pubkey}:${ts || ''}`;
+  const sigOk = await _verifyEd25519Simple(pubkey, signature, sigMsg);
+  if (!sigOk) return _err(401, 'INVALID_SIGNATURE', '서명 검증 실패', corsHeaders);
+
+  const ext = PROFILE_PHOTO_MIME_EXT[mime_type];
+  if (!ext) return _err(400, 'INVALID_MIME_TYPE', `지원하지 않는 이미지 형식입니다: ${JSON.stringify(mime_type)} (허용: jpeg/png/webp)`, corsHeaders);
+
+  if (!env.DEEPSEEK_API_KEY) return _err(500, 'DEEPSEEK_KEY_MISSING', 'DEEPSEEK_API_KEY secret 미설정', corsHeaders);
+
+  const prompt = `사진 한 장을 첨부합니다. 이 사진의 종류를 스스로 판단해(메뉴판/간판/` +
+    `사업자등록증/명함/이용약관·안전수칙·안내문/기타) 아래 JSON 스키마 그대로만 ` +
+    `출력하세요 — 설명·코드블록 없이 JSON 객체 하나만 출력합니다. 사진에서 실제로 ` +
+    `확인되지 않는 값은 반드시 null(또는 빈 배열)로 두고 절대 지어내지 마세요.\n\n` +
+    `{\n` +
+    `  "doc_type": "menu" | "signage" | "registration" | "notice" | "other",\n` +
+    `  "name": string | null,               // 상호명(간판·등록증에서 확인될 때만)\n` +
+    `  "address": string | null,            // 주소(등록증·간판에서 확인될 때만)\n` +
+    `  "entity_subtype": string | null,     // 업종(등록증·간판에서 확인될 때만)\n` +
+    `  "products_structured": [{"name": string, "price": number|null, "description": string}],\n` +
+    `                                        // 메뉴판일 때만 채움(항목·가격), 그 외엔 빈 배열\n` +
+    `  "notice_text": string | null,        // 이용약관/안전수칙/안내문일 때, 방문 전 꼭 알아야\n` +
+    `                                        // 할 핵심만 2~4문장의 자연스러운 안내문으로 요약\n` +
+    `                                        // (조항 그대로 베끼지 말 것)\n` +
+    `  "age_limit": {"min_age": number} | null  // 안내문에 나이 제한이 숫자로 명확할 때만\n` +
+    `}`;
+
+  const dataUrl = `data:${mime_type};base64,${image_base64}`;
+  let raw;
+  try {
+    const data = await deepseekChat({
+      env, model: resolveDeepseekModel('deepseek-v4-flash'),
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'text', text: prompt },
+          { type: 'image_url', image_url: { url: dataUrl } },
+        ],
+      }],
+      max_tokens: 1000, temperature: 0.2, timeoutMs: 20000,
+    });
+    raw = data.choices?.[0]?.message?.content || '';
+  } catch (e) {
+    return _err(502, 'VISION_CALL_FAILED', 'AI 판독 실패: ' + e.message, corsHeaders);
+  }
+
+  let extracted;
+  try {
+    extracted = JSON.parse(raw.replace(/^```(?:json)?\s*|\s*```$/g, '').trim());
+  } catch (e) {
+    return _err(502, 'VISION_PARSE_FAILED', 'AI 판독 결과를 해석하지 못했습니다 — 다시 시도해 주세요', corsHeaders);
+  }
+
+  return new Response(JSON.stringify({ ok: true, extracted, is_ai_draft: true }), {
+    status: 200, headers: corsHeaders,
+  });
+}
+
+// GET /media/profile-video/video/{guid}/{filename} — key에 이미 'video/' 접두가
+// 포함돼 있으므로 경로에서 그대로 떼어내 R2 조회에 쓴다.
+async function handleMediaVideoGet(request, env, corsHeaders) {
+  if (!env.PROFILE_MEDIA) return _err(503, 'VIDEO_STORAGE_UNAVAILABLE', 'R2 바인딩이 설정되지 않았습니다', corsHeaders);
+
+  const url = new URL(request.url);
+  const key = url.pathname.replace(/^\/media\/profile-video\//, '');
+  if (!key || key.includes('..')) return _err(400, 'INVALID_KEY', '잘못된 경로입니다', corsHeaders);
+
+  let obj;
+  try {
+    obj = await env.PROFILE_MEDIA.get(key);
+  } catch (e) {
+    return _err(502, 'R2_READ_FAILED', 'R2 조회 실패: ' + e.message, corsHeaders);
+  }
+  if (!obj) return _err(404, 'NOT_FOUND', '영상을 찾을 수 없습니다', corsHeaders);
+
+  const headers = new Headers(corsHeaders);
+  headers.set('Content-Type', obj.httpMetadata?.contentType || 'application/octet-stream');
+  headers.set('Cache-Control', obj.httpMetadata?.cacheControl || 'public, max-age=31536000, immutable');
+  return new Response(obj.body, { status: 200, headers });
+}
+
 async function handleProfilePost(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
@@ -28060,6 +28234,9 @@ async function handleProfilePost(request, env, corsHeaders) {
     // 다루지 않는다 — schema_id 정규화와 동일한 패턴).
     avatar_url = null,
     photo_urls = null,
+    // 2026-09-13 신설 — 프로필 영상(대시보드 폼 편집기의 영상 업로드).
+    // photo_urls와 동일한 관례(URL 화이트리스트, 개수 상한)로 처리한다.
+    video_urls = null,
   } = body;
 
   if (!entity_type) return _err(400, 'MISSING_FIELD', 'entity_type 필수', corsHeaders);
@@ -28276,6 +28453,14 @@ async function handleProfilePost(request, env, corsHeaders) {
   const resolvedPhotoUrls = Array.isArray(photo_urls)
     ? photo_urls.filter(_isValidMediaUrl).slice(0, 20) // 갤러리 상한 20장
     : null;
+  // 2026-09-13 신설 — 영상도 이 워커 자신의 /media/profile-video/ 경로만
+  // 허용(위 사진과 동일한 도용·피싱 방지 원칙). 영상은 사진보다 훨씬
+  // 무거우므로 갤러리 상한을 더 낮게(5개) 둔다.
+  const VIDEO_URL_PREFIX = 'https://hondi-proxy.tensor-city.workers.dev/media/profile-video/';
+  const _isValidVideoUrl = (u) => typeof u === 'string' && u.startsWith(VIDEO_URL_PREFIX);
+  const resolvedVideoUrls = Array.isArray(video_urls)
+    ? video_urls.filter(_isValidVideoUrl).slice(0, 5)
+    : null;
 
   // 2026-07-13 신설 — job_ksco 형식 검증(AC-AUTHOR_v1_0.md §3-1/§6).
   // 서버는 코드 형식과 허용 필드만 검증한다 — 1,999개 KSCO 코드→명칭
@@ -28455,6 +28640,9 @@ async function handleProfilePost(request, env, corsHeaders) {
     // 배열로 비움"을 구분(다른 필드들과 동일 관례).
     avatar_url: ('avatar_url' in body) ? resolvedAvatarUrl : ((prevExtra.public || {}).avatar_url ?? null),
     photo_urls: ('photo_urls' in body) ? (resolvedPhotoUrls ?? []) : ((prevExtra.public || {}).photo_urls ?? []),
+    // 2026-09-13 신설 — video_urls도 photo_urls와 동일한 'in body' 관례
+    // ("안 보냄=보존" vs "명시적 빈 배열=비움" 구분).
+    video_urls: ('video_urls' in body) ? (resolvedVideoUrls ?? []) : ((prevExtra.public || {}).video_urls ?? []),
   };
   const newExtra = { ...prevExtra, public: newExtraPublic };
 
@@ -28512,29 +28700,7 @@ async function handleProfilePost(request, env, corsHeaders) {
 
   // (2026-07-15: Supabase 병행쓰기 제거 — L1이 유일한 소스가 됐고,
   //  L1을 읽던 레거시 폴백 경로들도 전부 이 배치에서 함께 제거됐다.)
-  //
-  // ★ 2026-09-13 긴급 수정 — record.extra(=newExtra)에는 core 서브키가
-  // 없다(name/address/lat/lng/phone/website는 record의 톱레벨 필드로만
-  // 존재 — 위 record 리터럴 참조). 그런데 바로 아래 _mergeAgentSP가
-  // savedProfile을 그대로 principalProfile로 받아 자신의 newExtra를
-  // {...principalProfile.extra, public:{...}}로 구성한 뒤 다시
-  // _l1UpsertProfile을 호출한다 — 이때 core 인자를 안 넘기므로
-  // _l1UpsertProfile의 `core: {...extra?.core, ...core}` 병합식이
-  // `{...undefined, ...undefined}` = {}가 되어, 바로 위 줄에서 방금 막
-  // 정상 저장한 extra.core를 곧바로 빈 객체로 덮어썼다(매 가입·매 프로필
-  // 수정마다 100% 재현 — "POST 응답엔 이름이 echo되는데 그 직후 GET하면
-  // profile.name이 null"이라는 실사 증상과 정확히 일치, PocketBase
-  // PATCH가 JSON 필드를 통째로 교체하지 부분 병합하지 않기 때문). 수정:
-  // savedProfile.extra에 core를 명시적으로 실어, _mergeAgentSP가 이어받는
-  // extra?.core가 비어있지 않게 한다.
-  const savedProfile = {
-    ...record,
-    id: l1Result?.id,
-    extra: {
-      ...record.extra,
-      core: { name, address, lat, lng, phone, website, occupation: resolvedOccupation },
-    },
-  };
+  const savedProfile = { ...record, id: l1Result?.id };
 
   // 2026-06-23: SP 합성 시점 — 가입 직후가 아니라 PROFILE_SUBMIT 완료 후.
   // 2026-07-01 전면 재설계: 개인/기관 구분 없이 _mergeAgentSP 하나로 통합

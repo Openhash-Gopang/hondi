@@ -62,6 +62,11 @@ body{font-family:'Pretendard',-apple-system,sans-serif;background:#f9fafb;color:
 .photo-gallery img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;
   cursor:pointer;background:var(--bg-subtle,#f3f4f6)}
 
+/* ── 영상 갤러리 (2026-09-13 신설) — 사진 갤러리와 동일한 그리드 톤,
+   1열(영상은 사진보다 커서 3열 그리드가 안 어울림). ── */
+.video-gallery{display:grid;grid-template-columns:1fr;gap:10px;padding:12px 20px}
+.video-gallery video{width:100%;border-radius:10px;background:#000}
+
 /* ── 이용 안내 박스 (2026-07-27 신설) — 안전·자격 정보라 일반 텍스트보다
    눈에 띄어야 한다. 경고색이되 위협적이지 않은 톤(호박색 계열). ── */
 .notice-box{margin:0 20px 4px;padding:12px 14px;background:#fff8e6;
@@ -430,6 +435,12 @@ watchHondiSkin({
   <div class="card hidden" id="card-photos">
     <div class="card-title">사진</div>
     <div class="photo-gallery" id="photo-gallery"></div>
+  </div>
+
+  <!-- 영상 (대시보드 폼 편집기 업로드, 2026-09-13 신설) -->
+  <div class="card hidden" id="card-videos">
+    <div class="card-title">영상</div>
+    <div class="video-gallery" id="video-gallery"></div>
   </div>
 
   <!-- 판매 상품 (사업자) -->
@@ -1023,6 +1034,16 @@ function render(p) {
       `<img src="${url}" alt="${p.name || ''}" loading="lazy" onclick="window.open('${url}','_blank')">`
     ).join('');
     document.getElementById('card-photos').classList.remove('hidden');
+  }
+
+  // ── 영상 갤러리 (2026-09-13 신설) ──
+  const videoUrls = Array.isArray(pub.video_urls) ? pub.video_urls : [];
+  if (videoUrls.length) {
+    const vgallery = document.getElementById('video-gallery');
+    vgallery.innerHTML = videoUrls.map(url =>
+      `<video src="${url}" controls preload="metadata"></video>`
+    ).join('');
+    document.getElementById('card-videos').classList.remove('hidden');
   }
 
   // ── 판매 상품 ──
