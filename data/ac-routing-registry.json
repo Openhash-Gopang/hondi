@@ -1,5 +1,5 @@
 {
-  "_comment": "2026-09-13 세션 — AC(AGENT-COMMON)가 사용자 발화를 어디로 보낼지 결정하는 라우팅 레지스트리. 2,000개 질문 분류 실험(user/dev 각 1000개) 결과와 sp-catalog.json 실측 대조로 확정. internal=AC가 sp-catalog.json에서 SP를 직접 불러 그 자리에서 답함(탭 이동 없음). federated=완전히 분리된 서브도메인 사이트로 이동해야 답변 가능(그 사이트가 자체 백엔드·자체 SP를 가짐 — 예: K-Law는 klaw.hondi.net 자체에 판결방법론 v15.1과 다중 LLM 호출 로직을 갖고 있음, hondi 쪽엔 SP가 전혀 없음).",
+  "_comment": "2026-09-13 세션 — AC(AGENT-COMMON)가 사용자 발화를 어디로 보낼지 결정하는 라우팅 레지스트리. 2,000개 질문 분류 실험(user/dev 각 1000개) 결과와 sp-catalog.json 실측 대조로 확정. internal=AC가 sp-catalog.json에서 SP를 직접 참조해 판단하는 대상(카탈로그 소유권 관점). federated=완전히 분리된 서브도메인 사이트로 이동해야 답변 가능(그 사이트가 자체 백엔드·자체 SP를 가짐 — 예: K-Law는 klaw.hondi.net 자체에 판결방법론 v15.1과 다중 LLM 호출 로직을 갖고 있음, hondi 쪽엔 SP가 전혀 없음). ★2026-09-13 call-ai.js 배선 작업 중 정정★ — 애초 이 파일이 'internal=탭 이동 없음'이라고 서술했던 건 gwp-registry.js 실측과 대조해보니 부정확했다: internal 13개 중 실제로 시스템 프롬프트만 바꿔 같은 탭에서 답하는(gwp-registry.js type:'switch') 서비스는 K-Job/K-Plan/K-Watch/K-Telecom 4개뿐이고, 나머지 8개(K-Mail/K-Health/K-Public/K-Police/K-Traffic/K-Democracy/K-Logistics/K-Insurance)는 여전히 _gwpLaunch()로 해당 서브도메인 webapp.html을 새 탭으로 연다(gwp-registry.js type:'inline', url 있음) — 'internal'이 의미하는 건 'AC가 라우팅을 직접 판단'이라는 뜻이지 '탭이 안 열린다'는 뜻이 아니다. 각 항목의 runtime_type 필드(switch|gwp_launch|orchestration_subtask)가 실제 실행 방식을 구분한다. K-Search는 두 방식 어디에도 안 맞는 별도의 위임/복귀(push-pop) 오케스트레이션 서브태스크 방식이라 orchestration_subtask로 표시하고 call-ai.js의 classifyIntent 고신뢰 즉시배선 대상에서 제외했다.",
   "k_services": {
     "K-Mail": {
       "keywords": [
@@ -12,7 +12,9 @@
       ],
       "type": "internal",
       "catalog_key": "SP-25_kmail",
-      "catalog_file": "SP-25_kmail_v1_30.txt"
+      "catalog_file": "SP-25_kmail_v1_30.txt",
+      "gwp_id": "kmail",
+      "runtime_type": "gwp_launch"
     },
     "K-Health": {
       "keywords": [
@@ -23,7 +25,9 @@
       ],
       "type": "internal",
       "catalog_key": "SP-04_khealth",
-      "catalog_file": "SP-04_khealth_v3_0.txt"
+      "catalog_file": "SP-04_khealth_v3_0.txt",
+      "gwp_id": "khealth",
+      "runtime_type": "gwp_launch"
     },
     "K-Job": {
       "keywords": [
@@ -34,7 +38,9 @@
       ],
       "type": "internal",
       "catalog_key": "k-job",
-      "catalog_file": "k-job_v1_0.md"
+      "catalog_file": "k-job_v1_0.md",
+      "gwp_id": "kjob",
+      "runtime_type": "switch"
     },
     "K-Plan": {
       "keywords": [
@@ -44,7 +50,9 @@
       ],
       "type": "internal",
       "catalog_key": "k-plan",
-      "catalog_file": "k-plan_v1_3.md"
+      "catalog_file": "k-plan_v1_3.md",
+      "gwp_id": "kplan",
+      "runtime_type": "switch"
     },
     "K-Public": {
       "keywords": [
@@ -54,7 +62,9 @@
       ],
       "type": "internal",
       "catalog_key": "SP-10_kpublic",
-      "catalog_file": "SP-10_kpublic_v3.25.txt"
+      "catalog_file": "SP-10_kpublic_v3.25.txt",
+      "gwp_id": "kgov",
+      "runtime_type": "gwp_launch"
     },
     "K-Police": {
       "keywords": [
@@ -64,7 +74,9 @@
       ],
       "type": "internal",
       "catalog_key": "SP-03_kpolice",
-      "catalog_file": "SP-03_kpolice_v3_0.txt"
+      "catalog_file": "SP-03_kpolice_v3_0.txt",
+      "gwp_id": "kpolice",
+      "runtime_type": "gwp_launch"
     },
     "K-Traffic": {
       "keywords": [
@@ -74,7 +86,9 @@
       ],
       "type": "internal",
       "catalog_key": "SP-06_ktraffic",
-      "catalog_file": "SP-06_ktraffic_v3_0.txt"
+      "catalog_file": "SP-06_ktraffic_v3_0.txt",
+      "gwp_id": "ktransport",
+      "runtime_type": "gwp_launch"
     },
     "K-Democracy": {
       "keywords": [
@@ -84,7 +98,9 @@
       ],
       "type": "internal",
       "catalog_key": "SP-12_kdemocracy",
-      "catalog_file": "SP-12_kdemocracy_v3_2.txt"
+      "catalog_file": "SP-12_kdemocracy_v3_2.txt",
+      "gwp_id": "kdemocracy",
+      "runtime_type": "gwp_launch"
     },
     "K-Logistics": {
       "keywords": [
@@ -94,7 +110,9 @@
       ],
       "type": "internal",
       "catalog_key": "SP-13_klogistics",
-      "catalog_file": "SP-13_klogistics_v3_0.txt"
+      "catalog_file": "SP-13_klogistics_v3_0.txt",
+      "gwp_id": "klogistics",
+      "runtime_type": "gwp_launch"
     },
     "K-Insurance": {
       "keywords": [
@@ -104,7 +122,9 @@
       ],
       "type": "internal",
       "catalog_key": "SP-16_kinsurance",
-      "catalog_file": "SP-16_kinsurance_v3_0.txt"
+      "catalog_file": "SP-16_kinsurance_v3_0.txt",
+      "gwp_id": "kinsurance",
+      "runtime_type": "gwp_launch"
     },
     "K-Search": {
       "keywords": [
@@ -112,7 +132,9 @@
       ],
       "type": "internal",
       "catalog_key": "SP-18_ksearch",
-      "catalog_file": "SP-18_ksearch_v1.4.txt"
+      "catalog_file": "SP-18_ksearch_v1.4.txt",
+      "gwp_id": "ksearch",
+      "runtime_type": "orchestration_subtask"
     },
     "K-Telecom": {
       "keywords": [
@@ -125,7 +147,9 @@
       ],
       "type": "internal",
       "catalog_key": "SP-23_ktelecom",
-      "catalog_file": "SP-23_ktelecom_v1.0.txt"
+      "catalog_file": "SP-23_ktelecom_v1.0.txt",
+      "gwp_id": "ktelecom",
+      "runtime_type": "switch"
     },
     "K-Watch": {
       "keywords": [
@@ -135,7 +159,9 @@
       ],
       "type": "internal",
       "catalog_key": "k-watch",
-      "catalog_file": "k-watch_v1_0.md"
+      "catalog_file": "k-watch_v1_0.md",
+      "gwp_id": "kwatch",
+      "runtime_type": "switch"
     },
     "K-Law": {
       "keywords": [
