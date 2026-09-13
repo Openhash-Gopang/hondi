@@ -1,0 +1,55 @@
+name: Generate HONDI-FAQ manifest
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/gopang/ai/hondi-faq-router.js'
+      - 'tools/generate_faq_manifest.py'
+  workflow_dispatch:
+
+# hondi-faq-manifest.json은 hondi-search-relay(별도 저장소)가
+# https://hondi.net/hondi-faq-manifest.json으로 fetch해 쓰는 생성물이다.
+# "정본"은 이 레포의 src/gopang/ai/hondi-faq-router.js(HONDI_FAQ_REGISTRY)
+# 하나뿐 — 이 워크플로는 그 배열이 바뀔 때마다 JSON을 재생성해 PR을 연다.
+# manifest.yml(sp-catalog.json)과 완전히 같은 패턴: 수기로 두 곳을 맞춰야
+# 했던 과거 사고("혼디 숫자 코드" 오매칭 — 수기 매니페스트 23개 vs 실제
+# 119개)를 hondi-faq-manifest.json에서는 처음부터 반복하지 않기 위함.
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: faq-manifest
+  cancel-in-progress: true
+
+jobs:
+  build-faq-manifest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate hondi-faq-manifest.json
+        run: python3 tools/generate_faq_manifest.py
+
+      # 변경이 있을 때만 PR 생성(없으면 조용히 종료) — main 직접 push 대신
+      # PR을 연다(리포지토리 규칙 준수, manifest.yml과 동일).
+      - name: Create PR with regenerated FAQ manifest
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "ci: regenerate hondi-faq-manifest.json"
+          title: "ci: regenerate hondi-faq-manifest.json"
+          body: |
+            자동 생성 — `tools/generate_faq_manifest.py` 실행 결과.
+            `src/gopang/ai/hondi-faq-router.js`의 HONDI_FAQ_REGISTRY 변경 push에
+            반응해 자동으로 열린 PR입니다. 내용 확인 후 병합해 주세요.
+          branch: ci/faq-manifest-update
+          delete-branch: true
+          add-paths: hondi-faq-manifest.json

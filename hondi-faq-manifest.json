@@ -1,0 +1,324 @@
+[
+  {
+    "id": "pdv",
+    "label": "PDV(개인 데이터 금고)",
+    "file": "pdv.txt",
+    "triggers": [
+      "PDV",
+      "pdv",
+      "기록 금고",
+      "나의 기록",
+      "내 데이터 어디",
+      "데이터 어디 저장",
+      "어디에 저장",
+      "어디 저장",
+      "대화 저장",
+      "대화 어디",
+      "삭제하고 싶어",
+      "Private Data Vault",
+      "개인정보 어디",
+      "유출",
+      "서버에 남",
+      "서버에 저장",
+      "내 번호 저장",
+      "번호 저장되는"
+    ],
+    "base_path": "/prompts/HONDI-FAQ/"
+  },
+  {
+    "id": "openhash",
+    "label": "OpenHash(위변조 불가 원장)",
+    "file": "openhash.txt",
+    "triggers": [
+      "OpenHash",
+      "openhash",
+      "오픈해시",
+      "위변조",
+      "블록체인",
+      "해시체인",
+      "해시 체인",
+      "앵커링"
+    ],
+    "base_path": "/prompts/HONDI-FAQ/"
+  },
+  {
+    "id": "gdc",
+    "label": "GDC(화폐·결제)",
+    "file": "gdc.txt",
+    "triggers": [
+      "GDC",
+      "gdc",
+      "수수료",
+      "잔액",
+      "충전",
+      "결제 어떻게",
+      "환전",
+      "디지털 통화"
+    ],
+    "base_path": "/prompts/HONDI-FAQ/"
+  },
+  {
+    "id": "auth",
+    "label": "인증 레벨(L0~L3)",
+    "file": "auth.txt",
+    "triggers": [
+      "인증",
+      "로그인",
+      "L0",
+      "L1",
+      "L2",
+      "L3",
+      "지문",
+      "얼굴 인증",
+      "Face ID",
+      "4단어",
+      "시드"
+    ],
+    "base_path": "/prompts/HONDI-FAQ/"
+  },
+  {
+    "id": "governance",
+    "label": "오픈소스·비영리·거버넌스",
+    "file": "governance.txt",
+    "triggers": [
+      "오픈소스",
+      "비영리",
+      "주주",
+      "투자자",
+      "거버넌스",
+      "DAWN",
+      "투표",
+      "회사냐",
+      "회사야",
+      "회사인가",
+      "기업이야",
+      "누가 운영",
+      "누가 만들",
+      "만든 사람",
+      "딴데 파는",
+      "데이터 파는",
+      "데이터 판매",
+      "정보 파는",
+      "광고에 활용"
+    ],
+    "base_path": "/prompts/HONDI-FAQ/"
+  },
+  {
+    "id": "hondi-code",
+    "label": "혼디코드",
+    "file": "hondi-code.txt",
+    "triggers": [
+      "혼디코드",
+      "숫자 코드",
+      "숫자코드",
+      "색상 코드",
+      "컬러 코드",
+      "QR",
+      "내 코드"
+    ],
+    "base_path": "/prompts/HONDI-FAQ/"
+  },
+  {
+    "id": "gwp-vs-expert",
+    "label": "기관 AI vs 전문가 AI",
+    "file": "gwp-vs-expert.txt",
+    "triggers": [
+      "GWP",
+      "EXPERT",
+      "전문가 AI",
+      "기관 AI",
+      "변호사 AI",
+      "자문료",
+      "K-Law가 뭐",
+      "K-Tax가 뭐"
+    ],
+    "base_path": "/prompts/HONDI-FAQ/"
+  },
+  {
+    "id": "quota",
+    "label": "무료 사용량(1,000원 한도)",
+    "file": "quota.txt",
+    "triggers": [
+      "1000원",
+      "1,000원",
+      "무료 한도",
+      "사용량",
+      "얼마나 썼",
+      "전기료",
+      "한도 다 썼",
+      "FREE_QUOTA",
+      "돈 내야",
+      "돈 내나요",
+      "유료예요",
+      "무료예요",
+      "공짜예요",
+      "요금 나가"
+    ],
+    "base_path": "/prompts/HONDI-FAQ/"
+  },
+  {
+    "id": "search-vs-menu",
+    "label": "검색과 오른쪽 메뉴 차이",
+    "file": "search-vs-menu.txt",
+    "triggers": [
+      "검색이랑",
+      "검색해도 안",
+      "검색 결과 없",
+      "검색했는데 결과",
+      "검색했는데 안",
+      "검색해봤는데",
+      "검색해도 결과",
+      "검색해도 아무",
+      "오른쪽 메뉴랑",
+      "찾기 버튼"
+    ],
+    "base_path": "/prompts/HONDI-FAQ/"
+  },
+  {
+    "id": "tutorial-redo",
+    "label": "사용법 다시 안내",
+    "file": "tutorial-redo.txt",
+    "triggers": [
+      "튜토리얼 다시",
+      "처음부터 다시",
+      "사용법 다시",
+      "설명 다시",
+      "다시 알려줘"
+    ],
+    "base_path": "/prompts/HONDI-FAQ/"
+  },
+  {
+    "id": "shadow-ai",
+    "label": "그림자 AI(나만의 AI 비서)",
+    "file": "shadow-ai.txt",
+    "triggers": [
+      "그림자 AI",
+      "그림자AI",
+      "나만의 AI",
+      "왜 그림자",
+      "그림자란",
+      "shadow ai"
+    ],
+    "base_path": "/prompts/HONDI-FAQ/"
+  },
+  {
+    "id": "k-market",
+    "label": "K-Market 거래 검증",
+    "file": "k-market.txt",
+    "triggers": [
+      "K-Market",
+      "k-market",
+      "케이마켓",
+      "거래 검증",
+      "가격 위조",
+      "주문 검증"
+    ],
+    "base_path": "/prompts/HONDI-FAQ/"
+  },
+  {
+    "id": "seom",
+    "label": "SEOM 보상",
+    "file": "seom.txt",
+    "triggers": [
+      "SEOM",
+      "seom",
+      "노드 운영",
+      "노드 보상",
+      "인프라 보상"
+    ],
+    "base_path": "/prompts/HONDI-FAQ/"
+  },
+  {
+    "id": "k-law-safety",
+    "label": "K-Law 감시·K-Police·K-119",
+    "file": "k-law-safety.txt",
+    "triggers": [
+      "K-Law",
+      "k-law",
+      "케이로",
+      "K-Police",
+      "K-119",
+      "판결 예측",
+      "법률 자문 받고 싶",
+      "신고하고 싶어",
+      "증거 보존"
+    ],
+    "base_path": "/prompts/HONDI-FAQ/"
+  },
+  {
+    "id": "institution-account",
+    "label": "기관·사업자 계정",
+    "file": "institution-account.txt",
+    "triggers": [
+      "사업자 계정",
+      "기관 계정",
+      "운영자 모드",
+      "가게 계정",
+      "사장님 계정",
+      "내 가게 AI"
+    ],
+    "base_path": "/prompts/HONDI-FAQ/"
+  },
+  {
+    "id": "backup-key",
+    "label": "백업 키·계정 복구",
+    "file": "backup-key.txt",
+    "triggers": [
+      "백업 키",
+      "백업키",
+      "계정 복구",
+      "휴대폰 바꾸면",
+      "핸드폰 바꾸면",
+      "기기 바꾸면",
+      "휴대폰 잃어버렸",
+      "핸드폰 잃어버렸",
+      "폰 잃어버렸",
+      "폰 바꾸면"
+    ],
+    "base_path": "/prompts/HONDI-FAQ/"
+  },
+  {
+    "id": "overview",
+    "label": "혼디가 뭐하는 앱인가요",
+    "file": "overview.txt",
+    "triggers": [
+      "뭐하는 앱",
+      "뭐 하는 앱",
+      "무슨 앱",
+      "뭐하는 서비스",
+      "카톡이랑",
+      "카카오톡이랑",
+      "어떤 앱이",
+      "처음이라"
+    ],
+    "base_path": "/prompts/HONDI-FAQ/"
+  },
+  {
+    "id": "signup",
+    "label": "회원가입 방법",
+    "file": "signup.txt",
+    "triggers": [
+      "회원가입",
+      "가입 어떻게",
+      "가입은 어떻게",
+      "가입 방법",
+      "어떻게 가입",
+      "어떻게 시작"
+    ],
+    "base_path": "/prompts/HONDI-FAQ/"
+  },
+  {
+    "id": "withdrawal",
+    "label": "탈퇴·계정 삭제",
+    "file": "withdrawal.txt",
+    "triggers": [
+      "탈퇴",
+      "계정 삭제",
+      "계정 지우고",
+      "계정 지울",
+      "회원 탈퇴",
+      "가입 취소"
+    ],
+    "base_path": "/prompts/HONDI-FAQ/"
+  }
+]

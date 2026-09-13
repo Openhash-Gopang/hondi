@@ -342,6 +342,9 @@
       case "delegate_ksearch":
         appendMessage("bot", data.message);
         break;
+      case "info_answer":
+        appendMessage("bot", data.message);
+        break;
       default:
         appendMessage("bot", "응답을 이해하지 못했습니다.");
     }
