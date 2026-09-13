@@ -28120,7 +28120,11 @@ async function handleProfileDocumentScan(request, env, corsHeaders) {
       // (실사고: 20개 항목짜리 중식 메뉴판)에서 products_structured 배열이
       // 다 나오기 전에 응답이 잘려 JSON이 깨지는 게 실측 의심됨. 넉넉하게
       // 2500으로 상향(품목 수가 아주 많은 사진까지 감안).
-      max_tokens: 2500, temperature: 0.2, timeoutMs: 25000,
+      // 2026-09-13 재수정 — 2500도 20개 항목(가격·설명 포함) 메뉴판에
+      // 실측으로 부족했음이 서버 로그로 확인됨(finish_reason='length'
+      // 재현). 4000으로 재상향 — 토큰당 비용이 미미해(V4-Flash 출력
+      // 기준) 이 정도 여유는 비용 부담이 사실상 없다.
+      max_tokens: 4000, temperature: 0.2, timeoutMs: 30000,
     });
     raw = data.choices?.[0]?.message?.content || '';
     // 2026-09-13 신설 — finish_reason='length'면 max_tokens를 다 썼는데도
