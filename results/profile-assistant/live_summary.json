@@ -1,0 +1,18 @@
+{
+  "total": 10,
+  "counts": {
+    "LIVE-PASS": 9,
+    "LIVE-FAIL": 1
+  },
+  "runtime_seconds": 88,
+  "escalate_to_pro": {
+    "total_escalations": 0,
+    "scenarios_with_escalation": 0
+  },
+  "retry_safety_nets": {
+    "total_profile_submit_retries": 0,
+    "total_field_add_retries": 1,
+    "total_field_remove_retries": 0,
+    "scenarios_with_any_retry": 1
+  }
+}

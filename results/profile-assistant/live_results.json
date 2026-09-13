@@ -1,0 +1,1467 @@
+[
+  {
+    "no": 101,
+    "entity_type_expected": "business",
+    "edge_case_tags": [
+      "NO_LABEL_INFERENCE",
+      "SCHEMA_FROM_ACTIVITY"
+    ],
+    "terminal": "PROFILE_SUBMIT",
+    "turns_used": 10,
+    "submit_entity_type": "business",
+    "verdict": "LIVE-PASS",
+    "notes": [
+      "entity_type 일치, 결제STEP 스킵 원칙 위반 없음, 유도된 필드 태그 확인됨(있는 경우)"
+    ],
+    "usage": {
+      "prompt_tokens": 642047,
+      "completion_tokens": 1107
+    },
+    "escalation_count": 0,
+    "escalations": [],
+    "profile_submit_retries": 0,
+    "field_add_retries": 1,
+    "field_remove_retries": 0,
+    "entity_type_override_applied": false,
+    "transcript": [
+      {
+        "role": "user(persona)",
+        "content": "손님들 머리 감겨드리고, 파마도 해드리고 그래요. 요즘은 염색도 많이 하세요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "미용실을 운영하시는군요. 어느 동네에 계세요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 그냥 하던 대로 머리 만져드리는 거예요. 한림읍에서요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "한림읍이군요. 가게 이름은 어떻게 되세요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "아, 이름은 그냥 제 이름 걸어놨어요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "아, 네. 그럼 사장님 성함을 여쭤봐도 될까요? 가게 이름으로 걸어두셨다니 그대로 등록하면 될 것 같아요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 김정희라고 해요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "김정희님, 감사합니다. 혹시 가게 전화번호도 알려주시겠어요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "아이고, 번호가... 잠깐만요, 064로 시작하는데 뒤가 잘 기억이 안 나네요. 그냥 없이 해도 될까요?"
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 당연히 괜찮아요. 전화번호는 나중에 설정에서 언제든 추가하실 수 있어요.\n\n그럼 이제 GDC(혼디 디지털화폐)로 결제도 받으실 건지 여쭤볼게요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 그거 받아요. 요즘 손님들이 그걸로 많이 하시더라고요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 좋아요. 그럼 혹시 계좌로 직접 입금받는 것도 지원하실 건가요? 원하시면 프로필에 계좌 정보를 안내해서 손님이 바로 이체할 수 있게 해드릴 수 있어요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "아, 계좌는 좀 그렇고... 그건 안 넣어주세요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 알겠습니다. 계좌는 넣지 않을게요.\n\n그럼 예약도 받으시겠어요? 손님이 방문 일정을 미리 잡을 수 있게 해드릴 수 있어요."
+      },
+      {
+        "role": "assistant(PA-retry-field_add)",
+        "content": "[FIELD_ADD: key=industry_fields.payout_account, label=계좌 이체 결제 지원, entity_type=business, category=ksic:9611]"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 예약 받아요. 그게 편하니까요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 좋아요. 예약은 자동으로 확정되게 해둘게요.\n\n그럼 마지막으로, 프로필을 공개하시겠어요? 공개하시면 K-Market 같은 곳에서 검색되실 수 있어요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 공개해주세요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 알겠습니다. 그럼 지금까지 말씀해 주신 내용으로 프로필 카드를 만들어 드릴게요.\n\n🏪 김정희 (한림읍)\n📍 한림읍\n💇 머리 감기, 파마, 염색\n💳 GDC 결제도 받아요\n🌐 K-Market 등에서 검색돼요\n\n이렇게 등록할게요. 맞으면 '확인'을 눌러주세요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 맞아요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "🎉 프로필 완성됐어요!\n\n🏪 김정희 (한림읍)\n📍 한림읍\n💇 머리 감기, 파마, 염색\n💳 GDC 결제도 받아요\n🌐 K-Market 등에서 검색돼요\n\n혹시 프로필 만드는 과정에서 불편했던 거나 있었으면 하는 기능 있으세요? (없으면 그냥 넘어가셔도 돼요)\n\nPROFILE_SUBMIT {\n  \"name\": \"김정희\",\n  \"nickname\": \"김정희\",\n  \"entity_type\": \"business\",\n  \"entity_subtype\": \"미용실\",\n  \"schema_id\": \"9611\",\n  \"address\": \"한림읍\",\n  \"products\": \"머리 감기, 파마, 염색\",\n  \"description\": \"한림읍에서 미용실을 운영하고 있어요. 머리 감기, 파마, 염색을 주로 해드려요.\",\n  \"industry_fields\": {\n    \"reservation_config\": {\n      \"enabled\": true,\n      \"mode\": \"slot\",\n      \"confirm_mode\": \"auto\",\n      \"deposit_temp_threshold\": 36.5\n    }\n  },\n  \"gdc_accepted\": true,\n  \"is_public\": true,\n  \"field_visibility\": {\n    \"address\": false,\n    \"phone\": false,\n    \"website\": false,\n    \"description\": false,\n    \"products\": true,\n    \"hours\": false\n  },\n  \"deleted_product_names\": [],\n  \"data_sources\": {\n    \"name\": \"pa_dialogue\",\n    \"entity_type\": \"pa_dialogue\",\n    \"entity_subtype\": \"pa_dialogue\",\n    \"schema_id\": \"pa_dialogue\",\n    \"address\": \"pa_dialogue\",\n    \"products\": \"pa_dialogue\",\n    \"gdc_accepted\": \"pa_dialogue\",\n    \"is_public\": \"pa_dialogue\"\n  }\n}"
+      }
+    ],
+    "submit_json": {
+      "name": "김정희",
+      "nickname": "김정희",
+      "entity_type": "business",
+      "entity_subtype": "미용실",
+      "schema_id": "9611",
+      "address": "한림읍",
+      "products": "머리 감기, 파마, 염색",
+      "description": "한림읍에서 미용실을 운영하고 있어요. 머리 감기, 파마, 염색을 주로 해드려요.",
+      "industry_fields": {
+        "reservation_config": {
+          "enabled": true,
+          "mode": "slot",
+          "confirm_mode": "auto",
+          "deposit_temp_threshold": 36.5
+        }
+      },
+      "gdc_accepted": true,
+      "is_public": true,
+      "field_visibility": {
+        "address": false,
+        "phone": false,
+        "website": false,
+        "description": false,
+        "products": true,
+        "hours": false
+      },
+      "deleted_product_names": [],
+      "data_sources": {
+        "name": "pa_dialogue",
+        "entity_type": "pa_dialogue",
+        "entity_subtype": "pa_dialogue",
+        "schema_id": "pa_dialogue",
+        "address": "pa_dialogue",
+        "products": "pa_dialogue",
+        "gdc_accepted": "pa_dialogue",
+        "is_public": "pa_dialogue"
+      }
+    }
+  },
+  {
+    "no": 102,
+    "entity_type_expected": "business",
+    "edge_case_tags": [
+      "TIER3_REGULATED",
+      "JOB_VS_BUSINESS_AMBIGUOUS"
+    ],
+    "terminal": null,
+    "turns_used": 14,
+    "submit_entity_type": null,
+    "verdict": "LIVE-FAIL",
+    "notes": [
+      "MAX_TURNS(14) 안에 종료 태그 없음 — 무한 루프 또는 STEP 정체 의심"
+    ],
+    "usage": {
+      "prompt_tokens": 824704,
+      "completion_tokens": 1204
+    },
+    "escalation_count": 0,
+    "escalations": [],
+    "profile_submit_retries": 0,
+    "field_add_retries": 0,
+    "field_remove_retries": 0,
+    "entity_type_override_applied": false,
+    "transcript": [
+      {
+        "role": "user(persona)",
+        "content": "동네 어르신들 오시면 침 놔드리고 뜸도 떠드려요, 저희 한의원에서요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "한의원을 운영하시는군요. 어르신들께 침과 뜸 시술을 해드리는 곳으로 정리할게요.\n\n[PARTIAL_SAVE] {\"entity_type\": \"business\", \"entity_subtype\": \"한의원\", \"schema_id\": \"8691\"}\n\n[TEMPLATE_LOOKUP: schema_id=8691]\n\n혹시 한의원 이름은 어떻게 되세요?"
+      },
+      {
+        "role": "user(mocked-template-context)",
+        "content": "[CONTEXT: INDUSTRY_TEMPLATE]\n(참조 사례 없음 — 최초 사례)\n[/CONTEXT]"
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "아, 이 업종은 아직 등록된 사례가 없어서 제가 직접 하나씩 여쭤볼게요.\n\n한의원 이름부터 알려주시겠어요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 한의원 이름은 '정담한의원'입니다."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "정담한의원이군요. 좋은 이름이에요.\n\n[PARTIAL_SAVE] {\"name\": \"정담한의원\"}\n\n한의원은 어디에 위치해 계세요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "서울 마포구에 있어요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "서울 마포구에 계시는군요.\n\n[PARTIAL_SAVE] {\"address\": \"서울 마포구\"}\n\n마포구 어느 동네쯤인지도 알려주시면 더 정확히 등록할 수 있어요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "아, 망원동이요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "망원동이군요. 정확한 주소로 정리할게요.\n\n[PARTIAL_SAVE] {\"address\": \"서울 마포구 망원동\"}\n\n어르신들께 침과 뜸을 놔드리신다고 하셨는데, 그 외에 다른 진료나 서비스도 하시는 게 있으세요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 한방 내과 진료랑 한약 처방도 하고 있어요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "한방 내과 진료에 한약 처방까지 하시는군요. 그럼 주요 서비스로 정리할게요.\n\n[PARTIAL_SAVE] {\"products\": \"침 시술, 뜸 시술, 한방 내과 진료, 한약 처방\"}\n\n혹시 진료 시간은 어떻게 되세요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "평일은 오전 9시부터 저녁 7시까지고, 토요일은 오후 2시까지예요. 일요일은 휴진입니다."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "평일 9시~7시, 토요일은 오후 2시까지, 일요일 휴진으로 정리할게요.\n\n[PARTIAL_SAVE] {\"industry_fields\": {\"hours\": \"평일 09:00-19:00, 토요일 09:00-14:00, 일요일 휴진\"}}\n\n이제 결제 관련해서 여쭤볼게요. GDC(혼디 디지털화폐)로 결제도 받으시겠어요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, GDC 결제도 받을 수 있게 해주세요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "GDC 결제로 받으시는 걸로 할게요.\n\n[PARTIAL_SAVE] {\"gdc_accepted\": true}\n\n그럼 GDC와 별개로, 계좌로 직접 입금받는 것도 지원하시겠어요? 원하시면 프로필에 계좌 정보를 안내해서 환자분들이 바로 이체하실 수 있게 해드릴게요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 계좌 입금도 같이 지원해주세요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 그럼 계좌 정보를 하나씩 여쭤볼게요. 어느 은행 계좌를 쓰시나요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "국민은행이요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "국민은행이군요. 계좌번호는 어떻게 되세요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "123-45-6789-012예요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "계좌번호 확인 감사합니다. 마지막으로 예금주명은 어떻게 되세요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "예금주는 정담한의원입니다."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "계좌 정보 확인됐어요.\n\n[PARTIAL_SAVE] {\"payout_account\": {\"bank_name\": \"국민은행\", \"account_number\": \"123456789012\", \"holder_name\": \"정담한의원\"}}\n\n이제 예약 기능인데요, 환자분들이 방문 일정을 미리 잡을 수 있게 예약도 받으시겠어요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 예약 기능 켜주세요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "예약 기능 켜드릴게요.\n\n[PARTIAL_SAVE] {\"industry_fields\": {\"reservation_config\": {\"enabled\": true, \"mode\": \"slot\", \"confirm_mode\": \"auto\", \"deposit_temp_threshold\": 36.5}}}\n\n마지막으로, 프로필을 공개하시겠어요? 공개하시면 K-Market 등에서 검색되실 수 있어요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 공개해주세요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 공개로 설정할게요. 그럼 지금까지 정리된 내용을 확인해 드릴게요.\n\n🏪 정담한의원\n📍 서울 마포구 망원동\n⏰ 평일 09:00-19:00, 토요일 09:00-14:00, 일요일 휴진\n🍜 침 시술, 뜸 시술, 한방 내과 진료, 한약 처방\n💳 GDC 결제도 받아요\n🏦 계좌 이체도 받아요\n🌐 K-Market 등에서 검색돼요\n\n이렇게 등록할게요. 맞으면 '확인'을 눌러주세요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 맞아요."
+      }
+    ],
+    "submit_json": null
+  },
+  {
+    "no": 103,
+    "entity_type_expected": "business",
+    "edge_case_tags": [
+      "NO_LABEL_INFERENCE",
+      "SCHEMA_FROM_ACTIVITY"
+    ],
+    "terminal": "PROFILE_SUBMIT",
+    "turns_used": 9,
+    "submit_entity_type": "business",
+    "verdict": "LIVE-PASS",
+    "notes": [
+      "entity_type 일치, 결제STEP 스킵 원칙 위반 없음, 유도된 필드 태그 확인됨(있는 경우)"
+    ],
+    "usage": {
+      "prompt_tokens": 527816,
+      "completion_tokens": 1415
+    },
+    "escalation_count": 0,
+    "escalations": [],
+    "profile_submit_retries": 0,
+    "field_add_retries": 0,
+    "field_remove_retries": 0,
+    "entity_type_override_applied": false,
+    "transcript": [
+      {
+        "role": "user(persona)",
+        "content": "매일 새벽에 배 들어오면 나가서 생선 좀 떼다가 팔아요. 갈치, 고등어 이런 거요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "어부시군요. 새벽에 나가서 갈치·고등어를 떼어다 파신다니, 그럼 수산물 판매를 하시는 사업자로 등록하면 되겠어요.\n\n어디서 주로 파세요? 노점이면 노점 위치를, 시장이나 가게면 그 주소를 알려주시면 정확히 등록할 수 있어요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "한림항 근처요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "한림항 근처에서 파시는군요. 그럼 주소는 \"제주특별자치도 제주시 한림읍 한림항\" 정도로 등록할게요 — 정확한 위치(예: 한림항 활어직판장 앞, 특정 부두 등)가 있으면 더 정확히 반영할 수 있어요.\n\n혹시 상호명은 따로 쓰시는 게 있으세요? 없으면 \"한림항 갈치·고등어\" 같은 이름으로 등록해도 괜찮아요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "상호명은 따로 없어요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "알겠어요. 상호명이 따로 없으시면 이름은 \"한림항 갈치·고등어\"로 등록할게요.\n\n그럼 갈치랑 고등어는 어떻게 파세요? 한 마리씩 무게로 달아서 파시는지, 한 상자나 한 접시 단위로 파시는지 알려주시면 가격을 정리해서 등록할 수 있어요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "상자 단위로 팔아요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "상자 단위로 파시는군요. 그럼 갈치 한 상자랑 고등어 한 상자가 각각 얼마인지 알려주시겠어요? 가격을 알면 상품 목록에 정확히 넣어둘 수 있어요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "가격은 그때그때 달라서 정해놓질 않았어요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "아, 시세에 따라 달라지는 거군요. 그럼 가격은 비워두고, 상품 설명에 \"시세에 따라 변동\"이라고 적어둘게요 — 손님이 문의하면 그때 알려주시는 방식이면 되겠어요.\n\n그럼 이제 결제 부분만 여쭤볼게요. GDC(혼디 디지털화폐)로 결제도 받으시겠어요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, GDC로만 받고 싶어요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "GDC로만 받으시는군요. 그럼 계좌 이체는 따로 안 받으시는 걸로 하고 넘어갈게요.\n\n예약도 받으시겠어요? 손님이 미리 방문 일정을 잡을 수 있게 해드릴 수도 있어요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "예약은 안 받아요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "알겠어요, 예약은 안 받으시는 걸로 할게요.\n\n마지막으로 하나만 여쭤볼게요. 프로필을 공개하시겠어요? 공개하시면 K-Market 같은 곳에서 손님이 검색해서 찾을 수 있어요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 공개해 주세요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 공개로 등록할게요. 그럼 지금까지 정리한 내용을 확인해 주세요.\n\n🐟 한림항 갈치·고등어\n📍 제주특별자치도 제주시 한림읍 한림항\n🐟 갈치·고등어 (상자 단위, 시세에 따라 변동)\n💳 GDC 결제도 받아요\n🌐 K-Market 등에서 검색돼요\n\n이렇게 등록할게요. 맞으면 '확인'을 눌러주세요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 맞아요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "🎉 프로필 완성됐어요!\n\n🐟 한림항 갈치·고등어\n📍 제주특별자치도 제주시 한림읍 한림항\n🐟 갈치·고등어 (상자 단위, 시세에 따라 변동)\n💳 GDC 결제도 받아요\n🌐 K-Market 등에서 검색돼요\n\n이제 손님이 K-Market에서 검색해서 찾으실 수 있어요. 새벽 조업 나가실 때 안전 조심하시고, 혹시 프로필 만드는 과정에서 불편했던 거나 있었으면 하는 기능 있으세요? (없으면 그냥 넘어가셔도 돼요)\n\nPROFILE_SUBMIT {\n  \"name\": \"한림항 갈치·고등어\",\n  \"nickname\": \"한림항 갈치·고등어\",\n  \"entity_type\": \"business\",\n  \"entity_subtype\": \"수산물 판매\",\n  \"schema_id\": \"4621\",\n  \"address\": \"제주특별자치도 제주시 한림읍 한림항\",\n  \"products\": \"갈치·고등어 (상자 단위, 시세에 따라 변동)\",\n  \"products_structured\": [\n    { \"name\": \"갈치\", \"unit\": \"상자\", \"desc\": \"시세에 따라 변동\" },\n    { \"name\": \"고등어\", \"unit\": \"상자\", \"desc\": \"시세에 따라 변동\" }\n  ],\n  \"description\": \"한림항에서 새벽 조업 후 갈치·고등어를 상자 단위로 판매합니다.\",\n  \"industry_fields\": {\n    \"reservation_config\": { \"enabled\": false }\n  },\n  \"gdc_accepted\": true,\n  \"is_public\": true,\n  \"field_visibility\": { \"address\": false, \"phone\": false, \"website\": false, \"description\": false, \"products\": true, \"hours\": false },\n  \"deleted_product_names\": [],\n  \"data_sources\": {\n    \"name\": \"pa_dialogue\",\n    \"entity_type\": \"pa_dialogue\",\n    \"entity_subtype\": \"pa_dialogue\",\n    \"schema_id\": \"pa_dialogue\",\n    \"address\": \"pa_dialogue\",\n    \"products\": \"pa_dialogue\",\n    \"products_structured\": \"pa_dialogue\",\n    \"description\": \"pa_dialogue\",\n    \"gdc_accepted\": \"pa_dialogue\",\n    \"is_public\": \"pa_dialogue\"\n  }\n}"
+      }
+    ],
+    "submit_json": {
+      "name": "한림항 갈치·고등어",
+      "nickname": "한림항 갈치·고등어",
+      "entity_type": "business",
+      "entity_subtype": "수산물 판매",
+      "schema_id": "4621",
+      "address": "제주특별자치도 제주시 한림읍 한림항",
+      "products": "갈치·고등어 (상자 단위, 시세에 따라 변동)",
+      "products_structured": [
+        {
+          "name": "갈치",
+          "unit": "상자",
+          "desc": "시세에 따라 변동"
+        },
+        {
+          "name": "고등어",
+          "unit": "상자",
+          "desc": "시세에 따라 변동"
+        }
+      ],
+      "description": "한림항에서 새벽 조업 후 갈치·고등어를 상자 단위로 판매합니다.",
+      "industry_fields": {
+        "reservation_config": {
+          "enabled": false
+        }
+      },
+      "gdc_accepted": true,
+      "is_public": true,
+      "field_visibility": {
+        "address": false,
+        "phone": false,
+        "website": false,
+        "description": false,
+        "products": true,
+        "hours": false
+      },
+      "deleted_product_names": [],
+      "data_sources": {
+        "name": "pa_dialogue",
+        "entity_type": "pa_dialogue",
+        "entity_subtype": "pa_dialogue",
+        "schema_id": "pa_dialogue",
+        "address": "pa_dialogue",
+        "products": "pa_dialogue",
+        "products_structured": "pa_dialogue",
+        "description": "pa_dialogue",
+        "gdc_accepted": "pa_dialogue",
+        "is_public": "pa_dialogue"
+      }
+    }
+  },
+  {
+    "no": 104,
+    "entity_type_expected": "person",
+    "edge_case_tags": [
+      "NO_LABEL_INFERENCE",
+      "JOB_KSCO_FROM_ACTIVITY",
+      "PAYMENT_SKIP"
+    ],
+    "terminal": "PROFILE_SUBMIT",
+    "turns_used": 6,
+    "submit_entity_type": "person",
+    "verdict": "LIVE-PASS",
+    "notes": [
+      "entity_type 일치, 결제STEP 스킵 원칙 위반 없음, 유도된 필드 태그 확인됨(있는 경우)"
+    ],
+    "usage": {
+      "prompt_tokens": 348765,
+      "completion_tokens": 601
+    },
+    "escalation_count": 0,
+    "escalations": [],
+    "profile_submit_retries": 0,
+    "field_add_retries": 0,
+    "field_remove_retries": 0,
+    "entity_type_override_applied": false,
+    "transcript": [
+      {
+        "role": "user(persona)",
+        "content": "저는 그냥 하루 종일 노트북으로 코드 짜는 사람이에요. 집에서 일해요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "안녕하세요! 노트북으로 코드 짜시는 분이시군요. 집에서 일하신다니, 주소는 어디쯤인지 편하게 말씀해 주시겠어요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "안녕하세요. 네, 재택근무 중이에요. 주소는 서울 강남구 쪽이에요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "강남구에서 재택근무 중이시군요. 그럼 프로필에 \"서울 강남구\"로 등록할게요.\n\n혹시 연락처도 등록해두시겠어요? 필요하실 때만 알려주셔도 괜찮아요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 연락처는 등록해둘게요. 이메일로 하면 될까요?"
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 이메일도 좋아요. 편하게 알려주시면 프로필에 등록해둘게요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "hondi.user@example.com 으로 해주세요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "이메일 등록해뒀어요.\n\n그럼 이제 프로필 공개 여부만 정하면 되는데요, 공개로 하시겠어요? 공개하시면 K-Market 같은 곳에서 검색될 수 있어요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 공개로 해주세요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 공개로 설정할게요. 그럼 지금까지 정리된 내용으로 프로필 카드를 보여드릴게요.\n\n👤 hondi.user\n📍 서울 강남구\n📧 hondi.user@example.com\n🌐 다른 이용자에게 공개돼요\n\n이렇게 등록할게요. 맞으면 '확인'을 눌러주세요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 맞아요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "🎉 프로필 완성됐어요!\n\n👤 hondi.user\n📍 서울 강남구\n📧 hondi.user@example.com\n🌐 다른 이용자에게 공개돼요\n\nPROFILE_SUBMIT {\n  \"name\": \"hondi.user\",\n  \"nickname\": \"hondi.user\",\n  \"entity_type\": \"person\",\n  \"address\": \"서울 강남구\",\n  \"phone\": \"hondi.user@example.com\",\n  \"is_public\": true,\n  \"field_visibility\": { \"address\": false, \"phone\": false, \"website\": false, \"description\": false, \"products\": true, \"hours\": false },\n  \"data_sources\": { \"address\": \"pa_dialogue\", \"phone\": \"pa_dialogue\", \"is_public\": \"pa_dialogue\" }\n}\n\n혹시 프로필 만드는 과정에서 불편했던 거나 있었으면 하는 기능 있으세요? (없으면 그냥 넘어가셔도 돼요)"
+      }
+    ],
+    "submit_json": {
+      "name": "hondi.user",
+      "nickname": "hondi.user",
+      "entity_type": "person",
+      "address": "서울 강남구",
+      "phone": "hondi.user@example.com",
+      "is_public": true,
+      "field_visibility": {
+        "address": false,
+        "phone": false,
+        "website": false,
+        "description": false,
+        "products": true,
+        "hours": false
+      },
+      "data_sources": {
+        "address": "pa_dialogue",
+        "phone": "pa_dialogue",
+        "is_public": "pa_dialogue"
+      }
+    }
+  },
+  {
+    "no": 105,
+    "entity_type_expected": "business",
+    "edge_case_tags": [
+      "NO_LABEL_INFERENCE",
+      "JOB_VS_BUSINESS_AMBIGUOUS"
+    ],
+    "terminal": "PROFILE_SUBMIT",
+    "turns_used": 13,
+    "submit_entity_type": "business",
+    "verdict": "LIVE-PASS",
+    "notes": [
+      "entity_type 일치, 결제STEP 스킵 원칙 위반 없음, 유도된 필드 태그 확인됨(있는 경우)"
+    ],
+    "usage": {
+      "prompt_tokens": 761217,
+      "completion_tokens": 1542
+    },
+    "escalation_count": 0,
+    "escalations": [],
+    "profile_submit_retries": 0,
+    "field_add_retries": 0,
+    "field_remove_retries": 0,
+    "entity_type_override_applied": false,
+    "transcript": [
+      {
+        "role": "user(persona)",
+        "content": "사람들 모아서 요가 알려주고 스트레칭 도와드려요, 저희 스튜디오에서요. 몸 쓰는 일이라 재밌어요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "요가 스튜디오를 운영하시는군요! 몸 쓰는 일이라 재밌다는 말씀, 좋네요.\n\n혹시 스튜디오 이름은 어떻게 되세요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "아, 이름은 '밸런스 플로우'라고 해요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "밸런스 플로우, 좋은 이름이네요.\n\n스튜디오가 어디에 있으세요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "서울 마포구 쪽에 있어요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "마포구에 계시는군요.\n\n혹시 마포구 어느 동네쯤인지 알려주시면 정확히 등록할 수 있어요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "연남동이요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "연남동이군요.\n\n밸런스 플로우에서는 주로 어떤 수업을 하세요? 요가 종류나 스트레칭 프로그램 같은 걸 편하게 말씀해 주시면 제가 정리할게요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "빈야사랑 하타 위주로 하고, 초보자용 클래스도 같이 열고 있어요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "빈야사, 하타, 그리고 초보자 클래스까지 — 잘 알겠어요.\n\n혹시 수업료는 어떻게 되세요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "그룹 수업은 한 달에 15만 원이고, 개인 레슨은 회당 7만 원이에요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "수업료까지 잘 알겠어요.\n\n혹시 스튜디오 전화번호도 알려주시겠어요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "010-2345-6789요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "연락처도 잘 받았어요.\n\n혹시 영업시간은 어떻게 되세요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "평일은 오전 7시부터 밤 10시까지, 주말은 오전 9시부터 오후 6시까지 해요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "영업시간까지 잘 알겠어요.\n\n이제 결제 관련해서 여쭤볼게요. GDC(혼디 디지털화폐)로 결제도 받으시겠어요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, GDC 결제만 받을게요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "GDC 결제로 받으시는군요.\n\n그럼 계좌로 직접 입금받는 것도 지원할까요? 원하시면 프로필에 계좌 정보를 안내해 드려서 손님이 바로 이체할 수 있게 할게요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "아니요, 계좌 입금은 안 받아요. GDC만으로 할게요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "알겠어요, GDC만으로 하시는 걸로 할게요.\n\n그럼 예약도 받으시겠어요? 손님이 방문 일정을 미리 잡을 수 있어요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 예약 기능 켜주세요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "예약 기능 켜드릴게요.\n\n이 업종은 아직 자동화 제안이 없어서, AI가 지금 만들어드릴게요. 잠시 후 프로필에서 확인하실 수 있어요.\n\n마지막으로, 프로필을 공개하시겠어요? 공개하면 K-Market 등에서 검색돼요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 공개로 해주세요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "공개로 설정할게요. 지금까지 정리된 내용으로 프로필 카드를 만들어드릴게요.\n\n🏪 밸런스 플로우\n📍 서울 마포구 연남동\n📞 010-2345-6789\n⏰ 평일 07:00~22:00, 주말 09:00~18:00\n🧘 빈야사, 하타 요가, 초보자 클래스 (그룹 월 15만 원 / 개인 레슨 회당 7만 원)\n💳 GDC 결제도 받아요\n🌐 K-Market 등에서 검색돼요\n\n이렇게 등록할게요. 맞으면 '확인'을 눌러주세요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 맞아요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "🎉 프로필 완성됐어요!\n\n🏪 밸런스 플로우\n📍 서울 마포구 연남동\n📞 010-2345-6789\n⏰ 평일 07:00~22:00, 주말 09:00~18:00\n🧘 빈야사, 하타 요가, 초보자 클래스 (그룹 월 15만 원 / 개인 레슨 회당 7만 원)\n💳 GDC 결제도 받아요\n🌐 K-Market 등에서 검색돼요\n\nPROFILE_SUBMIT {\n  \"name\": \"밸런스 플로우\",\n  \"nickname\": \"밸런스 플로우\",\n  \"entity_type\": \"business\",\n  \"entity_subtype\": \"요가·필라테스 스튜디오\",\n  \"schema_id\": \"91110\",\n  \"address\": \"서울 마포구 연남동\",\n  \"phone\": \"010-2345-6789\",\n  \"products\": \"빈야사 요가, 하타 요가, 초보자 클래스 (그룹 월 15만 원, 개인 레슨 회당 7만 원)\",\n  \"products_structured\": [\n    { \"name\": \"그룹 수업\", \"price\": 150000, \"unit\": \"월\", \"desc\": \"빈야사·하타 요가 그룹 클래스\" },\n    { \"name\": \"개인 레슨\", \"price\": 70000, \"unit\": \"회\", \"desc\": \"1:1 개인 지도\" },\n    { \"name\": \"초보자 클래스\", \"desc\": \"요가 입문자 대상 클래스\" }\n  ],\n  \"description\": \"빈야사·하타 요가와 초보자 클래스를 진행하는 요가·스트레칭 스튜디오\",\n  \"industry_fields\": {\n    \"hours\": \"평일 07:00~22:00, 주말 09:00~18:00\",\n    \"reservation_config\": { \"enabled\": true, \"mode\": \"slot\", \"confirm_mode\": \"auto\", \"deposit_temp_threshold\": 36.5 }\n  },\n  \"gdc_accepted\": true,\n  \"is_public\": true,\n  \"field_visibility\": { \"address\": false, \"phone\": false, \"website\": false, \"description\": false, \"products\": true, \"hours\": false },\n  \"deleted_product_names\": [],\n  \"data_sources\": {\n    \"name\": \"pa_dialogue\",\n    \"address\": \"pa_dialogue\",\n    \"phone\": \"pa_dialogue\",\n    \"products\": \"pa_dialogue\",\n    \"industry_fields.hours\": \"pa_dialogue\",\n    \"gdc_accepted\": \"pa_dialogue\",\n    \"is_public\": \"pa_dialogue\"\n  }\n}\n\n혹시 프로필 만드는 과정에서 불편했던 거나 있었으면 하는 기능 있으세요? (없으면 그냥 넘어가셔도 돼요)"
+      }
+    ],
+    "submit_json": {
+      "name": "밸런스 플로우",
+      "nickname": "밸런스 플로우",
+      "entity_type": "business",
+      "entity_subtype": "요가·필라테스 스튜디오",
+      "schema_id": "91110",
+      "address": "서울 마포구 연남동",
+      "phone": "010-2345-6789",
+      "products": "빈야사 요가, 하타 요가, 초보자 클래스 (그룹 월 15만 원, 개인 레슨 회당 7만 원)",
+      "products_structured": [
+        {
+          "name": "그룹 수업",
+          "price": 150000,
+          "unit": "월",
+          "desc": "빈야사·하타 요가 그룹 클래스"
+        },
+        {
+          "name": "개인 레슨",
+          "price": 70000,
+          "unit": "회",
+          "desc": "1:1 개인 지도"
+        },
+        {
+          "name": "초보자 클래스",
+          "desc": "요가 입문자 대상 클래스"
+        }
+      ],
+      "description": "빈야사·하타 요가와 초보자 클래스를 진행하는 요가·스트레칭 스튜디오",
+      "industry_fields": {
+        "hours": "평일 07:00~22:00, 주말 09:00~18:00",
+        "reservation_config": {
+          "enabled": true,
+          "mode": "slot",
+          "confirm_mode": "auto",
+          "deposit_temp_threshold": 36.5
+        }
+      },
+      "gdc_accepted": true,
+      "is_public": true,
+      "field_visibility": {
+        "address": false,
+        "phone": false,
+        "website": false,
+        "description": false,
+        "products": true,
+        "hours": false
+      },
+      "deleted_product_names": [],
+      "data_sources": {
+        "name": "pa_dialogue",
+        "address": "pa_dialogue",
+        "phone": "pa_dialogue",
+        "products": "pa_dialogue",
+        "industry_fields.hours": "pa_dialogue",
+        "gdc_accepted": "pa_dialogue",
+        "is_public": "pa_dialogue"
+      }
+    }
+  },
+  {
+    "no": 106,
+    "entity_type_expected": "business",
+    "edge_case_tags": [
+      "THING_VS_BUSINESS_BOUNDARY",
+      "MULTI_LOCATION"
+    ],
+    "terminal": "PROFILE_SUBMIT",
+    "turns_used": 13,
+    "submit_entity_type": "business",
+    "verdict": "LIVE-PASS",
+    "notes": [
+      "entity_type 일치, 결제STEP 스킵 원칙 위반 없음, 유도된 필드 태그 확인됨(있는 경우)"
+    ],
+    "usage": {
+      "prompt_tokens": 771082,
+      "completion_tokens": 2160
+    },
+    "escalation_count": 0,
+    "escalations": [],
+    "profile_submit_retries": 0,
+    "field_add_retries": 0,
+    "field_remove_retries": 0,
+    "entity_type_override_applied": false,
+    "transcript": [
+      {
+        "role": "user(persona)",
+        "content": "한림이랑 애월 쪽에 뽑기 기계 몇 대 놔두고, 가끔 돌면서 물건 채워 넣으러 다녀요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "뽑기 기계 사업이시군요. 한림이랑 애월 두 곳에 나눠서 운영하시는 거네요.\n\n기계는 몇 대나 놓으셨어요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 두 곳에서 운영하고 있어요. 기계는 총 20대 정도 됩니다."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "20대면 꽤 규모가 있네요. 한림이랑 애월에 나눠서 관리하시는 것도 그렇고요.\n\n그 기계들, 혹시 각각 어디에 있는지 위치를 다 기록해 두고 계세요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 지점별로 몇 번 기계인지 다 정리해놨어요. 관리할 때 필요해서요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "관리 잘 하고 계시네요. 그럼 그 정리해두신 위치 정보를 프로필에도 담아둘까요? 나중에 기계 하나하나 상태나 채움 일정 관리하실 때 편하실 거예요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 그렇게 해주세요. 지점별로 정리된 거 그대로 넣으면 될 것 같아요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 그럼 프로필에 반영해둘게요. 한림 지점과 애월 지점, 각각 몇 번 기계가 몇 대씩 있는지 알려주시면 그대로 정리해서 넣어드릴게요.\n\n[PARTIAL_SAVE] {\"entity_type\": \"business\", \"entity_subtype\": \"뽑기 기계 운영\", \"schema_id\": \"기타 오락용품 소매업\"}\n\n[PARTIAL_SAVE] {\"industry_fields\": {\"locations\": \"한림 지점, 애월 지점 (기계 총 20대, 지점별 번호 정리됨)\"}}"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "한림에 12대, 애월에 8대 있어요. 번호는 각 지점별로 1번부터 붙여놨습니다."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "한림 12대, 애월 8대, 각 지점별로 1번부터 번호 붙여두셨군요. 그대로 정리해서 넣어둘게요.\n\n[PARTIAL_SAVE] {\"industry_fields\": {\"locations\": \"한림 지점 12대(1~12번), 애월 지점 8대(1~8번), 총 20대\"}}\n\n그런데 기계를 돌면서 채워 넣으신다니, 혹시 어떤 상품을 채워 넣으시는지도 알려주실 수 있어요? 뽑기 안에 들어가는 인형이나 피규어 같은 거요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 인형이나 피규어 종류로 채워요. 지점마다 인기 있는 게 조금씩 달라서 그때그때 맞춰 넣습니다."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "지점마다 인기 있는 게 달라서 그때그때 맞춰 넣으신다니, 그 판단이 쉽지 않으실 것 같아요.\n\n그럼 채워 넣으시는 상품 종류를 프로필에 담아둘까요? 지금은 \"인형·피규어\" 정도로만 적어두고, 나중에 지점별로 어떤 게 잘 나가는지 정리되면 그때 더 구체적으로 채워 넣으셔도 돼요.\n\n[PARTIAL_SAVE] {\"products\": \"인형·피규어 (지점별 인기 상품 상이, 수시 교체)\"}"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 그렇게 해두세요. 나중에 지점별로 정리되면 추가할게요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 그렇게 해둘게요. 나중에 지점별로 정리되시면 언제든 추가하실 수 있어요.\n\n그럼 이제 결제 쪽 여쭤볼게요. 뽑기 기계는 보통 동전이나 지폐로 하는데, 혹시 GDC(혼디 디지털화폐)로도 결제받으실 생각 있으세요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, GDC 결제만 받고 싶어요. 현금은 안 받습니다."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "GDC 결제만 받으시는군요. 현금은 안 받으신다고 하니 그렇게 반영할게요.\n\n[PARTIAL_SAVE] {\"gdc_accepted\": true}\n\n그럼 계좌로 직접 입금받는 것도 지원할까요? 원하시면 프로필에 계좌 정보를 안내해서 손님이 바로 이체할 수 있게 해드릴 수 있어요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "아니요, 계좌 입금은 필요 없어요. GDC만으로 충분합니다."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, GDC만으로 하시는 게 깔끔하겠네요. 계좌 입금은 안 넣어둘게요.\n\n그럼 예약 기능은 어떠세요? 뽑기 기계는 예약 개념이 없을 것 같긴 한데, 혹시 방문 일정을 미리 잡게 하거나 할 일이 있으실까요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "아니요, 예약은 필요 없어요. 그냥 방문해서 하시는 거라서요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 그럼 예약 기능은 꺼둘게요.\n\n[PARTIAL_SAVE] {\"industry_fields\": {\"reservation_config\": {\"enabled\": false}}}\n\n마지막으로 하나만 더 여쭤볼게요. 혹시 기계 채우러 다니시는 일정이나, 재고가 떨어졌을 때 알림 같은 걸 자동으로 챙겨드리면 도움이 되실까요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 그런 게 있으면 좋겠어요. 기계마다 채우는 시기가 달라서 챙기기 번거롭거든요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "그러면 그 부분은 AI가 챙겨드릴 수 있게 준비해둘게요. 기계마다 채우는 시기가 다르시다니, 그게 제일 번거로우셨겠어요.\n\n[PARTIAL_SAVE] {\"industry_fields\": {\"automation_opt_in\": [\"restock_reminder\"]}}\n\n이제 거의 다 됐어요. 프로필을 공개하시겠어요? 공개하시면 K-Market 같은 데서 검색되게 할 수 있어요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 공개해주세요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 공개로 설정할게요.\n\n[PARTIAL_SAVE] {\"is_public\": true}\n\n그럼 지금까지 정리된 내용으로 프로필 카드를 보여드릴게요.\n\n🚗 뽑기 기계 운영\n📍 한림 지점 12대(1~12번), 애월 지점 8대(1~8번), 총 20대\n🍜 인형·피규어 (지점별 인기 상품 상이, 수시 교체)\n💳 GDC 결제도 받아요\n🤖 AI가 기계별 채움 시기 알림도 챙겨드려요\n🌐 K-Market 등에서 검색돼요\n\n이렇게 등록할게요. 맞으면 '확인'을 눌러주세요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 맞아요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "🎉 프로필 완성됐어요!\n\n🚗 뽑기 기계 운영\n📍 한림 지점 12대(1~12번), 애월 지점 8대(1~8번), 총 20대\n🍜 인형·피규어 (지점별 인기 상품 상이, 수시 교체)\n💳 GDC 결제도 받아요\n🤖 AI가 기계별 채움 시기 알림도 챙겨드려요\n🌐 K-Market 등에서 검색돼요\n\nPROFILE_SUBMIT {\n  \"name\": \"뽑기 기계 운영\",\n  \"nickname\": \"뽑기 기계 운영\",\n  \"entity_type\": \"business\",\n  \"entity_subtype\": \"뽑기 기계 운영\",\n  \"schema_id\": \"기타 오락용품 소매업\",\n  \"address\": \"\",\n  \"products\": \"인형·피규어 (지점별 인기 상품 상이, 수시 교체)\",\n  \"description\": \"한림 지점 12대(1~12번), 애월 지점 8대(1~8번), 총 20대 운영. 지점별 인기 상품 상이, 수시 교체.\",\n  \"industry_fields\": {\n    \"locations\": \"한림 지점 12대(1~12번), 애월 지점 8대(1~8번), 총 20대\",\n    \"reservation_config\": { \"enabled\": false },\n    \"automation_opt_in\": [\"restock_reminder\"]\n  },\n  \"gdc_accepted\": true,\n  \"is_public\": true,\n  \"field_visibility\": { \"address\": false, \"phone\": false, \"website\": false, \"description\": false, \"products\": true, \"hours\": false },\n  \"deleted_product_names\": [],\n  \"data_sources\": {\n    \"entity_type\": \"pa_dialogue\",\n    \"entity_subtype\": \"pa_dialogue\",\n    \"schema_id\": \"pa_dialogue\",\n    \"products\": \"pa_dialogue\",\n    \"industry_fields.locations\": \"pa_dialogue\",\n    \"industry_fields.reservation_config\": \"pa_dialogue\",\n    \"industry_fields.automation_opt_in\": \"pa_dialogue\",\n    \"gdc_accepted\": \"pa_dialogue\",\n    \"is_public\": \"pa_dialogue\"\n  }\n}\n\n혹시 프로필 만드는 과정에서 불편했던 거나 있었으면 하는 기능 있으세요? (없으면 그냥 넘어가셔도 돼요)"
+      }
+    ],
+    "submit_json": {
+      "name": "뽑기 기계 운영",
+      "nickname": "뽑기 기계 운영",
+      "entity_type": "business",
+      "entity_subtype": "뽑기 기계 운영",
+      "schema_id": "기타 오락용품 소매업",
+      "address": "",
+      "products": "인형·피규어 (지점별 인기 상품 상이, 수시 교체)",
+      "description": "한림 지점 12대(1~12번), 애월 지점 8대(1~8번), 총 20대 운영. 지점별 인기 상품 상이, 수시 교체.",
+      "industry_fields": {
+        "locations": "한림 지점 12대(1~12번), 애월 지점 8대(1~8번), 총 20대",
+        "reservation_config": {
+          "enabled": false
+        },
+        "automation_opt_in": [
+          "restock_reminder"
+        ]
+      },
+      "gdc_accepted": true,
+      "is_public": true,
+      "field_visibility": {
+        "address": false,
+        "phone": false,
+        "website": false,
+        "description": false,
+        "products": true,
+        "hours": false
+      },
+      "deleted_product_names": [],
+      "data_sources": {
+        "entity_type": "pa_dialogue",
+        "entity_subtype": "pa_dialogue",
+        "schema_id": "pa_dialogue",
+        "products": "pa_dialogue",
+        "industry_fields.locations": "pa_dialogue",
+        "industry_fields.reservation_config": "pa_dialogue",
+        "industry_fields.automation_opt_in": "pa_dialogue",
+        "gdc_accepted": "pa_dialogue",
+        "is_public": "pa_dialogue"
+      }
+    }
+  },
+  {
+    "no": 107,
+    "entity_type_expected": "platform",
+    "edge_case_tags": [
+      "NO_LABEL_INFERENCE",
+      "PLATFORM_ENTITY",
+      "PAYMENT_SKIP"
+    ],
+    "terminal": "PROFILE_SUBMIT",
+    "turns_used": 6,
+    "submit_entity_type": "platform",
+    "verdict": "LIVE-PASS",
+    "notes": [
+      "entity_type 일치, 결제STEP 스킵 원칙 위반 없음, 유도된 필드 태그 확인됨(있는 경우)"
+    ],
+    "usage": {
+      "prompt_tokens": 349585,
+      "completion_tokens": 899
+    },
+    "escalation_count": 0,
+    "escalations": [],
+    "profile_submit_retries": 0,
+    "field_add_retries": 0,
+    "field_remove_retries": 0,
+    "entity_type_override_applied": false,
+    "transcript": [
+      {
+        "role": "user(persona)",
+        "content": "동네 사람들끼리 안 쓰는 물건 나눔하는 앱을 저희가 만들어서 운영해요. 그거 프로필 만들려고요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "안녕하세요! 나눔 앱을 직접 만들어 운영하시는군요, 멋지네요.\n\n그 앱 이름은 뭐라고 하세요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "안녕하세요. 이름은 '동네나눔'이에요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "동네나눔이군요, 좋은 이름이에요.\n\n이 앱은 어떤 방식으로 운영되나요? 회원들이 직접 물건을 올리고 서로 나눠 갖는 구조인지, 아니면 운영하시는 분들이 물건을 모아서 나눠주는 방식인지 편하게 말씀해 주세요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "회원들이 직접 안 쓰는 물건을 올리고, 필요한 사람이 가져가는 구조예요. 저는 앱만 운영하고 있어요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "아, 회원들끼리 직접 주고받는 구조이고 운영진은 앱만 관리하시는 거군요.\n\n그러면 이건 사람도 아니고 일반 사업자도 아니고, 서비스 자체를 등록하는 셈이네요. 서비스 이름은 동네나눔으로 하고, 어떤 서비스인지 설명도 한 줄 넣어둘게요.\n\n혹시 이 앱을 만든 곳이 따로 있나요? 아니면 대표님이 직접 만드신 건가요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "제가 직접 만들었어요. 따로 만든 곳은 없어요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "직접 만드셨군요, 대단하세요.\n\n그럼 운영 주체는 대표님 개인이 되는 거네요. 혹시 이 앱을 다른 사람에게도 알리고 싶으신 건가요, 아니면 나중에 필요할 때만 쓰실 건가요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "사람들이 많이 알았으면 좋겠어요. 동네에서 안 쓰는 물건이 잘 돌아갔으면 해서요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "좋은 취지네요. 그럼 공개로 등록해서 사람들이 검색으로 찾을 수 있게 할게요.\n\n이제 정리된 내용을 확인해 주세요.\n\n💻 동네나눔\n회원들이 직접 안 쓰는 물건을 올리고 필요한 사람이 가져가는 동네 나눔 서비스예요.\n🔧 서비스 제공 형태: 앱 (직접 운영)\n🌐 다른 이용자에게 공개돼요\n\n이렇게 등록할게요. 맞으면 '확인'을 눌러주세요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 맞아요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "🎉 프로필 완성됐어요!\n\n💻 동네나눔\n회원들이 직접 안 쓰는 물건을 올리고 필요한 사람이 가져가는 동네 나눔 서비스예요.\n🔧 서비스 제공 형태: 앱 (직접 운영)\n🌐 다른 이용자에게 공개돼요\n\nPROFILE_SUBMIT {\n  \"name\": \"동네나눔\",\n  \"nickname\": \"동네나눔\",\n  \"entity_type\": \"platform\",\n  \"entity_subtype\": \"나눔 서비스\",\n  \"schema_id\": \"6399\",\n  \"address\": \"\",\n  \"phone\": \"\",\n  \"products\": \"\",\n  \"description\": \"회원들이 직접 안 쓰는 물건을 올리고 필요한 사람이 가져가는 동네 나눔 서비스예요.\",\n  \"platform_type\": \"앱 (직접 운영)\",\n  \"is_public\": true,\n  \"field_visibility\": { \"address\": false, \"phone\": false, \"website\": false, \"description\": false, \"products\": true, \"hours\": false },\n  \"deleted_product_names\": [],\n  \"data_sources\": { \"name\": \"pa_dialogue\", \"entity_type\": \"pa_dialogue\", \"entity_subtype\": \"pa_dialogue\", \"schema_id\": \"pa_dialogue\", \"description\": \"pa_dialogue\", \"platform_type\": \"pa_dialogue\", \"is_public\": \"pa_dialogue\" }\n}\n\n혹시 프로필 만드는 과정에서 불편했던 거나 있었으면 하는 기능 있으세요? (없으면 그냥 넘어가셔도 돼요)"
+      }
+    ],
+    "submit_json": {
+      "name": "동네나눔",
+      "nickname": "동네나눔",
+      "entity_type": "platform",
+      "entity_subtype": "나눔 서비스",
+      "schema_id": "6399",
+      "address": "",
+      "phone": "",
+      "products": "",
+      "description": "회원들이 직접 안 쓰는 물건을 올리고 필요한 사람이 가져가는 동네 나눔 서비스예요.",
+      "platform_type": "앱 (직접 운영)",
+      "is_public": true,
+      "field_visibility": {
+        "address": false,
+        "phone": false,
+        "website": false,
+        "description": false,
+        "products": true,
+        "hours": false
+      },
+      "deleted_product_names": [],
+      "data_sources": {
+        "name": "pa_dialogue",
+        "entity_type": "pa_dialogue",
+        "entity_subtype": "pa_dialogue",
+        "schema_id": "pa_dialogue",
+        "description": "pa_dialogue",
+        "platform_type": "pa_dialogue",
+        "is_public": "pa_dialogue"
+      }
+    }
+  },
+  {
+    "no": 108,
+    "entity_type_expected": "person",
+    "edge_case_tags": [
+      "NO_LABEL_INFERENCE",
+      "JOB_TRANSITION",
+      "PAYMENT_SKIP"
+    ],
+    "terminal": "PROFILE_SUBMIT",
+    "turns_used": 8,
+    "submit_entity_type": "person",
+    "verdict": "LIVE-PASS",
+    "notes": [
+      "entity_type 일치, 결제STEP 스킵 원칙 위반 없음, 유도된 필드 태그 확인됨(있는 경우)"
+    ],
+    "usage": {
+      "prompt_tokens": 466017,
+      "completion_tokens": 664
+    },
+    "escalation_count": 0,
+    "escalations": [],
+    "profile_submit_retries": 0,
+    "field_add_retries": 0,
+    "field_remove_retries": 0,
+    "entity_type_override_applied": false,
+    "transcript": [
+      {
+        "role": "user(persona)",
+        "content": "저 원래 식당에서 요리했었는데, 요즘은 그만두고 유튜브에 레시피 영상만 올려요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "아, 요리하시는 분이시군요. 유튜브 레시피 영상이라니 흥미롭네요.\n\n그럼 지금은 요리사로서 활동하시는 건가요, 아니면 유튜버로서 활동하시는 건가요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "아, 요리사는 그만뒀어요. 지금은 영상 올리는 거 하고 있어요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "아, 네. 그럼 지금은 유튜버로 활동하고 계시는 거네요.\n\n혹시 유튜브 채널 이름이 어떻게 되세요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "유튜버라는 표현보다는 그냥 영상 올리는 거예요. 채널 이름은 아직 안 정했어요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "아, 네. 채널 이름은 나중에 정하셔도 괜찮아요.\n\n그럼 지금은 개인으로 등록하시는 걸로 할게요. 주로 어디에 사세요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "서울에 살아요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "서울이시군요. 서울 어느 동네쯤이세요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "마포구 쪽이에요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "마포구시군요. 연락처도 알려주시겠어요? 나중에 필요하실 때 쓰실 수 있어요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "아, 연락처는 좀 그래요. 굳이 안 넣어도 되지 않을까요?"
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 물론이에요. 연락처는 안 넣어도 괜찮아요.\n\n그럼 프로필을 공개하시겠어요? 공개하시면 다른 분들이 검색해서 찾으실 수 있어요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 공개로 해주세요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 공개로 할게요.\n\n이렇게 등록할게요. 맞으면 '확인'을 눌러주세요.\n\n👤 (닉네임)\n📍 서울 마포구\n🌐 다른 이용자에게 공개돼요\n\n확인해 주시면 바로 등록할게요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 맞아요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "🎉 프로필 완성됐어요!\n\n👤 (닉네임)\n📍 서울 마포구\n🌐 다른 이용자에게 공개돼요\n\nPROFILE_SUBMIT {\n  \"name\": \"\",\n  \"nickname\": \"\",\n  \"entity_type\": \"person\",\n  \"entity_subtype\": \"\",\n  \"schema_id\": \"\",\n  \"address\": \"서울 마포구\",\n  \"phone\": \"\",\n  \"products\": \"\",\n  \"description\": \"\",\n  \"is_public\": true,\n  \"field_visibility\": { \"address\": false, \"phone\": false, \"website\": false, \"description\": false, \"products\": true, \"hours\": false },\n  \"deleted_product_names\": [],\n  \"data_sources\": { \"address\": \"pa_dialogue\", \"is_public\": \"pa_dialogue\" }\n}\n\n혹시 프로필 만드는 과정에서 불편했던 거나 있었으면 하는 기능 있으세요? (없으면 그냥 넘어가셔도 돼요)"
+      }
+    ],
+    "submit_json": {
+      "name": "",
+      "nickname": "",
+      "entity_type": "person",
+      "entity_subtype": "",
+      "schema_id": "",
+      "address": "서울 마포구",
+      "phone": "",
+      "products": "",
+      "description": "",
+      "is_public": true,
+      "field_visibility": {
+        "address": false,
+        "phone": false,
+        "website": false,
+        "description": false,
+        "products": true,
+        "hours": false
+      },
+      "deleted_product_names": [],
+      "data_sources": {
+        "address": "pa_dialogue",
+        "is_public": "pa_dialogue"
+      }
+    }
+  },
+  {
+    "no": 109,
+    "entity_type_expected": "org",
+    "edge_case_tags": [
+      "INSTITUTION_VS_ORG_AMBIGUOUS",
+      "NO_LABEL_INFERENCE"
+    ],
+    "terminal": "PROFILE_SUBMIT",
+    "turns_used": 12,
+    "submit_entity_type": "org",
+    "verdict": "LIVE-PASS",
+    "notes": [
+      "entity_type 일치, 결제STEP 스킵 원칙 위반 없음, 유도된 필드 태그 확인됨(있는 경우)"
+    ],
+    "usage": {
+      "prompt_tokens": 706575,
+      "completion_tokens": 1778
+    },
+    "escalation_count": 0,
+    "escalations": [],
+    "profile_submit_retries": 0,
+    "field_add_retries": 0,
+    "field_remove_retries": 0,
+    "entity_type_override_applied": false,
+    "transcript": [
+      {
+        "role": "user(persona)",
+        "content": "저희 동네에 작은 도서관이 하나 있는데, 주민들이 자원봉사로 돌아가면서 운영해요. 그거 등록하려고요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "동네 도서관을 등록하시는군요. 자원봉사로 돌아가면서 운영하신다니, 협회·단체 성격으로 볼게요.\n\n먼저 도서관 이름이 어떻게 되세요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "아, 잠깐요. 공공기관으로 등록되는 건 아니죠? 저희는 시나 구청 소속이 아니라 주민들이 자발적으로 만든 작은도서관이에요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 맞게 보셨어요. 시·구청 소속이 아니라 주민들이 자발적으로 만든 곳이면 공공기관(institution)이 아니라 단체(org)로 등록돼요. 공식 기관이 아닌 임의 결사체로 보는 게 맞습니다.\n\n그럼 도서관 이름부터 알려주시겠어요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "아, 다행이네요. 이름은 '행복한마을 작은도서관'이에요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "행복한마을 작은도서관이군요. 좋은 이름이에요.\n\n주소는 어디에 있나요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "서울 마포구 쪽이에요. 동네 주민센터 근처 아파트 상가 1층에 있어요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "아, 마포구 쪽이군요. 상가 1층이면 찾기 편하겠어요.\n\n혹시 정확한 도로명 주소(건물명이나 번지수)도 알고 계세요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "아, 정확한 번지수는 지금 바로 기억이 안 나네요. 나중에 채워 넣어도 될까요?"
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 괜찮아요. 주소는 나중에 채워 넣으실 수 있어요.\n\n그럼 이 도서관에서는 어떤 걸 하시는지 알려주시겠어요? 책 대여만 하시는지, 아니면 다른 활동도 함께 하시는지요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "책 대여가 기본이고요, 아이들 대상 그림책 읽어주기랑 동네 어르신들 위한 작은 강좌도 열어요. 가끔 북클럽 모임도 하고요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "책 대여에 그림책 읽어주기, 어르신 강좌, 북클럽 모임까지 하시는군요. 동네 분들이 정말 많이 모이시겠어요.\n\n혹시 회원은 몇 분 정도 되세요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "등록 회원은 한 80명 정도 되고, 실제로 자주 오시는 분들은 30명 남짓이에요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "80명 등록에 자주 오시는 분이 30명 남짓이군요. 알겠습니다.\n\n그럼 이제 몇 가지만 더 여쭤볼게요. GDC(혼디 디지털화폐)로 후원이나 회비 같은 걸 받으실 계획이 있으세요?"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 후원금 받을 계획 있어요. 운영비가 늘 빠듯해서요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, GDC로 후원금 받으시는 걸로 할게요.\n\n그럼 계좌로 직접 입금받는 것도 지원할까요? 원하시면 프로필에 계좌 정보를 안내해서 후원하시는 분이 바로 이체할 수 있게 해드릴 수 있어요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "아, 계좌는 좀 그래요. 후원은 GDC로만 받는 게 깔끔할 것 같아요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 알겠습니다. 후원은 GDC로만 받으시는 걸로 할게요.\n\n그럼 예약 기능은 어떠세요? 그림책 읽어주기나 강좌처럼 참여 인원을 미리 받아야 하는 프로그램이 있으시면, 참가자들이 미리 신청할 수 있게 해드릴 수 있어요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "아, 그거 좋네요. 그림책 읽어주기랑 강좌는 인원이 한정돼서 미리 신청받으면 편할 것 같아요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 예약 기능 켜드릴게요. 그림책 읽어주기랑 강좌 신청받으시면 훨씬 편하실 거예요.\n\n마지막으로, 프로필을 공개하시겠어요? 공개하시면 K-Market 같은 데서 검색되니까 동네 분들이 더 쉽게 찾으실 수 있어요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 공개로 해주세요. 동네 분들이 많이 찾아오셨으면 좋겠어요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 공개로 할게요. 그럼 지금까지 정리한 내용을 확인해 드릴게요.\n\n🤝 행복한마을 작은도서관\n주민들이 자발적으로 운영하는 작은도서관이에요. 책 대여를 기본으로 하고, 아이들 대상 그림책 읽어주기와 어르신 강좌, 북클럽 모임도 함께 열고 있어요.\n📍 서울 마포구 (정확한 주소는 추후 입력)\n👥 회원 80명\n💳 GDC 후원금을 받아요\n🤖 AI가 예약 신청도 챙겨드려요\n🌐 K-Market 등에서 검색돼요\n\n이렇게 등록할게요. 맞으면 '확인'을 눌러주세요."
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 맞아요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "🎉 프로필 완성됐어요!\n\n🤝 행복한마을 작은도서관\n주민들이 자발적으로 운영하는 작은도서관이에요. 책 대여를 기본으로 하고, 아이들 대상 그림책 읽어주기와 어르신 강좌, 북클럽 모임도 함께 열고 있어요.\n📍 서울 마포구 (정확한 주소는 추후 입력)\n👥 회원 80명\n💳 GDC 후원금을 받아요\n🤖 AI가 예약 신청도 챙겨드려요\n🌐 K-Market 등에서 검색돼요\n\nPROFILE_SUBMIT {\n  \"name\": \"행복한마을 작은도서관\",\n  \"nickname\": \"행복한마을 작은도서관\",\n  \"entity_type\": \"org\",\n  \"entity_subtype\": \"작은도서관\",\n  \"schema_id\": \"91110\",\n  \"address\": \"서울 마포구\",\n  \"products\": \"도서 대여, 그림책 읽어주기, 어르신 강좌, 북클럽 모임\",\n  \"description\": \"주민들이 자발적으로 운영하는 작은도서관이에요. 책 대여를 기본으로 하고, 아이들 대상 그림책 읽어주기와 어르신 강좌, 북클럽 모임도 함께 열고 있어요.\",\n  \"member_count\": \"80\",\n  \"industry_fields\": {\n    \"reservation_config\": {\n      \"enabled\": true,\n      \"mode\": \"slot\",\n      \"confirm_mode\": \"auto\",\n      \"deposit_temp_threshold\": 36.5\n    }\n  },\n  \"gdc_accepted\": true,\n  \"is_public\": true,\n  \"field_visibility\": { \"address\": false, \"phone\": false, \"website\": false, \"description\": false, \"products\": true, \"hours\": false },\n  \"deleted_product_names\": [],\n  \"data_sources\": {\n    \"name\": \"pa_dialogue\",\n    \"entity_type\": \"pa_dialogue\",\n    \"entity_subtype\": \"pa_dialogue\",\n    \"schema_id\": \"pa_dialogue\",\n    \"address\": \"pa_dialogue\",\n    \"products\": \"pa_dialogue\",\n    \"description\": \"pa_dialogue\",\n    \"member_count\": \"pa_dialogue\",\n    \"gdc_accepted\": \"pa_dialogue\",\n    \"is_public\": \"pa_dialogue\"\n  }\n}\n\n혹시 프로필 만드는 과정에서 불편했던 거나 있었으면 하는 기능 있으세요? (없으면 그냥 넘어가셔도 돼요)"
+      }
+    ],
+    "submit_json": {
+      "name": "행복한마을 작은도서관",
+      "nickname": "행복한마을 작은도서관",
+      "entity_type": "org",
+      "entity_subtype": "작은도서관",
+      "schema_id": "91110",
+      "address": "서울 마포구",
+      "products": "도서 대여, 그림책 읽어주기, 어르신 강좌, 북클럽 모임",
+      "description": "주민들이 자발적으로 운영하는 작은도서관이에요. 책 대여를 기본으로 하고, 아이들 대상 그림책 읽어주기와 어르신 강좌, 북클럽 모임도 함께 열고 있어요.",
+      "member_count": "80",
+      "industry_fields": {
+        "reservation_config": {
+          "enabled": true,
+          "mode": "slot",
+          "confirm_mode": "auto",
+          "deposit_temp_threshold": 36.5
+        }
+      },
+      "gdc_accepted": true,
+      "is_public": true,
+      "field_visibility": {
+        "address": false,
+        "phone": false,
+        "website": false,
+        "description": false,
+        "products": true,
+        "hours": false
+      },
+      "deleted_product_names": [],
+      "data_sources": {
+        "name": "pa_dialogue",
+        "entity_type": "pa_dialogue",
+        "entity_subtype": "pa_dialogue",
+        "schema_id": "pa_dialogue",
+        "address": "pa_dialogue",
+        "products": "pa_dialogue",
+        "description": "pa_dialogue",
+        "member_count": "pa_dialogue",
+        "gdc_accepted": "pa_dialogue",
+        "is_public": "pa_dialogue"
+      }
+    }
+  },
+  {
+    "no": 110,
+    "entity_type_expected": "business",
+    "edge_case_tags": [
+      "NO_LABEL_INFERENCE",
+      "MULTI_CROP",
+      "PRIMARY_OCCUPATION_SIGNAL"
+    ],
+    "terminal": "PROFILE_SUBMIT",
+    "turns_used": 12,
+    "submit_entity_type": "business",
+    "verdict": "LIVE-PASS",
+    "notes": [
+      "entity_type 일치, 결제STEP 스킵 원칙 위반 없음, 유도된 필드 태그 확인됨(있는 경우)"
+    ],
+    "usage": {
+      "prompt_tokens": 714190,
+      "completion_tokens": 2551
+    },
+    "escalation_count": 0,
+    "escalations": [],
+    "profile_submit_retries": 0,
+    "field_add_retries": 0,
+    "field_remove_retries": 0,
+    "entity_type_override_applied": false,
+    "transcript": [
+      {
+        "role": "user(persona)",
+        "content": "논에서 벼농사 짓고, 겨울엔 감귤도 좀 키워요. 이게 제 본업이에요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "농사가 본업이시군요. 논에서 벼농사 짓고 겨울엔 감귤도 키우신다니, 그럼 사업자로 등록하시는 게 맞겠어요.\n\n혹시 사업자등록증에 나와 있는 상호명이 따로 있으실까요? 없으면 그냥 성함이나 \"OO농장\" 같은 이름으로 해도 괜찮아요.\n\n[PARTIAL_SAVE] {\"entity_type\": \"business\", \"entity_subtype\": \"벼농사·감귤 재배\", \"schema_id\": \"011\", \"products\": \"벼농사(쌀), 감귤\"}\n\n[TEMPLATE_LOOKUP: schema_id=011]"
+      },
+      {
+        "role": "user(mocked-template-context)",
+        "content": "[CONTEXT: INDUSTRY_TEMPLATE]\n(참조 사례 없음 — 최초 사례)\n[/CONTEXT]"
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "참조 사례가 없어도 괜찮아요. 제가 아는 선에서 정리해볼게요.\n\n그럼 상호명부터 정할까요? 사업자등록증에 나온 이름이 있으면 그걸로, 없으면 \"OO농장\"처럼 편하게 지어주셔도 돼요.\n\n[PARTIAL_SAVE] {\"entity_type\": \"business\", \"entity_subtype\": \"벼농사·감귤 재배\", \"schema_id\": \"011\", \"products\": \"벼농사(쌀), 감귤\"}"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "상호는 그냥 제 이름으로 해주세요. 따로 농장 이름 같은 건 안 써요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 그럼 성함을 상호로 등록할게요. 혹시 성함을 알려주시겠어요?\n\n[PARTIAL_SAVE] {\"entity_type\": \"business\", \"entity_subtype\": \"벼농사·감귤 재배\", \"schema_id\": \"011\", \"products\": \"벼농사(쌀), 감귤\"}"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "김정호라고 합니다."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "김정호님, 잘 알겠습니다. 그럼 상호는 \"김정호\"로 등록할게요.\n\n이제 주소를 알려주시겠어요? 농지가 있는 곳이나 사업장 주소로 하시면 돼요.\n\n[PARTIAL_SAVE] {\"name\": \"김정호\", \"entity_type\": \"business\", \"entity_subtype\": \"벼농사·감귤 재배\", \"schema_id\": \"011\", \"products\": \"벼농사(쌀), 감귤\"}"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "제주도 서귀포시에 있어요. 감귤밭이랑 논이 다 거기 있습니다."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "서귀포시면 감귤로 유명한 곳이네요. 주소는 \"제주특별자치도 서귀포시\"로 등록할게요.\n\n혹시 더 자세한 주소(읍·면·동까지)가 있으면 알려주세요. 없으면 시 단위로도 괜찮아요.\n\n[PARTIAL_SAVE] {\"name\": \"김정호\", \"address\": \"제주특별자치도 서귀포시\", \"entity_type\": \"business\", \"entity_subtype\": \"벼농사·감귤 재배\", \"schema_id\": \"011\", \"products\": \"벼농사(쌀), 감귤\"}"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "시 단위로 해두세요. 굳이 동까지는 안 넣어도 됩니다."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 시 단위로 등록할게요.\n\n그럼 이제 GDC(혼디 디지털화폐)로 결제도 받으실 건지 여쭤볼게요. 쌀이나 감귤을 혼디에서 직접 파실 계획이 있으면 켜두시면 돼요.\n\n[PARTIAL_SAVE] {\"name\": \"김정호\", \"address\": \"제주특별자치도 서귀포시\", \"entity_type\": \"business\", \"entity_subtype\": \"벼농사·감귤 재배\", \"schema_id\": \"011\", \"products\": \"벼농사(쌀), 감귤\"}"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "GDC는 필요 없어요. 계좌이체로만 받고 싶습니다."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, GDC는 안 켜고 계좌이체로만 받으시는 걸로 할게요.\n\n그럼 계좌 정보를 알려주시겠어요? 은행명부터 순서대로 여쭤볼게요.\n\n[PARTIAL_SAVE] {\"name\": \"김정호\", \"address\": \"제주특별자치도 서귀포시\", \"entity_type\": \"business\", \"entity_subtype\": \"벼농사·감귤 재배\", \"schema_id\": \"011\", \"products\": \"벼농사(쌀), 감귤\", \"gdc_accepted\": false}"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "농협은행이고, 계좌번호는 302-1234-5678-91입니다."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "농협은행이시군요. 계좌번호는 302-1234-5678-91로 확인했어요.\n\n마지막으로 예금주명을 알려주시겠어요? 성함 그대로 하시면 될 것 같은데, 확인차 여쭤볼게요.\n\n[PARTIAL_SAVE] {\"name\": \"김정호\", \"address\": \"제주특별자치도 서귀포시\", \"entity_type\": \"business\", \"entity_subtype\": \"벼농사·감귤 재배\", \"schema_id\": \"011\", \"products\": \"벼농사(쌀), 감귤\", \"gdc_accepted\": false, \"payout_account\": {\"bank_name\": \"농협은행\", \"account_number\": \"3021234567891\"}}"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "예금주는 김정호, 저랑 같습니다."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 예금주도 김정호님으로 확인했어요.\n\n이제 예약 기능을 받으실 건지 여쭤볼게요. 쌀이나 감귤을 미리 주문받거나 방문 일정을 잡아두실 계획이 있으면 켜두시면 돼요.\n\n[PARTIAL_SAVE] {\"name\": \"김정호\", \"address\": \"제주특별자치도 서귀포시\", \"entity_type\": \"business\", \"entity_subtype\": \"벼농사·감귤 재배\", \"schema_id\": \"011\", \"products\": \"벼농사(쌀), 감귤\", \"gdc_accepted\": false, \"payout_account\": {\"bank_name\": \"농협은행\", \"account_number\": \"3021234567891\", \"holder_name\": \"김정호\"}}"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "예약은 안 받아도 됩니다. 전화로 연락 오면 그때그때 거래해요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 예약은 안 받으시는 걸로 할게요. 전화로 연락 오면 거래하시는 방식이면 충분하겠어요.\n\n그럼 마지막으로 프로필을 공개하실 건지 여쭤볼게요. 공개하시면 K-Market 같은 곳에서 검색되실 수 있어요.\n\n[PARTIAL_SAVE] {\"name\": \"김정호\", \"address\": \"제주특별자치도 서귀포시\", \"entity_type\": \"business\", \"entity_subtype\": \"벼농사·감귤 재배\", \"schema_id\": \"011\", \"products\": \"벼농사(쌀), 감귤\", \"gdc_accepted\": false, \"payout_account\": {\"bank_name\": \"농협은행\", \"account_number\": \"3021234567891\", \"holder_name\": \"김정호\"}, \"industry_fields\": {\"reservation_config\": {\"enabled\": false}}}"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 공개해주세요. 사람들이 찾아올 수 있게 하는 게 낫죠."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "네, 공개로 등록할게요. 그럼 이제 정리된 내용을 확인해 드릴게요.\n\n🏪 김정호\n📍 제주특별자치도 서귀포시\n🍚 벼농사(쌀), 감귤\n🏦 계좌 이체도 받아요\n🌐 K-Market 등에서 검색돼요\n\n이렇게 등록할게요. 맞으면 '확인'을 눌러주세요.\n\n[PARTIAL_SAVE] {\"name\": \"김정호\", \"address\": \"제주특별자치도 서귀포시\", \"entity_type\": \"business\", \"entity_subtype\": \"벼농사·감귤 재배\", \"schema_id\": \"011\", \"products\": \"벼농사(쌀), 감귤\", \"gdc_accepted\": false, \"payout_account\": {\"bank_name\": \"농협은행\", \"account_number\": \"3021234567891\", \"holder_name\": \"김정호\"}, \"industry_fields\": {\"reservation_config\": {\"enabled\": false}}, \"is_public\": true}"
+      },
+      {
+        "role": "user(persona-next)",
+        "content": "네, 맞아요."
+      },
+      {
+        "role": "assistant(PA)",
+        "content": "🎉 프로필 완성됐어요!\n\n🏪 김정호\n📍 제주특별자치도 서귀포시\n🍚 벼농사(쌀), 감귤\n🏦 계좌 이체도 받아요\n🌐 K-Market 등에서 검색돼요\n\n혹시 프로필 만드는 과정에서 불편했던 거나 있었으면 하는 기능 있으세요? (없으면 그냥 넘어가셔도 돼요)\n\nPROFILE_SUBMIT {\n  \"name\": \"김정호\",\n  \"nickname\": \"김정호\",\n  \"entity_type\": \"business\",\n  \"entity_subtype\": \"벼농사·감귤 재배\",\n  \"schema_id\": \"011\",\n  \"address\": \"제주특별자치도 서귀포시\",\n  \"products\": \"벼농사(쌀), 감귤\",\n  \"products_structured\": [\n    { \"name\": \"쌀\", \"category\": \"벼농사\" },\n    { \"name\": \"감귤\", \"category\": \"감귤 재배\" }\n  ],\n  \"industry_fields\": { \"reservation_config\": { \"enabled\": false } },\n  \"gdc_accepted\": false,\n  \"payout_account\": { \"bank_name\": \"농협은행\", \"account_number\": \"3021234567891\", \"holder_name\": \"김정호\" },\n  \"is_public\": true,\n  \"field_visibility\": { \"address\": false, \"phone\": false, \"website\": false, \"description\": false, \"products\": true, \"hours\": false },\n  \"deleted_product_names\": [],\n  \"data_sources\": { \"name\": \"pa_dialogue\", \"address\": \"pa_dialogue\", \"entity_type\": \"pa_dialogue\", \"entity_subtype\": \"pa_dialogue\", \"schema_id\": \"pa_dialogue\", \"products\": \"pa_dialogue\", \"gdc_accepted\": \"pa_dialogue\", \"payout_account\": \"pa_dialogue\", \"is_public\": \"pa_dialogue\" }\n}\n\n[TEMPLATE_CANDIDATE: schema_id=011, fields=name|address|products|payout_account|is_public]"
+      }
+    ],
+    "submit_json": {
+      "name": "김정호",
+      "nickname": "김정호",
+      "entity_type": "business",
+      "entity_subtype": "벼농사·감귤 재배",
+      "schema_id": "011",
+      "address": "제주특별자치도 서귀포시",
+      "products": "벼농사(쌀), 감귤",
+      "products_structured": [
+        {
+          "name": "쌀",
+          "category": "벼농사"
+        },
+        {
+          "name": "감귤",
+          "category": "감귤 재배"
+        }
+      ],
+      "industry_fields": {
+        "reservation_config": {
+          "enabled": false
+        }
+      },
+      "gdc_accepted": false,
+      "payout_account": {
+        "bank_name": "농협은행",
+        "account_number": "3021234567891",
+        "holder_name": "김정호"
+      },
+      "is_public": true,
+      "field_visibility": {
+        "address": false,
+        "phone": false,
+        "website": false,
+        "description": false,
+        "products": true,
+        "hours": false
+      },
+      "deleted_product_names": [],
+      "data_sources": {
+        "name": "pa_dialogue",
+        "address": "pa_dialogue",
+        "entity_type": "pa_dialogue",
+        "entity_subtype": "pa_dialogue",
+        "schema_id": "pa_dialogue",
+        "products": "pa_dialogue",
+        "gdc_accepted": "pa_dialogue",
+        "payout_account": "pa_dialogue",
+        "is_public": "pa_dialogue"
+      }
+    }
+  }
+]
