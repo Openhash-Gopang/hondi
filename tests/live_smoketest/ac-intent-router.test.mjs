@@ -58,6 +58,19 @@ function main() {
     { q: "K-JIT은 왜 아직 sp-catalog.json에 등록되지 않았나요?", expectType: ROUTE_TYPES.NOT_YET_BUILT, expectHigh: true },
     { q: "GDC 지갑 충전 한도가 얼마인가요?", expectType: ROUTE_TYPES.AC_CORE, expectHigh: true },
     { q: "K-Mail이랑 K-Job 중에 어느 쪽이 먼저 나왔나요?", expectType: ROUTE_TYPES.UNKNOWN, expectHigh: false },
+    // 2026-09-13 추가 — K-Plan/K-Insurance/K-Health 키워드 정정 회귀 테스트
+    // (SP 답변능력 평가에서 발견: 세 서비스의 옛 키워드가 실제 SP 범위보다
+    // 넓은 일반 실세계 서비스를 암시해 무관 질문까지 끌어들이고 있었음).
+    // 이름이 명시되면 여전히 high-confidence로 잡혀야 한다(정정이 이름
+    // 매칭까지 망가뜨리지 않았는지 확인).
+    { q: "K-Plan으로 부산 출장 계획 짜줘", expectType: ROUTE_TYPES.SERVICE_SP_INTERNAL, expectHigh: true },
+    { q: "GDC 미소보험 가입하고 싶어요", expectType: ROUTE_TYPES.SERVICE_SP_INTERNAL, expectHigh: true },
+    { q: "증상 분석 좀 해줘요, 열이 나요", expectType: ROUTE_TYPES.SERVICE_SP_INTERNAL, expectHigh: true },
+    // 제거된 옛 키워드(일정 등록/캘린더, 보험료, 병원 예약)만으로는 더 이상
+    // 높은 확신으로 걸리면 안 된다 — 걸렸다면 정정이 무효화된 것.
+    { q: "일정 등록하고 싶어요", expectType: ROUTE_TYPES.UNKNOWN, expectHigh: false },
+    { q: "제 자동차보험료가 왜 이렇게 올랐어요", expectType: ROUTE_TYPES.UNKNOWN, expectHigh: false },
+    { q: "병원 예약하고 싶어요", expectType: ROUTE_TYPES.UNKNOWN, expectHigh: false },
   ];
 
   let fixedPass = 0;
