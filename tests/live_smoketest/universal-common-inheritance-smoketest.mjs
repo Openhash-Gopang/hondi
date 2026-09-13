@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------
  * 2026-09-13 발견한 결함(UNIVERSAL-common이 client-side _loadSpByKey()
  * 경로에서 실제로는 결합되지 않고 있었음 — K-Job/K-Plan/K-Watch/
- * K-Telecom/K-Estate/K-Bank가 U0~U13(서비스 자기 인식 원칙 포함)을
+ * K-Telecom/K-Estate가 U0~U13(서비스 자기 인식 원칙 포함)을
  * 하나도 못 받고 있었음)의 수정을 검증한다.
  *
  * render_expert_prompts.mjs와 동일한 원칙을 따른다 — 검증 로직을
@@ -14,7 +14,11 @@
  * (render_expert_prompts.mjs와 같은 셔밍, 네트워크 불필요).
  *
  * 검증 대상:
- *   1) switch형 6개 SP(K-Bank/K-Telecom/K-Estate/K-Plan/K-Watch/K-Job)
+ *   1) switch형 5개 SP(K-Telecom/K-Estate/K-Plan/K-Watch/K-Job — K-Bank는
+ *      2026-09-13에 gwp-registry.js의 2026-08-01 철회(kgdc가 은행
+ *      기능을 이미 흡수)를 뒤늦게 반영해 call-ai.js에서 함께 삭제,
+ *      이 목록에서도 제외했다. 대상 목록: prompts/AC-PRO-CORE_*.txt
+ *      changelog·call-ai.js 커밋 참고)
  *      각각의 합성 결과에 UNIVERSAL-common과 UNIVERSAL-INTEGRITY가
  *      둘 다 실려 있는지 — 하나라도 빠지면 이번 수정이 불완전한 것.
  *   2) UNIVERSAL-common 안에 U13(서비스 자기 인식) 문구가 실제로
@@ -57,7 +61,6 @@ globalThis.fetch = async (url, _opts) => {
 // 등 브라우저 전용 모듈 체인을 끌고 오지 않기 위해 manifest-loader.js의
 // _loadSpByKey()를 직접, 같은 인자로 호출한다).
 const SWITCH_TYPE_SPS = [
-  { manifestKey: 'SP-22_kbank', label: 'K-Bank' },
   { manifestKey: 'SP-23_ktelecom', label: 'K-Telecom' },
   { manifestKey: 'SP-24_kestate', label: 'K-Estate' },
   { manifestKey: 'k-plan', label: 'K-Plan' },
