@@ -27,7 +27,7 @@ import { assembleGovSystemPrompt } from './src/gopang/gov/gov-router.js';
 import { resolveGovFee, extractCityCodeFromTrace } from './src/gopang/gov/gov-fee-lookup.js';
 // 2026-07-14: 레거시 별칭 안전망 — HONDI_TIER_MODELS에 없는 model이
 // 클라이언트에서 그대로 들어와도(레거시 호출 등) 여기서 한 번 더 정규화한다.
-import { resolveDeepseekModel, deepseekChatText } from './src/gopang/core/deepseek-client.js';
+import { resolveDeepseekModel, deepseekChatText, deepseekChat } from './src/gopang/core/deepseek-client.js';
 // 2026-09-03 신설 — K-서비스 공용 인증 게이트. "phone_verify_token 또는
 // 지갑 서명으로 guid를 확정한다"는 판정 로직이 K-Plan/K-Law/K-Gov/
 // K-Business relay 4곳 + K-Mail 8개 엔드포인트에 각자 손으로 반복
