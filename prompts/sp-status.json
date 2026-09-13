@@ -239,7 +239,7 @@
       ]
     },
     {
-      "file": "prompts/UNIVERSAL-common_v1_12.md",
+      "file": "prompts/UNIVERSAL-common_v1_13.md",
       "name": "UNIVERSAL 공통 규칙 (정체성 무관 절차·원칙 원본)",
       "cat": "core",
       "cat_label": "시스템 · 시스템 코어·공통 규칙 (전체 SP가 상속하는 절차 원본, U1~U12)",
