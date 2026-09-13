@@ -248,21 +248,20 @@ export async function _loadKSearchSP() {
   }
 }
 
-// K-Bank/K-Telecom/K-Estate 로더 — 2026-07-12 신설. 처음엔 새 저장소
+// K-Telecom/K-Estate 로더 — 2026-07-12 신설. 처음엔 새 저장소
 // (bank.hondi.net 등)를 전제로 만들었다가, "모든 SP가 별도 저장소가
 // 필요한 것은 아니다"(주피터님 지적)를 반영해 K-Search와 같은
 // 시스템 전환형으로 재설계 — gwp-registry.js의 type:'switch' 참조.
-let _kBankSpCache = null;
-export async function _loadKBankSP() {
-  if (_kBankSpCache) return _kBankSpCache;
-  try {
-    _kBankSpCache = await _loadSpByKey('SP-22_kbank', 'K-Bank');
-    return _kBankSpCache;
-  } catch (e) {
-    console.warn('[Orchestration] K-Bank SP 로드 실패:', e.message);
-    return null;
-  }
-}
+// [2026-09-13 삭제 — K-Bank 로더(_loadKBankSP)] gwp-registry.js가
+// 2026-08-01에 이미 "kbank 항목 철회"(은행 기능은 kgdc가 이미 전부
+// 갖추고 있었음이 확인돼 kgdc로 흡수, prompts/archive/로 이동)를
+// 반영했는데, 이 파일의 로더·SWITCH_SP_LOADERS 등록·label 매핑은
+// 그 철회 때 함께 정리되지 않고 남아 있었다 — 그 결과 'SP-22_kbank'
+// (sp-catalog.json에 없는 키, prompts/에 파일 자체가 없음)를 매번
+// 조용히 fetch 실패하는 죽은 코드였다(universal-common-inheritance-
+// smoketest.mjs가 실제로 재현·확인). K-Bank는 ac-routing-registry.json
+// 에도 등록돼 있지 않아 실사용 경로로 호출될 일이 없었다 — 회귀
+// 위험 없이 삭제한다.
 let _kTelecomSpCache = null;
 export async function _loadKTelecomSP() {
   if (_kTelecomSpCache) return _kTelecomSpCache;
@@ -327,7 +326,6 @@ export async function _loadKJobSP() {
 }
 // switch 타입 GWP id → 로더 매핑(아래 _parseAgentTags의 GWP 분기가 참조)
 const SWITCH_SP_LOADERS = {
-  kbank: _loadKBankSP,
   ktelecom: _loadKTelecomSP,
   kestate: _loadKEstateSP,
   kplan: _loadKPlanSP,
@@ -1739,7 +1737,7 @@ export async function _handleOrchestrationTags(fullReply, bubble, sendFn = callA
   if (switchMatch) {
     const svcId = switchMatch[1].toLowerCase();
     const loader = SWITCH_SP_LOADERS[svcId];
-    const label = { kbank: 'K-Bank', ktelecom: 'K-Telecom', kestate: 'K-Estate', kplan: 'K-Plan', kwatch: 'K-Watch', kjob: 'K-Job' }[svcId];
+    const label = { ktelecom: 'K-Telecom', kestate: 'K-Estate', kplan: 'K-Plan', kwatch: 'K-Watch', kjob: 'K-Job' }[svcId];
     if (loader) {
       console.log(`[Orchestration] AC 최상위 CALL_${switchMatch[1]} 감지 — ${label}로 전달 전환`);
       await _updateBubble(_stripInternalTags(fullReply));
@@ -4708,7 +4706,7 @@ export function _parseAgentTags(fullReply, bubble, userText, _preTab) {
         // 서로 덮어쓸 수 없다. 그래도 실제 스트리밍/정지 버튼 UX가 기대대로
         // 되는지는 실배포 환경에서 한 번은 수동 확인 권장(이 하네스는
         // DOM/fetch가 최소 스텁이라 실제 스트림 타이밍까지는 검증 못 함).
-        const label = { ktelecom: 'K-Telecom', kestate: 'K-Estate', kbank: 'K-Bank', kplan: 'K-Plan', kwatch: 'K-Watch', kjob: 'K-Job' }[svcId];
+        const label = { ktelecom: 'K-Telecom', kestate: 'K-Estate', kplan: 'K-Plan', kwatch: 'K-Watch', kjob: 'K-Job' }[svcId];
         const loader = SWITCH_SP_LOADERS[svcId];
         if (_gwpSwitchRecoveryInFlight) {
           // 재진입 — 지금 막 자동복구로 전환한 SP 자신의 응답이 다시
