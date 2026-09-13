@@ -7,6 +7,9 @@
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <title>대시보드 — 혼디</title>
 <script src="/gopang-wallet.js"></script>
+<!-- 2026-09-13 신설 — GDC 대시보드 탭 이식(K-서비스 공용 전화번호 인증 모듈,
+     desktop.html의 "내 GDC 대시보드" 모달과 동일한 스크립트). -->
+<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
 </head>
 <body>
 <style>
@@ -266,6 +269,31 @@ code, pre, kbd, samp, input, button, textarea, select {
 .pf-form-actions { margin-top: 18px; display: flex; align-items: center; gap: 12px; }
 .pf-form-actions .mf-save { width: auto; padding: 9px 24px; }
 
+/* GDC 탭 (2026-09-13 이식 — desktop.html #user-dash-overlay의 .ud-* 클래스를
+   대시보드 색상 변수에 맞춰 재작성. 모달 껍데기(overlay/닫기버튼/카드 그림자)는
+   빼고 탭 내부 콘텐츠만 가져왔다. */
+.gdc-balance { border: 1px solid var(--border); border-radius: var(--r-sm); padding: 14px 16px;
+  display: flex; justify-content: space-between; align-items: baseline; margin: 16px 20px 0; }
+.gdc-balance .l { font-size: 11px; color: var(--text4); }
+.gdc-balance .v { font-family: 'SFMono-Regular', 'Consolas', monospace; font-size: 22px; color: var(--text); }
+.gdc-sub { font-size: 11px; color: var(--text4); padding: 0 16px 12px; margin: 0 20px 16px;
+  border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; }
+.gdc-tabs { display: flex; border-bottom: 1px solid var(--border); margin: 0 20px 14px; gap: 2px; }
+.gdc-tab { padding: 9px 12px; font-size: 12px; color: var(--text4); cursor: pointer; border-bottom: 2px solid transparent; }
+.gdc-tab.active { color: var(--brand); border-bottom-color: var(--brand); font-weight: 700; }
+.gdc-body { padding: 0 20px 20px; }
+.gdc-pane { display: none; }
+.gdc-pane.active { display: block; }
+.gdc-rows { border: 1px solid var(--border); border-radius: var(--r-sm); overflow: hidden; }
+.gdc-txn { display: grid; grid-template-columns: 12px 1fr auto; align-items: center; gap: 10px;
+  padding: 10px 12px; border-bottom: 1px solid var(--border); background: var(--surface); }
+.gdc-txn:last-child { border-bottom: none; }
+.gdc-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text2); }
+.gdc-title { color: var(--text); font-size: 12.5px; }
+.gdc-meta { color: var(--text4); font-size: 11px; margin-top: 2px; }
+.gdc-amt { font-family: 'SFMono-Regular', 'Consolas', monospace; font-size: 12.5px; color: var(--text); text-align: right; white-space: nowrap; }
+.gdc-empty { text-align: center; padding: 28px 16px; color: var(--text4); font-size: 11.5px; line-height: 1.7; }
+
 .pf-refresh-btn { font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: var(--r-full); border: none; background: var(--surface-container); color: var(--text3); cursor: pointer; }
 .pf-refresh-btn:hover { background: var(--brand-bg); color: var(--brand-dk); }
 
@@ -448,6 +476,17 @@ code, pre, kbd, samp, input, button, textarea, select {
   </div>
 
   <nav class="dash-tabs" id="sideNav">
+    <!-- 2026-09-13 재배치 — GDC·프로필 관리를 상단(첫 두 개)으로 이동.
+         desktop.html의 "대시보드" 진입점이 이 페이지로 오도록 재배선되면서,
+         가장 먼저 찾을 두 탭을 맨 위에 둔다. -->
+    <button class="dash-tab" data-tab="gdc">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+      <span>GDC</span>
+    </button>
+    <button class="dash-tab" data-tab="profile">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg>
+      <span>프로필 관리</span>
+    </button>
     <button class="dash-tab active" data-tab="home">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9"></path><path d="M9 21V12h6v9"></path></svg>
       <span>홈</span>
@@ -464,10 +503,6 @@ code, pre, kbd, samp, input, button, textarea, select {
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2v6.343L4.4 17.4A2 2 0 0 0 6.2 20h11.6a2 2 0 0 0 1.8-2.6L15 8.343V2"></path><line x1="8" y1="2" x2="16" y2="2"></line><line x1="7" y1="14" x2="17" y2="14"></line></svg>
       <span>세무</span>
     </button>
-    <button class="dash-tab" data-tab="profile">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg>
-      <span>프로필 관리</span>
-    </button>
     <button class="dash-tab" data-tab="contacts">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
       <span>대화상대 관리</span>
@@ -479,6 +514,35 @@ code, pre, kbd, samp, input, button, textarea, select {
   </nav>
 
     <div class="main-content">
+
+      <!-- GDC (2026-09-13 신설 — desktop.html "내 GDC 대시보드" 모달을
+           탭으로 이식. K-서비스 공용 전화번호 인증(KAuth)을 그대로 재사용
+           — Ed25519 지갑 서명이 아니라 OTP 인증이라 프로필 관리 탭과는
+           별도 인증 체계를 쓴다(모달 원본과 동일). -->
+      <div class="dash-panel" id="panel-gdc">
+        <div class="gdc-balance">
+          <div class="l">GDC 잔액</div>
+          <div class="v" id="gdcBalance">—</div>
+        </div>
+        <div class="gdc-sub" id="gdcRenew"></div>
+
+        <div class="gdc-tabs">
+          <div class="gdc-tab active" data-pane="gdc-pane-charge">충전</div>
+          <div class="gdc-tab" data-pane="gdc-pane-usage">이용료</div>
+          <div class="gdc-tab" data-pane="gdc-pane-buy">구매</div>
+          <div class="gdc-tab" data-pane="gdc-pane-sell">판매</div>
+        </div>
+        <div class="gdc-body">
+          <div id="gdcLoading" style="padding:40px 24px;text-align:center;color:var(--text4);font-size:13px">확인 중…</div>
+          <div id="gdcResult" style="display:none">
+            <div class="gdc-pane active" id="gdc-pane-charge"><div class="gdc-rows" id="gdcChargeRows"></div></div>
+            <div class="gdc-pane" id="gdc-pane-usage"><div class="gdc-rows" id="gdcUsageRows"></div></div>
+            <div class="gdc-pane" id="gdc-pane-buy"><div class="gdc-empty">혼디마켓 구매 내역은 아직 실제 데이터와 연결되지 않았습니다.</div></div>
+            <div class="gdc-pane" id="gdc-pane-sell"><div class="gdc-empty">혼디마켓 판매 내역은 아직 실제 데이터와 연결되지 않았습니다.</div></div>
+          </div>
+          <button class="mini-btn" id="gdcSwitchAccountBtn" type="button" style="margin-top:8px">다른 번호로 조회</button>
+        </div>
+      </div>
 
       <!-- 홈 -->
       <div class="dash-panel active" id="panel-home">
@@ -883,6 +947,7 @@ code, pre, kbd, samp, input, button, textarea, select {
 
 <script>
 var TITLES = {
+  gdc: ['GDC', '잔액·충전·이용료 내역을 확인합니다'],
   home: ['홈', '오늘 혼디가 나를 위해 한 일'],
   pdv: ['내 기록 검색', '24시간 기록된 PDV에서 검색합니다'],
   financials: ['재무제표', '손익계산서 · 대차대조표 · 현금흐름표'],
@@ -2094,5 +2159,139 @@ document.getElementById('hometaxQueryBtn')?.addEventListener('click', async () =
     statusEl.textContent = '조회 실패: ' + e.message;
   }
 });
+</script>
+<script>
+// ══════════════════════════════════════════════════════════════
+// GDC 탭 (2026-09-13 신설) — desktop.html의 "내 GDC 대시보드" 모달
+// (_openUserDashboard 등)을 그대로 이식. KAuth(전화번호 OTP, K-서비스
+// 공용 인증 모듈, https://hondi.net/auth/k-service-auth-client.js)를
+// 재사용한다 — 프로필 관리 탭의 Ed25519 지갑 서명과는 별개의 인증이다
+// (GDC 잔액은 전화번호 기준으로 관리되기 때문 — 모달 원본과 동일).
+// ══════════════════════════════════════════════════════════════
+(() => {
+  const GDC_PROXY = 'https://hondi-proxy.tensor-city.workers.dev';
+
+  function gdcReset() {
+    document.getElementById('gdcLoading').style.display = 'block';
+    document.getElementById('gdcLoading').textContent = '확인 중…';
+    document.getElementById('gdcResult').style.display = 'none';
+    document.getElementById('gdcChargeRows').innerHTML = '';
+    document.getElementById('gdcUsageRows').innerHTML = '';
+    document.querySelectorAll('#panel-gdc .gdc-tab').forEach((t, i) => t.classList.toggle('active', i === 0));
+    document.querySelectorAll('#panel-gdc .gdc-pane').forEach((p, i) => p.classList.toggle('active', i === 0));
+  }
+
+  // 2026-09-12 신설(desktop.html과 동일 매핑 — 두 화면 라벨이 갈라지지
+  // 않도록 매핑을 바꿀 때 항상 같이 맞춰줄 것).
+  const _AI_SERVICE_LABEL = {
+    'hondi-chat': 'AI 비서 사용료', 'klaw': 'K-Law 사용료', 'klaw-verdict': 'K-Law 판결 조회 사용료',
+    'kplan': 'K-Plan 사용료', 'kjit': 'K-JIT 사용료', 'kcity': 'K-City 사용료',
+    'kmail-quota-overage': 'K-Mail 발송 한도 초과 사용료', 'kmail-storage-overage': 'K-Mail 저장공간 초과 사용료',
+    'hondi-subscription': '혼디 구독료', 'expert-persona-subscription': '전문가 페르소나 구독료',
+  };
+  function _aiUsageLabel(serviceId, model) {
+    if (serviceId) {
+      if (_AI_SERVICE_LABEL[serviceId]) return _AI_SERVICE_LABEL[serviceId];
+      if (serviceId.startsWith('biz:')) return `K-Biz(${serviceId.slice(4)}) 사용료`;
+      if (serviceId.startsWith('gov-fee:')) return `정부 수수료(${serviceId.slice(8)})`;
+      if (serviceId.startsWith('gov:')) return `지방행정(${serviceId.slice(4)}) 사용료`;
+      return `AI 사용료 (${serviceId})`;
+    }
+    return model ? `AI 사용 (${model})` : 'AI 사용료';
+  }
+
+  async function gdcLoadHistory(guid) {
+    const chargeBox = document.getElementById('gdcChargeRows');
+    const usageBox = document.getElementById('gdcUsageRows');
+    chargeBox.innerHTML = '<div class="gdc-empty">불러오는 중…</div>';
+    usageBox.innerHTML = '<div class="gdc-empty">불러오는 중…</div>';
+    try {
+      const res = await fetch(`${GDC_PROXY}/user/gdc-history?guid=${encodeURIComponent(guid)}&limit=30`);
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        chargeBox.innerHTML = '<div class="gdc-empty">내역을 불러오지 못했습니다.</div>';
+        usageBox.innerHTML = '<div class="gdc-empty">내역을 불러오지 못했습니다.</div>';
+        return;
+      }
+      const fmtDate = iso => { try { return new Date(iso).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch { return iso; } };
+      const charges = (data.history || []).filter(h => h.type === 'deposit');
+      const usages = (data.history || []).filter(h => h.type === 'ai_usage_charge');
+
+      chargeBox.innerHTML = charges.length ? charges.map(h => `
+        <div class="gdc-txn">
+          <div class="gdc-dot"></div>
+          <div><div class="gdc-title">${(h.memo || '').startsWith('signup_bonus:') ? '가입 축하 충전' : '유상 충전'}</div>
+               <div class="gdc-meta">${fmtDate(h.created)}</div></div>
+          <div class="gdc-amt">+${Math.trunc(h.amount_gdc ?? 0).toLocaleString()}</div>
+        </div>`).join('') : '<div class="gdc-empty">충전 내역이 없습니다.</div>';
+
+      usageBox.innerHTML = usages.length ? usages.map(h => `
+        <div class="gdc-txn">
+          <div class="gdc-dot"></div>
+          <div><div class="gdc-title">${_aiUsageLabel(h.service_id, h.model)}</div>
+               <div class="gdc-meta">${fmtDate(h.created)}</div></div>
+          <div class="gdc-amt">−${Math.trunc(h.amount_gdc ?? 0).toLocaleString()}</div>
+        </div>`).join('') : '<div class="gdc-empty">이용료 내역이 없습니다.</div>';
+    } catch (e) {
+      chargeBox.innerHTML = '<div class="gdc-empty">서버에 연결할 수 없습니다.</div>';
+      usageBox.innerHTML = '<div class="gdc-empty">서버에 연결할 수 없습니다.</div>';
+    }
+  }
+
+  async function gdcLoadBalance() {
+    const loading = document.getElementById('gdcLoading');
+    try {
+      const balRes = await fetch(`${GDC_PROXY}/user/gdc-balance`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone_verify_token: KAuth.getToken() }),
+      });
+      const balData = await balRes.json().catch(() => null);
+      if (!balRes.ok || !balData?.ok) {
+        loading.textContent = balData?.message || '이 전화번호로 등록된 프로필을 찾을 수 없습니다.';
+        return;
+      }
+      document.getElementById('gdcBalance').textContent = (balData.balance ?? 0).toLocaleString();
+      const subLabel = balData.subscribed ? (balData.tier_name || balData.tier || '구독중') : '미구독';
+      document.getElementById('gdcRenew').textContent =
+        subLabel + (balData.renews_at ? ` · 다음 결제 ${balData.renews_at}` : '');
+      loading.style.display = 'none';
+      document.getElementById('gdcResult').style.display = 'block';
+      if (balData.guid) gdcLoadHistory(balData.guid);
+    } catch (e) {
+      loading.textContent = '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.';
+    }
+  }
+
+  async function gdcOpen() {
+    gdcReset();
+    if (typeof KAuth === 'undefined') {
+      document.getElementById('gdcLoading').textContent = '인증 모듈을 불러오지 못했습니다 — 새로고침해 주세요.';
+      return;
+    }
+    await KAuth.ensureLogin();
+    await gdcLoadBalance();
+  }
+
+  async function gdcSwitchAccount() {
+    KAuth.logout();
+    gdcReset();
+    await KAuth.ensureLogin();
+    await gdcLoadBalance();
+  }
+
+  // GDC 탭 최초 클릭 시에만 인증+조회(financials/tax 탭과 동일한 지연 로딩 관례).
+  document.querySelector('.dash-tab[data-tab="gdc"]')?.addEventListener('click', gdcOpen, { once: true });
+
+  document.getElementById('gdcSwitchAccountBtn')?.addEventListener('click', gdcSwitchAccount);
+
+  document.querySelectorAll('#panel-gdc .gdc-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('#panel-gdc .gdc-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('#panel-gdc .gdc-pane').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.pane).classList.add('active');
+    });
+  });
+})();
 </script>
 </body></html>
