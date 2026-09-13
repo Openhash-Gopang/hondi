@@ -685,6 +685,25 @@
     "date": "2026-07-23"
   },
   {
+    "path": "/docs/SESSION_LESSONS_AC_ROUTING_MODEL_20260913_v1_0.html",
+    "title": "AC 라우팅 모델 확정 + ac-intent-router 설계 — 2,000개 질문으로 검증(정밀도 95.1%), K-서비스 internal/federated 실측 분류, qna 도메인 SP 버그 수정 (0913)",
+    "description": "AC 라우팅 모델 확정 + ac-intent-router 설계 — 2,000개 질문으로 검증(정밀도 95.1%), K-서비스 internal/federated 실측 분류, qna 도메인 SP 버그 수정 (0913)",
+    "keywords": [
+      "AC 라우팅 모델 확정 + ac",
+      "intent",
+      "router 설계",
+      "000개 질문으로 검증 정밀도 95.1%",
+      "서비스 internal",
+      "federated 실측 분류",
+      "qna 도메인 SP 버그 수정",
+      "0913"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_AC_ROUTING_MODEL_20260913_v1_0.html",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-13"
+  },
+  {
     "path": "/docs/SESSION_LESSONS_BIOMETRIC_E164_DEPLOYMENT_20260907_v1_0.html",
     "title": "지문 인증 강화 + e164 평문 제거 + 배포 사고 — device-link/전화번호 재클레임 생체인증 필수화, profiles.e164 해시/암호화 분리, 배포 파이프라인 재발견 및 사고 5건 실전 교훈(0907) ↗",
     "description": "지문 인증 강화 + e164 평문 제거 + 배포 사고 — device-link/전화번호 재클레임 생체인증 필수화, profiles.e164 해시/암호화 분리, 배포 파이프라인 재발견 및 사고 5건 실전 교훈(0907) ↗",

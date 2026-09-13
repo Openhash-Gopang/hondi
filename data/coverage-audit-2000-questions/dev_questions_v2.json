@@ -1,0 +1,5002 @@
+[
+  {
+    "id": "dev-0001",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC(AGENT-COMMON)가 SP를 호출할 때 정확히 어떤 데이터를 넘겨주나요?"
+  },
+  {
+    "id": "dev-0002",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC와 SP 사이에 오가는 메시지 포맷이 문서화돼 있나요?"
+  },
+  {
+    "id": "dev-0003",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC가 여러 SP 중 하나를 고를 때 판단 기준이 뭔가요?"
+  },
+  {
+    "id": "dev-0004",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC↔SP 3대 통신 시나리오가 정확히 뭘 가리키나요?"
+  },
+  {
+    "id": "dev-0005",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "SP가 AC로부터 받은 컨텍스트를 잘못 해석하면 어떻게 디버깅하나요?"
+  },
+  {
+    "id": "dev-0006",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC-PRO-CORE와 AC-SHADOW-CORE는 어떤 상황에서 각각 쓰이나요?"
+  },
+  {
+    "id": "dev-0007",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC-FLASH-EXECUTOR는 어떤 경량 작업에 쓰이나요?"
+  },
+  {
+    "id": "dev-0008",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "gov-tree 하이브리드 구조에서 '하이브리드'가 의미하는 두 축이 뭔가요?"
+  },
+  {
+    "id": "dev-0009",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "gov-tree가 다루는 라우팅과 gov-router가 다루는 라우팅은 어떻게 다른가요?"
+  },
+  {
+    "id": "dev-0010",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "55개 저장소 중 어느 것이 서로 직접 의존관계를 갖고 있나요?"
+  },
+  {
+    "id": "dev-0011",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "hondi 저장소와 gopang 저장소 사이에 코드가 공유되나요, 완전히 독립적인가요?"
+  },
+  {
+    "id": "dev-0012",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "레거시 gopang 코드베이스가 아직도 운영 중인 부분이 있나요?"
+  },
+  {
+    "id": "dev-0013",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "새 K-서비스 저장소를 만들 때 gopang과 hondi 중 어느 걸 기준으로 복제하나요?"
+  },
+  {
+    "id": "dev-0014",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "단일 소스 원칙이 이 조직에서 왜 이렇게 강조되나요?"
+  },
+  {
+    "id": "dev-0015",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "SP 사본이 두 곳에 존재하는 걸 자동으로 탐지하는 도구가 있나요?"
+  },
+  {
+    "id": "dev-0016",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "오늘 발견된 hondi-search-worker.js 죽은 사본 같은 사례가 다른 저장소에도 있을까요?"
+  },
+  {
+    "id": "dev-0017",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "control-tower 원칙이 코드 레벨에서 구체적으로 어떻게 강제되나요?"
+  },
+  {
+    "id": "dev-0018",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "call-ai.js에 있는 control-tower 강제 로직을 우회할 방법이 있나요?"
+  },
+  {
+    "id": "dev-0019",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "CONTROL-TOWER-PRINCIPLE_v1_1.md가 모든 SP에 자동으로 로딩되는 구조인가요?"
+  },
+  {
+    "id": "dev-0020",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "manifest-loader.js가 SP를 로딩하는 순서는 어떻게 결정되나요?"
+  },
+  {
+    "id": "dev-0021",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "manifest-loader.js가 실패하면 AC는 어떤 폴백을 쓰나요?"
+  },
+  {
+    "id": "dev-0022",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "UNIVERSAL-INTEGRITY 문서 체계는 몇 단계 계층으로 이루어져 있나요?"
+  },
+  {
+    "id": "dev-0023",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "SP-TREE 거버넌스 문서가 실제 SP 파일 구조와 어떻게 매핑되나요?"
+  },
+  {
+    "id": "dev-0024",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "새로운 SP를 추가할 때 SP-TREE 거버넌스를 반드시 따라야 하나요?"
+  },
+  {
+    "id": "dev-0025",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "SP-TREE에 등록되지 않은 SP가 실행되는 경우가 있나요?"
+  },
+  {
+    "id": "dev-0026",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "GWP(General Work Protocol) 채팅이 정확히 뭘 지칭하는 약자인가요?"
+  },
+  {
+    "id": "dev-0027",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "GWP 세션 종료 시 리포트가 8개 저장소에 중복돼 있던 문제는 어떻게 해결됐나요?"
+  },
+  {
+    "id": "dev-0028",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "gwp-report-client.js 공유 모듈은 어느 저장소가 원본을 갖고 있나요?"
+  },
+  {
+    "id": "dev-0029",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "GWP 채팅 탭이 여러 개 열려도 상태가 꼬이지 않나요?"
+  },
+  {
+    "id": "dev-0030",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "chat-shell 공용화 이전에는 각 서비스가 입력창을 어떻게 따로 구현했었나요?"
+  },
+  {
+    "id": "dev-0031",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC의 첫 대화(이름짓기) 로직은 어느 파일에 있나요?"
+  },
+  {
+    "id": "dev-0032",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC가 사용자의 PDV를 조회할 때 권한 검사를 어떻게 하나요?"
+  },
+  {
+    "id": "dev-0033",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC가 여러 K-서비스를 넘나들며 대화 맥락을 유지하는 방법이 뭔가요?"
+  },
+  {
+    "id": "dev-0034",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "레포 간 코드 재사용 정책이 공식 문서로 정리돼 있나요?"
+  },
+  {
+    "id": "dev-0035",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "공통 유틸리티 함수는 어느 저장소에 두는 게 원칙인가요?"
+  },
+  {
+    "id": "dev-0036",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "각 K-서비스 저장소가 독립 배포되는데 버전 관리는 어떻게 맞추나요?"
+  },
+  {
+    "id": "dev-0037",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "hondi 저장소의 worker.js가 1만 2천 줄이 넘는데 리팩터링 계획이 있나요?"
+  },
+  {
+    "id": "dev-0038",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC-EVOLUTION 문서 시리즈(v1.0~v1.5)는 어떤 변화들을 기록하고 있나요?"
+  },
+  {
+    "id": "dev-0039",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AGENCY-AC-COMMON 문서와 AC-PRO-CORE 문서는 서로 어떻게 다른 레이어인가요?"
+  },
+  {
+    "id": "dev-0040",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "SP 버전이 올라갈 때마다 이전 버전과의 호환성을 어떻게 검증하나요?"
+  },
+  {
+    "id": "dev-0041",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC가 여러 SP의 응답을 동시에 기다려야 할 때 타임아웃 정책이 있나요?"
+  },
+  {
+    "id": "dev-0042",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "새로운 개발자가 이 55개 저장소 구조를 처음 파악하려면 어디서부터 봐야 하나요?"
+  },
+  {
+    "id": "dev-0043",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC-AUTHOR-ORG 문서는 조직 단위 AC 설계를 다루는 건가요?"
+  },
+  {
+    "id": "dev-0044",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "gov-tree의 최상위 노드는 어느 저장소가 담당하나요?"
+  },
+  {
+    "id": "dev-0045",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "gov-tree 구조가 바뀌면 모든 하위 저장소가 함께 갱신돼야 하나요?"
+  },
+  {
+    "id": "dev-0046",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC와 SP 사이의 통신이 실패했을 때 사용자에게 보여지는 기본 메시지는 뭔가요?"
+  },
+  {
+    "id": "dev-0047",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "SP 프롬프트 하나가 너무 커지면 분리하는 기준이 있나요?"
+  },
+  {
+    "id": "dev-0048",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "이 조직에서 '탭 분리' 작업을 할 때 반복적으로 배선을 빠뜨리는 원인이 뭐라고 보나요?"
+  },
+  {
+    "id": "dev-0049",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC가 사용자 발화의 의도를 SP 카탈로그와 매칭하는 알고리즘이 룰 기반인가요, 모델 기반인가요?"
+  },
+  {
+    "id": "dev-0050",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "sp-catalog.json이 잘못되면 어떤 증상이 나타나나요?"
+  },
+  {
+    "id": "dev-0051",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "sp-catalog-categories.json과 sp-catalog.json은 어떤 계층 관계인가요?"
+  },
+  {
+    "id": "dev-0052",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC-EVOLUTION-GAPS 문서는 어떤 미해결 격차들을 정리해둔 건가요?"
+  },
+  {
+    "id": "dev-0053",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "레거시 gopang 코드를 참고할 때 hondi와 이름이 같은 함수인데 동작이 다른 경우가 있나요?"
+  },
+  {
+    "id": "dev-0054",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "전체 조직에서 가장 오래된 저장소는 어디이고 언제 만들어졌나요?"
+  },
+  {
+    "id": "dev-0055",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "새 개발자 온보딩 문서가 아키텍처 전체를 커버하나요, 부분적인가요?"
+  },
+  {
+    "id": "dev-0056",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC가 두 개 이상의 SP를 동시에 활성화할 수 있는 구조인가요?"
+  },
+  {
+    "id": "dev-0057",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "이 조직의 코드 리뷰 프로세스가 레포마다 다른가요, 통일돼 있나요?"
+  },
+  {
+    "id": "dev-0058",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC-PRO-CORE의 버전이 v1.13까지 올라온 이유(주요 변경 이력)를 알 수 있나요?"
+  },
+  {
+    "id": "dev-0059",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "hondi 레포와 K-서비스 레포 사이에 순환 의존성이 생길 위험은 없나요?"
+  },
+  {
+    "id": "dev-0060",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "이 아키텍처에서 '단일 진실 공급원(single source of truth)'이 지켜지지 않은 사례가 오늘 말고 또 있었나요?"
+  },
+  {
+    "id": "dev-0061",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC가 사용자에게 명확화 질문을 던지는 기준이 SP마다 다르게 설정돼 있나요?"
+  },
+  {
+    "id": "dev-0062",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "여러 SP가 겹치는 기능을 갖고 있을 때 우선순위는 어떻게 정하나요?"
+  },
+  {
+    "id": "dev-0063",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "GWP 리포트가 실패하면 세션 종료 자체가 막히나요?"
+  },
+  {
+    "id": "dev-0064",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC가 최초 접속 시 사용자 기기(PC/모바일)를 구분해서 다르게 동작하나요?"
+  },
+  {
+    "id": "dev-0065",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "manifest-loader.js와 hondi의 site-manifest.json은 서로 관련이 있나요, 완전히 다른 개념인가요?"
+  },
+  {
+    "id": "dev-0066",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC-SHADOW-CORE가 사용되는 '그림자 AI'는 정확히 어떤 역할을 하나요?"
+  },
+  {
+    "id": "dev-0067",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "그림자 AI가 기록한 PDV와 사용자가 직접 대화로 남긴 PDV의 신뢰도 우선순위가 어떻게 되나요?"
+  },
+  {
+    "id": "dev-0068",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "SP 하나가 다른 SP를 내부적으로 호출하는 구조가 허용되나요?"
+  },
+  {
+    "id": "dev-0069",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC가 SP 호출 실패를 반복하면 사용자에게 자동으로 대안을 제시하나요?"
+  },
+  {
+    "id": "dev-0070",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "이 조직의 55개 저장소 전체를 한 번에 검색할 수 있는 도구가 있나요?"
+  },
+  {
+    "id": "dev-0071",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "새 K-서비스가 추가될 때 gov-tree 등록 절차가 자동화돼 있나요, 수동인가요?"
+  },
+  {
+    "id": "dev-0072",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC-EVOLUTION 문서들이 실제 코드 변경 커밋과 1대1로 매칭되나요?"
+  },
+  {
+    "id": "dev-0073",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "SP 문서에 있는 예시 대화가 실제 배포된 SP 동작과 항상 일치하나요?"
+  },
+  {
+    "id": "dev-0074",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "이 아키텍처에서 장애가 발생했을 때 어느 로그부터 확인해야 하나요?"
+  },
+  {
+    "id": "dev-0075",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC가 여러 언어(한국어 외)로도 SP를 호출할 수 있나요?"
+  },
+  {
+    "id": "dev-0076",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "새 SP를 배포하기 전에 거치는 필수 검토 단계가 몇 단계인가요?"
+  },
+  {
+    "id": "dev-0077",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC-PRO-CORE와 AC-FLASH-EXECUTOR 중 비용이 더 저렴한 쪽은 어느 쪽인가요?"
+  },
+  {
+    "id": "dev-0078",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "이 조직의 브랜치 전략(feature 브랜치, PR 머지 등)이 55개 저장소 전체에 동일하게 적용되나요?"
+  },
+  {
+    "id": "dev-0079",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "SP-TREE 거버넌스 문서가 마지막으로 갱신된 게 언제인가요?"
+  },
+  {
+    "id": "dev-0080",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC가 사용자의 이전 세션 기록을 얼마나 오래 참조하나요?"
+  },
+  {
+    "id": "dev-0081",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "gov-tree의 하위 지자체 노드가 늘어나면 상위 노드의 부하도 같이 늘어나나요?"
+  },
+  {
+    "id": "dev-0082",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AGENCY-AC-COMMON 문서의 버전이 1.5까지 올라온 배경이 뭔가요?"
+  },
+  {
+    "id": "dev-0083",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "이 조직에서 문서(md/html)와 실제 코드가 어긋나는 사례를 어떻게 주기적으로 점검하나요?"
+  },
+  {
+    "id": "dev-0084",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "SP가 여러 개 있는 K-서비스에서 어떤 SP가 최종 응답을 만드는지 어떻게 추적하나요?"
+  },
+  {
+    "id": "dev-0085",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC의 첫 인사말이 지역(제주/전국)에 따라 다르게 나가나요?"
+  },
+  {
+    "id": "dev-0086",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "이 아키텍처 전체를 한 장의 다이어그램으로 정리한 문서가 있나요?"
+  },
+  {
+    "id": "dev-0087",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "hondi.net이 아닌 다른 서비스 도메인에서도 AC 이름이 '혼디'로 통일돼 있나요?"
+  },
+  {
+    "id": "dev-0088",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC와 SP 사이의 프로토콜 버전이 올라가면 하위 호환을 어떻게 보장하나요?"
+  },
+  {
+    "id": "dev-0089",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "이 조직에서 코드보다 문서가 먼저 작성되나요, 반대인가요?"
+  },
+  {
+    "id": "dev-0090",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "SP 하나의 실패가 다른 SP의 실행에도 연쇄적으로 영향을 주는 구조인가요?"
+  },
+  {
+    "id": "dev-0091",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC가 사용자 요청을 K-서비스로 넘길지 자체 처리할지 판단하는 기준이 뭔가요?"
+  },
+  {
+    "id": "dev-0092",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "이 조직의 저장소들이 전부 같은 라이선스(GPL v3.0)를 쓰나요?"
+  },
+  {
+    "id": "dev-0093",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC-AUTHOR_v1_0 문서와 AC-AUTHOR-ORG 문서는 개인용과 조직용으로 나뉜 건가요?"
+  },
+  {
+    "id": "dev-0094",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "새로운 광역지자체 위성 저장소를 gov-tree에 편입할 때 몇 단계 승인을 거치나요?"
+  },
+  {
+    "id": "dev-0095",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "이 조직에서 히스토리(과거 세션 기록)를 검색 가능한 형태로 인덱싱해두나요?"
+  },
+  {
+    "id": "dev-0096",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC가 SP 카탈로그를 매 요청마다 새로 불러오나요, 캐싱해서 쓰나요?"
+  },
+  {
+    "id": "dev-0097",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "이 아키텍처에서 '제1원칙'이라고 불리는 실행 우선 원칙이 어긴 사례가 있었나요?"
+  },
+  {
+    "id": "dev-0098",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "SP 하나를 폐기할 때 참조하던 다른 SP나 문서까지 함께 정리하는 절차가 있나요?"
+  },
+  {
+    "id": "dev-0099",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC가 사용자별로 다른 성격(페르소나)을 유지한다는데 그 설정은 어디에 저장되나요?"
+  },
+  {
+    "id": "dev-0100",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "이 조직의 커밋 메시지 컨벤션이 55개 저장소에 동일하게 적용되나요?"
+  },
+  {
+    "id": "dev-0101",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC-EVOLUTION-GAPS에 기록된 격차 중 아직 해결 안 된 게 몇 개나 남아있나요?"
+  },
+  {
+    "id": "dev-0102",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "새 개발자가 실수로 gopang 레포에 작업했는데 hondi여야 했던 사례가 있었나요?"
+  },
+  {
+    "id": "dev-0103",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "이 아키텍처에서 서로 다른 K-서비스가 같은 사용자 데이터를 동시에 수정하면 충돌 처리가 어떻게 되나요?"
+  },
+  {
+    "id": "dev-0104",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC가 SP 응답을 사용자에게 그대로 전달하나요, 한번 가공해서 전달하나요?"
+  },
+  {
+    "id": "dev-0105",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "이 조직 전체에서 테스트 커버리지가 가장 낮은 영역은 어디라고 보나요?"
+  },
+  {
+    "id": "dev-0106",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "gov-tree와 openhash 원장은 서로 다른 시스템인데 어디서 접점이 생기나요?"
+  },
+  {
+    "id": "dev-0107",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC가 다국어 지원을 준비 중이라면 SP 프롬프트도 다국어로 번역해야 하나요?"
+  },
+  {
+    "id": "dev-0108",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "이 조직에서 신규 합류 개발자용 필수 읽기 문서 목록이 정해져 있나요?"
+  },
+  {
+    "id": "dev-0109",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "SP-TREE 거버넌스와 CONTROL-TOWER-PRINCIPLE 문서 중 어느 게 상위 규범인가요?"
+  },
+  {
+    "id": "dev-0110",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC가 사용자 발화를 오분류해서 엉뚱한 SP로 보내면 어떻게 복구되나요?"
+  },
+  {
+    "id": "dev-0111",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "이 아키텍처 전체를 유지보수하는 인력 구조가 어떻게 되나요?"
+  },
+  {
+    "id": "dev-0112",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC-PRO-CORE 최신 버전에서 이전 버전 대비 가장 크게 바뀐 부분이 뭔가요?"
+  },
+  {
+    "id": "dev-0113",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "이 조직에서 55개 저장소를 한꺼번에 클론해서 로컬 개발환경을 구성하는 스크립트가 있나요?"
+  },
+  {
+    "id": "dev-0114",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "gov-tree 확장이 완료되면 전국 단위 AC가 하나로 통합되나요, 지역별로 계속 분리되나요?"
+  },
+  {
+    "id": "dev-0115",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC와 SP 사이의 통신 로그가 얼마나 오래 보관되나요?"
+  },
+  {
+    "id": "dev-0116",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "이 조직에서 SP 프롬프트를 여러 사람이 동시에 편집하면 충돌이 나지 않나요?"
+  },
+  {
+    "id": "dev-0117",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "새 K-서비스가 gov-tree와 별도로 독립 운영될 수도 있나요?"
+  },
+  {
+    "id": "dev-0118",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "AC가 사용자에게 먼저 말을 거는 시점(첫 대화 외)이 정책적으로 정해져 있나요?"
+  },
+  {
+    "id": "dev-0119",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "이 조직의 55개 저장소 중 실제로 매일 배포가 일어나는 곳은 몇 곳 정도인가요?"
+  },
+  {
+    "id": "dev-0120",
+    "category": "1_멀티레포_아키텍처_총론",
+    "question": "SP 하나의 변경이 승인되기까지 평균적으로 몇 명의 검토를 거치나요?"
+  },
+  {
+    "id": "dev-0121",
+    "category": "2_K서비스_개별구현",
+    "question": "hondi 레포의 worker.js가 1만 2천 줄이 넘는데 라우팅 테이블을 어떻게 관리하나요?"
+  },
+  {
+    "id": "dev-0122",
+    "category": "2_K서비스_개별구현",
+    "question": "hondi 레포의 desktop.html이 단일 파일로 이렇게 큰데 번들링 도구를 안 쓰는 이유가 있나요?"
+  },
+  {
+    "id": "dev-0123",
+    "category": "2_K서비스_개별구현",
+    "question": "hondi 레포의 site-manifest.json 생성 파이프라인은 어떤 CI 훅에 걸려 있나요?"
+  },
+  {
+    "id": "dev-0124",
+    "category": "2_K서비스_개별구현",
+    "question": "hondi 레포에서 K-서비스별 서브도메인 라우팅은 어느 파일에서 정의하나요?"
+  },
+  {
+    "id": "dev-0125",
+    "category": "2_K서비스_개별구현",
+    "question": "hondi 레포의 pb_hooks/main.pb.js는 몇 개의 컬렉션 훅을 갖고 있나요?"
+  },
+  {
+    "id": "dev-0126",
+    "category": "2_K서비스_개별구현",
+    "question": "hondi 레포에 있는 프롬프트 폴더(prompts/)의 파일 명명 규칙이 뭔가요?"
+  },
+  {
+    "id": "dev-0127",
+    "category": "2_K서비스_개별구현",
+    "question": "hondi 레포의 tests/live_smoketest 디렉터리는 어떤 기준으로 파일을 나누나요?"
+  },
+  {
+    "id": "dev-0128",
+    "category": "2_K서비스_개별구현",
+    "question": "hondi 레포의 tools/ 디렉터리 스크립트들은 CI에서 어떻게 자동 실행되나요?"
+  },
+  {
+    "id": "dev-0129",
+    "category": "2_K서비스_개별구현",
+    "question": "hondi 레포와 K-서비스 서브도메인 레포들 사이의 GDC 과금 데이터는 어디서 통합되나요?"
+  },
+  {
+    "id": "dev-0130",
+    "category": "2_K서비스_개별구현",
+    "question": "hondi 레포의 docs/ 폴더에 md와 html 문서가 섞여 있는 기준이 뭔가요?"
+  },
+  {
+    "id": "dev-0131",
+    "category": "2_K서비스_개별구현",
+    "question": "hondi 레포에서 데스크톱과 모바일(webapp.html) 코드가 얼마나 중복되나요?"
+  },
+  {
+    "id": "dev-0132",
+    "category": "2_K서비스_개별구현",
+    "question": "hondi 레포의 커밋 히스토리가 스쿼시 병합 위주라 세밀한 변경 추적이 어려운데 정책을 바꿀 계획이 있나요?"
+  },
+  {
+    "id": "dev-0133",
+    "category": "2_K서비스_개별구현",
+    "question": "hondi 레포의 expert-persona-index.json은 몇 명 단위로 갱신되나요?"
+  },
+  {
+    "id": "dev-0134",
+    "category": "2_K서비스_개별구현",
+    "question": "hondi 레포의 CI 파이프라인이 실패하면 어느 채널로 알림이 가나요?"
+  },
+  {
+    "id": "dev-0135",
+    "category": "2_K서비스_개별구현",
+    "question": "hondi 레포의 문서(docs/) 파일 수가 200개를 넘는데 검색 없이 찾기 힘들지 않나요?"
+  },
+  {
+    "id": "dev-0136",
+    "category": "2_K서비스_개별구현",
+    "question": "gopang 레포는 지금도 실제로 운영되고 있나요, 완전히 레거시인가요?"
+  },
+  {
+    "id": "dev-0137",
+    "category": "2_K서비스_개별구현",
+    "question": "gopang 레포의 README.md에 passport 프로젝트 내용이 들어가 있던데 이거 실수 아닌가요?"
+  },
+  {
+    "id": "dev-0138",
+    "category": "2_K서비스_개별구현",
+    "question": "gopang과 hondi 레포의 디렉터리 구조가 얼마나 비슷한가요?"
+  },
+  {
+    "id": "dev-0139",
+    "category": "2_K서비스_개별구현",
+    "question": "gopang 레포에만 있고 hondi로 아직 이관 안 된 기능이 있나요?"
+  },
+  {
+    "id": "dev-0140",
+    "category": "2_K서비스_개별구현",
+    "question": "gopang 레포의 ROADMAP.md는 언제 마지막으로 갱신됐나요?"
+  },
+  {
+    "id": "dev-0141",
+    "category": "2_K서비스_개별구현",
+    "question": "gopang이 제주도청 AI 비서로 시작했다는데 그 시절 코드가 지금도 남아있나요?"
+  },
+  {
+    "id": "dev-0142",
+    "category": "2_K서비스_개별구현",
+    "question": "gopang 레포를 완전히 아카이브 처리할 계획이 있나요?"
+  },
+  {
+    "id": "dev-0143",
+    "category": "2_K서비스_개별구현",
+    "question": "gopang과 hondi 사이에 데이터 마이그레이션이 실제로 있었나요?"
+  },
+  {
+    "id": "dev-0144",
+    "category": "2_K서비스_개별구현",
+    "question": "gopang 레포 이름 자체가 조직명(Openhash-Gopang)과 같은데 혼동되지 않나요?"
+  },
+  {
+    "id": "dev-0145",
+    "category": "2_K서비스_개별구현",
+    "question": "gopang 레포에 남아있는 미해결 이슈가 몇 건이나 되나요?"
+  },
+  {
+    "id": "dev-0146",
+    "category": "2_K서비스_개별구현",
+    "question": "gopang 레포의 커밋 로그를 보면 hondi 분기 시점이 정확히 언제인가요?"
+  },
+  {
+    "id": "dev-0147",
+    "category": "2_K서비스_개별구현",
+    "question": "gopang 레포를 지금 새로 클론하면 바로 실행이 되나요?"
+  },
+  {
+    "id": "dev-0148",
+    "category": "2_K서비스_개별구현",
+    "question": "gopang 레포와 jeju/jejudo 레포는 서로 어떤 관계인가요?"
+  },
+  {
+    "id": "dev-0149",
+    "category": "2_K서비스_개별구현",
+    "question": "gopang 레포가 완전히 폐기되면 커밋 히스토리는 어떻게 보존되나요?"
+  },
+  {
+    "id": "dev-0150",
+    "category": "2_K서비스_개별구현",
+    "question": "klaw 레포는 hondi.net의 K-Law 소스와 완전히 동일한 코드인가요?"
+  },
+  {
+    "id": "dev-0151",
+    "category": "2_K서비스_개별구현",
+    "question": "klaw 레포가 다루는 판례 데이터베이스는 어디서 가져오나요?"
+  },
+  {
+    "id": "dev-0152",
+    "category": "2_K서비스_개별구현",
+    "question": "klaw 레포의 SP가 법률 분야별로 몇 개나 나뉘어 있나요?"
+  },
+  {
+    "id": "dev-0153",
+    "category": "2_K서비스_개별구현",
+    "question": "klaw 레포에 저장된 판례 데이터의 저작권 문제는 어떻게 처리하나요?"
+  },
+  {
+    "id": "dev-0154",
+    "category": "2_K서비스_개별구현",
+    "question": "klaw 레포의 desktop.html은 hondi와 얼마나 다른 디자인 시스템을 쓰나요?"
+  },
+  {
+    "id": "dev-0155",
+    "category": "2_K서비스_개별구현",
+    "question": "klaw 레포가 독립 도메인(klaw.hondi.net)으로 배포되는 파이프라인이 hondi와 같나요?"
+  },
+  {
+    "id": "dev-0156",
+    "category": "2_K서비스_개별구현",
+    "question": "klaw 레포에 라이브 스모크테스트가 있다면 어떤 시나리오를 다루나요?"
+  },
+  {
+    "id": "dev-0157",
+    "category": "2_K서비스_개별구현",
+    "question": "klaw 레포의 SP가 최신 판례를 반영하려면 데이터를 얼마나 자주 갱신하나요?"
+  },
+  {
+    "id": "dev-0158",
+    "category": "2_K서비스_개별구현",
+    "question": "klaw 레포와 K-Const(헌법재판소 시뮬레이션) 레포는 코드를 공유하나요?"
+  },
+  {
+    "id": "dev-0159",
+    "category": "2_K서비스_개별구현",
+    "question": "klaw 레포에서 잘못된 법률 조언이 나갔을 때 롤백 절차가 있나요?"
+  },
+  {
+    "id": "dev-0160",
+    "category": "2_K서비스_개별구현",
+    "question": "klaw 레포의 PocketBase 스키마가 hondi 본체와 별도로 관리되나요?"
+  },
+  {
+    "id": "dev-0161",
+    "category": "2_K서비스_개별구현",
+    "question": "klaw 레포가 GDC 과금과 연동되는 방식이 다른 K-서비스와 같나요?"
+  },
+  {
+    "id": "dev-0162",
+    "category": "2_K서비스_개별구현",
+    "question": "klaw 레포의 SP가 오래된 판례를 인용하면 어떻게 걸러내나요?"
+  },
+  {
+    "id": "dev-0163",
+    "category": "2_K서비스_개별구현",
+    "question": "klaw 레포와 K-Const 레포가 향후 하나로 합쳐질 가능성이 있나요?"
+  },
+  {
+    "id": "dev-0164",
+    "category": "2_K서비스_개별구현",
+    "question": "mail 레포는 K-Mail의 마케팅 소개 사이트인가요, 실제 메일 기능 코드도 포함하나요?"
+  },
+  {
+    "id": "dev-0165",
+    "category": "2_K서비스_개별구현",
+    "question": "mail 레포와 hondi 레포 안의 kmail 관련 코드는 어떻게 역할이 나뉘나요?"
+  },
+  {
+    "id": "dev-0166",
+    "category": "2_K서비스_개별구현",
+    "question": "mail 레포의 mail_id 자동배정 로직은 어느 파일에 있나요?"
+  },
+  {
+    "id": "dev-0167",
+    "category": "2_K서비스_개별구현",
+    "question": "mail 레포에서 콜론 버그(:) 관련 수정이 있었다는데 원인이 뭐였나요?"
+  },
+  {
+    "id": "dev-0168",
+    "category": "2_K서비스_개별구현",
+    "question": "mail 레포의 캠페인 기능이 사용자 의사와 무관하게 발송된 사고가 있었다는데 지금은 어떻게 방지되나요?"
+  },
+  {
+    "id": "dev-0169",
+    "category": "2_K서비스_개별구현",
+    "question": "mail 레포가 외부 이메일 서버(SMTP)와 실제로 통신하나요, 자체 시스템인가요?"
+  },
+  {
+    "id": "dev-0170",
+    "category": "2_K서비스_개별구현",
+    "question": "mail 레포의 FETCH_CONTENT 기능은 어떤 외부 소스까지 읽어올 수 있나요?"
+  },
+  {
+    "id": "dev-0171",
+    "category": "2_K서비스_개별구현",
+    "question": "mail 레포에서 GitHub 저장소 API 우회 로직이 왜 필요했나요?"
+  },
+  {
+    "id": "dev-0172",
+    "category": "2_K서비스_개별구현",
+    "question": "mail 레포의 스모크테스트가 실제 메일 발송까지 검증하나요, 모킹만 하나요?"
+  },
+  {
+    "id": "dev-0173",
+    "category": "2_K서비스_개별구현",
+    "question": "mail 레포와 hondi 검색이 연동될 때 어떤 API를 쓰나요?"
+  },
+  {
+    "id": "dev-0174",
+    "category": "2_K서비스_개별구현",
+    "question": "mail 레포의 GDC 요금 체계가 K-Mail 소개 문서와 실제로 일치하나요?"
+  },
+  {
+    "id": "dev-0175",
+    "category": "2_K서비스_개별구현",
+    "question": "mail 레포에서 SP 버전이 v1.30까지 올라온 주요 변경 이력이 뭔가요?"
+  },
+  {
+    "id": "dev-0176",
+    "category": "2_K서비스_개별구현",
+    "question": "mail 레포의 핸드오프 문서가 다른 K-서비스 대비 유난히 많은 이유가 있나요?"
+  },
+  {
+    "id": "dev-0177",
+    "category": "2_K서비스_개별구현",
+    "question": "plan 레포는 K-Plan 전용 사이트 코드만 있나요, SP 로직도 포함하나요?"
+  },
+  {
+    "id": "dev-0178",
+    "category": "2_K서비스_개별구현",
+    "question": "plan 레포의 GDC 실차감이 3주간 발생하지 않았던 사고 원인이 뭐였나요?"
+  },
+  {
+    "id": "dev-0179",
+    "category": "2_K서비스_개별구현",
+    "question": "plan 레포가 반복 일정을 처리하는 데이터 구조는 어떻게 되나요?"
+  },
+  {
+    "id": "dev-0180",
+    "category": "2_K서비스_개별구현",
+    "question": "plan 레포와 K-Mail이 일정 알림을 주고받을 때 어떤 프로토콜을 쓰나요?"
+  },
+  {
+    "id": "dev-0181",
+    "category": "2_K서비스_개별구현",
+    "question": "plan 레포의 캘린더 데이터는 PocketBase에 어떤 스키마로 저장되나요?"
+  },
+  {
+    "id": "dev-0182",
+    "category": "2_K서비스_개별구현",
+    "question": "plan 레포가 외부 캘린더(구글 캘린더 등)와 실제로 동기화되나요?"
+  },
+  {
+    "id": "dev-0183",
+    "category": "2_K서비스_개별구현",
+    "question": "plan 레포의 SP가 자연어 일정 표현('다음 주 화요일')을 파싱하는 로직이 자체 구현인가요?"
+  },
+  {
+    "id": "dev-0184",
+    "category": "2_K서비스_개별구현",
+    "question": "plan 레포에서 일정 충돌 감지 알고리즘은 어떻게 동작하나요?"
+  },
+  {
+    "id": "dev-0185",
+    "category": "2_K서비스_개별구현",
+    "question": "plan 레포의 desktop.html도 hondi 검색 매니페스트에 등록돼 있나요?"
+  },
+  {
+    "id": "dev-0186",
+    "category": "2_K서비스_개별구현",
+    "question": "plan 레포가 다른 K-서비스 대비 트래픽이 얼마나 되나요?"
+  },
+  {
+    "id": "dev-0187",
+    "category": "2_K서비스_개별구현",
+    "question": "plan 레포의 배포 파이프라인에 별도 Worker가 있나요?"
+  },
+  {
+    "id": "dev-0188",
+    "category": "2_K서비스_개별구현",
+    "question": "plan 레포에 알려진 미해결 버그가 있나요?"
+  },
+  {
+    "id": "dev-0189",
+    "category": "2_K서비스_개별구현",
+    "question": "plan 레포와 K-Mail 사이의 일정 알림 연동이 실패하면 로그가 어디에 남나요?"
+  },
+  {
+    "id": "dev-0190",
+    "category": "2_K서비스_개별구현",
+    "question": "job 레포는 K-Job 채용 매칭 알고리즘을 직접 구현하나요?"
+  },
+  {
+    "id": "dev-0191",
+    "category": "2_K서비스_개별구현",
+    "question": "job 레포의 이력서 데이터가 PDV와 어떻게 연동되나요?"
+  },
+  {
+    "id": "dev-0192",
+    "category": "2_K서비스_개별구현",
+    "question": "job 레포가 채용공고 사기를 걸러내는 로직을 갖고 있나요?"
+  },
+  {
+    "id": "dev-0193",
+    "category": "2_K서비스_개별구현",
+    "question": "job 레포와 K-Biz의 채용 연동 기능은 어느 쪽 저장소에 구현돼 있나요?"
+  },
+  {
+    "id": "dev-0194",
+    "category": "2_K서비스_개별구현",
+    "question": "job 레포의 SP가 자기소개서 첨삭까지 하는데 프롬프트가 얼마나 긴가요?"
+  },
+  {
+    "id": "dev-0195",
+    "category": "2_K서비스_개별구현",
+    "question": "job 레포에 구인 기업용과 구직자용 화면이 완전히 분리돼 있나요?"
+  },
+  {
+    "id": "dev-0196",
+    "category": "2_K서비스_개별구현",
+    "question": "job 레포의 데이터베이스에서 이력서는 얼마나 오래 보관되나요?"
+  },
+  {
+    "id": "dev-0197",
+    "category": "2_K서비스_개별구현",
+    "question": "job 레포가 다른 채용 플랫폼 API와 연동돼 있나요?"
+  },
+  {
+    "id": "dev-0198",
+    "category": "2_K서비스_개별구현",
+    "question": "job 레포의 스모크테스트가 이력서 매칭 정확도까지 검증하나요?"
+  },
+  {
+    "id": "dev-0199",
+    "category": "2_K서비스_개별구현",
+    "question": "job 레포에서 GDC 과금이 구인 기업한테만 적용되나요, 구직자한테도 적용되나요?"
+  },
+  {
+    "id": "dev-0200",
+    "category": "2_K서비스_개별구현",
+    "question": "job 레포의 desktop.html 구조가 hondi 메인과 비슷한 컴포넌트를 재사용하나요?"
+  },
+  {
+    "id": "dev-0201",
+    "category": "2_K서비스_개별구현",
+    "question": "job 레포에 최근 큰 리팩터링이 있었나요?"
+  },
+  {
+    "id": "dev-0202",
+    "category": "2_K서비스_개별구현",
+    "question": "job 레포의 채용공고 만료 처리가 자동으로 되나요?"
+  },
+  {
+    "id": "dev-0203",
+    "category": "2_K서비스_개별구현",
+    "question": "job 레포의 이력서 데이터가 K-Biz 채용과 연동될 때 권한 검사가 어떻게 되나요?"
+  },
+  {
+    "id": "dev-0204",
+    "category": "2_K서비스_개별구현",
+    "question": "biz 레포는 K-Biz의 세무·경영 자문 SP를 직접 갖고 있나요?"
+  },
+  {
+    "id": "dev-0205",
+    "category": "2_K서비스_개별구현",
+    "question": "biz 레포가 K-Tax 레포와 데이터를 얼마나 공유하나요?"
+  },
+  {
+    "id": "dev-0206",
+    "category": "2_K서비스_개별구현",
+    "question": "biz 레포의 사업자 인증 절차는 K-서비스 공통 인증과 같은 방식인가요?"
+  },
+  {
+    "id": "dev-0207",
+    "category": "2_K서비스_개별구현",
+    "question": "biz 레포에서 매출 관리 기능이 실제 회계 시스템과 연동되나요?"
+  },
+  {
+    "id": "dev-0208",
+    "category": "2_K서비스_개별구현",
+    "question": "biz 레포의 SP가 업종별로 세분화돼 있나요?"
+  },
+  {
+    "id": "dev-0209",
+    "category": "2_K서비스_개별구현",
+    "question": "biz 레포가 관리하는 사업자 데이터가 PDV의 업무 도메인에 저장되나요?"
+  },
+  {
+    "id": "dev-0210",
+    "category": "2_K서비스_개별구현",
+    "question": "biz 레포와 K-Job의 채용 연동은 실시간으로 이뤄지나요?"
+  },
+  {
+    "id": "dev-0211",
+    "category": "2_K서비스_개별구현",
+    "question": "biz 레포에서 정부 지원사업 정보는 어디서 수집하나요?"
+  },
+  {
+    "id": "dev-0212",
+    "category": "2_K서비스_개별구현",
+    "question": "biz 레포의 대시보드가 K-Stock 데이터와도 연동되나요?"
+  },
+  {
+    "id": "dev-0213",
+    "category": "2_K서비스_개별구현",
+    "question": "biz 레포의 GDC 과금이 매출 규모에 따라 어떻게 계산되나요?"
+  },
+  {
+    "id": "dev-0214",
+    "category": "2_K서비스_개별구현",
+    "question": "biz 레포에 프랜차이즈 특화 기능이 별도로 구현돼 있나요?"
+  },
+  {
+    "id": "dev-0215",
+    "category": "2_K서비스_개별구현",
+    "question": "biz 레포의 라이브 스모크테스트가 세무 계산 정확도를 검증하나요?"
+  },
+  {
+    "id": "dev-0216",
+    "category": "2_K서비스_개별구현",
+    "question": "biz 레포가 관리하는 업종 분류 체계는 표준산업분류(KSIC)를 따르나요?"
+  },
+  {
+    "id": "dev-0217",
+    "category": "2_K서비스_개별구현",
+    "question": "search 레포는 오늘 다룬 hondi-search-relay와 같은 코드베이스인가요, 별개인가요?"
+  },
+  {
+    "id": "dev-0218",
+    "category": "2_K서비스_개별구현",
+    "question": "search 레포가 K-Search(개인 데이터 검색)와 hondi 검색(사이트 내비게이션 검색) 중 어느 쪽을 다루나요?"
+  },
+  {
+    "id": "dev-0219",
+    "category": "2_K서비스_개별구현",
+    "question": "search 레포의 인덱싱 방식이 전문 검색엔진(Elasticsearch 등)을 쓰나요, 자체 구현인가요?"
+  },
+  {
+    "id": "dev-0220",
+    "category": "2_K서비스_개별구현",
+    "question": "search 레포가 PDV 전체를 검색 대상으로 삼을 때 성능 문제는 없나요?"
+  },
+  {
+    "id": "dev-0221",
+    "category": "2_K서비스_개별구현",
+    "question": "search 레포의 검색 결과 랭킹 알고리즘이 어떻게 되나요?"
+  },
+  {
+    "id": "dev-0222",
+    "category": "2_K서비스_개별구현",
+    "question": "search 레포와 hondi-search-relay가 향후 통합될 계획이 있나요?"
+  },
+  {
+    "id": "dev-0223",
+    "category": "2_K서비스_개별구현",
+    "question": "search 레포의 SP가 이미지 안의 텍스트도 검색하는 기능을 어떻게 구현했나요?"
+  },
+  {
+    "id": "dev-0224",
+    "category": "2_K서비스_개별구현",
+    "question": "search 레포에서 검색 속도 저하 이슈가 보고된 적 있나요?"
+  },
+  {
+    "id": "dev-0225",
+    "category": "2_K서비스_개별구현",
+    "question": "search 레포의 캐싱 전략이 hondi-search-relay와 같은 방식(KV, TTL)인가요?"
+  },
+  {
+    "id": "dev-0226",
+    "category": "2_K서비스_개별구현",
+    "question": "search 레포가 여러 K-서비스에 흩어진 데이터를 통합 검색하는 아키텍처가 어떻게 되나요?"
+  },
+  {
+    "id": "dev-0227",
+    "category": "2_K서비스_개별구현",
+    "question": "search 레포의 스모크테스트 커버리지가 어느 정도인가요?"
+  },
+  {
+    "id": "dev-0228",
+    "category": "2_K서비스_개별구현",
+    "question": "search 레포에 음성 검색 기능이 실제로 구현돼 있나요?"
+  },
+  {
+    "id": "dev-0229",
+    "category": "2_K서비스_개별구현",
+    "question": "search 레포의 인덱스 재구축 주기는 얼마나 되나요?"
+  },
+  {
+    "id": "dev-0230",
+    "category": "2_K서비스_개별구현",
+    "question": "watch 레포의 신고 접수 데이터가 지자체 담당 부서 시스템과 API로 연동되나요?"
+  },
+  {
+    "id": "dev-0231",
+    "category": "2_K서비스_개별구현",
+    "question": "watch 레포에서 위치 정보 없이 신고하면 어떻게 처리하나요?"
+  },
+  {
+    "id": "dev-0232",
+    "category": "2_K서비스_개별구현",
+    "question": "watch 레포의 허위 신고 필터링 로직이 어떤 기준으로 판단하나요?"
+  },
+  {
+    "id": "dev-0233",
+    "category": "2_K서비스_개별구현",
+    "question": "watch 레포가 CCTV 연동 기능을 실제로 구현했나요, 계획 단계인가요?"
+  },
+  {
+    "id": "dev-0234",
+    "category": "2_K서비스_개별구현",
+    "question": "watch 레포의 신고 우선순위 알고리즘이 중복 신고 수를 어떻게 반영하나요?"
+  },
+  {
+    "id": "dev-0235",
+    "category": "2_K서비스_개별구현",
+    "question": "watch 레포와 K-Police 레포의 신고 데이터가 서로 공유되나요?"
+  },
+  {
+    "id": "dev-0236",
+    "category": "2_K서비스_개별구현",
+    "question": "watch 레포의 사진 업로드 용량 제한이 얼마인가요?"
+  },
+  {
+    "id": "dev-0237",
+    "category": "2_K서비스_개별구현",
+    "question": "watch 레포의 지도 시각화는 어떤 지도 API를 쓰나요?"
+  },
+  {
+    "id": "dev-0238",
+    "category": "2_K서비스_개별구현",
+    "question": "watch 레포에서 신고 처리 SLA(처리 기한)가 정해져 있나요?"
+  },
+  {
+    "id": "dev-0239",
+    "category": "2_K서비스_개별구현",
+    "question": "watch 레포의 익명 신고가 실제로 완전한 익명인지 검증할 방법이 있나요?"
+  },
+  {
+    "id": "dev-0240",
+    "category": "2_K서비스_개별구현",
+    "question": "watch 레포의 스모크테스트가 신고-처리-완료 전체 흐름을 검증하나요?"
+  },
+  {
+    "id": "dev-0241",
+    "category": "2_K서비스_개별구현",
+    "question": "watch 레포가 다른 지자체로 확장될 때 부서 매핑 테이블을 어떻게 관리하나요?"
+  },
+  {
+    "id": "dev-0242",
+    "category": "2_K서비스_개별구현",
+    "question": "watch 레포의 신고 데이터가 통계로 공개될 때 개인정보는 어떻게 익명화되나요?"
+  },
+  {
+    "id": "dev-0243",
+    "category": "2_K서비스_개별구현",
+    "question": "watch 레포가 처리 못한 신고가 자동으로 상위 부서에 에스컬레이션되나요?"
+  },
+  {
+    "id": "dev-0244",
+    "category": "2_K서비스_개별구현",
+    "question": "telecom 레포가 실제 통신사 API와 연동해서 요금제 정보를 가져오나요, 자체 데이터인가요?"
+  },
+  {
+    "id": "dev-0245",
+    "category": "2_K서비스_개별구현",
+    "question": "telecom 레포의 번호이동 처리가 실시간으로 되나요, 배치로 처리되나요?"
+  },
+  {
+    "id": "dev-0246",
+    "category": "2_K서비스_개별구현",
+    "question": "telecom 레포에서 로밍 요금제 데이터는 어느 주기로 갱신하나요?"
+  },
+  {
+    "id": "dev-0247",
+    "category": "2_K서비스_개별구현",
+    "question": "telecom 레포의 요금제 추천 알고리즘이 사용 패턴을 얼마나 정교하게 분석하나요?"
+  },
+  {
+    "id": "dev-0248",
+    "category": "2_K서비스_개별구현",
+    "question": "telecom 레포가 알뜰폰 사업자 정보까지 커버하나요?"
+  },
+  {
+    "id": "dev-0249",
+    "category": "2_K서비스_개별구현",
+    "question": "telecom 레포의 스팸 차단 기능이 자체 DB인가요, 외부 서비스 연동인가요?"
+  },
+  {
+    "id": "dev-0250",
+    "category": "2_K서비스_개별구현",
+    "question": "telecom 레포에서 통신 장애 알림은 어떤 소스에서 받아오나요?"
+  },
+  {
+    "id": "dev-0251",
+    "category": "2_K서비스_개별구현",
+    "question": "telecom 레포의 결합 할인 계산 로직이 얼마나 복잡한가요?"
+  },
+  {
+    "id": "dev-0252",
+    "category": "2_K서비스_개별구현",
+    "question": "telecom 레포가 유심 재고 관리 기능도 갖고 있나요?"
+  },
+  {
+    "id": "dev-0253",
+    "category": "2_K서비스_개별구현",
+    "question": "telecom 레포의 GDC 결제와 실제 통신요금 청구가 어떻게 연결되나요?"
+  },
+  {
+    "id": "dev-0254",
+    "category": "2_K서비스_개별구현",
+    "question": "telecom 레포의 desktop.html이 hondi 디자인 시스템을 그대로 따르나요?"
+  },
+  {
+    "id": "dev-0255",
+    "category": "2_K서비스_개별구현",
+    "question": "telecom 레포에 알려진 미해결 이슈가 있나요?"
+  },
+  {
+    "id": "dev-0256",
+    "category": "2_K서비스_개별구현",
+    "question": "telecom 레포가 통신 3사 데이터를 모두 동일한 형식으로 정규화하나요?"
+  },
+  {
+    "id": "dev-0257",
+    "category": "2_K서비스_개별구현",
+    "question": "democracy 레포의 투표 시스템이 OpenHash 원장에 직접 기록되는 구조인가요?"
+  },
+  {
+    "id": "dev-0258",
+    "category": "2_K서비스_개별구현",
+    "question": "democracy 레포의 공헌도 점수는 어떤 데이터를 기반으로 계산되나요?"
+  },
+  {
+    "id": "dev-0259",
+    "category": "2_K서비스_개별구현",
+    "question": "democracy 레포가 다루는 desktop.html 도메인이 city.hondi.net처럼 별도인가요?"
+  },
+  {
+    "id": "dev-0260",
+    "category": "2_K서비스_개별구현",
+    "question": "democracy 레포의 청원 심사 알고리즘이 사람 개입 없이 자동으로 되나요?"
+  },
+  {
+    "id": "dev-0261",
+    "category": "2_K서비스_개별구현",
+    "question": "democracy 레포에서 투표 조작을 막는 기술적 장치가 뭐가 있나요?"
+  },
+  {
+    "id": "dev-0262",
+    "category": "2_K서비스_개별구현",
+    "question": "democracy 레포가 의결권 위임 기능을 실제로 구현했나요?"
+  },
+  {
+    "id": "dev-0263",
+    "category": "2_K서비스_개별구현",
+    "question": "democracy 레포의 안건 데이터베이스 스키마가 어떻게 되나요?"
+  },
+  {
+    "id": "dev-0264",
+    "category": "2_K서비스_개별구현",
+    "question": "democracy 레포와 K-City 레포가 시민 의견 데이터를 공유하나요?"
+  },
+  {
+    "id": "dev-0265",
+    "category": "2_K서비스_개별구현",
+    "question": "democracy 레포의 스모크테스트가 투표 무결성까지 검증하나요?"
+  },
+  {
+    "id": "dev-0266",
+    "category": "2_K서비스_개별구현",
+    "question": "democracy 레포가 지역 단위 안건과 전국 단위 안건을 어떻게 구분해서 처리하나요?"
+  },
+  {
+    "id": "dev-0267",
+    "category": "2_K서비스_개별구현",
+    "question": "democracy 레포에서 미성년자 투표 제한이 코드 레벨에서 어떻게 걸려있나요?"
+  },
+  {
+    "id": "dev-0268",
+    "category": "2_K서비스_개별구현",
+    "question": "democracy 레포의 GDC 연동이 있다면 어떤 용도로 쓰이나요?"
+  },
+  {
+    "id": "dev-0269",
+    "category": "2_K서비스_개별구현",
+    "question": "democracy 레포의 안건 데이터가 삭제 요청되면 OpenHash 기록은 어떻게 처리되나요?"
+  },
+  {
+    "id": "dev-0270",
+    "category": "2_K서비스_개별구현",
+    "question": "market 레포는 혼디장(K-Market) 전체 백엔드를 담당하나요?"
+  },
+  {
+    "id": "dev-0271",
+    "category": "2_K서비스_개별구현",
+    "question": "market 레포의 결제 시스템이 GDC 단일 결제 수단만 지원하나요?"
+  },
+  {
+    "id": "dev-0272",
+    "category": "2_K서비스_개별구현",
+    "question": "market 레포에서 판매자 신뢰도 점수는 어떻게 산출되나요?"
+  },
+  {
+    "id": "dev-0273",
+    "category": "2_K서비스_개별구현",
+    "question": "market 레포가 K-Logistics와 배송 데이터를 어떻게 주고받나요?"
+  },
+  {
+    "id": "dev-0274",
+    "category": "2_K서비스_개별구현",
+    "question": "market 레포의 상품 검색이 K-Search와 같은 엔진을 쓰나요?"
+  },
+  {
+    "id": "dev-0275",
+    "category": "2_K서비스_개별구현",
+    "question": "market 레포에서 거래 분쟁이 발생하면 처리 프로세스가 코드로 구현돼 있나요?"
+  },
+  {
+    "id": "dev-0276",
+    "category": "2_K서비스_개별구현",
+    "question": "market 레포의 수수료 계산 로직이 카테고리별로 다른가요?"
+  },
+  {
+    "id": "dev-0277",
+    "category": "2_K서비스_개별구현",
+    "question": "market 레포가 중고거래와 신품거래를 같은 스키마로 관리하나요?"
+  },
+  {
+    "id": "dev-0278",
+    "category": "2_K서비스_개별구현",
+    "question": "market 레포의 리뷰 시스템이 조작 방지 로직을 갖고 있나요?"
+  },
+  {
+    "id": "dev-0279",
+    "category": "2_K서비스_개별구현",
+    "question": "market 레포의 스모크테스트가 결제-배송-정산 전체 흐름을 커버하나요?"
+  },
+  {
+    "id": "dev-0280",
+    "category": "2_K서비스_개별구현",
+    "question": "market 레포가 농산물 직거래 같은 특화 카테고리를 별도로 관리하나요?"
+  },
+  {
+    "id": "dev-0281",
+    "category": "2_K서비스_개별구현",
+    "question": "market 레포의 정산 주기는 코드에서 어떻게 스케줄링되나요?"
+  },
+  {
+    "id": "dev-0282",
+    "category": "2_K서비스_개별구현",
+    "question": "market 레포의 정산 시스템이 gdc 레포의 결제 모듈을 그대로 가져다 쓰나요?"
+  },
+  {
+    "id": "dev-0283",
+    "category": "2_K서비스_개별구현",
+    "question": "market 레포에서 판매자와 구매자 간 채팅 기능도 자체 구현했나요?"
+  },
+  {
+    "id": "dev-0284",
+    "category": "2_K서비스_개별구현",
+    "question": "tax 레포가 홈택스 API와 실제로 연동돼 있나요, 자체 계산 로직인가요?"
+  },
+  {
+    "id": "dev-0285",
+    "category": "2_K서비스_개별구현",
+    "question": "tax 레포의 세액 계산 로직이 매년 세법 개정을 어떻게 반영하나요?"
+  },
+  {
+    "id": "dev-0286",
+    "category": "2_K서비스_개별구현",
+    "question": "tax 레포가 K-Biz의 매출 데이터를 자동으로 불러오는 연동이 있나요?"
+  },
+  {
+    "id": "dev-0287",
+    "category": "2_K서비스_개별구현",
+    "question": "tax 레포의 공제 항목 데이터베이스는 얼마나 자주 갱신되나요?"
+  },
+  {
+    "id": "dev-0288",
+    "category": "2_K서비스_개별구현",
+    "question": "tax 레포에서 잘못된 세금 계산으로 인한 책임 소재가 코드 주석에 명시돼 있나요?"
+  },
+  {
+    "id": "dev-0289",
+    "category": "2_K서비스_개별구현",
+    "question": "tax 레포의 SP가 세무사 수준의 상담을 어떻게 검증받았나요?"
+  },
+  {
+    "id": "dev-0290",
+    "category": "2_K서비스_개별구현",
+    "question": "tax 레포가 종합소득세와 부가세 계산을 같은 모듈에서 처리하나요?"
+  },
+  {
+    "id": "dev-0291",
+    "category": "2_K서비스_개별구현",
+    "question": "tax 레포의 스모크테스트가 실제 세액 계산 정확도까지 검증하나요?"
+  },
+  {
+    "id": "dev-0292",
+    "category": "2_K서비스_개별구현",
+    "question": "tax 레포에서 수정신고 처리 흐름이 어떻게 구현돼 있나요?"
+  },
+  {
+    "id": "dev-0293",
+    "category": "2_K서비스_개별구현",
+    "question": "tax 레포가 다루는 절세 제안 로직이 법적으로 문제없는 범위인지 어떻게 검증하나요?"
+  },
+  {
+    "id": "dev-0294",
+    "category": "2_K서비스_개별구현",
+    "question": "tax 레포의 desktop.html이 세금 계산기 UI를 어떻게 구현했나요?"
+  },
+  {
+    "id": "dev-0295",
+    "category": "2_K서비스_개별구현",
+    "question": "tax 레포가 국세청 정책 변경에 얼마나 빠르게 대응하나요?"
+  },
+  {
+    "id": "dev-0296",
+    "category": "2_K서비스_개별구현",
+    "question": "tax 레포가 지방세와 국세를 같은 화면에서 처리하나요?"
+  },
+  {
+    "id": "dev-0297",
+    "category": "2_K서비스_개별구현",
+    "question": "health 레포가 실제 병원 예약 시스템과 API로 연동되나요?"
+  },
+  {
+    "id": "dev-0298",
+    "category": "2_K서비스_개별구현",
+    "question": "health 레포의 건강 데이터가 PDV의 어느 도메인에 저장되나요?"
+  },
+  {
+    "id": "dev-0299",
+    "category": "2_K서비스_개별구현",
+    "question": "health 레포에서 의약품 상호작용 데이터베이스는 어디서 가져오나요?"
+  },
+  {
+    "id": "dev-0300",
+    "category": "2_K서비스_개별구현",
+    "question": "health 레포의 SP가 의료법상 진단 행위로 해석될 위험은 없나요?"
+  },
+  {
+    "id": "dev-0301",
+    "category": "2_K서비스_개별구현",
+    "question": "health 레포가 응급 상황에서 K-911과 자동으로 연동되나요?"
+  },
+  {
+    "id": "dev-0302",
+    "category": "2_K서비스_개별구현",
+    "question": "health 레포의 건강검진 결과 해석 로직이 의료 전문가 검수를 거쳤나요?"
+  },
+  {
+    "id": "dev-0303",
+    "category": "2_K서비스_개별구현",
+    "question": "health 레포에서 만성질환 관리 알림이 얼마나 정교하게 개인화되나요?"
+  },
+  {
+    "id": "dev-0304",
+    "category": "2_K서비스_개별구현",
+    "question": "health 레포의 데이터가 보험사 API와 연동될 위험이 있는 구조인가요?"
+  },
+  {
+    "id": "dev-0305",
+    "category": "2_K서비스_개별구현",
+    "question": "health 레포의 스모크테스트가 의료 정보 정확성까지 검증하나요?"
+  },
+  {
+    "id": "dev-0306",
+    "category": "2_K서비스_개별구현",
+    "question": "health 레포가 정신건강 상담 기능에 별도의 안전장치를 갖고 있나요?"
+  },
+  {
+    "id": "dev-0307",
+    "category": "2_K서비스_개별구현",
+    "question": "health 레포의 desktop.html이 다른 K-서비스보다 접근성(고령자 배려)에 신경 썼나요?"
+  },
+  {
+    "id": "dev-0308",
+    "category": "2_K서비스_개별구현",
+    "question": "health 레포가 다루는 데이터 민감도 때문에 암호화 수준이 다른 서비스보다 높나요?"
+  },
+  {
+    "id": "dev-0309",
+    "category": "2_K서비스_개별구현",
+    "question": "health 레포의 응급 연동(K-911)이 실제로 테스트된 사례가 있나요?"
+  },
+  {
+    "id": "dev-0310",
+    "category": "2_K서비스_개별구현",
+    "question": "health 레포가 다루는 예방접종 일정이 질병관리청 데이터와 동기화되나요?"
+  },
+  {
+    "id": "dev-0311",
+    "category": "2_K서비스_개별구현",
+    "question": "security 레포가 실제 CCTV·경비 장비 API와 연동되나요, 신고 접수만 하나요?"
+  },
+  {
+    "id": "dev-0312",
+    "category": "2_K서비스_개별구현",
+    "question": "security 레포의 침입 감지 알고리즘이 오탐률을 어떻게 관리하나요?"
+  },
+  {
+    "id": "dev-0313",
+    "category": "2_K서비스_개별구현",
+    "question": "security 레포가 스마트홈 기기(IoT)와 연동되는 표준 프로토콜이 뭔가요?"
+  },
+  {
+    "id": "dev-0314",
+    "category": "2_K서비스_개별구현",
+    "question": "security 레포에서 긴급 알림이 경찰 시스템(K-Police)과 자동 연동되나요?"
+  },
+  {
+    "id": "dev-0315",
+    "category": "2_K서비스_개별구현",
+    "question": "security 레포의 방문자 출입 기록 데이터는 얼마나 오래 보관되나요?"
+  },
+  {
+    "id": "dev-0316",
+    "category": "2_K서비스_개별구현",
+    "question": "security 레포가 사이버 보안(해킹 탐지)도 다루나요, 물리 보안 전용인가요?"
+  },
+  {
+    "id": "dev-0317",
+    "category": "2_K서비스_개별구현",
+    "question": "security 레포의 스모크테스트가 오탐/미탐 시나리오를 커버하나요?"
+  },
+  {
+    "id": "dev-0318",
+    "category": "2_K서비스_개별구현",
+    "question": "security 레포에서 아파트 단지 단위 계약이 어떻게 데이터 모델링돼 있나요?"
+  },
+  {
+    "id": "dev-0319",
+    "category": "2_K서비스_개별구현",
+    "question": "security 레포가 가족 위치 공유 기능의 개인정보 보호를 어떻게 처리하나요?"
+  },
+  {
+    "id": "dev-0320",
+    "category": "2_K서비스_개별구현",
+    "question": "security 레포의 GDC 과금이 세대별인가요, 개인별인가요?"
+  },
+  {
+    "id": "dev-0321",
+    "category": "2_K서비스_개별구현",
+    "question": "security 레포가 다루는 보안 취약점 자동 진단 로직이 있나요?"
+  },
+  {
+    "id": "dev-0322",
+    "category": "2_K서비스_개별구현",
+    "question": "security 레포의 알림 시스템이 Web Push를 쓰나요, SMS를 쓰나요?"
+  },
+  {
+    "id": "dev-0323",
+    "category": "2_K서비스_개별구현",
+    "question": "security 레포가 반려동물 안전 기능을 어떤 센서 데이터로 구현했나요?"
+  },
+  {
+    "id": "dev-0324",
+    "category": "2_K서비스_개별구현",
+    "question": "school 레포가 실제 학교 나이스(NEIS) 시스템과 연동되나요?"
+  },
+  {
+    "id": "dev-0325",
+    "category": "2_K서비스_개별구현",
+    "question": "school 레포의 급식 알림 데이터는 어디서 가져오나요?"
+  },
+  {
+    "id": "dev-0326",
+    "category": "2_K서비스_개별구현",
+    "question": "school 레포에서 학교폭력 신고가 K-Police 레포와 연동되나요?"
+  },
+  {
+    "id": "dev-0327",
+    "category": "2_K서비스_개별구현",
+    "question": "school 레포의 학부모-교사 소통 기능이 실시간 채팅인가요, 게시판 방식인가요?"
+  },
+  {
+    "id": "dev-0328",
+    "category": "2_K서비스_개별구현",
+    "question": "school 레포가 다자녀 가정을 하나의 계정으로 묶는 데이터 구조가 어떻게 되나요?"
+  },
+  {
+    "id": "dev-0329",
+    "category": "2_K서비스_개별구현",
+    "question": "school 레포의 성적 분석 알고리즘이 어떤 데이터를 기반으로 하나요?"
+  },
+  {
+    "id": "dev-0330",
+    "category": "2_K서비스_개별구현",
+    "question": "school 레포에서 등하교 알림이 위치 기반으로 자동 발송되나요?"
+  },
+  {
+    "id": "dev-0331",
+    "category": "2_K서비스_개별구현",
+    "question": "school 레포의 스모크테스트가 개인정보(미성년자) 보호 항목을 특별히 검증하나요?"
+  },
+  {
+    "id": "dev-0332",
+    "category": "2_K서비스_개별구현",
+    "question": "school 레포가 교육청 공지사항을 자동으로 크롤링해오나요?"
+  },
+  {
+    "id": "dev-0333",
+    "category": "2_K서비스_개별구현",
+    "question": "school 레포의 학비 지원 대상 판별 로직이 K-Public과 연동되나요?"
+  },
+  {
+    "id": "dev-0334",
+    "category": "2_K서비스_개별구현",
+    "question": "school 레포가 다루는 알레르기 정보가 급식실 시스템에 실시간 전달되나요?"
+  },
+  {
+    "id": "dev-0335",
+    "category": "2_K서비스_개별구현",
+    "question": "school 레포의 진로 상담 기능이 전문가 페르소나와 연동되나요?"
+  },
+  {
+    "id": "dev-0336",
+    "category": "2_K서비스_개별구현",
+    "question": "school 레포의 방과후 활동 신청이 정원 초과 시 대기열을 어떻게 관리하나요?"
+  },
+  {
+    "id": "dev-0337",
+    "category": "2_K서비스_개별구현",
+    "question": "stock 레포가 실시간 시세 데이터를 어느 증권 API에서 받아오나요?"
+  },
+  {
+    "id": "dev-0338",
+    "category": "2_K서비스_개별구현",
+    "question": "stock 레포의 종목 추천 알고리즘이 특정 증권사와 제휴된 광고 로직을 포함하나요?"
+  },
+  {
+    "id": "dev-0339",
+    "category": "2_K서비스_개별구현",
+    "question": "stock 레포에서 자동매매 기능이 실제 주문 체결까지 연결되나요, 시뮬레이션인가요?"
+  },
+  {
+    "id": "dev-0340",
+    "category": "2_K서비스_개별구현",
+    "question": "stock 레포의 포트폴리오 위험도 분석이 어떤 지표를 쓰나요?"
+  },
+  {
+    "id": "dev-0341",
+    "category": "2_K서비스_개별구현",
+    "question": "stock 레포가 해외 주식 데이터도 실시간으로 처리하나요?"
+  },
+  {
+    "id": "dev-0342",
+    "category": "2_K서비스_개별구현",
+    "question": "stock 레포의 세금(양도세) 계산 로직이 tax 레포와 공유되나요?"
+  },
+  {
+    "id": "dev-0343",
+    "category": "2_K서비스_개별구현",
+    "question": "stock 레포에서 시세 오류 신고가 접수되면 어떻게 검증하나요?"
+  },
+  {
+    "id": "dev-0344",
+    "category": "2_K서비스_개별구현",
+    "question": "stock 레포의 스모크테스트가 실시간 시세 지연을 감지하나요?"
+  },
+  {
+    "id": "dev-0345",
+    "category": "2_K서비스_개별구현",
+    "question": "stock 레포가 뉴스와 주가 변동을 연결하는 자연어 처리 로직이 자체 구현인가요?"
+  },
+  {
+    "id": "dev-0346",
+    "category": "2_K서비스_개별구현",
+    "question": "stock 레포의 모의투자 기능이 실계좌 데이터와 완전히 분리돼 있나요?"
+  },
+  {
+    "id": "dev-0347",
+    "category": "2_K서비스_개별구현",
+    "question": "stock 레포가 GDC로 투자 시뮬레이션 자금을 지급하나요?"
+  },
+  {
+    "id": "dev-0348",
+    "category": "2_K서비스_개별구현",
+    "question": "stock 레포의 은퇴 자금 설계 기능이 어떤 금융 모델을 쓰나요?"
+  },
+  {
+    "id": "dev-0349",
+    "category": "2_K서비스_개별구현",
+    "question": "stock 레포의 손절매 자동 설정이 실제 매도 주문까지 실행하나요?"
+  },
+  {
+    "id": "dev-0350",
+    "category": "2_K서비스_개별구현",
+    "question": "public 레포가 정부24 API와 실제로 연동돼 있나요, 별도 시스템인가요?"
+  },
+  {
+    "id": "dev-0351",
+    "category": "2_K서비스_개별구현",
+    "question": "public 레포의 민원 서류 발급이 전자정부 표준을 따르나요?"
+  },
+  {
+    "id": "dev-0352",
+    "category": "2_K서비스_개별구현",
+    "question": "public 레포에서 서류 위변조 검증 로직이 어떻게 구현돼 있나요?"
+  },
+  {
+    "id": "dev-0353",
+    "category": "2_K서비스_개별구현",
+    "question": "public 레포의 지원금 신청 자격 판별 로직이 지자체별로 다르게 설정되나요?"
+  },
+  {
+    "id": "dev-0354",
+    "category": "2_K서비스_개별구현",
+    "question": "public 레포가 K-Public 하나로 모든 민원을 통합 처리하는 아키텍처인가요?"
+  },
+  {
+    "id": "dev-0355",
+    "category": "2_K서비스_개별구현",
+    "question": "public 레포의 전입신고 처리가 실제 행정망과 연동되나요?"
+  },
+  {
+    "id": "dev-0356",
+    "category": "2_K서비스_개별구현",
+    "question": "public 레포에서 민원 처리 지연 사유를 자동으로 알려주는 로직이 있나요?"
+  },
+  {
+    "id": "dev-0357",
+    "category": "2_K서비스_개별구현",
+    "question": "public 레포의 스모크테스트가 실제 정부 시스템 연동까지 검증하나요, 모킹만 하나요?"
+  },
+  {
+    "id": "dev-0358",
+    "category": "2_K서비스_개별구현",
+    "question": "public 레포가 다문화가정 지원 제도 데이터를 어디서 관리하나요?"
+  },
+  {
+    "id": "dev-0359",
+    "category": "2_K서비스_개별구현",
+    "question": "public 레포의 출생신고·사망신고 처리가 법적 요건을 다 충족하나요?"
+  },
+  {
+    "id": "dev-0360",
+    "category": "2_K서비스_개별구현",
+    "question": "public 레포가 재난지원금 신청 몰림 시 부하를 어떻게 처리하나요?"
+  },
+  {
+    "id": "dev-0361",
+    "category": "2_K서비스_개별구현",
+    "question": "public 레포의 desktop.html이 고령자 접근성을 특별히 신경 썼나요?"
+  },
+  {
+    "id": "dev-0362",
+    "category": "2_K서비스_개별구현",
+    "question": "public 레포가 처리하는 민원 종류가 총 몇 가지나 되나요?"
+  },
+  {
+    "id": "dev-0363",
+    "category": "2_K서비스_개별구현",
+    "question": "public 레포가 재난지원금처럼 갑작스러운 대량 트래픽에 어떻게 스케일링하나요?"
+  },
+  {
+    "id": "dev-0364",
+    "category": "2_K서비스_개별구현",
+    "question": "police 레포가 실제 112 신고 시스템과 연동되나요, 별도 접수 채널인가요?"
+  },
+  {
+    "id": "dev-0365",
+    "category": "2_K서비스_개별구현",
+    "question": "police 레포의 신고자 익명성 보장이 기술적으로 어떻게 구현돼 있나요?"
+  },
+  {
+    "id": "dev-0366",
+    "category": "2_K서비스_개별구현",
+    "question": "police 레포에서 사이버 사기 신고가 금융감독원 시스템과도 연동되나요?"
+  },
+  {
+    "id": "dev-0367",
+    "category": "2_K서비스_개별구현",
+    "question": "police 레포의 실종 신고 처리 우선순위가 어떻게 결정되나요?"
+  },
+  {
+    "id": "dev-0368",
+    "category": "2_K서비스_개별구현",
+    "question": "police 레포가 K-Watch 레포와 신고 데이터를 공유하는 API가 있나요?"
+  },
+  {
+    "id": "dev-0369",
+    "category": "2_K서비스_개별구현",
+    "question": "police 레포에서 무고성 신고를 걸러내는 로직이 있나요?"
+  },
+  {
+    "id": "dev-0370",
+    "category": "2_K서비스_개별구현",
+    "question": "police 레포의 가정폭력 신고 처리가 특별히 강화된 보안을 갖고 있나요?"
+  },
+  {
+    "id": "dev-0371",
+    "category": "2_K서비스_개별구현",
+    "question": "police 레포의 스모크테스트가 긴급 상황 처리 속도를 검증하나요?"
+  },
+  {
+    "id": "dev-0372",
+    "category": "2_K서비스_개별구현",
+    "question": "police 레포가 CCTV 확인 요청을 실제 경찰 시스템에 자동 전달하나요?"
+  },
+  {
+    "id": "dev-0373",
+    "category": "2_K서비스_개별구현",
+    "question": "police 레포에서 아동학대 의심 신고가 별도 프로세스로 분리돼 있나요?"
+  },
+  {
+    "id": "dev-0374",
+    "category": "2_K서비스_개별구현",
+    "question": "police 레포의 신고 데이터 보관 기간이 법적 기준을 따르나요?"
+  },
+  {
+    "id": "dev-0375",
+    "category": "2_K서비스_개별구현",
+    "question": "police 레포가 다루는 신고 유형별 담당 경찰서 매핑이 어떻게 관리되나요?"
+  },
+  {
+    "id": "dev-0376",
+    "category": "2_K서비스_개별구현",
+    "question": "police 레포의 신고 접수 후 담당 경찰서 자동 배정 로직이 지역 기반인가요?"
+  },
+  {
+    "id": "dev-0377",
+    "category": "2_K서비스_개별구현",
+    "question": "911 레포가 실제 119/112 시스템과 API로 직접 연동되나요?"
+  },
+  {
+    "id": "dev-0378",
+    "category": "2_K서비스_개별구현",
+    "question": "911 레포의 위치 자동 파악 로직이 GPS 정확도를 어떻게 보정하나요?"
+  },
+  {
+    "id": "dev-0379",
+    "category": "2_K서비스_개별구현",
+    "question": "911 레포에서 신고 접수부터 구급대 도착까지 시간을 어떻게 추적하나요?"
+  },
+  {
+    "id": "dev-0380",
+    "category": "2_K서비스_개별구현",
+    "question": "911 레포가 화재와 응급의료 신고를 구분하는 분류 로직이 어떻게 되나요?"
+  },
+  {
+    "id": "dev-0381",
+    "category": "2_K서비스_개별구현",
+    "question": "911 레포의 오작동 신고 방지 로직이 얼마나 정교한가요?"
+  },
+  {
+    "id": "dev-0382",
+    "category": "2_K서비스_개별구현",
+    "question": "911 레포가 청각장애인용 신고 방식(텍스트 등)을 별도로 구현했나요?"
+  },
+  {
+    "id": "dev-0383",
+    "category": "2_K서비스_개별구현",
+    "question": "911 레포의 스모크테스트가 실제 긴급 상황 시나리오를 재현하나요?"
+  },
+  {
+    "id": "dev-0384",
+    "category": "2_K서비스_개별구현",
+    "question": "911 레포에서 신고 접수 후 가족 자동 알림 기능이 어떻게 구현돼 있나요?"
+  },
+  {
+    "id": "dev-0385",
+    "category": "2_K서비스_개별구현",
+    "question": "911 레포가 재난 상황(지진 등) 대량 신고를 어떻게 부하 분산하나요?"
+  },
+  {
+    "id": "dev-0386",
+    "category": "2_K서비스_개별구현",
+    "question": "911 레포의 응급처치 안내 콘텐츠는 누가 검수했나요?"
+  },
+  {
+    "id": "dev-0387",
+    "category": "2_K서비스_개별구현",
+    "question": "911 레포가 노약자 우선 처리 로직을 어떻게 판별하나요?"
+  },
+  {
+    "id": "dev-0388",
+    "category": "2_K서비스_개별구현",
+    "question": "911 레포의 신고 이력 데이터가 얼마나 오래 보관되나요?"
+  },
+  {
+    "id": "dev-0389",
+    "category": "2_K서비스_개별구현",
+    "question": "911 레포가 술 취한 신고자의 발화를 어떻게 정확히 파악하나요?"
+  },
+  {
+    "id": "dev-0390",
+    "category": "2_K서비스_개별구현",
+    "question": "911 레포의 위치 정확도가 실내에서는 얼마나 떨어지나요?"
+  },
+  {
+    "id": "dev-0391",
+    "category": "2_K서비스_개별구현",
+    "question": "insurance 레포가 실제 보험사 API와 연동돼 견적을 받아오나요?"
+  },
+  {
+    "id": "dev-0392",
+    "category": "2_K서비스_개별구현",
+    "question": "insurance 레포의 보험 추천 알고리즘이 특정 보험사와 제휴돼 있나요?"
+  },
+  {
+    "id": "dev-0393",
+    "category": "2_K서비스_개별구현",
+    "question": "insurance 레포에서 보험금 청구 대행이 실제로 자동화돼 있나요?"
+  },
+  {
+    "id": "dev-0394",
+    "category": "2_K서비스_개별구현",
+    "question": "insurance 레포의 약관 해석 SP가 법적 자문 수준의 정확도를 보장하나요?"
+  },
+  {
+    "id": "dev-0395",
+    "category": "2_K서비스_개별구현",
+    "question": "insurance 레포가 중복 가입 여부를 어떻게 판별하나요?"
+  },
+  {
+    "id": "dev-0396",
+    "category": "2_K서비스_개별구현",
+    "question": "insurance 레포의 보험료 인상 이유 설명 로직이 실제 보험사 데이터를 기반으로 하나요?"
+  },
+  {
+    "id": "dev-0397",
+    "category": "2_K서비스_개별구현",
+    "question": "insurance 레포에서 반려동물 보험 같은 특화 상품도 별도 스키마로 관리하나요?"
+  },
+  {
+    "id": "dev-0398",
+    "category": "2_K서비스_개별구현",
+    "question": "insurance 레포의 스모크테스트가 보험금 지급 심사 로직까지 검증하나요?"
+  },
+  {
+    "id": "dev-0399",
+    "category": "2_K서비스_개별구현",
+    "question": "insurance 레포가 다루는 개인 건강 정보가 health 레포와 공유되나요?"
+  },
+  {
+    "id": "dev-0400",
+    "category": "2_K서비스_개별구현",
+    "question": "insurance 레포의 자동차보험 비교 견적이 실시간으로 갱신되나요?"
+  },
+  {
+    "id": "dev-0401",
+    "category": "2_K서비스_개별구현",
+    "question": "insurance 레포가 보험 리모델링 상담 시 기존 계약 데이터를 어떻게 불러오나요?"
+  },
+  {
+    "id": "dev-0402",
+    "category": "2_K서비스_개별구현",
+    "question": "insurance 레포의 GDC 결제가 보험료 자동이체와 어떻게 연결되나요?"
+  },
+  {
+    "id": "dev-0403",
+    "category": "2_K서비스_개별구현",
+    "question": "insurance 레포의 치아보험처럼 특수 보험 상품도 일반 로직으로 처리되나요?"
+  },
+  {
+    "id": "dev-0404",
+    "category": "2_K서비스_개별구현",
+    "question": "traffic 레포가 실시간 교통정보를 어느 공공데이터 API에서 받아오나요?"
+  },
+  {
+    "id": "dev-0405",
+    "category": "2_K서비스_개별구현",
+    "question": "traffic 레포의 대중교통 환승 최적화 알고리즘이 얼마나 정교한가요?"
+  },
+  {
+    "id": "dev-0406",
+    "category": "2_K서비스_개별구현",
+    "question": "traffic 레포에서 주차 가능 공간 데이터는 실시간으로 갱신되나요?"
+  },
+  {
+    "id": "dev-0407",
+    "category": "2_K서비스_개별구현",
+    "question": "traffic 레포가 사고 다발 구간 데이터를 어디서 수집하나요?"
+  },
+  {
+    "id": "dev-0408",
+    "category": "2_K서비스_개별구현",
+    "question": "traffic 레포의 버스 도착 예측이 실제 GPS 데이터를 쓰나요?"
+  },
+  {
+    "id": "dev-0409",
+    "category": "2_K서비스_개별구현",
+    "question": "traffic 레포에서 장애인 콜택시 예약이 실제 배차 시스템과 연동되나요?"
+  },
+  {
+    "id": "dev-0410",
+    "category": "2_K서비스_개별구현",
+    "question": "traffic 레포의 신호등 대기시간 예측이 얼마나 정확한가요?"
+  },
+  {
+    "id": "dev-0411",
+    "category": "2_K서비스_개별구현",
+    "question": "traffic 레포의 스모크테스트가 실시간 데이터 지연을 감지하나요?"
+  },
+  {
+    "id": "dev-0412",
+    "category": "2_K서비스_개별구현",
+    "question": "traffic 레포가 전기차 충전소 정보를 어디서 가져오나요?"
+  },
+  {
+    "id": "dev-0413",
+    "category": "2_K서비스_개별구현",
+    "question": "traffic 레포에서 화물차 전용 경로 안내가 일반 경로와 다른 알고리즘을 쓰나요?"
+  },
+  {
+    "id": "dev-0414",
+    "category": "2_K서비스_개별구현",
+    "question": "traffic 레포가 다국어 경로 안내를 위해 번역 API를 쓰나요?"
+  },
+  {
+    "id": "dev-0415",
+    "category": "2_K서비스_개별구현",
+    "question": "traffic 레포의 날씨 연동 도로 상황 반영이 얼마나 정확한가요?"
+  },
+  {
+    "id": "dev-0416",
+    "category": "2_K서비스_개별구현",
+    "question": "traffic 레포의 렌터카 연동이 실제 렌터카 업체 API와 연결돼 있나요?"
+  },
+  {
+    "id": "dev-0417",
+    "category": "2_K서비스_개별구현",
+    "question": "logistics 레포가 여러 택배사 API를 통합해서 배송 추적을 하나요?"
+  },
+  {
+    "id": "dev-0418",
+    "category": "2_K서비스_개별구현",
+    "question": "logistics 레포의 배송 지연 예측 알고리즘이 어떤 데이터를 쓰나요?"
+  },
+  {
+    "id": "dev-0419",
+    "category": "2_K서비스_개별구현",
+    "question": "logistics 레포에서 파손 물품 배상 신청이 자동으로 처리되나요?"
+  },
+  {
+    "id": "dev-0420",
+    "category": "2_K서비스_개별구현",
+    "question": "logistics 레포가 K-Market과 배송 데이터를 실시간으로 공유하나요?"
+  },
+  {
+    "id": "dev-0421",
+    "category": "2_K서비스_개별구현",
+    "question": "logistics 레포의 소상공인 배송비 절감 제안이 실제 요금 비교 데이터를 기반으로 하나요?"
+  },
+  {
+    "id": "dev-0422",
+    "category": "2_K서비스_개별구현",
+    "question": "logistics 레포에서 해외 직구 배송 추적이 관세청 시스템과 연동되나요?"
+  },
+  {
+    "id": "dev-0423",
+    "category": "2_K서비스_개별구현",
+    "question": "logistics 레포의 냉장·냉동 배송 상태 모니터링이 IoT 센서와 연동되나요?"
+  },
+  {
+    "id": "dev-0424",
+    "category": "2_K서비스_개별구현",
+    "question": "logistics 레포의 스모크테스트가 분실 택배 추적 시나리오를 검증하나요?"
+  },
+  {
+    "id": "dev-0425",
+    "category": "2_K서비스_개별구현",
+    "question": "logistics 레포가 섬 지역 배송 지연을 별도로 예측하는 모델이 있나요?"
+  },
+  {
+    "id": "dev-0426",
+    "category": "2_K서비스_개별구현",
+    "question": "logistics 레포에서 K-JIT과 물류 데이터를 공유할 계획이 있나요?"
+  },
+  {
+    "id": "dev-0427",
+    "category": "2_K서비스_개별구현",
+    "question": "logistics 레포의 반려동물 운송 기능이 법적 요건을 충족하나요?"
+  },
+  {
+    "id": "dev-0428",
+    "category": "2_K서비스_개별구현",
+    "question": "logistics 레포가 대량 발송 업체용 API를 별도로 제공하나요?"
+  },
+  {
+    "id": "dev-0429",
+    "category": "2_K서비스_개별구현",
+    "question": "logistics 레포가 정기구독 배송의 스케줄 변경을 어떻게 처리하나요?"
+  },
+  {
+    "id": "dev-0430",
+    "category": "2_K서비스_개별구현",
+    "question": "logistics 레포가 명절 등 성수기 배송 지연을 미리 예측해서 안내하나요?"
+  },
+  {
+    "id": "dev-0431",
+    "category": "2_K서비스_개별구현",
+    "question": "qna 레포는 hondi 검색과 별개의 독립 질의응답 플랫폼인가요?"
+  },
+  {
+    "id": "dev-0432",
+    "category": "2_K서비스_개별구현",
+    "question": "qna 레포의 답변 신뢰도 검증 로직이 어떻게 구현돼 있나요?"
+  },
+  {
+    "id": "dev-0433",
+    "category": "2_K서비스_개별구현",
+    "question": "qna 레포에서 전문가 페르소나 추천이 자동으로 연결되나요?"
+  },
+  {
+    "id": "dev-0434",
+    "category": "2_K서비스_개별구현",
+    "question": "qna 레포의 채택 답변 알고리즘이 추천수 기반인가요, 다른 기준인가요?"
+  },
+  {
+    "id": "dev-0435",
+    "category": "2_K서비스_개별구현",
+    "question": "qna 레포가 부적절한 답변을 필터링하는 로직이 있나요?"
+  },
+  {
+    "id": "dev-0436",
+    "category": "2_K서비스_개별구현",
+    "question": "qna 레포에서 유사 질문 자동 매칭이 어떤 검색 방식을 쓰나요?"
+  },
+  {
+    "id": "dev-0437",
+    "category": "2_K서비스_개별구현",
+    "question": "qna 레포의 스모크테스트가 답변 품질까지 검증하나요?"
+  },
+  {
+    "id": "dev-0438",
+    "category": "2_K서비스_개별구현",
+    "question": "qna 레포가 지역 기반 질문(제주 등)을 따로 분류하나요?"
+  },
+  {
+    "id": "dev-0439",
+    "category": "2_K서비스_개별구현",
+    "question": "qna 레포의 답변 알림이 실시간 Web Push로 오나요?"
+  },
+  {
+    "id": "dev-0440",
+    "category": "2_K서비스_개별구현",
+    "question": "qna 레포가 K-Law 같은 전문 서비스로 질문을 넘기는 기준이 뭔가요?"
+  },
+  {
+    "id": "dev-0441",
+    "category": "2_K서비스_개별구현",
+    "question": "qna 레포에서 중복 질문 등록을 막는 로직이 있나요?"
+  },
+  {
+    "id": "dev-0442",
+    "category": "2_K서비스_개별구현",
+    "question": "qna 레포의 익명 질문 기능이 완전한 익명을 보장하나요?"
+  },
+  {
+    "id": "dev-0443",
+    "category": "2_K서비스_개별구현",
+    "question": "qna 레포의 인기 질문 순위 알고리즘이 조회수 기반인가요, 답변수 기반인가요?"
+  },
+  {
+    "id": "dev-0444",
+    "category": "2_K서비스_개별구현",
+    "question": "gdc 레포는 GDC 지갑과 결제 인프라 전체를 담당하는 저장소인가요?"
+  },
+  {
+    "id": "dev-0445",
+    "category": "2_K서비스_개별구현",
+    "question": "gdc 레포에서 중앙은행+시중은행 통합 모듈이 정확히 뭘 하나요?"
+  },
+  {
+    "id": "dev-0446",
+    "category": "2_K서비스_개별구현",
+    "question": "gdc 레포가 오픈뱅킹 API와 실제로 연동돼 있나요?"
+  },
+  {
+    "id": "dev-0447",
+    "category": "2_K서비스_개별구현",
+    "question": "gdc 레포의 대출·신용평가 로직이 실제 금융권 기준을 따르나요?"
+  },
+  {
+    "id": "dev-0448",
+    "category": "2_K서비스_개별구현",
+    "question": "gdc 레포에서 2026-07-23 .git 노출 사고가 있었다는데 지금은 어떻게 방지되나요?"
+  },
+  {
+    "id": "dev-0449",
+    "category": "2_K서비스_개별구현",
+    "question": "gdc 레포의 GDC 충전 자동화가 실패하면 재시도 로직이 어떻게 되나요?"
+  },
+  {
+    "id": "dev-0450",
+    "category": "2_K서비스_개별구현",
+    "question": "gdc 레포가 각 K-서비스별 요금 체계를 어떻게 통합 관리하나요?"
+  },
+  {
+    "id": "dev-0451",
+    "category": "2_K서비스_개별구현",
+    "question": "gdc 레포의 스모크테스트가 결제 실패 시나리오를 얼마나 커버하나요?"
+  },
+  {
+    "id": "dev-0452",
+    "category": "2_K서비스_개별구현",
+    "question": "gdc 레포에서 GDC 잔액 부족 시 서비스 차단 로직이 어떻게 구현돼 있나요?"
+  },
+  {
+    "id": "dev-0453",
+    "category": "2_K서비스_개별구현",
+    "question": "gdc 레포가 지갑 키(Ed25519/X25519) 관리를 직접 하나요, 별도 모듈인가요?"
+  },
+  {
+    "id": "dev-0454",
+    "category": "2_K서비스_개별구현",
+    "question": "gdc 레포의 거래 내역이 OpenHash 원장에 얼마나 자주 앵커링되나요?"
+  },
+  {
+    "id": "dev-0455",
+    "category": "2_K서비스_개별구현",
+    "question": "gdc 레포가 다루는 GDC 발행량 제한 정책이 코드로 강제되나요?"
+  },
+  {
+    "id": "dev-0456",
+    "category": "2_K서비스_개별구현",
+    "question": "gdc 레포의 발행량 정책이 바뀌면 기존 사용자 잔액에도 소급 적용되나요?"
+  },
+  {
+    "id": "dev-0457",
+    "category": "2_K서비스_개별구현",
+    "question": "gdc 레포의 KV 캐시 TTL이 실제 잔액 조회 정확도에 영향을 준 사례가 있나요?"
+  },
+  {
+    "id": "dev-0458",
+    "category": "2_K서비스_개별구현",
+    "question": "users 레포가 전체 조직의 회원가입·인증을 통합 관리하는 저장소인가요?"
+  },
+  {
+    "id": "dev-0459",
+    "category": "2_K서비스_개별구현",
+    "question": "users 레포의 전화번호 SHA-256 해시 변환 로직이 어느 파일에 있나요?"
+  },
+  {
+    "id": "dev-0460",
+    "category": "2_K서비스_개별구현",
+    "question": "users 레포가 device-link 기기 인증을 직접 구현하나요?"
+  },
+  {
+    "id": "dev-0461",
+    "category": "2_K서비스_개별구현",
+    "question": "users 레포의 PDV 스키마가 여기서 정의되고 다른 레포가 참조하나요?"
+  },
+  {
+    "id": "dev-0462",
+    "category": "2_K서비스_개별구현",
+    "question": "users 레포에서 생체인증 필수화 정책이 언제부터 강제됐나요?"
+  },
+  {
+    "id": "dev-0463",
+    "category": "2_K서비스_개별구현",
+    "question": "users 레포의 회원 탈퇴·개인정보 삭제 요청 처리가 몇 개 레포에 걸쳐 전파되나요?"
+  },
+  {
+    "id": "dev-0464",
+    "category": "2_K서비스_개별구현",
+    "question": "users 레포가 각 K-서비스의 로그인 세션을 통합 관리하나요?"
+  },
+  {
+    "id": "dev-0465",
+    "category": "2_K서비스_개별구현",
+    "question": "users 레포의 스모크테스트가 계정 보안 시나리오를 얼마나 커버하나요?"
+  },
+  {
+    "id": "dev-0466",
+    "category": "2_K서비스_개별구현",
+    "question": "users 레포에서 미성년자 가입 제한이 코드 레벨에서 어떻게 검증되나요?"
+  },
+  {
+    "id": "dev-0467",
+    "category": "2_K서비스_개별구현",
+    "question": "users 레포가 다국적 사용자(외국인) 인증도 지원하나요?"
+  },
+  {
+    "id": "dev-0468",
+    "category": "2_K서비스_개별구현",
+    "question": "users 레포의 세션 TTL 정책이 다른 K-서비스와 통일돼 있나요?"
+  },
+  {
+    "id": "dev-0469",
+    "category": "2_K서비스_개별구현",
+    "question": "users 레포가 계정 해킹 의심 시 자동 잠금 로직을 갖고 있나요?"
+  },
+  {
+    "id": "dev-0470",
+    "category": "2_K서비스_개별구현",
+    "question": "users 레포가 다른 25개 레포 전체의 인증을 단일 지점에서 처리하는 구조인가요?"
+  },
+  {
+    "id": "dev-0471",
+    "category": "3_인프라_계층",
+    "question": "openhash-L1-hanlim 노드가 담당하는 물리적 범위가 정확히 한림읍 하나인가요?"
+  },
+  {
+    "id": "dev-0472",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim의 PocketBase 인스턴스가 systemd 서비스로 관리된다는데 재시작 정책이 어떻게 되나요?"
+  },
+  {
+    "id": "dev-0473",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim이 다운되면 어느 상위 노드가 트래픽을 대신 받나요?"
+  },
+  {
+    "id": "dev-0474",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim의 pb_hooks/main.pb.js가 다른 L1 노드와 코드가 동일한가요?"
+  },
+  {
+    "id": "dev-0475",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim 노드의 하드웨어 사양이 처음 설계될 때 예상 트래픽 기준으로 정해졌나요?"
+  },
+  {
+    "id": "dev-0476",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim이 최초 시범 노드였던 만큼 다른 L1 노드보다 데이터가 훨씬 많이 쌓여있나요?"
+  },
+  {
+    "id": "dev-0477",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim의 nginx 라우팅 설정이 /n/l1-hanlim/ 경로로 고정돼 있나요?"
+  },
+  {
+    "id": "dev-0478",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim 노드에 장애가 났던 이력(크래시 루프 등)이 몇 번이나 있었나요?"
+  },
+  {
+    "id": "dev-0479",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim의 백업 주기가 다른 L1 노드와 동일한가요?"
+  },
+  {
+    "id": "dev-0480",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim 노드를 유료 서버로 전환한 이후 비용이 얼마나 늘었나요?"
+  },
+  {
+    "id": "dev-0481",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim이 새로운 L1 노드 추가 시 템플릿 역할을 하나요?"
+  },
+  {
+    "id": "dev-0482",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim의 로그 보관 기간이 얼마나 되나요?"
+  },
+  {
+    "id": "dev-0483",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim 노드의 마이그레이션 파일이 손상됐던 사고 이후 어떤 안전장치가 추가됐나요?"
+  },
+  {
+    "id": "dev-0484",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim이 다른 L1 노드와 직접 통신하는 경우가 있나요, 항상 상위 노드를 거치나요?"
+  },
+  {
+    "id": "dev-0485",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim 노드의 디스크 용량이 부족해지면 어떻게 확장하나요?"
+  },
+  {
+    "id": "dev-0486",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim의 worker-pdv.js가 처리하는 PDV 데이터 양이 어느 정도 되나요?"
+  },
+  {
+    "id": "dev-0487",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim 노드에 새로운 K-서비스가 추가될 때 배포 순서가 있나요?"
+  },
+  {
+    "id": "dev-0488",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim의 KV 네임스페이스가 다른 L1 노드와 물리적으로 분리돼 있나요?"
+  },
+  {
+    "id": "dev-0489",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim 노드가 온디맨드로 재기동되는 조건이 뭔가요?"
+  },
+  {
+    "id": "dev-0490",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim의 보안 그룹 설정이 다른 L1 노드보다 엄격한가요, 동일한가요?"
+  },
+  {
+    "id": "dev-0491",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim 노드의 라이브 스모크테스트가 얼마나 자주 실행되나요?"
+  },
+  {
+    "id": "dev-0492",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim이 openhash 원장에 앵커링하는 주기가 얼마나 되나요?"
+  },
+  {
+    "id": "dev-0493",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim 노드에서 장애 복구 훈련(DR)을 실제로 해본 적 있나요?"
+  },
+  {
+    "id": "dev-0494",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim의 node-meta.json이 잘못되면 어떤 증상이 나타나나요?"
+  },
+  {
+    "id": "dev-0495",
+    "category": "3_인프라_계층",
+    "question": "L1-hanlim이 다른 L1 노드보다 먼저 만들어졌다는 걸 코드에서 어떻게 확인할 수 있나요?"
+  },
+  {
+    "id": "dev-0496",
+    "category": "3_인프라_계층",
+    "question": "openhash-L1-ido1이 담당하는 지역은 정확히 어디인가요?"
+  },
+  {
+    "id": "dev-0497",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1과 L1-hanlim의 인프라 구성이 완전히 동일한 템플릿인가요?"
+  },
+  {
+    "id": "dev-0498",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1 노드가 hanlim 이후 두 번째로 만들어졌다는데 그 사이 개선된 점이 있나요?"
+  },
+  {
+    "id": "dev-0499",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1의 라우팅 테이블이 상위 L2 노드로 어떻게 전달되나요?"
+  },
+  {
+    "id": "dev-0500",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1 노드에 장애가 발생한 이력이 있나요?"
+  },
+  {
+    "id": "dev-0501",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1의 PocketBase 스키마가 hanlim 노드와 버전이 같나요?"
+  },
+  {
+    "id": "dev-0502",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1이 커버하는 K-서비스 종류가 hanlim과 다르게 제한돼 있나요?"
+  },
+  {
+    "id": "dev-0503",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1 노드의 배포 파이프라인이 자동화돼 있나요, 수동 배포인가요?"
+  },
+  {
+    "id": "dev-0504",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1의 이름에 있는 'ido1'이 무슨 뜻의 약자인가요?"
+  },
+  {
+    "id": "dev-0505",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1 노드가 향후 다른 이름의 L1 노드로 통합될 계획이 있나요?"
+  },
+  {
+    "id": "dev-0506",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1의 KV TTL 설정값이 hanlim과 동일한가요?"
+  },
+  {
+    "id": "dev-0507",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1 노드에 신규 서비스가 배포될 때 hanlim과 동시에 배포되나요?"
+  },
+  {
+    "id": "dev-0508",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1의 CPU/메모리 사양이 hanlim보다 낮게 설정된 이유가 있나요?"
+  },
+  {
+    "id": "dev-0509",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1 노드의 로그 모니터링 대시보드가 따로 있나요?"
+  },
+  {
+    "id": "dev-0510",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1이 L2-jeju-city와 직접 통신하는 API 스펙이 문서화돼 있나요?"
+  },
+  {
+    "id": "dev-0511",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1 노드의 백업 데이터가 hanlim과 같은 저장소에 보관되나요?"
+  },
+  {
+    "id": "dev-0512",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1의 온디맨드 기동 지연 시간이 hanlim과 비교해 얼마나 되나요?"
+  },
+  {
+    "id": "dev-0513",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1 노드에 실제 이용자 수가 얼마나 되나요?"
+  },
+  {
+    "id": "dev-0514",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1이 담당하는 지역의 gov-tree 등록 절차가 hanlim 때와 달랐나요?"
+  },
+  {
+    "id": "dev-0515",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1 노드의 방화벽 규칙이 hanlim과 동일하게 복제됐나요?"
+  },
+  {
+    "id": "dev-0516",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1의 마이그레이션 이력이 hanlim보다 적게 남아있는 이유가 있나요?"
+  },
+  {
+    "id": "dev-0517",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1 노드가 장애 시 hanlim으로 트래픽이 넘어가는 구조인가요?"
+  },
+  {
+    "id": "dev-0518",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1의 systemd 서비스 이름 규칙이 hanlim과 동일한가요?"
+  },
+  {
+    "id": "dev-0519",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1 노드의 배포 후 헬스체크 기준이 뭔가요?"
+  },
+  {
+    "id": "dev-0520",
+    "category": "3_인프라_계층",
+    "question": "L1-ido1이 앞으로 L1-ido2, L1-ido3처럼 더 늘어날 계획이 있나요?"
+  },
+  {
+    "id": "dev-0521",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city는 L1 노드(hanlim, ido1) 여러 개를 통합하는 역할인가요?"
+  },
+  {
+    "id": "dev-0522",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city의 routing_table.json이 갱신될 때 하위 L1 노드에도 자동 반영되나요?"
+  },
+  {
+    "id": "dev-0523",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city 노드가 다운되면 하위 L1 노드들은 독립적으로 계속 작동하나요?"
+  },
+  {
+    "id": "dev-0524",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city의 entities 디렉터리가 저장하는 데이터 범위가 뭔가요?"
+  },
+  {
+    "id": "dev-0525",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city와 제주시청 행정 시스템이 직접 연동돼 있나요?"
+  },
+  {
+    "id": "dev-0526",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city 노드의 PocketBase 인스턴스 이름이 gopang-pb-l2-jeju인가요?"
+  },
+  {
+    "id": "dev-0527",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city가 처리하는 트래픽이 L1 노드 대비 얼마나 많은가요?"
+  },
+  {
+    "id": "dev-0528",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city의 nginx 라우팅이 /n/l2-jeju/ 경로로 고정된 이유가 뭔가요?"
+  },
+  {
+    "id": "dev-0529",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city 노드가 상위 L3-jeju와 통신하는 주기가 실시간인가요, 배치인가요?"
+  },
+  {
+    "id": "dev-0530",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city의 blocks 디렉터리 구조가 L1 노드와 어떻게 다른가요?"
+  },
+  {
+    "id": "dev-0531",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city 노드에 장애가 났을 때 복구 절차가 L1보다 복잡한가요?"
+  },
+  {
+    "id": "dev-0532",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city의 캐시 정책이 L1 노드들과 어떻게 다른가요?"
+  },
+  {
+    "id": "dev-0533",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city 노드가 여러 L1 노드의 데이터를 집계하는 배치 작업이 있나요?"
+  },
+  {
+    "id": "dev-0534",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city의 로그 데이터양이 L1 노드보다 훨씬 많을 텐데 저장 정책이 어떻게 되나요?"
+  },
+  {
+    "id": "dev-0535",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city 노드가 새로운 L1 노드(예: L1-ido2)를 자동으로 인식하나요?"
+  },
+  {
+    "id": "dev-0536",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city의 보안 정책이 L1 노드보다 강화돼 있나요?"
+  },
+  {
+    "id": "dev-0537",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city 노드의 CPU/메모리 사양이 처리량에 비해 충분한가요?"
+  },
+  {
+    "id": "dev-0538",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city가 담당하는 gov-tree 상의 위치가 정확히 어디인가요?"
+  },
+  {
+    "id": "dev-0539",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city 노드의 마이그레이션이 하위 L1 노드 마이그레이션과 순서를 맞춰야 하나요?"
+  },
+  {
+    "id": "dev-0540",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city의 온디맨드 기동 조건이 L1 노드와 다른가요?"
+  },
+  {
+    "id": "dev-0541",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city 노드가 처리하는 K-서비스 종류가 L1보다 더 많나요?"
+  },
+  {
+    "id": "dev-0542",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city의 스모크테스트가 하위 L1 노드까지 연쇄 검증하나요?"
+  },
+  {
+    "id": "dev-0543",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city 노드의 배포 시 하위 L1 노드에도 영향이 가나요?"
+  },
+  {
+    "id": "dev-0544",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city가 향후 다른 시(市) 단위로 복제될 템플릿 역할을 하나요?"
+  },
+  {
+    "id": "dev-0545",
+    "category": "3_인프라_계층",
+    "question": "L2-jeju-city 노드의 장애 알림이 어느 채널로 전달되나요?"
+  },
+  {
+    "id": "dev-0546",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju는 제주도 전체를 아우르는 노드인가요?"
+  },
+  {
+    "id": "dev-0547",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju가 L2-jeju-city와 서귀포 등 다른 L2 노드를 통합 관리하나요?"
+  },
+  {
+    "id": "dev-0548",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju 노드의 routing_table.json 규모가 L2보다 얼마나 큰가요?"
+  },
+  {
+    "id": "dev-0549",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju가 도지사·도청 시스템과 직접 연동될 계획이 있나요?"
+  },
+  {
+    "id": "dev-0550",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju 노드가 다운되면 제주도 전체 서비스가 영향을 받나요?"
+  },
+  {
+    "id": "dev-0551",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju의 PocketBase 인스턴스가 gopang-pb-l3-jejudo로 명명된 이유가 뭔가요?"
+  },
+  {
+    "id": "dev-0552",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju 노드의 하드웨어 사양이 L2보다 얼마나 상위인가요?"
+  },
+  {
+    "id": "dev-0553",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju가 도 단위 통계 데이터를 집계하는 배치 작업을 갖고 있나요?"
+  },
+  {
+    "id": "dev-0554",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju 노드의 백업 정책이 L2보다 더 자주 이뤄지나요?"
+  },
+  {
+    "id": "dev-0555",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju가 서귀포 지역 L2 노드가 새로 생기면 자동으로 편입하나요?"
+  },
+  {
+    "id": "dev-0556",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju 노드의 로그 분석 대시보드가 별도로 구축돼 있나요?"
+  },
+  {
+    "id": "dev-0557",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju가 도 전체 재난 알림(태풍 등)을 통합 발송하는 역할도 하나요?"
+  },
+  {
+    "id": "dev-0558",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju 노드의 KV 네임스페이스가 L2 노드들과 어떻게 계층화돼 있나요?"
+  },
+  {
+    "id": "dev-0559",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju가 처리하는 트래픽 규모에 비해 서버 사양이 충분한가요?"
+  },
+  {
+    "id": "dev-0560",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju 노드의 장애 복구 시간(RTO) 목표가 몇 분으로 설정돼 있나요?"
+  },
+  {
+    "id": "dev-0561",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju가 앞으로 L4-kr로 넘어가는 데이터 앵커링 주기가 얼마나 되나요?"
+  },
+  {
+    "id": "dev-0562",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju 노드의 보안 감사가 하위 L2/L1 노드까지 포함하나요?"
+  },
+  {
+    "id": "dev-0563",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju가 도 전체 K-서비스 이용 통계를 외부에 공개하나요?"
+  },
+  {
+    "id": "dev-0564",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju 노드의 마이그레이션 실패가 하위 L2 노드에 어떤 영향을 주나요?"
+  },
+  {
+    "id": "dev-0565",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju가 온디맨드 기동될 때 하위 L2/L1 노드도 함께 깨어나나요?"
+  },
+  {
+    "id": "dev-0566",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju 노드의 CPU 사용률이 평소 얼마나 되나요?"
+  },
+  {
+    "id": "dev-0567",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju가 제주 이외 지역(전국 확장) 노드와 어떻게 구분되나요?"
+  },
+  {
+    "id": "dev-0568",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju 노드의 스모크테스트가 도 전체 시나리오를 검증하나요?"
+  },
+  {
+    "id": "dev-0569",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju가 향후 L3-busan, L3-seoul처럼 다른 도 단위 노드의 템플릿이 되나요?"
+  },
+  {
+    "id": "dev-0570",
+    "category": "3_인프라_계층",
+    "question": "L3-jeju 노드의 방화벽 정책이 도청 네트워크와 연동될 예정인가요?"
+  },
+  {
+    "id": "dev-0571",
+    "category": "3_인프라_계층",
+    "question": "L4-kr은 전국 단위 노드로서 모든 L3 노드를 통합하나요?"
+  },
+  {
+    "id": "dev-0572",
+    "category": "3_인프라_계층",
+    "question": "L4-kr이 아직 제주 하나뿐인 L3 노드만 관리하고 있는 건가요?"
+  },
+  {
+    "id": "dev-0573",
+    "category": "3_인프라_계층",
+    "question": "L4-kr 노드의 routing_table.json이 전국 지자체 확장 계획과 어떻게 맞물리나요?"
+  },
+  {
+    "id": "dev-0574",
+    "category": "3_인프라_계층",
+    "question": "L4-kr이 다운되면 각 도(道) 단위 L3 노드는 독립적으로 계속 작동하나요?"
+  },
+  {
+    "id": "dev-0575",
+    "category": "3_인프라_계층",
+    "question": "L4-kr 노드의 하드웨어 사양이 다른 하위 노드 대비 얼마나 상위인가요?"
+  },
+  {
+    "id": "dev-0576",
+    "category": "3_인프라_계층",
+    "question": "L4-kr이 국가 통계청이나 행정안전부 시스템과 연동될 계획이 있나요?"
+  },
+  {
+    "id": "dev-0577",
+    "category": "3_인프라_계층",
+    "question": "L4-kr 노드의 PocketBase 인스턴스가 gopang-pb-l4-kr로 단일화돼 있나요?"
+  },
+  {
+    "id": "dev-0578",
+    "category": "3_인프라_계층",
+    "question": "L4-kr이 전국 단위 재난 알림 발송의 최상위 허브 역할을 하나요?"
+  },
+  {
+    "id": "dev-0579",
+    "category": "3_인프라_계층",
+    "question": "L4-kr 노드의 백업이 지리적으로 분산된 곳에 저장되나요?"
+  },
+  {
+    "id": "dev-0580",
+    "category": "3_인프라_계층",
+    "question": "L4-kr이 새로운 광역지자체 L3 노드를 온보딩하는 표준 절차가 있나요?"
+  },
+  {
+    "id": "dev-0581",
+    "category": "3_인프라_계층",
+    "question": "L4-kr 노드의 로그 데이터가 전국 단위라 얼마나 방대한가요?"
+  },
+  {
+    "id": "dev-0582",
+    "category": "3_인프라_계층",
+    "question": "L4-kr이 전국 K-서비스 이용 통계를 국가 기관에 보고하는 체계가 있나요?"
+  },
+  {
+    "id": "dev-0583",
+    "category": "3_인프라_계층",
+    "question": "L4-kr 노드의 장애 복구 계획(DR)이 얼마나 구체적으로 문서화돼 있나요?"
+  },
+  {
+    "id": "dev-0584",
+    "category": "3_인프라_계층",
+    "question": "L4-kr이 openhash 원장의 전국 앵커링을 담당하는 유일한 노드인가요?"
+  },
+  {
+    "id": "dev-0585",
+    "category": "3_인프라_계층",
+    "question": "L4-kr 노드의 보안 등급이 국가 기반시설 수준으로 관리되나요?"
+  },
+  {
+    "id": "dev-0586",
+    "category": "3_인프라_계층",
+    "question": "L4-kr이 다른 나라의 유사 시스템과 데이터를 교환할 가능성이 있나요?"
+  },
+  {
+    "id": "dev-0587",
+    "category": "3_인프라_계층",
+    "question": "L4-kr 노드의 KV 네임스페이스가 L3 노드별로 완전히 격리돼 있나요?"
+  },
+  {
+    "id": "dev-0588",
+    "category": "3_인프라_계층",
+    "question": "L4-kr이 전국 확장 완료 시점을 언제로 목표하고 있나요?"
+  },
+  {
+    "id": "dev-0589",
+    "category": "3_인프라_계층",
+    "question": "L4-kr 노드의 CPU/메모리가 트래픽 급증(전국 이벤트 등)에 대비해 오토스케일링되나요?"
+  },
+  {
+    "id": "dev-0590",
+    "category": "3_인프라_계층",
+    "question": "L4-kr이 각 광역지자체 SP 콘텐츠의 품질을 심사하는 역할도 하나요?"
+  },
+  {
+    "id": "dev-0591",
+    "category": "3_인프라_계층",
+    "question": "L4-kr 노드의 마이그레이션이 전국 단위라 얼마나 신중하게 이뤄지나요?"
+  },
+  {
+    "id": "dev-0592",
+    "category": "3_인프라_계층",
+    "question": "L4-kr이 L5-global로 넘어가는 데이터의 범위가 뭔가요?"
+  },
+  {
+    "id": "dev-0593",
+    "category": "3_인프라_계층",
+    "question": "L4-kr 노드의 스모크테스트가 전국 시나리오까지 커버하나요?"
+  },
+  {
+    "id": "dev-0594",
+    "category": "3_인프라_계층",
+    "question": "L4-kr이 지자체 간 데이터 형식 차이를 표준화하는 역할을 하나요?"
+  },
+  {
+    "id": "dev-0595",
+    "category": "3_인프라_계층",
+    "question": "L4-kr 노드의 예산과 운영 인력이 다른 하위 노드 대비 얼마나 되나요?"
+  },
+  {
+    "id": "dev-0596",
+    "category": "3_인프라_계층",
+    "question": "L5-global은 아직 실제로 운영 중인가요, 설계 단계인가요?"
+  },
+  {
+    "id": "dev-0597",
+    "category": "3_인프라_계층",
+    "question": "L5-global이 담당하게 될 범위가 해외 진출 국가별 L4 노드를 통합하는 건가요?"
+  },
+  {
+    "id": "dev-0598",
+    "category": "3_인프라_계층",
+    "question": "L5-global 노드가 디지털 여권(Passport) 프로젝트와 직접 연동될 계획이 있나요?"
+  },
+  {
+    "id": "dev-0599",
+    "category": "3_인프라_계층",
+    "question": "L5-global의 routing_table.json은 국가별로 어떻게 구조화될 예정인가요?"
+  },
+  {
+    "id": "dev-0600",
+    "category": "3_인프라_계층",
+    "question": "L5-global이 국제표준(ICAO, eIDAS 등)과의 정합성을 어떻게 검증하나요?"
+  },
+  {
+    "id": "dev-0601",
+    "category": "3_인프라_계층",
+    "question": "L5-global 노드가 다운되면 각 국가의 L4 노드는 독립 운영이 가능한가요?"
+  },
+  {
+    "id": "dev-0602",
+    "category": "3_인프라_계층",
+    "question": "L5-global의 하드웨어/클라우드 인프라가 특정 리전에 집중돼 있나요, 분산돼 있나요?"
+  },
+  {
+    "id": "dev-0603",
+    "category": "3_인프라_계층",
+    "question": "L5-global이 국가 간 데이터 이전(GDPR 등 규제) 문제를 어떻게 다루나요?"
+  },
+  {
+    "id": "dev-0604",
+    "category": "3_인프라_계층",
+    "question": "L5-global 노드의 PocketBase 구조가 국가별로 완전히 분리되나요?"
+  },
+  {
+    "id": "dev-0605",
+    "category": "3_인프라_계층",
+    "question": "L5-global이 다국어 SP 콘텐츠를 통합 관리하는 허브 역할도 하나요?"
+  },
+  {
+    "id": "dev-0606",
+    "category": "3_인프라_계층",
+    "question": "L5-global의 보안 정책이 각국 법규를 모두 만족해야 하는데 어떻게 설계됐나요?"
+  },
+  {
+    "id": "dev-0607",
+    "category": "3_인프라_계층",
+    "question": "L5-global 노드가 첫 해외 진출국으로 어디를 목표하고 있나요?"
+  },
+  {
+    "id": "dev-0608",
+    "category": "3_인프라_계층",
+    "question": "L5-global의 앵커링 주기가 L4-kr보다 더 긴가요, 짧은가요?"
+  },
+  {
+    "id": "dev-0609",
+    "category": "3_인프라_계층",
+    "question": "L5-global이 전 세계 사용자 데이터를 하나의 원장으로 통합하나요, 국가별로 분리하나요?"
+  },
+  {
+    "id": "dev-0610",
+    "category": "3_인프라_계층",
+    "question": "L5-global 노드의 장애 대응 체계가 시차가 있는 여러 국가를 어떻게 커버하나요?"
+  },
+  {
+    "id": "dev-0611",
+    "category": "3_인프라_계층",
+    "question": "L5-global이 아직 코드보다 문서(설계) 위주로만 존재하는 상태인가요?"
+  },
+  {
+    "id": "dev-0612",
+    "category": "3_인프라_계층",
+    "question": "L5-global의 KV 네임스페이스가 국가 코드 기준으로 분리될 예정인가요?"
+  },
+  {
+    "id": "dev-0613",
+    "category": "3_인프라_계층",
+    "question": "L5-global 노드가 완성되면 조직의 저장소 수가 더 늘어나나요?"
+  },
+  {
+    "id": "dev-0614",
+    "category": "3_인프라_계층",
+    "question": "L5-global의 스모크테스트 계획이 이미 수립돼 있나요?"
+  },
+  {
+    "id": "dev-0615",
+    "category": "3_인프라_계층",
+    "question": "L5-global이 각국 정부와의 파트너십 없이도 운영 가능한 구조인가요?"
+  },
+  {
+    "id": "dev-0616",
+    "category": "3_인프라_계층",
+    "question": "L5-global 노드의 인력 구조(개발팀)가 국가별로 나뉠 예정인가요?"
+  },
+  {
+    "id": "dev-0617",
+    "category": "3_인프라_계층",
+    "question": "L5-global이 오픈해시 원장을 국가마다 다른 규제에 맞게 조정할 수 있나요?"
+  },
+  {
+    "id": "dev-0618",
+    "category": "3_인프라_계층",
+    "question": "L5-global의 로드맵이 공개 문서로 정리돼 있나요?"
+  },
+  {
+    "id": "dev-0619",
+    "category": "3_인프라_계층",
+    "question": "L5-global 노드가 처리할 언어가 몇 개 국어까지 늘어날 예정인가요?"
+  },
+  {
+    "id": "dev-0620",
+    "category": "3_인프라_계층",
+    "question": "L5-global이 완성되기까지 예상되는 기술적 난제가 뭔가요?"
+  },
+  {
+    "id": "dev-0621",
+    "category": "4_인증_보안_GDC결제",
+    "question": "전화번호를 SHA-256으로 해시한 뒤 IPv6 형태의 GUID로 변환하는 이유가 뭔가요?"
+  },
+  {
+    "id": "dev-0622",
+    "category": "4_인증_보안_GDC결제",
+    "question": "같은 전화번호가 항상 같은 GUID로 변환되는 걸 어떻게 보장하나요?"
+  },
+  {
+    "id": "dev-0623",
+    "category": "4_인증_보안_GDC결제",
+    "question": "해시 충돌 가능성은 실제로 검토된 적 있나요?"
+  },
+  {
+    "id": "dev-0624",
+    "category": "4_인증_보안_GDC결제",
+    "question": "전화번호가 바뀌면 예전 GUID와 새 GUID를 어떻게 연결하나요?"
+  },
+  {
+    "id": "dev-0625",
+    "category": "4_인증_보안_GDC결제",
+    "question": "이 해시 변환 로직이 여러 저장소에 중복 구현돼 있지는 않나요?"
+  },
+  {
+    "id": "dev-0626",
+    "category": "4_인증_보안_GDC결제",
+    "question": "GUID로 변환된 값에서 원래 전화번호를 역산할 수 있는 취약점은 없나요?"
+  },
+  {
+    "id": "dev-0627",
+    "category": "4_인증_보안_GDC결제",
+    "question": "국제 전화번호 형식(+82 등)도 동일한 해시 규칙을 따르나요?"
+  },
+  {
+    "id": "dev-0628",
+    "category": "4_인증_보안_GDC결제",
+    "question": "이 변환 로직에 레인보우 테이블 공격 방어(salt)가 적용돼 있나요?"
+  },
+  {
+    "id": "dev-0629",
+    "category": "4_인증_보안_GDC결제",
+    "question": "GUID 형식을 IPv6로 택한 특별한 이유가 있나요?"
+  },
+  {
+    "id": "dev-0630",
+    "category": "4_인증_보안_GDC결제",
+    "question": "전화번호 해시 변환 코드가 변경되면 기존 GUID가 전부 무효화되나요?"
+  },
+  {
+    "id": "dev-0631",
+    "category": "4_인증_보안_GDC결제",
+    "question": "device-link 인증이 QR 코드가 아니라 승인 알림 방식을 쓰는 이유가 뭔가요?"
+  },
+  {
+    "id": "dev-0632",
+    "category": "4_인증_보안_GDC결제",
+    "question": "새 기기 연결 요청이 만료되는 시간이 얼마로 설정돼 있나요?"
+  },
+  {
+    "id": "dev-0633",
+    "category": "4_인증_보안_GDC결제",
+    "question": "device-link 승인을 여러 기기에서 동시에 요청하면 어떻게 처리되나요?"
+  },
+  {
+    "id": "dev-0634",
+    "category": "4_인증_보안_GDC결제",
+    "question": "device-link 인증 과정이 중간자 공격(MITM)에 안전한가요?"
+  },
+  {
+    "id": "dev-0635",
+    "category": "4_인증_보안_GDC결제",
+    "question": "기기 연결 해제(로그아웃) 시 세션 토큰이 즉시 무효화되나요?"
+  },
+  {
+    "id": "dev-0636",
+    "category": "4_인증_보안_GDC결제",
+    "question": "device-link가 실패하는 가장 흔한 원인이 뭔가요?"
+  },
+  {
+    "id": "dev-0637",
+    "category": "4_인증_보안_GDC결제",
+    "question": "여러 기기에 동시 로그인 상태를 허용하는 최대 개수 제한이 있나요?"
+  },
+  {
+    "id": "dev-0638",
+    "category": "4_인증_보안_GDC결제",
+    "question": "device-link 인증 로그가 사용자한테 조회 가능하게 노출되나요?"
+  },
+  {
+    "id": "dev-0639",
+    "category": "4_인증_보안_GDC결제",
+    "question": "기기를 분실했을 때 원격으로 device-link를 강제 해제하는 기능이 있나요?"
+  },
+  {
+    "id": "dev-0640",
+    "category": "4_인증_보안_GDC결제",
+    "question": "device-link 인증 프로토콜이 표준(FIDO2 등)을 따르나요, 자체 구현인가요?"
+  },
+  {
+    "id": "dev-0641",
+    "category": "4_인증_보안_GDC결제",
+    "question": "생체인증이 필수화되기 전에는 어떤 인증 방식을 썼나요?"
+  },
+  {
+    "id": "dev-0642",
+    "category": "4_인증_보안_GDC결제",
+    "question": "생체인증 필수화 결정이 내려진 배경(인시던트 등)이 있었나요?"
+  },
+  {
+    "id": "dev-0643",
+    "category": "4_인증_보안_GDC결제",
+    "question": "생체인증 데이터가 서버에 저장되나요, 기기에만 저장되나요?"
+  },
+  {
+    "id": "dev-0644",
+    "category": "4_인증_보안_GDC결제",
+    "question": "생체인증이 실패했을 때의 백업 인증 수단이 뭔가요?"
+  },
+  {
+    "id": "dev-0645",
+    "category": "4_인증_보안_GDC결제",
+    "question": "생체인증 필수화가 노약자·장애인 접근성과 충돌하는 부분은 없나요?"
+  },
+  {
+    "id": "dev-0646",
+    "category": "4_인증_보안_GDC결제",
+    "question": "생체인증 데이터 유출 시 전화번호 노출보다 더 심각한 문제가 될 수 있는데 어떻게 대비하나요?"
+  },
+  {
+    "id": "dev-0647",
+    "category": "4_인증_보안_GDC결제",
+    "question": "생체인증 필수화 이후 로그인 실패율이 어떻게 변했나요?"
+  },
+  {
+    "id": "dev-0648",
+    "category": "4_인증_보안_GDC결제",
+    "question": "생체인증을 지원하지 않는 구형 기기 사용자는 어떻게 되나요?"
+  },
+  {
+    "id": "dev-0649",
+    "category": "4_인증_보안_GDC결제",
+    "question": "생체인증 재등록(지문 교체 등) 절차가 얼마나 번거로운가요?"
+  },
+  {
+    "id": "dev-0650",
+    "category": "4_인증_보안_GDC결제",
+    "question": "생체인증 필수화 정책이 모든 K-서비스에 동일하게 적용되나요?"
+  },
+  {
+    "id": "dev-0651",
+    "category": "4_인증_보안_GDC결제",
+    "question": "Ed25519와 X25519를 각각 서명용, 암호화용으로 나눠 쓰는 이유가 뭔가요?"
+  },
+  {
+    "id": "dev-0652",
+    "category": "4_인증_보안_GDC결제",
+    "question": "지갑 키 쌍이 생성되는 시점이 회원가입 시인가요, GDC 지갑 개설 시인가요?"
+  },
+  {
+    "id": "dev-0653",
+    "category": "4_인증_보안_GDC결제",
+    "question": "개인키가 기기 밖으로 절대 나가지 않는다는 걸 어떻게 코드로 보장하나요?"
+  },
+  {
+    "id": "dev-0654",
+    "category": "4_인증_보안_GDC결제",
+    "question": "지갑 키 백업(니모닉 등)이 표준 BIP39를 따르나요?"
+  },
+  {
+    "id": "dev-0655",
+    "category": "4_인증_보안_GDC결제",
+    "question": "여러 기기에서 같은 지갑 키를 공유하는 구조인가요, 기기마다 다른 키인가요?"
+  },
+  {
+    "id": "dev-0656",
+    "category": "4_인증_보안_GDC결제",
+    "question": "지갑 키가 유출되면 즉시 폐기하고 새 키로 교체하는 절차가 있나요?"
+  },
+  {
+    "id": "dev-0657",
+    "category": "4_인증_보안_GDC결제",
+    "question": "Ed25519 서명 검증이 실패하는 경우가 실제로 보고된 적 있나요?"
+  },
+  {
+    "id": "dev-0658",
+    "category": "4_인증_보안_GDC결제",
+    "question": "지갑 키 관리 코드가 감사(오디트)를 받은 적 있나요?"
+  },
+  {
+    "id": "dev-0659",
+    "category": "4_인증_보안_GDC결제",
+    "question": "지갑 키 생성에 사용하는 난수 생성기(RNG)가 암호학적으로 안전한가요?"
+  },
+  {
+    "id": "dev-0660",
+    "category": "4_인증_보안_GDC결제",
+    "question": "지갑 키가 하드웨어 보안 모듈(Knox Vault 등)에 저장되는 기기와 그렇지 않은 기기의 차이가 있나요?"
+  },
+  {
+    "id": "dev-0661",
+    "category": "4_인증_보안_GDC결제",
+    "question": "Web Push 구독 정보가 만료되면 자동으로 갱신되나요?"
+  },
+  {
+    "id": "dev-0662",
+    "category": "4_인증_보안_GDC결제",
+    "question": "여러 브라우저/기기에서 Web Push 구독을 모두 관리할 수 있나요?"
+  },
+  {
+    "id": "dev-0663",
+    "category": "4_인증_보안_GDC결제",
+    "question": "Web Push 알림이 도착하지 않는 경우 재전송 로직이 있나요?"
+  },
+  {
+    "id": "dev-0664",
+    "category": "4_인증_보안_GDC결제",
+    "question": "Web Push 구독 해지 요청이 즉시 반영되나요?"
+  },
+  {
+    "id": "dev-0665",
+    "category": "4_인증_보안_GDC결제",
+    "question": "Web Push의 VAPID 키 관리가 어느 저장소에서 중앙화돼 있나요?"
+  },
+  {
+    "id": "dev-0666",
+    "category": "4_인증_보안_GDC결제",
+    "question": "Web Push 알림 발송 실패율을 모니터링하는 대시보드가 있나요?"
+  },
+  {
+    "id": "dev-0667",
+    "category": "4_인증_보안_GDC결제",
+    "question": "Web Push가 브라우저별로 호환성 문제가 있었던 사례가 있나요?"
+  },
+  {
+    "id": "dev-0668",
+    "category": "4_인증_보안_GDC결제",
+    "question": "Web Push 대신 SMS로 대체 발송하는 폴백 로직이 있나요?"
+  },
+  {
+    "id": "dev-0669",
+    "category": "4_인증_보안_GDC결제",
+    "question": "Web Push 구독 데이터가 GDPR 같은 개인정보 규정을 준수하나요?"
+  },
+  {
+    "id": "dev-0670",
+    "category": "4_인증_보안_GDC결제",
+    "question": "Web Push Authorization 헤더 인코딩 문제가 있었다는데 지금은 해결됐나요?"
+  },
+  {
+    "id": "dev-0671",
+    "category": "4_인증_보안_GDC결제",
+    "question": "GDC의 중앙은행 모듈과 시중은행 모듈이 코드상 어떻게 분리돼 있나요?"
+  },
+  {
+    "id": "dev-0672",
+    "category": "4_인증_보안_GDC결제",
+    "question": "실제 은행과 제휴 없이 이 모듈이 어떻게 시중은행 역할을 시뮬레이션하나요?"
+  },
+  {
+    "id": "dev-0673",
+    "category": "4_인증_보안_GDC결제",
+    "question": "중앙은행 모듈이 GDC 발행량을 조절하는 통화정책 로직을 갖고 있나요?"
+  },
+  {
+    "id": "dev-0674",
+    "category": "4_인증_보안_GDC결제",
+    "question": "시중은행 모듈에서 예금·대출 이자율은 어떻게 결정되나요?"
+  },
+  {
+    "id": "dev-0675",
+    "category": "4_인증_보안_GDC결제",
+    "question": "이 통합 모듈이 실제 금융 규제(자본시장법 등) 검토를 거쳤나요?"
+  },
+  {
+    "id": "dev-0676",
+    "category": "4_인증_보안_GDC결제",
+    "question": "중앙은행 모듈과 시중은행 모듈 간 자금 이동이 실시간으로 정산되나요?"
+  },
+  {
+    "id": "dev-0677",
+    "category": "4_인증_보안_GDC결제",
+    "question": "GDC 시중은행 모듈에 지급준비율 개념이 구현돼 있나요?"
+  },
+  {
+    "id": "dev-0678",
+    "category": "4_인증_보안_GDC결제",
+    "question": "이 모듈이 실제 화폐가 아니라는 걸 사용자에게 어떻게 명확히 고지하나요?"
+  },
+  {
+    "id": "dev-0679",
+    "category": "4_인증_보안_GDC결제",
+    "question": "GDC 통합 모듈의 회계 처리가 이중장부 원칙을 따르나요?"
+  },
+  {
+    "id": "dev-0680",
+    "category": "4_인증_보안_GDC결제",
+    "question": "중앙은행 모듈 장애 시 시중은행 모듈의 거래도 함께 멈추나요?"
+  },
+  {
+    "id": "dev-0681",
+    "category": "4_인증_보안_GDC결제",
+    "question": "GDC 신용평가가 실제 신용정보원(NICE 등) 데이터를 쓰나요, 자체 데이터인가요?"
+  },
+  {
+    "id": "dev-0682",
+    "category": "4_인증_보안_GDC결제",
+    "question": "GDC 대출 승인 알고리즘이 어떤 변수를 기준으로 판단하나요?"
+  },
+  {
+    "id": "dev-0683",
+    "category": "4_인증_보안_GDC결제",
+    "question": "신용평가 결과가 잘못됐을 때 이의제기 절차가 있나요?"
+  },
+  {
+    "id": "dev-0684",
+    "category": "4_인증_보안_GDC결제",
+    "question": "GDC 대출 연체 시 어떤 제재가 가해지나요?"
+  },
+  {
+    "id": "dev-0685",
+    "category": "4_인증_보안_GDC결제",
+    "question": "신용평가 로직이 K-Biz의 매출 데이터를 자동으로 참조하나요?"
+  },
+  {
+    "id": "dev-0686",
+    "category": "4_인증_보안_GDC결제",
+    "question": "GDC 대출 이자율이 신용점수별로 어떻게 차등 적용되나요?"
+  },
+  {
+    "id": "dev-0687",
+    "category": "4_인증_보안_GDC결제",
+    "question": "신용평가 모델이 편향(bias) 검증을 거쳤나요?"
+  },
+  {
+    "id": "dev-0688",
+    "category": "4_인증_보안_GDC결제",
+    "question": "GDC 대출이 실제 법정 최고금리 규제를 따르나요?"
+  },
+  {
+    "id": "dev-0689",
+    "category": "4_인증_보안_GDC결제",
+    "question": "신용평가 데이터가 얼마나 오래 보관되나요?"
+  },
+  {
+    "id": "dev-0690",
+    "category": "4_인증_보안_GDC결제",
+    "question": "GDC 대출 상품이 여러 종류로 나뉘어 있나요, 단일 상품인가요?"
+  },
+  {
+    "id": "dev-0691",
+    "category": "4_인증_보안_GDC결제",
+    "question": "GDC 자동 충전이 오픈뱅킹 API의 어떤 권한 범위를 요구하나요?"
+  },
+  {
+    "id": "dev-0692",
+    "category": "4_인증_보안_GDC결제",
+    "question": "자동 충전 실패 시 재시도 간격이 어떻게 설정돼 있나요?"
+  },
+  {
+    "id": "dev-0693",
+    "category": "4_인증_보안_GDC결제",
+    "question": "오픈뱅킹 인증서가 만료되면 자동 충전이 조용히 멈추는 문제는 없나요?"
+  },
+  {
+    "id": "dev-0694",
+    "category": "4_인증_보안_GDC결제",
+    "question": "자동 충전 금액 상한선이 있나요?"
+  },
+  {
+    "id": "dev-0695",
+    "category": "4_인증_보안_GDC결제",
+    "question": "GDC 충전이 실패했는데 카드값은 빠져나간 사고가 실제로 있었나요?"
+  },
+  {
+    "id": "dev-0696",
+    "category": "4_인증_보안_GDC결제",
+    "question": "오픈뱅킹 연동이 여러 은행을 동시에 지원하나요?"
+  },
+  {
+    "id": "dev-0697",
+    "category": "4_인증_보안_GDC결제",
+    "question": "자동 충전 스케줄이 사용자가 직접 설정 가능한가요, 고정 주기인가요?"
+  },
+  {
+    "id": "dev-0698",
+    "category": "4_인증_보안_GDC결제",
+    "question": "오픈뱅킹 API 응답 지연이 GDC 잔액 표시에 어떤 영향을 주나요?"
+  },
+  {
+    "id": "dev-0699",
+    "category": "4_인증_보안_GDC결제",
+    "question": "GDC 충전 자동화 로직이 이중 충전을 방지하는 멱등성(idempotency) 처리를 하나요?"
+  },
+  {
+    "id": "dev-0700",
+    "category": "4_인증_보안_GDC결제",
+    "question": "오픈뱅킹 연동 시크릿 키가 노출된 사고가 있었나요?"
+  },
+  {
+    "id": "dev-0701",
+    "category": "4_인증_보안_GDC결제",
+    "question": "profiles 테이블에서 어떤 필드가 암호화 대상인가요?"
+  },
+  {
+    "id": "dev-0702",
+    "category": "4_인증_보안_GDC결제",
+    "question": "암호화 키 관리가 PocketBase 자체 기능인가요, 별도 구현인가요?"
+  },
+  {
+    "id": "dev-0703",
+    "category": "4_인증_보안_GDC결제",
+    "question": "암호화된 필드를 검색해야 할 때 성능 저하가 있지 않나요?"
+  },
+  {
+    "id": "dev-0704",
+    "category": "4_인증_보안_GDC결제",
+    "question": "profiles 테이블 백업 시에도 암호화 상태가 유지되나요?"
+  },
+  {
+    "id": "dev-0705",
+    "category": "4_인증_보안_GDC결제",
+    "question": "암호화 키가 유출되면 전체 사용자 프로필이 노출되는 구조는 아닌가요?"
+  },
+  {
+    "id": "dev-0706",
+    "category": "4_인증_보안_GDC결제",
+    "question": "profiles 테이블 스키마 변경 시 암호화 로직도 함께 마이그레이션하나요?"
+  },
+  {
+    "id": "dev-0707",
+    "category": "4_인증_보안_GDC결제",
+    "question": "PocketBase profiles PATCH가 인증 없이 가능했던 취약점은 어떻게 해결됐나요?"
+  },
+  {
+    "id": "dev-0708",
+    "category": "4_인증_보안_GDC결제",
+    "question": "암호화되지 않은 필드와 암호화된 필드가 섞여 있는 이유가 뭔가요?"
+  },
+  {
+    "id": "dev-0709",
+    "category": "4_인증_보안_GDC결제",
+    "question": "profiles 테이블 암호화가 모든 L1~L5 노드에 동일하게 적용되나요?"
+  },
+  {
+    "id": "dev-0710",
+    "category": "4_인증_보안_GDC결제",
+    "question": "암호화 알고리즘 교체(예: AES-256에서 다른 것으로)가 필요하면 어떻게 진행하나요?"
+  },
+  {
+    "id": "dev-0711",
+    "category": "4_인증_보안_GDC결제",
+    "question": "세션 TTL이 K-서비스마다 다르게 설정돼 있나요?"
+  },
+  {
+    "id": "dev-0712",
+    "category": "4_인증_보안_GDC결제",
+    "question": "세션이 만료되면 사용자한테 어떻게 알려주나요?"
+  },
+  {
+    "id": "dev-0713",
+    "category": "4_인증_보안_GDC결제",
+    "question": "세션 TTL을 사용자가 직접 늘리거나 줄일 수 있나요?"
+  },
+  {
+    "id": "dev-0714",
+    "category": "4_인증_보안_GDC결제",
+    "question": "회사 컴퓨터처럼 공용 기기에서는 세션 TTL이 더 짧게 적용되나요?"
+  },
+  {
+    "id": "dev-0715",
+    "category": "4_인증_보안_GDC결제",
+    "question": "세션 TTL 정책이 보안과 사용성 사이에서 어떤 기준으로 정해졌나요?"
+  },
+  {
+    "id": "dev-0716",
+    "category": "4_인증_보안_GDC결제",
+    "question": "세션이 갱신될 때마다 TTL이 초기화되나요, 고정 만료 시간이 있나요?"
+  },
+  {
+    "id": "dev-0717",
+    "category": "4_인증_보안_GDC결제",
+    "question": "여러 기기의 세션 TTL이 서로 다르게 관리되나요?"
+  },
+  {
+    "id": "dev-0718",
+    "category": "4_인증_보안_GDC결제",
+    "question": "세션 TTL 만료 직전 자동 갱신(refresh token) 로직이 있나요?"
+  },
+  {
+    "id": "dev-0719",
+    "category": "4_인증_보안_GDC결제",
+    "question": "세션 TTL 설정 실수로 로그인이 너무 자주 풀리는 문제가 있었나요?"
+  },
+  {
+    "id": "dev-0720",
+    "category": "4_인증_보안_GDC결제",
+    "question": "세션 데이터가 KV에 저장된다면 KV TTL과 세션 TTL이 일치하나요?"
+  },
+  {
+    "id": "dev-0721",
+    "category": "4_인증_보안_GDC결제",
+    "question": "Cloudflare KV의 TTL 최소값 제약이 정확히 얼마인가요?"
+  },
+  {
+    "id": "dev-0722",
+    "category": "4_인증_보안_GDC결제",
+    "question": "이 최소값 제약 때문에 어떤 기능이 설계를 바꿔야 했나요?"
+  },
+  {
+    "id": "dev-0723",
+    "category": "4_인증_보안_GDC결제",
+    "question": "KV TTL 최소값 이슈가 실제 장애로 이어진 사례가 있나요?"
+  },
+  {
+    "id": "dev-0724",
+    "category": "4_인증_보안_GDC결제",
+    "question": "TTL을 짧게 주고 싶은데 최소값 제약을 우회하는 방법이 있나요?"
+  },
+  {
+    "id": "dev-0725",
+    "category": "4_인증_보안_GDC결제",
+    "question": "KV 대신 다른 저장소(Durable Objects 등)로 바꾼 사례가 있나요?"
+  },
+  {
+    "id": "dev-0726",
+    "category": "4_인증_보안_GDC결제",
+    "question": "KV TTL 정책이 캐시 무효화 타이밍과 어떻게 충돌할 수 있나요?"
+  },
+  {
+    "id": "dev-0727",
+    "category": "4_인증_보안_GDC결제",
+    "question": "이 최소값 이슈가 문서화돼서 다른 개발자가 같은 실수를 안 하게 돼 있나요?"
+  },
+  {
+    "id": "dev-0728",
+    "category": "4_인증_보안_GDC결제",
+    "question": "KV TTL 최소값 때문에 실시간성이 중요한 기능에 지장이 있었나요?"
+  },
+  {
+    "id": "dev-0729",
+    "category": "4_인증_보안_GDC결제",
+    "question": "KV 캐시가 예상보다 오래 남아있어서 생긴 버그가 오늘 사례 말고 또 있나요?"
+  },
+  {
+    "id": "dev-0730",
+    "category": "4_인증_보안_GDC결제",
+    "question": "KV TTL 정책을 프로젝트 전체에서 일관되게 관리하는 문서가 있나요?"
+  },
+  {
+    "id": "dev-0731",
+    "category": "4_인증_보안_GDC결제",
+    "question": "지갑 키 백업이 니모닉 문구 방식인가요, 파일 다운로드 방식인가요?"
+  },
+  {
+    "id": "dev-0732",
+    "category": "4_인증_보안_GDC결제",
+    "question": "백업키를 분실했을 때 완전히 복구 불가능한 게 맞나요?"
+  },
+  {
+    "id": "dev-0733",
+    "category": "4_인증_보안_GDC결제",
+    "question": "백업키 여러 조각으로 나눠 보관하는 기능(샤미르 비밀공유 등)이 있나요?"
+  },
+  {
+    "id": "dev-0734",
+    "category": "4_인증_보안_GDC결제",
+    "question": "백업키 복구 시 신원 확인 절차가 추가로 필요한가요?"
+  },
+  {
+    "id": "dev-0735",
+    "category": "4_인증_보안_GDC결제",
+    "question": "백업키가 클라우드에 저장되지 않도록 강제하는 UX 장치가 있나요?"
+  },
+  {
+    "id": "dev-0736",
+    "category": "4_인증_보안_GDC결제",
+    "question": "백업키 재설정 시 예전 키가 즉시 무효화되나요?"
+  },
+  {
+    "id": "dev-0737",
+    "category": "4_인증_보안_GDC결제",
+    "question": "지갑 키 복구 과정이 사회공학적 공격에 취약하지는 않나요?"
+  },
+  {
+    "id": "dev-0738",
+    "category": "4_인증_보안_GDC결제",
+    "question": "백업키를 종이에 인쇄하는 기능을 앱에서 직접 제공하나요?"
+  },
+  {
+    "id": "dev-0739",
+    "category": "4_인증_보안_GDC결제",
+    "question": "백업키 분실로 인한 GDC 손실 사례가 실제로 있었나요?"
+  },
+  {
+    "id": "dev-0740",
+    "category": "4_인증_보안_GDC결제",
+    "question": "지갑 키 복구 절차가 표준(BIP39 등)을 따르는지 검증됐나요?"
+  },
+  {
+    "id": "dev-0741",
+    "category": "4_인증_보안_GDC결제",
+    "question": "전자증명서 지갑 API 인증을 받으려면 ISMS-P 인증이 선행돼야 하나요?"
+  },
+  {
+    "id": "dev-0742",
+    "category": "4_인증_보안_GDC결제",
+    "question": "행안부 인증 기준이 일반 K-서비스 보안 기준보다 더 엄격한가요?"
+  },
+  {
+    "id": "dev-0743",
+    "category": "4_인증_보안_GDC결제",
+    "question": "이 인증을 받는 데 예상되는 기간이 얼마나 되나요?"
+  },
+  {
+    "id": "dev-0744",
+    "category": "4_인증_보안_GDC결제",
+    "question": "전자증명서 지갑 기능이 아직 인증 전이라 제한적으로만 운영되나요?"
+  },
+  {
+    "id": "dev-0745",
+    "category": "4_인증_보안_GDC결제",
+    "question": "ISMS-P 인증 심사 항목 중 이 조직이 특히 취약한 부분이 있나요?"
+  },
+  {
+    "id": "dev-0746",
+    "category": "4_인증_보안_GDC결제",
+    "question": "전자증명서 지갑 API가 다른 정부 전자문서 시스템과 상호운용되나요?"
+  },
+  {
+    "id": "dev-0747",
+    "category": "4_인증_보안_GDC결제",
+    "question": "이 인증이 완료되면 어떤 새로운 기능이 열리나요?"
+  },
+  {
+    "id": "dev-0748",
+    "category": "4_인증_보안_GDC결제",
+    "question": "행안부 인증 기준 변경 시 코드를 얼마나 큰 폭으로 수정해야 하나요?"
+  },
+  {
+    "id": "dev-0749",
+    "category": "4_인증_보안_GDC결제",
+    "question": "전자증명서 지갑 인증 실패 시 재심사 절차가 어떻게 되나요?"
+  },
+  {
+    "id": "dev-0750",
+    "category": "4_인증_보안_GDC결제",
+    "question": "이 인증 작업을 전담하는 팀이 따로 있나요?"
+  },
+  {
+    "id": "dev-0751",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-JIT의 목적함수가 개별 비용최소화가 아니라 사회 총효용인 이유는 뭔가요?"
+  },
+  {
+    "id": "dev-0752",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-JIT은 왜 아직 sp-catalog.json에 등록되지 않았나요?"
+  },
+  {
+    "id": "dev-0753",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-JIT을 worker.js 라우팅에 연결하려면 뭐가 필요한가요?"
+  },
+  {
+    "id": "dev-0754",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-JIT과 K-Logistics는 어떻게 역할이 다른가요?"
+  },
+  {
+    "id": "dev-0755",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-JIT의 v0.1 이후 다음 마일스톤은 뭔가요?"
+  },
+  {
+    "id": "dev-0756",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-JIT이라는 이름의 'JIT'이 적시조달(Just-In-Time)을 뜻하는 게 맞나요?"
+  },
+  {
+    "id": "dev-0757",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-JIT의 조달 대상이 공공기관 물품인가요, 민간 물류까지 포함하나요?"
+  },
+  {
+    "id": "dev-0758",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-JIT이 사회 총효용을 계산할 때 어떤 지표를 쓰나요?"
+  },
+  {
+    "id": "dev-0759",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-JIT 초안 설계가 실제 공공조달 법규와 충돌하는 부분은 없나요?"
+  },
+  {
+    "id": "dev-0760",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-JIT이 정식 서비스가 되려면 어떤 기관의 승인이 필요한가요?"
+  },
+  {
+    "id": "dev-0761",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-JIT의 프로토타입이 실제 데이터로 테스트된 적 있나요?"
+  },
+  {
+    "id": "dev-0762",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-JIT 저장소의 커밋 활동이 최근에도 활발한가요, 방치돼 있나요?"
+  },
+  {
+    "id": "dev-0763",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-JIT과 시중 SCM(공급망관리) 솔루션의 차별점이 뭔가요?"
+  },
+  {
+    "id": "dev-0764",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-JIT이 다루는 '사회효용'을 정량화하는 게 기술적으로 얼마나 어려운가요?"
+  },
+  {
+    "id": "dev-0765",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-JIT을 도입하면 기존 조달 담당 공무원의 업무가 어떻게 바뀌나요?"
+  },
+  {
+    "id": "dev-0766",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-JIT 초안 문서에 리스크 분석이 포함돼 있나요?"
+  },
+  {
+    "id": "dev-0767",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-JIT이 다른 K-서비스와 달리 아직 desktop.html조차 없는 이유가 있나요?"
+  },
+  {
+    "id": "dev-0768",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-JIT의 목적함수를 결정한 근거 논문이나 자료가 있나요?"
+  },
+  {
+    "id": "dev-0769",
+    "category": "5_초안서비스_설계검토",
+    "question": "hondi.net의 K-City(체험하기, city.hondi.net)와 저장소 city(시민 복지 총합 최적 도시 설계)는 같은 서비스인가요?"
+  },
+  {
+    "id": "dev-0770",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-City 이름이 두 곳에서 다르게 쓰이는 문제는 언제부터 있었나요?"
+  },
+  {
+    "id": "dev-0771",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-City 명명 충돌을 해결하려면 어느 쪽 이름을 바꿔야 하나요?"
+  },
+  {
+    "id": "dev-0772",
+    "category": "5_초안서비스_설계검토",
+    "question": "hondi.net 메인 네비의 K-City는 정확히 어떤 기능을 하나요?"
+  },
+  {
+    "id": "dev-0773",
+    "category": "5_초안서비스_설계검토",
+    "question": "저장소 city의 '시민 복지 총합 최적 도시 설계'는 정확히 무엇을 계산하나요?"
+  },
+  {
+    "id": "dev-0774",
+    "category": "5_초안서비스_설계검토",
+    "question": "두 K-City 중 어느 쪽이 sp-catalog.json에 실제로 등록돼 있나요?"
+  },
+  {
+    "id": "dev-0775",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-City 명명 충돌 때문에 실제로 발생한 오류 사례가 있나요?"
+  },
+  {
+    "id": "dev-0776",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-City를 검색하면 두 서비스 중 어느 쪽으로 안내되나요?"
+  },
+  {
+    "id": "dev-0777",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-City 하위 모듈(재개발·감정평가)은 어느 저장소 소속인가요?"
+  },
+  {
+    "id": "dev-0778",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-City 명명 충돌 해결 계획이 로드맵에 있나요?"
+  },
+  {
+    "id": "dev-0779",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-City의 두 버전이 향후 하나로 합쳐질 가능성이 있나요, 완전히 분리될 예정인가요?"
+  },
+  {
+    "id": "dev-0780",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-City 명명 충돌을 오늘 이전에 누군가 이미 인지하고 있었나요?"
+  },
+  {
+    "id": "dev-0781",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-City 저장소의 원래 기획 의도와 hondi.net에 붙은 이름이 왜 어긋나게 됐나요?"
+  },
+  {
+    "id": "dev-0782",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-City 명명 충돌 해결 우선순위가 다른 버그보다 낮게 잡힌 이유가 있나요?"
+  },
+  {
+    "id": "dev-0783",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-City를 검색어로 테스트했을 때 SP가 두 후보 중 하나로 명확화 질문을 하나요?"
+  },
+  {
+    "id": "dev-0784",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-City 명명 충돌이 site-manifest.json 항목 등록에도 혼동을 일으켰나요?"
+  },
+  {
+    "id": "dev-0785",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-City 사용자가 재개발 정보를 찾으려다 복지 설계 정보만 보게 되는 경우가 있었나요?"
+  },
+  {
+    "id": "dev-0786",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-City(저장소)와 K-City(도시정비, city.hondi.net) 중 실제 개발 진척도가 더 앞선 쪽은 어디인가요?"
+  },
+  {
+    "id": "dev-0787",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-Const가 다루는 5개 심판유형은 각각 어떻게 시뮬레이션하나요?"
+  },
+  {
+    "id": "dev-0788",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-Const의 가상 결정이 실제 판례와 다르면 어떻게 처리하나요?"
+  },
+  {
+    "id": "dev-0789",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-Const는 언제 실제 서비스로 출시되나요?"
+  },
+  {
+    "id": "dev-0790",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-Const가 실제 헌법재판소 판례 데이터베이스를 참조하나요?"
+  },
+  {
+    "id": "dev-0791",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-Const의 시뮬레이션 결과가 법적 효력이 없다는 걸 사용자에게 어떻게 고지하나요?"
+  },
+  {
+    "id": "dev-0792",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-Const와 K-Law의 판례 데이터가 서로 공유되나요?"
+  },
+  {
+    "id": "dev-0793",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-Const 초안이 실제 헌법재판관 출신 자문을 받았나요?"
+  },
+  {
+    "id": "dev-0794",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-Const가 정치적으로 민감한 사건도 다루게 되면 중립성을 어떻게 유지하나요?"
+  },
+  {
+    "id": "dev-0795",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-Const의 5개 심판유형 중 가장 구현이 어려운 게 뭔가요?"
+  },
+  {
+    "id": "dev-0796",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-Const가 정식 출시되면 K-Law와 통합될 가능성이 있나요?"
+  },
+  {
+    "id": "dev-0797",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-Const 초안 단계에서 이미 발견된 설계상 한계가 있나요?"
+  },
+  {
+    "id": "dev-0798",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-Const가 실제 헌재 결정과 다른 결론을 낼 경우 오해를 부를 위험을 어떻게 관리하나요?"
+  },
+  {
+    "id": "dev-0799",
+    "category": "5_초안서비스_설계검토",
+    "question": "새 K-서비스를 초안 단계에서 정식 서비스로 승격하는 기준이 뭔가요?"
+  },
+  {
+    "id": "dev-0800",
+    "category": "5_초안서비스_설계검토",
+    "question": "초안 서비스가 sp-catalog.json에 등록되지 않으면 어떤 상태인가요?"
+  },
+  {
+    "id": "dev-0801",
+    "category": "5_초안서비스_설계검토",
+    "question": "초안 서비스도 GDC 과금이 적용되나요?"
+  },
+  {
+    "id": "dev-0802",
+    "category": "5_초안서비스_설계검토",
+    "question": "초안 서비스의 코드 리뷰는 정식 서비스와 다르게 진행되나요?"
+  },
+  {
+    "id": "dev-0803",
+    "category": "5_초안서비스_설계검토",
+    "question": "초안 서비스가 오래 방치되면 폐기 절차가 있나요?"
+  },
+  {
+    "id": "dev-0804",
+    "category": "5_초안서비스_설계검토",
+    "question": "새 K-서비스 저장소를 만들 때 따르는 표준 구조가 있나요?"
+  },
+  {
+    "id": "dev-0805",
+    "category": "5_초안서비스_설계검토",
+    "question": "초안 서비스에 라이브 스모크테스트를 미리 만들어두나요?"
+  },
+  {
+    "id": "dev-0806",
+    "category": "5_초안서비스_설계검토",
+    "question": "초안 서비스 이름을 지을 때 기존 서비스와 충돌을 막는 절차가 있나요?"
+  },
+  {
+    "id": "dev-0807",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-JIT과 K-Const 중 어느 쪽이 먼저 정식 출시될 예정인가요?"
+  },
+  {
+    "id": "dev-0808",
+    "category": "5_초안서비스_설계검토",
+    "question": "초안 서비스 목록은 어디서 한눈에 볼 수 있나요?"
+  },
+  {
+    "id": "dev-0809",
+    "category": "5_초안서비스_설계검토",
+    "question": "초안 서비스가 desktop.html 네비게이션에 안 보이는 게 원칙인가요, 실수로 누락된 건가요?"
+  },
+  {
+    "id": "dev-0810",
+    "category": "5_초안서비스_설계검토",
+    "question": "초안 서비스 개발에 참여하는 인력이 정식 서비스 개발팀과 겹치나요?"
+  },
+  {
+    "id": "dev-0811",
+    "category": "5_초안서비스_설계검토",
+    "question": "초안 서비스가 폐기될 때 저장소도 함께 삭제하나요, 아카이브만 하나요?"
+  },
+  {
+    "id": "dev-0812",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-City 사례처럼 이름 충돌이 재발하지 않도록 신규 서비스명 등록 절차가 있나요?"
+  },
+  {
+    "id": "dev-0813",
+    "category": "5_초안서비스_설계검토",
+    "question": "초안 서비스 승격 기준에 사용자 수요 조사도 포함되나요?"
+  },
+  {
+    "id": "dev-0814",
+    "category": "5_초안서비스_설계검토",
+    "question": "초안 서비스 3개(JIT, City, Const) 외에 또 다른 초안이 조직 내에 있나요?"
+  },
+  {
+    "id": "dev-0815",
+    "category": "5_초안서비스_설계검토",
+    "question": "초안 서비스가 정식 승격되기 전 베타 테스트 그룹을 운영하나요?"
+  },
+  {
+    "id": "dev-0816",
+    "category": "5_초안서비스_설계검토",
+    "question": "초안 서비스의 SP 프롬프트도 정식 서비스와 동일한 검토 절차를 거치나요?"
+  },
+  {
+    "id": "dev-0817",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-JIT, K-City, K-Const 세 초안 서비스 중 저장소 커밋 활동이 가장 활발한 곳은 어디인가요?"
+  },
+  {
+    "id": "dev-0818",
+    "category": "5_초안서비스_설계검토",
+    "question": "초안 서비스가 다른 정식 K-서비스의 리소스(DB, Worker)를 임시로 빌려 쓰나요?"
+  },
+  {
+    "id": "dev-0819",
+    "category": "5_초안서비스_설계검토",
+    "question": "초안 서비스 승격 결정을 누가 최종적으로 내리나요?"
+  },
+  {
+    "id": "dev-0820",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-Const처럼 법적 민감도가 높은 초안 서비스는 별도의 법률 검토를 거치나요?"
+  },
+  {
+    "id": "dev-0821",
+    "category": "5_초안서비스_설계검토",
+    "question": "초안 단계 서비스에 대한 사용자 피드백을 어떻게 수집하나요?"
+  },
+  {
+    "id": "dev-0822",
+    "category": "5_초안서비스_설계검토",
+    "question": "초안 서비스가 세 개나 동시에 진행 중인데 우선순위는 어떻게 정해지나요?"
+  },
+  {
+    "id": "dev-0823",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-City 명명 충돌 건을 계기로 신규 서비스명 사전 검색 절차가 새로 생겼나요?"
+  },
+  {
+    "id": "dev-0824",
+    "category": "5_초안서비스_설계검토",
+    "question": "초안 서비스 저장소에 README가 부실하면 표준화 요구를 받나요?"
+  },
+  {
+    "id": "dev-0825",
+    "category": "5_초안서비스_설계검토",
+    "question": "초안에서 정식으로 승격된 과거 K-서비스 사례가 있다면 어떤 과정을 거쳤나요?"
+  },
+  {
+    "id": "dev-0826",
+    "category": "5_초안서비스_설계검토",
+    "question": "초안 서비스가 오래 방치되다 다시 재개된 사례가 있나요?"
+  },
+  {
+    "id": "dev-0827",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-Const의 심판유형별 시뮬레이션이 서로 다른 SP로 나뉘어 구현될 예정인가요?"
+  },
+  {
+    "id": "dev-0828",
+    "category": "5_초안서비스_설계검토",
+    "question": "초안 서비스 문서에 '왜 아직 초안인지'에 대한 이유가 명시돼 있나요?"
+  },
+  {
+    "id": "dev-0829",
+    "category": "5_초안서비스_설계검토",
+    "question": "K-JIT과 K-City(저장소)가 둘 다 '사회적 최적화'를 표방하는데 서로 개념을 공유하나요?"
+  },
+  {
+    "id": "dev-0830",
+    "category": "5_초안서비스_설계검토",
+    "question": "초안 서비스 세 개 모두 GDC 결제 모듈 자체는 미리 붙여뒀나요, 아예 없나요?"
+  },
+  {
+    "id": "dev-0831",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "generate_site_manifest.py가 desktop.html 구조를 어떤 정규식으로 파싱하나요?"
+  },
+  {
+    "id": "dev-0832",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이 파이프라인이 새로운 4번째 소스(MEGA_MENU_PINNED, 순수 앵커)까지 잡아낸다는데 5번째 소스가 또 나올 가능성은 없나요?"
+  },
+  {
+    "id": "dev-0833",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이 스크립트가 desktop.html 파싱에 실패하면 어떤 에러를 내나요?"
+  },
+  {
+    "id": "dev-0834",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "audience 자동 분류가 섹션 라벨 문자열에만 의존하는데 라벨이 바뀌면 오분류되지 않나요?"
+  },
+  {
+    "id": "dev-0835",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "site-manifest.json 자동 생성이 다른 K-서비스 저장소에도 같은 패턴으로 적용될 수 있나요?"
+  },
+  {
+    "id": "dev-0836",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이 생성 스크립트를 CI가 아니라 pre-commit 훅으로 옮길 계획은 없나요?"
+  },
+  {
+    "id": "dev-0837",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "site-manifest.json이 GitHub Pages로 서빙되는데 캐시 무효화는 어떻게 이뤄지나요?"
+  },
+  {
+    "id": "dev-0838",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이 파이프라인이 생성한 keywords 필드의 품질을 자동으로 평가하는 방법이 있나요?"
+  },
+  {
+    "id": "dev-0839",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "site-manifest.json 생성 시 orphan standalone 페이지의 제목을 자동으로 못 채우는 문제는 어떻게 해결할 계획인가요?"
+  },
+  {
+    "id": "dev-0840",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이 생성기가 desktop.html 외의 다른 페이지(webapp.html 등)도 파싱 대상에 넣을 계획이 있나요?"
+  },
+  {
+    "id": "dev-0841",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이 CI 가드가 실패하면 PR 머지 자체가 막히나요, 경고만 뜨나요?"
+  },
+  {
+    "id": "dev-0842",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "check_site_manifest_sync.py가 generate_site_manifest.py --check를 그대로 위임하는 이유가 뭔가요?"
+  },
+  {
+    "id": "dev-0843",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이 가드가 매 커밋마다 실행되나요, PR 생성 시에만 실행되나요?"
+  },
+  {
+    "id": "dev-0844",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "CI 가드 실패 시 담당자에게 자동으로 알림이 가나요?"
+  },
+  {
+    "id": "dev-0845",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이 가드와 비슷한 패턴(check_capabilities_registry.py)이 다른 저장소에도 적용돼 있나요?"
+  },
+  {
+    "id": "dev-0846",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "check_site_manifest_sync가 오탐(false positive)을 낸 적이 있나요?"
+  },
+  {
+    "id": "dev-0847",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이 CI 가드를 우회하고 강제 머지하는 게 기술적으로 가능한가요?"
+  },
+  {
+    "id": "dev-0848",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이 가드가 검증하는 범위가 desktop.html 전체인가요, 특정 섹션만인가요?"
+  },
+  {
+    "id": "dev-0849",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "CI 가드 실행 시간이 얼마나 걸리나요?"
+  },
+  {
+    "id": "dev-0850",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이런 동기화 검증 가드를 site-manifest 외의 다른 설정 파일에도 확대 적용할 계획이 있나요?"
+  },
+  {
+    "id": "dev-0851",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "scope 필터링을 서버(hondi-search-relay)에서 하지 않고 클라이언트에서 하면 안 되는 이유가 뭔가요?"
+  },
+  {
+    "id": "dev-0852",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "scope가 'user'/'dev' 두 가지뿐인데 향후 세 번째 scope(예: 관리자)가 추가될 가능성이 있나요?"
+  },
+  {
+    "id": "dev-0853",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "scope 전환 시 대화 세션을 리셋하는 게 UX상 불편하지는 않나요?"
+  },
+  {
+    "id": "dev-0854",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "필터링된 매니페스트를 캐싱하지 않고 매번 필터링하는 게 성능에 영향을 주지 않나요?"
+  },
+  {
+    "id": "dev-0855",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "scope='dev'일 때만 활성화되는 DEV_SCOPE_NOTE가 실제로 얼마나 효과가 있었나요?"
+  },
+  {
+    "id": "dev-0856",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "scope 분리가 완료된 뒤 페르소나 매칭 로직도 scope를 인식하게 바꿀 계획이 있나요?"
+  },
+  {
+    "id": "dev-0857",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "scope 값이 클라이언트에서 조작되면(예: 강제로 dev 전송) 어떻게 방어하나요?"
+  },
+  {
+    "id": "dev-0858",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "scope 분리 이후 사용자 스코프의 검색 정확도가 실제로 개선됐다는 걸 어떻게 측정하나요?"
+  },
+  {
+    "id": "dev-0859",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "scope를 URL 파라미터로도 노출해서 딥링크를 지원할 계획이 있나요?"
+  },
+  {
+    "id": "dev-0860",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "scope 분리 설계를 다른 K-서비스의 검색 기능에도 재사용할 수 있나요?"
+  },
+  {
+    "id": "dev-0861",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "hondi-search-relay가 hondi-proxy에서 분리된 이유가 Cloudflare Error 1042 때문이라는데 구체적으로 뭐였나요?"
+  },
+  {
+    "id": "dev-0862",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이 저장소가 프로필 트리 바깥 경로에서만 배포 가능하다는 제약이 왜 생겼나요?"
+  },
+  {
+    "id": "dev-0863",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "wrangler deploy 실패 시 롤백 절차가 자동화돼 있나요?"
+  },
+  {
+    "id": "dev-0864",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이 저장소의 배포 권한을 가진 사람이 몇 명이나 되나요?"
+  },
+  {
+    "id": "dev-0865",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "배포 후 헬스체크가 자동으로 이뤄지나요, 수동 확인이 필요한가요?"
+  },
+  {
+    "id": "dev-0866",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "hondi-search-relay의 KV 네임스페이스가 다른 K-서비스와 공유되나요, 독립적인가요?"
+  },
+  {
+    "id": "dev-0867",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이 저장소의 시크릿(API 키 등)이 hondi 본체와 별도로 등록돼야 했던 이유가 뭔가요?"
+  },
+  {
+    "id": "dev-0868",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "배포 파이프라인에 스테이징 환경이 따로 있나요, 바로 프로덕션으로 배포되나요?"
+  },
+  {
+    "id": "dev-0869",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "hondi-search-relay 배포 이력을 조회할 수 있는 대시보드가 있나요?"
+  },
+  {
+    "id": "dev-0870",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이 저장소가 앞으로 더 많은 검색 기능(예: 이미지 검색)을 흡수할 계획이 있나요?"
+  },
+  {
+    "id": "dev-0871",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "matchPersonaByQuery의 부분일치 로직이 오늘 수정 전까지 얼마나 오래 방치돼 있었나요?"
+  },
+  {
+    "id": "dev-0872",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "AMBIGUOUS_PERSONA_LABELS 같은 개별 예외 등록 방식이 552명 규모에서 계속 확장 가능한가요?"
+  },
+  {
+    "id": "dev-0873",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "짧은 라벨 문제를 근본적으로 해결하려면 토큰화나 형태소 분석이 필요하지 않을까요?"
+  },
+  {
+    "id": "dev-0874",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "페르소나 매칭 실패율을 정기적으로 측정하는 지표가 있나요?"
+  },
+  {
+    "id": "dev-0875",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이 매칭 로직이 deepseek 모델 호출 전 1차 필터 역할만 하는 게 맞나요?"
+  },
+  {
+    "id": "dev-0876",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "매칭된 페르소나가 둘 이상이면 항상 deepseek로 넘기는 로직이 최선인가요, 우선순위를 매길 수도 있지 않나요?"
+  },
+  {
+    "id": "dev-0877",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "페르소나 라벨과 트리거 문구를 짓는 가이드라인이 있어서 향후 충돌을 예방하나요?"
+  },
+  {
+    "id": "dev-0878",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이 매칭 로직의 유닛테스트가 저장소에 커밋돼 있나요, 오늘처럼 매번 로컬 시뮬레이션으로만 검증하나요?"
+  },
+  {
+    "id": "dev-0879",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "552명의 페르소나가 계속 늘어나면 이 매칭 로직의 성능(속도)에 문제가 생기지 않을까요?"
+  },
+  {
+    "id": "dev-0880",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이 오탐 문제가 hondi-search 말고 다른 곳(K-Search 등)에서도 같은 패턴으로 발생할 수 있나요?"
+  },
+  {
+    "id": "dev-0881",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "gov-router가 hondi-search와 어떻게 역할이 겹치거나 나뉘나요?"
+  },
+  {
+    "id": "dev-0882",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "gov-router의 라우팅 규칙이 gov-tree 계층 구조를 그대로 반영하나요?"
+  },
+  {
+    "id": "dev-0883",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "gov-router가 지역별로 다른 SP를 호출하는 기준이 뭔가요?"
+  },
+  {
+    "id": "dev-0884",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "gov-router 라우팅 실패 시 어떤 폴백이 있나요?"
+  },
+  {
+    "id": "dev-0885",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "gov-router와 hondi-search-relay가 같은 매니페스트를 공유할 수 있나요?"
+  },
+  {
+    "id": "dev-0886",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "gov-router의 라우팅 테이블이 갱신되는 주기가 얼마나 되나요?"
+  },
+  {
+    "id": "dev-0887",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "gov-router가 사용자의 실제 거주 지역을 어떻게 판별하나요?"
+  },
+  {
+    "id": "dev-0888",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "gov-router 라우팅 오류로 다른 지역 SP가 잘못 호출된 사례가 있나요?"
+  },
+  {
+    "id": "dev-0889",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "gov-router의 테스트 커버리지가 hondi-search만큼 확보돼 있나요?"
+  },
+  {
+    "id": "dev-0890",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "gov-router가 전국 확장 이후 트래픽 급증에 대비한 설계가 돼 있나요?"
+  },
+  {
+    "id": "dev-0891",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이 조직에서 라이브 스모크테스트를 모킹 없이 실제 엔드포인트에 쏘는 이유가 뭔가요?"
+  },
+  {
+    "id": "dev-0892",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "스모크테스트 결과가 매번 100% 동일하지 않은데(LLM 응답 변동성) PASS 기준을 어떻게 잡나요?"
+  },
+  {
+    "id": "dev-0893",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "스모크테스트 실패 시 자동으로 재시도하는 로직이 있나요?"
+  },
+  {
+    "id": "dev-0894",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이 조직의 스모크테스트가 CI에 통합돼 있나요, 항상 사람이 수동 실행하나요?"
+  },
+  {
+    "id": "dev-0895",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "스모크테스트 결과 로그(jsonl)가 얼마나 오래 보관되나요?"
+  },
+  {
+    "id": "dev-0896",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "스모크테스트 케이스를 하드코딩하지 않고 매니페스트에서 동적으로 조회하게 바꾼 게 오늘 처음인가요?"
+  },
+  {
+    "id": "dev-0897",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이 조직에서 스모크테스트 실패율 추이를 시계열로 추적하나요?"
+  },
+  {
+    "id": "dev-0898",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "라이브 스모크테스트가 실제 과금(GDC, API 비용)을 발생시키는데 예산 관리는 어떻게 하나요?"
+  },
+  {
+    "id": "dev-0899",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "REVIEW로 분류되는 케이스(사람 판단 필요)가 전체의 몇 %나 되나요?"
+  },
+  {
+    "id": "dev-0900",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이 조직의 스모크테스트 작성 가이드라인이 문서로 정리돼 있나요?"
+  },
+  {
+    "id": "dev-0901",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "여러 K-서비스가 비슷한 키워드에 반응할 때 우선순위를 어떻게 정하나요?"
+  },
+  {
+    "id": "dev-0902",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "K-City처럼 이름이 겹치는 경우 라우팅 우선순위가 어떻게 꼬일 수 있나요?"
+  },
+  {
+    "id": "dev-0903",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "K-서비스 라우팅 규칙이 코드에 하드코딩돼 있나요, 설정 파일로 관리되나요?"
+  },
+  {
+    "id": "dev-0904",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "새 K-서비스가 추가될 때 기존 라우팅 우선순위에 영향을 주지 않게 하는 절차가 있나요?"
+  },
+  {
+    "id": "dev-0905",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "라우팅 우선순위 결정에 사용자 피드백이 반영되나요?"
+  },
+  {
+    "id": "dev-0906",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "K-서비스 라우팅이 실패해서 엉뚱한 서비스로 연결된 사례가 몇 건이나 보고됐나요?"
+  },
+  {
+    "id": "dev-0907",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "라우팅 우선순위를 A/B 테스트로 검증한 적 있나요?"
+  },
+  {
+    "id": "dev-0908",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "K-서비스 라우팅 규칙 변경 시 회귀 테스트를 어떻게 하나요?"
+  },
+  {
+    "id": "dev-0909",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "라우팅 우선순위가 지역(gov-tree)별로 다르게 설정될 수 있나요?"
+  },
+  {
+    "id": "dev-0910",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "K-서비스 라우팅 우선순위 문서가 최신 상태로 유지되고 있나요?"
+  },
+  {
+    "id": "dev-0911",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "expert-chat.html로 위임되는 조건이 hondi-search의 페르소나 매칭과 어떻게 다른가요?"
+  },
+  {
+    "id": "dev-0912",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "expert-chat 위임 후 대화 맥락이 hondi-search 세션과 이어지나요?"
+  },
+  {
+    "id": "dev-0913",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "expert-chat으로 위임된 후 사용자가 다시 검색으로 돌아오면 어떻게 처리되나요?"
+  },
+  {
+    "id": "dev-0914",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "expert-chat 위임 규칙이 문서화된 SP가 따로 있나요?"
+  },
+  {
+    "id": "dev-0915",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "expert-chat 위임이 잘못 트리거되면(오늘 u11 사례처럼) 사용자 경험에 어떤 영향을 주나요?"
+  },
+  {
+    "id": "dev-0916",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "expert-chat.html 자체의 배포 파이프라인이 hondi-search-relay와 같나요?"
+  },
+  {
+    "id": "dev-0917",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "expert-chat 위임 로직이 552명 페르소나 전체를 대상으로 하나요, 일부만 대상인가요?"
+  },
+  {
+    "id": "dev-0918",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "expert-chat 위임 후 상담이 유료로 전환되는 지점이 명확히 안내되나요?"
+  },
+  {
+    "id": "dev-0919",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "expert-chat 위임 규칙과 K-Search의 위임 규칙(delegate_ksearch)이 서로 다른 메커니즘인가요?"
+  },
+  {
+    "id": "dev-0920",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "expert-chat 위임 빈도를 모니터링해서 페르소나 인기도를 분석하나요?"
+  },
+  {
+    "id": "dev-0921",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "오늘처럼 코드는 배포됐는데 캐시된 옛날 데이터가 계속 서빙되는 문제가 재발하지 않게 할 방법이 있나요?"
+  },
+  {
+    "id": "dev-0922",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "배포 시 관련 KV 캐시를 자동으로 무효화하는 스크립트를 만들 계획이 있나요?"
+  },
+  {
+    "id": "dev-0923",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "캐시 TTL을 1시간으로 정한 근거가 뭔가요?"
+  },
+  {
+    "id": "dev-0924",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "배포 직후 캐시 강제 삭제를 배포 파이프라인의 필수 단계로 넣을 수 있나요?"
+  },
+  {
+    "id": "dev-0925",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이런 캐시-배포 불일치 문제가 hondi-search 말고 다른 K-서비스에서도 발생한 적 있나요?"
+  },
+  {
+    "id": "dev-0926",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "캐시 무효화 API를 별도로 노출해서 운영자가 즉시 트리거할 수 있게 할 계획이 있나요?"
+  },
+  {
+    "id": "dev-0927",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "캐시 TTL이 너무 짧으면 원본(GitHub Pages) 요청이 급증하는 트레이드오프는 어떻게 관리하나요?"
+  },
+  {
+    "id": "dev-0928",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "배포 후 캐시가 살아있는 동안 발생한 잘못된 응답에 대한 사용자 불만을 어떻게 추적하나요?"
+  },
+  {
+    "id": "dev-0929",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "캐시 상태를 실시간으로 조회할 수 있는 디버깅 엔드포인트가 있나요?"
+  },
+  {
+    "id": "dev-0930",
+    "category": "6_검색_라우팅_테스트방법론",
+    "question": "이 캐시-배포 지연 문제를 이번 세션 교훈 문서에 정식으로 기록해둘 계획인가요?"
+  },
+  {
+    "id": "dev-0931",
+    "category": "7_전국지자체_기술구조",
+    "question": "seoul 저장소가 gov-tree에서 L3 노드로 등록될 예정인가요, 별도 체계인가요?"
+  },
+  {
+    "id": "dev-0932",
+    "category": "7_전국지자체_기술구조",
+    "question": "서울처럼 인구밀집 지역은 L2 노드를 자치구 단위로 더 세분화해야 하지 않나요?"
+  },
+  {
+    "id": "dev-0933",
+    "category": "7_전국지자체_기술구조",
+    "question": "seoul 저장소의 SP 콘텐츠 작성이 다른 지자체보다 우선순위가 높게 잡혀 있나요?"
+  },
+  {
+    "id": "dev-0934",
+    "category": "7_전국지자체_기술구조",
+    "question": "서울 25개 자치구 데이터를 하나의 저장소에서 관리하면 확장성 문제가 없나요?"
+  },
+  {
+    "id": "dev-0935",
+    "category": "7_전국지자체_기술구조",
+    "question": "busan 저장소가 gov-tree 편입 시 항만 물류(K-Logistics) 데이터를 특별히 다루나요?"
+  },
+  {
+    "id": "dev-0936",
+    "category": "7_전국지자체_기술구조",
+    "question": "busan SP 콘텐츠 작성이 완료된 비율이 어느 정도인가요?"
+  },
+  {
+    "id": "dev-0937",
+    "category": "7_전국지자체_기술구조",
+    "question": "busan 저장소의 CI 가드가 hondi 본체와 동일한 패턴(check_*.py)을 쓰나요?"
+  },
+  {
+    "id": "dev-0938",
+    "category": "7_전국지자체_기술구조",
+    "question": "부산 확장이 기술적으로 얼마나 준비됐는지 저장소 커밋 이력으로 확인할 수 있나요?"
+  },
+  {
+    "id": "dev-0939",
+    "category": "7_전국지자체_기술구조",
+    "question": "incheon 저장소가 디지털 여권(Passport) 파일럿과 기술적으로 연동될 예정인가요?"
+  },
+  {
+    "id": "dev-0940",
+    "category": "7_전국지자체_기술구조",
+    "question": "incheon 저장소의 다국어 지원이 다른 지역 저장소보다 우선 구현되나요?"
+  },
+  {
+    "id": "dev-0941",
+    "category": "7_전국지자체_기술구조",
+    "question": "incheon SP 콘텐츠 검수는 누가 담당하나요?"
+  },
+  {
+    "id": "dev-0942",
+    "category": "7_전국지자체_기술구조",
+    "question": "incheon 저장소가 공항 관련 API(항공사, 출입국 등)와 연동될 계획이 있나요?"
+  },
+  {
+    "id": "dev-0943",
+    "category": "7_전국지자체_기술구조",
+    "question": "daejeon 저장소가 다른 지역보다 먼저 기술 검증 대상으로 선정된 이유가 있나요?"
+  },
+  {
+    "id": "dev-0944",
+    "category": "7_전국지자체_기술구조",
+    "question": "daejeon SP 콘텐츠에 과학기술 관련 특화 항목이 포함돼 있나요?"
+  },
+  {
+    "id": "dev-0945",
+    "category": "7_전국지자체_기술구조",
+    "question": "daejeon 저장소의 데이터 마이그레이션 계획이 문서화돼 있나요?"
+  },
+  {
+    "id": "dev-0946",
+    "category": "7_전국지자체_기술구조",
+    "question": "daejeon 위성 저장소가 세종 저장소와 인프라를 공유하나요?"
+  },
+  {
+    "id": "dev-0947",
+    "category": "7_전국지자체_기술구조",
+    "question": "ulsan 저장소가 산업단지 보안(K-Security) 관련 특화 SP를 별도로 갖고 있나요?"
+  },
+  {
+    "id": "dev-0948",
+    "category": "7_전국지자체_기술구조",
+    "question": "ulsan SP 콘텐츠 작성이 부산·경남권과 함께 진행되나요?"
+  },
+  {
+    "id": "dev-0949",
+    "category": "7_전국지자체_기술구조",
+    "question": "ulsan 저장소의 gov-tree 편입 시점이 확정됐나요?"
+  },
+  {
+    "id": "dev-0950",
+    "category": "7_전국지자체_기술구조",
+    "question": "ulsan 저장소가 산업재해 관련 K-911 연동을 특별히 강화하나요?"
+  },
+  {
+    "id": "dev-0951",
+    "category": "7_전국지자체_기술구조",
+    "question": "sejong 저장소가 openhash-L4-kr과 물리적으로 가장 가까운 곳에 배치될 예정인가요?"
+  },
+  {
+    "id": "dev-0952",
+    "category": "7_전국지자체_기술구조",
+    "question": "sejong SP 콘텐츠가 정부 부처 데이터와 직접 연동되는 구조인가요?"
+  },
+  {
+    "id": "dev-0953",
+    "category": "7_전국지자체_기술구조",
+    "question": "sejong 저장소의 보안 등급이 다른 지역 저장소보다 높게 설정되나요?"
+  },
+  {
+    "id": "dev-0954",
+    "category": "7_전국지자체_기술구조",
+    "question": "sejong 위성 저장소가 gov-tree의 특수 노드로 취급되나요?"
+  },
+  {
+    "id": "dev-0955",
+    "category": "7_전국지자체_기술구조",
+    "question": "sejong 저장소의 CI 가드가 정부 문서 규격까지 검증하나요?"
+  },
+  {
+    "id": "dev-0956",
+    "category": "7_전국지자체_기술구조",
+    "question": "chungbuk 저장소가 반도체 산업 관련 K-Biz 특화 SP를 갖고 있나요?"
+  },
+  {
+    "id": "dev-0957",
+    "category": "7_전국지자체_기술구조",
+    "question": "chungbuk SP 콘텐츠 작성 진척도가 다른 도 단위 저장소와 비슷한가요?"
+  },
+  {
+    "id": "dev-0958",
+    "category": "7_전국지자체_기술구조",
+    "question": "chungbuk 저장소의 gov-tree 편입이 충남과 동시에 진행되나요?"
+  },
+  {
+    "id": "dev-0959",
+    "category": "7_전국지자체_기술구조",
+    "question": "chungbuk 위성 저장소가 세종과 인프라를 공유할 가능성이 있나요?"
+  },
+  {
+    "id": "dev-0960",
+    "category": "7_전국지자체_기술구조",
+    "question": "chungbuk 저장소의 커밋 활동이 최근에도 이어지고 있나요?"
+  },
+  {
+    "id": "dev-0961",
+    "category": "7_전국지자체_기술구조",
+    "question": "chungnam 저장소가 농업 데이터 특화 SP를 별도로 갖고 있나요?"
+  },
+  {
+    "id": "dev-0962",
+    "category": "7_전국지자체_기술구조",
+    "question": "chungnam SP 콘텐츠가 항구(당진 등) 물류 데이터를 포함하나요?"
+  },
+  {
+    "id": "dev-0963",
+    "category": "7_전국지자체_기술구조",
+    "question": "chungnam 저장소의 gov-tree 편입 절차가 다른 도와 다른가요?"
+  },
+  {
+    "id": "dev-0964",
+    "category": "7_전국지자체_기술구조",
+    "question": "chungnam 위성 저장소가 재해(태풍) 대응 SP를 우선 구현하나요?"
+  },
+  {
+    "id": "dev-0965",
+    "category": "7_전국지자체_기술구조",
+    "question": "chungnam 저장소의 데이터 스키마가 전북 등 다른 농업 지역과 공유되나요?"
+  },
+  {
+    "id": "dev-0966",
+    "category": "7_전국지자체_기술구조",
+    "question": "jeonbuk 저장소가 특별자치도 전환 이후 저장소 구조도 바뀌었나요?"
+  },
+  {
+    "id": "dev-0967",
+    "category": "7_전국지자체_기술구조",
+    "question": "jeonbuk SP 콘텐츠에 새만금 개발 관련 데이터가 포함되나요?"
+  },
+  {
+    "id": "dev-0968",
+    "category": "7_전국지자체_기술구조",
+    "question": "jeonbuk 저장소가 강원(특별자치도)과 같은 기술 템플릿을 쓰나요?"
+  },
+  {
+    "id": "dev-0969",
+    "category": "7_전국지자체_기술구조",
+    "question": "jeonbuk 위성 저장소의 gov-tree 편입 시점이 확정됐나요?"
+  },
+  {
+    "id": "dev-0970",
+    "category": "7_전국지자체_기술구조",
+    "question": "jeonbuk 저장소의 CI 가드 구성이 문서화돼 있나요?"
+  },
+  {
+    "id": "dev-0971",
+    "category": "7_전국지자체_기술구조",
+    "question": "gyeongbuk 저장소가 제조업 밀집 지역 특화 SP를 갖고 있나요?"
+  },
+  {
+    "id": "dev-0972",
+    "category": "7_전국지자체_기술구조",
+    "question": "gyeongbuk SP 콘텐츠 작성이 대구와 함께 진행되나요?"
+  },
+  {
+    "id": "dev-0973",
+    "category": "7_전국지자체_기술구조",
+    "question": "gyeongbuk 저장소의 gov-tree 편입 계획이 문서화돼 있나요?"
+  },
+  {
+    "id": "dev-0974",
+    "category": "7_전국지자체_기술구조",
+    "question": "gyeongbuk 위성 저장소가 고령화 지역 특화 UX를 별도로 구현하나요?"
+  },
+  {
+    "id": "dev-0975",
+    "category": "7_전국지자체_기술구조",
+    "question": "gyeongbuk 저장소의 데이터 마이그레이션 담당자가 지정돼 있나요?"
+  },
+  {
+    "id": "dev-0976",
+    "category": "7_전국지자체_기술구조",
+    "question": "gyeongnam 저장소가 조선업 특화 K-Job 데이터를 별도로 관리하나요?"
+  },
+  {
+    "id": "dev-0977",
+    "category": "7_전국지자체_기술구조",
+    "question": "gyeongnam SP 콘텐츠가 부산·울산권과 통합 관리되나요?"
+  },
+  {
+    "id": "dev-0978",
+    "category": "7_전국지자체_기술구조",
+    "question": "gyeongnam 저장소의 gov-tree 편입이 다른 남부 지역과 동시에 이뤄지나요?"
+  },
+  {
+    "id": "dev-0979",
+    "category": "7_전국지자체_기술구조",
+    "question": "gyeongnam 위성 저장소가 어업 데이터 특화 SP를 갖고 있나요?"
+  },
+  {
+    "id": "dev-0980",
+    "category": "7_전국지자체_기술구조",
+    "question": "gyeongnam 저장소의 CI 파이프라인이 완성돼 있나요?"
+  },
+  {
+    "id": "dev-0981",
+    "category": "7_전국지자체_기술구조",
+    "question": "gyeonggi 저장소가 인구 규모 때문에 여러 L2 노드로 쪼개질 예정인가요?"
+  },
+  {
+    "id": "dev-0982",
+    "category": "7_전국지자체_기술구조",
+    "question": "gyeonggi SP 콘텐츠가 31개 시군별로 개별 관리되나요, 통합 관리되나요?"
+  },
+  {
+    "id": "dev-0983",
+    "category": "7_전국지자체_기술구조",
+    "question": "gyeonggi 저장소의 gov-tree 편입이 서울과 별도로 진행되나요?"
+  },
+  {
+    "id": "dev-0984",
+    "category": "7_전국지자체_기술구조",
+    "question": "gyeonggi 위성 저장소가 신도시(판교 등) 스타트업 데이터를 특화 관리하나요?"
+  },
+  {
+    "id": "dev-0985",
+    "category": "7_전국지자체_기술구조",
+    "question": "gyeonggi 저장소의 서버 용량 계획이 다른 지역보다 크게 잡혀 있나요?"
+  },
+  {
+    "id": "dev-0986",
+    "category": "7_전국지자체_기술구조",
+    "question": "gangwon 저장소가 산악지형 응급대응(K-911) 특화 SP를 갖고 있나요?"
+  },
+  {
+    "id": "dev-0987",
+    "category": "7_전국지자체_기술구조",
+    "question": "gangwon SP 콘텐츠에 관광 데이터가 우선 반영되나요?"
+  },
+  {
+    "id": "dev-0988",
+    "category": "7_전국지자체_기술구조",
+    "question": "gangwon 저장소가 통신 음영지역 대응 기술을 별도로 구현하나요?"
+  },
+  {
+    "id": "dev-0989",
+    "category": "7_전국지자체_기술구조",
+    "question": "gangwon 위성 저장소의 gov-tree 편입이 전북과 비슷한 시기인가요?"
+  },
+  {
+    "id": "dev-0990",
+    "category": "7_전국지자체_기술구조",
+    "question": "gangwon 저장소의 데이터 마이그레이션이 계절적 요인(겨울철 관광)을 고려하나요?"
+  },
+  {
+    "id": "dev-0991",
+    "category": "7_전국지자체_기술구조",
+    "question": "daegu 저장소가 섬유산업 특화 K-Biz SP를 갖고 있나요?"
+  },
+  {
+    "id": "dev-0992",
+    "category": "7_전국지자체_기술구조",
+    "question": "daegu SP 콘텐츠 작성이 경북과 통합 진행되나요?"
+  },
+  {
+    "id": "dev-0993",
+    "category": "7_전국지자체_기술구조",
+    "question": "daegu 저장소의 gov-tree 편입 계획이 확정됐나요?"
+  },
+  {
+    "id": "dev-0994",
+    "category": "7_전국지자체_기술구조",
+    "question": "daegu 위성 저장소가 폭염 대응 K-Health 특화 기능을 구현하나요?"
+  },
+  {
+    "id": "dev-0995",
+    "category": "7_전국지자체_기술구조",
+    "question": "daegu 저장소의 CI 가드 구성이 다른 광역시와 동일한가요?"
+  },
+  {
+    "id": "dev-0996",
+    "category": "7_전국지자체_기술구조",
+    "question": "jeonnam-gwangju 저장소가 통합 지자체 구조를 반영해 다른 저장소와 다르게 설계됐나요?"
+  },
+  {
+    "id": "dev-0997",
+    "category": "7_전국지자체_기술구조",
+    "question": "jeonnam-gwangju SP 콘텐츠가 예술·문화(광주)와 농업(전남) 데이터를 분리 관리하나요?"
+  },
+  {
+    "id": "dev-0998",
+    "category": "7_전국지자체_기술구조",
+    "question": "jeonnam-gwangju 저장소의 gov-tree 편입이 통합 이전 사례와 어떻게 다른가요?"
+  },
+  {
+    "id": "dev-0999",
+    "category": "7_전국지자체_기술구조",
+    "question": "jeonnam-gwangju 위성 저장소가 섬 지역 통신 인프라 문제를 별도로 다루나요?"
+  },
+  {
+    "id": "dev-1000",
+    "category": "7_전국지자체_기술구조",
+    "question": "jeonnam-gwangju 저장소가 향후 다른 통합 지자체 저장소의 기술 템플릿이 되나요?"
+  }
+]

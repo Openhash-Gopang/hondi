@@ -1,0 +1,277 @@
+{
+  "_comment": "2026-09-13 세션 — AC(AGENT-COMMON)가 사용자 발화를 어디로 보낼지 결정하는 라우팅 레지스트리. 2,000개 질문 분류 실험(user/dev 각 1000개) 결과와 sp-catalog.json 실측 대조로 확정. internal=AC가 sp-catalog.json에서 SP를 직접 불러 그 자리에서 답함(탭 이동 없음). federated=완전히 분리된 서브도메인 사이트로 이동해야 답변 가능(그 사이트가 자체 백엔드·자체 SP를 가짐 — 예: K-Law는 klaw.hondi.net 자체에 판결방법론 v15.1과 다중 LLM 호출 로직을 갖고 있음, hondi 쪽엔 SP가 전혀 없음).",
+  "k_services": {
+    "K-Mail": {
+      "keywords": [
+        "K-Mail",
+        "메일함",
+        "메일 보내",
+        "메일 발송",
+        "첨부파일 용량",
+        "메일 주소록"
+      ],
+      "type": "internal",
+      "catalog_key": "SP-25_kmail",
+      "catalog_file": "SP-25_kmail_v1_30.txt"
+    },
+    "K-Health": {
+      "keywords": [
+        "K-Health",
+        "건강검진",
+        "만성질환",
+        "병원 예약"
+      ],
+      "type": "internal",
+      "catalog_key": "SP-04_khealth",
+      "catalog_file": "SP-04_khealth_v3_0.txt"
+    },
+    "K-Job": {
+      "keywords": [
+        "K-Job",
+        "이력서",
+        "채용공고",
+        "구직"
+      ],
+      "type": "internal",
+      "catalog_key": "k-job",
+      "catalog_file": "k-job_v1_0.md"
+    },
+    "K-Plan": {
+      "keywords": [
+        "K-Plan",
+        "일정 등록",
+        "캘린더"
+      ],
+      "type": "internal",
+      "catalog_key": "k-plan",
+      "catalog_file": "k-plan_v1_3.md"
+    },
+    "K-Public": {
+      "keywords": [
+        "K-Public",
+        "주민등록등본",
+        "민원 서류"
+      ],
+      "type": "internal",
+      "catalog_key": "SP-10_kpublic",
+      "catalog_file": "SP-10_kpublic_v3.25.txt"
+    },
+    "K-Police": {
+      "keywords": [
+        "K-Police",
+        "분실물 신고",
+        "실종 신고"
+      ],
+      "type": "internal",
+      "catalog_key": "SP-03_kpolice",
+      "catalog_file": "SP-03_kpolice_v3_0.txt"
+    },
+    "K-Traffic": {
+      "keywords": [
+        "K-Traffic",
+        "교통 정체",
+        "버스 도착"
+      ],
+      "type": "internal",
+      "catalog_key": "SP-06_ktraffic",
+      "catalog_file": "SP-06_ktraffic_v3_0.txt"
+    },
+    "K-Democracy": {
+      "keywords": [
+        "K-Democracy",
+        "청원",
+        "DAWN"
+      ],
+      "type": "internal",
+      "catalog_key": "SP-12_kdemocracy",
+      "catalog_file": "SP-12_kdemocracy_v3_2.txt"
+    },
+    "K-Logistics": {
+      "keywords": [
+        "K-Logistics",
+        "택배 배송",
+        "배송 지연"
+      ],
+      "type": "internal",
+      "catalog_key": "SP-13_klogistics",
+      "catalog_file": "SP-13_klogistics_v3_0.txt"
+    },
+    "K-Insurance": {
+      "keywords": [
+        "K-Insurance",
+        "보험료",
+        "보험금 청구"
+      ],
+      "type": "internal",
+      "catalog_key": "SP-16_kinsurance",
+      "catalog_file": "SP-16_kinsurance_v3_0.txt"
+    },
+    "K-Search": {
+      "keywords": [
+        "K-Search"
+      ],
+      "type": "internal",
+      "catalog_key": "SP-18_ksearch",
+      "catalog_file": "SP-18_ksearch_v1.4.txt"
+    },
+    "K-Telecom": {
+      "keywords": [
+        "K-Telecom",
+        "번호이동",
+        "데이터 요금제",
+        "통신 요금제",
+        "로밍 요금제",
+        "유심"
+      ],
+      "type": "internal",
+      "catalog_key": "SP-23_ktelecom",
+      "catalog_file": "SP-23_ktelecom_v1.0.txt"
+    },
+    "K-Watch": {
+      "keywords": [
+        "K-Watch",
+        "불법 주차 신고",
+        "가로등 고장"
+      ],
+      "type": "internal",
+      "catalog_key": "k-watch",
+      "catalog_file": "k-watch_v1_0.md"
+    },
+    "K-Law": {
+      "keywords": [
+        "K-Law",
+        "판결",
+        "소송",
+        "법률 상담"
+      ],
+      "type": "federated",
+      "domain": "klaw.hondi.net"
+    },
+    "K-Biz": {
+      "keywords": [
+        "K-Biz",
+        "사업자 등록",
+        "매출 관리"
+      ],
+      "type": "federated",
+      "domain": "biz.hondi.net"
+    },
+    "K-Tax": {
+      "keywords": [
+        "K-Tax",
+        "종합소득세",
+        "부가세 신고"
+      ],
+      "type": "federated",
+      "domain": "tax.hondi.net"
+    },
+    "K-Security": {
+      "keywords": [
+        "K-Security",
+        "방범",
+        "침입 감지"
+      ],
+      "type": "federated",
+      "domain": "security.hondi.net"
+    },
+    "K-School": {
+      "keywords": [
+        "K-School",
+        "급식 알림",
+        "등하교 알림"
+      ],
+      "type": "federated",
+      "domain": "school.hondi.net"
+    },
+    "K-Stock": {
+      "keywords": [
+        "K-Stock",
+        "종목 추천",
+        "포트폴리오"
+      ],
+      "type": "federated",
+      "domain": "stock.hondi.net"
+    },
+    "K-City": {
+      "keywords": [
+        "K-City",
+        "재개발",
+        "감정평가",
+        "도시 설계"
+      ],
+      "type": "federated",
+      "domain": "city.hondi.net",
+      "note": "⚠ 2026-09-13 발견 — city.hondi.net(재개발/감정평가)과 저장소 city(시민 복지 총합 최적 도시 설계)의 명명 충돌 미해결 상태. 라우팅 전에 해소 필요."
+    },
+    "K-911": {
+      "keywords": [
+        "K-911",
+        "119",
+        "응급출동"
+      ],
+      "type": "federated",
+      "domain": "911.hondi.net"
+    },
+    "K-JIT": {
+      "keywords": [
+        "K-JIT",
+        "적시조달"
+      ],
+      "type": "not_yet_built",
+      "note": "초안 단계 — SP/사이트 모두 없음"
+    },
+    "K-Const": {
+      "keywords": [
+        "K-Const",
+        "헌법재판소 시뮬레이션"
+      ],
+      "type": "not_yet_built",
+      "note": "초안 단계 — SP/사이트 모두 없음"
+    }
+  },
+  "other_targets": {
+    "AC_CORE": {
+      "keywords": [
+        "회원가입",
+        "인증",
+        "GDC",
+        "숫자 코드",
+        "PDV",
+        "프로필",
+        "전문가 페르소나",
+        "요금제",
+        "구독",
+        "탈퇴",
+        "생체인증",
+        "지갑"
+      ],
+      "description": "AC 자신('혼디' 페르소나)이 직접 답함 — 계정/온보딩/GDC/PDV/프로필 등 AC 고유 소관"
+    },
+    "QNA": {
+      "domain": "qna.hondi.net",
+      "keywords": [
+        "gov-tree",
+        "아키텍처",
+        "저장소",
+        "특허",
+        "사업화",
+        "확산전략",
+        "파일럿",
+        "판결 방법론",
+        "GDC 중앙은행",
+        "K-JIT",
+        "K-Const"
+      ],
+      "description": "플랫폼 전략·특허·서브시스템 문서 기반 지식 어시스턴트(qna.hondi.net)로 위임. 2026-09-13 발견: 이 시스템 자체 도메인 SP 라우팅에 죽은 참조 버그가 있어 함께 수정함(SP-LAW.txt/SP-CIVIC.txt → 존재하지 않았음)."
+    },
+    "DEV_DOCS": {
+      "description": "hondi-search의 scope=dev(개발자 문서 검색)로 위임 — AC/SP 내부 동작, 인프라(L1~L5) 노드, 초안 서비스 설계, 검색·라우팅 자체에 관한 질문. 오늘 세션에서 신설한 site-manifest.json의 dev 매니페스트(79개 이상)가 대상."
+    },
+    "EXPERT_PERSONA": {
+      "description": "552명 전문가 페르소나 중 어느 K-서비스로도 커버 안 되는 초고도 전문 자문(M&A 실사, IFRS 연결재무제표 등)만 해당 — 2,000개 실험 결과 전체의 0.05%만 여기 해당했음. K-Law/K-Tax 등 이름이 명시된 질문은 먼저 해당 K-서비스로 보내고, 전문가 페르소나는 최후순위."
+    },
+    "K_SEARCH": {
+      "description": "사용자 개인 데이터(메일, 저장 문서 등) 검색 의도 — 기존 _handleKSearchExecutionTag 경로. 순수 텍스트 매칭만으론 오탐 위험이 있어(예: '검색' 단어 자체) 최종 확정은 여전히 LLM 판단에 맡기는 걸 권장."
+    }
+  }
+}
