@@ -1295,7 +1295,31 @@ document.addEventListener('keydown', function (e) {
     { l1: '혼디는 연간 수십 조 원의 AI 비용을', l2: '절반 이하로 줄입니다.', href: './highlights/ai-cost-half.html' },
     { l1: '카톡을 혼디로 바꾸면,', l2: '한국 GDP를 10% 높일 수 있습니다.', href: './highlights/gdp-growth.html' },
     { l1: '공공재 혼디,', l2: '혼디는 공공의 이익을 우선합니다.', href: './highlights/public-good.html' },
-    { l1: '쓰면 쓸수록 똑똑해지는', l2: '나만의 AI 비서, 혼디', href: '#core-philosophy' }
+    { l1: '쓰면 쓸수록 똑똑해지는', l2: '나만의 AI 비서, 혼디', href: '#core-philosophy' },
+    // 2026-09-14 추가 — '혼디란?' 소개 자료 20편(about-hondi.html 카드) 문구를
+    // 히어로 로테이션용으로 재구성. href는 about-hondi.html의 실제 링크와 동일하게 맞춤.
+    // (2026-09-14 재복원 — d6d8f66이 무관한 메뉴 변경과 함께 이 블록을
+    // 실수로 삭제해 6개로 되돌아갔던 것을 원상복구함.)
+    { l1: '판결 예측 일치도 85% vs 45%,', l2: '혼디는 챗GPT와 다릅니다.', href: './reports/hondi-vs-chatgpt.html' },
+    { l1: '카톡보다 100배 나은 혼디,', l2: '현장 베타 테스트를 시작합니다.', href: './reports/hondi-vs-chatgpt.html' },
+    { l1: '메신저, AI, 그리고 블록체인', l2: '이 셋을 하나로 합쳤습니다.', href: './reports/hondi-vs-kakao-ai-blockchain.html' },
+    { l1: '박사 수백 명을 쓸 수는 없지만,', l2: '나만의 AI 비서, 혼디가 있습니다.', href: './reports/hondi-mine-ai-secretary.html' },
+    { l1: '카톡처럼 쓰는데,', l2: '손안에 수많은 전문가 AI가 함께합니다.', href: './reports/hondi-usage-scenarios.html' },
+    { l1: '가게 앞에 숫자 하나 붙이면,', l2: '혼디가 일합니다.', href: './reports/hondi-business-admin-automation-scenario.html' },
+    { l1: '본인 인증 한 번으로,', l2: '수백 종의 전문 서비스를 이용합니다.', href: './reports/hondi-ai-town-office.html' },
+    { l1: '인허가 평균 20일이,', l2: '완성된 혼디로 10초 내외입니다.', href: './reports/hondi-example.html' },
+    { l1: '나 대신 뛰어다니는,', l2: '나만의 AI 비서, 혼디.', href: './reports/hondi-bankruptcy-automation-scenario.html' },
+    { l1: '유치원, 대학원을 넘어,', l2: '평생 동행하는 단 한 명의 교수 AI.', href: './reports/hondi-professor-teacher-complement.html' },
+    { l1: '시민에게 나만의 AI 비서를,', l2: '모든 기관과 부서에 그만의 AI 비서를.', href: './reports/hondi-mine-vs-their-ai.html' },
+    { l1: '짜장면 하나 배달에 트럭을 보내는 AI 대신,', l2: '혼디는 꼭 맞는 작은 로봇을 보냅니다.', href: './reports/hondi-mote-openhash.html' },
+    { l1: '혼디는 5천만 한국인 각각의 AI 비서입니다.', l2: '', href: '/integrated-system.html' },
+    { l1: '저희가 90%를 완성했습니다,', l2: '나머지 10%는 여러분과 함께 완성합니다.', href: './reports/hondi-field-test-v2.html' },
+    { l1: 'AI 정부 전환의 마지막 2%,', l2: '그 자리를 혼디가 채웁니다.', href: './reports/hondi-institutional-ai-roadmap.html' },
+    { l1: '법과 원칙이 모두에게 공정한 사회, 혼디가 만듭니다.', l2: '', href: './reports/hondi-rule-of-law.html' },
+    { l1: '9월 1일부터,', l2: '입법·사법·행정의 모든 기능을 테스트 중입니다.', href: './reports/hondi-business-admin-scenario.html' },
+    { l1: '3년 걸릴 소송을,', l2: '양측 모두 납득할 합의안을 3분 만에 제시합니다.', href: './reports/hondi-legal-arbitration-scenario.html' },
+    { l1: '재무제표 그 자체가,', l2: '디지털 화폐(GDC)가 됩니다.', href: './reports/hondi-gdc-currency-scenario.html' },
+    { l1: '금융 산업의 디지털 화폐 전환은,', l2: '이미 시작되었습니다.', href: './reports/hondi-prepare-today-finance.html' }
   ];
   var heroIdx = 0;
   var heroEl = document.getElementById('hero-title');
@@ -1809,6 +1833,12 @@ document.addEventListener('keydown', function (e) {
         renderCandidates((data.candidates || []).filter((c) => isSafeDesktopUrl(c.url)));
         break;
       case "delegate_ksearch":
+        appendMessage("bot", data.message);
+        break;
+      case "info_answer":
+        // 2026-09-14 신설 — 페이지 이동이 아니라 "질문에 대한 답"을 반환하는
+        // 타입. hondi-search-relay가 HONDI-FAQ 참고자료를 근거로 합성한
+        // 답변을 그대로 채팅 말풍선에 표시한다. 이동·후보 렌더링 없음.
         appendMessage("bot", data.message);
         break;
       default:
