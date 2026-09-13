@@ -105,6 +105,36 @@ async function _loadControlTowerPrincipleRaw() {
   }
 }
 
+// ★ 2026-09-13 신설 — UNIVERSAL-common(U0~U13, 서비스 자기 인식 등)
+// 자동 상속. K-Plan/K-Health/K-Insurance 등 여러 SP 파일 자신의 헤더가
+// "상위 상속: UNIVERSAL-INTEGRITY → UNIVERSAL-common(U0~U10/U13) → ..."
+// 라고 명시하고 있었는데, 실제로는 이 파일(client-side _loadSpByKey)의
+// 자동 결합 목록에 UNIVERSAL-common이 아예 없었다 — UNIVERSAL-INTEGRITY만
+// 결합되고 있었다. 즉 K-Job/K-Plan/K-Watch/K-Telecom/K-Estate/K-Bank처럼
+// 이 로더를 거쳐 client-side로 전환(switch)되는 모든 SP는 U13(서비스
+// 자기 인식 원칙, PR #224)을 포함해 U0~U13 전체를 실제로는 하나도
+// 상속받지 못하고 있었다 — 2026-09-13 K-Plan/K-Insurance/K-Health SP
+// 답변능력 평가 중 코드 추적으로 발견(문서상 상속 주장과 런타임 동작이
+// 어긋난 사례, UNIVERSAL-INTEGRITY가 겪었던 것과 동일한 종류의 결함).
+// UNIVERSAL-INTEGRITY·TASK-DELEGATION-GUIDE·CONTROL-TOWER-PRINCIPLE와
+// 동일한 패턴으로 고친다.
+let _universalCommonCache = null;
+async function _loadUniversalCommonRaw() {
+  if (_universalCommonCache) return _universalCommonCache;
+  try {
+    const manifest = await _loadManifest();
+    const fname = manifest['UNIVERSAL-common'];
+    if (!fname) return '';
+    const res = await fetch(_SP_BASE + fname);
+    if (!res.ok) return '';
+    _universalCommonCache = await res.text();
+    return _universalCommonCache;
+  } catch (e) {
+    console.warn('[SP] UNIVERSAL-common 로드 실패(무시, 개별 SP만 적용):', e.message);
+    return '';
+  }
+}
+
 export async function _loadSpByKey(manifestKey, label) {
   const manifest = await _loadManifest();
   const fname = manifest[manifestKey];
@@ -113,24 +143,27 @@ export async function _loadSpByKey(manifestKey, label) {
   if (!res.ok) throw new Error(`${label} SP 로드 실패: ${res.status} (${fname})`);
   const sp = await res.text();
 
-  // UNIVERSAL-INTEGRITY·TASK-DELEGATION-GUIDE·CONTROL-TOWER-PRINCIPLE
-  // 자기 자신을 로드할 때는 중복 결합하지 않는다(self-concat은 무의미).
-  if (manifestKey === 'UNIVERSAL-INTEGRITY' || manifestKey === 'TASK-DELEGATION-GUIDE'
-      || manifestKey === 'CONTROL-TOWER-PRINCIPLE') {
+  // UNIVERSAL-INTEGRITY·UNIVERSAL-common·TASK-DELEGATION-GUIDE·
+  // CONTROL-TOWER-PRINCIPLE 자기 자신을 로드할 때는 중복 결합하지
+  // 않는다(self-concat은 무의미).
+  if (manifestKey === 'UNIVERSAL-INTEGRITY' || manifestKey === 'UNIVERSAL-common'
+      || manifestKey === 'TASK-DELEGATION-GUIDE' || manifestKey === 'CONTROL-TOWER-PRINCIPLE') {
     console.info(`[SP] ${label} 로드 완료: ${fname} (${sp.length} chars)`);
     return sp;
   }
 
   const universal = await _loadUniversalIntegrityRaw();
+  const universalCommon = await _loadUniversalCommonRaw();
   const taskGuide = await _loadTaskDelegationGuideRaw();
   const controlTower = await _loadControlTowerPrincipleRaw();
-  const parts = [universal, taskGuide, controlTower, sp].filter(Boolean);
+  const parts = [universal, universalCommon, taskGuide, controlTower, sp].filter(Boolean);
   const combined = parts.join('\n\n---\n\n');
   console.info(`[SP] ${label} 로드 완료: ${fname} (${sp.length} chars` +
     (universal ? ` + UNIVERSAL-INTEGRITY ${universal.length} chars` : '') +
+    (universalCommon ? ` + UNIVERSAL-common ${universalCommon.length} chars` : '') +
     (taskGuide ? ` + TASK-DELEGATION-GUIDE ${taskGuide.length} chars` : '') +
     (controlTower ? ` + CONTROL-TOWER-PRINCIPLE ${controlTower.length} chars` : '') +
-    (!universal && !taskGuide && !controlTower ? ' — 공통문서 없이' : '') + `)`);
+    (!universal && !universalCommon && !taskGuide && !controlTower ? ' — 공통문서 없이' : '') + `)`);
   return combined;
 }
 
