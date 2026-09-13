@@ -63,7 +63,15 @@ async function askHondiGuide(systemPrompt, question) {
   };
   const res = await fetch(`${RELAY_ENDPOINT}/deepseek`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      // worker.js가 AI 프록시 경로(/deepseek 등)에 Origin 헤더를 강제한다
+      // (2026-06-28 DeepSeek 크레딧 소진 사고 이후 추가된 보호 — Origin
+      // 없는 요청은 403 FORBIDDEN_NO_ORIGIN). 브라우저는 자동으로 붙이지만
+      // Node의 fetch는 붙이지 않으므로 ALLOWED_ORIGINS(worker.js)에 있는
+      // 값을 명시한다. 2026-09-13 라이브 테스트에서 50/50 FAIL로 실측 확인.
+      "Origin": "https://hondi.net",
+    },
     body: JSON.stringify(body),
   });
   if (!res.ok) {
