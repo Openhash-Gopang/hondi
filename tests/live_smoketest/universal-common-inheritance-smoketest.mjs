@@ -33,7 +33,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '../../');
@@ -69,7 +69,14 @@ const SWITCH_TYPE_SPS = [
 ];
 
 async function main() {
-  const { _loadSpByKey } = await import(path.join(REPO_ROOT, 'src/gopang/ai/manifest-loader.js'));
+  // ★ 2026-09-13 수정(Windows 실사용에서 재현) — path.join()이 만든
+  // 절대경로를 동적 import()에 그대로 넘기면 macOS/Linux(경로가
+  // '/'로 시작)에서는 우연히 동작하지만, Windows(경로가 'C:\...'로
+  // 시작)에서는 Node ESM 로더가 'C:'를 스킴으로 오인해
+  // ERR_UNSUPPORTED_ESM_URL_SCHEME로 즉시 실패한다 — 이 컨테이너
+  // (Linux)에서 검증할 때는 못 잡았던 크로스플랫폼 결함이다.
+  // pathToFileURL()로 감싸면 두 OS 모두에서 올바른 file:// URL이 된다.
+  const { _loadSpByKey } = await import(pathToFileURL(path.join(REPO_ROOT, 'src/gopang/ai/manifest-loader.js')).href);
 
   let failCount = 0;
   const results = [];
