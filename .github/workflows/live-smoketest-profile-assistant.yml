@@ -24,6 +24,7 @@ on:
           - "profile_assistant_scenarios.json"
           - "profile_assistant_scenarios_retest_68fail.json"
           - "profile_assistant_scenarios_patch_qr_verify.json"
+          - "profile_assistant_scenarios_diverse_industries_20260913.json"
 
 permissions:
   contents: write

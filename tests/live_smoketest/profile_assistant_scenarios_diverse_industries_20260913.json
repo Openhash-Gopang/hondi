@@ -1,0 +1,458 @@
+[
+  {
+    "no": 1,
+    "entity_type_expected": "business",
+    "opening_line": "한림읍에서 중국집 하고 있어요, 상호는 하니반점이에요.",
+    "persona_facts": {
+      "code": "56",
+      "code_label": "음식점 및 주점업",
+      "tier": "Tier1",
+      "age_gender": "50대/남성"
+    },
+    "edge_case_tags": [
+      "HIER_OWN",
+      "GDC_Y_ACCT_N",
+      "RESV_N",
+      "PUBLIC_TRUE"
+    ],
+    "persona_directives": [
+      "메뉴는 짜장면 7000원, 짬뽕 8000원, 탕수육(소) 18000원이라고 답하세요.",
+      "GDC 결제는 받고 싶지만 계좌이체는 필요 없다고 답하세요.",
+      "예약 기능은 필요 없다고 답하세요.",
+      "프로필을 공개해도 된다고 답하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "음식점업(56) 정상 경로 — 메뉴 항목이 products_structured로 정리되는지, GDC_Y_ACCT_N 조합 처리"
+  },
+  {
+    "no": 2,
+    "entity_type_expected": "business",
+    "opening_line": "애월읍에서 미용실 운영 중이에요, 제주헤어라고 해요.",
+    "persona_facts": {
+      "code": "96",
+      "code_label": "기타 개인 서비스업(미용업)",
+      "tier": "Tier1",
+      "age_gender": "30대/여성"
+    },
+    "edge_case_tags": [
+      "RESV_Y",
+      "GDC_Y_ACCT_Y",
+      "PUBLIC_TRUE",
+      "AUTO_REALTIME_GEN"
+    ],
+    "persona_directives": [
+      "예약 기능을 켜고 싶다고 답하세요.",
+      "GDC 결제와 계좌이체 둘 다 받고 싶다고 답하세요(계좌·예금주명은 임의로 답).",
+      "프로필을 공개해도 된다고 답하세요.",
+      "업무 자동화 추천을 받으면 켜달라고 답하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "미용업(96) — RESV_Y/GDC_Y_ACCT_Y 조합 및 SP-INDUSTRY-TRANSFORM 실시간 생성 안내 흐름"
+  },
+  {
+    "no": 3,
+    "entity_type_expected": "business",
+    "opening_line": "구좌읍에서 작은 카페 해요, 이름은 청보리카페.",
+    "persona_facts": {
+      "code": "56",
+      "code_label": "음료점업",
+      "tier": "Tier1",
+      "age_gender": "40대/여성"
+    },
+    "edge_case_tags": [
+      "GDC_N_ACCT_Y",
+      "RESV_N",
+      "PUBLIC_FALSE",
+      "HIER_CLIMB"
+    ],
+    "persona_directives": [
+      "GDC는 필요 없고 계좌이체만 등록하고 싶다고 답하세요(은행·계좌번호·예금주명은 임의로 답).",
+      "예약 기능은 필요 없다고 답하세요.",
+      "프로필은 비공개로 하고 싶다고 답하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "음료점업 — GDC_N_ACCT_Y·PUBLIC_FALSE 조합, 비공개 선택 시 STEP4 처리"
+  },
+  {
+    "no": 4,
+    "entity_type_expected": "business",
+    "opening_line": "한림읍에서 영어학원 운영하고 있어요, 한림에듀라고 합니다.",
+    "persona_facts": {
+      "code": "85",
+      "code_label": "교육 서비스업",
+      "tier": "Tier3",
+      "age_gender": "40대/남성"
+    },
+    "edge_case_tags": [
+      "TIER3_REGULATED",
+      "GDC_Y_ACCT_N",
+      "RESV_Y",
+      "PUBLIC_TRUE"
+    ],
+    "persona_directives": [
+      "GDC 결제는 받고 계좌이체는 필요 없다고 답하세요.",
+      "예약(상담) 기능은 켜고 싶다고 답하세요.",
+      "프로필을 공개해도 된다고 답하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "교육서비스업(85, TIER3 규제업종) — STEP3C(업무 자동화 추천) 조용히 스킵 여부, '준비 안 됐다' 안내 미출력 확인"
+  },
+  {
+    "no": 5,
+    "entity_type_expected": "business",
+    "opening_line": "제주시청 근처에서 변호사 사무실 하고 있어요, 이름은 한라law.",
+    "persona_facts": {
+      "code": "71",
+      "code_label": "전문 서비스업",
+      "tier": "Tier3",
+      "age_gender": "40대/남성"
+    },
+    "edge_case_tags": [
+      "TIER3_REGULATED",
+      "GDC_N_ACCT_Y",
+      "RESV_Y",
+      "PUBLIC_FALSE"
+    ],
+    "persona_directives": [
+      "GDC는 필요 없고 계좌이체만 등록하고 싶다고 답하세요.",
+      "예약(상담 예약) 기능은 켜고 싶다고 답하세요.",
+      "프로필은 비공개로 하고 싶다고 답하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "전문서비스업(71, TIER3) — STEP3C 스킵 확인, job_ksco(변호사)와 entity_type=business 동시 처리"
+  },
+  {
+    "no": 6,
+    "entity_type_expected": "business",
+    "opening_line": "서귀포에서 동물병원 하고 있어요, 제주펫동물병원입니다.",
+    "persona_facts": {
+      "code": "86",
+      "code_label": "보건업",
+      "tier": "Tier3",
+      "age_gender": "30대/여성"
+    },
+    "edge_case_tags": [
+      "TIER3_REGULATED",
+      "GDC_Y_ACCT_Y",
+      "RESV_Y",
+      "PUBLIC_TRUE"
+    ],
+    "persona_directives": [
+      "GDC 결제와 계좌이체 둘 다 받고 싶다고 답하세요.",
+      "예약(진료 예약) 기능은 켜고 싶다고 답하세요.",
+      "프로필을 공개해도 된다고 답하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "보건업(86, TIER3) — 동물병원이 보건업으로 정확히 분류되는지, STEP3C 스킵"
+  },
+  {
+    "no": 7,
+    "entity_type_expected": "business",
+    "opening_line": "구좌읍에서 건강기능식품 말고 진짜 의약품 만드는 제조업체예요, 한라제약이라고 해요.",
+    "persona_facts": {
+      "code": "21",
+      "code_label": "의약품 제조업",
+      "tier": "Tier3",
+      "age_gender": "50대/남성"
+    },
+    "edge_case_tags": [
+      "TIER3_REGULATED",
+      "GDC_N_ACCT_Y",
+      "RESV_N",
+      "PUBLIC_FALSE"
+    ],
+    "persona_directives": [
+      "GDC는 필요 없고 계좌이체만 등록하고 싶다고 답하세요.",
+      "예약 기능은 필요 없다고 답하세요.",
+      "프로필은 비공개로 하고 싶다고 답하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "의약품 제조업(21, TIER3) — 건강기능식품과 의약품을 구분해 정확히 21로 분류하는지"
+  },
+  {
+    "no": 8,
+    "entity_type_expected": "business",
+    "opening_line": "한림읍에서 보험대리점 하고 있어요, 제주보험파트너스입니다.",
+    "persona_facts": {
+      "code": "65",
+      "code_label": "보험업",
+      "tier": "Tier3",
+      "age_gender": "40대/여성"
+    },
+    "edge_case_tags": [
+      "TIER3_REGULATED",
+      "GDC_Y_ACCT_N",
+      "RESV_Y",
+      "PUBLIC_TRUE"
+    ],
+    "persona_directives": [
+      "GDC 결제는 받고 계좌이체는 필요 없다고 답하세요.",
+      "예약(상담 예약) 기능은 켜고 싶다고 답하세요.",
+      "프로필을 공개해도 된다고 답하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "보험업(65, TIER3) — STEP3C 스킵 및 규제업종 안내 미노출"
+  },
+  {
+    "no": 9,
+    "entity_type_expected": "business",
+    "opening_line": "조천읍에서 자동차 정비소 하고 있어요, 제주모터스라고 해요.",
+    "persona_facts": {
+      "code": "95",
+      "code_label": "자동차 및 모터사이클 수리업",
+      "tier": "Tier1",
+      "age_gender": "40대/남성"
+    },
+    "edge_case_tags": [
+      "GDC_N_ACCT_Y",
+      "RESV_Y",
+      "PUBLIC_TRUE"
+    ],
+    "persona_directives": [
+      "GDC는 필요 없고 계좌이체만 등록하고 싶다고 답하세요.",
+      "예약(정비 예약) 기능은 켜고 싶다고 답하세요.",
+      "프로필을 공개해도 된다고 답하세요.",
+      "업무 자동화 추천을 받으면 켜달라고 답하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "자동차 수리업(95) — 비규제 업종의 SP-INDUSTRY-TRANSFORM 실시간 생성 안내 흐름([SP_INDUSTRY_TRANSFORM_GENERATE_REQUEST]) 확인"
+  },
+  {
+    "no": 10,
+    "entity_type_expected": "business",
+    "opening_line": "집에서 반찬도 좀 팔고, 손님들 머리도 만져줘요.",
+    "persona_facts": {
+      "code": "AMBIGUOUS",
+      "code_label": "음식료품 소매업 vs 미용업 복합",
+      "tier": "Tier1",
+      "age_gender": "50대/여성"
+    },
+    "edge_case_tags": [
+      "ESCALATE_REASON1",
+      "MULTI_KSIC"
+    ],
+    "persona_directives": [
+      "업종을 하나로 정리해달라고 하면 '둘 다 진짜로 해요'라고 답하세요.",
+      "먼저 물어보는 것에 자연스럽게 응하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "복합 업종(반찬 소매 + 미용) — 서로 다른 KSIC 대분류 2개 이상 충돌 시 [ESCALATE_TO_PRO: reason=1] 태그가 실제로 발동하는지, 발동 턴에 다른 문구가 섞이지 않는지"
+  },
+  {
+    "no": 11,
+    "entity_type_expected": "business",
+    "opening_line": "저 사업자예요, 한림읍에서 목공방 하고 있어요.",
+    "persona_facts": {
+      "code": "16",
+      "code_label": "목재 및 나무제품 제조업(공방)",
+      "tier": "Tier1",
+      "age_gender": "30대/남성"
+    },
+    "edge_case_tags": [
+      "ESCALATE_REASON2",
+      "CONTRADICTION"
+    ],
+    "persona_directives": [
+      "대화가 몇 턴 진행된 뒤, 갑자기 '아 사실 저는 그냥 개인이고 취미로 하는 거예요, 사업자 아니에요'라고 앞서 한 말을 번복하세요.",
+      "AI가 확인 질문을 하면 자연스럽게 답하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "이미 확정 저장된 entity_type=business와 이후 발화의 직접 모순 — [ESCALATE_TO_PRO: reason=2] 발동 여부"
+  },
+  {
+    "no": 12,
+    "entity_type_expected": "person",
+    "opening_line": "저 그냥 개인 프로필이에요, 대학생이고 편의점에서 알바도 해요.",
+    "persona_facts": {
+      "code": null,
+      "code_label": "학생/파트타임",
+      "tier": null,
+      "age_gender": "20대/여성"
+    },
+    "edge_case_tags": [
+      "PERSON_MULTI_STATUS",
+      "PAYMENT_SKIP"
+    ],
+    "persona_directives": [
+      "사업이나 가게를 운영하는 게 아니라고 명확히 하세요.",
+      "직업/신분을 물으면 학생이면서 편의점 파트타임도 한다고 답하세요."
+    ],
+    "skip_payment_steps_expected": true,
+    "verify_points": "entity_type=person, work_domain.statuses에 student·(파트타임 관련) 값이 배열로 함께 들어가는지, STEP3~3C가 정확히 스킵되는지"
+  },
+  {
+    "no": 13,
+    "entity_type_expected": "person",
+    "opening_line": "저 전업주부인데요, 가끔 프리랜서로 청소 대행도 해요.",
+    "persona_facts": {
+      "code": null,
+      "code_label": "전업주부/부업 프리랜서",
+      "tier": null,
+      "age_gender": "40대/여성"
+    },
+    "edge_case_tags": [
+      "PERSON_SIDE_JOB",
+      "MISCLASSIFICATION_GUARD",
+      "PAYMENT_SKIP"
+    ],
+    "persona_directives": [
+      "본인을 사업자라고 내세우지 않고 '그냥 가끔 하는 부업'이라는 뉘앙스를 유지하세요.",
+      "청소 대행을 본업/가게로 확장해서 말하지 마세요."
+    ],
+    "skip_payment_steps_expected": true,
+    "verify_points": "'프리랜서' 단어만으로 entity_type이 business로 오분류되지 않고 person 유지되는지(v2.31 오분류 방지 규칙), work_domain.statuses=[homemaker, self_employed] 배열 처리"
+  },
+  {
+    "no": 14,
+    "entity_type_expected": "thing",
+    "opening_line": "이건 노형동에 있는 무인 아이스크림 자판기예요. 저희 회사(㈜한라스낵)가 운영해요.",
+    "persona_facts": {
+      "code": null,
+      "code_label": "무인 자판기(물리적 개체)",
+      "tier": null,
+      "age_gender": null
+    },
+    "edge_case_tags": [
+      "THING_COMMERCE",
+      "PAYMENT_SKIP",
+      "OWNER_MENTIONED"
+    ],
+    "persona_directives": [
+      "자판기 자체의 프로필을 만들어달라고 요청한 것이지, 운영 회사(㈜한라스낵)를 사업자로 등록해달라는 게 아니라고 명확히 하세요.",
+      "메뉴/가격을 물으면 '아이스크림 2000원, 하드바 1500원'처럼 답하세요."
+    ],
+    "skip_payment_steps_expected": true,
+    "verify_points": "상거래 정보(메뉴·가격·결제)를 다루는 물리적 개체도 thing으로 유지되는지(소유주체 별도 언급 시에도 entity_type=thing 유지), STEP3~3C 스킵"
+  },
+  {
+    "no": 15,
+    "entity_type_expected": "concept",
+    "opening_line": "저희가 만든 AI 상담 페르소나 하나 등록하려고요, K서비스 AI 에이전트예요.",
+    "persona_facts": {
+      "code": null,
+      "code_label": "소프트웨어적 개체(AI 페르소나)",
+      "tier": null,
+      "age_gender": null
+    },
+    "edge_case_tags": [
+      "CONCEPT_ENTITY",
+      "PAYMENT_SKIP"
+    ],
+    "persona_directives": [
+      "이 개체가 사람도 조직도 아닌 소프트웨어/개념적 존재임을 유지하세요.",
+      "이름을 물으면 임의의 이름을 지어 답하세요."
+    ],
+    "skip_payment_steps_expected": true,
+    "verify_points": "entity_type=concept 판정 및 STEP3~3C 스킵, business로 오분류되지 않는지"
+  },
+  {
+    "no": 16,
+    "entity_type_expected": "org",
+    "opening_line": "저희 제주 서핑 동호회 프로필 만들려고요.",
+    "persona_facts": {
+      "code": null,
+      "code_label": "임의 결사체(동호회)",
+      "tier": null,
+      "age_gender": null
+    },
+    "edge_case_tags": [
+      "ORG_DEFAULT",
+      "INSTITUTION_VS_ORG_AMBIGUOUS"
+    ],
+    "persona_directives": [
+      "공공기관이 아니라 그냥 친목 동호회임을 유지하세요.",
+      "예약(모임 신청) 기능이 필요하면 켜달라고 답하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "기관(institution)과 단체(org)가 애매할 때 org를 기본값으로 두는 규칙이 실제로 적용되는지"
+  },
+  {
+    "no": 17,
+    "entity_type_expected": "institution",
+    "opening_line": "한림읍 행정복지센터인데요, 저희 기관 프로필 등록하려고 해요.",
+    "persona_facts": {
+      "code": null,
+      "code_label": "공공기관(행정복지센터)",
+      "tier": null,
+      "age_gender": null
+    },
+    "edge_case_tags": [
+      "INSTITUTION_CLEAR",
+      "PUBLIC_TRUE"
+    ],
+    "persona_directives": [
+      "공공성이 있는 공식 기관임을 명확히 하세요.",
+      "프로필을 공개해도 된다고 답하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "공공성이 명확한 기관(행정복지센터)이 institution으로 정확히 분류되는지(org와 혼동 없는지)"
+  },
+  {
+    "no": 18,
+    "entity_type_expected": "consumer",
+    "opening_line": "저는 사업 같은 거 안 해요, 그냥 물건 사려고 가입했어요.",
+    "persona_facts": {
+      "code": null,
+      "code_label": "단순 소비자",
+      "tier": null,
+      "age_gender": "20대/남성"
+    },
+    "edge_case_tags": [
+      "CONSUMER_ENTITY",
+      "PAYMENT_SKIP_LIKELY"
+    ],
+    "persona_directives": [
+      "직업이나 사업을 물으면 특별히 내세울 게 없다고 답하세요.",
+      "그냥 구매자로서만 프로필을 쓰고 싶다는 태도를 유지하세요."
+    ],
+    "skip_payment_steps_expected": true,
+    "verify_points": "사업 성격이 전혀 없는 순수 소비자가 person이 아니라 consumer로 분류되는지(화이트리스트 8종 구분)"
+  },
+  {
+    "no": 19,
+    "entity_type_expected": "business",
+    "opening_line": "한림읍에서 실내 클라이밍 센터 운영해요, 제주클라임이라고 합니다.",
+    "persona_facts": {
+      "code": "91",
+      "code_label": "스포츠 및 오락관련 서비스업",
+      "tier": "Tier1",
+      "age_gender": "30대/남성"
+    },
+    "edge_case_tags": [
+      "NOTICE_TEXT",
+      "AGE_LIMIT",
+      "RESV_Y",
+      "GDC_Y_ACCT_N"
+    ],
+    "persona_directives": [
+      "이용 조건을 물으면 '초등학생 이상만 이용 가능하고, 안전화와 안전벨트 착용이 필수예요. 처음 방문하면 보호자 동의서를 써야 해요'라고 답하세요.",
+      "예약 기능은 켜고 싶다고 답하세요.",
+      "GDC 결제는 받고 계좌이체는 필요 없다고 답하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "구술로 전달된 이용조건이 industry_fields.notice_text로 자연스럽게 요약되는지, 나이 제한이 age_limit(min_age=8 등)으로 구조화되는지, 약관투 문장을 그대로 베끼지 않는지"
+  },
+  {
+    "no": 20,
+    "entity_type_expected": "business",
+    "opening_line": "이어서 할게요.",
+    "persona_facts": {
+      "code": "47",
+      "code_label": "소매업(꽃집)",
+      "tier": "Tier1",
+      "age_gender": "30대/여성"
+    },
+    "edge_case_tags": [
+      "RESUME_CONTEXT",
+      "ALREADY_KNOWN_FIELDS"
+    ],
+    "persona_directives": [
+      "[CONTEXT: PROFILE_ONBOARDING]에 상호명(제주꽃가게)과 업종(소매업/꽃집), 주소(한림읍)가 이미 채워져 있다고 가정하고, 이미 준 정보를 다시 물어보면 '그거 아까 말씀드렸는데요'라는 뉘앙스로 답하세요.",
+      "GDC 결제만 받고 싶다고 답하세요.",
+      "예약 기능은 필요 없다고 답하세요.",
+      "프로필을 공개해도 된다고 답하세요."
+    ],
+    "skip_payment_steps_expected": false,
+    "verify_points": "[CONTEXT]에 주입된 항목을 다시 묻지 않는지(재인사 없이 곧바로 다음 단계로 진행하는지)"
+  }
+]
