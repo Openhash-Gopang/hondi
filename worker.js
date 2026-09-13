@@ -27182,12 +27182,23 @@ async function _getOrGenerateProfileTranslation(env, l1Record, profile, lang) {
   if (lang === nativeLang) return null; // 원문과 같은 언어면 번역 불필요
 
   const prevExtra = l1Record.extra || {};
+  const sourceFields = _extractTranslatableProfileText(profile);
+  // 2026-09-13 라이브 스모크테스트에서 발견된 결함 수정 — 원래는
+  // l1Record.updated(PocketBase 시스템 타임스탬프)로 캐시를 무효화했는데,
+  // 번역 캐시 자체를 저장하는 아래 _l1PatchProfile 호출이 그 updated를
+  // 매번 새로 찍어버려서, 바로 다음 조회 시점엔 "방금 캐시해둔 값"과
+  // "지금 레코드의 updated"가 이미 어긋나 캐시가 항상 무효화되는
+  // 자기파괴적 구조였다(실측: 캐시 재사용 3/3 FALSE). PocketBase의 범용
+  // updated 대신, 번역 대상 텍스트 자체의 스냅샷(JSON 문자열)으로 직접
+  // 비교한다 — 실제 원문 내용이 바뀔 때만 달라지므로, 다른 언어 캐시를
+  // 나중에 저장하는 등 무관한 PATCH에 영향받지 않는다.
+  const sourceSnapshot = JSON.stringify(sourceFields);
+
   const cached = prevExtra.translations?.[lang];
-  if (cached && cached.source_updated_at === l1Record.updated) {
+  if (cached && cached.source_snapshot === sourceSnapshot) {
     return cached;
   }
 
-  const sourceFields = _extractTranslatableProfileText(profile);
   const hasText = sourceFields.display_name || sourceFields.description || sourceFields.notice_text
     || sourceFields.products.some(p => p.name || p.description);
   if (!hasText) return null;
@@ -27196,7 +27207,7 @@ async function _getOrGenerateProfileTranslation(env, l1Record, profile, lang) {
   const prompt = `다음은 한 사업자/기관 프로필 항목의 JSON입니다. 이 JSON을 ${langName}로 ` +
     `번역해서, 정확히 같은 키 구조의 JSON 객체 하나만 출력하세요. 설명·코드블록·` +
     `추가 문구 없이 JSON만 출력합니다. 값이 null이면 null 그대로 두고, 지어내지 ` +
-    `마세요.\n\n${JSON.stringify(sourceFields)}`;
+    `마세요.\n\n${sourceSnapshot}`;
 
   const raw = await deepseekChatText({
     env, model: resolveDeepseekModel('deepseek-v4-flash'),
@@ -27221,7 +27232,7 @@ async function _getOrGenerateProfileTranslation(env, l1Record, profile, lang) {
     lang,
     is_ai_draft: true, // 모든 번역은 초안 — SP_translator-interpreter와 동일 원칙
     generated_at: new Date().toISOString(),
-    source_updated_at: l1Record.updated,
+    source_snapshot: sourceSnapshot,
     model: 'deepseek-v4-flash',
   };
 
