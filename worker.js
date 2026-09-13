@@ -27616,6 +27616,13 @@ ${JSON.stringify(iFields, null, 2)}
  * _mergeIndividualSP(개인 전용 통합 기록)로 나뉘어 있었으나, 이 함수
  * 하나로 합쳤다 — 기관도 더 이상 별도 행을 만들지 않는다.
  */
+// ⚠️ 호출 계약: principalProfile.extra.core가 이미 채워진 상태로 넘겨야
+// 한다(2026-09-13 버그 참조 — handleProfilePost가 core 없는 record를
+// 넘겨서 발생). 이 함수는 principalProfile.extra를 그대로 이어받아
+// _l1UpsertProfile에 넘기므로, core가 비어 있으면 방금 저장된 core가
+// 이 함수의 PATCH로 조용히 지워진다. 새 호출부를 추가할 때 반드시
+// L1에서 방금 조회/저장한 레코드(extra.core 포함)를 그대로 넘길 것 —
+// 로컬에서 새로 조립한 record 리터럴을 넘기지 말 것.
 async function _mergeAgentSP(env, principalProfile) {
   const compiled = await _compileAgentSP(env, principalProfile).catch(() => null);
   if (!compiled) return { ok: false, error: 'COMPILE_FAILED' };
@@ -28505,7 +28512,29 @@ async function handleProfilePost(request, env, corsHeaders) {
 
   // (2026-07-15: Supabase 병행쓰기 제거 — L1이 유일한 소스가 됐고,
   //  L1을 읽던 레거시 폴백 경로들도 전부 이 배치에서 함께 제거됐다.)
-  const savedProfile = { ...record, id: l1Result?.id };
+  //
+  // ★ 2026-09-13 긴급 수정 — record.extra(=newExtra)에는 core 서브키가
+  // 없다(name/address/lat/lng/phone/website는 record의 톱레벨 필드로만
+  // 존재 — 위 record 리터럴 참조). 그런데 바로 아래 _mergeAgentSP가
+  // savedProfile을 그대로 principalProfile로 받아 자신의 newExtra를
+  // {...principalProfile.extra, public:{...}}로 구성한 뒤 다시
+  // _l1UpsertProfile을 호출한다 — 이때 core 인자를 안 넘기므로
+  // _l1UpsertProfile의 `core: {...extra?.core, ...core}` 병합식이
+  // `{...undefined, ...undefined}` = {}가 되어, 바로 위 줄에서 방금 막
+  // 정상 저장한 extra.core를 곧바로 빈 객체로 덮어썼다(매 가입·매 프로필
+  // 수정마다 100% 재현 — "POST 응답엔 이름이 echo되는데 그 직후 GET하면
+  // profile.name이 null"이라는 실사 증상과 정확히 일치, PocketBase
+  // PATCH가 JSON 필드를 통째로 교체하지 부분 병합하지 않기 때문). 수정:
+  // savedProfile.extra에 core를 명시적으로 실어, _mergeAgentSP가 이어받는
+  // extra?.core가 비어있지 않게 한다.
+  const savedProfile = {
+    ...record,
+    id: l1Result?.id,
+    extra: {
+      ...record.extra,
+      core: { name, address, lat, lng, phone, website, occupation: resolvedOccupation },
+    },
+  };
 
   // 2026-06-23: SP 합성 시점 — 가입 직후가 아니라 PROFILE_SUBMIT 완료 후.
   // 2026-07-01 전면 재설계: 개인/기관 구분 없이 _mergeAgentSP 하나로 통합
