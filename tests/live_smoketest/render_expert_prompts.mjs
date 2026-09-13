@@ -41,7 +41,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '../../');
@@ -98,11 +98,15 @@ async function main() {
 
   // 프로덕션 코드 그 자체를 import — _composeExpertPrompt는 여기서
   // 재구현하지 않는다(§2-1 핵심).
+  // ★ 2026-09-13 수정(Windows 실사용에서 재현, universal-common-
+  // inheritance-smoketest.mjs와 동일 결함) — path.join()이 만든 절대
+  // 경로를 동적 import()에 그대로 넘기면 Windows에서
+  // ERR_UNSUPPORTED_ESM_URL_SCHEME로 실패한다. pathToFileURL()로 감싼다.
   const { _composeExpertPrompt } = await import(
-    path.join(REPO_ROOT, 'src/gopang/ai/expert-session.js')
+    pathToFileURL(path.join(REPO_ROOT, 'src/gopang/ai/expert-session.js')).href
   );
   const { EXPERT_REGISTRY } = await import(
-    path.join(REPO_ROOT, 'src/gopang/ai/expert-registry.js')
+    pathToFileURL(path.join(REPO_ROOT, 'src/gopang/ai/expert-registry.js')).href
   );
 
   const scenariosPath = path.resolve(__dirname, args.scenarios);
