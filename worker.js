@@ -28054,6 +28054,24 @@ async function handleProfileDocumentScan(request, env, corsHeaders) {
   const ext = PROFILE_PHOTO_MIME_EXT[mime_type];
   if (!ext) return _err(400, 'INVALID_MIME_TYPE', `지원하지 않는 이미지 형식입니다: ${JSON.stringify(mime_type)} (허용: jpeg/png/webp)`, corsHeaders);
 
+  // ★ 2026-09-13 전면 재작성 — DeepSeek로 이미지를 처리하려 했던 최초
+  // 구현은 두 가지가 겹쳐서 실제로는 이미지를 전혀 못 봤다:
+  //   1) resolveDeepseekModel()의 MODEL_ALIAS가 'deepseek-chat'(비전
+  //      지원 유일 모델)을 항상 'deepseek-v4-flash'(텍스트 전용)로
+  //      되돌려버린다 — call site에서 별칭 해석을 우회해도 deepseekChat()
+  //      내부에서 다시 resolveDeepseekModel()을 호출해 소용없었다.
+  //   2) 애초에 profile-assistant SP의 §IMAGE-SCAN 자체가 DeepSeek가
+  //      아니라 Gemini(_callGeminiGeneral, src/gopang/ai/vision.js)로
+  //      동작하고 있었다 — 그리고 그 Gemini 키(CFG.geminiKey)는 사용자가
+  //      직접 설정 화면에서 BYOK로 등록해야 하는 개인 키였다(AI 점원의
+  //      LLM 키와 동일한 구조). 즉 지금까지 이 기능은 "플랫폼이 제공하는
+  //      이미지 분석"이 전혀 아니었다 — 실사용자가 그 설정을 했을
+  //      가능성은 낮다.
+  // 이 엔드포인트는 대시보드 사용자에게 별도 BYOK 설정을 요구하지 않고
+  // 바로 쓰이는 게 맞다고 보고, vision.js._callGeminiGeneral과 동일한
+  // Gemini REST 요청 형식을 그대로 서버에서 재현하되 플랫폼 키
+  // (env.GEMINI_API_KEY, 새로 프로비저닝 필요)를 쓴다 — 이건 비용이
+  // 플랫폼에 귀속되는 정책적 선택이라는 점을 알려드려야 한다.
   if (!env.DEEPSEEK_API_KEY) return _err(500, 'DEEPSEEK_KEY_MISSING', 'DEEPSEEK_API_KEY secret 미설정', corsHeaders);
 
   const prompt = `사진 한 장을 첨부합니다. 이 사진의 종류를 스스로 판단해(메뉴판/간판/` +
@@ -28073,11 +28091,20 @@ async function handleProfileDocumentScan(request, env, corsHeaders) {
     `  "age_limit": {"min_age": number} | null  // 안내문에 나이 제한이 숫자로 명확할 때만\n` +
     `}`;
 
+  // ★ 2026-09-13 재수정 — Gemini(env.GEMINI_API_KEY, 별도 프로비저닝
+  // 필요) 대신 DeepSeek의 신규 비전 모델을 쓴다. DeepSeek이 2026년
+  // 8월 21일 deepseek-v4-flash-vision-exp(실험적, V4-Flash와 동일
+  // 가격)를 공개해 image_url 멀티모달 입력이 정식으로 가능해졌다 —
+  // 애초에 이 코드베이스의 "DeepSeek는 비전 불가"라는 판단(vision.js
+  // 주석)은 그 출시 이전 시점 기준이었다. 이 모델 ID는 MODEL_ALIAS에
+  // 없어 deepseekChat() 내부의 resolveDeepseekModel() 호출을 거쳐도
+  // 안 바뀐다. 새 시크릿 없이 이미 있는 DEEPSEEK_API_KEY만으로 동작한다
+  // — Gemini 전환은 결국 이번 커밋에서 다시 되돌린다.
   const dataUrl = `data:${mime_type};base64,${image_base64}`;
   let raw;
   try {
     const data = await deepseekChat({
-      env, model: resolveDeepseekModel('deepseek-v4-flash'),
+      env, model: 'deepseek-v4-flash-vision-exp',
       messages: [{
         role: 'user',
         content: [

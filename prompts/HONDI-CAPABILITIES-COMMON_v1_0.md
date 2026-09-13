@@ -77,6 +77,17 @@ PR·매일 스케줄로 이 줄들을 실제 코드와 대조한다(gopang-walle
 이용안내 초안을 구조화해 돌려준다. 이 엔드포인트 자체는 프로필을
 쓰지 않는다 — 사람이 확인 후 기존 POST /profile로 확정해야 실제
 반영된다(모든 AI 판독은 초안).
+2026-09-13 재작성(2차) — 최초 구현은 DeepSeek image_url을 썼는데
+당시(2026-08-21 이전) DeepSeek 텍스트 모델(v4-flash/v4-pro)은 실제로
+이미지를 처리하지 못했다(resolveDeepseekModel()의 별칭 매핑이 비전
+지원 이름을 텍스트 전용 모델로 되돌림 + §IMAGE-SCAN 자체가 원래
+Gemini BYOK 기반이었음). 1차 수정으로 Gemini 플랫폼 키(env.
+GEMINI_API_KEY)로 바꿨으나, DeepSeek가 2026년 8월 21일
+deepseek-v4-flash-vision-exp(실험적, V4-Flash와 동일 가격)를 공개해
+image_url 멀티모달이 정식으로 가능해진 것을 확인 — 이 모델 ID는
+MODEL_ALIAS에 없어 안전하게 그대로 통과된다. 최종적으로 DeepSeek
+비전 모델로 되돌렸다 — 이미 있는 DEEPSEEK_API_KEY만으로 동작하고
+새 시크릿(GEMINI_API_KEY)이 필요 없다.
 검증-서버: worker.js::handleProfileDocumentScan
 확인일: 2026-09-13
 
