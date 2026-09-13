@@ -81,6 +81,26 @@ export let history_ref = history;  // 외부 참조용
 // import하지 않는 독립 모듈이라 순환 참조 없이 바로 가져다 쓸 수 있다.
 import { _loadSpByKey } from './manifest-loader.js';
 
+// ── AC 사전 분류기(ac-intent-router.js) 배선 (2026-09-13 신설) ──────────
+// 배경은 ac-intent-router.js 파일 상단 주석 참고. 여기서는 그 모듈이
+// 필요로 하는 data/ac-routing-registry.json을 fetch해 캐싱하는 로더만
+// 둔다 — manifest-loader.js의 _loadManifest()와 동일한 패턴(세션당 1회,
+// no-cache로 최신본 보장).
+import { classifyIntent, ROUTE_TYPES } from './ac-intent-router.js';
+let _routingRegistryCache = null;
+async function _loadRoutingRegistry() {
+  if (_routingRegistryCache) return _routingRegistryCache;
+  try {
+    const res = await fetch('/data/ac-routing-registry.json', { cache: 'no-cache' });
+    if (!res.ok) throw new Error('routing registry fetch 실패: ' + res.status);
+    _routingRegistryCache = await res.json();
+    return _routingRegistryCache;
+  } catch (e) {
+    console.warn('[Router] ac-routing-registry.json 로드 실패(무시, classifyIntent 사전분류 생략):', e.message);
+    return null;
+  }
+}
+
 // AC-PRO-CORE(신규 기본 프롬프트) — 세션당 1회 캐시
 // v1.5(2026-07-28) — Pro/Flash 재설계: 기본으로 로드하는 프롬프트를
 // AGENT-COMMON(2500줄+ 판단보조 SCAFFOLDING 포함, 구 hondi-flash용)에서
@@ -4969,6 +4989,74 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
   }
 
   showTyping();
+
+  // ── AC 사전 분류기(classifyIntent) 고신뢰 즉시 라우팅 (2026-09-13 신설) ──
+  // 배경·범위 제한은 ac-intent-router.js 파일 상단 주석 참고. 요약: 오늘
+  // 2,000개 질문 실험에서 high-confidence로 확정한 규칙만 믿고, AC-PRO-CORE
+  // 추론 자체를 생략한다 — 단, SERVICE_SP_INTERNAL 중에서도 런타임이
+  // 확실히 파악된 두 갈래(switch/gwp_launch)만 다루고 나머지(FEDERATED/
+  // NOT_YET_BUILT/QNA/DEV_DOCS/K_SEARCH/EXPERT_PERSONA/UNKNOWN, 그리고
+  // AC_CORE — 이미 기본 경로라 별도 분기 불필요)는 손대지 않고 그대로
+  // 기존 LLM 카탈로그 판단으로 흘려보낸다. 이미지 첨부, 오케스트레이션
+  // 서브태스크 진행 중(CFG.systemStack), switch 자동복구 진행 중
+  // (_gwpSwitchRecoveryInFlight), 그리고 '['로 시작하는 내부 신호
+  // 메시지(예: [INTERNAL: ...], [KSEARCH_RESULT: ...])는 사용자가 방금
+  // 입력한 자연어 발화가 아니므로 전부 건너뛴다.
+  if (!imageFile && !(CFG.systemStack?.length > 0) && !_gwpSwitchRecoveryInFlight &&
+      typeof userText === 'string' && !userText.trim().startsWith('[')) {
+    try {
+      const registry = await _loadRoutingRegistry();
+      const preRoute = registry ? classifyIntent(userText, registry) : null;
+      if (preRoute && preRoute.confidence === 'high' && preRoute.type === ROUTE_TYPES.SERVICE_SP_INTERNAL) {
+        if (preRoute.runtime_type === 'switch' && SWITCH_SP_LOADERS[preRoute.gwp_id]) {
+          // ── 4개(K-Job/K-Plan/K-Watch/K-Telecom) — 기존 _forwardSwitchSP를
+          // 그대로 재사용한다. 원래 이 전환은 AC-PRO-CORE가 [GWP: id]를
+          // 낸 뒤에야(4713행 근처 자동복구 분기) 일어났는데, 여기서는 그
+          // LLM 왕복 자체를 생략하고 곧장 전환한다 — 전환 함수·로더·이후
+          // [INTERNAL: ...] 재주입 패턴은 그 분기와 100% 동일하다.
+          const label = { ktelecom: 'K-Telecom', kestate: 'K-Estate',
+            kplan: 'K-Plan', kwatch: 'K-Watch', kjob: 'K-Job' }[preRoute.gwp_id] || preRoute.gwp_id;
+          console.info(`[Router] classifyIntent 고신뢰(${preRoute.reason}) — AC-PRO-CORE 생략, ${label}로 즉시 전환`);
+          history.push({ role: 'user', content: userText });
+          _gwpSwitchRecoveryInFlight = true;
+          try {
+            await _forwardSwitchSP(SWITCH_SP_LOADERS[preRoute.gwp_id], label);
+            history.length = 0;
+            await callAI(
+              `[INTERNAL: 사전 라우팅(classifyIntent 고신뢰 판정) — ${label}로 이미 전환됐습니다. ` +
+              `사용자에게 보이지 않는 내부 신호입니다. 다음 요청을 이어받아 상담을 시작하세요: "${userText}"]`,
+              null, _preTab
+            );
+          } finally {
+            _gwpSwitchRecoveryInFlight = false;
+          }
+          return;
+        }
+        if (preRoute.runtime_type === 'gwp_launch' && typeof getService === 'function') {
+          // ── 나머지 8개(K-Mail/K-Health/K-Public/K-Police/K-Traffic/
+          // K-Democracy/K-Logistics/K-Insurance) — 기존 [GWP: id] LLM
+          // 경로가 새 탭을 열 때 쓰는 _gwpLaunch()를 그대로 재사용한다.
+          // status==='active'·url 존재 확인은 기존 _parseAgentTags의
+          // 가드(4661행 근처)와 동일하게 유지 — 확인 안 되면 아무 것도
+          // 하지 않고 아래로 흘려보내 기존 LLM 경로가 스스로 판단하게
+          // 둔다(이중 안전망).
+          const svcDef = getService(preRoute.gwp_id);
+          if (svcDef && svcDef.status === 'active' && svcDef.url) {
+            console.info(`[Router] classifyIntent 고신뢰(${preRoute.reason}) — AC-PRO-CORE 생략, ${svcDef.name} 새 탭으로 즉시 이동`);
+            history.push({ role: 'user', content: userText });
+            appendBubble('ai', `🔗 ${svcDef.name}(으)로 연결하고 있습니다…`);
+            history.push({ role: 'assistant', content: `[GWP: ${preRoute.gwp_id}]` });
+            _gwpLaunch(svcDef, userText, _preTab, _buildRoutingFacts());
+            return;
+          }
+          console.warn(`[Router] '${preRoute.gwp_id}' gwp_launch 사전판정됐지만 svcDef 상태 이상` +
+            `(status=${svcDef?.status}, url=${svcDef?.url}) — 기존 LLM 경로로 폴백`);
+        }
+      }
+    } catch (e) {
+      console.warn('[Router] classifyIntent 사전분류 처리 중 오류(무시, 기존 LLM 경로로 폴백):', e.message);
+    }
+  }
 
   // urgent=true → kemergency면 경고 표시 후 계속 처리
   // (고팡 비서가 추가로 응급 가이드 제공)

@@ -1,5 +1,5 @@
 {
-  "_comment": "2026-09-13 세션 — AC(AGENT-COMMON)가 사용자 발화를 어디로 보낼지 결정하는 라우팅 레지스트리. 2,000개 질문 분류 실험(user/dev 각 1000개) 결과와 sp-catalog.json 실측 대조로 확정. internal=AC가 sp-catalog.json에서 SP를 직접 불러 그 자리에서 답함(탭 이동 없음). federated=완전히 분리된 서브도메인 사이트로 이동해야 답변 가능(그 사이트가 자체 백엔드·자체 SP를 가짐 — 예: K-Law는 klaw.hondi.net 자체에 판결방법론 v15.1과 다중 LLM 호출 로직을 갖고 있음, hondi 쪽엔 SP가 전혀 없음). ★2026-09-13 SP 답변능력 평가 중 정정★ — internal 13개 중 K-Plan/K-Insurance/K-Health의 기존 키워드가 실제 SP 범위보다 넓은 일반 실세계 서비스(캘린더 앱/일반 보험상담/예약관리)를 암시하고 있어, 무관한 질문까지 이 SP들로 끌어들이고 있었다. 각 항목의 note 필드에 실제 범위와 근거를 남기고 키워드를 좁혔다 — 새 서비스를 등록할 때도 'SP 이름이 곧 동명의 실세계 서비스'라고 가정하지 말고 실제 SP 본문의 §0(범위)을 먼저 확인할 것.",
+  "_comment": "2026-09-13 세션 — AC(AGENT-COMMON)가 사용자 발화를 어디로 보낼지 결정하는 라우팅 레지스트리. 2,000개 질문 분류 실험(user/dev 각 1000개) 결과와 sp-catalog.json 실측 대조로 확정. internal=AC가 sp-catalog.json에서 SP를 직접 불러 그 자리에서 답함(탭 이동 없음). federated=완전히 분리된 서브도메인 사이트로 이동해야 답변 가능(그 사이트가 자체 백엔드·자체 SP를 가짐 — 예: K-Law는 klaw.hondi.net 자체에 판결방법론 v15.1과 다중 LLM 호출 로직을 갖고 있음, hondi 쪽엔 SP가 전혀 없음). ★2026-09-13 SP 답변능력 평가 중 정정★ — internal 13개 중 K-Plan/K-Insurance/K-Health의 기존 키워드가 실제 SP 범위보다 넓은 일반 실세계 서비스(캘린더 앱/일반 보험상담/예약관리)를 암시하고 있어, 무관한 질문까지 이 SP들로 끌어들이고 있었다. 각 항목의 note 필드에 실제 범위와 근거를 남기고 키워드를 좁혔다 — 새 서비스를 등록할 때도 'SP 이름이 곧 동명의 실세계 서비스'라고 가정하지 말고 실제 SP 본문의 §0(범위)을 먼저 확인할 것. ★2026-09-13 3차 추가★ — 각 internal 항목에 gwp_id(gwp-registry.js 쪽 실제 id)와 runtime_type(switch|gwp_launch|orchestration_subtask)을 명시해 call-ai.js의 classifyIntent 고신뢰 즉시 라우팅 배선이 참조하도록 함(K-Bank는 2026-08-01 철회·2026-09-13 call-ai.js 정리 완료라 애초에 이 목록에 없음).",
   "k_services": {
     "K-Mail": {
       "keywords": [
@@ -12,7 +12,9 @@
       ],
       "type": "internal",
       "catalog_key": "SP-25_kmail",
-      "catalog_file": "SP-25_kmail_v1_30.txt"
+      "catalog_file": "SP-25_kmail_v1_30.txt",
+      "gwp_id": "kmail",
+      "runtime_type": "gwp_launch"
     },
     "K-Health": {
       "keywords": [
@@ -24,7 +26,9 @@
       "type": "internal",
       "catalog_key": "SP-04_khealth",
       "catalog_file": "SP-04_khealth_v3_0.txt",
-      "note": "2026-09-13 SP 답변능력 평가에서 발견 — 예약 확정·검진결과지 PDF 발급·재활 일정 관리 기능은 없음. §0 명시 범위는 '증상 분석부터 기관 안내까지'(트리아지+기관 안내형 의료 정보 인프라)이지 예약/문서/일정관리 앱이 아님. 기존 키워드 '병원 예약'은 실제로 없는 기능을 암시해 제거."
+      "note": "2026-09-13 SP 답변능력 평가에서 발견 — 예약 확정·검진결과지 PDF 발급·재활 일정 관리 기능은 없음. §0 명시 범위는 '증상 분석부터 기관 안내까지'(트리아지+기관 안내형 의료 정보 인프라)이지 예약/문서/일정관리 앱이 아님. 기존 키워드 '병원 예약'은 실제로 없는 기능을 암시해 제거.",
+      "gwp_id": "khealth",
+      "runtime_type": "gwp_launch"
     },
     "K-Job": {
       "keywords": [
@@ -35,7 +39,9 @@
       ],
       "type": "internal",
       "catalog_key": "k-job",
-      "catalog_file": "k-job_v1_0.md"
+      "catalog_file": "k-job_v1_0.md",
+      "gwp_id": "kjob",
+      "runtime_type": "switch"
     },
     "K-Plan": {
       "keywords": [
@@ -46,7 +52,9 @@
       "type": "internal",
       "catalog_key": "k-plan",
       "catalog_file": "k-plan_v1_3.md",
-      "note": "2026-09-13 SP 답변능력 평가에서 발견 — 개인 캘린더/일정관리 앱이 아니다. k-plan_v1_3.md 서문에 '여전히 실제 서비스 백엔드에 연결되지 않은 설계 단계 문서'라고 명시돼 있고, 실체는 K-Intent→K-Compose→K-Execute→K-Recompose→K-Deliver→K-Report 5+1단계로 진행되는 목표 실행 계획 오케스트레이터(예: '부산 출장 준비')다. 기존 키워드 '일정 등록'·'캘린더'는 캘린더 앱처럼 오인시켜 실제로 없는 기능(외부 캘린더 내보내기, 마감 임박 알림, 상대방과의 일정 자동 조율) 질문을 이 SP로 잘못 끌어들이므로 제거."
+      "note": "2026-09-13 SP 답변능력 평가에서 발견 — 개인 캘린더/일정관리 앱이 아니다. k-plan_v1_3.md 서문에 '여전히 실제 서비스 백엔드에 연결되지 않은 설계 단계 문서'라고 명시돼 있고, 실체는 K-Intent→K-Compose→K-Execute→K-Recompose→K-Deliver→K-Report 5+1단계로 진행되는 목표 실행 계획 오케스트레이터(예: '부산 출장 준비')다. 기존 키워드 '일정 등록'·'캘린더'는 캘린더 앱처럼 오인시켜 실제로 없는 기능(외부 캘린더 내보내기, 마감 임박 알림, 상대방과의 일정 자동 조율) 질문을 이 SP로 잘못 끌어들이므로 제거.",
+      "gwp_id": "kplan",
+      "runtime_type": "switch"
     },
     "K-Public": {
       "keywords": [
@@ -56,7 +64,9 @@
       ],
       "type": "internal",
       "catalog_key": "SP-10_kpublic",
-      "catalog_file": "SP-10_kpublic_v3.25.txt"
+      "catalog_file": "SP-10_kpublic_v3.25.txt",
+      "gwp_id": "kgov",
+      "runtime_type": "gwp_launch"
     },
     "K-Police": {
       "keywords": [
@@ -66,7 +76,9 @@
       ],
       "type": "internal",
       "catalog_key": "SP-03_kpolice",
-      "catalog_file": "SP-03_kpolice_v3_0.txt"
+      "catalog_file": "SP-03_kpolice_v3_0.txt",
+      "gwp_id": "kpolice",
+      "runtime_type": "gwp_launch"
     },
     "K-Traffic": {
       "keywords": [
@@ -76,7 +88,9 @@
       ],
       "type": "internal",
       "catalog_key": "SP-06_ktraffic",
-      "catalog_file": "SP-06_ktraffic_v3_0.txt"
+      "catalog_file": "SP-06_ktraffic_v3_0.txt",
+      "gwp_id": "ktransport",
+      "runtime_type": "gwp_launch"
     },
     "K-Democracy": {
       "keywords": [
@@ -86,7 +100,9 @@
       ],
       "type": "internal",
       "catalog_key": "SP-12_kdemocracy",
-      "catalog_file": "SP-12_kdemocracy_v3_2.txt"
+      "catalog_file": "SP-12_kdemocracy_v3_2.txt",
+      "gwp_id": "kdemocracy",
+      "runtime_type": "gwp_launch"
     },
     "K-Logistics": {
       "keywords": [
@@ -96,7 +112,9 @@
       ],
       "type": "internal",
       "catalog_key": "SP-13_klogistics",
-      "catalog_file": "SP-13_klogistics_v3_0.txt"
+      "catalog_file": "SP-13_klogistics_v3_0.txt",
+      "gwp_id": "klogistics",
+      "runtime_type": "gwp_launch"
     },
     "K-Insurance": {
       "keywords": [
@@ -109,7 +127,9 @@
       "type": "internal",
       "catalog_key": "SP-16_kinsurance",
       "catalog_file": "SP-16_kinsurance_v3_0.txt",
-      "note": "2026-09-13 SP 답변능력 평가에서 발견 — SP-16_kinsurance_v3_0.txt §0에 '특정 보험사를 대리하지 않는다'고 명시된 Hondi 자체 GDC 기반 미소보험 시뮬레이션(리스크 산정+청구 접수)이지, 기존 상업 보험사(삼성화재 등) 상담·보험료 인상 문의·비교 견적 서비스가 아니다. 기존 키워드 '보험료'·'보험금 청구'는 실제 상업보험 질문에도 걸려 완전히 무관한 사안을 이 SP로 잘못 끌어들이므로 GDC/미소보험 한정 표현으로 좁힘."
+      "note": "2026-09-13 SP 답변능력 평가에서 발견 — SP-16_kinsurance_v3_0.txt §0에 '특정 보험사를 대리하지 않는다'고 명시된 Hondi 자체 GDC 기반 미소보험 시뮬레이션(리스크 산정+청구 접수)이지, 기존 상업 보험사(삼성화재 등) 상담·보험료 인상 문의·비교 견적 서비스가 아니다. 기존 키워드 '보험료'·'보험금 청구'는 실제 상업보험 질문에도 걸려 완전히 무관한 사안을 이 SP로 잘못 끌어들이므로 GDC/미소보험 한정 표현으로 좁힘.",
+      "gwp_id": "kinsurance",
+      "runtime_type": "gwp_launch"
     },
     "K-Search": {
       "keywords": [
@@ -117,7 +137,9 @@
       ],
       "type": "internal",
       "catalog_key": "SP-18_ksearch",
-      "catalog_file": "SP-18_ksearch_v1.4.txt"
+      "catalog_file": "SP-18_ksearch_v1.4.txt",
+      "gwp_id": "ksearch",
+      "runtime_type": "orchestration_subtask"
     },
     "K-Telecom": {
       "keywords": [
@@ -130,7 +152,9 @@
       ],
       "type": "internal",
       "catalog_key": "SP-23_ktelecom",
-      "catalog_file": "SP-23_ktelecom_v1.0.txt"
+      "catalog_file": "SP-23_ktelecom_v1.0.txt",
+      "gwp_id": "ktelecom",
+      "runtime_type": "switch"
     },
     "K-Watch": {
       "keywords": [
@@ -140,7 +164,9 @@
       ],
       "type": "internal",
       "catalog_key": "k-watch",
-      "catalog_file": "k-watch_v1_0.md"
+      "catalog_file": "k-watch_v1_0.md",
+      "gwp_id": "kwatch",
+      "runtime_type": "switch"
     },
     "K-Law": {
       "keywords": [
