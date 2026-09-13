@@ -28074,22 +28074,26 @@ async function handleProfileDocumentScan(request, env, corsHeaders) {
   // 플랫폼에 귀속되는 정책적 선택이라는 점을 알려드려야 한다.
   if (!env.DEEPSEEK_API_KEY) return _err(500, 'DEEPSEEK_KEY_MISSING', 'DEEPSEEK_API_KEY secret 미설정', corsHeaders);
 
-  const prompt = `사진 한 장을 첨부합니다. 이 사진의 종류를 스스로 판단해(메뉴판/간판/` +
-    `사업자등록증/명함/이용약관·안전수칙·안내문/기타) 아래 JSON 스키마 그대로만 ` +
-    `출력하세요 — 설명·코드블록 없이 JSON 객체 하나만 출력합니다. 사진에서 실제로 ` +
-    `확인되지 않는 값은 반드시 null(또는 빈 배열)로 두고 절대 지어내지 마세요.\n\n` +
-    `{\n` +
-    `  "doc_type": "menu" | "signage" | "registration" | "notice" | "other",\n` +
-    `  "name": string | null,               // 상호명(간판·등록증에서 확인될 때만)\n` +
-    `  "address": string | null,            // 주소(등록증·간판에서 확인될 때만)\n` +
-    `  "entity_subtype": string | null,     // 업종(등록증·간판에서 확인될 때만)\n` +
-    `  "products_structured": [{"name": string, "price": number|null, "description": string}],\n` +
-    `                                        // 메뉴판일 때만 채움(항목·가격), 그 외엔 빈 배열\n` +
-    `  "notice_text": string | null,        // 이용약관/안전수칙/안내문일 때, 방문 전 꼭 알아야\n` +
-    `                                        // 할 핵심만 2~4문장의 자연스러운 안내문으로 요약\n` +
-    `                                        // (조항 그대로 베끼지 말 것)\n` +
-    `  "age_limit": {"min_age": number} | null  // 안내문에 나이 제한이 숫자로 명확할 때만\n` +
-    `}`;
+  const prompt = `사진 한 장을 첨부합니다. 이 사진의 종류를 스스로 판단하세요 ` +
+    `(메뉴판/간판/사업자등록증/명함/이용약관·안전수칙·안내문/기타). ` +
+    `사진에서 실제로 확인되는 내용만으로 아래와 정확히 같은 키 구조의 ` +
+    `JSON 객체 하나만 출력하세요 — 설명 문장, 코드블록 표시(\`\`\`), ` +
+    `주석을 절대 포함하지 말고 순수 JSON 텍스트만 출력합니다. 이 예시는 ` +
+    `형식을 보여주기 위한 것이며 값 자체를 그대로 쓰면 안 됩니다 — 실제 ` +
+    `사진에서 관찰한 값으로 채우고, 확인되지 않는 항목은 null(배열은 빈 ` +
+    `배열 [])로 두세요. 절대 지어내지 마세요.\n\n` +
+    `doc_type: 사진 종류("menu"/"signage"/"registration"/"notice"/"other" 중 하나)\n` +
+    `name: 상호명 — 간판·등록증에서 확인될 때만, 그 외엔 null\n` +
+    `address: 주소 — 등록증·간판에서 확인될 때만, 그 외엔 null\n` +
+    `entity_subtype: 업종 — 등록증·간판에서 확인될 때만, 그 외엔 null\n` +
+    `products_structured: 메뉴판일 때만 채우는 배열([{name, price, description}]), 그 외엔 빈 배열\n` +
+    `notice_text: 이용약관/안전수칙/안내문일 때, 방문 전 꼭 알아야 할 핵심만 2~4문장의 자연스러운 안내문으로 요약(조항을 그대로 베끼지 말 것), 그 외엔 null\n` +
+    `age_limit: 안내문에 나이 제한이 숫자로 명확할 때만 {"min_age": 숫자}, 그 외엔 null\n\n` +
+    `형식 예시(메뉴판인 경우 — 값은 예시일 뿐 실제 사진 내용으로 채우세요):\n` +
+    `{"doc_type":"menu","name":null,"address":null,"entity_subtype":null,` +
+    `"products_structured":[{"name":"짜장면","price":7000,"description":""},` +
+    `{"name":"탕수육(소)","price":18000,"description":"돼지고기 탕수육"}],` +
+    `"notice_text":null,"age_limit":null}`;
 
   // ★ 2026-09-13 재수정 — Gemini(env.GEMINI_API_KEY, 별도 프로비저닝
   // 필요) 대신 DeepSeek의 신규 비전 모델을 쓴다. DeepSeek이 2026년
@@ -28121,8 +28125,25 @@ async function handleProfileDocumentScan(request, env, corsHeaders) {
 
   let extracted;
   try {
-    extracted = JSON.parse(raw.replace(/^```(?:json)?\s*|\s*```$/g, '').trim());
+    // 2026-09-13 보강 — 코드펜스 제거만으로는 모델이 JSON 앞뒤에 설명
+    // 문장을 덧붙이는 경우(신규 실험 모델이라 지시 준수가 완벽하지
+    // 않을 수 있음)를 못 잡는다. 텍스트 안에서 가장 바깥쪽 {...}만
+    // 뽑아내는 방식을 폴백으로 추가 — 첫 실사고(메뉴판 20개 사진)에서
+    // 파싱 실패가 실제로 재현됐다.
+    let cleaned = raw.replace(/^```(?:json)?\s*|\s*```$/g, '').trim();
+    try {
+      extracted = JSON.parse(cleaned);
+    } catch {
+      const first = cleaned.indexOf('{');
+      const last = cleaned.lastIndexOf('}');
+      if (first === -1 || last === -1 || last <= first) throw new Error('중괄호 블록을 찾을 수 없음');
+      extracted = JSON.parse(cleaned.slice(first, last + 1));
+    }
   } catch (e) {
+    // 실패 원인을 다음에 바로 알 수 있도록 원본 응답을 로그에 남긴다
+    // (응답 자체를 사용자에게 보여주진 않음 — 그대로 노출하면 프롬프트
+    // 인젝션·불필요한 혼란 소지).
+    console.warn('[Profile/DocumentScan] JSON 파싱 실패, 원본 응답:', raw.slice(0, 1000), '/ 오류:', e.message);
     return _err(502, 'VISION_PARSE_FAILED', 'AI 판독 결과를 해석하지 못했습니다 — 다시 시도해 주세요', corsHeaders);
   }
 
