@@ -60,13 +60,22 @@ function buildKeywordMatcher(keywords) {
 }
 
 /**
- * classifyIntent(userText, registry) -> { type, target, confidence, reason }
+ * classifyIntent(userText, registry, scope) -> { type, target, confidence, reason }
  *
  * confidence: 'high' | 'low'
  *   - 'high': 이 결과를 그대로 신뢰해 LLM 카탈로그 판단을 생략해도 된다고
  *             본 세션의 2,000개 분류 실험이 뒷받침하는 케이스.
  *   - 'low' : 규칙이 애매하게 걸렸거나 UNKNOWN인 경우 — 호출부는 반드시
  *             기존 LLM 판단으로 폴백해야 한다.
+ *
+ * scope: 'user' | 'dev' | undefined (2026-09-13 추가, 09-13 2차 확장)
+ *   호출부가 "이 발화가 나온 맥락 자체가 이미 개발자용인지"를 알 때만
+ *   넘긴다(예: hondi-search의 scope=dev 토글이 켜진 상태) — 모르면
+ *   생략한다. K-JIT/K-Const 같은 초안 서비스에 대해 "사용자가 쓸 수
+ *   있냐고 묻는 것"(NOT_YET_BUILT가 맞음)과 "개발자가 설계·구현
+ *   현황·로드맵을 묻는 것"(DEV_DOCS가 맞음)을 scope='dev'일 때만 좁게
+ *   구분한다 — scope가 없으면 기존 동작(NOT_YET_BUILT) 그대로
+ *   유지한다(과잉교정 방지).
  *
  * 이 함수는 순수 함수다(외부 상태 없음) — 유닛테스트하기 쉽게 설계했다.
  */
@@ -76,9 +85,23 @@ function buildKeywordMatcher(keywords) {
 // K-서비스 키워드가 우연히 겹쳐도(예: "채용공고"가 K-Job 키워드) 개발자
 // 질문으로 우선 판정해야 한다 — 그렇지 않으면 "job 레포가 채용공고 사기를
 // 거르나요?" 같은 레포 구현 질문이 K-Job 사용법 질문으로 잘못 넘어간다.
-const DEV_REPO_MENTION_RE = /\b(hondi|gopang|klaw|mail|plan|job|biz|watch|telecom|search|democracy|market|tax|health|security|school|stock|public|police|911|insurance|traffic|logistics|qna|gdc|users)\s*(레포|저장소)/i;
+const DEV_REPO_MENTION_RE = /\b(hondi|gopang|klaw|mail|plan|job|biz|watch|telecom|search|democracy|market|tax|health|security|school|stock|public|police|911|insurance|traffic|logistics|qna|gdc|users|jit|const)\s*(레포|저장소)/i;
 
-function classifyIntent(userText, registry) {
+// 2026-09-13 신설, 2026-09-13 2차 확장(K-JIT 19건 재검토) — 초안(not_yet_built)
+// 서비스의 "존재/이용 가능 여부"가 아니라 "설계·구현 현황·로드맵·내부
+// 동작 방식"을 묻는 개발자 특유의 어휘. dev-0798(K-Const 위험관리
+// 질문)에서 처음 만들었을 때는 리스크·한계 어휘만 좁게 잡았는데,
+// K-JIT 관련 19건(dev-0751~0764) 재검토 결과 그 범위로는 대부분(목적함수
+// 설계 이유, 마일스톤, 프로토타입 검증 여부, sp-catalog 미등록 사유,
+// worker.js 연동 방법, 경쟁 솔루션과의 차별점 등)을 못 잡는다는 게
+// 확인됐다 — 전부 "왜/어떻게 이렇게 설계됐는지, 지금 어디까지 됐는지"를
+// 묻는 동일 계열 질문이라 카테고리를 넓혔다. "이름 뜻이 맞나요"처럼
+// 사용자도 물을 법한 단순 정의 확인 질문(dev-0756)은 일부러 포함하지
+// 않았다 — scope='dev'라는 신호 하나만으로 밀어붙이기엔 사용자 쪽
+// 오탐 위험이 더 크다고 판단.
+const DEV_DESIGN_QUESTION_RE = /위험.*관리|오판|오해를\s*부를|한계.*(관리|대응)|설계.*(근거|의도|충돌)|아키텍처|리스크.*대응|오류\s*처리|장애\s*시나리오|목적함수|마일스톤|프로토타입|등록되지\s*않|(연결|연동)하려면|커밋\s*활동|저장소.*(활발|방치)|차별점|정량화|법규.*충돌|정식\s*서비스가\s*되려면|승인이?\s*필요|다음\s*단계|v\d+(\.\d+)+/;
+
+function classifyIntent(userText, registry, scope) {
   const q = (userText || "").trim();
   if (!q) return { type: ROUTE_TYPES.UNKNOWN, target: null, confidence: "low", reason: "빈 입력" };
 
@@ -101,6 +124,17 @@ function classifyIntent(userText, registry) {
   if (serviceHits.length === 1) {
     const { name, info } = serviceHits[0];
     if (info.type === "not_yet_built") {
+      // scope='dev' + 설계/구현현황/로드맵 어휘가 함께 있을 때만
+      // DEV_DOCS로 넘긴다(dev-0798·K-JIT 19건 재발 방지) — scope가
+      // 없으면 기존 동작 그대로 유지.
+      if (scope === "dev" && DEV_DESIGN_QUESTION_RE.test(q)) {
+        return {
+          type: ROUTE_TYPES.DEV_DOCS,
+          target: "hondi-search(scope=dev)",
+          confidence: "high",
+          reason: `${name}은 초안 서비스이지만 scope=dev + 설계/구현현황 어휘 매칭 — "쓸 수 있냐"가 아니라 "어떻게/왜 이렇게 설계됐냐, 지금 어디까지 됐냐"를 묻는 개발자 질문으로 판단`,
+        };
+      }
       return {
         type: ROUTE_TYPES.NOT_YET_BUILT,
         target: name,

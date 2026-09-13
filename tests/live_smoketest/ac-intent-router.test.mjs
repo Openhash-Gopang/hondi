@@ -71,11 +71,27 @@ function main() {
     { q: "일정 등록하고 싶어요", expectType: ROUTE_TYPES.UNKNOWN, expectHigh: false },
     { q: "제 자동차보험료가 왜 이렇게 올랐어요", expectType: ROUTE_TYPES.UNKNOWN, expectHigh: false },
     { q: "병원 예약하고 싶어요", expectType: ROUTE_TYPES.UNKNOWN, expectHigh: false },
+    // 2026-09-13 2차 추가 — dev-0798(K-Const) 회귀 테스트 + K-JIT
+    // 19건(dev-0751~0764) 재발 방지를 위한 DEV_DESIGN_QUESTION_RE 확장.
+    // scope 없이는 기존 동작(NOT_YET_BUILT) 그대로여야 과잉교정이 아니다.
+    { q: "K-Const가 실제 헌재 결정과 다른 결론을 낼 경우 오해를 부를 위험을 어떻게 관리하나요?", expectType: ROUTE_TYPES.NOT_YET_BUILT, expectHigh: true },
+    { q: "K-Const가 실제 헌재 결정과 다른 결론을 낼 경우 오해를 부를 위험을 어떻게 관리하나요?", expectType: ROUTE_TYPES.DEV_DOCS, expectHigh: true, scope: "dev" },
+    { q: "K-Const 지금 쓸 수 있나요?", expectType: ROUTE_TYPES.NOT_YET_BUILT, expectHigh: true, scope: "dev" },
+    // K-JIT 19건 표본 — scope='dev'일 때만 DEV_DOCS로 넘어가야 한다.
+    { q: "K-JIT의 목적함수가 개별 비용최소화가 아니라 사회 총효용인 이유는 뭔가요?", expectType: ROUTE_TYPES.DEV_DOCS, expectHigh: true, scope: "dev" },
+    { q: "K-JIT은 왜 아직 sp-catalog.json에 등록되지 않았나요?", expectType: ROUTE_TYPES.DEV_DOCS, expectHigh: true, scope: "dev" },
+    { q: "K-JIT의 v0.1 이후 다음 마일스톤은 뭔가요?", expectType: ROUTE_TYPES.DEV_DOCS, expectHigh: true, scope: "dev" },
+    { q: "K-JIT의 프로토타입이 실제 데이터로 테스트된 적 있나요?", expectType: ROUTE_TYPES.DEV_DOCS, expectHigh: true, scope: "dev" },
+    { q: "K-JIT 저장소의 커밋 활동이 최근에도 활발한가요, 방치돼 있나요?", expectType: ROUTE_TYPES.DEV_DOCS, expectHigh: false },
+    { q: "K-JIT과 시중 SCM(공급망관리) 솔루션의 차별점이 뭔가요?", expectType: ROUTE_TYPES.DEV_DOCS, expectHigh: true, scope: "dev" },
+    // scope='dev'라도 단순 이름 뜻 확인(사용자도 물을 법한 질문)은
+    // 의도적으로 DEV_DESIGN_QUESTION_RE 밖에 둔다 — 여전히 NOT_YET_BUILT.
+    { q: "K-JIT이라는 이름의 'JIT'이 적시조달(Just-In-Time)을 뜻하는 게 맞나요?", expectType: ROUTE_TYPES.NOT_YET_BUILT, expectHigh: true, scope: "dev" },
   ];
 
   let fixedPass = 0;
   for (const c of fixedCases) {
-    const r = classifyIntent(c.q, registry);
+    const r = classifyIntent(c.q, registry, c.scope);
     const typeOk = r.type === c.expectType;
     const confOk = (r.confidence === "high") === c.expectHigh;
     const ok = typeOk && confOk;
@@ -89,13 +105,19 @@ function main() {
   }
 
   // ── 대량 검증 — confidence='high' 판정만 정답과 대조
+  // 2026-09-13 2차 추가 — scope를 item.audience(user/dev, 원본 실험
+  // 설계에 이미 있던 필드)로 넘긴다. 실제 배선 시나리오를 그대로
+  // 반영한 것이다 — 호출부가 hondi-search의 scope=dev 토글처럼 발화
+  // 맥락 자체를 이미 알고 있을 때만 넘기는 상황을 재현한다(이 필드가
+  // 없던 v1에는 scope 없이 호출했었다 — 그때는 K-JIT 19건이 전부
+  // high-confidence 오답으로 잡혔었다).
   let highTotal = 0;
   let highCorrect = 0;
   let lowTotal = 0;
   const highMistakes = [];
 
   for (const item of groundTruth) {
-    const r = classifyIntent(item.question, registry);
+    const r = classifyIntent(item.question, registry, item.audience);
     if (r.confidence === "high") {
       highTotal++;
       if (isMatch(item.route_v2, r.type)) {
