@@ -56,9 +56,18 @@ function parseArgs() {
 let classifyCallCount = 0;
 async function realClassifyFn(text, candidatesText) {
   classifyCallCount++;
+  // ★ 2026-09-15 신설 — batch3(gov24-b3-002 "한부모가족") 라이브 재검증에서
+  // fetch()가 응답 없이 무한 대기하는 현상 발견(재현 확인됨). 원래 이
+  // 함수엔 타임아웃이 전혀 없어 프록시/DeepSeek 쪽이 멈추면 스크립트
+  // 전체가 그대로 멈춘다. AbortController로 45초 제한을 걸어 최소한
+  // 타임아웃 에러로 실패하고 다음 항목으로 넘어가게 한다 — 무한 대기를
+  // 진단 가능한 실패로 바꾸는 게 목적이라 사후이지 원인 수정은 아니다.
+  const _ac = new AbortController();
+  const _timeoutId = setTimeout(() => _ac.abort(), 45000);
   try {
     const r = await fetch(`${PROXY}/chat/completions`, {
       method: 'POST',
+      signal: _ac.signal,
       headers: {
         'Content-Type': 'application/json',
         // ★ 2026-08-23 신설(라이브 스모크테스트 403 실패 진단) — worker.js의
@@ -98,8 +107,11 @@ async function realClassifyFn(text, candidatesText) {
     const m = raw.match(/[A-Z0-9][A-Z0-9-]*/);
     return m ? m[0] : (raw === 'NONE' ? 'NONE' : null);
   } catch (e) {
-    console.warn(`  [_govClassifyFn] 실패(무시): ${e.message}`);
+    const reason = e.name === 'AbortError' ? '타임아웃(45초 초과)' : e.message;
+    console.warn(`  [_govClassifyFn] 실패(무시): ${reason}`);
     return null;
+  } finally {
+    clearTimeout(_timeoutId);
   }
 }
 
