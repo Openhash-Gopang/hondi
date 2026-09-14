@@ -336,7 +336,14 @@ body.gopang-authed #gopang-auth-gate{display:none}
 #ai-panel-handle.full svg{transform:rotate(180deg)}
 /* AI 비서 이름 — 좌측 정렬 (터치로 편집) + 고정 태그라인, 한 줄 표시
    (2026-07-27 갱신 — 기존 "혼디" 배지 박스 + "AI 비서" 부제 2줄 구성을
-   "{이름}, AI 메신저 테스트 버전" 한 줄로 축약. {이름}은 여전히
+   "{이름}, 최신 버전" 한 줄로 축약. {이름}은 여전히
+   [2026-09-14 정정 — "AI 메신저 테스트 버전"이라는 문구는 2026-07-07
+   #message-list(구 메인 채팅)가 숨겨진 뒤로 이 패널이 유일한 실제
+   프로덕션 화면이 됐는데도 그대로 남아있던 잔재였다. "테스트"라는
+   이름표 때문에 이 패널의 기능 격차(오케스트레이션 실행 태그·위치
+   컨텍스트 등)가 "테스트니까 그렇겠지"로 오인되며 실제 원인 파악이
+   늦어진 사고가 있었다(HANDOFF_2026-09-14_PANEL_VS_MAIN_CHAT_AUDIT
+   참고) — "최신 버전"으로 정정한다.]
    hondi_assistant_name(사용자가 지어준 이름, 기본값 "혼디")을 그대로
    표시하며 클릭 시 편집 가능 — 태그라인만 고정 문구로 추가된 것이고
    이름 편집 기능 자체는 바뀌지 않았다. 배지형 border/background는
@@ -1298,7 +1305,7 @@ body:not(.gopang-authed) .install-banner.show{display:none!important}
           <span id="ai-panel-name">혼디</span>
           <input id="ai-panel-name-input" type="text" maxlength="16"
                  placeholder="AI 비서 이름" autocomplete="off">
-          <span id="ai-panel-name-tagline">, AI 메신저 테스트 버전</span>
+          <span id="ai-panel-name-tagline">, 최신 버전</span>
         </div>
         <svg id="ai-panel-name-edit-icon" width="12" height="12" viewBox="0 0 24 24"
              fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -4154,6 +4161,16 @@ window.closePDV = closePDV;
       _loadAgentCommonSP, _handleProfileTags, _stripInternalTags, _buildFirstContactContext,
       _resolveHondiTier, _parseAgentTags, _handleWebSearchTag, _handleDelegateToFlashTag,
       _handleSPAuthorTags, _enforceConversationalStyle, _enforceRoutingBias,
+      // BUG-FIX(2026-09-14) — 이 패널은 _handleWebSearchTag/_handleDelegateToFlashTag/
+      // _handleSPAuthorTags처럼 "leaf" 핸들러(CFG.system을 안 건드리고 sendFn+
+      // history.push만 하는 부류)는 이미 이식돼 있었지만, 같은 부류인 아래 5개는
+      // 그동안 import조차 안 돼 있어 해당 태그가 나오면 화면에서 지워지기만
+      // (_stripInternalTags) 하고 조용히 멈췄다 — _handleOrchestrationTags처럼
+      // CFG.system을 바꾸는 부류가 아니라는 걸 함수 본문(grep)으로 직접 확인한
+      // 뒤에만 이 목록에 추가했다(재무제표 조회/K-Search 실행/무주인 프로필
+      // 생성/정부 서류 접수 5종/부서 업무 요청 — 전부 leaf 핸들러로 확인됨).
+      _handleBalanceCheckTag, _handleKSearchExecutionTag, _handleCreateUnclaimedProfileTag,
+      _handleGovTaskTags, _handleDeptTaskTag,
     } = await import('./src/gopang/ai/call-ai.js');
     // BUG-FIX(2026-07-02): _callPanelAI(AI 패널 — 실제로 쓰이는 주 경로)가
     // 지금까지 _parseAgentTags를 호출한 적이 없었다. 메인 채팅 전용
@@ -4786,6 +4803,27 @@ window.closePDV = closePDV;
         } catch (e) {
           console.warn('[Panel] _handleSPAuthorTags 처리 실패(무시):', e.message);
         }
+
+        // ── 나머지 leaf 액션 태그 실행 (2026-09-14 신설) ──────────────
+        // [BALANCE_CHECK]/[SEARCH]...[/SEARCH]/[CREATE_UNCLAIMED_PROFILE].../
+        // GOV_TASK_* 5종/[DEPT_TASK_REQUEST]... — 위 _handleWebSearchTag 등과
+        // 동일한 leaf 핸들러 부류(각자 독립된 태그 이름을 자기 앞부분에서
+        // 확인하고 없으면 즉시 false 반환하므로 서로 겹치지 않는다. 단,
+        // [SEARCH]...[/SEARCH](K-Search 질의 실행, JSON 블록)는 아래
+        // _parseAgentTags가 처리하는 [SEARCH: query=..., type=user](혼디
+        // 사용자검색 패널 오픈, 단일 라인)와 태그 형태 자체가 달라 안 겹친다
+        // — call-ai.js 두 함수 모두 grep으로 직접 대조 확인함). 5개 전부
+        // 순서 무관하게 순차 시도한다.
+        try { await _handleBalanceCheckTag(full, bubbleEl, _panelSendFn, userText); }
+        catch (e) { console.warn('[Panel] _handleBalanceCheckTag 처리 실패(무시):', e.message); }
+        try { await _handleKSearchExecutionTag(full, bubbleEl, _panelSendFn, userText); }
+        catch (e) { console.warn('[Panel] _handleKSearchExecutionTag 처리 실패(무시):', e.message); }
+        try { await _handleCreateUnclaimedProfileTag(full, bubbleEl, _panelSendFn, userText); }
+        catch (e) { console.warn('[Panel] _handleCreateUnclaimedProfileTag 처리 실패(무시):', e.message); }
+        try { await _handleGovTaskTags(full, bubbleEl, _panelSendFn, userText, []); }
+        catch (e) { console.warn('[Panel] _handleGovTaskTags 처리 실패(무시):', e.message); }
+        try { await _handleDeptTaskTag(full, bubbleEl, _panelSendFn, userText); }
+        catch (e) { console.warn('[Panel] _handleDeptTaskTag 처리 실패(무시):', e.message); }
 
         // ── GWP/SEARCH/OPEN_PROFILE/P2P_INVITE 태그 실행 (2026-07-02 신설) ──
         try { _parseAgentTags(full, null, userText, _preTab); }
