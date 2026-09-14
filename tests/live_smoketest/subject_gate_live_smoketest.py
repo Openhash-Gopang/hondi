@@ -5,16 +5,25 @@ tests/live_smoketest/subject_gate_live_smoketest.py
 subject-gate.js의 2단계 과목 게이트(refineToLeaf)를 실제 DeepSeek API로
 라이브 검증한다.
 
-## 무엇을 검증하는가
-기존 live_smoketest.py/scenarios_expert_routing_precision는 1단계
-(AC-PRO-CORE의 [EXPERT: professor] 같은 상위 태그)만 검증한다 — 이
-하네스는 그 다음 단계, 즉 "professor로 라우팅된 뒤 실제로 어느 세부
-리프(교수-국어/교수-수학 등)로 정밀화되는가"를 검증한다.
+## 2026-09-14 전면 재작성 — flat → 계층형 재동기화
+이전 버전(2026-08-08~08-10)은 dump_leaves.mjs로 root_id(professor 등)
+아래 전체 리프(158~308개)를 한 번에 flat하게 뽑아 프롬프트 하나에
+욱여넣었다. 그런데 subject-gate.js는 2026-08-10에 이미 flat→계층형으로
+리팩터돼(주석 "2026-08-10 리팩터(flat → 계층형)" 참고), 실제 refineToLeaf()는
+EXPERT_REGISTRY의 parentKey 트리를 한 단계씩(직계 자식만, 대부분 4~14개)
+내려가며 여러 번 작은 게이트 호출을 한다 — dump_leaves.mjs만 이 리팩터를
+놓치고 옛 방식 그대로 남아 있었다(2026-09-14, professor-06-hard-adjacent가
+308개 후보 프롬프트에서 reasoning_tokens 1500을 전부 소진하고 빈 응답을
+낸 걸 계기로 발견 — 실제 production이라면 이 케이스는 각 단계 최대
+30개 미만 후보라 애초에 이 문제가 생기지 않는다).
 
-subject-gate.js의 refineToLeaf()와 동일한 system prompt(GATE_SYS_PROMPT_HEAD
-+ dump_leaves.mjs로 뽑은 후보 메뉴)를 그대로 구성해서 호출하므로, 이
-하네스가 PASS면 실제 프로덕션 코드도 같은 입력에 같은 결과를 낸다고
-볼 수 있다(system prompt 텍스트·모델·temperature=0 전부 동일 소스).
+이번 재작성은 dump_leaves.mjs 대신 get_gate_level.mjs(2026-09-14 신설,
+한 id의 직계 자식만 돌려줌)를 매 단계 서브프로세스로 호출해서, Python
+쪽 refine_to_leaf()가 subject-gate.js의 refineToLeaf() for 루프를
+정확히 그대로 재현한다(재구현이 아니라 production 함수 get_gate_level.mjs
+가 그대로 통과시키는 EXPERT_REGISTRY/subject-gate.js의 실제 함수 호출
+결과를 그대로 조립) — 시나리오 하나당 API 호출이 1회가 아니라 트리
+깊이만큼(현재 최대 4단계) 될 수 있다.
 
 ## 시나리오 파일 형식
 [
@@ -28,26 +37,22 @@ subject-gate.js의 refineToLeaf()와 동일한 system prompt(GATE_SYS_PROMPT_HEA
   ...
 ]
 
-2026-08-10 개정 — 대응하는 리프가 레지스트리에 아예 없는 "완전공백"
-과목 시나리오는 expected_leaf_id를 null이 아니라 root_id 그대로
-채운다(예: "professor"). "해당 없음" 항목의 id가 root_id와 같기
-때문이다(subject-gate.js._buildGateCandidates 참고) — 이러면 별도
-분기 없이 일반 채점 로직(chosen == expected)이 그대로 정답 판정을
-해준다.
+완전공백 과목 시나리오는 expected_leaf_id를 root_id 그대로 채운다
+(예: "professor") — "해당 없음" 항목의 id가 root_id와 같기 때문이다
+(subject-gate.js._buildGateCandidates 참고).
 
 ## 한계
-- 후보 메뉴는 dump_leaves.mjs로 그때그때 최신 레지스트리에서 뽑으므로,
-  expected_leaf_id가 리프 레지스트리에서 이름이 바뀌면 이 스크립트가
-  아니라 시나리오 파일 쪽을 갱신해야 한다.
 - 인접 과목(예: professor-electrical vs professor-electronics)은
   발화가 애매하면 모델이 둘 중 하나를 골라도 사람이 보기엔 둘 다
-  말이 될 수 있다 — 그런 시나리오는 category에 "인접쌍"이라고 표시해
-  결과 리뷰 시 더 관대하게 봐야 한다(자동判定은 여전히 엄격 일치).
+  말이 될 수 있다 — category에 "인접쌍"이라고 표시된 건 결과 리뷰 시
+  더 관대하게 봐야 한다(자동判定은 여전히 엄격 일치).
+- 트리 각 단계마다 순차 API 호출이라 시나리오당 지연이 이전 버전보다
+  길다(단, 토큰 소진으로 인한 빈 응답은 구조적으로 사라진다).
 
 Usage:
-  DEEPSEEK_API_KEY=... python3 subject_gate_live_smoketest.py \\
-      --scenarios scenarios_subject_gate_stage2_20260808.json \\
-      --out ../../results/subject-gate \\
+  DEEPSEEK_API_KEY=... python3 subject_gate_live_smoketest.py \
+      --scenarios scenarios_subject_gate_stage2_20260808.json \
+      --out ../../results/subject-gate \
       --resume
 """
 import argparse
@@ -65,18 +70,14 @@ DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
 MODEL = "deepseek-v4-flash"  # subject-gate.js와 동일 모델
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-DUMP_LEAVES_SCRIPT = os.path.join(SCRIPT_DIR, "dump_leaves.mjs")
+GET_GATE_LEVEL_SCRIPT = os.path.join(SCRIPT_DIR, "get_gate_level.mjs")
 
 MAX_WORKERS = 5
 MAX_RETRIES = 4
 RETRY_BASE_SLEEP = 3
+MAX_DEPTH = 6  # subject-gate.js refineToLeaf()의 MAX_DEPTH와 동일
 
-# subject-gate.js의 GATE_SYS_PROMPT_HEAD와 정확히 동일한 문구 — 이
-# 하네스가 프로덕션과 다른 결과를 내지 않으려면 여기가 그 파일과
-# 어긋나면 안 된다(수정 시 양쪽 다 갱신). 2026-08-10 개정 — "확신이
-# 없으면 null" 지시(반례 4건 추가판 포함)가 실사 재검증에서 효과가
-# 없었음을 확인해, "해당 없음"을 후보 목록의 정식 항목으로 넣는 구조로
-# 전면 교체(subject-gate.js._buildGateCandidates 참고).
+# subject-gate.js의 GATE_SYS_PROMPT_HEAD와 정확히 동일한 문구.
 GATE_SYS_PROMPT_HEAD = (
     "사용자 발화를 아래 후보 목록 중 정확히 하나로 분류하세요. 후보 목록 "
     '맨 마지막 항목은 그 어떤 전공도 실제로 맞지 않을 때 고르는 "해당 '
@@ -88,31 +89,16 @@ GATE_SYS_PROMPT_HEAD = (
 )
 
 
-def get_leaf_candidates(roots):
-    """dump_leaves.mjs를 서브프로세스로 호출해 root_id별 리프 목록을 얻는다."""
-    # BUG-FIX(2026-09-14, Windows) — text=True만 쓰면 Windows에서는
-    # locale.getpreferredencoding()(한국어 로캘이면 cp949)로 stdout을
-    # 디코딩한다. dump_leaves.mjs는 한글 label을 UTF-8로 찍으므로 cp949
-    # 디코딩 중 멀티바이트 시퀀스가 깨져 UnicodeDecodeError가 백그라운드
-    # 리더 스레드에서 터지고, 그 결과 result.stdout이 None이 되어 아래
-    # json.loads()가 "must be str, bytes or bytearray, not NoneType"로
-    # 실패했다(Windows 실사용 재현 확인). encoding='utf-8'을 명시해
-    # 리눅스/맥과 동일하게 강제한다.
+def get_gate_level(node_id):
+    """get_gate_level.mjs를 서브프로세스로 호출해 node_id의 상태를 얻는다.
+    반환: {"kind": "leaf"} | {"kind": "passthrough", "childId": ...} |
+          {"kind": "gate", "candidates": [...]}
+    """
     result = subprocess.run(
-        ["node", DUMP_LEAVES_SCRIPT, *roots],
+        ["node", GET_GATE_LEVEL_SCRIPT, node_id],
         capture_output=True, text=True, encoding="utf-8", check=True, cwd=SCRIPT_DIR,
     )
     return json.loads(result.stdout)
-
-
-def build_gate_system_prompt(leaves):
-    # 2026-08-09 수정 — dump_leaves.mjs가 이제 subject-gate.js._leafMenuLine()을
-    # 그대로 호출해 만든 menuLine(LEAF_SYNONYMS 보강 포함)을 내려준다. 여기서
-    # "- id: label"로 재조립하지 않고 그 필드를 그대로 쓴다 — 이 하네스가
-    # production과 다른(더 빈약한) 메뉴로 채점하던 gap을 없앤다(K-12 어휘
-    # 동의어가 없으면 교과목 발화 검증 자체가 왜곡됨).
-    menu = "\n".join(l["menuLine"] for l in leaves)
-    return GATE_SYS_PROMPT_HEAD + menu
 
 
 def call_deepseek(api_key, system_prompt, user_utterance):
@@ -120,13 +106,10 @@ def call_deepseek(api_key, system_prompt, user_utterance):
     payload = {
         "model": MODEL,
         "temperature": 0,
-        "max_tokens": 1500,  # 2026-08-09 재상향(500→1000) — 500으로도 여전히 실패한
-        # professor-gap-01/17 실사 확인(reasoning_content 1700~1800자, finish_reason=length,
-        # 500 전량 소진). 프로덕션 subject-gate.js도 이번에 60→1000으로 맞춰 패치함 —
-        # 이 스크립트도 동일 값으로 맞춰 재검증.
-        # 2026-08-10 재상향(1000→1500) — K-12 리프 신설로 후보 158→162개, 프롬프트가
-        # 더 길어지며 reasoning_content_len 3700~3900대 재발(k12-sg-16/22 빈 응답).
-        # subject-gate.js와 동일 값으로 재동기화.
+        "max_tokens": 1500,  # subject-gate.js와 동일 값(계층형 전환 후에도
+        # 단계당 후보가 최악 케이스 30개 미만이라 1500이면 충분한 여유 —
+        # 예전 flat 308개 시절과 달리 이제 이 값을 낮출 여지도 있지만,
+        # subject-gate.js가 아직 1500이므로 그대로 맞춘다.
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_utterance[:2000]},
@@ -141,63 +124,97 @@ def call_deepseek(api_key, system_prompt, user_utterance):
                 msg = data["choices"][0]["message"]
                 text = msg.get("content") or ""
                 if not text:
-                    # 2026-08-09 진단 로그 — content가 비어 있을 때 reasoning_content가
-                    # 실제로 토큰을 다 먹었는지, finish_reason이 length인지 확인.
                     print(
                         f"[DEBUG-EMPTY] finish_reason={data['choices'][0].get('finish_reason')} "
                         f"reasoning_content_len={len(msg.get('reasoning_content') or '')} "
                         f"usage={data.get('usage')}",
                         flush=True,
                     )
-                return text, data.get("usage", {}), None
+                return text, None
             last_err = f"HTTP {resp.status_code}: {resp.text[:300]}"
         except requests.RequestException as e:
             last_err = f"request_exception: {e}"
         if attempt < MAX_RETRIES:
             time.sleep(RETRY_BASE_SLEEP * attempt)
-    return None, {}, last_err
+    return None, last_err
 
 
-def grade(scenario, leaf_ids, raw_text, call_err):
-    if call_err is not None:
-        return "LIVE-ERROR", call_err
-    try:
-        cleaned = re.sub(r"```json|```", "", raw_text or "").strip()
-        parsed = json.loads(cleaned)
-        chosen = parsed.get("id")
-    except (json.JSONDecodeError, AttributeError):
-        return "LIVE-FAIL", f"JSON 파싱 실패 — raw: {(raw_text or '')[:200]}"
+def refine_to_leaf(api_key, persona_id, user_text, trace):
+    """subject-gate.js의 refineToLeaf() for 루프를 그대로 재현한다.
+    trace 리스트에 단계별 기록을 남겨(레벨의 kind, 호출 여부, 선택 결과)
+    실패 시 어느 단계에서 무슨 일이 있었는지 사람이 바로 볼 수 있게 한다.
+    """
+    current_id = persona_id
+    for _depth in range(MAX_DEPTH):
+        try:
+            level = get_gate_level(current_id)
+        except (subprocess.CalledProcessError, json.JSONDecodeError) as e:
+            trace.append({"step": current_id, "error": f"get_gate_level 실패: {e}"})
+            return current_id, "LEVEL-ERROR"
 
+        if level["kind"] == "leaf":
+            trace.append({"step": current_id, "kind": "leaf"})
+            return current_id, None
+
+        if level["kind"] == "passthrough":
+            trace.append({"step": current_id, "kind": "passthrough", "to": level["childId"]})
+            current_id = level["childId"]
+            continue
+
+        # kind == "gate" — 실제 API 호출 1회
+        menu = "\n".join(c["menuLine"] for c in level["candidates"])
+        system_prompt = GATE_SYS_PROMPT_HEAD + menu
+        candidate_ids = {c["id"] for c in level["candidates"]}
+
+        raw_text, err = call_deepseek(api_key, system_prompt, user_text)
+        if err is not None:
+            trace.append({"step": current_id, "kind": "gate", "error": err})
+            return current_id, "CALL-ERROR"
+
+        try:
+            cleaned = re.sub(r"```json|```", "", raw_text or "").strip()
+            chosen = json.loads(cleaned).get("id")
+        except (json.JSONDecodeError, AttributeError):
+            trace.append({"step": current_id, "kind": "gate", "raw": (raw_text or "")[:200], "error": "parse"})
+            return current_id, "PARSE-ERROR"
+
+        if chosen is None or chosen not in candidate_ids:
+            trace.append({"step": current_id, "kind": "gate", "chosen": chosen, "error": "invalid-id"})
+            return current_id, "INVALID-ID"
+
+        trace.append({"step": current_id, "kind": "gate", "chosen": chosen})
+        if chosen == current_id:
+            return current_id, None  # "해당 없음" — 더 안 내려감
+        current_id = chosen
+
+    trace.append({"step": current_id, "error": "MAX_DEPTH 초과"})
+    return current_id, "MAX-DEPTH"
+
+
+def grade(scenario, resolved_id, walk_err):
     expected = scenario["expected_leaf_id"]
-
-    # 2026-08-10 개정 — "해당 없음"이 이제 후보 목록의 정식 항목(id는
-    # personaId=root_id 그대로)이라, 완전공백 과목 시나리오는
-    # expected_leaf_id를 root_id로 채워두면(예: "professor") 아래 일반
-    # 분기(chosen == expected)가 그대로 정답 판정을 해준다 — null 전용
-    # 특수 분기가 더 이상 필요 없다. chosen이 None으로 오는 경우는 이제
-    # 정상 경로가 아니라 순수 방어적 안전망(파싱 실패 등)으로만 취급한다.
-    if chosen is None:
-        return "LIVE-FAIL", f"id:null 응답 (기대: {expected}) — '해당 없음' 항목이 후보에 있는데도 null을 냄, 이례적"
-    if chosen not in leaf_ids:
-        return "LIVE-FAIL", f"화이트리스트 밖 id를 지어냄: {chosen} (기대: {expected}) — subject-gate.js면 이 경우 원래 personaId로 폴백함"
-    if chosen == expected:
-        return "LIVE-PASS", f"정확히 일치: {chosen}"
-    return "LIVE-FAIL", f"다른 리프로 정밀화됨: {chosen} (기대: {expected})"
+    if walk_err is not None:
+        return ("LIVE-ERROR" if walk_err in ("CALL-ERROR", "LEVEL-ERROR") else "LIVE-FAIL"), \
+            f"{walk_err} (도달: {resolved_id}, 기대: {expected})"
+    if resolved_id == expected:
+        return "LIVE-PASS", f"정확히 일치: {resolved_id}"
+    return "LIVE-FAIL", f"다른 리프로 정밀화됨: {resolved_id} (기대: {expected})"
 
 
-def process_one(api_key, scenario, gate_prompt, leaf_ids):
-    raw_text, usage, err = call_deepseek(api_key, gate_prompt, scenario["utterance"])
-    verdict, note = grade(scenario, leaf_ids, raw_text, err)
+def process_one(api_key, scenario):
+    trace = []
+    resolved_id, walk_err = refine_to_leaf(api_key, scenario["root_id"], scenario["utterance"], trace)
+    verdict, note = grade(scenario, resolved_id, walk_err)
     return {
         "id": scenario["id"],
         "root_id": scenario["root_id"],
         "utterance": scenario["utterance"],
         "expected_leaf_id": scenario["expected_leaf_id"],
         "category": scenario.get("category", ""),
-        "raw_response": raw_text,
+        "resolved_id": resolved_id,
+        "trace": trace,
         "live_verdict": verdict,
         "live_note": note,
-        "usage": usage,
     }
 
 
@@ -219,15 +236,6 @@ def main():
     if args.limit:
         scenarios = scenarios[: args.limit]
 
-    roots = sorted({s["root_id"] for s in scenarios})
-    print(f"후보 메뉴 로드 중 (roots: {roots})...")
-    candidates = get_leaf_candidates(roots)
-    for r in roots:
-        print(f"  {r}: {len(candidates[r])}개 리프")
-
-    gate_prompts = {r: build_gate_system_prompt(candidates[r]) for r in roots}
-    leaf_id_sets = {r: {l["id"] for l in candidates[r]} for r in roots}
-
     os.makedirs(args.out, exist_ok=True)
     out_path = os.path.join(args.out, "live_results.jsonl")
 
@@ -245,23 +253,18 @@ def main():
         print(f"[resume] {len(done_ids)}개 이미 완료됨 — 건너뜀")
 
     todo = [s for s in scenarios if s["id"] not in done_ids]
-    print(f"총 {len(scenarios)}개 시나리오, {len(todo)}개 실행 예정")
+    print(f"총 {len(scenarios)}개 시나리오, {len(todo)}개 실행 예정 (트리 단계별 순차 호출)")
 
     results = []
     with open(out_path, "a", encoding="utf-8") as out_f:
         with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
-            futures = {
-                pool.submit(
-                    process_one, api_key, s, gate_prompts[s["root_id"]], leaf_id_sets[s["root_id"]]
-                ): s
-                for s in todo
-            }
+            futures = {pool.submit(process_one, api_key, s): s for s in todo}
             for i, fut in enumerate(as_completed(futures), 1):
                 r = fut.result()
                 results.append(r)
                 out_f.write(json.dumps(r, ensure_ascii=False) + "\n")
                 out_f.flush()
-                print(f"[{i}/{len(todo)}] {r['id']:20s} {r['live_verdict']:12s} {r['live_note']}")
+                print(f"[{i}/{len(todo)}] {r['id']:28s} {r['live_verdict']:12s} {r['live_note']}")
 
     all_results = results
     if args.resume and os.path.exists(out_path):
@@ -281,9 +284,9 @@ def main():
         if status in counts:
             print(f"  {status:12s} {counts[status]}")
 
-    fails = [r for r in all_results if r["live_verdict"] == "LIVE-FAIL"]
+    fails = [r for r in all_results if r["live_verdict"] in ("LIVE-FAIL", "LIVE-ERROR")]
     if fails:
-        print("\n=== FAIL 목록 ===")
+        print("\n=== FAIL/ERROR 목록 ===")
         for r in fails:
             print(f"  - {r['id']} ({r['root_id']}): {r['live_note']}")
 
