@@ -1,0 +1,85 @@
+name: Bump App Version
+
+# ── 배경 ────────────────────────────────────────────────────
+# 예전엔 deploy.ps1이 로컬에서 커밋 직전 sw.js의 CACHE_NAME을
+# 타임스탬프로 바꿔줬다. main 브랜치가 PR 필수(브랜치 보호)로 바뀐
+# 뒤로는 아무도 deploy.ps1을 거치지 않고 PR 머지로만 main에 반영되기
+# 시작했는데, CACHE_NAME을 갱신하는 책임을 이어받은 자동화가 없어서
+# 2026-07-20 이후 CACHE_NAME이 그대로 멈춰 있었다(수십 건의 머지에도
+# 변화 없음) — 이 워크플로우가 그 빈 자리를 대신한다.
+#
+# main에 뭔가 머지될 때마다: version.json을 새로 쓰고, sw.js의
+# CACHE_NAME을 같은 값으로 동기화한 뒤 [skip ci] 커밋으로 다시 push한다.
+# [skip ci] 가드로 이 워크플로우가 자기 자신의 커밋에 반응해 무한
+# 루프를 도는 걸 막는다.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  bump-version:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute version string
+        id: ver
+        run: |
+          SHA=$(git rev-parse --short HEAD)
+          TS=$(date -u +%Y%m%d-%H%M%S)
+          echo "version=${TS}-${SHA}" >> "$GITHUB_OUTPUT"
+          echo "built_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      - name: Write version.json
+        run: |
+          cat > version.json << EOF
+          {
+            "version": "${{ steps.ver.outputs.version }}",
+            "commit": "$(git rev-parse HEAD)",
+            "builtAt": "${{ steps.ver.outputs.built_at }}"
+          }
+          EOF
+
+      - name: Sync sw.js CACHE_NAME to the same version
+        run: |
+          sed -i "s/const CACHE_NAME    = 'gopang-[^']*'/const CACHE_NAME    = 'gopang-${{ steps.ver.outputs.version }}'/" sw.js
+          grep -q "gopang-${{ steps.ver.outputs.version }}" sw.js || (echo "CACHE_NAME sync failed" && exit 1)
+
+      - name: Commit and push
+        run: |
+          git config user.name "hondi-version-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add version.json sw.js
+          if git diff --cached --quiet; then
+            echo "변경 없음 — 커밋 생략"
+            exit 0
+          fi
+          git commit -m "chore: bump build version to ${{ steps.ver.outputs.version }} [skip ci]"
+          git pull --rebase origin main
+          git push
+
+      # deploy.ps1의 기존 Cloudflare 캐시 퍼지 로직과 동일한 목적 —
+      # Cloudflare 엣지가 origin(GitHub Pages)의 Cache-Control에 따라
+      # version.json/sw.js를 들고 있으면, no-store로 요청해도 브라우저
+      # 단에서만 우회될 뿐 엣지 캐시엔 그대로 남아 "갱신 확인"이 옛 값을
+      # 계속 볼 수 있다. CF_API_TOKEN/CF_ZONE_ID 리포지토리 시크릿이
+      # 설정된 경우에만 실행되고, 없으면 조용히 건너뛴다(설정 안 해도
+      # 기능 자체는 동작 — 다만 전파 지연이 조금 더 있을 수 있음).
+      - name: Purge Cloudflare cache for version.json/sw.js
+        if: ${{ secrets.CF_API_TOKEN != '' && secrets.CF_ZONE_ID != '' }}
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
+        run: |
+          curl -sf -X POST "https://api.cloudflare.com/client/v4/zones/${CF_ZONE_ID}/purge_cache" \
+            -H "Authorization: Bearer ${CF_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            --data '{"files":["https://hondi.net/version.json","https://www.hondi.net/version.json","https://hondi.net/sw.js","https://www.hondi.net/sw.js"]}' \
+            || echo "Cloudflare 캐시 퍼지 실패 — 무시하고 계속 진행"
