@@ -2410,7 +2410,26 @@ export async function _handleWebSearchTag(fullReply, bubble, sendFn = callAI, us
 
 export async function _handleKSearchExecutionTag(fullReply, bubble, sendFn = callAI, userText = '') {
   const m = fullReply.match(/\[SEARCH\](.+?)\[\/SEARCH\]/s);
-  if (!m) return false;
+  if (!m) {
+    // BUG-FIX(2026-09-14) — 실사 재현(연속 2회, "근처 식당 찾아줘"류):
+    // K-Search 정식 핸드오프(CALL_KINTENT → K-Intent → K-Compose →
+    // K-Search) 없이, AGENT-COMMON이 "[SEARCH: 자유텍스트]" 형태를
+    // 직접 냈다 — 이 함수가 기대하는 JSON 본문 형식([SEARCH]{...}
+    // [/SEARCH])도 아니고, _parseAgentTags가 처리하는 사용자 검색 패널용
+    // "[SEARCH: query=..., type=user]" 형식도 아니다(query= 없음).
+    // 방치하면 화면에 대괄호 원문이 그대로 남고 대화가 조용히 끝난다.
+    // ksearch용 구식 [GWP: ksearch] 태그 자동복구(아래 _parseAgentTags
+    // 인근 GWP 처리부와 동일 원칙)와 같은 방식 — 잘못된 진입점을 정상
+    // 진입점([CALL_KINTENT])으로 밀어넣는다. query= 형식은 건드리지
+    // 않도록 부정형 전방탐색으로 명시적으로 제외한다.
+    const loose = fullReply.match(/\[SEARCH:\s*(?!query=)([^\]]+)\]/i);
+    if (loose) {
+      const q = loose[1].trim() || userText;
+      console.warn('[K-Search] 자유텍스트 [SEARCH: ...] 오형식 감지 — CALL_KINTENT로 자동복구:', q);
+      return _handleOrchestrationTags(`[CALL_KINTENT: query=${q}]`, bubble, sendFn, userText);
+    }
+    return false;
+  }
 
   let params;
   try {
