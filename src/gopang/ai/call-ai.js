@@ -5076,17 +5076,37 @@ export function _parseAgentTags(fullReply, bubble, userText, _preTab) {
         console.info('[GWP] LLM 판단 → 새 탭:', svcId);
         const cleanedReply = fullReply.replace(/\[GWP:\s*[\w-]+\]\s*/, '').trim();
         if (bubble) _updateStreamBubble(bubble, cleanedReply);
-        // ★ 2026-07-23 수정 — 지금까지는 userText(사용자의 방금 발화)만
-        // 새 탭에 넘겨서, 그 발화 자체엔 기관명이 없는 경우(예: "복지관련
-        // 부서 연결해 줘") 새 탭이 어느 시/도 소속인지 전혀 알 수 없어
-        // 전국 단위로 떨어지는 문제가 실사로 확인됐다. 그런데 바로 위
-        // cleanedReply(AI 자신의 이번 답변, 예: "제주시청 기초생활과로
-        // 연결해 드리겠습니다")에는 이미 그 기관명이 정확히 들어있다 —
-        // AI가 방금 스스로 판단해 말한 내용을 그냥 버리고 있었을 뿐이다.
-        // cleanedReply를 같이 실어 보내, 새 탭의 assembleGovSystemPrompt
-        // 키워드 매칭이 그 기관명을 그대로 잡을 수 있게 한다.
-        const gwpCtx = cleanedReply ? `${cleanedReply}\n\n[사용자 요청] ${userText}` : userText;
-        _gwpLaunch(svcDef, gwpCtx, _preTab, _buildRoutingFacts());
+        // ★ 2026-09-14 신설(결함 B 조치) — svcDef.requireConfirm(현재
+        // kgdc만 해당, gwp-registry.js 참고)이면 실제로 탭을 열기 전에
+        // 한 번 더 확인을 구한다. _parseAgentTags는 동기 함수라 별도
+        // async 리팩터 없이 블로킹 confirm()으로 충분하다 — 사용자가
+        // 취소하면 미리 열어둔 _preTab(있다면)을 닫고 이 분기만 건너뛴다
+        // (이 함수 뒤쪽의 WEB_SEARCH/SP_DRAFT_REQUEST/P2P_INVITE 등 서로
+        // 독립적인 다른 태그 처리는 그대로 계속 진행돼야 하므로, 여기서
+        // 함수 전체를 return으로 끊지 않고 이 GWP 오픈 자체만 건너뛴다).
+        let _gwpConfirmed = true;
+        if (svcDef.requireConfirm) {
+          _gwpConfirmed = (typeof window !== 'undefined' && typeof window.confirm === 'function')
+            ? window.confirm(svcDef.confirmMessage || `'${svcDef.name}' 화면으로 이동합니다. 계속할까요?`)
+            : true; // window.confirm이 없는 환경(예: 테스트)에서는 기존 동작 유지
+          if (!_gwpConfirmed) {
+            console.info(`[GWP] '${svcId}' — 사용자가 확인창에서 취소함, 탭 오픈 중단`);
+            if (_preTab && typeof _preTab.close === 'function' && !_preTab.closed) { _preTab.close(); }
+          }
+        }
+        if (_gwpConfirmed) {
+          // ★ 2026-07-23 수정 — 지금까지는 userText(사용자의 방금 발화)만
+          // 새 탭에 넘겨서, 그 발화 자체엔 기관명이 없는 경우(예: "복지관련
+          // 부서 연결해 줘") 새 탭이 어느 시/도 소속인지 전혀 알 수 없어
+          // 전국 단위로 떨어지는 문제가 실사로 확인됐다. 그런데 바로 위
+          // cleanedReply(AI 자신의 이번 답변, 예: "제주시청 기초생활과로
+          // 연결해 드리겠습니다")에는 이미 그 기관명이 정확히 들어있다 —
+          // AI가 방금 스스로 판단해 말한 내용을 그냥 버리고 있었을 뿐이다.
+          // cleanedReply를 같이 실어 보내, 새 탭의 assembleGovSystemPrompt
+          // 키워드 매칭이 그 기관명을 그대로 잡을 수 있게 한다.
+          const gwpCtx = cleanedReply ? `${cleanedReply}\n\n[사용자 요청] ${userText}` : userText;
+          _gwpLaunch(svcDef, gwpCtx, _preTab, _buildRoutingFacts());
+        }
       } else {
         // ★ 2026-08-03 신설 — entity 기반 launch 폴백(§ENTITY-LAUNCH).
         // core 21개 배열에 없는 id는 K-Search가 profiles에서 찾은

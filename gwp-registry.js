@@ -56,10 +56,18 @@ async function resolveSpUrls() {
 
 const GWP_REGISTRY = [
 
-  // ── 긴급·재난 (EMG) — tab: 사용자 명시적 확인 필요 ────────
+  // ── 긴급·재난 (EMG) — tab: 사용자가 새 탭에서 직접 확인 ────────
   {
     id: 'kemergency', name: 'K-Emergency', category: 'EMG',
     type: 'tab',      // 긴급은 반드시 새 탭 — 사용자가 직접 확인
+    // ★ 2026-09-14 검토(결함 B) — "결제·송금"과 같은 이유로 이 서비스도
+    // requireConfirm 대상에 넣을지 검토했으나 제외했다: 여기서 말하는
+    // "사용자가 직접 확인"은 [그 새 탭 안에서 상황을] 확인한다는 뜻이지
+    // "열기 전에 한 번 더 물어본다"는 뜻이 아니다 — 긴급 상황에서 진짜
+    // 위험한 건 되돌릴 수 없는 결제가 아니라 도움이 늦어지는 것이므로,
+    // 여닫기 전 확인창을 넣는 건 되레 해롭다(불필요한 지연). 오탐(false
+    // positive) 라우팅 자체를 줄이는 게 맞는 방향이고, 그건 이 게이트의
+    // 범위 밖이다.
     url: 'https://911.hondi.net/webapp.html',
     sp_key: 'SP-02_k119',
     status: 'active', priority: 0, threshold: 0.60,
@@ -196,6 +204,15 @@ const GWP_REGISTRY = [
   {
     id: 'kgdc', name: 'GDC', category: 'ECO',
     type: 'tab',   // 결제·송금은 반드시 새 탭
+    // ★ 2026-09-14 신설(결함 B 조치) — 이 주석("결제·송금은 반드시 새
+    // 탭")은 지금까지 사람이 읽는 설명일 뿐, 실제로 열기 전에 사용자
+    // 확인을 구하는 코드는 어디에도 없었다(call-ai.js:svcDef 분기가
+    // type과 무관하게 [GWP: id] 태그만 있으면 무조건 즉시 오픈).
+    // requireConfirm/confirmMessage를 실제 게이트로 추가한다 — kemergency
+    // 와 달리 결제·송금은 지연이 안전을 해치지 않고, 오히려 확인 한 번이
+    // 오탐 라우팅으로 인한 원치 않는 결제 화면 진입을 막아준다.
+    requireConfirm: true,
+    confirmMessage: '결제·송금·계좌 화면(GDC)으로 이동합니다. 계속할까요?',
     url: 'https://gdc.hondi.net/webapp.html',
     sp_key: 'SP-08_gdc',
     status: 'active', priority: 5, threshold: 0.75,
