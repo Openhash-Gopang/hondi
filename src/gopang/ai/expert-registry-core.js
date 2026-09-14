@@ -46,7 +46,12 @@ export const CORE_REGISTRY = {
     key: 'SP_accountant', needsMedicalSafety: false,
     // 2026-07-25 신설(주피터 지시) — 정책 반영 — 예전 '재무제표'는 kbusiness와 동일 문자열이라 삭제.
     // '회계감사를 의뢰하고 싶어'는 위임의도가 명확해 유지, 뒤에 '검토' 단독 대신 '의뢰'로 구체화
-    triggers: ['공인회계사에게 의뢰', '공인회계사 상담', '회계감사를 의뢰'],
+    triggers: ['공인회계사에게 의뢰', '공인회계사 상담', '회계감사를 의뢰',
+      // 2026-09-14 추가 — 상황 표현 보강. description이 이미 명시하는
+      // "M&A 실사"가 트리거엔 하나도 없어 "회사 인수 전에 상대 회사
+      // 재무 상태를 꼼꼼히 실사해줄 사람이 필요해요"가 kbusiness로 샌 게
+      // routing_ABmention_live_smoketest.py batch2 재현에서 확인됨.
+      '기업 실사를 맡기고', '인수 전 재무 실사'],
   },
   'accountant-audit': {
     label: '공인회계사(외부감사)', icon: '📊', category: 'FIN', ownerAgency: 'kfinance',
@@ -412,7 +417,13 @@ export const CORE_REGISTRY = {
     key: 'SP_mental-health-professional', needsMedicalSafety: true, // 2026-07-04: 상동
     // 2026-07-25 신설(주피터 지시) — 인접쌍(정신건강전문요원↔사회복지사) 구분 키워드 그대로 — '정신건강 재활'.
     // '심리상담사'는 clinical-psychologist와 동일 이유로 추가(위 주석 참고).
-    triggers: ['정신건강전문요원', '정신건강 재활', '심리상담사'],
+    triggers: ['정신건강전문요원', '정신건강 재활', '심리상담사',
+      // 2026-09-14 추가 — 상황 표현 보강. "가족이 정신질환으로 치료를
+      // 받고 있는데 지역사회에서 어떤 지원을 받을 수 있는지"가 기존
+      // 트리거와 안 겹쳐 khealth로 샌 게 routing_ABmention_live_
+      // smoketest.py batch2 재현에서 확인됨(social-worker의 2026-08-31
+      // "형편이 어려워졌는데"와 동일 계열 보강).
+      '가족이 정신질환', '지역사회에서 받을 수 있는 지원'],
   },
   // 2026-07-06 신설(SP-EDU-04) — 상담직 3개와 마찬가지로 위기개입 프로토콜(M5)
   // 상속 위해 needsMedicalSafety:true. category는 EDU 유지(복지 상담이 의료
