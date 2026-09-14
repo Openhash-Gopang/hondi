@@ -13309,10 +13309,10 @@ export default {
 
     // ── 부서/기관/사업자 간 업무지시 큐 (2026-07-12 신설, B그룹 대응) ──
     if (pathname === '/gov/dept-task' && request.method === 'POST')
-      return handleDeptTaskCreate(request, env, corsHeaders, { _err, _verifyEd25519, _l1FindProfileByGuid, _l1CreateDeptTask, _l1CreateDeptTaskEvent });
+      return handleDeptTaskCreate(request, env, corsHeaders, { _err, _verifyEd25519, _l1FindProfileByGuid, _l1CreateDeptTask, _l1CreateDeptTaskEvent, _l1RecordDeptTaskPdv });
     if (pathname.startsWith('/gov/dept-task/') && request.method === 'PATCH') {
       const taskId = pathname.replace('/gov/dept-task/', '');
-      return handleDeptTaskUpdate(request, env, corsHeaders, taskId, { _err, _l1UpdateDeptTask, _l1GetDeptTask, _l1CreateDeptTaskEvent });
+      return handleDeptTaskUpdate(request, env, corsHeaders, taskId, { _err, _l1UpdateDeptTask, _l1GetDeptTask, _l1CreateDeptTaskEvent, _l1RecordDeptTaskPdv });
     }
 
     // ── ai-setup (AI 비서 설정) ─────────────────────────────
@@ -21415,7 +21415,7 @@ async function handleBusinessRelay(bodyText, env, corsHeaders, meta = null, ctx 
             targetId: taskPayload.target_id, taskType: taskPayload.task_type, directive: taskPayload.directive,
             payload: taskPayload.payload, originChain: taskPayload.origin_chain || [],
           }, {
-            _l1FindProfileByGuid, _l1CreateDeptTask,
+            _l1FindProfileByGuid, _l1CreateDeptTask, _l1RecordDeptTaskPdv,
             _verifyEd25519, // 2026-07-14 수정(회귀 복구) — async()=>true 스텁 제거
           }, { authoritativeAgency: verifiedOrgId })
         : { ok: false, reason: 'INVALID_JSON' };
@@ -24774,7 +24774,7 @@ async function handleGovTaskSubmit(bodyText, env, corsHeaders) {
           },
           originChain: [],
         }, {
-          _err, _verifyEd25519, _l1FindProfileByGuid, _l1CreateDeptTask, _l1CreateDeptTaskEvent,
+          _err, _verifyEd25519, _l1FindProfileByGuid, _l1CreateDeptTask, _l1CreateDeptTaskEvent, _l1RecordDeptTaskPdv,
         });
         if (deptResult.ok) deptTaskId = deptResult.taskId;
         else console.warn('[GovTaskSubmit] dept_task 생성 실패:', deptResult.reason, deptResult.detail);
@@ -25515,7 +25515,7 @@ async function handleGovRelay(bodyText, env, corsHeaders, meta = null, ctx = nul
             targetId: payload.target_id, taskType: payload.task_type, directive: payload.directive,
             payload: payload.payload, originChain: payload.origin_chain || [],
           }, {
-            _l1FindProfileByGuid, _l1CreateDeptTask,
+            _l1FindProfileByGuid, _l1CreateDeptTask, _l1RecordDeptTaskPdv,
             _verifyEd25519, // 2026-07-14 수정(회귀 복구) — async()=>true 스텁 제거
           }, { authoritativeAgency: verifiedOrgId })
         : { ok: false, reason: 'INVALID_JSON' };
@@ -29155,6 +29155,61 @@ async function _l1CreateDeptTaskEvent(env, { task_id, from_status, to_status, at
     throw new Error(`dept_task_events 생성 실패 (HTTP ${res.status}): ${errText}`);
   }
   return res.json();
+}
+
+// ── dept_task 처리 주체(부서/기관/직원) 측 PDV 기록 (2026-09-14 신설) ──
+// 발견 경위: 2026-08-13 확정 설계원칙 — "기관/부서/직원의 업무 처리도
+// 시민 측(handleGovTaskSubmit)과 동일하게 6하원칙으로 자신의 PDV를 기록해야
+// 한다"(시민 PDV와 대칭적 설계) — 를 dept-task-handler.js(부서 간 내부
+// 업무지시 큐, STAFF_TASK_QUEUE)는 지금까지 반영하지 않고 있었다. 실사
+// 결과 dept_tasks.status 전이 + 선택적 result_note만 남을 뿐, 요청자·대상
+// 어느 쪽도 자신의 PDV 레코드를 쓰지 않아 시민 상담 쪽(AGY_VAULT_STORE→
+// owner_pdv, GOV_TASK→_appendGovTaskReviewEvent)과 달리 이 라인만
+// 비대칭이었다.
+// 새 컬렉션을 만들지 않고 기존 pdv_records를 그대로 쓴다 — GOV_TASK 쪽
+// _appendGovTaskReviewEvent와 동일한 append-only 패턴. domain='work' +
+// affiliation_org_id는 1784700001 마이그레이션이 이미 이 용도(소속이
+// 인증된 사람만 조회 가능 — worker.js _isAuthorizedForWorkDomain)로 설계해
+// 둔 필드를 그대로 쓴다 — 새 접근제어를 만들지 않는다.
+// 카운터파트(상대방) 식별자가 실제 개인(staff)이거나 사업자(business)일
+// 때만 owner_pdv의 §7.2와 동일한 원칙으로 해시한다 — dept/org/national/
+// k-service는 이미 공개된 기관 코드라 해싱 대상이 아니다(오히려 해싱하면
+// Pathfinder 등 후속 분석이 기관 코드를 못 읽게 돼 해가 된다).
+const _DEPT_TASK_PII_COUNTERPART_TYPES = new Set(['staff', 'business']);
+
+async function _l1RecordDeptTaskPdv(env, { actorType, actorId, counterpartType, counterpartId, taskId, what, how, why }) {
+  try {
+    let counterpartRef = counterpartId || null;
+    if (counterpartId && _DEPT_TASK_PII_COUNTERPART_TYPES.has(counterpartType)) {
+      // owner_pdv의 _ownerPdvWhoHash와 동일한 유도 방식(마스터키+용도별
+      // 접두어)이지만, 별도 salt 네임스페이스(actor별로 파생)를 써서
+      // owner_pdv 쪽 salt와 섞이지 않게 한다.
+      const salt = await _sha256Hex(`${_requireMasterKey(env)}:dept-task-counterpart-salt:${actorId}`);
+      counterpartRef = await _sha256Hex(`${counterpartId}:${salt}`);
+    }
+    const now = new Date().toISOString();
+    const summary6w = {
+      who: actorId, when: now, where: `${counterpartType}:${counterpartRef || 'unknown'}`,
+      what, how, why,
+      dept_task: { actor_type: actorType, counterpart_type: counterpartType, task_id: taskId },
+    };
+    const pdvReportId = `depttask:${actorId}:${taskId}:${Date.now()}`;
+    const res = await fetch(`${L1_DEFAULT}/api/collections/pdv_records/records`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        guid: actorId, report_id: pdvReportId, reporter_svc: actorId, svc: actorId,
+        type: 'dept_task_activity', summary: String(what || '').slice(0, 200),
+        summary_6w: JSON.stringify(summary6w),
+        block_hash: null, risk_level: 'low', source: actorId, openhash_anchored: false,
+        domain: 'work', affiliation_org_id: actorId,
+      }),
+    });
+    return res.ok;
+  } catch (e) {
+    console.warn('[DeptTaskPDV] 기록 실패(무시):', e.message);
+    return false;
+  }
 }
 
 // (2026-07-15 삭제 — _searchEntitiesRaw. 유일한 실 검색 경로는 이미

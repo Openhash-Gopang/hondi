@@ -430,7 +430,7 @@ async function createDeptTaskCore(env, params, deps, opts = {}) {
     originChain = [], pubkey = null, signature = null,
   } = params;
   const { authoritativeAgency = null } = opts;
-  const { _verifyEd25519, _l1FindProfileByGuid, _l1CreateDeptTask, _l1CreateDeptTaskEvent } = deps;
+  const { _verifyEd25519, _l1FindProfileByGuid, _l1CreateDeptTask, _l1CreateDeptTaskEvent, _l1RecordDeptTaskPdv } = deps;
 
   if (!requesterType || !requesterId) return { ok: false, reason: 'MISSING_FIELD', httpStatus: 400, detail: 'requester_type/requester_id 필수' };
   if (!targetType || !targetId)       return { ok: false, reason: 'MISSING_FIELD', httpStatus: 400, detail: 'target_type/target_id 필수' };
@@ -484,6 +484,22 @@ async function createDeptTaskCore(env, params, deps, opts = {}) {
     } catch (e) { console.warn('[pathfinder] event log failed', e); }
   }
 
+  // 요청자 측 자기 PDV 기록(결함 A 조치, 2026-09-14 신설) — "나(requester)는
+  // target에게 이 업무를 지시했다"는 요청자 자신의 6하원칙 기록. 대상
+  // (target) 측 기록은 아직 target이 아무 행위도 안 한 시점이라 여기서
+  // 같이 남기지 않는다 — target의 PDV는 handleDeptTaskUpdate가 실제 상태
+  // 전이 시점에 별도로 남긴다(시민 PDV의 "접수 시점 기록/이후 이벤트 기록"
+  // 분리와 동일 원칙). 실패해도 본 흐름(dept_task 생성)은 막지 않는다.
+  if (_l1RecordDeptTaskPdv) {
+    try {
+      await _l1RecordDeptTaskPdv(env, {
+        actorType: requesterType, actorId: requesterId,
+        counterpartType: targetType, counterpartId: targetId,
+        taskId: record.id, what: directive, how: taskType, why: '업무지시',
+      });
+    } catch (e) { console.warn('[DeptTaskPDV] 요청자 측 기록 실패(무시):', e.message); }
+  }
+
   return { ok: true, taskId: record.id, status: 'requested' };
 }
 
@@ -516,7 +532,7 @@ async function handleDeptTaskCreate(request, env, corsHeaders, deps) {
  * "안 하는 일" 원칙을 코드로도 강제한다.
  */
 async function handleDeptTaskUpdate(request, env, corsHeaders, taskId, deps) {
-  const { _err, _l1UpdateDeptTask, _l1GetDeptTask, _l1CreateDeptTaskEvent } = deps;
+  const { _err, _l1UpdateDeptTask, _l1GetDeptTask, _l1CreateDeptTaskEvent, _l1RecordDeptTaskPdv } = deps;
   let body;
   try { body = await request.json(); } catch {
     return _err(400, 'INVALID_JSON', '요청 본문이 올바르지 않습니다.', corsHeaders);
@@ -527,10 +543,14 @@ async function handleDeptTaskUpdate(request, env, corsHeaders, taskId, deps) {
 
   // Pathfinder 계측(2026-08-13 신설) — PATCH 전에 현재 status를 읽어 from_status로 쓴다.
   // 조회 실패해도 본 흐름은 계속(from_status만 null로 기록됨).
+  // ★ 2026-09-14 — before를 이 if-블록 밖으로 끌어올렸다(기존엔 지역
+  // 변수였음). 아래 PDV 기록(결함 A 조치)이 requester_type/id·directive를
+  // 다시 조회하지 않고 이 한 번의 fetch 결과를 그대로 재사용하기 위함.
   let fromStatus = null;
+  let before = null;
   if (_l1GetDeptTask) {
     try {
-      const before = await _l1GetDeptTask(env, taskId);
+      before = await _l1GetDeptTask(env, taskId);
       fromStatus = before?.status || null;
     } catch { /* 무시 */ }
   }
@@ -549,6 +569,22 @@ async function handleDeptTaskUpdate(request, env, corsHeaders, taskId, deps) {
         task_id: taskId, from_status: fromStatus, to_status: status, at: new Date().toISOString(),
       });
     } catch (e) { console.warn('[pathfinder] event log failed', e); }
+  }
+
+  // 대상(target) 측 자기 PDV 기록(결함 A 조치, 2026-09-14 신설) — "나
+  // (target)는 requester로부터 받은 이 업무를 status로 처리했다"는 대상
+  // 자신의 6하원칙 기록. before(위에서 이미 조회한 원본 레코드)가 있어야만
+  // requester_type/id·directive를 알 수 있으므로, before 조회 자체가
+  // 실패했던 경우(위 catch)엔 조용히 건너뛴다 — 상태 전이 자체는 이미
+  // 성공했으므로 응답을 막지 않는다.
+  if (_l1RecordDeptTaskPdv && before) {
+    try {
+      await _l1RecordDeptTaskPdv(env, {
+        actorType: before.target_type, actorId: before.target_id,
+        counterpartType: before.requester_type, counterpartId: before.requester_id,
+        taskId, what: result_note || before.directive || '', how: status, why: '업무 처리',
+      });
+    } catch (e) { console.warn('[DeptTaskPDV] 대상 측 기록 실패(무시):', e.message); }
   }
 
   return new Response(JSON.stringify({ ok: true, task_id: taskId, status }),
