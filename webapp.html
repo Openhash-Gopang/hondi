@@ -3399,6 +3399,13 @@ window.closePDV = closePDV;
   let _panelGenerating  = false;
   let _panelAbortCtl    = null;
   let _panelUserAborted = false;
+  // BUG-FIX(2026-09-14) — 아래 _callPanelAI 안의 "진행 예고 문구는 있으나
+  // 태그가 전혀 없음" 자동 재촉이 반복 호출로 서로를 부르는 걸 막는 상한.
+  // call-ai.js의 _tagOmissionNudgeCount와 동일한 이유·동일한 스코프
+  // (탭 새로고침 시 리셋)로 패널 쪽에도 별도 카운터를 둔다 — 패널은
+  // call-ai.js와 완전히 별개 구현이라 그 카운터를 공유하지 않는다.
+  let _panelTagOmissionNudgeCount = 0;
+  const _PANEL_TAG_OMISSION_NUDGE_MAX = 1;
 
   // ── PDV 누적량 → AI 버튼 색상 (2026-07-07 신설) ──────────────────
   // "데이터가 많을수록 AI가 사용자를 더 정확히 대신할 수 있다"는 것을
@@ -4841,6 +4848,50 @@ window.closePDV = closePDV;
         // ── GWP/SEARCH/OPEN_PROFILE/P2P_INVITE 태그 실행 (2026-07-02 신설) ──
         try { _parseAgentTags(full, null, userText, _preTab); }
         catch (e) { console.warn('[Panel] _parseAgentTags 처리 실패(무시):', e.message); }
+
+        // ── 진단 → 자동복구 (2026-09-14, call-ai.js와 동일 원칙) ──────
+        // 오늘 재현된 사례("애월읍에서 가까운 행정복지센터를 찾아줘" →
+        // "...찾아드릴게요. 잠시만요."에서 정지, 이 패널 화면)의 실제
+        // 원인 후보 — 위 오케스트레이션·leaf 태그 핸들러들과 그 아래
+        // _parseAgentTags까지 전부 거쳤는데도 아무 태그도 감지되지
+        // 않았다는 건, 모델이 진행 예고 문장만 내고 기계용 태그를 하나도
+        // 안 냈을 가능성이 높다는 뜻이다(call-ai.js 쪽 동일 결함 참고 —
+        // 이 패널은 그쪽과 별개 구현이라 자체적으로 고쳐야 한다). 한 번은
+        // 자동으로 재촉해 실제로 복구를 시도한다(무한루프 방지 상한 있음).
+        if (
+          /검색해\s*(서|드리|드릴게요|보겠습니다)|확인해\s*(보겠습니다|드릴게요)|알아보겠습니다|찾아드릴게요|조회해\s*드릴게요|잠시만\s*(요|기다려)/.test(full) &&
+          !/\[[A-Z][A-Z_]{2,}(:|\])/.test(full)
+        ) {
+          _panelTagOmissionNudgeCount += 1;
+          console.warn(
+            `[Panel][Diag→Recovery] 진행 예고 문구는 있으나 실행 가능한 태그가 전혀 없음 ` +
+            `(시도 ${_panelTagOmissionNudgeCount}/${_PANEL_TAG_OMISSION_NUDGE_MAX}) — SP가 태그를 빠뜨렸을 가능성:`,
+            full
+          );
+          if (_panelTagOmissionNudgeCount <= _PANEL_TAG_OMISSION_NUDGE_MAX) {
+            const _nudgeBubble = _appendPanelMsg('ai', '…');
+            _nudgeBubble.classList.add('streaming');
+            try {
+              await _callPanelAI(
+                `[INTERNAL: 방금 응답("${full.slice(0, 120)}")에서 확인·검색·조회 등을 ` +
+                `진행하겠다고 예고했지만, 실행 가능한 태그를 하나도 내지 않아 그 작업이 ` +
+                `실제로는 전혀 시작되지 않았습니다. 지금 바로 해당 태그(예: 기관이 §CATALOG에 ` +
+                `있으면 [GWP: id], 표 밖이면 [CALL_KINTENT: query=...], 위치 기반 업체 검색이면 ` +
+                `K-Search 흐름의 [SEARCH]...[/SEARCH])를 내거나, 태그를 낼 수 없는 상황이면 ` +
+                `사용자에게 그 사실을 명확히 알리고 직접 답변을 완결하세요. 원래 사용자 발화: ` +
+                `"${userText}"]`,
+                _nudgeBubble
+              );
+            } catch (e) {
+              console.warn('[Panel][Diag→Recovery] 자동 재촉 호출 실패(무시):', e.message);
+            } finally {
+              _nudgeBubble.classList.remove('streaming');
+            }
+            return;
+          }
+          console.warn('[Panel][Diag→Recovery] 상한 도달 — 추가 자동 재촉 없이 그대로 종료(무한루프 방지).');
+          _panelTagOmissionNudgeCount = 0;
+        }
 
         // ── EXPERT 태그 감지 → 전문가 페르소나 새 탭 오픈 ──────────
         // (2026-08-06 정정) 예전 isExpertActive() 가드는 항상 false를
