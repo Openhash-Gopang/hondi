@@ -929,8 +929,14 @@ export const PROFESSOR_REGISTRY = {
     triggers: [],
   },
   'professor-misc-series': {
-    label: '교수(기타 N.C.E 중계열)', icon: '🎓', category: 'EDU', ownerAgency: 'kedu',
+    label: '교수(기타 N.C.E 중계열, 교양자연과학·진로교육·기술가정 등 포함)', icon: '🎓', category: 'EDU', ownerAgency: 'kedu',
     key: 'SP_professor-misc-series', needsMedicalSafety: false,
+    // 2026-09-14 추가 — "기타"라는 라벨만으론 실제로 뭐가 들어있는지
+    // 전혀 짐작이 안 돼, "자연과학 전반을 교양 수준으로 폭넓게 배우고
+    // 싶다"(→ professor-generalscience가 바로 여기 있음)처럼 명확한
+    // 요청도 후보 중 아무 데도 안 맞는다고 판단해 최상위에서
+    // "해당없음"으로 떨어지는 게 subject_gate_live_smoketest.py
+    // 재작성 후 gapfill 재현(professor-gap-27)에서 확인됨.
     parentKey: 'professor',
     triggers: [],
   },

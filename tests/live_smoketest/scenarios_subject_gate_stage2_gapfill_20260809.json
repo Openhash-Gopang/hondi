@@ -80,15 +80,15 @@
     "id": "professor-gap-01-gapfill",
     "root_id": "professor",
     "utterance": "재료공학 전공인데 신소재 연구 관련 논문 지도를 받고 싶어요",
-    "expected_leaf_id": "professor-materials",
-    "category": "정상경로(3단 트리 리프 — professor→materials-series→materials) [갭필 배치, 2026-08-09 커버리지 보강, series당 1개 대표 리프]"
+    "expected_leaf_id": "professor-newmaterials",
+    "category": "정상경로(3단 트리 리프 — professor→materials-series→materials) [갭필 배치, 2026-08-09 커버리지 보강, series당 1개 대표 리프] [2026-09-14: 2026-08-09 작성 당시엔 이 더 세부적인 리프가 아직 없어 상위로 기대했으나, 이후 리프 신설로 기대값을 더 구체적인 리프로 갱신]"
   },
   {
     "id": "professor-gap-02-gapfill",
     "root_id": "professor",
     "utterance": "거시경제학 이론을 체계적으로, 경제학 관점에서 깊이 배우고 싶어요",
-    "expected_leaf_id": "professor-economics",
-    "category": "정상경로(3단 트리 리프 — business-economics→economics) [갭필 배치, 2026-08-09 커버리지 보강, series당 1개 대표 리프]"
+    "expected_leaf_id": "professor-macroeconomics",
+    "category": "정상경로(3단 트리 리프 — business-economics→economics) [갭필 배치, 2026-08-09 커버리지 보강, series당 1개 대표 리프] [2026-09-14: 2026-08-09 작성 당시엔 이 더 세부적인 리프가 아직 없어 상위로 기대했으나, 이후 리프 신설로 기대값을 더 구체적인 리프로 갱신]"
   },
   {
     "id": "professor-gap-03-gapfill",
@@ -101,8 +101,8 @@
     "id": "professor-gap-04-gapfill",
     "root_id": "professor",
     "utterance": "한국 근현대사를 깊이 있게, 역사학적 방법론으로 공부하고 싶어요",
-    "expected_leaf_id": "professor-history",
-    "category": "정상경로(3단 트리 리프 — humanities→history) [갭필 배치, 2026-08-09 커버리지 보강, series당 1개 대표 리프]"
+    "expected_leaf_id": "professor-koreanhistory",
+    "category": "정상경로(3단 트리 리프 — humanities→history) [갭필 배치, 2026-08-09 커버리지 보강, series당 1개 대표 리프] [2026-09-14: 2026-08-09 작성 당시엔 이 더 세부적인 리프가 아직 없어 상위로 기대했으나, 이후 리프 신설로 기대값을 더 구체적인 리프로 갱신]"
   },
   {
     "id": "professor-gap-05-gapfill",
@@ -115,22 +115,22 @@
     "id": "professor-gap-06-gapfill",
     "root_id": "professor",
     "utterance": "양자역학 개념이 너무 어려운데 물리학 전공 수준으로 이해하고 싶어요",
-    "expected_leaf_id": "professor-physics",
-    "category": "정상경로(3단 트리 리프 — mathphys→physics) [갭필 배치, 2026-08-09 커버리지 보강, series당 1개 대표 리프]"
+    "expected_leaf_id": "professor-quantummechanics",
+    "category": "정상경로(3단 트리 리프 — mathphys→physics) [갭필 배치, 2026-08-09 커버리지 보강, series당 1개 대표 리프] [2026-09-14: 2026-08-09 작성 당시엔 이 더 세부적인 리프가 아직 없어 상위로 기대했으나, 이후 리프 신설로 기대값을 더 구체적인 리프로 갱신]"
   },
   {
     "id": "professor-gap-07-gapfill",
     "root_id": "professor",
     "utterance": "분자생물학 실험 설계를 생명과학 관점에서 지도받고 싶어요",
-    "expected_leaf_id": "professor-biology",
-    "category": "정상경로(3단 트리 리프 — chembio→biology) [갭필 배치, 2026-08-09 커버리지 보강, series당 1개 대표 리프]"
+    "expected_leaf_id": "professor-molecularbiology",
+    "category": "정상경로(3단 트리 리프 — chembio→biology) [갭필 배치, 2026-08-09 커버리지 보강, series당 1개 대표 리프] [2026-09-14: 2026-08-09 작성 당시엔 이 더 세부적인 리프가 아직 없어 상위로 기대했으나, 이후 리프 신설로 기대값을 더 구체적인 리프로 갱신]"
   },
   {
     "id": "professor-gap-08-gapfill",
     "root_id": "professor",
     "utterance": "자료구조랑 알고리즘을 전산학 커리큘럼 수준으로 체계적으로 배우고 싶어요",
-    "expected_leaf_id": "professor-computerscience",
-    "category": "정상경로(3단 트리 리프 — electrical-computer→computerscience) [갭필 배치, 2026-08-09 커버리지 보강, series당 1개 대표 리프]"
+    "expected_leaf_id": "professor-datastructures",
+    "category": "정상경로(3단 트리 리프 — electrical-computer→computerscience) [갭필 배치, 2026-08-09 커버리지 보강, series당 1개 대표 리프] [2026-09-14: 2026-08-09 작성 당시엔 이 더 세부적인 리프가 아직 없어 상위로 기대했으나, 이후 리프 신설로 기대값을 더 구체적인 리프로 갱신]"
   },
   {
     "id": "professor-gap-09-gapfill",

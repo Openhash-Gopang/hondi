@@ -106,10 +106,11 @@ def call_deepseek(api_key, system_prompt, user_utterance):
     payload = {
         "model": MODEL,
         "temperature": 0,
-        "max_tokens": 1500,  # subject-gate.js와 동일 값(계층형 전환 후에도
-        # 단계당 후보가 최악 케이스 30개 미만이라 1500이면 충분한 여유 —
-        # 예전 flat 308개 시절과 달리 이제 이 값을 낮출 여지도 있지만,
-        # subject-gate.js가 아직 1500이므로 그대로 맞춘다.
+        "max_tokens": 4000,  # subject-gate.js와 동일 값. 2026-09-14
+        # 1500→4000 재상향 — 계층형 전환 후에도 deepseek-v4-flash가 특정
+        # 발화에서 후보 수와 무관하게 reasoning에 4600~5900자를 쓰는
+        # 사례가 gapfill 배치 재검증에서 6건 재현됨(1500 전량 소진 →
+        # finish_reason=length → 빈 응답).
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_utterance[:2000]},

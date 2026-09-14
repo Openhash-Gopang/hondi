@@ -133,9 +133,15 @@ function _gateOneLevel(personaId, candidates, userText) {
           // 2026-08-09 수정(60→1000), 2026-08-10 재상향(1000→1500) — flat
           // 162후보 시절 실사로 굳어진 값. 계층형 전환으로 단계당 후보 수가
           // 크게 줄었으니(대부분 4~14개) 이론상 더 낮춰도 되지만, 실사
-          // 재검증 전까지는 보수적으로 유지한다 — 낮췄다가 또 빈 응답이
-          // 재발하는 걸 이전 세션에서 이미 3차례 겪었다(§1-1).
-          max_tokens:  1500,
+          // 2026-09-14 재상향(1500→4000) — 계층형 전환으로 후보 수는 줄었지만,
+          // deepseek-v4-flash(reasoning 모델)가 후보 수와 무관하게 특정 발화에서
+          // 4600~5900자(추정 3000토큰 안팎)까지 reasoning_content를 쓰는 경우가
+          // subject_gate_live_smoketest.py 재검증(gapfill 배치)에서 6건 재현됨 —
+          // max_tokens 1500 전량이 reasoning에 소진돼 최종 답변 없이
+          // finish_reason=length로 끝났다(에러가 아니라 조용히 상위
+          // personaId로 폴백되므로 겉으로는 "그냥 좀 덜 정밀하게 라우팅됨"
+          // 정도로만 보여 오래 안 잡혔을 가능성). 4000으로 올려 재검증할 것.
+          max_tokens:  4000,
           temperature: 0.0,
           stream:      false,
           messages: [
