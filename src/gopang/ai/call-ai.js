@@ -32,6 +32,7 @@ import { _gwpLaunch } from '../gwp/engine.js';
 import { handleExpertTag, _composeExpertPrompt } from './expert-session.js';
 import { getExpertDef, resolveExpertId, EXPERT_REGISTRY } from './expert-registry.js';
 import { buildHondiFaqContext } from './hondi-faq-router.js';
+import { buildGoalPathContext } from './goal-path-router.js';
 import { buildRoutingHintPart } from './routing-hint.js';
 import { findFreshCredential } from '../idv/idv-store.js';
 
@@ -3884,6 +3885,11 @@ async function _buildEnhancedUserContent(userContent) {
     ? userContent
     : (Array.isArray(userContent) ? (userContent.find(c => c.type === 'text')?.text || '') : '');
   const faqBlock = await buildHondiFaqContext(plainText);
+  // GOAL-PATH(2026-09-15 신설) — hondi-faq-router.js와 완전히 동일한
+  // "키워드 매칭 → 이번 턴 user 메시지에만 주입" 패턴. 차이는 정적 파일이
+  // 아니라 goal_path_current(인간 승인을 거친 경로)를 매번 fetch한다는 것
+  // — 자세한 설계 근거는 goal-path-router.js 상단 주석 참조.
+  const goalPathBlock = await buildGoalPathContext(plainText);
 
   // 3단계(2026-07-09) — 처분성/기관 신호가 감지된 턴에만 UNIVERSAL-
   // INTEGRITY를 이번 턴의 user 메시지에만 끼워 넣는다(system prefix는
@@ -3923,9 +3929,9 @@ async function _buildEnhancedUserContent(userContent) {
     console.warn('[RoutingHint] 통합 지점에서 실패(무시):', e.message);
   }
 
-  if (!parts.length && !firstContact && !faqBlock && !integrityBlock && !shareBlock && !pdvReviewBlock && !jobKscoReviewBlock && !paHandoffBlock) return userContent;
+  if (!parts.length && !firstContact && !faqBlock && !goalPathBlock && !integrityBlock && !shareBlock && !pdvReviewBlock && !jobKscoReviewBlock && !paHandoffBlock) return userContent;
 
-  const ctxBlock = integrityBlock + shareBlock + pdvReviewBlock + jobKscoReviewBlock + paHandoffBlock + firstContact + faqBlock + (parts.length ? `[ctx]\n${parts.join('\n')}\n\n` : '');
+  const ctxBlock = integrityBlock + shareBlock + pdvReviewBlock + jobKscoReviewBlock + paHandoffBlock + firstContact + faqBlock + goalPathBlock + (parts.length ? `[ctx]\n${parts.join('\n')}\n\n` : '');
 
   // multipart(이미지 포함) 메시지 처리
   if (Array.isArray(userContent)) {

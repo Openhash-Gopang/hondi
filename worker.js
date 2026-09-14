@@ -5682,6 +5682,374 @@ async function _interceptAgyVaultStore(env, dataObj, guid, ctx) {
   return dataObj;
 }
 
+// ══════════════════════════════════════════════════════════════════
+// 다기관 목표 경로 갱신 파이프라인 (2026-09-15 신설)
+// "기관/부서/직책 간 업무 흐름의 최적 경로를 수시로 갱신할 방안" —
+// 모든 도메인(금전 포함)에 적용하되, 안전장치는 "위험 도메인 제외"가
+// 아니라 "새 경로는 자기검증(SP-PATH-VERIFIER) 통과 후에도 반드시 인간
+// 관리자 승인을 거쳐야만 goal_path_current(실제 사용되는 경로)에
+// 반영된다"는 2단계 게이트다(주피터 지시, 2026-09-15).
+//
+// 흐름: goal_path_traces(원재료, 모든 SP가 기록 가능) → 10분 스윕이
+// 집계해 goal_path_candidates 생성(pending_verification) →
+// SP-PATH-VERIFIER가 검증(기각 가능, 승인 불가) →
+// pending_admin_review → 인간 관리자가 /admin/goal-path.html(가칭,
+// 이 저장소 범위 밖 — 지금은 API만) 등에서 승인/반려 →
+// 승인 시에만 goal_path_current 갱신. K-Compose 소비 쪽은
+// src/gopang/ai/goal-path-router.js 참고.
+// ══════════════════════════════════════════════════════════════════
+
+// ── GOAL_TRACE_STEP 인터셉트 ─────────────────────────────────────
+// _interceptAgyVaultStore와 같은 자리·같은 구조를 재사용한다. 아직 어떤
+// SP 프롬프트도 이 태그를 내보내라는 지시를 받지 않았다 — 이 함수는
+// "태그가 나타나면 파싱해서 저장할 준비"다. (참고: 이전 세션에서 한 번
+// 이 컬렉션을 만들었다가 설계 재검토로 되돌렸었다 — 이번엔 goal_path_
+// candidates·goal_path_current까지 포함한 전체 파이프라인으로 다시
+// 만든다.)
+async function _interceptGoalPathTrace(env, dataObj, guid, ctx) {
+  const content = dataObj?.choices?.[0]?.message?.content;
+  const match = typeof content === 'string'
+    ? content.match(/\[GOAL_TRACE_STEP:([\s\S]*?)\]/)
+    : null;
+  if (!match) return dataObj;
+
+  const fields = _parseAgyVaultStoreTag(match[1]); // 필드=값 파싱 문법이 AGY_VAULT_STORE와 동일해 재사용
+  if (fields?.goal_id && fields?.agency_id) {
+    const writeTask = (async () => {
+      const guidHash = guid ? await _sha256Hex(`${_requireMasterKey(env)}:goal-path-trace:${guid}`) : null;
+      const token = await _l1AdminToken(env);
+      const res = await fetch(`${L1_DEFAULT}/api/collections/goal_path_traces/records`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          goal_id: fields.goal_id, trace_id: fields.trace_id || fields.when || String(Date.now()),
+          guid_hash: guidHash, agency_id: fields.agency_id,
+          step_index: fields.step_index ? Number(fields.step_index) : null,
+          outcome: ['success', 'rejected', 'skipped', 'retry'].includes(fields.outcome) ? fields.outcome : 'success',
+          note: (fields.note || fields.why || '').slice(0, 500),
+        }),
+      });
+      if (!res.ok) throw new Error(`goal_path_traces 저장 실패 HTTP ${res.status}`);
+    })().catch(e => console.warn('[GoalPathTrace] 기록 실패(응답 흐름은 계속 진행):', e.message));
+    if (ctx?.waitUntil) ctx.waitUntil(writeTask); else writeTask.catch(() => {});
+  } else {
+    console.warn('[GoalPathTrace] 태그 파싱 실패 또는 필수 필드(goal_id/agency_id) 없음:', match[1].slice(0, 200));
+  }
+  dataObj.choices[0].message.content = content.replace(/\[GOAL_TRACE_STEP:[\s\S]*?\]/, '').trim();
+  return dataObj;
+}
+
+// ── GET /goal-path/lookup?goal_id=... — goal-path-router.js(클라이언트) 전용 ──
+// 승인된 경로가 없으면 404(정상 케이스 — 신규 목표는 아직 없는 게 당연함,
+// 클라이언트는 이를 에러가 아니라 "아직 없음"으로 조용히 처리한다).
+async function handleGoalPathLookup(request, env, corsHeaders) {
+  const goalId = new URL(request.url).searchParams.get('goal_id') || '';
+  if (!goalId) return _err(400, 'MISSING_FIELD', 'goal_id 필수', corsHeaders);
+  try {
+    const token = await _l1AdminToken(env);
+    const filter = encodeURIComponent(`goal_id='${goalId.replace(/'/g, "\\'")}'`);
+    const res = await fetch(`${L1_DEFAULT}/api/collections/goal_path_current/records?filter=${filter}&perPage=1`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (!res.ok) return _err(502, 'L1_ERROR', 'goal_path_current 조회 실패', corsHeaders);
+    const data = await res.json().catch(() => ({ items: [] }));
+    const rec = data.items?.[0];
+    if (!rec) return new Response(JSON.stringify({ error: 'NOT_FOUND' }), { status: 404, headers: corsHeaders });
+    return new Response(JSON.stringify({
+      goal_id: rec.goal_id, recommended_sequence: rec.recommended_sequence,
+      confidence_score: rec.confidence_score, sample_size: rec.sample_size,
+    }), { headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'L1_UNREACHABLE', e.message, corsHeaders);
+  }
+}
+
+async function _l1CreateGoalPathCandidate(env, record) {
+  const token = await _l1AdminToken(env);
+  const res = await fetch(`${L1_DEFAULT}/api/collections/goal_path_candidates/records`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(record),
+  });
+  if (!res.ok) throw new Error(`goal_path_candidates 생성 실패 (HTTP ${res.status})`);
+  return res.json();
+}
+
+async function _l1UpdateGoalPathCandidate(env, id, patch) {
+  const token = await _l1AdminToken(env);
+  const res = await fetch(`${L1_DEFAULT}/api/collections/goal_path_candidates/records/${id}`, {
+    method: 'PATCH',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(patch),
+  });
+  if (!res.ok) throw new Error(`goal_path_candidates 갱신 실패 (HTTP ${res.status})`);
+  return res.json();
+}
+
+// ── 10분 주기 스윕: goal_path_traces 집계 → 후보 생성 ────────────────
+// 기존 usage 기타 스윕과 동일한 자리에 얹는다(worker.js 하단 scheduled
+// 핸들러). "새 경로"의 정의: 같은 goal_id의 최근 trace들을 trace_id별로
+// 묶어 실제 밟은 순서(step_index 순 agency_id 나열)를 만들고, 그 순서
+// 패턴별 성공률·표본수를 집계한다. 표본이 goal_path_current(있으면)와
+// 다른 패턴이면서 표본 수가 최소 임계치 이상이면 후보로 등록한다.
+// ★ 이 함수는 절대 goal_path_current를 쓰지 않는다 — 후보만 만든다.
+async function _runGoalPathSweep(env, ctx) {
+  const token = await _l1AdminToken(env);
+  // 최근 처리분 이후만 보고 싶지만, 이 컬렉션엔 아직 "마지막 스윕 시점"을
+  // 추적하는 별도 run 레코드가 없다(스윕 자체가 멱등적으로 재집계해도
+  // 무해하므로 — 후보 생성은 goal_id+sequence 조합 기준 중복 방지를
+  // 아래에서 별도 처리) — 단순화를 위해 최근 30일 전체를 매번 재집계한다.
+  const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString().replace('T', ' ').slice(0, 19);
+  const res = await fetch(
+    `${L1_DEFAULT}/api/collections/goal_path_traces/records?filter=${encodeURIComponent(`created>='${since}'`)}&perPage=500&sort=goal_id,trace_id,step_index`,
+    { headers: { 'Authorization': `Bearer ${token}` } },
+  );
+  if (!res.ok) throw new Error(`goal_path_traces 조회 실패 (HTTP ${res.status})`);
+  const data = await res.json().catch(() => ({ items: [] }));
+  const traces = data.items || [];
+  if (!traces.length) return { status: 'no_traces' };
+
+  // goal_id → trace_id → step_index 순 agency_id 배열로 묶는다
+  const byGoal = {};
+  for (const t of traces) {
+    byGoal[t.goal_id] = byGoal[t.goal_id] || {};
+    byGoal[t.goal_id][t.trace_id] = byGoal[t.goal_id][t.trace_id] || [];
+    byGoal[t.goal_id][t.trace_id].push(t);
+  }
+
+  const MIN_SAMPLE = 5; // 이 미만이면 "우연"과 구분 불가 — 후보로 올리지 않는다(§SP-PATH-VERIFIER §2-1과 별개의, 후보 생성 자체의 최소 문턱)
+  let created = 0;
+  for (const [goalId, byTrace] of Object.entries(byGoal)) {
+    const sequences = {}; // JSON 문자열 순서 → { count, successCount }
+    for (const steps of Object.values(byTrace)) {
+      const ordered = steps.sort((a, b) => (a.step_index || 0) - (b.step_index || 0));
+      const seqKey = JSON.stringify(ordered.map(s => s.agency_id));
+      const allSuccess = ordered.every(s => s.outcome === 'success');
+      sequences[seqKey] = sequences[seqKey] || { count: 0, successCount: 0, steps: ordered };
+      sequences[seqKey].count += 1;
+      if (allSuccess) sequences[seqKey].successCount += 1;
+    }
+    // 표본이 가장 많은 패턴을 후보로 — 여러 goal_id 반복 실행 시 매번
+    // 새 후보를 만들지 않도록, 이미 동일 seqKey로 pending 상태인 후보가
+    // 있으면 건너뛴다(중복 방지).
+    const best = Object.entries(sequences).sort((a, b) => b[1].count - a[1].count)[0];
+    if (!best || best[1].count < MIN_SAMPLE) continue;
+    const [seqKey, stat] = best;
+
+    const existingFilter = encodeURIComponent(`goal_id='${goalId.replace(/'/g, "\\'")}' && status='pending_verification'`);
+    const existingRes = await fetch(`${L1_DEFAULT}/api/collections/goal_path_candidates/records?filter=${existingFilter}&perPage=1`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    const existingData = await existingRes.json().catch(() => ({ items: [] }));
+    if (existingData.items?.length) continue; // 이미 검증 대기 중인 후보가 있으면 새로 안 만듦(중복 방지)
+
+    const proposedSequence = JSON.stringify(
+      JSON.parse(seqKey).map(agencyId => ({ agency_id: agencyId }))
+    );
+    const successRate = stat.count ? (stat.successCount / stat.count) : 0;
+    await _l1CreateGoalPathCandidate(env, {
+      goal_id: goalId,
+      proposed_sequence: proposedSequence,
+      basis_summary: `최근 30일 trace_id ${stat.count}건 중 이 순서로 실행됨, ` +
+        `성공률 ${(successRate * 100).toFixed(0)}%.`,
+      sample_size: stat.count,
+      status: 'pending_verification',
+    }).catch(e => console.error('[GoalPathSweep] 후보 생성 실패:', goalId, e.message));
+    created++;
+  }
+  return { status: 'ok', candidates_created: created };
+}
+
+// ── SP-PATH-VERIFIER 실행 — 방금 생성된 pending_verification 후보를 검증 ──
+async function _runGoalPathVerification(env, ctx) {
+  const token = await _l1AdminToken(env);
+  const res = await fetch(
+    `${L1_DEFAULT}/api/collections/goal_path_candidates/records?filter=${encodeURIComponent("status='pending_verification'")}&perPage=20`,
+    { headers: { 'Authorization': `Bearer ${token}` } },
+  );
+  if (!res.ok) throw new Error(`goal_path_candidates 조회 실패 (HTTP ${res.status})`);
+  const data = await res.json().catch(() => ({ items: [] }));
+  const candidates = data.items || [];
+  if (!candidates.length) return { status: 'no_pending' };
+
+  const manifestRes = await fetch(`https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO_NAME}/main/prompts/sp-catalog.json`, { cache: 'no-cache' });
+  const manifest = await manifestRes.json();
+  const verifierFile = manifest['SP-PATH-VERIFIER'];
+  if (!verifierFile) throw new Error('manifest에 SP-PATH-VERIFIER 키 없음');
+  const verifierSP = await fetch(`https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO_NAME}/main/prompts/${verifierFile}`, { cache: 'no-cache' }).then(r => r.text());
+
+  let verified = 0;
+  for (const c of candidates) {
+    try {
+      // 현재 승인된 경로(있으면) + 대응 GOAL-PLAYBOOK(있으면)을 함께 준다
+      const curFilter = encodeURIComponent(`goal_id='${c.goal_id.replace(/'/g, "\\'")}'`);
+      const curRes = await fetch(`${L1_DEFAULT}/api/collections/goal_path_current/records?filter=${curFilter}&perPage=1`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      const curData = await curRes.json().catch(() => ({ items: [] }));
+      const current = curData.items?.[0] || null;
+
+      let playbookText = '(해당 GOAL-PLAYBOOK 없음)';
+      try {
+        const pbRes = await fetch(`https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO_NAME}/main/prompts/GOAL-PLAYBOOKS/${c.goal_id}_v0_1.md`, { cache: 'no-cache' });
+        if (pbRes.ok) playbookText = await pbRes.text();
+      } catch (e) { /* 플레이북 없어도 검증은 계속 진행 */ }
+
+      const userMsg = `── 검증 대상 후보 ──
+goal_id: ${c.goal_id}
+proposed_sequence: ${c.proposed_sequence}
+basis_summary: ${c.basis_summary}
+sample_size: ${c.sample_size}
+
+── 현재 승인된 경로(있으면) ──
+${current ? current.recommended_sequence : '(아직 승인된 경로 없음 — 이 목표의 첫 후보)'}
+
+── 대응 GOAL-PLAYBOOK(있으면, 하드 제약 대조용) ──
+${playbookText.slice(0, 8000)}
+
+SP-PATH-VERIFIER §2~3 기준으로 이 후보를 검증해 주세요. §3 형식의 JSON
+객체 하나만 답하십시오: {"verdict":"verification_failed|pending_admin_review",
+"verification_report":"...", "verification_confidence":"high|medium|low",
+"needs_special_review":true|false}. JSON 외의 텍스트를 앞뒤에 붙이지 마십시오.`;
+
+      const llmRes = await fetch(DEEPSEEK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${env.DEEPSEEK_API_KEY}` },
+        body: JSON.stringify({
+          model: 'deepseek-v4-flash',
+          messages: [{ role: 'system', content: verifierSP }, { role: 'user', content: userMsg }],
+          max_tokens: 1500, stream: false,
+        }),
+      });
+      if (!llmRes.ok) throw new Error(`DeepSeek 호출 실패 (HTTP ${llmRes.status})`);
+      const llmData = await llmRes.json();
+      const raw = llmData.choices?.[0]?.message?.content || '{}';
+      let verdict;
+      try {
+        const m = raw.match(/\{[\s\S]*\}/);
+        verdict = JSON.parse(m ? m[0] : raw);
+      } catch (e) {
+        // 파싱 실패 — §0-1 원칙(애매하면 인간에게)에 따라 기각이 아니라
+        // 인간 검토로 넘긴다. 확신도는 low로 낮춘다.
+        verdict = { verdict: 'pending_admin_review', verification_report: '검증 모델 출력 파싱 실패 — 원문: ' + raw.slice(0, 500), verification_confidence: 'low', needs_special_review: true };
+      }
+
+      const finalStatus = verdict.verdict === 'verification_failed' ? 'verification_failed' : 'pending_admin_review';
+      await _l1UpdateGoalPathCandidate(env, c.id, {
+        status: finalStatus,
+        verification_report: verdict.verification_report || '',
+        verification_confidence: ['high', 'medium', 'low'].includes(verdict.verification_confidence) ? verdict.verification_confidence : 'low',
+        needs_special_review: !!verdict.needs_special_review,
+      });
+      verified++;
+
+      if (finalStatus === 'pending_admin_review') {
+        await _l1CreateEscalation(env, {
+          to: '@owner', reason: 'goal_path_candidate_review',
+          ref_collection: 'goal_path_candidates', ref_id: c.id,
+          summary: `[GOAL-PATH] "${c.goal_id}" 새 경로 후보가 검증을 통과해 관리자 승인을 기다립니다 ` +
+            `(표본 ${c.sample_size}건${verdict.needs_special_review ? ', 특별검토 필요' : ''}).`.slice(0, 2000),
+          read: false,
+        }).catch(e => console.error('[GoalPathVerify] escalation 생성 실패:', e.message));
+      }
+    } catch (e) {
+      console.error('[GoalPathVerify] 후보 검증 실패(다음 스윕에서 재시도 — pending_verification 유지):', c.id, e.message);
+    }
+  }
+  return { status: 'ok', verified };
+}
+
+// ── 인간 관리자 승인/반려 — goal_path_current를 쓸 수 있는 유일한 경로 ──
+async function handleGoalPathApprove(request, env, corsHeaders) {
+  const admin = await _requireAdmin(request, env);
+  if (!admin) return _err(401, 'UNAUTHORIZED', '관리자 인증이 필요합니다', corsHeaders);
+
+  const body = await request.json().catch(() => null);
+  const candidateId = body?.candidate_id;
+  if (!candidateId) return _err(400, 'MISSING_FIELD', 'candidate_id 필수', corsHeaders);
+
+  try {
+    const token = await _l1AdminToken(env);
+    const candRes = await fetch(`${L1_DEFAULT}/api/collections/goal_path_candidates/records/${candidateId}`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (!candRes.ok) return _err(404, 'NOT_FOUND', '후보를 찾을 수 없습니다', corsHeaders);
+    const cand = await candRes.json();
+    if (cand.status !== 'pending_admin_review') {
+      return _err(409, 'INVALID_STATE', `이 후보는 pending_admin_review 상태가 아닙니다(현재: ${cand.status})`, corsHeaders);
+    }
+
+    // goal_path_current upsert — goal_id 유니크 제약이라 기존 레코드 찾아 갱신, 없으면 생성
+    const curFilter = encodeURIComponent(`goal_id='${cand.goal_id.replace(/'/g, "\\'")}'`);
+    const curRes = await fetch(`${L1_DEFAULT}/api/collections/goal_path_current/records?filter=${curFilter}&perPage=1`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    const curData = await curRes.json().catch(() => ({ items: [] }));
+    const existing = curData.items?.[0] || null;
+
+    const payload = {
+      goal_id: cand.goal_id, recommended_sequence: cand.proposed_sequence,
+      confidence_score: cand.verification_confidence === 'high' ? 0.9 : cand.verification_confidence === 'medium' ? 0.6 : 0.3,
+      sample_size: cand.sample_size, source_candidate_id: cand.id,
+      approved_by: admin.admin, version: (existing?.version || 0) + 1,
+    };
+    const upsertRes = await fetch(
+      existing
+        ? `${L1_DEFAULT}/api/collections/goal_path_current/records/${existing.id}`
+        : `${L1_DEFAULT}/api/collections/goal_path_current/records`,
+      {
+        method: existing ? 'PATCH' : 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      },
+    );
+    if (!upsertRes.ok) throw new Error(`goal_path_current 갱신 실패 (HTTP ${upsertRes.status})`);
+
+    await _l1UpdateGoalPathCandidate(env, candidateId, {
+      status: 'approved', reviewed_by: admin.admin,
+      review_note: body.review_note || '',
+    });
+
+    return new Response(JSON.stringify({ ok: true, goal_id: cand.goal_id, version: payload.version }), { headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'APPROVE_FAILED', e.message, corsHeaders);
+  }
+}
+
+async function handleGoalPathReject(request, env, corsHeaders) {
+  const admin = await _requireAdmin(request, env);
+  if (!admin) return _err(401, 'UNAUTHORIZED', '관리자 인증이 필요합니다', corsHeaders);
+
+  const body = await request.json().catch(() => null);
+  const candidateId = body?.candidate_id;
+  if (!candidateId) return _err(400, 'MISSING_FIELD', 'candidate_id 필수', corsHeaders);
+
+  try {
+    await _l1UpdateGoalPathCandidate(env, candidateId, {
+      status: 'rejected', reviewed_by: admin.admin, review_note: body.review_note || '',
+    });
+    return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'REJECT_FAILED', e.message, corsHeaders);
+  }
+}
+
+async function handleGoalPathCandidates(request, env, corsHeaders) {
+  const status = new URL(request.url).searchParams.get('status') || 'pending_admin_review';
+  try {
+    const token = await _l1AdminToken(env);
+    const filter = encodeURIComponent(`status='${status.replace(/'/g, "\\'")}'`);
+    const res = await fetch(`${L1_DEFAULT}/api/collections/goal_path_candidates/records?filter=${filter}&perPage=100&sort=-created`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error(`조회 실패 HTTP ${res.status}`);
+    const data = await res.json().catch(() => ({ items: [] }));
+    return new Response(JSON.stringify({ items: data.items || [] }), { headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'LIST_FAILED', e.message, corsHeaders);
+  }
+}
+
 function _parseMetaTableTag(raw) {
   try {
     const fields = {};
@@ -12600,6 +12968,19 @@ export default {
     // 재시도한다. /api/ai-charge가 tx_hash 기준 멱등이라 10분마다 돌아도
     // 이중 차감 없음(위 다른 스윕들과 동일한 멱등 관례).
     ctx.waitUntil(_l1SweepPendingSettlements(env, ctx).catch(e => console.error('[SettlementSweep] 전체 실패:', e.message)));
+    // 2026-09-15 신설 — GOAL-PATH 갱신 파이프라인. 스윕(후보 생성)과
+    // 검증(SP-PATH-VERIFIER)을 순차로 — 검증이 이번 주기에 막 생성된
+    // 후보까지 바로 처리하도록 스윕 뒤에 바로 이어 돈다. 어느 쪽도
+    // goal_path_current를 쓰지 않는다 — 그건 인간 관리자 승인
+    // (handleGoalPathApprove)에서만 일어난다.
+    ctx.waitUntil((async () => {
+      try {
+        await _runGoalPathSweep(env, ctx);
+        await _runGoalPathVerification(env, ctx);
+      } catch (e) {
+        console.error('[GoalPath] 스윕/검증 전체 실패:', e.message);
+      }
+    })());
   },
 
   // ── 공문 메일 수신 (2026-08-31 신설) ─────────────────────────────
@@ -13024,6 +13405,16 @@ export default {
       return handleSPTreeGuardianAudit(request, env, corsHeaders, ctx);
     if (pathname === '/sp-tree-guardian/findings' && request.method === 'GET')
       return handleSPTreeGuardianFindings(request, env, corsHeaders);
+
+    // ── GOAL-PATH 갱신 파이프라인 (2026-09-15 신설) ──────────────────
+    if (pathname === '/goal-path/lookup' && request.method === 'GET')
+      return handleGoalPathLookup(request, env, corsHeaders);
+    if (pathname === '/goal-path-guardian/candidates' && request.method === 'GET')
+      return handleGoalPathCandidates(request, env, corsHeaders);
+    if (pathname === '/goal-path-guardian/approve' && request.method === 'POST')
+      return handleGoalPathApprove(request, env, corsHeaders);
+    if (pathname === '/goal-path-guardian/reject' && request.method === 'POST')
+      return handleGoalPathReject(request, env, corsHeaders);
 
     // ── SP-INDUSTRY-TRANSFORM 실시간 생성 (2026-07-23 신설) ────────
     if (pathname === '/sp-industry-transform/generate' && request.method === 'POST')
@@ -25432,6 +25823,7 @@ async function handleGovRelay(bodyText, env, corsHeaders, meta = null, ctx = nul
   // 안전문구 대체 직전) 전부에서 재사용한다 — 이제 "이 함수가 반환하는
   // 모든 최종 응답은 반환 직전에 반드시 이 인터셉트를 거친다"가 보장된다.
   await _interceptAgyVaultStore(env, data, guid, ctx);
+  await _interceptGoalPathTrace(env, data, guid, ctx); // 2026-09-15 신설
 
   // ── META_TABLE_UPDATE 서버측 처리 (2026-07-14 신설, 회귀 복구) ─────
   // AGENCY-AC-COMMON_v1.3.md §6 배선. canDelegate 여부와 무관하게 모든
@@ -25625,6 +26017,7 @@ async function handleGovRelay(bodyText, env, corsHeaders, meta = null, ctx = nul
             : data2?.choices?.[0]?.message?.content;
           data2.choices[0].message.content = finalContent;
           await _interceptAgyVaultStore(env, data2, guid, ctx); // 2026-08-10 — 이 새 응답에도 AGY_VAULT_STORE가 있을 수 있음
+          await _interceptGoalPathTrace(env, data2, guid, ctx); // 2026-09-15 신설
           return new Response(JSON.stringify(data2), { headers: corsHeaders });
         }
         return new Response(JSON.stringify(data), { headers: corsHeaders });
@@ -25649,6 +26042,7 @@ async function handleGovRelay(bodyText, env, corsHeaders, meta = null, ctx = nul
           const data3 = await res3.json();
           billGovCall(data3?.usage, `${agency}(sub-fail)`);
           await _interceptAgyVaultStore(env, data3, guid, ctx); // 2026-08-10
+          await _interceptGoalPathTrace(env, data3, guid, ctx); // 2026-09-15 신설
           return new Response(JSON.stringify(data3), { headers: corsHeaders });
         }
         return new Response(JSON.stringify(data), { headers: corsHeaders });
@@ -25681,6 +26075,7 @@ async function handleGovRelay(bodyText, env, corsHeaders, meta = null, ctx = nul
             `${sub.label}에 직접 문의하시거나 잠시 후 다시 시도해 주세요.`;
         }
         await _interceptAgyVaultStore(env, data4, guid, ctx); // 2026-08-10 — 위임 최종 합성 응답, 세션 종료형 AGY_VAULT_STORE 태그가 나올 확률이 가장 높은 지점
+        await _interceptGoalPathTrace(env, data4, guid, ctx); // 2026-09-15 신설 — 다기관 위임이 실제로 끝나는 지점
         return new Response(JSON.stringify(data4), { headers: corsHeaders });
       }
       return new Response(JSON.stringify(data), { headers: corsHeaders });
