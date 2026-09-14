@@ -553,13 +553,23 @@ export const CORE_REGISTRY = {
     label: '조경기술사', icon: '🌳', category: 'ENG', ownerAgency: 'gopang',
     key: 'SP_landscape-engineer', needsMedicalSafety: false,
     // 2026-07-25 신설(주피터 지시) — 99건 사고실험 A범주('조경 설계를 의뢰') 직접 커버
-    triggers: ['조경기술사', '조경 설계', '정원 설계'],
+    triggers: ['조경기술사', '조경 설계', '정원 설계',
+      // 2026-09-14 추가 — 상황 표현 보강. "마당에 어떤 나무랑 식물을
+      // 배치하면 좋을지 설계해줄 사람이 필요해요"가 기존 트리거와 안
+      // 겹쳐 kcommerce로 샌 게 routing_ABmention_live_smoketest.py
+      // batch4 재현에서 확인됨.
+      '마당에 나무를 심', '식물을 배치'],
   },
   'surveying-engineer': {
     label: '측량 및 지형공간정보기술사', icon: '📐', category: 'ENG', ownerAgency: 'gopang',
     key: 'SP_surveying-engineer', needsMedicalSafety: false,
     // 2026-07-25 신설(주피터 지시) — 직업명+법정업무명
-    triggers: ['측량 및 지형공간정보기술사', '측량', '지적측량'],
+    triggers: ['측량 및 지형공간정보기술사', '측량', '지적측량',
+      // 2026-09-14 추가 — 상황 표현 보강. "옆집이랑 땅 경계가 애매한데
+      // 정확한 경계선을 재줄 사람이 필요해요"가 기존 트리거와 안 겹쳐
+      // kregionalgov로 샌 게 routing_ABmention_live_smoketest.py
+      // batch4 재현에서 확인됨.
+      '땅 경계선을 재', '경계가 애매한데'],
   },
   'electrical-safety-engineer': {
     label: '전기안전기술사', icon: '⚡', category: 'ENG', ownerAgency: 'gopang',
