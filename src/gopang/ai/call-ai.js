@@ -1060,6 +1060,7 @@ export async function _handleProfileTags(fullReply, bubble, sendFn = callAI, use
     const contextBlocks = [];
     for (const { label, body } of lookups) {
       let refs = [];
+      const _stopTicker = _startWaitTicker(bubble, '프로필 참조 조회 중입니다');
       try {
         const res = await fetch(`${base}/template-lookup`, {
           method: 'POST',
@@ -1074,6 +1075,8 @@ export async function _handleProfileTags(fullReply, bubble, sendFn = callAI, use
         }
       } catch (e) {
         console.warn(`[Profile] template-lookup 요청 실패(${label}, 무시 — 빈 참조로 진행):`, e.message);
+      } finally {
+        _stopTicker();
       }
       // 참조가 없어도(신규 업종/정체성 최초 사례) 빈 블록으로 다음 턴을
       // 진행시킨다 — SP의 [§TEMPLATE-REFERENCE] 원칙("참조 없으면 조용히
@@ -1346,6 +1349,7 @@ export async function _handleOrchestrationTags(fullReply, bubble, sendFn = callA
       await _updateBubble(_stripInternalTags(fullReply));
       history.push({ role: 'assistant', content: fullReply });
       let resultText;
+      const _stopTicker = _startWaitTicker(bubble, '실행 계획을 갱신하는 중입니다');
       try {
         const res = await fetch(`${base}/orchestration/procedure-map/update`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1354,6 +1358,8 @@ export async function _handleOrchestrationTags(fullReply, bubble, sendFn = callA
         resultText = JSON.stringify(await res.json().catch(() => ({ status: res.status })));
       } catch (e) {
         resultText = `{"error":"${e.message}"}`;
+      } finally {
+        _stopTicker();
       }
       await _watchdogSendFn('PROCEDURE_MAP_UPDATE')(`[PROCEDURE_MAP_UPDATE 결과] ${resultText}`, null, null, resolveOrchestrationModel('PROCEDURE_MAP_UPDATE_RESULT'));
       return true;
@@ -1365,11 +1371,14 @@ export async function _handleOrchestrationTags(fullReply, bubble, sendFn = callA
       await _updateBubble(_stripInternalTags(fullReply));
       history.push({ role: 'assistant', content: fullReply });
       let resultText;
+      const _stopTicker = _startWaitTicker(bubble, '실행 계획을 조회하는 중입니다');
       try {
         const res = await fetch(`${base}/orchestration/procedure-map?goal=${encodeURIComponent(lookupMatch[1].trim())}`);
         resultText = res.ok ? JSON.stringify(await res.json()) : `{"error":"HTTP ${res.status}"}`;
       } catch (e) {
         resultText = `{"error":"${e.message}"}`;
+      } finally {
+        _stopTicker();
       }
       await _watchdogSendFn('PROCEDURE_MAP_LOOKUP')(`[PROCEDURE_MAP_LOOKUP 결과] ${resultText}\n\n위 결과를 이어받아 RULE-02를 계속 진행하세요.`, null, null, resolveOrchestrationModel('PROCEDURE_MAP_LOOKUP_RESULT'));
       return true;
@@ -1394,11 +1403,14 @@ export async function _handleOrchestrationTags(fullReply, bubble, sendFn = callA
       if (domain) qs.set('domain', domain.trim());
       if (limit) qs.set('limit', limit.trim());
       let resultText;
+      const _stopTicker = _startWaitTicker(bubble, '관련 혜택을 검색하는 중입니다');
       try {
         const res = await fetch(`${base}/orchestration/benefit-semantic-search?${qs.toString()}`);
         resultText = res.ok ? JSON.stringify(await res.json()) : `{"error":"HTTP ${res.status}"}`;
       } catch (e) {
         resultText = `{"error":"${e.message}"}`;
+      } finally {
+        _stopTicker();
       }
       await _watchdogSendFn('BENEFIT_SEMANTIC_SEARCH')(`[BENEFIT_SEMANTIC_SEARCH 결과] ${resultText}\n\n위 후보 목록을 이어받아 RULE-02 STEP 0-C를 계속 진행하세요.`, null, null, resolveOrchestrationModel('BENEFIT_SEMANTIC_SEARCH_RESULT'));
       return true;
@@ -1423,11 +1435,14 @@ export async function _handleOrchestrationTags(fullReply, bubble, sendFn = callA
       if (params.domain) qs.set('domain', params.domain);
       if (params.limit) qs.set('limit', params.limit);
       let resultText;
+      const _stopTicker = _startWaitTicker(bubble, '관련 혜택을 검색하는 중입니다');
       try {
         const res = await fetch(`${base}/orchestration/benefit-candidates?${qs.toString()}`);
         resultText = res.ok ? JSON.stringify(await res.json()) : `{"error":"HTTP ${res.status}"}`;
       } catch (e) {
         resultText = `{"error":"${e.message}"}`;
+      } finally {
+        _stopTicker();
       }
       await _watchdogSendFn('BENEFIT_CANDIDATE_SEARCH')(`[BENEFIT_CANDIDATE_SEARCH 결과] ${resultText}\n\n위 후보 목록을 이어받아 RULE-02 STEP 0-C를 계속 진행하세요.`, null, null, resolveOrchestrationModel('BENEFIT_CANDIDATE_SEARCH_RESULT'));
       return true;
@@ -1450,11 +1465,16 @@ export async function _handleOrchestrationTags(fullReply, bubble, sendFn = callA
         resultText = '{"error":"goal 필드를 이 태그 바디에서 못 찾음 — 등재 생략"}';
       } else {
         try {
-          const res = await fetch(`${base}/orchestration/procedure-map/draft`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ goal: goalM[1].trim(), domain: '', steps: [] }),
-          });
-          resultText = JSON.stringify(await res.json().catch(() => ({ status: res.status })));
+          const _stopTicker = _startWaitTicker(bubble, '실행 계획을 등록하는 중입니다');
+          try {
+            const res = await fetch(`${base}/orchestration/procedure-map/draft`, {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ goal: goalM[1].trim(), domain: '', steps: [] }),
+            });
+            resultText = JSON.stringify(await res.json().catch(() => ({ status: res.status })));
+          } finally {
+            _stopTicker();
+          }
         } catch (e) {
           resultText = `{"error":"${e.message}"}`;
         }
@@ -2267,6 +2287,7 @@ export async function _handleWebSearchTag(fullReply, bubble, sendFn = callAI, us
 
   const base = (CFG.endpoint || '').replace(/\/+$/, '');
   let resultText;
+  const _stopTicker = _startWaitTicker(bubble, '웹 검색 중입니다');
   try {
     const res = await fetch(`${base}/web-search`, {
       method: 'POST',
@@ -2289,6 +2310,8 @@ export async function _handleWebSearchTag(fullReply, bubble, sendFn = callAI, us
     }
   } catch (e) {
     resultText = `검색 오류: ${e.message}`;
+  } finally {
+    _stopTicker();
   }
 
   // RULE-07 [7-A] 대체형 — Hondi 검증 필드(guid 등)와 구분해 "웹 참고정보"
@@ -2333,6 +2356,7 @@ export async function _handleKSearchExecutionTag(fullReply, bubble, sendFn = cal
 
   const base = (CFG.endpoint || '').replace(/\/+$/, '');
   let resultText;
+  const _stopTicker = _startWaitTicker(bubble, '검색하는 중입니다');
   try {
     const res = await fetch(`${base}/search`, {
       method: 'POST',
@@ -2370,6 +2394,8 @@ export async function _handleKSearchExecutionTag(fullReply, bubble, sendFn = cal
     }
   } catch (e) {
     resultText = `검색 오류: ${e.message}`;
+  } finally {
+    _stopTicker();
   }
 
   // RULE-02 STEP4/5 — 후보 평가는 K-Search 자신(다음 턴)의 몫이다. 여기서는
@@ -2425,6 +2451,7 @@ export async function _handleCreateUnclaimedProfileTag(fullReply, bubble, sendFn
 
   const base = (CFG.endpoint || '').replace(/\/+$/, '');
   let resultText;
+  const _stopTicker = _startWaitTicker(bubble, '프로필을 등록하는 중입니다');
   try {
     const res = await fetch(`${base}/profile`, {
       method: 'POST',
@@ -2437,6 +2464,8 @@ export async function _handleCreateUnclaimedProfileTag(fullReply, bubble, sendFn
       : `등록 실패 (HTTP ${res.status}): ${JSON.stringify(payload)}`;
   } catch (e) {
     resultText = `등록 오류: ${e.message}`;
+  } finally {
+    _stopTicker();
   }
 
   const inject =
@@ -2474,6 +2503,7 @@ export async function _handleSPAuthorTags(fullReply, bubble, sendFn = callAI, us
     await _updateBubble(_stripInternalTags(fullReply));
     history.push({ role: 'assistant', content: fullReply });
     let resultText;
+    const _stopTicker = _startWaitTicker(bubble, '기관 레지스트리를 검색하는 중입니다');
     try {
       const qs = new URLSearchParams();
       if (get('q')) qs.set('q', get('q'));
@@ -2483,6 +2513,8 @@ export async function _handleSPAuthorTags(fullReply, bubble, sendFn = callAI, us
       resultText = res.ok ? JSON.stringify(await res.json()) : `{"error":"HTTP ${res.status}"}`;
     } catch (e) {
       resultText = `{"error":"${e.message}"}`;
+    } finally {
+      _stopTicker();
     }
     await sendFn(`[GWP_REGISTRY_SEARCH 결과] ${resultText}\n\n결과가 있으면 그 gwp_id로 STEP 4를 이어가고(match_score 재평가), 없으면 매칭 실패 처리로 진행하세요.`, null, null, resolveOrchestrationModel('GWP_REGISTRY_SEARCH_RESULT'));
     return true;
@@ -2517,6 +2549,7 @@ export async function _handleSPAuthorTags(fullReply, bubble, sendFn = callAI, us
     // 진행 말풍선은 "있으면 갱신, 없으면 생략"으로 처리하고, 큐잉 자체
     // (네트워크 호출)는 DOM과 무관하게 항상 끝까지 실행되도록 분리한다.
     const _progBubble = appendBubble('ai', '⏳ SP 초안 작성 요청을 서버에 등록하는 중…');
+    const _stopTicker = _startWaitTicker(_progBubble, 'SP 초안 작성 요청을 등록하는 중입니다');
     let resultText, _queueOk = false, _queueId = '';
     try {
       const res = await fetch(`${base}/sp-author/queue`, {
@@ -2537,6 +2570,8 @@ export async function _handleSPAuthorTags(fullReply, bubble, sendFn = callAI, us
       _queueId = data.id || data.request_id || '';
     } catch (e) {
       resultText = `{"error":"${e.message}"}`;
+    } finally {
+      _stopTicker();
     }
     if (_progBubble) {
       _progBubble.textContent = _queueOk
@@ -2565,6 +2600,7 @@ export async function _handleSPAuthorTags(fullReply, bubble, sendFn = callAI, us
     // 이유(appendBubble()이 #message-list 없는 컨텍스트에서 undefined
     // 반환)로 방어한다.
     const _progBubble = appendBubble('ai', '⏳ SP 초안 작성 요청을 서버에 등록하는 중…');
+    const _stopTicker = _startWaitTicker(_progBubble, 'SP 초안 작성 요청을 등록하는 중입니다');
     let resultText, _queueOk = false, _queueId = '';
     try {
       const res = await fetch(`${base}/sp-author/queue`, {
@@ -2593,6 +2629,8 @@ export async function _handleSPAuthorTags(fullReply, bubble, sendFn = callAI, us
       _queueId = data.id || data.request_id || '';
     } catch (e) {
       resultText = `{"error":"${e.message}"}`;
+    } finally {
+      _stopTicker();
     }
     if (_progBubble) {
       _progBubble.textContent = _queueOk
@@ -2658,6 +2696,7 @@ export async function _handleSPAuthorTags(fullReply, bubble, sendFn = callAI, us
     await _updateBubble(_stripInternalTags(fullReply));
     history.push({ role: 'assistant', content: fullReply });
     let resultText;
+    const _stopTicker = _startWaitTicker(bubble, '담당자에게 알리는 중입니다');
     try {
       const res = await fetch(`${base}/sp-author/escalate`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -2670,6 +2709,8 @@ export async function _handleSPAuthorTags(fullReply, bubble, sendFn = callAI, us
       resultText = JSON.stringify(await res.json().catch(() => ({ status: res.status })));
     } catch (e) {
       resultText = `{"error":"${e.message}"}`;
+    } finally {
+      _stopTicker();
     }
     await sendFn(`[ESCALATE 결과] ${resultText}`, null, null, resolveOrchestrationModel('ESCALATE_RESULT'));
     return true;
@@ -2713,6 +2754,7 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
       return true;
     }
     const base = (CFG.endpoint || '').replace(/\/+$/, '');
+    const _stopTicker = _startWaitTicker(bubble, '제출 서류 요건을 확인하는 중입니다');
     try {
       const res  = await fetch(`${base}/gov/task/schema/lookup`, {
         method: 'POST',
@@ -2720,6 +2762,7 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
         body: JSON.stringify({ ...payload, guid: _USER?.ipv6 || USER_GUID || null }),
       });
       const data = await res.json().catch(() => null);
+      _stopTicker();
       if (!data?.found) {
         await sendFn(`[INTERNAL: GOV_TASK_SCHEMA_LOOKUP 결과 — 레지스트리에 없음(found:false). ` +
           `§REQUIRED-DOCUMENTS 3단계(웹검색 후 GOV_TASK_DRAFT_REQUEST)로 진행하세요.]`);
@@ -2764,6 +2807,7 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
         `documents[]에 doc_id와 함께 idv_ref:true, sha256 자리에 contentHash를 사용하세요` +
         `(원본 파일을 별도로 요구하지 마세요).]`);
     } catch (e) {
+      _stopTicker();
       await sendFn(`[INTERNAL: GOV_TASK_SCHEMA_LOOKUP 서버 호출 실패(${e.message}) — ` +
         `IDV 조회 없이 기존 §REQUIRED-DOCUMENTS 2단계(정부24 안내)로 진행하세요.]`);
     }
@@ -2785,6 +2829,7 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
       return true;
     }
     const base = (CFG.endpoint || '').replace(/\/+$/, '');
+    const _stopTicker = _startWaitTicker(bubble, '조사 내용을 등록하는 중입니다');
     try {
       const res  = await fetch(`${base}/gov/task/schema/draft`, {
         method: 'POST',
@@ -2792,10 +2837,12 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
         body: JSON.stringify({ ...payload, guid: _USER?.ipv6 || USER_GUID || null }),
       });
       const data = await res.json().catch(() => null);
+      _stopTicker();
       await sendFn(`[INTERNAL: GOV_TASK_DRAFT_REQUEST 결과 수신 — 이 결과를 바탕으로 ` +
         `§REQUIRED-DOCUMENTS 3단계 지시(verified 여부에 따른 경고 문구 포함)대로 ` +
         `사용자에게 자연스럽게 안내하세요: ${JSON.stringify(data)}]`);
     } catch (e) {
+      _stopTicker();
       await sendFn(`[INTERNAL: GOV_TASK_DRAFT_REQUEST 서버 호출 실패(${e.message}) — ` +
         `저장이 안 됐음을 사용자에게 알리고, 지금 조사한 내용은 이번 대화에서만 ` +
         `유효한 임시 안내임을 명확히 하세요.]`);
@@ -2817,6 +2864,7 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
       return true;
     }
     const base = (CFG.endpoint || '').replace(/\/+$/, '');
+    const _stopTicker = _startWaitTicker(bubble, '접수 처리 중입니다');
     try {
       const res  = await fetch(`${base}/gov/task/submit`, {
         method: 'POST',
@@ -2830,6 +2878,7 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
         body: JSON.stringify({ ...payload, guid: _USER?.ipv6 || USER_GUID || null, trace }),
       });
       const data = await res.json().catch(() => null);
+      _stopTicker();
       // 2026-08-13 명확화 — 라이브 스모크테스트(no=6, gov_task_execute_
       // live_smoketest.py)에서 실제로 확인된 결함: 이 INTERNAL 메시지만
       // 받으면 모델이 접수번호 안내로 답을 끝내고 인간전속 구간이어도
@@ -2844,6 +2893,7 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
         `SP-22 STEP1 지침대로 안내 문구만 내고 끝내지 말고 반드시 [PROJECT_STATE_SAVE: ...]까지 ` +
         `낸 뒤 멈추세요 — 이 태그 없이 끝내면 재개 시 이 접수 상태가 유실됩니다.]`);
     } catch (e) {
+      _stopTicker();
       await sendFn(`[INTERNAL: GOV_TASK_SUBMIT_REQUEST 서버 호출 실패(${e.message}) — ` +
         `접수가 실제로 이루어지지 않았음을 사용자에게 명확히 알리세요. ` +
         `"접수했습니다"라고 말하면 안 됩니다.]`);
@@ -2875,6 +2925,7 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
       return true;
     }
     const base = (CFG.endpoint || '').replace(/\/+$/, '');
+    const _stopTicker = _startWaitTicker(bubble, '보완요청을 기록하는 중입니다');
     try {
       const res = await fetch(`${base}/gov/task/supplement-request`, {
         method: 'POST',
@@ -2882,10 +2933,12 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
         body: JSON.stringify(payload),
       });
       const data = await res.json().catch(() => null);
+      _stopTicker();
       await sendFn(`[INTERNAL: GOV_TASK_SUPPLEMENT_REQUEST 결과 수신 — 미비점(deficiency)과 ` +
         `보완할 내용(required_action)을 신청자에게 명확히 전달하세요. 재제출은 같은 receipt_no로 ` +
         `GOV_TASK_SUBMIT_REQUEST를 다시 낸다는 점도 함께 안내하세요: ${JSON.stringify(data)}]`);
     } catch (e) {
+      _stopTicker();
       await sendFn(`[INTERNAL: GOV_TASK_SUPPLEMENT_REQUEST 서버 호출 실패(${e.message}) — ` +
         `보완요청이 실제로 기록되지 않았음을 알리세요.]`);
     }
@@ -2906,6 +2959,7 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
       return true;
     }
     const base = (CFG.endpoint || '').replace(/\/+$/, '');
+    const _stopTicker = _startWaitTicker(bubble, '실사 일정을 조율하는 중입니다');
     try {
       const res = await fetch(`${base}/gov/task/field-inspection-schedule`, {
         method: 'POST',
@@ -2913,10 +2967,12 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
         body: JSON.stringify(payload),
       });
       const data = await res.json().catch(() => null);
+      _stopTicker();
       await sendFn(`[INTERNAL: GOV_TASK_FIELD_INSPECTION_SCHEDULE 결과 수신 — 일정 후보(proposed_slots)를 ` +
         `신청자에게 전달하고 확정을 요청하세요. 실사 자체와 그 결과 판단은 담당 공무원이 직접 하며 이 SP가 ` +
         `대행하지 않는다는 점을 넘지 마세요: ${JSON.stringify(data)}]`);
     } catch (e) {
+      _stopTicker();
       await sendFn(`[INTERNAL: GOV_TASK_FIELD_INSPECTION_SCHEDULE 서버 호출 실패(${e.message}) — ` +
         `일정이 실제로 기록되지 않았음을 알리세요.]`);
     }
@@ -2937,6 +2993,7 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
       return true;
     }
     const base = (CFG.endpoint || '').replace(/\/+$/, '');
+    const _stopTicker = _startWaitTicker(bubble, '의견을 제출하는 중입니다');
     try {
       const res = await fetch(`${base}/gov/task/opinion-submit`, {
         method: 'POST',
@@ -2944,12 +3001,14 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
         body: JSON.stringify(payload),
       });
       const data = await res.json().catch(() => null);
+      _stopTicker();
       // ★ §2-3 원문 그대로 — "이 태그는 승인이 아니다". 서버가 pending_human_action:true를
       // 내려주지만, 여기서도 명시적으로 재확인시켜 "승인됐다"고 잘못 요약하지 않게 한다.
       await sendFn(`[INTERNAL: GOV_TASK_OPINION_SUBMIT 결과 수신 — 이건 승인이 아니라 담당 공무원에게 ` +
         `제출된 의견일 뿐입니다. 사용자에게 "승인/반려됐다"고 말하지 말고, 담당 공무원 결재(officer-decision) ` +
         `전까지 pending_human_action 상태임을 REPORT(공리 1)로 정확히 전달하세요: ${JSON.stringify(data)}]`);
     } catch (e) {
+      _stopTicker();
       await sendFn(`[INTERNAL: GOV_TASK_OPINION_SUBMIT 서버 호출 실패(${e.message}) — ` +
         `의견이 실제로 제출되지 않았음을 알리세요.]`);
     }
@@ -2975,6 +3034,7 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
       return true;
     }
     const base = (CFG.endpoint || '').replace(/\/+$/, '');
+    const _stopTicker = _startWaitTicker(bubble, '수수료를 청구하는 중입니다');
     try {
       const res = await fetch(`${base}/gov/task/fee-approve`, {
         method: 'POST',
@@ -2982,11 +3042,13 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
         body: JSON.stringify({ receipt_no: payload.receipt_no, guid: _USER?.ipv6 || USER_GUID || null }),
       });
       const data = await res.json().catch(() => null);
+      _stopTicker();
       await sendFn(`[INTERNAL: GOV_FEE_APPROVE 결과 수신 — 청구 성공/실패 여부(ok)와 ` +
         `금액을 있는 그대로 사용자에게 전달하세요. 잔액 부족(INSUFFICIENT_BALANCE)이면 ` +
         `충전 안내를, 이미 처리된 건(NOT_PENDING)이면 현재 상태를 그대로 알리세요: ` +
         `${JSON.stringify(data)}]`);
     } catch (e) {
+      _stopTicker();
       await sendFn(`[INTERNAL: GOV_FEE_APPROVE 서버 호출 실패(${e.message}) — ` +
         `청구가 실제로 이루어지지 않았음을 사용자에게 명확히 알리세요. ` +
         `"청구했습니다"라고 말하면 안 됩니다.]`);
@@ -3042,6 +3104,7 @@ export async function _handleDeptTaskTag(fullReply, bubble, sendFn = callAI, use
 
   const base = (CFG.endpoint || '').replace(/\/+$/, '');
   let resultText;
+  const _stopTicker = _startWaitTicker(bubble, '업무지시를 등록하는 중입니다');
   try {
     const res = await fetch(`${base}/gov/dept-task`, {
       method: 'POST',
@@ -3054,6 +3117,8 @@ export async function _handleDeptTaskTag(fullReply, bubble, sendFn = callAI, use
       : `등록 실패 (HTTP ${res.status}): ${JSON.stringify(data)}`;
   } catch (e) {
     resultText = `등록 오류: ${e.message}`;
+  } finally {
+    _stopTicker();
   }
 
   await sendFn(`[INTERNAL: DEPT_TASK_REQUEST 결과 — 등록된 task_id/status를 그대로 안내하고, ` +
