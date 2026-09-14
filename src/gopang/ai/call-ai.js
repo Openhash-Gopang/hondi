@@ -1062,10 +1062,12 @@ export async function _handleProfileTags(fullReply, bubble, sendFn = callAI, use
       let refs = [];
       const _stopTicker = _startWaitTicker(bubble, '프로필 참조 조회 중입니다');
       try {
+        // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 신설(나머지 20개 배치).
         const res = await fetch(`${base}/template-lookup`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
+          signal: AbortSignal.timeout(45000),
         });
         if (res.ok) {
           const data = await res.json().catch(() => ({ refs: [] }));
@@ -1351,13 +1353,19 @@ export async function _handleOrchestrationTags(fullReply, bubble, sendFn = callA
       let resultText;
       const _stopTicker = _startWaitTicker(bubble, '실행 계획을 갱신하는 중입니다');
       try {
+        // BUG-FIX(2026-09-14, #250 후속) — CALL_GOVSYS/CALL_GOVTREE와
+        // 동일 결함(타임아웃 없음 → 서버 무응답 시 영원히 대기)이 나머지
+        // 20개 orchestration/gov-task fetch에도 있었다. 동일 상한 적용.
         const res = await fetch(`${base}/orchestration/procedure-map/update`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ goal: updateMatch[1].trim(), changes: [] }),
+          signal: AbortSignal.timeout(45000),
         });
         resultText = JSON.stringify(await res.json().catch(() => ({ status: res.status })));
       } catch (e) {
-        resultText = `{"error":"${e.message}"}`;
+        resultText = (e.name === 'TimeoutError' || e.name === 'AbortError')
+          ? '{"error":"서버 응답 시간 초과(45초)"}'
+          : `{"error":"${e.message}"}`;
       } finally {
         _stopTicker();
       }
@@ -1373,10 +1381,15 @@ export async function _handleOrchestrationTags(fullReply, bubble, sendFn = callA
       let resultText;
       const _stopTicker = _startWaitTicker(bubble, '실행 계획을 조회하는 중입니다');
       try {
-        const res = await fetch(`${base}/orchestration/procedure-map?goal=${encodeURIComponent(lookupMatch[1].trim())}`);
+        // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 신설(나머지 20개 배치).
+        const res = await fetch(`${base}/orchestration/procedure-map?goal=${encodeURIComponent(lookupMatch[1].trim())}`, {
+          signal: AbortSignal.timeout(45000),
+        });
         resultText = res.ok ? JSON.stringify(await res.json()) : `{"error":"HTTP ${res.status}"}`;
       } catch (e) {
-        resultText = `{"error":"${e.message}"}`;
+        resultText = (e.name === 'TimeoutError' || e.name === 'AbortError')
+          ? '{"error":"서버 응답 시간 초과(45초)"}'
+          : `{"error":"${e.message}"}`;
       } finally {
         _stopTicker();
       }
@@ -1405,10 +1418,15 @@ export async function _handleOrchestrationTags(fullReply, bubble, sendFn = callA
       let resultText;
       const _stopTicker = _startWaitTicker(bubble, '관련 혜택을 검색하는 중입니다');
       try {
-        const res = await fetch(`${base}/orchestration/benefit-semantic-search?${qs.toString()}`);
+        // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 신설(나머지 20개 배치).
+        const res = await fetch(`${base}/orchestration/benefit-semantic-search?${qs.toString()}`, {
+          signal: AbortSignal.timeout(45000),
+        });
         resultText = res.ok ? JSON.stringify(await res.json()) : `{"error":"HTTP ${res.status}"}`;
       } catch (e) {
-        resultText = `{"error":"${e.message}"}`;
+        resultText = (e.name === 'TimeoutError' || e.name === 'AbortError')
+          ? '{"error":"서버 응답 시간 초과(45초)"}'
+          : `{"error":"${e.message}"}`;
       } finally {
         _stopTicker();
       }
@@ -1437,10 +1455,15 @@ export async function _handleOrchestrationTags(fullReply, bubble, sendFn = callA
       let resultText;
       const _stopTicker = _startWaitTicker(bubble, '관련 혜택을 검색하는 중입니다');
       try {
-        const res = await fetch(`${base}/orchestration/benefit-candidates?${qs.toString()}`);
+        // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 신설(나머지 20개 배치).
+        const res = await fetch(`${base}/orchestration/benefit-candidates?${qs.toString()}`, {
+          signal: AbortSignal.timeout(45000),
+        });
         resultText = res.ok ? JSON.stringify(await res.json()) : `{"error":"HTTP ${res.status}"}`;
       } catch (e) {
-        resultText = `{"error":"${e.message}"}`;
+        resultText = (e.name === 'TimeoutError' || e.name === 'AbortError')
+          ? '{"error":"서버 응답 시간 초과(45초)"}'
+          : `{"error":"${e.message}"}`;
       } finally {
         _stopTicker();
       }
@@ -1467,16 +1490,20 @@ export async function _handleOrchestrationTags(fullReply, bubble, sendFn = callA
         try {
           const _stopTicker = _startWaitTicker(bubble, '실행 계획을 등록하는 중입니다');
           try {
+            // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 신설(나머지 20개 배치).
             const res = await fetch(`${base}/orchestration/procedure-map/draft`, {
               method: 'POST', headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ goal: goalM[1].trim(), domain: '', steps: [] }),
+              signal: AbortSignal.timeout(45000),
             });
             resultText = JSON.stringify(await res.json().catch(() => ({ status: res.status })));
           } finally {
             _stopTicker();
           }
         } catch (e) {
-          resultText = `{"error":"${e.message}"}`;
+          resultText = (e.name === 'TimeoutError' || e.name === 'AbortError')
+            ? '{"error":"서버 응답 시간 초과(45초)"}'
+            : `{"error":"${e.message}"}`;
         }
       }
       await _watchdogSendFn('PROCEDURE_MAP_DRAFT')(`[PROCEDURE_MAP_DRAFT 결과] ${resultText}`, null, null, resolveOrchestrationModel('PROCEDURE_MAP_DRAFT_RESULT'));
@@ -2334,10 +2361,13 @@ export async function _handleWebSearchTag(fullReply, bubble, sendFn = callAI, us
   let resultText;
   const _stopTicker = _startWaitTicker(bubble, '웹 검색 중입니다');
   try {
+    // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 없어 서버 무응답 시
+    // "웹 검색 중…"에서 영원히 멈추던 결함. 나머지 20개 배치와 동일 상한.
     const res = await fetch(`${base}/web-search`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query }),
+      signal: AbortSignal.timeout(45000),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
@@ -2354,7 +2384,9 @@ export async function _handleWebSearchTag(fullReply, bubble, sendFn = callAI, us
       resultText = parts.length > 0 ? parts.join('\n') : '검색 결과 없음';
     }
   } catch (e) {
-    resultText = `검색 오류: ${e.message}`;
+    resultText = (e.name === 'TimeoutError' || e.name === 'AbortError')
+      ? '검색 오류: 서버 응답 시간 초과(45초)'
+      : `검색 오류: ${e.message}`;
   } finally {
     _stopTicker();
   }
@@ -2415,6 +2447,10 @@ export async function _handleKSearchExecutionTag(fullReply, bubble, sendFn = cal
         p_lng: _userLocation?.lng ?? null,
         ...params,
       }),
+      // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 없어 서버 무응답 시
+      // "검색 중…"에서 영원히 멈추던 결함. K-Search RULE-02 STEP3
+      // [SEARCH]/[/SEARCH] 실행부라 음식점·업체 검색류가 이 경로다.
+      signal: AbortSignal.timeout(45000),
     });
     if (!res.ok) {
       resultText = `검색 실패 (HTTP ${res.status})`;
@@ -2438,7 +2474,9 @@ export async function _handleKSearchExecutionTag(fullReply, bubble, sendFn = cal
         : '검색 결과 없음';
     }
   } catch (e) {
-    resultText = `검색 오류: ${e.message}`;
+    resultText = (e.name === 'TimeoutError' || e.name === 'AbortError')
+      ? '검색 오류: 서버 응답 시간 초과(45초)'
+      : `검색 오류: ${e.message}`;
   } finally {
     _stopTicker();
   }
@@ -2498,17 +2536,21 @@ export async function _handleCreateUnclaimedProfileTag(fullReply, bubble, sendFn
   let resultText;
   const _stopTicker = _startWaitTicker(bubble, '프로필을 등록하는 중입니다');
   try {
+    // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 신설(나머지 20개 배치).
     const res = await fetch(`${base}/profile`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...params, claim_status: 'unclaimed' }),
+      signal: AbortSignal.timeout(45000),
     });
     const payload = await res.json().catch(() => ({}));
     resultText = res.ok
       ? JSON.stringify(payload)
       : `등록 실패 (HTTP ${res.status}): ${JSON.stringify(payload)}`;
   } catch (e) {
-    resultText = `등록 오류: ${e.message}`;
+    resultText = (e.name === 'TimeoutError' || e.name === 'AbortError')
+      ? '등록 오류: 서버 응답 시간 초과(45초)'
+      : `등록 오류: ${e.message}`;
   } finally {
     _stopTicker();
   }
@@ -2554,10 +2596,15 @@ export async function _handleSPAuthorTags(fullReply, bubble, sendFn = callAI, us
       if (get('q')) qs.set('q', get('q'));
       if (get('category')) qs.set('category', get('category'));
       if (get('tier')) qs.set('tier', get('tier'));
-      const res = await fetch(`${base}/gwp-registry/search?${qs.toString()}`);
+      // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 신설(나머지 20개 배치).
+      const res = await fetch(`${base}/gwp-registry/search?${qs.toString()}`, {
+        signal: AbortSignal.timeout(45000),
+      });
       resultText = res.ok ? JSON.stringify(await res.json()) : `{"error":"HTTP ${res.status}"}`;
     } catch (e) {
-      resultText = `{"error":"${e.message}"}`;
+      resultText = (e.name === 'TimeoutError' || e.name === 'AbortError')
+        ? '{"error":"서버 응답 시간 초과(45초)"}'
+        : `{"error":"${e.message}"}`;
     } finally {
       _stopTicker();
     }
@@ -2597,6 +2644,7 @@ export async function _handleSPAuthorTags(fullReply, bubble, sendFn = callAI, us
     const _stopTicker = _startWaitTicker(_progBubble, 'SP 초안 작성 요청을 등록하는 중입니다');
     let resultText, _queueOk = false, _queueId = '';
     try {
+      // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 신설(나머지 20개 배치).
       const res = await fetch(`${base}/sp-author/queue`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -2608,13 +2656,16 @@ export async function _handleSPAuthorTags(fullReply, bubble, sendFn = callAI, us
           source_conversation: get('source_conversation') || userText,
           priority: 'normal',
         }),
+        signal: AbortSignal.timeout(45000),
       });
       const data = await res.json().catch(() => ({ status: res.status }));
       resultText = JSON.stringify(data);
       _queueOk = res.ok && !data.error;
       _queueId = data.id || data.request_id || '';
     } catch (e) {
-      resultText = `{"error":"${e.message}"}`;
+      resultText = (e.name === 'TimeoutError' || e.name === 'AbortError')
+        ? '{"error":"서버 응답 시간 초과(45초)"}'
+        : `{"error":"${e.message}"}`;
     } finally {
       _stopTicker();
     }
@@ -2667,13 +2718,17 @@ export async function _handleSPAuthorTags(fullReply, bubble, sendFn = callAI, us
           risk_tier: get('risk_tier'),
           priority: 'normal',
         }),
+        // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 신설(나머지 20개 배치).
+        signal: AbortSignal.timeout(45000),
       });
       const data = await res.json().catch(() => ({ status: res.status }));
       resultText = JSON.stringify(data);
       _queueOk = res.ok && !data.error;
       _queueId = data.id || data.request_id || '';
     } catch (e) {
-      resultText = `{"error":"${e.message}"}`;
+      resultText = (e.name === 'TimeoutError' || e.name === 'AbortError')
+        ? '{"error":"서버 응답 시간 초과(45초)"}'
+        : `{"error":"${e.message}"}`;
     } finally {
       _stopTicker();
     }
@@ -2743,6 +2798,7 @@ export async function _handleSPAuthorTags(fullReply, bubble, sendFn = callAI, us
     let resultText;
     const _stopTicker = _startWaitTicker(bubble, '담당자에게 알리는 중입니다');
     try {
+      // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 신설(나머지 20개 배치).
       const res = await fetch(`${base}/sp-author/escalate`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -2750,10 +2806,13 @@ export async function _handleSPAuthorTags(fullReply, bubble, sendFn = callAI, us
           reason: get('reason') || 'other',
           summary: get('summary') || userText,
         }),
+        signal: AbortSignal.timeout(45000),
       });
       resultText = JSON.stringify(await res.json().catch(() => ({ status: res.status })));
     } catch (e) {
-      resultText = `{"error":"${e.message}"}`;
+      resultText = (e.name === 'TimeoutError' || e.name === 'AbortError')
+        ? '{"error":"서버 응답 시간 초과(45초)"}'
+        : `{"error":"${e.message}"}`;
     } finally {
       _stopTicker();
     }
@@ -2801,10 +2860,12 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
     const base = (CFG.endpoint || '').replace(/\/+$/, '');
     const _stopTicker = _startWaitTicker(bubble, '제출 서류 요건을 확인하는 중입니다');
     try {
+      // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 신설(나머지 20개 배치).
       const res  = await fetch(`${base}/gov/task/schema/lookup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...payload, guid: _USER?.ipv6 || USER_GUID || null }),
+        signal: AbortSignal.timeout(45000),
       });
       const data = await res.json().catch(() => null);
       _stopTicker();
@@ -2876,10 +2937,12 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
     const base = (CFG.endpoint || '').replace(/\/+$/, '');
     const _stopTicker = _startWaitTicker(bubble, '조사 내용을 등록하는 중입니다');
     try {
+      // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 신설(나머지 20개 배치).
       const res  = await fetch(`${base}/gov/task/schema/draft`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...payload, guid: _USER?.ipv6 || USER_GUID || null }),
+        signal: AbortSignal.timeout(45000),
       });
       const data = await res.json().catch(() => null);
       _stopTicker();
@@ -2921,6 +2984,8 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
         // 기본값 []로 조용히 넘어가고, 서버 쪽은 지역 무관(전국공통/BASELINE만)
         // 매칭으로 그레이스풀 디그레이드한다 — 에러 없음.
         body: JSON.stringify({ ...payload, guid: _USER?.ipv6 || USER_GUID || null, trace }),
+        // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 신설(나머지 20개 배치).
+        signal: AbortSignal.timeout(45000),
       });
       const data = await res.json().catch(() => null);
       _stopTicker();
@@ -2976,6 +3041,8 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
+        // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 신설(나머지 20개 배치).
+        signal: AbortSignal.timeout(45000),
       });
       const data = await res.json().catch(() => null);
       _stopTicker();
@@ -3010,6 +3077,8 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
+        // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 신설(나머지 20개 배치).
+        signal: AbortSignal.timeout(45000),
       });
       const data = await res.json().catch(() => null);
       _stopTicker();
@@ -3044,6 +3113,8 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
+        // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 신설(나머지 20개 배치).
+        signal: AbortSignal.timeout(45000),
       });
       const data = await res.json().catch(() => null);
       _stopTicker();
@@ -3085,6 +3156,8 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ receipt_no: payload.receipt_no, guid: _USER?.ipv6 || USER_GUID || null }),
+        // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 신설(나머지 20개 배치).
+        signal: AbortSignal.timeout(45000),
       });
       const data = await res.json().catch(() => null);
       _stopTicker();
@@ -3151,17 +3224,21 @@ export async function _handleDeptTaskTag(fullReply, bubble, sendFn = callAI, use
   let resultText;
   const _stopTicker = _startWaitTicker(bubble, '업무지시를 등록하는 중입니다');
   try {
+    // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 신설(나머지 20개 배치).
     const res = await fetch(`${base}/gov/dept-task`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(45000),
     });
     const data = await res.json().catch(() => ({}));
     resultText = res.ok
       ? JSON.stringify(data)
       : `등록 실패 (HTTP ${res.status}): ${JSON.stringify(data)}`;
   } catch (e) {
-    resultText = `등록 오류: ${e.message}`;
+    resultText = (e.name === 'TimeoutError' || e.name === 'AbortError')
+      ? '등록 오류: 서버 응답 시간 초과(45초)'
+      : `등록 오류: ${e.message}`;
   } finally {
     _stopTicker();
   }
@@ -3557,7 +3634,14 @@ async function _loadOwnJobContext() {
     const qs = new URLSearchParams({
       guid, viewer_guid: guid, viewer_pubkey: pubkey, viewer_sig: signature, viewer_ts: ts,
     });
-    const res = await fetch(`https://hondi-proxy.tensor-city.workers.dev/profile?${qs.toString()}`, { cache: 'no-cache' });
+    // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 신설(나머지 20개 배치).
+    // fire-and-forget 호출이라 사용자 화면을 직접 멈추지는 않지만,
+    // 타임아웃 없는 fetch가 무한정 매달려 있는 상태 자체가 다른 결함과
+    // 결합됐을 때 자원 누수로 이어질 수 있어 동일 원칙 적용.
+    const res = await fetch(`https://hondi-proxy.tensor-city.workers.dev/profile?${qs.toString()}`, {
+      cache: 'no-cache',
+      signal: AbortSignal.timeout(45000),
+    });
     const data = await res.json().catch(() => null);
     const identity = data?.extra?.public?.identity;
     if (identity && (identity.job_ksco || identity.affiliation || identity.work_domain)) {
@@ -3591,9 +3675,11 @@ async function _loadOwnJobContext() {
       identity.affiliation.some(a => a.verified && a.active !== false);
     if (hasVerifiedAffiliation) {
       try {
+        // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 신설(나머지 20개 배치).
         const assignRes = await fetch('https://hondi-proxy.tensor-city.workers.dev/gov/dept-task/my-assignments', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ guid, viewer_pubkey: pubkey, viewer_sig: signature, viewer_ts: ts }),
+          signal: AbortSignal.timeout(45000),
         });
         const assignData = await assignRes.json().catch(() => null);
         if (assignData?.ok && assignData.count > 0) {
@@ -4469,6 +4555,9 @@ async function _delegateToFlash(task, context) {
     // 엔드포인트도 메인 호출과 동일하게 /deepseek로 맞춘다(/chat/completions와
     // 같은 핸들러로 가긴 하지만, "혼디 제공 기본 키" 경로라는 의도를
     // 코드에서도 드러내기 위해 통일).
+    // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 신설(나머지 20개 배치).
+    // 이 호출 결과가 곧 사용자에게 보이는 최종 응답이 되므로, 타임아웃
+    // 없이 서버가 무응답이면 다른 태그들과 동일하게 "멈춘 것처럼" 보인다.
     const res = await fetch(CFG.endpoint.replace(/\/+$/, '') + '/deepseek', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -4483,6 +4572,7 @@ async function _delegateToFlash(task, context) {
           { role: 'user',   content: `task: ${task}\ncontext: ${context || '(없음)'}` },
         ],
       }),
+      signal: AbortSignal.timeout(45000),
     });
     if (res.status === 402) {
       // 무료 한도 소진 + GDC 잔액 부족 — pro에게 되돌려봤자 pro의 다음
