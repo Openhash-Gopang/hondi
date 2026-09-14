@@ -4423,37 +4423,117 @@ window.closePDV = closePDV;
         _trimPanelHistory();
         _savePanelHistory(); // 대화 연속성 — 응답마다 즉시 저장
 
-        // ── BUG-FIX(2026-09-14) — 응답이 max_tokens 한도로 끊긴 경우 복구 ──
+        // ── BUG-FIX(2026-09-14) — 응답이 max_tokens 한도로 끊긴 경우 근본
+        //    예방: 예산을 올려 조용히 한 번 더 시도 ──────────────────
         // 실사용 재현 사례: 모바일 "AI 메신저" 패널에서 "...찾아볼게요.
         // 잠시만 기다려 주세요."까지는 정상 출력되고, 그 직후 내려던
         // [CALL_GOVTREE: gov_tree_ref=..., task="..."] 태그가 max_tokens
         // 한도(hondi-pro thinking 모드가 reasoning에 예산을 다 씀)로
-        // 아예 시작도 못 하거나 중간에 끊겨서, 아래 4495행 정규식이
+        // 아예 시작도 못 하거나 중간에 끊겨서, 아래 태그 감지 정규식이
         // 매치 실패 → 그 아래 어떤 핸들러도 안 걸림 → 조용히 멈춤.
-        // call-ai.js(_callAIInner)에 이미 추가한 동일 검사를 이 패널
-        // (별도 구현)에도 그대로 적용한다 — _recoverOrchestrationFailure는
-        // call-ai.js 밖으로 export되어 있지 않아 여기서는 패널 자체 관례
-        // (_panelSendFn과 동일한 "새 버블 만들어 재귀 호출" 패턴)로 재구현.
+        // 처음엔(1차 수정) "끊기면 사용자에게 알린다"까지만 했는데,
+        // 그러면 사용자가 매번 다시 물어봐야 한다 — 근본 예방을 위해
+        // 예산을 2배로 올려 *같은 candidate·같은 대화로 조용히 재시도*
+        // 하고, 성공하면 방금 끊긴 자리(history의 이 assistant 턴)를
+        // 새 결과로 갈아끼운 뒤 아래 태그 처리로 그대로 이어간다 —
+        // 대부분의 경우 사용자는 응답이 살짝 늦어지는 것 말고는 끊김
+        // 자체를 경험하지 않는다. 이 패널은 candidate 페일오버 루프
+        // 자체를 재사용하지 않고(그 루프가 이 아래 태그 처리 코드까지
+        // 통째로 감싸고 있어 안전하게 재진입시키기 어려움) 같은 candidate
+        // (c)로 단발 재시도만 한다 — 그마저 실패하면(네트워크 오류 등)
+        // 기존처럼 AC가 사용자에게 자연스럽게 알리는 경로로 폴백한다.
         if (_finishReason === 'length') {
-          console.warn(
-            '[Panel] finish_reason=length로 응답 종료 — 복구 시도. 응답 끝부분:',
-            full.slice(-80)
-          );
-          const _recoveryMsg =
-            `[INTERNAL: 방금 응답이 max_tokens 한도로 중간에 끊겼습니다(finish_reason=length). ` +
-            `사용자에게 이 실패를 기술적 오류 문구 그대로 노출하지 말고, 자연스럽게 "요청이 ` +
-            `복잡해서 답변이 끊겼다"는 취지로 설명하고 다시 시도할지 물어보세요. 원래 사용자 ` +
-            `발화: "${userText}"]`;
-          const _recoveryBubble = _appendPanelMsg('ai', '…');
-          _recoveryBubble.classList.add('streaming');
+          console.warn('[Panel] 1차 응답이 finish_reason=length로 끊김 — 예산을 올려 재시도합니다.');
+          const _truncatedIdx = _panelHistory.length - 1; // 방금 push한 (끊긴) assistant 턴
+          let _retrySucceeded = false;
           try {
-            await _callPanelAI(_recoveryMsg, _recoveryBubble);
-          } catch (e) {
-            console.error('[Panel] finish_reason=length 복구 호출도 실패 — 포기:', e.message);
-          } finally {
-            _recoveryBubble.classList.remove('streaming');
+            const _retryBudget = resolveChatBudget(c.model) * 2;
+            const _retryMessages = _panelHistory.slice(0, _truncatedIdx); // 끊긴 턴 제외 — user까지만
+            const _retryAbortCtl = new AbortController();
+            _panelAbortCtl = _retryAbortCtl;
+            let _retryIdleTimer = setTimeout(() => _retryAbortCtl.abort(), 45000);
+            const _resetRetryIdle = () => { clearTimeout(_retryIdleTimer); _retryIdleTimer = setTimeout(() => _retryAbortCtl.abort(), 45000); };
+            const _retryRes = c.provider === 'deepseek-default'
+              ? await fetch(`${c.baseUrl}/deepseek`, {
+                  method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: _retryAbortCtl.signal,
+                  body: JSON.stringify({
+                    model: c.model, messages: _retryMessages, stream: true, max_tokens: _retryBudget,
+                    guid: (JSON.parse(localStorage.getItem('gopang_user_v4') || sessionStorage.getItem('gopang_user_v4') || '{}')?.ipv6) || null,
+                  }),
+                })
+              : await fetch(`${endpoint.replace(/\/+$/, '')}/llm/relay`, {
+                  method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: _retryAbortCtl.signal,
+                  body: JSON.stringify({
+                    provider: c.provider, baseUrl: c.baseUrl, apiKey: c.key,
+                    model: c.model, messages: _retryMessages, stream: true, max_tokens: _retryBudget,
+                  }),
+                });
+            _resetRetryIdle();
+            if (_retryRes.ok) {
+              bubbleEl.textContent = ''; // 끊긴 내용 지우고 재시도 결과로 새로 채운다
+              const _retryReader = _retryRes.body.getReader();
+              const _retryDec = new TextDecoder();
+              let _retryFull = '', _retryBuf = '', _retryFinishReason = null;
+              while (true) {
+                const { done, value } = await _retryReader.read();
+                _resetRetryIdle();
+                if (done) break;
+                _retryBuf += _retryDec.decode(value, { stream: true });
+                const _rLines = _retryBuf.split('\n');
+                _retryBuf = _rLines.pop();
+                for (const _rLine of _rLines) {
+                  if (!_rLine.startsWith('data: ')) continue;
+                  const _rData = _rLine.slice(6).trim();
+                  if (_rData === '[DONE]') break;
+                  try {
+                    const _rChunk = JSON.parse(_rData);
+                    if (_rChunk?.choices?.[0]?.finish_reason) _retryFinishReason = _rChunk.choices[0].finish_reason;
+                    const _rDelta = _rChunk?.choices?.[0]?.delta?.content || '';
+                    if (!_rDelta) continue;
+                    _retryFull += _rDelta;
+                    bubbleEl.textContent = _retryFull;
+                    msgList.scrollTop = msgList.scrollHeight;
+                  } catch {}
+                }
+              }
+              clearTimeout(_retryIdleTimer);
+              _panelAbortCtl = null;
+              if (_retryFinishReason !== 'length' && _retryFull) {
+                // 재시도 성공 — 끊긴 history 항목을 새 결과로 교체하고 계속 진행
+                _panelHistory[_truncatedIdx] = { role: 'assistant', content: _retryFull };
+                _savePanelHistory();
+                full = _retryFull;
+                _finishReason = _retryFinishReason;
+                _retrySucceeded = true;
+              } else {
+                console.warn('[Panel] 재시도도 finish_reason=length — 그대로 사용자 안내로 진행.');
+              }
+            } else {
+              clearTimeout(_retryIdleTimer);
+            }
+          } catch (retryErr) {
+            console.warn('[Panel] 재시도 자체가 실패 — 사용자 안내로 진행:', retryErr.message);
           }
-          return;
+
+          if (!_retrySucceeded) {
+            const _recoveryMsg =
+              `[INTERNAL: 방금 응답이 max_tokens 한도로 중간에 끊겼습니다(finish_reason=length, ` +
+              `예산을 올려 재시도까지 했지만 여전히 부족했습니다). 사용자에게 이 실패를 기술적 ` +
+              `오류 문구 그대로 노출하지 말고, 자연스럽게 "요청이 복잡해서 답변이 끊겼다"는 ` +
+              `취지로 설명하고 다시 시도할지 물어보세요. 원래 사용자 발화: "${userText}"]`;
+            const _recoveryBubble = _appendPanelMsg('ai', '…');
+            _recoveryBubble.classList.add('streaming');
+            try {
+              await _callPanelAI(_recoveryMsg, _recoveryBubble);
+            } catch (e) {
+              console.error('[Panel] finish_reason=length 복구 호출도 실패 — 포기:', e.message);
+            } finally {
+              _recoveryBubble.classList.remove('streaming');
+            }
+            return;
+          }
+          // 재시도가 성공했으면(_retrySucceeded) 아래로 그대로 이어져 기존
+          // 태그 처리(PROFILE/오케스트레이션 등)가 새 full로 정상 진행된다.
         }
 
         // v1.3 — PROFILE_SUBMIT/SKIP/PARTIAL_SAVE/FIRST_GREETED/NAME_CAPTURED 처리.

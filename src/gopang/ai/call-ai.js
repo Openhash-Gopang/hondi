@@ -5223,7 +5223,18 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
   console.log(`[AI] 호출 후보 ${candidates.length}개 준비 — 1번부터 순차 시도`);
 
   // ── 스트리밍 호출 (페일오버 포함) ───────────────────────
-  try {
+  // BUG-FIX(2026-09-14) — _streamOneAttempt(maxTokensOverride, reuseBubble)로
+  // 추출. 원래는 이 블록 전체(후보 페일오버 + SSE 수신)가 한 번만 실행돼,
+  // finish_reason==='length'(hondi-pro thinking이 reasoning에 예산을 다 써서
+  // 태그를 못 내는 경우)로 끊기면 "사용자에게 알리는 것" 말고는 되돌릴
+  // 방법이 없었다(그마저도 사용자가 못 보고 "잠시만 기다려 주세요"에서
+  // 멈춘 것처럼 느끼는 실사용 재현 사례가 있었음). 근본 예방을 위해
+  // 이제 끊기면 예산을 2배로 올려 *같은 messages로 조용히 한 번 더*
+  // 시도한다 — 대부분의 경우 사용자는 응답이 약간 늦어지는 것 말고는
+  // 끊김 자체를 아예 경험하지 않는다. 재시도까지 끊기는 경우(매우
+  // 드묾 — 첫 시도가 이미 CHAT_REPLY_PRO 하나 가득이었는데 그 2배로도
+  // 부족했다는 뜻)에만 기존처럼 AC가 사용자에게 자연스럽게 알린다.
+  async function _streamOneAttempt(maxTokensOverride, reuseBubble) {
     let res = null, usedCandidate = null, lastErr = null, idle = null;
 
     for (let i = 0; i < candidates.length; i++) {
@@ -5241,11 +5252,12 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
         // switch형 GWP 전환 대화에서 hondi-pro 페일오버 턴이 45초 idle
         // 타임아웃, reasoning_tokens만 280+ 소모). hondi-pro는 thinking이
         // 켜져 있어 CHAT_REPLY(800)로는 추론만 하다 끝난다 — candidate가
-        // hondi-pro인지 보고 예산을 그때그때 고른다.
+        // hondi-pro인지 보고 예산을 그때그때 고른다. maxTokensOverride가
+        // 있으면(재시도) 그 값을 우선한다.
         const reqBody = {
           model: c.model,
           messages,
-          max_tokens:  resolveChatBudget(c.model),
+          max_tokens:  maxTokensOverride ?? resolveChatBudget(c.model),
           temperature: 0.6,
           stream:      true,
         };
@@ -5326,13 +5338,17 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
     // 없는 빈 화면이 수 초간 노출돼 "멈춘 것처럼" 보이는 원인이었다
     // (실사용 중 발견). hideTyping()은 실제 첫 델타를 받는 시점으로
     // 옮기고, 그 전까지는 타이핑 인디케이터를 계속 띄워둔다.
-    const bubble = _createStreamBubble();
+    // BUG-FIX(2026-09-14) — reuseBubble이 있으면(=재시도) 새 말풍선을
+    // 또 만들지 않고 기존 것을 비워서 재사용한다. 안 그러면 화면에
+    // "끊긴 답"과 "다시 낸 답" 말풍선 두 개가 나란히 남는다.
+    const bubble = reuseBubble || _createStreamBubble();
+    if (reuseBubble) _updateStreamBubble(reuseBubble, '');
     let   _typingHidden = false;
     const reader  = res.body.getReader();
     const decoder = new TextDecoder();
     let   fullReply = '';
     let   buf       = '';
-    // BUG-FIX(2026-09-14) — 아래 finish_reason==='length' 복구 로직에서 쓴다.
+    // BUG-FIX(2026-09-14) — 아래 finish_reason==='length' 재시도/복구 로직에서 쓴다.
     let   finishReason = null;
 
     try {
@@ -5403,38 +5419,64 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
       if (!_typingHidden) { hideTyping(); _typingHidden = true; }
     }
 
+    return { fullReply, finishReason, usedCandidate, bubble };
+  }
+
+  // BUG-FIX(2026-09-14) — 아래 전체(1차 호출→필요시 재시도→후속 처리)를
+  // 원래 있던 하나의 try로 계속 감싼다. _streamOneAttempt 자체가 던지는
+  // 예외("모든 LLM 호출에 실패했습니다" 등)도 예전과 똑같이 맨 아래
+  // catch(err)(_preTab 정리·워치독 onFailure 처리 포함)로 잡혀야 하므로,
+  // 호출 지점을 try 밖에 두면 안 된다.
+  try {
+    let { fullReply, finishReason, usedCandidate, bubble } = await _streamOneAttempt(null, null);
+
+    // ── BUG-FIX(2026-09-14) — 끊기면 예산을 올려 조용히 한 번 더 시도 ──
+    // 근본 예방: 사용자에게 "끊겼다"고 알리기 전에, 같은 messages로 예산만
+    // 2배(resolveChatBudget의 2배 — hondi-pro 기준 4000→8000) 올려 재시도한다.
+    // 이번 재시도까지 finish_reason이 다시 'length'면 그대로 두고 아래
+    // 기존 복구 분기(사용자 안내)로 넘어간다 — 무한 재시도는 하지 않는다
+    // (예산을 계속 올려도 안 되는 경우는 "이 질의 자체가 구조적으로 너무
+    // 크다"는 뜻이라, 계속 조용히 재시도하기보다 한 번은 사용자에게
+    // 정직하게 알리는 게 맞다).
+    if (finishReason === 'length') {
+      console.warn('[AI] 1차 응답이 max_tokens 한도로 끊김(finish_reason=length) — 예산을 올려 자동 재시도합니다.');
+      try {
+        const _retryBudget = resolveChatBudget(usedCandidate?.model || activeModel) * 2;
+        const _retry = await _streamOneAttempt(_retryBudget, bubble);
+        fullReply    = _retry.fullReply;
+        finishReason = _retry.finishReason;
+        usedCandidate = _retry.usedCandidate;
+        bubble        = _retry.bubble;
+      } catch (retryErr) {
+        console.warn('[AI] 재시도 자체가 실패 — 1차(끊긴) 결과로 계속 진행:', retryErr.message);
+      }
+    }
+
+    // ── 스트리밍 호출 이후 공통 처리 ────────────────────────
     if (!fullReply) fullReply = '(응답 없음)';
     console.log(`[AI] 응답 완료 — ${fullReply.length}자`);
     if (CFG._modelOverride) { CFG.model = CFG._modelOverride; CFG._modelOverride = null; }
     history.push({ role: 'assistant', content: fullReply });
     if (bubble) bubble.classList.remove('streaming');
 
-    // ── BUG-FIX(2026-09-14) — 응답이 max_tokens 한도로 끊긴 경우 복구 ──
-    // 처음엔 "대괄호 태그가 안 닫혔을 때만" 잡으면 될 줄 알았는데(예:
-    // "...task=\"애월읍 근처 행"에서 잘림), 실제로는 hondi-pro가 필러
-    // 문장("...찾아볼게요. 잠시만 기다려 주세요.")까지는 깔끔하게 content로
-    // 다 내고, 그 다음 [CALL_GOVTREE: ...] 태그를 구성하기 직전/도중에
-    // reasoning_content가 남은 max_tokens를 전부 먹어버려 태그 글자가
-    // *하나도* content에 안 들어간 채 finish_reason:"length"로 끝나는
-    // 경우도 있다(스크린샷 재현 사례 — 화면에 태그 파편이 전혀 안 보이는
-    // 이유). 이 경우 fullReply에는 '[' 자체가 없어 아래 미완성 태그
-    // 휴리스틱만으로는 못 잡는다. 그래서 조건을 "미완성 태그가 있으면"
-    // 에서 "finish_reason===length면 무조건"으로 넓힌다 — AC의 정상
-    // 대화 스타일(§0-H, 1~3문장)에서 CHAT_REPLY(_PRO) 예산을 다 채울
-    // 정도로 긴 답은 애초에 설계 의도에도 안 맞으므로, 오탐 위험보다
-    // "조용히 멈추는" 위험이 훨씬 크다.
+    // ── BUG-FIX(2026-09-14) — 재시도까지도 끊긴 경우만 여기 도달 ──────
+    // (1차만 끊기고 재시도가 성공했으면 finishReason은 이미 'stop' 등으로
+    // 갱신돼 있어 이 분기를 안 탄다 — 정상 케이스는 사용자가 끊김 자체를
+    // 못 느낀다.) 재시도까지 끊긴 경우는 매우 드물지만(예산을 이미 2배
+    // 줬는데도 부족했다는 뜻), 조용히 넘어가지 않고 AC가 자연스럽게
+    // 사용자에게 알리게 한다.
     const _lastOpenBracket  = fullReply.lastIndexOf('[');
     const _lastCloseBracket = fullReply.lastIndexOf(']');
     const _hasUnclosedTag   = _lastOpenBracket > _lastCloseBracket;
     if (finishReason === 'length') {
       console.warn(
-        '[AI] finish_reason=length로 응답 종료 — 복구 시도.',
+        '[AI] 재시도 후에도 finish_reason=length — 사용자에게 안내.',
         _hasUnclosedTag
           ? `미완성 태그: ${fullReply.slice(_lastOpenBracket, _lastOpenBracket + 80)}`
           : '(태그 시작 전 잘림 — reasoning이 예산을 다 씀)'
       );
       await _recoverOrchestrationFailure(
-        new Error('응답이 max_tokens 한도로 끊겼습니다(finish_reason=length)'),
+        new Error('응답이 max_tokens 한도로 끊겼습니다(재시도 포함, finish_reason=length)'),
         callAI, userText, 'RESPONSE_TRUNCATED'
       );
       return;
