@@ -52,10 +52,13 @@ if ('serviceWorker' in navigator) {
 
       // 자동 적용 타이머 ID (중복 방지)
       let _autoApplyTimer = null;
-      // BUG-FIX(2026-09-14) — 배너가 뜬 뒤 실제 적용(postMessage/reload)
-      // 까지의 5초 카운트다운 타이머. 기존엔 이 타이머를 별도로 추적하지
-      // 않아 취소할 방법이 없었다 — 아래 _autoApplyUpdate 참고.
       let _autoApplyReloadTimer = null;
+      // BUG-FIX(2026-09-14, 재발) — 위 두 타이머로 진행 중인 사이클이
+      // "어떤 워커"를 대상으로 하는지 추적한다. reg.waiting은 동일한
+      // 워커가 계속 대기 중인 동안은 매번 같은 객체 참조를 반환하므로,
+      // ===로 "진짜 새 버전인지 vs 같은 버전을 또 감지했을 뿐인지"를
+      // 구분할 수 있다 — 아래 _autoApplyUpdate 참고.
+      let _pendingApplySW = null;
 
       // BUG-FIX(2026-09-14) — "새 버전이 있습니다" 배너가 짧은 시간에 여러
       // 번 잇달아 뜨는 문제. 원인: 병합이 연달아 여러 번 일어나면(각 병합마다
@@ -103,28 +106,36 @@ if ('serviceWorker' in navigator) {
           return;
         }
 
-        // BUG-FIX(2026-09-14) — "누적된 이전 버전은 무시하고 최근 버전만
-        // 적용해야 한다"는 요구사항 재확인 계기로 재점검: 기존 코드는
-        // 3초 디바운스 타이머(_autoApplyTimer)만 취소 대상이었는데, 그
-        // 타이머가 발화하는 순간(=배너가 뜨고 5초 카운트다운이 시작되는
-        // 순간) _autoApplyTimer를 곧바로 null로 되돌렸다. 그 결과 "배너가
-        // 이미 떠서 카운트다운 중인" 5초 구간에 또 다른 새 버전이
-        // 감지되면, 이미 진행 중인 사이클을 취소하지 못한 채 완전히
-        // 별개의 두 번째 3초→5초 사이클이 나란히 돌아갔다 — 각자 독립적
-        // 으로 reg.waiting을 읽어 postMessage/reload를 시도하므로 중복
-        // 새로고침이나 타이밍에 따라 과거 시점의 대기본을 붙잡을 여지가
-        // 남아 있었다. 이제 "배너 표시부터 실제 적용까지" 전체 구간을
-        // 하나의 취소 가능한 시퀀스로 묶는다 — 이 구간 안에서 새 버전이
-        // 또 감지되면 지금 진행 중인 사이클(타이머 2개 + 이미 뜬 배너
-        // DOM)을 전부 취소하고 처음부터 다시 시작한다. 그래서 실제로
-        // 끝까지 완료되는 사이클은 언제나 "가장 마지막에 감지된" 사이클
-        // 하나뿐이고, 그 사이클이 적용 시점에 읽는 reg.waiting은 그
-        // 시점 기준 최신본이다 — 중간에 있었던 버전들은 자연히
-        // 건너뛰어진다.
+        // ★ BUG-FIX(2026-09-14, 실사 재현 — 직전 수정이 새로 만든 회귀) ★
+        // 직전 수정("배너 표시부터 적용까지 전체 구간을 취소 가능하게")이
+        // 만든 새 버그: visibilitychange(포그라운드 복귀)는 화면을 잠깐
+        // 껐다 켜거나 알림창을 내렸다 올리기만 해도 자주 발생하는데, 그때
+        // 마다 reg.update() 후 reg.waiting이 여전히 참(아직 같은 버전이
+        // 대기 중)이면 무조건 _autoApplyUpdate(reg)를 다시 불렀다(147·
+        // 176·187행 등 4곳 모두 "새 버전인지"를 구분하지 않고 "대기 중인
+        // 게 있는지"만 본다). 직전 수정 이후로는 이게 "정말 새 버전이
+        // 왔다"와 구분되지 않은 채 매번 진행 중이던 카운트다운을 통째로
+        // 취소하고 처음부터 다시 시작해버려, 화면을 자주 들여다보는
+        // 실사용 환경에서는 카운트다운이 0초에 도달하지 못하고 배너가
+        // 무한히 반복되는 것처럼 보였다(실사 재현 확인).
+        //
+        // reg.waiting은 진짜 새 버전이 설치되지 않는 한 동일한 워커
+        // 객체 참조를 계속 반환한다 — 그 성질을 이용해 "지금 사이클이
+        // 이미 처리 중인 워커와 같은 워커인지"를 먼저 확인한다. 같으면
+        // (=재확인일 뿐, 새 버전 아님) 진행 중이던 카운트다운을 그대로
+        // 두고 아무것도 하지 않는다. 다르면(=진짜 새 버전) 이전 사이클을
+        // 취소하고 새로 시작한다 — 이 분기가 "누적된 이전 버전은 무시
+        // 하고 최근 버전만 적용" 요구사항의 본래 의도였다.
+        if ((_autoApplyTimer || _autoApplyReloadTimer) && reg.waiting === _pendingApplySW) {
+          console.log('[PWA] 이미 처리 중인 것과 같은 버전 재감지(단순 재확인) — 진행 중인 카운트다운 유지');
+          return;
+        }
+
         if (_autoApplyTimer) { clearTimeout(_autoApplyTimer); _autoApplyTimer = null; }
         if (_autoApplyReloadTimer) { clearTimeout(_autoApplyReloadTimer); _autoApplyReloadTimer = null; }
         const _staleBanner = document.getElementById('update-banner');
         if (_staleBanner) _staleBanner.remove(); // 이전 사이클의 배너(카운트다운 중이었을 수도)를 정리하고 새로 그린다
+        _pendingApplySW = reg.waiting;
 
         _autoApplyTimer = setTimeout(() => {
           _autoApplyTimer = null;
@@ -132,6 +143,7 @@ if ('serviceWorker' in navigator) {
           _showUpdateBanner(5);         // 카운트다운 배너 표시
           _autoApplyReloadTimer = setTimeout(() => {
             _autoApplyReloadTimer = null;
+            _pendingApplySW = null;
             sessionStorage.setItem(LOOP_KEY, String(Date.now()));
             const sw = reg.waiting;
             if (sw) {
