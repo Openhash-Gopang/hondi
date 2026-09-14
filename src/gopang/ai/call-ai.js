@@ -5728,26 +5728,11 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
     history.push({ role: 'assistant', content: fullReply });
     if (bubble) bubble.classList.remove('streaming');
 
-    // ══════════════════════════════════════════════════════════════
-    // 🔍 TEMP DIAGNOSTIC (2026-09-14 — 원인 확정 후 제거할 것, webapp.html
-    // 패널 쪽 동일 블록과 세트) — 이 아래 모든 _handle*Tag가 내부적으로
-    // _stripInternalTags(fullReply)를 거쳐 화면을 깨끗하게 지우기 때문에,
-    // "태그가 애초에 없었다"와 "태그는 있었는데 처리에 실패했다"를 화면
-    // 만으로는 구분할 수 없었다. 순수 읽기 전용 — fullReply를 수정하지
-    // 않고, 어떤 태그 처리 로직도 건드리지 않는다.
-    console.warn('[RAW-DEBUG] 원본 응답(태그 포함, 가공 전):', fullReply);
-    if (bubble) {
-      const _dbgEl = document.createElement('div');
-      _dbgEl.style.cssText =
-        'font-family:monospace;font-size:11px;color:#92400e;background:#fffbeb;' +
-        'border:1px dashed #f59e0b;white-space:pre-wrap;word-break:break-all;' +
-        'margin-top:6px;padding:6px;border-radius:6px;';
-      _dbgEl.textContent = '🔍 진단(원본, 태그 포함):\n' + fullReply;
-      (bubble.parentElement || bubble)?.appendChild?.(_dbgEl);
-    }
-    // ══════════════════════════════════════════════════════════════
-    // TEMP DIAGNOSTIC 끝
-    // ══════════════════════════════════════════════════════════════
+    // 2026-09-14 — 진단용 노란 박스(TEMP DIAGNOSTIC, #253, webapp.html
+    // 패널 쪽 동일 블록과 세트)는 원인이 확정돼(위치 컨텍스트 배선 누락 +
+    // leaf 액션 태그 5종 미이식, 9c3aaa2/5fcf79b1) 제거했다 — fullReply
+    // 값 자체를 화면에 노출하던 console.warn('[RAW-DEBUG] ...')와 노란
+    // 점선 박스 렌더링 코드 전체를 되돌렸다.
 
     // ── BUG-FIX(2026-09-14) — 재시도까지도 끊긴 경우만 여기 도달 ──────
     // (1차만 끊기고 재시도가 성공했으면 finishReason은 이미 'stop' 등으로
