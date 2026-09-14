@@ -94,6 +94,34 @@ async function _resolveLocation() {
     return;
   }
   let watchId = null, gotFirst = false;
+  // ── 2026-09-14 신설 — 사고실험(wrangler tail)으로 발견: watchPosition의
+  // success 콜백이 GPS 드리프트(수십 cm 단위 좌표 흔들림)만으로도 초당
+  // 1회꼴로 계속 발화하는데, 그때마다 아무 거리·시간 조건 없이 매번
+  // _reverseGeocodeViaKakao()를 다시 호출하고 있었다. 그 결과 /geocode가
+  // 수 분간 초당 1회씩 hondi-proxy로 쏟아졌고, 같은 시간대 /deepseek
+  // 호출들이 20~60초씩 걸리는 지연(사용자에게는 "생각하는 중입니다...
+  // 30초 경과" 및 진단창 "(응답 없음)" 반복으로 나타남)과 함께 관찰됐다.
+  // 실제로 사용자 위치가 유의미하게 바뀌지 않았는데도(6~7번째 소수점
+  // 자리만 흔들림, 즉 1m 미만) 매번 역지오코딩을 다시 부르는 건 낭비이자
+  // 이 지연의 주된 원인으로 판단 — 마지막으로 지오코딩한 지점에서 일정
+  // 거리 이상 이동했거나 일정 시간이 지났을 때만 다시 부르도록 스로틀을
+  // 추가한다. 좌표 자체(setUserLocation)는 기존처럼 매 tick 즉시 반영해
+  // 응답성은 그대로 유지한다 — 느려지는 건 역지오코딩 네트워크 호출뿐이다.
+  const GEOCODE_MIN_DISTANCE_M = 30;   // 이 거리 이상 움직여야 재조회
+  const GEOCODE_MIN_INTERVAL_MS = 20000; // 또는 이 시간 이상 지나야 재조회
+  let lastGeocodedAt = { lat: null, lng: null, ts: 0 };
+  function _haversineM(lat1, lng1, lat2, lng2) {
+    const R = 6371000, toRad = (d) => (d * Math.PI) / 180;
+    const dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+  function _shouldReGeocode(lat, lng) {
+    if (lastGeocodedAt.lat == null) return true;
+    const elapsed = Date.now() - lastGeocodedAt.ts;
+    const moved = _haversineM(lastGeocodedAt.lat, lastGeocodedAt.lng, lat, lng);
+    return moved >= GEOCODE_MIN_DISTANCE_M || elapsed >= GEOCODE_MIN_INTERVAL_MS;
+  }
   function startWatch(hi) {
     if (watchId !== null) navigator.geolocation.clearWatch(watchId);
     watchId = navigator.geolocation.watchPosition(
@@ -103,6 +131,8 @@ async function _resolveLocation() {
         setUserLocation({ lat, lng, accuracy: acc, source: 'GPS', address: _userLocation ? _userLocation.address : null, region: _userLocation ? _userLocation.region : null });
         _updateLocationInPrompt();
         if (!gotFirst) { gotFirst = true; setLocationPending(false); setLocationReady(true); if (!hi) startWatch(true); }
+        if (!_shouldReGeocode(lat, lng)) return;
+        lastGeocodedAt = { lat, lng, ts: Date.now() };
         const addr = await _reverseGeocodeViaKakao(lat, lng);
         if (addr) {
           setUserLocation({ lat, lng, accuracy: acc, source: 'GPS+KAKAO', address: addr, region: _userLocation ? _userLocation.region : null });
