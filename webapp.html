@@ -4550,6 +4550,30 @@ window.closePDV = closePDV;
         // 스트리밍되는 몇 초 동안 원래 버블에 PROFILE_SUBMIT 원문 JSON이 그대로
         // 보이는 깜빡임이 생긴다.
         // BUG-3 수정: textContent → innerHTML + 마크다운 렌더링 (**굵게**, \n→<br>)
+        // ══════════════════════════════════════════════════════════════
+        // 🔍 TEMP DIAGNOSTIC (2026-09-14 — 원인 확정 후 제거할 것)
+        // ══════════════════════════════════════════════════════════════
+        // 이 아래 _stripInternalTags(full)는 태그가 "없었다"/"있었는데
+        // 처리에 실패했다"를 구분하지 않고 항상 화면을 깨끗하게 지운다 —
+        // 즉 지금까지 어떤 스크린샷을 봐도 두 가능성을 구분할 수 없었다.
+        // 추측이나 재수정 대신, 원본(full — 태그 포함, 가공 전)을 화면에
+        // 그대로 노출해 다음 재현 때 눈으로 바로 확인한다. 이 블록은
+        // 순수 진단용이며 태그 처리/디스패치 로직은 전혀 건드리지 않는다
+        // — full 값 자체도 읽기만 하고 수정하지 않는다.
+        console.warn('[RAW-DEBUG][Panel] 원본 응답(태그 포함, 가공 전):', full);
+        {
+          const _dbgEl = document.createElement('div');
+          _dbgEl.style.cssText =
+            'font-family:monospace;font-size:11px;color:#92400e;background:#fffbeb;' +
+            'border:1px dashed #f59e0b;white-space:pre-wrap;word-break:break-all;' +
+            'margin-top:6px;padding:6px;border-radius:6px;';
+          _dbgEl.textContent = '🔍 진단(원본, 태그 포함):\n' + full;
+          (bubbleEl?.parentElement || msgList)?.appendChild(_dbgEl);
+        }
+        // ══════════════════════════════════════════════════════════════
+        // TEMP DIAGNOSTIC 끝
+        // ══════════════════════════════════════════════════════════════
+
         const _clean = _stripInternalTags(full);
         bubbleEl.innerHTML = _clean
           .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
