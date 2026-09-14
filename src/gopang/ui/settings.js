@@ -82,6 +82,11 @@ export function openSettings() {
   if (registered) _renderHondiCodeThumb();
   else { const t = document.getElementById('hondi-code-thumb'); if (t) t.style.display = 'none'; }
 
+  // 2-2. 현재 배포 버전 표시 — /version.json은 CI(bump-app-version.yml)가
+  // main 머지마다 자동 갱신한다. "최신 버전으로 갱신" 버튼을 누르기 전에도
+  // 지금 실행 중인 버전을 바로 확인할 수 있게 한다.
+  _loadCurrentVersionLabel();
+
   // 3. Guest 등록 유도 안내
   const idSec = document.getElementById('gopang-id-section');
   if (idSec) {
@@ -548,6 +553,22 @@ export async function _settingsRegisterHandle() {
 
   // [16] 등록 완료 후 설정 창 재호출 (상태 갱신)
   openSettings();
+}
+
+// ── 현재 배포 버전 표시 ──────────────────────────────────
+// no-store로 읽어야 한다 — 캐시된 옛 version.json을 보여주면 "지금 이
+// 화면의 실제 버전"이라는 표시 취지 자체가 무의미해진다.
+async function _loadCurrentVersionLabel() {
+  const el = document.getElementById('current-version-line');
+  if (!el) return;
+  try {
+    const res = await fetch('/version.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('version.json fetch failed');
+    const data = await res.json();
+    el.textContent = data?.version ? `현재 버전: ${data.version}` : '현재 버전을 확인할 수 없습니다';
+  } catch (e) {
+    el.textContent = '현재 버전을 확인할 수 없습니다 (오프라인일 수 있음)';
+  }
 }
 
 // ── SW 캐시 초기화 ───────────────────────────────────────
