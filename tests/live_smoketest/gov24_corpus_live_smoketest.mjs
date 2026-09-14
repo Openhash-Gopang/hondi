@@ -35,7 +35,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '../..');
@@ -113,7 +113,13 @@ async function main() {
   globalThis.window.HONDI_PROVINCE_CODE = 'jeju';
 
   const { assembleGovSystemPrompt, resolveGovAgency } = await import(
-    path.join(REPO_ROOT, 'src/gopang/gov/gov-router.js')
+    // BUG-FIX(2026-09-14, Windows) — path.join()이 만드는 'C:\...' 형태의
+    // 절대경로를 import()에 그대로 넘기면 Windows에서
+    // ERR_UNSUPPORTED_ESM_URL_SCHEME로 실패한다(Node ESM 로더가 절대경로는
+    // file:// URL이어야 한다고 요구 — 리눅스/맥은 스킴 없는 절대경로도
+    // 허용해 여태 안 드러났다). pathToFileURL()로 감싸 플랫폼 공통으로
+    // 만든다.
+    pathToFileURL(path.join(REPO_ROOT, 'src/gopang/gov/gov-router.js'))
   );
 
   const results = [];

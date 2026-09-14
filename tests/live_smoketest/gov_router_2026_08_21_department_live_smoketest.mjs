@@ -21,7 +21,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '../..');
@@ -254,7 +254,9 @@ async function main() {
   // — 실제 저장소 원격 데이터를 그대로 쓴다(로컬 테스트처럼 목을 쓰지 않음
   // — 이 스모크테스트는 프로덕션과 최대한 가깝게 검증하는 것이 목적).
   const { assembleGovSystemPrompt, resolveGovAgency } = await import(
-    path.join(REPO_ROOT, 'src/gopang/gov/gov-router.js')
+    // BUG-FIX(2026-09-14, Windows) — gov24_corpus_live_smoketest.mjs와
+    // 동일한 이유로 수정(ERR_UNSUPPORTED_ESM_URL_SCHEME).
+    pathToFileURL(path.join(REPO_ROOT, 'src/gopang/gov/gov-router.js'))
   );
 
   const results = [];
