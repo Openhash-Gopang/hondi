@@ -118,7 +118,13 @@ export const CORE_REGISTRY = {
     key: 'SP_financial-planner', needsMedicalSafety: false,
     // 2026-07-25 신설(주피터 지시) — 99건 사고실험에서 실패 확인된 '내 재무 계획을 수립해 줘'(주피터 원 예시) 직접
     // 커버. GWP와 충돌 없음
-    triggers: ['재무설계사', '재무 계획', '은퇴 설계', '노후 준비 계획', '자산관리'],
+    triggers: ['재무설계사', '재무 계획', '은퇴 설계', '노후 준비 계획', '자산관리',
+      // 2026-09-14 추가 — 상황 표현 보강. "월급을 어떻게 나눠서 저축하고
+      // 투자해야 은퇴 후에도 안정적일지"가 기존 트리거와 안 겹쳐 태그
+      // 자체가 안 나온 게 routing_ABmention_live_smoketest.py batch3
+      // 재현에서 확인됨(가장 나쁜 결과 — 라우팅 실패가 아니라 완전
+      // 무응답).
+      '월급을 어떻게 나눠서', '저축과 투자 계획'],
   },
 
   // ── 법률 (2026-07-17 추가분) ──────────────────────
@@ -506,7 +512,12 @@ export const CORE_REGISTRY = {
     label: '항해사', icon: '🧭', category: 'ENG', ownerAgency: 'gopang',
     key: 'SP_navigation-officer', needsMedicalSafety: false,
     // 2026-07-25 신설(주피터 지시) — 인접쌍(항해사↔도선사) — '운항' 고유 업무만
-    triggers: ['항해사', '항해', '선박 운항'],
+    triggers: ['항해사', '항해', '선박 운항',
+      // 2026-09-14 추가 — 상황 표현 보강. "제주에서 일본까지 배로 가는
+      // 항로를 실제로 짜줄 사람이 필요해요"가 기존 트리거와 안 겹쳐
+      // klogistics로 샌 게 routing_ABmention_live_smoketest.py batch3
+      // 재현에서 확인됨.
+      '항로를 짜', '뱃길을 안내'],
   },
   'marine-engineer': {
     label: '기관사(선박)', icon: '⚙️', category: 'ENG', ownerAgency: 'gopang',
@@ -525,7 +536,12 @@ export const CORE_REGISTRY = {
     key: 'SP_weather-forecaster', needsMedicalSafety: false,
     // 2026-07-25 신설(주피터 지시) — khealth GWP의 '기상청' 도메인과는 별개(민간 자문 페르소나) — 실사용 빈도
     // 낮을 것
-    triggers: ['기상예보사', '기상 예보 상담'],
+    triggers: ['기상예보사', '기상 예보 상담',
+      // 2026-09-14 추가 — 상황 표현 보강. "주말에 배를 띄워도 될 만큼
+      // 바다 날씨가 괜찮을지 판단해줄 사람이 필요해요"가 기존 트리거와
+      // 안 겹쳐 marine-pilot으로 샌 게 routing_ABmention_live_
+      // smoketest.py batch3 재현에서 확인됨.
+      '바다 날씨가 괜찮을지', '출항 가능한 날씨인지'],
   },
   'fire-safety-manager': {
     label: '소방시설관리사', icon: '🧯', category: 'ENG', ownerAgency: 'gopang',
@@ -557,7 +573,12 @@ export const CORE_REGISTRY = {
     // 2026-07-25 신설(주피터 지시) — 직업명+법정업무명
     triggers: ['가스기술사', '가스안전 점검',
       // 2026-08-31 추가 — 상황 표현 보강(위와 동일 배경)
-      '주방 가스 설비 점검', '가스 설비 안전'],
+      '주방 가스 설비 점검', '가스 설비 안전',
+      // 2026-09-14 추가 — 같은 배경. "가스 배관에서 냄새가 나는 것
+      // 같은데 점검해줄 사람이 필요해요"가 기존 문구들과 정확히 안
+      // 겹쳐(느낌은 같지만 문자열이 다름) kcommerce로 샌 게
+      // routing_ABmention_live_smoketest.py batch3 재현에서 확인됨.
+      '가스 배관에서 냄새', '가스 냄새가 나는데'],
   },
 
   // ── 부동산 (SP-RE-01, 2026-07-06 신설) ────────────────
