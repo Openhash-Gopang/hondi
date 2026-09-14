@@ -1,0 +1,23 @@
+[
+  {"id": "gov-nhis-recheck-1", "target_name": "국민건강보험공단 제주지사", "avoid_id": "kinsurance",
+   "utterance": "건강보험료가 왜 이렇게 많이 나왔는지 확인하고 싶어"},
+  {"id": "gov-nhis-recheck-2", "target_name": "국민건강보험공단 제주지사", "avoid_id": "kinsurance",
+   "utterance": "건강보험 자격이 상실됐다는 문자를 받았는데 왜 그런지 알아보고 싶어"},
+  {"id": "gov-nhis-recheck-3", "target_name": "국민건강보험공단 제주지사", "avoid_id": "kinsurance",
+   "utterance": "요양병원 이용할 때 건강보험이 적용되는지 확인하고 싶어"},
+  {"id": "gov-nhis-recheck-4", "target_name": "국민건강보험공단 제주지사", "avoid_id": "kinsurance",
+   "utterance": "지역가입자로 전환됐다는데 보험료가 왜 이렇게 바뀌었는지 알고 싶어"},
+  {"id": "gov-nhis-recheck-5", "target_name": "국민건강보험공단 제주지사", "avoid_id": "kinsurance",
+   "utterance": "건강보험증을 잃어버렸는데 재발급받고 싶어"},
+
+  {"id": "gov-kcomwel-recheck-1", "target_name": "근로복지공단 제주지사", "avoid_id": "kbusiness",
+   "utterance": "일하다가 다쳤는데 산재 신청을 어떻게 하는지 알고 싶어"},
+  {"id": "gov-kcomwel-recheck-2", "target_name": "근로복지공단 제주지사", "avoid_id": "kbusiness",
+   "utterance": "회사 다니다 허리를 다쳤는데 치료비를 보상받을 수 있는지 알고 싶어"},
+  {"id": "gov-kcomwel-recheck-3", "target_name": "근로복지공단 제주지사", "avoid_id": "kbusiness",
+   "utterance": "실업급여를 받으려면 어떻게 신청해야 하는지 알고 싶어"},
+  {"id": "gov-kcomwel-recheck-4", "target_name": "근로복지공단 제주지사", "avoid_id": "kbusiness",
+   "utterance": "출산휴가 급여를 어디서 신청하는지 알고 싶어"},
+  {"id": "gov-kcomwel-recheck-5", "target_name": "근로복지공단 제주지사", "avoid_id": "kbusiness",
+   "utterance": "직업훈련비를 지원받을 수 있는 제도가 있는지 알아보고 싶어"}
+]

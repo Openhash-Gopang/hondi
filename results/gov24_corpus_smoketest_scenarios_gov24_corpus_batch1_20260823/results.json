@@ -1,0 +1,818 @@
+[
+  {
+    "id": "gov24-b1-001",
+    "utterance": "토지대장등본 발급받고 싶어요",
+    "note": "[정부24 원본: 토지(임야)대장등본발급] 소관기관(정부24 명시): 국토교통부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-EMD-애월읍",
+      "(5단계 LLM 분류도 SP-EMD-LAZY로 합의 — 1단계에서 이미 확보해둔 위치 힌트로 확정, 재질문 생략)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-002",
+    "utterance": "토지대장 열람하고 싶어요",
+    "note": "[정부24 원본: 토지(임야)대장열람] 소관기관(정부24 명시): 국토교통부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-DO-PLAN",
+      "(LLM 분류 폴백)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-003",
+    "utterance": "토지대장등본 발급받고 싶어요",
+    "note": "[정부24 원본: 토지(임야)대장등본발급(대지권등록부)] 소관기관(정부24 명시): 국토교통부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-EMD-애월읍",
+      "(5단계 LLM 분류도 SP-EMD-LAZY로 합의 — 1단계에서 이미 확보해둔 위치 힌트로 확정, 재질문 생략)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-004",
+    "utterance": "토지대장 열람하고 싶어요",
+    "note": "[정부24 원본: 토지(임야)대장열람(대지권등록부)] 소관기관(정부24 명시): 국토교통부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "(LLM 분류 폴백)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-005",
+    "utterance": "주민등록표 등본 발급받고 싶어요",
+    "note": "[정부24 원본: 주민등록표 등본 발급] 소관기관(정부24 명시): 행정안전부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-EMD-애월읍",
+      "(5단계 LLM 분류도 SP-EMD-LAZY로 합의 — 1단계에서 이미 확보해둔 위치 힌트로 확정, 재질문 생략)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-006",
+    "utterance": "주민등록표 초본 발급받고 싶어요",
+    "note": "[정부24 원본: 주민등록표 초본 발급] 소관기관(정부24 명시): 행정안전부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-EMD-애월읍",
+      "(5단계 LLM 분류도 SP-EMD-LAZY로 합의 — 1단계에서 이미 확보해둔 위치 힌트로 확정, 재질문 생략)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-007",
+    "utterance": "주민등록표 등본 발급받고 싶어요",
+    "note": "[정부24 원본: 주민등록표 등본(영문) 발급] 소관기관(정부24 명시): 행정안전부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-EMD-애월읍",
+      "(5단계 LLM 분류도 SP-EMD-LAZY로 합의 — 1단계에서 이미 확보해둔 위치 힌트로 확정, 재질문 생략)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-008",
+    "utterance": "주민등록표 초본 발급받고 싶어요",
+    "note": "[정부24 원본: 주민등록표 초본(영문) 발급] 소관기관(정부24 명시): 행정안전부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-EMD-애월읍",
+      "(5단계 LLM 분류도 SP-EMD-LAZY로 합의 — 1단계에서 이미 확보해둔 위치 힌트로 확정, 재질문 생략)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-009",
+    "utterance": "건축물대장 관련해서 어떻게 해야 하나요",
+    "note": "[정부24 원본: 건축물대장(발급)] 소관기관(정부24 명시): 국토교통부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-CITYDEPT-jejusi-housing",
+      "(규칙 F 일반화 — 시청 국 소관 사무라 읍면동 생략)",
+      "PERMIT-CRITERIA-PROTOCOL(PERMIT-BUILDING-REPORT-14)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 2,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-010",
+    "utterance": "건축물대장 관련해서 어떻게 해야 하나요",
+    "note": "[정부24 원본: 건축물대장(열람)] 소관기관(정부24 명시): 국토교통부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-CITYDEPT-jejusi-housing",
+      "(규칙 F 일반화 — 시청 국 소관 사무라 읍면동 생략)",
+      "PERMIT-CRITERIA-PROTOCOL(PERMIT-BUILDING-REPORT-14)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 2,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-011",
+    "utterance": "여권 재발급 온라인 신청하고 싶어요",
+    "note": "[정부24 원본: 여권 재발급 온라인 신청] 소관기관(정부24 명시): 외교부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-CITYDEPT-jejusi-jachi",
+      "(규칙 F 일반화 — 시청 국 소관 사무라 읍면동 생략)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 2,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-012",
+    "utterance": "건강진단결과서 발급받고 싶어요",
+    "note": "[정부24 원본: 건강진단결과서(보건증) 발급] 소관기관(정부24 명시): 보건복지부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-BOHWAN"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-013",
+    "utterance": "지방세 납세증명서 발급받고 싶어요",
+    "note": "[정부24 원본: 지방세 납세증명서 발급] 소관기관(정부24 명시): 행정안전부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-DO-PLAN"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-014",
+    "utterance": "전입 신고하고 싶어요",
+    "note": "[정부24 원본: 전입신고] 소관기관(정부24 명시): 행정안전부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-EMD-애월읍",
+      "(5단계 LLM 분류도 SP-EMD-LAZY로 합의 — 1단계에서 이미 확보해둔 위치 힌트로 확정, 재질문 생략)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-015",
+    "utterance": "가족관계증명서 발급받고 싶어요",
+    "note": "[정부24 원본: 가족관계증명서 발급] 소관기관(정부24 명시): 대법원 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-EMD-애월읍",
+      "(5단계 LLM 분류도 SP-EMD-LAZY로 합의 — 1단계에서 이미 확보해둔 위치 힌트로 확정, 재질문 생략)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-016",
+    "utterance": "학교생활기록부 발급받고 싶어요",
+    "note": "[정부24 원본: 학교생활기록부(초중고) 발급] 소관기관(정부24 명시): 교육부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-DO-CULTURE",
+      "(LLM 분류 폴백)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-017",
+    "utterance": "자동차등록원부열람 발급 신청하고 싶어요",
+    "note": "[정부24 원본: 자동차등록원부(갑)열람발급신청] 소관기관(정부24 명시): 국토교통부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-CITYDEPT-jejusi-safety",
+      "(규칙 F 일반화 — 시청 국 소관 사무라 읍면동 생략)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 2,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-018",
+    "utterance": "지적도 등본 발급받고 싶어요",
+    "note": "[정부24 원본: 지적도 등본 발급] 소관기관(정부24 명시): 국토교통부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-EMD-애월읍",
+      "(5단계 LLM 분류도 SP-EMD-LAZY로 합의 — 1단계에서 이미 확보해둔 위치 힌트로 확정, 재질문 생략)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-019",
+    "utterance": "소득금액증명 발급받고 싶어요",
+    "note": "[정부24 원본: 소득금액증명 발급] 소관기관(정부24 명시): 국세청 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "JEJU-NATIONAL-SP",
+      "SP-NAT-STAT",
+      "(LLM 분류 폴백)"
+    ],
+    "agency": "gov_national",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-020",
+    "utterance": "대학 졸업증명서 신청하고 싶어요",
+    "note": "[정부24 원본: 대학(교) 졸업증명서 신청] 소관기관(정부24 명시): 교육부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-EMD-애월읍",
+      "(1단계 힌트 전용 매칭 폴백 — EMD가 위치 힌트로만 잡혀 2~5단계에 더 구체적인 매칭 기회를 먼저 줬으나 실패)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-021",
+    "utterance": "고용보험 자격이력내역서 관련해서 어떻게 해야 하나요",
+    "note": "[정부24 원본: 고용보험 자격이력내역서] 소관기관(정부24 명시): 근로복지공단 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "JEJU-NATIONAL-SP",
+      "SP-NAT-LABOR"
+    ],
+    "agency": "gov_national",
+    "classifyCallCount": 0,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-022",
+    "utterance": "임야도 등본 발급받고 싶어요",
+    "note": "[정부24 원본: 임야도 등본 발급] 소관기관(정부24 명시): 국토교통부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-EMD-애월읍",
+      "(5단계 LLM 분류도 SP-EMD-LAZY로 합의 — 1단계에서 이미 확보해둔 위치 힌트로 확정, 재질문 생략)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-023",
+    "utterance": "자동차등록원부열람 발급 신청하고 싶어요",
+    "note": "[정부24 원본: 자동차등록원부(을)열람발급신청] 소관기관(정부24 명시): 국토교통부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-CITYDEPT-jejusi-safety",
+      "(규칙 F 일반화 — 시청 국 소관 사무라 읍면동 생략)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 2,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-024",
+    "utterance": "토지이용계획확인 신청하고 싶어요",
+    "note": "[정부24 원본: 토지이용계획확인신청] 소관기관(정부24 명시): 국토교통부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-CITYDEPT-jejusi-housing",
+      "(규칙 F 일반화 — 시청 국 소관 사무라 읍면동 생략)",
+      "PERMIT-CRITERIA-PROTOCOL(PERMIT-BUILDING-REPORT-14)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 2,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-025",
+    "utterance": "납세증명서 발급받고 싶어요",
+    "note": "[정부24 원본: 납세증명서 발급] 소관기관(정부24 명시): 국세청 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-DO-PLAN",
+      "(LLM 분류 폴백)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-026",
+    "utterance": "건강보험 자격득실 확인서 관련해서 어떻게 해야 하나요",
+    "note": "[정부24 원본: 건강보험 자격득실 확인서] 소관기관(정부24 명시): 보건복지부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "JEJU-NATIONAL-SP",
+      "SP-NAT-NHIS"
+    ],
+    "agency": "gov_national",
+    "classifyCallCount": 0,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-027",
+    "utterance": "세목별과세증명 관련해서 어떻게 해야 하나요",
+    "note": "[정부24 원본: 세목별과세증명(서울외)] 소관기관(정부24 명시): 행정안전부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-DO-PLAN",
+      "(LLM 분류 폴백)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-028",
+    "utterance": "출입국에 관한 사실증명 관련해서 어떻게 해야 하나요",
+    "note": "[정부24 원본: 출입국에 관한 사실증명] 소관기관(정부24 명시): 법무부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "JEJU-NATIONAL-SP",
+      "SP-NAT-IMMIGRATION"
+    ],
+    "agency": "gov_national",
+    "classifyCallCount": 0,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-029",
+    "utterance": "주민등록증재 발급 신청하고 싶어요",
+    "note": "[정부24 원본: 주민등록증재발급신청] 소관기관(정부24 명시): 행정안전부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-EMD-애월읍",
+      "(5단계 LLM 분류도 SP-EMD-LAZY로 합의 — 1단계에서 이미 확보해둔 위치 힌트로 확정, 재질문 생략)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-030",
+    "utterance": "병적증명서 발급받고 싶어요",
+    "note": "[정부24 원본: 병적증명서 발급] 소관기관(정부24 명시): 병무청 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "JEJU-NATIONAL-SP",
+      "SP-NAT-MMA",
+      "(LLM 분류 폴백)"
+    ],
+    "agency": "gov_national",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-031",
+    "utterance": "인감증명서 발급 신청하고 싶어요",
+    "note": "[정부24 원본: 인감증명서 발급 신청] 소관기관(정부24 명시): 행정안전부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-EMD-애월읍",
+      "(5단계 LLM 분류도 SP-EMD-LAZY로 합의 — 1단계에서 이미 확보해둔 위치 힌트로 확정, 재질문 생략)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-032",
+    "utterance": "국민연금 가입내역 관련해서 어떻게 해야 하나요",
+    "note": "[정부24 원본: 국민연금 가입내역] 소관기관(정부24 명시): 국민연금공단 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "JEJU-NATIONAL-SP",
+      "SP-NAT-NPS"
+    ],
+    "agency": "gov_national",
+    "classifyCallCount": 0,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-033",
+    "utterance": "4대사회보험 가입자 가입내역 확인서 관련해서 어떻게 해야 하나요",
+    "note": "[정부24 원본: 4대사회보험 가입자 가입내역 확인서(개인)] 소관기관(정부24 명시): 국민연금공단 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "JEJU-NATIONAL-SP",
+      "SP-NAT-NHIS"
+    ],
+    "agency": "gov_national",
+    "classifyCallCount": 0,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-034",
+    "utterance": "유치원 및 초중등학교 졸업증명서 발급받고 싶어요",
+    "note": "[정부24 원본: 유치원 및 초중등학교 졸업증명서(국문) 발급] 소관기관(정부24 명시): 교육부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-EMD-애월읍",
+      "(1단계 힌트 전용 매칭 폴백 — EMD가 위치 힌트로만 잡혀 2~5단계에 더 구체적인 매칭 기회를 먼저 줬으나 실패)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-035",
+    "utterance": "운전경력증명 발급받고 싶어요",
+    "note": "[정부24 원본: 운전경력증명발급] 소관기관(정부24 명시): 경찰청 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "JEJU-NATIONAL-SP",
+      "SP-NAT-POLICE",
+      "(LLM 분류 폴백)"
+    ],
+    "agency": "gov_national",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-036",
+    "utterance": "4대 사회보험료 납부확인서 관련해서 어떻게 해야 하나요",
+    "note": "[정부24 원본: 4대 사회보험료 납부확인서] 소관기관(정부24 명시): 국민건강보험공단 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "JEJU-NATIONAL-SP",
+      "SP-NAT-NHIS",
+      "(LLM 분류 폴백)"
+    ],
+    "agency": "gov_national",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-037",
+    "utterance": "여권 발급 이력 조회하고 싶어요",
+    "note": "[정부24 원본: 여권 발급 이력 조회] 소관기관(정부24 명시): 외교부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "JEJU-NATIONAL-SP",
+      "SP-POLICY-LAZY(MOFA/fetched)"
+    ],
+    "agency": "gov_national",
+    "classifyCallCount": 0,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-038",
+    "utterance": "세목별과세증명 관련해서 어떻게 해야 하나요",
+    "note": "[정부24 원본: 세목별과세증명(서울)] 소관기관(정부24 명시): 행정안전부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-DO-PLAN",
+      "(LLM 분류 폴백)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-039",
+    "utterance": "기본증명서 발급받고 싶어요",
+    "note": "[정부24 원본: 기본증명서 발급] 소관기관(정부24 명시): 대법원 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-EMD-애월읍",
+      "(5단계 LLM 분류도 SP-EMD-LAZY로 합의 — 1단계에서 이미 확보해둔 위치 힌트로 확정, 재질문 생략)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-040",
+    "utterance": "미과세증명 관련해서 어떻게 해야 하나요",
+    "note": "[정부24 원본: 미과세증명(서울외)] 소관기관(정부24 명시): 행정안전부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-DO-PLAN",
+      "(LLM 분류 폴백)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-041",
+    "utterance": "대학 성적증명서 신청하고 싶어요",
+    "note": "[정부24 원본: 대학(교) 성적증명서 신청] 소관기관(정부24 명시): 교육부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-EMD-애월읍",
+      "(1단계 힌트 전용 매칭 폴백 — EMD가 위치 힌트로만 잡혀 2~5단계에 더 구체적인 매칭 기회를 먼저 줬으나 실패)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-042",
+    "utterance": "보육교직원 경력 증명서 관련해서 어떻게 해야 하나요",
+    "note": "[정부24 원본: 보육교직원 경력(재직) 증명서] 소관기관(정부24 명시): 교육부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-DO-WELFARE"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 4,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-043",
+    "utterance": "대학 졸업예정증명서 신청하고 싶어요",
+    "note": "[정부24 원본: 대학(교) 졸업예정증명서 신청] 소관기관(정부24 명시): 교육부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-EMD-애월읍",
+      "(1단계 힌트 전용 매칭 폴백 — EMD가 위치 힌트로만 잡혀 2~5단계에 더 구체적인 매칭 기회를 먼저 줬으나 실패)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-044",
+    "utterance": "세목별납세증명 관련해서 어떻게 해야 하나요",
+    "note": "[정부24 원본: 세목별납세증명(방문수령)] 소관기관(정부24 명시): 행정안전부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-DO-PLAN",
+      "(LLM 분류 폴백)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-045",
+    "utterance": "미과세증명 관련해서 어떻게 해야 하나요",
+    "note": "[정부24 원본: 미과세증명(서울)] 소관기관(정부24 명시): 행정안전부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-DO-PLAN",
+      "(LLM 분류 폴백)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-046",
+    "utterance": "세목별과세증명 관련해서 어떻게 해야 하나요",
+    "note": "[정부24 원본: 세목별과세증명(방문수령)] 소관기관(정부24 명시): 행정안전부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-DO-PLAN",
+      "(LLM 분류 폴백)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-047",
+    "utterance": "예방접종증명 관련해서 어떻게 해야 하나요",
+    "note": "[정부24 원본: 예방접종증명] 소관기관(정부24 명시): 질병관리청 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-DO-SAFETY"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 4,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-048",
+    "utterance": "취학통지서 온라인 신청 발급받고 싶어요",
+    "note": "[정부24 원본: 취학통지서 온라인 신청 발급] 소관기관(정부24 명시): 교육부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-CITY-JEJU",
+      "SP-EMD-애월읍",
+      "(5단계 LLM 분류도 SP-EMD-LAZY로 합의 — 1단계에서 이미 확보해둔 위치 힌트로 확정, 재질문 생략)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 5,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-049",
+    "utterance": "교통 범칙금 과태료 미납 내역 조회하고 싶어요",
+    "note": "[정부24 원본: 교통 범칙금 과태료 미납 내역 조회] 소관기관(정부24 명시): 경찰청 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-POLICE",
+      "SP-AGYDIV-POLICE-TRAFFIC(과 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  },
+  {
+    "id": "gov24-b1-050",
+    "utterance": "여권정보증명서 발급받고 싶어요",
+    "note": "[정부24 원본: 여권정보증명서 발급(국문)] 소관기관(정부24 명시): 외교부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "JEJU-NATIONAL-SP",
+      "SP-POLICY-LAZY(MOFA/cache)"
+    ],
+    "agency": "gov_national",
+    "classifyCallCount": 0,
+    "needsClarification": null,
+    "routedOk": true,
+    "error": null
+  }
+]

@@ -1,0 +1,542 @@
+[
+  {
+    "id": "kservice-kemergency-A-named",
+    "tier": "kservice",
+    "target_id": "kemergency",
+    "target_name": "K-Emergency",
+    "variant": "named",
+    "utterance": "K-Emergency이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: kemergency]"
+  },
+  {
+    "id": "kservice-kemergency-B-implied",
+    "tier": "kservice",
+    "target_id": "kemergency",
+    "target_name": "K-Emergency",
+    "variant": "implied",
+    "utterance": "긴급 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: kemergency]"
+  },
+  {
+    "id": "kservice-klaw-A-named",
+    "tier": "kservice",
+    "target_id": "klaw",
+    "target_name": "K-Law",
+    "variant": "named",
+    "utterance": "K-Law이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: klaw]"
+  },
+  {
+    "id": "kservice-klaw-B-implied",
+    "tier": "kservice",
+    "target_id": "klaw",
+    "target_name": "K-Law",
+    "variant": "implied",
+    "utterance": "소송 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: klaw]"
+  },
+  {
+    "id": "kservice-kpolice-A-named",
+    "tier": "kservice",
+    "target_id": "kpolice",
+    "target_name": "K-Police",
+    "variant": "named",
+    "utterance": "K-Police이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: kpolice]"
+  },
+  {
+    "id": "kservice-kpolice-B-implied",
+    "tier": "kservice",
+    "target_id": "kpolice",
+    "target_name": "K-Police",
+    "variant": "implied",
+    "utterance": "경찰 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: kpolice]"
+  },
+  {
+    "id": "kservice-ksecurity-A-named",
+    "tier": "kservice",
+    "target_id": "ksecurity",
+    "target_name": "K-Security",
+    "variant": "named",
+    "utterance": "K-Security이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: ksecurity]"
+  },
+  {
+    "id": "kservice-ksecurity-B-implied",
+    "tier": "kservice",
+    "target_id": "ksecurity",
+    "target_name": "K-Security",
+    "variant": "implied",
+    "utterance": "해킹 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: ksecurity]"
+  },
+  {
+    "id": "kservice-khealth-A-named",
+    "tier": "kservice",
+    "target_id": "khealth",
+    "target_name": "K-Health",
+    "variant": "named",
+    "utterance": "K-Health이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: khealth]"
+  },
+  {
+    "id": "kservice-khealth-B-implied",
+    "tier": "kservice",
+    "target_id": "khealth",
+    "target_name": "K-Health",
+    "variant": "implied",
+    "utterance": "아파요 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: khealth]"
+  },
+  {
+    "id": "kservice-kedu-A-named",
+    "tier": "kservice",
+    "target_id": "kedu",
+    "target_name": "K-School",
+    "variant": "named",
+    "utterance": "K-School이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: kedu]"
+  },
+  {
+    "id": "kservice-kedu-B-implied",
+    "tier": "kservice",
+    "target_id": "kedu",
+    "target_name": "K-School",
+    "variant": "implied",
+    "utterance": "공부 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: kedu]"
+  },
+  {
+    "id": "kservice-kgdc-A-named",
+    "tier": "kservice",
+    "target_id": "kgdc",
+    "target_name": "GDC",
+    "variant": "named",
+    "utterance": "GDC이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: kgdc]"
+  },
+  {
+    "id": "kservice-kgdc-B-implied",
+    "tier": "kservice",
+    "target_id": "kgdc",
+    "target_name": "GDC",
+    "variant": "implied",
+    "utterance": "결제 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: kgdc]"
+  },
+  {
+    "id": "kservice-kfinance-A-named",
+    "tier": "kservice",
+    "target_id": "kfinance",
+    "target_name": "K-Stock",
+    "variant": "named",
+    "utterance": "K-Stock이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: kfinance]"
+  },
+  {
+    "id": "kservice-kfinance-B-implied",
+    "tier": "kservice",
+    "target_id": "kfinance",
+    "target_name": "K-Stock",
+    "variant": "implied",
+    "utterance": "주식 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: kfinance]"
+  },
+  {
+    "id": "kservice-kinsurance-A-named",
+    "tier": "kservice",
+    "target_id": "kinsurance",
+    "target_name": "K-Insurance",
+    "variant": "named",
+    "utterance": "K-Insurance이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: kinsurance]"
+  },
+  {
+    "id": "kservice-kinsurance-B-implied",
+    "tier": "kservice",
+    "target_id": "kinsurance",
+    "target_name": "K-Insurance",
+    "variant": "implied",
+    "utterance": "보험 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: kinsurance]"
+  },
+  {
+    "id": "kservice-ktelecom-A-named",
+    "tier": "kservice",
+    "target_id": "ktelecom",
+    "target_name": "K-Telecom",
+    "variant": "named",
+    "utterance": "K-Telecom이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: ktelecom]"
+  },
+  {
+    "id": "kservice-ktelecom-B-implied",
+    "tier": "kservice",
+    "target_id": "ktelecom",
+    "target_name": "K-Telecom",
+    "variant": "implied",
+    "utterance": "요금제 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: ktelecom]"
+  },
+  {
+    "id": "kservice-kestate-A-named",
+    "tier": "kservice",
+    "target_id": "kestate",
+    "target_name": "K-Estate",
+    "variant": "named",
+    "utterance": "K-Estate이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: kestate]"
+  },
+  {
+    "id": "kservice-kestate-B-implied",
+    "tier": "kservice",
+    "target_id": "kestate",
+    "target_name": "K-Estate",
+    "variant": "implied",
+    "utterance": "전세 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: kestate]"
+  },
+  {
+    "id": "kservice-kplan-A-named",
+    "tier": "kservice",
+    "target_id": "kplan",
+    "target_name": "K-Plan",
+    "variant": "named",
+    "utterance": "K-Plan이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: kplan]"
+  },
+  {
+    "id": "kservice-kplan-B-implied",
+    "tier": "kservice",
+    "target_id": "kplan",
+    "target_name": "K-Plan",
+    "variant": "implied",
+    "utterance": "계획을 세워줘 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: kplan]"
+  },
+  {
+    "id": "kservice-kwatch-A-named",
+    "tier": "kservice",
+    "target_id": "kwatch",
+    "target_name": "K-Watch",
+    "variant": "named",
+    "utterance": "K-Watch이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: kwatch]"
+  },
+  {
+    "id": "kservice-kwatch-B-implied",
+    "tier": "kservice",
+    "target_id": "kwatch",
+    "target_name": "K-Watch",
+    "variant": "implied",
+    "utterance": "신고하고 싶어 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: kwatch]"
+  },
+  {
+    "id": "kservice-kjob-A-named",
+    "tier": "kservice",
+    "target_id": "kjob",
+    "target_name": "K-Job",
+    "variant": "named",
+    "utterance": "K-Job이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: kjob]"
+  },
+  {
+    "id": "kservice-kjob-B-implied",
+    "tier": "kservice",
+    "target_id": "kjob",
+    "target_name": "K-Job",
+    "variant": "implied",
+    "utterance": "이력서 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: kjob]"
+  },
+  {
+    "id": "kservice-kcommerce_seller-A-named",
+    "tier": "kservice",
+    "target_id": "kcommerce_seller",
+    "target_name": "K-Market(판매자 등록)",
+    "variant": "named",
+    "utterance": "K-Market(판매자 등록)이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: kcommerce_seller]"
+  },
+  {
+    "id": "kservice-kcommerce_seller-B-implied",
+    "tier": "kservice",
+    "target_id": "kcommerce_seller",
+    "target_name": "K-Market(판매자 등록)",
+    "variant": "implied",
+    "utterance": "판매자로 등록 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: kcommerce_seller]"
+  },
+  {
+    "id": "kservice-ktax-A-named",
+    "tier": "kservice",
+    "target_id": "ktax",
+    "target_name": "K-Tax",
+    "variant": "named",
+    "utterance": "K-Tax이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: ktax]"
+  },
+  {
+    "id": "kservice-ktax-B-implied",
+    "tier": "kservice",
+    "target_id": "ktax",
+    "target_name": "K-Tax",
+    "variant": "implied",
+    "utterance": "세금 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: ktax]"
+  },
+  {
+    "id": "kservice-kcommerce-A-named",
+    "tier": "kservice",
+    "target_id": "kcommerce",
+    "target_name": "K-Market",
+    "variant": "named",
+    "utterance": "K-Market이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: kcommerce]"
+  },
+  {
+    "id": "kservice-kcommerce-B-implied",
+    "tier": "kservice",
+    "target_id": "kcommerce",
+    "target_name": "K-Market",
+    "variant": "implied",
+    "utterance": "주문 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: kcommerce]"
+  },
+  {
+    "id": "kservice-ktransport-A-named",
+    "tier": "kservice",
+    "target_id": "ktransport",
+    "target_name": "K-Traffic",
+    "variant": "named",
+    "utterance": "K-Traffic이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: ktransport]"
+  },
+  {
+    "id": "kservice-ktransport-B-implied",
+    "tier": "kservice",
+    "target_id": "ktransport",
+    "target_name": "K-Traffic",
+    "variant": "implied",
+    "utterance": "과태료 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: ktransport]"
+  },
+  {
+    "id": "kservice-klogistics-A-named",
+    "tier": "kservice",
+    "target_id": "klogistics",
+    "target_name": "K-Logistics",
+    "variant": "named",
+    "utterance": "K-Logistics이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: klogistics]"
+  },
+  {
+    "id": "kservice-klogistics-B-implied",
+    "tier": "kservice",
+    "target_id": "klogistics",
+    "target_name": "K-Logistics",
+    "variant": "implied",
+    "utterance": "배송 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: klogistics]"
+  },
+  {
+    "id": "kservice-kregionalgov-A-named",
+    "tier": "kservice",
+    "target_id": "kregionalgov",
+    "target_name": "전국 지방행정 AI",
+    "variant": "named",
+    "utterance": "전국 지방행정 AI이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: kregionalgov]"
+  },
+  {
+    "id": "kservice-kregionalgov-B-implied",
+    "tier": "kservice",
+    "target_id": "kregionalgov",
+    "target_name": "전국 지방행정 AI",
+    "variant": "implied",
+    "utterance": "시청 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: kregionalgov]"
+  },
+  {
+    "id": "kservice-kgov-A-named",
+    "tier": "kservice",
+    "target_id": "kgov",
+    "target_name": "K-Public",
+    "variant": "named",
+    "utterance": "K-Public이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: kgov]"
+  },
+  {
+    "id": "kservice-kgov-B-implied",
+    "tier": "kservice",
+    "target_id": "kgov",
+    "target_name": "K-Public",
+    "variant": "implied",
+    "utterance": "민원 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: kgov]"
+  },
+  {
+    "id": "kservice-kdemocracy-A-named",
+    "tier": "kservice",
+    "target_id": "kdemocracy",
+    "target_name": "K-Democracy",
+    "variant": "named",
+    "utterance": "K-Democracy이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: kdemocracy]"
+  },
+  {
+    "id": "kservice-kdemocracy-B-implied",
+    "tier": "kservice",
+    "target_id": "kdemocracy",
+    "target_name": "K-Democracy",
+    "variant": "implied",
+    "utterance": "투표 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: kdemocracy]"
+  },
+  {
+    "id": "kservice-kbusiness-A-named",
+    "tier": "kservice",
+    "target_id": "kbusiness",
+    "target_name": "K-Business",
+    "variant": "named",
+    "utterance": "K-Business이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: kbusiness]"
+  },
+  {
+    "id": "kservice-kbusiness-B-implied",
+    "tier": "kservice",
+    "target_id": "kbusiness",
+    "target_name": "K-Business",
+    "variant": "implied",
+    "utterance": "재무제표 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: kbusiness]"
+  },
+  {
+    "id": "kservice-profile-assistant-A-named",
+    "tier": "kservice",
+    "target_id": "profile-assistant",
+    "target_name": "혼디 안내(튜토리얼·프로필)",
+    "variant": "named",
+    "utterance": "혼디 안내(튜토리얼·프로필)이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: profile-assistant]"
+  },
+  {
+    "id": "kservice-profile-assistant-B-implied",
+    "tier": "kservice",
+    "target_id": "profile-assistant",
+    "target_name": "혼디 안내(튜토리얼·프로필)",
+    "variant": "implied",
+    "utterance": "프로필 작성 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: profile-assistant]"
+  },
+  {
+    "id": "kservice-fiil-kcleaner-A-named",
+    "tier": "kservice",
+    "target_id": "fiil-kcleaner",
+    "target_name": "K-Cleaner",
+    "variant": "named",
+    "utterance": "K-Cleaner이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: fiil-kcleaner]"
+  },
+  {
+    "id": "kservice-fiil-kcleaner-B-implied",
+    "tier": "kservice",
+    "target_id": "fiil-kcleaner",
+    "target_name": "K-Cleaner",
+    "variant": "implied",
+    "utterance": "쓰레기 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: fiil-kcleaner]"
+  },
+  {
+    "id": "kservice-tool-web-search-A-named",
+    "tier": "kservice",
+    "target_id": "tool-web-search",
+    "target_name": "웹 검색",
+    "variant": "named",
+    "utterance": "웹 검색이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: tool-web-search]"
+  },
+  {
+    "id": "kservice-tool-web-search-B-implied",
+    "tier": "kservice",
+    "target_id": "tool-web-search",
+    "target_name": "웹 검색",
+    "variant": "implied",
+    "utterance": "검색해줘 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: tool-web-search]"
+  },
+  {
+    "id": "kservice-tool-calculator-A-named",
+    "tier": "kservice",
+    "target_id": "tool-calculator",
+    "target_name": "계산기",
+    "variant": "named",
+    "utterance": "계산기이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: tool-calculator]"
+  },
+  {
+    "id": "kservice-tool-calculator-B-implied",
+    "tier": "kservice",
+    "target_id": "tool-calculator",
+    "target_name": "계산기",
+    "variant": "implied",
+    "utterance": "얼마 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: tool-calculator]"
+  },
+  {
+    "id": "kservice-kqna-A-named",
+    "tier": "kservice",
+    "target_id": "kqna",
+    "target_name": "Gopang QnA",
+    "variant": "named",
+    "utterance": "Gopang QnA이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: kqna]"
+  },
+  {
+    "id": "kservice-kqna-B-implied",
+    "tier": "kservice",
+    "target_id": "kqna",
+    "target_name": "Gopang QnA",
+    "variant": "implied",
+    "utterance": "질문있어 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: kqna]"
+  },
+  {
+    "id": "kservice-kusers-A-named",
+    "tier": "kservice",
+    "target_id": "kusers",
+    "target_name": "Gopang Users",
+    "variant": "named",
+    "utterance": "Gopang Users이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: kusers]"
+  },
+  {
+    "id": "kservice-kusers-B-implied",
+    "tier": "kservice",
+    "target_id": "kusers",
+    "target_name": "Gopang Users",
+    "variant": "implied",
+    "utterance": "이 사람 찾아줘 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: kusers]"
+  },
+  {
+    "id": "kservice-kmail-A-named",
+    "tier": "kservice",
+    "target_id": "kmail",
+    "target_name": "K-Mail",
+    "variant": "named",
+    "utterance": "K-Mail이랑 직접 연결해 줘",
+    "expect_tag": "[GWP: kmail]"
+  },
+  {
+    "id": "kservice-kmail-B-implied",
+    "tier": "kservice",
+    "target_id": "kmail",
+    "target_name": "K-Mail",
+    "variant": "implied",
+    "utterance": "메일 보내 때문에 그런데 어디로 연락하면 될까요?",
+    "expect_tag": "[GWP: kmail]"
+  }
+]

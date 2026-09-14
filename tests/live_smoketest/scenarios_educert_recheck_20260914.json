@@ -1,0 +1,6 @@
+[
+  {"id": "gov24-b1-016", "utterance": "학교생활기록부 발급받고 싶어요", "expectContains": "JEJU-GOV-COMMON", "note": "[정부24 원본: 학교생활기록부(초중고) 발급] 소관기관(정부24 명시): 교육부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정."},
+  {"id": "gov24-b1-020", "utterance": "대학 졸업증명서 신청하고 싶어요", "expectContains": "JEJU-GOV-COMMON", "note": "[정부24 원본: 대학(교) 졸업증명서 신청] 소관기관(정부24 명시): 교육부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정."},
+  {"id": "gov24-b1-041", "utterance": "대학 성적증명서 신청하고 싶어요", "expectContains": "JEJU-GOV-COMMON", "note": "[정부24 원본: 대학(교) 성적증명서 신청] 소관기관(정부24 명시): 교육부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정."},
+  {"id": "gov24-b1-043", "utterance": "대학 졸업예정증명서 신청하고 싶어요", "expectContains": "JEJU-GOV-COMMON", "note": "[정부24 원본: 대학(교) 졸업예정증명서 신청] 소관기관(정부24 명시): 교육부 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정."}
+]
