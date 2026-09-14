@@ -4490,13 +4490,38 @@ window.closeHondiZoom = function() {
 </style>
 
 <div id="ask-bubble">
-  <div id="ask-bubble-label" onclick="openWebApp()">무엇이든 요청하세요.</div>
-  <button id="ask-bubble-btn" onclick="openWebApp()" title="무엇이든 요청하세요.">
+  <div id="ask-bubble-label" onclick="openHondiGuideChat()">무엇이든 요청하세요.</div>
+  <button id="ask-bubble-btn" onclick="openHondiGuideChat()" title="무엇이든 요청하세요.">
     <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
     </svg>
   </button>
 </div>
+<script>
+// ★ 2026-09-13 변경 — PC(desktop.html)와 폰(webapp.html)은 용도가
+// 다르다는 설계 원칙에 따라, 이 우측 하단 아이콘을 "폰 화면을 모달에
+// 그대로 띄우는"(openWebApp, 위쪽 mobile-topbar의 "웹앱 열기" 버튼은
+// 그 용도 그대로 유지) 방식에서, PC 방문 목적(혼디 시스템 전반의
+// 설명 + 사용자/개발자 매뉴얼 안내)에 맞는 hondi-guide 전문가
+// 페르소나로 바꾼다. hondi-guide는 이미 §CATALOG-EXPERT에 등록된
+// EXPERT라 새로 만들지 않고, AC가 [EXPERT: hondi-guide]로 라우팅할
+// 때와 동일한 경로(pages/expert-chat.html, buildTaxAdvisorChatUrl()과
+// 같은 URLSearchParams 패턴)를 그대로 재사용한다 — 조립 로직
+// (UNIVERSAL-INTEGRITY→UNIVERSAL-common→PROFESSIONAL-common→공통
+// 가드레일→EXPERT_BASE→SP_hondi-guide)을 여기서 새로 베끼지 않는
+// 이유: expert-chat.html 자체가 이미 한 번(2026-08-06) 그 조립 순서
+// 버그를 직접 겪고 고친 유일한 정본 구현이라, 세 번째 사본을 또
+// 만들면 이번 세션에서 계속 발견한 "복붙된 로직이 조용히 갈라지는"
+// 패턴을 반복하게 된다.
+//
+// 아래 있던 #chat-panel + _loadVisitorSP()(HONDI_VISITOR_SP) 조합은
+// 애초에 이 버튼에 연결된 적이 없던 죽은 코드였다(2026-09-13 발견,
+// 그 안 내용도 hondi-guide와 중복 — 별도 정리 필요, 이번 패치 범위 밖).
+function openHondiGuideChat() {
+  var qs = new URLSearchParams({ persona: 'hondi-guide', return: location.href });
+  window.open('/pages/expert-chat.html?' + qs.toString(), '_blank');
+}
+</script>
 
 
 <!-- ── "혼디란?" 소개 자료실 안내 플로팅 버튼 (2026-09-13 신설) ──
@@ -4590,7 +4615,13 @@ function _aboutFabHideToggle(cb) {
 </script>
 
 
-<!-- ── AI 채팅 패널 ── -->
+<!-- ── AI 채팅 패널 (2026-09-13 확인 — 죽은 코드, 후속 정리 필요) ──
+     아래 #chat-panel + _loadVisitorSP()(HONDI_VISITOR_SP)는 desktop.html
+     안에서 이걸 여는 버튼이 하나도 없다(openChatPanel() 호출부 전무,
+     grep으로 확인) — #ask-bubble은 이제 openHondiGuideChat()을 부른다
+     (위 참고). 내용도 hondi-guide(SP_hondi-guide)와 상당 부분 중복이라
+     이 블록 자체를 삭제하거나 hondi-guide로 재활용하는 걸 별도
+     후속으로 검토할 것. 지금은 안전하게(회귀 위험 없이) 그대로 둔다. -->
 <style>
 /* 오버레이: 배경 터치로 닫기 위한 투명 레이어 (body scroll은 유지) */
 #chat-panel-overlay {
