@@ -1784,10 +1784,10 @@ async function _gdcFreeQuotaGate(env, guid, corsHeaders, meta) {
 // 게이트가 잔액을 다시 확인하므로, 이 차감이 실패해 잔액이 실제보다
 // 높게 남아있어도 무제한으로 새지는 않는다(다음 정산 대사에서 걸러짐).
 async function _chargeGdcForAiUsage(env, {
-  guid, krwAmount, serviceId, model, hitTokens, missTokens, outTokens, costKRW, memo,
+  guid, krwAmount, serviceId, model, hitTokens, missTokens, outTokens, costKRW, memo, settlementKey,
 }) {
   if (!guid || !(krwAmount > 0)) return null;
-  const txHash = 'aicharge-' + (crypto.randomUUID?.() || (Date.now() + '-' + Math.random().toString(36).slice(2)));
+  const txHash = settlementKey || ('aicharge-' + (crypto.randomUUID?.() || (Date.now() + '-' + Math.random().toString(36).slice(2))));
   try {
     const res = await fetch(`${L1_DEFAULT}/api/ai-charge`, {
       method: 'POST',
@@ -1827,7 +1827,7 @@ async function _chargeGdcForAiUsage(env, {
 // 무료로 나가는 부분은 지금까지처럼 _recordFreeSpend(TTL 없는 평생
 // 누적)로, 그 초과분만 GDC 잔액에서 차감한다. 이렇게 해야 "가입자당
 // 평생 100원 무료"라는 약속이 요청 경계와 무관하게 정확히 지켜진다.
-async function _settleAiUsage(env, guid, bill, meta = {}, ctx = null) {
+async function _settleAiUsage(env, guid, bill, meta = {}, ctx = null, settlementKey = null) {
   if (!guid || !bill) return;
   const kv = env.AI_SETUP_SEALS_KV;
   let spentBefore = 0;
@@ -1870,12 +1870,21 @@ async function _settleAiUsage(env, guid, bill, meta = {}, ctx = null) {
   const paidPortion   = effectiveBilledKRW - freePortion;
 
   if (freePortion > 0) await _recordFreeSpend(env, guid, freePortion);
+  // ⚠ 알려진 한계(2026-09-14, 정산 아웃박스 신설과 함께 문서화): 위
+  // _recordFreeSpend(무료 100원 한도 누적)는 tx_hash 같은 멱등성 키가
+  // 없다 — 스윕이 이 함수를 재호출할 때, 원래 시도가 여기까지는 도달한
+  // 뒤에 취소됐다면 무료 한도가 이중으로 차감될 수 있다. 영향은 "사용자의
+  // 평생 무료 한도가 실제보다 조금 더 빨리 소진된 것처럼 보이는" 정도로
+  // 국한되며(회사가 손해를 보는 방향, GDC 실잔액이나 매출과는 무관),
+  // 아래 paidPortion(GDC 차감)은 settlementKey/tx_hash로 완전히
+  // 멱등하다. 무료 한도까지 완전히 멱등하게 만들려면 _recordFreeSpend도
+  // settlement_key 기준 중복 방지가 추가로 필요 — 다음 과제로 남긴다.
   if (paidPortion > 0) {
     const chargeResult = await _chargeGdcForAiUsage(env, {
       guid, krwAmount: paidPortion,
       serviceId: meta.serviceId, model: meta.model,
       hitTokens: meta.hitTokens, missTokens: meta.missTokens, outTokens: meta.outTokens,
-      costKRW: bill.apiCostKRW, memo: meta.memo,
+      costKRW: bill.apiCostKRW, memo: meta.memo, settlementKey,
     });
     // (2026-07-23 신설: GDC 저잔액 충전 권고 알림 — SP-GDC-CHARGE-v1_0 §3.
     //  실제 차감 직후 balance_after(GDC)를 그대로 재사용 — 별도 잔액 재조회 불필요.)
@@ -6431,6 +6440,120 @@ function L1_NODE_MAP_ID_OF(base) {
   return 'UNKNOWN';
 }
 
+// ── AI 정산 아웃박스 (2026-09-14 신설) ──────────────────────────────
+// 배경: callDeepSeek()이 응답을 반환한 뒤 ctx.waitUntil()로 넘기는
+// 사용량 기록·GDC 차감(_l1CreateUsageLog·_settleAiUsage)이, 요청 자체가
+// 오래 걸리면(예: 2026-09-14 GPS 역지오코딩 폭주로 /deepseek이
+// 20~60초까지 지연됐던 사고) 남은 waitUntil 유예 시간 부족으로 강제
+// 취소되어 통째로 유실되는 사례가 실사 로그로 확인됐다(2026-08-14
+// 주석에도 ctx.waitUntil 도입 전 51회 중 8회 유실 기록이 있음 — 즉
+// waitUntil 자체가 이 문제를 "완화"했을 뿐 "제거"하지는 못했다).
+//
+// 해결: 응답을 지연시키지 않는 선에서(스트리밍이 아닌 일반 호출은
+// 이 시점에 usage가 이미 확정돼 있으므로, 응답 직전에 이 레코드 하나만
+// 동기 기록 — PocketBase insert 1회, 실제 LLM 호출(수 초~수십 초)에
+// 비하면 무시할 수 있는 수준의 지연) status=pending 레코드를 먼저
+// 남긴다. ctx.waitUntil 작업이 정상 완료되면 settled로 갱신되고, 취소돼
+// pending으로 남으면 10분 주기 크론 스윕(_l1SweepPendingSettlements,
+// 기존 Merkle 앵커링 스윕과 동일 트리거에 편승)이 찾아내 동일
+// settlement_key(tx_hash)로 재정산한다 — /api/ai-charge가 이미
+// tx_hash 기준 멱등성을 보장하므로(pb_hooks/main.pb.js 참고) 이중
+// 차감 걱정 없이 안전하게 재시도할 수 있다.
+async function _l1CreateSettlementOutbox(env, {
+  guid, settlementKey, serviceId, tier, model, hitTokens, missTokens, outTokens, costKRW, billedKRW, extra = {},
+}) {
+  if (!guid || !settlementKey) return null;
+  try {
+    const token = await _l1AdminToken(env);
+    const res = await fetch(`${L1_DEFAULT}/api/collections/ai_settlement_outbox/records`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        guid, settlement_key: settlementKey, service_id: serviceId || 'hondi-chat', tier: tier || '', model: model || '',
+        hit_tokens: Math.round(hitTokens || 0), miss_tokens: Math.round(missTokens || 0), out_tokens: Math.round(outTokens || 0),
+        cost_krw: Math.round((costKRW || 0) * 100) / 100, billed_krw: Math.round((billedKRW || 0) * 100) / 100,
+        status: 'pending', attempts: 0, extra_json: JSON.stringify(extra || {}),
+      }),
+    });
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      console.warn('[SettlementOutbox] 등록 실패 (HTTP ' + res.status + '): ' + errText);
+      return null;
+    }
+    return await res.json().catch(() => null);
+  } catch (e) {
+    // 아웃박스 등록 자체가 실패해도(L1 순간 장애 등) 채팅 응답을 막지
+    // 않는다 — 이 경우 기존처럼 ctx.waitUntil 단독 경로에 맡겨진다
+    // (아웃박스 없이도 살아남는 정상 케이스가 훨씬 많으므로 응답 차단은
+    // 과도한 조치). 다만 이 실패는 눈에 띄게 남긴다.
+    console.warn('[SettlementOutbox] 등록 실패:', e.message);
+    return null;
+  }
+}
+
+async function _l1MarkSettlementOutbox(env, settlementKey, status) {
+  if (!settlementKey) return;
+  try {
+    const token = await _l1AdminToken(env);
+    const q = `settlement_key='${settlementKey.replace(/'/g, "\\'")}'`;
+    const findRes = await fetch(`${L1_DEFAULT}/api/collections/ai_settlement_outbox/records?filter=${encodeURIComponent(q)}&perPage=1`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    const found = await findRes.json().catch(() => null);
+    const rec = found?.items?.[0];
+    if (!rec) return; // 아웃박스 등록이 애초에 실패했던 경우(위 참고) — 조용히 무시
+    await fetch(`${L1_DEFAULT}/api/collections/ai_settlement_outbox/records/${rec.id}`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status, settled_at: status === 'settled' ? new Date().toISOString() : undefined }),
+    });
+  } catch (e) {
+    console.warn('[SettlementOutbox] 상태 갱신 실패(무시 — 다음 스윕이 다시 시도):', e.message);
+  }
+}
+
+// 10분 주기 크론(기존 Merkle 앵커링 스윕 트리거에 편승)에서 호출.
+// status=pending이고 등록된 지 2분이 지난(=한 waitUntil 주기가 지나고도
+// settled로 안 바뀐, 즉 취소됐을 가능성이 높은) 레코드만 재정산 대상으로
+// 삼는다 — 정상 처리 중인 레코드를 너무 빨리 건드리지 않기 위한 여유.
+async function _l1SweepPendingSettlements(env, ctx) {
+  try {
+    const token = await _l1AdminToken(env);
+    const cutoffISO = new Date(Date.now() - 2 * 60 * 1000).toISOString().replace('T', ' ').slice(0, 19);
+    const q = `status='pending' && created<'${cutoffISO}'`;
+    const res = await fetch(`${L1_DEFAULT}/api/collections/ai_settlement_outbox/records?filter=${encodeURIComponent(q)}&perPage=50`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (!res.ok) return;
+    const data = await res.json().catch(() => null);
+    const items = data?.items || [];
+    if (!items.length) { console.log('[SettlementSweep] 재정산 대상 없음'); return; }
+    console.log(`[SettlementSweep] 재정산 대상 ${items.length}건`);
+    for (const rec of items) {
+      try {
+        const bill = { apiCostKRW: rec.cost_krw || 0, billedKRW: rec.billed_krw || 0, multiplier: 1 };
+        const extra = JSON.parse(rec.extra_json || '{}');
+        await _l1CreateUsageLog(env, {
+          guid: rec.guid, serviceId: rec.service_id, tier: rec.tier, model: rec.model,
+          hitTokens: rec.hit_tokens, missTokens: rec.miss_tokens, outTokens: rec.out_tokens,
+          costKRW: rec.cost_krw, billedKRW: rec.billed_krw,
+        });
+        await _settleAiUsage(env, rec.guid, bill, {
+          serviceId: rec.service_id, model: rec.model,
+          hitTokens: rec.hit_tokens, missTokens: rec.miss_tokens, outTokens: rec.out_tokens,
+          ...extra,
+        }, ctx, rec.settlement_key);
+        await _l1MarkSettlementOutbox(env, rec.settlement_key, 'settled');
+        console.log('[SettlementSweep] 재정산 완료:', rec.settlement_key);
+      } catch (e) {
+        console.warn('[SettlementSweep] 재정산 실패(다음 스윕에서 재시도):', rec.settlement_key, e.message);
+      }
+    }
+  } catch (e) {
+    console.warn('[SettlementSweep] 스윕 전체 실패:', e.message);
+  }
+}
+
 // L1 profiles 컬렉션에서 guid로 레코드 조회 (Admin 토큰 필요 — is_public=false인 레코드도 봐야 하므로)
 // ── AI 사용량 상세 로그 (2026-07-14 신설) ──────────────────────────
 // HONDI_CHAT_COST 콘솔 로그는 조회가 안 되므로(Cloudflare 로그는
@@ -6487,7 +6610,7 @@ async function _l1CreateUsageLog(env, { guid, serviceId, tier, model, hitTokens,
 // 무료 한도가 30시간마다 조용히 리셋되는 심각한 회귀가 생긴다.
 async function _recordAiUsage(env, ctx, {
   guid, serviceId, tier, priceTier, model, usage,
-  logTag, extraLogFields = {}, spendKeys = [], onAfterRecord = null, multiplierOverride,
+  logTag, extraLogFields = {}, spendKeys = [], onAfterRecord = null, multiplierOverride, settlementKey = null,
 }) {
   if (!usage) return null;
   const bill = computeBilledKRW(env, usage, priceTier, multiplierOverride);
@@ -6506,7 +6629,17 @@ async function _recordAiUsage(env, ctx, {
   ];
   if (onAfterRecord) tasks.push(Promise.resolve(onAfterRecord(bill)));
 
-  const combined = Promise.all(tasks);
+  // 2026-09-14 신설 — settlementKey가 있으면(=callDeepSeek이 응답 직전
+  // ai_settlement_outbox에 pending으로 먼저 기록해둔 경우) 이 체인이
+  // 끝까지 성공했을 때만 outbox를 settled로 갱신한다. 도중에
+  // ctx.waitUntil 자체가 취소되면 이 줄까지 못 오므로 outbox는
+  // pending인 채 남고, 10분 주기 스윕(_l1SweepPendingSettlements)이
+  // 나중에 찾아 재정산한다 — 그 재정산도 같은 settlementKey(tx_hash)를
+  // 쓰므로 GDC 차감은 이중 발생하지 않는다(위 _settleAiUsage 캐비어트
+  // 참고: 무료 한도 차감 부분만 예외).
+  const combined = settlementKey
+    ? Promise.all(tasks).then(() => _l1MarkSettlementOutbox(env, settlementKey, 'settled'))
+    : Promise.all(tasks);
   if (ctx?.waitUntil) ctx.waitUntil(combined);
   else combined.catch(e => console.warn('[UsageRecord] 기록 실패:', e.message));
   return bill;
@@ -12461,6 +12594,12 @@ export default {
     // 대상은 storage_next_billing_at<=지금인 행뿐이라 대부분의 실행은
     // 조용히 아무 일도 안 함(월 1회씩만 각 사용자가 걸림).
     ctx.waitUntil(_runKmailStorageBillingSweep(env).catch(e => console.error('[K-Mail Storage Billing] 스윕 전체 실패:', e.message)));
+    // 2026-09-14 신설 — AI 정산 아웃박스 스윕(§ai_settlement_outbox 상단
+    // 주석 참고). ctx.waitUntil 취소로 status=pending인 채 남은
+    // AI 사용량 정산(사용량 로그 + GDC 차감)을 동일 settlement_key로
+    // 재시도한다. /api/ai-charge가 tx_hash 기준 멱등이라 10분마다 돌아도
+    // 이중 차감 없음(위 다른 스윕들과 동일한 멱등 관례).
+    ctx.waitUntil(_l1SweepPendingSettlements(env, ctx).catch(e => console.error('[SettlementSweep] 전체 실패:', e.message)));
   },
 
   // ── 공문 메일 수신 (2026-08-31 신설) ─────────────────────────────
@@ -19282,6 +19421,15 @@ async function callDeepSeek(bodyText,env,corsHeaders,fallbackFrom=null,meta=null
   if(isStream){
     if (guid && env.AI_SETUP_SEALS_KV) {
       const [forClient, forUsage] = res.body.tee();
+      // 2026-09-14 — 스트리밍은 usage가 스트림 종료 후에야 확정되므로
+      // 비스트리밍 경로처럼 응답 전에 아웃박스를 선기록할 수는 없다.
+      // 그래도 settlementKey만은 미리 발급해 _settleAiUsage/
+      // _chargeGdcForAiUsage가 멱등하게 동작하도록 맞춰둔다 — 아웃박스
+      // 선기록이 없으니 취소 시 스윕 재시도 대상이 되진 않지만(=이
+      // 경로는 아직 완전히 보호되지 않음, 알려진 한계로 남김), 적어도
+      // 우연히 두 번 실행되는 경우(네트워크 재시도 등)의 이중 차감은
+      // 막는다.
+      const _settlementKey = 'aicharge-' + (crypto.randomUUID?.() || (Date.now() + '-' + Math.random().toString(36).slice(2)));
       const usageTask = _parseUsageFromStream(forUsage, { env, meta: { tier: spendTier, model: backendModel, guid, ...meta } }).then(usage => _recordAiUsage(env, ctx, {
         guid, serviceId: 'hondi-chat', tier: spendTier, priceTier: spendTier, model: backendModel, usage,
         logTag: 'HONDI_CHAT_COST', extraLogFields: meta,
@@ -19291,7 +19439,7 @@ async function callDeepSeek(bodyText,env,corsHeaders,fallbackFrom=null,meta=null
           serviceId: 'hondi-chat', model: backendModel,
           hitTokens: usage?.prompt_cache_hit_tokens, missTokens: usage?.prompt_cache_miss_tokens,
           outTokens: usage?.completion_tokens,
-        }),
+        }, ctx, _settlementKey),
       }));
       if (ctx?.waitUntil) ctx.waitUntil(usageTask); else usageTask.catch(() => {});
       return new Response(forClient,{status:200,headers:{...corsHeaders,'Content-Type':'text/event-stream','Cache-Control':'no-cache','X-Accel-Buffering':'no'}});
@@ -19300,14 +19448,29 @@ async function callDeepSeek(bodyText,env,corsHeaders,fallbackFrom=null,meta=null
   }
   const data=await res.json();
   if (guid && env.AI_SETUP_SEALS_KV && data?.usage) {
+    // 2026-09-14 신설 — 정산 아웃박스(§ai_settlement_outbox 상단 주석
+    // 참고). 이 시점엔 usage가 이미 확정돼 있으므로, 응답을 돌려주기
+    // 직전에 pending 레코드 하나만 동기 기록해 ctx.waitUntil 취소로
+    // 인한 과금 유실에 대비한다 — PocketBase insert 1회만 추가되며,
+    // 방금 끝난 LLM 호출(보통 수 초, 드물게 수십 초) 대비 무시할 수
+    // 있는 지연이다. 이 insert 자체가 실패해도(L1 순간 장애) 응답은
+    // 그대로 나가고 기존 ctx.waitUntil 단독 경로로 폴백한다.
+    const _settlementKey = 'aicharge-' + (crypto.randomUUID?.() || (Date.now() + '-' + Math.random().toString(36).slice(2)));
+    const _bill = computeBilledKRW(env, data.usage, spendTier);
+    await _l1CreateSettlementOutbox(env, {
+      guid, settlementKey: _settlementKey, serviceId: 'hondi-chat', tier: spendTier, model: backendModel,
+      hitTokens: data.usage?.prompt_cache_hit_tokens, missTokens: data.usage?.prompt_cache_miss_tokens,
+      outTokens: data.usage?.completion_tokens, costKRW: _bill.apiCostKRW, billedKRW: _bill.billedKRW,
+      extra: meta || {},
+    });
     _recordAiUsage(env, ctx, {
       guid, serviceId: 'hondi-chat', tier: spendTier, priceTier: spendTier, model: backendModel, usage: data.usage,
-      logTag: 'HONDI_CHAT_COST', extraLogFields: meta,
+      logTag: 'HONDI_CHAT_COST', extraLogFields: meta, settlementKey: _settlementKey,
       onAfterRecord: bill => _settleAiUsage(env, guid, bill, {
         serviceId: 'hondi-chat', model: backendModel,
         hitTokens: data.usage?.prompt_cache_hit_tokens, missTokens: data.usage?.prompt_cache_miss_tokens,
         outTokens: data.usage?.completion_tokens,
-      }),
+      }, ctx, _settlementKey),
     });
   }
   if(fallbackFrom){const text=data.choices?.[0]?.message?.content||'{}';return new Response(JSON.stringify({candidates:[{content:{parts:[{text}],role:'model'},finishReason:'STOP'}],_provider:'deepseek-fallback',_fallback_from:fallbackFrom}),{headers:corsHeaders});}
