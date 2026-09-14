@@ -235,19 +235,96 @@ function _applyUpdate() {
 // 실행될 수 없었을 뿐이다.
 window._applyUpdate = _applyUpdate;
 
+// ── 버전 확인 헬퍼 ───────────────────────────────────────────
+// /version.json은 .github/workflows/bump-app-version.yml이 main에
+// 머지될 때마다 sw.js의 CACHE_NAME과 동일한 값으로 갱신해 커밋한다.
+// no-store로 요청해 브라우저/CDN 캐시를 우회한다(그렇지 않으면 "새
+// 버전 있는지" 확인 자체가 캐시된 옛 버전 정보를 다시 읽는 모순에 빠짐).
+const _VERSION_VERIFY_KEY = 'hondi_update_verify_pending';
+
+async function _fetchCurrentVersion() {
+  try {
+    const res = await fetch('/version.json', { cache: 'no-store' });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data?.version || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+// ── 갱신 결과 토스트 (성공/무변경/실패를 있는 그대로 표시) ─────
+function _showVersionToast(message, tone = 'ok') {
+  const existing = document.getElementById('version-verify-toast');
+  if (existing) existing.remove();
+
+  const colors = {
+    ok:   { bg: '#0057A8', fg: '#fff' },
+    info: { bg: '#1C1C1E', fg: '#F2F2F7' },
+    warn: { bg: '#8A5A00', fg: '#fff' },
+  };
+  const c = colors[tone] || colors.info;
+
+  const toast = document.createElement('div');
+  toast.id = 'version-verify-toast';
+  toast.style.cssText = `
+    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+    background: ${c.bg}; color: ${c.fg};
+    border-radius: 14px; padding: 12px 18px;
+    font-size: 13px; font-weight: 500; text-align: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    z-index: 9999; max-width: 86vw;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  `;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+
+// 새로고침 이전에 시작한 "최신 버전으로 갱신"의 결과를, 새로고침 이후
+// 실제 배포된 version.json과 비교해 검증한다 — reload 한 번으로 JS
+// 상태가 사라지므로 sessionStorage로 beforeVersion을 넘겨받는다.
+async function _verifyPendingUpdate() {
+  const raw = sessionStorage.getItem(_VERSION_VERIFY_KEY);
+  if (!raw) return;
+  sessionStorage.removeItem(_VERSION_VERIFY_KEY);
+
+  let before;
+  try { before = JSON.parse(raw); } catch { return; }
+
+  const after = await _fetchCurrentVersion();
+
+  if (!after || !before.beforeVersion) {
+    _showVersionToast('⚠️ 버전 확인에 실패했습니다 — 네트워크 상태를 확인해주세요', 'warn');
+  } else if (after !== before.beforeVersion) {
+    _showVersionToast(`✅ 최신 버전으로 갱신되었습니다 (${after})`, 'ok');
+  } else {
+    _showVersionToast('ℹ️ 이미 최신 버전입니다 (새 배포 없음)', 'info');
+  }
+}
+window.addEventListener('DOMContentLoaded', _verifyPendingUpdate);
+
 // ── 설정 패널의 "최신 버전으로 갱신" 버튼 — 수동 강제 갱신 ──────
 // 자동 감지(_autoApplyUpdate)와 달리 사용자가 언제든 직접 누를 수 있다.
-// 1) 모든 Cache Storage 항목 삭제 (sw.js가 들고 있던 캐시 전부 무효화)
-// 2) SW 갱신 체크 → 새 버전 있으면 즉시 skipWaiting 지시
-// 3) 새 버전 유무·에러 여부와 관계없이 항상 동일하게
-//    버튼 라벨에 "✅ 갱신 완료"를 0.9초간 보여준 뒤 새로고침
-//    (사용자가 클릭 직후 반응을 바로 인지할 수 있도록)
+// 1) 갱신 전 /version.json을 읽어 beforeVersion을 sessionStorage에 보관
+//    (새로고침 후에도 살아남아야 실제 갱신 여부를 비교할 수 있다)
+// 2) 모든 Cache Storage 항목 삭제 (sw.js가 들고 있던 캐시 전부 무효화)
+// 3) SW 갱신 체크 → 새 버전 있으면 즉시 skipWaiting 지시
+// 4) 새로고침 뒤 _verifyPendingUpdate()가 /version.json을 다시 읽어
+//    beforeVersion과 실제로 달라졌는지 비교하고, 그 결과를 있는 그대로
+//    토스트로 보여준다 — "눌렀으니 성공"이 아니라 "실제로 바뀌었는지"를
+//    검증한다. (2026-09-14 수정 — 예전엔 새 버전 유무와 무관하게 항상
+//    "✅ 갱신 완료"만 보여줘서, 실제로 갱신됐는지 사용자가 알 수 없다는
+//    신고가 있었음)
 async function forceUpdateApp(btn) {
   const label = document.getElementById('btn-force-update-label');
   if (btn) btn.style.pointerEvents = 'none';
-  if (label) label.textContent = '갱신 중…';
+  if (label) label.textContent = '확인 중…';
   window._manualUpdateInProgress = true; // controllerchange 자동 새로고침 억제
 
+  const beforeVersion = await _fetchCurrentVersion();
+
+  let hadWaitingSW = false;
   try {
     if ('caches' in window) {
       const keys = await caches.keys();
@@ -260,6 +337,7 @@ async function forceUpdateApp(btn) {
       if (reg) {
         await reg.update();
         if (reg.waiting) {
+          hadWaitingSW = true;
           reg.waiting.postMessage({ type: 'SKIP_WAITING' });
         }
       }
@@ -268,8 +346,12 @@ async function forceUpdateApp(btn) {
     console.warn('[PWA] 강제 갱신 실패 — 일반 새로고침으로 대체:', err);
   }
 
-  if (label) label.textContent = '✅ 갱신 완료';
-  setTimeout(() => window.location.reload(), 900);
+  sessionStorage.setItem(_VERSION_VERIFY_KEY, JSON.stringify({
+    beforeVersion, ts: Date.now(),
+  }));
+
+  if (label) label.textContent = hadWaitingSW ? '적용 중…' : '확인됨 — 새로고침 중…';
+  setTimeout(() => window.location.reload(), hadWaitingSW ? 1100 : 500);
 }
 window.forceUpdateApp = forceUpdateApp;
 

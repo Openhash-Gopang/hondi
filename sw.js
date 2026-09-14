@@ -3,7 +3,13 @@
 // PWA 오프라인 지원 + 캐시 전략
 // ═══════════════════════════════════════════════════════════
 
-const CACHE_NAME    = 'gopang-20260720-1500';
+const CACHE_NAME    = 'gopang-20260914-0000-bootstrap';
+// 2026-09-14 — 이 값은 이제 수동으로 관리하지 않는다. main에 머지될
+// 때마다 .github/workflows/bump-app-version.yml이 version.json과
+// 동일한 값으로 자동 동기화한다(설정 패널 "최신 버전으로 갱신"이 실제
+// 갱신 여부를 검증할 수 있으려면, 배포마다 이 값이 실제로 바뀌어야
+// 한다 — PR 필수 브랜치 보호 도입 이후 deploy.ps1을 아무도 거치지
+// 않게 되면서 2026-07-20부터 이 값이 멈춰 있었던 문제의 근본 수정).
 const CACHE_TIMEOUT = 5000; // 네트워크 타임아웃 5초
 // 2026-07-15 신설 — PERSONAL-AC-CALL-PROTOCOL §5 수신확인 3단계 전송용.
 const WORKER_PROXY  = 'https://hondi-proxy.tensor-city.workers.dev';
