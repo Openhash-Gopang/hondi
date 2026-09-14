@@ -29,6 +29,45 @@ const INPUT_SELECTOR    = '#msg-input';
 const SEND_BTN_SELECTOR = '#send-btn';
 const MIC_BTN_SELECTOR  = '#mic-btn';    // 실제 마이크 버튼 id가 다르면 이 한 줄만 교체
 
+// ── 의문문 자동 "?" 삽입 (2026-09-14 신설, 주피터 지시) ──────────────
+// ⚠️ 중요한 한계: Web Speech API는 인식된 텍스트와 신뢰도만 돌려줄 뿐,
+// 억양(pitch contour) 같은 음성 자체의 운율 정보는 애초에 노출하지
+// 않는다 — 그래서 "끝이 올라가는 억양"을 직접 감지하는 건 이 API로는
+// 불가능하다(음성 원본에 접근하려면 MediaRecorder + 별도 피치 분석
+// 파이프라인이 필요 — voice-input.js 상단 iOS 한계 주석과 같은 종류의
+// 더 큰 작업).
+//
+// 대신 한국어 의문문의 상당수는 억양과 무관하게 문법적으로(종결
+// 어미로) 이미 의문문임이 표시된다는 점을 이용한다 — 예: "~까요",
+// "~습니까", "~나요"는 억양이 어떻든 항상 의문문이다. 반대로 "~요"·
+// "~에요"·"~죠" 같은 어미는 억양에 따라 평서문도 의문문도 될 수 있어
+// (예: "밥 먹었어요"는 억양만으로 진술과 질문이 갈림) 텍스트만으로는
+// 판단할 근거가 없으므로 일부러 제외한다 — 잘못 물음표를 붙이는 오탐이
+// 아무것도 안 붙이는 것보다 사용자 경험상 더 거슬리기 때문에, 확신이
+// 낮은 어미는 건드리지 않는 쪽을 택했다.
+const QUESTION_ENDING_PATTERNS = [
+  '까요', '나요', '인가요', '던가요', '습니까', '읍니까', '을까요', 'ㄹ까요',
+  '까', '냐',
+];
+// "~니"로 끝나는 의문문(예: "밥 먹었니")은 흔하지만, 호칭·감탄사 등
+// 의문문이 아닌 단어도 "니"로 끝나는 경우가 있어(예: "어머니", "할머니")
+// 이 어미만 별도로 예외 목록을 두고 처리한다.
+const NI_ENDING_EXCLUDE = ['어머니', '할머니', '아니', '아니요', '아니오', '어머님', '아버니'];
+
+function _looksLikeKoreanQuestion(text) {
+  const t = text.trim();
+  if (!t || /[.!?？！。]$/.test(t)) return false; // 이미 문장부호가 있으면 건드리지 않음
+  if (QUESTION_ENDING_PATTERNS.some(p => t.endsWith(p))) return true;
+  if (t.endsWith('니') && !NI_ENDING_EXCLUDE.some(w => t.endsWith(w))) return true;
+  return false;
+}
+
+// finalizedTranscript를 입력창에 채우기 직전에 호출 — 의문형 어미로
+// 끝나면 물음표를 붙이고, 아니면 원문 그대로 돌려준다.
+function _appendQuestionMarkIfNeeded(text) {
+  return _looksLikeKoreanQuestion(text) ? text + '?' : text;
+}
+
 let recognizer = null;
 let micState   = 'OFF';   // 'ON' | 'OFF'
 let silenceTimer = null;
@@ -96,7 +135,7 @@ function _commitUtterance(retry = 0) {
   const input = _getInput();
   if (!input) return;
 
-  input.value = text;
+  input.value = _appendQuestionMarkIfNeeded(text);
   input.dispatchEvent(new Event('input', { bubbles: true })); // send-btn 활성화 리스너 등 트리거
 
   requestAnimationFrame(() => {
