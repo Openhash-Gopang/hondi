@@ -103,6 +103,33 @@ export function _updateStreamBubble(bubble, text) {
   if (list) list.scrollTop = list.scrollHeight;
 }
 
+// ── BUG-FIX(2026-09-14) — "5초 이상 걸리는 작업은 반드시 진행상황을
+// 알린다" 원칙 전용 유틸. 지금까지 실제 콘텐츠(delta)가 오기 전까지는
+// 화면이 그냥 "…"나 이전 필러 문장에 멈춰 있어서, LLM reasoning이나
+// 오케스트레이션 서버 호출(예: CALL_GOVTREE의 /orchestration/
+// execute-govtree-step)이 몇 초 이상 걸리면 사용자 입장에선 "멈춘
+// 것"과 구분이 안 됐다(이번 세션에서 다룬 finish_reason=length 버그와
+// 증상이 겹쳐 보이지만 원인은 다름 — 이건 "느림"이지 "끊김"이 아니다).
+// call-ai.js와 webapp.html(_callPanelAI) 양쪽에서 재사용한다 — 이번엔
+// 처음부터 공용 모듈(이 파일)에 두어 두 곳에 또 복사본이 생기는 걸
+// 피한다.
+//
+// @param {HTMLElement} bubble - 진행상황을 표시할 말풍선(없으면 무동작)
+// @param {string} [label] - 상황에 맞는 한국어 문구(예: '읍면동 사무소 확인 중')
+// @returns {() => void} stop 함수 — 실제 콘텐츠가 도착하거나 작업이
+//   끝나면(성공/실패 무관) 반드시 호출해서 타이머를 정리해야 한다.
+export function _startWaitTicker(bubble, label = '생각하는 중입니다') {
+  if (!bubble) return () => {};
+  let seconds = 0;
+  const id = setInterval(() => {
+    seconds += 5;
+    _updateStreamBubble(bubble, `${label}… (${seconds}초 경과)`);
+  }, 5000);
+  return function _stopWaitTicker() {
+    clearInterval(id);
+  };
+}
+
 // ── 리스크 칩 ────────────────────────────────────────────
 export function riskChip(level, flags = []) {
   const map = { S0:'✅ 안전', S1:'⚠️ 주의', S2:'🚨 경고', S3:'🛑 차단' };

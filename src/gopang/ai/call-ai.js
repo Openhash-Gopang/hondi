@@ -21,7 +21,7 @@ import { aiActive, history, _userLocation,
          _USER, USER_GUID, _locationPending, _locationReady,
          _gwpLiveProgress, _paHandoffPending, setPaHandoffPending } from '../core/state.js';
 import { appendBubble, showTyping, hideTyping,
-         _createStreamBubble, _updateStreamBubble, setBubbleTarget } from '../ui/bubble.js';
+         _createStreamBubble, _updateStreamBubble, setBubbleTarget, _startWaitTicker } from '../ui/bubble.js';
 import { _buildLocNote, _buildRoutingFacts, _waitForLocationReady } from '../services/location.js';
 import { _injectAuthConfirmButton } from '../core/auth.js';
 import { _klawReview } from '../services/klaw.js';
@@ -1475,6 +1475,7 @@ export async function _handleOrchestrationTags(fullReply, bubble, sendFn = callA
       await _updateBubble(_stripInternalTags(fullReply));
       history.push({ role: 'assistant', content: fullReply });
       let resultText;
+      const _stopTicker = _startWaitTicker(bubble, '기관 시스템 조회 중입니다');
       try {
         const res = await fetch(`${base}/orchestration/execute-atom`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1483,6 +1484,8 @@ export async function _handleOrchestrationTags(fullReply, bubble, sendFn = callA
         resultText = JSON.stringify(await res.json().catch(() => ({ status: res.status })));
       } catch (e) {
         resultText = `{"error":"${e.message}"}`;
+      } finally {
+        _stopTicker();
       }
       await _watchdogSendFn('CALL_GOVSYS')(`[CALL_GOVSYS 결과] ${resultText}\n\n결과가 requires_user_action이면 그 사유를 이용자에게 자연스럽게 전달하세요.`, null, null, resolveOrchestrationModel('CALL_GOVSYS_RESULT'));
       return true;
@@ -1503,6 +1506,11 @@ export async function _handleOrchestrationTags(fullReply, bubble, sendFn = callA
       history.push({ role: 'assistant', content: fullReply });
       const [, govTreeRef, task] = govtreeMatch;
       let resultText;
+      // BUG-FIX(2026-09-14) — 이게 바로 스크린샷 재현 사례의 실제 대기
+      // 구간이다: "...찾아볼게요"까지 뜬 뒤, 이 fetch가 응답하기 전까지
+      // (지방행정 SP가 실제로 조회·판단하는 시간) 화면이 몇 초~수십 초
+      // 동안 아무 갱신 없이 멈춰 있었다. 5초마다 진행상황을 알린다.
+      const _stopTicker = _startWaitTicker(bubble, '읍면동 사무소에 확인하는 중입니다');
       try {
         const res = await fetch(`${base}/orchestration/execute-govtree-step`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1511,6 +1519,8 @@ export async function _handleOrchestrationTags(fullReply, bubble, sendFn = callA
         resultText = JSON.stringify(await res.json().catch(() => ({ status: res.status })));
       } catch (e) {
         resultText = `{"error":"${e.message}"}`;
+      } finally {
+        _stopTicker();
       }
       await _watchdogSendFn('CALL_GOVTREE')(`[CALL_GOVTREE 결과] ${resultText}\n\nstatus가 gov_tree_ref_stale이면 org_profiles와 gov-tree가 어긋난 것이므로 이 기관은 미연결로 취급하고 대체 경로(K-Search 등)를 시도하세요. status=ok면 institution_response를 그 기관이 실제로 답한 내용으로 취급해 다음 단계로 진행하세요.`, null, null, resolveOrchestrationModel('CALL_GOVTREE_RESULT'));
       return true;
@@ -5350,6 +5360,13 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
     let   buf       = '';
     // BUG-FIX(2026-09-14) — 아래 finish_reason==='length' 재시도/복구 로직에서 쓴다.
     let   finishReason = null;
+    // BUG-FIX(2026-09-14) — "5초 이상 걸리면 반드시 진행상황을 알린다"
+    // 원칙. hondi-pro thinking 모드는 첫 델타가 오기까지 수십 초씩
+    // 걸릴 수 있는데, 지금까지는 그 사이 화면이 그냥 멈춰 있었다(타이핑
+    // 인디케이터만 반복 재생 — 몇 초짜리인지 사용자가 가늠 못 함).
+    // 첫 델타가 오면(=_typingHidden true) 바로 멈춘다 — 실제 콘텐츠가
+    // 이 문구를 덮어써야 하므로.
+    const _stopWaitTicker = _startWaitTicker(bubble, '생각하는 중입니다');
 
     try {
       while (true) {
@@ -5387,7 +5404,7 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
             if (_choice?.finish_reason) finishReason = _choice.finish_reason;
             const delta = _choice?.delta?.content ?? '';
             if (delta) {
-              if (!_typingHidden) { hideTyping(); _typingHidden = true; }
+              if (!_typingHidden) { hideTyping(); _typingHidden = true; _stopWaitTicker(); }
               fullReply += delta;
               // CLN 신고가 아닐 때만 실시간 렌더링
               if (bubble) _updateStreamBubble(bubble, fullReply);
@@ -5414,6 +5431,7 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
       throw streamErr;
     } finally {
       idle.cancel();
+      _stopWaitTicker(); // 안전장치 — 델타를 한 번도 못 받고 끝나도 타이머는 반드시 정리
       // ★ 안전장치 — 델타를 한 번도 못 받고 스트림이 끝나거나(빈 응답)
       // 에러로 종료된 경우, 타이핑 인디케이터가 영원히 안 사라지는 걸 방지.
       if (!_typingHidden) { hideTyping(); _typingHidden = true; }

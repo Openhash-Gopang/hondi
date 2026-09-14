@@ -4151,6 +4151,10 @@ window.closePDV = closePDV;
       _resolveHondiTier, _parseAgentTags, _handleWebSearchTag, _handleDelegateToFlashTag,
       _handleSPAuthorTags, _enforceConversationalStyle, _enforceRoutingBias,
     } = await import('./src/gopang/ai/call-ai.js');
+    // BUG-FIX(2026-09-14) — "5초 이상 걸리면 진행상황을 알린다" 공용
+      // 유틸(call-ai.js도 동일 모듈에서 가져다 씀 — 이번엔 처음부터 한
+      // 곳(bubble.js)에만 둬서 사본이 안 생기게 한다).
+    const { _startWaitTicker } = await import('./src/gopang/ui/bubble.js');
     // BUG-FIX(2026-07-02): _callPanelAI(AI 패널 — 실제로 쓰이는 주 경로)가
     // 지금까지 _parseAgentTags를 호출한 적이 없었다. 메인 채팅 전용
     // _callAIInner만 호출하고 있었고, 패널은 _stripInternalTags로 화면
@@ -4327,6 +4331,9 @@ window.closePDV = closePDV;
       _panelAbortCtl = _abortCtl; // 중단 버튼이 이 candidate를 취소할 수 있도록 바깥 스코프에 노출
       let _idleTimer = setTimeout(() => _abortCtl.abort(), _IDLE_TIMEOUT_MS);
       const _resetIdle = () => { clearTimeout(_idleTimer); _idleTimer = setTimeout(() => _abortCtl.abort(), _IDLE_TIMEOUT_MS); };
+      // BUG-FIX(2026-09-14) — try 블록 밖(catch)에서도 안전하게 정리할 수
+      // 있도록 여기서 미리 선언해 둔다(try 안의 const는 catch에서 안 보임).
+      let _stopTicker = null;
       try {
         // 벤더 직접 호출은 대부분 CORS에 막힌다 — 서버를 한 번 거쳐서 보낸다.
         // 'deepseek-default'는 혼디 제공 무료 기본 키(hondi-flash/hondi-pro) —
@@ -4380,6 +4387,11 @@ window.closePDV = closePDV;
         let buf  = '';
         // BUG-FIX(2026-09-14) — 아래 finish_reason==='length' 복구 로직에서 쓴다.
         let _finishReason = null;
+        // BUG-FIX(2026-09-14) — "5초 이상 걸리면 진행상황을 알린다" 원칙.
+        // 첫 델타가 오기 전까지 5초마다 bubbleEl에 경과 시간을 표시하고,
+        // 실제 텍스트가 오기 시작하면 즉시 멈춘다.
+        let _typingHiddenPanel = false;
+        _stopTicker = _startWaitTicker(bubbleEl, '생각하는 중입니다');
         // ※ 2026-07-01 수정: 이전엔 dec.decode(value)를 stream:true 없이
         //   매 read()마다 새로 호출하고, 청크 경계에 걸친 미완성 줄을
         //   버리고 있었다(call-ai.js 메인 스트림 루프와 달리 buf 누적이
@@ -4410,12 +4422,14 @@ window.closePDV = closePDV;
               }
               const chunk = _chunkObj?.choices?.[0]?.delta?.content || '';
               if (!chunk) continue; // 빈 델타(예: 리즈닝 하트비트)로는 화면을 건드리지 않는다
+              if (!_typingHiddenPanel) { _typingHiddenPanel = true; if (_stopTicker) _stopTicker(); }
               full += chunk;
               bubbleEl.textContent = full;
               msgList.scrollTop = msgList.scrollHeight;
             } catch {}
           }
         }
+        if (_stopTicker) _stopTicker(); // 안전장치 — 델타를 한 번도 못 받고 끝나도 타이머는 반드시 정리
         clearTimeout(_idleTimer);
         _panelAbortCtl = null; // 스트리밍 정상 종료 — 더 이상 중단할 대상 없음
         // 히스토리에 assistant 추가
@@ -4473,7 +4487,10 @@ window.closePDV = closePDV;
               bubbleEl.textContent = ''; // 끊긴 내용 지우고 재시도 결과로 새로 채운다
               const _retryReader = _retryRes.body.getReader();
               const _retryDec = new TextDecoder();
-              let _retryFull = '', _retryBuf = '', _retryFinishReason = null;
+              let _retryFull = '', _retryBuf = '', _retryFinishReason = null, _retryTypingHidden = false;
+              // BUG-FIX(2026-09-14) — 재시도도 예산을 2배 준 만큼 첫 델타까지
+              // 더 오래 걸릴 수 있다 — 여기도 동일하게 5초마다 알린다.
+              const _stopRetryTicker = _startWaitTicker(bubbleEl, '다시 확인하는 중입니다');
               while (true) {
                 const { done, value } = await _retryReader.read();
                 _resetRetryIdle();
@@ -4490,12 +4507,14 @@ window.closePDV = closePDV;
                     if (_rChunk?.choices?.[0]?.finish_reason) _retryFinishReason = _rChunk.choices[0].finish_reason;
                     const _rDelta = _rChunk?.choices?.[0]?.delta?.content || '';
                     if (!_rDelta) continue;
+                    if (!_retryTypingHidden) { _retryTypingHidden = true; _stopRetryTicker(); }
                     _retryFull += _rDelta;
                     bubbleEl.textContent = _retryFull;
                     msgList.scrollTop = msgList.scrollHeight;
                   } catch {}
                 }
               }
+              _stopRetryTicker(); // 안전장치
               clearTimeout(_retryIdleTimer);
               _panelAbortCtl = null;
               if (_retryFinishReason !== 'length' && _retryFull) {
@@ -4769,6 +4788,7 @@ window.closePDV = closePDV;
         }
         return;
       } catch(e) {
+        if (_stopTicker) _stopTicker(); // BUG-FIX(2026-09-14) — 타이머 누수 방지
         clearTimeout(_idleTimer); // 타임아웃/오류 어느 경로든 타이머 누수 방지
         // 사용자가 중단(stop) 버튼을 눌러 취소한 경우 — 다음 candidate로
         // 재시도하지 않고 바로 빠져나간다(에러가 아니라 의도된 취소).
