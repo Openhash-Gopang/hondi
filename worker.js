@@ -5682,6 +5682,46 @@ async function _interceptAgyVaultStore(env, dataObj, guid, ctx) {
   return dataObj;
 }
 
+// ── GOAL_TRACE_STEP 인터셉트 (2026-09-14 신설, Phase A 전용) ────────
+// _interceptAgyVaultStore와 같은 자리·같은 구조를 재사용한다. 배경·범위
+// 제한은 pb_migrations/1793990003_created_goal_path_traces.js 상단 주석
+// 참고 — 요약하면: 데이터를 쌓기만 하고, 아직 추천/자동최적화에는 쓰지
+// 않는다. 그리고 아직 어떤 SP 프롬프트도 이 태그를 내보내라는 지시를
+// 받지 않았다 — 이 함수는 "태그가 나타나면 파싱해서 저장할 준비"일
+// 뿐이고, 실제로 켜는(SP에 지시를 추가하는) 결정은 별도로 한다.
+async function _interceptGoalPathTrace(env, dataObj, guid, ctx) {
+  const content = dataObj?.choices?.[0]?.message?.content;
+  const match = typeof content === 'string'
+    ? content.match(/\[GOAL_TRACE_STEP:([\s\S]*?)\]/)
+    : null;
+  if (!match) return dataObj;
+
+  const fields = _parseAgyVaultStoreTag(match[1]); // 필드=값 파싱 로직은 AGY_VAULT_STORE와 동일 문법이라 재사용
+  if (fields?.goal_id && fields?.agency_id) {
+    const writeTask = (async () => {
+      const guidHash = guid ? await _sha256Hex(`${_requireMasterKey(env)}:goal-path-trace:${guid}`) : null;
+      const token = await _l1AdminToken(env);
+      const res = await fetch(`${L1_DEFAULT}/api/collections/goal_path_traces/records`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          goal_id: fields.goal_id, trace_id: fields.trace_id || fields.when || String(Date.now()),
+          guid_hash: guidHash, agency_id: fields.agency_id,
+          step_index: fields.step_index ? Number(fields.step_index) : null,
+          outcome: ['success', 'rejected', 'skipped', 'retry'].includes(fields.outcome) ? fields.outcome : 'success',
+          note: (fields.note || fields.why || '').slice(0, 500),
+        }),
+      });
+      if (!res.ok) throw new Error(`goal_path_traces 저장 실패 HTTP ${res.status}`);
+    })().catch(e => console.warn('[GoalPathTrace] 기록 실패(응답 흐름은 계속 진행):', e.message));
+    if (ctx?.waitUntil) ctx.waitUntil(writeTask); else writeTask.catch(() => {});
+  } else {
+    console.warn('[GoalPathTrace] 태그 파싱 실패 또는 필수 필드(goal_id/agency_id) 없음:', match[1].slice(0, 200));
+  }
+  dataObj.choices[0].message.content = content.replace(/\[GOAL_TRACE_STEP:[\s\S]*?\]/, '').trim();
+  return dataObj;
+}
+
 function _parseMetaTableTag(raw) {
   try {
     const fields = {};
@@ -25432,6 +25472,7 @@ async function handleGovRelay(bodyText, env, corsHeaders, meta = null, ctx = nul
   // 안전문구 대체 직전) 전부에서 재사용한다 — 이제 "이 함수가 반환하는
   // 모든 최종 응답은 반환 직전에 반드시 이 인터셉트를 거친다"가 보장된다.
   await _interceptAgyVaultStore(env, data, guid, ctx);
+  await _interceptGoalPathTrace(env, data, guid, ctx); // 2026-09-14 신설, Phase A — 아직 어떤 SP도 이 태그를 안 냄(대기 상태)
 
   // ── META_TABLE_UPDATE 서버측 처리 (2026-07-14 신설, 회귀 복구) ─────
   // AGENCY-AC-COMMON_v1.3.md §6 배선. canDelegate 여부와 무관하게 모든
@@ -25625,6 +25666,7 @@ async function handleGovRelay(bodyText, env, corsHeaders, meta = null, ctx = nul
             : data2?.choices?.[0]?.message?.content;
           data2.choices[0].message.content = finalContent;
           await _interceptAgyVaultStore(env, data2, guid, ctx); // 2026-08-10 — 이 새 응답에도 AGY_VAULT_STORE가 있을 수 있음
+          await _interceptGoalPathTrace(env, data2, guid, ctx); // 2026-09-14 신설, Phase A
           return new Response(JSON.stringify(data2), { headers: corsHeaders });
         }
         return new Response(JSON.stringify(data), { headers: corsHeaders });
@@ -25649,6 +25691,7 @@ async function handleGovRelay(bodyText, env, corsHeaders, meta = null, ctx = nul
           const data3 = await res3.json();
           billGovCall(data3?.usage, `${agency}(sub-fail)`);
           await _interceptAgyVaultStore(env, data3, guid, ctx); // 2026-08-10
+          await _interceptGoalPathTrace(env, data3, guid, ctx); // 2026-09-14 신설, Phase A
           return new Response(JSON.stringify(data3), { headers: corsHeaders });
         }
         return new Response(JSON.stringify(data), { headers: corsHeaders });
@@ -25681,6 +25724,7 @@ async function handleGovRelay(bodyText, env, corsHeaders, meta = null, ctx = nul
             `${sub.label}에 직접 문의하시거나 잠시 후 다시 시도해 주세요.`;
         }
         await _interceptAgyVaultStore(env, data4, guid, ctx); // 2026-08-10 — 위임 최종 합성 응답, 세션 종료형 AGY_VAULT_STORE 태그가 나올 확률이 가장 높은 지점
+        await _interceptGoalPathTrace(env, data4, guid, ctx); // 2026-09-14 신설, Phase A — 다기관 위임이 실제로 끝나는 지점이라 GOAL_TRACE_STEP도 여기서 나올 확률이 가장 높다
         return new Response(JSON.stringify(data4), { headers: corsHeaders });
       }
       return new Response(JSON.stringify(data), { headers: corsHeaders });
