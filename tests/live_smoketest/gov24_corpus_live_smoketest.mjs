@@ -68,8 +68,16 @@ async function realClassifyFn(text, candidatesText) {
     const r = await fetch(`${PROXY}/chat/completions`, {
       method: 'POST',
       signal: _ac.signal,
+      // ★ 2026-09-15 신설 — 타임아웃을 걸어도 두 번째 이후 호출부터
+      // 계속 멈추는 현상 발견(wrangler tail에 로그 자체가 안 찍힘 —
+      // 요청이 워커까지 도달을 못 함). 반면 같은 URL에 대한 PowerShell
+      // 단발 요청은 즉시 응답. Node(undici) 내장 fetch의 keep-alive
+      // 커넥션 재사용 관련 알려진 이슈로 의심됨 — 매 호출마다 새
+      // 커넥션을 강제해 재현되는지 확인한다.
+      keepalive: false,
       headers: {
         'Content-Type': 'application/json',
+        Connection: 'close',
         // ★ 2026-08-23 신설(라이브 스모크테스트 403 실패 진단) — worker.js의
         // AI_PROXY_PATHS 방어벽(2026-06-28 DeepSeek 크레딧 소진 사고 이후
         // 추가, "AI 프록시 호출에는 브라우저 Origin이 필요합니다")이 Node
