@@ -1,0 +1,55 @@
+[
+  {
+    "label": "K-Telecom",
+    "manifestKey": "SP-23_ktelecom",
+    "promptLength": 53414,
+    "hasUniversalIntegrity": true,
+    "hasUniversalCommon": true,
+    "hasU13": true,
+    "status": "OK"
+  },
+  {
+    "label": "K-Estate",
+    "manifestKey": "SP-24_kestate",
+    "promptLength": 53630,
+    "hasUniversalIntegrity": true,
+    "hasUniversalCommon": true,
+    "hasU13": true,
+    "status": "OK"
+  },
+  {
+    "label": "K-Plan",
+    "manifestKey": "k-plan",
+    "promptLength": 66106,
+    "hasUniversalIntegrity": true,
+    "hasUniversalCommon": true,
+    "hasU13": true,
+    "status": "OK"
+  },
+  {
+    "label": "K-Watch",
+    "manifestKey": "k-watch",
+    "promptLength": 55503,
+    "hasUniversalIntegrity": true,
+    "hasUniversalCommon": true,
+    "hasU13": true,
+    "status": "OK"
+  },
+  {
+    "label": "K-Job",
+    "manifestKey": "k-job",
+    "promptLength": 56464,
+    "hasUniversalIntegrity": true,
+    "hasUniversalCommon": true,
+    "hasU13": true,
+    "status": "OK"
+  },
+  {
+    "label": "AC-PRO-CORE",
+    "manifestKey": "AC-PRO-CORE",
+    "promptLength": 100041,
+    "hasUniversalCommon": true,
+    "hasAccountFacts": true,
+    "status": "OK"
+  }
+]
