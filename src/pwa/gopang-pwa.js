@@ -53,33 +53,69 @@ if ('serviceWorker' in navigator) {
       // 자동 적용 타이머 ID (중복 방지)
       let _autoApplyTimer = null;
 
-      function _autoApplyUpdate(reg) {
-        if (_autoApplyTimer) return;  // 이미 예약됨
+      // BUG-FIX(2026-09-14) — "새 버전이 있습니다" 배너가 짧은 시간에 여러
+      // 번 잇달아 뜨는 문제. 원인: 병합이 연달아 여러 번 일어나면(각 병합마다
+      // bump-app-version.yml이 version.json/sw.js CACHE_NAME을 갱신)
+      // 배포 하나가 끝나 자동 새로고침되자마자, 그 사이 이미 배포된 *다음*
+      // 버전을 곧바로 또 감지해 배너가 또 뜨는 일이 반복된다 — 병합 10번이면
+      // 배너도 10번 뜨는 것처럼 보였다. 아래 두 가지로 고친다:
+      //
+      // 1) 디바운스 — 같은 페이지 안에서 짧은 간격으로 여러 번 감지되면
+      //    (푸시 알림·포그라운드 복귀·30분 주기 체크가 겹치는 경우 등)
+      //    매번 새로 반응하지 않고, 감지가 잠잠해질 때까지 기다렸다가
+      //    그 시점에 실제로 대기 중인(=가장 최신) 버전 하나에 대해서만
+      //    배너를 띄운다. reg.waiting은 항상 최신 설치본을 가리키므로
+      //    (더 새 버전이 설치되면 브라우저가 이전 대기본을 자동으로
+      //    교체한다) 디바운스가 끝나는 시점에 한 번만 확인해도 안전하다.
+      // 2) 새로고침 후 쿨다운 연장 — 기존 루프 방지 회로차단기(20초)는
+      //    CDN 전파 지연 같은 즉각적 재발만 막기엔 충분했지만, 연속
+      //    병합처럼 분 단위로 이어지는 배포 러시는 못 막았다. 90초로
+      //    늘리고, 쿨다운 중 감지된 버전은 배너로 즉시 알리지 않는 대신
+      //    쿨다운이 끝나는 시점에 맞춰 한 번만 다시 확인하도록 예약한다
+      //    (그 사이 몇 번을 다시 감지하든 예약은 하나만 유지된다).
+      const _AUTO_UPDATE_DEBOUNCE_MS = 3000;
+      const LOOP_KEY = 'gopang_last_auto_reload';
+      const LOOP_COOLDOWN_MS = 90000;
+      let _cooldownRecheckTimer = null;
 
-        // ★ 무한 재시작 루프 방지 회로차단기 ★
-        // CDN 전파 지연 등으로 sw.js가 edge마다 다르게 응답되면 새로고침
-        // 직후에도 또 "새 버전"으로 오인될 수 있다. 최근 20초 내에 이미
-        // 자동 재시작했다면 이번엔 건너뛰고 수동 배너만 표시한다.
-        // sessionStorage는 reload에도 유지되므로 루프를 끝까지 추적해 막는다.
-        const LOOP_KEY = 'gopang_last_auto_reload';
+      function _autoApplyUpdate(reg) {
         const lastReload = Number(sessionStorage.getItem(LOOP_KEY) || 0);
-        if (Date.now() - lastReload < 20000) {
-          console.warn('[PWA] 최근 20초 내 자동 재시작 이력 감지 — 반복 루프 의심, 자동 적용 중단(수동 배너만 표시)');
-          _showUpdateBanner(0);
+        const sinceReload = Date.now() - lastReload;
+        if (sinceReload < LOOP_COOLDOWN_MS) {
+          // 방금 자동 새로고침했다 — 지금 뜬 배너를 또 띄우지 않고,
+          // 쿨다운이 끝나는 시점에 딱 한 번만 재확인을 예약한다(이미
+          // 예약돼 있으면 새로 잡지 않음 — 그 사이 몇 번을 더 감지해도
+          // 재확인은 하나만 남는다).
+          if (!_cooldownRecheckTimer) {
+            const remain = LOOP_COOLDOWN_MS - sinceReload;
+            console.log(`[PWA] 쿨다운 중(${Math.ceil(remain / 1000)}초 남음) — 배너 억제, 쿨다운 종료 시 재확인 예약`);
+            _cooldownRecheckTimer = setTimeout(() => {
+              _cooldownRecheckTimer = null;
+              reg.update().then(() => {
+                if (reg.waiting && navigator.serviceWorker.controller) _autoApplyUpdate(reg);
+              }).catch(() => {});
+            }, remain + 500);
+          }
           return;
         }
 
-        console.log('[PWA] 새 버전 감지 — 5초 후 자동 적용');
-        _showUpdateBanner(5);         // 카운트다운 배너 표시
+        // 디바운스 — 짧은 간격으로 다시 호출되면 타이머를 새로 잡아서,
+        // 감지가 잠잠해진 뒤의 "최종" 상태 하나에 대해서만 배너를 띄운다.
+        if (_autoApplyTimer) clearTimeout(_autoApplyTimer);
         _autoApplyTimer = setTimeout(() => {
-          sessionStorage.setItem(LOOP_KEY, String(Date.now()));
-          const sw = reg.waiting;
-          if (sw) {
-            sw.postMessage({ type: 'SKIP_WAITING' });
-          } else {
-            window.location.reload();
-          }
-        }, 5000);
+          _autoApplyTimer = null;
+          console.log('[PWA] 새 버전 감지(안정화됨) — 5초 후 자동 적용');
+          _showUpdateBanner(5);         // 카운트다운 배너 표시
+          setTimeout(() => {
+            sessionStorage.setItem(LOOP_KEY, String(Date.now()));
+            const sw = reg.waiting;
+            if (sw) {
+              sw.postMessage({ type: 'SKIP_WAITING' });
+            } else {
+              window.location.reload();
+            }
+          }, 5000);
+        }, _AUTO_UPDATE_DEBOUNCE_MS);
       }
 
       // 경로 ①: 새 SW 설치 완료 → 자동 적용
