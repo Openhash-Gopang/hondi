@@ -1483,8 +1483,30 @@ export async function _handleOrchestrationTags(fullReply, bubble, sendFn = callA
       return true;
     }
 
-    const govsysMatch = fullReply.match(/\[CALL_GOVSYS:\s*id=([\w-]+),\s*mode=([\w-]+),\s*caller=([\w-]+)\]/);
-    if (govsysMatch) {
+    // BUG-FIX(2026-09-14) — 이 두 태그(CALL_GOVSYS/CALL_GOVTREE)는 원래
+    // 엄격한 정규식(콤마 위치·따옴표까지 정확히 일치해야 매치)만 썼다.
+    // 그런데 CALL_KINTENT가 이미 겪었던 것과 똑같은 문제 — 모델이 형식을
+    // 살짝 다르게 내면(따옴표 생략, 필드 순서 변경 등) 정규식이 그냥
+    // 매치 실패하고, 그러면 여기 전체가 조용히 스킵돼 아무 안내도 없이
+    // 멈춘다 — 를 이 둘은 아직 안 고치고 있었다. _extractBracketTag로
+    // 태그 자체(중첩 대괄호까지 안전하게)는 먼저 확실히 떼어내고, 그
+    // 안의 key=value는 느슨하게(따옴표 유무·순서 무관) 파싱한다. 그래도
+    // 필수 필드를 못 찾으면 — 조용히 넘어가지 않고 — AC에게 "형식이
+    // 어긋났다"고 알려 재시도하게 한다(이전엔 이 경우 자체가 감지조차
+    // 안 됐다).
+    const govsysBody = _extractBracketTag(fullReply, 'CALL_GOVSYS');
+    if (govsysBody !== null) {
+      const idM = govsysBody.match(/\bid\s*=\s*([\w-]+)/i);
+      if (!idM) {
+        console.warn('[Orchestration] CALL_GOVSYS 태그 감지됐지만 id 필드 파싱 실패:', govsysBody.slice(0, 120));
+        await _updateBubble(_stripInternalTags(fullReply));
+        await _watchdogSendFn('CALL_GOVSYS_MALFORMED')(
+          `[INTERNAL: 방금 [CALL_GOVSYS: ...] 태그를 냈지만 id 필드를 찾지 못해 처리하지 못했습니다. ` +
+          `정확한 형식 "[CALL_GOVSYS: id=<atom_id>, mode=<mode>, caller=<caller>]"으로 다시 시도하거나, ` +
+          `안 되면 사용자에게 자연스럽게 상황을 알리고 다른 방법을 제안하세요.]`,
+          null, null, resolveOrchestrationModel('CALL_GOVTREE_RESULT'));
+        return true;
+      }
       // ★ 정정 ★ SP-20 문서는 이 태그의 id를 "automation_sp 식별자"처럼
       // 서술했지만, worker.js execute-atom은 atom_id로 조회한 뒤 그
       // 안의 automation_sp를 내부적으로 쓰는 구조다(3~4차 라운드에서
@@ -1499,32 +1521,50 @@ export async function _handleOrchestrationTags(fullReply, bubble, sendFn = callA
       try {
         const res = await fetch(`${base}/orchestration/execute-atom`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ atom_id: govsysMatch[1], atom_input: {} }),
+          body: JSON.stringify({ atom_id: idM[1], atom_input: {} }),
+          // BUG-FIX(2026-09-14) — 지금까지 이 fetch엔 타임아웃이 전혀
+          // 없었다. 서버(/orchestration/execute-atom)가 응답하지 않고
+          // 그냥 멈추면(백엔드 장애·다운스트림 대기 등) 브라우저 fetch는
+          // 기본적으로 "영원히" 기다린다 — 5초 진행알림 타이머는 계속
+          // 돌지만 실제로 끝나지는 않는 상태. 메인 스트리밍 호출에
+          // 이미 있는 45초 idle 타임아웃과 동일 상한을 여기도 건다.
+          signal: AbortSignal.timeout(45000),
         });
         resultText = JSON.stringify(await res.json().catch(() => ({ status: res.status })));
       } catch (e) {
-        resultText = `{"error":"${e.message}"}`;
+        resultText = (e.name === 'TimeoutError' || e.name === 'AbortError')
+          ? '{"error":"서버 응답 시간 초과(45초)"}'
+          : `{"error":"${e.message}"}`;
       } finally {
         _stopTicker();
       }
-      await _watchdogSendFn('CALL_GOVSYS')(`[CALL_GOVSYS 결과] ${resultText}\n\n결과가 requires_user_action이면 그 사유를 이용자에게 자연스럽게 전달하세요.`, null, null, resolveOrchestrationModel('CALL_GOVSYS_RESULT'));
+      await _watchdogSendFn('CALL_GOVSYS')(`[CALL_GOVSYS 결과] ${resultText}\n\n결과가 requires_user_action이면 그 사유를 이용자에게 자연스럽게 전달하세요. 오류나 시간 초과면 그 사실 그대로 사용자에게 알리고 다른 방법을 제안하세요.`, null, null, resolveOrchestrationModel('CALL_GOVSYS_RESULT'));
       return true;
     }
 
     // ── CALL_GOVTREE(2026-08-05 신설) — org_profiles.resolution_strategy=
     // gov_tree_delegate인 지방행정 기관 실행. CALL_GOVSYS(순수 API 자동화,
     // atom_id 기반)와 달리 gov-tree SP와 자연어로 한 턴 대화해서 결과를
-    // 얻는다 — task 필드는 콤마를 포함할 수 있어(자연어 문장) 반드시
-    // 따옴표로 감싸게 하고 정규식은 따옴표 안쪽만 통째로 뽑는다
-    // (BENEFIT_SEMANTIC_SEARCH의 query= 파싱과 동일한 이유).
-    const govtreeMatch = fullReply.match(
-      /\[CALL_GOVTREE:\s*gov_tree_ref=([\w:-]+),\s*task="([^"]*)"(?:,\s*caller=([\w-]+))?\]/
-    );
-    if (govtreeMatch) {
+    // 얻는다.
+    const govtreeBody = _extractBracketTag(fullReply, 'CALL_GOVTREE');
+    if (govtreeBody !== null) {
+      const refM    = govtreeBody.match(/gov_tree_ref\s*=\s*([\w:-]+)/i);
+      const taskM   = govtreeBody.match(/task\s*=\s*"([^"]*)"/i) || govtreeBody.match(/task\s*=\s*([^,]+)/i);
+      if (!refM || !taskM) {
+        console.warn('[Orchestration] CALL_GOVTREE 태그 감지됐지만 필드 파싱 실패(gov_tree_ref 또는 task 없음):', govtreeBody.slice(0, 120));
+        await _updateBubble(_stripInternalTags(fullReply));
+        await _watchdogSendFn('CALL_GOVTREE_MALFORMED')(
+          `[INTERNAL: 방금 [CALL_GOVTREE: ...] 태그를 냈지만 gov_tree_ref 또는 task 필드를 찾지 못해 ` +
+          `처리하지 못했습니다. 정확한 형식 "[CALL_GOVTREE: gov_tree_ref=<ref>, task=\\"<내용>\\"]"으로 ` +
+          `다시 시도하거나, 안 되면 사용자에게 자연스럽게 상황을 알리고 다른 방법(K-Search 등)을 제안하세요.]`,
+          null, null, resolveOrchestrationModel('CALL_GOVTREE_RESULT'));
+        return true;
+      }
       console.log('[Orchestration] CALL_GOVTREE 감지 — /orchestration/execute-govtree-step 호출');
       await _updateBubble(_stripInternalTags(fullReply));
       history.push({ role: 'assistant', content: fullReply });
-      const [, govTreeRef, task] = govtreeMatch;
+      const govTreeRef = refM[1];
+      const task = taskM[1].trim();
       let resultText;
       // BUG-FIX(2026-09-14) — 이게 바로 스크린샷 재현 사례의 실제 대기
       // 구간이다: "...찾아볼게요"까지 뜬 뒤, 이 fetch가 응답하기 전까지
@@ -1534,15 +1574,20 @@ export async function _handleOrchestrationTags(fullReply, bubble, sendFn = callA
       try {
         const res = await fetch(`${base}/orchestration/execute-govtree-step`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ gov_tree_ref: govTreeRef, task: task.trim() }),
+          body: JSON.stringify({ gov_tree_ref: govTreeRef, task }),
+          // BUG-FIX(2026-09-14) — CALL_GOVSYS와 동일한 이유로 타임아웃 신설.
+          // 서버 쪽 gov-tree SP 호출이 멈추면 이 fetch도 무한 대기였다.
+          signal: AbortSignal.timeout(45000),
         });
         resultText = JSON.stringify(await res.json().catch(() => ({ status: res.status })));
       } catch (e) {
-        resultText = `{"error":"${e.message}"}`;
+        resultText = (e.name === 'TimeoutError' || e.name === 'AbortError')
+          ? '{"error":"서버 응답 시간 초과(45초)"}'
+          : `{"error":"${e.message}"}`;
       } finally {
         _stopTicker();
       }
-      await _watchdogSendFn('CALL_GOVTREE')(`[CALL_GOVTREE 결과] ${resultText}\n\nstatus가 gov_tree_ref_stale이면 org_profiles와 gov-tree가 어긋난 것이므로 이 기관은 미연결로 취급하고 대체 경로(K-Search 등)를 시도하세요. status=ok면 institution_response를 그 기관이 실제로 답한 내용으로 취급해 다음 단계로 진행하세요.`, null, null, resolveOrchestrationModel('CALL_GOVTREE_RESULT'));
+      await _watchdogSendFn('CALL_GOVTREE')(`[CALL_GOVTREE 결과] ${resultText}\n\nstatus가 gov_tree_ref_stale이면 org_profiles와 gov-tree가 어긋난 것이므로 이 기관은 미연결로 취급하고 대체 경로(K-Search 등)를 시도하세요. status=ok면 institution_response를 그 기관이 실제로 답한 내용으로 취급해 다음 단계로 진행하세요. 오류나 시간 초과면 그 사실 그대로 사용자에게 알리고 다른 방법을 제안하세요.`, null, null, resolveOrchestrationModel('CALL_GOVTREE_RESULT'));
       return true;
     }
   }
