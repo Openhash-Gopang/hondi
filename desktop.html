@@ -1298,8 +1298,6 @@ document.addEventListener('keydown', function (e) {
     { l1: '쓰면 쓸수록 똑똑해지는', l2: '나만의 AI 비서, 혼디', href: '#core-philosophy' },
     // 2026-09-14 추가 — '혼디란?' 소개 자료 20편(about-hondi.html 카드) 문구를
     // 히어로 로테이션용으로 재구성. href는 about-hondi.html의 실제 링크와 동일하게 맞춤.
-    // (2026-09-14 재복원 — d6d8f66이 무관한 메뉴 변경과 함께 이 블록을
-    // 실수로 삭제해 6개로 되돌아갔던 것을 원상복구함.)
     { l1: '판결 예측 일치도 85% vs 45%,', l2: '혼디는 챗GPT와 다릅니다.', href: './reports/hondi-vs-chatgpt.html' },
     { l1: '카톡보다 100배 나은 혼디,', l2: '현장 베타 테스트를 시작합니다.', href: './reports/hondi-vs-chatgpt.html' },
     { l1: '메신저, AI, 그리고 블록체인', l2: '이 셋을 하나로 합쳤습니다.', href: './reports/hondi-vs-kakao-ai-blockchain.html' },
@@ -1833,12 +1831,6 @@ document.addEventListener('keydown', function (e) {
         renderCandidates((data.candidates || []).filter((c) => isSafeDesktopUrl(c.url)));
         break;
       case "delegate_ksearch":
-        appendMessage("bot", data.message);
-        break;
-      case "info_answer":
-        // 2026-09-14 신설 — 페이지 이동이 아니라 "질문에 대한 답"을 반환하는
-        // 타입. hondi-search-relay가 HONDI-FAQ 참고자료를 근거로 합성한
-        // 답변을 그대로 채팅 말풍선에 표시한다. 이동·후보 렌더링 없음.
         appendMessage("bot", data.message);
         break;
       default:
