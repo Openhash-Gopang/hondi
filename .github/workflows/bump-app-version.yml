@@ -24,6 +24,12 @@ jobs:
   bump-version:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: ubuntu-latest
+    # GitHub Actions는 if: 조건절에서 secrets 컨텍스트를 직접 참조하는
+    # 것을 허용하지 않는다("Unrecognized named-value: 'secrets'") —
+    # job-level env로 한 번 감싼 뒤 env 컨텍스트로 체크해야 한다.
+    env:
+      CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+      CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -73,10 +79,7 @@ jobs:
       # 설정된 경우에만 실행되고, 없으면 조용히 건너뛴다(설정 안 해도
       # 기능 자체는 동작 — 다만 전파 지연이 조금 더 있을 수 있음).
       - name: Purge Cloudflare cache for version.json/sw.js
-        if: ${{ secrets.CF_API_TOKEN != '' && secrets.CF_ZONE_ID != '' }}
-        env:
-          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
+        if: ${{ env.CF_API_TOKEN != '' && env.CF_ZONE_ID != '' }}
         run: |
           curl -sf -X POST "https://api.cloudflare.com/client/v4/zones/${CF_ZONE_ID}/purge_cache" \
             -H "Authorization: Bearer ${CF_API_TOKEN}" \
