@@ -282,8 +282,14 @@ export const PROFESSOR_REGISTRY = {
     triggers: [],
   },
   'professor-medicine-series': {
-    label: '교수(의료 중계열)', icon: '🎓', category: 'EDU', ownerAgency: 'kedu',
+    label: '교수(의료 중계열, 수의학 포함)', icon: '🎓', category: 'EDU', ownerAgency: 'kedu',
     key: 'SP_professor-medicine-series', needsMedicalSafety: false,
+    // 2026-09-14 추가 — "의료"라는 라벨만으론 사람 의학으로만 읽혀,
+    // "수의사가 되려고 수의학과 진학을 준비 중인데..." 발화가 최상위
+    // 단계에서 아무 후보와도 안 맞아 "해당없음"으로 즉시 떨어지는 게
+    // subject_gate_live_smoketest.py 재작성 후 재현에서 확인됨(원래
+    // professor-veterinary가 이 중계열 아래 있는데도 라벨에 그 힌트가
+    // 전혀 없었다).
     parentKey: 'professor',
     triggers: [],
   },
@@ -578,8 +584,13 @@ export const PROFESSOR_REGISTRY = {
     triggers: [],
   },
   'professor-materials-series': {
-    label: '교수(재료 중계열)', icon: '🎓', category: 'EDU', ownerAgency: 'kedu',
+    label: '교수(재료 중계열, 반도체·신소재·금속·세라믹 포함)', icon: '🎓', category: 'EDU', ownerAgency: 'kedu',
     key: 'SP_professor-materials-series', needsMedicalSafety: false,
+    // 2026-09-14 추가 — 라벨에 "반도체" 힌트가 전혀 없어 "반도체공학
+    // 전공"류 발화가 이 중계열을 못 찾고 professor-electrical-computer
+    // (전기·전자·컴퓨터)로 새는 게 subject_gate_live_smoketest.py
+    // 재작성 후 재현에서 확인됨(정부 표준분류상 반도체공학은 재료
+    // 소속이지만, 이 사실은 라벨만 봐선 전혀 알 수 없었다).
     parentKey: 'professor',
     triggers: [],
   },

@@ -67,7 +67,12 @@ const GATE_SYS_PROMPT_HEAD =
 // 특히 결과가 왜곡된다.
 export const LEAF_SYNONYMS = {
   'professor-korean':             ['국어', '받아쓰기', '맞춤법', '한글', '초등 국어', '글쓰기 기초'],
-  'professor-math':               ['수학', '산수', '구구단', '덧셈', '뺄셈', '곱셈', '나눗셈', '초등 수학'],
+  // 2026-09-14 추가 — "미적분"이 없어서 "미적분학 개념이 헷갈려서
+  // 수학을 배우고 싶다"류의 흔한 일상 표현이 옆 리프 professor-analysis
+  // (해석학, 더 formal한 수학 전공용 과목)로 새는 게
+  // subject_gate_live_smoketest.py 재작성 후 재현에서 확인됨 — 일상
+  // 언어로 "미적분"은 거의 항상 이 범용 수학 지도를 뜻한다.
+  'professor-math':               ['수학', '산수', '구구단', '덧셈', '뺄셈', '곱셈', '나눗셈', '초등 수학', '미적분', '미적분학'],
   'professor-english':            ['영어', '알파벳', '파닉스', '영어 기초', '초등 영어'],
   'professor-generalscience':     ['과학', '초등 과학', '과학 실험'],
   'professor-generalsocialscience': ['사회', '초등 사회'],
