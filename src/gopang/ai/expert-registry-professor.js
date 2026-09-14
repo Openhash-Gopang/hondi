@@ -416,14 +416,25 @@ export const PROFESSOR_REGISTRY = {
     triggers: [],
   },
   'professor-appliedarts-series': {
-    label: '교수(응용예술 중계열)', icon: '🎓', category: 'EDU', ownerAgency: 'kedu',
+    label: '교수(응용예술 중계열, 애니메이션·만화·게임 포함)', icon: '🎓', category: 'EDU', ownerAgency: 'kedu',
     key: 'SP_professor-appliedarts-series', needsMedicalSafety: false,
+    // 2026-09-14 추가 — "응용예술"이라는 라벨만으론 애니메이션이 여기
+    // 있는지 짐작이 안 돼, "애니메이션 원화 작업이랑 스토리보드 작법"
+    // 발화가 최상위 단계에서 professor-theater-film-series(연극·영화)
+    // 로 새는 게 subject_gate_live_smoketest.py gapfill 재검증에서
+    // 확인됨(애니메이션도 "영화"로 연상되기 쉬운데, 정작
+    // professor-animation은 이 중계열 안에 있다).
     parentKey: 'professor',
     triggers: [],
   },
   'professor-finearts-series': {
-    label: '교수(미술 중계열)', icon: '🎓', category: 'EDU', ownerAgency: 'kedu',
+    label: '교수(미술 중계열, 디자인·공예 포함)', icon: '🎓', category: 'EDU', ownerAgency: 'kedu',
     key: 'SP_professor-finearts-series', needsMedicalSafety: false,
+    // 2026-09-14 추가 — "미술"이라는 라벨이 순수미술로만 읽혀, "산업
+    // 디자인 전공인데 제품 디자인 프로세스" 발화가 최상위 단계에서
+    // 이 중계열을 못 찾고 professor-appliedarts-series(응용예술)로
+    // 새는 게 subject_gate_live_smoketest.py gapfill 재검증에서
+    // 확인됨(정작 professor-design은 이 중계열 안에 있다).
     parentKey: 'professor',
     triggers: [],
   },
@@ -1947,8 +1958,15 @@ export const PROFESSOR_REGISTRY = {
     triggers: ['생물통계학 지도', '임상시험통계 지도'],
   },
   'professor-medicine-specialty-series': {
-    label: '교수(의학 전문과목 중계열)', icon: '🎓', category: 'EDU', ownerAgency: 'kedu',
+    label: '교수(의학 전문과목 중계열, 본과 공통·기초의학 포함)', icon: '🎓', category: 'EDU', ownerAgency: 'kedu',
     key: 'SP_professor-medicine-specialty-series', needsMedicalSafety: false,
+    // 2026-09-14 추가 — "전문과목"이라는 라벨이 각 임상과(내과·외과 등)
+    // 전용으로만 읽혀, "의과대학 본과 시험 준비 중인데 병리생리학
+    // 개념 지도"처럼 특정 과가 아닌 본과 공통·기초의학 요청이 한 단계
+    // 위(professor-medicine-series)에서부터 아예 "해당없음"으로 떨어지는
+    // 게 subject_gate_live_smoketest.py gapfill 재검증에서 확인됨 —
+    // 정작 이 중계열 안에 그 요청이 가는 일반 리프(professor-medicine)가
+    // 있는데도 라벨이 그걸 전혀 암시 못 했다.
     parentKey: 'professor-medicine-series',
     triggers: [], // 중계열 자체는 직접 호출 대상 아님 — 소계열이 리프
   },
