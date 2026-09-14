@@ -4378,6 +4378,8 @@ window.closePDV = closePDV;
         const dec = new TextDecoder();
         let full = '';
         let buf  = '';
+        // BUG-FIX(2026-09-14) — 아래 finish_reason==='length' 복구 로직에서 쓴다.
+        let _finishReason = null;
         // ※ 2026-07-01 수정: 이전엔 dec.decode(value)를 stream:true 없이
         //   매 read()마다 새로 호출하고, 청크 경계에 걸친 미완성 줄을
         //   버리고 있었다(call-ai.js 메인 스트림 루프와 달리 buf 누적이
@@ -4397,7 +4399,16 @@ window.closePDV = closePDV;
             const data = line.slice(6).trim();
             if (data === '[DONE]') break;
             try {
-              const chunk = JSON.parse(data)?.choices?.[0]?.delta?.content || '';
+              const _chunkObj = JSON.parse(data);
+              // BUG-FIX(2026-09-14) — call-ai.js(_callAIInner)에 추가한 것과
+              // 동일한 이유로 이 패널도 finish_reason을 확인해야 한다(이
+              // 패널은 call-ai.js와 별도 구현이라 그 수정이 자동으로
+              // 반영되지 않는다 — 상단 주석의 resolveChatBudget 사례와
+              // 동일 패턴).
+              if (_chunkObj?.choices?.[0]?.finish_reason) {
+                _finishReason = _chunkObj.choices[0].finish_reason;
+              }
+              const chunk = _chunkObj?.choices?.[0]?.delta?.content || '';
               if (!chunk) continue; // 빈 델타(예: 리즈닝 하트비트)로는 화면을 건드리지 않는다
               full += chunk;
               bubbleEl.textContent = full;
@@ -4411,6 +4422,39 @@ window.closePDV = closePDV;
         _panelHistory.push({ role: 'assistant', content: full });
         _trimPanelHistory();
         _savePanelHistory(); // 대화 연속성 — 응답마다 즉시 저장
+
+        // ── BUG-FIX(2026-09-14) — 응답이 max_tokens 한도로 끊긴 경우 복구 ──
+        // 실사용 재현 사례: 모바일 "AI 메신저" 패널에서 "...찾아볼게요.
+        // 잠시만 기다려 주세요."까지는 정상 출력되고, 그 직후 내려던
+        // [CALL_GOVTREE: gov_tree_ref=..., task="..."] 태그가 max_tokens
+        // 한도(hondi-pro thinking 모드가 reasoning에 예산을 다 씀)로
+        // 아예 시작도 못 하거나 중간에 끊겨서, 아래 4495행 정규식이
+        // 매치 실패 → 그 아래 어떤 핸들러도 안 걸림 → 조용히 멈춤.
+        // call-ai.js(_callAIInner)에 이미 추가한 동일 검사를 이 패널
+        // (별도 구현)에도 그대로 적용한다 — _recoverOrchestrationFailure는
+        // call-ai.js 밖으로 export되어 있지 않아 여기서는 패널 자체 관례
+        // (_panelSendFn과 동일한 "새 버블 만들어 재귀 호출" 패턴)로 재구현.
+        if (_finishReason === 'length') {
+          console.warn(
+            '[Panel] finish_reason=length로 응답 종료 — 복구 시도. 응답 끝부분:',
+            full.slice(-80)
+          );
+          const _recoveryMsg =
+            `[INTERNAL: 방금 응답이 max_tokens 한도로 중간에 끊겼습니다(finish_reason=length). ` +
+            `사용자에게 이 실패를 기술적 오류 문구 그대로 노출하지 말고, 자연스럽게 "요청이 ` +
+            `복잡해서 답변이 끊겼다"는 취지로 설명하고 다시 시도할지 물어보세요. 원래 사용자 ` +
+            `발화: "${userText}"]`;
+          const _recoveryBubble = _appendPanelMsg('ai', '…');
+          _recoveryBubble.classList.add('streaming');
+          try {
+            await _callPanelAI(_recoveryMsg, _recoveryBubble);
+          } catch (e) {
+            console.error('[Panel] finish_reason=length 복구 호출도 실패 — 포기:', e.message);
+          } finally {
+            _recoveryBubble.classList.remove('streaming');
+          }
+          return;
+        }
 
         // v1.3 — PROFILE_SUBMIT/SKIP/PARTIAL_SAVE/FIRST_GREETED/NAME_CAPTURED 처리.
         // bubble은 null로 넘겨 call-ai.js의 _updateStreamBubble(메인 채팅 버블 구조
