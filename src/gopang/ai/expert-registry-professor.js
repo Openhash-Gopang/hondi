@@ -934,8 +934,16 @@ export const PROFESSOR_REGISTRY = {
     triggers: [],
   },
   'professor-transportation-series': {
-    label: '교수(교통·수송 중계열)', icon: '🎓', category: 'EDU', ownerAgency: 'kedu',
+    label: '교수(교통·수송 중계열, 항공운항·조종사 교육 포함 — 항공기 설계는 기계 중계열 소속)', icon: '🎓', category: 'EDU', ownerAgency: 'kedu',
     key: 'SP_professor-transportation-series', needsMedicalSafety: false,
+    // 2026-09-14 추가 — professor-mechanical 아래 professor-aerospace
+    // (항공·우주공학, 기체 설계)가 있어서 "항공운항학과... 항공역학
+    // 기초"처럼 조종·운항 쪽 요청도 최상위 단계에서 두 갈래(교통·수송의
+    // professor-aviation vs 기계의 professor-aerospace) 사이에서 모델이
+    // 과도하게 망설이다 reasoning 토큰을 소진하는 게(4000토큰도 부족,
+    // finish_reason=length) subject_gate_live_smoketest.py gapfill
+    // 재검증에서 확인됨. 두 갈래의 실제 구분(운항·조종 vs 기체 설계)을
+    // 라벨에 명시해 힌트를 준다.
     parentKey: 'professor',
     triggers: [],
   },
