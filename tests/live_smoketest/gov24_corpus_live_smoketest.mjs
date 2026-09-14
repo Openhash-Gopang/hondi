@@ -54,26 +54,44 @@ function parseArgs() {
 // ★ gov_router_2026_08_21_department_live_smoketest.mjs의 realClassifyFn과
 // 토씨 하나 안 틀리고 동일 — 프로덕션 K-Intent 폴백을 그대로 복제한다.
 let classifyCallCount = 0;
+
+// ★ 2026-09-15 신설 — batch3(gov24-b3-002 "한부모가족") 라이브 재검증에서
+// fetch()가 응답 없이 무한 대기하는 현상 발견. 처음엔 프록시/DeepSeek
+// 자체 지연으로 의심해 타임아웃을 45→90초로 늘렸으나, wrangler tail
+// 실측 로그(cf-worker-event)로 확인해보니 실제로는 26초 만에
+// outcome:"canceled"가 찍혀 있었다 — 우리 AbortController(45초)가
+// 발동하기 훨씬 전이다. cpuTimeMs:1로 워커는 그냥 DeepSeek 응답을
+// 기다리며 대기만 하고 있었으므로, 이 26초 컷은 우리 코드가 아니라
+// 클라이언트 쪽 네트워크 경로(공유기/ISP NAT의 idle 커넥션 타임아웃으로
+// 추정 — 사용자 ISP: KCTV JEJU BROADCASTING)에서 발생한 것으로 결론
+// 내렸다. 그래서 타임아웃을 늘리는 방향(90초)은 그 경로가 먼저 끊어
+// 버리니 효과가 없다 — 대신 NAT가 끊기 전(20초) 안쪽에서 짧게 포기하고
+// 매번 새 커넥션으로 재시도하는 쪽으로 전략을 바꾼다. 오늘 문서화된
+// DeepSeek 백엔드 혼잡(20~60초 지연)이 간헐적이라는 점을 감안하면,
+// 재시도 중 한 번이라도 20초 안에 응답이 오는 순간을 잡을 확률이 있다.
+const CLASSIFY_TIMEOUT_MS = 20000; // NAT 컷(실측 26초)보다 여유 있게 짧게
+const CLASSIFY_MAX_ATTEMPTS = 3;
+
 async function realClassifyFn(text, candidatesText) {
   classifyCallCount++;
-  // ★ 2026-09-15 신설 — batch3(gov24-b3-002 "한부모가족") 라이브 재검증에서
-  // fetch()가 응답 없이 무한 대기하는 현상 발견(재현 확인됨). 원래 이
-  // 함수엔 타임아웃이 전혀 없어 프록시/DeepSeek 쪽이 멈추면 스크립트
-  // 전체가 그대로 멈춘다. AbortController로 45초 제한을 걸어 최소한
-  // 타임아웃 에러로 실패하고 다음 항목으로 넘어가게 한다 — 무한 대기를
-  // 진단 가능한 실패로 바꾸는 게 목적이라 사후이지 원인 수정은 아니다.
+  for (let attempt = 1; attempt <= CLASSIFY_MAX_ATTEMPTS; attempt++) {
+    const result = await _classifyFnOnce(text, candidatesText, attempt);
+    if (result !== '__TIMEOUT__') return result;
+    if (attempt < CLASSIFY_MAX_ATTEMPTS) {
+      console.warn(`  [_govClassifyFn] ${attempt}번째 시도 타임아웃(${CLASSIFY_TIMEOUT_MS / 1000}초) — 재시도`);
+    }
+  }
+  console.warn(`  [_govClassifyFn] ${CLASSIFY_MAX_ATTEMPTS}회 전부 타임아웃 — 포기하고 NONE 취급`);
+  return null;
+}
+
+async function _classifyFnOnce(text, candidatesText) {
   const _ac = new AbortController();
-  const _timeoutId = setTimeout(() => _ac.abort(), 45000);
+  const _timeoutId = setTimeout(() => _ac.abort(), CLASSIFY_TIMEOUT_MS);
   try {
     const r = await fetch(`${PROXY}/chat/completions`, {
       method: 'POST',
       signal: _ac.signal,
-      // ★ 2026-09-15 신설 — 타임아웃을 걸어도 두 번째 이후 호출부터
-      // 계속 멈추는 현상 발견(wrangler tail에 로그 자체가 안 찍힘 —
-      // 요청이 워커까지 도달을 못 함). 반면 같은 URL에 대한 PowerShell
-      // 단발 요청은 즉시 응답. Node(undici) 내장 fetch의 keep-alive
-      // 커넥션 재사용 관련 알려진 이슈로 의심됨 — 매 호출마다 새
-      // 커넥션을 강제해 재현되는지 확인한다.
       keepalive: false,
       headers: {
         'Content-Type': 'application/json',
@@ -115,8 +133,8 @@ async function realClassifyFn(text, candidatesText) {
     const m = raw.match(/[A-Z0-9][A-Z0-9-]*/);
     return m ? m[0] : (raw === 'NONE' ? 'NONE' : null);
   } catch (e) {
-    const reason = e.name === 'AbortError' ? '타임아웃(45초 초과)' : e.message;
-    console.warn(`  [_govClassifyFn] 실패(무시): ${reason}`);
+    if (e.name === 'AbortError') return '__TIMEOUT__';
+    console.warn(`  [_govClassifyFn] 실패(무시): ${e.message}`);
     return null;
   } finally {
     clearTimeout(_timeoutId);
