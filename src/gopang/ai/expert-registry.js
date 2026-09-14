@@ -1,10 +1,21 @@
 /**
  * ai/expert-registry.js — 전문가 AI 정적 레지스트리
  *
- * 전문 분야(기관) AI(K-Law·K-Tax 등)는 별도 URL을 가진 새 탭 서비스이지만,
- * 전문가 AI(변호사·간호사 등 개별 자격직)는 별도 서비스가 없는 "순수 System
- * Prompt" 페르소나다. 따라서 GWP_REGISTRY(새 탭 방식)에 넣지 않고, 이 레지스트리를
- * 통해 "같은 스레드 내 System Prompt 교체" 방식(expert-session.js)으로 호출한다.
+ * ⚠️ 낡음(2026-09-14 발견·정정) — 바로 아래 두 줄("GWP_REGISTRY(새 탭 방식)에
+ * 넣지 않고... 같은 스레드 내 System Prompt 교체")은 2026-08-06 이전 설계를
+ * 설명하며, 그 시점부로 사실이 아니다. 실제로는 전문가 페르소나도 K-서비스와
+ * 동일하게 새 탭(pages/expert-chat.html)에서 독립 실행된다 — call-ai.js의
+ * "(2026-08-06 정정)" 주석 참고: 예전에 메인 스레드에 있던 isExpertActive()
+ * 분기는 항상 else(AC-PRO-CORE 로드)만 타는 죽은 조건문이었다고 명시돼 있다.
+ * expert-session.js의 스레드 내 교체 방식은 src/_archive/
+ * expert-session-legacy-inthread.js.md로 이미 아카이브된 예전 설계다. 아래
+ * 원문은 역사적 맥락 보존을 위해 남겨두되, 현재 동작의 근거로 인용하지 말 것.
+ *
+ * (원문, 낡음) 전문 분야(기관) AI(K-Law·K-Tax 등)는 별도 URL을 가진 새 탭
+ * 서비스이지만, 전문가 AI(변호사·간호사 등 개별 자격직)는 별도 서비스가 없는
+ * "순수 System Prompt" 페르소나다. 따라서 GWP_REGISTRY(새 탭 방식)에 넣지
+ * 않고, 이 레지스트리를 통해 "같은 스레드 내 System Prompt 교체" 방식
+ * (expert-session.js)으로 호출한다.
  *
  * 분류(LAW/HEALTH/EDU/ENG/FIN/REAL_ESTATE/IT/TRANSLATION/TOURISM/SPORTS/BEAUTY/
  * CULINARY)는 각 SP 파일 1행에 적힌 코드(SP-LAW-01 등)를 그대로 따른다. 임상심리사·

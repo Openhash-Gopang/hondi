@@ -1,0 +1,8 @@
+[
+  {
+    "id": "gov24-b3-002",
+    "utterance": "한부모가족 증명서 발급받고 싶어요",
+    "expectContains": "JEJU-GOV-COMMON",
+    "note": "[정부24 원본: 한부모가족 증명서 발급] 소관기관(정부24 명시): 사회 약자 복지 — 전수 관찰용. routedOk 항상 참(placeholder); 정확도는 trace/agency를 note와 대조해 사람이 판정."
+  }
+]
