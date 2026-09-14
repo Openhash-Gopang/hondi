@@ -5332,6 +5332,8 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
     const decoder = new TextDecoder();
     let   fullReply = '';
     let   buf       = '';
+    // BUG-FIX(2026-09-14) — 아래 finish_reason==='length' 복구 로직에서 쓴다.
+    let   finishReason = null;
 
     try {
       while (true) {
@@ -5354,7 +5356,20 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
               const cached = u.prompt_tokens_details?.cached_tokens ?? 0;
               console.log(`[Cache] prompt=${u.prompt_tokens} cached=${cached} completion=${u.completion_tokens} (절감율 ${cached ? Math.round(cached/u.prompt_tokens*100) : 0}%)`);
             }
-            const delta = chunk.choices?.[0]?.delta?.content ?? '';
+            const _choice = chunk.choices?.[0];
+            // BUG-FIX(2026-09-14) — 이 스트림 파서는 지금까지 delta.content만
+            // 읽고 finish_reason은 한 번도 확인하지 않았다. reasoning 계열
+            // 모델(hondi-pro)이 max_tokens를 다 쓰면 finish_reason:"length"로
+            // 끝나는데, 하필 그 시점이 [CALL_GOVTREE: ...] 같은 대괄호 태그를
+            // 내는 도중이면 태그가 닫히지 않아(예: "...task=\"애월읍 근처 행"에서
+            // 끊김) 아래 _handleOrchestrationTags/_handleGovTaskTags 등 어떤
+            // 정규식도 매칭이 안 되고, 에러도 안내도 없이 조용히 그 턴이
+            // 끝나버린다 — 모바일 AC가 "잠시만 기다려 주세요" 뒤에 영영
+            // 멈추는 버그로 실사용 중 재현(2026-09-14). worker.js의
+            // VISION_TRUNCATED(2026-09-13, 메뉴판 사진 응답이 항목 많을 때
+            // 잘리던 문제)와 동일 원칙 — finish_reason을 반드시 확인한다.
+            if (_choice?.finish_reason) finishReason = _choice.finish_reason;
+            const delta = _choice?.delta?.content ?? '';
             if (delta) {
               if (!_typingHidden) { hideTyping(); _typingHidden = true; }
               fullReply += delta;
@@ -5393,6 +5408,37 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
     if (CFG._modelOverride) { CFG.model = CFG._modelOverride; CFG._modelOverride = null; }
     history.push({ role: 'assistant', content: fullReply });
     if (bubble) bubble.classList.remove('streaming');
+
+    // ── BUG-FIX(2026-09-14) — 응답이 max_tokens 한도로 끊긴 경우 복구 ──
+    // 처음엔 "대괄호 태그가 안 닫혔을 때만" 잡으면 될 줄 알았는데(예:
+    // "...task=\"애월읍 근처 행"에서 잘림), 실제로는 hondi-pro가 필러
+    // 문장("...찾아볼게요. 잠시만 기다려 주세요.")까지는 깔끔하게 content로
+    // 다 내고, 그 다음 [CALL_GOVTREE: ...] 태그를 구성하기 직전/도중에
+    // reasoning_content가 남은 max_tokens를 전부 먹어버려 태그 글자가
+    // *하나도* content에 안 들어간 채 finish_reason:"length"로 끝나는
+    // 경우도 있다(스크린샷 재현 사례 — 화면에 태그 파편이 전혀 안 보이는
+    // 이유). 이 경우 fullReply에는 '[' 자체가 없어 아래 미완성 태그
+    // 휴리스틱만으로는 못 잡는다. 그래서 조건을 "미완성 태그가 있으면"
+    // 에서 "finish_reason===length면 무조건"으로 넓힌다 — AC의 정상
+    // 대화 스타일(§0-H, 1~3문장)에서 CHAT_REPLY(_PRO) 예산을 다 채울
+    // 정도로 긴 답은 애초에 설계 의도에도 안 맞으므로, 오탐 위험보다
+    // "조용히 멈추는" 위험이 훨씬 크다.
+    const _lastOpenBracket  = fullReply.lastIndexOf('[');
+    const _lastCloseBracket = fullReply.lastIndexOf(']');
+    const _hasUnclosedTag   = _lastOpenBracket > _lastCloseBracket;
+    if (finishReason === 'length') {
+      console.warn(
+        '[AI] finish_reason=length로 응답 종료 — 복구 시도.',
+        _hasUnclosedTag
+          ? `미완성 태그: ${fullReply.slice(_lastOpenBracket, _lastOpenBracket + 80)}`
+          : '(태그 시작 전 잘림 — reasoning이 예산을 다 씀)'
+      );
+      await _recoverOrchestrationFailure(
+        new Error('응답이 max_tokens 한도로 끊겼습니다(finish_reason=length)'),
+        callAI, userText, 'RESPONSE_TRUNCATED'
+      );
+      return;
+    }
 
     // ── OpenHash 앵커링 (2단계, 2026-07-09 신설 — 관찰 전용) ──────────
     // fire-and-forget: 실패해도 채팅 흐름을 절대 막지 않는다(p2p-chat.js
