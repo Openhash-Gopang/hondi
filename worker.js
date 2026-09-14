@@ -1593,11 +1593,11 @@ function computeBilledKRW(env, usage, priceTier, multiplierOverride) {
 
 // 스트리밍 응답 본문에서 마지막 usage 청크를 파싱(스트림은 tee()로 복제해
 // 클라이언트에게는 그대로 전달하면서 이 쪽에서만 소비한다 — 지연 없음).
-async function _parseUsageFromStream(stream) {
+async function _parseUsageFromStream(stream, diagCtx = null) {
   try {
     const reader = stream.getReader();
     const decoder = new TextDecoder();
-    let buf = '', usage = null;
+    let buf = '', usage = null, finishReason = null, contentLength = 0;
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -1608,8 +1608,32 @@ async function _parseUsageFromStream(stream) {
         if (!line.startsWith('data: ')) continue;
         const payload = line.slice(6).trim();
         if (payload === '[DONE]') continue;
-        try { const chunk = JSON.parse(payload); if (chunk.usage) usage = chunk.usage; } catch {}
+        try {
+          const chunk = JSON.parse(payload);
+          if (chunk.usage) usage = chunk.usage;
+          // BUG-FIX(2026-09-14, 진단 전용 — diagCtx가 있을 때만 동작하므로
+          // 기존 4개 호출부는 완전히 무영향) — "생각하는 중입니다" 반복 +
+          // "(응답 없음)" 실사 재현(K-Compose 내부 단계) 원인 확정용. 지금
+          // 까지는 클라이언트가 빈 응답을 받아도 서버 쪽에 finish_reason·
+          // 실제 생성 글자수·reasoning 토큰 소모량이 전혀 로그로 안 남아
+          // "왜 비었는지"(사고 모드가 예산을 다 써서인지, 벤더가 진짜로
+          // 빈 답을 준 것인지, 다른 이유인지) 구분할 방법이 없었다.
+          if (diagCtx) {
+            const choice = chunk.choices?.[0];
+            if (choice?.finish_reason) finishReason = choice.finish_reason;
+            if (choice?.delta?.content) contentLength += choice.delta.content.length;
+          }
+        } catch {}
       }
+    }
+    if (diagCtx) {
+      _dlog(diagCtx.env, JSON.stringify({
+        tag: 'AI_EMPTY_COMPLETION_DIAG', ts: new Date().toISOString(),
+        finishReason, contentLength, hasUsage: !!usage,
+        completionTokens: usage?.completion_tokens ?? null,
+        reasoningTokens: usage?.completion_tokens_details?.reasoning_tokens ?? null,
+        ...diagCtx.meta,
+      }));
     }
     return usage;
   } catch { return null; }
@@ -19258,7 +19282,7 @@ async function callDeepSeek(bodyText,env,corsHeaders,fallbackFrom=null,meta=null
   if(isStream){
     if (guid && env.AI_SETUP_SEALS_KV) {
       const [forClient, forUsage] = res.body.tee();
-      const usageTask = _parseUsageFromStream(forUsage).then(usage => _recordAiUsage(env, ctx, {
+      const usageTask = _parseUsageFromStream(forUsage, { env, meta: { tier: spendTier, model: backendModel, guid, ...meta } }).then(usage => _recordAiUsage(env, ctx, {
         guid, serviceId: 'hondi-chat', tier: spendTier, priceTier: spendTier, model: backendModel, usage,
         logTag: 'HONDI_CHAT_COST', extraLogFields: meta,
         // (2026-07-14: 무료 한도 100원을 넘는 사용량은 이제 GDC 잔액에서
