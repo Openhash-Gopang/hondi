@@ -4171,7 +4171,14 @@ window.closePDV = closePDV;
       // 생성/정부 서류 접수 5종/부서 업무 요청 — 전부 leaf 핸들러로 확인됨).
       _handleBalanceCheckTag, _handleKSearchExecutionTag, _handleCreateUnclaimedProfileTag,
       _handleGovTaskTags, _handleDeptTaskTag,
+      // BUG-FIX(2026-09-14, 추가 이식) — OpenHash 앵커링(관찰용, fire-and-forget).
+      // call-ai.js에서 지금까지 export 안 되고 있던 것도 이번에 함께 export 추가.
+      _anchorGovChain,
     } = await import('./src/gopang/ai/call-ai.js');
+    // BUG-FIX(2026-09-14, 추가 이식) — K-Law 백그라운드 상시 감시와 AUTH 태그
+    // (인증 단계 상향) 역시 위와 같은 이유로 이 패널엔 연결된 적이 없었다.
+    const { _klawReview } = await import('./src/gopang/services/klaw.js');
+    const { _injectAuthConfirmButton } = await import('./src/gopang/core/auth.js');
     // BUG-FIX(2026-07-02): _callPanelAI(AI 패널 — 실제로 쓰이는 주 경로)가
     // 지금까지 _parseAgentTags를 호출한 적이 없었다. 메인 채팅 전용
     // _callAIInner만 호출하고 있었고, 패널은 _stripInternalTags로 화면
@@ -4825,6 +4832,12 @@ window.closePDV = closePDV;
         try { await _handleDeptTaskTag(full, bubbleEl, _panelSendFn, userText); }
         catch (e) { console.warn('[Panel] _handleDeptTaskTag 처리 실패(무시):', e.message); }
 
+        // ── OpenHash 앵커링 (2단계, 관찰 전용) — 2026-09-14 추가 이식 ──────
+        // fire-and-forget: 실패해도 채팅 흐름을 절대 막지 않는다.
+        _anchorGovChain(userText, full).catch(e =>
+          console.warn('[Panel][GovChain] 앵커링 실패 (무시):', e.message)
+        );
+
         // ── GWP/SEARCH/OPEN_PROFILE/P2P_INVITE 태그 실행 (2026-07-02 신설) ──
         try { _parseAgentTags(full, null, userText, _preTab); }
         catch (e) { console.warn('[Panel] _parseAgentTags 처리 실패(무시):', e.message); }
@@ -4834,9 +4847,32 @@ window.closePDV = closePDV;
         // 반환하는 죽은 게이트였다(상세는
         // src/_archive/expert-session-legacy-inthread.js.md) — 제거해도
         // 동작 변화 없음(가드가 상시 통과였으므로).
-        handleExpertTag(full).catch(e =>
+        // BUG-FIX(2026-09-14) — 지금까지 userText·_preTab 없이 full 하나만
+        // 넘기고 있었다. handleExpertTag 내부에서 userText는 미등록 태그
+        // 신고(_reportUnresolvedTag)에, _preTab은 실제 탭 전환에 쓰인다 —
+        // 둘 다 undefined면 신고 내용이 비고, 팝업 차단을 우회하는 사전
+        // 오픈 탭 재사용도 못 한다. 알려진 남은 한계: handleExpertTag
+        // 내부의 "AC와의 이전 대화 맥락 인계" 로직은 call-ai.js 모듈의
+        // history(메인 채팅용)를 참조하는데, 이 패널의 실제 대화는
+        // _panelHistory에 있다 — 그래서 패널에서 이 태그가 나가면 페르소나
+        // 새 탭이 "이전 대화 요약" 없이 이번 발화만 받는다. 별도 후속
+        // 작업 필요(expert-session.js가 history 배열을 인자로 받도록
+        // 리팩터링해야 함) — 이번 패치 범위 밖으로 남겨둔다.
+        handleExpertTag(full, userText, _preTab).catch(e =>
           console.warn('[Panel] EXPERT 태그 처리 실패(무시):', e.message)
         );
+
+        // ── AUTH 태그 감지 → 인증 요구 (2026-09-14 추가 이식) ──────────
+        const _panelAuthMatch = full.match(/\[AUTH:(L[0-3])\]/);
+        if (_panelAuthMatch) {
+          const requiredLevel = _panelAuthMatch[1];
+          const stored = JSON.parse(localStorage.getItem('gopang_user_v4') || 'null');
+          const currentLevel = stored?.authLevel || 'L0';
+          const levels = ['L0', 'L1', 'L2', 'L3'];
+          if (levels.indexOf(requiredLevel) > levels.indexOf(currentLevel)) {
+            setTimeout(() => _injectAuthConfirmButton(requiredLevel), 400);
+          }
+        }
 
         // ── [라우팅 자기점검] GWP↔EXPERT 편향 방지 (2026-08-06 신설) ──
         // call-ai.js._enforceRoutingBias와 동일 함수를 재사용 — CFG.system을
@@ -4865,6 +4901,11 @@ window.closePDV = closePDV;
         } catch (e) {
           console.warn('[Panel] _enforceConversationalStyle 처리 실패(무시):', e.message);
         }
+
+        // K-Law 백그라운드 감시 트리거 — 대화 내용 자동 검토 (비동기,
+        // 2026-09-14 추가 이식 — 메인 채팅에만 연결돼 있었다)
+        setTimeout(() => _klawReview('conversation', null), 3000);
+
         return;
       } catch(e) {
         clearTimeout(_idleTimer); // 타임아웃/오류 어느 경로든 타이머 누수 방지

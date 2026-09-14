@@ -4251,7 +4251,12 @@ export function _selectGovVerificationMode(score) {
 //
 // PDV 원칙(§5)과 동일하게 원문이 아니라 해시만 남긴다 — userText/fullReply
 // 원문은 앵커에 포함하지 않는다.
-async function _anchorGovChain(userText, fullReply) {
+// BUG-FIX(2026-09-14) — export 추가. 지금까지 이 함수가 모듈 비공개라
+// call-ai.js 안(_callAIInner)에서만 쓸 수 있었다 — 패널(webapp.html)에는
+// OpenHash 앵커링(관찰용 기록)이 아예 연결된 적이 없었던 원인 중 하나.
+// 기존 호출부(5727행 근처) 동작에는 영향 없음 — export 추가만으로는
+// 아무것도 바뀌지 않는다.
+export async function _anchorGovChain(userText, fullReply) {
   // [GWP: id] 태그가 있으면 그 서비스를 gwpEntry로 사용 — _parseAgentTags의
   // 매칭 정규식과 동일(따로 만들지 않음, 하나 바뀌면 둘 다 갱신해야
   // 하는 문제 방지 목적으로 여기서도 같은 패턴을 그대로 재사용).
