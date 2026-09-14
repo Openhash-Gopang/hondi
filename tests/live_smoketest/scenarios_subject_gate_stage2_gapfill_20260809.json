@@ -172,7 +172,7 @@
     "root_id": "professor",
     "utterance": "의과대학 본과 시험을 준비 중인데 병리생리학 개념 지도를 받고 싶어요",
     "expected_leaf_id": "professor-medicine",
-    "category": "정상경로(3단 트리 리프 — medicine-series→medicine) [갭필 배치, 2026-08-09 커버리지 보강, series당 1개 대표 리프]"
+    "category": "정상경로(3단 트리 리프 — medicine-series→medicine) [갭필 배치, 2026-08-09 커버리지 보강, series당 1개 대표 리프] [2026-09-14 재검토 완료: '병리생리학'(기초의학)과 '병리학(임상)'(professor-med-pathology)은 별개 과목 — 기대값 professor-medicine 확정, expert-registry-professor.js의 label/trigger에 명시적 힌트 추가함]"
   },
   {
     "id": "professor-gap-15-gapfill",

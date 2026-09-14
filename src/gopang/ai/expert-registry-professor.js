@@ -361,10 +361,20 @@ export const PROFESSOR_REGISTRY = {
     triggers: ['수의학 지도', '수의사 국가고시 지도'],
   },
   'professor-medicine': {
-    label: '교수(의학)', icon: '🎓', category: 'EDU', ownerAgency: 'kedu',
+    // 2026-09-14 — label에 '병리생리학' 명시(인수인계서 4번 항목 검토
+    // 결과). professor-gap-14-gapfill 시나리오("의과대학 본과 시험을
+    // 준비 중인데 병리생리학 개념 지도")의 기대값이 이 리프인 게 맞는지
+    // 애매하다는 지적이 있었음 — refineToLeaf()는 label 텍스트만 보고
+    // 판단하는데, '병리생리학'(질병의 기능적 기전을 다루는 기초의학
+    // 과목)이 '병리학(임상)'(조직/검사 기반 진단 전문과,
+    // professor-med-pathology)과 '병리'라는 표면적 접두어만으로 LLM이
+    // 헷갈릴 여지가 있었다. 시나리오 기대값 자체는 맞다고 판단해
+    // 그대로 두고, 대신 이 리프가 그 과목을 명시적으로 흡수한다는 걸
+    // label에 못박아 재발을 막는다.
+    label: '교수(의학, 본과 공통 기초의학 — 생리학·병리생리학·약리학 등)', icon: '🎓', category: 'EDU', ownerAgency: 'kedu',
     key: 'SP_professor-medicine', needsMedicalSafety: false,
     parentKey: 'professor-medicine-specialty-series', // 2026-08-10 Tier2/§4 확장 재소속(구 부모: professor-medicine-series),
-    triggers: ['의학 본과 지도', '의사 국가고시 지도'],
+    triggers: ['의학 본과 지도', '의사 국가고시 지도', '병리생리학 지도', '기초의학 지도'],
   },
   'professor-dentistry-academic': {
     label: '교수(치의학)', icon: '🎓', category: 'EDU', ownerAgency: 'kedu',

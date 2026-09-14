@@ -5198,6 +5198,12 @@ const SP_CODE_TO_PDV_SCOPE = {
   'SP-NAT-CUSTOMS': 'kcustoms', 'SP-NAT-BOK': 'kbok', 'SP-NAT-STAT': 'kstat',
   'SP-NAT-FORESTRESEARCH': 'kforestresearch', 'SP-NAT-FORESTSEED': 'kforestseed',
   'SP-NAT-FORESTCOOP': 'kforestcoop',
+  // 2026-09-14 신설 — SP-NAT-EDUCERT(대학/학교 증명서)는 domain/도코드가
+  // 없어(제주 지역 사무소 개념 자체가 안 맞는 노드) 크래시는 안 나지만,
+  // 이 항목이 빠지면 이 상담의 PDV 기록 scope가 'pdv_general'로 뭉개져
+  // 다른 SP-NAT-* 기관들과 달리 학교증명서 관련 과거 민원 이력을 scope
+  // 기준으로 못 불러온다. 다른 국가기관 지사와 동일 원칙으로 k 접두어 부여.
+  'SP-NAT-EDUCERT': 'keducert',
   // 도 자체 부서
   'SP-DO-PLAN': 'kplan', 'SP-DO-SAFETY': 'ksafety', 'SP-DO-JACHI': 'kjachi',
   'SP-DO-ECON': 'kecon', 'SP-DO-INNOV': 'kinnov', 'SP-DO-WELFARE': 'kwelfare',
