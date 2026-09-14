@@ -4613,6 +4613,13 @@ async function _delegateToFlash(task, context) {
 let _delegateRetryCount = 0;
 const _DELEGATE_RETRY_MAX = 2;
 
+// BUG-FIX(2026-09-14) — "진행 예고 문구는 있으나 태그가 전혀 없음" 자동
+// 재촉(아래 callAI 메인 디스패처)이 같은 무발화 패턴을 반복하며 서로를
+// 계속 부르는 걸 막는 상한. _delegateRetryCount와 동일한 이유·동일한
+// 스코프(모듈 전역, 탭 새로고침 시 리셋)로 별도 카운터를 둔다.
+let _tagOmissionNudgeCount = 0;
+const _TAG_OMISSION_NUDGE_MAX = 1;
+
 // ── [대화 스타일] 코드 층 강제 — 2026-08-06 신설, 2026-08-06 재배선 ──
 // SP-22(K-Execute)/SP-21(K-Deliver)·CONTROL-TOWER-PRINCIPLE(모든 SP
 // 공통 상속)에 "정확히 하나의 실행 가능한 동작만, 문서 서식 없이
@@ -5796,20 +5803,44 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
     const _webSearchHandled = await _handleWebSearchTag(fullReply, bubble, callAI, userText);
     if (_webSearchHandled) return;
 
-    // ── 진단 로그 (2026-09-06 신설) ──────────────────────────
-    // 실사 리포트: "검색해서 알려드릴게요"라고 말해놓고 그대로 멈춤.
-    // 태그 파서(_handleWebSearchTag) 자체는 정상 동작하므로, 원인은 SP가
-    // 사람이 읽는 문장만 내고 기계용 [WEB_SEARCH: query=...] 태그를
-    // 빠뜨렸거나(케이스 A), 태그는 냈지만 형식이 깨져(query= 누락 등)
-    // 파서 정규식과 안 맞는 경우(케이스 B)로 추정된다 — 두 경우 원인이
-    // 다르므로(SP 프롬프트 문제 vs 모델의 태그 문법 실수) 구분해서 남긴다.
-    // 사용자에게는 아무 영향 없음(콘솔 로그만).
-    if (/검색해\s*(서|드리|드릴게요|보겠습니다)|확인해\s*보겠습니다|알아보겠습니다|찾아드릴게요/.test(fullReply)) {
-      if (/\[WEB_SEARCH:/.test(fullReply)) {
-        console.warn('[Diag] [WEB_SEARCH: 태그는 있으나 파서 정규식과 불일치(형식 깨짐 추정):', fullReply);
-      } else if (!/\[BALANCE_CHECK\]|\[GWP:|\[EXPERT:|\[GOV_TASK|\[DEPT_TASK/.test(fullReply)) {
-        console.warn('[Diag] 검색/확인 의도 문구는 있으나 태그 자체가 없음 — SP가 태그를 빠뜨렸을 가능성:', fullReply);
+    // ── 진단 로그(2026-09-06 신설) → 자동복구로 승격(2026-09-14) ──────
+    // 실사 리포트: "검색해서 알려드릴게요"/"잠시만요"라고 말해놓고 그대로
+    // 멈춤. 오늘 재현된 사례("애월읍에서 가까운 행정복지센터를 찾아줘"
+    // → "...찾아드릴게요. 잠시만요."에서 정지)로 재확인 — 원인은 태그
+    // 파서(각 _handle*Tag)가 아니라, 모델이 사람이 읽는 문장만 내고
+    // 기계용 태그([CALL_GOVTREE:.../GWP:.../WEB_SEARCH:... 등, 무엇이든)
+    // 자체를 하나도 안 내는 경우다. 지금까지는 콘솔 경고만 남기고 사용자
+    // 화면은 그대로 방치돼, "멈춘 것"과 "정상 종료"를 사용자가 구분할
+    // 방법이 없었다 — 이제 한 번은 자동으로 재촉해 실제로 복구를 시도한다
+    // (재귀 방지를 위해 세션당 상한 있음 — 아래 _tagOmissionNudgeCount).
+    // ★ 기존엔 WEB_SEARCH 계열 문구·태그만 봤다(하드코딩된 화이트리스트라
+    // CALL_GOVTREE 등 새 태그가 추가될 때마다 계속 놓쳤다) — 이제 "이미
+    // 알려진 특정 태그가 없다"가 아니라 "대괄호 태그가 통째로 하나도 없다"로
+    // 판정 기준을 일반화해, 어떤 태그가 빠지든 한 곳에서 다 잡는다.
+    if (
+      /검색해\s*(서|드리|드릴게요|보겠습니다)|확인해\s*(보겠습니다|드릴게요)|알아보겠습니다|찾아드릴게요|조회해\s*드릴게요|잠시만\s*(요|기다려)/.test(fullReply) &&
+      !/\[[A-Z][A-Z_]{2,}(:|\])/.test(fullReply)
+    ) {
+      _tagOmissionNudgeCount += 1;
+      console.warn(
+        `[Diag→Recovery] 진행 예고 문구는 있으나 실행 가능한 태그가 전혀 없음 ` +
+        `(시도 ${_tagOmissionNudgeCount}/${_TAG_OMISSION_NUDGE_MAX}) — SP가 태그를 빠뜨렸을 가능성:`,
+        fullReply
+      );
+      if (_tagOmissionNudgeCount <= _TAG_OMISSION_NUDGE_MAX) {
+        await callAI(
+          `[INTERNAL: 방금 응답("${fullReply.slice(0, 120)}")에서 확인·검색·조회 등을 ` +
+          `진행하겠다고 예고했지만, 실행 가능한 태그를 하나도 내지 않아 그 작업이 ` +
+          `실제로는 전혀 시작되지 않았습니다. 지금 바로 해당 태그(예: 기관이 §CATALOG에 ` +
+          `있으면 [GWP: id], 표 밖이면 [CALL_KINTENT: query=...], 위치 기반 업체 검색이면 ` +
+          `K-Search 흐름의 [SEARCH]...[/SEARCH])를 내거나, 태그를 낼 수 없는 상황이면 ` +
+          `사용자에게 그 사실을 명확히 알리고 직접 답변을 완결하세요. 원래 사용자 발화: ` +
+          `"${userText}"]`
+        );
+        return;
       }
+      console.warn('[Diag→Recovery] 상한 도달 — 추가 자동 재촉 없이 그대로 종료(무한루프 방지).');
+      _tagOmissionNudgeCount = 0;
     }
 
     // ── 재무제표 실시간 조회 태그 처리 (2026-07-13 신설) ──────
