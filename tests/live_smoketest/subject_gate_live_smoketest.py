@@ -90,9 +90,17 @@ GATE_SYS_PROMPT_HEAD = (
 
 def get_leaf_candidates(roots):
     """dump_leaves.mjs를 서브프로세스로 호출해 root_id별 리프 목록을 얻는다."""
+    # BUG-FIX(2026-09-14, Windows) — text=True만 쓰면 Windows에서는
+    # locale.getpreferredencoding()(한국어 로캘이면 cp949)로 stdout을
+    # 디코딩한다. dump_leaves.mjs는 한글 label을 UTF-8로 찍으므로 cp949
+    # 디코딩 중 멀티바이트 시퀀스가 깨져 UnicodeDecodeError가 백그라운드
+    # 리더 스레드에서 터지고, 그 결과 result.stdout이 None이 되어 아래
+    # json.loads()가 "must be str, bytes or bytearray, not NoneType"로
+    # 실패했다(Windows 실사용 재현 확인). encoding='utf-8'을 명시해
+    # 리눅스/맥과 동일하게 강제한다.
     result = subprocess.run(
         ["node", DUMP_LEAVES_SCRIPT, *roots],
-        capture_output=True, text=True, check=True, cwd=SCRIPT_DIR,
+        capture_output=True, text=True, encoding="utf-8", check=True, cwd=SCRIPT_DIR,
     )
     return json.loads(result.stdout)
 
