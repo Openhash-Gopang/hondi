@@ -4165,6 +4165,19 @@ window.closePDV = closePDV;
     // 메인 채팅 전용 상태라 패널의 system(=_panelHistory[0])과 안 맞으므로
     // 별도로 판단한다.
     const { handleExpertTag } = await import('./src/gopang/ai/expert-session.js');
+    // BUG-FIX(2026-09-14) — AC-PRO-CORE/AGENT-COMMON은 "AI 비서는 항상
+    // 사용자의 현재 위치를 알고 있어야 한다"고 명시하는데, 그 원칙을
+    // 실제로 지키는 코드(_waitForLocationReady + _buildLocNote 조합,
+    // call-ai.js의 _buildEnhancedUserContent가 메인 채팅에 이미 연결해
+    // 둠)가 이 패널에는 애초에 연결된 적이 없었다 — import조차 안 돼
+    // 있었다. 그래서 이 패널에서는 위치 서비스(services/location.js)가
+    // 백그라운드에서 정상 동작 중이어도 모델은 그 값을 한 번도 받아본
+    // 적이 없어 "실시간 위치를 모른다"는 게 거짓말이 아니라 사실이었다.
+    // 아래에서 메인 채팅과 동일한 원칙으로 매 턴 위치를 요청에 얹는다 —
+    // 단, _panelHistory(대화 기록)에는 저장하지 않는다(과거 턴에 그때의
+    // 스냅샷이 아니라 항상 "현재" 위치처럼 영구히 남으면 나중에 그 턴을
+    // 다시 읽을 때 오해를 부른다 — call-ai.js와 동일한 이유).
+    const { _buildLocNote, _waitForLocationReady } = await import('./src/gopang/services/location.js');
     // HONDI-FAQ(2026-07-01 신설) — 메인 채팅과 동일한 라우터를 그대로 재사용.
     // 자세한 설계 근거는 src/gopang/ai/hondi-faq-router.js 상단 주석 참조.
     const { buildHondiFaqContext } = await import('./src/gopang/ai/hondi-faq-router.js');
@@ -4264,6 +4277,25 @@ window.closePDV = closePDV;
     _panelHistory.push({ role: 'user', content: userContent });
     _trimPanelHistory(); // 실제 전송 직전에 잘라서, 이번 요청부터 바로 작아진 히스토리가 나간다
 
+    // 위치 컨텍스트 — call-ai.js._buildEnhancedUserContent와 동일한 원칙.
+    // 최대 4초까지만 대기하므로(services/location.js), 위치 권한을 거부한
+    // 사용자도 무한정 멈추지 않는다.
+    let _panelLocNote = '';
+    try {
+      await _waitForLocationReady();
+      _panelLocNote = _buildLocNote();
+    } catch (e) { console.warn('[Panel] 위치 확보 실패(무시):', e.message); }
+    // _panelHistory는 그대로 두고(위치 없는 원문 유지), 실제 API 호출에만
+    // 마지막 user 메시지에 위치를 얹은 사본을 쓴다.
+    function _messagesWithLocation(historyArr) {
+      if (!_panelLocNote) return historyArr;
+      const last = historyArr[historyArr.length - 1];
+      if (!last || last.role !== 'user' || typeof last.content !== 'string') return historyArr;
+      const copy = historyArr.slice();
+      copy[copy.length - 1] = { ...last, content: _panelLocNote.trim() + '\n\n' + last.content };
+      return copy;
+    }
+
     // ── 후보 생성: getPriorityOrder()로 정렬 ──────────────────────
     const priorityOrder = getPriorityOrder();
     const sorted = [...providers].sort((a, b) => {
@@ -4342,7 +4374,7 @@ window.closePDV = closePDV;
               headers: { 'Content-Type': 'application/json' },
               signal: _abortCtl.signal,
               body: JSON.stringify({
-                model: c.model, messages: _panelHistory, stream: true,
+                model: c.model, messages: _messagesWithLocation(_panelHistory), stream: true,
                 max_tokens: resolveChatBudget(c.model),
                 guid: (JSON.parse(localStorage.getItem('gopang_user_v4') || sessionStorage.getItem('gopang_user_v4') || '{}')?.ipv6) || null,
               }),
@@ -4353,7 +4385,7 @@ window.closePDV = closePDV;
               signal: _abortCtl.signal,
               body: JSON.stringify({
                 provider: c.provider, baseUrl: c.baseUrl, apiKey: c.key,
-                model: c.model, messages: _panelHistory, stream: true,
+                model: c.model, messages: _messagesWithLocation(_panelHistory), stream: true,
                 max_tokens: resolveChatBudget(c.model),
               }),
             });
@@ -4452,7 +4484,7 @@ window.closePDV = closePDV;
           let _retrySucceeded = false;
           try {
             const _retryBudget = resolveChatBudget(c.model) * 2;
-            const _retryMessages = _panelHistory.slice(0, _truncatedIdx); // 끊긴 턴 제외 — user까지만
+            const _retryMessages = _messagesWithLocation(_panelHistory.slice(0, _truncatedIdx)); // 끊긴 턴 제외 — user까지만
             const _retryAbortCtl = new AbortController();
             _panelAbortCtl = _retryAbortCtl;
             let _retryIdleTimer = setTimeout(() => _retryAbortCtl.abort(), 45000);
