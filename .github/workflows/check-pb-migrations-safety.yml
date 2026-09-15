@@ -1,0 +1,38 @@
+name: Check PB migrations safety
+
+# pb_migrations/*.js에 대한 두 가지 안전성 검사(2026-09-15 hanlim L1
+# 크래시 루프 사고 재발 방지용, tools/check_pb_migrations_safety.py 참고):
+#   1. 마이그레이션 파일 삭제 금지 (되돌릴 땐 새 파일로 역방향 추가)
+#   2. 컬렉션 이름 UNIQUE 충돌 사전탐지 (PocketBase가 실제로 검사하는
+#      _collections.name 제약을 배포 전에 미리 재현)
+
+"on":
+  push:
+    branches: [main]
+    paths:
+      - 'pb_migrations/**'
+      - 'tools/check_pb_migrations_safety.py'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'pb_migrations/**'
+      - 'tools/check_pb_migrations_safety.py'
+  workflow_dispatch:
+
+jobs:
+  check-pb-migrations-safety:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # origin/main과의 전체 diff 비교(삭제 파일 탐지)에 필요
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: pb_migrations 안전성 검사
+        run: python tools/check_pb_migrations_safety.py
