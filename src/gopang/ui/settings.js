@@ -955,7 +955,7 @@ export async function openGopangWallet() {
             반드시 <b>보낸이</b>는 본인 휴대폰 번호 뒷자리 8자로 입력해 주세요. 예: 010-1234-5678 → 12345678${senderLast8 ? ` — 회원님은 <b>${senderLast8}</b>` : ''}
           </div>
           <div style="margin-top:10px">
-            <a href="#" onclick="_toggleChargeSelfReportForm();return false;" style="font-size:12.5px;color:#007b8b;font-weight:600;text-decoration:none">입금하셨는데 반영이 안 되나요? 자가신고 →</a>
+            <a href="#" onclick="_toggleChargeSelfReportForm();return false;" style="font-size:12.5px;color:#007b8b;font-weight:600;text-decoration:none">본인 이름으로 입금하셨거나, GDC 잔액이 변동없나요? 여기를 클릭해 주세요.</a>
             <div id="_charge-self-report-box" style="display:none;margin-top:10px;padding:12px;border:1px solid #e5e7eb;border-radius:8px">
               <div style="font-size:12px;color:#6b7280;margin-bottom:8px;line-height:1.5">코드 없이 본인 실명으로 입금하셨다면, 입금액을 적어 신고해 주세요. 확인 후 반영해 드립니다.</div>
               <div style="display:flex;gap:8px">
