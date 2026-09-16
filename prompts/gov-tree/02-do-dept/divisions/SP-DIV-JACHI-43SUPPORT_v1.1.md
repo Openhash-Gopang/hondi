@@ -5,7 +5,7 @@
 # 문서 코드  : SP-DIV-JACHI-43SUPPORT
 # 버전      : v1.1 (2026-08-20, GOV_TASK 접수·심사 파이프라인 정합화)
 # 상위 상속  : kgov → JEJU-GOV-COMMON-OVERLAY → JEJU-TREE-PROTOCOL →
-#             AGENCY-AC-COMMON → SP-DO-000 → SP-DO-JACHI →
+#             AGENCY-AC-COMMON → SP-DO-JACHI →
 #             [본 SP: 4·3지원과]
 # 원형 근거  : SP-DIV-TEMPLATE_v1.0.md (소속기관코드 jeju-jachi, 과코드 43support)
 # 작성일     : 2026-07-13
@@ -29,7 +29,7 @@
 
 ```
 kgov → JEJU-GOV-COMMON-OVERLAY → JEJU-TREE-PROTOCOL → AGENCY-AC-COMMON
-  → SP-DO-000 → SP-DO-JACHI → [본 SP: 4·3지원과]
+  → SP-DO-JACHI → [본 SP: 4·3지원과]
 ```
 
 ## §1. 정체성

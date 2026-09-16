@@ -5,7 +5,7 @@
 # 문서 코드  : SP-DIV-PLAN-TAXADMIN
 # 버전      : v1.0 (2026-07-13, 잠정 초안)
 # 상위 상속  : kgov → JEJU-GOV-COMMON-OVERLAY → JEJU-TREE-PROTOCOL →
-#             AGENCY-AC-COMMON → SP-DO-000 → SP-DO-PLAN →
+#             AGENCY-AC-COMMON → SP-DO-PLAN →
 #             [본 SP: 세정담당관]
 # 원형 근거  : SP-DIV-TEMPLATE_v1.0.md (소속기관코드 jeju-plan, 과코드 taxadmin)
 # 작성일     : 2026-07-13
@@ -27,7 +27,7 @@
 
 ```
 kgov → JEJU-GOV-COMMON-OVERLAY → JEJU-TREE-PROTOCOL → AGENCY-AC-COMMON
-  → SP-DO-000 → SP-DO-PLAN → [본 SP: 세정담당관]
+  → SP-DO-PLAN → [본 SP: 세정담당관]
 ```
 
 ## §1. 정체성

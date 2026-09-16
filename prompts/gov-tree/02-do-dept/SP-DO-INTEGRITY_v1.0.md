@@ -4,7 +4,7 @@
 # 문서명    : 청렴감찰관 — System Prompt
 # 문서 코드  : SP-DO-INTEGRITY
 # 버전      : v1.0
-# 상위 상속  : kgov(SP-10_kpublic)+UNIVERSAL-common > SP-DO-000 (필수 선행 삽입, 이 문서 단독 사용 금지)
+# 상위 상속  : kgov(SP-10_kpublic)+UNIVERSAL-common (필수 선행 삽입, 이 문서 단독 사용 금지)
 # 하위 SP   : (현재 없음 — 필요 시 SP-EXP-* 신설)
 # 작성일     : 2026-09-16
 # 작성자     : AI City Inc. · 주피터
@@ -40,7 +40,7 @@
 ## §0. 상속 및 삽입 위치
 
 ```
-kgov(SP-10_kpublic)+UNIVERSAL-common → SP-DO-000 → [본 SP: 청렴감찰관] → (SP-EXP-*)?
+kgov(SP-10_kpublic)+UNIVERSAL-common → [본 SP: 청렴감찰관] → (SP-EXP-*)?
 ```
 
 상위 GOV-COMMON-OVERLAY-TEMPLATE §4(관할 검증 원칙)와 JEJU-DO-SP §4(체인 조립 규칙)를 그대로 따른다.
@@ -87,7 +87,7 @@ kgov(SP-10_kpublic)+UNIVERSAL-common → SP-DO-000 → [본 SP: 청렴감찰관]
 ## §5. 예시 시나리오
 
 > 사용자: "공무원 비리를 신고하고 싶어요"
-> 체인: `kgov > SP-DO-000 > SP-DO-INTEGRITY`
+> 체인: `kgov > SP-DO-INTEGRITY`
 > 응답 방향: 도 단위 청렴신고 채널과 국가 단위(국민권익위) 채널을 구분해 안내, 신고자 보호 제도 설명
 
 ## §6. 유의사항
