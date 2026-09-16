@@ -3004,12 +3004,24 @@ routerAdd("POST", "/api/mint", (c) => {
     console.log("[MINT] 진입");
     const body = $apis.requestInfo(c).data;
     console.log("[MINT] body 파싱 완료:", JSON.stringify(body));
-    const { guid, amount, krw_amount, secret, memo } = body;
+    const { guid, amount, krw_amount, secret, memo, dry_run } = body;
 
     const MINT_SECRET = $os.getenv("MINT_SECRET"); // 2026-07-19: 하드코딩 제거, 환경변수로 이관(공개 저장소 노출 방지)
     if (secret !== MINT_SECRET) {
       console.log("[MINT] secret 불일치");
       return c.json(403, { ok: false, error: "FORBIDDEN" });
+    }
+
+    // 2026-09-16 신설 — MINT_SECRET 회전(rotation) 직후 "워커의 새 값과
+    // hanlim의 새 값이 실제로 일치하는지"를 검증할 방법이 지금까지
+    // 없었다(실제로 발행해봐야만 확인 가능 → 검증하려고 진짜 GDC를
+    // 발행해야 하는 부작용). dry_run:true면 위 secret 검증만 통과시키고
+    // 그 아래 실제 발행 로직(guid 검증, DB 쓰기, 블록 저장)은 전혀
+    // 실행하지 않은 채 바로 200을 반환한다 — ops/verify-secret.sh가
+    // 이 모드로 시크릿 일치 여부만 부작용 없이 확인한다.
+    if (dry_run === true) {
+      console.log("[MINT] dry_run — secret 검증만 통과, 실제 발행 없음");
+      return c.json(200, { ok: true, dry_run: true });
     }
 
     let gdcAmount, krwAmount, mintMethod;
@@ -3289,6 +3301,13 @@ routerAdd("POST", "/api/ai-charge", (c) => {
     if (secret !== AI_CHARGE_SECRET) {
       console.log("[AI-CHARGE] secret 불일치");
       return c.json(403, { ok: false, error: "FORBIDDEN" });
+    }
+    // 2026-09-16 신설 — /api/mint의 dry_run과 동일 목적(§ 그쪽 주석 참고).
+    // ops/verify-secret.sh가 실제 차감 없이 AI_CHARGE_SECRET 일치 여부만
+    // 확인할 수 있도록 한다.
+    if (body.dry_run === true) {
+      console.log("[AI-CHARGE] dry_run — secret 검증만 통과, 실제 차감 없음");
+      return c.json(200, { ok: true, dry_run: true });
     }
     if (!guid || !tx_hash) {
       return c.json(400, { ok: false, error: "MISSING_FIELD", detail: "guid, tx_hash 필수" });
