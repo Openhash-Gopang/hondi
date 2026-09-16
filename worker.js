@@ -13750,6 +13750,7 @@ export default {
     if (pathname === '/biz/charge-info'    && request.method === 'GET')  return handleChargeInfo(request, env, corsHeaders);
     if (pathname === '/biz/charge-request' && request.method === 'POST') return handleChargeRequest(request, env, corsHeaders);
     if (pathname === '/biz/charge-status'  && request.method === 'GET')  return handleChargeStatus(request, env, corsHeaders);
+    if (pathname === '/biz/charge-self-report' && request.method === 'POST') return handleChargeSelfReport(request, env, corsHeaders);
     if (pathname === '/biz/charge-list'    && request.method === 'GET')  return handleChargeList(request, env, corsHeaders);
     if (pathname === '/biz/charge-confirm' && request.method === 'POST') return handleChargeConfirm(request, env, corsHeaders, ctx);
     if (pathname === '/admin/test-register-profile' && request.method === 'POST') return handleTestRegisterProfile(request, env, corsHeaders);
@@ -16485,6 +16486,10 @@ async function _phoneMatchKey(env, guid) {
 
 const CHARGE_MIN_KRW = 1000;    // 너무 작은 신청은 매칭 단서(전화번호 뒷자리)만으로 은행 명세서 대조가 더 번거로워짐
 const CHARGE_EXPIRE_HOURS = 48; // 이 시간 안에 입금 안 되면 UI/관리자 화면에서 만료로 표시(레코드 자체는 감사 보존을 위해 삭제하지 않음)
+// 2026-09-17 신설 — 코드 없는 입금 알림의 "금액 단독 자동매칭" 폴백이
+// 되돌아볼 수 있는 최대 시간창. CHARGE_EXPIRE_HOURS(48h)보다 짧게 잡아,
+// 아주 오래된 pending과 우연히 금액이 겹쳐 잘못 확정되는 위험을 줄인다.
+const CHARGE_SELF_REPORT_MATCH_WINDOW_HOURS = 24;
 
 // POST /biz/charge-request — 사용자가 충전 의사를 밝히고 본인 전화번호
 // 뒷 8자리를 매칭키로 등록한다(2026-08-28 이전엔 "매칭 코드를 발급"
@@ -16603,6 +16608,58 @@ async function handleChargeStatus(request, env, corsHeaders) {
     if (!res.ok) return _err(502, 'L1_ERROR', '신청 목록 조회 실패', corsHeaders);
     const data = await res.json().catch(() => ({ items: [] }));
     return new Response(JSON.stringify({ ok: true, requests: data.items || [] }), { status: 200, headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'L1_UNREACHABLE', 'L1 연결 실패: ' + e.message, corsHeaders);
+  }
+}
+
+// POST /biz/charge-self-report — 2026-09-17 신설(주피터 지시: "동명이인
+// 알림 이전에, 자각한 사용자 본인이 스스로 신고하는 1차 경로부터"; 이후
+// 교정: "왜 내 번호가 등장하나 — 자동으로 맞춰야지"). 사람에게 알리는
+// 부수효과가 전혀 없다 — pending 레코드만 남기면, 실제 입금 알림이
+// 들어올 때 handleChargeConfirmNotification의 금액 단독 매칭 폴백이
+// 자동으로 확정한다(아래 참고).
+async function handleChargeSelfReport(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+  const { guid, krw_amount } = body;
+  if (!guid) return _err(400, 'MISSING_FIELD', 'guid 필수', corsHeaders);
+  const krwAmount = Number(krw_amount);
+  if (!(krwAmount >= CHARGE_MIN_KRW)) {
+    return _err(400, 'INVALID_AMOUNT', `최소 신고 금액은 ${CHARGE_MIN_KRW}원입니다`, corsHeaders);
+  }
+
+  try {
+    const profile = await _l1FindProfileByGuid(env, guid);
+    if (!profile) return _err(404, 'GUID_NOT_FOUND', '사용자를 찾을 수 없습니다', corsHeaders);
+  } catch (e) {
+    return _err(502, 'L1_ERROR', 'guid 확인 실패: ' + e.message, corsHeaders);
+  }
+
+  const matchCode = await _phoneMatchKey(env, guid).catch(() => null);
+  if (!matchCode) {
+    // 전화 미인증 사용자는 애초에 매칭 단서(뒷 8자)가 없어 이 자가신고
+    // 자체가 의미가 없다 — 기존 /biz/charge-request(임시 코드 발급)로
+    // 안내한다.
+    return _err(400, 'PHONE_NOT_VERIFIED', '전화번호 인증 후 이용해 주세요.', corsHeaders);
+  }
+
+  const expiresAt = new Date(Date.now() + CHARGE_EXPIRE_HOURS * 3600 * 1000).toISOString();
+  try {
+    const token = await _l1AdminToken(env);
+    const res = await fetch(`${L1_DEFAULT}/api/collections/charge_requests/records`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        guid, match_code: matchCode, requested_krw: krwAmount,
+        status: 'pending', expires_at: expiresAt,
+      }),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data?.id) {
+      return _err(502, 'L1_ERROR', '신고 기록 실패: ' + JSON.stringify(data || {}).slice(0, 200), corsHeaders);
+    }
+    return new Response(JSON.stringify({ ok: true, request_id: data.id }), { status: 200, headers: corsHeaders });
   } catch (e) {
     return _err(502, 'L1_UNREACHABLE', 'L1 연결 실패: ' + e.message, corsHeaders);
   }
@@ -17158,10 +17215,48 @@ async function handleChargeConfirmNotification(request, env, corsHeaders, ctx) {
 
   const code = _extractChargeMatchCodeFromText(raw_text);
   if (!code) {
-    // 매칭코드를 못 찾으면 자동 처리 대상이 아니다 — 관리자 수동 확인(charge-admin.html)로
-    // 폴백. 여기서 오류로 취급하지 않는 이유: 알림 리스너는 은행 앱의 온갖 알림을
-    // (잔액조회·이벤트 알림 등) 무차별로 전달할 수 있고, 그중 실제 입금 알림만
-    // 골라내는 게 이 코드의 역할이다 — 나머지는 조용히 무시하는 게 정상 동작이다.
+    // 2026-09-17 신설(주피터 지시: "왜 내 번호가 등장하나 — 자동으로
+    // 맞춰야지") — 코드를 못 찾아도 포기하기 전에, 이 입금 문구의
+    // 금액과 정확히 일치하는 pending 신청(자가신고 포함)이 최근
+    // CHARGE_SELF_REPORT_MATCH_WINDOW_HOURS 시간 이내에 "단 하나"뿐인지
+    // 확인한다. 그러면 사람 개입 없이 바로 확정된다. 후보가 0개거나
+    // 2개 이상(금액 충돌)이면 기존과 동일하게 조용히 포기한다 — 그
+    // 경우는 새 알림을 만들지 않고, 주피터님이 이미 받는 원래 은행
+    // 알림으로 처리하면 된다.
+    const amountGuess = (Number(krw_amount) > 0) ? Number(krw_amount) : _extractKrwAmountFromText(raw_text);
+    if (amountGuess) {
+      try {
+        const token = await _l1AdminToken(env);
+        const headers = { 'Authorization': `Bearer ${token}` };
+        const sinceIso = new Date(Date.now() - CHARGE_SELF_REPORT_MATCH_WINDOW_HOURS * 3600 * 1000).toISOString();
+        const filter = encodeURIComponent(`requested_krw=${amountGuess} && status='pending' && created>='${sinceIso}'`);
+        const res = await fetch(`${L1_DEFAULT}/api/collections/charge_requests/records?filter=${filter}&perPage=5`, { headers });
+        const data = await res.json().catch(() => ({ items: [] }));
+        const candidates = data.items || [];
+        if (candidates.length === 1) {
+          const rec = candidates[0];
+          console.info(JSON.stringify({ tag: 'NOTIFICATION_CAPTURE_AMOUNT_FALLBACK_MATCH', guid: rec.guid, amount: amountGuess, ts: new Date().toISOString() }));
+          const result = await _mintAndRecordCharge(env, {
+            existingRequestId: rec.id, guid: rec.guid, ctx,
+            krwAmount: amountGuess, depositorName: depositor_name || '',
+            memo: `알림캡처(${source || 'unknown'}${app_package ? ':' + app_package : ''}) [코드없음-금액단독매칭]`,
+            channel: 'auto_notification_capture_amount_fallback', confirmedBy: 'system:notification_capture_amount_fallback',
+            externalTxId: notification_key,
+          });
+          if (result.ok) {
+            return _chargeCoreResultToResponse({ ...result, matched: true, match_code: null, amount_fallback: true }, corsHeaders);
+          }
+          console.error(JSON.stringify({ tag: 'NOTIFICATION_CAPTURE_AMOUNT_FALLBACK_CONFIRM_FAILED', guid: rec.guid, result, ts: new Date().toISOString() }));
+        } else if (candidates.length > 1) {
+          console.warn(JSON.stringify({ tag: 'NOTIFICATION_CAPTURE_AMOUNT_FALLBACK_AMBIGUOUS', amount: amountGuess, count: candidates.length, ts: new Date().toISOString() }));
+        }
+      } catch (e) {
+        console.warn('[NotificationCapture] 금액 단독 매칭 시도 중 오류(기존 동작으로 폴백):', e.message);
+      }
+    }
+    // 매칭코드도 없고 금액 단독 매칭도 실패(또는 애매)하면 기존과 동일하게
+    // 조용히 무시 — 알림 리스너는 은행 앱의 온갖 알림을 무차별로 전달할 수
+    // 있으므로 이건 정상 동작이다.
     console.info(JSON.stringify({ tag: 'NOTIFICATION_CAPTURE_NO_MATCH_CODE', source, app_package, ts: new Date().toISOString() }));
     return new Response(JSON.stringify({ ok: true, matched: false, reason: 'NO_MATCH_CODE_FOUND' }), { status: 200, headers: corsHeaders });
   }
