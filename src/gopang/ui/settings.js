@@ -837,7 +837,6 @@ export async function openGopangWallet() {
     // 계좌입금 충전 직후 이 시트를 열어도 항상 정확한 값을 보장한다.
     if (wallet?.refreshBalanceUI) await wallet.refreshBalanceUI().catch(() => {});
     const fs = wallet?.getFinancialState ? await wallet.getFinancialState() : {};
-    const balance = fs['bs-cash'] ?? 0;
 
     // 2026-09-16 삭제 — 여기 있던 /pdv/query 호출(pdvRes)은 결과를
     // 어디에도 쓰지 않는 죽은 코드였다. 2026-08-28에 실제 거래 데이터
@@ -868,10 +867,18 @@ export async function openGopangWallet() {
     // ledger_entries 쪽을 신뢰 가능한 단일 소스로 삼는다 — 매칭된
     // 충전 건이 양쪽에 중복으로 안 뜨도록, charge_requests에서는
     // status==='pending'인 것만 걸러 쓴다.
-    const [chargeHistory, ledgerHistory] = await Promise.all([
+    // 2026-09-17 수정(주피터 지시: "PC에서 폰의 데이터를 불러오는 게
+    // 낫지 않을까요 — 하나의 데이터 source 원칙") — gopang-wallet.js의
+    // hydrateFromServer()가 로컬-서버 드리프트 교정에 쓰는 것과 동일한
+    // 서버 단일 원장 엔드포인트를 여기서도 직접 호출한다. 이러면
+    // window.gopangWallet이 초기화됐는지와 무관하게, 폰이든 PC든 항상
+    // 서버가 계산한 같은 값을 받는다(기기별 로컬 재계산이 아니다).
+    const [chargeHistory, ledgerHistory, balanceRes] = await Promise.all([
       fetch(`${PROXY}/biz/charge-status?guid=${encodeURIComponent(guid)}`).then(r => r.json()).catch(() => null),
       fetch(`${PROXY}/wallet/ledger-history?guid=${encodeURIComponent(guid)}`).then(r => r.json()).catch(() => null),
+      fetch(`${PROXY}/biz/balance?guid=${encodeURIComponent(guid)}`).then(r => r.json()).catch(() => null),
     ]);
+    const balance = (balanceRes?.ok && typeof balanceRes.balance === 'number') ? balanceRes.balance : (fs['bs-cash'] ?? 0);
     const pendingCharges = ((chargeHistory?.ok && chargeHistory.requests) ? chargeHistory.requests : [])
       .filter(r => r.status === 'pending');
     const ledgerEntries = (ledgerHistory?.ok && ledgerHistory.entries) ? ledgerHistory.entries : [];
@@ -938,20 +945,20 @@ export async function openGopangWallet() {
       </div>
       <div style="padding:26px 16px 22px;border-bottom:1px solid #e5e7eb;text-align:center">
         <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#9ca3af;text-transform:uppercase;margin-bottom:10px">GDC 잔액</div>
-        <div style="font-size:34px;font-weight:700;color:#111827;letter-spacing:-.5px;font-variant-numeric:tabular-nums">₮${Math.trunc(balance).toLocaleString()}</div>
+        <div style="font-size:34px;font-weight:700;color:#111827;letter-spacing:-.5px;font-variant-numeric:tabular-nums">${Math.trunc(balance).toLocaleString()}T</div>
         <div style="font-size:11px;font-weight:600;letter-spacing:.05em;color:#9ca3af;text-transform:uppercase;margin-top:24px;margin-bottom:10px">혼디 이용료 (사용량 기준)</div>
         <div style="display:flex;justify-content:center">
           <div style="text-align:center;padding:0 16px;border-right:1px solid #e5e7eb">
             <div style="font-size:10.5px;color:#9ca3af;margin-bottom:5px">오늘</div>
-            <div style="font-size:14px;font-weight:600;color:#dc2626;font-variant-numeric:tabular-nums">-₮${Math.trunc(spendToday).toLocaleString()}</div>
+            <div style="font-size:14px;font-weight:600;color:#dc2626;font-variant-numeric:tabular-nums">-${Math.trunc(spendToday).toLocaleString()}T</div>
           </div>
           <div style="text-align:center;padding:0 16px;border-right:1px solid #e5e7eb">
             <div style="font-size:10.5px;color:#9ca3af;margin-bottom:5px">이번 주</div>
-            <div style="font-size:14px;font-weight:600;color:#dc2626;font-variant-numeric:tabular-nums">-₮${Math.trunc(spendWeek).toLocaleString()}</div>
+            <div style="font-size:14px;font-weight:600;color:#dc2626;font-variant-numeric:tabular-nums">-${Math.trunc(spendWeek).toLocaleString()}T</div>
           </div>
           <div style="text-align:center;padding:0 16px">
             <div style="font-size:10.5px;color:#9ca3af;margin-bottom:5px">이번 달</div>
-            <div style="font-size:14px;font-weight:600;color:#dc2626;font-variant-numeric:tabular-nums">-₮${Math.trunc(spendMonth).toLocaleString()}</div>
+            <div style="font-size:14px;font-weight:600;color:#dc2626;font-variant-numeric:tabular-nums">-${Math.trunc(spendMonth).toLocaleString()}T</div>
           </div>
         </div>
       </div>
@@ -971,7 +978,7 @@ export async function openGopangWallet() {
           <div style="font-size:12px;color:#9ca3af">${t.timestamp ? new Date(t.timestamp).toLocaleString('ko-KR') : ''}</div>
           ${isPending
             ? `<span style="align-self:flex-start;font-size:11px;font-weight:600;color:#b45309;background:#fef3c7;padding:4px 9px;border-radius:4px;letter-spacing:.02em">입금 대기</span>`
-            : `<span style="font-size:16px;font-weight:600;color:${amountColor};font-variant-numeric:tabular-nums">${amountPrefix}₮${Math.trunc(t.amount).toLocaleString()}</span>`}
+            : `<span style="font-size:16px;font-weight:600;color:${amountColor};font-variant-numeric:tabular-nums">${amountPrefix}${Math.trunc(t.amount).toLocaleString()}T</span>`}
         </div>`;
         }).join('')}
       </div>` : '<div style="padding:48px 16px;text-align:center;color:#9ca3af;font-size:13px">거래 내역이 없습니다.</div>'}
