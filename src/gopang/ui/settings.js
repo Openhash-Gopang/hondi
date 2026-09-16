@@ -895,17 +895,23 @@ export async function openGopangWallet() {
     // 덮어쓰므로 오래된 참조가 남을 걱정은 없다.
     window._gopangWalletTimeline = timeline;
 
-    // 2026-08-28 신설(주피터 지시: "지출/수입 상단 박스 용도가 애매하다 —
-    // 모든 항목을 지출/수입으로 분류해 보여주는 게 낫겠다") — 기존
-    // fs['pl-purchase']/fs['pl-revenue']는 last_tx_id와 마찬가지로 실제
-    // 값을 쓰는 코드가 없는 죽은 필드였다(항상 0만 표시). 이제
-    // ledger_entries의 실제 direction(credit=수입/debit=지출)으로
-    // 정직하게 집계한다 — 충전은 수입, 마켓 구매·AI 사용료는 지출,
-    // P2P 이체는 방향에 따라 자연스럽게 어느 한쪽으로 갈린다(내가 보낸
-    // 이체는 debit, 받은 이체는 credit으로 ledger_entries에 각자
-    // 기록되므로 별도 분기 불필요).
-    const incomeTotal = ledgerEntries.filter(r => r.direction === 'credit').reduce((s, r) => s + (Number(r.amount) || 0), 0);
-    const expenseTotal = ledgerEntries.filter(r => r.direction === 'debit').reduce((s, r) => s + (Number(r.amount) || 0), 0);
+    // 2026-09-16 수정(주피터 지시) — 베타 기간 중 실제로 동작하는 활성
+    // 기능은 "GDC 충전"과 "혼디 이용료(사용량 기준 종량제)" 두 가지뿐이다.
+    // 예전의 지출/수입 누적 합계는 계좌 카드·거래 내역과 정보가 겹치므로
+    // 제거하고, 대신 사용량 기준 이용료를 오늘/이번 주/이번 달로 나눠
+    // 보여준다. 다른 결제 수단(서비스별 결제·P2P·증권·예금대출보험)은
+    // 아직 존재하지 않으므로 이 집계에 포함하지 않는다 — 활성/비활성
+    // 구분은 아래 html의 "준비 중인 서비스" 섹션이 명시적으로 표시한다.
+    const _now = new Date();
+    const _startOfToday = new Date(_now.getFullYear(), _now.getMonth(), _now.getDate());
+    const _startOfWeek  = new Date(_startOfToday.getTime() - 6 * 24 * 60 * 60 * 1000);
+    const _startOfMonth = new Date(_now.getFullYear(), _now.getMonth(), 1);
+    const _sumDebitSince = (since) => ledgerEntries
+      .filter(r => r.direction === 'debit' && r.created && new Date(r.created) >= since)
+      .reduce((s, r) => s + (Number(r.amount) || 0), 0);
+    const spendToday = _sumDebitSince(_startOfToday);
+    const spendWeek  = _sumDebitSince(_startOfWeek);
+    const spendMonth = _sumDebitSince(_startOfMonth);
 
     const html = `
       <div style="padding:16px 16px 4px">
@@ -921,14 +927,19 @@ export async function openGopangWallet() {
       <div style="padding:26px 16px 22px;border-bottom:1px solid #e5e7eb;text-align:center">
         <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#9ca3af;text-transform:uppercase;margin-bottom:10px">GDC 잔액</div>
         <div style="font-size:34px;font-weight:700;color:#111827;letter-spacing:-.5px;font-variant-numeric:tabular-nums">₮${Math.trunc(balance).toLocaleString()}</div>
-        <div style="display:flex;margin-top:22px;justify-content:center">
-          <div style="text-align:center;padding:0 22px;border-right:1px solid #e5e7eb">
-            <div style="font-size:10.5px;font-weight:600;letter-spacing:.05em;color:#9ca3af;text-transform:uppercase;margin-bottom:5px">지출</div>
-            <div style="font-size:15px;font-weight:600;color:#dc2626;font-variant-numeric:tabular-nums">-₮${Math.trunc(expenseTotal).toLocaleString()}</div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:.05em;color:#9ca3af;text-transform:uppercase;margin-top:24px;margin-bottom:10px">혼디 이용료 (사용량 기준)</div>
+        <div style="display:flex;justify-content:center">
+          <div style="text-align:center;padding:0 16px;border-right:1px solid #e5e7eb">
+            <div style="font-size:10.5px;color:#9ca3af;margin-bottom:5px">오늘</div>
+            <div style="font-size:14px;font-weight:600;color:#dc2626;font-variant-numeric:tabular-nums">-₮${Math.trunc(spendToday).toLocaleString()}</div>
           </div>
-          <div style="text-align:center;padding:0 22px">
-            <div style="font-size:10.5px;font-weight:600;letter-spacing:.05em;color:#9ca3af;text-transform:uppercase;margin-bottom:5px">수입</div>
-            <div style="font-size:15px;font-weight:600;color:#0f9d58;font-variant-numeric:tabular-nums">+₮${Math.trunc(incomeTotal).toLocaleString()}</div>
+          <div style="text-align:center;padding:0 16px;border-right:1px solid #e5e7eb">
+            <div style="font-size:10.5px;color:#9ca3af;margin-bottom:5px">이번 주</div>
+            <div style="font-size:14px;font-weight:600;color:#dc2626;font-variant-numeric:tabular-nums">-₮${Math.trunc(spendWeek).toLocaleString()}</div>
+          </div>
+          <div style="text-align:center;padding:0 16px">
+            <div style="font-size:10.5px;color:#9ca3af;margin-bottom:5px">이번 달</div>
+            <div style="font-size:14px;font-weight:600;color:#dc2626;font-variant-numeric:tabular-nums">-₮${Math.trunc(spendMonth).toLocaleString()}</div>
           </div>
         </div>
       </div>
@@ -951,7 +962,26 @@ export async function openGopangWallet() {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
         </div>`;
         }).join('')}
-      </div>` : '<div style="padding:48px 16px;text-align:center;color:#9ca3af;font-size:13px">거래 내역이 없습니다.</div>'}`;
+      </div>` : '<div style="padding:48px 16px;text-align:center;color:#9ca3af;font-size:13px">거래 내역이 없습니다.</div>'}
+      <div style="padding:20px 16px 4px">
+        <div style="font-size:11px;font-weight:600;letter-spacing:.05em;color:#9ca3af;text-transform:uppercase">준비 중인 서비스</div>
+        <div style="font-size:12px;color:#9ca3af;margin-top:4px;line-height:1.5">베타 기간(2026.09.01 ~ 12.31) 종료 후 순차적으로 제공될 예정입니다.</div>
+      </div>
+      <div>
+        ${[
+          ['서비스별 결제', 'K-Law 등 혼디 서비스별 건당 결제 (예: 1만원)'],
+          ['사용자 간 송금·결제', '혼디 이용자 간 송금 및 매장 결제'],
+          ['증권 투자', '주식 등 투자 상품'],
+          ['예금·대출·보험', '제휴 금융기관 연계 예금/대출/보험'],
+        ].map(([title, desc]) => `
+        <div style="padding:13px 16px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:12px;opacity:.55">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:500;color:#111827">${title}</div>
+            <div style="font-size:12px;color:#9ca3af;margin-top:2px">${desc}</div>
+          </div>
+          <span style="flex-shrink:0;font-size:11px;font-weight:600;color:#6b7280;background:#f3f4f6;padding:4px 9px;border-radius:4px;letter-spacing:.02em">준비 중</span>
+        </div>`).join('')}
+      </div>`;
 
     document.getElementById('_gopang-sheet-body').innerHTML = html;
   } catch(e) {
