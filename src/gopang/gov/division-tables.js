@@ -10,6 +10,36 @@
 // file(해당 과/팀 SP 원문 경로, _fetchText 인자로 그대로 사용 가능)
 
 export const CITY_DIVISION_TABLE = [
+  // ★ 2026-09-16 추가 — jejusi.go.kr 조직도 스크린샷(1차 사료)으로
+  // 확인된 농수축산국(4과)·제주보건소(5개) 전체 누락을 채움. AGENT-COMMON
+  // 상위 국 SP는 아직 미작성(§0에 명시) — 다음 세션 과제.
+  { code: "SP-CITYDIV-JEJUSI-AGRI-ECOFARM", 국코드: "agri", 시코드: "jejusi",
+    name: "제주시청 농수축산국 친환경농정과", desc: "당신은 **제주시청 농수축산국 친환경농정과**를 대표하는 AI 레이어다.",
+    kw: ["친환경농정", "친환경농정과"], file: "04-city/divisions/SP-CITYDIV-JEJUSI-AGRI-ECOFARM_v1.0.md" },
+  { code: "SP-CITYDIV-JEJUSI-AGRI-CITRUS", 국코드: "agri", 시코드: "jejusi",
+    name: "제주시청 농수축산국 감귤유통과", desc: "당신은 **제주시청 농수축산국 감귤유통과**를 대표하는 AI 레이어다.",
+    kw: ["감귤유통", "감귤유통과"], file: "04-city/divisions/SP-CITYDIV-JEJUSI-AGRI-CITRUS_v1.0.md" },
+  { code: "SP-CITYDIV-JEJUSI-AGRI-FISHERY", 국코드: "agri", 시코드: "jejusi",
+    name: "제주시청 농수축산국 해양수산과", desc: "당신은 **제주시청 농수축산국 해양수산과**를 대표하는 AI 레이어다.",
+    kw: ["해양수산", "해양수산과"], file: "04-city/divisions/SP-CITYDIV-JEJUSI-AGRI-FISHERY_v1.0.md" },
+  { code: "SP-CITYDIV-JEJUSI-AGRI-LIVESTOCK", 국코드: "agri", 시코드: "jejusi",
+    name: "제주시청 농수축산국 청정축산과", desc: "당신은 **제주시청 농수축산국 청정축산과**를 대표하는 AI 레이어다.",
+    kw: ["청정축산", "청정축산과"], file: "04-city/divisions/SP-CITYDIV-JEJUSI-AGRI-LIVESTOCK_v1.0.md" },
+  { code: "SP-CITYDIV-JEJUSI-HEALTH-ADMIN", 국코드: "health", 시코드: "jejusi",
+    name: "제주시청 제주보건소 보건행정과", desc: "당신은 **제주시청 제주보건소 보건행정과**를 대표하는 AI 레이어다.",
+    kw: ["보건행정", "보건행정과"], file: "04-city/divisions/SP-CITYDIV-JEJUSI-HEALTH-ADMIN_v1.0.md" },
+  { code: "SP-CITYDIV-JEJUSI-HEALTH-EPIDEMIC", 국코드: "health", 시코드: "jejusi",
+    name: "제주시청 제주보건소 감염예방의약과", desc: "당신은 **제주시청 제주보건소 감염예방의약과**를 대표하는 AI 레이어다.",
+    kw: ["감염예방의약", "감염예방의약과"], file: "04-city/divisions/SP-CITYDIV-JEJUSI-HEALTH-EPIDEMIC_v1.0.md" },
+  { code: "SP-CITYDIV-JEJUSI-HEALTH-PROMOTION", 국코드: "health", 시코드: "jejusi",
+    name: "제주시청 제주보건소 건강증진과", desc: "당신은 **제주시청 제주보건소 건강증진과**를 대표하는 AI 레이어다.",
+    kw: ["건강증진", "건강증진과"], file: "04-city/divisions/SP-CITYDIV-JEJUSI-HEALTH-PROMOTION_v1.0.md" },
+  { code: "SP-CITYDIV-JEJUSI-HEALTH-WESTCENTER", 국코드: "health", 시코드: "jejusi",
+    name: "제주시청 제주보건소 서부보건소", desc: "당신은 **제주시청 제주보건소 서부보건소**를 대표하는 AI 레이어다.",
+    kw: ["서부보건", "서부보건소"], file: "04-city/divisions/SP-CITYDIV-JEJUSI-HEALTH-WESTCENTER_v1.0.md" },
+  { code: "SP-CITYDIV-JEJUSI-HEALTH-EASTCENTER", 국코드: "health", 시코드: "jejusi",
+    name: "제주시청 제주보건소 동부보건소", desc: "당신은 **제주시청 제주보건소 동부보건소**를 대표하는 AI 레이어다.",
+    kw: ["동부보건", "동부보건소"], file: "04-city/divisions/SP-CITYDIV-JEJUSI-HEALTH-EASTCENTER_v1.0.md" },
   { code: "SP-CITYDIV-JEJUSI-CLIMATE-ENVGUIDE", 국코드: "climate", 시코드: "jejusi",
     name: "제주시청 청정환경국 환경지도과", desc: "당신은 **제주시청 청정환경국 환경지도과**를 대표하는 AI 레이어다. 환경오염 단속, 폐기물 배출업소 지도·점검을 담당한다.",
     kw: ["점검", "폐기물 배출업소 지도", "환경오염 단속", "환경지도", "환경지도과"], file: "04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-ENVGUIDE_v1.0.md" },
