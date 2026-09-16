@@ -250,6 +250,60 @@ function _adminActionSecret(env) {
   return env.ADMIN_ACTION_SECRET || null;
 }
 
+// ═══════════════════════════════════════════════════════════
+// 2026-09-16 신설 — 시크릿 불일치(FORBIDDEN) 실시간 관리자 경보.
+//
+// 배경: 09-03 AI_CHARGE_SECRET 드리프트 사고(문서: docs/AI_CHARGE_SECRET
+// _DRIFT_INCIDENT_2026_09_03.md)와 09-16 ADMIN_ACTION_SECRET 드리프트
+// 사고(안드로이드 알림 리스너 앱 hondi-charge-notifier ↔ 이 워커) 둘 다
+// 원인 자체는 서버 로그에 태그(MINT_FAILED, FORBIDDEN)로 남아있었지만,
+// 실시간으로 보고 있는 사람이 없어 최소 수 시간~며칠 방치되다가 결국
+// 사용자가 "GDC 잔액이 안 늘어난다"고 신고해서야 발견됐다.
+//
+// 이 함수가 호출되는 지점들(관리자 액션 시크릿 검증, L1 /api/mint 발행
+// 시크릿 검증)은 전부 실사용자가 정상적으로는 절대 도달할 수 없는
+// 서버 대 서버 전용 경로다 — 즉 여기서 실패가 뜨는 건 "누군가 시도해봤다"
+// 보다 "우리 자신의 설정 두 곳이 서로 어긋났다"일 확률이 압도적으로
+// 높다. 그래서 반복 횟수를 기다리지 않고 최초 1회부터 즉시 경보한다.
+//
+// 채널로 웹푸시가 아니라 SMS(_sendSolapiSms)를 쓰는 이유: 웹푸시는
+// hondi-proxy 자신의 VAPID 설정에 의존하는데, 지금 겪는 사고 자체가
+// "이 워커의 설정이 어긋났다"는 것이므로 같은 워커의 다른 기능에
+// 기대는 알림 채널은 정작 사고가 났을 때 같이 안 갈 위험이 있다.
+// SMS는 완전히 별개의 서드파티(솔라피) 경로라 이 위험에서 자유롭다.
+//
+// env.ADMIN_ALERT_PHONE(secret, +820으로 시작하는 관리자 폰번호) 미설정
+// 시엔 조용히 스킵한다(fail-open — 경보 발송 실패가 원래 요청의 응답을
+// 절대 막아선 안 된다). RATE_LIMIT_KV로 같은 source에 대해 30분에 한
+// 번만 보내 SMS 폭탄을 방지한다 — 원인이 안 고쳐진 채로 반복 실패해도
+// 30분마다 재알림되므로 "한 번 보내고 끝"이 아니다.
+// ═══════════════════════════════════════════════════════════
+async function _alertAdminOnSecretFailure(env, source, detail) {
+  try {
+    if (!env.ADMIN_ALERT_PHONE) {
+      console.warn('[SecretAlert] ADMIN_ALERT_PHONE 미설정 — 경보 스킵:', source);
+      return;
+    }
+    const kv = env.RATE_LIMIT_KV;
+    const cooldownKey = `secret_alert_sent:${source}`;
+    if (kv) {
+      try {
+        const already = await kv.get(cooldownKey);
+        if (already) return; // 30분 이내 같은 source로 이미 경보 발송함
+        await kv.put(cooldownKey, '1', { expirationTtl: 1800 });
+      } catch (e) {
+        console.warn('[SecretAlert] 쿨다운 KV 조회/기록 실패(경보는 계속 진행):', e.message);
+      }
+    }
+    const text = `[혼디 경보] ${source} 시크릿 불일치(FORBIDDEN) 감지${detail ? ' — ' + detail : ''}. 즉시 확인 필요.`;
+    await _sendSolapiSms(env, env.ADMIN_ALERT_PHONE, text);
+    console.log('[SecretAlert] 관리자 SMS 발송 완료:', source);
+  } catch (e) {
+    // 경보 발송 자체의 실패는 원래 요청 흐름에 절대 영향을 주지 않는다.
+    console.warn('[SecretAlert] 경보 발송 실패(무시):', e.message);
+  }
+}
+
 // 2026-07-25: GOPANG_MASTER_KEY 하드코딩 폴백('gopang-webauthn-secret-v1')
 // 제거를 위한 공용 헬퍼. 이 문자열이 공개 저장소 소스에 그대로 노출돼
 // 있었기 때문에, 시크릿 미설정 환경에서는 세션 토큰·동의 토큰·WebAuthn
@@ -16703,6 +16757,12 @@ async function _mintAndRecordCharge(env, {
   }
   if (!mintData.ok) {
     console.warn('[MintAndRecordCharge] mint 실패:', JSON.stringify(mintData));
+    // 2026-09-16 신설 — L1이 FORBIDDEN을 반환하는 건 거의 항상 이 워커의
+    // MINT_SECRET과 hanlim의 MINT_SECRET이 어긋났다는 뜻(09-03 사고와
+    // 동일 클래스) — 반복 대기 없이 즉시 관리자에게 SMS 경보.
+    if (mintData.error === 'FORBIDDEN') {
+      await _alertAdminOnSecretFailure(env, 'MINT_SECRET:_mintAndRecordCharge', `channel=${channel}`);
+    }
     return { ok: false, status: 502, error: mintData.error || 'MINT_FAILED', detail: mintData.detail || 'GDC 발행 실패' };
   }
 
@@ -17083,7 +17143,16 @@ async function handleChargeConfirmNotification(request, env, corsHeaders, ctx) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
   const { secret, raw_text, notification_key, source, app_package, krw_amount, depositor_name } = body;
-  if (secret !== _adminActionSecret(env)) return _err(403, 'FORBIDDEN', '시크릿이 일치하지 않습니다', corsHeaders);
+  if (secret !== _adminActionSecret(env)) {
+    // 2026-09-16 신설 — 이 엔드포인트는 안드로이드 알림 리스너 앱
+    // (hondi-charge-notifier) 외에는 정상적으로 호출할 주체가 없다.
+    // 여기서의 403은 "누가 공격 시도" 아니면 "우리 자신의
+    // ADMIN_ACTION_SECRET이 앱과 워커 사이에서 어긋났다" 둘 중 하나뿐이라
+    // (실제로 09-16 오후에 후자로 확인된 사고가 있었다), 반복 대기 없이
+    // 즉시 관리자에게 SMS 경보.
+    await _alertAdminOnSecretFailure(env, 'ADMIN_ACTION_SECRET:charge-confirm-notification', `source=${source || 'unknown'}`);
+    return _err(403, 'FORBIDDEN', '시크릿이 일치하지 않습니다', corsHeaders);
+  }
   if (!raw_text) return _err(400, 'MISSING_FIELD', 'raw_text 필수', corsHeaders);
   if (!notification_key) return _err(400, 'MISSING_FIELD', 'notification_key 필수(멱등성 키)', corsHeaders);
 
@@ -27112,6 +27181,10 @@ async function handleAdminManualCharge(request, env, corsHeaders) {
     const data = await mintRes.json().catch(() => ({ ok: false, error: 'L1_PARSE_FAILED' }));
     if (!data.ok) {
       console.warn(JSON.stringify({ tag: 'MANUAL_CHARGE_FAILED', guid, krwAmount, error: data.error, ts: new Date().toISOString() }));
+      // 2026-09-16 신설 — _mintAndRecordCharge와 동일한 이유로 즉시 경보.
+      if (data.error === 'FORBIDDEN') {
+        await _alertAdminOnSecretFailure(env, 'MINT_SECRET:handleAdminManualCharge', `guid=${guid}`);
+      }
       return new Response(JSON.stringify(data), { status: 502, headers: corsHeaders });
     }
 
