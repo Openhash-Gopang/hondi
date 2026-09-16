@@ -1247,7 +1247,24 @@ document.addEventListener('keydown', function (e) {
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
       프롬프트
     </a>
+    <!-- 2026-09-16 신설 — 우측 여백에 "GDC 충전" 강조 버튼. 방금 작성한
+         Gopang Wallet 시트(src/gopang/ui/settings.js의 openGopangWallet(),
+         입금 계좌+복사 버튼+1:1 안내문 포함)를 팝업으로 연다.
+         참고: desktop.html은 2026-09-13에 이 팝업 대신 pages/dashboard.html
+         전체 페이지로 GDC 진입점을 옮긴 이력이 있다(위 "대시보드" 버튼
+         주석 참고) — 이번엔 명시적 지시로 팝업을 다시 쓴다. openGopangWallet
+         자체는 gopang-app.js 전체를 안 부르고 settings.js에서 함수만 직접
+         모듈 import한다(_openSheet가 자체 DOM을 만들어 붙이므로 이
+         페이지에 별도 컨테이너 마크업이 필요 없음 — 의존성 최소화). -->
+    <a href="#" onclick="window.openGopangWallet && window.openGopangWallet();return false;" class="site-nav-gdc-charge-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      GDC 충전
+    </a>
   </div>
+  <script type="module">
+    import { openGopangWallet } from '/src/gopang/ui/settings.js';
+    window.openGopangWallet = openGopangWallet;
+  </script>
 </div>
 
 <section class="site-hero" id="top">
