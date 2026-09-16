@@ -228,6 +228,28 @@ export function _updateLocationInPrompt() {
   CFG.locationStr = _userLocation.address || (_userLocation.lat ? _userLocation.lat.toFixed(4) + ',' + _userLocation.lng.toFixed(4) : '위치없음');
 }
 
+// ── 지갑 준비 후 PDV 주소지 재조회 (2026-09-16 신설) ──────────────────
+// 배경: _resolveLocation()은 페이지 로드 시 1회만 실행되고(_initLocation()의
+// _locationPending/_locationReady 가드), 그 시점에 window.gopangWallet이
+// 아직 없으면 _loadProfileAddressFromServer()가 조용히 null을 반환해
+// GPS/IP로 확정돼버린다 — 이후 지갑이 뒤늦게 준비돼도 재시도할 경로가
+// 없었다(pages/regional-gov.html이 "지갑 부트스트랩을 안 한다"고 자체
+// 주석에 명시해뒀던 공백). ensureWalletSetup()은 서명이 실제로 필요해진
+// 시점(사용자가 메시지를 보내는 순간)에만 호출하는 게 원칙이므로
+// (auth.js 주석 참고 — 페이지 로드 시 미리 부르면 방문하자마자 지갑
+// 설정 모달이 뜨는 나쁜 UX가 된다), 이 함수도 같은 시점(첫 메시지 전송
+// 직전)에 호출되는 걸 전제로 설계한다. 이미 PROFILE 소스로 확정됐으면
+// (지갑이 처음부터 있었던 경우) 아무 것도 하지 않고 조용히 반환한다.
+export async function retryProfileAddressIfWalletReady() {
+  if (_userLocation?.source === 'PROFILE') return; // 이미 주소지 기준으로 확정됨 — 재조회 불필요
+  if (!window.gopangWallet) return; // 지갑 여전히 없음(공용 PC 미설정 등) — GPS 폴백 유지
+  const addr = await _loadProfileAddressFromServer();
+  if (addr) {
+    setUserLocation({ source: 'PROFILE', address: addr, lat: null, lng: null });
+    _updateLocationInPrompt();
+  }
+}
+
 export function _buildLocNote() {
   if (!_userLocation || !_userLocation.source) return '';
   const loc = _userLocation;
