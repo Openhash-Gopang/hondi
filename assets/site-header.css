@@ -85,6 +85,19 @@
   .site-nav-highlight a { padding: 6px 9px; }
 }
 
+/* ── GDC 충전 버튼 (2026-09-16 신설) — 강조 탭들과 구분되는 눈에 띄는
+   색상(GDC 통화 색인 골드/앰버 계열)으로, 결제·충전 액션임을 시각적으로
+   분리한다. .site-nav-highlight 안의 다른 남색 pill과 나란히 두되 배경만
+   다르게 준다. ── */
+.site-nav-gdc-charge-btn {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  border: 1px solid rgba(255,255,255,0.5) !important;
+  font-weight: 700 !important;
+}
+.site-nav-gdc-charge-btn:hover {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
+}
+
 .site-hero {
   /* 2026-08-29 — 세로 패딩(top/bottom) 20% 증가로 히어로 전체 높이 확대
      (48px→58px, 40px→48px). 이후 2026-08-29 추가로 30% 더 확대
