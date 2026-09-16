@@ -836,12 +836,16 @@ export async function openGopangWallet() {
     // 있었다). fs는 로컬 지갑(IndexedDB)이 유일한 원본이므로 거기서
     // 직접 읽는다.
     const wallet = window.gopangWallet;
-    // 2026-08-28 신설 — 지갑 시트는 "지금 잔액이 얼마인지" 확인하려고
-    // 여는 화면이라, 로컬 캐시를 보여주기 전에 서버로 재대사한다(실패
-    // 해도 무시하고 로컬 값으로 폴백 — 아래 getFinancialState()가
-    // 어차피 그 결과를 담은 IndexedDB를 다시 읽는다). AI 채팅 차감이나
-    // 계좌입금 충전 직후 이 시트를 열어도 항상 정확한 값을 보장한다.
-    if (wallet?.refreshBalanceUI) await wallet.refreshBalanceUI().catch(() => {});
+    // 2026-09-17 수정(주피터 지시: "폰에서 지갑 로딩이 1분 이상 걸린다")
+    // — 아래 Promise.all이 이미 /biz/balance를 직접 병렬 호출해 이
+    // 시트의 잔액을 그 결과로 쓰므로, refreshBalanceUI()(내부적으로
+    // 같은 /biz/balance를 또 호출함)를 여기서 await로 기다릴 필요가
+    // 없다. 예전엔 이 한 줄이 끝날 때까지 아래 3개 병렬 호출이
+    // 시작조차 안 돼, 같은 엔드포인트를 두 번 부르면서 순차 대기까지
+    // 겹쳐 로딩이 크게 늘어났다. refreshBalanceUI()는 헤더
+    // (#gdc-balance 등) 동기화라는 이 시트와 무관한 목적이 있어 완전히
+    // 없애진 않되, 기다리지 않고 백그라운드로 흘려보낸다.
+    if (wallet?.refreshBalanceUI) wallet.refreshBalanceUI().catch(() => {});
     const fs = wallet?.getFinancialState ? await wallet.getFinancialState() : {};
 
     // 2026-09-16 삭제 — 여기 있던 /pdv/query 호출(pdvRes)은 결과를
