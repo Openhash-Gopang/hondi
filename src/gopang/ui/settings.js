@@ -921,6 +921,7 @@ export async function openGopangWallet() {
     const spendMonth = _sumDebitSince(_startOfMonth);
 
     const html = `
+      <div style="max-width:1040px;margin:0 auto">
       <div style="padding:16px 16px 4px">
         <div style="border:1px solid #e5e7eb;border-radius:10px;padding:16px">
           <div style="font-size:11px;font-weight:600;letter-spacing:.05em;color:#8a94a6;text-transform:uppercase;margin-bottom:8px">입금 계좌</div>
@@ -951,22 +952,22 @@ export async function openGopangWallet() {
         </div>
       </div>
       ${timeline.length > 0 ? `
-      <div style="padding:0">
-        <div style="padding:14px 16px 6px;font-size:11px;font-weight:600;letter-spacing:.05em;color:#9ca3af;text-transform:uppercase">거래 내역</div>
+      <div style="padding:14px 16px 6px;font-size:11px;font-weight:600;letter-spacing:.05em;color:#9ca3af;text-transform:uppercase">거래 내역</div>
+      <div style="padding:0 16px 6px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
         ${timeline.map((t, idx) => {
           const amountColor = t.direction === 'income' ? '#0f9d58' : (t.direction === 'expense' ? '#dc2626' : '#111827');
           const amountPrefix = t.direction === 'income' ? '+' : (t.direction === 'expense' ? '-' : '');
           const isPending = t.direction === 'pending';
           return `
-        <div onclick="_openTxDetail(${idx})" style="padding:13px 16px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:12px;cursor:pointer">
-          <div style="flex:1;min-width:0">
+        <div onclick="_openTxDetail(${idx})" style="border:1px solid #e5e7eb;border-radius:10px;padding:14px;cursor:pointer;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
             <div style="font-size:14px;font-weight:500;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.label}</div>
-            <div style="font-size:12px;color:#9ca3af;margin-top:2px">${t.timestamp ? new Date(t.timestamp).toLocaleString('ko-KR') : ''}</div>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
           </div>
+          <div style="font-size:12px;color:#9ca3af">${t.timestamp ? new Date(t.timestamp).toLocaleString('ko-KR') : ''}</div>
           ${isPending
-            ? `<span style="flex-shrink:0;font-size:11px;font-weight:600;color:#b45309;background:#fef3c7;padding:4px 9px;border-radius:4px;letter-spacing:.02em">입금 대기</span>`
-            : `<span style="flex-shrink:0;font-size:14px;font-weight:600;color:${amountColor};font-variant-numeric:tabular-nums">${amountPrefix}₮${Math.trunc(t.amount).toLocaleString()}</span>`}
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+            ? `<span style="align-self:flex-start;font-size:11px;font-weight:600;color:#b45309;background:#fef3c7;padding:4px 9px;border-radius:4px;letter-spacing:.02em">입금 대기</span>`
+            : `<span style="font-size:16px;font-weight:600;color:${amountColor};font-variant-numeric:tabular-nums">${amountPrefix}₮${Math.trunc(t.amount).toLocaleString()}</span>`}
         </div>`;
         }).join('')}
       </div>` : '<div style="padding:48px 16px;text-align:center;color:#9ca3af;font-size:13px">거래 내역이 없습니다.</div>'}
@@ -974,20 +975,21 @@ export async function openGopangWallet() {
         <div style="font-size:11px;font-weight:600;letter-spacing:.05em;color:#9ca3af;text-transform:uppercase">준비 중인 서비스</div>
         <div style="font-size:12px;color:#9ca3af;margin-top:4px;line-height:1.5">베타 기간(2026.09.01 ~ 12.31) 종료 후 순차적으로 제공될 예정입니다.</div>
       </div>
-      <div>
+      <div style="padding:0 16px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
         ${[
           ['서비스별 결제', 'K-Law 등 혼디 서비스별 건당 결제 (예: 1만원)'],
           ['사용자 간 송금·결제', '혼디 이용자 간 송금 및 매장 결제'],
           ['증권 투자', '주식 등 투자 상품'],
           ['예금·대출·보험', '제휴 금융기관 연계 예금/대출/보험'],
         ].map(([title, desc]) => `
-        <div style="padding:13px 16px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:12px;opacity:.55">
-          <div style="flex:1;min-width:0">
+        <div style="border:1px solid #e5e7eb;border-radius:10px;padding:14px;opacity:.55;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
             <div style="font-size:14px;font-weight:500;color:#111827">${title}</div>
-            <div style="font-size:12px;color:#9ca3af;margin-top:2px">${desc}</div>
+            <span style="flex-shrink:0;font-size:11px;font-weight:600;color:#6b7280;background:#f3f4f6;padding:4px 9px;border-radius:4px;letter-spacing:.02em">준비 중</span>
           </div>
-          <span style="flex-shrink:0;font-size:11px;font-weight:600;color:#6b7280;background:#f3f4f6;padding:4px 9px;border-radius:4px;letter-spacing:.02em">준비 중</span>
+          <div style="font-size:12px;color:#9ca3af;line-height:1.5">${desc}</div>
         </div>`).join('')}
+      </div>
       </div>`;
 
     document.getElementById('_gopang-sheet-body').innerHTML = html;
