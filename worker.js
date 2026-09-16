@@ -4481,6 +4481,38 @@ async function handleKlawSessionsBoard(request, url, env, corsHeaders) {
   }
 }
 
+// 2026-09-18 신설 — 공개 게시판 글의 전문을 보는 엔드포인트. 인증이 필요
+// 없다(누구나 봄). handleKlawSessionsDetail과 달리 소유자 일치를 보는 게
+// 아니라 is_public=true인지만 확인한다 — 비공개 글이면 존재 자체를
+// 알려주지 않는다(404와 동일하게 처리).
+async function handleKlawSessionsBoardDetail(request, url, env, corsHeaders) {
+  const recordId = (url.searchParams.get('id') || '').trim();
+  if (!recordId) return _err(400, 'MISSING_ID', 'id 필수', corsHeaders);
+  try {
+    const token = await _l1AdminToken(env);
+    const res = await fetch(
+      `${L1_DEFAULT}/api/collections/${KLAW_SESSIONS_COLLECTION}/records/${encodeURIComponent(recordId)}`,
+      { headers: { 'Authorization': `Bearer ${token}` } }
+    );
+    if (res.status === 404) return _err(404, 'NOT_FOUND', '게시물을 찾을 수 없습니다', corsHeaders);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const rec = await res.json();
+    if (!rec.is_public) return _err(404, 'NOT_FOUND', '게시물을 찾을 수 없습니다', corsHeaders);
+    return new Response(JSON.stringify({
+      ok: true,
+      title: rec.title || '', klaw_version: rec.klaw_version, llm_model: rec.llm_model,
+      case_type: rec.case_type, case_level: rec.case_level,
+      case_summary: rec.case_summary, verdict: rec.verdict,
+      confidence: rec.confidence, match_rate: rec.match_rate, match_items: rec.match_items || '',
+      case_input: rec.case_input || '', verdict_full: rec.verdict_full || '',
+      author: '이용자-' + (rec.user_id || '').slice(-4),
+      created: rec.created,
+    }), { headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'KLAW_SESSIONS_BOARD_DETAIL_FAILED', e.message, corsHeaders);
+  }
+}
+
 
 // 계산식(klaw:steps:${guid}:${day})을 그대로 재사용해, "재생성 버튼도
 // 오늘 3회 한도를 소진시킨다"는 사실을 클라이언트가 미리 보여줄 수
@@ -13462,6 +13494,7 @@ export default {
     if (pathname === '/klaw/sessions/detail' && request.method === 'GET') return handleKlawSessionsDetail(request, url, env, corsHeaders);
     if (pathname === '/klaw/sessions/visibility' && request.method === 'POST') return handleKlawSessionsVisibility(request, env, corsHeaders);
     if (pathname === '/klaw/sessions/board' && request.method === 'GET') return handleKlawSessionsBoard(request, url, env, corsHeaders);
+    if (pathname === '/klaw/sessions/board-detail' && request.method === 'GET') return handleKlawSessionsBoardDetail(request, url, env, corsHeaders);
     if (pathname === '/klaw/sessions' && request.method === 'POST') return handleKlawSessionsSave(request, env, corsHeaders);
     // 2026-08-13 신설 — 사고실험 F2 대응(일일 판결 생성 잔여 횟수 조회)
     if (pathname === '/klaw/quota' && request.method === 'GET') return handleKlawQuota(request, url, env, corsHeaders);
