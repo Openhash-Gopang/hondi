@@ -889,9 +889,23 @@ export async function openGopangWallet() {
       fetch(`${PROXY}/biz/balance?guid=${encodeURIComponent(guid)}`).then(r => r.json()).catch(() => null),
     ]);
     const balance = (balanceRes?.ok && typeof balanceRes.balance === 'number') ? balanceRes.balance : (fs['bs-cash'] ?? 0);
-    const pendingCharges = ((chargeHistory?.ok && chargeHistory.requests) ? chargeHistory.requests : [])
-      .filter(r => r.status === 'pending');
     const ledgerEntries = (ledgerHistory?.ok && ledgerHistory.entries) ? ledgerHistory.entries : [];
+    // 2026-09-17 수정(주피터 지시: 실측 확인 — "1,000원 신청이 6:07:07에
+    // 실제로 충전됐는데도 카드는 계속 입금 대기로 남아있다") — 확정
+    // 경로가 원본 pending 레코드 상태를 항상 갱신해주지는 않는다.
+    // ledgerEntries(진짜 원장)에 이 신청 이후 생성된 동일 금액의
+    // mint(GDC 충전) 기록이 있으면 이미 반영된 것으로 보고 제외한다.
+    // 금액이 우연히 같은 서로 다른 두 신청이 있으면 둘 다 같은 mint
+    // 기록과 매치돼 둘 다 사라질 수 있다는 게 이 방식의 한계이지만,
+    // "이미 돈이 들어왔는데 계속 대기 중이라고 보여주는" 훨씬 흔하고
+    // 혼란스러운 증상을 없애는 게 더 중요하다고 판단했다.
+    const _isAlreadyCredited = (req) => ledgerEntries.some(le =>
+      le.source === 'mint' &&
+      Number(le.amount) === Number(req.requested_krw) &&
+      req.created && le.created &&
+      new Date(le.created) >= new Date(req.created));
+    const pendingCharges = ((chargeHistory?.ok && chargeHistory.requests) ? chargeHistory.requests : [])
+      .filter(r => r.status === 'pending' && !_isAlreadyCredited(r));
 
     const _SOURCE_LABEL  = { mint: 'GDC 충전', market: '상품 구매', gdc_transfer: 'GDC 이체', ai_usage: 'AI 사용료' };
 
