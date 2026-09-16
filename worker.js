@@ -4189,14 +4189,26 @@ async function handleKlawBenchmarkDetail(request, url, env, corsHeaders) {
 // used_at 필드는 klaw_sessions 컬렉션에 없음(동시 브랜치 마이그레이션에
 // 미포함) — PocketBase 기본 created 시스템 필드로 대체. 클라이언트도
 // r.used_at 대신 r.created를 참조하도록 별도 패치.
+// 2026-09-16 수정 (주피터 지시 — "이력은 반드시 작성자 본인만 열람") —
+// 이전엔 user_id를 클라이언트가 보내는 값 그대로 믿고 필터링해서, 그
+// 값만 바꿔 보내면 누구든 남의 사건 요약·판결 내용을 조회하거나 남의
+// 이름으로 기록을 써넣을 수 있었다(사실상 비공개가 아니었음).
+// /klaw/relay와 동일하게 phone_verify_token으로 서버가 guid를 직접
+// 재확인해, 클라이언트가 자기 것 아닌 이력을 절대 조회/기록할 수
+// 없도록 강제한다.
 async function handleKlawSessionsHistory(request, url, env, corsHeaders) {
-  const userId = (url.searchParams.get('user_id') || '').trim();
-  if (!userId) return _err(400, 'MISSING_USER_ID', 'user_id 필수', corsHeaders);
+  const phoneVerifyToken = (url.searchParams.get('phone_verify_token') || '').trim();
+  const _histAuth = await _resolveGuidFromPhoneVerifyToken(env, phoneVerifyToken);
+  if (!_histAuth.ok) {
+    const { status, code, message } = mapPhoneAuthError(_histAuth);
+    return _err(status, code, message, corsHeaders);
+  }
+  const userId = _histAuth.guid;
   try {
     const token = await _l1AdminToken(env);
     const filter = encodeURIComponent(`user_id='${userId}'`);
     const res = await fetch(
-      `${L1_DEFAULT}/api/collections/${KLAW_SESSIONS_COLLECTION}/records?filter=${filter}&sort=-created&perPage=50&fields=klaw_version,llm_model,created`,
+      `${L1_DEFAULT}/api/collections/${KLAW_SESSIONS_COLLECTION}/records?filter=${filter}&sort=-created&perPage=50&fields=klaw_version,llm_model,match_rate,created`,
       { headers: { 'Authorization': `Bearer ${token}` } }
     );
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -4210,9 +4222,13 @@ async function handleKlawSessionsHistory(request, url, env, corsHeaders) {
 async function handleKlawSessionsSave(request, env, corsHeaders) {
   let body;
   try { body = await request.json(); } catch (e) { return _err(400, 'INVALID_JSON', '요청 본문 파싱 실패', corsHeaders); }
-  const userId = (body.user_id || '').trim();
+  const _saveAuth = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token);
+  if (!_saveAuth.ok) {
+    const { status, code, message } = mapPhoneAuthError(_saveAuth);
+    return _err(status, code, message, corsHeaders);
+  }
+  const userId = _saveAuth.guid;
   const klawVersion = (body.klaw_version || '').trim();
-  if (!userId) return _err(400, 'MISSING_USER_ID', 'user_id 필수', corsHeaders);
   if (!klawVersion) return _err(400, 'MISSING_KLAW_VERSION', 'klaw_version 필수', corsHeaders);
   try {
     const token = await _l1AdminToken(env);
@@ -4225,6 +4241,10 @@ async function handleKlawSessionsSave(request, env, corsHeaders) {
       case_summary: (body.case_summary || '').slice(0, 500),
       verdict:      (body.verdict || '').slice(0, 80),
       confidence:   body.confidence || '',
+      // match_rate — "일치도 평가 기준 v1.6" 양식의 XX% 값. PocketBase
+      // klaw_sessions 컬렉션에 이 필드가 아직 없다면 스키마에 텍스트
+      // 필드로 추가해야 실제로 저장된다(관리자 화면에서 수동 추가 필요).
+      match_rate:   (body.match_rate || '').slice(0, 20),
       case_input:   (body.case_input || '').slice(0, 2000),
     };
     const res = await fetch(`${L1_DEFAULT}/api/collections/${KLAW_SESSIONS_COLLECTION}/records`, {
