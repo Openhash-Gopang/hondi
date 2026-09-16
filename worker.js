@@ -4267,7 +4267,7 @@ async function handleKlawSessionsHistory(request, url, env, corsHeaders) {
     // 않는다 — 목록 조회 1번에 항목 최대 50개×전문(수만 자)을 전부
     // 실어보내면 불필요하게 무거워진다(상세 조회는 별도 엔드포인트).
     const res = await fetch(
-      `${L1_DEFAULT}/api/collections/${KLAW_SESSIONS_COLLECTION}/records?filter=${filter}&sort=-created&perPage=50&fields=id,klaw_version,llm_model,match_rate,created`,
+      `${L1_DEFAULT}/api/collections/${KLAW_SESSIONS_COLLECTION}/records?filter=${filter}&sort=-created&perPage=100&fields=id,title,klaw_version,llm_model,case_type,match_rate,match_items,is_public,created`,
       { headers: { 'Authorization': `Bearer ${token}` } }
     );
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -4319,10 +4319,11 @@ async function handleKlawSessionsDetail(request, url, env, corsHeaders) {
     }
     return new Response(JSON.stringify({
       ok: true,
-      klaw_version: rec.klaw_version, llm_model: rec.llm_model,
+      title: rec.title || '', klaw_version: rec.klaw_version, llm_model: rec.llm_model,
       case_type: rec.case_type, case_level: rec.case_level,
       case_summary: rec.case_summary, verdict: rec.verdict,
-      confidence: rec.confidence, match_rate: rec.match_rate,
+      confidence: rec.confidence, match_rate: rec.match_rate, match_items: rec.match_items || '',
+      is_public: !!rec.is_public,
       case_input: rec.case_input || '',
       verdict_full: rec.verdict_full || '', created: rec.created,
     }), { headers: corsHeaders });
@@ -4370,6 +4371,16 @@ async function handleKlawSessionsSave(request, env, corsHeaders) {
       // 극단값 대비) 그 사실을 저장본 자체에 눈에 띄게 남긴다 —
       // 나중에 열람할 때 "이거 전체 맞나?"를 알 수 있게.
       verdict_full: _klawTruncateWithNotice(body.verdict_full || '', 200000),
+      // 2026-09-18 신설(주피터 지시 — "게시판 형식의 이력 페이지") —
+      // title은 클라이언트가 case_type+요약에서 뽑아 보낸 표시용 제목.
+      // match_items는 "일치도 평가 기준" 방법론이 정의하는 항목별 점수를
+      // {항목명: 값} 형태의 JSON 문자열로 그대로 저장한다 — 항목 이름을
+      // 서버가 하드코딩하지 않아, 방법론 문서 버전이 바뀌어 항목 구성이
+      // 달라져도 코드 수정 없이 그대로 반영된다. is_public은 기본
+      // false(비공개) — 명시적으로 true를 보낸 경우에만 공개.
+      title:        (body.title || '').slice(0, 100),
+      match_items:  (body.match_items || '').slice(0, 2000),
+      is_public:    body.is_public === true,
     };
     const res = await fetch(`${L1_DEFAULT}/api/collections/${KLAW_SESSIONS_COLLECTION}/records`, {
       method: 'POST',
@@ -4377,13 +4388,100 @@ async function handleKlawSessionsSave(request, env, corsHeaders) {
       body: JSON.stringify(payload),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text().catch(() => '')}`);
-    return new Response(JSON.stringify({ ok: true }), { headers: corsHeaders });
+    // 2026-09-18 신설 — "일치도 평가"는 시뮬레이션 완료 이후 사용자가
+    // 별도로 실제 판결문을 붙여넣어야 진행되는 후속 단계라, 이 시점엔
+    // 아직 항목별 점수가 없다. 클라이언트가 나중에 /klaw/sessions/visibility
+    // 와 같은 방식으로 이 레코드를 찾아 match_items를 채워넣을 수 있도록
+    // 생성된 레코드의 id를 돌려준다.
+    const created = await res.json().catch(() => ({}));
+    return new Response(JSON.stringify({ ok: true, id: created.id || null }), { headers: corsHeaders });
   } catch (e) {
     return _err(502, 'KLAW_SESSIONS_SAVE_FAILED', e.message, corsHeaders);
   }
 }
 
-// 2026-08-13 신설 — 사고실험 F2 대응. handleKlawRelay와 동일한 stepKey
+// 2026-09-18 신설(주피터 지시 — "선택적으로 공개 옵션을 선택할 수 있다") —
+// 저장 이후에도 공개/비공개를 바꿀 수 있어야 하므로 별도 엔드포인트로
+// 분리한다. detail과 동일하게 phone_verify_token으로 재확인한 guid가
+// 그 레코드의 user_id와 일치할 때만 변경을 허용 — 남의 글을 몰래
+// 공개/비공개로 못 바꾸게 막는다.
+async function handleKlawSessionsVisibility(request, env, corsHeaders) {
+  let body;
+  try { body = await request.json(); } catch (e) { return _err(400, 'INVALID_JSON', '요청 본문 파싱 실패', corsHeaders); }
+  const recordId = (body.id || '').trim();
+  if (!recordId) return _err(400, 'MISSING_ID', 'id 필수', corsHeaders);
+  const _visAuth = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token);
+  if (!_visAuth.ok) {
+    const { status, code, message } = mapPhoneAuthError(_visAuth);
+    return _err(status, code, message, corsHeaders);
+  }
+  const userId = _visAuth.guid;
+  try {
+    const token = await _l1AdminToken(env);
+    const getRes = await fetch(
+      `${L1_DEFAULT}/api/collections/${KLAW_SESSIONS_COLLECTION}/records/${encodeURIComponent(recordId)}`,
+      { headers: { 'Authorization': `Bearer ${token}` } }
+    );
+    if (getRes.status === 404) return _err(404, 'NOT_FOUND', '이력을 찾을 수 없습니다', corsHeaders);
+    if (!getRes.ok) throw new Error(`HTTP ${getRes.status}`);
+    const rec = await getRes.json();
+    if (rec.user_id !== userId) return _err(404, 'NOT_FOUND', '이력을 찾을 수 없습니다', corsHeaders);
+
+    // 2026-09-18 확장 — 원래는 공개/비공개 토글 전용이었으나, "일치도
+    // 평가"가 시뮬레이션 이후 별도 단계로 완료되면서 항목별 점수
+    // (match_items)를 기존 레코드에 나중에 채워넣어야 하는 경우가
+    // 생겨 같은 본인 확인 로직을 재사용해 함께 처리한다. 두 값 다
+    // 요청에 없는 필드는 건드리지 않는다.
+    const patchBody = {};
+    if (typeof body.is_public === 'boolean') patchBody.is_public = body.is_public;
+    if (typeof body.match_items === 'string') patchBody.match_items = body.match_items.slice(0, 2000);
+    if (typeof body.title === 'string') patchBody.title = body.title.slice(0, 100);
+    if (Object.keys(patchBody).length === 0) return _err(400, 'NOTHING_TO_UPDATE', '변경할 값이 없습니다', corsHeaders);
+
+    const patchRes = await fetch(
+      `${L1_DEFAULT}/api/collections/${KLAW_SESSIONS_COLLECTION}/records/${encodeURIComponent(recordId)}`,
+      {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(patchBody),
+      }
+    );
+    if (!patchRes.ok) throw new Error(`HTTP ${patchRes.status}`);
+    return new Response(JSON.stringify({ ok: true, ...patchBody }), { headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'KLAW_SESSIONS_VISIBILITY_FAILED', e.message, corsHeaders);
+  }
+}
+
+// 2026-09-18 신설 — 공개 게시판. 본인 확인이 필요 없다(누구나 봄) — 대신
+// is_public=true인 것만, 그리고 user_id(전화번호 파생 guid) 원문은 절대
+// 내려주지 않고 뒷자리 일부만 잘라 익명 표시용으로만 사용한다.
+async function handleKlawSessionsBoard(request, url, env, corsHeaders) {
+  try {
+    const token = await _l1AdminToken(env);
+    const filter = encodeURIComponent(`is_public=true`);
+    const res = await fetch(
+      `${L1_DEFAULT}/api/collections/${KLAW_SESSIONS_COLLECTION}/records?filter=${filter}&sort=-created&perPage=100` +
+      `&fields=id,title,klaw_version,llm_model,case_type,case_summary,match_rate,match_items,user_id,created`,
+      { headers: { 'Authorization': `Bearer ${token}` } }
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json().catch(() => ({ items: [] }));
+    const items = (data.items || []).map(r => ({
+      id: r.id, title: r.title, klaw_version: r.klaw_version, llm_model: r.llm_model,
+      case_type: r.case_type, case_summary: r.case_summary,
+      match_rate: r.match_rate, match_items: r.match_items,
+      // 익명 작성자 표시 — 원본 guid는 절대 내보내지 않는다.
+      author: '이용자-' + (r.user_id || '').slice(-4),
+      created: r.created,
+    }));
+    return new Response(JSON.stringify({ ok: true, items }), { headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'KLAW_SESSIONS_BOARD_FAILED', e.message, corsHeaders);
+  }
+}
+
+
 // 계산식(klaw:steps:${guid}:${day})을 그대로 재사용해, "재생성 버튼도
 // 오늘 3회 한도를 소진시킨다"는 사실을 클라이언트가 미리 보여줄 수
 // 있게 한다. 이 조회 자체는 카운트를 늘리지 않는다(읽기 전용).
@@ -13362,6 +13460,8 @@ export default {
     // klaw_sessions
     if (pathname === '/klaw/sessions/history' && request.method === 'GET') return handleKlawSessionsHistory(request, url, env, corsHeaders);
     if (pathname === '/klaw/sessions/detail' && request.method === 'GET') return handleKlawSessionsDetail(request, url, env, corsHeaders);
+    if (pathname === '/klaw/sessions/visibility' && request.method === 'POST') return handleKlawSessionsVisibility(request, env, corsHeaders);
+    if (pathname === '/klaw/sessions/board' && request.method === 'GET') return handleKlawSessionsBoard(request, url, env, corsHeaders);
     if (pathname === '/klaw/sessions' && request.method === 'POST') return handleKlawSessionsSave(request, env, corsHeaders);
     // 2026-08-13 신설 — 사고실험 F2 대응(일일 판결 생성 잔여 횟수 조회)
     if (pathname === '/klaw/quota' && request.method === 'GET') return handleKlawQuota(request, url, env, corsHeaders);
