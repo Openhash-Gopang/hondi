@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>제주 행정 자동화 — 15실·국 70과 실태 보고서 | 혼디</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+:root {
+  --bg: #f8f9fa; --bg-alt: #ffffff; --bg-subtle: #f1f3f5; --surface: #ffffff;
+  --border: #e5e7eb; --border2: #d1d5db;
+  --brand: #3b82f6; --brand-dk: #1d4ed8; --brand-lt: #bfdbfe; --brand-bg: #eff6ff;
+  --amber: #f59e0b; --amber-lt: #fffbeb;
+  --red: #ef4444; --red-lt: #fef2f2;
+  --green: #16a34a; --green-lt: #f0fdf4;
+  --text: #0f172a; --text2: #1e293b; --text3: #374151; --text4: #6b7280;
+  --radius: 6px; --radius-lg: 10px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+body {
+  background: var(--bg); color: var(--text);
+  font-family: "Pretendard", -apple-system, sans-serif;
+  font-size: 14px; line-height: 1.75;
+}
+
+.page-header {
+  background: var(--bg-alt); border-bottom: 1px solid var(--border);
+  padding: 14px 20px; display: flex; align-items: center; gap: 12px;
+  position: sticky; top: 0; z-index: 5;
+}
+.page-header a.back {
+  font-size: 13px; color: var(--text4); text-decoration: none; font-weight: 600;
+  display: flex; align-items: center; gap: 4px;
+}
+.page-header a.back:hover { color: var(--brand-dk); }
+.page-header .brand { font-size: 13px; font-weight: 700; color: var(--brand-dk); }
+
+.wrap { max-width: 900px; margin: 0 auto; padding: 32px 20px 80px; }
+
+.temp-notice {
+  background: var(--amber-lt); border: 1px solid var(--amber);
+  border-radius: var(--radius-lg); padding: 14px 18px; margin-bottom: 24px;
+  font-size: 13px; line-height: 1.7; color: var(--text3);
+}
+.temp-notice strong { color: #92400e; }
+
+h1.doctitle {
+  font-size: 22px; font-weight: 800; color: var(--text); line-height: 1.4;
+  margin-bottom: 4px;
+}
+.doctitle-sub { font-size: 13px; color: var(--text4); margin-bottom: 24px; }
+
+h2 {
+  font-size: 17px; font-weight: 800; color: var(--brand-dk);
+  margin: 34px 0 12px; padding-bottom: 8px; border-bottom: 2px solid var(--brand-dk);
+}
+h3.subsec { font-size: 14.5px; font-weight: 700; margin: 18px 0 8px; color: var(--text2); }
+h4 { font-size: 14px; font-weight: 700; margin: 14px 0 6px; color: var(--text2); }
+
+p { font-size: 13.5px; line-height: 1.85; margin: 0 0 10px; color: var(--text3); }
+p.li { margin: 4px 0 4px 4px; }
+strong { color: var(--text); font-weight: 700; }
+code {
+  background: var(--bg-subtle); border-radius: 4px; padding: 1px 5px;
+  font-size: 12.5px; font-family: ui-monospace, monospace; color: var(--brand-dk);
+}
+hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+.tablewrap { overflow-x: auto; margin: 10px 0 18px; border: 1px solid var(--border); border-radius: var(--radius-lg); }
+table.dtab { width: 100%; border-collapse: collapse; font-size: 12.5px; min-width: 560px; }
+table.dtab thead tr { background: var(--bg-subtle); }
+table.dtab th { text-align: left; padding: 9px 12px; color: var(--text2); font-weight: 700; border-bottom: 1px solid var(--border2); white-space: nowrap; }
+table.dtab td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text3); }
+table.dtab tr:last-child td { border-bottom: none; }
+table.dtab td:first-child { font-weight: 600; color: var(--text2); white-space: nowrap; }
+
+.page-footer {
+  max-width: 900px; margin: 0 auto; padding: 20px 20px 60px;
+  font-size: 12px; color: var(--text4); border-top: 1px solid var(--border); text-align: center;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <a class="back" href="../desktop.html">← 혼디 홈으로</a>
+  <span class="brand">제주 행정 자동화</span>
+</div>
+
+<div class="wrap">
+
+  <div class="temp-notice">
+    <strong>임시 페이지 안내</strong> — 이 페이지는 "제주 행정 자동화" 메뉴의 임시 링크입니다.
+    아래 보고서는 2026-09-16 세션에서 작성된 초안이며, 이 메뉴 페이지 자체는 추후 일괄 수정될 예정입니다.
+  </div>
+
+  <h1 class="doctitle">제주 행정 자동화 — 15실·국 70과 실태 보고서</h1>
+  <div class="doctitle-sub">제주특별자치도청 조직 자동화 현황 및 과(課) 단위 업무 조사</div>
+
+<p>작성일: 2026-09-16 | 작성: Hondi 세션(주피터님 지시)</p>
+<h2>0. 방법론과 한계 (먼저 읽을 것)</h2>
+<p>이 보고서는 세 가지 자료를 종합했다.</p>
+<p>1. <strong>저장소 내 기존 산출물</strong> — <code>Openhash-Gopang/hondi</code>의 <code>prompts/gov-tree/02-do-dept/</code>에 이미 실제로 작성돼 있던 과(課) 단위 SP 23개(각 SP의 §CAPABILITIES 표에서 업무를 그대로 인용). 이 23개는 법령·정부 공식자료 기준으로 비교적 상세히 검증돼 있다.</p>
+<p>2. <strong>웹 검색으로 확인한 2026-07-03 조직개편 기사 원문</strong>(세계일보) — 신설·명칭 변경된 과·담당관의 실제 소관을 기사 문장 그대로 반영했다.</p>
+<p>3. <strong>일반적인 한국 지방자치단체 과 명칭의 통상적 업무 정의</strong> — jeju.go.kr의 과별 사무분장 페이지 자체를 이번 세션에서는 검색으로 직접 찾지 못했다 (사이트가 검색엔진에 구조화된 형태로 노출되지 않는 것으로 보임). 이 경우 "OO정책과/OO관리과/OO지원과" 같은 이름이 전국 광역자치단체에서 공통적으로 뜻하는 통상 업무를 적되, <strong>제주도청 특정 확인은 아님</strong>을 표(확인상태 열)에 명시했다.</p>
+<p><strong>따라서 이 표의 확인상태 열은 반드시 함께 읽어야 한다.</strong> "① 제주 확정(SP 상세 존재)"만 실사용 가능한 신뢰도이고, "③ 일반 통상 정의(제주 미확인)"은 추정이며 jeju.go.kr 원본 조직도·사무분장 규칙(정보공개청구 대상)으로 재검증 전에는 실제 안내에 쓰면 안 된다.</p>
+<p><strong>확인상태 범례</strong></p>
+<div class="tablewrap"><table class="dtab">
+<thead><tr><th>표기</th><th>의미</th></tr></thead>
+<tbody>
+<tr><td>① 제주 확정</td><td>저장소에 과 단위 SP가 이미 작성돼 있고, 법령·정부 공식자료로 뒷받침됨</td></tr>
+<tr><td>② 제주 개편 확인</td><td>2026-07 조직개편 뉴스 기사가 이 과의 신설·명칭변경·소관을 직접 언급</td></tr>
+<tr><td>③ 통상 정의(제주 미확인)</td><td>과 이름의 전국 공통적 통상 업무로 추정 — 제주 특정 사무분장 미확인</td></tr>
+<tr><td>④ 이름만 확인</td><td>do-dept-master-data.json에 이름만 등재, 업무 내용 미작성</td></tr>
+<tr><td>⑤ 완전 미확인</td><td>이름조차 확인 안 됨 — 15실·국 70과 정원에는 있으나 이번 세션에서 못 찾음</td></tr>
+</tbody></table></div>
+<p>지금까지 이름 또는 업무가 확인된 과·담당관은 <strong>48개</strong>다. 나머지는 70과 정원과 확인된 개수의 차이이며, 조직도 원본(jeju.go.kr) 직접 열람 또는 정보공개청구 없이는 채울 수 없다(§4 참고).</p>
+<hr>
+<h2>1. 기획조정실 (SP-DO-PLAN)</h2>
+<div class="tablewrap"><table class="dtab">
+<thead><tr><th>과/담당관</th><th>확인상태</th><th>주요업무</th></tr></thead>
+<tbody>
+<tr><td>정책기획관(마스터데이터상 "기획관리담당관"과 명칭 불일치 — §3-1 참고)</td><td>①</td><td>도정 종합계획 체계·수립 절차, 성과관리 지표·평가 주기(지방자치단체 합동평가 등). 특정 사업의 확정 여부·시행 시기는 실국 협의·예산편성을 통해서만 확정</td></tr>
+<tr><td>예산담당관</td><td>①</td><td>지방재정법 기준 예산편성 절차, 제주도 예산 규모·주요 사업 개요. 개별 사업 예산 반영 여부는 도의회 의결을 통해서만 확정</td></tr>
+<tr><td>인구정책담당관(마스터데이터상 "인구청년담당관"과 통합 표기)</td><td>①</td><td>탐라청년출발패키지(청년 전입 축하장려금), 외국인주민·다문화가족 지원정책(제4차 외국인정책 기본계획 2026년 시행계획 기준)</td></tr>
+<tr><td>청년정책담당관</td><td>①</td><td>청년월세지원사업, 청년 희망충전 월세 지원사업(35~39세). 개별 소득요건 심사는 복지로·정부24를 통해서만 확정</td></tr>
+<tr><td>특별자치법무담당관(마스터데이터상 "법무담당관")</td><td>①</td><td>제주특별법 특례 제도, 조례 제·개정 절차. 구체적 법률자문·소송대리는 변호사·법제처 소관</td></tr>
+<tr><td>세정담당관</td><td>①</td><td>지방세법 기준 세목 체계, 세정 정책 방향. 개별 세액 계산·부과·감면은 시청 세무과 소관, 감면 특례 존재 여부는 위택스·세무과 확인 없이 단정 불가</td></tr>
+<tr><td><strong>혁신관리기획관</strong></td><td>②</td><td><strong>2026-07 신설</strong>(세계일보 확인). 업무혁신·성과관리·공약관리를 통합, 공공기관 총괄관리로 도정 성과 연계성 제고. <strong>이번 세션 시점 SP 미작성 — 가장 시급한 공백 중 하나</strong></td></tr>
+<tr><td>시설관리공단설립준비단</td><td>④</td><td>마스터데이터 舊산하과목록에 이름만 등재. 업무 미확인</td></tr>
+</tbody></table></div>
+<h2>2. 특별자치행정국 (SP-DO-JACHI)</h2>
+<div class="tablewrap"><table class="dtab">
+<thead><tr><th>과/담당관</th><th>확인상태</th><th>주요업무</th></tr></thead>
+<tbody>
+<tr><td>자치행정과(SELFGOV)</td><td>①</td><td>정착주민 지역공동체 조성 지원 제도(제주愛in 공식자료 기준), 특별자치제도·조직개편 일반 안내</td></tr>
+<tr><td>총무과(JACHI-GENERAL — 국 산하 총무과, comm 계열의 "총무과(general)"와는 별개 과)</td><td>①</td><td>정보공개청구 절차, 도청 조직·연락처 안내. 개별 인사발령·채용 결과는 내부 인사절차 소관</td></tr>
+<tr><td>회계과(ACCOUNTING)</td><td>①</td><td>공유재산 및 물품 관리법 기준 도유재산 관리 체계, 대부·사용허가 절차 일반 안내(권한자는 도지사 — 시청 소관 아님을 확인)</td></tr>
+<tr><td>4·3지원과(43SUPPORT)</td><td>①</td><td>4·3희생자 보상금 지급기준, 신청 접수(등기우편 포함). 최종 인정·보상금 확정은 국가기구인 4·3위원회(행안부) 소관 — 도청·시청도 최종 결정권 없음</td></tr>
+<tr><td>특별자치제도추진단(=SP-DO-AUTONOMY, 국 산하 별도 SP로 이미 존재)</td><td>①</td><td>특별자치제도·분권 제도·특례 확대 관련 — 별도 SP 파일 존재, 이 보고서 범위상 상세는 생략</td></tr>
+<tr><td>자치분권협력과</td><td>④</td><td>마스터데이터 산하과목록에 이름만 등재. 업무 미확인</td></tr>
+</tbody></table></div>
+<h2>3. 경제활력국 (SP-DO-ECON)</h2>
+<div class="tablewrap"><table class="dtab">
+<thead><tr><th>과/담당관</th><th>확인상태</th><th>주요업무</th></tr></thead>
+<tbody>
+<tr><td>경제정책과</td><td>②</td><td><strong>2026-07 개편 확인</strong>(세계일보). 민생경제정책 총괄로 확대 — 사회연대경제·로컬경제 기능 추가. 탐나는전(지역화폐)·제로페이 통합, 자율상권구역 지정 등 최근 정책(뉴스서울 2025 보도 기준)</td></tr>
+<tr><td>기업정책과(舊 기업투자과)</td><td>②</td><td><strong>2026-07 명칭변경 확인</strong>. 창업부터 기업성장·투자유치·기업지원까지 기업 성장 전 주기 지원</td></tr>
+<tr><td>소상공인물류과(舊 소상공인과+통상물류과 통합)</td><td>②</td><td><strong>2026-07 통합신설 확인</strong>. 소상공인 지원과 물류 정책을 연계</td></tr>
+<tr><td>(舊)일자리경제과 → 고용센터 사업소 체계 전환</td><td>②</td><td><strong>2026-07 개편 확인</strong>. 고용센터가 담당관 소속 "과"에서 별도 사업소 체계로 전환 — 구직자·기업 대상 고용서비스. do-agency(직속기관) 티어로 재분류 필요(이번 세션 미반영)</td></tr>
+</tbody></table></div>
+<h2>4. 미래산업국(舊 혁신산업국) (SP-DO-INNOV)</h2>
+<div class="tablewrap"><table class="dtab">
+<thead><tr><th>과</th><th>확인상태</th><th>주요업무</th></tr></thead>
+<tbody>
+<tr><td>디지털혁신과</td><td>①</td><td>디지털 전환·스마트시티 정책 개요. 개별 지원 확정은 실제 심사를 통해서만</td></tr>
+<tr><td>미래성장과</td><td>①</td><td>신산업 육성 정책 개요. 개별 지원 확정은 실제 심사를 통해서만</td></tr>
+<tr><td>우주모빌리티과</td><td>①</td><td>UAM(도심항공교통)·드론 정책 개요·추진현황(2026년 자료 기준). 상용화 시점·기체 인증은 국토부·美 FAA 소관</td></tr>
+<tr><td>(舊)에너지산업과</td><td>① → 이관</td><td><strong>기후에너지국으로 이관 추정</strong>(2026-07 개편 확인). 이 세션에서 기후에너지국 SP 자체는 아직 미작성 — §5 참고</td></tr>
+</tbody></table></div>
+<h2>5. 기후환경국 / 기후에너지국(신설) (SP-DO-CLIMATE)</h2>
+<div class="tablewrap"><table class="dtab">
+<thead><tr><th>과</th><th>확인상태</th><th>주요업무</th></tr></thead>
+<tbody>
+<tr><td>기후대응과</td><td>④</td><td>이름만 등재. 통상적으로는 탄소중립·기후적응 정책 총괄(③ 통상 정의)</td></tr>
+<tr><td>환경보전과</td><td>④</td><td>이름만 등재. 통상적으로는 대기·수질 등 환경보전 정책(③ 통상 정의)</td></tr>
+<tr><td>자원순환과</td><td>④</td><td>이름만 등재. 통상적으로는 폐기물 정책·자원순환 총괄(③ 통상 정의)</td></tr>
+<tr><td><strong>탄소중립정책과</strong></td><td>②</td><td><strong>2026-07 확인</strong>. 기후환경국에서 신설 기후에너지국으로 이관</td></tr>
+<tr><td><strong>분산에너지과</strong></td><td>②</td><td><strong>2026-07 신설 확인</strong>. 분산에너지 정책, 재생에너지 보급·확산 등 에너지 전환 정책 전담</td></tr>
+</tbody></table></div>
+<h2>6. 도시건설국(舊 건설주택국) (SP-DO-HOUSING)</h2>
+<div class="tablewrap"><table class="dtab">
+<thead><tr><th>과</th><th>확인상태</th><th>주요업무</th></tr></thead>
+<tbody>
+<tr><td>주택정책과</td><td>③</td><td>통상 정의: 공공임대주택 등 주택정책 수립(제주 특정 확인 안 됨). 개별 건축허가 자체는 시청 건축과 소관(이미 SP 본문에 명시된 관할 구분)</td></tr>
+<tr><td>건설행정과</td><td>③</td><td>통상 정의: 건설업 등록, 건설엔지니어링업 등록, 하도급계약심사 등 건설행정 총괄(경기도 이행표준 문서 기준 유추 — 제주 특정 확인 안 됨)</td></tr>
+<tr><td>도로과</td><td>③</td><td>통상 정의: 도로망 확충·유지보수 계획(제주시 등 기초단체의 "도로관리과"와는 관할 구분 — 도청은 도道 관리 도로, 시는 관내 도로)</td></tr>
+<tr><td>하천과</td><td>③</td><td>통상 정의: 하천 정비·재해예방</td></tr>
+</tbody></table></div>
+<h2>7. 교통항공국 (SP-DO-TRANSPORT)</h2>
+<div class="tablewrap"><table class="dtab">
+<thead><tr><th>과/추진단</th><th>확인상태</th><th>주요업무</th></tr></thead>
+<tbody>
+<tr><td>대중교통과</td><td>③</td><td>통상 정의: 버스 준공영제, 교통약자 콜택시, 공영주차장 정책</td></tr>
+<tr><td>교통정책과</td><td>③</td><td>통상 정의: 교통 종합계획, 교통영향평가</td></tr>
+<tr><td>공항확충지원단(SP-DO-AIRPORTSUP, 이미 별도 SP 존재)</td><td>①</td><td>제2공항 공항확충 사업 관련 — 별도 SP 파일 존재</td></tr>
+<tr><td>(제2공항상생지원단 — 舊?/이미지상 "소통제2공항담당관"과의 관계 재검증 필요)</td><td>②</td><td><strong>2026-07 신설 확인</strong>(세계일보). 제2공항 관련 주민소통·주민지원 전담, 지역사회 상생협력. <strong>공항확충지원단과 별개 조직인지, 통합됐는지 뉴스로 교차확인 안 됨 — 가장 혼란스러운 지점</strong></td></tr>
+</tbody></table></div>
+<h2>8. 복지가족국(舊 보건복지여성국) (SP-DO-WELFARE)</h2>
+<div class="tablewrap"><table class="dtab">
+<thead><tr><th>과</th><th>확인상태</th><th>주요업무</th></tr></thead>
+<tbody>
+<tr><td>복지정책과</td><td>①</td><td>국민기초생활보장제도(급여 4종·선정기준, 2026년 보건복지부 공식 수치). 개별 가구 소득인정액 계산은 복지로 모의계산 또는 읍면동 실제조사로만 확정</td></tr>
+<tr><td>아동보육청소년과</td><td>①</td><td>아동수당(만 9세 미만)·부모급여(0세 월100만/1세 월50만)·첫만남이용권(1자녀 200만/2자녀 이상 300만) — 2026년 기준</td></tr>
+<tr><td>장애인복지과</td><td>①</td><td>장애인연금·장애수당·활동지원 제도, 장애인 등록 절차. 장애정도 심사는 국민연금공단, 종합점수 산정은 서비스지원 종합조사 소관</td></tr>
+<tr><td>노인복지과</td><td>①</td><td>기초연금(선정기준·신청방법), 노인일자리·경로당 프로그램. 장기요양등급 판정은 건보공단 소관</td></tr>
+<tr><td>여성가족과</td><td>④</td><td>이름만 등재. 통상적으로는 양성평등·한부모가족·다문화가족 지원(단, 성평등 정책 자체는 별도 조직 성평등여성정책관 소관일 가능성 — 관할 중복 재검증 필요)</td></tr>
+</tbody></table></div>
+<h2>9. 도민안전건강실(안전건강실) (SP-DO-SAFETY)</h2>
+<div class="tablewrap"><table class="dtab">
+<thead><tr><th>과</th><th>확인상태</th><th>주요업무</th></tr></thead>
+<tbody>
+<tr><td>안전정책과</td><td>①</td><td>재난안전 정책·시설 안전점검 체계, 안전신문고 신고 경로. 실제 응급대응·구조는 즉시 119/112</td></tr>
+<tr><td>자연재난과</td><td>①</td><td>재난지원금 지급기준(제주 재난안전대책본부 공식 기준), 피해신고 절차. 인명 위급 상황은 즉시 119</td></tr>
+<tr><td>사회재난과</td><td>①</td><td>감염병 위기경보 단계, 사회재난 유형·대응체계. 화재·감염병 확산 현장대응은 즉시 119/1339</td></tr>
+<tr><td>보건정책과</td><td>①</td><td>공공보건의료 정책·보건소 체계, 의료기관 개설 절차(의료법 기준). 개별 진료·처방은 의료기관에서만</td></tr>
+<tr><td>건강위생과</td><td>①</td><td>식품위생법·공중위생관리법 체계, 식품접객업 영업신고, 식중독 의심신고 경로. 개별 영업허가·행정처분은 시청 위생관리과 소관</td></tr>
+</tbody></table></div>
+<h2>10. 문화체육교육국 (SP-DO-CULTURE)</h2>
+<div class="tablewrap"><table class="dtab">
+<thead><tr><th>과</th><th>확인상태</th><th>주요업무</th></tr></thead>
+<tbody>
+<tr><td>문화정책과</td><td>③</td><td>통상 정의: 문화예술 진흥 종합계획, 문화재단 등 출자·출연기관 관리</td></tr>
+<tr><td>체육진흥과</td><td>③</td><td>통상 정의: 생활체육·전문체육 진흥, 체육시설 정책(제주시 "체육진흥과"는 관내 실무집행, 도청은 정책총괄로 관할 구분)</td></tr>
+<tr><td>평생교육과</td><td>③</td><td>통상 정의: 평생학습 진흥, 도서관 정책 총괄</td></tr>
+</tbody></table></div>
+<h2>11. 관광교류국 (SP-DO-TOURISM)</h2>
+<div class="tablewrap"><table class="dtab">
+<thead><tr><th>과</th><th>확인상태</th><th>주요업무</th></tr></thead>
+<tbody>
+<tr><td>관광정책과</td><td>③</td><td>통상 정의: 관광 종합계획, 숙박업·여행업 정책 총괄</td></tr>
+<tr><td>관광마케팅과</td><td>③</td><td>통상 정의: 국내외 관광 마케팅, 관광 홍보</td></tr>
+<tr><td>국제교류과</td><td>③</td><td>통상 정의: 자매도시·국제교류 협력, 외국인 관광객 유치 연계</td></tr>
+</tbody></table></div>
+<h2>12. 농축산식품국 (SP-DO-AGRI)</h2>
+<div class="tablewrap"><table class="dtab">
+<thead><tr><th>과</th><th>확인상태</th><th>주요업무</th></tr></thead>
+<tbody>
+<tr><td>농업정책과</td><td>③</td><td>통상 정의: 농업경영체 등록, 공익직불금 정책 총괄</td></tr>
+<tr><td>축산과</td><td>③</td><td>통상 정의: 축산업 허가, 가축방역 정책</td></tr>
+<tr><td>식품원예산업과</td><td>③</td><td>통상 정의: 감귤 등 원예작물 유통·가공산업 지원</td></tr>
+</tbody></table></div>
+<h2>13. 해양수산국 (SP-DO-OCEAN)</h2>
+<div class="tablewrap"><table class="dtab">
+<thead><tr><th>과</th><th>확인상태</th><th>주요업무</th></tr></thead>
+<tbody>
+<tr><td>수산정책과</td><td>③</td><td>통상 정의: 어업면허, 수산업 정책 총괄</td></tr>
+<tr><td>해양산업과</td><td>③</td><td>통상 정의: 양식업, 해양산업 육성</td></tr>
+<tr><td>어촌개발과</td><td>③</td><td>통상 정의: 마을어장·어촌 정주여건 개선사업</td></tr>
+</tbody></table></div>
+<h2>14. 소통·청렴·브랜드 계열 (2026-07 개편으로 세분화)</h2>
+<div class="tablewrap"><table class="dtab">
+<thead><tr><th>조직명</th><th>확인상태</th><th>주요업무</th></tr></thead>
+<tbody>
+<tr><td>소통담당관(SP-DO-COMM, 舊 소통청렴담당관)</td><td>②</td><td><strong>2026-07 개편 확인</strong>. 도민소통과 갈등관리 전담(청렴·감사 기능은 아래로 분리)</td></tr>
+<tr><td><strong>제주브랜드담당관</strong></td><td>②</td><td><strong>2026-07 신설 확인</strong>. 제주 브랜드 전략·마케팅. <strong>이번 세션 SP 미작성</strong></td></tr>
+<tr><td>청렴감찰관(SP-DO-INTEGRITY, 이번 세션 신설)</td><td>⑤→①</td><td>조직도 스크린샷으로 존재만 확인, 신설/분리 시점은 뉴스로 교차확인 안 됨. 공직비리·부조리 신고, 공직감찰</td></tr>
+</tbody></table></div>
+<h2>15. 신설 도지사 직속 조직 (2026-07, 이번 세션 이전에 이미 SP 작성됨)</h2>
+<div class="tablewrap"><table class="dtab">
+<thead><tr><th>조직명</th><th>확인상태</th><th>주요업무</th></tr></thead>
+<tbody>
+<tr><td>AI행정혁신추진단(SP-DO-AIGOV)</td><td>②</td><td>도정 행정서비스 AI 전환, 데이터기반 정책결정, AI 인재양성</td></tr>
+<tr><td>기본사회추진단(SP-DO-BASICSOC)</td><td>②</td><td>주거·의료·돌봄·교통·에너지를 아우르는 기본사회 정책 기획·조정(개별 급여는 복지가족국 등 집행부서 소관)</td></tr>
+<tr><td>노동안전감독관(SP-DO-LABOR)</td><td>②</td><td>전국 지방정부 최초 노동감독 전담조직(2026-08-25 설치). 사업장 근로감독·산업재해 예방(국가기관인 지방고용노동청과 관할 구분)</td></tr>
+</tbody></table></div>
+<h2>16. 그 외 확인된 단위</h2>
+<div class="tablewrap"><table class="dtab">
+<thead><tr><th>조직명</th><th>확인상태</th><th>주요업무</th></tr></thead>
+<tbody>
+<tr><td>대변인(SP-DO-SPOKES)</td><td>①</td><td>도정 홍보, 언론대응, 보도자료</td></tr>
+<tr><td>성평등여성정책관(SP-DO-GENDER)</td><td>④</td><td>성평등 정책 총괄 — SP는 있으나 domain/과 단위 세분 미작성</td></tr>
+<tr><td>소방안전본부(SP-AGY-FIRE, 03-do-agency 티어)</td><td>④</td><td>소방·구조·구급 총괄 — 이미 별도 SP 존재(과 단위가 아닌 직속기관 티어라 이 보고서의 "실·국 산하 과" 집계에는 포함하지 않음)</td></tr>
+<tr><td>도시균형추진단(SP-DO-BALANCE)</td><td>①</td><td>지역균형발전, 원도심·읍면 격차 해소(15분도시 관련, 2022년 신설 확인 — 서울신문)</td></tr>
+<tr><td>강정공동체사업추진단(SP-DO-GANGJEONG)</td><td>④</td><td>강정마을 공동체사업 — SP는 있으나 상세 미검증</td></tr>
+<tr><td>중앙협력본부(SP-DO-LIAISON)</td><td>①</td><td>국비 확보, 중앙정부 협력</td></tr>
+<tr><td>총무과(SP-DO-GENERAL, comm 계열 domain — 위 2번 특별자치행정국 총무과와는 별개 소속 추정)</td><td>④</td><td>일반서무, 문서관리, 인사지원 — 소속 실·국이 특별자치행정국인지 별도 보좌기관인지 확인 안 됨(도청 조직도상 총무과가 두 곳에 있을 가능성, §3-2 참고)</td></tr>
+</tbody></table></div>
+<hr>
+<h2>3. 이번 조사에서 발견한 불일치·중복 (다음 검증 우선순위)</h2>
+<h3 class="subsec">3-1. 기획조정실 내 명칭 불일치</h3>
+<p>과 단위 SP 파일(<code>SP-DIV-PLAN-POLICY</code>)은 "정책기획관"이라 부르는데, 국 단위 마스터데이터(<code>do-dept-master-data.json</code>)는 같은 자리를 "기획관리담당관"이라 부른다. 동일 조직인지, 실제로 둘 다 존재하는 별개 조직인지 jeju.go.kr 원본으로 재검증 필요.</p>
+<h3 class="subsec">3-2. "총무과"가 두 곳에 있는 것으로 보이는 문제</h3>
+<p>① 특별자치행정국 산하 <code>SP-DIV-JACHI-GENERAL</code>("제주도청 특별자치행정국 총무과")과 ② domain <code>general</code>의 <code>SP-DO-GENERAL</code>("총무과", 소속 실·국 불명확)이 각각 별도 SP로 존재한다. 도청 규모 조직에서 총무과가 실·국마다 있는 것은 실제로 흔한 구조(각 실·국 내부 서무)이지만, 이 두 SP가 서로 다른 과를 가리키는지 같은 과의 중복 문서인지 확인되지 않았다.</p>
+<h3 class="subsec">3-3. 교통항공국의 제2공항 관련 조직 3개가 서로 어떤 관계인지 불명확</h3>
+<p><code>SP-DO-AIRPORTSUP</code>("공항확충지원단", 기존), 2026-07 신설 "제2공항상생지원단" (뉴스 확인, SP 미작성), 그리고 2026-09-16 조직도 이미지의 "소통제2공항담당관" — 이 셋이 ①통합됐는지 ②병존하는지 ③명칭만 바뀌었는지가 이번 조사로는 확정되지 않았다. 도민 문의 시 라우팅 오류 가능성이 가장 큰 지점.</p>
+<h3 class="subsec">3-4. 경제활력국 마스터데이터가 2026-07 개편 이전 명칭으로 남아있음</h3>
+<p><code>do-dept-master-data.json</code>의 econ 레코드 <code>산하과목록</code>은 여전히 "경제정책과, 소상공인기업과, 일자리경제과 등"으로, 개편 후 실제 명칭(기업정책과, 소상공인물류과, 고용센터의 사업소 전환)이 반영돼 있지 않다. <strong>이번 세션에서는 시간 관계상 코드 수정까지는 하지 못했고 이 보고서에만 기록함 — 다음 작업 대상.</strong></p>
+<h2>4. 다음 단계 제안</h2>
+<p>1. <strong>jeju.go.kr 원본 조직도·사무분장 규칙 직접 확보</strong> — 이번 세션은 검색으로 접근하지 못했다. 브라우저 기반 접근(Claude in Chrome 등) 또는 제주도에 정보공개청구를 통해 「제주특별자치도 행정기구 설치 조례 시행규칙」 최신판 전문을 구하는 것이 가장 확실한 방법이다.</p>
+<p>2. §3-1~3-4의 불일치 4건을 우선 해소.</p>
+<p>3. 통상 정의(③)로 표시된 약 20개 과를 jeju.go.kr 원본으로 하나씩 ①로 승격 — 문화체육교육국·관광교류국·농축산식품국·해양수산국·도시건설국· 교통항공국이 우선순위(이 6개 국은 이름만 있고 상세 SP가 전혀 없음).</p>
+<p>4. 기후에너지국 SP 신설(§5의 탄소중립정책과·분산에너지과부터).</p>
+<p>5. 혁신관리기획관(기획조정실), 제주브랜드담당관(소통 계열) SP 신설.</p>
+
+</div>
+
+<div class="page-footer">
+  혼디(hondi.net) · Openhash-Gopang · 이 보고서는 저장소 내부 자료와 웹 검색으로 수집한 정보를 종합한 초안입니다.
+</div>
+
+</body>
+</html>

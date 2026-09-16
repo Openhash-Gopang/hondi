@@ -1213,6 +1213,13 @@ document.addEventListener('keydown', function (e) {
       대시보드
     </a>
     <a href="#" onclick="loadPage('ai-engine');return false;">AI 엔진</a>
+    <!-- 2026-09-16 신설 — "제주 행정 자동화" 메뉴. 이 세션에서 작성한
+         jeju_dept_report(70과 실태 보고서)를 담은 임시 standalone 페이지로
+         연결. loadPage() SPA가 아니라 일반 href로 연결(다른 standalone
+         페이지, 예: pages/routing-architecture.html과 동일 패턴) — 이
+         페이지 자체는 나중에 일괄 수정될 예정이라 지금은 임시 링크만
+         부착한다. -->
+    <a href="pages/jeju-gov-automation.html">제주 행정 자동화</a>
     <a href="#" onclick="loadPage('openhash');return false;">오픈해시</a>
     <a href="#" onclick="loadPage('hondi-market');return false;">혼디마켓</a>
     <a href="#" onclick="loadPage('about-hondi');return false;">혼디란?</a>
