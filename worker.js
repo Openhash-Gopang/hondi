@@ -4231,6 +4231,15 @@ async function handleKlawSessionsHistory(request, url, env, corsHeaders) {
 // guid를 재확인한 뒤, 그 레코드의 user_id가 정확히 일치할 때만
 // 반환한다 — 그렇지 않으면 남의 판결문 id를 추측해 열람할 수 있는
 // 구멍이 생긴다.
+// 2026-09-18 신설 — 무음 절단 방지. 상한을 넘는 경우에만 끝부분을 잘라내고
+// 그 사실을 눈에 띄게 남긴다(상한 안이면 원본 그대로, 아무 표시도 안
+// 붙인다).
+function _klawTruncateWithNotice(text, maxLen) {
+  if (text.length <= maxLen) return text;
+  const notice = '\n\n[⚠ 저장 용량 한도로 이 이후 내용이 잘렸습니다]';
+  return text.slice(0, maxLen - notice.length) + notice;
+}
+
 async function handleKlawSessionsDetail(request, url, env, corsHeaders) {
   const phoneVerifyToken = (url.searchParams.get('phone_verify_token') || '').trim();
   const recordId = (url.searchParams.get('id') || '').trim();
@@ -4260,6 +4269,7 @@ async function handleKlawSessionsDetail(request, url, env, corsHeaders) {
       case_type: rec.case_type, case_level: rec.case_level,
       case_summary: rec.case_summary, verdict: rec.verdict,
       confidence: rec.confidence, match_rate: rec.match_rate,
+      case_input: rec.case_input || '',
       verdict_full: rec.verdict_full || '', created: rec.created,
     }), { headers: corsHeaders });
   } catch (e) {
@@ -4297,7 +4307,15 @@ async function handleKlawSessionsSave(request, env, corsHeaders) {
       // verdict_full — 2026-09-18 신설(주피터 지시). STEP 0~C 전문. 60000자
       // 상한은 남용 방지용 여유값일 뿐 실사용 판결문은 대개 그보다 훨씬
       // 작다. klaw_sessions 컬렉션에 이 필드도 별도로 추가해야 한다.
-      verdict_full: (body.verdict_full || '').slice(0, 60000),
+      // 2026-09-18 사고실험 발견 — 60000자는 STEP별 maxTokens 상한
+      // (0:9000+A:14000+B:16000+C:9000=48000토큰)을 전부 소진하는
+      // 최악의 경우(한국어 토큰당 약 1.5~2자 가정 시 최대 7만~9만자)
+      // 보다 작아, 화면엔 온전한 판결문이 잘림 없이 표시됐는데 이력
+      // 저장본만 조용히 잘리는 사례가 나올 수 있었다. 상한을
+      // 200000자로 넉넉히 올리고, 그래도 넘치면(사실상 발생 안 하는
+      // 극단값 대비) 그 사실을 저장본 자체에 눈에 띄게 남긴다 —
+      // 나중에 열람할 때 "이거 전체 맞나?"를 알 수 있게.
+      verdict_full: _klawTruncateWithNotice(body.verdict_full || '', 200000),
     };
     const res = await fetch(`${L1_DEFAULT}/api/collections/${KLAW_SESSIONS_COLLECTION}/records`, {
       method: 'POST',
