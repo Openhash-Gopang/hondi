@@ -798,8 +798,22 @@ function _aiUsageIcon(serviceId) {
 // ③ Gopang Wallet
 // ══════════════════════════════════════════════════════════════
 export async function openGopangWallet() {
-  const user = JSON.parse(localStorage.getItem('gopang_user_v4') || '{}');
-  const guid = user.ipv6 || '';
+  // 2026-09-16 신설(주피터 지시: "무엇보다 사용자 인증을 거친 뒤 페이지
+  // 표시") — 인증 여부와 무관하게 시트부터 열고 조회를 시도하던 기존
+  // 동작을 막는다. _isRegistered()는 openSettings()에서 이미 쓰이는
+  // 표준 인증 판별 기준(handle 존재 여부)이다. guid 조회도
+  // _openUsagePage()와 동일하게 _USER → localStorage → sessionStorage
+  // 순으로 통일했다.
+  if (!_isRegistered()) {
+    alert('지갑을 보려면 먼저 가입/로그인이 필요합니다.');
+    return;
+  }
+  const user = JSON.parse(localStorage.getItem('gopang_user_v4') || sessionStorage.getItem('gopang_user_v4') || '{}');
+  const guid = _USER?.ipv6 || user.ipv6 || '';
+  if (!guid) {
+    alert('지갑을 보려면 먼저 가입/로그인이 필요합니다.');
+    return;
+  }
 
   _openSheet('Gopang Wallet', '<div style="padding:40px 16px;text-align:center;color:#9ca3af;font-size:14px">로딩 중...</div>');
 
