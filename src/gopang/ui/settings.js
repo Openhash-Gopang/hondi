@@ -866,22 +866,23 @@ export async function openGopangWallet() {
     const ledgerEntries = (ledgerHistory?.ok && ledgerHistory.entries) ? ledgerHistory.entries : [];
 
     const _SOURCE_LABEL  = { mint: 'GDC 충전', market: '상품 구매', gdc_transfer: 'GDC 이체', ai_usage: 'AI 사용료' };
-    const _SOURCE_ICON   = { mint: '💰', market: '🛍️', gdc_transfer: '↔️', ai_usage: '🤖' };
 
-    // 두 소스를 하나의 타임라인으로 정규화(공통 필드: kind/label/icon/
+    // 두 소스를 하나의 타임라인으로 정규화(공통 필드: kind/label/
     // amount/direction/timestamp/raw) — 상세 패널(_openTxDetail)이
     // kind로 원본 레코드 종류를 구분해 알맞은 6하원칙 문구를 만든다.
+    // 2026-09-16 수정 — 거래 목록에서 이모지 아이콘을 전부 제거하고
+    // 금융기관 입출금 내역처럼 텍스트 위주로 재구성하면서, 더 이상
+    // 쓰이지 않는 icon 필드도 함께 정리했다.
     const timeline = [
       ...pendingCharges.map(r => ({
         kind: 'charge_pending', raw: r,
         label: `${(r.requested_krw || 0).toLocaleString()}원 입금 신청`,
-        icon: '💰', direction: 'pending', amount: r.requested_krw || 0,
+        direction: 'pending', amount: r.requested_krw || 0,
         timestamp: r.created,
       })),
       ...ledgerEntries.map(r => ({
         kind: 'ledger', raw: r,
         label: r.source === 'ai_usage' ? _aiUsageLabel(r.service_id) : (_SOURCE_LABEL[r.source] || r.source || '거래'),
-        icon: r.source === 'ai_usage' ? _aiUsageIcon(r.service_id) : (_SOURCE_ICON[r.source] || '📄'),
         direction: r.direction === 'credit' ? 'income' : 'expense',
         amount: r.amount || 0,
         timestamp: r.created,
@@ -907,48 +908,50 @@ export async function openGopangWallet() {
     const expenseTotal = ledgerEntries.filter(r => r.direction === 'debit').reduce((s, r) => s + (Number(r.amount) || 0), 0);
 
     const html = `
-      <div style="padding:14px 16px;background:#f0f9fa;border-bottom:1px solid #f2f2f7">
-        <div style="font-size:12px;color:#6b7280;margin-bottom:6px">입금 계좌</div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="flex:1;font-size:15px;font-weight:600;color:#111827">기업은행 315-092028-04-011</div>
-          <button id="_gdc-account-copy-btn" onclick="_copyGdcAccountNumber()" style="flex-shrink:0;padding:6px 12px;border:1px solid #007b8b;border-radius:6px;background:#fff;color:#007b8b;font-size:12px;font-weight:600;cursor:pointer">복사</button>
-        </div>
-        <div style="font-size:12px;color:#6b7280;margin-top:8px;line-height:1.5">위 계좌로 입금하면, 입금액에 상응하는 GDC가 충전됩니다(GDC:KRW = 1:1).</div>
-      </div>
-      <div style="padding:20px 16px;border-bottom:1px solid #f2f2f7;text-align:center">
-        <div style="font-size:32px;font-weight:700;color:#111827">₮${Math.trunc(balance).toLocaleString()}</div>
-        <div style="font-size:13px;color:#9ca3af;margin-top:4px">GDC 잔액</div>
-        <div style="display:flex;gap:16px;margin-top:12px;justify-content:center">
-          <div style="text-align:center">
-            <div style="font-size:16px;font-weight:600;color:#dc2626">-₮${Math.trunc(expenseTotal).toLocaleString()}</div>
-            <div style="font-size:11px;color:#9ca3af">지출</div>
+      <div style="padding:16px 16px 4px">
+        <div style="border:1px solid #e5e7eb;border-radius:10px;padding:16px">
+          <div style="font-size:11px;font-weight:600;letter-spacing:.05em;color:#8a94a6;text-transform:uppercase;margin-bottom:8px">입금 계좌</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="flex:1;font-size:16px;font-weight:600;color:#111827;letter-spacing:-.1px">기업은행 315-092028-04-011</div>
+            <button id="_gdc-account-copy-btn" onclick="_copyGdcAccountNumber()" style="flex-shrink:0;padding:7px 14px;border:1px solid #007b8b;border-radius:6px;background:#fff;color:#007b8b;font-size:12.5px;font-weight:600;cursor:pointer;letter-spacing:.02em">복사</button>
           </div>
-          <div style="width:1px;background:#f2f2f7"></div>
-          <div style="text-align:center">
-            <div style="font-size:16px;font-weight:600;color:#007b8b">+₮${Math.trunc(incomeTotal).toLocaleString()}</div>
-            <div style="font-size:11px;color:#9ca3af">수입</div>
+          <div style="font-size:12.5px;color:#6b7280;margin-top:10px;line-height:1.55">위 계좌로 입금하면, 입금액에 상응하는 GDC가 충전됩니다(GDC:KRW = 1:1).</div>
+        </div>
+      </div>
+      <div style="padding:26px 16px 22px;border-bottom:1px solid #e5e7eb;text-align:center">
+        <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#9ca3af;text-transform:uppercase;margin-bottom:10px">GDC 잔액</div>
+        <div style="font-size:34px;font-weight:700;color:#111827;letter-spacing:-.5px;font-variant-numeric:tabular-nums">₮${Math.trunc(balance).toLocaleString()}</div>
+        <div style="display:flex;margin-top:22px;justify-content:center">
+          <div style="text-align:center;padding:0 22px;border-right:1px solid #e5e7eb">
+            <div style="font-size:10.5px;font-weight:600;letter-spacing:.05em;color:#9ca3af;text-transform:uppercase;margin-bottom:5px">지출</div>
+            <div style="font-size:15px;font-weight:600;color:#dc2626;font-variant-numeric:tabular-nums">-₮${Math.trunc(expenseTotal).toLocaleString()}</div>
+          </div>
+          <div style="text-align:center;padding:0 22px">
+            <div style="font-size:10.5px;font-weight:600;letter-spacing:.05em;color:#9ca3af;text-transform:uppercase;margin-bottom:5px">수입</div>
+            <div style="font-size:15px;font-weight:600;color:#0f9d58;font-variant-numeric:tabular-nums">+₮${Math.trunc(incomeTotal).toLocaleString()}</div>
           </div>
         </div>
       </div>
       ${timeline.length > 0 ? `
       <div style="padding:0">
-        <div style="padding:10px 16px;font-size:12px;color:#9ca3af;font-weight:600">거래 내역</div>
+        <div style="padding:14px 16px 6px;font-size:11px;font-weight:600;letter-spacing:.05em;color:#9ca3af;text-transform:uppercase">거래 내역</div>
         ${timeline.map((t, idx) => {
-          const amountColor = t.direction === 'income' ? '#0F9D58' : (t.direction === 'expense' ? '#dc2626' : '#B45309');
+          const amountColor = t.direction === 'income' ? '#0f9d58' : (t.direction === 'expense' ? '#dc2626' : '#111827');
           const amountPrefix = t.direction === 'income' ? '+' : (t.direction === 'expense' ? '-' : '');
-          const statusText = t.direction === 'pending' ? '입금 대기' : '';
+          const isPending = t.direction === 'pending';
           return `
-        <div onclick="_openTxDetail(${idx})" style="padding:14px 16px;border-bottom:1px solid #f2f2f7;display:flex;align-items:center;gap:12px;cursor:pointer">
-          <div style="width:40px;height:40px;border-radius:50%;background:#f2f2f7;display:flex;align-items:center;justify-content:center;font-size:18px">${t.icon}</div>
-          <div style="flex:1">
-            <div style="font-size:14px;color:#111827">${t.label}</div>
-            <div style="font-size:12px;color:#9ca3af">${t.timestamp ? new Date(t.timestamp).toLocaleString('ko-KR') : ''}</div>
+        <div onclick="_openTxDetail(${idx})" style="padding:13px 16px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:12px;cursor:pointer">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:500;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.label}</div>
+            <div style="font-size:12px;color:#9ca3af;margin-top:2px">${t.timestamp ? new Date(t.timestamp).toLocaleString('ko-KR') : ''}</div>
           </div>
-          <span style="font-size:13px;font-weight:600;color:${amountColor}">${statusText || `${amountPrefix}₮${Math.trunc(t.amount).toLocaleString()}`}</span>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c7c7cc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          ${isPending
+            ? `<span style="flex-shrink:0;font-size:11px;font-weight:600;color:#b45309;background:#fef3c7;padding:4px 9px;border-radius:4px;letter-spacing:.02em">입금 대기</span>`
+            : `<span style="flex-shrink:0;font-size:14px;font-weight:600;color:${amountColor};font-variant-numeric:tabular-nums">${amountPrefix}₮${Math.trunc(t.amount).toLocaleString()}</span>`}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
         </div>`;
         }).join('')}
-      </div>` : '<div style="padding:40px 16px;text-align:center;color:#9ca3af;font-size:13px">거래 내역이 없습니다.</div>'}`;
+      </div>` : '<div style="padding:48px 16px;text-align:center;color:#9ca3af;font-size:13px">거래 내역이 없습니다.</div>'}`;
 
     document.getElementById('_gopang-sheet-body').innerHTML = html;
   } catch(e) {
