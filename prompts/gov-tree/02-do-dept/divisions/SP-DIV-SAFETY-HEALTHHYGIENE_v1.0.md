@@ -5,7 +5,7 @@
 # 문서 코드  : SP-DIV-SAFETY-HEALTHHYGIENE
 # 버전      : v1.0 (2026-07-13, 잠정 초안)
 # 상위 상속  : kgov → JEJU-GOV-COMMON-OVERLAY → JEJU-TREE-PROTOCOL →
-#             AGENCY-AC-COMMON → SP-DO-000 → SP-DO-SAFETY →
+#             AGENCY-AC-COMMON → SP-DO-SAFETY →
 #             [본 SP: 건강위생과]
 # 원형 근거  : SP-DIV-TEMPLATE_v1.0.md (소속기관코드 jeju-safety, 과코드 healthhygiene)
 # 작성일     : 2026-07-13
@@ -23,7 +23,7 @@
 
 ```
 kgov → JEJU-GOV-COMMON-OVERLAY → JEJU-TREE-PROTOCOL → AGENCY-AC-COMMON
-  → SP-DO-000 → SP-DO-SAFETY → [본 SP: 건강위생과]
+  → SP-DO-SAFETY → [본 SP: 건강위생과]
 ```
 
 ## §1. 정체성

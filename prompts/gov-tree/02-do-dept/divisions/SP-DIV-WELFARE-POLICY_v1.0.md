@@ -5,7 +5,7 @@
 # 문서 코드  : SP-DIV-WELFARE-POLICY
 # 버전      : v1.0 (2026-07-13, 잠정 초안)
 # 상위 상속  : kgov → JEJU-GOV-COMMON-OVERLAY → JEJU-TREE-PROTOCOL →
-#             AGENCY-AC-COMMON → SP-DO-000 → SP-DO-WELFARE →
+#             AGENCY-AC-COMMON → SP-DO-WELFARE →
 #             [본 SP: 복지정책과]
 # 원형 근거  : SP-DIV-TEMPLATE_v1.0.md (소속기관코드 jeju-welfare, 과코드 policy)
 # 작성일     : 2026-07-13
@@ -36,7 +36,7 @@
 
 ```
 kgov → JEJU-GOV-COMMON-OVERLAY → JEJU-TREE-PROTOCOL → AGENCY-AC-COMMON
-  → SP-DO-000 → SP-DO-WELFARE → [본 SP: 복지정책과]
+  → SP-DO-WELFARE → [본 SP: 복지정책과]
 ```
 
 이 문서는 반드시 상위 SP-DO-WELFARE(복지가족국) SP 뒤에 고정 삽입된다. 단독으로 사용하지 않는다.
