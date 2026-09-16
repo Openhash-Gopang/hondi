@@ -997,7 +997,13 @@ export async function openGopangWallet() {
           </div>
           <div style="font-size:12px;color:#9ca3af">${t.timestamp ? new Date(t.timestamp).toLocaleString('ko-KR') : ''}</div>
           ${isPending
-            ? `<span style="align-self:flex-start;font-size:11px;font-weight:600;color:#b45309;background:#fef3c7;padding:4px 9px;border-radius:4px;letter-spacing:.02em">입금 대기</span>`
+            ? `<div style="display:flex;flex-direction:column;gap:8px">
+                <span style="align-self:flex-start;font-size:11px;font-weight:600;color:#b45309;background:#fef3c7;padding:4px 9px;border-radius:4px;letter-spacing:.02em">입금 대기</span>
+                <div style="height:4px;background:#f3f4f6;border-radius:2px;overflow:hidden">
+                  <div style="width:50%;height:100%;background:#f59e0b;border-radius:2px"></div>
+                </div>
+                <div style="font-size:11px;color:#9ca3af;line-height:1.5">신청 접수 완료 → 은행 입금 확인 중입니다. 확인되면 자동으로 반영됩니다(보통 몇 분~몇 시간 소요).</div>
+              </div>`
             : `<span style="font-size:16px;font-weight:600;color:${amountColor};font-variant-numeric:tabular-nums">${amountPrefix}${Math.trunc(t.amount).toLocaleString()}T</span>`}
         </div>`;
         }).join('')}
