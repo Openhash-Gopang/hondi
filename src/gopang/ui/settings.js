@@ -814,8 +814,12 @@ export async function openGopangWallet() {
     alert('지갑을 보려면 먼저 가입/로그인이 필요합니다.');
     return;
   }
+  // 2026-09-16 신설 — 헤더 오른쪽에 인증된 사용자 이름 표시(닉네임
+  // 우선, 없으면 handle). "인증된 사용자 표시가 없다"는 지적에 대한
+  // 직접적인 응답 — 시트를 여는 이 시점부터 바로 보이게 한다.
+  const displayName = user.nickname || _USER?.nickname || user.handle || _USER?.handle || '';
 
-  _openSheet('Gopang Wallet', '<div style="padding:40px 16px;text-align:center;color:#9ca3af;font-size:14px">로딩 중...</div>');
+  _openSheet('Gopang Wallet', '<div style="padding:40px 16px;text-align:center;color:#9ca3af;font-size:14px">로딩 중...</div>', displayName);
 
   try {
     const { PROXY } = await import('../core/state.js');
@@ -1296,7 +1300,7 @@ export async function openFinancialStatement() {
 // ══════════════════════════════════════════════════════════════
 // 공통 시트 패널
 // ══════════════════════════════════════════════════════════════
-function _openSheet(title, html) {
+function _openSheet(title, html, rightLabel = '') {
   let sheet = document.getElementById('_gopang-bottom-sheet');
   if (!sheet) {
     sheet = document.createElement('div');
@@ -1308,6 +1312,10 @@ function _openSheet(title, html) {
       'transform:translateY(100%)',
       'transition:transform 0.3s ease',
     ].join(';');
+    // 2026-09-16 수정(주피터 지시) — 헤더 오른쪽 빈 스페이서(36px)를
+    // 인증된 사용자 이름을 보여주는 자리로 확장했다. rightLabel이
+    // 비어 있으면(기존 시트 대부분) min-width:36px만 유지돼 "닫기"
+    // 버튼과 균형을 맞추는 기존 동작 그대로다.
     sheet.innerHTML = `
       <div style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid #f2f2f7;flex-shrink:0">
         <button id="_gopang-sheet-close"
@@ -1315,7 +1323,7 @@ function _openSheet(title, html) {
           닫기
         </button>
         <div id="_gopang-sheet-title" style="flex:1;text-align:center;font-size:16px;font-weight:600"></div>
-        <div style="width:36px"></div>
+        <div id="_gopang-sheet-right" style="min-width:36px;text-align:right;font-size:12.5px;font-weight:500;color:#6b7280;white-space:nowrap"></div>
       </div>
       <div id="_gopang-sheet-body" style="flex:1;overflow-y:auto"></div>`;
     document.body.appendChild(sheet);
@@ -1325,6 +1333,7 @@ function _openSheet(title, html) {
   }
 
   document.getElementById('_gopang-sheet-title').textContent = title;
+  document.getElementById('_gopang-sheet-right').textContent = rightLabel;
   document.getElementById('_gopang-sheet-body').innerHTML = html;
   requestAnimationFrame(() => { sheet.style.transform = 'translateY(0)'; });
 }
