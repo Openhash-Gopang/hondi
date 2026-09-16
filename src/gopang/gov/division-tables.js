@@ -276,6 +276,10 @@ export const CITY_DIVISION_TABLE = [
   { code: "SP-CITYDIV-SEOGWIPO-WELFARE-RESIDENT", 국코드: "welfare", 시코드: "seogwipo",
     name: "서귀포시청 복지위생국 주민복지과", desc: "당신은 **서귀포시청 복지위생국 주민복지과**를 대표하는 AI 레이어다. 복지 총괄·긴급복지지원을 담당한다 — **제주시와의 구조적 차이**: 제주시는 기초생활보장과가 별도 과로 분리돼 있으나(SP-CITYDIV-JEJUSI-WELFARE-BASICLIVELIHOOD), 서귀포시 city-dept-master-data.json에는 별도 기초생활보장과가 없어",
     kw: ["긴급복지지원", "복지 총괄", "주민복지", "주민복지과"], file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-WELFARE-RESIDENT_v1.1.md" },
+  { code: "SP-CITYDIV-SEOGWIPO-WELFARE-INTEGRATEDCARE", 국코드: "welfare", 시코드: "seogwipo",
+    // ★ 2026-09-16 신설 — 주피터님 제공 서귀포시 기구표(2026-03 기준) 확인.
+    name: "서귀포시청 복지위생국 통합돌봄과", desc: "당신은 **서귀포시청 복지위생국 통합돌봄과**를 대표하는 AI 레이어다. 돌봄정책, 돌봄지원(제주가치 통합돌봄 등), 희망복지지원단 운영을 담당한다.",
+    kw: ["통합돌봄과", "돌봄정책", "돌봄지원", "희망복지지원", "제주가치 통합돌봄"], file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-WELFARE-INTEGRATEDCARE_v1.0.md" },
   { code: "SP-CITYDIV-SEOGWIPO-WELFARE-WOMENFAMILY", 국코드: "welfare", 시코드: "seogwipo",
     name: "서귀포시청 복지위생국 여성가족과", desc: "당신은 **서귀포시청 복지위생국 여성가족과**를 대표하는 AI 레이어다. 한부모가족 지원, 가정폭력·성폭력 피해자 보호를 담당한다.",
     kw: ["가정폭력", "성폭력 피해자 보호", "여성가족", "여성가족과", "한부모가족 지원"], file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-WELFARE-WOMENFAMILY_v1.1.md" },
