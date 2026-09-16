@@ -76,9 +76,10 @@ export const CITY_DIVISION_TABLE = [
   { code: "SP-CITYDIV-JEJUSI-CULTURE-UDANGLIB", 국코드: "culture", 시코드: "jejusi",
     name: "제주시청 문화관광체육국 우당도서관", desc: "당신은 **제주시청 문화관광체육국 우당도서관**를 대표하는 AI 레이어다. 제주시립 우당도서관 — 도서 대출·반납, 자료실 이용을 담당하는 공공도서관이다.",
     kw: ["우당도서관", "제주시립 우당도서관"], file: "04-city/divisions/SP-CITYDIV-JEJUSI-CULTURE-UDANGLIB_v1.0.md" },
-  { code: "SP-CITYDIV-JEJUSI-ECON-INFOSUPPORT", 국코드: "econ", 시코드: "jejusi",
-    name: "제주시청 경제일자리국 정보화지원과", desc: "당신은 **제주시청 경제일자리국 정보화지원과**를 대표하는 AI 레이어다. 정보화교육, 스마트시티 관련 사업을 담당한다.",
-    kw: ["스마트시티 관련 사업", "정보화교육", "정보화지원", "정보화지원과"], file: "04-city/divisions/SP-CITYDIV-JEJUSI-ECON-INFOSUPPORT_v1.0.md" },
+  { code: "SP-CITYDIV-JEJUSI-ECON-DIGITAL", 국코드: "econ", 시코드: "jejusi",
+    // ★ 2026-09-16 개명 — 정보화지원과→디지털혁신과(조직도 스크린샷 확인).
+    name: "제주시청 경제일자리국 디지털혁신과", desc: "당신은 **제주시청 경제일자리국 디지털혁신과**(舊 정보화지원과)를 대표하는 AI 레이어다. 정보화교육, 스마트시티 관련 사업을 담당한다.",
+    kw: ["스마트시티 관련 사업", "정보화교육", "정보화지원", "정보화지원과", "디지털혁신", "디지털혁신과"], file: "04-city/divisions/SP-CITYDIV-JEJUSI-ECON-DIGITAL_v1.0.md" },
   { code: "SP-CITYDIV-JEJUSI-ECON-JOBENERGY", 국코드: "econ", 시코드: "jejusi",
     name: "제주시청 경제일자리국 일자리에너지과", desc: "당신은 **제주시청 경제일자리국 일자리에너지과**를 대표하는 AI 레이어다. 공공일자리사업, 에너지 절약·신재생에너지 보급 지원을 담당한다.",
     kw: ["공공일자리사업", "신재생에너지 보급 지원", "에너지 절약", "일자리에너지", "일자리에너지과"], file: "04-city/divisions/SP-CITYDIV-JEJUSI-ECON-JOBENERGY_v1.0.md" },
@@ -115,6 +116,14 @@ export const CITY_DIVISION_TABLE = [
   { code: "SP-CITYDIV-JEJUSI-SAFETY-VEHICLE", 국코드: "safety", 시코드: "jejusi",
     name: "제주시청 안전교통국 차량관리과", desc: "당신은 **제주시청 안전교통국 차량관리과**를 대표하는 AI 레이어다. 자동차 등록·이전등록, 차고지증명제 운영을 담당한다.",
     kw: ["이전등록", "자동차 등록", "차고지증명제 운영", "차량관리", "차량관리과"], file: "04-city/divisions/SP-CITYDIV-JEJUSI-SAFETY-VEHICLE_v1.1.md" },
+  { code: "SP-CITYDIV-JEJUSI-SAFETY-HYGIENE", 국코드: "safety", 시코드: "jejusi",
+    // ★ 2026-09-16 이관 — 복지위생국→안전교통위생국 개편으로 welfare에서 이동.
+    name: "제주시청 안전교통위생국 위생관리과", desc: "당신은 **제주시청 안전교통위생국 위생관리과**(舊 복지위생국 소속)를 대표하는 AI 레이어다. 식품위생업소(음식점 등) 및 공중위생업(숙박·미용 등) 인허가·신고를 담당한다.",
+    kw: ["공중위생업 인허가", "식품위생업소", "위생관리", "위생관리과"], file: "04-city/divisions/SP-CITYDIV-JEJUSI-SAFETY-HYGIENE_v1.0.md" },
+  { code: "SP-CITYDIV-JEJUSI-SAFETY-FOODSAFETY", 국코드: "safety", 시코드: "jejusi",
+    // ★ 2026-09-16 신설 — 조직도 스크린샷 확인.
+    name: "제주시청 안전교통위생국 식품안전과", desc: "당신은 **제주시청 안전교통위생국 식품안전과**를 대표하는 AI 레이어다. 식품위생업소 안전점검, 위해식품 단속, 식중독 예방을 담당하는 것으로 추정(재검증 필요).",
+    kw: ["식품안전", "식품안전과", "위해식품", "식중독"], file: "04-city/divisions/SP-CITYDIV-JEJUSI-SAFETY-FOODSAFETY_v1.0.md" },
   { code: "SP-CITYDIV-JEJUSI-WELFARE-BASICLIVELIHOOD", 국코드: "welfare", 시코드: "jejusi",
     name: "제주시청 복지위생국 기초생활보장과", desc: "당신은 **제주시청 복지위생국 기초생활보장과**를 대표하는 AI 레이어다. 국민기초생활보장(생계·의료·주거·교육급여) 신청·조사를 담당한다.",
     kw: ["국민기초생활보장 신청", "기초생활보장", "기초생활보장과", "조사"], file: "04-city/divisions/SP-CITYDIV-JEJUSI-WELFARE-BASICLIVELIHOOD_v1.1.md" },
@@ -124,9 +133,11 @@ export const CITY_DIVISION_TABLE = [
   { code: "SP-CITYDIV-JEJUSI-WELFARE-ELDERLY", 국코드: "welfare", 시코드: "jejusi",
     name: "제주시청 복지위생국 노인복지과", desc: "당신은 **제주시청 복지위생국 노인복지과**를 대표하는 AI 레이어다. 기초연금, 노인일자리, 경로당 지원을 담당한다.",
     kw: ["경로당 지원", "기초연금", "노인복지", "노인복지과", "노인일자리"], file: "04-city/divisions/SP-CITYDIV-JEJUSI-WELFARE-ELDERLY_v1.1.md" },
-  { code: "SP-CITYDIV-JEJUSI-WELFARE-HYGIENE", 국코드: "welfare", 시코드: "jejusi",
-    name: "제주시청 복지위생국 위생관리과", desc: "당신은 **제주시청 복지위생국 위생관리과**를 대표하는 AI 레이어다. 식품위생업소(음식점 등) 및 공중위생업(숙박·미용 등) 인허가·신고를 담당한다.",
-    kw: ["공중위생업 인허가", "식품위생업소", "신고", "위생관리", "위생관리과"], file: "04-city/divisions/SP-CITYDIV-JEJUSI-WELFARE-HYGIENE_v1.1.md" },
+  { code: "SP-CITYDIV-JEJUSI-WELFARE-INTEGRATEDCARE", 국코드: "welfare", 시코드: "jejusi",
+    // ★ 2026-09-16 신설 — 조직도 스크린샷 확인 + 웹검색으로 "제주가치
+    // 통합돌봄"(제주도 민선8기 정책) 실제 내용 확인.
+    name: "제주시청 복지가족국 통합돌봄과", desc: "당신은 **제주시청 복지가족국 통합돌봄과**를 대표하는 AI 레이어다. 제주가치 통합돌봄(가사지원·식사지원·긴급돌봄·방문목욕 등 통합 제공) 서비스의 시 단위 창구를 담당한다.",
+    kw: ["통합돌봄", "통합돌봄과", "제주가치 통합돌봄", "가사지원", "긴급돌봄"], file: "04-city/divisions/SP-CITYDIV-JEJUSI-WELFARE-INTEGRATEDCARE_v1.0.md" },
   { code: "SP-CITYDIV-JEJUSI-WELFARE-RESIDENT", 국코드: "welfare", 시코드: "jejusi",
     name: "제주시청 복지위생국 주민복지과", desc: "당신은 **제주시청 복지위생국 주민복지과**를 대표하는 AI 레이어다. 복지 총괄·긴급복지지원·사회보장급여 총괄 조정을 담당한다 — 도청 복지가족국(SP-DO-WELFARE)이 도 전체 복지정책을 수립하는 것과 달리, 이 과는 제주시 관내 개별 신청·급여 실행을 담당한다.",
     kw: ["긴급복지지원", "복지 총괄", "사회보장급여 총괄 조정", "주민복지", "주민복지과"], file: "04-city/divisions/SP-CITYDIV-JEJUSI-WELFARE-RESIDENT_v1.1.md" },
