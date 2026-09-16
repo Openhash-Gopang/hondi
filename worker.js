@@ -24341,8 +24341,8 @@ const AGENCY_TO_DEPT_TARGET = {
   // ── 여기부터 agency:task_key 세분 항목 (국 단위 폴백과 다른 국일 때 필수) ──
   'seogwipo:food_business_report':           { target_type: 'dept', target_id: 'city-dept:seogwipo:welfare' },
   'seogwipo:public_sanitation_business_report': { target_type: 'dept', target_id: 'city-dept:seogwipo:welfare' },
-  'jejusi:food_business_report':             { target_type: 'dept', target_id: 'city-dept:jeju:welfare' },
-  'jejusi:public_sanitation_business_report':   { target_type: 'dept', target_id: 'city-dept:jeju:welfare' },
+  'jejusi:food_business_report':             { target_type: 'dept', target_id: 'city-dept:jeju:safety' },  // ★ 2026-09-16 welfare→safety 이관(위생관리과가 안전교통위생국 소속으로 개편 확인)
+  'jejusi:public_sanitation_business_report':   { target_type: 'dept', target_id: 'city-dept:jeju:safety' },  // ★ 2026-09-16 위와 동일 사유
   // ── 07-org(출자출연기관) — target_type:'org' (DEPT_TASK_TAXONOMY.org에 사전 등록된 코드) ──
   'childmeal:kids_food_service_registration': { target_type: 'org', target_id: 'org:CHILDMEAL' },
   'jpdc:public_housing_application': { target_type: 'org', target_id: 'org:JPDC' },
