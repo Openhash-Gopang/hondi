@@ -17386,6 +17386,11 @@ async function handleChargeConfirmNotification(request, env, corsHeaders, ctx) {
           console.error(JSON.stringify({ tag: 'NOTIFICATION_CAPTURE_AMOUNT_FALLBACK_CONFIRM_FAILED', guid: rec.guid, result, ts: new Date().toISOString() }));
         } else if (candidates.length > 1) {
           console.warn(JSON.stringify({ tag: 'NOTIFICATION_CAPTURE_AMOUNT_FALLBACK_AMBIGUOUS', amount: amountGuess, count: candidates.length, ts: new Date().toISOString() }));
+        } else {
+          // 2026-09-17 신설 — 금액은 읽었는데 매칭되는 pending이 0건인
+          // 경우를 별도로 남긴다(기존엔 로그 없이 조용히 지나가 "금액을
+          // 못 읽었다"와 구분이 안 됐다).
+          console.info(JSON.stringify({ tag: 'NOTIFICATION_CAPTURE_AMOUNT_FALLBACK_NO_CANDIDATE', amount: amountGuess, ts: new Date().toISOString() }));
         }
       } catch (e) {
         console.warn('[NotificationCapture] 금액 단독 매칭 시도 중 오류(기존 동작으로 폴백):', e.message);
@@ -17393,8 +17398,15 @@ async function handleChargeConfirmNotification(request, env, corsHeaders, ctx) {
     }
     // 매칭코드도 없고 금액 단독 매칭도 실패(또는 애매)하면 기존과 동일하게
     // 조용히 무시 — 알림 리스너는 은행 앱의 온갖 알림을 무차별로 전달할 수
-    // 있으므로 이건 정상 동작이다.
-    console.info(JSON.stringify({ tag: 'NOTIFICATION_CAPTURE_NO_MATCH_CODE', source, app_package, ts: new Date().toISOString() }));
+    // 있으므로 이건 정상 동작이다. amountGuess·raw_text 일부(80자)를
+    // 같이 남겨, 다음엔 "금액을 아예 못 읽었는지" 여부가 로그 한 줄로
+    // 바로 보이게 한다(개인정보 노출을 줄이려 80자로 자름).
+    console.info(JSON.stringify({
+      tag: 'NOTIFICATION_CAPTURE_NO_MATCH_CODE', source, app_package,
+      amount_guess: amountGuess || null,
+      raw_text_snippet: (raw_text || '').slice(0, 80),
+      ts: new Date().toISOString(),
+    }));
     return new Response(JSON.stringify({ ok: true, matched: false, reason: 'NO_MATCH_CODE_FOUND' }), { status: 200, headers: corsHeaders });
   }
 
