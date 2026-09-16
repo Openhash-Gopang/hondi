@@ -4207,8 +4207,13 @@ async function handleKlawSessionsHistory(request, url, env, corsHeaders) {
   try {
     const token = await _l1AdminToken(env);
     const filter = encodeURIComponent(`user_id='${userId}'`);
+    // 2026-09-18 수정(주피터 지시) — 목록 자체는 계속 가볍게(match_rate만
+    // 보여주는 기존 UI 유지) 유지하되, 클릭 시 전문을 다시 불러올 수
+    // 있도록 레코드 id만 함께 내려준다. verdict_full은 여기 포함하지
+    // 않는다 — 목록 조회 1번에 항목 최대 50개×전문(수만 자)을 전부
+    // 실어보내면 불필요하게 무거워진다(상세 조회는 별도 엔드포인트).
     const res = await fetch(
-      `${L1_DEFAULT}/api/collections/${KLAW_SESSIONS_COLLECTION}/records?filter=${filter}&sort=-created&perPage=50&fields=klaw_version,llm_model,match_rate,created`,
+      `${L1_DEFAULT}/api/collections/${KLAW_SESSIONS_COLLECTION}/records?filter=${filter}&sort=-created&perPage=50&fields=id,klaw_version,llm_model,match_rate,created`,
       { headers: { 'Authorization': `Bearer ${token}` } }
     );
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -4216,6 +4221,49 @@ async function handleKlawSessionsHistory(request, url, env, corsHeaders) {
     return new Response(JSON.stringify({ ok: true, items: data.items || [] }), { headers: corsHeaders });
   } catch (e) {
     return _err(502, 'KLAW_SESSIONS_HISTORY_FAILED', e.message, corsHeaders);
+  }
+}
+
+// 2026-09-18 신설(주피터 지시 — "이력 목록에서 전문을 다시 열람") —
+// 목록에서 항목 하나를 클릭했을 때 그 레코드의 전문(verdict_full)을
+// 불러오는 전용 엔드포인트. record id만으로는 절대 조회되지 않도록,
+// /klaw/relay·/klaw/sessions와 동일하게 phone_verify_token으로 서버가
+// guid를 재확인한 뒤, 그 레코드의 user_id가 정확히 일치할 때만
+// 반환한다 — 그렇지 않으면 남의 판결문 id를 추측해 열람할 수 있는
+// 구멍이 생긴다.
+async function handleKlawSessionsDetail(request, url, env, corsHeaders) {
+  const phoneVerifyToken = (url.searchParams.get('phone_verify_token') || '').trim();
+  const recordId = (url.searchParams.get('id') || '').trim();
+  if (!recordId) return _err(400, 'MISSING_ID', 'id 필수', corsHeaders);
+  const _detAuth = await _resolveGuidFromPhoneVerifyToken(env, phoneVerifyToken);
+  if (!_detAuth.ok) {
+    const { status, code, message } = mapPhoneAuthError(_detAuth);
+    return _err(status, code, message, corsHeaders);
+  }
+  const userId = _detAuth.guid;
+  try {
+    const token = await _l1AdminToken(env);
+    const res = await fetch(
+      `${L1_DEFAULT}/api/collections/${KLAW_SESSIONS_COLLECTION}/records/${encodeURIComponent(recordId)}`,
+      { headers: { 'Authorization': `Bearer ${token}` } }
+    );
+    if (res.status === 404) return _err(404, 'NOT_FOUND', '이력을 찾을 수 없습니다', corsHeaders);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const rec = await res.json();
+    if (rec.user_id !== userId) {
+      // 본인 것이 아니면 존재 여부조차 알려주지 않는다(404와 동일하게).
+      return _err(404, 'NOT_FOUND', '이력을 찾을 수 없습니다', corsHeaders);
+    }
+    return new Response(JSON.stringify({
+      ok: true,
+      klaw_version: rec.klaw_version, llm_model: rec.llm_model,
+      case_type: rec.case_type, case_level: rec.case_level,
+      case_summary: rec.case_summary, verdict: rec.verdict,
+      confidence: rec.confidence, match_rate: rec.match_rate,
+      verdict_full: rec.verdict_full || '', created: rec.created,
+    }), { headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'KLAW_SESSIONS_DETAIL_FAILED', e.message, corsHeaders);
   }
 }
 
@@ -4246,6 +4294,10 @@ async function handleKlawSessionsSave(request, env, corsHeaders) {
       // 필드로 추가해야 실제로 저장된다(관리자 화면에서 수동 추가 필요).
       match_rate:   (body.match_rate || '').slice(0, 20),
       case_input:   (body.case_input || '').slice(0, 2000),
+      // verdict_full — 2026-09-18 신설(주피터 지시). STEP 0~C 전문. 60000자
+      // 상한은 남용 방지용 여유값일 뿐 실사용 판결문은 대개 그보다 훨씬
+      // 작다. klaw_sessions 컬렉션에 이 필드도 별도로 추가해야 한다.
+      verdict_full: (body.verdict_full || '').slice(0, 60000),
     };
     const res = await fetch(`${L1_DEFAULT}/api/collections/${KLAW_SESSIONS_COLLECTION}/records`, {
       method: 'POST',
@@ -13237,6 +13289,7 @@ export default {
     if (pathname === '/klaw/benchmark/detail' && request.method === 'GET') return handleKlawBenchmarkDetail(request, url, env, corsHeaders);
     // klaw_sessions
     if (pathname === '/klaw/sessions/history' && request.method === 'GET') return handleKlawSessionsHistory(request, url, env, corsHeaders);
+    if (pathname === '/klaw/sessions/detail' && request.method === 'GET') return handleKlawSessionsDetail(request, url, env, corsHeaders);
     if (pathname === '/klaw/sessions' && request.method === 'POST') return handleKlawSessionsSave(request, env, corsHeaders);
     // 2026-08-13 신설 — 사고실험 F2 대응(일일 판결 생성 잔여 횟수 조회)
     if (pathname === '/klaw/quota' && request.method === 'GET') return handleKlawQuota(request, url, env, corsHeaders);
