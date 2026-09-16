@@ -907,6 +907,14 @@ export async function openGopangWallet() {
     const expenseTotal = ledgerEntries.filter(r => r.direction === 'debit').reduce((s, r) => s + (Number(r.amount) || 0), 0);
 
     const html = `
+      <div style="padding:14px 16px;background:#f0f9fa;border-bottom:1px solid #f2f2f7">
+        <div style="font-size:12px;color:#6b7280;margin-bottom:6px">입금 계좌</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="flex:1;font-size:15px;font-weight:600;color:#111827">기업은행 315-092028-04-011</div>
+          <button id="_gdc-account-copy-btn" onclick="_copyGdcAccountNumber()" style="flex-shrink:0;padding:6px 12px;border:1px solid #007b8b;border-radius:6px;background:#fff;color:#007b8b;font-size:12px;font-weight:600;cursor:pointer">복사</button>
+        </div>
+        <div style="font-size:12px;color:#6b7280;margin-top:8px;line-height:1.5">위 계좌로 입금하면, 입금액에 상응하는 GDC가 충전됩니다(GDC:KRW = 1:1).</div>
+      </div>
       <div style="padding:20px 16px;border-bottom:1px solid #f2f2f7;text-align:center">
         <div style="font-size:32px;font-weight:700;color:#111827">₮${Math.trunc(balance).toLocaleString()}</div>
         <div style="font-size:13px;color:#9ca3af;margin-top:4px">GDC 잔액</div>
@@ -948,6 +956,27 @@ export async function openGopangWallet() {
       '<div style="padding:40px 16px;text-align:center;color:#ef4444;font-size:13px">데이터 로드 실패</div>';
   }
 }
+
+// 2026-09-16 신설(주피터 지시) — GDC 지갑 시트 상단 입금 계좌 복사 버튼.
+// pages/dashboard.html의 충전 탭(#wallet-deposit-account, 데스크톱 전용
+// 페이지)에 이미 같은 계좌·문구가 있었으나, 폰의 설정 메뉴에서 열리는
+// 이 시트(Gopang Wallet)에는 없었다 — 두 화면이 서로 몰랐던 별개 UI.
+// 표시는 하이픈 포함(가독성), 복사는 하이픈 제거(은행 앱 붙여넣기 호환).
+window._copyGdcAccountNumber = async function() {
+  const digitsOnly = '315-092028-04-011'.replace(/-/g, '');
+  try {
+    await navigator.clipboard.writeText(digitsOnly);
+    const btn = document.getElementById('_gdc-account-copy-btn');
+    if (btn) {
+      const prev = btn.textContent;
+      btn.textContent = '복사됨';
+      setTimeout(() => { btn.textContent = prev; }, 1500);
+    }
+  } catch (e) {
+    console.warn('[GopangWallet] 계좌번호 복사 실패:', e.message);
+    alert('복사에 실패했습니다. 계좌번호를 직접 선택해 복사해 주세요: ' + digitsOnly);
+  }
+};
 
 // 2026-08-28 신설(주피터 지시) — 거래 내역 항목을 탭하면 열리는 6하원칙
 // 상세 슬라이드아웃 패널. webapp.html의 #charge-detail-overlay(계정삭제와
