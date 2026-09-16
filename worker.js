@@ -17328,7 +17328,11 @@ async function handleChargeConfirmNotification(request, env, corsHeaders, ctx) {
       try {
         const token = await _l1AdminToken(env);
         const headers = { 'Authorization': `Bearer ${token}` };
-        const sinceIso = new Date(Date.now() - CHARGE_SELF_REPORT_MATCH_WINDOW_HOURS * 3600 * 1000).toISOString();
+        // 2026-09-17 핫픽스 — PocketBase 필터 날짜 비교는 이 저장소의
+        // 다른 곳(_l1SweepPendingSettlements 등)과 동일하게 'T' 구분자를
+        // 공백으로, 밀리초·Z는 잘라내야 한다. 그대로 두면 문자열 비교
+        // 순서가 실제 시각 순서와 어긋나 필터가 항상 실패할 수 있었다.
+        const sinceIso = new Date(Date.now() - CHARGE_SELF_REPORT_MATCH_WINDOW_HOURS * 3600 * 1000).toISOString().replace('T', ' ').slice(0, 19);
         const filter = encodeURIComponent(`requested_krw=${amountGuess} && status='pending' && created>='${sinceIso}'`);
         const res = await fetch(`${L1_DEFAULT}/api/collections/charge_requests/records?filter=${filter}&perPage=5`, { headers });
         const data = await res.json().catch(() => ({ items: [] }));
