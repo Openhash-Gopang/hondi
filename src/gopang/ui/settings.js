@@ -964,20 +964,24 @@ export async function openGopangWallet() {
             <div style="flex:1;font-size:16px;font-weight:600;color:#111827;letter-spacing:-.1px">기업은행 315-092028-04-011</div>
             <button id="_gdc-account-copy-btn" onclick="_copyGdcAccountNumber()" style="flex-shrink:0;padding:7px 14px;border:1px solid #007b8b;border-radius:6px;background:#fff;color:#007b8b;font-size:12.5px;font-weight:600;cursor:pointer;letter-spacing:.02em">복사</button>
           </div>
-          <div style="font-size:12.5px;color:#6b7280;margin-top:10px;line-height:1.55">위 계좌로 입금하면, 입금액에 상응하는 GDC가 충전됩니다(GDC:KRW = 1:1).</div>
-          <div style="margin-top:10px;padding:10px 12px;background:#fef3c7;border-radius:8px;font-size:12.5px;color:#92400e;line-height:1.6">
-            반드시 <b>보낸이</b>는 본인 휴대폰 번호 뒷자리 8자로 입력해 주세요. 예: 010-1234-5678 → 12345678${senderLast8 ? ` — 회원님은 <b>${senderLast8}</b>` : ''}
-          </div>
-          <div style="margin-top:10px">
-            <a href="#" onclick="_toggleChargeSelfReportForm();return false;" style="font-size:12.5px;color:#007b8b;font-weight:600;text-decoration:none">본인 이름으로 입금하셨거나, GDC 잔액이 변동없나요? 여기를 클릭해 주세요.</a>
-            <div id="_charge-self-report-box" style="display:none;margin-top:10px;padding:12px;border:1px solid #e5e7eb;border-radius:8px">
-              <div style="font-size:12px;color:#6b7280;margin-bottom:8px;line-height:1.5">코드 없이 본인 실명으로 입금하셨다면, 입금액을 적어 신고해 주세요. 확인 후 반영해 드립니다.</div>
-              <div style="display:flex;gap:8px">
-                <input id="_charge-self-report-amount" type="number" placeholder="입금액(원)" style="flex:1;min-width:0;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px" />
-                <button onclick="_submitChargeSelfReport()" style="flex-shrink:0;padding:8px 14px;border:none;border-radius:6px;background:#007b8b;color:#fff;font-size:12.5px;font-weight:600;cursor:pointer">신고 접수</button>
-              </div>
-              <div id="_charge-self-report-status" style="font-size:12px;margin-top:8px"></div>
+          <div style="font-size:12.5px;color:#6b7280;margin-top:10px;line-height:1.55">위 계좌로 입금하면, 입금액에 상응하는 GDC가 충전됩니다(GDC:KRW = 1:1). 아래 두 방법 중 하나를 선택해 입금해 주세요.</div>
+
+          <div style="margin-top:14px;padding:12px;border:1.5px solid #007b8b;border-radius:8px">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+              <span style="font-size:13px;font-weight:700;color:#007b8b">방법 1</span>
+              <span style="font-size:11px;font-weight:600;color:#007b8b;background:#e6f4f6;padding:2px 7px;border-radius:4px">추천</span>
             </div>
+            <div style="font-size:12px;color:#6b7280;margin-bottom:8px;line-height:1.5">입금하실 금액을 먼저 등록하고, 그 금액 그대로 입금해 주세요. 보낸이는 본인 이름 그대로여도 됩니다.</div>
+            <div style="display:flex;gap:8px">
+              <input id="_charge-self-report-amount" type="number" placeholder="입금하실 금액(원)" style="flex:1;min-width:0;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px" />
+              <button onclick="_submitChargeSelfReport()" style="flex-shrink:0;padding:8px 14px;border:none;border-radius:6px;background:#007b8b;color:#fff;font-size:12.5px;font-weight:600;cursor:pointer">등록</button>
+            </div>
+            <div id="_charge-self-report-status" style="font-size:12px;margin-top:8px"></div>
+          </div>
+
+          <div style="margin-top:10px;padding:12px;border:1px solid #e5e7eb;border-radius:8px">
+            <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:6px">방법 2</div>
+            <div style="font-size:12px;color:#6b7280;line-height:1.6">사전 등록 없이, <b>보낸이</b>를 본인 휴대폰 번호 뒷자리 8자로 입력해 입금해 주세요. 예: 010-1234-5678 → 12345678${senderLast8 ? ` — 회원님은 <b>${senderLast8}</b>` : ''}</div>
           </div>
         </div>
       </div>
@@ -1079,11 +1083,6 @@ window._copyGdcAccountNumber = async function() {
 // 본인이 스스로 신고하는 1차 경로부터") — 코드 없이 본인 실명으로
 // 입금한 사용자가 자진 신고하는 미니폼. worker.js의
 // POST /biz/charge-self-report와 짝을 이룬다.
-window._toggleChargeSelfReportForm = function() {
-  const box = document.getElementById('_charge-self-report-box');
-  if (box) box.style.display = (box.style.display === 'none' ? 'block' : 'none');
-};
-
 window._submitChargeSelfReport = async function() {
   const statusEl = document.getElementById('_charge-self-report-status');
   const amountEl = document.getElementById('_charge-self-report-amount');
