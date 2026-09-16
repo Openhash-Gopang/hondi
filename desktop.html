@@ -1265,8 +1265,28 @@ document.addEventListener('keydown', function (e) {
     </a>
   </div>
   <script type="module">
-    import { openGopangWallet } from '/src/gopang/ui/settings.js';
-    window.openGopangWallet = openGopangWallet;
+    import { openGopangWallet as _openGopangWalletImpl } from '/src/gopang/ui/settings.js';
+    // 2026-09-16 수정(주피터 지시) — desktop.html은 gopang-app.js를 안
+    // 불러 로그인/가입 팝업이 없다. 미인증 방문자가 이 버튼을 누르면
+    // 예전엔 openGopangWallet() 내부 alert만 뜨고 막다른 길이었는데,
+    // 이제 로그인 팝업이 있는 pages/dashboard.html로 먼저 보낸다.
+    // 인증 판정 기준은 core/auth.js의 _isRegistered()와 동일(handle
+    // 존재 여부)이지만, gopang-app.js 전체를 불러오는 비용을 피하려고
+    // localStorage만 직접 읽는다(의존성 최소화 원칙 유지).
+    window.openGopangWallet = function () {
+      let registered = false;
+      try {
+        const stored = JSON.parse(
+          localStorage.getItem('gopang_user_v4') ||
+          sessionStorage.getItem('gopang_user_v4') || 'null');
+        registered = !!(stored && stored.handle);
+      } catch (e) {}
+      if (!registered) {
+        location.href = '/pages/dashboard.html';
+        return;
+      }
+      _openGopangWalletImpl();
+    };
   </script>
 </div>
 
