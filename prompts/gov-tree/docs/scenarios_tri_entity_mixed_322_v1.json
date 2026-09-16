@@ -1,0 +1,2900 @@
+[
+ {
+  "id": 1,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT",
+  "발화": "제주시청 환경관리과로 연결 부탁드립니다."
+ },
+ {
+  "id": 2,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-WELFARE-WOMENFAMILY",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-WELFARE-WOMENFAMILY",
+  "발화": "가정폭력 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 3,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-CLIMATE-WATERPOLICY",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-CLIMATE-WATERPOLICY",
+  "발화": "물정책 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 4,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-WELFARE-DISABLED",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-WELFARE-DISABLED",
+  "발화": "장애인복지 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 5,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-JACHI-GENERAL",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-JACHI-GENERAL",
+  "발화": "제주도청 총무과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 6,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-HEALTH-EPIDEMIC",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-HEALTH-EPIDEMIC",
+  "발화": "제주시청 감염예방의약과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 7,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CLIMATE-LIVINGENV",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CLIMATE-LIVINGENV",
+  "발화": "생활환경 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 8,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CULTURE-TAMNALIB",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CULTURE-TAMNALIB",
+  "발화": "제주시청 제주시립 탐라도서관 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 9,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-ECON-VILLAGE",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-ECON-VILLAGE",
+  "발화": "제주시청 마을활력과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 10,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-LIVESTOCK",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-LIVESTOCK",
+  "발화": "가축분뇨 관리 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 11,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-JACHI-SELFGOV",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-JACHI-SELFGOV",
+  "발화": "자치행정 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 12,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CITYPLAN",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CITYPLAN",
+  "발화": "제주시청 도시계획과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 13,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-HOUSING-ARCHITECTURE",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-HOUSING-ARCHITECTURE",
+  "발화": "건축경관 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 14,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-WELFARE-ELDERLY",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-WELFARE-ELDERLY",
+  "발화": "노인복지 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 15,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-CULTURE-EDUCOOPERATION",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-CULTURE-EDUCOOPERATION",
+  "발화": "교육정책협력 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 16,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-AGRI-CITRUS",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-AGRI-CITRUS",
+  "발화": "제주도청 감귤유통과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 17,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-SAFETY-VEHICLE",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-SAFETY-VEHICLE",
+  "발화": "제주시청 차량관리과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 18,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-JACHI-VILLAGE",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-JACHI-VILLAGE",
+  "발화": "마을만들기 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 19,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-REGEN",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-REGEN",
+  "발화": "도시재생 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 20,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-JOBS",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-JOBS",
+  "발화": "서귀포시청 경제일자리과로 연결 부탁드립니다."
+ },
+ {
+  "id": 21,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CULTURE-TOURISM",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CULTURE-TOURISM",
+  "발화": "관광사업체 등록 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 22,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CLIMATE-FACILITY",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CLIMATE-FACILITY",
+  "발화": "매립시설 운영 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 23,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-HEALTH-EASTCENTER",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-HEALTH-EASTCENTER",
+  "발화": "동부보건 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 24,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-LIAISON",
+  "대상특정": "X",
+  "기대_SP": "SP-DO-LIAISON",
+  "발화": "국비 확보 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 25,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-REGEN",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-REGEN",
+  "발화": "제주시청 도시재생과로 연결 부탁드립니다."
+ },
+ {
+  "id": 26,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-CULTURE-CULTUREPOLICY",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-CULTURE-CULTUREPOLICY",
+  "발화": "문화정책 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 27,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-ECON-JOBECONOMY",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-ECON-JOBECONOMY",
+  "발화": "경제정책 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 28,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CLIMATE-JEOLMUL",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CLIMATE-JEOLMUL",
+  "발화": "제주시청 절물생태관리소 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 29,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CULTURE-ART",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CULTURE-ART",
+  "발화": "제주시청 문화예술과로 연결 부탁드립니다."
+ },
+ {
+  "id": 30,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-AGRI-ANIMALQUARANTINE",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-AGRI-ANIMALQUARANTINE",
+  "발화": "동물방역 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 31,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-PLAN-YOUTH",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-PLAN-YOUTH",
+  "발화": "제주도청 청년정책담당관로 연결 부탁드립니다."
+ },
+ {
+  "id": 32,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-WELFARE-INTEGRATEDCARE",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-WELFARE-INTEGRATEDCARE",
+  "발화": "돌봄정책 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 33,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-SAFETY-POLICY",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-SAFETY-POLICY",
+  "발화": "제주도청 안전정책과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 34,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-HOUSING-ARCHITECTURE",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-HOUSING-ARCHITECTURE",
+  "발화": "제주도청 건축경관과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 35,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-WELFARE-POLICY",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-WELFARE-POLICY",
+  "발화": "제주도청 복지정책과로 연결 부탁드립니다."
+ },
+ {
+  "id": 36,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-SAFETY-NATURALDISASTER",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-SAFETY-NATURALDISASTER",
+  "발화": "제주도청 자연재난과로 연결 부탁드립니다."
+ },
+ {
+  "id": 37,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-TOURISM-TOURISMPOLICY",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-TOURISM-TOURISMPOLICY",
+  "발화": "제주도청 관광정책과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 38,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-HEALTH-EASTCENTER",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-HEALTH-EASTCENTER",
+  "발화": "동부보건 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 39,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CULTURE-LIBRARYMGMT",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CULTURE-LIBRARYMGMT",
+  "발화": "도서관운영 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 40,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-AGRI-FOODINDUSTRY",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-AGRI-FOODINDUSTRY",
+  "발화": "제주도청 식품산업과로 연결 부탁드립니다."
+ },
+ {
+  "id": 41,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-LIAISON",
+  "대상특정": "O",
+  "기대_SP": "SP-DO-LIAISON",
+  "발화": "제주도청 중앙협력본부에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 42,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-TRANSPORT-TRAFFICPOLICY",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-TRANSPORT-TRAFFICPOLICY",
+  "발화": "교통정책 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 43,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-SAFETY-HEALTHHYGIENE",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-SAFETY-HEALTHHYGIENE",
+  "발화": "건강위생 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 44,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-WELFARE-CHILDCARE",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-WELFARE-CHILDCARE",
+  "발화": "제주도청 아동보육청소년과로 연결 부탁드립니다."
+ },
+ {
+  "id": 45,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-JACHI-ACCOUNTING",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-JACHI-ACCOUNTING",
+  "발화": "제주도청 회계재산관리과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 46,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-TRANSPORT-PUBLICTRANSPORT",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-TRANSPORT-PUBLICTRANSPORT",
+  "발화": "제주도청 대중교통과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 47,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-CLIMATE-WATERPOLICY",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-CLIMATE-WATERPOLICY",
+  "발화": "제주도청 물정책과로 연결 부탁드립니다."
+ },
+ {
+  "id": 48,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-JACHI-BUDGET",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-JACHI-BUDGET",
+  "발화": "기획예산 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 49,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-ECON-SMALLBIZ",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-ECON-SMALLBIZ",
+  "발화": "소상공인물류 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 50,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CULTURE-TAMNALIB",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CULTURE-TAMNALIB",
+  "발화": "제주시립 탐라도서관 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 51,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-CULTURE-SPORTSPROMO",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-CULTURE-SPORTSPROMO",
+  "발화": "제주도청 체육진흥과로 연결 부탁드립니다."
+ },
+ {
+  "id": 52,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CLIMATE-JEOLMUL",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CLIMATE-JEOLMUL",
+  "발화": "관리 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 53,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-JACHI-LIFELONGED",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-JACHI-LIFELONGED",
+  "발화": "서귀포시청 평생교육과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 54,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-HEALTH-PROMOTION",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-HEALTH-PROMOTION",
+  "발화": "제주시청 건강증진과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 55,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-HOUSING",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-HOUSING",
+  "발화": "주택 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 56,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-direct",
+  "sp_code": "CITYDEPT-SEOGWIPO-PR",
+  "대상특정": "X",
+  "기대_SP": "CITYDEPT-SEOGWIPO-PR",
+  "발화": "보도 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 57,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-WELFARE-INTEGRATEDCARE",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-WELFARE-INTEGRATEDCARE",
+  "발화": "제주시청 통합돌봄과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 58,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-LABOR",
+  "대상특정": "X",
+  "기대_SP": "SP-DO-LABOR",
+  "발화": "노동안전감독관 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 59,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-JACHI-SELFGOV",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-JACHI-SELFGOV",
+  "발화": "선거 행정지원 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 60,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-WELFARE-ELDERLY",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-WELFARE-ELDERLY",
+  "발화": "제주도청 노인복지과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 61,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-JACHI-TAX",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-JACHI-TAX",
+  "발화": "서귀포시청 세무과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 62,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-ECOFARM",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-ECOFARM",
+  "발화": "일반 농정 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 63,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-SPOKES",
+  "대상특정": "O",
+  "기대_SP": "SP-DO-SPOKES",
+  "발화": "제주도청 대변인 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 64,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CLIMATE-PARKS",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CLIMATE-PARKS",
+  "발화": "제주시청 공원녹지과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 65,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-SAFETY-SOCIALDISASTER",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-SAFETY-SOCIALDISASTER",
+  "발화": "사회재난 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 66,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-SAFETY-TRAFFIC",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-SAFETY-TRAFFIC",
+  "발화": "교통안전시설물 관리 실무 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 67,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-JACHI-GENERAL",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-JACHI-GENERAL",
+  "발화": "의전 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 68,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-AGRI-FISHERY",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-AGRI-FISHERY",
+  "발화": "해양수산 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 69,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-SPOKES",
+  "대상특정": "X",
+  "기대_SP": "SP-DO-SPOKES",
+  "발화": "대변인 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 70,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-JOBS",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-JOBS",
+  "발화": "경제일자리 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 71,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-direct",
+  "sp_code": "CITYDEPT-SEOGWIPO-COMM",
+  "대상특정": "O",
+  "기대_SP": "CITYDEPT-SEOGWIPO-COMM",
+  "발화": "서귀포시청 시민소통지원실로 연결 부탁드립니다."
+ },
+ {
+  "id": 72,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-PLAN-TAXADMIN",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-PLAN-TAXADMIN",
+  "발화": "제주도청 세정담당관 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 73,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-PLAN-YOUTH",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-PLAN-YOUTH",
+  "발화": "청년정책 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 74,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-WELFARE-DISABLED",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-WELFARE-DISABLED",
+  "발화": "서귀포시청 장애인복지과로 연결 부탁드립니다."
+ },
+ {
+  "id": 75,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CLIMATE-FORESTRECREATION",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CLIMATE-FORESTRECREATION",
+  "발화": "서귀포시청 산림휴양관리소로 연결 부탁드립니다."
+ },
+ {
+  "id": 76,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-SAFETY-VEHICLE",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-SAFETY-VEHICLE",
+  "발화": "이전등록 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 77,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-WELFARE-DISABLED",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-WELFARE-DISABLED",
+  "발화": "장애수당 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 78,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-PLAN-POPULATION",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-PLAN-POPULATION",
+  "발화": "제주도청 인구정책담당관에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 79,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-ECON-EMPLOYCENTER",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-ECON-EMPLOYCENTER",
+  "발화": "제주도청 고용센터에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 80,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-OCEAN-HAENYEOHERITAGE",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-OCEAN-HAENYEOHERITAGE",
+  "발화": "해녀문화유산 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 81,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-ECON-JOBENERGY",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-ECON-JOBENERGY",
+  "발화": "제주시청 일자리에너지과로 연결 부탁드립니다."
+ },
+ {
+  "id": 82,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-GANGJEONG",
+  "대상특정": "X",
+  "기대_SP": "SP-DO-GANGJEONG",
+  "발화": "강정마을 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 83,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CULTURE-ARTCENTER",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CULTURE-ARTCENTER",
+  "발화": "대관 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 84,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-OCEAN-MARINEPOLICY",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-OCEAN-MARINEPOLICY",
+  "발화": "수산정책 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 85,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-JACHI-GENERAL",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-JACHI-GENERAL",
+  "발화": "제주시청 도청 실 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 86,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-SAFETY-GENERAL",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-SAFETY-GENERAL",
+  "발화": "민방위 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 87,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-TRANSPORT-TRAFFICPOLICY",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-TRANSPORT-TRAFFICPOLICY",
+  "발화": "제주도청 교통정책과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 88,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-HEALTH-WESTCENTER",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-HEALTH-WESTCENTER",
+  "발화": "서귀포시청 서귀포시 서부지역 관할 보건지소에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 89,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-WELFARE-BASICLIVELIHOOD",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-WELFARE-BASICLIVELIHOOD",
+  "발화": "국민기초생활보장 신청 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 90,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CLIMATE-ENVGUIDE",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CLIMATE-ENVGUIDE",
+  "발화": "점검 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 91,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-OCEAN-PORTHARBOR",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-OCEAN-PORTHARBOR",
+  "발화": "제주도청 해운항만과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 92,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-SAFETY-HEALTHPOLICY",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-SAFETY-HEALTHPOLICY",
+  "발화": "보건정책 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 93,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-JACHI-ACCOUNTING",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-JACHI-ACCOUNTING",
+  "발화": "회계재산관리 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 94,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-HEALTH-PROMOTION",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-HEALTH-PROMOTION",
+  "발화": "건강증진 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 95,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-CONSTRUCT",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-CONSTRUCT",
+  "발화": "서귀포시청 건설과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 96,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CLIMATE-ENVMGMT",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CLIMATE-ENVMGMT",
+  "발화": "서귀포시청 기후환경과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 97,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-LIVESTOCK",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-LIVESTOCK",
+  "발화": "서귀포시청 청정축산과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 98,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CLIMATE-LIVINGENV",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CLIMATE-LIVINGENV",
+  "발화": "서귀포시청 생활환경과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 99,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-PLAN-POPULATION",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-PLAN-POPULATION",
+  "발화": "인구정책 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 100,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-SAFETY-HYGIENE",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-SAFETY-HYGIENE",
+  "발화": "제주시청 식품위생업소로 연결 부탁드립니다."
+ },
+ {
+  "id": 101,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-TRANSPORT-15MINCITY",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-TRANSPORT-15MINCITY",
+  "발화": "제주도청 15분도시과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 102,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-INNOV-ENERGYINDUSTRY",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-INNOV-ENERGYINDUSTRY",
+  "발화": "에너지산업 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 103,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-JACHI-BASICGOVPREP",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-JACHI-BASICGOVPREP",
+  "발화": "서귀포시청 기초자치단체 부활 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 104,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-AGRI-ECOFARM",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-AGRI-ECOFARM",
+  "발화": "제주시청 친환경농정과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 105,
+  "entity": "제주시청",
+  "tier": "jejusi-direct",
+  "sp_code": "CITYDEPT-JEJUSI-PR",
+  "대상특정": "X",
+  "기대_SP": "CITYDEPT-JEJUSI-PR",
+  "발화": "시정 홍보 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 106,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-JACHI-TAX",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-JACHI-TAX",
+  "발화": "등록면허세 등 신고형 지방세 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 107,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-direct",
+  "sp_code": "CITYDEPT-SEOGWIPO-COMM",
+  "대상특정": "X",
+  "기대_SP": "CITYDEPT-SEOGWIPO-COMM",
+  "발화": "소통감찰 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 108,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-ECON-EMPLOYCENTER",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-ECON-EMPLOYCENTER",
+  "발화": "고용 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 109,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-BUILDING",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-BUILDING",
+  "발화": "제주시청 건축과로 연결 부탁드립니다."
+ },
+ {
+  "id": 110,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-SAFETY-HEALTHHYGIENE",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-SAFETY-HEALTHHYGIENE",
+  "발화": "제주도청 건강위생과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 111,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-CLIMATE-ENVPOLICY",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-CLIMATE-ENVPOLICY",
+  "발화": "환경정책 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 112,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CLIMATE-LIVINGENV",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CLIMATE-LIVINGENV",
+  "발화": "생활환경 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 113,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-GENERAL",
+  "대상특정": "O",
+  "기대_SP": "SP-DO-GENERAL",
+  "발화": "제주도청 총무과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 114,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CULTURE-SPORTS",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CULTURE-SPORTS",
+  "발화": "공공체육시설 관리 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 115,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-ECON-JOBENERGY",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-ECON-JOBENERGY",
+  "발화": "공공일자리사업 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 116,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-JACHI-43SUPPORT",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-JACHI-43SUPPORT",
+  "발화": "제주도청 4·3지원과로 연결 부탁드립니다."
+ },
+ {
+  "id": 117,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-HEALTH-WESTCENTER",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-HEALTH-WESTCENTER",
+  "발화": "서부보건 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 118,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-CITY",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-CITY",
+  "발화": "도시 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 119,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-TOURISM-PEACEDIPLOMACY",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-TOURISM-PEACEDIPLOMACY",
+  "발화": "평화외교 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 120,
+  "entity": "제주시청",
+  "tier": "jejusi-direct",
+  "sp_code": "CITYDEPT-JEJUSI-CIVILAFFAIRS",
+  "대상특정": "O",
+  "기대_SP": "CITYDEPT-JEJUSI-CIVILAFFAIRS",
+  "발화": "제주시청 종합민원실에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 121,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CULTURE-ARTMUSEUM",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CULTURE-ARTMUSEUM",
+  "발화": "공립미술관 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 122,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-TRANSPORT-15MINCITY",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-TRANSPORT-15MINCITY",
+  "발화": "15분도시 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 123,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-WELFARE-HYGIENE",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-WELFARE-HYGIENE",
+  "발화": "공중위생업 인허가 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 124,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-direct",
+  "sp_code": "CITYDEPT-SEOGWIPO-CIVILAFFAIRS",
+  "대상특정": "X",
+  "기대_SP": "CITYDEPT-SEOGWIPO-CIVILAFFAIRS",
+  "발화": "가족관계등록 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 125,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-INNOV-FUTUREGROWTH",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-INNOV-FUTUREGROWTH",
+  "발화": "제주도청 미래성장과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 126,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-AIGOV",
+  "대상특정": "X",
+  "기대_SP": "SP-DO-AIGOV",
+  "발화": "AI행정서비스 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 127,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-SAFETY-HYGIENE",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-SAFETY-HYGIENE",
+  "발화": "공중위생업 인허가 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 128,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CLIMATE-FACILITY",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CLIMATE-FACILITY",
+  "발화": "제주시청 환경시설관리소에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 129,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-SAFETY-FOODSAFETY",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-SAFETY-FOODSAFETY",
+  "발화": "식품안전 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 130,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-JACHI-BASICGOVPREP",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-JACHI-BASICGOVPREP",
+  "발화": "기초자치단체 부활 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 131,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-WATER",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-WATER",
+  "발화": "서귀포시청 상하수도과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 132,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CONSTRUCT",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CONSTRUCT",
+  "발화": "건설 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 133,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-WELFARE-DISABLED",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-WELFARE-DISABLED",
+  "발화": "장애수당 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 134,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CONSTRUCT",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CONSTRUCT",
+  "발화": "제주시청 건설과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 135,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-TOURISM-PEACEDIPLOMACY",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-TOURISM-PEACEDIPLOMACY",
+  "발화": "제주도청 평화외교과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 136,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-GENERAL",
+  "대상특정": "X",
+  "기대_SP": "SP-DO-GENERAL",
+  "발화": "일반서무 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 137,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-ECON-DIGITAL",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-ECON-DIGITAL",
+  "발화": "스마트시티 관련 사업 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 138,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-CULTURE-CULTUREPOLICY",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-CULTURE-CULTUREPOLICY",
+  "발화": "제주도청 문화정책과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 139,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CLIMATE-PARKS",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CLIMATE-PARKS",
+  "발화": "서귀포시청 공원녹지과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 140,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-HOUSING-CONSTRUCTION",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-HOUSING-CONSTRUCTION",
+  "발화": "건설 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 141,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-AIRPORTSUP",
+  "대상특정": "O",
+  "기대_SP": "SP-DO-AIRPORTSUP",
+  "발화": "제주도청 공항확충지원단로 연결 부탁드립니다."
+ },
+ {
+  "id": 142,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-HOUSING-HOUSINGLAND",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-HOUSING-HOUSINGLAND",
+  "발화": "주택토지 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 143,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-HOUSING-HOUSINGLAND",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-HOUSING-HOUSINGLAND",
+  "발화": "제주도청 주택토지과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 144,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-BUILDING",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-BUILDING",
+  "발화": "건축 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 145,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-CITRUS",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-CITRUS",
+  "발화": "가격안정 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 146,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-OCEAN-PORTHARBOR",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-OCEAN-PORTHARBOR",
+  "발화": "해운항만 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 147,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-PLAN-BUDGET",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-PLAN-BUDGET",
+  "발화": "제주도청 예산담당관에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 148,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-SAFETY-FOODSAFETY",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-SAFETY-FOODSAFETY",
+  "발화": "제주시청 식품안전과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 149,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CULTURE-TOURISM",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CULTURE-TOURISM",
+  "발화": "관광사업체 등록 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 150,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-ECON-SMALLBIZ",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-ECON-SMALLBIZ",
+  "발화": "제주도청 소상공인물류과로 연결 부탁드립니다."
+ },
+ {
+  "id": 151,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-direct",
+  "sp_code": "CITYDEPT-SEOGWIPO-PR",
+  "대상특정": "O",
+  "기대_SP": "CITYDEPT-SEOGWIPO-PR",
+  "발화": "서귀포시청 공보실에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 152,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-PLAN-POLICY",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-PLAN-POLICY",
+  "발화": "제주도청 정책기획관로 연결 부탁드립니다."
+ },
+ {
+  "id": 153,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CULTURE-SPORTS",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CULTURE-SPORTS",
+  "발화": "제주시청 체육진흥과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 154,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-JACHI-BASICGOVPREP",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-JACHI-BASICGOVPREP",
+  "발화": "제주시청 설치준비지원단로 연결 부탁드립니다."
+ },
+ {
+  "id": 155,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-AGRI-FISHERY",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-AGRI-FISHERY",
+  "발화": "제주시청 해양수산과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 156,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CLIMATE-FORESTRECREATION",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CLIMATE-FORESTRECREATION",
+  "발화": "관리 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 157,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-SAFETY-NATURALDISASTER",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-SAFETY-NATURALDISASTER",
+  "발화": "자연재난 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 158,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-JACHI-TAX",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-JACHI-TAX",
+  "발화": "등록면허세 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 159,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-AGRI-LIVESTOCKPOLICY",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-AGRI-LIVESTOCKPOLICY",
+  "발화": "제주도청 친환경축산정책과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 160,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT",
+  "발화": "대기 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 161,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-FISHERY",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-FISHERY",
+  "발화": "서귀포시청 해양수산과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 162,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-JACHI-SELFGOV",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-JACHI-SELFGOV",
+  "발화": "제주도청 자치행정과로 연결 부탁드립니다."
+ },
+ {
+  "id": 163,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-TRAFFIC",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-TRAFFIC",
+  "발화": "교통안전시설물 관리 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 164,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-TRANSPORT-PUBLICTRANSPORT",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-TRANSPORT-PUBLICTRANSPORT",
+  "발화": "대중교통 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 165,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-BALANCE",
+  "대상특정": "X",
+  "기대_SP": "SP-DO-BALANCE",
+  "발화": "지역균형발전 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 166,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-AGRI-ECOFARMPOLICY",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-AGRI-ECOFARMPOLICY",
+  "발화": "친환경농업정책 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 167,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-BALANCE",
+  "대상특정": "O",
+  "기대_SP": "SP-DO-BALANCE",
+  "발화": "제주도청 도시균형추진단 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 168,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CULTURE-TOURISM",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CULTURE-TOURISM",
+  "발화": "서귀포시청 관광진흥과로 연결 부탁드립니다."
+ },
+ {
+  "id": 169,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-ECON-JOBECONOMY",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-ECON-JOBECONOMY",
+  "발화": "제주도청 경제정책과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 170,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CULTURE-ARTSHALL",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CULTURE-ARTSHALL",
+  "발화": "서귀포시청 대관에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 171,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-DIGITAL",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-DIGITAL",
+  "발화": "서귀포시청 디지털혁신과로 연결 부탁드립니다."
+ },
+ {
+  "id": 172,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-WELFARE-ELDERLY",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-WELFARE-ELDERLY",
+  "발화": "경로당 지원 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 173,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-JACHI-GENERAL",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-JACHI-GENERAL",
+  "발화": "총무 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 174,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-DIGITAL",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-DIGITAL",
+  "발화": "디지털혁신 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 175,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CLIMATE-PARKS",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CLIMATE-PARKS",
+  "발화": "가로수 관리 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 176,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CITYPLAN",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CITYPLAN",
+  "발화": "도시계획 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 177,
+  "entity": "제주시청",
+  "tier": "jejusi-direct",
+  "sp_code": "CITYDEPT-JEJUSI-COMM",
+  "대상특정": "O",
+  "기대_SP": "CITYDEPT-JEJUSI-COMM",
+  "발화": "제주시청 소통청렴지원실 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 178,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-WELFARE-ELDERLY",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-WELFARE-ELDERLY",
+  "발화": "경로당 지원 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 179,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-ECON-SMB",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-ECON-SMB",
+  "발화": "제주시청 경제소상공인과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 180,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-TRANSPORT-URBANPLAN",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-TRANSPORT-URBANPLAN",
+  "발화": "도시계획 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 181,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-JACHI-SELFGOV",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-JACHI-SELFGOV",
+  "발화": "제주시청 자치행정과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 182,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-ECON-INVESTMENT",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-ECON-INVESTMENT",
+  "발화": "제주도청 기업정책과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 183,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-AGRI-LIVESTOCK",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-AGRI-LIVESTOCK",
+  "발화": "청정축산 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 184,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-INNOV-ENERGYINDUSTRY",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-INNOV-ENERGYINDUSTRY",
+  "발화": "제주도청 에너지산업과로 연결 부탁드립니다."
+ },
+ {
+  "id": 185,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-HEALTH-ADMIN",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-HEALTH-ADMIN",
+  "발화": "서귀포시청 보건행정과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 186,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-WATER",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-WATER",
+  "발화": "급수 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 187,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-WELFARE-INTEGRATEDCARE",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-WELFARE-INTEGRATEDCARE",
+  "발화": "통합돌봄 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 188,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CLIMATE-ENVMGMT",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CLIMATE-ENVMGMT",
+  "발화": "기후 관련 인허가 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 189,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CULTURE-ART",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CULTURE-ART",
+  "발화": "문화예술 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 190,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-JACHI-SELFGOV",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-JACHI-SELFGOV",
+  "발화": "서귀포시청 자치행정과로 연결 부탁드립니다."
+ },
+ {
+  "id": 191,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CLIMATE-ENVGUIDE",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CLIMATE-ENVGUIDE",
+  "발화": "제주시청 환경지도과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 192,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-COMM",
+  "대상특정": "O",
+  "기대_SP": "SP-DO-COMM",
+  "발화": "제주도청 소통담당관에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 193,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-JACHI-BUDGET",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-JACHI-BUDGET",
+  "발화": "기획예산 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 194,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CULTURE-ARTMUSEUM",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CULTURE-ARTMUSEUM",
+  "발화": "서귀포시청 공립미술관로 연결 부탁드립니다."
+ },
+ {
+  "id": 195,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CLIMATE-LIVINGENV",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CLIMATE-LIVINGENV",
+  "발화": "제주시청 생활환경과로 연결 부탁드립니다."
+ },
+ {
+  "id": 196,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-TOURISM-TOURISMPOLICY",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-TOURISM-TOURISMPOLICY",
+  "발화": "관광정책 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 197,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-TRANSPORT-URBANPLAN",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-TRANSPORT-URBANPLAN",
+  "발화": "제주도청 도시계획과로 연결 부탁드립니다."
+ },
+ {
+  "id": 198,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-direct",
+  "sp_code": "CITYDEPT-SEOGWIPO-CIVILAFFAIRS",
+  "대상특정": "O",
+  "기대_SP": "CITYDEPT-SEOGWIPO-CIVILAFFAIRS",
+  "발화": "서귀포시청 종합민원실 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 199,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CULTURE-SPORTS",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CULTURE-SPORTS",
+  "발화": "공공체육시설 관리 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 200,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CULTURE-ARTSHALL",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CULTURE-ARTSHALL",
+  "발화": "대관 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 201,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-AUTONOMY",
+  "대상특정": "O",
+  "기대_SP": "SP-DO-AUTONOMY",
+  "발화": "제주도청 특별자치제도추진단에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 202,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-GANGJEONG",
+  "대상특정": "O",
+  "기대_SP": "SP-DO-GANGJEONG",
+  "발화": "제주도청 강정공동체사업추진단로 연결 부탁드립니다."
+ },
+ {
+  "id": 203,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-ECOFARM",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-ECOFARM",
+  "발화": "서귀포시청 친환경농정과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 204,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-FISHERY",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-FISHERY",
+  "발화": "수산물 유통 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 205,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-SAFETY-HEALTHPOLICY",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-SAFETY-HEALTHPOLICY",
+  "발화": "제주도청 보건정책과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 206,
+  "entity": "제주시청",
+  "tier": "jejusi-direct",
+  "sp_code": "CITYDEPT-JEJUSI-COMM",
+  "대상특정": "X",
+  "기대_SP": "CITYDEPT-JEJUSI-COMM",
+  "발화": "시정 소통 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 207,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-WELFARE-DISABLED",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-WELFARE-DISABLED",
+  "발화": "제주시청 장애인복지과로 연결 부탁드립니다."
+ },
+ {
+  "id": 208,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-COMM",
+  "대상특정": "X",
+  "기대_SP": "SP-DO-COMM",
+  "발화": "대민소통 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 209,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-HEALTH-WESTCENTER",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-HEALTH-WESTCENTER",
+  "발화": "서부보건 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 210,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-JACHI-PROPERTYTAX",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-JACHI-PROPERTYTAX",
+  "발화": "재산세 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 211,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-JACHI-GENERAL",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-JACHI-GENERAL",
+  "발화": "서귀포시청 총무과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 212,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-AGRI-CITRUS",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-AGRI-CITRUS",
+  "발화": "감귤유통 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 213,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-HEALTH-ADMIN",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-HEALTH-ADMIN",
+  "발화": "보건행정 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 214,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-JACHI-PROPERTYTAX",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-JACHI-PROPERTYTAX",
+  "발화": "제주시청 재산세과로 연결 부탁드립니다."
+ },
+ {
+  "id": 215,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CULTURE-TOURISMFACILITY",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CULTURE-TOURISMFACILITY",
+  "발화": "서귀포시청 관광지관리소 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 216,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CULTURE-ART",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CULTURE-ART",
+  "발화": "서귀포시청 문화예술과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 217,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-INNOV-FUTUREGROWTH",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-INNOV-FUTUREGROWTH",
+  "발화": "미래성장 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 218,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-BUILDING",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-BUILDING",
+  "발화": "서귀포시청 건축과로 연결 부탁드립니다."
+ },
+ {
+  "id": 219,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-BASICSOC",
+  "대상특정": "X",
+  "기대_SP": "SP-DO-BASICSOC",
+  "발화": "기본사회 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 220,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CULTURE-ARTCENTER",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CULTURE-ARTCENTER",
+  "발화": "제주시청 제주아트센터 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 221,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-WELFARE-INTEGRATEDCARE",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-WELFARE-INTEGRATEDCARE",
+  "발화": "서귀포시청 통합돌봄과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 222,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-AUTONOMY",
+  "대상특정": "X",
+  "기대_SP": "SP-DO-AUTONOMY",
+  "발화": "특별자치제도 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 223,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CULTURE-ART",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CULTURE-ART",
+  "발화": "공연 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 224,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-WATER",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-WATER",
+  "발화": "제주시청 상하수도과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 225,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-GENERAL",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-GENERAL",
+  "발화": "민방위 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 226,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-HEALTH-EASTCENTER",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-HEALTH-EASTCENTER",
+  "발화": "서귀포시청 동부보건소 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 227,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-HOUSING",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-HOUSING",
+  "발화": "제주시청 주택과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 228,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-HEALTH-EPIDEMIC",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-HEALTH-EPIDEMIC",
+  "발화": "감염예방의약 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 229,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-OCEAN-MARINEPOLICY",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-OCEAN-MARINEPOLICY",
+  "발화": "제주도청 수산정책과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 230,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-WELFARE-RESIDENT",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-WELFARE-RESIDENT",
+  "발화": "서귀포시청 주민복지과로 연결 부탁드립니다."
+ },
+ {
+  "id": 231,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-INNOV-SPACEMOBILITY",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-INNOV-SPACEMOBILITY",
+  "발화": "제주도청 우주모빌리티과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 232,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-WELFARE-DISABLED",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-WELFARE-DISABLED",
+  "발화": "제주도청 장애인복지과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 233,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-PLAN-LEGAL",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-PLAN-LEGAL",
+  "발화": "제주도청 특별자치법무담당관 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 234,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-WELFARE-BASICLIVELIHOOD",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-WELFARE-BASICLIVELIHOOD",
+  "발화": "제주시청 기초생활보장과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 235,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-CLIMATE-ENVPOLICY",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-CLIMATE-ENVPOLICY",
+  "발화": "제주도청 환경정책과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 236,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-WELFARE-ELDERLY",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-WELFARE-ELDERLY",
+  "발화": "제주시청 노인복지과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 237,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-OCEAN-HAENYEOHERITAGE",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-OCEAN-HAENYEOHERITAGE",
+  "발화": "제주도청 해녀문화유산과로 연결 부탁드립니다."
+ },
+ {
+  "id": 238,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-CLIMATE-FORESTGREEN",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-CLIMATE-FORESTGREEN",
+  "발화": "제주도청 산림녹지과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 239,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-SAFETY-TRAFFIC",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-SAFETY-TRAFFIC",
+  "발화": "제주시청 교통행정과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 240,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-SAFETY-GENERAL",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-SAFETY-GENERAL",
+  "발화": "제주시청 안전총괄과로 연결 부탁드립니다."
+ },
+ {
+  "id": 241,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-WELFARE-RESIDENT",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-WELFARE-RESIDENT",
+  "발화": "긴급복지지원 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 242,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-CONSTRUCT",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-CONSTRUCT",
+  "발화": "건설 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 243,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CULTURE-UDANGLIB",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CULTURE-UDANGLIB",
+  "발화": "우당도서관 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 244,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-OCEAN-MARINEINDUSTRY",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-OCEAN-MARINEINDUSTRY",
+  "발화": "제주도청 해양산업과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 245,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-TRAFFIC",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-TRAFFIC",
+  "발화": "서귀포시청 교통행정과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 246,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-HEALTH-ADMIN",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-HEALTH-ADMIN",
+  "발화": "보건소 행정 총괄 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 247,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CLIMATE-PARKS",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CLIMATE-PARKS",
+  "발화": "가로수 관리 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 248,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-CITRUS",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-CITRUS",
+  "발화": "서귀포시청 감귤유통과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 249,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-INNOV-SPACEMOBILITY",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-INNOV-SPACEMOBILITY",
+  "발화": "우주모빌리티 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 250,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-SAFETY-POLICY",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-SAFETY-POLICY",
+  "발화": "안전정책 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 251,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-GENDER",
+  "대상특정": "O",
+  "기대_SP": "SP-DO-GENDER",
+  "발화": "제주도청 성평등여성정책관로 연결 부탁드립니다."
+ },
+ {
+  "id": 252,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-TOURISM-TOURISMINDUSTRY",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-TOURISM-TOURISMINDUSTRY",
+  "발화": "관광산업 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 253,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-INNOV-DIGITAL",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-INNOV-DIGITAL",
+  "발화": "제주도청 디지털혁신과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 254,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-GENERAL",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-GENERAL",
+  "발화": "서귀포시청 안전총괄과로 연결 부탁드립니다."
+ },
+ {
+  "id": 255,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-BUILDING",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-BUILDING",
+  "발화": "건축 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 256,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-PLAN-TAXADMIN",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-PLAN-TAXADMIN",
+  "발화": "세정 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 257,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-CULTURE-EDUCOOPERATION",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-CULTURE-EDUCOOPERATION",
+  "발화": "제주도청 교육정책협력과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 258,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-AGRI-CITRUS",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-AGRI-CITRUS",
+  "발화": "제주시청 감귤유통과로 연결 부탁드립니다."
+ },
+ {
+  "id": 259,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-WELFARE-POLICY",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-WELFARE-POLICY",
+  "발화": "복지정책 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 260,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-ECON-SMB",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-ECON-SMB",
+  "발화": "경제소상공인 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 261,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-JACHI-GENERAL",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-JACHI-GENERAL",
+  "발화": "국 계층의 총무과와 성격이 유사하다 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 262,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-PLAN-POLICY",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-PLAN-POLICY",
+  "발화": "정책기획관 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 263,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-JACHI-BUDGET",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-JACHI-BUDGET",
+  "발화": "제주시청 기획예산과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 264,
+  "entity": "제주시청",
+  "tier": "jejusi-direct",
+  "sp_code": "CITYDEPT-JEJUSI-PR",
+  "대상특정": "O",
+  "기대_SP": "CITYDEPT-JEJUSI-PR",
+  "발화": "제주시청 공보실로 연결 부탁드립니다."
+ },
+ {
+  "id": 265,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-JACHI-BUDGET",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-JACHI-BUDGET",
+  "발화": "서귀포시청 기획예산과로 연결 부탁드립니다."
+ },
+ {
+  "id": 266,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-HEALTH-PROMOTION",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-HEALTH-PROMOTION",
+  "발화": "서귀포시청 건강증진과로 연결 부탁드립니다."
+ },
+ {
+  "id": 267,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-AGRI-LIVESTOCKPOLICY",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-AGRI-LIVESTOCKPOLICY",
+  "발화": "친환경축산정책 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 268,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-WELFARE-ELDERLY",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-WELFARE-ELDERLY",
+  "발화": "서귀포시청 노인복지과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 269,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CULTURE-SPORTS",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CULTURE-SPORTS",
+  "발화": "서귀포시청 체육진흥과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 270,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-HEALTH-WESTCENTER",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-HEALTH-WESTCENTER",
+  "발화": "제주시청 서부보건소로 연결 부탁드립니다."
+ },
+ {
+  "id": 271,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-BASICSOC",
+  "대상특정": "O",
+  "기대_SP": "SP-DO-BASICSOC",
+  "발화": "제주도청 기본사회추진단 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 272,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-HOUSING-ROADMANAGE",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-HOUSING-ROADMANAGE",
+  "발화": "도로관리 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 273,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-CULTURE-SPORTSPROMO",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-CULTURE-SPORTSPROMO",
+  "발화": "체육진흥 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 274,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-SAFETY-SOCIALDISASTER",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-SAFETY-SOCIALDISASTER",
+  "발화": "제주도청 사회재난과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 275,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-JACHI-BASICGOVPREP",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-JACHI-BASICGOVPREP",
+  "발화": "설치준비지원단 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 276,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-HEALTH-EASTCENTER",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-HEALTH-EASTCENTER",
+  "발화": "제주시청 동부보건소에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 277,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-TOURISM-TOURISMINDUSTRY",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-TOURISM-TOURISMINDUSTRY",
+  "발화": "제주도청 관광산업과로 연결 부탁드립니다."
+ },
+ {
+  "id": 278,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-JACHI-SELFGOV",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-JACHI-SELFGOV",
+  "발화": "마을공동체 관련 업무 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 279,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-INNOV-DIGITAL",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-INNOV-DIGITAL",
+  "발화": "디지털혁신 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 280,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CULTURE-LIBRARYMGMT",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CULTURE-LIBRARYMGMT",
+  "발화": "서귀포시청 도서관운영사무소로 연결 부탁드립니다."
+ },
+ {
+  "id": 281,
+  "entity": "제주시청",
+  "tier": "jejusi-direct",
+  "sp_code": "CITYDEPT-JEJUSI-CIVILAFFAIRS",
+  "대상특정": "X",
+  "기대_SP": "CITYDEPT-JEJUSI-CIVILAFFAIRS",
+  "발화": "통합 민원 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 282,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-HOUSING-ROADMANAGE",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-HOUSING-ROADMANAGE",
+  "발화": "제주도청 도로관리과로 연결 부탁드립니다."
+ },
+ {
+  "id": 283,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-AGRI-ECOFARM",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-AGRI-ECOFARM",
+  "발화": "친환경농정 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 284,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-ECON-DIGITAL",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-ECON-DIGITAL",
+  "발화": "제주시청 정보화지원과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 285,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-ECON-VILLAGE",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-ECON-VILLAGE",
+  "발화": "마을만들기 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 286,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-AGRI-CITRUS",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-AGRI-CITRUS",
+  "발화": "감귤유통 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 287,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-JACHI-TAX",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-JACHI-TAX",
+  "발화": "제주시청 세무과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 288,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-WELFARE-HYGIENE",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-WELFARE-HYGIENE",
+  "발화": "서귀포시청 위생관리과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 289,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-WELFARE-WOMENFAMILY",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-WELFARE-WOMENFAMILY",
+  "발화": "가정폭력 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 290,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CULTURE-TOURISM",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CULTURE-TOURISM",
+  "발화": "제주시청 관광진흥과로 연결 부탁드립니다."
+ },
+ {
+  "id": 291,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-INTEGRITY",
+  "대상특정": "O",
+  "기대_SP": "SP-DO-INTEGRITY",
+  "발화": "제주도청 청렴감찰관 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 292,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-PLAN-BUDGET",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-PLAN-BUDGET",
+  "발화": "예산 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 293,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-JACHI-LIFELONGED",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-JACHI-LIFELONGED",
+  "발화": "도서관과 별개의 평생학습 정책 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 294,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-CULTURE-UDANGLIB",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-CULTURE-UDANGLIB",
+  "발화": "제주시청 우당도서관에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 295,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-WELFARE-RESIDENT",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-WELFARE-RESIDENT",
+  "발화": "긴급복지지원 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 296,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-PLAN-LEGAL",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-PLAN-LEGAL",
+  "발화": "특별자치법무 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 297,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-ECON-INVESTMENT",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-ECON-INVESTMENT",
+  "발화": "기업정책 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 298,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-HEALTH-ADMIN",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-HEALTH-ADMIN",
+  "발화": "제주시청 보건행정과로 연결 부탁드립니다."
+ },
+ {
+  "id": 299,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-WATER",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-WATER",
+  "발화": "급수 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 300,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-LABOR",
+  "대상특정": "O",
+  "기대_SP": "SP-DO-LABOR",
+  "발화": "제주도청 노동안전감독관로 연결 부탁드립니다."
+ },
+ {
+  "id": 301,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-WELFARE-RESIDENT",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-WELFARE-RESIDENT",
+  "발화": "제주시청 주민복지과로 연결 부탁드립니다."
+ },
+ {
+  "id": 302,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-WELFARE-WOMENFAMILY",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-WELFARE-WOMENFAMILY",
+  "발화": "서귀포시청 여성가족과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 303,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-WELFARE-CHILDCARE",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-WELFARE-CHILDCARE",
+  "발화": "아동보육청소년 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 304,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-HEALTH-PROMOTION",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-HEALTH-PROMOTION",
+  "발화": "건강검진 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 305,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-CLIMATE-RECYCLING",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-CLIMATE-RECYCLING",
+  "발화": "자원순환 관련해서 어디로 문의해야 하는지 몰라서 일단 여쭤봅니다. 절차 좀 알려주세요."
+ },
+ {
+  "id": 306,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-CITY",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-CITY",
+  "발화": "서귀포시청 도시과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 307,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-GENDER",
+  "대상특정": "X",
+  "기대_SP": "SP-DO-GENDER",
+  "발화": "성평등여성정책관 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 308,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-INTEGRITY",
+  "대상특정": "X",
+  "기대_SP": "SP-DO-INTEGRITY",
+  "발화": "청렴감찰관 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 309,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-AGRI-FOODINDUSTRY",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-AGRI-FOODINDUSTRY",
+  "발화": "식품산업 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 310,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-CLIMATE-FORESTGREEN",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-CLIMATE-FORESTGREEN",
+  "발화": "산림녹지 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 311,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-HOUSING-CONSTRUCTION",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-HOUSING-CONSTRUCTION",
+  "발화": "제주도청 건설과로 연결 부탁드립니다."
+ },
+ {
+  "id": 312,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-WELFARE-WOMENFAMILY",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-WELFARE-WOMENFAMILY",
+  "발화": "제주시청 여성가족과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 313,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-JACHI-VILLAGE",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-JACHI-VILLAGE",
+  "발화": "서귀포시청 마을활력과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 314,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-AGRI-ECOFARMPOLICY",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-AGRI-ECOFARMPOLICY",
+  "발화": "제주도청 친환경농업정책과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 315,
+  "entity": "서귀포시청",
+  "tier": "seogwipo-division",
+  "sp_code": "SP-CITYDIV-SEOGWIPO-CULTURE-TOURISMFACILITY",
+  "대상특정": "X",
+  "기대_SP": "SP-CITYDIV-SEOGWIPO-CULTURE-TOURISMFACILITY",
+  "발화": "관광지 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ },
+ {
+  "id": 316,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-AGRI-ANIMALQUARANTINE",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-AGRI-ANIMALQUARANTINE",
+  "발화": "제주도청 동물방역과로 연결 부탁드립니다."
+ },
+ {
+  "id": 317,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-JACHI-43SUPPORT",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-JACHI-43SUPPORT",
+  "발화": "4·3지원 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 318,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-AIGOV",
+  "대상특정": "O",
+  "기대_SP": "SP-DO-AIGOV",
+  "발화": "제주도청 AI행정혁신추진단에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 319,
+  "entity": "제주도청",
+  "tier": "province-single",
+  "sp_code": "SP-DO-AIRPORTSUP",
+  "대상특정": "X",
+  "기대_SP": "SP-DO-AIRPORTSUP",
+  "발화": "공항확충지원단 관련 도움이 필요한데 어느 부서 소관인지 몰라서 문의드립니다."
+ },
+ {
+  "id": 320,
+  "entity": "제주시청",
+  "tier": "jejusi-division",
+  "sp_code": "SP-CITYDIV-JEJUSI-AGRI-LIVESTOCK",
+  "대상특정": "O",
+  "기대_SP": "SP-CITYDIV-JEJUSI-AGRI-LIVESTOCK",
+  "발화": "제주시청 청정축산과 담당자님, 어떻게 신청하나요?"
+ },
+ {
+  "id": 321,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-CLIMATE-RECYCLING",
+  "대상특정": "O",
+  "기대_SP": "SP-DIV-CLIMATE-RECYCLING",
+  "발화": "제주도청 자원순환과에 문의드립니다. 절차를 알고 싶습니다."
+ },
+ {
+  "id": 322,
+  "entity": "제주도청",
+  "tier": "province-division",
+  "sp_code": "SP-DIV-OCEAN-MARINEINDUSTRY",
+  "대상특정": "X",
+  "기대_SP": "SP-DIV-OCEAN-MARINEINDUSTRY",
+  "발화": "해양산업 때문에 그러는데요, 이런 것도 처리해 주나요?"
+ }
+]
