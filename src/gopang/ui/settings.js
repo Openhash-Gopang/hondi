@@ -835,19 +835,12 @@ export async function openGopangWallet() {
     const fs = wallet?.getFinancialState ? await wallet.getFinancialState() : {};
     const balance = fs['bs-cash'] ?? 0;
 
-    // pdv_log에서 거래 기록 조회
-    const pdvRes = await fetch(`${PROXY}/pdv/query`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: {
-          svc: 'gopang', ipv6: guid,
-          scope: ['kmarket'],
-          period: { start: '2026-01-01', end: new Date().toISOString().slice(0,10) },
-          auth_token: { level: 'L0', exp: Math.floor(Date.now()/1000) + 3600 },
-        }
-      })
-    }).catch(() => null);
+    // 2026-09-16 삭제 — 여기 있던 /pdv/query 호출(pdvRes)은 결과를
+    // 어디에도 쓰지 않는 죽은 코드였다. 2026-08-28에 실제 거래 데이터
+    // 소스가 pdv_log에서 ledger_entries(chargeHistory/ledgerHistory,
+    // 바로 아래)로 완전히 교체됐지만 옛 호출은 지우지 않고 남아있었고,
+    // 서버가 그 엔드포인트를 제거하면서(410 Gone) 지갑을 열 때마다
+    // 쓸모없는 실패 요청 + 콘솔 에러만 남기고 있었다.
 
     // 2026-08-28 신설(주피터 지시: "거래 내역이 표시되지 않습니다 —
     // 누가 언제 얼마를 입금했는지 기록") — 아래 last_tx_id 기반 섹션은
