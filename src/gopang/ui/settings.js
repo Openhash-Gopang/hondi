@@ -818,6 +818,12 @@ export async function openGopangWallet() {
   // 우선, 없으면 handle). "인증된 사용자 표시가 없다"는 지적에 대한
   // 직접적인 응답 — 시트를 여는 이 시점부터 바로 보이게 한다.
   const displayName = user.nickname || _USER?.nickname || user.handle || _USER?.handle || '';
+  // 2026-09-17 신설(주피터 지시) — 입금자 실명이 아니라 "보낸이"를
+  // 본인 휴대폰 번호 뒷자리 8자로 입력해야 입금 매칭이 된다. 매번
+  // 010-1234-5678을 12345678로 손수 변환하는 수고를 덜어주기 위해
+  // 본인 전화번호(e164, 로그인 시점부터 이미 로드됨)에서 직접 계산한다.
+  const _phoneDigits = ((user.e164 || _USER?.e164 || '') + '').replace(/\D/g, '');
+  const senderLast8 = _phoneDigits.slice(-8);
 
   _openSheet('Gopang Wallet', '<div style="padding:40px 16px;text-align:center;color:#9ca3af;font-size:14px">로딩 중...</div>', displayName);
 
@@ -941,6 +947,9 @@ export async function openGopangWallet() {
             <button id="_gdc-account-copy-btn" onclick="_copyGdcAccountNumber()" style="flex-shrink:0;padding:7px 14px;border:1px solid #007b8b;border-radius:6px;background:#fff;color:#007b8b;font-size:12.5px;font-weight:600;cursor:pointer;letter-spacing:.02em">복사</button>
           </div>
           <div style="font-size:12.5px;color:#6b7280;margin-top:10px;line-height:1.55">위 계좌로 입금하면, 입금액에 상응하는 GDC가 충전됩니다(GDC:KRW = 1:1).</div>
+          <div style="margin-top:10px;padding:10px 12px;background:#fef3c7;border-radius:8px;font-size:12.5px;color:#92400e;line-height:1.6">
+            반드시 <b>보낸이</b>는 본인 휴대폰 번호 뒷자리 8자로 입력해 주세요. 예: 010-1234-5678 → 12345678${senderLast8 ? ` — 회원님은 <b>${senderLast8}</b>` : ''}
+          </div>
         </div>
       </div>
       <div style="padding:26px 16px 22px;border-bottom:1px solid #e5e7eb;text-align:center">
