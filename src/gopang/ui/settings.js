@@ -950,6 +950,17 @@ export async function openGopangWallet() {
           <div style="margin-top:10px;padding:10px 12px;background:#fef3c7;border-radius:8px;font-size:12.5px;color:#92400e;line-height:1.6">
             반드시 <b>보낸이</b>는 본인 휴대폰 번호 뒷자리 8자로 입력해 주세요. 예: 010-1234-5678 → 12345678${senderLast8 ? ` — 회원님은 <b>${senderLast8}</b>` : ''}
           </div>
+          <div style="margin-top:10px">
+            <a href="#" onclick="_toggleChargeSelfReportForm();return false;" style="font-size:12.5px;color:#007b8b;font-weight:600;text-decoration:none">입금하셨는데 반영이 안 되나요? 자가신고 →</a>
+            <div id="_charge-self-report-box" style="display:none;margin-top:10px;padding:12px;border:1px solid #e5e7eb;border-radius:8px">
+              <div style="font-size:12px;color:#6b7280;margin-bottom:8px;line-height:1.5">코드 없이 본인 실명으로 입금하셨다면, 입금액을 적어 신고해 주세요. 확인 후 반영해 드립니다.</div>
+              <div style="display:flex;gap:8px">
+                <input id="_charge-self-report-amount" type="number" placeholder="입금액(원)" style="flex:1;min-width:0;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px" />
+                <button onclick="_submitChargeSelfReport()" style="flex-shrink:0;padding:8px 14px;border:none;border-radius:6px;background:#007b8b;color:#fff;font-size:12.5px;font-weight:600;cursor:pointer">신고 접수</button>
+              </div>
+              <div id="_charge-self-report-status" style="font-size:12px;margin-top:8px"></div>
+            </div>
+          </div>
         </div>
       </div>
       <div style="padding:26px 16px 22px;border-bottom:1px solid #e5e7eb;text-align:center">
@@ -1037,6 +1048,50 @@ window._copyGdcAccountNumber = async function() {
   } catch (e) {
     console.warn('[GopangWallet] 계좌번호 복사 실패:', e.message);
     alert('복사에 실패했습니다. 계좌번호를 직접 선택해 복사해 주세요: ' + digitsOnly);
+  }
+};
+
+// 2026-09-17 신설(주피터 지시: "동명이인 알림 이전에, 자각한 사용자
+// 본인이 스스로 신고하는 1차 경로부터") — 코드 없이 본인 실명으로
+// 입금한 사용자가 자진 신고하는 미니폼. worker.js의
+// POST /biz/charge-self-report와 짝을 이룬다.
+window._toggleChargeSelfReportForm = function() {
+  const box = document.getElementById('_charge-self-report-box');
+  if (box) box.style.display = (box.style.display === 'none' ? 'block' : 'none');
+};
+
+window._submitChargeSelfReport = async function() {
+  const statusEl = document.getElementById('_charge-self-report-status');
+  const amountEl = document.getElementById('_charge-self-report-amount');
+  const amount = Number(amountEl?.value);
+  if (!(amount > 0)) {
+    if (statusEl) { statusEl.textContent = '입금액을 정확히 입력해 주세요.'; statusEl.style.color = '#dc2626'; }
+    return;
+  }
+  const user = JSON.parse(localStorage.getItem('gopang_user_v4') || sessionStorage.getItem('gopang_user_v4') || '{}');
+  const guid = _USER?.ipv6 || user.ipv6 || '';
+  if (!guid) {
+    if (statusEl) { statusEl.textContent = '로그인이 필요합니다.'; statusEl.style.color = '#dc2626'; }
+    return;
+  }
+  if (statusEl) { statusEl.textContent = '접수 중...'; statusEl.style.color = '#9ca3af'; }
+  try {
+    const { PROXY } = await import('../core/state.js');
+    const res = await fetch(`${PROXY}/biz/charge-self-report`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ guid, krw_amount: amount, approx_time: new Date().toISOString() }),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data?.ok) {
+      if (statusEl) { statusEl.textContent = data?.message || '신고 접수에 실패했습니다.'; statusEl.style.color = '#dc2626'; }
+      return;
+    }
+    if (statusEl) { statusEl.textContent = '접수됐습니다. 확인 후 반영해 드립니다.'; statusEl.style.color = '#0f9d58'; }
+    if (amountEl) amountEl.value = '';
+    setTimeout(() => { openGopangWallet(); }, 1200);
+  } catch (e) {
+    if (statusEl) { statusEl.textContent = '신고 접수 중 오류가 발생했습니다.'; statusEl.style.color = '#dc2626'; }
   }
 };
 
