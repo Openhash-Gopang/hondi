@@ -30,6 +30,7 @@ import { inviteByHandle } from '../ui/p2p-chat.js';
 import { _openProfilePanel } from '../ui/settings.js';
 import { _gwpLaunch } from '../gwp/engine.js';
 import { handleExpertTag, _composeExpertPrompt } from './expert-session.js';
+import { suppressTagIfClarifying } from './clarify-guard.js';
 import { getExpertDef, resolveExpertId, EXPERT_REGISTRY } from './expert-registry.js';
 import { buildHondiFaqContext } from './hondi-faq-router.js';
 import { buildGoalPathContext } from './goal-path-router.js';
@@ -4920,6 +4921,17 @@ export function _parseAgentTags(fullReply, bubble, userText, _preTab) {
         console.info('[GWP] 태그 누락 폴백 — 표시명 매칭으로 라우팅 복구:', svcId);
       }
     }
+
+    // 2026-09-17 신설(clarify-guard.js) — 되묻는 턴에는 태그를 실행하지
+    // 않는다(AC-PRO-CORE_v1_16.txt §CORE 1단계 규칙의 코드 레벨 강제).
+    // 프롬프트 지시만으로는 준수율이 100%가 안 됨을 라이브 재현으로
+    // 확인(lawyer-auction: "[GWP: klaw] ... 어느 쪽이신가요?"). 반드시
+    // 위 폴백 로직 *이후*, 실제 실행(아래 if (svcId) 블록) *직전*에
+    // 걸어야 한다 — 폴백이 "연결해드릴까요?"류 문구로 태그를 다시
+    // 되살릴 수 있어서, 먼저 걸면 무력화된다. null로 무효화하면 아래
+    // 로직들은 svcId 없음과 동일하게 처리되고, 되묻는 응답 텍스트
+    // 자체는 그대로 사용자에게 보여진다.
+    svcId = suppressTagIfClarifying(svcId, fullReply, 'GWP');
 
     if (svcId) {
       const svcDef = (typeof getService === 'function') ? getService(svcId) : null;

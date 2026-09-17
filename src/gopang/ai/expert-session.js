@@ -22,6 +22,7 @@ import { EXPERT_REGISTRY, UNIVERSAL_INTEGRITY_KEY, COMMON_GUARDRAILS_KEY, COMMON
          EXPERT_BASE_KEY, CONTROL_TOWER_PRINCIPLE_KEY, getExpertGwpDef, resolveExpertId }
   from './expert-registry.js';
 import { refineToLeaf } from './subject-gate.js';
+import { suppressTagIfClarifying } from './clarify-guard.js';
 import { _loadSpByKey, _loadSpRawByKey } from './manifest-loader.js';
 // ★ 2026-08-30 수정 — 2026-07-19 신설된 핸드오프 맥락 요약(아래
 // summarizeHandoffContext6W 호출부, §"AC와의 이전 대화 맥락을 페르소나에
@@ -289,6 +290,10 @@ export async function handleExpertTag(fullReply, userText, _preTab) {
       console.info('[Expert] 태그 누락 폴백 — 표시명 매칭으로 라우팅 복구:', raw);
     }
   }
+
+  // 2026-09-17 신설(clarify-guard.js) — GWP측과 동일 사유·동일 조치.
+  // 반드시 위 폴백 로직 이후, 아래 !raw 조기 반환 직전에 걸어야 한다.
+  raw = suppressTagIfClarifying(raw, fullReply, 'EXPERT');
   if (!raw) return false;
 
   // @handle 직접 지목은 아직 미구현(별도 기능) — 조용히 무시하고 진행하지 않는다.
