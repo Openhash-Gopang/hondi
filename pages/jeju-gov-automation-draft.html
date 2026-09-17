@@ -141,13 +141,13 @@ footer{background:var(--gov-header);color:rgba(255,255,255,.5);padding:22px 0;ma
 
 <div class="page-head">
   <h1>제주 AI 행정 — 기관 · 국·부서 · 과·팀 단위 실행 지도</h1>
-  <p>제주특별자치도청·제주시청·서귀포시청·43개 읍면동 행정복지센터를 기관 단위로 먼저 고르고, 그 아래 국(局)·과(課)·팀 단위 SP까지 내려가 바로 실행합니다. 각 카드는 SP 원문·설명 문서·실행 화면 세 곳으로 연결됩니다.<br>
+  <p>제주특별자치도청·제주시청·서귀포시청·43개 읍면동 행정복지센터·직속기관·출자출연기관을 기관 단위로 먼저 고르고, 그 아래 국(局)·과(課)·팀 단위 SP까지 내려가 바로 실행합니다. 각 카드는 SP 원문·설명 문서·실행 화면 세 곳으로 연결됩니다.<br>
   <span class="exec-note">"실행" 링크는 regional-gov.html의 <code style="background:rgba(0,0,0,.06);padding:1px 5px;border-radius:3px;">?gov_code=</code> 직행 파라미터(K-정부 카탈로그가 이미 쓰고 있는 실제 기능, gov-router.js 확인)로 해당 국·과·팀 SP를 바로 엽니다.</span></p>
 </div>
 
 <div class="main">
   <div class="inst-wrap">
-    <div class="inst-group-label">기관 선택 (5)</div>
+    <div class="inst-group-label">기관 선택 (6)</div>
     <div class="inst-tabs" id="instTabs"></div>
   </div>
 
@@ -229,15 +229,18 @@ function govCodeUrl(code) {
 }
 function doDeptUrl(spCode) { return govCodeUrl(`do-dept:jeju:${spCode}`); }
 function doAgencyUrl(spCode) { return govCodeUrl(`do-agency:${spCode}`); }
+function orgUrl(spCode) { return govCodeUrl(`org:${spCode}`); }
 function bureauExecUrl(b) {
   if (b.kind === "do-dept") return doDeptUrl(b.spId);
   if (b.kind === "do-agency") return doAgencyUrl(b.spId);
+  if (b.kind === "org") return orgUrl(b.spId);
   if (b.kind === "city") return cityDeptUrl(b.id);
   return "#";
 }
 function divisionExecUrl(kind, spId) {
   if (kind === "do-dept") return doDeptUrl(spId);
   if (kind === "do-agency") return doAgencyUrl(spId);
+  if (kind === "org") return orgUrl(spId);
   if (kind === "city") return cityDivUrl(spId);
   return "#";
 }
@@ -959,6 +962,7 @@ const INSTITUTIONS = [
   { id: "seogwipo", name: "서귀포시청",       kind: "gov", bureaus: SEOGWIPO_BUREAUS },
   { id: "emd-root", name: "읍면동 행정복지센터", kind: "emdRoot" },
   { id: "agency",   name: "직속기관",         kind: "gov", bureaus: DO_AGENCIES },
+  { id: "org",      name: "출자출연기관",     kind: "gov", bureaus: DO_ORGS },
 ];
 
 let activeInstId = "do";
@@ -1064,7 +1068,7 @@ function renderBureauStrip() {
 
   const b = currentBureau();
   if (!b.spId) { strip.innerHTML = ""; return; }
-  const pathBase = { "do-dept": "02-do-dept/", "do-agency": "03-do-agency/", "city": "04-city/" }[b.kind] || "01-do/";
+  const pathBase = { "do-dept": "02-do-dept/", "do-agency": "03-do-agency/", "org": "07-org/", "city": "04-city/" }[b.kind] || "01-do/";
   const doPath = `${pathBase}${b.spId}.md`;
   const execHref = bureauExecUrl(b);
   strip.innerHTML = `
