@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>제주 AI 행정 — 실·국·과 단위 SP 실행 지도</title>
-<meta name="description" content="제주특별자치도청 15실·국 70과의 AI 행정 SP를 실·국 → 과 단위로 드릴다운하며, 각 단위의 SP 소스·설명 문서·실행 화면(webapp.html)으로 바로 연결합니다.">
+<title>제주 AI 행정 — 기관·실국과·읍면동 실행 지도</title>
+<meta name="description" content="제주특별자치도청·제주시청·서귀포시청·43개 읍면동 행정복지센터의 AI 행정 SP를 기관 → 국·부서 → 과/팀 단위로 드릴다운하며, 각 단위의 SP 소스·설명 문서·실행 화면으로 바로 연결합니다.">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
@@ -31,76 +31,89 @@
   --r: 6px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--font);font-size:14px;color:var(--text);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;}
+body{font-family:var(--font);font-size:15.5px;color:var(--text);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;}
 a{text-decoration:none;color:inherit;}
 button{font-family:inherit;cursor:pointer;}
 
-/* Notice banner — carries the reference-direction note the team agreed on */
-.ref-banner{background:var(--amber-bg);border-bottom:1px solid #E9D5A8;padding:10px 24px;font-size:12.5px;color:#6B5218;text-align:center;line-height:1.6;}
-.ref-banner strong{font-weight:700;}
+.ref-banner{background:var(--amber-bg);border-bottom:1px solid #E9D5A8;padding:10px 24px;font-size:13.5px;color:#6B5218;text-align:center;line-height:1.6;}
+.ref-banner code{background:rgba(0,0,0,.06);padding:1px 5px;border-radius:3px;}
 
 .topnav{background:var(--gov-nav);position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,.18);}
-.topnav-inner{max-width:1280px;margin:0 auto;padding:0 24px;display:flex;align-items:center;height:56px;gap:16px;}
-.topnav-logo{display:flex;align-items:center;gap:9px;font-size:16px;font-weight:800;color:#fff;padding-right:16px;border-right:1px solid rgba(255,255,255,.15);}
-.topnav-crumb{font-size:12.5px;color:rgba(255,255,255,.55);}
+.topnav-inner{max-width:1320px;margin:0 auto;padding:0 24px;display:flex;align-items:center;height:56px;gap:16px;}
+.topnav-logo{display:flex;align-items:center;gap:9px;font-size:17px;font-weight:800;color:#fff;padding-right:16px;border-right:1px solid rgba(255,255,255,.15);}
+.topnav-crumb{font-size:14px;color:rgba(255,255,255,.55);}
 .topnav-crumb a{color:rgba(255,255,255,.8);font-weight:600;}
 .topnav-crumb a:hover{text-decoration:underline;}
 .topnav-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
-.topnav-status{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:rgba(255,255,255,.55);}
+.topnav-status{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:rgba(255,255,255,.55);}
 .status-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;}
 
-.page-head{max-width:1280px;margin:0 auto;padding:28px 24px 4px;}
-.page-head h1{font-size:22px;font-weight:800;letter-spacing:-.4px;margin-bottom:6px;}
-.page-head p{font-size:13px;color:var(--sub);max-width:760px;line-height:1.7;}
+.page-head{max-width:1320px;margin:0 auto;padding:28px 24px 4px;}
+.page-head h1{font-size:25px;font-weight:800;letter-spacing:-.4px;margin-bottom:6px;}
+.page-head p{font-size:15px;color:var(--sub);max-width:820px;line-height:1.7;}
+.page-head .exec-note{color:var(--amber);font-weight:600;}
 
-.main{max-width:1280px;margin:0 auto;padding:20px 24px 64px;}
+.main{max-width:1320px;margin:0 auto;padding:20px 24px 64px;}
 
-/* Tier 1 — 실·국 tab bar */
-.tier1-wrap{margin-bottom:22px;}
-.tier1-label{font-size:11px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+/* Institution tier (기관) */
+.inst-wrap{margin-bottom:22px;}
+.inst-group-label{font-size:12.5px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 8px;}
+.inst-group-label:first-child{margin-top:0;}
+.inst-tabs{display:flex;flex-wrap:wrap;gap:6px;}
+.inst-tab{padding:10px 18px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);font-size:15px;font-weight:700;color:var(--sub);transition:all .12s;white-space:nowrap;}
+.inst-tab:hover{border-color:var(--primary-lt);color:var(--primary);}
+.inst-tab.active{background:var(--gov-nav);border-color:var(--gov-nav);color:#fff;}
+
+.emd-tabs{display:flex;flex-wrap:wrap;gap:5px;}
+.emd-tab{padding:7px 13px;border-radius:16px;border:1px solid var(--border);background:var(--surface);font-size:13.5px;font-weight:600;color:var(--sub);white-space:nowrap;}
+.emd-tab:hover{border-color:var(--primary-lt);color:var(--primary);}
+.emd-tab.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+.emd-city-block{margin-bottom:8px;}
+.emd-city-name{font-size:13px;font-weight:700;color:var(--hint);margin-bottom:5px;}
+
+/* Tier 2 — 국·부서 tab bar */
+.tier1-wrap{margin:18px 0 14px;}
+.tier1-label{font-size:12.5px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
 .tier1-tabs{display:flex;flex-wrap:wrap;gap:6px;}
-.tier1-tab{padding:8px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-size:12.5px;font-weight:600;color:var(--sub);transition:all .12s;white-space:nowrap;}
+.tier1-tab{padding:9px 16px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-size:14.5px;font-weight:600;color:var(--sub);transition:all .12s;white-space:nowrap;}
 .tier1-tab:hover{border-color:var(--primary-lt);color:var(--primary);}
 .tier1-tab.active{background:var(--primary);border-color:var(--primary);color:#fff;}
 .tier1-tab .count{opacity:.7;font-weight:700;margin-left:4px;}
 
-/* Selected 실·국 summary strip */
 .bureau-strip{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 20px;margin-bottom:16px;box-shadow:var(--shadow-1);flex-wrap:wrap;}
-.bureau-strip-title{font-size:16px;font-weight:800;}
-.bureau-strip-sub{font-size:12px;color:var(--hint);margin-top:2px;}
+.bureau-strip-title{font-size:18.5px;font-weight:800;}
+.bureau-strip-sub{font-size:14px;color:var(--hint);margin-top:2px;}
 .bureau-links{display:flex;gap:8px;flex-shrink:0;}
-.bureau-link{display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:var(--r);font-size:12px;font-weight:700;border:1px solid var(--border);color:var(--sub);}
+.bureau-link{display:inline-flex;align-items:center;gap:5px;padding:8px 14px;border-radius:var(--r);font-size:14px;font-weight:700;border:1px solid var(--border);color:var(--sub);}
 .bureau-link:hover{border-color:var(--primary-lt);color:var(--primary);background:var(--primary-bg);}
 .bureau-link.exec{background:var(--primary);border-color:var(--primary);color:#fff;}
 .bureau-link.exec:hover{background:var(--primary-dk);color:#fff;}
 
-/* Tier 2 — 과 card grid */
 .tier2-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;box-shadow:var(--shadow-1);}
 .tier2-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
-.tier2-head h2{font-size:14px;font-weight:800;display:flex;align-items:center;gap:7px;}
+.tier2-head h2{font-size:17px;font-weight:800;display:flex;align-items:center;gap:7px;}
 .tier2-head h2::before{content:"";width:8px;height:8px;background:var(--amber);flex-shrink:0;}
-.tier2-count{font-size:12.5px;color:var(--hint);font-weight:700;}
+.tier2-count{font-size:14.5px;color:var(--hint);font-weight:700;}
 
-.division-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;}
+.division-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;}
 .division-card{border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:8px;transition:border-color .12s;}
 .division-card:hover{border-color:var(--primary-lt);}
 .division-card.unconfirmed{background:repeating-linear-gradient(135deg,#fff,#fff 8px,#FAFAFB 8px,#FAFAFB 16px);}
-.division-name{font-size:13px;font-weight:700;line-height:1.4;}
-.division-badge{display:inline-flex;align-items:center;width:fit-content;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;}
+.division-name{font-size:15px;font-weight:700;line-height:1.4;}
+.division-badge{display:inline-flex;align-items:center;width:fit-content;padding:3px 9px;border-radius:10px;font-size:12px;font-weight:700;}
 .division-badge.confirmed{background:var(--green-bg);color:var(--green);}
 .division-badge.pending{background:var(--gray-bg);color:var(--gray-text);}
 .division-icons{display:flex;gap:6px;margin-top:auto;padding-top:4px;border-top:1px solid var(--border);}
-.division-icons a, .division-icons span{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:6px 4px;border-radius:5px;font-size:11px;font-weight:700;color:var(--sub);background:var(--gray-bg);}
+.division-icons a, .division-icons span{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:7px 5px;border-radius:5px;font-size:13px;font-weight:700;color:var(--sub);background:var(--gray-bg);}
 .division-icons a:hover{background:var(--primary-bg);color:var(--primary);}
 .division-icons a.exec{background:var(--primary-bg);color:var(--primary);}
 .division-icons a.exec:hover{background:var(--primary);color:#fff;}
-.division-icons span.disabled{opacity:.45;cursor:not-allowed;}
 
-.empty-state{padding:40px 20px;text-align:center;color:var(--hint);font-size:12.5px;line-height:1.8;}
-.empty-state code{background:var(--gray-bg);padding:2px 6px;border-radius:4px;font-size:11.5px;}
+.empty-state{padding:40px 20px;text-align:center;color:var(--hint);font-size:14.5px;line-height:1.8;grid-column:1/-1;}
+.empty-state code{background:var(--gray-bg);padding:2px 6px;border-radius:4px;font-size:13.5px;}
 
 footer{background:var(--gov-header);color:rgba(255,255,255,.5);padding:22px 0;margin-top:40px;}
-.footer-inner{max-width:1280px;margin:0 auto;padding:0 24px;font-size:11.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.footer-inner{max-width:1320px;margin:0 auto;padding:0 24px;font-size:13px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;}
 .footer-inner a:hover{color:#fff;}
 
 @media (max-width:720px){
@@ -112,8 +125,8 @@ footer{background:var(--gov-header);color:rgba(255,255,255,.5);padding:22px 0;ma
 <body>
 
 <div class="ref-banner">
-  <strong>단일 소스 참조 안내</strong> — 이 페이지의 실·국·과 목록은 현재 <code style="background:rgba(0,0,0,.06);padding:1px 5px;border-radius:3px;">desktop.html#k-government</code>의 "제주" 탭을 참조합니다.
-  본 페이지가 과 단위까지 완전히 채워지면, 참조 방향이 반전되어 k-government 제주 탭이 이 페이지를 참조하게 될 예정입니다.
+  <strong>단일 소스 참조 안내</strong> — 실·국·과 목록은 현재 <code>desktop.html#k-government</code>의 "제주" 탭을 참조합니다.
+  본 페이지가 과·팀 단위까지 완전히 채워지면 참조 방향이 반전되어 k-government 제주 탭이 이 페이지를 참조하게 될 예정입니다.
 </div>
 
 <nav class="topnav">
@@ -127,22 +140,29 @@ footer{background:var(--gov-header);color:rgba(255,255,255,.5);padding:22px 0;ma
 </nav>
 
 <div class="page-head">
-  <h1>제주 AI 행정 — 실·국·과 단위 실행 지도</h1>
-  <p>제주특별자치도청 15실·국 70과 체제를 실·국 단위로 먼저 고르고, 그 아래 과(課) 단위 SP까지 내려가 바로 실행합니다. 각 카드는 SP 원문·설명 문서·실행 화면(regional-gov.html) 세 곳으로 연결됩니다.<br>
-  <span style="color:var(--amber);font-weight:600;">* "실행" 링크는 regional-gov.html에 sp/return 파라미터로 직접 여는 기능이 구현된 이후 작동합니다 — 아래 "실행 링크 구현 제안" 참고.</span></p>
+  <h1>제주 AI 행정 — 기관 · 국·부서 · 과·팀 단위 실행 지도</h1>
+  <p>제주특별자치도청·제주시청·서귀포시청·43개 읍면동 행정복지센터를 기관 단위로 먼저 고르고, 그 아래 국(局)·과(課)·팀 단위 SP까지 내려가 바로 실행합니다. 각 카드는 SP 원문·설명 문서·실행 화면 세 곳으로 연결됩니다.<br>
+  <span class="exec-note">* "실행" 링크는 regional-gov.html에 sp/return 파라미터로 직접 여는 기능이 구현된 이후 작동합니다(현재 제안 단계 — 설계서 참고).</span></p>
 </div>
 
 <div class="main">
+  <div class="inst-wrap">
+    <div class="inst-group-label">기관 선택 (4)</div>
+    <div class="inst-tabs" id="instTabs"></div>
+  </div>
+
   <div class="tier1-wrap">
-    <div class="tier1-label">실·국 선택 (17)</div>
-    <div class="tier1-tabs" id="tier1Tabs"></div>
+    <div class="tier1-label" id="tier1Label">국·부서 선택</div>
+    <div id="tier1Container">
+      <div class="tier1-tabs" id="tier1Tabs"></div>
+    </div>
   </div>
 
   <div class="bureau-strip" id="bureauStrip"></div>
 
   <div class="tier2-section">
     <div class="tier2-head">
-      <h2 id="tier2Title">과(課) 단위</h2>
+      <h2 id="tier2Title">과·팀 단위</h2>
       <div class="tier2-count" id="tier2Count"></div>
     </div>
     <div class="division-grid" id="divisionGrid"></div>
@@ -159,34 +179,34 @@ footer{background:var(--gov-header);color:rgba(255,255,255,.5);padding:22px 0;ma
 <script>
 /*
  * ────────────────────────────────────────────────────────────────────
- * 데이터 소스 안내 (실제 연동 시 이 블록을 교체)
+ * 데이터 소스 안내 — 2026-09-17, 실제 원본 파일에서 직접 생성
  * ────────────────────────────────────────────────────────────────────
- * 실·국(BUREAUS) 17개 명칭은 desktop.html#k-government "제주 부서" 탭에서
- * 그대로 가져온 값입니다(2026-09-17 기준 확인).
+ * 아래 DO_BUREAUS / JEJUSI_BUREAUS / SEOGWIPO_BUREAUS / EMD_TEAMS는
+ * 전부 실제 저장소 원본 파일을 직접 받아 파싱해 생성한 데이터입니다
+ * (raw.githubusercontent.com/Openhash-Gopang/hondi/main/... 에서 직접
+ * fetch — 이름을 추측하거나 검색 스니펫에서 추정한 값이 아닙니다):
+ *   - src/gopang/gov/division-tables.js
+ *     → DO_DEPT_DIVISION_TABLE(도청 과), CITY_DIVISION_TABLE(시청 과)
+ *   - prompts/gov-tree/04-city/templates/city-dept-master-data.json
+ *     → 시청 국(局) 컨테이너 레코드(국이름 등)
+ *   - prompts/gov-tree/05-emd/templates/team-master-data.json
+ *     → 43개 읍면동 × 184개 팀 전체
  *
- * 과(divisions) 데이터는 실제로는 repo의 division-tables.js가 내보내는
- * DO_DEPT_DIVISION_TABLE에서 로드해야 합니다 — division-master-data.json은
- * PR #279에서 죽은 데이터로 확인되었으므로 절대 쓰지 마십시오.
+ * 확인된 전수 (생성 스크립트 실행 결과와 정확히 일치):
+ *  - 제주도청: 17실·국, division 53개(13개 국에 과 존재, 4개 국은 단일창구)
+ *  - 제주시청: division 48개 + 단일창구 3개 = 51개 리프 SP
+ *  - 서귀포시청: division 39개 + 단일창구 3개 = 42개 리프 SP
+ *  - 43개 읍·면·동 × 184개 팀(전부 team-master-data.json 원문 그대로)
  *
- * 이 목업에서는 "경제활력국" 한 곳만 실제 확인된 이름 3개(경제정책과/
- * 기업정책과/소상공인물류과)로 채우고, 4번째 과는 정확한 명칭이 검색으로
- * 확인되지 않아 "(명칭 확인 필요)"로 표시했습니다. 나머지 16개 실·국은
- * DO_DEPT_DIVISION_TABLE에서 실제 로드하기 전까지 "데이터 연동 필요"
- * 상태로 둡니다 — 개수·이름을 추측해서 채우지 않았습니다.
- *
- * SP 원문 경로 패턴(실제 저장소 구조 기준):
- *   국 단위: prompts/gov-tree/01-do/SP-DO-{DOMAIN}.md
- *   과 단위: prompts/gov-tree/02-do-dept/SP-DIV-{DOMAIN}-{N}.md
- * 실행 화면: pages/regional-gov.html — gov-tree SP의 실제 실행 화면은
- *   webapp.html이 아니라 이 파일입니다(PR #101/#281에서 확인, "전국
- *   지방행정 AI, 모든 지역 공용" 자유발화 채팅 탭).
- *   다만 이 페이지는 현재 자연어 자유발화 전용이며, 특정 SP를 URL
- *   파라미터로 지정해 바로 여는 기능이 아직 없습니다(2026-09-17 확인).
- *   저장소에서 확인되는 유일한 직접-오픈 사례는 pages/expert-chat.html의
- *   URLSearchParams(persona, return) 패턴(PR #245, 전문가 페르소나 전용)
- *   뿐입니다. 이 목업은 그 패턴을 regional-gov.html에도 동일하게
- *   구현하는 것을 전제로 sp/return 파라미터를 미리 붙여 두었습니다 —
- *   실제 구현 전까지 "▶ 실행" 버튼은 정상 동작하지 않습니다.
+ * 알려진 데이터 정합성 이슈(추측이 아니라 원본 대조로 발견한 것):
+ *  - 제주시청 agri(농수축산국)·health(제주보건소)는 CITY_DIVISION_TABLE에는
+ *    있지만(division 9개, 실제 라우팅 가능) city-dept-master-data.json의
+ *    국목록에는 컨테이너 레코드가 없습니다 — 카드에 작은 주석으로 표시.
+ *  - 읍면동 팀 SP는 과 단위와 달리 팀별 정적 .md 파일이 아니라
+ *    템플릿(예: SP-TEAM-GENERAL-TEMPLATE_v2.1.md) + 이 행의 데이터를
+ *    조합해 런타임에 렌더링되는 구조로 보입니다(gov-template-renderer.js
+ *    참조) — 그래서 팀 카드의 "SP 원문"은 개별 파일이 아니라 템플릿
+ *    파일을 가리킵니다.
  */
 
 const RAW_BASE = "https://raw.githubusercontent.com/Openhash-Gopang/hondi/main/prompts/gov-tree/";
@@ -196,41 +216,542 @@ const EXEC_BASE = "pages/regional-gov.html";
 function spSrcUrl(path) { return RAW_BASE + path; }
 function spDocUrl(path) { return REPO_BASE + path; }
 function execUrl(spId) {
-  // 제안 단계: regional-gov.html은 아직 sp 파라미터로 특정 SP를 직접 여는
-  // 기능이 없습니다(2026-09-17 저장소 확인 기준). expert-chat.html의
-  // URLSearchParams(persona, return) 패턴을 그대로 본떠 구현하는 것을
-  // 설계서에서 제안했습니다 — 이 링크는 그 제안이 구현된 이후를 가정합니다.
   const params = new URLSearchParams({ sp: spId, return: "pages/jeju-gov-automation.html" });
   return `${EXEC_BASE}?${params.toString()}`;
 }
 
-// 17개 실·국 — desktop.html#k-government "제주 부서" 탭과 동일(2026-09-17 확인)
-const BUREAUS = [
-  { id: "welfare",   name: "복지가족국(구 보...)",     spId: "SP-DO-WELFARE",   divisions: null },
-  { id: "plan",      name: "기획조정실",               spId: "SP-DO-PLAN",      divisions: null },
-  { id: "health",    name: "도민안전건강실(...)",       spId: "SP-DO-HEALTH",    divisions: null },
-  { id: "jachi",     name: "특별자치행정국",           spId: "SP-DO-JACHI",     divisions: null },
-  { id: "econ",      name: "경제활력국",               spId: "SP-DO-ECON",      divisions: [
-      { id: "econ-1", name: "경제정책과",      spId: "SP-DIV-ECON-1", confirmed: true },
-      { id: "econ-2", name: "기업정책과",      spId: "SP-DIV-ECON-2", confirmed: true },
-      { id: "econ-3", name: "소상공인물류과",  spId: "SP-DIV-ECON-3", confirmed: true },
-      { id: "econ-4", name: "(명칭 확인 필요 — 고용·노동 관련 과)", spId: "SP-DIV-ECON-4", confirmed: false },
+const DO_BUREAUS = [
+  { id: "welfare", name: "복지가족국(구 보...)", spId: "SP-DO-WELFARE", divisions: [
+      { id: "SP-DIV-WELFARE-CHILDCARE", name: "아동보육청소년과", spId: "SP-DIV-WELFARE-CHILDCARE", file: "02-do-dept/divisions/SP-DIV-WELFARE-CHILDCARE_v1.0.md", confirmed: true },
+      { id: "SP-DIV-WELFARE-DISABLED", name: "장애인복지과", spId: "SP-DIV-WELFARE-DISABLED", file: "02-do-dept/divisions/SP-DIV-WELFARE-DISABLED_v1.0.md", confirmed: true },
+      { id: "SP-DIV-WELFARE-ELDERLY", name: "노인복지과", spId: "SP-DIV-WELFARE-ELDERLY", file: "02-do-dept/divisions/SP-DIV-WELFARE-ELDERLY_v1.0.md", confirmed: true },
   ]},
-  { id: "innov",     name: "혁신산업국",               spId: "SP-DO-INNOV",     divisions: null },
-  { id: "climate",   name: "기후환경국",               spId: "SP-DO-CLIMATE",   divisions: null, divisionCount: 4 },
-  { id: "housing",   name: "건설주택국",               spId: "SP-DO-HOUSING",   divisions: null, divisionCount: 4 },
-  { id: "transport", name: "교통항공국",               spId: "SP-DO-TRANSPORT", divisions: null, divisionCount: 4 },
-  { id: "culture",   name: "문화체육교육국",           spId: "SP-DO-CULTURE",   divisions: null, divisionCount: 3 },
-  { id: "tourism",   name: "관광교류국",               spId: "SP-DO-TOURISM",   divisions: null, divisionCount: 3 },
-  { id: "agri",      name: "농축산식품국",             spId: "SP-DO-AGRI",      divisions: null, divisionCount: 5 },
-  { id: "ocean",     name: "해양수산국",               spId: "SP-DO-OCEAN",     divisions: null, divisionCount: 4 },
-  { id: "comm",      name: "소통청렴담당관",           spId: "SP-DO-COMM",      divisions: null },
-  { id: "general",   name: "총무과",                   spId: "SP-DO-GENERAL",   divisions: null },
-  { id: "central",   name: "중앙협력본부",             spId: "SP-DO-CENTRAL",   divisions: null },
-  { id: "spokesman", name: "대변인",                   spId: "SP-DO-SPOKES",    divisions: null },
+  { id: "plan", name: "기획조정실", spId: "SP-DO-PLAN", divisions: [
+      { id: "SP-DIV-PLAN-BUDGET", name: "예산담당관", spId: "SP-DIV-PLAN-BUDGET", file: "02-do-dept/divisions/SP-DIV-PLAN-BUDGET_v1.0.md", confirmed: true },
+      { id: "SP-DIV-PLAN-LEGAL", name: "특별자치법무담당관", spId: "SP-DIV-PLAN-LEGAL", file: "02-do-dept/divisions/SP-DIV-PLAN-LEGAL_v1.0.md", confirmed: true },
+      { id: "SP-DIV-PLAN-POLICY", name: "정책기획관", spId: "SP-DIV-PLAN-POLICY", file: "02-do-dept/divisions/SP-DIV-PLAN-POLICY_v1.0.md", confirmed: true },
+      { id: "SP-DIV-PLAN-POPULATION", name: "인구정책담당관", spId: "SP-DIV-PLAN-POPULATION", file: "02-do-dept/divisions/SP-DIV-PLAN-POPULATION_v1.0.md", confirmed: true },
+      { id: "SP-DIV-PLAN-TAXADMIN", name: "세정담당관", spId: "SP-DIV-PLAN-TAXADMIN", file: "02-do-dept/divisions/SP-DIV-PLAN-TAXADMIN_v1.0.md", confirmed: true },
+      { id: "SP-DIV-PLAN-YOUTH", name: "청년정책담당관", spId: "SP-DIV-PLAN-YOUTH", file: "02-do-dept/divisions/SP-DIV-PLAN-YOUTH_v1.0.md", confirmed: true },
+  ]},
+  { id: "health", name: "도민안전건강실(...)", spId: "SP-DO-SAFETY", divisions: [
+      { id: "SP-DIV-SAFETY-HEALTHHYGIENE", name: "건강위생과", spId: "SP-DIV-SAFETY-HEALTHHYGIENE", file: "02-do-dept/divisions/SP-DIV-SAFETY-HEALTHHYGIENE_v1.0.md", confirmed: true },
+      { id: "SP-DIV-SAFETY-HEALTHPOLICY", name: "보건정책과", spId: "SP-DIV-SAFETY-HEALTHPOLICY", file: "02-do-dept/divisions/SP-DIV-SAFETY-HEALTHPOLICY_v1.0.md", confirmed: true },
+      { id: "SP-DIV-SAFETY-NATURALDISASTER", name: "자연재난과", spId: "SP-DIV-SAFETY-NATURALDISASTER", file: "02-do-dept/divisions/SP-DIV-SAFETY-NATURALDISASTER_v1.0.md", confirmed: true },
+      { id: "SP-DIV-SAFETY-POLICY", name: "안전정책과", spId: "SP-DIV-SAFETY-POLICY", file: "02-do-dept/divisions/SP-DIV-SAFETY-POLICY_v1.0.md", confirmed: true },
+      { id: "SP-DIV-SAFETY-SOCIALDISASTER", name: "사회재난과", spId: "SP-DIV-SAFETY-SOCIALDISASTER", file: "02-do-dept/divisions/SP-DIV-SAFETY-SOCIALDISASTER_v1.0.md", confirmed: true },
+  ]},
+  { id: "jachi", name: "특별자치행정국", spId: "SP-DO-JACHI", divisions: [
+      { id: "SP-DIV-JACHI-43SUPPORT", name: "4·3지원과", spId: "SP-DIV-JACHI-43SUPPORT", file: "02-do-dept/divisions/SP-DIV-JACHI-43SUPPORT_v1.1.md", confirmed: true },
+      { id: "SP-DIV-JACHI-ACCOUNTING", name: "회계재산관리과", spId: "SP-DIV-JACHI-ACCOUNTING", file: "02-do-dept/divisions/SP-DIV-JACHI-ACCOUNTING_v1.1.md", confirmed: true },
+      { id: "SP-DIV-JACHI-GENERAL", name: "총무과", spId: "SP-DIV-JACHI-GENERAL", file: "02-do-dept/divisions/SP-DIV-JACHI-GENERAL_v1.0.md", confirmed: true },
+      { id: "SP-DIV-JACHI-SELFGOV", name: "자치행정과", spId: "SP-DIV-JACHI-SELFGOV", file: "02-do-dept/divisions/SP-DIV-JACHI-SELFGOV_v1.0.md", confirmed: true },
+  ]},
+  { id: "econ", name: "경제활력국", spId: "SP-DO-ECON", divisions: [
+      { id: "SP-DIV-ECON-JOBECONOMY", name: "경제정책과", spId: "SP-DIV-ECON-JOBECONOMY", file: "02-do-dept/divisions/SP-DIV-ECON-JOBECONOMY_v1.0.md", confirmed: true },
+      { id: "SP-DIV-ECON-INVESTMENT", name: "기업정책과", spId: "SP-DIV-ECON-INVESTMENT", file: "02-do-dept/divisions/SP-DIV-ECON-INVESTMENT_v1.0.md", confirmed: true },
+      { id: "SP-DIV-ECON-SMALLBIZ", name: "소상공인물류과", spId: "SP-DIV-ECON-SMALLBIZ", file: "02-do-dept/divisions/SP-DIV-ECON-SMALLBIZ_v1.0.md", confirmed: true },
+      { id: "SP-DIV-ECON-EMPLOYCENTER", name: "고용센터", spId: "SP-DIV-ECON-EMPLOYCENTER", file: "02-do-dept/divisions/SP-DIV-ECON-EMPLOYCENTER_v1.0.md", confirmed: true },
+  ]},
+  { id: "innov", name: "혁신산업국", spId: "SP-DO-INNOV", divisions: [
+      { id: "SP-DIV-INNOV-DIGITAL", name: "디지털혁신과", spId: "SP-DIV-INNOV-DIGITAL", file: "02-do-dept/divisions/SP-DIV-INNOV-DIGITAL_v1.0.md", confirmed: true },
+      { id: "SP-DIV-INNOV-ENERGYINDUSTRY", name: "에너지산업과", spId: "SP-DIV-INNOV-ENERGYINDUSTRY", file: "02-do-dept/divisions/SP-DIV-INNOV-ENERGYINDUSTRY_v1.0.md", confirmed: true },
+      { id: "SP-DIV-INNOV-FUTUREGROWTH", name: "미래성장과", spId: "SP-DIV-INNOV-FUTUREGROWTH", file: "02-do-dept/divisions/SP-DIV-INNOV-FUTUREGROWTH_v1.0.md", confirmed: true },
+      { id: "SP-DIV-INNOV-SPACEMOBILITY", name: "우주모빌리티과", spId: "SP-DIV-INNOV-SPACEMOBILITY", file: "02-do-dept/divisions/SP-DIV-INNOV-SPACEMOBILITY_v1.0.md", confirmed: true },
+  ]},
+  { id: "climate", name: "기후환경국", spId: "SP-DO-CLIMATE", divisions: [
+      { id: "SP-DIV-CLIMATE-ENVPOLICY", name: "환경정책과", spId: "SP-DIV-CLIMATE-ENVPOLICY", file: "02-do-dept/divisions/SP-DIV-CLIMATE-ENVPOLICY_v1.0.md", confirmed: true },
+      { id: "SP-DIV-CLIMATE-WATERPOLICY", name: "물정책과", spId: "SP-DIV-CLIMATE-WATERPOLICY", file: "02-do-dept/divisions/SP-DIV-CLIMATE-WATERPOLICY_v1.0.md", confirmed: true },
+      { id: "SP-DIV-CLIMATE-RECYCLING", name: "자원순환과", spId: "SP-DIV-CLIMATE-RECYCLING", file: "02-do-dept/divisions/SP-DIV-CLIMATE-RECYCLING_v1.0.md", confirmed: true },
+      { id: "SP-DIV-CLIMATE-FORESTGREEN", name: "산림녹지과", spId: "SP-DIV-CLIMATE-FORESTGREEN", file: "02-do-dept/divisions/SP-DIV-CLIMATE-FORESTGREEN_v1.0.md", confirmed: true },
+  ]},
+  { id: "housing", name: "건설주택국", spId: "SP-DO-HOUSING", divisions: [
+      { id: "SP-DIV-HOUSING-CONSTRUCTION", name: "건설주택국) 건설과", spId: "SP-DIV-HOUSING-CONSTRUCTION", file: "02-do-dept/divisions/SP-DIV-HOUSING-CONSTRUCTION_v1.0.md", confirmed: true },
+      { id: "SP-DIV-HOUSING-ARCHITECTURE", name: "건설주택국) 건축경관과", spId: "SP-DIV-HOUSING-ARCHITECTURE", file: "02-do-dept/divisions/SP-DIV-HOUSING-ARCHITECTURE_v1.0.md", confirmed: true },
+      { id: "SP-DIV-HOUSING-HOUSINGLAND", name: "건설주택국) 주택토지과", spId: "SP-DIV-HOUSING-HOUSINGLAND", file: "02-do-dept/divisions/SP-DIV-HOUSING-HOUSINGLAND_v1.0.md", confirmed: true },
+      { id: "SP-DIV-HOUSING-ROADMANAGE", name: "건설주택국) 도로관리과", spId: "SP-DIV-HOUSING-ROADMANAGE", file: "02-do-dept/divisions/SP-DIV-HOUSING-ROADMANAGE_v1.0.md", confirmed: true },
+  ]},
+  { id: "transport", name: "교통항공국", spId: "SP-DO-TRANSPORT", divisions: [
+      { id: "SP-DIV-TRANSPORT-TRAFFICPOLICY", name: "교통정책과", spId: "SP-DIV-TRANSPORT-TRAFFICPOLICY", file: "02-do-dept/divisions/SP-DIV-TRANSPORT-TRAFFICPOLICY_v1.0.md", confirmed: true },
+      { id: "SP-DIV-TRANSPORT-PUBLICTRANSPORT", name: "대중교통과", spId: "SP-DIV-TRANSPORT-PUBLICTRANSPORT", file: "02-do-dept/divisions/SP-DIV-TRANSPORT-PUBLICTRANSPORT_v1.0.md", confirmed: true },
+      { id: "SP-DIV-TRANSPORT-URBANPLAN", name: "도시계획과", spId: "SP-DIV-TRANSPORT-URBANPLAN", file: "02-do-dept/divisions/SP-DIV-TRANSPORT-URBANPLAN_v1.0.md", confirmed: true },
+      { id: "SP-DIV-TRANSPORT-15MINCITY", name: "15분도시과", spId: "SP-DIV-TRANSPORT-15MINCITY", file: "02-do-dept/divisions/SP-DIV-TRANSPORT-15MINCITY_v1.0.md", confirmed: true },
+  ]},
+  { id: "culture", name: "문화체육교육국", spId: "SP-DO-CULTURE", divisions: [
+      { id: "SP-DIV-CULTURE-CULTUREPOLICY", name: "문화정책과", spId: "SP-DIV-CULTURE-CULTUREPOLICY", file: "02-do-dept/divisions/SP-DIV-CULTURE-CULTUREPOLICY_v1.0.md", confirmed: true },
+      { id: "SP-DIV-CULTURE-SPORTSPROMO", name: "체육진흥과", spId: "SP-DIV-CULTURE-SPORTSPROMO", file: "02-do-dept/divisions/SP-DIV-CULTURE-SPORTSPROMO_v1.0.md", confirmed: true },
+      { id: "SP-DIV-CULTURE-EDUCOOPERATION", name: "교육정책협력과", spId: "SP-DIV-CULTURE-EDUCOOPERATION", file: "02-do-dept/divisions/SP-DIV-CULTURE-EDUCOOPERATION_v1.0.md", confirmed: true },
+  ]},
+  { id: "tourism", name: "관광교류국", spId: "SP-DO-TOURISM", divisions: [
+      { id: "SP-DIV-TOURISM-TOURISMPOLICY", name: "관광정책과", spId: "SP-DIV-TOURISM-TOURISMPOLICY", file: "02-do-dept/divisions/SP-DIV-TOURISM-TOURISMPOLICY_v1.0.md", confirmed: true },
+      { id: "SP-DIV-TOURISM-TOURISMINDUSTRY", name: "관광산업과", spId: "SP-DIV-TOURISM-TOURISMINDUSTRY", file: "02-do-dept/divisions/SP-DIV-TOURISM-TOURISMINDUSTRY_v1.0.md", confirmed: true },
+      { id: "SP-DIV-TOURISM-PEACEDIPLOMACY", name: "평화외교과", spId: "SP-DIV-TOURISM-PEACEDIPLOMACY", file: "02-do-dept/divisions/SP-DIV-TOURISM-PEACEDIPLOMACY_v1.0.md", confirmed: true },
+  ]},
+  { id: "agri", name: "농축산식품국", spId: "SP-DO-AGRI", divisions: [
+      { id: "SP-DIV-AGRI-ECOFARMPOLICY", name: "친환경농업정책과", spId: "SP-DIV-AGRI-ECOFARMPOLICY", file: "02-do-dept/divisions/SP-DIV-AGRI-ECOFARMPOLICY_v1.0.md", confirmed: true },
+      { id: "SP-DIV-AGRI-FOODINDUSTRY", name: "식품산업과", spId: "SP-DIV-AGRI-FOODINDUSTRY", file: "02-do-dept/divisions/SP-DIV-AGRI-FOODINDUSTRY_v1.0.md", confirmed: true },
+      { id: "SP-DIV-AGRI-CITRUS", name: "감귤유통과", spId: "SP-DIV-AGRI-CITRUS", file: "02-do-dept/divisions/SP-DIV-AGRI-CITRUS_v1.0.md", confirmed: true },
+      { id: "SP-DIV-AGRI-LIVESTOCKPOLICY", name: "친환경축산정책과", spId: "SP-DIV-AGRI-LIVESTOCKPOLICY", file: "02-do-dept/divisions/SP-DIV-AGRI-LIVESTOCKPOLICY_v1.0.md", confirmed: true },
+      { id: "SP-DIV-AGRI-ANIMALQUARANTINE", name: "동물방역과", spId: "SP-DIV-AGRI-ANIMALQUARANTINE", file: "02-do-dept/divisions/SP-DIV-AGRI-ANIMALQUARANTINE_v1.0.md", confirmed: true },
+  ]},
+  { id: "ocean", name: "해양수산국", spId: "SP-DO-OCEAN", divisions: [
+      { id: "SP-DIV-OCEAN-MARINEPOLICY", name: "수산정책과", spId: "SP-DIV-OCEAN-MARINEPOLICY", file: "02-do-dept/divisions/SP-DIV-OCEAN-MARINEPOLICY_v1.0.md", confirmed: true },
+      { id: "SP-DIV-OCEAN-MARINEINDUSTRY", name: "해양산업과", spId: "SP-DIV-OCEAN-MARINEINDUSTRY", file: "02-do-dept/divisions/SP-DIV-OCEAN-MARINEINDUSTRY_v1.0.md", confirmed: true },
+      { id: "SP-DIV-OCEAN-HAENYEOHERITAGE", name: "해녀문화유산과", spId: "SP-DIV-OCEAN-HAENYEOHERITAGE", file: "02-do-dept/divisions/SP-DIV-OCEAN-HAENYEOHERITAGE_v1.0.md", confirmed: true },
+      { id: "SP-DIV-OCEAN-PORTHARBOR", name: "해운항만과", spId: "SP-DIV-OCEAN-PORTHARBOR", file: "02-do-dept/divisions/SP-DIV-OCEAN-PORTHARBOR_v1.0.md", confirmed: true },
+  ]},
+  { id: "comm", name: "소통청렴담당관", spId: null, divisions: null },
+  { id: "general", name: "총무과", spId: null, divisions: null },
+  { id: "central", name: "중앙협력본부", spId: null, divisions: null },
+  { id: "spokesman", name: "대변인", spId: null, divisions: null },
 ];
 
+const JEJUSI_BUREAUS = [
+  { id: "jejusi-jachi", name: "자치행정국", spId: "SP-CITYDO-JEJUSI-JACHI", divisions: [
+      { id: "SP-CITYDIV-JEJUSI-JACHI-BASICGOVPREP", name: "자치행정국 기초자치단체 설치준비지원단", spId: "SP-CITYDIV-JEJUSI-JACHI-BASICGOVPREP", file: "04-city/divisions/SP-CITYDIV-JEJUSI-JACHI-BASICGOVPREP_v1.2.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-JACHI-BUDGET", name: "자치행정국 기획예산과", spId: "SP-CITYDIV-JEJUSI-JACHI-BUDGET", file: "04-city/divisions/SP-CITYDIV-JEJUSI-JACHI-BUDGET_v1.2.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-JACHI-GENERAL", name: "자치행정국 총무과", spId: "SP-CITYDIV-JEJUSI-JACHI-GENERAL", file: "04-city/divisions/SP-CITYDIV-JEJUSI-JACHI-GENERAL_v1.2.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-JACHI-PROPERTYTAX", name: "자치행정국 재산세과", spId: "SP-CITYDIV-JEJUSI-JACHI-PROPERTYTAX", file: "04-city/divisions/SP-CITYDIV-JEJUSI-JACHI-PROPERTYTAX_v1.2.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-JACHI-SELFGOV", name: "자치행정국 자치행정과", spId: "SP-CITYDIV-JEJUSI-JACHI-SELFGOV", file: "04-city/divisions/SP-CITYDIV-JEJUSI-JACHI-SELFGOV_v1.2.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-JACHI-TAX", name: "자치행정국 세무과", spId: "SP-CITYDIV-JEJUSI-JACHI-TAX", file: "04-city/divisions/SP-CITYDIV-JEJUSI-JACHI-TAX_v1.3.md", confirmed: true },
+  ]},
+  { id: "jejusi-safety", name: "안전교통위생국", spId: "SP-CITYDO-JEJUSI-SAFETY", divisions: [
+      { id: "SP-CITYDIV-JEJUSI-SAFETY-GENERAL", name: "안전교통국 안전총괄과", spId: "SP-CITYDIV-JEJUSI-SAFETY-GENERAL", file: "04-city/divisions/SP-CITYDIV-JEJUSI-SAFETY-GENERAL_v1.1.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-SAFETY-TRAFFIC", name: "안전교통국 교통행정과", spId: "SP-CITYDIV-JEJUSI-SAFETY-TRAFFIC", file: "04-city/divisions/SP-CITYDIV-JEJUSI-SAFETY-TRAFFIC_v1.1.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-SAFETY-VEHICLE", name: "안전교통국 차량관리과", spId: "SP-CITYDIV-JEJUSI-SAFETY-VEHICLE", file: "04-city/divisions/SP-CITYDIV-JEJUSI-SAFETY-VEHICLE_v1.1.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-SAFETY-HYGIENE", name: "안전교통위생국 위생관리과", spId: "SP-CITYDIV-JEJUSI-SAFETY-HYGIENE", file: "04-city/divisions/SP-CITYDIV-JEJUSI-SAFETY-HYGIENE_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-SAFETY-FOODSAFETY", name: "안전교통위생국 식품안전과", spId: "SP-CITYDIV-JEJUSI-SAFETY-FOODSAFETY", file: "04-city/divisions/SP-CITYDIV-JEJUSI-SAFETY-FOODSAFETY_v1.0.md", confirmed: true },
+  ]},
+  { id: "jejusi-welfare", name: "복지가족국", spId: "SP-CITYDO-JEJUSI-WELFARE", divisions: [
+      { id: "SP-CITYDIV-JEJUSI-WELFARE-BASICLIVELIHOOD", name: "복지위생국 기초생활보장과", spId: "SP-CITYDIV-JEJUSI-WELFARE-BASICLIVELIHOOD", file: "04-city/divisions/SP-CITYDIV-JEJUSI-WELFARE-BASICLIVELIHOOD_v1.1.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-WELFARE-DISABLED", name: "복지위생국 장애인복지과", spId: "SP-CITYDIV-JEJUSI-WELFARE-DISABLED", file: "04-city/divisions/SP-CITYDIV-JEJUSI-WELFARE-DISABLED_v1.1.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-WELFARE-ELDERLY", name: "복지위생국 노인복지과", spId: "SP-CITYDIV-JEJUSI-WELFARE-ELDERLY", file: "04-city/divisions/SP-CITYDIV-JEJUSI-WELFARE-ELDERLY_v1.1.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-WELFARE-INTEGRATEDCARE", name: "복지가족국 통합돌봄과", spId: "SP-CITYDIV-JEJUSI-WELFARE-INTEGRATEDCARE", file: "04-city/divisions/SP-CITYDIV-JEJUSI-WELFARE-INTEGRATEDCARE_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-WELFARE-RESIDENT", name: "복지위생국 주민복지과", spId: "SP-CITYDIV-JEJUSI-WELFARE-RESIDENT", file: "04-city/divisions/SP-CITYDIV-JEJUSI-WELFARE-RESIDENT_v1.1.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-WELFARE-WOMENFAMILY", name: "복지위생국 여성가족과", spId: "SP-CITYDIV-JEJUSI-WELFARE-WOMENFAMILY", file: "04-city/divisions/SP-CITYDIV-JEJUSI-WELFARE-WOMENFAMILY_v1.1.md", confirmed: true },
+  ]},
+  { id: "jejusi-econ", name: "경제일자리국", spId: "SP-CITYDO-JEJUSI-ECON", divisions: [
+      { id: "SP-CITYDIV-JEJUSI-ECON-DIGITAL", name: "경제일자리국 디지털혁신과", spId: "SP-CITYDIV-JEJUSI-ECON-DIGITAL", file: "04-city/divisions/SP-CITYDIV-JEJUSI-ECON-DIGITAL_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-ECON-JOBENERGY", name: "경제일자리국 일자리에너지과", spId: "SP-CITYDIV-JEJUSI-ECON-JOBENERGY", file: "04-city/divisions/SP-CITYDIV-JEJUSI-ECON-JOBENERGY_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-ECON-SMB", name: "경제일자리국 경제소상공인과", spId: "SP-CITYDIV-JEJUSI-ECON-SMB", file: "04-city/divisions/SP-CITYDIV-JEJUSI-ECON-SMB_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-ECON-VILLAGE", name: "경제일자리국 마을활력과", spId: "SP-CITYDIV-JEJUSI-ECON-VILLAGE", file: "04-city/divisions/SP-CITYDIV-JEJUSI-ECON-VILLAGE_v1.1.md", confirmed: true },
+  ]},
+  { id: "jejusi-culture", name: "문화관광체육국", spId: "SP-CITYDO-JEJUSI-CULTURE", divisions: [
+      { id: "SP-CITYDIV-JEJUSI-CULTURE-ARTCENTER", name: "문화관광체육국 제주아트센터", spId: "SP-CITYDIV-JEJUSI-CULTURE-ARTCENTER", file: "04-city/divisions/SP-CITYDIV-JEJUSI-CULTURE-ARTCENTER_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-CULTURE-ART", name: "문화관광체육국 문화예술과", spId: "SP-CITYDIV-JEJUSI-CULTURE-ART", file: "04-city/divisions/SP-CITYDIV-JEJUSI-CULTURE-ART_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-CULTURE-SPORTS", name: "문화관광체육국 체육진흥과", spId: "SP-CITYDIV-JEJUSI-CULTURE-SPORTS", file: "04-city/divisions/SP-CITYDIV-JEJUSI-CULTURE-SPORTS_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-CULTURE-TAMNALIB", name: "문화관광체육국 탐라도서관", spId: "SP-CITYDIV-JEJUSI-CULTURE-TAMNALIB", file: "04-city/divisions/SP-CITYDIV-JEJUSI-CULTURE-TAMNALIB_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-CULTURE-TOURISM", name: "문화관광체육국 관광진흥과", spId: "SP-CITYDIV-JEJUSI-CULTURE-TOURISM", file: "04-city/divisions/SP-CITYDIV-JEJUSI-CULTURE-TOURISM_v1.1.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-CULTURE-UDANGLIB", name: "문화관광체육국 우당도서관", spId: "SP-CITYDIV-JEJUSI-CULTURE-UDANGLIB", file: "04-city/divisions/SP-CITYDIV-JEJUSI-CULTURE-UDANGLIB_v1.0.md", confirmed: true },
+  ]},
+  { id: "jejusi-climate", name: "청정환경국", spId: "SP-CITYDO-JEJUSI-CLIMATE", divisions: [
+      { id: "SP-CITYDIV-JEJUSI-CLIMATE-ENVGUIDE", name: "청정환경국 환경지도과", spId: "SP-CITYDIV-JEJUSI-CLIMATE-ENVGUIDE", file: "04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-ENVGUIDE_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT", name: "청정환경국 환경관리과", spId: "SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT", file: "04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT_v1.1.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-CLIMATE-FACILITY", name: "청정환경국 환경시설관리소", spId: "SP-CITYDIV-JEJUSI-CLIMATE-FACILITY", file: "04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-FACILITY_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-CLIMATE-JEOLMUL", name: "청정환경국 절물생태관리소", spId: "SP-CITYDIV-JEJUSI-CLIMATE-JEOLMUL", file: "04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-JEOLMUL_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-CLIMATE-LIVINGENV", name: "청정환경국 생활환경과", spId: "SP-CITYDIV-JEJUSI-CLIMATE-LIVINGENV", file: "04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-LIVINGENV_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-CLIMATE-PARKS", name: "청정환경국 공원녹지과", spId: "SP-CITYDIV-JEJUSI-CLIMATE-PARKS", file: "04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-PARKS_v1.1.md", confirmed: true },
+  ]},
+  { id: "jejusi-housing", name: "도시건설국", spId: "SP-CITYDO-JEJUSI-HOUSING", divisions: [
+      { id: "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CITYPLAN", name: "도시건설국 도시계획과", spId: "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CITYPLAN", file: "04-city/divisions/SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CITYPLAN_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-REGEN", name: "도시건설국 도시재생과", spId: "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-REGEN", file: "04-city/divisions/SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-REGEN_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CONSTRUCT", name: "도시건설국 건설과", spId: "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CONSTRUCT", file: "04-city/divisions/SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CONSTRUCT_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-HOUSING", name: "도시건설국 주택과", spId: "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-HOUSING", file: "04-city/divisions/SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-HOUSING_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-BUILDING", name: "도시건설국 건축과", spId: "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-BUILDING", file: "04-city/divisions/SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-BUILDING_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-WATER", name: "도시건설국 상하수도과", spId: "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-WATER", file: "04-city/divisions/SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-WATER_v1.1.md", confirmed: true },
+  ]},
+  { id: "jejusi-agri", name: "agri", spId: "SP-CITYDO-JEJUSI-AGRI", divisions: [
+      { id: "SP-CITYDIV-JEJUSI-AGRI-ECOFARM", name: "농수축산국 친환경농정과", spId: "SP-CITYDIV-JEJUSI-AGRI-ECOFARM", file: "04-city/divisions/SP-CITYDIV-JEJUSI-AGRI-ECOFARM_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-AGRI-CITRUS", name: "농수축산국 감귤유통과", spId: "SP-CITYDIV-JEJUSI-AGRI-CITRUS", file: "04-city/divisions/SP-CITYDIV-JEJUSI-AGRI-CITRUS_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-AGRI-FISHERY", name: "농수축산국 해양수산과", spId: "SP-CITYDIV-JEJUSI-AGRI-FISHERY", file: "04-city/divisions/SP-CITYDIV-JEJUSI-AGRI-FISHERY_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-AGRI-LIVESTOCK", name: "농수축산국 청정축산과", spId: "SP-CITYDIV-JEJUSI-AGRI-LIVESTOCK", file: "04-city/divisions/SP-CITYDIV-JEJUSI-AGRI-LIVESTOCK_v1.0.md", confirmed: true },
+  ]},
+  { id: "jejusi-health", name: "health", spId: "SP-CITYDO-JEJUSI-HEALTH", divisions: [
+      { id: "SP-CITYDIV-JEJUSI-HEALTH-ADMIN", name: "제주보건소 보건행정과", spId: "SP-CITYDIV-JEJUSI-HEALTH-ADMIN", file: "04-city/divisions/SP-CITYDIV-JEJUSI-HEALTH-ADMIN_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-HEALTH-EPIDEMIC", name: "제주보건소 감염예방의약과", spId: "SP-CITYDIV-JEJUSI-HEALTH-EPIDEMIC", file: "04-city/divisions/SP-CITYDIV-JEJUSI-HEALTH-EPIDEMIC_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-HEALTH-PROMOTION", name: "제주보건소 건강증진과", spId: "SP-CITYDIV-JEJUSI-HEALTH-PROMOTION", file: "04-city/divisions/SP-CITYDIV-JEJUSI-HEALTH-PROMOTION_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-HEALTH-WESTCENTER", name: "제주보건소 서부보건소", spId: "SP-CITYDIV-JEJUSI-HEALTH-WESTCENTER", file: "04-city/divisions/SP-CITYDIV-JEJUSI-HEALTH-WESTCENTER_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-HEALTH-EASTCENTER", name: "제주보건소 동부보건소", spId: "SP-CITYDIV-JEJUSI-HEALTH-EASTCENTER", file: "04-city/divisions/SP-CITYDIV-JEJUSI-HEALTH-EASTCENTER_v1.0.md", confirmed: true },
+  ]},
+  { id: "jejusi-comm", name: "소통청렴지원실", spId: "SP-CITYDO-JEJUSI-COMM", divisions: null },
+  { id: "jejusi-pr", name: "공보실", spId: "SP-CITYDO-JEJUSI-PR", divisions: null },
+  { id: "jejusi-civilaffairs", name: "종합민원실", spId: "SP-CITYDO-JEJUSI-CIVILAFFAIRS", divisions: null },
+];
+
+const SEOGWIPO_BUREAUS = [
+  { id: "seogwipo-jachi", name: "자치행정국", spId: "SP-CITYDO-SEOGWIPO-JACHI", divisions: [
+      { id: "SP-CITYDIV-SEOGWIPO-JACHI-BASICGOVPREP", name: "자치행정국 기초자치단체설치준비지원단", spId: "SP-CITYDIV-SEOGWIPO-JACHI-BASICGOVPREP", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-JACHI-BASICGOVPREP_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-JACHI-BUDGET", name: "자치행정국 기획예산과", spId: "SP-CITYDIV-SEOGWIPO-JACHI-BUDGET", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-JACHI-BUDGET_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-JACHI-GENERAL", name: "자치행정국 총무과", spId: "SP-CITYDIV-SEOGWIPO-JACHI-GENERAL", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-JACHI-GENERAL_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-JACHI-LIFELONGED", name: "자치행정국 평생교육과", spId: "SP-CITYDIV-SEOGWIPO-JACHI-LIFELONGED", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-JACHI-LIFELONGED_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-JACHI-SELFGOV", name: "자치행정국 자치행정과", spId: "SP-CITYDIV-SEOGWIPO-JACHI-SELFGOV", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-JACHI-SELFGOV_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-JACHI-TAX", name: "자치행정국 세무과", spId: "SP-CITYDIV-SEOGWIPO-JACHI-TAX", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-JACHI-TAX_v1.1.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-JACHI-VILLAGE", name: "자치행정국 마을활력과", spId: "SP-CITYDIV-SEOGWIPO-JACHI-VILLAGE", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-JACHI-VILLAGE_v1.1.md", confirmed: true },
+  ]},
+  { id: "seogwipo-welfare", name: "복지위생국", spId: "SP-CITYDO-SEOGWIPO-WELFARE", divisions: [
+      { id: "SP-CITYDIV-SEOGWIPO-WELFARE-DISABLED", name: "복지위생국 장애인복지과", spId: "SP-CITYDIV-SEOGWIPO-WELFARE-DISABLED", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-WELFARE-DISABLED_v1.1.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-WELFARE-ELDERLY", name: "복지위생국 노인복지과", spId: "SP-CITYDIV-SEOGWIPO-WELFARE-ELDERLY", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-WELFARE-ELDERLY_v1.1.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-WELFARE-HYGIENE", name: "복지위생국 위생관리과", spId: "SP-CITYDIV-SEOGWIPO-WELFARE-HYGIENE", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-WELFARE-HYGIENE_v1.1.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-WELFARE-RESIDENT", name: "복지위생국 주민복지과", spId: "SP-CITYDIV-SEOGWIPO-WELFARE-RESIDENT", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-WELFARE-RESIDENT_v1.1.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-WELFARE-INTEGRATEDCARE", name: "복지위생국 통합돌봄과", spId: "SP-CITYDIV-SEOGWIPO-WELFARE-INTEGRATEDCARE", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-WELFARE-INTEGRATEDCARE_v1.0.md", confirmed: true },
+  ]},
+  { id: "seogwipo-culture", name: "문화관광체육국", spId: "SP-CITYDO-SEOGWIPO-CULTURE", divisions: [
+      { id: "SP-CITYDIV-SEOGWIPO-CULTURE-ARTMUSEUM", name: "문화관광체육국 서귀포 공립미술관", spId: "SP-CITYDIV-SEOGWIPO-CULTURE-ARTMUSEUM", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-CULTURE-ARTMUSEUM_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-CULTURE-ARTSHALL", name: "문화관광체육국 서귀포예술의전당", spId: "SP-CITYDIV-SEOGWIPO-CULTURE-ARTSHALL", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-CULTURE-ARTSHALL_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-CULTURE-ART", name: "문화관광체육국 문화예술과", spId: "SP-CITYDIV-SEOGWIPO-CULTURE-ART", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-CULTURE-ART_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-CULTURE-LIBRARYMGMT", name: "문화관광체육국 도서관운영사무소", spId: "SP-CITYDIV-SEOGWIPO-CULTURE-LIBRARYMGMT", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-CULTURE-LIBRARYMGMT_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-CULTURE-SPORTS", name: "문화관광체육국 체육진흥과", spId: "SP-CITYDIV-SEOGWIPO-CULTURE-SPORTS", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-CULTURE-SPORTS_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-CULTURE-TOURISMFACILITY", name: "문화관광체육국 관광지관리소", spId: "SP-CITYDIV-SEOGWIPO-CULTURE-TOURISMFACILITY", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-CULTURE-TOURISMFACILITY_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-CULTURE-TOURISM", name: "문화관광체육국 관광진흥과", spId: "SP-CITYDIV-SEOGWIPO-CULTURE-TOURISM", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-CULTURE-TOURISM_v1.1.md", confirmed: true },
+  ]},
+  { id: "seogwipo-agrieconomy", name: "농수축산경제국", spId: "SP-CITYDO-SEOGWIPO-AGRIECONOMY", divisions: [
+      { id: "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-CITRUS", name: "농수축산경제국 감귤유통과", spId: "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-CITRUS", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-AGRIECONOMY-CITRUS_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-DIGITAL", name: "농수축산경제국 디지털혁신과", spId: "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-DIGITAL", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-AGRIECONOMY-DIGITAL_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-ECOFARM", name: "농수축산경제국 친환경농정과", spId: "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-ECOFARM", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-AGRIECONOMY-ECOFARM_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-FISHERY", name: "농수축산경제국 해양수산과", spId: "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-FISHERY", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-AGRIECONOMY-FISHERY_v1.1.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-JOBS", name: "농수축산경제국 경제일자리과", spId: "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-JOBS", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-AGRIECONOMY-JOBS_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-LIVESTOCK", name: "농수축산경제국 청정축산과", spId: "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-LIVESTOCK", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-AGRIECONOMY-LIVESTOCK_v1.1.md", confirmed: true },
+  ]},
+  { id: "seogwipo-climate", name: "청정환경국", spId: "SP-CITYDO-SEOGWIPO-CLIMATE", divisions: [
+      { id: "SP-CITYDIV-SEOGWIPO-CLIMATE-ENVMGMT", name: "청정환경국 기후환경과", spId: "SP-CITYDIV-SEOGWIPO-CLIMATE-ENVMGMT", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-CLIMATE-ENVMGMT_v1.1.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-CLIMATE-FORESTRECREATION", name: "청정환경국 산림휴양관리소", spId: "SP-CITYDIV-SEOGWIPO-CLIMATE-FORESTRECREATION", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-CLIMATE-FORESTRECREATION_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-CLIMATE-LIVINGENV", name: "청정환경국 생활환경과", spId: "SP-CITYDIV-SEOGWIPO-CLIMATE-LIVINGENV", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-CLIMATE-LIVINGENV_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-CLIMATE-PARKS", name: "청정환경국 공원녹지과", spId: "SP-CITYDIV-SEOGWIPO-CLIMATE-PARKS", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-CLIMATE-PARKS_v1.1.md", confirmed: true },
+  ]},
+  { id: "seogwipo-housing", name: "안전도시건설국", spId: "SP-CITYDO-SEOGWIPO-HOUSING", divisions: [
+      { id: "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-BUILDING", name: "안전도시건설국 건축과", spId: "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-BUILDING", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-CONSTRUCTION-BUILDING_v1.3.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-CITY", name: "안전도시건설국 도시과", spId: "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-CITY", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-CONSTRUCTION-CITY_v1.1.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-CONSTRUCT", name: "안전도시건설국 건설과", spId: "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-CONSTRUCT", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-CONSTRUCTION-CONSTRUCT_v1.1.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-GENERAL", name: "안전도시건설국 안전총괄과", spId: "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-GENERAL", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-CONSTRUCTION-GENERAL_v1.1.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-TRAFFIC", name: "안전도시건설국 교통행정과", spId: "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-TRAFFIC", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-CONSTRUCTION-TRAFFIC_v1.1.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-WATER", name: "안전도시건설국 상하수도과", spId: "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-WATER", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-CONSTRUCTION-WATER_v1.2.md", confirmed: true },
+  ]},
+  { id: "seogwipo-health", name: "서귀포보건소", spId: "SP-CITYDO-SEOGWIPO-HEALTH", divisions: [
+      { id: "SP-CITYDIV-SEOGWIPO-HEALTH-ADMIN", name: "서귀포보건소 보건행정과", spId: "SP-CITYDIV-SEOGWIPO-HEALTH-ADMIN", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-HEALTH-ADMIN_v1.1.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-HEALTH-EASTCENTER", name: "서귀포보건소 동부보건소", spId: "SP-CITYDIV-SEOGWIPO-HEALTH-EASTCENTER", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-HEALTH-EASTCENTER_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-HEALTH-PROMOTION", name: "서귀포보건소 건강증진과", spId: "SP-CITYDIV-SEOGWIPO-HEALTH-PROMOTION", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-HEALTH-PROMOTION_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-SEOGWIPO-HEALTH-WESTCENTER", name: "서귀포보건소 서부보건소", spId: "SP-CITYDIV-SEOGWIPO-HEALTH-WESTCENTER", file: "04-city/divisions/SP-CITYDIV-SEOGWIPO-HEALTH-WESTCENTER_v1.0.md", confirmed: true },
+  ]},
+  { id: "seogwipo-comm", name: "시민소통지원실", spId: "SP-CITYDO-SEOGWIPO-COMM", divisions: null },
+  { id: "seogwipo-pr", name: "공보실", spId: "SP-CITYDO-SEOGWIPO-PR", divisions: null },
+  { id: "seogwipo-civilaffairs", name: "종합민원실", spId: "SP-CITYDO-SEOGWIPO-CIVILAFFAIRS", divisions: null },
+];
+
+const EMD_TEAMS = {
+  "제주시|애월읍": [
+    { id: "SP-EMD-AEWOL-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-AEWOL", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-AEWOL-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-AEWOL", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-AEWOL-industry", name: "산업팀", teamCode: "industry", emdCode: "SP-EMD-AEWOL", template: "SP-TEAM-INDUSTRY-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-AEWOL-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-AEWOL", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-AEWOL-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-AEWOL", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|조천읍": [
+    { id: "SP-EMD-JOCHEON-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-JOCHEON", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-JOCHEON-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-JOCHEON", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-JOCHEON-industry", name: "산업팀", teamCode: "industry", emdCode: "SP-EMD-JOCHEON", template: "SP-TEAM-INDUSTRY-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-JOCHEON-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-JOCHEON", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-JOCHEON-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-JOCHEON", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|구좌읍": [
+    { id: "SP-EMD-GUJWA-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-GUJWA", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-GUJWA-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-GUJWA", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-GUJWA-industry", name: "산업팀", teamCode: "industry", emdCode: "SP-EMD-GUJWA", template: "SP-TEAM-INDUSTRY-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-GUJWA-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-GUJWA", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-GUJWA-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-GUJWA", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|한경면": [
+    { id: "SP-EMD-HANGYEONG-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-HANGYEONG", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-HANGYEONG-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-HANGYEONG", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-HANGYEONG-industry", name: "산업팀", teamCode: "industry", emdCode: "SP-EMD-HANGYEONG", template: "SP-TEAM-INDUSTRY-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-HANGYEONG-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-HANGYEONG", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-HANGYEONG-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-HANGYEONG", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|추자면": [
+    { id: "SP-EMD-CHUJA-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-CHUJA", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-CHUJA-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-CHUJA", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-CHUJA-industry", name: "산업팀", teamCode: "industry", emdCode: "SP-EMD-CHUJA", template: "SP-TEAM-INDUSTRY-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-CHUJA-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-CHUJA", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-CHUJA-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-CHUJA", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|우도면": [
+    { id: "SP-EMD-UDO-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-UDO", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-UDO-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-UDO", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-UDO-industry", name: "산업팀", teamCode: "industry", emdCode: "SP-EMD-UDO", template: "SP-TEAM-INDUSTRY-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-UDO-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-UDO", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-UDO-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-UDO", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "서귀포시|대정읍": [
+    { id: "SP-EMD-DAEJEONG-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-DAEJEONG", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-DAEJEONG-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-DAEJEONG", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-DAEJEONG-industry", name: "산업팀", teamCode: "industry", emdCode: "SP-EMD-DAEJEONG", template: "SP-TEAM-INDUSTRY-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-DAEJEONG-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-DAEJEONG", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-DAEJEONG-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-DAEJEONG", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "서귀포시|남원읍": [
+    { id: "SP-EMD-NAMWON-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-NAMWON", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-NAMWON-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-NAMWON", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-NAMWON-industry", name: "산업팀", teamCode: "industry", emdCode: "SP-EMD-NAMWON", template: "SP-TEAM-INDUSTRY-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-NAMWON-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-NAMWON", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-NAMWON-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-NAMWON", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "서귀포시|성산읍": [
+    { id: "SP-EMD-SEONGSAN-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-SEONGSAN", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-SEONGSAN-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-SEONGSAN", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-SEONGSAN-industry", name: "산업팀", teamCode: "industry", emdCode: "SP-EMD-SEONGSAN", template: "SP-TEAM-INDUSTRY-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-SEONGSAN-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-SEONGSAN", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-SEONGSAN-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-SEONGSAN", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "서귀포시|안덕면": [
+    { id: "SP-EMD-ANDEOK-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-ANDEOK", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-ANDEOK-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-ANDEOK", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-ANDEOK-industry", name: "산업팀", teamCode: "industry", emdCode: "SP-EMD-ANDEOK", template: "SP-TEAM-INDUSTRY-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-ANDEOK-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-ANDEOK", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-ANDEOK-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-ANDEOK", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "서귀포시|표선면": [
+    { id: "SP-EMD-PYOSEON-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-PYOSEON", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-PYOSEON-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-PYOSEON", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-PYOSEON-industry", name: "산업팀", teamCode: "industry", emdCode: "SP-EMD-PYOSEON", template: "SP-TEAM-INDUSTRY-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-PYOSEON-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-PYOSEON", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-PYOSEON-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-PYOSEON", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|일도1동": [
+    { id: "SP-EMD-ILDO1-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-ILDO1", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-ILDO1-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-ILDO1", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-ILDO1-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-ILDO1", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-ILDO1-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-ILDO1", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|일도2동": [
+    { id: "SP-EMD-ILDO2-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-ILDO2", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-ILDO2-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-ILDO2", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-ILDO2-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-ILDO2", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-ILDO2-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-ILDO2", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|이도1동": [
+    { id: "SP-EMD-IDO1-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-IDO1", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-IDO1-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-IDO1", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-IDO1-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-IDO1", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-IDO1-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-IDO1", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|이도2동": [
+    { id: "SP-EMD-IDO2-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-IDO2", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-IDO2-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-IDO2", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-IDO2-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-IDO2", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-IDO2-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-IDO2", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|삼도1동": [
+    { id: "SP-EMD-SAMDO1-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-SAMDO1", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-SAMDO1-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-SAMDO1", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-SAMDO1-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-SAMDO1", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-SAMDO1-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-SAMDO1", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|삼도2동": [
+    { id: "SP-EMD-SAMDO2-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-SAMDO2", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-SAMDO2-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-SAMDO2", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-SAMDO2-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-SAMDO2", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-SAMDO2-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-SAMDO2", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|용담1동": [
+    { id: "SP-EMD-YONGDAM1-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-YONGDAM1", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-YONGDAM1-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-YONGDAM1", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-YONGDAM1-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-YONGDAM1", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-YONGDAM1-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-YONGDAM1", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|용담2동": [
+    { id: "SP-EMD-YONGDAM2-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-YONGDAM2", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-YONGDAM2-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-YONGDAM2", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-YONGDAM2-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-YONGDAM2", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-YONGDAM2-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-YONGDAM2", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|건입동": [
+    { id: "SP-EMD-GEONIP-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-GEONIP", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-GEONIP-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-GEONIP", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-GEONIP-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-GEONIP", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-GEONIP-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-GEONIP", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|화북동": [
+    { id: "SP-EMD-HWABUK-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-HWABUK", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-HWABUK-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-HWABUK", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-HWABUK-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-HWABUK", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-HWABUK-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-HWABUK", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|삼양동": [
+    { id: "SP-EMD-SAMYANG-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-SAMYANG", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-SAMYANG-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-SAMYANG", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-SAMYANG-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-SAMYANG", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-SAMYANG-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-SAMYANG", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|봉개동": [
+    { id: "SP-EMD-BONGGAE-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-BONGGAE", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-BONGGAE-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-BONGGAE", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-BONGGAE-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-BONGGAE", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-BONGGAE-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-BONGGAE", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|아라동": [
+    { id: "SP-EMD-ARA-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-ARA", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-ARA-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-ARA", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-ARA-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-ARA", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-ARA-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-ARA", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|오라동": [
+    { id: "SP-EMD-ORA-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-ORA", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-ORA-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-ORA", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-ORA-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-ORA", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-ORA-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-ORA", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|연동": [
+    { id: "SP-EMD-YEONDONG-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-YEONDONG", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-YEONDONG-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-YEONDONG", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-YEONDONG-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-YEONDONG", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-YEONDONG-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-YEONDONG", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|노형동": [
+    { id: "SP-EMD-NOHYEONG-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-NOHYEONG", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-NOHYEONG-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-NOHYEONG", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-NOHYEONG-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-NOHYEONG", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-NOHYEONG-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-NOHYEONG", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|외도동": [
+    { id: "SP-EMD-OEDO-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-OEDO", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-OEDO-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-OEDO", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-OEDO-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-OEDO", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-OEDO-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-OEDO", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|이호동": [
+    { id: "SP-EMD-IHO-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-IHO", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-IHO-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-IHO", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-IHO-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-IHO", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-IHO-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-IHO", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|도두동": [
+    { id: "SP-EMD-DODU-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-DODU", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-DODU-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-DODU", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-DODU-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-DODU", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-DODU-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-DODU", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "서귀포시|송산동": [
+    { id: "SP-EMD-SONGSAN-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-SONGSAN", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-SONGSAN-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-SONGSAN", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-SONGSAN-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-SONGSAN", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-SONGSAN-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-SONGSAN", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "서귀포시|정방동": [
+    { id: "SP-EMD-JEONGBANG-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-JEONGBANG", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-JEONGBANG-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-JEONGBANG", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-JEONGBANG-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-JEONGBANG", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-JEONGBANG-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-JEONGBANG", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "서귀포시|중앙동": [
+    { id: "SP-EMD-JUNGANG-SGP-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-JUNGANG-SGP", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-JUNGANG-SGP-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-JUNGANG-SGP", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-JUNGANG-SGP-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-JUNGANG-SGP", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-JUNGANG-SGP-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-JUNGANG-SGP", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "서귀포시|천지동": [
+    { id: "SP-EMD-CHEONJI-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-CHEONJI", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-CHEONJI-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-CHEONJI", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-CHEONJI-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-CHEONJI", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-CHEONJI-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-CHEONJI", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "서귀포시|효돈동": [
+    { id: "SP-EMD-HYODON-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-HYODON", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-HYODON-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-HYODON", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-HYODON-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-HYODON", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-HYODON-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-HYODON", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "서귀포시|영천동": [
+    { id: "SP-EMD-YEONGCHEON-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-YEONGCHEON", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-YEONGCHEON-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-YEONGCHEON", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-YEONGCHEON-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-YEONGCHEON", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-YEONGCHEON-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-YEONGCHEON", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "서귀포시|동홍동": [
+    { id: "SP-EMD-DONGHONG-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-DONGHONG", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-DONGHONG-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-DONGHONG", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-DONGHONG-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-DONGHONG", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-DONGHONG-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-DONGHONG", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "서귀포시|서홍동": [
+    { id: "SP-EMD-SEOHONG-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-SEOHONG", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-SEOHONG-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-SEOHONG", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-SEOHONG-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-SEOHONG", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-SEOHONG-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-SEOHONG", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "서귀포시|대륜동": [
+    { id: "SP-EMD-DAERYUN-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-DAERYUN", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-DAERYUN-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-DAERYUN", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-DAERYUN-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-DAERYUN", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-DAERYUN-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-DAERYUN", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "서귀포시|대천동": [
+    { id: "SP-EMD-DAECHEON-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-DAECHEON", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-DAECHEON-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-DAECHEON", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-DAECHEON-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-DAECHEON", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-DAECHEON-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-DAECHEON", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "서귀포시|중문동": [
+    { id: "SP-EMD-JUNGMUN-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-JUNGMUN", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-JUNGMUN-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-JUNGMUN", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-JUNGMUN-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-JUNGMUN", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-JUNGMUN-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-JUNGMUN", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "서귀포시|예래동": [
+    { id: "SP-EMD-YERAE-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-YERAE", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-YERAE-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-YERAE", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-YERAE-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-YERAE", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-YERAE-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-YERAE", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+  "제주시|한림읍": [
+    { id: "SP-EMD-HALLIM-general", name: "총무팀", teamCode: "general", emdCode: "SP-EMD-HALLIM", template: "SP-TEAM-GENERAL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-HALLIM-civil", name: "민원팀", teamCode: "civil", emdCode: "SP-EMD-HALLIM", template: "SP-TEAM-CIVIL-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-HALLIM-industry", name: "산업팀", teamCode: "industry", emdCode: "SP-EMD-HALLIM", template: "SP-TEAM-INDUSTRY-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-HALLIM-welfare", name: "주민복지팀", teamCode: "welfare", emdCode: "SP-EMD-HALLIM", template: "SP-TEAM-WELFARE-TEMPLATE_v2.1.md", confirmed: true },
+    { id: "SP-EMD-HALLIM-outreach", name: "찾아가는복지팀", teamCode: "outreach", emdCode: "SP-EMD-HALLIM", template: "SP-TEAM-OUTREACH-TEMPLATE_v2.1.md", confirmed: true },
+  ],
+};
+
+// ── 43개 읍·면·동 (공식 행정구역 통계 기준, 2026-09-17 확인) ──
+const JEJUSI_EMD = ["구좌읍","애월읍","조천읍","한림읍","한경면","추자면","우도면",
+  "건입동","노형동","도두동","봉개동","삼도1동","삼도2동","삼양동","아라동","연동",
+  "오라동","외도동","용담1동","용담2동","이도1동","이도2동","이호동","일도1동","일도2동","화북동"];
+const SEOGWIPO_EMD = ["대정읍","남원읍","성산읍","안덕면","표선면",
+  "송산동","정방동","중앙동","천지동","효돈동","영천동","동홍동","서홍동","대륜동","대천동","중문동","예래동"];
+
+function makeEmdInstitution(name, parentCity, parentId) {
+  const teams = EMD_TEAMS[`${parentCity}|${name}`] || [];
+  return {
+    id: `emd-${parentId}-${name}`,
+    name: `${name} 행정복지센터`,
+    shortName: name,
+    parentCity,
+    kind: "emd",
+    teams,
+  };
+}
+
+const EMD_LIST = [
+  ...JEJUSI_EMD.map(n => makeEmdInstitution(n, "제주시", "jejusi")),
+  ...SEOGWIPO_EMD.map(n => makeEmdInstitution(n, "서귀포시", "seogwipo")),
+];
+
+const INSTITUTIONS = [
+  { id: "do",       name: "제주특별자치도청", kind: "gov", bureaus: DO_BUREAUS },
+  { id: "jejusi",   name: "제주시청",         kind: "gov", bureaus: JEJUSI_BUREAUS },
+  { id: "seogwipo", name: "서귀포시청",       kind: "gov", bureaus: SEOGWIPO_BUREAUS },
+  { id: "emd-root", name: "읍면동 행정복지센터", kind: "emdRoot" },
+];
+
+let activeInstId = "do";
 let activeBureauId = "econ";
+let activeEmdId = EMD_LIST[0].id;
+
+function currentInst() { return INSTITUTIONS.find(x => x.id === activeInstId); }
+function currentEmd() { return EMD_LIST.find(x => x.id === activeEmdId); }
+function currentBureau() {
+  const inst = currentInst();
+  if (inst.kind !== "gov") return null;
+  return inst.bureaus.find(b => b.id === activeBureauId) || inst.bureaus[0];
+}
 
 function bureauCountLabel(b) {
   if (Array.isArray(b.divisions)) return b.divisions.length;
@@ -238,22 +759,91 @@ function bureauCountLabel(b) {
   return null;
 }
 
-function renderTier1() {
-  const wrap = document.getElementById("tier1Tabs");
+function renderInstTabs() {
+  const wrap = document.getElementById("instTabs");
   wrap.innerHTML = "";
-  BUREAUS.forEach(b => {
+  INSTITUTIONS.forEach(inst => {
+    const btn = document.createElement("button");
+    btn.className = "inst-tab" + (inst.id === activeInstId ? " active" : "");
+    btn.textContent = inst.name;
+    btn.onclick = () => selectInstitution(inst.id);
+    wrap.appendChild(btn);
+  });
+}
+
+function selectInstitution(id) {
+  activeInstId = id;
+  const inst = currentInst();
+  if (inst.kind === "gov") activeBureauId = inst.bureaus[0].id;
+  render();
+}
+
+function selectEmd(id) {
+  activeEmdId = id;
+  render();
+}
+
+function renderTier1() {
+  const inst = currentInst();
+  const label = document.getElementById("tier1Label");
+  const container = document.getElementById("tier1Container");
+  container.innerHTML = "";
+
+  if (inst.kind === "emdRoot") {
+    label.textContent = `읍·면·동 선택 (43)`;
+    [["제주시 (26)", "제주시"], ["서귀포시 (17)", "서귀포시"]].forEach(([groupLabel, city]) => {
+      const block = document.createElement("div");
+      block.className = "emd-city-block";
+      const cityLabel = document.createElement("div");
+      cityLabel.className = "emd-city-name";
+      cityLabel.textContent = groupLabel;
+      block.appendChild(cityLabel);
+      const row = document.createElement("div");
+      row.className = "emd-tabs";
+      EMD_LIST.filter(e => e.parentCity === city).forEach(e => {
+        const btn = document.createElement("button");
+        btn.className = "emd-tab" + (e.id === activeEmdId ? " active" : "");
+        btn.textContent = e.shortName;
+        btn.onclick = () => selectEmd(e.id);
+        row.appendChild(btn);
+      });
+      block.appendChild(row);
+      container.appendChild(block);
+    });
+    return;
+  }
+
+  label.textContent = `${inst.name} — 국·부서 선택 (${inst.bureaus.length})`;
+
+  const tabRow = document.createElement("div");
+  tabRow.className = "tier1-tabs";
+  inst.bureaus.forEach(b => {
     const btn = document.createElement("button");
     btn.className = "tier1-tab" + (b.id === activeBureauId ? " active" : "");
     const cnt = bureauCountLabel(b);
     btn.innerHTML = b.name + (cnt !== null ? `<span class="count">${cnt}</span>` : "");
     btn.onclick = () => { activeBureauId = b.id; render(); };
-    wrap.appendChild(btn);
+    tabRow.appendChild(btn);
   });
+  container.appendChild(tabRow);
 }
 
 function renderBureauStrip() {
-  const b = BUREAUS.find(x => x.id === activeBureauId);
+  const inst = currentInst();
   const strip = document.getElementById("bureauStrip");
+
+  if (inst.kind === "emdRoot") {
+    const e = currentEmd();
+    strip.innerHTML = `
+      <div>
+        <div class="bureau-strip-title">${e.name}</div>
+        <div class="bureau-strip-sub">${e.parentCity} 소속 — ${e.teams.length}개 팀 (team-master-data.json, 2026-09-17 확인)</div>
+      </div>`;
+    return;
+  }
+
+  const b = currentBureau();
+  if (!b.spId) { strip.innerHTML = ""; return; }
   const doPath = `01-do/${b.spId}.md`;
   strip.innerHTML = `
     <div>
@@ -268,47 +858,70 @@ function renderBureauStrip() {
 }
 
 function renderTier2() {
-  const b = BUREAUS.find(x => x.id === activeBureauId);
+  const inst = currentInst();
   const title = document.getElementById("tier2Title");
   const count = document.getElementById("tier2Count");
   const grid = document.getElementById("divisionGrid");
-
-  title.textContent = `${b.name} 산하 과(課) 단위`;
   grid.innerHTML = "";
 
-  if (Array.isArray(b.divisions) && b.divisions.length > 0) {
-    count.textContent = `${b.divisions.length}개 과`;
-    b.divisions.forEach(d => {
-      const divPath = `02-do-dept/${d.spId}.md`;
+  if (inst.kind === "emdRoot") {
+    const e = currentEmd();
+    title.textContent = `${e.name} 산하 팀 단위`;
+    count.textContent = `${e.teams.length}개 팀`;
+    e.teams.forEach(t => {
       const card = document.createElement("div");
-      card.className = "division-card" + (d.confirmed ? "" : " unconfirmed");
+      card.className = "division-card";
+      const templatePath = `05-emd/templates/${t.template}`;
       card.innerHTML = `
-        <div class="division-name">${d.name}</div>
-        <div class="division-badge ${d.confirmed ? "confirmed" : "pending"}">
-          ${d.confirmed ? "① 제주 확정" : "④ 명칭 미확인"}
-        </div>
+        <div class="division-name">${t.name}</div>
+        <div class="division-badge confirmed">① 제주 확정</div>
         <div class="division-icons">
-          <a href="${spSrcUrl(divPath)}" target="_blank">🔗 SP</a>
-          <a href="${spDocUrl(divPath)}" target="_blank">📄 문서</a>
-          <a class="exec" href="${execUrl(d.spId)}" target="_blank">▶ 실행*</a>
+          <a href="${spSrcUrl(templatePath)}" target="_blank">🔗 템플릿</a>
+          <a href="${spDocUrl(templatePath)}" target="_blank">📄 문서</a>
+          <a class="exec" href="${execUrl(t.id)}" target="_blank">▶ 실행*</a>
         </div>`;
       grid.appendChild(card);
     });
     return;
   }
 
-  // 과 데이터 미연동 상태 — 개수만 아는 경우와 전혀 모르는 경우를 구분해 표시
+  const b = currentBureau();
+  const divPathBase = inst.id === "do" ? "02-do-dept/" : "02-city-dept/";
+  title.textContent = `${b.name} 산하 과(課) 단위`;
+
+  if (Array.isArray(b.divisions) && b.divisions.length > 0) {
+    count.textContent = `${b.divisions.length}개 과`;
+    b.divisions.forEach(d => {
+      const card = document.createElement("div");
+      card.className = "division-card" + (d.confirmed ? "" : " unconfirmed");
+      const icons = d.spId
+        ? `<a href="${spSrcUrl(divPathBase + d.spId + ".md")}" target="_blank">🔗 SP</a>
+           <a href="${spDocUrl(divPathBase + d.spId + ".md")}" target="_blank">📄 문서</a>
+           <a class="exec" href="${execUrl(d.spId)}" target="_blank">▶ 실행*</a>`
+        : `<span>🔗 SP</span><span>📄 문서</span><span>▶ 실행*</span>`;
+      card.innerHTML = `
+        <div class="division-name">${d.name}</div>
+        <div class="division-badge ${d.confirmed ? "confirmed" : "pending"}">
+          ${d.confirmed ? "① 제주 확정" : "④ 명칭 미확인"}
+        </div>
+        <div class="division-icons">${icons}</div>`;
+      grid.appendChild(card);
+    });
+    return;
+  }
+
   count.textContent = b.divisionCount ? `${b.divisionCount}개 과 (명칭 미연동)` : "데이터 연동 필요";
   grid.innerHTML = `
-    <div class="empty-state" style="grid-column:1/-1;">
+    <div class="empty-state">
       ${b.divisionCount
-        ? `이 실·국 산하에 과 ${b.divisionCount}개가 있는 것으로 확인되었으나, 정확한 과 이름은 아직 이 페이지에 연동되지 않았습니다.`
-        : `이 실·국의 과 단위 데이터가 아직 이 페이지에 연동되지 않았습니다.`}
-      <br>저장소의 <code>division-tables.js</code> → <code>DO_DEPT_DIVISION_TABLE</code>에서 실제 목록을 불러와야 합니다.
+        ? `이 국·부서 산하에 과 ${b.divisionCount}개가 있는 것으로 확인되었으나, 정확한 과 이름은 아직 이 페이지에 연동되지 않았습니다.`
+        : `이 국·부서의 과 단위 데이터가 아직 이 페이지에 연동되지 않았습니다.`}
+      <br>저장소의 실제 division 테이블에서 목록을 불러와야 합니다.
     </div>`;
 }
 
 function render() {
+  renderInstTabs();
   renderTier1();
   renderBureauStrip();
   renderTier2();
