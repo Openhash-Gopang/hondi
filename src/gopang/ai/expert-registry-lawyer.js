@@ -72,13 +72,20 @@ export const LAWYER_REGISTRY = {
     label: '변호사(부동산)', icon: '⚖️', category: 'LAW', ownerAgency: 'klaw',
     key: 'SP_lawyer-realestate', needsMedicalSafety: false,
     parentKey: 'lawyer',
-    triggers: ['부동산 전문 변호사', '임대차 분쟁 상담'],
+    // 2026-09-17 추가 — candidate-prefilter.js가 순수 부분문자열 매칭이라
+    // "부동산 변호사"(구어체, '전문' 생략)는 이 세부분야 트리거에 안 걸리고
+    // klaw의 짧은 트리거 '변호사'만 걸려, 0단계 후보 목록에서 이 리프
+    // 자체가 아예 빠지는 사고 확인(실사 재현: routing_ABmention_live_
+    // smoketest.py 결과). '전문' 없는 구어체 변형을 추가.
+    triggers: ['부동산 전문 변호사', '부동산 변호사', '임대차 분쟁 상담'],
   },
   'lawyer-traffic': {
     label: '변호사(교통사고)', icon: '⚖️', category: 'LAW', ownerAgency: 'klaw',
     key: 'SP_lawyer-traffic', needsMedicalSafety: false,
     parentKey: 'lawyer',
-    triggers: ['교통사고 전문 변호사'],
+    // 2026-09-17 추가 — 위 lawyer-realestate와 동일 사유(구어체 '전문'
+    // 생략형 미매칭 → klaw로 새는 사고, 실사 재현 확인).
+    triggers: ['교통사고 전문 변호사', '교통사고 변호사'],
   },
   'lawyer-damages': {
     label: '변호사(손해배상)', icon: '⚖️', category: 'LAW', ownerAgency: 'klaw',
@@ -90,7 +97,8 @@ export const LAWYER_REGISTRY = {
     label: '변호사(등기·경매)', icon: '⚖️', category: 'LAW', ownerAgency: 'klaw',
     key: 'SP_lawyer-auction', needsMedicalSafety: false,
     parentKey: 'lawyer',
-    triggers: ['경매 전문 변호사', '명도소송 상담'],
+    // 2026-09-17 추가 — 동일 사유(구어체 '전문' 생략형 미매칭).
+    triggers: ['경매 전문 변호사', '경매 변호사', '등기 변호사', '명도소송 상담'],
   },
   'lawyer-commercial': {
     label: '변호사(상사법)', icon: '⚖️', category: 'LAW', ownerAgency: 'klaw',
@@ -126,13 +134,17 @@ export const LAWYER_REGISTRY = {
     label: '변호사(금융)', icon: '⚖️', category: 'LAW', ownerAgency: 'klaw',
     key: 'SP_lawyer-finance', needsMedicalSafety: false,
     parentKey: 'lawyer',
-    triggers: ['금융 전문 변호사', '대출 약관 분쟁'],
+    // 2026-09-17 추가 — 동일 사유(구어체 '전문' 생략형 미매칭).
+    triggers: ['금융 전문 변호사', '금융 변호사', '대출 약관 분쟁'],
   },
   'lawyer-insurance': {
     label: '변호사(보험)', icon: '⚖️', category: 'LAW', ownerAgency: 'klaw',
     key: 'SP_lawyer-insurance', needsMedicalSafety: false,
     parentKey: 'lawyer',
-    triggers: ['보험 전문 변호사', '보험금 지급거절 상담'],
+    // 2026-09-17 추가 — 동일 사유. 실사 재현 사례: "보험 변호사 AI 불러줘"
+    // → klaw도 아니고 kinsurance로 새어 "변호사" 요청 자체가 무시됨(가장
+    // 심각한 오탐 사례).
+    triggers: ['보험 전문 변호사', '보험 변호사', '보험금 지급거절 상담'],
   },
   'lawyer-government-contract': {
     label: '변호사(국가계약)', icon: '⚖️', category: 'LAW', ownerAgency: 'klaw',
@@ -186,19 +198,25 @@ export const LAWYER_REGISTRY = {
     label: '변호사(식품·의약)', icon: '⚖️', category: 'LAW', ownerAgency: 'klaw',
     key: 'SP_lawyer-foodpharma', needsMedicalSafety: false,
     parentKey: 'lawyer',
-    triggers: ['식품 의약 전문 변호사', '제조물책임 소송'],
+    // 2026-09-17 추가 — 동일 사유.
+    triggers: ['식품 의약 전문 변호사', '식품의약 변호사', '제조물책임 소송'],
   },
   'lawyer-maritime': {
     label: '변호사(해상)', icon: '⚖️', category: 'LAW', ownerAgency: 'klaw',
     key: 'SP_lawyer-maritime', needsMedicalSafety: false,
     parentKey: 'lawyer', // 2026-08-07 신설(의사·변호사 세부분야 대폭확장 배치8, 변호사 배치4)
-    triggers: ['해상사고 상담', '선박 관련 계약분쟁'],
+    // 2026-09-17 추가 — 기존 triggers에 '변호사' 단어 자체가 아예 없어서,
+    // "해상 변호사 불러줘"류 명시적 위임 발화조차 이 리프를 후보로 못
+    // 올렸다(실사 재현: [GWP_REGISTRY_SEARCH]로 새어 아예 존재하지 않는
+    // 검색 태그를 지어낸 사고까지 확인됨 — 별도 조치 필요할 수 있음).
+    triggers: ['해상사고 상담', '해상 변호사', '선박 관련 계약분쟁'],
   },
   'lawyer-trade': {
     label: '변호사(무역)', icon: '⚖️', category: 'LAW', ownerAgency: 'klaw',
     key: 'SP_lawyer-trade', needsMedicalSafety: false,
     parentKey: 'lawyer', // 2026-08-07 신설(의사·변호사 세부분야 대폭확장 배치8, 변호사 배치4)
-    triggers: ['무역계약 분쟁', '수출입 대금 미지급'],
+    // 2026-09-17 추가 — 동일 사유(기존 triggers에 '변호사' 단어 없음).
+    triggers: ['무역계약 분쟁', '무역 변호사', '수출입 대금 미지급'],
   },
   'lawyer-shipbuilding': {
     label: '변호사(조선)', icon: '⚖️', category: 'LAW', ownerAgency: 'klaw',
@@ -258,7 +276,8 @@ export const LAWYER_REGISTRY = {
     label: '변호사(해외투자)', icon: '⚖️', category: 'LAW', ownerAgency: 'klaw',
     key: 'SP_lawyer-overseas-investment', needsMedicalSafety: false,
     parentKey: 'lawyer', // 2026-08-07 신설(의사·변호사 세부분야 대폭확장 배치8, 변호사 배치4)
-    triggers: ['해외투자 구조 설계', '해외 M&A 자문'],
+    // 2026-09-17 추가 — 동일 사유.
+    triggers: ['해외투자 구조 설계', '해외투자 변호사', '해외 M&A 자문'],
   },
   'lawyer-sports': {
     label: '변호사(스포츠)', icon: '⚖️', category: 'LAW', ownerAgency: 'klaw',
@@ -270,13 +289,15 @@ export const LAWYER_REGISTRY = {
     label: '변호사(종교)', icon: '⚖️', category: 'LAW', ownerAgency: 'klaw',
     key: 'SP_lawyer-religious', needsMedicalSafety: false,
     parentKey: 'lawyer', // 2026-08-07 신설(의사·변호사 세부분야 대폭확장 배치8, 변호사 배치4)
-    triggers: ['종교단체 재산분쟁', '종교단체 내부 징계'],
+    // 2026-09-17 추가 — 동일 사유.
+    triggers: ['종교단체 재산분쟁', '종교 전문 변호사', '종교단체 내부 징계'],
   },
   'lawyer-guardianship': {
     label: '변호사(성년후견)', icon: '⚖️', category: 'LAW', ownerAgency: 'klaw',
     key: 'SP_lawyer-guardianship', needsMedicalSafety: false,
     parentKey: 'lawyer', // 2026-08-07 신설(의사·변호사 세부분야 대폭확장 배치8, 변호사 배치4)
-    triggers: ['성년후견 개시 심판', '후견인 선임 상담'],
+    // 2026-09-17 추가 — 동일 사유.
+    triggers: ['성년후견 개시 심판', '성년후견 변호사', '후견인 선임 상담'],
   },
   'lawyer-startup': {
     label: '변호사(스타트업)', icon: '⚖️', category: 'LAW', ownerAgency: 'klaw',
@@ -300,7 +321,8 @@ export const LAWYER_REGISTRY = {
     label: '변호사(엔터테인먼트)', icon: '⚖️', category: 'LAW', ownerAgency: 'klaw',
     key: 'SP_lawyer-entertainment', needsMedicalSafety: false,
     parentKey: 'lawyer', // 2026-08-07 신설(의사·변호사 세부분야 대폭확장 배치8, 변호사 배치4)
-    triggers: ['전속계약 검토', '연예인 수익배분 분쟁'],
+    // 2026-09-17 추가 — 동일 사유.
+    triggers: ['전속계약 검토', '엔터테인먼트 변호사', '연예인 수익배분 분쟁'],
   },
   'lawyer-construction': {
     label: '변호사(건설)', icon: '⚖️', category: 'LAW', ownerAgency: 'klaw',
@@ -312,7 +334,8 @@ export const LAWYER_REGISTRY = {
     label: '변호사(재개발·재건축)', icon: '⚖️', category: 'LAW', ownerAgency: 'klaw',
     key: 'SP_lawyer-redevelopment', needsMedicalSafety: false,
     parentKey: 'lawyer', // 2026-08-07 신설(의사·변호사 세부분야 대폭확장 배치8, 변호사 배치4)
-    triggers: ['재개발 조합 분쟁', '관리처분계획 불복'],
+    // 2026-09-17 추가 — 동일 사유.
+    triggers: ['재개발 조합 분쟁', '재개발 변호사', '재건축 변호사', '관리처분계획 불복'],
   },
   // 2026-07-06 신설(전문가 페르소나 누락 감사 결과) — 변호사와 다른 자격.
   // 업무범위(등기·경매·소액사건 등) 초과 시 lawyer로 안내하도록 SP 본문에 명시.
