@@ -506,8 +506,19 @@ async function handlePhoneOtpRequest(request, env, corsHeaders) {
 async function handlePhoneOtpVerify(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
-  const { e164, code, guid } = body;
-  if (!e164 || !code) return _err(400, 'MISSING_FIELD', 'e164, code 필수', corsHeaders);
+  // ★ 2026-09-17 신설 — 실사로 발견한 버그: 이 함수만 e164를 정규화하지
+  // 않고 클라이언트가 보낸 값을 그대로 KV 키로 썼다. handlePhoneOtpRequest는
+  // _normalizePhoneE164()로 "01096627170" → "+8201096627170" 형태로 저장하는데,
+  // 여기서 정규화 없이 "01096627170"을 그대로 쓰면 전혀 다른 키가 되어
+  // "OTP_EXPIRED"(코드가 아니라 키 자체가 없음)로 영구히 실패한다. 실제
+  // 로그인 화면(auth.js의 buildE164)은 요청·검증 양쪽에 항상 이미
+  // 정규화된 같은 문자열을 재사용해 우연히 안 걸렸을 뿐 — 원칙(서버는
+  // 클라이언트 포맷을 신뢰하지 않는다, docs/HONDI_UNIFIED_AUTH_BILLING_
+  // MANUAL 참고)을 지켰다면 애초에 없었을 구멍이다.
+  const e164 = _normalizePhoneE164(body.e164);
+  const { code, guid } = body;
+  if (!e164) return _err(400, 'INVALID_PHONE', '올바른 국내 전화번호 형식이 아닙니다', corsHeaders);
+  if (!code) return _err(400, 'MISSING_FIELD', 'code 필수', corsHeaders);
   if (!env.QR_SESSIONS_KV) return _err(500, 'KV_NOT_BOUND', 'OTP 저장소가 설정되지 않았습니다', corsHeaders);
   if (!env.PHONE_VERIFY_SECRET) return _err(500, 'SECRET_NOT_SET', 'PHONE_VERIFY_SECRET이 설정되지 않았습니다', corsHeaders);
 
