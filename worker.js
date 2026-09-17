@@ -20982,7 +20982,12 @@ async function handleKlawRelay(bodyText, env, corsHeaders, meta = null, ctx = nu
 
   if (isStream) {
     const [forClient, forUsage] = res.body.tee();
-    const usageTask = _parseUsageFromStream(forUsage).then(usage => _recordAiUsage(env, ctx, {
+    // ★ 2026-09-17 신설 — B-1 전수조사로 발견: 이 호출부엔 diagCtx가
+    // 안 배선돼 있었다(callDeepSeek만 배선돼 있었음). _parseUsageFromStream
+    // 내부 주석이 "diagCtx가 있을 때만 동작하므로 기존 4개 호출부는 완전히
+    // 무영향"이라 명시하고 있어, 이 추가는 기존 과금·응답 로직에 아무
+    // 영향 없이 AI_EMPTY_COMPLETION_DIAG 진단 로그만 새로 남긴다.
+    const usageTask = _parseUsageFromStream(forUsage, { env, meta: { tier: tierKey, model: backendModel, guid, ...meta } }).then(usage => _recordAiUsage(env, ctx, {
       guid, serviceId: 'klaw', tier: tierKey, priceTier, model: backendModel, usage,
       logTag: 'KLAW_RELAY_COST', extraLogFields: { elapsedMs: Date.now() - t0, ...meta },
       spendKeys: [userKey, globalKey], onAfterRecord: settleKlaw(usage),
@@ -21292,7 +21297,9 @@ async function handleKPlanRelay(bodyText, env, corsHeaders, meta = null, ctx = n
       return new Response(errText || JSON.stringify({ error:`HTTP ${res.status}` }), { status: res.status, headers: corsHeaders });
     }
     const [forClient, forUsage] = res.body.tee();
-    const usageTask = _parseUsageFromStream(forUsage).then(usage => _recordAiUsage(env, ctx, {
+    // ★ 2026-09-17 신설 — B-1 전수조사로 발견, handleKlawRelay와 동일 패턴.
+    // diagCtx는 진단 전용 가드라 기존 동작에 영향 없음.
+    const usageTask = _parseUsageFromStream(forUsage, { env, meta: { tier: tierKey, model: backendModel, guid, ...meta } }).then(usage => _recordAiUsage(env, ctx, {
       guid, serviceId: 'kplan', tier: tierKey, priceTier, model: backendModel, usage,
       logTag: 'KPLAN_RELAY_COST', extraLogFields: { elapsedMs: Date.now() - t0, ...meta },
       spendKeys: [userKey, globalKey], onAfterRecord: settleKplan(usage),
@@ -22257,7 +22264,8 @@ async function handleBusinessRelay(bodyText, env, corsHeaders, meta = null, ctx 
 
   if (isStream) {
     const [forClient, forUsage] = res.body.tee();
-    const usageTask = _parseUsageFromStream(forUsage).then(usage => _recordAiUsage(env, ctx, {
+    // ★ 2026-09-17 신설 — B-1 전수조사로 발견, handleKlawRelay와 동일 패턴.
+    const usageTask = _parseUsageFromStream(forUsage, { env, meta: { tier: tierKey, model: backendModel, guid, ...meta } }).then(usage => _recordAiUsage(env, ctx, {
       guid, serviceId: `biz:${bizKey}`, tier: tierKey, priceTier, model: backendModel, usage,
       logTag: 'BUSINESS_RELAY_COST', extraLogFields: { business_id: bizKey, ...meta },
       spendKeys: [userKey, globalKey], onAfterRecord: settleBiz(usage),
@@ -26273,7 +26281,8 @@ async function handleGovRelay(bodyText, env, corsHeaders, meta = null, ctx = nul
 
   if (isStream) {
     const [forClient, forUsage] = res.body.tee();
-    const usageTask = _parseUsageFromStream(forUsage).then(usage => billGovCall(usage, agency));
+    // ★ 2026-09-17 신설 — B-1 전수조사로 발견, 나머지 3곳과 동일 패턴.
+    const usageTask = _parseUsageFromStream(forUsage, { env, meta: { tier: tierKey, model: backendModel, guid, ...meta } }).then(usage => billGovCall(usage, agency));
     if (ctx?.waitUntil) ctx.waitUntil(usageTask); else usageTask.catch(() => {});
     return new Response(forClient, { status:200, headers:{ ...corsHeaders, 'Content-Type':'text/event-stream', 'Cache-Control':'no-cache', 'X-Accel-Buffering':'no' } });
   }
