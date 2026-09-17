@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>혼디 관리자</title>
+<link rel="icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/icons/icon-180.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<!-- ══════════════════════════════════════════════════════════
+     관리자 대시보드
+══════════════════════════════════════════════════════════ -->
+<style>
+  /* 관리자 대시보드 진회색 관제 화면 톤 (2026-09-01 재구성, 1단계:
+     컨테이너·로그인·통계·GDC 카드). 색상 토큰만 새로 정의하고 구조·id·
+     onclick은 그대로 둔다 — 기능 변경 없이 톤만 바꾸는 게 목적. */
+  body{
+    --ad-bg:#f4f5f6; --ad-panel:#ffffff; --ad-panel2:#eef0f2;
+    --ad-line:#d9dce1; --ad-line-strong:#b7bcc4;
+    --ad-text:#1a1d21; --ad-dim:#4b5563; --ad-faint:#78808c;
+    --ad-warn:#8a5a12; --ad-crit:#a8362b; --ad-accent:#2c5a86;
+    --ad-mono:'SFMono-Regular','Consolas',monospace;
+  }
+</style>
+<style>
+  /* 관리자 페이지 레이아웃 — 전문적·간결·사무적 톤(관제 패널 스타일).
+     장식용 아이콘·그림자·둥근모서리 남용을 피하고, 표/모노스페이스
+     숫자 중심의 밀도 있는 정보 배치를 우선한다. */
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--ad-bg);}
+  body{font-family:'Pretendard',sans-serif;color:var(--ad-text);line-height:1.5;}
+  a{color:var(--ad-accent);}
+  ::placeholder{color:var(--ad-faint);opacity:1;}
+  #admin-page{max-width:920px;margin:0 auto;padding:0 20px 64px}
+  #admin-page-header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 0;border-bottom:1px solid var(--ad-line);margin-bottom:24px;
+  }
+  #admin-page-header .title{font-size:15px;font-weight:600;letter-spacing:.2px}
+  #admin-page-header .right{display:flex;align-items:center;gap:16px}
+  #admin-page-header a, #admin-page-header span{font-size:12.5px;color:var(--ad-dim);text-decoration:none}
+  #logout-btn{display:none;cursor:pointer;border:1px solid var(--ad-line-strong);border-radius:4px;padding:5px 10px}
+  #logout-btn:hover{background:var(--ad-panel2)}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="admin-page">
+  <div id="admin-page-header">
+    <span class="title">혼디 관리자</span>
+    <div class="right">
+      <span id="logout-btn" onclick="_adminLogout()">로그아웃</span>
+      <a href="./desktop.html">← 사이트로</a>
+    </div>
+  </div>
+
+    <!-- 로그인 -->
+    <div id="admin-login" style="padding:40px 32px;text-align:center">
+      <div style="font-size:13px;color:var(--ad-dim,#9aa0a8);margin-bottom:20px">관리자 계정으로 로그인하세요</div>
+      <input id="admin-email-input" type="email" placeholder="이메일" autocomplete="username"
+             style="width:100%;max-width:320px;padding:10px 12px;border:1px solid var(--ad-line,#3c3f46);
+                    border-radius:4px;font-size:15px;outline:none;font-family:inherit;
+                    background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                    box-sizing:border-box;display:block;margin:0 auto 10px"
+             onkeydown="if(event.key==='Enter')document.getElementById('admin-pw-input')?.focus()">
+      <input id="admin-pw-input" type="password" placeholder="패스워드" autocomplete="current-password"
+             style="width:100%;max-width:320px;padding:10px 12px;border:1px solid var(--ad-line,#3c3f46);
+                    border-radius:4px;font-size:16px;outline:none;font-family:inherit;
+                    background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                    box-sizing:border-box;display:block;margin:0 auto 12px"
+             onkeydown="if(event.key==='Enter')_adminLogin()">
+      <button onclick="_adminLogin()" id="admin-login-btn"
+              style="width:100%;max-width:320px;padding:11px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                     border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit">
+        로그인
+      </button>
+      <div id="admin-login-err" style="color:var(--ad-crit,#d16054);font-size:13px;margin-top:10px;display:none">
+        이메일 또는 패스워드가 올바르지 않습니다.
+      </div>
+    </div>
+
+    <!-- 대시보드 본문 -->
+    <div id="admin-body" style="display:none;padding:22px 26px">
+
+      <!-- ① 통계 -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;
+                  background:var(--ad-line,#3c3f46);border:1px solid var(--ad-line,#3c3f46);border-radius:4px;
+                  overflow:hidden;margin-bottom:20px">
+        <div style="background:var(--ad-panel2,#33363c);padding:14px;text-align:center">
+          <div id="stat-total" style="font-family:var(--ad-mono);font-size:24px;color:var(--ad-text,#d7d9dd)">—</div>
+          <div style="font-size:11px;color:var(--ad-faint,#6e737a);margin-top:4px">전체 가입자</div>
+        </div>
+        <div style="background:var(--ad-panel2,#33363c);padding:14px;text-align:center">
+          <div id="stat-trial" style="font-family:var(--ad-mono);font-size:24px;color:var(--ad-text,#d7d9dd)">—</div>
+          <div style="font-size:11px;color:var(--ad-faint,#6e737a);margin-top:4px">체험 중</div>
+        </div>
+        <div style="background:var(--ad-panel2,#33363c);padding:14px;text-align:center">
+          <div id="stat-expired" style="font-family:var(--ad-mono);font-size:24px;color:var(--ad-text,#d7d9dd)">—</div>
+          <div style="font-size:11px;color:var(--ad-faint,#6e737a);margin-top:4px">체험 만료</div>
+        </div>
+        <div style="background:var(--ad-panel2,#33363c);padding:14px;text-align:center">
+          <div id="stat-paid" style="font-family:var(--ad-mono);font-size:24px;color:var(--ad-text,#d7d9dd)">—</div>
+          <div style="font-size:11px;color:var(--ad-faint,#6e737a);margin-top:4px">유료 전환</div>
+        </div>
+      </div>
+
+      <!-- ①-b GDC 충전 현황 (2026-08-31 신설 — /admin/gdc-summary 연동) -->
+      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:4px;padding:16px 18px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+          <div style="font-size:12px;color:var(--ad-faint,#6e737a);letter-spacing:.3px">GDC 충전 현황</div>
+          <span id="gdc-summary-month" style="font-family:var(--ad-mono);font-size:11px;color:var(--ad-faint,#6e737a)">불러오는 중…</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
+                    background:var(--ad-line,#3c3f46);border:1px solid var(--ad-line,#3c3f46);border-radius:4px;overflow:hidden">
+          <div style="background:var(--ad-panel2,#33363c);padding:12px 14px">
+            <div id="gdc-signup-bonus" style="font-family:var(--ad-mono);font-size:17px;color:var(--ad-text,#d7d9dd)">—</div>
+            <div style="font-size:10.5px;color:var(--ad-faint,#6e737a);margin-top:2px">가입 축하 충전 (무료)</div>
+            <div id="gdc-signup-bonus-count" style="font-size:10.5px;color:var(--ad-faint,#6e737a);margin-top:4px">—</div>
+          </div>
+          <div style="background:var(--ad-panel2,#33363c);padding:12px 14px">
+            <div id="gdc-manual-charge" style="font-family:var(--ad-mono);font-size:17px;color:var(--ad-text,#d7d9dd)">—</div>
+            <div style="font-size:10.5px;color:var(--ad-faint,#6e737a);margin-top:2px">유상 충전 (계좌입금)</div>
+            <div id="gdc-manual-charge-count" style="font-size:10.5px;color:var(--ad-faint,#6e737a);margin-top:4px">—</div>
+          </div>
+          <div style="background:var(--ad-panel2,#33363c);padding:12px 14px">
+            <div id="gdc-ai-usage" style="font-family:var(--ad-mono);font-size:17px;color:var(--ad-text,#d7d9dd)">—</div>
+            <div style="font-size:10.5px;color:var(--ad-faint,#6e737a);margin-top:2px">AI 사용량 비용(DeepSeek 등)</div>
+            <div id="gdc-ai-usage-count" style="font-size:10.5px;color:var(--ad-faint,#6e737a);margin-top:4px">—</div>
+          </div>
+        </div>
+        <div id="gdc-summary-note" style="font-size:10.5px;color:var(--ad-faint,#6e737a);margin-top:12px;line-height:1.6">
+          사용자 간 결제(혼디마켓 P2P)와 원장 무결성(BIVM) 검증은 아직 집계가 배선되지 않았습니다 — 별도 작업 예정.
+        </div>
+      </div>
+
+      <!-- ①-c GDC 충전 내역 (2026-09-06 신설 — /admin/charge-list 연동)
+           위 ①-b가 월별 합계라면, 이건 건별 상세 목록이다. 관리자 수동
+           확인·오픈뱅킹 폴링·PG 웹훅·폰 알림캡처, 확정 채널이 뭐였든
+           charge_requests에 기록되는 건 전부 이 목록에 뜬다. -->
+      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:4px;padding:16px 18px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+          <div style="font-size:12px;color:var(--ad-faint,#6e737a);letter-spacing:.3px">GDC 충전 내역</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <select id="charge-list-status" onchange="_loadChargeList()"
+                    style="padding:5px 8px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                           border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
+                           font-size:11.5px;font-family:inherit">
+              <option value="matched">확정됨</option>
+              <option value="pending">대기 중</option>
+            </select>
+            <button onclick="_loadChargeList()" id="charge-list-reload-btn"
+                    style="padding:5px 12px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                           border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
+                           font-size:11.5px;font-weight:500;cursor:pointer;font-family:inherit">새로고침</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:11.5px;min-width:720px">
+            <thead>
+              <tr style="text-align:left;color:var(--ad-faint,#6e737a)">
+                <th style="padding:0 8px 8px 0;font-weight:400;min-width:220px">GUID</th>
+                <th style="padding:0 8px 8px 0;font-weight:400;width:100px">매칭키</th>
+                <th style="padding:0 8px 8px 0;font-weight:400;width:90px;text-align:right">금액(원)</th>
+                <th style="padding:0 8px 8px 0;font-weight:400;width:140px">채널</th>
+                <th style="padding:0 8px 8px 0;font-weight:400;width:90px">상태</th>
+                <th style="padding:0 0 8px;width:150px">시각</th>
+              </tr>
+            </thead>
+            <tbody id="charge-list-body"></tbody>
+          </table>
+        </div>
+        <div id="charge-list-empty" style="font-size:12.5px;color:var(--ad-faint,#6e737a);text-align:center;padding:18px">
+          불러오는 중…
+        </div>
+      </div>
+
+      <!-- ② 무료 체험 기간 -->
+      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:4px;padding:16px 18px;margin-bottom:16px">
+        <div style="font-size:12px;color:var(--ad-faint,#6e737a);letter-spacing:.3px;margin-bottom:12px">무료 체험 기간</div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <label style="font-size:13px;color:var(--ad-dim,#9aa0a8)">가입 후 디폴트 키 사용 가능 기간</label>
+          <input id="trial-days-input" type="number" min="1" max="365" value="7"
+                 style="width:70px;padding:6px 9px;border:1px solid var(--ad-line,#3c3f46);border-radius:4px;
+                        background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                        font-family:var(--ad-mono);font-size:13px;text-align:center">
+          <span style="font-size:13px;color:var(--ad-faint,#6e737a)">일</span>
+          <button onclick="_saveTrialDays()"
+                  style="padding:7px 14px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                         border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
+                         font-size:12.5px;font-weight:500;cursor:pointer;font-family:inherit">저장</button>
+          <span id="trial-save-ok" style="font-size:11px;color:var(--ad-dim,#9aa0a8);display:none">✓ 저장됨</span>
+        </div>
+        <div style="font-size:11px;color:var(--ad-faint,#6e737a);margin-top:8px">
+          체험 만료 후: 이메일로 LLM 키 발급 안내 또는 유료 플랜 전환 안내
+        </div>
+      </div>
+
+      <!-- ③ 디폴트 LLM 키 -->
+      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:4px;padding:16px 18px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div style="font-size:12px;color:var(--ad-faint,#6e737a);letter-spacing:.3px">디폴트 LLM 키</div>
+          <button onclick="_addKeyRow()"
+                  style="padding:5px 12px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                         border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
+                         font-size:11.5px;font-weight:500;cursor:pointer;font-family:inherit">+ 키 추가</button>
+        </div>
+        <div style="font-size:11px;color:var(--ad-faint,#6e737a);margin-bottom:12px;line-height:1.6">
+          키는 Cloudflare KV에 저장되어 모든 사용자에게 자동 적용됩니다.
+          <code style="background:var(--ad-panel2,#33363c);color:var(--ad-dim,#9aa0a8);padding:1px 5px;border-radius:3px;font-family:var(--ad-mono)">hondi_default_llm_keys</code>
+        </div>
+        <div id="llm-key-list" style="display:flex;flex-direction:column;gap:8px"></div>
+        <div id="llm-key-empty" style="font-size:12.5px;color:var(--ad-faint,#6e737a);text-align:center;padding:18px">
+          등록된 키가 없습니다. "+ 키 추가"를 눌러 추가하세요.
+        </div>
+        <button onclick="_saveAllKeys()"
+                style="margin-top:14px;width:100%;padding:10px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                       border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
+                       font-size:13px;font-weight:500;cursor:pointer;font-family:inherit">
+          전체 저장
+        </button>
+        <div id="key-save-ok" style="font-size:11px;color:var(--ad-dim,#9aa0a8);text-align:center;margin-top:8px;display:none">
+          ✓ 저장되었습니다.
+        </div>
+      </div>
+
+      <!-- ④ 체험 만료 안내 메시지 -->
+      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:4px;padding:16px 18px;margin-bottom:16px">
+        <div style="font-size:12px;color:var(--ad-faint,#6e737a);letter-spacing:.3px;margin-bottom:12px">체험 만료 시 안내 메시지</div>
+        <textarea id="trial-expired-msg" rows="3"
+                  style="width:100%;padding:9px 11px;border:1px solid var(--ad-line,#3c3f46);border-radius:4px;
+                         background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                         font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box"
+                  placeholder="예) AI 비서 무료 체험 기간이 종료됐습니다."></textarea>
+        <button onclick="_saveExpiredMsg()"
+                style="margin-top:10px;padding:8px 18px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                       border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
+                       font-size:12.5px;font-weight:500;cursor:pointer;font-family:inherit">저장</button>
+        <span id="msg-save-ok" style="font-size:11px;color:var(--ad-dim,#9aa0a8);margin-left:10px;display:none">✓ 저장됨</span>
+      </div>
+
+      <!-- ⑤ Cloudflare 서브도메인 관리 -->
+      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:4px;padding:16px 18px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:12px;color:var(--ad-faint,#6e737a);letter-spacing:.3px">서브도메인 관리 (hondi.net)</div>
+          <button onclick="_addSubdomainRow()"
+                  style="padding:5px 12px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                         border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
+                         font-size:11.5px;font-weight:500;cursor:pointer;font-family:inherit">+ 추가</button>
+        </div>
+        <div style="font-size:11px;color:var(--ad-faint,#6e737a);margin-bottom:12px;line-height:1.6">
+          Cloudflare 자격증명을 저장하면 서브도메인 추가 시 자동으로 CNAME 레코드가 생성됩니다.<br>
+          Global API Key + Email 조합만 작동합니다 (Custom Token은 CORS 문제 있음 — 하단 오류 기록 참조).<br>
+          Target: <code style="background:var(--ad-panel2,#33363c);color:var(--ad-dim,#9aa0a8);padding:1px 4px;border-radius:3px;font-family:var(--ad-mono)">openhash-gopang.github.io</code> / DNS only
+        </div>
+
+        <!-- CF 자격증명 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+          <div>
+            <label style="font-size:11px;color:var(--ad-dim,#9aa0a8);display:block;margin-bottom:4px">Global API Key</label>
+            <input id="cf-api-key" type="text" placeholder="cfk_..."
+                   style="width:100%;padding:7px 9px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:3px;
+                          background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                          font-size:12px;font-family:var(--ad-mono);box-sizing:border-box">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--ad-dim,#9aa0a8);display:block;margin-bottom:4px">Email</label>
+            <input id="cf-email" type="email" placeholder="Tensor.city@gmail.com"
+                   style="width:100%;padding:7px 9px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:3px;
+                          background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                          font-size:12px;font-family:inherit;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--ad-dim,#9aa0a8);display:block;margin-bottom:4px">Zone ID</label>
+            <input id="cf-zone-id" type="text" placeholder="fd842cd737258a783e510e06fafbb07e"
+                   style="width:100%;padding:7px 9px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:3px;
+                          background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                          font-size:12px;font-family:var(--ad-mono);box-sizing:border-box">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--ad-dim,#9aa0a8);display:block;margin-bottom:4px">Target (CNAME 값)</label>
+            <input id="cf-target" type="text" value="openhash-gopang.github.io"
+                   style="width:100%;padding:7px 9px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:3px;
+                          background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                          font-size:12px;font-family:var(--ad-mono);box-sizing:border-box">
+          </div>
+        </div>
+        <button onclick="_saveCFCredentials()"
+                style="padding:6px 14px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                       border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
+                       font-size:11.5px;font-weight:500;cursor:pointer;font-family:inherit;margin-bottom:14px">
+          자격증명 저장 (localStorage)
+        </button>
+        <span id="cf-cred-ok" style="font-size:11px;color:var(--ad-dim,#9aa0a8);margin-left:8px;display:none">✓ 저장됨</span>
+
+        <!-- 서브도메인 목록 -->
+        <div id="subdomain-list" style="display:flex;flex-direction:column;gap:6px;margin-top:6px"></div>
+        <div id="subdomain-list-status" style="font-size:11px;color:var(--ad-faint,#6e737a);margin-top:8px;min-height:18px"></div>
+      </div>
+
+      <!-- ⑤-b 공문 발송 기록 (2026-08-31 신설) — 기관에 보낸 공문(예: 제주도청·
+           행안부·제주TP 등 dpaper.kr 지원 요청)의 발송·회신 이력을 기록한다.
+           worker.js /admin/letters(GET/POST)가 AI_SETUP_SEALS_KV에 JSON
+           배열로 저장 — LLM 키 목록과 동일한 "전체 배열 교체" 관례. -->
+      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:4px;padding:16px 18px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div style="font-size:12px;color:var(--ad-faint,#6e737a);letter-spacing:.3px">공문 발송 기록</div>
+          <button onclick="_addLetterRow()"
+                  style="padding:5px 12px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                         border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
+                         font-size:11.5px;font-weight:500;cursor:pointer;font-family:inherit">+ 공문 추가</button>
+        </div>
+        <div style="font-size:11px;color:var(--ad-faint,#6e737a);margin-bottom:12px;line-height:1.6">
+          기관에 보낸 공문의 발송·회신 현황을 기록합니다. 수신 날짜·수신 내용은 회신이 오면 gov-mail.hondi.net을 통해 자동으로 채워집니다(설정 후). "발송" 버튼은 이메일 주소가 채워진 행에서만 동작합니다.
+        </div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:11.5px;min-width:960px">
+            <thead>
+              <tr style="text-align:left;color:var(--ad-faint,#6e737a)">
+                <th style="padding:0 8px 8px 0;font-weight:400;min-width:120px">수신 기관</th>
+                <th style="padding:0 8px 8px 0;font-weight:400;min-width:160px">공문 제목</th>
+                <th style="padding:0 8px 8px 0;font-weight:400;min-width:140px">공문 링크</th>
+                <th style="padding:0 8px 8px 0;font-weight:400;min-width:150px">수신 이메일</th>
+                <th style="padding:0 8px 8px 0;font-weight:400;width:110px">보낸 날짜</th>
+                <th style="padding:0 8px 8px 0;font-weight:400;width:110px">수신 날짜</th>
+                <th style="padding:0 8px 8px 0;font-weight:400;min-width:160px">수신 내용</th>
+                <th style="padding:0 8px 8px 0;width:60px"></th>
+                <th style="padding:0 0 8px;width:50px"></th>
+              </tr>
+            </thead>
+            <tbody id="letter-list"></tbody>
+          </table>
+        </div>
+        <div id="letter-list-empty" style="font-size:12.5px;color:var(--ad-faint,#6e737a);text-align:center;padding:18px">
+          기록된 공문이 없습니다. "+ 공문 추가"를 눌러 추가하세요.
+        </div>
+        <button onclick="_saveAllLetters()"
+                style="margin-top:14px;width:100%;padding:10px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                       border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
+                       font-size:13px;font-weight:500;cursor:pointer;font-family:inherit">
+          전체 저장
+        </button>
+        <div id="letter-save-ok" style="font-size:11px;color:var(--ad-dim,#9aa0a8);text-align:center;margin-top:8px;display:none"></div>
+      </div>
+
+      <!-- ⑥ 자동 갱신 현황 (2026-07-28 신설) — AUTO_REFRESH_MANUAL_v1_0.html의
+           세 파이프라인(SP tier 재계산·미등록 태그 집계·사용자 피드백 취합)
+           실행 현황을 한눈에 본다. 조회만 하는 패널이라 워크플로 트리거
+           버튼은 없다 — 수동 실행은 매뉴얼의 gh workflow run 절차를 따른다. -->
+      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:4px;padding:16px 18px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+          <div style="font-size:12px;color:var(--ad-faint,#6e737a);letter-spacing:.3px">자동 갱신 현황</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <a href="./docs/AUTO_REFRESH_MANUAL_v1_0.html" target="_blank"
+               style="font-size:11px;color:var(--ad-dim,#9aa0a8);text-decoration:none">매뉴얼 ↗</a>
+            <button onclick="_loadAutoRefreshStatus(true)" id="auto-refresh-reload-btn"
+                    style="padding:5px 12px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                           border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
+                           font-size:11.5px;font-weight:500;cursor:pointer;font-family:inherit">새로고침</button>
+          </div>
+        </div>
+        <div id="auto-refresh-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1px;background:var(--ad-line,#3c3f46)">
+          <div style="grid-column:1/-1;display:flex;align-items:center;gap:10px;padding:16px;color:var(--ad-faint,#6e737a);font-size:12.5px;background:var(--ad-panel2,#33363c)">
+            <div style="width:14px;height:14px;border:2px solid var(--ad-line-strong,#4a4e56);border-top-color:var(--ad-dim,#9aa0a8);
+                        border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0"></div>
+            불러오는 중…
+          </div>
+        </div>
+        <div id="auto-refresh-status-note" style="font-size:10.5px;color:var(--ad-faint,#6e737a);margin-top:10px;line-height:1.6"></div>
+      </div>
+
+      <!-- ⑦ 사용자 일괄 삭제 -->
+      <div style="border:1px solid var(--ad-crit,#d16054);border-radius:4px;padding:16px 18px;margin-bottom:16px">
+        <div style="font-size:12px;color:var(--ad-crit,#d16054);letter-spacing:.3px;margin-bottom:10px">사용자 일괄 삭제</div>
+        <div style="font-size:11px;color:var(--ad-dim,#9aa0a8);margin-bottom:12px;line-height:1.7">
+          한 줄에 하나씩 <code style="background:var(--ad-panel2,#33363c);padding:1px 4px;border-radius:3px">@handle</code> 또는
+          GUID(IPv6)를 입력하세요. L1 PocketBase + Supabase 9개 테이블 + KV를 전부 삭제하며
+          되돌릴 수 없습니다. 한 번에 최대 100개.
+        </div>
+        <textarea id="bulk-delete-input" rows="5" placeholder="@KR-12345678
+2601:db80:4051:eb31:d7c7:8791:e78c:2d44"
+          style="width:100%;padding:9px 11px;border:1px solid var(--ad-crit,#d16054);border-radius:4px;
+                 background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                 font-size:12px;font-family:var(--ad-mono);resize:vertical;box-sizing:border-box"></textarea>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
+          <button onclick="_runBulkDelete()"
+                  style="padding:8px 16px;background:var(--ad-crit,#d16054);color:#1a1112;border:none;border-radius:4px;
+                         font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">
+            일괄 삭제 실행
+          </button>
+          <span id="bulk-delete-status" style="font-size:11px;color:var(--ad-dim,#9aa0a8)"></span>
+        </div>
+        <pre id="bulk-delete-result" style="display:none;margin-top:12px;padding:12px;background:var(--ad-panel2,#33363c);
+               border:1px solid var(--ad-line,#3c3f46);border-radius:4px;font-size:10.5px;line-height:1.6;color:var(--ad-text,#d7d9dd);
+               max-height:260px;overflow:auto;white-space:pre-wrap;word-break:break-all"></pre>
+      </div>
+
+      <!-- ⑧ 오류 기록 (2026-06-25) -->
+      <div style="border:1px solid var(--ad-warn,#d6a04a);border-radius:4px;padding:16px 18px">
+        <div style="font-size:12px;color:var(--ad-warn,#d6a04a);letter-spacing:.3px;margin-bottom:12px">
+          오류 기록 — 2026-06-25 Cloudflare DNS API
+        </div>
+        <div style="font-size:11px;color:var(--ad-dim,#9aa0a8);line-height:1.9">
+          <b style="color:var(--ad-text,#d7d9dd)">[오류 1] code:7003 "Could not route to /zones/.../dns/records"</b><br>
+          원인 A: URL 경로 오타 —
+          <code style="background:var(--ad-panel2,#33363c);padding:1px 4px;border-radius:3px">dns/records</code> (슬래시, 틀림) →
+          <code style="background:var(--ad-panel2,#33363c);padding:1px 4px;border-radius:3px">dns_records</code> (언더스코어, 정상)<br>
+          원인 B: Custom API Token의 Zone Resources가 "All zones"일 때 특정 Zone 접근 불가.
+          → "Specific zone → hondi.net" + "Zone:Read" 권한 추가 필요.<br><br>
+
+          <b style="color:var(--ad-text,#d7d9dd)">[오류 2] code:9207 "Request body is invalid"</b><br>
+          원인: PowerShell Here-String(@"..."@)이 JSON에 개행문자(CRLF)를 삽입 → CF API 파싱 실패.<br>
+          해결:
+          <code style="background:var(--ad-panel2,#33363c);padding:1px 4px;border-radius:3px">[System.IO.File]::WriteAllText(tmpFile, json)</code>
+          로 임시 파일 저장 후
+          <code style="background:var(--ad-panel2,#33363c);padding:1px 4px;border-radius:3px">curl --data-binary "@tmpFile"</code>
+          로 전송.<br><br>
+
+          <b style="color:var(--ad-text,#d7d9dd)">[최종 작동 조합]</b><br>
+          Global API Key (X-Auth-Key + X-Auth-Email) + endpoint: /dns_records + 파일 기반 JSON — 정상<br>
+          Custom Token → Zone routing 오류 반복 — 실패<br>
+          PowerShell ConvertTo-Json / Here-String → CRLF 삽입 오류 — 실패
+        </div>
+      </div>
+
+      <!-- ⑨ 사업 추진 (2026-09-16 신설) — 혼디제주(가칭) 법인 설립 사업계획 초안 -->
+      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:4px;padding:16px 18px;margin-top:16px">
+        <div style="font-size:12px;color:var(--ad-faint,#6e737a);letter-spacing:.3px;margin-bottom:10px">사업 추진</div>
+        <div style="font-size:11px;color:var(--ad-dim,#9aa0a8);margin-bottom:12px;line-height:1.7">
+          혼디제주(가칭) 법인 설립 및 제주 지역 필드테스트 사업계획 초안 — 자본금·지분구조, 조직 구성(Manning),
+          사업부문별(행정·금융·교통·교육·의료·시장·법원) 수익모델, 5개년 추정 재무제표 포함.
+        </div>
+        <a href="./docs/business-plan/hondi-jeju-corp.html" target="_blank" rel="noopener"
+           style="display:inline-block;padding:8px 16px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                  border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;font-size:13px;font-weight:500;
+                  text-decoration:none;font-family:inherit">
+          사업 추진 페이지 열기 ↗
+        </a>
+      </div>
+
+    </div><!-- /admin-body -->
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// 관리자 대시보드 JS — v3.0 (2026-07-25)
+// 보안 수정: 이전 버전은 비밀번호 해시·솔트가 이 공개 소스 파일에
+// 그대로 노출돼 있어(ADMIN_HASH/ADMIN_SALT), 로그인 절차 없이도
+// 누구나 유효한 관리자 토큰을 직접 만들 수 있는 상태였다. 이제는
+// worker.js의 POST /admin/login이 PocketBase(prompt_admins 컬렉션)로
+// 서버 측에서 이메일·비밀번호를 검증하고, 서버 전용 비밀
+// (env.ADMIN_MASTER_KEY)로 서명한 Bearer 토큰을 발급한다. 클라이언트는
+// 그 비밀을 알거나 계산할 수 없다.
+// ══════════════════════════════════════════════════════════════
+
+const WORKER_URL  = 'https://hondi-proxy.tensor-city.workers.dev';
+const LS_KEYS     = 'hondi_default_llm_keys';
+const LS_TRIAL    = 'hondi_trial_days';
+const LS_EXPR_MSG = 'hondi_trial_expired_msg';
+const LS_TOKEN    = 'hondi_admin_token';      // 서버가 발급한 Bearer 토큰(JWT 유사, 30분 만료)
+const LS_CF_CRED  = 'hondi_cf_credentials';
+
+const PROVIDERS = [
+  { id:'gemini',     label:'Gemini',      prefix:'AIza',    models:[
+    { id:'gemini-2.5-pro-preview-06-05',        label:'Gemini 2.5 Pro' },
+    { id:'gemini-2.5-flash-preview-05-20',      label:'Gemini 2.5 Flash' },
+    { id:'gemini-2.5-flash-lite-preview-06-17', label:'Gemini 2.5 Flash Lite' },
+    { id:'gemini-2.0-flash-001',                label:'Gemini 2.0 Flash' },
+  ]},
+  { id:'deepseek',   label:'DeepSeek',    prefix:'sk-',     models:[
+    { id:'deepseek-v4-flash',  label:'DeepSeek V4 Flash ★권장' },
+    { id:'deepseek-v4-pro',    label:'DeepSeek V4 Pro' },
+    { id:'deepseek-chat',      label:'DeepSeek V3 ← 2026-07-24 폐기 예정' },
+    { id:'deepseek-reasoner',  label:'DeepSeek R1 ← 2026-07-24 폐기 예정' },
+  ]},
+  { id:'grok',       label:'Grok (xAI)',  prefix:'xai-',    models:[
+    { id:'grok-3',        label:'Grok 3' },
+    { id:'grok-3-mini',   label:'Grok 3 Mini' },
+    { id:'grok-3-fast',   label:'Grok 3 Fast' },
+    { id:'grok-3-mini-fast', label:'Grok 3 Mini Fast' },
+    { id:'grok-2-vision-1212', label:'Grok 2 Vision' },
+  ]},
+  { id:'openrouter', label:'OpenRouter',  prefix:'sk-or-',  models:[
+    { id:'google/gemini-2.5-pro-preview',       label:'Gemini 2.5 Pro' },
+    { id:'google/gemini-2.5-flash-preview-05-20', label:'Gemini 2.5 Flash' },
+    { id:'deepseek/deepseek-v4-flash',          label:'DeepSeek V4 Flash ★' },
+    { id:'deepseek/deepseek-v4-pro',            label:'DeepSeek V4 Pro' },
+    { id:'x-ai/grok-3',                         label:'Grok 3' },
+    { id:'x-ai/grok-3-mini',                    label:'Grok 3 Mini' },
+    { id:'anthropic/claude-opus-4-5',           label:'Claude Opus 4.5' },
+    { id:'anthropic/claude-sonnet-4-5',         label:'Claude Sonnet 4.5' },
+    { id:'anthropic/claude-haiku-4-5',          label:'Claude Haiku 4.5' },
+    { id:'openai/gpt-4o',                       label:'GPT-4o' },
+    { id:'openai/gpt-4o-mini',                  label:'GPT-4o Mini' },
+    { id:'openai/o3',                           label:'o3' },
+    { id:'openai/o4-mini',                      label:'o4-mini' },
+    { id:'meta-llama/llama-4-maverick',         label:'Llama 4 Maverick' },
+    { id:'meta-llama/llama-4-scout',            label:'Llama 4 Scout' },
+    { id:'meta-llama/llama-3.3-70b-instruct',   label:'Llama 3.3 70B' },
+    { id:'mistralai/mistral-medium-3',          label:'Mistral Medium 3' },
+    { id:'mistralai/devstral-small-2505',       label:'Devstral Small' },
+  ]},
+  { id:'anthropic',  label:'Claude (Anthropic)', prefix:'sk-ant-', models:[
+    { id:'claude-opus-4-5-20251101',    label:'Claude Opus 4.5' },
+    { id:'claude-sonnet-4-5-20251022',  label:'Claude Sonnet 4.5' },
+    { id:'claude-haiku-4-5-20251001',   label:'Claude Haiku 4.5' },
+    { id:'claude-opus-4-0-20250514',    label:'Claude Opus 4.0' },
+    { id:'claude-sonnet-4-0-20250514',  label:'Claude Sonnet 4.0' },
+  ]},
+  { id:'openai',     label:'ChatGPT (OpenAI)', prefix:'sk-', models:[
+    { id:'gpt-4.1',      label:'GPT-4.1' },
+    { id:'gpt-4.1-mini', label:'GPT-4.1 Mini' },
+    { id:'gpt-4o',       label:'GPT-4o' },
+    { id:'gpt-4o-mini',  label:'GPT-4o Mini' },
+    { id:'o3',           label:'o3' },
+    { id:'o4-mini',      label:'o4-mini' },
+    { id:'o3-mini',      label:'o3-mini' },
+  ]},
+];
+
+// ── 인증 토큰 헬퍼 ────────────────────────────────────────────
+// 토큰은 로그인 시 서버(worker.js /admin/login)가 발급하며, 클라이언트는
+// 서명에 필요한 비밀을 전혀 알지 못한다. localStorage에는 편의를 위해
+// 토큰과 만료시각만 저장한다 — 실제 보안 경계는 항상 서버(_requireAdmin)이다.
+function _adminToken() {
+  try {
+    const raw = localStorage.getItem(LS_TOKEN);
+    if (!raw) return null;
+    const { token, exp } = JSON.parse(raw);
+    if (!token || !exp || Math.floor(Date.now()/1000) >= exp) return null;
+    return token;
+  } catch { return null; }
+}
+
+function _adminAuthHeaders() {
+  const t = _adminToken();
+  return t ? { 'Authorization': 'Bearer ' + t } : {};
+}
+
+// ── 패널 ─────────────────────────────────────────────────────
+function _openAdminPanel() {
+  if (_adminToken()) { _showAdminBody(); return; }
+  document.getElementById('admin-login').style.display     = 'block';
+  document.getElementById('admin-body').style.display      = 'none';
+  document.getElementById('admin-login-err').style.display = 'none';
+  document.getElementById('logout-btn').style.display      = 'none';
+  setTimeout(() => document.getElementById('admin-email-input')?.focus(), 100);
+}
+
+function _adminLogout() {
+  localStorage.removeItem(LS_TOKEN);
+  _openAdminPanel();
+}
+
+async function _adminLogin() {
+  const email = document.getElementById('admin-email-input').value.trim();
+  const pw    = document.getElementById('admin-pw-input').value;
+  const err   = document.getElementById('admin-login-err');
+  const btn   = document.getElementById('admin-login-btn');
+  if (!email || !pw) return;
+
+  btn.disabled = true; btn.textContent = '로그인 중…';
+  try {
+    const res  = await fetch(`${WORKER_URL}/admin/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pw }),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data?.token) {
+      err.textContent = data?.message || '이메일 또는 패스워드가 올바르지 않습니다.';
+      err.style.display = 'block';
+      return;
+    }
+    localStorage.setItem(LS_TOKEN, JSON.stringify({ token: data.token, exp: data.exp }));
+    document.getElementById('admin-pw-input').value = '';
+    err.style.display = 'none';
+    _showAdminBody();
+  } catch (e) {
+    err.textContent = '서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.';
+    err.style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = '로그인';
+  }
+}
+
+function _showAdminBody() {
+  document.getElementById('admin-login').style.display = 'none';
+  document.getElementById('admin-body').style.display  = 'block';
+  document.getElementById('logout-btn').style.display  = 'inline';
+  _renderKeyList();
+  _loadTrialSettings();
+  _loadStats();
+  _loadGdcSummary();
+  _loadChargeList();
+  _loadCFCredentials();
+  _renderSubdomainList();
+  _loadAutoRefreshStatus();
+  _loadLetters();
+}
+
+// ── 통계 ─────────────────────────────────────────────────────
+async function _loadStats() {
+  const trialDays = parseInt(localStorage.getItem(LS_TRIAL)||'7');
+  const trialMs   = trialDays*86400000;
+  const now = Date.now();
+  try {
+    // Worker 경유 — L1 PocketBase 직접 접근 시 HTTPS 인증서 없음
+    const res = await fetch(`${WORKER_URL}/admin/stats`, {signal:AbortSignal.timeout(10000), headers:_adminAuthHeaders()});
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    document.getElementById('stat-total').textContent = (data.total??0).toLocaleString();
+    let trial=0, expired=0;
+    (data.items||[]).forEach(u => { (now-new Date(u.created).getTime()<=trialMs)?trial++:expired++; });
+    document.getElementById('stat-trial').textContent   = trial;
+    document.getElementById('stat-expired').textContent = expired;
+    // stat-paid는 _loadGdcSummary()가 채운다(유상 충전 이력 기준 "유료
+    // 사용자" 정의 — /admin/gdc-summary 참고). 그 호출이 아직 끝나지
+    // 않았거나 실패했을 때를 위한 잠정값만 여기서 둔다.
+    if (document.getElementById('stat-paid').textContent === '—') {
+      document.getElementById('stat-paid').textContent = '…';
+    }
+  } catch(e) {
+    ['stat-total','stat-trial','stat-expired','stat-paid'].forEach(id=>{ document.getElementById(id).textContent='?'; });
+    console.warn('[stats]', e.message);
+  }
+}
+
+// ── GDC 충전 현황 (2026-08-31 신설) ──────────────────────────────
+// /admin/gdc-summary(worker.js handleAdminGdcSummary) 연동. 이 엔드포인트가
+// "유료 사용자"(유상 충전 이력 기준)도 함께 내려주므로, 위 stat-paid도
+// 여기서 채운다 — _loadStats()가 세운 하드코딩 '—'을 대체.
+// 사용자 간 결제(P2P)·BIVM 무결성은 아직 null로 내려온다(엔드포인트
+// 주석 참고) — 이 화면에서는 안내 문구로만 표시하고 숫자를 지어내지 않는다.
+async function _loadGdcSummary() {
+  const fmtGdc = n => (typeof n === 'number' ? n.toLocaleString('ko-KR') : '—');
+  try {
+    const res = await fetch(`${WORKER_URL}/admin/gdc-summary`, {signal:AbortSignal.timeout(10000), headers:_adminAuthHeaders()});
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.message || 'API_ERROR');
+
+    document.getElementById('gdc-summary-month').textContent = `${data.month} 기준`;
+
+    const paying = data.subscribers.paying;
+    const rate   = data.subscribers.conversion_rate;
+    document.getElementById('stat-paid').textContent =
+      paying.toLocaleString() + (rate != null ? ` (${rate}%)` : '');
+
+    const sb = data.gdc_charge.signup_bonus;
+    document.getElementById('gdc-signup-bonus').textContent       = `${fmtGdc(sb.total_gdc)} GDC(₮)`;
+    document.getElementById('gdc-signup-bonus-count').textContent = `${sb.count.toLocaleString()}건`;
+
+    const mc = data.gdc_charge.manual_charge;
+    document.getElementById('gdc-manual-charge').textContent       = `${fmtGdc(mc.total_gdc)} GDC(₮)`;
+    document.getElementById('gdc-manual-charge-count').textContent = `${mc.count.toLocaleString()}건 · ${fmtGdc(mc.total_krw)}원 입금 확인`;
+
+    const ai = data.ai_usage;
+    document.getElementById('gdc-ai-usage').textContent       = `${(ai.total_krw/1000).toLocaleString('ko-KR',{maximumFractionDigits:1})} 천원`;
+    document.getElementById('gdc-ai-usage-count').textContent = `${ai.count.toLocaleString()}건 · ${fmtGdc(ai.total_gdc)} GDC 차감`;
+
+    const noteParts = [];
+    if (data.p2p_market == null) noteParts.push('사용자 간 결제(혼디마켓 P2P) 집계 미배선');
+    if (data.bivm_check == null) noteParts.push('BIVM 원장 무결성 검증 미배선');
+    document.getElementById('gdc-summary-note').textContent =
+      noteParts.length ? noteParts.join(' · ') : '집계 정상';
+  } catch(e) {
+    document.getElementById('gdc-summary-month').textContent = '조회 실패';
+    if (document.getElementById('stat-paid').textContent === '…') {
+      document.getElementById('stat-paid').textContent = '?';
+    }
+    ['gdc-signup-bonus','gdc-manual-charge','gdc-ai-usage'].forEach(id=>{ document.getElementById(id).textContent='—'; });
+    console.warn('[gdc-summary]', e.message);
+  }
+}
+
+// ── GDC 충전 내역 (2026-09-06 신설) ──────────────────────────────
+// /admin/charge-list(worker.js handleAdminChargeList) 연동 — charge_requests
+// 컬렉션을 status별로 그대로 보여준다. /biz/charge-list와 조회 로직은
+// 동일하지만, 저 엔드포인트는 정적 시크릿을 ?secret=으로 받는 머신용
+// 인증이라 브라우저 대시보드에 그대로 못 쓴다(개발자도구로 시크릿 노출).
+// 여기서는 이미 이 대시보드가 쓰고 있는 단기만료 Bearer 토큰
+// (_adminAuthHeaders)으로 인증한다.
+async function _loadChargeList() {
+  const tbody  = document.getElementById('charge-list-body');
+  const empty  = document.getElementById('charge-list-empty');
+  const status = document.getElementById('charge-list-status').value;
+  empty.style.display = 'block';
+  empty.textContent = '불러오는 중…';
+  tbody.innerHTML = '';
+  try {
+    const res  = await fetch(`${WORKER_URL}/admin/charge-list?status=${encodeURIComponent(status)}&limit=100`,
+      {signal:AbortSignal.timeout(10000), headers:_adminAuthHeaders()});
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.message || 'API_ERROR');
+    const reqs = data.requests || [];
+    if (reqs.length === 0) {
+      empty.textContent = status === 'pending' ? '대기 중인 신청이 없습니다.' : '확정된 충전 내역이 없습니다.';
+      return;
+    }
+    empty.style.display = 'none';
+    const statusLabel = { matched: '확정됨', pending: '대기 중', expired: '만료됨' };
+    tbody.innerHTML = reqs.map(r => {
+      const amount = r.status === 'matched' ? (r.matched_krw ?? r.requested_krw) : r.requested_krw;
+      const when   = r.status === 'matched' ? (r.matched_at || r.created) : r.created;
+      const whenFmt = when ? new Date(when).toLocaleString('ko-KR', {timeZone:'Asia/Seoul', month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'}) : '—';
+      return `<tr style="border-top:1px solid var(--ad-line,#3c3f46)">
+        <td style="padding:7px 8px 7px 0;font-family:var(--ad-mono);word-break:break-all">${_esc(r.guid || '—')}</td>
+        <td style="padding:7px 8px 7px 0;font-family:var(--ad-mono)">${_esc(r.match_code || '—')}</td>
+        <td style="padding:7px 8px 7px 0;text-align:right;font-family:var(--ad-mono)">${(amount ?? 0).toLocaleString('ko-KR')}</td>
+        <td style="padding:7px 8px 7px 0;color:var(--ad-dim,#9aa0a8)">${_esc(r.channel || '—')}</td>
+        <td style="padding:7px 8px 7px 0">${statusLabel[r.status] || _esc(r.status || '—')}</td>
+        <td style="padding:7px 0;color:var(--ad-faint,#6e737a);font-family:var(--ad-mono)">${whenFmt}</td>
+      </tr>`;
+    }).join('');
+  } catch(e) {
+    empty.style.display = 'block';
+    empty.textContent = '조회 실패: ' + e.message;
+    console.warn('[charge-list]', e.message);
+  }
+}
+
+// ── 자동 갱신 현황 (2026-07-28 신설) ────────────────────────────
+// docs/AUTO_REFRESH_MANUAL_v1_0.html이 설명하는 세 파이프라인의 실행
+// 현황을 세 곳에서 읽어와 카드로 보여준다:
+//   1) GitHub Actions REST API — 워크플로 최근 실행 성공/실패·시각
+//      (공개 저장소라 인증 없이 조회 가능, 단 시간당 60회 rate limit)
+//   2) worker.js /sp-author/queue, /sp-author/escalations — 인증 없는
+//      공개 엔드포인트(§AUTO_REFRESH_MANUAL §운영 참조)
+//   3) data/feedback_triage_report.json — 저장소에 커밋된 최근 리포트
+//      (신규 피드백이 없었던 주는 파일 자체가 없을 수 있다 — 정상)
+// 이 패널은 조회 전용이다 — 워크플로를 여기서 실행하지 않는다(수동
+// 실행은 매뉴얼의 gh workflow run 절차를 따른다).
+const GH_REPO = 'Openhash-Gopang/gopang';
+const AR_WORKFLOWS = {
+  refresh:  'sp-refresh-scheduler.yml',
+  feedback: 'triage-user-feedback.yml',
+};
+// GitHub REST API는 비인증 요청이 시간당 60회로 제한된다 — 패널을
+// 열 때마다(관리자 로그인마다) 2회씩 소모하면 금방 바닥나므로,
+// sessionStorage에 짧게 캐시해 같은 탭에서의 반복 조회를 흡수한다.
+// "새로고침" 버튼은 이 캐시를 무시하고 강제로 새로 받아온다.
+const GH_CACHE_TTL_MS = 3 * 60 * 1000;
+let _arLoadSeq = 0; // 새로고침 연타 시 늦게 도착한 응답이 먼저 온 응답을 덮어쓰지 않도록 하는 순번
+
+function _relTimeKo(iso) {
+  if (!iso) return '기록 없음';
+  const diffSec = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (diffSec < 0) return '방금';
+  if (diffSec < 60) return '방금 전';
+  if (diffSec < 3600) return Math.floor(diffSec / 60) + '분 전';
+  if (diffSec < 86400) return Math.floor(diffSec / 3600) + '시간 전';
+  return Math.floor(diffSec / 86400) + '일 전';
+}
+
+// 두 워크플로 모두 요일/시각이 고정된 단순 스케줄이라, 범용 cron
+// 파서 대신 각각 전용 계산만 둔다(과설계 방지 — 스케줄이 바뀌면
+// 이 두 함수만 같이 고치면 된다).
+function _nextDailyUTC(hourUTC) {
+  const now = new Date();
+  const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), hourUTC, 0, 0));
+  if (next <= now) next.setUTCDate(next.getUTCDate() + 1);
+  return next;
+}
+function _nextWeeklyUTC(weekdayUTC, hourUTC) {
+  const now = new Date();
+  const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), hourUTC, 0, 0));
+  let delta = (weekdayUTC - next.getUTCDay() + 7) % 7;
+  if (delta === 0 && next <= now) delta = 7;
+  next.setUTCDate(next.getUTCDate() + delta);
+  return next;
+}
+function _fmtKST(date) {
+  return date.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' KST';
+}
+
+// workflowFile의 최근 실행을 가져온다. force=true면 캐시를 건너뛴다.
+// 실패 시 reason:'rate_limited'|'http'|'network'로 구분해 던져,
+// 화면에서 "레이트리밋"과 "그 외 오류"를 다르게 안내할 수 있게 한다.
+async function _fetchLatestRun(workflowFile, force) {
+  const cacheKey = 'ar_gh_run_' + workflowFile;
+  if (!force) {
+    try {
+      const cached = JSON.parse(sessionStorage.getItem(cacheKey) || 'null');
+      if (cached && (Date.now() - cached.ts) < GH_CACHE_TTL_MS) return cached.run;
+    } catch {}
+  }
+  const url = `https://api.github.com/repos/${GH_REPO}/actions/workflows/${workflowFile}/runs?per_page=1`;
+  let res;
+  try {
+    res = await fetch(url, { headers: { Accept: 'application/vnd.github+json' }, signal: AbortSignal.timeout(8000) });
+  } catch (e) {
+    const err = new Error('네트워크 오류'); err.kind = 'network'; throw err;
+  }
+  if (!res.ok) {
+    const remaining = res.headers.get('x-ratelimit-remaining');
+    const err = new Error('GitHub Actions API ' + res.status);
+    err.kind = (res.status === 403 && remaining === '0') ? 'rate_limited' : 'http';
+    throw err;
+  }
+  const data = await res.json();
+  const run = (data.workflow_runs || [])[0]
+    ? (({ status, conclusion, updated_at, html_url, event }) => ({ status, conclusion, updated_at, html_url, event }))(data.workflow_runs[0])
+    : null;
+  try { sessionStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), run })); } catch {}
+  return run;
+}
+
+function _runStatusDot(run) {
+  if (!run) return { color: 'var(--ad-faint,#6e737a)', label: '실행 이력 없음' };
+  if (run.status === 'in_progress' || run.status === 'queued') return { color: 'var(--ad-accent,#5b8ec4)', label: '실행 중' };
+  if (run.conclusion === 'success') return { color: 'var(--ad-dim,#9aa0a8)', label: '성공' };
+  if (run.conclusion === 'failure') return { color: 'var(--ad-crit,#d16054)', label: '실패' };
+  return { color: 'var(--ad-faint,#6e737a)', label: run.conclusion || run.status || '알 수 없음' };
+}
+
+// GH API 실패 사유별 카드 표시 문구 — 레이트리밋은 사용자 행동으로
+// 해결되지 않는 상태라(기다리는 것 외엔 방법 없음) 별도로 알려준다.
+function _runFailText(settledResult) {
+  if (settledResult.status === 'fulfilled') return null;
+  const kind = settledResult.reason && settledResult.reason.kind;
+  if (kind === 'rate_limited') return 'GitHub API 레이트리밋 초과 — 잠시 후 재시도';
+  if (kind === 'network') return '네트워크 오류';
+  return '조회 실패';
+}
+
+function _arCardShell(title, badge, bodyHtml, linkUrl) {
+  return `
+    <div style="background:var(--ad-panel2,#33363c);padding:13px 15px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:12.5px;color:var(--ad-text,#d7d9dd)">${title}</div>
+        <span style="font-size:10px;font-family:var(--ad-mono);color:var(--ad-faint,#6e737a);background:var(--ad-bg,#26282d);
+                     border:1px solid var(--ad-line,#3c3f46);border-radius:3px;padding:2px 7px">${badge}</span>
+      </div>
+      ${bodyHtml}
+      ${linkUrl ? `<a href="${linkUrl}" target="_blank" style="display:inline-block;margin-top:8px;font-size:11px;color:var(--ad-dim,#9aa0a8);text-decoration:none">Actions에서 보기 ↗</a>` : ''}
+    </div>`;
+}
+
+// count건 중 서버 목록이 perPage=200에서 잘렸을 가능성이 있으면(정확히
+// 200건 반환) "200+"로 표시해 실제보다 적어 보이는 착시를 막는다.
+function _countLabel(rawLength, count) {
+  return rawLength === 200 ? '200+건(집계 상한 도달)' : count + '건';
+}
+
+async function _loadAutoRefreshStatus(force) {
+  const mySeq = ++_arLoadSeq;
+  const wrap = document.getElementById('auto-refresh-cards');
+  const note = document.getElementById('auto-refresh-status-note');
+  const btn  = document.getElementById('auto-refresh-reload-btn');
+  if (!wrap || !note) return;
+  if (btn) { btn.disabled = true; btn.textContent = '불러오는 중…'; }
+
+  try {
+    const [refreshRun, feedbackRun, queueRes, escRes, reportRes] = await Promise.allSettled([
+      _fetchLatestRun(AR_WORKFLOWS.refresh, force),
+      _fetchLatestRun(AR_WORKFLOWS.feedback, force),
+      fetch(`${WORKER_URL}/sp-author/queue?status=queued`, { signal: AbortSignal.timeout(8000) })
+        .then(r => { if (!r.ok) throw new Error('queue http ' + r.status); return r.json(); }),
+      fetch(`${WORKER_URL}/sp-author/escalations?unread=true`, { signal: AbortSignal.timeout(8000) })
+        .then(r => { if (!r.ok) throw new Error('escalations http ' + r.status); return r.json(); }),
+      fetch('./data/feedback_triage_report.json', { signal: AbortSignal.timeout(8000) })
+        .then(r => { if (!r.ok) throw new Error('no report'); return r.json(); }),
+    ]);
+
+    // 새로고침을 연타해 여러 요청이 겹친 경우, 가장 나중에 시작한
+    // 요청(마지막 클릭)만 화면을 갱신한다 — 먼저 시작해 늦게 끝난
+    // 응답이 최신 화면을 덮어쓰는 걸 막는다.
+    if (mySeq !== _arLoadSeq) return;
+
+    const queueRaw = queueRes.status === 'fulfilled' ? (queueRes.value.items || []) : [];
+    const refreshQueued = queueRaw.filter(it => it.signal_source === 'refresh_schedule').length;
+    const tagQueued = queueRaw.filter(it => ['expert_tag_resolution', 'gwp_tag_resolution'].includes(it.signal_source)).length;
+
+    // escalations는 reason으로 서버 필터가 안 되므로(현재 unread만 지원),
+    // ②(미등록 태그) 전용 승격 알림만 클라이언트에서 걸러낸다 — 그대로
+    // 세면 다른 사유(예: gov-task 승인 대기 등)까지 섞여 과대집계된다.
+    const escRaw = escRes.status === 'fulfilled' ? (escRes.value.items || []) : [];
+    const escTagOnly = escRaw.filter(it => it.reason === 'sp_draft_request');
+
+    // ① SP Refresh Scheduler
+    const run1 = refreshRun.status === 'fulfilled' ? refreshRun.value : null;
+    const dot1 = _runStatusDot(run1);
+    const run1FailText = _runFailText(refreshRun);
+    const card1 = _arCardShell(
+      '① SP Refresh Scheduler',
+      '매일 09:00 KST',
+      `
+        <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ad-dim,#9aa0a8);margin-bottom:4px">
+          <span style="width:6px;height:6px;border-radius:50%;background:${run1 ? dot1.color : 'var(--ad-faint,#6e737a)'};flex-shrink:0"></span>
+          마지막 실행: ${run1 ? _relTimeKo(run1.updated_at) + ' · ' + dot1.label : run1FailText}
+        </div>
+        <div style="font-size:11.5px;color:var(--ad-faint,#6e737a);margin-bottom:4px">다음 예정: ${_fmtKST(_nextDailyUTC(0))}</div>
+        <div style="font-size:11.5px;color:var(--ad-faint,#6e737a)">갱신 대기 SP: <span style="color:var(--ad-text,#d7d9dd);font-family:var(--ad-mono)">${queueRes.status === 'fulfilled' ? _countLabel(queueRaw.length, refreshQueued) : '조회 실패'}</span></div>
+      `,
+      run1 ? run1.html_url : `https://github.com/${GH_REPO}/actions/workflows/${AR_WORKFLOWS.refresh}`
+    );
+
+    // ② 미등록 태그 반복 집계 (동일 워크플로 2번째 스텝)
+    const card2 = _arCardShell(
+      '② 미등록 태그 집계',
+      '①과 동일 워크플로',
+      `
+        <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ad-dim,#9aa0a8);margin-bottom:4px">
+          <span style="width:6px;height:6px;border-radius:50%;background:${run1 ? dot1.color : 'var(--ad-faint,#6e737a)'};flex-shrink:0"></span>
+          마지막 실행: ${run1 ? _relTimeKo(run1.updated_at) + ' · ' + dot1.label : run1FailText}
+        </div>
+        <div style="font-size:11.5px;color:var(--ad-faint,#6e737a);margin-bottom:4px">큐 대기(미등록 태그 신호): <span style="color:var(--ad-text,#d7d9dd);font-family:var(--ad-mono)">${queueRes.status === 'fulfilled' ? _countLabel(queueRaw.length, tagQueued) : '조회 실패'}</span></div>
+        <div style="font-size:11.5px;color:var(--ad-faint,#6e737a)">읽지 않은 승격 알림: <span style="color:var(--ad-text,#d7d9dd);font-family:var(--ad-mono)">${escRes.status === 'fulfilled' ? _countLabel(escRaw.length, escTagOnly.length) : '조회 실패'}</span></div>
+      `,
+      run1 ? run1.html_url : `https://github.com/${GH_REPO}/actions/workflows/${AR_WORKFLOWS.refresh}`
+    );
+
+    // ③ 사용자 피드백 취합
+    const run3 = feedbackRun.status === 'fulfilled' ? feedbackRun.value : null;
+    const dot3 = _runStatusDot(run3);
+    const run3FailText = _runFailText(feedbackRun);
+    let reportLine = '최근 리포트 없음(신규 피드백 없었음)';
+    if (reportRes.status === 'fulfilled') {
+      const r = reportRes.value;
+      reportLine = `${_relTimeKo(r.generated_at)} · 피드백 ${r.total_feedback_processed}건 · 클러스터 ${r.cluster_count}개 · 검토 대기 전달 ${r.bridged_to_review_queue}건`;
+    }
+    const card3 = _arCardShell(
+      '③ 사용자 피드백 취합',
+      '매주 월 07:00 KST',
+      `
+        <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ad-dim,#9aa0a8);margin-bottom:4px">
+          <span style="width:6px;height:6px;border-radius:50%;background:${run3 ? dot3.color : 'var(--ad-faint,#6e737a)'};flex-shrink:0"></span>
+          마지막 실행: ${run3 ? _relTimeKo(run3.updated_at) + ' · ' + dot3.label : run3FailText}
+        </div>
+        <div style="font-size:11.5px;color:var(--ad-faint,#6e737a);margin-bottom:4px">다음 예정: ${_fmtKST(_nextWeeklyUTC(1, 22))}</div>
+        <div style="font-size:11.5px;color:var(--ad-faint,#6e737a)">${reportLine}</div>
+      `,
+      run3 ? run3.html_url : `https://github.com/${GH_REPO}/actions/workflows/${AR_WORKFLOWS.feedback}`
+    );
+
+    wrap.innerHTML = card1 + card2 + card3;
+
+    // 실패 소스별로 구체적 원인을 안내 — "일부 실패" 한 줄 요약보다
+    // 다음 행동(레이트리밋이면 대기, 네트워크면 재시도)을 알 수 있게 한다.
+    const failNotes = [];
+    if (refreshRun.status === 'rejected') failNotes.push('① 실행 이력: ' + _runFailText(refreshRun));
+    if (feedbackRun.status === 'rejected') failNotes.push('③ 실행 이력: ' + _runFailText(feedbackRun));
+    if (queueRes.status === 'rejected') failNotes.push('갱신 대기열 조회 실패');
+    if (escRes.status === 'rejected') failNotes.push('승격 알림 조회 실패');
+    note.textContent = failNotes.length > 0
+      ? '일부 항목을 불러오지 못했습니다 — ' + failNotes.join(' · ')
+      : '조회 전용 패널입니다 — 워크플로 수동 실행은 매뉴얼의 gh workflow run 절차를 따르세요.';
+  } catch (e) {
+    if (mySeq !== _arLoadSeq) return;
+    note.textContent = '현황을 불러오는 중 예기치 않은 오류가 발생했습니다: ' + e.message;
+  } finally {
+    if (mySeq === _arLoadSeq && btn) { btn.disabled = false; btn.textContent = '새로고침'; }
+  }
+}
+
+// ── 체험 기간 ─────────────────────────────────────────────────
+function _loadTrialSettings() {
+  document.getElementById('trial-days-input').value  = localStorage.getItem(LS_TRIAL)||'7';
+  document.getElementById('trial-expired-msg').value = localStorage.getItem(LS_EXPR_MSG)||'';
+}
+
+async function _saveTrialDays() {
+  const v = parseInt(document.getElementById('trial-days-input').value)||7;
+  localStorage.setItem(LS_TRIAL, v);
+  try { await fetch(`${WORKER_URL}/admin/default-key`,{method:'POST',headers:{'Content-Type':'application/json',..._adminAuthHeaders()},body:JSON.stringify({trial_days:v})}); } catch {}
+  const ok=document.getElementById('trial-save-ok');
+  ok.style.display='inline'; setTimeout(()=>ok.style.display='none',2000);
+}
+
+async function _saveExpiredMsg() {
+  const v = document.getElementById('trial-expired-msg').value;
+  localStorage.setItem(LS_EXPR_MSG, v);
+  try { await fetch(`${WORKER_URL}/admin/default-key`,{method:'POST',headers:{'Content-Type':'application/json',..._adminAuthHeaders()},body:JSON.stringify({expired_msg:v})}); } catch {}
+  const ok=document.getElementById('msg-save-ok');
+  ok.style.display='inline'; setTimeout(()=>ok.style.display='none',2000);
+}
+
+// ── 사용자 일괄 삭제 ─────────────────────────────────────────
+async function _runBulkDelete() {
+  const raw = document.getElementById('bulk-delete-input').value;
+  const identifiers = raw.split('\n').map(s => s.trim()).filter(Boolean);
+  const statusEl = document.getElementById('bulk-delete-status');
+  const resultEl = document.getElementById('bulk-delete-result');
+  resultEl.style.display = 'none';
+
+  if (!identifiers.length) {
+    statusEl.textContent = '삭제할 @handle 또는 GUID를 한 줄에 하나씩 입력하세요.';
+    return;
+  }
+  if (identifiers.length > 100) {
+    statusEl.textContent = `한 번에 최대 100개까지만 가능합니다 (입력: ${identifiers.length}개).`;
+    return;
+  }
+
+  const sure = confirm(
+    `${identifiers.length}명의 계정을 완전히 삭제합니다.\n` +
+    `L1 PocketBase + Supabase 9개 테이블 + KV에서 모두 제거되며 되돌릴 수 없습니다.\n\n` +
+    `계속하시겠습니까?`
+  );
+  if (!sure) return;
+
+  statusEl.textContent = '삭제 중...';
+  try {
+    const res = await fetch(`${WORKER_URL}/admin/users/bulk-delete`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ..._adminAuthHeaders() },
+      body: JSON.stringify({ identifiers }),
+      signal: AbortSignal.timeout(60000),
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || data.detail || `HTTP ${res.status}`);
+
+    statusEl.textContent = `✓ 완료 — 처리 ${data.count}건 (그림자 정리: ${data.shadow_cleanup})`;
+    resultEl.textContent = JSON.stringify(data.results, null, 2);
+    resultEl.style.display = 'block';
+    document.getElementById('bulk-delete-input').value = '';
+  } catch (e) {
+    statusEl.textContent = '✗ 삭제 실패: ' + e.message;
+  }
+}
+
+// ── LLM 키 ───────────────────────────────────────────────────
+function _getKeys() { try{return JSON.parse(localStorage.getItem(LS_KEYS)||'[]');}catch{return [];} }
+function _esc(s) { return s.replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+function _onProviderChange(sel) {
+  const row=sel.closest('[data-row]');
+  const ms=row?.querySelector('.ak-model');
+  if(!ms) return;
+  const p=PROVIDERS.find(p=>p.id===sel.value)||PROVIDERS[0];
+  ms.innerHTML=p.models.map(m=>`<option value="${m.id}">${m.label}</option>`).join('');
+}
+
+function _renderKeyList() {
+  const keys=_getKeys();
+  const list=document.getElementById('llm-key-list');
+  const empty=document.getElementById('llm-key-empty');
+  list.innerHTML='';
+  empty.style.display=keys.length?'none':'block';
+  keys.forEach((k,i)=>{
+    const cp=PROVIDERS.find(p=>p.id===(k.provider||'gemini'))||PROVIDERS[0];
+    const row=document.createElement('div');
+    row.setAttribute('data-row',i);
+    row.style.cssText='display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--ad-panel2,#33363c);border:1px solid var(--ad-line,#3c3f46);border-radius:4px;padding:11px';
+    row.innerHTML=`
+      <select class="ak-prov" data-i="${i}" onchange="_onProviderChange(this)"
+        style="padding:6px 8px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:3px;font-size:13px;font-family:inherit;background:var(--ad-bg,#26282d);color:var(--ad-text,#d7d9dd);flex-shrink:0">
+        ${PROVIDERS.map(p=>`<option value="${p.id}" ${k.provider===p.id?'selected':''}>${p.label}</option>`).join('')}
+      </select>
+      <select class="ak-model" data-i="${i}"
+        style="padding:6px 8px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:3px;font-size:13px;font-family:inherit;background:var(--ad-bg,#26282d);color:var(--ad-text,#d7d9dd);flex-shrink:0;max-width:200px">
+        ${cp.models.map(m=>`<option value="${m.id}" ${k.model===m.id?'selected':''}>${m.label}</option>`).join('')}
+      </select>
+      <input class="ak-label" data-i="${i}" type="text" value="${_esc(k.label||'')}" placeholder="설명"
+        style="flex:1;min-width:100px;padding:6px 9px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:3px;font-size:13px;font-family:inherit;background:var(--ad-bg,#26282d);color:var(--ad-text,#d7d9dd)">
+      <input class="ak-key" data-i="${i}" type="password" value="${_esc(k.key||'')}" placeholder="API Key"
+        style="flex:2;min-width:160px;padding:6px 9px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:3px;font-size:13px;font-family:var(--ad-mono,monospace);background:var(--ad-bg,#26282d);color:var(--ad-text,#d7d9dd)"
+        onfocus="this.type='text'" onblur="this.type='password'">
+      <label style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--ad-dim,#9aa0a8);white-space:nowrap;cursor:pointer">
+        <input class="ak-active" data-i="${i}" type="checkbox" ${k.active?'checked':''} style="width:14px;height:14px;accent-color:#5b8ec4"> 활성
+      </label>
+      <button onclick="_removeKey(${i})" style="background:none;border:1px solid var(--ad-crit,#d16054);color:var(--ad-crit,#d16054);border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:pointer;flex-shrink:0">삭제</button>`;
+    list.appendChild(row);
+  });
+}
+
+function _addKeyRow() {
+  const keys=_getKeys();
+  if(keys.length>=10){alert('최대 10개');return;}
+  const def=PROVIDERS[0];
+  keys.push({provider:def.id,model:def.models[0]?.id||'',label:'',key:'',active:true});
+  localStorage.setItem(LS_KEYS,JSON.stringify(keys));
+  _renderKeyList();
+  document.getElementById('llm-key-empty').style.display='none';
+}
+
+function _removeKey(i) {
+  const keys=_getKeys(); keys.splice(i,1);
+  localStorage.setItem(LS_KEYS,JSON.stringify(keys)); _renderKeyList();
+}
+
+async function _saveAllKeys() {
+  const rows=document.getElementById('llm-key-list').children;
+  const keys=[];
+  for(const row of rows){
+    keys.push({
+      provider:row.querySelector('.ak-prov').value,
+      model:row.querySelector('.ak-model')?.value||'',
+      label:row.querySelector('.ak-label').value.trim(),
+      key:row.querySelector('.ak-key').value.trim(),
+      active:row.querySelector('.ak-active').checked,
+    });
+  }
+  const td=parseInt(document.getElementById('trial-days-input').value)||7;
+  const em=document.getElementById('trial-expired-msg').value;
+  localStorage.setItem(LS_KEYS,JSON.stringify(keys));
+  localStorage.setItem(LS_TRIAL,td);
+  localStorage.setItem(LS_EXPR_MSG,em);
+  const ok=document.getElementById('key-save-ok');
+  try {
+    const res=await fetch(`${WORKER_URL}/admin/default-key`,{method:'POST',headers:{'Content-Type':'application/json',..._adminAuthHeaders()},body:JSON.stringify({keys,trial_days:td,expired_msg:em})});
+    const d=await res.json();
+    ok.textContent=d.ok?'✓ KV에 저장됐습니다 — 모든 사용자에게 적용됩니다.':'⚠️ KV 저장 실패: '+(d.message||res.status);
+  } catch(e) { ok.textContent='⚠️ Worker 연결 실패: '+e.message; }
+  ok.style.display='block';
+  setTimeout(()=>{ok.style.display='none';ok.textContent='✓ 저장되었습니다.';},4000);
+  _renderKeyList();
+}
+
+// ══════════════════════════════════════════════════════════════
+// 공문 발송 기록 (2026-08-31 신설)
+// worker.js GET/POST /admin/letters (AI_SETUP_SEALS_KV, hondi:official_letters)
+// LLM 키 목록과 동일 패턴: 로드 → 화면에서 자유 편집 → "전체 저장"으로
+// 배열 통째 전송. id는 신규 행이면 비워두고, 저장 응답이 채워준 id를
+// 그대로 다시 화면에 반영한다(다음 저장부터 안정적으로 같은 항목을
+// 가리키게 하기 위함 — 순서만으로 항목을 구분하면 삭제/추가 후 어긋남).
+// ══════════════════════════════════════════════════════════════
+let _letters = [];
+
+function _renderLetterList() {
+  const tbody = document.getElementById('letter-list');
+  const empty = document.getElementById('letter-list-empty');
+  tbody.innerHTML = '';
+  empty.style.display = _letters.length ? 'none' : 'block';
+  const cellInput = (cls, i, val, type='text', ph='') =>
+    `<input class="${cls}" data-i="${i}" type="${type}" value="${_esc(val||'')}" placeholder="${_esc(ph)}"
+       style="width:100%;padding:6px 8px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:3px;font-size:11.5px;font-family:inherit;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);box-sizing:border-box">`;
+  _letters.forEach((l, i) => {
+    const tr = document.createElement('tr');
+    const canSend = !!(l.id && l.email);
+    tr.innerHTML = `
+      <td style="padding:4px 8px 4px 0">${cellInput('lt-inst', i, l.institution, 'text', '예: 제주특별자치도청')}</td>
+      <td style="padding:4px 8px 4px 0">${cellInput('lt-title', i, l.title, 'text', '공문 제목')}</td>
+      <td style="padding:4px 8px 4px 0">${cellInput('lt-link', i, l.link, 'text', 'https://...')}</td>
+      <td style="padding:4px 8px 4px 0">${cellInput('lt-email', i, l.email, 'email', 'to@institution.go.kr')}</td>
+      <td style="padding:4px 8px 4px 0">${cellInput('lt-sent', i, l.sent_date, 'date')}</td>
+      <td style="padding:4px 8px 4px 0">${cellInput('lt-recv-date', i, l.received_date, 'date')}</td>
+      <td style="padding:4px 8px 4px 0">${cellInput('lt-recv-content', i, l.received_content, 'text', '회신 요약')}</td>
+      <td style="padding:4px 0">
+        <button onclick="_sendLetterEmail(${i})" ${canSend ? '' : 'disabled'}
+          title="${canSend ? '' : '먼저 전체 저장 후, 이메일 주소를 채워야 발송할 수 있습니다'}"
+          style="background:none;border:1px solid ${canSend ? 'var(--ad-line-strong,#4a4e56)' : 'var(--ad-line,#3c3f46)'};color:${canSend ? 'var(--ad-dim,#9aa0a8)' : 'var(--ad-faint,#6e737a)'};
+                 border-radius:3px;padding:5px 8px;font-size:10.5px;cursor:${canSend ? 'pointer' : 'not-allowed'};white-space:nowrap">발송</button>
+      </td>
+      <td style="padding:4px 0"><button onclick="_removeLetter(${i})"
+        style="background:none;border:1px solid var(--ad-crit,#d16054);color:var(--ad-crit,#d16054);border-radius:3px;padding:5px 8px;font-size:10.5px;cursor:pointer;white-space:nowrap">삭제</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function _addLetterRow() {
+  _letters.push({ id:'', institution:'', title:'', link:'', email:'', sent_date:'', received_date:'', received_content:'' });
+  _renderLetterList();
+}
+
+function _removeLetter(i) {
+  _letters.splice(i, 1);
+  _renderLetterList();
+}
+
+async function _loadLetters() {
+  try {
+    const res = await fetch(`${WORKER_URL}/admin/letters`, {signal:AbortSignal.timeout(10000), headers:_adminAuthHeaders()});
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.message || 'API_ERROR');
+    _letters = data.letters || [];
+  } catch(e) {
+    console.warn('[letters]', e.message);
+    _letters = [];
+  }
+  _renderLetterList();
+}
+
+async function _saveAllLetters() {
+  const rows = document.getElementById('letter-list').children;
+  const letters = [];
+  let i = 0;
+  for (const row of rows) {
+    letters.push({
+      id: _letters[i]?.id || '',
+      institution:       row.querySelector('.lt-inst').value.trim(),
+      title:             row.querySelector('.lt-title').value.trim(),
+      link:              row.querySelector('.lt-link').value.trim(),
+      email:             row.querySelector('.lt-email').value.trim(),
+      sent_date:         row.querySelector('.lt-sent').value,
+      received_date:     row.querySelector('.lt-recv-date').value,
+      received_content:  row.querySelector('.lt-recv-content').value.trim(),
+    });
+    i++;
+  }
+  const ok = document.getElementById('letter-save-ok');
+  try {
+    const res = await fetch(`${WORKER_URL}/admin/letters`, {
+      method:'POST', headers:{'Content-Type':'application/json', ..._adminAuthHeaders()},
+      body: JSON.stringify({ letters }),
+    });
+    const d = await res.json();
+    if (d.ok) {
+      _letters = d.letters || letters; // 서버가 채운 id 반영
+      ok.style.color = 'var(--ad-dim,#9aa0a8)';
+      ok.textContent = '✓ 저장됐습니다.';
+    } else {
+      ok.style.color = 'var(--ad-crit,#d16054)';
+      ok.textContent = '⚠️ 저장 실패: ' + (d.message || res.status);
+    }
+  } catch(e) {
+    ok.style.color = 'var(--ad-crit,#d16054)';
+    ok.textContent = '⚠️ Worker 연결 실패: ' + e.message;
+  }
+  ok.style.display = 'block';
+  setTimeout(()=>{ ok.style.display='none'; }, 4000);
+  _renderLetterList();
+}
+
+// 발송 전 반드시 _saveAllLetters()를 거쳐야 letter.id가 서버에서
+// 확정된다(신규 행은 id가 비어있는 채로 시작 — crypto.randomUUID()는
+// 서버 쪽에서만 채운다, handleAdminLettersSet 주석 참고). 그래서 버튼은
+// l.id && l.email이 둘 다 있을 때만 활성화된다(_renderLetterList의
+// canSend 조건). 제목·본문은 매번 프롬프트로 받는다 — 별도 작성 폼을
+//새로 만들지 않고, 이미 있는 공문 초안(공문 초안 문서)을 복사해
+// 붙여넣는 흐름을 그대로 지원한다.
+async function _sendLetterEmail(i) {
+  const l = _letters[i];
+  if (!l || !l.id || !l.email) {
+    alert('먼저 "전체 저장"을 눌러 저장한 뒤, 수신 이메일 주소를 채워주세요.');
+    return;
+  }
+  const subject = prompt('제목을 입력하세요:', l.title || '');
+  if (subject === null) return;
+  const text = prompt('본문을 입력하세요 (공문 초안 내용을 붙여넣으세요):', '');
+  if (text === null) return;
+  if (!subject.trim() || !text.trim()) {
+    alert('제목과 본문을 모두 입력해야 합니다.');
+    return;
+  }
+
+  try {
+    const res = await fetch(`${WORKER_URL}/admin/letters/send-email`, {
+      method: 'POST', headers: {'Content-Type':'application/json', ..._adminAuthHeaders()},
+      body: JSON.stringify({ letter_id: l.id, to: l.email, subject: subject.trim(), text: text.trim() }),
+    });
+    const d = await res.json();
+    if (d.ok) {
+      alert(`발송했습니다 (발신 주소: ${d.from})`);
+      await _loadLetters(); // sent_date가 서버에서 갱신됐을 수 있으니 다시 불러온다
+    } else {
+      alert('발송 실패: ' + (d.message || res.status));
+    }
+  } catch(e) {
+    alert('Worker 연결 실패: ' + e.message);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// ⑤ Cloudflare 서브도메인 자동화
+// 작동 조건: Global API Key + X-Auth-Email 헤더 (Custom Token 불가)
+// 엔드포인트: /zones/{zoneId}/dns_records (언더스코어!)
+// JSON 전송: 문자열 직렬화 (개행문자 없게)
+// ══════════════════════════════════════════════════════════════
+
+function _loadCFCredentials() {
+  const s=JSON.parse(localStorage.getItem(LS_CF_CRED)||'{}');
+  if(s.apiKey) document.getElementById('cf-api-key').value =s.apiKey;
+  if(s.email)  document.getElementById('cf-email').value   =s.email;
+  if(s.zoneId) document.getElementById('cf-zone-id').value =s.zoneId;
+  if(s.target) document.getElementById('cf-target').value  =s.target;
+}
+
+function _saveCFCredentials() {
+  // password 필드는 JS로 세팅된 값이 브라우저에 따라 .value로 못 읽히는 경우가 있음
+  // → 비어있으면 기존 localStorage 값으로 보완
+  const prev=_getCFCred();
+  const c={
+    apiKey:document.getElementById('cf-api-key').value.trim() || prev.apiKey || '',
+    email:document.getElementById('cf-email').value.trim()  || prev.email  || '',
+    zoneId:document.getElementById('cf-zone-id').value.trim()|| prev.zoneId|| '',
+    target:document.getElementById('cf-target').value.trim() || prev.target || 'openhash-gopang.github.io',
+  };
+  if(!c.apiKey||!c.email||!c.zoneId){
+    alert('API Key, Email, Zone ID는 필수입니다.\n\n값이 인식되지 않으면 필드를 직접 다시 입력하세요.');return;
+  }
+  localStorage.setItem(LS_CF_CRED,JSON.stringify(c));
+  const saved=_getCFCred();
+  const ok=document.getElementById('cf-cred-ok');
+  if(saved.apiKey&&saved.email&&saved.zoneId){
+    ok.textContent='✓ 저장됨 ('+saved.apiKey.slice(0,8)+'...)';
+    ok.style.display='inline';
+    setTimeout(()=>{ok.style.display='none';ok.textContent='✓ 저장됨';},4000);
+  } else {
+    alert('저장 실패: localStorage를 사용할 수 없습니다.');
+  }
+}
+
+function _getCFCred() { return JSON.parse(localStorage.getItem(LS_CF_CRED)||'{}'); }
+function _getSubdomains() { try{return JSON.parse(localStorage.getItem('hondi_cf_subdomains')||'[]');}catch{return[];} }
+function _saveSubdomains(list) { localStorage.setItem('hondi_cf_subdomains',JSON.stringify(list)); }
+
+function _renderSubdomainList() {
+  const subs=_getSubdomains();
+  const list=document.getElementById('subdomain-list');
+  list.innerHTML='';
+  subs.forEach((s,i)=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:8px;background:var(--ad-panel2,#33363c);border:1px solid var(--ad-line,#3c3f46);border-radius:3px;padding:9px 11px';
+    row.innerHTML=`
+      <span style="font-size:13px;font-family:var(--ad-mono);flex:1;color:var(--ad-text,#d7d9dd)">${s.name}.hondi.net</span>
+      <span style="font-size:10.5px;padding:2px 8px;border-radius:3px;background:var(--ad-bg,#26282d);color:${s.status==='active'?'var(--ad-dim,#9aa0a8)':'var(--ad-warn,#d6a04a)'}">
+        ${s.status==='active'?'활성':'대기'}
+      </span>
+      <button onclick="_deleteSubdomain(${i})"
+              style="background:none;border:1px solid var(--ad-crit,#d16054);color:var(--ad-crit,#d16054);border-radius:3px;padding:3px 8px;font-size:10.5px;cursor:pointer">삭제</button>`;
+    list.appendChild(row);
+  });
+}
+
+function _addSubdomainRow() {
+  const cred=_getCFCred();
+  if(!cred.apiKey||!cred.email||!cred.zoneId){
+    alert('먼저 Cloudflare 자격증명을 입력하고 저장하세요.\n\nAPI Key, Email, Zone ID 모두 입력 후\n"자격증명 저장" 버튼을 클릭하세요.');return;
+  }
+  const name=prompt('추가할 서브도메인 이름 입력\n(예: klaw → klaw.hondi.net)\n\n여러 개: 쉼표로 구분 (예: qna,openhash,l1-ido1)');
+  if(!name||!name.trim()) return;
+  const names=name.split(',').map(n=>n.trim().toLowerCase().replace(/[^a-z0-9-]/g,'')).filter(Boolean);
+  if(!names.length){alert('유효하지 않은 이름입니다.');return;}
+  names.forEach(sub=>_createCFRecord(sub));
+}
+
+async function _createCFRecord(sub) {
+  const cred=_getCFCred();
+  if(!cred.apiKey||!cred.email||!cred.zoneId){
+    alert('먼저 Cloudflare 자격증명을 입력하고 저장하세요.');return;
+  }
+  const status=document.getElementById('subdomain-list-status');
+  status.textContent=`⏳ ${sub}.hondi.net 추가 중...`;
+  status.style.color='var(--ad-warn,#d6a04a)';
+  try {
+    // api.cloudflare.com CORS 차단 → Worker 프록시 경유
+    const res=await fetch(`${WORKER_URL}/admin/cf-dns`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json', ..._adminAuthHeaders()},
+      body:JSON.stringify({
+        apiKey:cred.apiKey, email:cred.email,
+        zoneId:cred.zoneId, name:sub,
+        content:cred.target||'openhash-gopang.github.io'
+      })
+    });
+    const data=await res.json();
+    if(data.success){
+      const subs=_getSubdomains();
+      subs.push({name:sub,recordId:data.result?.id,status:'active',created:new Date().toISOString()});
+      _saveSubdomains(subs); _renderSubdomainList();
+      status.textContent=`✅ ${sub}.hondi.net 추가 완료!`;
+      status.style.color='var(--ad-dim,#9aa0a8)';
+    } else {
+      status.textContent=`❌ 실패: ${data.errors?.[0]?.message||JSON.stringify(data.errors)}`;
+      status.style.color='var(--ad-crit,#d16054)';
+    }
+  } catch(e) {
+    status.textContent=`❌ 오류: ${e.message}`;
+    status.style.color='var(--ad-crit,#d16054)';
+  }
+}
+
+async function _deleteSubdomain(i) {
+  const subs=_getSubdomains(); const sub=subs[i];
+  if(!sub||!confirm(`${sub.name}.hondi.net을 삭제할까요?`)) return;
+  const cred=_getCFCred();
+  const status=document.getElementById('subdomain-list-status');
+  if(cred.apiKey&&cred.email&&cred.zoneId&&sub.recordId){
+    status.textContent=`⏳ ${sub.name}.hondi.net 삭제 중...`;
+    try {
+      const res=await fetch(
+        `https://api.cloudflare.com/client/v4/zones/${cred.zoneId}/dns_records/${sub.recordId}`,
+        {method:'DELETE',headers:{'X-Auth-Email':cred.email,'X-Auth-Key':cred.apiKey}}
+      );
+      const data=await res.json();
+      status.textContent=data.success?`✅ ${sub.name}.hondi.net 삭제 완료`:`⚠️ CF 삭제 실패(로컬만 제거): ${data.errors?.[0]?.message}`;
+      status.style.color=data.success?'var(--ad-dim,#9aa0a8)':'var(--ad-warn,#d6a04a)';
+    } catch(e) { status.textContent=`⚠️ 오류(로컬만 제거): ${e.message}`; status.style.color='var(--ad-warn,#d6a04a)'; }
+  }
+  subs.splice(i,1); _saveSubdomains(subs); _renderSubdomainList();
+}
+
+// ── 전역 노출 (onclick에서 직접 호출 가능하도록) ──────────────
+window._openAdminPanel   = _openAdminPanel;
+window._adminLogout      = _adminLogout;
+window._adminLogin       = _adminLogin;
+window._saveTrialDays    = _saveTrialDays;
+window._saveExpiredMsg   = _saveExpiredMsg;
+window._addKeyRow        = _addKeyRow;
+window._removeKey        = _removeKey;
+window._saveAllKeys      = _saveAllKeys;
+window._onProviderChange = _onProviderChange;
+window._saveCFCredentials= _saveCFCredentials;
+window._addSubdomainRow  = _addSubdomainRow;
+window._deleteSubdomain  = _deleteSubdomain;
+window._addLetterRow     = _addLetterRow;
+window._removeLetter     = _removeLetter;
+window._saveAllLetters   = _saveAllLetters;
+window._sendLetterEmail  = _sendLetterEmail;
+
+// 페이지 로드시 자동 초기화 (독립 페이지이므로 숨김 진입 트리거 불필요)
+_openAdminPanel();
+</script>
+</body>
+</html>
