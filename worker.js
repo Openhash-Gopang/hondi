@@ -17003,13 +17003,39 @@ async function _mintAndRecordCharge(env, {
 
   let finalRequestId = existingRequestId;
   if (existingRequestId) {
-    const patchRes = await fetch(`${L1_DEFAULT}/api/collections/charge_requests/records/${existingRequestId}`, {
-      method: 'PATCH', headers, body: JSON.stringify(patchBody),
-    });
-    if (!patchRes.ok) {
+    // 2026-09-17 수정(주피터 지시 — 실측 확인: 자동 금액 매칭 경로에서도
+    // mint는 성공했는데 이 PATCH만 실패해 "돈은 들어왔는데 카드는 계속
+    // 입금 대기"로 남는 증상 재현) — mint는 이미 완료된 되돌릴 수 없는
+    // 동작이고 이 PATCH는 그 결과를 기록만 하는 것이라 재시도해도
+    // 안전하다(멱등). 최대 3회, 짧은 지연을 두고 재시도한다.
+    let patchOk = false, lastPatchStatus = null, lastPatchBody = '';
+    for (let attempt = 1; attempt <= 3 && !patchOk; attempt++) {
+      if (attempt > 1) await new Promise(r => setTimeout(r, 400 * attempt));
+      try {
+        const patchRes = await fetch(`${L1_DEFAULT}/api/collections/charge_requests/records/${existingRequestId}`, {
+          method: 'PATCH', headers, body: JSON.stringify(patchBody),
+        });
+        patchOk = patchRes.ok;
+        if (!patchOk) {
+          lastPatchStatus = patchRes.status;
+          lastPatchBody = (await patchRes.text().catch(() => '')).slice(0, 300);
+        }
+      } catch (e) {
+        lastPatchStatus = 'FETCH_THREW';
+        lastPatchBody = e.message;
+      }
+    }
+    if (!patchOk) {
       // GDC는 이미 발행됐는데 상태 갱신만 실패한 경우 — 발행 자체는 되돌릴 수
       // 없으므로(멱등 처리 없음), 크게 로그를 남겨 수동 정정이 필요함을 표시.
-      console.error(JSON.stringify({ tag: 'CHARGE_CONFIRM_PATCH_FAILED_AFTER_MINT', requestId: existingRequestId, mint_content_hash: mintData.content_hash, guid: finalGuid, krwAmount: finalKrw, channel, ts: new Date().toISOString() }));
+      // 실패 이유(상태 코드·응답 본문 일부)를 같이 남겨 다음엔 원인이 바로
+      // 보이게 한다(기존엔 실패했다는 사실만 남고 이유가 없었다).
+      console.error(JSON.stringify({
+        tag: 'CHARGE_CONFIRM_PATCH_FAILED_AFTER_MINT', requestId: existingRequestId,
+        mint_content_hash: mintData.content_hash, guid: finalGuid, krwAmount: finalKrw, channel,
+        last_patch_status: lastPatchStatus, last_patch_body: lastPatchBody,
+        ts: new Date().toISOString(),
+      }));
     }
   } else {
     // 방식B(가상계좌 웹훅) — 사전 pending 레코드가 없으므로 감사 기록용으로
