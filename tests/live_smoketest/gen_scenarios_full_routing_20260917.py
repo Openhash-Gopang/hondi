@@ -51,15 +51,44 @@ gen_scenarios_batch2.py가 300건을 사람이 한 줄씩 손으로 쓴 것과 �
     구분 안 될 만큼 유사해질 수 있다(중계열 자체가 이름 없이는 설명하기
     어려운 추상 카테고리라는 구조적 한계).
   - 이 세트는 채점 기준이 되는 expect_tag를 top-level 기준으로만 단다
-    (leaf 항목도 [EXPERT: <leaf_id>]를 기대값으로 넣었지만, subject-gate
-    2단계 게이트는 클라이언트 사이드 2차 호출이라 **1단계 AC 응답만
-    보는 라이브 API 호출로는 검증 불가** — leaf 항목의 실제 채점은
-    get_gate_level.mjs류의 계층형 재현 방식이 필요하다. 이 파일은 우선
-    "발화 세트 자체"를 만드는 게 목적이고, 채점 스크립트는 별도 필요.)
+    (leaf 항목도 tier는 harness 규약대로 "expert"로 통일하고, expect_tag는
+    실제로 라이브 단일호출로 확인 가능한 1단계 부모 태그
+    `[EXPERT: <parent_id>]`만 넣었다. 진짜 리프 기대값은 별도
+    `leaf_target_id`/`leaf_note` 필드에 담아뒀다 — subject-gate 2단계
+    게이트는 클라이언트 사이드 2차 호출이라 **1단계 AC 응답만 보는 라이브
+    API 호출로는 검증 불가**하기 때문. leaf 항목이 LIVE-PASS로 나와도
+    "부모까지만 확인됐다"는 뜻이지 리프까지 맞았다는 보장은 아니다 —
+    리프까지의 실제 채점은 get_gate_level.mjs류의 계층형 재현 방식이
+    필요하다. 이 파일은 우선 "발화 세트 자체"를 만드는 게 목적이고,
+    leaf 전용 채점 스크립트는 별도 필요.)
 
-## 사용법
+## 사용법 (생성 + 라이브 실행)
     python3 gen_scenarios_full_routing_20260917.py
-    # tests/live_smoketest/scenarios_full_routing_20260917.json 생성
+    # tests/live_smoketest/ 아래에 4개 파일 생성:
+    #   scenarios_full_routing_20260917.json        (1,074건 전체)
+    #   scenarios_full_routing_20260917_kservice.json    (62건 — K-서비스)
+    #   scenarios_full_routing_20260917_expert-top.json  (126건 — 전문가 최상위)
+    #   scenarios_full_routing_20260917_expert-leaf.json (886건 — 전문가 세부리프)
+    #
+    # 실행은 기존 routing_ABmention_live_smoketest.py를 그대로 재사용한다
+    # (tier가 "kservice"/"expert"/"institution" 중 하나여야 채점되므로,
+    #  이 생성기는 top/leaf 구분을 tier가 아니라 level 필드에 담아 규약을
+    #  맞춰뒀다). 비용·시간을 아끼려면 규모가 작은 것부터 단계적으로:
+    #
+    #   cd tests/live_smoketest
+    #   export DEEPSEEK_API_KEY=sk-xxxx
+    #   python3 routing_ABmention_live_smoketest.py \
+    #       --scenarios scenarios_full_routing_20260917_kservice.json \
+    #       --out ../../results/routing-full/kservice
+    #   python3 routing_ABmention_live_smoketest.py \
+    #       --scenarios scenarios_full_routing_20260917_expert-top.json \
+    #       --out ../../results/routing-full/expert-top
+    #   # 위 두 개(총 188건)에서 큰 문제가 없는 걸 먼저 확인한 뒤, 규모가
+    #   # 훨씬 큰(886건) leaf를 마지막에 실행 — LIVE-PASS는 "부모 태그까지만
+    #   # 맞았다"는 뜻이므로 리프 자체 확인은 별도라는 점을 잊지 말 것.
+    #   python3 routing_ABmention_live_smoketest.py \
+    #       --scenarios scenarios_full_routing_20260917_expert-leaf.json \
+    #       --out ../../results/routing-full/expert-leaf
 """
 import json
 import re
@@ -192,14 +221,25 @@ def build_scenarios():
     for i, e in enumerate(experts):
         dname = display_name(e['label'])
         level = 'leaf' if e['parentKey'] else 'top'
+        # routing_ABmention_live_smoketest.py는 tier가 정확히 "kservice"/
+        # "expert"/"institution" 셋 중 하나여야 채점 분기를 탄다(그 외 값은
+        # 전부 LIVE-NEEDS-REVIEW로 새어버림) — level은 별도 필드로 보존.
+        ac_expect_tag = f"[EXPERT: {e['id']}]" if level == 'top' else f"[EXPERT: {e['parentKey']}]"
+        leaf_note = (
+            None if level == 'top' else
+            f"2단계 게이트에서 리프 {e['id']} 기대 — 1단계 AC 응답만 보는 "
+            f"이 하네스로는 미검증, get_gate_level.mjs류 별도 하네스 필요"
+        )
         no += 1
         t = NAMED_TEMPLATES_EXPERT[i % len(NAMED_TEMPLATES_EXPERT)]
         rows.append({
-            'no': no, 'id': f"expert-{e['id']}-named", 'tier': f'expert-{level}',
+            'no': no, 'id': f"expert-{e['id']}-named", 'tier': 'expert', 'level': level,
             'target_id': e['id'], 'target_name': dname, 'variant': 'named',
             'parent_id': e['parentKey'],
             'utterance': t.format(name=dname),
-            'expect_tag': f"[EXPERT: {e['id']}]" if level == 'top' else f"[EXPERT: {e['parentKey']}] (1단계) -> 2단계 게이트에서 {e['id']} 기대 (라이브 API 단일호출로는 미검증, get_gate_level.mjs류 필요)",
+            'expect_tag': ac_expect_tag,
+            'leaf_target_id': e['id'] if level == 'leaf' else None,
+            'leaf_note': leaf_note,
         })
         no += 1
         name_parts = {dname, e['label'], e['id']}
@@ -213,18 +253,32 @@ def build_scenarios():
             kw = m.group(2) if m else e['label']
         t2 = IMPLIED_TEMPLATES_EXPERT[i % len(IMPLIED_TEMPLATES_EXPERT)]
         rows.append({
-            'no': no, 'id': f"expert-{e['id']}-implied", 'tier': f'expert-{level}',
+            'no': no, 'id': f"expert-{e['id']}-implied", 'tier': 'expert', 'level': level,
             'target_id': e['id'], 'target_name': dname, 'variant': 'implied',
             'parent_id': e['parentKey'],
             'utterance': t2.format(kw=kw),
-            'expect_tag': f"[EXPERT: {e['id']}]" if level == 'top' else f"[EXPERT: {e['parentKey']}] (1단계) -> 2단계 게이트에서 {e['id']} 기대 (라이브 API 단일호출로는 미검증, get_gate_level.mjs류 필요)",
+            'expect_tag': ac_expect_tag,
+            'leaf_target_id': e['id'] if level == 'leaf' else None,
+            'leaf_note': leaf_note,
         })
 
     return rows
 
 if __name__ == '__main__':
     rows = build_scenarios()
-    out_path = os.path.join(REPO_ROOT, 'tests', 'live_smoketest', 'scenarios_full_routing_20260917.json')
-    with open(out_path, 'w', encoding='utf-8') as f:
+    out_dir = os.path.join(REPO_ROOT, 'tests', 'live_smoketest')
+    full_path = os.path.join(out_dir, 'scenarios_full_routing_20260917.json')
+    with open(full_path, 'w', encoding='utf-8') as f:
         json.dump(rows, f, ensure_ascii=False, indent=2)
-    print(f'{len(rows)}건 생성 -> {out_path}')
+    print(f'{len(rows)}건 생성 -> {full_path}')
+
+    splits = {
+        'kservice': [r for r in rows if r['tier'] == 'kservice'],
+        'expert-top': [r for r in rows if r['tier'] == 'expert' and r['level'] == 'top'],
+        'expert-leaf': [r for r in rows if r['tier'] == 'expert' and r['level'] == 'leaf'],
+    }
+    for name, subset in splits.items():
+        p = os.path.join(out_dir, f'scenarios_full_routing_20260917_{name}.json')
+        with open(p, 'w', encoding='utf-8') as f:
+            json.dump(subset, f, ensure_ascii=False, indent=2)
+        print(f'  - {name}: {len(subset)}건 -> {p}')
