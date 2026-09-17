@@ -31,7 +31,7 @@
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--ad-bg);}
   body{font-family:'Pretendard',sans-serif;color:var(--ad-text);line-height:1.5;}
-  a{color:var(--ad-accent);}
+  a{color:inherit;text-decoration:underline;text-underline-offset:2px;}
   ::placeholder{color:var(--ad-faint);opacity:1;}
   #admin-page{max-width:920px;margin:0 auto;padding:0 20px 64px}
   #admin-page-header{
@@ -41,9 +41,8 @@
   #admin-page-header .title{font-size:15px;font-weight:600;letter-spacing:.2px}
   #admin-page-header .right{display:flex;align-items:center;gap:16px}
   #admin-page-header a, #admin-page-header span{font-size:12.5px;color:var(--ad-dim);text-decoration:none}
-  #logout-btn{display:none;cursor:pointer;border:1px solid var(--ad-line-strong);border-radius:4px;padding:5px 10px}
+  #logout-btn{display:none;cursor:pointer;border:1px solid var(--ad-line-strong);border-radius:0;padding:5px 10px}
   #logout-btn:hover{background:var(--ad-panel2)}
-  @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -61,19 +60,19 @@
       <div style="font-size:13px;color:var(--ad-dim,#9aa0a8);margin-bottom:20px">관리자 계정으로 로그인하세요</div>
       <input id="admin-email-input" type="email" placeholder="이메일" autocomplete="username"
              style="width:100%;max-width:320px;padding:10px 12px;border:1px solid var(--ad-line,#3c3f46);
-                    border-radius:4px;font-size:15px;outline:none;font-family:inherit;
+                    border-radius:0;font-size:15px;outline:none;font-family:inherit;
                     background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
                     box-sizing:border-box;display:block;margin:0 auto 10px"
              onkeydown="if(event.key==='Enter')document.getElementById('admin-pw-input')?.focus()">
       <input id="admin-pw-input" type="password" placeholder="패스워드" autocomplete="current-password"
              style="width:100%;max-width:320px;padding:10px 12px;border:1px solid var(--ad-line,#3c3f46);
-                    border-radius:4px;font-size:16px;outline:none;font-family:inherit;
+                    border-radius:0;font-size:16px;outline:none;font-family:inherit;
                     background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
                     box-sizing:border-box;display:block;margin:0 auto 12px"
              onkeydown="if(event.key==='Enter')_adminLogin()">
       <button onclick="_adminLogin()" id="admin-login-btn"
               style="width:100%;max-width:320px;padding:11px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
-                     border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit">
+                     border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit">
         로그인
       </button>
       <div id="admin-login-err" style="color:var(--ad-crit,#d16054);font-size:13px;margin-top:10px;display:none">
@@ -86,7 +85,7 @@
 
       <!-- ① 통계 -->
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;
-                  background:var(--ad-line,#3c3f46);border:1px solid var(--ad-line,#3c3f46);border-radius:4px;
+                  background:var(--ad-line,#3c3f46);border:1px solid var(--ad-line,#3c3f46);border-radius:0;
                   overflow:hidden;margin-bottom:20px">
         <div style="background:var(--ad-panel2,#33363c);padding:14px;text-align:center">
           <div id="stat-total" style="font-family:var(--ad-mono);font-size:24px;color:var(--ad-text,#d7d9dd)">—</div>
@@ -107,13 +106,13 @@
       </div>
 
       <!-- ①-b GDC 충전 현황 (2026-08-31 신설 — /admin/gdc-summary 연동) -->
-      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:4px;padding:16px 18px;margin-bottom:16px">
+      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:0;padding:16px 18px;margin-bottom:16px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
           <div style="font-size:12px;color:var(--ad-faint,#6e737a);letter-spacing:.3px">GDC 충전 현황</div>
           <span id="gdc-summary-month" style="font-family:var(--ad-mono);font-size:11px;color:var(--ad-faint,#6e737a)">불러오는 중…</span>
         </div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
-                    background:var(--ad-line,#3c3f46);border:1px solid var(--ad-line,#3c3f46);border-radius:4px;overflow:hidden">
+                    background:var(--ad-line,#3c3f46);border:1px solid var(--ad-line,#3c3f46);border-radius:0;overflow:hidden">
           <div style="background:var(--ad-panel2,#33363c);padding:12px 14px">
             <div id="gdc-signup-bonus" style="font-family:var(--ad-mono);font-size:17px;color:var(--ad-text,#d7d9dd)">—</div>
             <div style="font-size:10.5px;color:var(--ad-faint,#6e737a);margin-top:2px">가입 축하 충전 (무료)</div>
@@ -139,20 +138,20 @@
            위 ①-b가 월별 합계라면, 이건 건별 상세 목록이다. 관리자 수동
            확인·오픈뱅킹 폴링·PG 웹훅·폰 알림캡처, 확정 채널이 뭐였든
            charge_requests에 기록되는 건 전부 이 목록에 뜬다. -->
-      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:4px;padding:16px 18px;margin-bottom:16px">
+      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:0;padding:16px 18px;margin-bottom:16px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
           <div style="font-size:12px;color:var(--ad-faint,#6e737a);letter-spacing:.3px">GDC 충전 내역</div>
           <div style="display:flex;align-items:center;gap:8px">
             <select id="charge-list-status" onchange="_loadChargeList()"
                     style="padding:5px 8px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
-                           border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
+                           border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;
                            font-size:11.5px;font-family:inherit">
               <option value="matched">확정됨</option>
               <option value="pending">대기 중</option>
             </select>
             <button onclick="_loadChargeList()" id="charge-list-reload-btn"
                     style="padding:5px 12px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
-                           border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
+                           border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;
                            font-size:11.5px;font-weight:500;cursor:pointer;font-family:inherit">새로고침</button>
           </div>
         </div>
@@ -177,18 +176,18 @@
       </div>
 
       <!-- ② 무료 체험 기간 -->
-      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:4px;padding:16px 18px;margin-bottom:16px">
+      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:0;padding:16px 18px;margin-bottom:16px">
         <div style="font-size:12px;color:var(--ad-faint,#6e737a);letter-spacing:.3px;margin-bottom:12px">무료 체험 기간</div>
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
           <label style="font-size:13px;color:var(--ad-dim,#9aa0a8)">가입 후 디폴트 키 사용 가능 기간</label>
           <input id="trial-days-input" type="number" min="1" max="365" value="7"
-                 style="width:70px;padding:6px 9px;border:1px solid var(--ad-line,#3c3f46);border-radius:4px;
+                 style="width:70px;padding:6px 9px;border:1px solid var(--ad-line,#3c3f46);border-radius:0;
                         background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
                         font-family:var(--ad-mono);font-size:13px;text-align:center">
           <span style="font-size:13px;color:var(--ad-faint,#6e737a)">일</span>
           <button onclick="_saveTrialDays()"
                   style="padding:7px 14px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
-                         border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
+                         border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;
                          font-size:12.5px;font-weight:500;cursor:pointer;font-family:inherit">저장</button>
           <span id="trial-save-ok" style="font-size:11px;color:var(--ad-dim,#9aa0a8);display:none">✓ 저장됨</span>
         </div>
@@ -198,17 +197,17 @@
       </div>
 
       <!-- ③ 디폴트 LLM 키 -->
-      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:4px;padding:16px 18px;margin-bottom:16px">
+      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:0;padding:16px 18px;margin-bottom:16px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
           <div style="font-size:12px;color:var(--ad-faint,#6e737a);letter-spacing:.3px">디폴트 LLM 키</div>
           <button onclick="_addKeyRow()"
                   style="padding:5px 12px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
-                         border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
+                         border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;
                          font-size:11.5px;font-weight:500;cursor:pointer;font-family:inherit">+ 키 추가</button>
         </div>
         <div style="font-size:11px;color:var(--ad-faint,#6e737a);margin-bottom:12px;line-height:1.6">
           키는 Cloudflare KV에 저장되어 모든 사용자에게 자동 적용됩니다.
-          <code style="background:var(--ad-panel2,#33363c);color:var(--ad-dim,#9aa0a8);padding:1px 5px;border-radius:3px;font-family:var(--ad-mono)">hondi_default_llm_keys</code>
+          <code style="background:var(--ad-panel2,#33363c);color:var(--ad-dim,#9aa0a8);padding:1px 5px;border-radius:0;font-family:var(--ad-mono)">hondi_default_llm_keys</code>
         </div>
         <div id="llm-key-list" style="display:flex;flex-direction:column;gap:8px"></div>
         <div id="llm-key-empty" style="font-size:12.5px;color:var(--ad-faint,#6e737a);text-align:center;padding:18px">
@@ -216,7 +215,7 @@
         </div>
         <button onclick="_saveAllKeys()"
                 style="margin-top:14px;width:100%;padding:10px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
-                       border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
+                       border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;
                        font-size:13px;font-weight:500;cursor:pointer;font-family:inherit">
           전체 저장
         </button>
@@ -226,33 +225,33 @@
       </div>
 
       <!-- ④ 체험 만료 안내 메시지 -->
-      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:4px;padding:16px 18px;margin-bottom:16px">
+      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:0;padding:16px 18px;margin-bottom:16px">
         <div style="font-size:12px;color:var(--ad-faint,#6e737a);letter-spacing:.3px;margin-bottom:12px">체험 만료 시 안내 메시지</div>
         <textarea id="trial-expired-msg" rows="3"
-                  style="width:100%;padding:9px 11px;border:1px solid var(--ad-line,#3c3f46);border-radius:4px;
+                  style="width:100%;padding:9px 11px;border:1px solid var(--ad-line,#3c3f46);border-radius:0;
                          background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
                          font-size:13px;font-family:inherit;resize:vertical;box-sizing:border-box"
                   placeholder="예) AI 비서 무료 체험 기간이 종료됐습니다."></textarea>
         <button onclick="_saveExpiredMsg()"
                 style="margin-top:10px;padding:8px 18px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
-                       border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
+                       border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;
                        font-size:12.5px;font-weight:500;cursor:pointer;font-family:inherit">저장</button>
         <span id="msg-save-ok" style="font-size:11px;color:var(--ad-dim,#9aa0a8);margin-left:10px;display:none">✓ 저장됨</span>
       </div>
 
       <!-- ⑤ Cloudflare 서브도메인 관리 -->
-      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:4px;padding:16px 18px;margin-bottom:16px">
+      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:0;padding:16px 18px;margin-bottom:16px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <div style="font-size:12px;color:var(--ad-faint,#6e737a);letter-spacing:.3px">서브도메인 관리 (hondi.net)</div>
           <button onclick="_addSubdomainRow()"
                   style="padding:5px 12px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
-                         border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
+                         border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;
                          font-size:11.5px;font-weight:500;cursor:pointer;font-family:inherit">+ 추가</button>
         </div>
         <div style="font-size:11px;color:var(--ad-faint,#6e737a);margin-bottom:12px;line-height:1.6">
           Cloudflare 자격증명을 저장하면 서브도메인 추가 시 자동으로 CNAME 레코드가 생성됩니다.<br>
           Global API Key + Email 조합만 작동합니다 (Custom Token은 CORS 문제 있음 — 하단 오류 기록 참조).<br>
-          Target: <code style="background:var(--ad-panel2,#33363c);color:var(--ad-dim,#9aa0a8);padding:1px 4px;border-radius:3px;font-family:var(--ad-mono)">openhash-gopang.github.io</code> / DNS only
+          Target: <code style="background:var(--ad-panel2,#33363c);color:var(--ad-dim,#9aa0a8);padding:1px 4px;border-radius:0;font-family:var(--ad-mono)">openhash-gopang.github.io</code> / DNS only
         </div>
 
         <!-- CF 자격증명 -->
@@ -260,35 +259,35 @@
           <div>
             <label style="font-size:11px;color:var(--ad-dim,#9aa0a8);display:block;margin-bottom:4px">Global API Key</label>
             <input id="cf-api-key" type="text" placeholder="cfk_..."
-                   style="width:100%;padding:7px 9px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:3px;
+                   style="width:100%;padding:7px 9px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;
                           background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
                           font-size:12px;font-family:var(--ad-mono);box-sizing:border-box">
           </div>
           <div>
             <label style="font-size:11px;color:var(--ad-dim,#9aa0a8);display:block;margin-bottom:4px">Email</label>
             <input id="cf-email" type="email" placeholder="Tensor.city@gmail.com"
-                   style="width:100%;padding:7px 9px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:3px;
+                   style="width:100%;padding:7px 9px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;
                           background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
                           font-size:12px;font-family:inherit;box-sizing:border-box">
           </div>
           <div>
             <label style="font-size:11px;color:var(--ad-dim,#9aa0a8);display:block;margin-bottom:4px">Zone ID</label>
             <input id="cf-zone-id" type="text" placeholder="fd842cd737258a783e510e06fafbb07e"
-                   style="width:100%;padding:7px 9px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:3px;
+                   style="width:100%;padding:7px 9px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;
                           background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
                           font-size:12px;font-family:var(--ad-mono);box-sizing:border-box">
           </div>
           <div>
             <label style="font-size:11px;color:var(--ad-dim,#9aa0a8);display:block;margin-bottom:4px">Target (CNAME 값)</label>
             <input id="cf-target" type="text" value="openhash-gopang.github.io"
-                   style="width:100%;padding:7px 9px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:3px;
+                   style="width:100%;padding:7px 9px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;
                           background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
                           font-size:12px;font-family:var(--ad-mono);box-sizing:border-box">
           </div>
         </div>
         <button onclick="_saveCFCredentials()"
                 style="padding:6px 14px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
-                       border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
+                       border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;
                        font-size:11.5px;font-weight:500;cursor:pointer;font-family:inherit;margin-bottom:14px">
           자격증명 저장 (localStorage)
         </button>
@@ -303,12 +302,12 @@
            행안부·제주TP 등 dpaper.kr 지원 요청)의 발송·회신 이력을 기록한다.
            worker.js /admin/letters(GET/POST)가 AI_SETUP_SEALS_KV에 JSON
            배열로 저장 — LLM 키 목록과 동일한 "전체 배열 교체" 관례. -->
-      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:4px;padding:16px 18px;margin-bottom:16px">
+      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:0;padding:16px 18px;margin-bottom:16px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
           <div style="font-size:12px;color:var(--ad-faint,#6e737a);letter-spacing:.3px">공문 발송 기록</div>
           <button onclick="_addLetterRow()"
                   style="padding:5px 12px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
-                         border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
+                         border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;
                          font-size:11.5px;font-weight:500;cursor:pointer;font-family:inherit">+ 공문 추가</button>
         </div>
         <div style="font-size:11px;color:var(--ad-faint,#6e737a);margin-bottom:12px;line-height:1.6">
@@ -337,7 +336,7 @@
         </div>
         <button onclick="_saveAllLetters()"
                 style="margin-top:14px;width:100%;padding:10px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
-                       border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
+                       border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;
                        font-size:13px;font-weight:500;cursor:pointer;font-family:inherit">
           전체 저장
         </button>
@@ -348,7 +347,7 @@
            세 파이프라인(SP tier 재계산·미등록 태그 집계·사용자 피드백 취합)
            실행 현황을 한눈에 본다. 조회만 하는 패널이라 워크플로 트리거
            버튼은 없다 — 수동 실행은 매뉴얼의 gh workflow run 절차를 따른다. -->
-      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:4px;padding:16px 18px;margin-bottom:16px">
+      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:0;padding:16px 18px;margin-bottom:16px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
           <div style="font-size:12px;color:var(--ad-faint,#6e737a);letter-spacing:.3px">자동 갱신 현황</div>
           <div style="display:flex;align-items:center;gap:10px">
@@ -356,65 +355,63 @@
                style="font-size:11px;color:var(--ad-dim,#9aa0a8);text-decoration:none">매뉴얼 ↗</a>
             <button onclick="_loadAutoRefreshStatus(true)" id="auto-refresh-reload-btn"
                     style="padding:5px 12px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
-                           border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;
+                           border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;
                            font-size:11.5px;font-weight:500;cursor:pointer;font-family:inherit">새로고침</button>
           </div>
         </div>
         <div id="auto-refresh-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1px;background:var(--ad-line,#3c3f46)">
-          <div style="grid-column:1/-1;display:flex;align-items:center;gap:10px;padding:16px;color:var(--ad-faint,#6e737a);font-size:12.5px;background:var(--ad-panel2,#33363c)">
-            <div style="width:14px;height:14px;border:2px solid var(--ad-line-strong,#4a4e56);border-top-color:var(--ad-dim,#9aa0a8);
-                        border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0"></div>
-            불러오는 중…
+          <div style="grid-column:1/-1;padding:16px;color:var(--ad-faint,#6e737a);font-size:12.5px;background:var(--ad-panel2,#33363c)">
+            조회 중…
           </div>
         </div>
         <div id="auto-refresh-status-note" style="font-size:10.5px;color:var(--ad-faint,#6e737a);margin-top:10px;line-height:1.6"></div>
       </div>
 
       <!-- ⑦ 사용자 일괄 삭제 -->
-      <div style="border:1px solid var(--ad-crit,#d16054);border-radius:4px;padding:16px 18px;margin-bottom:16px">
+      <div style="border:1px solid var(--ad-crit,#d16054);border-radius:0;padding:16px 18px;margin-bottom:16px">
         <div style="font-size:12px;color:var(--ad-crit,#d16054);letter-spacing:.3px;margin-bottom:10px">사용자 일괄 삭제</div>
         <div style="font-size:11px;color:var(--ad-dim,#9aa0a8);margin-bottom:12px;line-height:1.7">
-          한 줄에 하나씩 <code style="background:var(--ad-panel2,#33363c);padding:1px 4px;border-radius:3px">@handle</code> 또는
+          한 줄에 하나씩 <code style="background:var(--ad-panel2,#33363c);padding:1px 4px;border-radius:0">@handle</code> 또는
           GUID(IPv6)를 입력하세요. L1 PocketBase + Supabase 9개 테이블 + KV를 전부 삭제하며
           되돌릴 수 없습니다. 한 번에 최대 100개.
         </div>
         <textarea id="bulk-delete-input" rows="5" placeholder="@KR-12345678
 2601:db80:4051:eb31:d7c7:8791:e78c:2d44"
-          style="width:100%;padding:9px 11px;border:1px solid var(--ad-crit,#d16054);border-radius:4px;
+          style="width:100%;padding:9px 11px;border:1px solid var(--ad-crit,#d16054);border-radius:0;
                  background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
                  font-size:12px;font-family:var(--ad-mono);resize:vertical;box-sizing:border-box"></textarea>
         <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
           <button onclick="_runBulkDelete()"
-                  style="padding:8px 16px;background:var(--ad-crit,#d16054);color:#1a1112;border:none;border-radius:4px;
+                  style="padding:8px 16px;background:var(--ad-crit,#d16054);color:#1a1112;border:none;border-radius:0;
                          font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">
             일괄 삭제 실행
           </button>
           <span id="bulk-delete-status" style="font-size:11px;color:var(--ad-dim,#9aa0a8)"></span>
         </div>
         <pre id="bulk-delete-result" style="display:none;margin-top:12px;padding:12px;background:var(--ad-panel2,#33363c);
-               border:1px solid var(--ad-line,#3c3f46);border-radius:4px;font-size:10.5px;line-height:1.6;color:var(--ad-text,#d7d9dd);
+               border:1px solid var(--ad-line,#3c3f46);border-radius:0;font-size:10.5px;line-height:1.6;color:var(--ad-text,#d7d9dd);
                max-height:260px;overflow:auto;white-space:pre-wrap;word-break:break-all"></pre>
       </div>
 
       <!-- ⑧ 오류 기록 (2026-06-25) -->
-      <div style="border:1px solid var(--ad-warn,#d6a04a);border-radius:4px;padding:16px 18px">
+      <div style="border:1px solid var(--ad-warn,#d6a04a);border-radius:0;padding:16px 18px">
         <div style="font-size:12px;color:var(--ad-warn,#d6a04a);letter-spacing:.3px;margin-bottom:12px">
           오류 기록 — 2026-06-25 Cloudflare DNS API
         </div>
         <div style="font-size:11px;color:var(--ad-dim,#9aa0a8);line-height:1.9">
           <b style="color:var(--ad-text,#d7d9dd)">[오류 1] code:7003 "Could not route to /zones/.../dns/records"</b><br>
           원인 A: URL 경로 오타 —
-          <code style="background:var(--ad-panel2,#33363c);padding:1px 4px;border-radius:3px">dns/records</code> (슬래시, 틀림) →
-          <code style="background:var(--ad-panel2,#33363c);padding:1px 4px;border-radius:3px">dns_records</code> (언더스코어, 정상)<br>
+          <code style="background:var(--ad-panel2,#33363c);padding:1px 4px;border-radius:0">dns/records</code> (슬래시, 틀림) →
+          <code style="background:var(--ad-panel2,#33363c);padding:1px 4px;border-radius:0">dns_records</code> (언더스코어, 정상)<br>
           원인 B: Custom API Token의 Zone Resources가 "All zones"일 때 특정 Zone 접근 불가.
           → "Specific zone → hondi.net" + "Zone:Read" 권한 추가 필요.<br><br>
 
           <b style="color:var(--ad-text,#d7d9dd)">[오류 2] code:9207 "Request body is invalid"</b><br>
           원인: PowerShell Here-String(@"..."@)이 JSON에 개행문자(CRLF)를 삽입 → CF API 파싱 실패.<br>
           해결:
-          <code style="background:var(--ad-panel2,#33363c);padding:1px 4px;border-radius:3px">[System.IO.File]::WriteAllText(tmpFile, json)</code>
+          <code style="background:var(--ad-panel2,#33363c);padding:1px 4px;border-radius:0">[System.IO.File]::WriteAllText(tmpFile, json)</code>
           로 임시 파일 저장 후
-          <code style="background:var(--ad-panel2,#33363c);padding:1px 4px;border-radius:3px">curl --data-binary "@tmpFile"</code>
+          <code style="background:var(--ad-panel2,#33363c);padding:1px 4px;border-radius:0">curl --data-binary "@tmpFile"</code>
           로 전송.<br><br>
 
           <b style="color:var(--ad-text,#d7d9dd)">[최종 작동 조합]</b><br>
@@ -425,7 +422,7 @@
       </div>
 
       <!-- ⑨ 사업 추진 (2026-09-16 신설) — 혼디제주(가칭) 법인 설립 사업계획 초안 -->
-      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:4px;padding:16px 18px;margin-top:16px">
+      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:0;padding:16px 18px;margin-top:16px">
         <div style="font-size:12px;color:var(--ad-faint,#6e737a);letter-spacing:.3px;margin-bottom:10px">사업 추진</div>
         <div style="font-size:11px;color:var(--ad-dim,#9aa0a8);margin-bottom:12px;line-height:1.7">
           혼디제주(가칭) 법인 설립 및 제주 지역 필드테스트 사업계획 초안 — 자본금·지분구조, 조직 구성(Manning),
@@ -433,7 +430,7 @@
         </div>
         <a href="./docs/business-plan/hondi-jeju-corp.html" target="_blank" rel="noopener"
            style="display:inline-block;padding:8px 16px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
-                  border:1px solid var(--ad-line-strong,#4a4e56);border-radius:4px;font-size:13px;font-weight:500;
+                  border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;font-size:13px;font-weight:500;
                   text-decoration:none;font-family:inherit">
           사업 추진 페이지 열기 ↗
         </a>
@@ -831,7 +828,7 @@ function _arCardShell(title, badge, bodyHtml, linkUrl) {
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <div style="font-size:12.5px;color:var(--ad-text,#d7d9dd)">${title}</div>
         <span style="font-size:10px;font-family:var(--ad-mono);color:var(--ad-faint,#6e737a);background:var(--ad-bg,#26282d);
-                     border:1px solid var(--ad-line,#3c3f46);border-radius:3px;padding:2px 7px">${badge}</span>
+                     border:1px solid var(--ad-line,#3c3f46);border-radius:0;padding:2px 7px">${badge}</span>
       </div>
       ${bodyHtml}
       ${linkUrl ? `<a href="${linkUrl}" target="_blank" style="display:inline-block;margin-top:8px;font-size:11px;color:var(--ad-dim,#9aa0a8);text-decoration:none">Actions에서 보기 ↗</a>` : ''}
@@ -1043,25 +1040,25 @@ function _renderKeyList() {
     const cp=PROVIDERS.find(p=>p.id===(k.provider||'gemini'))||PROVIDERS[0];
     const row=document.createElement('div');
     row.setAttribute('data-row',i);
-    row.style.cssText='display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--ad-panel2,#33363c);border:1px solid var(--ad-line,#3c3f46);border-radius:4px;padding:11px';
+    row.style.cssText='display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--ad-panel2,#33363c);border:1px solid var(--ad-line,#3c3f46);border-radius:0;padding:11px';
     row.innerHTML=`
       <select class="ak-prov" data-i="${i}" onchange="_onProviderChange(this)"
-        style="padding:6px 8px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:3px;font-size:13px;font-family:inherit;background:var(--ad-bg,#26282d);color:var(--ad-text,#d7d9dd);flex-shrink:0">
+        style="padding:6px 8px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;font-size:13px;font-family:inherit;background:var(--ad-bg,#26282d);color:var(--ad-text,#d7d9dd);flex-shrink:0">
         ${PROVIDERS.map(p=>`<option value="${p.id}" ${k.provider===p.id?'selected':''}>${p.label}</option>`).join('')}
       </select>
       <select class="ak-model" data-i="${i}"
-        style="padding:6px 8px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:3px;font-size:13px;font-family:inherit;background:var(--ad-bg,#26282d);color:var(--ad-text,#d7d9dd);flex-shrink:0;max-width:200px">
+        style="padding:6px 8px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;font-size:13px;font-family:inherit;background:var(--ad-bg,#26282d);color:var(--ad-text,#d7d9dd);flex-shrink:0;max-width:200px">
         ${cp.models.map(m=>`<option value="${m.id}" ${k.model===m.id?'selected':''}>${m.label}</option>`).join('')}
       </select>
       <input class="ak-label" data-i="${i}" type="text" value="${_esc(k.label||'')}" placeholder="설명"
-        style="flex:1;min-width:100px;padding:6px 9px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:3px;font-size:13px;font-family:inherit;background:var(--ad-bg,#26282d);color:var(--ad-text,#d7d9dd)">
+        style="flex:1;min-width:100px;padding:6px 9px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;font-size:13px;font-family:inherit;background:var(--ad-bg,#26282d);color:var(--ad-text,#d7d9dd)">
       <input class="ak-key" data-i="${i}" type="password" value="${_esc(k.key||'')}" placeholder="API Key"
-        style="flex:2;min-width:160px;padding:6px 9px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:3px;font-size:13px;font-family:var(--ad-mono,monospace);background:var(--ad-bg,#26282d);color:var(--ad-text,#d7d9dd)"
+        style="flex:2;min-width:160px;padding:6px 9px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;font-size:13px;font-family:var(--ad-mono,monospace);background:var(--ad-bg,#26282d);color:var(--ad-text,#d7d9dd)"
         onfocus="this.type='text'" onblur="this.type='password'">
       <label style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--ad-dim,#9aa0a8);white-space:nowrap;cursor:pointer">
         <input class="ak-active" data-i="${i}" type="checkbox" ${k.active?'checked':''} style="width:14px;height:14px;accent-color:#5b8ec4"> 활성
       </label>
-      <button onclick="_removeKey(${i})" style="background:none;border:1px solid var(--ad-crit,#d16054);color:var(--ad-crit,#d16054);border-radius:3px;padding:5px 10px;font-size:11.5px;cursor:pointer;flex-shrink:0">삭제</button>`;
+      <button onclick="_removeKey(${i})" style="background:none;border:1px solid var(--ad-crit,#d16054);color:var(--ad-crit,#d16054);border-radius:0;padding:5px 10px;font-size:11.5px;cursor:pointer;flex-shrink:0">삭제</button>`;
     list.appendChild(row);
   });
 }
@@ -1126,7 +1123,7 @@ function _renderLetterList() {
   empty.style.display = _letters.length ? 'none' : 'block';
   const cellInput = (cls, i, val, type='text', ph='') =>
     `<input class="${cls}" data-i="${i}" type="${type}" value="${_esc(val||'')}" placeholder="${_esc(ph)}"
-       style="width:100%;padding:6px 8px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:3px;font-size:11.5px;font-family:inherit;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);box-sizing:border-box">`;
+       style="width:100%;padding:6px 8px;border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;font-size:11.5px;font-family:inherit;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);box-sizing:border-box">`;
   _letters.forEach((l, i) => {
     const tr = document.createElement('tr');
     const canSend = !!(l.id && l.email);
@@ -1142,10 +1139,10 @@ function _renderLetterList() {
         <button onclick="_sendLetterEmail(${i})" ${canSend ? '' : 'disabled'}
           title="${canSend ? '' : '먼저 전체 저장 후, 이메일 주소를 채워야 발송할 수 있습니다'}"
           style="background:none;border:1px solid ${canSend ? 'var(--ad-line-strong,#4a4e56)' : 'var(--ad-line,#3c3f46)'};color:${canSend ? 'var(--ad-dim,#9aa0a8)' : 'var(--ad-faint,#6e737a)'};
-                 border-radius:3px;padding:5px 8px;font-size:10.5px;cursor:${canSend ? 'pointer' : 'not-allowed'};white-space:nowrap">발송</button>
+                 border-radius:0;padding:5px 8px;font-size:10.5px;cursor:${canSend ? 'pointer' : 'not-allowed'};white-space:nowrap">발송</button>
       </td>
       <td style="padding:4px 0"><button onclick="_removeLetter(${i})"
-        style="background:none;border:1px solid var(--ad-crit,#d16054);color:var(--ad-crit,#d16054);border-radius:3px;padding:5px 8px;font-size:10.5px;cursor:pointer;white-space:nowrap">삭제</button></td>`;
+        style="background:none;border:1px solid var(--ad-crit,#d16054);color:var(--ad-crit,#d16054);border-radius:0;padding:5px 8px;font-size:10.5px;cursor:pointer;white-space:nowrap">삭제</button></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -1303,14 +1300,14 @@ function _renderSubdomainList() {
   list.innerHTML='';
   subs.forEach((s,i)=>{
     const row=document.createElement('div');
-    row.style.cssText='display:flex;align-items:center;gap:8px;background:var(--ad-panel2,#33363c);border:1px solid var(--ad-line,#3c3f46);border-radius:3px;padding:9px 11px';
+    row.style.cssText='display:flex;align-items:center;gap:8px;background:var(--ad-panel2,#33363c);border:1px solid var(--ad-line,#3c3f46);border-radius:0;padding:9px 11px';
     row.innerHTML=`
       <span style="font-size:13px;font-family:var(--ad-mono);flex:1;color:var(--ad-text,#d7d9dd)">${s.name}.hondi.net</span>
-      <span style="font-size:10.5px;padding:2px 8px;border-radius:3px;background:var(--ad-bg,#26282d);color:${s.status==='active'?'var(--ad-dim,#9aa0a8)':'var(--ad-warn,#d6a04a)'}">
+      <span style="font-size:10.5px;padding:2px 8px;border-radius:0;background:var(--ad-bg,#26282d);color:${s.status==='active'?'var(--ad-dim,#9aa0a8)':'var(--ad-warn,#d6a04a)'}">
         ${s.status==='active'?'활성':'대기'}
       </span>
       <button onclick="_deleteSubdomain(${i})"
-              style="background:none;border:1px solid var(--ad-crit,#d16054);color:var(--ad-crit,#d16054);border-radius:3px;padding:3px 8px;font-size:10.5px;cursor:pointer">삭제</button>`;
+              style="background:none;border:1px solid var(--ad-crit,#d16054);color:var(--ad-crit,#d16054);border-radius:0;padding:3px 8px;font-size:10.5px;cursor:pointer">삭제</button>`;
     list.appendChild(row);
   });
 }
