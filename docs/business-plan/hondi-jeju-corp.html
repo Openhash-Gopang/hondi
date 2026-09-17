@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사업 추진 — 혼디제주(가칭) 법인 설립 사업계획 초안</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --ink:#1c2430; --ink-soft:#4a5568; --paper:#ffffff;
+    --line:#d8d3c8; --line-strong:#a89f8c; --accent:#1f3a5f;
+    --accent-soft:#c9a45c; --tint:#f1efe6; --danger:#8a3b2b; --good:#1f6f4a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:#f6f4ee;}
+  body{font-family:'Pretendard',sans-serif;color:var(--ink);line-height:1.6;}
+  .wrap{max-width:880px;margin:0 auto;padding:40px 20px 80px;}
+  .eyebrow{font-size:13px;letter-spacing:.16em;color:var(--accent-soft);text-transform:uppercase;font-weight:600;margin-bottom:8px;}
+  h1{font-size:28px;margin:0 0 6px;color:var(--ink);}
+  .sub{font-size:15px;color:var(--ink-soft);margin:0 0 18px;}
+  .badge{display:inline-block;font-size:12px;font-weight:600;color:#fff;background:var(--accent);
+         border-radius:100px;padding:4px 12px;margin-right:8px;}
+  .badge.draft{background:var(--danger);}
+  .meta{font-size:13px;color:var(--ink-soft);margin-bottom:28px;}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:22px 24px;margin-bottom:20px;
+        box-shadow:0 2px 10px rgba(30,25,15,.05);}
+  .card h2{font-size:17px;margin:0 0 12px;color:var(--accent);}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:4px;}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;}
+  th{background:var(--tint);font-weight:600;color:var(--ink);}
+  td.num{text-align:right;font-variant-numeric:tabular-nums;}
+  .dl-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px;}
+  .dl-btn{flex:1 1 260px;display:flex;align-items:center;gap:10px;text-decoration:none;
+          border:1.5px solid var(--accent);border-radius:6px;padding:14px 16px;color:var(--accent);
+          transition:background .15s;}
+  .dl-btn:hover{background:var(--tint);}
+  .dl-btn .ico{font-size:22px;line-height:1;}
+  .dl-btn .txt strong{display:block;font-size:14px;color:var(--ink);}
+  .dl-btn .txt span{display:block;font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  ul{margin:6px 0 0;padding-left:20px;}
+  li{margin-bottom:6px;font-size:13.5px;}
+  .note{font-size:12px;color:var(--ink-soft);border-top:1px solid var(--line);padding-top:10px;margin-top:14px;}
+  .footer{font-size:12px;color:var(--ink-soft);text-align:center;margin-top:36px;}
+  a{color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">사업 추진 · 법인 설립</div>
+  <h1>혼디제주(가칭) 법인 설립 사업계획</h1>
+  <p class="sub">제주 지역 필드테스트를 위한 법인 설립 준비 · 조직 구성 · 사업부문별 수익모델 · 5개년 추정 재무제표</p>
+  <div class="meta">
+    <span class="badge draft">초안 (DRAFT)</span>
+    <span class="badge">2026-09-16 작성</span>
+  </div>
+
+  <div class="card">
+    <h2>개요</h2>
+    <table>
+      <tr><th style="width:140px">법인명(가칭)</th><td>혼디제주 주식회사</td></tr>
+      <tr><th>사업 목적</th><td>혼디(Hondi) 플랫폼의 제주 전역 포괄 적용 및 성능 필드테스트, 이후 전국 확산</td></tr>
+      <tr><th>필드테스트 기간</th><td>1년(제주 전역) 이후 전국 단계적 확산</td></tr>
+      <tr><th>자본금</th><td>100,000,000원(1억원) — AI City Inc. 51%, 잔여 49% 배정 미정</td></tr>
+      <tr><th>핵심 사업 영역</th><td>행정 · 금융(GDC) · 교통(자율주행) · 교육 · 의료 · 시장(소상공인) · 법원(K-Law) — 7대 기능</td></tr>
+      <tr><th>1차 과제</th><td>① 한국기술신용보증기금 운영자금 10억원 조달 ② dpaper API 승인 제주도청 공동 신청</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>사업계획 문서</h2>
+    <div class="dl-row">
+      <a class="dl-btn" href="./hondi-jeju-corp-business-plan-draft.docx">
+        <span class="ico">📄</span>
+        <span class="txt">
+          <strong>사업계획 초안 (Word)</strong>
+          <span>법인 개요 · 설립 절차 · 조직 구성 · 수익모델 · 재무제표 요약 · 리스크</span>
+        </span>
+      </a>
+      <a class="dl-btn" href="./hondi-jeju-corp-financial-model-draft.xlsx">
+        <span class="ico">📊</span>
+        <span class="txt">
+          <strong>5개년 재무모델 (Excel)</strong>
+          <span>가정 · 부문별 매출 · 손익계산서 · 지분구조 — 수식으로 재계산 가능</span>
+        </span>
+      </a>
+    </div>
+    <div class="note">클릭 시 파일이 다운로드됩니다. 재무 수치를 조정하려면 엑셀 파일의 "가정" 탭(파란 글자 셀)을 수정하세요.</div>
+  </div>
+
+  <div class="card">
+    <h2>사업부문별 매출 요약 (단위: 백만원)</h2>
+    <table>
+      <tr><th>구분</th><th>1차연도</th><th>2차연도</th><th>3차연도</th><th>4차연도</th><th>5차연도</th></tr>
+      <tr><td>행정</td><td class="num">300</td><td class="num">640</td><td class="num">1,620</td><td class="num">3,320</td><td class="num">5,220</td></tr>
+      <tr><td>금융(GDC)</td><td class="num">45</td><td class="num">180</td><td class="num">600</td><td class="num">1,500</td><td class="num">3,000</td></tr>
+      <tr><td>교통</td><td class="num">371</td><td class="num">1,485</td><td class="num">7,425</td><td class="num">7,425</td><td class="num">11,138</td></tr>
+      <tr><td>교육</td><td class="num">119</td><td class="num">594</td><td class="num">2,376</td><td class="num">7,128</td><td class="num">14,256</td></tr>
+      <tr><td>의료</td><td class="num">36</td><td class="num">144</td><td class="num">540</td><td class="num">1,440</td><td class="num">2,880</td></tr>
+      <tr><td>시장</td><td class="num">179</td><td class="num">1,076</td><td class="num">5,382</td><td class="num">17,940</td><td class="num">35,880</td></tr>
+      <tr><td>법원</td><td class="num">5</td><td class="num">25</td><td class="num">100</td><td class="num">250</td><td class="num">500</td></tr>
+      <tr style="font-weight:700;background:var(--tint)"><td>합계</td><td class="num">1,055</td><td class="num">4,144</td><td class="num">18,043</td><td class="num">39,003</td><td class="num">72,874</td></tr>
+    </table>
+    <div class="note">1차연도 영업손실 약 4.2억원 → 3차연도부터 흑자 전환, 5차연도 매출 약 729억원 추정(공격적 확산 시나리오).</div>
+  </div>
+
+  <div class="card">
+    <h2>후속 검토 필요 사항</h2>
+    <ul>
+      <li>GDC의 전자금융거래법상 선불전자지급수단 해당 여부 및 등록·인가 요건</li>
+      <li>자율주행 택시 1,000대 도입 관련 차량 조달 방식(SPV/리스) 및 여객자동차운수사업법 검토</li>
+      <li>의료법상 AI 진료·처방 관여 범위, 의료기기 해당 여부</li>
+      <li>변호사법상 K-Law 서비스(참고자료 vs 법률사무) 포지셔닝</li>
+      <li>재무 추정치는 초안이며 공인회계사 검증 필요</li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    작성: AI City Inc. / Team Jupiter · 문의: <a href="mailto:tensor.city@gmail.com">tensor.city@gmail.com</a><br>
+    본 문서는 내부 검토용 사업계획 초안이며, 법률·재무 자문을 대체하지 않습니다.
+  </div>
+
+</div>
+</body>
+</html>
