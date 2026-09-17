@@ -1748,7 +1748,18 @@ async function _l1GetBalanceKRW(guid) {
   // 방향의 실패).
   const attempt = async () => {
     try {
-      const res = await fetch(`${L1_DEFAULT}/api/balance?guid=${encodeURIComponent(guid)}`, { signal: AbortSignal.timeout(6000) });
+      // ★ 2026-09-17 신설 — 실사에서 재현: curl로 직접 L1을 두 번 연속
+      // 쳤을 때는 안정적으로 최신 잔액(12704)이 나오는데, 이 fetch를
+      // 거치면 같은 순간에도 0이 나오는 사례가 확인됨. l1-hanlim.hondi.net도
+      // Cloudflare 뒤에 있다면, Worker의 fetch() 서브리퀘스트가 origin
+      // 직접 요청과 다른 캐시 경로를 타면서 예전(잔액 낮던 시점) 응답을
+      // 엣지에 계속 캐싱해 재사용했을 가능성이 높다 — 이 엔드포인트는
+      // 절대 캐싱되면 안 되는 잔액 조회이므로 명시적으로 캐시를 끈다.
+      const res = await fetch(`${L1_DEFAULT}/api/balance?guid=${encodeURIComponent(guid)}`, {
+        signal: AbortSignal.timeout(6000),
+        cf: { cacheTtl: 0, cacheEverything: false },
+        headers: { 'Cache-Control': 'no-cache' },
+      });
       const data = await res.json().catch(() => null);
       if (!data || !data.ok) return null;
       return data;
