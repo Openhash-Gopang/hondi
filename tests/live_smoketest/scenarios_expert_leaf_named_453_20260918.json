@@ -1,0 +1,4079 @@
+[
+  {
+    "id": "expert-accountant-audit-A-named",
+    "tier": "expert",
+    "target_id": "accountant-audit",
+    "target_name": "공인회계사(외부감사)",
+    "variant": "named",
+    "utterance": "공인회계사(외부감사) AI를 불러줘.",
+    "expect_tag": "[EXPERT: accountant-audit]"
+  },
+  {
+    "id": "expert-accountant-due-diligence-A-named",
+    "tier": "expert",
+    "target_id": "accountant-due-diligence",
+    "target_name": "공인회계사(M&A 실사)",
+    "variant": "named",
+    "utterance": "공인회계사(M&A 실사)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: accountant-due-diligence]"
+  },
+  {
+    "id": "expert-accountant-forensic-A-named",
+    "tier": "expert",
+    "target_id": "accountant-forensic",
+    "target_name": "공인회계사(포렌식회계)",
+    "variant": "named",
+    "utterance": "공인회계사(포렌식회계)를 호출해줘.",
+    "expect_tag": "[EXPERT: accountant-forensic]"
+  },
+  {
+    "id": "expert-accountant-ifrs-A-named",
+    "tier": "expert",
+    "target_id": "accountant-ifrs",
+    "target_name": "공인회계사(IFRS·연결재무제표)",
+    "variant": "named",
+    "utterance": "공인회계사(IFRS·연결재무제표)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: accountant-ifrs]"
+  },
+  {
+    "id": "expert-accountant-internal-control-A-named",
+    "tier": "expert",
+    "target_id": "accountant-internal-control",
+    "target_name": "공인회계사(내부통제·컴플라이언스)",
+    "variant": "named",
+    "utterance": "공인회계사(내부통제·컴플라이언스)로 연결해줘.",
+    "expect_tag": "[EXPERT: accountant-internal-control]"
+  },
+  {
+    "id": "expert-accountant-ipo-A-named",
+    "tier": "expert",
+    "target_id": "accountant-ipo",
+    "target_name": "공인회계사(IPO·상장자문)",
+    "variant": "named",
+    "utterance": "공인회계사(IPO·상장자문) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: accountant-ipo]"
+  },
+  {
+    "id": "expert-accountant-nonprofit-public-A-named",
+    "tier": "expert",
+    "target_id": "accountant-nonprofit-public",
+    "target_name": "공인회계사(비영리·공공기관회계)",
+    "variant": "named",
+    "utterance": "공인회계사(비영리·공공기관회계) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: accountant-nonprofit-public]"
+  },
+  {
+    "id": "expert-accountant-restructuring-A-named",
+    "tier": "expert",
+    "target_id": "accountant-restructuring",
+    "target_name": "공인회계사(구조조정·회생 회계자문)",
+    "variant": "named",
+    "utterance": "공인회계사(구조조정·회생 회계자문)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: accountant-restructuring]"
+  },
+  {
+    "id": "expert-accountant-valuation-A-named",
+    "tier": "expert",
+    "target_id": "accountant-valuation",
+    "target_name": "공인회계사(기업가치평가)",
+    "variant": "named",
+    "utterance": "공인회계사(기업가치평가)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: accountant-valuation]"
+  },
+  {
+    "id": "expert-advanced-practice-nurse-A-named",
+    "tier": "expert",
+    "target_id": "advanced-practice-nurse",
+    "target_name": "전문간호사",
+    "variant": "named",
+    "utterance": "전문간호사 AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: advanced-practice-nurse]"
+  },
+  {
+    "id": "expert-advisor-A-named",
+    "tier": "expert",
+    "target_id": "advisor",
+    "target_name": "구매자문(K-Advisor)",
+    "variant": "named",
+    "utterance": "구매자문(K-Advisor) AI를 불러줘.",
+    "expect_tag": "[EXPERT: advisor]"
+  },
+  {
+    "id": "expert-appraiser-A-named",
+    "tier": "expert",
+    "target_id": "appraiser",
+    "target_name": "감정평가사",
+    "variant": "named",
+    "utterance": "감정평가사는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: appraiser]"
+  },
+  {
+    "id": "expert-architect-A-named",
+    "tier": "expert",
+    "target_id": "architect",
+    "target_name": "건축사",
+    "variant": "named",
+    "utterance": "건축사를 호출해줘.",
+    "expect_tag": "[EXPERT: architect]"
+  },
+  {
+    "id": "expert-chef-A-named",
+    "tier": "expert",
+    "target_id": "chef",
+    "target_name": "조리사",
+    "variant": "named",
+    "utterance": "조리사한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: chef]"
+  },
+  {
+    "id": "expert-childcare-teacher-A-named",
+    "tier": "expert",
+    "target_id": "childcare-teacher",
+    "target_name": "보육교사",
+    "variant": "named",
+    "utterance": "보육교사로 연결해줘.",
+    "expect_tag": "[EXPERT: childcare-teacher]"
+  },
+  {
+    "id": "expert-clinical-psychologist-A-named",
+    "tier": "expert",
+    "target_id": "clinical-psychologist",
+    "target_name": "임상심리사",
+    "variant": "named",
+    "utterance": "임상심리사 페르소나 호출해.",
+    "expect_tag": "[EXPERT: clinical-psychologist]"
+  },
+  {
+    "id": "expert-curator-A-named",
+    "tier": "expert",
+    "target_id": "curator",
+    "target_name": "학예사(큐레이터)",
+    "variant": "named",
+    "utterance": "학예사(큐레이터) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: curator]"
+  },
+  {
+    "id": "expert-customs-broker-A-named",
+    "tier": "expert",
+    "target_id": "customs-broker",
+    "target_name": "관세사",
+    "variant": "named",
+    "utterance": "관세사한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: customs-broker]"
+  },
+  {
+    "id": "expert-dental-hygienist-A-named",
+    "tier": "expert",
+    "target_id": "dental-hygienist",
+    "target_name": "치과위생사",
+    "variant": "named",
+    "utterance": "치과위생사가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: dental-hygienist]"
+  },
+  {
+    "id": "expert-dental-technician-A-named",
+    "tier": "expert",
+    "target_id": "dental-technician",
+    "target_name": "치과기공사",
+    "variant": "named",
+    "utterance": "치과기공사 AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: dental-technician]"
+  },
+  {
+    "id": "expert-dentist-A-named",
+    "tier": "expert",
+    "target_id": "dentist",
+    "target_name": "치과의사",
+    "variant": "named",
+    "utterance": "치과의사 AI를 불러줘.",
+    "expect_tag": "[EXPERT: dentist]"
+  },
+  {
+    "id": "expert-dietitian-A-named",
+    "tier": "expert",
+    "target_id": "dietitian",
+    "target_name": "영양사",
+    "variant": "named",
+    "utterance": "영양사는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: dietitian]"
+  },
+  {
+    "id": "expert-electrical-safety-engineer-A-named",
+    "tier": "expert",
+    "target_id": "electrical-safety-engineer",
+    "target_name": "전기안전기술사",
+    "variant": "named",
+    "utterance": "전기안전기술사를 호출해줘.",
+    "expect_tag": "[EXPERT: electrical-safety-engineer]"
+  },
+  {
+    "id": "expert-financial-planner-A-named",
+    "tier": "expert",
+    "target_id": "financial-planner",
+    "target_name": "재무설계사",
+    "variant": "named",
+    "utterance": "재무설계사한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: financial-planner]"
+  },
+  {
+    "id": "expert-fire-safety-manager-A-named",
+    "tier": "expert",
+    "target_id": "fire-safety-manager",
+    "target_name": "소방시설관리사",
+    "variant": "named",
+    "utterance": "소방시설관리사로 연결해줘.",
+    "expect_tag": "[EXPERT: fire-safety-manager]"
+  },
+  {
+    "id": "expert-gas-safety-engineer-A-named",
+    "tier": "expert",
+    "target_id": "gas-safety-engineer",
+    "target_name": "가스기술사",
+    "variant": "named",
+    "utterance": "가스기술사 페르소나 호출해.",
+    "expect_tag": "[EXPERT: gas-safety-engineer]"
+  },
+  {
+    "id": "expert-hairdresser-A-named",
+    "tier": "expert",
+    "target_id": "hairdresser",
+    "target_name": "미용사",
+    "variant": "named",
+    "utterance": "미용사 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: hairdresser]"
+  },
+  {
+    "id": "expert-health-educator-A-named",
+    "tier": "expert",
+    "target_id": "health-educator",
+    "target_name": "보건교육사",
+    "variant": "named",
+    "utterance": "보건교육사한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: health-educator]"
+  },
+  {
+    "id": "expert-hondi-guide-A-named",
+    "tier": "expert",
+    "target_id": "hondi-guide",
+    "target_name": "혼디 SP",
+    "variant": "named",
+    "utterance": "혼디 SP가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: hondi-guide]"
+  },
+  {
+    "id": "expert-industrial-safety-consultant-A-named",
+    "tier": "expert",
+    "target_id": "industrial-safety-consultant",
+    "target_name": "산업안전·보건지도사",
+    "variant": "named",
+    "utterance": "산업안전·보건지도사 AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: industrial-safety-consultant]"
+  },
+  {
+    "id": "expert-judicial-scrivener-A-named",
+    "tier": "expert",
+    "target_id": "judicial-scrivener",
+    "target_name": "법무사",
+    "variant": "named",
+    "utterance": "법무사 AI를 불러줘.",
+    "expect_tag": "[EXPERT: judicial-scrivener]"
+  },
+  {
+    "id": "expert-labor-attorney-A-named",
+    "tier": "expert",
+    "target_id": "labor-attorney",
+    "target_name": "공인노무사",
+    "variant": "named",
+    "utterance": "공인노무사는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: labor-attorney]"
+  },
+  {
+    "id": "expert-landscape-engineer-A-named",
+    "tier": "expert",
+    "target_id": "landscape-engineer",
+    "target_name": "조경기술사",
+    "variant": "named",
+    "utterance": "조경기술사를 호출해줘.",
+    "expect_tag": "[EXPERT: landscape-engineer]"
+  },
+  {
+    "id": "expert-lawyer-administrative-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-administrative",
+    "target_name": "변호사(행정법)",
+    "variant": "named",
+    "utterance": "변호사(행정법)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: lawyer-administrative]"
+  },
+  {
+    "id": "expert-lawyer-antitrust-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-antitrust",
+    "target_name": "변호사(공정거래)",
+    "variant": "named",
+    "utterance": "변호사(공정거래)로 연결해줘.",
+    "expect_tag": "[EXPERT: lawyer-antitrust]"
+  },
+  {
+    "id": "expert-lawyer-arbitration-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-arbitration",
+    "target_name": "변호사(중재)",
+    "variant": "named",
+    "utterance": "변호사(중재) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: lawyer-arbitration]"
+  },
+  {
+    "id": "expert-lawyer-auction-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-auction",
+    "target_name": "변호사(등기·경매)",
+    "variant": "named",
+    "utterance": "변호사(등기·경매) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: lawyer-auction]"
+  },
+  {
+    "id": "expert-lawyer-broadcasting-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-broadcasting",
+    "target_name": "변호사(방송통신)",
+    "variant": "named",
+    "utterance": "변호사(방송통신)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: lawyer-broadcasting]"
+  },
+  {
+    "id": "expert-lawyer-civil-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-civil",
+    "target_name": "변호사(민사법)",
+    "variant": "named",
+    "utterance": "변호사(민사법)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: lawyer-civil]"
+  },
+  {
+    "id": "expert-lawyer-collection-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-collection",
+    "target_name": "변호사(채권추심)",
+    "variant": "named",
+    "utterance": "변호사(채권추심) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: lawyer-collection]"
+  },
+  {
+    "id": "expert-lawyer-commercial-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-commercial",
+    "target_name": "변호사(상사법)",
+    "variant": "named",
+    "utterance": "변호사(상사법) AI를 불러줘.",
+    "expect_tag": "[EXPERT: lawyer-commercial]"
+  },
+  {
+    "id": "expert-lawyer-constitutional-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-constitutional",
+    "target_name": "변호사(헌법재판)",
+    "variant": "named",
+    "utterance": "변호사(헌법재판)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: lawyer-constitutional]"
+  },
+  {
+    "id": "expert-lawyer-construction-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-construction",
+    "target_name": "변호사(건설)",
+    "variant": "named",
+    "utterance": "변호사(건설)를 호출해줘.",
+    "expect_tag": "[EXPERT: lawyer-construction]"
+  },
+  {
+    "id": "expert-lawyer-corporate-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-corporate",
+    "target_name": "변호사(기업법무)",
+    "variant": "named",
+    "utterance": "변호사(기업법무)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: lawyer-corporate]"
+  },
+  {
+    "id": "expert-lawyer-criminal-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-criminal",
+    "target_name": "변호사(형사법)",
+    "variant": "named",
+    "utterance": "변호사(형사법)로 연결해줘.",
+    "expect_tag": "[EXPERT: lawyer-criminal]"
+  },
+  {
+    "id": "expert-lawyer-damages-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-damages",
+    "target_name": "변호사(손해배상)",
+    "variant": "named",
+    "utterance": "변호사(손해배상) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: lawyer-damages]"
+  },
+  {
+    "id": "expert-lawyer-energy-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-energy",
+    "target_name": "변호사(에너지)",
+    "variant": "named",
+    "utterance": "변호사(에너지) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: lawyer-energy]"
+  },
+  {
+    "id": "expert-lawyer-entertainment-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-entertainment",
+    "target_name": "변호사(엔터테인먼트)",
+    "variant": "named",
+    "utterance": "변호사(엔터테인먼트)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: lawyer-entertainment]"
+  },
+  {
+    "id": "expert-lawyer-environmental-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-environmental",
+    "target_name": "변호사(환경)",
+    "variant": "named",
+    "utterance": "변호사(환경)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: lawyer-environmental]"
+  },
+  {
+    "id": "expert-lawyer-execution-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-execution",
+    "target_name": "변호사(민사집행)",
+    "variant": "named",
+    "utterance": "변호사(민사집행) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: lawyer-execution]"
+  },
+  {
+    "id": "expert-lawyer-expropriation-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-expropriation",
+    "target_name": "변호사(수용 및 보상)",
+    "variant": "named",
+    "utterance": "변호사(수용 및 보상) AI를 불러줘.",
+    "expect_tag": "[EXPERT: lawyer-expropriation]"
+  },
+  {
+    "id": "expert-lawyer-family-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-family",
+    "target_name": "변호사(가사법)",
+    "variant": "named",
+    "utterance": "변호사(가사법)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: lawyer-family]"
+  },
+  {
+    "id": "expert-lawyer-finance-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-finance",
+    "target_name": "변호사(금융)",
+    "variant": "named",
+    "utterance": "변호사(금융)를 호출해줘.",
+    "expect_tag": "[EXPERT: lawyer-finance]"
+  },
+  {
+    "id": "expert-lawyer-foodpharma-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-foodpharma",
+    "target_name": "변호사(식품·의약)",
+    "variant": "named",
+    "utterance": "변호사(식품·의약)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: lawyer-foodpharma]"
+  },
+  {
+    "id": "expert-lawyer-government-contract-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-government-contract",
+    "target_name": "변호사(국가계약)",
+    "variant": "named",
+    "utterance": "변호사(국가계약)로 연결해줘.",
+    "expect_tag": "[EXPERT: lawyer-government-contract]"
+  },
+  {
+    "id": "expert-lawyer-guardianship-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-guardianship",
+    "target_name": "변호사(성년후견)",
+    "variant": "named",
+    "utterance": "변호사(성년후견) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: lawyer-guardianship]"
+  },
+  {
+    "id": "expert-lawyer-immigration-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-immigration",
+    "target_name": "변호사(이주 및 비자)",
+    "variant": "named",
+    "utterance": "변호사(이주 및 비자) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: lawyer-immigration]"
+  },
+  {
+    "id": "expert-lawyer-inheritance-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-inheritance",
+    "target_name": "변호사(상속)",
+    "variant": "named",
+    "utterance": "변호사(상속)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: lawyer-inheritance]"
+  },
+  {
+    "id": "expert-lawyer-insolvency-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-insolvency",
+    "target_name": "변호사(도산)",
+    "variant": "named",
+    "utterance": "변호사(도산)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: lawyer-insolvency]"
+  },
+  {
+    "id": "expert-lawyer-insurance-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-insurance",
+    "target_name": "변호사(보험)",
+    "variant": "named",
+    "utterance": "변호사(보험) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: lawyer-insurance]"
+  },
+  {
+    "id": "expert-lawyer-international-arbitration-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-international-arbitration",
+    "target_name": "변호사(국제중재)",
+    "variant": "named",
+    "utterance": "변호사(국제중재) AI를 불러줘.",
+    "expect_tag": "[EXPERT: lawyer-international-arbitration]"
+  },
+  {
+    "id": "expert-lawyer-international-relations-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-international-relations",
+    "target_name": "변호사(국제관계법)",
+    "variant": "named",
+    "utterance": "변호사(국제관계법)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: lawyer-international-relations]"
+  },
+  {
+    "id": "expert-lawyer-international-transactions-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-international-transactions",
+    "target_name": "변호사(국제거래)",
+    "variant": "named",
+    "utterance": "변호사(국제거래)를 호출해줘.",
+    "expect_tag": "[EXPERT: lawyer-international-transactions]"
+  },
+  {
+    "id": "expert-lawyer-it-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-it",
+    "target_name": "변호사(IT)",
+    "variant": "named",
+    "utterance": "변호사(IT)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: lawyer-it]"
+  },
+  {
+    "id": "expert-lawyer-juvenile-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-juvenile",
+    "target_name": "변호사(소년법)",
+    "variant": "named",
+    "utterance": "변호사(소년법)로 연결해줘.",
+    "expect_tag": "[EXPERT: lawyer-juvenile]"
+  },
+  {
+    "id": "expert-lawyer-legislation-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-legislation",
+    "target_name": "변호사(입법)",
+    "variant": "named",
+    "utterance": "변호사(입법) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: lawyer-legislation]"
+  },
+  {
+    "id": "expert-lawyer-maritime-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-maritime",
+    "target_name": "변호사(해상)",
+    "variant": "named",
+    "utterance": "변호사(해상) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: lawyer-maritime]"
+  },
+  {
+    "id": "expert-lawyer-military-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-military",
+    "target_name": "변호사(군형법)",
+    "variant": "named",
+    "utterance": "변호사(군형법)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: lawyer-military]"
+  },
+  {
+    "id": "expert-lawyer-overseas-investment-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-overseas-investment",
+    "target_name": "변호사(해외투자)",
+    "variant": "named",
+    "utterance": "변호사(해외투자)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: lawyer-overseas-investment]"
+  },
+  {
+    "id": "expert-lawyer-realestate-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-realestate",
+    "target_name": "변호사(부동산)",
+    "variant": "named",
+    "utterance": "변호사(부동산) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: lawyer-realestate]"
+  },
+  {
+    "id": "expert-lawyer-redevelopment-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-redevelopment",
+    "target_name": "변호사(재개발·재건축)",
+    "variant": "named",
+    "utterance": "변호사(재개발·재건축) AI를 불러줘.",
+    "expect_tag": "[EXPERT: lawyer-redevelopment]"
+  },
+  {
+    "id": "expert-lawyer-religious-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-religious",
+    "target_name": "변호사(종교)",
+    "variant": "named",
+    "utterance": "변호사(종교)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: lawyer-religious]"
+  },
+  {
+    "id": "expert-lawyer-school-violence-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-school-violence",
+    "target_name": "변호사(학교폭력)",
+    "variant": "named",
+    "utterance": "변호사(학교폭력)를 호출해줘.",
+    "expect_tag": "[EXPERT: lawyer-school-violence]"
+  },
+  {
+    "id": "expert-lawyer-securities-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-securities",
+    "target_name": "변호사(증권)",
+    "variant": "named",
+    "utterance": "변호사(증권)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: lawyer-securities]"
+  },
+  {
+    "id": "expert-lawyer-shipbuilding-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-shipbuilding",
+    "target_name": "변호사(조선)",
+    "variant": "named",
+    "utterance": "변호사(조선)로 연결해줘.",
+    "expect_tag": "[EXPERT: lawyer-shipbuilding]"
+  },
+  {
+    "id": "expert-lawyer-sports-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-sports",
+    "target_name": "변호사(스포츠)",
+    "variant": "named",
+    "utterance": "변호사(스포츠) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: lawyer-sports]"
+  },
+  {
+    "id": "expert-lawyer-startup-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-startup",
+    "target_name": "변호사(스타트업)",
+    "variant": "named",
+    "utterance": "변호사(스타트업) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: lawyer-startup]"
+  },
+  {
+    "id": "expert-lawyer-trade-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-trade",
+    "target_name": "변호사(무역)",
+    "variant": "named",
+    "utterance": "변호사(무역)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: lawyer-trade]"
+  },
+  {
+    "id": "expert-lawyer-traffic-A-named",
+    "tier": "expert",
+    "target_id": "lawyer-traffic",
+    "target_name": "변호사(교통사고)",
+    "variant": "named",
+    "utterance": "변호사(교통사고)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: lawyer-traffic]"
+  },
+  {
+    "id": "expert-librarian-A-named",
+    "tier": "expert",
+    "target_id": "librarian",
+    "target_name": "사서",
+    "variant": "named",
+    "utterance": "사서 AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: librarian]"
+  },
+  {
+    "id": "expert-lifelong-educator-A-named",
+    "tier": "expert",
+    "target_id": "lifelong-educator",
+    "target_name": "평생교육사",
+    "variant": "named",
+    "utterance": "평생교육사 AI를 불러줘.",
+    "expect_tag": "[EXPERT: lifelong-educator]"
+  },
+  {
+    "id": "expert-loss-adjuster-A-named",
+    "tier": "expert",
+    "target_id": "loss-adjuster",
+    "target_name": "손해사정사",
+    "variant": "named",
+    "utterance": "손해사정사는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: loss-adjuster]"
+  },
+  {
+    "id": "expert-marine-engineer-A-named",
+    "tier": "expert",
+    "target_id": "marine-engineer",
+    "target_name": "기관사(선박)",
+    "variant": "named",
+    "utterance": "기관사(선박)를 호출해줘.",
+    "expect_tag": "[EXPERT: marine-engineer]"
+  },
+  {
+    "id": "expert-marine-pilot-A-named",
+    "tier": "expert",
+    "target_id": "marine-pilot",
+    "target_name": "도선사",
+    "variant": "named",
+    "utterance": "도선사한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: marine-pilot]"
+  },
+  {
+    "id": "expert-medical-lab-technologist-A-named",
+    "tier": "expert",
+    "target_id": "medical-lab-technologist",
+    "target_name": "임상병리사",
+    "variant": "named",
+    "utterance": "임상병리사로 연결해줘.",
+    "expect_tag": "[EXPERT: medical-lab-technologist]"
+  },
+  {
+    "id": "expert-mental-health-professional-A-named",
+    "tier": "expert",
+    "target_id": "mental-health-professional",
+    "target_name": "정신건강전문요원",
+    "variant": "named",
+    "utterance": "정신건강전문요원 페르소나 호출해.",
+    "expect_tag": "[EXPERT: mental-health-professional]"
+  },
+  {
+    "id": "expert-midwife-A-named",
+    "tier": "expert",
+    "target_id": "midwife",
+    "target_name": "조산사",
+    "variant": "named",
+    "utterance": "조산사 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: midwife]"
+  },
+  {
+    "id": "expert-naval-architect-A-named",
+    "tier": "expert",
+    "target_id": "naval-architect",
+    "target_name": "조선사",
+    "variant": "named",
+    "utterance": "조선사한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: naval-architect]"
+  },
+  {
+    "id": "expert-navigation-officer-A-named",
+    "tier": "expert",
+    "target_id": "navigation-officer",
+    "target_name": "항해사",
+    "variant": "named",
+    "utterance": "항해사가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: navigation-officer]"
+  },
+  {
+    "id": "expert-nurse-A-named",
+    "tier": "expert",
+    "target_id": "nurse",
+    "target_name": "간호사",
+    "variant": "named",
+    "utterance": "간호사 AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: nurse]"
+  },
+  {
+    "id": "expert-occupational-therapist-A-named",
+    "tier": "expert",
+    "target_id": "occupational-therapist",
+    "target_name": "작업치료사",
+    "variant": "named",
+    "utterance": "작업치료사 AI를 불러줘.",
+    "expect_tag": "[EXPERT: occupational-therapist]"
+  },
+  {
+    "id": "expert-optician-A-named",
+    "tier": "expert",
+    "target_id": "optician",
+    "target_name": "안경사",
+    "variant": "named",
+    "utterance": "안경사는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: optician]"
+  },
+  {
+    "id": "expert-paramedic-A-named",
+    "tier": "expert",
+    "target_id": "paramedic",
+    "target_name": "응급구조사",
+    "variant": "named",
+    "utterance": "응급구조사를 호출해줘.",
+    "expect_tag": "[EXPERT: paramedic]"
+  },
+  {
+    "id": "expert-patent-attorney-bio-pharma-A-named",
+    "tier": "expert",
+    "target_id": "patent-attorney-bio-pharma",
+    "target_name": "변리사(바이오·제약)",
+    "variant": "named",
+    "utterance": "변리사(바이오·제약)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: patent-attorney-bio-pharma]"
+  },
+  {
+    "id": "expert-patent-attorney-chemistry-materials-A-named",
+    "tier": "expert",
+    "target_id": "patent-attorney-chemistry-materials",
+    "target_name": "변리사(화학·소재)",
+    "variant": "named",
+    "utterance": "변리사(화학·소재)로 연결해줘.",
+    "expect_tag": "[EXPERT: patent-attorney-chemistry-materials]"
+  },
+  {
+    "id": "expert-patent-attorney-design-A-named",
+    "tier": "expert",
+    "target_id": "patent-attorney-design",
+    "target_name": "변리사(디자인)",
+    "variant": "named",
+    "utterance": "변리사(디자인) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: patent-attorney-design]"
+  },
+  {
+    "id": "expert-patent-attorney-ip-strategy-A-named",
+    "tier": "expert",
+    "target_id": "patent-attorney-ip-strategy",
+    "target_name": "변리사(IP전략·특허맵)",
+    "variant": "named",
+    "utterance": "변리사(IP전략·특허맵) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: patent-attorney-ip-strategy]"
+  },
+  {
+    "id": "expert-patent-attorney-it-software-A-named",
+    "tier": "expert",
+    "target_id": "patent-attorney-it-software",
+    "target_name": "변리사(IT·소프트웨어)",
+    "variant": "named",
+    "utterance": "변리사(IT·소프트웨어)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: patent-attorney-it-software]"
+  },
+  {
+    "id": "expert-patent-attorney-licensing-A-named",
+    "tier": "expert",
+    "target_id": "patent-attorney-licensing",
+    "target_name": "변리사(라이선싱·기술이전계약)",
+    "variant": "named",
+    "utterance": "변리사(라이선싱·기술이전계약)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: patent-attorney-licensing]"
+  },
+  {
+    "id": "expert-patent-attorney-mechanical-electrical-A-named",
+    "tier": "expert",
+    "target_id": "patent-attorney-mechanical-electrical",
+    "target_name": "변리사(기계·전기전자)",
+    "variant": "named",
+    "utterance": "변리사(기계·전기전자) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: patent-attorney-mechanical-electrical]"
+  },
+  {
+    "id": "expert-patent-attorney-pct-international-A-named",
+    "tier": "expert",
+    "target_id": "patent-attorney-pct-international",
+    "target_name": "변리사(PCT·해외출원)",
+    "variant": "named",
+    "utterance": "변리사(PCT·해외출원) AI를 불러줘.",
+    "expect_tag": "[EXPERT: patent-attorney-pct-international]"
+  },
+  {
+    "id": "expert-patent-attorney-trademark-A-named",
+    "tier": "expert",
+    "target_id": "patent-attorney-trademark",
+    "target_name": "변리사(상표)",
+    "variant": "named",
+    "utterance": "변리사(상표)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: patent-attorney-trademark]"
+  },
+  {
+    "id": "expert-patent-attorney-trial-litigation-A-named",
+    "tier": "expert",
+    "target_id": "patent-attorney-trial-litigation",
+    "target_name": "변리사(심판·심결취소소송)",
+    "variant": "named",
+    "utterance": "변리사(심판·심결취소소송)를 호출해줘.",
+    "expect_tag": "[EXPERT: patent-attorney-trial-litigation]"
+  },
+  {
+    "id": "expert-pharmacist-A-named",
+    "tier": "expert",
+    "target_id": "pharmacist",
+    "target_name": "약사",
+    "variant": "named",
+    "utterance": "약사한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: pharmacist]"
+  },
+  {
+    "id": "expert-physical-therapist-A-named",
+    "tier": "expert",
+    "target_id": "physical-therapist",
+    "target_name": "물리치료사",
+    "variant": "named",
+    "utterance": "물리치료사로 연결해줘.",
+    "expect_tag": "[EXPERT: physical-therapist]"
+  },
+  {
+    "id": "expert-physician-anesthesiology-A-named",
+    "tier": "expert",
+    "target_id": "physician-anesthesiology",
+    "target_name": "의사(마취통증의학과)",
+    "variant": "named",
+    "utterance": "의사(마취통증의학과) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: physician-anesthesiology]"
+  },
+  {
+    "id": "expert-physician-cardiothoracic-A-named",
+    "tier": "expert",
+    "target_id": "physician-cardiothoracic",
+    "target_name": "의사(심장혈관흉부외과)",
+    "variant": "named",
+    "utterance": "의사(심장혈관흉부외과) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: physician-cardiothoracic]"
+  },
+  {
+    "id": "expert-physician-dermatology-A-named",
+    "tier": "expert",
+    "target_id": "physician-dermatology",
+    "target_name": "의사(피부과)",
+    "variant": "named",
+    "utterance": "의사(피부과)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: physician-dermatology]"
+  },
+  {
+    "id": "expert-physician-emergency-A-named",
+    "tier": "expert",
+    "target_id": "physician-emergency",
+    "target_name": "의사(응급의학과)",
+    "variant": "named",
+    "utterance": "의사(응급의학과)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: physician-emergency]"
+  },
+  {
+    "id": "expert-physician-ent-A-named",
+    "tier": "expert",
+    "target_id": "physician-ent",
+    "target_name": "의사(이비인후과)",
+    "variant": "named",
+    "utterance": "의사(이비인후과) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: physician-ent]"
+  },
+  {
+    "id": "expert-physician-internal-medicine-A-named",
+    "tier": "expert",
+    "target_id": "physician-internal-medicine",
+    "target_name": "의사(내과)",
+    "variant": "named",
+    "utterance": "의사(내과) AI를 불러줘.",
+    "expect_tag": "[EXPERT: physician-internal-medicine]"
+  },
+  {
+    "id": "expert-physician-lab-medicine-A-named",
+    "tier": "expert",
+    "target_id": "physician-lab-medicine",
+    "target_name": "의사(진단검사의학과)",
+    "variant": "named",
+    "utterance": "의사(진단검사의학과)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: physician-lab-medicine]"
+  },
+  {
+    "id": "expert-physician-neurology-A-named",
+    "tier": "expert",
+    "target_id": "physician-neurology",
+    "target_name": "의사(신경과)",
+    "variant": "named",
+    "utterance": "의사(신경과)를 호출해줘.",
+    "expect_tag": "[EXPERT: physician-neurology]"
+  },
+  {
+    "id": "expert-physician-nuclear-medicine-A-named",
+    "tier": "expert",
+    "target_id": "physician-nuclear-medicine",
+    "target_name": "의사(핵의학과)",
+    "variant": "named",
+    "utterance": "의사(핵의학과)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: physician-nuclear-medicine]"
+  },
+  {
+    "id": "expert-physician-obgyn-A-named",
+    "tier": "expert",
+    "target_id": "physician-obgyn",
+    "target_name": "의사(산부인과)",
+    "variant": "named",
+    "utterance": "의사(산부인과)로 연결해줘.",
+    "expect_tag": "[EXPERT: physician-obgyn]"
+  },
+  {
+    "id": "expert-physician-occupational-A-named",
+    "tier": "expert",
+    "target_id": "physician-occupational",
+    "target_name": "의사(직업환경의학과)",
+    "variant": "named",
+    "utterance": "의사(직업환경의학과) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: physician-occupational]"
+  },
+  {
+    "id": "expert-physician-ophthalmology-A-named",
+    "tier": "expert",
+    "target_id": "physician-ophthalmology",
+    "target_name": "의사(안과)",
+    "variant": "named",
+    "utterance": "의사(안과) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: physician-ophthalmology]"
+  },
+  {
+    "id": "expert-physician-orthopedics-A-named",
+    "tier": "expert",
+    "target_id": "physician-orthopedics",
+    "target_name": "의사(정형외과)",
+    "variant": "named",
+    "utterance": "의사(정형외과)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: physician-orthopedics]"
+  },
+  {
+    "id": "expert-physician-pathology-A-named",
+    "tier": "expert",
+    "target_id": "physician-pathology",
+    "target_name": "의사(병리과)",
+    "variant": "named",
+    "utterance": "의사(병리과)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: physician-pathology]"
+  },
+  {
+    "id": "expert-physician-pediatrics-A-named",
+    "tier": "expert",
+    "target_id": "physician-pediatrics",
+    "target_name": "의사(소아청소년과)",
+    "variant": "named",
+    "utterance": "의사(소아청소년과) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: physician-pediatrics]"
+  },
+  {
+    "id": "expert-physician-plastic-A-named",
+    "tier": "expert",
+    "target_id": "physician-plastic",
+    "target_name": "의사(성형외과)",
+    "variant": "named",
+    "utterance": "의사(성형외과) AI를 불러줘.",
+    "expect_tag": "[EXPERT: physician-plastic]"
+  },
+  {
+    "id": "expert-physician-preventive-A-named",
+    "tier": "expert",
+    "target_id": "physician-preventive",
+    "target_name": "의사(예방의학과)",
+    "variant": "named",
+    "utterance": "의사(예방의학과)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: physician-preventive]"
+  },
+  {
+    "id": "expert-physician-psychiatry-A-named",
+    "tier": "expert",
+    "target_id": "physician-psychiatry",
+    "target_name": "의사(정신건강의학과)",
+    "variant": "named",
+    "utterance": "의사(정신건강의학과)를 호출해줘.",
+    "expect_tag": "[EXPERT: physician-psychiatry]"
+  },
+  {
+    "id": "expert-physician-radiation-oncology-A-named",
+    "tier": "expert",
+    "target_id": "physician-radiation-oncology",
+    "target_name": "의사(방사선종양학과)",
+    "variant": "named",
+    "utterance": "의사(방사선종양학과)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: physician-radiation-oncology]"
+  },
+  {
+    "id": "expert-physician-radiology-A-named",
+    "tier": "expert",
+    "target_id": "physician-radiology",
+    "target_name": "의사(영상의학과)",
+    "variant": "named",
+    "utterance": "의사(영상의학과)로 연결해줘.",
+    "expect_tag": "[EXPERT: physician-radiology]"
+  },
+  {
+    "id": "expert-physician-rehabilitation-A-named",
+    "tier": "expert",
+    "target_id": "physician-rehabilitation",
+    "target_name": "의사(재활의학과)",
+    "variant": "named",
+    "utterance": "의사(재활의학과) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: physician-rehabilitation]"
+  },
+  {
+    "id": "expert-physician-surgery-A-named",
+    "tier": "expert",
+    "target_id": "physician-surgery",
+    "target_name": "의사(외과)",
+    "variant": "named",
+    "utterance": "의사(외과) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: physician-surgery]"
+  },
+  {
+    "id": "expert-physician-urology-A-named",
+    "tier": "expert",
+    "target_id": "physician-urology",
+    "target_name": "의사(비뇨의학과)",
+    "variant": "named",
+    "utterance": "의사(비뇨의학과)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: physician-urology]"
+  },
+  {
+    "id": "expert-professional-engineer-A-named",
+    "tier": "expert",
+    "target_id": "professional-engineer",
+    "target_name": "기술사",
+    "variant": "named",
+    "utterance": "기술사가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professional-engineer]"
+  },
+  {
+    "id": "expert-professor-accounting-A-named",
+    "tier": "expert",
+    "target_id": "professor-accounting",
+    "target_name": "교수(회계·세무학)",
+    "variant": "named",
+    "utterance": "교수(회계·세무학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-accounting]"
+  },
+  {
+    "id": "expert-professor-administrativelaw-A-named",
+    "tier": "expert",
+    "target_id": "professor-administrativelaw",
+    "target_name": "교수(행정법)",
+    "variant": "named",
+    "utterance": "교수(행정법) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-administrativelaw]"
+  },
+  {
+    "id": "expert-professor-advertising-A-named",
+    "tier": "expert",
+    "target_id": "professor-advertising",
+    "target_name": "교수(광고·홍보학)",
+    "variant": "named",
+    "utterance": "교수(광고·홍보학)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-advertising]"
+  },
+  {
+    "id": "expert-professor-aerospace-A-named",
+    "tier": "expert",
+    "target_id": "professor-aerospace",
+    "target_name": "교수(항공·우주공학)",
+    "variant": "named",
+    "utterance": "교수(항공·우주공학)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-aerospace]"
+  },
+  {
+    "id": "expert-professor-agrobiosystems-A-named",
+    "tier": "expert",
+    "target_id": "professor-agrobiosystems",
+    "target_name": "교수(농림수산바이오시스템공학)",
+    "variant": "named",
+    "utterance": "교수(농림수산바이오시스템공학)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-agrobiosystems]"
+  },
+  {
+    "id": "expert-professor-agroecology-A-named",
+    "tier": "expert",
+    "target_id": "professor-agroecology",
+    "target_name": "교수(농림수산환경생태학)",
+    "variant": "named",
+    "utterance": "교수(농림수산환경생태학)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-agroecology]"
+  },
+  {
+    "id": "expert-professor-ai-engineering-A-named",
+    "tier": "expert",
+    "target_id": "professor-ai-engineering",
+    "target_name": "교수(인공지능공학)",
+    "variant": "named",
+    "utterance": "교수(인공지능공학) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-ai-engineering]"
+  },
+  {
+    "id": "expert-professor-algebra-A-named",
+    "tier": "expert",
+    "target_id": "professor-algebra",
+    "target_name": "교수(대수학)",
+    "variant": "named",
+    "utterance": "교수(대수학) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-algebra]"
+  },
+  {
+    "id": "expert-professor-analysis-A-named",
+    "tier": "expert",
+    "target_id": "professor-analysis",
+    "target_name": "교수(해석학)",
+    "variant": "named",
+    "utterance": "교수(해석학)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-analysis]"
+  },
+  {
+    "id": "expert-professor-analyticalchemistry-A-named",
+    "tier": "expert",
+    "target_id": "professor-analyticalchemistry",
+    "target_name": "교수(분석화학)",
+    "variant": "named",
+    "utterance": "교수(분석화학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-analyticalchemistry]"
+  },
+  {
+    "id": "expert-professor-animalhealth-A-named",
+    "tier": "expert",
+    "target_id": "professor-animalhealth",
+    "target_name": "교수(동물보건)",
+    "variant": "named",
+    "utterance": "교수(동물보건) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-animalhealth]"
+  },
+  {
+    "id": "expert-professor-animalscience-A-named",
+    "tier": "expert",
+    "target_id": "professor-animalscience",
+    "target_name": "교수(축산학)",
+    "variant": "named",
+    "utterance": "교수(축산학) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-animalscience]"
+  },
+  {
+    "id": "expert-professor-animation-A-named",
+    "tier": "expert",
+    "target_id": "professor-animation",
+    "target_name": "교수(애니메이션)",
+    "variant": "named",
+    "utterance": "교수(애니메이션)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-animation]"
+  },
+  {
+    "id": "expert-professor-anthropology-A-named",
+    "tier": "expert",
+    "target_id": "professor-anthropology",
+    "target_name": "교수(인류학)",
+    "variant": "named",
+    "utterance": "교수(인류학)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-anthropology]"
+  },
+  {
+    "id": "expert-professor-appliedfinearts-A-named",
+    "tier": "expert",
+    "target_id": "professor-appliedfinearts",
+    "target_name": "교수(응용미술)",
+    "variant": "named",
+    "utterance": "교수(응용미술)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-appliedfinearts]"
+  },
+  {
+    "id": "expert-professor-appliedstatistics-A-named",
+    "tier": "expert",
+    "target_id": "professor-appliedstatistics",
+    "target_name": "교수(응용통계학)",
+    "variant": "named",
+    "utterance": "교수(응용통계학)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-appliedstatistics]"
+  },
+  {
+    "id": "expert-professor-archaeologicalanthropology-A-named",
+    "tier": "expert",
+    "target_id": "professor-archaeologicalanthropology",
+    "target_name": "교수(고고인류학)",
+    "variant": "named",
+    "utterance": "교수(고고인류학) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-archaeologicalanthropology]"
+  },
+  {
+    "id": "expert-professor-archaeology-A-named",
+    "tier": "expert",
+    "target_id": "professor-archaeology",
+    "target_name": "교수(고고학)",
+    "variant": "named",
+    "utterance": "교수(고고학) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-archaeology]"
+  },
+  {
+    "id": "expert-professor-architecturalengineering-A-named",
+    "tier": "expert",
+    "target_id": "professor-architecturalengineering",
+    "target_name": "교수(건축공학)",
+    "variant": "named",
+    "utterance": "교수(건축공학)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-architecturalengineering]"
+  },
+  {
+    "id": "expert-professor-architecture-A-named",
+    "tier": "expert",
+    "target_id": "professor-architecture",
+    "target_name": "교수(건축학)",
+    "variant": "named",
+    "utterance": "교수(건축학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-architecture]"
+  },
+  {
+    "id": "expert-professor-areastudies-A-named",
+    "tier": "expert",
+    "target_id": "professor-areastudies",
+    "target_name": "교수(국제지역학)",
+    "variant": "named",
+    "utterance": "교수(국제지역학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-areastudies]"
+  },
+  {
+    "id": "expert-professor-arthistory-A-named",
+    "tier": "expert",
+    "target_id": "professor-arthistory",
+    "target_name": "교수(미술학)",
+    "variant": "named",
+    "utterance": "교수(미술학) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-arthistory]"
+  },
+  {
+    "id": "expert-professor-artspeeducation-A-named",
+    "tier": "expert",
+    "target_id": "professor-artspeeducation",
+    "target_name": "교수(예술·체육교육)",
+    "variant": "named",
+    "utterance": "교수(예술·체육교육)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-artspeeducation]"
+  },
+  {
+    "id": "expert-professor-astronomy-A-named",
+    "tier": "expert",
+    "target_id": "professor-astronomy",
+    "target_name": "교수(천문·대기과학)",
+    "variant": "named",
+    "utterance": "교수(천문·대기과학)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-astronomy]"
+  },
+  {
+    "id": "expert-professor-automotive-A-named",
+    "tier": "expert",
+    "target_id": "professor-automotive",
+    "target_name": "교수(자동차공학)",
+    "variant": "named",
+    "utterance": "교수(자동차공학)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-automotive]"
+  },
+  {
+    "id": "expert-professor-aviation-A-named",
+    "tier": "expert",
+    "target_id": "professor-aviation",
+    "target_name": "교수(항공운항학)",
+    "variant": "named",
+    "utterance": "교수(항공운항학)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-aviation]"
+  },
+  {
+    "id": "expert-professor-beautyart-A-named",
+    "tier": "expert",
+    "target_id": "professor-beautyart",
+    "target_name": "교수(뷰티아트)",
+    "variant": "named",
+    "utterance": "교수(뷰티아트) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-beautyart]"
+  },
+  {
+    "id": "expert-professor-biochemistry-A-named",
+    "tier": "expert",
+    "target_id": "professor-biochemistry",
+    "target_name": "교수(생화학)",
+    "variant": "named",
+    "utterance": "교수(생화학) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-biochemistry]"
+  },
+  {
+    "id": "expert-professor-bioengineering-A-named",
+    "tier": "expert",
+    "target_id": "professor-bioengineering",
+    "target_name": "교수(생명공학)",
+    "variant": "named",
+    "utterance": "교수(생명공학)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-bioengineering]"
+  },
+  {
+    "id": "expert-professor-biology-A-named",
+    "tier": "expert",
+    "target_id": "professor-biology",
+    "target_name": "교수(생명과학)",
+    "variant": "named",
+    "utterance": "교수(생명과학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-biology]"
+  },
+  {
+    "id": "expert-professor-biomedengineering-A-named",
+    "tier": "expert",
+    "target_id": "professor-biomedengineering",
+    "target_name": "교수(의공학)",
+    "variant": "named",
+    "utterance": "교수(의공학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-biomedengineering]"
+  },
+  {
+    "id": "expert-professor-biopsychology-A-named",
+    "tier": "expert",
+    "target_id": "professor-biopsychology",
+    "target_name": "교수(생물심리학)",
+    "variant": "named",
+    "utterance": "교수(생물심리학) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-biopsychology]"
+  },
+  {
+    "id": "expert-professor-biostatistics-A-named",
+    "tier": "expert",
+    "target_id": "professor-biostatistics",
+    "target_name": "교수(생물통계학)",
+    "variant": "named",
+    "utterance": "교수(생물통계학)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-biostatistics]"
+  },
+  {
+    "id": "expert-professor-biotechnology-A-named",
+    "tier": "expert",
+    "target_id": "professor-biotechnology",
+    "target_name": "교수(바이오테크놀로지학)",
+    "variant": "named",
+    "utterance": "교수(바이오테크놀로지학)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-biotechnology]"
+  },
+  {
+    "id": "expert-professor-broadcasting-entertainment-A-named",
+    "tier": "expert",
+    "target_id": "professor-broadcasting-entertainment",
+    "target_name": "교수(방송연예)",
+    "variant": "named",
+    "utterance": "교수(방송연예)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-broadcasting-entertainment]"
+  },
+  {
+    "id": "expert-professor-business-A-named",
+    "tier": "expert",
+    "target_id": "professor-business",
+    "target_name": "교수(경영학)",
+    "variant": "named",
+    "utterance": "교수(경영학)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-business]"
+  },
+  {
+    "id": "expert-professor-careereducation-A-named",
+    "tier": "expert",
+    "target_id": "professor-careereducation",
+    "target_name": "교수(진로교육)",
+    "variant": "named",
+    "utterance": "교수(진로교육) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-careereducation]"
+  },
+  {
+    "id": "expert-professor-cellbiology-A-named",
+    "tier": "expert",
+    "target_id": "professor-cellbiology",
+    "target_name": "교수(세포생물학)",
+    "variant": "named",
+    "utterance": "교수(세포생물학) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-cellbiology]"
+  },
+  {
+    "id": "expert-professor-ceramics-A-named",
+    "tier": "expert",
+    "target_id": "professor-ceramics",
+    "target_name": "교수(세라믹공학)",
+    "variant": "named",
+    "utterance": "교수(세라믹공학)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-ceramics]"
+  },
+  {
+    "id": "expert-professor-chemicalengineering-A-named",
+    "tier": "expert",
+    "target_id": "professor-chemicalengineering",
+    "target_name": "교수(화학공학)",
+    "variant": "named",
+    "utterance": "교수(화학공학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-chemicalengineering]"
+  },
+  {
+    "id": "expert-professor-chemistry-A-named",
+    "tier": "expert",
+    "target_id": "professor-chemistry",
+    "target_name": "교수(화학)",
+    "variant": "named",
+    "utterance": "교수(화학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-chemistry]"
+  },
+  {
+    "id": "expert-professor-childfamilystudies-A-named",
+    "tier": "expert",
+    "target_id": "professor-childfamilystudies",
+    "target_name": "교수(아동·가족학)",
+    "variant": "named",
+    "utterance": "교수(아동·가족학) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-childfamilystudies]"
+  },
+  {
+    "id": "expert-professor-chinese-A-named",
+    "tier": "expert",
+    "target_id": "professor-chinese",
+    "target_name": "교수(중국어·문학)",
+    "variant": "named",
+    "utterance": "교수(중국어·문학)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-chinese]"
+  },
+  {
+    "id": "expert-professor-circuittheory-A-named",
+    "tier": "expert",
+    "target_id": "professor-circuittheory",
+    "target_name": "교수(회로이론)",
+    "variant": "named",
+    "utterance": "교수(회로이론)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-circuittheory]"
+  },
+  {
+    "id": "expert-professor-civilengineering-A-named",
+    "tier": "expert",
+    "target_id": "professor-civilengineering",
+    "target_name": "교수(토목공학)",
+    "variant": "named",
+    "utterance": "교수(토목공학)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-civilengineering]"
+  },
+  {
+    "id": "expert-professor-civillaw-A-named",
+    "tier": "expert",
+    "target_id": "professor-civillaw",
+    "target_name": "교수(민법)",
+    "variant": "named",
+    "utterance": "교수(민법)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-civillaw]"
+  },
+  {
+    "id": "expert-professor-civilprocedure-A-named",
+    "tier": "expert",
+    "target_id": "professor-civilprocedure",
+    "target_name": "교수(민사소송법)",
+    "variant": "named",
+    "utterance": "교수(민사소송법) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-civilprocedure]"
+  },
+  {
+    "id": "expert-professor-classicalchinese-A-named",
+    "tier": "expert",
+    "target_id": "professor-classicalchinese",
+    "target_name": "교수(한문학)",
+    "variant": "named",
+    "utterance": "교수(한문학) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-classicalchinese]"
+  },
+  {
+    "id": "expert-professor-clinicalhealth-A-named",
+    "tier": "expert",
+    "target_id": "professor-clinicalhealth",
+    "target_name": "교수(임상보건)",
+    "variant": "named",
+    "utterance": "교수(임상보건)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-clinicalhealth]"
+  },
+  {
+    "id": "expert-professor-clinicalpsychology-A-named",
+    "tier": "expert",
+    "target_id": "professor-clinicalpsychology",
+    "target_name": "교수(임상심리학)",
+    "variant": "named",
+    "utterance": "교수(임상심리학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-clinicalpsychology]"
+  },
+  {
+    "id": "expert-professor-clothing-A-named",
+    "tier": "expert",
+    "target_id": "professor-clothing",
+    "target_name": "교수(의류·의상학)",
+    "variant": "named",
+    "utterance": "교수(의류·의상학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-clothing]"
+  },
+  {
+    "id": "expert-professor-cognitivepsychology-A-named",
+    "tier": "expert",
+    "target_id": "professor-cognitivepsychology",
+    "target_name": "교수(인지심리학)",
+    "variant": "named",
+    "utterance": "교수(인지심리학) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-cognitivepsychology]"
+  },
+  {
+    "id": "expert-professor-comics-A-named",
+    "tier": "expert",
+    "target_id": "professor-comics",
+    "target_name": "교수(만화)",
+    "variant": "named",
+    "utterance": "교수(만화)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-comics]"
+  },
+  {
+    "id": "expert-professor-commerciallaw-A-named",
+    "tier": "expert",
+    "target_id": "professor-commerciallaw",
+    "target_name": "교수(상법)",
+    "variant": "named",
+    "utterance": "교수(상법)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-commerciallaw]"
+  },
+  {
+    "id": "expert-professor-comparativepolitics-A-named",
+    "tier": "expert",
+    "target_id": "professor-comparativepolitics",
+    "target_name": "교수(비교정치론)",
+    "variant": "named",
+    "utterance": "교수(비교정치론)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-comparativepolitics]"
+  },
+  {
+    "id": "expert-professor-competitionlaw-A-named",
+    "tier": "expert",
+    "target_id": "professor-competitionlaw",
+    "target_name": "교수(경제법)",
+    "variant": "named",
+    "utterance": "교수(경제법)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-competitionlaw]"
+  },
+  {
+    "id": "expert-professor-composition-A-named",
+    "tier": "expert",
+    "target_id": "professor-composition",
+    "target_name": "교수(작곡)",
+    "variant": "named",
+    "utterance": "교수(작곡) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-composition]"
+  },
+  {
+    "id": "expert-professor-computerarchitecture-A-named",
+    "tier": "expert",
+    "target_id": "professor-computerarchitecture",
+    "target_name": "교수(컴퓨터구조)",
+    "variant": "named",
+    "utterance": "교수(컴퓨터구조) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-computerarchitecture]"
+  },
+  {
+    "id": "expert-professor-computernetworks-A-named",
+    "tier": "expert",
+    "target_id": "professor-computernetworks",
+    "target_name": "교수(컴퓨터네트워크)",
+    "variant": "named",
+    "utterance": "교수(컴퓨터네트워크)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-computernetworks]"
+  },
+  {
+    "id": "expert-professor-computerscience-A-named",
+    "tier": "expert",
+    "target_id": "professor-computerscience",
+    "target_name": "교수(전산학·컴퓨터공학)",
+    "variant": "named",
+    "utterance": "교수(전산학·컴퓨터공학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-computerscience]"
+  },
+  {
+    "id": "expert-professor-condensedmatter-A-named",
+    "tier": "expert",
+    "target_id": "professor-condensedmatter",
+    "target_name": "교수(고체물리학)",
+    "variant": "named",
+    "utterance": "교수(고체물리학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-condensedmatter]"
+  },
+  {
+    "id": "expert-professor-constitutionallaw-A-named",
+    "tier": "expert",
+    "target_id": "professor-constitutionallaw",
+    "target_name": "교수(헌법)",
+    "variant": "named",
+    "utterance": "교수(헌법) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-constitutionallaw]"
+  },
+  {
+    "id": "expert-professor-consumerscience-A-named",
+    "tier": "expert",
+    "target_id": "professor-consumerscience",
+    "target_name": "교수(소비자·가정자원)",
+    "variant": "named",
+    "utterance": "교수(소비자·가정자원)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-consumerscience]"
+  },
+  {
+    "id": "expert-professor-contemporarymusic-A-named",
+    "tier": "expert",
+    "target_id": "professor-contemporarymusic",
+    "target_name": "교수(실용음악)",
+    "variant": "named",
+    "utterance": "교수(실용음악)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-contemporarymusic]"
+  },
+  {
+    "id": "expert-professor-controlengineering-A-named",
+    "tier": "expert",
+    "target_id": "professor-controlengineering",
+    "target_name": "교수(제어계측공학)",
+    "variant": "named",
+    "utterance": "교수(제어계측공학)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-controlengineering]"
+  },
+  {
+    "id": "expert-professor-counselingpsychology-A-named",
+    "tier": "expert",
+    "target_id": "professor-counselingpsychology",
+    "target_name": "교수(상담심리학)",
+    "variant": "named",
+    "utterance": "교수(상담심리학)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-counselingpsychology]"
+  },
+  {
+    "id": "expert-professor-craft-A-named",
+    "tier": "expert",
+    "target_id": "professor-craft",
+    "target_name": "교수(공예)",
+    "variant": "named",
+    "utterance": "교수(공예) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-craft]"
+  },
+  {
+    "id": "expert-professor-creativewriting-A-named",
+    "tier": "expert",
+    "target_id": "professor-creativewriting",
+    "target_name": "교수(문예창작학)",
+    "variant": "named",
+    "utterance": "교수(문예창작학) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-creativewriting]"
+  },
+  {
+    "id": "expert-professor-criminallaw-A-named",
+    "tier": "expert",
+    "target_id": "professor-criminallaw",
+    "target_name": "교수(형법)",
+    "variant": "named",
+    "utterance": "교수(형법)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-criminallaw]"
+  },
+  {
+    "id": "expert-professor-criminalprocedure-A-named",
+    "tier": "expert",
+    "target_id": "professor-criminalprocedure",
+    "target_name": "교수(형사소송법)",
+    "variant": "named",
+    "utterance": "교수(형사소송법)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-criminalprocedure]"
+  },
+  {
+    "id": "expert-professor-cropscience-A-named",
+    "tier": "expert",
+    "target_id": "professor-cropscience",
+    "target_name": "교수(작물·원예학)",
+    "variant": "named",
+    "utterance": "교수(작물·원예학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-cropscience]"
+  },
+  {
+    "id": "expert-professor-culinaryscience-A-named",
+    "tier": "expert",
+    "target_id": "professor-culinaryscience",
+    "target_name": "교수(조리과학)",
+    "variant": "named",
+    "utterance": "교수(조리과학) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-culinaryscience]"
+  },
+  {
+    "id": "expert-professor-culturalanthropology-A-named",
+    "tier": "expert",
+    "target_id": "professor-culturalanthropology",
+    "target_name": "교수(문화인류학)",
+    "variant": "named",
+    "utterance": "교수(문화인류학)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-culturalanthropology]"
+  },
+  {
+    "id": "expert-professor-culturalsociology-A-named",
+    "tier": "expert",
+    "target_id": "professor-culturalsociology",
+    "target_name": "교수(문화사회학)",
+    "variant": "named",
+    "utterance": "교수(문화사회학)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-culturalsociology]"
+  },
+  {
+    "id": "expert-professor-culturalstudies-A-named",
+    "tier": "expert",
+    "target_id": "professor-culturalstudies",
+    "target_name": "교수(문화·민속·미술사학)",
+    "variant": "named",
+    "utterance": "교수(문화·민속·미술사학)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-culturalstudies]"
+  },
+  {
+    "id": "expert-professor-dance-A-named",
+    "tier": "expert",
+    "target_id": "professor-dance",
+    "target_name": "교수(무용)",
+    "variant": "named",
+    "utterance": "교수(무용)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-dance]"
+  },
+  {
+    "id": "expert-professor-database-A-named",
+    "tier": "expert",
+    "target_id": "professor-database",
+    "target_name": "교수(데이터베이스)",
+    "variant": "named",
+    "utterance": "교수(데이터베이스) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-database]"
+  },
+  {
+    "id": "expert-professor-datastructures-A-named",
+    "tier": "expert",
+    "target_id": "professor-datastructures",
+    "target_name": "교수(자료구조·알고리즘)",
+    "variant": "named",
+    "utterance": "교수(자료구조·알고리즘) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-datastructures]"
+  },
+  {
+    "id": "expert-professor-dent-conservative-A-named",
+    "tier": "expert",
+    "target_id": "professor-dent-conservative",
+    "target_name": "교수(치과보존학)",
+    "variant": "named",
+    "utterance": "교수(치과보존학)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-dent-conservative]"
+  },
+  {
+    "id": "expert-professor-dent-omfs-A-named",
+    "tier": "expert",
+    "target_id": "professor-dent-omfs",
+    "target_name": "교수(구강악안면외과학)",
+    "variant": "named",
+    "utterance": "교수(구강악안면외과학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-dent-omfs]"
+  },
+  {
+    "id": "expert-professor-dent-oralmedicine-A-named",
+    "tier": "expert",
+    "target_id": "professor-dent-oralmedicine",
+    "target_name": "교수(구강내과학)",
+    "variant": "named",
+    "utterance": "교수(구강내과학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-dent-oralmedicine]"
+  },
+  {
+    "id": "expert-professor-dent-oralpathology-A-named",
+    "tier": "expert",
+    "target_id": "professor-dent-oralpathology",
+    "target_name": "교수(구강병리학)",
+    "variant": "named",
+    "utterance": "교수(구강병리학) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-dent-oralpathology]"
+  },
+  {
+    "id": "expert-professor-dent-oralradiology-A-named",
+    "tier": "expert",
+    "target_id": "professor-dent-oralradiology",
+    "target_name": "교수(구강악안면방사선학)",
+    "variant": "named",
+    "utterance": "교수(구강악안면방사선학)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-dent-oralradiology]"
+  },
+  {
+    "id": "expert-professor-dent-orthodontics-A-named",
+    "tier": "expert",
+    "target_id": "professor-dent-orthodontics",
+    "target_name": "교수(치과교정학)",
+    "variant": "named",
+    "utterance": "교수(치과교정학)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-dent-orthodontics]"
+  },
+  {
+    "id": "expert-professor-dent-pediatricdentistry-A-named",
+    "tier": "expert",
+    "target_id": "professor-dent-pediatricdentistry",
+    "target_name": "교수(소아치과학)",
+    "variant": "named",
+    "utterance": "교수(소아치과학)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-dent-pediatricdentistry]"
+  },
+  {
+    "id": "expert-professor-dent-periodontics-A-named",
+    "tier": "expert",
+    "target_id": "professor-dent-periodontics",
+    "target_name": "교수(치주과학)",
+    "variant": "named",
+    "utterance": "교수(치주과학)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-dent-periodontics]"
+  },
+  {
+    "id": "expert-professor-dent-preventivedentistry-A-named",
+    "tier": "expert",
+    "target_id": "professor-dent-preventivedentistry",
+    "target_name": "교수(예방치과학)",
+    "variant": "named",
+    "utterance": "교수(예방치과학) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-dent-preventivedentistry]"
+  },
+  {
+    "id": "expert-professor-dent-prosthodontics-A-named",
+    "tier": "expert",
+    "target_id": "professor-dent-prosthodontics",
+    "target_name": "교수(치과보철학)",
+    "variant": "named",
+    "utterance": "교수(치과보철학) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-dent-prosthodontics]"
+  },
+  {
+    "id": "expert-professor-dentistry-academic-A-named",
+    "tier": "expert",
+    "target_id": "professor-dentistry-academic",
+    "target_name": "교수(치의학)",
+    "variant": "named",
+    "utterance": "교수(치의학)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-dentistry-academic]"
+  },
+  {
+    "id": "expert-professor-design-A-named",
+    "tier": "expert",
+    "target_id": "professor-design",
+    "target_name": "교수(디자인)",
+    "variant": "named",
+    "utterance": "교수(디자인)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-design]"
+  },
+  {
+    "id": "expert-professor-developmentalbiology-A-named",
+    "tier": "expert",
+    "target_id": "professor-developmentalbiology",
+    "target_name": "교수(발생생물학)",
+    "variant": "named",
+    "utterance": "교수(발생생물학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-developmentalbiology]"
+  },
+  {
+    "id": "expert-professor-developmentalpsychology-A-named",
+    "tier": "expert",
+    "target_id": "professor-developmentalpsychology",
+    "target_name": "교수(발달심리학)",
+    "variant": "named",
+    "utterance": "교수(발달심리학) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-developmentalpsychology]"
+  },
+  {
+    "id": "expert-professor-diffeq-A-named",
+    "tier": "expert",
+    "target_id": "professor-diffeq",
+    "target_name": "교수(미분방정식)",
+    "variant": "named",
+    "utterance": "교수(미분방정식)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-diffeq]"
+  },
+  {
+    "id": "expert-professor-disasterprevention-A-named",
+    "tier": "expert",
+    "target_id": "professor-disasterprevention",
+    "target_name": "교수(방재공학)",
+    "variant": "named",
+    "utterance": "교수(방재공학)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-disasterprevention]"
+  },
+  {
+    "id": "expert-professor-discretemath-A-named",
+    "tier": "expert",
+    "target_id": "professor-discretemath",
+    "target_name": "교수(이산수학)",
+    "variant": "named",
+    "utterance": "교수(이산수학)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-discretemath]"
+  },
+  {
+    "id": "expert-professor-dynamics-A-named",
+    "tier": "expert",
+    "target_id": "professor-dynamics",
+    "target_name": "교수(동역학)",
+    "variant": "named",
+    "utterance": "교수(동역학)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-dynamics]"
+  },
+  {
+    "id": "expert-professor-earlychildhoodeducation-A-named",
+    "tier": "expert",
+    "target_id": "professor-earlychildhoodeducation",
+    "target_name": "교수(유아교육)",
+    "variant": "named",
+    "utterance": "교수(유아교육) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-earlychildhoodeducation]"
+  },
+  {
+    "id": "expert-professor-earthscience-A-named",
+    "tier": "expert",
+    "target_id": "professor-earthscience",
+    "target_name": "교수(지구·지질학)",
+    "variant": "named",
+    "utterance": "교수(지구·지질학) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-earthscience]"
+  },
+  {
+    "id": "expert-professor-easternhistory-A-named",
+    "tier": "expert",
+    "target_id": "professor-easternhistory",
+    "target_name": "교수(동양사)",
+    "variant": "named",
+    "utterance": "교수(동양사)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-easternhistory]"
+  },
+  {
+    "id": "expert-professor-easternphilosophy-A-named",
+    "tier": "expert",
+    "target_id": "professor-easternphilosophy",
+    "target_name": "교수(동양철학)",
+    "variant": "named",
+    "utterance": "교수(동양철학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-easternphilosophy]"
+  },
+  {
+    "id": "expert-professor-ecology-A-named",
+    "tier": "expert",
+    "target_id": "professor-ecology",
+    "target_name": "교수(생태학)",
+    "variant": "named",
+    "utterance": "교수(생태학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-ecology]"
+  },
+  {
+    "id": "expert-professor-econometrics-A-named",
+    "tier": "expert",
+    "target_id": "professor-econometrics",
+    "target_name": "교수(계량경제학)",
+    "variant": "named",
+    "utterance": "교수(계량경제학) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-econometrics]"
+  },
+  {
+    "id": "expert-professor-economichistory-A-named",
+    "tier": "expert",
+    "target_id": "professor-economichistory",
+    "target_name": "교수(경제사)",
+    "variant": "named",
+    "utterance": "교수(경제사)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-economichistory]"
+  },
+  {
+    "id": "expert-professor-economics-A-named",
+    "tier": "expert",
+    "target_id": "professor-economics",
+    "target_name": "교수(경제학)",
+    "variant": "named",
+    "utterance": "교수(경제학)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-economics]"
+  },
+  {
+    "id": "expert-professor-education-A-named",
+    "tier": "expert",
+    "target_id": "professor-education",
+    "target_name": "교수(교육학)",
+    "variant": "named",
+    "utterance": "교수(교육학)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-education]"
+  },
+  {
+    "id": "expert-professor-electrical-A-named",
+    "tier": "expert",
+    "target_id": "professor-electrical",
+    "target_name": "교수(전기공학)",
+    "variant": "named",
+    "utterance": "교수(전기공학)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-electrical]"
+  },
+  {
+    "id": "expert-professor-electricalmachinery-A-named",
+    "tier": "expert",
+    "target_id": "professor-electricalmachinery",
+    "target_name": "교수(전기기기학)",
+    "variant": "named",
+    "utterance": "교수(전기기기학) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-electricalmachinery]"
+  },
+  {
+    "id": "expert-professor-electromagnetism-A-named",
+    "tier": "expert",
+    "target_id": "professor-electromagnetism",
+    "target_name": "교수(전자기학)",
+    "variant": "named",
+    "utterance": "교수(전자기학) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-electromagnetism]"
+  },
+  {
+    "id": "expert-professor-electronics-A-named",
+    "tier": "expert",
+    "target_id": "professor-electronics",
+    "target_name": "교수(전자공학)",
+    "variant": "named",
+    "utterance": "교수(전자공학)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-electronics]"
+  },
+  {
+    "id": "expert-professor-elementaryeducation-A-named",
+    "tier": "expert",
+    "target_id": "professor-elementaryeducation",
+    "target_name": "교수(초등교육)",
+    "variant": "named",
+    "utterance": "교수(초등교육)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-elementaryeducation]"
+  },
+  {
+    "id": "expert-professor-energyengineering-A-named",
+    "tier": "expert",
+    "target_id": "professor-energyengineering",
+    "target_name": "교수(에너지공학)",
+    "variant": "named",
+    "utterance": "교수(에너지공학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-energyengineering]"
+  },
+  {
+    "id": "expert-professor-engineeringeducation-A-named",
+    "tier": "expert",
+    "target_id": "professor-engineeringeducation",
+    "target_name": "교수(공학교육)",
+    "variant": "named",
+    "utterance": "교수(공학교육) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-engineeringeducation]"
+  },
+  {
+    "id": "expert-professor-english-A-named",
+    "tier": "expert",
+    "target_id": "professor-english",
+    "target_name": "교수(영어·영문학)",
+    "variant": "named",
+    "utterance": "교수(영어·영문학)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-english]"
+  },
+  {
+    "id": "expert-professor-environmentalengineering-A-named",
+    "tier": "expert",
+    "target_id": "professor-environmentalengineering",
+    "target_name": "교수(환경공학)",
+    "variant": "named",
+    "utterance": "교수(환경공학)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-environmentalengineering]"
+  },
+  {
+    "id": "expert-professor-environmentallaw-A-named",
+    "tier": "expert",
+    "target_id": "professor-environmentallaw",
+    "target_name": "교수(환경법)",
+    "variant": "named",
+    "utterance": "교수(환경법)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-environmentallaw]"
+  },
+  {
+    "id": "expert-professor-environmentalscience-A-named",
+    "tier": "expert",
+    "target_id": "professor-environmentalscience",
+    "target_name": "교수(환경학)",
+    "variant": "named",
+    "utterance": "교수(환경학)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-environmentalscience]"
+  },
+  {
+    "id": "expert-professor-epistemology-A-named",
+    "tier": "expert",
+    "target_id": "professor-epistemology",
+    "target_name": "교수(인식론)",
+    "variant": "named",
+    "utterance": "교수(인식론) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-epistemology]"
+  },
+  {
+    "id": "expert-professor-ethics-A-named",
+    "tier": "expert",
+    "target_id": "professor-ethics",
+    "target_name": "교수(철학·윤리학)",
+    "variant": "named",
+    "utterance": "교수(철학·윤리학) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-ethics]"
+  },
+  {
+    "id": "expert-professor-ethicstheory-A-named",
+    "tier": "expert",
+    "target_id": "professor-ethicstheory",
+    "target_name": "교수(윤리학)",
+    "variant": "named",
+    "utterance": "교수(윤리학)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-ethicstheory]"
+  },
+  {
+    "id": "expert-professor-familysociology-A-named",
+    "tier": "expert",
+    "target_id": "professor-familysociology",
+    "target_name": "교수(가족사회학)",
+    "variant": "named",
+    "utterance": "교수(가족사회학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-familysociology]"
+  },
+  {
+    "id": "expert-professor-film-A-named",
+    "tier": "expert",
+    "target_id": "professor-film",
+    "target_name": "교수(영화)",
+    "variant": "named",
+    "utterance": "교수(영화) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-film]"
+  },
+  {
+    "id": "expert-professor-financeinsurance-A-named",
+    "tier": "expert",
+    "target_id": "professor-financeinsurance",
+    "target_name": "교수(금융·보험학)",
+    "variant": "named",
+    "utterance": "교수(금융·보험학) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-financeinsurance]"
+  },
+  {
+    "id": "expert-professor-finearts-A-named",
+    "tier": "expert",
+    "target_id": "professor-finearts",
+    "target_name": "교수(순수미술)",
+    "variant": "named",
+    "utterance": "교수(순수미술)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-finearts]"
+  },
+  {
+    "id": "expert-professor-fisheries-A-named",
+    "tier": "expert",
+    "target_id": "professor-fisheries",
+    "target_name": "교수(수산학)",
+    "variant": "named",
+    "utterance": "교수(수산학)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-fisheries]"
+  },
+  {
+    "id": "expert-professor-fluidmechanics-A-named",
+    "tier": "expert",
+    "target_id": "professor-fluidmechanics",
+    "target_name": "교수(유체역학)",
+    "variant": "named",
+    "utterance": "교수(유체역학)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-fluidmechanics]"
+  },
+  {
+    "id": "expert-professor-foodengineering-A-named",
+    "tier": "expert",
+    "target_id": "professor-foodengineering",
+    "target_name": "교수(식품공학)",
+    "variant": "named",
+    "utterance": "교수(식품공학)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-foodengineering]"
+  },
+  {
+    "id": "expert-professor-forestry-A-named",
+    "tier": "expert",
+    "target_id": "professor-forestry",
+    "target_name": "교수(산림학)",
+    "variant": "named",
+    "utterance": "교수(산림학) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-forestry]"
+  },
+  {
+    "id": "expert-professor-french-A-named",
+    "tier": "expert",
+    "target_id": "professor-french",
+    "target_name": "교수(프랑스어·문학)",
+    "variant": "named",
+    "utterance": "교수(프랑스어·문학) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-french]"
+  },
+  {
+    "id": "expert-professor-game-A-named",
+    "tier": "expert",
+    "target_id": "professor-game",
+    "target_name": "교수(게임)",
+    "variant": "named",
+    "utterance": "교수(게임)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-game]"
+  },
+  {
+    "id": "expert-professor-generalengineering-A-named",
+    "tier": "expert",
+    "target_id": "professor-generalengineering",
+    "target_name": "교수(교양공학)",
+    "variant": "named",
+    "utterance": "교수(교양공학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-generalengineering]"
+  },
+  {
+    "id": "expert-professor-generalhumanities-A-named",
+    "tier": "expert",
+    "target_id": "professor-generalhumanities",
+    "target_name": "교수(교양인문학)",
+    "variant": "named",
+    "utterance": "교수(교양인문학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-generalhumanities]"
+  },
+  {
+    "id": "expert-professor-generallanguage-A-named",
+    "tier": "expert",
+    "target_id": "professor-generallanguage",
+    "target_name": "교수(교양어·문학)",
+    "variant": "named",
+    "utterance": "교수(교양어·문학) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-generallanguage]"
+  },
+  {
+    "id": "expert-professor-generalmusic-A-named",
+    "tier": "expert",
+    "target_id": "professor-generalmusic",
+    "target_name": "교수(교양음악)",
+    "variant": "named",
+    "utterance": "교수(교양음악)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-generalmusic]"
+  },
+  {
+    "id": "expert-professor-generalpractical-A-named",
+    "tier": "expert",
+    "target_id": "professor-generalpractical",
+    "target_name": "교수(교양 기술·가정)",
+    "variant": "named",
+    "utterance": "교수(교양 기술·가정)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-generalpractical]"
+  },
+  {
+    "id": "expert-professor-generalscience-A-named",
+    "tier": "expert",
+    "target_id": "professor-generalscience",
+    "target_name": "교수(교양자연과학)",
+    "variant": "named",
+    "utterance": "교수(교양자연과학)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-generalscience]"
+  },
+  {
+    "id": "expert-professor-generalsocialscience-A-named",
+    "tier": "expert",
+    "target_id": "professor-generalsocialscience",
+    "target_name": "교수(교양사회과학)",
+    "variant": "named",
+    "utterance": "교수(교양사회과학)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-generalsocialscience]"
+  },
+  {
+    "id": "expert-professor-genetics-A-named",
+    "tier": "expert",
+    "target_id": "professor-genetics",
+    "target_name": "교수(유전학)",
+    "variant": "named",
+    "utterance": "교수(유전학) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-genetics]"
+  },
+  {
+    "id": "expert-professor-geography-A-named",
+    "tier": "expert",
+    "target_id": "professor-geography",
+    "target_name": "교수(도시·지역·지리학)",
+    "variant": "named",
+    "utterance": "교수(도시·지역·지리학) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-geography]"
+  },
+  {
+    "id": "expert-professor-geometrytopology-A-named",
+    "tier": "expert",
+    "target_id": "professor-geometrytopology",
+    "target_name": "교수(기하·위상수학)",
+    "variant": "named",
+    "utterance": "교수(기하·위상수학)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-geometrytopology]"
+  },
+  {
+    "id": "expert-professor-german-A-named",
+    "tier": "expert",
+    "target_id": "professor-german",
+    "target_name": "교수(독일어·문학)",
+    "variant": "named",
+    "utterance": "교수(독일어·문학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-german]"
+  },
+  {
+    "id": "expert-professor-gis-A-named",
+    "tier": "expert",
+    "target_id": "professor-gis",
+    "target_name": "교수(지리정보시스템(GIS))",
+    "variant": "named",
+    "utterance": "교수(지리정보시스템(GIS)) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-gis]"
+  },
+  {
+    "id": "expert-professor-healtheducation-A-named",
+    "tier": "expert",
+    "target_id": "professor-healtheducation",
+    "target_name": "교수(간호·보건 교육)",
+    "variant": "named",
+    "utterance": "교수(간호·보건 교육) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-healtheducation]"
+  },
+  {
+    "id": "expert-professor-healthmgmt-A-named",
+    "tier": "expert",
+    "target_id": "professor-healthmgmt",
+    "target_name": "교수(보건관리)",
+    "variant": "named",
+    "utterance": "교수(보건관리)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-healthmgmt]"
+  },
+  {
+    "id": "expert-professor-herbalpharmacy-A-named",
+    "tier": "expert",
+    "target_id": "professor-herbalpharmacy",
+    "target_name": "교수(한약학)",
+    "variant": "named",
+    "utterance": "교수(한약학)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-herbalpharmacy]"
+  },
+  {
+    "id": "expert-professor-history-A-named",
+    "tier": "expert",
+    "target_id": "professor-history",
+    "target_name": "교수(역사·고고학)",
+    "variant": "named",
+    "utterance": "교수(역사·고고학)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-history]"
+  },
+  {
+    "id": "expert-professor-housingstudies-A-named",
+    "tier": "expert",
+    "target_id": "professor-housingstudies",
+    "target_name": "교수(주거학)",
+    "variant": "named",
+    "utterance": "교수(주거학)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-housingstudies]"
+  },
+  {
+    "id": "expert-professor-hrorganization-A-named",
+    "tier": "expert",
+    "target_id": "professor-hrorganization",
+    "target_name": "교수(인사조직론)",
+    "variant": "named",
+    "utterance": "교수(인사조직론) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-hrorganization]"
+  },
+  {
+    "id": "expert-professor-humangeography-A-named",
+    "tier": "expert",
+    "target_id": "professor-humangeography",
+    "target_name": "교수(인문지리학)",
+    "variant": "named",
+    "utterance": "교수(인문지리학) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-humangeography]"
+  },
+  {
+    "id": "expert-professor-industrialengineering-A-named",
+    "tier": "expert",
+    "target_id": "professor-industrialengineering",
+    "target_name": "교수(산업공학)",
+    "variant": "named",
+    "utterance": "교수(산업공학)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-industrialengineering]"
+  },
+  {
+    "id": "expert-professor-industrialorganization-A-named",
+    "tier": "expert",
+    "target_id": "professor-industrialorganization",
+    "target_name": "교수(산업조직론)",
+    "variant": "named",
+    "utterance": "교수(산업조직론)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-industrialorganization]"
+  },
+  {
+    "id": "expert-professor-inorganicchemistry-A-named",
+    "tier": "expert",
+    "target_id": "professor-inorganicchemistry",
+    "target_name": "교수(무기화학)",
+    "variant": "named",
+    "utterance": "교수(무기화학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-inorganicchemistry]"
+  },
+  {
+    "id": "expert-professor-instrumental-A-named",
+    "tier": "expert",
+    "target_id": "professor-instrumental",
+    "target_name": "교수(기악)",
+    "variant": "named",
+    "utterance": "교수(기악) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-instrumental]"
+  },
+  {
+    "id": "expert-professor-international-A-named",
+    "tier": "expert",
+    "target_id": "professor-international",
+    "target_name": "교수(국제학)",
+    "variant": "named",
+    "utterance": "교수(국제학)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-international]"
+  },
+  {
+    "id": "expert-professor-internationalbusiness-A-named",
+    "tier": "expert",
+    "target_id": "professor-internationalbusiness",
+    "target_name": "교수(국제경영론)",
+    "variant": "named",
+    "utterance": "교수(국제경영론)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-internationalbusiness]"
+  },
+  {
+    "id": "expert-professor-internationaleconomics-A-named",
+    "tier": "expert",
+    "target_id": "professor-internationaleconomics",
+    "target_name": "교수(국제경제학)",
+    "variant": "named",
+    "utterance": "교수(국제경제학)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-internationaleconomics]"
+  },
+  {
+    "id": "expert-professor-internationallaw-A-named",
+    "tier": "expert",
+    "target_id": "professor-internationallaw",
+    "target_name": "교수(국제법)",
+    "variant": "named",
+    "utterance": "교수(국제법)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-internationallaw]"
+  },
+  {
+    "id": "expert-professor-internationalpolitics-A-named",
+    "tier": "expert",
+    "target_id": "professor-internationalpolitics",
+    "target_name": "교수(국제정치론)",
+    "variant": "named",
+    "utterance": "교수(국제정치론) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-internationalpolitics]"
+  },
+  {
+    "id": "expert-professor-iopsychology-A-named",
+    "tier": "expert",
+    "target_id": "professor-iopsychology",
+    "target_name": "교수(산업및조직심리학)",
+    "variant": "named",
+    "utterance": "교수(산업및조직심리학) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-iopsychology]"
+  },
+  {
+    "id": "expert-professor-iplaw-A-named",
+    "tier": "expert",
+    "target_id": "professor-iplaw",
+    "target_name": "교수(지식재산권법)",
+    "variant": "named",
+    "utterance": "교수(지식재산권법)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-iplaw]"
+  },
+  {
+    "id": "expert-professor-japanese-A-named",
+    "tier": "expert",
+    "target_id": "professor-japanese",
+    "target_name": "교수(일본어·문학)",
+    "variant": "named",
+    "utterance": "교수(일본어·문학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-japanese]"
+  },
+  {
+    "id": "expert-professor-kmed-acupuncture-A-named",
+    "tier": "expert",
+    "target_id": "professor-kmed-acupuncture",
+    "target_name": "교수(침구학)",
+    "variant": "named",
+    "utterance": "교수(침구학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-kmed-acupuncture]"
+  },
+  {
+    "id": "expert-professor-kmed-eentderm-A-named",
+    "tier": "expert",
+    "target_id": "professor-kmed-eentderm",
+    "target_name": "교수(한방안이비인후피부과학)",
+    "variant": "named",
+    "utterance": "교수(한방안이비인후피부과학) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-kmed-eentderm]"
+  },
+  {
+    "id": "expert-professor-kmed-internalmedicine-A-named",
+    "tier": "expert",
+    "target_id": "professor-kmed-internalmedicine",
+    "target_name": "교수(한방내과학)",
+    "variant": "named",
+    "utterance": "교수(한방내과학)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-kmed-internalmedicine]"
+  },
+  {
+    "id": "expert-professor-kmed-neuropsychiatry-A-named",
+    "tier": "expert",
+    "target_id": "professor-kmed-neuropsychiatry",
+    "target_name": "교수(한방신경정신과학)",
+    "variant": "named",
+    "utterance": "교수(한방신경정신과학)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-kmed-neuropsychiatry]"
+  },
+  {
+    "id": "expert-professor-kmed-obgyn-A-named",
+    "tier": "expert",
+    "target_id": "professor-kmed-obgyn",
+    "target_name": "교수(한방부인과학)",
+    "variant": "named",
+    "utterance": "교수(한방부인과학)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-kmed-obgyn]"
+  },
+  {
+    "id": "expert-professor-kmed-pediatrics-A-named",
+    "tier": "expert",
+    "target_id": "professor-kmed-pediatrics",
+    "target_name": "교수(한방소아과학)",
+    "variant": "named",
+    "utterance": "교수(한방소아과학)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-kmed-pediatrics]"
+  },
+  {
+    "id": "expert-professor-kmed-rehab-A-named",
+    "tier": "expert",
+    "target_id": "professor-kmed-rehab",
+    "target_name": "교수(한방재활의학)",
+    "variant": "named",
+    "utterance": "교수(한방재활의학) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-kmed-rehab]"
+  },
+  {
+    "id": "expert-professor-kmed-sasang-A-named",
+    "tier": "expert",
+    "target_id": "professor-kmed-sasang",
+    "target_name": "교수(사상체질과학)",
+    "variant": "named",
+    "utterance": "교수(사상체질과학) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-kmed-sasang]"
+  },
+  {
+    "id": "expert-professor-korean-A-named",
+    "tier": "expert",
+    "target_id": "professor-korean",
+    "target_name": "교수(국어·국문학)",
+    "variant": "named",
+    "utterance": "교수(국어·국문학)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-korean]"
+  },
+  {
+    "id": "expert-professor-koreanhistory-A-named",
+    "tier": "expert",
+    "target_id": "professor-koreanhistory",
+    "target_name": "교수(한국사)",
+    "variant": "named",
+    "utterance": "교수(한국사)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-koreanhistory]"
+  },
+  {
+    "id": "expert-professor-koreanmedicine-A-named",
+    "tier": "expert",
+    "target_id": "professor-koreanmedicine",
+    "target_name": "교수(한의학)",
+    "variant": "named",
+    "utterance": "교수(한의학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-koreanmedicine]"
+  },
+  {
+    "id": "expert-professor-koreanmusic-A-named",
+    "tier": "expert",
+    "target_id": "professor-koreanmusic",
+    "target_name": "교수(국악)",
+    "variant": "named",
+    "utterance": "교수(국악) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-koreanmusic]"
+  },
+  {
+    "id": "expert-professor-koreanpolitics-A-named",
+    "tier": "expert",
+    "target_id": "professor-koreanpolitics",
+    "target_name": "교수(한국정치론)",
+    "variant": "named",
+    "utterance": "교수(한국정치론)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-koreanpolitics]"
+  },
+  {
+    "id": "expert-professor-laboreconomics-A-named",
+    "tier": "expert",
+    "target_id": "professor-laboreconomics",
+    "target_name": "교수(노동경제학)",
+    "variant": "named",
+    "utterance": "교수(노동경제학)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-laboreconomics]"
+  },
+  {
+    "id": "expert-professor-laborlaw-A-named",
+    "tier": "expert",
+    "target_id": "professor-laborlaw",
+    "target_name": "교수(노동법)",
+    "variant": "named",
+    "utterance": "교수(노동법)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-laborlaw]"
+  },
+  {
+    "id": "expert-professor-landscapearchitecture-A-named",
+    "tier": "expert",
+    "target_id": "professor-landscapearchitecture",
+    "target_name": "교수(조경학)",
+    "variant": "named",
+    "utterance": "교수(조경학)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-landscapearchitecture]"
+  },
+  {
+    "id": "expert-professor-languageeducation-A-named",
+    "tier": "expert",
+    "target_id": "professor-languageeducation",
+    "target_name": "교수(언어교육)",
+    "variant": "named",
+    "utterance": "교수(언어교육) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-languageeducation]"
+  },
+  {
+    "id": "expert-professor-law-A-named",
+    "tier": "expert",
+    "target_id": "professor-law",
+    "target_name": "교수(법학)",
+    "variant": "named",
+    "utterance": "교수(법학) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-law]"
+  },
+  {
+    "id": "expert-professor-libraryscience-A-named",
+    "tier": "expert",
+    "target_id": "professor-libraryscience",
+    "target_name": "교수(문헌정보학)",
+    "variant": "named",
+    "utterance": "교수(문헌정보학)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-libraryscience]"
+  },
+  {
+    "id": "expert-professor-linguisticanthropology-A-named",
+    "tier": "expert",
+    "target_id": "professor-linguisticanthropology",
+    "target_name": "교수(언어인류학)",
+    "variant": "named",
+    "utterance": "교수(언어인류학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-linguisticanthropology]"
+  },
+  {
+    "id": "expert-professor-linguistics-A-named",
+    "tier": "expert",
+    "target_id": "professor-linguistics",
+    "target_name": "교수(언어학)",
+    "variant": "named",
+    "utterance": "교수(언어학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-linguistics]"
+  },
+  {
+    "id": "expert-professor-logic-A-named",
+    "tier": "expert",
+    "target_id": "professor-logic",
+    "target_name": "교수(논리학)",
+    "variant": "named",
+    "utterance": "교수(논리학) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-logic]"
+  },
+  {
+    "id": "expert-professor-machinedesign-A-named",
+    "tier": "expert",
+    "target_id": "professor-machinedesign",
+    "target_name": "교수(기계설계)",
+    "variant": "named",
+    "utterance": "교수(기계설계)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-machinedesign]"
+  },
+  {
+    "id": "expert-professor-macroeconomics-A-named",
+    "tier": "expert",
+    "target_id": "professor-macroeconomics",
+    "target_name": "교수(거시경제학)",
+    "variant": "named",
+    "utterance": "교수(거시경제학)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-macroeconomics]"
+  },
+  {
+    "id": "expert-professor-marketing-A-named",
+    "tier": "expert",
+    "target_id": "professor-marketing",
+    "target_name": "교수(마케팅론)",
+    "variant": "named",
+    "utterance": "교수(마케팅론)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-marketing]"
+  },
+  {
+    "id": "expert-professor-materials-A-named",
+    "tier": "expert",
+    "target_id": "professor-materials",
+    "target_name": "교수(재료공학)",
+    "variant": "named",
+    "utterance": "교수(재료공학)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-materials]"
+  },
+  {
+    "id": "expert-professor-math-A-named",
+    "tier": "expert",
+    "target_id": "professor-math",
+    "target_name": "교수(수학)",
+    "variant": "named",
+    "utterance": "교수(수학) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-math]"
+  },
+  {
+    "id": "expert-professor-mathematicalstatistics-A-named",
+    "tier": "expert",
+    "target_id": "professor-mathematicalstatistics",
+    "target_name": "교수(수리통계학)",
+    "variant": "named",
+    "utterance": "교수(수리통계학) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-mathematicalstatistics]"
+  },
+  {
+    "id": "expert-professor-mechanical-eng-A-named",
+    "tier": "expert",
+    "target_id": "professor-mechanical-eng",
+    "target_name": "교수(기계공학)",
+    "variant": "named",
+    "utterance": "교수(기계공학)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-mechanical-eng]"
+  },
+  {
+    "id": "expert-professor-mechanicsphysics-A-named",
+    "tier": "expert",
+    "target_id": "professor-mechanicsphysics",
+    "target_name": "교수(역학)",
+    "variant": "named",
+    "utterance": "교수(역학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-mechanicsphysics]"
+  },
+  {
+    "id": "expert-professor-mechatronics-A-named",
+    "tier": "expert",
+    "target_id": "professor-mechatronics",
+    "target_name": "교수(메카트로닉스공학)",
+    "variant": "named",
+    "utterance": "교수(메카트로닉스공학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-mechatronics]"
+  },
+  {
+    "id": "expert-professor-med-anesthesiology-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-anesthesiology",
+    "target_name": "교수(마취통증의학)",
+    "variant": "named",
+    "utterance": "교수(마취통증의학) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-med-anesthesiology]"
+  },
+  {
+    "id": "expert-professor-med-dermatology-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-dermatology",
+    "target_name": "교수(피부과학)",
+    "variant": "named",
+    "utterance": "교수(피부과학)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-med-dermatology]"
+  },
+  {
+    "id": "expert-professor-med-emergencymedicine-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-emergencymedicine",
+    "target_name": "교수(응급의학)",
+    "variant": "named",
+    "utterance": "교수(응급의학)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-med-emergencymedicine]"
+  },
+  {
+    "id": "expert-professor-med-familymedicine-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-familymedicine",
+    "target_name": "교수(가정의학)",
+    "variant": "named",
+    "utterance": "교수(가정의학)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-med-familymedicine]"
+  },
+  {
+    "id": "expert-professor-med-generalsurgery-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-generalsurgery",
+    "target_name": "교수(외과학)",
+    "variant": "named",
+    "utterance": "교수(외과학)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-med-generalsurgery]"
+  },
+  {
+    "id": "expert-professor-med-internalmedicine-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-internalmedicine",
+    "target_name": "교수(내과학)",
+    "variant": "named",
+    "utterance": "교수(내과학) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-med-internalmedicine]"
+  },
+  {
+    "id": "expert-professor-med-labmedicine-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-labmedicine",
+    "target_name": "교수(진단검사의학)",
+    "variant": "named",
+    "utterance": "교수(진단검사의학) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-med-labmedicine]"
+  },
+  {
+    "id": "expert-professor-med-neurology-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-neurology",
+    "target_name": "교수(신경과학(임상))",
+    "variant": "named",
+    "utterance": "교수(신경과학(임상))한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-med-neurology]"
+  },
+  {
+    "id": "expert-professor-med-neurosurgery-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-neurosurgery",
+    "target_name": "교수(신경외과학)",
+    "variant": "named",
+    "utterance": "교수(신경외과학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-med-neurosurgery]"
+  },
+  {
+    "id": "expert-professor-med-nuclearmedicine-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-nuclearmedicine",
+    "target_name": "교수(핵의학)",
+    "variant": "named",
+    "utterance": "교수(핵의학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-med-nuclearmedicine]"
+  },
+  {
+    "id": "expert-professor-med-obgyn-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-obgyn",
+    "target_name": "교수(산부인과학)",
+    "variant": "named",
+    "utterance": "교수(산부인과학) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-med-obgyn]"
+  },
+  {
+    "id": "expert-professor-med-occupationalmedicine-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-occupationalmedicine",
+    "target_name": "교수(직업환경의학)",
+    "variant": "named",
+    "utterance": "교수(직업환경의학)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-med-occupationalmedicine]"
+  },
+  {
+    "id": "expert-professor-med-ophthalmology-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-ophthalmology",
+    "target_name": "교수(안과학)",
+    "variant": "named",
+    "utterance": "교수(안과학)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-med-ophthalmology]"
+  },
+  {
+    "id": "expert-professor-med-orthopedics-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-orthopedics",
+    "target_name": "교수(정형외과학)",
+    "variant": "named",
+    "utterance": "교수(정형외과학)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-med-orthopedics]"
+  },
+  {
+    "id": "expert-professor-med-otolaryngology-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-otolaryngology",
+    "target_name": "교수(이비인후과학)",
+    "variant": "named",
+    "utterance": "교수(이비인후과학)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-med-otolaryngology]"
+  },
+  {
+    "id": "expert-professor-med-pathology-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-pathology",
+    "target_name": "교수(병리학(임상))",
+    "variant": "named",
+    "utterance": "교수(병리학(임상)) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-med-pathology]"
+  },
+  {
+    "id": "expert-professor-med-pediatrics-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-pediatrics",
+    "target_name": "교수(소아청소년과학)",
+    "variant": "named",
+    "utterance": "교수(소아청소년과학) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-med-pediatrics]"
+  },
+  {
+    "id": "expert-professor-med-plasticsurgery-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-plasticsurgery",
+    "target_name": "교수(성형외과학)",
+    "variant": "named",
+    "utterance": "교수(성형외과학)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-med-plasticsurgery]"
+  },
+  {
+    "id": "expert-professor-med-preventivemedicine-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-preventivemedicine",
+    "target_name": "교수(예방의학)",
+    "variant": "named",
+    "utterance": "교수(예방의학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-med-preventivemedicine]"
+  },
+  {
+    "id": "expert-professor-med-psychiatry-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-psychiatry",
+    "target_name": "교수(정신건강의학)",
+    "variant": "named",
+    "utterance": "교수(정신건강의학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-med-psychiatry]"
+  },
+  {
+    "id": "expert-professor-med-radiationoncology-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-radiationoncology",
+    "target_name": "교수(방사선종양학)",
+    "variant": "named",
+    "utterance": "교수(방사선종양학) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-med-radiationoncology]"
+  },
+  {
+    "id": "expert-professor-med-radiology-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-radiology",
+    "target_name": "교수(영상의학)",
+    "variant": "named",
+    "utterance": "교수(영상의학)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-med-radiology]"
+  },
+  {
+    "id": "expert-professor-med-rehabmedicine-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-rehabmedicine",
+    "target_name": "교수(재활의학)",
+    "variant": "named",
+    "utterance": "교수(재활의학)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-med-rehabmedicine]"
+  },
+  {
+    "id": "expert-professor-med-thoracicsurgery-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-thoracicsurgery",
+    "target_name": "교수(심장혈관흉부외과학)",
+    "variant": "named",
+    "utterance": "교수(심장혈관흉부외과학)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-med-thoracicsurgery]"
+  },
+  {
+    "id": "expert-professor-med-tuberculosis-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-tuberculosis",
+    "target_name": "교수(결핵과학)",
+    "variant": "named",
+    "utterance": "교수(결핵과학)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-med-tuberculosis]"
+  },
+  {
+    "id": "expert-professor-med-urology-A-named",
+    "tier": "expert",
+    "target_id": "professor-med-urology",
+    "target_name": "교수(비뇨의학)",
+    "variant": "named",
+    "utterance": "교수(비뇨의학) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-med-urology]"
+  },
+  {
+    "id": "expert-professor-mediastudies-A-named",
+    "tier": "expert",
+    "target_id": "professor-mediastudies",
+    "target_name": "교수(언론·방송·매체학)",
+    "variant": "named",
+    "utterance": "교수(언론·방송·매체학) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-mediastudies]"
+  },
+  {
+    "id": "expert-professor-medicalscience-A-named",
+    "tier": "expert",
+    "target_id": "professor-medicalscience",
+    "target_name": "교수(의과학)",
+    "variant": "named",
+    "utterance": "교수(의과학)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-medicalscience]"
+  },
+  {
+    "id": "expert-professor-medicine-A-named",
+    "tier": "expert",
+    "target_id": "professor-medicine",
+    "target_name": "교수(의학, 본과 공통 기초의학 — 생리학·병리생리학·약리학 등)",
+    "variant": "named",
+    "utterance": "교수(의학, 본과 공통 기초의학 — 생리학·병리생리학·약리학 등)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-medicine]"
+  },
+  {
+    "id": "expert-professor-metallurgy-A-named",
+    "tier": "expert",
+    "target_id": "professor-metallurgy",
+    "target_name": "교수(금속공학)",
+    "variant": "named",
+    "utterance": "교수(금속공학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-metallurgy]"
+  },
+  {
+    "id": "expert-professor-metaphysics-A-named",
+    "tier": "expert",
+    "target_id": "professor-metaphysics",
+    "target_name": "교수(형이상학)",
+    "variant": "named",
+    "utterance": "교수(형이상학) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-metaphysics]"
+  },
+  {
+    "id": "expert-professor-microbiology-A-named",
+    "tier": "expert",
+    "target_id": "professor-microbiology",
+    "target_name": "교수(미생물학)",
+    "variant": "named",
+    "utterance": "교수(미생물학)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-microbiology]"
+  },
+  {
+    "id": "expert-professor-microeconomics-A-named",
+    "tier": "expert",
+    "target_id": "professor-microeconomics",
+    "target_name": "교수(미시경제학)",
+    "variant": "named",
+    "utterance": "교수(미시경제학)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-microeconomics]"
+  },
+  {
+    "id": "expert-professor-militaryscience-A-named",
+    "tier": "expert",
+    "target_id": "professor-militaryscience",
+    "target_name": "교수(군사·국방·안보)",
+    "variant": "named",
+    "utterance": "교수(군사·국방·안보)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-militaryscience]"
+  },
+  {
+    "id": "expert-professor-mis-A-named",
+    "tier": "expert",
+    "target_id": "professor-mis",
+    "target_name": "교수(경영정보학)",
+    "variant": "named",
+    "utterance": "교수(경영정보학)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-mis]"
+  },
+  {
+    "id": "expert-professor-molecularbiology-A-named",
+    "tier": "expert",
+    "target_id": "professor-molecularbiology",
+    "target_name": "교수(분자생물학)",
+    "variant": "named",
+    "utterance": "교수(분자생물학) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-molecularbiology]"
+  },
+  {
+    "id": "expert-professor-monetaryeconomics-A-named",
+    "tier": "expert",
+    "target_id": "professor-monetaryeconomics",
+    "target_name": "교수(화폐금융론)",
+    "variant": "named",
+    "utterance": "교수(화폐금융론) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-monetaryeconomics]"
+  },
+  {
+    "id": "expert-professor-musicology-A-named",
+    "tier": "expert",
+    "target_id": "professor-musicology",
+    "target_name": "교수(음악학)",
+    "variant": "named",
+    "utterance": "교수(음악학)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-musicology]"
+  },
+  {
+    "id": "expert-professor-navalengineering-A-named",
+    "tier": "expert",
+    "target_id": "professor-navalengineering",
+    "target_name": "교수(조선·해양공학)",
+    "variant": "named",
+    "utterance": "교수(조선·해양공학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-navalengineering]"
+  },
+  {
+    "id": "expert-professor-newmaterials-A-named",
+    "tier": "expert",
+    "target_id": "professor-newmaterials",
+    "target_name": "교수(신소재공학)",
+    "variant": "named",
+    "utterance": "교수(신소재공학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-newmaterials]"
+  },
+  {
+    "id": "expert-professor-nursing-A-named",
+    "tier": "expert",
+    "target_id": "professor-nursing",
+    "target_name": "교수(간호학)",
+    "variant": "named",
+    "utterance": "교수(간호학) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-nursing]"
+  },
+  {
+    "id": "expert-professor-nutrition-A-named",
+    "tier": "expert",
+    "target_id": "professor-nutrition",
+    "target_name": "교수(식품영양학)",
+    "variant": "named",
+    "utterance": "교수(식품영양학)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-nutrition]"
+  },
+  {
+    "id": "expert-professor-oceanography-A-named",
+    "tier": "expert",
+    "target_id": "professor-oceanography",
+    "target_name": "교수(해양학)",
+    "variant": "named",
+    "utterance": "교수(해양학)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-oceanography]"
+  },
+  {
+    "id": "expert-professor-operatingsystems-A-named",
+    "tier": "expert",
+    "target_id": "professor-operatingsystems",
+    "target_name": "교수(운영체제)",
+    "variant": "named",
+    "utterance": "교수(운영체제)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-operatingsystems]"
+  },
+  {
+    "id": "expert-professor-operationsmgmt-A-named",
+    "tier": "expert",
+    "target_id": "professor-operationsmgmt",
+    "target_name": "교수(생산운영관리)",
+    "variant": "named",
+    "utterance": "교수(생산운영관리)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-operationsmgmt]"
+  },
+  {
+    "id": "expert-professor-optics-A-named",
+    "tier": "expert",
+    "target_id": "professor-optics",
+    "target_name": "교수(광학공학)",
+    "variant": "named",
+    "utterance": "교수(광학공학) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-optics]"
+  },
+  {
+    "id": "expert-professor-opticsphysics-A-named",
+    "tier": "expert",
+    "target_id": "professor-opticsphysics",
+    "target_name": "교수(광학(물리))",
+    "variant": "named",
+    "utterance": "교수(광학(물리)) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-opticsphysics]"
+  },
+  {
+    "id": "expert-professor-organicchemistry-A-named",
+    "tier": "expert",
+    "target_id": "professor-organicchemistry",
+    "target_name": "교수(유기화학)",
+    "variant": "named",
+    "utterance": "교수(유기화학)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-organicchemistry]"
+  },
+  {
+    "id": "expert-professor-otherasianlanguages-A-named",
+    "tier": "expert",
+    "target_id": "professor-otherasianlanguages",
+    "target_name": "교수(기타아시아어·문학)",
+    "variant": "named",
+    "utterance": "교수(기타아시아어·문학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-otherasianlanguages]"
+  },
+  {
+    "id": "expert-professor-othereuropeanlanguages-A-named",
+    "tier": "expert",
+    "target_id": "professor-othereuropeanlanguages",
+    "target_name": "교수(기타유럽어·문학)",
+    "variant": "named",
+    "utterance": "교수(기타유럽어·문학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-othereuropeanlanguages]"
+  },
+  {
+    "id": "expert-professor-particlephysics-A-named",
+    "tier": "expert",
+    "target_id": "professor-particlephysics",
+    "target_name": "교수(입자물리학)",
+    "variant": "named",
+    "utterance": "교수(입자물리학) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-particlephysics]"
+  },
+  {
+    "id": "expert-professor-pharmacy-A-named",
+    "tier": "expert",
+    "target_id": "professor-pharmacy",
+    "target_name": "교수(약학)",
+    "variant": "named",
+    "utterance": "교수(약학)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-pharmacy]"
+  },
+  {
+    "id": "expert-professor-photography-A-named",
+    "tier": "expert",
+    "target_id": "professor-photography",
+    "target_name": "교수(사진)",
+    "variant": "named",
+    "utterance": "교수(사진)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-photography]"
+  },
+  {
+    "id": "expert-professor-physicalchemistry-A-named",
+    "tier": "expert",
+    "target_id": "professor-physicalchemistry",
+    "target_name": "교수(물리화학)",
+    "variant": "named",
+    "utterance": "교수(물리화학)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-physicalchemistry]"
+  },
+  {
+    "id": "expert-professor-physicaleducation-A-named",
+    "tier": "expert",
+    "target_id": "professor-physicaleducation",
+    "target_name": "교수(체육)",
+    "variant": "named",
+    "utterance": "교수(체육)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-physicaleducation]"
+  },
+  {
+    "id": "expert-professor-physicalgeography-A-named",
+    "tier": "expert",
+    "target_id": "professor-physicalgeography",
+    "target_name": "교수(자연지리학)",
+    "variant": "named",
+    "utterance": "교수(자연지리학) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-physicalgeography]"
+  },
+  {
+    "id": "expert-professor-physics-A-named",
+    "tier": "expert",
+    "target_id": "professor-physics",
+    "target_name": "교수(물리학)",
+    "variant": "named",
+    "utterance": "교수(물리학) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-physics]"
+  },
+  {
+    "id": "expert-professor-physiologybio-A-named",
+    "tier": "expert",
+    "target_id": "professor-physiologybio",
+    "target_name": "교수(생리학)",
+    "variant": "named",
+    "utterance": "교수(생리학)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-physiologybio]"
+  },
+  {
+    "id": "expert-professor-policystudies-A-named",
+    "tier": "expert",
+    "target_id": "professor-policystudies",
+    "target_name": "교수(정책학)",
+    "variant": "named",
+    "utterance": "교수(정책학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-policystudies]"
+  },
+  {
+    "id": "expert-professor-politicaltheory-A-named",
+    "tier": "expert",
+    "target_id": "professor-politicaltheory",
+    "target_name": "교수(정치사상)",
+    "variant": "named",
+    "utterance": "교수(정치사상) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-politicaltheory]"
+  },
+  {
+    "id": "expert-professor-politics-A-named",
+    "tier": "expert",
+    "target_id": "professor-politics",
+    "target_name": "교수(정치외교학)",
+    "variant": "named",
+    "utterance": "교수(정치외교학) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-politics]"
+  },
+  {
+    "id": "expert-professor-polymerengineering-A-named",
+    "tier": "expert",
+    "target_id": "professor-polymerengineering",
+    "target_name": "교수(고분자공학)",
+    "variant": "named",
+    "utterance": "교수(고분자공학)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-polymerengineering]"
+  },
+  {
+    "id": "expert-professor-powerengineering-A-named",
+    "tier": "expert",
+    "target_id": "professor-powerengineering",
+    "target_name": "교수(전력공학)",
+    "variant": "named",
+    "utterance": "교수(전력공학)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-powerengineering]"
+  },
+  {
+    "id": "expert-professor-predental-A-named",
+    "tier": "expert",
+    "target_id": "professor-predental",
+    "target_name": "교수(치의예과)",
+    "variant": "named",
+    "utterance": "교수(치의예과)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-predental]"
+  },
+  {
+    "id": "expert-professor-prekoreanmed-A-named",
+    "tier": "expert",
+    "target_id": "professor-prekoreanmed",
+    "target_name": "교수(한의예과)",
+    "variant": "named",
+    "utterance": "교수(한의예과)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-prekoreanmed]"
+  },
+  {
+    "id": "expert-professor-premed-A-named",
+    "tier": "expert",
+    "target_id": "professor-premed",
+    "target_name": "교수(의예과)",
+    "variant": "named",
+    "utterance": "교수(의예과) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-premed]"
+  },
+  {
+    "id": "expert-professor-prevet-A-named",
+    "tier": "expert",
+    "target_id": "professor-prevet",
+    "target_name": "교수(수의예과)",
+    "variant": "named",
+    "utterance": "교수(수의예과) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-prevet]"
+  },
+  {
+    "id": "expert-professor-probabilitytheory-A-named",
+    "tier": "expert",
+    "target_id": "professor-probabilitytheory",
+    "target_name": "교수(확률론)",
+    "variant": "named",
+    "utterance": "교수(확률론)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-probabilitytheory]"
+  },
+  {
+    "id": "expert-professor-psychology-A-named",
+    "tier": "expert",
+    "target_id": "professor-psychology",
+    "target_name": "교수(심리학)",
+    "variant": "named",
+    "utterance": "교수(심리학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-psychology]"
+  },
+  {
+    "id": "expert-professor-publicadministration-A-named",
+    "tier": "expert",
+    "target_id": "professor-publicadministration",
+    "target_name": "교수(행정학)",
+    "variant": "named",
+    "utterance": "교수(행정학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-publicadministration]"
+  },
+  {
+    "id": "expert-professor-publicfinance-A-named",
+    "tier": "expert",
+    "target_id": "professor-publicfinance",
+    "target_name": "교수(재정학)",
+    "variant": "named",
+    "utterance": "교수(재정학) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-publicfinance]"
+  },
+  {
+    "id": "expert-professor-publichealth-A-named",
+    "tier": "expert",
+    "target_id": "professor-publichealth",
+    "target_name": "교수(보건학)",
+    "variant": "named",
+    "utterance": "교수(보건학)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-publichealth]"
+  },
+  {
+    "id": "expert-professor-quantummechanics-A-named",
+    "tier": "expert",
+    "target_id": "professor-quantummechanics",
+    "target_name": "교수(양자역학)",
+    "variant": "named",
+    "utterance": "교수(양자역학)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-quantummechanics]"
+  },
+  {
+    "id": "expert-professor-railwaycontrol-A-named",
+    "tier": "expert",
+    "target_id": "professor-railwaycontrol",
+    "target_name": "교수(철도운전제어학)",
+    "variant": "named",
+    "utterance": "교수(철도운전제어학)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-railwaycontrol]"
+  },
+  {
+    "id": "expert-professor-railwayengineering-A-named",
+    "tier": "expert",
+    "target_id": "professor-railwayengineering",
+    "target_name": "교수(철도공학)",
+    "variant": "named",
+    "utterance": "교수(철도공학)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-railwayengineering]"
+  },
+  {
+    "id": "expert-professor-realestate-A-named",
+    "tier": "expert",
+    "target_id": "professor-realestate",
+    "target_name": "교수(부동산)",
+    "variant": "named",
+    "utterance": "교수(부동산) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-realestate]"
+  },
+  {
+    "id": "expert-professor-rehabilitation-A-named",
+    "tier": "expert",
+    "target_id": "professor-rehabilitation",
+    "target_name": "교수(재활치료)",
+    "variant": "named",
+    "utterance": "교수(재활치료) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-rehabilitation]"
+  },
+  {
+    "id": "expert-professor-religiousstudies-A-named",
+    "tier": "expert",
+    "target_id": "professor-religiousstudies",
+    "target_name": "교수(종교학)",
+    "variant": "named",
+    "utterance": "교수(종교학)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-religiousstudies]"
+  },
+  {
+    "id": "expert-professor-russian-A-named",
+    "tier": "expert",
+    "target_id": "professor-russian",
+    "target_name": "교수(러시아어·문학)",
+    "variant": "named",
+    "utterance": "교수(러시아어·문학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-russian]"
+  },
+  {
+    "id": "expert-professor-safetyengineering-A-named",
+    "tier": "expert",
+    "target_id": "professor-safetyengineering",
+    "target_name": "교수(안전공학)",
+    "variant": "named",
+    "utterance": "교수(안전공학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-safetyengineering]"
+  },
+  {
+    "id": "expert-professor-scienceeducation-A-named",
+    "tier": "expert",
+    "target_id": "professor-scienceeducation",
+    "target_name": "교수(자연과학교육)",
+    "variant": "named",
+    "utterance": "교수(자연과학교육) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-scienceeducation]"
+  },
+  {
+    "id": "expert-professor-secretarial-A-named",
+    "tier": "expert",
+    "target_id": "professor-secretarial",
+    "target_name": "교수(비서)",
+    "variant": "named",
+    "utterance": "교수(비서)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-secretarial]"
+  },
+  {
+    "id": "expert-professor-semiconductor-A-named",
+    "tier": "expert",
+    "target_id": "professor-semiconductor",
+    "target_name": "교수(반도체공학)",
+    "variant": "named",
+    "utterance": "교수(반도체공학)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-semiconductor]"
+  },
+  {
+    "id": "expert-professor-shipnavigation-A-named",
+    "tier": "expert",
+    "target_id": "professor-shipnavigation",
+    "target_name": "교수(선박운항학)",
+    "variant": "named",
+    "utterance": "교수(선박운항학)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-shipnavigation]"
+  },
+  {
+    "id": "expert-professor-skincare-A-named",
+    "tier": "expert",
+    "target_id": "professor-skincare",
+    "target_name": "교수(피부미용)",
+    "variant": "named",
+    "utterance": "교수(피부미용)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-skincare]"
+  },
+  {
+    "id": "expert-professor-socialpsychology-A-named",
+    "tier": "expert",
+    "target_id": "professor-socialpsychology",
+    "target_name": "교수(사회심리학)",
+    "variant": "named",
+    "utterance": "교수(사회심리학) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-socialpsychology]"
+  },
+  {
+    "id": "expert-professor-socialstudieseducation-A-named",
+    "tier": "expert",
+    "target_id": "professor-socialstudieseducation",
+    "target_name": "교수(사회과교육)",
+    "variant": "named",
+    "utterance": "교수(사회과교육) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-socialstudieseducation]"
+  },
+  {
+    "id": "expert-professor-socialwelfare-A-named",
+    "tier": "expert",
+    "target_id": "professor-socialwelfare",
+    "target_name": "교수(사회복지학)",
+    "variant": "named",
+    "utterance": "교수(사회복지학)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-socialwelfare]"
+  },
+  {
+    "id": "expert-professor-sociology-A-named",
+    "tier": "expert",
+    "target_id": "professor-sociology",
+    "target_name": "교수(사회학)",
+    "variant": "named",
+    "utterance": "교수(사회학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-sociology]"
+  },
+  {
+    "id": "expert-professor-software-A-named",
+    "tier": "expert",
+    "target_id": "professor-software",
+    "target_name": "교수(응용소프트웨어공학)",
+    "variant": "named",
+    "utterance": "교수(응용소프트웨어공학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-software]"
+  },
+  {
+    "id": "expert-professor-solidmechanics-A-named",
+    "tier": "expert",
+    "target_id": "professor-solidmechanics",
+    "target_name": "교수(고체역학)",
+    "variant": "named",
+    "utterance": "교수(고체역학) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-solidmechanics]"
+  },
+  {
+    "id": "expert-professor-sound-A-named",
+    "tier": "expert",
+    "target_id": "professor-sound",
+    "target_name": "교수(음향)",
+    "variant": "named",
+    "utterance": "교수(음향)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-sound]"
+  },
+  {
+    "id": "expert-professor-spanish-A-named",
+    "tier": "expert",
+    "target_id": "professor-spanish",
+    "target_name": "교수(스페인어·문학)",
+    "variant": "named",
+    "utterance": "교수(스페인어·문학)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-spanish]"
+  },
+  {
+    "id": "expert-professor-specialeducation-A-named",
+    "tier": "expert",
+    "target_id": "professor-specialeducation",
+    "target_name": "교수(특수교육)",
+    "variant": "named",
+    "utterance": "교수(특수교육)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-specialeducation]"
+  },
+  {
+    "id": "expert-professor-statistics-A-named",
+    "tier": "expert",
+    "target_id": "professor-statistics",
+    "target_name": "교수(통계학)",
+    "variant": "named",
+    "utterance": "교수(통계학)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-statistics]"
+  },
+  {
+    "id": "expert-professor-strategy-A-named",
+    "tier": "expert",
+    "target_id": "professor-strategy",
+    "target_name": "교수(경영전략론)",
+    "variant": "named",
+    "utterance": "교수(경영전략론) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-strategy]"
+  },
+  {
+    "id": "expert-professor-stratification-A-named",
+    "tier": "expert",
+    "target_id": "professor-stratification",
+    "target_name": "교수(계층및계급론)",
+    "variant": "named",
+    "utterance": "교수(계층및계급론) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-stratification]"
+  },
+  {
+    "id": "expert-professor-taxlaw-A-named",
+    "tier": "expert",
+    "target_id": "professor-taxlaw",
+    "target_name": "교수(조세법)",
+    "variant": "named",
+    "utterance": "교수(조세법)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-taxlaw]"
+  },
+  {
+    "id": "expert-professor-telecommunications-A-named",
+    "tier": "expert",
+    "target_id": "professor-telecommunications",
+    "target_name": "교수(정보·통신공학)",
+    "variant": "named",
+    "utterance": "교수(정보·통신공학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-telecommunications]"
+  },
+  {
+    "id": "expert-professor-textileengineering-A-named",
+    "tier": "expert",
+    "target_id": "professor-textileengineering",
+    "target_name": "교수(섬유공학)",
+    "variant": "named",
+    "utterance": "교수(섬유공학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-textileengineering]"
+  },
+  {
+    "id": "expert-professor-theater-A-named",
+    "tier": "expert",
+    "target_id": "professor-theater",
+    "target_name": "교수(연극)",
+    "variant": "named",
+    "utterance": "교수(연극) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-theater]"
+  },
+  {
+    "id": "expert-professor-theoreticalsociology-A-named",
+    "tier": "expert",
+    "target_id": "professor-theoreticalsociology",
+    "target_name": "교수(이론사회학)",
+    "variant": "named",
+    "utterance": "교수(이론사회학)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-theoreticalsociology]"
+  },
+  {
+    "id": "expert-professor-theoryofcomputation-A-named",
+    "tier": "expert",
+    "target_id": "professor-theoryofcomputation",
+    "target_name": "교수(계산이론)",
+    "variant": "named",
+    "utterance": "교수(계산이론)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-theoryofcomputation]"
+  },
+  {
+    "id": "expert-professor-thermalstatphysics-A-named",
+    "tier": "expert",
+    "target_id": "professor-thermalstatphysics",
+    "target_name": "교수(열및통계역학)",
+    "variant": "named",
+    "utterance": "교수(열및통계역학)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-thermalstatphysics]"
+  },
+  {
+    "id": "expert-professor-thermodynamics-A-named",
+    "tier": "expert",
+    "target_id": "professor-thermodynamics",
+    "target_name": "교수(열역학)",
+    "variant": "named",
+    "utterance": "교수(열역학)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-thermodynamics]"
+  },
+  {
+    "id": "expert-professor-tourism-A-named",
+    "tier": "expert",
+    "target_id": "professor-tourism",
+    "target_name": "교수(관광학)",
+    "variant": "named",
+    "utterance": "교수(관광학) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-tourism]"
+  },
+  {
+    "id": "expert-professor-tradedistribution-A-named",
+    "tier": "expert",
+    "target_id": "professor-tradedistribution",
+    "target_name": "교수(무역·유통학)",
+    "variant": "named",
+    "utterance": "교수(무역·유통학) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: professor-tradedistribution]"
+  },
+  {
+    "id": "expert-professor-trafficsystems-A-named",
+    "tier": "expert",
+    "target_id": "professor-trafficsystems",
+    "target_name": "교수(교통시스템공학)",
+    "variant": "named",
+    "utterance": "교수(교통시스템공학)한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: professor-trafficsystems]"
+  },
+  {
+    "id": "expert-professor-uav-A-named",
+    "tier": "expert",
+    "target_id": "professor-uav",
+    "target_name": "교수(무인항공기(운항)학)",
+    "variant": "named",
+    "utterance": "교수(무인항공기(운항)학)가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-uav]"
+  },
+  {
+    "id": "expert-professor-urbanengineering-A-named",
+    "tier": "expert",
+    "target_id": "professor-urbanengineering",
+    "target_name": "교수(도시공학)",
+    "variant": "named",
+    "utterance": "교수(도시공학) AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: professor-urbanengineering]"
+  },
+  {
+    "id": "expert-professor-urbansociology-A-named",
+    "tier": "expert",
+    "target_id": "professor-urbansociology",
+    "target_name": "교수(도시및지역사회학)",
+    "variant": "named",
+    "utterance": "교수(도시및지역사회학) AI를 불러줘.",
+    "expect_tag": "[EXPERT: professor-urbansociology]"
+  },
+  {
+    "id": "expert-professor-veterinary-A-named",
+    "tier": "expert",
+    "target_id": "professor-veterinary",
+    "target_name": "교수(수의학)",
+    "variant": "named",
+    "utterance": "교수(수의학)는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-veterinary]"
+  },
+  {
+    "id": "expert-professor-videoart-A-named",
+    "tier": "expert",
+    "target_id": "professor-videoart",
+    "target_name": "교수(영상예술)",
+    "variant": "named",
+    "utterance": "교수(영상예술)를 호출해줘.",
+    "expect_tag": "[EXPERT: professor-videoart]"
+  },
+  {
+    "id": "expert-professor-vocal-A-named",
+    "tier": "expert",
+    "target_id": "professor-vocal",
+    "target_name": "교수(성악)",
+    "variant": "named",
+    "utterance": "교수(성악)한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-vocal]"
+  },
+  {
+    "id": "expert-professor-westernhistory-A-named",
+    "tier": "expert",
+    "target_id": "professor-westernhistory",
+    "target_name": "교수(서양사)",
+    "variant": "named",
+    "utterance": "교수(서양사)로 연결해줘.",
+    "expect_tag": "[EXPERT: professor-westernhistory]"
+  },
+  {
+    "id": "expert-professor-westernphilosophy-A-named",
+    "tier": "expert",
+    "target_id": "professor-westernphilosophy",
+    "target_name": "교수(서양철학)",
+    "variant": "named",
+    "utterance": "교수(서양철학) 페르소나 호출해.",
+    "expect_tag": "[EXPERT: professor-westernphilosophy]"
+  },
+  {
+    "id": "expert-radiologic-technologist-A-named",
+    "tier": "expert",
+    "target_id": "radiologic-technologist",
+    "target_name": "방사선사",
+    "variant": "named",
+    "utterance": "방사선사 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: radiologic-technologist]"
+  },
+  {
+    "id": "expert-real-estate-agent-A-named",
+    "tier": "expert",
+    "target_id": "real-estate-agent",
+    "target_name": "공인중개사",
+    "variant": "named",
+    "utterance": "공인중개사한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: real-estate-agent]"
+  },
+  {
+    "id": "expert-sanitarian-A-named",
+    "tier": "expert",
+    "target_id": "sanitarian",
+    "target_name": "위생사",
+    "variant": "named",
+    "utterance": "위생사가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: sanitarian]"
+  },
+  {
+    "id": "expert-school-counselor-A-named",
+    "tier": "expert",
+    "target_id": "school-counselor",
+    "target_name": "전문상담교사",
+    "variant": "named",
+    "utterance": "전문상담교사 AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: school-counselor]"
+  },
+  {
+    "id": "expert-security-engineer-A-named",
+    "tier": "expert",
+    "target_id": "security-engineer",
+    "target_name": "정보보안전문가",
+    "variant": "named",
+    "utterance": "정보보안전문가 AI를 불러줘.",
+    "expect_tag": "[EXPERT: security-engineer]"
+  },
+  {
+    "id": "expert-social-worker-A-named",
+    "tier": "expert",
+    "target_id": "social-worker",
+    "target_name": "사회복지사",
+    "variant": "named",
+    "utterance": "사회복지사는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: social-worker]"
+  },
+  {
+    "id": "expert-speech-language-pathologist-A-named",
+    "tier": "expert",
+    "target_id": "speech-language-pathologist",
+    "target_name": "언어재활사",
+    "variant": "named",
+    "utterance": "언어재활사를 호출해줘.",
+    "expect_tag": "[EXPERT: speech-language-pathologist]"
+  },
+  {
+    "id": "expert-sports-instructor-A-named",
+    "tier": "expert",
+    "target_id": "sports-instructor",
+    "target_name": "생활스포츠지도사",
+    "variant": "named",
+    "utterance": "생활스포츠지도사한테 바로 연결해줘.",
+    "expect_tag": "[EXPERT: sports-instructor]"
+  },
+  {
+    "id": "expert-surveying-engineer-A-named",
+    "tier": "expert",
+    "target_id": "surveying-engineer",
+    "target_name": "측량 및 지형공간정보기술사",
+    "variant": "named",
+    "utterance": "측량 및 지형공간정보기술사로 연결해줘.",
+    "expect_tag": "[EXPERT: surveying-engineer]"
+  },
+  {
+    "id": "expert-tax-accountant-A-named",
+    "tier": "expert",
+    "target_id": "tax-accountant",
+    "target_name": "세무사",
+    "variant": "named",
+    "utterance": "세무사 페르소나 호출해.",
+    "expect_tag": "[EXPERT: tax-accountant]"
+  },
+  {
+    "id": "expert-teacher-A-named",
+    "tier": "expert",
+    "target_id": "teacher",
+    "target_name": "교사(정교사)",
+    "variant": "named",
+    "utterance": "교사(정교사) 상담 바로 시작해줘.",
+    "expect_tag": "[EXPERT: teacher]"
+  },
+  {
+    "id": "expert-tour-guide-A-named",
+    "tier": "expert",
+    "target_id": "tour-guide",
+    "target_name": "관광통역안내사",
+    "variant": "named",
+    "utterance": "관광통역안내사한테 물어보고 싶어, 지금 불러줘.",
+    "expect_tag": "[EXPERT: tour-guide]"
+  },
+  {
+    "id": "expert-traditional-medicine-doctor-A-named",
+    "tier": "expert",
+    "target_id": "traditional-medicine-doctor",
+    "target_name": "한의사",
+    "variant": "named",
+    "utterance": "한의사가 필요해, 바로 연결해줘.",
+    "expect_tag": "[EXPERT: traditional-medicine-doctor]"
+  },
+  {
+    "id": "expert-translator-interpreter-A-named",
+    "tier": "expert",
+    "target_id": "translator-interpreter",
+    "target_name": "통역사·번역사",
+    "variant": "named",
+    "utterance": "통역사·번역사 AI 세션 열어줘.",
+    "expect_tag": "[EXPERT: translator-interpreter]"
+  },
+  {
+    "id": "expert-veterinarian-A-named",
+    "tier": "expert",
+    "target_id": "veterinarian",
+    "target_name": "수의사",
+    "variant": "named",
+    "utterance": "수의사 AI를 불러줘.",
+    "expect_tag": "[EXPERT: veterinarian]"
+  },
+  {
+    "id": "expert-weather-forecaster-A-named",
+    "tier": "expert",
+    "target_id": "weather-forecaster",
+    "target_name": "기상예보사",
+    "variant": "named",
+    "utterance": "기상예보사는 지금 바로 연결해줘.",
+    "expect_tag": "[EXPERT: weather-forecaster]"
+  },
+  {
+    "id": "expert-youth-counselor-A-named",
+    "tier": "expert",
+    "target_id": "youth-counselor",
+    "target_name": "청소년상담사",
+    "variant": "named",
+    "utterance": "청소년상담사를 호출해줘.",
+    "expect_tag": "[EXPERT: youth-counselor]"
+  }
+]
