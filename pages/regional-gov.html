@@ -91,6 +91,14 @@
 window.K_AUTH_CONFIG = { serviceLabel: '전국 지방행정 AI' };
 </script>
 <script src="https://hondi.net/auth/k-service-auth-client.js"></script>
+<!-- ★ 2026-09-17 신설(0015 후속 수정) — _parseAgentTags([GWP:] 태그 처리,
+     방금 이 페이지에 배선함)는 getService()/window.GWP_REGISTRY 전역이
+     반드시 있어야 서비스를 실제로 찾는다. webapp.html은 이 스크립트를
+     로드하지만 이 페이지는 그동안 아예 로드한 적이 없었다 — 그 결과
+     svcDef가 항상 null이 되어, 태그 배선 자체는 있어도 실제로는 어떤
+     [GWP: id]도 launch되지 않는 상태였다(0015 배선만으로는 미완성).
+     webapp.html과 동일한 파일·동일 버전으로 로드한다. -->
+<script src="/gwp-registry.js?v=20260624"></script>
 </head>
 <body>
 
