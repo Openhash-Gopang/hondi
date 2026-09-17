@@ -142,7 +142,7 @@ footer{background:var(--gov-header);color:rgba(255,255,255,.5);padding:22px 0;ma
 <div class="page-head">
   <h1>제주 AI 행정 — 기관 · 국·부서 · 과·팀 단위 실행 지도</h1>
   <p>제주특별자치도청·제주시청·서귀포시청·43개 읍면동 행정복지센터를 기관 단위로 먼저 고르고, 그 아래 국(局)·과(課)·팀 단위 SP까지 내려가 바로 실행합니다. 각 카드는 SP 원문·설명 문서·실행 화면 세 곳으로 연결됩니다.<br>
-  <span class="exec-note">* "실행" 링크는 regional-gov.html에 sp/return 파라미터로 직접 여는 기능이 구현된 이후 작동합니다(현재 제안 단계 — 설계서 참고).</span></p>
+  <span class="exec-note">"실행" 링크는 regional-gov.html의 <code style="background:rgba(0,0,0,.06);padding:1px 5px;border-radius:3px;">?gov_code=</code> 직행 파라미터(K-정부 카탈로그가 이미 쓰고 있는 실제 기능, gov-router.js 확인)로 해당 국·과·팀 SP를 바로 엽니다.</span></p>
 </div>
 
 <div class="main">
@@ -215,10 +215,23 @@ const EXEC_BASE = "pages/regional-gov.html";
 
 function spSrcUrl(path) { return RAW_BASE + path; }
 function spDocUrl(path) { return REPO_BASE + path; }
-function execUrl(spId) {
-  const params = new URLSearchParams({ sp: spId, return: "pages/jeju-gov-automation.html" });
+
+// gov_code 형식은 gov-router.js의 _assembleGovSystemPromptRaw() directCode
+// 분기(§-0.9)를 그대로 따른다 — 2026-09-17 원본 파싱으로 확인, tier별 code 형식:
+//   do-dept:{도코드}:{SP-DO-* 국 코드 또는 SP-DIV-* 과 코드}   (도청)
+//   city-dept:{시코드}-{국코드}                                  (시청 국 단위, 예: jejusi-jachi)
+//   city:{SP-CITYDIV-* 과 코드}                                  (시청 과 단위)
+//   emd:{읍면동명}                                                (읍면동, 예: 애월읍)
+//   team:{읍면동명}-{팀이름}                                      (읍면동 팀, 예: 애월읍-총무팀)
+function govCodeUrl(code) {
+  const params = new URLSearchParams({ gov_code: code });
   return `${EXEC_BASE}?${params.toString()}`;
 }
+function doDeptUrl(spCode) { return govCodeUrl(`do-dept:jeju:${spCode}`); }
+function cityDeptUrl(bureauId) { return govCodeUrl(`city-dept:${bureauId}`); }
+function cityDivUrl(spCode) { return govCodeUrl(`city:${spCode}`); }
+function emdUrl(emdName) { return govCodeUrl(`emd:${emdName}`); }
+function teamUrl(emdName, teamName) { return govCodeUrl(`team:${emdName}-${teamName}`); }
 
 const DO_BUREAUS = [
   { id: "welfare", name: "복지가족국(구 보...)", spId: "SP-DO-WELFARE", divisions: [
@@ -845,6 +858,7 @@ function renderBureauStrip() {
   const b = currentBureau();
   if (!b.spId) { strip.innerHTML = ""; return; }
   const doPath = `01-do/${b.spId}.md`;
+  const execHref = inst.id === "do" ? doDeptUrl(b.spId) : cityDeptUrl(b.id);
   strip.innerHTML = `
     <div>
       <div class="bureau-strip-title">${b.name}</div>
@@ -853,7 +867,7 @@ function renderBureauStrip() {
     <div class="bureau-links">
       <a class="bureau-link" href="${spSrcUrl(doPath)}" target="_blank">🔗 SP 원문</a>
       <a class="bureau-link" href="${spDocUrl(doPath)}" target="_blank">📄 저장소에서 보기</a>
-      <a class="bureau-link exec" href="${execUrl(b.spId)}" target="_blank">▶ 실행 화면 열기 <span style="opacity:.75;font-weight:600;">(제안·미구현)</span></a>
+      <a class="bureau-link exec" href="${execHref}" target="_blank">▶ 실행 화면 열기</a>
     </div>`;
 }
 
@@ -878,7 +892,7 @@ function renderTier2() {
         <div class="division-icons">
           <a href="${spSrcUrl(templatePath)}" target="_blank">🔗 템플릿</a>
           <a href="${spDocUrl(templatePath)}" target="_blank">📄 문서</a>
-          <a class="exec" href="${execUrl(t.id)}" target="_blank">▶ 실행*</a>
+          <a class="exec" href="${teamUrl(e.shortName, t.name)}" target="_blank">▶ 실행</a>
         </div>`;
       grid.appendChild(card);
     });
@@ -886,7 +900,6 @@ function renderTier2() {
   }
 
   const b = currentBureau();
-  const divPathBase = inst.id === "do" ? "02-do-dept/" : "02-city-dept/";
   title.textContent = `${b.name} 산하 과(課) 단위`;
 
   if (Array.isArray(b.divisions) && b.divisions.length > 0) {
@@ -894,11 +907,12 @@ function renderTier2() {
     b.divisions.forEach(d => {
       const card = document.createElement("div");
       card.className = "division-card" + (d.confirmed ? "" : " unconfirmed");
+      const execHref = inst.id === "do" ? doDeptUrl(d.spId) : cityDivUrl(d.spId);
       const icons = d.spId
-        ? `<a href="${spSrcUrl(divPathBase + d.spId + ".md")}" target="_blank">🔗 SP</a>
-           <a href="${spDocUrl(divPathBase + d.spId + ".md")}" target="_blank">📄 문서</a>
-           <a class="exec" href="${execUrl(d.spId)}" target="_blank">▶ 실행*</a>`
-        : `<span>🔗 SP</span><span>📄 문서</span><span>▶ 실행*</span>`;
+        ? `<a href="${spSrcUrl(d.file)}" target="_blank">🔗 SP</a>
+           <a href="${spDocUrl(d.file)}" target="_blank">📄 문서</a>
+           <a class="exec" href="${execHref}" target="_blank">▶ 실행</a>`
+        : `<span>🔗 SP</span><span>📄 문서</span><span>▶ 실행</span>`;
       card.innerHTML = `
         <div class="division-name">${d.name}</div>
         <div class="division-badge ${d.confirmed ? "confirmed" : "pending"}">
