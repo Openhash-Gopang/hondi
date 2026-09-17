@@ -4267,7 +4267,7 @@ async function handleKlawSessionsHistory(request, url, env, corsHeaders) {
     // 않는다 — 목록 조회 1번에 항목 최대 50개×전문(수만 자)을 전부
     // 실어보내면 불필요하게 무거워진다(상세 조회는 별도 엔드포인트).
     const res = await fetch(
-      `${L1_DEFAULT}/api/collections/${KLAW_SESSIONS_COLLECTION}/records?filter=${filter}&sort=-created&perPage=100&fields=id,title,klaw_version,llm_model,case_type,match_rate,match_items,is_public,created`,
+      `${L1_DEFAULT}/api/collections/${KLAW_SESSIONS_COLLECTION}/records?filter=${filter}&sort=-created&perPage=100&fields=id,title,klaw_version,llm_model,case_type,case_summary,match_rate,match_items,is_public,created`,
       { headers: { 'Authorization': `Bearer ${token}` } }
     );
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
