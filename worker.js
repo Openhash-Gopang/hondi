@@ -1747,24 +1747,25 @@ async function _l1GetBalanceKRW(guid) {
   // 죽어있으면(지속 장애) 재시도 후에도 그대로 차단되는 게 맞다(안전한
   // 방향의 실패).
   const attempt = async () => {
+    const l1Url = `${L1_DEFAULT}/api/balance?guid=${encodeURIComponent(guid)}`;
     try {
-      // ★ 2026-09-17 신설 — 실사에서 재현: curl로 직접 L1을 두 번 연속
-      // 쳤을 때는 안정적으로 최신 잔액(12704)이 나오는데, 이 fetch를
-      // 거치면 같은 순간에도 0이 나오는 사례가 확인됨. l1-hanlim.hondi.net도
-      // Cloudflare 뒤에 있다면, Worker의 fetch() 서브리퀘스트가 origin
-      // 직접 요청과 다른 캐시 경로를 타면서 예전(잔액 낮던 시점) 응답을
-      // 엣지에 계속 캐싱해 재사용했을 가능성이 높다 — 이 엔드포인트는
-      // 절대 캐싱되면 안 되는 잔액 조회이므로 명시적으로 캐시를 끈다.
-      const res = await fetch(`${L1_DEFAULT}/api/balance?guid=${encodeURIComponent(guid)}`, {
+      const res = await fetch(l1Url, {
         signal: AbortSignal.timeout(6000),
         cf: { cacheTtl: 0, cacheEverything: false },
         headers: { 'Cache-Control': 'no-cache' },
       });
-      const data = await res.json().catch(() => null);
+      const rawText = await res.text();
+      // ★ 2026-09-17 임시 진단 로그 — worker가 실제로 어떤 원문을 받는지
+      // 직접 확인하기 위함. curl 직접 호출은 안정적으로 최신 잔액을
+      // 주는데 이 경로만 0이 나오는 사례가 있어, 캐시 우회 옵션을
+      // 추가했음에도 재현되면 원인을 좁히기 위해 원문 자체를 남긴다.
+      // 원인 확인되면 이 로그는 제거할 것.
+      console.log('[L1_BALANCE_DIAG]', JSON.stringify({ url: l1Url, guid, status: res.status, rawText: rawText.slice(0, 500) }));
+      const data = JSON.parse(rawText || 'null');
       if (!data || !data.ok) return null;
       return data;
     } catch (e) {
-      console.warn('[AiCharge] 잔액 조회 실패:', e.message);
+      console.warn('[AiCharge] 잔액 조회 실패:', e.message, JSON.stringify({ url: l1Url, guid }));
       return null;
     }
   };
