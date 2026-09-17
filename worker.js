@@ -14258,7 +14258,7 @@ export default {
       return new Response(JSON.stringify({ error: 'Method Not Allowed' }), { status: 405, headers: corsHeaders });
     }
 
-    const bodyText = await request.text();
+    let bodyText = await request.text();
 
     // ── AI 프록시 라우트 추가 보호 — 비용이 직접 발생하는 경로이므로
     // 한 번 더 엄격하게 검사한다. 위쪽 전역 검사(line ~275)는
@@ -14270,7 +14270,11 @@ export default {
     // DEEPSEEK_API_KEY 등 서버 보유 키로 무제한 호출이 가능했다.
     // (2026-06-28 — 기기를 모두 끈 상태에서도 DeepSeek 크레딧이
     // 소진된 사고의 원인 분석 후 추가)
-    const AI_PROXY_PATHS = ['/chat/completions', '/deepseek', '/ai/chat', '/gemini/', '/llm/relay', '/klaw/relay', '/kplan/relay', '/kjit/relay', '/kcity/relay', '/gov/relay'];
+    // ★ 2026-09-17 신설 — business/relay가 이 목록에서 빠져 있어 klaw/
+    // kplan/gov/deepseek와 달리 Origin 헤더 검사 자체를 안 받고 있었다
+    // (직접 curl로 재현 확인: Origin 없이도 그대로 통과함). AI 비용이
+    // 똑같이 발생하는 경로인데 보호 수준만 낮았던 명백한 누락.
+    const AI_PROXY_PATHS = ['/chat/completions', '/deepseek', '/ai/chat', '/gemini/', '/llm/relay', '/klaw/relay', '/kplan/relay', '/kjit/relay', '/kcity/relay', '/gov/relay', '/business/relay'];
     const isAiProxyPath = AI_PROXY_PATHS.some(p => pathname === p || pathname.startsWith(p));
     const _meta = {
       ip:     request.headers.get('cf-connecting-ip') || 'unknown',
@@ -14281,6 +14285,46 @@ export default {
     if (isAiProxyPath && !corsOrigin) {
       console.warn(JSON.stringify({ tag: 'AI_PROXY_BLOCKED_NO_ORIGIN', ts: new Date().toISOString(), ..._meta }));
       return _err(403, 'FORBIDDEN_NO_ORIGIN', 'AI 프록시 호출에는 브라우저 Origin이 필요합니다.', corsHeaders);
+    }
+
+    // ── 2026-09-17 신설 — "현관문 하나" 통합 인증 게이트 ───────────
+    // 그동안 klaw/kplan/kjit/kcity는 각자 자기 함수 안에서 개별적으로
+    // phone_verify_token을 검증했고(4곳에 똑같은 블록이 복붙돼 있었다는
+    // 게 klaw 함수 주석에도 적혀있다), gov는 선택적으로만 검증했으며,
+    // business는 아예 이 검증 자체가 없었다(실사로 발견 — 무작위 guid로
+    // 실제 AI 호출·과금이 그대로 통과됨). 서비스를 새로 추가할 때마다
+    // 이 체크를 빠뜨릴 위험이 실제로 현실화된 것 — 그래서 개별 함수
+    // 안이 아니라 디스패치 지점 한 곳에서 전부 강제한다("주피터 지시":
+    // AI(LLM)를 쓰는 모든 서비스는 인증된 사용자만 접근).
+    //
+    // business/relay는 아직 제외 — market 저장소(kmarket_admin_
+    // dashboard.html)에 전화번호 인증 UI 자체가 없어(무작위 guid를
+    // localStorage에 저장하는 방식), 지금 강제하면 그 화면의 채팅
+    // 기능이 즉시 전부 끊긴다. 프런트엔드 이식 후 이 배열에 추가할 것.
+    // chat/completions·deepseek(메인 채팅)은 2026-09-17 주피터 지시로
+    // 포함 확정 — 익명 체험 대신 가입 시 무료 GDC 지급(SIGNUP_BONUS_KRW,
+    // _grantSignupBonus, 이미 구현돼 있음)으로 체험 기회를 제공한다.
+    // ⚠️ callDeepSeek 주석에 있던 "desktop.html 방문자 데모 위젯" 같은
+    // 원래 비로그인 허용 호출도 이제 전부 막힌다 — 그 위젯이 아직
+    // 살아있다면 별도 확인 필요.
+    // /ai/chat, /gemini/, /llm/relay는 이번 결정에 없던 별도 경로라
+    // 인증 모델을 확인 안 하고 같이 묶지 않았다 — 필요하면 별도 검토.
+    const MANDATORY_AUTH_PATHS = ['/klaw/relay', '/kplan/relay', '/kjit/relay', '/kcity/relay', '/gov/relay', '/chat/completions', '/deepseek'];
+    if (MANDATORY_AUTH_PATHS.some(p => pathname === p || pathname.startsWith(p))) {
+      let _gateBody;
+      try { _gateBody = JSON.parse(bodyText); } catch {
+        return _err(400, 'INVALID_JSON', '', corsHeaders);
+      }
+      const _authResult = await _resolveGuidFromPhoneVerifyToken(env, _gateBody?.phone_verify_token);
+      if (!_authResult.ok) {
+        const { status, code, message } = mapPhoneAuthError(_authResult);
+        console.warn(JSON.stringify({ tag: 'HONDI_FRONT_DOOR_AUTH_BLOCKED', path: pathname, code, ..._meta }));
+        return _err(status, code, message, corsHeaders);
+      }
+      // 검증된 guid로 치환해 재직렬화 — 아래 개별 핸들러는 body.guid를
+      // 그대로 신뢰해도 된다(이미 이 자리에서 검증 끝남). 클라이언트가
+      // 보낸 원래 guid/phone_verify_token은 폐기한다.
+      bodyText = JSON.stringify({ ..._gateBody, guid: _authResult.guid, phone_verify_token: undefined });
     }
 
     if (pathname === '/chat/completions')        return callDeepSeek(bodyText, env, corsHeaders, null, _meta, ctx);
@@ -20222,15 +20266,16 @@ async function callDeepSeek(bodyText,env,corsHeaders,fallbackFrom=null,meta=null
   const isStream = !!parsedBody?.stream;
   let guid = parsedBody?.guid || null;
 
-  // 2026-09-07 신설 — market/school/stock 등 지갑 없는(전화번호 인증만
-  // 한) 세션이 guid 없이(또는 'anonymous'로) 호출하면 _gdcFreeQuotaGate와
-  // _chargeGdcForAiUsage가 둘 다 조용히 통과시켜(guid 없으면 무료 게이트
-  // 자체를 건너뜀) 완전히 무과금·무기록으로 새고 있었다(주피터 지적,
-  // 2026-09-07 원칙: "모든 사용은 개별 사용자별로 과금"). guid가 없거나
-  // 'anonymous'인데 phone_verify_token이 있으면 그걸로 실제 guid를
-  // 도출한다. 실패해도 기존처럼(guid 없음 취급) 계속 진행 — 이 경로는
-  // desktop.html 방문자 데모 위젯처럼 원래 비로그인 허용 호출도 섞여
-  // 있어 여기서 강제 차단하지 않는다(하드 필수화는 별도 결정 필요).
+  // 2026-09-07 신설, 2026-09-17 갱신 — chat/completions·deepseek는 이제
+  // 디스패치 지점의 공용 게이트("현관문 하나")가 HTTP 요청 단계에서
+  // 이미 phone_verify_token을 검증해 guid를 확정한 뒤 넘겨준다(익명
+  // 호출은 그 자리에서 401로 막힘 — 가입 시 무료 GDC 지급으로 체험
+  // 기회를 대신 제공). 그래서 여기 도달하는 HTTP 요청은 guid가 이미
+  // 채워져 있는 게 정상이다.
+  // 다만 이 함수는 callOpenAIFromGeminiBody가 실패 폴백으로 guid 없이
+  // 직접 호출하기도 한다(/gemini/ 경로는 이번 게이트 대상이 아님) —
+  // 그 내부 호출까지 깨뜨리지 않기 위해 아래 관대한 처리(guid 없으면
+  // 무료 게이트를 건너뛰고 계속 진행)는 의도적으로 남겨둔다.
   if ((!guid || guid === 'anonymous') && parsedBody?.phone_verify_token) {
     const _dsAuth = await _resolveGuidFromPhoneVerifyToken(env, parsedBody.phone_verify_token);
     if (_dsAuth.ok) guid = _dsAuth.guid;
@@ -20675,28 +20720,14 @@ async function handleKlawRelay(bodyText, env, corsHeaders, meta = null, ctx = nu
   let { guid, tier, messages, max_tokens, stream, step_cycle, claim_amount_krw, case_id, currentLocation, phone_verify_token } = body || {};
   if (!guid || !Array.isArray(messages)) return _err(400, 'MISSING_FIELD', 'guid/messages 필수', corsHeaders);
 
-  // ── 전화번호 로그인 필수화 (2026-09-02 신설 — 주피터 지시) ──
-  // K-Law는 지금까지 인증 없는 공개 MVP였다(3549행 위쪽 주석 참고 — 고팡
-  // wallet 서명 인증 체계 밖의 별도 guid/기기지문). 이제 실사용량만큼
-  // 실제 GDC가 차감되므로, "본인 확인 없는 guid로 과금·잔액조회"가
-  // 가능한 구멍을 막아야 한다. handleUserGdcBalance(2026-09-01)와 같은
-  // phone_verify_token(SMS 인증 완료 증명, /biz/phone-otp-verify 발급)을
-  // 요구해, 토큰이 가리키는 전화번호의 profiles 레코드에서 guid를 직접
-  // 도출한다 — 클라이언트가 body에 실어 보낸 guid는 신뢰하지 않고
-  // 버린다(그대로 두면 "전화번호는 내 것, guid는 남의 것"으로 남의
-  // GDC 잔고를 차감시키는 경로가 열린다).
-  // ★ 프런트엔드(klaw 저장소 webapp.html)가 아직 OTP 로그인 UI를 붙이기
-  // 전에 이 백엔드만 먼저 배포하면 모든 K-Law 호출이 401로 막힌다 —
-  // 반드시 프런트 로그인 플로우와 함께 배포할 것.
-  // 2026-09-03 — 상태코드 매핑을 공용 게이트(mapPhoneAuthError)로 위임
-  // (src/worker/k-service-auth.js 참고, 이전엔 이 블록이 klaw/kplan/
-  // business/gov 4곳에 그대로 복붙돼 있었다).
-  const _klawAuth = await _resolveGuidFromPhoneVerifyToken(env, phone_verify_token);
-  if (!_klawAuth.ok) {
-    const { status, code, message } = mapPhoneAuthError(_klawAuth);
-    return _err(status, code, message, corsHeaders);
-  }
-  guid = _klawAuth.guid; // 인증된 전화번호 소유자의 guid로 강제 치환
+  // ── 전화번호 인증은 이제 디스패치 지점의 공용 게이트("현관문 하나",
+  // 2026-09-17 신설)에서 한 번만 처리한다 — 이 함수까지 도달했다는
+  // 것 자체가 이미 guid가 phone_verify_token으로 검증됐다는 뜻이라
+  // 여기서 재검증하지 않는다. (이전엔 이 블록이 klaw/kplan/business/
+  // gov 4곳에 그대로 복붙돼 있었고, business는 아예 빠뜨린 채 방치돼
+  // 무작위 guid로 실제 과금이 통과되는 구멍이 있었다 — 재발 방지를
+  // 위해 개별 함수가 아니라 디스패치 한 곳에서만 강제하는 구조로
+  // 바꿨다. 상세 이력은 git blame으로 이전 버전 참고.)
 
   // ── 티어 기반 요금 면제 — 2026-08-14 현재 해당 없음 ──
   // 2026-08-11엔 "전문직 티어(all_services_free)"가 있어 K-Law를 무료로
@@ -21131,17 +21162,14 @@ async function _handleKjitKcityRelay(bodyText, env, corsHeaders, meta, ctx, { se
   let body;
   try { body = JSON.parse(bodyText); } catch { return _err(400, 'INVALID_JSON', '', corsHeaders); }
 
-  const { messages, max_tokens, phone_verify_token, currentLocation } = body || {};
+  const { guid, messages, max_tokens, currentLocation } = body || {};
   if (!Array.isArray(messages)) return _err(400, 'MISSING_FIELD', 'messages 필수', corsHeaders);
 
-  // ── 전화번호 로그인 필수 — K-Law·K-Plan과 동일 이유(실제 GDC 과금이
-  // 걸리므로 본인 확인 없는 guid로 과금·잔액조회가 가능한 구멍을 막는다).
-  const _auth = await _resolveGuidFromPhoneVerifyToken(env, phone_verify_token);
-  if (!_auth.ok) {
-    const { status, code, message } = mapPhoneAuthError(_auth);
-    return _err(status, code, message, corsHeaders);
-  }
-  const guid = _auth.guid;
+  // ── 전화번호 인증은 이제 디스패치 지점의 공용 게이트("현관문 하나",
+  // 2026-09-17 신설)에서 한 번만 처리한다 — 여기 도달했다는 것 자체가
+  // 이미 guid가 phone_verify_token으로 검증됐다는 뜻이라 재검증하지
+  // 않고 body.guid를 그대로 신뢰한다.
+  if (!guid) return _err(400, 'MISSING_FIELD', 'guid 필수(공용 게이트 통과 후 자동 주입되어야 함)', corsHeaders);
 
   // 클라이언트가 보낸 system 메시지는 전부 제거 — 서버가 조립한
   // 내용(universal layers + 위 KJIT/KCITY_SYSTEM_PROMPT)만 유효하다
@@ -21221,20 +21249,14 @@ async function handleKPlanRelay(bodyText, env, corsHeaders, meta = null, ctx = n
   let body;
   try { body = JSON.parse(bodyText); } catch { return _err(400, 'INVALID_JSON', '', corsHeaders); }
 
-  let { tier, messages, max_tokens, stream, generation_type, currentLocation, phone_verify_token, plan_id } = body || {};
+  let { guid, tier, messages, max_tokens, stream, generation_type, currentLocation, phone_verify_token, plan_id } = body || {};
   if (!Array.isArray(messages)) return _err(400, 'MISSING_FIELD', 'messages 필수', corsHeaders);
 
-  // ── 전화번호 로그인 필수 — K-Law와 동일 이유(실제 GDC 과금이 걸리므로
-  // 본인 확인 없는 guid로 과금·잔액조회가 가능한 구멍을 막는다).
-  // 클라이언트가 body에 실어 보낸 guid는 신뢰하지 않고, 이 토큰이
-  // 가리키는 전화번호의 profiles 레코드에서 guid를 직접 도출한다.
-  // 2026-09-03 — 공용 게이트로 위임(src/worker/k-service-auth.js)
-  const _kplanAuth = await _resolveGuidFromPhoneVerifyToken(env, phone_verify_token);
-  if (!_kplanAuth.ok) {
-    const { status, code, message } = mapPhoneAuthError(_kplanAuth);
-    return _err(status, code, message, corsHeaders);
-  }
-  const guid = _kplanAuth.guid; // 인증된 전화번호 소유자의 guid로 강제 확정
+  // ── 전화번호 인증은 이제 디스패치 지점의 공용 게이트("현관문 하나",
+  // 2026-09-17 신설)에서 한 번만 처리한다 — 여기 도달했다는 것 자체가
+  // 이미 guid가 phone_verify_token으로 검증됐다는 뜻이라 재검증하지
+  // 않고 body.guid를 그대로 신뢰한다.
+  if (!guid) return _err(400, 'MISSING_FIELD', 'guid 필수(공용 게이트 통과 후 자동 주입되어야 함)', corsHeaders);
 
   const universalInjected = await _fetchUniversalLayers();
   let messagesWithIntegrity = universalInjected
@@ -26121,21 +26143,13 @@ async function handleGovRelay(bodyText, env, corsHeaders, meta = null, ctx = nul
   // 보내도 조용히 무시된다(하위호환, 에러 없음).
   let { guid, agency, agencyPrompt, messages, max_tokens, stream, tier: _clientTierIgnored, provinceCode, currentLocation, task_key, gov_task_roundtrips, phone_verify_token } = body || {};
 
-  // 2026-09-07 신설 — regional-gov.html처럼 지갑 없는 기기(새 기기·
-  // 시크릿 모드 등)에서 phone_verify_token(k-service-auth-client.js)만
-  // 들고 오는 세션을 위한 경로. klaw/kplan/kjit·kcity와 동일 패턴
-  // (_resolveGuidFromPhoneVerifyToken)으로 guid를 서버에서 직접
-  // 도출한다 — 클라이언트가 보낸 guid는 이 경우 무시하고 치환한다.
-  // phone_verify_token이 없으면(기존 GWP_TOKEN/지갑 guid 경로) 기존
-  // 동작 그대로 하위호환 유지 — K-Public 등 기존 흐름은 안 깨진다.
-  if (phone_verify_token) {
-    const _govAuth = await _resolveGuidFromPhoneVerifyToken(env, phone_verify_token);
-    if (!_govAuth.ok) {
-      const { status, code, message } = mapPhoneAuthError(_govAuth);
-      return _err(status, code, message, corsHeaders);
-    }
-    guid = _govAuth.guid;
-  }
+  // ── 전화번호 인증은 이제 디스패치 지점의 공용 게이트("현관문 하나",
+  // 2026-09-17 신설)에서 한 번만 처리한다 — 이 함수까지 도달했다는
+  // 것 자체가 이미 guid가 phone_verify_token으로 검증됐다는 뜻이라
+  // 재검증하지 않는다. (이전엔 phone_verify_token이 없으면 클라이언트
+  // 자칭 guid를 그대로 믿는 하위호환 폴백이 있었으나, "AI를 쓰는 모든
+  // 서비스는 인증된 사용자만"이라는 원칙에 따라 그 폴백은 제거했다 —
+  // 이제 이 경로에 도달한 요청은 전부 이미 인증된 상태다.)
 
   if (!guid || !agency || !Array.isArray(messages)) return _err(400, 'MISSING_FIELD', 'guid/agency/messages 필수', corsHeaders);
   if (!GOV_AGENCIES.has(agency)) return _err(400, 'UNKNOWN_AGENCY', `등록되지 않은 기관: ${agency}`, corsHeaders);
