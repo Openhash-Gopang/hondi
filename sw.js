@@ -3,7 +3,7 @@
 // PWA 오프라인 지원 + 캐시 전략
 // ═══════════════════════════════════════════════════════════
 
-const CACHE_NAME    = 'gopang-20260917-014643-9a9691bb';
+const CACHE_NAME    = 'gopang-20260917-015920-fbeaec56';
 // 2026-09-14 — 이 값은 이제 수동으로 관리하지 않는다. main에 머지될
 // 때마다 .github/workflows/bump-app-version.yml이 version.json과
 // 동일한 값으로 자동 동기화한다(설정 패널 "최신 버전으로 갱신"이 실제
