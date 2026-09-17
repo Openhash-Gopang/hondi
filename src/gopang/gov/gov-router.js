@@ -2962,14 +2962,33 @@ function _matchEmdTeam(text, teamRecords, emdCode) {
 
 // candidates: _scoreMatchTies().tied — division과 동일하게 이미 갖고
 // 있는 팀 데이터(입력_문구)를 그대로 후보 설명으로 재사용한다.
+// ★ 2026-09-17 수정 — _classifyFallback/_classifyDivisionFallback과 달리
+// 이 함수만 NeedsClarificationSignal 처리가 빠져 있었다(발견 경위: 총무과
+// 중복 SP 동점 사고실험을 전 계층에 일반화해 점검하던 중 확인). 읍면동
+// 팀 계층에서 LLM이 애매함을 느껴 CLARIFY: 형식으로 답해도 이 함수가
+// 그 신호를 파싱하지 않고 '||' → null 처리해버려, 상위 호출부는 그냥
+// "세부 팀 없음"으로 오인하고 읍면동 단위로 조용히 폴백했다 — 사용자
+// 입장에서는 되물어야 할 애매함이 티 안 나게 삼켜지는 것과 같다.
+// 주피터 지시(2026-08-21 신설 원칙: 애매하면 반드시 사용자에게
+// 되묻는다 — 그렇게 되물으면 그것 자체가 테스트 성공)를 팀 계층까지
+// 동일하게 적용해 일관성을 맞춘다.
 async function _classifyTeamFallback(text, candidates, classifyFn) {
   if (!classifyFn || !candidates || candidates.length === 0) return null;
   const candidatesText = candidates.map(c => `${c.code}: ${c.name} — ${c.desc}`).join('\n');
   try {
     const code = await classifyFn(text, candidatesText);
+    const clarifyCodes = _parseClarifySignal(code);
+    if (clarifyCodes) {
+      const options = clarifyCodes
+        .map(c => candidates.find(cand => cand.code === c))
+        .filter(Boolean)
+        .map(cand => ({ code: cand.code, name: cand.name || cand.code }));
+      if (options.length >= 2) throw new NeedsClarificationSignal(options);
+    }
     if (!code || code === 'NONE') return null;
     return candidates.find(c => c.code === code) || null;
   } catch (e) {
+    if (e instanceof NeedsClarificationSignal) throw e;
     console.warn('[gov-router] 팀 LLM 분류 폴백 실패:', e.message);
     return null;
   }
@@ -2987,6 +3006,12 @@ async function _resolveEmdTeam(text, emdRec, classifyFn) {
     if (!picked) return null;
     return picked._rec;
   } catch (e) {
+    // ★ 2026-09-17 수정 — NeedsClarificationSignal까지 여기서 삼켜버리면
+    // _classifyTeamFallback을 고쳐도 소용없다(호출부인 여기가 조용히
+    // null 처리 후 읍면동 단위로 폴백해버림). 이 신호만은 그대로
+    // 위(assembleGovSystemPrompt)로 다시 던져서 실제로 사용자에게
+    // 되묻는 흐름까지 이어지게 한다 — 그 외 진짜 오류만 여기서 삼킨다.
+    if (e instanceof NeedsClarificationSignal) throw e;
     console.warn(`[gov-router] 읍면동 팀 매칭 실패(emd_code=${emdRec.emd_code}): ${e.message} — 읍면동 응답만 사용`);
     return null;
   }
