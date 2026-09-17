@@ -155,6 +155,22 @@ def parse_experts():
         out.extend(parse_expert_file(os.path.join(REPO_ROOT, fn)))
     return out
 
+def resolve_root_id(expert_id, by_id):
+    """parentKey 체인을 끝까지(최상위까지) 따라 올라가 진짜 루트 id를 찾는다.
+    AC-PRO-CORE는 professor/physician/lawyer 같은 다단 계층에서도 항상
+    최상위 루트 태그만 낸다(subject-gate.js 설계) — 중계열(예:
+    professor-language-literature)은 클라이언트 2차 호출 전용이라 1단계
+    라이브 응답에는 절대 안 나온다. 그래서 expect_tag는 직계 parentKey가
+    아니라 이 함수로 구한 루트를 써야 한다."""
+    seen = set()
+    cur = expert_id
+    while True:
+        parent = by_id.get(cur, {}).get('parentKey')
+        if not parent or parent in seen:
+            return cur
+        seen.add(parent)
+        cur = parent
+
 def display_name(label):
     """'의사(피부과)' -> '피부과 의사' / '법무사' -> '법무사'"""
     m = re.match(r'^(.+?)\((.+)\)$', label)
@@ -195,6 +211,7 @@ IMPLIED_TEMPLATES_KSERVICE = [
 def build_scenarios():
     kservices = parse_kservices()
     experts = parse_experts()
+    by_id = {e['id']: e for e in experts}
     rows = []
     no = 0
 
@@ -224,7 +241,12 @@ def build_scenarios():
         # routing_ABmention_live_smoketest.py는 tier가 정확히 "kservice"/
         # "expert"/"institution" 셋 중 하나여야 채점 분기를 탄다(그 외 값은
         # 전부 LIVE-NEEDS-REVIEW로 새어버림) — level은 별도 필드로 보존.
-        ac_expect_tag = f"[EXPERT: {e['id']}]" if level == 'top' else f"[EXPERT: {e['parentKey']}]"
+        # expect_tag는 직계 parentKey가 아니라 진짜 루트(resolve_root_id)를
+        # 써야 한다 — professor 계열처럼 중계열(예:
+        # professor-language-literature)이 끼어 있으면 AC 1단계 응답은
+        # 그 중계열이 아니라 최상위 루트("professor")만 낸다.
+        root_id = resolve_root_id(e['id'], by_id) if level == 'leaf' else e['id']
+        ac_expect_tag = f"[EXPERT: {root_id}]"
         leaf_note = (
             None if level == 'top' else
             f"2단계 게이트에서 리프 {e['id']} 기대 — 1단계 AC 응답만 보는 "
