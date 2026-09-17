@@ -264,8 +264,28 @@
   }
 
   async function startDeviceLink() {
-    var phone = els.phone.value.trim();
-    if (!phone) { setMsg('전화번호를 입력해 주세요.', 'err'); return; }
+    var rawPhone = els.phone.value.trim();
+    if (!rawPhone) { setMsg('전화번호를 입력해 주세요.', 'err'); return; }
+    // ★ 2026-09-17 신설 — 이 스크립트는 여러 도메인(klaw/plan/mail.hondi.net,
+    // hondi.net desktop.html)에 그대로 로드되는 classic script라
+    // core/auth.js를 정적으로 import할 수 없었고, 그래서 지금까지 입력창의
+    // "뒷 8자리" 원문을 그대로 서버에 보냈다 — 서버(handleDeviceLinkInit)가
+    // 정규화를 해줘서 우연히 문제없이 동작했을 뿐이다. handlePhoneOtpVerify가
+    // 이 가정(호출자가 뭘 보내든 서버가 항상 정규화해준다)이 깨지는 걸
+    // 실사로 보여줬으므로, 원칙대로 클라이언트도 "물리적으로 하나뿐인"
+    // 정규화 함수(core/auth.js의 buildE164)를 직접 써서 보낸다. klaw
+    // 저장소 webapp.html이 이미 같은 방식(동적 cross-origin import)으로
+    // https://hondi.net/src/gopang/gwp/gwp-report-client.js를 성공적으로
+    // 쓰고 있어 이 패턴 자체는 검증된 것이다.
+    var phone = rawPhone;
+    try {
+      var authMod = await import('https://hondi.net/src/gopang/core/auth.js');
+      phone = authMod.buildE164(rawPhone, 'KR');
+    } catch (e) {
+      // 공유 모듈 로드 실패 시(네트워크 문제 등) 원본 입력값으로 그대로
+      // 진행 — 서버 쪽 정규화가 최후 방어선이므로 완전히 막지는 않는다.
+      console.warn('[KAuth] buildE164 공유 모듈 로드 실패, 원본 입력값 사용:', e.message);
+    }
     els.devlinkBtn.disabled = true;
     setMsg('', '');
     var sigMsg = 'kauth-login:' + (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)) + ':' + Date.now();
