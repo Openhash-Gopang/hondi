@@ -13883,7 +13883,7 @@ export default {
     if (pathname === '/biz/charge-info'    && request.method === 'GET')  return handleChargeInfo(request, env, corsHeaders);
     if (pathname === '/biz/charge-request' && request.method === 'POST') return handleChargeRequest(request, env, corsHeaders);
     if (pathname === '/biz/charge-status'  && request.method === 'GET')  return handleChargeStatus(request, env, corsHeaders);
-    if (pathname === '/biz/charge-self-report' && request.method === 'POST') return handleChargeSelfReport(request, env, corsHeaders);
+    if (pathname === '/biz/charge-self-report' && request.method === 'POST') return handleChargeSelfReport(request, env, corsHeaders, ctx);
     if (pathname === '/biz/charge-list'    && request.method === 'GET')  return handleChargeList(request, env, corsHeaders);
     if (pathname === '/biz/charge-confirm' && request.method === 'POST') return handleChargeConfirm(request, env, corsHeaders, ctx);
     if (pathname === '/admin/test-register-profile' && request.method === 'POST') return handleTestRegisterProfile(request, env, corsHeaders);
@@ -16752,7 +16752,7 @@ async function handleChargeStatus(request, env, corsHeaders) {
 // 부수효과가 전혀 없다 — pending 레코드만 남기면, 실제 입금 알림이
 // 들어올 때 handleChargeConfirmNotification의 금액 단독 매칭 폴백이
 // 자동으로 확정한다(아래 참고).
-async function handleChargeSelfReport(request, env, corsHeaders) {
+async function handleChargeSelfReport(request, env, corsHeaders, ctx) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
   const { guid, krw_amount } = body;
@@ -16780,9 +16780,9 @@ async function handleChargeSelfReport(request, env, corsHeaders) {
   const expiresAt = new Date(Date.now() + CHARGE_EXPIRE_HOURS * 3600 * 1000).toISOString();
   try {
     const token = await _l1AdminToken(env);
+    const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
     const res = await fetch(`${L1_DEFAULT}/api/collections/charge_requests/records`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      method: 'POST', headers,
       body: JSON.stringify({
         guid, match_code: matchCode, requested_krw: krwAmount,
         status: 'pending', expires_at: expiresAt,
@@ -16792,6 +16792,43 @@ async function handleChargeSelfReport(request, env, corsHeaders) {
     if (!res.ok || !data?.id) {
       return _err(502, 'L1_ERROR', '신고 기록 실패: ' + JSON.stringify(data || {}).slice(0, 200), corsHeaders);
     }
+
+    // 2026-09-17 신설(주피터 지시 — 실측 확인: 자가신고보다 입금이 먼저
+    // 일어나면 handleChargeConfirmNotification이 그 순간엔 매칭 대상을
+    // 못 찾아 영영 놓쳤다) — 방금 만든 신고와 정확히 같은 금액의
+    // unmatched_deposit_captures(이전에 도착했지만 못 맞춘 입금)가
+    // 있는지 바로 확인한다. 단 1건일 때만 안전하게 즉시 확정하고,
+    // 2건 이상(금액 충돌)이면 애매하니 그냥 일반 pending으로 둔다.
+    try {
+      const filter = encodeURIComponent(`amount=${krwAmount}`);
+      const capRes = await fetch(`${L1_DEFAULT}/api/collections/unmatched_deposit_captures/records?filter=${filter}&sort=created&perPage=5`, { headers });
+      const capData = await capRes.json().catch(() => ({ items: [] }));
+      const captures = capData.items || [];
+      if (captures.length === 1) {
+        const cap = captures[0];
+        const result = await _mintAndRecordCharge(env, {
+          existingRequestId: data.id, guid, ctx, krwAmount,
+          depositorName: cap.depositor_name || '',
+          memo: `자가신고 소급 매칭(입금이 신고보다 먼저 도착) [${cap.notification_key}]`,
+          channel: 'auto_notification_capture_amount_fallback',
+          confirmedBy: 'system:self_report_retroactive_match',
+          externalTxId: cap.notification_key || null,
+        });
+        if (result.ok) {
+          await fetch(`${L1_DEFAULT}/api/collections/unmatched_deposit_captures/records/${cap.id}`, {
+            method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` },
+          }).catch(() => {});
+          console.info(JSON.stringify({ tag: 'CHARGE_SELF_REPORT_RETROACTIVE_MATCH', guid, amount: krwAmount, ts: new Date().toISOString() }));
+          return new Response(JSON.stringify({ ok: true, request_id: data.id, matched_immediately: true }), { status: 200, headers: corsHeaders });
+        }
+        console.error(JSON.stringify({ tag: 'CHARGE_SELF_REPORT_RETROACTIVE_MATCH_MINT_FAILED', guid, amount: krwAmount, result, ts: new Date().toISOString() }));
+      } else if (captures.length > 1) {
+        console.warn(JSON.stringify({ tag: 'CHARGE_SELF_REPORT_UNMATCHED_CAPTURE_AMBIGUOUS', amount: krwAmount, count: captures.length, ts: new Date().toISOString() }));
+      }
+    } catch (e) {
+      console.warn('[ChargeSelfReport] 소급 매칭 조회 실패(일반 대기로 진행):', e.message);
+    }
+
     return new Response(JSON.stringify({ ok: true, request_id: data.id }), { status: 200, headers: corsHeaders });
   } catch (e) {
     return _err(502, 'L1_UNREACHABLE', 'L1 연결 실패: ' + e.message, corsHeaders);
@@ -17388,9 +17425,22 @@ async function handleChargeConfirmNotification(request, env, corsHeaders, ctx) {
           console.warn(JSON.stringify({ tag: 'NOTIFICATION_CAPTURE_AMOUNT_FALLBACK_AMBIGUOUS', amount: amountGuess, count: candidates.length, ts: new Date().toISOString() }));
         } else {
           // 2026-09-17 신설 — 금액은 읽었는데 매칭되는 pending이 0건인
-          // 경우를 별도로 남긴다(기존엔 로그 없이 조용히 지나가 "금액을
-          // 못 읽었다"와 구분이 안 됐다).
+          // 경우, 로그만 남기고 포기하지 않는다. 실제 입금이 자가신고
+          // 보다 먼저 도착한 경우(실측으로 확인된 근본 원인)일 수 있으니
+          // unmatched_deposit_captures에 저장해둔다 — 나중에 자가신고가
+          // 들어오면 handleChargeSelfReport가 이걸 찾아 짝짓는다.
           console.info(JSON.stringify({ tag: 'NOTIFICATION_CAPTURE_AMOUNT_FALLBACK_NO_CANDIDATE', amount: amountGuess, ts: new Date().toISOString() }));
+          try {
+            await fetch(`${L1_DEFAULT}/api/collections/unmatched_deposit_captures/records`, {
+              method: 'POST', headers,
+              body: JSON.stringify({
+                amount: amountGuess, raw_text: raw_text || '', notification_key,
+                source: source || '', app_package: app_package || '', depositor_name: depositor_name || '',
+              }),
+            });
+          } catch (e) {
+            console.warn('[NotificationCapture] unmatched_deposit_captures 저장 실패:', e.message);
+          }
         }
       } catch (e) {
         console.warn('[NotificationCapture] 금액 단독 매칭 시도 중 오류(기존 동작으로 폴백):', e.message);
