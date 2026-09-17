@@ -971,7 +971,7 @@ export async function openGopangWallet() {
               <span style="font-size:13px;font-weight:700;color:#007b8b">방법 1</span>
               <span style="font-size:11px;font-weight:600;color:#007b8b;background:#e6f4f6;padding:2px 7px;border-radius:4px">추천</span>
             </div>
-            <div style="font-size:12px;color:#6b7280;margin-bottom:8px;line-height:1.5">입금하실 금액을 먼저 등록하고, 그 금액 그대로 입금해 주세요. 보낸이는 본인 이름 그대로여도 됩니다.</div>
+            <div style="font-size:12px;color:#6b7280;margin-bottom:8px;line-height:1.5">입금하실 금액을 먼저 등록하고, 그 금액 그대로 입금해 주세요. 보낸이는 본인 이름 그대로여도 됩니다. 폰 번호가 아니라 이름으로 이미 입금하셨어도, 여기에 입금 금액을 적어 주세요.</div>
             <div style="display:flex;gap:8px">
               <input id="_charge-self-report-amount" type="number" placeholder="입금하실 금액(원)" style="flex:1;min-width:0;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px" />
               <button onclick="_submitChargeSelfReport()" style="flex-shrink:0;padding:8px 14px;border:none;border-radius:6px;background:#007b8b;color:#fff;font-size:12.5px;font-weight:600;cursor:pointer">등록</button>
