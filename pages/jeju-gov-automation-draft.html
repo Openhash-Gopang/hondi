@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>제주 AI 행정 — 실·국·과 단위 SP 실행 지도</title>
+<meta name="description" content="제주특별자치도청 15실·국 70과의 AI 행정 SP를 실·국 → 과 단위로 드릴다운하며, 각 단위의 SP 소스·설명 문서·실행 화면(webapp.html)으로 바로 연결합니다.">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root {
+  --gov-header: #001845;
+  --gov-nav: #1B2A6B;
+  --primary: #3D4FC4;
+  --primary-dk: #2F3EA0;
+  --primary-lt: #6472DB;
+  --primary-bg: #EEF0FB;
+  --primary-bd: #C9CEF2;
+  --amber: #B9791F;
+  --amber-bg: #FBF1E0;
+  --surface: #FFFFFF;
+  --bg: #F5F6FA;
+  --border: #DFE2ED;
+  --text: #1A202C;
+  --sub: #4A5568;
+  --hint: #718096;
+  --green: #1B6B3A; --green-bg: #E6F4EC;
+  --gray-bg: #EDEFF3; --gray-text: #718096;
+  --font: 'Pretendard', -apple-system, 'Apple SD Gothic Neo', sans-serif;
+  --shadow-1: 0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.05);
+  --r: 6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);font-size:14px;color:var(--text);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;}
+a{text-decoration:none;color:inherit;}
+button{font-family:inherit;cursor:pointer;}
+
+/* Notice banner — carries the reference-direction note the team agreed on */
+.ref-banner{background:var(--amber-bg);border-bottom:1px solid #E9D5A8;padding:10px 24px;font-size:12.5px;color:#6B5218;text-align:center;line-height:1.6;}
+.ref-banner strong{font-weight:700;}
+
+.topnav{background:var(--gov-nav);position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,.18);}
+.topnav-inner{max-width:1280px;margin:0 auto;padding:0 24px;display:flex;align-items:center;height:56px;gap:16px;}
+.topnav-logo{display:flex;align-items:center;gap:9px;font-size:16px;font-weight:800;color:#fff;padding-right:16px;border-right:1px solid rgba(255,255,255,.15);}
+.topnav-crumb{font-size:12.5px;color:rgba(255,255,255,.55);}
+.topnav-crumb a{color:rgba(255,255,255,.8);font-weight:600;}
+.topnav-crumb a:hover{text-decoration:underline;}
+.topnav-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.topnav-status{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:rgba(255,255,255,.55);}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;}
+
+.page-head{max-width:1280px;margin:0 auto;padding:28px 24px 4px;}
+.page-head h1{font-size:22px;font-weight:800;letter-spacing:-.4px;margin-bottom:6px;}
+.page-head p{font-size:13px;color:var(--sub);max-width:760px;line-height:1.7;}
+
+.main{max-width:1280px;margin:0 auto;padding:20px 24px 64px;}
+
+/* Tier 1 — 실·국 tab bar */
+.tier1-wrap{margin-bottom:22px;}
+.tier1-label{font-size:11px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.tier1-tabs{display:flex;flex-wrap:wrap;gap:6px;}
+.tier1-tab{padding:8px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-size:12.5px;font-weight:600;color:var(--sub);transition:all .12s;white-space:nowrap;}
+.tier1-tab:hover{border-color:var(--primary-lt);color:var(--primary);}
+.tier1-tab.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+.tier1-tab .count{opacity:.7;font-weight:700;margin-left:4px;}
+
+/* Selected 실·국 summary strip */
+.bureau-strip{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 20px;margin-bottom:16px;box-shadow:var(--shadow-1);flex-wrap:wrap;}
+.bureau-strip-title{font-size:16px;font-weight:800;}
+.bureau-strip-sub{font-size:12px;color:var(--hint);margin-top:2px;}
+.bureau-links{display:flex;gap:8px;flex-shrink:0;}
+.bureau-link{display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:var(--r);font-size:12px;font-weight:700;border:1px solid var(--border);color:var(--sub);}
+.bureau-link:hover{border-color:var(--primary-lt);color:var(--primary);background:var(--primary-bg);}
+.bureau-link.exec{background:var(--primary);border-color:var(--primary);color:#fff;}
+.bureau-link.exec:hover{background:var(--primary-dk);color:#fff;}
+
+/* Tier 2 — 과 card grid */
+.tier2-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px 22px;box-shadow:var(--shadow-1);}
+.tier2-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.tier2-head h2{font-size:14px;font-weight:800;display:flex;align-items:center;gap:7px;}
+.tier2-head h2::before{content:"";width:8px;height:8px;background:var(--amber);flex-shrink:0;}
+.tier2-count{font-size:12.5px;color:var(--hint);font-weight:700;}
+
+.division-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;}
+.division-card{border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:8px;transition:border-color .12s;}
+.division-card:hover{border-color:var(--primary-lt);}
+.division-card.unconfirmed{background:repeating-linear-gradient(135deg,#fff,#fff 8px,#FAFAFB 8px,#FAFAFB 16px);}
+.division-name{font-size:13px;font-weight:700;line-height:1.4;}
+.division-badge{display:inline-flex;align-items:center;width:fit-content;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;}
+.division-badge.confirmed{background:var(--green-bg);color:var(--green);}
+.division-badge.pending{background:var(--gray-bg);color:var(--gray-text);}
+.division-icons{display:flex;gap:6px;margin-top:auto;padding-top:4px;border-top:1px solid var(--border);}
+.division-icons a, .division-icons span{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:6px 4px;border-radius:5px;font-size:11px;font-weight:700;color:var(--sub);background:var(--gray-bg);}
+.division-icons a:hover{background:var(--primary-bg);color:var(--primary);}
+.division-icons a.exec{background:var(--primary-bg);color:var(--primary);}
+.division-icons a.exec:hover{background:var(--primary);color:#fff;}
+.division-icons span.disabled{opacity:.45;cursor:not-allowed;}
+
+.empty-state{padding:40px 20px;text-align:center;color:var(--hint);font-size:12.5px;line-height:1.8;}
+.empty-state code{background:var(--gray-bg);padding:2px 6px;border-radius:4px;font-size:11.5px;}
+
+footer{background:var(--gov-header);color:rgba(255,255,255,.5);padding:22px 0;margin-top:40px;}
+.footer-inner{max-width:1280px;margin:0 auto;padding:0 24px;font-size:11.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.footer-inner a:hover{color:#fff;}
+
+@media (max-width:720px){
+  .division-grid{grid-template-columns:1fr 1fr;}
+  .bureau-strip{flex-direction:column;align-items:flex-start;}
+}
+</style>
+</head>
+<body>
+
+<div class="ref-banner">
+  <strong>단일 소스 참조 안내</strong> — 이 페이지의 실·국·과 목록은 현재 <code style="background:rgba(0,0,0,.06);padding:1px 5px;border-radius:3px;">desktop.html#k-government</code>의 "제주" 탭을 참조합니다.
+  본 페이지가 과 단위까지 완전히 채워지면, 참조 방향이 반전되어 k-government 제주 탭이 이 페이지를 참조하게 될 예정입니다.
+</div>
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a href="https://hondi.net" class="topnav-logo">🏛️ 혼디 K-정부</a>
+    <div class="topnav-crumb"><a href="desktop.html#k-government">K-정부</a> / <a href="desktop.html#k-government">제주</a> / <span style="color:#fff;">제주 AI 행정</span></div>
+    <div class="topnav-right">
+      <div class="topnav-status"><span class="status-dot"></span>라이브 · 필드 테스트 중</div>
+    </div>
+  </div>
+</nav>
+
+<div class="page-head">
+  <h1>제주 AI 행정 — 실·국·과 단위 실행 지도</h1>
+  <p>제주특별자치도청 15실·국 70과 체제를 실·국 단위로 먼저 고르고, 그 아래 과(課) 단위 SP까지 내려가 바로 실행합니다. 각 카드는 SP 원문·설명 문서·실행 화면(regional-gov.html) 세 곳으로 연결됩니다.<br>
+  <span style="color:var(--amber);font-weight:600;">* "실행" 링크는 regional-gov.html에 sp/return 파라미터로 직접 여는 기능이 구현된 이후 작동합니다 — 아래 "실행 링크 구현 제안" 참고.</span></p>
+</div>
+
+<div class="main">
+  <div class="tier1-wrap">
+    <div class="tier1-label">실·국 선택 (17)</div>
+    <div class="tier1-tabs" id="tier1Tabs"></div>
+  </div>
+
+  <div class="bureau-strip" id="bureauStrip"></div>
+
+  <div class="tier2-section">
+    <div class="tier2-head">
+      <h2 id="tier2Title">과(課) 단위</h2>
+      <div class="tier2-count" id="tier2Count"></div>
+    </div>
+    <div class="division-grid" id="divisionGrid"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div>© 2026 혼디넷(hondi.net) · 제주 AI 행정 · 팀 주피터</div>
+    <div><a href="desktop.html#k-government">K-정부 카탈로그로</a> · <a href="https://github.com/Openhash-Gopang/hondi" target="_blank">GitHub ↗</a></div>
+  </div>
+</footer>
+
+<script>
+/*
+ * ────────────────────────────────────────────────────────────────────
+ * 데이터 소스 안내 (실제 연동 시 이 블록을 교체)
+ * ────────────────────────────────────────────────────────────────────
+ * 실·국(BUREAUS) 17개 명칭은 desktop.html#k-government "제주 부서" 탭에서
+ * 그대로 가져온 값입니다(2026-09-17 기준 확인).
+ *
+ * 과(divisions) 데이터는 실제로는 repo의 division-tables.js가 내보내는
+ * DO_DEPT_DIVISION_TABLE에서 로드해야 합니다 — division-master-data.json은
+ * PR #279에서 죽은 데이터로 확인되었으므로 절대 쓰지 마십시오.
+ *
+ * 이 목업에서는 "경제활력국" 한 곳만 실제 확인된 이름 3개(경제정책과/
+ * 기업정책과/소상공인물류과)로 채우고, 4번째 과는 정확한 명칭이 검색으로
+ * 확인되지 않아 "(명칭 확인 필요)"로 표시했습니다. 나머지 16개 실·국은
+ * DO_DEPT_DIVISION_TABLE에서 실제 로드하기 전까지 "데이터 연동 필요"
+ * 상태로 둡니다 — 개수·이름을 추측해서 채우지 않았습니다.
+ *
+ * SP 원문 경로 패턴(실제 저장소 구조 기준):
+ *   국 단위: prompts/gov-tree/01-do/SP-DO-{DOMAIN}.md
+ *   과 단위: prompts/gov-tree/02-do-dept/SP-DIV-{DOMAIN}-{N}.md
+ * 실행 화면: pages/regional-gov.html — gov-tree SP의 실제 실행 화면은
+ *   webapp.html이 아니라 이 파일입니다(PR #101/#281에서 확인, "전국
+ *   지방행정 AI, 모든 지역 공용" 자유발화 채팅 탭).
+ *   다만 이 페이지는 현재 자연어 자유발화 전용이며, 특정 SP를 URL
+ *   파라미터로 지정해 바로 여는 기능이 아직 없습니다(2026-09-17 확인).
+ *   저장소에서 확인되는 유일한 직접-오픈 사례는 pages/expert-chat.html의
+ *   URLSearchParams(persona, return) 패턴(PR #245, 전문가 페르소나 전용)
+ *   뿐입니다. 이 목업은 그 패턴을 regional-gov.html에도 동일하게
+ *   구현하는 것을 전제로 sp/return 파라미터를 미리 붙여 두었습니다 —
+ *   실제 구현 전까지 "▶ 실행" 버튼은 정상 동작하지 않습니다.
+ */
+
+const RAW_BASE = "https://raw.githubusercontent.com/Openhash-Gopang/hondi/main/prompts/gov-tree/";
+const REPO_BASE = "https://github.com/Openhash-Gopang/hondi/blob/main/prompts/gov-tree/";
+const EXEC_BASE = "pages/regional-gov.html";
+
+function spSrcUrl(path) { return RAW_BASE + path; }
+function spDocUrl(path) { return REPO_BASE + path; }
+function execUrl(spId) {
+  // 제안 단계: regional-gov.html은 아직 sp 파라미터로 특정 SP를 직접 여는
+  // 기능이 없습니다(2026-09-17 저장소 확인 기준). expert-chat.html의
+  // URLSearchParams(persona, return) 패턴을 그대로 본떠 구현하는 것을
+  // 설계서에서 제안했습니다 — 이 링크는 그 제안이 구현된 이후를 가정합니다.
+  const params = new URLSearchParams({ sp: spId, return: "pages/jeju-gov-automation.html" });
+  return `${EXEC_BASE}?${params.toString()}`;
+}
+
+// 17개 실·국 — desktop.html#k-government "제주 부서" 탭과 동일(2026-09-17 확인)
+const BUREAUS = [
+  { id: "welfare",   name: "복지가족국(구 보...)",     spId: "SP-DO-WELFARE",   divisions: null },
+  { id: "plan",      name: "기획조정실",               spId: "SP-DO-PLAN",      divisions: null },
+  { id: "health",    name: "도민안전건강실(...)",       spId: "SP-DO-HEALTH",    divisions: null },
+  { id: "jachi",     name: "특별자치행정국",           spId: "SP-DO-JACHI",     divisions: null },
+  { id: "econ",      name: "경제활력국",               spId: "SP-DO-ECON",      divisions: [
+      { id: "econ-1", name: "경제정책과",      spId: "SP-DIV-ECON-1", confirmed: true },
+      { id: "econ-2", name: "기업정책과",      spId: "SP-DIV-ECON-2", confirmed: true },
+      { id: "econ-3", name: "소상공인물류과",  spId: "SP-DIV-ECON-3", confirmed: true },
+      { id: "econ-4", name: "(명칭 확인 필요 — 고용·노동 관련 과)", spId: "SP-DIV-ECON-4", confirmed: false },
+  ]},
+  { id: "innov",     name: "혁신산업국",               spId: "SP-DO-INNOV",     divisions: null },
+  { id: "climate",   name: "기후환경국",               spId: "SP-DO-CLIMATE",   divisions: null, divisionCount: 4 },
+  { id: "housing",   name: "건설주택국",               spId: "SP-DO-HOUSING",   divisions: null, divisionCount: 4 },
+  { id: "transport", name: "교통항공국",               spId: "SP-DO-TRANSPORT", divisions: null, divisionCount: 4 },
+  { id: "culture",   name: "문화체육교육국",           spId: "SP-DO-CULTURE",   divisions: null, divisionCount: 3 },
+  { id: "tourism",   name: "관광교류국",               spId: "SP-DO-TOURISM",   divisions: null, divisionCount: 3 },
+  { id: "agri",      name: "농축산식품국",             spId: "SP-DO-AGRI",      divisions: null, divisionCount: 5 },
+  { id: "ocean",     name: "해양수산국",               spId: "SP-DO-OCEAN",     divisions: null, divisionCount: 4 },
+  { id: "comm",      name: "소통청렴담당관",           spId: "SP-DO-COMM",      divisions: null },
+  { id: "general",   name: "총무과",                   spId: "SP-DO-GENERAL",   divisions: null },
+  { id: "central",   name: "중앙협력본부",             spId: "SP-DO-CENTRAL",   divisions: null },
+  { id: "spokesman", name: "대변인",                   spId: "SP-DO-SPOKES",    divisions: null },
+];
+
+let activeBureauId = "econ";
+
+function bureauCountLabel(b) {
+  if (Array.isArray(b.divisions)) return b.divisions.length;
+  if (b.divisionCount) return b.divisionCount;
+  return null;
+}
+
+function renderTier1() {
+  const wrap = document.getElementById("tier1Tabs");
+  wrap.innerHTML = "";
+  BUREAUS.forEach(b => {
+    const btn = document.createElement("button");
+    btn.className = "tier1-tab" + (b.id === activeBureauId ? " active" : "");
+    const cnt = bureauCountLabel(b);
+    btn.innerHTML = b.name + (cnt !== null ? `<span class="count">${cnt}</span>` : "");
+    btn.onclick = () => { activeBureauId = b.id; render(); };
+    wrap.appendChild(btn);
+  });
+}
+
+function renderBureauStrip() {
+  const b = BUREAUS.find(x => x.id === activeBureauId);
+  const strip = document.getElementById("bureauStrip");
+  const doPath = `01-do/${b.spId}.md`;
+  strip.innerHTML = `
+    <div>
+      <div class="bureau-strip-title">${b.name}</div>
+      <div class="bureau-strip-sub">국(局) 단위 SP — ${b.spId}</div>
+    </div>
+    <div class="bureau-links">
+      <a class="bureau-link" href="${spSrcUrl(doPath)}" target="_blank">🔗 SP 원문</a>
+      <a class="bureau-link" href="${spDocUrl(doPath)}" target="_blank">📄 저장소에서 보기</a>
+      <a class="bureau-link exec" href="${execUrl(b.spId)}" target="_blank">▶ 실행 화면 열기 <span style="opacity:.75;font-weight:600;">(제안·미구현)</span></a>
+    </div>`;
+}
+
+function renderTier2() {
+  const b = BUREAUS.find(x => x.id === activeBureauId);
+  const title = document.getElementById("tier2Title");
+  const count = document.getElementById("tier2Count");
+  const grid = document.getElementById("divisionGrid");
+
+  title.textContent = `${b.name} 산하 과(課) 단위`;
+  grid.innerHTML = "";
+
+  if (Array.isArray(b.divisions) && b.divisions.length > 0) {
+    count.textContent = `${b.divisions.length}개 과`;
+    b.divisions.forEach(d => {
+      const divPath = `02-do-dept/${d.spId}.md`;
+      const card = document.createElement("div");
+      card.className = "division-card" + (d.confirmed ? "" : " unconfirmed");
+      card.innerHTML = `
+        <div class="division-name">${d.name}</div>
+        <div class="division-badge ${d.confirmed ? "confirmed" : "pending"}">
+          ${d.confirmed ? "① 제주 확정" : "④ 명칭 미확인"}
+        </div>
+        <div class="division-icons">
+          <a href="${spSrcUrl(divPath)}" target="_blank">🔗 SP</a>
+          <a href="${spDocUrl(divPath)}" target="_blank">📄 문서</a>
+          <a class="exec" href="${execUrl(d.spId)}" target="_blank">▶ 실행*</a>
+        </div>`;
+      grid.appendChild(card);
+    });
+    return;
+  }
+
+  // 과 데이터 미연동 상태 — 개수만 아는 경우와 전혀 모르는 경우를 구분해 표시
+  count.textContent = b.divisionCount ? `${b.divisionCount}개 과 (명칭 미연동)` : "데이터 연동 필요";
+  grid.innerHTML = `
+    <div class="empty-state" style="grid-column:1/-1;">
+      ${b.divisionCount
+        ? `이 실·국 산하에 과 ${b.divisionCount}개가 있는 것으로 확인되었으나, 정확한 과 이름은 아직 이 페이지에 연동되지 않았습니다.`
+        : `이 실·국의 과 단위 데이터가 아직 이 페이지에 연동되지 않았습니다.`}
+      <br>저장소의 <code>division-tables.js</code> → <code>DO_DEPT_DIVISION_TABLE</code>에서 실제 목록을 불러와야 합니다.
+    </div>`;
+}
+
+function render() {
+  renderTier1();
+  renderBureauStrip();
+  renderTier2();
+}
+
+render();
+</script>
+</body>
+</html>
