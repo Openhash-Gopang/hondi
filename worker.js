@@ -17431,13 +17431,20 @@ async function handleChargeConfirmNotification(request, env, corsHeaders, ctx) {
           // 들어오면 handleChargeSelfReport가 이걸 찾아 짝짓는다.
           console.info(JSON.stringify({ tag: 'NOTIFICATION_CAPTURE_AMOUNT_FALLBACK_NO_CANDIDATE', amount: amountGuess, ts: new Date().toISOString() }));
           try {
-            await fetch(`${L1_DEFAULT}/api/collections/unmatched_deposit_captures/records`, {
-              method: 'POST', headers,
+            // 2026-09-17 핫픽스 — 위 headers는 GET용으로 만든 것이라
+            // Content-Type이 없다. POST에 그대로 재사용하면 PocketBase가
+            // body를 JSON으로 못 읽어 저장이 조용히 실패할 수 있었다.
+            const postHeaders = { ...headers, 'Content-Type': 'application/json' };
+            const capRes = await fetch(`${L1_DEFAULT}/api/collections/unmatched_deposit_captures/records`, {
+              method: 'POST', headers: postHeaders,
               body: JSON.stringify({
                 amount: amountGuess, raw_text: raw_text || '', notification_key,
                 source: source || '', app_package: app_package || '', depositor_name: depositor_name || '',
               }),
             });
+            if (!capRes.ok) {
+              console.warn('[NotificationCapture] unmatched_deposit_captures 저장 실패:', capRes.status, (await capRes.text().catch(() => '')).slice(0, 200));
+            }
           } catch (e) {
             console.warn('[NotificationCapture] unmatched_deposit_captures 저장 실패:', e.message);
           }
