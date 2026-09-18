@@ -14320,7 +14320,13 @@ export default {
     // 살아있다면 별도 확인 필요.
     // /ai/chat, /gemini/, /llm/relay는 이번 결정에 없던 별도 경로라
     // 인증 모델을 확인 안 하고 같이 묶지 않았다 — 필요하면 별도 검토.
-    const MANDATORY_AUTH_PATHS = ['/klaw/relay', '/kplan/relay', '/kjit/relay', '/kcity/relay', '/gov/relay', '/chat/completions', '/deepseek'];
+    // 2026-09-18 롤백(주피터 지시) — /chat/completions·/deepseek는 원래
+    // 2026-09-17에 이 목록에 포함됐었으나(#326 "현관문 하나"), 이를 만족시키기
+    // 위해 클라이언트에 새로 붙인 phone_verify_token 팝업(KAuth)이 이 앱에
+    // 이미 있던 별개의 지갑 기반 세션 시스템(auth.js의 _issueSession, Ed25519
+    // 서명)과 충돌 — 두 인증 오버레이가 동시에 뜨는 등 불안정을 일으켜 원상
+    // 복귀한다. 메인 채팅 인증은 계속 그 기존 지갑 세션에 맡긴다.
+    const MANDATORY_AUTH_PATHS = ['/klaw/relay', '/kplan/relay', '/kjit/relay', '/kcity/relay', '/gov/relay'];
     if (MANDATORY_AUTH_PATHS.some(p => pathname === p || pathname.startsWith(p))) {
       let _gateBody;
       try { _gateBody = JSON.parse(bodyText); } catch {
