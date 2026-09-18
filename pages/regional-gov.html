@@ -203,10 +203,21 @@ async function _callGovClassifyModel(systemPrompt, userText) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'deepseek-v4-flash',
-      // subject-gate.js의 _gateOneLevel과 동일값(4000) — reasoning_content가
-      // 최종 답변 전에 토큰을 소진하는 문제가 max_tokens 30/2000에서
-      // 각각 확인됐던 이력 참고(위 이력 주석, 2026-09-18).
-      max_tokens: 4000,
+      // 2026-09-18 4000→12000 재조정 — 4000에서도 A1/A3/A5 라이브 실사
+      // 5건이 completion_tokens=reasoning_tokens=4000(정확히 상한)으로
+      // 빈 응답 재현됨(이력 주석 위 참고, max_tokens 30/2000 단계에서도
+      // 같은 증상 확인된 바 있음). 같은 5건을 max_tokens=12000으로
+      // 재실행하는 진단(tests/live_smoketest/gov_clarify_live_smoketest.py
+      // --max-tokens)으로 "추론이 안 끝나는 구조적 문제"와 "단순 예산
+      // 부족"을 갈랐고, 4/5건이 12000 안에서 정상 종료(reasoning 최대
+      // 8520 사용, diag-01)됨을 확인 — 무한/비정상 루프가 아니라 순수
+      // 예산 부족이었다. 실제 과금은 상한이 아니라 실사용 토큰 기준이라
+      // 대부분의 쉬운 케이스(100~1000대)는 비용 영향이 없고, 어려운
+      // 케이스만 레이턴시가 늘어나는 대신 빈 응답이 사라진다.
+      // (나머지 1건, "보훈 대상자" 케이스는 재실행 시 392 토큰만 쓰고도
+      // 결과가 달라져 — temperature=0인데도 — 예산이 아닌 모델
+      // 비결정성 쪽 문제로 별도 이슈다. 여기서는 다루지 않는다.)
+      max_tokens: 12000,
       temperature: 0,
       messages: [
         { role: 'system', content: systemPrompt },
