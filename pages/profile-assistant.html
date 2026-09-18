@@ -68,6 +68,17 @@
   </div>
 </div>
 
+<!-- ── 전화번호 로그인 게이트 (2026-09-18 긴급 추가) ──────────────────
+     worker.js #326("현관문 하나")가 /deepseek에 phone_verify_token을
+     강제한 이후, 이 페이지의 독립 callPaAI() 구현에는 그 배선이 없어
+     동일하게 400 LOGIN_REQUIRED로 막힌다(webapp.html/expert-chat.html과
+     같은 클래스의 회귀). 동일한 공용 로그인 모듈을 여기도 로드한다 —
+     module 스크립트보다 먼저(동기 로드) 와야 window.KAuth가 제때 존재. -->
+<script>
+  window.K_AUTH_CONFIG = { serviceLabel: '혼디' };
+</script>
+<script src="/auth/k-service-auth-client.js"></script>
+
 <script type="module" src="/gopang-wallet.js"></script>
 <script type="module">
 // ══════════════════════════════════════════════════════════════
@@ -480,9 +491,28 @@ async function _pumpSSE(response, onJson) {
     }
   }
 }
+// ── phone_verify_token 확보 (2026-09-18 신설 — 긴급 회귀 수정) ───────
+// call-ai.js/expert-chat.html의 _ensurePhoneVerifyToken()과 동일 로직의
+// 복제본(이 페이지는 무거운 call-ai.js 모듈 그래프를 끌어오지 않는
+// 독립 경량 페이지라 import 대신 복제 — 로직을 고칠 일이 생기면 세
+// 파일 모두 반영할 것).
+async function _ensurePhoneVerifyToken() {
+  if (typeof window === 'undefined' || !window.KAuth || typeof window.KAuth.ensureLogin !== 'function') {
+    console.warn('[PA][Auth] KAuth 모듈 미로드 — phone_verify_token 없이 진행(서버 400 예상)');
+    return null;
+  }
+  try {
+    return await window.KAuth.ensureLogin();
+  } catch (e) {
+    console.warn('[PA][Auth] ensureLogin 실패:', e.message);
+    return null;
+  }
+}
+
 async function callPaAI(msgs, onChunk, tierOverride) {
   const candidates = _buildCandidates(tierOverride);
   const user = _loadUser();
+  const _pvt = await _ensurePhoneVerifyToken();
   let lastErr = null;
   for (const c of candidates) {
     try {
@@ -508,7 +538,7 @@ async function callPaAI(msgs, onChunk, tierOverride) {
         : c.provider === 'deepseek-default'
         ? await fetch(`${c.baseUrl}/deepseek`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...reqBody, guid: user?.ipv6 || null }),
+            body: JSON.stringify({ ...reqBody, guid: user?.ipv6 || null, phone_verify_token: _pvt }),
           })
         : await fetch(`${RELAY_ENDPOINT}/llm/relay`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },

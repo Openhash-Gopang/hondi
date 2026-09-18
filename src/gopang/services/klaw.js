@@ -110,6 +110,19 @@ export async function _klawReview(source, payload) {
     //   호출했기 때문. 고정 저가 모델로 바꾸면 다시 켜도 안전하다.
     const klawSystemPrompt = klawPrompt;
 
+    // BUG-FIX(2026-09-18, 긴급) — worker.js #326 게이트가 /deepseek에
+    // phone_verify_token을 강제하는데 이 백그라운드 감시 호출엔 그 배선이
+    // 없어 400으로 막혔다(call-ai.js와 동일 클래스 회귀). call-ai.js와의
+    // 순환 import를 피하기 위해 그 파일의 _ensurePhoneVerifyToken()과
+    // 동일 로직을 그대로 복제한다.
+    let _pvt = null;
+    if (typeof window !== 'undefined' && window.KAuth && typeof window.KAuth.ensureLogin === 'function') {
+      try { _pvt = await window.KAuth.ensureLogin(); }
+      catch (e) { console.warn('[Klaw][Auth] ensureLogin 실패:', e.message); }
+    } else {
+      console.warn('[Klaw][Auth] KAuth 모듈 미로드 — phone_verify_token 없이 진행(서버 400 예상)');
+    }
+
     const res = await fetch(CFG.endpoint + '/deepseek', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -121,6 +134,7 @@ export async function _klawReview(source, payload) {
           { role: 'system',  content: klawSystemPrompt },
           { role: 'user',    content: reviewText },
         ],
+        phone_verify_token: _pvt,
       }),
     });
 

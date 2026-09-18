@@ -6,7 +6,7 @@ import { _isRegistered, ensureWalletSetup } from '../core/auth.js';
 import { appendBubble, riskChip } from './bubble.js';
 import { activateAI } from '../ai/toggle.js';
 import { _sendP2P } from '../p2p/webrtc.js';
-import { callAI } from '../ai/call-ai.js';
+import { callAI, _ensurePhoneVerifyToken } from '../ai/call-ai.js';
 import { _showRegisterFlow } from './register-flow.js';
 import { CFG } from '../core/config.js';
 import { _gwpLaunch } from '../gwp/engine.js';
@@ -188,6 +188,10 @@ function _buildPhase7LlmCaller() {
   const tier = CFG.phase7.tier === 'pro' ? 'hondi-pro' : 'hondi-flash';
   return async ({ systemPrompt, userMessage }) => {
     const guid = _USER?.ipv6 || USER_GUID || null;
+    // BUG-FIX(2026-09-18, 긴급) — worker.js #326 게이트가 /deepseek에
+    // phone_verify_token을 강제하는데 이 Phase 7 호출엔 그 배선이 없어
+    // 400 LOGIN_REQUIRED로 막혔다(call-ai.js와 동일 클래스 회귀).
+    const _pvt = await _ensurePhoneVerifyToken();
     const res = await fetch(`${CFG.endpoint.replace(/\/+$/, '')}/deepseek`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -200,6 +204,7 @@ function _buildPhase7LlmCaller() {
         max_tokens: 300,
         temperature: 0.2,
         guid,
+        phone_verify_token: _pvt,
       }),
     });
     if (!res.ok) throw new Error(`phase7 llm http ${res.status}`);

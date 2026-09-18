@@ -506,7 +506,7 @@ let _currentAbort = null;
 // 후보 페일오버 루프 전체가 재사용한다 — 페일오버 시도마다 매번
 // 다시 로그인을 확인하면 재시도가 곧 재로그인 요구로 보여 사용자
 // 경험이 나빠진다.
-async function _ensurePhoneVerifyToken() {
+export async function _ensurePhoneVerifyToken() {
   if (typeof window === 'undefined' || !window.KAuth || typeof window.KAuth.ensureLogin !== 'function') {
     // 스크립트 로드 실패 등 — 토큰 없이 진행하면 서버가 400
     // LOGIN_REQUIRED로 명확히 알려주므로 여기서 조용히 삼키지 않고

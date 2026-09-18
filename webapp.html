@@ -4170,6 +4170,24 @@ window.closePDV = closePDV;
   // 20~30초씩 걸렸다(§HANDOFF_2026-08-06 라이브 재검증, Network 탭
   // deepseek fetch 33.90s/22.16s 실측). resolveOrchestrationModel 자체는
   // 이미 정확했다 — 그 결과를 패널까지 전달할 배선이 없었을 뿐이다.
+  // ── phone_verify_token 확보 (2026-09-18 신설 — 긴급 회귀 수정) ───────
+  // worker.js #326 게이트가 /deepseek에 phone_verify_token을 강제하는데
+  // 이 AI 패널(_callPanelAI)은 메인 채팅(call-ai.js._callAIInner)과 완전히
+  // 별개의 후보 페일오버 구현이라 그쪽 수정이 미치지 못했다. 이 스크립트
+  // 블록은 <script type="module">이 아니라 정적 export를 못 쓰므로(바로
+  // 위 _panelHistory 연결부와 동일 사유), call-ai.js가 export하는
+  // _ensurePhoneVerifyToken()을 동적 import로 재사용한다 — 로직을 또
+  // 복제하지 않기 위함.
+  async function _ensurePhoneVerifyTokenPanel() {
+    try {
+      const { _ensurePhoneVerifyToken } = await import('./src/gopang/ai/call-ai.js');
+      return await _ensurePhoneVerifyToken();
+    } catch (e) {
+      console.warn('[Panel][Auth] phone_verify_token 확보 실패:', e.message);
+      return null;
+    }
+  }
+
   async function _callPanelAI(userText, bubbleEl, attached, _preTab, modelTier) {
     _panelUserAborted = false; // 새 요청 시작 — 이전 취소 플래그 초기화
     const { PROVIDER_INFO, getPriorityOrder } = await import('./src/gopang/core/config.js');
@@ -4395,6 +4413,15 @@ window.closePDV = closePDV;
       if (MODEL_MIGRATION[c.model]) c.model = MODEL_MIGRATION[c.model];
     }
 
+    // BUG-FIX(2026-09-18, 긴급) — worker.js #326 게이트가 /deepseek에
+    // phone_verify_token을 강제하는데, 이 AI 패널(_callPanelAI)은 메인
+    // 채팅(call-ai.js)과 완전히 별개의 후보 페일오버 구현이라 그쪽 수정이
+    // 미치지 못했다 — 패널에서 보내는 모든 메시지가 400 LOGIN_REQUIRED로
+    // 막히는 회귀가 있었다(주피터 실사 재현). 아래 재시도(finish_reason=
+    // length) 분기도 같은 candidate(c)를 그대로 재사용하므로 이 한 번의
+    // 확보로 두 fetch 지점 모두 커버된다.
+    const _panelPvt = await _ensurePhoneVerifyTokenPanel();
+
     let lastErr = '';
     for (const c of candidates) {
       // BUG-FIX(2026-07-01): 아래 fetch()에 타임아웃이 전혀 없어, 서버가
@@ -4423,6 +4450,7 @@ window.closePDV = closePDV;
                 model: c.model, messages: _messagesWithLocation(_panelHistory), stream: true,
                 max_tokens: resolveChatBudget(c.model),
                 guid: (JSON.parse(localStorage.getItem('gopang_user_v4') || sessionStorage.getItem('gopang_user_v4') || '{}')?.ipv6) || null,
+                phone_verify_token: _panelPvt,
               }),
             })
           : await fetch(`${endpoint.replace(/\/+$/, '')}/llm/relay`, {
@@ -4541,6 +4569,7 @@ window.closePDV = closePDV;
                   body: JSON.stringify({
                     model: c.model, messages: _retryMessages, stream: true, max_tokens: _retryBudget,
                     guid: (JSON.parse(localStorage.getItem('gopang_user_v4') || sessionStorage.getItem('gopang_user_v4') || '{}')?.ipv6) || null,
+                    phone_verify_token: _panelPvt,
                   }),
                 })
               : await fetch(`${endpoint.replace(/\/+$/, '')}/llm/relay`, {

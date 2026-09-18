@@ -75,6 +75,21 @@
 </div>
 </div>
 
+<!-- ── 전화번호 로그인 게이트 (2026-09-18 긴급 추가) ──────────────────
+     worker.js #326("현관문 하나", 2026-09-17)가 /deepseek·/chat/completions에
+     phone_verify_token을 강제한 이후, webapp.html(call-ai.js)에는 이미
+     이식했지만 이 페이지(pages/expert-chat.html)는 별도의 독립
+     callExpertAI() 구현을 갖고 있어 그 수정이 미치지 못했다 — desktop.html
+     하단 채팅 버튼으로 열리는 페르소나 상담이 여전히 400 LOGIN_REQUIRED로
+     막히는 게 실사로 재현됨(주피터, 2026-09-18). K-Plan/K-Law/K-Mail/
+     webapp.html과 동일한 공용 로그인 모듈을 여기도 로드한다. 아래
+     type="module" 스크립트보다 먼저(동기 로드) 와야 window.KAuth가
+     제때 존재한다. -->
+<script>
+  window.K_AUTH_CONFIG = { serviceLabel: '혼디' };
+</script>
+<script src="/auth/k-service-auth-client.js"></script>
+
 <script type="module">
 import { EXPERT_REGISTRY, UNIVERSAL_INTEGRITY_KEY, COMMON_GUARDRAILS_KEY,
          COMMON_MEDICAL_SAFETY_KEY, EXPERT_BASE_KEY, isConsultableChild, resolveExpertId }
@@ -351,9 +366,28 @@ async function _pumpSSE(response, onJson) {
   }
 }
 
+// ── phone_verify_token 확보 (2026-09-18 신설 — 긴급 회귀 수정) ───────
+// call-ai.js의 _ensurePhoneVerifyToken()과 동일 로직 — 이 페이지는
+// 별도 모듈이라 그쪽 함수를 import할 수 없어 그대로 복제한다(두 곳이
+// 갈라지지 않도록, 로직을 고칠 일이 생기면 반드시 두 파일 모두 반영할 것).
+async function _ensurePhoneVerifyToken() {
+  if (typeof window === 'undefined' || !window.KAuth || typeof window.KAuth.ensureLogin !== 'function') {
+    console.warn('[Expert][Auth] KAuth 모듈 미로드 — phone_verify_token 없이 진행(서버 400 예상)');
+    return null;
+  }
+  try {
+    return await window.KAuth.ensureLogin();
+  } catch (e) {
+    console.warn('[Expert][Auth] ensureLogin 실패:', e.message);
+    return null;
+  }
+}
+
 async function callExpertAI(messages, onChunk) {
   const candidates = _buildCandidates();
   const user = _loadUser();
+  // 후보 페일오버 루프 전체가 재사용하도록 루프 진입 전 한 번만 확보
+  const _pvt = await _ensurePhoneVerifyToken();
   let lastErr = null;
   for (const c of candidates) {
     try {
@@ -368,7 +402,7 @@ async function callExpertAI(messages, onChunk) {
         ? await fetch(`${c.baseUrl}/deepseek`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...reqBody, guid: user?.ipv6 || null }),
+            body: JSON.stringify({ ...reqBody, guid: user?.ipv6 || null, phone_verify_token: _pvt }),
           })
         : await fetch(`${RELAY_ENDPOINT}/llm/relay`, {
             method: 'POST',
