@@ -171,7 +171,7 @@ const PROXY = 'https://hondi-proxy.tensor-city.workers.dev';
 
 // ── 실국/시청/기관/과·팀 LLM 분류 폴백 (2026-08-02 신설) ───────────────
 // gov-router.js의 _classifyFallback/_classifyDivisionFallback이 기대하는
-// 계약: async (text, candidatesText) => 'CODE' | 'NONE' | null.
+// 계약: async (text, candidatesText) => 'CODE' | 'NONE' | 'CLARIFY:A,B' | null.
 // v1.2(§0 국가기관 지연초기화 도입 시점)에 이 폴백 메커니즘 자체는
 // 만들어졌지만, 실제 호출부(이 파일)에서 지금까지 쭉 classifyFn 자리에
 // null을 넘겨왔다 — 즉 동점/미분류 발화에서 LLM이 대신 판단해주는
@@ -180,63 +180,106 @@ const PROXY = 'https://hondi-proxy.tensor-city.workers.dev';
 // 저지연/저비용이 중요하므로 gov-flash 등급, JSON 강제 없이 코드 한
 // 줄만 요구 — 실패해도 null 반환(호출부가 이미 "확정 못하면 안전하게
 // 상위 계층으로 폴백"하도록 설계돼 있어 이 함수는 절대 throw하지 않는다).
+//
+// ★ 2026-09-18 전면 재작성 — "CLARIFY:코드1,코드2" 자기선고 방식
+// (2026-08-21, 코드 한 줄 자유 텍스트로 code/NONE/CLARIFY: 중 하나를
+// 직접 선택하게 하던 원래 설계)이 처음으로 라이브 검증됐는데, 진짜
+// 애매한 쌍 15건 중 4건만 실제로 CLARIFY를 냈다(나머지 11건은 확신
+// 있게 하나만 고름) — subject-gate.js의 EXPERT 게이트에서 같은 설계가
+// 0/22로 거의 안 쓰였던 것보다는 낫지만("확신 있게 고르기"와 "동시에
+// 의심하기"가 한 JSON 안에서 충돌하는 정도가 후보 수·과제 단순성에
+// 따라 달랐던 것으로 추정), 여전히 30% 미만이라 주피터 지시로 같은
+// 처방(2단계 분리)을 이식한다. 1차 호출은 "code"(확신 있는 선택, 지금
+// 까지와 동일 판단)와 "runnerUp"(부담 적은 차선책 사실 보고, 없으면
+// null)을 같이 받는다. runnerUp이 있을 때만 완전히 별개의 2차 호출로
+// "이 발화가 runnerUp에도 해당할 수 있는가"를 예/아니오로만 확인 —
+// "예"일 때만 진짜 애매함으로 확정한다. 외부 계약(반환 문자열 형식)은
+// 그대로 유지한다 — gov-router.js의 _classifyFallback/_parseClarifySignal
+// 쪽은 전혀 수정할 필요가 없다(CLARIFY:코드1,코드2 형식을 이 함수
+// 내부에서 조합해 반환하는 것뿐).
+async function _callGovClassifyModel(systemPrompt, userText) {
+  const r = await fetch(`${PROXY}/chat/completions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'deepseek-v4-flash',
+      // subject-gate.js의 _gateOneLevel과 동일값(4000) — reasoning_content가
+      // 최종 답변 전에 토큰을 소진하는 문제가 max_tokens 30/2000에서
+      // 각각 확인됐던 이력 참고(위 이력 주석, 2026-09-18).
+      max_tokens: 4000,
+      temperature: 0,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userText },
+      ],
+    }),
+  });
+  if (!r.ok) return null;
+  const d = await r.json();
+  return (d.choices?.[0]?.message?.content || '').trim();
+}
+
 async function _govClassifyFn(text, candidatesText) {
   try {
-    const r = await fetch(`${PROXY}/chat/completions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'deepseek-v4-flash',
-        // ★ 2026-09-18 수정(30→2000, 사용자 지시로 시작된
-        // gov-clarify 최초 라이브 검증에서 발견) — "저지연/저비용이라
-        // max_tokens 30"이라는 위 설계 취지 자체는 맞지만, deepseek-v4-flash는
-        // reasoning 모델이라 최종 답변 전에 reasoning_content부터 채운다.
-        // 라이브 검증 6/6건 전부 finish_reason=length, reasoning_tokens=30
-        // (=max_tokens 전량)으로 확인됨 — 즉 이 함수는 켜진 이후로 단 한
-        // 글자의 실제 코드/NONE/CLARIFY 응답도 낸 적이 없었을 가능성이
-        // 높다(실패해도 조용히 null 폴백이라 겉으로 티가 안 났다). 정확히
-        // subject-gate.js의 _gateOneLevel이 2026-09-14에 1500→4000으로
-        // 재상향했던 것과 같은 원인 — 다만 이쪽은 원래 값(30)이 훨씬 낮아
-        // 100%로 재현됐다. 최종 응답 자체는 여전히 짧지만(코드 한 줄 또는
-        // CLARIFY:코드1,코드2), reasoning_content 여유를 주기 위해 2000으로
-        // 올린다 — subject-gate.js의 4000보다는 후보 목록이 짧고 JSON
-        // 강제도 없어 낮춰 잡았다. 필요시 재검증 후 추가 조정.
-        //
-        // ★ 2026-09-18 재조정(2000→4000) — gov-clarify A1 실사 17건에서
-        // 3/17(18%)이 여전히 빈 응답으로 확인됨(2000도 부족). subject-
-        // gate.js와 동일한 4000으로 맞춘다 — 이 함수는 후보 목록이 더
-        // 짧고 JSON 강제도 없어 4000까지는 필요 없을 거라 낮춰 잡았던
-        // 판단이 틀렸다는 뜻. 재검증 후 그래도 부족하면 원인을 토큰
-        // 예산이 아닌 다른 데서 찾아야 한다.
-        max_tokens: 4000,
-        temperature: 0,
-        messages: [
-          { role: 'system', content:
-            '아래는 제주 지방행정 라우팅 코드 후보 목록이다. 사용자 발화를 읽고 ' +
-            '가장 알맞은 코드 하나만 답하라. 확신이 없거나 해당하는 코드가 없으면 ' +
-            'NONE이라고만 답하라. 후보 중 2개가 똑같이 그럴듯해서 하나로 못 고르겠으면 ' +
-            '"CLARIFY:코드1,코드2" 형식으로만 답하라(콤마로 구분, 공백 없이, 정확히 2개만). ' +
-            '다른 설명·문장부호 없이 코드, NONE, 또는 CLARIFY:... 중 하나만 출력한다.\n\n' +
-            candidatesText },
-          { role: 'user', content: text },
-        ],
-      }),
-    });
-    if (!r.ok) return null;
-    const d = await r.json();
-    const raw = (d.choices?.[0]?.message?.content || '').trim();
-    // ★ 2026-08-21 수정(사용자 지시 — 설계 공백 해소: "애매하면 되묻기") —
-    // CLARIFY:코드1,코드2 형식은 접두어까지 그대로 보존해서 반환해야
-    // gov-router.js의 _parseClarifySignal()이 인식한다. 기존 정규식은
-    // 코드 형식(SP-XXX-YYY)만 뽑아서 CLARIFY: 접두어가 잘려나갔었다.
-    if (raw.startsWith('CLARIFY:')) {
-      const codes = raw.slice(8).match(/[A-Z0-9][A-Z0-9-]*/g) || [];
-      return codes.length >= 2 ? `CLARIFY:${codes[0]},${codes[1]}` : null;
+    const systemPrompt =
+      '아래는 제주 지방행정 라우팅 코드 후보 목록이다. 사용자 발화를 읽고 ' +
+      '다른 텍스트 없이 JSON으로만 응답하라: {"code": "<가장 알맞은 코드, ' +
+      '확신이 없거나 해당하는 코드가 없으면 NONE>", "runnerUp": "<그다음으로 ' +
+      '가능성 있는 다른 구체적 코드, 없으면 null>"}. "code"는 지금까지처럼 ' +
+      '확신 있게 고르는 판단이다 — 이 판단 자체는 조금도 망설이지 않는다. ' +
+      '"runnerUp"은 별개의 질문이다: "code"로 고른 것 말고도 이 발화만으로는 ' +
+      '완전히 배제할 수 없는 다른 구체적인 코드가 하나 있다면 그 코드를, ' +
+      '그런 코드가 전혀 없다면 null을 넣는다(runnerUp을 적는다고 "code" ' +
+      '판단이 흔들리는 게 아니다).\n\n후보 목록:\n' + candidatesText;
+
+    const raw = await _callGovClassifyModel(systemPrompt, text);
+    if (!raw) return null;
+    const cleaned = raw.replace(/```json|```/g, '').trim();
+
+    let parsed = null;
+    try { parsed = JSON.parse(cleaned); } catch { /* 아래 하위호환 경로로 */ }
+
+    if (!parsed || typeof parsed !== 'object') {
+      // 하위호환 — 모델이 JSON 대신 구 형식(코드 한 줄 또는 CLARIFY:...)으로
+      // 답한 경우도 최대한 건진다. 정상 경로에서는 거의 안 탈 것으로 예상.
+      if (cleaned.startsWith('CLARIFY:')) {
+        const codes = cleaned.slice(8).match(/[A-Z0-9][A-Z0-9-]*/g) || [];
+        return codes.length >= 2 ? `CLARIFY:${codes[0]},${codes[1]}` : null;
+      }
+      const m = cleaned.match(/[A-Z0-9][A-Z0-9-]*/);
+      return m ? m[0] : (cleaned === 'NONE' ? 'NONE' : null);
     }
-    // 코드 형식(SP-XXX-YYY 등)만 추출 — 모델이 마침표/따옴표를 덧붙이는
-    // 경우가 있어 그대로 비교하면 놓친다.
-    const m = raw.match(/[A-Z0-9][A-Z0-9-]*/);
-    return m ? m[0] : (raw === 'NONE' ? 'NONE' : null);
+
+    const code = typeof parsed.code === 'string' ? parsed.code.trim() : null;
+    if (!code || code === 'NONE') return code || null;
+
+    const runnerUp = typeof parsed.runnerUp === 'string' ? parsed.runnerUp.trim() : null;
+    if (runnerUp && runnerUp !== code) {
+      // runnerUp 후보의 설명 줄을 candidatesText에서 그대로 찾아 2차 확인
+      // 프롬프트에 그대로 재사용한다(재구현 없음 — ROUTE_DESCRIPTIONS를
+      // 다시 조회하지 않고 이미 받은 텍스트에서 찾는다).
+      const runnerUpLine = candidatesText
+        .split('\n')
+        .find((l) => l.startsWith(runnerUp + ':'));
+      if (runnerUpLine) {
+        const confirmPrompt =
+          '아래 발화가, 주어진 기관·부서에도 해당할 수 있는지만 판단하라. ' +
+          '"이미 다른 더 적합한 후보가 있을 수도 있다"는 점은 이 판단과 ' +
+          '무관하다 — 오직 "여기에도 해당할 수 있는가"만 본다. 다른 텍스트 ' +
+          '없이 JSON으로만 응답하라: {"fits": true} 또는 {"fits": false}.\n\n' +
+          runnerUpLine;
+        const confirmRaw = await _callGovClassifyModel(confirmPrompt, text);
+        if (confirmRaw) {
+          try {
+            const confirmParsed = JSON.parse(confirmRaw.replace(/```json|```/g, '').trim());
+            if (confirmParsed?.fits === true) {
+              return `CLARIFY:${code},${runnerUp}`;
+            }
+          } catch { /* 2차 호출 파싱 실패 — 애매함 아님으로 처리, 아래 code 그대로 */ }
+        }
+      }
+    }
+    return code;
   } catch (e) {
     console.warn('[RegionalGov] LLM 분류 폴백 실패(무시 — 상위 계층으로 폴백):', e.message);
     return null;

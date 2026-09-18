@@ -48,8 +48,12 @@ RETRY_BASE_SLEEP = 3
 # pages/regional-gov.html의 _govClassifyFn 시스템 프롬프트 머리말과 정확히
 # 동일한 문구 — production 소스(fn eval)에서 그대로 추출. 어긋나면 이
 # 하네스가 production과 다른 걸 테스트하게 된다(양쪽 다 갱신 필요).
-CLASSIFY_PROMPT_HEAD = "아래는 제주 지방행정 라우팅 코드 후보 목록이다. 사용자 발화를 읽고 가장 알맞은 코드 하나만 답하라. 확신이 없거나 해당하는 코드가 없으면 NONE이라고만 답하라. 후보 중 2개가 똑같이 그럴듯해서 하나로 못 고르겠으면 \"CLARIFY:코드1,코드2\" 형식으로만 답하라(콤마로 구분, 공백 없이, 정확히 2개만). 다른 설명·문장부호 없이 코드, NONE, 또는 CLARIFY:... 중 하나만 출력한다.\n\n"
+CLASSIFY_PROMPT_HEAD = '아래는 제주 지방행정 라우팅 코드 후보 목록이다. 사용자 발화를 읽고 다른 텍스트 없이 JSON으로만 응답하라: {"code": "<가장 알맞은 코드, 확신이 없거나 해당하는 코드가 없으면 NONE>", "runnerUp": "<그다음으로 가능성 있는 다른 구체적 코드, 없으면 null>"}. "code"는 지금까지처럼 확신 있게 고르는 판단이다 — 이 판단 자체는 조금도 망설이지 않는다. "runnerUp"은 별개의 질문이다: "code"로 고른 것 말고도 이 발화만으로는 완전히 배제할 수 없는 다른 구체적인 코드가 하나 있다면 그 코드를, 그런 코드가 전혀 없다면 null을 넣는다(runnerUp을 적는다고 "code" 판단이 흔들리는 게 아니다).\n\n후보 목록:\n'
 
+# 2026-09-18 추가 — runnerUp 2차 확인 호출 프롬프트. pages/regional-gov.html의
+# _govClassifyFn 재작성(자기선고 CLARIFY: → code+runnerUp 2단계 분리, subject-
+# gate.js의 runnerUp 설계를 그대로 이식)에서 production 문자열을 그대로 추출.
+CONFIRM_PROMPT_HEAD = '아래 발화가, 주어진 기관·부서에도 해당할 수 있는지만 판단하라. "이미 다른 더 적합한 후보가 있을 수도 있다"는 점은 이 판단과 무관하다 — 오직 "여기에도 해당할 수 있는가"만 본다. 다른 텍스트 없이 JSON으로만 응답하라: {"fits": true} 또는 {"fits": false}.\n\n'
 
 def call_deepseek(api_key, system_prompt, user_utterance):
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
@@ -103,56 +107,99 @@ def parse_clarify_signal(raw):
     return codes if len(codes) >= 2 else None
 
 
-def grade(scenario, raw_text, call_err):
-    if call_err is not None:
-        return "LIVE-ERROR", call_err, None
-
-    raw = (raw_text or "").strip()
-    clarify_codes = parse_clarify_signal(raw)
+def run_classify(api_key, scenario):
+    """pages/regional-gov.html의 _govClassifyFn을 그대로 재현(재구현 아님 —
+    프롬프트 문구는 위에서 production 문자열을 그대로 추출해 복사, 판단
+    순서·후처리 규칙도 그쪽 코드 그대로 따라감). 1차 호출(code+runnerUp)
+    → runnerUp이 유효하면 2차 호출(예/아니오)까지 마친 뒤 최종 verdict를
+    낸다. 반환: (verdict, note, chosen, usages: list)
+    """
+    candidate_codes = scenario["candidate_codes"]
     expected = scenario["expected_ambiguous_pair"]  # None이면 오탐 확인용 통제 시나리오
+    candidates_text = "\n".join(
+        f"{code}: {scenario['descriptions'][code]}" for code in candidate_codes
+    )
 
-    if clarify_codes:
-        valid = [c for c in clarify_codes if c in scenario["candidate_codes"]]
-        if len(valid) >= 2:
-            if expected is None:
-                return (
-                    "LIVE-CLARIFY-FALSEPOSITIVE",
-                    f"통제 시나리오(애매함 없음)인데 CLARIFY 발동 — 과잉 트리거: {valid}",
-                    raw,
-                )
-            if set(valid[:2]) == set(expected):
-                return "LIVE-CLARIFY-CORRECT", f"CLARIFY 발동, 기대한 쌍과 정확히 일치: {valid}", raw
-            return "LIVE-CLARIFY-OTHERPAIR", f"CLARIFY는 발동했으나 다른 쌍: {valid} (기대: {expected})", raw
-        return "LIVE-FAIL", f"CLARIFY 형식이나 유효 코드 부족: {clarify_codes}", raw
+    raw1, usage1, err1 = call_deepseek(
+        api_key, CLASSIFY_PROMPT_HEAD + candidates_text, scenario["utterance"]
+    )
+    usages = [usage1]
+    if err1 is not None:
+        return "LIVE-ERROR", err1, None, usages
 
-    # 단일 코드 매칭 추출 — _govClassifyFn의 정규식과 동일 규칙.
-    m = re.match(r"[A-Z0-9][A-Z0-9-]*", raw)
-    chosen = m.group(0) if m else None
-    if chosen == "NONE":
-        return "LIVE-FAIL", "NONE 응답 — 후보 중 하나는 명백히 맞아야 하는 시나리오인데 회피", chosen
-    if chosen and chosen in scenario["candidate_codes"]:
-        if expected is None:
-            return "LIVE-PASS", f"통제 시나리오 — 확신 있게 단일 코드로 정상 답함: {chosen}", chosen
-        note = (
-            f"단일 코드로 확신 있게 답함(하나를 골랐지만 기대 쌍 {expected} 중 하나): {chosen}"
-            if chosen in expected
-            else f"단일 코드로 확신 있게 답함(기대 쌍 밖): {chosen}"
+    cleaned = re.sub(r"```json|```", "", raw1 or "").strip()
+    parsed = None
+    try:
+        parsed = json.loads(cleaned)
+    except (json.JSONDecodeError, TypeError):
+        parsed = None
+
+    if not isinstance(parsed, dict):
+        # 하위호환 경로(_govClassifyFn과 동일) — 정상 경로에서는 거의 안 탈 것으로 예상.
+        clarify_codes = parse_clarify_signal(cleaned)
+        if clarify_codes:
+            valid = [c for c in clarify_codes if c in candidate_codes]
+            if len(valid) >= 2:
+                verdict, note = _grade_clarify_pair(valid, expected, "구형식 CLARIFY")
+                return verdict, note, None, usages
+        return "LIVE-FAIL", f"JSON 파싱 실패(하위호환 경로도 실패) — raw: {cleaned[:200]}", None, usages
+
+    code = parsed.get("code") if isinstance(parsed.get("code"), str) else None
+    code = code.strip() if code else None
+    if not code or code == "NONE":
+        if expected is None and code == "NONE":
+            return "LIVE-FAIL", "통제 시나리오인데 NONE 응답 — 명백한 정답을 회피", code, usages
+        return "LIVE-FAIL", f"code 없음/NONE — raw: {cleaned[:200]}", code, usages
+    if code not in candidate_codes:
+        return "LIVE-FAIL", f"화이트리스트 밖 code: {code}", code, usages
+
+    runner_up = parsed.get("runnerUp") if isinstance(parsed.get("runnerUp"), str) else None
+    runner_up = runner_up.strip() if runner_up else None
+    runner_up_valid = runner_up and runner_up != code and runner_up in candidate_codes
+
+    if runner_up_valid:
+        runner_up_line = f"{runner_up}: {scenario['descriptions'][runner_up]}"
+        raw2, usage2, err2 = call_deepseek(
+            api_key, CONFIRM_PROMPT_HEAD + runner_up_line, scenario["utterance"]
         )
-        return "LIVE-FAIL", note, chosen
-    return "LIVE-FAIL", f"파싱 실패/화이트리스트 밖 — raw: {raw[:200]}", chosen
+        usages.append(usage2)
+        if err2 is None:
+            try:
+                cleaned2 = re.sub(r"```json|```", "", raw2 or "").strip()
+                parsed2 = json.loads(cleaned2)
+                fits = parsed2.get("fits") if isinstance(parsed2, dict) else None
+            except (json.JSONDecodeError, TypeError):
+                fits = None
+            if fits is True:
+                verdict, note = _grade_clarify_pair([code, runner_up], expected, "runnerUp 확인 결과")
+                return verdict, note, None, usages
+        # 2차 호출 실패 또는 fits!=true → production과 동일하게 애매함
+        # 아님으로 처리, 아래에서 code 그대로 채점.
+
+    if expected is None:
+        return "LIVE-PASS", f"통제 시나리오 — 확신 있게 단일 코드로 정상 답함: {code}", code, usages
+    note = (
+        f"단일 코드로 확신 있게 답함(하나를 골랐지만 기대 쌍 {expected} 중 하나): {code}"
+        if code in expected
+        else f"단일 코드로 확신 있게 답함(기대 쌍 밖): {code}"
+    )
+    return "LIVE-FAIL", note, code, usages
+
+
+def _grade_clarify_pair(valid_pair, expected, prefix):
+    if expected is None:
+        return "LIVE-CLARIFY-FALSEPOSITIVE", f"통제 시나리오인데 {prefix} 발동 — 과잉 트리거: {valid_pair}"
+    if set(valid_pair[:2]) == set(expected):
+        return "LIVE-CLARIFY-CORRECT", f"{prefix} 애매함 확정, 기대한 쌍과 정확히 일치: {valid_pair} (기대: {expected})"
+    return "LIVE-CLARIFY-OTHERPAIR", f"{prefix} 애매함 확정, 다른 쌍: {valid_pair} (기대: {expected})"
 
 
 def process_one(api_key, scenario):
-    candidates_text = "\n".join(
-        f"{code}: {scenario['descriptions'][code]}" for code in scenario["candidate_codes"]
-    )
-    system_prompt = CLASSIFY_PROMPT_HEAD + candidates_text
-    raw_text, usage, err = call_deepseek(api_key, system_prompt, scenario["utterance"])
-    verdict, note, chosen = grade(scenario, raw_text, err)
+    verdict, note, chosen, usages = run_classify(api_key, scenario)
     return {
         "id": scenario["id"], "utterance": scenario["utterance"],
         "expected_ambiguous_pair": scenario["expected_ambiguous_pair"],
-        "live_verdict": verdict, "live_note": note, "chosen": chosen, "usage": usage,
+        "live_verdict": verdict, "live_note": note, "chosen": chosen, "usages": usages,
     }
 
 

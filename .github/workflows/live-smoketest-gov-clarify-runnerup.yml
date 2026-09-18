@@ -1,0 +1,49 @@
+name: Live Smoketest — Gov Router CLARIFY (runnerUp redesign, all 17)
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  run-gov-clarify-runnerup-smoketest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install requests
+
+      - name: Run gov-router CLARIFY runnerUp redesign retest (17 scenarios)
+        working-directory: tests/live_smoketest
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          python3 gov_clarify_live_smoketest.py \
+            --scenarios scenarios_gov_clarify_all17_20260918.json \
+            --out ../../results/gov-clarify-runnerup
+
+      - name: Commit results to results branch
+        if: always()
+        run: |
+          git config user.name "hondi-live-smoketest-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout -B results/live-smoketest-gov-clarify-runnerup
+          git add -f results/
+          git diff --cached --quiet || git commit -m "chore: gov-clarify-runnerup live smoketest results ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+          git push --force origin HEAD:results/live-smoketest-gov-clarify-runnerup
+
+      - name: Upload artifact (backup)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-smoketest-gov-clarify-runnerup-results
+          path: results/
