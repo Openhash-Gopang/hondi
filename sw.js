@@ -68,8 +68,20 @@ self.addEventListener('install', (event) => {
       );
       console.log(`[SW] 사전 캐시 완료 — 성공: ${ok}, 실패: ${fail}`);
     }).then(() => {
-      console.log('[SW] 설치 완료 — skipWaiting');
-      return self.skipWaiting();
+      // BUG-FIX(2026-09-18, 주피터 실사 재현) — 여기서 무조건 self.skipWaiting()을
+      // 부르면, gopang-pwa.js가 KAuth 로그인 오버레이가 떠 있는 동안 새로고침을
+      // 미루도록 짜둔 클라이언트 쪽 방어(_autoApplyUpdate의 #ksa-overlay 체크,
+      // sw.postMessage({type:'SKIP_WAITING'}) 호출 시점 제어)가 통째로 무의미해진다
+      // — 이 SW가 설치되자마자 스스로 활성화해버려 모든 열린 탭에 즉시
+      // controllerchange(→ window.location.reload())가 발사되기 때문이다.
+      // 그 결과 폰에서 device-link 전화번호 인증을 성공시켜도, PC/웹 쪽이
+      // 폴링으로 결과를 받아 persist()하기 전에 새 SW가 이미 활성화되며
+      // 페이지가 통째로 새로 열려 토큰이 저장되지 못하는 게 매 상호작용마다
+      // 재현되고 있었다(이번 세션 배포가 잦아 거의 항상 새 SW가 대기 중이었음).
+      // 원래 의도대로 "새 SW는 waiting 상태로 대기하고, 클라이언트가 준비됐다고
+      // 판단할 때(message: SKIP_WAITING) 활성화"하도록 여기서의 자동 skipWaiting을
+      // 제거한다 — 182행의 message 리스너가 유일한 활성화 경로가 된다.
+      console.log('[SW] 설치 완료 — waiting 상태 유지(클라이언트의 SKIP_WAITING 메시지를 기다림)');
     })
   );
 });
