@@ -4773,75 +4773,20 @@ onRecordAfterCreateRequest((e) => {
   }
 }, "profiles");
 
-// ── 잔액/거래이력 공용 유틸 (2026-09-06 신설) ───────────────────────
-// computeBalance 로직을 여러 훅(삭제 방어, PATCH 최초 바인딩 방어)에서
-// 재사용하기 위해 여기로 뺐다. 주의: 이 프로젝트의 PocketBase Goja
-// 엔진은 콜백 바깥의 "최상위 function 이름(){} 선언"을 조용히 무시하는
-// 제약이 실사로 확인됐다(파일 상단 _sigVerify 관련 기존 주석 참고) —
-// 하지만 "최상위 var에 즉시실행함수(IIFE)의 반환값(객체)을 담는" 패턴은
-// 실제로 동작한다(_sigVerify 자체가 그 증거). 그래서 같은 패턴으로
-// 감싼다 — bare function 선언이 아니라 var 대입이라는 게 핵심이다.
-var _balanceUtils = (function() {
-  function computeBalance(guid) {
-    const allBlocks = $app.dao().findRecordsByFilter("blocks", "block_type != ''", "", 10000, 0);
-    let balance = 0;
-    for (const b of allBlocks) {
-      let blkOutputs;
-      try { blkOutputs = JSON.parse(b.getString("outputs") || "[]"); } catch (_) { continue; }
-      for (const o of blkOutputs) {
-        if (o.recipient_guid === guid) balance += (o.amount || 0);
-      }
-      if (b.getString("buyer_guid") === guid) {
-        const total = blkOutputs.reduce((s, o) => s + (o.amount || 0), 0);
-        balance -= total;
-      }
-    }
-    return balance;
-  }
-
-  function hasHistory(guid) {
-    const anyBlock = $app.dao().findRecordsByFilter(
-      "blocks",
-      `buyer_guid = '${guid}' || seller_guid = '${guid}'`,
-      "",
-      1,
-      0
-    );
-    return anyBlock.length > 0;
-  }
-
-  // 삭제/PATCH 훅 둘 다 "잔액도 확인하고 이력도 확인"하는 동일한 순회를
-  // 두 번(computeBalance + hasHistory 각각 findRecordsByFilter 전체
-  // 스캔) 하게 되는 비효율을 피하려고, 한 번의 순회로 둘 다 구하는
-  // 조합 함수도 같이 제공한다. 호출부는 필요에 맞게 골라 쓰면 된다.
-  function computeBalanceAndHistory(guid) {
-    const allBlocks = $app.dao().findRecordsByFilter("blocks", "block_type != ''", "", 10000, 0);
-    let balance = 0;
-    let hasHist = false;
-    for (const b of allBlocks) {
-      let blkOutputs;
-      try { blkOutputs = JSON.parse(b.getString("outputs") || "[]"); } catch (_) { continue; }
-      for (const o of blkOutputs) {
-        if (o.recipient_guid === guid) balance += (o.amount || 0);
-      }
-      const buyerGuid = b.getString("buyer_guid");
-      const sellerGuid = b.getString("seller_guid");
-      if (buyerGuid === guid) {
-        const total = blkOutputs.reduce((s, o) => s + (o.amount || 0), 0);
-        balance -= total;
-      }
-      if (buyerGuid === guid || sellerGuid === guid) hasHist = true;
-    }
-    return { balance: balance, hasHistory: hasHist };
-  }
-
-  return {
-    computeBalance: computeBalance,
-    hasHistory: hasHistory,
-    computeBalanceAndHistory: computeBalanceAndHistory,
-  };
-})();
-
+// ── 잔액/거래이력 공용 유틸 (2026-09-06 신설, 2026-09-19 버그 수정) ──
+// [2026-09-19 근본 원인 수정] 이 자리에 있던 전역(top-level var + IIFE)
+// _balanceUtils는 실사용 삭제 요청에서 "_balanceUtils is not defined"
+// ReferenceError를 냈다 — 아래 있던 기존 주석은 "top-level var에 IIFE
+// 반환값을 담는 패턴은 실제로 동작한다(_sigVerify가 증거)"고 주장했지만,
+// 그 근거였던 _sigVerify 자체가 2026-09-06에 이미 정반대로 정정된
+// 상태였다(1225번째 줄 부근 주석: "그 승격은 실제로는 동작하지 않았다" —
+// 전역 참조는 ReferenceError가 나고, 실제로 동작하는 유일한 패턴은
+// "콜백 내부에서 매번 지역 선언"뿐이었다). 즉 이 파일은 이미 한 번
+// 검증된 결론과 반대되는 주석을 단 채로 같은 실수를 반복하고 있었다.
+// 그래서 top-level 선언은 제거하고, computeBalanceAndHistory를 쓰는
+// 두 훅(하드 삭제 방어 / PATCH 최초 키 바인딩 방어) 각각의 콜백 내부에
+// _sigVerify와 동일한 방식으로 지역 재선언했다 — 코드 중복이지만, 이
+// 파일에서 유일하게 실사용 검증된 워크어라운드다.
 // ── 프로필 하드 삭제 방어 훅 (2026-09-06 신설) ──────────────────────
 // 배경: 테스트/봇 계정 정리 스크립트가 profiles를 DELETE API로 직접
 // 지우는 걸 실사로 확인했는데, 이 API는 guid에 잔액이나 거래이력이
@@ -4868,8 +4813,33 @@ onRecordBeforeDeleteRequest((e) => {
   const forced = info.data.force_delete === true || info.data.force_delete === "true"
     || info.query.force_delete === "true";
 
-  // computeBalance/hasHistory는 이제 파일 상단의 _balanceUtils(top-level
-  // var + IIFE 패턴)로 공용화했다 — 이 콜백 안에서 중복 재정의하지 않는다.
+  // [2026-09-19] top-level var + IIFE로 뺐던 _balanceUtils가 이 콜백
+  // 안에서 "_balanceUtils is not defined"로 깨지는 게 실사로 확인돼,
+  // _sigVerify와 동일한 워크어라운드(콜백 내부 지역 재선언)로 되돌렸다.
+  var _balanceUtils = (function() {
+    function computeBalanceAndHistory(guid) {
+      const allBlocks = $app.dao().findRecordsByFilter("blocks", "block_type != ''", "", 10000, 0);
+      let balance = 0;
+      let hasHist = false;
+      for (const b of allBlocks) {
+        let blkOutputs;
+        try { blkOutputs = JSON.parse(b.getString("outputs") || "[]"); } catch (_) { continue; }
+        for (const o of blkOutputs) {
+          if (o.recipient_guid === guid) balance += (o.amount || 0);
+        }
+        const buyerGuid = b.getString("buyer_guid");
+        const sellerGuid = b.getString("seller_guid");
+        if (buyerGuid === guid) {
+          const total = blkOutputs.reduce((s, o) => s + (o.amount || 0), 0);
+          balance -= total;
+        }
+        if (buyerGuid === guid || sellerGuid === guid) hasHist = true;
+      }
+      return { balance: balance, hasHistory: hasHist };
+    }
+    return { computeBalanceAndHistory: computeBalanceAndHistory };
+  })();
+
   let balance = 0;
   let hasHistory = false;
   try {
@@ -4966,6 +4936,33 @@ onRecordBeforeUpdateRequest((e) => {
   // → 잔액/이력이 있는 guid의 최초 바인딩은 phone_verify_token으로
   //   전화번호 소유까지 재확인해야 통과하도록 막는다.
   if (!registeredPubkey) {
+    // [2026-09-19] 위 삭제 훅과 동일한 이유로 콜백 내부에 지역 재선언한다
+    // (top-level _balanceUtils는 "is not defined"로 깨진다 — 상세 사유는
+    // 이 파일의 _balanceUtils 유틸 주석과 삭제 훅 쪽 주석 참고).
+    var _balanceUtils = (function() {
+      function computeBalanceAndHistory(guid) {
+        const allBlocks = $app.dao().findRecordsByFilter("blocks", "block_type != ''", "", 10000, 0);
+        let balance = 0;
+        let hasHist = false;
+        for (const b of allBlocks) {
+          let blkOutputs;
+          try { blkOutputs = JSON.parse(b.getString("outputs") || "[]"); } catch (_) { continue; }
+          for (const o of blkOutputs) {
+            if (o.recipient_guid === guid) balance += (o.amount || 0);
+          }
+          const buyerGuid = b.getString("buyer_guid");
+          const sellerGuid = b.getString("seller_guid");
+          if (buyerGuid === guid) {
+            const total = blkOutputs.reduce((s, o) => s + (o.amount || 0), 0);
+            balance -= total;
+          }
+          if (buyerGuid === guid || sellerGuid === guid) hasHist = true;
+        }
+        return { balance: balance, hasHistory: hasHist };
+      }
+      return { computeBalanceAndHistory: computeBalanceAndHistory };
+    })();
+
     let balance = 0;
     let hasHistory = false;
     try {
