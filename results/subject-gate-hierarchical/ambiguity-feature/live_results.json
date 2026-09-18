@@ -1,0 +1,2549 @@
+[
+  {
+    "id": "gate2-accountant-ifrs",
+    "utterance": "공인회계사(IFRS·연결재무제표)한테 바로 연결해줘.",
+    "expected_leaf_id": "accountant-ifrs",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "accountant",
+        "correctChoiceId": "accountant-ifrs",
+        "chosenId": "accountant-ifrs",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: accountant-ifrs",
+        "usages": [
+          {
+            "prompt_tokens": 625,
+            "completion_tokens": 73,
+            "total_tokens": 698,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 57
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 625
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-lawyer-juvenile",
+    "utterance": "변호사(소년법)로 연결해줘.",
+    "expected_leaf_id": "lawyer-juvenile",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "lawyer",
+        "correctChoiceId": "lawyer-juvenile",
+        "chosenId": "lawyer-juvenile",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: lawyer-juvenile",
+        "usages": [
+          {
+            "prompt_tokens": 1084,
+            "completion_tokens": 81,
+            "total_tokens": 1165,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 64
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 1084
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-lawyer-insolvency",
+    "utterance": "변호사(도산)가 필요해, 바로 연결해줘.",
+    "expected_leaf_id": "lawyer-insolvency",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "lawyer",
+        "correctChoiceId": "lawyer-insolvency",
+        "chosenId": "lawyer-insolvency",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: lawyer-insolvency",
+        "usages": [
+          {
+            "prompt_tokens": 1088,
+            "completion_tokens": 103,
+            "total_tokens": 1191,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 86
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 1088
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-lawyer-overseas-investment",
+    "utterance": "변호사(해외투자)가 필요해, 바로 연결해줘.",
+    "expected_leaf_id": "lawyer-overseas-investment",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "lawyer",
+        "correctChoiceId": "lawyer-overseas-investment",
+        "chosenId": "lawyer-overseas-investment",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: lawyer-overseas-investment",
+        "usages": [
+          {
+            "prompt_tokens": 1090,
+            "completion_tokens": 156,
+            "total_tokens": 1246,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 135
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 1090
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-physician-urology",
+    "utterance": "의사(비뇨의학과)한테 물어보고 싶어, 지금 불러줘.",
+    "expected_leaf_id": "physician-urology",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "physician",
+        "correctChoiceId": "physician-urology",
+        "chosenId": "physician-urology",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: physician-urology",
+        "usages": [
+          {
+            "prompt_tokens": 783,
+            "completion_tokens": 115,
+            "total_tokens": 898,
+            "prompt_tokens_details": {
+              "cached_tokens": 256
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 99
+            },
+            "prompt_cache_hit_tokens": 256,
+            "prompt_cache_miss_tokens": 527
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-lawyer-school-violence",
+    "utterance": "변호사(학교폭력)를 호출해줘.",
+    "expected_leaf_id": "lawyer-school-violence",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "lawyer",
+        "correctChoiceId": "lawyer-school-violence",
+        "chosenId": "lawyer-school-violence",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: lawyer-school-violence",
+        "usages": [
+          {
+            "prompt_tokens": 1087,
+            "completion_tokens": 493,
+            "total_tokens": 1580,
+            "prompt_tokens_details": {
+              "cached_tokens": 896
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 476
+            },
+            "prompt_cache_hit_tokens": 896,
+            "prompt_cache_miss_tokens": 191
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-lawyer-international-arbitration",
+    "utterance": "변호사(국제중재) AI를 불러줘.",
+    "expected_leaf_id": "lawyer-international-arbitration",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "lawyer",
+        "correctChoiceId": "lawyer-international-arbitration",
+        "chosenId": "lawyer-international-arbitration",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: lawyer-international-arbitration",
+        "usages": [
+          {
+            "prompt_tokens": 1087,
+            "completion_tokens": 761,
+            "total_tokens": 1848,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 742
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 1087
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-agrobiosystems",
+    "utterance": "교수(농림수산바이오시스템공학)한테 바로 연결해줘.",
+    "expected_leaf_id": "professor-agrobiosystems",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-agriculture-fishery-series",
+        "chosenId": "professor-agriculture-fishery-series",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-agriculture-fishery-series",
+        "usages": [
+          {
+            "prompt_tokens": 1022,
+            "completion_tokens": 263,
+            "total_tokens": 1285,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 242
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 254
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-agriculture-fishery-series",
+        "correctChoiceId": "professor-agrobiosystems",
+        "chosenId": "professor-agrobiosystems",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-agrobiosystems",
+        "usages": [
+          {
+            "prompt_tokens": 569,
+            "completion_tokens": 64,
+            "total_tokens": 633,
+            "prompt_tokens_details": {
+              "cached_tokens": 256
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 46
+            },
+            "prompt_cache_hit_tokens": 256,
+            "prompt_cache_miss_tokens": 313
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-advertising",
+    "utterance": "교수(광고·홍보학)는 지금 바로 연결해줘.",
+    "expected_leaf_id": "professor-advertising",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)",
+    "live_verdict": "LIVE-FAIL",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-business-economics",
+        "chosenId": "professor-socialscience",
+        "verdict": "LIVE-FAIL",
+        "note": "다른 노드로 정밀화됨: professor-socialscience (기대: professor-business-economics)",
+        "usages": [
+          {
+            "prompt_tokens": 1018,
+            "completion_tokens": 349,
+            "total_tokens": 1367,
+            "prompt_tokens_details": {
+              "cached_tokens": 256
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 328
+            },
+            "prompt_cache_hit_tokens": 256,
+            "prompt_cache_miss_tokens": 762
+          },
+          {
+            "prompt_tokens": 158,
+            "completion_tokens": 585,
+            "total_tokens": 743,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 578
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 158
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-aerospace",
+    "utterance": "교수(항공·우주공학)를 호출해줘.",
+    "expected_leaf_id": "professor-aerospace",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-mechanical",
+        "chosenId": "professor-mechanical",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-mechanical",
+        "usages": [
+          {
+            "prompt_tokens": 1016,
+            "completion_tokens": 950,
+            "total_tokens": 1966,
+            "prompt_tokens_details": {
+              "cached_tokens": 256
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 934
+            },
+            "prompt_cache_hit_tokens": 256,
+            "prompt_cache_miss_tokens": 760
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-mechanical",
+        "correctChoiceId": "professor-aerospace",
+        "chosenId": "professor-aerospace",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-aerospace",
+        "usages": [
+          {
+            "prompt_tokens": 595,
+            "completion_tokens": 60,
+            "total_tokens": 655,
+            "prompt_tokens_details": {
+              "cached_tokens": 256
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 43
+            },
+            "prompt_cache_hit_tokens": 256,
+            "prompt_cache_miss_tokens": 339
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-agroecology",
+    "utterance": "교수(농림수산환경생태학)로 연결해줘.",
+    "expected_leaf_id": "professor-agroecology",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-agriculture-fishery-series",
+        "chosenId": "professor-agriculture-fishery-series",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-agriculture-fishery-series",
+        "usages": [
+          {
+            "prompt_tokens": 1018,
+            "completion_tokens": 824,
+            "total_tokens": 1842,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 800
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 250
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-agriculture-fishery-series",
+        "correctChoiceId": "professor-agroecology",
+        "chosenId": "professor-agroecology",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-agroecology",
+        "usages": [
+          {
+            "prompt_tokens": 565,
+            "completion_tokens": 68,
+            "total_tokens": 633,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 51
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 181
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-astronomy",
+    "utterance": "교수(천문·대기과학)를 호출해줘.",
+    "expected_leaf_id": "professor-astronomy",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-mathphys",
+        "chosenId": "professor-mathphys",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-mathphys",
+        "usages": [
+          {
+            "prompt_tokens": 1015,
+            "completion_tokens": 366,
+            "total_tokens": 1381,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 349
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 247
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-mathphys",
+        "correctChoiceId": "professor-astronomy",
+        "chosenId": "professor-astronomy",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-astronomy",
+        "usages": [
+          {
+            "prompt_tokens": 544,
+            "completion_tokens": 234,
+            "total_tokens": 778,
+            "prompt_tokens_details": {
+              "cached_tokens": 256
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 217
+            },
+            "prompt_cache_hit_tokens": 256,
+            "prompt_cache_miss_tokens": 288
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-archaeologicalanthropology",
+    "utterance": "교수(고고인류학) 페르소나 호출해.",
+    "expected_leaf_id": "professor-archaeologicalanthropology",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)",
+    "live_verdict": "LIVE-AMBIGUOUS-CORRECT",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-socialscience",
+        "chosenId": null,
+        "verdict": "LIVE-AMBIGUOUS-CORRECT",
+        "note": "runnerUp 확인 결과 애매함 확정, 정답 포함: ['professor-humanities', 'professor-socialscience'] (기대: professor-socialscience)",
+        "usages": [
+          {
+            "prompt_tokens": 1016,
+            "completion_tokens": 786,
+            "total_tokens": 1802,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 766
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 248
+          },
+          {
+            "prompt_tokens": 153,
+            "completion_tokens": 433,
+            "total_tokens": 586,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 426
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 153
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-bioengineering",
+    "utterance": "교수(생명공학)한테 물어보고 싶어, 지금 불러줘.",
+    "expected_leaf_id": "professor-bioengineering",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)",
+    "live_verdict": "LIVE-FAIL",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-chemeng-energy-series",
+        "chosenId": "professor-chembio",
+        "verdict": "LIVE-FAIL",
+        "note": "다른 노드로 정밀화됨: professor-chembio (기대: professor-chemeng-energy-series)",
+        "usages": [
+          {
+            "prompt_tokens": 1022,
+            "completion_tokens": 479,
+            "total_tokens": 1501,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 455
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 254
+          },
+          {
+            "prompt_tokens": 167,
+            "completion_tokens": 444,
+            "total_tokens": 611,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 437
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 167
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-biology",
+    "utterance": "교수(생명과학)가 필요해, 바로 연결해줘.",
+    "expected_leaf_id": "professor-biology",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-chembio",
+        "chosenId": "professor-chembio",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-chembio",
+        "usages": [
+          {
+            "prompt_tokens": 1015,
+            "completion_tokens": 151,
+            "total_tokens": 1166,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 134
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 247
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-chembio",
+        "correctChoiceId": "professor-biology-series",
+        "chosenId": "professor-biology-series",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-biology-series",
+        "usages": [
+          {
+            "prompt_tokens": 512,
+            "completion_tokens": 231,
+            "total_tokens": 743,
+            "prompt_tokens_details": {
+              "cached_tokens": 256
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 214
+            },
+            "prompt_cache_hit_tokens": 256,
+            "prompt_cache_miss_tokens": 256
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-biology-series",
+        "correctChoiceId": "professor-biology",
+        "chosenId": "professor-biology",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-biology",
+        "usages": [
+          {
+            "prompt_tokens": 551,
+            "completion_tokens": 151,
+            "total_tokens": 702,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 135
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 167
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-biochemistry",
+    "utterance": "교수(생화학) 상담 바로 시작해줘.",
+    "expected_leaf_id": "professor-biochemistry",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)",
+    "live_verdict": "LIVE-AMBIGUOUS-CORRECT",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-chembio",
+        "chosenId": null,
+        "verdict": "LIVE-AMBIGUOUS-CORRECT",
+        "note": "runnerUp 확인 결과 애매함 확정, 정답 포함: ['professor-chembio', 'professor-medicine-series'] (기대: professor-chembio)",
+        "usages": [
+          {
+            "prompt_tokens": 1013,
+            "completion_tokens": 1665,
+            "total_tokens": 2678,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 1646
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 245
+          },
+          {
+            "prompt_tokens": 155,
+            "completion_tokens": 154,
+            "total_tokens": 309,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 147
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 155
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-business",
+    "utterance": "교수(경영학)로 연결해줘.",
+    "expected_leaf_id": "professor-business",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-business-economics",
+        "chosenId": "professor-business-economics",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-business-economics",
+        "usages": [
+          {
+            "prompt_tokens": 1011,
+            "completion_tokens": 190,
+            "total_tokens": 1201,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 173
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 243
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-business-economics",
+        "correctChoiceId": "professor-business-series",
+        "chosenId": "professor-business-series",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-business-series",
+        "usages": [
+          {
+            "prompt_tokens": 576,
+            "completion_tokens": 301,
+            "total_tokens": 877,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 285
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 192
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-business-series",
+        "correctChoiceId": "professor-business",
+        "chosenId": "professor-business",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-business",
+        "usages": [
+          {
+            "prompt_tokens": 526,
+            "completion_tokens": 655,
+            "total_tokens": 1181,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 640
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 142
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-chemistry",
+    "utterance": "교수(화학) AI 세션 열어줘.",
+    "expected_leaf_id": "professor-chemistry",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-chembio",
+        "chosenId": "professor-chembio",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-chembio",
+        "usages": [
+          {
+            "prompt_tokens": 1012,
+            "completion_tokens": 249,
+            "total_tokens": 1261,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 225
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 244
+          },
+          {
+            "prompt_tokens": 157,
+            "completion_tokens": 654,
+            "total_tokens": 811,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 647
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 157
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-chembio",
+        "correctChoiceId": "professor-chemistry-series",
+        "chosenId": "professor-chemistry-series",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-chemistry-series",
+        "usages": [
+          {
+            "prompt_tokens": 509,
+            "completion_tokens": 363,
+            "total_tokens": 872,
+            "prompt_tokens_details": {
+              "cached_tokens": 256
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 346
+            },
+            "prompt_cache_hit_tokens": 256,
+            "prompt_cache_miss_tokens": 253
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-chemistry-series",
+        "correctChoiceId": "professor-chemistry",
+        "chosenId": "professor-chemistry",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-chemistry",
+        "usages": [
+          {
+            "prompt_tokens": 519,
+            "completion_tokens": 307,
+            "total_tokens": 826,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 291
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 135
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-biostatistics",
+    "utterance": "교수(생물통계학)는 지금 바로 연결해줘.",
+    "expected_leaf_id": "professor-biostatistics",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)",
+    "live_verdict": "LIVE-FAIL",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-mathphys",
+        "chosenId": "professor-publichealth-series",
+        "verdict": "LIVE-FAIL",
+        "note": "다른 노드로 정밀화됨: professor-publichealth-series (기대: professor-mathphys)",
+        "usages": [
+          {
+            "prompt_tokens": 1016,
+            "completion_tokens": 2138,
+            "total_tokens": 3154,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 2116
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 248
+          },
+          {
+            "prompt_tokens": 162,
+            "completion_tokens": 441,
+            "total_tokens": 603,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 434
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 162
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-childfamilystudies",
+    "utterance": "교수(아동·가족학) AI를 불러줘.",
+    "expected_leaf_id": "professor-childfamilystudies",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)",
+    "live_verdict": "LIVE-FAIL",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-socialscience",
+        "chosenId": "professor-homeeconomics-series",
+        "verdict": "LIVE-FAIL",
+        "note": "다른 노드로 정밀화됨: professor-homeeconomics-series (기대: professor-socialscience)",
+        "usages": [
+          {
+            "prompt_tokens": 1015,
+            "completion_tokens": 1191,
+            "total_tokens": 2206,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 1174
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 247
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-contemporarymusic",
+    "utterance": "교수(실용음악)를 호출해줘.",
+    "expected_leaf_id": "professor-contemporarymusic",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-music-series",
+        "chosenId": "professor-music-series",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-music-series",
+        "usages": [
+          {
+            "prompt_tokens": 1013,
+            "completion_tokens": 102,
+            "total_tokens": 1115,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 85
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 245
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-music-series",
+        "correctChoiceId": "professor-contemporarymusic",
+        "chosenId": "professor-contemporarymusic",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-contemporarymusic",
+        "usages": [
+          {
+            "prompt_tokens": 548,
+            "completion_tokens": 87,
+            "total_tokens": 635,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 70
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 164
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-competitionlaw",
+    "utterance": "교수(경제법)로 연결해줘.",
+    "expected_leaf_id": "professor-competitionlaw",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-law-series",
+        "chosenId": "professor-law-series",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-law-series",
+        "usages": [
+          {
+            "prompt_tokens": 1011,
+            "completion_tokens": 325,
+            "total_tokens": 1336,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 309
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 243
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-law-series",
+        "correctChoiceId": "professor-competitionlaw",
+        "chosenId": "professor-competitionlaw",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-competitionlaw",
+        "usages": [
+          {
+            "prompt_tokens": 628,
+            "completion_tokens": 77,
+            "total_tokens": 705,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 59
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 244
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-biomedengineering",
+    "utterance": "교수(의공학) AI 세션 열어줘.",
+    "expected_leaf_id": "professor-biomedengineering",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)",
+    "live_verdict": "LIVE-FAIL",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-electrical-computer",
+        "chosenId": null,
+        "verdict": "LIVE-FAIL",
+        "note": "1차 호출 JSON 파싱 실패 — raw: ",
+        "usages": [
+          {
+            "prompt_tokens": 1013,
+            "completion_tokens": 4000,
+            "total_tokens": 5013,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 4000
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 245
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-consumerscience",
+    "utterance": "교수(소비자·가정자원)는 지금 바로 연결해줘.",
+    "expected_leaf_id": "professor-consumerscience",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)",
+    "live_verdict": "LIVE-FAIL",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-socialscience",
+        "chosenId": "professor-homeeconomics-series",
+        "verdict": "LIVE-FAIL",
+        "note": "다른 노드로 정밀화됨: professor-homeeconomics-series (기대: professor-socialscience)",
+        "usages": [
+          {
+            "prompt_tokens": 1019,
+            "completion_tokens": 692,
+            "total_tokens": 1711,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 675
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 251
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-electromagnetism",
+    "utterance": "교수(전자기학) 상담 바로 시작해줘.",
+    "expected_leaf_id": "professor-electromagnetism",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)",
+    "live_verdict": "LIVE-AMBIGUOUS-CORRECT",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-mathphys",
+        "chosenId": null,
+        "verdict": "LIVE-AMBIGUOUS-CORRECT",
+        "note": "runnerUp 확인 결과 애매함 확정, 정답 포함: ['professor-electrical-computer', 'professor-mathphys'] (기대: professor-mathphys)",
+        "usages": [
+          {
+            "prompt_tokens": 1014,
+            "completion_tokens": 290,
+            "total_tokens": 1304,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 267
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 246
+          },
+          {
+            "prompt_tokens": 160,
+            "completion_tokens": 125,
+            "total_tokens": 285,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 118
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 160
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-dent-conservative",
+    "utterance": "교수(치과보존학)한테 물어보고 싶어, 지금 불러줘.",
+    "expected_leaf_id": "professor-dent-conservative",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-medicine-series",
+        "chosenId": "professor-medicine-series",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-medicine-series",
+        "usages": [
+          {
+            "prompt_tokens": 1023,
+            "completion_tokens": 316,
+            "total_tokens": 1339,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 299
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 255
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-medicine-series",
+        "correctChoiceId": "professor-dentistry-specialty-series",
+        "chosenId": "professor-dentistry-specialty-series",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-dentistry-specialty-series",
+        "usages": [
+          {
+            "prompt_tokens": 546,
+            "completion_tokens": 125,
+            "total_tokens": 671,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 104
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 162
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-dentistry-specialty-series",
+        "correctChoiceId": "professor-dent-conservative",
+        "chosenId": "professor-dent-conservative",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-dent-conservative",
+        "usages": [
+          {
+            "prompt_tokens": 653,
+            "completion_tokens": 106,
+            "total_tokens": 759,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 87
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 269
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-design",
+    "utterance": "교수(디자인)가 필요해, 바로 연결해줘.",
+    "expected_leaf_id": "professor-design",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-finearts-series",
+        "chosenId": "professor-finearts-series",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-finearts-series",
+        "usages": [
+          {
+            "prompt_tokens": 1014,
+            "completion_tokens": 564,
+            "total_tokens": 1578,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 548
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 246
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-finearts-series",
+        "correctChoiceId": "professor-design",
+        "chosenId": "professor-design",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-design",
+        "usages": [
+          {
+            "prompt_tokens": 527,
+            "completion_tokens": 108,
+            "total_tokens": 635,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 93
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 143
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-environmentalengineering",
+    "utterance": "교수(환경공학)를 호출해줘.",
+    "expected_leaf_id": "professor-environmentalengineering",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)",
+    "live_verdict": "LIVE-FAIL",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-construction",
+        "chosenId": "professor-chembio",
+        "verdict": "LIVE-FAIL",
+        "note": "다른 노드로 정밀화됨: professor-chembio (기대: professor-construction)",
+        "usages": [
+          {
+            "prompt_tokens": 1013,
+            "completion_tokens": 837,
+            "total_tokens": 1850,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 820
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 245
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-film",
+    "utterance": "교수(영화) AI 세션 열어줘.",
+    "expected_leaf_id": "professor-film",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-theater-film-series",
+        "chosenId": "professor-theater-film-series",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-theater-film-series",
+        "usages": [
+          {
+            "prompt_tokens": 1012,
+            "completion_tokens": 306,
+            "total_tokens": 1318,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 288
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 244
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-theater-film-series",
+        "correctChoiceId": "professor-film",
+        "chosenId": "professor-film",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-film",
+        "usages": [
+          {
+            "prompt_tokens": 482,
+            "completion_tokens": 139,
+            "total_tokens": 621,
+            "prompt_tokens_details": {
+              "cached_tokens": 256
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 124
+            },
+            "prompt_cache_hit_tokens": 256,
+            "prompt_cache_miss_tokens": 226
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-areastudies",
+    "utterance": "교수(국제지역학) AI 세션 열어줘.",
+    "expected_leaf_id": "professor-areastudies",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)",
+    "live_verdict": "LIVE-FAIL",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-humanities",
+        "chosenId": "professor-socialscience",
+        "verdict": "LIVE-FAIL",
+        "note": "다른 노드로 정밀화됨: professor-socialscience (기대: professor-humanities)",
+        "usages": [
+          {
+            "prompt_tokens": 1015,
+            "completion_tokens": 3411,
+            "total_tokens": 4426,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 3391
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 247
+          },
+          {
+            "prompt_tokens": 153,
+            "completion_tokens": 4000,
+            "total_tokens": 4153,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 4000
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 153
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-korean",
+    "utterance": "교수(국어·국문학)한테 물어보고 싶어, 지금 불러줘.",
+    "expected_leaf_id": "professor-korean",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-language-literature",
+        "chosenId": "professor-language-literature",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-language-literature",
+        "usages": [
+          {
+            "prompt_tokens": 1024,
+            "completion_tokens": 372,
+            "total_tokens": 1396,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 355
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 256
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-language-literature",
+        "correctChoiceId": "professor-korean",
+        "chosenId": "professor-korean",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-korean",
+        "usages": [
+          {
+            "prompt_tokens": 747,
+            "completion_tokens": 127,
+            "total_tokens": 874,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 111
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 363
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-kmed-eentderm",
+    "utterance": "교수(한방안이비인후피부과학) AI를 불러줘.",
+    "expected_leaf_id": "professor-kmed-eentderm",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-medicine-series",
+        "chosenId": "professor-medicine-series",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-medicine-series",
+        "usages": [
+          {
+            "prompt_tokens": 1019,
+            "completion_tokens": 381,
+            "total_tokens": 1400,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 364
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 251
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-medicine-series",
+        "correctChoiceId": "professor-koreanmedicine-specialty-series",
+        "chosenId": "professor-koreanmedicine-specialty-series",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-koreanmedicine-specialty-series",
+        "usages": [
+          {
+            "prompt_tokens": 542,
+            "completion_tokens": 163,
+            "total_tokens": 705,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 142
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 158
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-koreanmedicine-specialty-series",
+        "correctChoiceId": "professor-kmed-eentderm",
+        "chosenId": "professor-kmed-eentderm",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-kmed-eentderm",
+        "usages": [
+          {
+            "prompt_tokens": 609,
+            "completion_tokens": 112,
+            "total_tokens": 721,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 92
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 225
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-game",
+    "utterance": "교수(게임)한테 물어보고 싶어, 지금 불러줘.",
+    "expected_leaf_id": "professor-game",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-appliedarts-series",
+        "chosenId": "professor-appliedarts-series",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-appliedarts-series",
+        "usages": [
+          {
+            "prompt_tokens": 1020,
+            "completion_tokens": 874,
+            "total_tokens": 1894,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 856
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 252
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-appliedarts-series",
+        "correctChoiceId": "professor-game",
+        "chosenId": "professor-game",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-game",
+        "usages": [
+          {
+            "prompt_tokens": 536,
+            "completion_tokens": 239,
+            "total_tokens": 775,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 226
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 152
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-math",
+    "utterance": "교수(수학) 페르소나 호출해.",
+    "expected_leaf_id": "professor-math",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-mathphys",
+        "chosenId": "professor-mathphys",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-mathphys",
+        "usages": [
+          {
+            "prompt_tokens": 1013,
+            "completion_tokens": 133,
+            "total_tokens": 1146,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 116
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 245
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-mathphys",
+        "correctChoiceId": "professor-math-series",
+        "chosenId": "professor-math-series",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-math-series",
+        "usages": [
+          {
+            "prompt_tokens": 542,
+            "completion_tokens": 202,
+            "total_tokens": 744,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 185
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 158
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-math-series",
+        "correctChoiceId": "professor-math",
+        "chosenId": "professor-math",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-math",
+        "usages": [
+          {
+            "prompt_tokens": 585,
+            "completion_tokens": 127,
+            "total_tokens": 712,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 111
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 201
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-med-ophthalmology",
+    "utterance": "교수(안과학)를 호출해줘.",
+    "expected_leaf_id": "professor-med-ophthalmology",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-medicine-series",
+        "chosenId": "professor-medicine-series",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-medicine-series",
+        "usages": [
+          {
+            "prompt_tokens": 1011,
+            "completion_tokens": 80,
+            "total_tokens": 1091,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 63
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 243
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-medicine-series",
+        "correctChoiceId": "professor-medicine-specialty-series",
+        "chosenId": "professor-medicine-specialty-series",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-medicine-specialty-series",
+        "usages": [
+          {
+            "prompt_tokens": 534,
+            "completion_tokens": 552,
+            "total_tokens": 1086,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 532
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 150
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-medicine-specialty-series",
+        "correctChoiceId": "professor-med-ophthalmology",
+        "chosenId": "professor-med-ophthalmology",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-med-ophthalmology",
+        "usages": [
+          {
+            "prompt_tokens": 905,
+            "completion_tokens": 55,
+            "total_tokens": 960,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 36
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 521
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-med-otolaryngology",
+    "utterance": "교수(이비인후과학)로 연결해줘.",
+    "expected_leaf_id": "professor-med-otolaryngology",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-medicine-series",
+        "chosenId": "professor-medicine-series",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-medicine-series",
+        "usages": [
+          {
+            "prompt_tokens": 1013,
+            "completion_tokens": 120,
+            "total_tokens": 1133,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 103
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 245
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-medicine-series",
+        "correctChoiceId": "professor-medicine-specialty-series",
+        "chosenId": "professor-medicine-specialty-series",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-medicine-specialty-series",
+        "usages": [
+          {
+            "prompt_tokens": 536,
+            "completion_tokens": 449,
+            "total_tokens": 985,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 429
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 152
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-medicine-specialty-series",
+        "correctChoiceId": "professor-med-otolaryngology",
+        "chosenId": "professor-med-otolaryngology",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-med-otolaryngology",
+        "usages": [
+          {
+            "prompt_tokens": 907,
+            "completion_tokens": 63,
+            "total_tokens": 970,
+            "prompt_tokens_details": {
+              "cached_tokens": 640
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 44
+            },
+            "prompt_cache_hit_tokens": 640,
+            "prompt_cache_miss_tokens": 267
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-militaryscience",
+    "utterance": "교수(군사·국방·안보)한테 바로 연결해줘.",
+    "expected_leaf_id": "professor-militaryscience",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)",
+    "live_verdict": "LIVE-FAIL",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-socialscience",
+        "chosenId": "professor",
+        "verdict": "LIVE-FAIL",
+        "note": "다른 노드로 정밀화됨: professor (기대: professor-socialscience)",
+        "usages": [
+          {
+            "prompt_tokens": 1018,
+            "completion_tokens": 360,
+            "total_tokens": 1378,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 342
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 250
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-med-preventivemedicine",
+    "utterance": "교수(예방의학)가 필요해, 바로 연결해줘.",
+    "expected_leaf_id": "professor-med-preventivemedicine",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)",
+    "live_verdict": "LIVE-AMBIGUOUS-CORRECT",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-medicine-series",
+        "chosenId": null,
+        "verdict": "LIVE-AMBIGUOUS-CORRECT",
+        "note": "runnerUp 확인 결과 애매함 확정, 정답 포함: ['professor-medicine-series', 'professor-publichealth-series'] (기대: professor-medicine-series)",
+        "usages": [
+          {
+            "prompt_tokens": 1016,
+            "completion_tokens": 944,
+            "total_tokens": 1960,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 922
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 248
+          },
+          {
+            "prompt_tokens": 153,
+            "completion_tokens": 254,
+            "total_tokens": 407,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 247
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 153
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-microeconomics",
+    "utterance": "교수(미시경제학)를 호출해줘.",
+    "expected_leaf_id": "professor-microeconomics",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-business-economics",
+        "chosenId": "professor-business-economics",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-business-economics",
+        "usages": [
+          {
+            "prompt_tokens": 1014,
+            "completion_tokens": 165,
+            "total_tokens": 1179,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 148
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 246
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-business-economics",
+        "correctChoiceId": "professor-economics-series",
+        "chosenId": "professor-economics-series",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-economics-series",
+        "usages": [
+          {
+            "prompt_tokens": 579,
+            "completion_tokens": 382,
+            "total_tokens": 961,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 360
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 195
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-economics-series",
+        "correctChoiceId": "professor-microeconomics",
+        "chosenId": "professor-microeconomics",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-microeconomics",
+        "usages": [
+          {
+            "prompt_tokens": 588,
+            "completion_tokens": 84,
+            "total_tokens": 672,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 68
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 204
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-medicalscience",
+    "utterance": "교수(의과학)한테 물어보고 싶어, 지금 불러줘.",
+    "expected_leaf_id": "professor-medicalscience",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)",
+    "live_verdict": "LIVE-FAIL",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-misc-series",
+        "chosenId": "professor-medicine-series",
+        "verdict": "LIVE-FAIL",
+        "note": "다른 노드로 정밀화됨: professor-medicine-series (기대: professor-misc-series)",
+        "usages": [
+          {
+            "prompt_tokens": 1020,
+            "completion_tokens": 1273,
+            "total_tokens": 2293,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 1256
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 252
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-othereuropeanlanguages",
+    "utterance": "교수(기타유럽어·문학) AI 세션 열어줘.",
+    "expected_leaf_id": "professor-othereuropeanlanguages",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-language-literature",
+        "chosenId": "professor-language-literature",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-language-literature",
+        "usages": [
+          {
+            "prompt_tokens": 1018,
+            "completion_tokens": 50,
+            "total_tokens": 1068,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 33
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 250
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-language-literature",
+        "correctChoiceId": "professor-othereuropeanlanguages",
+        "chosenId": "professor-othereuropeanlanguages",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-othereuropeanlanguages",
+        "usages": [
+          {
+            "prompt_tokens": 741,
+            "completion_tokens": 131,
+            "total_tokens": 872,
+            "prompt_tokens_details": {
+              "cached_tokens": 512
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 110
+            },
+            "prompt_cache_hit_tokens": 512,
+            "prompt_cache_miss_tokens": 229
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-nutrition",
+    "utterance": "교수(식품영양학)는 지금 바로 연결해줘.",
+    "expected_leaf_id": "professor-nutrition",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-homeeconomics-series",
+        "chosenId": "professor-homeeconomics-series",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-homeeconomics-series",
+        "usages": [
+          {
+            "prompt_tokens": 1016,
+            "completion_tokens": 546,
+            "total_tokens": 1562,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 529
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 248
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-homeeconomics-series",
+        "correctChoiceId": "professor-nutrition",
+        "chosenId": "professor-nutrition",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-nutrition",
+        "usages": [
+          {
+            "prompt_tokens": 503,
+            "completion_tokens": 145,
+            "total_tokens": 648,
+            "prompt_tokens_details": {
+              "cached_tokens": 256
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 128
+            },
+            "prompt_cache_hit_tokens": 256,
+            "prompt_cache_miss_tokens": 247
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-publicadministration",
+    "utterance": "교수(행정학) AI 세션 열어줘.",
+    "expected_leaf_id": "professor-publicadministration",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-socialscience",
+        "chosenId": "professor-socialscience",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-socialscience",
+        "usages": [
+          {
+            "prompt_tokens": 1013,
+            "completion_tokens": 161,
+            "total_tokens": 1174,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 145
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 245
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-socialscience",
+        "correctChoiceId": "professor-publicadministration",
+        "chosenId": "professor-publicadministration",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-publicadministration",
+        "usages": [
+          {
+            "prompt_tokens": 675,
+            "completion_tokens": 88,
+            "total_tokens": 763,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 72
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 291
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-marketing",
+    "utterance": "교수(마케팅론)한테 바로 연결해줘.",
+    "expected_leaf_id": "professor-marketing",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)",
+    "live_verdict": "LIVE-FAIL",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-business-economics",
+        "chosenId": "professor-business-economics",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-business-economics",
+        "usages": [
+          {
+            "prompt_tokens": 1014,
+            "completion_tokens": 88,
+            "total_tokens": 1102,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 71
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 246
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-business-economics",
+        "correctChoiceId": "professor-business-series",
+        "chosenId": null,
+        "verdict": "LIVE-FAIL",
+        "note": "1차 호출 JSON 파싱 실패 — raw: ",
+        "usages": [
+          {
+            "prompt_tokens": 579,
+            "completion_tokens": 4000,
+            "total_tokens": 4579,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 4000
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 195
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-skincare",
+    "utterance": "교수(피부미용)로 연결해줘.",
+    "expected_leaf_id": "professor-skincare",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)",
+    "live_verdict": "LIVE-FAIL",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-publichealth-series",
+        "chosenId": "professor",
+        "verdict": "LIVE-FAIL",
+        "note": "다른 노드로 정밀화됨: professor (기대: professor-publichealth-series)",
+        "usages": [
+          {
+            "prompt_tokens": 1012,
+            "completion_tokens": 1125,
+            "total_tokens": 2137,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 1106
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 244
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-railwayengineering",
+    "utterance": "교수(철도공학)로 연결해줘.",
+    "expected_leaf_id": "professor-railwayengineering",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)",
+    "live_verdict": "LIVE-FAIL",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-mechanical",
+        "chosenId": "professor-transportation-series",
+        "verdict": "LIVE-FAIL",
+        "note": "다른 노드로 정밀화됨: professor-transportation-series (기대: professor-mechanical)",
+        "usages": [
+          {
+            "prompt_tokens": 1012,
+            "completion_tokens": 1263,
+            "total_tokens": 2275,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 1240
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 244
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-theoreticalsociology",
+    "utterance": "교수(이론사회학)는 지금 바로 연결해줘.",
+    "expected_leaf_id": "professor-theoreticalsociology",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-socialscience",
+        "chosenId": "professor-socialscience",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-socialscience",
+        "usages": [
+          {
+            "prompt_tokens": 1015,
+            "completion_tokens": 72,
+            "total_tokens": 1087,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 56
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 247
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-socialscience",
+        "correctChoiceId": "professor-sociology-series",
+        "chosenId": "professor-sociology-series",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-sociology-series",
+        "usages": [
+          {
+            "prompt_tokens": 677,
+            "completion_tokens": 355,
+            "total_tokens": 1032,
+            "prompt_tokens_details": {
+              "cached_tokens": 512
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 339
+            },
+            "prompt_cache_hit_tokens": 512,
+            "prompt_cache_miss_tokens": 165
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-sociology-series",
+        "correctChoiceId": "professor-theoreticalsociology",
+        "chosenId": "professor-theoreticalsociology",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-theoreticalsociology",
+        "usages": [
+          {
+            "prompt_tokens": 540,
+            "completion_tokens": 412,
+            "total_tokens": 952,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 393
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 156
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-policystudies",
+    "utterance": "교수(정책학)가 필요해, 바로 연결해줘.",
+    "expected_leaf_id": "professor-policystudies",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)",
+    "live_verdict": "LIVE-FAIL",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-socialscience",
+        "chosenId": "professor-socialscience",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-socialscience",
+        "usages": [
+          {
+            "prompt_tokens": 1015,
+            "completion_tokens": 409,
+            "total_tokens": 1424,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 393
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 247
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-socialscience",
+        "correctChoiceId": "professor-politics-series",
+        "chosenId": "professor-publicadministration",
+        "verdict": "LIVE-FAIL",
+        "note": "다른 노드로 정밀화됨: professor-publicadministration (기대: professor-politics-series)",
+        "usages": [
+          {
+            "prompt_tokens": 677,
+            "completion_tokens": 2080,
+            "total_tokens": 2757,
+            "prompt_tokens_details": {
+              "cached_tokens": 512
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 2059
+            },
+            "prompt_cache_hit_tokens": 512,
+            "prompt_cache_miss_tokens": 165
+          },
+          {
+            "prompt_tokens": 155,
+            "completion_tokens": 617,
+            "total_tokens": 772,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 610
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 155
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-uav",
+    "utterance": "교수(무인항공기(운항)학)가 필요해, 바로 연결해줘.",
+    "expected_leaf_id": "professor-uav",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)",
+    "live_verdict": "LIVE-PASS",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-transportation-series",
+        "chosenId": "professor-transportation-series",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-transportation-series",
+        "usages": [
+          {
+            "prompt_tokens": 1022,
+            "completion_tokens": 910,
+            "total_tokens": 1932,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 892
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 254
+          }
+        ]
+      },
+      {
+        "gateNodeId": "professor-transportation-series",
+        "correctChoiceId": "professor-uav",
+        "chosenId": "professor-uav",
+        "verdict": "LIVE-PASS",
+        "note": "정확히 일치: professor-uav",
+        "usages": [
+          {
+            "prompt_tokens": 563,
+            "completion_tokens": 520,
+            "total_tokens": 1083,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 504
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 179
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-photography",
+    "utterance": "교수(사진)를 호출해줘.",
+    "expected_leaf_id": "professor-photography",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)",
+    "live_verdict": "LIVE-AMBIGUOUS-CORRECT",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-appliedarts-series",
+        "chosenId": null,
+        "verdict": "LIVE-AMBIGUOUS-CORRECT",
+        "note": "runnerUp 확인 결과 애매함 확정, 정답 포함: ['professor-appliedarts-series', 'professor-finearts-series'] (기대: professor-appliedarts-series)",
+        "usages": [
+          {
+            "prompt_tokens": 1011,
+            "completion_tokens": 3935,
+            "total_tokens": 4946,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 3911
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 243
+          },
+          {
+            "prompt_tokens": 155,
+            "completion_tokens": 979,
+            "total_tokens": 1134,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 972
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 155
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-sound",
+    "utterance": "교수(음향)는 지금 바로 연결해줘.",
+    "expected_leaf_id": "professor-sound",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)",
+    "live_verdict": "LIVE-FAIL",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-appliedarts-series",
+        "chosenId": null,
+        "verdict": "LIVE-FAIL",
+        "note": "1차 호출 JSON 파싱 실패 — raw: ",
+        "usages": [
+          {
+            "prompt_tokens": 1013,
+            "completion_tokens": 4000,
+            "total_tokens": 5013,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 4000
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 245
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "gate2-professor-videoart",
+    "utterance": "교수(영상예술)를 호출해줘.",
+    "expected_leaf_id": "professor-videoart",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)",
+    "live_verdict": "LIVE-FAIL",
+    "step_results": [
+      {
+        "gateNodeId": "professor",
+        "correctChoiceId": "professor-appliedarts-series",
+        "chosenId": "professor-theater-film-series",
+        "verdict": "LIVE-FAIL",
+        "note": "다른 노드로 정밀화됨: professor-theater-film-series (기대: professor-appliedarts-series)",
+        "usages": [
+          {
+            "prompt_tokens": 1013,
+            "completion_tokens": 3025,
+            "total_tokens": 4038,
+            "prompt_tokens_details": {
+              "cached_tokens": 768
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 3009
+            },
+            "prompt_cache_hit_tokens": 768,
+            "prompt_cache_miss_tokens": 245
+          }
+        ]
+      }
+    ]
+  }
+]
