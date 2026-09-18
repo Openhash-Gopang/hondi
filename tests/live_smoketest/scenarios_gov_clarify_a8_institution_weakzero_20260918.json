@@ -1,0 +1,163 @@
+[
+  {
+    "id": "gov-clarify-a8-01-police-safety",
+    "utterance": "요즘 동네 생활안전이 걱정돼서 순찰을 좀 늘려주실 수 있나요. 전반적인 안전 관리도 궁금해요.",
+    "candidate_codes": [
+      "SP-AGY-POLICE",
+      "SP-DO-SAFETY"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-AGY-POLICE",
+      "SP-DO-SAFETY"
+    ],
+    "descriptions": {
+      "SP-AGY-POLICE": "자치경찰단 — 생활안전, 교통(주정차 단속 등 일부), 관광경찰, 지역 특성 치안(자연환경·문화재 보호 관련 수사 일부)",
+      "SP-DO-SAFETY": "제주도청 도민안전건강실(안전건강실) — 재난·안전 총괄"
+    },
+    "note": "_resolveInstitutionMatch topScore===1(약한 매칭) 분기 — 자치경찰단 kw '생활안전' 1개 매칭 vs 도민안전건강실 kw '안전' 1개 매칭 — 결정론적 스코어링 사전 확인. topScore===1일 때만 기존에도 L2 병합 안전망이 있었지만(A6는 topScore>=2만 수정) 실제로 되묻는지는 이번이 첫 라이브 검증."
+  },
+  {
+    "id": "gov-clarify-a8-02-police-tourism",
+    "utterance": "관광경찰한테 문의하고 싶은 게 있는데, 관광 관련해서도 상담받고 싶어요.",
+    "candidate_codes": [
+      "SP-AGY-POLICE",
+      "SP-DO-TOURISM"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-AGY-POLICE",
+      "SP-DO-TOURISM"
+    ],
+    "descriptions": {
+      "SP-AGY-POLICE": "자치경찰단 — 생활안전, 교통(주정차 단속 등 일부), 관광경찰, 지역 특성 치안(자연환경·문화재 보호 관련 수사 일부)",
+      "SP-DO-TOURISM": "제주도청 관광교류국"
+    },
+    "note": "_resolveInstitutionMatch topScore===1(약한 매칭) 분기 — 자치경찰단 kw '관광경찰' 1개 매칭 vs 관광교류국 kw '관광' 1개 매칭. topScore===1일 때만 기존에도 L2 병합 안전망이 있었지만(A6는 topScore>=2만 수정) 실제로 되묻는지는 이번이 첫 라이브 검증."
+  },
+  {
+    "id": "gov-clarify-a8-03-jpspo-welfare",
+    "utterance": "장애인 생활 지원에 대해 상담받고 싶어요.",
+    "candidate_codes": [
+      "SP-ORG-JPSPO",
+      "SP-DO-WELFARE"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-ORG-JPSPO",
+      "SP-DO-WELFARE"
+    ],
+    "descriptions": {
+      "SP-ORG-JPSPO": "제주특별자치도장애인체육회 — 장애인 생활·전문체육 진흥, 제주장애인스포츠센터 관련 사업",
+      "SP-DO-WELFARE": "제주도청 복지가족국(구 보건복지여성국)"
+    },
+    "note": "_resolveInstitutionMatch topScore===1(약한 매칭) 분기 — 제주특별자치도장애인체육회 kw '장애인 생활' 1개 매칭 vs 복지가족국 kw '장애인' 1개 매칭. topScore===1일 때만 기존에도 L2 병합 안전망이 있었지만(A6는 topScore>=2만 수정) 실제로 되묻는지는 이번이 첫 라이브 검증."
+  },
+  {
+    "id": "gov-clarify-a8-04-control-weak-noL2",
+    "utterance": "자치경찰단에 지역 특성 치안 관련해서 문의드리고 싶어요.",
+    "candidate_codes": [
+      "SP-AGY-POLICE",
+      "SP-DO-SAFETY"
+    ],
+    "expected_ambiguous_pair": null,
+    "descriptions": {
+      "SP-AGY-POLICE": "자치경찰단 — 생활안전, 교통(주정차 단속 등 일부), 관광경찰, 지역 특성 치안(자연환경·문화재 보호 관련 수사 일부)",
+      "SP-DO-SAFETY": "제주도청 도민안전건강실(안전건강실) — 재난·안전 총괄"
+    },
+    "note": "통제 시나리오 — '지역 특성 치안'은 POLICE에서만 매칭되고 SAFETY(L2)와는 안 겹친다(사전 확인). 확신 있게 단일 확정돼야 함."
+  },
+  {
+    "id": "gov-clarify-a8-05-zeromatch-agency-plan",
+    "utterance": "지방세 체납 관련 문의드립니다.",
+    "candidate_codes": [
+      "SP-AGY-AGRITECH",
+      "SP-AGY-ARTMUSEUM",
+      "SP-AGY-BOHWAN",
+      "SP-AGY-CHUKSAN",
+      "SP-AGY-FIRE",
+      "SP-AGY-FOLKMUSEUM",
+      "SP-AGY-HERITAGE",
+      "SP-AGY-LIBRARY",
+      "SP-AGY-POLICE",
+      "SP-AGY-WATER",
+      "SP-DO-PLAN"
+    ],
+    "expected_ambiguous_pair": null,
+    "descriptions": {
+      "SP-AGY-AGRITECH": "농업기술원 — 농업경영체 대상 재배기술 지도, 신품종 시험·보급, 영농기술 교육",
+      "SP-AGY-ARTMUSEUM": "제주특별자치도립미술관 — 도민 미술문화의식 향상, 소장품 전시, 제주비엔날레 등 국제교류전 개최",
+      "SP-AGY-BOHWAN": "보건환경연구원 — 수질·대기·식품 등 환경·보건 검사·분석, 감염병 진단 검사 지원",
+      "SP-AGY-CHUKSAN": "축산생명연구원 — 가축전염병 방역·검사, 축산 관련 연구·기술 지원",
+      "SP-AGY-FIRE": "소방안전본부 — 화재·구조·구급 출동, 소방시설 인허가, 재난 예방",
+      "SP-AGY-FOLKMUSEUM": "제주특별자치도민속자연사박물관 — 제주 민속문화·자연사 자료 보존·전시, 제주학 아카데미 등 교육 프로그램 운영",
+      "SP-AGY-HERITAGE": "세계유산본부 — 한라산국립공원 등 유네스코 세계자연유산·지질공원 관리, 특별 인허가(탐방로 이용, 학술조사 등)",
+      "SP-AGY-LIBRARY": "제주특별자치도 공공도서관(원형) — 도서 대출·반납, 열람실 이용, 지역자료(제주문헌실) 보존, 어린이·평생학습 프로그램 운영",
+      "SP-AGY-POLICE": "자치경찰단 — 생활안전, 교통(주정차 단속 등 일부), 관광경찰, 지역 특성 치안(자연환경·문화재 보호 관련 수사 일부)",
+      "SP-AGY-WATER": "상하수도본부 — 상수도 요금·계량·급수 정책, 하수도 시설·처리, 급수 중단·누수 민원의 정책·시설 총괄 주체",
+      "SP-DO-PLAN": "제주도청 기획조정실 — 지방세는 여기, 국세는 국세청(SP-NAT-TAX) 소관"
+    },
+    "note": "_resolveInstitutionMatch topScore===0(완전 미매칭) 분기 — 직속기관(agency) 10개 전체가 키워드 0개 매칭(사전 확인)이라 도청 L2 최우선 후보(SP-DO-PLAN, '지방세' 매칭)를 병합해 11개 전체를 classifyFn에 던진다. 무관한 기관 10개 속에서도 정답(PLAN)을 정확히 골라내는지, 엉뚱한 기관으로 새지 않는지 검증"
+  },
+  {
+    "id": "gov-clarify-a8-06-zeromatch-org-gender",
+    "utterance": "성평등 관련 정책 상담을 받고 싶어요.",
+    "candidate_codes": [
+      "SP-ORG-CHILDCARE",
+      "SP-ORG-CHILDMEAL",
+      "SP-ORG-ICCJEJU",
+      "SP-ORG-IPF",
+      "SP-ORG-JCCEI",
+      "SP-ORG-JCGF",
+      "SP-ORG-JCPA",
+      "SP-ORG-JEA",
+      "SP-ORG-JEDA",
+      "SP-ORG-JEJU43",
+      "SP-ORG-JEJUMED",
+      "SP-ORG-JERI",
+      "SP-ORG-JFAC",
+      "SP-ORG-JILES",
+      "SP-ORG-JPASS",
+      "SP-ORG-JPDC",
+      "SP-ORG-JPSPO",
+      "SP-ORG-JSPO",
+      "SP-ORG-JTA",
+      "SP-ORG-JTO",
+      "SP-ORG-JTP",
+      "SP-ORG-JWFRI",
+      "SP-ORG-MAEUL",
+      "SP-ORG-SGPMED",
+      "SP-ORG-TRANSWEAK",
+      "SP-ORG-URBANREGEN",
+      "SP-DO-GENDER"
+    ],
+    "expected_ambiguous_pair": null,
+    "descriptions": {
+      "SP-ORG-CHILDCARE": "제주특별자치도 아이돌봄광역지원센터 — 12세 이하 아동 대상 방문 아이돌봄서비스 연계, 아이돌보미 모집·교육",
+      "SP-ORG-CHILDMEAL": "제주 어린이급식관리지원센터(1~4, 원형) — 어린이 급식소(어린이집·유치원 등) 위생·영양 관리 지원, 급식소 등록 관리(식품위생법 근거 국가사업)",
+      "SP-ORG-ICCJEJU": "제주국제컨벤션센터(ICC JEJU) — 국제회의·전시·공연 등 컨벤션 시설 대관 및 MICE(회의·포상관광·컨벤션·전시) 행사 유치·지원",
+      "SP-ORG-IPF": "국제평화재단 — \\",
+      "SP-ORG-JCCEI": "제주창조경제혁신센터 — 초기 창업기업 발굴·보육, 창업 공모전·투자 연계 지원",
+      "SP-ORG-JCGF": "제주신용보증재단 — 소기업·소상공인 대상 신용보증서 발급, 특별채무감면 캠페인 등 금융지원",
+      "SP-ORG-JCPA": "제주영상문화산업진흥원 — 영상·영화·콘텐츠 산업 지원, 촬영지 지원, 영상 인력 양성",
+      "SP-ORG-JEA": "제주에너지공사(JEA) — 풍력·태양광 등 신재생에너지 생산·판매, 에너지연구기술센터 운영, 해상풍력발전단지 조성사업",
+      "SP-ORG-JEDA": "제주경제통상진흥원(JBA) — 중소기업·소상공인·사회적기업 판로·자금·경영 지원, 소상공인경영지원센터·디자인스튜디오 운영, 창업 지원",
+      "SP-ORG-JEJU43": "제주4·3평화재단 — 4·3평화기념관 운영, 희생자·유족 신고 지원, 진상조사·평화인권교육·추념식 주관",
+      "SP-ORG-JEJUMED": "제주의료원 — 공공의료(취약계층 의료지원 포함), 검진센터·재활치료센터·고압산소치료센터 운영",
+      "SP-ORG-JERI": "제주연구원(JRI) — 제주 지역 정책연구(경제·복지·환경·농업·관광 등 전 분야), 도정 정책 자문, 지하수연구센터 운영",
+      "SP-ORG-JFAC": "제주문화예술재단 — 문화예술 창작·활동 지원, 문화예술 공모사업 운영",
+      "SP-ORG-JILES": "제주평생교육장학진흥원 — 평생교육 프로그램 운영(제주평생교육다모아), 장학금 지원, 외국어 학습비 지원",
+      "SP-ORG-JPASS": "제주특별자치도사회서비스원 — 국공립 어린이집·요양시설 등 공공 사회복지시설 위탁 운영, 돌봄서비스 품질 관리",
+      "SP-ORG-JPDC": "제주특별자치도개발공사(JPDC) — 제주삼다수(먹는샘물) 생산·유통, 공공주택 개발·분양·임대, 감귤 가공(감귤복합처리가공단지), 지하수 자원 관리",
+      "SP-ORG-JPSPO": "제주특별자치도장애인체육회 — 장애인 생활·전문체육 진흥, 제주장애인스포츠센터 관련 사업",
+      "SP-ORG-JSPO": "제주특별자치도체육회 — 생활체육·전문체육 진흥, 직장운동경기부 운영, 전국체전 등 대회 참가 지원",
+      "SP-ORG-JTA": "제주특별자치도관광협회 — 관광사업체 회원 지원, 관광 관련 업무협약·캠페인 추진(예: 신용보증재단·은행과의 금융지원 협약)",
+      "SP-ORG-JTO": "제주관광공사(JTO) — 관광 마케팅·프로모션, 관광 이벤트 기획·운영, 면세점 등 관광 부대사업(제주관광공사법 제49조 근거)",
+      "SP-ORG-JTP": "제주테크노파크(JTP) — 지역 중소기업 기술지원, 산학연 협력, 청정바이오·화장품 등 지역전략산업 육성",
+      "SP-ORG-JWFRI": "제주여성가족연구원 — 여성·가족·성평등 정책 연구, 제주 성인지통계시스템 운영",
+      "SP-ORG-MAEUL": "제주마을만들기종합지원센터 — 마을공동체 사업(마을만들기) 공모·컨설팅, 주민역량강화 프로그램 운영",
+      "SP-ORG-SGPMED": "서귀포의료원 — 서귀포시 유일 종합병원으로서 공공의료 제공, 응급의료센터 운영",
+      "SP-ORG-TRANSWEAK": "제주특별자치도 교통약자이동지원센터 — 휠체어 이용 장애인 등 교통약자 대상 특별교통수단(콜택시) 배차·운영",
+      "SP-ORG-URBANREGEN": "제주특별자치도 도시재생지원센터 — 도시재생 뉴딜사업 등 지원, 지역 재생사업 컨설팅·주민참여 프로그램 운영",
+      "SP-DO-GENDER": "제주도청 성평등여성정책관 — 성평등·여성정책(복지가족국의 가족·아동·보육과는 별도)"
+    },
+    "note": "topScore===0 분기, org 테이블(26개, 더 큰 후보군) 버전 — '성평등' 개념이 SP-ORG-JWFRI(제주여성가족연구원, kw '성평등 정책 연구'는 전체 구문이라 이 발화와는 불일치)와 표면적으로 관련돼 보일 수 있어 특히 흥미로운 케이스. 26개 무관 기관 속에서 SP-DO-GENDER를 정확히 찾아내는지 검증"
+  }
+]
