@@ -1,0 +1,938 @@
+[
+  {
+    "id": "CT-0105",
+    "directCode": "do-agency:SP-AGYDIV-HERITAGE-MANAGEMENT",
+    "renderText": "세계유산본부 세계유산본부 유산관리과",
+    "pdvLocationHint": null,
+    "utterance": "세계유산본부 세계유산본부 유산관리과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(세계유산본부 세계유산본부 유산관리과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0106",
+    "directCode": "do-agency:SP-AGY-LIBRARY",
+    "renderText": "제주특별자치도 공공도서관(원형)",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도 공공도서관(원형)에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/bureau",
+    "note": "do-agency 국/부서 단위(제주특별자치도 공공도서관(원형)) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0107",
+    "directCode": "do-agency:SP-AGYDIV-LIBRARY-INFOSERVICE",
+    "renderText": "제주특별자치도 공공도서관(원형) 제주특별자치도한라도서관 정보서비스팀(추정)",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도 공공도서관(원형) 제주특별자치도한라도서관 정보서비스팀(추정)에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(제주특별자치도 공공도서관(원형) 제주특별자치도한라도서관 정보서비스팀(추정)) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0108",
+    "directCode": "do-agency:SP-AGYDIV-LIBRARY-POLICY",
+    "renderText": "제주특별자치도 공공도서관(원형) 제주특별자치도한라도서관 정책협력팀(추정)",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도 공공도서관(원형) 제주특별자치도한라도서관 정책협력팀(추정)에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(제주특별자치도 공공도서관(원형) 제주특별자치도한라도서관 정책협력팀(추정)) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0109",
+    "directCode": "do-agency:SP-AGY-POLICE",
+    "renderText": "자치경찰단",
+    "pdvLocationHint": null,
+    "utterance": "자치경찰단에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/bureau",
+    "note": "do-agency 국/부서 단위(자치경찰단) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0110",
+    "directCode": "do-agency:SP-AGYDIV-POLICE-SAFETY",
+    "renderText": "자치경찰단 자치경찰단 생활안전과",
+    "pdvLocationHint": null,
+    "utterance": "자치경찰단 자치경찰단 생활안전과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(자치경찰단 자치경찰단 생활안전과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0111",
+    "directCode": "do-agency:SP-AGYDIV-POLICE-TRAFFIC",
+    "renderText": "자치경찰단 자치경찰단 교통과",
+    "pdvLocationHint": null,
+    "utterance": "자치경찰단 자치경찰단 교통과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(자치경찰단 자치경찰단 교통과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0112",
+    "directCode": "do-agency:SP-AGYDIV-POLICE-WOMENYOUTH",
+    "renderText": "자치경찰단 자치경찰단 여성청소년과",
+    "pdvLocationHint": null,
+    "utterance": "자치경찰단 자치경찰단 여성청소년과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(자치경찰단 자치경찰단 여성청소년과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0113",
+    "directCode": "do-agency:SP-AGY-WATER",
+    "renderText": "상하수도본부",
+    "pdvLocationHint": null,
+    "utterance": "상하수도본부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/bureau",
+    "note": "do-agency 국/부서 단위(상하수도본부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0114",
+    "directCode": "do-agency:SP-AGYDIV-WATER-ADMIN",
+    "renderText": "상하수도본부 상하수도본부 경영지원과",
+    "pdvLocationHint": null,
+    "utterance": "상하수도본부 상하수도본부 경영지원과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(상하수도본부 상하수도본부 경영지원과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0115",
+    "directCode": "do-agency:SP-AGYDIV-WATER-SEWAGE",
+    "renderText": "상하수도본부 상하수도본부 하수도과",
+    "pdvLocationHint": null,
+    "utterance": "상하수도본부 상하수도본부 하수도과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(상하수도본부 상하수도본부 하수도과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0116",
+    "directCode": "do-agency:SP-AGYDIV-WATER-WATERSUPPLY",
+    "renderText": "상하수도본부 상하수도본부 상수도과",
+    "pdvLocationHint": null,
+    "utterance": "상하수도본부 상하수도본부 상수도과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(상하수도본부 상하수도본부 상수도과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0117",
+    "directCode": "org:SP-ORG-CHILDCARE",
+    "renderText": "제주특별자치도 아이돌봄광역지원센터",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도 아이돌봄광역지원센터에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/bureau",
+    "note": "org 국/부서 단위(제주특별자치도 아이돌봄광역지원센터) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0118",
+    "directCode": "org:SP-ORGDIV-CHILDCARE-SUPPORT",
+    "renderText": "제주특별자치도 아이돌봄광역지원센터 제주특별자치도 아이돌봄광역지원센터 돌봄지원팀",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도 아이돌봄광역지원센터 제주특별자치도 아이돌봄광역지원센터 돌봄지원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주특별자치도 아이돌봄광역지원센터 제주특별자치도 아이돌봄광역지원센터 돌봄지원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0119",
+    "directCode": "org:SP-ORG-CHILDMEAL",
+    "renderText": "제주 어린이급식관리지원센터(1~4, 원형)",
+    "pdvLocationHint": null,
+    "utterance": "제주 어린이급식관리지원센터(1~4, 원형)에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/bureau",
+    "note": "org 국/부서 단위(제주 어린이급식관리지원센터(1~4, 원형)) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0120",
+    "directCode": "org:SP-ORGDIV-CHILDMEAL-ADMIN",
+    "renderText": "제주 어린이급식관리지원센터(1~4, 원형) 어린이급식관리지원센터 기획운영팀",
+    "pdvLocationHint": null,
+    "utterance": "제주 어린이급식관리지원센터(1~4, 원형) 어린이급식관리지원센터 기획운영팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주 어린이급식관리지원센터(1~4, 원형) 어린이급식관리지원센터 기획운영팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0121",
+    "directCode": "org:SP-ORGDIV-CHILDMEAL-HYGIENE",
+    "renderText": "제주 어린이급식관리지원센터(1~4, 원형) 어린이급식관리지원센터 위생팀",
+    "pdvLocationHint": null,
+    "utterance": "제주 어린이급식관리지원센터(1~4, 원형) 어린이급식관리지원센터 위생팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주 어린이급식관리지원센터(1~4, 원형) 어린이급식관리지원센터 위생팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0122",
+    "directCode": "org:SP-ORGDIV-CHILDMEAL-NUTRITION",
+    "renderText": "제주 어린이급식관리지원센터(1~4, 원형) 어린이급식관리지원센터 영양팀",
+    "pdvLocationHint": null,
+    "utterance": "제주 어린이급식관리지원센터(1~4, 원형) 어린이급식관리지원센터 영양팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주 어린이급식관리지원센터(1~4, 원형) 어린이급식관리지원센터 영양팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0123",
+    "directCode": "org:SP-ORG-ICCJEJU",
+    "renderText": "제주국제컨벤션센터(ICC JEJU)",
+    "pdvLocationHint": null,
+    "utterance": "제주국제컨벤션센터(ICC JEJU)에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/bureau",
+    "note": "org 국/부서 단위(제주국제컨벤션센터(ICC JEJU)) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0124",
+    "directCode": "org:SP-ORGDIV-ICCJEJU-MARKETING",
+    "renderText": "제주국제컨벤션센터(ICC JEJU) 제주국제컨벤션센터 마케팅팀",
+    "pdvLocationHint": null,
+    "utterance": "제주국제컨벤션센터(ICC JEJU) 제주국제컨벤션센터 마케팅팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주국제컨벤션센터(ICC JEJU) 제주국제컨벤션센터 마케팅팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0125",
+    "directCode": "org:SP-ORGDIV-ICCJEJU-MGMT",
+    "renderText": "제주국제컨벤션센터(ICC JEJU) 제주국제컨벤션센터 경영지원팀",
+    "pdvLocationHint": null,
+    "utterance": "제주국제컨벤션센터(ICC JEJU) 제주국제컨벤션센터 경영지원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주국제컨벤션센터(ICC JEJU) 제주국제컨벤션센터 경영지원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0126",
+    "directCode": "org:SP-ORGDIV-ICCJEJU-OPS",
+    "renderText": "제주국제컨벤션센터(ICC JEJU) 제주국제컨벤션센터 운영팀",
+    "pdvLocationHint": null,
+    "utterance": "제주국제컨벤션센터(ICC JEJU) 제주국제컨벤션센터 운영팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주국제컨벤션센터(ICC JEJU) 제주국제컨벤션센터 운영팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0127",
+    "directCode": "org:SP-ORGDIV-ICCJEJU-VENUE",
+    "renderText": "제주국제컨벤션센터(ICC JEJU) 제주국제컨벤션센터 시설운영팀",
+    "pdvLocationHint": null,
+    "utterance": "제주국제컨벤션센터(ICC JEJU) 제주국제컨벤션센터 시설운영팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주국제컨벤션센터(ICC JEJU) 제주국제컨벤션센터 시설운영팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0128",
+    "directCode": "org:SP-ORG-IPF",
+    "renderText": "국제평화재단",
+    "pdvLocationHint": null,
+    "utterance": "국제평화재단에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/bureau",
+    "note": "org 국/부서 단위(국제평화재단) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0129",
+    "directCode": "org:SP-ORGDIV-IPF-PEACE",
+    "renderText": "국제평화재단 국제평화재단 국제교류팀",
+    "pdvLocationHint": null,
+    "utterance": "국제평화재단 국제평화재단 국제교류팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(국제평화재단 국제평화재단 국제교류팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0130",
+    "directCode": "org:SP-ORG-JCCEI",
+    "renderText": "제주창조경제혁신센터",
+    "pdvLocationHint": null,
+    "utterance": "제주창조경제혁신센터에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/bureau",
+    "note": "org 국/부서 단위(제주창조경제혁신센터) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0131",
+    "directCode": "org:SP-ORGDIV-JCCEI-SUPPORT",
+    "renderText": "제주창조경제혁신센터 제주창조경제혁신센터 창업지원팀",
+    "pdvLocationHint": null,
+    "utterance": "제주창조경제혁신센터 제주창조경제혁신센터 창업지원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주창조경제혁신센터 제주창조경제혁신센터 창업지원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0132",
+    "directCode": "org:SP-ORG-JCGF",
+    "renderText": "제주신용보증재단",
+    "pdvLocationHint": null,
+    "utterance": "제주신용보증재단에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/bureau",
+    "note": "org 국/부서 단위(제주신용보증재단) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0133",
+    "directCode": "org:SP-ORGDIV-JCGF-ADMIN",
+    "renderText": "제주신용보증재단 제주신용보증재단 경영지원부",
+    "pdvLocationHint": null,
+    "utterance": "제주신용보증재단 제주신용보증재단 경영지원부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주신용보증재단 제주신용보증재단 경영지원부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0134",
+    "directCode": "org:SP-ORGDIV-JCGF-RISK",
+    "renderText": "제주신용보증재단 제주신용보증재단 리스크관리부",
+    "pdvLocationHint": null,
+    "utterance": "제주신용보증재단 제주신용보증재단 리스크관리부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주신용보증재단 제주신용보증재단 리스크관리부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0135",
+    "directCode": "org:SP-ORGDIV-JCGF-UNDERWRITING",
+    "renderText": "제주신용보증재단 제주신용보증재단 보증심사부",
+    "pdvLocationHint": null,
+    "utterance": "제주신용보증재단 제주신용보증재단 보증심사부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주신용보증재단 제주신용보증재단 보증심사부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0136",
+    "directCode": "org:SP-ORG-JCPA",
+    "renderText": "제주영상문화산업진흥원",
+    "pdvLocationHint": null,
+    "utterance": "제주영상문화산업진흥원에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/bureau",
+    "note": "org 국/부서 단위(제주영상문화산업진흥원) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0137",
+    "directCode": "org:SP-ORGDIV-JCPA-BASE",
+    "renderText": "제주영상문화산업진흥원 제주콘텐츠진흥원 콘텐츠기반팀",
+    "pdvLocationHint": null,
+    "utterance": "제주영상문화산업진흥원 제주콘텐츠진흥원 콘텐츠기반팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주영상문화산업진흥원 제주콘텐츠진흥원 콘텐츠기반팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0138",
+    "directCode": "org:SP-ORGDIV-JCPA-CONTENTS",
+    "renderText": "제주영상문화산업진흥원 제주콘텐츠진흥원 콘텐츠산업팀",
+    "pdvLocationHint": null,
+    "utterance": "제주영상문화산업진흥원 제주콘텐츠진흥원 콘텐츠산업팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주영상문화산업진흥원 제주콘텐츠진흥원 콘텐츠산업팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0139",
+    "directCode": "org:SP-ORGDIV-JCPA-FOSTER",
+    "renderText": "제주영상문화산업진흥원 제주콘텐츠진흥원 콘텐츠육성팀",
+    "pdvLocationHint": null,
+    "utterance": "제주영상문화산업진흥원 제주콘텐츠진흥원 콘텐츠육성팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주영상문화산업진흥원 제주콘텐츠진흥원 콘텐츠육성팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0140",
+    "directCode": "org:SP-ORGDIV-JCPA-SPREAD",
+    "renderText": "제주영상문화산업진흥원 제주콘텐츠진흥원 콘텐츠확산팀",
+    "pdvLocationHint": null,
+    "utterance": "제주영상문화산업진흥원 제주콘텐츠진흥원 콘텐츠확산팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주영상문화산업진흥원 제주콘텐츠진흥원 콘텐츠확산팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0141",
+    "directCode": "org:SP-ORGDIV-JCPA-TALENT",
+    "renderText": "제주영상문화산업진흥원 제주콘텐츠진흥원 콘텐츠인재팀",
+    "pdvLocationHint": null,
+    "utterance": "제주영상문화산업진흥원 제주콘텐츠진흥원 콘텐츠인재팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주영상문화산업진흥원 제주콘텐츠진흥원 콘텐츠인재팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0142",
+    "directCode": "org:SP-ORG-JEA",
+    "renderText": "제주에너지공사(JEA)",
+    "pdvLocationHint": null,
+    "utterance": "제주에너지공사(JEA)에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/bureau",
+    "note": "org 국/부서 단위(제주에너지공사(JEA)) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0143",
+    "directCode": "org:SP-ORGDIV-JEA-EVINFRA",
+    "renderText": "제주에너지공사(JEA) 제주에너지공사 전기차인프라운영팀",
+    "pdvLocationHint": null,
+    "utterance": "제주에너지공사(JEA) 제주에너지공사 전기차인프라운영팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주에너지공사(JEA) 제주에너지공사 전기차인프라운영팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0144",
+    "directCode": "org:SP-ORGDIV-JEA-FACILITY",
+    "renderText": "제주에너지공사(JEA) 제주에너지공사 시설팀",
+    "pdvLocationHint": null,
+    "utterance": "제주에너지공사(JEA) 제주에너지공사 시설팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주에너지공사(JEA) 제주에너지공사 시설팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0145",
+    "directCode": "org:SP-ORGDIV-JEA-HYDROGEN",
+    "renderText": "제주에너지공사(JEA) 제주에너지공사 청정수소사업단",
+    "pdvLocationHint": null,
+    "utterance": "제주에너지공사(JEA) 제주에너지공사 청정수소사업단에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주에너지공사(JEA) 제주에너지공사 청정수소사업단) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0146",
+    "directCode": "org:SP-ORGDIV-JEA-PLANNING",
+    "renderText": "제주에너지공사(JEA) 제주에너지공사 경영기획본부",
+    "pdvLocationHint": null,
+    "utterance": "제주에너지공사(JEA) 제주에너지공사 경영기획본부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주에너지공사(JEA) 제주에너지공사 경영기획본부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0147",
+    "directCode": "org:SP-ORGDIV-JEA-RENEWABLE",
+    "renderText": "제주에너지공사(JEA) 제주에너지공사 신재생에너지사업본부",
+    "pdvLocationHint": null,
+    "utterance": "제주에너지공사(JEA) 제주에너지공사 신재생에너지사업본부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주에너지공사(JEA) 제주에너지공사 신재생에너지사업본부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0148",
+    "directCode": "org:SP-ORGDIV-JEA-WINDOPS",
+    "renderText": "제주에너지공사(JEA) 제주에너지공사 풍력사업운영본부",
+    "pdvLocationHint": null,
+    "utterance": "제주에너지공사(JEA) 제주에너지공사 풍력사업운영본부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주에너지공사(JEA) 제주에너지공사 풍력사업운영본부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0149",
+    "directCode": "org:SP-ORG-JEDA",
+    "renderText": "제주경제통상진흥원(JBA)",
+    "pdvLocationHint": null,
+    "utterance": "제주경제통상진흥원(JBA)에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/bureau",
+    "note": "org 국/부서 단위(제주경제통상진흥원(JBA)) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0150",
+    "directCode": "org:SP-ORGDIV-JEDA-BUSINESS",
+    "renderText": "제주경제통상진흥원(JBA) 제주경제통상진흥원 사업지원팀",
+    "pdvLocationHint": null,
+    "utterance": "제주경제통상진흥원(JBA) 제주경제통상진흥원 사업지원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주경제통상진흥원(JBA) 제주경제통상진흥원 사업지원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0151",
+    "directCode": "org:SP-ORGDIV-JEDA-EXPORT",
+    "renderText": "제주경제통상진흥원(JBA) 제주특별자치도경제통상진흥원 수출판로지원팀",
+    "pdvLocationHint": null,
+    "utterance": "제주경제통상진흥원(JBA) 제주특별자치도경제통상진흥원 수출판로지원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주경제통상진흥원(JBA) 제주특별자치도경제통상진흥원 수출판로지원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0152",
+    "directCode": "org:SP-ORGDIV-JEDA-FINANCE",
+    "renderText": "제주경제통상진흥원(JBA) 제주특별자치도경제통상진흥원 자금지원팀",
+    "pdvLocationHint": null,
+    "utterance": "제주경제통상진흥원(JBA) 제주특별자치도경제통상진흥원 자금지원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주경제통상진흥원(JBA) 제주특별자치도경제통상진흥원 자금지원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0153",
+    "directCode": "org:SP-ORGDIV-JEDA-MGMT",
+    "renderText": "제주경제통상진흥원(JBA) 제주특별자치도경제통상진흥원 경영혁신본부",
+    "pdvLocationHint": null,
+    "utterance": "제주경제통상진흥원(JBA) 제주특별자치도경제통상진흥원 경영혁신본부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주경제통상진흥원(JBA) 제주특별자치도경제통상진흥원 경영혁신본부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0154",
+    "directCode": "org:SP-ORGDIV-JEDA-PLANNING",
+    "renderText": "제주경제통상진흥원(JBA) 제주경제통상진흥원 경영기획팀",
+    "pdvLocationHint": null,
+    "utterance": "제주경제통상진흥원(JBA) 제주경제통상진흥원 경영기획팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주경제통상진흥원(JBA) 제주경제통상진흥원 경영기획팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0155",
+    "directCode": "org:SP-ORGDIV-JEDA-STARTUP",
+    "renderText": "제주경제통상진흥원(JBA) 제주특별자치도경제통상진흥원 창업지원팀",
+    "pdvLocationHint": null,
+    "utterance": "제주경제통상진흥원(JBA) 제주특별자치도경제통상진흥원 창업지원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주경제통상진흥원(JBA) 제주특별자치도경제통상진흥원 창업지원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0156",
+    "directCode": "org:SP-ORG-JEJU43",
+    "renderText": "제주4·3평화재단",
+    "pdvLocationHint": null,
+    "utterance": "제주4·3평화재단에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/bureau",
+    "note": "org 국/부서 단위(제주4·3평화재단) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0157",
+    "directCode": "org:SP-ORGDIV-JEJU43-ADMIN",
+    "renderText": "제주4·3평화재단 제주4·3평화재단 사무처",
+    "pdvLocationHint": null,
+    "utterance": "제주4·3평화재단 제주4·3평화재단 사무처에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주4·3평화재단 제주4·3평화재단 사무처) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0158",
+    "directCode": "org:SP-ORGDIV-JEJU43-PEACE",
+    "renderText": "제주4·3평화재단 제주4·3평화재단 평화사업팀",
+    "pdvLocationHint": null,
+    "utterance": "제주4·3평화재단 제주4·3평화재단 평화사업팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주4·3평화재단 제주4·3평화재단 평화사업팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0159",
+    "directCode": "org:SP-ORGDIV-JEJU43-RESEARCH",
+    "renderText": "제주4·3평화재단 제주4·3평화재단 조사연구실",
+    "pdvLocationHint": null,
+    "utterance": "제주4·3평화재단 제주4·3평화재단 조사연구실에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주4·3평화재단 제주4·3평화재단 조사연구실) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0160",
+    "directCode": "org:SP-ORG-JEJUMED",
+    "renderText": "제주의료원",
+    "pdvLocationHint": null,
+    "utterance": "제주의료원에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/bureau",
+    "note": "org 국/부서 단위(제주의료원) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0161",
+    "directCode": "org:SP-ORGDIV-JEJUMED-ADMIN",
+    "renderText": "제주의료원 제주의료원 행정지원부",
+    "pdvLocationHint": null,
+    "utterance": "제주의료원 제주의료원 행정지원부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주의료원 제주의료원 행정지원부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0162",
+    "directCode": "org:SP-ORGDIV-JEJUMED-CLINICAL",
+    "renderText": "제주의료원 제주의료원 진료부",
+    "pdvLocationHint": null,
+    "utterance": "제주의료원 제주의료원 진료부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주의료원 제주의료원 진료부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0163",
+    "directCode": "org:SP-ORGDIV-JEJUMED-NURSING",
+    "renderText": "제주의료원 제주의료원 간호부",
+    "pdvLocationHint": null,
+    "utterance": "제주의료원 제주의료원 간호부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주의료원 제주의료원 간호부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0164",
+    "directCode": "org:SP-ORG-JERI",
+    "renderText": "제주연구원(JRI)",
+    "pdvLocationHint": null,
+    "utterance": "제주연구원(JRI)에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/bureau",
+    "note": "org 국/부서 단위(제주연구원(JRI)) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0165",
+    "directCode": "org:SP-ORGDIV-JERI-CITIZEN",
+    "renderText": "제주연구원(JRI) 제주연구원 도민행복연구실",
+    "pdvLocationHint": null,
+    "utterance": "제주연구원(JRI) 제주연구원 도민행복연구실에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주연구원(JRI) 제주연구원 도민행복연구실) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0166",
+    "directCode": "org:SP-ORGDIV-JERI-DISASTER",
+    "renderText": "제주연구원(JRI) 제주연구원 제주재난안전연구센터",
+    "pdvLocationHint": null,
+    "utterance": "제주연구원(JRI) 제주연구원 제주재난안전연구센터에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주연구원(JRI) 제주연구원 제주재난안전연구센터) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0167",
+    "directCode": "org:SP-ORGDIV-JERI-FUTURE",
+    "renderText": "제주연구원(JRI) 제주연구원 미래대응전략실",
+    "pdvLocationHint": null,
+    "utterance": "제주연구원(JRI) 제주연구원 미래대응전략실에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주연구원(JRI) 제주연구원 미래대응전략실) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0168",
+    "directCode": "org:SP-ORGDIV-JERI-GROWTH",
+    "renderText": "제주연구원(JRI) 제주연구원 지속성장연구실",
+    "pdvLocationHint": null,
+    "utterance": "제주연구원(JRI) 제주연구원 지속성장연구실에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주연구원(JRI) 제주연구원 지속성장연구실) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0169",
+    "directCode": "org:SP-ORGDIV-JERI-MGMT",
+    "renderText": "제주연구원(JRI) 제주연구원 경영지원실",
+    "pdvLocationHint": null,
+    "utterance": "제주연구원(JRI) 제주연구원 경영지원실에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주연구원(JRI) 제주연구원 경영지원실) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0170",
+    "directCode": "org:SP-ORGDIV-JERI-PLANNING",
+    "renderText": "제주연구원(JRI) 제주연구원 기획경영부",
+    "pdvLocationHint": null,
+    "utterance": "제주연구원(JRI) 제주연구원 기획경영부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주연구원(JRI) 제주연구원 기획경영부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0171",
+    "directCode": "org:SP-ORGDIV-JERI-RESEARCH",
+    "renderText": "제주연구원(JRI) 제주연구원 연구부",
+    "pdvLocationHint": null,
+    "utterance": "제주연구원(JRI) 제주연구원 연구부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주연구원(JRI) 제주연구원 연구부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0172",
+    "directCode": "org:SP-ORG-JFAC",
+    "renderText": "제주문화예술재단",
+    "pdvLocationHint": null,
+    "utterance": "제주문화예술재단에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/bureau",
+    "note": "org 국/부서 단위(제주문화예술재단) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0173",
+    "directCode": "org:SP-ORGDIV-JFAC-MGMT",
+    "renderText": "제주문화예술재단 제주문화예술재단 경영지원팀",
+    "pdvLocationHint": null,
+    "utterance": "제주문화예술재단 제주문화예술재단 경영지원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주문화예술재단 제주문화예술재단 경영지원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0174",
+    "directCode": "org:SP-ORGDIV-JFAC-PROGRAM",
+    "renderText": "제주문화예술재단 제주문화예술재단 문화사업팀",
+    "pdvLocationHint": null,
+    "utterance": "제주문화예술재단 제주문화예술재단 문화사업팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주문화예술재단 제주문화예술재단 문화사업팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0175",
+    "directCode": "org:SP-ORGDIV-JFAC-SUPPORT",
+    "renderText": "제주문화예술재단 제주문화예술재단 문화지원팀",
+    "pdvLocationHint": null,
+    "utterance": "제주문화예술재단 제주문화예술재단 문화지원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주문화예술재단 제주문화예술재단 문화지원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0176",
+    "directCode": "org:SP-ORG-JILES",
+    "renderText": "제주평생교육장학진흥원",
+    "pdvLocationHint": null,
+    "utterance": "제주평생교육장학진흥원에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/bureau",
+    "note": "org 국/부서 단위(제주평생교육장학진흥원) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0177",
+    "directCode": "org:SP-ORGDIV-JILES-EDU",
+    "renderText": "제주평생교육장학진흥원 제주평생교육장학진흥원 평생교육팀",
+    "pdvLocationHint": null,
+    "utterance": "제주평생교육장학진흥원 제주평생교육장학진흥원 평생교육팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주평생교육장학진흥원 제주평생교육장학진흥원 평생교육팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0178",
+    "directCode": "org:SP-ORGDIV-JILES-MGMT",
+    "renderText": "제주평생교육장학진흥원 제주평생교육장학진흥원 경영지원팀",
+    "pdvLocationHint": null,
+    "utterance": "제주평생교육장학진흥원 제주평생교육장학진흥원 경영지원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주평생교육장학진흥원 제주평생교육장학진흥원 경영지원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0179",
+    "directCode": "org:SP-ORGDIV-JILES-SCHOLARSHIP",
+    "renderText": "제주평생교육장학진흥원 제주평생교육장학진흥원 장학팀",
+    "pdvLocationHint": null,
+    "utterance": "제주평생교육장학진흥원 제주평생교육장학진흥원 장학팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주평생교육장학진흥원 제주평생교육장학진흥원 장학팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0180",
+    "directCode": "org:SP-ORG-JPASS",
+    "renderText": "제주특별자치도사회서비스원",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도사회서비스원에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/bureau",
+    "note": "org 국/부서 단위(제주특별자치도사회서비스원) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0181",
+    "directCode": "org:SP-ORGDIV-JPASS-ADMIN",
+    "renderText": "제주특별자치도사회서비스원 제주특별자치도 사회서비스원 경영지원부",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도사회서비스원 제주특별자치도 사회서비스원 경영지원부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주특별자치도사회서비스원 제주특별자치도 사회서비스원 경영지원부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0182",
+    "directCode": "org:SP-ORGDIV-JPASS-SERVICESUPPORT",
+    "renderText": "제주특별자치도사회서비스원 제주특별자치도 사회서비스원 서비스지원부",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도사회서비스원 제주특별자치도 사회서비스원 서비스지원부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주특별자치도사회서비스원 제주특별자치도 사회서비스원 서비스지원부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0183",
+    "directCode": "org:SP-ORG-JPDC",
+    "renderText": "제주특별자치도개발공사(JPDC)",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도개발공사(JPDC)에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/bureau",
+    "note": "org 국/부서 단위(제주특별자치도개발공사(JPDC)) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0184",
+    "directCode": "org:SP-ORGDIV-JPDC-BUSINESS",
+    "renderText": "제주특별자치도개발공사(JPDC) 제주특별자치도개발공사 사업본부",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도개발공사(JPDC) 제주특별자치도개발공사 사업본부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주특별자치도개발공사(JPDC) 제주특별자치도개발공사 사업본부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0185",
+    "directCode": "org:SP-ORGDIV-JPDC-PLANNING",
+    "renderText": "제주특별자치도개발공사(JPDC) 제주특별자치도개발공사 경영기획본부",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도개발공사(JPDC) 제주특별자치도개발공사 경영기획본부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주특별자치도개발공사(JPDC) 제주특별자치도개발공사 경영기획본부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0186",
+    "directCode": "org:SP-ORGDIV-JPDC-PRODUCTION",
+    "renderText": "제주특별자치도개발공사(JPDC) 제주특별자치도개발공사 생산팀",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도개발공사(JPDC) 제주특별자치도개발공사 생산팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주특별자치도개발공사(JPDC) 제주특별자치도개발공사 생산팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0187",
+    "directCode": "org:SP-ORGDIV-JPDC-QUALITY",
+    "renderText": "제주특별자치도개발공사(JPDC) 제주특별자치도개발공사 품질관리팀",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도개발공사(JPDC) 제주특별자치도개발공사 품질관리팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주특별자치도개발공사(JPDC) 제주특별자치도개발공사 품질관리팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0188",
+    "directCode": "org:SP-ORGDIV-JPDC-SALES",
+    "renderText": "제주특별자치도개발공사(JPDC) 제주특별자치도개발공사 영업팀",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도개발공사(JPDC) 제주특별자치도개발공사 영업팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주특별자치도개발공사(JPDC) 제주특별자치도개발공사 영업팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0189",
+    "directCode": "org:SP-ORGDIV-JPDC-WATERRESEARCH",
+    "renderText": "제주특별자치도개발공사(JPDC) 제주특별자치도개발공사 수자원연구팀",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도개발공사(JPDC) 제주특별자치도개발공사 수자원연구팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주특별자치도개발공사(JPDC) 제주특별자치도개발공사 수자원연구팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0190",
+    "directCode": "org:SP-ORG-JPSPO",
+    "renderText": "제주특별자치도장애인체육회",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도장애인체육회에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/bureau",
+    "note": "org 국/부서 단위(제주특별자치도장애인체육회) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0191",
+    "directCode": "org:SP-ORGDIV-JPSPO-ADMIN",
+    "renderText": "제주특별자치도장애인체육회 제주특별자치도장애인체육회 경영지원부",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도장애인체육회 제주특별자치도장애인체육회 경영지원부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주특별자치도장애인체육회 제주특별자치도장애인체육회 경영지원부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0192",
+    "directCode": "org:SP-ORGDIV-JPSPO-ELITESPORT",
+    "renderText": "제주특별자치도장애인체육회 제주특별자치도장애인체육회 전문체육부",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도장애인체육회 제주특별자치도장애인체육회 전문체육부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주특별자치도장애인체육회 제주특별자치도장애인체육회 전문체육부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0193",
+    "directCode": "org:SP-ORGDIV-JPSPO-LIFESPORT",
+    "renderText": "제주특별자치도장애인체육회 제주특별자치도장애인체육회 생활체육부",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도장애인체육회 제주특별자치도장애인체육회 생활체육부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주특별자치도장애인체육회 제주특별자치도장애인체육회 생활체육부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0194",
+    "directCode": "org:SP-ORGDIV-JPSPO-PLANNING",
+    "renderText": "제주특별자치도장애인체육회 제주특별자치도장애인체육회 기획조정부",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도장애인체육회 제주특별자치도장애인체육회 기획조정부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주특별자치도장애인체육회 제주특별자치도장애인체육회 기획조정부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0195",
+    "directCode": "org:SP-ORG-JSPO",
+    "renderText": "제주특별자치도체육회",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도체육회에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/bureau",
+    "note": "org 국/부서 단위(제주특별자치도체육회) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0196",
+    "directCode": "org:SP-ORGDIV-JSPO-ADMIN",
+    "renderText": "제주특별자치도체육회 제주특별자치도체육회 경영지원부",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도체육회 제주특별자치도체육회 경영지원부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주특별자치도체육회 제주특별자치도체육회 경영지원부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0197",
+    "directCode": "org:SP-ORGDIV-JSPO-ELITESPORT",
+    "renderText": "제주특별자치도체육회 제주특별자치도체육회 전문체육부",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도체육회 제주특별자치도체육회 전문체육부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주특별자치도체육회 제주특별자치도체육회 전문체육부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0198",
+    "directCode": "org:SP-ORGDIV-JSPO-LIFESPORT",
+    "renderText": "제주특별자치도체육회 제주특별자치도체육회 생활체육부",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도체육회 제주특별자치도체육회 생활체육부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주특별자치도체육회 제주특별자치도체육회 생활체육부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0199",
+    "directCode": "org:SP-ORGDIV-JSPO-PLANNING",
+    "renderText": "제주특별자치도체육회 제주특별자치도체육회 기획조정부",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도체육회 제주특별자치도체육회 기획조정부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주특별자치도체육회 제주특별자치도체육회 기획조정부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0200",
+    "directCode": "org:SP-ORG-JTA",
+    "renderText": "제주특별자치도관광협회",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도관광협회에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/bureau",
+    "note": "org 국/부서 단위(제주특별자치도관광협회) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0201",
+    "directCode": "org:SP-ORGDIV-JTA-MEMBERSUPPORT",
+    "renderText": "제주특별자치도관광협회 제주관광협회 회원지원팀",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도관광협회 제주관광협회 회원지원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주특별자치도관광협회 제주관광협회 회원지원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0202",
+    "directCode": "org:SP-ORG-JTO",
+    "renderText": "제주관광공사(JTO)",
+    "pdvLocationHint": null,
+    "utterance": "제주관광공사(JTO)에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/bureau",
+    "note": "org 국/부서 단위(제주관광공사(JTO)) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0203",
+    "directCode": "org:SP-ORGDIV-JTO-AUDIT",
+    "renderText": "제주관광공사(JTO) 제주관광공사 감사팀",
+    "pdvLocationHint": null,
+    "utterance": "제주관광공사(JTO) 제주관광공사 감사팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주관광공사(JTO) 제주관광공사 감사팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0204",
+    "directCode": "org:SP-ORGDIV-JTO-INDUSTRY",
+    "renderText": "제주관광공사(JTO) 제주관광공사 관광산업실",
+    "pdvLocationHint": null,
+    "utterance": "제주관광공사(JTO) 제주관광공사 관광산업실에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주관광공사(JTO) 제주관광공사 관광산업실) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0205",
+    "directCode": "org:SP-ORGDIV-JTO-MARKETING",
+    "renderText": "제주관광공사(JTO) 제주관광공사 마케팅사업본부",
+    "pdvLocationHint": null,
+    "utterance": "제주관광공사(JTO) 제주관광공사 마케팅사업본부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주관광공사(JTO) 제주관광공사 마케팅사업본부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0206",
+    "directCode": "org:SP-ORGDIV-JTO-PLANNING",
+    "renderText": "제주관광공사(JTO) 제주관광공사 경영기획본부",
+    "pdvLocationHint": null,
+    "utterance": "제주관광공사(JTO) 제주관광공사 경영기획본부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주관광공사(JTO) 제주관광공사 경영기획본부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0207",
+    "directCode": "org:SP-ORGDIV-JTO-PROFIT",
+    "renderText": "제주관광공사(JTO) 제주관광공사 수익사업실",
+    "pdvLocationHint": null,
+    "utterance": "제주관광공사(JTO) 제주관광공사 수익사업실에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/division",
+    "note": "org 과/division 단위(제주관광공사(JTO) 제주관광공사 수익사업실) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0208",
+    "directCode": "org:SP-ORG-JTP",
+    "renderText": "제주테크노파크(JTP)",
+    "pdvLocationHint": null,
+    "utterance": "제주테크노파크(JTP)에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "org/bureau",
+    "note": "org 국/부서 단위(제주테크노파크(JTP)) 관제탑 원칙 준수 테스트"
+  }
+]

@@ -1,0 +1,938 @@
+[
+  {
+    "id": "CT-0001",
+    "directCode": "do-dept:jeju:SP-DO-WELFARE",
+    "renderText": "복지가족국(구 보...)",
+    "pdvLocationHint": null,
+    "utterance": "복지가족국(구 보...)에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(복지가족국(구 보...)) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0002",
+    "directCode": "do-dept:jeju:SP-DIV-WELFARE-CHILDCARE",
+    "renderText": "복지가족국(구 보...) 아동보육청소년과",
+    "pdvLocationHint": null,
+    "utterance": "복지가족국(구 보...) 아동보육청소년과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(복지가족국(구 보...) 아동보육청소년과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0003",
+    "directCode": "do-dept:jeju:SP-DIV-WELFARE-DISABLED",
+    "renderText": "복지가족국(구 보...) 장애인복지과",
+    "pdvLocationHint": null,
+    "utterance": "복지가족국(구 보...) 장애인복지과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(복지가족국(구 보...) 장애인복지과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0004",
+    "directCode": "do-dept:jeju:SP-DIV-WELFARE-ELDERLY",
+    "renderText": "복지가족국(구 보...) 노인복지과",
+    "pdvLocationHint": null,
+    "utterance": "복지가족국(구 보...) 노인복지과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(복지가족국(구 보...) 노인복지과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0005",
+    "directCode": "do-dept:jeju:SP-DIV-WELFARE-POLICY",
+    "renderText": "복지가족국(구 보...) 복지정책과",
+    "pdvLocationHint": null,
+    "utterance": "복지가족국(구 보...) 복지정책과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(복지가족국(구 보...) 복지정책과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0006",
+    "directCode": "do-dept:jeju:SP-DO-PLAN",
+    "renderText": "기획조정실",
+    "pdvLocationHint": null,
+    "utterance": "기획조정실에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(기획조정실) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0007",
+    "directCode": "do-dept:jeju:SP-DIV-PLAN-BUDGET",
+    "renderText": "기획조정실 예산담당관",
+    "pdvLocationHint": null,
+    "utterance": "기획조정실 예산담당관에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(기획조정실 예산담당관) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0008",
+    "directCode": "do-dept:jeju:SP-DIV-PLAN-LEGAL",
+    "renderText": "기획조정실 특별자치법무담당관",
+    "pdvLocationHint": null,
+    "utterance": "기획조정실 특별자치법무담당관에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(기획조정실 특별자치법무담당관) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0009",
+    "directCode": "do-dept:jeju:SP-DIV-PLAN-POLICY",
+    "renderText": "기획조정실 정책기획관",
+    "pdvLocationHint": null,
+    "utterance": "기획조정실 정책기획관에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(기획조정실 정책기획관) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0010",
+    "directCode": "do-dept:jeju:SP-DIV-PLAN-POPULATION",
+    "renderText": "기획조정실 인구정책담당관",
+    "pdvLocationHint": null,
+    "utterance": "기획조정실 인구정책담당관에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(기획조정실 인구정책담당관) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0011",
+    "directCode": "do-dept:jeju:SP-DIV-PLAN-TAXADMIN",
+    "renderText": "기획조정실 세정담당관",
+    "pdvLocationHint": null,
+    "utterance": "기획조정실 세정담당관에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(기획조정실 세정담당관) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0012",
+    "directCode": "do-dept:jeju:SP-DIV-PLAN-YOUTH",
+    "renderText": "기획조정실 청년정책담당관",
+    "pdvLocationHint": null,
+    "utterance": "기획조정실 청년정책담당관에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(기획조정실 청년정책담당관) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0013",
+    "directCode": "do-dept:jeju:SP-DO-SAFETY",
+    "renderText": "도민안전건강실(...)",
+    "pdvLocationHint": null,
+    "utterance": "도민안전건강실(...)에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(도민안전건강실(...)) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0014",
+    "directCode": "do-dept:jeju:SP-DIV-SAFETY-HEALTHHYGIENE",
+    "renderText": "도민안전건강실(...) 건강위생과",
+    "pdvLocationHint": null,
+    "utterance": "도민안전건강실(...) 건강위생과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(도민안전건강실(...) 건강위생과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0015",
+    "directCode": "do-dept:jeju:SP-DIV-SAFETY-HEALTHPOLICY",
+    "renderText": "도민안전건강실(...) 보건정책과",
+    "pdvLocationHint": null,
+    "utterance": "도민안전건강실(...) 보건정책과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(도민안전건강실(...) 보건정책과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0016",
+    "directCode": "do-dept:jeju:SP-DIV-SAFETY-NATURALDISASTER",
+    "renderText": "도민안전건강실(...) 자연재난과",
+    "pdvLocationHint": null,
+    "utterance": "도민안전건강실(...) 자연재난과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(도민안전건강실(...) 자연재난과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0017",
+    "directCode": "do-dept:jeju:SP-DIV-SAFETY-POLICY",
+    "renderText": "도민안전건강실(...) 안전정책과",
+    "pdvLocationHint": null,
+    "utterance": "도민안전건강실(...) 안전정책과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(도민안전건강실(...) 안전정책과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0018",
+    "directCode": "do-dept:jeju:SP-DIV-SAFETY-SOCIALDISASTER",
+    "renderText": "도민안전건강실(...) 사회재난과",
+    "pdvLocationHint": null,
+    "utterance": "도민안전건강실(...) 사회재난과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(도민안전건강실(...) 사회재난과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0019",
+    "directCode": "do-dept:jeju:SP-DO-JACHI",
+    "renderText": "특별자치행정국",
+    "pdvLocationHint": null,
+    "utterance": "특별자치행정국에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(특별자치행정국) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0020",
+    "directCode": "do-dept:jeju:SP-DIV-JACHI-43SUPPORT",
+    "renderText": "특별자치행정국 4·3지원과",
+    "pdvLocationHint": null,
+    "utterance": "특별자치행정국 4·3지원과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(특별자치행정국 4·3지원과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0021",
+    "directCode": "do-dept:jeju:SP-DIV-JACHI-ACCOUNTING",
+    "renderText": "특별자치행정국 회계재산관리과",
+    "pdvLocationHint": null,
+    "utterance": "특별자치행정국 회계재산관리과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(특별자치행정국 회계재산관리과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0022",
+    "directCode": "do-dept:jeju:SP-DIV-JACHI-GENERAL",
+    "renderText": "특별자치행정국 총무과",
+    "pdvLocationHint": null,
+    "utterance": "특별자치행정국 총무과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(특별자치행정국 총무과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0023",
+    "directCode": "do-dept:jeju:SP-DIV-JACHI-SELFGOV",
+    "renderText": "특별자치행정국 자치행정과",
+    "pdvLocationHint": null,
+    "utterance": "특별자치행정국 자치행정과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(특별자치행정국 자치행정과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0024",
+    "directCode": "do-dept:jeju:SP-DO-ECON",
+    "renderText": "경제활력국",
+    "pdvLocationHint": null,
+    "utterance": "경제활력국에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(경제활력국) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0025",
+    "directCode": "do-dept:jeju:SP-DIV-ECON-JOBECONOMY",
+    "renderText": "경제활력국 경제정책과",
+    "pdvLocationHint": null,
+    "utterance": "경제활력국 경제정책과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(경제활력국 경제정책과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0026",
+    "directCode": "do-dept:jeju:SP-DIV-ECON-INVESTMENT",
+    "renderText": "경제활력국 기업정책과",
+    "pdvLocationHint": null,
+    "utterance": "경제활력국 기업정책과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(경제활력국 기업정책과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0027",
+    "directCode": "do-dept:jeju:SP-DIV-ECON-SMALLBIZ",
+    "renderText": "경제활력국 소상공인물류과",
+    "pdvLocationHint": null,
+    "utterance": "경제활력국 소상공인물류과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(경제활력국 소상공인물류과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0028",
+    "directCode": "do-dept:jeju:SP-DIV-ECON-EMPLOYCENTER",
+    "renderText": "경제활력국 고용센터",
+    "pdvLocationHint": null,
+    "utterance": "경제활력국 고용센터에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(경제활력국 고용센터) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0029",
+    "directCode": "do-dept:jeju:SP-DO-INNOV",
+    "renderText": "혁신산업국",
+    "pdvLocationHint": null,
+    "utterance": "혁신산업국에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(혁신산업국) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0030",
+    "directCode": "do-dept:jeju:SP-DIV-INNOV-DIGITAL",
+    "renderText": "혁신산업국 디지털혁신과",
+    "pdvLocationHint": null,
+    "utterance": "혁신산업국 디지털혁신과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(혁신산업국 디지털혁신과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0031",
+    "directCode": "do-dept:jeju:SP-DIV-INNOV-ENERGYINDUSTRY",
+    "renderText": "혁신산업국 에너지산업과",
+    "pdvLocationHint": null,
+    "utterance": "혁신산업국 에너지산업과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(혁신산업국 에너지산업과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0032",
+    "directCode": "do-dept:jeju:SP-DIV-INNOV-FUTUREGROWTH",
+    "renderText": "혁신산업국 미래성장과",
+    "pdvLocationHint": null,
+    "utterance": "혁신산업국 미래성장과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(혁신산업국 미래성장과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0033",
+    "directCode": "do-dept:jeju:SP-DIV-INNOV-SPACEMOBILITY",
+    "renderText": "혁신산업국 우주모빌리티과",
+    "pdvLocationHint": null,
+    "utterance": "혁신산업국 우주모빌리티과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(혁신산업국 우주모빌리티과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0034",
+    "directCode": "do-dept:jeju:SP-DO-CLIMATE",
+    "renderText": "기후환경국",
+    "pdvLocationHint": null,
+    "utterance": "기후환경국에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(기후환경국) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0035",
+    "directCode": "do-dept:jeju:SP-DIV-CLIMATE-ENVPOLICY",
+    "renderText": "기후환경국 환경정책과",
+    "pdvLocationHint": null,
+    "utterance": "기후환경국 환경정책과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(기후환경국 환경정책과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0036",
+    "directCode": "do-dept:jeju:SP-DIV-CLIMATE-WATERPOLICY",
+    "renderText": "기후환경국 물정책과",
+    "pdvLocationHint": null,
+    "utterance": "기후환경국 물정책과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(기후환경국 물정책과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0037",
+    "directCode": "do-dept:jeju:SP-DIV-CLIMATE-RECYCLING",
+    "renderText": "기후환경국 자원순환과",
+    "pdvLocationHint": null,
+    "utterance": "기후환경국 자원순환과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(기후환경국 자원순환과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0038",
+    "directCode": "do-dept:jeju:SP-DIV-CLIMATE-FORESTGREEN",
+    "renderText": "기후환경국 산림녹지과",
+    "pdvLocationHint": null,
+    "utterance": "기후환경국 산림녹지과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(기후환경국 산림녹지과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0039",
+    "directCode": "do-dept:jeju:SP-DO-HOUSING",
+    "renderText": "건설주택국",
+    "pdvLocationHint": null,
+    "utterance": "건설주택국에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(건설주택국) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0040",
+    "directCode": "do-dept:jeju:SP-DIV-HOUSING-CONSTRUCTION",
+    "renderText": "건설주택국 건설주택국) 건설과",
+    "pdvLocationHint": null,
+    "utterance": "건설주택국 건설주택국) 건설과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(건설주택국 건설주택국) 건설과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0041",
+    "directCode": "do-dept:jeju:SP-DIV-HOUSING-ARCHITECTURE",
+    "renderText": "건설주택국 건설주택국) 건축경관과",
+    "pdvLocationHint": null,
+    "utterance": "건설주택국 건설주택국) 건축경관과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(건설주택국 건설주택국) 건축경관과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0042",
+    "directCode": "do-dept:jeju:SP-DIV-HOUSING-HOUSINGLAND",
+    "renderText": "건설주택국 건설주택국) 주택토지과",
+    "pdvLocationHint": null,
+    "utterance": "건설주택국 건설주택국) 주택토지과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(건설주택국 건설주택국) 주택토지과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0043",
+    "directCode": "do-dept:jeju:SP-DIV-HOUSING-ROADMANAGE",
+    "renderText": "건설주택국 건설주택국) 도로관리과",
+    "pdvLocationHint": null,
+    "utterance": "건설주택국 건설주택국) 도로관리과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(건설주택국 건설주택국) 도로관리과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0044",
+    "directCode": "do-dept:jeju:SP-DO-TRANSPORT",
+    "renderText": "교통항공국",
+    "pdvLocationHint": null,
+    "utterance": "교통항공국에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(교통항공국) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0045",
+    "directCode": "do-dept:jeju:SP-DIV-TRANSPORT-TRAFFICPOLICY",
+    "renderText": "교통항공국 교통정책과",
+    "pdvLocationHint": null,
+    "utterance": "교통항공국 교통정책과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(교통항공국 교통정책과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0046",
+    "directCode": "do-dept:jeju:SP-DIV-TRANSPORT-PUBLICTRANSPORT",
+    "renderText": "교통항공국 대중교통과",
+    "pdvLocationHint": null,
+    "utterance": "교통항공국 대중교통과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(교통항공국 대중교통과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0047",
+    "directCode": "do-dept:jeju:SP-DIV-TRANSPORT-URBANPLAN",
+    "renderText": "교통항공국 도시계획과",
+    "pdvLocationHint": null,
+    "utterance": "교통항공국 도시계획과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(교통항공국 도시계획과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0048",
+    "directCode": "do-dept:jeju:SP-DIV-TRANSPORT-15MINCITY",
+    "renderText": "교통항공국 15분도시과",
+    "pdvLocationHint": null,
+    "utterance": "교통항공국 15분도시과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(교통항공국 15분도시과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0049",
+    "directCode": "do-dept:jeju:SP-DO-CULTURE",
+    "renderText": "문화체육교육국",
+    "pdvLocationHint": null,
+    "utterance": "문화체육교육국에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(문화체육교육국) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0050",
+    "directCode": "do-dept:jeju:SP-DIV-CULTURE-CULTUREPOLICY",
+    "renderText": "문화체육교육국 문화정책과",
+    "pdvLocationHint": null,
+    "utterance": "문화체육교육국 문화정책과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(문화체육교육국 문화정책과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0051",
+    "directCode": "do-dept:jeju:SP-DIV-CULTURE-SPORTSPROMO",
+    "renderText": "문화체육교육국 체육진흥과",
+    "pdvLocationHint": null,
+    "utterance": "문화체육교육국 체육진흥과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(문화체육교육국 체육진흥과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0052",
+    "directCode": "do-dept:jeju:SP-DIV-CULTURE-EDUCOOPERATION",
+    "renderText": "문화체육교육국 교육정책협력과",
+    "pdvLocationHint": null,
+    "utterance": "문화체육교육국 교육정책협력과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(문화체육교육국 교육정책협력과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0053",
+    "directCode": "do-dept:jeju:SP-DO-TOURISM",
+    "renderText": "관광교류국",
+    "pdvLocationHint": null,
+    "utterance": "관광교류국에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(관광교류국) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0054",
+    "directCode": "do-dept:jeju:SP-DIV-TOURISM-TOURISMPOLICY",
+    "renderText": "관광교류국 관광정책과",
+    "pdvLocationHint": null,
+    "utterance": "관광교류국 관광정책과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(관광교류국 관광정책과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0055",
+    "directCode": "do-dept:jeju:SP-DIV-TOURISM-TOURISMINDUSTRY",
+    "renderText": "관광교류국 관광산업과",
+    "pdvLocationHint": null,
+    "utterance": "관광교류국 관광산업과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(관광교류국 관광산업과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0056",
+    "directCode": "do-dept:jeju:SP-DIV-TOURISM-PEACEDIPLOMACY",
+    "renderText": "관광교류국 평화외교과",
+    "pdvLocationHint": null,
+    "utterance": "관광교류국 평화외교과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(관광교류국 평화외교과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0057",
+    "directCode": "do-dept:jeju:SP-DO-AGRI",
+    "renderText": "농축산식품국",
+    "pdvLocationHint": null,
+    "utterance": "농축산식품국에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(농축산식품국) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0058",
+    "directCode": "do-dept:jeju:SP-DIV-AGRI-ECOFARMPOLICY",
+    "renderText": "농축산식품국 친환경농업정책과",
+    "pdvLocationHint": null,
+    "utterance": "농축산식품국 친환경농업정책과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(농축산식품국 친환경농업정책과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0059",
+    "directCode": "do-dept:jeju:SP-DIV-AGRI-FOODINDUSTRY",
+    "renderText": "농축산식품국 식품산업과",
+    "pdvLocationHint": null,
+    "utterance": "농축산식품국 식품산업과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(농축산식품국 식품산업과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0060",
+    "directCode": "do-dept:jeju:SP-DIV-AGRI-CITRUS",
+    "renderText": "농축산식품국 감귤유통과",
+    "pdvLocationHint": null,
+    "utterance": "농축산식품국 감귤유통과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(농축산식품국 감귤유통과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0061",
+    "directCode": "do-dept:jeju:SP-DIV-AGRI-LIVESTOCKPOLICY",
+    "renderText": "농축산식품국 친환경축산정책과",
+    "pdvLocationHint": null,
+    "utterance": "농축산식품국 친환경축산정책과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(농축산식품국 친환경축산정책과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0062",
+    "directCode": "do-dept:jeju:SP-DIV-AGRI-ANIMALQUARANTINE",
+    "renderText": "농축산식품국 동물방역과",
+    "pdvLocationHint": null,
+    "utterance": "농축산식품국 동물방역과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(농축산식품국 동물방역과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0063",
+    "directCode": "do-dept:jeju:SP-DO-OCEAN",
+    "renderText": "해양수산국",
+    "pdvLocationHint": null,
+    "utterance": "해양수산국에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(해양수산국) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0064",
+    "directCode": "do-dept:jeju:SP-DIV-OCEAN-MARINEPOLICY",
+    "renderText": "해양수산국 수산정책과",
+    "pdvLocationHint": null,
+    "utterance": "해양수산국 수산정책과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(해양수산국 수산정책과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0065",
+    "directCode": "do-dept:jeju:SP-DIV-OCEAN-MARINEINDUSTRY",
+    "renderText": "해양수산국 해양산업과",
+    "pdvLocationHint": null,
+    "utterance": "해양수산국 해양산업과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(해양수산국 해양산업과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0066",
+    "directCode": "do-dept:jeju:SP-DIV-OCEAN-HAENYEOHERITAGE",
+    "renderText": "해양수산국 해녀문화유산과",
+    "pdvLocationHint": null,
+    "utterance": "해양수산국 해녀문화유산과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(해양수산국 해녀문화유산과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0067",
+    "directCode": "do-dept:jeju:SP-DIV-OCEAN-PORTHARBOR",
+    "renderText": "해양수산국 해운항만과",
+    "pdvLocationHint": null,
+    "utterance": "해양수산국 해운항만과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "do-dept 과/division 단위(해양수산국 해운항만과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0068",
+    "directCode": "do-dept:jeju:SP-DO-COMM",
+    "renderText": "소통담당관(구 소통청렴담당관)",
+    "pdvLocationHint": null,
+    "utterance": "소통담당관(구 소통청렴담당관)에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(소통담당관(구 소통청렴담당관)) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0069",
+    "directCode": "do-dept:jeju:SP-DO-GENERAL",
+    "renderText": "총무과",
+    "pdvLocationHint": null,
+    "utterance": "총무과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(총무과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0070",
+    "directCode": "do-dept:jeju:SP-DO-LIAISON",
+    "renderText": "중앙협력본부",
+    "pdvLocationHint": null,
+    "utterance": "중앙협력본부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(중앙협력본부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0071",
+    "directCode": "do-dept:jeju:SP-DO-SPOKES",
+    "renderText": "대변인",
+    "pdvLocationHint": null,
+    "utterance": "대변인에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(대변인) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0072",
+    "directCode": "do-dept:jeju:SP-DO-AIGOV",
+    "renderText": "AI행정혁신추진단",
+    "pdvLocationHint": null,
+    "utterance": "AI행정혁신추진단에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(AI행정혁신추진단) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0073",
+    "directCode": "do-dept:jeju:SP-DO-AIRPORTSUP",
+    "renderText": "공항확충지원단",
+    "pdvLocationHint": null,
+    "utterance": "공항확충지원단에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(공항확충지원단) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0074",
+    "directCode": "do-dept:jeju:SP-DO-AUTONOMY",
+    "renderText": "특별자치제도추진단",
+    "pdvLocationHint": null,
+    "utterance": "특별자치제도추진단에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(특별자치제도추진단) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0075",
+    "directCode": "do-dept:jeju:SP-DO-BALANCE",
+    "renderText": "도시균형추진단",
+    "pdvLocationHint": null,
+    "utterance": "도시균형추진단에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(도시균형추진단) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0076",
+    "directCode": "do-dept:jeju:SP-DO-BASICSOC",
+    "renderText": "기본사회추진단",
+    "pdvLocationHint": null,
+    "utterance": "기본사회추진단에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(기본사회추진단) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0077",
+    "directCode": "do-dept:jeju:SP-DO-GANGJEONG",
+    "renderText": "강정공동체사업추진단",
+    "pdvLocationHint": null,
+    "utterance": "강정공동체사업추진단에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(강정공동체사업추진단) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0078",
+    "directCode": "do-dept:jeju:SP-DO-GENDER",
+    "renderText": "성평등여성정책관",
+    "pdvLocationHint": null,
+    "utterance": "성평등여성정책관에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(성평등여성정책관) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0079",
+    "directCode": "do-dept:jeju:SP-DO-LABOR",
+    "renderText": "노동안전감독관",
+    "pdvLocationHint": null,
+    "utterance": "노동안전감독관에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/bureau",
+    "note": "do-dept 국/부서 단위(노동안전감독관) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0080",
+    "directCode": "do-agency:SP-AGY-AGRITECH",
+    "renderText": "농업기술원",
+    "pdvLocationHint": null,
+    "utterance": "농업기술원에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/bureau",
+    "note": "do-agency 국/부서 단위(농업기술원) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0081",
+    "directCode": "do-agency:SP-AGYDIV-AGRITECH-ADMIN",
+    "renderText": "농업기술원 농업기술원 행정운영과",
+    "pdvLocationHint": null,
+    "utterance": "농업기술원 농업기술원 행정운영과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(농업기술원 농업기술원 행정운영과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0082",
+    "directCode": "do-agency:SP-AGYDIV-AGRITECH-EXTENSION",
+    "renderText": "농업기술원 농업기술원 기술보급과",
+    "pdvLocationHint": null,
+    "utterance": "농업기술원 농업기술원 기술보급과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(농업기술원 농업기술원 기술보급과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0083",
+    "directCode": "do-agency:SP-AGYDIV-AGRITECH-RESEARCH",
+    "renderText": "농업기술원 농업기술원 연구개발과",
+    "pdvLocationHint": null,
+    "utterance": "농업기술원 농업기술원 연구개발과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(농업기술원 농업기술원 연구개발과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0084",
+    "directCode": "do-agency:SP-AGY-ARTMUSEUM",
+    "renderText": "제주특별자치도립미술관",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도립미술관에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/bureau",
+    "note": "do-agency 국/부서 단위(제주특별자치도립미술관) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0085",
+    "directCode": "do-agency:SP-AGYDIV-ARTMUSEUM-JHYUN",
+    "renderText": "제주특별자치도립미술관 제주도립미술관 제주현대미술관",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도립미술관 제주도립미술관 제주현대미술관에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(제주특별자치도립미술관 제주도립미술관 제주현대미술관) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0086",
+    "directCode": "do-agency:SP-AGYDIV-ARTMUSEUM-KIMTSCHANGYEUL",
+    "renderText": "제주특별자치도립미술관 제주도립미술관 김창열미술관",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도립미술관 제주도립미술관 김창열미술관에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(제주특별자치도립미술관 제주도립미술관 김창열미술관) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0087",
+    "directCode": "do-agency:SP-AGYDIV-ARTMUSEUM-MAIN",
+    "renderText": "제주특별자치도립미술관 제주도립미술관 본관",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도립미술관 제주도립미술관 본관에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(제주특별자치도립미술관 제주도립미술관 본관) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0088",
+    "directCode": "do-agency:SP-AGY-BOHWAN",
+    "renderText": "보건환경연구원",
+    "pdvLocationHint": null,
+    "utterance": "보건환경연구원에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/bureau",
+    "note": "do-agency 국/부서 단위(보건환경연구원) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0089",
+    "directCode": "do-agency:SP-AGYDIV-BOHWAN-ENVIRONMENT",
+    "renderText": "보건환경연구원 보건환경연구원 환경연구과",
+    "pdvLocationHint": null,
+    "utterance": "보건환경연구원 보건환경연구원 환경연구과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(보건환경연구원 보건환경연구원 환경연구과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0090",
+    "directCode": "do-agency:SP-AGYDIV-BOHWAN-HEALTH",
+    "renderText": "보건환경연구원 보건환경연구원 보건연구과",
+    "pdvLocationHint": null,
+    "utterance": "보건환경연구원 보건환경연구원 보건연구과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(보건환경연구원 보건환경연구원 보건연구과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0091",
+    "directCode": "do-agency:SP-AGY-CHUKSAN",
+    "renderText": "축산생명연구원",
+    "pdvLocationHint": null,
+    "utterance": "축산생명연구원에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/bureau",
+    "note": "do-agency 국/부서 단위(축산생명연구원) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0092",
+    "directCode": "do-agency:SP-AGYDIV-CHUKSAN-RESEARCH",
+    "renderText": "축산생명연구원 축산생명연구원 축산연구과",
+    "pdvLocationHint": null,
+    "utterance": "축산생명연구원 축산생명연구원 축산연구과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(축산생명연구원 축산생명연구원 축산연구과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0093",
+    "directCode": "do-agency:SP-AGY-FIRE",
+    "renderText": "소방안전본부",
+    "pdvLocationHint": null,
+    "utterance": "소방안전본부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/bureau",
+    "note": "do-agency 국/부서 단위(소방안전본부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0094",
+    "directCode": "do-agency:SP-AGYDIV-FIRE-ADMIN",
+    "renderText": "소방안전본부 소방안전본부 소방행정과",
+    "pdvLocationHint": null,
+    "utterance": "소방안전본부 소방안전본부 소방행정과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(소방안전본부 소방안전본부 소방행정과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0095",
+    "directCode": "do-agency:SP-AGYDIV-FIRE-PREVENTION",
+    "renderText": "소방안전본부 소방안전본부 예방안전과",
+    "pdvLocationHint": null,
+    "utterance": "소방안전본부 소방안전본부 예방안전과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(소방안전본부 소방안전본부 예방안전과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0096",
+    "directCode": "do-agency:SP-AGYDIV-FIRE-RESPONSE",
+    "renderText": "소방안전본부 소방안전본부 현장대응과",
+    "pdvLocationHint": null,
+    "utterance": "소방안전본부 소방안전본부 현장대응과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(소방안전본부 소방안전본부 현장대응과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0097",
+    "directCode": "do-agency:SP-AGY-FOLKMUSEUM",
+    "renderText": "제주특별자치도민속자연사박물관",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도민속자연사박물관에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/bureau",
+    "note": "do-agency 국/부서 단위(제주특별자치도민속자연사박물관) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0098",
+    "directCode": "do-agency:SP-AGYDIV-FOLKMUSEUM-ADMIN",
+    "renderText": "제주특별자치도민속자연사박물관 제주특별자치도민속자연사박물관 관리실",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도민속자연사박물관 제주특별자치도민속자연사박물관 관리실에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(제주특별자치도민속자연사박물관 제주특별자치도민속자연사박물관 관리실) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0099",
+    "directCode": "do-agency:SP-AGYDIV-FOLKMUSEUM-ARCHAEOFOLK",
+    "renderText": "제주특별자치도민속자연사박물관 제주특별자치도민속자연사박물관 고고민속과",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도민속자연사박물관 제주특별자치도민속자연사박물관 고고민속과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(제주특별자치도민속자연사박물관 제주특별자치도민속자연사박물관 고고민속과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0100",
+    "directCode": "do-agency:SP-AGYDIV-FOLKMUSEUM-MARINE",
+    "renderText": "제주특별자치도민속자연사박물관 제주특별자치도민속자연사박물관 해양생물과",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도민속자연사박물관 제주특별자치도민속자연사박물관 해양생물과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(제주특별자치도민속자연사박물관 제주특별자치도민속자연사박물관 해양생물과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0101",
+    "directCode": "do-agency:SP-AGYDIV-FOLKMUSEUM-MINERALBOTANY",
+    "renderText": "제주특별자치도민속자연사박물관 제주특별자치도민속자연사박물관 광식물과",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도민속자연사박물관 제주특별자치도민속자연사박물관 광식물과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(제주특별자치도민속자연사박물관 제주특별자치도민속자연사박물관 광식물과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0102",
+    "directCode": "do-agency:SP-AGYDIV-FOLKMUSEUM-ZOOLOGY",
+    "renderText": "제주특별자치도민속자연사박물관 제주특별자치도민속자연사박물관 동물과",
+    "pdvLocationHint": null,
+    "utterance": "제주특별자치도민속자연사박물관 제주특별자치도민속자연사박물관 동물과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(제주특별자치도민속자연사박물관 제주특별자치도민속자연사박물관 동물과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0103",
+    "directCode": "do-agency:SP-AGY-HERITAGE",
+    "renderText": "세계유산본부",
+    "pdvLocationHint": null,
+    "utterance": "세계유산본부에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/bureau",
+    "note": "do-agency 국/부서 단위(세계유산본부) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0104",
+    "directCode": "do-agency:SP-AGYDIV-HERITAGE-HALLASAN",
+    "renderText": "세계유산본부 세계유산본부 한라산연구과",
+    "pdvLocationHint": null,
+    "utterance": "세계유산본부 세계유산본부 한라산연구과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-agency/division",
+    "note": "do-agency 과/division 단위(세계유산본부 세계유산본부 한라산연구과) 관제탑 원칙 준수 테스트"
+  }
+]

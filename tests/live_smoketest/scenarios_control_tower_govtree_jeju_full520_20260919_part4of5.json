@@ -1,0 +1,938 @@
+[
+  {
+    "id": "CT-0313",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-AGRIECONOMY-ECOFARM",
+    "renderText": "농수축산경제국 농수축산경제국 친환경농정과",
+    "pdvLocationHint": null,
+    "utterance": "농수축산경제국 농수축산경제국 친환경농정과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/division",
+    "note": "seogwipo 과/division 단위(농수축산경제국 농수축산경제국 친환경농정과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0314",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-AGRIECONOMY-FISHERY",
+    "renderText": "농수축산경제국 농수축산경제국 해양수산과",
+    "pdvLocationHint": null,
+    "utterance": "농수축산경제국 농수축산경제국 해양수산과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/division",
+    "note": "seogwipo 과/division 단위(농수축산경제국 농수축산경제국 해양수산과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0315",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-AGRIECONOMY-JOBS",
+    "renderText": "농수축산경제국 농수축산경제국 경제일자리과",
+    "pdvLocationHint": null,
+    "utterance": "농수축산경제국 농수축산경제국 경제일자리과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/division",
+    "note": "seogwipo 과/division 단위(농수축산경제국 농수축산경제국 경제일자리과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0316",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-AGRIECONOMY-LIVESTOCK",
+    "renderText": "농수축산경제국 농수축산경제국 청정축산과",
+    "pdvLocationHint": null,
+    "utterance": "농수축산경제국 농수축산경제국 청정축산과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/division",
+    "note": "seogwipo 과/division 단위(농수축산경제국 농수축산경제국 청정축산과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0317",
+    "directCode": "city-dept:seogwipo-climate",
+    "renderText": "청정환경국",
+    "pdvLocationHint": null,
+    "utterance": "청정환경국에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/bureau",
+    "note": "seogwipo 국/부서 단위(청정환경국) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0318",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-CLIMATE-ENVMGMT",
+    "renderText": "청정환경국 청정환경국 기후환경과",
+    "pdvLocationHint": null,
+    "utterance": "청정환경국 청정환경국 기후환경과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/division",
+    "note": "seogwipo 과/division 단위(청정환경국 청정환경국 기후환경과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0319",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-CLIMATE-FORESTRECREATION",
+    "renderText": "청정환경국 청정환경국 산림휴양관리소",
+    "pdvLocationHint": null,
+    "utterance": "청정환경국 청정환경국 산림휴양관리소에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/division",
+    "note": "seogwipo 과/division 단위(청정환경국 청정환경국 산림휴양관리소) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0320",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-CLIMATE-LIVINGENV",
+    "renderText": "청정환경국 청정환경국 생활환경과",
+    "pdvLocationHint": null,
+    "utterance": "청정환경국 청정환경국 생활환경과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/division",
+    "note": "seogwipo 과/division 단위(청정환경국 청정환경국 생활환경과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0321",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-CLIMATE-PARKS",
+    "renderText": "청정환경국 청정환경국 공원녹지과",
+    "pdvLocationHint": null,
+    "utterance": "청정환경국 청정환경국 공원녹지과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/division",
+    "note": "seogwipo 과/division 단위(청정환경국 청정환경국 공원녹지과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0322",
+    "directCode": "city-dept:seogwipo-housing",
+    "renderText": "안전도시건설국",
+    "pdvLocationHint": null,
+    "utterance": "안전도시건설국에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/bureau",
+    "note": "seogwipo 국/부서 단위(안전도시건설국) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0323",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-CONSTRUCTION-BUILDING",
+    "renderText": "안전도시건설국 안전도시건설국 건축과",
+    "pdvLocationHint": null,
+    "utterance": "안전도시건설국 안전도시건설국 건축과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/division",
+    "note": "seogwipo 과/division 단위(안전도시건설국 안전도시건설국 건축과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0324",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-CONSTRUCTION-CITY",
+    "renderText": "안전도시건설국 안전도시건설국 도시과",
+    "pdvLocationHint": null,
+    "utterance": "안전도시건설국 안전도시건설국 도시과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/division",
+    "note": "seogwipo 과/division 단위(안전도시건설국 안전도시건설국 도시과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0325",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-CONSTRUCTION-CONSTRUCT",
+    "renderText": "안전도시건설국 안전도시건설국 건설과",
+    "pdvLocationHint": null,
+    "utterance": "안전도시건설국 안전도시건설국 건설과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/division",
+    "note": "seogwipo 과/division 단위(안전도시건설국 안전도시건설국 건설과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0326",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-CONSTRUCTION-GENERAL",
+    "renderText": "안전도시건설국 안전도시건설국 안전총괄과",
+    "pdvLocationHint": null,
+    "utterance": "안전도시건설국 안전도시건설국 안전총괄과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/division",
+    "note": "seogwipo 과/division 단위(안전도시건설국 안전도시건설국 안전총괄과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0327",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-CONSTRUCTION-TRAFFIC",
+    "renderText": "안전도시건설국 안전도시건설국 교통행정과",
+    "pdvLocationHint": null,
+    "utterance": "안전도시건설국 안전도시건설국 교통행정과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/division",
+    "note": "seogwipo 과/division 단위(안전도시건설국 안전도시건설국 교통행정과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0328",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-CONSTRUCTION-WATER",
+    "renderText": "안전도시건설국 안전도시건설국 상하수도과",
+    "pdvLocationHint": null,
+    "utterance": "안전도시건설국 안전도시건설국 상하수도과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/division",
+    "note": "seogwipo 과/division 단위(안전도시건설국 안전도시건설국 상하수도과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0329",
+    "directCode": "city-dept:seogwipo-health",
+    "renderText": "서귀포보건소",
+    "pdvLocationHint": null,
+    "utterance": "서귀포보건소에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/bureau",
+    "note": "seogwipo 국/부서 단위(서귀포보건소) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0330",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-HEALTH-ADMIN",
+    "renderText": "서귀포보건소 서귀포보건소 보건행정과",
+    "pdvLocationHint": null,
+    "utterance": "서귀포보건소 서귀포보건소 보건행정과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/division",
+    "note": "seogwipo 과/division 단위(서귀포보건소 서귀포보건소 보건행정과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0331",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-HEALTH-EASTCENTER",
+    "renderText": "서귀포보건소 서귀포보건소 동부보건소",
+    "pdvLocationHint": null,
+    "utterance": "서귀포보건소 서귀포보건소 동부보건소에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/division",
+    "note": "seogwipo 과/division 단위(서귀포보건소 서귀포보건소 동부보건소) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0332",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-HEALTH-PROMOTION",
+    "renderText": "서귀포보건소 서귀포보건소 건강증진과",
+    "pdvLocationHint": null,
+    "utterance": "서귀포보건소 서귀포보건소 건강증진과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/division",
+    "note": "seogwipo 과/division 단위(서귀포보건소 서귀포보건소 건강증진과) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0333",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-HEALTH-WESTCENTER",
+    "renderText": "서귀포보건소 서귀포보건소 서부보건소",
+    "pdvLocationHint": null,
+    "utterance": "서귀포보건소 서귀포보건소 서부보건소에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/division",
+    "note": "seogwipo 과/division 단위(서귀포보건소 서귀포보건소 서부보건소) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0334",
+    "directCode": "city-dept:seogwipo-comm",
+    "renderText": "시민소통지원실",
+    "pdvLocationHint": null,
+    "utterance": "시민소통지원실에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/bureau",
+    "note": "seogwipo 국/부서 단위(시민소통지원실) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0335",
+    "directCode": "city-dept:seogwipo-pr",
+    "renderText": "공보실",
+    "pdvLocationHint": null,
+    "utterance": "공보실에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/bureau",
+    "note": "seogwipo 국/부서 단위(공보실) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0336",
+    "directCode": "city-dept:seogwipo-civilaffairs",
+    "renderText": "종합민원실",
+    "pdvLocationHint": null,
+    "utterance": "종합민원실에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/bureau",
+    "note": "seogwipo 국/부서 단위(종합민원실) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0337",
+    "directCode": "team:구좌읍-총무팀",
+    "renderText": "구좌읍 행정복지센터 총무팀",
+    "pdvLocationHint": null,
+    "utterance": "구좌읍 행정복지센터 총무팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(구좌읍 행정복지센터 총무팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0338",
+    "directCode": "team:구좌읍-민원팀",
+    "renderText": "구좌읍 행정복지센터 민원팀",
+    "pdvLocationHint": null,
+    "utterance": "구좌읍 행정복지센터 민원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(구좌읍 행정복지센터 민원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0339",
+    "directCode": "team:구좌읍-산업팀",
+    "renderText": "구좌읍 행정복지센터 산업팀",
+    "pdvLocationHint": null,
+    "utterance": "구좌읍 행정복지센터 산업팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(구좌읍 행정복지센터 산업팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0340",
+    "directCode": "team:구좌읍-주민복지팀",
+    "renderText": "구좌읍 행정복지센터 주민복지팀",
+    "pdvLocationHint": null,
+    "utterance": "구좌읍 행정복지센터 주민복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(구좌읍 행정복지센터 주민복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0341",
+    "directCode": "team:구좌읍-찾아가는복지팀",
+    "renderText": "구좌읍 행정복지센터 찾아가는복지팀",
+    "pdvLocationHint": null,
+    "utterance": "구좌읍 행정복지센터 찾아가는복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(구좌읍 행정복지센터 찾아가는복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0342",
+    "directCode": "team:애월읍-총무팀",
+    "renderText": "애월읍 행정복지센터 총무팀",
+    "pdvLocationHint": null,
+    "utterance": "애월읍 행정복지센터 총무팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(애월읍 행정복지센터 총무팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0343",
+    "directCode": "team:애월읍-민원팀",
+    "renderText": "애월읍 행정복지센터 민원팀",
+    "pdvLocationHint": null,
+    "utterance": "애월읍 행정복지센터 민원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(애월읍 행정복지센터 민원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0344",
+    "directCode": "team:애월읍-산업팀",
+    "renderText": "애월읍 행정복지센터 산업팀",
+    "pdvLocationHint": null,
+    "utterance": "애월읍 행정복지센터 산업팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(애월읍 행정복지센터 산업팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0345",
+    "directCode": "team:애월읍-주민복지팀",
+    "renderText": "애월읍 행정복지센터 주민복지팀",
+    "pdvLocationHint": null,
+    "utterance": "애월읍 행정복지센터 주민복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(애월읍 행정복지센터 주민복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0346",
+    "directCode": "team:애월읍-찾아가는복지팀",
+    "renderText": "애월읍 행정복지센터 찾아가는복지팀",
+    "pdvLocationHint": null,
+    "utterance": "애월읍 행정복지센터 찾아가는복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(애월읍 행정복지센터 찾아가는복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0347",
+    "directCode": "team:조천읍-총무팀",
+    "renderText": "조천읍 행정복지센터 총무팀",
+    "pdvLocationHint": null,
+    "utterance": "조천읍 행정복지센터 총무팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(조천읍 행정복지센터 총무팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0348",
+    "directCode": "team:조천읍-민원팀",
+    "renderText": "조천읍 행정복지센터 민원팀",
+    "pdvLocationHint": null,
+    "utterance": "조천읍 행정복지센터 민원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(조천읍 행정복지센터 민원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0349",
+    "directCode": "team:조천읍-산업팀",
+    "renderText": "조천읍 행정복지센터 산업팀",
+    "pdvLocationHint": null,
+    "utterance": "조천읍 행정복지센터 산업팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(조천읍 행정복지센터 산업팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0350",
+    "directCode": "team:조천읍-주민복지팀",
+    "renderText": "조천읍 행정복지센터 주민복지팀",
+    "pdvLocationHint": null,
+    "utterance": "조천읍 행정복지센터 주민복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(조천읍 행정복지센터 주민복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0351",
+    "directCode": "team:조천읍-찾아가는복지팀",
+    "renderText": "조천읍 행정복지센터 찾아가는복지팀",
+    "pdvLocationHint": null,
+    "utterance": "조천읍 행정복지센터 찾아가는복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(조천읍 행정복지센터 찾아가는복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0352",
+    "directCode": "team:한림읍-총무팀",
+    "renderText": "한림읍 행정복지센터 총무팀",
+    "pdvLocationHint": null,
+    "utterance": "한림읍 행정복지센터 총무팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(한림읍 행정복지센터 총무팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0353",
+    "directCode": "team:한림읍-민원팀",
+    "renderText": "한림읍 행정복지센터 민원팀",
+    "pdvLocationHint": null,
+    "utterance": "한림읍 행정복지센터 민원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(한림읍 행정복지센터 민원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0354",
+    "directCode": "team:한림읍-산업팀",
+    "renderText": "한림읍 행정복지센터 산업팀",
+    "pdvLocationHint": null,
+    "utterance": "한림읍 행정복지센터 산업팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(한림읍 행정복지센터 산업팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0355",
+    "directCode": "team:한림읍-주민복지팀",
+    "renderText": "한림읍 행정복지센터 주민복지팀",
+    "pdvLocationHint": null,
+    "utterance": "한림읍 행정복지센터 주민복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(한림읍 행정복지센터 주민복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0356",
+    "directCode": "team:한림읍-찾아가는복지팀",
+    "renderText": "한림읍 행정복지센터 찾아가는복지팀",
+    "pdvLocationHint": null,
+    "utterance": "한림읍 행정복지센터 찾아가는복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(한림읍 행정복지센터 찾아가는복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0357",
+    "directCode": "team:한경면-총무팀",
+    "renderText": "한경면 행정복지센터 총무팀",
+    "pdvLocationHint": null,
+    "utterance": "한경면 행정복지센터 총무팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(한경면 행정복지센터 총무팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0358",
+    "directCode": "team:한경면-민원팀",
+    "renderText": "한경면 행정복지센터 민원팀",
+    "pdvLocationHint": null,
+    "utterance": "한경면 행정복지센터 민원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(한경면 행정복지센터 민원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0359",
+    "directCode": "team:한경면-산업팀",
+    "renderText": "한경면 행정복지센터 산업팀",
+    "pdvLocationHint": null,
+    "utterance": "한경면 행정복지센터 산업팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(한경면 행정복지센터 산업팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0360",
+    "directCode": "team:한경면-주민복지팀",
+    "renderText": "한경면 행정복지센터 주민복지팀",
+    "pdvLocationHint": null,
+    "utterance": "한경면 행정복지센터 주민복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(한경면 행정복지센터 주민복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0361",
+    "directCode": "team:한경면-찾아가는복지팀",
+    "renderText": "한경면 행정복지센터 찾아가는복지팀",
+    "pdvLocationHint": null,
+    "utterance": "한경면 행정복지센터 찾아가는복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(한경면 행정복지센터 찾아가는복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0362",
+    "directCode": "team:추자면-총무팀",
+    "renderText": "추자면 행정복지센터 총무팀",
+    "pdvLocationHint": null,
+    "utterance": "추자면 행정복지센터 총무팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(추자면 행정복지센터 총무팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0363",
+    "directCode": "team:추자면-민원팀",
+    "renderText": "추자면 행정복지센터 민원팀",
+    "pdvLocationHint": null,
+    "utterance": "추자면 행정복지센터 민원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(추자면 행정복지센터 민원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0364",
+    "directCode": "team:추자면-산업팀",
+    "renderText": "추자면 행정복지센터 산업팀",
+    "pdvLocationHint": null,
+    "utterance": "추자면 행정복지센터 산업팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(추자면 행정복지센터 산업팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0365",
+    "directCode": "team:추자면-주민복지팀",
+    "renderText": "추자면 행정복지센터 주민복지팀",
+    "pdvLocationHint": null,
+    "utterance": "추자면 행정복지센터 주민복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(추자면 행정복지센터 주민복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0366",
+    "directCode": "team:추자면-찾아가는복지팀",
+    "renderText": "추자면 행정복지센터 찾아가는복지팀",
+    "pdvLocationHint": null,
+    "utterance": "추자면 행정복지센터 찾아가는복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(추자면 행정복지센터 찾아가는복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0367",
+    "directCode": "team:우도면-총무팀",
+    "renderText": "우도면 행정복지센터 총무팀",
+    "pdvLocationHint": null,
+    "utterance": "우도면 행정복지센터 총무팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(우도면 행정복지센터 총무팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0368",
+    "directCode": "team:우도면-민원팀",
+    "renderText": "우도면 행정복지센터 민원팀",
+    "pdvLocationHint": null,
+    "utterance": "우도면 행정복지센터 민원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(우도면 행정복지센터 민원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0369",
+    "directCode": "team:우도면-산업팀",
+    "renderText": "우도면 행정복지센터 산업팀",
+    "pdvLocationHint": null,
+    "utterance": "우도면 행정복지센터 산업팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(우도면 행정복지센터 산업팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0370",
+    "directCode": "team:우도면-주민복지팀",
+    "renderText": "우도면 행정복지센터 주민복지팀",
+    "pdvLocationHint": null,
+    "utterance": "우도면 행정복지센터 주민복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(우도면 행정복지센터 주민복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0371",
+    "directCode": "team:우도면-찾아가는복지팀",
+    "renderText": "우도면 행정복지센터 찾아가는복지팀",
+    "pdvLocationHint": null,
+    "utterance": "우도면 행정복지센터 찾아가는복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(우도면 행정복지센터 찾아가는복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0372",
+    "directCode": "team:건입동-총무팀",
+    "renderText": "건입동 행정복지센터 총무팀",
+    "pdvLocationHint": null,
+    "utterance": "건입동 행정복지센터 총무팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(건입동 행정복지센터 총무팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0373",
+    "directCode": "team:건입동-민원팀",
+    "renderText": "건입동 행정복지센터 민원팀",
+    "pdvLocationHint": null,
+    "utterance": "건입동 행정복지센터 민원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(건입동 행정복지센터 민원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0374",
+    "directCode": "team:건입동-주민복지팀",
+    "renderText": "건입동 행정복지센터 주민복지팀",
+    "pdvLocationHint": null,
+    "utterance": "건입동 행정복지센터 주민복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(건입동 행정복지센터 주민복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0375",
+    "directCode": "team:건입동-찾아가는복지팀",
+    "renderText": "건입동 행정복지센터 찾아가는복지팀",
+    "pdvLocationHint": null,
+    "utterance": "건입동 행정복지센터 찾아가는복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(건입동 행정복지센터 찾아가는복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0376",
+    "directCode": "team:노형동-총무팀",
+    "renderText": "노형동 행정복지센터 총무팀",
+    "pdvLocationHint": null,
+    "utterance": "노형동 행정복지센터 총무팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(노형동 행정복지센터 총무팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0377",
+    "directCode": "team:노형동-민원팀",
+    "renderText": "노형동 행정복지센터 민원팀",
+    "pdvLocationHint": null,
+    "utterance": "노형동 행정복지센터 민원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(노형동 행정복지센터 민원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0378",
+    "directCode": "team:노형동-주민복지팀",
+    "renderText": "노형동 행정복지센터 주민복지팀",
+    "pdvLocationHint": null,
+    "utterance": "노형동 행정복지센터 주민복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(노형동 행정복지센터 주민복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0379",
+    "directCode": "team:노형동-찾아가는복지팀",
+    "renderText": "노형동 행정복지센터 찾아가는복지팀",
+    "pdvLocationHint": null,
+    "utterance": "노형동 행정복지센터 찾아가는복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(노형동 행정복지센터 찾아가는복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0380",
+    "directCode": "team:도두동-총무팀",
+    "renderText": "도두동 행정복지센터 총무팀",
+    "pdvLocationHint": null,
+    "utterance": "도두동 행정복지센터 총무팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(도두동 행정복지센터 총무팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0381",
+    "directCode": "team:도두동-민원팀",
+    "renderText": "도두동 행정복지센터 민원팀",
+    "pdvLocationHint": null,
+    "utterance": "도두동 행정복지센터 민원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(도두동 행정복지센터 민원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0382",
+    "directCode": "team:도두동-주민복지팀",
+    "renderText": "도두동 행정복지센터 주민복지팀",
+    "pdvLocationHint": null,
+    "utterance": "도두동 행정복지센터 주민복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(도두동 행정복지센터 주민복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0383",
+    "directCode": "team:도두동-찾아가는복지팀",
+    "renderText": "도두동 행정복지센터 찾아가는복지팀",
+    "pdvLocationHint": null,
+    "utterance": "도두동 행정복지센터 찾아가는복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(도두동 행정복지센터 찾아가는복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0384",
+    "directCode": "team:봉개동-총무팀",
+    "renderText": "봉개동 행정복지센터 총무팀",
+    "pdvLocationHint": null,
+    "utterance": "봉개동 행정복지센터 총무팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(봉개동 행정복지센터 총무팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0385",
+    "directCode": "team:봉개동-민원팀",
+    "renderText": "봉개동 행정복지센터 민원팀",
+    "pdvLocationHint": null,
+    "utterance": "봉개동 행정복지센터 민원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(봉개동 행정복지센터 민원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0386",
+    "directCode": "team:봉개동-주민복지팀",
+    "renderText": "봉개동 행정복지센터 주민복지팀",
+    "pdvLocationHint": null,
+    "utterance": "봉개동 행정복지센터 주민복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(봉개동 행정복지센터 주민복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0387",
+    "directCode": "team:봉개동-찾아가는복지팀",
+    "renderText": "봉개동 행정복지센터 찾아가는복지팀",
+    "pdvLocationHint": null,
+    "utterance": "봉개동 행정복지센터 찾아가는복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(봉개동 행정복지센터 찾아가는복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0388",
+    "directCode": "team:삼도1동-총무팀",
+    "renderText": "삼도1동 행정복지센터 총무팀",
+    "pdvLocationHint": null,
+    "utterance": "삼도1동 행정복지센터 총무팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(삼도1동 행정복지센터 총무팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0389",
+    "directCode": "team:삼도1동-민원팀",
+    "renderText": "삼도1동 행정복지센터 민원팀",
+    "pdvLocationHint": null,
+    "utterance": "삼도1동 행정복지센터 민원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(삼도1동 행정복지센터 민원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0390",
+    "directCode": "team:삼도1동-주민복지팀",
+    "renderText": "삼도1동 행정복지센터 주민복지팀",
+    "pdvLocationHint": null,
+    "utterance": "삼도1동 행정복지센터 주민복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(삼도1동 행정복지센터 주민복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0391",
+    "directCode": "team:삼도1동-찾아가는복지팀",
+    "renderText": "삼도1동 행정복지센터 찾아가는복지팀",
+    "pdvLocationHint": null,
+    "utterance": "삼도1동 행정복지센터 찾아가는복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(삼도1동 행정복지센터 찾아가는복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0392",
+    "directCode": "team:삼도2동-총무팀",
+    "renderText": "삼도2동 행정복지센터 총무팀",
+    "pdvLocationHint": null,
+    "utterance": "삼도2동 행정복지센터 총무팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(삼도2동 행정복지센터 총무팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0393",
+    "directCode": "team:삼도2동-민원팀",
+    "renderText": "삼도2동 행정복지센터 민원팀",
+    "pdvLocationHint": null,
+    "utterance": "삼도2동 행정복지센터 민원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(삼도2동 행정복지센터 민원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0394",
+    "directCode": "team:삼도2동-주민복지팀",
+    "renderText": "삼도2동 행정복지센터 주민복지팀",
+    "pdvLocationHint": null,
+    "utterance": "삼도2동 행정복지센터 주민복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(삼도2동 행정복지센터 주민복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0395",
+    "directCode": "team:삼도2동-찾아가는복지팀",
+    "renderText": "삼도2동 행정복지센터 찾아가는복지팀",
+    "pdvLocationHint": null,
+    "utterance": "삼도2동 행정복지센터 찾아가는복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(삼도2동 행정복지센터 찾아가는복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0396",
+    "directCode": "team:삼양동-총무팀",
+    "renderText": "삼양동 행정복지센터 총무팀",
+    "pdvLocationHint": null,
+    "utterance": "삼양동 행정복지센터 총무팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(삼양동 행정복지센터 총무팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0397",
+    "directCode": "team:삼양동-민원팀",
+    "renderText": "삼양동 행정복지센터 민원팀",
+    "pdvLocationHint": null,
+    "utterance": "삼양동 행정복지센터 민원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(삼양동 행정복지센터 민원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0398",
+    "directCode": "team:삼양동-주민복지팀",
+    "renderText": "삼양동 행정복지센터 주민복지팀",
+    "pdvLocationHint": null,
+    "utterance": "삼양동 행정복지센터 주민복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(삼양동 행정복지센터 주민복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0399",
+    "directCode": "team:삼양동-찾아가는복지팀",
+    "renderText": "삼양동 행정복지센터 찾아가는복지팀",
+    "pdvLocationHint": null,
+    "utterance": "삼양동 행정복지센터 찾아가는복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(삼양동 행정복지센터 찾아가는복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0400",
+    "directCode": "team:아라동-총무팀",
+    "renderText": "아라동 행정복지센터 총무팀",
+    "pdvLocationHint": null,
+    "utterance": "아라동 행정복지센터 총무팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(아라동 행정복지센터 총무팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0401",
+    "directCode": "team:아라동-민원팀",
+    "renderText": "아라동 행정복지센터 민원팀",
+    "pdvLocationHint": null,
+    "utterance": "아라동 행정복지센터 민원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(아라동 행정복지센터 민원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0402",
+    "directCode": "team:아라동-주민복지팀",
+    "renderText": "아라동 행정복지센터 주민복지팀",
+    "pdvLocationHint": null,
+    "utterance": "아라동 행정복지센터 주민복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(아라동 행정복지센터 주민복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0403",
+    "directCode": "team:아라동-찾아가는복지팀",
+    "renderText": "아라동 행정복지센터 찾아가는복지팀",
+    "pdvLocationHint": null,
+    "utterance": "아라동 행정복지센터 찾아가는복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(아라동 행정복지센터 찾아가는복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0404",
+    "directCode": "team:연동-총무팀",
+    "renderText": "연동 행정복지센터 총무팀",
+    "pdvLocationHint": null,
+    "utterance": "연동 행정복지센터 총무팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(연동 행정복지센터 총무팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0405",
+    "directCode": "team:연동-민원팀",
+    "renderText": "연동 행정복지센터 민원팀",
+    "pdvLocationHint": null,
+    "utterance": "연동 행정복지센터 민원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(연동 행정복지센터 민원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0406",
+    "directCode": "team:연동-주민복지팀",
+    "renderText": "연동 행정복지센터 주민복지팀",
+    "pdvLocationHint": null,
+    "utterance": "연동 행정복지센터 주민복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(연동 행정복지센터 주민복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0407",
+    "directCode": "team:연동-찾아가는복지팀",
+    "renderText": "연동 행정복지센터 찾아가는복지팀",
+    "pdvLocationHint": null,
+    "utterance": "연동 행정복지센터 찾아가는복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(연동 행정복지센터 찾아가는복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0408",
+    "directCode": "team:오라동-총무팀",
+    "renderText": "오라동 행정복지센터 총무팀",
+    "pdvLocationHint": null,
+    "utterance": "오라동 행정복지센터 총무팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(오라동 행정복지센터 총무팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0409",
+    "directCode": "team:오라동-민원팀",
+    "renderText": "오라동 행정복지센터 민원팀",
+    "pdvLocationHint": null,
+    "utterance": "오라동 행정복지센터 민원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(오라동 행정복지센터 민원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0410",
+    "directCode": "team:오라동-주민복지팀",
+    "renderText": "오라동 행정복지센터 주민복지팀",
+    "pdvLocationHint": null,
+    "utterance": "오라동 행정복지센터 주민복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(오라동 행정복지센터 주민복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0411",
+    "directCode": "team:오라동-찾아가는복지팀",
+    "renderText": "오라동 행정복지센터 찾아가는복지팀",
+    "pdvLocationHint": null,
+    "utterance": "오라동 행정복지센터 찾아가는복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(오라동 행정복지센터 찾아가는복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0412",
+    "directCode": "team:외도동-총무팀",
+    "renderText": "외도동 행정복지센터 총무팀",
+    "pdvLocationHint": null,
+    "utterance": "외도동 행정복지센터 총무팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(외도동 행정복지센터 총무팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0413",
+    "directCode": "team:외도동-민원팀",
+    "renderText": "외도동 행정복지센터 민원팀",
+    "pdvLocationHint": null,
+    "utterance": "외도동 행정복지센터 민원팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(외도동 행정복지센터 민원팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0414",
+    "directCode": "team:외도동-주민복지팀",
+    "renderText": "외도동 행정복지센터 주민복지팀",
+    "pdvLocationHint": null,
+    "utterance": "외도동 행정복지센터 주민복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(외도동 행정복지센터 주민복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0415",
+    "directCode": "team:외도동-찾아가는복지팀",
+    "renderText": "외도동 행정복지센터 찾아가는복지팀",
+    "pdvLocationHint": null,
+    "utterance": "외도동 행정복지센터 찾아가는복지팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(외도동 행정복지센터 찾아가는복지팀) 관제탑 원칙 준수 테스트"
+  },
+  {
+    "id": "CT-0416",
+    "directCode": "team:용담1동-총무팀",
+    "renderText": "용담1동 행정복지센터 총무팀",
+    "pdvLocationHint": null,
+    "utterance": "용담1동 행정복지센터 총무팀에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "emd/team",
+    "note": "읍면동 팀 단위(용담1동 행정복지센터 총무팀) 관제탑 원칙 준수 테스트"
+  }
+]
