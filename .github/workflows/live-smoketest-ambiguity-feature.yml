@@ -1,0 +1,55 @@
+name: Live Smoketest — Subject-Gate Ambiguity Ask-Back Feature
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  run-ambiguity-feature-smoketest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install deps
+        run: pip install requests
+
+      - name: Run ambiguity feature test (30 regression-sample + 22 known-adjacent-confusion)
+        working-directory: tests/live_smoketest
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          python3 subject_gate_hierarchical_live_smoketest.py \
+            --scenarios scenarios_ambiguity_feature_test_20260918.json \
+            --roots professor,physician,lawyer,patent-attorney,accountant \
+            --out ../../results/subject-gate-hierarchical/ambiguity-feature
+
+      - name: Commit results to results branch
+        if: always()
+        run: |
+          git config user.name "hondi-live-smoketest-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout -B results/live-smoketest-ambiguity-feature
+          git add -f results/
+          git diff --cached --quiet || git commit -m "chore: ambiguity-feature live smoketest results ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+          git push --force origin HEAD:results/live-smoketest-ambiguity-feature
+
+      - name: Upload artifact (backup)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-smoketest-ambiguity-feature-results
+          path: results/

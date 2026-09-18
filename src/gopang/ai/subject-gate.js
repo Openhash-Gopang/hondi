@@ -41,7 +41,29 @@ const GATE_SYS_PROMPT_HEAD =
   '전공이 있어도, 그 전공이 실제로 다루는 정규 교과·분야가 아니면 ' +
   '억지로 고르지 말고 이 "해당 없음" 항목을 고르십시오. 반드시 후보 ' +
   '목록의 id 값 중 하나만, 다른 텍스트 없이 JSON으로만 응답하세요: ' +
-  '{"id": "<후보 id>"}.\n\n후보 목록:\n';
+  '{"id": "<후보 id>"}.\n\n' +
+  // 2026-09-18 추가 — 확신도 기반 되묻기 (AC-PRO-CORE §1의 같은 원칙을
+  // 이 게이트 단계에도 적용). 배경: subject_gate_hierarchical_live_
+  // smoketest.py 395건 실사에서, 인접한 두 세부분야 사이에서 실제로는
+  // 근거가 팽팽한데도 이 게이트가 항상 하나를 확신 있게 골라버리는
+  // 습관이 확인됨(생활과학 vs 사회과학, 경영 vs 사회과학 등) — 오답
+  // 자체보다, 그 판단을 사용자에게 확인받을 방법이 전혀 없다는 게
+  // 문제였다(주피터 지시). AC-PRO-CORE가 이미 2026-08-01에 "짐작해서
+  // 하나를 고르지 않고 후보를 나열해 되묻는다"로 정착시킨 원칙을,
+  // 여기서도 "해당없음"과는 별개의 세 번째 출력 형태로 추가한다 —
+  // "해당없음"은 범위 밖일 때, "ambiguous"는 범위 안의 특정 후보
+  // 2개(이상) 사이에서 진짜로 갈릴 때다. refineToLeaf가 이 신호를
+  // 받으면 더 내려가지 않고 후보를 그대로 launch 컨텍스트에 실어
+  // 넘겨, 세부분야 대신 연결된 페르소나가 첫 답변에서 직접 확인하게
+  // 한다(SP_EXPERT_BASE §1-2-A 참조) — 짐작해서 잘못 연결하는 것보다
+  // 낫다는 게 이 프로젝트 전반의 원칙이다.
+  '단, 후보 중 정확히 하나를 확신 있게 고를 근거가 없고 "해당 없음"이 ' +
+  '아니라 실제로 구체적인 전공 2개(또는 그 이상) 사이에서 근거가 ' +
+  '팽팽히 갈린다면, 짐작해서 하나를 고르지 말고 다음 형식으로만 ' +
+  '응답하세요: {"ambiguous": ["<후보1 id>", "<후보2 id>"]} — 이 목록에 ' +
+  '"해당 없음" 항목은 절대 넣지 않습니다. 조금이라도 더 맞는 쪽이 ' +
+  '있으면 짐작하지 말고 보통의 {"id": "..."}로 확신 있게 답하세요 — ' +
+  '이 형식은 정말로 근거가 대등하게 갈릴 때만 씁니다.\n\n후보 목록:\n';
 
 // ── 2026-08-08 신설(초중고 학년대 어휘 보강) ────────────────────────
 // 배경(주피터 지시): 초등 산수와 대학 수학을 별도 페르소나로 안 쪼갠다
@@ -167,12 +189,27 @@ function _gateOneLevel(personaId, candidates, userText) {
       // 화이트리스트 검증 — 이 단계 후보 목록(직계 자식 + "해당 없음")에
       // 실제로 있는 id만 채택. "해당 없음"을 고르면 chosenId===personaId.
       if (chosenId && candidates.some(c => c.id === chosenId) && EXPERT_REGISTRY[chosenId]) {
-        return chosenId;
+        return { chosenId, ambiguousIds: null };
       }
-      return personaId;
+
+      // 2026-09-18 추가 — ambiguous 응답 파싱. "해당없음"(personaId 자신)은
+      // 후보에서 제외하고, 화이트리스트에 실제로 있는 것만, 2개 이상일 때만
+      // 인정한다 — 모델이 형식은 맞춰 냈지만 실제로는 1개뿐이거나 엉뚱한
+      // id를 섞어 보낸 경우까지 "애매함"으로 잘못 인정하지 않기 위함.
+      const ambiguousRaw = Array.isArray(parsed?.ambiguous) ? parsed.ambiguous : null;
+      if (ambiguousRaw) {
+        const validAmbiguous = ambiguousRaw.filter(
+          (id) => id !== personaId && candidates.some((c) => c.id === id) && EXPERT_REGISTRY[id]
+        );
+        if (validAmbiguous.length >= 2) {
+          return { chosenId: personaId, ambiguousIds: validAmbiguous };
+        }
+      }
+
+      return { chosenId: personaId, ambiguousIds: null };
     } catch (e) {
       console.warn('[SubjectGate] 과목 게이트 실패(무시 — 이 단계 personaId로 폴백):', e.message);
-      return personaId;
+      return { chosenId: personaId, ambiguousIds: null };
     }
   })();
 }
@@ -187,9 +224,20 @@ function _gateOneLevel(personaId, candidates, userText) {
  * 원칙은 flat 버전과 동일, 다만 이제 그 "상위 노드"가 트리 중간
  * 어디든(예: professor-law-series) 될 수 있다.
  *
+ * 2026-09-18 변경 — 반환 형태가 string에서 객체로 바뀌었다(주피터 지시:
+ * "오분류는 문제가 안 됩니다. 심각한 문제는 애매한 경우에 사용자에게
+ * 되묻지 않는 것"). 어느 단계에서든 게이트가 "ambiguous"를 내면 그
+ * 즉시 하강을 멈추고(더 내려가지 않음 — 애매한 채로 한 단계 더 짐작해
+ * 내려가면 오차가 누적된다), 후보 라벨을 ambiguousCandidates로 함께
+ * 반환한다. 호출부(expert-session.js)가 이걸 받아 launch 컨텍스트에
+ * 실어 넘기면, 세부분야 대신 연결된 페르소나가 자기 STEP 0에서 직접
+ * 확인 질문을 한다(SP_EXPERT_BASE §1-2-A) — 이 함수 자신은 대화형이
+ * 아니므로 사용자에게 직접 되묻지 않고, "되물어야 한다는 사실"만
+ * 다음 레이어로 정확히 전달하는 게 이 함수의 책임이다.
+ *
  * @param {string} personaId - 1단계 라우팅이 낸 EXPERT_REGISTRY 키
  * @param {string} userText  - 이 태그를 유발한 사용자 발화 원문
- * @returns {Promise<string>} 정밀화된(또는 변경 없는) personaId
+ * @returns {Promise<{personaId: string, ambiguousCandidates: string[]|null}>}
  */
 export async function refineToLeaf(personaId, userText) {
   let currentId = personaId;
@@ -198,17 +246,23 @@ export async function refineToLeaf(personaId, userText) {
   for (let depth = 0; depth < MAX_DEPTH; depth++) {
     const children = getConsultableChildren(currentId);
 
-    if (children.length === 0) return currentId; // currentId 자신이 리프
+    if (children.length === 0) return { personaId: currentId, ambiguousCandidates: null }; // currentId 자신이 리프
     if (children.length === 1) { currentId = children[0].id; continue; } // 게이트 호출 없이 통과
 
     const candidates = _buildGateCandidates(currentId, children);
-    const chosenId = await _gateOneLevel(currentId, candidates, userText);
+    const { chosenId, ambiguousIds } = await _gateOneLevel(currentId, candidates, userText);
 
-    if (chosenId === currentId) return currentId; // "해당 없음" 또는 실패 폴백 — 더 안 내려감
+    if (ambiguousIds) {
+      const labels = ambiguousIds.map((id) => (EXPERT_REGISTRY[id] || {}).label || id);
+      console.info('[SubjectGate] 리프 정밀화 보류 — 후보 간 확신 없음:', currentId, '→', ambiguousIds.join(', '));
+      return { personaId: currentId, ambiguousCandidates: labels };
+    }
+
+    if (chosenId === currentId) return { personaId: currentId, ambiguousCandidates: null }; // "해당 없음" 또는 실패 폴백 — 더 안 내려감
     if (chosenId !== currentId) {
       console.info('[SubjectGate] 리프 정밀화:', currentId, '→', chosenId);
     }
     currentId = chosenId;
   }
-  return currentId;
+  return { personaId: currentId, ambiguousCandidates: null };
 }

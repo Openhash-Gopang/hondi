@@ -1,0 +1,314 @@
+[
+  {
+    "id": "gate2-accountant-ifrs",
+    "utterance": "공인회계사(IFRS·연결재무제표)한테 바로 연결해줘.",
+    "expected_leaf_id": "accountant-ifrs",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-lawyer-insolvency",
+    "utterance": "변호사(도산)가 필요해, 바로 연결해줘.",
+    "expected_leaf_id": "lawyer-insolvency",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-lawyer-international-arbitration",
+    "utterance": "변호사(국제중재) AI를 불러줘.",
+    "expected_leaf_id": "lawyer-international-arbitration",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-lawyer-juvenile",
+    "utterance": "변호사(소년법)로 연결해줘.",
+    "expected_leaf_id": "lawyer-juvenile",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-lawyer-overseas-investment",
+    "utterance": "변호사(해외투자)가 필요해, 바로 연결해줘.",
+    "expected_leaf_id": "lawyer-overseas-investment",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-lawyer-school-violence",
+    "utterance": "변호사(학교폭력)를 호출해줘.",
+    "expected_leaf_id": "lawyer-school-violence",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-physician-urology",
+    "utterance": "의사(비뇨의학과)한테 물어보고 싶어, 지금 불러줘.",
+    "expected_leaf_id": "physician-urology",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-advertising",
+    "utterance": "교수(광고·홍보학)는 지금 바로 연결해줘.",
+    "expected_leaf_id": "professor-advertising",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)"
+  },
+  {
+    "id": "gate2-professor-aerospace",
+    "utterance": "교수(항공·우주공학)를 호출해줘.",
+    "expected_leaf_id": "professor-aerospace",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-agrobiosystems",
+    "utterance": "교수(농림수산바이오시스템공학)한테 바로 연결해줘.",
+    "expected_leaf_id": "professor-agrobiosystems",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-agroecology",
+    "utterance": "교수(농림수산환경생태학)로 연결해줘.",
+    "expected_leaf_id": "professor-agroecology",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-archaeologicalanthropology",
+    "utterance": "교수(고고인류학) 페르소나 호출해.",
+    "expected_leaf_id": "professor-archaeologicalanthropology",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)"
+  },
+  {
+    "id": "gate2-professor-areastudies",
+    "utterance": "교수(국제지역학) AI 세션 열어줘.",
+    "expected_leaf_id": "professor-areastudies",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)"
+  },
+  {
+    "id": "gate2-professor-astronomy",
+    "utterance": "교수(천문·대기과학)를 호출해줘.",
+    "expected_leaf_id": "professor-astronomy",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-biochemistry",
+    "utterance": "교수(생화학) 상담 바로 시작해줘.",
+    "expected_leaf_id": "professor-biochemistry",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)"
+  },
+  {
+    "id": "gate2-professor-bioengineering",
+    "utterance": "교수(생명공학)한테 물어보고 싶어, 지금 불러줘.",
+    "expected_leaf_id": "professor-bioengineering",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)"
+  },
+  {
+    "id": "gate2-professor-biology",
+    "utterance": "교수(생명과학)가 필요해, 바로 연결해줘.",
+    "expected_leaf_id": "professor-biology",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-biomedengineering",
+    "utterance": "교수(의공학) AI 세션 열어줘.",
+    "expected_leaf_id": "professor-biomedengineering",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)"
+  },
+  {
+    "id": "gate2-professor-biostatistics",
+    "utterance": "교수(생물통계학)는 지금 바로 연결해줘.",
+    "expected_leaf_id": "professor-biostatistics",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)"
+  },
+  {
+    "id": "gate2-professor-business",
+    "utterance": "교수(경영학)로 연결해줘.",
+    "expected_leaf_id": "professor-business",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-chemistry",
+    "utterance": "교수(화학) AI 세션 열어줘.",
+    "expected_leaf_id": "professor-chemistry",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-childfamilystudies",
+    "utterance": "교수(아동·가족학) AI를 불러줘.",
+    "expected_leaf_id": "professor-childfamilystudies",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)"
+  },
+  {
+    "id": "gate2-professor-competitionlaw",
+    "utterance": "교수(경제법)로 연결해줘.",
+    "expected_leaf_id": "professor-competitionlaw",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-consumerscience",
+    "utterance": "교수(소비자·가정자원)는 지금 바로 연결해줘.",
+    "expected_leaf_id": "professor-consumerscience",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)"
+  },
+  {
+    "id": "gate2-professor-contemporarymusic",
+    "utterance": "교수(실용음악)를 호출해줘.",
+    "expected_leaf_id": "professor-contemporarymusic",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-dent-conservative",
+    "utterance": "교수(치과보존학)한테 물어보고 싶어, 지금 불러줘.",
+    "expected_leaf_id": "professor-dent-conservative",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-design",
+    "utterance": "교수(디자인)가 필요해, 바로 연결해줘.",
+    "expected_leaf_id": "professor-design",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-electromagnetism",
+    "utterance": "교수(전자기학) 상담 바로 시작해줘.",
+    "expected_leaf_id": "professor-electromagnetism",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)"
+  },
+  {
+    "id": "gate2-professor-environmentalengineering",
+    "utterance": "교수(환경공학)를 호출해줘.",
+    "expected_leaf_id": "professor-environmentalengineering",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)"
+  },
+  {
+    "id": "gate2-professor-film",
+    "utterance": "교수(영화) AI 세션 열어줘.",
+    "expected_leaf_id": "professor-film",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-game",
+    "utterance": "교수(게임)한테 물어보고 싶어, 지금 불러줘.",
+    "expected_leaf_id": "professor-game",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-kmed-eentderm",
+    "utterance": "교수(한방안이비인후피부과학) AI를 불러줘.",
+    "expected_leaf_id": "professor-kmed-eentderm",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)"
+  },
+  {
+    "id": "gate2-professor-korean",
+    "utterance": "교수(국어·국문학)한테 물어보고 싶어, 지금 불러줘.",
+    "expected_leaf_id": "professor-korean",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-marketing",
+    "utterance": "교수(마케팅론)한테 바로 연결해줘.",
+    "expected_leaf_id": "professor-marketing",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)"
+  },
+  {
+    "id": "gate2-professor-math",
+    "utterance": "교수(수학) 페르소나 호출해.",
+    "expected_leaf_id": "professor-math",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-med-ophthalmology",
+    "utterance": "교수(안과학)를 호출해줘.",
+    "expected_leaf_id": "professor-med-ophthalmology",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-med-otolaryngology",
+    "utterance": "교수(이비인후과학)로 연결해줘.",
+    "expected_leaf_id": "professor-med-otolaryngology",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-med-preventivemedicine",
+    "utterance": "교수(예방의학)가 필요해, 바로 연결해줘.",
+    "expected_leaf_id": "professor-med-preventivemedicine",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)"
+  },
+  {
+    "id": "gate2-professor-medicalscience",
+    "utterance": "교수(의과학)한테 물어보고 싶어, 지금 불러줘.",
+    "expected_leaf_id": "professor-medicalscience",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)"
+  },
+  {
+    "id": "gate2-professor-microeconomics",
+    "utterance": "교수(미시경제학)를 호출해줘.",
+    "expected_leaf_id": "professor-microeconomics",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-militaryscience",
+    "utterance": "교수(군사·국방·안보)한테 바로 연결해줘.",
+    "expected_leaf_id": "professor-militaryscience",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)"
+  },
+  {
+    "id": "gate2-professor-nutrition",
+    "utterance": "교수(식품영양학)는 지금 바로 연결해줘.",
+    "expected_leaf_id": "professor-nutrition",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-othereuropeanlanguages",
+    "utterance": "교수(기타유럽어·문학) AI 세션 열어줘.",
+    "expected_leaf_id": "professor-othereuropeanlanguages",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-photography",
+    "utterance": "교수(사진)를 호출해줘.",
+    "expected_leaf_id": "professor-photography",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)"
+  },
+  {
+    "id": "gate2-professor-policystudies",
+    "utterance": "교수(정책학)가 필요해, 바로 연결해줘.",
+    "expected_leaf_id": "professor-policystudies",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)"
+  },
+  {
+    "id": "gate2-professor-publicadministration",
+    "utterance": "교수(행정학) AI 세션 열어줘.",
+    "expected_leaf_id": "professor-publicadministration",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-railwayengineering",
+    "utterance": "교수(철도공학)로 연결해줘.",
+    "expected_leaf_id": "professor-railwayengineering",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)"
+  },
+  {
+    "id": "gate2-professor-skincare",
+    "utterance": "교수(피부미용)로 연결해줘.",
+    "expected_leaf_id": "professor-skincare",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)"
+  },
+  {
+    "id": "gate2-professor-sound",
+    "utterance": "교수(음향)는 지금 바로 연결해줘.",
+    "expected_leaf_id": "professor-sound",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)"
+  },
+  {
+    "id": "gate2-professor-theoreticalsociology",
+    "utterance": "교수(이론사회학)는 지금 바로 연결해줘.",
+    "expected_leaf_id": "professor-theoreticalsociology",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-uav",
+    "utterance": "교수(무인항공기(운항)학)가 필요해, 바로 연결해줘.",
+    "expected_leaf_id": "professor-uav",
+    "category": "regression-sample(이전에 확신 있게 통과 — 새 스키마로도 그대로 id 응답 유지되는지)"
+  },
+  {
+    "id": "gate2-professor-videoart",
+    "utterance": "교수(영상예술)를 호출해줘.",
+    "expected_leaf_id": "professor-videoart",
+    "category": "known-adjacent-confusion(이전엔 확신 있게 오답 — 이제 ambiguous로 정직하게 인정하는지)"
+  }
+]

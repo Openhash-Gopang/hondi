@@ -85,6 +85,10 @@ RETRY_BASE_SLEEP = 3
 
 # subject-gate.js의 GATE_SYS_PROMPT_HEAD와 정확히 동일한 문구 — 어긋나면
 # 이 하네스가 production과 다른 걸 테스트하게 된다(양쪽 다 갱신 필요).
+# 2026-09-18 갱신 — "ambiguous" 출력 형식 추가(§1-2-A/B, 주피터 지시: 오분류가
+# 아니라 "애매한데 안 되묻는 것"이 문제라는 지적에 따른 신설). 하네스도 함께
+# 갱신 안 하면 production은 이제 되묻는데 하네스는 여전히 옛 스키마로만
+# 채점해 또 괴리가 생긴다 — 위 max_tokens 사례와 같은 실수를 반복하지 않는다.
 GATE_SYS_PROMPT_HEAD = (
     "사용자 발화를 아래 후보 목록 중 정확히 하나로 분류하세요. 후보 목록 "
     '맨 마지막 항목은 그 어떤 전공도 실제로 맞지 않을 때 고르는 "해당 '
@@ -92,7 +96,14 @@ GATE_SYS_PROMPT_HEAD = (
     '전공이 있어도, 그 전공이 실제로 다루는 정규 교과·분야가 아니면 '
     '억지로 고르지 말고 이 "해당 없음" 항목을 고르십시오. 반드시 후보 '
     '목록의 id 값 중 하나만, 다른 텍스트 없이 JSON으로만 응답하세요: '
-    '{"id": "<후보 id>"}.\n\n후보 목록:\n'
+    '{"id": "<후보 id>"}.\n\n'
+    '단, 후보 중 정확히 하나를 확신 있게 고를 근거가 없고 "해당 없음"이 '
+    '아니라 실제로 구체적인 전공 2개(또는 그 이상) 사이에서 근거가 '
+    '팽팽히 갈린다면, 짐작해서 하나를 고르지 말고 다음 형식으로만 '
+    '응답하세요: {"ambiguous": ["<후보1 id>", "<후보2 id>"]} — 이 목록에 '
+    '"해당 없음" 항목은 절대 넣지 않습니다. 조금이라도 더 맞는 쪽이 '
+    '있으면 짐작하지 말고 보통의 {"id": "..."}로 확신 있게 답하세요 — '
+    '이 형식은 정말로 근거가 대등하게 갈릴 때만 씁니다.\n\n후보 목록:\n'
 )
 
 
@@ -171,9 +182,36 @@ def grade_step(gate_node_id, correct_choice_id, candidate_ids, raw_text, call_er
     try:
         cleaned = re.sub(r"```json|```", "", raw_text or "").strip()
         parsed = json.loads(cleaned)
-        chosen = parsed.get("id")
     except (json.JSONDecodeError, AttributeError):
         return "LIVE-FAIL", f"JSON 파싱 실패 — raw: {(raw_text or '')[:200]}", None
+
+    # 2026-09-18 추가 — "ambiguous" 응답 채점. 이건 하드 FAIL이 아니다:
+    # production이라면 여기서 launch를 멈추고 사용자에게 되묻는다(§1-2-A) —
+    # 짐작해서 잘못 고르는 것보다 정직하게 애매함을 인정한 것이므로, 실제
+    # 정답이 그 후보 목록 안에 있었는지로 "정직하게 맞는 방향을 잡았는지"만
+    # 채점한다. LIVE-AMBIGUOUS-*는 LIVE-PASS와 별개 카테고리로 집계된다 —
+    # "틀리지 않았다"와 "확신 있게 맞혔다"는 이 설계에서 다른 것이기 때문에
+    # 하나로 뭉뚱그리지 않는다.
+    ambiguous = parsed.get("ambiguous") if isinstance(parsed, dict) else None
+    if isinstance(ambiguous, list) and len(ambiguous) >= 2:
+        valid = [a for a in ambiguous if a in candidate_ids and a != gate_node_id]
+        if len(valid) >= 2:
+            if correct_choice_id in valid:
+                return (
+                    "LIVE-AMBIGUOUS-CORRECT",
+                    f"애매함 인정, 정답 포함: {valid} (기대: {correct_choice_id})",
+                    None,
+                )
+            return (
+                "LIVE-AMBIGUOUS-WRONG",
+                f"애매함 인정했지만 정답 미포함: {valid} (기대: {correct_choice_id})",
+                None,
+            )
+        # 형식은 ambiguous였지만 유효 후보가 1개 이하 — production의
+        # validAmbiguous 검증과 동일한 기준으로 무효 처리, 일반 FAIL로 채점.
+        return "LIVE-FAIL", f"ambiguous 형식이나 유효 후보 부족: {ambiguous}", None
+
+    chosen = parsed.get("id") if isinstance(parsed, dict) else None
     if chosen is None:
         return "LIVE-FAIL", "id:null 응답 — 이례적", None
     if chosen not in candidate_ids:
