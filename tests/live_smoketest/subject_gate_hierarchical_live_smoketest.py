@@ -51,6 +51,9 @@ Usage:
       --scenarios scenarios_hierarchical_gate_20260810.json \\
       --out ../../results/subject-gate-hierarchical \\
       --resume
+  (--roots 생략 시 기존과 동일하게 professor 하나만 대상. 시나리오가
+   여러 트리를 섞어 담고 있으면 --roots professor,physician,lawyer,
+   patent-attorney,accountant 처럼 전부 나열해야 한다 — 2026-09-18 인자화.)
 """
 import argparse
 import json
@@ -65,7 +68,12 @@ import requests
 
 DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
 MODEL = "deepseek-v4-flash"  # subject-gate.js와 동일 모델
-ROOT = "professor"  # 2026-08-10 배치들이 전부 professor 트리라 고정 — 다른 트리(physician/lawyer) 검증 시 인자화 필요
+# 2026-09-18 인자화 — dump_leaf_paths.mjs/dump_gate_levels.mjs는 애초에
+# 여러 root를 한 번에 받도록 만들어져 있었다(`process.argv.slice(2)`,
+# for-of 루프) — 이 파이썬 래퍼만 professor 하나로 하드코딩돼 있었을 뿐,
+# .mjs 쪽 변경은 필요 없었다. --roots로 콤마 구분 다중 root 지정 가능
+# (기본값은 기존 동작과 동일하게 professor 하나만).
+DEFAULT_ROOTS = ["professor"]
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DUMP_LEVELS_SCRIPT = os.path.join(SCRIPT_DIR, "dump_gate_levels.mjs")
@@ -88,10 +96,12 @@ GATE_SYS_PROMPT_HEAD = (
 )
 
 
-def load_gate_levels():
-    """dump_gate_levels.mjs를 서브프로세스로 호출 — 노드별 실제 후보 메뉴."""
+def load_gate_levels(roots):
+    """dump_gate_levels.mjs를 서브프로세스로 호출 — 노드별 실제 후보 메뉴.
+    roots는 리스트 — 여러 트리(professor/physician/lawyer/patent-attorney/
+    accountant 등)를 한 번에 넘기면 .mjs가 각각 BFS로 돌며 합쳐서 낸다."""
     result = subprocess.run(
-        ["node", DUMP_LEVELS_SCRIPT, ROOT],
+        ["node", DUMP_LEVELS_SCRIPT, *roots],
         capture_output=True, text=True, check=True, cwd=SCRIPT_DIR,
     )
     data = json.loads(result.stdout)
@@ -103,10 +113,10 @@ def load_gate_levels():
     return by_node
 
 
-def load_leaf_paths():
+def load_leaf_paths(roots):
     """dump_leaf_paths.mjs를 서브프로세스로 호출 — 리프별 게이트 스텝 목록."""
     result = subprocess.run(
-        ["node", DUMP_PATHS_SCRIPT, ROOT],
+        ["node", DUMP_PATHS_SCRIPT, *roots],
         capture_output=True, text=True, check=True, cwd=SCRIPT_DIR,
     )
     return json.loads(result.stdout)
@@ -223,7 +233,13 @@ def main():
     ap.add_argument("--out", default="../../results/subject-gate-hierarchical")
     ap.add_argument("--resume", action="store_true")
     ap.add_argument("--limit", type=int, default=None)
+    ap.add_argument(
+        "--roots", default=",".join(DEFAULT_ROOTS),
+        help="콤마 구분 root id 목록 (예: professor,physician,lawyer,patent-attorney,accountant). "
+             "시나리오 파일이 여러 트리를 섞어 담고 있으면 전부 나열해야 expected_leaf_id를 찾는다.",
+    )
     args = ap.parse_args()
+    roots = [r.strip() for r in args.roots.split(",") if r.strip()]
 
     api_key = os.environ.get("DEEPSEEK_API_KEY")
     if not api_key:
@@ -235,9 +251,9 @@ def main():
     if args.limit:
         scenarios = scenarios[: args.limit]
 
-    print("게이트 레벨/리프 경로 로드 중...")
-    gate_levels = load_gate_levels()
-    leaf_paths = load_leaf_paths()
+    print(f"게이트 레벨/리프 경로 로드 중... (roots: {', '.join(roots)})")
+    gate_levels = load_gate_levels(roots)
+    leaf_paths = load_leaf_paths(roots)
     print(f"  게이트 호출 지점 {len(gate_levels)}개, 리프 {len(leaf_paths)}개")
 
     os.makedirs(args.out, exist_ok=True)
