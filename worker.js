@@ -14026,6 +14026,18 @@ export default {
     if (pathname === '/account/push-device-info' && request.method === 'GET') {
       return handlePushDeviceInfoGet(request, env, corsHeaders);
     }
+    // ── 등록된 기기 목록 조회 + 폰 승인만으로 특정 기기 삭제 (2026-09-19
+    // 신설, 주피터 지시) — "공용 PC로 잘못 등록된 기기(deviceType 오류
+    // 등)를, 로컬에 지갑이 없어 스스로는 절대 못 고치는" 상황을 위한
+    // 자기서비스 경로. 목록 조회는 읽기 전용이라 서명 불필요(§ 아래
+    // handleAccountDevicesGet 주석), 삭제는 반드시 그 계정의 진짜
+    // Ed25519 서명(=폰의 승인)이 있어야만 실행된다.
+    if (pathname === '/account/devices' && request.method === 'GET') {
+      return handleAccountDevicesGet(request, env, corsHeaders);
+    }
+    if (pathname === '/account/remove-device' && request.method === 'POST') {
+      return handleAccountRemoveDevice(request, env, corsHeaders);
+    }
     if (pathname === '/account/delete-profile' && request.method === 'POST') {
       return handleAccountDeleteProfile(request, env, corsHeaders);
     }
@@ -27085,6 +27097,87 @@ async function handlePushDeviceInfoGet(request, env, corsHeaders) {
     updatedAt: mine.updatedAt || null,
     totalDevices: devices.length,
   }), { status: 200, headers: corsHeaders });
+}
+
+// GET /account/devices?guid=...
+// 등록된 기기 전체 목록을 돌려준다(deviceId·deviceType·updatedAt만 —
+// subscription endpoint 자체는 절대 포함하지 않는다). 읽기 전용이라
+// 서명을 요구하지 않는다 — 이미 이 파일의 다른 GET들(/wallet/x25519,
+// /account/push-device-info)도 같은 원칙(guid만으로 조회, 노출되는
+// 값은 전부 "존재해도 무해한" 메타데이터뿐)을 쓴다. "이 기기 목록에
+// 무엇이 있는지 보는 것" 자체는 위험하지 않고, 위험한 건 "삭제"이며
+// 그건 아래 handleAccountRemoveDevice가 서명으로 막는다.
+async function handleAccountDevicesGet(request, env, corsHeaders) {
+  const url = new URL(request.url);
+  const guid = url.searchParams.get('guid');
+  if (!guid) return _err(400, 'MISSING_FIELD', 'guid 필수', corsHeaders);
+
+  let record;
+  try {
+    record = await _l1FindProfileByGuid(env, guid);
+  } catch (e) {
+    return _err(502, 'L1_UNREACHABLE', 'L1 연결 실패: ' + e.message, corsHeaders);
+  }
+  if (!record) return _err(404, 'PROFILE_NOT_FOUND', '이 guid로 등록된 계정이 없습니다', corsHeaders);
+
+  const devices = _parseDeviceSubscriptions(record.push_subscription).map(d => ({
+    deviceId: d.deviceId,
+    deviceType: d.deviceType || 'unknown',
+    updatedAt: d.updatedAt || null,
+  }));
+  return new Response(JSON.stringify({ ok: true, devices }), { status: 200, headers: corsHeaders });
+}
+
+// POST /account/remove-device
+// body: { guid, deviceId, pubkey, signature, ts }
+// 서명 대상: `remove-device:${guid}:${deviceId}:${ts}`
+// 2026-09-19 신설(주피터 지시) — "공용 PC로 잘못 등록된 기기를, 로컬에
+// 지갑이 없어 스스로는 절대 못 고치는" 상황의 자기서비스 해결책. 이
+// 요청 자체는 어느 기기에서 보내든 상관없다(공용 PC 자신이 보내도 됨) —
+// 중요한 건 서명이 "그 계정의 진짜 개인키"로 됐는가이고, 그 개인키는
+// 항상 폰에만 있으므로 사실상 "폰의 승인"이 곧 이 요청의 인가다.
+// postPushSubscribe()(push.js)와 완전히 같은 신뢰 모델 — 서명 없이
+// 아무나 남의 기기 목록을 조작 못 하게 막는 이유도 동일하다.
+async function handleAccountRemoveDevice(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+  const { guid, deviceId, pubkey, signature, ts } = body;
+  if (!guid)      return _err(400, 'MISSING_FIELD', 'guid 필수', corsHeaders);
+  if (!deviceId)  return _err(400, 'MISSING_FIELD', 'deviceId 필수', corsHeaders);
+  if (!pubkey)    return _err(400, 'MISSING_FIELD', 'pubkey 필수', corsHeaders);
+  if (!signature) return _err(400, 'MISSING_FIELD', 'signature 필수', corsHeaders);
+
+  const sigMsg = `remove-device:${guid}:${deviceId}:${ts || ''}`;
+  const sigOk  = await _verifyEd25519Simple(pubkey, signature, sigMsg);
+  if (!sigOk) return _err(401, 'INVALID_SIGNATURE', '서명 검증 실패', corsHeaders);
+
+  let record;
+  try {
+    record = await _l1FindProfileByGuid(env, guid);
+  } catch (e) {
+    return _err(502, 'L1_UNREACHABLE', 'L1 연결 실패: ' + e.message, corsHeaders);
+  }
+  if (!record) return _err(404, 'PROFILE_NOT_FOUND', '이 guid로 등록된 계정이 없습니다', corsHeaders);
+
+  // TOFU — 이 guid에 이미 핀된 공개키와 일치해야만 진짜 소유자로 인정
+  // (/wallet/x25519 POST와 동일 원칙).
+  if (record.pubkey_ed25519 && record.pubkey_ed25519 !== pubkey) {
+    return _err(403, 'PUBKEY_MISMATCH', '등록된 공개키와 일치하지 않습니다', corsHeaders);
+  }
+
+  const devices = _parseDeviceSubscriptions(record.push_subscription);
+  const remaining = devices.filter(d => d.deviceId !== deviceId);
+  if (remaining.length === devices.length) {
+    return _err(404, 'DEVICE_NOT_FOUND', '해당 deviceId가 이 계정에 등록돼 있지 않습니다', corsHeaders);
+  }
+
+  try {
+    await _l1PatchProfile(env, record.id, { push_subscription: _serializeDeviceSubscriptions(remaining) });
+  } catch (e) {
+    return _err(500, 'L1_PATCH_FAILED', e.message, corsHeaders);
+  }
+  return new Response(JSON.stringify({ ok: true, removed: deviceId, remainingCount: remaining.length }),
+    { status: 200, headers: corsHeaders });
 }
 
 async function handleWalletX25519Get(request, env, corsHeaders) {

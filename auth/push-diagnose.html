@@ -67,6 +67,14 @@
   <div class="value" id="v-cooldown">확인 중...</div>
 </div>
 
+<h2 style="font-size:15px;margin:22px 0 8px">📱 등록된 기기 목록</h2>
+<p class="desc" style="margin-bottom:12px">
+  이 계정에 등록된 모든 기기입니다. 잘못 등록된 기기(예: 폰이 아닌
+  PC가 mobile로 등록됨)는 폰의 승인만으로 삭제할 수 있습니다 —
+  삭제하려는 기기 자신에 지갑이 없어도 됩니다.
+</p>
+<div id="device-list"><div class="row"><div class="value">불러오는 중...</div></div></div>
+
 <button id="btn-retry">지금 다시 시도</button>
 <button id="btn-resubscribe" style="background:#dc2626">
   구독 초기화 후 재시도(VAPID 키가 바뀐 경우 필수)
@@ -77,6 +85,7 @@
 
 <div id="result"></div>
 
+<script src="/gopang-wallet.js"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -197,6 +206,84 @@
       $('v-cooldown').className = 'value ' + (hoursAgo < 24 ? 'warn' : 'ok');
     } else {
       $('v-cooldown').textContent = '기록 없음 (자동 재시도가 아직 한 번도 안 돎)';
+    }
+
+    if (stored?.ipv6) loadDeviceList(stored.ipv6, stored.e164 || null);
+  }
+
+  // ── 등록된 기기 목록 + 폰 승인만으로 삭제 (2026-09-19 신설) ─────
+  // 삭제하려는 그 기기 자신에 지갑이 없어도(공용 PC 등) 상관없다 —
+  // 서명은 항상 GopangWallet.createSessionSignProxy()를 통해 폰에서
+  // 받는다. 이 페이지를 여는 기기가 곧 서명하는 기기일 필요가 없다는
+  // 뜻(예: 공용 PC 자신의 잘못된 등록도 그 공용 PC 화면에서 바로
+  // 지울 수 있다 — 승인만 폰에서 하면 됨).
+  async function loadDeviceList(guid, e164) {
+    const listEl = $('device-list');
+    try {
+      const res = await fetch(`${WORKER}/account/devices?guid=${encodeURIComponent(guid)}`);
+      const data = await res.json().catch(() => ({}));
+      if (!data.ok || !Array.isArray(data.devices)) {
+        listEl.innerHTML = '<div class="row"><div class="value bad">기기 목록을 불러오지 못했습니다.</div></div>';
+        return;
+      }
+      if (data.devices.length === 0) {
+        listEl.innerHTML = '<div class="row"><div class="value">등록된 기기가 없습니다.</div></div>';
+        return;
+      }
+      const myDeviceId = localStorage.getItem('gopang_device_id');
+      listEl.innerHTML = data.devices.map(d => {
+        const updated = d.updatedAt ? new Date(d.updatedAt).toLocaleString('ko-KR') : '(시각 정보 없음)';
+        const mine = d.deviceId === myDeviceId ? ' (이 기기)' : '';
+        return `<div class="row" data-device-id="${d.deviceId}">
+          <div class="label">${d.deviceType}${mine} · ${updated}</div>
+          <div class="value" style="font-size:11px;color:#9ca3af;margin-bottom:8px">${d.deviceId}</div>
+          <button class="btn-remove-device" data-device-id="${d.deviceId}"
+            style="background:#dc2626;padding:9px;font-size:12px;margin-top:0">삭제(폰 승인 필요)</button>
+        </div>`;
+      }).join('');
+      listEl.querySelectorAll('.btn-remove-device').forEach(btn => {
+        btn.addEventListener('click', () => removeDevice(guid, e164, btn.dataset.deviceId, btn));
+      });
+    } catch (e) {
+      listEl.innerHTML = '<div class="row"><div class="value bad">오류: ' + e.message + '</div></div>';
+    }
+  }
+
+  async function removeDevice(guid, e164, deviceId, btn) {
+    if (!confirm(`이 기기(${deviceId.slice(0, 8)}...)를 삭제할까요?\n폰에 승인 요청이 갑니다.`)) return;
+    btn.disabled = true;
+    btn.textContent = '폰 승인 대기 중...';
+    const resultEl = $('result');
+    resultEl.style.display = 'block';
+    resultEl.textContent = '폰에 승인 요청을 보냈습니다 — 스마트폰 알림을 확인해 주세요...';
+    resultEl.style.color = '#d1fae5';
+
+    try {
+      if (typeof window.GopangWallet?.createSessionSignProxy !== 'function') {
+        throw new Error('GopangWallet 모듈을 불러오지 못했습니다.');
+      }
+      const proxy = window.GopangWallet.createSessionSignProxy();
+      await proxy.setIdentity({ guid, e164 });
+      const ts = Date.now();
+      const sigMsg = `remove-device:${guid}:${deviceId}:${ts}`;
+      const signature = await proxy.sign(sigMsg);
+      if (!proxy.publicKeyB64u) throw new Error('서명은 됐지만 공개키를 확인하지 못했습니다 — 다시 시도해 주세요.');
+
+      const res = await fetch(`${WORKER}/account/remove-device`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guid, deviceId, pubkey: proxy.publicKeyB64u, signature, ts }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data.detail || data.error || '삭제 요청이 실패했습니다.');
+
+      resultEl.textContent = `삭제 완료 — 남은 기기 ${data.remainingCount}개`;
+      loadDeviceList(guid, e164);
+    } catch (e) {
+      resultEl.textContent = '오류: ' + e.message;
+      resultEl.style.color = '#fca5a5';
+      btn.disabled = false;
+      btn.textContent = '삭제(폰 승인 필요)';
     }
   }
 
