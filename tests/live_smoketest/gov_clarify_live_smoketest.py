@@ -107,11 +107,17 @@ def grade(scenario, raw_text, call_err):
 
     raw = (raw_text or "").strip()
     clarify_codes = parse_clarify_signal(raw)
-    expected = scenario["expected_ambiguous_pair"]
+    expected = scenario["expected_ambiguous_pair"]  # None이면 오탐 확인용 통제 시나리오
 
     if clarify_codes:
         valid = [c for c in clarify_codes if c in scenario["candidate_codes"]]
         if len(valid) >= 2:
+            if expected is None:
+                return (
+                    "LIVE-CLARIFY-FALSEPOSITIVE",
+                    f"통제 시나리오(애매함 없음)인데 CLARIFY 발동 — 과잉 트리거: {valid}",
+                    raw,
+                )
             if set(valid[:2]) == set(expected):
                 return "LIVE-CLARIFY-CORRECT", f"CLARIFY 발동, 기대한 쌍과 정확히 일치: {valid}", raw
             return "LIVE-CLARIFY-OTHERPAIR", f"CLARIFY는 발동했으나 다른 쌍: {valid} (기대: {expected})", raw
@@ -123,6 +129,8 @@ def grade(scenario, raw_text, call_err):
     if chosen == "NONE":
         return "LIVE-FAIL", "NONE 응답 — 후보 중 하나는 명백히 맞아야 하는 시나리오인데 회피", chosen
     if chosen and chosen in scenario["candidate_codes"]:
+        if expected is None:
+            return "LIVE-PASS", f"통제 시나리오 — 확신 있게 단일 코드로 정상 답함: {chosen}", chosen
         note = (
             f"단일 코드로 확신 있게 답함(하나를 골랐지만 기대 쌍 {expected} 중 하나): {chosen}"
             if chosen in expected
