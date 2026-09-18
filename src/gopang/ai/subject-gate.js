@@ -84,6 +84,14 @@ export const LEAF_SYNONYMS = {
   'professor-classicalchinese':   ['한문', '한자', '사자성어'],
   'professor-generalpractical':   ['기술가정', '기술·가정', '실과', '가정 실습', '요리실습', '바느질', '목공', '발명'],
   'professor-careereducation':    ['진로와 직업', '진로', '적성검사'],
+  // 2026-09-18 추가 — subject_gate_hierarchical_live_smoketest.py 5트리
+  // 범용화 실사(395건)에서 발견: professor-mechanical 게이트 아래
+  // professor-mechanicaleng-series는 자체 triggers가 없는 중계열 노드라
+  // (label만 "교수(기계공학 중계열)") 열역학/유체역학/고체역학/기계설계
+  // 발화 4건 전부가 이 자식으로 못 내려가고 부모(professor-mechanical,
+  // "해당없음")에 멈추는 걸 재현 — 위 K-12 케이스들과 동일한 원인
+  // (라벨 문구 ≠ 실제 발화 어휘)이라 같은 방식으로 보강.
+  'professor-mechanicaleng-series': ['열역학', '유체역학', '고체역학', '동역학', '기계설계', '재료역학', '기계요소설계', '베르누이방정식', '운동방정식'],
 };
 
 export function _leafMenuLine(leaf) {

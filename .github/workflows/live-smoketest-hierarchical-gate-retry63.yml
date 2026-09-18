@@ -1,0 +1,55 @@
+name: Live Smoketest — Subject-Gate Hierarchical (retry 63)
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  run-hierarchical-gate-retry63-smoketest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install deps
+        run: pip install requests
+
+      - name: Retry the 63 originally-failed scenarios (max_tokens fix + LEAF_SYNONYMS fix applied)
+        working-directory: tests/live_smoketest
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          python3 subject_gate_hierarchical_live_smoketest.py \
+            --scenarios scenarios_hierarchical_gate_retry63_20260918.json \
+            --roots professor,physician,lawyer,patent-attorney,accountant \
+            --out ../../results/subject-gate-hierarchical/retry63
+
+      - name: Commit results to results branch
+        if: always()
+        run: |
+          git config user.name "hondi-live-smoketest-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout -B results/live-smoketest-hierarchical-gate-retry63
+          git add -f results/
+          git diff --cached --quiet || git commit -m "chore: hierarchical-gate retry63 live smoketest results ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+          git push --force origin HEAD:results/live-smoketest-hierarchical-gate-retry63
+
+      - name: Upload artifact (backup)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-smoketest-hierarchical-gate-retry63-results
+          path: results/

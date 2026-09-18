@@ -127,7 +127,15 @@ def call_deepseek(api_key, system_prompt, user_utterance):
     payload = {
         "model": MODEL,
         "temperature": 0,
-        "max_tokens": 1500,  # subject-gate.js와 동일값 유지(§1-1 이력 참고, 단계당 후보는 크게 줄었지만 아직 보수적으로 유지)
+        "max_tokens": 4000,  # subject-gate.js와 동일값 유지 — 2026-08-10 1000→1500,
+        # 2026-09-14 production이 1500→4000으로 재상향(deepseek-v4-flash가
+        # reasoning_content로 최대 3000토큰가량 먹어치워 최종 답 없이
+        # finish_reason=length로 끝나는 사례 재현). 이 하네스는 그 재상향을
+        # 반영 안 한 채 1500에 남아 있었고, 2026-09-18 5트리 범용화 실사
+        # 395건 중 63건 실패의 절반이 넘는 35건이 바로 이 stale 값 때문에
+        # raw가 빈 문자열로 온 JSON 파싱 실패였다 — production과 다른 값을
+        # 쓰고 있었으니 그 35건은 이 하네스만의 가짜 실패였다. 4000으로
+        # 맞춰 재검증.
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_utterance[:2000]},
