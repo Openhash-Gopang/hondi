@@ -56,10 +56,13 @@ def call_deepseek(api_key, system_prompt, user_utterance):
     payload = {
         "model": MODEL,
         "temperature": 0,
-        # _govClassifyFn 원문 그대로 — 저지연/저비용 목적의 max_tokens 30.
-        # (subject-gate.js의 reasoning-token-소진 문제와 달리 이쪽은 JSON
-        # 강제가 없는 한 줄 코드 응답이라 원래 값 그대로 사용한다.)
-        "max_tokens": 30,
+        # 2026-09-18 갱신 — pages/regional-gov.html의 _govClassifyFn이
+        # max_tokens 30→2000으로 수정됐는데(원인: 추론모델이 30 전량을
+        # reasoning에 소진해 실제 응답을 한 번도 못 냄, 이 하네스의 첫
+        # 실사 6/6건에서 재현) 이 하네스는 독립 상수라 그 갱신을 자동으로
+        # 안 따라갔다 — 재실행해도 여전히 0글자 응답이었던 원인이 바로
+        # 이것. production과 동일하게 2000으로 맞춘다.
+        "max_tokens": 2000,
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_utterance[:2000]},
