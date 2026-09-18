@@ -1,0 +1,103 @@
+[
+  {
+    "id": "gov-clarify-a10-03-control-iccjeju-specific",
+    "utterance": "제주국제컨벤션센터 시설의 냉난방 설비 점검 일정이 궁금해요.",
+    "expected_ambiguous_pair": null,
+    "live_verdict": "LIVE-PASS",
+    "live_note": "통제 시나리오 — 확신 있게 단일 코드로 정상 답함: SP-ORGDIV-ICCJEJU-VENUE",
+    "chosen": "SP-ORGDIV-ICCJEJU-VENUE",
+    "usages": [
+      {
+        "prompt_tokens": 382,
+        "completion_tokens": 237,
+        "total_tokens": 619,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 213
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 382
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a10-01-iccjeju-tie",
+    "utterance": "행사장 운영 관련해서 문의하고 싶은데 어디로 연락하면 되나요.",
+    "expected_ambiguous_pair": [
+      "SP-ORGDIV-ICCJEJU-OPS",
+      "SP-ORGDIV-ICCJEJU-VENUE"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-ORGDIV-ICCJEJU-OPS', 'SP-ORGDIV-ICCJEJU-VENUE'] (기대: ['SP-ORGDIV-ICCJEJU-OPS', 'SP-ORGDIV-ICCJEJU-VENUE'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 372,
+        "completion_tokens": 339,
+        "total_tokens": 711,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 307
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 372
+      },
+      {
+        "prompt_tokens": 197,
+        "completion_tokens": 315,
+        "total_tokens": 512,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 308
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 197
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a10-02-jwfri-tie",
+    "utterance": "여성가족 관련 정책연구를 진행 중인데 협업이 가능한지 문의하고 싶어요.",
+    "expected_ambiguous_pair": [
+      "SP-ORGDIV-JWFRI-POLICY",
+      "SP-ORGDIV-JWFRI-RESEARCH"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-ORGDIV-JWFRI-POLICY', 'SP-ORGDIV-JWFRI-RESEARCH'] (기대: ['SP-ORGDIV-JWFRI-POLICY', 'SP-ORGDIV-JWFRI-RESEARCH'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 367,
+        "completion_tokens": 459,
+        "total_tokens": 826,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 425
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 367
+      },
+      {
+        "prompt_tokens": 184,
+        "completion_tokens": 402,
+        "total_tokens": 586,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 395
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 184
+      }
+    ]
+  }
+]
