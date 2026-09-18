@@ -1,0 +1,380 @@
+[
+  {
+    "id": "gate2-professor-skincare",
+    "utterance": "교수(피부미용)로 연결해줘.",
+    "expected_leaf_id": "professor-skincare",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-rehabilitation",
+    "utterance": "교수(재활치료) 상담 바로 시작해줘.",
+    "expected_leaf_id": "professor-rehabilitation",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-animalhealth",
+    "utterance": "교수(동물보건) AI 세션 열어줘.",
+    "expected_leaf_id": "professor-animalhealth",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-photography",
+    "utterance": "교수(사진)를 호출해줘.",
+    "expected_leaf_id": "professor-photography",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-videoart",
+    "utterance": "교수(영상예술)를 호출해줘.",
+    "expected_leaf_id": "professor-videoart",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-sound",
+    "utterance": "교수(음향)는 지금 바로 연결해줘.",
+    "expected_leaf_id": "professor-sound",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-appliedfinearts",
+    "utterance": "교수(응용미술)한테 바로 연결해줘.",
+    "expected_leaf_id": "professor-appliedfinearts",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-generalmusic",
+    "utterance": "교수(교양음악)는 지금 바로 연결해줘.",
+    "expected_leaf_id": "professor-generalmusic",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-biomedengineering",
+    "utterance": "교수(의공학) AI 세션 열어줘.",
+    "expected_leaf_id": "professor-biomedengineering",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-environmentalengineering",
+    "utterance": "교수(환경공학)를 호출해줘.",
+    "expected_leaf_id": "professor-environmentalengineering",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-optics",
+    "utterance": "교수(광학공학) 페르소나 호출해.",
+    "expected_leaf_id": "professor-optics",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-landscapearchitecture",
+    "utterance": "교수(조경학)로 연결해줘.",
+    "expected_leaf_id": "professor-landscapearchitecture",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-urbanengineering",
+    "utterance": "교수(도시공학) AI 세션 열어줘.",
+    "expected_leaf_id": "professor-urbanengineering",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-railwayengineering",
+    "utterance": "교수(철도공학)로 연결해줘.",
+    "expected_leaf_id": "professor-railwayengineering",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-navalengineering",
+    "utterance": "교수(조선·해양공학)가 필요해, 바로 연결해줘.",
+    "expected_leaf_id": "professor-navalengineering",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-mechatronics",
+    "utterance": "교수(메카트로닉스공학) AI 세션 열어줘.",
+    "expected_leaf_id": "professor-mechatronics",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-bioengineering",
+    "utterance": "교수(생명공학)한테 물어보고 싶어, 지금 불러줘.",
+    "expected_leaf_id": "professor-bioengineering",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-childfamilystudies",
+    "utterance": "교수(아동·가족학) AI를 불러줘.",
+    "expected_leaf_id": "professor-childfamilystudies",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-areastudies",
+    "utterance": "교수(국제지역학) AI 세션 열어줘.",
+    "expected_leaf_id": "professor-areastudies",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-textileengineering",
+    "utterance": "교수(섬유공학) AI 세션 열어줘.",
+    "expected_leaf_id": "professor-textileengineering",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-consumerscience",
+    "utterance": "교수(소비자·가정자원)는 지금 바로 연결해줘.",
+    "expected_leaf_id": "professor-consumerscience",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-militaryscience",
+    "utterance": "교수(군사·국방·안보)한테 바로 연결해줘.",
+    "expected_leaf_id": "professor-militaryscience",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-libraryscience",
+    "utterance": "교수(문헌정보학)한테 물어보고 싶어, 지금 불러줘.",
+    "expected_leaf_id": "professor-libraryscience",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-healtheducation",
+    "utterance": "교수(간호·보건 교육) AI를 불러줘.",
+    "expected_leaf_id": "professor-healtheducation",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-artspeeducation",
+    "utterance": "교수(예술·체육교육)는 지금 바로 연결해줘.",
+    "expected_leaf_id": "professor-artspeeducation",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-generalengineering",
+    "utterance": "교수(교양공학)가 필요해, 바로 연결해줘.",
+    "expected_leaf_id": "professor-generalengineering",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-advertising",
+    "utterance": "교수(광고·홍보학)는 지금 바로 연결해줘.",
+    "expected_leaf_id": "professor-advertising",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-tourism",
+    "utterance": "교수(관광학) 페르소나 호출해.",
+    "expected_leaf_id": "professor-tourism",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-secretarial",
+    "utterance": "교수(비서)는 지금 바로 연결해줘.",
+    "expected_leaf_id": "professor-secretarial",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-medicalscience",
+    "utterance": "교수(의과학)한테 물어보고 싶어, 지금 불러줘.",
+    "expected_leaf_id": "professor-medicalscience",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-beautyart",
+    "utterance": "교수(뷰티아트) 페르소나 호출해.",
+    "expected_leaf_id": "professor-beautyart",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-shipnavigation",
+    "utterance": "교수(선박운항학)한테 바로 연결해줘.",
+    "expected_leaf_id": "professor-shipnavigation",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-macroeconomics",
+    "utterance": "교수(거시경제학)를 호출해줘.",
+    "expected_leaf_id": "professor-macroeconomics",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-monetaryeconomics",
+    "utterance": "교수(화폐금융론) 상담 바로 시작해줘.",
+    "expected_leaf_id": "professor-monetaryeconomics",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-electromagnetism",
+    "utterance": "교수(전자기학) 상담 바로 시작해줘.",
+    "expected_leaf_id": "professor-electromagnetism",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-economichistory",
+    "utterance": "교수(경제사)는 지금 바로 연결해줘.",
+    "expected_leaf_id": "professor-economichistory",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-mechanicsphysics",
+    "utterance": "교수(역학)가 필요해, 바로 연결해줘.",
+    "expected_leaf_id": "professor-mechanicsphysics",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-biochemistry",
+    "utterance": "교수(생화학) 상담 바로 시작해줘.",
+    "expected_leaf_id": "professor-biochemistry",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-genetics",
+    "utterance": "교수(유전학) 페르소나 호출해.",
+    "expected_leaf_id": "professor-genetics",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-physiologybio",
+    "utterance": "교수(생리학)한테 물어보고 싶어, 지금 불러줘.",
+    "expected_leaf_id": "professor-physiologybio",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-policystudies",
+    "utterance": "교수(정책학)가 필요해, 바로 연결해줘.",
+    "expected_leaf_id": "professor-policystudies",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-internationalpolitics",
+    "utterance": "교수(국제정치론) 페르소나 호출해.",
+    "expected_leaf_id": "professor-internationalpolitics",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-circuittheory",
+    "utterance": "교수(회로이론)를 호출해줘.",
+    "expected_leaf_id": "professor-circuittheory",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-computernetworks",
+    "utterance": "교수(컴퓨터네트워크)한테 물어보고 싶어, 지금 불러줘.",
+    "expected_leaf_id": "professor-computernetworks",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-thermodynamics",
+    "utterance": "교수(열역학)로 연결해줘.",
+    "expected_leaf_id": "professor-thermodynamics",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-fluidmechanics",
+    "utterance": "교수(유체역학)한테 바로 연결해줘.",
+    "expected_leaf_id": "professor-fluidmechanics",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-electricalmachinery",
+    "utterance": "교수(전기기기학) 페르소나 호출해.",
+    "expected_leaf_id": "professor-electricalmachinery",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-solidmechanics",
+    "utterance": "교수(고체역학) AI를 불러줘.",
+    "expected_leaf_id": "professor-solidmechanics",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-machinedesign",
+    "utterance": "교수(기계설계)는 지금 바로 연결해줘.",
+    "expected_leaf_id": "professor-machinedesign",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-dynamics",
+    "utterance": "교수(동역학)로 연결해줘.",
+    "expected_leaf_id": "professor-dynamics",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-marketing",
+    "utterance": "교수(마케팅론)한테 바로 연결해줘.",
+    "expected_leaf_id": "professor-marketing",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-hrorganization",
+    "utterance": "교수(인사조직론) 페르소나 호출해.",
+    "expected_leaf_id": "professor-hrorganization",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-operationsmgmt",
+    "utterance": "교수(생산운영관리)로 연결해줘.",
+    "expected_leaf_id": "professor-operationsmgmt",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-internationalbusiness",
+    "utterance": "교수(국제경영론)를 호출해줘.",
+    "expected_leaf_id": "professor-internationalbusiness",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-archaeologicalanthropology",
+    "utterance": "교수(고고인류학) 페르소나 호출해.",
+    "expected_leaf_id": "professor-archaeologicalanthropology",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-linguisticanthropology",
+    "utterance": "교수(언어인류학)가 필요해, 바로 연결해줘.",
+    "expected_leaf_id": "professor-linguisticanthropology",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-physicalgeography",
+    "utterance": "교수(자연지리학) 페르소나 호출해.",
+    "expected_leaf_id": "professor-physicalgeography",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-biostatistics",
+    "utterance": "교수(생물통계학)는 지금 바로 연결해줘.",
+    "expected_leaf_id": "professor-biostatistics",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-med-orthopedics",
+    "utterance": "교수(정형외과학)한테 바로 연결해줘.",
+    "expected_leaf_id": "professor-med-orthopedics",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-med-preventivemedicine",
+    "utterance": "교수(예방의학)가 필요해, 바로 연결해줘.",
+    "expected_leaf_id": "professor-med-preventivemedicine",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-med-tuberculosis",
+    "utterance": "교수(결핵과학)로 연결해줘.",
+    "expected_leaf_id": "professor-med-tuberculosis",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-dent-preventivedentistry",
+    "utterance": "교수(예방치과학) 페르소나 호출해.",
+    "expected_leaf_id": "professor-dent-preventivedentistry",
+    "category": "2단계 리프 정밀화(root=professor)"
+  },
+  {
+    "id": "gate2-professor-kmed-eentderm",
+    "utterance": "교수(한방안이비인후피부과학) AI를 불러줘.",
+    "expected_leaf_id": "professor-kmed-eentderm",
+    "category": "2단계 리프 정밀화(root=professor)"
+  }
+]
