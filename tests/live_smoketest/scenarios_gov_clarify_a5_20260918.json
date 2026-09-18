@@ -1,0 +1,62 @@
+[
+  {
+    "id": "gov-clarify-a5-01-natweather-safetynatural",
+    "utterance": "태풍이 올라온다는데 대응 상황을 어디서 확인할 수 있나요.",
+    "candidate_codes": ["SP-NAT-WEATHER", "SP-DIV-SAFETY-NATURALDISASTER"],
+    "expected_ambiguous_pair": ["SP-NAT-WEATHER", "SP-DIV-SAFETY-NATURALDISASTER"],
+    "descriptions": {
+      "SP-NAT-WEATHER": "제주지방기상청(기상청) — 기상특보·태풍정보·실시간 기상 예보를 담당한다.",
+      "SP-DIV-SAFETY-NATURALDISASTER": "제주도청 도민안전건강실 자연재난과 — 태풍·호우·폭염 등 자연재해 대응을 담당한다."
+    }
+  },
+  {
+    "id": "gov-clarify-a5-02-natweather-safetynatural-variant",
+    "utterance": "태풍 예보를 보니 우리 동네도 위험할 것 같은데, 어디에 문의하면 안내를 받을 수 있나요.",
+    "candidate_codes": ["SP-NAT-WEATHER", "SP-DIV-SAFETY-NATURALDISASTER"],
+    "expected_ambiguous_pair": ["SP-NAT-WEATHER", "SP-DIV-SAFETY-NATURALDISASTER"],
+    "descriptions": {
+      "SP-NAT-WEATHER": "제주지방기상청(기상청) — 기상특보·태풍정보·실시간 기상 예보를 담당한다.",
+      "SP-DIV-SAFETY-NATURALDISASTER": "제주도청 도민안전건강실 자연재난과 — 태풍·호우·폭염 등 자연재해 대응을 담당한다."
+    }
+  },
+  {
+    "id": "gov-clarify-a5-03-natenv-climateenvpolicy",
+    "utterance": "공사를 하려고 하는데 환경영향평가를 받아야 하는지 궁금해요.",
+    "candidate_codes": ["SP-NAT-ENV", "SP-DIV-CLIMATE-ENVPOLICY"],
+    "expected_ambiguous_pair": ["SP-NAT-ENV", "SP-DIV-CLIMATE-ENVPOLICY"],
+    "descriptions": {
+      "SP-NAT-ENV": "영산강유역환경청(환경부 소속 지방환경청) — 환경영향평가 관련 사무를 담당한다.",
+      "SP-DIV-CLIMATE-ENVPOLICY": "제주도청 기후환경국 환경정책과 — 환경 정책 총괄·기획을 담당한다."
+    }
+  },
+  {
+    "id": "gov-clarify-a5-04-natanimalquarantine-agri",
+    "utterance": "반려동물을 데리고 육지로 나가려고 하는데 검역 절차가 어떻게 되는지 알고 싶어요.",
+    "candidate_codes": ["SP-NAT-ANIMALQUARANTINE", "SP-DIV-AGRI-ANIMALQUARANTINE"],
+    "expected_ambiguous_pair": ["SP-NAT-ANIMALQUARANTINE", "SP-DIV-AGRI-ANIMALQUARANTINE"],
+    "descriptions": {
+      "SP-NAT-ANIMALQUARANTINE": "농림축산검역본부 제주지역본부(국가기관) — 동물검역·가축검역, 반려동물 동반 출도 검역을 담당한다.",
+      "SP-DIV-AGRI-ANIMALQUARANTINE": "제주도청 농축산식품국 동물방역과 — 도내 가축·반려동물 방역 행정을 담당한다."
+    }
+  },
+  {
+    "id": "gov-clarify-a5-05-control-natairport",
+    "utterance": "비행기가 결항됐다고 해서 공항에 문의하고 싶은데 어디로 연락하면 되나요.",
+    "candidate_codes": ["SP-NAT-AIRPORT", "SP-DIV-SAFETY-NATURALDISASTER"],
+    "expected_ambiguous_pair": null,
+    "descriptions": {
+      "SP-NAT-AIRPORT": "제주국제공항(한국공항공사) — 공항 운영, 항공편 출발·도착 안내를 담당한다.",
+      "SP-DIV-SAFETY-NATURALDISASTER": "제주도청 도민안전건강실 자연재난과 — 태풍·호우·폭염 등 자연재해 대응을 담당한다(항공편 결항 안내와 무관)."
+    }
+  },
+  {
+    "id": "gov-clarify-a5-06-control-city-sports",
+    "utterance": "동네 체육관 같은 공공체육시설을 이용하고 싶은데 어디에 문의하면 되나요.",
+    "candidate_codes": ["SP-CITYDIV-JEJUSI-CULTURE-SPORTS", "SP-NAT-WEATHER"],
+    "expected_ambiguous_pair": null,
+    "descriptions": {
+      "SP-CITYDIV-JEJUSI-CULTURE-SPORTS": "제주시청 문화관광체육국 체육진흥과 — 생활체육 진흥, 공공체육시설 관리를 담당한다.",
+      "SP-NAT-WEATHER": "제주지방기상청(기상청) — 기상특보·태풍정보·실시간 기상 예보를 담당한다(공공체육시설 이용과 무관)."
+    }
+  }
+]
