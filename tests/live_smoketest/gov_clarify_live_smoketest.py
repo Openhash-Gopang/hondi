@@ -44,6 +44,11 @@ MODEL = "deepseek-v4-flash"  # pages/regional-gov.html의 _govClassifyFn과 동�
 MAX_WORKERS = 5
 MAX_RETRIES = 4
 RETRY_BASE_SLEEP = 3
+# 2026-09-18 추가 — 빈 응답(추론이 max_tokens 안에서 안 끝나는 현상) 근본원인
+# 진단용. production 기본값은 4000(동기화 유지)이지만, --max-tokens로 더 큰
+# 값을 줘서 "예산을 더 주면 끝나는지 vs 그래도 안 끝나는지"를 구분해볼 수
+# 있게 모듈 전역으로 뺐다. --max-tokens 생략 시 기존과 완전히 동일(회귀 없음).
+MAX_TOKENS = 4000
 
 # pages/regional-gov.html의 _govClassifyFn 시스템 프롬프트 머리말과 정확히
 # 동일한 문구 — production 소스(fn eval)에서 그대로 추출. 어긋나면 이
@@ -68,7 +73,9 @@ def call_deepseek(api_key, system_prompt, user_utterance):
         # 이것. production과 동일하게 맞춘다.
         # 2026-09-18 재갱신(2000→4000) — A1 실사 17건에서도 3건(18%)이
         # 빈 응답으로 남아 production을 4000으로 재조정 — 동기화.
-        "max_tokens": 4000,
+        # 2026-09-18 추가 — 진단 실행에서는 MAX_TOKENS(--max-tokens)로 이
+        # 값을 더 키워볼 수 있다(위 MAX_TOKENS 전역 주석 참고).
+        "max_tokens": MAX_TOKENS,
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_utterance[:2000]},
@@ -204,10 +211,16 @@ def process_one(api_key, scenario):
 
 
 def main():
+    global MAX_TOKENS
     ap = argparse.ArgumentParser()
     ap.add_argument("--scenarios", required=True)
     ap.add_argument("--out", default="../../results/gov-clarify")
+    ap.add_argument("--max-tokens", type=int, default=MAX_TOKENS,
+                     help="진단용 — production 기본값(4000)보다 키워서 빈 응답이 "
+                          "예산 부족 때문인지(늘리면 해결) 아니면 추론이 끝나지 "
+                          "않는 다른 문제인지(늘려도 그대로 4000/N 소진) 구분한다.")
     args = ap.parse_args()
+    MAX_TOKENS = args.max_tokens
 
     api_key = os.environ.get("DEEPSEEK_API_KEY")
     if not api_key:
