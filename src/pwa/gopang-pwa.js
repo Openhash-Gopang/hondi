@@ -141,7 +141,25 @@ if ('serviceWorker' in navigator) {
           _autoApplyTimer = null;
           console.log('[PWA] 새 버전 감지(안정화됨) — 5초 후 자동 적용');
           _showUpdateBanner(5);         // 카운트다운 배너 표시
-          _autoApplyReloadTimer = setTimeout(() => {
+          _autoApplyReloadTimer = setTimeout(function _fireReload() {
+            // BUG-FIX(2026-09-18, 주피터 실사 재현) — KAuth 로그인 오버레이가
+            // 떠 있는 동안(전화번호 device-link 인증 진행 중) 이 자동
+            // 새로고침이 끼어들면, 폰에서 방금 "본인 확인"을 눌러 인증이
+            // 실제로는 성공했는데도 그 결과를 받아 persist()하기 전에
+            // 페이지가 통째로 새로 열려버려 토큰이 저장되지 않는다 —
+            // 사용자 입장에서는 "인증은 성공하는데 다음 지시를 내리면
+            // 또 인증을 요구한다"가 무한 반복되는 것으로 보인다. 이 세션
+            // 동안 배포가 잦아(짧은 간격으로 새 버전이 계속 감지됨) 매
+            // 상호작용마다 이 경합이 재현될 조건이 갖춰져 있었다.
+            // 오버레이가 떠 있으면 새로고침을 걸지 않고 1초 뒤 다시
+            // 확인한다 — 오버레이가 사라질 때까지(로그인 완료 또는 사용자
+            // 취소) 계속 미룬다.
+            var overlay = document.getElementById('ksa-overlay');
+            if (overlay && overlay.classList.contains('show')) {
+              console.log('[PWA] 로그인 진행 중 — 자동 새로고침 보류, 1초 후 재확인');
+              _autoApplyReloadTimer = setTimeout(_fireReload, 1000);
+              return;
+            }
             _autoApplyReloadTimer = null;
             _pendingApplySW = null;
             sessionStorage.setItem(LOOP_KEY, String(Date.now()));
