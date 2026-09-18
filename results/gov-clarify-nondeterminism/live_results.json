@@ -1,0 +1,457 @@
+[
+  {
+    "id": "nondet-jocheon-welfare-outreach-run03",
+    "utterance": "보훈 대상자인데 신청 절차를 잘 몰라서 직접 찾아와서 설명해주실 수 있을까요.",
+    "expected_ambiguous_pair": [
+      "welfare",
+      "outreach"
+    ],
+    "live_verdict": "LIVE-FAIL",
+    "live_note": "단일 코드로 확신 있게 답함(하나를 골랐지만 기대 쌍 ['welfare', 'outreach'] 중 하나): welfare",
+    "chosen": "welfare",
+    "usages": [
+      {
+        "prompt_tokens": 365,
+        "completion_tokens": 354,
+        "total_tokens": 719,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 340
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 237
+      }
+    ]
+  },
+  {
+    "id": "nondet-jocheon-welfare-outreach-run01",
+    "utterance": "보훈 대상자인데 신청 절차를 잘 몰라서 직접 찾아와서 설명해주실 수 있을까요.",
+    "expected_ambiguous_pair": [
+      "welfare",
+      "outreach"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['outreach', 'welfare'] (기대: ['welfare', 'outreach'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 365,
+        "completion_tokens": 630,
+        "total_tokens": 995,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 614
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 237
+      },
+      {
+        "prompt_tokens": 208,
+        "completion_tokens": 195,
+        "total_tokens": 403,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 188
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 208
+      }
+    ]
+  },
+  {
+    "id": "nondet-jocheon-welfare-outreach-run02",
+    "utterance": "보훈 대상자인데 신청 절차를 잘 몰라서 직접 찾아와서 설명해주실 수 있을까요.",
+    "expected_ambiguous_pair": [
+      "welfare",
+      "outreach"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['outreach', 'welfare'] (기대: ['welfare', 'outreach'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 365,
+        "completion_tokens": 1266,
+        "total_tokens": 1631,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 1250
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 237
+      },
+      {
+        "prompt_tokens": 208,
+        "completion_tokens": 176,
+        "total_tokens": 384,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 169
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 208
+      }
+    ]
+  },
+  {
+    "id": "nondet-jocheon-welfare-outreach-run06",
+    "utterance": "보훈 대상자인데 신청 절차를 잘 몰라서 직접 찾아와서 설명해주실 수 있을까요.",
+    "expected_ambiguous_pair": [
+      "welfare",
+      "outreach"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['outreach', 'welfare'] (기대: ['welfare', 'outreach'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 365,
+        "completion_tokens": 1060,
+        "total_tokens": 1425,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 1047
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 237
+      },
+      {
+        "prompt_tokens": 208,
+        "completion_tokens": 178,
+        "total_tokens": 386,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 171
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 208
+      }
+    ]
+  },
+  {
+    "id": "nondet-jocheon-welfare-outreach-run05",
+    "utterance": "보훈 대상자인데 신청 절차를 잘 몰라서 직접 찾아와서 설명해주실 수 있을까요.",
+    "expected_ambiguous_pair": [
+      "welfare",
+      "outreach"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['outreach', 'welfare'] (기대: ['welfare', 'outreach'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 365,
+        "completion_tokens": 2263,
+        "total_tokens": 2628,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 2247
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 237
+      },
+      {
+        "prompt_tokens": 208,
+        "completion_tokens": 242,
+        "total_tokens": 450,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 235
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 208
+      }
+    ]
+  },
+  {
+    "id": "nondet-gender-welfare-hanbumo-run01",
+    "utterance": "한부모 가정 여성 지원 제도를 문의하고 싶어요.",
+    "expected_ambiguous_pair": [
+      "SP-DO-GENDER",
+      "SP-DO-WELFARE"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-DO-WELFARE', 'SP-DO-GENDER'] (기대: ['SP-DO-GENDER', 'SP-DO-WELFARE'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 325,
+        "completion_tokens": 1000,
+        "total_tokens": 1325,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 977
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 197
+      },
+      {
+        "prompt_tokens": 182,
+        "completion_tokens": 671,
+        "total_tokens": 853,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 664
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 182
+      }
+    ]
+  },
+  {
+    "id": "nondet-gender-welfare-hanbumo-run02",
+    "utterance": "한부모 가정 여성 지원 제도를 문의하고 싶어요.",
+    "expected_ambiguous_pair": [
+      "SP-DO-GENDER",
+      "SP-DO-WELFARE"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-DO-WELFARE', 'SP-DO-GENDER'] (기대: ['SP-DO-GENDER', 'SP-DO-WELFARE'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 325,
+        "completion_tokens": 510,
+        "total_tokens": 835,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 487
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 197
+      },
+      {
+        "prompt_tokens": 182,
+        "completion_tokens": 646,
+        "total_tokens": 828,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 639
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 182
+      }
+    ]
+  },
+  {
+    "id": "nondet-jocheon-welfare-outreach-run04",
+    "utterance": "보훈 대상자인데 신청 절차를 잘 몰라서 직접 찾아와서 설명해주실 수 있을까요.",
+    "expected_ambiguous_pair": [
+      "welfare",
+      "outreach"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['outreach', 'welfare'] (기대: ['welfare', 'outreach'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 365,
+        "completion_tokens": 3776,
+        "total_tokens": 4141,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 3760
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 237
+      },
+      {
+        "prompt_tokens": 208,
+        "completion_tokens": 224,
+        "total_tokens": 432,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 217
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 208
+      }
+    ]
+  },
+  {
+    "id": "nondet-gender-welfare-hanbumo-run06",
+    "utterance": "한부모 가정 여성 지원 제도를 문의하고 싶어요.",
+    "expected_ambiguous_pair": [
+      "SP-DO-GENDER",
+      "SP-DO-WELFARE"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-DO-WELFARE', 'SP-DO-GENDER'] (기대: ['SP-DO-GENDER', 'SP-DO-WELFARE'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 325,
+        "completion_tokens": 772,
+        "total_tokens": 1097,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 749
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 197
+      },
+      {
+        "prompt_tokens": 182,
+        "completion_tokens": 228,
+        "total_tokens": 410,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 221
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 182
+      }
+    ]
+  },
+  {
+    "id": "nondet-gender-welfare-hanbumo-run05",
+    "utterance": "한부모 가정 여성 지원 제도를 문의하고 싶어요.",
+    "expected_ambiguous_pair": [
+      "SP-DO-GENDER",
+      "SP-DO-WELFARE"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-DO-WELFARE', 'SP-DO-GENDER'] (기대: ['SP-DO-GENDER', 'SP-DO-WELFARE'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 325,
+        "completion_tokens": 1050,
+        "total_tokens": 1375,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 1027
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 197
+      },
+      {
+        "prompt_tokens": 182,
+        "completion_tokens": 369,
+        "total_tokens": 551,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 362
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 182
+      }
+    ]
+  },
+  {
+    "id": "nondet-gender-welfare-hanbumo-run04",
+    "utterance": "한부모 가정 여성 지원 제도를 문의하고 싶어요.",
+    "expected_ambiguous_pair": [
+      "SP-DO-GENDER",
+      "SP-DO-WELFARE"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-DO-WELFARE', 'SP-DO-GENDER'] (기대: ['SP-DO-GENDER', 'SP-DO-WELFARE'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 325,
+        "completion_tokens": 1837,
+        "total_tokens": 2162,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 1817
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 197
+      },
+      {
+        "prompt_tokens": 182,
+        "completion_tokens": 718,
+        "total_tokens": 900,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 711
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 182
+      }
+    ]
+  },
+  {
+    "id": "nondet-gender-welfare-hanbumo-run03",
+    "utterance": "한부모 가정 여성 지원 제도를 문의하고 싶어요.",
+    "expected_ambiguous_pair": [
+      "SP-DO-GENDER",
+      "SP-DO-WELFARE"
+    ],
+    "live_verdict": "LIVE-FAIL",
+    "live_note": "단일 코드로 확신 있게 답함(하나를 골랐지만 기대 쌍 ['SP-DO-GENDER', 'SP-DO-WELFARE'] 중 하나): SP-DO-WELFARE",
+    "chosen": "SP-DO-WELFARE",
+    "usages": [
+      {
+        "prompt_tokens": 325,
+        "completion_tokens": 152,
+        "total_tokens": 477,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 129
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 197
+      },
+      {
+        "prompt_tokens": 182,
+        "completion_tokens": 4190,
+        "total_tokens": 4372,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 4183
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 182
+      }
+    ]
+  }
+]
