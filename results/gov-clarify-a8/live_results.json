@@ -1,0 +1,188 @@
+[
+  {
+    "id": "gov-clarify-a8-05-zeromatch-agency-plan",
+    "utterance": "지방세 체납 관련 문의드립니다.",
+    "expected_ambiguous_pair": null,
+    "live_verdict": "LIVE-PASS",
+    "live_note": "통제 시나리오 — 확신 있게 단일 코드로 정상 답함: SP-DO-PLAN",
+    "chosen": "SP-DO-PLAN",
+    "usages": [
+      {
+        "prompt_tokens": 803,
+        "completion_tokens": 133,
+        "total_tokens": 936,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 116
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 803
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a8-04-control-weak-noL2",
+    "utterance": "자치경찰단에 지역 특성 치안 관련해서 문의드리고 싶어요.",
+    "expected_ambiguous_pair": null,
+    "live_verdict": "LIVE-PASS",
+    "live_note": "통제 시나리오 — 확신 있게 단일 코드로 정상 답함: SP-AGY-POLICE",
+    "chosen": "SP-AGY-POLICE",
+    "usages": [
+      {
+        "prompt_tokens": 355,
+        "completion_tokens": 185,
+        "total_tokens": 540,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 166
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 355
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a8-03-jpspo-welfare",
+    "utterance": "장애인 생활 지원에 대해 상담받고 싶어요.",
+    "expected_ambiguous_pair": [
+      "SP-ORG-JPSPO",
+      "SP-DO-WELFARE"
+    ],
+    "live_verdict": "LIVE-FAIL",
+    "live_note": "단일 코드로 확신 있게 답함(하나를 골랐지만 기대 쌍 ['SP-ORG-JPSPO', 'SP-DO-WELFARE'] 중 하나): SP-DO-WELFARE",
+    "chosen": "SP-DO-WELFARE",
+    "usages": [
+      {
+        "prompt_tokens": 333,
+        "completion_tokens": 670,
+        "total_tokens": 1003,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 652
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 333
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a8-01-police-safety",
+    "utterance": "요즘 동네 생활안전이 걱정돼서 순찰을 좀 늘려주실 수 있나요. 전반적인 안전 관리도 궁금해요.",
+    "expected_ambiguous_pair": [
+      "SP-AGY-POLICE",
+      "SP-DO-SAFETY"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-AGY-POLICE', 'SP-DO-SAFETY'] (기대: ['SP-AGY-POLICE', 'SP-DO-SAFETY'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 376,
+        "completion_tokens": 348,
+        "total_tokens": 724,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 323
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 376
+      },
+      {
+        "prompt_tokens": 199,
+        "completion_tokens": 304,
+        "total_tokens": 503,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 297
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 199
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a8-02-police-tourism",
+    "utterance": "관광경찰한테 문의하고 싶은 게 있는데, 관광 관련해서도 상담받고 싶어요.",
+    "expected_ambiguous_pair": [
+      "SP-AGY-POLICE",
+      "SP-DO-TOURISM"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-AGY-POLICE', 'SP-DO-TOURISM'] (기대: ['SP-AGY-POLICE', 'SP-DO-TOURISM'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 345,
+        "completion_tokens": 300,
+        "total_tokens": 645,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 274
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 345
+      },
+      {
+        "prompt_tokens": 168,
+        "completion_tokens": 312,
+        "total_tokens": 480,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 305
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 168
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a8-06-zeromatch-org-gender",
+    "utterance": "성평등 관련 정책 상담을 받고 싶어요.",
+    "expected_ambiguous_pair": null,
+    "live_verdict": "LIVE-CLARIFY-FALSEPOSITIVE",
+    "live_note": "통제 시나리오인데 runnerUp 확인 결과 발동 — 과잉 트리거: ['SP-DO-GENDER', 'SP-ORG-JWFRI']",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 1701,
+        "completion_tokens": 509,
+        "total_tokens": 2210,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 486
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 1701
+      },
+      {
+        "prompt_tokens": 177,
+        "completion_tokens": 805,
+        "total_tokens": 982,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 798
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 177
+      }
+    ]
+  }
+]
