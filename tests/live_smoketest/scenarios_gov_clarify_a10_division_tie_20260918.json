@@ -1,0 +1,50 @@
+[
+  {
+    "id": "gov-clarify-a10-01-iccjeju-tie",
+    "utterance": "행사장 운영 관련해서 문의하고 싶은데 어디로 연락하면 되나요.",
+    "candidate_codes": [
+      "SP-ORGDIV-ICCJEJU-OPS",
+      "SP-ORGDIV-ICCJEJU-VENUE"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-ORGDIV-ICCJEJU-OPS",
+      "SP-ORGDIV-ICCJEJU-VENUE"
+    ],
+    "descriptions": {
+      "SP-ORGDIV-ICCJEJU-OPS": "제주국제컨벤션센터 운영팀 — 대회의실·중소회의실·전시장 등 시설 대관·행사운영 담당",
+      "SP-ORGDIV-ICCJEJU-VENUE": "제주국제컨벤션센터 시설운영팀 — 시설관리(서귀포시 중문관광단지 소재) 담당"
+    },
+    "note": "_resolveDoAgencyDivision/_resolveOrgDivision(기관 산하 division 동점) 분기 — production 테이블 전수 대조로 발견한 진짜 동점 쌍: 둘 다 kw '운영'/'운영팀' 계열로 겹치고, 이름도 '운영팀' vs '시설운영팀'로 비슷하다. JILES처럼 중복 데이터가 아니라 실제로 다른 팀(행사운영 vs 시설관리)이라 진짜 애매함 테스트로 적합"
+  },
+  {
+    "id": "gov-clarify-a10-02-jwfri-tie",
+    "utterance": "여성가족 관련 정책연구를 진행 중인데 협업이 가능한지 문의하고 싶어요.",
+    "candidate_codes": [
+      "SP-ORGDIV-JWFRI-POLICY",
+      "SP-ORGDIV-JWFRI-RESEARCH"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-ORGDIV-JWFRI-POLICY",
+      "SP-ORGDIV-JWFRI-RESEARCH"
+    ],
+    "descriptions": {
+      "SP-ORGDIV-JWFRI-POLICY": "제주여성가족연구원 여성가족정책연구실 — 성평등·인권, 돌봄·교육, 일자리·일생활균형, 인구·가족 등 정책연구",
+      "SP-ORGDIV-JWFRI-RESEARCH": "제주여성가족연구원 연구팀 — 일반 연구 담당(세부 미확인)"
+    },
+    "note": "두 번째 동점 쌍 — '여성가족정책연구실'(특정 정책연구실)과 '연구팀'(범용 연구팀)이 kw '연구' 계열로 겹친다. 발화가 정책연구실 쪽에 더 가깝지만 '연구팀'도 배제 못 할 후보라 실제로 애매함"
+  },
+  {
+    "id": "gov-clarify-a10-03-control-iccjeju-specific",
+    "utterance": "제주국제컨벤션센터 시설의 냉난방 설비 점검 일정이 궁금해요.",
+    "candidate_codes": [
+      "SP-ORGDIV-ICCJEJU-OPS",
+      "SP-ORGDIV-ICCJEJU-VENUE"
+    ],
+    "expected_ambiguous_pair": null,
+    "descriptions": {
+      "SP-ORGDIV-ICCJEJU-OPS": "제주국제컨벤션센터 운영팀 — 대회의실·중소회의실·전시장 등 시설 대관·행사운영 담당",
+      "SP-ORGDIV-ICCJEJU-VENUE": "제주국제컨벤션센터 시설운영팀 — 시설관리(서귀포시 중문관광단지 소재) 담당"
+    },
+    "note": "통제 시나리오 — 냉난방 설비 점검은 명백히 시설관리(VENUE) 소관, 행사 대관(OPS)과는 무관하다. 문맥상 명확한데도 과잉 되묻기가 발동하지 않는지 확인"
+  }
+]
