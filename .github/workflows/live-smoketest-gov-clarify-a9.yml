@@ -1,0 +1,49 @@
+name: Live Smoketest — Gov Router CLARIFY A9 Batch (institution pure-tie)
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  run-gov-clarify-a9-smoketest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install requests
+
+      - name: Run gov-router CLARIFY A9 batch (3 scenarios — 기관간 순수 동점(tied.length>1) 분기 검증, 위치정보 없음 가정)
+        working-directory: tests/live_smoketest
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          python3 gov_clarify_live_smoketest.py \
+            --scenarios scenarios_gov_clarify_a9_institution_tie_20260918.json \
+            --out ../../results/gov-clarify-a9
+
+      - name: Commit results to results branch
+        if: always()
+        run: |
+          git config user.name "hondi-live-smoketest-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout -B results/live-smoketest-gov-clarify-a9
+          git add -f results/
+          git diff --cached --quiet || git commit -m "chore: gov-clarify-a9 live smoketest results ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+          git push --force origin HEAD:results/live-smoketest-gov-clarify-a9
+
+      - name: Upload artifact (backup)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-smoketest-gov-clarify-a9-results
+          path: results/
