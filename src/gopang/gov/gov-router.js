@@ -3121,7 +3121,32 @@ async function _resolveInstitutionMatch(text, table, pdvLocationHint, classifyFn
       : table;
     return _classifyDivisionFallback(text, zeroTable, classifyFn);
   }
-  if (tied.length === 1 && topScore >= 2) return best;
+  if (tied.length === 1 && topScore >= 2) {
+    // ★ 2026-09-18 수정(A6 라이브 검증 전 결정론적 스코어링 재현으로
+    // 발견) — topScore>=2(강한 매칭)라고 해서 L2 충돌 가능성이 없는 게
+    // 아니다. 실측: "소상공인 창업 지원을 받고 싶어요"가 SP-ORG-JEDA에
+    // 2개(소상공인, 창업 지원) 매칭돼 여기서 바로 확정됐는데, 도청
+    // SP-DO-ECON(L2)에도 '소상공인' 매칭 근거가 실제로 있다 — 2026-08-23
+    // _localGovCollisionCandidate(국가기관↔지방행정, A4/A5로 검증)가
+    // 고친 것과 정확히 같은 클래스의 충돌이 institution↔L2 사이에서는
+    // 매칭 강도 2 이상일 때 안전망 자체가 없었다(바로 아래 topScore===1
+    // 분기만 L2를 합쳐 되물었음). L2가 진짜로 겹칠 때만(topScore>0)
+    // 안전망을 켠다 — L2가 아예 안 겹치면 불필요한 LLM 호출 없이 기존
+    // 동작 그대로 즉시 확정(회귀 없음).
+    const l2ForStrong = _scoreMatchTies(text, _l2Table());
+    if (!classifyFn || !l2ForStrong.best || l2ForStrong.topScore === 0) return best;
+    const extendedStrongTable = !table.includes(l2ForStrong.best)
+      ? [...table, { ...l2ForStrong.best, name: l2ForStrong.best.code, desc: ROUTE_DESCRIPTIONS[l2ForStrong.best.code] || l2ForStrong.best.domain || '' }]
+      : table;
+    let pickedStrong;
+    try {
+      pickedStrong = await _classifyDivisionFallback(text, extendedStrongTable, classifyFn);
+    } catch (e) {
+      if (e instanceof NeedsClarificationSignal) throw e;
+      pickedStrong = null;
+    }
+    return pickedStrong || best;
+  }
   if (tied.length === 1 && topScore === 1) {
     // ★ 2026-08-21 신설(스모크테스트 실측 결함 대응) — 키워드 1개짜리
     // 약한 매칭은 우연한 오버랩일 위험이 크다(실측: "어린이집을 새로
