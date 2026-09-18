@@ -2273,7 +2273,7 @@ function _showPhonePopup(resolve) {
           const mode = await _showDedicatedOrSharedChoice();
           if (mode === 'shared' && typeof window.GopangWallet?.createSessionSignProxy === 'function') {
             const proxy = window.GopangWallet.createSessionSignProxy();
-            await proxy.setIdentity({ guid: found.guid, handle: found.handle || null });
+            await proxy.setIdentity({ guid: found.guid, handle: found.handle || null, e164: found.e164 || null });
             window.gopangWallet = proxy;
             console.info('[Auth] 공용 PC 모드로 로그인 — 이 세션엔 개인키를 저장하지 않습니다. 서명이 필요할 때마다 폰 승인을 거칩니다.');
             session = await _issueSession(found.guid, 'gopang');

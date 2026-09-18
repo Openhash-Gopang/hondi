@@ -1793,10 +1793,22 @@
    *  돌려받는다. 결과는 postMessage로 전달되며, 서명 자체는 검증 가능한
    *  공개 정보라 봉투 암호화가 필요 없다(개인키만 절대 노출 안 되면 됨).
    * ──────────────────────────────────────────────── */
-  function _openSignRequestPopup(sigMsg) {
+  function _openSignRequestPopup(sigMsg, e164) {
     return new Promise((resolve, reject) => {
+      // 2026-09-18 수정(주피터 지시) — device-link.html은 이미 PREFILLED_PHONE
+      // 쿼리 파라미터로 전화번호를 받으면 전화번호 입력 화면 자체를 건너뛰고
+      // 곧장 요청을 보내는 경로가 있다(§DEVICE_LINK_MANUAL_v1_0.md — 기기
+      // 불일치 화면의 지갑 완전 이전 플로우가 이미 이 경로를 쓴다). 그런데
+      // 이 공용 PC 서명 위임 경로는 그 경로를 안 쓰고 있어, 로그인 화면에서
+      // 이미 입력받은 번호를 서명할 때마다 다시 처음부터 입력하게 만들고
+      // 있었다 — 사이트 전체가 "뒷자리 8자" 형식으로 통일돼 있는데 이
+      // 화면만 예외적으로 "010-1234-5678" 전체 입력 형식을 쓰는 것도 이
+      // 재입력 화면이 아예 안 뜨면 함께 해결된다. 알고 있는 번호가 있으면
+      // 그대로 실어 보낸다.
+      const url = '/auth/device-link.html?purpose=sign_request&sigMsg=' + encodeURIComponent(sigMsg)
+        + (e164 ? '&phone=' + encodeURIComponent(e164) : '');
       const popup = window.open(
-        '/auth/device-link.html?purpose=sign_request&sigMsg=' + encodeURIComponent(sigMsg),
+        url,
         'gopang_sign_request', 'width=420,height=560,menubar=no,toolbar=no'
       );
       if (!popup) {
@@ -1854,6 +1866,7 @@
       // guid를 알게 된 이후에도 공개키를 별도로 채우지 않으면 그 다음
       // _issueSession() 호출은 여전히 실패한다 — 후속 과제로 남김).
       this.publicKeyB64u = null;
+      this.e164 = null;
       this._pubkeyFetch = null;
       // 2026-07-23 추가 — 사고실험 E11에서 발견: 거의 동시에 두 서명이
       // 필요해지면 둘 다 같은 이름('gopang_sign_request')의 팝업을 열려고
@@ -1871,9 +1884,12 @@
     // 조용히 null로 남기고 넘어간다 — 어차피 서명 자체는 폰이 하므로
     // 이 사전 조회는 "미리 알아두는" 최적화일 뿐, 서명 검증의 신뢰
     // 근거가 아니다(신뢰는 여전히 서버의 TOFU 대조가 담당).
-    setIdentity({ guid, handle } = {}) {
+    // e164도 함께 받아 기억해 둔다 — 로그인 화면에서 이미 입력받은
+    // 번호를 서명 팝업이 다시 물어보지 않게 하기 위함(§ 아래 _signOne).
+    setIdentity({ guid, handle, e164 } = {}) {
       this.guid = guid || null;
       this.handle = handle || null;
+      this.e164 = e164 || null;
       if (this.guid) {
         this._pubkeyFetch = (async () => {
           try {
@@ -1903,7 +1919,7 @@
       return this.sign(payload);
     }
     async _signOne(payload) {
-      const { signature, guid, publicKeyB64u } = await _openSignRequestPopup(String(payload));
+      const { signature, guid, publicKeyB64u } = await _openSignRequestPopup(String(payload), this.e164);
       // 첫 서명 성공 시점에야 서버(전화번호 조회 결과)로부터 실제 guid를
       // 처음 알게 된다 — 공용 PC는 사전에 어떤 계정인지 전혀 모르는
       // 상태에서 시작하기 때문. sessionStorage에만 남긴다(localStorage
