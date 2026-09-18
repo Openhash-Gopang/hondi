@@ -27050,6 +27050,14 @@ async function handleWalletX25519Get(request, env, corsHeaders) {
   }
 
   const pubkey = record?.x25519_pubkey || null;
+  // 2026-09-18 추가 — "공용 PC" 로그인(SessionSignProxy)이 _issueSession()의
+  // sigMsg(`auth-issue:guid:공개키:svc:ts`)를 만들려면 서명 요청 *전에* 이
+  // 계정의 Ed25519 공개키를 알아야 한다. 공용 PC는 개인키를 가진 적이
+  // 없어 스스로는 절대 알 수 없고, 폰만 갖고 있다 — 그런데 record는 이미
+  // 같은 조회로 pubkey_ed25519도 갖고 있으므로(x25519_pubkey와 같은 행),
+  // 별도 엔드포인트 없이 여기 얹어서 함께 내려준다. 공개키는 원래 공개
+  // 정보라 노출에 안전하다(서명 능력은 개인키에만 있음).
+  const ed25519Pubkey = record?.pubkey_ed25519 || null;
 
   if (!pubkey) {
     return new Response(JSON.stringify({
@@ -27057,7 +27065,7 @@ async function handleWalletX25519Get(request, env, corsHeaders) {
       message: '암호화 키가 아직 준비되지 않았습니다. 휴대폰에서 고팡 앱을 한 번 완전히 종료한 뒤 다시 열어 주세요. (가입이 안 되어 있다면 먼저 가입을 완료해 주세요.)',
     }), { status: 200, headers: corsHeaders });
   }
-  return new Response(JSON.stringify({ ok: true, registered: true, x25519_pubkey: pubkey }),
+  return new Response(JSON.stringify({ ok: true, registered: true, x25519_pubkey: pubkey, ed25519_pubkey: ed25519Pubkey }),
     { status: 200, headers: corsHeaders });
 }
 

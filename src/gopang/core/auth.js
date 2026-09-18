@@ -2239,7 +2239,7 @@ function _showPhonePopup(resolve) {
 
   // ── 기존 회원 로그인 공통 처리 (전화번호 경로·닉네임 경로 공용) ──
   async function _loginExisting(found, valForDisplay) {
-    const session = await _issueSession(found.guid, 'gopang');
+    let session = await _issueSession(found.guid, 'gopang');
     if (!session.ok) {
       console.warn('[Auth] 세션 검증 실패:', session.reason);
       btn.style.opacity = '1';
@@ -2258,13 +2258,38 @@ function _showPhonePopup(resolve) {
           phoneErr.style.display = 'block';
           return;
         }
+        // 2026-09-18 신설(주피터 지시) — gopangWalletNeedsSetup(PC/미확인
+        // 기기)인 경우, 지금까지는 무조건 아래 _showDeviceMismatchNotice()
+        // (지갑을 이 PC로 완전히 이전하거나 백업 키 수동 입력)로만
+        // 보냈다. 그런데 ensureWalletSetup()(send-message.js 등에서만
+        // 호출되던)에는 이미 "공용 PC" 모드 — 개인키를 이 PC에 저장하지
+        // 않고 서명이 필요할 때마다 폰 승인을 원격으로 거치는 방식
+        // (GopangWallet.createSessionSignProxy()) — 가 있었는데, 정작
+        // 로그인 진입점에서는 이 선택지를 제공한 적이 없었다("PC는
+        // 인증 기기가 아니다"는 원칙이 실제 로그인 화면엔 반영 안 돼
+        // 있었던 것). 이미 계정을 찾은 상태(found)이므로
+        // _showAccountExistsCheck()는 건너뛰고 전용/공용 선택만 받는다.
+        if (window.gopangWalletNeedsSetup && !window.gopangWalletLocked) {
+          const mode = await _showDedicatedOrSharedChoice();
+          if (mode === 'shared' && typeof window.GopangWallet?.createSessionSignProxy === 'function') {
+            const proxy = window.GopangWallet.createSessionSignProxy();
+            await proxy.setIdentity({ guid: found.guid, handle: found.handle || null });
+            window.gopangWallet = proxy;
+            console.info('[Auth] 공용 PC 모드로 로그인 — 이 세션엔 개인키를 저장하지 않습니다. 서명이 필요할 때마다 폰 승인을 거칩니다.');
+            session = await _issueSession(found.guid, 'gopang');
+          }
+          // mode === 'dedicated'이거나 프록시 생성이 여의치 않으면 아래
+          // 기존 흐름(지갑 완전 이전 안내)으로 그대로 이어진다.
+        }
       }
-      if (typeof DEV_MODE !== 'undefined' && DEV_MODE) {
-        console.info('[DEV] _showPhonePopup DeviceMismatch 우회:', found.handle);
-      } else {
-        overlay.remove();
-        _showDeviceMismatchNotice(found, resolve);
-        return;
+      if (!session.ok) {
+        if (typeof DEV_MODE !== 'undefined' && DEV_MODE) {
+          console.info('[DEV] _showPhonePopup DeviceMismatch 우회:', found.handle);
+        } else {
+          overlay.remove();
+          _showDeviceMismatchNotice(found, resolve);
+          return;
+        }
       }
     }
 

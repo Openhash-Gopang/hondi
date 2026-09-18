@@ -1841,6 +1841,20 @@
       this.guid = null;
       this.handle = null;
       this._isSessionProxy = true;
+      // 2026-09-18 추가 — _issueSession()(auth.js)은 서명을 요청하기
+      // *전에* `wallet.publicKeyB64u`를 읽어 sigMsg를 만든다
+      // (`auth-issue:guid:공개키:svc:ts`). 이 프록시는 개인키가 없으니
+      // 스스로는 절대 공개키를 모르지만, guid를 이미 아는 경우(로그인
+      // 진입점처럼)라면 서버가 이미 알고 있는 그 계정의 공개키를 미리
+      // 물어봐서 채워둘 수 있다 — 이래야 _issueSession()의 사전 체크
+      // (`!wallet?.publicKeyB64u`)를 통과해 실제로 서명 단계까지 갈 수
+      // 있다. guid를 아직 모르는 진짜 익명 공용 PC 부트스트랩(기존
+      // ensureWalletSetup 경로)에서는 이 필드가 null로 남고, 그 경우는
+      // 여전히 이 수정의 대상이 아니다(§ 문서 참고 — 첫 서명 결과로
+      // guid를 알게 된 이후에도 공개키를 별도로 채우지 않으면 그 다음
+      // _issueSession() 호출은 여전히 실패한다 — 후속 과제로 남김).
+      this.publicKeyB64u = null;
+      this._pubkeyFetch = null;
       // 2026-07-23 추가 — 사고실험 E11에서 발견: 거의 동시에 두 서명이
       // 필요해지면 둘 다 같은 이름('gopang_sign_request')의 팝업을 열려고
       // 해서, 두 번째 호출이 첫 번째가 아직 열어둔 팝업을 가로채(같은
@@ -1851,7 +1865,28 @@
       // 하나만 뜨고, 먼저 요청한 게 항상 먼저 처리된다.
       this._queue = Promise.resolve();
     }
-    setIdentity({ guid, handle } = {}) { this.guid = guid || null; this.handle = handle || null; }
+    // 2026-09-18 수정 — guid가 이미 알려진 경우(예: 로그인 화면에서
+    // 전화번호로 계정을 이미 찾은 뒤) 서버에 등록된 Ed25519 공개키를
+    // 미리 조회해 publicKeyB64u를 채운다. 실패해도(네트워크 오류 등)
+    // 조용히 null로 남기고 넘어간다 — 어차피 서명 자체는 폰이 하므로
+    // 이 사전 조회는 "미리 알아두는" 최적화일 뿐, 서명 검증의 신뢰
+    // 근거가 아니다(신뢰는 여전히 서버의 TOFU 대조가 담당).
+    setIdentity({ guid, handle } = {}) {
+      this.guid = guid || null;
+      this.handle = handle || null;
+      if (this.guid) {
+        this._pubkeyFetch = (async () => {
+          try {
+            const res = await fetch(`${WORKER_URL}/wallet/x25519?guid=${encodeURIComponent(this.guid)}`);
+            const data = await res.json().catch(() => ({}));
+            if (data?.ed25519_pubkey) this.publicKeyB64u = data.ed25519_pubkey;
+          } catch (e) {
+            console.warn('[GopangWallet] SessionSignProxy 공개키 사전조회 실패(무시 — 서명 단계에서 재시도 가능):', e.message);
+          }
+        })();
+      }
+      return this._pubkeyFetch || Promise.resolve();
+    }
     sign(payload) {
       const run = () => this._signOne(payload);
       // 이전 서명이 성공했든 실패했든(예: 사용자가 팝업을 닫아 reject)
@@ -1862,8 +1897,13 @@
       this._queue = result.then(() => {}, () => {});
       return result;
     }
+    // 2026-09-18 추가 — _issueSession()은 wallet.signPayload()라는
+    // 이름을 호출한다(sign()이 아님). 별도 로직 없이 그대로 위임.
+    signPayload(payload) {
+      return this.sign(payload);
+    }
     async _signOne(payload) {
-      const { signature, guid } = await _openSignRequestPopup(String(payload));
+      const { signature, guid, publicKeyB64u } = await _openSignRequestPopup(String(payload));
       // 첫 서명 성공 시점에야 서버(전화번호 조회 결과)로부터 실제 guid를
       // 처음 알게 된다 — 공용 PC는 사전에 어떤 계정인지 전혀 모르는
       // 상태에서 시작하기 때문. sessionStorage에만 남긴다(localStorage
@@ -1877,6 +1917,10 @@
           }
         } catch (e) { /* sessionStorage 접근 불가 환경 — 서명 자체엔 영향 없음 */ }
       }
+      // 2026-09-18 추가 — setIdentity()로 사전조회가 안 됐거나 실패했던
+      // 경우, 서명 팝업 응답에 이미 실려오는 공개키로 뒤늦게라도 채운다
+      // (다음 서명부터는 _issueSession()의 사전 체크를 통과할 수 있음).
+      if (publicKeyB64u && !this.publicKeyB64u) this.publicKeyB64u = publicKeyB64u;
       return signature;
     }
   }
