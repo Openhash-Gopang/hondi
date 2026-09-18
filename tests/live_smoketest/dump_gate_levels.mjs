@@ -43,6 +43,10 @@ function walk(nodeId) {
     candidateCount: candidates.length,
     candidates: candidates.map((c) => ({
       id: c.id,
+      // 2026-09-18 추가 — runnerUp 2차 확인 호출(subject-gate.js의
+      // _confirmRunnerUpFits)이 EXPERT_REGISTRY[id].label을 그대로 쓰므로,
+      // 하네스가 같은 라벨을 재구현 없이 그대로 쓸 수 있게 여기서도 노출한다.
+      label: (EXPERT_REGISTRY[c.id] || {}).label || null,
       menuLine: _leafMenuLine(c),
       hasSynonyms: Boolean(LEAF_SYNONYMS[c.id]),
     })),
