@@ -36,12 +36,21 @@
 #   4) 교체(단 1회 cp) + 명시적 systemctl restart (v3)
 #   5) 최대 120초 헬스체크 대기
 #   6) 실패 시 백업으로 즉시 롤백 + 재시작
-
+#
+# 2026-09-19 수정 — RAW_URL이 아직도 아카이브된 옛 저장소
+# Openhash-Gopang/gopang을 가리키고 있던 것을 발견해 hondi로 고쳤다.
+# ops/apply-pb-migrations.sh는 이미 2026-09-02에 이 문제(RAW_BASE가
+# 옛 저장소를 가리키던 것)를 고쳤는데, 같은 계열의 apply-pb-hooks.sh는
+# 그때 같이 고쳐지지 않고 남아있었던 것으로 보인다. 다만 이쪽은 옛
+# gopang 저장소 자체가 404가 아니라 (아직 살아있는 채로) 아주 오래된
+# pb_hooks 내용을 200 OK로 계속 반환하고 있어서 — apply-pb-migrations.sh
+# 때처럼 워크플로가 눈에 띄게 실패하지 않고 조용히 구식 pb_hooks(2026-09-06
+# NODE_ID 정리 이전 버전 확인됨)를 hanlim에 배포해왔을 위험이 있다.
 set -euo pipefail
 
 PB_ROOT="/opt/gopang"
 SERVICE="gopang-pb-hanlim.service"
-RAW_URL="https://raw.githubusercontent.com/Openhash-Gopang/gopang/main/pb_hooks/main.pb.js"
+RAW_URL="https://raw.githubusercontent.com/Openhash-Gopang/hondi/main/pb_hooks/main.pb.js"
 BACKUP_DIR="$PB_ROOT/pb_hooks_backups"
 
 cd "$PB_ROOT"
