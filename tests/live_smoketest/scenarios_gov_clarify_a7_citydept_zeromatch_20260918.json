@@ -1,0 +1,55 @@
+[
+  {
+    "id": "gov-clarify-a7-01-yugidongmul",
+    "utterance": "유기동물을 발견했는데 어디에 신고해야 하나요.",
+    "candidate_codes": ["SP-CITYDEPT-jejusi-jachi", "SP-CITYDEPT-jejusi-safety", "SP-CITYDEPT-jejusi-welfare", "SP-CITYDEPT-jejusi-econ", "SP-CITYDEPT-jejusi-comm", "SP-CITYDEPT-jejusi-pr", "SP-CITYDEPT-jejusi-civilaffairs", "SP-CITYDEPT-jejusi-culture", "SP-CITYDEPT-jejusi-climate", "SP-CITYDEPT-jejusi-housing", "SP-CITYDEPT-jejusi-agri", "SP-CITYDEPT-jejusi-health"],
+    "expected_ambiguous_pair": null,
+    "descriptions": {
+      "SP-CITYDEPT-jejusi-jachi": "자치행정담당부서(jachi) 소관 — 관련 키워드 예시: 자치행정국, 총무과, 기획예산과, 세무과, 재산세과, 지방세",
+      "SP-CITYDEPT-jejusi-safety": "안전총괄담당부서(safety) 소관 — 관련 키워드 예시: 안전교통위생국, 안전교통국, 안전총괄과, 교통행정과, 차량관리과, 교통",
+      "SP-CITYDEPT-jejusi-welfare": "사회복지담당부서(welfare) 소관 — 관련 키워드 예시: 복지가족국, 복지위생국, 주민복지과, 노인복지과, 장애인복지과, 기초생활보장과",
+      "SP-CITYDEPT-jejusi-econ": "지역경제담당부서(econ) 소관 — 관련 키워드 예시: 경제일자리국, 경제소상공인과, 일자리에너지과, 마을활력과, 디지털혁신과, 정보화지원과",
+      "SP-CITYDEPT-jejusi-comm": "소통청렴지원실(comm) 소관 — 관련 키워드 예시: 소통청렴지원실, 시정 소통, 청렴신고, 공직감찰",
+      "SP-CITYDEPT-jejusi-pr": "공보실(pr) 소관 — 관련 키워드 예시: 공보실, 시정 홍보, 보도자료",
+      "SP-CITYDEPT-jejusi-civilaffairs": "종합민원실(civilaffairs) 소관 — 관련 키워드 예시: 종합민원실, 통합 민원, 민원 접수처",
+      "SP-CITYDEPT-jejusi-culture": "문화체육담당부서(culture) 소관 — 관련 키워드 예시: 문화관광체육국, 문화예술과, 관광진흥과, 체육진흥과, 우당도서관, 탐라도서관",
+      "SP-CITYDEPT-jejusi-climate": "환경관리담당부서(climate) 소관 — 관련 키워드 예시: 청정환경국, 환경관리과, 환경지도과, 생활환경과, 공원녹지과, 절물생태관리소",
+      "SP-CITYDEPT-jejusi-housing": "건설(주택)담당부서(housing) 소관 — 관련 키워드 예시: 도시건설국, 도시계획과, 도시재생과, 건축과, 주택과, 상하수도과",
+      "SP-CITYDEPT-jejusi-agri": "농축산담당부서(agri) 소관 — 관련 키워드 예시: 농수축산국, 친환경농정과, 감귤유통과, 해양수산과, 청정축산과, 친환경농정",
+      "SP-CITYDEPT-jejusi-health": "보건소(health) 소관 — 관련 키워드 예시: 제주보건소, 보건행정과, 감염예방의약과, 건강증진과, 서부보건소, 동부보건소"
+    },
+    "note": "_resolveCityDeptMatch 키워드 완전매칭 실패(topScore=0, 제주시 국(局) 12개 kw 215개 전체와 대조해 사전 확인) 시 전체 국 목록을 classifyFn에 던지는 구제망 검증. jejusi kw 목록 어디에도 동물/반려/유기 관련 단어가 전혀 없어 결정론적으로 zero-match 확정됨(_kwMatch 재현 스크립트로 확인) — 실제로는 농수축산국(agri)이 정답이어야 함(한국 지자체 통상 관할)"
+  },
+  {
+    "id": "gov-clarify-a7-02-goyangi-jungseonghwa",
+    "utterance": "떠돌이 고양이 중성화 수술 지원 사업이 있는지 궁금해요.",
+    "candidate_codes": ["SP-CITYDEPT-jejusi-jachi", "SP-CITYDEPT-jejusi-safety", "SP-CITYDEPT-jejusi-welfare", "SP-CITYDEPT-jejusi-econ", "SP-CITYDEPT-jejusi-comm", "SP-CITYDEPT-jejusi-pr", "SP-CITYDEPT-jejusi-civilaffairs", "SP-CITYDEPT-jejusi-culture", "SP-CITYDEPT-jejusi-climate", "SP-CITYDEPT-jejusi-housing", "SP-CITYDEPT-jejusi-agri", "SP-CITYDEPT-jejusi-health"],
+    "expected_ambiguous_pair": null,
+    "descriptions": {
+      "SP-CITYDEPT-jejusi-jachi": "자치행정담당부서(jachi) 소관 — 관련 키워드 예시: 자치행정국, 총무과, 기획예산과, 세무과, 재산세과, 지방세",
+      "SP-CITYDEPT-jejusi-safety": "안전총괄담당부서(safety) 소관 — 관련 키워드 예시: 안전교통위생국, 안전교통국, 안전총괄과, 교통행정과, 차량관리과, 교통",
+      "SP-CITYDEPT-jejusi-welfare": "사회복지담당부서(welfare) 소관 — 관련 키워드 예시: 복지가족국, 복지위생국, 주민복지과, 노인복지과, 장애인복지과, 기초생활보장과",
+      "SP-CITYDEPT-jejusi-econ": "지역경제담당부서(econ) 소관 — 관련 키워드 예시: 경제일자리국, 경제소상공인과, 일자리에너지과, 마을활력과, 디지털혁신과, 정보화지원과",
+      "SP-CITYDEPT-jejusi-comm": "소통청렴지원실(comm) 소관 — 관련 키워드 예시: 소통청렴지원실, 시정 소통, 청렴신고, 공직감찰",
+      "SP-CITYDEPT-jejusi-pr": "공보실(pr) 소관 — 관련 키워드 예시: 공보실, 시정 홍보, 보도자료",
+      "SP-CITYDEPT-jejusi-civilaffairs": "종합민원실(civilaffairs) 소관 — 관련 키워드 예시: 종합민원실, 통합 민원, 민원 접수처",
+      "SP-CITYDEPT-jejusi-culture": "문화체육담당부서(culture) 소관 — 관련 키워드 예시: 문화관광체육국, 문화예술과, 관광진흥과, 체육진흥과, 우당도서관, 탐라도서관",
+      "SP-CITYDEPT-jejusi-climate": "환경관리담당부서(climate) 소관 — 관련 키워드 예시: 청정환경국, 환경관리과, 환경지도과, 생활환경과, 공원녹지과, 절물생태관리소",
+      "SP-CITYDEPT-jejusi-housing": "건설(주택)담당부서(housing) 소관 — 관련 키워드 예시: 도시건설국, 도시계획과, 도시재생과, 건축과, 주택과, 상하수도과",
+      "SP-CITYDEPT-jejusi-agri": "농축산담당부서(agri) 소관 — 관련 키워드 예시: 농수축산국, 친환경농정과, 감귤유통과, 해양수산과, 청정축산과, 친환경농정",
+      "SP-CITYDEPT-jejusi-health": "보건소(health) 소관 — 관련 키워드 예시: 제주보건소, 보건행정과, 감염예방의약과, 건강증진과, 서부보건소, 동부보건소"
+    },
+    "note": "위와 동일 클래스 — zero-match 사전 확인 완료, 두 번째 발화로 재현성 확인. 농수축산국(agri) 대신 보건소(health)로 샐 가능성도 있어 어느 쪽이 나오는지 특히 주목할 값"
+  },
+  {
+    "id": "gov-clarify-a7-03-control-direct-kwmatch",
+    "utterance": "재산세 납부 기한이 언제까지인지 알고 싶어요.",
+    "candidate_codes": ["SP-CITYDEPT-jejusi-jachi", "SP-CITYDEPT-jejusi-econ"],
+    "expected_ambiguous_pair": null,
+    "descriptions": {
+      "SP-CITYDEPT-jejusi-jachi": "자치행정담당부서(jachi) 소관 — 관련 키워드 예시: 자치행정국, 총무과, 기획예산과, 세무과, 재산세과, 지방세",
+      "SP-CITYDEPT-jejusi-econ": "지역경제담당부서(econ) 소관 — 관련 키워드 예시: 경제일자리국, 경제소상공인과, 일자리에너지과, 마을활력과, 디지털혁신과, 정보화지원과"
+    },
+    "note": "통제 시나리오 — '재산세'는 jachi kw에 명시적으로 있어 production에서는 _matchCityDept 직접매칭으로 즉시 확정되고 classifyFn(및 이 구제망)을 아예 안 탄다. 이 하네스는 classifyFn만 재현하므로 실제 코드 분기 자체를 테스트하진 못하지만, 최소한 classifyFn 레벨에서도 확신 있게 jachi로 답하는지 확인하는 대조군"
+  }
+]
