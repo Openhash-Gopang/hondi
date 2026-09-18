@@ -1,0 +1,334 @@
+[
+  {
+    "id": "gov-clarify-a2-03-seogwipo-village-selfgov",
+    "utterance": "동네 주민들과 마을공동체 활동을 시작해보고 싶은데 시청 어느 부서와 상담하면 될까요.",
+    "expected_ambiguous_pair": [
+      "SP-CITYDIV-SEOGWIPO-JACHI-VILLAGE",
+      "SP-CITYDIV-SEOGWIPO-JACHI-SELFGOV"
+    ],
+    "live_verdict": "LIVE-FAIL",
+    "live_note": "단일 코드로 확신 있게 답함(하나를 골랐지만 기대 쌍 ['SP-CITYDIV-SEOGWIPO-JACHI-VILLAGE', 'SP-CITYDIV-SEOGWIPO-JACHI-SELFGOV'] 중 하나): SP-CITYDIV-SEOGWIPO-JACHI-VILLAGE",
+    "chosen": "SP-CITYDIV-SEOGWIPO-JACHI-VILLAGE",
+    "usages": [
+      {
+        "prompt_tokens": 442,
+        "completion_tokens": 491,
+        "total_tokens": 933,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 466
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 442
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a2-06-do-safety-natural-social-disaster",
+    "utterance": "폭염이 심해서 피해가 걱정되는데 도청 어느 부서에서 대응하고 있는지 알고 싶어요.",
+    "expected_ambiguous_pair": [
+      "SP-DIV-SAFETY-NATURALDISASTER",
+      "SP-DIV-SAFETY-SOCIALDISASTER"
+    ],
+    "live_verdict": "LIVE-FAIL",
+    "live_note": "단일 코드로 확신 있게 답함(하나를 골랐지만 기대 쌍 ['SP-DIV-SAFETY-NATURALDISASTER', 'SP-DIV-SAFETY-SOCIALDISASTER'] 중 하나): SP-DIV-SAFETY-NATURALDISASTER",
+    "chosen": "SP-DIV-SAFETY-NATURALDISASTER",
+    "usages": [
+      {
+        "prompt_tokens": 376,
+        "completion_tokens": 116,
+        "total_tokens": 492,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 92
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 376
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a2-05-do-climate-envpolicy-recycling",
+    "utterance": "일회용품 사용을 줄이고 재활용을 늘리는 정책을 도청이 어떻게 추진하고 있는지 알고 싶어요.",
+    "expected_ambiguous_pair": [
+      "SP-DIV-CLIMATE-ENVPOLICY",
+      "SP-DIV-CLIMATE-RECYCLING"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-DIV-CLIMATE-RECYCLING', 'SP-DIV-CLIMATE-ENVPOLICY'] (기대: ['SP-DIV-CLIMATE-ENVPOLICY', 'SP-DIV-CLIMATE-RECYCLING'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 362,
+        "completion_tokens": 592,
+        "total_tokens": 954,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 561
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 362
+      },
+      {
+        "prompt_tokens": 195,
+        "completion_tokens": 116,
+        "total_tokens": 311,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 109
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 195
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a2-02-jejusi-village-selfgov",
+    "utterance": "우리 마을에서 주민들이 주도해서 마을 사업을 하나 해보려고 하는데 어디에 문의하면 되나요.",
+    "expected_ambiguous_pair": [
+      "SP-CITYDIV-JEJUSI-ECON-VILLAGE",
+      "SP-CITYDIV-JEJUSI-JACHI-SELFGOV"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-CITYDIV-JEJUSI-ECON-VILLAGE', 'SP-CITYDIV-JEJUSI-JACHI-SELFGOV'] (기대: ['SP-CITYDIV-JEJUSI-ECON-VILLAGE', 'SP-CITYDIV-JEJUSI-JACHI-SELFGOV'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 423,
+        "completion_tokens": 902,
+        "total_tokens": 1325,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 862
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 423
+      },
+      {
+        "prompt_tokens": 227,
+        "completion_tokens": 136,
+        "total_tokens": 363,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 129
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 227
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a2-04-do-welfare-policy-elderly",
+    "utterance": "어르신들을 위한 복지 지원 제도가 어떤 게 있는지 전반적으로 안내받고 싶어요.",
+    "expected_ambiguous_pair": [
+      "SP-DIV-WELFARE-POLICY",
+      "SP-DIV-WELFARE-ELDERLY"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-DIV-WELFARE-ELDERLY', 'SP-DIV-WELFARE-POLICY'] (기대: ['SP-DIV-WELFARE-POLICY', 'SP-DIV-WELFARE-ELDERLY'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 368,
+        "completion_tokens": 799,
+        "total_tokens": 1167,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 771
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 368
+      },
+      {
+        "prompt_tokens": 189,
+        "completion_tokens": 302,
+        "total_tokens": 491,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 295
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 189
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a2-09-control-jejusi-citrus",
+    "utterance": "감귤 유통구조 개선 사업 참여 방법을 알고 싶어요.",
+    "expected_ambiguous_pair": null,
+    "live_verdict": "LIVE-PASS",
+    "live_note": "통제 시나리오 — 확신 있게 단일 코드로 정상 답함: SP-CITYDIV-JEJUSI-AGRI-CITRUS",
+    "chosen": "SP-CITYDIV-JEJUSI-AGRI-CITRUS",
+    "usages": [
+      {
+        "prompt_tokens": 409,
+        "completion_tokens": 172,
+        "total_tokens": 581,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 144
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 409
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a2-10-control-do-ocean-haenyeo",
+    "utterance": "해녀 문화유산 등재 관련 자료를 어디서 받을 수 있나요.",
+    "expected_ambiguous_pair": null,
+    "live_verdict": "LIVE-PASS",
+    "live_note": "통제 시나리오 — 확신 있게 단일 코드로 정상 답함: SP-DIV-OCEAN-HAENYEOHERITAGE",
+    "chosen": "SP-DIV-OCEAN-HAENYEOHERITAGE",
+    "usages": [
+      {
+        "prompt_tokens": 397,
+        "completion_tokens": 128,
+        "total_tokens": 525,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 101
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 397
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a2-07-do-transport-policy-public",
+    "utterance": "버스 요금 체계가 어떻게 정해지는지, 관련해서 민원을 넣고 싶은데 어디로 문의해야 하나요.",
+    "expected_ambiguous_pair": [
+      "SP-DIV-TRANSPORT-TRAFFICPOLICY",
+      "SP-DIV-TRANSPORT-PUBLICTRANSPORT"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-DIV-TRANSPORT-PUBLICTRANSPORT', 'SP-DIV-TRANSPORT-TRAFFICPOLICY'] (기대: ['SP-DIV-TRANSPORT-TRAFFICPOLICY', 'SP-DIV-TRANSPORT-PUBLICTRANSPORT'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 373,
+        "completion_tokens": 360,
+        "total_tokens": 733,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 320
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 373
+      },
+      {
+        "prompt_tokens": 201,
+        "completion_tokens": 250,
+        "total_tokens": 451,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 243
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 201
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a2-08-jejusi-envguide-envmgmt",
+    "utterance": "공장에서 냄새와 매연이 계속 나서 불편한데 이거 어디에 이야기하면 되나요.",
+    "expected_ambiguous_pair": [
+      "SP-CITYDIV-JEJUSI-CLIMATE-ENVGUIDE",
+      "SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-CITYDIV-JEJUSI-CLIMATE-ENVGUIDE', 'SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT'] (기대: ['SP-CITYDIV-JEJUSI-CLIMATE-ENVGUIDE', 'SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 392,
+        "completion_tokens": 327,
+        "total_tokens": 719,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 282
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 392
+      },
+      {
+        "prompt_tokens": 215,
+        "completion_tokens": 165,
+        "total_tokens": 380,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 158
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 215
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a2-01-jejusi-propertytax-tax",
+    "utterance": "자동차를 새로 사서 등록하려는데 세금 관련해서 어디로 문의해야 하나요.",
+    "expected_ambiguous_pair": [
+      "SP-CITYDIV-JEJUSI-JACHI-PROPERTYTAX",
+      "SP-CITYDIV-JEJUSI-JACHI-TAX"
+    ],
+    "live_verdict": "LIVE-FAIL",
+    "live_note": "단일 코드로 확신 있게 답함(하나를 골랐지만 기대 쌍 ['SP-CITYDIV-JEJUSI-JACHI-PROPERTYTAX', 'SP-CITYDIV-JEJUSI-JACHI-TAX'] 중 하나): SP-CITYDIV-JEJUSI-JACHI-TAX",
+    "chosen": "SP-CITYDIV-JEJUSI-JACHI-TAX",
+    "usages": [
+      {
+        "prompt_tokens": 525,
+        "completion_tokens": 912,
+        "total_tokens": 1437,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 872
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 525
+      },
+      {
+        "prompt_tokens": 244,
+        "completion_tokens": 627,
+        "total_tokens": 871,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 620
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 244
+      }
+    ]
+  }
+]
