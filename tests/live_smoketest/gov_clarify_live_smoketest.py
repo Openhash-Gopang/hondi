@@ -61,8 +61,10 @@ def call_deepseek(api_key, system_prompt, user_utterance):
         # reasoning에 소진해 실제 응답을 한 번도 못 냄, 이 하네스의 첫
         # 실사 6/6건에서 재현) 이 하네스는 독립 상수라 그 갱신을 자동으로
         # 안 따라갔다 — 재실행해도 여전히 0글자 응답이었던 원인이 바로
-        # 이것. production과 동일하게 2000으로 맞춘다.
-        "max_tokens": 2000,
+        # 이것. production과 동일하게 맞춘다.
+        # 2026-09-18 재갱신(2000→4000) — A1 실사 17건에서도 3건(18%)이
+        # 빈 응답으로 남아 production을 4000으로 재조정 — 동기화.
+        "max_tokens": 4000,
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_utterance[:2000]},

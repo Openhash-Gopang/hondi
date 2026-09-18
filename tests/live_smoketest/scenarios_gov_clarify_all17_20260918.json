@@ -1,0 +1,298 @@
+[
+  {
+    "id": "gov-clarify-01-gender-welfare",
+    "utterance": "여성 일자리 지원이랑 아이돌봄 서비스를 같이 문의하고 싶은데 어디로 연결해줘.",
+    "candidate_codes": [
+      "SP-DO-GENDER",
+      "SP-DO-WELFARE",
+      "SP-DO-ECON",
+      "SP-DO-CULTURE"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-DO-GENDER",
+      "SP-DO-WELFARE"
+    ],
+    "descriptions": {
+      "SP-DO-GENDER": "성평등여성정책관 [성평등·여성정책 — 복지가족국의 가족·아동·보육과는 별도]",
+      "SP-DO-WELFARE": "복지가족국(구 보건복지여성국)",
+      "SP-DO-ECON": "경제활력국",
+      "SP-DO-CULTURE": "문화체육교육국"
+    }
+  },
+  {
+    "id": "gov-clarify-02-gender-welfare",
+    "utterance": "여성가족 관련 정책 상담을 받고 싶어요.",
+    "candidate_codes": [
+      "SP-DO-GENDER",
+      "SP-DO-WELFARE",
+      "SP-DO-CULTURE"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-DO-GENDER",
+      "SP-DO-WELFARE"
+    ],
+    "descriptions": {
+      "SP-DO-GENDER": "성평등여성정책관 [성평등·여성정책 — 복지가족국의 가족·아동·보육과는 별도]",
+      "SP-DO-WELFARE": "복지가족국(구 보건복지여성국)",
+      "SP-DO-CULTURE": "문화체육교육국"
+    }
+  },
+  {
+    "id": "gov-clarify-03-general-plan",
+    "utterance": "직원 인사 발령이랑 관련 서류 처리 문의하려고 하는데요.",
+    "candidate_codes": [
+      "SP-DO-GENERAL",
+      "SP-DO-PLAN",
+      "SP-DO-SAFETY"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-DO-GENERAL",
+      "SP-DO-PLAN"
+    ],
+    "descriptions": {
+      "SP-DO-GENERAL": "총무과 [일반서무·문서관리·인사지원 실무 — 기획조정실 인사정책과는 별도]",
+      "SP-DO-PLAN": "기획조정실 [지방세는 여기, 국세는 SP-NAT-TAX]",
+      "SP-DO-SAFETY": "도민안전건강실(안전건강실)"
+    }
+  },
+  {
+    "id": "gov-clarify-04-police-prosecution",
+    "utterance": "폭행 사건으로 고소하고 싶은데 어디부터 절차를 밟아야 하나요.",
+    "candidate_codes": [
+      "SP-NAT-POLICE",
+      "SP-NAT-PROSECUTION",
+      "SP-NAT-COURT"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-NAT-POLICE",
+      "SP-NAT-PROSECUTION"
+    ],
+    "descriptions": {
+      "SP-NAT-POLICE": "제주지방경찰청(경찰청(국가경찰)) [국가경찰 — 형사·수사 전반]",
+      "SP-NAT-PROSECUTION": "제주지방검찰청(법무부(대검찰청)) [검찰 — 공소·기소. 경찰과 다름]",
+      "SP-NAT-COURT": "제주지방법원(법원행정처(사법부)) [실제 재판 절차 — K-Law(AI 판결 시뮬레이션)와 다름]"
+    }
+  },
+  {
+    "id": "gov-clarify-05-police-prosecution",
+    "utterance": "사기 피해를 당했는데 수사가 어떻게 진행되는지 물어보고 싶어요.",
+    "candidate_codes": [
+      "SP-NAT-POLICE",
+      "SP-NAT-PROSECUTION"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-NAT-POLICE",
+      "SP-NAT-PROSECUTION"
+    ],
+    "descriptions": {
+      "SP-NAT-POLICE": "제주지방경찰청(경찰청(국가경찰)) [국가경찰 — 형사·수사 전반]",
+      "SP-NAT-PROSECUTION": "제주지방검찰청(법무부(대검찰청)) [검찰 — 공소·기소. 경찰과 다름]"
+    }
+  },
+  {
+    "id": "gov-clarify-06-housing-transport",
+    "utterance": "새로 생기는 택지지구에 버스 노선이랑 도로는 어떻게 되는지 문의하고 싶어요.",
+    "candidate_codes": [
+      "SP-DO-HOUSING",
+      "SP-DO-TRANSPORT",
+      "SP-DO-CLIMATE"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-DO-HOUSING",
+      "SP-DO-TRANSPORT"
+    ],
+    "descriptions": {
+      "SP-DO-HOUSING": "건설주택국",
+      "SP-DO-TRANSPORT": "교통항공국",
+      "SP-DO-CLIMATE": "기후환경국"
+    }
+  },
+  {
+    "id": "gov-clarify-a1-07-educert-govplatform",
+    "utterance": "졸업증명서를 정부24에서 뗄 수 있는지, 어디로 가야 하는지 문의하고 싶어요.",
+    "candidate_codes": [
+      "SP-NAT-EDUCERT",
+      "SP-NAT-GOVPLATFORM",
+      "SP-NAT-IMMIGRATION"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-NAT-EDUCERT",
+      "SP-NAT-GOVPLATFORM"
+    ],
+    "descriptions": {
+      "SP-NAT-EDUCERT": "대학·학교 증명서(졸업·성적·재학·생활기록부 등) [제주 지역 사무소 없음 — 소속 학교 자체 시스템 또는 정부24 연계로 안내]",
+      "SP-NAT-GOVPLATFORM": "정부24 범부처 통합 자체서비스(하이패스 미납요금·요금감면일괄·미환급금·지원결정통지 출력·1372 소비자상담센터 등) [특정 기관의 제주 지역 사무소 개념이 안 맞음 — 정부24(gov.kr) 또는 110으로 안내]",
+      "SP-NAT-IMMIGRATION": "제주출입국·외국인청(법무부)"
+    }
+  },
+  {
+    "id": "gov-clarify-a1-08-coastguard-police",
+    "utterance": "바닷가에서 사고가 났는데 신고는 어디로 해야 하나요.",
+    "candidate_codes": [
+      "SP-NAT-COASTGUARD",
+      "SP-NAT-POLICE",
+      "SP-NAT-PORT"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-NAT-COASTGUARD",
+      "SP-NAT-POLICE"
+    ],
+    "descriptions": {
+      "SP-NAT-COASTGUARD": "제주해양경찰서(해양경찰청)",
+      "SP-NAT-POLICE": "제주지방경찰청(경찰청(국가경찰)) [국가경찰 — 형사·수사 전반]",
+      "SP-NAT-PORT": "제주지방해양수산청(해양수산부)"
+    }
+  },
+  {
+    "id": "gov-clarify-a1-09-labor-laborrel",
+    "utterance": "회사에서 월급을 못 받았는데 어디에 신고하고 구제받을 수 있나요.",
+    "candidate_codes": [
+      "SP-NAT-LABOR",
+      "SP-NAT-LABORREL",
+      "SP-NAT-LABORIMPROVE"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-NAT-LABOR",
+      "SP-NAT-LABORREL"
+    ],
+    "descriptions": {
+      "SP-NAT-LABOR": "근로복지공단 제주지사(고용노동부)",
+      "SP-NAT-LABORREL": "제주지방노동위원회(고용노동부)",
+      "SP-NAT-LABORIMPROVE": "광주지방고용노동청 제주근로개선지도센터(고용노동부)"
+    }
+  },
+  {
+    "id": "gov-clarify-a1-10-quarantine",
+    "utterance": "해외에서 들어오는데 검역 절차가 어떻게 되는지 문의하고 싶어요.",
+    "candidate_codes": [
+      "SP-NAT-ANIMALQUARANTINE",
+      "SP-NAT-HUMANQUARANTINE",
+      "SP-NAT-CUSTOMS"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-NAT-ANIMALQUARANTINE",
+      "SP-NAT-HUMANQUARANTINE"
+    ],
+    "descriptions": {
+      "SP-NAT-ANIMALQUARANTINE": "농림축산검역본부 제주지역본부(농림축산식품부)",
+      "SP-NAT-HUMANQUARANTINE": "국립제주검역소(질병관리청)",
+      "SP-NAT-CUSTOMS": "제주세관(관세청)"
+    }
+  },
+  {
+    "id": "gov-clarify-a1-11-food-quality",
+    "utterance": "식품 원산지 표시가 잘못된 것 같은데 어디에 신고해야 하나요.",
+    "candidate_codes": [
+      "SP-NAT-AGROQUALITY",
+      "SP-NAT-FISHQUALITY",
+      "SP-NAT-FOODIMPORT"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-NAT-AGROQUALITY",
+      "SP-NAT-FISHQUALITY"
+    ],
+    "descriptions": {
+      "SP-NAT-AGROQUALITY": "국립농산물품질관리원 제주지원(농림축산식품부)",
+      "SP-NAT-FISHQUALITY": "국립수산물품질관리원 제주지원(해양수산부)",
+      "SP-NAT-FOODIMPORT": "광주지방식품의약품안전청 제주수입식품검사소(식품의약품안전처)"
+    }
+  },
+  {
+    "id": "gov-clarify-a1-12-plan-tax",
+    "utterance": "세금 신고를 어디에 해야 하는지 문의하고 싶어요.",
+    "candidate_codes": [
+      "SP-DO-PLAN",
+      "SP-NAT-TAX",
+      "SP-NAT-CUSTOMS"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-DO-PLAN",
+      "SP-NAT-TAX"
+    ],
+    "descriptions": {
+      "SP-DO-PLAN": "기획조정실 [지방세는 여기, 국세는 SP-NAT-TAX]",
+      "SP-NAT-TAX": "제주세무서(국세청) [국세 — 지방세 아님]",
+      "SP-NAT-CUSTOMS": "제주세관(관세청)"
+    }
+  },
+  {
+    "id": "gov-clarify-a1-13-jachi-city",
+    "utterance": "자치행정 관련 업무를 제주시청에 문의하고 싶은데 맞는 건가요.",
+    "candidate_codes": [
+      "SP-DO-JACHI",
+      "SP-CITY-JEJU"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-DO-JACHI",
+      "SP-CITY-JEJU"
+    ],
+    "descriptions": {
+      "SP-DO-JACHI": "특별자치행정국 [제도 설명용 — 실제 자치경찰 사무는 SP-AGY-POLICE]",
+      "SP-CITY-JEJU": "제주시청"
+    }
+  },
+  {
+    "id": "gov-clarify-a1-14-police-prosecution-retry",
+    "utterance": "이 사건이 재판까지 갈지, 먼저 어디서 조사를 받아야 하는지 궁금해요.",
+    "candidate_codes": [
+      "SP-NAT-POLICE",
+      "SP-NAT-PROSECUTION",
+      "SP-NAT-COURT"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-NAT-POLICE",
+      "SP-NAT-PROSECUTION"
+    ],
+    "descriptions": {
+      "SP-NAT-POLICE": "제주지방경찰청(경찰청(국가경찰)) [국가경찰 — 형사·수사 전반]",
+      "SP-NAT-PROSECUTION": "제주지방검찰청(법무부(대검찰청)) [검찰 — 공소·기소. 경찰과 다름]",
+      "SP-NAT-COURT": "제주지방법원(법원행정처(사법부)) [실제 재판 절차 — K-Law(AI 판결 시뮬레이션)와 다름]"
+    }
+  },
+  {
+    "id": "gov-clarify-a1-15-gender-welfare-retry",
+    "utterance": "한부모 가정 여성 지원 제도를 문의하고 싶어요.",
+    "candidate_codes": [
+      "SP-DO-GENDER",
+      "SP-DO-WELFARE"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-DO-GENDER",
+      "SP-DO-WELFARE"
+    ],
+    "descriptions": {
+      "SP-DO-GENDER": "성평등여성정책관 [성평등·여성정책 — 복지가족국의 가족·아동·보육과는 별도]",
+      "SP-DO-WELFARE": "복지가족국(구 보건복지여성국)"
+    }
+  },
+  {
+    "id": "gov-clarify-a1-16-control-weather",
+    "utterance": "내일 제주도 날씨가 어떻게 되는지 알려줘.",
+    "candidate_codes": [
+      "SP-NAT-WEATHER",
+      "SP-DO-CLIMATE",
+      "SP-NAT-ENV"
+    ],
+    "expected_ambiguous_pair": null,
+    "descriptions": {
+      "SP-NAT-WEATHER": "제주지방기상청(기상청)",
+      "SP-DO-CLIMATE": "기후환경국",
+      "SP-NAT-ENV": "영산강유역환경청 제주주재사무실(기후에너지환경부)"
+    }
+  },
+  {
+    "id": "gov-clarify-a1-17-control-veterans",
+    "utterance": "국가유공자 등록 절차를 문의하고 싶습니다.",
+    "candidate_codes": [
+      "SP-NAT-VETERANS",
+      "SP-NAT-MMA",
+      "SP-NAT-NPS"
+    ],
+    "expected_ambiguous_pair": null,
+    "descriptions": {
+      "SP-NAT-VETERANS": "제주보훈청(국가보훈부)",
+      "SP-NAT-MMA": "제주지방병무청(병무청)",
+      "SP-NAT-NPS": "국민연금공단 제주지역본부(보건복지부)"
+    }
+  }
+]
