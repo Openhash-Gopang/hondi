@@ -1,0 +1,146 @@
+[
+  {
+    "id": "gov-clarify-05-police-prosecution",
+    "utterance": "사기 피해를 당했는데 수사가 어떻게 진행되는지 물어보고 싶어요.",
+    "expected_ambiguous_pair": [
+      "SP-NAT-POLICE",
+      "SP-NAT-PROSECUTION"
+    ],
+    "live_verdict": "LIVE-FAIL",
+    "live_note": "단일 코드로 확신 있게 답함(하나를 골랐지만 기대 쌍 ['SP-NAT-POLICE', 'SP-NAT-PROSECUTION'] 중 하나): SP-NAT-POLICE",
+    "chosen": "SP-NAT-POLICE",
+    "usage": {
+      "prompt_tokens": 285,
+      "completion_tokens": 190,
+      "total_tokens": 475,
+      "prompt_tokens_details": {
+        "cached_tokens": 128
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 183
+      },
+      "prompt_cache_hit_tokens": 128,
+      "prompt_cache_miss_tokens": 157
+    }
+  },
+  {
+    "id": "gov-clarify-04-police-prosecution",
+    "utterance": "폭행 사건으로 고소하고 싶은데 어디부터 절차를 밟아야 하나요.",
+    "expected_ambiguous_pair": [
+      "SP-NAT-POLICE",
+      "SP-NAT-PROSECUTION"
+    ],
+    "live_verdict": "LIVE-FAIL",
+    "live_note": "단일 코드로 확신 있게 답함(하나를 골랐지만 기대 쌍 ['SP-NAT-POLICE', 'SP-NAT-PROSECUTION'] 중 하나): SP-NAT-POLICE",
+    "chosen": "SP-NAT-POLICE",
+    "usage": {
+      "prompt_tokens": 337,
+      "completion_tokens": 227,
+      "total_tokens": 564,
+      "prompt_tokens_details": {
+        "cached_tokens": 128
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 220
+      },
+      "prompt_cache_hit_tokens": 128,
+      "prompt_cache_miss_tokens": 209
+    }
+  },
+  {
+    "id": "gov-clarify-03-general-plan",
+    "utterance": "직원 인사 발령이랑 관련 서류 처리 문의하려고 하는데요.",
+    "expected_ambiguous_pair": [
+      "SP-DO-GENERAL",
+      "SP-DO-PLAN"
+    ],
+    "live_verdict": "LIVE-FAIL",
+    "live_note": "단일 코드로 확신 있게 답함(하나를 골랐지만 기대 쌍 ['SP-DO-GENERAL', 'SP-DO-PLAN'] 중 하나): SP-DO-GENERAL",
+    "chosen": "SP-DO-GENERAL",
+    "usage": {
+      "prompt_tokens": 294,
+      "completion_tokens": 236,
+      "total_tokens": 530,
+      "prompt_tokens_details": {
+        "cached_tokens": 128
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 229
+      },
+      "prompt_cache_hit_tokens": 128,
+      "prompt_cache_miss_tokens": 166
+    }
+  },
+  {
+    "id": "gov-clarify-02-gender-welfare",
+    "utterance": "여성가족 관련 정책 상담을 받고 싶어요.",
+    "expected_ambiguous_pair": [
+      "SP-DO-GENDER",
+      "SP-DO-WELFARE"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "CLARIFY 발동, 기대한 쌍과 정확히 일치: ['SP-DO-GENDER', 'SP-DO-WELFARE']",
+    "chosen": "CLARIFY:SP-DO-GENDER,SP-DO-WELFARE",
+    "usage": {
+      "prompt_tokens": 275,
+      "completion_tokens": 1492,
+      "total_tokens": 1767,
+      "prompt_tokens_details": {
+        "cached_tokens": 128
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1475
+      },
+      "prompt_cache_hit_tokens": 128,
+      "prompt_cache_miss_tokens": 147
+    }
+  },
+  {
+    "id": "gov-clarify-06-housing-transport",
+    "utterance": "새로 생기는 택지지구에 버스 노선이랑 도로는 어떻게 되는지 문의하고 싶어요.",
+    "expected_ambiguous_pair": [
+      "SP-DO-HOUSING",
+      "SP-DO-TRANSPORT"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "CLARIFY 발동, 기대한 쌍과 정확히 일치: ['SP-DO-HOUSING', 'SP-DO-TRANSPORT']",
+    "chosen": "CLARIFY:SP-DO-HOUSING,SP-DO-TRANSPORT",
+    "usage": {
+      "prompt_tokens": 253,
+      "completion_tokens": 1092,
+      "total_tokens": 1345,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1072
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 253
+    }
+  },
+  {
+    "id": "gov-clarify-01-gender-welfare",
+    "utterance": "여성 일자리 지원이랑 아이돌봄 서비스를 같이 문의하고 싶은데 어디로 연결해줘.",
+    "expected_ambiguous_pair": [
+      "SP-DO-GENDER",
+      "SP-DO-WELFARE"
+    ],
+    "live_verdict": "LIVE-FAIL",
+    "live_note": "파싱 실패/화이트리스트 밖 — raw: ",
+    "chosen": null,
+    "usage": {
+      "prompt_tokens": 302,
+      "completion_tokens": 2000,
+      "total_tokens": 2302,
+      "prompt_tokens_details": {
+        "cached_tokens": 128
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 2000
+      },
+      "prompt_cache_hit_tokens": 128,
+      "prompt_cache_miss_tokens": 174
+    }
+  }
+]
