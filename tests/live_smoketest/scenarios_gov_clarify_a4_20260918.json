@@ -1,0 +1,83 @@
+[
+  {
+    "id": "gov-clarify-a4-01-mss-econsmb-original-bug",
+    "utterance": "소상공인 정책자금 대출 상담하고 싶어요.",
+    "candidate_codes": ["SP-POLICY-MSS", "SP-CITYDIV-JEJUSI-ECON-SMB"],
+    "expected_ambiguous_pair": ["SP-POLICY-MSS", "SP-CITYDIV-JEJUSI-ECON-SMB"],
+    "descriptions": {
+      "SP-POLICY-MSS": "중소벤처기업부(전국 단일 정책기관) 소관 사무",
+      "SP-CITYDIV-JEJUSI-ECON-SMB": "제주시청 경제일자리국 경제소상공인과 — 소상공인 지원, 전통시장 활성화를 담당한다."
+    },
+    "note": "2026-08-30 수정 코멘트에 실제 재현된 원래 버그 발화를 그대로 사용(classifyFn 없을 때 MSS로 즉시확정되던 사례)"
+  },
+  {
+    "id": "gov-clarify-a4-02-mss-econsmb-variant",
+    "utterance": "가게 운영이 어려워서 정책자금 대출을 받고 싶은데 어디로 신청하면 되나요.",
+    "candidate_codes": ["SP-POLICY-MSS", "SP-CITYDIV-JEJUSI-ECON-SMB"],
+    "expected_ambiguous_pair": ["SP-POLICY-MSS", "SP-CITYDIV-JEJUSI-ECON-SMB"],
+    "descriptions": {
+      "SP-POLICY-MSS": "중소벤처기업부(전국 단일 정책기관) 소관 사무",
+      "SP-CITYDIV-JEJUSI-ECON-SMB": "제주시청 경제일자리국 경제소상공인과 — 소상공인 지원, 전통시장 활성화를 담당한다."
+    }
+  },
+  {
+    "id": "gov-clarify-a4-03-mcst-culture-art",
+    "utterance": "문화예술 지원사업에 참여하고 싶은데 신청은 어디에 하면 되나요.",
+    "candidate_codes": ["SP-POLICY-MCST", "SP-CITYDIV-JEJUSI-CULTURE-ART"],
+    "expected_ambiguous_pair": ["SP-POLICY-MCST", "SP-CITYDIV-JEJUSI-CULTURE-ART"],
+    "descriptions": {
+      "SP-POLICY-MCST": "문화체육관광부(전국 단일 정책기관) 소관 사무",
+      "SP-CITYDIV-JEJUSI-CULTURE-ART": "제주시청 문화관광체육국 문화예술과 — 문화예술 지원사업, 공연·전시 행정을 담당한다."
+    }
+  },
+  {
+    "id": "gov-clarify-a4-04-mocee-envmgmt",
+    "utterance": "공장 굴뚝에서 나오는 대기오염물질 때문에 걱정이 되는데 어디에 문의해야 하나요.",
+    "candidate_codes": ["SP-POLICY-MOCEE", "SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT"],
+    "expected_ambiguous_pair": ["SP-POLICY-MOCEE", "SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT"],
+    "descriptions": {
+      "SP-POLICY-MOCEE": "기후에너지환경부(전국 단일 정책기관) 소관 사무",
+      "SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT": "제주시청 청정환경국 환경관리과 — 환경 총괄, 대기·수질 관리를 담당한다(관내 환경 인허가·관리 실무)."
+    }
+  },
+  {
+    "id": "gov-clarify-a4-05-molit-housing-architecture",
+    "utterance": "낡은 아파트 재건축 정비사업을 추진하려고 하는데 인허가는 어디서 받아야 하나요.",
+    "candidate_codes": ["SP-POLICY-MOLIT", "SP-DIV-HOUSING-ARCHITECTURE"],
+    "expected_ambiguous_pair": ["SP-POLICY-MOLIT", "SP-DIV-HOUSING-ARCHITECTURE"],
+    "descriptions": {
+      "SP-POLICY-MOLIT": "국토교통부(전국 단일 정책기관) 소관 사무",
+      "SP-DIV-HOUSING-ARCHITECTURE": "제주도청 도시건설국(舊 건설주택국) 건축경관과 — 건축 인허가·경관 심의 실무를 담당한다."
+    }
+  },
+  {
+    "id": "gov-clarify-a4-06-mafra-agri-livestock",
+    "utterance": "축사를 새로 지으려고 하는데 정책자금 지원을 받을 수 있는 방법이 있을까요.",
+    "candidate_codes": ["SP-POLICY-MAFRA", "SP-DIV-AGRI-LIVESTOCKPOLICY"],
+    "expected_ambiguous_pair": ["SP-POLICY-MAFRA", "SP-DIV-AGRI-LIVESTOCKPOLICY"],
+    "descriptions": {
+      "SP-POLICY-MAFRA": "농림축산식품부(전국 단일 정책기관) 소관 사무",
+      "SP-DIV-AGRI-LIVESTOCKPOLICY": "제주도청 농축산식품국 친환경축산정책과 — 축산 정책·지원사업 실무를 담당한다."
+    }
+  },
+  {
+    "id": "gov-clarify-a4-07-control-mofa-passport",
+    "utterance": "여권 유효기간이 얼마 안 남았는데 연장이나 재발급 절차가 궁금해요.",
+    "candidate_codes": ["SP-POLICY-MOFA", "SP-CITYDIV-JEJUSI-ECON-SMB"],
+    "expected_ambiguous_pair": null,
+    "descriptions": {
+      "SP-POLICY-MOFA": "외교부(전국 단일 정책기관) 소관 사무 — 여권 발급·재발급·유효기간 관련 전국 단일 사무.",
+      "SP-CITYDIV-JEJUSI-ECON-SMB": "제주시청 경제일자리국 경제소상공인과 — 소상공인 지원, 전통시장 활성화를 담당한다(여권과 무관)."
+    }
+  },
+  {
+    "id": "gov-clarify-a4-08-control-city-only-traditionalmarket",
+    "utterance": "동네 전통시장 활성화 지원 사업에 참여하고 싶은데 시청 어디에 신청하면 되나요.",
+    "candidate_codes": ["SP-CITYDIV-JEJUSI-ECON-SMB", "SP-POLICY-MSS"],
+    "expected_ambiguous_pair": null,
+    "descriptions": {
+      "SP-CITYDIV-JEJUSI-ECON-SMB": "제주시청 경제일자리국 경제소상공인과 — 소상공인 지원, 전통시장 활성화를 담당한다.",
+      "SP-POLICY-MSS": "중소벤처기업부(전국 단일 정책기관) 소관 사무 — 전국 단위 정책자금·창업지원 제도를 총괄하며, 개별 지자체의 전통시장 현장 사업과는 구분된다."
+    }
+  }
+]
