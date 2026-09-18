@@ -14016,6 +14016,16 @@ export default {
       if (request.method === 'GET')  return handleWalletX25519Get(request, env, corsHeaders);
       if (request.method === 'POST') return handleWalletX25519Post(request, env, corsHeaders);
     }
+    // ── 이 기기 자신의 push 등록 정보 조회 (2026-09-19 신설) ───────
+    // push-diagnose.html이 "서버에 이 기기가 mobile로 등록돼 있는지
+    // desktop으로 등록돼 있는지"를 직접 물어보는 용도. deviceId는
+    // getOrCreateDeviceId()(localStorage)로 이 브라우저 설치본 고유값이라,
+    // 서명 없이 guid+deviceId만으로 "이 기기 자신의" 레코드 하나만 돌려줘도
+    // 안전하다(다른 기기 정보 노출 없음, subscription endpoint 자체는
+    // 노출 안 함 — deviceType/updatedAt만).
+    if (pathname === '/account/push-device-info' && request.method === 'GET') {
+      return handlePushDeviceInfoGet(request, env, corsHeaders);
+    }
     if (pathname === '/account/delete-profile' && request.method === 'POST') {
       return handleAccountDeleteProfile(request, env, corsHeaders);
     }
@@ -27037,6 +27047,46 @@ function verifyDeltaZero(outputs, balanceClaimed) {
 // ═══════════════════════════════════════════════════════════
 
 // GET /wallet/x25519?guid=...  (PC가 호출, 인증 불필요 — 공개키는 비밀 아님)
+// GET /account/push-device-info?guid=...&deviceId=...
+// 이 기기(deviceId) 자신이 서버 push_subscription 목록에 어떤 deviceType
+// (mobile/desktop/unknown)으로 등록돼 있는지만 돌려준다. 다른 기기 정보나
+// subscription endpoint 자체는 절대 포함하지 않는다 — 진단 목적으로
+// "이 브라우저가 스스로 판정한 deviceType"과 "서버에 실제 저장된
+// deviceType"이 어긋나는지만 비교할 수 있으면 충분하다(2026-09-19,
+// "PC가 원래 폰에 가야 할 device-link 알림을 대신 받는다" 재발 조사 중
+// 발견 — push-diagnose.html이 이 값을 화면에 안 보여줘서 추측에만
+// 의존하고 있었다).
+async function handlePushDeviceInfoGet(request, env, corsHeaders) {
+  const url = new URL(request.url);
+  const guid = url.searchParams.get('guid');
+  const deviceId = url.searchParams.get('deviceId');
+  if (!guid || !deviceId) return _err(400, 'MISSING_FIELD', 'guid, deviceId 필수', corsHeaders);
+
+  let record;
+  try {
+    record = await _l1FindProfileByGuid(env, guid);
+  } catch (e) {
+    return _err(502, 'L1_UNREACHABLE', 'L1 연결 실패: ' + e.message, corsHeaders);
+  }
+  if (!record) {
+    return new Response(JSON.stringify({ ok: true, found: false, message: '이 guid로 등록된 계정이 없습니다.' }),
+      { status: 200, headers: corsHeaders });
+  }
+
+  const devices = _parseDeviceSubscriptions(record.push_subscription);
+  const mine = devices.find(d => d.deviceId === deviceId);
+  if (!mine) {
+    return new Response(JSON.stringify({ ok: true, found: false, totalDevices: devices.length }),
+      { status: 200, headers: corsHeaders });
+  }
+  return new Response(JSON.stringify({
+    ok: true, found: true,
+    deviceType: mine.deviceType || 'unknown',
+    updatedAt: mine.updatedAt || null,
+    totalDevices: devices.length,
+  }), { status: 200, headers: corsHeaders });
+}
+
 async function handleWalletX25519Get(request, env, corsHeaders) {
   const url  = new URL(request.url);
   const guid = url.searchParams.get('guid');

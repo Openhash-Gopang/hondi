@@ -59,6 +59,10 @@
   <div class="value" id="v-guid">확인 중...</div>
 </div>
 <div class="row">
+  <div class="label">이 기기가 서버에 등록된 종류(deviceType)</div>
+  <div class="value" id="v-devicetype">확인 중...</div>
+</div>
+<div class="row">
   <div class="label">자동 재시도 쿨다운 기록</div>
   <div class="value" id="v-cooldown">확인 중...</div>
 </div>
@@ -76,6 +80,7 @@
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
+  const WORKER = 'https://hondi-proxy.tensor-city.workers.dev'; // src/gopang/services/push.js의 WORKER_URL과 동일 값
 
   function fmtPermission(p) {
     if (p === 'granted') return { text: 'granted (허용됨)', cls: 'ok' };
@@ -143,6 +148,44 @@
     } else {
       $('v-guid').textContent = '로그인 정보 없음 — 이 브라우저에서 로그인 상태가 아닙니다';
       $('v-guid').className = 'value bad';
+    }
+
+    // 4.5 이 기기의 서버측 deviceType (2026-09-19 신설) — "PC가 원래
+    // 폰에 가야 할 device-link 알림을 대신 받는다"는 재발 조사 중, 이
+    // 페이지가 그 원인(로컬 UA 판정과 서버 저장값이 어긋나는지)을 화면에
+    // 안 보여줘서 추측에만 의존하던 문제를 고친다. deviceId는
+    // src/gopang/services/push.js의 getOrCreateDeviceId()와 반드시 같은
+    // localStorage 키('gopang_device_id')를 써야 같은 기기로 식별된다 —
+    // 이 페이지는 일반 <script>(모듈 아님)라 그 함수를 import할 수 없어
+    // 키 이름만 그대로 복제해 재사용한다(로직을 고칠 일이 생기면 두 곳
+    // 모두 반영할 것).
+    if (stored?.ipv6) {
+      try {
+        let deviceId = localStorage.getItem('gopang_device_id');
+        if (!deviceId) {
+          $('v-devicetype').textContent = '이 기기에 device_id가 없음 — 아직 한 번도 구독을 시도한 적이 없는 것으로 보입니다';
+          $('v-devicetype').className = 'value warn';
+        } else {
+          const localGuess = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '') ? 'mobile' : 'desktop';
+          const res = await fetch(`${WORKER}/account/push-device-info?guid=${encodeURIComponent(stored.ipv6)}&deviceId=${encodeURIComponent(deviceId)}`);
+          const data = await res.json().catch(() => ({}));
+          if (!data.found) {
+            $('v-devicetype').textContent = `서버에 이 기기 등록 자체가 없음(deviceId: ${deviceId.slice(0,8)}...) — 이 브라우저가 스스로 판정한 종류: ${localGuess}`;
+            $('v-devicetype').className = 'value warn';
+          } else if (data.deviceType !== localGuess) {
+            $('v-devicetype').textContent = `⚠ 불일치 — 서버 저장값: ${data.deviceType} / 이 브라우저가 지금 판정한 값: ${localGuess}. 아래 "구독 초기화 후 재시도"로 바로잡을 수 있습니다.`;
+            $('v-devicetype').className = 'value bad';
+          } else {
+            $('v-devicetype').textContent = `${data.deviceType} (서버·로컬 판정 일치, 정상)`;
+            $('v-devicetype').className = 'value ok';
+          }
+        }
+      } catch (e) {
+        $('v-devicetype').textContent = '조회 실패: ' + e.message;
+        $('v-devicetype').className = 'value bad';
+      }
+    } else {
+      $('v-devicetype').textContent = '(로그인 정보 없어서 확인 불가)';
     }
 
     // 5. 쿨다운 기록
