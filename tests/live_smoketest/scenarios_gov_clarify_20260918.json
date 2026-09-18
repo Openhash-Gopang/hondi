@@ -1,0 +1,110 @@
+[
+  {
+    "id": "gov-clarify-01-gender-welfare",
+    "utterance": "여성 일자리 지원이랑 아이돌봄 서비스를 같이 문의하고 싶은데 어디로 연결해줘.",
+    "candidate_codes": [
+      "SP-DO-GENDER",
+      "SP-DO-WELFARE",
+      "SP-DO-ECON",
+      "SP-DO-CULTURE"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-DO-GENDER",
+      "SP-DO-WELFARE"
+    ],
+    "descriptions": {
+      "SP-DO-GENDER": "성평등여성정책관 [성평등·여성정책 — 복지가족국의 가족·아동·보육과는 별도]",
+      "SP-DO-WELFARE": "복지가족국(구 보건복지여성국)",
+      "SP-DO-ECON": "경제활력국",
+      "SP-DO-CULTURE": "문화체육교육국"
+    }
+  },
+  {
+    "id": "gov-clarify-02-gender-welfare",
+    "utterance": "여성가족 관련 정책 상담을 받고 싶어요.",
+    "candidate_codes": [
+      "SP-DO-GENDER",
+      "SP-DO-WELFARE",
+      "SP-DO-CULTURE"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-DO-GENDER",
+      "SP-DO-WELFARE"
+    ],
+    "descriptions": {
+      "SP-DO-GENDER": "성평등여성정책관 [성평등·여성정책 — 복지가족국의 가족·아동·보육과는 별도]",
+      "SP-DO-WELFARE": "복지가족국(구 보건복지여성국)",
+      "SP-DO-CULTURE": "문화체육교육국"
+    }
+  },
+  {
+    "id": "gov-clarify-03-general-plan",
+    "utterance": "직원 인사 발령이랑 관련 서류 처리 문의하려고 하는데요.",
+    "candidate_codes": [
+      "SP-DO-GENERAL",
+      "SP-DO-PLAN",
+      "SP-DO-SAFETY"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-DO-GENERAL",
+      "SP-DO-PLAN"
+    ],
+    "descriptions": {
+      "SP-DO-GENERAL": "총무과 [일반서무·문서관리·인사지원 실무 — 기획조정실 인사정책과는 별도]",
+      "SP-DO-PLAN": "기획조정실 [지방세는 여기, 국세는 SP-NAT-TAX]",
+      "SP-DO-SAFETY": "도민안전건강실(안전건강실)"
+    }
+  },
+  {
+    "id": "gov-clarify-04-police-prosecution",
+    "utterance": "폭행 사건으로 고소하고 싶은데 어디부터 절차를 밟아야 하나요.",
+    "candidate_codes": [
+      "SP-NAT-POLICE",
+      "SP-NAT-PROSECUTION",
+      "SP-NAT-COURT"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-NAT-POLICE",
+      "SP-NAT-PROSECUTION"
+    ],
+    "descriptions": {
+      "SP-NAT-POLICE": "제주지방경찰청(경찰청(국가경찰)) [국가경찰 — 형사·수사 전반]",
+      "SP-NAT-PROSECUTION": "제주지방검찰청(법무부(대검찰청)) [검찰 — 공소·기소. 경찰과 다름]",
+      "SP-NAT-COURT": "제주지방법원(법원행정처(사법부)) [실제 재판 절차 — K-Law(AI 판결 시뮬레이션)와 다름]"
+    }
+  },
+  {
+    "id": "gov-clarify-05-police-prosecution",
+    "utterance": "사기 피해를 당했는데 수사가 어떻게 진행되는지 물어보고 싶어요.",
+    "candidate_codes": [
+      "SP-NAT-POLICE",
+      "SP-NAT-PROSECUTION"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-NAT-POLICE",
+      "SP-NAT-PROSECUTION"
+    ],
+    "descriptions": {
+      "SP-NAT-POLICE": "제주지방경찰청(경찰청(국가경찰)) [국가경찰 — 형사·수사 전반]",
+      "SP-NAT-PROSECUTION": "제주지방검찰청(법무부(대검찰청)) [검찰 — 공소·기소. 경찰과 다름]"
+    }
+  },
+  {
+    "id": "gov-clarify-06-housing-transport",
+    "utterance": "새로 생기는 택지지구에 버스 노선이랑 도로는 어떻게 되는지 문의하고 싶어요.",
+    "candidate_codes": [
+      "SP-DO-HOUSING",
+      "SP-DO-TRANSPORT",
+      "SP-DO-CLIMATE"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-DO-HOUSING",
+      "SP-DO-TRANSPORT"
+    ],
+    "descriptions": {
+      "SP-DO-HOUSING": "건설주택국",
+      "SP-DO-TRANSPORT": "교통항공국",
+      "SP-DO-CLIMATE": "기후환경국"
+    }
+  }
+]
