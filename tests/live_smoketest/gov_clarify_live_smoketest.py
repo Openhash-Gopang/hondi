@@ -45,10 +45,11 @@ MAX_WORKERS = 5
 MAX_RETRIES = 4
 RETRY_BASE_SLEEP = 3
 # 2026-09-18 추가 — 빈 응답(추론이 max_tokens 안에서 안 끝나는 현상) 근본원인
-# 진단용. production 기본값은 4000(동기화 유지)이지만, --max-tokens로 더 큰
-# 값을 줘서 "예산을 더 주면 끝나는지 vs 그래도 안 끝나는지"를 구분해볼 수
-# 있게 모듈 전역으로 뺐다. --max-tokens 생략 시 기존과 완전히 동일(회귀 없음).
-MAX_TOKENS = 4000
+# 진단용으로 모듈 전역으로 뺐다. --max-tokens로 값을 바꿔 재실행할 수 있다.
+# 2026-09-18 재갱신(4000→12000) — 진단 결과(diag-01~05) 4/5건이 12000 안에서
+# 정상 종료(최대 reasoning 8520)됨을 확인, pages/regional-gov.html의
+# _callGovClassifyModel도 동일하게 12000으로 올려 production과 동기화.
+MAX_TOKENS = 12000
 
 # pages/regional-gov.html의 _govClassifyFn 시스템 프롬프트 머리말과 정확히
 # 동일한 문구 — production 소스(fn eval)에서 그대로 추출. 어긋나면 이
@@ -71,10 +72,9 @@ def call_deepseek(api_key, system_prompt, user_utterance):
         # 실사 6/6건에서 재현) 이 하네스는 독립 상수라 그 갱신을 자동으로
         # 안 따라갔다 — 재실행해도 여전히 0글자 응답이었던 원인이 바로
         # 이것. production과 동일하게 맞춘다.
-        # 2026-09-18 재갱신(2000→4000) — A1 실사 17건에서도 3건(18%)이
-        # 빈 응답으로 남아 production을 4000으로 재조정 — 동기화.
-        # 2026-09-18 추가 — 진단 실행에서는 MAX_TOKENS(--max-tokens)로 이
-        # 값을 더 키워볼 수 있다(위 MAX_TOKENS 전역 주석 참고).
+        # 2026-09-18 재갱신(2000→4000→12000, 위 MAX_TOKENS 전역 주석 참고) —
+        # production(pages/regional-gov.html의 _callGovClassifyModel)과
+        # 항상 동기화 유지. --max-tokens로 진단 실행 시에만 다른 값을 준다.
         "max_tokens": MAX_TOKENS,
         "messages": [
             {"role": "system", "content": system_prompt},
