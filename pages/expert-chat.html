@@ -1210,10 +1210,15 @@ async function _ensureExpertPersonaAccess() {
   }
 
   if (data?.access) {
-    if (data.trial) {
-      const untilStr = data.trial_until ? new Date(data.trial_until).toLocaleDateString('ko-KR') : '';
-      appendBubble('ai', `📌 ${escHtml(def.label)} AI는 첫 1일 무료입니다${untilStr ? `(${untilStr}까지)` : ''}. 이후 월 ${EXPERT_PERSONA_MONTHLY_FEE_KRW_DISPLAY}원이 GDC 잔액에서 자동 청구됩니다.`);
-    }
+    // 2026-09-18 삭제(주피터 지시) — 이 공지("첫 1일 무료 ... 월 9,900원
+    // GDC 자동청구")는 webapp.html의 메인 AI 비서(AC)용 문구였고, 그마저도
+    // 이미 옛 버전(현재 webapp.html의 실제 무료 한도 안내는 "100원어치
+    // 무료 사용량" 방식으로 바뀌어 있다 — call-ai.js의 FREE_QUOTA_EXCEEDED/
+    // GDC_INSUFFICIENT_BALANCE 메시지 참고). 이 페이지(전문가 페르소나
+    // 상담)에 잘못 노출되고 있던 것이라 그대로 삭제한다. 트라이얼 여부
+    // 자체는 여전히 서버가 판정하고(access:true) 그대로 상담을 진행하므로
+    // (아래 startGreeting()), 게이트 로직 자체는 바뀌지 않는다 — 사용자에게
+    // 보여주던 공지 문구만 제거.
     startGreeting();
     return;
   }
