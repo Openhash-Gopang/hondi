@@ -1,0 +1,178 @@
+[
+  {
+    "id": "gov-clarify-a6-04-control-jeda-only",
+    "utterance": "제주경제통상진흥원 디자인스튜디오를 이용하고 싶은데 예약 방법이 궁금해요.",
+    "expected_ambiguous_pair": null,
+    "live_verdict": "LIVE-PASS",
+    "live_note": "통제 시나리오 — 확신 있게 단일 코드로 정상 답함: SP-ORG-JEDA",
+    "chosen": "SP-ORG-JEDA",
+    "usages": [
+      {
+        "prompt_tokens": 405,
+        "completion_tokens": 112,
+        "total_tokens": 517,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 95
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 405
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a6-02-jeda-econ-jungsogieop",
+    "utterance": "중소기업 창업 지원 사업이 궁금해요.",
+    "expected_ambiguous_pair": [
+      "SP-ORG-JEDA",
+      "SP-DO-ECON"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-ORG-JEDA', 'SP-DO-ECON'] (기대: ['SP-ORG-JEDA', 'SP-DO-ECON'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 388,
+        "completion_tokens": 225,
+        "total_tokens": 613,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 202
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 388
+      },
+      {
+        "prompt_tokens": 190,
+        "completion_tokens": 130,
+        "total_tokens": 320,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 123
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 190
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a6-03-jeda-econ-gyeongyeong",
+    "utterance": "소상공인 경영 지원 신청하고 싶습니다.",
+    "expected_ambiguous_pair": [
+      "SP-ORG-JEDA",
+      "SP-DO-ECON"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-ORG-JEDA', 'SP-DO-ECON'] (기대: ['SP-ORG-JEDA', 'SP-DO-ECON'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 385,
+        "completion_tokens": 510,
+        "total_tokens": 895,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 487
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 385
+      },
+      {
+        "prompt_tokens": 187,
+        "completion_tokens": 215,
+        "total_tokens": 402,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 208
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 187
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a6-01-jeda-econ-changeop",
+    "utterance": "소상공인 창업 지원을 받고 싶어요.",
+    "expected_ambiguous_pair": [
+      "SP-ORG-JEDA",
+      "SP-DO-ECON"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-ORG-JEDA', 'SP-DO-ECON'] (기대: ['SP-ORG-JEDA', 'SP-DO-ECON'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 386,
+        "completion_tokens": 372,
+        "total_tokens": 758,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 349
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 386
+      },
+      {
+        "prompt_tokens": 188,
+        "completion_tokens": 217,
+        "total_tokens": 405,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 210
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 188
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a6-05-control-econ-only",
+    "utterance": "일자리 창출 정책과 고용 지원 사업에 대해 전반적으로 상담받고 싶어요.",
+    "expected_ambiguous_pair": null,
+    "live_verdict": "LIVE-PASS",
+    "live_note": "통제 시나리오 — 확신 있게 단일 코드로 정상 답함: SP-DO-ECON",
+    "chosen": "SP-DO-ECON",
+    "usages": [
+      {
+        "prompt_tokens": 398,
+        "completion_tokens": 5835,
+        "total_tokens": 6233,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 5812
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 398
+      },
+      {
+        "prompt_tokens": 226,
+        "completion_tokens": 1131,
+        "total_tokens": 1357,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 1124
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 226
+      }
+    ]
+  }
+]
