@@ -318,7 +318,14 @@ export async function handleExpertTag(fullReply, userText, _preTab) {
   // personaId로 다시 조회한다 — 정밀화 전 gwpDef를 재사용하면 personaId만
   // professor-math로 바뀌고 실제 launch는 여전히 professor(범용) SP로
   // 나가는 stale-def 버그가 재발한다.
-  personaId = await refineToLeaf(personaId, userText);
+  // 2026-09-18 변경 — refineToLeaf가 이제 { personaId, ambiguousCandidates }를
+  // 반환한다(주피터 지시: 오분류보다 "애매한데 안 되묻는 것"이 진짜 문제).
+  // ambiguousCandidates가 있으면 personaId는 정밀화를 멈춘 상위 노드이고,
+  // 그 후보들을 finalCtx에 실어 launch되는 페르소나가 직접 확인하게 한다
+  // (아래 finalCtx 조립부 참고, SP_EXPERT_BASE §1-2-A).
+  const _refined = await refineToLeaf(personaId, userText);
+  personaId = _refined.personaId;
+  const ambiguousCandidates = _refined.ambiguousCandidates;
 
   const gwpDef = getExpertGwpDef(personaId);
   if (!gwpDef) {
@@ -391,6 +398,20 @@ export async function handleExpertTag(fullReply, userText, _preTab) {
     }
   } catch (e) {
     console.warn('[Expert] 핸드오프 맥락 요약 실패(무시 — 이번 발화만 전달):', e.message);
+  }
+
+  // 2026-09-18 신설 — 2단계 게이트(subject-gate.js)가 세부분야를 확신
+  // 있게 못 골랐을 때, 짐작해서 launch하지 않고 그 사실 자체를 페르소나에게
+  // 넘긴다. 핸드오프 요약 블록과 같은 자리(둘 다 [이번 발화] 앞에 붙는
+  // 구조적 접두 블록)에 쌓는다 — 핸드오프가 있으면 그 위에, 없으면
+  // userText 위에 그대로 얹는다.
+  if (ambiguousCandidates && ambiguousCandidates.length >= 2) {
+    const candLines = ambiguousCandidates.map((l) => `- ${l}`).join('\n');
+    finalCtx =
+      `[세부 전공/분야 확인 필요 — AI 비서 단계에서 다음 후보 중 하나로 ` +
+      `확신 있게 좁히지 못했습니다. 짐작해서 진행하지 말고, 첫 답변에서 ` +
+      `이 중 어느 쪽인지(또는 둘 다 아닌지) 자연스럽게 확인한 뒤 진행하세요]\n` +
+      `${candLines}\n\n${finalCtx}`;
   }
 
   _gwpLaunch(gwpDef, finalCtx, _preTab, _buildRoutingFacts());
