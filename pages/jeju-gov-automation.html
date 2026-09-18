@@ -193,7 +193,10 @@ footer{background:var(--gov-header);color:rgba(255,255,255,.5);padding:22px 0;ma
  *     → 43개 읍면동 × 184개 팀 전체
  *
  * 확인된 전수 (생성 스크립트 실행 결과와 정확히 일치):
- *  - 제주도청: 17실·국, division 53개(13개 국에 과 존재, 4개 국은 단일창구)
+ *  - 제주도청: 25실·국(2026-09-19 정비 — 저장소 실사로 누락 8개 추가 확인:
+ *    AI행정혁신추진단·공항확충지원단·특별자치제도추진단·도시균형추진단·
+ *    기본사회추진단·강정공동체사업추진단·성평등여성정책관·노동안전감독관),
+ *    division 53개(13개 국에 과 존재, 나머지 12개 국은 단일창구)
  *  - 제주시청: division 48개 + 단일창구 3개 = 51개 리프 SP
  *  - 서귀포시청: division 39개 + 단일창구 3개 = 42개 리프 SP
  *  - 43개 읍·면·동 × 184개 팀(전부 team-master-data.json 원문 그대로)
@@ -330,10 +333,18 @@ const DO_BUREAUS = [
       { id: "SP-DIV-OCEAN-HAENYEOHERITAGE", name: "해녀문화유산과", spId: "SP-DIV-OCEAN-HAENYEOHERITAGE", file: "02-do-dept/divisions/SP-DIV-OCEAN-HAENYEOHERITAGE_v1.0.md", confirmed: true },
       { id: "SP-DIV-OCEAN-PORTHARBOR", name: "해운항만과", spId: "SP-DIV-OCEAN-PORTHARBOR", file: "02-do-dept/divisions/SP-DIV-OCEAN-PORTHARBOR_v1.0.md", confirmed: true },
   ]},
-  { id: "comm", name: "소통청렴담당관", spId: null, kind: "do-dept", divisions: null },
-  { id: "general", name: "총무과", spId: null, kind: "do-dept", divisions: null },
-  { id: "central", name: "중앙협력본부", spId: null, kind: "do-dept", divisions: null },
-  { id: "spokesman", name: "대변인", spId: null, kind: "do-dept", divisions: null },
+  { id: "comm", name: "소통담당관(구 소통청렴담당관)", spId: "SP-DO-COMM", kind: "do-dept", divisions: null },
+  { id: "general", name: "총무과", spId: "SP-DO-GENERAL", kind: "do-dept", divisions: null },
+  { id: "central", name: "중앙협력본부", spId: "SP-DO-LIAISON", kind: "do-dept", divisions: null },
+  { id: "spokesman", name: "대변인", spId: "SP-DO-SPOKES", kind: "do-dept", divisions: null },
+  { id: "aigov", name: "AI행정혁신추진단", spId: "SP-DO-AIGOV", kind: "do-dept", divisions: null },
+  { id: "airportsup", name: "공항확충지원단", spId: "SP-DO-AIRPORTSUP", kind: "do-dept", divisions: null },
+  { id: "autonomy", name: "특별자치제도추진단", spId: "SP-DO-AUTONOMY", kind: "do-dept", divisions: null },
+  { id: "balance", name: "도시균형추진단", spId: "SP-DO-BALANCE", kind: "do-dept", divisions: null },
+  { id: "basicsoc", name: "기본사회추진단", spId: "SP-DO-BASICSOC", kind: "do-dept", divisions: null },
+  { id: "gangjeong", name: "강정공동체사업추진단", spId: "SP-DO-GANGJEONG", kind: "do-dept", divisions: null },
+  { id: "gender", name: "성평등여성정책관", spId: "SP-DO-GENDER", kind: "do-dept", divisions: null },
+  { id: "labor", name: "노동안전감독관", spId: "SP-DO-LABOR", kind: "do-dept", divisions: null },
 ];
 
 const DO_AGENCIES = [
