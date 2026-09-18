@@ -1,0 +1,103 @@
+[
+  {
+    "id": "gov-clarify-a9-03-control-sportsorg-disabled",
+    "utterance": "장애인 전문체육 진흥 관련 지원 사업이 궁금해요.",
+    "expected_ambiguous_pair": null,
+    "live_verdict": "LIVE-PASS",
+    "live_note": "통제 시나리오 — 확신 있게 단일 코드로 정상 답함: SP-ORG-JPSPO",
+    "chosen": "SP-ORG-JPSPO",
+    "usages": [
+      {
+        "prompt_tokens": 361,
+        "completion_tokens": 379,
+        "total_tokens": 740,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 361
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 233
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a9-02-sportsorg-tie",
+    "utterance": "전문체육 진흥 관련 지원 사업이 궁금해요.",
+    "expected_ambiguous_pair": [
+      "SP-ORG-JPSPO",
+      "SP-ORG-JSPO"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-ORG-JSPO', 'SP-ORG-JPSPO'] (기대: ['SP-ORG-JPSPO', 'SP-ORG-JSPO'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 359,
+        "completion_tokens": 326,
+        "total_tokens": 685,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 302
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 231
+      },
+      {
+        "prompt_tokens": 188,
+        "completion_tokens": 149,
+        "total_tokens": 337,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 142
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 188
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a9-01-medcenter-tie",
+    "utterance": "의료원 진료 예약을 하고 싶은데 어떻게 해야 하나요.",
+    "expected_ambiguous_pair": [
+      "SP-ORG-JEJUMED",
+      "SP-ORG-SGPMED"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-ORG-JEJUMED', 'SP-ORG-SGPMED'] (기대: ['SP-ORG-JEJUMED', 'SP-ORG-SGPMED'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 370,
+        "completion_tokens": 4533,
+        "total_tokens": 4903,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 4507
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 370
+      },
+      {
+        "prompt_tokens": 192,
+        "completion_tokens": 344,
+        "total_tokens": 536,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 337
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 192
+      }
+    ]
+  }
+]
