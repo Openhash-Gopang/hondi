@@ -1,0 +1,178 @@
+[
+  {
+    "id": "gov-clarify-a5-05-control-natairport",
+    "utterance": "비행기가 결항됐다고 해서 공항에 문의하고 싶은데 어디로 연락하면 되나요.",
+    "expected_ambiguous_pair": null,
+    "live_verdict": "LIVE-PASS",
+    "live_note": "통제 시나리오 — 확신 있게 단일 코드로 정상 답함: SP-NAT-AIRPORT",
+    "chosen": "SP-NAT-AIRPORT",
+    "usages": [
+      {
+        "prompt_tokens": 375,
+        "completion_tokens": 136,
+        "total_tokens": 511,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 118
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 247
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a5-06-control-city-sports",
+    "utterance": "동네 체육관 같은 공공체육시설을 이용하고 싶은데 어디에 문의하면 되나요.",
+    "expected_ambiguous_pair": null,
+    "live_verdict": "LIVE-PASS",
+    "live_note": "통제 시나리오 — 확신 있게 단일 코드로 정상 답함: SP-CITYDIV-JEJUSI-CULTURE-SPORTS",
+    "chosen": "SP-CITYDIV-JEJUSI-CULTURE-SPORTS",
+    "usages": [
+      {
+        "prompt_tokens": 376,
+        "completion_tokens": 115,
+        "total_tokens": 491,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 88
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 248
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a5-04-natanimalquarantine-agri",
+    "utterance": "반려동물을 데리고 육지로 나가려고 하는데 검역 절차가 어떻게 되는지 알고 싶어요.",
+    "expected_ambiguous_pair": [
+      "SP-NAT-ANIMALQUARANTINE",
+      "SP-DIV-AGRI-ANIMALQUARANTINE"
+    ],
+    "live_verdict": "LIVE-FAIL",
+    "live_note": "단일 코드로 확신 있게 답함(하나를 골랐지만 기대 쌍 ['SP-NAT-ANIMALQUARANTINE', 'SP-DIV-AGRI-ANIMALQUARANTINE'] 중 하나): SP-NAT-ANIMALQUARANTINE",
+    "chosen": "SP-NAT-ANIMALQUARANTINE",
+    "usages": [
+      {
+        "prompt_tokens": 379,
+        "completion_tokens": 485,
+        "total_tokens": 864,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 463
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 251
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a5-02-natweather-safetynatural-variant",
+    "utterance": "태풍 예보를 보니 우리 동네도 위험할 것 같은데, 어디에 문의하면 안내를 받을 수 있나요.",
+    "expected_ambiguous_pair": [
+      "SP-NAT-WEATHER",
+      "SP-DIV-SAFETY-NATURALDISASTER"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-NAT-WEATHER', 'SP-DIV-SAFETY-NATURALDISASTER'] (기대: ['SP-NAT-WEATHER', 'SP-DIV-SAFETY-NATURALDISASTER'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 370,
+        "completion_tokens": 1002,
+        "total_tokens": 1372,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 972
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 242
+      },
+      {
+        "prompt_tokens": 208,
+        "completion_tokens": 194,
+        "total_tokens": 402,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 187
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 208
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a5-01-natweather-safetynatural",
+    "utterance": "태풍이 올라온다는데 대응 상황을 어디서 확인할 수 있나요.",
+    "expected_ambiguous_pair": [
+      "SP-NAT-WEATHER",
+      "SP-DIV-SAFETY-NATURALDISASTER"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-DIV-SAFETY-NATURALDISASTER', 'SP-NAT-WEATHER'] (기대: ['SP-NAT-WEATHER', 'SP-DIV-SAFETY-NATURALDISASTER'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 358,
+        "completion_tokens": 224,
+        "total_tokens": 582,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 194
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 230
+      },
+      {
+        "prompt_tokens": 187,
+        "completion_tokens": 1881,
+        "total_tokens": 2068,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 1874
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 187
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a5-03-natenv-climateenvpolicy",
+    "utterance": "공사를 하려고 하는데 환경영향평가를 받아야 하는지 궁금해요.",
+    "expected_ambiguous_pair": [
+      "SP-NAT-ENV",
+      "SP-DIV-CLIMATE-ENVPOLICY"
+    ],
+    "live_verdict": "LIVE-FAIL",
+    "live_note": "단일 코드로 확신 있게 답함(하나를 골랐지만 기대 쌍 ['SP-NAT-ENV', 'SP-DIV-CLIMATE-ENVPOLICY'] 중 하나): SP-NAT-ENV",
+    "chosen": "SP-NAT-ENV",
+    "usages": [
+      {
+        "prompt_tokens": 349,
+        "completion_tokens": 2714,
+        "total_tokens": 3063,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 2698
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 221
+      }
+    ]
+  }
+]
