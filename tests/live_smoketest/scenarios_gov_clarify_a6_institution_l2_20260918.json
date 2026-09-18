@@ -1,0 +1,57 @@
+[
+  {
+    "id": "gov-clarify-a6-01-jeda-econ-changeop",
+    "utterance": "소상공인 창업 지원을 받고 싶어요.",
+    "candidate_codes": ["SP-ORG-JEDA", "SP-DO-ECON"],
+    "expected_ambiguous_pair": ["SP-ORG-JEDA", "SP-DO-ECON"],
+    "descriptions": {
+      "SP-ORG-JEDA": "제주경제통상진흥원 — 중소기업·소상공인·사회적기업 판로·자금·경영 지원, 소상공인경영지원센터·디자인스튜디오 운영, 창업 지원(출자출연기관, 07-org)",
+      "SP-DO-ECON": "제주도청 경제활력국(도청 실·국, 02-do-dept) — 도 전체 소상공인·자영업·중소기업 산업정책 총괄"
+    },
+    "note": "_resolveInstitutionMatch topScore>=2(강한 매칭) 분기 — 결정론적 스코어링으로 사전 확인: JEDA 2개(소상공인/창업 지원) vs SP-DO-ECON 1개(소상공인) 매칭. 2026-09-18 수정 전에는 이 분기가 L2 비교 자체를 안 해서 classifyFn 호출 없이 JEDA로 즉시 확정됐다(코드 추적으로 확정적 재현, LLM 비결정성과 무관) — 수정 후 실제로 되묻기가 발동하는지 라이브 검증"
+  },
+  {
+    "id": "gov-clarify-a6-02-jeda-econ-jungsogieop",
+    "utterance": "중소기업 창업 지원 사업이 궁금해요.",
+    "candidate_codes": ["SP-ORG-JEDA", "SP-DO-ECON"],
+    "expected_ambiguous_pair": ["SP-ORG-JEDA", "SP-DO-ECON"],
+    "descriptions": {
+      "SP-ORG-JEDA": "제주경제통상진흥원 — 중소기업·소상공인·사회적기업 판로·자금·경영 지원, 소상공인경영지원센터·디자인스튜디오 운영, 창업 지원(출자출연기관, 07-org)",
+      "SP-DO-ECON": "제주도청 경제활력국(도청 실·국, 02-do-dept) — 도 전체 소상공인·자영업·중소기업 산업정책 총괄"
+    },
+    "note": "JEDA 2개(중소기업/창업 지원) vs SP-DO-ECON 1개(중소기업) 매칭 — 위와 동일 클래스, 다른 발화로 재현성 확인"
+  },
+  {
+    "id": "gov-clarify-a6-03-jeda-econ-gyeongyeong",
+    "utterance": "소상공인 경영 지원 신청하고 싶습니다.",
+    "candidate_codes": ["SP-ORG-JEDA", "SP-DO-ECON"],
+    "expected_ambiguous_pair": ["SP-ORG-JEDA", "SP-DO-ECON"],
+    "descriptions": {
+      "SP-ORG-JEDA": "제주경제통상진흥원 — 중소기업·소상공인·사회적기업 판로·자금·경영 지원, 소상공인경영지원센터·디자인스튜디오 운영, 창업 지원(출자출연기관, 07-org)",
+      "SP-DO-ECON": "제주도청 경제활력국(도청 실·국, 02-do-dept) — 도 전체 소상공인·자영업·중소기업 산업정책 총괄"
+    },
+    "note": "JEDA 2개(경영 지원/소상공인) vs SP-DO-ECON 1개(소상공인) 매칭 — 위와 동일 클래스, 세 번째 발화로 재현성 확인"
+  },
+  {
+    "id": "gov-clarify-a6-04-control-jeda-only",
+    "utterance": "제주경제통상진흥원 디자인스튜디오를 이용하고 싶은데 예약 방법이 궁금해요.",
+    "candidate_codes": ["SP-ORG-JEDA", "SP-DO-ECON"],
+    "expected_ambiguous_pair": null,
+    "descriptions": {
+      "SP-ORG-JEDA": "제주경제통상진흥원 — 중소기업·소상공인·사회적기업 판로·자금·경영 지원, 소상공인경영지원센터·디자인스튜디오 운영, 창업 지원(출자출연기관, 07-org)",
+      "SP-DO-ECON": "제주도청 경제활력국(도청 실·국, 02-do-dept) — 도 전체 소상공인·자영업·중소기업 산업정책 총괄"
+    },
+    "note": "통제 시나리오 — 결정론적 스코어링 사전 확인 결과 JEDA topScore=1(기관명만 매칭, '디자인스튜디오 운영' 키워드와는 '이용하고'가 달라 불일치)·L2 topScore=0. topScore===1 분기(이번 수정과 무관, 기존 로직)라 L2가 안 겹치면 classifyFn엔 JEDA 단독 후보로만 넘어간다 — 애매함 없이 확신 있게 단일 확정되는지 확인하는 통제군"
+  },
+  {
+    "id": "gov-clarify-a6-05-control-econ-only",
+    "utterance": "일자리 창출 정책과 고용 지원 사업에 대해 전반적으로 상담받고 싶어요.",
+    "candidate_codes": ["SP-ORG-JEDA", "SP-DO-ECON"],
+    "expected_ambiguous_pair": null,
+    "descriptions": {
+      "SP-ORG-JEDA": "제주경제통상진흥원 — 중소기업·소상공인·사회적기업 판로·자금·경영 지원, 소상공인경영지원센터·디자인스튜디오 운영, 창업 지원(출자출연기관, 07-org)",
+      "SP-DO-ECON": "제주도청 경제활력국(도청 실·국, 02-do-dept) — 도 전체 소상공인·자영업·중소기업 산업정책 총괄"
+    },
+    "note": "통제 시나리오 — 일자리/고용은 SP-DO-ECON(L2) 키워드('일자리','고용')에만 매칭되고 JEDA 키워드와는 안 겹친다. 확신 있게 ECON만 단독 확정돼야 함"
+  }
+]
