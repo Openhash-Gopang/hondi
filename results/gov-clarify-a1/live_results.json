@@ -1,0 +1,399 @@
+[
+  {
+    "id": "gov-clarify-a1-07-educert-govplatform",
+    "utterance": "졸업증명서를 정부24에서 뗄 수 있는지, 어디로 가야 하는지 문의하고 싶어요.",
+    "expected_ambiguous_pair": [
+      "SP-NAT-EDUCERT",
+      "SP-NAT-GOVPLATFORM"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-NAT-EDUCERT', 'SP-NAT-GOVPLATFORM'] (기대: ['SP-NAT-EDUCERT', 'SP-NAT-GOVPLATFORM'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 455,
+        "completion_tokens": 759,
+        "total_tokens": 1214,
+        "prompt_tokens_details": {
+          "cached_tokens": 256
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 735
+        },
+        "prompt_cache_hit_tokens": 256,
+        "prompt_cache_miss_tokens": 199
+      },
+      {
+        "prompt_tokens": 252,
+        "completion_tokens": 582,
+        "total_tokens": 834,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 575
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 252
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a1-10-quarantine",
+    "utterance": "해외에서 들어오는데 검역 절차가 어떻게 되는지 문의하고 싶어요.",
+    "expected_ambiguous_pair": [
+      "SP-NAT-ANIMALQUARANTINE",
+      "SP-NAT-HUMANQUARANTINE"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-NAT-HUMANQUARANTINE', 'SP-NAT-ANIMALQUARANTINE'] (기대: ['SP-NAT-ANIMALQUARANTINE', 'SP-NAT-HUMANQUARANTINE'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 341,
+        "completion_tokens": 1073,
+        "total_tokens": 1414,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 1041
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 213
+      },
+      {
+        "prompt_tokens": 179,
+        "completion_tokens": 474,
+        "total_tokens": 653,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 467
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 179
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a1-08-coastguard-police",
+    "utterance": "바닷가에서 사고가 났는데 신고는 어디로 해야 하나요.",
+    "expected_ambiguous_pair": [
+      "SP-NAT-COASTGUARD",
+      "SP-NAT-POLICE"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-NAT-COASTGUARD', 'SP-NAT-POLICE'] (기대: ['SP-NAT-COASTGUARD', 'SP-NAT-POLICE'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 348,
+        "completion_tokens": 1435,
+        "total_tokens": 1783,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 1413
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 220
+      },
+      {
+        "prompt_tokens": 183,
+        "completion_tokens": 673,
+        "total_tokens": 856,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 666
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 183
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a1-12-plan-tax",
+    "utterance": "세금 신고를 어디에 해야 하는지 문의하고 싶어요.",
+    "expected_ambiguous_pair": [
+      "SP-DO-PLAN",
+      "SP-NAT-TAX"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-NAT-TAX', 'SP-DO-PLAN'] (기대: ['SP-DO-PLAN', 'SP-NAT-TAX'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 333,
+        "completion_tokens": 252,
+        "total_tokens": 585,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 230
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 205
+      },
+      {
+        "prompt_tokens": 170,
+        "completion_tokens": 945,
+        "total_tokens": 1115,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 938
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 170
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a1-09-labor-laborrel",
+    "utterance": "회사에서 월급을 못 받았는데 어디에 신고하고 구제받을 수 있나요.",
+    "expected_ambiguous_pair": [
+      "SP-NAT-LABOR",
+      "SP-NAT-LABORREL"
+    ],
+    "live_verdict": "LIVE-CLARIFY-OTHERPAIR",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 다른 쌍: ['SP-NAT-LABORIMPROVE', 'SP-NAT-LABOR'] (기대: ['SP-NAT-LABOR', 'SP-NAT-LABORREL'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 353,
+        "completion_tokens": 747,
+        "total_tokens": 1100,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 720
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 225
+      },
+      {
+        "prompt_tokens": 172,
+        "completion_tokens": 1714,
+        "total_tokens": 1886,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 1707
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 172
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a1-11-food-quality",
+    "utterance": "식품 원산지 표시가 잘못된 것 같은데 어디에 신고해야 하나요.",
+    "expected_ambiguous_pair": [
+      "SP-NAT-AGROQUALITY",
+      "SP-NAT-FISHQUALITY"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-NAT-AGROQUALITY', 'SP-NAT-FISHQUALITY'] (기대: ['SP-NAT-AGROQUALITY', 'SP-NAT-FISHQUALITY'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 371,
+        "completion_tokens": 2079,
+        "total_tokens": 2450,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 2055
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 243
+      },
+      {
+        "prompt_tokens": 176,
+        "completion_tokens": 418,
+        "total_tokens": 594,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 411
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 176
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a1-16-control-weather",
+    "utterance": "내일 제주도 날씨가 어떻게 되는지 알려줘.",
+    "expected_ambiguous_pair": null,
+    "live_verdict": "LIVE-PASS",
+    "live_note": "통제 시나리오 — 확신 있게 단일 코드로 정상 답함: SP-NAT-WEATHER",
+    "chosen": "SP-NAT-WEATHER",
+    "usages": [
+      {
+        "prompt_tokens": 324,
+        "completion_tokens": 95,
+        "total_tokens": 419,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 77
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 196
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a1-17-control-veterans",
+    "utterance": "국가유공자 등록 절차를 문의하고 싶습니다.",
+    "expected_ambiguous_pair": null,
+    "live_verdict": "LIVE-PASS",
+    "live_note": "통제 시나리오 — 확신 있게 단일 코드로 정상 답함: SP-NAT-VETERANS",
+    "chosen": "SP-NAT-VETERANS",
+    "usages": [
+      {
+        "prompt_tokens": 324,
+        "completion_tokens": 116,
+        "total_tokens": 440,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 98
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 196
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a1-15-gender-welfare-retry",
+    "utterance": "한부모 가정 여성 지원 제도를 문의하고 싶어요.",
+    "expected_ambiguous_pair": [
+      "SP-DO-GENDER",
+      "SP-DO-WELFARE"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-DO-WELFARE', 'SP-DO-GENDER'] (기대: ['SP-DO-GENDER', 'SP-DO-WELFARE'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 325,
+        "completion_tokens": 602,
+        "total_tokens": 927,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 579
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 197
+      },
+      {
+        "prompt_tokens": 182,
+        "completion_tokens": 729,
+        "total_tokens": 911,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 722
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 182
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a1-13-jachi-city",
+    "utterance": "자치행정 관련 업무를 제주시청에 문의하고 싶은데 맞는 건가요.",
+    "expected_ambiguous_pair": [
+      "SP-DO-JACHI",
+      "SP-CITY-JEJU"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-CITY-JEJU', 'SP-DO-JACHI'] (기대: ['SP-DO-JACHI', 'SP-CITY-JEJU'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 316,
+        "completion_tokens": 3876,
+        "total_tokens": 4192,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 3852
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 188
+      },
+      {
+        "prompt_tokens": 184,
+        "completion_tokens": 2013,
+        "total_tokens": 2197,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 2006
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 184
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a1-14-police-prosecution-retry",
+    "utterance": "이 사건이 재판까지 갈지, 먼저 어디서 조사를 받아야 하는지 궁금해요.",
+    "expected_ambiguous_pair": [
+      "SP-NAT-POLICE",
+      "SP-NAT-PROSECUTION"
+    ],
+    "live_verdict": "LIVE-CLARIFY-OTHERPAIR",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 다른 쌍: ['SP-NAT-POLICE', 'SP-NAT-COURT'] (기대: ['SP-NAT-POLICE', 'SP-NAT-PROSECUTION'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 403,
+        "completion_tokens": 4866,
+        "total_tokens": 5269,
+        "prompt_tokens_details": {
+          "cached_tokens": 256
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 4845
+        },
+        "prompt_cache_hit_tokens": 256,
+        "prompt_cache_miss_tokens": 147
+      },
+      {
+        "prompt_tokens": 203,
+        "completion_tokens": 1480,
+        "total_tokens": 1683,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 1473
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 203
+      }
+    ]
+  }
+]
