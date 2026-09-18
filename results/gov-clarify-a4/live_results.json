@@ -1,0 +1,269 @@
+[
+  {
+    "id": "gov-clarify-a4-03-mcst-culture-art",
+    "utterance": "문화예술 지원사업에 참여하고 싶은데 신청은 어디에 하면 되나요.",
+    "expected_ambiguous_pair": [
+      "SP-POLICY-MCST",
+      "SP-CITYDIV-JEJUSI-CULTURE-ART"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-CITYDIV-JEJUSI-CULTURE-ART', 'SP-POLICY-MCST'] (기대: ['SP-POLICY-MCST', 'SP-CITYDIV-JEJUSI-CULTURE-ART'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 347,
+        "completion_tokens": 355,
+        "total_tokens": 702,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 322
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 347
+      },
+      {
+        "prompt_tokens": 176,
+        "completion_tokens": 138,
+        "total_tokens": 314,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 131
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 176
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a4-02-mss-econsmb-variant",
+    "utterance": "가게 운영이 어려워서 정책자금 대출을 받고 싶은데 어디로 신청하면 되나요.",
+    "expected_ambiguous_pair": [
+      "SP-POLICY-MSS",
+      "SP-CITYDIV-JEJUSI-ECON-SMB"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-POLICY-MSS', 'SP-CITYDIV-JEJUSI-ECON-SMB'] (기대: ['SP-POLICY-MSS', 'SP-CITYDIV-JEJUSI-ECON-SMB'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 353,
+        "completion_tokens": 766,
+        "total_tokens": 1119,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 734
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 353
+      },
+      {
+        "prompt_tokens": 202,
+        "completion_tokens": 165,
+        "total_tokens": 367,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 158
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 202
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a4-04-mocee-envmgmt",
+    "utterance": "공장 굴뚝에서 나오는 대기오염물질 때문에 걱정이 되는데 어디에 문의해야 하나요.",
+    "expected_ambiguous_pair": [
+      "SP-POLICY-MOCEE",
+      "SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT', 'SP-POLICY-MOCEE'] (기대: ['SP-POLICY-MOCEE', 'SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 368,
+        "completion_tokens": 900,
+        "total_tokens": 1268,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 868
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 368
+      },
+      {
+        "prompt_tokens": 186,
+        "completion_tokens": 191,
+        "total_tokens": 377,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 184
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 186
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a4-05-molit-housing-architecture",
+    "utterance": "낡은 아파트 재건축 정비사업을 추진하려고 하는데 인허가는 어디서 받아야 하나요.",
+    "expected_ambiguous_pair": [
+      "SP-POLICY-MOLIT",
+      "SP-DIV-HOUSING-ARCHITECTURE"
+    ],
+    "live_verdict": "LIVE-FAIL",
+    "live_note": "단일 코드로 확신 있게 답함(하나를 골랐지만 기대 쌍 ['SP-POLICY-MOLIT', 'SP-DIV-HOUSING-ARCHITECTURE'] 중 하나): SP-DIV-HOUSING-ARCHITECTURE",
+    "chosen": "SP-DIV-HOUSING-ARCHITECTURE",
+    "usages": [
+      {
+        "prompt_tokens": 358,
+        "completion_tokens": 1083,
+        "total_tokens": 1441,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 1062
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 358
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a4-07-control-mofa-passport",
+    "utterance": "여권 유효기간이 얼마 안 남았는데 연장이나 재발급 절차가 궁금해요.",
+    "expected_ambiguous_pair": null,
+    "live_verdict": "LIVE-PASS",
+    "live_note": "통제 시나리오 — 확신 있게 단일 코드로 정상 답함: SP-POLICY-MOFA",
+    "chosen": "SP-POLICY-MOFA",
+    "usages": [
+      {
+        "prompt_tokens": 374,
+        "completion_tokens": 117,
+        "total_tokens": 491,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 98
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 374
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a4-06-mafra-agri-livestock",
+    "utterance": "축사를 새로 지으려고 하는데 정책자금 지원을 받을 수 있는 방법이 있을까요.",
+    "expected_ambiguous_pair": [
+      "SP-POLICY-MAFRA",
+      "SP-DIV-AGRI-LIVESTOCKPOLICY"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-DIV-AGRI-LIVESTOCKPOLICY', 'SP-POLICY-MAFRA'] (기대: ['SP-POLICY-MAFRA', 'SP-DIV-AGRI-LIVESTOCKPOLICY'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 348,
+        "completion_tokens": 379,
+        "total_tokens": 727,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 348
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 348
+      },
+      {
+        "prompt_tokens": 178,
+        "completion_tokens": 201,
+        "total_tokens": 379,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 194
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 178
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a4-08-control-city-only-traditionalmarket",
+    "utterance": "동네 전통시장 활성화 지원 사업에 참여하고 싶은데 시청 어디에 신청하면 되나요.",
+    "expected_ambiguous_pair": null,
+    "live_verdict": "LIVE-PASS",
+    "live_note": "통제 시나리오 — 확신 있게 단일 코드로 정상 답함: SP-CITYDIV-JEJUSI-ECON-SMB",
+    "chosen": "SP-CITYDIV-JEJUSI-ECON-SMB",
+    "usages": [
+      {
+        "prompt_tokens": 394,
+        "completion_tokens": 536,
+        "total_tokens": 930,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 512
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 394
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a4-01-mss-econsmb-original-bug",
+    "utterance": "소상공인 정책자금 대출 상담하고 싶어요.",
+    "expected_ambiguous_pair": [
+      "SP-POLICY-MSS",
+      "SP-CITYDIV-JEJUSI-ECON-SMB"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['SP-POLICY-MSS', 'SP-CITYDIV-JEJUSI-ECON-SMB'] (기대: ['SP-POLICY-MSS', 'SP-CITYDIV-JEJUSI-ECON-SMB'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 340,
+        "completion_tokens": 2506,
+        "total_tokens": 2846,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 2477
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 340
+      },
+      {
+        "prompt_tokens": 189,
+        "completion_tokens": 125,
+        "total_tokens": 314,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 118
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 189
+      }
+    ]
+  }
+]
