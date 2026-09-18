@@ -73,6 +73,13 @@ def call_deepseek(api_key, system_prompt, user_utterance):
                 data = resp.json()
                 msg = data["choices"][0]["message"]
                 text = msg.get("content") or ""
+                if not text:
+                    print(
+                        f"[DEBUG-EMPTY] finish_reason={data['choices'][0].get('finish_reason')} "
+                        f"reasoning_content_len={len(msg.get('reasoning_content') or '')} "
+                        f"usage={data.get('usage')}",
+                        flush=True,
+                    )
                 return text, data.get("usage", {}), None
             last_err = f"HTTP {resp.status_code}: {resp.text[:300]}"
         except requests.RequestException as e:
