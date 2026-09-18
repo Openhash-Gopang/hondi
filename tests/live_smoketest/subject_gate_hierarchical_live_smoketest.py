@@ -95,7 +95,15 @@ RETRY_BASE_SLEEP = 3
 # scenarios_ambiguity_feature_test_20260918.json 52건 실사에서 첫 버전 문구로는
 # ambiguous가 0/22건 실제 사용되지 않아(AC-PRO-CORE 2026-08-01과 동일한 습관),
 # 이름 붙인 트리거 조건으로 재작성한 production 버전을 그대로 복사.
-GATE_SYS_PROMPT_HEAD = '사용자 발화를 아래 후보 목록 중 정확히 하나로 분류하세요. 후보 목록 맨 마지막 항목은 그 어떤 전공도 실제로 맞지 않을 때 고르는 "해당 없음" 항목입니다 — 발화 소재와 이름이 비슷하거나 어렴풋이 연상되는 전공이 있어도, 그 전공이 실제로 다루는 정규 교과·분야가 아니면 억지로 고르지 말고 이 "해당 없음" 항목을 고르십시오. 반드시 후보 목록의 id 값 중 하나만, 다른 텍스트 없이 JSON으로만 응답하세요: {"id": "<후보 id>"}.\n\n단, 아래 신호 중 하나라도 해당하면 짐작해서 하나를 고르지 말고 반드시 ambiguous로 응답하십시오(이 신호가 없을 때만 확신 있게 id를 고릅니다):\n  - 후보 하나가 더 넓은/일반적인 성격의 분야(예: 사회과학·생활과학· 화학·생명과학·환경 같은 포괄 범주)이고 다른 하나가 그 밑에 속할 수도 있는 더 구체적인 세부분야인데, 발화에 그 세부분야 쪽 성격을 가늠할 구체적 단서(방법론·산업·대상 등)가 없다.\n  - 후보 두 개가 실무에서 자주 겹치거나 서로 상대 영역으로 흔히 오인되는 인접 분야인데, 발화만으로 어느 쪽 전통·접근에 가까운지 가를 신호가 없다.\n"확신이 안 서면 더 일반적이고 안전해 보이는 후보로 일단 보내고 본다"는 틀린 전략입니다 — 위 신호가 하나라도 있으면 반드시 다음 형식으로만 응답하세요: {"ambiguous": ["<후보1 id>", "<후보2 id>"]} — 이 목록에 "해당 없음" 항목은 절대 넣지 않습니다. 위 신호가 전혀 없고 조금이라도 더 맞는 쪽이 뚜렷하면 짐작이 아니라 실제 판단이니 망설이지 말고 보통의 {"id": "..."}로 확신 있게 답하세요.\n\n후보 목록:\n'
+# subject-gate.js의 GATE_SYS_PROMPT_HEAD/RUNNER_UP_CONFIRM_PROMPT_HEAD와
+# 정확히 동일한 문구 — 어긋나면 이 하네스가 production과 다른 걸 테스트하게
+# 된다(양쪽 다 갱신 필요). 2026-09-18 3차 재설계 — 자기선고형 ambiguous
+# (1·2차 시도 모두 0/22건 사용)를 폐기하고, id+runnerUp 1차 호출 후
+# runnerUp이 있을 때만 예/아니오 2차 호출로 확정하는 2단계 분리 방식으로
+# 교체. 두 문구 모두 production 문자열을 그대로 추출해 복사.
+GATE_SYS_PROMPT_HEAD = '사용자 발화를 아래 후보 목록 중 정확히 하나로 분류하세요. 후보 목록 맨 마지막 항목은 그 어떤 전공도 실제로 맞지 않을 때 고르는 "해당 없음" 항목입니다 — 발화 소재와 이름이 비슷하거나 어렴풋이 연상되는 전공이 있어도, 그 전공이 실제로 다루는 정규 교과·분야가 아니면 억지로 고르지 말고 이 "해당 없음" 항목을 고르십시오. 다른 텍스트 없이 JSON으로만 응답하세요: {"id": "<가장 확신 있는 후보 id>", "runnerUp": "<id 또는 null>"}. "id"는 지금까지처럼 가장 확신 있는 후보를 고르십시오 — 확신 있게 고르는 이 판단 자체는 조금도 망설이지 않습니다. "runnerUp"은 별개의 질문입니다: "id"로 고른 것 말고도, 이 발화만으로는 완전히 배제할 수 없는 다른 구체적인 후보가 하나 있다면 그 id를, 그런 후보가 전혀 없다면 null을 넣으세요 — "해당 없음" 항목은 runnerUp으로 넣지 않습니다. runnerUp은 나중에 별도로 한 번 더 확인하는 용도일 뿐이니, 있는지 없는지만 정직하게 보고하면 됩니다(runnerUp을 적는다고 "id" 판단이 흔들리는 게 아닙니다).\n\n후보 목록:\n'
+
+RUNNER_UP_CONFIRM_PROMPT_HEAD = '아래 발화가, 주어진 전공에도 해당할 수 있는지만 판단하세요. "이미 다른 더 적합한 전공이 있을 수도 있다"는 점은 이 판단과 무관합니다 — 오직 "이 전공에도 해당할 수 있는가"만 봅니다. 다른 텍스트 없이 JSON으로만 응답하세요: {"fits": true} 또는 {"fits": false}.\n\n전공: '
 
 
 
@@ -111,8 +119,13 @@ def load_gate_levels(roots):
     by_node = {}
     for level in data["gateLevels"]:
         candidate_ids = {c["id"] for c in level["candidates"]}
+        # 2026-09-18 추가 — runnerUp 2차 확인 호출에 label이 필요(production의
+        # _confirmRunnerUpFits가 EXPERT_REGISTRY[id].label을 그대로 씀).
+        candidate_labels = {c["id"]: c["label"] for c in level["candidates"]}
         menu = "\n".join(c["menuLine"] for c in level["candidates"])
-        by_node[level["nodeId"]] = {"menu": menu, "candidate_ids": candidate_ids}
+        by_node[level["nodeId"]] = {
+            "menu": menu, "candidate_ids": candidate_ids, "candidate_labels": candidate_labels,
+        }
     return by_node
 
 
@@ -168,52 +181,78 @@ def call_deepseek(api_key, system_prompt, user_utterance):
     return None, {}, last_err
 
 
-def grade_step(gate_node_id, correct_choice_id, candidate_ids, raw_text, call_err):
-    if call_err is not None:
-        return "LIVE-ERROR", call_err, None
+def run_gate_step(api_key, gate_node_id, correct_choice_id, node, utterance):
+    """subject-gate.js의 _gateOneLevel + _confirmRunnerUpFits를 그대로 재현
+    (재구현 아님 — 프롬프트 문구는 위에서 production 문자열을 그대로 추출해
+    복사, 판단 순서·화이트리스트 규칙도 그쪽 코드 그대로 따라감).
+    1차 호출(id+runnerUp) → runnerUp이 유효하면 2차 호출(예/아니오)까지 마친
+    뒤 최종 verdict를 낸다. 반환: (verdict, note, chosen, usages: list)
+    """
+
+    def call(system_prompt, user_utterance):
+        return call_deepseek(api_key, system_prompt, user_utterance)
+
+    menu = node["menu"]
+    candidate_ids = node["candidate_ids"]
+    candidate_labels = node["candidate_labels"]
+
+    raw1, usage1, err1 = call(GATE_SYS_PROMPT_HEAD + menu, utterance)
+    usages = [usage1]
+    if err1 is not None:
+        return "LIVE-ERROR", err1, None, usages
     try:
-        cleaned = re.sub(r"```json|```", "", raw_text or "").strip()
+        cleaned = re.sub(r"```json|```", "", raw1 or "").strip()
         parsed = json.loads(cleaned)
     except (json.JSONDecodeError, AttributeError):
-        return "LIVE-FAIL", f"JSON 파싱 실패 — raw: {(raw_text or '')[:200]}", None
-
-    # 2026-09-18 추가 — "ambiguous" 응답 채점. 이건 하드 FAIL이 아니다:
-    # production이라면 여기서 launch를 멈추고 사용자에게 되묻는다(§1-2-A) —
-    # 짐작해서 잘못 고르는 것보다 정직하게 애매함을 인정한 것이므로, 실제
-    # 정답이 그 후보 목록 안에 있었는지로 "정직하게 맞는 방향을 잡았는지"만
-    # 채점한다. LIVE-AMBIGUOUS-*는 LIVE-PASS와 별개 카테고리로 집계된다 —
-    # "틀리지 않았다"와 "확신 있게 맞혔다"는 이 설계에서 다른 것이기 때문에
-    # 하나로 뭉뚱그리지 않는다.
-    ambiguous = parsed.get("ambiguous") if isinstance(parsed, dict) else None
-    if isinstance(ambiguous, list) and len(ambiguous) >= 2:
-        valid = [a for a in ambiguous if a in candidate_ids and a != gate_node_id]
-        if len(valid) >= 2:
-            if correct_choice_id in valid:
-                return (
-                    "LIVE-AMBIGUOUS-CORRECT",
-                    f"애매함 인정, 정답 포함: {valid} (기대: {correct_choice_id})",
-                    None,
-                )
-            return (
-                "LIVE-AMBIGUOUS-WRONG",
-                f"애매함 인정했지만 정답 미포함: {valid} (기대: {correct_choice_id})",
-                None,
-            )
-        # 형식은 ambiguous였지만 유효 후보가 1개 이하 — production의
-        # validAmbiguous 검증과 동일한 기준으로 무효 처리, 일반 FAIL로 채점.
-        return "LIVE-FAIL", f"ambiguous 형식이나 유효 후보 부족: {ambiguous}", None
+        return "LIVE-FAIL", f"1차 호출 JSON 파싱 실패 — raw: {(raw1 or '')[:200]}", None, usages
 
     chosen = parsed.get("id") if isinstance(parsed, dict) else None
-    if chosen is None:
-        return "LIVE-FAIL", "id:null 응답 — 이례적", None
-    if chosen not in candidate_ids:
-        return "LIVE-FAIL", f"화이트리스트 밖 id: {chosen} (production이면 {gate_node_id}로 폴백)", chosen
+    if chosen is None or chosen not in candidate_ids or chosen not in candidate_labels:
+        return "LIVE-FAIL", f"화이트리스트 밖/누락 id: {chosen} (production이면 {gate_node_id}로 폴백)", chosen, usages
+
+    # "해당없음"(chosen===gate_node_id) 선택 시 runnerUp을 아예 안 본다 —
+    # production _gateOneLevel과 동일 규칙.
+    runner_up = parsed.get("runnerUp") if isinstance(parsed, dict) else None
+    runner_up_valid = (
+        chosen != gate_node_id
+        and runner_up and runner_up != chosen and runner_up != gate_node_id
+        and runner_up in candidate_ids and runner_up in candidate_labels
+    )
+
+    if runner_up_valid:
+        confirm_prompt = RUNNER_UP_CONFIRM_PROMPT_HEAD + candidate_labels[runner_up]
+        raw2, usage2, err2 = call(confirm_prompt, utterance)
+        usages.append(usage2)
+        if err2 is None:
+            try:
+                cleaned2 = re.sub(r"```json|```", "", raw2 or "").strip()
+                parsed2 = json.loads(cleaned2)
+                fits = parsed2.get("fits") if isinstance(parsed2, dict) else None
+            except (json.JSONDecodeError, AttributeError):
+                fits = None
+            if fits is True:
+                valid_pair = [chosen, runner_up]
+                if correct_choice_id in valid_pair:
+                    return (
+                        "LIVE-AMBIGUOUS-CORRECT",
+                        f"runnerUp 확인 결과 애매함 확정, 정답 포함: {valid_pair} (기대: {correct_choice_id})",
+                        None, usages,
+                    )
+                return (
+                    "LIVE-AMBIGUOUS-WRONG",
+                    f"runnerUp 확인 결과 애매함 확정, 정답 미포함: {valid_pair} (기대: {correct_choice_id})",
+                    None, usages,
+                )
+        # 2차 호출 실패 또는 fits!=true → production과 동일하게 애매함
+        # 아님으로 처리, 아래에서 chosen 그대로 채점.
+
     if chosen == correct_choice_id:
-        return "LIVE-PASS", f"정확히 일치: {chosen}", chosen
-    return "LIVE-FAIL", f"다른 노드로 정밀화됨: {chosen} (기대: {correct_choice_id})", chosen
+        return "LIVE-PASS", f"정확히 일치: {chosen}", chosen, usages
+    return "LIVE-FAIL", f"다른 노드로 정밀화됨: {chosen} (기대: {correct_choice_id})", chosen, usages
 
 
 def process_one(api_key, scenario, gate_levels, leaf_paths):
+
     expected_leaf = scenario["expected_leaf_id"]
     steps = leaf_paths.get(expected_leaf)
     if steps is None:
@@ -245,14 +284,12 @@ def process_one(api_key, scenario, gate_levels, leaf_paths):
             })
             overall = "SETUP-ERROR"
             break
-        system_prompt = GATE_SYS_PROMPT_HEAD + node["menu"]
-        raw_text, usage, err = call_deepseek(api_key, system_prompt, scenario["utterance"])
-        verdict, note, chosen = grade_step(
-            step["gateNodeId"], step["correctChoiceId"], node["candidate_ids"], raw_text, err
+        verdict, note, chosen, usages = run_gate_step(
+            api_key, step["gateNodeId"], step["correctChoiceId"], node, scenario["utterance"]
         )
         step_results.append({
             "gateNodeId": step["gateNodeId"], "correctChoiceId": step["correctChoiceId"],
-            "chosenId": chosen, "verdict": verdict, "note": note, "usage": usage,
+            "chosenId": chosen, "verdict": verdict, "note": note, "usages": usages,
         })
         if verdict != "LIVE-PASS":
             overall = verdict

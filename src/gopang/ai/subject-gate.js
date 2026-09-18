@@ -39,54 +39,39 @@ const GATE_SYS_PROMPT_HEAD =
   '맨 마지막 항목은 그 어떤 전공도 실제로 맞지 않을 때 고르는 "해당 ' +
   '없음" 항목입니다 — 발화 소재와 이름이 비슷하거나 어렴풋이 연상되는 ' +
   '전공이 있어도, 그 전공이 실제로 다루는 정규 교과·분야가 아니면 ' +
-  '억지로 고르지 말고 이 "해당 없음" 항목을 고르십시오. 반드시 후보 ' +
-  '목록의 id 값 중 하나만, 다른 텍스트 없이 JSON으로만 응답하세요: ' +
-  '{"id": "<후보 id>"}.\n\n' +
-  // 2026-09-18 추가 — 확신도 기반 되묻기 (AC-PRO-CORE §1의 같은 원칙을
-  // 이 게이트 단계에도 적용). 배경: subject_gate_hierarchical_live_
-  // smoketest.py 395건 실사에서, 인접한 두 세부분야 사이에서 실제로는
-  // 근거가 팽팽한데도 이 게이트가 항상 하나를 확신 있게 골라버리는
-  // 습관이 확인됨(생활과학 vs 사회과학, 경영 vs 사회과학 등) — 오답
-  // 자체보다, 그 판단을 사용자에게 확인받을 방법이 전혀 없다는 게
-  // 문제였다(주피터 지시). AC-PRO-CORE가 이미 2026-08-01에 "짐작해서
-  // 하나를 고르지 않고 후보를 나열해 되묻는다"로 정착시킨 원칙을,
-  // 여기서도 "해당없음"과는 별개의 세 번째 출력 형태로 추가한다 —
-  // "해당없음"은 범위 밖일 때, "ambiguous"는 범위 안의 특정 후보
-  // 2개(이상) 사이에서 진짜로 갈릴 때다. refineToLeaf가 이 신호를
-  // 받으면 더 내려가지 않고 후보를 그대로 launch 컨텍스트에 실어
-  // 넘겨, 세부분야 대신 연결된 페르소나가 첫 답변에서 직접 확인하게
-  // 한다(SP_EXPERT_BASE §1-2-A 참조) — 짐작해서 잘못 연결하는 것보다
-  // 낫다는 게 이 프로젝트 전반의 원칙이다.
-  //
-  // 2026-09-18 즉시 재수정 — 위 문구("근거가 팽팽히 갈린다면")만으로는
-  // 실사(scenarios_ambiguity_feature_test_20260918.json, 52건: 회귀
-  // 샘플 30건은 정상, 그러나 이미 알려진 인접혼동 22건 중 ambiguous
-  // 사용 0건)에서 전혀 안 쓰였다 — AC-PRO-CORE가 2026-08-01에 겪은
-  // 것과 똑같은 습관이다("판단력 부족이 아니라 습관 — 후보를 좁히기
-  // 귀찮거나 불친절해 보일까봐 일단 눈에 익은 범용 쪽 하나를 고르고
-  // 본다"). 그때 AC-PRO-CORE를 실제로 고친 건 막연한 되묻기 지시가
-  // 아니라 **구체적으로 이름 붙인 트리거 조건**이었다 — 여기도 동일한
-  // 처방을 적용한다: 19건 실패를 다시 보면 거의 전부 "후보 하나가 더
-  // 넓은/일반적인 상위 성격 분야(사회과학·생활과학·화학생명과학 등)고
-  // 다른 하나가 그 밑의 더 구체적인 세부분야인데, 발화만으로 어느
-  // 쪽인지 가를 단서가 없다"는 동일 패턴이었다 — 아래에 이 패턴을
-  // 정확히 명시한다.
-  '단, 아래 신호 중 하나라도 해당하면 짐작해서 하나를 고르지 말고 ' +
-  '반드시 ambiguous로 응답하십시오(이 신호가 없을 때만 확신 있게 id를 ' +
-  '고릅니다):\n' +
-  '  - 후보 하나가 더 넓은/일반적인 성격의 분야(예: 사회과학·생활과학· ' +
-  '화학·생명과학·환경 같은 포괄 범주)이고 다른 하나가 그 밑에 속할 ' +
-  '수도 있는 더 구체적인 세부분야인데, 발화에 그 세부분야 쪽 성격을 ' +
-  '가늠할 구체적 단서(방법론·산업·대상 등)가 없다.\n' +
-  '  - 후보 두 개가 실무에서 자주 겹치거나 서로 상대 영역으로 흔히 ' +
-  '오인되는 인접 분야인데, 발화만으로 어느 쪽 전통·접근에 가까운지 ' +
-  '가를 신호가 없다.\n' +
-  '"확신이 안 서면 더 일반적이고 안전해 보이는 후보로 일단 보내고 ' +
-  '본다"는 틀린 전략입니다 — 위 신호가 하나라도 있으면 반드시 다음 ' +
-  '형식으로만 응답하세요: {"ambiguous": ["<후보1 id>", "<후보2 id>"]} — ' +
-  '이 목록에 "해당 없음" 항목은 절대 넣지 않습니다. 위 신호가 전혀 ' +
-  '없고 조금이라도 더 맞는 쪽이 뚜렷하면 짐작이 아니라 실제 판단이니 ' +
-  '망설이지 말고 보통의 {"id": "..."}로 확신 있게 답하세요.\n\n후보 목록:\n';
+  '억지로 고르지 말고 이 "해당 없음" 항목을 고르십시오. 다른 텍스트 ' +
+  '없이 JSON으로만 응답하세요: {"id": "<가장 확신 있는 후보 id>", ' +
+  '"runnerUp": "<id 또는 null>"}. "id"는 지금까지처럼 가장 확신 있는 ' +
+  '후보를 고르십시오 — 확신 있게 고르는 이 판단 자체는 조금도 망설이지 ' +
+  '않습니다. "runnerUp"은 별개의 질문입니다: "id"로 고른 것 말고도, ' +
+  '이 발화만으로는 완전히 배제할 수 없는 다른 구체적인 후보가 하나 ' +
+  '있다면 그 id를, 그런 후보가 전혀 없다면 null을 넣으세요 — "해당 ' +
+  '없음" 항목은 runnerUp으로 넣지 않습니다. runnerUp은 나중에 별도로 ' +
+  '한 번 더 확인하는 용도일 뿐이니, 있는지 없는지만 정직하게 보고하면 ' +
+  '됩니다(runnerUp을 적는다고 "id" 판단이 흔들리는 게 아닙니다).\n\n' +
+  '후보 목록:\n';
+
+// 2026-09-18 신설 — ambiguous 여부를 "id"와 같은 호출에서 자기선고하게
+// 하는 방식(1·2차 시도 모두)이 실사에서 0/22건으로 실패했다(주피터
+// 지시로 재검토). 원인 추정: "확신 있게 하나를 고르라"는 지시와
+// "동시에 스스로 의심하라"는 지시가 같은 JSON 안에서 충돌해, 모델이
+// 항상 전자만 이행하고 후자는 생략했다 — AC-PRO-CORE는 자연어 대화
+// 맥락(되묻는 게 자연스러운 행동)에서 성공했지만, 이건 "JSON 하나만
+// 내라"는 엄격한 구조화 출력 과제라 같은 처방이 안 먹혔다.
+//
+// 재설계(2단계 분리): 1차 호출은 손대지 않은 채 "id"(확신 있는 선택)는
+// 그대로 받고, 그 옆에 부담 적은 "runnerUp"(차선책 id, 없으면 null)만
+// 추가로 받는다 — 이건 "이미 다 훑은 후보 중 2등이 누구냐"는 사실
+// 보고라 회피가 어렵다. runnerUp이 있을 때만 완전히 별개의 2차 호출로
+// "이 발화가 runnerUp에도 해당할 수 있습니까?"를 단순 예/아니오로
+// 묻는다 — 이진 질문은 회피할 방법이 없다. "예"면 그제서야 진짜
+// ambiguous로 확정한다.
+const RUNNER_UP_CONFIRM_PROMPT_HEAD =
+  '아래 발화가, 주어진 전공에도 해당할 수 있는지만 판단하세요. "이미 ' +
+  '다른 더 적합한 전공이 있을 수도 있다"는 점은 이 판단과 무관합니다 ' +
+  '— 오직 "이 전공에도 해당할 수 있는가"만 봅니다. 다른 텍스트 없이 ' +
+  'JSON으로만 응답하세요: {"fits": true} 또는 {"fits": false}.\n\n' +
+  '전공: ';
 
 // ── 2026-08-08 신설(초중고 학년대 어휘 보강) ────────────────────────
 // 배경(주피터 지시): 초등 산수와 대학 수학을 별도 페르소나로 안 쪼갠다
@@ -174,62 +159,83 @@ export function _buildGateCandidates(personaId, leaves) {
 // 30개 미만)로 억제된다. §CATALOG-EXPERT professor 대분야를 여러
 // 중계열/소계열로 나눈 기존 설계(§2-4~§2-7)와 동일한 "커지면 한 단계
 // 더 쪼갠다" 원칙을 라우팅 로직에도 그대로 적용한 것.
+async function _callDeepseekGate(systemPrompt, userText) {
+  const res = await fetch(CFG.endpoint + '/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model:       'deepseek-v4-flash',
+      // 2026-08-09 수정(60→1000), 2026-08-10 재상향(1000→1500) — flat
+      // 162후보 시절 실사로 굳어진 값. 계층형 전환으로 단계당 후보 수가
+      // 크게 줄었으니(대부분 4~14개) 이론상 더 낮춰도 되지만, 실사
+      // 2026-09-14 재상향(1500→4000) — 계층형 전환으로 후보 수는 줄었지만,
+      // deepseek-v4-flash(reasoning 모델)가 후보 수와 무관하게 특정 발화에서
+      // 4600~5900자(추정 3000토큰 안팎)까지 reasoning_content를 쓰는 경우가
+      // subject_gate_live_smoketest.py 재검증(gapfill 배치)에서 6건 재현됨 —
+      // max_tokens 1500 전량이 reasoning에 소진돼 최종 답변 없이
+      // finish_reason=length로 끝났다(에러가 아니라 조용히 상위
+      // personaId로 폴백되므로 겉으로는 "그냥 좀 덜 정밀하게 라우팅됨"
+      // 정도로만 보여 오래 안 잡혔을 가능성). 4000으로 올려 재검증할 것.
+      max_tokens:  4000,
+      temperature: 0.0,
+      stream:      false,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user',   content: (userText || '').slice(0, 2000) },
+      ],
+    }),
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const data = await res.json();
+  const raw  = data.choices?.[0]?.message?.content || '{}';
+  return JSON.parse(raw.replace(/```json|```/g, '').trim());
+}
+
+// 2026-09-18 신설 — runnerUp이 실제로 애매함인지 확인하는 2차 호출.
+// 단순 예/아니오 이진 질문 하나뿐이라, 1차 호출처럼 "확신 있게 고르기"
+// 과제와 섞이지 않는다 — 회피할 스키마 여지 자체가 없다.
+async function _confirmRunnerUpFits(runnerUpDef, userText) {
+  try {
+    const prompt = RUNNER_UP_CONFIRM_PROMPT_HEAD + runnerUpDef.label;
+    const parsed = await _callDeepseekGate(prompt, userText);
+    return parsed?.fits === true;
+  } catch (e) {
+    console.warn('[SubjectGate] runnerUp 확인 호출 실패(무시 — 애매함 아님으로 처리):', e.message);
+    return false;
+  }
+}
+
 function _gateOneLevel(personaId, candidates, userText) {
   return (async () => {
     try {
       const menu = candidates.map(_leafMenuLine).join('\n');
-      const res = await fetch(CFG.endpoint + '/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model:       'deepseek-v4-flash',
-          // 2026-08-09 수정(60→1000), 2026-08-10 재상향(1000→1500) — flat
-          // 162후보 시절 실사로 굳어진 값. 계층형 전환으로 단계당 후보 수가
-          // 크게 줄었으니(대부분 4~14개) 이론상 더 낮춰도 되지만, 실사
-          // 2026-09-14 재상향(1500→4000) — 계층형 전환으로 후보 수는 줄었지만,
-          // deepseek-v4-flash(reasoning 모델)가 후보 수와 무관하게 특정 발화에서
-          // 4600~5900자(추정 3000토큰 안팎)까지 reasoning_content를 쓰는 경우가
-          // subject_gate_live_smoketest.py 재검증(gapfill 배치)에서 6건 재현됨 —
-          // max_tokens 1500 전량이 reasoning에 소진돼 최종 답변 없이
-          // finish_reason=length로 끝났다(에러가 아니라 조용히 상위
-          // personaId로 폴백되므로 겉으로는 "그냥 좀 덜 정밀하게 라우팅됨"
-          // 정도로만 보여 오래 안 잡혔을 가능성). 4000으로 올려 재검증할 것.
-          max_tokens:  4000,
-          temperature: 0.0,
-          stream:      false,
-          messages: [
-            { role: 'system', content: GATE_SYS_PROMPT_HEAD + menu },
-            { role: 'user',   content: (userText || '').slice(0, 2000) },
-          ],
-        }),
-      });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
-      const raw  = data.choices?.[0]?.message?.content || '{}';
-      const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+      const parsed = await _callDeepseekGate(GATE_SYS_PROMPT_HEAD + menu, userText);
       const chosenId = parsed?.id;
 
       // 화이트리스트 검증 — 이 단계 후보 목록(직계 자식 + "해당 없음")에
       // 실제로 있는 id만 채택. "해당 없음"을 고르면 chosenId===personaId.
-      if (chosenId && candidates.some(c => c.id === chosenId) && EXPERT_REGISTRY[chosenId]) {
-        return { chosenId, ambiguousIds: null };
+      if (!(chosenId && candidates.some(c => c.id === chosenId) && EXPERT_REGISTRY[chosenId])) {
+        return { chosenId: personaId, ambiguousIds: null };
       }
 
-      // 2026-09-18 추가 — ambiguous 응답 파싱. "해당없음"(personaId 자신)은
-      // 후보에서 제외하고, 화이트리스트에 실제로 있는 것만, 2개 이상일 때만
-      // 인정한다 — 모델이 형식은 맞춰 냈지만 실제로는 1개뿐이거나 엉뚱한
-      // id를 섞어 보낸 경우까지 "애매함"으로 잘못 인정하지 않기 위함.
-      const ambiguousRaw = Array.isArray(parsed?.ambiguous) ? parsed.ambiguous : null;
-      if (ambiguousRaw) {
-        const validAmbiguous = ambiguousRaw.filter(
-          (id) => id !== personaId && candidates.some((c) => c.id === id) && EXPERT_REGISTRY[id]
-        );
-        if (validAmbiguous.length >= 2) {
-          return { chosenId: personaId, ambiguousIds: validAmbiguous };
+      // 2026-09-18 신설 — runnerUp 검증 및 2차 확인 호출. "해당없음"을
+      // id로 고른 경우(범위 밖 판단)는 runnerUp을 아예 안 본다 — 범위
+      // 밖이라는 판단 자체가 이미 명확하다는 뜻이므로 되물을 이유가 없다.
+      const runnerUpId = parsed?.runnerUp;
+      const runnerUpValid =
+        chosenId !== personaId &&
+        runnerUpId && runnerUpId !== chosenId && runnerUpId !== personaId &&
+        candidates.some((c) => c.id === runnerUpId) && EXPERT_REGISTRY[runnerUpId];
+
+      if (runnerUpValid) {
+        const fits = await _confirmRunnerUpFits(EXPERT_REGISTRY[runnerUpId], userText);
+        if (fits) {
+          console.info('[SubjectGate] runnerUp 확인 결과 애매함 확정:', chosenId, '↔', runnerUpId);
+          return { chosenId: personaId, ambiguousIds: [chosenId, runnerUpId] };
         }
       }
 
-      return { chosenId: personaId, ambiguousIds: null };
+      return { chosenId, ambiguousIds: null };
     } catch (e) {
       console.warn('[SubjectGate] 과목 게이트 실패(무시 — 이 단계 personaId로 폴백):', e.message);
       return { chosenId: personaId, ambiguousIds: null };
