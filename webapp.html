@@ -2418,6 +2418,21 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
 })();
 </script>
 
+<!-- ── 전화번호 로그인 게이트 (2026-09-18 긴급 추가) ──────────────────
+     worker.js #326("현관문 하나", 2026-09-17)가 디스패치 지점에서
+     /deepseek·/chat/completions에 phone_verify_token을 강제하기
+     시작했다. K-Plan/K-Law/K-Mail/desktop.html에는 이미 이 공용
+     로그인 모듈(auth/k-service-auth-client.js, window.KAuth)이
+     이식돼 있었지만, 정작 그 두 경로를 호출하는 메인 챗(이 페이지)에는
+     빠져 있어 모든 메시지가 400 LOGIN_REQUIRED로 막히는 전면 장애가
+     발생했다(주피터 실사 재현). gopang-app.js(→ call-ai.js)가 실제로
+     메시지를 보내기 전에 window.KAuth를 쓸 수 있도록, 모듈 스크립트보다
+     먼저 로드한다(call-ai.js의 _ensurePhoneVerifyToken()이 참조). -->
+<script>
+  window.K_AUTH_CONFIG = { serviceLabel: '혼디' };
+</script>
+<script src="/auth/k-service-auth-client.js"></script>
+
 <!-- 혼디 모듈 -->
 <script src="/src/pwa/gopang-pwa.js?v=20260914"></script>
 <!-- BUG FIX: /src/auth/gopang-auth.js는 src/gopang/core/auth.js의 오래된 죽은 복사본이며

@@ -489,6 +489,40 @@ async function _popSP() {
 // 현재 진행 중인 스트리밍 fetch를 중단한다 (Claude의 정지 버튼과 동일한 동작).
 let _currentAbort = null;
 
+// ── phone_verify_token 확보 (2026-09-18 신설 — 긴급 회귀 수정) ───────
+// 배경: worker.js #326("현관문 하나")가 2026-09-17부터 /deepseek·
+// /chat/completions에 phone_verify_token을 강제하기 시작했는데,
+// K-Plan/K-Law/K-Mail/desktop.html에는 이미 이식된 공용 로그인 모듈
+// (auth/k-service-auth-client.js, window.KAuth)이 정작 그 두 경로를
+// 실제로 호출하는 이 메인 챗(webapp.html)에는 연결돼 있지 않았다 —
+// 그 결과 모든 메시지가 예외 없이 400 LOGIN_REQUIRED로 막히는 전면
+// 장애가 발생함(주피터 실사 재현, 2026-09-18). K-서비스들과 동일한
+// KAuth.ensureLogin()을 그대로 재사용해 배선을 맞춘다.
+//
+// ensureLogin()은 미로그인 상태면 로그인 오버레이(전화번호 device-link)
+// 를 띄우고 완료될 때까지 대기한 뒤 토큰 문자열을 반환한다. 이미
+// 로그인돼 있으면(쿠키에 유효한 토큰) 오버레이 없이 즉시 반환한다.
+// 세션당(=한 번의 사용자 메시지 전송당) 한 번만 호출하고 그 결과를
+// 후보 페일오버 루프 전체가 재사용한다 — 페일오버 시도마다 매번
+// 다시 로그인을 확인하면 재시도가 곧 재로그인 요구로 보여 사용자
+// 경험이 나빠진다.
+async function _ensurePhoneVerifyToken() {
+  if (typeof window === 'undefined' || !window.KAuth || typeof window.KAuth.ensureLogin !== 'function') {
+    // 스크립트 로드 실패 등 — 토큰 없이 진행하면 서버가 400
+    // LOGIN_REQUIRED로 명확히 알려주므로 여기서 조용히 삼키지 않고
+    // 로그만 남긴다(호출부가 이미 실패를 사용자에게 보여주는 기존
+    // 경로를 그대로 탄다).
+    console.warn('[Auth] KAuth 모듈 미로드 — phone_verify_token 없이 진행(서버 400 예상)');
+    return null;
+  }
+  try {
+    return await window.KAuth.ensureLogin();
+  } catch (e) {
+    console.warn('[Auth] ensureLogin 실패:', e.message);
+    return null;
+  }
+}
+
 // ── 유휴(idle) 타임아웃 공용 헬퍼 (2026-07-01) ───────────────────
 // BUG-FIX: 아래 _callLLM/_callAIInner의 fetch()에는 타임아웃이 전혀 없어,
 // 서버가 무응답으로 멈추면 await가 영원히 반환되지 않았다(패널 쪽 동일 버그를
@@ -4463,6 +4497,9 @@ export async function _callLLM(messages, options = {}) {
   const _lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
   const _lastUserText = typeof _lastUserMsg?.content === 'string' ? _lastUserMsg.content : '';
   const candidates = _buildCallCandidates(_lastUserText, messages);
+  // 2026-09-18 신설 — worker.js #326 게이트가 /deepseek에 phone_verify_token을
+  // 강제하므로, 후보 페일오버 루프 진입 전에 한 번만 확보해 재사용한다.
+  const _pvt = await _ensurePhoneVerifyToken();
 
   let res = null, lastErr = null, idle = null;
   for (let i = 0; i < candidates.length; i++) {
@@ -4498,7 +4535,7 @@ export async function _callLLM(messages, options = {}) {
         ? await fetch(`${c.baseUrl}/deepseek`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...reqBody, guid: _USER?.ipv6 || USER_GUID || null }),
+            body: JSON.stringify({ ...reqBody, guid: _USER?.ipv6 || USER_GUID || null, phone_verify_token: _pvt }),
             signal: idle.signal,
           })
         : await fetch(`${CFG.endpoint.replace(/\/+$/, '')}/llm/relay`, {
@@ -4588,6 +4625,11 @@ async function _delegateToFlash(task, context) {
     // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 신설(나머지 20개 배치).
     // 이 호출 결과가 곧 사용자에게 보이는 최종 응답이 되므로, 타임아웃
     // 없이 서버가 무응답이면 다른 태그들과 동일하게 "멈춘 것처럼" 보인다.
+    // BUG-FIX(2026-09-18) — worker.js #326 게이트가 /deepseek에
+    // phone_verify_token을 강제하므로 함께 실어 보낸다(위 guid 누락
+    // 버그와 동일 클래스: 이 호출도 메인 스트리밍 호출과 인증 요건이
+    // 같아야 한다).
+    const _pvt = await _ensurePhoneVerifyToken();
     const res = await fetch(CFG.endpoint.replace(/\/+$/, '') + '/deepseek', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -4597,6 +4639,7 @@ async function _delegateToFlash(task, context) {
         temperature: 0.3,
         stream:      false,
         guid:        _USER?.ipv6 || USER_GUID || null,
+        phone_verify_token: _pvt,
         messages: [
           { role: 'system', content: sysPrompt },
           { role: 'user',   content: `task: ${task}\ncontext: ${context || '(없음)'}` },
@@ -5489,6 +5532,16 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
   const activeModel = CFG.model;
   console.log(`[AI] 호출 후보 ${candidates.length}개 준비 — 1번부터 순차 시도`);
 
+  // BUG-FIX(2026-09-18, 긴급) — worker.js #326("현관문 하나") 게이트가
+  // 2026-09-17부터 /deepseek·/chat/completions에 phone_verify_token을
+  // 강제하기 시작했는데, 이 메인 챗 경로에는 그 필드를 붙이는 배선이
+  // 아예 없어서 모든 메시지가 예외 없이 400 LOGIN_REQUIRED로 막히는
+  // 전면 장애가 발생했다(주피터 실사 재현). K-Plan/K-Law/K-Mail이 이미
+  // 쓰고 있는 공용 KAuth.ensureLogin()을 여기서도 한 번만 호출해 재사용
+  // — 재시도(_streamOneAttempt 반복 호출)마다 다시 로그인을 확인하지
+  // 않도록 클로저로 캡처한다.
+  const _pvt = await _ensurePhoneVerifyToken();
+
   // ── 스트리밍 호출 (페일오버 포함) ───────────────────────
   // BUG-FIX(2026-09-14) — _streamOneAttempt(maxTokensOverride, reuseBubble)로
   // 추출. 원래는 이 블록 전체(후보 페일오버 + SSE 수신)가 한 번만 실행돼,
@@ -5551,7 +5604,7 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
           ? await fetch(`${c.baseUrl}/deepseek`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ ...reqBody, guid: _USER?.ipv6 || USER_GUID || null }),
+              body: JSON.stringify({ ...reqBody, guid: _USER?.ipv6 || USER_GUID || null, phone_verify_token: _pvt }),
               signal: idle.signal,
             })
           : await fetch(`${CFG.endpoint.replace(/\/+$/, '')}/llm/relay`, {
