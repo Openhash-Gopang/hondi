@@ -1,0 +1,124 @@
+[
+  {
+    "id": "nondet-jocheon-welfare-outreach-run01",
+    "utterance": "보훈 대상자인데 신청 절차를 잘 몰라서 직접 찾아와서 설명해주실 수 있을까요.",
+    "candidate_codes": ["welfare", "outreach"],
+    "expected_ambiguous_pair": ["welfare", "outreach"],
+    "descriptions": {
+      "welfare": "조천읍 주민복지팀 — 기초생활수급·기초연금 접수, 보훈 접수(1차 접수, 최종 심사는 시청 소관) 관련 접수·신청",
+      "outreach": "조천읍 찾아가는복지팀 — 복지 사각지대 발굴, 방문 상담 관련 접수·신청"
+    },
+    "note": "diag-04 재현 — 동일 발화를 max_tokens=12000, temperature=0 고정으로 6회 반복 호출해 진짜 비결정성인지(같은 조건에서 답이 흔들리는지) 직접 검증"
+  },
+  {
+    "id": "nondet-jocheon-welfare-outreach-run02",
+    "utterance": "보훈 대상자인데 신청 절차를 잘 몰라서 직접 찾아와서 설명해주실 수 있을까요.",
+    "candidate_codes": ["welfare", "outreach"],
+    "expected_ambiguous_pair": ["welfare", "outreach"],
+    "descriptions": {
+      "welfare": "조천읍 주민복지팀 — 기초생활수급·기초연금 접수, 보훈 접수(1차 접수, 최종 심사는 시청 소관) 관련 접수·신청",
+      "outreach": "조천읍 찾아가는복지팀 — 복지 사각지대 발굴, 방문 상담 관련 접수·신청"
+    }
+  },
+  {
+    "id": "nondet-jocheon-welfare-outreach-run03",
+    "utterance": "보훈 대상자인데 신청 절차를 잘 몰라서 직접 찾아와서 설명해주실 수 있을까요.",
+    "candidate_codes": ["welfare", "outreach"],
+    "expected_ambiguous_pair": ["welfare", "outreach"],
+    "descriptions": {
+      "welfare": "조천읍 주민복지팀 — 기초생활수급·기초연금 접수, 보훈 접수(1차 접수, 최종 심사는 시청 소관) 관련 접수·신청",
+      "outreach": "조천읍 찾아가는복지팀 — 복지 사각지대 발굴, 방문 상담 관련 접수·신청"
+    }
+  },
+  {
+    "id": "nondet-jocheon-welfare-outreach-run04",
+    "utterance": "보훈 대상자인데 신청 절차를 잘 몰라서 직접 찾아와서 설명해주실 수 있을까요.",
+    "candidate_codes": ["welfare", "outreach"],
+    "expected_ambiguous_pair": ["welfare", "outreach"],
+    "descriptions": {
+      "welfare": "조천읍 주민복지팀 — 기초생활수급·기초연금 접수, 보훈 접수(1차 접수, 최종 심사는 시청 소관) 관련 접수·신청",
+      "outreach": "조천읍 찾아가는복지팀 — 복지 사각지대 발굴, 방문 상담 관련 접수·신청"
+    }
+  },
+  {
+    "id": "nondet-jocheon-welfare-outreach-run05",
+    "utterance": "보훈 대상자인데 신청 절차를 잘 몰라서 직접 찾아와서 설명해주실 수 있을까요.",
+    "candidate_codes": ["welfare", "outreach"],
+    "expected_ambiguous_pair": ["welfare", "outreach"],
+    "descriptions": {
+      "welfare": "조천읍 주민복지팀 — 기초생활수급·기초연금 접수, 보훈 접수(1차 접수, 최종 심사는 시청 소관) 관련 접수·신청",
+      "outreach": "조천읍 찾아가는복지팀 — 복지 사각지대 발굴, 방문 상담 관련 접수·신청"
+    }
+  },
+  {
+    "id": "nondet-jocheon-welfare-outreach-run06",
+    "utterance": "보훈 대상자인데 신청 절차를 잘 몰라서 직접 찾아와서 설명해주실 수 있을까요.",
+    "candidate_codes": ["welfare", "outreach"],
+    "expected_ambiguous_pair": ["welfare", "outreach"],
+    "descriptions": {
+      "welfare": "조천읍 주민복지팀 — 기초생활수급·기초연금 접수, 보훈 접수(1차 접수, 최종 심사는 시청 소관) 관련 접수·신청",
+      "outreach": "조천읍 찾아가는복지팀 — 복지 사각지대 발굴, 방문 상담 관련 접수·신청"
+    }
+  },
+  {
+    "id": "nondet-gender-welfare-hanbumo-run01",
+    "utterance": "한부모 가정 여성 지원 제도를 문의하고 싶어요.",
+    "candidate_codes": ["SP-DO-GENDER", "SP-DO-WELFARE"],
+    "expected_ambiguous_pair": ["SP-DO-GENDER", "SP-DO-WELFARE"],
+    "descriptions": {
+      "SP-DO-GENDER": "성평등여성정책관 [성평등·여성정책 — 복지가족국의 가족·아동·보육과는 별도]",
+      "SP-DO-WELFARE": "복지가족국(구 보건복지여성국)"
+    },
+    "note": "a1-15-gender-welfare-retry 재현 — 이전엔 빈 응답, 방금 재검증에선 LIVE-FAIL로 다른 결과. 동일 조건 반복으로 진짜 비결정성인지 검증"
+  },
+  {
+    "id": "nondet-gender-welfare-hanbumo-run02",
+    "utterance": "한부모 가정 여성 지원 제도를 문의하고 싶어요.",
+    "candidate_codes": ["SP-DO-GENDER", "SP-DO-WELFARE"],
+    "expected_ambiguous_pair": ["SP-DO-GENDER", "SP-DO-WELFARE"],
+    "descriptions": {
+      "SP-DO-GENDER": "성평등여성정책관 [성평등·여성정책 — 복지가족국의 가족·아동·보육과는 별도]",
+      "SP-DO-WELFARE": "복지가족국(구 보건복지여성국)"
+    }
+  },
+  {
+    "id": "nondet-gender-welfare-hanbumo-run03",
+    "utterance": "한부모 가정 여성 지원 제도를 문의하고 싶어요.",
+    "candidate_codes": ["SP-DO-GENDER", "SP-DO-WELFARE"],
+    "expected_ambiguous_pair": ["SP-DO-GENDER", "SP-DO-WELFARE"],
+    "descriptions": {
+      "SP-DO-GENDER": "성평등여성정책관 [성평등·여성정책 — 복지가족국의 가족·아동·보육과는 별도]",
+      "SP-DO-WELFARE": "복지가족국(구 보건복지여성국)"
+    }
+  },
+  {
+    "id": "nondet-gender-welfare-hanbumo-run04",
+    "utterance": "한부모 가정 여성 지원 제도를 문의하고 싶어요.",
+    "candidate_codes": ["SP-DO-GENDER", "SP-DO-WELFARE"],
+    "expected_ambiguous_pair": ["SP-DO-GENDER", "SP-DO-WELFARE"],
+    "descriptions": {
+      "SP-DO-GENDER": "성평등여성정책관 [성평등·여성정책 — 복지가족국의 가족·아동·보육과는 별도]",
+      "SP-DO-WELFARE": "복지가족국(구 보건복지여성국)"
+    }
+  },
+  {
+    "id": "nondet-gender-welfare-hanbumo-run05",
+    "utterance": "한부모 가정 여성 지원 제도를 문의하고 싶어요.",
+    "candidate_codes": ["SP-DO-GENDER", "SP-DO-WELFARE"],
+    "expected_ambiguous_pair": ["SP-DO-GENDER", "SP-DO-WELFARE"],
+    "descriptions": {
+      "SP-DO-GENDER": "성평등여성정책관 [성평등·여성정책 — 복지가족국의 가족·아동·보육과는 별도]",
+      "SP-DO-WELFARE": "복지가족국(구 보건복지여성국)"
+    }
+  },
+  {
+    "id": "nondet-gender-welfare-hanbumo-run06",
+    "utterance": "한부모 가정 여성 지원 제도를 문의하고 싶어요.",
+    "candidate_codes": ["SP-DO-GENDER", "SP-DO-WELFARE"],
+    "expected_ambiguous_pair": ["SP-DO-GENDER", "SP-DO-WELFARE"],
+    "descriptions": {
+      "SP-DO-GENDER": "성평등여성정책관 [성평등·여성정책 — 복지가족국의 가족·아동·보육과는 별도]",
+      "SP-DO-WELFARE": "복지가족국(구 보건복지여성국)"
+    }
+  }
+]
