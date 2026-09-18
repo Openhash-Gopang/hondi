@@ -1,0 +1,88 @@
+[
+  {
+    "id": "gov-clarify-a3-01-aewol-welfare-outreach",
+    "utterance": "형편이 너무 어려워서 기초생활수급을 신청하고 싶은데, 제가 거동이 불편해서 직접 못 가니 집으로 방문해서 상담도 받을 수 있을까요.",
+    "candidate_codes": ["welfare", "outreach", "civil"],
+    "expected_ambiguous_pair": ["welfare", "outreach"],
+    "descriptions": {
+      "welfare": "애월읍 주민복지팀 — 기초생활수급·기초연금 접수, 보훈 접수(1차 접수, 최종 심사는 시청 소관) 관련 접수·신청",
+      "outreach": "애월읍 찾아가는복지팀 — 복지 사각지대 발굴, 방문 상담 관련 접수·신청",
+      "civil": "애월읍 민원팀 — 주민등록등초본, 가족관계등록, 인감증명 등 제증명 발급 관련 접수·신청"
+    }
+  },
+  {
+    "id": "gov-clarify-a3-02-hallim-welfare-outreach",
+    "utterance": "기초연금을 신청하려고 하는데 서류 작성이 너무 어려워서, 직접 찾아와서 도와주실 수 있는지 궁금합니다.",
+    "candidate_codes": ["welfare", "outreach", "general"],
+    "expected_ambiguous_pair": ["welfare", "outreach"],
+    "descriptions": {
+      "welfare": "한림읍 주민복지팀 — 기초생활수급·기초연금 접수, 보훈 접수(1차 접수, 최종 심사는 시청 복지위생국) 관련 접수·신청",
+      "outreach": "한림읍 찾아가는복지팀 — 복지 사각지대 발굴, 방문 상담 관련 접수·신청",
+      "general": "한림읍 총무팀 — 민방위, 청소·환경정비, 이륜차 민원, 청사 관리 관련 접수·신청"
+    }
+  },
+  {
+    "id": "gov-clarify-a3-03-namwon-welfare-outreach",
+    "utterance": "생활이 너무 어려운데 어떤 지원을 받을 수 있는지, 집으로 와서 상담해주실 수 있나요.",
+    "candidate_codes": ["welfare", "outreach"],
+    "expected_ambiguous_pair": ["welfare", "outreach"],
+    "descriptions": {
+      "welfare": "남원읍 주민복지팀 — 기초생활수급·기초연금 접수, 보훈 접수(1차 접수, 최종 심사는 시청 소관) 관련 접수·신청",
+      "outreach": "남원읍 찾아가는복지팀 — 복지 사각지대 발굴, 방문 상담 관련 접수·신청"
+    }
+  },
+  {
+    "id": "gov-clarify-a3-04-daejeong-welfare-outreach",
+    "utterance": "기초생활수급자 신청 관련해서 상담을 받고 싶은데, 거동이 어려운 어르신이라 방문 상담이 가능한지 궁금합니다.",
+    "candidate_codes": ["welfare", "outreach", "civil"],
+    "expected_ambiguous_pair": ["welfare", "outreach"],
+    "descriptions": {
+      "welfare": "대정읍 주민복지팀 — 기초생활수급·기초연금 접수, 보훈 접수(1차 접수, 최종 심사는 시청 소관) 관련 접수·신청",
+      "outreach": "대정읍 찾아가는복지팀 — 복지 사각지대 발굴, 방문 상담 관련 접수·신청",
+      "civil": "대정읍 민원팀 — 주민등록등초본, 가족관계등록, 인감증명 등 제증명 발급 관련 접수·신청"
+    }
+  },
+  {
+    "id": "gov-clarify-a3-05-jocheon-welfare-outreach",
+    "utterance": "보훈 대상자인데 신청 절차를 잘 몰라서 직접 찾아와서 설명해주실 수 있을까요.",
+    "candidate_codes": ["welfare", "outreach"],
+    "expected_ambiguous_pair": ["welfare", "outreach"],
+    "descriptions": {
+      "welfare": "조천읍 주민복지팀 — 기초생활수급·기초연금 접수, 보훈 접수(1차 접수, 최종 심사는 시청 소관) 관련 접수·신청",
+      "outreach": "조천읍 찾아가는복지팀 — 복지 사각지대 발굴, 방문 상담 관련 접수·신청"
+    }
+  },
+  {
+    "id": "gov-clarify-a3-06-seongsan-welfare-outreach",
+    "utterance": "혼자 사시는 어르신이 복지 혜택을 놓치고 계신 것 같은데, 신청도 해드리고 상담도 받을 수 있는 곳이 있을까요.",
+    "candidate_codes": ["welfare", "outreach", "general"],
+    "expected_ambiguous_pair": ["welfare", "outreach"],
+    "descriptions": {
+      "welfare": "성산읍 주민복지팀 — 기초생활수급·기초연금 접수, 보훈 접수(1차 접수, 최종 심사는 시청 소관) 관련 접수·신청",
+      "outreach": "성산읍 찾아가는복지팀 — 복지 사각지대 발굴, 방문 상담 관련 접수·신청",
+      "general": "성산읍 총무팀 — 민방위, 청소·환경정비, 이륜차 민원, 청사 관리 관련 접수·신청"
+    }
+  },
+  {
+    "id": "gov-clarify-a3-07-control-jungmun-civil",
+    "utterance": "주민등록등본을 한 통 떼고 싶은데 어디로 가야 하나요.",
+    "candidate_codes": ["civil", "welfare", "general"],
+    "expected_ambiguous_pair": null,
+    "descriptions": {
+      "civil": "중문동 민원팀 — 주민등록등초본, 가족관계등록, 인감증명 등 제증명 발급 관련 접수·신청",
+      "welfare": "중문동 주민복지팀 — 기초생활수급·기초연금 접수, 보훈 접수(1차 접수, 최종 심사는 시청 소관) 관련 접수·신청",
+      "general": "중문동 총무팀 — 민방위, 청소·환경정비, 이륜차 민원, 청사 관리 관련 접수·신청"
+    }
+  },
+  {
+    "id": "gov-clarify-a3-08-control-aewol-industry",
+    "utterance": "농업경영체 등록을 새로 하고 싶은데 어디서 신청하나요.",
+    "candidate_codes": ["industry", "welfare", "civil"],
+    "expected_ambiguous_pair": null,
+    "descriptions": {
+      "industry": "애월읍 산업팀 — 농업경영체 등록, 영농지원, 지역 주력산업 현장 지원 관련 접수·신청",
+      "welfare": "애월읍 주민복지팀 — 기초생활수급·기초연금 접수, 보훈 접수(1차 접수, 최종 심사는 시청 소관) 관련 접수·신청",
+      "civil": "애월읍 민원팀 — 주민등록등초본, 가족관계등록, 인감증명 등 제증명 발급 관련 접수·신청"
+    }
+  }
+]
