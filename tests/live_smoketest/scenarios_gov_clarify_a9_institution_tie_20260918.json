@@ -1,0 +1,50 @@
+[
+  {
+    "id": "gov-clarify-a9-01-medcenter-tie",
+    "utterance": "의료원 진료 예약을 하고 싶은데 어떻게 해야 하나요.",
+    "candidate_codes": [
+      "SP-ORG-JEJUMED",
+      "SP-ORG-SGPMED"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-ORG-JEJUMED",
+      "SP-ORG-SGPMED"
+    ],
+    "descriptions": {
+      "SP-ORG-JEJUMED": "제주의료원 — 공공의료(취약계층 의료지원 포함), 검진센터·재활치료센터·고압산소치료센터 운영 (제주시 소재)",
+      "SP-ORG-SGPMED": "서귀포의료원 — 서귀포시 유일 종합병원으로서 공공의료 제공, 응급의료센터 운영 (서귀포시 소재)"
+    },
+    "note": "_resolveInstitutionMatch 기관간 순수 동점 분기(tied.length>1) — production 코드 주석이 직접 설명하는 실제 설계 동기 그 자체: JEJUMED/SGPMED가 kw '의료원' 하나로 완전 동점이고, 시코드(jejusi/seogwipo)가 다르므로 원래는 PDV 위치 힌트로 결정론적으로 먼저 좁힌다 — 이 하네스는 위치 힌트를 시뮬레이션하지 않으므로 정확히 '위치 정보가 없어 LLM으로 넘어가는' 경로를 테스트한다. 되묻기가 제대로 발동해야 함(사용자에게 '제주시/서귀포시 중 어디시죠' 식으로 물어야 정상)"
+  },
+  {
+    "id": "gov-clarify-a9-02-sportsorg-tie",
+    "utterance": "전문체육 진흥 관련 지원 사업이 궁금해요.",
+    "candidate_codes": [
+      "SP-ORG-JPSPO",
+      "SP-ORG-JSPO"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-ORG-JPSPO",
+      "SP-ORG-JSPO"
+    ],
+    "descriptions": {
+      "SP-ORG-JPSPO": "제주특별자치도장애인체육회 — 장애인 생활·전문체육 진흥, 제주장애인스포츠센터 관련 사업",
+      "SP-ORG-JSPO": "제주특별자치도체육회 — 생활체육·전문체육 진흥, 직장운동경기부 운영, 전국체전 등 대회 참가 지원"
+    },
+    "note": "기관간 순수 동점 분기, 두 번째 케이스 — JPSPO(장애인체육회)/JSPO(일반체육회) 둘 다 kw '전문체육 진흥' 동일 매칭, 시코드 필드 자체가 없어(도 전체 관할) 위치 기반 해소가 원천적으로 불가능하다 — 항상 classifyFn으로 넘어가야 하는 구조. 장애인 여부를 특정 안 한 발화라 실제로도 애매함"
+  },
+  {
+    "id": "gov-clarify-a9-03-control-sportsorg-disabled",
+    "utterance": "장애인 전문체육 진흥 관련 지원 사업이 궁금해요.",
+    "candidate_codes": [
+      "SP-ORG-JPSPO",
+      "SP-ORG-JSPO"
+    ],
+    "expected_ambiguous_pair": null,
+    "descriptions": {
+      "SP-ORG-JPSPO": "제주특별자치도장애인체육회 — 장애인 생활·전문체육 진흥, 제주장애인스포츠센터 관련 사업",
+      "SP-ORG-JSPO": "제주특별자치도체육회 — 생활체육·전문체육 진흥, 직장운동경기부 운영, 전국체전 등 대회 참가 지원"
+    },
+    "note": "통제 시나리오 — '장애인'이 명시되면 JPSPO(장애인체육회)로 명확히 좁혀져야 함. 키워드 매칭 점수는 여전히 동점(둘 다 '전문체육 진흥' 매칭)이지만 문맥상 장애인체육회가 명백한 정답 — classifyFn이 단순 키워드 동점을 넘어 문맥으로 올바르게 판단하는지 확인"
+  }
+]
