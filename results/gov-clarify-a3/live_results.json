@@ -1,0 +1,282 @@
+[
+  {
+    "id": "gov-clarify-a3-01-aewol-welfare-outreach",
+    "utterance": "형편이 너무 어려워서 기초생활수급을 신청하고 싶은데, 제가 거동이 불편해서 직접 못 가니 집으로 방문해서 상담도 받을 수 있을까요.",
+    "expected_ambiguous_pair": [
+      "welfare",
+      "outreach"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['welfare', 'outreach'] (기대: ['welfare', 'outreach'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 428,
+        "completion_tokens": 261,
+        "total_tokens": 689,
+        "prompt_tokens_details": {
+          "cached_tokens": 256
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 245
+        },
+        "prompt_cache_hit_tokens": 256,
+        "prompt_cache_miss_tokens": 172
+      },
+      {
+        "prompt_tokens": 208,
+        "completion_tokens": 136,
+        "total_tokens": 344,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 129
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 208
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a3-03-namwon-welfare-outreach",
+    "utterance": "생활이 너무 어려운데 어떤 지원을 받을 수 있는지, 집으로 와서 상담해주실 수 있나요.",
+    "expected_ambiguous_pair": [
+      "welfare",
+      "outreach"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['outreach', 'welfare'] (기대: ['welfare', 'outreach'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 368,
+        "completion_tokens": 329,
+        "total_tokens": 697,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 316
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 240
+      },
+      {
+        "prompt_tokens": 211,
+        "completion_tokens": 347,
+        "total_tokens": 558,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 340
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 211
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a3-07-control-jungmun-civil",
+    "utterance": "주민등록등본을 한 통 떼고 싶은데 어디로 가야 하나요.",
+    "expected_ambiguous_pair": null,
+    "live_verdict": "LIVE-PASS",
+    "live_note": "통제 시나리오 — 확신 있게 단일 코드로 정상 답함: civil",
+    "chosen": "civil",
+    "usages": [
+      {
+        "prompt_tokens": 402,
+        "completion_tokens": 83,
+        "total_tokens": 485,
+        "prompt_tokens_details": {
+          "cached_tokens": 256
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 70
+        },
+        "prompt_cache_hit_tokens": 256,
+        "prompt_cache_miss_tokens": 146
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a3-08-control-aewol-industry",
+    "utterance": "농업경영체 등록을 새로 하고 싶은데 어디서 신청하나요.",
+    "expected_ambiguous_pair": null,
+    "live_verdict": "LIVE-PASS",
+    "live_note": "통제 시나리오 — 확신 있게 단일 코드로 정상 답함: industry",
+    "chosen": "industry",
+    "usages": [
+      {
+        "prompt_tokens": 406,
+        "completion_tokens": 60,
+        "total_tokens": 466,
+        "prompt_tokens_details": {
+          "cached_tokens": 256
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 47
+        },
+        "prompt_cache_hit_tokens": 256,
+        "prompt_cache_miss_tokens": 150
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a3-06-seongsan-welfare-outreach",
+    "utterance": "혼자 사시는 어르신이 복지 혜택을 놓치고 계신 것 같은데, 신청도 해드리고 상담도 받을 수 있는 곳이 있을까요.",
+    "expected_ambiguous_pair": [
+      "welfare",
+      "outreach"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['outreach', 'welfare'] (기대: ['welfare', 'outreach'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 420,
+        "completion_tokens": 707,
+        "total_tokens": 1127,
+        "prompt_tokens_details": {
+          "cached_tokens": 256
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 691
+        },
+        "prompt_cache_hit_tokens": 256,
+        "prompt_cache_miss_tokens": 164
+      },
+      {
+        "prompt_tokens": 223,
+        "completion_tokens": 243,
+        "total_tokens": 466,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 236
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 223
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a3-02-hallim-welfare-outreach",
+    "utterance": "기초연금을 신청하려고 하는데 서류 작성이 너무 어려워서, 직접 찾아와서 도와주실 수 있는지 궁금합니다.",
+    "expected_ambiguous_pair": [
+      "welfare",
+      "outreach"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['welfare', 'outreach'] (기대: ['welfare', 'outreach'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 417,
+        "completion_tokens": 2196,
+        "total_tokens": 2613,
+        "prompt_tokens_details": {
+          "cached_tokens": 256
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 2180
+        },
+        "prompt_cache_hit_tokens": 256,
+        "prompt_cache_miss_tokens": 161
+      },
+      {
+        "prompt_tokens": 197,
+        "completion_tokens": 129,
+        "total_tokens": 326,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 122
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 197
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a3-04-daejeong-welfare-outreach",
+    "utterance": "기초생활수급자 신청 관련해서 상담을 받고 싶은데, 거동이 어려운 어르신이라 방문 상담이 가능한지 궁금합니다.",
+    "expected_ambiguous_pair": [
+      "welfare",
+      "outreach"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['outreach', 'welfare'] (기대: ['welfare', 'outreach'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 421,
+        "completion_tokens": 2427,
+        "total_tokens": 2848,
+        "prompt_tokens_details": {
+          "cached_tokens": 256
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 2414
+        },
+        "prompt_cache_hit_tokens": 256,
+        "prompt_cache_miss_tokens": 165
+      },
+      {
+        "prompt_tokens": 221,
+        "completion_tokens": 191,
+        "total_tokens": 412,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 184
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 221
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a3-05-jocheon-welfare-outreach",
+    "utterance": "보훈 대상자인데 신청 절차를 잘 몰라서 직접 찾아와서 설명해주실 수 있을까요.",
+    "expected_ambiguous_pair": [
+      "welfare",
+      "outreach"
+    ],
+    "live_verdict": "LIVE-CLARIFY-CORRECT",
+    "live_note": "runnerUp 확인 결과 애매함 확정, 기대한 쌍과 정확히 일치: ['welfare', 'outreach'] (기대: ['welfare', 'outreach'])",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 365,
+        "completion_tokens": 5692,
+        "total_tokens": 6057,
+        "prompt_tokens_details": {
+          "cached_tokens": 128
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 5679
+        },
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 237
+      },
+      {
+        "prompt_tokens": 188,
+        "completion_tokens": 503,
+        "total_tokens": 691,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 496
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 188
+      }
+    ]
+  }
+]
