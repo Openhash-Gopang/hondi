@@ -126,7 +126,7 @@ A6에서 "institution 레벨도 classifyFn을 거치는구나"를 확인한 뒤,
 3. ~~institution↔L2 강한매칭 충돌 안전망~~ **완료(A6).** PR #356으로 수정, 5/5 라이브 검증 통과.
 4. ~~classifyFn 소비 지점 나머지 전수 검증(A7~A10)~~ **완료(후속 갱신 4 참고).** 14/14 전 지점 커버, 구조적 결함은 A6 하나뿐.
 5. ~~`SP-ORGDIV-JILES-EDU`/`SP-ORGDIV-JILES-LIFELONG` 중복 데이터 정리~~ **완료(후속 갱신 5 참고).** LIFELONG 코드/파일 폐기, EDU로 통합, jiles.or.kr 원본으로 재검증.
-6. **PocketBase 라이브 레지스트리에서 `unclaimed_7ba267d3-49ff-4337-8421-2923c139dadf`(구 JILES-LIFELONG) 레코드 정리.** 이 세션은 DB 접근 권한이 없어 못 함 — admin 권한 있는 세션/사람이 처리해야 함.
+6. ~~PocketBase 라이브 레지스트리에서 `unclaimed_7ba267d3-49ff-4337-8421-2923c139dadf`(구 JILES-LIFELONG) 레코드 정리~~ **완료.** l1-hanlim 서버에 직접 접속해 l3-jejudo 인스턴스 API로 삭제 완료 — 상세 내용 및 이 과정에서 발견한 별도의 심각한 인프라 장애(48개 PocketBase 인스턴스 중 46개 crash-loop, 삭제 전 검증 훅 버그)는 `docs/INCIDENT_2026-09-18_l1-hanlim-pocketbase-crashloop-recovery.md` 참고 — 그 문서의 "남은 후속 작업"이 새로운 우선순위로 추가돼야 함(특히 삭제훅 `_balanceUtils` 버그는 시급).
 7. **A2~A5의 표본 규모를 넓힐지 결정.** 지금까지는 배치당 6~17건 소규모 표본이다. 급하지 않다.
 8. **"확신도 임계값(예: 80%)까지 계속 되묻기" 제안은 채택하지 않기로 했다(사용자 논의 결론, 이전 세션).** 대신 검증된 구조("확신 있는 선택 + 부담 적은 차선책 보고 + 단일 이진 확인")를 원칙으로 최상위 공통 SP에 명시하는 방향으로 진행하기로 함 — 이 작업 자체가 범위에 포함됐었는지는 재확인 필요.
 9. **EXPERT 쪽(subject-gate.js) 페르소나 게이트**는 gov-router 계열과 다른 시스템이라 이번 라운드 범위 밖으로 남겨둠. 필요하면 별도 라운드로.
