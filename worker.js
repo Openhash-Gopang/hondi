@@ -901,6 +901,14 @@ async function handleDeviceLinkInit(request, env, corsHeaders) {
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
   const { pcPubKeyB64u, pcLabel, sigMsg } = body;
   const purpose = body.purpose === 'sign_request' ? 'sign_request' : 'key_transfer'; // 미지정/그외 값은 안전하게 기존 동작으로
+  // 2026-09-19 신설(주피터 지적) — "삭제하려는 기기 자신에게 그 삭제
+  // 승인 요청이 함께 간다"는 문제(잘못 mobile로 등록된 기기가 자기 자신을
+  // 지우는 요청의 push 대상에도 포함되는 경우). 호출부가 "이 기기ID로는
+  // 절대 보내지 마라"를 명시할 수 있게 한다 — 임의의 기기를 대상에서
+  // 빼는 게 아니라, 요청 자체를 만든 쪽이 스스로 배제를 선언하는 것이라
+  // 악용 여지가 없다(자기 자신을 못 받게 하는 것뿐, 남을 못 받게 막는
+  // 게 아님).
+  const excludeDeviceId = typeof body.excludeDeviceId === 'string' ? body.excludeDeviceId : null;
   const e164 = _normalizePhoneE164(body.e164);
   if (!e164) {
     return _err(400, 'INVALID_PHONE', '올바른 국내 전화번호 형식이 아닙니다', corsHeaders);
@@ -1036,7 +1044,14 @@ async function handleDeviceLinkInit(request, env, corsHeaders) {
       // 기존 방식은 "일단 다 보내고 나중에 알려주기"였을 뿐 발송 자체를
       // 막지는 못했다).
       const devices = _parseDeviceSubscriptions(profile?.push_subscription);
-      const mobileDevices = devices.filter(d => d.deviceType === 'mobile');
+      // 2026-09-19 추가 — excludeDeviceId가 지정되면 발송 대상에서
+      // 그 기기만 제외한다(§위 주석). hasMobileDevice/pushSentToMobile도
+      // 이 제외가 반영된 집합 기준으로 계산해야 한다 — 그렇지 않으면
+      // "제외한 기기 하나뿐이었는데 hasMobileDevice:true로 잘못 응답"하는
+      // 새 버그가 생긴다.
+      const mobileDevices = devices
+        .filter(d => d.deviceType === 'mobile')
+        .filter(d => !excludeDeviceId || d.deviceId !== excludeDeviceId);
       hasMobileDevice = mobileDevices.length > 0;
       if (mobileDevices.length) {
         const payload = JSON.stringify({

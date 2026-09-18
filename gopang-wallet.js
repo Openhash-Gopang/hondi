@@ -1793,7 +1793,7 @@
    *  돌려받는다. 결과는 postMessage로 전달되며, 서명 자체는 검증 가능한
    *  공개 정보라 봉투 암호화가 필요 없다(개인키만 절대 노출 안 되면 됨).
    * ──────────────────────────────────────────────── */
-  function _openSignRequestPopup(sigMsg, e164) {
+  function _openSignRequestPopup(sigMsg, e164, excludeDeviceId) {
     return new Promise((resolve, reject) => {
       // 2026-09-18 수정(주피터 지시) — device-link.html은 이미 PREFILLED_PHONE
       // 쿼리 파라미터로 전화번호를 받으면 전화번호 입력 화면 자체를 건너뛰고
@@ -1805,8 +1805,13 @@
       // 화면만 예외적으로 "010-1234-5678" 전체 입력 형식을 쓰는 것도 이
       // 재입력 화면이 아예 안 뜨면 함께 해결된다. 알고 있는 번호가 있으면
       // 그대로 실어 보낸다.
+      // 2026-09-19 추가(주피터 지적) — 삭제하려는 기기 자신이 이 요청을
+      // 만드는 경우(§push-diagnose.html), 그 기기가 mobile로 (잘못)
+      // 등록돼 있으면 "자기 자신을 지워달라"는 승인 요청이 자기 자신
+      // 에게도 감 — excludeDeviceId로 그 기기를 발송 대상에서 뺀다.
       const url = '/auth/device-link.html?purpose=sign_request&sigMsg=' + encodeURIComponent(sigMsg)
-        + (e164 ? '&phone=' + encodeURIComponent(e164) : '');
+        + (e164 ? '&phone=' + encodeURIComponent(e164) : '')
+        + (excludeDeviceId ? '&excludeDeviceId=' + encodeURIComponent(excludeDeviceId) : '');
       const popup = window.open(
         url,
         'gopang_sign_request', 'width=420,height=560,menubar=no,toolbar=no'
@@ -1903,8 +1908,8 @@
       }
       return this._pubkeyFetch || Promise.resolve();
     }
-    sign(payload) {
-      const run = () => this._signOne(payload);
+    sign(payload, excludeDeviceId) {
+      const run = () => this._signOne(payload, excludeDeviceId);
       // 이전 서명이 성공했든 실패했든(예: 사용자가 팝업을 닫아 reject)
       // 다음 서명 요청은 항상 이어서 실행돼야 하므로, 큐 자체는 끊기지
       // 않게 별도로 이어붙인다. run()의 반환(성공/실패)은 그대로
@@ -1918,8 +1923,12 @@
     signPayload(payload) {
       return this.sign(payload);
     }
-    async _signOne(payload) {
-      const { signature, guid, publicKeyB64u } = await _openSignRequestPopup(String(payload), this.e164);
+    // 2026-09-19 추가 — excludeDeviceId: 이 서명 요청에 대한 승인 알림을
+    // 보내지 말아야 할 deviceId(주로 "자기 자신을 삭제하는" 요청을 만든
+    // 그 기기 자신 — §push-diagnose.html). 일반 로그인 재인증(sign())
+    // 호출부는 이 인자를 안 넘기므로 기존 동작 그대로다.
+    async _signOne(payload, excludeDeviceId) {
+      const { signature, guid, publicKeyB64u } = await _openSignRequestPopup(String(payload), this.e164, excludeDeviceId);
       // 첫 서명 성공 시점에야 서버(전화번호 조회 결과)로부터 실제 guid를
       // 처음 알게 된다 — 공용 PC는 사전에 어떤 계정인지 전혀 모르는
       // 상태에서 시작하기 때문. sessionStorage에만 남긴다(localStorage

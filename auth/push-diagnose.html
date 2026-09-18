@@ -266,7 +266,10 @@
       await proxy.setIdentity({ guid, e164 });
       const ts = Date.now();
       const sigMsg = `remove-device:${guid}:${deviceId}:${ts}`;
-      const signature = await proxy.sign(sigMsg);
+      // excludeDeviceId=deviceId — 지금 지우려는 그 기기가 (잘못
+      // mobile로 등록돼 있어) 자기 자신을 지우라는 알림을 스스로
+      // 받는 걸 막는다(주피터 지적, 2026-09-19).
+      const signature = await proxy.sign(sigMsg, deviceId);
       if (!proxy.publicKeyB64u) throw new Error('서명은 됐지만 공개키를 확인하지 못했습니다 — 다시 시도해 주세요.');
 
       const res = await fetch(`${WORKER}/account/remove-device`, {

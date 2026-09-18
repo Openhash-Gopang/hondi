@@ -123,6 +123,11 @@ import { _buildKrE164, KR_AREA_CODES, krNeededDigitsFor, _restoreFromBackupKey }
   const PARAMS  = new URLSearchParams(location.search);
   const PURPOSE = PARAMS.get('purpose') === 'sign_request' ? 'sign_request' : 'key_transfer';
   const SIG_MSG = PARAMS.get('sigMsg') || null;
+  // 2026-09-19 신설 — 호출부가 "이 deviceId로는 승인 알림을 보내지 마라"고
+  // 명시할 수 있게 전달만 해준다(실제 필터링은 서버 handleDeviceLinkInit이
+  // 함). "자기 자신을 삭제하는 요청이 자기 자신에게도 알림으로 간다"는
+  // 문제(§push-diagnose.html의 기기 삭제 기능) 대응.
+  const EXCLUDE_DEVICE_ID = PARAMS.get('excludeDeviceId') || null;
   const IS_POPUP_SIGN = PURPOSE === 'sign_request' && !!window.opener;
   // 팝업(window.open)은 같은 오리진이면 opener와 sessionStorage를 공유한다
   // (스펙 동작) — 그래서 "이번 공용 PC 세션에서 이미 승인받은 전화번호"를
@@ -311,6 +316,7 @@ import { _buildKrE164, KR_AREA_CODES, krNeededDigitsFor, _restoreFromBackupKey }
       if (PURPOSE === 'sign_request') {
         if (!SIG_MSG) throw new Error('서명 대상이 없습니다(sigMsg 누락) — 잘못된 요청입니다.');
         initBody.sigMsg = SIG_MSG;
+        if (EXCLUDE_DEVICE_ID) initBody.excludeDeviceId = EXCLUDE_DEVICE_ID;
       } else {
         // key_transfer만 X25519 키페어가 필요하다(개인키 봉투 수신용).
         // sign_request는 서명 '결과'만 평문으로 받으면 되므로 불필요.
