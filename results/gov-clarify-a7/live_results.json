@@ -1,0 +1,84 @@
+[
+  {
+    "id": "gov-clarify-a7-03-control-direct-kwmatch",
+    "utterance": "재산세 납부 기한이 언제까지인지 알고 싶어요.",
+    "expected_ambiguous_pair": null,
+    "live_verdict": "LIVE-PASS",
+    "live_note": "통제 시나리오 — 확신 있게 단일 코드로 정상 답함: SP-CITYDEPT-jejusi-jachi",
+    "chosen": "SP-CITYDEPT-jejusi-jachi",
+    "usages": [
+      {
+        "prompt_tokens": 395,
+        "completion_tokens": 94,
+        "total_tokens": 489,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 72
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 395
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a7-01-yugidongmul",
+    "utterance": "유기동물을 발견했는데 어디에 신고해야 하나요.",
+    "expected_ambiguous_pair": null,
+    "live_verdict": "LIVE-PASS",
+    "live_note": "통제 시나리오 — 확신 있게 단일 코드로 정상 답함: SP-CITYDEPT-jejusi-agri",
+    "chosen": "SP-CITYDEPT-jejusi-agri",
+    "usages": [
+      {
+        "prompt_tokens": 1019,
+        "completion_tokens": 310,
+        "total_tokens": 1329,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 288
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 1019
+      }
+    ]
+  },
+  {
+    "id": "gov-clarify-a7-02-goyangi-jungseonghwa",
+    "utterance": "떠돌이 고양이 중성화 수술 지원 사업이 있는지 궁금해요.",
+    "expected_ambiguous_pair": null,
+    "live_verdict": "LIVE-CLARIFY-FALSEPOSITIVE",
+    "live_note": "통제 시나리오인데 runnerUp 확인 결과 발동 — 과잉 트리거: ['SP-CITYDEPT-jejusi-agri', 'SP-CITYDEPT-jejusi-climate']",
+    "chosen": null,
+    "usages": [
+      {
+        "prompt_tokens": 1027,
+        "completion_tokens": 1241,
+        "total_tokens": 2268,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 1212
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 1027
+      },
+      {
+        "prompt_tokens": 214,
+        "completion_tokens": 1778,
+        "total_tokens": 1992,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 1771
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 214
+      }
+    ]
+  }
+]
