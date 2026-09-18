@@ -1,0 +1,162 @@
+[
+  {
+    "id": "gov-clarify-a2-01-jejusi-propertytax-tax",
+    "utterance": "자동차를 새로 사서 등록하려는데 세금 관련해서 어디로 문의해야 하나요.",
+    "candidate_codes": [
+      "SP-CITYDIV-JEJUSI-JACHI-PROPERTYTAX",
+      "SP-CITYDIV-JEJUSI-JACHI-TAX",
+      "SP-CITYDIV-JEJUSI-SAFETY-VEHICLE"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-CITYDIV-JEJUSI-JACHI-PROPERTYTAX",
+      "SP-CITYDIV-JEJUSI-JACHI-TAX"
+    ],
+    "descriptions": {
+      "SP-CITYDIV-JEJUSI-JACHI-PROPERTYTAX": "제주시청 자치행정국 재산세과 — 재산세·자동차세 등 시청이 매년 정기적으로 부과(고지)하는 지방세를 담당한다. 취득·등록 시 신고하는 세목(취득세 등)은 세무과 소관이므로 혼동하지 않는다.",
+      "SP-CITYDIV-JEJUSI-JACHI-TAX": "제주시청 자치행정국 세무과 — 취득세·등록면허세·지방소득세 등 신고납부형 지방세를 담당한다. 재산세·자동차세 등 부과형 지방세는 재산세과(별도 과) 소관이므로 혼동하지 않는다.",
+      "SP-CITYDIV-JEJUSI-SAFETY-VEHICLE": "제주시청 안전교통국 차량관리과 — 자동차 등록·이전등록, 차고지증명제 운영을 담당한다(세금이 아니라 등록 행정 자체)."
+    }
+  },
+  {
+    "id": "gov-clarify-a2-02-jejusi-village-selfgov",
+    "utterance": "우리 마을에서 주민들이 주도해서 마을 사업을 하나 해보려고 하는데 어디에 문의하면 되나요.",
+    "candidate_codes": [
+      "SP-CITYDIV-JEJUSI-ECON-VILLAGE",
+      "SP-CITYDIV-JEJUSI-JACHI-SELFGOV"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-CITYDIV-JEJUSI-ECON-VILLAGE",
+      "SP-CITYDIV-JEJUSI-JACHI-SELFGOV"
+    ],
+    "descriptions": {
+      "SP-CITYDIV-JEJUSI-ECON-VILLAGE": "제주시청 경제일자리국 마을활력과 — 마을만들기, 주민 주도 도시재생 사업(마을기업, 도시재생 등 물리적·경제적 활력사업)을 집행한다.",
+      "SP-CITYDIV-JEJUSI-JACHI-SELFGOV": "제주시청 자치행정국 자치행정과 — 읍면동 행정 총괄·지원, 주민자치·마을공동체 관련 업무, 선거 관련 행정지원을 담당한다."
+    }
+  },
+  {
+    "id": "gov-clarify-a2-03-seogwipo-village-selfgov",
+    "utterance": "동네 주민들과 마을공동체 활동을 시작해보고 싶은데 시청 어느 부서와 상담하면 될까요.",
+    "candidate_codes": [
+      "SP-CITYDIV-SEOGWIPO-JACHI-VILLAGE",
+      "SP-CITYDIV-SEOGWIPO-JACHI-SELFGOV"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-CITYDIV-SEOGWIPO-JACHI-VILLAGE",
+      "SP-CITYDIV-SEOGWIPO-JACHI-SELFGOV"
+    ],
+    "descriptions": {
+      "SP-CITYDIV-SEOGWIPO-JACHI-VILLAGE": "서귀포시청 자치행정국 마을활력과 — 마을만들기, 주민 주도 마을공동체 사업을 담당한다.",
+      "SP-CITYDIV-SEOGWIPO-JACHI-SELFGOV": "서귀포시청 자치행정국 자치행정과 — 읍면동 행정 총괄·지원, 선거 행정지원을 담당한다. 서귀포시는 마을공동체·평생교육 업무가 마을활력과·평생교육과로 별도 분리돼 있어 이 과의 업무 범위가 제주시보다 좁다."
+    }
+  },
+  {
+    "id": "gov-clarify-a2-04-do-welfare-policy-elderly",
+    "utterance": "어르신들을 위한 복지 지원 제도가 어떤 게 있는지 전반적으로 안내받고 싶어요.",
+    "candidate_codes": [
+      "SP-DIV-WELFARE-POLICY",
+      "SP-DIV-WELFARE-ELDERLY"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-DIV-WELFARE-POLICY",
+      "SP-DIV-WELFARE-ELDERLY"
+    ],
+    "descriptions": {
+      "SP-DIV-WELFARE-POLICY": "제주도청 복지가족국 복지정책과 — 복지 정책 총괄·기획을 담당한다.",
+      "SP-DIV-WELFARE-ELDERLY": "제주도청 복지가족국 노인복지과 — 노인 대상 복지사업(기초연금, 노인일자리, 경로당 지원 등) 실무를 담당한다."
+    }
+  },
+  {
+    "id": "gov-clarify-a2-05-do-climate-envpolicy-recycling",
+    "utterance": "일회용품 사용을 줄이고 재활용을 늘리는 정책을 도청이 어떻게 추진하고 있는지 알고 싶어요.",
+    "candidate_codes": [
+      "SP-DIV-CLIMATE-ENVPOLICY",
+      "SP-DIV-CLIMATE-RECYCLING"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-DIV-CLIMATE-ENVPOLICY",
+      "SP-DIV-CLIMATE-RECYCLING"
+    ],
+    "descriptions": {
+      "SP-DIV-CLIMATE-ENVPOLICY": "제주도청 기후환경국 환경정책과 — 환경 정책 총괄·기획을 담당한다.",
+      "SP-DIV-CLIMATE-RECYCLING": "제주도청 기후환경국 자원순환과 — 폐기물 감량·재활용 정책 실무를 담당한다."
+    }
+  },
+  {
+    "id": "gov-clarify-a2-06-do-safety-natural-social-disaster",
+    "utterance": "폭염이 심해서 피해가 걱정되는데 도청 어느 부서에서 대응하고 있는지 알고 싶어요.",
+    "candidate_codes": [
+      "SP-DIV-SAFETY-NATURALDISASTER",
+      "SP-DIV-SAFETY-SOCIALDISASTER"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-DIV-SAFETY-NATURALDISASTER",
+      "SP-DIV-SAFETY-SOCIALDISASTER"
+    ],
+    "descriptions": {
+      "SP-DIV-SAFETY-NATURALDISASTER": "제주도청 도민안전건강실 자연재난과 — 태풍·호우·폭염 등 자연재해 대응을 담당한다.",
+      "SP-DIV-SAFETY-SOCIALDISASTER": "제주도청 도민안전건강실 사회재난과 — 화재·감염병·인적사고 등 사회재난 대응을 담당한다."
+    }
+  },
+  {
+    "id": "gov-clarify-a2-07-do-transport-policy-public",
+    "utterance": "버스 요금 체계가 어떻게 정해지는지, 관련해서 민원을 넣고 싶은데 어디로 문의해야 하나요.",
+    "candidate_codes": [
+      "SP-DIV-TRANSPORT-TRAFFICPOLICY",
+      "SP-DIV-TRANSPORT-PUBLICTRANSPORT"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-DIV-TRANSPORT-TRAFFICPOLICY",
+      "SP-DIV-TRANSPORT-PUBLICTRANSPORT"
+    ],
+    "descriptions": {
+      "SP-DIV-TRANSPORT-TRAFFICPOLICY": "제주도청 교통항공국 교통정책과 — 교통 정책 총괄·기획을 담당한다.",
+      "SP-DIV-TRANSPORT-PUBLICTRANSPORT": "제주도청 교통항공국 대중교통과 — 버스·택시 등 대중교통 운영·요금 실무를 담당한다."
+    }
+  },
+  {
+    "id": "gov-clarify-a2-08-jejusi-envguide-envmgmt",
+    "utterance": "공장에서 냄새와 매연이 계속 나서 불편한데 이거 어디에 이야기하면 되나요.",
+    "candidate_codes": [
+      "SP-CITYDIV-JEJUSI-CLIMATE-ENVGUIDE",
+      "SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT"
+    ],
+    "expected_ambiguous_pair": [
+      "SP-CITYDIV-JEJUSI-CLIMATE-ENVGUIDE",
+      "SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT"
+    ],
+    "descriptions": {
+      "SP-CITYDIV-JEJUSI-CLIMATE-ENVGUIDE": "제주시청 청정환경국 환경지도과 — 환경오염 단속, 폐기물 배출업소 지도·점검을 담당한다.",
+      "SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT": "제주시청 청정환경국 환경관리과 — 환경 총괄, 대기·수질 관리를 담당한다(관내 환경 인허가·관리 실무)."
+    }
+  },
+  {
+    "id": "gov-clarify-a2-09-control-jejusi-citrus",
+    "utterance": "감귤 유통구조 개선 사업 참여 방법을 알고 싶어요.",
+    "candidate_codes": [
+      "SP-CITYDIV-JEJUSI-AGRI-CITRUS",
+      "SP-CITYDIV-JEJUSI-AGRI-ECOFARM",
+      "SP-CITYDIV-JEJUSI-AGRI-LIVESTOCK"
+    ],
+    "expected_ambiguous_pair": null,
+    "descriptions": {
+      "SP-CITYDIV-JEJUSI-AGRI-CITRUS": "제주시청 농수축산국 감귤유통과 — 감귤 유통구조 개선, 감귤산업 진흥을 담당한다.",
+      "SP-CITYDIV-JEJUSI-AGRI-ECOFARM": "제주시청 농수축산국 친환경농정과 — 친환경 농업 정책을 담당한다.",
+      "SP-CITYDIV-JEJUSI-AGRI-LIVESTOCK": "제주시청 농수축산국 청정축산과 — 축산업 관련 행정을 담당한다."
+    }
+  },
+  {
+    "id": "gov-clarify-a2-10-control-do-ocean-haenyeo",
+    "utterance": "해녀 문화유산 등재 관련 자료를 어디서 받을 수 있나요.",
+    "candidate_codes": [
+      "SP-DIV-OCEAN-HAENYEOHERITAGE",
+      "SP-DIV-OCEAN-MARINEPOLICY",
+      "SP-DIV-OCEAN-MARINEINDUSTRY"
+    ],
+    "expected_ambiguous_pair": null,
+    "descriptions": {
+      "SP-DIV-OCEAN-HAENYEOHERITAGE": "제주도청 해양수산국 해녀문화유산과 — 해녀문화 보전·유산 등재 업무를 담당한다.",
+      "SP-DIV-OCEAN-MARINEPOLICY": "제주도청 해양수산국 수산정책과 — 수산업 정책 총괄을 담당한다.",
+      "SP-DIV-OCEAN-MARINEINDUSTRY": "제주도청 해양수산국 해양산업과 — 해양산업 진흥을 담당한다."
+    }
+  }
+]
