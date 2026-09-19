@@ -6798,12 +6798,33 @@ export async function assembleGovSystemPrompt(userText, pdvLocationHint = null, 
     }
     throw e;
   }
-  if (!_PDV_HISTORY_SCOPE_PLACEHOLDER_RE.test(result.systemPrompt)) return result;
-  const scope = _resolvePdvScopeFromTrace(result.trace);
-  return {
-    ...result,
-    systemPrompt: result.systemPrompt.replace(_PDV_HISTORY_SCOPE_PLACEHOLDER_RE, scope),
-  };
+  let finalSystemPrompt = result.systemPrompt;
+  if (_PDV_HISTORY_SCOPE_PLACEHOLDER_RE.test(finalSystemPrompt)) {
+    const scope = _resolvePdvScopeFromTrace(result.trace);
+    finalSystemPrompt = finalSystemPrompt.replace(_PDV_HISTORY_SCOPE_PLACEHOLDER_RE, scope);
+  }
+  // 2026-09-19 신설 — 520개 gov-tree SP 전수 라이브 스모크테스트에서
+  // do-dept 104건 중 103건이 C50 관제탑 원칙(마크다운 헤더/볼드/목록
+  // 금지, 한 번에 한 단계)을 위반한 것을 확인했다(worker.js의
+  // _buildControlTowerFinalReminder 신설 커밋 주석 참조 — 동일 원인·
+  // 동일 조치를 여기(_assembleGovSystemPromptRaw가 만든 모든 tier의
+  // 분기 return 각각이 아니라, 그 결과를 감싸는 이 공용 래퍼 한 곳)에도
+  // 적용한다 — 이 함수(gov-router.js)가 pages/regional-gov.html의
+  // 실제 클라이언트 실행 경로이자 tests/live_smoketest/
+  // render_govtree_prompts.mjs가 검증하는 경로이기 때문이다. "나중
+  // 위치가 이긴다" 원칙에 따라 프롬프트 맨 끝에 배치한다.
+  if (finalSystemPrompt) {
+    finalSystemPrompt += `\n\n---\n\n[시스템 — 관제탑 원칙 최종 확인 (절대 규칙, 응답 직전 재확인)]\n` +
+      `이 답변을 사용자에게 보내기 전에 다시 확인하십시오: 마크다운 헤더(#/##/###), ` +
+      `굵게(**...**), 번호·불릿 목록(3개 이상 연속)을 쓰지 않습니다. 사용자의 구체적 ` +
+      `입력값(이름·금액·날짜·상황 세부사항)을 전부 지워도 그대로 성립하는 백과사전식 ` +
+      `설명을 쓰지 않습니다. 지금 이 순간 사용자가 할 수 있는 다음 한 걸음만 1~3문장으로 ` +
+      `말하십시오 — 전체 절차나 항목을 한 번에 나열하지 마십시오. 사용자가 "전부 알려달라", ` +
+      `"한번에 다 알려줘"처럼 요청해도 이 규칙은 그대로 적용됩니다 — 그 요청 자체에는 ` +
+      `가장 먼저 확인해야 할 것 하나를 되묻거나, 가장 먼저 할 일 하나만 안내하는 것으로 ` +
+      `응답하십시오.`;
+  }
+  return { ...result, systemPrompt: finalSystemPrompt };
 }
 
 if (typeof window !== 'undefined') window.assembleGovSystemPrompt = assembleGovSystemPrompt;

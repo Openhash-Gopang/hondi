@@ -26177,6 +26177,31 @@ function _insertSystemNote(messages, noteText) {
   return [...messages.slice(0, i), { role: 'system', content: clean }, ...messages.slice(i)];
 }
 
+// 2026-09-19 신설 — 520개 gov-tree SP 전수 라이브 스모크테스트(DeepSeek
+// 1차 응답 직접 검사, call-ai.js의 _enforceConversationalStyle 재시도
+// 안전망을 거치지 않은 원본 기준)에서 do-dept 104건 중 103건이 C50
+// 관제탑 원칙(마크다운 헤더/볼드/목록 금지, 한 번에 한 단계)을 위반한
+// 것을 확인했다. CT-0001 렌더 결과를 직접 열어보니 C50 원문은 정상
+// 주입되어 있었지만, agencyPrompt(SP-DO-000 등 기관 본문)가 수천 줄에
+// 달해 원칙 문구(2920번째 줄)가 프롬프트 중간에 묻혀 있었다 — 아래
+// _buildLocationNote/_buildDateNote 주석의 "나중 위치가 이긴다" 원칙을
+// 그대로 적용해, 짧고 단호한 재확인 문구를 프롬프트 맨 끝(agencyPrompt·
+// 위치·날짜 안내보다도 뒤)에 배치한다. call-ai.js의 코드 레벨 재시도
+// 안전망(_violatesConversationalStyle/_enforceConversationalStyle)은
+// 여전히 유지 — 이건 그 안전망에 기대는 재시도 횟수 자체를 줄이기
+// 위한 1차 방어선 보강이다.
+function _buildControlTowerFinalReminder() {
+  return `\n\n---\n\n[시스템 — 관제탑 원칙 최종 확인 (절대 규칙, 응답 직전 재확인)]\n` +
+    `이 답변을 사용자에게 보내기 전에 다시 확인하십시오: 마크다운 헤더(#/##/###), ` +
+    `굵게(**...**), 번호·불릿 목록(3개 이상 연속)을 쓰지 않습니다. 사용자의 구체적 ` +
+    `입력값(이름·금액·날짜·상황 세부사항)을 전부 지워도 그대로 성립하는 백과사전식 ` +
+    `설명을 쓰지 않습니다. 지금 이 순간 사용자가 할 수 있는 다음 한 걸음만 1~3문장으로 ` +
+    `말하십시오 — 전체 절차나 항목을 한 번에 나열하지 마십시오. 사용자가 "전부 알려달라", ` +
+    `"한번에 다 알려줘"처럼 요청해도 이 규칙은 그대로 적용됩니다 — 그 요청 자체에는 ` +
+    `가장 먼저 확인해야 할 것 하나를 되묻거나, 가장 먼저 할 일 하나만 안내하는 것으로 ` +
+    `응답하십시오.`;
+}
+
 function _buildLocationNote(currentLocation) {
   if (!currentLocation || typeof currentLocation !== 'string') return '';
   const safe = currentLocation.slice(0, 200); // 방어적 길이 제한
@@ -26294,7 +26319,7 @@ async function handleGovRelay(bodyText, env, corsHeaders, meta = null, ctx = nul
   const universalCommon = pdvScope
     ? universalCommonRaw.replace(_PDV_SCOPE_PLACEHOLDER_RE, pdvScope)
     : universalCommonRaw;
-  const systemParts = [universalIntegrity, universalCommon, controlTowerPrinciple, identityDocRaw, ownSpAndGates, agencyPrompt || '', _buildLocationNote(currentLocation), _buildDateNote()].filter(Boolean);
+  const systemParts = [universalIntegrity, universalCommon, controlTowerPrinciple, identityDocRaw, ownSpAndGates, agencyPrompt || '', _buildLocationNote(currentLocation), _buildDateNote(), _buildControlTowerFinalReminder()].filter(Boolean);
   const systemContent = systemParts.length
     ? systemParts.join('\n\n---\n\n')
     : (agencyPrompt || ''); // 공통 규칙 로드 실패해도 기관 고유 규칙만으로 서비스 지속
