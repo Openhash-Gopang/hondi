@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>혼디 Hondi — 혼디, 어디에 쓰는 물건인가요?</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --ink:#1a1a1a; --ink-soft:#4d4d4d; --paper:#ffffff;
+    --line:#c8c8c8; --line-strong:#1a1a1a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{background:#fff;font-family:'Pretendard',sans-serif;color:var(--ink);}
+  @page{ size:A4; margin:10mm 12mm; }
+  .sheet{ width:210mm; margin:10mm auto; background:var(--paper); padding:12mm 15mm; position:relative; border:1px solid #ddd; }
+  @media print{ body{background:none;} .sheet{ box-shadow:none; margin:0 auto; width:auto; border:none; padding:0; } .avoid-break{ break-inside:avoid; page-break-inside:avoid; } }
+
+  .kt-badge{ font-size:14px; font-weight:800; color:var(--ink); letter-spacing:.02em; margin-bottom:8px; }
+
+  h1{ font-size:22px; font-weight:800; margin:8px 0 6px; line-height:1.35; }
+  .subtitle{ font-size:13.5px; font-weight:600; color:var(--ink-soft); margin:0 0 12px; }
+  p{ font-size:14px; line-height:1.75; margin:0 0 9px; color:var(--ink); }
+  .lede{ font-size:14px; line-height:1.8; margin:0 0 12px; color:var(--ink); }
+
+  h2{ font-size:15.5px; font-weight:800; margin:16px 0 8px; display:flex; align-items:center; gap:7px; }
+  h2 .n{ width:23px; height:23px; border-radius:50%; border:1.5px solid var(--ink); display:inline-flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0; }
+
+  table{ width:100%; border-collapse:collapse; margin:11px 0 12px; font-size:13px; }
+  thead th{ text-align:left; font-weight:700; padding:8px 9px; border-bottom:1.5px solid var(--ink); }
+  tbody td{ padding:8px 9px; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.6; }
+  tbody td:first-child{ font-weight:700; width:34%; }
+
+  .note{ border:1px solid var(--line); padding:12px 15px; margin:11px 0; font-size:12.5px; color:var(--ink-soft); line-height:1.7; }
+  .stat{ font-weight:700; color:var(--ink); }
+
+  .highlight-line{ border:1.5px solid #1c3fae; border-radius:4px; padding:10px 14px; margin:10px 0; text-align:center; font-size:13.5px; font-weight:700; color:#14204f; }
+  .dev-report-note{ font-size:9.5px; color:var(--ink-soft); text-align:center; border-top:1px solid var(--line); padding-top:6px; margin-top:9px; }
+
+  ul.plain{ margin:0 0 11px 18px; }
+  ul.plain li{ font-size:13.5px; line-height:1.75; margin-bottom:6px; }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+  <div class="kt-badge">카톡대신 혼디</div>
+
+  <h1>혼디, 어디에 쓰는 물건인가요?</h1>
+  <p class="subtitle">혼디의 AI 기술 구조를 쉽게 설명합니다 — 오픈소스 LLM으로 전문 분야 만점을 만드는 법</p>
+
+  <h2><span class="n">1</span> 혼디는 제주 토종 AI입니다</h2>
+  <p>놀랍게도 혼디는 자체 개발한 <b>거대 언어 모델(LLM)</b>이 없습니다. LLM 개발은 수백억~수조 원이 투입되는 초대형 프로젝트로, 혼디 개발자 같은 스타트업이 맨몸으로 뛰어들 수 있는 영역이 아닙니다.</p>
+  <p>그럼에도 혼디는 챗GPT 등 상용 LLM보다 성능은 뛰어나고, 비용은 절반 이하입니다. 자체 LLM 없이 어떻게 이런 기능을 구현할 수 있을까요?</p>
+
+  <h2><span class="n">2</span> 오픈소스 LLM</h2>
+  <p>혼디는 소스코드가 공개된 오픈소스 LLM을 활용합니다. 일반적으로 오픈소스 LLM은 챗GPT 같은 상용 LLM보다 성능이 많이 떨어지는 것으로 알려져 있습니다. 그런데도 혼디는 상용 LLM보다 월등히 높은 성능을 보여줍니다. 그 비결은 무엇일까요?</p>
+
+  <h2><span class="n">3</span> 전교 1등 vs. 전교 꼴찌</h2>
+  <p>거대 상용 AI 모델들은 세상의 모든 요리를 척척 만들어내는 만능 요리사에 가깝습니다. 반면 혼디는 딱 하나의 요리만 누구보다 잘 만드는 요리사입니다.</p>
+  <p>비유하자면, 챗GPT는 전 과목에서 99점을 받는 우등생이고, 혼디는 딱 한 과목만 100점이고 나머지는 0점인 학생입니다.</p>
+  <p>혼디는 성능이 뒤처지는 오픈소스 LLM을 잘 훈련시켜(이를 <b>파인튜닝(Fine-tuning)</b>이라 부릅니다) 딱 한 과목만 만점을 받도록 만들었습니다. 이 방식의 장점은 소스가 공개된 오픈소스 LLM만으로도 특정 분야에서 언제나 만점을 받는 AI를 구현할 수 있다는 점이고, 단점은 무수히 많은 분야마다 각각의 전문 AI를 따로 만들어야 한다는 점입니다.</p>
+
+  <h2><span class="n">4</span> 혼디의 접근법 — 계층 구조로 압축하기</h2>
+  <p>혼디는 복잡다양한 분야들을 한데 모아 놓고, 서로 공통되는 기능을 뽑아 공유하는 방식을 택했습니다. 예를 들어 짜장면 제조법과 짬뽕 제조법은 밀가루 반죽 과정을 공유합니다.</p>
+  <p>이런 식으로 공통 요소를 층층이 묶어 계층 구조를 만들면, 수천 개에 달하는 분야를 단 몇 개의 핵심 모듈로 줄일 수 있습니다. 각 분야를 처음부터 따로 훈련시키는 대신, 공유 가능한 기반 위에서 효율적으로 전문성을 쌓아 올리는 셈입니다.</p>
+
+  <div class="dev-report-note">혼디 · 혼디, 어디에 쓰는 물건인가요? (hondi.net) 1 / 3</div>
+</div>
+
+<div class="sheet">
+
+  <h2><span class="n">5</span> 혼디의 성능</h2>
+  <p>혼디는 각 분야에 전문화된 수백 개의 AI 모델로 구성된 네트워크입니다. 그중 하나가 법률 모듈인 <b>K-Law</b>입니다.</p>
+  <p>K-Law는 사건의 개요만으로 수년 뒤에 나올 대법원 판결문을 미리 내다봅니다. 학계와의 공동 검증 결과, 실제 대법원 판결과의 일치율은 <b>90% 이상</b>으로 확인됐습니다. 이에 비해 범용 상용 LLM의 판결 예측 정확도는 같은 기준 자체 평가에서 현저히 낮은 수준에 그쳤습니다.</p>
+
+  <table>
+    <thead><tr><th>구분</th><th>K-Law</th><th>범용 상용 LLM</th></tr></thead>
+    <tbody>
+      <tr><td>대법원 판결 예측 일치율</td><td class="stat">90%+ (학계 공동 검증)</td><td>현저히 낮음 (자체 평가)</td></tr>
+    </tbody>
+  </table>
+
+  <p>K-Law의 판결문 예측 방법론, 테스트 절차와 결과, 테스트 환경 등 데이터는 klaw.hondi.kr에 투명하게 공개되어 있습니다.</p>
+  <p>다시 한번 강조하면, K-Law는 혼디를 구성하는 수백 개 전문 분야 AI 모델 중 단 하나일 뿐입니다. 의료, 금융, 교육, 교통/물류, 입법, 행정 등 나머지 분야 역시 같은 방법론으로 비슷한 수준의 성능을 목표로 개발되고 있습니다.</p>
+
+  <h2><span class="n">6</span> 법원과 판사가 불필요해지나요?</h2>
+  <p>소송을 시작하기도 전에 그 결과를 상당한 정확도로 예측할 수 있다면, 기존 사법 시스템에도 변화가 불가피할 것입니다. 다만 위 수치는 개발 단계의 자체·학계 공동 평가 결과이며, 전면적인 제3자 객관적 검증은 계속 진행 중이므로 속단은 이릅니다.</p>
+  <p>그러나 AI 기술이 우리 사회 전 분야에 적지 않은 영향을 미칠 것이라는 점만큼은 충분히 짐작할 수 있는 일입니다.</p>
+
+  <h2><span class="n">7</span> 제주 AI 행정</h2>
+  <p>혼디의 수백 개 전문 분야 중 하나는 <b>'AI 정부'</b>입니다. 혼디가 AI 정부를 만드는 과정은 간단합니다.</p>
+  <p>먼저, 제주도에 소재한 중앙 정부 기관(국세청, 고용부 등)과 지방 행정 기관(도청, 시청 등) 각 부서의 반복적인 민원 업무를 일정 부분 대행할 AI를 만듭니다(약 700개). 그다음, 제주도에 실제로 배포·적용하여 미비점을 보완하고 허점을 수정합니다. 그다음, 제주 AI 행정을 전국에 복제합니다(Ctrl-C, Ctrl-V?).</p>
+  <p>이미 혼디는 제주 지역 각종 기관·부서의 AI 모델 초안을 완성하고, 각 부서의 업무를 반영하는 정련 과정에 있습니다. hondi.net 상단 <b>'제주 AI 행정'</b> 메뉴를 클릭하면, 각 기관 및 부서에 할당된 AI 모델의 초안과 현 단계 성능을 직접 테스트해 보실 수 있습니다.</p>
+
+  <div class="dev-report-note">혼디 · 혼디, 어디에 쓰는 물건인가요? (hondi.net) 2 / 3</div>
+</div>
+
+<div class="sheet">
+
+  <h2><span class="n">·</span> 맺음말</h2>
+  <p>혼디는 미완성 상태이지만, 그럼에도 여러분의 유료 가입을 요청합니다.</p>
+  <p>여러분의 참여가 없다면, 현재 90% 완성 수준에서 계속 머물 것입니다.</p>
+
+  <table>
+    <thead><tr><th>요금제</th><th>내용</th></tr></thead>
+    <tbody>
+      <tr><td>월 1,000원</td><td>기본료 + 사용량만큼 추가 요금</td></tr>
+      <tr><td>월 10,000원</td><td>정액제</td></tr>
+      <tr><td>연 100,000원</td><td>연간 회원</td></tr>
+    </tbody>
+  </table>
+
+  <div class="highlight-line">더 알아보기 → klaw.hondi.kr · 지금 가입하기 → hondi.net</div>
+
+  <div class="note">
+    면책 조항 — 본 문서의 챗GPT 등 상용 LLM과의 성능·비용 비교, K-Law의 판결 예측 정확도 등에 관한 서술은 혼디 프로젝트가 지향하는 방향과 현재(개발·필드 테스트 기간) 기준 안내이며, 전면적으로 검증된 확정 통계가 아니고 사전 고지 없이 변경될 수 있으며, 특정 기업의 가치를 폄훼할 의도가 없습니다.
+  </div>
+
+  <div class="dev-report-note">혼디 개발 총괄 및 AI City Inc. 대표 도영민 (제주시 한림읍) · 문의: ceo@hondi.net<br>혼디 · 혼디, 어디에 쓰는 물건인가요? (hondi.net) 3 / 3</div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>혼디 Hondi — 혼디의 K-Law는 무엇이고, 무엇이 다른가요?</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --ink:#1a1a1a; --ink-soft:#4d4d4d; --paper:#ffffff;
+    --line:#c8c8c8; --line-strong:#1a1a1a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{background:#fff;font-family:'Pretendard',sans-serif;color:var(--ink);}
+  @page{ size:A4; margin:10mm 12mm; }
+  .sheet{ width:210mm; margin:10mm auto; background:var(--paper); padding:12mm 15mm; position:relative; border:1px solid #ddd; }
+  @media print{ body{background:none;} .sheet{ box-shadow:none; margin:0 auto; width:auto; border:none; padding:0; } .avoid-break{ break-inside:avoid; page-break-inside:avoid; } }
+
+  .kt-badge{ font-size:14px; font-weight:800; color:var(--ink); letter-spacing:.02em; margin-bottom:8px; }
+
+  h1{ font-size:21px; font-weight:800; margin:8px 0 6px; line-height:1.35; }
+  .subtitle{ font-size:13px; font-weight:600; color:var(--ink-soft); margin:0 0 12px; line-height:1.6; }
+  p{ font-size:13.5px; line-height:1.75; margin:0 0 9px; color:var(--ink); }
+  .lede{ font-size:13.5px; line-height:1.8; margin:0 0 12px; color:var(--ink); }
+
+  h2{ font-size:15px; font-weight:800; margin:15px 0 7px; display:flex; align-items:center; gap:7px; }
+  h2 .n{ width:22px; height:22px; border-radius:50%; border:1.5px solid var(--ink); display:inline-flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:700; flex-shrink:0; }
+
+  table{ width:100%; border-collapse:collapse; margin:10px 0 12px; font-size:12.8px; }
+  thead th{ text-align:left; font-weight:700; padding:8px 9px; border-bottom:1.5px solid var(--ink); }
+  tbody td{ padding:8px 9px; border-bottom:1px solid var(--line); vertical-align:top; line-height:1.6; }
+  tbody td:first-child{ font-weight:700; }
+  tbody tr.hl td{ background:#f3f5fb; font-weight:700; }
+
+  .note{ border:1px solid var(--line); padding:11px 14px; margin:10px 0; font-size:11.8px; color:var(--ink-soft); line-height:1.65; }
+  .stat{ font-weight:700; color:var(--ink); }
+
+  .highlight-line{ border:1.5px solid #1c3fae; border-radius:4px; padding:10px 14px; margin:10px 0; text-align:center; font-size:13px; font-weight:700; color:#14204f; }
+  .dev-report-note{ font-size:9.5px; color:var(--ink-soft); text-align:center; border-top:1px solid var(--line); padding-top:6px; margin-top:9px; }
+
+  ul.plain{ margin:0 0 11px 18px; }
+  ul.plain li{ font-size:13px; line-height:1.7; margin-bottom:5px; }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+  <div class="kt-badge">카톡대신 혼디</div>
+
+  <h1>혼디의 K-Law는 무엇이고, 무엇이 다른가요?</h1>
+  <p class="subtitle">혼디는 2026년 9월 1일부터 12월 31일까지 대한민국 최초의 전자동 AI 정부 필드 테스트를 진행하고 있습니다. 그중 사법 영역을 담당하는 K-Law는 법률 전문가의 업무를 보조하도록 설계된 모듈입니다. K-Law가 무엇이며, 기존 거대 LLM들과 무엇이 다른지 안내합니다.</p>
+
+  <h2><span class="n">1</span> 혼디들의 네트워크, 혼디넷(hondi.net)</h2>
+  <p>혼디는 수백~수천 개의 상호 독립적이면서도 서로 긴밀하게 연동된 AI 레고블록들의 네트워크입니다. 혼디의 강점은 블록 하나하나의 성능이 아니라, 수많은 블록들이 이루는 네트워크 그 자체에서 나옵니다.</p>
+  <p>레고블록으로 조립한 건담 로봇을 떠올려 보십시오. 하나하나는 평범한 블록이지만, 수천 개가 정교하게 맞물리면 강력한 로봇이 됩니다. 혼디넷도 마찬가지입니다.</p>
+
+  <h2><span class="n">2</span> 혼디의 법률 블록, K-Law</h2>
+  <p>그런데 혼디는 개별 블록 하나하나도 매우 강력합니다. K-Law는 혼디의 법률 모듈입니다.</p>
+  <p>통상 1심에서 3심(대법원)까지는 수년이 걸리고, 수백만 원에서 수천만 원의 비용이 듭니다. 혼디는 당사자 간 합의 또는 변호사 중재로 단 3분 만에 마칠 가능성을 엽니다.</p>
+  <p>수년 뒤에나 나올 대법원 판결문을 3분 만에 예측하여 보여주고, 왜 그런 결론에 이를 수밖에 없는지 조목조목 설명해 주는 AI가 있다면 어떨까요? 그것이 바로 혼디의 수천 개 블록 중 하나인 K-Law입니다. 혼디 개발자의 자체 테스트 결과, K-Law는 대법원 최신 판례의 75.5%에서 대법원 예상 판결문을 높은 정확도로 예측합니다. 최신 판례는 AI가 학습한 것이 아닙니다.</p>
+
+  <h2><span class="n">3</span> 인문학과 수학</h2>
+  <p>의문이 들 수 있습니다. 사법적 판단은 인문학의 영역인데, 복잡다양한 사건에서 어떻게 수학처럼 정답을 찾아낼 수 있을까요?</p>
+  <p>이유는 법학도 어떤 의미에서는 논리적으로 도출 가능한 영역이기 때문입니다. 1심, 2심(고등법원), 3심(대법원), 헌법재판소는 헌법·법률·판례라는 도구를 사용하여 문제를 푸는 일련의 과정이며, 심급을 거칠수록 그 과정이 더욱 다듬어집니다. 그러므로, 사건 개요를 정확히 입력하면, 대법원 판결문과 헌법재판소 결정문의 방향성을 상당한 정확도로 예측해 볼 수 있습니다. AI의 강점은 바로 그 논리 구조를 끝까지 따라가는 추론 능력입니다.</p>
+
+  <h2><span class="n">4</span> Blind Test가 말해주는 것</h2>
+  <p>대법원이 공개한 판례 300건을 대상으로 테스트한 결과, K-Law(v15.1)가 예측한 판결문의 실제 적중률은 75%였습니다. A4 용지 절반 분량의 사건 개요만 주어졌고, 웹 검색을 차단한 이른바 "Blind Test" 조건이었습니다. 같은 조건에서 타 거대 LLM의 적중률은 45% 내외로 자체 측정되었습니다.</p>
+
+  <table>
+    <thead><tr><th>구분</th><th>적중률</th></tr></thead>
+    <tbody>
+      <tr class="hl"><td>K-Law (v15.1, Blind Test, 자체 측정)</td><td class="stat">75%</td></tr>
+      <tr><td>타 거대 LLM (Blind Test, 자체 측정)</td><td>약 45%</td></tr>
+      <tr><td>1·2심 판결문 vs 대법원 공개 판례 일치도</td><td>약 50%</td></tr>
+    </tbody>
+  </table>
+
+  <p>테스트 절차와 방법, 사용한 판례, K-Law(v15.1) 방법론, 예상 판결문과 실제 판결문 간 일치도 평가 기준은 모두 오픈소스로 공개되어 있으며, 누구나 실제 혹은 가상의 사건으로 직접 테스트해 볼 수 있습니다. klaw.hondi.net</p>
+  <p>대법원이 주기적으로 공개하는 판례는 법리가 특히 복잡한 사건들이며, 1심·2심 판결문과 대법원 공개 판례 간의 일치도조차 50% 안팎입니다. 이런 난도 높은 사건에서 K-Law가 75%를 넘는 일치도를 보였다는 점에서, 상대적으로 단순한 일반 사건에서는 이보다 높은 일치도를 기대해 볼 수 있다는 해석도 가능합니다. 다만 이는 추정이며 사건 유형에 따라 편차가 있을 수 있습니다. K-Law는 현재 version 20.0에 이르렀고, 성능은 꾸준히 향상되어 왔습니다.</p>
+  <p>다만, 이 결과는 혼디 개발자의 자체 테스트이며, 개발자 편향이 있을 수 있으므로, 제3자의 독립적인 검증을 추진 중입니다.</p>
+
+  <div class="dev-report-note">혼디 · K-Law (hondi.net) 1 / 2</div>
+</div>
+
+<div class="sheet">
+
+  <h2><span class="n">5</span> 법원 판결문과 이솝 우화</h2>
+  <p>법원의 판결문은 일반인이 온전히 이해하기 쉽지 않습니다. 기존 법원이 갖지 못한 K-Law의 강점 중 하나는, 아무리 복잡한 법리라도 어린이 눈높이에서 설명한다는 점입니다.</p>
+  <p>마치 이솝 우화처럼, 분쟁 당사자 쌍방이 납득할 때까지 적절한 비유를 들어 차근차근 설명합니다. 더러, 판결이 당사자 입장에서 다소 억울하더라도, 그것이 공동체의 질서와 이익을 위한 불가피한 선택이었음을 스스로 납득할 수 있게 됩니다.</p>
+  <p>klaw.hondi.net/100cases 페이지는 2026년 9월 1일 기준, 대법원 최신 판례 100건을 시간 순으로 무작위 선택하여, 이솝 우화처럼 설명합니다. 분쟁 당사자가 소송을 시작하기 전에 혼디의 예상 판결문과 그러한 판결문이 도출되는 전후 사정을 미리 참고할 수 있다면, 승산이 낮은 소송의 불필요한 남발을 줄이는 데 도움이 될 수 있고, 나아가 사회적 비용 절감에도 기여할 수 있을 것으로 기대합니다.</p>
+  <p>직접 테스트해 보십시오. klaw.hondi.net</p>
+
+  <h2><span class="n">6</span> 짜장면과 요리사</h2>
+  <p>거대 LLM들은 한식·일식·중식을 두루 잘하는 만능 요리사에 비유할 수 있으며, 몸값도 높습니다. 반면 혼디는 오직 하나만 잘하는 수많은 요리사들의 네트워크입니다. 중식 전체가 아니라 짜장면 하나, 짬뽕 하나만 파고드는 요리사들입니다.</p>
+  <p>그러므로 짜장면 하나만 놓고 겨루면 혼디가 만능형 거대 LLM보다 강점을 가질 수 있습니다. K-Law 역시 혼디넷의 수많은 요리사 중 하나입니다.</p>
+
+  <h2><span class="n">7</span> 완전한 공평</h2>
+  <p>혼디의 가장 큰 강점은 혼디가 이해관계자가 아니라는 점입니다. '팔은 안으로 굽는다'는 말이 설령 헌법보다 높은 힘을 갖는다 해도, 혼디에게는 애초에 팔이 없습니다.</p>
+
+  <h2><span class="n">·</span> 필드 테스트 기간 한정, 지금 가입하십시오</h2>
+  <p>K-Law는 2026년 9월 1일부터 12월 31일까지의 전자동 AI 정부 필드 테스트 기간 중 법률 실무 현장을 우선 대상으로 공개됩니다.</p>
+  <ul class="plain">
+    <li>사건 개요 입력 후 단 3분 만에 예상 대법원 판결문 확인</li>
+    <li>복잡한 법리를 의뢰인에게 쉽게 설명할 때 활용</li>
+    <li>승산이 낮은 소송을 사전에 가려내는 검토 도구로 활용</li>
+  </ul>
+
+  <div class="highlight-line">필드 테스트 기간 중 유료 가입 시 특별 혜택이 제공됩니다. 지금 klaw.hondi.net에서 가입하십시오.</div>
+
+  <div class="note">
+    K-Law가 제공하는 예상 판결문 및 설명은 참고용 시뮬레이션이며, 법률 자문이나 법률 대리를 대체하지 않습니다. 구체적인 사건에 대한 판단은 반드시 변호사 등 법률 전문가와 상담하시기 바랍니다.<br><br>
+    K-Law의 시뮬레이션은 인간 변호사가 직접 중재하거나 분쟁 당사자 쌍방이 동의한 경우에 한해서만 법적 효력을 가지며, 그 외의 경우에는 어떠한 법적 효력도 갖지 않습니다.<br><br>
+    본 문서에 기재된 적중률·일치도 등 성능 수치는 혼디 개발자의 자체 테스트 결과이며, 제3자의 독립적인 검증이 완료되지 않았습니다. 실제 사건에서의 결과는 사건의 성격, 증거관계, 법리 등에 따라 달라질 수 있으며 동일하게 재현됨을 보장하지 않습니다.<br><br>
+    혼디 K-Law는 현재 베타(필드 테스트) 단계이며, 테스트 기간 및 서비스 내용은 사전 고지 없이 변경될 수 있습니다. 타 AI 서비스와의 비교 수치 역시 혼디의 자체 테스트 환경에서 측정된 것으로, 동일한 조건이 아닌 실사용 환경에서는 결과가 다를 수 있습니다.
+  </div>
+
+  <div class="dev-report-note">혼디 개발 총괄 및 AI City Inc. 대표 도영민 (제주시 한림읍) · 개발: 팀 주피터 / AI City Inc. · 소스 및 개발 조직: GitHub Openhash-Gopang · 문의: ceo@hondi.net<br>혼디 · K-Law (hondi.net) 2 / 2</div>
+
+</div>
+
+</body>
+</html>
