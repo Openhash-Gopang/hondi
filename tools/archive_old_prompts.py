@@ -46,7 +46,14 @@ ROOT     = Path(__file__).parent.parent
 PROMPTS  = ROOT / 'prompts'
 ARCHIVE  = PROMPTS / 'archive'
 
-KEEP_LATEST = 5  # 계열당 prompts/ 최상위에 남길 최신 버전 개수
+KEEP_LATEST = 1  # 계열당 prompts/ 최상위에 남길 최신 버전 개수
+# ★ 2026-09-20 (Phase 2 구조감사 후속) — 5 → 1로 하향. sp-catalog.json이
+# 항상 정확히 1개(최신본)만 참조하므로, 그 이상 남겨둬도 "사람이 볼 때의
+# 최신 확인" 목적에는 git 이력으로 충분하고, 5개씩 쌓아두면 계열 70개
+# 기준 ~300개 죽은 파일이 prompts/ 최상위에 상시 체류하는 결과가 된다
+# (Phase 2 감사에서 실측: SP_architect 하나만도 v2.8/2.9/3.0/3.1/3.3
+# 5버전 전부 생존). 안전 원칙(§안전 원칙)은 그대로 — 최신본은 여전히
+# 항상 보존되고, archive/로 이동만 할 뿐 삭제하지 않는다.
 
 
 def parse_version(fname: str) -> tuple:
@@ -134,16 +141,34 @@ def main():
         return
 
     ARCHIVE.mkdir(exist_ok=True)
+    moved, dupes_removed, conflicts = 0, 0, 0
     for f in to_archive:
         dest = ARCHIVE / f.name
         if dest.exists():
-            print(f'  건너뜀(이미 archive에 동명 파일 존재): {f.name}')
+            # ★ 2026-09-20 추가 — KEEP_LATEST를 5→1로 낮추면서 "이미 archive에
+            # 동명 파일 존재"로 건너뛰던 파일들이 prompts/ 최상위에 그대로
+            # 남아 정리 효과가 반감되는 걸 발견(Phase 2 후속 정리 중 실측).
+            # 대부분은 예전 archive 작업에서 이미 옮겨진 것과 완전히 같은
+            # 내용의 잔재이므로, 내용이 동일하면 원본을 안전하게 지운다
+            # (archive/에 이미 그 내용이 보존돼 있으니 데이터 손실 없음).
+            # 내용이 다르면(동명이인 버전 충돌) 절대 자동 처리하지 않고
+            # 사람 확인 대상으로 남긴다.
+            if f.read_bytes() == dest.read_bytes():
+                print(f'  {"[dry-run] " if dry_run else ""}{f.relative_to(ROOT)} (archive와 내용 동일 — 원본 삭제)')
+                dupes_removed += 1
+                if not dry_run:
+                    f.unlink()
+            else:
+                print(f'  ⚠ 충돌(내용 다름, 수동 확인 필요): {f.relative_to(ROOT)} vs {dest.relative_to(ROOT)}')
+                conflicts += 1
             continue
         print(f'  {"[dry-run] " if dry_run else ""}{f.relative_to(ROOT)} → {dest.relative_to(ROOT)}')
+        moved += 1
         if not dry_run:
             shutil.move(str(f), str(dest))
 
-    print(f'\n총 {len(to_archive)}개 {"이동 예정(dry-run)" if dry_run else "이동 완료"}.')
+    print(f'\n총 {len(to_archive)}건 중 이동 {moved}건, 동일내용 삭제 {dupes_removed}건, '
+          f'충돌(수동확인 필요) {conflicts}건 {"(dry-run)" if dry_run else ""}.')
 
 
 if __name__ == '__main__':

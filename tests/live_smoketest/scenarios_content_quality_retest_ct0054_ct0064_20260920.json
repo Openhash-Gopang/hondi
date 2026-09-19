@@ -1,0 +1,20 @@
+[
+  {
+    "id": "CT-0054",
+    "directCode": "do-dept:jeju:SP-DIV-TOURISM-TOURISMPOLICY",
+    "renderText": "관광교류국 관광정책과",
+    "pdvLocationHint": null,
+    "utterance": "관광교류국 관광정책과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "v1.1 재검증 — '관광사업 등록·허가'를 자기 소관으로 나열하던 CT-0054 재현 여부 확인(§2 혼동 주의 항목 추가 후)"
+  },
+  {
+    "id": "CT-0064",
+    "directCode": "do-dept:jeju:SP-DIV-OCEAN-MARINEPOLICY",
+    "renderText": "해양수산국 수산정책과",
+    "pdvLocationHint": null,
+    "utterance": "해양수산국 수산정책과에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "do-dept/division",
+    "note": "v1.1 재검증 — 근거 없는 '어촌·어항 정책' 예시를 지어내던 CT-0064 재현 여부 확인(§2 혼동 주의 항목 추가 후)"
+  }
+]

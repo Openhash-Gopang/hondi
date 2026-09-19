@@ -48,15 +48,16 @@ agencyPrompt, ...].join('\n\n---\n\n')). 즉 지금까지 이 스크립트가
 찾아낸 "환각"은 실제 사용자 응답에도 재현되는지 확인 전이었다 — U2가
 이미 억제하고 있었을 수도 있다.
 
-이 스크립트는 이제 UNIVERSAL-INTEGRITY·UNIVERSAL-common을 prompts/
-디렉터리에서 직접 읽어(로컬 sp-catalog.json 매니페스트 기준, 프로덕션이
-GitHub raw에서 읽는 파일과 같은 저장소·같은 경로) agencyPrompt 앞에
-붙인다. **완전한 재현은 아니다** — 아래 두 레이어는 아직 안 붙인다:
-- CONTROL-TOWER-PRINCIPLE: sp-catalog.json에 이 키 자체가 없어서
-  프로덕션에서도 로드에 항상 실패한다(별도로 발견한 버그 — try/catch로
-  조용히 삼켜지고 빈 문자열로 대체됨). 즉 "안 붙이는 게" 오히려 프로덕션
-  실태와 일치한다 — 이건 재현 누락이 아니라 의도적으로 프로덕션의 버그를
-  그대로 반영한 것이다.
+이 스크립트는 이제 UNIVERSAL-INTEGRITY·UNIVERSAL-common·CONTROL-TOWER-
+PRINCIPLE을 prompts/ 디렉터리에서 직접 읽어(로컬 sp-catalog.json
+매니페스트 기준, 프로덕션이 GitHub raw에서 읽는 파일과 같은 저장소·
+같은 경로) agencyPrompt 앞에 붙인다. **완전한 재현은 아니다** — 아래
+레이어는 아직 안 붙인다:
+- (2026-09-20 정정) CONTROL-TOWER-PRINCIPLE은 이전엔 sp-catalog.json에
+  키 자체가 없어 프로덕션에서도 로드가 항상 실패했었다(별도로 발견한
+  버그). 같은 세션에서 build_manifest.py·sp-catalog.json을 고쳐 이
+  버그를 해결했으므로, 이 스크립트도 세 번째 레이어로 다시 붙였다 —
+  "안 붙이는 게 프로덕션과 일치"했던 이전 기록은 이제 낡은 정보다.
 - identityDoc(K-Public_common/PROFESSIONAL-common)·ownSpAndGates(기관
   정본 SP+게이트 스키마): worker.js의 _fetchOwnSpAndGates(agency)가
   agency별로 동적 조립하는데, 이 Python 스크립트에서 그 로직을 안전하게
@@ -142,7 +143,16 @@ def _load_universal_layers(manifest):
     if _universal_layers_cache is not None:
         return _universal_layers_cache
     parts = []
-    for key in ("UNIVERSAL-INTEGRITY", "UNIVERSAL-common"):
+    # ★ 2026-09-20 추가 — CONTROL-TOWER-PRINCIPLE이 sp-catalog.json에
+    # 키 자체가 없어 프로덕션에서도 로드가 항상 실패하던 버그를 같은
+    # 세션에서 별도로 발견·수정했다(build_manifest.py ALLOWLIST_PREFIXES
+    # 오분류 정정 + 스캔 블록 추가, sp-catalog.json에 키 등록). 그 결과
+    # 프로덕션의 worker.js systemParts 조립 순서([universalIntegrity,
+    # universalCommon, controlTowerPrinciple, ...])와 다시 맞추려면 이
+    # 하네스도 세 번째 레이어로 CONTROL-TOWER-PRINCIPLE을 같은 순서로
+    # 붙여야 한다 — "안 붙이는 게 프로덕션과 일치"했던 이전 주석은 이제
+    # 낡은 정보다(프로덕션이 고쳐졌으므로).
+    for key in ("UNIVERSAL-INTEGRITY", "UNIVERSAL-common", "CONTROL-TOWER-PRINCIPLE"):
         try:
             parts.append(load_sp_file(manifest, key))
         except FileNotFoundError as e:

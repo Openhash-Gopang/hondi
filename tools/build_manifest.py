@@ -188,6 +188,20 @@ _scan_single(r'^UNIVERSAL-job-assist_v', '.md', 'UNIVERSAL-job-assist')
 #      참조할 구체적 서비스별 대행 방법 목록(등본 발급 등)을 담는다.
 _scan_single(r'^TASK-DELEGATION-GUIDE_v', '.md', 'TASK-DELEGATION-GUIDE')
 
+# 2-c-3-b) CONTROL-TOWER-PRINCIPLE — prompts/CONTROL-TOWER-PRINCIPLE_vX_Y.md
+#      2026-09-20 신설(Phase 2 구조감사 + content-quality live-smoketest
+#      세션에서 공동 발견) — 이 파일은 ALLOWLIST_PREFIXES에 "카탈로그
+#      등록 아닌 설계 문서"로 잘못 분류돼 있었으나, 실제로는 worker.js
+#      (_fetchByManifestKeyFromGithub('CONTROL-TOWER-PRINCIPLE'))와
+#      manifest-loader.js(_loadSpByKey)가 둘 다 런타임에 manifest 키로
+#      직접 조회하는 실사용 문서다 — UNIVERSAL-INTEGRITY·TASK-DELEGATION-
+#      GUIDE와 정확히 동일한 위상. 그 결과 sp-catalog.json에 키 자체가
+#      한 번도 생성된 적이 없어, 프로덕션에서 이 문서 전문이 항상 로드
+#      실패 후 빈 문자열로 대체되고 있었다(gov-router.js가 별도로 붙이는
+#      짧은 리마인더 덕에 형식 준수만 그럭저럭 유지됨). UNIVERSAL-INTEGRITY와
+#      동일한 스캔 패턴을 추가하고, ALLOWLIST_PREFIXES에서도 제거한다.
+_scan_single(r'^CONTROL-TOWER-PRINCIPLE_v', '.md', 'CONTROL-TOWER-PRINCIPLE')
+
 # 2-c-4) HONDI-CAPABILITIES-COMMON — prompts/HONDI-CAPABILITIES-COMMON_vX_Y.md
 #      2026-07-27 신설(config.js loadPersonalAssistantSP()가 manifest 조회
 #      로 사용 — §DIGITAL-BRIDGE). 이 스캔 블록이 처음부터 없어서
@@ -368,9 +382,12 @@ ALLOWLIST_PREFIXES = (
     # k-plan/k-social-match/k-watch 세 개는 실제 서비스 기획 문서일
     # 가능성도 있어 이후 확인이 필요함(현재는 안전한 기본값으로 보수적
     # 배제만 함 — 카탈로그 등록이 아니라 문서 취급).
-    'CONTROL-TOWER-PRINCIPLE', 'GOV-TASK-POST-ACCEPTANCE-REVIEW',
+    'GOV-TASK-POST-ACCEPTANCE-REVIEW',
     'ROUTING-BRANCH-REFERENCE', 'k-plan_v1_0', 'k-social-match_v1_0',
     'k-watch_v1_0',
+    # ★ 2026-09-20: CONTROL-TOWER-PRINCIPLE는 여기서 제거 — 실제로는
+    # 런타임이 manifest 키로 조회하는 카탈로그 대상 문서였다(위 2-c-3-b
+    # 스캔 블록 참고). 설계도로 오분류돼 있던 것이 원인.
 )
 
 unrecognized = []
