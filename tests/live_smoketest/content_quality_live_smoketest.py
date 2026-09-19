@@ -340,10 +340,15 @@ def process_one(api_key, manifest, scenario, prompts_dir=None):
     )
     if err:
         return {**scenario, "raw_response": None, "content_verdict": "CONTENT-ERROR",
-                "content_note": f"생성 호출 실패: {err}", "critic": None}
+                "content_note": f"생성 호출 실패: {err}", "critic": None, "gen_debug": gen_debug}
     if not raw_text or not raw_text.strip():
+        # ★ 2026-09-20 교정 — part2to5 표본(82건) 실행에서 CT-0317이 이 경로로
+        # CONTENT-ERROR가 났는데, gen_debug를 안 남겨서 원인(reasoning 토큰
+        # 예산 부족인지, 다른 이유인지)을 결과 jsonl만 보고 진단할 수 없었다.
+        # run_critic의 empty-response 경로(_debug_suffix)와 동일하게 맞춘다.
         return {**scenario, "raw_response": raw_text, "content_verdict": "CONTENT-ERROR",
-                "content_note": "응답이 비어 있음 — 내용 채점 불가", "critic": None}
+                "content_note": f"응답이 비어 있음 — 내용 채점 불가{_debug_suffix(gen_debug)}",
+                "critic": None, "gen_debug": gen_debug}
 
     critic, critic_err, critic_debug = run_critic(api_key, system_prompt, scenario["utterance"], raw_text)
     if critic_err:
