@@ -66,8 +66,17 @@ PROMPTS_DIR = "../../prompts"
 MAX_WORKERS = 4
 MAX_RETRIES = 4
 RETRY_BASE_SLEEP = 3
+# ★ 2026-09-20 교정 — part1of5(104건) 첫 실사 실행에서 9건이 CONTENT-ERROR로
+# 실패했다(critic_empty_response 7건 + critic_json_parse_error(문자열이 중간에
+# 끊김) 2건). control_tower_live_smoketest.py의 call_deepseek 주석이 이미
+# 2026-08-08/09에 기록해둔 것과 같은 원인이었다 — deepseek-v4-flash가 추론형
+# 모델이라 reasoning 토큰도 max_tokens 예산에 포함되는데(관측된 reasoning
+# 길이 3,200~11,500자대), 비평가 호출만 CRITIC_MAX_TOKENS=2000으로 너무 낮게
+# 잡아서 reasoning이 예산을 다 쓰고 최종 JSON(content)이 비거나 중간에
+# 잘렸다. 생성 호출(GEN_MAX_TOKENS)엔 이미 이 교훈이 반영돼 있었는데 비평가
+# 호출엔 반영을 빼먹은 게 원인 — 같은 모델이니 같은 예산을 줘야 했다.
 GEN_MAX_TOKENS = 12000  # control_tower_live_smoketest.py와 동일 근거(추론형 모델 토큰 예산)
-CRITIC_MAX_TOKENS = 2000
+CRITIC_MAX_TOKENS = 12000  # 위 사유로 GEN_MAX_TOKENS와 동일하게 상향(2000 → 12000)
 
 
 # ── 실제 서비스 응답 생성 (control_tower_live_smoketest.py와 동일 로직) ──
@@ -123,10 +132,16 @@ def call_deepseek(api_key, messages, max_tokens, temperature=0):
             if resp.status_code == 200:
                 data = resp.json()
                 choice = data.get("choices", [{}])[0]
-                content = choice.get("message", {}).get("content", "")
+                msg = choice.get("message", {})
+                content = msg.get("content", "")
+                # control_tower_live_smoketest.py와 동일하게 reasoning_content
+                # 길이를 같이 남긴다 — max_tokens 예산 부족으로 빈 응답/잘린
+                # JSON이 재발하면 이 필드로 바로 원인 진단이 가능하도록.
                 debug = {
                     "finish_reason": choice.get("finish_reason"),
                     "usage": data.get("usage"),
+                    "has_reasoning_content": bool(msg.get("reasoning_content")),
+                    "reasoning_content_len": len(msg.get("reasoning_content") or ""),
                 }
                 return content, None, debug
             last_err = f"HTTP {resp.status_code}: {resp.text[:300]}"
@@ -225,16 +240,27 @@ def run_critic(api_key, system_prompt, utterance, raw_response):
     ]
     content, err, debug = call_deepseek(api_key, messages, CRITIC_MAX_TOKENS, temperature=0)
     if err:
-        return None, err
+        return None, err, debug
     if not content or not content.strip():
-        return None, "critic_empty_response"
+        return None, f"critic_empty_response{_debug_suffix(debug)}", debug
     m = JSON_BLOCK_RE.search(content)
     raw_json = m.group(0) if m else content
     try:
         parsed = json.loads(raw_json)
     except json.JSONDecodeError as e:
-        return None, f"critic_json_parse_error: {e} raw={content[:300]!r}"
-    return parsed, None
+        return None, f"critic_json_parse_error: {e} raw={content[:300]!r}{_debug_suffix(debug)}", debug
+    return parsed, None, debug
+
+
+def _debug_suffix(debug):
+    # 실패 사유 문자열에 finish_reason/reasoning 길이를 같이 남겨서, 결과
+    # jsonl만 보고도 "또 토큰 예산 부족이었는지" 바로 진단 가능하게 한다.
+    if not debug:
+        return ""
+    return (
+        f" [finish={debug.get('finish_reason')}, "
+        f"reasoning_len={debug.get('reasoning_content_len', '-')}]"
+    )
 
 
 def process_one(api_key, manifest, scenario, prompts_dir=None):
@@ -258,11 +284,11 @@ def process_one(api_key, manifest, scenario, prompts_dir=None):
         return {**scenario, "raw_response": raw_text, "content_verdict": "CONTENT-ERROR",
                 "content_note": "응답이 비어 있음 — 내용 채점 불가", "critic": None}
 
-    critic, critic_err = run_critic(api_key, system_prompt, scenario["utterance"], raw_text)
+    critic, critic_err, critic_debug = run_critic(api_key, system_prompt, scenario["utterance"], raw_text)
     if critic_err:
         return {**scenario, "raw_response": raw_text, "content_verdict": "CONTENT-ERROR",
                 "content_note": f"비평가 호출 실패: {critic_err}", "critic": None,
-                "gen_debug": gen_debug}
+                "gen_debug": gen_debug, "critic_debug": critic_debug}
 
     overall = critic.get("overall_flag", "NEEDS_REVIEW")
     verdict = "CONTENT-PASS" if overall == "OK" else "CONTENT-NEEDS-REVIEW"
@@ -273,6 +299,7 @@ def process_one(api_key, manifest, scenario, prompts_dir=None):
         "content_note": critic.get("overall_reason", ""),
         "critic": critic,
         "gen_debug": gen_debug,
+        "critic_debug": critic_debug,
     }
 
 
