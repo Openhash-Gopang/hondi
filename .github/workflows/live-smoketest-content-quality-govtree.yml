@@ -1,0 +1,82 @@
+name: Live Smoketest — Content Quality (gov-tree, directCode)
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenarios_file:
+        description: "Scenario file name in tests/live_smoketest/ (blank = scenarios_control_tower_govtree_jeju_full520_20260919.json)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  run-govtree-content-quality-smoketest:
+    runs-on: ubuntu-latest
+    # 시나리오당 API 호출이 2회(생성+비평)라 control-tower 워크플로(30분)보다
+    # 여유를 더 둔다. 그래도 104건(5분할 중 1개) 기준으로 한 번에 못 끝나면
+    # scenarios_file 입력을 파트 단위로 나눠 여러 번 실행할 것(HANDOFF §5·§6 참고
+    # — 결과 브랜치가 매번 force-push로 덮어써지므로 배치별로 gh run download 권장).
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python deps
+        run: pip install requests
+
+      - name: Render gov-tree institution system prompts (directCode → real SP text)
+        working-directory: tests/live_smoketest
+        run: |
+          SCEN="${{ github.event.inputs.scenarios_file }}"
+          if [ -z "$SCEN" ]; then SCEN="scenarios_control_tower_govtree_jeju_full520_20260919.json"; fi
+          BASE=$(basename "$SCEN" .json)
+          echo "scenarios=$SCEN base=$BASE"
+          echo "SCEN=$SCEN" >> "$GITHUB_ENV"
+          echo "BASE=$BASE" >> "$GITHUB_ENV"
+          node render_govtree_prompts.mjs --scenarios "$SCEN" --out "../../results/${BASE}-prompts"
+
+      - name: Run content-quality LLM-critic smoketest against DeepSeek
+        working-directory: tests/live_smoketest
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          python3 content_quality_live_smoketest.py \
+            --scenarios "$SCEN" \
+            --prompts-dir "../../results/${BASE}-prompts" \
+            --out "../../results/content-quality-${BASE}"
+
+      - name: Select stage-2 human review sample
+        working-directory: tests/live_smoketest
+        run: |
+          python3 select_content_quality_sample.py \
+            --results "../../results/content-quality-${BASE}/content_quality_results.jsonl" \
+            --out "../../results/content-quality-${BASE}/human_review_sample"
+
+      - name: Commit results to results branch
+        if: always()
+        run: |
+          git config user.name "hondi-live-smoketest-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout -B results/live-smoketest-content-quality-govtree
+          git add -f results/
+          git diff --cached --quiet || git commit -m "chore: content-quality gov-tree live smoketest results ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+          git push --force origin HEAD:results/live-smoketest-content-quality-govtree
+
+      - name: Upload artifact (backup)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-smoketest-content-quality-govtree-results
+          path: results/
