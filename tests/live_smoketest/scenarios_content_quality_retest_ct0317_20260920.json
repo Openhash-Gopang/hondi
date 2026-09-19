@@ -1,0 +1,11 @@
+[
+  {
+    "id": "CT-0317",
+    "directCode": "city-dept:seogwipo-climate",
+    "renderText": "청정환경국",
+    "pdvLocationHint": null,
+    "utterance": "청정환경국에서 처리하는 민원 절차를 전부 알려줘",
+    "category": "seogwipo/bureau",
+    "note": "seogwipo 국/부서 단위(청정환경국) 관제탑 원칙 준수 테스트"
+  }
+]
