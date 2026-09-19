@@ -1,0 +1,645 @@
+[
+  {
+    "id": "CT-0095",
+    "directCode": "do-agency:SP-AGYDIV-FIRE-PREVENTION",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-FIRE",
+      "SP-AGYDIV-FIRE-PREVENTION(directCode)"
+    ],
+    "promptLength": 181347,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0095.txt"
+  },
+  {
+    "id": "CT-0110",
+    "directCode": "do-agency:SP-AGYDIV-POLICE-SAFETY",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-POLICE",
+      "SP-AGYDIV-POLICE-SAFETY(directCode)"
+    ],
+    "promptLength": 179334,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0110.txt"
+  },
+  {
+    "id": "CT-0107",
+    "directCode": "do-agency:SP-AGYDIV-LIBRARY-INFOSERVICE",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-LIBRARY",
+      "SP-AGYDIV-LIBRARY-INFOSERVICE(directCode)"
+    ],
+    "promptLength": 183516,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0107.txt"
+  },
+  {
+    "id": "CT-0106",
+    "directCode": "do-agency:SP-AGY-LIBRARY",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-LIBRARY(directCode)"
+    ],
+    "promptLength": 181536,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0106.txt"
+  },
+  {
+    "id": "CT-0088",
+    "directCode": "do-agency:SP-AGY-BOHWAN",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-BOHWAN(directCode)"
+    ],
+    "promptLength": 177572,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0088.txt"
+  },
+  {
+    "id": "CT-0081",
+    "directCode": "do-agency:SP-AGYDIV-AGRITECH-ADMIN",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-AGRITECH",
+      "SP-AGYDIV-AGRITECH-ADMIN(directCode)"
+    ],
+    "promptLength": 178735,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0081.txt"
+  },
+  {
+    "id": "CT-0099",
+    "directCode": "do-agency:SP-AGYDIV-FOLKMUSEUM-ARCHAEOFOLK",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-FOLKMUSEUM",
+      "SP-AGYDIV-FOLKMUSEUM-ARCHAEOFOLK(directCode)"
+    ],
+    "promptLength": 182384,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0099.txt"
+  },
+  {
+    "id": "CT-0111",
+    "directCode": "do-agency:SP-AGYDIV-POLICE-TRAFFIC",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-POLICE",
+      "SP-AGYDIV-POLICE-TRAFFIC(directCode)"
+    ],
+    "promptLength": 179989,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0111.txt"
+  },
+  {
+    "id": "CT-0103",
+    "directCode": "do-agency:SP-AGY-HERITAGE",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-HERITAGE(directCode)"
+    ],
+    "promptLength": 178515,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0103.txt"
+  },
+  {
+    "id": "CT-0112",
+    "directCode": "do-agency:SP-AGYDIV-POLICE-WOMENYOUTH",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-POLICE",
+      "SP-AGYDIV-POLICE-WOMENYOUTH(directCode)"
+    ],
+    "promptLength": 178691,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0112.txt"
+  },
+  {
+    "id": "CT-0128",
+    "directCode": "org:SP-ORG-IPF",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-ORG-IPF(directCode)"
+    ],
+    "promptLength": 177218,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0128.txt"
+  },
+  {
+    "id": "CT-0213",
+    "directCode": "org:SP-ORGDIV-JWFRI-MGMT",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-ORG-JWFRI",
+      "SP-ORGDIV-JWFRI-MGMT(directCode)"
+    ],
+    "promptLength": 182164,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0213.txt"
+  },
+  {
+    "id": "CT-0225",
+    "directCode": "org:SP-ORG-URBANREGEN",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-ORG-URBANREGEN(directCode)"
+    ],
+    "promptLength": 180364,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0225.txt"
+  },
+  {
+    "id": "CT-0137",
+    "directCode": "org:SP-ORGDIV-JCPA-BASE",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-ORG-JCPA",
+      "SP-ORGDIV-JCPA-BASE(directCode)"
+    ],
+    "promptLength": 182324,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0137.txt"
+  },
+  {
+    "id": "CT-0131",
+    "directCode": "org:SP-ORGDIV-JCCEI-SUPPORT",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-ORG-JCCEI",
+      "SP-ORGDIV-JCCEI-SUPPORT(directCode)"
+    ],
+    "promptLength": 181506,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0131.txt"
+  },
+  {
+    "id": "CT-0134",
+    "directCode": "org:SP-ORGDIV-JCGF-RISK",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-ORG-JCGF",
+      "SP-ORGDIV-JCGF-RISK(directCode)"
+    ],
+    "promptLength": 183572,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0134.txt"
+  },
+  {
+    "id": "CT-0192",
+    "directCode": "org:SP-ORGDIV-JPSPO-ELITESPORT",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-ORG-JPSPO",
+      "SP-ORGDIV-JPSPO-ELITESPORT(directCode)"
+    ],
+    "promptLength": 181626,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0192.txt"
+  },
+  {
+    "id": "CT-0120",
+    "directCode": "org:SP-ORGDIV-CHILDMEAL-ADMIN",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-ORG-CHILDMEAL",
+      "SP-ORGDIV-CHILDMEAL-ADMIN(directCode)"
+    ],
+    "promptLength": 181607,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0120.txt"
+  },
+  {
+    "id": "CT-0158",
+    "directCode": "org:SP-ORGDIV-JEJU43-PEACE",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-ORG-JEJU43",
+      "SP-ORGDIV-JEJU43-PEACE(directCode)"
+    ],
+    "promptLength": 181865,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0158.txt"
+  },
+  {
+    "id": "CT-0160",
+    "directCode": "org:SP-ORG-JEJUMED",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-ORG-JEJUMED(directCode)"
+    ],
+    "promptLength": 180591,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0160.txt"
+  },
+  {
+    "id": "CT-0252",
+    "directCode": "city-dept:jejusi-culture",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-JEJU",
+      "SP-CITYDEPT-jejusi-culture(directCode)"
+    ],
+    "promptLength": 174353,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0252.txt"
+  },
+  {
+    "id": "CT-0265",
+    "directCode": "city:SP-CITYDIV-JEJUSI-CLIMATE-PARKS",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-JEJU",
+      "SP-CITYDEPT-jejusi-climate",
+      "SP-CITYDIV-JEJUSI-CLIMATE-PARKS(directCode)"
+    ],
+    "promptLength": 178297,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0265.txt"
+  },
+  {
+    "id": "CT-0282",
+    "directCode": "city:SP-CITYDIV-JEJUSI-HEALTH-WESTCENTER",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-JEJU",
+      "SP-CITYDIV-JEJUSI-HEALTH-WESTCENTER(directCode)"
+    ],
+    "promptLength": 175762,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0282.txt"
+  },
+  {
+    "id": "CT-0267",
+    "directCode": "city:SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CITYPLAN",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-JEJU",
+      "SP-CITYDEPT-jejusi-housing",
+      "PERMIT-CRITERIA-PROTOCOL(PERMIT-BUILDING-REPORT-14)",
+      "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CITYPLAN(directCode)"
+    ],
+    "promptLength": 181784,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0267.txt"
+  },
+  {
+    "id": "CT-0245",
+    "directCode": "city:SP-CITYDIV-JEJUSI-WELFARE-RESIDENT",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-JEJU",
+      "SP-CITYDEPT-jejusi-welfare",
+      "SP-CITYDIV-JEJUSI-WELFARE-RESIDENT(directCode)"
+    ],
+    "promptLength": 178523,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0245.txt"
+  },
+  {
+    "id": "CT-0264",
+    "directCode": "city:SP-CITYDIV-JEJUSI-CLIMATE-LIVINGENV",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-JEJU",
+      "SP-CITYDEPT-jejusi-climate",
+      "SP-CITYDIV-JEJUSI-CLIMATE-LIVINGENV(directCode)"
+    ],
+    "promptLength": 177210,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0264.txt"
+  },
+  {
+    "id": "CT-0230",
+    "directCode": "city:SP-CITYDIV-JEJUSI-JACHI-GENERAL",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-JEJU",
+      "SP-CITYDEPT-jejusi-jachi",
+      "SP-CITYDIV-JEJUSI-JACHI-GENERAL(directCode)"
+    ],
+    "promptLength": 177558,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0230.txt"
+  },
+  {
+    "id": "CT-0278",
+    "directCode": "city-dept:jejusi-health",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-JEJU",
+      "SP-DO-000",
+      "(L2 미매칭 — 공통 레이어가 일반 안내만 제공)"
+    ],
+    "promptLength": 177055,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0278.txt"
+  },
+  {
+    "id": "CT-0271",
+    "directCode": "city:SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-BUILDING",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-JEJU",
+      "SP-CITYDEPT-jejusi-housing",
+      "PERMIT-CRITERIA-PROTOCOL(PERMIT-BUILDING-REPORT-14)",
+      "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-BUILDING(directCode)"
+    ],
+    "promptLength": 181692,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0271.txt"
+  },
+  {
+    "id": "CT-0266",
+    "directCode": "city-dept:jejusi-housing",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-JEJU",
+      "SP-CITYDEPT-jejusi-housing(directCode)",
+      "PERMIT-CRITERIA-PROTOCOL(PERMIT-BUILDING-REPORT-14)"
+    ],
+    "promptLength": 178746,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0266.txt"
+  },
+  {
+    "id": "CT-0330",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-HEALTH-ADMIN",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-SEOGWIPO",
+      "SP-CITYDEPT-seogwipo-health",
+      "SP-CITYDIV-SEOGWIPO-HEALTH-ADMIN(directCode)"
+    ],
+    "promptLength": 178271,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0330.txt"
+  },
+  {
+    "id": "CT-0287",
+    "directCode": "city-dept:seogwipo-jachi",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-SEOGWIPO",
+      "SP-CITYDEPT-seogwipo-jachi(directCode)"
+    ],
+    "promptLength": 174464,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0287.txt"
+  },
+  {
+    "id": "CT-0310",
+    "directCode": "city-dept:seogwipo-agrieconomy",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-SEOGWIPO",
+      "SP-CITYDEPT-seogwipo-agrieconomy(directCode)"
+    ],
+    "promptLength": 174473,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0310.txt"
+  },
+  {
+    "id": "CT-0321",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-CLIMATE-PARKS",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-SEOGWIPO",
+      "SP-CITYDEPT-seogwipo-climate",
+      "SP-CITYDIV-SEOGWIPO-CLIMATE-PARKS(directCode)"
+    ],
+    "promptLength": 178232,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0321.txt"
+  },
+  {
+    "id": "CT-0328",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-CONSTRUCTION-WATER",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-SEOGWIPO",
+      "SP-CITYDEPT-seogwipo-housing",
+      "PERMIT-CRITERIA-PROTOCOL(PERMIT-BUILDING-REPORT-14)",
+      "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-WATER(directCode)"
+    ],
+    "promptLength": 181239,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0328.txt"
+  },
+  {
+    "id": "CT-0288",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-JACHI-BASICGOVPREP",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-SEOGWIPO",
+      "SP-CITYDEPT-seogwipo-jachi",
+      "SP-CITYDIV-SEOGWIPO-JACHI-BASICGOVPREP(directCode)"
+    ],
+    "promptLength": 177469,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0288.txt"
+  },
+  {
+    "id": "CT-0318",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-CLIMATE-ENVMGMT",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-SEOGWIPO",
+      "SP-CITYDEPT-seogwipo-climate",
+      "SP-CITYDIV-SEOGWIPO-CLIMATE-ENVMGMT(directCode)"
+    ],
+    "promptLength": 178535,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0318.txt"
+  },
+  {
+    "id": "CT-0298",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-WELFARE-HYGIENE",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-SEOGWIPO",
+      "SP-CITYDEPT-seogwipo-welfare",
+      "SP-CITYDIV-SEOGWIPO-WELFARE-HYGIENE(directCode)"
+    ],
+    "promptLength": 178372,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0298.txt"
+  },
+  {
+    "id": "CT-0296",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-WELFARE-DISABLED",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-SEOGWIPO",
+      "SP-CITYDEPT-seogwipo-welfare",
+      "SP-CITYDIV-SEOGWIPO-WELFARE-DISABLED(directCode)"
+    ],
+    "promptLength": 178550,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0296.txt"
+  },
+  {
+    "id": "CT-0333",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-HEALTH-WESTCENTER",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-SEOGWIPO",
+      "SP-CITYDEPT-seogwipo-health",
+      "SP-CITYDIV-SEOGWIPO-HEALTH-WESTCENTER(directCode)"
+    ],
+    "promptLength": 177038,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0333.txt"
+  },
+  {
+    "id": "CT-0392",
+    "directCode": "team:삼도2동-총무팀",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-JEJU",
+      "SP-EMD-삼도2동",
+      "SP-TEAM-삼도2동-총무팀(directCode)"
+    ],
+    "promptLength": 186518,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0392.txt"
+  },
+  {
+    "id": "CT-0503",
+    "directCode": "team:서홍동-주민복지팀",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-SEOGWIPO",
+      "SP-EMD-서홍동",
+      "SP-TEAM-서홍동-주민복지팀(directCode)"
+    ],
+    "promptLength": 186721,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0503.txt"
+  },
+  {
+    "id": "CT-0507",
+    "directCode": "team:대륜동-주민복지팀",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-SEOGWIPO",
+      "SP-EMD-대륜동",
+      "SP-TEAM-대륜동-주민복지팀(directCode)"
+    ],
+    "promptLength": 186703,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0507.txt"
+  },
+  {
+    "id": "CT-0346",
+    "directCode": "team:애월읍-찾아가는복지팀",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-JEJU",
+      "SP-EMD-애월읍",
+      "SP-TEAM-애월읍-찾아가는복지팀(directCode)"
+    ],
+    "promptLength": 186528,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0346.txt"
+  },
+  {
+    "id": "CT-0354",
+    "directCode": "team:한림읍-산업팀",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-JEJU",
+      "SP-EMD-한림읍",
+      "SP-TEAM-한림읍-산업팀(directCode)"
+    ],
+    "promptLength": 187505,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0354.txt"
+  },
+  {
+    "id": "CT-0360",
+    "directCode": "team:한경면-주민복지팀",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-JEJU",
+      "SP-EMD-한경면",
+      "SP-TEAM-한경면-주민복지팀(directCode)"
+    ],
+    "promptLength": 186895,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0360.txt"
+  },
+  {
+    "id": "CT-0441",
+    "directCode": "team:일도2동-민원팀",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-JEJU",
+      "SP-EMD-일도2동",
+      "SP-TEAM-일도2동-민원팀(directCode)"
+    ],
+    "promptLength": 187228,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0441.txt"
+  },
+  {
+    "id": "CT-0410",
+    "directCode": "team:오라동-주민복지팀",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-JEJU",
+      "SP-EMD-오라동",
+      "SP-TEAM-오라동-주민복지팀(directCode)"
+    ],
+    "promptLength": 186684,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0410.txt"
+  },
+  {
+    "id": "CT-0460",
+    "directCode": "team:성산읍-산업팀",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-SEOGWIPO",
+      "SP-EMD-성산읍",
+      "SP-TEAM-성산읍-산업팀(directCode)"
+    ],
+    "promptLength": 187134,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0460.txt"
+  },
+  {
+    "id": "CT-0342",
+    "directCode": "team:애월읍-총무팀",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-JEJU",
+      "SP-EMD-애월읍",
+      "SP-TEAM-애월읍-총무팀(directCode)"
+    ],
+    "promptLength": 186784,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0342.txt"
+  }
+]
