@@ -51,19 +51,26 @@ agencyPrompt, ...].join('\n\n---\n\n')). 즉 지금까지 이 스크립트가
 이 스크립트는 이제 UNIVERSAL-INTEGRITY·UNIVERSAL-common을 prompts/
 디렉터리에서 직접 읽어(로컬 sp-catalog.json 매니페스트 기준, 프로덕션이
 GitHub raw에서 읽는 파일과 같은 저장소·같은 경로) agencyPrompt 앞에
-붙인다. **완전한 재현은 아니다** — 아래 두 레이어는 아직 안 붙인다:
-- CONTROL-TOWER-PRINCIPLE: sp-catalog.json에 이 키 자체가 없어서
-  프로덕션에서도 로드에 항상 실패한다(별도로 발견한 버그 — try/catch로
-  조용히 삼켜지고 빈 문자열로 대체됨). 즉 "안 붙이는 게" 오히려 프로덕션
-  실태와 일치한다 — 이건 재현 누락이 아니라 의도적으로 프로덕션의 버그를
-  그대로 반영한 것이다.
-- identityDoc(K-Public_common/PROFESSIONAL-common)·ownSpAndGates(기관
-  정본 SP+게이트 스키마): worker.js의 _fetchOwnSpAndGates(agency)가
-  agency별로 동적 조립하는데, 이 Python 스크립트에서 그 로직을 안전하게
-  재구현할 근거가 아직 없다 — 다음 세션 후속 조사 필요(정직하게 기록).
-  이 갭이 남아있는 채로도 U2(불확실 식별자 생성 차단)는 이미 포함되므로
-  "환각 의심" 축 재현에는 충분하지만, "사무분장 정합성" 축은 여전히
-  완전한 재현이 아닐 수 있다는 점을 결과 해석 시 감안할 것.
+붙인다.
+
+## ★ 2026-09-20 추가 정정 — CONTROL-TOWER-PRINCIPLE·identityDoc·ownSpAndGates
+위 문단을 쓸 당시엔 이 세 레이어를 전부 "재현 못 함"으로 남겼으나, 이후
+worker.js를 직접 대조해 다음을 확인·반영했다:
+
+- **CONTROL-TOWER-PRINCIPLE**: sp-catalog.json 키 누락 버그를 다른 패치
+  (#393)에서 고쳤다 — 프로덕션이 이제 정상 로드하므로, 이 스크립트도
+  UNIVERSAL-INTEGRITY·UNIVERSAL-common 뒤에 같이 붙인다(재현 완료).
+- **identityDoc(K-Public_common/PROFESSIONAL-common)·ownSpAndGates(기관
+  정본 SP+게이트 스키마)**: 재구현이 필요 없다는 게 밝혀졌다 — worker.js
+  22215행 `NO_IDENTITY_LAYER_AGENCIES`에 `'gov_do'`가 포함돼 있고,
+  22800행 `_fetchOwnSpAndGates`도 `dynamicRegional` agency(gov_do·
+  gov_national)는 즉시 빈 문자열을 반환한다. 즉 이 gov-tree 시나리오군
+  (agency=gov_do)에는 프로덕션 자체가 이 두 레이어를 붙이지 않는다 —
+  재현 누락이 아니라 해당 없음이 확인된 것이며, 지금 이 스크립트가 하는
+  그대로(안 붙임)가 정확한 재현이다.
+
+지금 이 스크립트가 실제 프로덕션과 다른 부분은 없다(gov-tree/gov_do
+시나리오 한정).
 
 ## 사용법
 render_govtree_prompts.mjs로 먼저 <id>.txt를 만들어둔 뒤:
@@ -142,7 +149,19 @@ def _load_universal_layers(manifest):
     if _universal_layers_cache is not None:
         return _universal_layers_cache
     parts = []
-    for key in ("UNIVERSAL-INTEGRITY", "UNIVERSAL-common"):
+    # ★ 2026-09-20 재정정 — sp-catalog.json에 CONTROL-TOWER-PRINCIPLE 키가
+    # 없어서 프로덕션도 로드에 항상 실패하던 버그를 다른 패치(#393)에서
+    # 고쳤다. 그래서 "안 붙이는 게 프로덕션과 일치한다"던 이 스크립트의
+    # 기존 판단이 이제는 낡았다 — 프로덕션이 정상화됐으니 여기도 맞춰
+    # CONTROL-TOWER-PRINCIPLE을 포함한다. identityDoc·ownSpAndGates는
+    # 여전히 안 붙인다 — 이번엔 재구현이 어려워서가 아니라, worker.js를
+    # 직접 확인한 결과 gov_do/gov_national agency는애초에 두 레이어가
+    # 빈 문자열이기 때문이다(NO_IDENTITY_LAYER_AGENCIES에 'gov_do'
+    # 포함 + _fetchOwnSpAndGates가 dynamicRegional agency는 즉시 ''
+    # 반환 — worker.js 22215행·22800행 참고). 즉 이 두 레이어는 재현
+    # 누락이 아니라 애초에 이 시나리오군(gov-tree)에는 해당 없음이
+    # 확인된 것이다.
+    for key in ("UNIVERSAL-INTEGRITY", "UNIVERSAL-common", "CONTROL-TOWER-PRINCIPLE"):
         try:
             parts.append(load_sp_file(manifest, key))
         except FileNotFoundError as e:
