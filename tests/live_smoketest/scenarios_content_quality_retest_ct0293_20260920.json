@@ -1,0 +1,11 @@
+[
+ {
+  "id": "CT-0293",
+  "directCode": "city:SP-CITYDIV-SEOGWIPO-JACHI-TAX",
+  "renderText": "자치행정국 자치행정국 세무과",
+  "pdvLocationHint": null,
+  "utterance": "자치행정국 자치행정국 세무과에서 처리하는 민원 절차를 전부 알려줘",
+  "category": "seogwipo/division",
+  "note": "seogwipo 과/division 단위(자치행정국 자치행정국 세무과) 관제탑 원칙 준수 테스트"
+ }
+]
