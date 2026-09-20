@@ -15,6 +15,9 @@ import { handleAiChat, handleEscalate } from './src/worker/ai-chat-handler.js';
 import { handleOrderQueue } from './src/worker/order-queue-handler.js';
 import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
 import { handleDeptTaskCreate, handleDeptTaskUpdate, createDeptTaskCore, DEPT_TASK_TAXONOMY, _authoritativeCheck, _verifyAccessCert } from './src/worker/dept-task-handler.js';
+// 2026-09-20: K-FOI(SP-28_kfoi) — 정보 공개 청구 비서·청구 건 추적·공유 아카이브. 구현은 이 모듈에 있고
+// worker.js에는 import·팩토리(_kfoiHandlers)·라우트만 둔다(4만 줄 공유 파일의 병합 충돌을 줄이려는 분리).
+import { makeKfoiHandlers, KFOI_SP_KEY } from './src/worker/kfoi-handler.js';
 // 2026-08-05: org_profiles(K-Compose 오케스트레이션 레지스트리)와 gov-tree
 // (지방행정 SP 콘텐츠)를 잇는 CALL_GOVTREE 배선(§ handleGovTreeStepExecute)에
 // 필요 — gov-router.js는 window 전역에도 붙지만 `export async function`으로도
@@ -13601,6 +13604,17 @@ export default {
     // 2026-09-11 신설 — K-Address(SP-26) 대화형 주소록 관리, K-Mail과
     // 완전히 격리된 별도 엔드포인트.
     if (pathname === '/kaddress/chat' && request.method === 'POST') return handleKaddressChat(request, env, corsHeaders, ctx);
+    // 2026-09-20 신설 — K-FOI(SP-28) 정보 공개 청구. 채팅(폼 채우기)·청구 건 CRUD·공유 아카이브.
+    // 모두 다른 K-서비스와 같은 공용 인증 게이트(phone_verify_token)를 쓴다.
+    if (pathname === '/kfoi/chat' && request.method === 'POST') return _kfoiHandlers().chat(request, env, corsHeaders, ctx);
+    if (pathname === '/kfoi/campaigns/list' && request.method === 'GET') return _kfoiHandlers().campaignsList(request, url, env, corsHeaders);
+    if (pathname === '/kfoi/campaigns/save' && request.method === 'POST') return _kfoiHandlers().campaignsSave(request, env, corsHeaders);
+    if (pathname === '/kfoi/campaigns/close' && request.method === 'POST') return _kfoiHandlers().campaignsClose(request, env, corsHeaders);
+    if (pathname === '/kfoi/campaigns/reopen' && request.method === 'POST') return _kfoiHandlers().campaignsReopen(request, env, corsHeaders);
+    if (pathname === '/kfoi/campaigns/share' && request.method === 'POST') return _kfoiHandlers().campaignsShare(request, env, corsHeaders);
+    if (pathname === '/kfoi/campaigns/delete' && request.method === 'POST') return _kfoiHandlers().campaignsDelete(request, env, corsHeaders);
+    if (pathname === '/kfoi/archive/search' && request.method === 'GET') return _kfoiHandlers().archiveSearch(request, url, env, corsHeaders);
+    if (pathname === '/kfoi/archive/get' && request.method === 'GET') return _kfoiHandlers().archiveGet(request, url, env, corsHeaders);
     if (pathname === '/kmail/messages/state' && request.method === 'POST') return handleKmailMessageStateSet(request, env, corsHeaders);
     if (pathname === '/kmail/messages/state' && request.method === 'GET') return handleKmailMessageStatesList(request, url, env, corsHeaders);
     if (pathname === '/kmail/blocklist' && request.method === 'POST') return handleKmailBlocklistAdd(request, env, corsHeaders);
@@ -36668,6 +36682,42 @@ let _kaddressSpCache = null;
 let _kaddressSpCacheAt = 0;
 let _kaddressSpFailedAt = 0;
 const _KADDRESS_SP_TTL_MS = 10 * 60 * 1000;
+
+// ── K-FOI(SP-28_kfoi) — SP 로더 + 핸들러 팩토리 (2026-09-20) ─────────────
+let _kfoiSpCache = null;
+let _kfoiSpCacheAt = 0;
+let _kfoiSpFailedAt = 0;
+const _KFOI_SP_TTL_MS = 5 * 60 * 1000;
+async function _fetchKfoiSp(env) {
+  const now = Date.now();
+  if (_kfoiSpCache && (now - _kfoiSpCacheAt) < _KFOI_SP_TTL_MS) return _kfoiSpCache;
+  if (_kfoiSpFailedAt && (now - _kfoiSpFailedAt) < _MANIFEST_FAIL_RETRY_MS) {
+    if (_kfoiSpCache) return _kfoiSpCache;
+    throw new Error(KFOI_SP_KEY + ' 로드 실패(최근 재시도 쿨다운 중)');
+  }
+  try {
+    _kfoiSpCache = await _fetchByManifestKeyFromGithub(KFOI_SP_KEY);
+    _kfoiSpCacheAt = now;
+    _kfoiSpFailedAt = 0;
+    return _kfoiSpCache;
+  } catch (e) {
+    _kfoiSpFailedAt = now;
+    if (_kfoiSpCache) return _kfoiSpCache;
+    throw e;
+  }
+}
+let _kfoiHandlersInstance = null;
+function _kfoiHandlers() {
+  if (!_kfoiHandlersInstance) {
+    _kfoiHandlersInstance = makeKfoiHandlers({
+      kAuth: _kAuth, err: _err, l1AdminToken: _l1AdminToken, L1_DEFAULT,
+      deepseekChatText, resolveDeepseekModel,
+      fetchSp: _fetchKfoiSp, fetchUniversal: _fetchUniversalLayers,
+      webSearch: _performWebSearchCore, urlFetch: _performUrlFetchForSummary,
+    });
+  }
+  return _kfoiHandlersInstance;
+}
 
 async function _fetchKaddressSp(env) {
   const now = Date.now();
