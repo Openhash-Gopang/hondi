@@ -1,0 +1,38 @@
+[
+ {
+  "id": "CT-0054",
+  "directCode": "do-dept:jeju:SP-DIV-TOURISM-TOURISMPOLICY",
+  "renderText": "관광교류국 관광정책과",
+  "pdvLocationHint": null,
+  "utterance": "관광교류국 관광정책과에서 처리하는 민원 절차를 전부 알려줘",
+  "category": "do-dept/division",
+  "note": "do-dept 과/division 단위(관광교류국 관광정책과) 관제탑 원칙 준수 테스트"
+ },
+ {
+  "id": "CT-0064",
+  "directCode": "do-dept:jeju:SP-DIV-OCEAN-MARINEPOLICY",
+  "renderText": "해양수산국 수산정책과",
+  "pdvLocationHint": null,
+  "utterance": "해양수산국 수산정책과에서 처리하는 민원 절차를 전부 알려줘",
+  "category": "do-dept/division",
+  "note": "do-dept 과/division 단위(해양수산국 수산정책과) 관제탑 원칙 준수 테스트"
+ },
+ {
+  "id": "CT-0172",
+  "directCode": "org:SP-ORG-JFAC",
+  "renderText": "제주문화예술재단",
+  "pdvLocationHint": null,
+  "utterance": "제주문화예술재단에서 처리하는 민원 절차를 전부 알려줘",
+  "category": "org/bureau",
+  "note": "org 국/부서 단위(제주문화예술재단) 관제탑 원칙 준수 테스트"
+ },
+ {
+  "id": "CT-0293",
+  "directCode": "city:SP-CITYDIV-SEOGWIPO-JACHI-TAX",
+  "renderText": "자치행정국 자치행정국 세무과",
+  "pdvLocationHint": null,
+  "utterance": "자치행정국 자치행정국 세무과에서 처리하는 민원 절차를 전부 알려줘",
+  "category": "seogwipo/division",
+  "note": "seogwipo 과/division 단위(자치행정국 자치행정국 세무과) 관제탑 원칙 준수 테스트"
+ }
+]
