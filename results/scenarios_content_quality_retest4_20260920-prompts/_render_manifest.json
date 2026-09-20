@@ -1,0 +1,53 @@
+[
+  {
+    "id": "CT-0054",
+    "directCode": "do-dept:jeju:SP-DIV-TOURISM-TOURISMPOLICY",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-DO-TOURISM",
+      "SP-DIV-TOURISM-TOURISMPOLICY(directCode)"
+    ],
+    "promptLength": 180049,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0054.txt"
+  },
+  {
+    "id": "CT-0064",
+    "directCode": "do-dept:jeju:SP-DIV-OCEAN-MARINEPOLICY",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-DO-OCEAN",
+      "SP-DIV-OCEAN-MARINEPOLICY(directCode)"
+    ],
+    "promptLength": 180071,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0064.txt"
+  },
+  {
+    "id": "CT-0172",
+    "directCode": "org:SP-ORG-JFAC",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-ORG-JFAC(directCode)"
+    ],
+    "promptLength": 180551,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0172.txt"
+  },
+  {
+    "id": "CT-0293",
+    "directCode": "city:SP-CITYDIV-SEOGWIPO-JACHI-TAX",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-CITY-SEOGWIPO",
+      "SP-CITYDEPT-seogwipo-jachi",
+      "SP-CITYDIV-SEOGWIPO-JACHI-TAX(directCode)"
+    ],
+    "promptLength": 178765,
+    "renderStatus": "OK",
+    "systemPromptFile": "CT-0293.txt"
+  }
+]
