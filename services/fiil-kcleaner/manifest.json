@@ -2,11 +2,11 @@
   "id":          "fiil-kcleaner",
   "name":        "K-Cleaner",
   "icon":        "🌊",
-  "version":     "1.2.0",
-  "url":         "https://fiil.kr/webapp.html",
+  "version":     "2.0.0",
+  "url":         "https://clean.hondi.net/webapp.html",
   "category":    "ENV",
-  "sp_path":     "prompts/SP-14_kcleaner_v1.2.txt",
-  "sp_img_path": "prompts/SP-14-IMG_kcleaner_vision_prompt_v1.0.txt",
+  "sp_path":     "prompts/SP-14_kcleaner_v1.4.txt",
+  "sp_img_path": "prompts/SP-14-IMG_kcleaner_vision_prompt_v1.1.txt",
   "triggers":    ["쓰레기","환경","해안","청소","수거","오염","해양","산림","침적","불법투기","폐기물"],
-  "description": "해양·산림·생활 환경 현장 신고 및 AI 분석 서비스"
+  "description": "해양·산림·생활 환경 현장 신고 및 AI 분석 서비스 (2026-09-21: fiil.kr → clean.hondi.net 이전)"
 }

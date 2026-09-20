@@ -5,8 +5,9 @@
  * 있었는데 구버전 gopang.net 도메인만 갖고 있어(브랜드 전환 이후 갱신
  * 안 됨), 실제 배포본(hondi.net 계열)에서는 서명 릴레이 전체가 막혀
  * 있었다. gwp-registry.js에 등록된 모든 서비스 도메인(하위 시스템이
- * GWP 탭으로 열리는 곳) + fiil.kr처럼 *.hondi.net이 아닌 예외를 명시
- * 나열한다.
+ * GWP 탭으로 열리는 곳) + clean.hondi.net처럼 *.hondi.net 서브도메인이라도
+ * 신규 추가 시 누락되기 쉬운 항목을 명시 나열한다.
+ * (2026-09-21: fiil.kr → clean.hondi.net 이전에 맞춰 항목 교체)
  *
  * 이 파일은 의존성이 없는 순수 모듈이다 — sign.js(ui/bubble.js,
  * core/state.js에 의존)를 통째로 import하지 않고도 silent-sign.html
@@ -32,7 +33,7 @@ export const GWP_ALLOWED_ORIGINS = [
   'https://stock.hondi.net',
   'https://tax.hondi.net',
   'https://traffic.hondi.net',
-  'https://fiil.kr',
+  'https://clean.hondi.net',
   'https://openhash-gopang.github.io',
   location.origin,  // 개발 환경 (localhost 등)
 ];

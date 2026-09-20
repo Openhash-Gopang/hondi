@@ -650,5 +650,7 @@
   "k-job": "k-job_v1_0.md",
   "k-plan": "k-plan_v1_3.md",
   "k-watch": "k-watch_v1_0.md",
-  "CONTROL-TOWER-PRINCIPLE": "CONTROL-TOWER-PRINCIPLE_v1_1.md"
+  "CONTROL-TOWER-PRINCIPLE": "CONTROL-TOWER-PRINCIPLE_v1_1.md",
+  "SP-14_kcleaner": "SP-14_kcleaner_v1.4.txt",
+  "SP-14-IMG_kcleaner_vision_prompt": "SP-14-IMG_kcleaner_vision_prompt_v1.1.txt"
 }

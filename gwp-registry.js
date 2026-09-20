@@ -662,10 +662,17 @@ const GWP_REGISTRY = [
   },
 
   // ── 환경 (ENV) — inline (신고) ────────────────────────────
+  // ★ 2026-09-21 — fiil.kr → clean.hondi.net(Openhash-Gopang/clean)으로 이전.
+  // 이전 사유: fiil.kr 화면이 _gwpLaunch()가 이미 넘겨주던 token(GUID)·
+  // facts(currentLocation 등) 쿼리 파라미터를 전혀 소비하지 않아 (a) 실제
+  // 로그인 사용자 대신 더미 데이터가 표시되고 (b) 혼디가 이미 확보한 위치를
+  // 무시한 채 자체 navigator.geolocation을 다시 호출해 GPS 시간 초과가
+  // 반복되던 결함이 실사로 확인됨. clean.hondi.net 쪽 webapp.html에서
+  // token→프로필 조회, facts→위치 사용을 구현해 해소(clean 저장소 README 참고).
   {
     id: 'fiil-kcleaner', name: 'K-Cleaner', category: 'ENV',
     type: 'inline',
-    url: 'https://fiil.kr/webapp.html',
+    url: 'https://clean.hondi.net/webapp.html',
     sp_key: 'SP-14_kcleaner',
     status: 'active', priority: 11, threshold: 0.65,
     description: '해안·도심 쓰레기 AI 자동 분석·신고.',
