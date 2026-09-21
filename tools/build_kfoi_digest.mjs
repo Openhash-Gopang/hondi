@@ -33,7 +33,13 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const GT = path.join(ROOT, 'prompts/gov-tree');
 const PAGE = path.join(ROOT, 'pages/jeju-gov-automation.html');
 const OUT = path.join(GT, 'kfoi-digest/gov-digest.json');
-const ORG_BASELINE_DO = path.join(GT, 'kfoi-digest/org-baseline-do.json');   // 도청 현행 조직 기준표(사람이 검증해 갱신한다)
+// 현행 조직 기준표(사람이 검증해 갱신한다). 유형(tier)마다 파일 하나. 도청은 시행규칙 원문으로, 제주시·서귀포시는 조직도 이미지로 만들었다 —
+// 그래서 각 파일의 mapping이 비어 있을 수 있다(그 경우 유형 전체에 open_questions·baseline_note만 붙는다).
+const ORG_BASELINE_FILES = {
+  do: path.join(GT, 'kfoi-digest/org-baseline-do.json'),
+  'jeju-si': path.join(GT, 'kfoi-digest/org-baseline-jeju-si.json'),
+  seogwipo: path.join(GT, 'kfoi-digest/org-baseline-seogwipo.json'),
+};
 
 export const TIER_LABELS = {
   'do': '제주특별자치도 도청(실·국·과)',
@@ -200,30 +206,42 @@ export function buildDigest(data = loadPageData()) {
 //   status: match(현행과 같음) | renamed(개칭 — current_name이 현행) | name_differs(공식 표기와 다름, 개칭 여부 미확인)
 //           | not_in_official_menu(공식 메뉴에 없음 — 폐지·통합 가능) | unverified(확인 못 함)
 function applyOrgBaseline(tiers) {
-  if (!fs.existsSync(ORG_BASELINE_DO)) return;
-  const base = JSON.parse(fs.readFileSync(ORG_BASELINE_DO, 'utf8'));
-  const t = tiers[base.tier];
-  if (!t) return;
-  const counts = {};
-  let parent = null;
-  for (const e of t.entries) {
-    if (e.kind === 'bureau' || e.kind === 'institution') {
-      const m = base.mapping[e.id] || { status: 'unverified' };
-      e.org = { status: m.status, ...(m.current_name ? { current_name: m.current_name } : {}), ...(m.confidence ? { confidence: m.confidence } : {}), ...(m.note ? { note: m.note } : {}) };
-      counts[m.status] = (counts[m.status] || 0) + 1;
-      parent = e;
-    } else if (e.kind === 'division' && parent && parent.org && parent.org.status !== 'match') {
-      e.org = { status: 'parent_' + parent.org.status };
+  for (const [tierKey, file] of Object.entries(ORG_BASELINE_FILES)) {
+    if (!fs.existsSync(file)) continue;
+    const base = JSON.parse(fs.readFileSync(file, 'utf8'));
+    const t = tiers[tierKey];
+    if (!t) continue;
+    const hasMapping = base.mapping && Object.keys(base.mapping).length > 0;
+    const counts = {};
+    let parent = null;
+    if (hasMapping) {
+      for (const e of t.entries) {
+        if (e.kind === 'bureau' || e.kind === 'institution') {
+          const m = base.mapping[e.id] || { status: 'unverified' };
+          e.org = {
+            status: m.status,
+            ...(m.current_name ? { current_name: m.current_name } : {}),
+            ...(m.confidence ? { confidence: m.confidence } : {}),
+            ...(m.legal_basis ? { legal_basis: m.legal_basis } : {}),
+            ...(m.current_divisions ? { current_divisions: m.current_divisions } : {}),
+            ...(m.note ? { note: m.note } : {}),
+          };
+          counts[m.status] = (counts[m.status] || 0) + 1;
+          parent = e;
+        } else if (e.kind === 'division' && parent && parent.org && parent.org.status !== 'match') {
+          e.org = { status: 'parent_' + parent.org.status };
+        }
+      }
     }
+    t.baseline = {
+      as_of: base.as_of, basis: base.basis, checked_on: base.checked_on, confidence_note: base.confidence_note,
+      ...(hasMapping ? { org_counts: counts, official_bureaus: base.official_units.bureaus.length } : {}),
+      missing_in_inventory: base.missing_in_inventory, open_questions: base.open_questions,
+      sources: base.sources.map(x => x.url),
+    };
   }
-  t.baseline = {
-    as_of: base.as_of, basis: base.basis, checked_on: base.checked_on, confidence_note: base.confidence_note,
-    org_counts: counts, official_bureaus: base.official_units.bureaus.length,
-    missing_in_inventory: base.missing_in_inventory, open_questions: base.open_questions,
-    sources: base.sources.map(x => x.url),
-  };
-  for (const k of ['jeju-si', 'seogwipo', 'emd']) {
-    if (tiers[k]) tiers[k].baseline_note = '도청 개편(2026.8.25)과 별개로 이 유형의 조직이 바뀌었는지 확인하지 못했다.';
+  for (const k of ['emd']) {
+    if (tiers[k] && !tiers[k].baseline) tiers[k].baseline_note = '이 유형의 조직이 바뀌었는지 확인하지 못했다.';
   }
 }
 

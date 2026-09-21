@@ -71,6 +71,35 @@ await test('제주시 농수축산국·보건소 이름이 영문 자리표시�
   const health = dataForNameCheck.JEJUSI_BUREAUS.find(b => b.spId === 'SP-CITYDO-JEJUSI-HEALTH');
   assert.equal(agri.name, '농수축산국'); assert.equal(health.name, '제주보건소');
 });
+await test('버그 수정 회귀: current_divisions·legal_basis가 실제로 digest 항목까지 전달된다(2026-09-21에 baseline JSON에는 있었지만 digest 출력에는 빠져 있던 결함)', () => {
+  const e = digest.tiers.do.entries.find(x => x.id === 'SP-DO-CLIMATE');
+  assert.deepEqual(e.org.current_divisions, ['환경정책과', '물정책과', '자원순환과', '산림녹지과']);
+  assert.equal(e.org.legal_basis, '제21조의3');
+  const full = compactEntry(e, false);   // 국 하나만 상세 조회(브리프 아님) — current_divisions까지 실림
+  assert.deepEqual(full.org.current_divisions, e.org.current_divisions); assert.equal(full.org.legal_basis, e.org.legal_basis);
+  const brief = compactEntry(e, true);   // kind:"bureau" 전체 훑기 — current_divisions는 빼서 26개가 한 페이지에 들어가게 한다
+  assert.equal(brief.org.legal_basis, e.org.legal_basis); assert.ok(!('current_divisions' in brief.org));
+});
+await test('서귀포시: 사용자가 제공한 조직도 이미지로 국 10개 전부 확인(전부 일치, 신뢰도 high)', () => {
+  const t = digest.tiers.seogwipo;
+  assert.equal(t.baseline.org_counts.match, 10); assert.equal(Object.keys(t.baseline.org_counts).length, 1, '불일치 없이 전부 match');
+  const clim = t.entries.find(e => e.id === 'SP-CITYDO-SEOGWIPO-CLIMATE');
+  assert.deepEqual(clim.org.current_divisions, ['기후환경과', '생활환경과', '공원녹지과', '산림휴양관리소']);
+});
+await test('제주시: 서귀포시와 대조해 청정환경국 과 이름이 다르다는 것을 열린 질문으로 남긴다(국 단위 매핑 없이 유형 수준 메모만)', () => {
+  const t = digest.tiers['jeju-si'];
+  assert.ok(!t.baseline.org_counts, '아직 국 단위 판정은 없음(이미지만으로는 부족)');
+  assert.ok(t.baseline.open_questions.some(q => q.includes('기후환경과') && q.includes('서귀포')));
+});
+await test('읍·면·동은 baseline_note만 남고(조직 기준표 없음) 다른 유형과 섞이지 않는다', () => {
+  assert.ok(digest.tiers.emd.baseline_note && !digest.tiers.emd.baseline);
+});
+await test('digestQuery: 서귀포시 kind:"bureau"도 한 페이지로 조회되고 org가 실린다(국 10개 전부 match)', () => {
+  const r = digestQuery(digest, { tier: 'seogwipo', kind: 'bureau' });
+  assert.equal(r.matched, 10); assert.equal(r.next_offset, null);
+  assert.ok(r.entries.every(e => e.org && e.org.status === 'match'));
+});
+
 await test('다이제스트 항목 수가 「제주 AI 행정」 페이지 데이터와 정확히 일치한다', () => {
   for (const [k, n] of Object.entries(expected)) assert.equal(digest.tiers[k].entries.length, n, k);
   assert.deepEqual(Object.keys(digest.tiers).sort(), Object.keys(expected).sort());
@@ -155,7 +184,8 @@ await test('조직 기준표: 상태 집계가 국·단 수와 일치하고, 실
 await test('조직 기준표: 확인하지 못한 것(열린 질문)이 숨겨지지 않고 요약에 남는다', () => {
   assert.ok(baseline.open_questions.length >= 3 && baseline.confidence_note.includes('확인하지 못했다'));
   assert.ok(baseline.open_questions.some(q => q.includes('분장사무')), '과 단위 분장사무는 아직 확인하지 못했다는 사실이 남아야 함');
-  for (const k of ['jeju-si', 'seogwipo', 'emd']) assert.ok(digest.tiers[k].baseline_note.includes('확인하지 못했다'), k);
+  for (const k of ['jeju-si', 'seogwipo']) assert.ok(digest.tiers[k].baseline.confidence_note.includes('확인'), k);
+  assert.ok(digest.tiers.emd.baseline_note.includes('확인하지 못했다'));
 });
 await test('digestQuery: summary에 도청 조직 대조가 실리고, 첫 페이지에만 baseline 전문이 실린다', () => {
   const s = digestQuery(digest, { tier: 'summary' });

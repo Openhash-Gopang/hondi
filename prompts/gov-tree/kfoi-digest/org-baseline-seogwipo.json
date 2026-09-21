@@ -1,0 +1,155 @@
+{
+ "tier": "seogwipo",
+ "as_of": "2026-09-22",
+ "basis": "서귀포시 행정조직도(사용자 제공 이미지, 부서 업무 목록 포함)",
+ "checked_on": "2026-09-22",
+ "confidence_note": "제주도청과 달리 서귀포시는 시행규칙 원문이 아니라 시 홈페이지의 행정조직도 이미지로 확인했다. 과 이름은 전부 SP 목록과 일치했다(도청 개편의 여파가 서귀포시에는 아직 없거나, 이미 반영돼 있는 것으로 보인다). 이미지에는 각 과의 세부 업무(3~6개 키워드)도 있어 SP 본문(§2) 갱신에 바로 쓸 수 있다 — 이번에는 국·과 이름만 대조했고 세부 업무는 반영하지 않았다.",
+ "official_units": {
+  "bureaus": [
+   "자치행정국",
+   "복지위생국",
+   "문화관광체육국",
+   "농수축산경제국",
+   "청정환경국",
+   "안전도시건설국"
+  ],
+  "offices": [
+   "시민소통지원실",
+   "공보실",
+   "종합민원실",
+   "서귀포보건소"
+  ],
+  "note": "서귀포보건소는 SP 목록에서 국(局)급 유형(직속기관)으로 다뤄지고 있어 offices에 넣었다."
+ },
+ "reform_deltas": [],
+ "missing_in_inventory": [],
+ "corrections": [],
+ "open_questions": [
+  "자치행정국의 '기초자치단체설치준비지원단'이 이미지 조직도에 없다 — 폐지됐는지, 이미지가 한시조직을 생략한 것인지 미확인",
+  "청정환경국의 '기후환경과'가 서귀포시·제주시 모두에 있다는 것이 이번에 확인됐다. 그런데 제주시 SP 목록에는 기후환경과가 없고 환경관리과·환경시설관리소가 있다 — 제주시 청정환경국이 아직 개편 전 명칭을 쓰고 있을 가능성이 도청 사례(혁신산업국→미래산업국 등)와 같은 패턴으로 보인다(prompts/gov-tree/kfoi-digest/org-baseline-jeju-si.json 참고)",
+  "각 과의 세부 업무(이미지에 키워드로 있음)를 SP 본문(§2)에 반영하는 작업은 하지 않았다"
+ ],
+ "sources": [
+  {
+   "id": "seogwipo-orgchart",
+   "title": "서귀포시 행정조직도(사용자 제공 이미지, 부서별 업무 포함)",
+   "url": "",
+   "kind": "user-provided-image"
+  }
+ ],
+ "mapping": {
+  "SP-CITYDO-SEOGWIPO-JACHI": {
+   "status": "match",
+   "current_name": "자치행정국",
+   "confidence": "high",
+   "current_divisions": [
+    "총무과",
+    "기획예산과",
+    "자치행정과",
+    "마을활력과",
+    "평생교육과",
+    "세무과"
+   ],
+   "note": "과 이름이 SP 목록과 정확히 일치(이미지 조직도, 2026-09-22 확인). 자치행정국은 이미지에 없는 \"기초자치단체설치준비지원단\"을 SP 목록이 추가로 갖고 있음(한시조직으로 보이나 미확인)"
+  },
+  "SP-CITYDO-SEOGWIPO-WELFARE": {
+   "status": "match",
+   "current_name": "복지위생국",
+   "confidence": "high",
+   "current_divisions": [
+    "주민복지과",
+    "통합돌봄과",
+    "노인복지과",
+    "장애인복지과",
+    "여성가족과",
+    "위생관리과"
+   ],
+   "note": "과 이름이 SP 목록과 정확히 일치(이미지 조직도, 2026-09-22 확인)"
+  },
+  "SP-CITYDO-SEOGWIPO-CULTURE": {
+   "status": "match",
+   "current_name": "문화관광체육국",
+   "confidence": "high",
+   "current_divisions": [
+    "문화예술과",
+    "관광진흥과",
+    "체육진흥과",
+    "서귀포예술의전당",
+    "도서관운영사무소",
+    "관광지관리소",
+    "서귀포공립미술관"
+   ],
+   "note": "과 이름이 SP 목록과 정확히 일치(이미지 조직도, 2026-09-22 확인)"
+  },
+  "SP-CITYDO-SEOGWIPO-AGRIECONOMY": {
+   "status": "match",
+   "current_name": "농수축산경제국",
+   "confidence": "high",
+   "current_divisions": [
+    "경제일자리과",
+    "디지털혁신과",
+    "친환경농정과",
+    "감귤유통과",
+    "해양수산과",
+    "청정축산과"
+   ],
+   "note": "과 이름이 SP 목록과 정확히 일치(이미지 조직도, 2026-09-22 확인)"
+  },
+  "SP-CITYDO-SEOGWIPO-CLIMATE": {
+   "status": "match",
+   "current_name": "청정환경국",
+   "confidence": "high",
+   "current_divisions": [
+    "기후환경과",
+    "생활환경과",
+    "공원녹지과",
+    "산림휴양관리소"
+   ],
+   "note": "과 이름이 SP 목록과 정확히 일치(이미지 조직도, 2026-09-22 확인)"
+  },
+  "SP-CITYDO-SEOGWIPO-HOUSING": {
+   "status": "match",
+   "current_name": "안전도시건설국",
+   "confidence": "high",
+   "current_divisions": [
+    "안전총괄과",
+    "도시과",
+    "건축과",
+    "건설과",
+    "교통행정과",
+    "상하수도과"
+   ],
+   "note": "과 이름이 SP 목록과 정확히 일치(이미지 조직도, 2026-09-22 확인)"
+  },
+  "SP-CITYDO-SEOGWIPO-HEALTH": {
+   "status": "match",
+   "current_name": "서귀포보건소",
+   "confidence": "high",
+   "current_divisions": [
+    "보건행정과",
+    "건강증진과",
+    "동부보건소",
+    "서부보건소"
+   ],
+   "note": "과 이름이 SP 목록과 정확히 일치(이미지 조직도, 2026-09-22 확인)"
+  },
+  "SP-CITYDO-SEOGWIPO-COMM": {
+   "status": "match",
+   "current_name": "시민소통지원실",
+   "confidence": "high",
+   "note": "이미지 조직도로 이름 확인(2026-09-22)"
+  },
+  "SP-CITYDO-SEOGWIPO-PR": {
+   "status": "match",
+   "current_name": "공보실",
+   "confidence": "high",
+   "note": "이미지 조직도로 이름 확인(2026-09-22)"
+  },
+  "SP-CITYDO-SEOGWIPO-CIVILAFFAIRS": {
+   "status": "match",
+   "current_name": "종합민원실",
+   "confidence": "high",
+   "note": "이미지 조직도로 이름 확인(2026-09-22)"
+  }
+ }
+}
