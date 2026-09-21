@@ -1,0 +1,97 @@
+name: Live Smoketest — K-Address 소속 기관 계층(org-units)
+
+# 2026-09-21 신설 — 소속 기관 계층 분류(PR #404 워커 API + 마이그레이션
+# 1794010001·1794010002)가 "실서버"에서 실제로 동작하는지 끝에서 끝까지 확인한다.
+#   1) 워커 배포 여부(라우트 존재) + L1 PocketBase에 org_units 컬렉션/필드 존재
+#   2) 노드 생성·중복/이름 검증, 연락처 배정, 이름 변경·이동·삭제 시 하위/연락처 경로 갱신
+#   3) GET /kmail/contacts?org_path= 조회 필터 — 형제 접두어 노드('대학' vs '대학병원')를
+#      잘못 잡지 않는지(worker.js 변경분의 라이브 검증)
+#   4) resync 정합성
+#
+# 기존 live-smoketest-kaddress-contacts.yml과 동일한 관례(workflow_dispatch,
+# phone_verify_token 오프라인 재현, PocketBase Admin API로 실제 저장 결과 검증,
+# results 브랜치 커밋, artifact 업로드).
+#
+# ★ 실계정 주의 — test_e164는 주소록을 실제로 가진 등록 계정이다. 이 테스트는
+#   (a) 이번 실행 전용 고유 루트 노드(zz-smoketest-<8hex>) 아래에서만 노드를
+#   만들고 바꾸며, (b) 테스트 연락처 3건(이메일 @example-smoketest.invalid)을
+#   만들고, (c) 끝나면 PocketBase Admin API로 "이번 실행이 만든 것만" 삭제한다.
+#   실계정의 기존 노드·연락처는 읽기만 하고 쓰지 않는다. 시드(23개 노드 생성)는
+#   with_seed=true일 때만 호출한다. 실행이 중간에 죽어도 finally에서 정리하지만,
+#   워크플로 자체가 강제 종료되면 "zz-smoketest-"로 시작하는 노드와
+#   "smoketest-…@example-smoketest.invalid" 연락처가 남을 수 있다 — 그땐 그 접두어로
+#   찾아 지우면 된다.
+#
+# 필요 GitHub Secrets(이미 등록됨):
+#   PHONE_VERIFY_SECRET, PB_ADMIN_EMAIL, PB_ADMIN_PASSWORD
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_e164:
+        description: "주소록을 실제로 소유한 등록된 테스트 계정 전화번호 — 어떤 형식이든(뒷자리 8자리만도 가능)"
+        required: true
+      worker_base:
+        description: "worker.js(hondi-proxy) base URL"
+        required: false
+        default: ""
+      with_seed:
+        description: "true면 시드 템플릿(23개 노드)을 실계정 트리에 실제로 생성 — 기본 false"
+        required: false
+        default: "false"
+      no_cleanup:
+        description: "true면 테스트 노드·연락처를 지우지 않고 남겨둠(디버깅용)"
+        required: false
+        default: "false"
+
+permissions:
+  contents: write
+
+jobs:
+  run-kaddress-org-units-smoketest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install requests
+
+      - name: Run K-Address org-units live smoketest
+        working-directory: tests/live_smoketest
+        env:
+          PHONE_VERIFY_SECRET: ${{ secrets.PHONE_VERIFY_SECRET }}
+          PB_ADMIN_EMAIL: ${{ secrets.PB_ADMIN_EMAIL }}
+          PB_ADMIN_PASSWORD: ${{ secrets.PB_ADMIN_PASSWORD }}
+        run: |
+          EXTRA_ARGS=""
+          if [ "${{ github.event.inputs.with_seed }}" = "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --with-seed"; fi
+          if [ "${{ github.event.inputs.no_cleanup }}" = "true" ]; then EXTRA_ARGS="$EXTRA_ARGS --no-cleanup"; fi
+          python3 kaddress_org_units_live_smoketest.py \
+            --out "../../results/kaddress-org-units" \
+            --worker-base "${{ github.event.inputs.worker_base || 'https://hondi-proxy.tensor-city.workers.dev' }}" \
+            --test-e164 "${{ github.event.inputs.test_e164 }}" \
+            $EXTRA_ARGS
+
+      - name: Commit results to results branch
+        if: always()
+        run: |
+          git config user.name "hondi-live-smoketest-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout -B results/live-smoketest-kaddress-org-units
+          git add -f results/
+          git diff --cached --quiet || git commit -m "chore: K-Address org-units live smoketest results ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+          git push --force origin HEAD:results/live-smoketest-kaddress-org-units
+
+      - name: Upload artifact (backup)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-smoketest-kaddress-org-units-results
+          path: results/
