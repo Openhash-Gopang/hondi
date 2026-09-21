@@ -117,6 +117,47 @@ await test('digestQuery: q로 거른다(부서·업무 낱말), 결과 없으면
   assert.ok(r.entries.some(e => e.name.includes('생활환경')));
   assert.equal(digestQuery(digest, { tier: 'do', q: 'zzzz없는낱말' }).matched, 0);
 });
+// ── 현행 조직 대조(2026-09-21 K-FOI 시험에서 SP 목록이 2026.8.25 개편 전 조직으로 드러남) ──
+const baseline = JSON.parse(fs.readFileSync(path.join(ROOT, 'prompts/gov-tree/kfoi-digest/org-baseline-do.json'), 'utf8'));
+await test('조직 기준표: 도청의 모든 국·단 SP가 기준표에 있고, 기준표에 인벤토리에 없는 낡은 항목이 없다', () => {
+  const ids = digest.tiers.do.entries.filter(e => e.kind === 'bureau').map(e => e.id);
+  for (const id of ids) assert.ok(baseline.mapping[id], `기준표에 없음: ${id} — SP를 추가했다면 org-baseline-do.json에도 판정을 넣으세요`);
+  for (const id of Object.keys(baseline.mapping)) assert.ok(ids.includes(id), `기준표에만 있음(인벤토리에서 빠짐): ${id}`);
+  for (const e of digest.tiers.do.entries.filter(e => e.kind === 'bureau')) assert.ok(['match', 'renamed', 'name_differs', 'not_in_official_menu', 'unverified'].includes(e.org.status), e.id);
+});
+await test('조직 기준표: 확인된 개칭(혁신산업국→미래산업국, 기후환경국→환경산림자원국)과 신설(기후에너지국)이 요약본에 실린다', () => {
+  const by = Object.fromEntries(digest.tiers.do.entries.filter(e => e.kind === 'bureau').map(e => [e.id, e]));
+  assert.deepEqual([by['SP-DO-INNOV'].org.status, by['SP-DO-INNOV'].org.current_name], ['renamed', '미래산업국']);
+  assert.deepEqual([by['SP-DO-CLIMATE'].org.status, by['SP-DO-CLIMATE'].org.current_name], ['renamed', '환경산림자원국']);
+  assert.ok(digest.tiers.do.baseline.missing_in_inventory.some(m => m.name === '기후에너지국' && m.confidence === 'high'));
+  const innovDiv = digest.tiers.do.entries.find(e => e.kind === 'division' && e.parent === by['SP-DO-INNOV'].name);
+  assert.equal(innovDiv.org.status, 'parent_renamed', '개칭된 국의 과에는 상위 상태가 표시돼야 함');
+});
+await test('조직 기준표: 상태 집계가 국·단 수와 일치하고, 실·국 15개는 개편 보도의 실·국 수와 일치한다', () => {
+  const total = Object.values(digest.tiers.do.baseline.org_counts).reduce((a, b) => a + b, 0);
+  assert.equal(total, digest.tiers.do.entries.filter(e => e.kind === 'bureau').length);
+  assert.equal(baseline.official_units.bureaus.length, baseline.expected_counts['실국']);
+  assert.ok(baseline.official_units.bureaus.includes('미래산업국') && baseline.official_units.bureaus.includes('기후에너지국') && !baseline.official_units.bureaus.includes('혁신산업국'));
+});
+await test('조직 기준표: 확인하지 못한 것(신뢰도 낮음·열린 질문)이 숨겨지지 않고 요약에 남는다', () => {
+  assert.ok(baseline.open_questions.length >= 3 && baseline.confidence_note.includes('확인하지 못했다'));
+  assert.ok(digest.tiers.do.baseline.missing_in_inventory.some(m => m.confidence === 'low'));
+  for (const k of ['jeju-si', 'seogwipo', 'emd']) assert.ok(digest.tiers[k].baseline_note.includes('확인하지 못했다'), k);
+});
+await test('digestQuery: summary에 도청 조직 대조가 실리고, 첫 페이지에만 baseline 전문이 실린다', () => {
+  const s = digestQuery(digest, { tier: 'summary' });
+  assert.ok(s.tiers.do.org_baseline.missing_in_inventory.includes('기후에너지국') && s.tiers.do.org_baseline.org_counts.renamed === 2);
+  const p1 = digestQuery(digest, { tier: 'do', offset: 0 }); assert.ok(p1.baseline && p1.baseline.confidence_note);
+  const p2 = digestQuery(digest, { tier: 'do', offset: p1.next_offset }); assert.ok(!p2.baseline);
+});
+await test('digestQuery: kind:"bureau"는 국·단 26개를 한 페이지로 돌려주고 현행 조직 대조를 담는다(전체 페이징 불필요)', () => {
+  const r = digestQuery(digest, { tier: 'do', kind: 'bureau' });
+  assert.equal(r.matched, 26); assert.equal(r.returned, 26); assert.equal(r.next_offset, null, '한 페이지에 다 실려야 함');
+  assert.ok(JSON.stringify(r.entries).length <= 5500);
+  assert.ok(r.entries.every(e => e.org && e.org.status));
+  assert.equal(r.entries.find(e => e.name.startsWith('혁신산업국')).org.current_name, '미래산업국');
+});
+
 await test('compactEntry: 비어 있는 필드는 빼고 긴 문장은 줄인다', () => {
   const c = compactEntry({ name: 'A', state: 'draft', does: ['가'.repeat(200)], cannot: [], unverified: [] });
   assert.deepEqual(Object.keys(c), ['name', 'state', 'does']); assert.ok(c.does[0].length <= 90);
