@@ -208,11 +208,20 @@ export function archiveView(rec) {
 
 // ── LLM 응답의 끝 태그 파싱 ────────────────────────────────────
 // 예: "...설명... [KFOI_SEARCH {"query":"제주시 생활환경과 업무"}]"
+export const KNOWN_TOOL_NAMES = ['ARCHIVE_SEARCH', 'SEARCH', 'FETCH', 'DIGEST'];
 export function extractTrailingTag(reply) {
   const text = String(reply || '');
-  const re = /[\[(]?\s*KFOI_(SEARCH|FETCH|ARCHIVE_SEARCH|DIGEST|FILL)\b/g;
+  // 알려진 도구·FILL은 JSON이 깨졌어도 잡아 "형식 오류"로 처리한다. 모르는 이름은 "KFOI_이름 {" 꼴일 때만 도구 요청으로 본다 —
+  // SP와 Worker가 따로 배포되어 SP가 아직 Worker에 없는 도구를 부르는 경우(2026-09-21 실사용), 원문 태그가 화면에 그대로
+  // 노출되고 흐름이 멈추는 대신 "지원하지 않는 도구"라는 결과를 모델에게 돌려주고 이어가기 위해서다. RESULT·TOOLS는 서버 메시지 이름이다.
+  const re = /[\[(]?\s*KFOI_([A-Z][A-Z_]*)\b/g;
   let m; let last = null;
-  while ((m = re.exec(text))) last = m;
+  while ((m = re.exec(text))) {
+    const nm = m[1];
+    if (nm === 'RESULT' || nm === 'TOOLS') continue;
+    const known = nm === 'FILL' || KNOWN_TOOL_NAMES.includes(nm);
+    if (known || /^\s*\{/.test(text.slice(m.index + m[0].length))) last = m;
+  }
   if (!last) return null;
   const name = last[1];
   const before = text.slice(0, last.index).trim();
@@ -230,6 +239,13 @@ export function extractTrailingTag(reply) {
   let args;
   try { args = JSON.parse(text.slice(braceStart, end + 1)); } catch { return { name, invalid: true, before }; }
   return { name, args, before };
+}
+
+// 어떤 경로로든 KFOI_ 태그가 사용자에게 보이는 답변에 남지 않게 한다(태그는 서버·화면 사이의 약속이지 사용자 문장이 아니다).
+export function stripStrayTags(text) {
+  const t = String(text || '');
+  const m = /[\[(]?\s*KFOI_[A-Z][A-Z_]*\s*\{/.exec(t);
+  return (m ? t.slice(0, m.index) : t).trim();
 }
 
 function isToolResultMessage(m) { return m && m.role === 'user' && typeof m.content === 'string' && m.content.startsWith('[KFOI_RESULT'); }
@@ -510,6 +526,10 @@ export function makeKfoiHandlers(deps) {
   }
 
   // ── 도구 실행(검색·열람·아카이브) ────────────────────────────
+  // 이 서버가 실제로 지원하는 조사 도구. 시스템 메시지의 [KFOI_TOOLS …] 줄로 SP에 알린다 — SP는 그 줄에 있는 도구만 쓴다.
+  // (SP는 GitHub에서 바로 읽히고 Worker는 따로 배포되므로, SP가 서버보다 먼저 새 도구를 부르는 어긋남을 막는 약속이다.)
+  function availableTools() { return [...KNOWN_TOOL_NAMES.filter(n => n !== 'DIGEST'), ...(typeof fetchDigest === 'function' ? ['DIGEST'] : [])]; }
+
   async function runTool(env, ctx, tag, digestCalls = 0) {
     const a = tag.args || {};
     if (tag.name === 'DIGEST') {
@@ -551,7 +571,11 @@ export function makeKfoiHandlers(deps) {
       const compact = r && r.ok ? { url: r.url || target, text: String(r.text_snippet || '').slice(0, 6000) } : { url: target, error: r && r.error, message: r && r.message };
       return { label: `페이지 열람: ${target}`, kind: 'fetch', text: clipJsonForLlm(compact, 6500) };
     }
-    return { label: '', kind: 'none', text: '{}' };
+    const avail = availableTools();
+    return {
+      label: `지원하지 않는 도구 요청: KFOI_${tag.name}`, kind: 'unsupported',
+      text: JSON.stringify({ error: 'UNSUPPORTED_TOOL', tool: 'KFOI_' + tag.name, available: avail, message: `이 서버는 KFOI_${tag.name} 도구를 지원하지 않습니다. 사용 가능한 도구(${avail.join(', ')})만 쓰거나 도구 없이 정리하세요.` }),
+    };
   }
 
   // ── POST /kfoi/chat ─────────────────────────────────────────
@@ -613,6 +637,7 @@ export function makeKfoiHandlers(deps) {
       const systemMessages = [
         ...(universal ? [{ role: 'system', content: universal }] : []),
         { role: 'system', content: systemPrompt },
+        { role: 'system', content: `[KFOI_TOOLS 사용 가능한 조사 도구: ${availableTools().join(', ')}]` },
       ];
       let raw;
       if (choice.provider === 'default') {
@@ -675,12 +700,12 @@ export function makeKfoiHandlers(deps) {
       append.push(finalMsg);
       if (tag && tag.name === 'FILL' && !tag.invalid) {
         action = await sanitizeFill(env, tag.args);
-        reply = tag.before.replace(/`{3}[a-z]*\s*$/i, '').trim();
+        reply = stripStrayTags(tag.before.replace(/`{3}[a-z]*\s*$/i, '')).trim();
         if (!action) reply = (reply ? reply + '\n\n' : '') + '(청구 폼에 채울 값을 확인하지 못했습니다 — 청구 기관과 항목을 다시 알려 주세요.)';
       } else if (tag && tag.invalid) {
-        reply = tag.before || '응답 형식이 올바르지 않았습니다. 요청을 조금 더 구체적으로 다시 적어 주세요.';
+        reply = stripStrayTags(tag.before) || '응답 형식이 올바르지 않았습니다. 요청을 조금 더 구체적으로 다시 적어 주세요.';
       } else {
-        reply = raw;
+        reply = stripStrayTags(raw) || '응답 형식이 올바르지 않았습니다. 요청을 조금 더 구체적으로 다시 적어 주세요.';
       }
       break;
     }

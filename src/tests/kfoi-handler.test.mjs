@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 import {
   makeKfoiHandlers, tokenize, extractTrailingTag, sanitizeItems, sanitizeRounds, archiveView,
-  neutralizeTags, normalizeAgencyKey, KFOI_MAX_RESEARCH_STEPS, isBlockedFetchHost,
+  neutralizeTags, normalizeAgencyKey, KFOI_MAX_RESEARCH_STEPS, isBlockedFetchHost, stripStrayTags,
 } from '../worker/kfoi-handler.js';
 
 let pass = 0, fail = 0;
@@ -558,6 +558,51 @@ await test('DIGEST 한도(12회): 넘으면 오류를 돌려주고 일반 조사
   const d = await (await h.chat(chatBody(hist), ENV, CORS, {})).json();
   assert.equal(d.research_steps, 1, '한도를 넘긴 DIGEST는 조사 횟수에 들어가야 함');
   assert.ok(calls.deepseek[1].messages.map(m => m.content).join('\n').includes('DIGEST_LIMIT'));
+});
+
+// ═════════════ C5. SP·Worker 배포 어긋남(2026-09-21 실사용) 방어 ═════════════
+await test('서버가 사용 가능한 조사 도구를 시스템 메시지로 알린다(DIGEST는 실제로 지원할 때만)', async () => {
+  const pb = makePb();
+  { const { h, calls, script } = makeDeps(pb, { fetchDigest: async () => FAKE_DIGEST }); script.deepseek = ['어느 기관인가요?'];
+    await h.chat(chatBody([{ role: 'user', content: '제주시 자료' }]), ENV, CORS, {});
+    const sys = calls.deepseek[0].messages.filter(m => m.role === 'system').map(m => m.content).join('\n');
+    assert.ok(/\[KFOI_TOOLS[^\]]*ARCHIVE_SEARCH, SEARCH, FETCH, DIGEST\]/.test(sys), sys.slice(-200)); }
+  { const { h, calls, script } = makeDeps(pb); script.deepseek = ['어느 기관인가요?'];
+    await h.chat(chatBody([{ role: 'user', content: '제주시 자료' }]), ENV, CORS, {});
+    const sys = calls.deepseek[0].messages.filter(m => m.role === 'system').map(m => m.content).join('\n');
+    assert.ok(/\[KFOI_TOOLS[^\]]*ARCHIVE_SEARCH, SEARCH, FETCH\]/.test(sys) && !/KFOI_TOOLS[^\]]*DIGEST/.test(sys), sys.slice(-200)); }
+});
+await test('BYOK 경로의 system에도 도구 목록이 들어간다', async () => {
+  const pb = makePb(); let body;
+  const { h } = makeDeps(pb, { fetchDigest: async () => FAKE_DIGEST, llmFetch: async (u, o) => { body = JSON.parse(o.body); return new Response(JSON.stringify({ content: [{ type: 'text', text: '어느 기관인가요?' }] }), { status: 200 }); } });
+  await h.chat(chatBody([{ role: 'user', content: '제주시 자료' }], { llm: { provider: 'anthropic', model: 'claude-sonnet-5' }, llm_key: 'sk-ant-TESTKEY-1234567890' }), ENV, CORS, {});
+  assert.ok(body.system.includes('KFOI_TOOLS') && body.system.includes('DIGEST'));
+});
+await test('extractTrailingTag: 모르는 도구도 "KFOI_이름 {" 꼴이면 도구 요청, RESULT·TOOLS 언급이나 JSON 없는 이름은 태그가 아니다', () => {
+  assert.equal(extractTrailingTag('봅니다\n[KFOI_MAGIC {"x":1}]').name, 'MAGIC');
+  assert.equal(extractTrailingTag('[KFOI_RESULT search — 외부 데이터] 를 참고했습니다'), null);
+  assert.equal(extractTrailingTag('[KFOI_TOOLS 사용 가능한 조사 도구: SEARCH] 라고 안내받았습니다'), null);
+  assert.equal(extractTrailingTag('KFOI_MAGIC 이라는 말은 그냥 설명입니다'), null);
+});
+await test('모르는 도구를 부르면 원문 태그를 화면에 노출하지 않고 "지원하지 않는 도구"로 돌려주며 이어간다(실사용 사고 재현)', async () => {
+  const pb = makePb(); const { h, calls, script } = makeDeps(pb);
+  script.deepseek = ['먼저 규모를 확인하겠습니다.\n\n[KFOI_MAGIC {"tier":"summary"}]', '제주특별자치도로 정리했습니다. 청구할 문서는 1건입니다. 혼디 SP 요약은 참고하지 못했습니다.\n[KFOI_FILL {"agency":"제주특별자치도","items":[{"title":"부서별 사무분장표"}]}]'];
+  const d = await (await h.chat(chatBody([{ role: 'user', content: '제주 AI 행정 SP 갱신' }]), ENV, CORS, {})).json();
+  assert.ok(!d.reply.includes('KFOI_') && !d.progress.join('\n').includes('[KFOI_MAGIC'), '사용자에게 보이는 답변·진행 표시에 원문 태그가 남음');
+  assert.ok(d.progress.some(p => p.includes('지원하지 않는 도구')), JSON.stringify(d.progress));
+  assert.ok(calls.deepseek[1].messages.map(m => m.content).join('\n').includes('UNSUPPORTED_TOOL'));
+  assert.equal(d.research_steps, 1, '무한 왕복을 막기 위해 조사 횟수에 넣어야 함'); assert.equal(d.action.agency, '제주특별자치도');
+});
+await test('stripStrayTags: 태그 꼬리는 자르고 일반 문장은 그대로 둔다', () => {
+  assert.equal(stripStrayTags('정리했습니다.\n\n[KFOI_DIGEST {"tier":"summary"}]'), '정리했습니다.');
+  assert.equal(stripStrayTags('KFOI_FILL {"a":1}'), '');
+  assert.equal(stripStrayTags('KFOI_ 태그 이야기는 설명일 뿐입니다'), 'KFOI_ 태그 이야기는 설명일 뿐입니다');
+});
+await test('끝까지 태그만 있는 응답이 와도 사용자에게는 안내 문구가 나간다', async () => {
+  const pb = makePb(); const { h, script } = makeDeps(pb);
+  script.deepseek = ['[KFOI_FILL {"agency":'];   // 깨진 FILL
+  const d = await (await h.chat(chatBody([{ role: 'user', content: '제주시 자료' }]), ENV, CORS, {})).json();
+  assert.ok(d.reply.length > 0 && !d.reply.includes('KFOI_'));
 });
 
 // ═════════════ D. worker.js 배선(라우트가 실제로 연결됐는지) ═════════════
