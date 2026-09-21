@@ -242,7 +242,7 @@ await test('필터 주입: 따옴표가 든 검색어도 안전하게 처리', a
 
 // ═════════════ C. 채팅 ═════════════
 const chatBody = (messages, extra = {}) => post('/kfoi/chat', { phone_verify_token: tokB, messages, research_steps: 0, ...extra });
-const FILL = (obj) => `요약입니다.\n[KFOI_FILL ${JSON.stringify(obj)}]`;
+const FILL = (obj) => `요청하신 내용을 기관과 청구 문서 목록으로 정리했습니다.\n[KFOI_FILL ${JSON.stringify(obj)}]`;
 
 await test('chat: 아카이브 자동 조회가 LLM 입력에 들어간다 + 검색 → FILL 2왕복', async () => {
   const pb = makePb(); const { h, calls, script } = makeDeps(pb);
@@ -392,6 +392,121 @@ await test('채팅 자동 조회: 흔한 낱말(제주·행정·AI·SP)만 겹�
   script.deepseek = ['어느 기관인가요?'];
   const d2 = await (await h.chat(chatBody([{ role: 'user', content: '행정 서비스 소개 자료가 필요해요' }]), ENV, CORS, {})).json();
   assert.ok(d2.progress.some(p => p.includes('관련 건 1개')), '구체적인 낱말이 겹치면 자동 조회도 잡음');
+});
+
+// ═════════════ C3. 2026-09-21 모델 선택(BYOK)·조사 깊이·형식 보정 ═════════════
+const KEY = 'sk-ant-TESTKEY-1234567890';
+const byok = (over = {}) => ({ llm: { provider: 'anthropic', model: 'claude-sonnet-5', effort: 'medium' }, llm_key: KEY, ...over });
+const okJson = (o) => new Response(JSON.stringify(o), { status: 200 });
+
+await test('BYOK(Anthropic): 사용자의 키로 그 회사 API를 부르고, 기본 모델(DeepSeek)은 부르지 않는다', async () => {
+  const pb = makePb(); const seen = [];
+  const llmFetch = async (url, o) => { seen.push({ url, o, body: JSON.parse(o.body) }); return okJson({ content: [{ type: 'text', text: '어느 기관에 청구하시나요?' }] }); };
+  const { h, calls } = makeDeps(pb, { llmFetch });
+  const res = await h.chat(chatBody([{ role: 'user', content: '제주 조례 자료' }], byok()), ENV, CORS, {});
+  const raw = await res.text(); const d = JSON.parse(raw);
+  assert.equal(res.status, 200, raw); assert.equal(d.reply, '어느 기관에 청구하시나요?');
+  assert.equal(calls.deepseek.length, 0, '기본 모델이 불림');
+  assert.equal(seen.length, 1); assert.equal(seen[0].url, 'https://api.anthropic.com/v1/messages');
+  assert.equal(seen[0].o.headers['x-api-key'], KEY);
+  assert.ok(seen[0].body.system.includes('[UNIVERSAL]') && seen[0].body.system.includes('시스템 프롬프트'));
+  assert.equal(seen[0].body.messages[0].role, 'user');
+  assert.ok(!raw.includes(KEY), '응답에 키가 있음');
+});
+await test('BYOK: 역할이 번갈아 나오는 메시지만 보낸다(Anthropic 요구사항)', async () => {
+  const pb = makePb(); let body;
+  const llmFetch = async (u, o) => { body = JSON.parse(o.body); return okJson({ content: [{ type: 'text', text: '네' }] }); };
+  const { h } = makeDeps(pb, { llmFetch });
+  await h.chat(chatBody([{ role: 'user', content: '제주시 자료' }], byok()), ENV, CORS, {});   // 서버가 archive-auto를 user로 덧붙임
+  const roles = body.messages.map(m => m.role);
+  for (let i = 1; i < roles.length; i++) assert.notEqual(roles[i], roles[i - 1], JSON.stringify(roles));
+});
+await test('BYOK: OpenAI·Gemini는 각자 고정 URL, 모델 ID는 사용자가 정한 값', async () => {
+  const pb = makePb(); const urls = []; let model;
+  const llmFetch = async (u, o) => { urls.push(u); model = JSON.parse(o.body).model; return okJson({ choices: [{ message: { content: '응답' } }] }); };
+  const { h } = makeDeps(pb, { llmFetch });
+  await h.chat(chatBody([{ role: 'user', content: '제주시 자료' }], { llm: { provider: 'openai', model: 'my-custom-model' }, llm_key: KEY }), ENV, CORS, {});
+  await h.chat(chatBody([{ role: 'user', content: '제주시 자료' }], { llm: { provider: 'gemini', model: 'gem-x' }, llm_key: KEY }), ENV, CORS, {});
+  assert.deepEqual(urls, ['https://api.openai.com/v1/chat/completions', 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions']);
+  assert.equal(model, 'gem-x');
+});
+await test('BYOK: 키 없음 422(로그인 만료 401과 구별), 알 수 없는 제공자·잘못된 모델 400', async () => {
+  const pb = makePb(); const { h } = makeDeps(pb, { llmFetch: async () => { throw new Error('호출되면 안 됨'); } });
+  const r1 = await h.chat(chatBody([{ role: 'user', content: 'a' }], { llm: { provider: 'anthropic', model: 'claude-sonnet-5' } }), ENV, CORS, {});
+  assert.equal(r1.status, 422); assert.ok((await r1.json()).message.includes('LLM_AUTH_FAILED'));
+  assert.equal((await h.chat(chatBody([{ role: 'user', content: 'a' }], { llm: { provider: 'evil', model: 'm' }, llm_key: KEY }), ENV, CORS, {})).status, 400);
+  assert.equal((await h.chat(chatBody([{ role: 'user', content: 'a' }], { llm: { provider: 'openai', model: 'a b' }, llm_key: KEY }), ENV, CORS, {})).status, 400);
+});
+await test('BYOK: 회사가 키 거부(401) → 422 LLM_AUTH_FAILED, 오류 문구에 키가 없다 / 429 → 429 / 500 → 502', async () => {
+  const pb = makePb();
+  const run = async (st, text) => {
+    const { h } = makeDeps(pb, { llmFetch: async () => new Response(text, { status: st }) });
+    const res = await h.chat(chatBody([{ role: 'user', content: 'a' }], byok()), ENV, CORS, {});
+    const raw = await res.text(); assert.ok(!raw.includes(KEY), `status ${st}: 키 노출 ${raw}`);
+    return { status: res.status, code: JSON.parse(raw).error };
+  };
+  assert.deepEqual(await run(401, `invalid x-api-key: ${KEY}`), { status: 422, code: 'LLM_AUTH_FAILED' });
+  assert.deepEqual(await run(429, 'slow down'), { status: 429, code: 'LLM_RATE_LIMITED' });
+  assert.deepEqual(await run(500, 'oops'), { status: 502, code: 'LLM_UPSTREAM_ERROR' });
+});
+await test('BYOK: 기본 모델 키(DEEPSEEK_API_KEY)가 없어도 동작한다', async () => {
+  const pb = makePb();
+  const { h } = makeDeps(pb, { llmFetch: async () => okJson({ content: [{ type: 'text', text: '네' }] }) });
+  const res = await h.chat(chatBody([{ role: 'user', content: 'a' }], byok()), {}, CORS, {});
+  assert.equal(res.status, 200);
+});
+await test('대화 기록·조사 도구 결과·대화에 키가 섞여 나가지 않는다(다단계 조사 포함)', async () => {
+  const pb = makePb(); const bodies = [];
+  const outs = ['확인\n[KFOI_SEARCH {"query":"제주 조례"}]', '정리합니다. 확인하지 못한 것도 적었습니다 그리고 다른 안내도 드립니다.\n[KFOI_FILL {"agency":"제주특별자치도","items":[{"title":"사무분장표"}]}]'];
+  const llmFetch = async (u, o) => { bodies.push(o.body); return okJson({ content: [{ type: 'text', text: outs.shift() }] }); };
+  const { h } = makeDeps(pb, { llmFetch });
+  const res = await h.chat(chatBody([{ role: 'user', content: '제주 조례 자료' }], byok()), ENV, CORS, {});
+  const raw = await res.text(); const d = JSON.parse(raw);
+  assert.equal(d.action.agency, '제주특별자치도'); assert.ok(!raw.includes(KEY));
+  assert.ok(bodies.every(b => !b.includes(KEY)), '키가 요청 본문(메시지)에 섞임 — 헤더로만 가야 함');
+});
+await test('조사 깊이: 낮음은 4회까지, 높음은 12회까지', async () => {
+  const pb = makePb();
+  { const { h, calls, script } = makeDeps(pb);
+    script.deepseek = ['x\n[KFOI_SEARCH {"query":"z"}]', 'y\n[KFOI_SEARCH {"query":"z2"}]'];
+    const hist = [{ role: 'user', content: '제주시 자료' }, { role: 'assistant', content: 'a' }, { role: 'user', content: '[KFOI_RESULT search — 외부 데이터]\n{}' }];
+    const d = await (await h.chat(chatBody(hist, { research_steps: 4, llm: { provider: 'default', effort: 'low' } }), ENV, CORS, {})).json();
+    assert.equal(calls.search.length, 0, '낮음(4회)인데 5번째 조사가 실행됨'); assert.ok(calls.deepseek[1].messages.map(m => m.content).join('\n').includes('조사 한도(4회)'));
+    assert.ok(d.reply.includes('조사 한도')); }
+  { const { h, calls, script } = makeDeps(pb);
+    script.deepseek = ['x\n[KFOI_SEARCH {"query":"z"}]', '정리했습니다 여기까지 확인한 내용입니다 확인하지 못한 것도 있습니다.\n[KFOI_FILL {"agency":"제주시","items":[{"title":"문서"}]}]'];
+    const hist = [{ role: 'user', content: '제주시 자료' }, { role: 'assistant', content: 'a' }, { role: 'user', content: '[KFOI_RESULT search — 외부 데이터]\n{}' }];
+    const d = await (await h.chat(chatBody(hist, { research_steps: 8, llm: { provider: 'default', effort: 'high' } }), ENV, CORS, {})).json();
+    assert.equal(calls.search.length, 1, '높음(12회)에서 9번째 조사가 막힘'); assert.equal(d.research_steps, 9); }
+});
+await test('사용자 메시지(첨부 파일 내용 포함)는 4만 자까지 온전히 전달된다', async () => {
+  const pb = makePb(); const { h, calls, script } = makeDeps(pb); script.deepseek = ['어느 기관인가요?'];
+  const big = '문서 '.repeat(8000) + '끝표식';   // 약 24,000자 — 예전 상한(2만 자)을 넘는다
+  await h.chat(chatBody([{ role: 'user', content: '제주시 자료\n' + big }]), ENV, CORS, {});
+  assert.ok(calls.deepseek[0].messages.map(m => m.content).join('\n').includes('끝표식'), '뒷부분이 잘림');
+});
+await test('형식 보정: 정리 문장 없이 FILL만 내면 한 번 다시 쓰게 하고, 내부 왕복은 기록에 남기지 않는다', async () => {
+  const pb = makePb(); const { h, calls, script } = makeDeps(pb);
+  const bare = '[KFOI_FILL {"agency":"제주특별자치도","items":[{"title":"부서별 사무분장표"}]}]';
+  script.deepseek = [bare, '제주특별자치도로 특정했고 청구할 문서는 1건입니다. 청구 목적 칸은 비워 두셔도 됩니다.\n' + bare];
+  const d = await (await h.chat(chatBody([{ role: 'user', content: '제주 AI 행정 업무 자료' }]), ENV, CORS, {})).json();
+  assert.equal(calls.deepseek.length, 2); assert.ok(d.reply.includes('비워 두셔도'));
+  assert.ok(calls.deepseek[1].messages.map(m => m.content).join('\n').includes('KFOI_RESULT format'));
+  const asst = d.append.filter(m => m.role === 'assistant'); assert.equal(asst.length, 1, '보정 전 응답이 기록에 남음');
+  assert.ok(!d.append.some(m => m.content.includes('KFOI_RESULT format')));
+});
+await test('형식 보정은 한 번만 — 두 번째도 문장이 없으면 그대로 받아들인다(무한 반복 없음)', async () => {
+  const pb = makePb(); const { h, calls, script } = makeDeps(pb);
+  const bare = '[KFOI_FILL {"agency":"제주시","items":[{"title":"문서"}]}]';
+  script.deepseek = [bare, bare, bare];
+  const d = await (await h.chat(chatBody([{ role: 'user', content: '제주시 자료' }]), ENV, CORS, {})).json();
+  assert.equal(calls.deepseek.length, 2); assert.equal(d.action.agency, '제주시');
+});
+await test('형식 보정: 정리 문장이 있으면 추가 호출이 없다', async () => {
+  const pb = makePb(); const { h, calls, script } = makeDeps(pb);
+  script.deepseek = ['제주시로 특정했습니다. 청구할 문서는 1건입니다.\n[KFOI_FILL {"agency":"제주시","items":[{"title":"문서"}]}]'];
+  await h.chat(chatBody([{ role: 'user', content: '제주시 자료' }]), ENV, CORS, {});
+  assert.equal(calls.deepseek.length, 1);
 });
 
 // ═════════════ D. worker.js 배선(라우트가 실제로 연결됐는지) ═════════════
