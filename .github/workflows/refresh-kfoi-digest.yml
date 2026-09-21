@@ -1,0 +1,51 @@
+name: Refresh K-FOI SP digest
+
+# ── 배경 ────────────────────────────────────────────────────
+# 정보 공개 청구 비서(SP-28_kfoi)의 KFOI_DIGEST 도구는 「제주 AI 행정」 기관·부서 SP의 요약본
+# (prompts/gov-tree/kfoi-digest/gov-digest.json)을 Worker가 GitHub main에서 읽어 쓴다. 이 요약본은
+# tools/build_kfoi_digest.mjs가 gov-tree의 SP들에서 뽑아 만든 파생 파일이라, SP를 고칠 때마다 사람이 다시 만들어
+# 커밋해야 하면 곧 낡아 버린다(낡은 요약으로 청구 항목을 만들면 안 된다). bump-app-version.yml과 같은 방식으로,
+# 관련 파일이 main에 머지되면 요약본을 다시 만들어 [skip ci] 커밋으로 반영한다.
+#
+# 요약본만 바뀌는 푸시(자기 자신의 커밋 포함)에는 반응하지 않는다(paths 제외 + [skip ci] 가드).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'prompts/gov-tree/**'
+      - '!prompts/gov-tree/kfoi-digest/**'
+      - 'pages/jeju-gov-automation.html'
+      - 'tools/build_kfoi_digest.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-digest:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Rebuild digest
+        run: node tools/build_kfoi_digest.mjs
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "hondi-digest-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add prompts/gov-tree/kfoi-digest/gov-digest.json
+          if git diff --cached --quiet; then
+            echo "요약본 변경 없음 — 커밋 생략"
+            exit 0
+          fi
+          git commit -m "chore: refresh K-FOI SP digest [skip ci]"
+          # 그 사이 다른 머지가 있었으면 그 위로 다시 얹는다(요약본은 다시 만들면 되므로 충돌해도 안전).
+          git pull --rebase origin main || { echo "rebase 실패 — 다음 머지 때 다시 만들어집니다"; exit 0; }
+          git push
