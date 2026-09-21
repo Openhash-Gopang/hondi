@@ -36735,13 +36735,39 @@ async function _fetchKfoiSp(env) {
     throw e;
   }
 }
+// 「제주 AI 행정」 SP 요약본(다이제스트) — tools/build_kfoi_digest.mjs가 만들어 저장소에 커밋해 둔다.
+// 저장소가 갱신되면 Worker 재배포 없이 이 캐시가 만료되는 대로(10분) 새 파일을 읽는다.
+let _kfoiDigestCache = null;
+let _kfoiDigestCacheAt = 0;
+let _kfoiDigestFailedAt = 0;
+const _KFOI_DIGEST_TTL_MS = 10 * 60 * 1000;
+async function _fetchKfoiDigest(env) {
+  const now = Date.now();
+  if (_kfoiDigestCache && (now - _kfoiDigestCacheAt) < _KFOI_DIGEST_TTL_MS) return _kfoiDigestCache;
+  if (_kfoiDigestFailedAt && (now - _kfoiDigestFailedAt) < _MANIFEST_FAIL_RETRY_MS) {
+    if (_kfoiDigestCache) return _kfoiDigestCache;
+    throw new Error('K-FOI 다이제스트 로드 실패(최근 재시도 쿨다운 중)');
+  }
+  try {
+    const res = await fetch(`${GITHUB_RAW_BASE}/prompts/gov-tree/kfoi-digest/gov-digest.json`, { cache: 'no-cache' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    _kfoiDigestCache = await res.json();
+    _kfoiDigestCacheAt = now;
+    _kfoiDigestFailedAt = 0;
+    return _kfoiDigestCache;
+  } catch (e) {
+    _kfoiDigestFailedAt = now;
+    if (_kfoiDigestCache) return _kfoiDigestCache;
+    throw e;
+  }
+}
 let _kfoiHandlersInstance = null;
 function _kfoiHandlers() {
   if (!_kfoiHandlersInstance) {
     _kfoiHandlersInstance = makeKfoiHandlers({
       kAuth: _kAuth, err: _err, l1AdminToken: _l1AdminToken, L1_DEFAULT,
       deepseekChatText, resolveDeepseekModel,
-      fetchSp: _fetchKfoiSp, fetchUniversal: _fetchUniversalLayers,
+      fetchSp: _fetchKfoiSp, fetchUniversal: _fetchUniversalLayers, fetchDigest: _fetchKfoiDigest,
       webSearch: _performWebSearchCore, urlFetch: _performUrlFetchForSummary,
     });
   }
