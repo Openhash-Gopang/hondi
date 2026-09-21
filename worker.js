@@ -13626,6 +13626,8 @@ export default {
     if (pathname === '/kfoi/campaigns/delete' && request.method === 'POST') return _kfoiHandlers().campaignsDelete(request, env, corsHeaders);
     if (pathname === '/kfoi/archive/search' && request.method === 'GET') return _kfoiHandlers().archiveSearch(request, url, env, corsHeaders);
     if (pathname === '/kfoi/archive/get' && request.method === 'GET') return _kfoiHandlers().archiveGet(request, url, env, corsHeaders);
+    // 배포 확인용(인증 없음, 사용자 데이터 없음): 핸들러 버전·사용 가능한 조사 도구·SP 버전·요약본 상태
+    if (pathname === '/kfoi/health' && request.method === 'GET') return _kfoiHandlers().health(request, env, corsHeaders);
     if (pathname === '/kmail/messages/state' && request.method === 'POST') return handleKmailMessageStateSet(request, env, corsHeaders);
     if (pathname === '/kmail/messages/state' && request.method === 'GET') return handleKmailMessageStatesList(request, url, env, corsHeaders);
     if (pathname === '/kmail/blocklist' && request.method === 'POST') return handleKmailBlocklistAdd(request, env, corsHeaders);
