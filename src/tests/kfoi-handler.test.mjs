@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 import {
   makeKfoiHandlers, tokenize, extractTrailingTag, sanitizeItems, sanitizeRounds, archiveView,
-  neutralizeTags, normalizeAgencyKey, KFOI_MAX_RESEARCH_STEPS, isBlockedFetchHost, stripStrayTags,
+  neutralizeTags, normalizeAgencyKey, KFOI_MAX_RESEARCH_STEPS, isBlockedFetchHost, stripStrayTags, KFOI_HANDLER_VERSION,
 } from '../worker/kfoi-handler.js';
 
 let pass = 0, fail = 0;
@@ -605,6 +605,27 @@ await test('끝까지 태그만 있는 응답이 와도 사용자에게는 안�
   assert.ok(d.reply.length > 0 && !d.reply.includes('KFOI_'));
 });
 
+// ═════════════ C6. 배포 확인(GET /kfoi/health) ═════════════
+await test('health: 핸들러 버전·사용 가능한 도구·SP 버전·요약본 상태를 인증 없이 보여 준다', async () => {
+  const pb = makePb();
+  const { h } = makeDeps(pb, { fetchSp: async () => '[SP-28_kfoi v1.4 · K-FOI]\n본문', fetchDigest: async () => FAKE_DIGEST });
+  const res = await h.health(new Request('https://w.test/kfoi/health'), ENV, CORS);
+  const d = await res.json();
+  assert.equal(res.status, 200); assert.equal(d.ok, true); assert.equal(d.handler_version, KFOI_HANDLER_VERSION);
+  assert.deepEqual(d.tools, ['ARCHIVE_SEARCH', 'SEARCH', 'FETCH', 'DIGEST']);
+  assert.deepEqual(d.sp, { loaded: true, version: 'v1.4' }); assert.deepEqual(d.digest, { loaded: true, tiers: { do: 2, emd: 1 } });
+  assert.ok(!JSON.stringify(d).includes('sk-') && !('owner_guid' in d), '민감 정보 없음');
+});
+await test('health: SP·요약본을 못 불러와도 200으로 원인을 알려 준다 / 요약 도구가 없는 배포는 DIGEST가 도구 목록에 없다', async () => {
+  const pb = makePb();
+  const { h } = makeDeps(pb, { fetchSp: async () => { throw new Error('HTTP 404'); }, fetchDigest: async () => { throw new Error('HTTP 404'); } });
+  const d = await (await h.health(new Request('https://w.test/kfoi/health'), ENV, CORS)).json();
+  assert.equal(d.ok, true); assert.equal(d.sp.loaded, false); assert.equal(d.digest.loaded, false);
+  const { h: h2 } = makeDeps(pb, { fetchDigest: undefined });
+  const d2 = await (await h2.health(new Request('https://w.test/kfoi/health'), ENV, CORS)).json();
+  assert.deepEqual(d2.tools, ['ARCHIVE_SEARCH', 'SEARCH', 'FETCH']); assert.equal(d2.digest.error, 'not_supported_by_this_deployment');
+});
+
 // ═════════════ D. worker.js 배선(라우트가 실제로 연결됐는지) ═════════════
 globalThis.window = globalThis;
 const { default: worker } = await import('../../worker.js');
@@ -631,6 +652,14 @@ for (const [m, p, b] of [
     assert.ok(data && data.ok === false, `예상 밖 응답: ${res.status} ${JSON.stringify(data)}`);
   });
 }
+await test('worker 배선: GET /kfoi/health — 라우트 연결 + worker.js가 요약 도구(fetchDigest)를 핸들러에 실제로 넘긴다', async () => {
+  const res = await viaWorker('GET', '/kfoi/health');
+  assert.equal(res.status, 200);
+  const d = await res.json();
+  assert.equal(d.ok, true); assert.equal(d.handler_version, KFOI_HANDLER_VERSION);
+  assert.ok(d.tools.includes('DIGEST'), 'worker.js가 fetchDigest를 넘기지 않음 — 도구 목록: ' + d.tools.join(','));
+  assert.equal(d.sp.loaded, false); assert.equal(d.digest.loaded, false);   // 이 테스트에서는 네트워크가 막혀 있다
+});
 globalThis.fetch = origFetch;
 
 console.log(`\n${pass}/${pass + fail} passed`);

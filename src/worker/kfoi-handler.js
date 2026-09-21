@@ -29,6 +29,7 @@ import { parseLlmChoice, callByokLlm, redact as redactKey } from './kfoi-llm.js'
 import { digestQuery } from './kfoi-digest.js';
 
 export const KFOI_SP_KEY = 'SP-28_kfoi';
+export const KFOI_HANDLER_VERSION = '2026-09-21.4';   // 배포 확인용(GET /kfoi/health). 핸들러 동작을 고칠 때 올린다
 export const KFOI_MAX_RESEARCH_STEPS = 8;       // 한 번의 질문에서 아카이브·검색·열람을 합쳐 쓸 수 있는 횟수
 const MAX_LLM_ROUNDS_PER_CALL = 2;              // HTTP 요청 하나에서 돌리는 LLM 왕복 수(나머지는 클라이언트가 이어 호출)
 const MAX_MESSAGES = 60;
@@ -713,9 +714,28 @@ export function makeKfoiHandlers(deps) {
     return json({ ok: true, reply, action, pending, append, progress, research_steps: steps }, corsHeaders);
   }
 
+  // ── GET /kfoi/health — 인증 없이 "지금 배포된 서버가 무엇을 아는가"를 보여 준다(사용자 데이터 없음) ─────────
+  // SP는 GitHub에서 바로 읽히고 Worker는 따로 배포되어, 둘이 어긋나면 화면만 봐서는 원인을 알 수 없었다(2026-09-21).
+  // 브라우저로 이 주소를 열면 핸들러 버전·사용 가능한 조사 도구·읽고 있는 SP 버전·요약본 상태가 한눈에 보인다.
+  async function health(request, env, corsHeaders) {
+    const out = { ok: true, handler_version: KFOI_HANDLER_VERSION, tools: availableTools(), byok: ['anthropic', 'openai', 'gemini'] };
+    try {
+      const sp = await fetchSp(env);
+      const m = /\[SP-28_kfoi (v[\d.]+)/.exec(String(sp));
+      out.sp = { loaded: true, version: m ? m[1] : 'unknown' };
+    } catch (e) { out.sp = { loaded: false, error: oneLine(e && e.message, 80) }; }
+    if (typeof fetchDigest === 'function') {
+      try {
+        const d = await fetchDigest(env);
+        out.digest = { loaded: true, tiers: Object.fromEntries(Object.entries((d && d.tiers) || {}).map(([k, t]) => [k, t && t.stats ? t.stats.total : 0])) };
+      } catch (e) { out.digest = { loaded: false, error: oneLine(e && e.message, 80) }; }
+    } else out.digest = { loaded: false, error: 'not_supported_by_this_deployment' };
+    return json(out, corsHeaders);
+  }
+
   return {
     chat, campaignsList, campaignsSave, campaignsClose, campaignsReopen, campaignsShare, campaignsDelete,
-    archiveSearch, archiveGet,
+    archiveSearch, archiveGet, health,
     // 테스트·내부 재사용용
     _archiveSearchCore: archiveSearchCore,
   };
