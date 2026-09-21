@@ -55,6 +55,8 @@ await test('parseSp: 상태 판정(데이터 공백 표 → gapped, v1.0 아님 
 });
 
 const digest = buildDigest();
+const dataForNameCheck = loadPageData();
+
 const data = loadPageData();
 const expected = {
   do: data.DO_BUREAUS.length + data.DO_BUREAUS.reduce((n, b) => n + (b.divisions || []).length, 0),
@@ -64,6 +66,11 @@ const expected = {
   seogwipo: data.SEOGWIPO_BUREAUS.length + data.SEOGWIPO_BUREAUS.reduce((n, b) => n + (b.divisions || []).length, 0),
   emd: data.EMD_LIST.length,
 };
+await test('제주시 농수축산국·보건소 이름이 영문 자리표시자("agri"·"health")가 아니라 한글 이름이다(2026-09-22 발견한 데이터 결함)', () => {
+  const agri = dataForNameCheck.JEJUSI_BUREAUS.find(b => b.spId === 'SP-CITYDO-JEJUSI-AGRI');
+  const health = dataForNameCheck.JEJUSI_BUREAUS.find(b => b.spId === 'SP-CITYDO-JEJUSI-HEALTH');
+  assert.equal(agri.name, '농수축산국'); assert.equal(health.name, '제주보건소');
+});
 await test('다이제스트 항목 수가 「제주 AI 행정」 페이지 데이터와 정확히 일치한다', () => {
   for (const [k, n] of Object.entries(expected)) assert.equal(digest.tiers[k].entries.length, n, k);
   assert.deepEqual(Object.keys(digest.tiers).sort(), Object.keys(expected).sort());
@@ -123,7 +130,7 @@ await test('조직 기준표: 도청의 모든 국·단 SP가 기준표에 있�
   const ids = digest.tiers.do.entries.filter(e => e.kind === 'bureau').map(e => e.id);
   for (const id of ids) assert.ok(baseline.mapping[id], `기준표에 없음: ${id} — SP를 추가했다면 org-baseline-do.json에도 판정을 넣으세요`);
   for (const id of Object.keys(baseline.mapping)) assert.ok(ids.includes(id), `기준표에만 있음(인벤토리에서 빠짐): ${id}`);
-  for (const e of digest.tiers.do.entries.filter(e => e.kind === 'bureau')) assert.ok(['match', 'renamed', 'name_differs', 'not_in_official_menu', 'unverified'].includes(e.org.status), e.id);
+  for (const e of digest.tiers.do.entries.filter(e => e.kind === 'bureau')) assert.ok(['match', 'renamed', 'name_differs', 'not_in_official_menu', 'unverified', 'abolished', 'is_division_not_bureau'].includes(e.org.status), e.id);
 });
 await test('조직 기준표: 확인된 개칭(혁신산업국→미래산업국, 기후환경국→환경산림자원국)과 신설(기후에너지국)이 요약본에 실린다', () => {
   const by = Object.fromEntries(digest.tiers.do.entries.filter(e => e.kind === 'bureau').map(e => [e.id, e]));
@@ -133,20 +140,26 @@ await test('조직 기준표: 확인된 개칭(혁신산업국→미래산업국
   const innovDiv = digest.tiers.do.entries.find(e => e.kind === 'division' && e.parent === by['SP-DO-INNOV'].name);
   assert.equal(innovDiv.org.status, 'parent_renamed', '개칭된 국의 과에는 상위 상태가 표시돼야 함');
 });
+await test('조직 기준표: 원문으로 확인된 과 구성(current_divisions)이 실려 있고, 시행규칙 조문(legal_basis)을 인용한다', () => {
+  assert.deepEqual(baseline.mapping['SP-DO-CLIMATE'].current_divisions, ['환경정책과', '물정책과', '자원순환과', '산림녹지과']);
+  assert.equal(baseline.mapping['SP-DO-CLIMATE'].legal_basis, '제21조의3');
+  assert.equal(baseline.mapping['SP-DO-GENERAL'].status, 'is_division_not_bureau', '총무과는 특별자치행정국 소속 과이지 독립 국이 아니다');
+  for (const id of ['SP-DO-AIRPORTSUP', 'SP-DO-AUTONOMY', 'SP-DO-BALANCE']) assert.equal(baseline.mapping[id].status, 'abolished');
+});
 await test('조직 기준표: 상태 집계가 국·단 수와 일치하고, 실·국 15개는 개편 보도의 실·국 수와 일치한다', () => {
   const total = Object.values(digest.tiers.do.baseline.org_counts).reduce((a, b) => a + b, 0);
   assert.equal(total, digest.tiers.do.entries.filter(e => e.kind === 'bureau').length);
   assert.equal(baseline.official_units.bureaus.length, baseline.expected_counts['실국']);
   assert.ok(baseline.official_units.bureaus.includes('미래산업국') && baseline.official_units.bureaus.includes('기후에너지국') && !baseline.official_units.bureaus.includes('혁신산업국'));
 });
-await test('조직 기준표: 확인하지 못한 것(신뢰도 낮음·열린 질문)이 숨겨지지 않고 요약에 남는다', () => {
+await test('조직 기준표: 확인하지 못한 것(열린 질문)이 숨겨지지 않고 요약에 남는다', () => {
   assert.ok(baseline.open_questions.length >= 3 && baseline.confidence_note.includes('확인하지 못했다'));
-  assert.ok(digest.tiers.do.baseline.missing_in_inventory.some(m => m.confidence === 'low'));
+  assert.ok(baseline.open_questions.some(q => q.includes('분장사무')), '과 단위 분장사무는 아직 확인하지 못했다는 사실이 남아야 함');
   for (const k of ['jeju-si', 'seogwipo', 'emd']) assert.ok(digest.tiers[k].baseline_note.includes('확인하지 못했다'), k);
 });
 await test('digestQuery: summary에 도청 조직 대조가 실리고, 첫 페이지에만 baseline 전문이 실린다', () => {
   const s = digestQuery(digest, { tier: 'summary' });
-  assert.ok(s.tiers.do.org_baseline.missing_in_inventory.includes('기후에너지국') && s.tiers.do.org_baseline.org_counts.renamed === 2);
+  assert.ok(s.tiers.do.org_baseline.missing_in_inventory.includes('기후에너지국') && s.tiers.do.org_baseline.org_counts.renamed === digest.tiers.do.baseline.org_counts.renamed);
   const p1 = digestQuery(digest, { tier: 'do', offset: 0 }); assert.ok(p1.baseline && p1.baseline.confidence_note);
   const p2 = digestQuery(digest, { tier: 'do', offset: p1.next_offset }); assert.ok(!p2.baseline);
 });
