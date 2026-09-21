@@ -33,6 +33,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const GT = path.join(ROOT, 'prompts/gov-tree');
 const PAGE = path.join(ROOT, 'pages/jeju-gov-automation.html');
 const OUT = path.join(GT, 'kfoi-digest/gov-digest.json');
+const ORG_BASELINE_DO = path.join(GT, 'kfoi-digest/org-baseline-do.json');   // 도청 현행 조직 기준표(사람이 검증해 갱신한다)
 
 export const TIER_LABELS = {
   'do': '제주특별자치도 도청(실·국·과)',
@@ -183,6 +184,8 @@ export function buildDigest(data = loadPageData()) {
     tiers.emd.entries.push(compact({ id: e.spId || '', kind: 'emd', name: e.name, parent: e.parentCity, state: 'template', teams: (e.teams || []).map(t => t.name), }));
   }
 
+  applyOrgBaseline(tiers);
+
   for (const t of Object.values(tiers)) {
     const c = { total: t.entries.length, draft: 0, revised: 0, gapped: 0, template: 0 };
     for (const en of t.entries) c[en.state || 'template']++;
@@ -191,13 +194,47 @@ export function buildDigest(data = loadPageData()) {
   return { version: 1, source: 'prompts/gov-tree + pages/jeju-gov-automation.html', tiers };
 }
 
+// ── 현행 조직 대조(도청) ─────────────────────────────────────────────────────────
+// 2026-09-21 K-FOI 시험에서 SP 목록(혁신산업국·기후환경국 등)이 2026.8.25 개편 이후의 현행 조직과 다르다는 것이 드러났다.
+// LLM이 매번 웹에서 다시 찾게 두지 않고, 사람이 검증한 기준표(org-baseline-do.json)를 SP 항목에 붙여 요약본이 직접 말하게 한다.
+//   status: match(현행과 같음) | renamed(개칭 — current_name이 현행) | name_differs(공식 표기와 다름, 개칭 여부 미확인)
+//           | not_in_official_menu(공식 메뉴에 없음 — 폐지·통합 가능) | unverified(확인 못 함)
+function applyOrgBaseline(tiers) {
+  if (!fs.existsSync(ORG_BASELINE_DO)) return;
+  const base = JSON.parse(fs.readFileSync(ORG_BASELINE_DO, 'utf8'));
+  const t = tiers[base.tier];
+  if (!t) return;
+  const counts = {};
+  let parent = null;
+  for (const e of t.entries) {
+    if (e.kind === 'bureau' || e.kind === 'institution') {
+      const m = base.mapping[e.id] || { status: 'unverified' };
+      e.org = { status: m.status, ...(m.current_name ? { current_name: m.current_name } : {}), ...(m.confidence ? { confidence: m.confidence } : {}), ...(m.note ? { note: m.note } : {}) };
+      counts[m.status] = (counts[m.status] || 0) + 1;
+      parent = e;
+    } else if (e.kind === 'division' && parent && parent.org && parent.org.status !== 'match') {
+      e.org = { status: 'parent_' + parent.org.status };
+    }
+  }
+  t.baseline = {
+    as_of: base.as_of, basis: base.basis, checked_on: base.checked_on, confidence_note: base.confidence_note,
+    org_counts: counts, official_bureaus: base.official_units.bureaus.length,
+    missing_in_inventory: base.missing_in_inventory, open_questions: base.open_questions,
+    sources: base.sources.map(x => x.url),
+  };
+  for (const k of ['jeju-si', 'seogwipo', 'emd']) {
+    if (tiers[k]) tiers[k].baseline_note = '도청 개편(2026.8.25)과 별개로 이 유형의 조직이 바뀌었는지 확인하지 못했다.';
+  }
+}
+
 // 한 줄에 항목 하나 — git diff가 읽기 쉽다.
 export function serialize(digest) {
   const lines = ['{', '"version": ' + digest.version + ',', '"source": ' + JSON.stringify(digest.source) + ',', '"tiers": {'];
   const keys = Object.keys(digest.tiers);
   keys.forEach((k, ti) => {
     const t = digest.tiers[k];
-    lines.push(JSON.stringify(k) + ': {"label": ' + JSON.stringify(t.label) + ', "stats": ' + JSON.stringify(t.stats) + ', "entries": [');
+    lines.push(JSON.stringify(k) + ': {"label": ' + JSON.stringify(t.label) + ', "stats": ' + JSON.stringify(t.stats) +
+      (t.baseline ? ', "baseline": ' + JSON.stringify(t.baseline) : '') + (t.baseline_note ? ', "baseline_note": ' + JSON.stringify(t.baseline_note) : '') + ', "entries": [');
     t.entries.forEach((e, i) => lines.push(JSON.stringify(e) + (i < t.entries.length - 1 ? ',' : '')));
     lines.push(']}' + (ti < keys.length - 1 ? ',' : ''));
   });
@@ -213,7 +250,7 @@ export function toMarkdownChunks(digest, maxChars = 18000) {
     const head = () => `# ${t.label} — 「제주 AI 행정」 SP 요약 (${key} ${n})\n\n총 ${t.stats.total}건 · 초안(v1.0) ${t.stats.draft} · 갱신됨 ${t.stats.revised} · 데이터 공백 표 있음 ${t.stats.gapped} · 템플릿 ${t.stats.template}\n\n`;
     buf = head();
     for (const e of t.entries) {
-      let s = `### ${e.name}${e.parent ? ' (' + e.parent + ')' : ''} — ${e.state}\n`;
+      let s = `### ${e.name}${e.parent ? ' (' + e.parent + ')' : ''} — ${e.state}${e.org && e.org.status !== 'match' ? ' · 현행 조직 대조: ' + e.org.status + (e.org.current_name ? ' → ' + e.org.current_name : '') : ''}\n`;
       if (e.handles) s += `- 다루는 일(입력): ${e.handles}\n`;
       if (e.outputs) s += `- 결과(출력): ${e.outputs}\n`;
       if (e.does && e.does.length) s += `- 직접 처리: ${e.does.join(' / ')}\n`;

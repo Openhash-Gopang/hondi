@@ -1,0 +1,285 @@
+{
+ "tier": "do",
+ "as_of": "2026-08-25",
+ "basis": "제주특별자치도 행정기구 설치 및 정원 조례·시행규칙 개편(민선 9기 첫 조직개편, 시행규칙 제938호 2026.8.25 시행)",
+ "checked_on": "2026-09-22",
+ "confidence_note": "조례·시행규칙 본문은 확인하지 못했다(국가법령정보센터는 자바스크립트 페이지, 제주도청 누리집은 자동 열람 차단). 아래는 ① 제주도청 누리집 메뉴(검색 발췌) ② 언론 보도(개편안 7/3, 도의회 상임위 수정 가결 7/23) ③ U-LEX의 시행규칙 제938호 개정 표기를 교차한 것이다. 과(課) 단위는 확인하지 못했다.",
+ "official_units": {
+  "bureaus": [
+   "기획조정실",
+   "안전건강실",
+   "특별자치행정국",
+   "경제활력국",
+   "복지가족국",
+   "도시건설국",
+   "교통항공국",
+   "문화체육교육국",
+   "관광교류국",
+   "농축산식품국",
+   "해양수산국",
+   "미래산업국",
+   "기후에너지국",
+   "환경산림자원국",
+   "소방안전본부"
+  ],
+  "offices": [
+   "대변인",
+   "기본사회추진단",
+   "청렴감찰관",
+   "성평등여성정책관",
+   "노동안전감독관",
+   "소통·제2공항담당관",
+   "AI혁신추진단",
+   "강정공동체사업추진단",
+   "중앙협력본부",
+   "전국체전기획단"
+  ],
+  "note": "실·국 15개는 '15실·국 68과(수정안)'이라는 보도의 실·국 수와 일치한다. 소방안전본부는 「제주 AI 행정」에서 직속기관 유형에 있다."
+ },
+ "expected_counts": {
+  "실국": 15,
+  "과": 68,
+  "note": "개편안 원안은 15실·국 70과, 도의회 상임위가 15실·국 68과로 수정 가결(7/23)"
+ },
+ "reform_deltas": [
+  {
+   "item": "혁신산업국 → 미래산업국",
+   "confidence": "high"
+  },
+  {
+   "item": "기후에너지국 신설(탄소중립정책과 이관, 분산에너지과 신설)",
+   "confidence": "high"
+  },
+  {
+   "item": "기후환경국 → 환경산림자원국",
+   "confidence": "high",
+   "note": "초안 보도는 환경자원국"
+  },
+  {
+   "item": "소상공인과+통상물류과 → 소상공인물류과, 기업투자과 → 기업정책과, 고용센터 → 사업소 체계",
+   "confidence": "high"
+  },
+  {
+   "item": "신설: 기본사회추진단, 소통담당관, 제주브랜드담당관, 제2공항상생지원단, AI행정혁신추진단, 혁신관리기획관(개편안)",
+   "confidence": "medium",
+   "note": "공식 메뉴의 표기는 소통·제2공항담당관, AI혁신추진단이며 제주브랜드담당관·혁신관리기획관은 메뉴에서 확인하지 못함"
+  },
+  {
+   "item": "폐지: 특별자치분권추진단, 15분도시추진단",
+   "confidence": "medium",
+   "note": "보도 기준. 공식 메뉴 일부 발췌에는 15분도시추진단이 남아 있어 표기 지연 가능성"
+  },
+  {
+   "item": "정무부지사 → 기후경제정무부지사",
+   "confidence": "high",
+   "note": "SP 대상 아님"
+  }
+ ],
+ "missing_in_inventory": [
+  {
+   "name": "기후에너지국",
+   "confidence": "high",
+   "note": "신설. 재생에너지·탄소중립·분산에너지·스마트그리드·전기차 업무. 탄소중립정책과 이관, 분산에너지과 신설"
+  },
+  {
+   "name": "전국체전기획단",
+   "confidence": "medium",
+   "note": "공식 누리집 메뉴에 있음. 개편과의 관계 미확인"
+  },
+  {
+   "name": "제주브랜드담당관",
+   "confidence": "low",
+   "note": "개편안(7/3)에서 신설 — 공식 메뉴에서 확인하지 못함"
+  },
+  {
+   "name": "혁신관리기획관",
+   "confidence": "low",
+   "note": "기획조정실 소속 신설(개편안) — 최종안 반영 미확인"
+  }
+ ],
+ "open_questions": [
+  "조례·시행규칙 제938호 본문의 실·국별 과 목록(68개)과 분장사무",
+  "안전건강실·도시건설국·소통·제2공항담당관·AI혁신추진단이 개편에 따른 개칭인지, 원래부터의 표기 차이인지",
+  "제주시·서귀포시(행정시)와 읍·면·동, 직속기관·출자출연기관의 조직이 함께 바뀌었는지"
+ ],
+ "sources": [
+  {
+   "id": "nav",
+   "title": "제주특별자치도 누리집 조직 메뉴(환경산림자원국 페이지 발췌)",
+   "url": "https://www.jeju.go.kr/group/part8.htm",
+   "kind": "official-site"
+  },
+  {
+   "id": "hl-0703",
+   "title": "헤드라인제주 — 민선 9기 제주도정 첫 조직개편안 공개(2026-07-03)",
+   "url": "https://www.headlinejeju.co.kr/news/articleView.html?idxno=595471",
+   "kind": "news"
+  },
+  {
+   "id": "hl-0723",
+   "title": "헤드라인제주 — 조직개편 도의회 상임위 수정 가결(2026-07-23)",
+   "url": "https://www.headlinejeju.co.kr/news/articleView.html?idxno=596394",
+   "kind": "news"
+  },
+  {
+   "id": "jss",
+   "title": "제주의소리 — 조직개편 초안(2026-07-03)",
+   "url": "https://www.jejusori.net/news/articleView.html?idxno=504473",
+   "kind": "news"
+  },
+  {
+   "id": "newsis",
+   "title": "뉴시스 — 15실·국 70과 체제 재편(2026-07-03)",
+   "url": "https://www.newsis.com/view/NISX20260703_0003694952",
+   "kind": "news"
+  },
+  {
+   "id": "ulex",
+   "title": "U-LEX — 제주특별자치도 행정기구 설치 조례 시행규칙(제938호 시행 2026.8.25 표기)",
+   "url": "https://www.ulex.co.kr/%EB%B2%95%EB%A5%A0/1275576-2118012-%EC%A0%9C%EC%A3%BC%ED%8A%B9%EB%B3%84%EC%9E%90%EC%B9%98%EB%8F%84%ED%96%89%EC%A0%95",
+   "kind": "law-mirror"
+  }
+ ],
+ "mapping": {
+  "SP-DO-WELFARE": {
+   "status": "match",
+   "current_name": "복지가족국",
+   "confidence": "high"
+  },
+  "SP-DO-PLAN": {
+   "status": "match",
+   "current_name": "기획조정실",
+   "confidence": "high",
+   "note": "개편안(7/3)에 혁신관리기획관 신설 — 최종안 반영 여부 미확인, 이 목록에는 없음"
+  },
+  "SP-DO-SAFETY": {
+   "status": "name_differs",
+   "current_name": "안전건강실",
+   "confidence": "medium",
+   "note": "공식 누리집 메뉴 표기. 개편과의 관계 미확인"
+  },
+  "SP-DO-JACHI": {
+   "status": "match",
+   "current_name": "특별자치행정국",
+   "confidence": "medium",
+   "note": "도의회 수정안에서 총무과·행정국이 원위치되었다는 보도(7/23) — 세부 미확인"
+  },
+  "SP-DO-ECON": {
+   "status": "match",
+   "current_name": "경제활력국",
+   "confidence": "high",
+   "note": "소상공인물류과·기업정책과는 이미 반영됨. 고용센터는 사업소 체계로 전환(과 목록 재확인 필요)"
+  },
+  "SP-DO-INNOV": {
+   "status": "renamed",
+   "current_name": "미래산업국",
+   "confidence": "high",
+   "note": "혁신산업국 → 미래산업국 명칭 변경(신설 기후에너지국과 분리)"
+  },
+  "SP-DO-CLIMATE": {
+   "status": "renamed",
+   "current_name": "환경산림자원국",
+   "confidence": "high",
+   "note": "기후환경국 → 환경산림자원국 전환. 초안 단계 보도에는 환경자원국 표기도 있어 최종 표기는 원문 확인. 탄소중립정책과는 기후에너지국으로 이관"
+  },
+  "SP-DO-HOUSING": {
+   "status": "name_differs",
+   "current_name": "도시건설국",
+   "confidence": "medium",
+   "note": "공식 누리집 메뉴는 도시건설국. 15분도시추진단 폐지·도시계획 업무 이관과 관련 가능(미확인)"
+  },
+  "SP-DO-TRANSPORT": {
+   "status": "match",
+   "current_name": "교통항공국",
+   "confidence": "medium",
+   "note": "소관 과(도시계획과·15분도시과)는 15분도시추진단 폐지의 영향 여부 재확인 필요"
+  },
+  "SP-DO-CULTURE": {
+   "status": "match",
+   "current_name": "문화체육교육국",
+   "confidence": "high"
+  },
+  "SP-DO-TOURISM": {
+   "status": "match",
+   "current_name": "관광교류국",
+   "confidence": "high"
+  },
+  "SP-DO-AGRI": {
+   "status": "match",
+   "current_name": "농축산식품국",
+   "confidence": "high"
+  },
+  "SP-DO-OCEAN": {
+   "status": "match",
+   "current_name": "해양수산국",
+   "confidence": "high"
+  },
+  "SP-DO-COMM": {
+   "status": "name_differs",
+   "current_name": "소통·제2공항담당관",
+   "confidence": "medium",
+   "note": "공식 누리집 메뉴 표기(소통담당관과 제2공항 지원 기능의 통합으로 보임). 개편안 보도는 소통담당관·제2공항상생지원단을 각각 신설"
+  },
+  "SP-DO-INTEGRITY": {
+   "status": "match",
+   "current_name": "청렴감찰관",
+   "confidence": "high"
+  },
+  "SP-DO-GENERAL": {
+   "status": "unverified",
+   "confidence": "low",
+   "note": "총무과는 과 단위라 공식 메뉴에 없음. 개편에서 총무과가 원위치되었다는 보도만 확인"
+  },
+  "SP-DO-LIAISON": {
+   "status": "match",
+   "current_name": "중앙협력본부",
+   "confidence": "high"
+  },
+  "SP-DO-SPOKES": {
+   "status": "match",
+   "current_name": "대변인",
+   "confidence": "high"
+  },
+  "SP-DO-AIGOV": {
+   "status": "name_differs",
+   "current_name": "AI혁신추진단",
+   "confidence": "medium",
+   "note": "공식 누리집 메뉴 표기. 개편안 보도 표기는 AI행정혁신추진단"
+  },
+  "SP-DO-AIRPORTSUP": {
+   "status": "not_in_official_menu",
+   "confidence": "low",
+   "note": "공식 메뉴에 없음 — 소통·제2공항담당관 또는 제2공항상생지원단으로 개편됐을 가능성(미확인) (메뉴 발췌가 \"…\"로 잘려 있어 없다는 판단 자체도 확실하지 않음)"
+  },
+  "SP-DO-AUTONOMY": {
+   "status": "not_in_official_menu",
+   "confidence": "low",
+   "note": "공식 메뉴에 없음. 특별자치분권추진단 폐지 보도와 관련 가능(명칭 불일치라 미확인) (메뉴 발췌가 \"…\"로 잘려 있어 없다는 판단 자체도 확실하지 않음)"
+  },
+  "SP-DO-BALANCE": {
+   "status": "not_in_official_menu",
+   "confidence": "low",
+   "note": "공식 메뉴에 없음. 15분도시추진단 폐지와 관련 가능(미확인) (메뉴 발췌가 \"…\"로 잘려 있어 없다는 판단 자체도 확실하지 않음)"
+  },
+  "SP-DO-BASICSOC": {
+   "status": "match",
+   "current_name": "기본사회추진단",
+   "confidence": "high"
+  },
+  "SP-DO-GANGJEONG": {
+   "status": "match",
+   "current_name": "강정공동체사업추진단",
+   "confidence": "high"
+  },
+  "SP-DO-GENDER": {
+   "status": "match",
+   "current_name": "성평등여성정책관",
+   "confidence": "high"
+  },
+  "SP-DO-LABOR": {
+   "status": "match",
+   "current_name": "노동안전감독관",
+   "confidence": "high"
+  }
+ }
+}
