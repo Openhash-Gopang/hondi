@@ -85,11 +85,6 @@
  ],
  "missing_in_inventory": [
   {
-   "name": "기후에너지국",
-   "confidence": "high",
-   "note": "신설. 기후에너지정책과·탄소중립정책과·분산에너지과(시행규칙 제21조의2)"
-  },
-  {
    "name": "전국체전기획단",
    "confidence": "high",
    "note": "한시기구(시행규칙 제93조). 산하 전국체전기획과"
@@ -104,6 +99,10 @@
   {
    "item": "제주브랜드담당관·혁신관리기획관은 시행규칙 원문에서 검색되지 않는다 — 7/3 개편안 보도에는 있었으나 최종 시행규칙에는 반영되지 않았거나 다른 이름(혁신관리담당관)으로 확정된 것으로 보인다(기획조정실 산하 '혁신관리담당관' 확인)",
    "confidence": "medium"
+  },
+  {
+   "item": "2026-09-22: 실제 SP 인벤토리(page data) 반영 완료 — 개칭 5건(이름만 갱신, spId 유지)·신설 1건(기후에너지국, 과 SP는 미작성)·폐지 3건(SP-DO-AIRPORTSUP·AUTONOMY·BALANCE, archive/로 이동)·중복 제거 1건(SP-DO-GENERAL — 총무과는 이미 SP-DIV-JACHI-GENERAL로 특별자치행정국 소속에 정확히 있었음, 최상위 중복 항목만 제거)",
+   "confidence": "high"
   }
  ],
  "open_questions": [
@@ -327,12 +326,6 @@
    "confidence": "high",
    "note": "시행규칙 제6조(2026.8.21. 본조신설로 조문 위치 재정비 — 기관 자체는 기존에도 있었음)"
   },
-  "SP-DO-GENERAL": {
-   "status": "is_division_not_bureau",
-   "current_name": "총무과",
-   "confidence": "high",
-   "note": "시행규칙 제10조에 따라 특별자치행정국 소속 과다. 「제주 AI 행정」 목록에서 독립 국으로 다루면 안 된다 — 특별자치행정국(SP-DO-JACHI)의 division으로 재분류 필요"
-  },
   "SP-DO-LIAISON": {
    "status": "match",
    "current_name": "중앙협력본부",
@@ -350,21 +343,6 @@
    "current_name": "AI혁신추진단",
    "confidence": "high",
    "note": "시행규칙 제6조의4(2026.8.21. 본조신설). 언론 보도의 \"AI행정혁신추진단\"보다 짧은 정식 명칭"
-  },
-  "SP-DO-AIRPORTSUP": {
-   "status": "abolished",
-   "confidence": "high",
-   "note": "시행규칙 원문에 본청 조직으로는 존재하지 않는다(부칙의 경과조치 목록에 \"서귀포시 공항확충지원팀→공항확충지원과\"만 있고 이는 서귀포시 소속). 도청 SP 목록에서 archive 처리 대상"
-  },
-  "SP-DO-AUTONOMY": {
-   "status": "abolished",
-   "confidence": "high",
-   "note": "시행규칙 원문에서 검색되지 않음(특별자치분권추진단 폐지 보도와 부합) — archive 처리 대상"
-  },
-  "SP-DO-BALANCE": {
-   "status": "abolished",
-   "confidence": "high",
-   "note": "시행규칙 원문에서 검색되지 않음(15분도시추진단 폐지 보도와 부합) — archive 처리 대상"
   },
   "SP-DO-BASICSOC": {
    "status": "match",
@@ -389,6 +367,18 @@
    "current_name": "노동안전감독관",
    "confidence": "high",
    "note": "시행규칙 제6조의2(2026.8.21. 본조신설)"
+  },
+  "SP-DO-CLIMATEENERGY": {
+   "status": "match",
+   "current_name": "기후에너지국",
+   "confidence": "high",
+   "legal_basis": "제21조의2",
+   "current_divisions": [
+    "기후에너지정책과",
+    "탄소중립정책과",
+    "분산에너지과"
+   ],
+   "note": "2026-09-22 SP 인벤토리에 신규 등록(page data). 과 SP 3개는 아직 미작성(분장사무 근거인 별표 7 미확보) — 청구 목적으로 추천 항목에 포함해야 함"
   }
  }
 }

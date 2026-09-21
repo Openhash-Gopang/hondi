@@ -29,7 +29,7 @@ import { parseLlmChoice, callByokLlm, redact as redactKey } from './kfoi-llm.js'
 import { digestQuery } from './kfoi-digest.js';
 
 export const KFOI_SP_KEY = 'SP-28_kfoi';
-export const KFOI_HANDLER_VERSION = '2026-09-22.3';   // 배포 확인용(GET /kfoi/health). 핸들러 동작을 고칠 때 올린다
+export const KFOI_HANDLER_VERSION = '2026-09-22.4';   // 배포 확인용(GET /kfoi/health). 핸들러 동작을 고칠 때 올린다
 export const KFOI_MAX_RESEARCH_STEPS = 8;       // 한 번의 질문에서 아카이브·검색·열람을 합쳐 쓸 수 있는 횟수
 const MAX_LLM_ROUNDS_PER_CALL = 2;              // HTTP 요청 하나에서 돌리는 LLM 왕복 수(나머지는 클라이언트가 이어 호출)
 const MAX_MESSAGES = 60;

@@ -173,7 +173,7 @@ export function buildDigest(data = loadPageData()) {
     addTier(key);
     for (const b of arr) {
       entryFrom(key, kind, b.spId, b.name, '', findByPrefix(dir, b.spId));
-      for (const d of (b.divisions || [])) entryFrom(key, 'division', d.spId, d.name, b.name, path.join(GT, d.file));
+      for (const d of (b.divisions || [])) entryFrom(key, 'division', d.spId, d.name, b.name, d.file ? path.join(GT, d.file) : null);
     }
   }
   // 제주시·서귀포시: 국 SP는 템플릿 렌더링(정적 파일 없음), 과 SP는 정적 파일
@@ -181,7 +181,7 @@ export function buildDigest(data = loadPageData()) {
     addTier(key);
     for (const b of arr) {
       entryFrom(key, 'bureau', b.spId, b.name, '', null);
-      for (const d of (b.divisions || [])) entryFrom(key, 'division', d.spId, d.name, b.name, path.join(GT, d.file));
+      for (const d of (b.divisions || [])) entryFrom(key, 'division', d.spId, d.name, b.name, d.file ? path.join(GT, d.file) : null);
     }
   }
   // 읍·면·동: 팀 SP는 5종 템플릿으로 렌더링 — 읍면동별로 팀 목록만 싣는다
