@@ -1,0 +1,218 @@
+[
+  {
+    "no": 1,
+    "name": "미인증 GET /kmail/org-units → 400 LOGIN_REQUIRED (워커 배포 확인)",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 2,
+    "name": "GET /kmail/org-units (인증 통과·트리 조회)",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 3,
+    "name": "루트 노드 생성",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 4,
+    "name": "자식 노드 생성(+별칭)",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 5,
+    "name": "손자 노드 생성(3단계)",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 6,
+    "name": "접두어를 공유하는 형제 노드 생성('대학' vs '대학병원')",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 7,
+    "name": "중복 생성 → 409 UNIT_EXISTS",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 8,
+    "name": "이름에 '>' → 400 INVALID_NAME",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 9,
+    "name": "테스트 연락처 3건 등록(csv-import: created=3, failedCount=0)",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 10,
+    "name": "테스트 연락처가 PocketBase에 실제 저장됨",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 11,
+    "name": "assign: a → 학과",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 12,
+    "name": "assign: b → 대학",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 13,
+    "name": "assign: c → 대학병원",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 14,
+    "name": "존재하지 않는 노드로 assign → 404",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 15,
+    "name": "GET /kmail/contacts?org_path=대학 → a,b만(형제 '대학병원' 제외)",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 16,
+    "name": "GET ?org_path=루트 → a,b,c 전부",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 17,
+    "name": "페이지 메타: page=1, totalPages=1, totalItems=3",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 18,
+    "name": "범위 밖 페이지(page=2) → 200 + 빈 목록",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 19,
+    "name": "GET ?org_path=대학병원 → c만",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 20,
+    "name": "GET ?org_path=__NONE__ → 배정된 a,b,c는 제외",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 21,
+    "name": "org_path에 '%' → 400 INVALID_ORG_PATH",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 22,
+    "name": "트리 건수: T(0,3) C(1,2) G(1,1) S(1,1)",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 23,
+    "name": "별칭 저장·반환",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 24,
+    "name": "update: '대학' → '대학교'",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 25,
+    "name": "PocketBase: a/b 경로 갱신, c(형제) 불변",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 26,
+    "name": "새 경로로 조회 → a,b",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 27,
+    "name": "옛 경로로 조회 → 없음",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 28,
+    "name": "move: 학과를 '대학병원' 아래로",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 29,
+    "name": "PocketBase: a 경로가 이동 반영",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 30,
+    "name": "move: 루트를 자기 하위로 → 400 CYCLE",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 31,
+    "name": "delete: 하위 있는 루트 → 409 HAS_CHILDREN",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 32,
+    "name": "delete: 리프(연락처 1건) → 삭제 + 부모로 이동",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 33,
+    "name": "PocketBase: a가 부모('대학병원') 소속으로",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 34,
+    "name": "assign unit_id='' → 미분류로 복귀",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 35,
+    "name": "resync: 정합 상태에서 pending=0, 노드/연락처 수정 0",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  },
+  {
+    "no": 36,
+    "name": "정리: 테스트 노드·연락처가 남지 않음",
+    "verdict": "LIVE-PASS",
+    "reason": ""
+  }
+]
