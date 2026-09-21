@@ -180,6 +180,11 @@ def run(args, rec):
         rec.check("GET /kmail/contacts?org_path=대학 → a,b만(형제 '대학병원' 제외)", s == 200 and got == {a, bb}, f"HTTP {s} got={sorted(got)}")
         s, b, got = contacts_under(T)
         rec.check("GET ?org_path=루트 → a,b,c 전부", s == 200 and got == {a, bb, c}, f"HTTP {s} got={sorted(got)}")
+        # 2026-09-21 — 목록 페이지 지원(미분류 정리 마법사가 전체를 열거하는 데 필요). 응답에 page/totalPages/totalItems.
+        rec.check("페이지 메타: page=1, totalPages=1, totalItems=3",
+                  (b.get("page"), b.get("totalPages"), b.get("totalItems")) == (1, 1, 3), f"{ {k: b.get(k) for k in ('page', 'totalPages', 'totalItems')} }")
+        s2, b2 = GET("/kmail/contacts", {"status": "all", "org_path": T, "page": 2})
+        rec.check("범위 밖 페이지(page=2) → 200 + 빈 목록", s2 == 200 and b2.get("items") == [], f"HTTP {s2} {str(b2)[:120]}")
         s, b, got = contacts_under(P_S)
         rec.check("GET ?org_path=대학병원 → c만", s == 200 and got == {c}, f"HTTP {s} got={sorted(got)}")
         s, b, got = contacts_under("__NONE__")

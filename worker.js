@@ -34279,13 +34279,21 @@ async function _kmailCountContacts(env, guid, opts = {}) {
   return data.totalItems || 0;
 }
 
-async function _kmailQueryContacts(env, guid, { status = 'confirmed', q = '', relationship = '', occupation = '', org = '', tag = '', category = '', org_path = '' } = {}) {
+// 2026-09-21 — 페이지 지원(미분류 정리 마법사가 전체를 열거하려면 필요: 종전엔 perPage=200 한 번뿐이라
+// 201번째부터는 어떤 방법으로도 가져올 수 없었다). 정렬은 (org, name) 뒤에 id를 붙여 동률에서도 페이지
+// 경계가 흔들리지 않게 한다. _kmailQueryContacts는 시그니처·반환(items 배열)이 그대로라 기존 호출부
+// (목록 핸들러, 채팅 조회 2곳)는 영향이 없다.
+async function _kmailQueryContactsPage(env, guid, { status = 'confirmed', q = '', relationship = '', occupation = '', org = '', tag = '', category = '', org_path = '' } = {}, page = 1) {
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}` };
   const filter = encodeURIComponent(_kmailContactsFilterString(guid, { status, q, relationship, occupation, org, tag, category, org_path }));
-  const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records?filter=${filter}&sort=org,name&perPage=200`, { headers });
+  const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records?filter=${filter}&sort=org,name,id&perPage=200&page=${page}`, { headers });
   const data = await res.json().catch(() => ({ items: [] }));
-  return data.items || [];
+  const items = data.items || [];
+  return { items, page: data.page || page, totalPages: data.totalPages || 1, totalItems: typeof data.totalItems === 'number' ? data.totalItems : items.length };
+}
+async function _kmailQueryContacts(env, guid, opts = {}) {
+  return (await _kmailQueryContactsPage(env, guid, opts, 1)).items;
 }
 
 // 2026-09-03 신설(v1.7) — 캠페인 이력 조회. KMAIL_LOOKUP_CAMPAIGNS가
@@ -34499,8 +34507,10 @@ async function handleKmailContactsList(request, url, env, corsHeaders) {
   if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
   const guid = auth.guid;
 
-  const items = await _kmailQueryContacts(env, guid, { status, q, relationship, occupation, org, tag, category, org_path });
-  return new Response(JSON.stringify({ ok: true, items }), { status: 200, headers: corsHeaders });
+  // 2026-09-21 — page(1부터, 기본 1). 응답에 page/totalPages/totalItems를 덧붙인다(기존 필드는 그대로).
+  const page = Math.max(1, Math.min(500, parseInt(qp.page, 10) || 1));
+  const r = await _kmailQueryContactsPage(env, guid, { status, q, relationship, occupation, org, tag, category, org_path }, page);
+  return new Response(JSON.stringify({ ok: true, items: r.items, page: r.page, totalPages: r.totalPages, totalItems: r.totalItems }), { status: 200, headers: corsHeaders });
 }
 
 // GET /kmail/mailbox?box=inbox|sent&guid=...&pubkey=...&signature=...&ts=...&include_deleted=true|false
