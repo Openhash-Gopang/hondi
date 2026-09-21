@@ -18,6 +18,8 @@ import { handleDeptTaskCreate, handleDeptTaskUpdate, createDeptTaskCore, DEPT_TA
 // 2026-09-20: K-FOI(SP-28_kfoi) — 정보 공개 청구 비서·청구 건 추적·공유 아카이브. 구현은 이 모듈에 있고
 // worker.js에는 import·팩토리(_kfoiHandlers)·라우트만 둔다(4만 줄 공유 파일의 병합 충돌을 줄이려는 분리).
 import { makeKfoiHandlers, KFOI_SP_KEY } from './src/worker/kfoi-handler.js';
+// 2026-09-21: K-Address 소속 기관 계층(org_units) — 트리 CRUD·연락처 배정·정합성 복구. 구현은 이 모듈에 있다.
+import { makeOrgUnitHandlers, orgPathFilterClause, validatePathParam, ORG_UNASSIGNED } from './src/worker/kaddress-org-handler.js';
 // 2026-08-05: org_profiles(K-Compose 오케스트레이션 레지스트리)와 gov-tree
 // (지방행정 SP 콘텐츠)를 잇는 CALL_GOVTREE 배선(§ handleGovTreeStepExecute)에
 // 필요 — gov-router.js는 window 전역에도 붙지만 `export async function`으로도
@@ -13561,6 +13563,15 @@ export default {
     if (pathname === '/kmail/contacts/update' && request.method === 'POST') return handleKmailContactsUpdate(request, env, corsHeaders);
     if (pathname === '/kmail/contacts/tag' && request.method === 'POST') return handleKmailContactsTag(request, env, corsHeaders);
     if (pathname === '/kmail/contacts/merge' && request.method === 'POST') return handleKmailContactsMerge(request, env, corsHeaders);
+    // 2026-09-21 — 소속 기관 계층(org_units). 구현: src/worker/kaddress-org-handler.js
+    if (pathname === '/kmail/org-units' && request.method === 'GET') return _orgUnitHandlers().list(request, url, env, corsHeaders);
+    if (pathname === '/kmail/org-units/seed' && request.method === 'POST') return _orgUnitHandlers().seed(request, env, corsHeaders);
+    if (pathname === '/kmail/org-units/create' && request.method === 'POST') return _orgUnitHandlers().create(request, env, corsHeaders);
+    if (pathname === '/kmail/org-units/update' && request.method === 'POST') return _orgUnitHandlers().update(request, env, corsHeaders);
+    if (pathname === '/kmail/org-units/move' && request.method === 'POST') return _orgUnitHandlers().move(request, env, corsHeaders);
+    if (pathname === '/kmail/org-units/delete' && request.method === 'POST') return _orgUnitHandlers().remove(request, env, corsHeaders);
+    if (pathname === '/kmail/org-units/resync' && request.method === 'POST') return _orgUnitHandlers().resync(request, env, corsHeaders);
+    if (pathname === '/kmail/contacts/assign-org' && request.method === 'POST') return _orgUnitHandlers().assign(request, env, corsHeaders);
     // 2026-09-11 신설 — CSV/엑셀 일괄 업로드(mail 저장소 §주소록). AI를
     // 전혀 거치지 않는 순수 REST 등록 경로 — 태그 잘림·거짓 완료·배치
     // 크기 초과 같은 AI 호출 특유의 사고가 구조적으로 발생할 수 없다.
@@ -34210,7 +34221,16 @@ async function handleKmailContactsCsvImport(request, env, corsHeaders) {
 // 필터 절 구성 로직을 공유하기 위해 뺐다. 한쪽만 고치고 다른 쪽을
 // 놓치는 사고를 막기 위함(예: q에 address 필드를 추가했는데 카운트
 // 쪽엔 반영이 안 되는 식의 드리프트).
-function _kmailContactsFilterString(guid, { status = 'confirmed', q = '', relationship = '', occupation = '', org = '', tag = '', category = '' } = {}) {
+// 2026-09-21 — 소속 기관 트리 핸들러(makeKfoiHandlers와 같은 지연 생성 패턴).
+let _orgUnitHandlersInstance = null;
+function _orgUnitHandlers() {
+  if (!_orgUnitHandlersInstance) {
+    _orgUnitHandlersInstance = makeOrgUnitHandlers({ kAuth: _kAuth, err: _err, l1AdminToken: _l1AdminToken, L1_DEFAULT });
+  }
+  return _orgUnitHandlersInstance;
+}
+
+function _kmailContactsFilterString(guid, { status = 'confirmed', q = '', relationship = '', occupation = '', org = '', tag = '', category = '', org_path = '' } = {}) {
   const esc = s => String(s).replace(/'/g, "\\'");
   const clauses = [`owner_user_guid='${esc(guid)}'`];
   if (status !== 'all') clauses.push(`status='${esc(status)}'`);
@@ -34231,6 +34251,12 @@ function _kmailContactsFilterString(guid, { status = 'confirmed', q = '', relati
   // "필터 없음"과 구분이 안 되므로 별도 처리한다.
   if (category === '__NONE__') clauses.push(`category=''`);
   else if (category) clauses.push(`category~'${esc(category)}'`);
+  // 2026-09-21 신설 — 소속 기관 트리(org_path) 기준 조회. '경로' 자신 + 그 하위 전부.
+  // ★ 단순 접두(org_path~'X%')가 아니라 (= 'X' || ~ 'X>%')여야 한다 — 접두만 쓰면
+  // '제주대학교'가 형제 '제주대학교병원'까지 잡는다(kaddress-org-handler.js 참고).
+  // '__NONE__'는 소속 미분류(org_path 비어 있음) 버킷 — category와 같은 예약어 관례.
+  if (org_path === ORG_UNASSIGNED) clauses.push(`org_path=''`);
+  else if (org_path) clauses.push(orgPathFilterClause(org_path, esc));
   return clauses.join(' && ');
 }
 
@@ -34251,10 +34277,10 @@ async function _kmailCountContacts(env, guid, opts = {}) {
   return data.totalItems || 0;
 }
 
-async function _kmailQueryContacts(env, guid, { status = 'confirmed', q = '', relationship = '', occupation = '', org = '', tag = '', category = '' } = {}) {
+async function _kmailQueryContacts(env, guid, { status = 'confirmed', q = '', relationship = '', occupation = '', org = '', tag = '', category = '', org_path = '' } = {}) {
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}` };
-  const filter = encodeURIComponent(_kmailContactsFilterString(guid, { status, q, relationship, occupation, org, tag, category }));
+  const filter = encodeURIComponent(_kmailContactsFilterString(guid, { status, q, relationship, occupation, org, tag, category, org_path }));
   const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records?filter=${filter}&sort=org,name&perPage=200`, { headers });
   const data = await res.json().catch(() => ({ items: [] }));
   return data.items || [];
@@ -34460,6 +34486,9 @@ async function handleKmailContactsList(request, url, env, corsHeaders) {
   const org = (qp.org || '').trim();
   const tag = (qp.tag || '').trim();
   const category = (qp.category || '').trim();
+  const orgPathQ = validatePathParam(qp.org_path);
+  if (!orgPathQ.ok) return _err(400, orgPathQ.code, orgPathQ.message, corsHeaders);
+  const org_path = orgPathQ.path;
   if (!['pending_review', 'confirmed', 'rejected', 'all'].includes(status)) {
     return _err(400, 'INVALID_STATUS', "status는 pending_review/confirmed/rejected/all 중 하나여야 합니다", corsHeaders);
   }
@@ -34468,7 +34497,7 @@ async function handleKmailContactsList(request, url, env, corsHeaders) {
   if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
   const guid = auth.guid;
 
-  const items = await _kmailQueryContacts(env, guid, { status, q, relationship, occupation, org, tag, category });
+  const items = await _kmailQueryContacts(env, guid, { status, q, relationship, occupation, org, tag, category, org_path });
   return new Response(JSON.stringify({ ok: true, items }), { status: 200, headers: corsHeaders });
 }
 
