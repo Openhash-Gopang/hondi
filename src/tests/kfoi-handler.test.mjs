@@ -5,7 +5,7 @@
 import assert from 'node:assert/strict';
 import {
   makeKfoiHandlers, tokenize, extractTrailingTag, sanitizeItems, sanitizeRounds, archiveView,
-  neutralizeTags, normalizeAgencyKey, KFOI_MAX_RESEARCH_STEPS,
+  neutralizeTags, normalizeAgencyKey, KFOI_MAX_RESEARCH_STEPS, isBlockedFetchHost,
 } from '../worker/kfoi-handler.js';
 
 let pass = 0, fail = 0;
@@ -347,6 +347,51 @@ await test('chat: 잘못된 태그 JSON은 안내 문구', async () => {
   script.deepseek = ['정리했습니다.\n[KFOI_FILL {"agency":"제주시","items":[}]'];
   const d = await (await h.chat(chatBody([{ role: 'user', content: '제주시 자료' }]), ENV, CORS, {})).json();
   assert.equal(d.action, null); assert.ok(d.reply.length > 0);
+});
+
+// ═════════════ C2. 2026-09-21 첫 실사용에서 드러난 문제의 회귀 방지 ═════════════
+await test('isBlockedFetchHost: GitHub 계열은 차단, 비슷한 이름·기관 사이트는 허용', () => {
+  for (const u of ['https://github.com/Openhash-Gopang/hondi', 'https://raw.githubusercontent.com/x/y/main/a.json', 'https://gist.github.com/a', 'https://api.github.com/repos/x', 'https://gitlab.com/a'])
+    assert.equal(isBlockedFetchHost(u), true, u);
+  for (const u of ['https://www.jejusi.go.kr/org', 'https://www.law.go.kr/x', 'https://notgithub.com/a', 'https://github.com.evil.example/a'])
+    assert.equal(isBlockedFetchHost(u), false, u);
+});
+await test('chat: 코드 저장소 열람은 실행되지 않고 조사 횟수에도 넣지 않는다(실사용에서 8회를 소진한 문제)', async () => {
+  const pb = makePb(); const { h, calls, script } = makeDeps(pb);
+  script.deepseek = [
+    '저장소를 봅니다\n[KFOI_FETCH {"url":"https://github.com/Openhash-Gopang/hondi"}]',
+    '법령을 확인합니다\n[KFOI_SEARCH {"query":"제주특별자치도 행정기구 설치 조례 시행규칙 분장사무"}]',
+  ];
+  const d = await (await h.chat(chatBody([{ role: 'user', content: '제주 AI 행정 SP를 갱신하려 합니다' }]), ENV, CORS, {})).json();
+  assert.equal(calls.fetch.length, 0, 'GitHub 열람이 실행됨');
+  assert.equal(calls.search.length, 1, '두 번째 왕복의 검색은 실행됨');
+  assert.equal(d.research_steps, 1, '차단된 열람은 횟수에 들어가지 않고 검색만 1회');
+  assert.ok(d.progress.some(p => p.includes('건너뜀')));
+  assert.ok(calls.deepseek[1].messages.map(m => m.content).join('\n').includes('HOST_NOT_ALLOWED'), '모델에게 이유가 전달됨');
+});
+await test('FILL: other_agencies는 정리되고 이번 기관과 같은 기관은 빠진다', async () => {
+  const pb = makePb(); const { h, script } = makeDeps(pb);
+  script.deepseek = [FILL({ agency: '제주특별자치도', items: [{ title: '부서별 사무분장표', scope: '최신본' }], other_agencies: [
+    { agency: '제주시', dept: '소관 전 부서 및 읍·면·동', note: '같은 목록으로 별도 청구' },
+    { agency: '제주특별자치도청', dept: '', note: '' },
+    { agency: '', dept: 'x' },
+    { agency: '서귀포시', dept: '소관 전 부서 및 읍·면·동', note: 'y'.repeat(999) }] })];
+  const d = await (await h.chat(chatBody([{ role: 'user', content: '기관과 부서 각각의 업무 자료' }]), ENV, CORS, {})).json();
+  assert.deepEqual(d.action.other_agencies.map(o => o.agency), ['제주시', '서귀포시']);
+  assert.equal(d.action.other_agencies[1].note.length, 200);
+});
+await test('채팅 자동 조회: 흔한 낱말(제주·행정·AI·SP)만 겹친 건은 관련 건이 아니다 / 아카이브 탭 직접 검색은 그대로', async () => {
+  const pb = makePb(); const { h, calls, script } = makeDeps(pb);
+  const id = (await saveCampaign(h, tokA, { agency: '제주도', dept: '', title: '제주 행정 AI 서비스 자료', items: [{ title: '행정 서비스 소개 자료' }] })).data.campaign.id;
+  await closeShared(h, tokA, id, true);
+  script.deepseek = ['어느 기관인가요?'];
+  const d = await (await h.chat(chatBody([{ role: 'user', content: '제주 AI 행정 SP를 갱신하려 합니다 필요한 서비스' }]), ENV, CORS, {})).json();
+  assert.ok(d.progress.some(p => p.includes('일치하는 건이 없습니다')), '자동 조회가 흔한 낱말만으로 건을 잡음: ' + JSON.stringify(d.progress));
+  const direct = await archiveSearch(h, tokB, { q: '제주 행정' });
+  assert.equal(direct.items.length, 1, '사용자가 탭에서 직접 검색하면 입력한 낱말로 찾아 준다');
+  script.deepseek = ['어느 기관인가요?'];
+  const d2 = await (await h.chat(chatBody([{ role: 'user', content: '행정 서비스 소개 자료가 필요해요' }]), ENV, CORS, {})).json();
+  assert.ok(d2.progress.some(p => p.includes('관련 건 1개')), '구체적인 낱말이 겹치면 자동 조회도 잡음');
 });
 
 // ═════════════ D. worker.js 배선(라우트가 실제로 연결됐는지) ═════════════
