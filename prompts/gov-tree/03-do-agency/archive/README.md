@@ -82,3 +82,21 @@
   `pages/k-government.html`은 이전 배치들도 갱신하지 않은 별도 govCode 메뉴 데이터라(이미 BOHWAN·
   CHUKSAN 등 예전 이름이 남아 있음) 이번에도 손대지 않았다 — 범위 밖으로 남겨둔다.
 
+# 2026-09-23 — 3쌍(배선된 division ↔ 새 division) §3 경계 정리
+
+바로 위 배치에서 "다음 배치에서 재정리 필요"로 남긴 3건을 정리했다. 배선(task_key)은 어느 쪽도
+끊지 않았다 — 실제로 겹치는 두 SP의 역할을 문서에 명시적으로 나눠, LLM이 두 division 중 어느
+쪽이 실제 신청 접수를 처리하는지 헷갈리지 않게 했다.
+
+- **본관(MAIN, `artmuseum_main_facility_rental`) ↔ 운영과(ADMIN)**: 본관 전시실 대관 신청의 접수·
+  심사는 본관이 계속 맡고, 운영과는 미술관 전체 예산·인사·홍보·업무협력 총괄행정만 답한다.
+- **상수도과(WATERSUPPLY, `water_connection_application`) ↔ 상수도정책시설과(POLICYFACILITY)**:
+  개별 급수공사신청의 접수·심사는 상수도과가 계속 맡고, 상수도정책시설과는 광역화·원인자부담금·
+  수도정비기본계획 등 정책·제도 문의만 답한다.
+- **유산관리과(MANAGEMENT, `heritage_alteration_permit`) ↔ 문화유산과(CULTURALHERITAGE)·자연유산과
+  (NATURALHERITAGE)**: 문화유산·자연유산 어느 쪽이든 현상변경허가 신청의 접수·심사는 유산관리과가
+  하나로 맡고, 문화유산과·자연유산과는 각 분야의 지정·조사·시설 운영 등 사무만 답한다.
+
+테스트 2건(작업 #11)을 추가해 6개 division 전부에 경계 문구가 있는지, 그리고 이 정리 과정에서
+배선된 3개 division의 task_key가 실수로 바뀌거나 사라지지 않았는지 회귀 검증했다.
+
