@@ -118,10 +118,10 @@ await test('소방안전본부(SP-AGY-FIRE)가 직속기관에서 도청(do) 유
   const divs = digest.tiers.do.entries.filter(e => e.kind === 'division' && e.parent === '소방안전본부');
   assert.equal(divs.length, 3, '기존 division 3개(실제 내용 있음)는 그대로 옮겨졌어야 함');
 });
-await test('직속기관·사업소(agency) 조직 기준표: 2026-09-23까지 9개(농업기술원·보건환경연구원·축산생명연구원·한라도서관·자치경찰단·민속자연사박물관·도립미술관·상하수도본부·세계유산본부) 전부 match로 정리됐다(structure_differs 0)', () => {
+await test('직속기관·사업소(agency) 조직 기준표: 2026-09-23까지 11개(농업기술원·보건환경연구원·축산생명연구원·한라도서관·자치경찰단·민속자연사박물관·도립미술관·상하수도본부·세계유산본부·공공정책연수원·보훈청) 전부 match로 정리됐다(structure_differs 0)', () => {
   const t = digest.tiers.agency;
   assert.equal(t.baseline.org_counts.structure_differs, undefined, '이제 structure_differs로 남은 기관이 없어야 함');
-  assert.equal(t.baseline.org_counts.match, 9);
+  assert.equal(t.baseline.org_counts.match, 11);
   const agri = t.entries.find(e => e.id === 'SP-AGY-AGRITECH');
   assert.equal(agri.org.status, 'match'); assert.equal(agri.org.legal_basis, '제23~24조');
   assert.equal(agri.org.current_divisions.length, 9);
@@ -135,11 +135,16 @@ await test('직속기관·사업소(agency) 조직 기준표: 2026-09-23까지 9
   assert.equal(water.org.status, 'match'); assert.equal(water.org.current_divisions.length, 9);
   const heritage = t.entries.find(e => e.id === 'SP-AGY-HERITAGE');
   assert.equal(heritage.org.status, 'match'); assert.equal(heritage.org.confidence, 'medium', '유산정책부 4개는 사무 배정을 원문 재확인 못 해 medium'); assert.equal(heritage.org.current_divisions.length, 10);
+  const publicpolicy = t.entries.find(e => e.id === 'SP-AGY-PUBLICPOLICY');
+  assert.equal(publicpolicy.org.status, 'match'); assert.equal(publicpolicy.org.legal_basis, '제25~26조'); assert.equal(publicpolicy.org.current_divisions.length, 1);
+  const veterans = t.entries.find(e => e.id === 'SP-AGY-VETERANS');
+  assert.equal(veterans.org.status, 'match'); assert.equal(veterans.org.legal_basis, '제31~32조'); assert.equal(veterans.org.current_divisions.length, 3);
 });
-await test('직속기관·사업소 조직 기준표: 법정 기관 23개 중 SP가 없는 15개(누락 12 + 합의제행정기관 3)가 열거된다', () => {
+await test('직속기관·사업소 조직 기준표: 법정 기관 23개 중 SP가 없는 13개(누락 10 + 합의제행정기관 3)가 열거된다(2026-09-23 공공정책연수원·보훈청 반영으로 15→13)', () => {
   const t = digest.tiers.agency;
-  assert.equal(t.baseline.missing_in_inventory.length, 15);
-  assert.ok(t.baseline.missing_in_inventory.some(m => m.name === '보훈청' && m.chapter === '직속기관'));
+  assert.equal(t.baseline.missing_in_inventory.length, 13);
+  assert.ok(!t.baseline.missing_in_inventory.some(m => m.name === '보훈청'), '보훈청은 반영 완료로 missing_in_inventory에서 빠져야 함');
+  assert.ok(!t.baseline.missing_in_inventory.some(m => m.name === '공공정책연수원'), '공공정책연수원은 반영 완료로 missing_in_inventory에서 빠져야 함');
   assert.ok(t.baseline.missing_in_inventory.some(m => m.name === '감사위원회' && m.chapter === '합의제행정기관'));
   assert.ok(t.baseline.missing_in_inventory.some(m => m.name === '고용센터'), '2026.8.21. 신설 기관도 반영돼야 함');
 });

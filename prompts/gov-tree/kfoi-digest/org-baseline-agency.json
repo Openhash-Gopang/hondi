@@ -18,28 +18,6 @@
  "reform_deltas": [],
  "missing_in_inventory": [
   {
-   "name": "공공정책연수원",
-   "chapter": "직속기관",
-   "section": "제2절",
-   "legal_basis": "제25~26조",
-   "current_divisions": [
-    "교육운영과"
-   ],
-   "confidence": "high"
-  },
-  {
-   "name": "보훈청",
-   "chapter": "직속기관",
-   "section": "제5절",
-   "legal_basis": "제31~32조",
-   "current_divisions": [
-    "보훈과",
-    "보상과",
-    "항일기념관"
-   ],
-   "confidence": "high"
-  },
-  {
    "name": "제주소방서·서귀포소방서·서부소방서·동부소방서",
    "chapter": "직속기관",
    "section": "제6절",
@@ -367,6 +345,28 @@
     "총괄과(공공하수처리시설 현대화사업추진단)"
    ],
    "note": "2026-09-23 division 9개를 별표9로 신설, 이름·구성 일치 확인. 기존 3개 중 경영지원과·하수도과(둘 다 배선 없음)는 archive로 이동. 상수도과(WATERSUPPLY)는 별표9 실명 9개에는 없는 이름이지만 실제 접수 파이프라인(급수공사 신청 task_key)에 배선돼 있어 그대로 뒀다 — 상수도정책시설과 등과 업무가 겹칠 수 있어 다음 배치에서 재정리 필요"
+  },
+  "SP-AGY-PUBLICPOLICY": {
+   "status": "match",
+   "current_name": "공공정책연수원",
+   "confidence": "high",
+   "legal_basis": "제25~26조",
+   "current_divisions": [
+    "교육운영과"
+   ],
+   "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제25~26조·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(교육운영과 1개)을 확인해 SP-AGY-PUBLICPOLICY와 하위 SP-AGYDIV-PUBLICPOLICY-EDUCATION을 함께 신설했다. §2는 별표8(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다."
+  },
+  "SP-AGY-VETERANS": {
+   "status": "match",
+   "current_name": "보훈청",
+   "confidence": "high",
+   "legal_basis": "제31~32조",
+   "current_divisions": [
+    "보훈과",
+    "보상과",
+    "항일기념관"
+   ],
+   "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제31~32조·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(보훈과·보상과·항일기념관 3개)을 확인해 SP-AGY-VETERANS와 하위 division 3개를 함께 신설했다. §2는 별표8(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다. **명칭 중복 유의**: gov-router.js의 JEJU_NATIONAL_TABLE에 이미 SP-NAT-VETERANS(\"제주보훈청(국가보훈부)\")가 \"보훈청\" 키워드로 등록돼 있다 — 도 직속기관(이 SP)과 국가보훈부 소속 기관의 소관 중복·우선순위는 이번 배치에서 해결하지 않았다(SP-AGY-VETERANS_v1.0.md §6 참고, 다음 배치에서 재검증 필요)."
   }
  }
 }
