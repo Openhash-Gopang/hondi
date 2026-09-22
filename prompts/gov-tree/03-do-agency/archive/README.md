@@ -1,0 +1,21 @@
+# 03-do-agency division 정리 (2026-09-22, 별표 8·9 원문 반영)
+
+시행규칙 별표 8(직속기관별 분장사무)·별표 9(사업소별 분장사무) 원문을 확보해 대조한 결과,
+농업기술원(SP-AGY-AGRITECH)·보건환경연구원(SP-AGY-BOHWAN)·축산생명연구원(SP-AGY-CHUKSAN)
+산하 division의 이름·구성이 실제 조직과 전혀 달랐다(예: 농업기술원은 "행정운영과·기술보급과·
+연구개발과" 3개였으나 실제로는 "총무과·농산물원종장·농업디지털센터·미래농업육성과·친환경연구과·
+과수연구과·원예작물과·기술지원조정과·농업기술센터" 9개다).
+
+이 세 기관은 division 파일 어디에도 실제 서비스에 연결된 task_key(GOV_TASK 접수 파이프라인)가
+없는 것을 먼저 확인했다(2026-09-22) — 그래서 안전하게 archive로 옮기고 새로 만들 수 있었다.
+(다른 6개 기관 — 도립미술관·민속자연사박물관·세계유산본부·한라도서관·자치경찰단·상하수도본부 —
+은 일부 division에 실제 배선이 있어 같은 방식을 그대로 적용할 수 없다. §11-3의 다음 배치 참고.)
+
+- `SP-AGYDIV-AGRITECH-ADMIN/EXTENSION/RESEARCH_v1.0.md` → 새 division 9개
+  (`prompts/gov-tree/kfoi-digest/org-baseline-agency.json` §농업기술원 참고)로 대체
+- `SP-AGYDIV-BOHWAN-ENVIRONMENT/HEALTH_v1.0.md` → 새 division 9개로 대체
+- `SP-AGYDIV-CHUKSAN-RESEARCH_v1.0.md` → 새 division 2개로 대체(기관·과 이름 자체가
+  2024.7.9. 축산진흥원→축산생명연구원, 축산진흥과→축산생명과로 개명된 것도 함께 확인)
+
+새 division들은 §2(완결 처리 업무)에 별표 8·9(2024.01.22. 개정본)의 실제 사무를 담았다.
+그 뒤 개편 여부는 각 파일이 정직하게 "확인하지 못함"으로 밝히고 있다.

@@ -142,5 +142,54 @@ await test('작업 #5 회귀: city 파일 경로 참조(division-tables.js·페�
   assert.ok(out.includes('모든 참조가 최신 파일과 일치합니다'), out);
 });
 
+await test('작업 #6: 농업기술원·보건환경연구원·축산생명연구원 division 20개가 실제 분장사무(별표 8·9)로 신설됐다', () => {
+  const digest = buildDigest();
+  const created = [
+    ['SP-AGY-AGRITECH', 9], ['SP-AGY-BOHWAN', 9], ['SP-AGY-CHUKSAN', 2],
+  ];
+  for (const [parentId, n] of created) {
+    const divs = digest.tiers.agency.entries.filter(e => e.kind === 'division' &&
+      digest.tiers.agency.entries.find(p => p.kind === 'institution' && p.id === parentId)?.name === e.parent);
+    assert.equal(divs.length, n, `${parentId}: division 개수가 안 맞음`);
+    for (const d of divs) {
+      assert.equal(d.state, 'draft', `${d.id}: v1.0 신설이니 draft여야 함(초안이지만 내용은 실제 사무)`);
+      assert.ok(d.does && d.does.length > 0, `${d.id}: does가 비어 있음`);
+      for (const line of d.does) assert.ok(/^\d{1,3}\.\s/.test(line), `${d.id}: 번호 매긴 사무 형식 아님`);
+    }
+  }
+});
+await test('작업 #6 안전장치: 실제 접수 파이프라인(task_key)이 걸린 division 6개는 이번 배치에서 건드리지 않았다', () => {
+  // 처음엔 "GOV_TASK"·"REQUIRED_DOCUMENTS_REGISTRY" 문자열이 있으면 배선된 것으로 잡았는데, LIBRARY-INFOSERVICE·
+  // POLICE-SAFETY는 그 반대(등록 대상이 "아니다"라고 판정한 기록)였다 — task_key 실제 대입 여부로 다시 확인해 걸러냈다.
+  // 그 둘은 다음 배치에서 다른 기관들처럼 완전히 새로 만들 수 있는 후보다(LIBRARY는 2개 division 전부 미배선이라
+  // 통째로 가능할 수도 있다).
+  const wired = [
+    'SP-AGYDIV-ARTMUSEUM-JHYUN', 'SP-AGYDIV-ARTMUSEUM-MAIN', 'SP-AGYDIV-FOLKMUSEUM-ADMIN',
+    'SP-AGYDIV-HERITAGE-MANAGEMENT', 'SP-AGYDIV-POLICE-TRAFFIC', 'SP-AGYDIV-WATER-WATERSUPPLY',
+  ];
+  for (const id of wired) {
+    const path = execFileSync('bash', ['-c', `grep -rl "^# 문서 코드  : ${id}$" prompts/gov-tree/03-do-agency/divisions/*.md || true`], { cwd: ROOT }).toString().trim();
+    assert.ok(path, `${id}: 파일을 못 찾음(실수로 이동·삭제됐을 수 있음)`);
+    const content = fs.readFileSync(path, 'utf8');
+    assert.ok(content.includes('task_key'), `${id}: task_key 배선이 사라짐 — 실제 서비스가 끊겼을 수 있음`);
+  }
+});
+await test('작업 #6 회귀: archive로 옮긴 6개 파일이 실제로 archive/에 있고, live 디렉터리엔 없다', () => {
+  const moved = [
+    'SP-AGYDIV-AGRITECH-ADMIN_v1.0.md', 'SP-AGYDIV-AGRITECH-EXTENSION_v1.0.md', 'SP-AGYDIV-AGRITECH-RESEARCH_v1.0.md',
+    'SP-AGYDIV-BOHWAN-ENVIRONMENT_v1.0.md', 'SP-AGYDIV-BOHWAN-HEALTH_v1.0.md', 'SP-AGYDIV-CHUKSAN-RESEARCH_v1.0.md',
+  ];
+  for (const f of moved) {
+    assert.ok(fs.existsSync(path.join(ROOT, 'prompts/gov-tree/03-do-agency/archive', f)), `${f}: archive에 없음`);
+    assert.ok(!fs.existsSync(path.join(ROOT, 'prompts/gov-tree/03-do-agency/divisions', f)), `${f}: live에 아직 있음`);
+  }
+});
+await test('작업 #6: 축산진흥과→축산생명과 개명이 division 표시 이름에 반영됐다(별표의 옛 이름을 그대로 쓰지 않음)', () => {
+  const digest = buildDigest();
+  const names = digest.tiers.agency.entries.filter(e => e.kind === 'division' && e.parent === '축산생명연구원').map(e => e.name);
+  assert.ok(names.some(n => n.includes('축산생명과')), names.join(','));
+  assert.ok(!names.some(n => n.includes('축산진흥과')), '개명 전 이름이 그대로 노출됨: ' + names.join(','));
+});
+
 console.log(`\n${pass}/${pass + fail} passed`);
 process.exit(fail ? 1 : 0);

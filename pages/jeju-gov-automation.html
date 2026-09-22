@@ -371,9 +371,15 @@ const DO_BUREAUS = [
 
 const DO_AGENCIES = [
   { id: "SP-AGY-AGRITECH", name: "농업기술원", spId: "SP-AGY-AGRITECH", kind: "do-agency", divisions: [
-      { id: "SP-AGYDIV-AGRITECH-ADMIN", name: "농업기술원 행정운영과", spId: "SP-AGYDIV-AGRITECH-ADMIN", file: "03-do-agency/divisions/SP-AGYDIV-AGRITECH-ADMIN_v1.0.md", confirmed: true },
-      { id: "SP-AGYDIV-AGRITECH-EXTENSION", name: "농업기술원 기술보급과", spId: "SP-AGYDIV-AGRITECH-EXTENSION", file: "03-do-agency/divisions/SP-AGYDIV-AGRITECH-EXTENSION_v1.0.md", confirmed: true },
-      { id: "SP-AGYDIV-AGRITECH-RESEARCH", name: "농업기술원 연구개발과", spId: "SP-AGYDIV-AGRITECH-RESEARCH", file: "03-do-agency/divisions/SP-AGYDIV-AGRITECH-RESEARCH_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-AGRITECH-GENERAL", name: "총무과", spId: "SP-AGYDIV-AGRITECH-GENERAL", file: "03-do-agency/divisions/SP-AGYDIV-AGRITECH-GENERAL_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-AGRITECH-SEEDFARM", name: "농산물원종장", spId: "SP-AGYDIV-AGRITECH-SEEDFARM", file: "03-do-agency/divisions/SP-AGYDIV-AGRITECH-SEEDFARM_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-AGRITECH-DIGITAL", name: "농업디지털센터", spId: "SP-AGYDIV-AGRITECH-DIGITAL", file: "03-do-agency/divisions/SP-AGYDIV-AGRITECH-DIGITAL_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-AGRITECH-FUTUREAGRI", name: "미래농업육성과", spId: "SP-AGYDIV-AGRITECH-FUTUREAGRI", file: "03-do-agency/divisions/SP-AGYDIV-AGRITECH-FUTUREAGRI_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-AGRITECH-ECORESEARCH", name: "친환경연구과", spId: "SP-AGYDIV-AGRITECH-ECORESEARCH", file: "03-do-agency/divisions/SP-AGYDIV-AGRITECH-ECORESEARCH_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-AGRITECH-FRUITRESEARCH", name: "과수연구과", spId: "SP-AGYDIV-AGRITECH-FRUITRESEARCH", file: "03-do-agency/divisions/SP-AGYDIV-AGRITECH-FRUITRESEARCH_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-AGRITECH-HORTICULTURE", name: "원예작물과", spId: "SP-AGYDIV-AGRITECH-HORTICULTURE", file: "03-do-agency/divisions/SP-AGYDIV-AGRITECH-HORTICULTURE_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-AGRITECH-EXTENSIONCOORD", name: "기술지원조정과", spId: "SP-AGYDIV-AGRITECH-EXTENSIONCOORD", file: "03-do-agency/divisions/SP-AGYDIV-AGRITECH-EXTENSIONCOORD_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-AGRITECH-CENTERS", name: "농업기술센터(제주, 서귀포,동부, 서부)", spId: "SP-AGYDIV-AGRITECH-CENTERS", file: "03-do-agency/divisions/SP-AGYDIV-AGRITECH-CENTERS_v1.0.md", confirmed: true },
   ]},
   { id: "SP-AGY-ARTMUSEUM", name: "제주특별자치도립미술관", spId: "SP-AGY-ARTMUSEUM", kind: "do-agency", divisions: [
       { id: "SP-AGYDIV-ARTMUSEUM-JHYUN", name: "제주도립미술관 제주현대미술관", spId: "SP-AGYDIV-ARTMUSEUM-JHYUN", file: "03-do-agency/divisions/SP-AGYDIV-ARTMUSEUM-JHYUN_v1.1.md", confirmed: true },
@@ -381,11 +387,19 @@ const DO_AGENCIES = [
       { id: "SP-AGYDIV-ARTMUSEUM-MAIN", name: "제주도립미술관 본관", spId: "SP-AGYDIV-ARTMUSEUM-MAIN", file: "03-do-agency/divisions/SP-AGYDIV-ARTMUSEUM-MAIN_v1.1.md", confirmed: true },
   ]},
   { id: "SP-AGY-BOHWAN", name: "보건환경연구원", spId: "SP-AGY-BOHWAN", kind: "do-agency", divisions: [
-      { id: "SP-AGYDIV-BOHWAN-ENVIRONMENT", name: "보건환경연구원 환경연구과", spId: "SP-AGYDIV-BOHWAN-ENVIRONMENT", file: "03-do-agency/divisions/SP-AGYDIV-BOHWAN-ENVIRONMENT_v1.0.md", confirmed: false },
-      { id: "SP-AGYDIV-BOHWAN-HEALTH", name: "보건환경연구원 보건연구과", spId: "SP-AGYDIV-BOHWAN-HEALTH", file: "03-do-agency/divisions/SP-AGYDIV-BOHWAN-HEALTH_v1.0.md", confirmed: false },
+      { id: "SP-AGYDIV-BOHWAN-GENERAL", name: "총괄운영과", spId: "SP-AGYDIV-BOHWAN-GENERAL", file: "03-do-agency/divisions/SP-AGYDIV-BOHWAN-GENERAL_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-BOHWAN-INFECTIOUS", name: "감염병검사과", spId: "SP-AGYDIV-BOHWAN-INFECTIOUS", file: "03-do-agency/divisions/SP-AGYDIV-BOHWAN-INFECTIOUS_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-BOHWAN-MICROBIO", name: "미생물과", spId: "SP-AGYDIV-BOHWAN-MICROBIO", file: "03-do-agency/divisions/SP-AGYDIV-BOHWAN-MICROBIO_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-BOHWAN-FOODANALYSIS", name: "식품분석과", spId: "SP-AGYDIV-BOHWAN-FOODANALYSIS", file: "03-do-agency/divisions/SP-AGYDIV-BOHWAN-FOODANALYSIS_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-BOHWAN-AGRIMARINETEST", name: "농수산물검사과", spId: "SP-AGYDIV-BOHWAN-AGRIMARINETEST", file: "03-do-agency/divisions/SP-AGYDIV-BOHWAN-AGRIMARINETEST_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-BOHWAN-ENVSURVEY", name: "환경조사과", spId: "SP-AGYDIV-BOHWAN-ENVSURVEY", file: "03-do-agency/divisions/SP-AGYDIV-BOHWAN-ENVSURVEY_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-BOHWAN-SOILCHEM", name: "토양화학과", spId: "SP-AGYDIV-BOHWAN-SOILCHEM", file: "03-do-agency/divisions/SP-AGYDIV-BOHWAN-SOILCHEM_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-BOHWAN-AIRENV", name: "대기환경과", spId: "SP-AGYDIV-BOHWAN-AIRENV", file: "03-do-agency/divisions/SP-AGYDIV-BOHWAN-AIRENV_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-BOHWAN-WATERQUALITY", name: "수질연구과", spId: "SP-AGYDIV-BOHWAN-WATERQUALITY", file: "03-do-agency/divisions/SP-AGYDIV-BOHWAN-WATERQUALITY_v1.0.md", confirmed: true },
   ]},
   { id: "SP-AGY-CHUKSAN", name: "축산생명연구원", spId: "SP-AGY-CHUKSAN", kind: "do-agency", divisions: [
-      { id: "SP-AGYDIV-CHUKSAN-RESEARCH", name: "축산생명연구원 축산연구과", spId: "SP-AGYDIV-CHUKSAN-RESEARCH", file: "03-do-agency/divisions/SP-AGYDIV-CHUKSAN-RESEARCH_v1.0.md", confirmed: false },
+      { id: "SP-AGYDIV-CHUKSAN-LIVESTOCKLIFE", name: "축산생명과", spId: "SP-AGYDIV-CHUKSAN-LIVESTOCKLIFE", file: "03-do-agency/divisions/SP-AGYDIV-CHUKSAN-LIVESTOCKLIFE_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-CHUKSAN-LIVESTOCKRES", name: "가축자원과", spId: "SP-AGYDIV-CHUKSAN-LIVESTOCKRES", file: "03-do-agency/divisions/SP-AGYDIV-CHUKSAN-LIVESTOCKRES_v1.0.md", confirmed: true },
   ]},
   { id: "SP-AGY-FOLKMUSEUM", name: "제주특별자치도민속자연사박물관", spId: "SP-AGY-FOLKMUSEUM", kind: "do-agency", divisions: [
       { id: "SP-AGYDIV-FOLKMUSEUM-ADMIN", name: "제주특별자치도민속자연사박물관 관리실", spId: "SP-AGYDIV-FOLKMUSEUM-ADMIN", file: "03-do-agency/divisions/SP-AGYDIV-FOLKMUSEUM-ADMIN_v1.1.md", confirmed: true },
