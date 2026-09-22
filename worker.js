@@ -14050,6 +14050,12 @@ export default {
     if (pathname === '/admin/users/manual-charge' && request.method === 'POST')
       return handleAdminManualCharge(request, env, corsHeaders);
 
+    // POST /admin/users/manual-debit — 관리자 수동 차감 (2026-09-23 신설).
+    // manual-charge의 반대 방향 — 잘못 나간 GDC를 되돌리거나 이중 충전을
+    // 정정할 때 사용. _chargeGdcForAiUsage(/api/ai-charge)를 재사용한다.
+    if (pathname === '/admin/users/manual-debit' && request.method === 'POST')
+      return handleAdminManualDebit(request, env, corsHeaders);
+
     // GET /admin/manual-charges/recent?limit=... — 전체 관리자 수동충전
     // 감사로그 (2026-07-27 신설). 콘솔로그(휘발성)만 있던 걸 조회
     // 가능한 UI로 보완한다.
@@ -27577,6 +27583,111 @@ async function handleAdminManualCharge(request, env, corsHeaders) {
   } catch (e) {
     return _err(502, 'L1_UNREACHABLE', 'L1 호출 실패: ' + e.message, corsHeaders);
   }
+}
+
+// ═══════════════════════════════════════════════════════════
+// POST /admin/users/manual-debit — 관리자 수동 차감 (2026-09-23 신설,
+// 주피터 지시: "충전 오류를 관리자가 쉽게 조정할 수 있는 패널" 요청에
+// 따라 위 manual-charge와 대칭으로 신설).
+//
+// 배경: 지금까지는 관리자가 GDC를 "더 주는" 방향(manual-charge, /api/mint)
+// 만 있었다 — 반대로 잘못 나간 만큼 "되돌리는" 방향이 없었다(예: 폐지된
+// 구독 결제로 9,900 GDC가 잘못 빠져나간 경우, 원칙적으로는 그만큼
+// 되돌려주는 게 맞지만, 그 반대 방향 — 예를 들어 이중 충전을 정정하는
+// 경우 — 는 이 엔드포인트가 필요하다). manual-charge를 그대로 복붙하지
+// 않고 새 mint 로직도 만들지 않는다 — 이미 있는 _chargeGdcForAiUsage
+// (/api/ai-charge 경유, tx_hash 멱등성 내장)를 serviceId='admin-correction'
+// 으로 재사용해, AI 사용료 차감과 동일한 검증된 경로를 탄다. 잔액 부족이면
+// (그 이상 뺄 게 없으면) 그대로 실패 응답을 돌려준다 — 마이너스 잔액을
+// 만들지 않는다.
+// ═══════════════════════════════════════════════════════════
+async function handleAdminManualDebit(request, env, corsHeaders) {
+  const admin = await _requireAdmin(request, env);
+  if (!admin) return _err(401, 'UNAUTHORIZED', '관리자 인증이 필요합니다', corsHeaders);
+
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+
+  const { guid, krw_amount, memo, confirm_large, idempotency_key } = body;
+  if (!guid) return _err(400, 'MISSING_FIELD', 'guid 필수', corsHeaders);
+  const krwAmount = Number(krw_amount);
+  if (!(krwAmount > 0)) return _err(400, 'INVALID_AMOUNT', 'krw_amount는 0보다 커야 합니다', corsHeaders);
+  if (!memo || !memo.trim()) return _err(400, 'MISSING_FIELD', '차감 사유(memo)는 필수입니다 — 잔액을 빼는 조정이라 감사 추적상 이유를 반드시 남겨야 합니다', corsHeaders);
+  if (!idempotency_key) return _err(400, 'MISSING_FIELD', 'idempotency_key 필수(클라이언트가 매 요청마다 새로 생성)', corsHeaders);
+
+  try {
+    const profile = await _l1FindProfileByGuid(env, guid);
+    if (!profile) return _err(404, 'GUID_NOT_FOUND', '해당 guid의 사용자를 찾을 수 없습니다', corsHeaders);
+  } catch (e) {
+    return _err(502, 'L1_ERROR', 'guid 확인 실패: ' + e.message, corsHeaders);
+  }
+
+  // manual-charge와 동일한 캡/2단계 확인 — 방향만 반대일 뿐 "오탈자로
+  // 큰 금액이 실수로 움직인다"는 위험은 똑같다.
+  if (krwAmount > MANUAL_CHARGE_HARD_CAP_KRW) {
+    return _err(400, 'AMOUNT_EXCEEDS_CAP',
+      `1회 차감 한도(${MANUAL_CHARGE_HARD_CAP_KRW.toLocaleString('ko-KR')}원)를 초과했습니다. 나눠서 처리하세요.`,
+      corsHeaders);
+  }
+  if (krwAmount >= MANUAL_CHARGE_CONFIRM_THRESHOLD_KRW && !confirm_large) {
+    return new Response(JSON.stringify({
+      ok: false, error: 'CONFIRMATION_REQUIRED',
+      message: `${krwAmount.toLocaleString('ko-KR')}원은 고액입니다. 금액을 다시 확인한 뒤 confirm_large:true로 재요청하세요.`,
+      requires_confirmation: true,
+    }), { status: 409, headers: corsHeaders });
+  }
+
+  const kv = env.AI_SETUP_SEALS_KV;
+  const idemKvKey = `hondi:manual_debit_idem:${idempotency_key}`;
+  if (kv) {
+    try {
+      const already = await kv.get(idemKvKey);
+      if (already) return new Response(already, { status: 200, headers: corsHeaders });
+    } catch (e) {
+      console.warn('[ManualDebit] 멱등성 키 조회 실패(계속 진행, 중복 위험 있음):', e.message);
+    }
+  } else {
+    console.warn('[ManualDebit] AI_SETUP_SEALS_KV 바인딩 없음 — 멱등성 보호 불가로 계속 진행');
+  }
+
+  let charge;
+  try {
+    charge = await _chargeGdcForAiUsage(env, {
+      guid, krwAmount, serviceId: 'admin-correction',
+      memo: `manual_debit|admin=${admin?.sub || admin?.role || 'unknown'}|note=${memo}`,
+      settlementKey: `admin-debit-${idempotency_key}`,
+    });
+  } catch (e) {
+    return _err(502, 'L1_UNREACHABLE', 'L1 호출 실패: ' + e.message, corsHeaders);
+  }
+  if (!charge?.ok) {
+    console.warn(JSON.stringify({ tag: 'MANUAL_DEBIT_FAILED', guid, krwAmount, error: charge?.error, ts: new Date().toISOString() }));
+    return new Response(JSON.stringify({
+      ok: false, error: charge?.error || 'CHARGE_FAILED',
+      message: charge?.error === 'INSUFFICIENT_BALANCE'
+        ? '잔액이 차감액보다 적어 처리할 수 없습니다. 잔액을 다시 확인해 주세요.'
+        : (charge?.detail || '차감에 실패했습니다.'),
+      detail: charge,
+    }), { status: 502, headers: corsHeaders });
+  }
+
+  const responsePayload = {
+    ok: true, guid, debited_krw: krwAmount, debited_gdc: charge.charged_gdc,
+    balance_after_gdc: charge.balance_after,
+    balance_after_krw: charge.balance_after != null ? Math.round(charge.balance_after * EXCHANGE_RATE_KRW_PER_GDC) : null,
+  };
+
+  console.log(JSON.stringify({
+    tag: 'MANUAL_DEBIT_OK', guid, krwAmount, chargedGdc: charge.charged_gdc, balanceAfter: charge.balance_after,
+    admin: admin?.sub || admin?.role, idempotency_key, ts: new Date().toISOString(),
+  }));
+
+  if (kv) {
+    try { await kv.put(idemKvKey, JSON.stringify(responsePayload), { expirationTtl: 86400 }); }
+    catch (e) { console.warn('[ManualDebit] 멱등성 키 저장 실패(다음 재시도 시 중복 위험):', e.message); }
+  }
+
+  return new Response(JSON.stringify(responsePayload), { status: 200, headers: corsHeaders });
 }
 
 async function handleAdminUserSearch(request, env, corsHeaders) {

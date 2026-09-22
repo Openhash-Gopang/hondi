@@ -175,6 +175,74 @@
         </div>
       </div>
 
+      <!-- ①-d GDC 잔액 조정 (2026-09-23 신설 — 주피터 지시: 베타 기간 충전
+           오류를 관리자가 쉽게 보정할 수 있는 패널. /admin/users/search로
+           찾아 선택 → /admin/users/manual-charge(충전) 또는
+           /admin/users/manual-debit(차감, 신설). 두 엔드포인트 모두
+           100,000원 이상 2단계 확인·1회 500,000원 상한·멱등성 보호가
+           서버에 이미 있어, 여기서는 그 결과를 그대로 보여주기만 한다. -->
+      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:0;padding:16px 18px;margin-bottom:16px">
+        <div style="font-size:12px;color:var(--ad-faint,#6e737a);letter-spacing:.3px;margin-bottom:12px">GDC 잔액 조정 (수동 보정)</div>
+        <div style="font-size:11px;color:var(--ad-faint,#6e737a);margin-bottom:12px;line-height:1.6">
+          이중 충전, 폐지된 요금제로 잘못 나간 청구 등을 직접 보정합니다. 100,000원 이상은 재확인이 필요하고, 500,000원을 넘는 1회 조정은 막혀 있습니다 — 나눠서 처리하세요.
+        </div>
+
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <input id="adj-search-q" type="text" placeholder="닉네임(handle) 또는 GUID 일부"
+                 onkeydown="if(event.key==='Enter') _adjSearch()"
+                 style="flex:1;padding:8px 10px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                        border:1px solid var(--ad-line,#3c3f46);border-radius:0;font-size:12.5px;font-family:inherit">
+          <button onclick="_adjSearch()"
+                  style="padding:8px 16px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                         border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;
+                         font-size:12.5px;font-weight:500;cursor:pointer;font-family:inherit">검색</button>
+        </div>
+        <div id="adj-search-results" style="max-height:180px;overflow-y:auto;margin-bottom:12px"></div>
+
+        <div id="adj-selected" style="display:none;border-top:1px solid var(--ad-line,#3c3f46);padding-top:14px;margin-top:4px">
+          <div style="font-size:11px;color:var(--ad-faint,#6e737a);margin-bottom:2px">선택된 사용자</div>
+          <div style="font-family:var(--ad-mono);font-size:12.5px;color:var(--ad-text,#d7d9dd);word-break:break-all" id="adj-selected-guid">—</div>
+          <div style="font-size:12.5px;color:var(--ad-dim,#9aa0a8);margin-top:4px">현재 잔액: <span id="adj-selected-balance" style="font-family:var(--ad-mono)">—</span></div>
+
+          <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;align-items:flex-end">
+            <div>
+              <div style="font-size:10.5px;color:var(--ad-faint,#6e737a);margin-bottom:4px">방향</div>
+              <select id="adj-direction" style="padding:7px 9px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);border:1px solid var(--ad-line,#3c3f46);border-radius:0;font-size:12.5px;font-family:inherit">
+                <option value="charge">충전(+)</option>
+                <option value="debit">차감(−)</option>
+              </select>
+            </div>
+            <div>
+              <div style="font-size:10.5px;color:var(--ad-faint,#6e737a);margin-bottom:4px">금액(원, 1T=1원)</div>
+              <input id="adj-amount" type="number" min="1" step="1" placeholder="9900"
+                     style="width:130px;padding:7px 9px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                            border:1px solid var(--ad-line,#3c3f46);border-radius:0;font-size:12.5px;font-family:var(--ad-mono)">
+            </div>
+            <div style="flex:1;min-width:200px">
+              <div style="font-size:10.5px;color:var(--ad-faint,#6e737a);margin-bottom:4px">사유(memo, 필수)</div>
+              <input id="adj-memo" type="text" placeholder="예: expert-persona-subscription 오청구 환불"
+                     style="width:100%;padding:7px 9px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                            border:1px solid var(--ad-line,#3c3f46);border-radius:0;font-size:12.5px;font-family:inherit">
+            </div>
+            <button onclick="_adjSubmit()" id="adj-submit-btn"
+                    style="padding:8px 18px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);
+                           border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;
+                           font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit">실행</button>
+          </div>
+          <div id="adj-confirm-row" style="display:none;margin-top:10px;padding:10px;border:1px solid #a35b1f;background:rgba(163,91,31,0.12)">
+            <div style="font-size:12px;color:#e0a45c;margin-bottom:8px">고액 조정입니다 — 금액을 다시 확인하셨나요?</div>
+            <button onclick="_adjSubmit(true)"
+                    style="padding:6px 14px;background:#a35b1f;color:#fff;border:none;border-radius:0;font-size:12px;font-weight:600;cursor:pointer">확인, 진행</button>
+          </div>
+          <div id="adj-result" style="font-size:12.5px;margin-top:10px"></div>
+
+          <div style="margin-top:14px">
+            <div style="font-size:10.5px;color:var(--ad-faint,#6e737a);margin-bottom:6px">최근 내역</div>
+            <div id="adj-history" style="font-size:11.5px;color:var(--ad-dim,#9aa0a8)">—</div>
+          </div>
+        </div>
+      </div>
+
       <!-- ② 무료 체험 기간 -->
       <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:0;padding:16px 18px;margin-bottom:16px">
         <div style="font-size:12px;color:var(--ad-faint,#6e737a);letter-spacing:.3px;margin-bottom:12px">무료 체험 기간</div>
@@ -718,6 +786,119 @@ async function _loadChargeList() {
   }
 }
 
+// ── GDC 잔액 조정 (2026-09-23 신설) ──────────────────────────────
+// 검색(/admin/users/search) → 선택 → 충전(/admin/users/manual-charge,
+// 기존) 또는 차감(/admin/users/manual-debit, 이번에 신설) 실행.
+// 서버가 이미 멱등성·상한·2단계 확인을 전부 갖고 있어 여기서는 그
+// 결과를 그대로 보여주기만 한다 — 새 검증 로직을 프런트에 만들지 않는다.
+let _adjSelectedGuid = null;
+let _adjIdemKey = null;
+
+async function _adjSearch() {
+  const q = document.getElementById('adj-search-q').value.trim();
+  const box = document.getElementById('adj-search-results');
+  box.innerHTML = '<div style="font-size:12px;color:var(--ad-faint,#6e737a);padding:8px 0">검색 중…</div>';
+  try {
+    const res = await fetch(`${WORKER_URL}/admin/users/search?q=${encodeURIComponent(q)}&limit=20`,
+      {signal:AbortSignal.timeout(10000), headers:_adminAuthHeaders()});
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.message || 'API_ERROR');
+    if (!data.users.length) { box.innerHTML = '<div style="font-size:12px;color:var(--ad-faint,#6e737a);padding:8px 0">결과 없음</div>'; return; }
+    box.innerHTML = data.users.map(u => `
+      <div onclick='_adjSelect(${JSON.stringify(u.guid)}, ${JSON.stringify(u.handle || "")}, ${JSON.stringify(u.balance_gdc)})'
+           style="padding:8px 10px;border:1px solid var(--ad-line,#3c3f46);margin-bottom:4px;cursor:pointer;font-size:12px"
+           onmouseover="this.style.background='var(--ad-panel2,#33363c)'" onmouseout="this.style.background=''">
+        <span style="color:var(--ad-text,#d7d9dd)">${_esc(u.handle || '(닉네임 없음)')}</span>
+        <span style="color:var(--ad-faint,#6e737a);font-family:var(--ad-mono);margin-left:8px;word-break:break-all">${_esc(u.guid)}</span>
+        <span style="float:right;font-family:var(--ad-mono);color:var(--ad-dim,#9aa0a8)">${u.balance_error ? '잔액조회 실패' : (u.balance_gdc ?? 0).toLocaleString() + ' T'}</span>
+      </div>`).join('');
+  } catch(e) {
+    box.innerHTML = `<div style="font-size:12px;color:#e07a7a;padding:8px 0">검색 실패: ${_esc(e.message)}</div>`;
+  }
+}
+
+function _adjSelect(guid, handle, balanceGdc) {
+  _adjSelectedGuid = guid;
+  _adjIdemKey = null;
+  document.getElementById('adj-selected').style.display = 'block';
+  document.getElementById('adj-selected-guid').textContent = (handle ? handle + ' · ' : '') + guid;
+  document.getElementById('adj-selected-balance').textContent = (typeof balanceGdc === 'number' ? balanceGdc.toLocaleString() : '—') + ' T';
+  document.getElementById('adj-amount').value = '';
+  document.getElementById('adj-memo').value = '';
+  document.getElementById('adj-result').textContent = '';
+  document.getElementById('adj-confirm-row').style.display = 'none';
+  _adjLoadHistory(guid);
+}
+
+async function _adjLoadHistory(guid) {
+  const box = document.getElementById('adj-history');
+  box.textContent = '불러오는 중…';
+  try {
+    const res = await fetch(`${WORKER_URL}/admin/users/history?guid=${encodeURIComponent(guid)}&limit=10`,
+      {signal:AbortSignal.timeout(10000), headers:_adminAuthHeaders()});
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.message || 'API_ERROR');
+    if (!data.history.length) { box.textContent = '내역 없음'; return; }
+    box.innerHTML = data.history.map(h => {
+      const sign = h.type === 'deposit' ? '+' : '−';
+      const amt  = (h.amount_gdc ?? 0).toLocaleString();
+      const when = h.created ? new Date(h.created).toLocaleString('ko-KR', {timeZone:'Asia/Seoul', month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'}) : '—';
+      return `<div style="padding:3px 0">${when} &nbsp; ${sign}${amt} T &nbsp; <span style="color:var(--ad-faint,#6e737a)">${_esc(h.memo || '')}</span></div>`;
+    }).join('');
+  } catch(e) {
+    box.textContent = '조회 실패: ' + e.message;
+  }
+}
+
+async function _adjSubmit(confirmLarge) {
+  if (!_adjSelectedGuid) return;
+  const direction  = document.getElementById('adj-direction').value;
+  const amount     = Number(document.getElementById('adj-amount').value);
+  const memo       = document.getElementById('adj-memo').value.trim();
+  const resultBox  = document.getElementById('adj-result');
+  const confirmRow = document.getElementById('adj-confirm-row');
+
+  if (!(amount > 0)) { resultBox.innerHTML = '<span style="color:#e07a7a">금액을 입력하세요.</span>'; return; }
+  if (!memo) { resultBox.innerHTML = '<span style="color:#e07a7a">사유(memo)를 입력하세요 — 감사 추적에 필요합니다.</span>'; return; }
+
+  const btn = document.getElementById('adj-submit-btn');
+  btn.disabled = true; btn.textContent = '처리 중…';
+  resultBox.textContent = '';
+
+  // 같은 조정 시도(첫 요청 → 고액 재확인 → 확인 클릭)는 같은
+  // idempotency_key를 유지해야 한다 — 성공해야만 새 키로 초기화한다.
+  if (!_adjIdemKey) _adjIdemKey = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + '-' + Math.random());
+  const path = direction === 'charge' ? '/admin/users/manual-charge' : '/admin/users/manual-debit';
+
+  try {
+    const res = await fetch(`${WORKER_URL}${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ..._adminAuthHeaders() },
+      body: JSON.stringify({ guid: _adjSelectedGuid, krw_amount: amount, memo, confirm_large: !!confirmLarge, idempotency_key: _adjIdemKey }),
+      signal: AbortSignal.timeout(15000),
+    });
+    const data = await res.json();
+
+    if (data.requires_confirmation) {
+      confirmRow.style.display = 'block';
+      return;
+    }
+    if (!data.ok) throw new Error(data.message || data.error || 'API_ERROR');
+
+    confirmRow.style.display = 'none';
+    _adjIdemKey = null; // 다음 조정은 새 idempotency_key로 시작
+    const balAfter = (data.balance_after_gdc ?? 0).toLocaleString();
+    resultBox.innerHTML = `<span style="color:#7fbf7f">✓ ${direction === 'charge' ? '충전' : '차감'} 완료 — 조정 후 잔액 ${balAfter} T</span>`;
+    document.getElementById('adj-selected-balance').textContent = balAfter + ' T';
+    document.getElementById('adj-amount').value = '';
+    document.getElementById('adj-memo').value = '';
+    _adjLoadHistory(_adjSelectedGuid);
+  } catch(e) {
+    resultBox.innerHTML = `<span style="color:#e07a7a">실패: ${_esc(e.message)}</span>`;
+  } finally {
+    btn.disabled = false; btn.textContent = '실행';
+  }
+}
 // ── 자동 갱신 현황 (2026-07-28 신설) ────────────────────────────
 // docs/AUTO_REFRESH_MANUAL_v1_0.html이 설명하는 세 파이프라인의 실행
 // 현황을 세 곳에서 읽어와 카드로 보여준다:
