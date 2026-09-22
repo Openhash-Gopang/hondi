@@ -153,6 +153,22 @@ export async function _gwpLaunch(service, context, _preTab = null, facts = null)
     }
   }
 
+  // ★ 2026-09-22 — K-Cleaner(fiil.kr → clean.hondi.net) 실사 결과, GPS가
+  // "혼디 비서가 자동으로 전달"되지 않고 매번 새로 요청하다 시간 초과되는
+  // 결함을 확인. 원인은 새 계약(facts/facts_enc, currentLocation)만
+  // 보내고 있었는데, 수신 측 gwp-sdk.js는 여전히 구버전 계약인 평문
+  // gps_addr 파라미터만 읽고 있었던 것 — 즉 위치 정보 자체는 항상 정상
+  // 전달되고 있었지만 이름이 안 맞아 아무도 못 읽고 있었다. facts와
+  // 별개로, effectiveFacts.currentLocation이 있으면 하위호환용 평문
+  // gps_addr도 함께 실어 보낸다(신규 계약을 읽는 서비스에는 영향 없음).
+  if (effectiveFacts && effectiveFacts.currentLocation) {
+    try {
+      svcUrl.searchParams.set('gps_addr', effectiveFacts.currentLocation);
+    } catch (e) {
+      console.warn('[GWP] gps_addr(구버전 계약 호환) 설정 실패 (무시하고 계속):', e.message);
+    }
+  }
+
   // 이미 확보해둔 탭 핸들에 완성된 URL 반영
   if (_tabHandle && !_tabHandle.closed) {
     _tabHandle.location.href = svcUrl.toString();
