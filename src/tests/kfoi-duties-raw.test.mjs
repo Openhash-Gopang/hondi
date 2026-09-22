@@ -232,5 +232,29 @@ await test('작업 #8: 자치경찰단 division 6개가 실제 분장사무(별�
   assert.ok(!fs.existsSync(path.join(ROOT, 'prompts/gov-tree/03-do-agency/archive', 'SP-AGYDIV-POLICE-TRAFFIC_v1.1.md')), '배선된 교통과가 실수로 archive에 옮겨지면 안 됨');
 });
 
+await test('작업 #9: 민속자연사박물관 division 2개가 실제 분장사무(별표9)로 신설되고, 배선된 관리실은 손대지 않았다', () => {
+  const digest = buildDigest();
+  const inst = digest.tiers.agency.entries.find(e => e.id === 'SP-AGY-FOLKMUSEUM');
+  const divs = digest.tiers.agency.entries.filter(e => e.kind === 'division' && e.parent === inst.name);
+  assert.equal(divs.length, 3, '새 2개 + 배선된 관리실 1개 = 3개여야 함');
+  const admin = divs.find(e => e.id === 'SP-AGYDIV-FOLKMUSEUM-ADMIN');
+  assert.ok(admin, '배선된 관리실이 남아 있어야 함');
+  const apath = execFileSync('bash', ['-c', 'grep -rl "^# 문서 코드  : SP-AGYDIV-FOLKMUSEUM-ADMIN$" prompts/gov-tree/03-do-agency/divisions/*.md || true'], { cwd: ROOT }).toString().trim();
+  assert.ok(apath, '관리실 파일을 못 찾음');
+  assert.ok(fs.readFileSync(apath, 'utf8').includes("task_key: 'folkmuseum_facility_rental'"), '관리실의 실제 배선이 사라짐');
+  const newDivs = divs.filter(e => e.id !== 'SP-AGYDIV-FOLKMUSEUM-ADMIN');
+  assert.equal(newDivs.length, 2);
+  for (const d of newDivs) {
+    assert.equal(d.state, 'draft');
+    assert.ok(d.does && d.does.length > 0);
+    for (const line of d.does) assert.ok(/^\d{1,3}\.\s/.test(line));
+  }
+  for (const f of ['SP-AGYDIV-FOLKMUSEUM-ARCHAEOFOLK_v1.0.md', 'SP-AGYDIV-FOLKMUSEUM-MARINE_v1.0.md', 'SP-AGYDIV-FOLKMUSEUM-MINERALBOTANY_v1.0.md', 'SP-AGYDIV-FOLKMUSEUM-ZOOLOGY_v1.0.md']) {
+    assert.ok(fs.existsSync(path.join(ROOT, 'prompts/gov-tree/03-do-agency/archive', f)), `${f}: archive에 없음`);
+    assert.ok(!fs.existsSync(path.join(ROOT, 'prompts/gov-tree/03-do-agency/divisions', f)), `${f}: live에 아직 있음`);
+  }
+  assert.ok(!fs.existsSync(path.join(ROOT, 'prompts/gov-tree/03-do-agency/archive', 'SP-AGYDIV-FOLKMUSEUM-ADMIN_v1.1.md')), '배선된 관리실이 실수로 archive에 옮겨지면 안 됨');
+});
+
 console.log(`\n${pass}/${pass + fail} passed`);
 process.exit(fail ? 1 : 0);
