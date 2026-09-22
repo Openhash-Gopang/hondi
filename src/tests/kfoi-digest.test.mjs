@@ -118,10 +118,10 @@ await test('소방안전본부(SP-AGY-FIRE)가 직속기관에서 도청(do) 유
   const divs = digest.tiers.do.entries.filter(e => e.kind === 'division' && e.parent === '소방안전본부');
   assert.equal(divs.length, 3, '기존 division 3개(실제 내용 있음)는 그대로 옮겨졌어야 함');
 });
-await test('직속기관·사업소(agency) 조직 기준표: 2026-09-23까지 18개(농업기술원·보건환경연구원·축산생명연구원·한라도서관·자치경찰단·민속자연사박물관·도립미술관·상하수도본부·세계유산본부·공공정책연수원·보훈청·문화예술진흥원·해양수산연구원·동물위생시험소·설문대여성문화센터·돌문화공원관리소·고용센터·중앙협력본부) 전부 match로 정리됐다(structure_differs 0)', () => {
+await test('직속기관·사업소(agency) 조직 기준표: 2026-09-23까지 20개(농업기술원·보건환경연구원·축산생명연구원·한라도서관·자치경찰단·민속자연사박물관·도립미술관·상하수도본부·세계유산본부·공공정책연수원·보훈청·문화예술진흥원·해양수산연구원·동물위생시험소·설문대여성문화센터·돌문화공원관리소·고용센터·중앙협력본부·제주환경자원순환센터·제주안전체험관) 전부 match로 정리됐다(structure_differs 0)', () => {
   const t = digest.tiers.agency;
   assert.equal(t.baseline.org_counts.structure_differs, undefined, '이제 structure_differs로 남은 기관이 없어야 함');
-  assert.equal(t.baseline.org_counts.match, 18);
+  assert.equal(t.baseline.org_counts.match, 20);
   const agri = t.entries.find(e => e.id === 'SP-AGY-AGRITECH');
   assert.equal(agri.org.status, 'match'); assert.equal(agri.org.legal_basis, '제23~24조');
   assert.equal(agri.org.current_divisions.length, 9);
@@ -153,14 +153,20 @@ await test('직속기관·사업소(agency) 조직 기준표: 2026-09-23까지 1
   assert.equal(employment.org.status, 'match'); assert.equal(employment.org.legal_basis, '제59조의4~5'); assert.equal(employment.org.current_divisions.length, 4);
   const centralcoop = t.entries.find(e => e.id === 'SP-AGY-CENTRALCOOP');
   assert.equal(centralcoop.org.status, 'match'); assert.equal(centralcoop.org.legal_basis, '제40~41조'); assert.equal(centralcoop.org.current_divisions.length, 1);
+  const envcirculation = t.entries.find(e => e.id === 'SP-AGY-ENVCIRCULATION');
+  assert.equal(envcirculation.org.status, 'match'); assert.equal(envcirculation.org.confidence, 'low', '별표8·9 원문에 사무 없음 — 명칭 추정이라 low여야 함');
+  assert.equal(envcirculation.org.legal_basis, '제59조의2~3'); assert.equal(envcirculation.org.current_divisions.length, 2);
+  const safetyexperience = t.entries.find(e => e.id === 'SP-AGY-SAFETYEXPERIENCE');
+  assert.equal(safetyexperience.org.status, 'match'); assert.equal(safetyexperience.org.confidence, 'low', '별표8·9 원문에 사무 없음 — 명칭 추정이라 low여야 함');
+  assert.equal(safetyexperience.org.legal_basis, '제35조의2'); assert.equal(safetyexperience.org.current_divisions.length, 3);
 });
-await test('직속기관·사업소 조직 기준표: 법정 기관 23개 중 SP가 없는 6개(누락 3 + 합의제행정기관 3)가 열거된다(2026-09-23 문화예술진흥원 등 7개 반영으로 13→6)', () => {
+await test('직속기관·사업소 조직 기준표: 법정 기관 23개 중 SP가 없는 4개(누락 1 + 합의제행정기관 3)가 열거된다(2026-09-23 제주환경자원순환센터·제주안전체험관 반영으로 6→4)', () => {
   const t = digest.tiers.agency;
-  assert.equal(t.baseline.missing_in_inventory.length, 6);
-  const reflected = ['보훈청', '공공정책연수원', '문화예술진흥원', '해양수산연구원', '동물위생시험소', '설문대여성문화센터', '돌문화공원관리소', '고용센터', '중앙협력본부'];
+  assert.equal(t.baseline.missing_in_inventory.length, 4);
+  const reflected = ['보훈청', '공공정책연수원', '문화예술진흥원', '해양수산연구원', '동물위생시험소', '설문대여성문화센터', '돌문화공원관리소', '고용센터', '중앙협력본부', '제주환경자원순환센터', '제주안전체험관'];
   for (const n of reflected) assert.ok(!t.baseline.missing_in_inventory.some(m => m.name === n), `${n}은 반영 완료로 missing_in_inventory에서 빠져야 함`);
   assert.ok(t.baseline.missing_in_inventory.some(m => m.name === '감사위원회' && m.chapter === '합의제행정기관'));
-  assert.ok(t.baseline.missing_in_inventory.some(m => m.name === '제주환경자원순환센터'), '아직 반영하지 않은 기관도 남아 있어야 함');
+  assert.ok(t.baseline.missing_in_inventory.some(m => m.name.includes('소방서')), '아직 반영하지 않은 기관도 남아 있어야 함');
 });
 
 await test('다이제스트 항목 수가 「제주 AI 행정」 페이지 데이터와 정확히 일치한다', () => {

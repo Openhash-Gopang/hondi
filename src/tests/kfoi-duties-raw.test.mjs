@@ -490,5 +490,84 @@ await test('작업 #13 안전장치: 고용센터·중앙협력본부 division-t
   }
 });
 
+await test('작업 #14: 제주환경자원순환센터·제주안전체험관(그동안 SP 자체가 없던 missing_in_inventory 2건)이 기관 2개·division 5개로 신설됐다', () => {
+  const digest = buildDigest();
+  const created = [
+    ['SP-AGY-ENVCIRCULATION', 2], ['SP-AGY-SAFETYEXPERIENCE', 3],
+  ];
+  for (const [parentId, n] of created) {
+    const inst = digest.tiers.agency.entries.find(e => e.kind === 'institution' && e.id === parentId);
+    assert.ok(inst, `${parentId}: 기관 항목이 digest에 없음`);
+    const divs = digest.tiers.agency.entries.filter(e => e.kind === 'division' && e.parent === inst.name);
+    assert.equal(divs.length, n, `${parentId}: division 개수가 안 맞음`);
+    for (const d of divs) {
+      assert.equal(d.state, 'draft', `${d.id}: v1.0 신설이니 draft여야 함`);
+      assert.ok(d.does && d.does.length > 0, `${d.id}: does가 비어 있음`);
+      assert.ok(d.does.length <= 6, `${d.id}: 명칭 추정 항목은 3~6건 수준으로 modest해야 함(${d.does.length}건)`);
+      for (const line of d.does) assert.ok(/^\d{1,3}\.\s/.test(line), `${d.id}: 번호 매긴 사무 형식 아님`);
+    }
+  }
+});
+await test('작업 #14 정직 공시: 별표8·9 원문에 사무가 없어 명칭 추정으로 작성했다는 문구가 기관·division SP 전부에 있다(confidence: low)', () => {
+  const files = [
+    'prompts/gov-tree/03-do-agency/SP-AGY-ENVCIRCULATION_v1.0.md',
+    'prompts/gov-tree/03-do-agency/SP-AGY-SAFETYEXPERIENCE_v1.0.md',
+    'prompts/gov-tree/03-do-agency/divisions/SP-AGYDIV-ENVCIRCULATION-FACILITY_v1.0.md',
+    'prompts/gov-tree/03-do-agency/divisions/SP-AGYDIV-ENVCIRCULATION-FOODWASTE_v1.0.md',
+    'prompts/gov-tree/03-do-agency/divisions/SP-AGYDIV-SAFETYEXPERIENCE-SUPPORT_v1.0.md',
+    'prompts/gov-tree/03-do-agency/divisions/SP-AGYDIV-SAFETYEXPERIENCE-PLANNING_v1.0.md',
+    'prompts/gov-tree/03-do-agency/divisions/SP-AGYDIV-SAFETYEXPERIENCE-OPERATIONS_v1.0.md',
+  ];
+  for (const f of files) {
+    const full = path.join(ROOT, f);
+    assert.ok(fs.existsSync(full), `${f}: 파일이 없음`);
+    const content = fs.readFileSync(full, 'utf8');
+    assert.ok(content.includes('정직하게 밝힘'), `${f}: "정직하게 밝힘" 공시 문구가 없음`);
+    assert.ok(content.includes('confidence: low') || content.includes('confidence: low)'), `${f}: confidence: low 표기가 없음`);
+    assert.ok(content.includes('별표') && (content.includes('없다') || content.includes('없음')), `${f}: "별표에 원문이 없다"는 취지의 문구가 없음`);
+    assert.ok(!/task_key\s*:\s*'/.test(content), `${f}: 실수로 task_key가 대입됨(브랜드 신규 기관이라 배선이 없어야 함)`);
+  }
+});
+await test('작업 #14: org-baseline-agency.json에서 제주환경자원순환센터·제주안전체험관이 missing_in_inventory에서 mapping으로 옮겨졌고, confidence가 low다', () => {
+  const baseline = JSON.parse(fs.readFileSync(path.join(DIR, 'org-baseline-agency.json'), 'utf8'));
+  assert.ok(!baseline.missing_in_inventory.some(m => m.name === '제주환경자원순환센터'), '제주환경자원순환센터가 여전히 missing_in_inventory에 있음');
+  assert.ok(!baseline.missing_in_inventory.some(m => m.name === '제주안전체험관'), '제주안전체험관이 여전히 missing_in_inventory에 있음');
+  assert.equal(baseline.mapping['SP-AGY-ENVCIRCULATION'].status, 'match');
+  assert.equal(baseline.mapping['SP-AGY-ENVCIRCULATION'].confidence, 'low', '원문 없이 명칭 추정이라 low여야 함(이전 배치의 high와 다름)');
+  assert.deepEqual(baseline.mapping['SP-AGY-ENVCIRCULATION'].current_divisions, ['자원순환시설관리과', '음식물자원화과']);
+  assert.equal(baseline.mapping['SP-AGY-SAFETYEXPERIENCE'].status, 'match');
+  assert.equal(baseline.mapping['SP-AGY-SAFETYEXPERIENCE'].confidence, 'low', '원문 없이 명칭 추정이라 low여야 함(이전 배치의 high와 다름)');
+  assert.deepEqual(baseline.mapping['SP-AGY-SAFETYEXPERIENCE'].current_divisions, ['체험지원과', '체험기획과', '체험운영과']);
+  for (const code of ['SP-AGY-ENVCIRCULATION', 'SP-AGY-SAFETYEXPERIENCE']) {
+    assert.ok(baseline.mapping[code].note.includes('정직하게 밝힘'), `${code}: note에 정직 공시 문구가 없음`);
+  }
+});
+await test('작업 #14 회귀: division-tables.js·페이지 인벤토리 양쪽에 새 기관 2개·division 5개 라우팅 항목이 있다', () => {
+  const dt = fs.readFileSync(path.join(ROOT, 'src/gopang/gov/division-tables.js'), 'utf8');
+  const page = fs.readFileSync(path.join(ROOT, 'pages/jeju-gov-automation.html'), 'utf8');
+  const ids = [
+    'SP-AGY-ENVCIRCULATION', 'SP-AGYDIV-ENVCIRCULATION-FACILITY', 'SP-AGYDIV-ENVCIRCULATION-FOODWASTE',
+    'SP-AGY-SAFETYEXPERIENCE', 'SP-AGYDIV-SAFETYEXPERIENCE-SUPPORT', 'SP-AGYDIV-SAFETYEXPERIENCE-PLANNING',
+    'SP-AGYDIV-SAFETYEXPERIENCE-OPERATIONS',
+  ];
+  assert.equal(ids.length, 2 + 5);
+  for (const id of ids) {
+    assert.ok(dt.includes(`"${id}"`), `division-tables.js에 ${id} 없음`);
+    assert.ok(page.includes(`"${id}"`), `jeju-gov-automation.html에 ${id} 없음`);
+  }
+});
+await test('작업 #14 안전장치: division-tables.js의 SP-AGY-ENVCIRCULATION 관련 kw 배열에 bare "자원순환" 키워드가 없다(SP-DIV-CLIMATE-RECYCLING·gov-router.js 여러 항목과 충돌)', () => {
+  const dt = fs.readFileSync(path.join(ROOT, 'src/gopang/gov/division-tables.js'), 'utf8');
+  const m = dt.match(/export const JEJU_AGENCY_TABLE = \[[\s\S]*?\n\];/);
+  const m2 = dt.match(/export const JEJU_AGENCY_DIVISION_TABLE = \[[\s\S]*?\n\];/);
+  assert.ok(m && m2, '테이블을 찾지 못함');
+  const block = m[0] + m2[0];
+  const kwArrays = [...block.matchAll(/kw:\s*\[([^\]]*)\]/g)].map(x => x[1]);
+  for (const arr of kwArrays) {
+    assert.ok(!/"자원순환"/.test(arr), 'bare "자원순환" 키워드가 있음(SP-DIV-CLIMATE-RECYCLING·gov-router.js와 충돌)');
+    assert.ok(!/"자원순환과"/.test(arr), 'bare "자원순환과" 키워드가 있음(SP-DIV-CLIMATE-RECYCLING와 충돌)');
+  }
+});
+
 console.log(`\n${pass}/${pass + fail} passed`);
 process.exit(fail ? 1 : 0);

@@ -519,6 +519,18 @@ export const JEJU_AGENCY_TABLE = [
     // 명칭이 겹친다 — SP-AGY-CENTRALCOOP_v1.0.md §6 참고, 다음 배치에서 실제 관계 재검증 전까지는
     // division 고유 사무명 위주로만 구성)
     kw: ["국회대외협력부", "세종시권", "국회대외과"], file: "03-do-agency/SP-AGY-CENTRALCOOP_v1.0.md" },
+  // ★ 2026-09-23 신설(작업 #14) — org-baseline-agency.json의 missing_in_inventory에서 발견된
+  // 사업소·직속기관 2개(제주환경자원순환센터·제주안전체험관). 둘 다 duties-raw-2024-01-22.json
+  // (별표8·9 원문)에 division별 분장사무가 전혀 없어(전수 검색 확인) §2를 명칭에서 추정한 내용으로
+  // 채웠다 — org-baseline-agency.json의 confidence를 "low"로 표기했다(작업 #12/#13의 high와 다름,
+  // 상세는 archive/README.md·각 SP §6 참고). 제주환경자원순환센터는 "자원순환"이 기존 SP-DIV-CLIMATE-
+  // RECYCLING·gov-router.js 여러 항목의 bare 키워드와 겹쳐 bare "자원순환"을 넣지 않았다.
+  { code: "SP-AGY-ENVCIRCULATION", name: "제주환경자원순환센터", desc: "당신은 제주특별자치도청 **제주환경자원순환센터**를 대표하는 AI 레이어다. 주요 소관(추정): 광역 폐기물 매립·소각시설 운영, 음식물류 폐기물 자원화시설 운영",
+    // ★ bare "자원순환"은 넣지 않았다(SP-DIV-CLIMATE-RECYCLING kw·gov-router.js JEJU_DO_TABLE 여러
+    // 항목에 이미 bare "자원순환"이 등록돼 있어 명칭이 겹친다 — SP-AGY-ENVCIRCULATION_v1.0.md §6 참고)
+    kw: ["제주환경자원순환센터", "환경자원순환센터"], file: "03-do-agency/SP-AGY-ENVCIRCULATION_v1.0.md" },
+  { code: "SP-AGY-SAFETYEXPERIENCE", name: "제주안전체험관", desc: "당신은 제주특별자치도청 **제주안전체험관**을 대표하는 AI 레이어다. 주요 소관(추정): 도민·학생 대상 재난안전 체험교육 시설 운영, 체험 프로그램 기획·운영",
+    kw: ["제주안전체험관", "안전체험관"], file: "03-do-agency/SP-AGY-SAFETYEXPERIENCE_v1.0.md" },
 ];
 
 export const JEJU_ORG_TABLE = [
@@ -832,6 +844,23 @@ export const JEJU_AGENCY_DIVISION_TABLE = [
     // 그 이름·키워드로 등록돼 있어 명칭이 겹친다 — SP-AGY-CENTRALCOOP_v1.0.md §6 참고)
     name: "중앙협력본부 국회대외협력부", desc: "당신은 **중앙협력본부 국회대외협력부**을 대표하는 AI 레이어다.",
     kw: ["국회대외협력부", "세종시권 중앙부처", "국회 협력 기획"], file: "03-do-agency/divisions/SP-AGYDIV-CENTRALCOOP-ASSEMBLY_v1.0.md" },
+  // ★ 2026-09-23 신설(작업 #14) — SP-AGY-ENVCIRCULATION/SAFETYEXPERIENCE 산하 division 5개.
+  // §2 전부 confidence: low(원문 없음, 명칭 추정) — 각 division 파일 §2·§3 참고.
+  { code: "SP-AGYDIV-ENVCIRCULATION-FACILITY", institution: "SP-AGY-ENVCIRCULATION",
+    name: "제주환경자원순환센터 자원순환시설관리과", desc: "당신은 **제주환경자원순환센터 자원순환시설관리과**을 대표하는 AI 레이어다.",
+    kw: ["자원순환시설관리과", "환경자원순환센터 매립시설", "환경자원순환센터 소각시설"], file: "03-do-agency/divisions/SP-AGYDIV-ENVCIRCULATION-FACILITY_v1.0.md" },
+  { code: "SP-AGYDIV-ENVCIRCULATION-FOODWASTE", institution: "SP-AGY-ENVCIRCULATION",
+    name: "제주환경자원순환센터 음식물자원화과", desc: "당신은 **제주환경자원순환센터 음식물자원화과**을 대표하는 AI 레이어다.",
+    kw: ["음식물자원화과", "음식물류 폐기물 자원화시설"], file: "03-do-agency/divisions/SP-AGYDIV-ENVCIRCULATION-FOODWASTE_v1.0.md" },
+  { code: "SP-AGYDIV-SAFETYEXPERIENCE-SUPPORT", institution: "SP-AGY-SAFETYEXPERIENCE",
+    name: "제주안전체험관 체험지원과", desc: "당신은 **제주안전체험관 체험지원과**을 대표하는 AI 레이어다.",
+    kw: ["체험지원과", "체험교육 예약", "안전체험관 예약"], file: "03-do-agency/divisions/SP-AGYDIV-SAFETYEXPERIENCE-SUPPORT_v1.0.md" },
+  { code: "SP-AGYDIV-SAFETYEXPERIENCE-PLANNING", institution: "SP-AGY-SAFETYEXPERIENCE",
+    name: "제주안전체험관 체험기획과", desc: "당신은 **제주안전체험관 체험기획과**을 대표하는 AI 레이어다.",
+    kw: ["체험기획과", "체험교육 프로그램 기획"], file: "03-do-agency/divisions/SP-AGYDIV-SAFETYEXPERIENCE-PLANNING_v1.0.md" },
+  { code: "SP-AGYDIV-SAFETYEXPERIENCE-OPERATIONS", institution: "SP-AGY-SAFETYEXPERIENCE",
+    name: "제주안전체험관 체험운영과", desc: "당신은 **제주안전체험관 체험운영과**을 대표하는 AI 레이어다.",
+    kw: ["체험운영과", "체험교육 현장 진행"], file: "03-do-agency/divisions/SP-AGYDIV-SAFETYEXPERIENCE-OPERATIONS_v1.0.md" },
 ];
 
 export const JEJU_ORG_DIVISION_TABLE = [

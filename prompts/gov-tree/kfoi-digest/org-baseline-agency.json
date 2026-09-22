@@ -31,29 +31,6 @@
    "confidence": "high"
   },
   {
-   "name": "제주안전체험관",
-   "chapter": "직속기관",
-   "section": "제7절",
-   "legal_basis": "제35조의2",
-   "current_divisions": [
-    "체험지원과",
-    "체험기획과",
-    "체험운영과"
-   ],
-   "confidence": "high"
-  },
-  {
-   "name": "제주환경자원순환센터",
-   "chapter": "사업소",
-   "section": "제13절",
-   "legal_basis": "제59조의2~3",
-   "current_divisions": [
-    "자원순환시설관리과",
-    "음식물자원화과"
-   ],
-   "confidence": "high"
-  },
-  {
    "name": "감사위원회",
    "chapter": "합의제행정기관",
    "section": "제1절",
@@ -367,6 +344,29 @@
     "서귀포지소"
    ],
    "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제59조의4~5·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(취업지원총괄과·고용지원과·실업급여과·서귀포지소)을 확인해 SP-AGY-EMPLOYMENT와 하위 division을 함께 신설했다. §2는 별표9(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다. 별표9(2024.01.22. 개정본)에는 사업소 단위 사무 분장이 없고, 별표7(본청)에 옛 조직상 \"고용센터\" 사무 22건이 division 구분 없이 실려 있었다 — 이 배치가 주제별로 4개 division에 재배치했다(작성자 판단, 원문 아님). **명칭 중복 유의**: division-tables.js의 DO_DEPT_DIVISION_TABLE에 이미 SP-DIV-ECON-EMPLOYCENTER(\"경제활력국 고용센터\")가 bare 키워드 [\"고용\", \"고용센터\"]로 등록돼 있다 — 도 부서 산하 division과 이 사업소가 같은 실체인지는 이번 조사에서 확정하지 못했다 (SP-AGY-EMPLOYMENT_v1.0.md §6 참고, 다음 배치에서 재검증 필요)."
+  },
+  "SP-AGY-ENVCIRCULATION": {
+   "status": "match",
+   "current_name": "제주환경자원순환센터",
+   "confidence": "low",
+   "legal_basis": "제59조의2~3",
+   "current_divisions": [
+    "자원순환시설관리과",
+    "음식물자원화과"
+   ],
+   "note": "2026-09-23 신설(작업 #14) — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다. 시행규칙 제59조의2~3·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(자원순환시설관리과·음식물자원화과)을 확인해 SP-AGY-ENVCIRCULATION와 하위 division을 함께 신설했다. **정직하게 밝힘(confidence: low, 이전 배치와 다름)**: duties-raw-2024-01-22.json(별표8·9 원문)을 이 기관명·전 division명으로 전수 검색했으나 division별 분장사무가 전혀 없었다 — 그래서 §2는 별표 원문이 아니라 기관·과 이름에서 합리적으로 추정한 최소한의 범위만 담았다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다."
+  },
+  "SP-AGY-SAFETYEXPERIENCE": {
+   "status": "match",
+   "current_name": "제주안전체험관",
+   "confidence": "low",
+   "legal_basis": "제35조의2",
+   "current_divisions": [
+    "체험지원과",
+    "체험기획과",
+    "체험운영과"
+   ],
+   "note": "2026-09-23 신설(작업 #14) — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다. 시행규칙 제35조의2·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(체험지원과·체험기획과·체험운영과)을 확인해 SP-AGY-SAFETYEXPERIENCE와 하위 division을 함께 신설했다. **정직하게 밝힘(confidence: low, 이전 배치와 다름)**: duties-raw-2024-01-22.json(별표8·9 원문)을 이 기관명·전 division명으로 전수 검색했으나 division별 분장사무가 전혀 없었다 — 그래서 §2는 별표 원문이 아니라 기관·과 이름에서 합리적으로 추정한 최소한의 범위만 담았다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다."
   }
  }
 }
