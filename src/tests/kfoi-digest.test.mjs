@@ -120,8 +120,8 @@ await test('소방안전본부(SP-AGY-FIRE)가 직속기관에서 도청(do) 유
 });
 await test('직속기관·사업소(agency) 조직 기준표: 2026-09-22 작업으로 3개(농업기술원·보건환경연구원·축산생명연구원)는 match로, 나머지 6개는 여전히 structure_differs로 정직하게 남는다', () => {
   const t = digest.tiers.agency;
-  assert.equal(t.baseline.org_counts.structure_differs, 6);
-  assert.equal(t.baseline.org_counts.match, 3);
+  assert.equal(t.baseline.org_counts.structure_differs, 5);
+  assert.equal(t.baseline.org_counts.match, 4);
   const agri = t.entries.find(e => e.id === 'SP-AGY-AGRITECH');
   assert.equal(agri.org.status, 'match'); assert.equal(agri.org.legal_basis, '제23~24조');
   assert.equal(agri.org.current_divisions.length, 9);

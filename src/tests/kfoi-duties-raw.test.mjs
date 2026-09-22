@@ -191,5 +191,22 @@ await test('작업 #6: 축산진흥과→축산생명과 개명이 division 표�
   assert.ok(!names.some(n => n.includes('축산진흥과')), '개명 전 이름이 그대로 노출됨: ' + names.join(','));
 });
 
+await test('작업 #7: 한라도서관 division 2개가 실제 분장사무(별표9)로 신설됐고 옛 "(추정)" 파일은 archive로 이동했다', () => {
+  const digest = buildDigest();
+  const inst = digest.tiers.agency.entries.find(e => e.id === 'SP-AGY-LIBRARY');
+  const divs = digest.tiers.agency.entries.filter(e => e.kind === 'division' && e.parent === inst.name);
+  assert.equal(divs.length, 2);
+  for (const d of divs) {
+    assert.equal(d.state, 'draft');
+    assert.ok(!d.name.includes('추정'), `${d.id}: 이름에 "추정"이 남아 있음`);
+    assert.ok(d.does && d.does.length > 0);
+    for (const line of d.does) assert.ok(/^\d{1,3}\.\s/.test(line));
+  }
+  for (const f of ['SP-AGYDIV-LIBRARY-INFOSERVICE_v1.1.md', 'SP-AGYDIV-LIBRARY-POLICY_v1.0.md']) {
+    assert.ok(fs.existsSync(path.join(ROOT, 'prompts/gov-tree/03-do-agency/archive', f)), `${f}: archive에 없음`);
+    assert.ok(!fs.existsSync(path.join(ROOT, 'prompts/gov-tree/03-do-agency/divisions', f)), `${f}: live에 아직 있음`);
+  }
+});
+
 console.log(`\n${pass}/${pass + fail} passed`);
 process.exit(fail ? 1 : 0);
