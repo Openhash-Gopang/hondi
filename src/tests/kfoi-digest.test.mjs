@@ -86,10 +86,20 @@ await test('서귀포시: 사용자가 제공한 조직도 이미지로 국 10�
   const clim = t.entries.find(e => e.id === 'SP-CITYDO-SEOGWIPO-CLIMATE');
   assert.deepEqual(clim.org.current_divisions, ['기후환경과', '생활환경과', '공원녹지과', '산림휴양관리소']);
 });
-await test('제주시: 서귀포시와 대조해 청정환경국 과 이름이 다르다는 것을 열린 질문으로 남긴다(국 단위 매핑 없이 유형 수준 메모만)', () => {
+await test('제주시: 시행규칙 원문(제72조)으로 청정환경국 과 구성 불일치가 확정됐고, 법령이 확인한 기후환경과가 인벤토리에 추가됐다', () => {
   const t = digest.tiers['jeju-si'];
-  assert.ok(!t.baseline.org_counts, '아직 국 단위 판정은 없음(이미지만으로는 부족)');
-  assert.ok(t.baseline.open_questions.some(q => q.includes('기후환경과') && q.includes('서귀포')));
+  assert.equal(t.baseline.org_counts.match, 11); assert.equal(t.baseline.org_counts.name_differs, 1);
+  const climate = t.entries.find(e => e.id === 'SP-CITYDO-JEJUSI-CLIMATE');
+  assert.equal(climate.org.status, 'name_differs'); assert.equal(climate.org.legal_basis, '제72조');
+  assert.deepEqual(climate.org.current_divisions, ['기후환경과', '환경지도과', '생활환경과', '공원녹지과', '절물생태관리소']);
+  const divs = t.entries.filter(e => e.kind === 'division' && e.parent === '청정환경국').map(e => e.name);
+  assert.ok(divs.some(n => n.includes('기후환경과')), '법령이 확인한 기후환경과가 실제 인벤토리(page data)에 추가됐어야 함');
+});
+await test('서귀포시: 시행규칙 원문(제76조~제86조)으로 국 10개 전부 신뢰도 high로 확정됐다(이미지 단독 근거에서 격상)', () => {
+  const t = digest.tiers.seogwipo;
+  assert.equal(t.baseline.org_counts.match, 10);
+  const climate = t.entries.find(e => e.id === 'SP-CITYDO-SEOGWIPO-CLIMATE');
+  assert.equal(climate.org.confidence, 'high'); assert.equal(climate.org.legal_basis, '제84조');
 });
 await test('읍·면·동은 baseline_note만 남고(조직 기준표 없음) 다른 유형과 섞이지 않는다', () => {
   assert.ok(digest.tiers.emd.baseline_note && !digest.tiers.emd.baseline);
