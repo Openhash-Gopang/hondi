@@ -4,7 +4,8 @@
   "do_count": 45,
   "city_count": 68,
   "excluded": "부서명이 2026.8.21 개편으로 바뀌었거나 새로 생긴 것은 여기 없다 — duties-raw-2024-01-22.json의 stale_dept_names 참고. 직속기관·사업소(agency 유형)는 괄호 표기(연구개발국(하위 4과) 등) 때문에 자동 대조가 부정확해 이 파일에 넣지 않았다 — 사람이 한 번 더 봐야 한다.",
-  "status_update_2026_09_22": "do 배열의 45건 중 40건은 작업 #4에서 실제로 SP §2에 반영됐다(applied:true, applied_file 참고 — 파일 경로는 반영 당시 버전, 이후 더 바뀌었을 수 있음). spId는 실제로 고친 파일 기준(division이 있으면 division-level)으로 정정했다. 5건(도시계획과 1건 + 소방안전본부 4건)은 division 재배치·명칭 정리가 먼저 필요해 반영하지 않았다 (applied:false) — §11-2·§10의 SP-DO-HOUSING/SP-AGY-FIRE 참고."
+  "status_update_2026_09_22": "do 배열의 45건 중 40건은 작업 #4에서 실제로 SP §2에 반영됐다(applied:true, applied_file 참고 — 파일 경로는 반영 당시 버전, 이후 더 바뀌었을 수 있음). spId는 실제로 고친 파일 기준(division이 있으면 division-level)으로 정정했다. 5건(도시계획과 1건 + 소방안전본부 4건)은 division 재배치·명칭 정리가 먼저 필요해 반영하지 않았다 (applied:false) — §11-2·§10의 SP-DO-HOUSING/SP-AGY-FIRE 참고.",
+  "status_update_2026_09_22_city": "city 배열도 51/68건이 작업 #5에서 실제로 SP §2에 반영됐다. 이전 버전은 도시 간 이름이 같은 부서(공보실·총무과 등)를 tier 없이 이름만으로 대조해 제주시 항목 상당수가 서귀포시로 잘못 표시된 결함이 있었다 — 별표11 원문의 섹션 헤더(제주시/서귀포시)로 다시 계산해 정정했다. 12건(도시건설·건설 관련 division)은 §2가 사무 목록이 아니라 실제 접수 파이프라인(task_key) 표라서 건드리지 않았고, 5건은 해당 SP 파일 자체가 아직 없다(공보실·종합민원실 등)."
  },
  "do": [
   {
@@ -2315,9 +2316,8 @@
  ],
  "city": [
   {
-   "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-PR",
-   "section": "제주특별자치도 제주시",
+   "tier": "jeju-si",
+   "spId": "SP-CITYDO-JEJUSI-PR",
    "dept": "공보실",
    "duties": [
     "시정홍보에 관한 사항",
@@ -2332,12 +2332,13 @@
     "주요행사문 작성",
     "시정가이드 홍보",
     "공고 및 고시 등록 관리"
-   ]
+   ],
+   "applied": false,
+   "reason": "해당 SP 파일이 아직 없음(사무실/민원실 등 최상위 부서, 개별 SP 미작성)"
   },
   {
-   "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-CIVILAFFAIRS",
-   "section": "제주특별자치도 제주시",
+   "tier": "jeju-si",
+   "spId": "SP-CITYDO-JEJUSI-CIVILAFFAIRS",
    "dept": "종합민원실",
    "duties": [
     "주민등록사무 관리",
@@ -2376,12 +2377,13 @@
     "「지적재조사에 관한 특별법」에 관한 사항",
     "지적불부합지 대상 토지조사 및 정리업무",
     "그 밖에 민원에 관한 사무"
-   ]
+   ],
+   "applied": false,
+   "reason": "해당 SP 파일이 아직 없음(사무실/민원실 등 최상위 부서, 개별 SP 미작성)"
   },
   {
-   "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-JACHI",
-   "section": "제주특별자치도 제주시",
+   "tier": "jeju-si",
+   "spId": "SP-CITYDIV-JEJUSI-JACHI-GENERAL",
    "dept": "총무과",
    "duties": [
     "의전 및 행사에 관한 사항",
@@ -2411,12 +2413,13 @@
     "통계업무",
     "행정자료실 운영",
     "그 밖에 다른 과에 속하지 아니하는 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-JACHI-GENERAL_v1.3.md"
   },
   {
-   "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-JACHI",
-   "section": "제주특별자치도 제주시",
+   "tier": "jeju-si",
+   "spId": "SP-CITYDIV-JEJUSI-JACHI-BUDGET",
    "dept": "기획예산과",
    "duties": [
     "시정 주요업무계획 수립 및 관리",
@@ -2450,12 +2453,13 @@
     "법무 및 소송에 관한 사항",
     "규제개혁에 관한 사항",
     "납세 관련 고충민원 처리 등 납세자보호관 운영"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-JACHI-BUDGET_v1.3.md"
   },
   {
-   "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-JACHI",
-   "section": "제주특별자치도 제주시",
+   "tier": "jeju-si",
+   "spId": "SP-CITYDIV-JEJUSI-JACHI-SELFGOV",
    "dept": "자치행정과",
    "duties": [
     "읍·면·동 행정지원 및 지도·감독",
@@ -2487,12 +2491,13 @@
     "자원봉사에 관한 사항",
     "행정시 권한강화 및 기능개선에 관한 사항",
     "인구감소 및 지방 소멸 대책에 관한 사항"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-JACHI-SELFGOV_v1.3.md"
   },
   {
-   "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-JACHI",
-   "section": "제주특별자치도 제주시",
+   "tier": "jeju-si",
+   "spId": "SP-CITYDIV-JEJUSI-JACHI-TAX",
    "dept": "세무과",
    "duties": [
     "도세 종합 조정",
@@ -2504,12 +2509,13 @@
     "개별주택 가격 조사 및 가격 결정 공시",
     "체납액 징수 및 정리",
     "압류재산 공매"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-JACHI-TAX_v1.4.md"
   },
   {
    "tier": "jeju-si",
-   "spId": "SP-CITYDO-JEJUSI-JACHI",
-   "section": "제주특별자치도 제주시",
+   "spId": "SP-CITYDIV-JEJUSI-JACHI-PROPERTYTAX",
    "dept": "재산세과",
    "duties": [
     "도세 부과·징수(재산세·자동차세·도시계획세·공동시설세)",
@@ -2521,12 +2527,13 @@
     "세외수입업무 총괄",
     "제주시 소관 총괄채권 관리",
     "국·공유재산 관리(위임된 사무에 한정한다)"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-JACHI-PROPERTYTAX_v1.3.md"
   },
   {
-   "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-HOUSING",
-   "section": "제주특별자치도 제주시",
+   "tier": "jeju-si",
+   "spId": "SP-CITYDIV-JEJUSI-SAFETY-GENERAL",
    "dept": "안전총괄과",
    "duties": [
     "안전관리종합계획 수립 및 결과 평가",
@@ -2572,12 +2579,13 @@
     "「산업안전보건법」에 따른 안전관리에 관한 사항",
     "안전감찰 업무 지원(안잔감찰 자료 수합, 지적사항 관리 등)",
     "그 밖에 안전관리에 관한 사무 및 국 내 다른 과에 속하지 아니하는 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-SAFETY-GENERAL_v1.2.md"
   },
   {
-   "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-HOUSING",
-   "section": "제주특별자치도 제주시",
+   "tier": "jeju-si",
+   "spId": "SP-CITYDIV-JEJUSI-SAFETY-TRAFFIC",
    "dept": "교통행정과",
    "duties": [
     "화물자동차운송사업 허가에 관한 사항",
@@ -2612,12 +2620,13 @@
     "주정차 단속요원 인력 및 장비 운용관리",
     "화물자동차 사용자에 대한 유가보조금 지급에 관한 사항",
     "그 밖에 교통에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-SAFETY-TRAFFIC_v1.2.md"
   },
   {
    "tier": "jeju-si",
-   "spId": "SP-CITYDO-JEJUSI-SAFETY",
-   "section": "제주특별자치도 제주시",
+   "spId": "SP-CITYDIV-JEJUSI-SAFETY-VEHICLE",
    "dept": "차량관리과",
    "duties": [
     "차고지증명제 운영 계획 수립",
@@ -2632,12 +2641,13 @@
     "자동차등록·과태료 부과 및 체납액 관리",
     "이륜차 등록 관리 등에 관한 사항",
     "그 밖에 주차관리에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-SAFETY-VEHICLE_v1.2.md"
   },
   {
-   "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-WELFARE",
-   "section": "제주특별자치도 제주시",
+   "tier": "jeju-si",
+   "spId": "SP-CITYDIV-JEJUSI-WELFARE-RESIDENT",
    "dept": "주민복지과",
    "duties": [
     "종합사회복지관 및 기초푸드뱅크·마켓 운영 및 지원",
@@ -2671,12 +2681,13 @@
     "드림스타트 관련 복지계획 수립",
     "드림스타트 사례 관리 및 복지프로그램 수행",
     "그 밖에 주민복지에 관한 사무 및 국 내 다른 과에 속하지 아니하는 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-WELFARE-RESIDENT_v1.2.md"
   },
   {
-   "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-WELFARE",
-   "section": "제주특별자치도 제주시",
+   "tier": "jeju-si",
+   "spId": "SP-CITYDIV-JEJUSI-WELFARE-ELDERLY",
    "dept": "노인복지과",
    "duties": [
     "노인 단체 육성 및 지원",
@@ -2701,12 +2712,13 @@
     "노인맞춤돌봄사업에 관한 사무",
     "어버이날 및 노인의 날 행사에 관한 사항",
     "그 밖에 노인 복지 및 지원에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-WELFARE-ELDERLY_v1.2.md"
   },
   {
-   "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-WELFARE",
-   "section": "제주특별자치도 제주시",
+   "tier": "jeju-si",
+   "spId": "SP-CITYDIV-JEJUSI-WELFARE-DISABLED",
    "dept": "장애인복지과",
    "duties": [
     "장애인편의시설 증진사업에 관한 사항",
@@ -2731,12 +2743,13 @@
     "장애인재활보조기구에 관한 사항",
     "장애인전용주차구역의 지도·단속 및 과태료 부과",
     "그 밖에 장애인 복지 및 지원에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-WELFARE-DISABLED_v1.2.md"
   },
   {
    "tier": "jeju-si",
-   "spId": "SP-CITYDO-JEJUSI-WELFARE",
-   "section": "제주특별자치도 제주시",
+   "spId": "SP-CITYDIV-JEJUSI-WELFARE-BASICLIVELIHOOD",
    "dept": "기초생활보장과",
    "duties": [
     "국민기초생활보장사업에 관한 업무",
@@ -2757,12 +2770,13 @@
     "한부모 가족 복지시설 운영 지원 및 지도·감독",
     "미혼모·부자 가정 및 조손가정 지원",
     "그 밖에 기초생활보장에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-WELFARE-BASICLIVELIHOOD_v1.2.md"
   },
   {
-   "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-WELFARE",
-   "section": "제주특별자치도 제주시",
+   "tier": "jeju-si",
+   "spId": "SP-CITYDIV-JEJUSI-WELFARE-WOMENFAMILY",
    "dept": "여성가족과",
    "duties": [
     "여성가족정책 종합계획 수립",
@@ -2800,12 +2814,13 @@
     "청소년성문화센터 운영 및 관리",
     "청소년 문화의집 운영 및 관리",
     "그 밖에 여성·가족 지원에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-WELFARE-WOMENFAMILY_v1.2.md"
   },
   {
-   "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-WELFARE",
-   "section": "제주특별자치도 제주시",
+   "tier": "jeju-si",
+   "spId": "SP-CITYDIV-JEJUSI-SAFETY-HYGIENE",
    "dept": "위생관리과",
    "duties": [
     "공중위생업소 영업신고 및 지도점검",
@@ -2835,12 +2850,13 @@
     "청소년 유해업소 지도·단속에 관한 사항",
     "식품접객업소 및 목욕장업 영업소 어린이놀이시설 안전관리사무",
     "그 밖에 공중·식품위생 관리에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-SAFETY-HYGIENE_v1.1.md"
   },
   {
    "tier": "jeju-si",
-   "spId": "SP-CITYDO-JEJUSI-ECON",
-   "section": "제주특별자치도 제주시",
+   "spId": "SP-CITYDIV-JEJUSI-ECON-SMB",
    "dept": "경제소상공인과",
    "duties": [
     "지역경제 활성화에 관한 사항",
@@ -2879,12 +2895,13 @@
     "수입물품(공산품) 등의 원산지 표시 등에 관한 사항",
     "골목형상점가 지정 및 운영관리에 관한 사무",
     "그 밖에 지역경제, 소상공인에 관한 사무 및 국 내 다른 과에 속하지 아니하는 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-ECON-SMB_v1.1.md"
   },
   {
    "tier": "jeju-si",
-   "spId": "SP-CITYDO-JEJUSI-ECON",
-   "section": "제주특별자치도 제주시",
+   "spId": "SP-CITYDIV-JEJUSI-ECON-JOBENERGY",
    "dept": "일자리에너지과",
    "duties": [
     "공공근로사업에 관한 사항",
@@ -2910,12 +2927,13 @@
     "도시가스·고압가스·액화석유가스·석유판매업·석탄사업 허가 등록 및 관리",
     "환경친화적 자동차 충전구역 및 전용주차구역 관리에 관한 사항(위임된 사무에 한정한다)",
     "그 밖에 일자리, 에너지에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-ECON-JOBENERGY_v1.1.md"
   },
   {
-   "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-JACHI",
-   "section": "제주특별자치도 제주시",
+   "tier": "jeju-si",
+   "spId": "SP-CITYDIV-JEJUSI-ECON-VILLAGE",
    "dept": "마을활력과",
    "duties": [
     "베스트 특화마을 육성 및 지원",
@@ -2933,12 +2951,13 @@
     "귀농·귀촌지원 및 교육 운영",
     "정착주민에 관한 사항",
     "그 밖에 마을활력 사업에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-ECON-VILLAGE_v1.2.md"
   },
   {
-   "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-CULTURE",
-   "section": "제주특별자치도 제주시",
+   "tier": "jeju-si",
+   "spId": "SP-CITYDIV-JEJUSI-CULTURE-ART",
    "dept": "문화예술과",
    "duties": [
     "문화예술축제 및 행사에 관한 사항",
@@ -2960,12 +2979,13 @@
     "국내외 도시 간 교류증진",
     "재외도민에 관한 업무",
     "그 밖에 문화예술에 관한 사무 및 국 내 다른 과에 속하지 아니하는 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-CULTURE-ART_v1.1.md"
   },
   {
-   "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-CULTURE",
-   "section": "제주특별자치도 제주시",
+   "tier": "jeju-si",
+   "spId": "SP-CITYDIV-JEJUSI-CULTURE-TOURISM",
    "dept": "관광진흥과",
    "duties": [
     "관광활성화에 관한 사항",
@@ -2988,12 +3008,13 @@
     "미신고 불법 숙박업소 합동 단속반 운영(총괄)",
     "미신고 불법 숙박업 관련 민원접수 및 처리, 유관기관 통보 등",
     "그 밖에 관광진흥에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-CULTURE-TOURISM_v1.2.md"
   },
   {
-   "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-CULTURE",
-   "section": "제주특별자치도 제주시",
+   "tier": "jeju-si",
+   "spId": "SP-CITYDIV-JEJUSI-CULTURE-SPORTS",
    "dept": "체육진흥과",
    "duties": [
     "체육 진흥에 관한 계획 수립 및 시행",
@@ -3010,12 +3031,13 @@
     "애월국민체육센터 운영 및 관리",
     "노형미리내공원 운영 및 관리",
     "그 밖에 체육진흥 및 체육시설 운영·관리에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-CULTURE-SPORTS_v1.1.md"
   },
   {
    "tier": "jeju-si",
-   "spId": "SP-CITYDO-JEJUSI-CULTURE",
-   "section": "제주특별자치도 제주시",
+   "spId": "SP-CITYDIV-JEJUSI-CULTURE-UDANGLIB",
    "dept": "우당도서관",
    "duties": [
     "우당도서관 운영 및 관리",
@@ -3023,35 +3045,38 @@
     "지역도서관 협력지원에 관한 사항",
     "조천읍도서관 운영 및 관리",
     "그 밖에 관할 도서관 운영에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-CULTURE-UDANGLIB_v1.1.md"
   },
   {
    "tier": "jeju-si",
-   "spId": "SP-CITYDO-JEJUSI-CULTURE",
-   "section": "제주특별자치도 제주시",
+   "spId": "SP-CITYDIV-JEJUSI-CULTURE-TAMNALIB",
    "dept": "탐라도서관",
    "duties": [
     "탐라도서관 운영 및 관리",
     "지역도서관 협력지원에 관한 사항",
     "애월도서관·한경도서관 운영 및 관리",
     "그 밖에 관할 도서관 운영에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-CULTURE-TAMNALIB_v1.1.md"
   },
   {
    "tier": "jeju-si",
-   "spId": "SP-CITYDO-JEJUSI-CULTURE",
-   "section": "제주특별자치도 제주시",
+   "spId": "SP-CITYDIV-JEJUSI-CULTURE-ARTCENTER",
    "dept": "제주아트센터",
    "duties": [
     "제주아트센터 운영에 관한 사항",
     "제주아트센터 공연 및 대관에 관한 사항",
     "제주아트센터 사용료 수납 및 감면 등에 관한 사항"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-CULTURE-ARTCENTER_v1.1.md"
   },
   {
    "tier": "jeju-si",
-   "spId": "SP-CITYDO-JEJUSI-CLIMATE",
-   "section": "제주특별자치도 제주시",
+   "spId": "SP-CITYDIV-JEJUSI-CLIMATE-ENVGUIDE",
    "dept": "환경지도과",
    "duties": [
     "토양환경보전에 관한 사항",
@@ -3080,12 +3105,13 @@
     "노후경유차 조기폐차 지원에 관한 사무",
     "석면건축물 안전관리에 관한 사무",
     "그 밖에 환경지도 및 단속에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-ENVGUIDE_v1.1.md"
   },
   {
-   "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-CLIMATE",
-   "section": "제주특별자치도 제주시",
+   "tier": "jeju-si",
+   "spId": "SP-CITYDIV-JEJUSI-CLIMATE-LIVINGENV",
    "dept": "생활환경과",
    "duties": [
     "생활쓰레기 종합관리 및 기본계획 수립",
@@ -3108,12 +3134,13 @@
     "친환경상품 구매 촉진에 관한 사항",
     "EPR(생산자책임재활용제도)에 관한 사항",
     "그 밖에 청소 및 환경자원에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-LIVINGENV_v1.1.md"
   },
   {
-   "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-CLIMATE",
-   "section": "제주특별자치도 제주시",
+   "tier": "jeju-si",
+   "spId": "SP-CITYDIV-JEJUSI-CLIMATE-PARKS",
    "dept": "공원녹지과",
    "duties": [
     "도시녹화계획의 수립",
@@ -3150,22 +3177,24 @@
     "숲경영체험림 조성계획(변경) 승인에 관한 사항",
     "임산물(농림축산식품장관이 고시한 “농산물 등의 원산지 표시대상” 품목 중 버섯, 산채, 수실류 등 임산물 품목에 한정한다) 원산지 단속에 관한 사항",
     "그 밖에 공원녹지에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-PARKS_v1.2.md"
   },
   {
    "tier": "jeju-si",
-   "spId": "SP-CITYDO-JEJUSI-CLIMATE",
-   "section": "제주특별자치도 제주시",
+   "spId": "SP-CITYDIV-JEJUSI-CLIMATE-JEOLMUL",
    "dept": "절물생태관리소",
    "duties": [
     "절물휴양림 조성 및 운영·관리",
     "노루생태원 운영 및 관리"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-JEOLMUL_v1.1.md"
   },
   {
-   "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-AGRIECONOMY",
-   "section": "제주특별자치도 제주시",
+   "tier": "jeju-si",
+   "spId": "SP-CITYDIV-JEJUSI-AGRI-FISHERY",
    "dept": "해양수산과",
    "duties": [
     "해양수산진흥 종합계획 수립 및 지원",
@@ -3205,12 +3234,13 @@
     "연안체험활동 신고 및 수리 등에 관한 사항",
     "어촌어항 재생개발 사업에 관한 사항",
     "그 밖에 해양수산에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-JEJUSI-AGRI-FISHERY_v1.1.md"
   },
   {
    "tier": "jeju-si",
-   "spId": "SP-CITYDO-JEJUSI-HOUSING",
-   "section": "제주특별자치도 제주시",
+   "spId": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CITYPLAN",
    "dept": "도시계획과",
    "duties": [
     "도시관리계획의 입안(도지사가 직접 시행하는 사업을 위한 도시관리계획은 제외한다)",
@@ -3238,12 +3268,13 @@
     "측량기준점(국가기준점) 관리 및 현황 조사에 관한 사항",
     "15분 도시 제주 조성 지원에 관한 사항",
     "그 밖에 도시행정에 관한 사무"
-   ]
+   ],
+   "applied": false,
+   "reason": "§2가 duty 목록이 아니라 실제 접수 파이프라인(task_key) 표라서 덮어쓰지 않음 — 헤더: ## §2. 접수 (기존 파이프라인) 및 완결 처리 업무"
   },
   {
    "tier": "jeju-si",
-   "spId": "SP-CITYDO-JEJUSI-HOUSING",
-   "section": "제주특별자치도 제주시",
+   "spId": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-REGEN",
    "dept": "도시재생과",
    "duties": [
     "도시개발사업 계획 수립(타당성 조사를 포함한다)",
@@ -3272,12 +3303,13 @@
     "옥외광고물 허가·신고 처리 및 광고물 등록업체 관리",
     "불법 광고물 단속 및 정비",
     "그 밖에 도시개발에 관한 사항"
-   ]
+   ],
+   "applied": false,
+   "reason": "§2가 duty 목록이 아니라 실제 접수 파이프라인(task_key) 표라서 덮어쓰지 않음 — 헤더: ## §2. 접수 (기존 파이프라인) 및 완결 처리 업무"
   },
   {
-   "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-HOUSING",
-   "section": "제주특별자치도 제주시",
+   "tier": "jeju-si",
+   "spId": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CONSTRUCT",
    "dept": "건설과",
    "duties": [
     "국유재산(행정재산도로) 관리",
@@ -3303,12 +3335,13 @@
     "제주시 관할 도로의 차선·노면표시 및 과속방지턱 설치·관리",
     "도로사업 미불용지 보상에 관한 사항",
     "그 밖에 건설·도로에 관한 사무"
-   ]
+   ],
+   "applied": false,
+   "reason": "§2가 duty 목록이 아니라 실제 접수 파이프라인(task_key) 표라서 덮어쓰지 않음 — 헤더: ## §2. 접수 (기존 파이프라인) 및 완결 처리 업무"
   },
   {
    "tier": "jeju-si",
-   "spId": "SP-CITYDO-JEJUSI-HOUSING",
-   "section": "제주특별자치도 제주시",
+   "spId": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-HOUSING",
    "dept": "주택과",
    "duties": [
     "건축행정의 종합계획 및 건실화에 관한 사항",
@@ -3336,12 +3369,13 @@
     "주택법 위반 건축물 지도·단속 및 처리",
     "건축협정에 관한 사항",
     "그 밖에 주택민원에 관한 사항"
-   ]
+   ],
+   "applied": false,
+   "reason": "§2가 duty 목록이 아니라 실제 접수 파이프라인(task_key) 표라서 덮어쓰지 않음 — 헤더: ## §2. 접수 (기존 파이프라인) 및 완결 처리 업무"
   },
   {
-   "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-HOUSING",
-   "section": "제주특별자치도 제주시",
+   "tier": "jeju-si",
+   "spId": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-BUILDING",
    "dept": "건축과",
    "duties": [
     "건축 인·허가의 건실화에 관한 사항",
@@ -3360,12 +3394,13 @@
     "건축물 해체의 허가",
     "공사중단 장기방치 건축물 정비에 관한 사무",
     "그 밖에 건축민원에 관한 사무"
-   ]
+   ],
+   "applied": false,
+   "reason": "§2가 duty 목록이 아니라 실제 접수 파이프라인(task_key) 표라서 덮어쓰지 않음 — 헤더: ## §2. 접수 (기존 파이프라인)"
   },
   {
-   "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-HOUSING",
-   "section": "제주특별자치도 제주시",
+   "tier": "jeju-si",
+   "spId": "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-WATER",
    "dept": "상하수도과",
    "duties": [
     "제주시 지역 상하수도 요금 부과·징수",
@@ -3408,12 +3443,13 @@
     "부서 내 자산관리 및 저장품 수급관리",
     "제주시 지역 우수관 및 집수구 유지․관리(하수처리계획 구역 내로 한정한다)",
     "상하수도본부와의 협의조정 및 지원에 관한 사항"
-   ]
+   ],
+   "applied": false,
+   "reason": "§2가 duty 목록이 아니라 실제 접수 파이프라인(task_key) 표라서 덮어쓰지 않음 — 헤더: ## §2. 접수 (기존 파이프라인) 및 완결 처리 업무"
   },
   {
    "tier": "seogwipo",
    "spId": "SP-CITYDO-SEOGWIPO-COMM",
-   "section": "제주특별자치도 서귀포시",
    "dept": "시민소통지원실",
    "duties": [
     "공직기강 감찰",
@@ -3430,12 +3466,13 @@
     "지역여론(동향) 관리",
     "강정지역 주민 공동체회복 지원 기금에 관한 사항",
     "갈등관리 사무"
-   ]
+   ],
+   "applied": false,
+   "reason": "해당 SP 파일이 아직 없음(사무실/민원실 등 최상위 부서, 개별 SP 미작성)"
   },
   {
    "tier": "seogwipo",
    "spId": "SP-CITYDO-SEOGWIPO-PR",
-   "section": "제주특별자치도 서귀포시",
    "dept": "공보실",
    "duties": [
     "시정홍보에 관한 사항",
@@ -3451,12 +3488,13 @@
     "시정가이드 홍보",
     "공고 및 고시 등록·관리",
     "서귀포시 SNS서포터즈 운영에 관한 사항"
-   ]
+   ],
+   "applied": false,
+   "reason": "해당 SP 파일이 아직 없음(사무실/민원실 등 최상위 부서, 개별 SP 미작성)"
   },
   {
    "tier": "seogwipo",
    "spId": "SP-CITYDO-SEOGWIPO-CIVILAFFAIRS",
-   "section": "제주특별자치도 서귀포시",
    "dept": "종합민원실",
    "duties": [
     "주민등록사무 관리",
@@ -3496,12 +3534,13 @@
     "「지적재조사에 관한 특별법」에 관한 사항",
     "지적불부합지 대상 토지조사 및 정리업무",
     "그 밖에 민원에 관한 사무"
-   ]
+   ],
+   "applied": false,
+   "reason": "해당 SP 파일이 아직 없음(사무실/민원실 등 최상위 부서, 개별 SP 미작성)"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-JACHI",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-JACHI-GENERAL",
    "dept": "총무과",
    "duties": [
     "의전 및 행사에 관한 사항",
@@ -3531,12 +3570,13 @@
     "통계업무",
     "행정자료실 운영",
     "그 밖에 다른 과에 속하지 아니하는 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-SEOGWIPO-JACHI-GENERAL_v1.1.md"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-JACHI",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-JACHI-BUDGET",
    "dept": "기획예산과",
    "duties": [
     "시정 주요업무계획 수립 및 관리",
@@ -3567,12 +3607,13 @@
     "청년활동 지원에 관한 사항",
     "청년 교육프로그램 운영지원에 관한 사항",
     "청년 인재 육성·역량개발 및 교류 등에 관한 사항"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-SEOGWIPO-JACHI-BUDGET_v1.1.md"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-JACHI",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-JACHI-SELFGOV",
    "dept": "자치행정과",
    "duties": [
     "읍·면·동 행정지원 및 지도·감독",
@@ -3601,12 +3642,13 @@
     "자원봉사에 관한 사항",
     "행정시 권한강화에 관한 사항",
     "강정지역 주민 공동체회복 지원 기금에 관한 사항"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-SEOGWIPO-JACHI-SELFGOV_v1.1.md"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-JACHI",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-JACHI-VILLAGE",
    "dept": "마을활력과",
    "duties": [
     "자립마을 육성 및 지원",
@@ -3621,12 +3663,13 @@
     "귀농·귀촌지원 및 교육 운영",
     "정착주민에 관한 사항",
     "그 밖에 마을활력 사업에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-SEOGWIPO-JACHI-VILLAGE_v1.2.md"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-JACHI",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-JACHI-LIFELONGED",
    "dept": "평생교육과",
    "duties": [
     "교육발전계획 수립 및 인재육성 지원",
@@ -3648,12 +3691,13 @@
     "자기주도학습센터 운영 및 관리",
     "비정규학교 운영 지원에 관한 사항(비정규학교 운영비 등 지원, 비정규학교 문예행사, 프로그램 운영개발 지원)",
     "그 밖에 평생교육에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-SEOGWIPO-JACHI-LIFELONGED_v1.1.md"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-JACHI",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-JACHI-TAX",
    "dept": "세무과",
    "duties": [
     "도세 종합 조정",
@@ -3670,12 +3714,13 @@
     "도세 세입관리",
     "세외수입업무 총괄",
     "서귀포시 소관 총괄 채권 관리"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-SEOGWIPO-JACHI-TAX_v1.2.md"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-WELFARE",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-WELFARE-RESIDENT",
    "dept": "주민복지과",
    "duties": [
     "기초푸드뱅크 운영 지원",
@@ -3700,12 +3745,13 @@
     "충혼묘지 관리",
     "지역사회통합돌봄사업 확산에 관한 사항",
     "그 밖에 주민복지에 관한 사무 및 국 내 다른 과에 속하지 아니하는 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-SEOGWIPO-WELFARE-RESIDENT_v1.2.md"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-WELFARE",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-WELFARE-WOMENFAMILY",
    "dept": "여성가족과",
    "duties": [
     "여성가족정책 종합계획 수립",
@@ -3741,12 +3787,13 @@
     "드림스타트 관련 복지계획 수립 및 조정",
     "드림스타트 사례관리 및 복지프로그램 수행 33.「아동복지법」에 관한 위임 사무 34.「입양촉진 및 절차에 관한 특례법」에 관한 위임 사무",
     "그 밖에 여성·가족 지원에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-SEOGWIPO-WELFARE-WOMENFAMILY_v1.2.md"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-WELFARE",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-WELFARE-HYGIENE",
    "dept": "위생관리과",
    "duties": [
     "공중위생업소 영업신고 및 지도·점검",
@@ -3775,12 +3822,13 @@
     "소비자식품위생감시원 운영",
     "청소년 유해업소 지도 및 단속",
     "식품접객업소 및 목욕장업 영업소 어린이놀이시설 안전 관리"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-SEOGWIPO-WELFARE-HYGIENE_v1.2.md"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-CULTURE",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-CULTURE-ART",
    "dept": "문화예술과",
    "duties": [
     "문화예술축제 및 행사에 관한 사항",
@@ -3800,12 +3848,13 @@
     "서복전시관 운영 및 관리",
     "작가의 산책길 및 문화예술시장에 관한 사항",
     "그 밖에 문화예술에 관한 사무 및 국 내 다른 과에 속하지 아니하는 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-SEOGWIPO-CULTURE-ART_v1.1.md"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-CULTURE",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-CULTURE-TOURISM",
    "dept": "관광진흥과",
    "duties": [
     "관광진흥계획 수립 및 시행",
@@ -3829,12 +3878,13 @@
     "미신고 불법 숙박업소 합동 단속반 운영(총괄)",
     "미신고 불법 불법숙박업 관련 민원접수 및 처리, 유관기관 통보 등",
     "그 밖에관광진흥에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-SEOGWIPO-CULTURE-TOURISM_v1.2.md"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-CULTURE",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-CULTURE-SPORTS",
    "dept": "체육진흥과",
    "duties": [
     "체육진흥에 관한 계획 수립 및 시행",
@@ -3851,23 +3901,25 @@
     "프로축구단 경기 운영 및 행정적 지원",
     "e스포츠에 관한 사항",
     "그 밖에 체육진흥 및 체육시설 운영·관리에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-SEOGWIPO-CULTURE-SPORTS_v1.1.md"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-CULTURE",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-CULTURE-ARTSHALL",
    "dept": "서귀포예술의전당",
    "duties": [
     "서귀포예술의전당 운영에 관한 사항",
     "서귀포예술의전당 공연 및 대관에 관한 사항",
     "서귀포예술의전당 사용료 수납 및 감면 등에 관한 사항"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-SEOGWIPO-CULTURE-ARTSHALL_v1.1.md"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-CULTURE",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-CULTURE-LIBRARYMGMT",
    "dept": "도서관운영사무소",
    "duties": [
     "도서관 프로그램 개발 및 보급",
@@ -3880,12 +3932,13 @@
     "읍·면 지역(성산일출·안덕산방·표선) 도서관 운영 및 관리",
     "지역도서관 협력지원에 관한 사항",
     "그 밖에 관할 도서관 운영에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-SEOGWIPO-CULTURE-LIBRARYMGMT_v1.1.md"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-CULTURE",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-CULTURE-TOURISMFACILITY",
    "dept": "관광지관리소",
    "duties": [
     "직영관광지 운영 및 관리 업무 총괄(매·검표 및 관람료 징수, 공연장 및 주차장 시설 관리, 공유재산 관리)",
@@ -3895,12 +3948,13 @@
     "감귤랜드 조성에 관한 사항",
     "세계감귤전시관(아열대식물원) 운영 및 관리",
     "그 밖에 관광지 및 감귤박물관 운영에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-SEOGWIPO-CULTURE-TOURISMFACILITY_v1.1.md"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-CULTURE",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-CULTURE-ARTMUSEUM",
    "dept": "서귀포공립미술관",
    "duties": [
     "서귀포 공립미술관(이중섭미술관․기당미술관․소암기념관)",
@@ -3917,12 +3971,13 @@
     "서귀포 공립미술관별 기타 미술관련 행사(공연, 학술행사 등)",
     "다른 미술관과의 업무 협력 및 상호 교류",
     "미술관 홍보 업무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-SEOGWIPO-CULTURE-ARTMUSEUM_v1.1.md"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-AGRIECONOMY",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-JOBS",
    "dept": "경제일자리과",
    "duties": [
     "지역경제살리기에 관한 사항",
@@ -3982,12 +4037,13 @@
     "수입물품(공산품) 등의 원산지 표시 등에 관한 사항",
     "천문과학문화관 운영 및 관리",
     "그 밖에 지역경제에 관한 사무 및 국 내 다른 과에 속하지 아니하는 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-SEOGWIPO-AGRIECONOMY-JOBS_v1.1.md"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-AGRIECONOMY",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-FISHERY",
    "dept": "해양수산과",
    "duties": [
     "해양수산진흥 종합계획 수립 및 지원",
@@ -4027,12 +4083,13 @@
     "연안체험활동 신고 및 수리 등에 관한 사항",
     "어촌어항 재생개발 사업에 관한 사항",
     "그 밖에 해양수산에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-SEOGWIPO-AGRIECONOMY-FISHERY_v1.2.md"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-AGRIECONOMY",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-AGRIECONOMY-LIVESTOCK",
    "dept": "청정축산과",
    "duties": [
     "축산정책 종합개발 수립 및 시행",
@@ -4058,12 +4115,13 @@
     "부정축산물 지도·단속 및 축산물 수거·검사",
     "축산물 원산지 단속",
     "그 밖에 축산행정에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-SEOGWIPO-AGRIECONOMY-LIVESTOCK_v1.2.md"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-CLIMATE",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-CLIMATE-ENVMGMT",
    "dept": "기후환경과",
    "duties": [
     "환경보전 계획 수립",
@@ -4113,12 +4171,13 @@
     "곶자왈 지역 환경보존에 관한 사항",
     "절상대보전지역 안에서의 행위허가 및 관리(한라산국립공원 지역은 제외한다)",
     "그 밖에 환경관리에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-SEOGWIPO-CLIMATE-ENVMGMT_v1.2.md"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-CLIMATE",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-CLIMATE-LIVINGENV",
    "dept": "생활환경과",
    "duties": [
     "생활쓰레기 종합관리 및 기본계획 수립",
@@ -4143,12 +4202,13 @@
     "재활용 선별시설 운영 및 관리",
     "자원순환에 관한 사항",
     "그 밖에 청소 및 환경자원에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-SEOGWIPO-CLIMATE-LIVINGENV_v1.1.md"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-CLIMATE",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-CLIMATE-PARKS",
    "dept": "공원녹지과",
    "duties": [
     "도시녹화계획의 수립",
@@ -4180,12 +4240,13 @@
     "국유림(산림청 소관) 관리",
     "임산물(농림수산식품부장관이 고시한 “농산물 등의 원산지표시대상” 품목 중 버섯·산채·수실류 등 임산물 품목을 말한다) 원산지 단속에 관한 사항",
     "그 밖에 공원녹지에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-SEOGWIPO-CLIMATE-PARKS_v1.2.md"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-CLIMATE",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-CLIMATE-FORESTRECREATION",
    "dept": "산림휴양관리소",
    "duties": [
     "「산림문화·휴양에 관한 법률」에 관한 사항(서귀포치유의숲 조성 및 관리, 산림휴양인프라 구축사업, 등산문화증진 및 숲길보전사업 등)",
@@ -4196,12 +4257,13 @@
     "숲길 조성 및 관리에 관한 사항(위임된 사무에 한정한다)",
     "숲경영체험림 조성계획(변경) 승인에 관한 사항",
     "그 밖에 산림휴양에 관한 사무"
-   ]
+   ],
+   "applied": true,
+   "applied_file": "04-city/divisions/SP-CITYDIV-SEOGWIPO-CLIMATE-FORESTRECREATION_v1.1.md"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-HOUSING",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-GENERAL",
    "dept": "안전총괄과",
    "duties": [
     "안전관리종합계획 수립 및 결과 평가",
@@ -4239,12 +4301,13 @@
     "「산업안전보건법」에 따른 안전관리에 관한 사항",
     "안전감찰 업무 지원(안전감찰 자료 수합, 지적사항 관리 등)",
     "그 밖에 안전관리에 관한 사무 및 국 내 다른 과에 속하지 아니하는 사무"
-   ]
+   ],
+   "applied": false,
+   "reason": "§2가 duty 목록이 아니라 실제 접수 파이프라인(task_key) 표라서 덮어쓰지 않음 — 헤더: ## §2. 접수 (기존 파이프라인)"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-HOUSING",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-CITY",
    "dept": "도시과",
    "duties": [
     "도시관리계획 정비·지원에 관한 사무",
@@ -4271,12 +4334,13 @@
     "측량기준점(국가기준점) 관리 및 현황 조사에 관한 사항",
     "15분 도시 제주 조성 지원에 관한 사항",
     "그 밖에 도시행정에 관한 사무"
-   ]
+   ],
+   "applied": false,
+   "reason": "§2가 duty 목록이 아니라 실제 접수 파이프라인(task_key) 표라서 덮어쓰지 않음 — 헤더: ## §2. 접수 (기존 파이프라인)"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-HOUSING",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-BUILDING",
    "dept": "건축과",
    "duties": [
     "건축물(주거용 제외) 건축허가·신고·사용승인 및 사후관리",
@@ -4306,12 +4370,13 @@
     "건축협정에 관한 사항",
     "빈집 정비사업에 관한 사항",
     "그 밖에 건축에 관한 사무"
-   ]
+   ],
+   "applied": false,
+   "reason": "§2가 duty 목록이 아니라 실제 접수 파이프라인(task_key) 표라서 덮어쓰지 않음 — 헤더: ## §2. 접수 (기존 파이프라인 그대로 인용 — 이 SP가 새로 만들지 않음)"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-HOUSING",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-CONSTRUCT",
    "dept": "건설과",
    "duties": [
     "국유재산(행정재산도로) 관리",
@@ -4343,12 +4408,13 @@
     "농촌생활환경 정비사업에 관한 사항",
     "농업기반 시설 관리",
     "그 밖에 건설·도로에 관한 사무"
-   ]
+   ],
+   "applied": false,
+   "reason": "§2가 duty 목록이 아니라 실제 접수 파이프라인(task_key) 표라서 덮어쓰지 않음 — 헤더: ## §2. 접수 (기존 파이프라인)"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-HOUSING",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-TRAFFIC",
    "dept": "교통행정과",
    "duties": [
     "화물자동차운송사업 허가에 관한 사항",
@@ -4392,12 +4458,13 @@
     "도시교통정비 촉진에 관한 사항",
     "화물자동차 사용자에 대한 유가보조금 지급에 관한 사항",
     "그 밖에 교통 및 주차에 관한 사무"
-   ]
+   ],
+   "applied": false,
+   "reason": "§2가 duty 목록이 아니라 실제 접수 파이프라인(task_key) 표라서 덮어쓰지 않음 — 헤더: ## §2. 접수 (기존 파이프라인)"
   },
   {
    "tier": "seogwipo",
-   "spId": "SP-CITYDO-SEOGWIPO-HOUSING",
-   "section": "제주특별자치도 서귀포시",
+   "spId": "SP-CITYDIV-SEOGWIPO-CONSTRUCTION-WATER",
    "dept": "상하수도과",
    "duties": [
     "서귀포시 지역 상하수도 요금 부과·징수",
@@ -4440,7 +4507,9 @@
     "부서 내 자산관리 및 저장품 수급관리",
     "서귀포시 지역 우수관 및 집수구 유지․관리(하수처리계획구역 내로 한정한다)",
     "상하수도본부와의 협의조정 및 지원에 관한 사항"
-   ]
+   ],
+   "applied": false,
+   "reason": "§2가 duty 목록이 아니라 실제 접수 파이프라인(task_key) 표라서 덮어쓰지 않음 — 헤더: ## §2. 접수 (기존 파이프라인)"
   }
  ]
 }
