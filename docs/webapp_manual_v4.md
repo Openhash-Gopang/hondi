@@ -395,7 +395,7 @@ sendMessage()
 | `[GWP:kcommerce]` | K-Market | 주문·배달·음식·쇼핑·예약 |
 | `[GWP:ktransport]` | K-Traffic | 교통·버스·지하철·택시·길찾기 |
 | `[GWP:klogistics]` | K-Logistics | 택배·배송·물류·운송·추적 |
-| `[GWP:fiil-kcleaner]` | K-Cleaner | 쓰레기·환경오염·불법투기·신고 |
+| `[GWP:fiil-kcleaner]` | K-Clean | 쓰레기·환경오염·불법투기·신고 |
 | `[GWP:kgov]` | K-Gov | 민원·등본·허가·면허·행정심판 |
 | `[GWP:kdemocracy]` | K-Democracy | 투표·안건·청원·고팡 의회 |
 

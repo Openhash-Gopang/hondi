@@ -28,7 +28,7 @@
 | 저장소 | URL | 역할 |
 |---|---|---|
 | gopang_v2 | github.com/Openhash-Gopang/gopang_v2 | 고팡 포털 (hondi.net) |
-| fiil | github.com/nounweb/fiil | K-Cleaner 서비스 (fiil.kr) |
+| fiil | github.com/nounweb/fiil | K-Clean 서비스 (fiil.kr) |
 
 ---
 
@@ -55,7 +55,7 @@ gopang_v2/
 │       └── reporter.js     ← fiil 신고서 생성·전송
 │
 ├── services/
-│   ├── fiil-kcleaner/manifest.json  ← K-Cleaner 서비스 등록 정보
+│   ├── fiil-kcleaner/manifest.json  ← K-Clean 서비스 등록 정보
 │   └── klaw/manifest.json           ← K-Law 서비스 등록 정보
 │
 ├── klaw/prompts/
@@ -65,8 +65,8 @@ gopang_v2/
 ├── prompts/
 │   ├── SP-00-ROUTER.txt    ← 고팡 1단계 라우터
 │   ├── SP-00_v9.0.txt      ← 고팡 AI 비서 시스템 프롬프트
-│   ├── SP-14_kcleaner_v1.2.txt      ← K-Cleaner 텍스트 분석
-│   └── SP-14-IMG_kcleaner_vision_prompt_v1.0.txt ← K-Cleaner 이미지 분석
+│   ├── SP-14_kcleaner_v1.2.txt      ← K-Clean 텍스트 분석
+│   └── SP-14-IMG_kcleaner_vision_prompt_v1.0.txt ← K-Clean 이미지 분석
 │
 └── tools/
     ├── serve.py            ← 로컬 테스트 서버 (포트 8000)
@@ -96,7 +96,7 @@ gopang_v2/
 ├── GOV  정부행정
 ├── JUS  사법·법률      → K-Law ✅
 ├── IND  산업·생산
-├── ENV  환경·자원      → K-Cleaner (fiil.kr) ✅
+├── ENV  환경·자원      → K-Clean (fiil.kr) ✅
 ├── CUL  문화·여가
 ├── SOC  사회·복지
 ├── IOT  IoT·사물
@@ -186,7 +186,7 @@ _onGwpMessage(e)  ←──────────────────     
 export const GWP_REGISTRY = [
   {
     id:       'fiil-kcleaner',
-    name:     'K-Cleaner',
+    name:     'K-Clean',
     icon:     '🌊',
     url:      location.hostname === 'localhost'
                 ? 'http://localhost:8001/webapp.html'

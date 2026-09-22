@@ -914,7 +914,7 @@
     "utterance": "동네 해변에 쓰레기가 잔뜩 쌓여있는데 이거 신고할 수 있나요",
     "expected_type": "GWP",
     "expected_id": "fiil-kcleaner",
-    "expected_name": "K-Cleaner",
+    "expected_name": "K-Clean",
     "category": "정상경로(2차-콜로키얼 패러프레이즈)",
     "static_verdict": "N/A",
     "basis": "gwp-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈"
@@ -924,7 +924,7 @@
     "utterance": "공사장에서 폐수를 몰래 흘려보내는 것 같은데 신고하고 싶어요",
     "expected_type": "GWP",
     "expected_id": "fiil-kcleaner",
-    "expected_name": "K-Cleaner",
+    "expected_name": "K-Clean",
     "category": "정상경로(2차-콜로키얼 패러프레이즈)",
     "static_verdict": "N/A",
     "basis": "gwp-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈"
@@ -934,7 +934,7 @@
     "utterance": "분리수거를 제대로 하고 싶은데 이 재질은 뭘로 버려야 하는지 모르겠어요",
     "expected_type": "GWP",
     "expected_id": "fiil-kcleaner",
-    "expected_name": "K-Cleaner",
+    "expected_name": "K-Clean",
     "category": "정상경로(2차-콜로키얼 패러프레이즈)",
     "static_verdict": "N/A",
     "basis": "gwp-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈"
@@ -944,7 +944,7 @@
     "utterance": "누가 산에다가 몰래 쓰레기를 버리고 가는 걸 봤어요",
     "expected_type": "GWP",
     "expected_id": "fiil-kcleaner",
-    "expected_name": "K-Cleaner",
+    "expected_name": "K-Clean",
     "category": "정상경로(2차-콜로키얼 패러프레이즈)",
     "static_verdict": "N/A",
     "basis": "gwp-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈"
@@ -2844,7 +2844,7 @@
     "utterance": "자원봉사로 해변 정화 활동에 참여하고 싶은데 어떻게 신청해요",
     "expected_type": "GWP",
     "expected_id": "fiil-kcleaner",
-    "expected_name": "K-Cleaner",
+    "expected_name": "K-Clean",
     "category": "정상경로(2차-콜로키얼 패러프레이즈)",
     "static_verdict": "N/A",
     "basis": "gwp-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈"
@@ -2884,7 +2884,7 @@
     "utterance": "공사장에서 물이 계속 새서 흘러나오는데 이게 폐수인지 그냥 빗물인지도 모르겠어요, 일단 신고하고 싶어요",
     "expected_type": "GWP",
     "expected_id": "fiil-kcleaner",
-    "expected_name": "K-Cleaner",
+    "expected_name": "K-Clean",
     "category": "경계 판단(2차-동음이의/인접 서비스 충돌 재현)",
     "static_verdict": "N/A",
     "basis": "fiil-kcleaner triggers('폐수','불법 배출') 근거 — 애매한 상황 서술에서도 신고 의도 인식 확인"

@@ -1,5 +1,5 @@
 /**
- * services/kcleaner.js — K-Cleaner 이미지 분석·진행상황
+ * services/kcleaner.js — K-Clean 이미지 분석·진행상황
  */
 import { _userLocation, PROXY } from '../core/state.js';
 import { appendBubble } from '../ui/bubble.js';
@@ -63,13 +63,13 @@ export function _hideGeminiProgress(timer) {
 // src/gopang/ai/vision.js의 동명 함수가 담당), 게다가 템플릿 리터럴이
 // 중간에 닫히지 않은 채 파일 끝까지 이어져 이 파일 자체가 파싱 불가
 // 상태였다(node --check로 재현 확인). 실행에 전혀 관여하지 않던
-// 죽은 코드라 정리 차원에서 제거했다 — 실제 K-Cleaner Vision 분석
+// 죽은 코드라 정리 차원에서 제거했다 — 실제 K-Clean Vision 분석
 // 경로를 바꾸는 변경은 아니다.
 
 // ── FIIL.kr 신고 전송 — Supabase 직접 저장 ─────────────────
 // localStorage/postMessage 방식 폐기 → Supabase REST API 사용
 // 어떤 브라우저에서도 동일한 DB에 저장/조회 가능
-// ── K-Cleaner AI 응답 텍스트 파싱 — 전체 데이터 추출 ────────
+// ── K-Clean AI 응답 텍스트 파싱 — 전체 데이터 추출 ────────
 export function _parseKCleanerReply(text) {
   const R = {
     materials: [], volume: '', summary: '', terrain: '',
@@ -245,15 +245,15 @@ export async function _updateFiilReport(reportId, parsed) {
       }
     );
     if (res.ok) {
-      console.log('[K-Cleaner] ✅ 전체 데이터 업데이트 완료 →', reportId,
+      console.log('[K-Clean] ✅ 전체 데이터 업데이트 완료 →', reportId,
         '성분', parsed.materials.length, '개 / 타임라인', parsed.timeline.length,
         '단계 / 합계 ₩' + cd.total);
     } else {
       const errText = await res.text().catch(() => '');
-      console.warn('[K-Cleaner] PATCH 오류:', res.status, errText);
+      console.warn('[K-Clean] PATCH 오류:', res.status, errText);
     }
   } catch(e) {
-    console.warn('[K-Cleaner] 업데이트 오류:', e.message);
+    console.warn('[K-Clean] 업데이트 오류:', e.message);
   }
 }
 

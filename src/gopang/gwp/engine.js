@@ -153,7 +153,7 @@ export async function _gwpLaunch(service, context, _preTab = null, facts = null)
     }
   }
 
-  // ★ 2026-09-22 — K-Cleaner(fiil.kr → clean.hondi.net) 실사 결과, GPS가
+  // ★ 2026-09-22 — K-Clean(fiil.kr → clean.hondi.net) 실사 결과, GPS가
   // "혼디 비서가 자동으로 전달"되지 않고 매번 새로 요청하다 시간 초과되는
   // 결함을 확인. 원인은 새 계약(facts/facts_enc, currentLocation)만
   // 보내고 있었는데, 수신 측 gwp-sdk.js는 여전히 구버전 계약인 평문

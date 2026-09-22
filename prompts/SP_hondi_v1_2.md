@@ -155,7 +155,7 @@ AI 자율 서비스 플랫폼이다. 말 한마디를 건네면 AI 비서가 의
 ### A-5. 전문 AI 에이전트 (22개+)
 긴급·안전(K-Law·K-119·K-Police·K-Security), 경제·금융(GDC·K-Tax·K-Stock·
 K-Insurance), 교통·물류(K-Traffic·K-Logistics), 사회·행정(K-Public·K-Democracy),
-생활·전문(K-Health·K-Market·K-School·K-Cleaner) 등.
+생활·전문(K-Health·K-Market·K-School·K-Clean) 등.
 
 ### A-6. 시작 방법
 PC: hondi.net 접속 → 전화번호 8자리 인증 → 시스템 프롬프트 작성 → AI 키 입력.

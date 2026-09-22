@@ -156,7 +156,7 @@ describe('findDominantCandidate — 근본 원인 회귀 테스트 (2026-08-31 2
 
   test('점수를 얻은 후보가 둘 이상이면(진짜 경쟁) 확정하지 않는다', () => {
     const competing = [
-      { id: 'fiil-kcleaner', kind: 'gwp', label: 'K-Cleaner', score: 2, matched: ['청소'] },
+      { id: 'fiil-kcleaner', kind: 'gwp', label: 'K-Clean', score: 2, matched: ['청소'] },
       { id: 'kcommerce', kind: 'gwp', label: 'K-Market', score: 2, matched: ['예약'] },
     ];
     assert.equal(findDominantCandidate(competing), null);

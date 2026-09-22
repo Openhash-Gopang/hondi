@@ -220,7 +220,7 @@ feat: {서비스명} ({서비스ID}) 레지스트리 등록
 | `ECO` | 금융·경제 | GDC, K-Stock, K-Insurance, K-Tax |
 | `MKT` | 시장·거래 | K-Market |
 | `TRN` | 교통·물류 | K-Traffic, K-Logistics |
-| `ENV` | 환경·자원 | K-Cleaner |
+| `ENV` | 환경·자원 | K-Clean |
 | `GOV` | 정부행정 | K-Gov |
 | `LEG` | 입법·정책 | K-Democracy |
 | `SOC` | 사회·복지 | (예정) |

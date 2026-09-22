@@ -54,7 +54,7 @@
 | `src/gopang/ai/router.js` | SP-00 라우터 — 사용자 메시지를 서비스별로 분류 (K-Law, K-Market 등) |
 | `src/gopang/ai/toggle.js` | AI 비서 활성화·비활성화 UI 제어 |
 | `src/gopang/ai/mic.js` | 마이크 입력 — Web Speech API / MediaRecorder STT, `toggleMic()` export |
-| `src/gopang/ai/vision.js` | Gemini Vision — K-Cleaner 이미지 분석, EXIF 처리 |
+| `src/gopang/ai/vision.js` | Gemini Vision — K-Clean 이미지 분석, EXIF 처리 |
 | `src/gopang/ai/weather.js` | 날씨·해양기상·역지오코딩·현장보고서 |
 
 ### 3-3. UI
@@ -67,7 +67,7 @@
 | `src/gopang/ui/search.js` | 검색 오버레이 — 사용자·업체·PDV 검색, `openSearch()`, `runSearch()`, `selectContact()`, `openProfile()` |
 | `src/gopang/ui/register-flow.js` | 아이디 등록 플로우 UI — `_showRegisterFlow()` |
 | `src/gopang/ui/welcome.js` | 초기 환영 메시지 — `_showWelcomeMessage()` |
-| `src/gopang/ui/progress.js` | 진행 상황 시트 (K-Cleaner 등) — `_progressStart()`, `_closeProgressSheet()` |
+| `src/gopang/ui/progress.js` | 진행 상황 시트 (K-Clean 등) — `_progressStart()`, `_closeProgressSheet()` |
 | `src/gopang/ui/file-attach.js` | 파일 첨부·카메라 — `triggerAttach()`, `triggerCamera()`, `handleFileSelect()` |
 
 ### 3-4. Services
@@ -76,7 +76,7 @@
 |------|------|
 | `src/gopang/services/location.js` | **위치 서비스** — GPS watch, IP폴백, PDV주소폴백. `_scheduleLocation()`, `_initLocation()`, `_buildLocNote()`. ⚠️ 61번 줄 백틱 수정 완료 |
 | `src/gopang/services/klaw.js` | K-Law 백그라운드 감시 파이프라인 — `_klawReview()` |
-| `src/gopang/services/kcleaner.js` | K-Cleaner 이미지 분석 진행 관리 |
+| `src/gopang/services/kcleaner.js` | K-Clean 이미지 분석 진행 관리 |
 | `src/gopang/services/fiil.js` | FIIL.kr 환경 신고 전송 (Supabase) |
 
 ### 3-5. GWP (Gopang Widget Protocol)
@@ -128,7 +128,7 @@
 | `SP-11_kstock_v1.0.txt` | K-Stock |
 | `SP-12_kdemocracy_v1.0.txt` | K-Democracy |
 | `SP-13_klogistics_v1.0.txt` | K-Logistics |
-| `SP-14_kcleaner_v1.2.txt` | K-Cleaner |
+| `SP-14_kcleaner_v1.2.txt` | K-Clean |
 | `SP-14_kinsurance_v1.0.txt` | K-Insurance |
 
 ---

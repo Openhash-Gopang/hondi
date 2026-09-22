@@ -214,7 +214,7 @@
     "utterance": "우리 동네 해안가에 쓰레기가 많이 떠밀려온 것 같은데 이거 신고하거나 치울 수 있는 방법이 있나요",
     "expected_type": "GWP",
     "expected_id": "fiil-kcleaner",
-    "expected_name": "K-Cleaner",
+    "expected_name": "K-Clean",
     "category": "부정테스트(EXPERT 오발동 방지 — 환경)",
     "static_verdict": "PASS",
     "basis": "gwp-registry.js fiil-kcleaner.triggers('쓰레기','해안') 정확 매칭. 대응 EXPERT 페르소나 없음 — 대조군 케이스"

@@ -41,7 +41,7 @@ UNIVERSAL-INTEGRITY_v1_0.md  (U0~U7 — 안내로 끝내지 않기, 확신도 �
 │   ├─ K-Market/K-Commerce (market 저장소) ✅
 │   ├─ K-Stock (stock 저장소) ✅
 │   ├─ GDC (gdc 저장소, desktop.html만 — webapp.html은 AI채팅 없음) ✅
-│   └─ K-Cleaner (fiil.kr) ❓ 저장소 위치 미발견, 미배선
+│   └─ K-Clean (fiil.kr) ❓ 저장소 위치 미발견, 미배선
 │
 ├─ [전문직 페르소나 트랙] SP_common_guardrails.md(매니페스트 경유 최신본)  (C1~C42: 적극적보조 판단/실행 분리)
 │   ├─ (의료 계열) SP_common_medical_safety.md(매니페스트 경유 최신본) + SP_red_flag_registry_v1_0.md 추가 상속
@@ -70,13 +70,13 @@ UNIVERSAL-INTEGRITY_v1_0.md  (U0~U7 — 안내로 끝내지 않기, 확신도 �
 | K-Public 9개 | K-Public_common_v1_3 | `worker.js` `handleGovRelay` + `GOV_AGENCIES` | ✅ (wrangler deploy 시점부터 적용) |
 | K-Law | 자체(K-Public_common 미상속) | `worker.js` `handleKlawRelay` | ⚠️ 의도적 예외, UNIVERSAL-INTEGRITY만 주입 |
 | 미편입 K-서비스 4개 | (없음, UNIVERSAL-INTEGRITY만) | 각 저장소 클라이언트 JS | ✅ (2026-07-04 신규 배선) |
-| K-Cleaner | ❓ | ❓ | ❓ 저장소 미발견 |
+| K-Clean | ❓ | ❓ | ❓ 저장소 미발견 |
 | 전문직 27개 | SP_common_guardrails(매니페스트 경유 최신본) | `expert-session.js` `_composeExpertPrompt` | ✅ 코드 확인 |
 | 개인/사업자 | AGENT-COMMON_v3_44 | `worker.js` `_compileAgentSP` | ✅ 코드 확인 |
 
 ## 3. 알려진 공백 (다음 작업 후보)
 
-1. K-Cleaner 저장소 위치 확인 및 UNIVERSAL-INTEGRITY 배선
+1. K-Clean 저장소 위치 확인 및 UNIVERSAL-INTEGRITY 배선
 2. K-Law를 K-Public_common 생태계로 완전 편입할지, 계속 독자 노선으로
    둘지 — `SP_hierarchy_inheritance_v1_0.md`에 "다음 개정 때 편입 예정"
    이라고 오래전부터 적혀있었으나 실행되지 않은 상태

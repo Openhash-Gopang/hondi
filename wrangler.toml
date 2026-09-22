@@ -107,7 +107,7 @@ bucket_name = "hondi-profile-media"
 binding = "KMAIL_ATTACHMENTS"
 bucket_name = "hondi-kmail-attachments"
 
-# 2026-09-22 신설 — K-Cleaner(clean.hondi.net, 구 fiil.kr) 현장 사진.
+# 2026-09-22 신설 — K-Clean(clean.hondi.net, 구 fiil.kr) 현장 사진.
 # 이전엔 fiil.kr 자체 Supabase Storage(이미 노출 확인된 anon key로
 # 직접 업로드)에 저장했다. citizen_reports와 같은 성격의 "시민 신고
 # 증빙 사진"이라 공개 조회는 필요 없지만, 로그인/서명 절차가 없는

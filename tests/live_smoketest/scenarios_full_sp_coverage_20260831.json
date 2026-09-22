@@ -4,7 +4,7 @@
     "utterance": "집 청소 서비스를 예약하고 싶어요",
     "expected_type": "GWP",
     "expected_id": "fiil-kcleaner",
-    "expected_name": "K-Cleaner",
+    "expected_name": "K-Clean",
     "category": "SP전수커버리지-GWP-ENV",
     "static_verdict": "PASS",
     "basis": "기존 배치 scenarios_full_routing_300_20260808.json(no=43) 취합. §CATALOG fiil-kcleaner(해안·도심 쓰레기 AI 자동 분석·신고.)"

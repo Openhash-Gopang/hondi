@@ -59,7 +59,7 @@ UNIVERSAL-INTEGRITY도 클라이언트에서 별도로 fetch해 앞에 붙인다
 | kgov | K-Public | 민원·행정(국가사무) | ✅ `/gov/relay` |
 | kdemocracy | K-Democracy | 투표·거버넌스 | ❌ 미적용 |
 | kbusiness | K-Business | 사업체 어드바이저 | ✅ `/business/relay` |
-| fiil-kcleaner | K-Cleaner | 환경 신고 | ❌ 미적용 |
+| fiil-kcleaner | K-Clean | 환경 신고 | ❌ 미적용 |
 
 **⚠️ 실사로 확인된 불일치**: `worker.js`에 UNIVERSAL-INTEGRITY/
 UNIVERSAL-common을 서버에서 강제 주입하는 전용 relay는 `klaw`,

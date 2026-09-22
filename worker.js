@@ -4851,7 +4851,7 @@ async function handleSocialDemoMatch(request, env, corsHeaders) {
 
 // ═══════════════════════════════════════════════════════════
 // 시민 신고(안전신문고식) — 시민 티어 신규 항목 (2026-08-11 신설)
-// K-Cleaner(fiil-kcleaner, 환경쓰레기)와 동일 패턴을 교통위반·바가지
+// K-Clean(fiil-kcleaner, 환경쓰레기)와 동일 패턴을 교통위반·바가지
 // 요금 등 다른 민원 범주로 확장한다. Hondi가 직접 관공서로 접수를
 // 대행하지는 않는다(그건 법적 대리 행위 소지가 있음) — 신고 내용을
 // 구조화해 정리해주고, 실제 접수는 안전신문고(safepatrol.go.kr) 등
@@ -4912,7 +4912,7 @@ async function handleCitizenReportList(request, url, env, corsHeaders) {
 
 
 // ═══════════════════════════════════════════════════════════
-// K-Cleaner(clean.hondi.net, 구 fiil.kr) 신고 저장 — L1 PocketBase
+// K-Clean(clean.hondi.net, 구 fiil.kr) 신고 저장 — L1 PocketBase
 // (2026-09-22 신설)
 //
 // 이전에는 fiil.kr이 독자 Supabase 프로젝트에 anon key를 클라이언트에
@@ -5061,7 +5061,7 @@ async function handleKCleanerReportList(url, env, corsHeaders) {
   }
 }
 
-// ── K-Cleaner 현장 사진 저장(R2) ──────────────────────────────
+// ── K-Clean 현장 사진 저장(R2) ──────────────────────────────
 // citizen_reports/kcleaner_reports와 같은 익명 신고 흐름 — 로그인/
 // 지갑 서명 절차가 없으므로 profile-photo와 달리 Ed25519 서명 검증을
 // 요구하지 않는다. handleProfilePhotoUpload/handleMediaGet과 동일한
@@ -13867,7 +13867,7 @@ export default {
     // ── 시민 신고(안전신문고식) — 시민 티어 신규 항목 (2026-08-11 신설) ──
     if (pathname === '/citizen/reports/submit' && request.method === 'POST') return handleCitizenReportSubmit(request, env, corsHeaders);
     if (pathname === '/citizen/reports/list' && request.method === 'GET') return handleCitizenReportList(request, url, env, corsHeaders);
-    // ── K-Cleaner(clean.hondi.net) 신고 저장 — L1 PocketBase (2026-09-22 신설) ──
+    // ── K-Clean(clean.hondi.net) 신고 저장 — L1 PocketBase (2026-09-22 신설) ──
     if (pathname === '/kcleaner/report' && request.method === 'POST')   return handleKCleanerReportSubmit(request, env, corsHeaders);
     if (pathname === '/kcleaner/reports' && request.method === 'GET')   return handleKCleanerReportList(url, env, corsHeaders);
     if (pathname.startsWith('/kcleaner/report/') && request.method === 'PATCH') return handleKCleanerReportUpdate(request, url, env, corsHeaders);

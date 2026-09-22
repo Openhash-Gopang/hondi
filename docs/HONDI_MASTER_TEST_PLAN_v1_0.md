@@ -59,7 +59,7 @@
 | users | Gopang Users 엔티티 검색(2026-07-17 신규 등록, 테스트 0건) | 16 | kusers |
 | gopang-test | 빈 저장소(LICENSE만) | 1 | — (검증 대상 제외) |
 
-gopang 내부 서브서비스(별도 저장소 아님): `services/fiil-kcleaner`(K-Cleaner, id: fiil-kcleaner),
+gopang 내부 서브서비스(별도 저장소 아님): `services/fiil-kcleaner`(K-Clean, id: fiil-kcleaner),
 `kbank`/`ktelecom`/`kestate`(type:'switch' — 같은 스레드 SP 교체 방식, 별도 저장소 불필요),
 `profile-assistant`(가입 튜토리얼), `tool-calculator`/`tool-web-search`(function-calling 도구),
 `ksearch`(검색).

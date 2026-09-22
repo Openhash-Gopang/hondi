@@ -69,19 +69,19 @@ import가 안 돼 있었습니다**(이미지 첨부 후 Gemini 분석 경로를
 
 61행 `_callGeminiVision` 함수 안에서 백틱(`` ` ``)으로 시작한 템플릿 리터럴
 문자열이 안 닫혀서, 그 뒤 파일 전체(`_parseKCleanerReply`, `_updateFiilReport` 등
-K-Cleaner 사진신고 파싱·저장 로직 전부)가 문자열 안에 파묻혀 `SyntaxError:
+K-Clean 사진신고 파싱·저장 로직 전부)가 문자열 안에 파묻혀 `SyntaxError:
 Unexpected end of input`로 파일 전체가 깨져 있습니다.
 
 **다행히 지금 당장 실피해는 없습니다** — `grep -rln`으로 확인한 결과 이 파일을
 import하는 곳이 저장소 전체에 **단 한 곳도 없습니다**(고아 파일). 다만 이건
-"패턴 없음"이 아니라 **D-13(fiil.kr 환경신고 — K-Cleaner 사진 신고, 조직 전체
+"패턴 없음"이 아니라 **D-13(fiil.kr 환경신고 — K-Clean 사진 신고, 조직 전체
 커버리지 문서 기준)이 사실상 연결이 끊겨 있다**는 뜻입니다 — `worker.js`의
 `UNIVERSAL_FORCED_K_SERVICES`엔 `'fiil-kcleaner'`가 등록돼 있는데(서버는 준비돼
 있음) 정작 이걸 부를 프론트엔드 진입점이 없는 상태입니다.
 
 **이 파일은 이번에 고치지 않았습니다** — 백틱 안에 파묻힌 원래 프롬프트 텍스트가
 어디까지였고 실제 API 호출 로직이 어떻게 이어졌어야 하는지 추측으로 복원하면
-위험합니다(K-Cleaner의 `_parseKCleanerReply`는 이미 완성도 높은 정규식 파싱
+위험합니다(K-Clean의 `_parseKCleanerReply`는 이미 완성도 높은 정규식 파싱
 로직이라 대충 재구성하면 데이터 유실 위험). **다음 세션에서 별도로 다루는 걸
 권장**하며, `vision.js`에 이미 있는 `_callGeminiVision`/`_showGeminiProgress`와
 중복 정의라는 점도 함께 정리가 필요합니다(어느 쪽이 정본인지 결정 필요).

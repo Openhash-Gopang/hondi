@@ -183,7 +183,7 @@ users/
 
 ### 4.2 SP-00의 system prompt 오염 문제 (해결됨)
 
-**원인**: `saveSettings()`가 `CFG.system`을 `localStorage.gopang_cfg.system`에 저장하고, `loadSettings()`가 매 로드 시 이를 복원하여 K-Cleaner 등 전문가 SP로 오염됨
+**원인**: `saveSettings()`가 `CFG.system`을 `localStorage.gopang_cfg.system`에 저장하고, `loadSettings()`가 매 로드 시 이를 복원하여 K-Clean 등 전문가 SP로 오염됨
 
 **해결**: `gopang-app.js` 3곳 수정
 ```javascript
@@ -739,7 +739,7 @@ DEEPSEEK_MODEL = deepseek-v4-flash (기본), deepseek-chat (V3)
 
 | # | 오류/증상 | 파일 | 원인 | 수정 방법 |
 |---|---|---|---|---|
-| B1 | 짜장면 주문 → K-Cleaner 응답 | gopang-app.js | saveSettings()가 K-Cleaner SP를 `localStorage.gopang_cfg.system`에 저장, loadSettings()가 매 로드 시 CFG.system 덮어씀 | system 저장/복원 제거, CFG.system_base 도입, callAI() 진입 시 복원 |
+| B1 | 짜장면 주문 → K-Clean 응답 | gopang-app.js | saveSettings()가 K-Clean SP를 `localStorage.gopang_cfg.system`에 저장, loadSettings()가 매 로드 시 CFG.system 덮어씀 | system 저장/복원 제거, CFG.system_base 도입, callAI() 진입 시 복원 |
 | B2 | `profile.html:363 Cannot access 'params' before initialization` | profile.html | OPENER_ORIGIN(363줄)이 params(369줄)보다 먼저 `params.get()` 호출 → TDZ ReferenceError | params 선언 블록을 OPENER_ORIGIN 선언 앞으로 이동 |
 | B3 | K-Market AI 응답 없음 (Location 후 멈춤) | market/webapp.html | gwp=1로 열린 K-Market이 sendMessage()→gwpMatch()→kcommerce 재매칭→gwpLaunch() 무한루프 | `_isGwpMode` 체크 추가: gwp=1이면 gwpMatch 건너뜀 |
 | B4 | Market Search 결과 0건 | market/webapp.html | Kakao `region_2depth_name`이 "제주시"만 반환(읍 없음) → p_address LIKE 불일치 | p_address=null, p_lat/p_lng GPS 좌표만 사용 |
@@ -839,15 +839,15 @@ cat prompts/SP-00-ROUTER-LATEST.txt
 # → 라우팅 폴백 → K-Market 호출 안 됨
 ```
 
-### 17.3 라우팅 오류 (짜장면 → K-Cleaner) 진단 순서
+### 17.3 라우팅 오류 (짜장면 → K-Clean) 진단 순서
 
 ```
 1. 콘솔 [Router] 로그: "프롬프트 로드 완료: SP-00-ROUTER-v4_1.txt" 확인
 2. Network 탭 /chat/completions → request body "system" 필드
-   → CFG.system 오염 여부 확인 (K-Cleaner 내용이면 오염)
+   → CFG.system 오염 여부 확인 (K-Clean 내용이면 오염)
 3. Network 탭 /chat/completions → response content
    → LLM 실제 출력 태그 확인 ([GWP:kcommerce] 있어야 정상)
-4. CFG.system이 K-Cleaner SP 내용이면:
+4. CFG.system이 K-Clean SP 내용이면:
 ```
 
 ```javascript
