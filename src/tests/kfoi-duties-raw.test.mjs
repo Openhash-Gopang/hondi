@@ -97,5 +97,50 @@ await test('작업 #4 회귀: 파일 경로 참조(division-tables.js·페이지
   assert.ok(out.includes('모든 참조가 최신 파일과 일치합니다'), out);
 });
 
+await test('결함 수정 회귀: 제주시·서귀포시 duty 항목의 tier가 이름 겹침으로 뒤섞이지 않는다(별표11의 섹션 헤더로 확정)', () => {
+  // 두 도시 모두에 있는 부서명("공보실"·"총무과"·"자치행정과" 등)이 최소 하나씩은 제주시 쪽에도 있어야 한다 —
+  // 예전 결함은 이런 이름이 전부 서귀포시로 쏠렸다(이름만으로 대조 + 사전 순회 순서 때문에 뒤에 오는 도시가 덮어씀).
+  const jejusiDepts = new Set(usable.city.filter(x => x.tier === 'jeju-si').map(x => x.dept));
+  const seogwipoDepts = new Set(usable.city.filter(x => x.tier === 'seogwipo').map(x => x.dept));
+  const overlap = [...jejusiDepts].filter(d => seogwipoDepts.has(d));
+  assert.ok(overlap.length >= 5, `두 도시에 같은 이름의 부서가 이만큼은 있어야 정상: ${overlap.length}`);
+  assert.ok(usable.city.filter(x => x.tier === 'jeju-si').length >= 30, 'jeju-si 항목이 비정상적으로 적음(결함 재발 의심)');
+  assert.ok(usable.city.filter(x => x.tier === 'seogwipo').length >= 25, 'seogwipo 항목이 비정상적으로 적음(결함 재발 의심)');
+});
+await test('작업 #5: 실제 반영된 city SP 51개의 §2가 분장사무로 바뀌었다(도청과 같은 검증)', () => {
+  const digest = buildDigest();
+  const applied = usable.city.filter(x => x.applied);
+  assert.equal(applied.length, 51);
+  let checked = 0;
+  for (const hit of applied) {
+    const tierEntries = digest.tiers[hit.tier].entries;
+    const t = tierEntries.find(e => e.id === hit.spId);
+    assert.ok(t, `${hit.tier}/${hit.spId}(${hit.dept}): digest에 없음`);
+    checked++;
+    assert.equal(t.state, 'revised', `${hit.spId}: 갱신이 안 됨`);
+    assert.ok(t.does && t.does.length > 0, `${hit.spId}: does가 비어 있음`);
+    for (const line of t.does) {
+      assert.ok(!line.startsWith('>'), `${hit.spId}: caveat이 does에 섞임`);
+      assert.ok(/^\d{1,3}\.\s/.test(line), `${hit.spId}: 번호 매긴 사무 형식 아님`);
+    }
+  }
+  assert.equal(checked, 51);
+});
+await test('작업 #5: 접수 파이프라인(task_key) 표를 가진 12개 division은 §2를 건드리지 않았다(실제 서비스 배선 보호)', () => {
+  const digest = buildDigest();
+  const notApplied = usable.city.filter(x => !x.applied && x.reason && x.reason.includes('task_key'));
+  assert.equal(notApplied.length, 12);
+  for (const x of notApplied) {
+    const t = digest.tiers[x.tier].entries.find(e => e.id === x.spId);
+    assert.ok(t, `${x.spId}: digest에 없음`);
+    // task_key 표는 does로 추출되지 않아야 한다(파이프라인 표는 does 목록 형식이 아니므로) — 있어도 caveat류는 아니어야 함
+    if (t.does) for (const line of t.does) assert.ok(!line.startsWith('>'), `${x.spId}: 잘못 건드림`);
+  }
+});
+await test('작업 #5 회귀: city 파일 경로 참조(division-tables.js·페이지 인벤토리)가 전부 새 버전 파일명을 가리킨다', () => {
+  const out = execFileSync('python3', ['tools/check_stale_refs.py'], { cwd: ROOT }).toString();
+  assert.ok(out.includes('모든 참조가 최신 파일과 일치합니다'), out);
+});
+
 console.log(`\n${pass}/${pass + fail} passed`);
 process.exit(fail ? 1 : 0);
