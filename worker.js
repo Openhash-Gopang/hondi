@@ -34214,6 +34214,25 @@ async function _kmailFindExistingContact(env, guid, email) {
   return (data.items && data.items[0]) || null;
 }
 
+// 2026-09-22 신설 — CSV 일괄등록이 건마다(중복확인 1회 + 생성 1회) 따로 왕복하던 것을
+// 10건 병렬로만 줄였더니(직전 수정) 여전히 느리다는 실사용 피드백. 중복확인은 이메일 목록을
+// 한 번의 필터 조회(OR로 묶어서)로 몰아 전체 왕복 횟수를 절반으로 줄인다 — 배치 50건이면
+// 기존 100회(순차) → 51회(첫 수정, 10개씩 병렬 5라운드) → 이번 수정으로 조회 1회 + 생성 최대 50회.
+async function _kmailFindExistingEmails(env, guid, emails) {
+  var norm = emails.map(_kmailNormalizeEmail).filter(Boolean);
+  if (!norm.length) return new Set();
+  var token = await _l1AdminToken(env);
+  var esc = function (s) { return String(s).replace(/'/g, "\\'"); };
+  var clause = norm.map(function (e) { return "email='" + esc(e) + "'"; }).join(' || ');
+  var filter = encodeURIComponent("owner_user_guid='" + esc(guid) + "' && status!='rejected' && (" + clause + ')');
+  var res = await fetch(L1_DEFAULT + '/api/collections/kmail_contacts/records?filter=' + filter + '&perPage=' + norm.length + '&fields=email',
+    { headers: { Authorization: 'Bearer ' + token } });
+  var data = await res.json().catch(function () { return { items: [] }; });
+  var found = new Set();
+  (data.items || []).forEach(function (it) { found.add(_kmailNormalizeEmail(it.email)); });
+  return found;
+}
+
 // POST /kmail/contacts/propose
 // body: { guid, pubkey, signature, ts, recipient_query, candidates: [{name, org, dept, email, source_url, confidence, tags}] }
 async function handleKmailContactsPropose(request, env, corsHeaders) {
@@ -34385,17 +34404,14 @@ async function handleKmailContactsCsvImport(request, env, corsHeaders) {
   const validAll = rows.filter(c => c && typeof c.email === 'string' && emailRe.test(c.email.trim()));
   const invalidCount = rows.length - validAll.length;
 
-  // 2026-09-22 수정 — 예전엔 건마다(중복확인 1회+생성 1회) 순차로 await 했다.
-  // 50건이면 최대 100번의 순차 PocketBase 왕복이라, 실서버 왕복 지연에서는
-  // 배치 하나에도 수십 초가 걸려 Cloudflare Worker 처리시간 제한에 걸려
-  // 응답이 끊기는 사고가 났다(실사용 확인: 204건 업로드가 0/204에서 멈춤).
-  // CONCURRENCY 개씩 묶어 병렬로 처리해 왕복 횟수는 그대로지만 벽시계 시간을
-  // 크게 줄인다. 같은 배치 안에 이메일이 겹치면(사용자가 실수로 같은 사람을
-  // 두 줄에 넣은 경우) 먼저 정규화 이메일 기준으로 걸러 딱 한 번만 만든다 —
-  // 병렬 처리 시 "둘 다 중복확인을 통과해 둘 다 생성되는" 경쟁 상태를
-  // 이 방식으로 원천 차단한다(중복확인 자체가 PocketBase 필터 조회라
-  // 두 요청이 동시에 나가면 서로의 존재를 못 볼 수 있음).
-  const CONCURRENCY = 10;
+  // 2026-09-22 수정(1차) — 건마다(중복확인 1회+생성 1회) 순차 왕복하던 것을 10건씩 병렬로.
+  // 2026-09-22 수정(2차) — 그래도 느리다는 실사용 피드백(50건 배치가 여전히 체감상 오래
+  // 걸림). 중복확인 자체를 이메일 목록 하나의 필터 조회로 몰아(_kmailFindExistingEmails)
+  // 왕복을 배치당 1회로 줄인다 — 50건 기준 기존 51왕복(1차 수정) → 이번엔 조회 1 + 생성
+  // 최대 50, 순차 대기 라운드도 조회 1라운드 + 생성 CONCURRENCY라운드로 준다.
+  // 같은 배치 안 이메일 중복은 여전히 먼저 걸러 경쟁 상태를 막는다(일괄 조회로 바뀌어도
+  // 배치 내부에서 같은 이메일 2줄이 둘 다 "기존 없음"으로 나올 수 있어 방어가 그대로 필요).
+  const CONCURRENCY = 20;
   const seenEmail = new Set();
   const valid = [];
   let batchDup = 0;
@@ -34408,6 +34424,7 @@ async function handleKmailContactsCsvImport(request, env, corsHeaders) {
 
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  const existingEmails = await _kmailFindExistingEmails(env, guid, valid.map(c => c.email));
   let created = 0, skippedDup = batchDup, autoCategorized = 0;
   // 2026-09-11 신설 — 지금까지 레코드 생성이 실패해도(예: category가
   // select 옵션과 안 맞아 검증 거부되는 경우) 아무 로그도 안 남아서
@@ -34420,8 +34437,7 @@ async function handleKmailContactsCsvImport(request, env, corsHeaders) {
 
   async function processOne(c) {
     const email = _kmailNormalizeEmail(c.email);
-    const existing = await _kmailFindExistingContact(env, guid, email);
-    if (existing) { skippedDup++; return; }
+    if (existingEmails.has(email)) { skippedDup++; return; }
 
     let category = typeof c.category === 'string' ? c.category.trim() : '';
     if (!category) {
@@ -34459,6 +34475,7 @@ async function handleKmailContactsCsvImport(request, env, corsHeaders) {
     failedSample: failed,
   }), { status: 200, headers: corsHeaders });
 }
+
 
 
 // GET /kmail/contacts?guid=...&pubkey=...&signature=...&ts=...&status=pending_review
