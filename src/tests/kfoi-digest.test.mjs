@@ -110,6 +110,30 @@ await test('digestQuery: 서귀포시 kind:"bureau"도 한 페이지로 조회�
   assert.ok(r.entries.every(e => e.org && e.org.status === 'match'));
 });
 
+await test('소방안전본부(SP-AGY-FIRE)가 직속기관에서 도청(do) 유형으로 이동했다(시행규칙 제21조의4 확인)', () => {
+  const inDo = digest.tiers.do.entries.find(e => e.id === 'SP-AGY-FIRE');
+  const inAgency = digest.tiers.agency.entries.find(e => e.id === 'SP-AGY-FIRE');
+  assert.ok(inDo && inDo.kind === 'bureau', 'do 유형에 bureau로 있어야 함');
+  assert.ok(!inAgency, 'agency 유형에는 더 이상 없어야 함');
+  const divs = digest.tiers.do.entries.filter(e => e.kind === 'division' && e.parent === '소방안전본부');
+  assert.equal(divs.length, 3, '기존 division 3개(실제 내용 있음)는 그대로 옮겨졌어야 함');
+});
+await test('직속기관·사업소(agency) 조직 기준표: 9개 SP 전부 원문과 과 구성이 다르다는 것이 정직하게 표시된다(문서화만, SP 파일 미변경)', () => {
+  const t = digest.tiers.agency;
+  assert.equal(t.baseline.org_counts.structure_differs, 9);
+  const agri = t.entries.find(e => e.id === 'SP-AGY-AGRITECH');
+  assert.equal(agri.org.status, 'structure_differs'); assert.equal(agri.org.legal_basis, '제23~24조');
+  assert.ok(agri.org.current_divisions.some(d => d.includes('연구개발국')));
+  assert.ok(agri.does || agri.handles, 'SP 본문 자체는 이번 배치에서 바꾸지 않았어야 함(구조만 문서화)');
+});
+await test('직속기관·사업소 조직 기준표: 법정 기관 23개 중 SP가 없는 15개(누락 12 + 합의제행정기관 3)가 열거된다', () => {
+  const t = digest.tiers.agency;
+  assert.equal(t.baseline.missing_in_inventory.length, 15);
+  assert.ok(t.baseline.missing_in_inventory.some(m => m.name === '보훈청' && m.chapter === '직속기관'));
+  assert.ok(t.baseline.missing_in_inventory.some(m => m.name === '감사위원회' && m.chapter === '합의제행정기관'));
+  assert.ok(t.baseline.missing_in_inventory.some(m => m.name === '고용센터'), '2026.8.21. 신설 기관도 반영돼야 함');
+});
+
 await test('다이제스트 항목 수가 「제주 AI 행정」 페이지 데이터와 정확히 일치한다', () => {
   for (const [k, n] of Object.entries(expected)) assert.equal(digest.tiers[k].entries.length, n, k);
   assert.deepEqual(Object.keys(digest.tiers).sort(), Object.keys(expected).sort());
@@ -169,7 +193,7 @@ await test('조직 기준표: 도청의 모든 국·단 SP가 기준표에 있�
   const ids = digest.tiers.do.entries.filter(e => e.kind === 'bureau').map(e => e.id);
   for (const id of ids) assert.ok(baseline.mapping[id], `기준표에 없음: ${id} — SP를 추가했다면 org-baseline-do.json에도 판정을 넣으세요`);
   for (const id of Object.keys(baseline.mapping)) assert.ok(ids.includes(id), `기준표에만 있음(인벤토리에서 빠짐): ${id}`);
-  for (const e of digest.tiers.do.entries.filter(e => e.kind === 'bureau')) assert.ok(['match', 'renamed', 'name_differs', 'not_in_official_menu', 'unverified', 'abolished', 'is_division_not_bureau'].includes(e.org.status), e.id);
+  for (const e of digest.tiers.do.entries.filter(e => e.kind === 'bureau')) assert.ok(['match', 'renamed', 'name_differs', 'not_in_official_menu', 'unverified', 'abolished', 'is_division_not_bureau', 'structure_differs'].includes(e.org.status), e.id);
 });
 await test('조직 기준표: 확인된 개칭(혁신산업국→미래산업국, 기후환경국→환경산림자원국)이 요약본에 실리고, 신설된 기후에너지국은 2026-09-22 반영으로 더 이상 missing이 아니다', () => {
   const by = Object.fromEntries(digest.tiers.do.entries.filter(e => e.kind === 'bureau').map(e => [e.id, e]));
@@ -213,9 +237,9 @@ await test('digestQuery: summary에 도청 조직 대조가 실리고, 첫 페�
   const p1 = digestQuery(digest, { tier: 'do', offset: 0 }); assert.ok(p1.baseline && p1.baseline.confidence_note);
   const p2 = digestQuery(digest, { tier: 'do', offset: p1.next_offset }); assert.ok(!p2.baseline);
 });
-await test('digestQuery: kind:"bureau"는 국·단 23개(폐지 3건·중복 1건 반영 후)를 한 페이지로 돌려주고 현행 조직 대조를 담는다', () => {
+await test('digestQuery: kind:"bureau"는 국·단 24개(폐지 3건·중복 1건 반영, 소방안전본부 이동 후)를 한 페이지로 돌려주고 현행 조직 대조를 담는다', () => {
   const r = digestQuery(digest, { tier: 'do', kind: 'bureau' });
-  assert.equal(r.matched, 23); assert.equal(r.returned, 23); assert.equal(r.next_offset, null, '한 페이지에 다 실려야 함');
+  assert.equal(r.matched, 24); assert.equal(r.returned, 24); assert.equal(r.next_offset, null, '한 페이지에 다 실려야 함');
   assert.ok(JSON.stringify(r.entries).length <= 5500);
   assert.ok(r.entries.every(e => e.org && e.org.status));
   assert.equal(r.entries.find(e => e.name === '미래산업국').org.current_name, '미래산업국');
