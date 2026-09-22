@@ -107,6 +107,17 @@ bucket_name = "hondi-profile-media"
 binding = "KMAIL_ATTACHMENTS"
 bucket_name = "hondi-kmail-attachments"
 
+# 2026-09-22 신설 — K-Cleaner(clean.hondi.net, 구 fiil.kr) 현장 사진.
+# 이전엔 fiil.kr 자체 Supabase Storage(이미 노출 확인된 anon key로
+# 직접 업로드)에 저장했다. citizen_reports와 같은 성격의 "시민 신고
+# 증빙 사진"이라 공개 조회는 필요 없지만, 로그인/서명 절차가 없는
+# 익명 신고 흐름이므로 profile-photo와 동일하게 서명 인증 없이 GET
+# 프록시로 공개한다(handleKCleanerPhotoUpload/GetPhoto 참조). 배포 전
+# 필수: wrangler r2 bucket create hondi-kcleaner-photos
+[[r2_buckets]]
+binding = "KCLEANER_PHOTOS"
+bucket_name = "hondi-kcleaner-photos"
+
 # ★ 배포 전 필수 — 아래 index_name의 Vectorize 인덱스를 먼저 만들어야
 # 한다(로컬에선 실행 못 함, 배포 권한 있는 쪽에서 1회 실행):
 #   wrangler vectorize create hondi-benefit-catalog --dimensions=1024 --metric=cosine

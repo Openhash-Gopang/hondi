@@ -4912,6 +4912,229 @@ async function handleCitizenReportList(request, url, env, corsHeaders) {
 
 
 // ═══════════════════════════════════════════════════════════
+// K-Cleaner(clean.hondi.net, 구 fiil.kr) 신고 저장 — L1 PocketBase
+// (2026-09-22 신설)
+//
+// 이전에는 fiil.kr이 독자 Supabase 프로젝트에 anon key를 클라이언트에
+// 그대로 박아 직접 저장하고 있었다 — 그 키는 2026-08-12 45개 저장소
+// 시크릿 스캔에서 이미 노출 확인된 바로 그 project ref
+// (ebbecjfrwaswbdybbgiu)였다(state.js _SUPABASE_URL 주석 참고). 이
+// 블록은 위 citizen_reports와 동일 컨벤션(_l1AdminToken + L1_DEFAULT)
+// 으로 kcleaner_reports 컬렉션을 확정해, state.js에 남아 있던 마지막
+// TODO(주피터)를 해소한다.
+//
+// 컬렉션 자체는 pb_migrations/1794200001_created_kcleaner_reports.js로
+// 정의돼 있다(citizen_reports와 동일하게 API 규칙 전부 admin-only —
+// 이 Worker만 admin 토큰으로 접근). 관리자 콘솔에서 수동으로 만들 필요
+// 없음 — main에 merge되면 deploy-pb-migrations.yml이 hanlim L1에 자동
+// 적용한다. 필드: report_code(unique)/user_guid/type/type_code/location/
+// gps/reported_at/urgency/status/image_url/cost(json)/dispatch(json)/
+// analysis(json)/approved_at/approved_cost/income_before_tax(2단계 대비,
+// 아직 미사용) — 스키마 상세와 설계 근거는 그 마이그레이션 파일 주석 참고.
+// ═══════════════════════════════════════════════════════════
+
+async function _kcleanerFindByCode(env, reportCode) {
+  const token = await _l1AdminToken(env);
+  const filter = encodeURIComponent(`report_code='${reportCode}'`);
+  const res = await fetch(`${L1_DEFAULT}/api/collections/kcleaner_reports/records?filter=${filter}&perPage=1`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`L1 kcleaner_reports 조회 실패 (HTTP ${res.status})`);
+  const data = await res.json().catch(() => ({ items: [] }));
+  return data.items?.[0] || null;
+}
+
+async function handleKCleanerReportSubmit(request, env, corsHeaders) {
+  let body;
+  try { body = await request.json(); } catch (e) { return _err(400, 'INVALID_JSON', '요청 본문 파싱 실패', corsHeaders); }
+  const reportCode = (body.report_code || body.id || '').trim();
+  if (!reportCode) return _err(400, 'MISSING_REPORT_CODE', 'report_code 필수', corsHeaders);
+
+  try {
+    const token = await _l1AdminToken(env);
+    const res = await fetch(`${L1_DEFAULT}/api/collections/kcleaner_reports/records`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        report_code: reportCode,
+        user_guid:   (body.user_guid || body.reporter || '').trim() || null,
+        type:        body.type || null,
+        type_code:   body.type_code || null,
+        location:    body.location || null,
+        gps:         body.gps || null,
+        reported_at: body.reported_at || new Date().toISOString(),
+        urgency:     body.urgency || null,
+        status:      body.status || '접수',
+        image_url:   body.image_url || null,
+        cost:        body.cost || null,
+        dispatch:    body.dispatch || null,
+        analysis:    body.analysis || null,
+      }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text().catch(() => '')}`);
+    const rec = await res.json();
+    return new Response(JSON.stringify({ ok: true, report: rec }), { headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'KCLEANER_REPORT_SUBMIT_FAILED', e.message, corsHeaders);
+  }
+}
+
+// GET(select)+merge+PATCH — 예전 Supabase _updateFiilReport와 동일 패턴.
+// analysis/cost/dispatch는 기존 값 위에 얕은 병합(shallow merge)한다.
+async function handleKCleanerReportUpdate(request, url, env, corsHeaders) {
+  const reportCode = decodeURIComponent((url.pathname.split('/').pop() || '').trim());
+  if (!reportCode) return _err(400, 'MISSING_REPORT_CODE', 'report_code 필수', corsHeaders);
+  let patch;
+  try { patch = await request.json(); } catch (e) { return _err(400, 'INVALID_JSON', '요청 본문 파싱 실패', corsHeaders); }
+
+  try {
+    const existing = await _kcleanerFindByCode(env, reportCode);
+    if (!existing) return _err(404, 'KCLEANER_REPORT_NOT_FOUND', `report_code=${reportCode}`, corsHeaders);
+
+    const merged = {
+      analysis: { ...(existing.analysis || {}), ...(patch.analysis || {}) },
+      cost:     patch.cost     ? { ...(existing.cost     || {}), ...patch.cost }     : existing.cost,
+      dispatch: patch.dispatch ? { ...(existing.dispatch || {}), ...patch.dispatch } : existing.dispatch,
+      status:   patch.status   || existing.status,
+    };
+    // 관리자 승인/정산 플로우(budget.html/report.html, 2단계 이관 예정)용
+    // 스칼라 필드 — 넘어온 경우에만 덮어쓴다. kcleaner_reports 컬렉션에
+    // approved_at(date)/approved_cost(number)/income_before_tax(number)
+    // 필드가 추가로 필요하다(스키마 노트 참고).
+    for (const key of ['approved_at', 'approved_cost', 'income_before_tax']) {
+      if (patch[key] !== undefined) merged[key] = patch[key];
+    }
+
+    const token = await _l1AdminToken(env);
+    const res = await fetch(`${L1_DEFAULT}/api/collections/kcleaner_reports/records/${existing.id}`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(merged),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text().catch(() => '')}`);
+    const rec = await res.json();
+    return new Response(JSON.stringify({ ok: true, report: rec }), { headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'KCLEANER_REPORT_UPDATE_FAILED', e.message, corsHeaders);
+  }
+}
+
+async function handleKCleanerReportGet(url, env, corsHeaders) {
+  const reportCode = decodeURIComponent((url.pathname.split('/').pop() || '').trim());
+  if (!reportCode) return _err(400, 'MISSING_REPORT_CODE', 'report_code 필수', corsHeaders);
+  try {
+    const rec = await _kcleanerFindByCode(env, reportCode);
+    if (!rec) return _err(404, 'KCLEANER_REPORT_NOT_FOUND', `report_code=${reportCode}`, corsHeaders);
+    return new Response(JSON.stringify({ ok: true, report: rec }), { headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'KCLEANER_REPORT_GET_FAILED', e.message, corsHeaders);
+  }
+}
+
+// guid가 없으면(원본 fiil.kr의 Supabase 쿼리도 원래 사용자 필터가 없었다
+// — "내 신고 현황" 탭이되 실제로는 전체 최근 신고를 보여주는 구조였음.
+// 동작을 그대로 유지해 최근 목록을 준다) 전체 최근 목록을 준다.
+// status/limit은 dashboard.html·budget.html·stats.html 등 관리자 페이지가
+// 필요로 하는 더 큰/필터된 목록 조회를 위해 추가(2026-09-22) — limit은
+// 최대 1000으로 제한한다.
+async function handleKCleanerReportList(url, env, corsHeaders) {
+  const guid   = (url.searchParams.get('guid') || '').trim();
+  const status = (url.searchParams.get('status') || '').trim();
+  let limit = parseInt(url.searchParams.get('limit') || '10', 10);
+  if (!Number.isFinite(limit) || limit <= 0) limit = 10;
+  limit = Math.min(limit, 1000);
+  try {
+    const token = await _l1AdminToken(env);
+    const clauses = [];
+    if (guid)   clauses.push(`user_guid='${guid.replace(/'/g, "\\'")}'`);
+    if (status) clauses.push(`status='${status.replace(/'/g, "\\'")}'`);
+    const qs = new URLSearchParams({ sort: '-reported_at', perPage: String(limit) });
+    if (clauses.length) qs.set('filter', clauses.join(' && '));
+    const res = await fetch(`${L1_DEFAULT}/api/collections/kcleaner_reports/records?${qs}`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json().catch(() => ({ items: [] }));
+    return new Response(JSON.stringify({ ok: true, reports: data.items || [] }), { headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'KCLEANER_REPORT_LIST_FAILED', e.message, corsHeaders);
+  }
+}
+
+// ── K-Cleaner 현장 사진 저장(R2) ──────────────────────────────
+// citizen_reports/kcleaner_reports와 같은 익명 신고 흐름 — 로그인/
+// 지갑 서명 절차가 없으므로 profile-photo와 달리 Ed25519 서명 검증을
+// 요구하지 않는다. handleProfilePhotoUpload/handleMediaGet과 동일한
+// base64 업로드 + 프록시 GET 패턴만 재사용한다.
+const KCLEANER_PHOTO_MAX_BYTES = 8 * 1024 * 1024; // 8MB — 현장 사진 기준 여유있게
+// 프로필 사진(jpeg/png/webp 3종)보다 넓게 허용 — 원래 fiil.kr 클라이언트
+// 코드가 iOS 갤러리에서 흔한 heic/heif, 구형 gif까지 받아주고 있었다
+// (재인코딩 없이 확장자만 붙이는 방식). 같은 관용도를 유지한다.
+const KCLEANER_PHOTO_MIME_EXT = {
+  'image/jpeg': 'jpg', 'image/jpg': 'jpg', 'image/png': 'png', 'image/webp': 'webp',
+  'image/heic': 'jpg', 'image/heif': 'jpg', 'image/gif': 'gif',
+};
+
+async function handleKCleanerPhotoUpload(request, env, corsHeaders) {
+  if (!env.KCLEANER_PHOTOS) {
+    return _err(503, 'PHOTO_STORAGE_UNAVAILABLE', 'R2 바인딩(KCLEANER_PHOTOS)이 설정되지 않았습니다', corsHeaders);
+  }
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+  const { image_base64, mime_type, guid } = body;
+  if (!image_base64) return _err(400, 'MISSING_FIELD', 'image_base64 필수', corsHeaders);
+
+  const ext = KCLEANER_PHOTO_MIME_EXT[mime_type];
+  if (!ext) return _err(400, 'INVALID_MIME_TYPE', `지원하지 않는 이미지 형식입니다: ${JSON.stringify(mime_type)} (허용: jpeg/png/webp/heic/heif/gif)`, corsHeaders);
+
+  let bytes;
+  try {
+    bytes = _base64ToBytes(image_base64);
+  } catch (e) {
+    return _err(400, 'INVALID_BASE64', 'image_base64 디코딩 실패: ' + e.message, corsHeaders);
+  }
+  if (bytes.byteLength > KCLEANER_PHOTO_MAX_BYTES) {
+    return _err(400, 'FILE_TOO_LARGE', `이미지가 너무 큽니다(${Math.round(bytes.byteLength / 1024)}KB, 최대 ${KCLEANER_PHOTO_MAX_BYTES / 1024 / 1024}MB)`, corsHeaders);
+  }
+
+  const safeGuid = encodeURIComponent(guid || 'anon');
+  const key = `${safeGuid}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
+
+  try {
+    await env.KCLEANER_PHOTOS.put(key, bytes, {
+      httpMetadata: { contentType: mime_type, cacheControl: 'public, max-age=31536000, immutable' },
+    });
+  } catch (e) {
+    return _err(502, 'R2_WRITE_FAILED', 'R2 저장 실패: ' + e.message, corsHeaders);
+  }
+
+  const url = `https://hondi-proxy.tensor-city.workers.dev/media/kcleaner-photo/${key}`;
+  return new Response(JSON.stringify({ ok: true, url, key }), { status: 200, headers: corsHeaders });
+}
+
+// GET /media/kcleaner-photo/{guid}/{filename}
+async function handleKCleanerPhotoGet(request, env, corsHeaders) {
+  if (!env.KCLEANER_PHOTOS) return _err(503, 'PHOTO_STORAGE_UNAVAILABLE', 'R2 바인딩이 설정되지 않았습니다', corsHeaders);
+  const url = new URL(request.url);
+  const key = url.pathname.replace(/^\/media\/kcleaner-photo\//, '');
+  if (!key || key.includes('..')) return _err(400, 'INVALID_KEY', '잘못된 경로입니다', corsHeaders);
+
+  let obj;
+  try {
+    obj = await env.KCLEANER_PHOTOS.get(key);
+  } catch (e) {
+    return _err(502, 'R2_READ_FAILED', 'R2 조회 실패: ' + e.message, corsHeaders);
+  }
+  if (!obj) return _err(404, 'NOT_FOUND', '사진을 찾을 수 없습니다', corsHeaders);
+
+  const headers = new Headers(corsHeaders);
+  headers.set('Content-Type', obj.httpMetadata?.contentType || 'application/octet-stream');
+  headers.set('Cache-Control', obj.httpMetadata?.cacheControl || 'public, max-age=31536000, immutable');
+  return new Response(obj.body, { headers });
+}
+
+
+// ═══════════════════════════════════════════════════════════
 // 구독 티어 · 월정기 결제 스케줄러 — 공통 선결과제 (2026-08-11 신설)
 //
 // 지난 조사에서 확인된 공백: profiles 스키마에 "이번 달 기본/프리미엄
@@ -13644,6 +13867,13 @@ export default {
     // ── 시민 신고(안전신문고식) — 시민 티어 신규 항목 (2026-08-11 신설) ──
     if (pathname === '/citizen/reports/submit' && request.method === 'POST') return handleCitizenReportSubmit(request, env, corsHeaders);
     if (pathname === '/citizen/reports/list' && request.method === 'GET') return handleCitizenReportList(request, url, env, corsHeaders);
+    // ── K-Cleaner(clean.hondi.net) 신고 저장 — L1 PocketBase (2026-09-22 신설) ──
+    if (pathname === '/kcleaner/report' && request.method === 'POST')   return handleKCleanerReportSubmit(request, env, corsHeaders);
+    if (pathname === '/kcleaner/reports' && request.method === 'GET')   return handleKCleanerReportList(url, env, corsHeaders);
+    if (pathname.startsWith('/kcleaner/report/') && request.method === 'PATCH') return handleKCleanerReportUpdate(request, url, env, corsHeaders);
+    if (pathname.startsWith('/kcleaner/report/') && request.method === 'GET')   return handleKCleanerReportGet(url, env, corsHeaders);
+    if (pathname === '/kcleaner/photo-upload' && request.method === 'POST')     return handleKCleanerPhotoUpload(request, env, corsHeaders);
+    if (pathname.startsWith('/media/kcleaner-photo/') && request.method === 'GET') return handleKCleanerPhotoGet(request, env, corsHeaders);
     // ── 구독 티어 · 월정기 결제 — 공통 선결과제 (2026-08-11 신설) ──
     if (pathname === '/subscription/subscribe' && request.method === 'POST') return handleSubscribe(request, env, corsHeaders);
     if (pathname === '/subscription/status' && request.method === 'GET') return handleSubscriptionStatus(request, url, env, corsHeaders);

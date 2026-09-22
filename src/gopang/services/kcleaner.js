@@ -1,7 +1,7 @@
 /**
  * services/kcleaner.js — K-Cleaner 이미지 분석·진행상황
  */
-import { _userLocation } from '../core/state.js';
+import { _userLocation, PROXY } from '../core/state.js';
 import { appendBubble } from '../ui/bubble.js';
 
 export function _showGeminiProgress() {
@@ -58,8 +58,13 @@ export function _hideGeminiProgress(timer) {
   }, 400);  // 100% 도달 애니메이션 후 제거
 }
 
-async function _callGeminiVision(imageFile, geminiKey) {
-  const GEMINI_VISION_SYSTEM = `당신은 환경 현장 사진을 분석하는 객관적 데이터 추출 전문가다.
+// 2026-09-22: 여기 있던 _callGeminiVision()은 이 파일이 아무 곳에서도
+// import되지 않는 고아 코드였고(grep 확인 — 실제 Vision 호출은
+// src/gopang/ai/vision.js의 동명 함수가 담당), 게다가 템플릿 리터럴이
+// 중간에 닫히지 않은 채 파일 끝까지 이어져 이 파일 자체가 파싱 불가
+// 상태였다(node --check로 재현 확인). 실행에 전혀 관여하지 않던
+// 죽은 코드라 정리 차원에서 제거했다 — 실제 K-Cleaner Vision 분석
+// 경로를 바꾸는 변경은 아니다.
 
 // ── FIIL.kr 신고 전송 — Supabase 직접 저장 ─────────────────
 // localStorage/postMessage 방식 폐기 → Supabase REST API 사용
@@ -191,25 +196,19 @@ export function _parseKCleanerReply(text) {
   return R;
 }
 
-// ── Supabase reports 행 업데이트 — 전체 파싱 데이터 저장 ──────
+// ── kcleaner_reports(L1 PocketBase) 병합-업데이트 ──────────────
+// 2026-09-22: state.js의 TODO(주피터) 해소 — fiil-kcleaner의 reports
+// 테이블이 대응할 L1 PocketBase 컬렉션명이 kcleaner_reports로 확정됨에
+// 따라, Supabase(_SUPABASE_URL/_SUPABASE_KEY, 이미 2026-08-12 보안
+// 스캔에서 노출 확인된 anon key)를 직접 호출하던 방식을 걷어내고
+// hondi-proxy(worker.js)의 PATCH /kcleaner/report/:report_code로
+// 이관했다. GET(select)+merge+PATCH였던 예전 패턴은 이제 Worker
+// 안에서 동일하게 수행된다(handleKCleanerReportUpdate) — 클라이언트는
+// 병합할 필드만 보내면 된다.
 export async function _updateFiilReport(reportId, parsed) {
-  // ★ 2026-08-12 — 위 pdv/record.js와 동일 사유(state.js TODO 참조).
-  // fiil-kcleaner의 reports 테이블이 L1 PocketBase 어느 컬렉션에
-  // 대응하는지 확정 전까지 비활성.
-  if (!_SUPABASE_URL || !_SUPABASE_KEY) {
-    console.error('[K-Cleaner] _updateFiilReport 비활성 — reports의 PocketBase 목적지 미확정(TODO, state.js 참조)');
-    return;
-  }
   try {
-    const res = await fetch(
-      _SUPABASE_URL + '/rest/v1/reports?id=eq.' + reportId + '&select=analysis,cost&limit=1',
-      { headers: { 'apikey': _SUPABASE_KEY, 'Authorization': 'Bearer ' + _SUPABASE_KEY } }
-    );
-    const rows = await res.json();
-    const existing = rows[0] || {};
-    const analysis = existing.analysis || {};
-
-    // 성분 (중량·처리경로 포함)
+    const cd = parsed.cost_detail;
+    const analysis = {};
     if (parsed.materials.length > 0) analysis.materials = parsed.materials;
     if (parsed.volume)               analysis.volume    = parsed.volume;
     if (parsed.terrain)              analysis.terrain   = parsed.terrain;
@@ -225,41 +224,36 @@ export async function _updateFiilReport(reportId, parsed) {
     if (parsed.weather.condition)    analysis.weather       = parsed.weather;
     if (parsed.gcs_points)           analysis.gcs_points    = parsed.gcs_points;
     if (parsed.openhash_block_id)    analysis.openhash_block_id = parsed.openhash_block_id;
-    if (parsed.cost_detail.total)    analysis.cost_detail   = parsed.cost_detail;
+    if (cd.total)                    analysis.cost_detail   = cd;
     if (parsed.processing_items.length) analysis.processing_items = parsed.processing_items;
 
-    // 비용 (Supabase cost 컬럼 — report.html 비용 섹션에 사용)
-    const cd = parsed.cost_detail;
+    // 비용(report.html 비용 섹션에 쓰이는 요약 형태) — Worker가 기존
+    // 값 위에 얕은 병합을 해주므로 여기서는 새로 계산된 값만 보낸다.
     const cost = {
-      labor:     cd.labor_personnel || existing.cost?.labor     || 0,
-      equipment: (cd.drone_transport || 0) + (cd.vehicle || 0) || existing.cost?.equipment || 0,
-      supplies:  cd.processing_subtotal || existing.cost?.supplies || 0,
+      labor:     cd.labor_personnel || 0,
+      equipment: (cd.drone_transport || 0) + (cd.vehicle || 0) || 0,
+      supplies:  cd.processing_subtotal || 0,
       other:     cd.supplies || 0,
     };
 
-    const patchRes = await fetch(
-      _SUPABASE_URL + '/rest/v1/reports?id=eq.' + reportId,
+    const res = await fetch(
+      `${PROXY}/kcleaner/report/${encodeURIComponent(reportId)}`,
       {
         method: 'PATCH',
-        headers: {
-          'apikey': _SUPABASE_KEY,
-          'Authorization': 'Bearer ' + _SUPABASE_KEY,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({ analysis, cost })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ analysis, cost }),
       }
     );
-    if (patchRes.ok) {
-      console.log('[FIIL] ✅ 전체 데이터 업데이트 완료 →', reportId,
+    if (res.ok) {
+      console.log('[K-Cleaner] ✅ 전체 데이터 업데이트 완료 →', reportId,
         '성분', parsed.materials.length, '개 / 타임라인', parsed.timeline.length,
         '단계 / 합계 ₩' + cd.total);
     } else {
-      const errText = await patchRes.text();
-      console.warn('[FIIL] PATCH 오류:', patchRes.status, errText);
+      const errText = await res.text().catch(() => '');
+      console.warn('[K-Cleaner] PATCH 오류:', res.status, errText);
     }
   } catch(e) {
-    console.warn('[FIIL] 업데이트 오류:', e.message);
+    console.warn('[K-Cleaner] 업데이트 오류:', e.message);
   }
 }
 
