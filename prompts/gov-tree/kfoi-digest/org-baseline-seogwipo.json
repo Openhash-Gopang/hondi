@@ -1,0 +1,172 @@
+{
+ "tier": "seogwipo",
+ "as_of": "2026-08-25",
+ "basis": "제주특별자치도 행정기구 설치 및 정원 조례 시행규칙(제938호, 2026.8.25. 시행) 제76조~제86조(제6장 제2절 서귀포시) 원문 확인",
+ "checked_on": "2026-09-22",
+ "confidence_note": "2026-09-22 사용자가 제공한 조직도 이미지로 먼저 10개 국이 전부 일치함을 확인했고, 같은 날 시행규칙 원문(제6장 제2절)으로 재확인했다 — 이미지와 원문이 완전히 일치한다. 유일한 차이는 자치행정국의 '기초자치단체설치준비지원단'이 원문의 하부조직 열거에 없다는 것(제주시와 같은 패턴).",
+ "official_units": {
+  "bureaus": [
+   "시민소통지원실",
+   "공보실",
+   "종합민원실",
+   "자치행정국",
+   "복지위생국",
+   "문화관광체육국",
+   "농수축산경제국",
+   "청정환경국",
+   "안전도시건설국",
+   "서귀포보건소"
+  ],
+  "offices": [],
+  "note": "시행규칙 제78조가 열거하는 10개 하부조직"
+ },
+ "expected_counts": {
+  "국": 6,
+  "과": 37,
+  "note": "국 6개(자치행정국~안전도시건설국)+보건소, 과 소계는 이번에 확인한 7개 국·소의 합(37개)"
+ },
+ "reform_deltas": [],
+ "missing_in_inventory": [],
+ "corrections": [
+  {
+   "item": "2026-09-22 시행규칙 원문(제76조~제86조)으로 이미지 대조(2026-09-22, 국 10개 전수 일치)를 재확인 — 신뢰도를 이미지 단독 근거에서 원문 근거로 격상",
+   "confidence": "high"
+  }
+ ],
+ "open_questions": [
+  "자치행정국의 '기초자치단체설치준비지원단'이 시행규칙 하부조직 열거에 없는 이유(제주시와 같은 패턴 — 한시기구 별도 규정 여부)",
+  "각 과의 세부 분장사무(별표 7 필요)"
+ ],
+ "sources": [
+  {
+   "id": "law-sirhaeng",
+   "title": "제주특별자치도 행정기구 설치 및 정원 조례 시행규칙(제938호, 2026.8.25. 시행) 제6장 제2절 — 사용자 제공 원문",
+   "url": "",
+   "kind": "user-provided-primary"
+  },
+  {
+   "id": "seogwipo-orgchart",
+   "title": "서귀포시 행정조직도(사용자 제공 이미지, 2026-09-22)",
+   "url": "",
+   "kind": "user-provided-image"
+  }
+ ],
+ "mapping": {
+  "SP-CITYDO-SEOGWIPO-JACHI": {
+   "status": "match",
+   "current_name": "자치행정국",
+   "confidence": "high",
+   "note": "\"기초자치단체설치준비지원단\"이 시행규칙 원문(하부조직 열거)에 없다 — 제주시와 같은 패턴, 한시조직이라 이 조문 체계 밖일 가능성",
+   "legal_basis": "제80조",
+   "current_divisions": [
+    "총무과",
+    "기획예산과",
+    "자치행정과",
+    "마을활력과",
+    "평생교육과",
+    "세무과"
+   ]
+  },
+  "SP-CITYDO-SEOGWIPO-WELFARE": {
+   "status": "match",
+   "current_name": "복지위생국",
+   "confidence": "high",
+   "legal_basis": "제81조",
+   "current_divisions": [
+    "주민복지과",
+    "통합돌봄과",
+    "노인복지과",
+    "장애인복지과",
+    "여성가족과",
+    "위생관리과"
+   ]
+  },
+  "SP-CITYDO-SEOGWIPO-CULTURE": {
+   "status": "match",
+   "current_name": "문화관광체육국",
+   "confidence": "high",
+   "legal_basis": "제82조",
+   "current_divisions": [
+    "문화예술과",
+    "관광진흥과",
+    "체육진흥과",
+    "서귀포예술의전당",
+    "도서관운영사무소",
+    "관광지관리소",
+    "서귀포공립미술관"
+   ]
+  },
+  "SP-CITYDO-SEOGWIPO-AGRIECONOMY": {
+   "status": "match",
+   "current_name": "농수축산경제국",
+   "confidence": "high",
+   "legal_basis": "제83조",
+   "current_divisions": [
+    "경제일자리과",
+    "디지털혁신과",
+    "친환경농정과",
+    "감귤유통과",
+    "해양수산과",
+    "청정축산과"
+   ]
+  },
+  "SP-CITYDO-SEOGWIPO-CLIMATE": {
+   "status": "match",
+   "current_name": "청정환경국",
+   "confidence": "high",
+   "note": "시행규칙 원문과 정확히 일치(제주시와 달리 이미 기후환경과로 갱신돼 있었다)",
+   "legal_basis": "제84조",
+   "current_divisions": [
+    "기후환경과",
+    "생활환경과",
+    "공원녹지과",
+    "산림휴양관리소"
+   ]
+  },
+  "SP-CITYDO-SEOGWIPO-HOUSING": {
+   "status": "match",
+   "current_name": "안전도시건설국",
+   "confidence": "high",
+   "legal_basis": "제85조",
+   "current_divisions": [
+    "안전총괄과",
+    "도시과",
+    "건축과",
+    "건설과",
+    "교통행정과",
+    "상하수도과"
+   ]
+  },
+  "SP-CITYDO-SEOGWIPO-HEALTH": {
+   "status": "match",
+   "current_name": "서귀포보건소",
+   "confidence": "high",
+   "legal_basis": "제86조",
+   "current_divisions": [
+    "보건행정과",
+    "건강증진과",
+    "동부보건소",
+    "서부보건소"
+   ]
+  },
+  "SP-CITYDO-SEOGWIPO-COMM": {
+   "status": "match",
+   "current_name": "시민소통지원실",
+   "confidence": "high",
+   "note": "제79조의 부시장 보조ㆍ보좌기관(시민소통지원실ㆍ공보실ㆍ종합민원실) 중 하나",
+   "legal_basis": "제79조"
+  },
+  "SP-CITYDO-SEOGWIPO-PR": {
+   "status": "match",
+   "current_name": "공보실",
+   "confidence": "high",
+   "legal_basis": "제79조"
+  },
+  "SP-CITYDO-SEOGWIPO-CIVILAFFAIRS": {
+   "status": "match",
+   "current_name": "종합민원실",
+   "confidence": "high",
+   "legal_basis": "제79조"
+  }
+ }
+}

@@ -276,7 +276,7 @@ const DO_BUREAUS = [
       { id: "SP-DIV-PLAN-TAXADMIN", name: "세정담당관", spId: "SP-DIV-PLAN-TAXADMIN", file: "02-do-dept/divisions/SP-DIV-PLAN-TAXADMIN_v1.0.md", confirmed: true },
       { id: "SP-DIV-PLAN-YOUTH", name: "청년정책담당관", spId: "SP-DIV-PLAN-YOUTH", file: "02-do-dept/divisions/SP-DIV-PLAN-YOUTH_v1.0.md", confirmed: true },
   ]},
-  { id: "health", name: "도민안전건강실(...)", spId: "SP-DO-SAFETY", kind: "do-dept", divisions: [
+  { id: "health", name: "안전건강실", spId: "SP-DO-SAFETY", kind: "do-dept", divisions: [
       { id: "SP-DIV-SAFETY-HEALTHHYGIENE", name: "건강위생과", spId: "SP-DIV-SAFETY-HEALTHHYGIENE", file: "02-do-dept/divisions/SP-DIV-SAFETY-HEALTHHYGIENE_v1.0.md", confirmed: true },
       { id: "SP-DIV-SAFETY-HEALTHPOLICY", name: "보건정책과", spId: "SP-DIV-SAFETY-HEALTHPOLICY", file: "02-do-dept/divisions/SP-DIV-SAFETY-HEALTHPOLICY_v1.0.md", confirmed: true },
       { id: "SP-DIV-SAFETY-NATURALDISASTER", name: "자연재난과", spId: "SP-DIV-SAFETY-NATURALDISASTER", file: "02-do-dept/divisions/SP-DIV-SAFETY-NATURALDISASTER_v1.0.md", confirmed: true },
@@ -295,17 +295,24 @@ const DO_BUREAUS = [
       { id: "SP-DIV-ECON-SMALLBIZ", name: "소상공인물류과", spId: "SP-DIV-ECON-SMALLBIZ", file: "02-do-dept/divisions/SP-DIV-ECON-SMALLBIZ_v1.0.md", confirmed: true },
       { id: "SP-DIV-ECON-EMPLOYCENTER", name: "고용센터", spId: "SP-DIV-ECON-EMPLOYCENTER", file: "02-do-dept/divisions/SP-DIV-ECON-EMPLOYCENTER_v1.0.md", confirmed: true },
   ]},
-  { id: "innov", name: "혁신산업국", spId: "SP-DO-INNOV", kind: "do-dept", divisions: [
+  { id: "innov", name: "미래산업국", spId: "SP-DO-INNOV", kind: "do-dept", divisions: [
       { id: "SP-DIV-INNOV-DIGITAL", name: "디지털혁신과", spId: "SP-DIV-INNOV-DIGITAL", file: "02-do-dept/divisions/SP-DIV-INNOV-DIGITAL_v1.0.md", confirmed: true },
       { id: "SP-DIV-INNOV-ENERGYINDUSTRY", name: "에너지산업과", spId: "SP-DIV-INNOV-ENERGYINDUSTRY", file: "02-do-dept/divisions/SP-DIV-INNOV-ENERGYINDUSTRY_v1.0.md", confirmed: true },
       { id: "SP-DIV-INNOV-FUTUREGROWTH", name: "미래성장과", spId: "SP-DIV-INNOV-FUTUREGROWTH", file: "02-do-dept/divisions/SP-DIV-INNOV-FUTUREGROWTH_v1.0.md", confirmed: true },
       { id: "SP-DIV-INNOV-SPACEMOBILITY", name: "우주모빌리티과", spId: "SP-DIV-INNOV-SPACEMOBILITY", file: "02-do-dept/divisions/SP-DIV-INNOV-SPACEMOBILITY_v1.0.md", confirmed: true },
   ]},
-  { id: "climate", name: "기후환경국", spId: "SP-DO-CLIMATE", kind: "do-dept", divisions: [
+  { id: "climate", name: "환경산림자원국", spId: "SP-DO-CLIMATE", kind: "do-dept", divisions: [
       { id: "SP-DIV-CLIMATE-ENVPOLICY", name: "환경정책과", spId: "SP-DIV-CLIMATE-ENVPOLICY", file: "02-do-dept/divisions/SP-DIV-CLIMATE-ENVPOLICY_v1.0.md", confirmed: true },
       { id: "SP-DIV-CLIMATE-WATERPOLICY", name: "물정책과", spId: "SP-DIV-CLIMATE-WATERPOLICY", file: "02-do-dept/divisions/SP-DIV-CLIMATE-WATERPOLICY_v1.0.md", confirmed: true },
       { id: "SP-DIV-CLIMATE-RECYCLING", name: "자원순환과", spId: "SP-DIV-CLIMATE-RECYCLING", file: "02-do-dept/divisions/SP-DIV-CLIMATE-RECYCLING_v1.0.md", confirmed: true },
       { id: "SP-DIV-CLIMATE-FORESTGREEN", name: "산림녹지과", spId: "SP-DIV-CLIMATE-FORESTGREEN", file: "02-do-dept/divisions/SP-DIV-CLIMATE-FORESTGREEN_v1.0.md", confirmed: true },
+  ]},
+  // 2026-09-22 신설 확인(시행규칙 제21조의2) — 과 SP는 아직 없음(분장사무 근거인 별표 7을 아직 확보하지 못해 내용을
+  // 채우지 않았다). 기관 목록에는 올려 두고, 청구 비서(K-FOI)의 요약본에는 org.status:"missing_in_inventory"로 잡힌다.
+  { id: "climateenergy", name: "기후에너지국", spId: "SP-DO-CLIMATEENERGY", kind: "do-dept", divisions: [
+      { id: "SP-DIV-CLIMATEENERGY-POLICY", name: "기후에너지정책과", spId: "SP-DIV-CLIMATEENERGY-POLICY", file: "", confirmed: false },
+      { id: "SP-DIV-CLIMATEENERGY-CARBON", name: "탄소중립정책과", spId: "SP-DIV-CLIMATEENERGY-CARBON", file: "", confirmed: false },
+      { id: "SP-DIV-CLIMATEENERGY-DISTRIBUTED", name: "분산에너지과", spId: "SP-DIV-CLIMATEENERGY-DISTRIBUTED", file: "", confirmed: false },
   ]},
   { id: "housing", name: "건설주택국", spId: "SP-DO-HOUSING", kind: "do-dept", divisions: [
       { id: "SP-DIV-HOUSING-CONSTRUCTION", name: "건설주택국) 건설과", spId: "SP-DIV-HOUSING-CONSTRUCTION", file: "02-do-dept/divisions/SP-DIV-HOUSING-CONSTRUCTION_v1.0.md", confirmed: true },
@@ -342,15 +349,11 @@ const DO_BUREAUS = [
       { id: "SP-DIV-OCEAN-HAENYEOHERITAGE", name: "해녀문화유산과", spId: "SP-DIV-OCEAN-HAENYEOHERITAGE", file: "02-do-dept/divisions/SP-DIV-OCEAN-HAENYEOHERITAGE_v1.0.md", confirmed: true },
       { id: "SP-DIV-OCEAN-PORTHARBOR", name: "해운항만과", spId: "SP-DIV-OCEAN-PORTHARBOR", file: "02-do-dept/divisions/SP-DIV-OCEAN-PORTHARBOR_v1.0.md", confirmed: true },
   ]},
-  { id: "comm", name: "소통담당관(구 소통청렴담당관)", spId: "SP-DO-COMM", kind: "do-dept", divisions: null },
+  { id: "comm", name: "소통ㆍ제2공항담당관", spId: "SP-DO-COMM", kind: "do-dept", divisions: null },
   { id: "integrity", name: "청렴감찰관", spId: "SP-DO-INTEGRITY", kind: "do-dept", divisions: null },
-  { id: "general", name: "총무과", spId: "SP-DO-GENERAL", kind: "do-dept", divisions: null },
   { id: "central", name: "중앙협력본부", spId: "SP-DO-LIAISON", kind: "do-dept", divisions: null },
   { id: "spokesman", name: "대변인", spId: "SP-DO-SPOKES", kind: "do-dept", divisions: null },
-  { id: "aigov", name: "AI행정혁신추진단", spId: "SP-DO-AIGOV", kind: "do-dept", divisions: null },
-  { id: "airportsup", name: "공항확충지원단", spId: "SP-DO-AIRPORTSUP", kind: "do-dept", divisions: null },
-  { id: "autonomy", name: "특별자치제도추진단", spId: "SP-DO-AUTONOMY", kind: "do-dept", divisions: null },
-  { id: "balance", name: "도시균형추진단", spId: "SP-DO-BALANCE", kind: "do-dept", divisions: null },
+  { id: "aigov", name: "AI혁신추진단", spId: "SP-DO-AIGOV", kind: "do-dept", divisions: null },
   { id: "basicsoc", name: "기본사회추진단", spId: "SP-DO-BASICSOC", kind: "do-dept", divisions: null },
   { id: "gangjeong", name: "강정공동체사업추진단", spId: "SP-DO-GANGJEONG", kind: "do-dept", divisions: null },
   { id: "gender", name: "성평등여성정책관", spId: "SP-DO-GENDER", kind: "do-dept", divisions: null },
@@ -585,9 +588,13 @@ const JEJUSI_BUREAUS = [
       { id: "SP-CITYDIV-JEJUSI-CULTURE-UDANGLIB", name: "문화관광체육국 우당도서관", spId: "SP-CITYDIV-JEJUSI-CULTURE-UDANGLIB", file: "04-city/divisions/SP-CITYDIV-JEJUSI-CULTURE-UDANGLIB_v1.0.md", confirmed: true },
   ]},
   { id: "jejusi-climate", name: "청정환경국", spId: "SP-CITYDO-JEJUSI-CLIMATE", kind: "city", divisions: [
+      // 2026-09-22 시행규칙(제938호) 제72조 확인: 기후환경과ㆍ환경지도과ㆍ생활환경과ㆍ공원녹지과ㆍ절물생태관리소(5개)가
+      // 정본이다. 환경관리과ㆍ환경시설관리소는 이 조문에 없다 — 이미 작성된 SP 내용을 삭제하지 않고 남겨 두되(다음 배치에서
+      // 별표 7로 분장사무를 확인한 뒤 정리), 법령이 확인해 준 기후환경과를 우선 추가한다(과 SP는 아직 미작성).
+      { id: "SP-CITYDIV-JEJUSI-CLIMATE-CLIMATEENV", name: "청정환경국 기후환경과", spId: "SP-CITYDIV-JEJUSI-CLIMATE-CLIMATEENV", file: "", confirmed: false },
       { id: "SP-CITYDIV-JEJUSI-CLIMATE-ENVGUIDE", name: "청정환경국 환경지도과", spId: "SP-CITYDIV-JEJUSI-CLIMATE-ENVGUIDE", file: "04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-ENVGUIDE_v1.0.md", confirmed: true },
-      { id: "SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT", name: "청정환경국 환경관리과", spId: "SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT", file: "04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT_v1.1.md", confirmed: true },
-      { id: "SP-CITYDIV-JEJUSI-CLIMATE-FACILITY", name: "청정환경국 환경시설관리소", spId: "SP-CITYDIV-JEJUSI-CLIMATE-FACILITY", file: "04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-FACILITY_v1.0.md", confirmed: true },
+      { id: "SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT", name: "청정환경국 환경관리과", spId: "SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT", file: "04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT_v1.1.md", confirmed: false },
+      { id: "SP-CITYDIV-JEJUSI-CLIMATE-FACILITY", name: "청정환경국 환경시설관리소", spId: "SP-CITYDIV-JEJUSI-CLIMATE-FACILITY", file: "04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-FACILITY_v1.0.md", confirmed: false },
       { id: "SP-CITYDIV-JEJUSI-CLIMATE-JEOLMUL", name: "청정환경국 절물생태관리소", spId: "SP-CITYDIV-JEJUSI-CLIMATE-JEOLMUL", file: "04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-JEOLMUL_v1.0.md", confirmed: true },
       { id: "SP-CITYDIV-JEJUSI-CLIMATE-LIVINGENV", name: "청정환경국 생활환경과", spId: "SP-CITYDIV-JEJUSI-CLIMATE-LIVINGENV", file: "04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-LIVINGENV_v1.0.md", confirmed: true },
       { id: "SP-CITYDIV-JEJUSI-CLIMATE-PARKS", name: "청정환경국 공원녹지과", spId: "SP-CITYDIV-JEJUSI-CLIMATE-PARKS", file: "04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-PARKS_v1.1.md", confirmed: true },
@@ -600,13 +607,13 @@ const JEJUSI_BUREAUS = [
       { id: "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-BUILDING", name: "도시건설국 건축과", spId: "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-BUILDING", file: "04-city/divisions/SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-BUILDING_v1.0.md", confirmed: true },
       { id: "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-WATER", name: "도시건설국 상하수도과", spId: "SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-WATER", file: "04-city/divisions/SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-WATER_v1.1.md", confirmed: true },
   ]},
-  { id: "jejusi-agri", name: "agri", spId: "SP-CITYDO-JEJUSI-AGRI", kind: "city", divisions: [
+  { id: "jejusi-agri", name: "농수축산국", spId: "SP-CITYDO-JEJUSI-AGRI", kind: "city", divisions: [
       { id: "SP-CITYDIV-JEJUSI-AGRI-ECOFARM", name: "농수축산국 친환경농정과", spId: "SP-CITYDIV-JEJUSI-AGRI-ECOFARM", file: "04-city/divisions/SP-CITYDIV-JEJUSI-AGRI-ECOFARM_v1.0.md", confirmed: true },
       { id: "SP-CITYDIV-JEJUSI-AGRI-CITRUS", name: "농수축산국 감귤유통과", spId: "SP-CITYDIV-JEJUSI-AGRI-CITRUS", file: "04-city/divisions/SP-CITYDIV-JEJUSI-AGRI-CITRUS_v1.0.md", confirmed: true },
       { id: "SP-CITYDIV-JEJUSI-AGRI-FISHERY", name: "농수축산국 해양수산과", spId: "SP-CITYDIV-JEJUSI-AGRI-FISHERY", file: "04-city/divisions/SP-CITYDIV-JEJUSI-AGRI-FISHERY_v1.0.md", confirmed: true },
       { id: "SP-CITYDIV-JEJUSI-AGRI-LIVESTOCK", name: "농수축산국 청정축산과", spId: "SP-CITYDIV-JEJUSI-AGRI-LIVESTOCK", file: "04-city/divisions/SP-CITYDIV-JEJUSI-AGRI-LIVESTOCK_v1.0.md", confirmed: true },
   ]},
-  { id: "jejusi-health", name: "health", spId: "SP-CITYDO-JEJUSI-HEALTH", kind: "city", divisions: [
+  { id: "jejusi-health", name: "제주보건소", spId: "SP-CITYDO-JEJUSI-HEALTH", kind: "city", divisions: [
       { id: "SP-CITYDIV-JEJUSI-HEALTH-ADMIN", name: "제주보건소 보건행정과", spId: "SP-CITYDIV-JEJUSI-HEALTH-ADMIN", file: "04-city/divisions/SP-CITYDIV-JEJUSI-HEALTH-ADMIN_v1.0.md", confirmed: true },
       { id: "SP-CITYDIV-JEJUSI-HEALTH-EPIDEMIC", name: "제주보건소 감염예방의약과", spId: "SP-CITYDIV-JEJUSI-HEALTH-EPIDEMIC", file: "04-city/divisions/SP-CITYDIV-JEJUSI-HEALTH-EPIDEMIC_v1.0.md", confirmed: true },
       { id: "SP-CITYDIV-JEJUSI-HEALTH-PROMOTION", name: "제주보건소 건강증진과", spId: "SP-CITYDIV-JEJUSI-HEALTH-PROMOTION", file: "04-city/divisions/SP-CITYDIV-JEJUSI-HEALTH-PROMOTION_v1.0.md", confirmed: true },

@@ -557,7 +557,7 @@ const JEJU_L2_TABLE = [
     // 문의로도 쓰이는 일반 용어라 남기되, 개별 세액 확인은 SP 본문 §3에서
     // 시청 세무과·재산세과로 위임하도록 이미 명시해뒀다(이중 안전장치).
     kw: ['기획조정실', '고향사랑기부', '세정', '지방세', '청년정책', '인구정책', '예산', '기획', '정책기획관', '특별자치법무'] },
-  { code: 'SP-DO-SAFETY',   file: '02-do-dept/SP-DO-SAFETY_v1.1.md',
+  { code: 'SP-DO-SAFETY',   file: '02-do-dept/SP-DO-SAFETY_v1.3.md',
     domain: 'safety', 도코드: 'jeju',
     kw: ['안전건강실', '재난', '태풍', '호우', '보건정책', '감염병', '예방접종', '응급의료', '안전', '재난', '보건', '건강위생', '사회재난', '안전정책', '자연재난'] },
   { code: 'SP-DO-JACHI',    file: '02-do-dept/SP-DO-JACHI_v1.1.md',
@@ -566,7 +566,7 @@ const JEJU_L2_TABLE = [
   { code: 'SP-DO-ECON',     file: '02-do-dept/SP-DO-ECON_v1.1.md',
     domain: 'econ', 도코드: 'jeju',
     kw: ['경제활력국', '소상공인', '자영업', '중소기업', '일자리', '정책자금', '경제', '경제정책', '고용', '기업정책', '소상공인물류'] },
-  { code: 'SP-DO-INNOV',    file: '02-do-dept/SP-DO-INNOV_v1.2.md',
+  { code: 'SP-DO-INNOV',    file: '02-do-dept/SP-DO-INNOV_v1.3.md',
     domain: 'innov', 도코드: 'jeju',
     // ★ 2026-09-16 수정 — 세계일보(2026-07-04) 확인 결과 '혁신산업국'→
     // '미래산업국' 명칭 변경 확정. '신재생'/'풍력'/'태양광'은 신설
@@ -581,7 +581,7 @@ const JEJU_L2_TABLE = [
     domain: 'welfare', 도코드: 'jeju',
     kw: ['복지가족국', '보건복지여성국', '기초생활수급', '기초연금', '보육료', '어린이집', '장애인복지', '한부모',
          '복지', '임신', '난임', '출산', '육아', '보육', '장애인', '여성가족', '차상위계층', '부모급여', '노인복지', '복지정책', '아동보육청소년'] },  // ★ 2026-08-23 '난임'·'차상위계층'·'부모급여' 추가(4~5차 사고실험 발견)
-  { code: 'SP-DO-CLIMATE',  file: '02-do-dept/SP-DO-CLIMATE_v1.1.md',
+  { code: 'SP-DO-CLIMATE',  file: '02-do-dept/SP-DO-CLIMATE_v1.3.md',
     domain: 'climate', 도코드: 'jeju',
     // ★ 2026-07-23 수정 — '분리배출' 삭제(100건 사고실험에서 발견,
     // 주피터 지시). "분리배출 위반 신고"처럼 실제로는 시청 생활환경과·
@@ -630,7 +630,7 @@ const JEJU_L2_TABLE = [
   // static 방식을 그대로 유지 — 잘못 domain을 채우면 존재하지 않는
   // 템플릿 fetch가 실패해 조용히 static으로 폴백되긴 하지만(코드상
   // try/catch), 혼란을 막기 위해 있는 그대로 static으로 둔다.
-  { code: 'SP-DO-COMM',     file: '02-do-dept/SP-DO-COMM_v1.1.md',
+  { code: 'SP-DO-COMM',     file: '02-do-dept/SP-DO-COMM_v1.2.md',
     domain: 'comm', 도코드: 'jeju',
     // ★ 2026-09-16 수정 — 세계일보(2026-07-04)+조직도 스크린샷 확인 결과
     // '소통청렴담당관'의 청렴·감사 기능이 별도 조직(청렴감찰관,
@@ -649,7 +649,7 @@ const JEJU_L2_TABLE = [
     // SP-NAT-LABOR)과 코드/domain이 겹치지 않도록 이 항목은 domain
     // 필드를 의도적으로 비운다(static 경로 고정).
     kw: ['노동안전감독관', '노동감독', '사업장 감독', '임금체불', '산업재해 예방', '중대재해'] },
-  { code: 'SP-DO-AIGOV',   file: '02-do-dept/SP-DO-AIGOV_v1.0.md',
+  { code: 'SP-DO-AIGOV',   file: '02-do-dept/SP-DO-AIGOV_v1.1.md',
     // ★ 2026-09-16 신설 — 조직도 스크린샷에서 최초 식별. 세계일보
     // (2026-07-04) 확인 — 도지사 직속, 도정 행정서비스의 AI 전환 담당.
     // SP-DO-INNOV(미래산업국·산업 육성)와 관할이 다르므로 키워드를
@@ -662,9 +662,10 @@ const JEJU_L2_TABLE = [
     kw: ['기본사회추진단', '기본사회', '기본사회 정책'] },
   { code: 'SP-DO-GENDER',   file: '02-do-dept/SP-DO-GENDER_v1.0.md',
     kw: ['성평등여성정책관', '성평등', '성평등정책', '성평등 정책'] },
-  { code: 'SP-DO-GENERAL',  file: '02-do-dept/SP-DO-GENERAL_v1.0.md',
-    domain: 'general', 도코드: 'jeju',
-    kw: ['총무과', '일반서무', '문서관리', '인사지원'] },
+  // 2026-09-22 제거 — 시행규칙(제938호) 원문 제10조 확인 결과 총무과는 독립 국이 아니라
+  // 특별자치행정국(SP-DO-JACHI) 소속 과다. 이 route는 SP-DIV-JACHI-GENERAL(division)과
+  // 완전히 중복이었다(같은 대상을 최상위 도부서로 착각해 이중 등록). '총무과'는 이제
+  // JACHI의 division 경로로만 매칭된다.
   { code: 'SP-DO-SPOKES',   file: '02-do-dept/SP-DO-SPOKES_v1.0.md',
     domain: 'spokes', 도코드: 'jeju',
     kw: ['대변인', '도정 홍보', '도정홍보', '언론대응', '보도자료'] },
@@ -673,12 +674,12 @@ const JEJU_L2_TABLE = [
   // data.json에 대응 도메인 레코드가 없어(2026-08-21 확인) static 방식이
   // 맞다 — LIAISON만 위 COMM/GENERAL/SPOKES와 동일 사유로 템플릿 경로로
   // 전환.
-  { code: 'SP-DO-AIRPORTSUP', file: '02-do-dept/SP-DO-AIRPORTSUP_v1.0.md',
-    kw: ['공항확충지원단', '제2공항', '공항확충', '공항 확충 사업'] },
-  { code: 'SP-DO-AUTONOMY',   file: '02-do-dept/SP-DO-AUTONOMY_v1.0.md',
-    kw: ['특별자치제도추진단', '특별자치제도', '분권 제도', '특례 확대'] },
-  { code: 'SP-DO-BALANCE',    file: '02-do-dept/SP-DO-BALANCE_v1.0.md',
-    kw: ['도시균형추진단', '지역균형발전', '원도심', '읍면 격차'] },
+  // 2026-09-22 제거 — 시행규칙(제938호) 원문에 본청 조직으로 존재하지 않는다(폐지 확인,
+  // prompts/gov-tree/02-do-dept/archive/README.md 참고). 제2공항 관련 주민지원·상생협력
+  // 기능은 SP-DO-COMM(소통ㆍ제2공항담당관, 시행규칙 제6조의3)으로 흡수됐다 — 아래 kw로 이동.
+  // 2026-09-22 제거 — 시행규칙(제938호) 원문에 존재하지 않는다(폐지 확인). 후속 조직 미확인.
+  // 2026-09-22 제거 — 시행규칙(제938호) 원문에 존재하지 않는다(15분도시추진단 폐지 보도와
+  // 같은 흐름으로 보이나 확정 근거는 아니다). 후속 조직 미확인.
   { code: 'SP-DO-GANGJEONG',  file: '02-do-dept/SP-DO-GANGJEONG_v1.0.md',
     kw: ['강정공동체사업추진단', '강정마을', '강정 공동체'] },
   { code: 'SP-DO-LIAISON',    file: '02-do-dept/SP-DO-LIAISON_v1.0.md',

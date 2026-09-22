@@ -16,9 +16,16 @@ function textOf(e) {
 // SP 하나를 LLM에 보여 줄 짧은 형태로 줄인다(비어 있는 필드는 뺀다).
 export function compactEntry(e, brief = false) {
   const o = { name: e.name };
-  if (brief) {   // 국(기관) 단위 조직 대조용 — 이름·상태·현행 조직 대조 결과만
+  if (brief) {   // 국(기관) 단위 조직 대조용 — 이름·상태·현행 조직 대조 결과만. current_divisions는 뺀다(길다 —
+    // 국 26개를 한 페이지에 담아야 해서). 필요하면 브리프 아닌 조회(offset 페이징)로 그 국을 본다.
     o.state = e.state;
-    if (e.org) { o.org = { status: e.org.status }; if (e.org.current_name) o.org.current_name = e.org.current_name; if (e.org.confidence) o.org.confidence = e.org.confidence; if (e.org.note) o.org.note = e.org.note.length > 80 ? e.org.note.slice(0, 79) + '…' : e.org.note; }
+    if (e.org) {
+      o.org = { status: e.org.status };
+      if (e.org.current_name) o.org.current_name = e.org.current_name;
+      if (e.org.confidence) o.org.confidence = e.org.confidence;
+      if (e.org.legal_basis) o.org.legal_basis = e.org.legal_basis;
+      if (e.org.note) o.org.note = e.org.note.length > 60 ? e.org.note.slice(0, 59) + '…' : e.org.note;
+    }
     if (e.handles) o.handles = e.handles.length > 60 ? e.handles.slice(0, 59) + '…' : e.handles;
     return o;
   }
@@ -35,6 +42,8 @@ export function compactEntry(e, brief = false) {
     o.org = { status: e.org.status };
     if (e.org.current_name) o.org.current_name = e.org.current_name;
     if (e.org.confidence) o.org.confidence = e.org.confidence;
+    if (e.org.legal_basis) o.org.legal_basis = e.org.legal_basis;
+    if (e.org.current_divisions) o.org.current_divisions = e.org.current_divisions;
     if (e.org.note) o.org.note = e.org.note.length > 90 ? e.org.note.slice(0, 89) + '…' : e.org.note;
   }
   return o;
