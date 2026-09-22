@@ -16812,7 +16812,26 @@ async function handleAdminChargeList(request, env, corsHeaders) {
     const res = await fetch(`${L1_DEFAULT}/api/collections/charge_requests/records?filter=${filter}&sort=${sortField}&perPage=${limit}`, { headers });
     if (!res.ok) return _err(502, 'L1_ERROR', '목록 조회 실패', corsHeaders);
     const data = await res.json().catch(() => ({ items: [] }));
-    return new Response(JSON.stringify({ ok: true, requests: data.items || [] }), { status: 200, headers: corsHeaders });
+    const requests = data.items || [];
+
+    // 2026-09-23 신설(주피터 지시 — 관리자 화면에 이름/아이디/전화번호도
+    // 같이 보여달라는 요청) — depositor_name(입금자명)·match_code(매칭용
+    // 전화번호 뒷자리)는 charge_requests 자체에 이미 있어 추가 조회가
+    // 필요 없다. handle만 profiles에서 guid로 조인한다(같은 guid가 여러
+    // 건일 수 있어 먼저 중복 제거 후 병렬 조회). "이름"에 앱 닉네임을 못
+    // 쓰는 이유: nickname_hash로만 저장돼 있어(단방향 해시) 서버에 평문
+    // 닉네임 자체가 없다 — PDV 로컬 우선 원칙 때문에 의도된 설계다.
+    const uniqueGuids = [...new Set(requests.map(r => r.guid).filter(Boolean))];
+    const handleByGuid = {};
+    await Promise.allSettled(uniqueGuids.map(async (g) => {
+      try {
+        const p = await _l1FindProfileByGuid(env, g);
+        if (p) handleByGuid[g] = p.handle || null;
+      } catch (e) { /* 조회 실패 시 handle 없이(—) 표시 — 목록 전체를 막지 않음 */ }
+    }));
+
+    const enriched = requests.map(r => ({ ...r, handle: handleByGuid[r.guid] || null }));
+    return new Response(JSON.stringify({ ok: true, requests: enriched }), { status: 200, headers: corsHeaders });
   } catch (e) {
     return _err(502, 'L1_UNREACHABLE', 'L1 연결 실패: ' + e.message, corsHeaders);
   }
