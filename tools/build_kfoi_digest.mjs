@@ -115,7 +115,7 @@ export function parseSp(md, fallbackName = '') {
   }
   const s2 = find(/^§?2[\.\s]/);
   if (s2) {
-    const lines = s2.body.split('\n').map(l => l.trim()).filter(l => /^[-*]\s+/.test(l) || (l && !l.startsWith('|') && !l.startsWith('#') && !l.startsWith('```')));
+    const lines = s2.body.split('\n').map(l => l.trim()).filter(l => /^[-*]\s+/.test(l) || /^\d{1,3}\.\s+/.test(l) || (l && !l.startsWith('|') && !l.startsWith('#') && !l.startsWith('```') && !l.startsWith('>')));
     out.does = lines.slice(0, 3).map(l => clip(l.replace(/^[-*]\s+/, ''), 140));
   }
   const cap = find(/CAPABILITIES/);
