@@ -660,13 +660,13 @@ const JEJU_L2_TABLE = [
     // (2026-07-04) 확인 — 도지사 직속, 기본사회 정책 기획·조정 전담
     // (개별 급여 집행은 복지가족국 등 기존 부서 소관, §3에 명시).
     kw: ['기본사회추진단', '기본사회', '기본사회 정책'] },
-  { code: 'SP-DO-GENDER',   file: '02-do-dept/SP-DO-GENDER_v1.0.md',
+  { code: 'SP-DO-GENDER',   file: '02-do-dept/SP-DO-GENDER_v1.1.md',
     kw: ['성평등여성정책관', '성평등', '성평등정책', '성평등 정책'] },
   // 2026-09-22 제거 — 시행규칙(제938호) 원문 제10조 확인 결과 총무과는 독립 국이 아니라
   // 특별자치행정국(SP-DO-JACHI) 소속 과다. 이 route는 SP-DIV-JACHI-GENERAL(division)과
   // 완전히 중복이었다(같은 대상을 최상위 도부서로 착각해 이중 등록). '총무과'는 이제
   // JACHI의 division 경로로만 매칭된다.
-  { code: 'SP-DO-SPOKES',   file: '02-do-dept/SP-DO-SPOKES_v1.0.md',
+  { code: 'SP-DO-SPOKES',   file: '02-do-dept/SP-DO-SPOKES_v1.1.md',
     domain: 'spokes', 도코드: 'jeju',
     kw: ['대변인', '도정 홍보', '도정홍보', '언론대응', '보도자료'] },
   // ★ 2026-08-03 신설 — 전수 감사로 발견된 나머지 5개 누락(한시조직/

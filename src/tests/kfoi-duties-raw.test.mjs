@@ -55,7 +55,7 @@ await test('중요: 별표 7·8·9·11은 2024.01.22 개정본이라는 사실�
 });
 await test('사용 가능 목록: do 45건·city 68건이 confirmed-current org-baseline과 실제로 대응한다(스팟 체크)', () => {
   assert.equal(usable.do.length, 45); assert.equal(usable.city.length, 68);
-  const climate = usable.do.find(x => x.spId === 'SP-DO-CLIMATE' && x.dept === '환경정책과');
+  const climate = usable.do.find(x => x.spId === 'SP-DIV-CLIMATE-ENVPOLICY' && x.dept === '환경정책과');
   assert.ok(climate && climate.duties.length > 10, '환경산림자원국(환경정책과)의 업무가 있어야 함');
   assert.ok(usable.city.some(x => x.tier === 'seogwipo'), '서귀포시 항목이 있어야 함');
   assert.ok(usable.city.some(x => x.tier === 'jeju-si'), '제주시 항목이 있어야 함');
@@ -63,6 +63,38 @@ await test('사용 가능 목록: do 45건·city 68건이 confirmed-current org-
 await test('사용 가능 목록: 2026년에 개편·신설된 부서(구 조직 명칭)는 섞여 있지 않다', () => {
   const staleNames = raw._meta.do_tier_classification.stale_dept_names;
   for (const item of usable.do) assert.ok(!staleNames.includes(item.dept), `구 조직명이 섞임: ${item.dept}`);
+});
+
+import { execFileSync } from 'node:child_process';
+import { buildDigest } from '../../tools/build_kfoi_digest.mjs';
+
+await test('작업 #4: 실제 반영된 도청 SP 40개의 §2가 분장사무로 바뀌었고, 요약본(digest)의 does에 caveat 인용문이 아니라 사무 항목만 잡힌다', () => {
+  const digest = buildDigest();
+  const applied = usable.do.filter(x => x.applied);
+  assert.equal(applied.length, 40);
+  let checked = 0;
+  for (const hit of applied) {
+    const t = digest.tiers.do.entries.find(e => e.id === hit.spId);
+    assert.ok(t, `${hit.spId}(${hit.dept}): digest에 없음`);
+    checked++;
+    assert.equal(t.state, 'revised', `${hit.spId}: v1.0 그대로면 갱신이 안 된 것`);
+    assert.ok(t.does && t.does.length > 0, `${hit.spId}: does가 비어 있음`);
+    for (const line of t.does) {
+      assert.ok(!line.startsWith('>'), `${hit.spId}: caveat 인용문이 does에 섞임 — ${line.slice(0, 40)}`);
+      assert.ok(/^\d{1,3}\.\s/.test(line), `${hit.spId}: 번호 매긴 사무 형식이 아님 — ${line.slice(0, 40)}`);
+    }
+  }
+  assert.equal(checked, 40);
+});
+await test('작업 #4: 반영하지 않은 5건(도시계획과·소방안전본부 4개)은 applied:false로 정직하게 남아 있다', () => {
+  const notApplied = usable.do.filter(x => !x.applied);
+  assert.equal(notApplied.length, 5);
+  assert.ok(notApplied.some(x => x.dept === '도시계획과'));
+  assert.equal(notApplied.filter(x => x.spId === 'SP-AGY-FIRE').length, 4);
+});
+await test('작업 #4 회귀: 파일 경로 참조(division-tables.js·페이지 인벤토리·gov-router.js)가 전부 새 버전 파일명을 가리킨다(check_stale_refs 0건)', () => {
+  const out = execFileSync('python3', ['tools/check_stale_refs.py'], { cwd: ROOT }).toString();
+  assert.ok(out.includes('모든 참조가 최신 파일과 일치합니다'), out);
 });
 
 console.log(`\n${pass}/${pass + fail} passed`);
