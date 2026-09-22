@@ -28,7 +28,7 @@ https://gopang-proxy.tensor-city.workers.dev
 
 **리스크**: `gopang-proxy.tensor-city.workers.dev`가 지금도 살아있는 워커인지 이번 세션에서 확인 못 했다(컨테이너 네트워크 정책상 `*.workers.dev` 접근 불가). 만약 이미 폐기됐다면 이 4개 서비스는 **AI 채팅과 PDV 기록이 현재 전부 실패 중**일 수 있다 — 조속한 확인 필요.
 
-**K-Cleaner**: `kcleaner`/`fiil`/`fiil-kcleaner` 이름으로 GitHub 조직 내 저장소를 찾지 못함. 다른 이름이거나 별도 호스팅으로 추정, 미확인 상태로 남김.
+**K-Clean**: `kcleaner`/`fiil`/`fiil-kcleaner` 이름으로 GitHub 조직 내 저장소를 찾지 못함. 다른 이름이거나 별도 호스팅으로 추정, 미확인 상태로 남김.
 
 ## 3. 갱신된 종합 표
 
@@ -39,11 +39,11 @@ https://gopang-proxy.tensor-city.workers.dev
 | K-Public 산하 9개 (public/tax/health/police/911/democracy/insurance/traffic/logistics) | PASS, 배포 확인됨(v5) |
 | K-Law | 별도 `/klaw/relay` 유지, 미상속 |
 | K-School/Market/Stock/GDC | **K-Public 생태계 밖, 별개 문제(구버전 프록시 엔드포인트) 발견 — 원 목적(§14 상속)과 무관하게 우선 점검 필요** |
-| K-Cleaner | 저장소 미발견, 미확인 |
+| K-Clean | 저장소 미발견, 미확인 |
 
 ## 4. 권고 (갱신)
 
 1. **(긴급, 신규)** `gopang-proxy.tensor-city.workers.dev` 생존 여부 확인. 죽어있다면 K-School/Market/Stock/GDC의 `gopang-wallet.js` 및 각 webapp.html의 엔드포인트를 `hondi-proxy`로 즉시 교체.
 2. 이 4개 서비스를 K-Public 생태계에 편입할지(별도 설계 결정 필요 — 지금은 의도적으로 독립된 서비스였을 가능성도 있음) 여부와 무관하게, (1)이 선행돼야 함.
-3. K-Cleaner 저장소 위치 확인.
+3. K-Clean 저장소 위치 확인.
 4. 정부 트랙 실행例시 보강(v3 권고 유지).

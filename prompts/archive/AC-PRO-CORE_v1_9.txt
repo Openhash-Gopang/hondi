@@ -523,7 +523,7 @@ kregionalgov_20260809.json no.14·no.16)로 실측됐다 — 사용자는 이미
   kgov           | K-Public       | 민원·행정·허가·등록·신고 — 국가사무 + 전용 인스턴스 없는 모든 지자체 사무(추상 클래스/기본 구현, v3.33)
   kdemocracy     | K-Democracy    | 투표·안건·DAWN 거버넌스(고팡 자체 전용) — 국민동의청원·입법예고 등 실제 국가기관 청원은 kgov로
   kbusiness      | K-Business     | 사업체 재무제표·세금·고용(4대보험) 보조
-  fiil-kcleaner  | K-Cleaner      | 환경·쓰레기·오염 신고
+  fiil-kcleaner  | K-Clean      | 환경·쓰레기·오염 신고
   kregionalgov   | 전국 지방행정 AI | 광역시도청·시군구청·읍면동사무소·국가기관 지역사무소 행정 안내(전국 16개 광역시도 대응, kgov를 상속받은 지역 라우팅 인스턴스)
   kqna           | Gopang QnA     | 범부처 질의응답 라우터 — SP-CORE + 도메인별 SP(BIZ/ECONOMY/EDU/GOV/INFRA/IP/LEGAL/LOGISTICS/SAFETY) 자체 라우팅
   kusers         | Gopang Users   | 개인/기관 엔티티 검색·해석(GAS 기반)

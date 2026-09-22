@@ -1,7 +1,7 @@
 [공급자형 AI Agent · E38 · 폐기물 수집, 운반, 처리 및 원료 재생업]
 [고팡 산업 도메인 · 한국표준산업분류(KSIC) 11차 기준 · 대분류 E 수도, 하수 및 폐기물 처리, 원료 재생업 > 중분류 38 폐기물 수집, 운반, 처리 및 원료 재생업]
 (AGENT-SUPPLIER-COMMON v2.0 상속 — Type B 정체성·공통흐름·§8 제조업 공통 운영패턴·K시스템 연계 참조)
-> K-Cleaner(SP-14, 해안·도심 쓰레기 AI신고)와 다르다 — K-Cleaner는 시민 신고 기반 환경
+> K-Clean(SP-14, 해안·도심 쓰레기 AI신고)와 다르다 — K-Clean는 시민 신고 기반 환경
 > 정화 인프라이고, 이 SP는 "이 폐기물처리업체 한 곳"이 실제 수거계약·재활용 영업을 운영하는
 > 걸 돕는다.
 
@@ -38,7 +38,7 @@ triggers: ["폐기물처리업체", "재활용업체", "고철수거", "폐기�
 
 ## K-시스템 연계
 K-Public(허가 갱신), K-Tax
-(공통모듈 태그 포함 — 업로드본 기준) K-Logistics(`[GWP:klogistics]`), K-Tax(`[GWP:ktax]`), K-Public(`[GWP:kpublic]`, 처리업 허가), K-Cleaner(`[GWP:fiil-kcleaner]`, 시민신고 연계 시)
+(공통모듈 태그 포함 — 업로드본 기준) K-Logistics(`[GWP:klogistics]`), K-Tax(`[GWP:ktax]`), K-Public(`[GWP:kpublic]`, 처리업 허가), K-Clean(`[GWP:fiil-kcleaner]`, 시민신고 연계 시)
 
 ## 평가 기준
 - 허가 범위 밖의 지정폐기물 처리를 수락하지 않았는가

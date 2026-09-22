@@ -215,7 +215,7 @@ migrate((db) => {
   {
     const rec = new Record(col);
     rec.set("gwp_id", "fiil-kcleaner");
-    rec.set("name", "K-Cleaner");
+    rec.set("name", "K-Clean");
     rec.set("tier", "core");
     rec.set("category", "ENV");
     rec.set("keywords", "쓰레기 환경 해안 분리수거 청소 오염 폐기물 불법 투기 해변 해양 오염 폐수 불법 배출");

@@ -1,5 +1,5 @@
 /**
- * ai/vision.js — Gemini Vision (K-Cleaner 이미지 분석·EXIF)
+ * ai/vision.js — Gemini Vision (K-Clean 이미지 분석·EXIF)
  */
 // ── DeepSeek API 호출 ───────────────────────────────────
 // ── 모델별 비전 지원 여부 ────────────────────────────────
@@ -26,7 +26,7 @@ export function _fileToBase64(file) {
 }
 
 // ── EXIF GPS·시간 추출 (순수 JS, 외부 라이브러리 불필요) ────
-// ── Gemini Vision 호출 — K-Cleaner 이미지 분석 전담 ─────────
+// ── Gemini Vision 호출 — K-Clean 이미지 분석 전담 ─────────
 // SP-14-IMG v1.0 system prompt 기반으로 구조화된 JSON 반환
 // ── Gemini 분석 중 Progress Bar 헬퍼 ────────────────────────
 export function _showGeminiProgress() {
@@ -207,8 +207,8 @@ export function _geminiResultToText(result, userText) {
 
   // 사용자가 텍스트를 입력하지 않은 경우 — 이미지만으로 의도 자율 파악
   const intentGuide = userText
-    ? `사용자원문: ${userText}\n위 Gemini 분석 결과를 바탕으로 K-Cleaner v1.2 방법론에 따라 수거견적서와 환경신고서를 작성하라.`
-    : `사용자원문: (없음 — 텍스트 없이 이미지만 전송됨)\n\n[자율 의도 파악 지시]\n사용자가 별도 설명 없이 이미지만 전송했다. 아래 순서로 처리하라:\n① 이미지 내용에서 사용자의 목적·요구를 스스로 판단한다.\n② 환경 오염·쓰레기 현장 사진이면 → K-Cleaner v1.2 신고·견적 절차를 자동 실행한다.\n③ 환경 외 사진(음식·문서·사람·사물 등)이면 → 사진에서 파악한 맥락에 맞는 적절한 도움을 제공한다.\n④ 불명확한 경우에만 한 가지 확인 질문을 한다. 단, 환경 신고 가능성이 조금이라도 있으면 먼저 신고·견적을 진행하고 추가 확인은 이후에 한다.`;
+    ? `사용자원문: ${userText}\n위 Gemini 분석 결과를 바탕으로 K-Clean v1.2 방법론에 따라 수거견적서와 환경신고서를 작성하라.`
+    : `사용자원문: (없음 — 텍스트 없이 이미지만 전송됨)\n\n[자율 의도 파악 지시]\n사용자가 별도 설명 없이 이미지만 전송했다. 아래 순서로 처리하라:\n① 이미지 내용에서 사용자의 목적·요구를 스스로 판단한다.\n② 환경 오염·쓰레기 현장 사진이면 → K-Clean v1.2 신고·견적 절차를 자동 실행한다.\n③ 환경 외 사진(음식·문서·사람·사물 등)이면 → 사진에서 파악한 맥락에 맞는 적절한 도움을 제공한다.\n④ 불명확한 경우에만 한 가지 확인 질문을 한다. 단, 환경 신고 가능성이 조금이라도 있으면 먼저 신고·견적을 진행하고 추가 확인은 이후에 한다.`;
 
   return `[Gemini Vision 현장 분석 결과 — SP-14-IMG-v1.0]
 신뢰도: ${Math.round((result.confidence||0)*100)}% | 이미지품질: ${result.image_quality||'?'}

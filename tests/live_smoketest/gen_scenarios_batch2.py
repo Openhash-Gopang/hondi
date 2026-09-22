@@ -162,10 +162,10 @@ add("이 앱 처음 써보는데 뭐부터 하면 되는지 하나씩 알려줄�
 add("제 프로필에 정보를 좀 더 채워 넣고 싶은데 도와줄래요", "GWP", "profile-assistant", "혼디 안내(튜토리얼·프로필)", CAT_PARA, BASIS_GWP)
 add("등록한 프로필 내용이 틀려서 고치고 싶어요", "GWP", "profile-assistant", "혼디 안내(튜토리얼·프로필)", CAT_PARA, BASIS_GWP)
 
-add("동네 해변에 쓰레기가 잔뜩 쌓여있는데 이거 신고할 수 있나요", "GWP", "fiil-kcleaner", "K-Cleaner", CAT_PARA, BASIS_GWP)
-add("공사장에서 폐수를 몰래 흘려보내는 것 같은데 신고하고 싶어요", "GWP", "fiil-kcleaner", "K-Cleaner", CAT_PARA, BASIS_GWP)
-add("분리수거를 제대로 하고 싶은데 이 재질은 뭘로 버려야 하는지 모르겠어요", "GWP", "fiil-kcleaner", "K-Cleaner", CAT_PARA, BASIS_GWP)
-add("누가 산에다가 몰래 쓰레기를 버리고 가는 걸 봤어요", "GWP", "fiil-kcleaner", "K-Cleaner", CAT_PARA, BASIS_GWP)
+add("동네 해변에 쓰레기가 잔뜩 쌓여있는데 이거 신고할 수 있나요", "GWP", "fiil-kcleaner", "K-Clean", CAT_PARA, BASIS_GWP)
+add("공사장에서 폐수를 몰래 흘려보내는 것 같은데 신고하고 싶어요", "GWP", "fiil-kcleaner", "K-Clean", CAT_PARA, BASIS_GWP)
+add("분리수거를 제대로 하고 싶은데 이 재질은 뭘로 버려야 하는지 모르겠어요", "GWP", "fiil-kcleaner", "K-Clean", CAT_PARA, BASIS_GWP)
+add("누가 산에다가 몰래 쓰레기를 버리고 가는 걸 봤어요", "GWP", "fiil-kcleaner", "K-Clean", CAT_PARA, BASIS_GWP)
 
 add("허가 신청하는 게 조건이 되는지 안 되는지 잘 모르겠어서 검토받고 싶어요", "GWP", "kqna", "Gopang QnA", CAT_PARA, BASIS_GWP)
 add("이거 어디에 물어봐야 할지도 모르겠는 애매한 궁금증이 있는데 들어볼래요", "GWP", "kqna", "Gopang QnA", CAT_PARA, BASIS_GWP)
@@ -472,7 +472,7 @@ add("보증금을 못 돌려받고 있는데 이거 절차상 어떻게 진행�
 add("적금 만기가 다가오는데 다음엔 뭘로 갈아탈지 고민이에요", "GWP", "kbank", "K-Bank", CAT_PARA, BASIS_GWP)
 add("중고로 산 물건이 하자가 있어서 판매자한테 교환을 요청하고 싶어요", "GWP", "kcommerce", "K-Market", CAT_PARA, BASIS_GWP)
 add("갑자기 정전이 됐는데 우리 동네만 그런 건지 확인하고 싶어요", "GWP", "ktelecom", "K-Telecom", CAT_PARA, BASIS_GWP)
-add("자원봉사로 해변 정화 활동에 참여하고 싶은데 어떻게 신청해요", "GWP", "fiil-kcleaner", "K-Cleaner", CAT_PARA, BASIS_GWP)
+add("자원봉사로 해변 정화 활동에 참여하고 싶은데 어떻게 신청해요", "GWP", "fiil-kcleaner", "K-Clean", CAT_PARA, BASIS_GWP)
 
 add("과외 선생님을 사람으로 소개해줄 수 있나요, AI 말고요", "PLATFORM", "direct-response", "라우팅 불필요(kedu/professor 둘 다 사람 매칭이 아니라고 정직히 안내해야 함)",
     CAT_COLLISION, "gwp-registry.js kedu 주석 근거 — 사람 과외 매칭 서비스가 아니라는 점을 명시적으로 부정해야 하는 사례")
@@ -480,7 +480,7 @@ add("보이스피싱 신고를 경찰에다 바로 넣고 싶은데 어디로 �
     "ksecurity(사이버범죄 대응)와 kpolice(경찰 신고) 경계 — '경찰'을 명시적으로 지목한 경우의 우선순위 확인")
 add("스미싱 문자를 받아서 그런데 이거 개인정보가 샌 건지 확인부터 하고 싶어요", "GWP", "ksecurity", "K-Security", CAT_COLLISION,
     "ksecurity triggers('스미싱','개인정보 유출') 근거 — kpolice와 반대편 정상 케이스")
-add("공사장에서 물이 계속 새서 흘러나오는데 이게 폐수인지 그냥 빗물인지도 모르겠어요, 일단 신고하고 싶어요", "GWP", "fiil-kcleaner", "K-Cleaner", CAT_COLLISION,
+add("공사장에서 물이 계속 새서 흘러나오는데 이게 폐수인지 그냥 빗물인지도 모르겠어요, 일단 신고하고 싶어요", "GWP", "fiil-kcleaner", "K-Clean", CAT_COLLISION,
     "fiil-kcleaner triggers('폐수','불법 배출') 근거 — 애매한 상황 서술에서도 신고 의도 인식 확인")
 add("식당에서 위생이 엉망인 걸 봤는데 이거 관청에 신고해야 하나요 아니면 위생사한테 물어봐야 하나요", "EXPERT", "sanitarian", "위생사",
     CAT_COLLISION, "sanitarian triggers('위생 점검','식품위생')와 kgov(민원)의 경계 — 전문가 자문 요청이 명확한 방향")

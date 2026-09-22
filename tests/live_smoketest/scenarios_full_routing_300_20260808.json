@@ -424,7 +424,7 @@
     "utterance": "집 청소 서비스를 예약하고 싶어요",
     "expected_type": "GWP",
     "expected_id": "fiil-kcleaner",
-    "expected_name": "K-Cleaner",
+    "expected_name": "K-Clean",
     "category": "GWP-정상",
     "basis": "§CATALOG fiil-kcleaner(해안·도심 쓰레기 AI 자동 분석·신고.)",
     "static_verdict": "PASS"
@@ -434,7 +434,7 @@
     "utterance": "이사 후 대청소를 맡기고 싶어요",
     "expected_type": "GWP",
     "expected_id": "fiil-kcleaner",
-    "expected_name": "K-Cleaner",
+    "expected_name": "K-Clean",
     "category": "GWP-패러프레이즈",
     "basis": "§CATALOG fiil-kcleaner(해안·도심 쓰레기 AI 자동 분석·신고.)",
     "static_verdict": "PASS"

@@ -42,7 +42,7 @@ const GOV_AGENCIES = new Set([
 | SP | 상태 |
 |---|---|
 | K-Law (SP-01) | `/klaw/relay`로 별도 처리 — 코드 주석에 "다음 개정 때 이 경로로 통합 예정"이라 명시. **미상속.** |
-| K-School, K-GDC, K-Stock, K-Market, K-Cleaner | `GOV_AGENCIES`에 없음 — 이번 세션에서 이 5개가 시스템 프롬프트를 어떻게 조립하는지 이 저장소 안에서 찾지 못함. 별도 워커이거나 미완성 상태로 추정되나 **확인 불가.** |
+| K-School, K-GDC, K-Stock, K-Market, K-Clean | `GOV_AGENCIES`에 없음 — 이번 세션에서 이 5개가 시스템 프롬프트를 어떻게 조립하는지 이 저장소 안에서 찾지 못함. 별도 워커이거나 미완성 상태로 추정되나 **확인 불가.** |
 
 즉 "K-Public_common 한 곳만 고치면 16개 전체에 전파된다"는 v3 보고서의 암묵적 전제는 **틀렸다** — 실제로는 9개에만 전파되고, K-Law는 알려진 대로 별도, 나머지 5개는 배선 자체가 불투명하다. 이 정정은 이번 라운드의 가장 중요한 발견이다.
 
@@ -63,7 +63,7 @@ const GOV_AGENCIES = new Set([
 ## 3. 갱신된 권고 (우선순위 순)
 
 1. **(배포 확인)** `hondi-proxy` Cloudflare Worker에 이번 `worker.js` 변경사항이 실제로 배포됐는지 확인한다 — `wrangler tail` 또는 실제 요청 테스트로.
-2. **(배선 확인)** K-School·K-GDC·K-Stock·K-Market·K-Cleaner 5개 서비스가 시스템 프롬프트를 어디서/어떻게 조립하는지 찾는다. `GOV_AGENCIES`에 추가할 수 있는 것들인지, 아니면 원래 다른 상속 구조를 쓰는지부터 확인이 먼저다.
+2. **(배선 확인)** K-School·K-GDC·K-Stock·K-Market·K-Clean 5개 서비스가 시스템 프롬프트를 어디서/어떻게 조립하는지 찾는다. `GOV_AGENCIES`에 추가할 수 있는 것들인지, 아니면 원래 다른 상속 구조를 쓰는지부터 확인이 먼저다.
 3. **(K-Law 통합)** `SP_hierarchy_inheritance_v1_0.md`에 이미 "다음 개정 때 편입 예정"이라고 적혀있던 작업 — K-Law를 `/gov/relay` + `K-Public_common`으로 통합할지, 아니면 판결방법론(v15.1)의 특수성 때문에 계속 별도로 둘지 결정이 필요하다.
 4. 정부(Jejudo) 트랙의 `jeju` 저장소 미확인 문제는 v3 권고 그대로 유효하다.
 

@@ -1,6 +1,6 @@
-# K-Cleaner 이미지 분석 전용 Vision Prompt
+# K-Clean 이미지 분석 전용 Vision Prompt
 # ═══════════════════════════════════════════════════
-# 문서명    : K-Cleaner 현장 이미지 분석 — Gemini Vision 전용
+# 문서명    : K-Clean 현장 이미지 분석 — Gemini Vision 전용
 # 문서 코드  : SP-14-IMG
 # 버전      : v1.0
 # 작성일     : 2026-05-23

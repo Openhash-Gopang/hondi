@@ -14,7 +14,7 @@
 // v2.2 변경사항 (2026-06-29, manifest.json 정합화 점검 반영):
 //   (2026-07-09: prompts/manifest.json → prompts/sp-catalog.json 개명, W-16)
 //   - kinsurance.sp_key: 'SP-14_kinsurance' → 'SP-16_kinsurance'
-//     (K-Insurance가 K-Cleaner와의 SP-14 번호 충돌로 SP-16 재배정됨에 따라
+//     (K-Insurance가 K-Clean와의 SP-14 번호 충돌로 SP-16 재배정됨에 따라
 //      manifest.json(현 sp-catalog.json) 키가 바뀌었고, 이 파일의 sp_key가 그 변경을 따라가지
 //      못해 깨져 있었음 — resolveSpUrls() 호출 시 sp_url이 null이 되는 버그)
 // ═══════════════════════════════════════════════════════════
@@ -259,7 +259,7 @@ const GWP_REGISTRY = [
     id: 'kinsurance', name: 'K-Insurance', category: 'ECO',
     type: 'inline',
     url: 'https://insurance.hondi.net/webapp.html',
-    sp_key: 'SP-16_kinsurance',  // v2.2 — SP-14에서 재배정됨 (K-Cleaner 번호충돌 해소)
+    sp_key: 'SP-16_kinsurance',  // v2.2 — SP-14에서 재배정됨 (K-Clean 번호충돌 해소)
     status: 'active', priority: 6, threshold: 0.70,
     // 2026-07-26 정정: insurance/webapp.html 실제 배포본 대조 결과,
     // 공적 보험(건강·산재·고용보험·국민연금) 청구·수급 절차 안내만
@@ -670,7 +670,7 @@ const GWP_REGISTRY = [
   // 반복되던 결함이 실사로 확인됨. clean.hondi.net 쪽 webapp.html에서
   // token→프로필 조회, facts→위치 사용을 구현해 해소(clean 저장소 README 참고).
   {
-    id: 'fiil-kcleaner', name: 'K-Cleaner', category: 'ENV',
+    id: 'fiil-kcleaner', name: 'K-Clean', category: 'ENV',
     type: 'inline',
     url: 'https://clean.hondi.net/webapp.html',
     sp_key: 'SP-14_kcleaner',

@@ -236,6 +236,6 @@ async function _micStartMediaRecorder() {
 // ── FIIL.kr 신고 전송 — Supabase 직접 저장 ─────────────────
 // localStorage/postMessage 방식 폐기 → Supabase REST API 사용
 // 어떤 브라우저에서도 동일한 DB에 저장/조회 가능
-// ── K-Cleaner AI 응답 텍스트 파싱 — 전체 데이터 추출 ────────
+// ── K-Clean AI 응답 텍스트 파싱 — 전체 데이터 추출 ────────
 
 

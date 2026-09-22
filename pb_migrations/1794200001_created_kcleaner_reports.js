@@ -1,5 +1,5 @@
 /// <reference path="../pb_data/types.d.ts" />
-// kcleaner_reports — 2026-09-22 신설. K-Cleaner(clean.hondi.net, 구 fiil.kr)
+// kcleaner_reports — 2026-09-22 신설. K-Clean(clean.hondi.net, 구 fiil.kr)
 // 신고 저장소. state.js에 남아 있던 TODO(주피터) 해소 — fiil-kcleaner의
 // reports 테이블(Supabase, 이미 2026-08-12 시크릿 스캔에서 노출 확인된
 // anon key로 클라이언트가 직접 호출하고 있었음)을 대체한다.

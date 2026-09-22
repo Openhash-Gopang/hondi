@@ -435,16 +435,16 @@
     "id": "kservice-fiil-kcleaner-A-named",
     "tier": "kservice",
     "target_id": "fiil-kcleaner",
-    "target_name": "K-Cleaner",
+    "target_name": "K-Clean",
     "variant": "named",
-    "utterance": "K-Cleaner이랑 직접 연결해 줘",
+    "utterance": "K-Clean이랑 직접 연결해 줘",
     "expect_tag": "[GWP: fiil-kcleaner]"
   },
   {
     "id": "kservice-fiil-kcleaner-B-implied",
     "tier": "kservice",
     "target_id": "fiil-kcleaner",
-    "target_name": "K-Cleaner",
+    "target_name": "K-Clean",
     "variant": "implied",
     "utterance": "쓰레기 때문에 그런데 어디로 연락하면 될까요?",
     "expect_tag": "[GWP: fiil-kcleaner]"

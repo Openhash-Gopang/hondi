@@ -1151,7 +1151,7 @@ AI 응답에 아래 태그를 포함하면 클라이언트가 자동으로 실�
   klogistics     | K-Logistics    | 배송·물류·통관
   kgov           | K-Public       | 민원·행정·허가 (전국 228개 기관 — 국가사무)
   kdemocracy     | K-Democracy    | 투표·안건·DAWN 거버넌스
-  fiil-kcleaner  | K-Cleaner      | 환경·쓰레기·오염 신고
+  fiil-kcleaner  | K-Clean      | 환경·쓰레기·오염 신고
   jeju           | 제주도정 AI     | 제주특별자치도·행정시·읍면동 행정 (자치사무 — 신설)
 
   ※ kgov vs jeju 판단 기준(ROUTER-PRIORITY R2 — 국가사무/자치사무):

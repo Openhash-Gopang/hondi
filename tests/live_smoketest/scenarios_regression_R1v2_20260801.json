@@ -818,7 +818,7 @@
     "utterance": "공사장에서 폐수를 몰래 흘려보내는 것 같은데 신고하고 싶어요",
     "expected_type": "GWP",
     "expected_id": "fiil-kcleaner",
-    "expected_name": "K-Cleaner",
+    "expected_name": "K-Clean",
     "category": "회귀감시(원래 PASS — 되묻기 과잉반응 여부 확인)",
     "static_verdict": "N/A",
     "basis": "gwp-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",

@@ -253,7 +253,7 @@ OpenHash 증거 무결성 보존. 경찰청·검찰청·사이버수사대 연�
 
 ---
 
-### fiil-kcleaner — K-Cleaner
+### fiil-kcleaner — K-Clean
 **카테고리**: ENV | **URL**: https://fiil.kr
 **실제 기능**: 사진 한 장으로 해안·도심 쓰레기·불법 투기를 AI 자동 분석·신고.
 GWP 프로토콜 연동. 환경부·지방자치단체·해양수산부 연동.
@@ -443,7 +443,7 @@ score가 임계값 미달이면 `gopang-direct` 반환.
 
 ### 해안 쓰레기 신고
 ```json
-{"category":"ENV","service_id":"fiil-kcleaner","service_url":"https://fiil.kr","confidence":0.91,"reason":"해안 쓰레기 신고는 K-Cleaner 처리 대상","secondary":null,"urgent":false,"gwp_ctx":null}
+{"category":"ENV","service_id":"fiil-kcleaner","service_url":"https://fiil.kr","confidence":0.91,"reason":"해안 쓰레기 신고는 K-Clean 처리 대상","secondary":null,"urgent":false,"gwp_ctx":null}
 ```
 
 ### 환경 신고 + 법률 복합
