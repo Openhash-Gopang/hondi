@@ -302,6 +302,15 @@ const DO_BUREAUS = [
       { id: "SP-DIV-CLIMATEENERGY-CARBON", name: "탄소중립정책과", spId: "SP-DIV-CLIMATEENERGY-CARBON", file: "", confirmed: false },
       { id: "SP-DIV-CLIMATEENERGY-DISTRIBUTED", name: "분산에너지과", spId: "SP-DIV-CLIMATEENERGY-DISTRIBUTED", file: "", confirmed: false },
   ]},
+  // 2026-09-22 DO_AGENCIES(직속기관)에서 이동 — 시행규칙 제21조의4 확인 결과 소방안전본부는
+  // 직속기관이 아니라 도청 15실·국·본부 중 하나다(spId는 이력 보존을 위해 SP-AGY-FIRE 그대로 둠).
+  // 산하 과 이름은 원문(소방정책과ㆍ예방대응과ㆍ구조구급과ㆍ119종합상황실ㆍ119특수대응단, 5개)과
+  // 다르다 — 기존 division 3개(실제 내용 있음)는 그대로 두고, 다음 배치에서 별표 확인 후 정리한다.
+  { id: "SP-AGY-FIRE", name: "소방안전본부", spId: "SP-AGY-FIRE", kind: "do-dept", divisions: [
+      { id: "SP-AGYDIV-FIRE-ADMIN", name: "소방안전본부 소방행정과", spId: "SP-AGYDIV-FIRE-ADMIN", file: "03-do-agency/divisions/SP-AGYDIV-FIRE-ADMIN_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-FIRE-PREVENTION", name: "소방안전본부 예방안전과", spId: "SP-AGYDIV-FIRE-PREVENTION", file: "03-do-agency/divisions/SP-AGYDIV-FIRE-PREVENTION_v1.1.md", confirmed: true },
+      { id: "SP-AGYDIV-FIRE-RESPONSE", name: "소방안전본부 현장대응과", spId: "SP-AGYDIV-FIRE-RESPONSE", file: "03-do-agency/divisions/SP-AGYDIV-FIRE-RESPONSE_v1.1.md", confirmed: true },
+  ]},
   { id: "housing", name: "건설주택국", spId: "SP-DO-HOUSING", kind: "do-dept", divisions: [
       { id: "SP-DIV-HOUSING-CONSTRUCTION", name: "건설주택국) 건설과", spId: "SP-DIV-HOUSING-CONSTRUCTION", file: "02-do-dept/divisions/SP-DIV-HOUSING-CONSTRUCTION_v1.0.md", confirmed: true },
       { id: "SP-DIV-HOUSING-ARCHITECTURE", name: "건설주택국) 건축경관과", spId: "SP-DIV-HOUSING-ARCHITECTURE", file: "02-do-dept/divisions/SP-DIV-HOUSING-ARCHITECTURE_v1.0.md", confirmed: true },
@@ -360,11 +369,6 @@ const DO_AGENCIES = [
   ]},
   { id: "SP-AGY-CHUKSAN", name: "축산생명연구원", spId: "SP-AGY-CHUKSAN", kind: "do-agency", divisions: [
       { id: "SP-AGYDIV-CHUKSAN-RESEARCH", name: "축산생명연구원 축산연구과", spId: "SP-AGYDIV-CHUKSAN-RESEARCH", file: "03-do-agency/divisions/SP-AGYDIV-CHUKSAN-RESEARCH_v1.0.md", confirmed: false },
-  ]},
-  { id: "SP-AGY-FIRE", name: "소방안전본부", spId: "SP-AGY-FIRE", kind: "do-agency", divisions: [
-      { id: "SP-AGYDIV-FIRE-ADMIN", name: "소방안전본부 소방행정과", spId: "SP-AGYDIV-FIRE-ADMIN", file: "03-do-agency/divisions/SP-AGYDIV-FIRE-ADMIN_v1.0.md", confirmed: true },
-      { id: "SP-AGYDIV-FIRE-PREVENTION", name: "소방안전본부 예방안전과", spId: "SP-AGYDIV-FIRE-PREVENTION", file: "03-do-agency/divisions/SP-AGYDIV-FIRE-PREVENTION_v1.1.md", confirmed: true },
-      { id: "SP-AGYDIV-FIRE-RESPONSE", name: "소방안전본부 현장대응과", spId: "SP-AGYDIV-FIRE-RESPONSE", file: "03-do-agency/divisions/SP-AGYDIV-FIRE-RESPONSE_v1.1.md", confirmed: true },
   ]},
   { id: "SP-AGY-FOLKMUSEUM", name: "제주특별자치도민속자연사박물관", spId: "SP-AGY-FOLKMUSEUM", kind: "do-agency", divisions: [
       { id: "SP-AGYDIV-FOLKMUSEUM-ADMIN", name: "제주특별자치도민속자연사박물관 관리실", spId: "SP-AGYDIV-FOLKMUSEUM-ADMIN", file: "03-do-agency/divisions/SP-AGYDIV-FOLKMUSEUM-ADMIN_v1.1.md", confirmed: true },

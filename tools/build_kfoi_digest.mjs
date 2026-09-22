@@ -39,6 +39,7 @@ const ORG_BASELINE_FILES = {
   do: path.join(GT, 'kfoi-digest/org-baseline-do.json'),
   'jeju-si': path.join(GT, 'kfoi-digest/org-baseline-jeju-si.json'),
   seogwipo: path.join(GT, 'kfoi-digest/org-baseline-seogwipo.json'),
+  agency: path.join(GT, 'kfoi-digest/org-baseline-agency.json'),
 };
 
 export const TIER_LABELS = {
