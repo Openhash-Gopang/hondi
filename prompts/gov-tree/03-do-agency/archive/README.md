@@ -100,3 +100,39 @@
 테스트 2건(작업 #11)을 추가해 6개 division 전부에 경계 문구가 있는지, 그리고 이 정리 과정에서
 배선된 3개 division의 task_key가 실수로 바뀌거나 사라지지 않았는지 회귀 검증했다.
 
+# 2026-09-23 — 공공정책연수원·보훈청(SP-AGY-PUBLICPOLICY/VETERANS) 기관·division 신설(작업 #12)
+
+지금까지는 기존 SP를 고치는 배치였지만, 이번은 **인벤토리에 SP 자체가 아예 없던** 기관 2개를
+처음부터 신설했다 — org-baseline-agency.json의 `missing_in_inventory`(SP가 없어 대조조차 못 한
+법정 기관 15개) 중 "공공정책연수원"(1개 division)·"보훈청"(3개 division)을 확인해 만들었다.
+
+- **공공정책연수원**(`SP-AGY-PUBLICPOLICY`, 교육운영과 1개): 시행규칙 제25~26조·별표8(2024.01.22.
+  개정본)로 기관 SP와 하위 `SP-AGYDIV-PUBLICPOLICY-EDUCATION`을 함께 신설했다. 별표8 원문에서
+  25번 항목이 "공무원사이버외국어교육과정 운영 26 자치경찰 직무교육 등 운영 27 공공기관(공기업,
+  출자출연기관) 직무교육 등 운영"처럼 줄바꿈이 소실된 채 한 줄에 뭉쳐 있었다 — 3개 항목(25·26·27)으로
+  풀어 다시 번호를 매기고, 이어지는 "그 밖에…" 항목은 26번이 아니라 28번으로 정정했다(division 파일
+  버전 이력·§2에 정직하게 밝힘). 산하 division이 1개뿐이라 기관 SP와 division SP의 §2가 실질적으로
+  거의 겹치는데, 이는 조직 설계상 사실이지 작성 결함이 아니다(기관 SP §6에 명시).
+- **보훈청**(`SP-AGY-VETERANS`, 보훈과·보상과·항일기념관 3개): 시행규칙 제31~32조·별표8(2024.01.22.
+  개정본)로 기관 SP와 하위 division 3개를 함께 신설했다. 항일기념관 division은 별표8 원문상 사무가
+  2건뿐인데, 이는 §2의 누락이 아니라 원문 자체가 그렇다(정직하게 밝힘). 보훈과(예우·기념사업 중심)와
+  보상과(등록·보상금 지급 등 처분성 사무 중심)는 사무가 겹치지 않도록 각 division §3에 상호 참고를
+  남겼다.
+- **명칭 중복 미해결**: `src/gopang/gov/gov-router.js`의 `JEJU_NATIONAL_TABLE`에는 이미
+  `SP-NAT-VETERANS`("제주보훈청(국가보훈부)")가 "보훈청" 등의 키워드로 등록돼 있다. 이번에 신설한
+  `SP-AGY-VETERANS`는 org-baseline-agency.json이 도 "직속기관"(제31~32조)으로 분류한 기관이라 —
+  현실에서 보훈 행정이 통상 국가보훈부 소속 지방보훈(지)청 체계로 운영되는 점과 이 저장소의 조례·
+  시행규칙 데이터가 어떻게 정합되는지는 이번 조사에서 확정하지 못했다. `division-tables.js`의 `kw`도
+  이 명칭 중복을 피해 "보훈청" 단독 키워드는 넣지 않고 기관명 전체·division 고유 사무명 위주로만
+  구성했다 — gov-router.js 쪽 실제 라우팅 연결 여부는 다음 배치에서 재검증할 것(SP-AGY-VETERANS_v1.0.md
+  §6에 상세 기록).
+- **연락처 확인 못 함**: 두 기관 모두 jeju.go.kr 공식 홈페이지 접속을 시도했으나(robots.txt·타임아웃)
+  실패해 대표전화·소재지는 "확인하지 못함"으로 명시했다(TBD가 아니라 명시적 미확인 표기).
+- 이 6개 SP(기관 2·division 4) 어디에도 실제 서비스에 연결된 task_key가 없는 것을 먼저 확인했다
+  (2026-09-23) — 그래서 archive 이동 없이 바로 신설만으로 끝났다(기존 batch10/11처럼 배선된 division과의
+  경계 정리는 필요 없었다).
+- `division-tables.js`·`pages/jeju-gov-automation.html`·`org-baseline-agency.json`(missing_in_inventory→
+  mapping 이동) 세 곳 모두 갱신했고, `src/tests/kfoi-duties-raw.test.mjs`에 작업 #12 테스트 5건을,
+  `src/tests/kfoi-digest.test.mjs`의 기존 org_counts/missing_in_inventory 검증을 9→11·15→13으로 갱신했다.
+  `tools/check_stale_refs.py`(668건 전부 정상)·clean-clone 재검증도 통과했다.
+

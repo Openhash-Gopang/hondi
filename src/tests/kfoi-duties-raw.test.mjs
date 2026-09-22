@@ -347,5 +347,64 @@ await test('작업 #11 안전장치: 경계 정리 이후에도 배선된 4개 d
   }
 });
 
+await test('작업 #12: 공공정책연수원·보훈청(그동안 SP 자체가 없던 missing_in_inventory 2건)이 기관 2개·division 4개로 신설됐다', () => {
+  const digest = buildDigest();
+  const created = [
+    ['SP-AGY-PUBLICPOLICY', 1], ['SP-AGY-VETERANS', 3],
+  ];
+  for (const [parentId, n] of created) {
+    const inst = digest.tiers.agency.entries.find(e => e.kind === 'institution' && e.id === parentId);
+    assert.ok(inst, `${parentId}: 기관 항목이 digest에 없음`);
+    const divs = digest.tiers.agency.entries.filter(e => e.kind === 'division' && e.parent === inst.name);
+    assert.equal(divs.length, n, `${parentId}: division 개수가 안 맞음`);
+    for (const d of divs) {
+      assert.equal(d.state, 'draft', `${d.id}: v1.0 신설이니 draft여야 함(초안이지만 내용은 실제 사무)`);
+      assert.ok(d.does && d.does.length > 0, `${d.id}: does가 비어 있음`);
+      for (const line of d.does) assert.ok(/^\d{1,3}\.\s/.test(line), `${d.id}: 번호 매긴 사무 형식 아님`);
+    }
+  }
+});
+await test('작업 #12: 공공정책연수원 교육운영과는 원문의 뭉친 25번 항목을 25·26·27로 풀어 실제 28개 사무 항목을 담았다', () => {
+  const p = execFileSync('bash', ['-c', 'grep -rl "^# 문서 코드  : SP-AGYDIV-PUBLICPOLICY-EDUCATION$" prompts/gov-tree/03-do-agency/divisions/*.md || true'], { cwd: ROOT }).toString().trim();
+  assert.ok(p, 'SP-AGYDIV-PUBLICPOLICY-EDUCATION 파일을 못 찾음');
+  const content = fs.readFileSync(p, 'utf8');
+  assert.ok(content.includes('28. 그 밖에 교육운영 및 관리에 관한 사항'), '28번 항목(뭉친 25번을 풀어낸 결과)이 없음');
+  assert.ok(content.includes('26. 자치경찰 직무교육 등 운영'), '26번 항목이 없음');
+  assert.ok(content.includes('27. 공공기관(공기업, 출자출연기관) 직무교육 등 운영'), '27번 항목이 없음');
+});
+await test('작업 #12 안전장치: 이번에 신설한 기관 2개·division 4개 어디에도 실제 접수 파이프라인(task_key)이 실수로 생기지 않았다', () => {
+  const files = [
+    'prompts/gov-tree/03-do-agency/SP-AGY-PUBLICPOLICY_v1.0.md',
+    'prompts/gov-tree/03-do-agency/SP-AGY-VETERANS_v1.0.md',
+    'prompts/gov-tree/03-do-agency/divisions/SP-AGYDIV-PUBLICPOLICY-EDUCATION_v1.0.md',
+    'prompts/gov-tree/03-do-agency/divisions/SP-AGYDIV-VETERANS-AFFAIRS_v1.0.md',
+    'prompts/gov-tree/03-do-agency/divisions/SP-AGYDIV-VETERANS-COMPENSATION_v1.0.md',
+    'prompts/gov-tree/03-do-agency/divisions/SP-AGYDIV-VETERANS-MEMORIAL_v1.0.md',
+  ];
+  for (const f of files) {
+    const full = path.join(ROOT, f);
+    assert.ok(fs.existsSync(full), `${f}: 파일이 없음`);
+    const content = fs.readFileSync(full, 'utf8');
+    assert.ok(!/task_key\s*:\s*'/.test(content), `${f}: 실수로 task_key가 대입됨(브랜드 신규 기관이라 배선이 없어야 함)`);
+  }
+});
+await test('작업 #12: org-baseline-agency.json에서 공공정책연수원·보훈청이 missing_in_inventory에서 mapping으로 옮겨졌다', () => {
+  const baseline = JSON.parse(fs.readFileSync(path.join(DIR, 'org-baseline-agency.json'), 'utf8'));
+  assert.ok(!baseline.missing_in_inventory.some(m => m.name === '공공정책연수원'), '공공정책연수원이 여전히 missing_in_inventory에 있음');
+  assert.ok(!baseline.missing_in_inventory.some(m => m.name === '보훈청'), '보훈청이 여전히 missing_in_inventory에 있음');
+  assert.equal(baseline.mapping['SP-AGY-PUBLICPOLICY'].status, 'match');
+  assert.deepEqual(baseline.mapping['SP-AGY-PUBLICPOLICY'].current_divisions, ['교육운영과']);
+  assert.equal(baseline.mapping['SP-AGY-VETERANS'].status, 'match');
+  assert.deepEqual(baseline.mapping['SP-AGY-VETERANS'].current_divisions, ['보훈과', '보상과', '항일기념관']);
+});
+await test('작업 #12 회귀: division-tables.js·페이지 인벤토리 양쪽에 새 기관 2개·division 4개 라우팅 항목이 있다', () => {
+  const dt = fs.readFileSync(path.join(ROOT, 'src/gopang/gov/division-tables.js'), 'utf8');
+  const page = fs.readFileSync(path.join(ROOT, 'pages/jeju-gov-automation.html'), 'utf8');
+  for (const id of ['SP-AGY-PUBLICPOLICY', 'SP-AGY-VETERANS', 'SP-AGYDIV-PUBLICPOLICY-EDUCATION', 'SP-AGYDIV-VETERANS-AFFAIRS', 'SP-AGYDIV-VETERANS-COMPENSATION', 'SP-AGYDIV-VETERANS-MEMORIAL']) {
+    assert.ok(dt.includes(`"${id}"`), `division-tables.js에 ${id} 없음`);
+    assert.ok(page.includes(`"${id}"`), `jeju-gov-automation.html에 ${id} 없음`);
+  }
+});
+
 console.log(`\n${pass}/${pass + fail} passed`);
 process.exit(fail ? 1 : 0);

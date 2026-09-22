@@ -485,6 +485,13 @@ export const JEJU_AGENCY_TABLE = [
     kw: ["도서 대출", "어린이 열람실", "어린이 프로그램", "열람실 이용", "제주특별자치도 공공도서관", "지역자료 보존", "평생학습 프로그램 운영"], file: "03-do-agency/SP-AGY-LIBRARY_v1.1.md" },  // ★ 2026-09-15 수정(gov24_corpus batch4 발견) — bare '어린이'가 "어린이집 입소 대기 신청"의 "어린이집"과 우연히 겹쳐 도서관으로 오확정(2026-08-21 주석의 "어린이집 보육료 지원" 사례와 동일 클래스 — 그때는 L2 후보 병합으로 구제 경로만 만들고 원인 키워드는 안 고쳤음). 도서관 고유 프로그램명으로 복합어화(SP-NAT-POLICE의 '경찰'→'지방경찰청' 원칙과 동일)
   { code: "SP-AGY-POLICE", name: "자치경찰단", desc: "당신은 제주특별자치도청 **자치경찰단**을 대표하는 AI 레이어다. 주요 소관: 생활안전, 교통(주정차 단속 등 일부), 관광경찰, 지역 특성 치안(자연환경·문화재 보호 관련 수사 일부)",
     kw: ["관광경찰", "생활안전", "자치경찰단", "지역 특성 치안"], file: "03-do-agency/SP-AGY-POLICE_v1.0.md" },
+  { code: "SP-AGY-PUBLICPOLICY", name: "제주특별자치도 공공정책연수원", desc: "당신은 제주특별자치도청 **제주특별자치도 공공정책연수원**을 대표하는 AI 레이어다. 주요 소관: 소속 공무원 중·장기 교육훈련 기본계획 수립·운영, 특별자치전문교육, 국외교육훈련, 외국어교육 등 공무원 역량 개발",
+    kw: ["공공정책연수원", "공무원 교육훈련", "국외교육훈련", "특별자치전문교육"], file: "03-do-agency/SP-AGY-PUBLICPOLICY_v1.0.md" },
+  { code: "SP-AGY-VETERANS", name: "제주특별자치도 보훈청", desc: "당신은 제주특별자치도청 **제주특별자치도 보훈청**을 대표하는 AI 레이어다. 주요 소관: 국가유공자·참전유공자 등에 대한 예우·기념사업, 각종 보상금·증서 발급, 국가유공자 등록·생활실태 조사, 항일기념관 운영",
+    // ★ 2026-09-23 — "보훈청" 단독 키워드는 넣지 않았다(gov-router.js의 JEJU_NATIONAL_TABLE에 이미
+    // SP-NAT-VETERANS("제주보훈청(국가보훈부)")가 "보훈청"으로 등록돼 있어 명칭이 겹친다 — SP-AGY-VETERANS_v1.0.md §6 참고,
+    // 다음 배치에서 실제 라우팅 연결 여부 재검증 전까지는 기관명 전체·division 고유 사무명 위주로만 구성)
+    kw: ["제주특별자치도 보훈청", "국가유공자 등록", "참전유공자 예우", "항일기념관"], file: "03-do-agency/SP-AGY-VETERANS_v1.0.md" },
   { code: "SP-AGY-WATER", name: "상하수도본부", desc: "당신은 제주특별자치도청 **상하수도본부**를 대표하는 AI 레이어다. 주요 소관: 상수도 요금·계량·급수 정책, 하수도 시설·처리, 급수 중단·누수 민원의 정책·시설 총괄 주체",
     kw: ["급수 정책", "급수 중단", "누수 민원의 정책", "상수도 요금", "상하수도본부", "시설 총괄 주체", "하수도 시설"], file: "03-do-agency/SP-AGY-WATER_v1.3.md" },
 ];
@@ -700,6 +707,18 @@ export const JEJU_AGENCY_DIVISION_TABLE = [
   { code: "SP-AGYDIV-POLICE-TRAFFICINFO", institution: "SP-AGY-POLICE",
     name: "자치경찰단 교통정보센터", desc: "당신은 **자치경찰단 교통정보센터**을 대표하는 AI 레이어다.",
     kw: ["교통정보", "교통정보센터"], file: "03-do-agency/divisions/SP-AGYDIV-POLICE-TRAFFICINFO_v1.0.md" },
+  { code: "SP-AGYDIV-PUBLICPOLICY-EDUCATION", institution: "SP-AGY-PUBLICPOLICY",
+    name: "제주특별자치도 공공정책연수원 교육운영과", desc: "당신은 **제주특별자치도 공공정책연수원 교육운영과**를 대표하는 AI 레이어다.",
+    kw: ["교육운영", "교육운영과", "공무원 위탁교육"], file: "03-do-agency/divisions/SP-AGYDIV-PUBLICPOLICY-EDUCATION_v1.0.md" },
+  { code: "SP-AGYDIV-VETERANS-AFFAIRS", institution: "SP-AGY-VETERANS",
+    name: "제주특별자치도 보훈청 보훈과", desc: "당신은 **제주특별자치도 보훈청 보훈과**를 대표하는 AI 레이어다.",
+    kw: ["보훈과", "보훈행사", "참전유공자단체"], file: "03-do-agency/divisions/SP-AGYDIV-VETERANS-AFFAIRS_v1.0.md" },
+  { code: "SP-AGYDIV-VETERANS-COMPENSATION", institution: "SP-AGY-VETERANS",
+    name: "제주특별자치도 보훈청 보상과", desc: "당신은 **제주특별자치도 보훈청 보상과**를 대표하는 AI 레이어다.",
+    kw: ["보상과", "국가유공자 등록", "국가유공자 보상금"], file: "03-do-agency/divisions/SP-AGYDIV-VETERANS-COMPENSATION_v1.0.md" },
+  { code: "SP-AGYDIV-VETERANS-MEMORIAL", institution: "SP-AGY-VETERANS",
+    name: "제주특별자치도 보훈청 항일기념관", desc: "당신은 **제주특별자치도 보훈청 항일기념관**을 대표하는 AI 레이어다.",
+    kw: ["항일기념관"], file: "03-do-agency/divisions/SP-AGYDIV-VETERANS-MEMORIAL_v1.0.md" },
   { code: "SP-AGYDIV-WATER-MGMT", institution: "SP-AGY-WATER",
     name: "상하수도본부 경영관리과", desc: "당신은 **상하수도본부 경영관리과**을 대표하는 AI 레이어다.",
     kw: ["경영관리", "경영관리과"], file: "03-do-agency/divisions/SP-AGYDIV-WATER-MGMT_v1.0.md" },
