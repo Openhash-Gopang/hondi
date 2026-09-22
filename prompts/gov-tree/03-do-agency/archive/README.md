@@ -39,3 +39,12 @@
   있으나, 배선을 끊지 않기 위해 이번 배치에서는 정리하지 않고 각 division의 §3에 상호 참고만
   남겼다 — 다음 배치에서 실제 최신 별표로 재검증 후 통합 여부 결정.
 
+# 2026-09-22 — 민속자연사박물관(SP-AGY-FOLKMUSEUM) division 정리(부분)
+
+- `SP-AGYDIV-FOLKMUSEUM-ARCHAEOFOLK/MARINE/MINERALBOTANY/ZOOLOGY_v1.0.md`(고고민속과·해양생물과·
+  광식물과·동물과, 전부 배선 없음) → 별표9(2024.01.22. 개정본) 확인 결과 실제 2개 division
+  (운영과·민속자연사연구과)으로 교체하며 archive로 이동.
+- `SP-AGYDIV-FOLKMUSEUM-ADMIN_v1.1.md`(관리실)는 **그대로 두었다** — 시설 대관 신청 task_key에
+  실제로 배선돼 있다. 새로 만든 "운영과"(시설·예산·관람객 지원 포함)와 업무가 겹칠 수 있으나,
+  배선을 끊지 않기 위해 이번 배치에서는 정리하지 않고 각 division의 §3에 상호 참고만 남겼다.
+

@@ -213,6 +213,10 @@
   {
    "item": "2026-09-22: 자치경찰단 division을 별표8 실제 구성(6개)으로 대부분 교체 — 배선된 교통과는 유지하고 별도 참고만 남김(완전한 통합은 다음 배치)",
    "confidence": "high"
+  },
+  {
+   "item": "2026-09-22: 민속자연사박물관 division을 별표9 실제 구성(2개)으로 대부분 교체 — 배선된 관리실은 유지하고 별도 참고만 남김",
+   "confidence": "high"
   }
  ],
  "open_questions": [
@@ -291,15 +295,15 @@
    "note": "2026-09-22 division 2개를 별표9로 신설(축산진흥과→축산생명과 개명 반영, 시행규칙 제47조 2024.7.9. 개정). 기존 1개는 archive/로 이동"
   },
   "SP-AGY-FOLKMUSEUM": {
-   "status": "structure_differs",
+   "status": "match",
    "current_name": "민속자연사박물관",
    "confidence": "high",
-   "legal_basis": "제44~45조",
+   "legal_basis": "제44·45조",
    "current_divisions": [
     "운영과",
     "민속자연사연구과"
    ],
-   "note": "사업소(제5절) 확인 결과 원문 과 구성이 SP 목록과 다르다 — SP: 관리실, 고고민속과, 해양생물과, 광식물과, 동물과 / 원문: 운영과, 민속자연사연구과. 이번 배치에서는 문서화만 하고 SP 파일은 갱신하지 않았다(과 하나하나의 분장사무가 없으면 새 division SP를 만들어도 빈 틀이 된다)."
+   "note": "2026-09-22 division 2개를 별표9로 신설(운영과·민속자연사연구과), 이름·구성 일치 확인. 기존 4개(고고민속과 등, 배선 없음)는 archive로 이동. 기존 관리실(SP-AGYDIV-FOLKMUSEUM-ADMIN)은 실제 접수 파이프라인(시설 대관)에 배선돼 있어 그대로 뒀다 — 새 운영과와 업무가 겹칠 수 있어 다음 배치에서 재정리 필요"
   },
   "SP-AGY-HERITAGE": {
    "status": "structure_differs",
