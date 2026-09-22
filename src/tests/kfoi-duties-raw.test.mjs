@@ -256,5 +256,67 @@ await test('작업 #9: 민속자연사박물관 division 2개가 실제 분장�
   assert.ok(!fs.existsSync(path.join(ROOT, 'prompts/gov-tree/03-do-agency/archive', 'SP-AGYDIV-FOLKMUSEUM-ADMIN_v1.1.md')), '배선된 관리실이 실수로 archive에 옮겨지면 안 됨');
 });
 
+await test('작업 #10: 도립미술관·상하수도본부·세계유산본부 division 21개가 실제 분장사무(별표9)로 신설되고, 배선된 5개(JHYUN·MAIN·WATERSUPPLY·MANAGEMENT + 새로 옮긴 KIMTSCHANGYEUL)는 손대지 않았거나 이름 일치만 반영했다', () => {
+  const digest = buildDigest();
+  const created = [
+    ['SP-AGY-ARTMUSEUM', 2], ['SP-AGY-WATER', 9], ['SP-AGY-HERITAGE', 10],
+  ];
+  for (const [parentId, n] of created) {
+    const parentName = digest.tiers.agency.entries.find(p => p.kind === 'institution' && p.id === parentId)?.name;
+    const divs = digest.tiers.agency.entries.filter(e => e.kind === 'division' && e.parent === parentName);
+    // 새로 만든 순수 신설 division만 셀 것 — 배선된 기존 division·이번에 이름만 갱신한 KIMTSCHANGYEUL은 제외
+    const wiredOrRevised = ['SP-AGYDIV-ARTMUSEUM-JHYUN', 'SP-AGYDIV-ARTMUSEUM-MAIN', 'SP-AGYDIV-ARTMUSEUM-KIMTSCHANGYEUL', 'SP-AGYDIV-WATER-WATERSUPPLY', 'SP-AGYDIV-HERITAGE-MANAGEMENT'];
+    const newDivs = divs.filter(e => !wiredOrRevised.includes(e.id));
+    assert.equal(newDivs.length, n, `${parentId}: 순수 신설 division 개수가 안 맞음`);
+    for (const d of newDivs) {
+      assert.equal(d.state, 'draft', `${d.id}: v1.0 신설이니 draft여야 함`);
+      assert.ok(d.does && d.does.length > 0, `${d.id}: does가 비어 있음`);
+      for (const line of d.does) assert.ok(/^\d{1,3}\.\s/.test(line), `${d.id}: 번호 매긴 사무 형식 아님`);
+    }
+  }
+});
+await test('작업 #10 안전장치: 실제 접수 파이프라인(task_key)이 걸린 4개 division은 이번 배치에서도 건드리지 않았다', () => {
+  const wired = [
+    'SP-AGYDIV-ARTMUSEUM-JHYUN', 'SP-AGYDIV-ARTMUSEUM-MAIN',
+    'SP-AGYDIV-HERITAGE-MANAGEMENT', 'SP-AGYDIV-WATER-WATERSUPPLY',
+  ];
+  for (const id of wired) {
+    const p = execFileSync('bash', ['-c', `grep -rl "^# 문서 코드  : ${id}$" prompts/gov-tree/03-do-agency/divisions/*.md || true`], { cwd: ROOT }).toString().trim();
+    assert.ok(p, `${id}: 파일을 못 찾음(실수로 이동·삭제됐을 수 있음)`);
+    const content = fs.readFileSync(p, 'utf8');
+    assert.ok(content.includes('task_key'), `${id}: task_key 배선이 사라짐 — 실제 서비스가 끊겼을 수 있음`);
+  }
+});
+await test('작업 #10: 김창열미술관(배선 없음)은 이름은 이미 일치했지만 §2를 별표9 실제 사무로 다시 썼다(division-tables.js 라우팅 참조를 깨지 않도록 파일명·버전은 v1.0 그대로 유지)', () => {
+  const p = execFileSync('bash', ['-c', 'grep -rl "^# 문서 코드  : SP-AGYDIV-ARTMUSEUM-KIMTSCHANGYEUL$" prompts/gov-tree/03-do-agency/divisions/*.md || true'], { cwd: ROOT }).toString().trim();
+  assert.ok(p.endsWith('SP-AGYDIV-ARTMUSEUM-KIMTSCHANGYEUL_v1.0.md'), 'v1.0 파일명이어야 함(division-tables.js가 이 경로를 참조): ' + p);
+  const content = fs.readFileSync(p, 'utf8');
+  assert.ok(!/task_key\s*:\s*'/.test(content), '원래 배선이 없던 division에 실제 task_key 대입이 생기면 안 됨(설명 문구 속 "task_key" 단어는 무관)');
+  assert.ok(content.includes('제주도립김창열미술관 운영 및 관리'), '별표9 실제 사무가 반영돼야 함');
+  const dt = fs.readFileSync(path.join(ROOT, 'src/gopang/gov/division-tables.js'), 'utf8');
+  assert.ok(dt.includes('SP-AGYDIV-ARTMUSEUM-KIMTSCHANGYEUL_v1.0.md'), 'division-tables.js의 라우팅 참조가 살아있어야 함');
+});
+await test('작업 #10 회귀: archive로 옮긴 3개 파일(경영지원과·하수도과·한라산연구과)이 실제로 archive/에 있고, live 디렉터리엔 없다', () => {
+  const moved = [
+    'SP-AGYDIV-WATER-ADMIN_v1.0.md', 'SP-AGYDIV-WATER-SEWAGE_v1.0.md', 'SP-AGYDIV-HERITAGE-HALLASAN_v1.0.md',
+  ];
+  for (const f of moved) {
+    assert.ok(fs.existsSync(path.join(ROOT, 'prompts/gov-tree/03-do-agency/archive', f)), `${f}: archive에 없음`);
+    assert.ok(!fs.existsSync(path.join(ROOT, 'prompts/gov-tree/03-do-agency/divisions', f)), `${f}: live에 아직 있음`);
+  }
+  assert.ok(!fs.existsSync(path.join(ROOT, 'prompts/gov-tree/03-do-agency/archive', 'SP-AGYDIV-ARTMUSEUM-JHYUN_v1.1.md')), '배선된 JHYUN이 실수로 archive에 옮겨지면 안 됨');
+  assert.ok(!fs.existsSync(path.join(ROOT, 'prompts/gov-tree/03-do-agency/archive', 'SP-AGYDIV-ARTMUSEUM-MAIN_v1.1.md')), '배선된 MAIN이 실수로 archive에 옮겨지면 안 됨');
+  assert.ok(!fs.existsSync(path.join(ROOT, 'prompts/gov-tree/03-do-agency/archive', 'SP-AGYDIV-WATER-WATERSUPPLY_v1.1.md')), '배선된 WATERSUPPLY가 실수로 archive에 옮겨지면 안 됨');
+  assert.ok(!fs.existsSync(path.join(ROOT, 'prompts/gov-tree/03-do-agency/archive', 'SP-AGYDIV-HERITAGE-MANAGEMENT_v1.1.md')), '배선된 MANAGEMENT가 실수로 archive에 옮겨지면 안 됨');
+});
+await test('작업 #10: 세계유산본부 유산정책부 4개(유산정책과·문화유산과·자연유산과·세계유산과)는 §10-2(본문·별표 이름 불일치)를 §4에서 스스로 밝힌다', () => {
+  for (const id of ['SP-AGYDIV-HERITAGE-POLICY', 'SP-AGYDIV-HERITAGE-WORLDHERITAGE', 'SP-AGYDIV-HERITAGE-CULTURALHERITAGE', 'SP-AGYDIV-HERITAGE-NATURALHERITAGE']) {
+    const p = execFileSync('bash', ['-c', `grep -rl "^# 문서 코드  : ${id}$" prompts/gov-tree/03-do-agency/divisions/*.md || true`], { cwd: ROOT }).toString().trim();
+    assert.ok(p, `${id}: 파일을 못 찾음`);
+    const content = fs.readFileSync(p, 'utf8');
+    assert.ok(content.includes('§10-2'), `${id}: §10-2 플래그가 없음 — 사무 배정이 추정이라는 사실을 숨기면 안 됨`);
+  }
+});
+
 console.log(`\n${pass}/${pass + fail} passed`);
 process.exit(fail ? 1 : 0);
