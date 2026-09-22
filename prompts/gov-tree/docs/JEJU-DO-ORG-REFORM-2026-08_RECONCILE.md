@@ -240,3 +240,44 @@ city 63건(파일이 실제로 있는 것) 중 51건을 §2에 반영했다. 도
 - 직속기관·사업소(별표8·9) 재검토는 아직이다.
 - 반영하지 않은 17개(도청 옛 조직명)와 별표8·9(직속기관·사업소, 괄호 표기 문제)는 이전과 같은 상태다.
 
+## 15. 직속기관·사업소(agency) division 20개 신설 — 3개 기관 완료 (2026-09-22, 작업 #6)
+
+### 발견: 배선이 없는 3개 기관부터 전면 교체
+
+작업을 시작하기 전에 24개 기존 division 파일 전부를 확인해 **실제 서비스 파이프라인(task_key)에 배선된 것이 있는지**부터 봤다. 처음엔 "GOV_TASK"·"REQUIRED_DOCUMENTS_REGISTRY" 문자열이 있는 10개(FIRE 2개 제외 8개)를 "배선됨"으로 잘못 분류했는데, 다시 정확히 보니 그중 2개(LIBRARY-INFOSERVICE, POLICE-SAFETY)는 **"이 업무는 등록 대상이 아니다"라고 판정한 기록**이었고 실제 배선은 아니었다. 정확히 세어 보니 **6개 파일만 실제 배선**(ARTMUSEUM-JHYUN·MAIN, FOLKMUSEUM-ADMIN, HERITAGE-MANAGEMENT, POLICE-TRAFFIC, WATER-WATERSUPPLY)이었다.
+
+농업기술원(SP-AGY-AGRITECH)·보건환경연구원(SP-AGY-BOHWAN)·축산생명연구원(SP-AGY-CHUKSAN) 3개 기관은 소속 division 어디에도 배선이 없어서 **안전하게 통째로 교체**했다.
+
+### 반영 내용
+
+- **20개 division 신설**(농업기술원 9, 보건환경연구원 9, 축산생명연구원 2) — 별표 8·9(2024.01.22. 개정본)의 실제 사무를 §2에 담았다. §1·§CAPABILITIES 등 나머지 섹션은 발명하지 않고 최소한의 공통 문구(SP-AGYDIV-TEMPLATE_v1.0.md 패턴)만 썼다.
+- **6개 옛 division 파일 archive 이동** — 기존엔 이름 자체가 틀렸거나("행정운영과" 등 실존하지 않음) "가칭·추정"이라고 스스로 밝힌 상태였다.
+- **축산생명연구원 개명 확인**: 시행규칙 제47조(2024.7.9. 개정)로 "축산진흥원→축산생명연구원", "축산진흥과→축산생명과"로 바뀐 것을 확인했다. 별표9(2024.01.22.)는 이 개명보다 앞서 만들어져 옛 이름 그대로다 — division 표시 이름은 현재 이름(축산생명과)으로 쓰고, 옛 이름은 각주로만 남겼다.
+- `pages/jeju-gov-automation.html`·`-draft.html`, `src/gopang/gov/division-tables.js`(실제 라우팅 키워드), `org-baseline-agency.json`을 전부 갱신했다.
+
+### 다음 배치 후보 (남은 6개 기관)
+
+| 기관 | 배선된 division | 손대지 못하는 이유 없이 진행 가능한 division |
+|---|---|---|
+| 한라도서관(LIBRARY) | **없음**(재확인 결과) | 2개 전부 — **통째로 교체 가능** |
+| 자치경찰단(POLICE) | 1개(TRAFFIC) | 2개(SAFETY·WOMENYOUTH) — WOMENYOUTH는 실존하지 않는 과라 특히 우선 |
+| 도립미술관(ARTMUSEUM) | 2개(JHYUN·MAIN) | 1개(KIMTSCHANGYEUL) — 나머지는 이름 자체는 맞을 수 있어 재확인 필요 |
+| 민속자연사박물관(FOLKMUSEUM) | 1개(ADMIN) | 4개(ARCHAEOFOLK·MARINE·MINERALBOTANY·ZOOLOGY) |
+| 세계유산본부(HERITAGE) | 1개(MANAGEMENT) | 1개(HALLASAN) + 본문·별표 이름이 서로 다른 문제(§10-2) 먼저 해결 필요 |
+| 상하수도본부(WATER) | 1개(WATERSUPPLY) | 2개(ADMIN·SEWAGE) |
+
+**한라도서관이 다음으로 가장 깔끔하다** — 배선이 전혀 없고, 기존 파일이 스스로 "정보서비스팀(추정)"이라고 밝힌 상태라 교체해도 잃을 게 없다.
+
+## 16. 한라도서관 division 2개 신설 (2026-09-22, 작업 #7)
+
+배선 재확인 결과 한라도서관(SP-AGY-LIBRARY)은 2개 division 전부 실제 서비스 배선이 없었다 — 통째로 교체했다.
+
+- `SP-AGYDIV-LIBRARY-OPERATIONS`(운영과, 도서관 정책·육성·작은도서관 지원 총괄), `SP-AGYDIV-LIBRARY-DOCINFO`
+  (문헌정보과, 도 단위 자료 수집·독서문화 진흥) — 별표9(2024.01.22. 개정본), 시행규칙 제52·53조 확인
+- 옛 division 2개(정보서비스팀·정책협력팀)는 둘 다 스스로 "(추정)"이라고 밝힌 잠정 명칭이었다 — archive로 이동
+- `pages/jeju-gov-automation.html`·`-draft.html`, `division-tables.js`, `org-baseline-agency.json` 갱신
+
+### 남은 5개 기관 (다음 배치)
+
+자치경찰단(배선 1/3)·도립미술관(배선 2/3)·민속자연사박물관(배선 1/5)·상하수도본부(배선 1/3)·세계유산본부(배선 1/2, 본문·별표 이름 불일치 문제 별도 해결 필요)가 남았다. 자치경찰단의 "여성청소년과"(실존하지 않는 과, 배선 없음)부터 우선순위가 높다.
+
