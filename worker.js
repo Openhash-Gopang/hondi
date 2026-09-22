@@ -727,20 +727,13 @@ async function handleUserGdcBalance(request, env, corsHeaders) {
     if (!profile) return _err(404, 'PROFILE_NOT_FOUND', '이 전화번호로 등록된 프로필이 없습니다', corsHeaders);
 
     const guid = profile.guid;
-    const [balanceGdc, sub] = await Promise.all([
-      getBalanceGdcForStatus(guid),
-      _l1GetSubscription(env, guid).catch(() => null),
-    ]);
-
-    const subscribed = !!(sub && sub.status === 'active');
+    // 2026-09-23 — 구독 요금제 폐지로 subscribed/tier/tier_name/renews_at
+    // 필드 제거. 잔액만 반환(순수 종량제라 "구독 상태" 자체가 없음).
+    const balanceGdc = await getBalanceGdcForStatus(guid);
     return new Response(JSON.stringify({
       ok: true,
       guid,
       balance: balanceGdc ?? 0,
-      subscribed,
-      tier: subscribed ? sub.tier : null,
-      tier_name: subscribed ? (SUBSCRIPTION_TIERS[sub.tier]?.name ?? sub.tier) : null,
-      renews_at: subscribed ? (sub.next_billing_at || null) : null,
     }), { status: 200, headers: corsHeaders });
   } catch (e) {
     return _err(502, 'L1_ERROR', '잔액 조회 실패: ' + e.message, corsHeaders);
@@ -2258,7 +2251,7 @@ async function handleSignupBonusRetry(request, env, corsHeaders) {
 // 기록해 두고 — 이후 사용자가 충전해서 문턱값 위로 회복되면 플래그를
 // 지워 다음에 다시 낮아질 때 재알림이 가능하게 한다.
 // ═══════════════════════════════════════════════════════════
-const GDC_LOW_BALANCE_THRESHOLD_KRW = 20; // 잔액이 20원 상당(=20 GDC, 1:1 환율 기준, 2026-07-27부터) 이하로 내려가면 알림
+const GDC_LOW_BALANCE_THRESHOLD_KRW = 1000; // 2026-09-23 수정(주피터 지시, 20→1,000) — 구독 요금제 폐지로 이 알림이 "GDC 보충" 안내의 유일한 경로가 됨. 잔액이 1,000T(=1,000 GDC, 1:1 환율 기준) 미만으로 내려가면 알림
 const GDC_LOW_BALANCE_THRESHOLD_GDC = GDC_LOW_BALANCE_THRESHOLD_KRW / EXCHANGE_RATE_KRW_PER_GDC;
 
 async function _checkLowBalanceAndNotify(env, guid, balanceGdc) {
@@ -5133,375 +5126,23 @@ async function handleKCleanerPhotoGet(request, env, corsHeaders) {
   return new Response(obj.body, { headers });
 }
 
-
 // ═══════════════════════════════════════════════════════════
-// 구독 티어 · 월정기 결제 스케줄러 — 공통 선결과제 (2026-08-11 신설)
-//
-// 지난 조사에서 확인된 공백: profiles 스키마에 "이번 달 기본/프리미엄
-// 구독 중인지" 저장할 필드 자체가 없었고, GDC 잔액에서 매달 정기적으로
-// 구독료를 차감하는 스케줄 로직도 전혀 없었다(입금→GDC 충전만 있었음).
-// 이 블록은 그 두 가지를 채운다 — profiles 자체는 건드리지 않고 별도
-// user_subscriptions 컬렉션(seller_products/seller_reviews와 동일
-// 컨벤션)으로 분리했다.
-//
-// 요금제(2026-08-14 단일 티어로 재설계, 주피터 지시):
-//   citizen(시민, 990원) — 유일한 티어. 행정 서비스 기본 사용량을 넘는
-//   이용을 포함해, K-Law 등 모든 개별 서비스는 전부 건별로 과금된다.
-//   이전에 있었던 사업자/학생/전문직 3개 상위 티어(및 "교수 페르소나
-//   무제한"·"K-Law 등 전 서비스 무료" 같은 티어 차등 혜택)는 전부
-//   폐기됐다 — 아래 PROFESSOR_MONTHLY_LIMIT_CITIZEN 관련 게이팅도
-//   같은 이유로 이후에 제거됨(그 문단 주석 참고).
-// 자동 카드결제는 없다 — 가입자가 GDC 지갑을 충전해두면(기존 charge.html
-// 수동 확인 방식 그대로), 이 스케줄러가 매월 그 잔액에서 구독료를
-// 차감한다. 잔액 부족 시 즉시 정지하지 않고 유예(grace) 기간을 둔다.
+// 2026-09-23 전면 폐지(주피터 지시) — 시민 구독(990원, SUBSCRIPTION_TIERS/
+// handleSubscribe/handleSubscriptionStatus/_l1GetSubscription/
+// _runMonthlyBillingSweep)과 전문가 페르소나 개별 구독(9,900원/리프,
+// expert_persona_subscriptions 관련 일체)을 모두 제거했다. 요금제는
+// 이제 "가입 시 100T 무료 지급(SIGNUP_BONUS_KRW) + 순수 사용량 종량제
+// (_settleAiUsage/_chargeGdcForAiUsage)" 하나로 통일 — 기본료도 없다.
+// 저잔액(1,000T 미만) 알림은 _checkLowBalanceAndNotify가 담당한다
+// (GDC_LOW_BALANCE_THRESHOLD_KRW 참고). _addOneMonth만 스토리지 월정기
+// 과금(storage_next_billing_at) 쪽에서 계속 쓰여 남겨둔다.
 // ═══════════════════════════════════════════════════════════
-
-const SUBSCRIPTION_TIERS = {
-  citizen: { name: '시민', price_krw: 990, all_services_free: false },
-};
-// 잔액 부족으로 결제가 밀렸을 때, 즉시 서비스를 끊지 않고 봐주는 기간.
-// 2026-08-14: 7일 → 1일로 단축(주피터 지시) — 이전엔 통신사·OTT 관행
-// (3~7일)을 참고했으나, 990원 단일 저가 요금제 체계에서는 미납 방치
-// 기간을 짧게 유지하는 쪽으로 정책 변경.
-const SUBSCRIPTION_GRACE_DAYS = 1;
-
 function _addOneMonth(date) {
   const d = new Date(date);
   d.setMonth(d.getMonth() + 1);
   return d;
 }
 
-async function _l1GetSubscription(env, guid) {
-  const token = await _l1AdminToken(env);
-  const filter = encodeURIComponent(`user_guid='${guid}'`);
-  const res = await fetch(`${L1_DEFAULT}/api/collections/user_subscriptions/records?filter=${filter}&perPage=1`, {
-    headers: { 'Authorization': `Bearer ${token}` },
-  });
-  if (!res.ok) throw new Error(`L1 user_subscriptions 조회 실패 (HTTP ${res.status})`);
-  const data = await res.json().catch(() => ({ items: [] }));
-  return data.items?.[0] || null;
-}
-
-// POST /subscription/subscribe — {guid, tier} → 신규 가입 또는 티어 변경.
-// 가입 즉시 1회차를 청구한다(구독 시작일 = 결제일 원칙 — 무료 유예 없이
-// 바로 청구해야 "구독 중인데 결제 안 됨" 상태가 애초에 생기지 않는다).
-async function handleSubscribe(request, env, corsHeaders) {
-  let body;
-  try { body = await request.json(); } catch (e) { return _err(400, 'INVALID_JSON', '요청 본문 파싱 실패', corsHeaders); }
-  const guid = (body.guid || '').trim();
-  const tier = (body.tier || '').trim();
-  if (!guid) return _err(400, 'MISSING_GUID', 'guid 필수', corsHeaders);
-  if (!SUBSCRIPTION_TIERS[tier]) return _err(400, 'INVALID_TIER', `tier는 ${Object.keys(SUBSCRIPTION_TIERS).join('/')} 중 하나`, corsHeaders);
-
-  const priceKrw = SUBSCRIPTION_TIERS[tier].price_krw;
-  let charge;
-  try {
-    charge = await _chargeGdcForAiUsage(env, {
-      guid, krwAmount: priceKrw, serviceId: 'hondi-subscription',
-      memo: `구독 개시: ${SUBSCRIPTION_TIERS[tier].name}(${tier})`,
-    });
-  } catch (e) {
-    return _err(502, 'CHARGE_FAILED', e.message, corsHeaders);
-  }
-  if (!charge?.ok) {
-    return new Response(JSON.stringify({
-      ok: false, error: 'INSUFFICIENT_BALANCE',
-      message: 'GDC 잔액이 부족합니다. 먼저 충전한 뒤 다시 시도해 주세요.',
-      detail: charge,
-    }), { status: 402, headers: corsHeaders });
-  }
-
-  const now = new Date();
-  const nextBilling = _addOneMonth(now);
-  try {
-    const token = await _l1AdminToken(env);
-    const existing = await _l1GetSubscription(env, guid);
-    const payload = {
-      user_guid: guid, tier, status: 'active',
-      billing_amount_krw: priceKrw,
-      next_billing_at: nextBilling.toISOString(),
-      last_billed_at: now.toISOString(),
-      last_billing_result: 'success',
-      grace_started_at: null,
-      created_at: existing?.created_at || now.toISOString(),
-    };
-    const url = existing
-      ? `${L1_DEFAULT}/api/collections/user_subscriptions/records/${existing.id}`
-      : `${L1_DEFAULT}/api/collections/user_subscriptions/records`;
-    const res = await fetch(url, {
-      method: existing ? 'PATCH' : 'POST',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text().catch(() => '')}`);
-    const rec = await res.json();
-    return new Response(JSON.stringify({ ok: true, subscription: rec, balance_after_krw: charge.balance_after }), { headers: corsHeaders });
-  } catch (e) {
-    // GDC는 이미 차감됐는데 레코드 저장에 실패한 경우 — 돈만 나가고 구독은
-    // 안 잡히는 사고를 막기 위해 반드시 에러로 표면화한다(조용히 삼키지 않음).
-    return _err(502, 'SUBSCRIPTION_RECORD_FAILED', `결제는 완료됐으나 구독 기록 저장 실패 — 반드시 수동 확인 필요: ${e.message}`, corsHeaders);
-  }
-}
-
-// GET /subscription/status?guid=...
-async function handleSubscriptionStatus(request, url, env, corsHeaders) {
-  const guid = (url.searchParams.get('guid') || '').trim();
-  if (!guid) return _err(400, 'MISSING_GUID', 'guid 파라미터 필수', corsHeaders);
-  try {
-    const sub = await _l1GetSubscription(env, guid);
-    if (!sub) {
-      return new Response(JSON.stringify({ subscribed: false, tiers: SUBSCRIPTION_TIERS }), { headers: corsHeaders });
-    }
-    return new Response(JSON.stringify({
-      subscribed: true,
-      tier: sub.tier, tier_name: SUBSCRIPTION_TIERS[sub.tier]?.name,
-      status: sub.status, next_billing_at: sub.next_billing_at,
-      last_billed_at: sub.last_billed_at, last_billing_result: sub.last_billing_result,
-      all_services_free: !!SUBSCRIPTION_TIERS[sub.tier]?.all_services_free,
-      tiers: SUBSCRIPTION_TIERS,
-    }), { headers: corsHeaders });
-  } catch (e) {
-    return _err(502, 'SUBSCRIPTION_STATUS_FAILED', e.message, corsHeaders);
-  }
-}
-
-// ═══════════════════════════════════════════════════════════
-// 전문가 페르소나(리프) 개별 구독 — 2026-08-15 신설(주피터 결정)
-//
-// 위 SUBSCRIPTION_TIERS(시민 990원)와는 별개 축이다. "혼디를 쓸 자격"과
-// "이 전문가 페르소나 하나를 쓸 자격"은 서로 다른 결제 단위 — 전문가
-// 페르소나(리프, 총 435개 — 단일 리프 직업군 59개 + physician 세부분야
-// 23개 + lawyer 세부분야 46개 + professor 세부분야 307개)는 각각 월
-// 9,900원. 중간 노드(비-리프)는 과금 대상이 아니다(2026-08-15 결정) —
-// 이 컬렉션엔 리프 personaId로만 레코드가 생겨야 한다.
-//
-// 첫 1개월 무료: 특정 (guid, personaId) 조합을 처음 접근할 때는 청구 없이
-// 레코드만 만들고 next_billing_at을 가입일+1개월로 잡는다 — 다음 정기
-// 스윕 때 그 리프에 대한 첫 실제 청구가 시도된다. 리프별로 독립이므로
-// 사용자가 서로 다른 두 리프를 각각 처음 쓰면 리프마다 한 달씩 무료다.
-// ═══════════════════════════════════════════════════════════
-
-const EXPERT_PERSONA_MONTHLY_FEE_KRW = 9900;
-const EXPERT_PERSONA_GRACE_DAYS = 1; // 시민 티어(2026-08-14)와 동일 정책 재사용
-// 2026-08-15 수정(주피터 지시) — 무료체험 기간을 1개월 → 1일로 단축.
-// next_billing_at(=최초 실청구 시도일)은 여전히 이 값으로 계산하고, 실청구
-// 이후의 정기 갱신 주기(매 결제 성공 시 _addOneMonth)는 그대로 1개월 유지 —
-// 짧아진 건 "처음 한 번 공짜로 써보는 기간"뿐, 구독 자체의 청구 주기가
-// 아니다.
-const EXPERT_PERSONA_TRIAL_DAYS = 1;
-function _addExpertPersonaTrialPeriod(date) {
-  return new Date(new Date(date).getTime() + EXPERT_PERSONA_TRIAL_DAYS * 24 * 60 * 60 * 1000);
-}
-
-async function _l1GetExpertPersonaSubscription(env, guid, personaId) {
-  const token = await _l1AdminToken(env);
-  const filter = encodeURIComponent(`user_guid='${guid}' && persona_id='${personaId}'`);
-  const res = await fetch(`${L1_DEFAULT}/api/collections/expert_persona_subscriptions/records?filter=${filter}&perPage=1`, {
-    headers: { 'Authorization': `Bearer ${token}` },
-  });
-  if (!res.ok) throw new Error(`L1 expert_persona_subscriptions 조회 실패 (HTTP ${res.status})`);
-  const data = await res.json().catch(() => ({ items: [] }));
-  return data.items?.[0] || null;
-}
-
-// GET /expert-persona/access?guid=&personaId= — 전문가 페르소나 세션을 열기
-// 전 클라이언트(expert-chat.html)가 호출하는 게이트. 기록이 없으면(=이
-// 사용자의 이 리프 최초 접근) 청구 없이 무료체험 레코드를 만들고
-// access:true를 돌려준다. 이미 기록이 있으면 그 status로 판정한다 —
-// active/grace는 통과, suspended는 access:false.
-async function handleExpertPersonaAccess(request, url, env, corsHeaders) {
-  const guid = (url.searchParams.get('guid') || '').trim();
-  const personaId = (url.searchParams.get('personaId') || '').trim();
-  if (!guid) return _err(400, 'MISSING_GUID', 'guid 파라미터 필수', corsHeaders);
-  if (!personaId) return _err(400, 'MISSING_PERSONA_ID', 'personaId 파라미터 필수', corsHeaders);
-
-  let sub;
-  try {
-    sub = await _l1GetExpertPersonaSubscription(env, guid, personaId);
-  } catch (e) {
-    return _err(502, 'EXPERT_PERSONA_LOOKUP_FAILED', e.message, corsHeaders);
-  }
-
-  if (!sub) {
-    // 최초 접근 — 청구 없이 무료체험 레코드 생성
-    const now = new Date();
-    const trialUntil = _addExpertPersonaTrialPeriod(now);
-    try {
-      const token = await _l1AdminToken(env);
-      const payload = {
-        user_guid: guid, persona_id: personaId, status: 'active',
-        billing_amount_krw: EXPERT_PERSONA_MONTHLY_FEE_KRW,
-        next_billing_at: trialUntil.toISOString(),
-        last_billed_at: null,
-        last_billing_result: 'free_trial',
-        grace_started_at: null,
-        created_at: now.toISOString(),
-      };
-      const res = await fetch(`${L1_DEFAULT}/api/collections/expert_persona_subscriptions/records`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text().catch(() => '')}`);
-      return new Response(JSON.stringify({
-        access: true, trial: true, status: 'active',
-        trial_until: trialUntil.toISOString(), billing_amount_krw: EXPERT_PERSONA_MONTHLY_FEE_KRW,
-      }), { headers: corsHeaders });
-    } catch (e) {
-      // 레코드 생성 실패 — 과금은 안 됐으니 막을 이유가 없다(과금 없이
-      // 열어주고 로그만 남긴다 — "청구는 됐는데 기록 실패"와는 반대 방향의
-      // 안전한 실패).
-      console.error('[ExpertPersonaBilling] 무료체험 레코드 생성 실패(과금 없이 통과):', guid, personaId, e.message);
-      return new Response(JSON.stringify({ access: true, trial: true, status: 'active', warning: 'RECORD_CREATE_FAILED' }), { headers: corsHeaders });
-    }
-  }
-
-  if (sub.status === 'suspended') {
-    return new Response(JSON.stringify({
-      access: false, status: 'suspended',
-      message: `GDC 잔액 부족으로 이 페르소나 구독이 정지됐습니다. 충전 후 재구독해 주세요.`,
-      billing_amount_krw: EXPERT_PERSONA_MONTHLY_FEE_KRW,
-    }), { headers: corsHeaders });
-  }
-
-  return new Response(JSON.stringify({
-    access: true, trial: sub.last_billing_result === 'free_trial',
-    status: sub.status, next_billing_at: sub.next_billing_at,
-    billing_amount_krw: EXPERT_PERSONA_MONTHLY_FEE_KRW,
-  }), { headers: corsHeaders });
-}
-
-// POST /expert-persona/resubscribe — {guid, personaId} → suspended 상태를
-// 즉시 결제로 재개한다(신규 최초가입은 위 GET 게이트가 무료체험으로 자동
-// 처리하므로, 이 엔드포인트는 "정지된 구독을 되살리는" 용도로만 쓰인다).
-async function handleExpertPersonaResubscribe(request, env, corsHeaders) {
-  let body;
-  try { body = await request.json(); } catch (e) { return _err(400, 'INVALID_JSON', '요청 본문 파싱 실패', corsHeaders); }
-  const guid = (body.guid || '').trim();
-  const personaId = (body.personaId || '').trim();
-  if (!guid) return _err(400, 'MISSING_GUID', 'guid 필수', corsHeaders);
-  if (!personaId) return _err(400, 'MISSING_PERSONA_ID', 'personaId 필수', corsHeaders);
-
-  let charge;
-  try {
-    charge = await _chargeGdcForAiUsage(env, {
-      guid, krwAmount: EXPERT_PERSONA_MONTHLY_FEE_KRW, serviceId: 'expert-persona-subscription',
-      memo: `전문가 페르소나 재구독: ${personaId}`,
-    });
-  } catch (e) {
-    return _err(502, 'CHARGE_FAILED', e.message, corsHeaders);
-  }
-  if (!charge?.ok) {
-    return new Response(JSON.stringify({
-      ok: false, error: 'INSUFFICIENT_BALANCE',
-      message: 'GDC 잔액이 부족합니다. 먼저 충전한 뒤 다시 시도해 주세요.',
-      detail: charge,
-    }), { status: 402, headers: corsHeaders });
-  }
-
-  const now = new Date();
-  try {
-    const token = await _l1AdminToken(env);
-    const existing = await _l1GetExpertPersonaSubscription(env, guid, personaId);
-    const payload = {
-      user_guid: guid, persona_id: personaId, status: 'active',
-      billing_amount_krw: EXPERT_PERSONA_MONTHLY_FEE_KRW,
-      next_billing_at: _addOneMonth(now).toISOString(),
-      last_billed_at: now.toISOString(),
-      last_billing_result: 'success',
-      grace_started_at: null,
-      created_at: existing?.created_at || now.toISOString(),
-    };
-    const url2 = existing
-      ? `${L1_DEFAULT}/api/collections/expert_persona_subscriptions/records/${existing.id}`
-      : `${L1_DEFAULT}/api/collections/expert_persona_subscriptions/records`;
-    const res = await fetch(url2, {
-      method: existing ? 'PATCH' : 'POST',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text().catch(() => '')}`);
-    const rec = await res.json();
-    return new Response(JSON.stringify({ ok: true, subscription: rec, balance_after_krw: charge.balance_after }), { headers: corsHeaders });
-  } catch (e) {
-    return _err(502, 'EXPERT_PERSONA_RECORD_FAILED', `결제는 완료됐으나 구독 기록 저장 실패 — 반드시 수동 확인 필요: ${e.message}`, corsHeaders);
-  }
-}
-
-// ── 전문가 페르소나 월정기 결제 스윕 — user_subscriptions 스윕(§ 위)과
-// 동일 구조를 리프 단위 컬렉션에 재적용한다. free_trial로 시작한 레코드도
-// next_billing_at 도래 시 이 스윕에서 첫 실제 청구를 받는다 — 무료는 딱
-// 1개월뿐이고, 이후는 시민 티어와 동일한 grace/suspended 흐름을 탄다.
-async function _runExpertPersonaBillingSweep(env) {
-  if (!env.L1_ADMIN_EMAIL || !env.L1_ADMIN_PASSWORD) return;
-  let due;
-  try {
-    const token = await _l1AdminToken(env);
-    const nowIso = new Date().toISOString();
-    const filter = encodeURIComponent(`next_billing_at<='${nowIso}' && (status='active' || status='grace')`);
-    const res = await fetch(`${L1_DEFAULT}/api/collections/expert_persona_subscriptions/records?filter=${filter}&perPage=200`, {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json().catch(() => ({ items: [] }));
-    due = data.items || [];
-  } catch (e) {
-    console.error('[ExpertPersonaBilling] 대상 조회 실패:', e.message);
-    return;
-  }
-  if (!due.length) return;
-
-  const token = await _l1AdminToken(env);
-  for (const sub of due) {
-    try {
-      const charge = await _chargeGdcForAiUsage(env, {
-        guid: sub.user_guid, krwAmount: EXPERT_PERSONA_MONTHLY_FEE_KRW, serviceId: 'expert-persona-subscription',
-        memo: `월 정기 구독료: 전문가 페르소나(${sub.persona_id})`,
-      });
-
-      const now = new Date();
-      let patch;
-      if (charge?.ok) {
-        patch = {
-          status: 'active',
-          next_billing_at: _addOneMonth(now).toISOString(),
-          last_billed_at: now.toISOString(),
-          last_billing_result: 'success',
-          grace_started_at: null,
-        };
-      } else {
-        const graceStartedAt = sub.grace_started_at ? new Date(sub.grace_started_at) : now;
-        const graceExpired = (now - graceStartedAt) / (1000 * 60 * 60 * 24) >= EXPERT_PERSONA_GRACE_DAYS;
-        patch = {
-          status: graceExpired ? 'suspended' : 'grace',
-          next_billing_at: new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString(),
-          last_billing_result: charge ? 'insufficient_balance' : 'error',
-          grace_started_at: graceStartedAt.toISOString(),
-        };
-        await _sendPushToGuid(env, sub.user_guid, {
-          title: graceExpired ? '전문가 페르소나 구독이 정지되었습니다' : '전문가 페르소나 구독료 결제 실패',
-          body: graceExpired
-            ? `GDC 잔액 부족으로 전문가 페르소나(${sub.persona_id}) 구독이 정지됐습니다. 충전 후 재구독해 주세요.`
-            : `GDC 잔액 부족으로 전문가 페르소나(${sub.persona_id}) 구독료(${EXPERT_PERSONA_MONTHLY_FEE_KRW.toLocaleString('ko-KR')}원)가 결제되지 않았습니다. ${EXPERT_PERSONA_GRACE_DAYS}일 안에 충전해 주세요.`,
-          tag: 'expert-persona-billing', url: 'https://gdc.hondi.net/charge.html',
-        }).catch(() => {});
-      }
-
-      await fetch(`${L1_DEFAULT}/api/collections/expert_persona_subscriptions/records/${sub.id}`, {
-        method: 'PATCH',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(patch),
-      }).catch(e => console.error('[ExpertPersonaBilling] 레코드 갱신 실패:', sub.id, e.message));
-
-      console.log(JSON.stringify({
-        tag: 'EXPERT_PERSONA_BILLING', guid: sub.user_guid, personaId: sub.persona_id,
-        result: patch.last_billing_result || patch.status, ts: now.toISOString(),
-      }));
-    } catch (e) {
-      console.error('[ExpertPersonaBilling] 개별 처리 실패(건너뜀):', sub.user_guid, sub.persona_id, e.message);
-    }
-  }
-}
 
 // ═══════════════════════════════════════════════════════════
 // 교수 페르소나(professor) 월 사용 한도 — 2026-08-11 신설(주피터 지시)
@@ -5549,93 +5190,6 @@ async function handleProfessorUsageConsume(request, env, corsHeaders) {
   return new Response(JSON.stringify({ unlimited: true, allowed: true }), { headers: corsHeaders });
 }
 
-// ── 월정기 결제 스윕 — scheduled()의 기존 10분 주기 크론에 편승 ──────────
-// (openbanking 자동확정 폴링과 동일 관례). next_billing_at이 지난 active/
-// grace 구독을 찾아 그 잔액에서 차감을 시도한다. 성공하면 다음 결제일을
-// 한 달 뒤로 미루고 grace를 해제, 실패하면 grace로 전환(또는 grace 만료
-// 시 suspended로). 이미 처리된 건은 next_billing_at이 미래로 밀려 있으므로
-// 10분마다 재실행돼도 중복 청구되지 않는다(멱등).
-async function _runMonthlyBillingSweep(env) {
-  if (!env.L1_ADMIN_EMAIL || !env.L1_ADMIN_PASSWORD) return; // 로컬/미배포 환경 보호
-  let due;
-  try {
-    const token = await _l1AdminToken(env);
-    const nowIso = new Date().toISOString();
-    const filter = encodeURIComponent(`next_billing_at<='${nowIso}' && (status='active' || status='grace')`);
-    const res = await fetch(`${L1_DEFAULT}/api/collections/user_subscriptions/records?filter=${filter}&perPage=200`, {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json().catch(() => ({ items: [] }));
-    due = data.items || [];
-  } catch (e) {
-    console.error('[SubscriptionBilling] 대상 조회 실패:', e.message);
-    return;
-  }
-  if (!due.length) return;
-
-  const token = await _l1AdminToken(env);
-  for (const sub of due) {
-    try {
-      const tierCfg = SUBSCRIPTION_TIERS[sub.tier];
-      if (!tierCfg) { console.warn('[SubscriptionBilling] 알 수 없는 tier, 건너뜀:', sub.tier, sub.user_guid); continue; }
-
-      const charge = await _chargeGdcForAiUsage(env, {
-        guid: sub.user_guid, krwAmount: tierCfg.price_krw, serviceId: 'hondi-subscription',
-        memo: `월 정기 구독료: ${tierCfg.name}(${sub.tier})`,
-      });
-
-      const now = new Date();
-      let patch;
-      if (charge?.ok) {
-        patch = {
-          status: 'active',
-          next_billing_at: _addOneMonth(now).toISOString(),
-          last_billed_at: now.toISOString(),
-          last_billing_result: 'success',
-          grace_started_at: null,
-        };
-      } else {
-        // 잔액 부족 등 실패 — 이미 grace 중이었고 유예기간을 넘겼으면 정지,
-        // 아니면 grace로 전환(최초 실패면 grace_started_at을 지금으로 기록).
-        const graceStartedAt = sub.grace_started_at ? new Date(sub.grace_started_at) : now;
-        const graceExpired = (now - graceStartedAt) / (1000 * 60 * 60 * 24) >= SUBSCRIPTION_GRACE_DAYS;
-        patch = {
-          status: graceExpired ? 'suspended' : 'grace',
-          // next_billing_at을 하루 뒤로 미뤄 재시도 — 매 10분마다 무의미하게
-          // 재시도하지 않도록 최소 간격을 둔다.
-          next_billing_at: new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString(),
-          // L1 /api/ai-charge의 정확한 실패 사유 코드 체계는 이 저장소
-          // 밖(main.pb.js)이라 여기서 세밀히 분기하지 않는다 — charge가
-          // 존재하는데 실패했으면 대부분 잔액부족이므로 그렇게 기록하고,
-          // charge 자체가 없으면(네트워크 등 예외적 상황) error로 남긴다.
-          last_billing_result: charge ? 'insufficient_balance' : 'error',
-          grace_started_at: graceStartedAt.toISOString(),
-        };
-        await _sendPushToGuid(env, sub.user_guid, {
-          title: graceExpired ? '혼디 구독이 정지되었습니다' : '혼디 구독료 결제 실패',
-          body: graceExpired
-            ? `GDC 잔액 부족으로 구독(${tierCfg.name})이 정지됐습니다. 충전 후 다시 구독해 주세요.`
-            : `GDC 잔액 부족으로 구독료(${tierCfg.name}, ${tierCfg.price_krw.toLocaleString('ko-KR')}원)가 결제되지 않았습니다. ${SUBSCRIPTION_GRACE_DAYS}일 안에 충전해 주세요.`,
-          tag: 'subscription-billing', url: 'https://gdc.hondi.net/charge.html',
-        }).catch(() => {});
-      }
-
-      await fetch(`${L1_DEFAULT}/api/collections/user_subscriptions/records/${sub.id}`, {
-        method: 'PATCH',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(patch),
-      }).catch(e => console.error('[SubscriptionBilling] 레코드 갱신 실패:', sub.id, e.message));
-
-      console.log(JSON.stringify({
-        tag: 'SUBSCRIPTION_BILLING', guid: sub.user_guid, tier: sub.tier,
-        result: patch.last_billing_result || patch.status, ts: now.toISOString(),
-      }));
-    } catch (e) {
-      console.error('[SubscriptionBilling] 개별 처리 실패(건너뜀):', sub.user_guid, e.message);
-    }
-  }
-}
 
 
 // ═══════════════════════════════════════════════════════════
@@ -13481,14 +13035,9 @@ export default {
     // 크론에 편승 — 별도 wrangler.toml 트리거 불필요. env.AUTO_CONFIRM_
     // OPENBANKING_ENABLED=true 아니면 함수 내부에서 즉시 반환(no-op).
     ctx.waitUntil(_pollOpenBankingAutoConfirm(env, ctx).catch(e => console.error('[OpenBanking] 폴링 전체 실패:', e.message)));
-    // 2026-08-11 신설 — 구독 월정기 결제 스윕. 같은 10분 주기 크론에 편승
-    // (openbanking 자동확정과 동일 관례) — 별도 wrangler.toml 트리거 불필요.
-    // 함수 자체가 멱등이라(처리된 건은 next_billing_at이 미래로 밀림)
-    // 10분마다 재실행돼도 중복 청구되지 않는다.
-    ctx.waitUntil(_runMonthlyBillingSweep(env).catch(e => console.error('[SubscriptionBilling] 스윕 전체 실패:', e.message)));
-    // 2026-08-15 신설 — 전문가 페르소나(리프) 개별 구독 월정기 결제 스윕.
-    // 동일 10분 주기 크론에 편승, 동일하게 멱등(next_billing_at 기준).
-    ctx.waitUntil(_runExpertPersonaBillingSweep(env).catch(e => console.error('[ExpertPersonaBilling] 스윕 전체 실패:', e.message)));
+    // 2026-09-23 제거(주피터 지시) — 시민/전문가 페르소나 구독 스윕
+    // (_runMonthlyBillingSweep, _runExpertPersonaBillingSweep) 폐기.
+    // 요금제가 순수 종량제 하나로 통일되면서 정기 결제 자체가 없어짐.
     // 2026-09-01 신설 — K-Mail 예약 캠페인 발송 스윕. send_at이 지난
     // scheduled 캠페인을 찾아 발송(_kmailSweepDueCampaigns 참고). 동일
     // 10분 주기 크론에 편승 — 별도 wrangler.toml 트리거 불필요.
@@ -13874,12 +13423,10 @@ export default {
     if (pathname.startsWith('/kcleaner/report/') && request.method === 'GET')   return handleKCleanerReportGet(url, env, corsHeaders);
     if (pathname === '/kcleaner/photo-upload' && request.method === 'POST')     return handleKCleanerPhotoUpload(request, env, corsHeaders);
     if (pathname.startsWith('/media/kcleaner-photo/') && request.method === 'GET') return handleKCleanerPhotoGet(request, env, corsHeaders);
-    // ── 구독 티어 · 월정기 결제 — 공통 선결과제 (2026-08-11 신설) ──
-    if (pathname === '/subscription/subscribe' && request.method === 'POST') return handleSubscribe(request, env, corsHeaders);
-    if (pathname === '/subscription/status' && request.method === 'GET') return handleSubscriptionStatus(request, url, env, corsHeaders);
-    // 2026-08-15 신설 — 전문가 페르소나(리프) 개별 구독 게이트/재구독
-    if (pathname === '/expert-persona/access' && request.method === 'GET') return handleExpertPersonaAccess(request, url, env, corsHeaders);
-    if (pathname === '/expert-persona/resubscribe' && request.method === 'POST') return handleExpertPersonaResubscribe(request, env, corsHeaders);
+    // 2026-09-23 제거(주피터 지시) — 구독 요금제 폐지로 /subscription/subscribe,
+    // /subscription/status, /expert-persona/access, /expert-persona/resubscribe
+    // 라우트 전부 삭제. professor-usage는 이미 항상 allowed:true인 무제한
+    // 스텁이라(expert-session.js가 여전히 호출) 그대로 남겨둔다.
     if (pathname === '/subscription/professor-usage' && request.method === 'GET') return handleProfessorUsageStatus(request, url, env, corsHeaders);
     if (pathname === '/subscription/professor-usage/consume' && request.method === 'POST') return handleProfessorUsageConsume(request, env, corsHeaders);
     // ── 사업자 티어 확장 — 재고관리·공급망·인사·채용·업무일정 (2026-08-11 신설) ──
@@ -21040,18 +20587,10 @@ async function handleKlawRelay(bodyText, env, corsHeaders, meta = null, ctx = nu
   // 위해 개별 함수가 아니라 디스패치 한 곳에서만 강제하는 구조로
   // 바꿨다. 상세 이력은 git blame으로 이전 버전 참고.)
 
-  // ── 티어 기반 요금 면제 — 2026-08-14 현재 해당 없음 ──
-  // 2026-08-11엔 "전문직 티어(all_services_free)"가 있어 K-Law를 무료로
-  // 면제하는 경로였으나, 2026-08-14에 티어가 시민(990원) 단일로
-  // 재설계되며 all_services_free:true인 티어 자체가 더 이상 없다 —
-  // 그래서 지금은 이 조회가 사실상 항상 false로 귀결된다(구독 조회에
-  // 성공해도 실패해도 결과는 같음). 향후 다시 무료 면제 티어가
-  // 생기면 이 조회 로직만 그대로 재사용하면 되므로 구조는 남겨둔다.
-  let _klawFreeTier = false;
-  try {
-    const sub = await _l1GetSubscription(env, guid);
-    _klawFreeTier = !!SUBSCRIPTION_TIERS[sub?.tier]?.all_services_free;
-  } catch (e) { /* 미구독/조회실패 → 유료로 간주(보수적) */ }
+  // ── 티어 기반 요금 면제 — 2026-09-23 구독 요금제 자체가 폐지되어
+  // _l1GetSubscription/SUBSCRIPTION_TIERS가 더 이상 존재하지 않는다.
+  // "전 서비스 무료 티어" 개념도 함께 사라졌으므로 항상 false로 고정.
+  const _klawFreeTier = false;
 
   // UNIVERSAL-INTEGRITY·UNIVERSAL-common 서버측 강제 주입(2026-07-04 신설,
   // 2026-07-20 UNIVERSAL-common 추가) — K-Law는 클라이언트가 시스템 메시지를

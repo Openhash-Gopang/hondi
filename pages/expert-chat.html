@@ -1146,82 +1146,11 @@ async function _connectHumanExpert(occupationKeyword, escReason = 'success') {
   }
 }
 
-// ══════════════════════════════════════════════════════════════
-// 2026-08-15 신설 — 전문가 페르소나(리프) 개별 구독 게이트. 첫 접근은
-// worker.js(/expert-persona/access)가 청구 없이 자동으로 무료체험
-// 레코드를 만들어 통과시킨다(첫 1일 무료, 2026-08-15 주피터 지시로
-// 1개월 → 1일로 단축). 이후
-// 정지(suspended)된 경우에만 여기서 결제 화면을 보여준다.
-//
-// 게이트 조회 자체가 실패하면(네트워크 오류 등) 막지 않고 그냥 통과시킨다
-// — 결제 여부를 확정할 수 없다고 상담 자체를 차단하면 가용성이 더 크게
-// 훼손된다는 판단(기존 FREE_QUOTA_ENFORCEMENT_ENABLED 등 다른 게이트와
-// 동일한 방향의 절충). 실제 청구 누락 여부는 서버 로그(EXPERT_PERSONA_
-// BILLING 태그)로 사후 확인한다.
-// ══════════════════════════════════════════════════════════════
-async function _ensureExpertPersonaAccess() {
-  const user = _loadUser();
-  const guid = user?.ipv6;
-  if (!guid) { startGreeting(); return; } // 비로그인 등 guid 없음 — 기존 동작 유지
-
-  let data;
-  try {
-    const res = await fetch(`${RELAY_ENDPOINT}/expert-persona/access?guid=${encodeURIComponent(guid)}&personaId=${encodeURIComponent(PERSONA)}`);
-    data = await res.json();
-  } catch (e) {
-    console.warn('[Expert] 구독 게이트 조회 실패(통과 처리):', e.message);
-    startGreeting();
-    return;
-  }
-
-  if (data?.access) {
-    // 2026-09-18 삭제(주피터 지시) — 이 공지("첫 1일 무료 ... 월 9,900원
-    // GDC 자동청구")는 webapp.html의 메인 AI 비서(AC)용 문구였고, 그마저도
-    // 이미 옛 버전(현재 webapp.html의 실제 무료 한도 안내는 "100원어치
-    // 무료 사용량" 방식으로 바뀌어 있다 — call-ai.js의 FREE_QUOTA_EXCEEDED/
-    // GDC_INSUFFICIENT_BALANCE 메시지 참고). 이 페이지(전문가 페르소나
-    // 상담)에 잘못 노출되고 있던 것이라 그대로 삭제한다. 트라이얼 여부
-    // 자체는 여전히 서버가 판정하고(access:true) 그대로 상담을 진행하므로
-    // (아래 startGreeting()), 게이트 로직 자체는 바뀌지 않는다 — 사용자에게
-    // 보여주던 공지 문구만 제거.
-    startGreeting();
-    return;
-  }
-
-  // 정지 상태 — 결제 안내 + 재구독 버튼
-  const btnId = 'expert-resub-btn-' + Date.now();
-  appendBubble('ai',
-    `${escHtml(data?.message || 'GDC 잔액 부족으로 이 페르소나 구독이 정지됐습니다.')}<br>` +
-    `월 이용료: <b>${EXPERT_PERSONA_MONTHLY_FEE_KRW_DISPLAY}원</b><br><br>` +
-    `<button id="${btnId}" onclick="_resubscribeExpertPersona('${btnId}')" style="margin-top:4px;padding:8px 14px;border:none;border-radius:8px;background:#0057A8;color:#fff;font-weight:600;cursor:pointer">` +
-    `💳 지금 결제하고 계속하기</button>`
-  );
-}
-const EXPERT_PERSONA_MONTHLY_FEE_KRW_DISPLAY = '9,900';
-
-window._resubscribeExpertPersona = async function(btnId) {
-  const user = _loadUser();
-  const guid = user?.ipv6;
-  const btn = document.getElementById(btnId);
-  if (btn) { btn.disabled = true; btn.textContent = '결제 처리 중…'; }
-  try {
-    const res = await fetch(`${RELAY_ENDPOINT}/expert-persona/resubscribe`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ guid, personaId: PERSONA }),
-    });
-    const data = await res.json();
-    if (!res.ok || data?.ok === false) {
-      appendBubble('ai', `⚠ 결제에 실패했습니다: ${escHtml(data?.message || data?.error || '알 수 없는 오류')}`);
-      if (btn) { btn.disabled = false; btn.textContent = '💳 지금 결제하고 계속하기'; }
-      return;
-    }
-    appendBubble('ai', '✅ 결제가 완료됐습니다. 상담을 시작합니다.');
-    startGreeting();
-  } catch (e) {
-    appendBubble('ai', `⚠ 결제 처리 중 오류: ${escHtml(e.message)}`);
-    if (btn) { btn.disabled = false; btn.textContent = '💳 지금 결제하고 계속하기'; }
-  }
-};
+// 2026-09-23 제거(주피터 지시) — 전문가 페르소나 개별 구독 요금제 폐지로
+// _ensureExpertPersonaAccess()/_resubscribeExpertPersona() 게이트를
+// 삭제하고, 2026-08-15 이전처럼 startGreeting()을 직접 호출하도록 되돌림
+// (아래 호출부 참고). 순수 종량제 과금은 여전히 call-ai.js 쪽 기존
+// FREE_QUOTA_EXCEEDED/GDC_INSUFFICIENT_BALANCE 경로가 그대로 처리한다.
 
 function startGreeting() {
   // GWP_CTX(그림자 AI로부터 전달된, 사용자가 방금 한 발화 원문)가 있으면
@@ -1457,7 +1386,7 @@ document.addEventListener('click', _resetIdle);
 document.addEventListener('keydown', _resetIdle);
 _resetIdle();
 
-_ensureExpertPersonaAccess();
+startGreeting();
 </script>
 </body>
 </html>
