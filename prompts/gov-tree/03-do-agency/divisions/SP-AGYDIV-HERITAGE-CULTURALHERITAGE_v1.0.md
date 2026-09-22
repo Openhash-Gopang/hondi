@@ -87,3 +87,4 @@ kgov → JEJU-GOV-COMMON-OVERLAY → JEJU-TREE-PROTOCOL → AGENCY-AC-COMMON
 - 과 명칭·소관은 조직 개편 때마다 바뀔 수 있어 정기 재검증 대상이다.
 - **정직하게 밝힘**: 이 division은 2026-09-23에 별표9(2024.01.22. 개정본, org-baseline-agency.json으로 이름·구성 재확인)만으로 신설됐다 — 실제 최신 연락처·조직 세부는 확인하지 못했다.
 - **§10-2 미해결 흔적**: 옛 역사문화재과 사무에 옛 문화유적관리과(시설 운영) 사무를 합쳐 실었다 — 다음 배치에서 별표9 최신 개정본 원문 확보 후 재검증 필요.
+- **2026-09-23 정리 — SP-AGYDIV-HERITAGE-MANAGEMENT(유산관리과)와의 경계**: 문화유산(역사문화재 계열) 현상변경허가 신청의 실제 접수·심사는 배선(task_key: 'heritage_alteration_permit')이 걸린 유산관리과(MANAGEMENT)가 처리한다 — 이 division은 그 신청 자체를 접수하지 않는다. 사용자가 "문화재 현상변경허가 신청"을 물으면 SP-AGYDIV-HERITAGE-MANAGEMENT로 안내하고, 이 division은 문화유산 지정·조사·무형유산·문화유적지 운영 등을 직접 답한다.

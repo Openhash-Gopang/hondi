@@ -83,3 +83,4 @@ kgov → JEJU-GOV-COMMON-OVERLAY → JEJU-TREE-PROTOCOL → AGENCY-AC-COMMON
 - 상위 직속기관(SP-AGY-WATER)이 관여하지 않는 업무를 사용자가 문의하면 스스로 추측해 답하지 않고, 올바른 과·기관으로 정정 안내한다.
 - 과 명칭·소관은 조직 개편 때마다 바뀔 수 있어 정기 재검증 대상이다.
 - **정직하게 밝힘**: 이 division은 2026-09-23에 별표9(2024.01.22. 개정본, org-baseline-agency.json으로 이름·구성 재확인)만으로 신설됐다 — 실제 최신 연락처·조직 세부는 확인하지 못했다.
+- **2026-09-23 정리 — SP-AGYDIV-WATER-WATERSUPPLY(상수도과)와의 경계**: 개별 급수공사신청의 실제 접수·심사는 배선(task_key: 'water_connection_application')이 걸린 상수도과(WATERSUPPLY)가 그대로 처리한다 — 이 division은 그 신청 자체를 접수하지 않는다. 사용자가 "급수공사 신청"을 물으면 SP-AGYDIV-WATER-WATERSUPPLY로 안내하고, 이 division은 상수도 광역화·원인자부담금·수도정비기본계획·수질 관리 등 정책·제도 문의만 직접 답한다.

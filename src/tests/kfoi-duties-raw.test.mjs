@@ -318,5 +318,34 @@ await test('작업 #10: 세계유산본부 유산정책부 4개(유산정책과�
   }
 });
 
+await test('작업 #11: 배선된 division과 새 division이 겹치는 3쌍(본관↔운영과, 상수도과↔상수도정책시설과, 유산관리과↔문화유산과·자연유산과) 모두 양쪽에 "2026-09-23 정리" 경계 문구가 있다', () => {
+  const pairs = [
+    ['SP-AGYDIV-ARTMUSEUM-MAIN', 'SP-AGYDIV-ARTMUSEUM-ADMIN'],
+    ['SP-AGYDIV-WATER-WATERSUPPLY', 'SP-AGYDIV-WATER-POLICYFACILITY'],
+    ['SP-AGYDIV-HERITAGE-MANAGEMENT', 'SP-AGYDIV-HERITAGE-CULTURALHERITAGE'],
+    ['SP-AGYDIV-HERITAGE-MANAGEMENT', 'SP-AGYDIV-HERITAGE-NATURALHERITAGE'],
+  ];
+  for (const [wiredId, otherId] of pairs) {
+    for (const id of [wiredId, otherId]) {
+      const p = execFileSync('bash', ['-c', `grep -rl "^# 문서 코드  : ${id}$" prompts/gov-tree/03-do-agency/divisions/*.md || true`], { cwd: ROOT }).toString().trim();
+      assert.ok(p, `${id}: 파일을 못 찾음`);
+      const content = fs.readFileSync(p, 'utf8');
+      assert.ok(/2026-09-23( §3)? 정리/.test(content), `${id}: 경계 정리 문구가 없음`);
+    }
+  }
+});
+await test('작업 #11 안전장치: 경계 정리 이후에도 배선된 4개 division의 task_key는 그대로다', () => {
+  const wired = {
+    'SP-AGYDIV-ARTMUSEUM-MAIN': 'artmuseum_main_facility_rental',
+    'SP-AGYDIV-WATER-WATERSUPPLY': 'water_connection_application',
+    'SP-AGYDIV-HERITAGE-MANAGEMENT': 'heritage_alteration_permit',
+  };
+  for (const [id, key] of Object.entries(wired)) {
+    const p = execFileSync('bash', ['-c', `grep -rl "^# 문서 코드  : ${id}$" prompts/gov-tree/03-do-agency/divisions/*.md || true`], { cwd: ROOT }).toString().trim();
+    const content = fs.readFileSync(p, 'utf8');
+    assert.ok(content.includes(`task_key: '${key}'`), `${id}: task_key가 바뀌거나 사라짐`);
+  }
+});
+
 console.log(`\n${pass}/${pass + fail} passed`);
 process.exit(fail ? 1 : 0);

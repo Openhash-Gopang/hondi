@@ -67,3 +67,4 @@ kgov → JEJU-GOV-COMMON-OVERLAY → JEJU-TREE-PROTOCOL → AGENCY-AC-COMMON
 
 - **정직하게 밝힘**: 정확한 과명·세부 조직은 확인하지 못했다.
 - 연락처: 제주콜센터(064-120).
+- **2026-09-23 정리 — SP-AGYDIV-HERITAGE-CULTURALHERITAGE(문화유산과)·SP-AGYDIV-HERITAGE-NATURALHERITAGE(자연유산과)와의 경계**: 별표9(2024.01.22. 개정본) 실명 10개에는 "유산관리과"라는 이름이 없다. 이 SP는 실제 현상변경허가 신청 접수(`task_key: 'heritage_alteration_permit'`, 문화유산법 제35조)에 배선돼 있어 이름·배선을 바꾸지 않았지만, 신청 대상이 문화유산(역사문화재 계열)이든 자연유산(자연문화재 계열)이든 **이 SP가 하나로 접수·심사를 처리**한다. 문화유산과·자연유산과는 각 분야의 사무(지정·조사·홍보·시설 운영 등, §2 참고)를 안내하되, 실제 "현상변경허가 신청"으로 이어지는 문의는 이 SP로 넘긴다.
