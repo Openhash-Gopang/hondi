@@ -156,24 +156,23 @@ export const KLAW_COOLDOWN_MS = 30000;
 export function setKlawBusy(v)      { _klawBusy      = v; }
 export function setKlawLastCheck(v) { _klawLastCheck = v; }
 
-// ── Supabase ─────────────────────────────────────────────
+// ── Supabase (전량 제거 완료, 2026-09-22) ─────────────────
 // ★ 2026-08-12 — 45개 저장소 시크릿 스캔에서 이 anon key가 openhash-L1-hanlim
 // 포함 최소 12개 저장소 실행 코드에 리터럴로 박혀 공개된 게 발견됨(project
-// ref ebbecjfrwaswbdybbgiu). 값 자체는 즉시 제거한다 — 이미 노출된 키이므로
-// Supabase 대시보드에서 회전도 별도로 필요(코드 수정과 무관하게 필수).
+// ref ebbecjfrwaswbdybbgiu). 값 자체는 이미 빈 문자열로 제거돼 있었음 —
+// Supabase 대시보드에서의 키 회전은 코드 수정과 무관하게 별도로 필요.
 //
-// 이 상수를 쓰던 4개 파일 중 auth.js는 이미 L1 PocketBase 직접 호출로
-// 교체 완료. pdv/record.js(_patchL1LedgerUserHash·_patchPdvChainHeight)는
-// 2026-08-20 Worker PATCH /pdv/ledger-hash·/pdv/chain-height 경유로 전환
-// 완료 — l1_ledger/pdv_log는 이미 pdv_records로 통합돼 있던 대상이라
-// 별도 컬렉션 확정이 필요 없어졌다(record.js는 더 이상 이 상수를 import
-// 하지 않음).
-// TODO(주피터): kcleaner.js(_updateFiilReport, fiil-kcleaner의 reports
-// 테이블)만 아직 미해결 — 이쪽은 GET(select)+merge+PATCH 패턴이라 대상
-// PocketBase 컬렉션명 확정이 필요하다. 확정되는 대로 동일하게 Worker
-// 엔드포인트(예: PATCH /kcleaner/report)로 옮길 것.
-export const _SUPABASE_URL = '';
-export const _SUPABASE_KEY = '';
+// 이 상수를 쓰던 4개 파일: auth.js(L1 PocketBase 직접 호출로 교체),
+// pdv/record.js(2026-08-20 Worker PATCH /pdv/ledger-hash·/pdv/chain-height
+// 경유로 전환), kcleaner.js(2026-09-22 — 마지막 미해결 항목이었음.
+// fiil-kcleaner의 reports 테이블을 kcleaner_reports L1 PocketBase
+// 컬렉션으로 확정하고, Worker PATCH /kcleaner/report/:report_code
+// 경유로 전환 완료 — _updateFiilReport 참고) — 전부 마이그레이션
+// 완료되어 이 파일에서 상수 자체를 제거한다. 남은 위험: nounweb/fiil
+// (clean.hondi.net 이관 전 원본)의 webapp.html에 같은 anon key가 아직
+// 하드코딩돼 있었음 — clean.hondi.net 이관 시 함께 제거 대상.
+export const _SUPABASE_URL = undefined; // deprecated — no longer used anywhere; kept only so a stray import doesn't crash at load time
+export const _SUPABASE_KEY = undefined; // deprecated — see _SUPABASE_URL
 
 // ── L1 ───────────────────────────────────────────────────
 export const L1_URL = 'https://l1-hanlim.hondi.net/api/collections/profiles/records';
