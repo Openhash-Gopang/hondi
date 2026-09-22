@@ -43,73 +43,6 @@
    "confidence": "high"
   },
   {
-   "name": "중앙협력본부",
-   "chapter": "사업소",
-   "section": "제3절",
-   "legal_basis": "제40~41조",
-   "current_divisions": [
-    "국회대외협력부(행정총괄과ㆍ국회대외과ㆍ정부협력과)"
-   ],
-   "confidence": "high"
-  },
-  {
-   "name": "문화예술진흥원",
-   "chapter": "사업소",
-   "section": "제4절",
-   "legal_basis": "제42~43조",
-   "current_divisions": [
-    "운영과",
-    "공연기획과"
-   ],
-   "confidence": "high"
-  },
-  {
-   "name": "해양수산연구원",
-   "chapter": "사업소",
-   "section": "제7절",
-   "legal_basis": "제48~49조",
-   "current_divisions": [
-    "해양수산자원과",
-    "해양환경연구과",
-    "수산종자연구과",
-    "수산물안전과",
-    "광어연구센터"
-   ],
-   "confidence": "high"
-  },
-  {
-   "name": "동물위생시험소",
-   "chapter": "사업소",
-   "section": "제8절",
-   "legal_basis": "제50~51조",
-   "current_divisions": [
-    "축산물안전과",
-    "방역진단과"
-   ],
-   "confidence": "high"
-  },
-  {
-   "name": "설문대여성문화센터",
-   "chapter": "사업소",
-   "section": "제11절",
-   "legal_basis": "제56~57조",
-   "current_divisions": [
-    "운영과"
-   ],
-   "confidence": "high"
-  },
-  {
-   "name": "돌문화공원관리소",
-   "chapter": "사업소",
-   "section": "제12절",
-   "legal_basis": "제58~59조",
-   "current_divisions": [
-    "공원운영과",
-    "돌문화연구과"
-   ],
-   "confidence": "high"
-  },
-  {
    "name": "제주환경자원순환센터",
    "chapter": "사업소",
    "section": "제13절",
@@ -117,19 +50,6 @@
    "current_divisions": [
     "자원순환시설관리과",
     "음식물자원화과"
-   ],
-   "confidence": "high"
-  },
-  {
-   "name": "고용센터",
-   "chapter": "사업소",
-   "section": "제14절",
-   "legal_basis": "제59조의4~5",
-   "current_divisions": [
-    "취업지원총괄과",
-    "고용지원과",
-    "실업급여과",
-    "서귀포지소"
    ],
    "confidence": "high"
   },
@@ -367,6 +287,86 @@
     "항일기념관"
    ],
    "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제31~32조·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(보훈과·보상과·항일기념관 3개)을 확인해 SP-AGY-VETERANS와 하위 division 3개를 함께 신설했다. §2는 별표8(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다. **명칭 중복 유의**: gov-router.js의 JEJU_NATIONAL_TABLE에 이미 SP-NAT-VETERANS(\"제주보훈청(국가보훈부)\")가 \"보훈청\" 키워드로 등록돼 있다 — 도 직속기관(이 SP)과 국가보훈부 소속 기관의 소관 중복·우선순위는 이번 배치에서 해결하지 않았다(SP-AGY-VETERANS_v1.0.md §6 참고, 다음 배치에서 재검증 필요)."
+  },
+  "SP-AGY-CENTRALCOOP": {
+   "status": "match",
+   "current_name": "중앙협력본부",
+   "confidence": "high",
+   "legal_basis": "제40~41조",
+   "current_divisions": [
+    "국회대외협력부(행정총괄과ㆍ국회대외과ㆍ정부협력과)"
+   ],
+   "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제40~41조·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(국회대외협력부(행정총괄과ㆍ국회대외과ㆍ정부협력과))을 확인해 SP-AGY-CENTRALCOOP와 하위 division을 함께 신설했다. §2는 별표9(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다. 별표9(2024.01.22. 개정본) 원문에는 이 기관이 \"대외행정지원과\"·\"국회협력과\"·\"정부협력과\" 3개 독립된 과로 나뉘어 있어(이름도 org-baseline의 행정총괄과·국회대외과와 정확히 일치하지 않음), org-baseline의 current_divisions(\"국회대외협력부\" 1개, 3개 팀 표기)와 구조가 다르다 — 이 SP는 org-baseline 구조를 따라 division 1개로 신설했다. **명칭 중복 유의**: gov-router.js의 JEJU_DO_TABLE에 이미 SP-DO-LIAISON(\"중앙협력본부\", 02-do-dept 최상위 도 부서)이 정확히 같은 이름·키워드로 등록돼 있다 — 도 부서와 사업소로 이중 등록된 것인지는 이번 조사에서 확정하지 못했다(SP-AGY-CENTRALCOOP_v1.0.md §6 참고, 다음 배치에서 재검증 필요)."
+  },
+  "SP-AGY-CULTUREARTS": {
+   "status": "match",
+   "current_name": "문화예술진흥원",
+   "confidence": "high",
+   "legal_basis": "제42~43조",
+   "current_divisions": [
+    "운영과",
+    "공연기획과"
+   ],
+   "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제42~43조·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(운영과·공연기획과)을 확인해 SP-AGY-CULTUREARTS와 하위 division을 함께 신설했다. §2는 별표9(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다."
+  },
+  "SP-AGY-MARINEFISHERIES": {
+   "status": "match",
+   "current_name": "해양수산연구원",
+   "confidence": "high",
+   "legal_basis": "제48~49조",
+   "current_divisions": [
+    "해양수산자원과",
+    "해양환경연구과",
+    "수산종자연구과",
+    "수산물안전과",
+    "광어연구센터"
+   ],
+   "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제48~49조·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(해양수산자원과·해양환경연구과·수산종자연구과·수산물안전과·광어연구센터)을 확인해 SP-AGY-MARINEFISHERIES와 하위 division을 함께 신설했다. §2는 별표9(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다."
+  },
+  "SP-AGY-ANIMALHYGIENE": {
+   "status": "match",
+   "current_name": "동물위생시험소",
+   "confidence": "high",
+   "legal_basis": "제50~51조",
+   "current_divisions": [
+    "축산물안전과",
+    "방역진단과"
+   ],
+   "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제50~51조·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(축산물안전과·방역진단과)을 확인해 SP-AGY-ANIMALHYGIENE와 하위 division을 함께 신설했다. §2는 별표9(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다."
+  },
+  "SP-AGY-SEOLMUNDAE": {
+   "status": "match",
+   "current_name": "설문대여성문화센터",
+   "confidence": "high",
+   "legal_basis": "제56~57조",
+   "current_divisions": [
+    "운영과"
+   ],
+   "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제56~57조·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(운영과)을 확인해 SP-AGY-SEOLMUNDAE와 하위 division을 함께 신설했다. §2는 별표9(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다. 별표9(2024.01.22. 개정본) 원문은 이 기관을 \"교육운영과\"·\"문화기획과\" 2개 과로 적고 있어 org-baseline의 current_divisions(운영과 1개)와 다르다 — SP-AGY-SEOLMUNDAE_v1.0.md §6에 정직하게 밝힘."
+  },
+  "SP-AGY-STONEPARK": {
+   "status": "match",
+   "current_name": "돌문화공원관리소",
+   "confidence": "high",
+   "legal_basis": "제58~59조",
+   "current_divisions": [
+    "공원운영과",
+    "돌문화연구과"
+   ],
+   "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제58~59조·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(공원운영과·돌문화연구과)을 확인해 SP-AGY-STONEPARK와 하위 division을 함께 신설했다. §2는 별표9(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다. 별표9(2024.01.22. 개정본) 원문에는 \"돌문화연구과\"의 사무 항목이 없다(공원운영과만 있음) — 돌문화연구과 §2는 명칭에서 추정한 내용이며 confidence low, SP-AGY-STONEPARK_v1.0.md §6에 정직하게 밝힘."
+  },
+  "SP-AGY-EMPLOYMENT": {
+   "status": "match",
+   "current_name": "고용센터",
+   "confidence": "high",
+   "legal_basis": "제59조의4~5",
+   "current_divisions": [
+    "취업지원총괄과",
+    "고용지원과",
+    "실업급여과",
+    "서귀포지소"
+   ],
+   "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제59조의4~5·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(취업지원총괄과·고용지원과·실업급여과·서귀포지소)을 확인해 SP-AGY-EMPLOYMENT와 하위 division을 함께 신설했다. §2는 별표9(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다. 별표9(2024.01.22. 개정본)에는 사업소 단위 사무 분장이 없고, 별표7(본청)에 옛 조직상 \"고용센터\" 사무 22건이 division 구분 없이 실려 있었다 — 이 배치가 주제별로 4개 division에 재배치했다(작성자 판단, 원문 아님). **명칭 중복 유의**: division-tables.js의 DO_DEPT_DIVISION_TABLE에 이미 SP-DIV-ECON-EMPLOYCENTER(\"경제활력국 고용센터\")가 bare 키워드 [\"고용\", \"고용센터\"]로 등록돼 있다 — 도 부서 산하 division과 이 사업소가 같은 실체인지는 이번 조사에서 확정하지 못했다 (SP-AGY-EMPLOYMENT_v1.0.md §6 참고, 다음 배치에서 재검증 필요)."
   }
  }
 }
