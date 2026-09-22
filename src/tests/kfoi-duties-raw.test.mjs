@@ -208,5 +208,29 @@ await test('작업 #7: 한라도서관 division 2개가 실제 분장사무(별�
   }
 });
 
+await test('작업 #8: 자치경찰단 division 6개가 실제 분장사무(별표8)로 신설되고, 배선된 교통과는 손대지 않았다', () => {
+  const digest = buildDigest();
+  const inst = digest.tiers.agency.entries.find(e => e.id === 'SP-AGY-POLICE');
+  const divs = digest.tiers.agency.entries.filter(e => e.kind === 'division' && e.parent === inst.name);
+  assert.equal(divs.length, 7, '새 6개 + 배선된 교통과 1개 = 7개여야 함');
+  const traffic = divs.find(e => e.id === 'SP-AGYDIV-POLICE-TRAFFIC');
+  assert.ok(traffic, '배선된 교통과가 남아 있어야 함');
+  const tpath = execFileSync('bash', ['-c', 'grep -rl "^# 문서 코드  : SP-AGYDIV-POLICE-TRAFFIC$" prompts/gov-tree/03-do-agency/divisions/*.md || true'], { cwd: ROOT }).toString().trim();
+  assert.ok(tpath, '교통과 파일을 못 찾음');
+  assert.ok(fs.readFileSync(tpath, 'utf8').includes("task_key: 'parking_violation_fine_objection'"), '교통과의 실제 배선이 사라짐');
+  const newDivs = divs.filter(e => e.id !== 'SP-AGYDIV-POLICE-TRAFFIC');
+  assert.equal(newDivs.length, 6);
+  for (const d of newDivs) {
+    assert.equal(d.state, 'draft');
+    assert.ok(d.does && d.does.length > 0);
+    for (const line of d.does) assert.ok(/^\d{1,3}\.\s/.test(line));
+  }
+  for (const f of ['SP-AGYDIV-POLICE-SAFETY_v1.1.md', 'SP-AGYDIV-POLICE-WOMENYOUTH_v1.0.md']) {
+    assert.ok(fs.existsSync(path.join(ROOT, 'prompts/gov-tree/03-do-agency/archive', f)), `${f}: archive에 없음`);
+    assert.ok(!fs.existsSync(path.join(ROOT, 'prompts/gov-tree/03-do-agency/divisions', f)), `${f}: live에 아직 있음`);
+  }
+  assert.ok(!fs.existsSync(path.join(ROOT, 'prompts/gov-tree/03-do-agency/archive', 'SP-AGYDIV-POLICE-TRAFFIC_v1.1.md')), '배선된 교통과가 실수로 archive에 옮겨지면 안 됨');
+});
+
 console.log(`\n${pass}/${pass + fail} passed`);
 process.exit(fail ? 1 : 0);
