@@ -2297,7 +2297,26 @@ document.getElementById('hometaxQueryBtn')?.addEventListener('click', async () =
   // gdcOpen()이 KAuth.ensureLogin() → gdcLoadBalance()를 그대로
   // 수행하고, gdcLoadBalance()가 홈 탭 요소(kpiGdcBalance 등)까지
   // 함께 채우므로 별도 로직 불필요.
-  gdcOpen();
+  // 2026-09-23 버그 수정(주피터 실사로 발견 — 인증 팝업 두 개가 겹쳐
+  // 보임) — gdcOpen()을 무조건 즉시 호출하면, 메인 대시보드 로그인
+  // (#loginScreen, 지갑/Ed25519 기반)이 아직 안 끝난 상태에서도 KAuth의
+  // 전화번호 인증 팝업이 그 위에 곧바로 겹쳐서 뜬다. #dashboardApp이
+  // 실제로 보이게 된 뒤(=메인 로그인 완료 후)에만 호출하도록, 위 프로필
+  // 탭의 기존 패턴(pfRefreshAll의 MutationObserver)과 동일하게 맞춘다.
+  const _dashboardAppElForGdc = document.getElementById('dashboardApp');
+  if (_dashboardAppElForGdc && _dashboardAppElForGdc.style.display !== 'none') {
+    gdcOpen();
+  } else if (_dashboardAppElForGdc) {
+    const _gdcAutoOpenObserver = new MutationObserver(() => {
+      if (_dashboardAppElForGdc.style.display !== 'none') {
+        _gdcAutoOpenObserver.disconnect();
+        gdcOpen();
+      }
+    });
+    _gdcAutoOpenObserver.observe(_dashboardAppElForGdc, { attributes: true, attributeFilter: ['style'] });
+  } else {
+    gdcOpen(); // dashboardApp을 못 찾은 예상 밖 상황 — 안전하게 기존 동작 유지
+  }
 
   // 홈 탭의 "거래 내역" 링크·GDC KPI 카드를 누르면 GDC 탭으로 이동.
   document.getElementById('walletHistoryLink')?.addEventListener('click', (e) => {
