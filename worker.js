@@ -34382,12 +34382,33 @@ async function handleKmailContactsCsvImport(request, env, corsHeaders) {
   const status = body.status === 'pending_review' ? 'pending_review' : 'confirmed';
 
   const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const valid = rows.filter(c => c && typeof c.email === 'string' && emailRe.test(c.email.trim()));
-  const invalidCount = rows.length - valid.length;
+  const validAll = rows.filter(c => c && typeof c.email === 'string' && emailRe.test(c.email.trim()));
+  const invalidCount = rows.length - validAll.length;
+
+  // 2026-09-22 수정 — 예전엔 건마다(중복확인 1회+생성 1회) 순차로 await 했다.
+  // 50건이면 최대 100번의 순차 PocketBase 왕복이라, 실서버 왕복 지연에서는
+  // 배치 하나에도 수십 초가 걸려 Cloudflare Worker 처리시간 제한에 걸려
+  // 응답이 끊기는 사고가 났다(실사용 확인: 204건 업로드가 0/204에서 멈춤).
+  // CONCURRENCY 개씩 묶어 병렬로 처리해 왕복 횟수는 그대로지만 벽시계 시간을
+  // 크게 줄인다. 같은 배치 안에 이메일이 겹치면(사용자가 실수로 같은 사람을
+  // 두 줄에 넣은 경우) 먼저 정규화 이메일 기준으로 걸러 딱 한 번만 만든다 —
+  // 병렬 처리 시 "둘 다 중복확인을 통과해 둘 다 생성되는" 경쟁 상태를
+  // 이 방식으로 원천 차단한다(중복확인 자체가 PocketBase 필터 조회라
+  // 두 요청이 동시에 나가면 서로의 존재를 못 볼 수 있음).
+  const CONCURRENCY = 10;
+  const seenEmail = new Set();
+  const valid = [];
+  let batchDup = 0;
+  for (const c of validAll) {
+    const email = _kmailNormalizeEmail(c.email);
+    if (seenEmail.has(email)) { batchDup++; continue; }
+    seenEmail.add(email);
+    valid.push(c);
+  }
 
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-  let created = 0, skippedDup = 0, autoCategorized = 0;
+  let created = 0, skippedDup = batchDup, autoCategorized = 0;
   // 2026-09-11 신설 — 지금까지 레코드 생성이 실패해도(예: category가
   // select 옵션과 안 맞아 검증 거부되는 경우) 아무 로그도 안 남아서
   // "왜 0건만 등록됐는지" 진단할 방법이 없었다(실사 발견 — 767건짜리
@@ -34397,10 +34418,10 @@ async function handleKmailContactsCsvImport(request, env, corsHeaders) {
   const failed = [];
   const FAILED_SAMPLE_MAX = 20;
 
-  for (const c of valid) {
+  async function processOne(c) {
     const email = _kmailNormalizeEmail(c.email);
     const existing = await _kmailFindExistingContact(env, guid, email);
-    if (existing) { skippedDup++; continue; }
+    if (existing) { skippedDup++; return; }
 
     let category = typeof c.category === 'string' ? c.category.trim() : '';
     if (!category) {
@@ -34421,11 +34442,15 @@ async function handleKmailContactsCsvImport(request, env, corsHeaders) {
         added_via_query: '(CSV/엑셀 일괄 업로드)',
       }),
     });
-    if (res.ok) { created++; continue; }
+    if (res.ok) { created++; return; }
     const errBody = await res.json().catch(() => null);
     const errMsg = errBody?.message || `HTTP ${res.status}`;
     console.error('[K-Address CSV Import] 레코드 생성 실패:', email, errMsg, JSON.stringify(errBody?.data || {}));
     if (failed.length < FAILED_SAMPLE_MAX) failed.push({ email, error: errMsg });
+  }
+
+  for (let i = 0; i < valid.length; i += CONCURRENCY) {
+    await Promise.all(valid.slice(i, i + CONCURRENCY).map(processOne));
   }
 
   return new Response(JSON.stringify({
@@ -34434,6 +34459,7 @@ async function handleKmailContactsCsvImport(request, env, corsHeaders) {
     failedSample: failed,
   }), { status: 200, headers: corsHeaders });
 }
+
 
 // GET /kmail/contacts?guid=...&pubkey=...&signature=...&ts=...&status=pending_review
 // GET /kmail/contacts?guid=...&pubkey=...&signature=...&ts=...&status=pending_review
