@@ -403,7 +403,6 @@ code, pre, kbd, samp, input, button, textarea, select {
 .login-success-icon svg { width: 26px; height: 26px; }
 </style>
 
-<div class="mock-banner">⚠️ "진행 중인 절차"·"최근 활동"·"이번 달 처리"·"진행 중 절차"·"데이터 무결성"은 구조 설계용 목업입니다. GDC 잔액/지갑은 실제 데이터입니다(전화번호 인증 필요).</div>
 
 <!-- ══════════════ 로그인 화면 ══════════════ -->
 <div class="login-screen" id="loginScreen">
@@ -544,82 +543,34 @@ code, pre, kbd, samp, input, button, textarea, select {
         </div>
       </div>
 
-      <!-- 홈 -->
+      <!-- 홈 (2026-09-23 수정 — 목업 패널 전부 제거: 진행 중인 절차·
+           최근 활동·이번 달 처리·진행 중 절차·데이터 무결성·PDV 무결성.
+           실제 데이터가 있는 GDC 잔액/지갑과, 데이터가 아닌 순수 링크인
+           바로가기만 남긴다. -->
       <div class="dash-panel active" id="panel-home">
-        <div class="kpi-strip">
+        <div class="kpi-strip" style="grid-template-columns:1fr">
           <div class="kpi-cell"><div class="kpi-label">GDC 잔액</div><div class="kpi-value" id="kpiGdcBalance">—</div><div class="kpi-delta" id="kpiGdcBalanceSub">인증 후 표시됩니다</div></div>
-          <div class="kpi-cell"><div class="kpi-label">이번 달 처리</div><div class="kpi-value">18건</div><div class="kpi-delta">K-서비스 12 · 전문가 6</div></div>
-          <div class="kpi-cell"><div class="kpi-label">진행 중 절차</div><div class="kpi-value">3건</div><div class="kpi-delta">사법1 · 행정1 · 입법1</div></div>
-          <div class="kpi-cell"><div class="kpi-label">데이터 무결성</div><div class="kpi-value">정상</div><div class="kpi-delta ok">앵커링 8분 전</div></div>
         </div>
 
-        <div class="grid-2">
-          <div>
-            <div class="panel">
-              <div class="panel-head"><h2>진행 중인 절차</h2><a href="#">전체 보기</a></div>
-              <div class="row">
-                <span class="status-dot amber"></span>
-                <div class="row-body"><div class="row-title">임대차보증금 반환 — K-Law 가상 판결 검토</div><div class="row-desc">변호사 중재 대기 · 2026-08-20 접수</div></div>
-                <span class="status-tag amber">진행 중</span>
-              </div>
-              <div class="row">
-                <span class="status-dot gray"></span>
-                <div class="row-body"><div class="row-title">건축 인허가 신청 — 현장 실사 대기</div><div class="row-desc">5단계 중 2단계 · 2026-08-18 접수</div></div>
-                <span class="status-tag gray">담당자 처리</span>
-              </div>
-              <div class="row">
-                <span class="status-dot red"></span>
-                <div class="row-body"><div class="row-title">임대차 보증금 공제 기준 명확화 청원</div><div class="row-desc">1단계 37/100명 · 잔여 22일</div></div>
-                <span class="status-tag red">확산 필요</span>
-              </div>
-            </div>
-
-            <div class="panel">
-              <div class="panel-head"><h2>최근 활동</h2><a href="#">전체 보기</a></div>
-              <div class="row">
-                <span class="activity-mark"></span>
-                <div class="row-body"><div class="row-title" style="font-weight:500;"><b>K-Market</b>에서 짜장면 1그릇 주문 완료</div><div class="meta-row"><span>제주시 한림읍 · 오늘 12:32</span><span class="tag-chip">GDC 7,000원</span></div></div>
-              </div>
-              <div class="row">
-                <span class="activity-mark"></span>
-                <div class="row-body"><div class="row-title" style="font-weight:500;">변호사 페르소나에게 <b>임대차 계약서 검토</b> 요청</div><div class="meta-row"><span>오늘 10:15</span><span class="tag-chip">전문가 페르소나</span></div></div>
-              </div>
-              <div class="row">
-                <span class="activity-mark"></span>
-                <div class="row-body"><div class="row-title" style="font-weight:500;"><b>K-Tax</b>에서 종합소득세 예상세액 조회</div><div class="meta-row"><span>어제 21:04</span></div></div>
-              </div>
-            </div>
+        <div class="panel">
+          <div class="panel-head"><h2>GDC 지갑</h2><a href="#" id="walletHistoryLink">거래 내역</a></div>
+          <div class="wallet-num" id="homeWalletBalance">—<span>T</span></div>
+          <div class="wallet-sub">기본료 없는 순수 종량제 · 베타 기간 1T = 1원 고정 — 사용한 만큼만 차감됩니다</div>
+          <div class="wallet-deposit-box">
+            <div class="wallet-deposit-label">입금 계좌</div>
+            <div class="wallet-deposit-account">AI City Inc.(에이아이시티주식회사) · 기업은행 315-092028-04-011</div>
+            <div style="margin-top:6px;font-size:11.5px;color:var(--text4)">입금하신 금액만큼(1T = 1원) GDC로 자동 충전됩니다. 구독·정액 요금제는 없습니다.</div>
           </div>
+          <div id="homeWalletRecentTx"><div class="wallet-tx"><span>전화번호 인증 후 표시됩니다</span></div></div>
+        </div>
 
-          <div>
-            <div class="panel">
-              <div class="panel-head"><h2>GDC 지갑</h2><a href="#" id="walletHistoryLink">거래 내역</a></div>
-              <div class="wallet-num" id="homeWalletBalance">—<span>T</span></div>
-              <div class="wallet-sub">기본료 없는 순수 종량제 · 베타 기간 1T = 1원 고정 — 사용한 만큼만 차감됩니다</div>
-              <div class="wallet-deposit-box">
-                <div class="wallet-deposit-label">입금 계좌</div>
-                <div class="wallet-deposit-account">AI City Inc.(에이아이시티주식회사) · 기업은행 315-092028-04-011</div>
-                <div style="margin-top:6px;font-size:11.5px;color:var(--text4)">입금하신 금액만큼(1T = 1원) GDC로 자동 충전됩니다. 구독·정액 요금제는 없습니다.</div>
-              </div>
-              <div id="homeWalletRecentTx"><div class="wallet-tx"><span>전화번호 인증 후 표시됩니다</span></div></div>
-            </div>
-
-            <div class="panel">
-              <div class="panel-head"><h2>PDV 무결성</h2></div>
-              <div class="pdv-line"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>최근 활동 4건 기록 완료</div>
-              <div class="pdv-line"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>위변조 이력 없음</div>
-              <div class="pdv-hash-box">0x8f3a...c721 (8분 전)</div>
-            </div>
-
-            <div class="panel">
-              <div class="panel-head"><h2>바로가기</h2></div>
-              <div class="quick-grid">
-                <a class="quick-item" href="/pages/k-services.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6z"></path></svg><span>K-119</span></a>
-                <a class="quick-item" href="/pages/klaw-research.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M5 7h14M5 7l-3 7a4 4 0 0 0 8 0L5 7zM19 7l-3 7a4 4 0 0 0 8 0l-5-7z"></path></svg><span>K-Law</span></a>
-                <a class="quick-item" href="/pages/k-services.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span>K-Tax</span></a>
-                <a class="quick-item" href="/pages/expert-personas.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41 11 3.83 3.83 11 13.41 20.59a2 2 0 0 0 2.83 0l4.35-4.35a2 2 0 0 0 0-2.83z"></path></svg><span>전문가</span></a>
-              </div>
-            </div>
+        <div class="panel">
+          <div class="panel-head"><h2>바로가기</h2></div>
+          <div class="quick-grid">
+            <a class="quick-item" href="/pages/k-services.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6z"></path></svg><span>K-119</span></a>
+            <a class="quick-item" href="/pages/klaw-research.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M5 7h14M5 7l-3 7a4 4 0 0 0 8 0L5 7zM19 7l-3 7a4 4 0 0 0 8 0l-5-7z"></path></svg><span>K-Law</span></a>
+            <a class="quick-item" href="/pages/k-services.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span>K-Tax</span></a>
+            <a class="quick-item" href="/pages/expert-personas.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41 11 3.83 3.83 11 13.41 20.59a2 2 0 0 0 2.83 0l4.35-4.35a2 2 0 0 0 0-2.83z"></path></svg><span>전문가</span></a>
           </div>
         </div>
       </div>
@@ -2283,7 +2234,10 @@ document.getElementById('hometaxQueryBtn')?.addEventListener('click', async () =
         loading.textContent = balData?.message || '이 전화번호로 등록된 프로필을 찾을 수 없습니다.';
         return;
       }
-      const balanceDisplay = (balData.balance ?? 0).toLocaleString();
+      // 2026-09-23 수정(주피터 지시) — 소수점 이하 생략. GDC 잔액은 L1에서
+      // 부동소수점으로 내려오는데(예: 1412.0187325...), 거래 내역 행은
+      // 이미 Math.trunc로 정수 표시 중이었고 이 합계 표시만 빠져있었다.
+      const balanceDisplay = Math.trunc(balData.balance ?? 0).toLocaleString();
       document.getElementById('gdcBalance').textContent = balanceDisplay;
       // 2026-09-23 — 구독 요금제 폐지로 subscribed/tier/tier_name/renews_at
       // 필드가 응답에서 사라짐(worker.js /user/gdc-balance 참고). 고정 문구로 대체.
