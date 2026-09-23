@@ -301,9 +301,9 @@ await test('digestQuery: summary에 도청 조직 대조가 실리고, 첫 페�
   const p1 = digestQuery(digest, { tier: 'do', offset: 0 }); assert.ok(p1.baseline && p1.baseline.confidence_note);
   const p2 = digestQuery(digest, { tier: 'do', offset: p1.next_offset }); assert.ok(!p2.baseline);
 });
-await test('digestQuery: kind:"bureau"는 국·단 24개(폐지 3건·중복 1건 반영, 소방안전본부 이동 후)를 한 페이지로 돌려주고 현행 조직 대조를 담는다', () => {
+await test('digestQuery: kind:"bureau"는 국·단 23개(폐지 3건·중복 1건 반영, 소방안전본부 이동 후, 2026-09-24 작업 #17로 SP-DO-LIAISON도 archive)를 한 페이지로 돌려주고 현행 조직 대조를 담는다', () => {
   const r = digestQuery(digest, { tier: 'do', kind: 'bureau' });
-  assert.equal(r.matched, 24); assert.equal(r.returned, 24); assert.equal(r.next_offset, null, '한 페이지에 다 실려야 함');
+  assert.equal(r.matched, 23); assert.equal(r.returned, 23); assert.equal(r.next_offset, null, '한 페이지에 다 실려야 함');
   assert.ok(JSON.stringify(r.entries).length <= 5500);
   assert.ok(r.entries.every(e => e.org && e.org.status));
   assert.equal(r.entries.find(e => e.name === '미래산업국').org.current_name, '미래산업국');

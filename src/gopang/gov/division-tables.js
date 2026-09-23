@@ -300,9 +300,10 @@ export const DO_DEPT_DIVISION_TABLE = [
   { code: "SP-DIV-ECON-SMALLBIZ", domain: "econ",
     name: "경제활력국 소상공인물류과", desc: "당신은 **제주도청 경제활력국 소상공인물류과**를 대표하는 AI 레이어다.",
     kw: ["소상공인물류", "소상공인물류과"], file: "02-do-dept/divisions/SP-DIV-ECON-SMALLBIZ_v1.0.md" },
-  { code: "SP-DIV-ECON-EMPLOYCENTER", domain: "econ",
-    name: "경제활력국 고용센터", desc: "당신은 **제주도청 경제활력국 고용센터**를 대표하는 AI 레이어다.",
-    kw: ["고용", "고용센터"], file: "02-do-dept/divisions/SP-DIV-ECON-EMPLOYCENTER_v1.0.md" },
+  // 2026-09-24 제거(작업 #17, 사용자 확인 + 웹 조사) — 경제활력국 산하 division이 아니라
+  // 도 직속 "사업소"(제주특별법 제44조 근거)로 잘못 모델링된 것으로 확인됐다. 정본은
+  // SP-AGY-EMPLOYMENT(03-do-agency, 및 하위 division 4개)이다 — archive/SP-DIV-ECON-
+  // EMPLOYCENTER_v1.0.md 참고, prompts/gov-tree/03-do-agency/archive/README.md 상세 기록.
   { code: "SP-DIV-CLIMATE-ENVPOLICY", domain: "climate",
     name: "기후환경국 환경정책과", desc: "당신은 **제주도청 기후환경국 환경정책과**를 대표하는 AI 레이어다.",
     kw: ["환경정책", "환경정책과"], file: "02-do-dept/divisions/SP-DIV-CLIMATE-ENVPOLICY_v1.1.md" },
@@ -508,15 +509,18 @@ export const JEJU_AGENCY_TABLE = [
   { code: "SP-AGY-STONEPARK", name: "돌문화공원관리소", desc: "당신은 제주특별자치도청 **돌문화공원관리소**를 대표하는 AI 레이어다. 주요 소관: 돌문화공원 조성·운영·관리, 교래자연휴양림 운영, 돌문화 자료 조사연구",
     kw: ["돌문화공원관리소", "돌문화공원", "교래자연휴양림"], file: "03-do-agency/SP-AGY-STONEPARK_v1.0.md" },
   { code: "SP-AGY-EMPLOYMENT", name: "제주특별자치도 고용센터", desc: "당신은 제주특별자치도청 **제주특별자치도 고용센터**를 대표하는 AI 레이어다. 주요 소관: 구직자 취업지원·채용박람회, 직업훈련·직업능력개발, 고용보험 실업급여 안내",
-    // ★ 2026-09-23 — bare "고용"·"고용센터"는 넣지 않았다(division-tables.js의 DO_DEPT_DIVISION_TABLE에
-    // 이미 SP-DIV-ECON-EMPLOYCENTER("경제활력국 고용센터")가 그 두 키워드로 등록돼 있어 명칭이 겹친다 —
-    // SP-AGY-EMPLOYMENT_v1.0.md §6 참고, 다음 배치에서 실제 관계 재검증 전까지는 기관명 전체·division
-    // 고유 사무명 위주로만 구성)
+    // ★ 2026-09-24(작업 #17) — 정리 완료, 아래 이유로 일원화: 이전에 겹치던 SP-DIV-ECON-
+    // EMPLOYCENTER("경제활력국 고용센터")는 조례 개별 검증 없이 "경제활력국 산하 부서"로 잘못
+    // 모델링된 것으로 확인돼(위키백과 확인 — 실제로는 제주특별법 제44조 근거 도 직속 사업소)
+    // archive로 옮겼다(사용자 확인 + 웹 조사, 2026-09-24). 이 SP-AGY-EMPLOYMENT가 정본이다 —
+    // bare "고용"·"고용센터" 키워드는 여전히 넣지 않고 기관명 전체·division 고유 사무명 위주로 유지.
     kw: ["제주특별자치도 고용센터", "취업지원총괄과", "구직자 맞춤형 취업지원"], file: "03-do-agency/SP-AGY-EMPLOYMENT_v1.0.md" },
   { code: "SP-AGY-CENTRALCOOP", name: "제주특별자치도 중앙협력본부(사업소)", desc: "당신은 제주특별자치도청 **제주특별자치도 중앙협력본부(사업소)**를 대표하는 AI 레이어다. 주요 소관: 국회·중앙부처(세종시권 포함) 대상 도정 협력·예산절충·입법지원, 중앙언론 대상 도정홍보",
-    // ★ 2026-09-23 — bare "중앙협력본부"는 넣지 않았다(gov-router.js의 JEJU_DO_TABLE에 이미
-    // SP-DO-LIAISON("중앙협력본부", 02-do-dept 최상위 도 부서)이 정확히 같은 이름·키워드로 등록돼 있어
-    // 명칭이 겹친다 — SP-AGY-CENTRALCOOP_v1.0.md §6 참고, 다음 배치에서 실제 관계 재검증 전까지는
+    // ★ 2026-09-24(작업 #17) — 정리 완료, 아래 이유로 일원화: 이전에 겹치던 SP-DO-LIAISON
+    // (02-do-dept 최상위 도 부서, "일반 지식 기반 초안, jeju.go.kr 재검증 필요"라고 스스로 밝혔던
+    // 문서)은 실제 조례상 계층(제40~41조, 실·국이 아니라 사업소)부터 다른 것으로 확인돼 archive로
+    // 옮겼다(사용자 확인 + 웹 조사, 2026-09-24). 이 SP-AGY-CENTRALCOOP가 정본이다 — bare
+    // "중앙협력본부"는 여전히 넣지 않고 다음 배치에서 실제 관계 재검증 전까지는
     // division 고유 사무명 위주로만 구성)
     kw: ["국회대외협력부", "세종시권", "국회대외과"], file: "03-do-agency/SP-AGY-CENTRALCOOP_v1.0.md" },
   // ★ 2026-09-23 신설(작업 #14) — org-baseline-agency.json의 missing_in_inventory에서 발견된
@@ -563,8 +567,10 @@ export const JEJU_COLLEGIAL_TABLE = [
     // 같은 실체를 가리킬 가능성이 있어 다음 배치 재검증 필요)
     kw: ["지방노동위원회", "조정사건", "중재사건", "재해보상 심사"], file: "03b-collegial-agency/SP-COMM-LABOR_v1.0.md" },
   { code: "SP-COMM-POLICE", name: "자치경찰위원회", desc: "당신은 제주특별자치도 **자치경찰위원회**를 대표하는 AI 레이어다. 주요 소관: 자치경찰사무 정책 심의·의결, 자치경찰사무 담당 공무원 인사·평가, 국가경찰·자치경찰 사무조정",
-    // ★ bare "자치경찰"은 넣지 않았다(SP-AGY-POLICE(자치경찰단, 집행조직)와 별개 기관이라 혼동
-    // 방지 — SP-COMM-POLICE_v1.0.md §6 참고). "자치경찰단"과 겹치지 않는 위원회 고유 키워드만 사용.
+    // ★ 2026-09-24(작업 #17) 확인됨 — 상하관계, 문서화 완료: 이 위원회(심의·의결·지휘·감독 기구)와
+    // SP-AGY-POLICE(자치경찰단, 집행조직)는 별개 기관이며 위원회가 자치경찰단의 상급 컨트롤타워다
+    // (웹 조사로 확인, SP-COMM-POLICE_v1.0.md §LEGAL-BASIS·SP-AGY-POLICE_v1.0.md §0 참고). bare
+    // "자치경찰"은 넣지 않고 "자치경찰단"과 겹치지 않는 위원회 고유 키워드만 사용.
     kw: ["자치경찰위원회", "위원구성협의체", "자치경찰사무 정책"], file: "03b-collegial-agency/SP-COMM-POLICE_v1.0.md" },
 ];
 
@@ -875,8 +881,9 @@ export const JEJU_AGENCY_DIVISION_TABLE = [
     name: "고용센터 서귀포지소", desc: "당신은 **고용센터 서귀포지소**을 대표하는 AI 레이어다.",
     kw: ["서귀포고용센터", "고용센터 서귀포지소"], file: "03-do-agency/divisions/SP-AGYDIV-EMPLOYMENT-SEOGWIPO_v1.0.md" },
   { code: "SP-AGYDIV-CENTRALCOOP-ASSEMBLY", institution: "SP-AGY-CENTRALCOOP",
-    // ★ bare "중앙협력본부"는 넣지 않았다(gov-router.js JEJU_DO_TABLE의 SP-DO-LIAISON이 이미
-    // 그 이름·키워드로 등록돼 있어 명칭이 겹친다 — SP-AGY-CENTRALCOOP_v1.0.md §6 참고)
+    // ★ 2026-09-24(작업 #17) 정리 완료 — 예전에 겹치던 gov-router.js JEJU_DO_TABLE의
+    // SP-DO-LIAISON은 archive로 옮겨졌다(사용자 확인 + 웹 조사, SP-AGY-CENTRALCOOP_v1.0.md §6
+    // 참고). bare "중앙협력본부"는 여전히 넣지 않는다.
     name: "중앙협력본부 국회대외협력부", desc: "당신은 **중앙협력본부 국회대외협력부**을 대표하는 AI 레이어다.",
     kw: ["국회대외협력부", "세종시권 중앙부처", "국회 협력 기획"], file: "03-do-agency/divisions/SP-AGYDIV-CENTRALCOOP-ASSEMBLY_v1.0.md" },
   // ★ 2026-09-23 신설(작업 #14) — SP-AGY-ENVCIRCULATION/SAFETYEXPERIENCE 산하 division 5개.

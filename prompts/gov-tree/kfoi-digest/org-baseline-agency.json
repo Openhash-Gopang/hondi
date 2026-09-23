@@ -3,7 +3,7 @@
  "as_of": "2026-08-25",
  "basis": "제주특별자치도 행정기구 설치 및 정원 조례 시행규칙(제938호, 2026.8.25. 시행) 제3장(직속기관, 제23조~제35조의2)ㆍ제4장(사업소, 제36조~제59조의5)ㆍ제5장(합의제행정기관, 제60조~제63조의3) 원문 확인",
  "checked_on": "2026-09-22",
- "confidence_note": "도청(do)ㆍ제주시ㆍ서귀포시와 달리 이 유형은 현재 SP 인벤토리(DO_AGENCIES, 원래 10개)의 과 구성이 원문과 광범위하게 다르다 — 9개 전부 'structure_differs'다(이름 일부만 겹치거나 아예 다르다). 또한 소방안전본부(SP-AGY-FIRE)는 이 유형이 아니라 도청 15실·국·본부(제21조의4)였다는 것을 이번에 확인해 do 유형으로 옮겼다. 법정 직속기관 7개ㆍ사업소 14개 중 9개만 SP가 있고 12개는 전혀 없다(공공정책연수원ㆍ보훈청ㆍ소방서 4곳ㆍ안전체험관ㆍ중앙협력본부(이미 SP-DO-LIAISON으로 도청 유형에 있음, 아래 참고)ㆍ문화예술진흥원ㆍ해양수산연구원ㆍ동물위생시험소ㆍ설문대여성문화센터ㆍ돌문화공원관리소ㆍ환경자원순환센터ㆍ고용센터). 합의제행정기관(감사위원회 등 3개)은 2026-09-24(작업 #16)에 별도 tier(collegial, org-baseline-collegial.json)로 분리 신설돼 이 파일의 missing_in_inventory에서는 빠졌다 — 아래 corrections 참고. 각 과의 분장사무(별표 8ㆍ9ㆍ10)는 확보하지 못해 실제 SP 본문 작성은 다음 배치다.",
+ "confidence_note": "도청(do)ㆍ제주시ㆍ서귀포시와 달리 이 유형은 현재 SP 인벤토리(DO_AGENCIES, 원래 10개)의 과 구성이 원문과 광범위하게 다르다 — 9개 전부 'structure_differs'다(이름 일부만 겹치거나 아예 다르다). 또한 소방안전본부(SP-AGY-FIRE)는 이 유형이 아니라 도청 15실·국·본부(제21조의4)였다는 것을 이번에 확인해 do 유형으로 옮겼다. 법정 직속기관 7개ㆍ사업소 14개 중 9개만 SP가 있고 12개는 전혀 없다(공공정책연수원ㆍ보훈청ㆍ소방서 4곳ㆍ안전체험관ㆍ중앙협력본부ㆍ문화예술진흥원ㆍ해양수산연구원ㆍ동물위생시험소ㆍ설문대여성문화센터ㆍ돌문화공원관리소ㆍ환경자원순환센터ㆍ고용센터). 합의제행정기관(감사위원회 등 3개)은 2026-09-24(작업 #16)에 별도 tier(collegial, org-baseline-collegial.json)로 분리 신설돼 이 파일의 missing_in_inventory에서는 빠졌다 — 아래 corrections 참고. 각 과의 분장사무(별표 8ㆍ9ㆍ10)는 확보하지 못해 실제 SP 본문 작성은 다음 배치다.",
  "official_units": {
   "bureaus": [],
   "offices": [],
@@ -22,8 +22,8 @@
    "confidence": "high"
   },
   {
-   "item": "중앙협력본부는 이미 SP-DO-LIAISON으로 도청(do) 유형에 있다(2026-09-21 확인, match) — 그런데 시행규칙 원문상 중앙협력본부는 제4장 제3절(사업소)에 있다. 도청 보좌기관이 아니라 사업소로 분류돼야 정확하다 — 이번 배치에서는 옮기지 않고 기록만 남긴다",
-   "confidence": "medium"
+   "item": "2026-09-24(작업 #17, 사용자 확인 + 웹 조사) 해소: 중앙협력본부가 SP-DO-LIAISON으로 도청(do) 유형에 이중 등록돼 있던 문제를 정리했다 — SP-DO-LIAISON 자체가 '일반 지식 기반 초안, jeju.go.kr 재검증 필요'라고 스스로 밝히고 있었고, 시행규칙 원문상 중앙협력본부는 제4장 제3절(사업소)이 맞다(도청 보좌기관 아님, 위키백과로도 재확인). SP-DO-LIAISON은 archive/로 옮기고 org-baseline-do.json에서도 제거했다 — 이 SP-AGY-CENTRALCOOP(사업소, agency 유형)가 정본이다.",
+   "confidence": "high"
   },
   {
    "item": "2026-09-22: 농업기술원·보건환경연구원·축산생명연구원 division을 별표 8·9(2024.01.22. 개정본) 실제 구성으로 전면 교체(archive/로 이동 후 신설). 이 3개 기관은 division에 실제 서비스 배선(task_key)이 없어 안전하게 교체 가능했다 — 나머지 6개 기관(도립미술관·민속자연사박물관·세계유산본부·한라도서관·자치경찰단·상하수도본부)은 일부 division에 배선이 있어 같은 방식을 그대로 적용할 수 없다",
@@ -223,7 +223,7 @@
    "current_divisions": [
     "국회대외협력부(행정총괄과ㆍ국회대외과ㆍ정부협력과)"
    ],
-   "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제40~41조·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(국회대외협력부(행정총괄과ㆍ국회대외과ㆍ정부협력과))을 확인해 SP-AGY-CENTRALCOOP와 하위 division을 함께 신설했다. §2는 별표9(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다. 별표9(2024.01.22. 개정본) 원문에는 이 기관이 \"대외행정지원과\"·\"국회협력과\"·\"정부협력과\" 3개 독립된 과로 나뉘어 있어(이름도 org-baseline의 행정총괄과·국회대외과와 정확히 일치하지 않음), org-baseline의 current_divisions(\"국회대외협력부\" 1개, 3개 팀 표기)와 구조가 다르다 — 이 SP는 org-baseline 구조를 따라 division 1개로 신설했다. **명칭 중복 유의**: gov-router.js의 JEJU_DO_TABLE에 이미 SP-DO-LIAISON(\"중앙협력본부\", 02-do-dept 최상위 도 부서)이 정확히 같은 이름·키워드로 등록돼 있다 — 도 부서와 사업소로 이중 등록된 것인지는 이번 조사에서 확정하지 못했다(SP-AGY-CENTRALCOOP_v1.0.md §6 참고, 다음 배치에서 재검증 필요)."
+   "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제40~41조·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(국회대외협력부(행정총괄과ㆍ국회대외과ㆍ정부협력과))을 확인해 SP-AGY-CENTRALCOOP와 하위 division을 함께 신설했다. §2는 별표9(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다. 별표9(2024.01.22. 개정본) 원문에는 이 기관이 \"대외행정지원과\"·\"국회협력과\"·\"정부협력과\" 3개 독립된 과로 나뉘어 있어(이름도 org-baseline의 행정총괄과·국회대외과와 정확히 일치하지 않음), org-baseline의 current_divisions(\"국회대외협력부\" 1개, 3개 팀 표기)와 구조가 다르다 — 이 SP는 org-baseline 구조를 따라 division 1개로 신설했다. **명칭 중복 해소(2026-09-24, 작업 #17)**: gov-router.js의 JEJU_DO_TABLE에 있던 SP-DO-LIAISON(\"중앙협력본부\", 02-do-dept 최상위 도 부서)과 이중 등록 문제였다 — 사용자 확인 + 웹 조사 결과 SP-DO-LIAISON은 조례 개별 검증 없이 작성된 초안이었고 실제 조례상 계층(사업소, 제40~41조)도 이 SP와 일치한다는 것을 확인해, SP-DO-LIAISON을 archive로 옮기고 이 SP-AGY-CENTRALCOOP로 일원화했다(SP-AGY-CENTRALCOOP_v1.0.md §6·prompts/gov-tree/03-do-agency/archive/README.md 참고)."
   },
   "SP-AGY-CULTUREARTS": {
    "status": "match",
@@ -293,7 +293,7 @@
     "실업급여과",
     "서귀포지소"
    ],
-   "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제59조의4~5·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(취업지원총괄과·고용지원과·실업급여과·서귀포지소)을 확인해 SP-AGY-EMPLOYMENT와 하위 division을 함께 신설했다. §2는 별표9(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다. 별표9(2024.01.22. 개정본)에는 사업소 단위 사무 분장이 없고, 별표7(본청)에 옛 조직상 \"고용센터\" 사무 22건이 division 구분 없이 실려 있었다 — 이 배치가 주제별로 4개 division에 재배치했다(작성자 판단, 원문 아님). **명칭 중복 유의**: division-tables.js의 DO_DEPT_DIVISION_TABLE에 이미 SP-DIV-ECON-EMPLOYCENTER(\"경제활력국 고용센터\")가 bare 키워드 [\"고용\", \"고용센터\"]로 등록돼 있다 — 도 부서 산하 division과 이 사업소가 같은 실체인지는 이번 조사에서 확정하지 못했다 (SP-AGY-EMPLOYMENT_v1.0.md §6 참고, 다음 배치에서 재검증 필요)."
+   "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제59조의4~5·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(취업지원총괄과·고용지원과·실업급여과·서귀포지소)을 확인해 SP-AGY-EMPLOYMENT와 하위 division을 함께 신설했다. §2는 별표9(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다. 별표9(2024.01.22. 개정본)에는 사업소 단위 사무 분장이 없고, 별표7(본청)에 옛 조직상 \"고용센터\" 사무 22건이 division 구분 없이 실려 있었다 — 이 배치가 주제별로 4개 division에 재배치했다(작성자 판단, 원문 아님). **명칭 중복 해소(2026-09-24, 작업 #17)**: division-tables.js의 DO_DEPT_DIVISION_TABLE에 있던 SP-DIV-ECON-EMPLOYCENTER(\"경제활력국 고용센터\", bare 키워드 [\"고용\", \"고용센터\"])와 이중 등록 문제였다 — 사용자 확인 + 웹 조사 결과 SP-DIV-ECON-EMPLOYCENTER는 조례 개별 검증 없이 \"경제활력국 산하 부서\"로 잘못 모델링된 것이었고(실제로는 제주특별법 제44조 근거 도 직속 사업소), 이 SP-AGY-EMPLOYMENT와 같은 실체임을 확인해 SP-DIV-ECON-EMPLOYCENTER를 archive로 옮기고 이 SP로 일원화했다(SP-AGY-EMPLOYMENT_v1.0.md §6·prompts/gov-tree/03-do-agency/archive/README.md 참고)."
   },
   "SP-AGY-ENVCIRCULATION": {
    "status": "match",

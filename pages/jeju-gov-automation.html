@@ -293,7 +293,9 @@ const DO_BUREAUS = [
       { id: "SP-DIV-ECON-JOBECONOMY", name: "경제정책과", spId: "SP-DIV-ECON-JOBECONOMY", file: "02-do-dept/divisions/SP-DIV-ECON-JOBECONOMY_v1.0.md", confirmed: true },
       { id: "SP-DIV-ECON-INVESTMENT", name: "기업정책과", spId: "SP-DIV-ECON-INVESTMENT", file: "02-do-dept/divisions/SP-DIV-ECON-INVESTMENT_v1.0.md", confirmed: true },
       { id: "SP-DIV-ECON-SMALLBIZ", name: "소상공인물류과", spId: "SP-DIV-ECON-SMALLBIZ", file: "02-do-dept/divisions/SP-DIV-ECON-SMALLBIZ_v1.0.md", confirmed: true },
-      { id: "SP-DIV-ECON-EMPLOYCENTER", name: "고용센터", spId: "SP-DIV-ECON-EMPLOYCENTER", file: "02-do-dept/divisions/SP-DIV-ECON-EMPLOYCENTER_v1.0.md", confirmed: true },
+      // 2026-09-24 제거(작업 #17) — SP-DIV-ECON-EMPLOYCENTER는 경제활력국 산하 division이 아니라
+      // 도 직속 사업소로 잘못 모델링된 것으로 확인돼 archive로 옮겼다. 정본은 SP-AGY-EMPLOYMENT
+      // (03-do-agency)이다.
   ]},
   { id: "innov", name: "미래산업국", spId: "SP-DO-INNOV", kind: "do-dept", divisions: [
       { id: "SP-DIV-INNOV-DIGITAL", name: "디지털혁신과", spId: "SP-DIV-INNOV-DIGITAL", file: "02-do-dept/divisions/SP-DIV-INNOV-DIGITAL_v1.0.md", confirmed: true },
@@ -360,7 +362,9 @@ const DO_BUREAUS = [
   ]},
   { id: "comm", name: "소통ㆍ제2공항담당관", spId: "SP-DO-COMM", kind: "do-dept", divisions: null },
   { id: "integrity", name: "청렴감찰관", spId: "SP-DO-INTEGRITY", kind: "do-dept", divisions: null },
-  { id: "central", name: "중앙협력본부", spId: "SP-DO-LIAISON", kind: "do-dept", divisions: null },
+  // 2026-09-24 제거(작업 #17) — SP-DO-LIAISON("중앙협력본부")은 실제 조례상 계층(실·국이 아니라
+  // 사업소, 제40~41조)부터 다른 것으로 확인돼 archive로 옮겼다. 정본은 SP-AGY-CENTRALCOOP
+  // (03-do-agency, kind: agency)이다.
   { id: "spokesman", name: "대변인", spId: "SP-DO-SPOKES", kind: "do-dept", divisions: null },
   { id: "aigov", name: "AI혁신추진단", spId: "SP-DO-AIGOV", kind: "do-dept", divisions: null },
   { id: "basicsoc", name: "기본사회추진단", spId: "SP-DO-BASICSOC", kind: "do-dept", divisions: null },

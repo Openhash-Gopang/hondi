@@ -129,3 +129,16 @@ sp-intercall·sp-tag-dispatch, 환경설정 의존으로 추정)을 제외하고
 **이번 배치 이후에도 confidence: low(감사위원회 4개 division)·medium(자치경찰협력과)로 남는 항목이
 있다** — 실제 서비스 라우팅(task_key)을 연결하기 전에는 반드시 최신 별표나 실제 조직 자료로 §2를
 재검증해야 한다. SP-NAT-LABORREL과의 소관 중복도 다음 배치에서 해결해야 할 과제로 남는다.
+
+# 2026-09-24 — 자치경찰위원회 ↔ 자치경찰단 상하관계 문서화(작업 #17)
+
+위 배치에서 "명칭이 비슷해 라우팅 키워드 충돌 위험이 있다"고 open_questions에 남겨뒀던 것을
+프로젝트 총괄에게 직접 확인 + 웹 조사로 해소했다. 자치경찰위원회(`SP-COMM-POLICE`)가 자치경찰단
+(`SP-AGY-POLICE`, 03-do-agency)에 대해 실질적인 지휘·감독 권한을 행사하는 상급 컨트롤타워라는
+사실을 jeju.go.kr 공식 설명·삼다일보 보도로 확인했다(웹 조사로 확인, 2026-09-24). 두 기관은 여전히
+서로 다른 별개의 법인격이며(삭제·통합 없음), 이번에는 그 관계의 방향만 양쪽 SP에 명시했다 —
+상세 내용은 `prompts/gov-tree/03-do-agency/archive/README.md`의 "2026-09-24 — 명칭 충돌 3건 정리"
+항목 참고. 같은 배치에서 고용센터·중앙협력본부의 명칭 중복도 옛 SP(SP-DIV-ECON-EMPLOYCENTER·
+SP-DO-LIAISON) archive로 정리했고, 지방노동위원회(`SP-COMM-LABOR` vs `SP-NAT-LABORREL`)는 프로젝트
+총괄이 "확실하지 않음, 다음 배치에서 더 조사"라고 답해 이번에도 손대지 않고 open_questions에
+그대로 남겨뒀다.

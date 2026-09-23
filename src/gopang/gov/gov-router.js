@@ -685,9 +685,12 @@ const JEJU_L2_TABLE = [
   // 같은 흐름으로 보이나 확정 근거는 아니다). 후속 조직 미확인.
   { code: 'SP-DO-GANGJEONG',  file: '02-do-dept/SP-DO-GANGJEONG_v1.0.md',
     kw: ['강정공동체사업추진단', '강정마을', '강정 공동체'] },
-  { code: 'SP-DO-LIAISON',    file: '02-do-dept/SP-DO-LIAISON_v1.0.md',
-    domain: 'liaison', 도코드: 'jeju',
-    kw: ['중앙협력본부', '국비 확보', '중앙정부 협력', '국비확보'] },
+  // 2026-09-24 제거(작업 #17, 사용자 확인 + 웹 조사) — SP-DO-LIAISON 자체가 "일반 지식
+  // 기반 초안, jeju.go.kr 재검증 필요"라고 스스로 밝히고 있었고, 실제 조례상 계층(실·국이
+  // 아니라 사업소, 제40~41조)부터 다른 것으로 확인됐다. 정본은 SP-AGY-CENTRALCOOP
+  // (03-do-agency, 및 하위 division)이다 — archive/SP-DO-LIAISON_v1.0.md 참고,
+  // prompts/gov-tree/03-do-agency/archive/README.md 상세 기록. '중앙협력본부'·'국비 확보'
+  // 등 kw는 division-tables.js JEJU_AGENCY_TABLE의 SP-AGY-CENTRALCOOP로 이관.
 ];
 
 const JEJU_CITY_TABLE = [

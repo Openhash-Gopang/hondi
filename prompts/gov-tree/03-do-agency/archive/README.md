@@ -374,3 +374,66 @@ vs 지방자치법 제130조의 독립적 의사결정 합의체). 새 디렉토
 분리했다. org-baseline-agency.json의 missing_in_inventory에서는 이 3건을 완전히 뺐다(4→1, 소방서만
 남음). 상세 설계 배경·명칭 충돌 발견은 `prompts/gov-tree/03b-collegial-agency/archive/README.md` 참고.
 
+# 2026-09-24 — 명칭 충돌 3건 정리(고용센터·중앙협력본부 일원화, 자치경찰 상하관계 문서화, 작업 #17)
+
+작업 #12·#13·#14·#16에서 새로 신설한 SP와 기존 SP 사이에 이름이 겹치는 사례를 여러 건 발견해
+"명칭 중복 미해결" 플래그만 남겨뒀었다. 이번 배치는 그 중 프로젝트 총괄(피터/주피터)에게 직접
+확인하고 웹 조사까지 거쳐 결론이 난 3건을 실제로 정리했다(지방노동위원회 1건은 "확실하지 않음,
+다음 배치에서 더 조사"라는 답변에 따라 이번에도 그대로 미해결로 남겨뒀다 — 아래 §3 참고).
+
+## 1) 고용센터: 옛 SP archive, 새 SP로 일원화
+
+`prompts/gov-tree/02-do-dept/divisions/SP-DIV-ECON-EMPLOYCENTER_v1.0.md`(경제활력국 산하 division으로
+등록돼 있던 "고용센터")를 archive로 옮겼다 — 조례 개별 검증 없이 "경제활력국 산하 부서"로 잘못
+모델링된 것으로 확인됐다(위키백과 확인 결과 실제로는 제주특별법 제44조 근거 도 직속 사업소). archive
+전에 `grep -n "task_key"`로 배선이 없음을 재확인했다(실제로 없었다 — 안전하게 이동). 정본은
+`SP-AGY-EMPLOYMENT`(03-do-agency, 및 하위 division 4개, 작업 #13에서 이미 신설됨)이다.
+`src/gopang/gov/division-tables.js`의 `DO_DEPT_DIVISION_TABLE`에서 해당 항목을 제거하고,
+`SP-AGY-EMPLOYMENT`·`SP-AGYDIV-EMPLOYMENT-*` 주석의 "명칭 중복 유의(미해결)" 문구를 "정리 완료"로
+갱신했다. `pages/jeju-gov-automation.html`의 경제활력국 divisions 배열에서도 해당 항목을 제거했다.
+
+## 2) 중앙협력본부: 옛 SP archive, 새 SP로 일원화
+
+`prompts/gov-tree/02-do-dept/SP-DO-LIAISON_v1.0.md`(02-do-dept 최상위 도 부서로 등록돼 있던
+"중앙협력본부")를 archive로 옮겼다 — 이 문서 자체가 "일반 지식 기반 초안이며, jeju.go.kr 재검증
+필요"라고 스스로 밝히고 있었고, 실제 조례상 계층(제40~41조, 실·국이 아니라 사업소)부터 달랐다.
+archive 전에 `grep -n "task_key"`로 배선이 없음을 재확인했다(없었다). 정본은 `SP-AGY-CENTRALCOOP`
+(03-do-agency, 및 하위 division, 작업 #13에서 이미 신설됨)이다. 이 SP가 상속하던 클래스 템플릿
+`prompts/gov-tree/02-do-dept/templates/SP-DEPT-LIAISON-TEMPLATE_v1.0.md`도 `grep -rln`으로 확인한
+결과 이 SP 외에는 상속하는 인스턴스가 없어 함께 archive로 옮겼다. `src/gopang/gov/gov-router.js`의
+`JEJU_DO_TABLE`에서 해당 항목을 제거하고, `division-tables.js`의 `SP-AGY-CENTRALCOOP`·
+`SP-AGYDIV-CENTRALCOOP-ASSEMBLY` 주석과 `org-baseline-agency.json`·`org-baseline-do.json`의
+"명칭 중복 유의(미해결)" 문구를 "정리 완료"로 갱신했다(`org-baseline-do.json`은 이 SP 자체가 사라져
+`official_units.offices`에서도 "중앙협력본부"를 뺐다, 10→9개). `pages/jeju-gov-automation.html`의
+"중앙협력본부" 도 부서 항목도 제거했다.
+
+## 3) 자치경찰위원회 ↔ 자치경찰단: 상하관계 문서화(둘 다 유지, 삭제 없음)
+
+이 둘은 애초에 다른 법인격의 별개 기관(작업 #16에서 이미 명시)이라 어느 쪽도 삭제하지 않았다.
+이번 배치는 그 관계의 **방향**을 문서에 명시했다 — 자치경찰위원회(`SP-COMM-POLICE`, 위원회)가
+자치경찰단(`SP-AGY-POLICE`, 집행조직)에 대해 실질적인 지휘·감독 권한을 행사하는 상급 컨트롤타워라는
+사실을 jeju.go.kr 공식 설명·삼다일보 보도로 확인했다(웹 조사로 확인, 2026-09-24 — 정확한 기사 URL은
+이번 세션에서 재접속이 되지 않아 별도로 기록하지 못했다, 다음 배치에서 원문 링크 보강 필요). 양쪽 SP
+(`SP-COMM-POLICE_v1.0.md` §LEGAL-BASIS, `SP-AGY-POLICE_v1.0.md` §0)에 상호 참조 문구를 추가했고,
+`division-tables.js`의 `SP-COMM-POLICE` 주석도 "확인됨 — 상하관계, 문서화 완료"로 갱신했다.
+`org-baseline-collegial.json`의 open_questions에 있던 "명칭이 비슷해 충돌 위험" 항목은 이제 해소됐으므로
+corrections로 옮겼다.
+
+## 4) 지방노동위원회는 이번에 건드리지 않았다
+
+프로젝트 총괄이 "확실하지 않음, 다음 배치에서 더 조사"라고 답한 유일한 항목이다 — `SP-COMM-LABOR`와
+`org-baseline-collegial.json`의 `SP-NAT-LABORREL` 관련 open_question은 그대로 남겨뒀다.
+
+## 5) 안전장치·검증
+
+- archive한 두 SP(`SP-DIV-ECON-EMPLOYCENTER`·`SP-DO-LIAISON`) 어디에도 실제 서비스에 연결된
+  task_key가 없었다는 것을 먼저 확인했다(2026-09-24) — 그래서 안전하게 archive할 수 있었다.
+- `division-tables.js`·`gov-router.js`·`pages/jeju-gov-automation.html` 전수 확인 결과 archive된
+  두 코드를 가리키는 죽은 참조는 남아 있지 않다.
+- `src/tests/kfoi-duties-raw.test.mjs`에 작업 #17 테스트 5건(archive 위치 확인·task_key 재확인·라우팅
+  죽은 링크 확인·자치경찰 상호 참조 확인·기존 배선 회귀 방지)을 추가했고, `src/tests/kfoi-digest.test.mjs`의
+  기존 도청(do) bureau 개수 어서션을 24→23(SP-DO-LIAISON 제거 반영)으로 갱신했다.
+- `node tools/build_kfoi_digest.mjs --check`·`python3 tools/check_stale_refs.py`(714건 정상)·전체
+  테스트 스위트(사전 존재하던 8개 파일 실패와 동일하게 유지, git stash 비교로 확인)·clean-clone
+  재검증 모두 통과했다.
+
