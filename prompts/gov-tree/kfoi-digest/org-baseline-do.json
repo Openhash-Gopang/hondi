@@ -31,10 +31,9 @@
    "소통ㆍ제2공항담당관",
    "AI혁신추진단",
    "강정공동체사업추진단",
-   "중앙협력본부",
    "전국체전기획단"
   ],
-  "note": "실·국·본부 15개, 보좌기관·한시기구 10개는 시행규칙 원문(제3조의2~제6조의4, 제40조, 제93~94조)으로 확인했다."
+  "note": "실·국·본부 15개, 보좌기관·한시기구 9개는 시행규칙 원문(제3조의2~제6조의4, 제93~94조)으로 확인했다. 2026-09-24(작업 #17) — 중앙협력본부는 원래 이 목록(보좌기관·한시기구, 10개)에 있었으나, 시행규칙 제40~41조 원문상 실제로는 제4장 제3절(사업소)이라 이 목록에서 제거했다(corrections 참고) — SP-AGY-CENTRALCOOP(agency 유형)이 정본이다."
  },
  "expected_counts": {
   "실국": 15,
@@ -102,6 +101,10 @@
   },
   {
    "item": "2026-09-22: 실제 SP 인벤토리(page data) 반영 완료 — 개칭 5건(이름만 갱신, spId 유지)·신설 1건(기후에너지국, 과 SP는 미작성)·폐지 3건(SP-DO-AIRPORTSUP·AUTONOMY·BALANCE, archive/로 이동)·중복 제거 1건(SP-DO-GENERAL — 총무과는 이미 SP-DIV-JACHI-GENERAL로 특별자치행정국 소속에 정확히 있었음, 최상위 중복 항목만 제거)",
+   "confidence": "high"
+  },
+  {
+   "item": "2026-09-24(작업 #17, 사용자 확인 + 웹 조사): SP-DO-LIAISON(중앙협력본부)을 도청(do) 유형 인벤토리·official_units.offices에서 제거하고 archive/로 이동 — 이 파일이 2026-09-21에 'match'로 판정하고 official_units.offices에 '보좌기관·한시기구'로 올려뒀던 것 자체가 오류였다. 시행규칙 제40~41조 원문상 중앙협력본부는 제4장 제3절(사업소)이지 본청 2장(실·국·보좌기관)이 아니다 — 위키백과로도 재확인했다. 정본은 prompts/gov-tree/03-do-agency/SP-AGY-CENTRALCOOP_v1.0.md(agency 유형)이며, 상세 배경은 prompts/gov-tree/03-do-agency/archive/README.md 참고. official_units.offices는 10개→9개로 갱신했다.",
    "confidence": "high"
   }
  ],
@@ -325,12 +328,6 @@
    "current_name": "청렴감찰관",
    "confidence": "high",
    "note": "시행규칙 제6조(2026.8.21. 본조신설로 조문 위치 재정비 — 기관 자체는 기존에도 있었음)"
-  },
-  "SP-DO-LIAISON": {
-   "status": "match",
-   "current_name": "중앙협력본부",
-   "confidence": "high",
-   "note": "시행규칙 제40~41조. 산하에 국회대외협력부를 둠"
   },
   "SP-DO-SPOKES": {
    "status": "match",

@@ -300,9 +300,10 @@ export const DO_DEPT_DIVISION_TABLE = [
   { code: "SP-DIV-ECON-SMALLBIZ", domain: "econ",
     name: "경제활력국 소상공인물류과", desc: "당신은 **제주도청 경제활력국 소상공인물류과**를 대표하는 AI 레이어다.",
     kw: ["소상공인물류", "소상공인물류과"], file: "02-do-dept/divisions/SP-DIV-ECON-SMALLBIZ_v1.0.md" },
-  { code: "SP-DIV-ECON-EMPLOYCENTER", domain: "econ",
-    name: "경제활력국 고용센터", desc: "당신은 **제주도청 경제활력국 고용센터**를 대표하는 AI 레이어다.",
-    kw: ["고용", "고용센터"], file: "02-do-dept/divisions/SP-DIV-ECON-EMPLOYCENTER_v1.0.md" },
+  // 2026-09-24 제거(작업 #17, 사용자 확인 + 웹 조사) — 경제활력국 산하 division이 아니라
+  // 도 직속 "사업소"(제주특별법 제44조 근거)로 잘못 모델링된 것으로 확인됐다. 정본은
+  // SP-AGY-EMPLOYMENT(03-do-agency, 및 하위 division 4개)이다 — archive/SP-DIV-ECON-
+  // EMPLOYCENTER_v1.0.md 참고, prompts/gov-tree/03-do-agency/archive/README.md 상세 기록.
   { code: "SP-DIV-CLIMATE-ENVPOLICY", domain: "climate",
     name: "기후환경국 환경정책과", desc: "당신은 **제주도청 기후환경국 환경정책과**를 대표하는 AI 레이어다.",
     kw: ["환경정책", "환경정책과"], file: "02-do-dept/divisions/SP-DIV-CLIMATE-ENVPOLICY_v1.1.md" },
@@ -494,6 +495,83 @@ export const JEJU_AGENCY_TABLE = [
     kw: ["제주특별자치도 보훈청", "국가유공자 등록", "참전유공자 예우", "항일기념관"], file: "03-do-agency/SP-AGY-VETERANS_v1.0.md" },
   { code: "SP-AGY-WATER", name: "상하수도본부", desc: "당신은 제주특별자치도청 **상하수도본부**를 대표하는 AI 레이어다. 주요 소관: 상수도 요금·계량·급수 정책, 하수도 시설·처리, 급수 중단·누수 민원의 정책·시설 총괄 주체",
     kw: ["급수 정책", "급수 중단", "누수 민원의 정책", "상수도 요금", "상하수도본부", "시설 총괄 주체", "하수도 시설"], file: "03-do-agency/SP-AGY-WATER_v1.3.md" },
+  // ★ 2026-09-23 신설(작업 #13) — org-baseline-agency.json의 missing_in_inventory에서 발견된
+  // 사업소 7개(문화예술진흥원·해양수산연구원·동물위생시험소·설문대여성문화센터·돌문화공원관리소·
+  // 고용센터·중앙협력본부). 고용센터·중앙협력본부는 명칭 중복이 있어 bare 키워드를 피했다(각 항목 주석 참고).
+  { code: "SP-AGY-CULTUREARTS", name: "제주특별자치도 문화예술진흥원", desc: "당신은 제주특별자치도청 **제주특별자치도 문화예술진흥원**을 대표하는 AI 레이어다. 주요 소관: 문예회관 전시실·공연장 운영, 도립무용단 운영, 기획공연·전시 유치",
+    kw: ["제주특별자치도 문화예술진흥원", "문예회관", "도립무용단", "공연기획과"], file: "03-do-agency/SP-AGY-CULTUREARTS_v1.0.md" },
+  { code: "SP-AGY-MARINEFISHERIES", name: "제주특별자치도 해양수산연구원", desc: "당신은 제주특별자치도청 **제주특별자치도 해양수산연구원**을 대표하는 AI 레이어다. 주요 소관: 수산 양식품종·종자 기술 연구, 해양환경 모니터링, 수산물 안전성 검사, 광어연구센터",
+    kw: ["제주특별자치도 해양수산연구원", "광어연구센터", "수산종자연구과", "양식기술 보급"], file: "03-do-agency/SP-AGY-MARINEFISHERIES_v1.0.md" },
+  { code: "SP-AGY-ANIMALHYGIENE", name: "제주특별자치도 동물위생시험소", desc: "당신은 제주특별자치도청 **제주특별자치도 동물위생시험소**를 대표하는 AI 레이어다. 주요 소관: 축산물 안전성 검사, 가축전염병 방역·예찰·검역, 광역동물보호센터 운영",
+    kw: ["제주특별자치도 동물위생시험소", "축산물안전과", "방역진단과", "광역동물보호센터"], file: "03-do-agency/SP-AGY-ANIMALHYGIENE_v1.0.md" },
+  { code: "SP-AGY-SEOLMUNDAE", name: "설문대여성문화센터", desc: "당신은 제주특별자치도청 **설문대여성문화센터**를 대표하는 AI 레이어다. 주요 소관: 여성평생교육·능력개발 프로그램 운영, 여성역사문화 전시·자료 보존",
+    kw: ["설문대여성문화센터", "여성역사문화전시관", "여성자원활동센터"], file: "03-do-agency/SP-AGY-SEOLMUNDAE_v1.0.md" },
+  { code: "SP-AGY-STONEPARK", name: "돌문화공원관리소", desc: "당신은 제주특별자치도청 **돌문화공원관리소**를 대표하는 AI 레이어다. 주요 소관: 돌문화공원 조성·운영·관리, 교래자연휴양림 운영, 돌문화 자료 조사연구",
+    kw: ["돌문화공원관리소", "돌문화공원", "교래자연휴양림"], file: "03-do-agency/SP-AGY-STONEPARK_v1.0.md" },
+  { code: "SP-AGY-EMPLOYMENT", name: "제주특별자치도 고용센터", desc: "당신은 제주특별자치도청 **제주특별자치도 고용센터**를 대표하는 AI 레이어다. 주요 소관: 구직자 취업지원·채용박람회, 직업훈련·직업능력개발, 고용보험 실업급여 안내",
+    // ★ 2026-09-24(작업 #17) — 정리 완료, 아래 이유로 일원화: 이전에 겹치던 SP-DIV-ECON-
+    // EMPLOYCENTER("경제활력국 고용센터")는 조례 개별 검증 없이 "경제활력국 산하 부서"로 잘못
+    // 모델링된 것으로 확인돼(위키백과 확인 — 실제로는 제주특별법 제44조 근거 도 직속 사업소)
+    // archive로 옮겼다(사용자 확인 + 웹 조사, 2026-09-24). 이 SP-AGY-EMPLOYMENT가 정본이다 —
+    // bare "고용"·"고용센터" 키워드는 여전히 넣지 않고 기관명 전체·division 고유 사무명 위주로 유지.
+    kw: ["제주특별자치도 고용센터", "취업지원총괄과", "구직자 맞춤형 취업지원"], file: "03-do-agency/SP-AGY-EMPLOYMENT_v1.0.md" },
+  { code: "SP-AGY-CENTRALCOOP", name: "제주특별자치도 중앙협력본부(사업소)", desc: "당신은 제주특별자치도청 **제주특별자치도 중앙협력본부(사업소)**를 대표하는 AI 레이어다. 주요 소관: 국회·중앙부처(세종시권 포함) 대상 도정 협력·예산절충·입법지원, 중앙언론 대상 도정홍보",
+    // ★ 2026-09-24(작업 #17) — 정리 완료, 아래 이유로 일원화: 이전에 겹치던 SP-DO-LIAISON
+    // (02-do-dept 최상위 도 부서, "일반 지식 기반 초안, jeju.go.kr 재검증 필요"라고 스스로 밝혔던
+    // 문서)은 실제 조례상 계층(제40~41조, 실·국이 아니라 사업소)부터 다른 것으로 확인돼 archive로
+    // 옮겼다(사용자 확인 + 웹 조사, 2026-09-24). 이 SP-AGY-CENTRALCOOP가 정본이다 — bare
+    // "중앙협력본부"는 여전히 넣지 않고 다음 배치에서 실제 관계 재검증 전까지는
+    // division 고유 사무명 위주로만 구성)
+    kw: ["국회대외협력부", "세종시권", "국회대외과"], file: "03-do-agency/SP-AGY-CENTRALCOOP_v1.0.md" },
+  // ★ 2026-09-23 신설(작업 #14) — org-baseline-agency.json의 missing_in_inventory에서 발견된
+  // 사업소·직속기관 2개(제주환경자원순환센터·제주안전체험관). 둘 다 duties-raw-2024-01-22.json
+  // (별표8·9 원문)에 division별 분장사무가 전혀 없어(전수 검색 확인) §2를 명칭에서 추정한 내용으로
+  // 채웠다 — org-baseline-agency.json의 confidence를 "low"로 표기했다(작업 #12/#13의 high와 다름,
+  // 상세는 archive/README.md·각 SP §6 참고). 제주환경자원순환센터는 "자원순환"이 기존 SP-DIV-CLIMATE-
+  // RECYCLING·gov-router.js 여러 항목의 bare 키워드와 겹쳐 bare "자원순환"을 넣지 않았다.
+  { code: "SP-AGY-ENVCIRCULATION", name: "제주환경자원순환센터", desc: "당신은 제주특별자치도청 **제주환경자원순환센터**를 대표하는 AI 레이어다. 주요 소관(추정): 광역 폐기물 매립·소각시설 운영, 음식물류 폐기물 자원화시설 운영",
+    // ★ bare "자원순환"은 넣지 않았다(SP-DIV-CLIMATE-RECYCLING kw·gov-router.js JEJU_DO_TABLE 여러
+    // 항목에 이미 bare "자원순환"이 등록돼 있어 명칭이 겹친다 — SP-AGY-ENVCIRCULATION_v1.0.md §6 참고)
+    kw: ["제주환경자원순환센터", "환경자원순환센터"], file: "03-do-agency/SP-AGY-ENVCIRCULATION_v1.0.md" },
+  { code: "SP-AGY-SAFETYEXPERIENCE", name: "제주안전체험관", desc: "당신은 제주특별자치도청 **제주안전체험관**을 대표하는 AI 레이어다. 주요 소관(추정): 도민·학생 대상 재난안전 체험교육 시설 운영, 체험 프로그램 기획·운영",
+    kw: ["제주안전체험관", "안전체험관"], file: "03-do-agency/SP-AGY-SAFETYEXPERIENCE_v1.0.md" },
+  // ★ 2026-09-24 신설(작업 #15) — 사용자 지시("현장 단위까지 SP를 갖춰 소방서 직원이
+  // 오류를 수정 갱신할 수 있게 하라")에 따라 소방서 4개(제주·서귀포·서부·동부, 지방자치법
+  // 제126조상 SP-AGY-FIRE(소방안전본부)의 하급 직속기관)를 신설했다. 산하 division(과) 13개는
+  // JEJU_AGENCY_DIVISION_TABLE에 별도 추가. 현장 단위(119안전센터·구조대·지역대) 31개는
+  // 라우팅 테이블에 올리지 않았다(오탐 위험, archive/README.md 참고) — 문서로만 존재한다.
+  // 기관명 자체를 kw로 썼다(예: "제주소방서") — SP-AGY-FIRE(소방안전본부)의 기존 kw
+  // ("구급 출동"·"소방시설 인허가"·"소방안전본부"·"재난 예방")와 겹치지 않는다.
+  { code: "SP-AGY-FIREJEJU", name: "제주소방서", desc: "당신은 제주특별자치도 소방안전본부 산하 **제주소방서**를 대표하는 AI 레이어다. 주요 소관: 제주시 동(洞) 지역 중심 화재 예방·진압, 구조·구급",
+    kw: ["제주소방서"], file: "03-do-agency/SP-AGY-FIREJEJU_v1.0.md" },
+  { code: "SP-AGY-FIRESEOGWIPO", name: "서귀포소방서", desc: "당신은 제주특별자치도 소방안전본부 산하 **서귀포소방서**를 대표하는 AI 레이어다. 주요 소관: 서귀포시 동(洞) 지역 중심 화재 예방·진압, 구조·구급",
+    kw: ["서귀포소방서"], file: "03-do-agency/SP-AGY-FIRESEOGWIPO_v1.0.md" },
+  { code: "SP-AGY-FIRESEOBU", name: "서부소방서", desc: "당신은 제주특별자치도 소방안전본부 산하 **서부소방서**를 대표하는 AI 레이어다. 주요 소관: 제주 서부(한림·애월·한경·대정·안덕) 화재 예방·진압, 구조·구급",
+    kw: ["서부소방서"], file: "03-do-agency/SP-AGY-FIRESEOBU_v1.0.md" },
+  { code: "SP-AGY-FIREDONGBU", name: "동부소방서", desc: "당신은 제주특별자치도 소방안전본부 산하 **동부소방서**를 대표하는 AI 레이어다. 주요 소관: 제주 동부(성산·구좌·조천·남원·표선) 화재 예방·진압, 구조·구급",
+    kw: ["동부소방서"], file: "03-do-agency/SP-AGY-FIREDONGBU_v1.0.md" },
+];
+
+// ★ 2026-09-24 신설(작업 #16) — 합의제행정기관(감사위원회·지방노동위원회·자치경찰위원회). 위
+// JEJU_AGENCY_TABLE(직속기관·사업소, kind: institution)과 달리 지방자치법 제130조의 독립적
+// 의사결정 합의체라 별도 테이블로 분리했다(K-FOI tier도 별도: collegial). 03b-collegial-agency/
+// archive/README.md 참고. 명칭 중복(감사·노동위원회·자치경찰) 유의사항은 각 항목 주석·해당 SP §6 참고.
+export const JEJU_COLLEGIAL_TABLE = [
+  { code: "SP-COMM-AUDIT", name: "감사위원회", desc: "당신은 제주특별자치도 **감사위원회**를 대표하는 AI 레이어다. 주요 소관: 자체감사, 공직 비위 조사, 감사결과 심의·의결, 부패방지·청렴시책 지원",
+    // ★ bare "감사"는 넣지 않았다(SP-DO-COMM 청렴감찰관·SP-ORGDIV-JTO-AUDIT에 이미 bare "감사"가
+    // 등록돼 있어 명칭이 겹친다 — SP-COMM-AUDIT_v1.0.md §6 참고)
+    kw: ["감사위원회", "공직 비위 조사", "부패방지지원센터"], file: "03b-collegial-agency/SP-COMM-AUDIT_v1.0.md" },
+  { code: "SP-COMM-LABOR", name: "지방노동위원회", desc: "당신은 제주특별자치도 **지방노동위원회**를 대표하는 AI 레이어다. 주요 소관: 노동쟁의 조정·중재, 부당해고·부당노동행위 구제신청 심판, 재해보상 심사",
+    // ★ bare "노동위원회"·"부당해고"는 넣지 않았다(gov-router.js JEJU_NATIONAL_TABLE에 이미
+    // SP-NAT-LABORREL이 그 두 키워드로 등록돼 있어 명칭이 겹친다 — SP-COMM-LABOR_v1.0.md §6 참고,
+    // 같은 실체를 가리킬 가능성이 있어 다음 배치 재검증 필요)
+    kw: ["지방노동위원회", "조정사건", "중재사건", "재해보상 심사"], file: "03b-collegial-agency/SP-COMM-LABOR_v1.0.md" },
+  { code: "SP-COMM-POLICE", name: "자치경찰위원회", desc: "당신은 제주특별자치도 **자치경찰위원회**를 대표하는 AI 레이어다. 주요 소관: 자치경찰사무 정책 심의·의결, 자치경찰사무 담당 공무원 인사·평가, 국가경찰·자치경찰 사무조정",
+    // ★ 2026-09-24(작업 #17) 확인됨 — 상하관계, 문서화 완료: 이 위원회(심의·의결·지휘·감독 기구)와
+    // SP-AGY-POLICE(자치경찰단, 집행조직)는 별개 기관이며 위원회가 자치경찰단의 상급 컨트롤타워다
+    // (웹 조사로 확인, SP-COMM-POLICE_v1.0.md §LEGAL-BASIS·SP-AGY-POLICE_v1.0.md §0 참고). bare
+    // "자치경찰"은 넣지 않고 "자치경찰단"과 겹치지 않는 위원회 고유 키워드만 사용.
+    kw: ["자치경찰위원회", "위원구성협의체", "자치경찰사무 정책"], file: "03b-collegial-agency/SP-COMM-POLICE_v1.0.md" },
 ];
 
 export const JEJU_ORG_TABLE = [
@@ -749,6 +827,153 @@ export const JEJU_AGENCY_DIVISION_TABLE = [
   { code: "SP-AGYDIV-WATER-WATERSUPPLY", institution: "SP-AGY-WATER",
     name: "상하수도본부 상수도과", desc: "당신은 **상하수도본부 상수도과**(가칭 — §0 참조)를 대표하는 AI 레이어다.",
     kw: ["상수도", "상수도과"], file: "03-do-agency/divisions/SP-AGYDIV-WATER-WATERSUPPLY_v1.1.md" },
+  // ★ 2026-09-23 신설(작업 #13) — SP-AGY-CULTUREARTS/MARINEFISHERIES/ANIMALHYGIENE/SEOLMUNDAE/
+  // STONEPARK/EMPLOYMENT/CENTRALCOOP 산하 division 17개. EMPLOYMENT·CENTRALCOOP은 명칭 중복
+  // 회피를 위해 bare 일반 키워드("고용", "중앙협력본부")를 넣지 않았다(각 기관 항목 주석 참고).
+  { code: "SP-AGYDIV-CULTUREARTS-ADMIN", institution: "SP-AGY-CULTUREARTS",
+    name: "문화예술진흥원 운영과", desc: "당신은 **문화예술진흥원 운영과**을 대표하는 AI 레이어다.",
+    kw: ["문예회관 대관", "전시실 사용허가", "문화사랑회"], file: "03-do-agency/divisions/SP-AGYDIV-CULTUREARTS-ADMIN_v1.0.md" },
+  { code: "SP-AGYDIV-CULTUREARTS-PERFORMANCE", institution: "SP-AGY-CULTUREARTS",
+    name: "문화예술진흥원 공연기획과", desc: "당신은 **문화예술진흥원 공연기획과**을 대표하는 AI 레이어다.",
+    kw: ["공연기획과", "도립무용단", "기획공연"], file: "03-do-agency/divisions/SP-AGYDIV-CULTUREARTS-PERFORMANCE_v1.0.md" },
+  { code: "SP-AGYDIV-MARINEFISHERIES-RESOURCES", institution: "SP-AGY-MARINEFISHERIES",
+    name: "해양수산연구원 해양수산자원과", desc: "당신은 **해양수산연구원 해양수산자원과**을 대표하는 AI 레이어다.",
+    kw: ["해양수산자원과", "수산기술 전문교육", "시험조사선"], file: "03-do-agency/divisions/SP-AGYDIV-MARINEFISHERIES-RESOURCES_v1.0.md" },
+  { code: "SP-AGYDIV-MARINEFISHERIES-ENVIRONMENT", institution: "SP-AGY-MARINEFISHERIES",
+    name: "해양수산연구원 해양환경연구과", desc: "당신은 **해양수산연구원 해양환경연구과**을 대표하는 AI 레이어다.",
+    kw: ["해양환경연구과", "연안환경 변화 예측", "마을어장 자원생태"], file: "03-do-agency/divisions/SP-AGYDIV-MARINEFISHERIES-ENVIRONMENT_v1.0.md" },
+  { code: "SP-AGYDIV-MARINEFISHERIES-SEED", institution: "SP-AGY-MARINEFISHERIES",
+    name: "해양수산연구원 수산종자연구과", desc: "당신은 **해양수산연구원 수산종자연구과**을 대표하는 AI 레이어다.",
+    kw: ["수산종자연구과", "홍해삼 종자", "전복류 품종개량"], file: "03-do-agency/divisions/SP-AGYDIV-MARINEFISHERIES-SEED_v1.0.md" },
+  { code: "SP-AGYDIV-MARINEFISHERIES-SAFETY", institution: "SP-AGY-MARINEFISHERIES",
+    name: "해양수산연구원 수산물안전과", desc: "당신은 **해양수산연구원 수산물안전과**을 대표하는 AI 레이어다.",
+    kw: ["수산물안전과", "양식수산물 안전성 검사", "수산 백신"], file: "03-do-agency/divisions/SP-AGYDIV-MARINEFISHERIES-SAFETY_v1.0.md" },
+  { code: "SP-AGYDIV-MARINEFISHERIES-FLATFISH", institution: "SP-AGY-MARINEFISHERIES",
+    name: "해양수산연구원 광어연구센터", desc: "당신은 **해양수산연구원 광어연구센터**을 대표하는 AI 레이어다.",
+    kw: ["광어연구센터", "광어 양식", "광어 품종개량"], file: "03-do-agency/divisions/SP-AGYDIV-MARINEFISHERIES-FLATFISH_v1.0.md" },
+  { code: "SP-AGYDIV-ANIMALHYGIENE-LIVESTOCKSAFETY", institution: "SP-AGY-ANIMALHYGIENE",
+    name: "동물위생시험소 축산물안전과", desc: "당신은 **동물위생시험소 축산물안전과**을 대표하는 AI 레이어다.",
+    kw: ["축산물안전과", "축산물 유해 잔류물질 검사", "광역동물보호센터"], file: "03-do-agency/divisions/SP-AGYDIV-ANIMALHYGIENE-LIVESTOCKSAFETY_v1.0.md" },
+  { code: "SP-AGYDIV-ANIMALHYGIENE-QUARANTINE", institution: "SP-AGY-ANIMALHYGIENE",
+    name: "동물위생시험소 방역진단과", desc: "당신은 **동물위생시험소 방역진단과**을 대표하는 AI 레이어다.",
+    kw: ["방역진단과", "가축전염병예찰협의회", "반입가축 검역"], file: "03-do-agency/divisions/SP-AGYDIV-ANIMALHYGIENE-QUARANTINE_v1.0.md" },
+  { code: "SP-AGYDIV-SEOLMUNDAE-ADMIN", institution: "SP-AGY-SEOLMUNDAE",
+    name: "설문대여성문화센터 운영과", desc: "당신은 **설문대여성문화센터 운영과**을 대표하는 AI 레이어다.",
+    kw: ["여성평생교육", "여성역사문화전시관", "여성자원활동센터 운영"], file: "03-do-agency/divisions/SP-AGYDIV-SEOLMUNDAE-ADMIN_v1.0.md" },
+  { code: "SP-AGYDIV-STONEPARK-OPERATIONS", institution: "SP-AGY-STONEPARK",
+    name: "돌문화공원관리소 공원운영과", desc: "당신은 **돌문화공원관리소 공원운영과**을 대표하는 AI 레이어다.",
+    kw: ["공원운영과", "교래자연휴양림"], file: "03-do-agency/divisions/SP-AGYDIV-STONEPARK-OPERATIONS_v1.0.md" },
+  { code: "SP-AGYDIV-STONEPARK-RESEARCH", institution: "SP-AGY-STONEPARK",
+    name: "돌문화공원관리소 돌문화연구과", desc: "당신은 **돌문화공원관리소 돌문화연구과**을 대표하는 AI 레이어다.",
+    kw: ["돌문화연구과", "돌문화 자료 조사"], file: "03-do-agency/divisions/SP-AGYDIV-STONEPARK-RESEARCH_v1.0.md" },
+  { code: "SP-AGYDIV-EMPLOYMENT-JOBSUPPORT", institution: "SP-AGY-EMPLOYMENT",
+    name: "고용센터 취업지원총괄과", desc: "당신은 **고용센터 취업지원총괄과**을 대표하는 AI 레이어다.",
+    kw: ["취업지원총괄과", "채용박람회", "구직자 맞춤형 취업지원 서비스"], file: "03-do-agency/divisions/SP-AGYDIV-EMPLOYMENT-JOBSUPPORT_v1.0.md" },
+  { code: "SP-AGYDIV-EMPLOYMENT-SUPPORT", institution: "SP-AGY-EMPLOYMENT",
+    name: "고용센터 고용지원과", desc: "당신은 **고용센터 고용지원과**을 대표하는 AI 레이어다.",
+    kw: ["고용지원과", "직업훈련시설", "직업진로 지도"], file: "03-do-agency/divisions/SP-AGYDIV-EMPLOYMENT-SUPPORT_v1.0.md" },
+  { code: "SP-AGYDIV-EMPLOYMENT-BENEFITS", institution: "SP-AGY-EMPLOYMENT",
+    // ★ bare "실업급여"는 넣지 않았다(gov-router.js JEJU_NATIONAL_TABLE의 SP-NAT-LABOR가 이미
+    // 그 키워드로 등록돼 있어 명칭이 겹친다)
+    name: "고용센터 실업급여과", desc: "당신은 **고용센터 실업급여과**을 대표하는 AI 레이어다.",
+    kw: ["실업급여과", "고용센터 실업급여"], file: "03-do-agency/divisions/SP-AGYDIV-EMPLOYMENT-BENEFITS_v1.0.md" },
+  { code: "SP-AGYDIV-EMPLOYMENT-SEOGWIPO", institution: "SP-AGY-EMPLOYMENT",
+    name: "고용센터 서귀포지소", desc: "당신은 **고용센터 서귀포지소**을 대표하는 AI 레이어다.",
+    kw: ["서귀포고용센터", "고용센터 서귀포지소"], file: "03-do-agency/divisions/SP-AGYDIV-EMPLOYMENT-SEOGWIPO_v1.0.md" },
+  { code: "SP-AGYDIV-CENTRALCOOP-ASSEMBLY", institution: "SP-AGY-CENTRALCOOP",
+    // ★ 2026-09-24(작업 #17) 정리 완료 — 예전에 겹치던 gov-router.js JEJU_DO_TABLE의
+    // SP-DO-LIAISON은 archive로 옮겨졌다(사용자 확인 + 웹 조사, SP-AGY-CENTRALCOOP_v1.0.md §6
+    // 참고). bare "중앙협력본부"는 여전히 넣지 않는다.
+    name: "중앙협력본부 국회대외협력부", desc: "당신은 **중앙협력본부 국회대외협력부**을 대표하는 AI 레이어다.",
+    kw: ["국회대외협력부", "세종시권 중앙부처", "국회 협력 기획"], file: "03-do-agency/divisions/SP-AGYDIV-CENTRALCOOP-ASSEMBLY_v1.0.md" },
+  // ★ 2026-09-23 신설(작업 #14) — SP-AGY-ENVCIRCULATION/SAFETYEXPERIENCE 산하 division 5개.
+  // §2 전부 confidence: low(원문 없음, 명칭 추정) — 각 division 파일 §2·§3 참고.
+  { code: "SP-AGYDIV-ENVCIRCULATION-FACILITY", institution: "SP-AGY-ENVCIRCULATION",
+    name: "제주환경자원순환센터 자원순환시설관리과", desc: "당신은 **제주환경자원순환센터 자원순환시설관리과**을 대표하는 AI 레이어다.",
+    kw: ["자원순환시설관리과", "환경자원순환센터 매립시설", "환경자원순환센터 소각시설"], file: "03-do-agency/divisions/SP-AGYDIV-ENVCIRCULATION-FACILITY_v1.0.md" },
+  { code: "SP-AGYDIV-ENVCIRCULATION-FOODWASTE", institution: "SP-AGY-ENVCIRCULATION",
+    name: "제주환경자원순환센터 음식물자원화과", desc: "당신은 **제주환경자원순환센터 음식물자원화과**을 대표하는 AI 레이어다.",
+    kw: ["음식물자원화과", "음식물류 폐기물 자원화시설"], file: "03-do-agency/divisions/SP-AGYDIV-ENVCIRCULATION-FOODWASTE_v1.0.md" },
+  { code: "SP-AGYDIV-SAFETYEXPERIENCE-SUPPORT", institution: "SP-AGY-SAFETYEXPERIENCE",
+    name: "제주안전체험관 체험지원과", desc: "당신은 **제주안전체험관 체험지원과**을 대표하는 AI 레이어다.",
+    kw: ["체험지원과", "체험교육 예약", "안전체험관 예약"], file: "03-do-agency/divisions/SP-AGYDIV-SAFETYEXPERIENCE-SUPPORT_v1.0.md" },
+  { code: "SP-AGYDIV-SAFETYEXPERIENCE-PLANNING", institution: "SP-AGY-SAFETYEXPERIENCE",
+    name: "제주안전체험관 체험기획과", desc: "당신은 **제주안전체험관 체험기획과**을 대표하는 AI 레이어다.",
+    kw: ["체험기획과", "체험교육 프로그램 기획"], file: "03-do-agency/divisions/SP-AGYDIV-SAFETYEXPERIENCE-PLANNING_v1.0.md" },
+  { code: "SP-AGYDIV-SAFETYEXPERIENCE-OPERATIONS", institution: "SP-AGY-SAFETYEXPERIENCE",
+    name: "제주안전체험관 체험운영과", desc: "당신은 **제주안전체험관 체험운영과**을 대표하는 AI 레이어다.",
+    kw: ["체험운영과", "체험교육 현장 진행"], file: "03-do-agency/divisions/SP-AGYDIV-SAFETYEXPERIENCE-OPERATIONS_v1.0.md" },
+  // ★ 2026-09-24 신설(작업 #15) — 소방서 4개(제주·서귀포·서부·동부) 산하 과 13개.
+  // 별표8(2024.01.22. 개정본) 원문 사무(confidence: high). kw는 기존 SP-AGYDIV-FIRE-ADMIN/
+  // PREVENTION/RESPONSE(소방안전본부 자체의 province-level 가칭 division, bare "소방행정과"·
+  // "예방안전과"·"현장대응과")와 겹치지 않도록 "{소방서명} {과명}" 복합어로만 구성했다.
+  { code: "SP-AGYDIV-FIREJEJU-ADMIN", institution: "SP-AGY-FIREJEJU",
+    name: "제주소방서 소방행정과", desc: "당신은 **제주소방서 소방행정과**를 대표하는 AI 레이어다.",
+    kw: ["제주소방서 소방행정과"], file: "03-do-agency/divisions/SP-AGYDIV-FIREJEJU-ADMIN_v1.0.md" },
+  { code: "SP-AGYDIV-FIREJEJU-PREVENTION", institution: "SP-AGY-FIREJEJU",
+    name: "제주소방서 예방안전과", desc: "당신은 **제주소방서 예방안전과**를 대표하는 AI 레이어다.",
+    kw: ["제주소방서 예방안전과"], file: "03-do-agency/divisions/SP-AGYDIV-FIREJEJU-PREVENTION_v1.0.md" },
+  { code: "SP-AGYDIV-FIREJEJU-RESPONSE", institution: "SP-AGY-FIREJEJU",
+    name: "제주소방서 119재난대응과", desc: "당신은 **제주소방서 119재난대응과**를 대표하는 AI 레이어다.",
+    kw: ["제주소방서 119재난대응과"], file: "03-do-agency/divisions/SP-AGYDIV-FIREJEJU-RESPONSE_v1.0.md" },
+  { code: "SP-AGYDIV-FIREJEJU-FIELDCOMMAND", institution: "SP-AGY-FIREJEJU",
+    name: "제주소방서 현장대응단", desc: "당신은 **제주소방서 현장대응단**를 대표하는 AI 레이어다.",
+    kw: ["제주소방서 현장대응단"], file: "03-do-agency/divisions/SP-AGYDIV-FIREJEJU-FIELDCOMMAND_v1.0.md" },
+  { code: "SP-AGYDIV-FIRESEOGWIPO-ADMIN", institution: "SP-AGY-FIRESEOGWIPO",
+    name: "서귀포소방서 소방행정과", desc: "당신은 **서귀포소방서 소방행정과**를 대표하는 AI 레이어다.",
+    kw: ["서귀포소방서 소방행정과"], file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOGWIPO-ADMIN_v1.0.md" },
+  { code: "SP-AGYDIV-FIRESEOGWIPO-PREVENTIONRESCUE", institution: "SP-AGY-FIRESEOGWIPO",
+    name: "서귀포소방서 예방구조과", desc: "당신은 **서귀포소방서 예방구조과**를 대표하는 AI 레이어다.",
+    kw: ["서귀포소방서 예방구조과"], file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOGWIPO-PREVENTIONRESCUE_v1.0.md" },
+  { code: "SP-AGYDIV-FIRESEOGWIPO-FIELDCOMMAND", institution: "SP-AGY-FIRESEOGWIPO",
+    name: "서귀포소방서 현장대응단", desc: "당신은 **서귀포소방서 현장대응단**를 대표하는 AI 레이어다.",
+    kw: ["서귀포소방서 현장대응단"], file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOGWIPO-FIELDCOMMAND_v1.0.md" },
+  { code: "SP-AGYDIV-FIRESEOBU-ADMIN", institution: "SP-AGY-FIRESEOBU",
+    name: "서부소방서 소방행정과", desc: "당신은 **서부소방서 소방행정과**를 대표하는 AI 레이어다.",
+    kw: ["서부소방서 소방행정과"], file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOBU-ADMIN_v1.0.md" },
+  { code: "SP-AGYDIV-FIRESEOBU-PREVENTIONRESCUE", institution: "SP-AGY-FIRESEOBU",
+    name: "서부소방서 예방구조과", desc: "당신은 **서부소방서 예방구조과**를 대표하는 AI 레이어다.",
+    kw: ["서부소방서 예방구조과"], file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOBU-PREVENTIONRESCUE_v1.0.md" },
+  { code: "SP-AGYDIV-FIRESEOBU-FIELDCOMMAND", institution: "SP-AGY-FIRESEOBU",
+    name: "서부소방서 현장대응단", desc: "당신은 **서부소방서 현장대응단**를 대표하는 AI 레이어다.",
+    kw: ["서부소방서 현장대응단"], file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOBU-FIELDCOMMAND_v1.0.md" },
+  { code: "SP-AGYDIV-FIREDONGBU-ADMIN", institution: "SP-AGY-FIREDONGBU",
+    name: "동부소방서 소방행정과", desc: "당신은 **동부소방서 소방행정과**를 대표하는 AI 레이어다.",
+    kw: ["동부소방서 소방행정과"], file: "03-do-agency/divisions/SP-AGYDIV-FIREDONGBU-ADMIN_v1.0.md" },
+  { code: "SP-AGYDIV-FIREDONGBU-PREVENTIONRESCUE", institution: "SP-AGY-FIREDONGBU",
+    name: "동부소방서 예방구조과", desc: "당신은 **동부소방서 예방구조과**를 대표하는 AI 레이어다.",
+    kw: ["동부소방서 예방구조과"], file: "03-do-agency/divisions/SP-AGYDIV-FIREDONGBU-PREVENTIONRESCUE_v1.0.md" },
+  { code: "SP-AGYDIV-FIREDONGBU-FIELDCOMMAND", institution: "SP-AGY-FIREDONGBU",
+    name: "동부소방서 현장대응단", desc: "당신은 **동부소방서 현장대응단**를 대표하는 AI 레이어다.",
+    kw: ["동부소방서 현장대응단"], file: "03-do-agency/divisions/SP-AGYDIV-FIREDONGBU-FIELDCOMMAND_v1.0.md" },
+];
+
+// ★ 2026-09-24 신설(작업 #16) — JEJU_COLLEGIAL_TABLE(감사위원회·지방노동위원회·자치경찰위원회)
+// 산하 division 7개. institution 필드로 JEJU_COLLEGIAL_TABLE과 연결된다(JEJU_AGENCY_DIVISION_TABLE과
+// 동일 패턴). 감사위원회 4개는 별표 원문 없음(confidence: low, 명칭 추정) — 각 division 파일 §2 참고.
+export const JEJU_COLLEGIAL_DIVISION_TABLE = [
+  { code: "SP-COMMDIV-AUDIT-AUDIT", institution: "SP-COMM-AUDIT",
+    name: "감사위원회 감사과", desc: "당신은 **감사위원회 감사과**를 대표하는 AI 레이어다.",
+    kw: ["감사과", "자체감사 계획"], file: "03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-AUDIT_v1.0.md" },
+  { code: "SP-COMMDIV-AUDIT-INVESTIGATION", institution: "SP-COMM-AUDIT",
+    name: "감사위원회 조사과", desc: "당신은 **감사위원회 조사과**를 대표하는 AI 레이어다.",
+    kw: ["조사과", "공직 비위 신고"], file: "03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-INVESTIGATION_v1.0.md" },
+  { code: "SP-COMMDIV-AUDIT-DELIBERATION", institution: "SP-COMM-AUDIT",
+    name: "감사위원회 심의과", desc: "당신은 **감사위원회 심의과**를 대표하는 AI 레이어다.",
+    kw: ["심의과", "감사결과 심의"], file: "03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-DELIBERATION_v1.0.md" },
+  { code: "SP-COMMDIV-AUDIT-ANTICORRUPTION", institution: "SP-COMM-AUDIT",
+    name: "감사위원회 부패방지지원센터", desc: "당신은 **감사위원회 부패방지지원센터**를 대표하는 AI 레이어다.",
+    kw: ["부패방지지원센터", "청렴도 평가 지원"], file: "03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-ANTICORRUPTION_v1.0.md" },
+  { code: "SP-COMMDIV-LABOR-SECRETARIAT", institution: "SP-COMM-LABOR",
+    // ★ bare "노동위원회"·"부당해고"는 넣지 않았다(상위 SP-COMM-LABOR 주석·§6 참고)
+    name: "지방노동위원회 사무국", desc: "당신은 **지방노동위원회 사무국**을 대표하는 AI 레이어다.",
+    kw: ["지방노동위원회 사무국", "조정위원회", "중재위원회", "부당노동행위 구제신청"], file: "03b-collegial-agency/divisions/SP-COMMDIV-LABOR-SECRETARIAT_v1.0.md" },
+  { code: "SP-COMMDIV-POLICE-GENERAL", institution: "SP-COMM-POLICE",
+    name: "자치경찰위원회 자치경찰총괄과", desc: "당신은 **자치경찰위원회 자치경찰총괄과**를 대표하는 AI 레이어다.",
+    kw: ["자치경찰총괄과", "위원구성협의체"], file: "03b-collegial-agency/divisions/SP-COMMDIV-POLICE-GENERAL_v1.0.md" },
+  { code: "SP-COMMDIV-POLICE-COOP", institution: "SP-COMM-POLICE",
+    name: "자치경찰위원회 자치경찰협력과", desc: "당신은 **자치경찰위원회 자치경찰협력과**를 대표하는 AI 레이어다.",
+    kw: ["자치경찰협력과", "국가경찰사무 자치경찰사무 협력"], file: "03b-collegial-agency/divisions/SP-COMMDIV-POLICE-COOP_v1.0.md" },
 ];
 
 export const JEJU_ORG_DIVISION_TABLE = [

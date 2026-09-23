@@ -293,7 +293,9 @@ const DO_BUREAUS = [
       { id: "SP-DIV-ECON-JOBECONOMY", name: "경제정책과", spId: "SP-DIV-ECON-JOBECONOMY", file: "02-do-dept/divisions/SP-DIV-ECON-JOBECONOMY_v1.0.md", confirmed: true },
       { id: "SP-DIV-ECON-INVESTMENT", name: "기업정책과", spId: "SP-DIV-ECON-INVESTMENT", file: "02-do-dept/divisions/SP-DIV-ECON-INVESTMENT_v1.0.md", confirmed: true },
       { id: "SP-DIV-ECON-SMALLBIZ", name: "소상공인물류과", spId: "SP-DIV-ECON-SMALLBIZ", file: "02-do-dept/divisions/SP-DIV-ECON-SMALLBIZ_v1.0.md", confirmed: true },
-      { id: "SP-DIV-ECON-EMPLOYCENTER", name: "고용센터", spId: "SP-DIV-ECON-EMPLOYCENTER", file: "02-do-dept/divisions/SP-DIV-ECON-EMPLOYCENTER_v1.0.md", confirmed: true },
+      // 2026-09-24 제거(작업 #17) — SP-DIV-ECON-EMPLOYCENTER는 경제활력국 산하 division이 아니라
+      // 도 직속 사업소로 잘못 모델링된 것으로 확인돼 archive로 옮겼다. 정본은 SP-AGY-EMPLOYMENT
+      // (03-do-agency)이다.
   ]},
   { id: "innov", name: "미래산업국", spId: "SP-DO-INNOV", kind: "do-dept", divisions: [
       { id: "SP-DIV-INNOV-DIGITAL", name: "디지털혁신과", spId: "SP-DIV-INNOV-DIGITAL", file: "02-do-dept/divisions/SP-DIV-INNOV-DIGITAL_v1.0.md", confirmed: true },
@@ -360,7 +362,9 @@ const DO_BUREAUS = [
   ]},
   { id: "comm", name: "소통ㆍ제2공항담당관", spId: "SP-DO-COMM", kind: "do-dept", divisions: null },
   { id: "integrity", name: "청렴감찰관", spId: "SP-DO-INTEGRITY", kind: "do-dept", divisions: null },
-  { id: "central", name: "중앙협력본부", spId: "SP-DO-LIAISON", kind: "do-dept", divisions: null },
+  // 2026-09-24 제거(작업 #17) — SP-DO-LIAISON("중앙협력본부")은 실제 조례상 계층(실·국이 아니라
+  // 사업소, 제40~41조)부터 다른 것으로 확인돼 archive로 옮겼다. 정본은 SP-AGY-CENTRALCOOP
+  // (03-do-agency, kind: agency)이다.
   { id: "spokesman", name: "대변인", spId: "SP-DO-SPOKES", kind: "do-dept", divisions: null },
   { id: "aigov", name: "AI혁신추진단", spId: "SP-DO-AIGOV", kind: "do-dept", divisions: null },
   { id: "basicsoc", name: "기본사회추진단", spId: "SP-DO-BASICSOC", kind: "do-dept", divisions: null },
@@ -442,6 +446,73 @@ const DO_AGENCIES = [
       { id: "SP-AGYDIV-VETERANS-COMPENSATION", name: "제주특별자치도 보훈청 보상과", spId: "SP-AGYDIV-VETERANS-COMPENSATION", file: "03-do-agency/divisions/SP-AGYDIV-VETERANS-COMPENSATION_v1.0.md", confirmed: true },
       { id: "SP-AGYDIV-VETERANS-MEMORIAL", name: "제주특별자치도 보훈청 항일기념관", spId: "SP-AGYDIV-VETERANS-MEMORIAL", file: "03-do-agency/divisions/SP-AGYDIV-VETERANS-MEMORIAL_v1.0.md", confirmed: true },
   ]},
+  { id: "SP-AGY-CULTUREARTS", name: "제주특별자치도 문화예술진흥원", spId: "SP-AGY-CULTUREARTS", kind: "do-agency", divisions: [
+      { id: "SP-AGYDIV-CULTUREARTS-ADMIN", name: "문화예술진흥원 운영과", spId: "SP-AGYDIV-CULTUREARTS-ADMIN", file: "03-do-agency/divisions/SP-AGYDIV-CULTUREARTS-ADMIN_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-CULTUREARTS-PERFORMANCE", name: "문화예술진흥원 공연기획과", spId: "SP-AGYDIV-CULTUREARTS-PERFORMANCE", file: "03-do-agency/divisions/SP-AGYDIV-CULTUREARTS-PERFORMANCE_v1.0.md", confirmed: true },
+  ]},
+  { id: "SP-AGY-MARINEFISHERIES", name: "제주특별자치도 해양수산연구원", spId: "SP-AGY-MARINEFISHERIES", kind: "do-agency", divisions: [
+      { id: "SP-AGYDIV-MARINEFISHERIES-RESOURCES", name: "해양수산연구원 해양수산자원과", spId: "SP-AGYDIV-MARINEFISHERIES-RESOURCES", file: "03-do-agency/divisions/SP-AGYDIV-MARINEFISHERIES-RESOURCES_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-MARINEFISHERIES-ENVIRONMENT", name: "해양수산연구원 해양환경연구과", spId: "SP-AGYDIV-MARINEFISHERIES-ENVIRONMENT", file: "03-do-agency/divisions/SP-AGYDIV-MARINEFISHERIES-ENVIRONMENT_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-MARINEFISHERIES-SEED", name: "해양수산연구원 수산종자연구과", spId: "SP-AGYDIV-MARINEFISHERIES-SEED", file: "03-do-agency/divisions/SP-AGYDIV-MARINEFISHERIES-SEED_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-MARINEFISHERIES-SAFETY", name: "해양수산연구원 수산물안전과", spId: "SP-AGYDIV-MARINEFISHERIES-SAFETY", file: "03-do-agency/divisions/SP-AGYDIV-MARINEFISHERIES-SAFETY_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-MARINEFISHERIES-FLATFISH", name: "해양수산연구원 광어연구센터", spId: "SP-AGYDIV-MARINEFISHERIES-FLATFISH", file: "03-do-agency/divisions/SP-AGYDIV-MARINEFISHERIES-FLATFISH_v1.0.md", confirmed: true },
+  ]},
+  { id: "SP-AGY-ANIMALHYGIENE", name: "제주특별자치도 동물위생시험소", spId: "SP-AGY-ANIMALHYGIENE", kind: "do-agency", divisions: [
+      { id: "SP-AGYDIV-ANIMALHYGIENE-LIVESTOCKSAFETY", name: "동물위생시험소 축산물안전과", spId: "SP-AGYDIV-ANIMALHYGIENE-LIVESTOCKSAFETY", file: "03-do-agency/divisions/SP-AGYDIV-ANIMALHYGIENE-LIVESTOCKSAFETY_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-ANIMALHYGIENE-QUARANTINE", name: "동물위생시험소 방역진단과", spId: "SP-AGYDIV-ANIMALHYGIENE-QUARANTINE", file: "03-do-agency/divisions/SP-AGYDIV-ANIMALHYGIENE-QUARANTINE_v1.0.md", confirmed: true },
+  ]},
+  { id: "SP-AGY-SEOLMUNDAE", name: "설문대여성문화센터", spId: "SP-AGY-SEOLMUNDAE", kind: "do-agency", divisions: [
+      { id: "SP-AGYDIV-SEOLMUNDAE-ADMIN", name: "설문대여성문화센터 운영과", spId: "SP-AGYDIV-SEOLMUNDAE-ADMIN", file: "03-do-agency/divisions/SP-AGYDIV-SEOLMUNDAE-ADMIN_v1.0.md", confirmed: true },
+  ]},
+  { id: "SP-AGY-STONEPARK", name: "돌문화공원관리소", spId: "SP-AGY-STONEPARK", kind: "do-agency", divisions: [
+      { id: "SP-AGYDIV-STONEPARK-OPERATIONS", name: "돌문화공원관리소 공원운영과", spId: "SP-AGYDIV-STONEPARK-OPERATIONS", file: "03-do-agency/divisions/SP-AGYDIV-STONEPARK-OPERATIONS_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-STONEPARK-RESEARCH", name: "돌문화공원관리소 돌문화연구과", spId: "SP-AGYDIV-STONEPARK-RESEARCH", file: "03-do-agency/divisions/SP-AGYDIV-STONEPARK-RESEARCH_v1.0.md", confirmed: true },
+  ]},
+  { id: "SP-AGY-EMPLOYMENT", name: "제주특별자치도 고용센터", spId: "SP-AGY-EMPLOYMENT", kind: "do-agency", divisions: [
+      { id: "SP-AGYDIV-EMPLOYMENT-JOBSUPPORT", name: "고용센터 취업지원총괄과", spId: "SP-AGYDIV-EMPLOYMENT-JOBSUPPORT", file: "03-do-agency/divisions/SP-AGYDIV-EMPLOYMENT-JOBSUPPORT_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-EMPLOYMENT-SUPPORT", name: "고용센터 고용지원과", spId: "SP-AGYDIV-EMPLOYMENT-SUPPORT", file: "03-do-agency/divisions/SP-AGYDIV-EMPLOYMENT-SUPPORT_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-EMPLOYMENT-BENEFITS", name: "고용센터 실업급여과", spId: "SP-AGYDIV-EMPLOYMENT-BENEFITS", file: "03-do-agency/divisions/SP-AGYDIV-EMPLOYMENT-BENEFITS_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-EMPLOYMENT-SEOGWIPO", name: "고용센터 서귀포지소", spId: "SP-AGYDIV-EMPLOYMENT-SEOGWIPO", file: "03-do-agency/divisions/SP-AGYDIV-EMPLOYMENT-SEOGWIPO_v1.0.md", confirmed: true },
+  ]},
+  { id: "SP-AGY-CENTRALCOOP", name: "제주특별자치도 중앙협력본부(사업소)", spId: "SP-AGY-CENTRALCOOP", kind: "do-agency", divisions: [
+      { id: "SP-AGYDIV-CENTRALCOOP-ASSEMBLY", name: "중앙협력본부 국회대외협력부", spId: "SP-AGYDIV-CENTRALCOOP-ASSEMBLY", file: "03-do-agency/divisions/SP-AGYDIV-CENTRALCOOP-ASSEMBLY_v1.0.md", confirmed: true },
+  ]},
+  // ★ 2026-09-23 신설(작업 #14) — 별표8·9 원문에 사무 없음(confidence: low), archive/README.md 참고
+  { id: "SP-AGY-ENVCIRCULATION", name: "제주환경자원순환센터", spId: "SP-AGY-ENVCIRCULATION", kind: "do-agency", divisions: [
+      { id: "SP-AGYDIV-ENVCIRCULATION-FACILITY", name: "제주환경자원순환센터 자원순환시설관리과", spId: "SP-AGYDIV-ENVCIRCULATION-FACILITY", file: "03-do-agency/divisions/SP-AGYDIV-ENVCIRCULATION-FACILITY_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-ENVCIRCULATION-FOODWASTE", name: "제주환경자원순환센터 음식물자원화과", spId: "SP-AGYDIV-ENVCIRCULATION-FOODWASTE", file: "03-do-agency/divisions/SP-AGYDIV-ENVCIRCULATION-FOODWASTE_v1.0.md", confirmed: true },
+  ]},
+  { id: "SP-AGY-SAFETYEXPERIENCE", name: "제주안전체험관", spId: "SP-AGY-SAFETYEXPERIENCE", kind: "do-agency", divisions: [
+      { id: "SP-AGYDIV-SAFETYEXPERIENCE-SUPPORT", name: "제주안전체험관 체험지원과", spId: "SP-AGYDIV-SAFETYEXPERIENCE-SUPPORT", file: "03-do-agency/divisions/SP-AGYDIV-SAFETYEXPERIENCE-SUPPORT_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-SAFETYEXPERIENCE-PLANNING", name: "제주안전체험관 체험기획과", spId: "SP-AGYDIV-SAFETYEXPERIENCE-PLANNING", file: "03-do-agency/divisions/SP-AGYDIV-SAFETYEXPERIENCE-PLANNING_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-SAFETYEXPERIENCE-OPERATIONS", name: "제주안전체험관 체험운영과", spId: "SP-AGYDIV-SAFETYEXPERIENCE-OPERATIONS", file: "03-do-agency/divisions/SP-AGYDIV-SAFETYEXPERIENCE-OPERATIONS_v1.0.md", confirmed: true },
+  ]},
+  // ★ 2026-09-24 신설(작업 #15) — 소방서 4개(제주·서귀포·서부·동부, 지방자치법 제126조상
+  // SP-AGY-FIRE(소방안전본부)의 하급 직속기관). 산하 과 13개는 별표8(2024.01.22. 개정본)
+  // 원문 사무로 채웠다(confidence: high). 현장 단위(119안전센터 24개·구조대 4개·지역대 3개,
+  // 총 31개)는 03-do-agency/divisions/field-units/에 문서로만 신설했다 — 라우팅 인벤토리
+  // (이 페이지·division-tables.js)에는 올리지 않았다(archive/README.md 참고).
+  { id: "SP-AGY-FIREJEJU", name: "제주소방서", spId: "SP-AGY-FIREJEJU", kind: "do-agency", divisions: [
+      { id: "SP-AGYDIV-FIREJEJU-ADMIN", name: "제주소방서 소방행정과", spId: "SP-AGYDIV-FIREJEJU-ADMIN", file: "03-do-agency/divisions/SP-AGYDIV-FIREJEJU-ADMIN_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-FIREJEJU-PREVENTION", name: "제주소방서 예방안전과", spId: "SP-AGYDIV-FIREJEJU-PREVENTION", file: "03-do-agency/divisions/SP-AGYDIV-FIREJEJU-PREVENTION_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-FIREJEJU-RESPONSE", name: "제주소방서 119재난대응과", spId: "SP-AGYDIV-FIREJEJU-RESPONSE", file: "03-do-agency/divisions/SP-AGYDIV-FIREJEJU-RESPONSE_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-FIREJEJU-FIELDCOMMAND", name: "제주소방서 현장대응단", spId: "SP-AGYDIV-FIREJEJU-FIELDCOMMAND", file: "03-do-agency/divisions/SP-AGYDIV-FIREJEJU-FIELDCOMMAND_v1.0.md", confirmed: true },
+  ]},
+  { id: "SP-AGY-FIRESEOGWIPO", name: "서귀포소방서", spId: "SP-AGY-FIRESEOGWIPO", kind: "do-agency", divisions: [
+      { id: "SP-AGYDIV-FIRESEOGWIPO-ADMIN", name: "서귀포소방서 소방행정과", spId: "SP-AGYDIV-FIRESEOGWIPO-ADMIN", file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOGWIPO-ADMIN_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-FIRESEOGWIPO-PREVENTIONRESCUE", name: "서귀포소방서 예방구조과", spId: "SP-AGYDIV-FIRESEOGWIPO-PREVENTIONRESCUE", file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOGWIPO-PREVENTIONRESCUE_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-FIRESEOGWIPO-FIELDCOMMAND", name: "서귀포소방서 현장대응단", spId: "SP-AGYDIV-FIRESEOGWIPO-FIELDCOMMAND", file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOGWIPO-FIELDCOMMAND_v1.0.md", confirmed: true },
+  ]},
+  { id: "SP-AGY-FIRESEOBU", name: "서부소방서", spId: "SP-AGY-FIRESEOBU", kind: "do-agency", divisions: [
+      { id: "SP-AGYDIV-FIRESEOBU-ADMIN", name: "서부소방서 소방행정과", spId: "SP-AGYDIV-FIRESEOBU-ADMIN", file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOBU-ADMIN_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-FIRESEOBU-PREVENTIONRESCUE", name: "서부소방서 예방구조과", spId: "SP-AGYDIV-FIRESEOBU-PREVENTIONRESCUE", file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOBU-PREVENTIONRESCUE_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-FIRESEOBU-FIELDCOMMAND", name: "서부소방서 현장대응단", spId: "SP-AGYDIV-FIRESEOBU-FIELDCOMMAND", file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOBU-FIELDCOMMAND_v1.0.md", confirmed: true },
+  ]},
+  { id: "SP-AGY-FIREDONGBU", name: "동부소방서", spId: "SP-AGY-FIREDONGBU", kind: "do-agency", divisions: [
+      { id: "SP-AGYDIV-FIREDONGBU-ADMIN", name: "동부소방서 소방행정과", spId: "SP-AGYDIV-FIREDONGBU-ADMIN", file: "03-do-agency/divisions/SP-AGYDIV-FIREDONGBU-ADMIN_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-FIREDONGBU-PREVENTIONRESCUE", name: "동부소방서 예방구조과", spId: "SP-AGYDIV-FIREDONGBU-PREVENTIONRESCUE", file: "03-do-agency/divisions/SP-AGYDIV-FIREDONGBU-PREVENTIONRESCUE_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-FIREDONGBU-FIELDCOMMAND", name: "동부소방서 현장대응단", spId: "SP-AGYDIV-FIREDONGBU-FIELDCOMMAND", file: "03-do-agency/divisions/SP-AGYDIV-FIREDONGBU-FIELDCOMMAND_v1.0.md", confirmed: true },
+  ]},
   { id: "SP-AGY-WATER", name: "상하수도본부", spId: "SP-AGY-WATER", kind: "do-agency", divisions: [
       { id: "SP-AGYDIV-WATER-MGMT", name: "상하수도본부 경영관리과", spId: "SP-AGYDIV-WATER-MGMT", file: "03-do-agency/divisions/SP-AGYDIV-WATER-MGMT_v1.0.md", confirmed: true },
       { id: "SP-AGYDIV-WATER-POLICYFACILITY", name: "상하수도본부 상수도정책시설과", spId: "SP-AGYDIV-WATER-POLICYFACILITY", file: "03-do-agency/divisions/SP-AGYDIV-WATER-POLICYFACILITY_v1.0.md", confirmed: true },
@@ -453,6 +524,26 @@ const DO_AGENCIES = [
       { id: "SP-AGYDIV-WATER-SEOGWIPOSEWAGEOPS", name: "상하수도본부 서귀포하수운영과", spId: "SP-AGYDIV-WATER-SEOGWIPOSEWAGEOPS", file: "03-do-agency/divisions/SP-AGYDIV-WATER-SEOGWIPOSEWAGEOPS_v1.0.md", confirmed: true },
       { id: "SP-AGYDIV-WATER-TASKFORCE", name: "상하수도본부 공공하수처리시설 현대화사업추진단 총괄과", spId: "SP-AGYDIV-WATER-TASKFORCE", file: "03-do-agency/divisions/SP-AGYDIV-WATER-TASKFORCE_v1.0.md", confirmed: true },
       { id: "SP-AGYDIV-WATER-WATERSUPPLY", name: "상하수도본부 상수도과", spId: "SP-AGYDIV-WATER-WATERSUPPLY", file: "03-do-agency/divisions/SP-AGYDIV-WATER-WATERSUPPLY_v1.1.md", confirmed: true },
+  ]},
+];
+
+// ★ 2026-09-24 신설(작업 #16) — 합의제행정기관(감사위원회·지방노동위원회·자치경찰위원회). 도지사 직속기관·
+// 사업소(DO_AGENCIES, kind: "do-agency")와 조직법적 성격이 달라(지방자치법 제130조의 독립적 의사결정
+// 합의체) 새 K-FOI tier(collegial, kind: "collegial-agency")로 별도 관리한다. 03b-collegial-agency/
+// 참고(archive/README.md에 설계 배경).
+const DO_COLLEGIAL = [
+  { id: "SP-COMM-AUDIT", name: "감사위원회", spId: "SP-COMM-AUDIT", kind: "collegial-agency", divisions: [
+      { id: "SP-COMMDIV-AUDIT-AUDIT", name: "감사위원회 감사과", spId: "SP-COMMDIV-AUDIT-AUDIT", file: "03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-AUDIT_v1.0.md", confirmed: true },
+      { id: "SP-COMMDIV-AUDIT-INVESTIGATION", name: "감사위원회 조사과", spId: "SP-COMMDIV-AUDIT-INVESTIGATION", file: "03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-INVESTIGATION_v1.0.md", confirmed: true },
+      { id: "SP-COMMDIV-AUDIT-DELIBERATION", name: "감사위원회 심의과", spId: "SP-COMMDIV-AUDIT-DELIBERATION", file: "03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-DELIBERATION_v1.0.md", confirmed: true },
+      { id: "SP-COMMDIV-AUDIT-ANTICORRUPTION", name: "감사위원회 부패방지지원센터", spId: "SP-COMMDIV-AUDIT-ANTICORRUPTION", file: "03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-ANTICORRUPTION_v1.0.md", confirmed: true },
+  ]},
+  { id: "SP-COMM-LABOR", name: "지방노동위원회", spId: "SP-COMM-LABOR", kind: "collegial-agency", divisions: [
+      { id: "SP-COMMDIV-LABOR-SECRETARIAT", name: "지방노동위원회 사무국", spId: "SP-COMMDIV-LABOR-SECRETARIAT", file: "03b-collegial-agency/divisions/SP-COMMDIV-LABOR-SECRETARIAT_v1.0.md", confirmed: true },
+  ]},
+  { id: "SP-COMM-POLICE", name: "자치경찰위원회", spId: "SP-COMM-POLICE", kind: "collegial-agency", divisions: [
+      { id: "SP-COMMDIV-POLICE-GENERAL", name: "자치경찰위원회 자치경찰총괄과", spId: "SP-COMMDIV-POLICE-GENERAL", file: "03b-collegial-agency/divisions/SP-COMMDIV-POLICE-GENERAL_v1.0.md", confirmed: true },
+      { id: "SP-COMMDIV-POLICE-COOP", name: "자치경찰위원회 자치경찰협력과", spId: "SP-COMMDIV-POLICE-COOP", file: "03b-collegial-agency/divisions/SP-COMMDIV-POLICE-COOP_v1.0.md", confirmed: true },
   ]},
 ];
 
@@ -1035,6 +1126,7 @@ const INSTITUTIONS = [
   { id: "seogwipo", name: "서귀포시청",       kind: "gov", bureaus: SEOGWIPO_BUREAUS },
   { id: "emd-root", name: "읍면동 행정복지센터", kind: "emdRoot" },
   { id: "agency",   name: "직속기관",         kind: "gov", bureaus: DO_AGENCIES },
+  { id: "collegial", name: "합의제행정기관",  kind: "gov", bureaus: DO_COLLEGIAL },
   { id: "org",      name: "출자출연기관",     kind: "gov", bureaus: DO_ORGS },
 ];
 

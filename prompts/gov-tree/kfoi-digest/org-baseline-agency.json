@@ -3,7 +3,7 @@
  "as_of": "2026-08-25",
  "basis": "제주특별자치도 행정기구 설치 및 정원 조례 시행규칙(제938호, 2026.8.25. 시행) 제3장(직속기관, 제23조~제35조의2)ㆍ제4장(사업소, 제36조~제59조의5)ㆍ제5장(합의제행정기관, 제60조~제63조의3) 원문 확인",
  "checked_on": "2026-09-22",
- "confidence_note": "도청(do)ㆍ제주시ㆍ서귀포시와 달리 이 유형은 현재 SP 인벤토리(DO_AGENCIES, 원래 10개)의 과 구성이 원문과 광범위하게 다르다 — 9개 전부 'structure_differs'다(이름 일부만 겹치거나 아예 다르다). 또한 소방안전본부(SP-AGY-FIRE)는 이 유형이 아니라 도청 15실·국·본부(제21조의4)였다는 것을 이번에 확인해 do 유형으로 옮겼다. 법정 직속기관 7개ㆍ사업소 14개 중 9개만 SP가 있고 12개는 전혀 없다(공공정책연수원ㆍ보훈청ㆍ소방서 4곳ㆍ안전체험관ㆍ중앙협력본부(이미 SP-DO-LIAISON으로 도청 유형에 있음, 아래 참고)ㆍ문화예술진흥원ㆍ해양수산연구원ㆍ동물위생시험소ㆍ설문대여성문화센터ㆍ돌문화공원관리소ㆍ환경자원순환센터ㆍ고용센터). 합의제행정기관(감사위원회 등 3개)도 이 유형 자체가 인벤토리에 없다. 각 과의 분장사무(별표 8ㆍ9ㆍ10)는 확보하지 못해 실제 SP 본문 작성은 다음 배치다.",
+ "confidence_note": "도청(do)ㆍ제주시ㆍ서귀포시와 달리 이 유형은 현재 SP 인벤토리(DO_AGENCIES, 원래 10개)의 과 구성이 원문과 광범위하게 다르다 — 9개 전부 'structure_differs'다(이름 일부만 겹치거나 아예 다르다). 또한 소방안전본부(SP-AGY-FIRE)는 이 유형이 아니라 도청 15실·국·본부(제21조의4)였다는 것을 이번에 확인해 do 유형으로 옮겼다. 법정 직속기관 7개ㆍ사업소 14개 중 9개만 SP가 있고 12개는 전혀 없다(공공정책연수원ㆍ보훈청ㆍ소방서 4곳ㆍ안전체험관ㆍ중앙협력본부ㆍ문화예술진흥원ㆍ해양수산연구원ㆍ동물위생시험소ㆍ설문대여성문화센터ㆍ돌문화공원관리소ㆍ환경자원순환센터ㆍ고용센터). 합의제행정기관(감사위원회 등 3개)은 2026-09-24(작업 #16)에 별도 tier(collegial, org-baseline-collegial.json)로 분리 신설돼 이 파일의 missing_in_inventory에서는 빠졌다 — 아래 corrections 참고. 각 과의 분장사무(별표 8ㆍ9ㆍ10)는 확보하지 못해 실제 SP 본문 작성은 다음 배치다.",
  "official_units": {
   "bureaus": [],
   "offices": [],
@@ -12,173 +12,18 @@
  "expected_counts": {
   "직속기관": 7,
   "사업소": 14,
-  "합의제행정기관": 3,
-  "note": "직속기관 7개 중 1개(소방안전본부)는 실제로는 도청 유형이었다 — 남은 6개가 이 유형에 속한다. 총 6+14+3=23개 법정 기관 중 SP가 있는 것은 9개뿐이다."
+  "note": "직속기관 7개 중 1개(소방안전본부)는 실제로는 도청 유형이었다 — 남은 6개가 이 유형에 속한다. 합의제행정기관 3개는 2026-09-24(작업 #16)부터 이 tier가 아니라 별도 tier(collegial, org-baseline-collegial.json)로 분리됐다."
  },
  "reform_deltas": [],
- "missing_in_inventory": [
-  {
-   "name": "제주소방서·서귀포소방서·서부소방서·동부소방서",
-   "chapter": "직속기관",
-   "section": "제6절",
-   "legal_basis": "제33~35조",
-   "current_divisions": [
-    "(각 서) 소방행정과",
-    "예방안전과/예방구조과",
-    "119재난대응과/현장대응단",
-    "119센터ㆍ119구조대ㆍ119지역대"
-   ],
-   "confidence": "high"
-  },
-  {
-   "name": "제주안전체험관",
-   "chapter": "직속기관",
-   "section": "제7절",
-   "legal_basis": "제35조의2",
-   "current_divisions": [
-    "체험지원과",
-    "체험기획과",
-    "체험운영과"
-   ],
-   "confidence": "high"
-  },
-  {
-   "name": "중앙협력본부",
-   "chapter": "사업소",
-   "section": "제3절",
-   "legal_basis": "제40~41조",
-   "current_divisions": [
-    "국회대외협력부(행정총괄과ㆍ국회대외과ㆍ정부협력과)"
-   ],
-   "confidence": "high"
-  },
-  {
-   "name": "문화예술진흥원",
-   "chapter": "사업소",
-   "section": "제4절",
-   "legal_basis": "제42~43조",
-   "current_divisions": [
-    "운영과",
-    "공연기획과"
-   ],
-   "confidence": "high"
-  },
-  {
-   "name": "해양수산연구원",
-   "chapter": "사업소",
-   "section": "제7절",
-   "legal_basis": "제48~49조",
-   "current_divisions": [
-    "해양수산자원과",
-    "해양환경연구과",
-    "수산종자연구과",
-    "수산물안전과",
-    "광어연구센터"
-   ],
-   "confidence": "high"
-  },
-  {
-   "name": "동물위생시험소",
-   "chapter": "사업소",
-   "section": "제8절",
-   "legal_basis": "제50~51조",
-   "current_divisions": [
-    "축산물안전과",
-    "방역진단과"
-   ],
-   "confidence": "high"
-  },
-  {
-   "name": "설문대여성문화센터",
-   "chapter": "사업소",
-   "section": "제11절",
-   "legal_basis": "제56~57조",
-   "current_divisions": [
-    "운영과"
-   ],
-   "confidence": "high"
-  },
-  {
-   "name": "돌문화공원관리소",
-   "chapter": "사업소",
-   "section": "제12절",
-   "legal_basis": "제58~59조",
-   "current_divisions": [
-    "공원운영과",
-    "돌문화연구과"
-   ],
-   "confidence": "high"
-  },
-  {
-   "name": "제주환경자원순환센터",
-   "chapter": "사업소",
-   "section": "제13절",
-   "legal_basis": "제59조의2~3",
-   "current_divisions": [
-    "자원순환시설관리과",
-    "음식물자원화과"
-   ],
-   "confidence": "high"
-  },
-  {
-   "name": "고용센터",
-   "chapter": "사업소",
-   "section": "제14절",
-   "legal_basis": "제59조의4~5",
-   "current_divisions": [
-    "취업지원총괄과",
-    "고용지원과",
-    "실업급여과",
-    "서귀포지소"
-   ],
-   "confidence": "high"
-  },
-  {
-   "name": "감사위원회",
-   "chapter": "합의제행정기관",
-   "section": "제1절",
-   "legal_basis": "제60~61조",
-   "current_divisions": [
-    "감사과",
-    "조사과",
-    "심의과",
-    "부패방지지원센터"
-   ],
-   "confidence": "high",
-   "note": "합의제행정기관(제5장) — SP 인벤토리에 이 유형 자체가 없다"
-  },
-  {
-   "name": "지방노동위원회",
-   "chapter": "합의제행정기관",
-   "section": "제2절",
-   "legal_basis": "제62~63조",
-   "current_divisions": [
-    "사무국"
-   ],
-   "confidence": "high",
-   "note": "합의제행정기관(제5장) — SP 인벤토리에 이 유형 자체가 없다"
-  },
-  {
-   "name": "자치경찰위원회",
-   "chapter": "합의제행정기관",
-   "section": "제3절",
-   "legal_basis": "제63조의2~3",
-   "current_divisions": [
-    "자치경찰총괄과",
-    "자치경찰협력과"
-   ],
-   "confidence": "high",
-   "note": "합의제행정기관(제5장) — SP 인벤토리에 이 유형 자체가 없다"
-  }
- ],
+ "missing_in_inventory": [],
  "corrections": [
   {
    "item": "2026-09-22: 소방안전본부(SP-AGY-FIRE)를 DO_AGENCIES에서 DO_BUREAUS로 이동(kind: do-dept) — 시행규칙 제21조의4로 도청 15실·국·본부 중 하나임을 확인. spId는 이력 보존을 위해 그대로 둠. 산하 과 이름(소방행정과 등, 3개)은 원문(소방정책과 등, 5개)과 다르지만 division 파일 내용은 이번에 바꾸지 않았다",
    "confidence": "high"
   },
   {
-   "item": "중앙협력본부는 이미 SP-DO-LIAISON으로 도청(do) 유형에 있다(2026-09-21 확인, match) — 그런데 시행규칙 원문상 중앙협력본부는 제4장 제3절(사업소)에 있다. 도청 보좌기관이 아니라 사업소로 분류돼야 정확하다 — 이번 배치에서는 옮기지 않고 기록만 남긴다",
-   "confidence": "medium"
+   "item": "2026-09-24(작업 #17, 사용자 확인 + 웹 조사) 해소: 중앙협력본부가 SP-DO-LIAISON으로 도청(do) 유형에 이중 등록돼 있던 문제를 정리했다 — SP-DO-LIAISON 자체가 '일반 지식 기반 초안, jeju.go.kr 재검증 필요'라고 스스로 밝히고 있었고, 시행규칙 원문상 중앙협력본부는 제4장 제3절(사업소)이 맞다(도청 보좌기관 아님, 위키백과로도 재확인). SP-DO-LIAISON은 archive/로 옮기고 org-baseline-do.json에서도 제거했다 — 이 SP-AGY-CENTRALCOOP(사업소, agency 유형)가 정본이다.",
+   "confidence": "high"
   },
   {
    "item": "2026-09-22: 농업기술원·보건환경연구원·축산생명연구원 division을 별표 8·9(2024.01.22. 개정본) 실제 구성으로 전면 교체(archive/로 이동 후 신설). 이 3개 기관은 division에 실제 서비스 배선(task_key)이 없어 안전하게 교체 가능했다 — 나머지 6개 기관(도립미술관·민속자연사박물관·세계유산본부·한라도서관·자치경찰단·상하수도본부)은 일부 division에 배선이 있어 같은 방식을 그대로 적용할 수 없다",
@@ -195,12 +40,14 @@
   {
    "item": "2026-09-22: 민속자연사박물관 division을 별표9 실제 구성(2개)으로 대부분 교체 — 배선된 관리실은 유지하고 별도 참고만 남김",
    "confidence": "high"
+  },
+  {
+   "item": "2026-09-24(작업 #16): missing_in_inventory에 있던 감사위원회·지방노동위원회·자치경찰위원회 3건(합의제행정기관, 제5장)을 이 파일에서 빼고 새 K-FOI tier(collegial, org-baseline-collegial.json)로 옮겼다 — 이 3개 기관은 도지사 직속기관·사업소(제3·4장, kind: institution)와 조직법적 성격이 달라(합의제 의결기구) 이 tier(agency)에 억지로 포함하지 않기로 했다(프로젝트 총괄 지시). expected_counts에서도 '합의제행정기관: 3' 행을 뺐다. **재구성 참고(2026-09-24 작업 #15/#16 병합 재현)**: 원 batch16은 66d8287b(작업 #15 이전) 기준으로 작성돼 이 시점의 missing_in_inventory에는 소방서 4곳 항목도 남아 있었으나(4→1 예정), 이번 병합은 이미 작업 #15가 반영된 e663875b 위에 이뤄져 소방서 4곳은 이미 mapping으로 옮겨진 상태였다 — 그래서 이 배치 이후 missing_in_inventory는 1건이 아니라 0건(빈 배열)이다.",
+   "confidence": "high"
   }
  ],
  "open_questions": [
   "직속기관·사업소 9개의 실제 과 SP(division)를 원문 명칭으로 재작성할지, 병존 표시만 하고 별표(분장사무)를 먼저 기다릴지 — 도청 15실·국과 같은 규모의 작업이 필요하다",
-  "누락 12개 기관(공공정책연수원 등)에 대해 새 SP를 만들지, 민원 접점이 적은 기관부터 순차로 만들지",
-  "합의제행정기관(감사위원회 등) 3개를 K-FOI의 어느 유형에 넣을지 — 기존 6개 유형(do/jeju-si/seogwipo/agency/org/emd)에 없는 새 범주다",
   "중앙협력본부의 도청(do)/사업소(agency) 소속 재정리 여부"
  ],
  "sources": [
@@ -367,6 +214,169 @@
     "항일기념관"
    ],
    "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제31~32조·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(보훈과·보상과·항일기념관 3개)을 확인해 SP-AGY-VETERANS와 하위 division 3개를 함께 신설했다. §2는 별표8(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다. **명칭 중복 유의**: gov-router.js의 JEJU_NATIONAL_TABLE에 이미 SP-NAT-VETERANS(\"제주보훈청(국가보훈부)\")가 \"보훈청\" 키워드로 등록돼 있다 — 도 직속기관(이 SP)과 국가보훈부 소속 기관의 소관 중복·우선순위는 이번 배치에서 해결하지 않았다(SP-AGY-VETERANS_v1.0.md §6 참고, 다음 배치에서 재검증 필요)."
+  },
+  "SP-AGY-CENTRALCOOP": {
+   "status": "match",
+   "current_name": "중앙협력본부",
+   "confidence": "high",
+   "legal_basis": "제40~41조",
+   "current_divisions": [
+    "국회대외협력부(행정총괄과ㆍ국회대외과ㆍ정부협력과)"
+   ],
+   "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제40~41조·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(국회대외협력부(행정총괄과ㆍ국회대외과ㆍ정부협력과))을 확인해 SP-AGY-CENTRALCOOP와 하위 division을 함께 신설했다. §2는 별표9(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다. 별표9(2024.01.22. 개정본) 원문에는 이 기관이 \"대외행정지원과\"·\"국회협력과\"·\"정부협력과\" 3개 독립된 과로 나뉘어 있어(이름도 org-baseline의 행정총괄과·국회대외과와 정확히 일치하지 않음), org-baseline의 current_divisions(\"국회대외협력부\" 1개, 3개 팀 표기)와 구조가 다르다 — 이 SP는 org-baseline 구조를 따라 division 1개로 신설했다. **명칭 중복 해소(2026-09-24, 작업 #17)**: gov-router.js의 JEJU_DO_TABLE에 있던 SP-DO-LIAISON(\"중앙협력본부\", 02-do-dept 최상위 도 부서)과 이중 등록 문제였다 — 사용자 확인 + 웹 조사 결과 SP-DO-LIAISON은 조례 개별 검증 없이 작성된 초안이었고 실제 조례상 계층(사업소, 제40~41조)도 이 SP와 일치한다는 것을 확인해, SP-DO-LIAISON을 archive로 옮기고 이 SP-AGY-CENTRALCOOP로 일원화했다(SP-AGY-CENTRALCOOP_v1.0.md §6·prompts/gov-tree/03-do-agency/archive/README.md 참고)."
+  },
+  "SP-AGY-CULTUREARTS": {
+   "status": "match",
+   "current_name": "문화예술진흥원",
+   "confidence": "high",
+   "legal_basis": "제42~43조",
+   "current_divisions": [
+    "운영과",
+    "공연기획과"
+   ],
+   "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제42~43조·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(운영과·공연기획과)을 확인해 SP-AGY-CULTUREARTS와 하위 division을 함께 신설했다. §2는 별표9(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다."
+  },
+  "SP-AGY-MARINEFISHERIES": {
+   "status": "match",
+   "current_name": "해양수산연구원",
+   "confidence": "high",
+   "legal_basis": "제48~49조",
+   "current_divisions": [
+    "해양수산자원과",
+    "해양환경연구과",
+    "수산종자연구과",
+    "수산물안전과",
+    "광어연구센터"
+   ],
+   "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제48~49조·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(해양수산자원과·해양환경연구과·수산종자연구과·수산물안전과·광어연구센터)을 확인해 SP-AGY-MARINEFISHERIES와 하위 division을 함께 신설했다. §2는 별표9(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다."
+  },
+  "SP-AGY-ANIMALHYGIENE": {
+   "status": "match",
+   "current_name": "동물위생시험소",
+   "confidence": "high",
+   "legal_basis": "제50~51조",
+   "current_divisions": [
+    "축산물안전과",
+    "방역진단과"
+   ],
+   "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제50~51조·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(축산물안전과·방역진단과)을 확인해 SP-AGY-ANIMALHYGIENE와 하위 division을 함께 신설했다. §2는 별표9(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다."
+  },
+  "SP-AGY-SEOLMUNDAE": {
+   "status": "match",
+   "current_name": "설문대여성문화센터",
+   "confidence": "high",
+   "legal_basis": "제56~57조",
+   "current_divisions": [
+    "운영과"
+   ],
+   "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제56~57조·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(운영과)을 확인해 SP-AGY-SEOLMUNDAE와 하위 division을 함께 신설했다. §2는 별표9(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다. 별표9(2024.01.22. 개정본) 원문은 이 기관을 \"교육운영과\"·\"문화기획과\" 2개 과로 적고 있어 org-baseline의 current_divisions(운영과 1개)와 다르다 — SP-AGY-SEOLMUNDAE_v1.0.md §6에 정직하게 밝힘."
+  },
+  "SP-AGY-STONEPARK": {
+   "status": "match",
+   "current_name": "돌문화공원관리소",
+   "confidence": "high",
+   "legal_basis": "제58~59조",
+   "current_divisions": [
+    "공원운영과",
+    "돌문화연구과"
+   ],
+   "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제58~59조·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(공원운영과·돌문화연구과)을 확인해 SP-AGY-STONEPARK와 하위 division을 함께 신설했다. §2는 별표9(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다. 별표9(2024.01.22. 개정본) 원문에는 \"돌문화연구과\"의 사무 항목이 없다(공원운영과만 있음) — 돌문화연구과 §2는 명칭에서 추정한 내용이며 confidence low, SP-AGY-STONEPARK_v1.0.md §6에 정직하게 밝힘."
+  },
+  "SP-AGY-EMPLOYMENT": {
+   "status": "match",
+   "current_name": "고용센터",
+   "confidence": "high",
+   "legal_basis": "제59조의4~5",
+   "current_divisions": [
+    "취업지원총괄과",
+    "고용지원과",
+    "실업급여과",
+    "서귀포지소"
+   ],
+   "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제59조의4~5·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(취업지원총괄과·고용지원과·실업급여과·서귀포지소)을 확인해 SP-AGY-EMPLOYMENT와 하위 division을 함께 신설했다. §2는 별표9(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다. 별표9(2024.01.22. 개정본)에는 사업소 단위 사무 분장이 없고, 별표7(본청)에 옛 조직상 \"고용센터\" 사무 22건이 division 구분 없이 실려 있었다 — 이 배치가 주제별로 4개 division에 재배치했다(작성자 판단, 원문 아님). **명칭 중복 해소(2026-09-24, 작업 #17)**: division-tables.js의 DO_DEPT_DIVISION_TABLE에 있던 SP-DIV-ECON-EMPLOYCENTER(\"경제활력국 고용센터\", bare 키워드 [\"고용\", \"고용센터\"])와 이중 등록 문제였다 — 사용자 확인 + 웹 조사 결과 SP-DIV-ECON-EMPLOYCENTER는 조례 개별 검증 없이 \"경제활력국 산하 부서\"로 잘못 모델링된 것이었고(실제로는 제주특별법 제44조 근거 도 직속 사업소), 이 SP-AGY-EMPLOYMENT와 같은 실체임을 확인해 SP-DIV-ECON-EMPLOYCENTER를 archive로 옮기고 이 SP로 일원화했다(SP-AGY-EMPLOYMENT_v1.0.md §6·prompts/gov-tree/03-do-agency/archive/README.md 참고)."
+  },
+  "SP-AGY-ENVCIRCULATION": {
+   "status": "match",
+   "current_name": "제주환경자원순환센터",
+   "confidence": "low",
+   "legal_basis": "제59조의2~3",
+   "current_divisions": [
+    "자원순환시설관리과",
+    "음식물자원화과"
+   ],
+   "note": "2026-09-23 신설(작업 #14) — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다. 시행규칙 제59조의2~3·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(자원순환시설관리과·음식물자원화과)을 확인해 SP-AGY-ENVCIRCULATION와 하위 division을 함께 신설했다. **정직하게 밝힘(confidence: low, 이전 배치와 다름)**: duties-raw-2024-01-22.json(별표8·9 원문)을 이 기관명·전 division명으로 전수 검색했으나 division별 분장사무가 전혀 없었다 — 그래서 §2는 별표 원문이 아니라 기관·과 이름에서 합리적으로 추정한 최소한의 범위만 담았다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다."
+  },
+  "SP-AGY-SAFETYEXPERIENCE": {
+   "status": "match",
+   "current_name": "제주안전체험관",
+   "confidence": "low",
+   "legal_basis": "제35조의2",
+   "current_divisions": [
+    "체험지원과",
+    "체험기획과",
+    "체험운영과"
+   ],
+   "note": "2026-09-23 신설(작업 #14) — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다. 시행규칙 제35조의2·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(체험지원과·체험기획과·체험운영과)을 확인해 SP-AGY-SAFETYEXPERIENCE와 하위 division을 함께 신설했다. **정직하게 밝힘(confidence: low, 이전 배치와 다름)**: duties-raw-2024-01-22.json(별표8·9 원문)을 이 기관명·전 division명으로 전수 검색했으나 division별 분장사무가 전혀 없었다 — 그래서 §2는 별표 원문이 아니라 기관·과 이름에서 합리적으로 추정한 최소한의 범위만 담았다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다."
+  },
+  "SP-AGY-FIREJEJU": {
+   "status": "match",
+   "current_name": "제주소방서",
+   "confidence": "high",
+   "legal_basis": "제33~35조",
+   "current_divisions": [
+    "소방행정과",
+    "예방안전과",
+    "119재난대응과",
+    "현장대응단",
+    "119안전센터(9개)",
+    "119구조대",
+    "119지역대(확인 못함)"
+   ],
+   "note": "2026-09-24 신설(작업 #15, 사용자 지시 — 현장 단위까지 SP 뼈대를 만들어 소방서 직원이 검증·수정할 수 있게 함). 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(제주소방서·서귀포소방서·서부소방서·동부소방서 통합 항목). 지방자치법 제126조상 SP-AGY-FIRE(소방안전본부)의 하급 직속기관이며, §0에 그 상속 체인을 명시했다. §2는 별표8(2024.01.22. 개정본) 원문(confidence: high) — 소방행정과·예방안전과·119재난대응과·현장대응단 4개 과로 구성된 것을 확인했다(다른 3개 서는 예방안전과+119재난대응과가 '예방구조과' 1개로 합쳐져 3개 과다). 119안전센터 9개(이도·삼도·오라·연동·노형·외도·항만·화북·아라)·119구조대 1개는 나무위키·jeju.go.kr 스니펫으로 교차검증했다. **정직하게 밝힘**: 원 작업 지시서에는 이 서에도 119지역대(구좌읍 김녕지역·우도면·표선면 성읍리)가 있다고 돼 있었으나, 웹 교차검증 결과 우도119지역대는 명확히 동부소방서 소속으로 확인돼(헤드라인제주 보도) 이 서에는 배정하지 않았다 — 위키 표 추출 중복 오류로 판단했다(archive/README.md 참고)."
+  },
+  "SP-AGY-FIRESEOGWIPO": {
+   "status": "match",
+   "current_name": "서귀포소방서",
+   "confidence": "high",
+   "legal_basis": "제33~35조",
+   "current_divisions": [
+    "소방행정과",
+    "예방구조과",
+    "현장대응단",
+    "119안전센터(4개)",
+    "119구조대",
+    "119지역대(확인 못함)"
+   ],
+   "note": "2026-09-24 신설(작업 #15). §2는 별표8(2024.01.22. 개정본) 원문(confidence: high) — 소방행정과·예방구조과·현장대응단 3개 과. 119안전센터 4개(대신·동홍·중문·효돈)는 언론 보도로 교차검증했다. **정직하게 밝힘**: 원 작업 지시서의 119지역대(김녕·우도·표선성읍) 배정은 우도119지역대가 동부소방서 소속으로 확인돼(헤드라인제주 보도) 이 서에는 배정하지 않았다 — 위키 표 추출 중복 오류로 판단했다(archive/README.md 참고)."
+  },
+  "SP-AGY-FIRESEOBU": {
+   "status": "match",
+   "current_name": "서부소방서",
+   "confidence": "high",
+   "legal_basis": "제33~35조",
+   "current_divisions": [
+    "소방행정과",
+    "예방구조과",
+    "현장대응단",
+    "119안전센터(6개)",
+    "119구조대"
+   ],
+   "note": "2026-09-24 신설(작업 #15). §2는 별표8(2024.01.22. 개정본) 원문(confidence: high) — 소방행정과·예방구조과·현장대응단 3개 과. 119안전센터 6개(한림·애월·한경·대정·안덕·영어교육도시)는 원 작업 지시서(나무위키 근거) 그대로 반영했다 — 웹 교차검증은 상세 확인까지 이르지 못했다. 이 서에는 119지역대가 원 작업 지시서에도 없었다."
+  },
+  "SP-AGY-FIREDONGBU": {
+   "status": "match",
+   "current_name": "동부소방서",
+   "confidence": "high",
+   "legal_basis": "제33~35조",
+   "current_divisions": [
+    "소방행정과",
+    "예방구조과",
+    "현장대응단",
+    "119안전센터(5개)",
+    "119구조대",
+    "119지역대(3개, 확인됨/추정)"
+   ],
+   "note": "2026-09-24 신설(작업 #15). §2는 별표8(2024.01.22. 개정본) 원문(confidence: high) — 소방행정과·예방구조과·현장대응단 3개 과. 119안전센터 5개(성산·구좌·조천·남원·표선)는 언론 보도로 교차검증했다. **119지역대 3개(우도·김녕·성읍)를 이 서 산하로만 배정했다** — 우도119지역대는 헤드라인제주 보도로 동부소방서 소속임을 확인했고(confidence: high), 김녕119지역대·성읍119지역대는 명칭·소속을 뒷받침하는 1차 출처를 찾지 못해 구좌읍·표선면이 이 서 관할이라는 정황으로만 추정했다(confidence: low, 각 SP §JURISDICTION-NOTE 참고). 제주소방서·서귀포소방서에도 이 3개 지역대가 있다는 원 작업 지시서의 내용은 위키 표 추출 중복 오류로 판단해 반영하지 않았다."
   }
  }
 }
