@@ -437,3 +437,74 @@ corrections로 옮겼다.
   테스트 스위트(사전 존재하던 8개 파일 실패와 동일하게 유지, git stash 비교로 확인)·clean-clone
   재검증 모두 통과했다.
 
+
+# 2026-09-24 — batch13~17 신설 SP 18개 대상 라이브 스모크테스트 준비(작업 #18, 사용자 지시)
+
+프로젝트 총괄(피터/주피터) 명시적 요청 — "새로 추가된 SP들을 대상으로, 사용자 발화 라우팅을 테스트하기
+위한, 라이브 스모크테스트를 준비하십시오." 가장 가까운 선례(`gov_router_2026_08_21_department_live_
+smoketest.mjs`·`live-smoketest-gov-router-2026-08-21-departments.yml`)를 그대로 복제해 새로 만들었다 —
+설계를 새로 하지 않고 기존 패턴(`assembleGovSystemPrompt`/`resolveGovAgency` 실제 import, pages/
+regional-gov.html의 `_govClassifyFn`을 토씨 하나 안 틀리고 복제한 `realClassifyFn`, 체크1(라우팅 도달)·
+체크3(SP 응답 품질) 동일 패턴)을 그대로 따랐다.
+
+## 만든 파일
+
+- `tests/live_smoketest/gov_router_2026_09_24_new_agencies_live_smoketest.mjs`
+- `.github/workflows/live-smoketest-gov-router-2026-09-24-new-agencies.yml`
+
+## 대상과 시나리오 구성(총 22건)
+
+batch13(작업 #13)·batch14(작업 #14)·batch15(작업 #15, 소방서 4개)·batch16(작업 #16, 합의제행정기관
+신설 tier)·batch17(작업 #17, 명칭충돌 정리)에서 새로 생긴 기관 18개(사용자가 준 목록은 17개 항목으로
+정리돼 있었으나, 실제 코드 기준으로 SP-AGY-POLICE/SP-COMM-POLICE를 별도로 세면 18개 코드) 전부를
+커버했다:
+
+- 사업소·직속기관 11개: 각 1~2개 시나리오(문화예술진흥원·해양수산연구원은 2개씩 — division 커버리지
+  확대).
+- 소방서 4개 중 3개(제주·동부·서부, "최소 2곳" 요구를 초과 충족) — 과 레벨만(현장단위 31개는 원래
+  라우팅 테이블에 없어 대상 아님).
+- 합의제행정기관 3개(감사위원회·지방노동위원회·자치경찰위원회) 각 1개.
+- 명칭충돌 3건 검증(이번 스모크테스트의 핵심 포인트): 고용센터 일원화 2건(취업지원총괄과 사무·채용
+  박람회), 중앙협력본부 일원화 1건(세종시권 중앙부처 협력), 자치경찰위원회 vs 자치경찰단 쌍 2건
+  (위원회의 정책 심의 vs 집행조직의 관광경찰 신고 — 양쪽이 실제로 갈라지는지 확인).
+
+각 시나리오 발화는 `src/gopang/gov/division-tables.js`의 institution/division kw(§2 완결처리업무)에서
+실제 등재된 사무를 그대로 가져와 자연스러운 사용자 말투로 바꾼 것이다 — 꾸며낸 사무 없음.
+
+## 이 세션에서 실제로 검증한 것 (정직한 범위 표시)
+
+⚠️ 이 환경엔 실제 `DEEPSEEK_API_KEY`가 없어 `realClassifyFn`(LLM 폴백 분류)까지 포함한 완전한 라이브
+실행은 이 세션에서 하지 못했다. 대신 다음 두 가지를 실행했다:
+
+1. **문법 검증**: `node --check`로 새 `.mjs` 파일이 문법 오류 없이 로드됨을 확인. `.github/workflows/
+   live-smoketest-gov-router-2026-09-24-new-agencies.yml`도 `python3 -c "import yaml; yaml.safe_load(...)"`
+   로 YAML 문법이 유효함을 확인했다.
+2. **오프라인 키워드 매칭 시뮬레이션**(스크래치 전용 스크립트, 커밋 대상 아님) — `assembleGovSystemPrompt`를
+   `classifyFn` 없이(LLM 폴백 없이) 호출해 순수 kw 매칭만으로 22건 중 몇 건이 이미 올바른 SP에
+   도달하는지 확인했다. 결과: **13/22건 키워드만으로 성공**, 나머지 9건(veterans-registration·
+   marinefisheries-seed·animalhygiene-quarantine·envcirculation-foodwaste·employment-jobfair·
+   centralcoop-sejong·police-committee-deliberation·comm-audit-report·comm-labor-remedy)은 kw
+   미매칭 또는 다른 SP로 오매칭돼 실제 배포 환경에서는 K-Intent LLM 폴백(`realClassifyFn`)이 필요하다
+   — 이건 실패가 아니라 설계상 예상된 동작이다(kw는 1차 필터, LLM이 2차 폴백).
+   - 이 시뮬레이션 과정에서 실제 kw 명칭충돌 2건을 추가로 발견해 시나리오 문구를 조정했다: (a) "화재"
+     라는 단어 자체가 응급 감지 게이트(`SP-EXP-EMERGENCY`, "애매하면 응급으로" 원칙)에 최우선으로
+     가로채져 원래 의도한 소방서 행정 문의 라우팅을 검증할 수 없었다 — 순수 행정 문구("소방시설 점검
+     신청")로 바꿨다. (b) "관광지" 단어가 SP-DO-TOURISM(bare "관광" kw)와 매칭 점수에서 동점/우위가
+     되어 "관광경찰" 시나리오가 SP-AGY-POLICE로 못 갔다 — "관광지" 없이 "관광경찰"만 남겼다. 이 둘은
+     라우팅 버그가 아니라 (a)는 의도된 안전 설계, (b)는 알려진 kw 매칭 한계(최고 점수 방식, 최장
+     일치 방식 아님)이며, 다음 배치에서 별도로 재검토할 가치가 있는 관찰 사항으로만 기록해둔다(이번
+     배치 범위 밖 — 실제 SP kw 정의 자체는 건드리지 않았다).
+   - 별개로, veterans-registration(→ SP-NAT-VETERANS)·marinefisheries-seed(→ SP-AGY-CHUKSAN)·
+     envcirculation-foodwaste(→ SP-DO-CLIMATE)는 순수 kw 단계에서 다른 기존 SP로 오매칭됐다 — LLM
+     폴백이 실제로 이 오매칭을 바로잡는지는 `DEEPSEEK_API_KEY` 있는 환경에서 라이브 실행해야 확인
+     가능하다(이 세션에서 검증 못함, 정직하게 명시).
+3. 기존 회귀 스윕 재실행: `node tools/build_kfoi_digest.mjs --check`(477건 정상)·`python3 tools/
+   check_stale_refs.py`(714건 정상, 변동 없음)·전체 테스트 스위트(`src/tests/*.test.mjs`, 사전 존재하던
+   8개 파일 실패와 동일하게 유지 — 새 파일 추가로 인한 신규 회귀 없음).
+
+## 완전한 검증을 위해 남은 일
+
+GitHub Actions에서 `workflow_dispatch`로 `live-smoketest-gov-router-2026-09-24-new-agencies.yml`을
+`DEEPSEEK_API_KEY` secret과 함께 수동 실행해야 `realClassifyFn`(LLM 폴백)까지 포함한 완전한 라이브
+검증 결과를 얻는다. 결과는 `results/gov_router_2026_09_24_new_agencies_smoketest/results.json`과
+`results/live-smoketest-gov-router-2026-09-24-new-agencies` 브랜치에 남는다.
