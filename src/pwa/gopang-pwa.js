@@ -154,8 +154,20 @@ if ('serviceWorker' in navigator) {
             // 오버레이가 떠 있으면 새로고침을 걸지 않고 1초 뒤 다시
             // 확인한다 — 오버레이가 사라질 때까지(로그인 완료 또는 사용자
             // 취소) 계속 미룬다.
+            // BUG-FIX(2026-09-23, 주피터 실사 재현 — 09-18 사고의 재발) —
+            // 위 09-18 수정은 #ksa-overlay(공용 KAuth 모듈)만 확인했다.
+            // dashboard.html의 메인 지갑 로그인은 별도 ID(#loginScreen)를
+            // 쓰는데, 그 페이지에는 #ksa-overlay 자체가 없어 이 가드가
+            // 전혀 작동하지 않았다 — 그래서 같은 "인증은 성공하는데
+            // 다음 지시를 내리면 또 요구한다" 무한 반복이 dashboard.html
+            // 에서만 재현됐다(09-18 당시엔 이 페이지가 없었거나 이 가드
+            // 적용 대상에서 빠져있었던 것으로 보임). #loginScreen도 함께
+            // 확인하도록 확장 — display:none이 아니면(=아직 로그인 중)
+            // 새로고침을 그대로 미룬다.
             var overlay = document.getElementById('ksa-overlay');
-            if (overlay && overlay.classList.contains('show')) {
+            var loginScreenEl = document.getElementById('loginScreen');
+            var loginScreenShowing = loginScreenEl && getComputedStyle(loginScreenEl).display !== 'none';
+            if ((overlay && overlay.classList.contains('show')) || loginScreenShowing) {
               console.log('[PWA] 로그인 진행 중 — 자동 새로고침 보류, 1초 후 재확인');
               _autoApplyReloadTimer = setTimeout(_fireReload, 1000);
               return;

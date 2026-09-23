@@ -758,21 +758,34 @@ async function handleUserGdcHistory(request, url, env, corsHeaders) {
   if (!Number.isFinite(limit) || limit <= 0) limit = 30;
   if (limit > 100) limit = 100;
 
-  let items = [];
+  // 2026-09-23 버그 수정(주피터 실사 발견 — "10건 넘게 충전했는데 2건만
+  // 보임") — 이전엔 deposit·ai_usage_charge를 OR로 묶어 한 쿼리로,
+  // perPage=limit 하나만 적용해 가져왔다. AI 사용료는 짧은 시간에 수십
+  // 건씩 몰리는 반면 충전은 드물게 발생하므로, 최신순 정렬 후 상위
+  // limit개를 자르면 최근 사용 내역이 그 자리를 거의 다 차지해 오래된
+  // 충전 내역이 통째로 밀려났다(실측: limit=100인데 충전 0건). 두
+  // 쿼리로 분리해 "충전은 최대 limit건, 사용은 최대 limit건"을 각각
+  // 독립적으로 보장한다.
+  let depositItems = [], usageItems = [];
   try {
     const token = await _l1AdminToken(env);
     const esc = guid.replace(/'/g, "\\'");
-    const filter = `(seller_guid='${esc}'&&block_type='deposit')||(buyer_guid='${esc}'&&block_type='ai_usage_charge')`;
-    const res = await fetch(
-      `${L1_DEFAULT}/api/collections/blocks/records?filter=${encodeURIComponent(filter)}&sort=-created&perPage=${limit}`,
-      { headers: { 'Authorization': `Bearer ${token}` }, signal: AbortSignal.timeout(8000) }
-    );
-    if (!res.ok) return _err(502, 'L1_ERROR', `L1 조회 실패 (HTTP ${res.status})`, corsHeaders);
-    const data = await res.json().catch(() => ({ items: [] }));
-    items = data.items || [];
+    const headers = { 'Authorization': `Bearer ${token}` };
+    const [depositRes, usageRes] = await Promise.all([
+      fetch(`${L1_DEFAULT}/api/collections/blocks/records?filter=${encodeURIComponent(`seller_guid='${esc}'&&block_type='deposit'`)}&sort=-created&perPage=${limit}`,
+        { headers, signal: AbortSignal.timeout(8000) }),
+      fetch(`${L1_DEFAULT}/api/collections/blocks/records?filter=${encodeURIComponent(`buyer_guid='${esc}'&&block_type='ai_usage_charge'`)}&sort=-created&perPage=${limit}`,
+        { headers, signal: AbortSignal.timeout(8000) }),
+    ]);
+    if (!depositRes.ok) return _err(502, 'L1_ERROR', `L1 조회 실패 (충전, HTTP ${depositRes.status})`, corsHeaders);
+    if (!usageRes.ok) return _err(502, 'L1_ERROR', `L1 조회 실패 (사용료, HTTP ${usageRes.status})`, corsHeaders);
+    depositItems = (await depositRes.json().catch(() => ({ items: [] }))).items || [];
+    usageItems = (await usageRes.json().catch(() => ({ items: [] }))).items || [];
   } catch (e) {
     return _err(502, 'L1_ERROR', 'L1 조회 실패: ' + e.message, corsHeaders);
   }
+
+  const items = [...depositItems, ...usageItems].sort((a, b) => (a.created < b.created ? 1 : -1));
 
   const history = items.map(rec => {
     let out = {};
@@ -2314,7 +2327,44 @@ async function handleBalanceStatus(request, env, corsHeaders) {
   }), { status: 200, headers: corsHeaders });
 }
 
-// 기존 _l1GetBalanceKRW는 KRW로 환산된 값만 반환한다 — 이 엔드포인트는
+// GET /fx/rates?base=KRW&to=USD,EUR,JPY,CNY,GBP (2026-09-23 신설)
+// Frankfurter API(https://www.frankfurter.dev, ECB 기준환율, 무료·키
+// 불필요)를 그대로 중계한다. ECB는 영업일 기준 1일 1회(대략 16:00 CET)
+// 갱신 — 초단위 틱 데이터를 원하면 유료 시장데이터 공급자 계약이 별도
+// 필요하다는 점을 명시적으로 밝힌다(과장 없이).
+const FX_ALLOWED_CODES = new Set(['USD','EUR','JPY','CNY','GBP','KRW','AUD','CAD','CHF','HKD','SGD','THB','VND','INR','IDR']);
+async function handleFxRates(request, env, corsHeaders) {
+  const url  = new URL(request.url);
+  const base = (url.searchParams.get('base') || 'KRW').toUpperCase();
+  const toParam = (url.searchParams.get('to') || 'USD,EUR,JPY,CNY').toUpperCase();
+  const toCodes = toParam.split(',').map(s => s.trim()).filter(Boolean);
+
+  if (!FX_ALLOWED_CODES.has(base)) return _err(400, 'INVALID_CURRENCY', `지원하지 않는 기준 통화: ${base}`, corsHeaders);
+  const validTo = toCodes.filter(c => FX_ALLOWED_CODES.has(c));
+  if (validTo.length === 0) return _err(400, 'INVALID_CURRENCY', '유효한 대상 통화가 없습니다', corsHeaders);
+
+  try {
+    const fxRes = await fetch(
+      `https://api.frankfurter.app/latest?from=${encodeURIComponent(base)}&to=${encodeURIComponent(validTo.join(','))}`,
+      { signal: AbortSignal.timeout(6000) }
+    );
+    if (!fxRes.ok) return _err(502, 'FX_UPSTREAM_ERROR', `환율 조회 실패 (HTTP ${fxRes.status})`, corsHeaders);
+    const fxData = await fxRes.json().catch(() => null);
+    if (!fxData?.rates) return _err(502, 'FX_UPSTREAM_ERROR', '환율 응답 형식 오류', corsHeaders);
+
+    return new Response(JSON.stringify({
+      ok: true,
+      base,
+      rates: fxData.rates,      // { "USD": 0.00072, "EUR": 0.00066, ... } — base 통화 1단위당 환산값
+      date: fxData.date,        // ECB 기준환율 발표일(YYYY-MM-DD) — "실시간 틱"이 아니라 영업일 1회 갱신임을 클라이언트가 그대로 보여줄 수 있게 노출
+      source: 'ECB (via frankfurter.app)',
+    }), { status: 200, headers: corsHeaders });
+  } catch (e) {
+    return _err(502, 'FX_UPSTREAM_ERROR', '환율 서버 연결 실패: ' + e.message, corsHeaders);
+  }
+}
+
+
 // GDC 원 단위도 함께 보여줘야 해서 별도 소형 헬퍼로 둔다(로직 중복은
 // fetch 한 줄 수준이라 감수).
 async function getBalanceGdcForStatus(guid) {
@@ -13701,6 +13751,18 @@ export default {
     if (pathname === '/biz/gdc-test-loan-apply' && request.method === 'POST') return handleGdcTestLoanApply(request, env, corsHeaders);
     if (pathname === '/biz/gdc-test-loan-repay' && request.method === 'POST') return handleGdcTestLoanRepay(request, env, corsHeaders);
     if (pathname === '/biz/balance-status' && request.method === 'GET') return handleBalanceStatus(request, env, corsHeaders);
+
+    // 2026-09-23 신설(주피터 지시) — GDC 탭 통화 교환 UI를 실제로 동작하게
+    // 만들기 위한 첫 조각: 실시간 국제 외환시장 환율. ECB(유럽중앙은행)
+    // 기준환율을 공개 제공하는 Frankfurter API(무료, 키 불필요, 영업일
+    // 기준 1일 1회 갱신 — 초단위 틱 데이터는 아니지만 "실시간 국제
+    // 외환시장 환율"의 일반적 의미에 해당)를 그대로 중계한다. 화이트페이퍼
+    // §8의 다국적 통화 풀·§9의 지분 토큰(스마트 컨트랙트) 자체는 지금
+    // hondi-proxy 아키텍처(PocketBase 블록 원장)와 완전히 다른 설계라
+    // 이번엔 옮기지 않았고, 그 위에서 실제 환율만 먼저 실제 데이터로
+    // 연결했다 — 상세 이유는 이 커밋 메시지와 채팅 기록 참고(별도 계획
+    // 문서는 아직 없음).
+    if (pathname === '/fx/rates' && request.method === 'GET') return handleFxRates(request, env, corsHeaders);
     if (pathname === '/biz/admin/signup-bonus-retry' && request.method === 'POST') return handleSignupBonusRetry(request, env, corsHeaders);
     if (pathname === '/biz/gdc-dao/proposal'  && request.method === 'POST') return handleGdcDaoProposalCreate(request, env, corsHeaders);
     if (pathname === '/biz/gdc-dao/vote'      && request.method === 'POST') return handleGdcDaoVote(request, env, corsHeaders);
@@ -13933,6 +13995,13 @@ export default {
       return handleProfileVideoUpload(request, env, corsHeaders);
     if (pathname.startsWith('/media/profile-video/') && request.method === 'GET')
       return handleMediaVideoGet(request, env, corsHeaders);
+
+    // 2026-09-23 신설(주피터 지시) — 프로필 음성 업로드/서빙. 사진·영상과
+    // 완전히 동일한 이유로 generic startsWith('/profile')보다 먼저 체크.
+    if (pathname === '/profile/audio-upload' && request.method === 'POST')
+      return handleProfileAudioUpload(request, env, corsHeaders);
+    if (pathname.startsWith('/media/profile-audio/') && request.method === 'GET')
+      return handleMediaAudioGet(request, env, corsHeaders);
 
     // 2026-09-13 신설 — 문서/메뉴판/이용안내 사진을 업로드하면 DeepSeek
     // 비전으로 즉시 분석해 구조화 필드(초안)를 돌려준다(§IMAGE-SCAN과
@@ -27408,21 +27477,26 @@ async function handleAdminUserHistory(request, env, corsHeaders) {
   if (!Number.isFinite(limit) || limit <= 0) limit = 30;
   if (limit > 100) limit = 100;
 
-  let items = [];
+  // 2026-09-23 — /user/gdc-history와 동일한 버그·동일한 수정(주피터 실사
+  // 발견). 두 쿼리로 분리해 충전·사용 각각 최대 limit건을 독립 보장.
+  let depositItems = [], usageItems = [];
   try {
     const token = await _l1AdminToken(env);
     const esc = guid.replace(/'/g, "\\'");
-    const filter = `(seller_guid='${esc}'&&block_type='deposit')||(buyer_guid='${esc}'&&block_type='ai_usage_charge')`;
-    const res = await fetch(
-      `${L1_DEFAULT}/api/collections/blocks/records?filter=${encodeURIComponent(filter)}&sort=-created&perPage=${limit}`,
-      { headers: { 'Authorization': `Bearer ${token}` } }
-    );
-    if (!res.ok) return _err(502, 'L1_ERROR', `L1 조회 실패 (HTTP ${res.status})`, corsHeaders);
-    const data = await res.json().catch(() => ({ items: [] }));
-    items = data.items || [];
+    const headers = { 'Authorization': `Bearer ${token}` };
+    const [depositRes, usageRes] = await Promise.all([
+      fetch(`${L1_DEFAULT}/api/collections/blocks/records?filter=${encodeURIComponent(`seller_guid='${esc}'&&block_type='deposit'`)}&sort=-created&perPage=${limit}`, { headers }),
+      fetch(`${L1_DEFAULT}/api/collections/blocks/records?filter=${encodeURIComponent(`buyer_guid='${esc}'&&block_type='ai_usage_charge'`)}&sort=-created&perPage=${limit}`, { headers }),
+    ]);
+    if (!depositRes.ok) return _err(502, 'L1_ERROR', `L1 조회 실패 (충전, HTTP ${depositRes.status})`, corsHeaders);
+    if (!usageRes.ok) return _err(502, 'L1_ERROR', `L1 조회 실패 (사용료, HTTP ${usageRes.status})`, corsHeaders);
+    depositItems = (await depositRes.json().catch(() => ({ items: [] }))).items || [];
+    usageItems = (await usageRes.json().catch(() => ({ items: [] }))).items || [];
   } catch (e) {
     return _err(502, 'L1_ERROR', 'L1 조회 실패: ' + e.message, corsHeaders);
   }
+
+  const items = [...depositItems, ...usageItems].sort((a, b) => (a.created < b.created ? 1 : -1));
 
   const history = items.map(rec => {
     let out = {};
@@ -29413,6 +29487,89 @@ async function handleMediaVideoGet(request, env, corsHeaders) {
   return new Response(obj.body, { status: 200, headers });
 }
 
+// ═══════════════════════════════════════════════════════════
+// 2026-09-23 신설(주피터 지시) — 프로필 음성 업로드
+// handleProfileVideoUpload/handleMediaVideoGet과 완전히 동일한 패턴
+// (같은 R2 버킷 PROFILE_MEDIA를 'audio/' 접두 key로 재사용). 음성은
+// 영상보다 훨씬 가벼우므로 사진과 같은 5MB 상한을 쓴다.
+// ═══════════════════════════════════════════════════════════
+const PROFILE_AUDIO_MAX_BYTES = 5 * 1024 * 1024; // 5MB — 디코딩된 원본 기준
+const PROFILE_AUDIO_MIME_EXT = {
+  'audio/mpeg': 'mp3', 'audio/mp4': 'm4a', 'audio/wav': 'wav',
+  'audio/webm': 'webm', 'audio/ogg': 'ogg',
+};
+
+// POST /profile/audio-upload
+// body: { guid, pubkey, signature, ts, audio_base64, mime_type }
+// → { ok:true, url, key }
+async function handleProfileAudioUpload(request, env, corsHeaders) {
+  if (!env.PROFILE_MEDIA) {
+    return _err(503, 'AUDIO_STORAGE_UNAVAILABLE', 'R2 바인딩(PROFILE_MEDIA)이 설정되지 않았습니다', corsHeaders);
+  }
+
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+
+  const { guid, pubkey, signature, ts, audio_base64, mime_type } = body;
+  if (!guid)         return _err(400, 'MISSING_FIELD', 'guid 필수', corsHeaders);
+  if (!pubkey)       return _err(400, 'MISSING_FIELD', 'pubkey 필수', corsHeaders);
+  if (!signature)    return _err(400, 'MISSING_FIELD', 'signature 필수', corsHeaders);
+  if (!audio_base64) return _err(400, 'MISSING_FIELD', 'audio_base64 필수', corsHeaders);
+
+  const sigMsg = `${guid}:${pubkey}:${ts || ''}`;
+  const sigOk = await _verifyEd25519Simple(pubkey, signature, sigMsg);
+  if (!sigOk) return _err(401, 'INVALID_SIGNATURE', '서명 검증 실패', corsHeaders);
+
+  const ext = PROFILE_AUDIO_MIME_EXT[mime_type];
+  if (!ext) return _err(400, 'INVALID_MIME_TYPE', `지원하지 않는 음성 형식입니다: ${JSON.stringify(mime_type)} (허용: mp3/m4a/wav/webm/ogg)`, corsHeaders);
+
+  let bytes;
+  try {
+    bytes = _base64ToBytes(audio_base64);
+  } catch (e) {
+    return _err(400, 'INVALID_BASE64', 'audio_base64 디코딩 실패: ' + e.message, corsHeaders);
+  }
+  if (bytes.byteLength > PROFILE_AUDIO_MAX_BYTES) {
+    return _err(400, 'FILE_TOO_LARGE', `음성 파일이 너무 큽니다(${Math.round(bytes.byteLength / 1024 / 1024)}MB, 최대 ${PROFILE_AUDIO_MAX_BYTES / 1024 / 1024}MB)`, corsHeaders);
+  }
+
+  const safeGuid = encodeURIComponent(guid);
+  const key = `audio/${safeGuid}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
+
+  try {
+    await env.PROFILE_MEDIA.put(key, bytes, {
+      httpMetadata: { contentType: mime_type, cacheControl: 'public, max-age=31536000, immutable' },
+    });
+  } catch (e) {
+    return _err(502, 'R2_WRITE_FAILED', 'R2 저장 실패: ' + e.message, corsHeaders);
+  }
+
+  const url = `https://hondi-proxy.tensor-city.workers.dev/media/profile-audio/${key}`;
+  return new Response(JSON.stringify({ ok: true, url, key }), { status: 200, headers: corsHeaders });
+}
+
+// GET /media/profile-audio/audio/{guid}/{filename}
+async function handleMediaAudioGet(request, env, corsHeaders) {
+  if (!env.PROFILE_MEDIA) return _err(503, 'AUDIO_STORAGE_UNAVAILABLE', 'R2 바인딩이 설정되지 않았습니다', corsHeaders);
+
+  const url = new URL(request.url);
+  const key = url.pathname.replace(/^\/media\/profile-audio\//, '');
+  if (!key || key.includes('..')) return _err(400, 'INVALID_KEY', '잘못된 경로입니다', corsHeaders);
+
+  let obj;
+  try {
+    obj = await env.PROFILE_MEDIA.get(key);
+  } catch (e) {
+    return _err(502, 'R2_READ_FAILED', 'R2 조회 실패: ' + e.message, corsHeaders);
+  }
+  if (!obj) return _err(404, 'NOT_FOUND', '음성을 찾을 수 없습니다', corsHeaders);
+
+  const headers = new Headers(corsHeaders);
+  headers.set('Content-Type', obj.httpMetadata?.contentType || 'application/octet-stream');
+  headers.set('Cache-Control', obj.httpMetadata?.cacheControl || 'public, max-age=31536000, immutable');
+  return new Response(obj.body, { status: 200, headers });
+}
+
 async function handleProfilePost(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
@@ -29523,6 +29680,9 @@ async function handleProfilePost(request, env, corsHeaders) {
     // 2026-09-13 신설 — 프로필 영상(대시보드 폼 편집기의 영상 업로드).
     // photo_urls와 동일한 관례(URL 화이트리스트, 개수 상한)로 처리한다.
     video_urls = null,
+    // 2026-09-23 신설(주피터 지시 — 프로필 탭에 음성 업로드 추가) —
+    // photo_urls/video_urls와 완전히 동일한 관례.
+    audio_urls = null,
   } = body;
 
   if (!entity_type) return _err(400, 'MISSING_FIELD', 'entity_type 필수', corsHeaders);
@@ -29747,6 +29907,13 @@ async function handleProfilePost(request, env, corsHeaders) {
   const resolvedVideoUrls = Array.isArray(video_urls)
     ? video_urls.filter(_isValidVideoUrl).slice(0, 5)
     : null;
+  // 2026-09-23 신설 — 음성도 사진·영상과 동일한 원칙(자체 도메인 URL만
+  // 허용, 갤러리 상한). 음성은 영상보다 가벼우므로 사진과 같은 20개 상한.
+  const AUDIO_URL_PREFIX = 'https://hondi-proxy.tensor-city.workers.dev/media/profile-audio/';
+  const _isValidAudioUrl = (u) => typeof u === 'string' && u.startsWith(AUDIO_URL_PREFIX);
+  const resolvedAudioUrls = Array.isArray(audio_urls)
+    ? audio_urls.filter(_isValidAudioUrl).slice(0, 20)
+    : null;
 
   // 2026-07-13 신설 — job_ksco 형식 검증(AC-AUTHOR_v1_0.md §3-1/§6).
   // 서버는 코드 형식과 허용 필드만 검증한다 — 1,999개 KSCO 코드→명칭
@@ -29929,6 +30096,8 @@ async function handleProfilePost(request, env, corsHeaders) {
     // 2026-09-13 신설 — video_urls도 photo_urls와 동일한 'in body' 관례
     // ("안 보냄=보존" vs "명시적 빈 배열=비움" 구분).
     video_urls: ('video_urls' in body) ? (resolvedVideoUrls ?? []) : ((prevExtra.public || {}).video_urls ?? []),
+    // 2026-09-23 신설 — audio_urls도 동일한 'in body' 존재 여부 관례.
+    audio_urls: ('audio_urls' in body) ? (resolvedAudioUrls ?? []) : ((prevExtra.public || {}).audio_urls ?? []),
   };
   const newExtra = { ...prevExtra, public: newExtraPublic };
 
