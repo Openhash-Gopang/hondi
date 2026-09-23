@@ -7,7 +7,7 @@
 // 문법은 무력화해서 넘긴다(호출 측에서 neutralizeTags).
 
 const DEFAULT_MAX_CHARS = 5500;
-const TIER_KEYS_HINT = 'do, jeju-si, seogwipo, agency, org, emd';
+const TIER_KEYS_HINT = 'do, jeju-si, seogwipo, agency, collegial, org, emd';
 
 function textOf(e) {
   return [e.name, e.parent, e.handles, e.outputs, ...(e.does || []), ...(e.can || [])].join(' ').toLowerCase();
@@ -63,7 +63,7 @@ export function digestQuery(digest, args = {}, maxChars = DEFAULT_MAX_CHARS) {
         ...(t.baseline ? { org_baseline: { as_of: t.baseline.as_of, org_counts: t.baseline.org_counts, missing_in_inventory: t.baseline.missing_in_inventory.map(m => m.name) } } : {}),
         ...(t.baseline_note ? { baseline_note: t.baseline_note } : {}),
       }])),
-      how_to_read: 'state: draft=v1.0 초안(내용이 얇을 수 있음) · revised=갱신됨 · gapped=데이터 공백 표 있음 · template=템플릿 렌더링(개별 내용 없음). org_baseline(도청): 현행 조직(2026-08-25 개편)과 SP 목록을 대조한 결과 — org.status는 match·renamed·name_differs·not_in_official_menu·unverified. 이어서 {"tier":"do","kind":"bureau"} 처럼 유형을 조회하세요(kind: bureau·division·institution·emd — 국 단위만 볼 때는 bureau).',
+      how_to_read: 'state: draft=v1.0 초안(내용이 얇을 수 있음) · revised=갱신됨 · gapped=데이터 공백 표 있음 · template=템플릿 렌더링(개별 내용 없음). org_baseline(도청): 현행 조직(2026-08-25 개편)과 SP 목록을 대조한 결과 — org.status는 match·renamed·name_differs·not_in_official_menu·unverified. 이어서 {"tier":"do","kind":"bureau"} 처럼 유형을 조회하세요(kind: bureau·division·institution·committee·emd — 국 단위만 볼 때는 bureau, 합의제행정기관은 committee).',
     };
   }
   const tier = Object.prototype.hasOwnProperty.call(tiers, key) ? tiers[key] : null;

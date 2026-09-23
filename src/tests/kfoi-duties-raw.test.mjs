@@ -607,7 +607,10 @@ await test('작업 #15 안전장치: 이번에 신설한 기관 4개·division 1
 await test('작업 #15: org-baseline-agency.json에서 소방서 4곳이 missing_in_inventory에서 mapping으로 옮겨졌고, confidence가 high다', () => {
   const baseline = JSON.parse(fs.readFileSync(path.join(DIR, 'org-baseline-agency.json'), 'utf8'));
   assert.ok(!baseline.missing_in_inventory.some(m => m.name.includes('소방서')), '소방서가 여전히 missing_in_inventory에 있음');
-  assert.equal(baseline.missing_in_inventory.length, 3, '남은 3개(합의제행정기관)만 있어야 함');
+  // ★ 병합 재현 참고(2026-09-24, 작업 #15/#16): 원 작업 #15는 이 시점에 missing_in_inventory가
+  // 3개(합의제행정기관)만 남는다고 가정했으나, 이 저장소에서는 작업 #16(합의제행정기관 tier 분리)이
+  // 바로 뒤이어 같은 파일을 갱신해 최종 missing_in_inventory는 0건이다 — 아래 작업 #16 테스트가 그 상태를 검증한다.
+  assert.ok(baseline.missing_in_inventory.length <= 3, '소방서 4곳 반영 후 남은 항목은 합의제행정기관 3개 이하여야 함');
   for (const code of ['SP-AGY-FIREJEJU', 'SP-AGY-FIRESEOGWIPO', 'SP-AGY-FIRESEOBU', 'SP-AGY-FIREDONGBU']) {
     assert.equal(baseline.mapping[code].status, 'match');
     assert.equal(baseline.mapping[code].confidence, 'high', '별표8 원문 사무가 있어 high여야 함');
@@ -663,6 +666,127 @@ await test('작업 #15 정직 공시: 현장 단위(119안전센터·구조대·
   for (const code of ['FIREJEJU', 'FIRESEOGWIPO', 'FIRESEOBU']) {
     assert.ok(!files.some(f => f.startsWith(`SP-AGYDIV-${code}-REGIONAL-`)), `${code}: 119지역대를 만들지 않았어야 함(우도119지역대가 동부소방서 소속으로 확인돼 중복 배정하지 않음)`);
   }
+});
+
+// ── 작업 #16(2026-09-24) — 합의제행정기관 새 tier(collegial) 신설 ──────────────────────
+await test('작업 #16: 감사위원회·지방노동위원회·자치경찰위원회(합의제행정기관 3개)가 새 디렉토리(03b-collegial-agency)에 기관 3개·division 7개로 신설됐다', () => {
+  const files = [
+    'prompts/gov-tree/03b-collegial-agency/SP-COMM-AUDIT_v1.0.md',
+    'prompts/gov-tree/03b-collegial-agency/SP-COMM-LABOR_v1.0.md',
+    'prompts/gov-tree/03b-collegial-agency/SP-COMM-POLICE_v1.0.md',
+    'prompts/gov-tree/03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-AUDIT_v1.0.md',
+    'prompts/gov-tree/03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-INVESTIGATION_v1.0.md',
+    'prompts/gov-tree/03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-DELIBERATION_v1.0.md',
+    'prompts/gov-tree/03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-ANTICORRUPTION_v1.0.md',
+    'prompts/gov-tree/03b-collegial-agency/divisions/SP-COMMDIV-LABOR-SECRETARIAT_v1.0.md',
+    'prompts/gov-tree/03b-collegial-agency/divisions/SP-COMMDIV-POLICE-GENERAL_v1.0.md',
+    'prompts/gov-tree/03b-collegial-agency/divisions/SP-COMMDIV-POLICE-COOP_v1.0.md',
+  ];
+  for (const f of files) assert.ok(fs.existsSync(path.join(ROOT, f)), `${f}: 파일이 없음`);
+});
+await test('작업 #16 안전장치: 새 기관 3개·division 7개 어디에도 실제 접수 파이프라인(task_key)이 실수로 생기지 않았다', () => {
+  const files = [
+    'prompts/gov-tree/03b-collegial-agency/SP-COMM-AUDIT_v1.0.md',
+    'prompts/gov-tree/03b-collegial-agency/SP-COMM-LABOR_v1.0.md',
+    'prompts/gov-tree/03b-collegial-agency/SP-COMM-POLICE_v1.0.md',
+    'prompts/gov-tree/03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-AUDIT_v1.0.md',
+    'prompts/gov-tree/03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-INVESTIGATION_v1.0.md',
+    'prompts/gov-tree/03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-DELIBERATION_v1.0.md',
+    'prompts/gov-tree/03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-ANTICORRUPTION_v1.0.md',
+    'prompts/gov-tree/03b-collegial-agency/divisions/SP-COMMDIV-LABOR-SECRETARIAT_v1.0.md',
+    'prompts/gov-tree/03b-collegial-agency/divisions/SP-COMMDIV-POLICE-GENERAL_v1.0.md',
+    'prompts/gov-tree/03b-collegial-agency/divisions/SP-COMMDIV-POLICE-COOP_v1.0.md',
+  ];
+  for (const f of files) {
+    const content = fs.readFileSync(path.join(ROOT, f), 'utf8');
+    assert.ok(!/task_key\s*:\s*'/.test(content), `${f}: 실수로 task_key가 대입됨(신규 tier라 배선이 없어야 함)`);
+  }
+});
+await test('작업 #16: 감사위원회 4개 division은 원문 없이 명칭 추정(confidence: low)이라는 정직 공시 문구가 있다', () => {
+  const files = [
+    'prompts/gov-tree/03b-collegial-agency/SP-COMM-AUDIT_v1.0.md',
+    'prompts/gov-tree/03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-AUDIT_v1.0.md',
+    'prompts/gov-tree/03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-INVESTIGATION_v1.0.md',
+    'prompts/gov-tree/03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-DELIBERATION_v1.0.md',
+    'prompts/gov-tree/03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-ANTICORRUPTION_v1.0.md',
+  ];
+  for (const f of files) {
+    const content = fs.readFileSync(path.join(ROOT, f), 'utf8');
+    assert.ok(content.includes('정직하게 밝힘'), `${f}: "정직하게 밝힘" 공시 문구가 없음`);
+    assert.ok(content.includes('confidence: low'), `${f}: confidence: low 표기가 없음`);
+    assert.ok(content.includes('별표') && (content.includes('없다') || content.includes('없음')), `${f}: "별표에 원문이 없다"는 취지의 문구가 없음`);
+  }
+});
+await test('작업 #16: 지방노동위원회 사무국·자치경찰총괄과는 별표10(2024.01.22. 개정본) 원문을 그대로 사용해 confidence: high다', () => {
+  const laborFile = fs.readFileSync(path.join(ROOT, 'prompts/gov-tree/03b-collegial-agency/divisions/SP-COMMDIV-LABOR-SECRETARIAT_v1.0.md'), 'utf8');
+  assert.ok(laborFile.includes('부당해고 등 구제신청 사건'), '별표10 원문 사무가 실려야 함');
+  assert.ok(laborFile.includes('재해보상 심사·중재 사건'));
+  const policeGeneral = fs.readFileSync(path.join(ROOT, 'prompts/gov-tree/03b-collegial-agency/divisions/SP-COMMDIV-POLICE-GENERAL_v1.0.md'), 'utf8');
+  assert.ok(policeGeneral.includes('위원구성협의체'), '별표10 원문 사무가 실려야 함');
+  const baseline = JSON.parse(fs.readFileSync(path.join(DIR, 'org-baseline-collegial.json'), 'utf8'));
+  assert.equal(baseline.mapping['SP-COMM-LABOR'].confidence, 'high');
+});
+await test('작업 #16 정직 공시: 자치경찰협력과(SP-COMMDIV-POLICE-COOP)는 별표10의 옛 이름(자치경찰정책과)과 다르다는 점을 confidence: medium으로 밝혔다', () => {
+  const coop = fs.readFileSync(path.join(ROOT, 'prompts/gov-tree/03b-collegial-agency/divisions/SP-COMMDIV-POLICE-COOP_v1.0.md'), 'utf8');
+  assert.ok(coop.includes('자치경찰정책과'), '옛 이름 언급이 있어야 함');
+  assert.ok(coop.includes('confidence: medium'), 'medium 표기가 있어야 함');
+  const baseline = JSON.parse(fs.readFileSync(path.join(DIR, 'org-baseline-collegial.json'), 'utf8'));
+  assert.equal(baseline.mapping['SP-COMM-POLICE'].confidence, 'medium');
+});
+await test('작업 #16: org-baseline-agency.json에서 감사위원회·지방노동위원회·자치경찰위원회 3건이 missing_in_inventory에서 완전히 빠지고, 새 org-baseline-collegial.json의 mapping으로 옮겨졌다', () => {
+  const agencyBaseline = JSON.parse(fs.readFileSync(path.join(DIR, 'org-baseline-agency.json'), 'utf8'));
+  for (const n of ['감사위원회', '지방노동위원회', '자치경찰위원회']) {
+    assert.ok(!agencyBaseline.missing_in_inventory.some(m => m.name === n), `${n}가 여전히 org-baseline-agency.json의 missing_in_inventory에 있음`);
+  }
+  // ★ 병합 재현 참고(2026-09-24, 작업 #15/#16): 원 작업 #16은 66d8287b(작업 #15 이전) 기준으로
+  // 작성돼 이 시점에 소방서 4곳이 아직 missing_in_inventory에 남아 1건이 될 것으로 가정했으나, 이
+  // 저장소는 작업 #15가 먼저 반영돼(e663875b) 소방서 4곳이 이미 mapping으로 옮겨진 상태다 — 그래서
+  // 이 배치 이후 최종 missing_in_inventory는 1건이 아니라 0건(빈 배열)이다.
+  assert.equal(agencyBaseline.missing_in_inventory.length, 0, '작업 #15에서 소방서까지 이미 반영된 상태라 남는 항목이 없어야 함');
+  const collegialBaseline = JSON.parse(fs.readFileSync(path.join(DIR, 'org-baseline-collegial.json'), 'utf8'));
+  assert.equal(collegialBaseline.tier, 'collegial');
+  assert.equal(collegialBaseline.missing_in_inventory.length, 0);
+  for (const code of ['SP-COMM-AUDIT', 'SP-COMM-LABOR', 'SP-COMM-POLICE']) {
+    assert.equal(collegialBaseline.mapping[code].status, 'match');
+  }
+});
+await test('작업 #16 회귀: division-tables.js(JEJU_COLLEGIAL_TABLE·JEJU_COLLEGIAL_DIVISION_TABLE)·페이지 인벤토리(DO_COLLEGIAL) 양쪽에 새 기관 3개·division 7개 라우팅 항목이 있다', () => {
+  const dt = fs.readFileSync(path.join(ROOT, 'src/gopang/gov/division-tables.js'), 'utf8');
+  const page = fs.readFileSync(path.join(ROOT, 'pages/jeju-gov-automation.html'), 'utf8');
+  const gr = fs.readFileSync(path.join(ROOT, 'src/gopang/gov/gov-router.js'), 'utf8');
+  const ids = [
+    'SP-COMM-AUDIT', 'SP-COMM-LABOR', 'SP-COMM-POLICE',
+    'SP-COMMDIV-AUDIT-AUDIT', 'SP-COMMDIV-AUDIT-INVESTIGATION', 'SP-COMMDIV-AUDIT-DELIBERATION', 'SP-COMMDIV-AUDIT-ANTICORRUPTION',
+    'SP-COMMDIV-LABOR-SECRETARIAT', 'SP-COMMDIV-POLICE-GENERAL', 'SP-COMMDIV-POLICE-COOP',
+  ];
+  assert.equal(ids.length, 3 + 7);
+  for (const id of ids) {
+    assert.ok(dt.includes(`"${id}"`), `division-tables.js에 ${id} 없음`);
+    assert.ok(page.includes(`"${id}"`), `jeju-gov-automation.html에 ${id} 없음`);
+  }
+  assert.ok(dt.includes('JEJU_COLLEGIAL_TABLE') && dt.includes('JEJU_COLLEGIAL_DIVISION_TABLE'));
+  assert.ok(gr.includes('JEJU_COLLEGIAL_TABLE') && gr.includes('JEJU_COLLEGIAL_DIVISION_TABLE'), 'gov-router.js가 새 테이블을 배선(import)해야 함');
+  assert.ok(gr.includes("collegial:") && gr.includes("collegialDivision:"), 'PROVINCE_TABLES.jeju에 collegial 필드가 배선돼야 함');
+});
+await test('작업 #16 안전장치: 명칭 중복 위험 키워드(bare "감사"·"노동위원회"·"부당해고"·"자치경찰")가 새 테이블 kw에 없다', () => {
+  const dt = fs.readFileSync(path.join(ROOT, 'src/gopang/gov/division-tables.js'), 'utf8');
+  const m = dt.match(/export const JEJU_COLLEGIAL_TABLE = \[[\s\S]*?\n\];/);
+  const m2 = dt.match(/export const JEJU_COLLEGIAL_DIVISION_TABLE = \[[\s\S]*?\n\];/);
+  assert.ok(m && m2, '테이블을 찾지 못함');
+  const block = m[0] + m2[0];
+  const kwArrays = [...block.matchAll(/kw:\s*\[([^\]]*)\]/g)].map(x => x[1]);
+  for (const arr of kwArrays) {
+    for (const bare of ['"감사"', '"노동위원회"', '"부당해고"', '"자치경찰"']) {
+      assert.ok(!arr.includes(bare), `bare ${bare} 키워드가 있음(기존 등록된 SP와 충돌 위험)`);
+    }
+  }
+});
+await test('작업 #16 명칭 중복 발견 기록: gov-router.js의 JEJU_NATIONAL_TABLE에 이미 SP-NAT-LABORREL(노동위원회·부당해고 키워드)이 있고, org-baseline-collegial.json의 open_questions에 이 중복이 정직하게 기록돼 있다', () => {
+  const gr = fs.readFileSync(path.join(ROOT, 'src/gopang/gov/gov-router.js'), 'utf8');
+  assert.ok(gr.includes('SP-NAT-LABORREL'), '기존 국가기관 라우팅 표에 SP-NAT-LABORREL이 있어야 함(이번에 발견한 명칭 중복의 전제)');
+  const collegialBaseline = JSON.parse(fs.readFileSync(path.join(DIR, 'org-baseline-collegial.json'), 'utf8'));
+  assert.ok(collegialBaseline.open_questions.some(q => q.includes('SP-NAT-LABORREL')), 'open_questions에 SP-NAT-LABORREL 중복 기록이 있어야 함');
+  assert.ok(collegialBaseline.open_questions.some(q => q.includes('자치경찰단')), 'open_questions에 자치경찰위원회 vs 자치경찰단 구분 기록이 있어야 함');
 });
 
 console.log(`\n${pass}/${pass + fail} passed`);

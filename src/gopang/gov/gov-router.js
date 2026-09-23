@@ -77,7 +77,10 @@ const _RAW_ROOT = _rawBase(_DEFAULT_REPO) + '/prompts/';
 // 내되, 실제로는 agent-common 재fetch가 아니라 이미 갖고 있는
 // division/team 데이터를 후보로 준다 ③"애매함"은 최고점 동점으로 정의.
 import { CITY_DIVISION_TABLE, DO_DEPT_DIVISION_TABLE,
-  JEJU_AGENCY_TABLE, JEJU_ORG_TABLE, JEJU_AGENCY_DIVISION_TABLE, JEJU_ORG_DIVISION_TABLE } from './division-tables.js';
+  JEJU_AGENCY_TABLE, JEJU_ORG_TABLE, JEJU_AGENCY_DIVISION_TABLE, JEJU_ORG_DIVISION_TABLE,
+  // ★ 2026-09-24 신설(작업 #16) — 합의제행정기관(감사위원회·지방노동위원회·자치경찰위원회).
+  // JEJU_AGENCY_TABLE(직속기관·사업소)과 조직법적 성격이 달라 별도 테이블로 분리했다.
+  JEJU_COLLEGIAL_TABLE, JEJU_COLLEGIAL_DIVISION_TABLE } from './division-tables.js';
 // ── §6-1~8 division(실·국·과) 지연 합성 라우팅 (2026-08-16 신설) ──────
 // 70개 정책기관 "본청" 단위(policy-bodies)까지는 이미 위 -0.8) 단계에서
 // 배선돼 있었다. 이 import는 그 아래 계층 — 실/국/과 561건 — 을 다룬다.
@@ -2363,7 +2366,9 @@ const PROVINCE_TABLES = {
     // 다른 도는 아래에서 agency/org 필드 자체를 안 적어도 accessor의
     // `|| []` 폴백으로 안전하게 빈 배열이 된다(l2/national과 동일 패턴).
     agency: JEJU_AGENCY_TABLE, org: JEJU_ORG_TABLE,
-    agencyDivision: JEJU_AGENCY_DIVISION_TABLE, orgDivision: JEJU_ORG_DIVISION_TABLE },
+    agencyDivision: JEJU_AGENCY_DIVISION_TABLE, orgDivision: JEJU_ORG_DIVISION_TABLE,
+    // ★ 2026-09-24 신설(작업 #16) — 합의제행정기관(collegial). agency/org와 동일 패턴.
+    collegial: JEJU_COLLEGIAL_TABLE, collegialDivision: JEJU_COLLEGIAL_DIVISION_TABLE },
   // 2026-07-24 — 1단계 확대: 부산 16개 자치구·군 + 서울 25개 자치구
   // 메타데이터 등록 완료(계획서 v1.1 §5). L2는 v1.0부터 이미 실사 완료 상태.
   busan: { l2: BUSAN_L2_TABLE, city: BUSAN_CITY_TABLE, national: [_makePoliceEntry('busan')], citydept: BUSAN_CITY_DEPT_TABLE,
@@ -2424,6 +2429,9 @@ function _agencyTable() { return PROVINCE_TABLES[_resolveProvinceCode()]?.agency
 function _orgTable() { return PROVINCE_TABLES[_resolveProvinceCode()]?.org || []; }
 function _agencyDivisionTable() { return PROVINCE_TABLES[_resolveProvinceCode()]?.agencyDivision || []; }
 function _orgDivisionTable() { return PROVINCE_TABLES[_resolveProvinceCode()]?.orgDivision || []; }
+// ★ 2026-09-24 신설(작업 #16) — 합의제행정기관(collegial) accessor. agency/org와 동일 패턴.
+function _collegialTable() { return PROVINCE_TABLES[_resolveProvinceCode()]?.collegial || []; }
+function _collegialDivisionTable() { return PROVINCE_TABLES[_resolveProvinceCode()]?.collegialDivision || []; }
 
 // ── directCode(K-Search 엔티티 매칭 확정 경로) 전용 — 도 무관 코드 탐색 ──
 // ★ 2026-08-04 신설 — 버그 수정. directCode 처리부(§ -0.9)가 지금까지
@@ -2444,7 +2452,8 @@ function _orgDivisionTable() { return PROVINCE_TABLES[_resolveProvinceCode()]?.o
 // 규칙 자체가 깨지면 이 함수가 아니라 시딩 규칙을 고쳐야 한다).
 //
 // tableKey: PROVINCE_TABLES의 하위 키('l2'|'city'|'citydept'|'agency'|
-// 'org'|'agencyDivision'|'orgDivision'). predicate: (entry) => boolean.
+// 'org'|'agencyDivision'|'orgDivision'|'collegial'|'collegialDivision',
+// collegial 계열은 2026-09-24 신설 — 작업 #16). predicate: (entry) => boolean.
 // 반환: { provinceCode, entry } | null. 여러 도에서 동시에 매칭되면(코드
 // 유일성 가정이 깨진 경우) 첫 매칭을 쓰고 콘솔에 경고를 남긴다 — 조용히
 // 삼키지 않는다.
@@ -3208,6 +3217,10 @@ async function _fetchAgencyText(match) {
 async function _fetchOrgText(match) {
   return _fetchText(match.file, _currentProvinceRepo());
 }
+// ★ 2026-09-24 신설(작업 #16) — 합의제행정기관(collegial). agency/org와 동일 패턴.
+async function _fetchCollegialText(match) {
+  return _fetchText(match.file, _currentProvinceRepo());
+}
 async function _resolveDoAgencyDivision(text, agyMatch, classifyFn) {
   if (!agyMatch) return null;
   const table = _agencyDivisionTable().filter(e => e.institution === agyMatch.code);
@@ -3219,6 +3232,15 @@ async function _resolveDoAgencyDivision(text, agyMatch, classifyFn) {
 async function _resolveOrgDivision(text, orgMatch, classifyFn) {
   if (!orgMatch) return null;
   const table = _orgDivisionTable().filter(e => e.institution === orgMatch.code);
+  const { best, topScore, tied } = _scoreMatchTies(text, table);
+  if (topScore === 0) return null;
+  if (tied.length === 1) return best;
+  return _classifyDivisionFallback(text, tied, classifyFn);
+}
+// ★ 2026-09-24 신설(작업 #16) — 합의제행정기관(collegial) division 판정. agency/org와 동일 패턴.
+async function _resolveCollegialDivision(text, commMatch, classifyFn) {
+  if (!commMatch) return null;
+  const table = _collegialDivisionTable().filter(e => e.institution === commMatch.code);
   const { best, topScore, tied } = _scoreMatchTies(text, table);
   if (topScore === 0) return null;
   if (tied.length === 1) return best;
@@ -5600,6 +5622,44 @@ async function _assembleGovSystemPromptRaw(userText, pdvLocationHint = null, cla
         }
       }
     }
+    // ★ 2026-09-24 신설(작업 #16) — 합의제행정기관(collegial-agency). agency/org와 동일 패턴.
+    if (tier === 'collegial-agency' && code) {
+      const colonIdx = code.indexOf(':');
+      const explicitProvince = colonIdx >= 0 ? code.slice(0, colonIdx) : null;
+      const actualCode = colonIdx >= 0 ? code.slice(colonIdx + 1) : code;
+      const found = (explicitProvince && PROVINCE_TABLES[explicitProvince])
+        ? (() => {
+            const entry = (PROVINCE_TABLES[explicitProvince].collegial || []).find(e => e.code === actualCode);
+            return entry ? { provinceCode: explicitProvince, entry } : null;
+          })()
+        : _findEntryAcrossProvinces('collegial', e => e.code === actualCode);
+      if (found) {
+        _currentResolvedProvinceCode = found.provinceCode;
+        const doSp = await _loadDoSp(found.provinceCode);
+        parts.push(doSp);
+        trace.push('SP-DO-000');
+        const commText = await _fetchCollegialText(found.entry);
+        parts.push(commText);
+        trace.push(`${found.entry.code}(directCode)`);
+        return { systemPrompt: parts.join('\n\n---\n\n'), trace };
+      }
+      _currentResolvedProvinceCode = 'jeju';
+      const divEntry = JEJU_COLLEGIAL_DIVISION_TABLE.find(e => e.code === actualCode);
+      if (divEntry) {
+        const parentEntry = _collegialTable().find(e => e.code === divEntry.institution);
+        if (parentEntry) {
+          const doSp = await _loadDoSp('jeju');
+          parts.push(doSp);
+          trace.push('SP-DO-000');
+          const commText = await _fetchCollegialText(parentEntry);
+          parts.push(commText);
+          trace.push(parentEntry.code);
+          parts.push(await _fetchText(divEntry.file, _currentProvinceRepo()));
+          trace.push(`${divEntry.code}(directCode)`);
+          return { systemPrompt: parts.join('\n\n---\n\n'), trace };
+        }
+      }
+    }
     // ★ 2026-08-03 신설 — tier='city'. 다른 세션의 seed_gov_tree_remaining_
     // registry.py가 시청(SP-CITY-*)과 시청 division(SP-CITYDIV-*)을 이
     // 접두어로 등록했다 — 내가 만든 'city-dept:{시코드}-{국코드}' 규약
@@ -6177,6 +6237,22 @@ async function _assembleGovSystemPromptRaw(userText, pdvLocationHint = null, cla
       if (orgDivisionMatch) {
         parts.push(await _fetchText(orgDivisionMatch.file, _currentProvinceRepo()));
         trace.push(`${orgDivisionMatch.code}(팀 특정)`);
+      }
+      await _appendExpertIfMatched();
+      return { systemPrompt: parts.join('\n\n---\n\n'), trace };
+    }
+    // ★ 2026-09-24 신설(작업 #16) — 합의제행정기관(collegial). agency/org와 동일 패턴으로
+    // 마지막에 매칭한다(감사위원회·지방노동위원회·자치경찰위원회, kw는 bare 낱말 충돌 회피 완료 —
+    // division-tables.js JEJU_COLLEGIAL_TABLE 주석 참고).
+    const commMatch = await _resolveInstitutionMatch(text, _collegialTable(), pdvLocationHint, classifyFn);
+    if (commMatch) {
+      const commText = await _fetchCollegialText(commMatch);
+      parts.push(commText);
+      trace.push(commMatch.code);
+      const commDivisionMatch = await _resolveCollegialDivision(text, commMatch, classifyFn);
+      if (commDivisionMatch) {
+        parts.push(await _fetchText(commDivisionMatch.file, _currentProvinceRepo()));
+        trace.push(`${commDivisionMatch.code}(과 특정)`);
       }
       await _appendExpertIfMatched();
       return { systemPrompt: parts.join('\n\n---\n\n'), trace };

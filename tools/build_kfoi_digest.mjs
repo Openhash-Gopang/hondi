@@ -40,6 +40,7 @@ const ORG_BASELINE_FILES = {
   'jeju-si': path.join(GT, 'kfoi-digest/org-baseline-jeju-si.json'),
   seogwipo: path.join(GT, 'kfoi-digest/org-baseline-seogwipo.json'),
   agency: path.join(GT, 'kfoi-digest/org-baseline-agency.json'),
+  collegial: path.join(GT, 'kfoi-digest/org-baseline-collegial.json'),
 };
 
 export const TIER_LABELS = {
@@ -47,6 +48,10 @@ export const TIER_LABELS = {
   'jeju-si': '제주시청(국·과)',
   'seogwipo': '서귀포시청(국·과)',
   'agency': '도 직속기관',
+  // ★ 2026-09-24 신설(작업 #16) — 합의제행정기관(감사위원회·지방노동위원회·자치경찰위원회). 도지사
+  // 직속기관·사업소(agency)와 조직법적 성격이 달라(지방자치법 제130조의 독립적 의사결정 합의체)
+  // 별도 tier로 분리했다. prompts/gov-tree/03b-collegial-agency/archive/README.md 참고.
+  'collegial': '합의제행정기관',
   'org': '출자·출연기관',
   'emd': '읍·면·동',
 };
@@ -168,6 +173,8 @@ export function buildDigest(data = loadPageData()) {
   const staticTiers = [
     ['do', data.DO_BUREAUS, '02-do-dept', 'bureau'],
     ['agency', data.DO_AGENCIES, '03-do-agency', 'institution'],
+    // ★ 2026-09-24 신설(작업 #16) — kind: 'committee'로 institution(도지사 직속 집행조직)과 구분한다.
+    ['collegial', data.DO_COLLEGIAL, '03b-collegial-agency', 'committee'],
     ['org', data.DO_ORGS, '07-org', 'institution'],
   ];
   for (const [key, arr, dir, kind] of staticTiers) {
@@ -217,7 +224,9 @@ function applyOrgBaseline(tiers) {
     let parent = null;
     if (hasMapping) {
       for (const e of t.entries) {
-        if (e.kind === 'bureau' || e.kind === 'institution') {
+        // ★ 2026-09-24(작업 #16) — 'committee'(합의제행정기관, collegial tier)도 institution과
+        // 동일하게 org-baseline 대조 대상이다.
+        if (e.kind === 'bureau' || e.kind === 'institution' || e.kind === 'committee') {
           const m = base.mapping[e.id] || { status: 'unverified' };
           e.org = {
             status: m.status,

@@ -523,6 +523,26 @@ const DO_AGENCIES = [
   ]},
 ];
 
+// ★ 2026-09-24 신설(작업 #16) — 합의제행정기관(감사위원회·지방노동위원회·자치경찰위원회). 도지사 직속기관·
+// 사업소(DO_AGENCIES, kind: "do-agency")와 조직법적 성격이 달라(지방자치법 제130조의 독립적 의사결정
+// 합의체) 새 K-FOI tier(collegial, kind: "collegial-agency")로 별도 관리한다. 03b-collegial-agency/
+// 참고(archive/README.md에 설계 배경).
+const DO_COLLEGIAL = [
+  { id: "SP-COMM-AUDIT", name: "감사위원회", spId: "SP-COMM-AUDIT", kind: "collegial-agency", divisions: [
+      { id: "SP-COMMDIV-AUDIT-AUDIT", name: "감사위원회 감사과", spId: "SP-COMMDIV-AUDIT-AUDIT", file: "03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-AUDIT_v1.0.md", confirmed: true },
+      { id: "SP-COMMDIV-AUDIT-INVESTIGATION", name: "감사위원회 조사과", spId: "SP-COMMDIV-AUDIT-INVESTIGATION", file: "03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-INVESTIGATION_v1.0.md", confirmed: true },
+      { id: "SP-COMMDIV-AUDIT-DELIBERATION", name: "감사위원회 심의과", spId: "SP-COMMDIV-AUDIT-DELIBERATION", file: "03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-DELIBERATION_v1.0.md", confirmed: true },
+      { id: "SP-COMMDIV-AUDIT-ANTICORRUPTION", name: "감사위원회 부패방지지원센터", spId: "SP-COMMDIV-AUDIT-ANTICORRUPTION", file: "03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-ANTICORRUPTION_v1.0.md", confirmed: true },
+  ]},
+  { id: "SP-COMM-LABOR", name: "지방노동위원회", spId: "SP-COMM-LABOR", kind: "collegial-agency", divisions: [
+      { id: "SP-COMMDIV-LABOR-SECRETARIAT", name: "지방노동위원회 사무국", spId: "SP-COMMDIV-LABOR-SECRETARIAT", file: "03b-collegial-agency/divisions/SP-COMMDIV-LABOR-SECRETARIAT_v1.0.md", confirmed: true },
+  ]},
+  { id: "SP-COMM-POLICE", name: "자치경찰위원회", spId: "SP-COMM-POLICE", kind: "collegial-agency", divisions: [
+      { id: "SP-COMMDIV-POLICE-GENERAL", name: "자치경찰위원회 자치경찰총괄과", spId: "SP-COMMDIV-POLICE-GENERAL", file: "03b-collegial-agency/divisions/SP-COMMDIV-POLICE-GENERAL_v1.0.md", confirmed: true },
+      { id: "SP-COMMDIV-POLICE-COOP", name: "자치경찰위원회 자치경찰협력과", spId: "SP-COMMDIV-POLICE-COOP", file: "03b-collegial-agency/divisions/SP-COMMDIV-POLICE-COOP_v1.0.md", confirmed: true },
+  ]},
+];
+
 const DO_ORGS = [
   { id: "SP-ORG-CHILDCARE", name: "제주특별자치도 아이돌봄광역지원센터", spId: "SP-ORG-CHILDCARE", kind: "org", divisions: [
       { id: "SP-ORGDIV-CHILDCARE-SUPPORT", name: "제주특별자치도 아이돌봄광역지원센터 돌봄지원팀", spId: "SP-ORGDIV-CHILDCARE-SUPPORT", file: "07-org/divisions/SP-ORGDIV-CHILDCARE-SUPPORT_v1.0.md", confirmed: true },
@@ -1102,6 +1122,7 @@ const INSTITUTIONS = [
   { id: "seogwipo", name: "서귀포시청",       kind: "gov", bureaus: SEOGWIPO_BUREAUS },
   { id: "emd-root", name: "읍면동 행정복지센터", kind: "emdRoot" },
   { id: "agency",   name: "직속기관",         kind: "gov", bureaus: DO_AGENCIES },
+  { id: "collegial", name: "합의제행정기관",  kind: "gov", bureaus: DO_COLLEGIAL },
   { id: "org",      name: "출자출연기관",     kind: "gov", bureaus: DO_ORGS },
 ];
 

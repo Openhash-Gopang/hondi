@@ -548,6 +548,26 @@ export const JEJU_AGENCY_TABLE = [
     kw: ["동부소방서"], file: "03-do-agency/SP-AGY-FIREDONGBU_v1.0.md" },
 ];
 
+// ★ 2026-09-24 신설(작업 #16) — 합의제행정기관(감사위원회·지방노동위원회·자치경찰위원회). 위
+// JEJU_AGENCY_TABLE(직속기관·사업소, kind: institution)과 달리 지방자치법 제130조의 독립적
+// 의사결정 합의체라 별도 테이블로 분리했다(K-FOI tier도 별도: collegial). 03b-collegial-agency/
+// archive/README.md 참고. 명칭 중복(감사·노동위원회·자치경찰) 유의사항은 각 항목 주석·해당 SP §6 참고.
+export const JEJU_COLLEGIAL_TABLE = [
+  { code: "SP-COMM-AUDIT", name: "감사위원회", desc: "당신은 제주특별자치도 **감사위원회**를 대표하는 AI 레이어다. 주요 소관: 자체감사, 공직 비위 조사, 감사결과 심의·의결, 부패방지·청렴시책 지원",
+    // ★ bare "감사"는 넣지 않았다(SP-DO-COMM 청렴감찰관·SP-ORGDIV-JTO-AUDIT에 이미 bare "감사"가
+    // 등록돼 있어 명칭이 겹친다 — SP-COMM-AUDIT_v1.0.md §6 참고)
+    kw: ["감사위원회", "공직 비위 조사", "부패방지지원센터"], file: "03b-collegial-agency/SP-COMM-AUDIT_v1.0.md" },
+  { code: "SP-COMM-LABOR", name: "지방노동위원회", desc: "당신은 제주특별자치도 **지방노동위원회**를 대표하는 AI 레이어다. 주요 소관: 노동쟁의 조정·중재, 부당해고·부당노동행위 구제신청 심판, 재해보상 심사",
+    // ★ bare "노동위원회"·"부당해고"는 넣지 않았다(gov-router.js JEJU_NATIONAL_TABLE에 이미
+    // SP-NAT-LABORREL이 그 두 키워드로 등록돼 있어 명칭이 겹친다 — SP-COMM-LABOR_v1.0.md §6 참고,
+    // 같은 실체를 가리킬 가능성이 있어 다음 배치 재검증 필요)
+    kw: ["지방노동위원회", "조정사건", "중재사건", "재해보상 심사"], file: "03b-collegial-agency/SP-COMM-LABOR_v1.0.md" },
+  { code: "SP-COMM-POLICE", name: "자치경찰위원회", desc: "당신은 제주특별자치도 **자치경찰위원회**를 대표하는 AI 레이어다. 주요 소관: 자치경찰사무 정책 심의·의결, 자치경찰사무 담당 공무원 인사·평가, 국가경찰·자치경찰 사무조정",
+    // ★ bare "자치경찰"은 넣지 않았다(SP-AGY-POLICE(자치경찰단, 집행조직)와 별개 기관이라 혼동
+    // 방지 — SP-COMM-POLICE_v1.0.md §6 참고). "자치경찰단"과 겹치지 않는 위원회 고유 키워드만 사용.
+    kw: ["자치경찰위원회", "위원구성협의체", "자치경찰사무 정책"], file: "03b-collegial-agency/SP-COMM-POLICE_v1.0.md" },
+];
+
 export const JEJU_ORG_TABLE = [
   { code: "SP-ORG-CHILDCARE", name: "제주특별자치도 아이돌봄광역지원센터", desc: "당신은 **제주특별자치도 아이돌봄광역지원센터**를 대표하는 AI 레이어다. 주요 소관: 12세 이하 아동 대상 방문 아이돌봄서비스 연계, 아이돌보미 모집·교육",
     kw: ["아이돌보미 모집", "제주특별자치도 아이돌봄광역지원센터"], file: "07-org/SP-ORG-CHILDCARE_v1.0.md" },
@@ -919,6 +939,34 @@ export const JEJU_AGENCY_DIVISION_TABLE = [
   { code: "SP-AGYDIV-FIREDONGBU-FIELDCOMMAND", institution: "SP-AGY-FIREDONGBU",
     name: "동부소방서 현장대응단", desc: "당신은 **동부소방서 현장대응단**를 대표하는 AI 레이어다.",
     kw: ["동부소방서 현장대응단"], file: "03-do-agency/divisions/SP-AGYDIV-FIREDONGBU-FIELDCOMMAND_v1.0.md" },
+];
+
+// ★ 2026-09-24 신설(작업 #16) — JEJU_COLLEGIAL_TABLE(감사위원회·지방노동위원회·자치경찰위원회)
+// 산하 division 7개. institution 필드로 JEJU_COLLEGIAL_TABLE과 연결된다(JEJU_AGENCY_DIVISION_TABLE과
+// 동일 패턴). 감사위원회 4개는 별표 원문 없음(confidence: low, 명칭 추정) — 각 division 파일 §2 참고.
+export const JEJU_COLLEGIAL_DIVISION_TABLE = [
+  { code: "SP-COMMDIV-AUDIT-AUDIT", institution: "SP-COMM-AUDIT",
+    name: "감사위원회 감사과", desc: "당신은 **감사위원회 감사과**를 대표하는 AI 레이어다.",
+    kw: ["감사과", "자체감사 계획"], file: "03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-AUDIT_v1.0.md" },
+  { code: "SP-COMMDIV-AUDIT-INVESTIGATION", institution: "SP-COMM-AUDIT",
+    name: "감사위원회 조사과", desc: "당신은 **감사위원회 조사과**를 대표하는 AI 레이어다.",
+    kw: ["조사과", "공직 비위 신고"], file: "03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-INVESTIGATION_v1.0.md" },
+  { code: "SP-COMMDIV-AUDIT-DELIBERATION", institution: "SP-COMM-AUDIT",
+    name: "감사위원회 심의과", desc: "당신은 **감사위원회 심의과**를 대표하는 AI 레이어다.",
+    kw: ["심의과", "감사결과 심의"], file: "03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-DELIBERATION_v1.0.md" },
+  { code: "SP-COMMDIV-AUDIT-ANTICORRUPTION", institution: "SP-COMM-AUDIT",
+    name: "감사위원회 부패방지지원센터", desc: "당신은 **감사위원회 부패방지지원센터**를 대표하는 AI 레이어다.",
+    kw: ["부패방지지원센터", "청렴도 평가 지원"], file: "03b-collegial-agency/divisions/SP-COMMDIV-AUDIT-ANTICORRUPTION_v1.0.md" },
+  { code: "SP-COMMDIV-LABOR-SECRETARIAT", institution: "SP-COMM-LABOR",
+    // ★ bare "노동위원회"·"부당해고"는 넣지 않았다(상위 SP-COMM-LABOR 주석·§6 참고)
+    name: "지방노동위원회 사무국", desc: "당신은 **지방노동위원회 사무국**을 대표하는 AI 레이어다.",
+    kw: ["지방노동위원회 사무국", "조정위원회", "중재위원회", "부당노동행위 구제신청"], file: "03b-collegial-agency/divisions/SP-COMMDIV-LABOR-SECRETARIAT_v1.0.md" },
+  { code: "SP-COMMDIV-POLICE-GENERAL", institution: "SP-COMM-POLICE",
+    name: "자치경찰위원회 자치경찰총괄과", desc: "당신은 **자치경찰위원회 자치경찰총괄과**를 대표하는 AI 레이어다.",
+    kw: ["자치경찰총괄과", "위원구성협의체"], file: "03b-collegial-agency/divisions/SP-COMMDIV-POLICE-GENERAL_v1.0.md" },
+  { code: "SP-COMMDIV-POLICE-COOP", institution: "SP-COMM-POLICE",
+    name: "자치경찰위원회 자치경찰협력과", desc: "당신은 **자치경찰위원회 자치경찰협력과**를 대표하는 AI 레이어다.",
+    kw: ["자치경찰협력과", "국가경찰사무 자치경찰사무 협력"], file: "03b-collegial-agency/divisions/SP-COMMDIV-POLICE-COOP_v1.0.md" },
 ];
 
 export const JEJU_ORG_DIVISION_TABLE = [

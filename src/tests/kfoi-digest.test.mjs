@@ -61,6 +61,7 @@ const data = loadPageData();
 const expected = {
   do: data.DO_BUREAUS.length + data.DO_BUREAUS.reduce((n, b) => n + (b.divisions || []).length, 0),
   agency: data.DO_AGENCIES.length + data.DO_AGENCIES.reduce((n, b) => n + (b.divisions || []).length, 0),
+  collegial: data.DO_COLLEGIAL.length + data.DO_COLLEGIAL.reduce((n, b) => n + (b.divisions || []).length, 0),
   org: data.DO_ORGS.length + data.DO_ORGS.reduce((n, b) => n + (b.divisions || []).length, 0),
   'jeju-si': data.JEJUSI_BUREAUS.length + data.JEJUSI_BUREAUS.reduce((n, b) => n + (b.divisions || []).length, 0),
   seogwipo: data.SEOGWIPO_BUREAUS.length + data.SEOGWIPO_BUREAUS.reduce((n, b) => n + (b.divisions || []).length, 0),
@@ -174,13 +175,27 @@ await test('직속기관·사업소(agency) 조직 기준표: 2026-09-24까지 2
     assert.equal(divs.length, 3, `${code}: 소방행정과·예방구조과·현장대응단 3개 과여야 함`);
   }
 });
-await test('직속기관·사업소 조직 기준표: 법정 기관 23개 중 SP가 없는 3개(합의제행정기관 3개뿐)가 열거된다(2026-09-24 소방서 4곳 반영으로 4→3)', () => {
+await test('직속기관·사업소 조직 기준표: 2026-09-24(작업 #16)에 합의제행정기관 3개가 새 tier(collegial)로 옮겨져 missing_in_inventory는 0건이다(작업 #15에서 이미 소방서 4곳도 반영 완료)', () => {
   const t = digest.tiers.agency;
-  assert.equal(t.baseline.missing_in_inventory.length, 3);
-  const reflected = ['보훈청', '공공정책연수원', '문화예술진흥원', '해양수산연구원', '동물위생시험소', '설문대여성문화센터', '돌문화공원관리소', '고용센터', '중앙협력본부', '제주환경자원순환센터', '제주안전체험관', '제주소방서·서귀포소방서·서부소방서·동부소방서'];
+  assert.equal(t.baseline.missing_in_inventory.length, 0);
+  const reflected = ['보훈청', '공공정책연수원', '문화예술진흥원', '해양수산연구원', '동물위생시험소', '설문대여성문화센터', '돌문화공원관리소', '고용센터', '중앙협력본부', '제주환경자원순환센터', '제주안전체험관', '제주소방서', '감사위원회', '지방노동위원회', '자치경찰위원회'];
   for (const n of reflected) assert.ok(!t.baseline.missing_in_inventory.some(m => m.name === n), `${n}은 반영 완료로 missing_in_inventory에서 빠져야 함`);
-  assert.ok(t.baseline.missing_in_inventory.some(m => m.name === '감사위원회' && m.chapter === '합의제행정기관'));
-  assert.ok(t.baseline.missing_in_inventory.every(m => m.chapter === '합의제행정기관'), '남은 3개는 전부 합의제행정기관이어야 함(감사위원회·지방노동위원회·자치경찰위원회)');
+});
+await test('새 tier(collegial, 작업 #16): 감사위원회·지방노동위원회·자치경찰위원회 3개가 전부 match이고, division 7개까지 포함해 총 10건이다', () => {
+  const t = digest.tiers.collegial;
+  assert.equal(t.label, '합의제행정기관');
+  assert.equal(t.stats.total, 10);
+  assert.equal(t.baseline.org_counts.match, 3);
+  const audit = t.entries.find(e => e.id === 'SP-COMM-AUDIT');
+  assert.equal(audit.kind, 'committee'); assert.equal(audit.org.status, 'match'); assert.equal(audit.org.confidence, 'low');
+  assert.equal(audit.org.legal_basis, '제60~61조'); assert.equal(audit.org.current_divisions.length, 4);
+  const labor = t.entries.find(e => e.id === 'SP-COMM-LABOR');
+  assert.equal(labor.org.confidence, 'high'); assert.equal(labor.org.legal_basis, '제62~63조'); assert.equal(labor.org.current_divisions.length, 1);
+  const police = t.entries.find(e => e.id === 'SP-COMM-POLICE');
+  assert.equal(police.org.confidence, 'medium'); assert.equal(police.org.legal_basis, '제63조의2~3'); assert.equal(police.org.current_divisions.length, 2);
+  const divs = t.entries.filter(e => e.kind === 'division');
+  assert.equal(divs.length, 7);
+  assert.equal(t.baseline.missing_in_inventory.length, 0, '3개 전부 이번 배치로 반영 완료');
 });
 
 await test('다이제스트 항목 수가 「제주 AI 행정」 페이지 데이터와 정확히 일치한다', () => {
@@ -211,7 +226,7 @@ await test('크기: JSON은 600KB 이하, 유효한 JSON이다', () => {
 
 await test('digestQuery: summary는 유형별 규모·상태만', () => {
   const r = digestQuery(digest, { tier: 'summary' });
-  assert.equal(Object.keys(r.tiers).length, 6); assert.equal(r.tiers.do.stats.total, expected.do); assert.ok(r.how_to_read.includes('draft'));
+  assert.equal(Object.keys(r.tiers).length, 7); assert.equal(r.tiers.do.stats.total, expected.do); assert.ok(r.how_to_read.includes('draft'));
   assert.deepEqual(digestQuery(digest, {}), r);
 });
 await test('digestQuery: 알 수 없는 유형·프로토타입 키는 거부', () => {

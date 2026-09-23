@@ -364,3 +364,13 @@ RESPONSE(소방안전본부 자체의 province-level 가칭 division, 2026-07-13
   현장 단위 31개(및 김녕·성읍 지역대의 소속 추정)는 실제 소방서 직원의 검증·수정 전까지 확정된 사실로
   취급하면 안 된다. 이것이 이번 배치의 존재 이유이기도 하다.
 
+# 2026-09-24 — 합의제행정기관(감사위원회·지방노동위원회·자치경찰위원회)은 이 tier가 아니라 새 tier로 신설(작업 #16)
+
+이 파일의 open_questions에 남아 있던 "합의제행정기관 3개를 K-FOI의 어느 유형에 넣을지 — 기존 6개
+유형에 없는 새 범주다"를 프로젝트 총괄 지시에 따라 완전히 새 tier(`collegial`)를 신설하는 방향으로
+해소했다 — 이 tier(agency, 도지사 직속 집행조직)와 조직법적 성격이 다르기 때문이다(도지사 소속 집행조직
+vs 지방자치법 제130조의 독립적 의사결정 합의체). 새 디렉토리 `prompts/gov-tree/03b-collegial-agency/`·
+새 org-baseline 파일 `org-baseline-collegial.json`·새 SP 코드 접두어(`SP-COMM-*`/`SP-COMMDIV-*`)로
+분리했다. org-baseline-agency.json의 missing_in_inventory에서는 이 3건을 완전히 뺐다(4→1, 소방서만
+남음). 상세 설계 배경·명칭 충돌 발견은 `prompts/gov-tree/03b-collegial-agency/archive/README.md` 참고.
+
