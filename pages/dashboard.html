@@ -278,12 +278,13 @@ code, pre, kbd, samp, input, button, textarea, select {
 .gdc-balance { border: 1px solid var(--border); border-radius: var(--r-sm); padding: 14px 16px;
   display: flex; justify-content: space-between; align-items: baseline; margin: 16px 20px 0; }
 .gdc-balance .l { font-size: 11px; color: var(--text4); }
-.gdc-balance .v { font-family: 'SFMono-Regular', 'Consolas', monospace; font-size: 22px; color: var(--text); }
+.gdc-balance .v { font-family: 'Pretendard', sans-serif; font-size: 22px; color: var(--text); }
 .gdc-sub { font-size: 11px; color: var(--text4); padding: 0 16px 12px; margin: 0 20px 16px;
   border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; }
 .gdc-tabs { display: flex; border-bottom: 1px solid var(--border); margin: 0 20px 14px; gap: 2px; }
 .gdc-tab { padding: 9px 12px; font-size: 12px; color: var(--text4); cursor: pointer; border-bottom: 2px solid transparent; }
-.gdc-tab.active { color: var(--brand); border-bottom-color: var(--brand); font-weight: 700; }
+.gdc-tab.active { color: #fff; background: var(--brand); border-color: var(--brand) !important; }
+.gdc-pagesize-btn.active { background: var(--brand); color: #fff; border-color: var(--brand); }
 .gdc-body { padding: 0 20px 20px; }
 .gdc-pane { display: none; }
 .gdc-pane.active { display: block; }
@@ -294,7 +295,7 @@ code, pre, kbd, samp, input, button, textarea, select {
 .gdc-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text2); }
 .gdc-title { color: var(--text); font-size: 12.5px; }
 .gdc-meta { color: var(--text4); font-size: 11px; margin-top: 2px; }
-.gdc-amt { font-family: 'SFMono-Regular', 'Consolas', monospace; font-size: 12.5px; color: var(--text); text-align: right; white-space: nowrap; }
+.gdc-amt { font-family: 'Pretendard', sans-serif; font-size: 12.5px; color: var(--text); text-align: right; white-space: nowrap; }
 .gdc-empty { text-align: center; padding: 28px 16px; color: var(--text4); font-size: 11.5px; line-height: 1.7; }
 
 .pf-refresh-btn { font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: var(--r-full); border: none; background: var(--surface-container); color: var(--text3); cursor: pointer; }
@@ -540,15 +541,25 @@ code, pre, kbd, samp, input, button, textarea, select {
         </div>
         <div class="gdc-sub" id="gdcRenew"></div>
 
-        <div class="gdc-tabs">
-          <div class="gdc-tab active" data-pane="gdc-pane-charge">충전</div>
-          <div class="gdc-tab" data-pane="gdc-pane-usage">이용료</div>
-          <div class="gdc-tab" data-pane="gdc-pane-buy">구매</div>
-          <div class="gdc-tab" data-pane="gdc-pane-sell">판매</div>
+        <!-- 2026-09-23 수정(주피터 지시) — 탭(밑줄) 대신 카드 4개로 배치.
+             기존 gdc-tab/gdc-pane 클래스·전환 로직(아래 JS)은 그대로 두고
+             마크업만 카드 스타일로 바꿨다 — data-pane 연결 방식은 동일. -->
+        <div class="gdc-tabs" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;border-bottom:none;margin:0 20px 14px">
+          <div class="gdc-tab active" data-pane="gdc-pane-charge" style="border:1px solid var(--border);border-bottom:1px solid var(--border);border-radius:var(--r-sm);padding:12px;text-align:center;font-weight:600">충전</div>
+          <div class="gdc-tab" data-pane="gdc-pane-usage" style="border:1px solid var(--border);border-bottom:1px solid var(--border);border-radius:var(--r-sm);padding:12px;text-align:center;font-weight:600">이용료</div>
+          <div class="gdc-tab" data-pane="gdc-pane-buy" style="border:1px solid var(--border);border-bottom:1px solid var(--border);border-radius:var(--r-sm);padding:12px;text-align:center;font-weight:600">구매</div>
+          <div class="gdc-tab" data-pane="gdc-pane-sell" style="border:1px solid var(--border);border-bottom:1px solid var(--border);border-radius:var(--r-sm);padding:12px;text-align:center;font-weight:600">판매</div>
         </div>
         <div class="gdc-body">
           <div id="gdcLoading" style="padding:40px 24px;text-align:center;color:var(--text4);font-size:13px">확인 중…</div>
           <div id="gdcResult" style="display:none">
+            <!-- 2026-09-23 신설 — 페이지 크기 선택(기본 5개씩). 충전/이용료
+                 두 탭에서 공용으로 쓴다(구매/판매는 아직 데이터가 없어서 해당 없음). -->
+            <div id="gdcPageSizeRow" style="display:flex;gap:6px;margin-bottom:8px">
+              <button class="mini-btn gdc-pagesize-btn active" data-size="5" type="button">5개씩 보기</button>
+              <button class="mini-btn gdc-pagesize-btn" data-size="10" type="button">10개씩 보기</button>
+              <button class="mini-btn gdc-pagesize-btn" data-size="50" type="button">50개씩 보기</button>
+            </div>
             <div class="gdc-pane active" id="gdc-pane-charge"><div class="gdc-rows" id="gdcChargeRows"></div></div>
             <div class="gdc-pane" id="gdc-pane-usage"><div class="gdc-rows" id="gdcUsageRows"></div></div>
             <div class="gdc-pane" id="gdc-pane-buy"><div class="gdc-empty">혼디마켓 구매 내역은 아직 실제 데이터와 연결되지 않았습니다.</div></div>
@@ -566,13 +577,13 @@ code, pre, kbd, samp, input, button, textarea, select {
              /fx/rates(ECB 기준환율 실시간 중계, 무료 공개 API)를 그대로
              불러온다 — 여기 보이는 숫자는 진짜 시장 환율이다. -->
         <div style="margin:20px;border:1px solid var(--border)">
-          <div style="padding:10px 16px;border-bottom:1px solid var(--border);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;color:var(--text4)">통화 표시 · CURRENCY DISPLAY</div>
+          <div style="padding:10px 16px;border-bottom:1px solid var(--border);font-family:'Pretendard',sans-serif;font-size:11px;letter-spacing:1px;color:var(--text4)">통화 표시 · CURRENCY DISPLAY</div>
           <div style="padding:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-            <select id="fxCurrencySelect" style="padding:8px 10px;border:1px solid var(--border);font-family:'IBM Plex Mono',monospace;font-size:13px">
+            <select id="fxCurrencySelect" style="padding:8px 10px;border:1px solid var(--border);font-family:'Pretendard',sans-serif;font-size:13px">
               <option value="USD">USD</option><option value="EUR">EUR</option><option value="JPY">JPY</option>
               <option value="CNY">CNY</option><option value="GBP">GBP</option><option value="THB">THB</option>
             </select>
-            <div style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600" id="fxConvertedAmount">—</div>
+            <div style="font-family:'Pretendard',sans-serif;font-size:20px;font-weight:600" id="fxConvertedAmount">—</div>
             <div style="font-size:11px;color:var(--text4)" id="fxRateNote">환율 불러오는 중…</div>
           </div>
         </div>
@@ -581,19 +592,19 @@ code, pre, kbd, samp, input, button, textarea, select {
              금융기관 실무진 필드테스트 후에만). 이 버튼들은 실제 GDC를
              발행·이체하지 않는다 — 계산 결과만 보여준다. -->
         <div style="margin:0 20px 20px;border:1px solid var(--warning);background:var(--warning-container)">
-          <div style="padding:10px 16px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--warning)">SIMULATION · 아래 예금·대출은 계산만 하고 실제 GDC를 이체하지 않습니다 — 금융기관 실무진 1년 이상 필드테스트 후 실제 서비스 예정</div>
+          <div style="padding:10px 16px;font-family:'Pretendard',sans-serif;font-size:11px;color:var(--warning)">SIMULATION · 아래 예금·대출은 계산만 하고 실제 GDC를 이체하지 않습니다 — 금융기관 실무진 1년 이상 필드테스트 후 실제 서비스 예정</div>
           <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--border)">
             <div style="background:#fff;padding:14px 16px">
               <div style="font-size:11.5px;color:var(--text4)">대출 — 재무제표 기반 실시간 산정 (시뮬레이션)</div>
               <div style="display:flex;gap:8px;margin-top:8px">
-                <input id="loanAmountInput" type="number" placeholder="희망 금액(GDC)" style="flex:1;padding:8px;border:1px solid var(--border);font-family:'IBM Plex Mono',monospace;font-size:13px">
+                <input id="loanAmountInput" type="number" placeholder="희망 금액(GDC)" style="flex:1;padding:8px;border:1px solid var(--border);font-family:'Pretendard',sans-serif;font-size:13px">
                 <button id="loanCalcBtn" type="button" class="mini-btn">산정</button>
               </div>
-              <div style="margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:13px" id="loanRateResult"></div>
+              <div style="margin-top:8px;font-family:'Pretendard',sans-serif;font-size:13px" id="loanRateResult"></div>
             </div>
             <div style="background:#fff;padding:14px 16px">
               <div style="font-size:11.5px;color:var(--text4)">정기예금 (시뮬레이션 — 실제 상품 연동 전)</div>
-              <div style="margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;color:var(--brand)">[금리] <span style="font-size:12px;color:var(--text4)">% · 12개월</span></div>
+              <div style="margin-top:8px;font-family:'Pretendard',sans-serif;font-size:20px;font-weight:600;color:var(--brand)">[금리] <span style="font-size:12px;color:var(--text4)">% · 12개월</span></div>
               <div style="margin-top:4px;font-size:11px;color:var(--text4)">시중은행 대표 상품 연동 예정 — 실제 금리 미확정</div>
             </div>
           </div>
@@ -608,20 +619,20 @@ code, pre, kbd, samp, input, button, textarea, select {
              표준(SP_authoring_standard_L1L2L3_v1_0.md)에 맞춘 실제
              작성은 별도 작업으로 남겨둔다. -->
         <div style="margin:0 20px 20px;border:1px solid var(--border)">
-          <div style="padding:10px 16px;border-bottom:1px solid var(--border);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;color:var(--text4)">이 화면이 쓸 SP(자리표시자) · PLANNED SYSTEM PROMPTS</div>
+          <div style="padding:10px 16px;border-bottom:1px solid var(--border);font-family:'Pretendard',sans-serif;font-size:11px;letter-spacing:1px;color:var(--text4)">이 화면이 쓸 SP(자리표시자) · PLANNED SYSTEM PROMPTS</div>
           <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--border)">
             <div style="background:#fff;padding:14px 16px">
-              <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--text4)">SP-GDC-FX-01 (미작성)</div>
+              <div style="font-family:'Pretendard',sans-serif;font-size:10.5px;color:var(--text4)">SP-GDC-FX-01 (미작성)</div>
               <div style="font-size:13px;font-weight:600;margin-top:4px">외환 환전</div>
               <div style="font-size:11px;color:var(--text4);margin-top:4px">지금은 순수 계산(환율 × 금액) — AI 개입 없음. 재정산·이의제기 판단이 필요해지면 SP로 승격</div>
             </div>
             <div style="background:#fff;padding:14px 16px">
-              <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--text4)">SP-GDC-DEPOSIT-01 (미작성)</div>
+              <div style="font-family:'Pretendard',sans-serif;font-size:10.5px;color:var(--text4)">SP-GDC-DEPOSIT-01 (미작성)</div>
               <div style="font-size:13px;font-weight:600;margin-top:4px">예금 이자율 결정</div>
               <div style="font-size:11px;color:var(--text4);margin-top:4px">시중은행 상품 연동 전 — 카드 자체가 자리표시자, 로직 없음</div>
             </div>
             <div style="background:#fff;padding:14px 16px">
-              <div style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--text4)">SP-GDC-LOAN-01 (미작성)</div>
+              <div style="font-family:'Pretendard',sans-serif;font-size:10.5px;color:var(--text4)">SP-GDC-LOAN-01 (미작성)</div>
               <div style="font-size:13px;font-weight:600;margin-top:4px">대출 이자율 결정</div>
               <div style="font-size:11px;color:var(--text4);margin-top:4px">지금은 금액 구간별 고정 가산율 — 재무제표 신용등급 판단이 필요해지면 SP로 승격</div>
             </div>
@@ -2298,45 +2309,93 @@ document.getElementById('hometaxQueryBtn')?.addEventListener('click', async () =
     return model ? `AI 사용 (${model})` : 'AI 사용료';
   }
 
+  // 2026-09-23 신설(주피터 지시) — 5/10/50개씩 보기 + 행 클릭 시 상세
+  // 패널. 원본 배열을 캐싱해뒀다가 페이지 크기 바뀔 때마다 다시 잘라
+  // 그리기만 한다(재요청 없음). limit=100은 백엔드(/user/gdc-history)
+  // 최대치 — "50개씩 보기"가 실제로 50개를 보여주려면 최소 이만큼은
+  // 미리 받아둬야 한다.
+  let _gdcChargesCache = [];
+  let _gdcUsagesCache = [];
+  let _gdcPageSize = 5;
+  const _gdcFmtDate = iso => { try { return new Date(iso).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch { return iso; } };
+
+  function _gdcRenderRows(kind) {
+    const isCharge = kind === 'charge';
+    const box = document.getElementById(isCharge ? 'gdcChargeRows' : 'gdcUsageRows');
+    const list = (isCharge ? _gdcChargesCache : _gdcUsagesCache).slice(0, _gdcPageSize);
+    if (!list.length) {
+      box.innerHTML = `<div class="gdc-empty">${isCharge ? '충전' : '이용료'} 내역이 없습니다.</div>`;
+      return;
+    }
+    box.innerHTML = list.map((h, i) => {
+      const isBonus = isCharge && (h.memo || '').startsWith('signup_bonus:');
+      const title = isCharge
+        ? (isBonus ? '<div class="gdc-title">가입 축하 충전</div>' : '')
+        : `<div class="gdc-title">${_aiUsageLabel(h.service_id, h.model)}</div>`;
+      const sign = isCharge ? '+' : '−';
+      return `
+      <div class="gdc-txn" data-kind="${kind}" data-idx="${i}" style="cursor:pointer" onclick="_gdcOpenDetail('${kind}', ${i})">
+        <div class="gdc-dot"></div>
+        <div>${title}
+             <div class="gdc-meta">${_gdcFmtDate(h.created)}</div></div>
+        <div class="gdc-amt">${sign}${Math.trunc(h.amount_gdc ?? 0).toLocaleString()}</div>
+      </div>`;
+    }).join('');
+  }
+
+  window._gdcOpenDetail = function (kind, idx) {
+    const h = (kind === 'charge' ? _gdcChargesCache : _gdcUsagesCache)[idx];
+    if (!h) return;
+    const isCharge = kind === 'charge';
+    const isBonus = isCharge && (h.memo || '').startsWith('signup_bonus:');
+    document.getElementById('gdcDetailTitle').textContent = isCharge
+      ? (isBonus ? '가입 축하 충전' : '충전')
+      : _aiUsageLabel(h.service_id, h.model);
+    document.getElementById('gdcDetailDate').textContent = _gdcFmtDate(h.created);
+    document.getElementById('gdcDetailAmount').textContent = `${isCharge ? '+' : '−'}${Math.trunc(h.amount_gdc ?? 0).toLocaleString()} T`;
+    document.getElementById('gdcDetailType').textContent = isCharge ? '충전' : '이용료';
+    const memoRow = document.getElementById('gdcDetailMemoRow');
+    if (h.memo) { memoRow.style.display = 'block'; document.getElementById('gdcDetailMemo').textContent = h.memo; }
+    else { memoRow.style.display = 'none'; }
+
+    document.getElementById('gdcDetailOverlay').style.display = 'block';
+    requestAnimationFrame(() => {
+      document.getElementById('gdcDetailOverlay').style.opacity = '1';
+      document.getElementById('gdcDetailPanel').style.transform = 'translateX(0)';
+    });
+  };
+  window._gdcCloseDetail = function () {
+    document.getElementById('gdcDetailOverlay').style.opacity = '0';
+    document.getElementById('gdcDetailPanel').style.transform = 'translateX(100%)';
+    setTimeout(() => { document.getElementById('gdcDetailOverlay').style.display = 'none'; }, 220);
+  };
+
+  document.querySelectorAll('.gdc-pagesize-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      _gdcPageSize = Number(btn.dataset.size);
+      document.querySelectorAll('.gdc-pagesize-btn').forEach(b => b.classList.toggle('active', b === btn));
+      _gdcRenderRows('charge');
+      _gdcRenderRows('usage');
+    });
+  });
+
   async function gdcLoadHistory(guid) {
     const chargeBox = document.getElementById('gdcChargeRows');
     const usageBox = document.getElementById('gdcUsageRows');
     chargeBox.innerHTML = '<div class="gdc-empty">불러오는 중…</div>';
     usageBox.innerHTML = '<div class="gdc-empty">불러오는 중…</div>';
     try {
-      const res = await fetch(`${GDC_PROXY}/user/gdc-history?guid=${encodeURIComponent(guid)}&limit=30`);
+      const res = await fetch(`${GDC_PROXY}/user/gdc-history?guid=${encodeURIComponent(guid)}&limit=100`);
       const data = await res.json().catch(() => null);
       if (!res.ok || !data?.ok) {
         chargeBox.innerHTML = '<div class="gdc-empty">내역을 불러오지 못했습니다.</div>';
         usageBox.innerHTML = '<div class="gdc-empty">내역을 불러오지 못했습니다.</div>';
         return;
       }
-      const fmtDate = iso => { try { return new Date(iso).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch { return iso; } };
-      const charges = (data.history || []).filter(h => h.type === 'deposit');
-      const usages = (data.history || []).filter(h => h.type === 'ai_usage_charge');
-
-      chargeBox.innerHTML = charges.length ? charges.map(h => {
-        // 2026-09-23 수정(주피터 지시) — "유상 충전" 문구 삭제. 충전은
-        // 전부 유상(가입 보너스만 예외)이라 매번 반복 표시할 이유가
-        // 없다 — 이 탭 자체가 이미 "충전" 탭이다. 가입 보너스만 구분해서
-        // 보여주고, 나머지는 날짜만 보여준다.
-        const isBonus = (h.memo || '').startsWith('signup_bonus:');
-        return `
-        <div class="gdc-txn">
-          <div class="gdc-dot"></div>
-          <div>${isBonus ? '<div class="gdc-title">가입 축하 충전</div>' : ''}
-               <div class="gdc-meta">${fmtDate(h.created)}</div></div>
-          <div class="gdc-amt">+${Math.trunc(h.amount_gdc ?? 0).toLocaleString()}</div>
-        </div>`;
-      }).join('') : '<div class="gdc-empty">충전 내역이 없습니다.</div>';
-
-      usageBox.innerHTML = usages.length ? usages.map(h => `
-        <div class="gdc-txn">
-          <div class="gdc-dot"></div>
-          <div><div class="gdc-title">${_aiUsageLabel(h.service_id, h.model)}</div>
-               <div class="gdc-meta">${fmtDate(h.created)}</div></div>
-          <div class="gdc-amt">−${Math.trunc(h.amount_gdc ?? 0).toLocaleString()}</div>
-        </div>`).join('') : '<div class="gdc-empty">이용료 내역이 없습니다.</div>';
+      _gdcChargesCache = (data.history || []).filter(h => h.type === 'deposit');
+      _gdcUsagesCache = (data.history || []).filter(h => h.type === 'ai_usage_charge');
+      _gdcRenderRows('charge');
+      _gdcRenderRows('usage');
 
       // 2026-09-23 신설 — 홈 탭 "GDC 지갑" 패널의 최근 거래 2건도 같은
       // 응답으로 채운다(별도 호출 없음). data.history는 이미 최신순.
@@ -2346,7 +2405,7 @@ document.getElementById('hometaxQueryBtn')?.addEventListener('click', async () =
         homeTx.innerHTML = recent.length ? recent.map(h => {
           const isDeposit = h.type === 'deposit';
           const label = isDeposit
-            ? ((h.memo || '').startsWith('signup_bonus:') ? '가입 축하 충전' : fmtDate(h.created))
+            ? ((h.memo || '').startsWith('signup_bonus:') ? '가입 축하 충전' : _gdcFmtDate(h.created))
             : _aiUsageLabel(h.service_id, h.model);
           const amt = Math.trunc(h.amount_gdc ?? 0).toLocaleString();
           return `<div class="wallet-tx"><span>${label}</span><b class="${isDeposit ? 'plus' : 'minus'}">${isDeposit ? '+' : '−'}${amt}T</b></div>`;
@@ -2423,6 +2482,11 @@ document.getElementById('hometaxQueryBtn')?.addEventListener('click', async () =
       document.querySelectorAll('#panel-gdc .gdc-pane').forEach(p => p.classList.remove('active'));
       tab.classList.add('active');
       document.getElementById(tab.dataset.pane).classList.add('active');
+      // 2026-09-23 — 페이지 크기 선택은 충전/이용료에만 의미가 있다
+      // (구매/판매는 아직 고정 안내 문구뿐).
+      const pane = tab.dataset.pane;
+      document.getElementById('gdcPageSizeRow').style.display =
+        (pane === 'gdc-pane-charge' || pane === 'gdc-pane-usage') ? 'flex' : 'none';
     });
   });
 
@@ -2467,7 +2531,7 @@ document.getElementById('hometaxQueryBtn')?.addEventListener('click', async () =
   async function _fxLoadRates() {
     const note = document.getElementById('fxRateNote');
     try {
-      const res = await fetch(`${WORKER}/fx/rates?base=KRW&to=USD,EUR,JPY,CNY,GBP,THB`);
+      const res = await fetch(`${GDC_PROXY}/fx/rates?base=KRW&to=USD,EUR,JPY,CNY,GBP,THB`);
       const data = await res.json();
       if (!data.ok) throw new Error(data.message || 'API_ERROR');
       _fxLatestRates = data.rates;
@@ -2507,4 +2571,26 @@ document.getElementById('hometaxQueryBtn')?.addEventListener('click', async () =
   });
 })();
 </script>
+
+<!-- GDC 거래 상세 슬라이드 패널 (2026-09-23 신설, 주피터 지시) — admin.html의
+     충전 내역 상세 패널과 같은 상호작용: 행 클릭 시 오른쪽에서 나타나고,
+     오버레이(패널 바깥) 클릭 시 다시 사라진다. -->
+<div id="gdcDetailOverlay" onclick="if(event.target===this)_gdcCloseDetail()"
+     style="display:none;opacity:0;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:1000;transition:opacity 0.2s ease">
+  <div id="gdcDetailPanel"
+       style="position:absolute;top:0;right:0;bottom:0;width:min(380px,92vw);background:#fff;
+              border-left:1px solid var(--border);transform:translateX(100%);
+              transition:transform 0.22s ease;overflow-y:auto;padding:22px 20px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
+      <div style="font-size:15px;font-weight:700" id="gdcDetailTitle">—</div>
+      <button onclick="_gdcCloseDetail()" style="background:none;border:none;color:var(--text4);font-size:20px;cursor:pointer;line-height:1;padding:2px 6px">×</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;font-size:13px">
+      <div><div style="color:var(--text4);font-size:11px">일시</div><div id="gdcDetailDate">—</div></div>
+      <div><div style="color:var(--text4);font-size:11px">금액</div><div id="gdcDetailAmount" style="font-size:20px;font-weight:700">—</div></div>
+      <div><div style="color:var(--text4);font-size:11px">구분</div><div id="gdcDetailType">—</div></div>
+      <div id="gdcDetailMemoRow" style="display:none"><div style="color:var(--text4);font-size:11px">메모</div><div id="gdcDetailMemo">—</div></div>
+    </div>
+  </div>
+</div>
 </body></html>
