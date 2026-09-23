@@ -1424,6 +1424,18 @@ import { L1_URL, setUser } from '/src/gopang/core/state.js';
   }
 
   function completeLogin() {
+    // 2026-09-23 신설(주피터 지시 — "여러 차례 고쳤는데도 무한 반복 재발")
+    // — 09-18/09-23 두 차례 수정은 "#loginScreen이 보이는 동안" SW 강제
+    // 새로고침을 미루는 가드였다. 그런데 이 함수가 loginScreen을 감추는
+    // 바로 그 순간, GopangWallet.restoreFromPrivateKey()가 IndexedDB에
+    // 쓴 개인키가 실제로 커밋되기 전에(요청 자체는 onsuccess로 끝나도
+    // 트랜잭션 커밋은 한 틱 뒤일 수 있음) 대기 중이던 새로고침이 그
+    // 좁은 틈에 끼어들면, 재시작된 페이지가 방금 저장된 지갑을 못 읽어
+    // 다시 처음부터(전화번호 입력) 로그인을 요구하는 것으로 보인다 —
+    // "폰 확인까지 다 했는데 또 뜬다"는 신고와 정확히 일치. loginScreen
+    // 가시성 대신 명시적 유예 타임스탬프를 추가로 둬서, 로그인 직후
+    // 4초간은 IndexedDB 커밋이 확실히 끝날 시간을 준다.
+    window._hondiAuthGraceUntil = Date.now() + 4000;
     showStep(stepDone);
     setTimeout(() => {
       loginScreen.style.display = 'none';

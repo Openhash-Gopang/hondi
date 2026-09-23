@@ -193,7 +193,36 @@ Edge 콘솔에서 `navigator.userAgent`를 직접 확인해 이 정규식에 실
 그 재시도가 실제로 완료됐는지 확인할 것 — 완료 확인 없이 화제를
 전환하면 이번처럼 통째로 누락될 수 있다.
 
-## 교훈 요약
+## 12. 재발 — 09-23, dashboard.html에서 같은 증상 두 차례 더
+
+같은 "인증은 성공하는데 다음 지시를 내리면 또 요구한다" 무한 반복이
+`dashboard.html`에서 재발했다(주피터 실사, 2회 독립 재현).
+
+**1차 재발 원인**: §4의 수정(`gopang-pwa.js`의 자동 새로고침 유예 가드)이
+`#ksa-overlay`(공용 KAuth 모듈)만 확인했는데, `dashboard.html`의 메인
+지갑 로그인은 별도 ID(`#loginScreen`)를 쓴다 — 그 페이지엔 `#ksa-overlay`
+자체가 없어 가드가 전혀 작동하지 않았다. `loginScreenEl`의
+`display !== 'none'` 여부도 함께 확인하도록 확장.
+
+**2차 재발 원인**: 위 수정으로도 부족했다. `completeLogin()`이
+`#loginScreen`을 감추는 바로 그 틈에, `GopangWallet.restoreFromPrivateKey()`
+가 IndexedDB에 쓴 개인키가 실제로 커밋되기 전일 수 있다(개별 요청의
+`onsuccess`는 트랜잭션 커밋보다 먼저 끝날 수 있음) — 그 좁은 창에서
+새로고침이 끼어들면, 재시작된 페이지가 방금 저장된 지갑을 못 읽어
+처음부터(전화번호 입력) 다시 요구한다. `#loginScreen`의 가시성만 보는
+가드로는 "감춰진 직후"를 못 잡는다.
+
+**수정**: `dashboard.html`의 `completeLogin()`이 로그인 성공 시점에
+`window._hondiAuthGraceUntil = Date.now() + 4000`(4초 유예)을 심어두고,
+`gopang-pwa.js`의 새로고침 가드가 `#loginScreen` 가시성·`#ksa-overlay`에
+더해 이 유예 타임스탬프도 함께 확인한다 — IndexedDB 커밋이 끝날 시간을
+명시적으로 보장.
+
+**교훈 추가**: "화면 요소가 안 보이면 안전하다"고 가정하지 말 것 —
+UI가 사라진 시점과 그 UI가 트리거한 비동기 부작용(여기선 IndexedDB
+쓰기)이 실제로 끝나는 시점은 다를 수 있다. 화면 가시성 대신(또는 그에
+더해) 그 작업 자체의 완료를 명시적으로 신호하는 편이 더 안전하다.
+
 
 1. 서버 정책 변경에 클라이언트가 안 맞을 때, 새 인증 모듈을 만들기 전에
    기존 인증 아키텍처가 있는지 저장소 전체를 먼저 검색할 것.
