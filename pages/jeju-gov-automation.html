@@ -483,6 +483,32 @@ const DO_AGENCIES = [
       { id: "SP-AGYDIV-SAFETYEXPERIENCE-PLANNING", name: "제주안전체험관 체험기획과", spId: "SP-AGYDIV-SAFETYEXPERIENCE-PLANNING", file: "03-do-agency/divisions/SP-AGYDIV-SAFETYEXPERIENCE-PLANNING_v1.0.md", confirmed: true },
       { id: "SP-AGYDIV-SAFETYEXPERIENCE-OPERATIONS", name: "제주안전체험관 체험운영과", spId: "SP-AGYDIV-SAFETYEXPERIENCE-OPERATIONS", file: "03-do-agency/divisions/SP-AGYDIV-SAFETYEXPERIENCE-OPERATIONS_v1.0.md", confirmed: true },
   ]},
+  // ★ 2026-09-24 신설(작업 #15) — 소방서 4개(제주·서귀포·서부·동부, 지방자치법 제126조상
+  // SP-AGY-FIRE(소방안전본부)의 하급 직속기관). 산하 과 13개는 별표8(2024.01.22. 개정본)
+  // 원문 사무로 채웠다(confidence: high). 현장 단위(119안전센터 24개·구조대 4개·지역대 3개,
+  // 총 31개)는 03-do-agency/divisions/field-units/에 문서로만 신설했다 — 라우팅 인벤토리
+  // (이 페이지·division-tables.js)에는 올리지 않았다(archive/README.md 참고).
+  { id: "SP-AGY-FIREJEJU", name: "제주소방서", spId: "SP-AGY-FIREJEJU", kind: "do-agency", divisions: [
+      { id: "SP-AGYDIV-FIREJEJU-ADMIN", name: "제주소방서 소방행정과", spId: "SP-AGYDIV-FIREJEJU-ADMIN", file: "03-do-agency/divisions/SP-AGYDIV-FIREJEJU-ADMIN_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-FIREJEJU-PREVENTION", name: "제주소방서 예방안전과", spId: "SP-AGYDIV-FIREJEJU-PREVENTION", file: "03-do-agency/divisions/SP-AGYDIV-FIREJEJU-PREVENTION_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-FIREJEJU-RESPONSE", name: "제주소방서 119재난대응과", spId: "SP-AGYDIV-FIREJEJU-RESPONSE", file: "03-do-agency/divisions/SP-AGYDIV-FIREJEJU-RESPONSE_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-FIREJEJU-FIELDCOMMAND", name: "제주소방서 현장대응단", spId: "SP-AGYDIV-FIREJEJU-FIELDCOMMAND", file: "03-do-agency/divisions/SP-AGYDIV-FIREJEJU-FIELDCOMMAND_v1.0.md", confirmed: true },
+  ]},
+  { id: "SP-AGY-FIRESEOGWIPO", name: "서귀포소방서", spId: "SP-AGY-FIRESEOGWIPO", kind: "do-agency", divisions: [
+      { id: "SP-AGYDIV-FIRESEOGWIPO-ADMIN", name: "서귀포소방서 소방행정과", spId: "SP-AGYDIV-FIRESEOGWIPO-ADMIN", file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOGWIPO-ADMIN_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-FIRESEOGWIPO-PREVENTIONRESCUE", name: "서귀포소방서 예방구조과", spId: "SP-AGYDIV-FIRESEOGWIPO-PREVENTIONRESCUE", file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOGWIPO-PREVENTIONRESCUE_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-FIRESEOGWIPO-FIELDCOMMAND", name: "서귀포소방서 현장대응단", spId: "SP-AGYDIV-FIRESEOGWIPO-FIELDCOMMAND", file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOGWIPO-FIELDCOMMAND_v1.0.md", confirmed: true },
+  ]},
+  { id: "SP-AGY-FIRESEOBU", name: "서부소방서", spId: "SP-AGY-FIRESEOBU", kind: "do-agency", divisions: [
+      { id: "SP-AGYDIV-FIRESEOBU-ADMIN", name: "서부소방서 소방행정과", spId: "SP-AGYDIV-FIRESEOBU-ADMIN", file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOBU-ADMIN_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-FIRESEOBU-PREVENTIONRESCUE", name: "서부소방서 예방구조과", spId: "SP-AGYDIV-FIRESEOBU-PREVENTIONRESCUE", file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOBU-PREVENTIONRESCUE_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-FIRESEOBU-FIELDCOMMAND", name: "서부소방서 현장대응단", spId: "SP-AGYDIV-FIRESEOBU-FIELDCOMMAND", file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOBU-FIELDCOMMAND_v1.0.md", confirmed: true },
+  ]},
+  { id: "SP-AGY-FIREDONGBU", name: "동부소방서", spId: "SP-AGY-FIREDONGBU", kind: "do-agency", divisions: [
+      { id: "SP-AGYDIV-FIREDONGBU-ADMIN", name: "동부소방서 소방행정과", spId: "SP-AGYDIV-FIREDONGBU-ADMIN", file: "03-do-agency/divisions/SP-AGYDIV-FIREDONGBU-ADMIN_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-FIREDONGBU-PREVENTIONRESCUE", name: "동부소방서 예방구조과", spId: "SP-AGYDIV-FIREDONGBU-PREVENTIONRESCUE", file: "03-do-agency/divisions/SP-AGYDIV-FIREDONGBU-PREVENTIONRESCUE_v1.0.md", confirmed: true },
+      { id: "SP-AGYDIV-FIREDONGBU-FIELDCOMMAND", name: "동부소방서 현장대응단", spId: "SP-AGYDIV-FIREDONGBU-FIELDCOMMAND", file: "03-do-agency/divisions/SP-AGYDIV-FIREDONGBU-FIELDCOMMAND_v1.0.md", confirmed: true },
+  ]},
   { id: "SP-AGY-WATER", name: "상하수도본부", spId: "SP-AGY-WATER", kind: "do-agency", divisions: [
       { id: "SP-AGYDIV-WATER-MGMT", name: "상하수도본부 경영관리과", spId: "SP-AGYDIV-WATER-MGMT", file: "03-do-agency/divisions/SP-AGYDIV-WATER-MGMT_v1.0.md", confirmed: true },
       { id: "SP-AGYDIV-WATER-POLICYFACILITY", name: "상하수도본부 상수도정책시설과", spId: "SP-AGYDIV-WATER-POLICYFACILITY", file: "03-do-agency/divisions/SP-AGYDIV-WATER-POLICYFACILITY_v1.0.md", confirmed: true },

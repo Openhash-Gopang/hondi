@@ -531,6 +531,21 @@ export const JEJU_AGENCY_TABLE = [
     kw: ["제주환경자원순환센터", "환경자원순환센터"], file: "03-do-agency/SP-AGY-ENVCIRCULATION_v1.0.md" },
   { code: "SP-AGY-SAFETYEXPERIENCE", name: "제주안전체험관", desc: "당신은 제주특별자치도청 **제주안전체험관**을 대표하는 AI 레이어다. 주요 소관(추정): 도민·학생 대상 재난안전 체험교육 시설 운영, 체험 프로그램 기획·운영",
     kw: ["제주안전체험관", "안전체험관"], file: "03-do-agency/SP-AGY-SAFETYEXPERIENCE_v1.0.md" },
+  // ★ 2026-09-24 신설(작업 #15) — 사용자 지시("현장 단위까지 SP를 갖춰 소방서 직원이
+  // 오류를 수정 갱신할 수 있게 하라")에 따라 소방서 4개(제주·서귀포·서부·동부, 지방자치법
+  // 제126조상 SP-AGY-FIRE(소방안전본부)의 하급 직속기관)를 신설했다. 산하 division(과) 13개는
+  // JEJU_AGENCY_DIVISION_TABLE에 별도 추가. 현장 단위(119안전센터·구조대·지역대) 31개는
+  // 라우팅 테이블에 올리지 않았다(오탐 위험, archive/README.md 참고) — 문서로만 존재한다.
+  // 기관명 자체를 kw로 썼다(예: "제주소방서") — SP-AGY-FIRE(소방안전본부)의 기존 kw
+  // ("구급 출동"·"소방시설 인허가"·"소방안전본부"·"재난 예방")와 겹치지 않는다.
+  { code: "SP-AGY-FIREJEJU", name: "제주소방서", desc: "당신은 제주특별자치도 소방안전본부 산하 **제주소방서**를 대표하는 AI 레이어다. 주요 소관: 제주시 동(洞) 지역 중심 화재 예방·진압, 구조·구급",
+    kw: ["제주소방서"], file: "03-do-agency/SP-AGY-FIREJEJU_v1.0.md" },
+  { code: "SP-AGY-FIRESEOGWIPO", name: "서귀포소방서", desc: "당신은 제주특별자치도 소방안전본부 산하 **서귀포소방서**를 대표하는 AI 레이어다. 주요 소관: 서귀포시 동(洞) 지역 중심 화재 예방·진압, 구조·구급",
+    kw: ["서귀포소방서"], file: "03-do-agency/SP-AGY-FIRESEOGWIPO_v1.0.md" },
+  { code: "SP-AGY-FIRESEOBU", name: "서부소방서", desc: "당신은 제주특별자치도 소방안전본부 산하 **서부소방서**를 대표하는 AI 레이어다. 주요 소관: 제주 서부(한림·애월·한경·대정·안덕) 화재 예방·진압, 구조·구급",
+    kw: ["서부소방서"], file: "03-do-agency/SP-AGY-FIRESEOBU_v1.0.md" },
+  { code: "SP-AGY-FIREDONGBU", name: "동부소방서", desc: "당신은 제주특별자치도 소방안전본부 산하 **동부소방서**를 대표하는 AI 레이어다. 주요 소관: 제주 동부(성산·구좌·조천·남원·표선) 화재 예방·진압, 구조·구급",
+    kw: ["동부소방서"], file: "03-do-agency/SP-AGY-FIREDONGBU_v1.0.md" },
 ];
 
 export const JEJU_ORG_TABLE = [
@@ -861,6 +876,49 @@ export const JEJU_AGENCY_DIVISION_TABLE = [
   { code: "SP-AGYDIV-SAFETYEXPERIENCE-OPERATIONS", institution: "SP-AGY-SAFETYEXPERIENCE",
     name: "제주안전체험관 체험운영과", desc: "당신은 **제주안전체험관 체험운영과**을 대표하는 AI 레이어다.",
     kw: ["체험운영과", "체험교육 현장 진행"], file: "03-do-agency/divisions/SP-AGYDIV-SAFETYEXPERIENCE-OPERATIONS_v1.0.md" },
+  // ★ 2026-09-24 신설(작업 #15) — 소방서 4개(제주·서귀포·서부·동부) 산하 과 13개.
+  // 별표8(2024.01.22. 개정본) 원문 사무(confidence: high). kw는 기존 SP-AGYDIV-FIRE-ADMIN/
+  // PREVENTION/RESPONSE(소방안전본부 자체의 province-level 가칭 division, bare "소방행정과"·
+  // "예방안전과"·"현장대응과")와 겹치지 않도록 "{소방서명} {과명}" 복합어로만 구성했다.
+  { code: "SP-AGYDIV-FIREJEJU-ADMIN", institution: "SP-AGY-FIREJEJU",
+    name: "제주소방서 소방행정과", desc: "당신은 **제주소방서 소방행정과**를 대표하는 AI 레이어다.",
+    kw: ["제주소방서 소방행정과"], file: "03-do-agency/divisions/SP-AGYDIV-FIREJEJU-ADMIN_v1.0.md" },
+  { code: "SP-AGYDIV-FIREJEJU-PREVENTION", institution: "SP-AGY-FIREJEJU",
+    name: "제주소방서 예방안전과", desc: "당신은 **제주소방서 예방안전과**를 대표하는 AI 레이어다.",
+    kw: ["제주소방서 예방안전과"], file: "03-do-agency/divisions/SP-AGYDIV-FIREJEJU-PREVENTION_v1.0.md" },
+  { code: "SP-AGYDIV-FIREJEJU-RESPONSE", institution: "SP-AGY-FIREJEJU",
+    name: "제주소방서 119재난대응과", desc: "당신은 **제주소방서 119재난대응과**를 대표하는 AI 레이어다.",
+    kw: ["제주소방서 119재난대응과"], file: "03-do-agency/divisions/SP-AGYDIV-FIREJEJU-RESPONSE_v1.0.md" },
+  { code: "SP-AGYDIV-FIREJEJU-FIELDCOMMAND", institution: "SP-AGY-FIREJEJU",
+    name: "제주소방서 현장대응단", desc: "당신은 **제주소방서 현장대응단**를 대표하는 AI 레이어다.",
+    kw: ["제주소방서 현장대응단"], file: "03-do-agency/divisions/SP-AGYDIV-FIREJEJU-FIELDCOMMAND_v1.0.md" },
+  { code: "SP-AGYDIV-FIRESEOGWIPO-ADMIN", institution: "SP-AGY-FIRESEOGWIPO",
+    name: "서귀포소방서 소방행정과", desc: "당신은 **서귀포소방서 소방행정과**를 대표하는 AI 레이어다.",
+    kw: ["서귀포소방서 소방행정과"], file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOGWIPO-ADMIN_v1.0.md" },
+  { code: "SP-AGYDIV-FIRESEOGWIPO-PREVENTIONRESCUE", institution: "SP-AGY-FIRESEOGWIPO",
+    name: "서귀포소방서 예방구조과", desc: "당신은 **서귀포소방서 예방구조과**를 대표하는 AI 레이어다.",
+    kw: ["서귀포소방서 예방구조과"], file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOGWIPO-PREVENTIONRESCUE_v1.0.md" },
+  { code: "SP-AGYDIV-FIRESEOGWIPO-FIELDCOMMAND", institution: "SP-AGY-FIRESEOGWIPO",
+    name: "서귀포소방서 현장대응단", desc: "당신은 **서귀포소방서 현장대응단**를 대표하는 AI 레이어다.",
+    kw: ["서귀포소방서 현장대응단"], file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOGWIPO-FIELDCOMMAND_v1.0.md" },
+  { code: "SP-AGYDIV-FIRESEOBU-ADMIN", institution: "SP-AGY-FIRESEOBU",
+    name: "서부소방서 소방행정과", desc: "당신은 **서부소방서 소방행정과**를 대표하는 AI 레이어다.",
+    kw: ["서부소방서 소방행정과"], file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOBU-ADMIN_v1.0.md" },
+  { code: "SP-AGYDIV-FIRESEOBU-PREVENTIONRESCUE", institution: "SP-AGY-FIRESEOBU",
+    name: "서부소방서 예방구조과", desc: "당신은 **서부소방서 예방구조과**를 대표하는 AI 레이어다.",
+    kw: ["서부소방서 예방구조과"], file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOBU-PREVENTIONRESCUE_v1.0.md" },
+  { code: "SP-AGYDIV-FIRESEOBU-FIELDCOMMAND", institution: "SP-AGY-FIRESEOBU",
+    name: "서부소방서 현장대응단", desc: "당신은 **서부소방서 현장대응단**를 대표하는 AI 레이어다.",
+    kw: ["서부소방서 현장대응단"], file: "03-do-agency/divisions/SP-AGYDIV-FIRESEOBU-FIELDCOMMAND_v1.0.md" },
+  { code: "SP-AGYDIV-FIREDONGBU-ADMIN", institution: "SP-AGY-FIREDONGBU",
+    name: "동부소방서 소방행정과", desc: "당신은 **동부소방서 소방행정과**를 대표하는 AI 레이어다.",
+    kw: ["동부소방서 소방행정과"], file: "03-do-agency/divisions/SP-AGYDIV-FIREDONGBU-ADMIN_v1.0.md" },
+  { code: "SP-AGYDIV-FIREDONGBU-PREVENTIONRESCUE", institution: "SP-AGY-FIREDONGBU",
+    name: "동부소방서 예방구조과", desc: "당신은 **동부소방서 예방구조과**를 대표하는 AI 레이어다.",
+    kw: ["동부소방서 예방구조과"], file: "03-do-agency/divisions/SP-AGYDIV-FIREDONGBU-PREVENTIONRESCUE_v1.0.md" },
+  { code: "SP-AGYDIV-FIREDONGBU-FIELDCOMMAND", institution: "SP-AGY-FIREDONGBU",
+    name: "동부소방서 현장대응단", desc: "당신은 **동부소방서 현장대응단**를 대표하는 AI 레이어다.",
+    kw: ["동부소방서 현장대응단"], file: "03-do-agency/divisions/SP-AGYDIV-FIREDONGBU-FIELDCOMMAND_v1.0.md" },
 ];
 
 export const JEJU_ORG_DIVISION_TABLE = [

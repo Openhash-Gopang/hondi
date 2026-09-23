@@ -569,5 +569,101 @@ await test('작업 #14 안전장치: division-tables.js의 SP-AGY-ENVCIRCULATION
   }
 });
 
+await test('작업 #15: 소방서 4개(제주·서귀포·서부·동부)가 기관 4개·division 13개(과)로 신설됐다(별표8 원문, confidence: high)', () => {
+  const digest = buildDigest();
+  const created = [
+    ['SP-AGY-FIREJEJU', 4], ['SP-AGY-FIRESEOGWIPO', 3], ['SP-AGY-FIRESEOBU', 3], ['SP-AGY-FIREDONGBU', 3],
+  ];
+  for (const [parentId, n] of created) {
+    const inst = digest.tiers.agency.entries.find(e => e.kind === 'institution' && e.id === parentId);
+    assert.ok(inst, `${parentId}: 기관 항목이 digest에 없음`);
+    const divs = digest.tiers.agency.entries.filter(e => e.kind === 'division' && e.parent === inst.name);
+    assert.equal(divs.length, n, `${parentId}: division 개수가 안 맞음`);
+    for (const d of divs) {
+      assert.equal(d.state, 'draft', `${d.id}: v1.0 신설이니 draft여야 함(초안이지만 §2 내용은 별표8 실제 사무)`);
+      assert.ok(d.does && d.does.length > 0, `${d.id}: does가 비어 있음`);
+      for (const line of d.does) assert.ok(/^\d{1,3}\.\s/.test(line), `${d.id}: 번호 매긴 사무 형식 아님`);
+    }
+  }
+});
+await test('작업 #15 안전장치: 이번에 신설한 기관 4개·division 13개 어디에도 실제 접수 파이프라인(task_key)이 실수로 생기지 않았고, 기존 SP-AGYDIV-FIRE-ADMIN/PREVENTION/RESPONSE(소방안전본부 자체)의 task_key는 그대로 유지됐다(회귀 방지)', () => {
+  const codes = ['FIREJEJU', 'FIRESEOGWIPO', 'FIRESEOBU', 'FIREDONGBU'];
+  const files = codes.map(c => `prompts/gov-tree/03-do-agency/SP-AGY-${c}_v1.0.md`);
+  for (const f of fs.readdirSync(path.join(ROOT, 'prompts/gov-tree/03-do-agency/divisions'))) {
+    if (codes.some(c => f.startsWith(`SP-AGYDIV-${c}-`))) files.push(`prompts/gov-tree/03-do-agency/divisions/${f}`);
+  }
+  assert.equal(files.length, 4 + 13, `이번 배치 기관·division 파일 수가 17개가 아님(${files.length})`);
+  for (const f of files) {
+    const full = path.join(ROOT, f);
+    assert.ok(fs.existsSync(full), `${f}: 파일이 없음`);
+    const content = fs.readFileSync(full, 'utf8');
+    assert.ok(!/task_key\s*:\s*'/.test(content), `${f}: 실수로 task_key가 대입됨(신규 기관이라 배선이 없어야 함)`);
+  }
+  // 회귀: 기존 소방안전본부(SP-AGY-FIRE) 산하 division 3개는 이번 배치에서 건드리지 않았어야 하고,
+  // 그중 예방안전과의 실제 task_key 배선은 그대로 남아 있어야 한다.
+  const prevention = fs.readFileSync(path.join(ROOT, 'prompts/gov-tree/03-do-agency/divisions/SP-AGYDIV-FIRE-PREVENTION_v1.1.md'), 'utf8');
+  assert.ok(prevention.includes("task_key: 'hazardous_material_facility_permit'"), 'SP-AGYDIV-FIRE-PREVENTION의 기존 task_key 배선이 사라짐(회귀)');
+});
+await test('작업 #15: org-baseline-agency.json에서 소방서 4곳이 missing_in_inventory에서 mapping으로 옮겨졌고, confidence가 high다', () => {
+  const baseline = JSON.parse(fs.readFileSync(path.join(DIR, 'org-baseline-agency.json'), 'utf8'));
+  assert.ok(!baseline.missing_in_inventory.some(m => m.name.includes('소방서')), '소방서가 여전히 missing_in_inventory에 있음');
+  assert.equal(baseline.missing_in_inventory.length, 3, '남은 3개(합의제행정기관)만 있어야 함');
+  for (const code of ['SP-AGY-FIREJEJU', 'SP-AGY-FIRESEOGWIPO', 'SP-AGY-FIRESEOBU', 'SP-AGY-FIREDONGBU']) {
+    assert.equal(baseline.mapping[code].status, 'match');
+    assert.equal(baseline.mapping[code].confidence, 'high', '별표8 원문 사무가 있어 high여야 함');
+  }
+});
+await test('작업 #15 회귀: division-tables.js·페이지 인벤토리 양쪽에 새 기관 4개·division 13개 라우팅 항목이 있다', () => {
+  const dt = fs.readFileSync(path.join(ROOT, 'src/gopang/gov/division-tables.js'), 'utf8');
+  const page = fs.readFileSync(path.join(ROOT, 'pages/jeju-gov-automation.html'), 'utf8');
+  const ids = [
+    'SP-AGY-FIREJEJU', 'SP-AGYDIV-FIREJEJU-ADMIN', 'SP-AGYDIV-FIREJEJU-PREVENTION', 'SP-AGYDIV-FIREJEJU-RESPONSE', 'SP-AGYDIV-FIREJEJU-FIELDCOMMAND',
+    'SP-AGY-FIRESEOGWIPO', 'SP-AGYDIV-FIRESEOGWIPO-ADMIN', 'SP-AGYDIV-FIRESEOGWIPO-PREVENTIONRESCUE', 'SP-AGYDIV-FIRESEOGWIPO-FIELDCOMMAND',
+    'SP-AGY-FIRESEOBU', 'SP-AGYDIV-FIRESEOBU-ADMIN', 'SP-AGYDIV-FIRESEOBU-PREVENTIONRESCUE', 'SP-AGYDIV-FIRESEOBU-FIELDCOMMAND',
+    'SP-AGY-FIREDONGBU', 'SP-AGYDIV-FIREDONGBU-ADMIN', 'SP-AGYDIV-FIREDONGBU-PREVENTIONRESCUE', 'SP-AGYDIV-FIREDONGBU-FIELDCOMMAND',
+  ];
+  assert.equal(ids.length, 4 + 13);
+  for (const id of ids) {
+    assert.ok(dt.includes(`"${id}"`), `division-tables.js에 ${id} 없음`);
+    assert.ok(page.includes(`"${id}"`), `jeju-gov-automation.html에 ${id} 없음`);
+  }
+});
+await test('작업 #15 안전장치: 새 소방서 division kw가 전부 "{소방서명} {과명}" 복합어라 기존 SP-AGYDIV-FIRE-ADMIN/PREVENTION/RESPONSE의 bare kw("소방행정과"·"예방안전과"·"현장대응과")와 겹치지 않는다', () => {
+  const dt = fs.readFileSync(path.join(ROOT, 'src/gopang/gov/division-tables.js'), 'utf8');
+  const m2 = dt.match(/export const JEJU_AGENCY_DIVISION_TABLE = \[[\s\S]*?\n\];/);
+  assert.ok(m2, '테이블을 찾지 못함');
+  const newCodes = ['FIREJEJU', 'FIRESEOGWIPO', 'FIRESEOBU', 'FIREDONGBU'];
+  const kwArrays = [...m2[0].matchAll(/code:\s*"SP-AGYDIV-(FIRE(?:JEJU|SEOGWIPO|SEOBU|DONGBU)-[A-Z]+)"[\s\S]*?kw:\s*\[([^\]]*)\]/g)];
+  assert.equal(kwArrays.length, 13, '새 소방서 division 13개의 kw를 다 찾지 못함');
+  for (const [, code, arr] of kwArrays) {
+    assert.ok(!arr.split(',').map(s => s.trim().replace(/"/g, '')).includes('소방행정과'), `${code}: bare "소방행정과" 키워드가 있음(SP-AGYDIV-FIRE-ADMIN과 충돌)`);
+    assert.ok(!arr.split(',').map(s => s.trim().replace(/"/g, '')).includes('예방안전과'), `${code}: bare "예방안전과" 키워드가 있음(SP-AGYDIV-FIRE-PREVENTION과 충돌)`);
+    assert.ok(!arr.split(',').map(s => s.trim().replace(/"/g, '')).includes('현장대응과'), `${code}: bare "현장대응과" 키워드가 있음(SP-AGYDIV-FIRE-RESPONSE와 충돌)`);
+  }
+});
+await test('작업 #15 정직 공시: 현장 단위(119안전센터·구조대·지역대) SP 31개가 field-units/에 신설됐고, 전부 state: draft·나무위키 출처 등급 공시가 있으며 라우팅 테이블에는 등록돼 있지 않다', () => {
+  const dir = path.join(ROOT, 'prompts/gov-tree/03-do-agency/divisions/field-units');
+  const files = fs.readdirSync(dir).filter(f => f.endsWith('.md'));
+  assert.equal(files.length, 31, `현장단위 파일 수가 31개가 아님(${files.length})`);
+  const dt = fs.readFileSync(path.join(ROOT, 'src/gopang/gov/division-tables.js'), 'utf8');
+  const page = fs.readFileSync(path.join(ROOT, 'pages/jeju-gov-automation.html'), 'utf8');
+  for (const f of files) {
+    const content = fs.readFileSync(path.join(dir, f), 'utf8');
+    assert.ok(content.includes('state: draft'), `${f}: state: draft 표기가 없음`);
+    assert.ok(content.includes('정직하게 밝힘'), `${f}: 정직하게 밝힘 문구가 없음`);
+    assert.ok(!/task_key\s*:\s*'/.test(content), `${f}: 실수로 task_key가 대입됨`);
+    const code = f.replace(/_v1\.0\.md$/, '');
+    assert.ok(!dt.includes(`"${code}"`), `${f}: division-tables.js에 등록돼 있음(현장단위는 라우팅 대상 아님)`);
+    assert.ok(!page.includes(`"${code}"`), `${f}: jeju-gov-automation.html에 등록돼 있음(현장단위는 라우팅 대상 아님)`);
+  }
+  const jejuCenters = files.filter(f => f.startsWith('SP-AGYDIV-FIREJEJU-CENTER-'));
+  assert.equal(jejuCenters.length, 9, '제주소방서 119안전센터는 9개여야 함');
+  const dongbuRegional = files.filter(f => f.startsWith('SP-AGYDIV-FIREDONGBU-REGIONAL-'));
+  assert.equal(dongbuRegional.length, 3, '동부소방서 119지역대는 3개(우도·김녕·성읍)여야 함');
+  for (const code of ['FIREJEJU', 'FIRESEOGWIPO', 'FIRESEOBU']) {
+    assert.ok(!files.some(f => f.startsWith(`SP-AGYDIV-${code}-REGIONAL-`)), `${code}: 119지역대를 만들지 않았어야 함(우도119지역대가 동부소방서 소속으로 확인돼 중복 배정하지 않음)`);
+  }
+});
+
 console.log(`\n${pass}/${pass + fail} passed`);
 process.exit(fail ? 1 : 0);

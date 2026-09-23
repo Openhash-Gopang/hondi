@@ -118,10 +118,10 @@ await test('소방안전본부(SP-AGY-FIRE)가 직속기관에서 도청(do) 유
   const divs = digest.tiers.do.entries.filter(e => e.kind === 'division' && e.parent === '소방안전본부');
   assert.equal(divs.length, 3, '기존 division 3개(실제 내용 있음)는 그대로 옮겨졌어야 함');
 });
-await test('직속기관·사업소(agency) 조직 기준표: 2026-09-23까지 20개(농업기술원·보건환경연구원·축산생명연구원·한라도서관·자치경찰단·민속자연사박물관·도립미술관·상하수도본부·세계유산본부·공공정책연수원·보훈청·문화예술진흥원·해양수산연구원·동물위생시험소·설문대여성문화센터·돌문화공원관리소·고용센터·중앙협력본부·제주환경자원순환센터·제주안전체험관) 전부 match로 정리됐다(structure_differs 0)', () => {
+await test('직속기관·사업소(agency) 조직 기준표: 2026-09-24까지 24개(…제주환경자원순환센터·제주안전체험관·제주소방서·서귀포소방서·서부소방서·동부소방서) 전부 match로 정리됐다(structure_differs 0)', () => {
   const t = digest.tiers.agency;
   assert.equal(t.baseline.org_counts.structure_differs, undefined, '이제 structure_differs로 남은 기관이 없어야 함');
-  assert.equal(t.baseline.org_counts.match, 20);
+  assert.equal(t.baseline.org_counts.match, 24);
   const agri = t.entries.find(e => e.id === 'SP-AGY-AGRITECH');
   assert.equal(agri.org.status, 'match'); assert.equal(agri.org.legal_basis, '제23~24조');
   assert.equal(agri.org.current_divisions.length, 9);
@@ -159,14 +159,28 @@ await test('직속기관·사업소(agency) 조직 기준표: 2026-09-23까지 2
   const safetyexperience = t.entries.find(e => e.id === 'SP-AGY-SAFETYEXPERIENCE');
   assert.equal(safetyexperience.org.status, 'match'); assert.equal(safetyexperience.org.confidence, 'low', '별표8·9 원문에 사무 없음 — 명칭 추정이라 low여야 함');
   assert.equal(safetyexperience.org.legal_basis, '제35조의2'); assert.equal(safetyexperience.org.current_divisions.length, 3);
+  const fireJeju = t.entries.find(e => e.id === 'SP-AGY-FIREJEJU');
+  assert.equal(fireJeju.org.status, 'match'); assert.equal(fireJeju.org.confidence, 'high'); assert.equal(fireJeju.org.legal_basis, '제33~35조');
+  const fireSeogwipo = t.entries.find(e => e.id === 'SP-AGY-FIRESEOGWIPO');
+  assert.equal(fireSeogwipo.org.status, 'match'); assert.equal(fireSeogwipo.org.confidence, 'high');
+  const fireSeobu = t.entries.find(e => e.id === 'SP-AGY-FIRESEOBU');
+  assert.equal(fireSeobu.org.status, 'match'); assert.equal(fireSeobu.org.confidence, 'high');
+  const fireDongbu = t.entries.find(e => e.id === 'SP-AGY-FIREDONGBU');
+  assert.equal(fireDongbu.org.status, 'match'); assert.equal(fireDongbu.org.confidence, 'high');
+  const fireJejuDivs = t.entries.filter(e => e.kind === 'division' && e.parent === '제주소방서');
+  assert.equal(fireJejuDivs.length, 4, '제주소방서는 소방행정과·예방안전과·119재난대응과·현장대응단 4개 과');
+  for (const code of ['SEOGWIPO', 'SEOBU', 'DONGBU']) {
+    const divs = t.entries.filter(e => e.kind === 'division' && e.parent === (code === 'SEOGWIPO' ? '서귀포소방서' : code === 'SEOBU' ? '서부소방서' : '동부소방서'));
+    assert.equal(divs.length, 3, `${code}: 소방행정과·예방구조과·현장대응단 3개 과여야 함`);
+  }
 });
-await test('직속기관·사업소 조직 기준표: 법정 기관 23개 중 SP가 없는 4개(누락 1 + 합의제행정기관 3)가 열거된다(2026-09-23 제주환경자원순환센터·제주안전체험관 반영으로 6→4)', () => {
+await test('직속기관·사업소 조직 기준표: 법정 기관 23개 중 SP가 없는 3개(합의제행정기관 3개뿐)가 열거된다(2026-09-24 소방서 4곳 반영으로 4→3)', () => {
   const t = digest.tiers.agency;
-  assert.equal(t.baseline.missing_in_inventory.length, 4);
-  const reflected = ['보훈청', '공공정책연수원', '문화예술진흥원', '해양수산연구원', '동물위생시험소', '설문대여성문화센터', '돌문화공원관리소', '고용센터', '중앙협력본부', '제주환경자원순환센터', '제주안전체험관'];
+  assert.equal(t.baseline.missing_in_inventory.length, 3);
+  const reflected = ['보훈청', '공공정책연수원', '문화예술진흥원', '해양수산연구원', '동물위생시험소', '설문대여성문화센터', '돌문화공원관리소', '고용센터', '중앙협력본부', '제주환경자원순환센터', '제주안전체험관', '제주소방서·서귀포소방서·서부소방서·동부소방서'];
   for (const n of reflected) assert.ok(!t.baseline.missing_in_inventory.some(m => m.name === n), `${n}은 반영 완료로 missing_in_inventory에서 빠져야 함`);
   assert.ok(t.baseline.missing_in_inventory.some(m => m.name === '감사위원회' && m.chapter === '합의제행정기관'));
-  assert.ok(t.baseline.missing_in_inventory.some(m => m.name.includes('소방서')), '아직 반영하지 않은 기관도 남아 있어야 함');
+  assert.ok(t.baseline.missing_in_inventory.every(m => m.chapter === '합의제행정기관'), '남은 3개는 전부 합의제행정기관이어야 함(감사위원회·지방노동위원회·자치경찰위원회)');
 });
 
 await test('다이제스트 항목 수가 「제주 AI 행정」 페이지 데이터와 정확히 일치한다', () => {
