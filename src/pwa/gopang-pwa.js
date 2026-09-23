@@ -167,8 +167,21 @@ if ('serviceWorker' in navigator) {
             var overlay = document.getElementById('ksa-overlay');
             var loginScreenEl = document.getElementById('loginScreen');
             var loginScreenShowing = loginScreenEl && getComputedStyle(loginScreenEl).display !== 'none';
-            if ((overlay && overlay.classList.contains('show')) || loginScreenShowing) {
-              console.log('[PWA] 로그인 진행 중 — 자동 새로고침 보류, 1초 후 재확인');
+            // BUG-FIX(2026-09-23, 2차 재발 — 주피터 실사: "폰 확인까지
+            // 다 했는데 또 뜬다") — 위 loginScreenShowing 체크만으로는
+            // 부족했다. completeLogin()이 loginScreen을 감추는 바로 그
+            // 틈에, GopangWallet.restoreFromPrivateKey()가 IndexedDB에
+            // 쓴 개인키가 아직 커밋 전일 수 있다(요청의 onsuccess는
+            // 트랜잭션 커밋보다 먼저 끝날 수 있음) — 이 좁은 창에서
+            // 새로고침이 끼어들면 재시작된 페이지가 방금 저장된 지갑을
+            // 못 읽어 처음부터(전화번호 입력) 다시 요구한다. dashboard.
+            // html의 completeLogin()이 로그인 성공 시점에 심어두는
+            // window._hondiAuthGraceUntil(약 4초짜리 유예 타임스탬프)도
+            // 함께 확인해, loginScreen이 막 사라진 뒤에도 커밋이 끝날
+            // 시간을 확실히 준다.
+            var inAuthGrace = window._hondiAuthGraceUntil && Date.now() < window._hondiAuthGraceUntil;
+            if ((overlay && overlay.classList.contains('show')) || loginScreenShowing || inAuthGrace) {
+              console.log('[PWA] 로그인 진행 중(또는 유예 시간) — 자동 새로고침 보류, 1초 후 재확인');
               _autoApplyReloadTimer = setTimeout(_fireReload, 1000);
               return;
             }
