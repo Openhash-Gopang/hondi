@@ -633,7 +633,7 @@ const JEJU_L2_TABLE = [
   // static 방식을 그대로 유지 — 잘못 domain을 채우면 존재하지 않는
   // 템플릿 fetch가 실패해 조용히 static으로 폴백되긴 하지만(코드상
   // try/catch), 혼란을 막기 위해 있는 그대로 static으로 둔다.
-  { code: 'SP-DO-COMM',     file: '02-do-dept/SP-DO-COMM_v1.2.md',
+  { code: 'SP-DO-COMM',     file: '02-do-dept/SP-DO-COMM_v1.3.md',
     domain: 'comm', 도코드: 'jeju',
     // ★ 2026-09-16 수정 — 세계일보(2026-07-04)+조직도 스크린샷 확인 결과
     // '소통청렴담당관'의 청렴·감사 기능이 별도 조직(청렴감찰관,

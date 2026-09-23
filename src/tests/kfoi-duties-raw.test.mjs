@@ -834,5 +834,69 @@ await test('작업 #17 안전장치: 정리 이후에도 배선된 division의 t
   assert.ok(/task_key/.test(traffic), '기존 배선된 교통과 division의 task_key가 사라짐(회귀)');
 });
 
+await test('작업 #18: 도청 17개 중 순수 개칭 7건이 §2 실제 사무로 채워졌다(회계재산관리과·교육정책협력과·평화외교과·소통ㆍ제2공항담당관·경제활력국 3과)', () => {
+  const digest = buildDigest();
+  const checks = [
+    ['SP-DIV-JACHI-ACCOUNTING', '회계재산관리과'], ['SP-DIV-CULTURE-EDUCOOPERATION', '교육정책협력과'],
+    ['SP-DIV-TOURISM-PEACEDIPLOMACY', '평화외교과'], ['SP-DO-COMM', '소통ㆍ제2공항담당관'],
+    ['SP-DIV-ECON-JOBECONOMY', '경제정책과'], ['SP-DIV-ECON-INVESTMENT', '기업정책과'], ['SP-DIV-ECON-SMALLBIZ', '소상공인물류과'],
+  ];
+  for (const [id, name] of checks) {
+    const found = [...digest.tiers.do.entries].find(e => e.id === id);
+    assert.ok(found, `${id}(${name}): digest에 없음`);
+    assert.equal(found.state, 'revised', `${id}: v1.0 그대로면 갱신 안 됨`);
+    assert.ok(found.does && found.does.length > 0, `${id}: does가 비어 있음`);
+    for (const line of found.does) {
+      assert.ok(!line.startsWith('>'), `${id}: caveat이 does에 섞임`);
+      assert.ok(/^\d{1,3}\.\s/.test(line), `${id}: 번호 매긴 사무 형식 아님`);
+    }
+  }
+});
+await test('작업 #18: 노동일자리과가 신설돼 경제활력국이 확정 4과 구조(경제정책과·노동일자리과·기업정책과·소상공인물류과)를 갖췄다', () => {
+  const digest = buildDigest();
+  const econ = digest.tiers.do.entries.find(e => e.id === 'SP-DO-ECON');
+  const divs = digest.tiers.do.entries.filter(e => e.kind === 'division' && e.parent === econ.name);
+  assert.equal(divs.length, 4);
+  const labor = divs.find(e => e.id === 'SP-DIV-ECON-LABOR');
+  assert.ok(labor && labor.does && labor.does.length > 0, '노동일자리과가 없거나 비어 있음');
+});
+await test('작업 #18: 미래산업국이 확정 3과 구조(미래성장과·첨단산업과·정보지원과)로 정리되고, 실존하지 않던 옛 3과는 archive로 이동했다', () => {
+  const digest = buildDigest();
+  const innov = digest.tiers.do.entries.find(e => e.id === 'SP-DO-INNOV');
+  const divs = digest.tiers.do.entries.filter(e => e.kind === 'division' && e.parent === innov.name);
+  assert.equal(divs.length, 3);
+  assert.ok(divs.some(d => d.name === '미래성장과'));
+  assert.ok(divs.some(d => d.name === '첨단산업과'));
+  assert.ok(divs.some(d => d.name === '정보지원과'));
+  for (const f of ['SP-DIV-INNOV-DIGITAL_v1.0.md', 'SP-DIV-INNOV-ENERGYINDUSTRY_v1.0.md', 'SP-DIV-INNOV-SPACEMOBILITY_v1.0.md']) {
+    assert.ok(fs.existsSync(path.join(ROOT, 'prompts/gov-tree/02-do-dept/archive', f)), `${f}: archive에 없음`);
+    assert.ok(!fs.existsSync(path.join(ROOT, 'prompts/gov-tree/02-do-dept/divisions', f)), `${f}: live에 아직 있음`);
+  }
+});
+await test('작업 #18: 도시계획과가 교통항공국에서 도시건설국으로 실제로 옮겨졌고(시행규칙 제13조), §2도 채워졌다', () => {
+  const digest = buildDigest();
+  const housing = digest.tiers.do.entries.find(e => e.id === 'SP-DO-HOUSING');
+  const transport = digest.tiers.do.entries.find(e => e.id === 'SP-DO-TRANSPORT');
+  const urbanplan = digest.tiers.do.entries.find(e => e.id === 'SP-DIV-TRANSPORT-URBANPLAN');
+  assert.ok(urbanplan, '도시계획과가 digest에 없음');
+  assert.equal(urbanplan.parent, housing.name, `도시계획과의 parent가 ${urbanplan.parent} — ${housing.name}(도시건설국)이어야 함`);
+  assert.notEqual(urbanplan.parent, transport.name, '도시계획과가 아직 교통항공국 소속으로 남아 있음');
+  assert.ok(urbanplan.does && urbanplan.does.length > 0, '도시계획과 §2가 비어 있음');
+  const transportDivs = digest.tiers.do.entries.filter(e => e.kind === 'division' && e.parent === transport.name);
+  assert.equal(transportDivs.length, 2, '교통항공국은 이제 2과(교통항공정책과·대중교통과)여야 함');
+  assert.ok(!transportDivs.some(d => d.id === 'SP-DIV-TRANSPORT-15MINCITY'), '폐지된 15분도시과가 교통항공국에 남아 있음');
+  assert.ok(fs.existsSync(path.join(ROOT, 'prompts/gov-tree/02-do-dept/archive/SP-DIV-TRANSPORT-15MINCITY_v1.0.md')), '15분도시과가 archive에 없음');
+});
+await test('작업 #18: 보건정책과·건강위생과 대응 관계가 추정임을 파일에 정직하게 밝혔다', () => {
+  const p1 = execFileSync('bash', ['-c', 'grep -rl "^# 문서 코드  : SP-DIV-SAFETY-HEALTHPOLICY$" prompts/gov-tree/02-do-dept/divisions/*.md || true'], { cwd: ROOT }).toString().trim();
+  const p2 = execFileSync('bash', ['-c', 'grep -rl "^# 문서 코드  : SP-DIV-SAFETY-HEALTHHYGIENE$" prompts/gov-tree/02-do-dept/divisions/*.md || true'], { cwd: ROOT }).toString().trim();
+  assert.ok(fs.readFileSync(p1, 'utf8').includes('대응 관계 추정'));
+  assert.ok(fs.readFileSync(p2, 'utf8').includes('대응 관계 추정'));
+});
+await test('작업 #18 회귀: 파일 경로 참조(division-tables.js·gov-router.js·페이지 인벤토리)가 전부 최신 버전 파일명을 가리킨다', () => {
+  const out = execFileSync('python3', ['tools/check_stale_refs.py'], { cwd: ROOT }).toString();
+  assert.ok(out.includes('모든 참조가 최신 파일과 일치합니다'), out);
+});
+
 console.log(`\n${pass}/${pass + fail} passed`);
 process.exit(fail ? 1 : 0);

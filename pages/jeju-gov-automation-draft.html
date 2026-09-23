@@ -265,29 +265,33 @@ const DO_BUREAUS = [
       { id: "SP-DIV-PLAN-YOUTH", name: "청년정책담당관", spId: "SP-DIV-PLAN-YOUTH", file: "02-do-dept/divisions/SP-DIV-PLAN-YOUTH_v1.1.md", confirmed: true },
   ]},
   { id: "health", name: "안전건강실", spId: "SP-DO-SAFETY", kind: "do-dept", divisions: [
-      { id: "SP-DIV-SAFETY-HEALTHHYGIENE", name: "건강위생과", spId: "SP-DIV-SAFETY-HEALTHHYGIENE", file: "02-do-dept/divisions/SP-DIV-SAFETY-HEALTHHYGIENE_v1.0.md", confirmed: true },
-      { id: "SP-DIV-SAFETY-HEALTHPOLICY", name: "보건정책과", spId: "SP-DIV-SAFETY-HEALTHPOLICY", file: "02-do-dept/divisions/SP-DIV-SAFETY-HEALTHPOLICY_v1.0.md", confirmed: true },
+      { id: "SP-DIV-SAFETY-HEALTHHYGIENE", name: "건강위생과", spId: "SP-DIV-SAFETY-HEALTHHYGIENE", file: "02-do-dept/divisions/SP-DIV-SAFETY-HEALTHHYGIENE_v1.1.md", confirmed: true },
+      { id: "SP-DIV-SAFETY-HEALTHPOLICY", name: "보건정책과", spId: "SP-DIV-SAFETY-HEALTHPOLICY", file: "02-do-dept/divisions/SP-DIV-SAFETY-HEALTHPOLICY_v1.1.md", confirmed: true },
       { id: "SP-DIV-SAFETY-NATURALDISASTER", name: "자연재난과", spId: "SP-DIV-SAFETY-NATURALDISASTER", file: "02-do-dept/divisions/SP-DIV-SAFETY-NATURALDISASTER_v1.1.md", confirmed: true },
       { id: "SP-DIV-SAFETY-POLICY", name: "안전정책과", spId: "SP-DIV-SAFETY-POLICY", file: "02-do-dept/divisions/SP-DIV-SAFETY-POLICY_v1.1.md", confirmed: true },
       { id: "SP-DIV-SAFETY-SOCIALDISASTER", name: "사회재난과", spId: "SP-DIV-SAFETY-SOCIALDISASTER", file: "02-do-dept/divisions/SP-DIV-SAFETY-SOCIALDISASTER_v1.1.md", confirmed: true },
   ]},
   { id: "jachi", name: "특별자치행정국", spId: "SP-DO-JACHI", kind: "do-dept", divisions: [
       { id: "SP-DIV-JACHI-43SUPPORT", name: "4·3지원과", spId: "SP-DIV-JACHI-43SUPPORT", file: "02-do-dept/divisions/SP-DIV-JACHI-43SUPPORT_v1.2.md", confirmed: true },
-      { id: "SP-DIV-JACHI-ACCOUNTING", name: "회계재산관리과", spId: "SP-DIV-JACHI-ACCOUNTING", file: "02-do-dept/divisions/SP-DIV-JACHI-ACCOUNTING_v1.1.md", confirmed: true },
+      { id: "SP-DIV-JACHI-ACCOUNTING", name: "회계재산관리과", spId: "SP-DIV-JACHI-ACCOUNTING", file: "02-do-dept/divisions/SP-DIV-JACHI-ACCOUNTING_v1.2.md", confirmed: true },
       { id: "SP-DIV-JACHI-GENERAL", name: "총무과", spId: "SP-DIV-JACHI-GENERAL", file: "02-do-dept/divisions/SP-DIV-JACHI-GENERAL_v1.1.md", confirmed: true },
       { id: "SP-DIV-JACHI-SELFGOV", name: "자치행정과", spId: "SP-DIV-JACHI-SELFGOV", file: "02-do-dept/divisions/SP-DIV-JACHI-SELFGOV_v1.1.md", confirmed: true },
   ]},
   { id: "econ", name: "경제활력국", spId: "SP-DO-ECON", kind: "do-dept", divisions: [
-      { id: "SP-DIV-ECON-JOBECONOMY", name: "경제정책과", spId: "SP-DIV-ECON-JOBECONOMY", file: "02-do-dept/divisions/SP-DIV-ECON-JOBECONOMY_v1.0.md", confirmed: true },
-      { id: "SP-DIV-ECON-INVESTMENT", name: "기업정책과", spId: "SP-DIV-ECON-INVESTMENT", file: "02-do-dept/divisions/SP-DIV-ECON-INVESTMENT_v1.0.md", confirmed: true },
-      { id: "SP-DIV-ECON-SMALLBIZ", name: "소상공인물류과", spId: "SP-DIV-ECON-SMALLBIZ", file: "02-do-dept/divisions/SP-DIV-ECON-SMALLBIZ_v1.0.md", confirmed: true },
+      { id: "SP-DIV-ECON-JOBECONOMY", name: "경제정책과", spId: "SP-DIV-ECON-JOBECONOMY", file: "02-do-dept/divisions/SP-DIV-ECON-JOBECONOMY_v1.1.md", confirmed: true },
+      { id: "SP-DIV-ECON-INVESTMENT", name: "기업정책과", spId: "SP-DIV-ECON-INVESTMENT", file: "02-do-dept/divisions/SP-DIV-ECON-INVESTMENT_v1.1.md", confirmed: true },
+      { id: "SP-DIV-ECON-SMALLBIZ", name: "소상공인물류과", spId: "SP-DIV-ECON-SMALLBIZ", file: "02-do-dept/divisions/SP-DIV-ECON-SMALLBIZ_v1.1.md", confirmed: true },
+      { id: "SP-DIV-ECON-LABOR", name: "노동일자리과", spId: "SP-DIV-ECON-LABOR", file: "02-do-dept/divisions/SP-DIV-ECON-LABOR_v1.0.md", confirmed: false },
       { id: "SP-DIV-ECON-EMPLOYCENTER", name: "고용센터", spId: "SP-DIV-ECON-EMPLOYCENTER", file: "02-do-dept/divisions/SP-DIV-ECON-EMPLOYCENTER_v1.0.md", confirmed: true },
   ]},
+  // 2026-09-24 확인(시행규칙 제21조): 미래산업국은 미래성장과ㆍ첨단산업과ㆍ정보지원과 3개다. 기존
+  // 디지털혁신과ㆍ에너지산업과ㆍ우주모빌리티과(구 혁신산업국 시절 명칭, 배선 없음 확인)는 archive로
+  // 옮겼다. 첨단산업과ㆍ정보지원과는 별표7(2024.01.22.)에 이름 자체가 없어 사무 근거가 없다 — file
+  // 없이 등록만 해 둔다(§2 미작성, 다음 배치에서 실제 자료 확보 후 채운다).
   { id: "innov", name: "미래산업국", spId: "SP-DO-INNOV", kind: "do-dept", divisions: [
-      { id: "SP-DIV-INNOV-DIGITAL", name: "디지털혁신과", spId: "SP-DIV-INNOV-DIGITAL", file: "02-do-dept/divisions/SP-DIV-INNOV-DIGITAL_v1.0.md", confirmed: true },
-      { id: "SP-DIV-INNOV-ENERGYINDUSTRY", name: "에너지산업과", spId: "SP-DIV-INNOV-ENERGYINDUSTRY", file: "02-do-dept/divisions/SP-DIV-INNOV-ENERGYINDUSTRY_v1.0.md", confirmed: true },
       { id: "SP-DIV-INNOV-FUTUREGROWTH", name: "미래성장과", spId: "SP-DIV-INNOV-FUTUREGROWTH", file: "02-do-dept/divisions/SP-DIV-INNOV-FUTUREGROWTH_v1.1.md", confirmed: true },
-      { id: "SP-DIV-INNOV-SPACEMOBILITY", name: "우주모빌리티과", spId: "SP-DIV-INNOV-SPACEMOBILITY", file: "02-do-dept/divisions/SP-DIV-INNOV-SPACEMOBILITY_v1.0.md", confirmed: true },
+      { id: "SP-DIV-INNOV-ADVTECH", name: "첨단산업과", spId: "SP-DIV-INNOV-ADVTECH", file: "", confirmed: false },
+      { id: "SP-DIV-INNOV-INFOSUPPORT", name: "정보지원과", spId: "SP-DIV-INNOV-INFOSUPPORT", file: "", confirmed: false },
   ]},
   { id: "climate", name: "환경산림자원국", spId: "SP-DO-CLIMATE", kind: "do-dept", divisions: [
       { id: "SP-DIV-CLIMATE-ENVPOLICY", name: "환경정책과", spId: "SP-DIV-CLIMATE-ENVPOLICY", file: "02-do-dept/divisions/SP-DIV-CLIMATE-ENVPOLICY_v1.1.md", confirmed: true },
@@ -316,22 +320,24 @@ const DO_BUREAUS = [
       { id: "SP-DIV-HOUSING-ARCHITECTURE", name: "건설주택국) 건축경관과", spId: "SP-DIV-HOUSING-ARCHITECTURE", file: "02-do-dept/divisions/SP-DIV-HOUSING-ARCHITECTURE_v1.1.md", confirmed: true },
       { id: "SP-DIV-HOUSING-HOUSINGLAND", name: "건설주택국) 주택토지과", spId: "SP-DIV-HOUSING-HOUSINGLAND", file: "02-do-dept/divisions/SP-DIV-HOUSING-HOUSINGLAND_v1.1.md", confirmed: true },
       { id: "SP-DIV-HOUSING-ROADMANAGE", name: "건설주택국) 도로관리과", spId: "SP-DIV-HOUSING-ROADMANAGE", file: "02-do-dept/divisions/SP-DIV-HOUSING-ROADMANAGE_v1.1.md", confirmed: true },
+      { id: "SP-DIV-TRANSPORT-URBANPLAN", name: "건설주택국) 도시계획과", spId: "SP-DIV-TRANSPORT-URBANPLAN", file: "02-do-dept/divisions/SP-DIV-TRANSPORT-URBANPLAN_v1.1.md", confirmed: true },  // 2026-09-24: 교통항공국에서 이동(시행규칙 제13조), spId는 이력 보존을 위해 그대로 둠
   ]},
+  // 2026-09-24 확인(시행규칙 제14조): 교통항공국은 교통항공정책과ㆍ대중교통과 2개다. 도시계획과는
+  // 도시건설국 소속으로 확인돼 그쪽으로 옮겼다(아래 housing 블록 참고). 15분도시과는 폐지 확인,
+  // archive로 이동.
   { id: "transport", name: "교통항공국", spId: "SP-DO-TRANSPORT", kind: "do-dept", divisions: [
-      { id: "SP-DIV-TRANSPORT-TRAFFICPOLICY", name: "교통정책과", spId: "SP-DIV-TRANSPORT-TRAFFICPOLICY", file: "02-do-dept/divisions/SP-DIV-TRANSPORT-TRAFFICPOLICY_v1.0.md", confirmed: true },
+      { id: "SP-DIV-TRANSPORT-TRAFFICPOLICY", name: "교통항공정책과", spId: "SP-DIV-TRANSPORT-TRAFFICPOLICY", file: "02-do-dept/divisions/SP-DIV-TRANSPORT-TRAFFICPOLICY_v1.1.md", confirmed: true },
       { id: "SP-DIV-TRANSPORT-PUBLICTRANSPORT", name: "대중교통과", spId: "SP-DIV-TRANSPORT-PUBLICTRANSPORT", file: "02-do-dept/divisions/SP-DIV-TRANSPORT-PUBLICTRANSPORT_v1.1.md", confirmed: true },
-      { id: "SP-DIV-TRANSPORT-URBANPLAN", name: "도시계획과", spId: "SP-DIV-TRANSPORT-URBANPLAN", file: "02-do-dept/divisions/SP-DIV-TRANSPORT-URBANPLAN_v1.0.md", confirmed: true },
-      { id: "SP-DIV-TRANSPORT-15MINCITY", name: "15분도시과", spId: "SP-DIV-TRANSPORT-15MINCITY", file: "02-do-dept/divisions/SP-DIV-TRANSPORT-15MINCITY_v1.0.md", confirmed: true },
   ]},
   { id: "culture", name: "문화체육교육국", spId: "SP-DO-CULTURE", kind: "do-dept", divisions: [
       { id: "SP-DIV-CULTURE-CULTUREPOLICY", name: "문화정책과", spId: "SP-DIV-CULTURE-CULTUREPOLICY", file: "02-do-dept/divisions/SP-DIV-CULTURE-CULTUREPOLICY_v1.1.md", confirmed: true },
       { id: "SP-DIV-CULTURE-SPORTSPROMO", name: "체육진흥과", spId: "SP-DIV-CULTURE-SPORTSPROMO", file: "02-do-dept/divisions/SP-DIV-CULTURE-SPORTSPROMO_v1.1.md", confirmed: true },
-      { id: "SP-DIV-CULTURE-EDUCOOPERATION", name: "교육정책협력과", spId: "SP-DIV-CULTURE-EDUCOOPERATION", file: "02-do-dept/divisions/SP-DIV-CULTURE-EDUCOOPERATION_v1.0.md", confirmed: true },
+      { id: "SP-DIV-CULTURE-EDUCOOPERATION", name: "교육정책협력과", spId: "SP-DIV-CULTURE-EDUCOOPERATION", file: "02-do-dept/divisions/SP-DIV-CULTURE-EDUCOOPERATION_v1.1.md", confirmed: true },
   ]},
   { id: "tourism", name: "관광교류국", spId: "SP-DO-TOURISM", kind: "do-dept", divisions: [
       { id: "SP-DIV-TOURISM-TOURISMPOLICY", name: "관광정책과", spId: "SP-DIV-TOURISM-TOURISMPOLICY", file: "02-do-dept/divisions/SP-DIV-TOURISM-TOURISMPOLICY_v1.1.md", confirmed: true },
       { id: "SP-DIV-TOURISM-TOURISMINDUSTRY", name: "관광산업과", spId: "SP-DIV-TOURISM-TOURISMINDUSTRY", file: "02-do-dept/divisions/SP-DIV-TOURISM-TOURISMINDUSTRY_v1.1.md", confirmed: true },
-      { id: "SP-DIV-TOURISM-PEACEDIPLOMACY", name: "평화외교과", spId: "SP-DIV-TOURISM-PEACEDIPLOMACY", file: "02-do-dept/divisions/SP-DIV-TOURISM-PEACEDIPLOMACY_v1.0.md", confirmed: true },
+      { id: "SP-DIV-TOURISM-PEACEDIPLOMACY", name: "평화외교과", spId: "SP-DIV-TOURISM-PEACEDIPLOMACY", file: "02-do-dept/divisions/SP-DIV-TOURISM-PEACEDIPLOMACY_v1.1.md", confirmed: true },
   ]},
   { id: "agri", name: "농축산식품국", spId: "SP-DO-AGRI", kind: "do-dept", divisions: [
       { id: "SP-DIV-AGRI-ECOFARMPOLICY", name: "친환경농업정책과", spId: "SP-DIV-AGRI-ECOFARMPOLICY", file: "02-do-dept/divisions/SP-DIV-AGRI-ECOFARMPOLICY_v1.1.md", confirmed: true },
