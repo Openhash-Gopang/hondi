@@ -59,6 +59,26 @@
   }
   #debug-log .err { color: #fca5a5; }
   #debug-log .ok  { color: #6ee7b7; }
+
+  /* 2026-09-25 — 서명 요청(sign_request) 화면: 구글식 본인 확인 (주피터 지시) */
+  #card.simple-mode { max-width: 420px; padding: 28px 22px 32px; }
+  #card.simple-mode #debug-log { display: none; }
+  #card.simple-mode.has-error #debug-log { display: block; }
+  .dl-simple h1 { font-size: 22px; line-height: 1.4; margin-bottom: 8px; }
+  #dl-rows { text-align: left; margin: 22px 0 8px; }
+  #dl-rows .row { margin-bottom: 18px; }
+  #dl-rows .k { font-size: 15px; font-weight: 700; color: #111827; }
+  #dl-rows .v { font-size: 16px; color: #4b5563; margin-top: 2px; word-break: break-all; }
+  #dl-rows details { font-size: 13px; color: #6b7280; margin-top: 4px; }
+  #dl-rows details div { font-family: monospace; font-size: 11px; word-break: break-all; margin-top: 4px; }
+  /* 두 버튼: 크기는 크게, 사이는 넓게(64px) — 실수로 잘못 누르지 않도록 */
+  .dl-simple #btn-approve, .dl-simple #btn-deny {
+    background: #fff; border: 1px solid #d1d5db; min-height: 56px; font-size: 16px; font-weight: 600;
+    margin-bottom: 0; border-radius: 12px;
+  }
+  .dl-simple #btn-approve { color: #0b57d0; margin-top: 24px; }
+  .dl-simple #btn-deny { color: #b3261e; margin-top: 64px; }
+  .dl-simple #btn-approve:disabled, .dl-simple #btn-deny:disabled { background: #f3f4f6; color: #9ca3af; }
 </style>
 </head>
 <body>
@@ -110,7 +130,7 @@
 
   const $ = (id) => document.getElementById(id);
   const show = (id) => { ['loading','content','error','unlock'].forEach(x => $(x).classList.add('hide')); $(id).classList.remove('hide'); };
-  const setStatus = (msg, kind) => { $('status').textContent = msg || ''; $('status').className = kind || ''; };
+  const setStatus = (msg, kind) => { $('status').textContent = msg || ''; $('status').className = kind || ''; if (kind === 'error') $('card').classList.add('has-error'); };
 
   // 2026-07-20 신설 — USB 원격 디버깅이 반복적으로 불안정해, 화면에
   // 직접 단계별 로그를 남긴다. 각 단계 진입·성공·실패를 전부 기록해서
@@ -194,17 +214,48 @@
     // 문구를 그대로 쓰면 사실과 다르게 겁을 주게 된다. 또한 "뭐에
     // 서명하는지" 안 보여주고 버튼만 누르게 하면 맹목적 서명이 되므로
     // sigMsg를 반드시 화면에 보여준다.
-    if (data.purpose === 'sign_request') {
-      document.querySelector('#content h1').textContent = '서명 요청이 도착했습니다';
-      document.querySelector('#content .warn').innerHTML =
-        `이 요청을 승인하면 <strong>아래 내용 1건에만</strong> 서명합니다. ` +
-        `계정 전체 권한이나 개인키는 그 기기로 넘어가지 않습니다.<br><br>` +
-        `<div style="background:#fff;border:1px solid #fde68a;border-radius:6px;` +
-        `padding:8px;margin-top:6px;font-family:monospace;font-size:11px;` +
-        `word-break:break-all;color:#111827">${_escapeHtml(data.sigMsg || '(내용 없음)')}</div>`;
-      $('btn-approve').textContent = '본인이 맞습니다 — 서명 허용';
-    }
+    if (data.purpose === 'sign_request') renderSignRequestSimple(data);
     show('content');
+  }
+
+  // ── 서명 요청 화면(구글식) — 요청 내용(sigMsg)을 사람이 읽는 문장으로 바꿔 보여 준다 ──
+  // 화면에 보이는 문장은 실제로 서명할 sigMsg에서 그대로 읽어 낸 값이다(맹목적 서명 방지).
+  // 해석하지 못하는 요청은 문장을 지어내지 않고 원문을 펼쳐서 보여 준다.
+  function parseSigMsg(msg) {
+    const raw = String(msg || '');
+    if (raw.startsWith('kauth-login:')) return { title: '로그인을 시도하고 계신가요?', raw };
+    const kv = {};
+    raw.split('\n').forEach(l => { const i = l.indexOf('='); if (i > 0) kv[l.slice(0, i)] = l.slice(i + 1); });
+    if (kv.ns === 'hondi.net/digit' && /^[1-9][0-9]{0,9}$/.test(kv.serial || '')) {
+      if (kv.type === 'claim') return { title: '번호 ' + kv.serial + ' 등록을 시도하고 계신가요?', raw };
+      if (kv.type === 'transfer') return { title: '번호 ' + kv.serial + '을(를) 다른 사람에게 양도하려는 건가요?', raw };
+      if (kv.type === 'revoke') return { title: '번호 ' + kv.serial + '을(를) 영구 폐기하려는 건가요?', raw };
+    }
+    return { title: '이 요청을 승인하시겠습니까?', raw, showRaw: true };
+  }
+  function fmtRequestTime(ms) {
+    if (!ms) return '방금';
+    const m = Math.floor((Date.now() - ms) / 60000);
+    if (m < 2) return '방금';
+    if (m < 60) return m + '분 전';
+    return new Date(ms).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+  }
+  function renderSignRequestSimple(data) {
+    const info = parseSigMsg(data.sigMsg);
+    const c = $('content');
+    c.classList.add('dl-simple'); $('card').classList.add('simple-mode');
+    c.querySelector('h1').textContent = info.title;
+    $('pc-label').style.display = 'none';
+    c.querySelector('.warn').style.display = 'none';
+    let box = $('dl-rows');
+    if (!box) { box = document.createElement('div'); box.id = 'dl-rows'; c.insertBefore(box, $('btn-approve')); }
+    const row = (k, v) => '<div class="row"><div class="k">' + k + '</div><div class="v">' + _escapeHtml(v) + '</div></div>';
+    box.innerHTML = row('기기', data.pcLabel || '알 수 없는 기기')
+      + row('다음 위치 근처', data.pcGeo ? data.pcGeo + (data.pcGeoSrc === 'ip' ? ' (접속 위치 기준, 대략)' : '') : '확인할 수 없음')
+      + row('시간', fmtRequestTime(data.createdAt))
+      + (info.showRaw ? '<details open><summary>요청 내용</summary><div>' + _escapeHtml(info.raw || '(내용 없음)') + '</div></details>' : '');
+    $('btn-approve').textContent = '✓ 예, 본인이 맞습니다';
+    $('btn-deny').textContent = '✕ 아니요, 허용하지 않습니다';
   }
 
   function _escapeHtml(s) {

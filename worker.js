@@ -14,6 +14,9 @@
 import { handleAiChat, handleEscalate } from './src/worker/ai-chat-handler.js';
 import { handleOrderQueue } from './src/worker/order-queue-handler.js';
 import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
+import { makeDigitClaimHandler } from './src/worker/digit-claim-handler.js';
+import { makePocketBaseDigitStore } from './src/worker/digit-claim-store.js';
+import { resolveDeviceGeo } from './src/worker/device-geo.js';
 import { handleDeptTaskCreate, handleDeptTaskUpdate, createDeptTaskCore, DEPT_TASK_TAXONOMY, _authoritativeCheck, _verifyAccessCert } from './src/worker/dept-task-handler.js';
 // 2026-09-20: K-FOI(SP-28_kfoi) — 정보 공개 청구 비서·청구 건 추적·공유 아카이브. 구현은 이 모듈에 있고
 // worker.js에는 import·팩토리(_kfoiHandlers)·라우트만 둔다(4만 줄 공유 파일의 병합 충돌을 줄이려는 분리).
@@ -1004,12 +1007,14 @@ async function handleDeviceLinkInit(request, env, corsHeaders) {
 
   const sessionId = crypto.randomUUID();
   const code = _generateDeviceLinkCode();
+  const _geo = await resolveDeviceGeo(env, request, body);       // 카카오 주소(요청 기기 위치) — 실패해도 세션 생성은 계속
   const record = {
     guid: profile.guid, e164, purpose,
     pcPubKeyB64u: purpose === 'key_transfer' ? pcPubKeyB64u : null,
     sigMsg: purpose === 'sign_request' ? sigMsg : null,
     pcLabel: pcLabel || '알 수 없는 기기',
     code, attempts: 0, state: 'pending', smsResendCount: 0,
+    pcGeo: _geo.address, pcGeoSrc: _geo.src, createdAt: Date.now(),      // 승인 화면 표시용(2026-09-25, 좌표는 저장하지 않음)
   };
   await _dlPut(env, sessionId, record, DEVICE_LINK_TTL_SECONDS);
 
@@ -1194,6 +1199,7 @@ async function handleDeviceLinkSession(request, env, corsHeaders) {
     pcPubKeyB64u: record.pcPubKeyB64u,
     purpose: record.purpose || 'key_transfer', // 2026-07-23 신설 — 이전 세션 레코드엔 없을 수 있어 기본값 보정
     sigMsg: record.sigMsg || null,
+    pcGeo: record.pcGeo || null, pcGeoSrc: record.pcGeoSrc || null, createdAt: record.createdAt || null,
   }), { status: 200, headers: corsHeaders });
 }
 
@@ -5413,6 +5419,18 @@ function _randomShortId() {
 // 관례가 존재)를 발견해 그걸 그대로 재사용하도록 바꿨다. 새 테이블을
 // 만들면 "코드=신원"이라는 기존 설계와 별개로 "코드=결제대상"이라는
 // 두 번째 진실의 원천이 생겨 혼란만 커진다.
+// ── 혼디 숫자 번호: 서명된 청구 레코드 API (GET /digit/status·/digit/chain, POST /digit/record) ──
+// 서명한 키는 그 guid 계정에 핀(pin)된 지갑 키(profiles.pubkey_ed25519)여야 한다.
+// 예약 번호(5자리 미만 등) 청구 권한 서명 검증용 공개키는 env.DIGIT_AUTHORITY_PUBKEY (없으면 예약 번호 청구 불가).
+function handleDigitRoutes(request, url, env, corsHeaders) {
+  const handler = makeDigitClaimHandler({
+    l1: makePocketBaseDigitStore({ base: L1_DEFAULT, getToken: () => _l1AdminToken(env) }),
+    getPinnedPubKey: async (e, guid) => (await _l1FindProfileByGuid(e, guid))?.pubkey_ed25519 || null,
+    authorityPubKey: env.DIGIT_AUTHORITY_PUBKEY || null,
+  });
+  return handler.handle(request, url, env, corsHeaders);
+}
+
 async function handlePayCodeMine(request, url, env, corsHeaders) {
   const guid = (url.searchParams.get('guid') || '').trim();
   const businessName = (url.searchParams.get('business_name') || '').trim();
@@ -13484,6 +13502,8 @@ export default {
     if (pathname === '/biz/finance/revenue-report' && request.method === 'GET') return handleFinanceRevenueReport(request, url, env, corsHeaders);
     if (pathname === '/biz/products/set-cost-price' && request.method === 'POST') return handleSetProductCostPrice(request, env, corsHeaders);
     // ── 혼디 숫자코드 무수수료 결제(POS) — 사업자 티어 마지막 항목 (2026-08-11 신설) ──
+    // ── 혼디 숫자 번호 — 서명된 청구 레코드(중복 확인·청구·양도·폐기, 2026-09-24 신설) ──
+    if (pathname.startsWith('/digit/')) return handleDigitRoutes(request, url, env, corsHeaders);
     if (pathname === '/pay/code/mine' && request.method === 'GET') return handlePayCodeMine(request, url, env, corsHeaders);
     if (pathname === '/pay/code/resolve' && request.method === 'GET') return handlePayCodeResolve(request, url, env, corsHeaders);
     if (pathname === '/biz/inventory/reorder-suggestions' && request.method === 'GET') return handleInventoryReorderSuggestions(request, url, env, corsHeaders);
