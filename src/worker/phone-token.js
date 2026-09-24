@@ -11,6 +11,19 @@
 // ═════════════════════════════════════════════════
 
 const enc = new TextEncoder();
+
+/**
+ * 전화번호 비교용 표준형. 혼디는 E.164 를 "+82" 뒤에 0을 그대로 둔 형태(+8201096627170)로 저장한다(worker.js _normalizePhoneE164).
+ * 그래서 +8201096627170 / +821096627170 / 01096627170 / 010-9662-7170 이 모두 '8201096627170' 으로 같아지게 한다.
+ * (예전에 이 검사가 계정의 `phone` 칸만 보고 표기 차이를 무시하지 못해, 문자 인증을 통과한 본인이 "번호가 다르다"고 거절당했다.)
+ */
+export function canonPhone(x) {
+  let d = String(x ?? '').replace(/\D/g, '');
+  if (!d) return '';
+  if (d.startsWith('0')) d = '82' + d;
+  else if (d.startsWith('82') && !d.startsWith('820')) d = '820' + d.slice(2);
+  return d;
+}
 async function hmacHex(secret, message) {
   const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
   const sig = await crypto.subtle.sign('HMAC', key, enc.encode(message));
@@ -42,9 +55,9 @@ export async function verifyFreshPhoneToken({ secret, token, guid, accountPhone,
   if (!(ttlMs > 0)) return bad(500, 'TTL_NOT_SET', '토큰 유효기간 설정이 없습니다.');
   const issuedAt = exp - ttlMs;
   if (now - issuedAt > freshMs) return bad(401, 'PHONE_TOKEN_STALE', '방금 진행한 문자 인증만 사용할 수 있습니다. 문자 인증을 다시 진행해 주세요.');
-  const acct = String(accountPhone || '').replace(/\D/g, '');
-  const tok = e164.replace(/^\+82/, '').replace(/\D/g, '');
-  if (!acct || acct !== tok) return bad(403, 'PHONE_MISMATCH', '인증한 전화번호가 이 계정에 등록된 번호와 다릅니다.');
+  const acct = canonPhone(accountPhone), tok = canonPhone(e164);
+  if (!acct) return bad(403, 'ACCOUNT_PHONE_MISSING', '이 계정에 등록된 전화번호를 찾지 못했습니다. 혼디 앱에서 다시 로그인해 주세요.');
+  if (acct !== tok) return bad(403, 'PHONE_MISMATCH', '인증한 전화번호가 이 계정에 등록된 번호와 다릅니다.');
   return { ok: true };
 }
 
@@ -56,7 +69,8 @@ export async function verifyFreshPhoneToken({ secret, token, guid, accountPhone,
  * verifyStepUp(token, guid, txHash) → { ok, reason } — worker.js의 _verifyStepUpToken 을 감싸서 넘긴다.
  */
 export async function verifyPhoneAndStepUp({ secret, token, guid, profile, ttlMs, freshMs, stepUpToken, verifyStepUp, now }) {
-  const pv = await verifyFreshPhoneToken({ secret, token, guid, accountPhone: profile?.phone, ttlMs, freshMs, ...(now ? { now } : {}) });
+  // 계정 전화번호는 profiles.e164 (가입 시 저장되는 칸). 예전 가져오기 데이터용 phone 칸은 보조로만 쓴다.
+  const pv = await verifyFreshPhoneToken({ secret, token, guid, accountPhone: profile?.e164 || profile?.phone, ttlMs, freshMs, ...(now ? { now } : {}) });
   if (!pv.ok) return pv;
   const creds = profile?.extra?.webauthn_credentials;
   if (Array.isArray(creds) && creds.length > 0) {

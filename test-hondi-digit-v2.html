@@ -149,7 +149,8 @@ const me = (() => {
 let state = { serial: null, checked: false, registered: false, mode: null };
 let lastCanvas = null, sms = null;
 
-const maskPhone = e164 => { const d = String(e164).replace(/^\+82/, '0').replace(/\D/g, ''); return d.length >= 8 ? d.slice(0, 3) + '-****-' + d.slice(-4) : '등록된 번호'; };
+// 혼디의 E.164 저장형은 +82 뒤에 0이 남는다(+8201096627170). 어느 표기로 와도 010-****-7170 으로 보이게 한다.
+const maskPhone = e164 => { let d = String(e164).replace(/\D/g, ''); if (d.startsWith('82')) d = d.slice(2); if (d && !d.startsWith('0')) d = '0' + d; return d.length >= 8 ? d.slice(0, 3) + '-****-' + d.slice(-4) : '등록된 번호'; };
 const b64uToBuf = s => { const b = s.replace(/-/g, '+').replace(/_/g, '/'); const bin = atob(b + '==='.slice((b.length + 3) % 4)); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u.buffer; };
 const bufToB64u = buf => { let s = ''; for (const c of new Uint8Array(buf)) s += String.fromCharCode(c); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
 const errText = (j, status) => (j && (j.detail || j.message || j.error)) || ('요청에 실패했습니다 (HTTP ' + status + ')');
