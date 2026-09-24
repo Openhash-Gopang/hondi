@@ -65,13 +65,27 @@ def perspective_coeffs(w, h, p):
 
 def make_frame(serial, rng, *, frac=0.7, blur=0.0, noise=0.0, gain=1.0, offset=0, contrast=1.0,
                cast=(1, 1, 1), rot=0.0, persp=0.0, jpeg=None, scene='screen', wall=110,
-               cut=None, dx=0, dy=0, logo=True, outline=True, occlude=None):
+               cut=None, dx=0, dy=0, logo=True, outline=True, occlude=None, clutter=False):
     code = render_code(serial, with_logo=logo, with_outline=outline)
     W, H = code.size
     M = 40 if scene == 'screen' else 260
     bg = 255 if scene == 'screen' else wall
-    paper = Image.new('L', (W + 2 * 40, H + 2 * 40), 255)
-    paper.paste(code, (40, 40))
+    if clutter:
+        # 실제 화면 사진처럼 코드 위·아래에 다른 화면 요소(글자줄·슬라이더·버튼·테두리)가 있다.
+        # 예전 가정("맨 아래 덩어리 = 숫자열")을 깨뜨리는 장면 — 실기기 테스트에서 발견된 실패 유형
+        top_pad, bot_pad = 110, 420
+        paper = Image.new('L', (W + 80, H + top_pad + bot_pad), 255)
+        paper.paste(code, (40, top_pad))
+        d = ImageDraw.Draw(paper); r2 = random.Random(int(rng.integers(1 << 30)))
+        for i in range(3): d.rectangle([40, 20 + i * 26, 40 + r2.randint(200, W - 80), 20 + i * 26 + 8], fill=60)
+        y = top_pad + H + 24
+        d.rectangle([40, y, W + 40, y + 6], fill=90)                                   # 슬라이더 줄
+        for i in range(3): d.rounded_rectangle([40 + i * ((W - 16) // 3 + 8), y + 30, 40 + i * ((W - 16) // 3 + 8) + (W - 16) // 3, y + 78], 8, outline=150, width=2)
+        d.rounded_rectangle([40 + (W - 16) // 3 + 8, y + 96, W + 40, y + 150], 10, fill=40)
+        for i in range(4): d.rectangle([40, y + 180 + i * 28, 40 + r2.randint(250, W - 40), y + 180 + i * 28 + 8], fill=70)
+    else:
+        paper = Image.new('L', (W + 2 * 40, H + 2 * 40), 255)
+        paper.paste(code, (40, 40))
     canvas = Image.new('L', (paper.width + 2 * (M - 40 if M > 40 else 0), paper.height + 2 * (M - 40 if M > 40 else 0)), bg)
     off = (canvas.width - paper.width) // 2
     canvas.paste(paper, (off, off))
@@ -195,6 +209,12 @@ def build_specs():
     for kind in ['bar', 'blocks', 'wide_lines', 'dots', 'other_text', 'typed_bold']:
         for _ in range(10):
             s = rand_serial(rng.randint(1, 10), rng); add('S6_fake_logo', kind, s, None, _fake=kind)
+    # S7: 어수선한 화면(코드 위·아래에 다른 화면 요소) — 로고 우선 탐색의 회귀 방지용
+    for cond, kw in [('clean', dict(frac=0.55)), ('tilt', dict(frac=0.55, rot=3, persp=0.04)), ('far', dict(frac=0.38, blur=0.8, noise=5, jpeg=75, gain=0.85)),
+                     ('phone', dict(frac=0.5, rot=-2, persp=0.05, blur=0.9, noise=6, jpeg=75, gain=0.8, scene='wall', wall=120))]:
+        for n in (1, 3, 5, 8, 10):
+            for _ in range(10):
+                s = rand_serial(n, rng); add('S7_clutter', f'{cond}@N{n}', s, s, clutter=True, **kw)
     if os.environ.get('QUICK'):
         specs = specs[::12]          # 빠른 점검용(약 1/12)
     for i, sp in enumerate(specs):
