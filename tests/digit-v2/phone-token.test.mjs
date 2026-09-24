@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { verifyFreshPhoneToken, verifyPhoneAndStepUp } from '../../src/worker/phone-token.js';
+import { verifyFreshPhoneToken, verifyPhoneAndStepUp, canonPhone } from '../../src/worker/phone-token.js';
 
 const SECRET = 'test-secret', TTL = 30 * 24 * 3600 * 1000, GUID = '2001:db8::7', NOW = 1_800_000_000_000;
 const enc = new TextEncoder();
@@ -48,7 +48,9 @@ test('만료된 토큰 거절', async () => {
 });
 test('토큰 전화번호가 계정 전화번호와 다르면 거절(남의 번호로 인증한 토큰)', async () => {
   const r = await verifyFreshPhoneToken({ ...base, accountPhone: '01011112222', token: await token() });
-  assert.equal(r.code, 'PHONE_MISMATCH'); assert.equal((await verifyFreshPhoneToken({ ...base, accountPhone: '', token: await token() })).code, 'PHONE_MISMATCH');
+  assert.equal(r.code, 'PHONE_MISMATCH');
+  // 계정에 전화번호가 아예 없으면 "다르다"가 아니라 "찾지 못했다"고 정확히 알린다
+  assert.equal((await verifyFreshPhoneToken({ ...base, accountPhone: '', token: await token() })).code, 'ACCOUNT_PHONE_MISSING');
 });
 test('형식 오류·빈 토큰·비밀값 없음', async () => {
   for (const t of ['', 'abc', 'a:b.c', undefined, null]) assert.equal((await verifyFreshPhoneToken({ ...base, token: t })).ok, false);
@@ -75,4 +77,24 @@ test('지문 계정: step-up 통과 시 등록 허용, 검증기는 (토큰, gui
 test('SMS 토큰이 이미 부적합하면 step-up 검사 전에 그 오류를 돌려준다', async () => {
   const r = await verifyPhoneAndStepUp(suArgs({ token: await token({ issuedAgoMs: 20 * 60_000 }), freshMs: 10 * 60_000, profile: { phone: '01096627170', extra: { webauthn_credentials: [{}] } }, verifyStepUp: async () => ({ ok: true }) }));
   assert.equal(r.code, 'PHONE_TOKEN_STALE');
+});
+
+// ── 회귀: "문자 인증한 본인 번호가 계정 번호와 다르다"는 오거절 (표기 차이 + 계정의 e164 칸) ──
+test('canonPhone: 혼디의 실제 저장형(+82 뒤 0 유지)과 통상 E.164·국내형·대시형이 모두 같은 값', () => {
+  for (const x of ['+8201096627170', '+821096627170', '01096627170', '010-9662-7170', '8201096627170', ' +82 010 9662 7170 '])
+    assert.equal(canonPhone(x), '8201096627170', x);
+  assert.equal(canonPhone(''), ''); assert.equal(canonPhone(null), '');
+});
+test('계정 e164가 +8201096627170(실제 저장형)이고 토큰도 같은 형이면 통과 — 이번에 오거절되던 경우', async () => {
+  assert.ok((await verifyFreshPhoneToken({ ...base, accountPhone: '+8201096627170', token: await token() })).ok);
+});
+test('계정 e164가 통상형(+821096627170)이어도 토큰(+8201096627170)과 같은 번호로 인정', async () => {
+  assert.ok((await verifyFreshPhoneToken({ ...base, accountPhone: '+821096627170', token: await token() })).ok);
+});
+test('verifyPhoneAndStepUp은 계정의 e164 칸을 쓴다(phone 칸이 비어 있어도 통과, phone만 있으면 보조로 통과)', async () => {
+  const su = async () => ({ ok: true });
+  assert.ok((await verifyPhoneAndStepUp(suArgs({ token: await token(), profile: { e164: '+8201096627170', phone: '', extra: {} }, verifyStepUp: su }))).ok);
+  assert.ok((await verifyPhoneAndStepUp(suArgs({ token: await token(), profile: { phone: '01096627170', extra: {} }, verifyStepUp: su }))).ok);
+  assert.equal((await verifyPhoneAndStepUp(suArgs({ token: await token(), profile: { e164: '+8201011112222', extra: {} }, verifyStepUp: su }))).code, 'PHONE_MISMATCH');
+  assert.equal((await verifyPhoneAndStepUp(suArgs({ token: await token(), profile: null, verifyStepUp: su }))).code, 'ACCOUNT_PHONE_MISSING');
 });
