@@ -3,23 +3,41 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>혼디 숫자 코드 v2 — 인식 테스트 (1단계)</title>
+<title>혼디 숫자 코드 v2 — 등록·인식 테스트</title>
 <link rel="stylesheet" href="/assets/fonts.css">
 <style>
-  :root { --bg:#f6f7f9; --card:#fff; --line:#e3e6ea; --text:#111827; --sub:#4b5563; --ok:#0a7d33; --bad:#b42318; --acc:#1e4fd8; }
+  :root { --bg:#f6f7f9; --card:#fff; --line:#e3e6ea; --text:#111827; --sub:#4b5563; --ok:#0a7d33; --okbg:#e3f5e9; --bad:#b42318; --warn:#8a5a00; --warnbg:#fff1d6; --acc:#1e4fd8; --accbg:#e8eefc; }
   * { box-sizing: border-box; }
   body { margin:0; background:var(--bg); color:var(--text); font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif; font-size:16px; line-height:1.6; }
   main { max-width:760px; margin:0 auto; padding:16px; }
   h1 { font-size:22px; margin:8px 0 4px; } h2 { font-size:18px; margin:0 0 10px; }
   p.sub { color:var(--sub); margin:0 0 14px; font-size:15px; }
   .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px; }
+  .card.locked { opacity:.55; }
+  .lockmsg { display:none; color:var(--warn); background:var(--warnbg); border-radius:8px; padding:8px 10px; font-size:15px; margin:0 0 10px; }
+  .card.locked .lockmsg { display:block; }
   label { display:block; font-size:15px; color:var(--sub); margin:8px 0 4px; }
   input[type=text], input[type=file] { width:100%; font-size:18px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; font-family:inherit; }
+  input[readonly] { background:#f1f3f6; }
   button { font-family:inherit; font-size:16px; padding:11px 16px; border-radius:10px; border:1px solid var(--acc); background:var(--acc); color:#fff; cursor:pointer; margin:8px 8px 0 0; }
   button.ghost { background:#fff; color:var(--acc); }
+  button[disabled] { opacity:.4; cursor:default; }
+  .banner { background:var(--warnbg); color:var(--warn); border-radius:8px; padding:8px 10px; font-size:14px; margin:0 0 10px; }
+  .banner.server { background:var(--okbg); color:var(--ok); }
+  ol.steps { list-style:none; display:flex; gap:6px; padding:0; margin:0 0 8px; }
+  ol.steps li { flex:1; text-align:center; font-size:14px; padding:6px 4px; border-radius:8px; background:#f1f3f6; color:var(--sub); }
+  ol.steps li.now { background:var(--accbg); color:var(--acc); font-weight:700; }
+  ol.steps li.done { background:var(--okbg); color:var(--ok); font-weight:700; }
+  .msg { min-height:24px; margin:8px 0 0; font-size:15px; } .msg.ok { color:var(--ok); } .msg.bad { color:var(--bad); } .msg.warn { color:var(--warn); }
+  .reg { display:none; margin-top:10px; padding:10px 12px; background:var(--okbg); color:var(--ok); border-radius:10px; font-size:16px; }
+  .reg b { font-size:22px; letter-spacing:.12em; }
   #codeOut canvas { max-width:100%; height:auto; border:1px solid var(--line); border-radius:8px; background:#fff; }
-  .cam { position:relative; width:100%; background:#000; border-radius:12px; overflow:hidden; }
-  .cam video { width:100%; display:block; } .cam canvas.ov { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+  /* 카메라 창: 숫자 코드의 가로로 긴 비율에 맞춘다 (스캐너 ROI와 같은 비율 → 보이는 곳 = 분석하는 곳) */
+  .cam { position:relative; width:100%; background:#000; border-radius:12px; overflow:hidden; aspect-ratio: var(--roi, 2.7) / 1; }
+  .cam video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
+  .cam canvas.ov { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+  .cam .guide { position:absolute; inset:6px; border:2px dashed rgba(255,255,255,.55); border-radius:8px; pointer-events:none; }
+  .cam .hint { position:absolute; left:0; right:0; bottom:8px; text-align:center; color:#fff; font-size:14px; text-shadow:0 1px 3px #000; pointer-events:none; }
   #status { font-size:17px; font-weight:600; margin:10px 0 4px; min-height:28px; }
   .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px; font-size:15px; }
   .stats div { background:#f1f3f6; border-radius:8px; padding:8px 10px; } .stats b { display:block; font-size:17px; }
@@ -31,21 +49,34 @@
 </head>
 <body>
 <main>
-  <h1>혼디 숫자 코드 v2 — 인식 테스트 (1단계)</h1>
-  <p class="sub">일련번호 1~10자리 · "hondi.net" 로고 아래 왼쪽 정렬 · 자릿수는 스캐너가 스스로 셉니다.</p>
+  <h1>혼디 숫자 코드 v2 — 등록·인식 테스트</h1>
+  <p class="sub">번호를 등록(중복 확인 → 발급 → 폰 인증)한 뒤 그 번호로 코드를 만들고, 카메라로 읽어 봅니다.</p>
 
-  <section class="card">
-    <h2>① 코드 만들기 (다른 화면/종이에 띄워 놓고 찍어 보세요)</h2>
-    <label for="serial">일련번호 (1~10자리, 첫 자리 1~9)</label>
-    <input id="serial" type="text" inputmode="numeric" maxlength="10" value="48210" autocomplete="off">
-    <button id="mk">만들기</button>
-    <button id="dl" class="ghost">PNG 저장</button>
+  <section class="card" id="s1">
+    <h2>① 코드 등록하기</h2>
+    <div id="modeBanner" class="banner">서버 연결을 확인하는 중…</div>
+    <ol class="steps" id="steps"><li id="st1" class="now">1 중복 확인</li><li id="st2">2 번호 발급</li><li id="st3">3 폰 인증</li></ol>
+    <label for="serial">원하는 번호 (1~10자리, 첫 자리 1~9)</label>
+    <input id="serial" type="text" inputmode="numeric" maxlength="10" value="" placeholder="예: 48210" autocomplete="off">
+    <button id="bCheck">중복 확인</button>
+    <button id="bIssue" disabled>이 번호로 발급받기</button>
+    <button id="bVerify" disabled>폰으로 인증하기</button>
+    <div id="regMsg" class="msg" role="status"></div>
+    <div id="reg" class="reg">등록 완료 · 내 번호 <b id="regNo"></b> <button id="bAgain" class="ghost" style="margin:0 0 0 8px">다른 번호로 다시 등록</button></div>
+  </section>
+
+  <section class="card locked" id="s2">
+    <h2>② 숫자 코드 만들기</h2>
+    <p class="lockmsg">① 등록을 마치면 열립니다.</p>
+    <p class="sub" style="margin:0 0 6px">등록한 번호로 코드 이미지를 만듭니다. 다른 화면이나 인쇄한 종이에 띄워 놓고 ③에서 찍어 보세요.</p>
+    <button id="mk" disabled>코드 만들기</button>
+    <button id="dl" class="ghost" disabled>PNG 저장</button>
     <div id="codeOut" style="margin-top:12px"></div>
   </section>
 
-  <section class="card">
-    <h2>② 카메라로 읽기</h2>
-    <div class="cam"><video id="v" playsinline muted></video><canvas class="ov" id="ov"></canvas></div>
+  <section class="card" id="s3">
+    <h2>③ 카메라로 읽기</h2>
+    <div class="cam" id="cam"><video id="v" playsinline muted></video><canvas class="ov" id="ov"></canvas><div class="guide"></div><div class="hint">코드(로고+숫자)를 이 창 안에 가로로 맞추세요</div></div>
     <canvas id="work" style="display:none"></canvas>
     <div id="status">대기 중</div>
     <button id="go">스캔 시작</button><button id="stop" class="ghost">중지</button>
@@ -58,19 +89,19 @@
       <div>연속 일치<b id="sStreak">-</b></div>
     </div>
     <ul class="tips">
-      <li>노란 상자 = 숫자 칸 후보, 파란 상자 = 로고, 초록 = 읽기 성공.</li>
-      <li>"사유"가 계속 바뀌지 않고 한 값에 머물면 그 값이 병목입니다. 그대로 알려 주세요.</li>
+      <li>파란 상자 = 로고(기준점), 노란 상자 = 숫자 칸 후보, 초록 = 읽기 성공.</li>
+      <li>"사유"가 한 값에 머물면 그 값이 병목입니다. 그대로 알려 주세요.</li>
     </ul>
   </section>
 
   <section class="card">
-    <h2>③ 사진/스크린샷으로 읽기</h2>
+    <h2>④ 사진/스크린샷으로 읽기</h2>
     <input id="file" type="file" accept="image/*">
     <div id="photoOut" style="margin-top:10px"></div>
   </section>
 
   <section class="card">
-    <h2>④ 결과 기록</h2>
+    <h2>⑤ 결과 기록</h2>
     <div id="result" class="big">-</div>
     <div class="stats" style="margin:10px 0"><div>성공<b id="cOk">0</b></div><div>오인식<b id="cWrong">0</b></div><div>기록 수<b id="cN">0</b></div></div>
     <table><thead><tr><th>시각</th><th>기대</th><th>인식</th><th>자릿수</th><th>판정</th></tr></thead><tbody id="log"></tbody></table>
@@ -80,31 +111,112 @@
 
 <script type="module">
 import { generateDigitCodeCanvas } from '/src/gopang/ai/hondi-digit-render.js';
-import { startScanner, stopScanner, analyzePhoto } from '/src/gopang/ai/hondi-digit-scanner-v2.js';
+import { startScanner, stopScanner, analyzePhoto, ROI_ASPECT } from '/src/gopang/ai/hondi-digit-scanner-v2.js';
 import { isValidSerial } from '/src/gopang/ai/hondi-digit-core.js';
+import { classifySerial } from '/src/gopang/ai/hondi-digit-claim.js';
 
 const $ = id => document.getElementById(id);
-const rows = []; let lastCanvas = null;
+document.documentElement.style.setProperty('--roi', String(ROI_ASPECT));
 
-async function make() {
+// ── ① 등록 ───────────────────────────────────────────────────
+// 서버(/digit/*)가 연결되어 있으면 실제 API로 중복을 확인하고, 아니면 "시험 모드"로 이 기기 안에서만 흉내 낸다.
+// 시험 모드의 중복 확인·발급·폰 인증은 실제 효력이 없다(다른 기기와 공유되지 않음).
+const LS = 'hondi_digit_test_claims_v1';
+const localClaims = () => { try { return JSON.parse(localStorage.getItem(LS) || '{}'); } catch { return {}; } };
+const saveLocal = m => { try { localStorage.setItem(LS, JSON.stringify(m)); } catch {} };
+let serverMode = false, state = { serial: null, checked: false, issued: false, verified: false };
+let lastCanvas = null;
+
+async function serverStatus(serial) {
+  try {
+    const r = await fetch('/digit/status?serial=' + encodeURIComponent(serial), { signal: AbortSignal.timeout(4000) });
+    if (!r.ok) return null;
+    const j = await r.json();
+    return j && j.ok ? j : null;
+  } catch { return null; }
+}
+(async () => {
+  serverMode = !!(await serverStatus('48210'));
+  const b = $('modeBanner');
+  if (serverMode) { b.className = 'banner server'; b.textContent = '서버 연결됨 — 중복 확인은 실제 서버에서 합니다. (발급·폰 인증은 아직 시험 모드)'; }
+  else { b.className = 'banner'; b.textContent = '시험 모드 — 서버(/digit/*)가 아직 연결되지 않았습니다. 중복 확인·발급·폰 인증은 이 기기 안에서만 흉내 내며 실제 효력이 없습니다.'; }
+})();
+
+function setSteps() {
+  $('st1').className = state.checked ? 'done' : 'now';
+  $('st2').className = state.issued ? 'done' : (state.checked ? 'now' : '');
+  $('st3').className = state.verified ? 'done' : (state.issued ? 'now' : '');
+  $('bIssue').disabled = !(state.checked && !state.issued);
+  $('bVerify').disabled = !(state.issued && !state.verified);
+  $('bCheck').disabled = state.issued;
+  $('serial').readOnly = state.issued;
+}
+function msg(t, cls) { const m = $('regMsg'); m.textContent = t; m.className = 'msg ' + (cls || ''); }
+function lock(on) {
+  $('s2').classList.toggle('locked', on); $('mk').disabled = on; $('dl').disabled = on;
+  if (on) { $('codeOut').replaceChildren(); lastCanvas = null; }
+}
+function resetReg() {
+  state = { serial: null, checked: false, issued: false, verified: false };
+  $('reg').style.display = 'none'; $('serial').value = ''; msg('');
+  lock(true); setSteps(); $('expect').value = '';
+}
+
+$('bCheck').onclick = async () => {
   const s = $('serial').value.trim();
-  if (!isValidSerial(s)) { $('codeOut').textContent = '1~10자리 숫자, 첫 자리 1~9만 가능합니다.'; return; }
-  lastCanvas = await generateDigitCodeCanvas(s, 2);
+  state.checked = false; setSteps();
+  if (!isValidSerial(s)) return msg('1~10자리 숫자, 첫 자리는 1~9여야 합니다.', 'bad');
+  msg('중복 확인 중…');
+  const tier = classifySerial(s);
+  if (tier.tier === 'public-safety') return msg('공공 안내·긴급 번호는 등록할 수 없습니다.', 'bad');
+  const sv = serverMode ? await serverStatus(s) : null;
+  if (sv) {
+    if (sv.status === 'claimed') return msg('이미 사용 중인 번호입니다. 다른 번호를 골라 주세요.', 'bad');
+    if (sv.status === 'revoked') return msg('폐기된 번호는 다시 쓸 수 없습니다.', 'bad');
+    if (sv.status === 'blocked') return msg('등록할 수 없는 번호입니다.', 'bad');
+  } else if (localClaims()[s]) {
+    return msg('이 기기에서 이미 등록한 번호입니다(시험 모드). 다른 번호를 골라 주세요.', 'bad');
+  }
+  state.serial = s; state.checked = true; setSteps();
+  const note = tier.tier === 'open' ? '' : ` ※ 정식 서비스에서는 ${tier.tier === 'reserved-short' ? '5자리 미만' : '기억하기 쉬운'} 예약 번호(경매 대상)입니다. 시험에서는 허용합니다.`;
+  msg('사용할 수 있는 번호입니다. 다음: 발급받기' + note, 'ok');
+};
+$('bIssue').onclick = () => {
+  const m = localClaims(); m[state.serial] = Date.now(); saveLocal(m);       // 시험 모드: 이 기기에 선점 기록
+  state.issued = true; setSteps();
+  msg('고유 번호를 발급했습니다. 다음: 폰으로 본인 인증', 'ok');
+};
+$('bVerify').onclick = async () => {
+  msg('폰으로 인증 알림을 보내는 중… (시험 모드)', 'warn');
+  await new Promise(r => setTimeout(r, 1200));
+  state.verified = true; setSteps();
+  $('reg').style.display = 'block'; $('regNo').textContent = state.serial;
+  msg('본인 인증 완료 (시험 모드: 실제 알림은 보내지 않았습니다).', 'ok');
+  $('expect').value = state.serial;
+  lock(false); make();
+};
+$('bAgain').onclick = resetReg;
+$('serial').addEventListener('input', () => { if (!state.issued) { state.checked = false; setSteps(); } });
+
+// ── ② 코드 만들기 ─────────────────────────────────────────────
+async function make() {
+  if (!state.verified) return;
+  lastCanvas = await generateDigitCodeCanvas(state.serial, 2);
   $('codeOut').replaceChildren(lastCanvas);
 }
 $('mk').onclick = make;
 $('dl').onclick = async () => {
   if (!lastCanvas) await make(); if (!lastCanvas) return;
-  const a = document.createElement('a'); a.download = `hondi-code-${$('serial').value.trim()}.png`; a.href = lastCanvas.toDataURL('image/png'); a.click();
+  const a = document.createElement('a'); a.download = `hondi-code-${state.serial}.png`; a.href = lastCanvas.toDataURL('image/png'); a.click();
 };
-make();
 
+// ── 결과 기록 ─────────────────────────────────────────────────
+const rows = [];
 function record(serial, r, source) {
   const exp = $('expect').value.trim();
   const verdict = !exp ? '-' : (exp === serial ? '성공' : '오인식');
   rows.push({ t: new Date().toLocaleTimeString('ko-KR'), exp: exp || '-', got: serial, n: r.n, verdict, source });
-  $('result').textContent = serial;
-  render();
+  $('result').textContent = serial; render();
 }
 function render() {
   $('cOk').textContent = rows.filter(r => r.verdict === '성공').length;
@@ -119,13 +231,14 @@ function render() {
 $('copy').onclick = () => navigator.clipboard.writeText(['time,expected,got,digits,verdict,source', ...rows.map(r => [r.t, r.exp, r.got, r.n, r.verdict, r.source].join(','))].join('\n'));
 $('clr').onclick = () => { rows.length = 0; render(); $('result').textContent = '-'; };
 
+// ── ③ 카메라 ─────────────────────────────────────────────────
 let streak = 0, lastKey = null;
 $('go').onclick = async () => {
   $('result').textContent = '-';
   try {
     await startScanner($('v'), $('work'), $('ov'),
       (serial, r) => { $('status').textContent = `인식 완료: ${serial} (${r.n}자리)`; record(serial, r, 'camera'); },
-      msg => { $('status').textContent = msg; },
+      m => { $('status').textContent = m; },
       r => {
         $('sMs').textContent = r.ms.toFixed(0) + ' ms';
         $('sReason').textContent = r.ok ? '성공' : r.reason;
@@ -138,15 +251,18 @@ $('go').onclick = async () => {
 };
 $('stop').onclick = () => { stopScanner(); $('status').textContent = '중지됨'; };
 
+// ── ④ 사진 ───────────────────────────────────────────────────
 $('file').onchange = async e => {
   const f = e.target.files[0]; if (!f) return;
   const bmp = await createImageBitmap(f);
   const c = document.createElement('canvas'); c.width = bmp.width; c.height = bmp.height;
   const ctx = c.getContext('2d', { willReadFrequently: true }); ctx.drawImage(bmp, 0, 0);
-  const r = analyzePhoto(ctx.getImageData(0, 0, c.width, c.height),
+  analyzePhoto(ctx.getImageData(0, 0, c.width, c.height),
     (serial, res) => { $('photoOut').innerHTML = `<span class="pass">${serial}</span> (${res.n}자리, ${res.ms.toFixed(0)}ms)`; record(serial, res, 'photo'); },
-    msg => { $('photoOut').innerHTML = `<span class="fail">${msg}</span>`; });
+    m => { $('photoOut').innerHTML = `<span class="fail">${m}</span>`; });
 };
+
+lock(true); setSteps();
 </script>
 </body>
 </html>

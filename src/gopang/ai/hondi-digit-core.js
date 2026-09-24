@@ -165,6 +165,13 @@ const HOLLOWS = [
   { x1: 0.28, x2: 0.72, y1: 0.60, y2: 0.86 },
 ];
 const HOLLOW_MAX = 0.12;
+// 좌·우 중간 틈: 위쪽 세로획(f,b)과 아래쪽 세로획(e,c) 사이는 어느 숫자에서도 비어 있다.
+// 세로로 긴 물체(손가락·그림자 줄·덧붙인 선)가 왼쪽 두 획을 함께 덮어 3→8 같은 다른 숫자로 보이게 만드는 경우를 걸러낸다.
+const SIDE_GAPS = [
+  { x1: 0.03, x2: 0.17, y1: 0.475, y2: 0.525 },
+  { x1: 0.83, x2: 0.97, y1: 0.475, y2: 0.525 },
+];
+const SIDE_GAP_MAX = 0.40;
 const MIN_CERTAINTY = 0;   // 켜짐≥60% / 꺼짐≤20% 밖(애매)이면 음수 → 거절
 
 function resample(gray, W, H, box, N = 100) {
@@ -209,13 +216,14 @@ export function readCell(gray, W, H, blob) {
     certainty = Math.min(certainty, on ? ratio - SEG_ON_MIN : SEG_OFF_MAX - ratio);   // 음수 = 애매
   }
   const stray = Math.max(...HOLLOWS.map(h => regionDark(g, thr, h)));
+  const gapInk = Math.max(...SIDE_GAPS.map(h => regionDark(g, thr, h)));
   const scores = Object.entries(DIGIT_BITS).map(([d, p]) => {
     let diff = 0; for (let i = 0; i < 7; i++) if (bits[i] !== p[i]) diff++;
     return { digit: d, diff };
   }).sort((a, b) => a.diff - b.diff);
   // solid: 켜진 획은 꽉 차 있고(≥60%) 꺼진 획은 깨끗하며(≤20%) 안쪽 구멍에 잉크가 없다
-  const solid = certainty >= MIN_CERTAINTY && stray <= HOLLOW_MAX;
-  return { digit: scores[0].digit, margin: scores[1].diff - scores[0].diff, bestDiff: scores[0].diff, bits, ratios, certainty, stray, solid };
+  const solid = certainty >= MIN_CERTAINTY && stray <= HOLLOW_MAX && gapInk <= SIDE_GAP_MAX;
+  return { digit: scores[0].digit, margin: scores[1].diff - scores[0].diff, bestDiff: scores[0].diff, bits, ratios, certainty, stray, gapInk, solid };
 }
 
 // ── 메인 분석 ────────────────────────────────────────────────
@@ -245,7 +253,7 @@ function sampleLevel(gray, q) {          // 밝기 분위수(종이 밝기 추�
 // 기하 왜곡(회전·원근)이 원인일 수 있는 실패 사유 — 이때만 비싼 보정을 시도한다
 const GEOM_REASONS = new Set(['box-aspect', 'no-boxes', 'box-width-inconsistent', 'pitch-inconsistent',
   'no-logo', 'not-left-aligned', 'boxes-merged', 'too-wide', 'logo-scale-mismatch', 'row-clipped', 'no-ink',
-  'bad-pattern', 'low-certainty', 'trailing-ink', 'logo-mismatch']);
+  'bad-pattern', 'low-certainty', 'trailing-ink', 'logo-mismatch', 'no-digit-row', 'box-off-grid']);
 
 /**
  * @param {Uint8Array|Uint8ClampedArray} gray  W*H 회색조
@@ -268,10 +276,28 @@ export function analyzeGray(gray, W, H, opts = {}) {
   // 회전/원근 보정 후보를 점수 순으로 시도
   // 추정은 국소 배경 보정을 거친 영상에서 한다 — 어두운 벽/그림자가 잉크 점으로 섞이면 각도 추정이 무너진다
   const src = flatField(gray, W, H);
-  const cands = estimateTransforms(src, W, H);
+  if (requireLogo && !_logoLikeBlob(src, W, H, otsuThreshold(src))) return r0;     // 로고 비슷한 덩어리가 없다 → 보정해 봐야 소용없음
+  const cands = estimateTransforms(src, W, H).filter(tf => tf.deg !== 0 || tf.a !== 0 || tf.b !== 0);   // 항등 변환은 이미 시도함
   for (const tf of cands) {
-    const r = _tryBase(warpGray(src, W, H, tf), W, H, requireLogo);
+    const w = warpGray(src, W, H, tf);
+    const r = _both(w, W, H, otsuThreshold(w), requireLogo);       // 이미 평탄화한 영상이라 _tryBase(평탄화 재계산)까지는 필요 없다
     if (r.ok) return { ...r, transform: tf };
+  }
+  // 로고 기준 회전 탐색: 화면 전체의 점 분포로 각도를 못 잡는 어수선한 장면(다른 글자·버튼이 많은 화면)에서는
+  // 각도를 조금씩 돌려 가며 "로고가 잡히고 숫자열까지 읽히는" 각도를 찾는다. 테두리선 판정이 기울기에 민감해서 필요하다.
+  if (requireLogo) {
+    // 비용: 각도마다 화면 전체를 돌려야 하므로 절반 해상도로 "로고가 잡히는 각도"만 찾고,
+    // 읽기(확정)는 항상 원해상도에서 다시 한다 — 낮은 해상도의 읽기 결과는 절대 그대로 받아들이지 않는다.
+    const W2 = W >> 1, H2 = H >> 1, half = new Uint8Array(W2 * H2);
+    for (let y = 0; y < H2; y++) { const r0i = 2 * y * W, ro = y * W2; for (let x = 0; x < W2; x++) { const i = r0i + 2 * x; half[ro + x] = (src[i] + src[i + 1] + src[i + W] + src[i + W + 1]) >> 2; } }
+    for (const deg of [1.5, -1.5, 3, -3, 4.5, -4.5, 6, -6, 8, -8, 10, -10, 12.5, -12.5, 15, -15, 18, -18, 22, -22]) {
+      const w2 = warpGray(half, W2, H2, { deg, a: 0, b: 0 });
+      const r2 = _analyzeAnchored(w2, W2, H2, otsuThreshold(w2));
+      if (!r2.ok && !(r2.logoScore != null && r2.logoScore >= LOGO_MIN_NCC)) continue;      // 이 각도에서는 로고가 안 잡힘
+      const w = warpGray(src, W, H, { deg, a: 0, b: 0 });
+      const r = _analyzeAnchored(w, W, H, otsuThreshold(w));
+      if (r.ok) return { ...r, transform: { deg, a: 0, b: 0 } };
+    }
   }
   return r0;
 }
@@ -279,20 +305,20 @@ export function analyzeGray(gray, W, H, opts = {}) {
 // 여러 이진화 전략: ① 전체 Otsu ② 종이만 잘라 Otsu(밝은 종이가 어두운 벽 위에 있을 때) ③ 어두운 쪽만 다시 Otsu
 function _tryBase(gray, W, H, requireLogo) {
   const t1 = otsuThreshold(gray);
-  const first = _analyzeAt(gray, W, H, t1, requireLogo);
+  const first = _both(gray, W, H, t1, requireLogo);
   if (first.ok) return { ...first, threshold: t1 };
 
   // ② 국소 배경 보정 후 Otsu — 어두운 벽/그림자 위의 종이에 가장 강하다
   const ff = flatField(gray, W, H);
   const tf = otsuThreshold(ff);
-  const rf = _analyzeAt(ff, W, H, tf, requireLogo);
+  const rf = _both(ff, W, H, tf, requireLogo);
   if (rf.ok) return { ...rf, threshold: tf, flat: true };
 
   const pb = paperBox(gray, W, H, t1);
   if (pb) {
     const cw = pb.x2 - pb.x1, ch = pb.y2 - pb.y1, crop = new Uint8Array(cw * ch);
     for (let y = 0; y < ch; y++) crop.set(gray.subarray((pb.y1 + y) * W + pb.x1, (pb.y1 + y) * W + pb.x2), y * cw);
-    const r = _analyzeAt(crop, cw, ch, otsuThreshold(crop), requireLogo);
+    const r = _both(crop, cw, ch, otsuThreshold(crop), requireLogo);
     if (r.ok) {
       const bx = r.row.boxes.map(b => ({ x1: b.x1 + pb.x1, x2: b.x2 + pb.x1, y1: b.y1 + pb.y1, y2: b.y2 + pb.y1 }));
       const lr = r.row.logoRow ? { p1: r.row.logoRow.p1 + pb.y1, p2: r.row.logoRow.p2 + pb.y1 } : null;
@@ -301,7 +327,7 @@ function _tryBase(gray, W, H, requireLogo) {
     }
   }
   const t2 = otsuThreshold(gray, 0, t1);
-  if (t2 < t1 - 8) { const r = _analyzeAt(gray, W, H, t2, requireLogo); if (r.ok) return { ...r, threshold: t2 }; }
+  if (t2 < t1 - 8) { const r = _both(gray, W, H, t2, requireLogo); if (r.ok) return { ...r, threshold: t2 }; }
   return first;
 }
 
@@ -497,29 +523,125 @@ export function ncc(a, b) {
   return sab / Math.sqrt(saa * sbb);
 }
 
-export function _analyzeAt(gray, W, H, thr, requireLogo) {
+// 숫자열 위·아래 테두리선 찾기: 박스마다 폭 ≈ BOX_W 의 가로선이 위와 아래에 있다.
+// 행 투영 대신 "그 행에서 가장 긴 연속 어두운 구간"을 보므로 코드 옆·아래의 다른 화면 요소나 칸이 1개뿐인 코드에도 흔들리지 않는다.
+function findDigitRowByLines(gray, W, H, lineThr, x1, x2, yLo, yHi, boxW, boxH, topMax) {
+  const need = boxW * 0.8, isLine = new Uint8Array(Math.max(0, yHi - yLo + 1));
+  for (let y = yLo; y <= yHi; y++) {
+    const row = y * W; let run = 0, best = 0;
+    for (let x = x1; x < x2; x++) { if (gray[row + x] <= lineThr) { run++; if (run > best) best = run; } else run = 0; }
+    isLine[y - yLo] = best >= need && best <= boxW * 1.6 ? 1 : 0;      // 박스 폭 안팎의 선만(카드 테두리 같은 긴 선은 제외)
+  }
+  const groups = [];
+  for (let i = 0; i < isLine.length; i++) if (isLine[i]) { let j = i; while (j + 1 < isLine.length && isLine[j + 1]) j++; groups.push({ a: yLo + i, b: yLo + j }); i = j; }
+  const maxThick = Math.max(3, boxH * 0.2);      // 테두리선은 박스 폭 전체(≈1.0), 세그먼트 가로획(a·g·d)은 ≈0.53 → 0.8 이상만 테두리로 본다
+  const cand = groups.filter(g => g.b - g.a + 1 <= maxThick);
+  for (const top of cand) {
+    if (top.a > topMax) break;
+    let best = null;
+    for (const bot of cand) {
+      const h = bot.b - top.a + 1;
+      if (bot.a > top.b && h >= boxH * 0.75 && h <= boxH * 1.3 && (!best || Math.abs(h - boxH) < Math.abs(best.h - boxH))) best = { bot, h };
+    }
+    if (best) return { p1: top.a, p2: best.bot.b + 1 };
+  }
+  return null;
+}
+
+// 로고 비슷한 "넓적한 진한 덩어리"가 아예 없으면(빈 벽·글자뿐인 화면 등) 비싼 회전·원근 탐색을 건너뛴다.
+// 기울면 행 투영 높이가 커져 종횡비가 줄어들므로 넉넉히 본다(정확한 판정은 이후 NCC가 한다).
+function _logoLikeBlob(gray, W, H, thr) {
+  const paper = Math.max(thr + 30, sampleLevel(gray, 0.95));
+  const thrRow = thr + 0.25 * (paper - thr);
+  const rp = rowProfile(gray, W, H, thrRow);
+  const base = percentile(rp, 0.3);
+  const minDark = Math.max(3, Math.round(base * 3 + W * 0.003));
+  const rows = mergeRuns(runs(rp, minDark, 1), Math.max(2, Math.round(H * 0.008))).filter(r => r.p2 - r.p1 >= Math.max(6, Math.round(H * 0.015)));
+  for (const rb of rows) {
+    const ink = logoExtentX(gray, W, thrRow, rb.p1, rb.p2);
+    if (!ink) continue;
+    const w = ink.max - ink.min, h = rb.p2 - rb.p1;
+    if (w >= W * 0.10 && w / h >= 1.2 && w / h <= 14) return true;      // 종횡비 1.2 ≈ 30° 회전까지
+  }
+  return false;
+}
+
+// ── 로고 우선 탐색 ──────────────────────────────────────────────
+// "맨 아래 덩어리 = 숫자열" 가정은 코드만 찍힌 화면에서만 성립한다. 실제 화면에는 코드 아래에 다른 글자·버튼이 있다.
+// 그래서 먼저 "hondi.net" 로고를 프레임 어디에서든 찾고(모양 검증), 숫자열은 로고 바로 아래
+// (로고 폭에서 정해지는 거리·높이)에서만 찾는다. 로고가 곧 기준점이다.
+export function _analyzeAnchored(gray, W, H, thr) {
+  if (LOGO_TEMPLATE.length !== LOGO_GX * LOGO_GY) return { ok: false, reason: 'no-logo' };
+  const paper = Math.max(thr + 30, sampleLevel(gray, 0.95));
+  const thrRow = thr + 0.25 * (paper - thr);
+  const rp = rowProfile(gray, W, H, thrRow);
+  const base = percentile(rp, 0.3);
+  const minDark = Math.max(3, Math.round(base * 3 + W * 0.003));
+  const minLen = Math.max(6, Math.round(H * 0.015));
+  const rowBlobs = mergeRuns(runs(rp, minDark, 1), Math.max(2, Math.round(H * 0.008))).filter(r => r.p2 - r.p1 >= minLen);
+  if (!rowBlobs.length) return { ok: false, reason: 'no-ink' };
+  const inkLevel = sampleLevel(gray, 0.02);
+
+  let best = null;
+  for (const rb of rowBlobs) {
+    const ink = logoExtentX(gray, W, thrRow, rb.p1, rb.p2);
+    if (!ink) continue;
+    const w = ink.max - ink.min, h = rb.p2 - rb.p1;
+    if (w < W * 0.10 || w / h < 5.0 || w / h > 11) continue;          // 로고 잉크 종횡비 7.74 (기울기·원근 여유)
+    const score = ncc(logoDescriptor(gray, W, H, ink, rb, paper, inkLevel), LOGO_TEMPLATE);
+    if (!best || score > best.score) best = { rb, ink, score };
+  }
+  if (!best) return { ok: false, reason: 'no-logo' };
+  if (best.score < LOGO_MIN_NCC) return { ok: false, reason: 'logo-mismatch', logoScore: best.score };
+
+  const w = best.ink.max - best.ink.min, sc = w / LOGO_INK_W, p = PITCH * sc;
+  const boxH = BOX_H * sc, gap = LOGO_TO_ROW_GAP * sc;
+  const x1 = Math.max(0, Math.floor(best.ink.min - 0.8 * p)), x2 = Math.min(W, Math.ceil(best.ink.max + 0.8 * p));
+  const lineThr2 = Math.min(255, thr + 0.4 * (paper - thr));
+  const lo = Math.floor(best.rb.p2 + 0.3 * gap), hi = Math.ceil(best.rb.p2 + 3.2 * gap);
+  const digitRow = findDigitRowByLines(gray, W, H, lineThr2, x1, x2, lo, Math.min(H - 1, Math.ceil(hi + boxH * 1.4)), BOX_W * sc, boxH, hi);
+  if (!digitRow) return { ok: false, reason: 'no-digit-row', logoScore: best.score };
+  if (digitRow.p2 >= H - 1) return { ok: false, reason: 'row-clipped' };
+  const rr = _analyzeAt(gray, W, H, thr, true, { digitRow, logoRow: best.rb, x1, x2 });
+  if (!rr.ok && rr.logoScore == null) rr.logoScore = best.score;
+  return rr;
+}
+
+// 로고 우선 → (실패하면) 기존 "맨 아래 덩어리" 방식 순서로 시도
+function _both(gray, W, H, thr, requireLogo) {
+  if (requireLogo) { const a = _analyzeAnchored(gray, W, H, thr); if (a.ok) return a; }
+  return _analyzeAt(gray, W, H, thr, requireLogo);
+}
+
+export function _analyzeAt(gray, W, H, thr, requireLogo, anchor = null) {
   const paper = Math.max(thr + 30, sampleLevel(gray, 0.95));       // 종이(밝은 쪽) 밝기 추정
   const thrRow = thr + 0.25 * (paper - thr);                      // 블러로 옅어진 가는 선까지 잡는 문턱
   const lineThr = Math.min(255, thr + 0.4 * (paper - thr));
 
-  // 1) 세로 투영 → 내용 덩어리(로고, 숫자열).  배경 잡음 수준을 재서 문턱을 정한다.
-  const rp = rowProfile(gray, W, H, thrRow);
-  const base = percentile(rp, 0.3);
-  const minDark = Math.max(3, Math.round(base * 3 + W * 0.003));
-  const minLen  = Math.max(3, Math.round(H * 0.02));
-  const rowBlobs = mergeRuns(runs(rp, minDark, 1), Math.max(2, Math.round(H * 0.01))).filter(r => r.p2 - r.p1 >= minLen);
-  if (!rowBlobs.length) return { ok: false, reason: 'no-ink' };
+  let digitRow, logoRow;
+  if (anchor) {                       // 로고를 먼저 찾은 경우: 숫자열 행/좌우 범위가 이미 정해져 있다
+    digitRow = anchor.digitRow; logoRow = anchor.logoRow;
+  } else {
+    // 1) 세로 투영 → 내용 덩어리(로고, 숫자열).  배경 잡음 수준을 재서 문턱을 정한다.
+    const rp = rowProfile(gray, W, H, thrRow);
+    const base = percentile(rp, 0.3);
+    const minDark = Math.max(3, Math.round(base * 3 + W * 0.003));
+    const minLen  = Math.max(3, Math.round(H * 0.02));
+    const rowBlobs = mergeRuns(runs(rp, minDark, 1), Math.max(2, Math.round(H * 0.01))).filter(r => r.p2 - r.p1 >= minLen);
+    if (!rowBlobs.length) return { ok: false, reason: 'no-ink' };
 
-  const digitRow = rowBlobs[rowBlobs.length - 1];
-  const logoRow  = rowBlobs.length >= 2 ? rowBlobs[rowBlobs.length - 2] : null;
-  if (requireLogo && !logoRow) return { ok: false, reason: 'no-logo' };
-  if (digitRow.p2 >= H - 1 || digitRow.p1 <= 0) return { ok: false, reason: 'row-clipped' };
+    digitRow = rowBlobs[rowBlobs.length - 1];
+    logoRow = rowBlobs.length >= 2 ? rowBlobs[rowBlobs.length - 2] : null;
+    if (requireLogo && !logoRow) return { ok: false, reason: 'no-logo' };
+    if (digitRow.p2 >= H - 1 || digitRow.p1 <= 0) return { ok: false, reason: 'row-clipped' };
+  }
   const rowH = digitRow.p2 - digitRow.p1;
 
   // 2) 숫자열 박스 덩어리: 박스마다 "위 테두리선 + 아래 테두리선"이 있다 — 윗띠·아랫띠 둘 다 어두운 열만 박스 안.
   const band = Math.max(2, Math.round(rowH * 0.1));
   const inBox = new Uint8Array(W);
-  for (let x = 0; x < W; x++) {
+  const xa = anchor ? anchor.x1 : 0, xb = anchor ? anchor.x2 : W;
+  for (let x = xa; x < xb; x++) {
     let top = false, bot = false;
     for (let y = digitRow.p1; y < digitRow.p1 + band; y++) if (gray[y * W + x] <= lineThr) { top = true; break; }
     for (let y = digitRow.p2 - band; y < digitRow.p2; y++) if (gray[y * W + x] <= lineThr) { bot = true; break; }
@@ -532,7 +654,7 @@ export function _analyzeAt(gray, W, H, thr, requireLogo) {
 
   // 3) 교차 검증
   const bw = median(boxes.map(b => b.x2 - b.x1));
-  if (boxes.some(b => Math.abs((b.x2 - b.x1) - bw) > bw * 0.25)) return { ok: false, reason: 'box-width-inconsistent' };
+  if (boxes.some(b => Math.abs((b.x2 - b.x1) - bw) > bw * 0.25)) return { ok: false, reason: 'box-width-inconsistent', boxes };
   const aspect = rowH / bw;
   if (aspect < 1.35 || aspect > 2.2) return { ok: false, reason: 'box-aspect' };
   if (boxes.length > 1) {
@@ -548,12 +670,17 @@ export function _analyzeAt(gray, W, H, thr, requireLogo) {
     if (!logoInk) return { ok: false, reason: 'no-logo' };
     const pitchLogo = (logoInk.max - logoInk.min) / MAX_DIGITS;
     const ratio = bw / pitchLogo;                                  // 설계값 0.86
-    if (ratio < 0.65 || ratio > 1.05) return { ok: false, reason: 'logo-scale-mismatch' };
+    if (ratio < 0.74 || ratio > 0.98) return { ok: false, reason: 'logo-scale-mismatch' };     // 설계값 0.86 — 테두리가 흐려 칸이 좁게 잡히면 읽는 위치가 어긋난다
     if (LOGO_TEMPLATE.length === LOGO_GX * LOGO_GY) {
       logoScore = ncc(logoDescriptor(gray, W, H, logoInk, logoRow, paper, sampleLevel(gray, 0.02)), LOGO_TEMPLATE);
       if (LOGO_MIN_NCC > 0 && logoScore < LOGO_MIN_NCC) return { ok: false, reason: 'logo-mismatch', logoScore };
     }
-    if (Math.abs(boxes[0].x1 - logoInk.min) > pitchLogo * 0.6) return { ok: false, reason: 'not-left-aligned' };
+    if (Math.abs(boxes[0].x1 - logoInk.min) > pitchLogo * 0.4) return { ok: false, reason: 'not-left-aligned' };
+    // 로고가 정하는 칸 위치와 실제 검출한 박스가 어긋나면 읽는 자리가 틀어진 것이다 → 오독하느니 거절
+    for (let i = 0; i < boxes.length; i++) {
+      const pred = logoInk.min + i * pitchLogo;
+      if (Math.abs(boxes[i].x1 - pred) > pitchLogo * (0.22 + 0.02 * i)) return { ok: false, reason: 'box-off-grid' };
+    }
     if (boxes[boxes.length - 1].x2 - logoInk.max > pitchLogo * 0.6) return { ok: false, reason: 'too-wide' };
   }
   if (boxes.length > MAX_DIGITS) return { ok: false, reason: 'too-many-digits' };
@@ -563,7 +690,7 @@ export function _analyzeAt(gray, W, H, thr, requireLogo) {
     const st = [];
     for (let i = 1; i < boxes.length; i++) st.push(boxes[i].x1 - boxes[i-1].x1);
     const pitchEst = boxes.length > 1 ? median(st) : bw / (1 - GAP_RATIO);
-    const x0 = boxes[boxes.length - 1].x2 + 1, x1 = Math.min(W, Math.round(x0 + pitchEst * 0.95));
+    const x0 = boxes[boxes.length - 1].x2 + 1, x1 = Math.min(anchor ? anchor.x2 : W, Math.round(x0 + pitchEst * 0.95));
     let dark = 0, n = 0;
     for (let y = digitRow.p1; y < digitRow.p2; y++) { const r = y * W; for (let x = x0; x < x1; x++) { n++; if (gray[r + x] <= thr) dark++; } }
     if (n > 0 && dark / n > 0.04) return { ok: false, reason: 'trailing-ink' };
