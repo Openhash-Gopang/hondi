@@ -1,0 +1,14 @@
+{
+  "name": "hondi-digit-v2-tests",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "pngjs": "^7.0.0"
+  },
+  "scripts": {
+    "test:unit": "node --test claim.test.mjs handler.test.mjs",
+    "consts": "node dump-consts.mjs",
+    "gen": "python gen_cases.py",
+    "test:recog": "node run_tests.mjs"
+  }
+}
