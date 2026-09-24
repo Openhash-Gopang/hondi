@@ -14,6 +14,7 @@
 import { handleAiChat, handleEscalate } from './src/worker/ai-chat-handler.js';
 import { handleOrderQueue } from './src/worker/order-queue-handler.js';
 import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
+import { profilePhoneFilter, last8Filter, pickGuidByLast8 } from './src/worker/phone-lookup.js';
 import { makeDigitClaimHandler } from './src/worker/digit-claim-handler.js';
 import { makePocketBaseDigitStore } from './src/worker/digit-claim-store.js';
 import { verifyPhoneAndStepUp } from './src/worker/phone-token.js';
@@ -646,7 +647,7 @@ async function _resolveGuidFromPhoneVerifyToken(env, phoneVerifyToken) {
     // 버그 — device-link sign_request 로그인이 이 경로를 실제 데이터로
     // 처음 타면서 발견(주피터 실사 재현). _l1FindProfileByE164와 동일한
     // 필터 패턴으로 정정.
-    const filter  = encodeURIComponent(`e164='${e164}'`);
+    const filter  = encodeURIComponent(await profilePhoneFilter(env, e164));       // e164_hash + 옛 평문 계정
     const res = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${filter}&perPage=1`, {
       headers: { 'Authorization': `Bearer ${l1Token}` },
       signal: AbortSignal.timeout(8000),
@@ -720,7 +721,7 @@ async function handleUserGdcBalance(request, env, corsHeaders) {
 
   try {
     const l1Token = await _l1AdminToken(env);
-    const filter  = encodeURIComponent(`e164='${e164}'`);
+    const filter  = encodeURIComponent(await profilePhoneFilter(env, e164));       // e164_hash + 옛 평문 계정
     const res = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${filter}&perPage=1`, {
       headers: { 'Authorization': `Bearer ${l1Token}` },
       signal: AbortSignal.timeout(8000),
@@ -891,7 +892,7 @@ function _deviceLinkTtl(record) {
 // 신설. _l1FindProfileByGuid/_l1FindProfileByHandle과 동일 패턴.
 async function _l1FindProfileByE164(env, e164) {
   const token = await _l1AdminToken(env);
-  const filter = encodeURIComponent(`e164='${e164}'`);
+  const filter = encodeURIComponent(await profilePhoneFilter(env, e164));       // e164_hash + 옛 평문 계정
   const res = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${filter}&perPage=1`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
@@ -17397,17 +17398,13 @@ function _extractKrwAmountFromText(text) {
 async function _findGuidByPhoneMatchKey(env, code) {
   if (!/^\d{8}$/.test(code)) return null;
   const token = await _l1AdminToken(env);
-  const filter = encodeURIComponent(`e164~'${code}'`);
+  const filter = encodeURIComponent(last8Filter(code));                          // e164_last8 + 옛 평문 계정
   const res = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${filter}&perPage=5`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   if (!res.ok) return null;
   const data = await res.json().catch(() => ({ items: [] }));
-  const exact = (data.items || []).filter(p => {
-    const digits = String(p.e164 || '').replace(/\D/g, '');
-    return digits.slice(-8) === code;
-  });
-  return (exact.length === 1) ? exact[0].guid : null;
+  return pickGuidByLast8(data.items, code);
 }
 
 async function handleChargeConfirmNotification(request, env, corsHeaders, ctx) {
