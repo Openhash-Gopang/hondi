@@ -1,0 +1,43 @@
+name: Live Smoketest — gov-tree 신설 SP 17개 폭넓은 라우팅(작업 #19, 실제 DeepSeek)
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  run-new-agencies-broad-routing-smoketest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Run broad new-agencies routing + SP response live smoketest
+        working-directory: tests/live_smoketest
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: node gov_router_2026_09_24_new_agencies_broad_live_smoketest.mjs
+
+      - name: Commit results to results branch
+        if: always()
+        run: |
+          git config user.name "hondi-live-smoketest-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout -B results/live-smoketest-gov-router-2026-09-24-new-agencies-broad
+          git add -f results/
+          git diff --cached --quiet || git commit -m "chore: 작업#19 신설 SP 폭넓은 라우팅 live smoketest results ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+          git push --force origin HEAD:results/live-smoketest-gov-router-2026-09-24-new-agencies-broad
+
+      - name: Upload artifact (backup)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-smoketest-gov-router-2026-09-24-new-agencies-broad-results
+          path: results/
