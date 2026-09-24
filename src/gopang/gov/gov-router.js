@@ -951,6 +951,26 @@ function _cityDeptCollisionCandidate(text, pdvLocationHint) {
 function _localGovCollisionCandidate(text, pdvLocationHint) {
   const cityDept = _cityDeptCollisionCandidate(text, pdvLocationHint);
   if (cityDept) return cityDept;
+  // ★ 2026-09-24 신설(작업 #19, veterans-registration 라이브 스모크테스트
+  // 실패 사고실험에서 발견) — 이 함수는 원래 "국가기관 ↔ 시청 국/도청
+  // 실·국(L2)" 두 계층만 검사했다. 그런데 직속기관(03-do-agency, 예:
+  // 제주특별자치도 보훈청)도 국가기관과 이름이 겹치는 사무를 갖는다
+  // ("국가유공자 등록"— SP-AGYDIV-VETERANS-COMPENSATION §2 별표8 근거,
+  // 국가사무처럼 보이지만 실제로는 도 직속기관에 위임된 사무). 직속기관
+  // 계층이 이 충돌 검사에서 빠져 있어서, SP-NAT-VETERANS의 bare
+  // '국가유공자' 키워드가 SP-AGY-VETERANS의 더 구체적인 '국가유공자 등록'
+  // 키워드보다 먼저(0단계 국가기관 매칭이 0.6단계 직속기관 매칭보다
+  // 먼저 실행되므로) 확정돼버리는 구조적 버그가 있었다. l2와 동일한
+  // 방식(가장 높은 점수의 키워드 매칭)으로 직속기관도 후보에 포함시킨다.
+  const { best: agencyBest, topScore: agencyScore } = _scoreMatchTies(text, _agencyTable());
+  if (agencyBest && agencyScore > 0) {
+    return {
+      code: agencyBest.code,
+      name: agencyBest.name || agencyBest.code,
+      desc: ROUTE_DESCRIPTIONS[agencyBest.code] || agencyBest.desc || `${agencyBest.code}(도 직속기관) 소관 사무`,
+      _agencyMatch: agencyBest,
+    };
+  }
   const { best: l2Best, topScore: l2Score } = _scoreMatchTies(text, _l2Table());
   if (!l2Best || l2Score === 0) return null;
   return {
@@ -3102,8 +3122,33 @@ async function _fetchEmdTeamText(teamRec, emdRec) {
 // 이미 쓰는 _matchCity(text, pdvLocationHint)로 먼저 결정론적으로
 // 좁힌다(LLM 호출도, 비용도 없음) — 그래도 못 좁히면(위치 정보 자체가
 // 없거나 시코드가 없는 순수 내용적 동점) 그때만 LLM로 넘긴다.
-async function _resolveInstitutionMatch(text, table, pdvLocationHint, classifyFn) {
+// siblingTables: ★ 2026-09-24 신설(작업 #19, police-committee-deliberation
+// 라이브 스모크테스트 실패 사고실험에서 발견) — 이 함수는 agency/org/
+// collegial 세 계층에 각각 독립 호출되는데(호출부 순서: agency → org →
+// collegial, 먼저 매칭되면 즉시 return), 그 중 어느 한 테이블만으로 zero-
+// score/약한-매칭 LLM 폴백을 돌리면 나머지 두 계층의 후보가 LLM에게
+// 아예 보이지 않는다. 실측(오프라인 mock classifyFn으로 후보 목록을
+// 직접 로그로 확인, 아래 debug 스크립트 참고): "자치경찰사무에 대한
+// 정책을 심의·의결하는 절차가 궁금한데"가 agency 테이블 대상 zero-score
+// 폴백에서 SP-COMM-POLICE(합의제 위원회, 정답)가 후보에 전혀 없이
+// SP-AGY-POLICE(집행조직, 오답)만 보고 그걸 골랐다 — 이게 진짜 원인이며,
+// 처음 가설이었던 _buildCandidatesText()(전역 안전망, step 5)는 이
+// 사례에서 아예 도달하지도 않았다(agency 매칭이 이미 확정하고 return).
+// siblingTables로 형제 계층(org/collegial 등)을 zero-score·약한-매칭
+// 후보 풀에 추가로 얹어, LLM이 계층을 넘나들며 고를 수 있게 한다 — 직접
+// 키워드 완전매칭(_scoreMatchTies(text, table))은 이 table 하나만 보므로
+// 영향받지 않는다(고속경로 회귀 없음).
+async function _resolveInstitutionMatch(text, table, pdvLocationHint, classifyFn, siblingTables = []) {
   const { best, topScore, tied } = _scoreMatchTies(text, table);
+  const _mergeSiblings = (baseTable) => {
+    let merged = baseTable;
+    for (const sib of siblingTables) {
+      for (const e of sib) {
+        if (!merged.includes(e)) merged = [...merged, e];
+      }
+    }
+    return merged;
+  };
   if (topScore === 0) {
     // ★ 2026-08-04 신설 — kw 리터럴 매칭이 전부 실패해도 조용히 포기하지
     // 않는다. "지하철 타다가 물건 놓고 내렸는데 어디다 물어봐요"처럼 kw
@@ -3129,9 +3174,10 @@ async function _resolveInstitutionMatch(text, table, pdvLocationHint, classifyFn
     // 삼키지 않음 — 이게 핵심: 예전엔 애매하면 조용히 오답을 골랐지만,
     // 이제 애매하면 사용자에게 되묻는다).
     const l2BestForZero = _scoreMatchTies(text, _l2Table()).best;
-    const zeroTable = l2BestForZero && !table.includes(l2BestForZero)
+    const zeroTableBase = l2BestForZero && !table.includes(l2BestForZero)
       ? [...table, { ...l2BestForZero, name: l2BestForZero.code, desc: ROUTE_DESCRIPTIONS[l2BestForZero.code] || l2BestForZero.domain || '' }]
       : table;
+    const zeroTable = _mergeSiblings(zeroTableBase);
     return _classifyDivisionFallback(text, zeroTable, classifyFn);
   }
   if (tied.length === 1 && topScore >= 2) {
@@ -3148,9 +3194,10 @@ async function _resolveInstitutionMatch(text, table, pdvLocationHint, classifyFn
     // 동작 그대로 즉시 확정(회귀 없음).
     const l2ForStrong = _scoreMatchTies(text, _l2Table());
     if (!classifyFn || !l2ForStrong.best || l2ForStrong.topScore === 0) return best;
-    const extendedStrongTable = !table.includes(l2ForStrong.best)
+    const extendedStrongTableBase = !table.includes(l2ForStrong.best)
       ? [...table, { ...l2ForStrong.best, name: l2ForStrong.best.code, desc: ROUTE_DESCRIPTIONS[l2ForStrong.best.code] || l2ForStrong.best.domain || '' }]
       : table;
+    const extendedStrongTable = _mergeSiblings(extendedStrongTableBase);
     let pickedStrong;
     try {
       pickedStrong = await _classifyDivisionFallback(text, extendedStrongTable, classifyFn);
@@ -3185,9 +3232,10 @@ async function _resolveInstitutionMatch(text, table, pdvLocationHint, classifyFn
       return (l2ForWeak.best && l2ForWeak.topScore > topScore) ? null : best;
     }
     const l2Best = _scoreMatchTies(text, _l2Table()).best;
-    const extendedTable = l2Best && !table.includes(l2Best)
+    const extendedTableBase = l2Best && !table.includes(l2Best)
       ? [...table, { ...l2Best, name: l2Best.code, desc: ROUTE_DESCRIPTIONS[l2Best.code] || l2Best.domain || '' }]
       : table;
+    const extendedTable = _mergeSiblings(extendedTableBase);
     // ★ 2026-08-21 수정 — 예전엔 .catch(() => null)로 실패를 전부
     // 삼켜서 NeedsClarificationSignal(되묻기 신호)까지 조용히 사라지고
     // best(약한 매칭)로 폴백해버렸다. 되묻기 신호는 그대로 위로
@@ -3239,6 +3287,24 @@ async function _resolveOrgDivision(text, orgMatch, classifyFn) {
   if (topScore === 0) return null;
   if (tied.length === 1) return best;
   return _classifyDivisionFallback(text, tied, classifyFn);
+}
+// ★ 2026-09-24 신설(작업 #19) — _resolveInstitutionMatch에 siblingTables를
+// 추가한 결과, agency 테이블을 대상으로 호출해도 zero-score/약한-매칭
+// LLM 폴백이 org·collegial 후보를 고를 수 있게 됐다(예: SP-COMM-POLICE).
+// 그런데 fetch/division 처리 함수(_fetchAgencyText·_resolveDoAgencyDivision
+// 등)는 원래 "이 결과는 반드시 그 table 소속"이라고 가정하고 짜여 있다 —
+// _fetchAgencyText 자체는 단순히 match.file을 그대로 fetch하므로 어느
+// 테이블 출신이든 안전하게 동작하지만, division 조회는 institution===code로
+// 특정 division 테이블만 필터링하므로 잘못된 테이블(agency division table에서
+// collegial 코드를 찾음)로 조회하면 항상 빈 결과(division 없음)가 나온다 —
+// 틀린 답은 아니지만(상위 SP는 맞게 로드됨) division까지 정확히 특정하지
+// 못하는 손실이 있다. code 접두어(SP-AGY-/SP-ORG-/SP-COMM-)로 실제 출신
+// 테이블을 판별해 맞는 division 조회 함수로 위임한다.
+async function _resolveInstitutionDivision(text, match, classifyFn) {
+  if (!match) return null;
+  if (match.code.startsWith('SP-ORG-')) return _resolveOrgDivision(text, match, classifyFn);
+  if (match.code.startsWith('SP-COMM-')) return _resolveCollegialDivision(text, match, classifyFn);
+  return _resolveDoAgencyDivision(text, match, classifyFn);
 }
 // ★ 2026-09-24 신설(작업 #16) — 합의제행정기관(collegial) division 판정. agency/org와 동일 패턴.
 async function _resolveCollegialDivision(text, commMatch, classifyFn) {
@@ -6107,6 +6173,19 @@ async function _assembleGovSystemPromptRaw(userText, pdvLocationHint = null, cla
   // 안전망. natMatch(지사형 집행기관)도 즉시확정 전에 시청 국 계층과
   // 충돌하는지 확인한다. classifyFn 없거나 시청 후보 없으면 기존과
   // 완전히 동일(회귀 없음).
+  // ★ 2026-09-24 수정(작업 #19, veterans-registration 라이브 스모크테스트
+  // 실패 사고실험에서 발견) — classifyFn 유무와 무관하게 항상 검사하도록
+  // 바꾸는 방안도 시도했으나, national-agency-100-scenarios.test.mjs에서
+  // 8건의 새 회귀(coastguard·weather·laborimprove·nhis·humanquarantine·
+  // env·forestcoop 등 — 이 도메인들은 국가기관 단독 소관인데 L2 원형
+  // 키워드(예: '해양'→ocean, '환경'→climate)와 어휘가 겹쳐서 classifyFn
+  // 없이 결정론적으로 "지방행정 우선" 기본값을 적용하면 잘못 지방으로
+  // 튕겨나갔다)를 일으켜 되돌렸다 — 이 가드(`natMatch && classifyFn`)는
+  // 의도적 설계(오프라인/LLM 없는 호출에서는 국가기관 즉시확정이 안전
+  // 기본값)이므로 그대로 유지한다. 대신 아래 `_localGovCollisionCandidate`
+  // 자체에 직속기관(agency) 후보를 추가해, classifyFn이 실제로 있는
+  // 프로덕션 호출(라이브 스모크테스트 등)에서 LLM이 "국가유공자 등록"
+  // 같은 더 구체적인 도 직속기관 사무를 올바르게 고를 수 있게 한다.
   const _natCityCollision = (natMatch && classifyFn)
     ? _localGovCollisionCandidate(text, pdvLocationHint) : null;
   if (natMatch && !_natCityCollision) {
@@ -6218,28 +6297,45 @@ async function _assembleGovSystemPromptRaw(userText, pdvLocationHint = null, cla
   // 정리했다 — 실사 안 된 도는 accessor가 자동으로 빈 배열을 반환해
   // 아래 매칭이 전부 조용히 스킵된다(l2/national과 동일한 안전망).
   {
-    const agyMatch = await _resolveInstitutionMatch(text, _agencyTable(), pdvLocationHint, classifyFn);
+    // ★ 2026-09-24 수정(작업 #19, police-committee-deliberation 라이브
+    // 스모크테스트 실패 사고실험에서 발견·확정) — agency 매칭의 zero-score/
+    // 약한-매칭 LLM 폴백(_resolveInstitutionMatch 내부)이 org/collegial
+    // 테이블을 전혀 몰라서, "자치경찰사무에 대한 정책을 심의·의결하는
+    // 절차가 궁금한데"처럼 키워드 완전매칭이 하나도 없는 발화는 agency
+    // 테이블 안에서만(SP-AGY-POLICE 등) 가장 비슷한 오답을 골랐다 —
+    // SP-COMM-POLICE(합의제 위원회, 정답)는 애초에 후보 목록에 없었다
+    // (오프라인 mock classifyFn으로 후보 목록을 직접 로그로 찍어 확정,
+    // "짐작 금지" 원칙에 따라 추측이 아니라 실측). 원래 가설이었던
+    // _buildCandidatesText()(전역 안전망, 5단계)는 이 사례에서 도달조차
+    // 안 한다 — agency 매칭이 이미 여기서 확정·return하기 때문. 각 호출에
+    // 형제 테이블을 siblingTables로 넘겨 LLM이 계층을 넘나들며 고를 수
+    // 있게 한다(직접 키워드 완전매칭 고속경로는 각 table 하나만 스코어링
+    // 하므로 영향받지 않음 — 회귀 없음).
+    const agyMatch = await _resolveInstitutionMatch(text, _agencyTable(), pdvLocationHint, classifyFn, [_orgTable(), _collegialTable()]);
     if (agyMatch) {
       const agencyText = await _fetchAgencyText(agyMatch);
       parts.push(agencyText);
       trace.push(agyMatch.code);
-      const agyDivisionMatch = await _resolveDoAgencyDivision(text, agyMatch, classifyFn);
+      // _resolveInstitutionDivision — siblingTables 덕분에 agyMatch가 실제로는
+      // org/collegial 코드일 수도 있어(예: SP-COMM-POLICE), code 접두어로
+      // 실제 출신 테이블을 판별해 맞는 division 조회 함수로 위임한다.
+      const agyDivisionMatch = await _resolveInstitutionDivision(text, agyMatch, classifyFn);
       if (agyDivisionMatch) {
         parts.push(await _fetchText(agyDivisionMatch.file, _currentProvinceRepo()));
-        trace.push(`${agyDivisionMatch.code}(과 특정)`);
+        trace.push(`${agyDivisionMatch.code}(과/팀 특정)`);
       }
       await _appendExpertIfMatched();
       return { systemPrompt: parts.join('\n\n---\n\n'), trace };
     }
-    const orgMatch = await _resolveInstitutionMatch(text, _orgTable(), pdvLocationHint, classifyFn);
+    const orgMatch = await _resolveInstitutionMatch(text, _orgTable(), pdvLocationHint, classifyFn, [_collegialTable()]);
     if (orgMatch) {
       const orgText = await _fetchOrgText(orgMatch);
       parts.push(orgText);
       trace.push(orgMatch.code);
-      const orgDivisionMatch = await _resolveOrgDivision(text, orgMatch, classifyFn);
+      const orgDivisionMatch = await _resolveInstitutionDivision(text, orgMatch, classifyFn);
       if (orgDivisionMatch) {
         parts.push(await _fetchText(orgDivisionMatch.file, _currentProvinceRepo()));
-        trace.push(`${orgDivisionMatch.code}(팀 특정)`);
+        trace.push(`${orgDivisionMatch.code}(팀/과 특정)`);
       }
       await _appendExpertIfMatched();
       return { systemPrompt: parts.join('\n\n---\n\n'), trace };

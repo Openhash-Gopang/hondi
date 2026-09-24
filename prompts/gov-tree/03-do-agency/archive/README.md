@@ -508,3 +508,131 @@ GitHub Actions에서 `workflow_dispatch`로 `live-smoketest-gov-router-2026-09-2
 `DEEPSEEK_API_KEY` secret과 함께 수동 실행해야 `realClassifyFn`(LLM 폴백)까지 포함한 완전한 라이브
 검증 결과를 얻는다. 결과는 `results/gov_router_2026_09_24_new_agencies_smoketest/results.json`과
 `results/live-smoketest-gov-router-2026-09-24-new-agencies` 브랜치에 남는다.
+
+---
+
+# 작업 #19 (2026-09-24) — 라이브 스모크테스트 실패 2건 수정 + 더 폭넓은 라우팅 스모크테스트 신설
+
+작업 #18의 라이브 스모크테스트(22건)를 GitHub Actions에서 실제로 `DEEPSEEK_API_KEY`와 함께 돌린
+결과, 22건 중 2건이 실패했다(`results/live-smoketest-gov-router-2026-09-24-new-agencies` 브랜치의
+`results/gov_router_2026_09_24_new_agencies_smoketest/results.json`에서 확인). 프로젝트 총괄(피터/
+주피터)의 지시: "수정하십시오. 그리고, 더욱 폭넓은 사용자 발화로 라이브 테스트를 한 번 더 진행하십시오."
+
+## 버그 1 — 보훈청 명칭 충돌("국가유공자" bare 키워드)
+
+**실패 시나리오**: `veterans-registration`("국가유공자 등록을 하고 싶은데 어디로 가야 하나요") →
+실제: `SP-NAT-VETERANS`, 기대: `SP-AGY-VETERANS`.
+
+**원인(코드 추적으로 확정, 추측 아님)**: `gov-router.js`의 `assembleGovSystemPrompt`는 "0) 국가기관
+매칭"(`_matchNational`)을 "0.6) 직속기관(03-do-agency) 매칭"보다 먼저 실행한다. `JEJU_NATIONAL_TABLE`의
+`SP-NAT-VETERANS`가 bare `'국가유공자'` 키워드를 갖고 있어, "국가유공자 등록"이라는 발화가 국가기관
+단계에서 즉시 매칭·확정돼버린다 — 도 직속기관(`SP-AGY-VETERANS`)이 이미 더 구체적인 키워드
+`'국가유공자 등록'`을 갖고 있었는데도(division-tables.js) 그 단계까지 도달하지 못했다.
+
+이 국가기관↔지방행정 충돌을 막는 안전망(`_localGovCollisionCandidate`)이 이미 있었지만, 예전엔
+시청 국(`_cityDeptTable`)·도청 실·국(`_l2Table`) 두 계층만 검사했고 **03-do-agency(직속기관) 계층은
+검사 대상에서 아예 빠져 있었다** — 이게 진짜 원인이다.
+
+**관할 재확인(추측 금지 원칙에 따라 원문 확인)**: `SP-AGYDIV-VETERANS-COMPENSATION_v1.0.md` §2를
+직접 읽어, 「제주특별자치도 행정기구 설치 및 정원 조례 시행규칙」 별표8(직속기관별 분장사무)에 이
+과의 사무로 "1. 각종 등록에 관한 사항"이 실제로 명시돼 있음을 확인했다. `SP-AGY-VETERANS_v1.0.md`
+§5(예시 시나리오)도 "국가유공자 등록은 어디서 신청하나요" → 도 직속기관 체인으로 이미 명시하고 있었다.
+즉 "국가유공자 등록"(신규 등록 신청)은 도 직속기관(보훈청)에 위임된 사무로 문서상 확인되며,
+`SP-NAT-VETERANS`(국가보훈부 소관, 연금·의료 등 중앙 사무)와는 별개다 — 라우팅을 도 직속기관 쪽으로
+고치는 것이 맞다.
+
+**수정**: `_localGovCollisionCandidate()`에 `_agencyTable()` 검사를 추가했다(cityDept → agency → l2
+순으로 확인). 이제 국가기관 매칭이 즉시 확정되기 전에, 같은 발화가 도 직속기관 키워드에도 걸리는지
+함께 확인하고, 걸리면(그리고 classifyFn이 있으면) LLM에게 두 후보(`SP-NAT-VETERANS` vs
+`SP-AGY-VETERANS`)를 함께 주고 고르게 한다.
+
+**시도했다가 되돌린 접근**: 처음엔 `classifyFn`이 없어도(오프라인) 이 충돌 검사 자체를 항상 실행하도록
+바꿔봤으나, `national-agency-100-scenarios.test.mjs`에서 8건의 새 회귀(coastguard·weather·
+laborimprove·nhis·humanquarantine·env·forestcoop 등 — 순수 국가기관 소관 도메인인데 L2 원형
+키워드('해양'→ocean, '환경'→climate 등)와 어휘가 겹쳐 "classifyFn 없으면 지방행정 우선"이라는
+결정론적 기본값이 잘못 지방으로 튕겨나감)를 일으켰다. `natMatch && classifyFn` 가드는 의도적 설계
+(LLM 없는 호출에서는 국가기관 즉시확정이 안전 기본값)임을 재확인하고 원복했다 — `_localGovCollision
+Candidate` 자체에 agency 계층을 추가하는 것만 유지했다(실제 프로덕션 호출은 항상 `classifyFn`을
+주입하므로 이 가드는 실질적으로 영향이 없다).
+
+## 버그 2 — 자치경찰위원회/자치경찰단 명칭 충돌(합의제행정기관)
+
+**실패 시나리오**: `police-committee-deliberation`("자치경찰사무에 대한 정책을 심의·의결하는 절차가
+궁금한데 어디에 문의해야 하나요") → 실제: `SP-AGY-POLICE`, 기대: `SP-COMM-POLICE`.
+
+**원래 가설(작업 지시서에 적혀 있던 것)**: "전역 LLM 안전망"(`_buildCandidatesText()`, step 5)이
+agency/org/collegial 계층을 후보에 안 넣어서 그런 것 아닌가 — 이 가설은 **틀렸다**. 오프라인 mock
+`classifyFn`으로 실제 후보 목록을 직접 로그로 찍어 확인한 결과(스크래치 디버그 스크립트, 커밋 대상
+아님), 이 시나리오는 `_buildCandidatesText()`(step 5)에 도달조차 하지 않았다 — "0.6) 직속기관/
+출자출연기관 매칭" 단계에서 `_resolveInstitutionMatch(text, _agencyTable(), ...)`가 이미 확정하고
+`return`해버리기 때문이다.
+
+**진짜 원인(로그로 확정)**: 이 발화는 `_agencyTable()`·`_collegialTable()` 어느 쪽 키워드와도 정확히
+겹치지 않아(topScore===0) `_resolveInstitutionMatch`의 "zero-score LLM 폴백" 경로를 탄다. 이 폴백은
+`table`(agency 하나) + L2 1등 후보만 후보로 구성했다 — **org/collegial 계층은 애초에 이 후보 목록에
+없었다.** 그 결과 LLM(또는 mock)은 `SP-COMM-POLICE`(정답, 합의제 위원회)를 볼 기회조차 없이 후보
+agency 목록 중 "그나마 비슷한" `SP-AGY-POLICE`(집행조직)를 골랐다. 실측 로그에서 `classifyCallCount:
+1`이었고, 그 1번의 호출에 전달된 후보 목록 전체(agency 27개)에 `SP-COMM-POLICE` 문자열이 전혀
+없었음을 직접 확인했다 — 짐작이 아니라 실측이다.
+
+**수정**: `_resolveInstitutionMatch(text, table, pdvLocationHint, classifyFn, siblingTables=[])`에
+5번째 인자 `siblingTables`를 추가했다. zero-score 폴백·약한 매칭(topScore===1)·강한 매칭
+(topScore>=2)의 LLM 후보 목록 구성부에 모두 `siblingTables`를 병합하도록 고쳤다(직접 키워드 완전매칭
+고속경로는 `table` 하나만 스코어링하므로 영향받지 않는다 — 회귀 없음). 호출부(0.6단계)에서:
+- agency 매칭 호출에 `[_orgTable(), _collegialTable()]`을 형제 테이블로 전달
+- org 매칭 호출에 `[_collegialTable()]`을 형제 테이블로 전달
+
+이제 agency 테이블 매칭이 LLM에게 물어볼 때 org·collegial 후보까지 함께 보여준다. 다만 이러면
+`agyMatch`로 반환되는 객체가 실제로는 org/collegial 코드일 수 있으므로, division 조회 함수도 코드
+접두어(`SP-ORG-`/`SP-COMM-`/그 외)로 실제 출신 테이블을 판별해 올바른 division 테이블을 조회하는
+디스패처(`_resolveInstitutionDivision`)를 새로 추가했다.
+
+## 수정 후 검증
+
+1. **오프라인 키워드/후보 시뮬레이션**(DEEPSEEK_API_KEY 없어 실제 LLM 응답까지는 검증 못함, 정직하게
+   명시) — mock `classifyFn`으로 두 버그 각각 재현:
+   - 버그1: classifyFn 없음(순수 키워드) → 여전히 `SP-NAT-VETERANS`로 감(예상된 동작, 정직하게
+     확인). classifyFn 목(후보에 `SP-AGY-VETERANS`가 있으면 그걸 고르는 목) → 후보 목록에
+     `SP-AGY-VETERANS`가 실제로 포함됨을 확인했고, 그걸 고르면 trace가
+     `SP-DO-000 > SP-AGY-VETERANS > SP-AGYDIV-VETERANS-COMPENSATION(과 특정)`으로 정확히 감.
+   - 버그2: classifyFn 목(후보에 `SP-COMM-POLICE`가 있으면 그걸 고르는 목) → 수정 전엔 후보 목록에
+     `SP-COMM-POLICE`가 전혀 없었고(agency 27개만), 수정 후엔 agency+org+collegial 전부(62개 후보)가
+     포함되고 `SP-COMM-POLICE`를 고르면 trace가 `SP-DO-000 > SP-COMM-POLICE`로 정확히 감.
+2. **기존 회귀 스윕**: `node tools/build_kfoi_digest.mjs --check`(476건 정상)·`python3 tools/
+   check_stale_refs.py`(711건 정상)·`src/tests/*.test.mjs` 전체(27개 파일) — 수정 전후 `git stash`로
+   대조한 결과 **정확히 동일한 8개 파일이 실패**(사전 존재 실패, 이번 작업과 무관 — `c50-next-step-
+   marker`·`conversational-style-guard`·`do-dept-completion`·`gov-router-2026-08-21-session-
+   smoketest`·`kplan-kwatch-kjob-dispatch`·`national-agency-100-scenarios`·`sp-intercall`·
+   `sp-tag-dispatch`)했고 **새 회귀는 0건**이었다. `national-agency-100-scenarios.test.mjs`의 기존
+   2건 실패도 diff로 내용까지 대조해 수정 전과 완전히 동일함을 확인했다(타이밍 값만 다름).
+   `grep -rln "SP-NAT-VETERANS\|SP-AGY-POLICE" src/tests/`로 찾은 `kfoi-duties-raw.test.mjs`·
+   `kfoi-digest.test.mjs`도 통과 유지.
+3. `_buildCandidatesText()`는 이번 두 버그 어느 쪽의 원인도 아니었으므로(원래 가설이 틀렸음을 확인)
+   건드리지 않았다 — 08-21 부서 라우팅 스모크테스트(`gov_router_2026_08_21_department_live_smoketest.mjs`)
+   영향 없음.
+
+## 더 폭넓은 라이브 스모크테스트 신설
+
+프로젝트 총괄의 "더욱 폭넓은 사용자 발화로 라이브 테스트를 한 번 더 진행하십시오" 지시에 따라
+`tests/live_smoketest/gov_router_2026_09_24_new_agencies_broad_live_smoketest.mjs`(총 42개 시나리오)를
+신설했다(기존 22건 파일·워크플로는 그대로 보존 — 계속 재실행 가능).
+
+- 신설 SP 17개(agency 11 + 소방서 4 + collegial 3, 단 소방서는 4곳 전부·집계상 AGY-POLICE 포함) 각
+  최소 2건, 격식체/반말/간접 표현/복합 질문 등으로 표현을 다양화.
+- 보훈청(`SP-AGY-VETERANS`) 4건·자치경찰위원회(`SP-COMM-POLICE`) 4건 + 대응쌍 자치경찰단
+  (`SP-AGY-POLICE`) 2건 — 이번에 고친 두 버그의 회귀 재발을 다른 표현으로 재검증.
+- 애매한 경계 케이스 4건을 `info: true`(관찰 전용, pass/fail 강제 안 함)로 포함: 자치경찰/국가경찰
+  비교형 질문, 소방서 위치 불특정 질문, "국가유공자"만 언급한 매우 일반적인 질문, "자치경찰"만
+  언급해 집행조직/위원회 구분이 안 되는 질문.
+- 오프라인 검증(mock classifyFn, DEEPSEEK_API_KEY 없어 실제 LLM 검증은 못함 — 정직하게 명시): 판정
+  대상 38건 전부 통과, 관찰용 4건은 trace를 기록만 함. `node --check`로 문법 검증 통과.
+- 대응 워크플로 `.github/workflows/live-smoketest-gov-router-2026-09-24-new-agencies-broad.yml`을
+  기존 패턴(`workflow_dispatch`, `DEEPSEEK_API_KEY` secret, results 브랜치 push, 아티팩트 업로드)
+  그대로 신설했다(`python3 -c "import yaml; yaml.safe_load(...)"`로 YAML 문법 확인).
+
+## 완전한 검증을 위해 남은 일 (작업 #19)
+
+이 세션엔 `DEEPSEEK_API_KEY`가 없어 `realClassifyFn`(실제 LLM 분류)까지 포함한 완전한 라이브 실행은
+GitHub Actions에서 `workflow_dispatch`로 두 워크플로(`live-smoketest-gov-router-2026-09-24-new-
+agencies.yml` 재실행 — 이번엔 22건 모두 통과해야 정상, `live-smoketest-gov-router-2026-09-24-new-
+agencies-broad.yml` 신규 실행)를 `DEEPSEEK_API_KEY` secret과 함께 수동 실행해야 한다.
