@@ -191,12 +191,36 @@ def build_specs():
         add('S5_negative', 'logo_only', '', None, _logo_only=True)
     for _ in range(40):
         add('S5_negative', 'random_boxes', '', None, _boxes=True)
+    # S6: 가짜 로고 — 로고 자리에 다른 것을 넣은 숫자열(기대: 거절). 로고 검증의 회귀 방지용
+    for kind in ['bar', 'blocks', 'wide_lines', 'dots', 'other_text', 'typed_bold']:
+        for _ in range(10):
+            s = rand_serial(rng.randint(1, 10), rng); add('S6_fake_logo', kind, s, None, _fake=kind)
     if os.environ.get('QUICK'):
         specs = specs[::12]          # 빠른 점검용(약 1/12)
     for i, sp in enumerate(specs):
         sp['id'] = f"{sp['suite']}_{i:05d}"
         sp['seed'] = i
     return specs
+
+
+def fake_logo_frame(serial, kind, rng):
+    from PIL import ImageFont
+    ink = (C['LOGO']['inkX1'], C['LOGO']['inkY1'], C['LOGO']['inkX2'], C['LOGO']['inkY2'])
+    code = render_code(serial, with_logo=False); d = ImageDraw.Draw(code)
+    if kind == 'bar': d.rectangle(list(ink), fill=0)
+    elif kind == 'blocks':
+        for i in range(9): d.rectangle([ink[0] + i * 47, ink[1], ink[0] + i * 47 + 36, ink[3]], fill=0)
+    elif kind == 'wide_lines':
+        for i in range(4): d.rectangle([ink[0], ink[1] + i * 14, ink[2], ink[1] + i * 14 + 7], fill=0)
+    elif kind == 'dots':
+        for i in range(30): d.ellipse([ink[0] + i * 14, ink[1] + 10, ink[0] + i * 14 + 9, ink[1] + 45], fill=0)
+    elif kind == 'other_text': d.text((ink[0], ink[1] - 8), 'HELLO WORLD', fill=0, font=ImageFont.load_default(size=60))
+    elif kind == 'typed_bold':
+        for dx in (0, 1, 2): d.text((ink[0] + dx, ink[1] - 8), 'HONDI.NET', fill=0, font=ImageFont.load_default(size=64))
+    s = (0.7 * FW) / code.width
+    img = code.resize((int(code.width * s), int(code.height * s)), Image.LANCZOS)
+    fr = Image.new('L', (FW, FH), 255); fr.paste(img, ((FW - img.width) // 2, (FH - img.height) // 2))
+    return fr.convert('RGB')
 
 
 def negative_frame(kind, rng):
@@ -229,6 +253,8 @@ def run(sp):
         Image.fromarray(np.clip(a, 0, 255).astype(np.uint8)).convert('RGB').save(path)
     elif kw.pop('_logo_only', False):
         negative_frame('logo_only', rng).save(path)
+    elif kw.get('_fake'):
+        fake_logo_frame(sp['serial'], kw['_fake'], rng).save(path)
     elif kw.pop('_boxes', False):
         negative_frame('random_boxes', rng).save(path)
     else:

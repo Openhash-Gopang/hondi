@@ -245,7 +245,7 @@ function sampleLevel(gray, q) {          // 밝기 분위수(종이 밝기 추�
 // 기하 왜곡(회전·원근)이 원인일 수 있는 실패 사유 — 이때만 비싼 보정을 시도한다
 const GEOM_REASONS = new Set(['box-aspect', 'no-boxes', 'box-width-inconsistent', 'pitch-inconsistent',
   'no-logo', 'not-left-aligned', 'boxes-merged', 'too-wide', 'logo-scale-mismatch', 'row-clipped', 'no-ink',
-  'bad-pattern', 'low-certainty', 'trailing-ink']);
+  'bad-pattern', 'low-certainty', 'trailing-ink', 'logo-mismatch']);
 
 /**
  * @param {Uint8Array|Uint8ClampedArray} gray  W*H 회색조
@@ -440,6 +440,63 @@ export function warpGray(gray, W, H, tf) {
   return out;
 }
 
+// 로고의 좌우 끝: 세로 줄(종이 가장자리·벽 모서리)이 로고 행에 걸쳐 잡혀도 넓어지지 않도록,
+// 글자 간격보다 크게 떨어진 덩어리는 다른 물체로 보고 잉크가 가장 많은 덩어리만 로고로 삼는다.
+function logoExtentX(gray, W, thr, y1, y2) {
+  const rowH = y2 - y1, colDark = new Uint32Array(W);
+  for (let y = y1; y < y2; y++) { const r = y * W; for (let x = 0; x < W; x++) if (gray[r + x] <= thr) colDark[x]++; }
+  const minC = Math.max(1, Math.round(rowH * 0.06)), gap = Math.max(3, Math.round(rowH * 0.5));
+  const groups = []; let cur = null, lastX = -1e9;
+  for (let x = 0; x < W; x++) {
+    if (colDark[x] < minC) continue;
+    if (!cur || x - lastX > gap) { cur = { min: x, max: x + 1, ink: 0 }; groups.push(cur); }
+    cur.max = x + 1; cur.ink += colDark[x]; lastX = x;
+  }
+  if (!groups.length) return null;
+  groups.sort((a, b) => b.ink - a.ink);
+  return { min: groups[0].min, max: groups[0].max };
+}
+
+// ── 로고 검증 ("hondi.net"이 맞는지) ─────────────────────────────
+// 로고 잉크 영역을 48×8 격자로 나눠 칸별 어두운 정도를 구하고, 저장해 둔 원본 로고와 정규화 상관(NCC)을 낸다.
+// 크기·블러·밝기가 달라도 글자가 만드는 굴곡 모양은 유지되므로 견딘다. 검은 막대·블록·다른 글자는 걸러진다.
+export const LOGO_GX = 48, LOGO_GY = 8;
+export const LOGO_TEMPLATE = [0.66,0.66,0.38,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.15,0.7,0.7,0.34,0,0.76,0.91,0.08,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.44,0.52,0,1,1,0.58,0.03,0.03,0,0,0,0.03,0.06,0,0,0,0,0,0,0.08,0,0,0,0,0.2,0.99,1,0.49,0,0.7,0.85,0.08,0,0,0,0,0,0,0.06,0.04,0,0,0,0.05,0.07,0,0,0.04,0.83,0.75,0,0.67,1,0.77,0.87,0.87,0.23,0.01,0.47,0.88,0.93,0.74,0.19,0.38,0.77,0.65,0.66,0.96,0.7,0.05,0.25,0.77,0.78,0.87,1,0.49,0.31,0.8,0.81,0.3,0,0,0.1,0.77,0.77,0.54,0.92,0.86,0.21,0.02,0.54,0.92,0.94,0.63,0.12,0.77,1,0.94,0.72,0.51,1,0.99,0.98,1,0.57,0.26,0.99,0.89,0.67,1,0.73,0.5,1,0.98,0.99,1,1,0.26,0.75,1,0.85,0.92,1,0.49,0.41,1,1,0.39,0,0,0.13,1,1,0.96,0.99,1,0.56,0.3,1,0.85,0.64,1,0.52,1,1,1,0.94,0.51,1,0.62,0.5,1,0.62,0.51,1,0.65,0.25,1,0.96,0.12,0.92,1,0.32,0.91,1,0.33,0.92,1,0.34,0.63,1,0.49,0.05,0.87,1,0.39,0,0,0.01,0.62,1,0.61,0.55,1,0.61,0.52,1,0.87,0.74,1,0.65,0.45,1,0.76,0.16,0.63,1,0.68,0.53,1,0.7,0.54,1,0.66,0.26,1,0.94,0.19,0.94,1,0.4,0.89,1,0.44,0.91,1,0.35,0.66,1,0.63,0.13,0.89,1,0.52,0.23,0.52,0.08,0.68,1,0.69,0.58,1,0.71,0.56,1,0.78,0.36,0.66,0.46,0.41,1,0.75,0.48,1,1,1,0.75,1,1,0.43,0.97,0.91,0.74,1,0.68,0.49,1,1,0.77,0.89,1,0.79,0.74,1,0.86,0.93,1,1,0.54,1,1,0.87,0.67,1,0.43,1,1,1,0.74,1,1,0.48,0.99,0.9,0.54,0.96,0.4,0.34,1,0.94,0.76,0.71,0.71,0.71,0.54,0.71,0.71,0.16,0.37,0.83,0.89,0.68,0.13,0.35,0.71,0.71,0.55,0.64,0.71,0.57,0.25,0.81,0.77,0.53,0.71,0.71,0.38,0.71,0.71,0.62,0.44,0.84,0.22,0.71,0.71,0.71,0.53,0.71,0.71,0.17,0.44,0.87,0.9,0.62,0.04,0.08,0.77,0.93,0.44];   // tests/digit-v2/make-logo-template.mjs 로 생성
+// 실측(합성 3,300장 중 정상 코드 209장 표본): 진짜 로고 NCC 최소 0.75(작고 흐린 경우) · 대부분 0.99,
+// 가짜(검은 막대·블록·점·줄무늬·다른 글자·굵은 활자체) 최대 0.43 → 사이인 0.6으로 정한다.
+export const LOGO_MIN_NCC = 0.6;
+
+export function logoDescriptor(gray, W, H, ink, row, paper, inkLevel) {
+  const x1 = ink.min, x2 = ink.max, y1 = row.p1, y2 = row.p2;
+  const out = new Float32Array(LOGO_GX * LOGO_GY);
+  const span = Math.max(1, paper - inkLevel);
+  for (let gy = 0; gy < LOGO_GY; gy++) {
+    const ya = y1 + (y2 - y1) * gy / LOGO_GY, yb = y1 + (y2 - y1) * (gy + 1) / LOGO_GY;
+    const ys = Math.max(0, Math.floor(ya)), ye = Math.min(H, Math.max(ys + 1, Math.ceil(yb)));
+    for (let gx = 0; gx < LOGO_GX; gx++) {
+      const xa = x1 + (x2 - x1) * gx / LOGO_GX, xb = x1 + (x2 - x1) * (gx + 1) / LOGO_GX;
+      const xs = Math.max(0, Math.floor(xa)), xe = Math.min(W, Math.max(xs + 1, Math.ceil(xb)));
+      let sum = 0, n = 0;
+      for (let y = ys; y < ye; y++) { const r = y * W; for (let x = xs; x < xe; x++) {
+        const d = (paper - gray[r + x]) / span * 1.5;          // 파란/빨간 글자(회색조 85)도 "잉크"로 포화
+        sum += d < 0 ? 0 : d > 1 ? 1 : d; n++;
+      } }
+      out[gy * LOGO_GX + gx] = n ? sum / n : 0;
+    }
+  }
+  return out;
+}
+
+export function ncc(a, b) {
+  const n = a.length; let ma = 0, mb = 0;
+  for (let i = 0; i < n; i++) { ma += a[i]; mb += b[i]; }
+  ma /= n; mb /= n;
+  let sab = 0, saa = 0, sbb = 0;
+  for (let i = 0; i < n; i++) { const da = a[i] - ma, db = b[i] - mb; sab += da * db; saa += da * da; sbb += db * db; }
+  if (saa < 1e-6 || sbb < 1e-6) return 0;                       // 무늬 없는 덩어리(검은 막대 등)
+  return sab / Math.sqrt(saa * sbb);
+}
+
 export function _analyzeAt(gray, W, H, thr, requireLogo) {
   const paper = Math.max(thr + 30, sampleLevel(gray, 0.95));       // 종이(밝은 쪽) 밝기 추정
   const thrRow = thr + 0.25 * (paper - thr);                      // 블러로 옅어진 가는 선까지 잡는 문턱
@@ -485,13 +542,17 @@ export function _analyzeAt(gray, W, H, thr, requireLogo) {
     if (step.some(v => Math.abs(v - ms) > ms * 0.2)) return { ok: false, reason: 'pitch-inconsistent' };
     if (ms < bw * 1.03) return { ok: false, reason: 'boxes-merged' };
   }
-  let logoInk = null;
+  let logoInk = null, logoScore = null;
   if (logoRow) {
-    logoInk = inkExtentX(gray, W, thrRow, logoRow.p1, logoRow.p2);
+    logoInk = logoExtentX(gray, W, thrRow, logoRow.p1, logoRow.p2);
     if (!logoInk) return { ok: false, reason: 'no-logo' };
     const pitchLogo = (logoInk.max - logoInk.min) / MAX_DIGITS;
     const ratio = bw / pitchLogo;                                  // 설계값 0.86
     if (ratio < 0.65 || ratio > 1.05) return { ok: false, reason: 'logo-scale-mismatch' };
+    if (LOGO_TEMPLATE.length === LOGO_GX * LOGO_GY) {
+      logoScore = ncc(logoDescriptor(gray, W, H, logoInk, logoRow, paper, sampleLevel(gray, 0.02)), LOGO_TEMPLATE);
+      if (LOGO_MIN_NCC > 0 && logoScore < LOGO_MIN_NCC) return { ok: false, reason: 'logo-mismatch', logoScore };
+    }
     if (Math.abs(boxes[0].x1 - logoInk.min) > pitchLogo * 0.6) return { ok: false, reason: 'not-left-aligned' };
     if (boxes[boxes.length - 1].x2 - logoInk.max > pitchLogo * 0.6) return { ok: false, reason: 'too-wide' };
   }
@@ -515,5 +576,5 @@ export function _analyzeAt(gray, W, H, thr, requireLogo) {
   const certainty = Math.min(...cells.map(c => c.certainty));
   const serial = cells.map(c => c.digit).join('');
   if (!isValidSerial(serial)) return { ok: false, reason: 'invalid-serial' };      // 앞자리 0 등
-  return { ok: true, serial, n: cells.length, certainty, cells, row: { digitRow, logoRow, boxes, logoInk } };
+  return { ok: true, serial, n: cells.length, certainty, logoScore, cells, row: { digitRow, logoRow, boxes, logoInk } };
 }
