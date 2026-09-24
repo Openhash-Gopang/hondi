@@ -10,6 +10,7 @@ export const LOCK_FRAMES = 3;
 
 const REASON_HINT = {
   'no-ink': '코드를 화면에 비춰주세요.',
+  'logo-mismatch': '"hondi.net" 로고가 또렷하게 보이도록 비춰주세요. (다른 글자·무늬는 코드로 읽지 않아요)',
   'no-logo': '"hondi.net" 로고와 숫자가 함께 보이도록 비춰주세요.',
   'row-clipped': '숫자열이 화면 끝에 걸렸어요. 조금 더 멀리서 비춰주세요.',
   'not-left-aligned': '숫자열이 잘렸을 수 있어요. 로고와 숫자를 모두 화면 안에 넣어주세요.',
