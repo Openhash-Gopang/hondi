@@ -12,8 +12,19 @@
 
 const enc = new TextEncoder();
 
+/*
+ * 전화번호 표준(docs/HONDI_UNIFIED_AUTH_BILLING_MANUAL_v1_0_20260917.md §4.5, docs/DEVICE_LINK_MANUAL_v1_0.md §6-1):
+ *   · 시스템 내부 형식은 "+82 뒤에 0을 유지" — +8201XXXXXXXX (표준 E.164와 다름). 서버는 worker.js _normalizePhoneE164 로 항상 재정규화.
+ * 계정 쪽 저장(pb_migrations/1793900100…, pb_hooks/main.pb.js — 2026-09-07 "서버에 개인정보를 저장하지 않는다"):
+ *   · profiles.e164 는 새 가입부터 항상 빈 문자열('')이다. 전화번호는 e164_hash 로만 남는다:
+ *       e164_hash = HMAC-SHA256(PHONE_VERIFY_SECRET, "e164-lookup:" + e164)   (hex)
+ *   · 이전에 가입한 계정은 평문 e164 가 남아 있고 e164_hash 는 백필되어 있다.
+ * 그래서 "토큰의 번호 = 계정의 번호" 비교는 **e164_hash 끼리**(pb_hooks 의 재인증 검사와 같은 방식)가 기준이고,
+ * 평문 e164/phone 은 해시가 없는 옛 레코드용 보조다. (평문 칸만 보면 새 계정은 항상 "번호가 다르다"로 거절된다.)
+ */
+
 /**
- * 전화번호 비교용 표준형. 혼디는 E.164 를 "+82" 뒤에 0을 그대로 둔 형태(+8201096627170)로 저장한다(worker.js _normalizePhoneE164).
+ * 전화번호 비교용 표준형(평문끼리 비교할 때만 사용). 혼디는 E.164 를 "+82" 뒤에 0을 그대로 둔 형태(+8201096627170)로 저장한다(worker.js _normalizePhoneE164).
  * 그래서 +8201096627170 / +821096627170 / 01096627170 / 010-9662-7170 이 모두 '8201096627170' 으로 같아지게 한다.
  * (예전에 이 검사가 계정의 `phone` 칸만 보고 표기 차이를 무시하지 못해, 문자 인증을 통과한 본인이 "번호가 다르다"고 거절당했다.)
  */
@@ -35,7 +46,7 @@ function timingSafeEqualHex(a, b) {
   return d === 0;
 }
 
-export async function verifyFreshPhoneToken({ secret, token, guid, accountPhone, ttlMs, freshMs = 10 * 60 * 1000, now = Date.now() }) {
+export async function verifyFreshPhoneToken({ secret, token, guid, accountPhone, accountE164Hash, ttlMs, freshMs = 10 * 60 * 1000, now = Date.now() }) {
   const bad = (status, code, message) => ({ ok: false, status, code, message });
   if (!secret) return bad(500, 'SECRET_NOT_SET', 'PHONE_VERIFY_SECRET이 설정되지 않았습니다.');
   if (!guid) return bad(400, 'MISSING_GUID', 'guid가 필요합니다.');
@@ -55,9 +66,16 @@ export async function verifyFreshPhoneToken({ secret, token, guid, accountPhone,
   if (!(ttlMs > 0)) return bad(500, 'TTL_NOT_SET', '토큰 유효기간 설정이 없습니다.');
   const issuedAt = exp - ttlMs;
   if (now - issuedAt > freshMs) return bad(401, 'PHONE_TOKEN_STALE', '방금 진행한 문자 인증만 사용할 수 있습니다. 문자 인증을 다시 진행해 주세요.');
-  const acct = canonPhone(accountPhone), tok = canonPhone(e164);
-  if (!acct) return bad(403, 'ACCOUNT_PHONE_MISSING', '이 계정에 등록된 전화번호를 찾지 못했습니다. 혼디 앱에서 다시 로그인해 주세요.');
-  if (acct !== tok) return bad(403, 'PHONE_MISMATCH', '인증한 전화번호가 이 계정에 등록된 번호와 다릅니다.');
+  if (accountE164Hash) {
+    // 기준: e164_hash 끼리 비교(pb_hooks 재인증 검사와 동일). 토큰의 e164는 서버가 정규화해 서명한 값 그대로 해시한다.
+    const tokHash = await hmacHex(secret, 'e164-lookup:' + e164);
+    if (!timingSafeEqualHex(String(accountE164Hash).toLowerCase(), tokHash)) return bad(403, 'PHONE_MISMATCH', '인증한 전화번호가 이 계정에 등록된 번호와 다릅니다.');
+  } else {
+    // 해시가 없는 옛 레코드: 평문 e164/phone 이 있으면 표준형으로 비교, 둘 다 없으면 "다르다"가 아니라 "찾지 못했다"
+    const acct = canonPhone(accountPhone), tok = canonPhone(e164);
+    if (!acct) return bad(403, 'ACCOUNT_PHONE_MISSING', '이 계정에 등록된 전화번호 정보를 찾지 못했습니다. 관리자에게 문의해 주세요.');
+    if (acct !== tok) return bad(403, 'PHONE_MISMATCH', '인증한 전화번호가 이 계정에 등록된 번호와 다릅니다.');
+  }
   return { ok: true };
 }
 
@@ -69,8 +87,8 @@ export async function verifyFreshPhoneToken({ secret, token, guid, accountPhone,
  * verifyStepUp(token, guid, txHash) → { ok, reason } — worker.js의 _verifyStepUpToken 을 감싸서 넘긴다.
  */
 export async function verifyPhoneAndStepUp({ secret, token, guid, profile, ttlMs, freshMs, stepUpToken, verifyStepUp, now }) {
-  // 계정 전화번호는 profiles.e164 (가입 시 저장되는 칸). 예전 가져오기 데이터용 phone 칸은 보조로만 쓴다.
-  const pv = await verifyFreshPhoneToken({ secret, token, guid, accountPhone: profile?.e164 || profile?.phone, ttlMs, freshMs, ...(now ? { now } : {}) });
+  // 계정 전화번호는 e164_hash 가 기준(새 계정은 평문 e164 가 빈 칸). 평문 e164/phone 은 해시가 없는 옛 레코드 보조.
+  const pv = await verifyFreshPhoneToken({ secret, token, guid, accountE164Hash: profile?.e164_hash, accountPhone: profile?.e164 || profile?.phone, ttlMs, freshMs, ...(now ? { now } : {}) });
   if (!pv.ok) return pv;
   const creds = profile?.extra?.webauthn_credentials;
   if (Array.isArray(creds) && creds.length > 0) {

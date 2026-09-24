@@ -98,3 +98,33 @@ test('verifyPhoneAndStepUp은 계정의 e164 칸을 쓴다(phone 칸이 비어 �
   assert.equal((await verifyPhoneAndStepUp(suArgs({ token: await token(), profile: { e164: '+8201011112222', extra: {} }, verifyStepUp: su }))).code, 'PHONE_MISMATCH');
   assert.equal((await verifyPhoneAndStepUp(suArgs({ token: await token(), profile: null, verifyStepUp: su }))).code, 'ACCOUNT_PHONE_MISSING');
 });
+
+// ── 실제 저장 방식(2026-09-07): 새 계정은 평문 e164가 빈 칸이고 e164_hash만 있다 ──
+const E164 = '+8201096627170';
+const hashOf = e => hex(SECRET, 'e164-lookup:' + e);          // pb_hooks: $security.hs256("e164-lookup:" + e164, secret)
+test('새 계정(평문 e164 빈 칸, e164_hash만 있음) — 문자 인증한 본인 번호와 해시가 같으면 통과', async () => {
+  const profile = { e164: '', phone: '', e164_hash: await hashOf(E164), extra: {} };
+  const r = await verifyPhoneAndStepUp(suArgs({ token: await token(), profile, verifyStepUp: async () => ({ ok: true }) }));
+  assert.ok(r.ok, JSON.stringify(r));
+});
+test('e164_hash가 다른 번호의 것이면 거절(남의 번호로 인증한 토큰)', async () => {
+  const profile = { e164: '', e164_hash: await hashOf('+8201011112222'), extra: {} };
+  const r = await verifyPhoneAndStepUp(suArgs({ token: await token(), profile, verifyStepUp: async () => ({ ok: true }) }));
+  assert.equal(r.code, 'PHONE_MISMATCH');
+});
+test('해시가 있으면 해시가 기준 — 평문 칸이 우연히 같아도 해시가 다르면 거절', async () => {
+  const profile = { e164: E164, e164_hash: await hashOf('+8201011112222'), extra: {} };
+  assert.equal((await verifyPhoneAndStepUp(suArgs({ token: await token(), profile, verifyStepUp: async () => ({ ok: true }) }))).code, 'PHONE_MISMATCH');
+});
+test('e164_hash 대문자 16진수도 같은 값으로 비교', async () => {
+  const profile = { e164: '', e164_hash: (await hashOf(E164)).toUpperCase(), extra: {} };
+  assert.ok((await verifyPhoneAndStepUp(suArgs({ token: await token(), profile, verifyStepUp: async () => ({ ok: true }) }))).ok);
+});
+test('비밀값이 다르면(해시 계산이 달라짐) 거절 — 계정 해시는 PHONE_VERIFY_SECRET 기준', async () => {
+  const profile = { e164: '', e164_hash: await hex('other-secret', 'e164-lookup:' + E164), extra: {} };
+  assert.equal((await verifyPhoneAndStepUp(suArgs({ token: await token(), profile, verifyStepUp: async () => ({ ok: true }) }))).code, 'PHONE_MISMATCH');
+});
+test('해시도 평문도 없으면 ACCOUNT_PHONE_MISSING(“다르다”가 아니라 “찾지 못했다”)', async () => {
+  const r = await verifyPhoneAndStepUp(suArgs({ token: await token(), profile: { e164: '', phone: '', e164_hash: '', extra: {} }, verifyStepUp: async () => ({ ok: true }) }));
+  assert.equal(r.code, 'ACCOUNT_PHONE_MISSING');
+});
