@@ -11,6 +11,7 @@
 //   · 청구 레코드의 owner 키는 제출한 guid 계정에 핀(pin)된 지갑 공개키와 같아야 한다.
 //     (지갑 키는 가입 시 폰 알림 본인 인증으로 계정에 묶인다 → "폰 인증 = 소유권 확보"를 그대로 이어받음)
 //   · 동시 청구는 (serial, seq) 유니크 인덱스가 정리한다 — 서버 로직에 락이 없다.
+//   · 본인 확인은 두 요소다: ① 지갑 서명(핀된 키) ② 방금 문자(SMS)로 인증한 토큰(verifyPhoneToken 주입 시 필수, 2026-09-25).
 //   · worker.js의 저수준 의존성(L1 admin 토큰, 핀된 키 조회)은 주입받는다 — k-service-auth.js와 같은 방식.
 //
 // worker.js 연결 예:
@@ -38,7 +39,7 @@ function json(body, status, corsHeaders = {}) {
 }
 const err = (status, code, message, cors) => json({ ok: false, code, message }, status, cors);
 
-export function makeDigitClaimHandler({ l1, getPinnedPubKey, authorityPubKey = null, premiumList = new Set(), anchor = null, now = () => Date.now() }) {
+export function makeDigitClaimHandler({ l1, getPinnedPubKey, authorityPubKey = null, premiumList = new Set(), anchor = null, now = () => Date.now(), verifyPhoneToken = null }) {
   if (!l1?.listRecords || !l1?.appendRecord) throw new Error('makeDigitClaimHandler: l1.listRecords/appendRecord 필요');
   if (typeof getPinnedPubKey !== 'function') throw new Error('makeDigitClaimHandler: getPinnedPubKey 필요');
 
@@ -79,6 +80,14 @@ export function makeDigitClaimHandler({ l1, getPinnedPubKey, authorityPubKey = n
         const pinned = await getPinnedPubKey(env, guid);
         if (!pinned) return err(404, 'NO_ACCOUNT', '계정을 찾을 수 없습니다.', cors);
         if (pinned !== record.owner) return err(403, 'KEY_MISMATCH', '서명 키가 이 계정의 지갑 키와 다릅니다.', cors);
+
+        // 1.5) 문자(SMS) 인증: 서명과 별개의 두 번째 요소. verifyPhoneToken이 주입된 환경에서는 방금 문자로 인증한 토큰이 없으면 거절한다.
+        if (verifyPhoneToken) {
+          const tok = body.phone_verify_token;
+          if (!tok) return err(401, 'PHONE_TOKEN_REQUIRED', '문자(SMS) 인증이 필요합니다.', cors);
+          const pv = await verifyPhoneToken(env, tok, guid, { step_up_token: body.step_up_token });
+          if (!pv || !pv.ok) return err((pv && pv.status) || 401, (pv && pv.code) || 'PHONE_TOKEN_INVALID', (pv && pv.message) || '문자 인증을 확인하지 못했습니다.', cors);
+        }
 
         // 2) 상태 전이 검증(서명·해시·seq·prev·소유자·폐기 여부)
         const { state } = await loadState(record.serial);

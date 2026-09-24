@@ -16,6 +16,7 @@ import { handleOrderQueue } from './src/worker/order-queue-handler.js';
 import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
 import { makeDigitClaimHandler } from './src/worker/digit-claim-handler.js';
 import { makePocketBaseDigitStore } from './src/worker/digit-claim-store.js';
+import { verifyPhoneAndStepUp } from './src/worker/phone-token.js';
 import { resolveDeviceGeo } from './src/worker/device-geo.js';
 import { handleDeptTaskCreate, handleDeptTaskUpdate, createDeptTaskCore, DEPT_TASK_TAXONOMY, _authoritativeCheck, _verifyAccessCert } from './src/worker/dept-task-handler.js';
 // 2026-09-20: K-FOI(SP-28_kfoi) — 정보 공개 청구 비서·청구 건 추적·공유 아카이브. 구현은 이 모듈에 있고
@@ -5427,6 +5428,15 @@ function handleDigitRoutes(request, url, env, corsHeaders) {
     l1: makePocketBaseDigitStore({ base: L1_DEFAULT, getToken: () => _l1AdminToken(env) }),
     getPinnedPubKey: async (e, guid) => (await _l1FindProfileByGuid(e, guid))?.pubkey_ed25519 || null,
     authorityPubKey: env.DIGIT_AUTHORITY_PUBKEY || null,
+    // 본인 확인: 지갑 서명 + 방금(10분 이내) 문자(SMS) 인증한 토큰. 지문(WebAuthn) 계정은 기존 재가입 규칙과 같이 지문 step-up도 필요.
+    // 토큰은 /biz/phone-otp-verify 가 guid를 묶어 발급한 것이어야 한다.
+    verifyPhoneToken: async (e, token, guid, extra) => verifyPhoneAndStepUp({
+      secret: e.PHONE_VERIFY_SECRET, token, guid,
+      profile: await _l1FindProfileByGuid(e, guid).catch(() => null),
+      ttlMs: PHONE_VERIFY_TOKEN_TTL_MS, freshMs: 10 * 60 * 1000,
+      stepUpToken: extra?.step_up_token,
+      verifyStepUp: (t, g, tx) => _verifyStepUpToken(e, t, g, tx),
+    }),
   });
   return handler.handle(request, url, env, corsHeaders);
 }
