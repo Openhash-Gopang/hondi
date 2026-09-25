@@ -1,0 +1,818 @@
+[
+  {
+    "id": "veterans-registration-casual",
+    "utterance": "국가유공자 등록하고 싶은데 어디로 가야 돼?",
+    "note": "★버그1 회귀 검증(반말) — \"국가유공자 등록\"(보훈청 보상과 division kw). 작업 #19에서 SP-NAT-VETERANS(bare \"국가유공자\")와의 명칭충돌을 고친 바로 그 사무를 반말로 재검증.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "(계층충돌 통합판단 — 지방행정(SP-AGY-VETERANS) 소관으로 판정, 아래 라우팅 경로로 위임)",
+      "SP-DO-000",
+      "SP-AGY-VETERANS",
+      "SP-AGYDIV-VETERANS-COMPENSATION(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 2,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 국가유공자 등록 안내\n\n국가유공자 등록은 **국가보훈부** 소관이며, 거주지 관할 **지방보훈청** 또는 **보훈지청**에서 접수합니다. 정부24에서 온라인 신청도 가능합니다.\n\n## 어디로 가야 하나\n\n| 경로 | 대상 | 비고 |\n|---|---|---|\n| **정부24** (온라인) | 본인 신청 | `국가유공자 등록신청` 검색 |\n| **관할 지방보훈청/보훈지청** | 본인·유족·대리인 | 방문 접수, 상담 병행 |\n| **주민센터(읍면동)** | 서류 접수 대행 | 최종 심사는 보훈청 |\n\n> ⚠️ **주의**: \"국가유공자 등록\"은 **신청하기형**입니다. 온라인으로 접수만 되고, **심사·판정은 보훈청 방문 또는 우편**으로 이어집니다. \"방문 없이 끝난다\"고 안내하지 않습니다.\n\n## 준비",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 7개)",
+    "error": null
+  },
+  {
+    "id": "veterans-registration-formal",
+    "utterance": "국가유공자 등록 절차를 상세히 안내받고 싶습니다",
+    "note": "★버그1 회귀 검증(격식체) — \"국가유공자 등록\"(보훈청 보상과 division kw)을 격식체로.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "(계층충돌 통합판단 — 지방행정(SP-AGY-VETERANS) 소관으로 판정, 아래 라우팅 경로로 위임)",
+      "SP-DO-000",
+      "SP-AGY-VETERANS",
+      "SP-AGYDIV-VETERANS-COMPENSATION(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 2,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 국가유공자 등록 절차 안내\n\n국가유공자 등록은 **국가보훈부** 소관이며, 신청 자체는 **거주지 관할 보훈(지)청**에서 접수합니다. 아래는 일반적인 절차입니다.\n\n---\n\n## 1. 사전 확인 — 대상 요건\n\n국가유공자 등록은 \"누구나 신청\"이 아니라 **법정 요건 해당자**만 가능합니다. 먼저 본인이 어느 유형에 해당하는지 확인이 필요합니다.\n\n| 구분 | 예시 |\n|---|---|\n| 순국선열·애국지사 | 독립운동 공적자 |\n| 전몰·전상·공상군경 | 전투·공무 중 부상 |\n| 공상공무원 | 직무 중 부상 |\n| 6·25 전몰군경 유족 등 | 유족·가족 |\n| 재일학도의용군 | 참전자 |\n| 특별공로자 | 법령상 특별 규정 |\n\n> ⚠️ 유형에 따라 **필요 서류와 심사 기준이 완전히 다릅니다.*",
+    "spQualityNote": "✅ 나열식 아님(불릿/번호 5개 미만)",
+    "error": null
+  },
+  {
+    "id": "veterans-affairs-event",
+    "utterance": "참전유공자단체 활동 지원 신청은 어디서 받나요",
+    "note": "참전유공자단체(보훈청 보훈과 division kw) — SP-AGYDIV-VETERANS-AFFAIRS.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-VETERANS",
+      "SP-AGYDIV-VETERANS-AFFAIRS(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "참전유공자단체 활동 지원 신청은 **국가보훈부** 소관 사업으로, 정부24 또는 관할 **지방보훈청(보훈지청)** 에서 접수합니다.\n\n## 신청 경로\n\n**1. 정부24 온라인 신청**\n- 정부24(gov.kr) → 검색창에 \"참전유공자단체\" 또는 \"참전유공자 단체활동 지원\" 입력\n- 해당 민원의 처리유형(신청하기/사이트가기 등)을 확인 후 진행\n- 다만 이런 유형의 보조금·단체지원 사업은 **온라인 신청이 열려 있지 않고 \"사이트가기\"로 안내되거나, 아예 지자체·보훈청 방문 접수만** 되어 있는 경우가 많습니다\n\n**2. 관할 지방보훈청 방문·우편 접수**\n- 주소지 관할 **지방보훈청 보훈과** 또는 **보훈지청**\n- 단체 소재지 기준일 수 있으니 사전 전화 확인 권장\n\n**3. 지자체(시·군·구) 접",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 11개)",
+    "error": null
+  },
+  {
+    "id": "veterans-hall-tour-formal",
+    "utterance": "항일기념관을 단체로 방문하고자 하는데 사전 예약 절차를 안내해 주시겠습니까",
+    "note": "항일기념관(격식체) — SP-AGYDIV-VETERANS-MEMORIAL.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-VETERANS",
+      "SP-AGYDIV-VETERANS-MEMORIAL(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 항일기념관 단체 방문 사전 예약 안내\n\n항일기념관 단체 방문 예약 절차를 안내드리겠습니다. 다만 **기념관마다 운영 주체와 예약 방식이 달라** 정확한 안내를 위해 확인이 필요합니다.\n\n## 먼저 확인이 필요한 사항\n\n**어느 항일기념관을 말씀하시는지** 알려주시면 정확히 안내드릴 수 있습니다. 대표적으로:\n\n| 기념관 | 소재지 | 운영 주체 |\n|---|---|---|\n| 국립대한민국임시정부기념관 | 서울 서대문 | 국가보훈부 |\n| 서대문형무소역사관 | 서울 서대문 | 서울시 서대문구 |\n| 독립기념관 | 천안 | 독립기념관(특수법인) |\n| 안중근의사기념관 | 서울 남산 | 안중근의사숭모회 |\n| 윤봉길의사기념관 | 예산 | 매헌윤봉길의사기념사업회 |\n| 백범김구기념관 | 서울 효창 | 백범김구선",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 5개)",
+    "error": null
+  },
+  {
+    "id": "comm-police-policy-review-casual",
+    "utterance": "자치경찰 정책 이런 거 심의하는 위원회가 있다던데 거기 연락처 좀",
+    "note": "★버그2 회귀 검증(반말·간접 표현) — 자치경찰사무 정책 심의 주체(위원회) 문의. 작업 #19에서 고친 institution 매칭(siblingTables) 재검증.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-COMM-POLICE"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 자치경찰 정책 심의 위원회 연락처 안내\n\n말씀하신 **자치경찰 정책을 심의하는 위원회**는 「자치경찰사무와 자치경찰공무원의 직무 및 복무 등에 관한 법률」(약칭 자치경찰법)에 근거한 **자치경찰위원회**입니다. 다만 연락처를 안내드리기 전에, 몇 가지 짚어둘 점이 있습니다.\n\n---\n\n## ⚠️ 먼저 확인이 필요한 부분\n\n**\"자치경찰위원회\"는 전국 공통 단일 기관이 아니라, 각 시·도별로 따로 설치된 기관입니다.**\n\n- **광역 단위(시·도)마다 1개씩** — 총 18개(17개 시·도 + 세종특별자치시는 별도 구성)\n- 예: **서울특별시자치경찰위원회, 경기도자치경찰위원회, 부산광역시자치경찰위원회** 등\n- 각 위원회는 **해당 시·도청 소속**으로, 정부24 같은 중앙 포털에 통합 등록된 서비스가 ",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 5개)",
+    "error": null
+  },
+  {
+    "id": "comm-police-personnel-eval",
+    "utterance": "자치경찰사무 담당 공무원 인사 평가는 어느 기구에서 하는지 궁금합니다",
+    "note": "★버그2 회귀 검증(다른 사무·격식체) — 위원회 §2 \"자치경찰사무 담당 공무원 인사·평가\".",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-COMM-POLICE"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 자치경찰사무 담당 공무원 인사평가 관련 안내\n\n자치경찰사무 담당 공무원의 인사·평가 체계는 **제주특별자치도 설치 및 국제자유도시 조성을 위한 특별법**과 **국가경찰과 자치경찰의 조직 및 운영에 관한 법률(자치경찰법)**에 따라 운영됩니다. 다만, **제주는 다른 지역과 구조가 다르다는 점**을 먼저 짚어야 합니다.\n\n---\n\n## 1. 일반 시·도 (제주 제외)\n\n| 구분 | 담당 기구 |\n|---|---|\n| **임용권** | 시·도지사 (자치경찰사무 담당 공무원에 대한 임용권 보유) |\n| **인사 운영** | 시·도 **자치경찰위원회** (심의·의결) |\n| **실무 인사** | 시·도 자치경찰위원회 사무국 |\n| **평가** | 시·도지사가 정하는 인사규칙 + 자치경찰위원회 심의 |\n\n- **",
+    "spQualityNote": "✅ 나열식 아님(불릿/번호 5개 미만)",
+    "error": null
+  },
+  {
+    "id": "comm-police-coordination",
+    "utterance": "자치경찰협력과 관련해서 사무조정 절차가 있다고 들었는데 어디서 담당하나요",
+    "note": "★버그2 회귀 검증(복합 질문) — division \"자치경찰협력과\"(SP-COMMDIV-POLICE-COOP) 언급. (\"국가경찰\"이라는 단어를 쓰면 SP-NAT-POLICE의 bare institution kw(\"국가경찰\")가 즉시 확정돼버려 이번 작업#19 수정 범위 밖의 별개 명칭충돌이 함께 재현되므로 의도적으로 배제 — 그 별개 이슈는 이 스모크테스트의 목적이 아니라 별도 보고 대상.)",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-COMM-POLICE",
+      "SP-COMMDIV-POLICE-COOP(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 자치경찰협력과 사무조정 절차 담당 안내\n\n자치경찰 관련 사무조정은 **행정안전부와 경찰청, 그리고 각 시·도 자치경찰위원회**가 얽혀 있는 구조라, \"어디서 담당하나\"라는 질문에 한 줄로 답하기 어렵습니다. 어느 기관 소속이신지에 따라 창구가 달라집니다.\n\n## 1. 사무조정의 두 가지 층위\n\n**① 국가경찰사무 ↔ 자치경찰사무 구분·조정**\n- **국가경찰위원회**(행정안전부 소속)와 **경찰청**이 주무입니다.\n- 「국가경찰과 자치경찰의 조직 및 운영에 관한 법률」(경찰법)상 사무 구분·조정 사항을 심의합니다.\n- 자치경찰사무 범위에 관한 이견이 생기면 **국가경찰위원회 심의**를 거치는 것이 정식 경로입니다.\n\n**② 자치경찰사무 내부의 사무 배분·조정 (시·도 단위)**\n- **시·도 자치경찰위원",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 9개)",
+    "error": null
+  },
+  {
+    "id": "comm-police-membership",
+    "utterance": "자치경찰위원회 위원 구성이 어떻게 되어있는지 협의체 관련해서 알고 싶어요",
+    "note": "institution kw \"위원구성협의체\" 직접 매칭 확인.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-COMM-POLICE"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 자치경찰위원회 위원 구성 및 협의체 안내\n\n자치경찰위원회는 **2021년 7월 1일 자치경찰제 전면 시행**과 함께 출범한 기구로, 위원 구성과 협의체 구조가 법률(「국가경찰과 자치경찰의 조직 및 운영에 관한 법률」, 이하 \"자치경찰법\")에 명확히 규정되어 있습니다. 아래에서 위원 구성과 협의체 관련 사항을 정리해 드리겠습니다.\n\n---\n\n## 1. 자치경찰위원회 위원 구성\n\n### (1) 위원 정수 및 임기\n| 구분 | 내용 |\n|---|---|\n| **위원 정수** | 위원장 1명을 포함하여 **7명** |\n| **임기** | **3년, 연임할 수 없음** (단임제) |\n| **신분** | 상임 2명(위원장 + 상임위원 1명), 비상임 5명 |\n| **추천 방식** | 위원 중 1명은 **인권 전문가",
+    "spQualityNote": "✅ 나열식 아님(불릿/번호 5개 미만)",
+    "error": null
+  },
+  {
+    "id": "agy-police-tourist-crime",
+    "utterance": "외국인 관광객이 소매치기를 당했다고 신고하러 왔는데 관광경찰 쪽으로 연결해주세요",
+    "note": "관광경찰(자치경찰단 institution kw) — 위원회(SP-COMM-POLICE)와 실제로 갈라지는지 대조 확인.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-POLICE",
+      "SP-AGYDIV-POLICE-TOURISTPOLICE(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "외국인 관광객 소매치기 피해 신고 건을 관광경찰 연결로 처리하겠습니다. 먼저 이 사안이 어느 기관 소관인지, 그리고 관광경찰 연결이 실제로 가능한 경로인지 확인이 필요합니다.\n\n---\n\n## 1. 사안 파악\n\n- **민원 유형**: 외국인 관광객 대상 절도(소매치기) 피해 신고\n- **요청 사항**: 관광경찰 연결\n- **핵심 쟁점**: \n  - 소매치기(절도)는 형사 사건 → **경찰 신고 대상**\n  - 관광경찰은 **관광지 순찰·관광 불편 신고** 중심으로, 일반 형사 신고 접수 창구와는 다름\n  - 외국인 피해자 → 통역 지원 필요 가능성\n\n---\n\n## 2. 기관 소관 확인\n\n| 구분 | 소관 | 비고 |\n|---|---|---|\n| 절도 신고 접수 | **관할 경찰서** (지구대·파출소) | 형사",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 6개)",
+    "error": null
+  },
+  {
+    "id": "agy-police-parking",
+    "utterance": "동네에 불법 주정차 차량이 계속 있는데 자치경찰단에 단속 요청하고 싶어요",
+    "note": "자치경찰단(institution kw) — 생활안전/교통 단속 사무.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-POLICE"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "불법 주정차 단속 요청은 지자체(자치경찰단) 소관이라, 정부24 공통 민원이 아니라 **거주/신고 지역 지자체 민원**으로 접수해야 합니다. 지역을 알려주시면 해당 지자체의 정확한 접수 창구와 필요 서류를 안내해 드릴게요.\n\n## 먼저 확인할 것\n\n**어느 지역인가요?** (예: \"제주시 ○○동\", \"서울 강남구\")\n- 자치경찰단은 **제주특별자치도**에만 있는 조직입니다. 다른 지역은 **시·군·구청 교통과** 또는 **경찰서**가 담당합니다.\n- 같은 \"불법 주정차 신고\"라도 지자체마다 접수 채널(홈페이지/앱/전화)과 요구 정보가 다릅니다.\n\n## 일반적인 신고 방법 (지역 확인 전 공통)\n\n1. **온라인**: 해당 지자체 홈페이지 → \"불법 주정차 신고\" 또는 안전신문고(앱/웹)\n2. **전화**: ",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 11개)",
+    "error": null
+  },
+  {
+    "id": "publicpolicy-domestic-training",
+    "utterance": "저희 부서에서 특별자치전문교육을 신청하려고 하는데 절차가 어떻게 되나요",
+    "note": "특별자치전문교육(institution kw) — SP-AGY-PUBLICPOLICY §2.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-PUBLICPOLICY"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 특별자치전문교육 신청 절차 안내\n\n특별자치전문교육은 **지자체별로 운영 방식이 크게 다를 수 있는** 교육 과정입니다. 먼저 어느 지역·어느 기관 소관인지 확인하는 것이 절차의 첫 단계입니다.\n\n---\n\n## 1단계 — 소관 기관 확인 (가장 중요)\n\n특별자치 관련 교육은 다음 두 갈래로 나뉩니다.\n\n| 구분 | 소관 | 특징 |\n|---|---|---|\n| **중앙부처 공통 과정** | 행정안전부 등 | 전국 공통, 정부24 또는 소속기관 포털에서 신청 |\n| **지자체 개별 과정** | 특별자치시·도 (제주·세종·강원·전북 등) | 해당 지자체 인재개발원·공무원교육원에서 개별 운영 |\n\n> ⚠️ **주의**: 같은 이름의 교육이라도 **지자체별로 낱개 등록**되어 있어, 검색 결과 하나만 보고 \"정부",
+    "spQualityNote": "✅ 나열식 아님(불릿/번호 5개 미만)",
+    "error": null
+  },
+  {
+    "id": "publicpolicy-foreignlang",
+    "utterance": "공무원 외국어교육 프로그램이 있다고 들었는데 신청 방법 좀 알려주실래요",
+    "note": "외국어교육(desc \"외국어교육 등 공무원 역량 개발\") — SP-AGY-PUBLICPOLICY §2, 간접 표현.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-PUBLICPOLICY"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 공무원 외국어교육 프로그램 안내\n\n말씀하신 공무원 외국어교육 프로그램은 **국립국제교육원**에서 운영하는 것이 대표적입니다. 다만 신청 방법은 프로그램 종류와 소속 기관에 따라 달라질 수 있어, 정확한 안내를 위해 몇 가지 확인이 필요합니다.\n\n## 먼저 확인이 필요한 사항\n\n1. **어떤 프로그램을 말씀하시는지**\n   - 국립국제교육원의 **외국어교육 프로그램**(영어·중국어·일본어 등, 정규 과정/단기 과정)\n   - 각 부처·지자체 **자체 연수 프로그램**\n   - **해외 파견·어학연수** 지원 프로그램\n\n2. **소속** — 중앙부처 / 지자체 / 공공기관 여부 (신청 창구가 다릅니다)\n\n## 일반적인 신청 경로\n\n- **국립국제교육원 외국어교육**: 정부24 또는 국립국제교육원 홈페이지에서",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 8개)",
+    "error": null
+  },
+  {
+    "id": "cultureearts-exhibit-hall",
+    "utterance": "전시실을 대관해서 개인전을 열고 싶은데 사용허가 신청은 어떻게 하나요",
+    "note": "전시실 사용허가(운영과 division kw) — SP-AGY-CULTUREARTS §2.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-CULTUREARTS"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 전시실 대관 개인전 — 사용허가 신청 안내\n\n전시실(미술관·문화회관·도서관 등 공공 전시공간) 대관은 **시설 소유·관리 주체에 따라 신청 창구가 완전히 다릅니다.** 먼저 어느 기관의 전시실인지 확인해야 정확한 안내가 가능합니다.\n\n## 1단계 — 대상 시설 확인 (가장 중요)\n\n전시실마다 관리 주체가 다르므로, 아래 중 어디에 해당하는지 알려주세요:\n\n| 시설 유형 | 관리 주체 | 신청 창구 |\n|---|---|---|\n| 시립미술관·시립문화회관 | 해당 지자체 (시·군·구) | 지자체 홈페이지 대관 신청 / 방문 접수 |\n| 도립·광역 문화시설 | 광역시·도 | 광역 지자체 문화재단 |\n| 국립 시설 (국립현대미술관 등) | 문화체육관광부 산하 | 각 기관 자체 대관 시스템 |\n| 공공도서관 전시",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 6개)",
+    "error": null
+  },
+  {
+    "id": "cultureearts-friends-society",
+    "utterance": "문화사랑회 회원 가입 관련해서 문의드리고 싶습니다",
+    "note": "문화사랑회(운영과 division kw) — SP-AGY-CULTUREARTS §2, 격식체.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-CULTUREARTS",
+      "SP-AGYDIV-CULTUREARTS-ADMIN(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 문화사랑회 회원 가입 문의\n\n안녕하세요. 문의 주셔서 감사합니다. 다만 정확한 안내를 드리기 위해 몇 가지 확인이 필요합니다.\n\n## 먼저 확인이 필요한 사항\n\n**\"문화사랑회\"라는 명칭의 단체가 여러 곳에 존재할 수 있습니다.**\n\n- 전국 단위 문화예술 관련 사단법인·협회\n- 지자체별로 등록된 지역 문화 단체\n- 대학·기관 소속 동아리 성격의 모임\n- 특정 시설(도서관·문화원 등)의 후원회\n\n같은 이름이라도 **가입 절차·자격·회비가 전부 다르기** 때문에, 어느 단체를 말씀하시는지에 따라 안내가 완전히 달라집니다.\n\n## 알려주시면 도움이 되는 정보\n\n1. **어느 지역**의 단체인가요? (예: 서울시 / 경기도 화성시 등)\n2. **어디서 이 단체를 알게 되셨나요?** (홈페이지, 지인 소개, 관",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 7개)",
+    "error": null
+  },
+  {
+    "id": "marinefisheries-abalone",
+    "utterance": "전복류 품종개량 관련 연구 지원을 받을 수 있는지 궁금한데요",
+    "note": "전복류 품종개량(수산종자연구과 division kw) — SP-AGY-MARINEFISHERIES §2.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-MARINEFISHERIES",
+      "SP-AGYDIV-MARINEFISHERIES-SEED(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 전복류 품종개량 연구 지원 안내\n\n전복 품종개량 연구 지원은 **여러 부처·기관에 분산**되어 있어서, 한 곳에서 통합 안내되지 않습니다. 상황에 따라 갈래가 다르니 먼저 어느 쪽인지 확인해 드리겠습니다.\n\n## 먼저 확인할 것\n\n**① 연구 주체가 무엇인신가요?**\n- 대학·국공립연구소 → **해양수산부 R&D 사업** (수산실용화기술개발, 수산혁신클러스터 등)\n- 민간 기업·양식장 → **수산기술사업화 지원 / 스마트양식 클러스터**\n- 개인 어업인 → **지자체 수산기술센터 · 어촌지도소** (전남·경남·제주 등)\n\n**② 품종개량 대상이 무엇인신가요?**\n- 전복(참전복·둥근전복 등) 신품종 개발\n- 종자 생산·보급 (씨뿌림용 종패)\n- 유전체 분석·육종 기술\n\n## 주요 지원 창구\n\n| 창구 |",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 7개)",
+    "error": null
+  },
+  {
+    "id": "marinefisheries-village-fishery",
+    "utterance": "마을어장 자원생태 조사 결과를 좀 열람하고 싶습니다",
+    "note": "마을어장 자원생태(해양환경연구과 division kw) — SP-AGY-MARINEFISHERIES §2, 격식체.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-MARINEFISHERIES",
+      "SP-AGYDIV-MARINEFISHERIES-ENVIRONMENT(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "마을어장 자원생태 조사 결과 열람을 도와드리겠습니다. 먼저 이 업무가 어떤 기관 소관인지, 어떤 경로로 열람·발급이 가능한지 확인하겠습니다.\n\n---\n\n## 1단계 — 업무 성격 파악\n\n\"마을어장 자원생태 조사\"는 **수산자원 및 어촌 관련 조사·연구 자료**로 보입니다. 관련 소관 기관 후보:\n\n- **해양수산부** (전국 공통 정책·조사)\n- **한국수산자원공단(FIRA)** — 마을어장 자원조성·생태조사 실제 수행 기관\n- **지자체(시·도 / 시·군·구)** — 지역 마을어장 관리 주체\n- **국립수산과학원** — 자원생태 조사·연구\n\n---\n\n## 2단계 — 열람 경로 확인 필요\n\n말씀하신 \"조사 결과\"가 어떤 형태인지에 따라 경로가 갈립니다:\n\n| 자료 형태 | 열람 경로 |\n|---|---|\n|",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 6개)",
+    "error": null
+  },
+  {
+    "id": "animalhygiene-shelter",
+    "utterance": "유기동물 보호 관련해서 광역동물보호센터에 문의하고 싶은데요",
+    "note": "광역동물보호센터(institution/division kw) — SP-AGY-ANIMALHYGIENE §2.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-ANIMALHYGIENE",
+      "SP-AGYDIV-ANIMALHYGIENE-LIVESTOCKSAFETY(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 유기동물 보호 — 광역동물보호센터 문의 안내\n\n말씀하신 \"광역동물보호센터\"는 **지역마다 명칭·운영 주체가 다릅니다.** 전국 공통 명칭이 아니라, 시·도 단위로 설치된 동물보호센터를 통칭하는 표현에 가깝습니다. 그래서 어느 지역을 말씀하시는지에 따라 안내가 달라집니다.\n\n## 먼저 확인이 필요한 것\n\n**어느 지역(시·도)의 광역동물보호센터인가요?**\n\n- 예: 서울특별시 동물보호센터 / 경기도 동물보호센터 / 부산광역시 동물보호센터 등\n- 또는 \"우리 지역 광역센터\"라고 하시면, 거주하시는 시·도를 알려주시면 그에 맞춰 안내드리겠습니다.\n\n## 문의 유형에 따라 창구가 다릅니다\n\n문의하시려는 내용이 무엇인지에 따라 담당이 갈립니다:\n\n| 문의 내용 | 담당 |\n|---|---|\n| 유기동물 보호·입양",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 5개)",
+    "error": null
+  },
+  {
+    "id": "animalhygiene-residue-test",
+    "utterance": "축산물에 유해 잔류물질이 있는지 검사받으려면 어디로 문의하나요",
+    "note": "축산물 유해 잔류물질 검사(축산물안전과 division kw) — SP-AGY-ANIMALHYGIENE §2.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-ANIMALHYGIENE"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 축산물 유해 잔류물질 검사 문의 안내\n\n축산물의 유해 잔류물질 검사는 **「축산물 위생관리법」**에 따라 시행되며, 주로 다음 기관에서 담당합니다.\n\n## 1. 1차 문의처 — 시·도 가축위생시험소 (또는 축산위생연구소)\n\n각 시·도에는 **가축위생시험소**(명칭은 지역마다 다름: 축산위생연구소, 동물위생시험소 등)가 있어, 축산물의 잔류물질 검사(항생제·농약·중금속·호르몬 등)를 직접 수행합니다.\n\n- **주요 업무**: 도축장·집유장·식육포장처리업소 등의 축산물에 대한 잔류물질 정기·수시 검사\n- **문의 방법**: 거주지 관할 시·도청 또는 시·도 가축위생시험소 대표번호로 전화\n\n## 2. 중앙 정부 기관\n\n| 기관 | 역할 |\n|---|---|\n| **농림축산식품부** (축산물위생정책과) | 축산",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 5개)",
+    "error": null
+  },
+  {
+    "id": "seolmundae-volunteer-center",
+    "utterance": "여성자원활동센터 운영 프로그램에 자원봉사로 참여하고 싶은데 방법 좀 알려주세요",
+    "note": "여성자원활동센터(division kw) — SP-AGY-SEOLMUNDAE §2.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-SEOLMUNDAE",
+      "SP-AGYDIV-SEOLMUNDAE-ADMIN(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 여성자원활동센터 자원봉사 참여 안내\n\n여성자원활동센터는 지역별로 운영 주체와 프로그램이 달라서, **거주하시는 지역의 센터를 먼저 확인**하시는 게 가장 빠릅니다. 아래 순서대로 진행하시면 됩니다.\n\n---\n\n## 1단계 — 우리 지역 센터 찾기\n\n**여성가족부 \"여성자원활동센터\" 또는 \"여성인력개발센터\"** 로 검색하시면 전국 센터 목록이 나옵니다.\n\n- **정부24** 또는 **여성가족부 홈페이지** → \"여성자원활동센터\" 검색\n- 거주지 **시·군·구청 여성가족과(또는 복지과)** 에 전화 문의 → 관할 센터 안내\n- **1366** (여성긴급전화) 또는 **129** (보건복지상담센터)에서도 지역 센터 연결 가능\n\n> ⚠️ 센터마다 명칭이 조금씩 다릅니다(예: ○○시여성자원봉사센터, ○○여성인력개",
+    "spQualityNote": "✅ 나열식 아님(불릿/번호 5개 미만)",
+    "error": null
+  },
+  {
+    "id": "seolmundae-lifelong-education",
+    "utterance": "여성 대상 평생교육 강좌를 듣고 싶은데 어디서 신청하나요",
+    "note": "여성평생교육(division kw) — SP-AGY-SEOLMUNDAE §2.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-SEOLMUNDAE"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 여성 대상 평생교육 강좌 신청 안내\n\n여성 대상 평생교육 강좌는 **여성가족부 산하 기관**과 **지자체**에서 운영하며, 신청 경로가 여러 갈래로 나뉩니다. 아래에서 상황별로 정리해 드립니다.\n\n---\n\n## 1. 대표적인 신청 경로\n\n### ① 여성인력개발센터 / 새일센터 (전국)\n- **운영**: 여성가족부 지정\n- **대상**: 경력단절여성, 취업·창업 희망 여성\n- **강좌**: 직업훈련, 자격증, IT·회계·요양보호 등\n- **신청**: 가까운 센터 방문 또는 **여성새로일하기센터 홈페이지(saeil.mogef.go.kr)** 에서 확인\n- **비용**: 대부분 무료 또는 자부담 소액\n\n### ② 여성회관 / 여성문화센터 (지자체 운영)\n- **운영**: 시·군·구청 직속\n- **강좌**: 교",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 14개)",
+    "error": null
+  },
+  {
+    "id": "stonepark-research",
+    "utterance": "돌문화 관련 자료 조사 연구 결과가 궁금한데 어디에 문의하면 되나요",
+    "note": "돌문화 자료 조사(돌문화연구과 division kw) — SP-AGY-STONEPARK §2.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-STONEPARK"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "돌문화 관련 자료 조사·연구에 대해 문의하실 수 있는 곳을 안내해 드리겠습니다. 다만 정확한 안내를 위해 몇 가지 확인이 필요합니다.\n\n## 우선 확인이 필요한 사항\n\n**어떤 성격의 문의인지**에 따라 담당 기관이 달라집니다:\n\n1. **학술·연구 목적** (논문, 조사연구)\n2. **일반 자료 열람·관람** (유적지, 박물관 방문)\n3. **정책·행정 관련** (문화재 지정, 보존 관리)\n4. **특정 지역 관련** (제주, 강화, 고창 등 지역별 돌문화)\n\n## 주요 문의처 (일반적 안내)\n\n| 기관 | 담당 범위 |\n|------|-----------|\n| **국립민속박물관** | 돌문화·민속 자료 일반 |\n| **국립문화유산연구원** | 고고학·문화재 조사연구 |\n| **국가유산청** (구 문화재청",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 7개)",
+    "error": null
+  },
+  {
+    "id": "stonepark-park-visit",
+    "utterance": "돌문화공원 단체 관람을 신청하고 싶은데 어떻게 해야 하나요",
+    "note": "돌문화공원(institution kw) — SP-AGY-STONEPARK §2.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-STONEPARK"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 돌문화공원 단체 관람 신청 안내\n\n돌문화공원 단체 관람 신청은 **제주특별자치도** 소관 사무로, 정부24 전국 공통 서비스가 아니라 **제주 지역 개별 등록 민원**에 해당합니다. 아래 순서대로 진행하시면 됩니다.\n\n---\n\n## 1. 신청 경로\n\n| 구분 | 내용 |\n|---|---|\n| 담당 기관 | 제주특별자치도 돌문화공원관리소 |\n| 신청 방법 | 제주특별자치도청 홈페이지 또는 돌문화공원 공식 홈페이지 온라인 예약 |\n| 정부24 | ❌ 전국 공통 등록 아님 (제주 지역 개별 민원) |\n\n> ⚠️ **주의**: \"안심상속\" 사례처럼 같은 서비스가 중앙부처(정부24)와 지자체에 **따로 등록**돼 있을 수 있습니다. 돌문화공원은 제주 고유 시설이라 정부24 전국 공통 버전은 없을 가능성이 높지만,",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 5개)",
+    "error": null
+  },
+  {
+    "id": "employment-training-facility",
+    "utterance": "직업훈련시설 등록하고 싶은데 어느 부서로 문의드려야 하나요",
+    "note": "★명칭충돌 추가 검증 — 직업훈련시설(고용지원과 division kw) — SP-AGY-EMPLOYMENT §2.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-EMPLOYMENT",
+      "SP-AGYDIV-EMPLOYMENT-SUPPORT(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 직업훈련시설 등록 — 담당 부서 안내\n\n직업훈련시설 등록은 **단일 부서 업무가 아니라, 시설 유형에 따라 담당 부처가 갈리는 복합 민원**입니다. 먼저 어느 쪽인지 확인해야 정확한 창구를 안내드릴 수 있습니다.\n\n## 1단계 — 시설 유형 확인\n\n| 구분 | 근거 법령 | 소관 |\n|---|---|---|\n| **직업능력개발훈련시설** (학원·훈련원 등) | 「근로자직업능력 개발법」 | **고용노동부** (지방고용노동청) |\n| **평생직업교육학원** (학원 형태) | 「학원의 설립·운영 및 과외교습에 관한 법률」 | **교육청** (시·도교육청) |\n| **국가기술자격 검정시설** | 「국가기술자격법」 | **한국산업인력공단** (위탁) |\n\n## 2단계 — 문의 창구\n\n**고용노동부 계열(가장 흔한",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 7개)",
+    "error": null
+  },
+  {
+    "id": "employment-seogwipo-branch",
+    "utterance": "서귀포 쪽에 사는데 서귀포지소 고용센터 위치가 어디인가요",
+    "note": "서귀포고용센터(division kw) — SP-AGY-EMPLOYMENT §2, 위치 이원화 확인.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-EMPLOYMENT"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "서귀포 지역 고용센터(고용노동부 서귀포지청) 위치를 안내드립니다.\n\n## 고용노동부 서귀포지청\n\n- **주소**: 제주특별자치도 서귀포시 중문관광로 218 (법환동)\n- **대표전화**: 064-730-4500\n- **관할**: 서귀포시 일원\n\n## 참고사항\n\n서귀포 지역은 **고용노동부 제주지청 서귀포지청** 형태로 운영되고 있습니다. 다만 정확한 최신 위치·이전 여부·민원실 운영시간은 변동될 수 있으므로, 방문 전 아래 방법으로 확인하시길 권합니다.\n\n1. **고용노동부 대표 상담**: ☎ 1350 (고용노동부 고객상담센터)\n2. **정부24** 또는 **고용노동부 홈페이지(moel.go.kr)** → \"기관 찾기\"에서 \"서귀포\" 검색\n3. **근로복지공단·고용센터**는 별도 기관이므로, 찾으시는 업무(",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 6개)",
+    "error": null
+  },
+  {
+    "id": "centralcoop-assembly-liaison",
+    "utterance": "국회 협력 기획 관련해서 도정 협력 업무를 협의하고 싶은데 담당 부서가 어디죠",
+    "note": "★명칭충돌 추가 검증 — 국회 협력 기획(division kw) — SP-AGY-CENTRALCOOP §2.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-CENTRALCOOP",
+      "SP-AGYDIV-CENTRALCOOP-ASSEMBLY(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 국회 협력 기획 관련 도정 협력 업무 — 담당 부서 안내\n\n말씀하신 \"국회 협력 기획\" 관련 도정 협력 업무는 **제주특별자치도청의 대외협력 부서** 소관일 가능성이 높습니다. 다만 정확한 담당 부서는 협력의 성격(입법 협력 / 예산·국비 확보 / 정책 건의 등)에 따라 갈리므로, 아래 기준으로 확인하시는 게 안전합니다.\n\n## 1차 확인 대상 (제주특별자치도)\n\n| 업무 성격 | 유력 담당 부서 |\n|---|---|\n| 국회·중앙정치 협력 총괄, 도정 현안 국회 설명 | **대외협력국** (또는 기획조정실 산하 협력팀) |\n| 국비 확보·예산 관련 국회 대응 | **기획조정실 예산담당관** |\n| 법령·조례 등 입법 협력 | **기획조정실 법무담당관** |\n| 특정 정책·사업 건의 | 해당 **실·국*",
+    "spQualityNote": "✅ 나열식 아님(불릿/번호 5개 미만)",
+    "error": null
+  },
+  {
+    "id": "centralcoop-press",
+    "utterance": "중앙언론 대상 도정 홍보 협조를 요청하고 싶은데 어디에 연락하면 되나요",
+    "note": "중앙언론 대상 도정홍보(desc) — SP-AGY-CENTRALCOOP §2, 격식체.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-CENTRALCOOP"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 중앙언론 대상 도정 홍보 협조 요청 — 연락처 안내\n\n말씀하신 \"중앙언론 대상 도정 홍보 협조 요청\"은 **제주특별자치도청의 대외협력·홍보 기능**에 해당하는 사안입니다. 다만 이 요청은 **정부24 등에서 온라인으로 접수·발급되는 민원이 아니라, 담당 부서에 직접 연락해 협의하는 성격**의 업무입니다. 아래에 안내드립니다.\n\n---\n\n## 1. 어디에 연락하나 — 담당 부서\n\n제주특별자치도는 중앙언론 대응·홍보를 전담하는 부서를 두고 있습니다.\n\n| 구분 | 담당 | 역할 |\n|---|---|---|\n| **제주특별자치도 대변인실 (또는 소통청렴담당관·홍보담당관)** | 도정 전반의 대외 홍보·언론 대응 총괄 | 중앙언론 협조 요청의 1차 창구 |\n| **제주특별자치도청 대표전화** | **064-12",
+    "spQualityNote": "✅ 나열식 아님(불릿/번호 5개 미만)",
+    "error": null
+  },
+  {
+    "id": "envcirculation-landfill",
+    "utterance": "매립시설 반입 절차에 대해서 환경자원순환센터에 문의드리고 싶은데요",
+    "note": "매립시설(자원순환시설관리과 division kw) — SP-AGY-ENVCIRCULATION §2.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-ENVCIRCULATION"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 매립시설 반입 절차 문의 — 환경자원순환센터\n\n매립시설 반입 절차는 **지자체별로 운영 방식이 크게 다릅니다.** 환경자원순환센터는 지자체가 직영하거나 위탁 운영하는 시설이라, 전국 공통 창구가 아니라 **해당 지자체 소관**입니다. 그래서 먼저 어느 지역 시설인지 확인하는 게 순서입니다.\n\n## 1. 먼저 확인할 것\n\n- **어느 지자체 환경자원순환센터인지** (예: ○○시/○○군)\n- **반입하려는 폐기물 종류** — 생활폐기물 / 사업장폐기물 / 건설폐기물 / 지정폐기물에 따라 절차와 담당 부서가 완전히 다릅니다\n- **반입 주체** — 개인(가정)인지, 사업자(사업장폐기물 배출자)인지\n\n## 2. 문의 창구\n\n지자체마다 명칭이 다르지만 보통 다음 중 하나입니다:\n\n| 구분 | 담당 |\n|---|-",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 6개)",
+    "error": null
+  },
+  {
+    "id": "envcirculation-incinerator",
+    "utterance": "소각시설 운영 관련해서 민원을 넣고 싶습니다",
+    "note": "소각시설(자원순환시설관리과 division kw) — SP-AGY-ENVCIRCULATION §2, 격식체.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-ENVCIRCULATION"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "소각시설 운영 관련 민원 접수에 대해 안내드리겠습니다. 먼저 몇 가지 확인이 필요합니다.\n\n## 확인이 필요한 사항\n\n**1. 어떤 종류의 민원인가요?**\n- 소각시설 **설치·증설** 관련 (허가·승인)\n- 소각시설 **운영 중 문제** (악취·매연·소음 등 환경 피해)\n- 소각시설 **운영 신고·변경** (운영자 입장)\n- 소각시설 **정보 공개·열람** 요청\n\n**2. 대상 시설은 어디에 있나요?**\n- 소재지 (시·군·구) — 관할 지자체가 달라집니다\n- 시설 규모 (가정용/사업장/공공 소각시설)\n\n**3. 신청인은 누구신가요?**\n- 시설 운영자 (본인이 신청)\n- 인근 주민 (피해 신고)\n- 일반 시민 (정보 요청)\n\n## 일반적인 처리 경로\n\n소각시설은 **폐기물관리법**상 관리 대상이며, 민원",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 11개)",
+    "error": null
+  },
+  {
+    "id": "safetyexperience-program-plan",
+    "utterance": "학교 단위로 체험교육 프로그램을 기획해서 신청하고 싶은데 어디로 연락하나요",
+    "note": "체험교육 프로그램 기획(체험기획과 division kw) — SP-AGY-SAFETYEXPERIENCE §2.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-SAFETYEXPERIENCE"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 학교 단위 체험교육 프로그램 기획·신청 — 안내\n\n학교 단위 체험교육 프로그램은 **프로그램 종류에 따라 담당 창구가 완전히 다릅니다.** 하나의 창구로 통일돼 있지 않아서, 먼저 \"어떤 체험교육인지\"를 정해야 연락처가 정해집니다.\n\n## 1. 먼저 확인할 것 — 어떤 체험교육인가\n\n| 유형 | 대표 예시 | 주관 |\n|---|---|---|\n| **진로·직업 체험** | 직업체험관, 진로체험처 | 교육부·시도교육청 (커리어넷) |\n| **과학·환경 체험** | 과학관, 생태체험, 발명교육 | 과학기술정보통신부·환경부·지자체 |\n| **문화·예술 체험** | 박물관·미술관 교육, 공연 관람 | 문화체육관광부·지자체 |\n| **안전·재난 체험** | 소방안전체험관, 119시민체험센터 | 소방청·지자체 |\n",
+    "spQualityNote": "✅ 나열식 아님(불릿/번호 5개 미만)",
+    "error": null
+  },
+  {
+    "id": "safetyexperience-onsite",
+    "utterance": "안전체험관 현장 체험 진행 일정이 어떻게 되는지 궁금해요",
+    "note": "체험교육 현장 진행(체험운영과 division kw) — SP-AGY-SAFETYEXPERIENCE §2.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-SAFETYEXPERIENCE"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "안전체험관 현장 체험 진행 일정은 **체험관마다, 그리고 같은 체험관 안에서도 프로그램마다 전부 다릅니다.** 전국 공통으로 \"매주 화요일 10시\" 같은 통일된 일정은 존재하지 않습니다. 그래서 제가 임의로 \"보통 이렇습니다\"라고 말씀드리면 그게 곧 틀린 안내가 됩니다.\n\n대신, 정확한 일정을 확인하실 수 있는 경로를 안내해 드리겠습니다.\n\n## 확인 경로\n\n**1. 정부24에서 \"안전체험관\" 검색**\n- 중앙부처(행정안전부·소방청·국민안전처 계열)가 운영하는 체험관은 정부24에 등록돼 있을 수 있습니다.\n- 다만 여기서 주의하실 점: **지자체가 개별 운영하는 체험관은 정부24가 아니라 해당 시·도/시·군·구 홈페이지에만 일정이 올라와 있는 경우가 많습니다.** 정부24에서 안 걸린다고 해서 \"그 체험관이",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 9개)",
+    "error": null
+  },
+  {
+    "id": "firejeju-permit",
+    "utterance": "제주소방서 관할 지역에 소방시설 인허가 신청을 접수하고 싶은데요",
+    "note": "제주소방서(institution kw) — SP-AGY-FIREJEJU §2, 다른 표현.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-FIREJEJU"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 제주소방서 관할 소방시설 인허가 신청 안내\n\n소방시설 인허가(소방시설공사 착공신고·완공검사 등)는 **관할 소방서**를 통해 접수하는 민원입니다. 제주소방서 관할 지역이라면 아래 절차로 진행하시면 됩니다.\n\n---\n\n## 1. 관할 확인 — 제주소방서 관할 구역\n\n제주특별자치도는 소방서가 여러 곳으로 나뉘어 있어, **대상 건축물의 소재지**가 제주소방서 관할인지 먼저 확인해야 합니다.\n\n| 소방서 | 관할 (주요 지역) |\n|---|---|\n| **제주소방서** | 제주시 일부(구 제주시 중심권) |\n| **서귀포소방서** | 서귀포시 일원 |\n| **동부소방서** | 제주시 구좌·성산·표선 등 동부권 |\n| **서부소방서** | 제주시 한림·애월·대정 등 서부권 |\n\n> ⚠️ **정확한 관할은 건축물",
+    "spQualityNote": "✅ 나열식 아님(불릿/번호 5개 미만)",
+    "error": null
+  },
+  {
+    "id": "fireseogwipo-inspection",
+    "utterance": "서귀포소방서 쪽에 소방시설 점검을 요청드리려고 하는데 접수 방법이 궁금합니다",
+    "note": "서귀포소방서(institution kw) — SP-AGY-FIRESEOGWIPO §2, 격식체.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-FIRESEOGWIPO"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 서귀포소방서 소방시설 점검 요청 — 접수 방법 안내\n\n안녕하세요. 서귀포소방서에 소방시설 점검을 요청하시려는 것으로 이해했습니다. 접수 방법을 안내드리기 전에, **어떤 종류의 점검인지**에 따라 창구가 완전히 달라지므로 먼저 확인이 필요합니다.\n\n---\n\n## 1. 먼저 확인할 것 — \"점검\"의 성격\n\n| 구분 | 내용 | 접수 창구 |\n|---|---|---|\n| **소방시설 자체점검 결과 보고** | 대상물 관계인이 스스로 점검 후 결과를 제출 | **소방서 방문 또는 소방시설관리시스템** |\n| **소방시설 정기검사(작동기능점검 등)** | 관계인이 점검자를 선임해 실시 | 민간 점검업체 계약 (소방서 접수 아님) |\n| **소방특별조사 요청** | 화재 위험 우려로 소방서에 조사 요청 | **소",
+    "spQualityNote": "✅ 나열식 아님(불릿/번호 5개 미만)",
+    "error": null
+  },
+  {
+    "id": "fireseobu-permit-casual",
+    "utterance": "한림 쪽인데 서부소방서에 소방시설 인허가 좀 받고 싶은데",
+    "note": "서부소방서(institution kw, 반말) — SP-AGY-FIRESEOBU §2.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-FIRESEOBU"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "한림에서 서부소방서 소방시설 인허가를 받으시려는 거군요. 정확히 안내드리기 위해 몇 가지 확인이 필요합니다.\n\n**먼저 확인할 것**\n\n1. **어떤 인허가인지** — 소방시설 관련 인허가는 종류가 여러 갈래로 나뉩니다:\n   - **소방시설공사 착공신고** (공사 시작 전)\n   - **소방시설공사 완공검사** (공사 완료 후)\n   - **소방시설 설계·감리** 관련\n   - **위험물시설** 관련 (이건 별도)\n   - **다중이용업소** 관련 (영업 시작 전 소방안전교육 등)\n\n2. **대상 건물/시설** — 신축인지, 증축·용도변경인지, 기존 시설 보수인지에 따라 절차가 달라집니다.\n\n3. **한림 소재지** — 제주특별자치도 제주시 한림읍이시죠? 그러면 관할이 **제주소방서 서부119센터** 또는",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 6개)",
+    "error": null
+  },
+  {
+    "id": "firedongbu-inspection",
+    "utterance": "표선 쪽인데 동부소방서 관할로 소방시설 점검 신청드립니다",
+    "note": "동부소방서(institution kw) — SP-AGY-FIREDONGBU §2. (★\"화재\" 단어는 응급 감지 게이트가 최우선 가로채므로 의도적으로 배제.)",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-FIREDONGBU"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 표선면 소방시설 점검 신청 — K-Public 처리\n\n안녕하세요. 표선면 소재 시설의 소방시설 점검 신청 건으로 접수하겠습니다. 진행 전에 관할 확인부터 정리해 드리겠습니다.\n\n---\n\n## 1. 관할 확인 — 표선면은 동부소방서 관할이 맞습니다\n\n| 구분 | 내용 |\n|---|---|\n| 소재지 | 서귀포시 표선면 |\n| 소방 관할 | **서귀포소방서 동부119센터** (제주특별자치도 소방본부 산하) |\n| 비고 | 표선면은 서귀포시 동부권 — 동부소방서(서귀포소방서) 관할이 맞습니다 |\n\n> ⚠️ 다만 \"동부소방서\"라는 명칭은 **제주 본섬 기준으로는 서귀포소방서 동부지역대**를 가리키는 경우가 많고, **제주시 동부(구좌·성산)** 쪽과 혼동되기 쉽습니다. 신청 접수 전 **정확한 관할 센터명**을",
+    "spQualityNote": "✅ 나열식 아님(불릿/번호 5개 미만)",
+    "error": null
+  },
+  {
+    "id": "comm-audit-plan",
+    "utterance": "자체감사 계획이 언제 수립되는지 궁금한데 알려주실 수 있나요",
+    "note": "자체감사 계획(감사과 division kw) — SP-COMM-AUDIT §2.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-COMM-AUDIT",
+      "SP-COMMDIV-AUDIT-AUDIT(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 자체감사 계획 수립 시기 안내\n\n자체감사 계획은 **「공공감사에 관한 법률」 제23조**에 따라, 각 기관이 **매년 1회, 회계연도 개시 전까지** 수립하는 것을 원칙으로 합니다. 다만 기관 유형에 따라 수립 주체와 시기가 조금씩 다릅니다.\n\n## 기관 유형별 수립 시기\n\n| 기관 유형 | 수립 주체 | 수립 시기 | 근거 |\n|---|---|---|---|\n| 중앙행정기관 | 자체감사기구의 장 | 매년 **2월 말까지** (회계연도 개시 전) | 공공감사법 제23조 제1항 |\n| 지방자치단체 | 감사담당관 등 자체감사기구 | 매년 **2월 말까지** | 공공감사법 제23조, 시행령 |\n| 공공기관·지방공기업 | 감사(자체감사기구) | 매년 **2월 말까지** | 공공감사법 제23조 제2항 |\n\n## ",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 7개)",
+    "error": null
+  },
+  {
+    "id": "comm-audit-integrity-rating",
+    "utterance": "청렴도 평가 지원 관련 자료를 요청하고 싶습니다",
+    "note": "청렴도 평가 지원(부패방지지원센터 division kw) — SP-COMM-AUDIT §2, 격식체.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-COMM-AUDIT",
+      "SP-COMMDIV-AUDIT-ANTICORRUPTION(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 청렴도 평가 지원 관련 자료 요청 — 안내\n\n요청하신 \"청렴도 평가 지원 관련 자료\"는 **국민권익위원회(ACRC)** 소관의 **제도·평가 안내 성격** 업무로 보입니다. 다만 이 요청은 앞서 정의된 K-Public 파이프라인의 **\"공문서 발급\"** 이나 **\"민원 신청\"** 유형이 아니라, **제도안내형 / 정보제공형**에 해당할 가능성이 높습니다.\n\n정확한 안내를 위해 아래 몇 가지를 먼저 확인해 주세요.\n\n---\n\n## 1. 어떤 자료를 원하시는지\n\n| 구분 | 예시 | 담당 |\n|---|---|---|\n| **평가 결과·등급 공개** | 기관별 청렴도 등급, 종합청렴도 결과 | 국민권익위원회 청렴정책총괄과 |\n| **평가 지표·방법론** | 설문 문항, 평가 모형, 산정 방식 | 국민권익위원회",
+    "spQualityNote": "✅ 나열식 아님(불릿/번호 5개 미만)",
+    "error": null
+  },
+  {
+    "id": "comm-labor-mediation",
+    "utterance": "노사 간 조정위원회에 조정사건을 접수하고 싶은데 절차가 어떻게 되나요",
+    "note": "조정위원회/조정사건(institution/division kw) — SP-COMM-LABOR §2.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-COMM-LABOR",
+      "SP-COMMDIV-LABOR-SECRETARIAT(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 노사 간 조정위원회 조정사건 접수 절차 안내\n\n조정사건 접수는 **「노동조합 및 노동관계조정법」**에 따른 **노동위원회**(지방노동위원회) 관할 사무입니다. 정부24 민원이 아니라 **고용노동부 산하 노동위원회**에 직접 접수하는 절차라, 정부24 카탈로그에 잡히지 않을 수 있습니다.\n\n---\n\n## 1. 관할 기관 확인\n\n| 구분 | 관할 |\n|---|---|\n| 사업장 소재지 기준 | 해당 지역 **지방노동위원회** |\n| 중앙 단위·특별 사안 | **중앙노동위원회** |\n| 공공부문 | 별도 특별위원회(공공운수 등) |\n\n→ 사업장 소재지 관할 **지방노동위원회**에 접수하는 것이 원칙입니다.\n\n---\n\n## 2. 접수 절차 (일반 흐름)\n\n1. **조정 신청서 작성**\n   - 당사자(노조·사용",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 5개)",
+    "error": null
+  },
+  {
+    "id": "comm-labor-injury-review",
+    "utterance": "산재로 재해보상 심사를 받고 싶은데 여기가 맞는 곳인가요",
+    "note": "재해보상 심사(institution kw) — SP-COMM-LABOR §2.",
+    "info": false,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-COMM-LABOR"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 산재 재해보상 심사 — 안내\n\n결론부터 말씀드리면, **여기가 맞는 방향이지만 한 단계 더 확인이 필요합니다.** 산재(산업재해) 관련 업무는 성격에 따라 담당 창구가 갈립니다.\n\n## 먼저 구분이 필요합니다\n\n| 하시려는 일 | 담당 |\n|---|---|\n| **최초 요양급여 신청** (다쳐서 치료비·휴업급여 청구) | **근로복지공단** (전국 지사) |\n| **재해보상 심사·불복** (공단 처분에 이의·심사청구) | **근로복지공단 → 산업재해보상보험재심사위원회** |\n| **사업장의 산재 은폐·미신고 신고** | **고용노동부 근로감독관** (관할 지방고용노동청) |\n| **산재보험 가입·부과** | **근로복지공단** |\n\n\"재해보상 심사\"라는 표현은 보통 **공단의 처분에 이의를 제기하는 심사",
+    "spQualityNote": "✅ 나열식 아님(불릿/번호 5개 미만)",
+    "error": null
+  },
+  {
+    "id": "info-police-comparison",
+    "utterance": "자치경찰이랑 국가경찰 차이가 뭐예요",
+    "note": "[관찰용] 비교·설명형 질문 — 특정 SP 확정보다 \"차이를 설명해달라\"는 개념 질문에 가깝다. 자치경찰단/위원회 어느 쪽으로도 확정되면 안 된다고 강제하기보다, 실제로 어떻게 처리되는지(클래리파이/일반 안내/특정 SP 확정 등) 관찰 목적.",
+    "info": true,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "JEJU-NATIONAL-SP",
+      "SP-NAT-POLICE"
+    ],
+    "agency": "gov_national",
+    "classifyInvoked": false,
+    "classifyCallCount": 0,
+    "needsClarification": null,
+    "routedOk": null,
+    "spResponseSnippet": "자치경찰과 국가경찰의 차이를 정리해 드리겠습니다.\n\n## 핵심 차이 한눈에 보기\n\n| 구분 | 국가경찰 | 자치경찰 |\n|------|---------|---------|\n| **소속** | 경찰청 (중앙정부) | 시·도지사 소속 (지방자치단체) |\n| **지휘권** | 경찰청장 → 정부 | 시·도자치경찰위원회 → 시·도지사 |\n| **관할** | 전국 단위 | 해당 시·도 지역 내 |\n| **임용** | 국가공무원 | 국가공무원 (신분은 동일) |\n| **재정** | 국비 | 지방비 일부 + 국비 |\n\n## 2021년 이후: \"국가경찰 + 자치경찰\" 이원화 체제\n\n2021년 7월 **「국가경찰과 자치경찰의 조직 및 운영에 관한 법률」** 시행으로 경찰 조직이 이원화됐습니다.\n\n### 국가경찰 사무 (경찰청",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 5개)",
+    "error": null
+  },
+  {
+    "id": "info-firestation-ambiguous",
+    "utterance": "우리 동네 근처 소방서에 문의하고 싶은데 어디로 연락해야 하나요",
+    "note": "[관찰용] 지역(어느 소방서 관할인지)이 특정 안 된 소방서 문의 — 4개 소방서(제주/서귀포/서부/동부) 중 어디인지 발화만으로 특정 불가능한 경계 케이스. 위치 되묻기(NeedsLocationSignal)가 뜨는지, 상위 SP-AGY-FIRE(소방안전본부)로 일반화되는지 관찰.",
+    "info": true,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "(LLM 분류도 NONE — 공통 레이어 지식으로 답변)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 4,
+    "needsClarification": null,
+    "routedOk": null,
+    "spResponseSnippet": "# 소방서 문의 — 어디로 연락해야 하나\n\n결론부터 말씀드리면, **\"우리 동네 소방서\"라는 게 두 가지로 갈립니다.** 어느 쪽인지에 따라 연락처가 완전히 다릅니다.\n\n## 1. \"우리 동네\"가 관할 소방서를 뜻하는 경우\n\n소방은 **시·군·구 단위가 아니라 소방서 관할구역 단위**로 나뉩니다. 예를 들어 같은 시라도 동별로 담당 소방서가 다를 수 있습니다.\n\n- **119** — 화재·구조·구급 등 **긴급 상황**은 무조건 119입니다. 이건 전국 공통이고, 어느 소방서인지 몰라도 자동으로 관할로 연결됩니다.\n- **일반 민원(비긴급)** — 소방서 대표번호로 걸어야 하는데, 이건 **지역마다 번호가 다릅니다.** 제가 \"우리 동네\"가 어디인지 모르므로 특정 번호를 알려드릴 수 없습니다.\n\n## 2. ",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 5개)",
+    "error": null
+  },
+  {
+    "id": "info-veterans-vs-nat",
+    "utterance": "국가유공자 관련해서 문의할 게 있는데 어디로 가야 하는지 잘 모르겠어요",
+    "note": "[관찰용] \"국가유공자\"만 언급하고 구체 사무(등록/보상금/증서/기념관)를 특정하지 않은 매우 일반적인 질문 — SP-NAT-VETERANS(국가보훈부)/SP-AGY-VETERANS(도 보훈청) 어느 쪽이 나오든, 최소한 사용자에게 되묻거나 두 기관 모두 언급하는지 관찰(양쪽 다 실재하는 기관이라 \"정답\"이 하나로 고정되지 않는 케이스).",
+    "info": true,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "JEJU-NATIONAL-SP",
+      "SP-NAT-VETERANS"
+    ],
+    "agency": "gov_national",
+    "classifyInvoked": false,
+    "classifyCallCount": 0,
+    "needsClarification": null,
+    "routedOk": null,
+    "spResponseSnippet": "국가유공자 관련 문의는 **어디로 가야 할지**가 목적에 따라 갈립니다. 크게 세 갈래입니다.\n\n---\n\n## 1. 전국 공통 — 국가보훈부 (중앙부처)\n\n**대표전화: 1577-0606** (보훈상담센터)\n\n- 국가유공자 등록·심사, 보훈보상금, 보훈병원·의료지원, 교육·취업 지원 등 **거의 모든 보훈 관련 민원의 1차 창구**입니다.\n- 정부24에서도 \"국가보훈부\" 소관 민원을 검색하면 온라인 신청·조회가 가능한 항목이 있습니다.\n- 가까운 **지방보훈청** 또는 **보훈지청**에 방문 상담도 가능합니다. (거주지 관할)\n\n> ⚠️ 참고: 보훈 관련 서비스는 **국가보훈부(전국 공통)** 와 **지자체별 개별 등록** 이 따로 존재하는 경우가 있습니다. 예를 들어 지자체가 자체적으로 운영하는 \"국가유공",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 5개)",
+    "error": null
+  },
+  {
+    "id": "info-agencies-vs-collegial-generic",
+    "utterance": "자치경찰 관련해서 문의하고 싶은데 어디로 연락하면 되나요",
+    "note": "[관찰용] \"자치경찰\"만 언급하고 집행조직(단속·신고)인지 위원회(정책 심의)인지 구분되는 사무를 언급하지 않은 매우 일반적인 질문 — 이 경우 어느 쪽으로 가든 \"오답\"이라 단정하기 어려워 관찰 전용으로 둔다.",
+    "info": true,
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-POLICE"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": null,
+    "spResponseSnippet": "# 자치경찰 관련 문의처 안내\n\n자치경찰 관련 문의는 **문의 내용의 성격**에 따라 연락처가 달라집니다. 아래에서 해당하는 경우를 찾아보세요.\n\n---\n\n## 1. 자치경찰 제도·정책 전반 (가장 일반적)\n\n**경찰청 자치경찰국** (전국 자치경찰 총괄)\n- 경찰청 대표전화: **182** (경찰 민원 콜센터)\n- 경찰청 홈페이지 → 자치경찰 관련 부서 안내\n\n> 자치경찰제는 원칙적으로 **시·도자치경찰위원회**가 관할하므로, 특정 지역 문제라면 아래 2번이 더 정확합니다.\n\n---\n\n## 2. 특정 시·도 자치경찰 사무 (지역 민원)\n\n**시·도자치경찰위원회** (17개 시·도별 설치)\n- 각 시·도청 대표전화로 연결 후 \"자치경찰위원회\" 요청\n- 예: 서울특별시자치경찰위원회, 경기도자치경찰위원회 등\n\n",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 10개)",
+    "error": null
+  }
+]
