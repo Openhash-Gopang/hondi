@@ -1,0 +1,411 @@
+[
+  {
+    "id": "publicpolicy-overseas-training",
+    "utterance": "저 공무원인데 국외교육훈련 프로그램 신청하고 싶은데 어디에 문의하면 되나요",
+    "note": "국외교육훈련(공공정책연수원 institution kw) — SP-AGY-PUBLICPOLICY §2.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-PUBLICPOLICY"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 국외교육훈련 프로그램 문의처 안내\n\n공무원 국외교육훈련은 **국가공무원인지 지방공무원인지**에 따라 담당 기관이 완전히 달라집니다. 소속과 신분을 먼저 확인해 주세요.\n\n---\n\n## 1. 국가공무원 (중앙부처·국가기관 소속)\n\n**국가공무원인재개발원 (NHI)**\n- 국가공무원 국외훈련의 주관 기관입니다.\n- 국외훈련 기획·선발·관리 업무를 총괄합니다.\n- 홈페이지: nhi.go.kr → 「국외훈련」 메뉴\n- 대표전화: 043-931-1114 (국가공무원인재개발원)\n\n**소속 부처 인사담당 부서**\n- 실제 선발은 각 부처가 자체 계획에 따라 진행하는 경우가 많습니다.\n- 먼저 **소속 부처 인사과(교육훈련 담당)** 에 문의하는 것이 가장 빠릅니다.\n\n---\n\n## 2. 지방공무원 (시·도, 시·군·",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 10개)",
+    "error": null
+  },
+  {
+    "id": "veterans-registration",
+    "utterance": "국가유공자 등록을 하고 싶은데 어디로 가야 하나요",
+    "note": "국가유공자 등록(보훈청 보상과 division kw) — SP-AGY-VETERANS §2.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "(계층충돌 통합판단 — 지방행정(SP-AGY-VETERANS) 소관으로 판정, 아래 라우팅 경로로 위임)",
+      "SP-DO-000",
+      "SP-AGY-VETERANS",
+      "SP-AGYDIV-VETERANS-COMPENSATION(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 2,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "국가유공자 등록은 **국가보훈부** 소관이고, 신청 창구는 크게 두 갈래입니다.\n\n## 어디로 가야 하나\n\n**1) 온라인 — 정부24 (gov.kr)**\n- \"국가유공자 등록신청\"으로 검색하면 온라인 신청 메뉴가 나옵니다.\n- 다만 이 건은 **본인확인(실명인증) + 첨부서류 제출**이 필요한 유형이라, 정부24에서 접수만 하고 **최종 심사는 보훈(지)청**에서 이뤄집니다. \"방문 없이 바로 끝난다\"는 안내는 이 민원엔 해당하지 않습니다.\n\n**2) 오프라인 — 주소지 관할 보훈(지)청**\n- 전국 보훈(지)청 민원실에서 접수합니다.\n- 지자체(시·군·구)나 읍·면·동 주민센터는 **접수 대행 창구가 아닙니다.** 보훈청이 없는 지역의 경우에만 일부 지자체가 서류 확인·안내 정도를 도와주는 수준이고, 실",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 7개)",
+    "error": null
+  },
+  {
+    "id": "veterans-memorial-hall",
+    "utterance": "항일기념관 관람 시간이랑 단체 관람 예약 방법이 궁금해요",
+    "note": "항일기념관(보훈청 항일기념관 division kw) — SP-AGY-VETERANS §2.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-VETERANS",
+      "SP-AGYDIV-VETERANS-MEMORIAL(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 항일기념관 관람 안내\n\n항일기념관은 여러 곳이 있어서, 어느 기념관을 말씀하시는지에 따라 관람 시간과 단체 예약 방법이 다릅니다. 아래에서 해당 기념관을 확인해 주세요.\n\n---\n\n## 주요 항일기념관 안내\n\n### 1. 국립대한민국임시정부기념관 (서울 서대문구)\n- **관람 시간**: 화~일 10:00~18:00 (입장 마감 17:30) / 월요일 휴관\n- **관람료**: 무료\n- **단체 관람**: 20인 이상 단체는 사전 예약 필요 (홈페이지 또는 전화)\n- **문의**: 02-772-8700\n\n### 2. 서대문형무소역사관 (서울 서대문구)\n- **관람 시간**: 09:30~18:00 (3~10월) / 09:30~17:00 (11~2월) / 월요일 휴관\n- **관람료**: 성인 3,000원 (단체",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 12개)",
+    "error": null
+  },
+  {
+    "id": "cultureearts-hall-rental",
+    "utterance": "문예회관 공연장을 대관하고 싶은데 신청 절차가 어떻게 되나요",
+    "note": "문예회관 대관(문화예술진흥원 운영과 division kw) — SP-AGY-CULTUREARTS §2.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-CULTUREARTS"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 문예회관 공연장 대관 신청 절차 안내\n\n문예회관 공연장 대관은 **지자체별로 운영 주체와 절차가 다릅니다.** 전국 공통 창구가 없어서, 어느 문예회관인지에 따라 신청 방법이 달라집니다. 아래 순서로 확인하시면 됩니다.\n\n---\n\n## 1단계 — 어느 문예회관인지 먼저 특정\n\n문예회관은 크게 세 가지로 나뉩니다.\n\n| 구분 | 예시 | 신청 창구 |\n|---|---|---|\n| **지자체 직영** | 시립문예회관, 구립문화회관 | 해당 시·군·구청 문화예술과 또는 회관 홈페이지 |\n| **재단·공단 위탁** | ○○문화재단, ○○시설관리공단 | 재단/공단 홈페이지 대관 시스템 |\n| **교육청 소속** | 학생문화예술관 등 | 해당 교육청 |\n\n→ **\"○○시 문예회관\"처럼 정확한 명칭**을 알려주시면 ",
+    "spQualityNote": "✅ 나열식 아님(불릿/번호 5개 미만)",
+    "error": null
+  },
+  {
+    "id": "cultureearts-dance-troupe",
+    "utterance": "도립무용단 공연 일정이랑 티켓 예매가 궁금해요",
+    "note": "도립무용단(문화예술진흥원 공연기획과 division kw) — SP-AGY-CULTUREARTS §2.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-CULTUREARTS",
+      "SP-AGYDIV-CULTUREARTS-PERFORMANCE(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "도립무용단 공연 일정과 티켓 예매에 대해 안내해 드리겠습니다. 먼저 어느 지역의 도립무용단인지 확인이 필요합니다.\n\n**확인이 필요한 사항:**\n- 어느 도(道)의 도립무용단인가요? (예: 경기도립무용단, 충청북도립무용단, 전라남도립무용단 등)\n\n지역에 따라 공연 일정과 예매처가 모두 다르기 때문에, 정확한 안내를 위해 지역을 알려주시면 다음과 같이 도와드리겠습니다.\n\n**지역 확인 후 안내 가능한 내용:**\n1. **공연 일정** — 해당 도립무용단의 최신 공연 캘린더\n2. **티켓 예매처** — 인터파크, 예스24, 티켓링크 등 공식 예매 채널\n3. **예매 방법** — 온라인 예매 절차 및 할인 정보\n4. **문의처** — 해당 도립무용단 사무국 연락처\n\n---\n\n참고로, 도립무용단은 각 도의 **문화",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 5개)",
+    "error": null
+  },
+  {
+    "id": "marinefisheries-flatfish",
+    "utterance": "광어연구센터에 광어 양식 기술 관련해서 상담을 받고 싶은데요",
+    "note": "광어연구센터·광어 양식(해양수산연구원 division kw) — SP-AGY-MARINEFISHERIES §2.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-MARINEFISHERIES",
+      "SP-AGYDIV-MARINEFISHERIES-FLATFISH(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 광어 양식 기술 상담 안내\n\n광어(넙치) 양식 기술 상담을 원하시는군요. 관련 기관과 절차를 안내해 드리겠습니다.\n\n## 1. 상담 가능 기관\n\n**국립수산과학원 (중앙부처, 전국 공통)**\n- 수산생물 연구·기술지도 담당\n- 정부24 또는 기관 홈페이지를 통한 상담 신청 가능\n\n**지역 광어연구센터 / 수산기술지원센터**\n- 지자체별로 운영되는 경우가 많음\n- 해당 지역 연구센터에 직접 문의 권장\n\n## 2. 상담 신청 방법\n\n| 방법 | 내용 |\n|------|------|\n| 온라인 | 정부24 또는 국립수산과학원 홈페이지 민원·상담 메뉴 |\n| 전화 | 국립수산과학원 대표번호 / 지역 수산기술지원센터 |\n| 방문 | 관할 시·도 수산기술지원센터 또는 연구센터 |\n\n## 3. 상담 시 준비하면 좋은",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 10개)",
+    "error": null
+  },
+  {
+    "id": "marinefisheries-seed",
+    "utterance": "홍해삼 종자 생산 기술 지원을 받고 싶은데 어디로 문의하나요",
+    "note": "홍해삼 종자(해양수산연구원 수산종자연구과 division kw) — SP-AGY-MARINEFISHERIES §2.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-MARINEFISHERIES",
+      "SP-AGYDIV-MARINEFISHERIES-SEED(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 홍해삼 종자 생산 기술 지원 문의 안내\n\n홍해삼(해삼) 종자 생산 기술 지원은 **수산 관련 정부 기관**을 통해 안내받으실 수 있습니다. 다만 정확한 담당 창구는 지역과 사업 유형에 따라 달라질 수 있어, 아래 경로를 순서대로 확인하시길 권합니다.\n\n## 1차 문의처 — 국립수산과학원 (NIFS)\n\n해삼을 포함한 수산 종자(종묘) 생산 기술 연구·지도를 담당하는 **국가 연구기관**입니다.\n\n- **국립수산과학원** — 수산생물 연구·품종 개량·종자 생산 기술 개발\n- 산하 **수산종자연구소** 및 지역 연구소(동해·서해·남해수산연구소)에서 해삼 종묘 생산 기술 자료·지도를 제공\n- 홈페이지: nifs.go.kr → \"수산종자\" 또는 \"해삼\" 검색\n\n## 2차 문의처 — 지자체 수산 담당 부서\n\n실제 ",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 9개)",
+    "error": null
+  },
+  {
+    "id": "animalhygiene-quarantine",
+    "utterance": "외부에서 반입되는 가축 검역 절차가 궁금한데요",
+    "note": "반입가축 검역(동물위생시험소 방역진단과 division kw) — SP-AGY-ANIMALHYGIENE §2.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-ANIMALHYGIENE"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "가축 검역 절차에 대해 안내드리겠습니다. 다만 정확한 안내를 위해 몇 가지 확인이 필요합니다.\n\n## 먼저 확인이 필요한 사항\n\n**어떤 상황인지**에 따라 담당 기관과 절차가 완전히 달라집니다:\n\n1. **수입 가축** (외국에서 소·돼지·닭 등을 들여오는 경우)\n   → 농림축산검역본부 (검역계류장 격리검역)\n\n2. **국내 이동** (국내에서 지역 간 이동, 가축시장 출하 등)\n   → 시·도 가축방역기관 (이동승인, 검역증명서)\n\n3. **반려동물(개·고양이) 동반 입국**\n   → 농림축산검역본부 (광견병 항체검사, 격리)\n\n4. **축산물(고기·육가공품) 반입**\n   → 별도 절차 (검역 대상 여부 판정)\n\n## 절차 안내를 위해 알려주실 것\n\n- **어떤 동물**인가요? (소/돼지/닭/개/고양",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 7개)",
+    "error": null
+  },
+  {
+    "id": "seolmundae-history-exhibit",
+    "utterance": "여성역사문화전시관 관람 프로그램이랑 견학 신청이 궁금해요",
+    "note": "여성역사문화전시관(설문대여성문화센터 institution/division kw) — SP-AGY-SEOLMUNDAE §2.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-SEOLMUNDAE",
+      "SP-AGYDIV-SEOLMUNDAE-ADMIN(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 여성역사문화전시관 관람 프로그램·견학 신청 안내\n\n문의하신 **여성역사문화전시관**의 관람 프로그램과 견학 신청에 대해 안내드립니다. 다만 정확한 안내를 위해 먼저 확인이 필요한 부분이 있어 함께 말씀드립니다.\n\n---\n\n## ⚠️ 먼저 확인이 필요합니다\n\n\"여성역사문화전시관\"이라는 명칭의 시설이 **여러 곳** 존재할 수 있습니다. 대표적으로:\n\n- **국립여성사전시관** (여성가족부 산하, 경기도 고양시)\n- 각 **지자체가 운영하는 여성사·여성문화 전시관** (예: 서울·경기·지역별)\n\n시설마다 **운영 주체(국가/지자체)와 신청 방식이 완전히 다르기** 때문에, 어느 시설을 말씀하시는지에 따라 안내가 달라집니다.\n\n**어느 지역의, 어느 기관이 운영하는 전시관**인지 알려주시면 정확히 안내해 드리",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 8개)",
+    "error": null
+  },
+  {
+    "id": "stonepark-forest-reservation",
+    "utterance": "교래자연휴양림 숙소 이용 예약하고 싶은데요",
+    "note": "교래자연휴양림(돌문화공원관리소 공원운영과 division kw) — SP-AGY-STONEPARK §2.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-STONEPARK",
+      "SP-AGYDIV-STONEPARK-OPERATIONS(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "교래자연휴양림 숙소 예약을 도와드리겠습니다. 먼저 예약 절차와 필요 정보를 확인해볼게요.\n\n<GOV_TASK_SCHEMA_LOOKUP>\n{\"task_name\":\"교래자연휴양림 숙소 예약\",\"keywords\":[\"교래자연휴양림\",\"자연휴양림\",\"숙소예약\",\"숙박예약\"]}\n</GOV_TASK_SCHEMA_LOOKUP>\n\n잠시만요, 예약에 필요한 정보를 정리해드리겠습니다.\n\n---\n\n## 교래자연휴양림 숙소 예약 안내\n\n교래자연휴양림은 **제주특별자치도**가 운영하는 자연휴양림으로, 숙소 예약은 **산림청 \"숲나들e\" 통합예약시스템**을 통해 진행됩니다.\n\n### 예약 경로\n- **숲나들e** (foresttrip.go.kr) — 전국 자연휴양림 통합 예약\n- 제주특별자치도청 / 교래자연휴양림 홈페이지에서도 연결",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 14개)",
+    "error": null
+  },
+  {
+    "id": "envcirculation-foodwaste",
+    "utterance": "음식물류 폐기물 자원화시설 관련해서 문의드리고 싶은 게 있어요",
+    "note": "음식물류 폐기물 자원화시설(제주환경자원순환센터 음식물자원화과 division kw) — SP-AGY-ENVCIRCULATION §2.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-ENVCIRCULATION",
+      "SP-AGYDIV-ENVCIRCULATION-FOODWASTE(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "음식물류 폐기물 자원화시설 관련 문의시군요. 어떤 부분이 궁금하신지 조금 더 구체적으로 알려주시면 정확히 안내해드릴 수 있습니다.\n\n**자주 문의하시는 항목들:**\n\n1. **설치·인허가** — 자원화시설 신규 설치 시 폐기물처리시설 설치승인(환경부 또는 시·도지사), 사전환경성검토 등\n2. **운영 중 행정처분** — 위반사항에 대한 개선명령·과징금·영업정지 등\n3. **보조금·지원사업** — 설치비 지원, 운영비 보조 (지자체별 상이)\n4. **신고·변경** — 시설 변경신고, 휴업·폐업 신고\n5. **기술·공정 문의** — 퇴비화·사료화·바이오가스화 등 처리방식 관련\n\n**먼저 확인해주실 것:**\n- 어느 **지자체**(시·군·구) 소재 시설인가요?\n- 문의 목적이 **신규 설치 / 운영 중 문제 / ",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 8개)",
+    "error": null
+  },
+  {
+    "id": "safetyexperience-reservation",
+    "utterance": "제주안전체험관 체험교육 프로그램 예약을 하고 싶은데요",
+    "note": "안전체험관 체험교육 예약(제주안전체험관 체험지원과 division kw) — SP-AGY-SAFETYEXPERIENCE §2.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-SAFETYEXPERIENCE"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 제주안전체험관 체험교육 프로그램 예약 안내\n\n제주안전체험관 체험교육 프로그램 예약은 **정부24 공통 민원이 아니라 제주특별자치도 소관 지자체 개별 서비스**입니다. 정부24에서 \"예약하기\" 버튼으로 보이더라도 실제 예약 처리는 제주안전체험관(또는 제주소방안전본부) 자체 시스템에서 이루어지는 경우가 많습니다.\n\n## 예약 경로\n\n1. **제주안전체험관 공식 홈페이지** — 체험 프로그램별 예약 페이지에서 직접 신청\n2. **제주특별자치도 소방안전본부** — 안전체험 교육 담당 부서 문의\n3. **정부24** — \"제주안전체험관\" 또는 \"안전체험\" 검색 시 사이트가기형으로 연결될 수 있음\n\n## 예약 시 일반적으로 필요한 정보\n\n- 체험자 성명·생년월일·연락처\n- 체험 희망 일시 및 프로그램 (소방·교통·",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 10개)",
+    "error": null
+  },
+  {
+    "id": "employment-jobsupport",
+    "utterance": "구직자 맞춤형 취업지원 서비스를 받고 싶은데 어디로 가면 되나요",
+    "note": "★명칭충돌 검증(고용센터 일원화) — 구직자 맞춤형 취업지원(고용센터 취업지원총괄과 division kw). 옛 SP-DIV-ECON-EMPLOYCENTER(경제활력국 산하로 잘못 모델링됐던 것)는 작업 #17에서 archive로 옮겨졌다 — SP-AGY-EMPLOYMENT(도 직속 사업소)로 도달해야 정답.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-EMPLOYMENT",
+      "SP-AGYDIV-EMPLOYMENT-JOBSUPPORT(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 구직자 맞춤형 취업지원 서비스 안내\n\n결론부터 말씀드리면, **고용노동부 고용24(work24.go.kr)** 또는 **가까운 고용센터**를 통해 신청하시면 됩니다. 정부24에서도 관련 민원을 검색할 수 있지만, 실제 서비스는 고용24에서 처리되는 경우가 많습니다.\n\n---\n\n## 1. 어디로 가야 하나요?\n\n| 경로 | 대상 서비스 | 비고 |\n|---|---|---|\n| **고용24** (work24.go.kr) | 국민취업지원제도, 취업성공패키지 후속, 구인·구직 매칭, 직업훈련 | 온라인 신청 가능 |\n| **거주지 관할 고용센터** | 국민취업지원제도, 실업급여, 취업지원 프로그램 | 방문 상담 필수인 경우 많음 |\n| **여성새로일하기센터** | 경력단절여성 대상 | 별도 기관 |\n| **지자",
+    "spQualityNote": "✅ 나열식 아님(불릿/번호 5개 미만)",
+    "error": null
+  },
+  {
+    "id": "employment-jobfair",
+    "utterance": "채용박람회에 참가 신청하고 싶은데 어느 부서에 문의하면 되나요",
+    "note": "★명칭충돌 검증(고용센터 일원화, 2건째) — 채용박람회(고용센터 취업지원총괄과 division kw).",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-EMPLOYMENT",
+      "SP-AGYDIV-EMPLOYMENT-JOBSUPPORT(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "채용박람회 참가 신청 문의처는 **박람회를 주최하는 기관에 따라 다릅니다.** \"채용박람회\"는 전국 공통 단일 창구가 있는 서비스가 아니라, 주최 기관(고용노동부·지자체·공공기관 등)마다 담당 부서가 제각각이기 때문에, 어느 박람회인지부터 특정해야 정확한 부서를 알려드릴 수 있습니다.\n\n## 먼저 확인이 필요한 것\n\n**어느 채용박람회인가요?** 다음 중 하나라도 알려주시면 담당 부서를 좁힐 수 있습니다.\n\n- 주최 기관명 (예: ○○시청, ○○고용센터, ○○공단)\n- 박람회 이름 또는 개최 지역·시기\n- 어디서 이 박람회 정보를 보셨는지 (공고문, 홈페이지, 안내문 등)\n\n## 일반적인 문의처 안내\n\n주최 유형별로 대표적인 담당 창구는 다음과 같습니다.\n\n| 주최 유형 | 대표 문의처 |\n|---|---|",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 5개)",
+    "error": null
+  },
+  {
+    "id": "centralcoop-sejong",
+    "utterance": "세종시에 있는 중앙부처랑 도정 협력 업무를 협의하고 싶은데 어디로 연락하면 되나요",
+    "note": "★명칭충돌 검증(중앙협력본부 일원화) — 세종시권 중앙부처 협력(중앙협력본부 국회대외협력부 kw \"세종시권\"). 옛 SP-DO-LIAISON(02-do-dept 최상위 도 부서로 잘못 모델링됐던 것)은 작업 #17에서 archive로 옮겨졌다 — SP-AGY-CENTRALCOOP(사업소)로 도달해야 정답.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-CENTRALCOOP"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 세종시 소재 중앙부처·도정 협력 업무 연락처 안내\n\n세종시는 **정부세종청사**가 있어 중앙부처와 지자체(세종특별자치시)가 같은 도시에 공존하는 특수한 구조입니다. 협력 업무 성격에 따라 창구가 완전히 달라지므로, 아래 3단계로 나눠 안내드립니다.\n\n---\n\n## 1. 먼저 확인하실 것 — \"어떤 성격의 협력인가\"\n\n| 협력 유형 | 주 담당 | 창구 |\n|---|---|---|\n| **정책·제도 협의** (법령·예산·국가사업) | 중앙부처 | 각 부처 대표번호 → 해당 실·국 |\n| **지역 집행·사업 협의** (세종시 관할 사무) | 세종특별자치시 | 시청 해당 부서 |\n| **중앙-지방 공동사업** (국가균형발전, 행정수도 등) | 행정안전부·국무조정실 | 아래 2번 참조 |\n\n---\n\n## 2. ",
+    "spQualityNote": "✅ 나열식 아님(불릿/번호 5개 미만)",
+    "error": null
+  },
+  {
+    "id": "police-committee-deliberation",
+    "utterance": "자치경찰사무에 대한 정책을 심의·의결하는 절차가 궁금한데 어디에 문의해야 하나요",
+    "note": "★명칭충돌 검증(자치경찰위원회 vs 자치경찰단, 1/2) — 자치경찰사무 정책 심의(자치경찰위원회 institution kw). SP-COMM-POLICE(합의제 위원회, 자치경찰단의 상급 컨트롤타워)로 가야 정답 — SP-AGY-POLICE(집행조직)로 새면 오답.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-COMM-POLICE"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 자치경찰사무 정책 심의·의결 절차 문의 안내\n\n자치경찰사무에 대한 **정책 심의·의결**은 「국가경찰과 자치경찰의 조직 및 운영에 관한 법률」에 따라 **자치경찰위원회**가 담당합니다. 문의처는 **심의·의결 주체가 누구냐**에 따라 갈립니다.\n\n---\n\n## 1. 어디에 문의해야 하나 — 주체별 구분\n\n| 구분 | 심의·의결 기구 | 문의처 |\n|---|---|---|\n| **시·도 자치경찰사무** | 시·도 **자치경찰위원회** | 해당 시·도청 자치경찰위원회 사무국 (또는 자치경찰담당관실) |\n| **국가경찰사무 중 자치경찰 관련** | **국가경찰위원회** | 경찰청 국가경찰위원회 사무국 |\n| **제도·법령 해석** | — | 경찰청 자치경찰정책관실 / 행정안전부 자치경찰지원과 |\n\n> **핵심",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 5개)",
+    "error": null
+  },
+  {
+    "id": "police-agency-tourism",
+    "utterance": "소매치기를 당한 것 같은데 관광경찰한테 신고하려면 어디로 연락하나요",
+    "note": "★명칭충돌 검증(자치경찰위원회 vs 자치경찰단, 2/2) — 관광경찰(자치경찰단 institution kw). SP-AGY-POLICE(집행조직)로 가야 정답 — SP-COMM-POLICE(심의·의결 위원회)로 새면 오답. 앞 시나리오와 쌍을 이뤄 양쪽이 실제로 갈라지는지 확인. (★2026-09-24 실측 발견 — \"관광지\"를 함께 쓰면 bare \"관광\" kw를 가진 SP-DO-TOURISM(도청 관광교류국)이 매칭 점수에서 앞서 SP-AGY-POLICE로 못 감. 이건 이번 스모크테스트가 찾아낸 실제 명칭충돌 이슈로, 별도로 보고했다 — 이 시나리오 문구는 \"관광지\" 없이 순수 \"관광경찰\"만 남겨 SP-AGY-POLICE 고유 kw만 매칭되게 했다.)",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-POLICE",
+      "SP-AGYDIV-POLICE-TOURISTPOLICE(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 소매치기 피해 — 관광경찰 신고 안내\n\n소매치기(절도) 피해를 입으셨군요. **관광경찰은 전국 공통으로 112(경찰청)로 연결**되며, 관광지 특화 순찰·통역 지원을 받으실 수 있습니다. 아래 순서대로 안내드립니다.\n\n---\n\n## 1. 즉시 연락처\n\n| 상황 | 연락처 | 비고 |\n|---|---|---|\n| **긴급 신고(현행범·추격 가능)** | **112** | 24시간, 외국어 통역 연결 가능 |\n| **관광경찰 직통(서울 주요 관광지)** | **02-700-0122** | 명동·동대문·홍대 등 관광특구 순찰대 |\n| **관광 불편 신고(비긴급)** | **1330** | 한국관광공사 관광안내·통역, 24시간 |\n| **소매치기 피해 접수(비긴급)** | 가까운 **지구대·파출소** | 방문 ",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 5개)",
+    "error": null
+  },
+  {
+    "id": "firejeju-inspection",
+    "utterance": "제주소방서 관할 지역에서 소방시설 점검 신청을 하고 싶은데요",
+    "note": "제주소방서(institution kw \"제주소방서\") — SP-AGY-FIREJEJU §2.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-FIREJEJU"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 제주소방서 관할 지역 소방시설 점검 신청 안내\n\n안녕하세요. 제주소방서 관할 지역의 소방시설 점검 신청에 대해 안내드리겠습니다.\n\n---\n\n## 1. 먼저 확인이 필요한 사항\n\n소방시설 점검 신청은 **대상 시설의 종류·규모**와 **점검 유형**에 따라 담당 기관과 절차가 달라집니다. 다음을 알려주시면 정확히 안내해 드릴 수 있습니다.\n\n| 구분 | 확인 필요 사항 |\n|---|---|\n| **시설 용도** | 공동주택 / 업무시설 / 판매시설 / 위험물시설 등 |\n| **시설 규모** | 연면적, 층수, 수용인원 |\n| **점검 유형** | **자체점검**(관계인 의무) / **소방특별조사**(관서 점검) / **소방시설공사**(신설·증축) |\n| **신청 목적** | 정기 자체점검 결과 제출 / 특",
+    "spQualityNote": "✅ 나열식 아님(불릿/번호 5개 미만)",
+    "error": null
+  },
+  {
+    "id": "firedongbu-report",
+    "utterance": "성산 쪽인데 동부소방서에 소방시설 점검 신청을 하고 싶어요",
+    "note": "동부소방서(institution kw \"동부소방서\") — SP-AGY-FIREDONGBU §2. (★\"화재\"라는 단어를 쓰면 응급 감지 게이트(SP-EXP-EMERGENCY, \"애매하면 응급으로\" 원칙)가 다른 무엇보다 먼저 가로채 최우선 처리로 빠진다 — 이건 라우팅 버그가 아니라 의도된 안전 설계이므로, 이 시나리오는 순수 행정 문의로만 문구를 구성했다.)",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-FIREDONGBU"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 소방시설 점검 신청 — 성산 ↔ 동부소방서 관할 확인\n\n성산은 **서귀포시 성산읍**이고, 동부소방서는 **제주시 동부 관할**입니다. 이 부분이 먼저 정리돼야 합니다.\n\n## 1. 관할 확인 (가장 중요)\n\n제주특별자치도 소방은 **제주소방서 / 서귀포소방서 / 동부소방서 / 서부소방서** 4개로 나뉘고, 관할은 **행정구역 기준**입니다.\n\n- **성산읍** → **서귀포소방서** 관할 (서귀포시 동부권)\n- **동부소방서** → 제주시 구좌읍·우도면·성산 일부가 아닌 **제주시 동부 지역** 관할\n\n즉, **성산 소재 대상물은 동부소방서가 아니라 서귀포소방서 관할**일 가능성이 높습니다. 다만 소방시설 점검 신청은 **대상물 소재지** 기준이므로, 신청하려는 건물이 성산읍이면 서귀포소방서로 가야 합",
+    "spQualityNote": "✅ 나열식 아님(불릿/번호 5개 미만)",
+    "error": null
+  },
+  {
+    "id": "fireseobu-rescue",
+    "utterance": "안덕면 쪽인데 서부소방서에 구조 출동 문의를 좀 하고 싶은데요",
+    "note": "서부소방서(institution kw \"서부소방서\") — SP-AGY-FIRESEOBU §2.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-AGY-FIRESEOBU"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "안덕면 쪽이시고, 서부소방서에 구조 출동 관련 문의를 하고 싶으시군요. 상황을 정확히 안내드리기 위해 몇 가지 확인이 필요합니다.\n\n먼저, **어떤 종류의 문의인지**에 따라 담당 창구가 완전히 달라집니다.\n\n**1. 지금 급박한 상황(실제 구조 요청)이라면**\n- 문의가 아니라 **즉시 신고**입니다. **119**로 전화하시면 서부소방서 관할 여부와 무관하게 즉시 출동 체계로 연결됩니다. 안덕면은 서귀포소방서 관할일 가능성이 높으니, 119 상황실에서 관할 소방서로 자동 배정합니다.\n\n**2. 행정 문의(구조 출동 이력 확인, 구조대 운영 관련 질의, 민원성 문의)라면**\n- 서부소방서는 **제주특별자치도 소방안전본부** 산하입니다. 안덕면은 행정구역상 **서귀포시** 소속이라, 소방 관할은 보통 **서",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 7개)",
+    "error": null
+  },
+  {
+    "id": "comm-audit-report",
+    "utterance": "공직자 비위를 신고하고 싶은데 어디로 접수하면 되나요",
+    "note": "공직 비위 신고(감사위원회 조사과 division kw) — SP-COMM-AUDIT §2.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-COMM-AUDIT"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 공직자 비위 신고 — 접수 경로 안내\n\n공직자 비위(부패·횡령·직무유기 등) 신고는 **신고 대상이 누구냐**에 따라 접수 창구가 달라집니다. 아래 순서대로 확인하시면 됩니다.\n\n---\n\n## 1. 1차 판단 — 신고 대상이 누구인가\n\n| 대상 | 접수 기관 |\n|---|---|\n| **국가공무원·지방공무원·공공기관 임직원** | 국민권익위원회 (국가) |\n| **경찰·검찰·법관 등 사법기관 공직자** | 해당 기관 감찰부서 + 국민권익위 |\n| **지자체 공직자 (시·군·구)** | 해당 지자체 감사관 + 국민권익위 |\n| **공직자 배우자·직계존비속 (이해충돌)** | 국민권익위 (공직자윤리법) |\n\n---\n\n## 2. 대표 접수 창구\n\n### ① 국민권익위원회 — 국민신문고\n- **온라인**: `w",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 9개)",
+    "error": null
+  },
+  {
+    "id": "comm-labor-remedy",
+    "utterance": "부당노동행위 구제신청을 하고 싶은데 어디로 문의해야 하나요",
+    "note": "부당노동행위 구제신청(지방노동위원회 사무국 division kw) — SP-COMM-LABOR §2. bare \"부당해고\"는 SP-NAT-LABORREL과 겹쳐 SP 원문에서 의도적으로 피한 키워드이므로, division kw에 실제 등재된 \"부당노동행위 구제신청\" 표현을 그대로 썼다.",
+    "trace": [
+      "JEJU-GOV-COMMON",
+      "SP-DO-000",
+      "SP-COMM-LABOR",
+      "SP-COMMDIV-LABOR-SECRETARIAT(과/팀 특정)"
+    ],
+    "agency": "gov_do",
+    "classifyInvoked": true,
+    "classifyCallCount": 1,
+    "needsClarification": null,
+    "routedOk": true,
+    "spResponseSnippet": "# 부당노동행위 구제신청 안내\n\n부당노동행위 구제신청은 **노동위원회**에 신청하는 사건입니다. 정부24에서 단순 민원으로 접수하는 것이 아니라, **관할 노동위원회에 직접 신청서를 제출**하는 절차입니다.\n\n## 1. 어디에 신청하나요?\n\n| 구분 | 접수 기관 |\n|---|---|\n| **중앙** | 중앙노동위원회 (세종) |\n| **지역** | 사업장 소재지 관할 **지방노동위원회** |\n\n- 사업장이 있는 지역의 **지방노동위원회**가 원칙적 관할입니다.\n- 전국 13개 지방노동위원회(서울·부산·경기·인천·대구·광주·대전·울산·강원·충북·충남·전북·전남·경북·경남·제주) 중 해당 지역을 확인하시면 됩니다.\n\n## 2. 신청 방법\n\n1. **신청서 작성** — 「노동위원회법 시행규칙」 별지 서식 (부당",
+    "spQualityNote": "⚠️ 나열식 응답 의심(불릿/번호 8개)",
+    "error": null
+  }
+]
