@@ -756,3 +756,32 @@ LLM 폴백(전체 후보 중 문맥으로 판단)에 맡기는 게 설계 의도
   필요하다 — jeju.go.kr 계열 사이트는 robots.txt/방화벽으로 이번에도 직접 접속하지 못했다.
 - `SP-AGY-ARTMUSEUM`·`SP-AGY-HERITAGE`의 "고유명사 division" 라우팅 위험은 별도 배치로
   재검토 필요(위 A3 참고).
+
+## 작업 #21 라이브 재검증 결과 (2026-09-26, PR #461 병합 직후)
+
+병합 직후 프로젝트 총괄이 두 워크플로(`live-smoketest-gov-router-2026-09-24-new-agencies.yml`·
+`-broad.yml`)를 `workflow_dispatch`로 직접 재실행했다 — 이번엔 실제 `DEEPSEEK_API_KEY`가 붙은
+실측 실행이다(`results/live-smoketest-gov-router-2026-09-24-new-agencies`·`-broad` 브랜치의
+`results.json`을 직접 fetch해 확인, 추측 아님).
+
+- **narrow(22건)**: 판정 대상 22건 **전부 통과**(작업 #19 당시 21/22였던 것에서 개선).
+- **broad(42건)**: 판정 대상 38건(관찰용 4건 제외) **전부 통과**(작업 #19 당시 36/38였던
+  것에서 개선).
+- 작업 #19에서 실패했던 두 시나리오 모두 이번엔 정확히 라우팅됐다(실제 trace 확인):
+  - `veterans-registration-casual`("국가유공자 등록하고 싶은데 어디로 가야 돼?") → trace:
+    `(계층충돌 통합판단 — 지방행정(SP-AGY-VETERANS) 소관으로 판정, 아래 라우팅 경로로 위임)`
+    → `SP-AGY-VETERANS` → `SP-AGYDIV-VETERANS-COMPENSATION(과/팀 특정)`. 실제 DeepSeek이 이번에
+    정정한 `ROUTE_DESCRIPTIONS['SP-NAT-VETERANS']`(2006년 도 이관 사실 명시)를 보고 스스로 도
+    기관이 맞다고 판단한 것으로 보인다(로그로 직접 확인 — 추측 아님).
+  - `cultureearts-friends-society`("문화사랑회 회원 가입 관련해서 문의드리고 싶습니다") → trace:
+    `SP-AGY-CULTUREARTS` → `SP-AGYDIV-CULTUREARTS-ADMIN(과/팀 특정)`. `classifyCallCount`으로
+    확인한 결과 이제 기관 계층에서 키워드 매칭만으로 즉시 확정돼(topScore=1, 단독 최고점)
+    LLM 호출 자체가 불필요해졌다.
+- 관찰용(`info: true`) 4건도 기대대로 동작했다 — 특히 `info-veterans-vs-nat`("국가유공자"만
+  언급한 일반 질문, "등록" 등 구체 사무 언급 없음)는 여전히 `SP-NAT-VETERANS`(국가기관)로 갔다
+  — 이는 버그가 아니라 남겨둔 안전장치(구체적 사무 언급이 없으면 국가기관 기본값 유지)가
+  의도대로 동작한 것이다.
+
+**결론**: 작업 #21에서 고친 두 버그(보훈청·문화사랑회)는 이제 실측(실제 DeepSeek API 호출)으로
+확정 검증됐다. 남은 미해결 항목은 B4(지방노동위원회)·B5(자치경찰협력과 명칭)·B6(감사위원회
+division)·`SP-AGY-ARTMUSEUM`/`SP-AGY-HERITAGE`의 고유명사 division 위험, 그대로다.
