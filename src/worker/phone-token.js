@@ -35,6 +35,20 @@ export function canonPhone(x) {
   else if (d.startsWith('82') && !d.startsWith('820')) d = '820' + d.slice(2);
   return d;
 }
+
+/**
+ * LEGACY: 2026-09-07 이전 가입 계정의 e164_hash는 그 시절 저장돼 있던 평문 e164 문자열을 "있는 그대로" 해시했다
+ * (pb_migrations/1793900200_backfill…). 그 문자열이 지금의 정규화 규칙("+82" 뒤에 0을 남긴다)과 다른 옛 표기
+ * ("+82" 뒤 0을 생략한 통상 E.164, 예: +821096627170)였다면, 지금 서버가 새로 계산하는 해시와 영원히 어긋난다.
+ * 그래서 두 가지 후보 e164 문자열(표준형 · 옛 형식)을 모두 만들어 해시를 각각 시도한다.
+ */
+export function e164Candidates(rawE164) {
+  const d = canonPhone(rawE164);          // "8201096627170"
+  if (!d) return [];
+  const out = [`+${d}`];                                  // 표준형: +8201096627170
+  if (d.startsWith('820')) out.push(`+82${d.slice(3)}`);   // 옛 형식: +821096627170 (0 미유지)
+  return out;
+}
 async function hmacHex(secret, message) {
   const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
   const sig = await crypto.subtle.sign('HMAC', key, enc.encode(message));
@@ -67,9 +81,11 @@ export async function verifyFreshPhoneToken({ secret, token, guid, accountPhone,
   const issuedAt = exp - ttlMs;
   if (now - issuedAt > freshMs) return bad(401, 'PHONE_TOKEN_STALE', '방금 진행한 문자 인증만 사용할 수 있습니다. 문자 인증을 다시 진행해 주세요.');
   if (accountE164Hash) {
-    // 기준: e164_hash 끼리 비교(pb_hooks 재인증 검사와 동일). 토큰의 e164는 서버가 정규화해 서명한 값 그대로 해시한다.
-    const tokHash = await hmacHex(secret, 'e164-lookup:' + e164);
-    if (!timingSafeEqualHex(String(accountE164Hash).toLowerCase(), tokHash)) return bad(403, 'PHONE_MISMATCH', '인증한 전화번호가 이 계정에 등록된 번호와 다릅니다.');
+    // 기준: e164_hash 끼리 비교(pb_hooks 재인증 검사와 동일). 표준형과, 백필 당시 저장돼 있었을 수 있는
+    // 옛 형식(0 미유지) 둘 다 시도한다 — 어느 하나라도 맞으면 같은 번호로 인정한다.
+    const accHash = String(accountE164Hash).toLowerCase();
+    const cands = await Promise.all(e164Candidates(e164).map(c => hmacHex(secret, 'e164-lookup:' + c)));
+    if (!cands.some(h => timingSafeEqualHex(accHash, h))) return bad(403, 'PHONE_MISMATCH', '인증한 전화번호가 이 계정에 등록된 번호와 다릅니다.');
   } else {
     // 해시가 없는 옛 레코드: 평문 e164/phone 이 있으면 표준형으로 비교, 둘 다 없으면 "다르다"가 아니라 "찾지 못했다"
     const acct = canonPhone(accountPhone), tok = canonPhone(e164);
