@@ -85,12 +85,21 @@ export async function verifyFreshPhoneToken({ secret, token, guid, accountPhone,
     // 옛 형식(0 미유지) 둘 다 시도한다 — 어느 하나라도 맞으면 같은 번호로 인정한다.
     const accHash = String(accountE164Hash).toLowerCase();
     const cands = await Promise.all(e164Candidates(e164).map(c => hmacHex(secret, 'e164-lookup:' + c)));
-    if (!cands.some(h => timingSafeEqualHex(accHash, h))) return bad(403, 'PHONE_MISMATCH', '인증한 전화번호가 이 계정에 등록된 번호와 다릅니다.');
+    if (!cands.some(h => timingSafeEqualHex(accHash, h))) {
+      // 진단용(2026-09-25, 세 차례 수정에도 재현되어 신설): 계정엔 e164_hash가 있는데 표준형·옛형식 두 후보 모두 불일치.
+      // accHash/cands 앞 8자만 로그에 남긴다(해시의 일부만이라 원문 역산 불가 — 전체 원문/전체 해시는 절대 남기지 않는다).
+      console.warn(`[PhoneToken] HASH_NO_MATCH guid=${guid} acc=${accHash.slice(0, 8)}… cands=${cands.map(h => h.slice(0, 8) + '…').join(',')}`);
+      return bad(403, 'PHONE_MISMATCH_HASH', '인증한 전화번호가 이 계정에 등록된 번호와 다릅니다. (진단: HASH_NO_MATCH — 계정에 저장된 번호 해시와 방금 계산한 해시가 일치하지 않습니다)');
+    }
   } else {
     // 해시가 없는 옛 레코드: 평문 e164/phone 이 있으면 표준형으로 비교, 둘 다 없으면 "다르다"가 아니라 "찾지 못했다"
     const acct = canonPhone(accountPhone), tok = canonPhone(e164);
     if (!acct) return bad(403, 'ACCOUNT_PHONE_MISSING', '이 계정에 등록된 전화번호 정보를 찾지 못했습니다. 관리자에게 문의해 주세요.');
-    if (acct !== tok) return bad(403, 'PHONE_MISMATCH', '인증한 전화번호가 이 계정에 등록된 번호와 다릅니다.');
+    if (acct !== tok) {
+      // 진단용: 계정에 e164_hash가 아예 없어 평문 칸(옛 레코드용 보조)으로 비교했는데도 불일치.
+      console.warn(`[PhoneToken] LEGACY_PLAIN_NO_MATCH guid=${guid} acctLen=${acct.length} tokLen=${tok.length} acctTail=${acct.slice(-4)} tokTail=${tok.slice(-4)}`);
+      return bad(403, 'PHONE_MISMATCH_PLAIN', '인증한 전화번호가 이 계정에 등록된 번호와 다릅니다. (진단: LEGACY_PLAIN_NO_MATCH — 계정에 e164_hash가 없어 평문 칸으로 비교했으며, 그 값도 다릅니다)');
+    }
   }
   return { ok: true };
 }
