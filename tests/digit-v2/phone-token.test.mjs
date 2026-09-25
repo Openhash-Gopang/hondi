@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { verifyFreshPhoneToken, verifyPhoneAndStepUp, canonPhone } from '../../src/worker/phone-token.js';
+import { verifyFreshPhoneToken, verifyPhoneAndStepUp, canonPhone, e164Candidates } from '../../src/worker/phone-token.js';
 
 const SECRET = 'test-secret', TTL = 30 * 24 * 3600 * 1000, GUID = '2001:db8::7', NOW = 1_800_000_000_000;
 const enc = new TextEncoder();
@@ -127,4 +127,27 @@ test('비밀값이 다르면(해시 계산이 달라짐) 거절 — 계정 해�
 test('해시도 평문도 없으면 ACCOUNT_PHONE_MISSING(“다르다”가 아니라 “찾지 못했다”)', async () => {
   const r = await verifyPhoneAndStepUp(suArgs({ token: await token(), profile: { e164: '', phone: '', e164_hash: '', extra: {} }, verifyStepUp: async () => ({ ok: true }) }));
   assert.equal(r.code, 'ACCOUNT_PHONE_MISSING');
+});
+
+// ── 회귀: 2026-09-07 이전 가입 계정의 옛 e164 표기(0 미유지)로 백필된 해시 ──
+test('e164Candidates: 표준형(0 유지)과 옛 형식(0 미유지) 두 후보를 낸다', () => {
+  assert.deepEqual(e164Candidates('+8201096627170'), ['+8201096627170', '+821096627170']);
+  assert.deepEqual(e164Candidates('01096627170'), ['+8201096627170', '+821096627170']);
+  assert.deepEqual(e164Candidates(''), []);
+});
+test('계정 e164_hash가 옛 형식(0 미유지)으로 백필돼 있어도 통과 — 이번에 재현된 오거절', async () => {
+  const legacyHash = await hashOf('+821096627170');           // 그 시절 저장돼 있던 평문을 그대로 해시했다고 가정
+  const profile = { e164: '', e164_hash: legacyHash, extra: {} };
+  const r = await verifyPhoneAndStepUp(suArgs({ token: await token(), profile, verifyStepUp: async () => ({ ok: true }) }));
+  assert.ok(r.ok, JSON.stringify(r));
+});
+test('표준형(0 유지)으로 백필된 계정도 여전히 통과', async () => {
+  const profile = { e164: '', e164_hash: await hashOf(E164), extra: {} };
+  assert.ok((await verifyPhoneAndStepUp(suArgs({ token: await token(), profile, verifyStepUp: async () => ({ ok: true }) }))).ok);
+});
+test('두 후보 어느 쪽으로도 안 맞는 진짜 다른 번호는 여전히 거절', async () => {
+  const otherHash = await hashOf('+821011112222');
+  const profile = { e164: '', e164_hash: otherHash, extra: {} };
+  const r = await verifyPhoneAndStepUp(suArgs({ token: await token(), profile, verifyStepUp: async () => ({ ok: true }) }));
+  assert.equal(r.code, 'PHONE_MISMATCH');
 });
