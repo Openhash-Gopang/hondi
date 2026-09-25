@@ -213,7 +213,7 @@
     "보상과",
     "항일기념관"
    ],
-   "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제31~32조·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(보훈과·보상과·항일기념관 3개)을 확인해 SP-AGY-VETERANS와 하위 division 3개를 함께 신설했다. §2는 별표8(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다. **명칭 중복 유의 — 2026-09-26(작업 #21) 재검증 결과, 대부분 해소**: 위키백과 확인 결과 제주 보훈청은 2006년 특별법에 따라 실제로 도 소속으로 이관됐다(SP-AGY-VETERANS_v1.0.md §6 참고). gov-router.js의 ROUTE_DESCRIPTIONS['SP-NAT-VETERANS'] 오기(\"제주보훈청(국가보훈부)\")와 바레 '보훈급여' 키워드를 정정했다. 다만 이관 범위 전체를 원문 조항으로 직접 확인하진 못했고, 제주특별법 개정으로 환원될 수 있다는 서술도 있어 정기 재검증 대상으로 남긴다."
+   "note": "2026-09-23 신설 — 이전까지 SP 자체가 없어 missing_in_inventory에 있었다(org-baseline-agency.json 감사에서 발견). 시행규칙 제31~32조·org-baseline-agency.json(2026-08-25 시행 제938호 확인)으로 기관명·산하 division 구성(보훈과·보상과·항일기념관 3개)을 확인해 SP-AGY-VETERANS와 하위 division 3개를 함께 신설했다. §2는 별표8(2024.01.22. 개정본)의 실제 사무로 채웠다. 기관 레벨 대표전화·소재지는 jeju.go.kr 접속 시도가 실패(robots.txt/타임아웃)해 확인하지 못했다. **명칭 중복 유의 — 2026-09-26(작업 #21) 재검증 결과, 대부분 해소**: 위키백과 확인 결과 제주 보훈청은 2006년 특별법에 따라 실제로 도 소속으로 이관됐다(SP-AGY-VETERANS_v1.0.md §6 참고). gov-router.js의 ROUTE_DESCRIPTIONS['SP-NAT-VETERANS'] 오기(\"제주보훈청(국가보훈부)\")와 바레 '보훈급여' 키워드를 정정했다. 다만 이관 범위 전체를 원문 조항으로 직접 확인하진 못했고, 제주특별법 개정으로 환원될 수 있다는 서술도 있어 정기 재검증 대상으로 남긴다. 2026-09-26 라이브 스모크테스트(실제 DeepSeek API)로 라우팅 자체는 실측 확인 완료(archive/README.md 작업 #21 참고)."
   },
   "SP-AGY-CENTRALCOOP": {
    "status": "match",
