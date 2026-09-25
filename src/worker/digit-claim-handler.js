@@ -121,6 +121,9 @@ export function makeDigitClaimHandler({ l1, getPinnedPubKey, authorityPubKey = n
       return err(404, 'NOT_FOUND', '알 수 없는 경로입니다.', cors);
     } catch (e) {
       const code = e?.code || 'INTERNAL';
+      // 2026-09-26 신설 — 이 catch가 조용히 502로 뭉개기만 해서, 실제 원인(스택 포함)이 어디에도 안 남아
+      // Cloudflare Logs를 봐도 요청 메타데이터만 보이고 진짜 오류를 찾을 방법이 없었다(주피터 실사로 발견).
+      console.error(`[DigitClaimHandler] ${request.method} ${url.pathname} 처리 중 오류(code=${code}):`, e && e.stack ? e.stack : e);   // path는 try{} 블록 스코프라 catch에서 못 봄 — url.pathname을 직접 씀
       return err(code === 'CHAIN_CORRUPT' ? 500 : 502, code, e?.message || '처리 중 오류', cors);
     }
   }
