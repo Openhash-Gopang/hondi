@@ -378,7 +378,7 @@ body.gopang-authed #gopang-auth-gate{display:none}
 #ai-panel-close svg{pointer-events:none;stroke:currentColor}
 
 /* 숫자 코드 버튼 — 우측, 설정 버튼 바로 왼쪽 (2026-09-24, 주피터 지시).
-   혼디 숫자 코드 만들기·스캔 테스트 페이지(/test-hondi-digit-v2.html)로 연결한다.
+   혼디 숫자 코드 만들기·인식 페이지(/pages/digit-code.html, 정식 반영 2026-09-26)로 연결한다.
    설정 버튼(#ai-panel-close)과 같은 크기·모양의 원형 버튼. */
 #ai-panel-digit{
   display:flex;
@@ -1330,7 +1330,7 @@ body:not(.gopang-authed) .install-banner.show{display:none!important}
       </div>
       <!-- 숫자 코드 버튼 (우, 설정 버튼 왼쪽) — 2026-09-24(주피터 지시): 스캔 프레임 모서리 + 7세그먼트 "8"
            아이콘. 누르면 숫자 코드 만들기·카메라 인식 테스트 페이지가 새 탭으로 열린다(앱 상태 유지). -->
-      <a id="ai-panel-digit" href="https://hondi.net/test-hondi-digit-v2.html" target="_blank" rel="noopener"
+      <a id="ai-panel-digit" href="https://hondi.net/pages/digit-code.html" target="_blank" rel="noopener"
          title="숫자 코드" aria-label="숫자 코드">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">

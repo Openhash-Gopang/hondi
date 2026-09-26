@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>내 혼디 숫자 코드</title>
+<link rel="stylesheet" href="/assets/fonts.css">
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --line:#e3e6ea; --text:#111827; --sub:#4b5563; --ok:#0a7d33; --okbg:#e3f5e9; --bad:#b42318; --warn:#8a5a00; --warnbg:#fff1d6; --acc:#1e4fd8; --accbg:#e8eefc; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif; font-size:16px; line-height:1.6; }
+  main { max-width:760px; margin:0 auto; padding:16px; }
+  h1 { font-size:22px; margin:8px 0 4px; } h2 { font-size:18px; margin:0 0 10px; }
+  p.sub { color:var(--sub); margin:0 0 14px; font-size:15px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px; }
+  .card.locked { opacity:.55; }
+  .lockmsg { display:none; color:var(--warn); background:var(--warnbg); border-radius:8px; padding:8px 10px; font-size:15px; margin:0 0 10px; }
+  .card.locked .lockmsg { display:block; }
+  label { display:block; font-size:15px; color:var(--sub); margin:8px 0 4px; }
+  input[type=text] { width:100%; font-size:18px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; font-family:inherit; }
+  input[readonly] { background:#f1f3f6; }
+  button { font-family:inherit; font-size:16px; padding:11px 16px; border-radius:10px; border:1px solid var(--acc); background:var(--acc); color:#fff; cursor:pointer; margin:8px 8px 0 0; }
+  button.ghost { background:#fff; color:var(--acc); }
+  button[disabled] { opacity:.4; cursor:default; }
+  .banner { background:var(--warnbg); color:var(--warn); border-radius:8px; padding:8px 10px; font-size:14px; margin:0 0 10px; }
+  .banner.server { background:var(--okbg); color:var(--ok); }
+  ol.steps { list-style:none; display:flex; gap:6px; padding:0; margin:0 0 8px; }
+  ol.steps li { flex:1; text-align:center; font-size:14px; padding:6px 4px; border-radius:8px; background:#f1f3f6; color:var(--sub); }
+  ol.steps li.now { background:var(--accbg); color:var(--acc); font-weight:700; }
+  ol.steps li.done { background:var(--okbg); color:var(--ok); font-weight:700; }
+  .msg { min-height:24px; margin:8px 0 0; font-size:15px; } .msg.ok { color:var(--ok); } .msg.bad { color:var(--bad); } .msg.warn { color:var(--warn); }
+  .wait input[type=text] { width:100%; font-size:20px; letter-spacing:.3em; text-align:center; }
+  .wait { display:none; margin-top:10px; padding:12px; background:var(--accbg); color:var(--acc); border-radius:10px; font-size:15px; }
+  .reg { display:none; margin-top:10px; padding:10px 12px; background:var(--okbg); color:var(--ok); border-radius:10px; font-size:16px; }
+  .reg b { font-size:22px; letter-spacing:.12em; }
+  #codeOut canvas { max-width:100%; height:auto; border:1px solid var(--line); border-radius:8px; background:#fff; }
+  /* 카메라 창: 숫자 코드의 가로로 긴 비율에 맞춘다 (스캐너 ROI와 같은 비율 → 보이는 곳 = 분석하는 곳) */
+  .cam { position:relative; width:100%; background:#000; border-radius:12px; overflow:hidden; aspect-ratio: var(--roi, 2.7) / 1; }
+  .cam video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
+  .cam canvas.ov { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+  .cam .guide { position:absolute; inset:6px; border:2px dashed rgba(255,255,255,.55); border-radius:8px; pointer-events:none; }
+  .cam .hint { position:absolute; left:0; right:0; bottom:8px; text-align:center; color:#fff; font-size:14px; text-shadow:0 1px 3px #000; pointer-events:none; }
+  #status { font-size:17px; font-weight:600; margin:10px 0 4px; min-height:28px; }
+  .big { font-size:34px; font-weight:800; letter-spacing:.06em; }
+  .scanResult { display:none; margin-top:10px; padding:12px; border-radius:10px; font-size:16px; }
+  .scanResult.ok { display:block; background:var(--okbg); color:var(--ok); }
+  ul.tips { margin:6px 0 0; padding-left:20px; color:var(--sub); font-size:15px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>내 혼디 숫자 코드</h1>
+  <p class="sub">번호를 등록(중복 확인 → 문자 인증)한 뒤, 그 번호로 코드를 만들어 간판이나 명함에 인쇄하세요. 카메라로 잘 읽히는지 바로 확인할 수 있습니다.</p>
+
+  <section class="card" id="s1">
+    <h2>① 코드 등록하기</h2>
+    <div id="modeBanner" class="banner">계정을 확인하는 중…</div>
+    <ol class="steps" id="steps"><li id="st1" class="now">1 중복 확인</li><li id="st2">2 문자 인증 · 발급</li></ol>
+    <label for="serial">원하는 번호 (1~10자리, 첫 자리 1~9)</label>
+    <input id="serial" type="text" inputmode="numeric" maxlength="10" value="" placeholder="예: 48210" autocomplete="off">
+    <button id="bCheck">중복 확인</button>
+    <button id="bIssue" disabled>이 번호로 발급받기</button>
+    <button id="bTest" class="ghost" style="display:none" disabled>시험 모드로 진행 (알림 없이)</button>
+    <div id="sms" class="wait">
+      <b>문자(SMS)로 인증번호를 보냈습니다.</b><br>
+      <span id="smsDesc"></span>
+      <input id="otp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="인증번호 6자리" style="margin-top:8px">
+      <div id="otpErr" class="msg bad"></div>
+      <div><button id="bOtp">확인</button><button id="bResendSms" class="ghost">문자 다시 받기</button><button id="bCancel" class="ghost">취소</button></div>
+      <span id="waitTimer"></span>
+    </div>
+    <div id="regMsg" class="msg" role="status"></div>
+    <div id="reg" class="reg">등록 완료 · 내 번호 <b id="regNo"></b> <button id="bAgain" class="ghost" style="margin:0 0 0 8px">다른 번호로 다시 등록</button></div>
+  </section>
+
+  <section class="card locked" id="s2">
+    <h2>② 숫자 코드 만들기</h2>
+    <p class="lockmsg">① 등록을 마치면 열립니다.</p>
+    <p class="sub" style="margin:0 0 6px">등록한 번호로 코드 이미지를 만듭니다. 인쇄해서 간판·명함·현관에 붙이세요.</p>
+    <button id="mk" disabled>코드 만들기</button>
+    <button id="dl" class="ghost" disabled>PNG 저장</button>
+    <div id="codeOut" style="margin-top:12px"></div>
+  </section>
+
+  <section class="card" id="s3">
+    <h2>③ 카메라로 확인하기</h2>
+    <p class="sub" style="margin:0 0 10px">만든 코드를 다른 화면이나 인쇄물에 띄워 놓고, 잘 읽히는지 확인해 보세요.</p>
+    <div class="cam" id="cam"><video id="v" playsinline muted></video><canvas class="ov" id="ov"></canvas><div class="guide"></div><div class="hint">코드(로고+숫자)를 이 창 안에 가로로 맞추세요</div></div>
+    <canvas id="work" style="display:none"></canvas>
+    <div id="status">대기 중</div>
+    <button id="go">스캔 시작</button><button id="stop" class="ghost">중지</button>
+    <div id="scanResult" class="scanResult"></div>
+    <ul class="tips">
+      <li>파란 상자는 로고(기준점), 노란 상자는 숫자 칸, 초록 상자는 정상 인식을 뜻합니다.</li>
+      <li>코드 전체(로고 포함)가 창 안에 가로로 들어오게, 화면을 밝게 하고 비춰 주세요.</li>
+    </ul>
+  </section>
+</main>
+
+<script src="/gopang-wallet.js"></script>
+<script type="module">
+import { generateDigitCodeCanvas } from '/src/gopang/ai/hondi-digit-render.js';
+import { startScanner, stopScanner, ROI_ASPECT } from '/src/gopang/ai/hondi-digit-scanner-v2.js';
+import { isValidSerial } from '/src/gopang/ai/hondi-digit-core.js';
+import { classifySerial, canonical, recordHash, verifySig, CLAIM_VERSION, CLAIM_NS, GENESIS_PREV } from '/src/gopang/ai/hondi-digit-claim.js';
+
+const $ = id => document.getElementById(id);
+document.documentElement.style.setProperty('--roi', String(ROI_ASPECT));
+
+// ── ① 등록: 중복 확인 → [이 번호로 발급받기] 한 번 → 문자(SMS) 인증번호 → 입력 → (지문 계정은 지문 확인) → 서명 → 등록 ──────────
+// 본인 인증은 기존 혼디 가입자 인증과 똑같은 방식을 그대로 쓴다(src/gopang/core/auth.js 의 _requestAndVerifyPhoneOtp):
+//   · POST /biz/phone-otp-request {e164}  → "[혼디] 인증번호는 ○○○○○○입니다. 5분 이내에 입력해 주세요." (안드로이드는 @hondi.net #코드 로 자동 입력)
+//   · POST /biz/phone-otp-verify {e164, code, guid} → phone_verify_token (계정 guid에 묶임)
+//   · 이 번호로 지문(WebAuthn) 계정이 있으면 응답에 지문 챌린지가 오고, 문자 코드가 맞아도 지문 확인(step-up)을 통과해야 한다.
+// 이 화면은 로그인한 사용자용이라 폰 번호(e164)와 계정(guid)을 앱이 이미 안다 → 다시 묻지 않는다.
+// 문자 인증은 "누구인가"(전화번호 소유), 지갑 서명은 "어느 키인가"(청구 레코드 소유자)를 각각 증명한다 — 서버가 둘 다 확인한다.
+const WORKER = 'https://hondi-proxy.tensor-city.workers.dev';
+const LS = 'hondi_digit_test_claims_v1';
+const localClaims = () => { try { return JSON.parse(localStorage.getItem(LS) || '{}'); } catch { return {}; } };
+const saveLocal = m => { try { localStorage.setItem(LS, JSON.stringify(m)); } catch {} };
+const me = (() => {
+  try {
+    const u = JSON.parse(localStorage.getItem('gopang_user_v4') || 'null');
+    return u && !u.isGuest && !u.isTemp && u.ipv6 && u.e164 ? { guid: u.ipv6, e164: u.e164, handle: u.handle || u.nickname || u.name || '' } : null;
+  } catch { return null; }
+})();
+let state = { serial: null, checked: false, registered: false, mode: null };
+let lastCanvas = null, sms = null;
+
+// 혼디의 E.164 저장형은 +82 뒤에 0이 남는다(+8201096627170). 어느 표기로 와도 010-****-7170 으로 보이게 한다.
+const maskPhone = e164 => { let d = String(e164).replace(/\D/g, ''); if (d.startsWith('82')) d = d.slice(2); if (d && !d.startsWith('0')) d = '0' + d; return d.length >= 8 ? d.slice(0, 3) + '-****-' + d.slice(-4) : '등록된 번호'; };
+const b64uToBuf = s => { const b = s.replace(/-/g, '+').replace(/_/g, '/'); const bin = atob(b + '==='.slice((b.length + 3) % 4)); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u.buffer; };
+const bufToB64u = buf => { let s = ''; for (const c of new Uint8Array(buf)) s += String.fromCharCode(c); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+const errText = (j, status) => (j && (j.detail || j.message || j.error)) || ('요청에 실패했습니다 (HTTP ' + status + ')');
+
+async function serverStatus(serial) {
+  try {
+    const r = await fetch(WORKER + '/digit/status?serial=' + encodeURIComponent(serial), { signal: AbortSignal.timeout(6000) });
+    if (!r.ok) return null;
+    const j = await r.json();
+    return j && j.ok ? j : null;
+  } catch { return null; }
+}
+
+function msg(t, cls) { const m = $('regMsg'); m.textContent = t; m.className = 'msg ' + (cls || ''); }
+function setSteps() {
+  $('st1').className = state.checked ? 'done' : 'now';
+  $('st2').className = state.registered ? 'done' : (state.checked ? 'now' : '');
+  const busy = !!sms;
+  $('bCheck').disabled = busy || state.registered;
+  $('bIssue').disabled = !(state.checked && !state.registered && !busy && me);
+  $('bTest').disabled = !(state.checked && !state.registered && !busy);
+  $('serial').readOnly = busy || state.registered;
+}
+function lock(on) {
+  $('s2').classList.toggle('locked', on); $('mk').disabled = on; $('dl').disabled = on;
+  if (on) { $('codeOut').replaceChildren(); lastCanvas = null; }
+}
+function resetReg() {
+  stopSms();
+  state = { serial: null, checked: false, registered: false, mode: null };
+  $('reg').style.display = 'none'; $('serial').value = ''; msg('');
+  lock(true); setSteps();
+}
+
+(() => {
+  const b = $('modeBanner');
+  if (me) { b.className = 'banner server'; b.textContent = '로그인 계정 확인됨' + (me.handle ? ' (' + me.handle + ')' : '') + ' — 본인 인증 문자(SMS)가 ' + maskPhone(me.e164) + ' 로 전송됩니다.'; }
+  else { b.className = 'banner'; b.textContent = '로그인한 계정을 찾지 못했습니다. 혼디 앱에서 로그인한 뒤 앱의 숫자 코드 아이콘으로 열어 주세요. (문자 인증 없이 카메라만 시험하려면 아래 「시험 모드」를 쓰세요.)'; $('bTest').style.display = ''; }
+})();
+
+$('bCheck').onclick = async () => {
+  const s = $('serial').value.trim();
+  state.checked = false; setSteps();
+  if (!isValidSerial(s)) return msg('1~10자리 숫자, 첫 자리는 1~9여야 합니다.', 'bad');
+  msg('중복 확인 중…');
+  const tier = classifySerial(s);
+  if (tier.tier === 'public-safety') return msg('공공 안내·긴급 번호는 등록할 수 없습니다.', 'bad');
+  const sv = await serverStatus(s);
+  if (sv) {
+    if (sv.status === 'claimed') return msg('이미 사용 중인 번호입니다. 다른 번호를 골라 주세요.', 'bad');
+    if (sv.status === 'revoked') return msg('폐기된 번호는 다시 쓸 수 없습니다.', 'bad');
+    if (sv.status === 'blocked') return msg('등록할 수 없는 번호입니다.', 'bad');
+    if (sv.status === 'reserved') return msg('예약 번호(' + (tier.tier === 'reserved-short' ? '5자리 미만' : '기억하기 쉬운 번호') + ')는 경매로만 배정됩니다. 다른 번호를 골라 주세요.', 'bad');
+  } else if (localClaims()[s]) {
+    return msg('이 기기에서 이미 등록한 번호입니다(서버 미연결). 다른 번호를 골라 주세요.', 'bad');
+  }
+  state.serial = s; state.checked = true; setSteps();
+  const note = tier.tier === 'open' ? '' : ` ※ 정식 서비스에서는 ${tier.tier === 'reserved-short' ? '5자리 미만' : '기억하기 쉬운'} 예약 번호(경매 대상)입니다. 시험에서는 허용합니다.`;
+  msg((sv ? '사용할 수 있는 번호입니다(서버 확인).' : '사용할 수 있는 번호입니다(서버 미연결 — 이 기기 기준).') + ' 다음: 이 번호로 발급받기' + note, 'ok');
+};
+
+// ── 발급받기 = 문자(SMS) 인증 ──
+async function requestOtp() {
+  const r = await fetch(WORKER + '/biz/phone-otp-request', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ e164: me.e164 }), signal: AbortSignal.timeout(15000) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok || !j.ok) throw new Error(errText(j, r.status));
+  return j;
+}
+function stopSms() {
+  if (!sms) return;
+  clearInterval(sms.tick); if (sms.ac) sms.ac.abort();
+  sms = null; $('sms').style.display = 'none';
+}
+function showSms(j) {
+  sms = { challenge: j.existingAccountBiometricChallenge || null, remain: j.expires_in || 300, attempts: 0, busy: false, ac: null, tick: null };
+  $('sms').style.display = 'block'; $('otp').value = ''; $('otpErr').textContent = '';
+  $('smsDesc').textContent = maskPhone(me.e164) + ' 로 전송된 인증번호 6자리를 입력해 주세요. (안드로이드에서는 문자가 도착하면 자동으로 입력됩니다)';
+  $('bOtp').disabled = false; $('bOtp').textContent = '확인';
+  setSteps(); $('otp').focus();
+  const tick = () => { if (!sms) return; $('waitTimer').textContent = sms.remain > 0 ? `(${Math.floor(sms.remain / 60)}분 ${sms.remain % 60}초 후 만료)` : '(만료됨 — 문자를 다시 받아 주세요)'; sms.remain -= 1; };
+  sms.tick = setInterval(tick, 1000); tick();
+  // 문자가 도착하면 브라우저가 코드를 자동으로 넘겨준다(WebOTP). 미지원·거부는 조용히 무시 — 수동 입력은 그대로 된다.
+  if ('OTPCredential' in window && navigator.credentials && navigator.credentials.get) {
+    sms.ac = new AbortController();
+    navigator.credentials.get({ otp: { transport: ['sms'] }, signal: sms.ac.signal })
+      .then(c => { if (sms && c && c.code) { $('otp').value = c.code; confirmOtp(); } }).catch(() => {});
+  }
+}
+$('bIssue').onclick = async () => {
+  if (!me || !state.checked) return;
+  $('bIssue').disabled = true; msg('문자(SMS) 인증번호를 보내는 중…', 'warn');
+  try { const j = await requestOtp(); msg('', ''); showSms(j); } catch (e) { setSteps(); msg(e.message || '인증번호를 보내지 못했습니다.', 'bad'); }
+};
+$('bResendSms').onclick = async () => {
+  if (!sms) return;
+  try { const j = await requestOtp(); const keep = sms.attempts; stopSms(); showSms(j); sms.attempts = keep; msg('인증번호를 다시 보냈습니다.', 'ok'); }
+  catch (e) { $('otpErr').textContent = e.message || '다시 보내지 못했습니다.'; }
+};
+$('bCancel').onclick = () => { stopSms(); setSteps(); msg('취소했습니다.', ''); };
+$('otp').addEventListener('input', () => { if (/^\d{6}$/.test($('otp').value.trim())) confirmOtp(); });
+$('bOtp').onclick = () => confirmOtp();
+
+async function getWallet() {
+  const t0 = Date.now();
+  while (window.gopangWallet === undefined && Date.now() - t0 < 2500) await new Promise(r => setTimeout(r, 150));
+  let w = window.gopangWallet || null;
+  if (!w && window.GopangWallet) {
+    w = await window.GopangWallet.load();      // 사용자 동작 안에서 부르므로 지문/Face ID 창이 정상적으로 뜬다
+    if (w) { try { w.setIdentity({ guid: me.guid, handle: me.handle || null, e164: me.e164 }); } catch {} window.gopangWallet = w; }
+  }
+  if (!w || typeof w.signPayload !== 'function') throw new Error('이 기기에서 지갑을 열 수 없습니다. 혼디 앱에 로그인한 뒤 다시 시도해 주세요.');
+  return w;
+}
+async function ownerPubKey(guid) {
+  const r = await fetch(`${WORKER}/wallet/x25519?guid=${encodeURIComponent(guid)}`, { signal: AbortSignal.timeout(8000) });
+  const j = await r.json().catch(() => ({}));
+  if (!j.ed25519_pubkey) throw new Error('계정의 지갑 키를 찾지 못했습니다. 혼디 앱에서 다시 로그인해 주세요.');
+  return j.ed25519_pubkey;
+}
+async function biometricStepUp(ch) {
+  let assertion;
+  try {
+    assertion = await navigator.credentials.get({ publicKey: {
+      challenge: b64uToBuf(ch.challengeB64u), rpId: ch.rpId || 'hondi.net',
+      allowCredentials: (ch.credentialIds || []).map(id => ({ id: b64uToBuf(id), type: 'public-key' })), userVerification: 'required' } });
+  } catch (e) { throw new Error('이 번호로 등록된 계정은 지문 인증이 필요합니다 — 이 기기에서 지문 확인을 통과하지 못했습니다(' + (e.message || e) + '). 그 계정을 등록했던 기기에서 다시 시도해 주세요.'); }
+  const r = await fetch(WORKER + '/account/step-up-verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+    guid: ch.guid, sessionId: ch.sessionId, credentialId: bufToB64u(assertion.rawId),
+    authenticatorDataB64u: bufToB64u(assertion.response.authenticatorData), clientDataJSONB64u: bufToB64u(assertion.response.clientDataJSON), signatureB64u: bufToB64u(assertion.response.signature) }) });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok || !d.ok) throw new Error(d.detail || '지문 확인에 실패했습니다.');
+  return d.step_up_token;
+}
+function otpFail(text) { const e = $('otpErr'); e.textContent = text; if (sms) { sms.busy = false; } $('bOtp').disabled = false; $('bOtp').textContent = '확인'; }
+
+async function confirmOtp() {
+  if (!sms || sms.busy) return;
+  const code = $('otp').value.trim();
+  if (!/^\d{6}$/.test(code)) { $('otpErr').textContent = '6자리 숫자를 입력해 주세요.'; return; }
+  sms.busy = true; $('bOtp').disabled = true; $('bOtp').textContent = '확인 중…'; $('otpErr').textContent = '';
+  try {
+    const wallet = await getWallet();                               // ① 지갑 먼저(사용자 동작 안)
+    const r = await fetch(WORKER + '/biz/phone-otp-verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ e164: me.e164, code, guid: me.guid }), signal: AbortSignal.timeout(15000) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.ok) {                                            // ② 인증번호 확인
+      sms.attempts += 1;
+      if (sms.attempts >= 5) { stopSms(); setSteps(); return msg('인증 시도 횟수를 초과했습니다. 처음부터 다시 시도해 주세요.', 'bad'); }
+      return otpFail(errText(j, r.status));
+    }
+    const phoneToken = j.phone_verify_token;
+    const stepUp = sms.challenge ? await biometricStepUp(sms.challenge) : null;   // ③ 지문 계정이면 지문 확인
+    const owner = await ownerPubKey(me.guid);                        // ④ 청구 레코드 서명
+    const rec = { v: CLAIM_VERSION, ns: CLAIM_NS, type: 'claim', serial: state.serial, seq: 0, prev: GENESIS_PREV, owner, to: null, ts: Date.now() };
+    let sig = await wallet.signPayload(canonical(rec));
+    if (sig && typeof sig === 'object' && sig.signature) sig = sig.signature;
+    rec.sig = sig; rec.hash = await recordHash(rec);
+    if (!(await verifySig(rec.owner, canonical(rec), rec.sig))) throw new Error('서명이 요청 내용과 맞지 않습니다. 이 기기의 지갑이 계정의 키와 다를 수 있습니다.');
+    stopSms();
+    await submitClaim(rec, phoneToken, stepUp);
+  } catch (e) { if (sms) otpFail(e.message || '등록에 실패했습니다.'); else { setSteps(); msg(e.message || '등록에 실패했습니다.', 'bad'); } }
+}
+async function submitClaim(rec, phoneToken, stepUp) {
+  // 서버가 "이 등록은 안 된다"고 확정한 경우(중복·서명/문자 인증 불일치·예약 번호 등)만 막고,
+  // 서버 미연결·서버 내부 오류는 본인 확인 자체는 유효하므로 이 기기 기록으로 넘어가되 사유를 알린다.
+  const DEFINITE = /^(KEY_MISMATCH|BAD_SIG|BAD_HASH|RESERVED|PUBLIC_SAFETY|NO_ACCOUNT|NOT_OWNER|SEQ|PREV|TS_SKEW|SERIAL|VERSION|TYPE|MALFORMED|BIOMETRIC_REQUIRED|PHONE_.*)$/;
+  let mode = 'local', serverNote = '';
+  try {
+    const r = await fetch(WORKER + '/digit/record', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ record: rec, guid: me.guid, phone_verify_token: phoneToken, ...(stepUp ? { step_up_token: stepUp } : {}) }), signal: AbortSignal.timeout(10000) });
+    const j = await r.json().catch(() => null);
+    if (j && j.ok) mode = 'server';
+    else if (j && (j.code === 'ALREADY_CLAIMED' || j.code === 'RACE_LOST')) { state.checked = false; setSteps(); return msg('방금 다른 사용자가 먼저 등록한 번호입니다. 다른 번호를 골라 주세요.', 'bad'); }
+    else if (j && j.code && DEFINITE.test(j.code)) { setSteps(); return msg(j.message || '서버가 등록을 거절했습니다.', 'bad'); }
+    // 그 외(서버 내부 오류 등)는 등록은 이 기기 기록으로 진행하되, 화면에 실제 사유를 남긴다(2026-09-26 —
+    // 예전엔 "서버가 응답하지 않았다"로 뭉뚱그려서, 문자 인증은 정상인데 다른 단계에서 나는 오류의 원인을
+    // 알 방법이 없었다). j가 아예 없으면(빈 응답) 상태 코드만이라도 보여준다.
+    else if (j) serverNote = ` [서버 응답: HTTP ${r.status} ${j.code || ''} ${j.message || ''}]`.trim();
+    else serverNote = ` [서버 응답: HTTP ${r.status}, 본문 없음]`;
+  } catch (e) { serverNote = ` [요청 실패: ${e.name === 'TimeoutError' ? '응답 시간 초과' : (e.message || e.name)}]`; }
+  completeRegistration(mode, serverNote);
+}
+function completeRegistration(mode, serverNote) {
+  if (mode === 'local') { const m = localClaims(); m[state.serial] = Date.now(); saveLocal(m); }
+  state.registered = true; state.mode = mode; setSteps();
+  $('reg').style.display = 'block'; $('regNo').textContent = state.serial;
+  msg((mode === 'server' ? '등록 완료 — 문자 인증과 서버 등록을 마쳤습니다.'
+    : mode === 'test' ? '시험 모드로 등록했습니다(문자 인증 없음, 이 기기에서만 유효).'
+    : '본인 확인은 완료했습니다. 서버(/digit/*)가 아직 연결되지 않았거나 응답하지 않아 등록 기록은 이 기기에만 남았습니다.') + (serverNote || ''), mode === 'server' ? 'ok' : 'warn');
+  lock(false); make();
+}
+
+// ── ② 코드 만들기 ─────────────────────────────────────────────
+async function make() {
+  if (!state.registered) return;
+  lastCanvas = await generateDigitCodeCanvas(state.serial, 2);
+  $('codeOut').replaceChildren(lastCanvas);
+}
+$('mk').onclick = make;
+$('dl').onclick = async () => {
+  if (!lastCanvas) await make(); if (!lastCanvas) return;
+  const a = document.createElement('a'); a.download = `hondi-code-${state.serial}.png`; a.href = lastCanvas.toDataURL('image/png'); a.click();
+};
+
+// ── ③ 카메라로 확인 ─────────────────────────────────────────────
+$('go').onclick = async () => {
+  $('scanResult').className = 'scanResult';
+  try {
+    await startScanner($('v'), $('work'), $('ov'),
+      (serial) => {
+        const mine = serial === state.serial;
+        $('status').textContent = '인식 완료';
+        $('scanResult').className = 'scanResult ok';
+        $('scanResult').textContent = mine ? `\u2713 정상적으로 읽혔습니다 — ${serial}` : `인식된 번호: ${serial} (등록한 번호와 다릅니다)`;
+      },
+      m => { $('status').textContent = m; });
+  } catch (e) { /* 상태 문구는 스캐너가 이미 표시 */ }
+};
+$('stop').onclick = () => { stopScanner(); $('status').textContent = '중지됨'; };
+
+lock(true); setSteps();
+</script>
+</body>
+</html>
