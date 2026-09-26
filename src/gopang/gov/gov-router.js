@@ -971,6 +971,25 @@ function _localGovCollisionCandidate(text, pdvLocationHint) {
       _agencyMatch: agencyBest,
     };
   }
+  // ★ 2026-09-26 추가(작업 #22) — 위와 정확히 같은 클래스의 구멍이
+  // 합의제행정기관(03b-collegial-agency) 계층에도 있었다. "제주특별자치도
+  // 행정기구 설치 및 정원 조례" 제3조("도지사 소속하에 그 직무에 관하여
+  // 독립된 지위를 가지는 제주특별자치도지방노동위원회를 둔다")를 확인한
+  // 결과, 지방노동위원회도 보훈청과 같은 클래스로 제주특별법 특례에 따라
+  // 도지사 소속 합의제행정기관으로 실제 설치돼 있다 — 그런데 이 함수가
+  // agency 테이블만 검사해서, SP-NAT-LABORREL의 바레 '노동위원회' 키워드가
+  // SP-COMM-LABOR(합의제, 이 특례를 반영한 SP)와 충돌 검사도 없이 0단계
+  // 국가기관 매칭에서 즉시 확정돼버리는 구조였다. agency와 동일한 방식으로
+  // collegial 테이블도 후보에 포함시킨다.
+  const { best: collegialBest, topScore: collegialScore } = _scoreMatchTies(text, _collegialTable());
+  if (collegialBest && collegialScore > 0) {
+    return {
+      code: collegialBest.code,
+      name: collegialBest.name || collegialBest.code,
+      desc: ROUTE_DESCRIPTIONS[collegialBest.code] || collegialBest.desc || `${collegialBest.code}(합의제행정기관) 소관 사무`,
+      _collegialMatch: collegialBest,
+    };
+  }
   const { best: l2Best, topScore: l2Score } = _scoreMatchTies(text, _l2Table());
   if (!l2Best || l2Score === 0) return null;
   return {
@@ -2631,7 +2650,21 @@ const ROUTE_DESCRIPTIONS = {
   // 정정한다 — 다만 이관 범위 전체를 원문(제주특별법 해당 조항)으로 확정하지
   // 못했으므로 "정책·서훈 등"은 잠정 기술이며, 필요 시 재검증한다.
   'SP-NAT-VETERANS': '국가보훈부 직접 소관 보훈 정책·서훈 등 국가 사무 (제주는 2006년 이관으로 등록·보상금 지급 등 집행사무는 도 소속 SP-AGY-VETERANS 소관 — "제주보훈청"이라는 명칭 자체는 도 기관이지 국가보훈부 소속이 아님)',
-  'SP-NAT-LABORREL': '제주지방노동위원회(고용노동부)',
+  // ★ 2026-09-26 수정(작업 #22, B4 지방노동위원회 소속 재조사로 확인) —
+  // 이전 설명("제주지방노동위원회(고용노동부)")은 노동위원회법 제2조("중앙
+  // 노동위원회와 지방노동위원회는 고용노동부장관 소속으로 둔다", 전국 공통
+  // 원칙)만 근거로 삼은 것이었다. 그런데 "제주특별자치도 행정기구 설치 및
+  // 정원 조례" 제3조(ulex.co.kr 경유로 확인, 원문 인용)는 "도지사 소속하에
+  // 그 직무에 관하여 독립된 지위를 가지는 제주특별자치도감사위원회 및
+  // 제주특별자치도지방노동위원회를 둔다"고 명시하고, 이 조례 제1조(목적)는
+  // 「제주특별자치도 설치 및 국제자유도시 조성을 위한 특별법」 여러 조항을
+  // 근거 법령으로 든다 — 즉 보훈청과 같은 클래스로, 제주특별법 특례에 따라
+  // 지방노동위원회도 실제로 도지사 소속 합의제행정기관으로 설치돼 있을
+  // 가능성이 크다(감사위원회가 도 소속이라는 데는 이견이 없다는 점도
+  // 방증). 다만 law.go.kr 원문(제주특별법 해당 조항 자체)은 여전히
+  // robots.txt로 직접 대조하지 못했고, "위원회 자체"와 "이를 지원하는
+  // 사무국"이 조례상 구분되는지도 확정 못했다 — 완전히 해소된 건 아니다.
+  'SP-NAT-LABORREL': '고용노동부 소관 노동위원회법상 원칙(전국 공통, 지방노동위원회는 고용노동부장관 소속) — 다만 제주는 "제주특별자치도 행정기구 설치 및 정원 조례" 제3조에 따라 도지사 소속 합의제행정기관으로 별도 설치돼 있어(SP-COMM-LABOR), 실제로는 도 소관일 가능성이 있음(원문 전체 대조는 미완)',
   'SP-NAT-PROBATION': '제주준법지원센터(법무부(범죄예방정책국))',
   'SP-NAT-ANIMALQUARANTINE': '농림축산검역본부 제주지역본부(농림축산식품부)',
   'SP-NAT-HUMANQUARANTINE': '국립제주검역소(질병관리청)',
