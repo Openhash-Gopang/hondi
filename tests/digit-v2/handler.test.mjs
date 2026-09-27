@@ -20,6 +20,10 @@ function fakeStore() {
       if (rows.some(r => (r.serial === rec.serial && r.seq === rec.seq) || r.hash === rec.hash)) throw new Error('CONFLICT');
       rows.push({ ...rec });
     },
+    async findSerialsByOwner(pubkey) {
+      await new Promise(r => setTimeout(r, 1));
+      return [...new Set(rows.filter(r => r.owner === pubkey || r.to === pubkey).map(r => r.serial))];
+    },
   };
 }
 async function setup() {
@@ -109,4 +113,38 @@ test('저장소가 변조되면(체인 손상) 500 CHAIN_CORRUPT — 조용히 �
   l1.rows[0].owner = users.eve.publicKeyB64u;                       // DB 직접 조작
   const r = await get('/digit/status?serial=31000');
   assert.equal(r.status, 500); assert.equal(r.body.code, 'CHAIN_CORRUPT');
+});
+
+// 2026-09-27 신설 — 대시보드 "이 숫자 코드로 등록된 프로필" 표시용 GET /digit/mine.
+test('/digit/mine — 자기 번호만 보이고, 남에게 양도한 번호는 더는 안 보인다', async () => {
+  const { users, post, get } = await setup();
+  await post(await makeClaim(users.alice, '48210'), 'guid-alice');
+  await post(await makeClaim(users.alice, '90417'), 'guid-alice');
+  await post(await makeClaim(users.bob, '73204'), 'guid-bob');
+  let mine = await get('/digit/mine?guid=guid-alice');
+  assert.equal(mine.status, 200);
+  assert.deepEqual(mine.body.serials.map(s => s.serial).sort(), ['48210', '90417']);
+  // 90417을 bob에게 양도 — 이후 alice의 목록에선 빠지고, bob의 목록엔 나타나야 한다
+  const chain = await get('/digit/chain?serial=90417');
+  const head = chain.body.records[0];
+  const t = await makeTransfer(users.alice, head, users.bob.publicKeyB64u);
+  assert.equal((await post(t, 'guid-alice')).status, 200);
+  mine = await get('/digit/mine?guid=guid-alice');
+  assert.deepEqual(mine.body.serials.map(s => s.serial), ['48210']);
+  const bobMine = await get('/digit/mine?guid=guid-bob');
+  assert.deepEqual(bobMine.body.serials.map(s => s.serial).sort(), ['73204', '90417']);
+});
+
+test('/digit/mine — 계정 없음(404), guid 누락(400)', async () => {
+  const { get } = await setup();
+  assert.equal((await get('/digit/mine?guid=guid-nobody')).status, 404);
+  assert.equal((await get('/digit/mine')).status, 400);
+});
+
+test('/digit/mine — 저장소가 findSerialsByOwner를 지원하지 않으면 501(나머지 엔드포인트는 그대로 동작)', async () => {
+  const l1 = { rows: [], async listRecords() { return []; }, async appendRecord() {} }; // findSerialsByOwner 없음
+  const h = makeDigitClaimHandler({ l1, getPinnedPubKey: async () => 'somepubkey' });
+  const get = async (path) => { const u = new URL('https://x' + path); const res = await h.handle(new Request(u), u, {}); return { status: res.status, body: await res.json() }; };
+  assert.equal((await get('/digit/mine?guid=g')).status, 501);
+  assert.equal((await get('/digit/status?serial=1234')).status, 200); // 다른 라우트는 영향 없음
 });

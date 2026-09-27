@@ -4,6 +4,9 @@
 // 엔드포인트
 //   GET  /digit/status?serial=NNNN   번호 상태(available/claimed/revoked/reserved/blocked) + 정책 등급
 //   GET  /digit/chain?serial=NNNN    레코드 체인 전체(공개) — 누구나 verifyChain()으로 서버 없이 검증
+//   GET  /digit/mine?guid=GUID       이 계정이 현재 소유한 번호 목록(대시보드 "이 숫자 코드로 등록된
+//                                    프로필" 표시용, 2026-09-27 신설) — 공개 체인 데이터의 재조합일 뿐
+//                                    이라 새로운 권한을 필요로 하지 않는다.
 //   POST /digit/record               { record, grant?, guid }  청구·양도·폐기 레코드 제출
 //
 // 원칙
@@ -27,6 +30,8 @@
 // l1 인터페이스(PocketBase 어댑터가 구현):
 //   listRecords(serial) → 레코드 배열(seq 오름차순)
 //   appendRecord(rec)   → 저장. (serial,seq) 또는 hash 중복이면 반드시 Error('CONFLICT') 를 던진다.
+//   findSerialsByOwner(pubkey) → GET /digit/mine 전용(선택). 없으면 그 라우트만 501을 돌려주고
+//                                나머지 엔드포인트는 그대로 동작한다(기존 호출부·테스트 호환성).
 // ═════════════════════════════════════════════════
 
 import {
@@ -68,6 +73,30 @@ export function makeDigitClaimHandler({ l1, getPinnedPubKey, authorityPubKey = n
         const { recs, state } = await loadState(serial);
         if (path === '/digit/chain') return json({ ok: true, serial, records: recs, state: publicState(serial, state, { premiumList }) }, 200, cors);
         return json({ ok: true, ...publicState(serial, state, { premiumList }) }, 200, cors);
+      }
+
+      // 2026-09-27 신설 — 대시보드 "이 숫자 코드로 등록된 프로필" 표시용. owner/to에
+      // 이 계정 pubkey가 등장한 적 있는 serial을 후보로 모은 뒤(findSerialsByOwner),
+      // 각 serial을 loadState()로 다시 재생해 "지금도" 이 계정이 소유자인 것만 남긴다
+      // — 양도로 손을 뗀 번호가 owner='' 검색에 여전히 걸리기 때문(candidate ≠ 확정).
+      if (request.method === 'GET' && path === '/digit/mine') {
+        const guid = url.searchParams.get('guid') || '';
+        if (!guid) return err(400, 'MISSING', 'guid가 필요합니다.', cors);
+        const pinned = await getPinnedPubKey(env, guid);
+        if (!pinned) return err(404, 'NO_ACCOUNT', '계정을 찾을 수 없습니다.', cors);
+        if (typeof l1.findSerialsByOwner !== 'function') return err(501, 'NOT_IMPLEMENTED', '이 저장소 어댑터는 /digit/mine을 지원하지 않습니다.', cors);
+        const candidates = await l1.findSerialsByOwner(pinned);
+        const mine = [];
+        for (const serial of candidates) {
+          try {
+            const { state } = await loadState(serial);
+            if (state && !state.revoked && state.owner === pinned) mine.push(publicState(serial, state, { premiumList }));
+          } catch (e) {
+            // 체인이 손상된 개별 번호 하나 때문에 목록 전체를 못 돌려주는 일은 없어야 한다 — 건너뛴다.
+            console.warn(`[DigitClaimHandler] /digit/mine — ${serial} 체인 재생 실패(건너뜀):`, e.message);
+          }
+        }
+        return json({ ok: true, serials: mine }, 200, cors);
       }
 
       if (request.method === 'POST' && path === '/digit/record') {

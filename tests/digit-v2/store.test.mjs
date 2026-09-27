@@ -10,14 +10,19 @@ async function wallet() {
   return { publicKeyB64u: b64u(await crypto.subtle.exportKey('raw', kp.publicKey)),
            sign: async m => b64u(await crypto.subtle.sign('Ed25519', kp.privateKey, new TextEncoder().encode(m))) };
 }
-// PocketBase REST 흉내: 필터 serial='…' 목록, 유니크 인덱스((serial,seq),hash) 위반 시 400
+// PocketBase REST 흉내: 필터 serial='…' 목록, owner='…' || to='…' 목록,
+// 유니크 인덱스((serial,seq),hash) 위반 시 400
 function fakePocketBase() {
   const rows = []; let n = 0;
   return async (input, init = {}) => {
     const u = new URL(input); const method = (init.method || 'GET').toUpperCase();
     if (method === 'GET') {
-      const m = /serial='((?:[^'\\]|\\.)*)'/.exec(u.searchParams.get('filter') || '');
-      const items = rows.filter(r => !m || r.serial === m[1]).sort((a, b) => a.seq - b.seq);
+      const filter = u.searchParams.get('filter') || '';
+      const bySerial = /serial='((?:[^'\\]|\\.)*)'/.exec(filter);
+      const byOwner  = /owner='((?:[^'\\]|\\.)*)'/.exec(filter);
+      let items;
+      if (byOwner) { const v = byOwner[1]; items = rows.filter(r => r.owner === v || r.to === v); }
+      else items = rows.filter(r => !bySerial || r.serial === bySerial[1]).sort((a, b) => a.seq - b.seq);
       return new Response(JSON.stringify({ items, page: 1, perPage: 200, totalItems: items.length }), { status: 200 });
     }
     const body = JSON.parse(init.body);
@@ -64,4 +69,15 @@ test('핸들러+어댑터 통합: 동시 청구 12건 → 정확히 1건 성공'
     return res.status;
   }));
   assert.equal(results.filter(s => s === 200).length, 1, results.join(','));
+});
+
+test('어댑터: findSerialsByOwner — owner 또는 to로 등장한 serial을 중복 없이 돌려준다', async () => {
+  const store = makePocketBaseDigitStore({ base: 'https://l1', getToken: async () => 't', fetchImpl: fakePocketBase() });
+  const a = await wallet(), b = await wallet();
+  const c1 = await makeClaim(a, '11111'); await store.appendRecord(c1);
+  const c2 = await makeClaim(a, '22222'); await store.appendRecord(c2);
+  const t = await (await import('../../src/gopang/ai/hondi-digit-claim.js')).makeTransfer(a, { serial: '22222', seq: 0, hash: c2.hash }, b.publicKeyB64u);
+  await store.appendRecord(t);
+  assert.deepEqual((await store.findSerialsByOwner(a.publicKeyB64u)).sort(), ['11111', '22222']); // 양도했어도 후보에는 남음(확정은 호출부 몫)
+  assert.deepEqual(await store.findSerialsByOwner(b.publicKeyB64u), ['22222']);
 });

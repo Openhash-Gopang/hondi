@@ -845,6 +845,7 @@ code, pre, kbd, samp, input, button, textarea, select {
               <div class="row"><div class="row-body"><div class="row-title">공개 범위</div><div class="row-desc" id="pfVisibility">불러오는 중…</div></div></div>
               <div class="row"><div class="row-body"><div class="row-title">프로필 변경 이력</div><div class="row-desc" id="pfLastUpdated">불러오는 중…</div></div></div>
               <div class="row"><div class="row-body"><div class="row-title">연동 계정</div><div class="row-desc" id="pfLinkedAccounts">불러오는 중…</div></div></div>
+              <div class="row"><div class="row-body"><div class="row-title">연결된 숫자 코드</div><div class="row-desc" id="pfDigitCodes">불러오는 중…</div></div></div>
               <div class="row"><div class="row-body"><div class="row-title">불러오기</div><div class="row-desc">지갑·서버 상태에 따라 최신 값이 늦게 반영될 수 있어요</div></div><button class="pf-refresh-btn" id="pfRefreshBtn">새로고침</button></div>
             </div>
             <div class="pf-sync-note" id="pfSyncNote"></div>
@@ -1541,8 +1542,34 @@ import { L1_URL, setUser } from '/src/gopang/core/state.js';
     }
   }
 
+  // 2026-09-27 신설 — "연결된 숫자 코드" 표시. GET /digit/mine은 이 계정이
+  // 현재 소유한(양도로 손을 뗀 건 빠진) 번호만 돌려준다(digit-claim-handler.js
+  // 참고) — 즉 여기 나열되는 번호는 전부 지금 이 프로필과 연결된 것이다.
+  // 이 탭에서(AI 대화든 폼이든) 프로필을 고치면, 그게 곧 저 번호들을 스캔했을
+  // 때 보이는 프로필이 갱신되는 것과 같다 — 프로필은 번호별로 따로 있는 게
+  // 아니라 계정당 하나이고, 숫자 코드는 그 프로필을 가리키는 포인터일 뿐이다.
+  async function pfFetchDigitCodes() {
+    const box = $('pfDigitCodes');
+    if (!box) return;
+    try {
+      const reg = JSON.parse(localStorage.getItem('gopang_user_v4') || '{}');
+      const guid = reg.ipv6 || reg.guid;
+      if (!guid) { box.textContent = '-'; return; }
+      const res = await fetch(`${PF_PROXY}/digit/mine?guid=${encodeURIComponent(guid)}`, { cache: 'no-cache' });
+      const data = await res.json().catch(() => null);
+      if (!data?.ok) { box.textContent = '-'; return; } // NOT_IMPLEMENTED/NO_ACCOUNT 등 — 조용히 숨김(이 행은 부가 정보일 뿐)
+      const mine = data.serials || [];
+      box.textContent = mine.length
+        ? mine.map(s => s.serial).join(', ') + ' — 이 프로필로 연결됨(위 대화·폼 수정이 그대로 반영됩니다)'
+        : '연결된 숫자 코드가 없습니다 — 숫자 코드 페이지에서 번호를 등록해 보세요';
+    } catch (e) {
+      box.textContent = '-';
+    }
+  }
+
   function pfRefreshAll() {
     pfFetchServerProfile();
+    pfFetchDigitCodes();
   }
 
   $('pfRefreshBtn')?.addEventListener('click', pfRefreshAll);
