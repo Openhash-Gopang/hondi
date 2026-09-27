@@ -191,3 +191,36 @@ test('mine — 내가 채권자·채무자인 매물 모두, 서명 여부와 �
   assert.equal(mine.body.listings[0].creditor_signed, true);
   assert.equal(mine.body.listings[0].debtor_signed, false);
 });
+
+test('legal-review — 등기부 내용을 분석해 우려사항 목록을 돌려준다(참여자 아니어도 가능, 저장 안 함)', async () => {
+  const legalChat = async () => JSON.stringify({
+    summary: '채무자 사망으로 상속 문제가 확인되며, 근저당권이 남아있어 인수 여부를 특약해야 합니다.',
+    concerns: [
+      { issue: '채무자 사망·상속 미확정', severity: 'high', explanation: '등기부상 소유자가 사망해 상속이 개시됐으나 상속등기가 안 되어 처분권자가 불명확합니다.', recommended_action: '상속인 전원 확인 및 상속포기·한정승인 여부 확인' },
+      { issue: '근저당권 5천만원 잔존', severity: 'medium', explanation: '을구에 말소되지 않은 근저당권이 있습니다.', recommended_action: '말소 또는 인수 여부를 매매계약에 명시' },
+    ],
+  });
+  const { call } = await setup(legalChat);
+  const r = await call('POST', '/consent-sale/legal-review', {
+    registry_text: '갑구 3번 강제경매개시결정(취하), 을구 1번 근저당권설정 채권최고액 5천만원 채무자 최경자',
+    additional_facts: '채무자 최경자는 2~3개월 전 사망. 상속 여부 불투명.',
+  });
+  assert.equal(r.status, 200, JSON.stringify(r.body));
+  assert.equal(r.body.concerns.length, 2);
+  assert.equal(r.body.concerns[0].severity, 'high');
+  assert.ok(r.body.disclaimer.includes('법률 자문이 아닙니다'));
+});
+
+test('legal-review — 입력 길이 검증(너무 짧거나 너무 김)', async () => {
+  const { call } = await setup(async () => '{}');
+  assert.equal((await call('POST', '/consent-sale/legal-review', { registry_text: '짧음' })).body.code, 'REGISTRY_TEXT');
+  assert.equal((await call('POST', '/consent-sale/legal-review', { registry_text: 'x'.repeat(6001) })).body.code, 'REGISTRY_TEXT');
+  assert.equal((await call('POST', '/consent-sale/legal-review', { registry_text: '갑구 소유권보존 등기 내용이 이 정도 길이는 됩니다', additional_facts: 'y'.repeat(2001) })).body.code, 'ADDITIONAL_FACTS');
+});
+
+test('legal-review — AI 응답이 JSON이 아니면 지어내지 않고 실패로 알린다', async () => {
+  const { call } = await setup(async () => '분석 결과: 문제 없음(자유 서술)');
+  const r = await call('POST', '/consent-sale/legal-review', { registry_text: '갑구 소유권보존 등기 내용이 이 정도 길이는 됩니다' });
+  assert.equal(r.status, 502);
+  assert.equal(r.body.code, 'LEGAL_REVIEW_FAILED');
+});
