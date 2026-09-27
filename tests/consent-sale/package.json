@@ -1,0 +1,8 @@
+{
+  "name": "hondi-consent-sale-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:unit": "node --test protocol.test.mjs handler.test.mjs store.test.mjs"
+  }
+}
