@@ -27570,6 +27570,25 @@ async function _l1FindProfileByGuid(env, guid) {
   return data.items?.[0] || null;
 }
 
+// 2026-09-27 신설 — 혼디 숫자 코드 "프로필 연결" 1단계. /digit/status가 돌려주는
+// owner는 Ed25519 pubkey뿐이라(guid가 없음), 그 pubkey로 프로필을 바로 찾아야
+// 하는 수요(숫자 코드 스캔 → 프로필 표시)가 생겼다. digit_claim_records의
+// submitter_guid는 쓰지 않는다 — transfer 레코드의 제출자는 항상 "양도 전"
+// 소유자라 소유권 이전이 한 번이라도 있으면 틀린 guid를 가리키게 된다
+// (hondi-digit-claim.js applyRecord 참고). pubkey_ed25519는 소유권 이전 여부와
+// 무관하게 항상 "현재" 소유자를 가리키므로 이 역조회가 유일하게 안전한 경로.
+async function _l1FindProfileByPubkey(env, pubkey) {
+  const token = await _l1AdminToken(env);
+  const esc = pubkey.replace(/'/g, "\\'");
+  const filter = encodeURIComponent(`pubkey_ed25519='${esc}'`);
+  const res = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${filter}&perPage=1`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error(`L1 조회 실패 (HTTP ${res.status})`);
+  const data = await res.json().catch(() => ({ items: [] }));
+  return data.items?.[0] || null;
+}
+
 async function handleAdminManualCharge(request, env, corsHeaders) {
   const admin = await _requireAdmin(request, env);
   if (!admin) return _err(401, 'UNAUTHORIZED', '관리자 인증이 필요합니다', corsHeaders);
@@ -28594,6 +28613,10 @@ async function handleProfileGet(request, env, corsHeaders) {
 
   const rawHandle = decodeURIComponent(url.pathname.replace('/profile/', '').replace('/profile', ''));
   const guidParam = url.searchParams.get('guid');
+  // 2026-09-27 신설 — 혼디 숫자 코드 "프로필 연결". /digit/status는 owner를
+  // Ed25519 pubkey로만 돌려주므로(guid를 모름), 그 pubkey로 바로 프로필을
+  // 찾을 경로가 필요하다. _l1FindProfileByPubkey 주석 참고.
+  const pubkeyParam = url.searchParams.get('pubkey');
   const normHandle = rawHandle ? (rawHandle.startsWith('@') ? rawHandle : '@' + rawHandle) : null;
 
   // ── 2026-06-30: L1 PocketBase 직접조회를 1차 경로로 — extra(json) 필드를
@@ -28606,7 +28629,9 @@ async function handleProfileGet(request, env, corsHeaders) {
   try {
     l1Record = guidParam
       ? await _l1FindProfileByGuid(env, guidParam)
-      : (rawHandle ? await _l1FindProfileByHandle(env, normHandle) : null);
+      : (pubkeyParam
+          ? await _l1FindProfileByPubkey(env, pubkeyParam)
+          : (rawHandle ? await _l1FindProfileByHandle(env, normHandle) : null));
   } catch (e) {
     console.warn('[Profile] L1 조회 실패:', e.message);  // (실제 폴백 로직 없음 — 낡은 메시지 정정, 2026-07-19)
   }

@@ -70,7 +70,10 @@
       <span id="waitTimer"></span>
     </div>
     <div id="regMsg" class="msg" role="status"></div>
-    <div id="reg" class="reg">등록 완료 · 내 번호 <b id="regNo"></b> <button id="bAgain" class="ghost" style="margin:0 0 0 8px">다른 번호로 다시 등록</button></div>
+    <div id="reg" class="reg">등록 완료 · 내 번호 <b id="regNo"></b>
+      <button id="bWriteProfile" class="ghost" style="margin:0 0 0 8px">이 번호로 프로필 작성하기 ↗</button>
+      <button id="bAgain" class="ghost" style="margin:0 0 0 8px">다른 번호로 다시 등록</button>
+    </div>
   </section>
 
   <section class="card locked" id="s2">
@@ -90,6 +93,7 @@
     <div id="status">대기 중</div>
     <button id="go">스캔 시작</button><button id="stop" class="ghost">중지</button>
     <div id="scanResult" class="scanResult"></div>
+    <div id="profileLookup" class="scanResult"></div>
     <ul class="tips">
       <li>파란 상자는 로고(기준점), 노란 상자는 숫자 칸, 초록 상자는 정상 인식을 뜻합니다.</li>
       <li>코드 전체(로고 포함)가 창 안에 가로로 들어오게, 화면을 밝게 하고 비춰 주세요.</li>
@@ -314,11 +318,28 @@ function completeRegistration(mode, serverNote) {
   if (mode === 'local') { const m = localClaims(); m[state.serial] = Date.now(); saveLocal(m); }
   state.registered = true; state.mode = mode; setSteps();
   $('reg').style.display = 'block'; $('regNo').textContent = state.serial;
+  // 2026-09-27 신설 — 프로필 연결 ①: 프로필 작성은 "이 번호가 실제로 서버에
+  // 등록된(청구 레코드가 있는) 순간"에만 의미가 있다. 다른 사용자가 나중에
+  // 이 번호를 스캔하는 시점엔 절대 프로필을 쓸 수 없게 한다(주피터님 지시,
+  // 2026-09-27) — 그건 ③ 스캔 쪽에서 "보기 전용" 조회만 하도록 분리했다.
+  // mode==='local'/'test'는 서버에 청구 레코드가 없으므로(이 기기 임시
+  // 기록뿐) 프로필을 연결할 실제 소유권 근거가 없어 버튼을 숨긴다.
+  $('bWriteProfile').style.display = (mode === 'server' && me) ? '' : 'none';
   msg((mode === 'server' ? '등록 완료 — 문자 인증과 서버 등록을 마쳤습니다.'
     : mode === 'test' ? '시험 모드로 등록했습니다(문자 인증 없음, 이 기기에서만 유효).'
     : '본인 확인은 완료했습니다. 서버(/digit/*)가 아직 연결되지 않았거나 응답하지 않아 등록 기록은 이 기기에만 남았습니다.') + (serverNote || ''), mode === 'server' ? 'ok' : 'warn');
   lock(false); make();
 }
+// 등록 직후에만 노출되는 진입점 — 기존 GWP 레지스트리의 profile-assistant SP
+// (gwp-registry.js) 새 탭 규약을 그대로 따른다. 이 페이지는 독립 페이지라
+// gwp/engine.js의 _gwpLaunch()가 기대하는 채팅 화면 전역 상태(core/state.js의
+// _USER 등)가 없으므로, 그 규약(?gwp=1&token=<guid>)만 재현해 새 탭을 직접
+// 연다 — profile-assistant.html의 _paGuid()는 URL의 token이 아니라 현재
+// 지갑 세션(localStorage)만 보고 "내 프로필"을 판단하므로 이걸로 충분하다.
+$('bWriteProfile').onclick = () => {
+  if (!me) return;
+  window.open('/pages/profile-assistant.html?gwp=1&token=' + encodeURIComponent(me.guid), '_blank');
+};
 
 // ── ② 코드 만들기 ─────────────────────────────────────────────
 async function make() {
@@ -332,9 +353,45 @@ $('dl').onclick = async () => {
   const a = document.createElement('a'); a.download = `hondi-code-${state.serial}.png`; a.href = lastCanvas.toDataURL('image/png'); a.click();
 };
 
-// ── ③ 카메라로 확인 ─────────────────────────────────────────────
+// ── ③ 카메라로 확인 — 조회 전용(읽기만). 프로필 작성은 절대 여기서 하지
+// 않는다 — ① 등록 성공 시점에만 가능하다(위 completeRegistration 참고,
+// 주피터님 지시 2026-09-27). 여기서는 그 번호에 이미 연결된 프로필이
+// 있으면 보여주고, 없으면 "아직 없다"고만 알린다. 스캔한 사람이 그 번호의
+// 소유자 본인인지 여부는 아예 따지지 않는다 — 어느 쪽이든 결과는 같다.
+async function showProfileForSerial(serial) {
+  const box = $('profileLookup');
+  box.className = 'scanResult'; box.style.display = 'block'; box.textContent = '프로필 확인 중…';
+  try {
+    const sv = await serverStatus(serial);
+    if (!sv || sv.status !== 'claimed') {
+      box.textContent = sv && sv.status === 'available'
+        ? '아직 등록되지 않은 번호입니다.'
+        : '이 번호의 프로필 정보를 서버에서 확인할 수 없습니다(서버 미연결일 수 있습니다).';
+      return;
+    }
+    // /digit/status의 owner는 Ed25519 pubkey뿐이라(guid를 모름) 그 pubkey로
+    // 바로 프로필을 찾는다(worker.js _l1FindProfileByPubkey, 2026-09-27 신설).
+    const r = await fetch(WORKER + '/profile?pubkey=' + encodeURIComponent(sv.owner), { signal: AbortSignal.timeout(8000) });
+    const j = await r.json().catch(() => null);
+    if (r.ok && j && j.ok && j.profile) {
+      const handle = (j.profile.handle || '').replace(/^@/, '');
+      const label = j.profile.name || (handle ? '@' + handle : '(이름 없음)');
+      box.className = 'scanResult ok';
+      box.replaceChildren();
+      box.append(document.createTextNode('프로필: ' + label + ' — '));
+      const a = document.createElement('a');
+      a.href = '/profile.html?handle=' + encodeURIComponent(handle); a.target = '_blank'; a.textContent = '보기 ↗';
+      box.append(a);
+    } else {
+      box.textContent = '이 번호는 등록됐지만, 아직 프로필을 작성하지 않았습니다.';
+    }
+  } catch (e) {
+    box.textContent = '프로필 확인 중 오류가 발생했습니다.';
+  }
+}
 $('go').onclick = async () => {
   $('scanResult').className = 'scanResult';
+  $('profileLookup').className = 'scanResult'; $('profileLookup').style.display = 'none'; $('profileLookup').replaceChildren();
   try {
     await startScanner($('v'), $('work'), $('ov'),
       (serial) => {
@@ -342,6 +399,7 @@ $('go').onclick = async () => {
         $('status').textContent = '인식 완료';
         $('scanResult').className = 'scanResult ok';
         $('scanResult').textContent = mine ? `\u2713 정상적으로 읽혔습니다 — ${serial}` : `인식된 번호: ${serial} (등록한 번호와 다릅니다)`;
+        showProfileForSerial(serial);
       },
       m => { $('status').textContent = m; });
   } catch (e) { /* 상태 문구는 스캐너가 이미 표시 */ }
