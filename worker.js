@@ -17,6 +17,8 @@ import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
 import { profilePhoneFilter, last8Filter, pickGuidByLast8 } from './src/worker/phone-lookup.js';
 import { makeDigitClaimHandler } from './src/worker/digit-claim-handler.js';
 import { makePocketBaseDigitStore } from './src/worker/digit-claim-store.js';
+import { makeConsentSaleHandler } from './src/worker/consent-sale-handler.js';
+import { makeConsentSaleStore } from './src/worker/consent-sale-store.js';
 import { verifyPhoneAndStepUp } from './src/worker/phone-token.js';
 import { resolveDeviceGeo } from './src/worker/device-geo.js';
 import { handleDeptTaskCreate, handleDeptTaskUpdate, createDeptTaskCore, DEPT_TASK_TAXONOMY, _authoritativeCheck, _verifyAccessCert } from './src/worker/dept-task-handler.js';
@@ -5438,6 +5440,18 @@ function handleDigitRoutes(request, url, env, corsHeaders) {
       stepUpToken: extra?.step_up_token,
       verifyStepUp: (t, g, tx) => _verifyStepUpToken(e, t, g, tx),
     }),
+  });
+  return handler.handle(request, url, env, corsHeaders);
+}
+
+// ── K-Estate 통합 "합의매각" API (2026-09-27 신설) ── 채권자·채무자 두 계정이
+// 각자 지갑으로 서명해야만 등록이 확정된다(혼디 숫자 코드와 같은 서명 원리를
+// consent-sale-handler.js가 별도 프로토콜로 재사용). "경매"라는 말은 쓰지
+// 않는다 — 법원 개시결정에 의한 절차가 아니라 순수 당사자 합의 절차이므로.
+function handleConsentSaleRoutes(request, url, env, corsHeaders) {
+  const handler = makeConsentSaleHandler({
+    l1: makeConsentSaleStore({ base: L1_DEFAULT, getToken: () => _l1AdminToken(env) }),
+    getPinnedPubKey: async (e, guid) => (await _l1FindProfileByGuid(e, guid))?.pubkey_ed25519 || null,
   });
   return handler.handle(request, url, env, corsHeaders);
 }
@@ -13515,6 +13529,7 @@ export default {
     // ── 혼디 숫자코드 무수수료 결제(POS) — 사업자 티어 마지막 항목 (2026-08-11 신설) ──
     // ── 혼디 숫자 번호 — 서명된 청구 레코드(중복 확인·청구·양도·폐기, 2026-09-24 신설) ──
     if (pathname.startsWith('/digit/')) return handleDigitRoutes(request, url, env, corsHeaders);
+    if (pathname.startsWith('/consent-sale/')) return handleConsentSaleRoutes(request, url, env, corsHeaders);
     if (pathname === '/pay/code/mine' && request.method === 'GET') return handlePayCodeMine(request, url, env, corsHeaders);
     if (pathname === '/pay/code/resolve' && request.method === 'GET') return handlePayCodeResolve(request, url, env, corsHeaders);
     if (pathname === '/biz/inventory/reorder-suggestions' && request.method === 'GET') return handleInventoryReorderSuggestions(request, url, env, corsHeaders);

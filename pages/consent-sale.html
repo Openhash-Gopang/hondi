@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>합의매각 — K-Estate</title>
+<link rel="stylesheet" href="/assets/fonts.css">
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --line:#e3e6ea; --text:#111827; --sub:#4b5563; --ok:#0a7d33; --okbg:#e3f5e9; --bad:#b42318; --warn:#8a5a00; --warnbg:#fff1d6; --acc:#1e4fd8; --accbg:#e8eefc; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif; font-size:16px; line-height:1.6; }
+  main { max-width:760px; margin:0 auto; padding:16px; }
+  h1 { font-size:22px; margin:8px 0 4px; } h2 { font-size:18px; margin:0 0 10px; }
+  p.sub { color:var(--sub); margin:0 0 14px; font-size:15px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px; }
+  label { display:block; font-size:15px; color:var(--sub); margin:8px 0 4px; }
+  input[type=text], input[type=number], select, textarea { width:100%; font-size:16px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; font-family:inherit; }
+  textarea { resize:vertical; min-height:64px; }
+  button { font-family:inherit; font-size:16px; padding:11px 16px; border-radius:10px; border:1px solid var(--acc); background:var(--acc); color:#fff; cursor:pointer; margin:8px 8px 0 0; }
+  button.ghost { background:#fff; color:var(--acc); }
+  button[disabled] { opacity:.4; cursor:default; }
+  .banner { background:var(--warnbg); color:var(--warn); border-radius:8px; padding:8px 10px; font-size:14px; margin:0 0 10px; }
+  .banner.server { background:var(--okbg); color:var(--ok); }
+  .msg { min-height:22px; margin:8px 0 0; font-size:15px; } .msg.ok { color:var(--ok); } .msg.bad { color:var(--bad); } .msg.warn { color:var(--warn); }
+  .listing { border:1px solid var(--line); border-radius:10px; padding:12px; margin-bottom:10px; }
+  .listing .region { font-weight:700; font-size:16px; }
+  .listing .price { font-weight:700; color:var(--acc); }
+  .listing .badge { display:inline-block; font-size:12px; padding:2px 8px; border-radius:999px; margin-left:6px; }
+  .badge.active { background:var(--okbg); color:var(--ok); }
+  .badge.pending { background:var(--warnbg); color:var(--warn); }
+  .badge.draft { background:#eee; color:var(--sub); }
+  .appraisal { margin-top:6px; font-size:14px; color:var(--sub); background:#f8fafc; border-radius:8px; padding:6px 10px; }
+  .empty { color:var(--sub); font-size:15px; padding:8px 0; }
+  fieldset { border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin:10px 0; }
+  fieldset legend { padding:0 6px; color:var(--sub); font-size:14px; }
+  .row2 { display:flex; gap:10px; } .row2 > * { flex:1; }
+</style>
+</head>
+<body>
+<main>
+  <h1>합의매각 <span style="font-size:14px; font-weight:400; color:var(--sub)">— K-Estate</span></h1>
+  <p class="sub">채권자·채무자 두 계정이 각자 지갑으로 서명해야만 등록이 확정되는 부동산 매물입니다.
+  대법원 경매 사이트를 참고했지만, 법원의 개시결정에 의한 절차가 아니라 <b>당사자 합의</b>에 의한
+  매각 절차입니다 — 사법기관의 경매가 아닙니다.</p>
+
+  <section class="card">
+    <h2>매물 검색</h2>
+    <label for="nlQuery">자연어로 찾아보세요</label>
+    <input id="nlQuery" type="text" placeholder="예: 부산 영도구의 부동산 매물 중에서 5천만 원 미만 단독 주택을 검색해 줘">
+    <button id="bSearchNl">검색</button>
+    <button class="ghost" id="bSearchAll">전체 보기</button>
+    <div class="msg" id="searchMsg"></div>
+    <div id="results"></div>
+  </section>
+
+  <section class="card" id="registerCard">
+    <h2>매물 등록 제안</h2>
+    <div id="loginBanner" class="banner">계정을 확인하는 중…</div>
+    <label for="myRole">내 역할</label>
+    <select id="myRole"><option value="creditor">채권자</option><option value="debtor">채무자</option></select>
+    <label for="cpGuid">상대방 계정(GUID)</label>
+    <input id="cpGuid" type="text" placeholder="상대방의 혼디 계정 GUID">
+    <div class="row2">
+      <div><label for="region">지역</label><input id="region" type="text" placeholder="예: 부산 영도구"></div>
+      <div><label for="ptype">유형</label>
+        <select id="ptype"><option>단독주택</option><option>아파트</option><option>연립다세대</option><option>상가</option><option>토지</option><option>기타</option></select>
+      </div>
+    </div>
+    <label for="price">희망 매각가(원)</label>
+    <input id="price" type="number" min="1" placeholder="예: 45000000">
+    <label for="desc">설명(선택)</label>
+    <textarea id="desc" maxlength="2000" placeholder="방 개수, 상태 등"></textarea>
+    <button id="bPropose">제안 만들고 서명하기</button>
+    <div class="msg" id="proposeMsg"></div>
+  </section>
+
+  <section class="card">
+    <h2>내 매물</h2>
+    <p class="sub">내가 채권자 또는 채무자로 걸려 있는 매물입니다. 상대방 서명을 기다리는 중이면 여기서 내가 서명할 수 있습니다.</p>
+    <button class="ghost" id="bRefreshMine">새로고침</button>
+    <div class="msg" id="mineMsg"></div>
+    <div id="mineList"></div>
+  </section>
+</main>
+
+<script src="/gopang-wallet.js"></script>
+<script type="module">
+import { canonical, verifySig } from '/src/gopang/ai/hondi-consent-sale.js';
+
+const $ = id => document.getElementById(id);
+const WORKER = 'https://hondi-proxy.tensor-city.workers.dev';
+const PROPERTY_TYPES = ['단독주택', '아파트', '연립다세대', '상가', '토지', '기타'];
+
+const me = (() => {
+  try {
+    const u = JSON.parse(localStorage.getItem('gopang_user_v4') || 'null');
+    return u && !u.isGuest && !u.isTemp && u.ipv6 ? { guid: u.ipv6, handle: u.handle || u.nickname || u.name || '' } : null;
+  } catch { return null; }
+})();
+
+function money(n) { return Number(n).toLocaleString('ko-KR') + '원'; }
+function setMsg(id, text, cls) { const m = $(id); m.textContent = text; m.className = 'msg ' + (cls || ''); }
+
+async function getWallet() {
+  const t0 = Date.now();
+  while (window.gopangWallet === undefined && Date.now() - t0 < 2500) await new Promise(r => setTimeout(r, 150));
+  let w = window.gopangWallet || null;
+  if (!w && window.GopangWallet) {
+    w = await window.GopangWallet.load();
+    if (w) { try { w.setIdentity({ guid: me.guid, handle: me.handle || null }); } catch {} window.gopangWallet = w; }
+  }
+  if (!w || typeof w.signPayload !== 'function') throw new Error('이 기기에서 지갑을 열 수 없습니다. 혼디 앱에 로그인한 뒤 다시 시도해 주세요.');
+  return w;
+}
+async function signCanonical(payload) {
+  const wallet = await getWallet();
+  let sig = await wallet.signPayload(canonical(payload));
+  if (sig && typeof sig === 'object' && sig.signature) sig = sig.signature;
+  return sig;
+}
+
+// ── 매물 검색(누구나) ──────────────────────────────────────────
+function renderResults(listings, note) {
+  const box = $('results');
+  box.replaceChildren();
+  if (note) { const p = document.createElement('div'); p.className = 'empty'; p.textContent = note; box.appendChild(p); }
+  if (!listings.length) { if (!note) box.appendChild(Object.assign(document.createElement('div'), { className: 'empty', textContent: '조건에 맞는 매물이 없습니다.' })); return; }
+  for (const l of listings) {
+    const div = document.createElement('div'); div.className = 'listing';
+    div.innerHTML = `<div class="region">${l.region} · ${l.property_type}</div>` +
+      `<div class="price">${money(l.price)}</div>` +
+      (l.description ? `<div>${l.description}</div>` : '') +
+      (l.appraisal_value ? `<div class="appraisal">AI 참고 감정가(법적 효력 없음): ${money(l.appraisal_value)}${l.appraisal_note ? ' — ' + l.appraisal_note : ''}</div>` : '');
+    box.appendChild(div);
+  }
+}
+async function runSearch(params) {
+  setMsg('searchMsg', '검색 중…');
+  try {
+    const qs = new URLSearchParams(params);
+    const r = await fetch(`${WORKER}/consent-sale/search?${qs.toString()}`, { signal: AbortSignal.timeout(10000) });
+    const j = await r.json().catch(() => null);
+    if (!r.ok || !j?.ok) { setMsg('searchMsg', j?.message || '검색에 실패했습니다.', 'bad'); return; }
+    setMsg('searchMsg', '');
+    renderResults(j.listings, null);
+  } catch (e) { setMsg('searchMsg', e.message || '검색 중 오류가 발생했습니다.', 'bad'); }
+}
+$('bSearchAll').onclick = () => runSearch({});
+$('bSearchNl').onclick = async () => {
+  const query = $('nlQuery').value.trim();
+  if (!query) return runSearch({});
+  setMsg('searchMsg', '질문을 읽는 중…');
+  try {
+    const r = await fetch(`${WORKER}/consent-sale/search-nl`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ query }), signal: AbortSignal.timeout(15000) });
+    const j = await r.json().catch(() => null);
+    if (!r.ok || !j?.ok) { setMsg('searchMsg', j?.message || '검색에 실패했습니다.', 'bad'); return; }
+    setMsg('searchMsg', j.note || '');
+    renderResults(j.listings, j.note);
+  } catch (e) { setMsg('searchMsg', e.message || '검색 중 오류가 발생했습니다.', 'bad'); }
+};
+$('nlQuery').addEventListener('keydown', e => { if (e.key === 'Enter') $('bSearchNl').click(); });
+
+// ── 등록 제안 + 서명(로그인 필요) ────────────────────────────────
+(() => {
+  const b = $('loginBanner');
+  if (me) { b.className = 'banner server'; b.textContent = '로그인 계정 확인됨' + (me.handle ? ' (' + me.handle + ')' : '') + '.'; }
+  else { b.className = 'banner'; b.textContent = '로그인한 계정을 찾지 못했습니다. 혼디 앱에서 로그인한 뒤 다시 열어 주세요.'; $('bPropose').disabled = true; }
+})();
+
+$('bPropose').onclick = async () => {
+  if (!me) return;
+  const role = $('myRole').value;
+  const counterparty_guid = $('cpGuid').value.trim();
+  const region = $('region').value.trim();
+  const property_type = $('ptype').value;
+  const price = Number($('price').value);
+  const description = $('desc').value.trim();
+  if (!counterparty_guid) return setMsg('proposeMsg', '상대방 계정(GUID)을 입력해 주세요.', 'bad');
+  $('bPropose').disabled = true; setMsg('proposeMsg', '제안을 만드는 중…');
+  try {
+    const dr = await fetch(`${WORKER}/consent-sale/draft`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ my_guid: me.guid, role, counterparty_guid, region, property_type, price, description }),
+      signal: AbortSignal.timeout(10000),
+    });
+    const dj = await dr.json().catch(() => null);
+    if (!dr.ok || !dj?.ok) { setMsg('proposeMsg', dj?.message || '제안 생성에 실패했습니다.', 'bad'); return; }
+
+    setMsg('proposeMsg', '지갑으로 서명하는 중…');
+    const sig = await signCanonical(dj.payload);
+    const sr = await fetch(`${WORKER}/consent-sale/sign`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: dj.id, guid: me.guid, sig }), signal: AbortSignal.timeout(10000),
+    });
+    const sj = await sr.json().catch(() => null);
+    if (!sr.ok || !sj?.ok) { setMsg('proposeMsg', sj?.message || '서명 제출에 실패했습니다.', 'bad'); return; }
+    setMsg('proposeMsg', sj.status === 'active' ? '등록이 확정되었습니다.' : '내 서명을 마쳤습니다 — 상대방의 서명을 기다립니다.', 'ok');
+    $('cpGuid').value = ''; $('region').value = ''; $('price').value = ''; $('desc').value = '';
+    loadMine();
+  } catch (e) { setMsg('proposeMsg', e.message || '오류가 발생했습니다.', 'bad'); }
+  finally { $('bPropose').disabled = false; }
+};
+
+// ── 내 매물(서명 대기 포함) ───────────────────────────────────────
+function statusBadge(status) {
+  if (status === 'active') return '<span class="badge active">확정</span>';
+  if (status === 'pending_countersign') return '<span class="badge pending">상대방 서명 대기</span>';
+  return '<span class="badge draft">내 서명 대기</span>';
+}
+async function loadMine() {
+  if (!me) { $('mineList').replaceChildren(); setMsg('mineMsg', '로그인이 필요합니다.', 'warn'); return; }
+  setMsg('mineMsg', '불러오는 중…');
+  try {
+    const r = await fetch(`${WORKER}/consent-sale/mine?guid=${encodeURIComponent(me.guid)}`, { signal: AbortSignal.timeout(10000) });
+    const j = await r.json().catch(() => null);
+    if (!r.ok || !j?.ok) { setMsg('mineMsg', j?.message || '불러오지 못했습니다.', 'bad'); return; }
+    setMsg('mineMsg', '');
+    const box = $('mineList'); box.replaceChildren();
+    if (!j.listings.length) { box.appendChild(Object.assign(document.createElement('div'), { className: 'empty', textContent: '등록한 매물이 없습니다.' })); return; }
+    for (const l of j.listings) {
+      const mySigned = l.my_role === 'creditor' ? l.creditor_signed : l.debtor_signed;
+      const div = document.createElement('div'); div.className = 'listing';
+      div.innerHTML = `<div class="region">${l.region} · ${l.property_type} ${statusBadge(l.status)}</div>` +
+        `<div class="price">${money(l.price)}</div>` +
+        `<div style="font-size:14px; color:var(--sub)">내 역할: ${l.my_role === 'creditor' ? '채권자' : '채무자'}</div>`;
+      if (l.status !== 'active' && !mySigned) {
+        const btn = document.createElement('button'); btn.textContent = '서명하기';
+        btn.onclick = async () => {
+          btn.disabled = true;
+          try {
+            const sig = await signCanonical({
+              v: 1, ns: 'hondi.net/consent-sale', region: l.region, property_type: l.property_type,
+              price: l.price, description_hash: l.description_hash, creditor_pubkey: l.creditor_pubkey,
+              debtor_pubkey: l.debtor_pubkey, ts: l.ts,
+            });
+            const sr = await fetch(`${WORKER}/consent-sale/sign`, {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: l.id, guid: me.guid, sig }), signal: AbortSignal.timeout(10000),
+            });
+            const sj = await sr.json().catch(() => null);
+            if (!sr.ok || !sj?.ok) { alert(sj?.message || '서명 제출에 실패했습니다.'); btn.disabled = false; return; }
+            loadMine();
+          } catch (e) { alert(e.message || '서명 중 오류가 발생했습니다.'); btn.disabled = false; }
+        };
+        div.appendChild(btn);
+      }
+      if (l.status === 'active') {
+        if (l.appraisal_value) {
+          const a = document.createElement('div'); a.className = 'appraisal';
+          a.textContent = `AI 참고 감정가(법적 효력 없음): ${money(l.appraisal_value)}`;
+          div.appendChild(a);
+        } else {
+          const btn = document.createElement('button'); btn.className = 'ghost'; btn.textContent = 'AI 참고 감정가 생성';
+          btn.onclick = async () => {
+            btn.disabled = true; btn.textContent = '생성 중…';
+            try {
+              const ar = await fetch(`${WORKER}/consent-sale/appraise`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: l.id, guid: me.guid }), signal: AbortSignal.timeout(20000),
+              });
+              const aj = await ar.json().catch(() => null);
+              if (!ar.ok || !aj?.ok) { alert(aj?.message || '참고 감정가 생성에 실패했습니다.'); btn.disabled = false; btn.textContent = 'AI 참고 감정가 생성'; return; }
+              loadMine();
+            } catch (e) { alert(e.message || '오류가 발생했습니다.'); btn.disabled = false; btn.textContent = 'AI 참고 감정가 생성'; }
+          };
+          div.appendChild(btn);
+        }
+      }
+      box.appendChild(div);
+    }
+  } catch (e) { setMsg('mineMsg', e.message || '오류가 발생했습니다.', 'bad'); }
+}
+$('bRefreshMine').onclick = loadMine;
+runSearch({});
+loadMine();
+</script>
+</body>
+</html>
