@@ -18,6 +18,18 @@
 //   POST /consent-sale/search-nl    { query } — 자연어 문장을 조건으로 해석해 검색.
 //   POST /consent-sale/appraise     { id, guid } — 당사자만, AI 참고 감정가 생성
 //                                    (법적 효력 없는 참고치 — SP_appraiser와 동일 원칙).
+//   POST /consent-sale/legal-review { registry_text, additional_facts? } — 등기부
+//                                    등본 내용(발급본에서 직접 옮기거나 요약한 텍스트)과
+//                                    부가 사실(예: "채무자 2~3개월 전 사망")을 넣으면
+//                                    법적 우려사항을 분석해 준다(2026-09-27 신설).
+//                                    특정 매물(id)에 매이지 않는 독립 도구다 — 등기부
+//                                    내용은 신청자가 제공한 값일 뿐 Hondi가 검증한 사실이
+//                                    아니므로, 특정 매물에 영구히 붙여 다른 사람에게
+//                                    공개하면 위조된 내용이 그 매물의 "공식 검토"처럼
+//                                    보일 위험이 있다 — 그래서 저장하지 않고 매번 그
+//                                    자리에서 답을 돌려주기만 한다. SP_lawyer-auction·
+//                                    SP_lawyer-inheritance의 관점(등기·경매 절차, 상속)을
+//                                    참고했으나 법률 자문이 아닌 참고 의견이다.
 //   GET  /consent-sale/mine         ?guid= — 내가 채권자·채무자인 매물 전체(서명
 //                                    대기 포함) — K-Estate 대시보드용.
 //
@@ -211,6 +223,47 @@ export function makeConsentSaleHandler({ l1, getPinnedPubKey, chatText = default
     return json({ ok: true, appraisal_value: updated.appraisal_value, appraisal_note: updated.appraisal_note, appraised_at: updated.appraised_at }, 200, cors);
   }
 
+  // 등기부 등본 내용(신청자가 붙여넣거나 요약한 텍스트)과 부가 사실을 바탕으로
+  // 법적 우려사항을 분석한다. 특정 매물에 저장하지 않는다(위 엔드포인트 설명 참고) —
+  // 이 값들은 신청자가 제공한 것일 뿐 Hondi가 검증한 사실이 아니다.
+  async function handleLegalReview(request, env, cors) {
+    let body; try { body = await request.json(); } catch { return err(400, 'MALFORMED', '요청 본문이 JSON이 아닙니다.', cors); }
+    const registry_text = (body?.registry_text || '').trim();
+    const additional_facts = (body?.additional_facts || '').trim();
+    if (registry_text.length < 20 || registry_text.length > 6000) return err(400, 'REGISTRY_TEXT', '등기부 내용은 20~6000자여야 합니다.', cors);
+    if (additional_facts.length > 2000) return err(400, 'ADDITIONAL_FACTS', '부가 사실은 2000자 이내여야 합니다.', cors);
+
+    const sys = '당신은 부동산 매매 전 법적 우려사항을 점검하는 보조자입니다. 이것은 법률 자문이 ' +
+      '아니라 참고 의견이며, 실제 계약 전 변호사·법무사 상담과 등기부등본 원본 재확인이 항상 ' +
+      '필요함을 전제합니다. 사용자가 준 등기부 등본 내용(과 있다면 부가 사실)만 근거로 삼고, ' +
+      '거기 없는 사실을 지어내지 않습니다. 특히 다음을 놓치지 않고 살핍니다: (1) 소유자·채무자의 ' +
+      '사망 여부와 상속 개시 — 상속인이 확정됐는지, 상속포기·한정승인 여부, 상속등기 여부, 처분권자가 ' +
+      '누구인지, (2) 근저당권·가압류·가등기 등 을구/갑구의 소유권 이외 권리 — 말소 여부, 채권최고액과 ' +
+      '실제 채무액의 차이, 인수 또는 말소 특약 필요 여부, (3) 경매개시결정·그 취하 이력 — 취하가 채무 ' +
+      '변제·합의를 뜻하지는 몇 회차·최저가 흐름이 시사하는 시장성, 취하되어도 담보권 자체는 소멸하지 ' +
+      '않는다는 점, (4) 소유권 이전 이력(상속·매매 등)에 분쟁 소지가 있는지, (5) 그 밖에 등기부 내용에서 ' +
+      '드러나는 이상 징후. 오직 JSON 객체 하나만 출력하세요: ' +
+      '{"summary":"한두 문장 총평","concerns":[{"issue":"쟁점 제목","severity":"high|medium|low",' +
+      '"explanation":"왜 문제인지","recommended_action":"매수인이 해야 할 확인·조치"}]}. 코드블록·설명 없이 이 JSON만 출력합니다.';
+    const user = `[등기부 등본 내용]\n${registry_text}` + (additional_facts ? `\n\n[부가 사실]\n${additional_facts}` : '');
+    const text = await chatText({
+      env, model: 'deepseek-v4-flash', max_tokens: 1200, timeoutMs: 20000, fallbackText: '',
+      messages: [{ role: 'system', content: sys }, { role: 'user', content: user }],
+    });
+    const parsed = parseJsonLoose(text);
+    if (!parsed || !Array.isArray(parsed.concerns)) return err(502, 'LEGAL_REVIEW_FAILED', '법적 검토 분석을 생성하지 못했습니다.', cors);
+    const concerns = parsed.concerns.slice(0, 20).map(c => ({
+      issue: String(c.issue || '').slice(0, 200),
+      severity: ['high', 'medium', 'low'].includes(c.severity) ? c.severity : 'medium',
+      explanation: String(c.explanation || '').slice(0, 1000),
+      recommended_action: String(c.recommended_action || '').slice(0, 500),
+    }));
+    return json({
+      ok: true, summary: String(parsed.summary || '').slice(0, 500), concerns,
+      disclaimer: '이 분석은 제공된 내용만으로 생성한 참고 의견이며 법률 자문이 아닙니다. 실제 계약 전 등기부등본 원본을 다시 확인하고 변호사·법무사와 상담하세요.',
+    }, 200, cors);
+  }
+
   async function handleMine(url, env, cors) {
     const guid = url.searchParams.get('guid') || '';
     if (!guid) return err(400, 'MISSING', 'guid가 필요합니다.', cors);
@@ -238,6 +291,7 @@ export function makeConsentSaleHandler({ l1, getPinnedPubKey, chatText = default
       if (request.method === 'GET' && path === '/consent-sale/search') return await handleSearch(url, cors);
       if (request.method === 'POST' && path === '/consent-sale/search-nl') return await handleSearchNl(request, env, cors);
       if (request.method === 'POST' && path === '/consent-sale/appraise') return await handleAppraise(request, env, cors);
+      if (request.method === 'POST' && path === '/consent-sale/legal-review') return await handleLegalReview(request, env, cors);
       if (request.method === 'GET' && path === '/consent-sale/mine') return await handleMine(url, env, cors);
       return err(404, 'NOT_FOUND', '알 수 없는 경로입니다.', cors);
     } catch (e) {

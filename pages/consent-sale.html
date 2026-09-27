@@ -30,6 +30,17 @@
   .badge.pending { background:var(--warnbg); color:var(--warn); }
   .badge.draft { background:#eee; color:var(--sub); }
   .appraisal { margin-top:6px; font-size:14px; color:var(--sub); background:#f8fafc; border-radius:8px; padding:6px 10px; }
+  .concern { border-left:4px solid var(--line); padding:8px 10px; margin:8px 0; border-radius:6px; background:#f8fafc; }
+  .concern.sev-high { border-left-color:var(--bad); }
+  .concern.sev-medium { border-left-color:var(--warn); }
+  .concern.sev-low { border-left-color:var(--ok); }
+  .concern .issue { font-weight:700; }
+  .concern .sevtag { font-size:12px; margin-left:6px; padding:1px 7px; border-radius:999px; }
+  .sev-high .sevtag { background:#fde2df; color:var(--bad); }
+  .sev-medium .sevtag { background:var(--warnbg); color:var(--warn); }
+  .sev-low .sevtag { background:var(--okbg); color:var(--ok); }
+  .concern .action { font-size:14px; color:var(--sub); margin-top:4px; }
+  .disclaimer { font-size:13px; color:var(--sub); margin-top:10px; }
   .empty { color:var(--sub); font-size:15px; padding:8px 0; }
   fieldset { border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin:10px 0; }
   fieldset legend { padding:0 6px; color:var(--sub); font-size:14px; }
@@ -72,6 +83,21 @@
     <textarea id="desc" maxlength="2000" placeholder="방 개수, 상태 등"></textarea>
     <button id="bPropose">제안 만들고 서명하기</button>
     <div class="msg" id="proposeMsg"></div>
+  </section>
+
+  <section class="card">
+    <h2>법적 검토(참고용)</h2>
+    <p class="sub">등기부 등본 내용을 붙여넣으면 법적 우려사항을 짚어 드립니다. 매물에 저장되지 않고
+    이 화면에서만 확인할 수 있습니다 — <b>법률 자문이 아니라 참고 의견</b>이며, 실제 계약 전
+    등기부등본 원본 재확인과 변호사·법무사 상담이 필요합니다. 등기부에 없는 정보(채무자 사망 등)는
+    아래 "부가 사실"에 따로 적어 주세요.</p>
+    <label for="regText">등기부 등본 내용</label>
+    <textarea id="regText" rows="6" placeholder="예: 갑구 3번 강제경매개시결정(취하), 을구 1번 근저당권설정 채권최고액 5천만원 채무자 최경자 …"></textarea>
+    <label for="regFacts">부가 사실(선택)</label>
+    <textarea id="regFacts" rows="2" placeholder="예: 채무자는 2~3개월 전 사망. 상속 여부 불투명."></textarea>
+    <button id="bLegalReview">법적 검토 실행</button>
+    <div class="msg" id="legalMsg"></div>
+    <div id="legalResult"></div>
   </section>
 
   <section class="card">
@@ -271,6 +297,34 @@ async function loadMine() {
   } catch (e) { setMsg('mineMsg', e.message || '오류가 발생했습니다.', 'bad'); }
 }
 $('bRefreshMine').onclick = loadMine;
+// ── 법적 검토(참고용, 저장 안 함) ──────────────────────────────────
+const sevLabel = { high: '높음', medium: '중간', low: '낮음' };
+$('bLegalReview').onclick = async () => {
+  const registry_text = $('regText').value.trim();
+  const additional_facts = $('regFacts').value.trim();
+  if (registry_text.length < 20) return setMsg('legalMsg', '등기부 등본 내용을 20자 이상 입력해 주세요.', 'bad');
+  $('bLegalReview').disabled = true; setMsg('legalMsg', '분석 중…'); $('legalResult').replaceChildren();
+  try {
+    const r = await fetch(`${WORKER}/consent-sale/legal-review`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ registry_text, additional_facts }), signal: AbortSignal.timeout(25000),
+    });
+    const j = await r.json().catch(() => null);
+    if (!r.ok || !j?.ok) { setMsg('legalMsg', j?.message || '법적 검토에 실패했습니다.', 'bad'); return; }
+    setMsg('legalMsg', '');
+    const box = $('legalResult');
+    const summary = document.createElement('p'); summary.textContent = j.summary; box.appendChild(summary);
+    for (const c of j.concerns) {
+      const div = document.createElement('div'); div.className = `concern sev-${c.severity}`;
+      div.innerHTML = `<span class="issue">${c.issue}</span><span class="sevtag">${sevLabel[c.severity] || c.severity}</span>` +
+        `<div>${c.explanation}</div><div class="action">권장 조치: ${c.recommended_action}</div>`;
+      box.appendChild(div);
+    }
+    const disc = document.createElement('div'); disc.className = 'disclaimer'; disc.textContent = j.disclaimer; box.appendChild(disc);
+  } catch (e) { setMsg('legalMsg', e.message || '오류가 발생했습니다.', 'bad'); }
+  finally { $('bLegalReview').disabled = false; }
+};
+
 runSearch({});
 loadMine();
 </script>
