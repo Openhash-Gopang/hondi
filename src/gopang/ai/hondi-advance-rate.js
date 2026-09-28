@@ -20,6 +20,9 @@
  *     않는다(위로의 교정은 cv·연변동성 같은 입력을 데이터로 다시 맞추는 방식으로만).
  *  ② 정책 상한(거버넌스): 유동성 등급별 고정 상한. 통계가 아무리 좋아도 이 값을 넘지 않는다.
  *  ③ 거부 조건(0%): 소유권 미확정·선순위 권리 불명·법적 검토 고위험 쟁점, 또는 σ 과대.
+ *  ④ 사다리 상한(선택, ladder 인자를 줄 때만): 법원 경매와 같은 20% 저감 사다리에서 허용하는 가장
+ *     깊은 회차의 최저가에 팔려도 선지급 원금+자본비용+판매비용이 회수되도록 하는 결정적 상한
+ *     (hondi-sale-ladder.js ladderAdvanceCapBps). 인자를 안 주면 기존 동작과 완전히 같다.
  *
  * ★ 이 파일의 수치(등급 경계·상한·기대실현비율·매각기간·비용률·변동성·안전여유)는 전부 가정이며
  *   보정되지 않았다. 과거 사건 백테스트로 다시 맞춰야 한다. 정책 상한·전체 상한·거부 조건은
@@ -28,6 +31,7 @@
  *   확인이 필요하다.
  */
 import { maxAdvanceBps } from './hondi-settlement.js';
+import { ladderAdvanceCapBps } from './hondi-sale-ladder.js';
 
 export const ADVANCE_CAP_BPS = 9000;
 export const ADVANCE_FLOOR_BPS = 0;
@@ -85,6 +89,7 @@ export function computeAdvance({
   txn_12m, comps_count, comps_cv = null, months_stale = 0, annual_rate_bps, fee_bps = 0,
   flags = {}, empirical_ratio_p05 = null, empirical_n = 0,
   annual_vol, model_sigma, prior_cv, cap_bps = ADVANCE_CAP_BPS,
+  ladder = null,   // { max_round, round_interval_days?, reduction_bps? | reduction_ppm?, start_price?, round_unit? } — 허용하는 가장 깊은 매각 회차
 }) {
   const t = liquidityTier(txn_12m);
   const sg = estimateSigma({ comps_count, comps_cv, months_stale, days_to_sell: t.expected_days, annual_vol, model_sigma, prior_cv });
@@ -104,16 +109,31 @@ export function computeAdvance({
   const statistical = maxAdvanceBps({ ratio_quantile: q_used, selling_cost_bps: t.selling_cost_bps, fee_bps, annual_rate_bps, days: t.expected_days }) - SAFETY_MARGIN_BPS;
   const statistical_bps = Math.max(0, statistical);
 
-  const raw = Math.min(statistical_bps, base.policy_cap_bps);
+  // 사다리 상한: 매각까지 걸리는 일수는 시장 예상 일수와 (허용 회차 × 회차 간격) 중 큰 쪽(보수적)
+  let ladder_cap_bps = null;
+  if (ladder) {
+    const interval = ladder.round_interval_days ?? 0;
+    ladder_cap_bps = ladderAdvanceCapBps({
+      max_round: ladder.max_round, reduction_bps: ladder.reduction_bps, reduction_ppm: ladder.reduction_ppm,
+      selling_cost_bps: t.selling_cost_bps, fee_bps, annual_rate_bps,
+      days: Math.max(t.expected_days, ladder.max_round * interval),
+      start_price: ladder.start_price ?? null,           // 추정가를 알면 원 단위로 정확히 계산(회수 보장이 정확히 성립)
+      round_unit: ladder.round_unit,
+    });
+  }
+  const upper = Math.min(statistical_bps, base.policy_cap_bps);
+  const raw = ladder_cap_bps != null ? Math.min(upper, ladder_cap_bps) : upper;
   const advance_bps = Math.max(ADVANCE_FLOOR_BPS, Math.floor(raw / ADVANCE_STEP_BPS) * ADVANCE_STEP_BPS);
-  const binding = statistical_bps <= base.policy_cap_bps
-    ? (useEmp && q_used < q_theory ? 'empirical' : 'statistical') : 'policy_cap';
+  const binding = ladder_cap_bps != null && ladder_cap_bps < upper ? 'ladder_cap'
+    : statistical_bps <= base.policy_cap_bps
+      ? (useEmp && q_used < q_theory ? 'empirical' : 'statistical') : 'policy_cap';
 
   const reasons = [
     `유동성 등급 ${t.tier}(최근 12개월 실거래 ${txn_12m}건) — 정책 상한 ${base.policy_cap_bps / 100}%`,
     `추정 불확실성 σ=${sg.sigma.toFixed(3)}${sg.thin_data ? ' (비교사례 부족 → 보수적 사전 산포 적용)' : ''}`,
     `하위 5% 실현비율 ${q_used.toFixed(3)}${binding === 'empirical' ? ' (백테스트 실측이 이론보다 낮아 실측 적용)' : ''} → 통계적 한도 ${statistical_bps / 100}%`,
-    `최종 ${advance_bps / 100}% (제약: ${binding === 'policy_cap' ? '유동성 등급 정책 상한' : binding === 'empirical' ? '백테스트 실측' : '통계적 한도'})`,
+    ...(ladder_cap_bps != null ? [`사다리 상한 ${ladder_cap_bps / 100}% (최대 ${ladder.max_round}회차까지 허용, 회차마다 ${(ladder.reduction_ppm ?? (ladder.reduction_bps ?? 2000) * 100) / 10000}% 저감)`] : []),
+    `최종 ${advance_bps / 100}% (제약: ${{ policy_cap: '유동성 등급 정책 상한', empirical: '백테스트 실측', ladder_cap: '매각 사다리 상한', statistical: '통계적 한도' }[binding]})`,
   ];
-  return { ...base, advance_bps, binding, statistical_bps, ratio_quantile_theory: q_theory, ratio_quantile_used: q_used, reasons };
+  return { ...base, advance_bps, binding, statistical_bps, ladder_cap_bps, ratio_quantile_theory: q_theory, ratio_quantile_used: q_used, reasons };
 }
