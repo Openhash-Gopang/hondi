@@ -83,6 +83,34 @@ export function advanceAmount({ estimated_price, advance_bps }) {
   return mulBps(estimated_price, advance_bps);
 }
 
+/** 자본비용 = ceil(선지급액 × 연이율 × 일수 / 365) — 단리, 올림(자금 제공자에게 불리하게 깎이지 않도록). */
+export function carryAmount({ advance, annual_rate_bps, days }) {
+  money('advance', advance); bps('annual_rate_bps', annual_rate_bps, 10000);
+  if (!Number.isSafeInteger(days) || days < 0 || days > MAX_DAYS) throw new RangeError(`days: 0~${MAX_DAYS} 정수여야 합니다 (받은 값: ${days})`);
+  return Number(ceilDiv(BigInt(advance) * BigInt(annual_rate_bps) * BigInt(days), BigInt(BPS * DAYS_PER_YEAR)));
+}
+
+/**
+ * 미매각 종결 정산 — 허용한 최심 시점까지 매각되지 않아 사건이 종결된 경우(주피터님 결정 2026-09-28).
+ * 선지급은 이미 당사자에게 지급되었고 무소구라 당사자에게 되돌려 받지 않는다. 시스템에는 원금+자본비용이
+ * 남으며, 종결 후 회수액(recovery: 담보권 실행·재매각 등으로 실제 회수한 금액, 없으면 0)으로 메운다.
+ * 회수액이 원금+자본비용을 넘으면 초과분은 당사자 몫(surplus_to_parties)이다.
+ * ★ 종결 후 회수는 시스템이 선지급과 함께 채권자의 담보권을 넘겨받는(대위) 등 집행 가능한 청구권을
+ *   갖는다는 가정에 기댄다. 그 가정이 없으면 recovery는 0이고 손실은 원금 전액이다(법·제도 검토 보류 중).
+ */
+export function settleTermination({ advance, annual_rate_bps, days, recovery = 0 }) {
+  money('recovery', recovery);
+  const carry = carryAmount({ advance, annual_rate_bps, days });
+  const owed = advance + carry;
+  const recovered = Math.min(recovery, owed);
+  return {
+    version: SETTLEMENT_VERSION, mode: 'termination',
+    advance, carry, owed_to_system: owed, recovered,
+    system_shortfall: owed - recovered, system_net: recovered - advance, surplus_to_parties: recovery - recovered,
+    balanced: recovered + (owed - recovered) === owed,
+  };
+}
+
 /**
  * 2단계 — 선지급 후 정산 (계산 전용, 미시행)
  * 선지급 시점: 선지급액을 채권자 청구액 한도로 먼저 채권자에게, 남으면 채무자에게 지급.
@@ -105,7 +133,7 @@ export function settleAdvance({
   const advance = mulBps(estimated_price, advance_bps);
   const creditor_advance = Math.min(advance, creditor_claim);
   const debtor_advance = advance - creditor_advance;
-  const carry = Number(ceilDiv(BigInt(advance) * BigInt(annual_rate_bps) * BigInt(days), BigInt(BPS * DAYS_PER_YEAR)));
+  const carry = carryAmount({ advance, annual_rate_bps, days });
 
   const { costs_paid, uncovered_costs, fee, net } = netProceeds(sale_price, selling_costs, fee_bps);
   const owed_to_system = advance + carry;
