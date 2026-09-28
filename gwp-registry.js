@@ -363,6 +363,30 @@ const GWP_REGISTRY = [
       '계약 갱신','재건축','조합원','매물 등록','이사 갈 집',
     ],
   },
+  {
+    id: 'kestate-appraisal', name: 'K-Estate 3단계 가치평가', category: 'ECO',
+    type: 'switch',
+    sp_key: 'SP-24a_kestate_appraisal',
+    // 2026-09-28 신설 — 국가(시점수정)·지역(지역요인)·개별(권리) 3단계 부동산
+    // 가치평가(hondi-staged-valuation.js)의 증거 수집 전용 SP. status는 의도적으로
+    // 'active'가 아니라 'pending'이다 — candidate-prefilter.js가 status==='active'인
+    // 항목만 후보로 거르고, call-ai.js도 svcDef.status!=='active'면 디스패치하지
+    // 않으므로(ksearch와 동일 패턴), 이 등록만으로는 실사용자에게 서빙되지 않는다.
+    // SP-24a 자체가 실제로 이 규칙대로 웹 검색을 수행하고 올바른
+    // [STAGED_VALUATION] 블록을 내는지 아직 실행 검증되지 않았고(코드 계산
+    // 로직만 tests/settlement/staged-valuation.test.mjs로 검증됨), 검증 규약
+    // (docs/kestate/verification-protocol.md)의 채택 기준값도 비어 있다.
+    // call-ai.js의 SWITCH_SP_LOADERS·[CALL_...] 정규식·로더 함수 배선은 이번
+    // 커밋에 포함하지 않는다 — 실행 검증 전에 실제 디스패치 경로까지 만들면
+    // 검증 안 된 금전 계산 로직이 사실상 활성화된 것과 같은 위험을 지기 때문.
+    // 실행 검증 후 status를 'active'로 바꾸고 그때 call-ai.js 배선을 추가한다.
+    status: 'pending', priority: 6, threshold: 0.70,
+    description: '국가(시점수정)·지역(지역요인)·개별(권리) 3단계 부동산 가치평가 — 담보대출 선지급·중재 공정가치 산출용 원자료(출처·조회일 포함) 수집 전용. 계수·불확실성·차감액 계산은 코드(hondi-staged-valuation.js)가 담당하고 SP가 낸 계산값은 채택하지 않는다. 아직 실행 검증 전이라 실사용자에게 서빙되지 않는다.',
+    triggers: [
+      '담보 감정평가','3단계 가치평가','시점수정 지역요인 개별요인',
+      '부동산 담보 대출 감정','공정가치 산정',
+    ],
+  },
 
   // ── 2026-09-02 신설 — K-Plan/K-Watch/K-Job. 셋 다 K-Telecom/K-Estate와
   // 동일한 이유(별도 저장소·도메인이 필요 없는 SP)로 type:'switch'로

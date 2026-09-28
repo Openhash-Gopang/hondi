@@ -2,11 +2,17 @@
 SP-24a_kestate_appraisal_v0_1.txt
 K-Estate 국가·지역·개별 3단계 가치평가 — 증거 수집 전용 System Prompt v0.1
 저장위치(제안): gopang/prompts/SP-24a_kestate_appraisal_v0_1.txt
-GWP ID: 미배정  |  카테고리(제안): ECO(경제)
-상태: ★★★ 초안(draft), sp-catalog.json 미등록, worker.js 라우팅 미연결 ★★★
-      아직 어떤 이용자에게도 서빙되지 않는다. 실제로 LLM이 이 규칙대로
-      웹 검색을 하고 아래 형식의 [STAGED_VALUATION] 블록을 정확히 내는지는
-      아직 실행 검증되지 않았다(파서·코드 검증만 테스트됨 — 아래 [한계] 참조).
+GWP ID: 'kestate-appraisal'  |  카테고리: ECO(경제)
+상태: ★★★ 초안(draft), gwp-registry.js에 status:'pending'으로 등록(2026-09-28) ★★★
+      sp-catalog.json에도 등록됐지만, candidate-prefilter.js/call-ai.js가
+      status==='active'인 항목만 후보로 삼으므로(ksearch와 동일 패턴) 이
+      등록만으로는 어떤 이용자에게도 서빙되지 않는다. call-ai.js의
+      SWITCH_SP_LOADERS·[CALL_...] 정규식·로더 함수 배선은 아직 하지
+      않았다 — 실행 검증 전에 실제 디스패치 경로까지 만들면 검증 안 된
+      금전 계산 로직이 사실상 활성화된 것과 같은 위험을 지기 때문이다.
+      실제로 LLM이 이 규칙대로 웹 검색을 하고 아래 형식의
+      [STAGED_VALUATION] 블록을 정확히 내는지는 아직 실행 검증되지
+      않았다(파서·코드 검증만 테스트됨 — 아래 [한계] 참조).
 ================================================================
 
 ================================================================
@@ -158,11 +164,13 @@ evidence 형태는 항상 { value, source, asof(YYYY-MM-DD) }이며 asof는
 ================================================================
 [한계 — 검증하지 못한 것]
 ================================================================
-- 이 문서는 초안이며 sp-catalog.json에 등록되지 않았고 worker.js 라우팅에도
-  연결되지 않았다. 실제로 LLM이 이 규칙대로 웹 검색을 수행하고 위 형식의
-  JSON을 정확히 내는지는 실행 검증되지 않았다 — hondi-staged-valuation.js의
-  파서·코드 계산 로직만 유닛 테스트로 검증됐다(tests/settlement/
-  staged-valuation.test.mjs). SP → 코드 연결 경로(파서, 라우팅)는 비어 있다.
+- 이 문서는 초안이다. sp-catalog.json과 gwp-registry.js(status:'pending')에는
+  등록됐지만, call-ai.js의 실제 디스패치 배선(SWITCH_SP_LOADERS·[CALL_...]
+  정규식·로더 함수)은 아직 없다. 실제로 LLM이 이 규칙대로 웹 검색을 수행하고
+  위 형식의 JSON을 정확히 내는지는 실행 검증되지 않았다 —
+  hondi-staged-valuation.js의 파서·코드 계산 로직만 유닛 테스트로
+  검증됐다(tests/settlement/staged-valuation.test.mjs). SP → 코드 연결
+  경로(파서, call-ai.js 배선)는 비어 있다.
 - σ 가산 사전값(REGIONAL_RISK_SIGMA 등)과 정비 단계 σ 값은 가정이며
   백테스트로 보정해야 한다(hondi-staged-valuation.js 주석 참조).
 - 지역·유형별 지수 세분도와 정비구역 자료의 최신성은 지역마다 다르다.

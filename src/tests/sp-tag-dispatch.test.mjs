@@ -251,13 +251,16 @@ describe('SD — kemergency 하드 게이트 (_estimateGovImportance)', () => {
 // 오판했던 것 자체가 SD-05형 실수였음, 문서 참고).
 // ═══════════════════════════════════════════════════════════
 describe('SD — GWP_REGISTRY 구조적 위생 점검', () => {
-  test('SD-14: 전체 31개 엔트리 각각 비어있지 않은 triggers 배열을 가짐', () => {
+  test('SD-14: 전체 32개 엔트리 각각 비어있지 않은 triggers 배열을 가짐', () => {
     // ★ 2026-09-02 갱신 — 실제 GWP_REGISTRY가 31개로, 이전 기대값(27)은
     // 그 사이 레지스트리 구성이 바뀌며(K-Mail 신설로 28, K-Plan/K-Watch/
     // K-Job의 AC 오케스트레이션 편입으로 +3 → 31) 노후화된 숫자였다. 이
     // assert 자체가 "숫자가 바뀌면 확인 신호로만 취급"하도록 설계된 정적
     // 위생 점검이라, 실제 결함이 아니라 단순 갱신.
-    assert.equal(GWP_REGISTRY.length, 31, `엔트리 수 변경 감지(현재 ${GWP_REGISTRY.length}) — 이 숫자가 바뀌면 다른 곳(문서 등)도 갱신 필요할 수 있음, 실패 아니라 확인 신호로만 취급해도 됨`);
+    // ★ 2026-09-28 갱신 — kestate-appraisal(SP-24a, status:'pending') 신설로
+    // 31 → 32. status가 'pending'이라 candidate-prefilter.js/call-ai.js의
+    // active 전용 필터를 통과하지 못해 실사용자에게는 서빙되지 않는다.
+    assert.equal(GWP_REGISTRY.length, 32, `엔트리 수 변경 감지(현재 ${GWP_REGISTRY.length}) — 이 숫자가 바뀌면 다른 곳(문서 등)도 갱신 필요할 수 있음, 실패 아니라 확인 신호로만 취급해도 됨`);
     for (const e of GWP_REGISTRY) {
       assert.ok(Array.isArray(e.triggers) && e.triggers.length > 0, `${e.id}: triggers 비어있음`);
     }
