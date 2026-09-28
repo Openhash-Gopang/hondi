@@ -61,3 +61,12 @@ test('compareToBaseline — 같은 표본에서 모델과 기준선 비교', () 
   assert.equal(compareToBaseline(bad).beats_baseline, false);
   assert.equal(compareToBaseline([rec(100, 100)]).beats_baseline, null);   // 기준선 없으면 판정 불가
 });
+
+test('bias_median — 극단값 하나에 평균 편향은 폭발하지만 중앙값 편향은 안정적이다', () => {
+  const rows = Array.from({ length: 99 }, () => ({ estimated_price: 110, realized_price: 100 }));     // 전부 +10%
+  rows.push({ estimated_price: 110, realized_price: 1 });                                             // 실제가가 1원인 극단값 1건
+  const m = evaluate(rows);
+  assert.ok(m.bias > 1);                                   // 평균 백분율 오차: 극단값 하나가 (110−1)/1 = 10,900%를 더해 폭발
+  near(m.bias_median, 0.10);                               // 중앙값은 +10% 그대로
+  assert.equal(evaluate([rec(100, null)]).bias_median, null);
+});
