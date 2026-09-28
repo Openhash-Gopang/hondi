@@ -22,7 +22,9 @@
  *
  * ★ 임계값(편향 허용 3%, 목표 커버리지 95%, 소표본 30건)은 가정이며 보정되지 않았다.
  */
-import { computeAdvance } from './hondi-advance-rate.js';
+import { computeAdvance, LIQUIDITY_TIERS } from './hondi-advance-rate.js';
+import { transactionConfidence, gate, DEFAULT_MIN_CONFIDENCE } from './hondi-confidence-gate.js';
+import { downturnCapBps } from './hondi-loss-defense.js';
 import { advanceAmount } from './hondi-settlement.js';
 import { evaluate, LOW_SAMPLE_N } from './hondi-valuation-metrics.js';
 
@@ -67,8 +69,17 @@ export function mediationEstimate({ point, sigma, model_version, basis = '' }) {
  * 대출 트랙 산출물 — 공정가치를 참조해 보수적 담보가치·선지급액·LTV를 낸다.
  * collateral_value = 하위 5% 시나리오에서 판매비용·자본비용을 뺀 순회수 가능 가치(공정가치 이하).
  * ltv_bps = 선지급액 / 담보가치. 안전 여유·정책 상한·사다리 상한만큼 항상 100% 아래다.
+ *
+ * 선지급 한도에 걸리는 제약(강한 순서): veto(소유권 미확정 등) → confidence_gate(거래 확신도 미달, 주피터님 2026-09-28)
+ *   → stress_cap(하락장 스트레스, 선택) → 통계·정책·사다리 상한. 확신도 미달이면 선지급은 0이지만 담보가치는
+ *   정보로 남기고, 시장 거래 중재(중재 트랙)는 영향받지 않는다.
+ * window_days = 허용 매각 기간: ladder에 round_interval_days가 있으면 max_round × 간격, 없으면 등급의 기본 예상 일수.
+ * stress: { annual_decline_bps, recovery_days, enforcement_cost_bps?, margin_bps? } — 주면 종결 경로 하락장 상한을 건다.
  */
-export function lendingEstimate({ fair_value, inputs, annual_rate_bps, fee_bps = 0, ladder = null, cap_bps, empirical_ratio_p05 = null, empirical_n = 0, model_version }) {
+export function lendingEstimate({
+  fair_value, inputs, annual_rate_bps, fee_bps = 0, ladder = null, cap_bps, empirical_ratio_p05 = null, empirical_n = 0,
+  min_confidence = DEFAULT_MIN_CONFIDENCE, stress = null, model_version,
+}) {
   posInt('fair_value', fair_value, 1);
   if (typeof model_version !== 'string' || !model_version) throw new RangeError('model_version이 필요합니다');
   const { clean, dropped } = sanitizeInputs('lending', inputs);
@@ -78,14 +89,36 @@ export function lendingEstimate({ fair_value, inputs, annual_rate_bps, fee_bps =
     ...(cap_bps != null ? { cap_bps } : {}),
     ladder: ladder ? { ...ladder, start_price: fair_value } : null,
   });
+  const tierRow = LIQUIDITY_TIERS.find(t => t.tier === r.tier);
+  const window_days = ladder?.round_interval_days ? ladder.max_round * ladder.round_interval_days : tierRow.expected_days;
+  const confidence = transactionConfidence({ txn_12m: clean.txn_12m, sigma: r.sigma, window_days, flags: clean.registry_flags ?? {} });
+  const g = gate(confidence, min_confidence);
+
+  let advance_bps = r.advance_bps, binding = r.binding, stress_cap_bps = null;
+  const reasons = [...r.reasons];
+  if (stress) {
+    stress_cap_bps = downturnCapBps({
+      annual_decline_bps: stress.annual_decline_bps, days_outstanding: window_days + stress.recovery_days, annual_rate_bps,
+      enforcement_cost_bps: stress.enforcement_cost_bps ?? 0, margin_bps: stress.margin_bps ?? 0,
+    });
+    const capped = Math.floor(stress_cap_bps / 100) * 100;
+    reasons.push(`하락장 스트레스 상한 ${stress_cap_bps / 100}% (연 ${stress.annual_decline_bps / 100}% 하락, 사건 ${window_days}일 + 회수 ${stress.recovery_days}일)`);
+    if (capped < advance_bps) { advance_bps = capped; binding = 'stress_cap'; }
+  }
+  if (r.binding !== 'veto') {
+    reasons.push(`거래 확신도 ${confidence.score10}/10 (제약 요인: ${confidence.limiting}) — 차단 기준 ${g.threshold * 10}/10 ${g.passed ? '통과' : '미달 → 선지급 차단'}`);
+    if (!g.passed) { advance_bps = 0; binding = 'confidence_gate'; }
+  }
+
   const collateral_value = mulBpsFloor(fair_value, r.collateral_bps);
-  const advance = advanceAmount({ estimated_price: fair_value, advance_bps: r.advance_bps });
+  const advance = advanceAmount({ estimated_price: fair_value, advance_bps });
   if (collateral_value > fair_value) throw new Error('불변식 위반: 담보가치가 공정가치를 넘었습니다');
   if (advance > collateral_value) throw new Error('불변식 위반: 선지급액이 담보가치를 넘었습니다');
   const ltv_bps = collateral_value > 0 ? Number((BigInt(advance) * 10000n) / BigInt(collateral_value)) : 0;
   return Object.freeze({
-    track: 'lending', model_version, fair_value_ref: fair_value, collateral_value, advance_bps: r.advance_bps, advance, ltv_bps,
-    binding: r.binding, tier: r.tier, ratio_quantile_used: r.ratio_quantile_used, dropped_inputs: dropped, reasons: r.reasons,
+    track: 'lending', model_version, fair_value_ref: fair_value, collateral_value, advance_bps, advance, ltv_bps,
+    binding, tier: r.tier, ratio_quantile_used: r.ratio_quantile_used, dropped_inputs: dropped, reasons,
+    confidence, gate: g, stress_cap_bps, window_days,
   });
 }
 

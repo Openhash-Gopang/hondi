@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { terminationExposure, allocateLoss, terminationThrottle, poolThrottle, checkConcentration, applyDefenses } from '../../src/gopang/ai/hondi-loss-defense.js';
+import { terminationExposure, allocateLoss, terminationThrottle, poolThrottle, checkConcentration, applyDefenses, downturnCapBps } from '../../src/gopang/ai/hondi-loss-defense.js';
 import { settleTermination, carryAmount } from '../../src/gopang/ai/hondi-settlement.js';
 
 test('settleTermination — 회수 0이면 원금+자본비용이 손실, 회수가 충분하면 손실 0과 초과분은 당사자 몫', () => {
@@ -106,4 +106,22 @@ test('applyDefenses — 선지급률을 결코 늘리지 않고, 100bp 단위로
     if (ms.length) assert.ok(applyDefenses(a, [...ms, 9000]) <= r);        // 승수를 더할수록 같거나 작아진다
   }
   assert.throws(() => applyDefenses(8300, [10001]), RangeError);
+});
+
+test('downturnCapBps — 손계산 일치, 경과일 0이면 집행비용만, 경과일·하락률·이율이 클수록 상한은 낮아진다', () => {
+  // 연 20% 하락, 331일, 집행비용 3%, 연 8%: 0.8^(331/365) × 0.97 / (1 + 0.08×331/365)
+  const yrs = 331 / 365, expected = Math.floor(Math.pow(0.8, yrs) * 0.97 / (1 + 0.08 * yrs) * 10000);
+  assert.equal(downturnCapBps({ annual_decline_bps: 2000, days_outstanding: 331, annual_rate_bps: 800, enforcement_cost_bps: 300 }), expected);
+  assert.ok(expected > 7300 && expected < 7500);
+  assert.equal(downturnCapBps({ annual_decline_bps: 2000, days_outstanding: 0, annual_rate_bps: 800, enforcement_cost_bps: 300 }), 9700);
+  assert.equal(downturnCapBps({ annual_decline_bps: 0, days_outstanding: 0, annual_rate_bps: 0 }), 10000);
+  const cap = o => downturnCapBps({ annual_decline_bps: 2000, days_outstanding: 200, annual_rate_bps: 800, enforcement_cost_bps: 300, ...o });
+  assert.ok(cap({ days_outstanding: 100 }) > cap({ days_outstanding: 300 }));
+  assert.ok(cap({ annual_decline_bps: 1000 }) > cap({ annual_decline_bps: 3000 }));
+  assert.ok(cap({ annual_rate_bps: 400 }) > cap({ annual_rate_bps: 1200 }));
+  assert.equal(cap({ margin_bps: 500 }), cap() - 500);
+  assert.equal(downturnCapBps({ annual_decline_bps: 9999, days_outstanding: 3650, annual_rate_bps: 800 }), 0);      // 극단 하락 → 0(음수로 내려가지 않는다)
+  assert.throws(() => downturnCapBps({ annual_decline_bps: 10000, days_outstanding: 1, annual_rate_bps: 800 }), RangeError);
+  assert.throws(() => downturnCapBps({ annual_decline_bps: 2000, days_outstanding: 3651, annual_rate_bps: 800 }), RangeError);
+  assert.throws(() => downturnCapBps({ annual_decline_bps: 2000, days_outstanding: 1.5, annual_rate_bps: 800 }), RangeError);
 });

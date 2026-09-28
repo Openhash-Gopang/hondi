@@ -168,3 +168,65 @@ test('대출 판정은 통계적 양립성을 본다 — 정확히 보정된 모
   assert.equal(d.verdict, 'fail');
   assert.equal(evaluateLendingTrack(mk(20, 25)).verdict, 'low_sample');
 });
+
+const LADDER60 = { max_round: 61, round_interval_days: 1, reduction_ppm: 5_570 };
+const MED = { txn_12m: 15, comps_count: 8, comps_cv: 0.10, months_stale: 3 };
+const LOW = { txn_12m: 5, comps_count: 4, comps_cv: 0.15, months_stale: 4 };
+
+test('확신도 차단 — 60일 허용 기준: 아파트·보통은 통과, 거래 적은 물건은 선지급 0(담보가치는 정보로 남는다)', () => {
+  const run = inputs => lendingEstimate({ fair_value: F, inputs, annual_rate_bps: 800, ladder: LADDER60, model_version: 'g' });
+  const apt = run(APT), med = run(MED), low = run(LOW), thin = run(THIN);
+  assert.equal(apt.gate.passed, true); assert.ok(apt.advance > 0);
+  assert.equal(med.gate.passed, true); assert.ok(med.advance > 0);                 // 확신도 약 0.57 ≥ 0.5
+  assert.equal(low.gate.passed, false); assert.equal(low.advance, 0); assert.equal(low.binding, 'confidence_gate');
+  assert.equal(thin.gate.passed, false); assert.equal(thin.advance, 0); assert.equal(thin.binding, 'confidence_gate');
+  assert.ok(thin.collateral_value > 0 && thin.confidence.score10 < 2);             // 담보가치는 계산되어 남고, 확신도 점수도 기록
+  assert.equal(thin.confidence.limiting, 'precision');
+  assert.ok(thin.reasons.some(x => x.includes('선지급 차단')));
+  assert.equal(apt.window_days, 61);
+});
+
+test('임계값을 올리면 더 많이 차단되고, 0이면 차단 없음(이전 동작), 중재 트랙은 무관', () => {
+  const at = (inputs, m) => lendingEstimate({ fair_value: F, inputs, annual_rate_bps: 800, ladder: LADDER60, min_confidence: m, model_version: 'g' });
+  assert.ok(at(MED, 0.4).advance > 0); assert.equal(at(MED, 0.7).advance, 0); assert.equal(at(MED, 0.7).binding, 'confidence_gate');
+  assert.ok(at(APT, 0.85).advance > 0); assert.equal(at(APT, 0.95).advance, 0);
+  assert.ok(at(THIN, 0).advance >= 0 && at(THIN, 0).binding !== 'confidence_gate');   // 0 = 차단 해제
+  const m0 = mediationEstimate({ point: F, sigma: 0.1, model_version: 'm' });
+  for (const th of [0, 0.5, 0.95]) { assert.ok(assertSeparation(mediationEstimate({ point: F, sigma: 0.1, model_version: 'm' }), at(APT, th))); }
+  assert.equal(m0.fair_value, F);                                                      // 선지급이 막혀도 시장 중재의 공정가치는 그대로
+  assert.throws(() => at(APT, 1.5), RangeError);
+});
+
+test('거부 조건(veto)이 확신도 차단보다 우선한다', () => {
+  const l = lendingEstimate({ fair_value: F, inputs: { ...APT, registry_flags: { unresolved_title: true } }, annual_rate_bps: 800, ladder: LADDER60, model_version: 'v' });
+  assert.equal(l.binding, 'veto'); assert.equal(l.advance, 0); assert.equal(l.confidence.components.legal, 0);
+});
+
+test('하락장 스트레스 상한 — 완만한 하락(연 20%)에서는 사다리 상한이 이미 더 촘촘하고, 가혹한 하락(연 30%)이나 긴 회수에서만 걸린다', () => {
+  const st = (decline, recovery_days) => lendingEstimate({ fair_value: F, inputs: APT, annual_rate_bps: 800, ladder: LADDER60, model_version: 's',
+    stress: { annual_decline_bps: decline, recovery_days, enforcement_cost_bps: 300 } });
+  const none = lendingEstimate({ fair_value: F, inputs: APT, annual_rate_bps: 800, ladder: LADDER60, model_version: 's' });
+  const mild = st(2000, 270);                                  // 연 20% 하락, 회수 270일 → 스트레스 상한 약 73% > 사다리 상한 약 68%
+  assert.equal(mild.binding, 'ladder_cap'); assert.equal(mild.advance, none.advance); assert.ok(mild.stress_cap_bps > mild.advance_bps);
+  const harsh = st(3000, 270);                                 // 연 30% 하락 → 스트레스 상한 약 65% < 사다리 상한
+  assert.equal(harsh.binding, 'stress_cap'); assert.ok(harsh.advance < none.advance);
+  const court = st(2000, 517);                                 // 회수가 법원 경매 경로(약 17개월)처럼 길면 20% 하락에서도 걸린다
+  assert.equal(court.binding, 'stress_cap'); assert.ok(court.advance < none.advance);
+  const fast = st(3000, 90);                                   // 같은 가혹한 하락이라도 회수가 빠르면 스트레스 상한이 풀린다
+  assert.notEqual(fast.binding, 'stress_cap'); assert.ok(fast.advance > harsh.advance);
+  assert.ok(harsh.reasons.some(x => x.includes('하락장 스트레스'))); assert.equal(none.stress_cap_bps, null);
+  const gated = lendingEstimate({ fair_value: F, inputs: THIN, annual_rate_bps: 800, ladder: LADDER60, model_version: 's', stress: { annual_decline_bps: 2000, recovery_days: 270 } });
+  assert.equal(gated.binding, 'confidence_gate'); assert.equal(gated.advance, 0);      // 차단은 스트레스 상한보다 강하다
+});
+
+test('속성(무작위 1000건) — 차단이 켜져 있어도 담보가치 ≤ 공정가치, 선지급 ≤ 담보가치, 차단된 건은 선지급 0', () => {
+  let s = 8080; const rnd = () => (s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32;
+  for (let i = 0; i < 1000; i++) {
+    const fv = 1_000_000 + Math.floor(rnd() * 900_000_000);
+    const inputs = { txn_12m: Math.floor(rnd() * 80), comps_count: Math.floor(rnd() * 40), comps_cv: rnd() < 0.2 ? null : rnd() * 0.4, months_stale: rnd() * 18 };
+    const l = lendingEstimate({ fair_value: fv, inputs, annual_rate_bps: Math.floor(rnd() * 1500), ladder: rnd() < 0.5 ? LADDER60 : null,
+      min_confidence: rnd(), stress: rnd() < 0.5 ? { annual_decline_bps: Math.floor(rnd() * 5000), recovery_days: Math.floor(rnd() * 500) } : null, model_version: 'p' });
+    assert.ok(l.collateral_value <= fv && l.advance <= l.collateral_value);
+    if (!l.gate.passed) assert.equal(l.advance, 0);
+  }
+});

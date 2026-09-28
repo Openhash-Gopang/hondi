@@ -122,3 +122,24 @@ export function applyDefenses(advance_bps, multipliers_bps = []) {
   const v = Number((BigInt(advance_bps) * m) / BigInt(BPS));
   return Math.floor(v / 100) * 100;
 }
+
+/**
+ * 하락장 스트레스 상한(bp) — 부동산 경기가 전반적으로 하락하는 경우(주피터님 지시 2026-09-28)의 방어.
+ * 미매각 종결 경로에서 담보를 처분할 때, 시장이 연 annual_decline_bps로 하락한다고 가정해도 선지급 원금과
+ * 자본비용이 회수되는 최대 선지급률이다:
+ *     상한 = (1 − 연 하락률)^(경과일/365) × (1 − 집행비용률) / (1 + 연이율 × 경과일/365) − 여유
+ * days_outstanding = 선지급부터 회수 완료까지의 총 일수(사건 수명 + 종결 후 회수 기간).
+ * 이 식이 보여주는 것: 경과일이 짧을수록 상한이 올라간다 — 그러나 사건 수명(며칠~두 달)보다 종결 후 회수 기간
+ * (수개월~1년 이상)이 경과일의 대부분을 차지하므로, 사건 수명을 줄이는 것만으로는 효과가 작다(sim-downturn.mjs).
+ * 매각이 바닥가 이상에서 성사되는 경로에서는 시장 하락과 무관하게 회수가 보장되므로(바닥가 불변식) 이 상한은
+ * "종결 경로"의 방어다.
+ */
+export function downturnCapBps({ annual_decline_bps, days_outstanding, annual_rate_bps, enforcement_cost_bps = 0, margin_bps = 0 }) {
+  bpsRange('annual_decline_bps', annual_decline_bps, 9999); bpsRange('annual_rate_bps', annual_rate_bps, 10000);
+  bpsRange('enforcement_cost_bps', enforcement_cost_bps); bpsRange('margin_bps', margin_bps);
+  if (!Number.isSafeInteger(days_outstanding) || days_outstanding < 0 || days_outstanding > 3650) throw new RangeError(`days_outstanding: 0~3650 정수여야 합니다 (받은 값: ${days_outstanding})`);
+  const yrs = days_outstanding / 365;
+  const stressed = Math.pow(1 - annual_decline_bps / BPS, yrs) * (1 - enforcement_cost_bps / BPS);
+  const carry = 1 + (annual_rate_bps / BPS) * yrs;
+  return Math.max(0, Math.min(BPS, Math.floor((stressed / carry) * BPS) - margin_bps));
+}
