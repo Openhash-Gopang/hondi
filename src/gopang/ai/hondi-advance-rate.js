@@ -99,14 +99,17 @@ export function computeAdvance({
   if (vetoed.length || sg.sigma > SIGMA_VETO) {
     const reasons = vetoed.map(f => `거부: ${VETO_LABEL[f]}`);
     if (sg.sigma > SIGMA_VETO) reasons.push(`거부: 추정 불확실성 σ=${sg.sigma.toFixed(2)}가 한계 ${SIGMA_VETO}를 넘음`);
-    return { ...base, advance_bps: 0, binding: 'veto', statistical_bps: 0, ratio_quantile_theory: null, ratio_quantile_used: null, reasons };
+    return { ...base, advance_bps: 0, binding: 'veto', statistical_bps: 0, collateral_bps: 0, ratio_quantile_theory: null, ratio_quantile_used: null, reasons };
   }
 
   const q_theory = t.expected_ratio * Math.exp(-Z95 * sg.sigma);
   const useEmp = empirical_ratio_p05 != null && empirical_n >= MIN_EMPIRICAL_N;
   if (useEmp && !(empirical_ratio_p05 > 0 && empirical_ratio_p05 <= 2)) throw new RangeError('empirical_ratio_p05: 0 초과 2 이하여야 합니다');
   const q_used = useEmp ? Math.min(q_theory, empirical_ratio_p05) : q_theory;
-  const statistical = maxAdvanceBps({ ratio_quantile: q_used, selling_cost_bps: t.selling_cost_bps, fee_bps, annual_rate_bps, days: t.expected_days }) - SAFETY_MARGIN_BPS;
+  // collateral_bps = 하위 5% 시나리오에서 판매비용·자본비용을 뺀 순회수 가능 비율(공정가치 대비, 안전 여유 차감 전).
+  // 대출 트랙의 "담보가치"가 이 값이다(hondi-valuation-tracks.js). 선지급 한도는 여기서 안전 여유를 더 뺀다.
+  const collateral_bps = maxAdvanceBps({ ratio_quantile: q_used, selling_cost_bps: t.selling_cost_bps, fee_bps, annual_rate_bps, days: t.expected_days });
+  const statistical = collateral_bps - SAFETY_MARGIN_BPS;
   const statistical_bps = Math.max(0, statistical);
 
   // 사다리 상한: 매각까지 걸리는 일수는 시장 예상 일수와 (허용 회차 × 회차 간격) 중 큰 쪽(보수적)
@@ -135,5 +138,5 @@ export function computeAdvance({
     ...(ladder_cap_bps != null ? [`사다리 상한 ${ladder_cap_bps / 100}% (최대 ${ladder.max_round}회차까지 허용, 회차마다 ${(ladder.reduction_ppm ?? (ladder.reduction_bps ?? 2000) * 100) / 10000}% 저감)`] : []),
     `최종 ${advance_bps / 100}% (제약: ${{ policy_cap: '유동성 등급 정책 상한', empirical: '백테스트 실측', ladder_cap: '매각 사다리 상한', statistical: '통계적 한도' }[binding]})`,
   ];
-  return { ...base, advance_bps, binding, statistical_bps, ladder_cap_bps, ratio_quantile_theory: q_theory, ratio_quantile_used: q_used, reasons };
+  return { ...base, advance_bps, binding, statistical_bps, collateral_bps, ladder_cap_bps, ratio_quantile_theory: q_theory, ratio_quantile_used: q_used, reasons };
 }

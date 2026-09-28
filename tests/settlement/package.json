@@ -3,10 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:unit": "node --test settlement.test.mjs metrics.test.mjs advance-rate.test.mjs sale-ladder.test.mjs case-state.test.mjs loss-defense.test.mjs",
+    "test:unit": "node --test settlement.test.mjs metrics.test.mjs advance-rate.test.mjs sale-ladder.test.mjs case-state.test.mjs loss-defense.test.mjs tracks.test.mjs",
     "sim": "node sim-advance-yield.mjs",
     "sim:tiers": "node sim-advance-tiers.mjs",
     "sim:ladder": "node sim-ladder.mjs",
-    "sim:termination": "node sim-termination.mjs"
+    "sim:termination": "node sim-termination.mjs",
+    "sim:tracks": "node sim-tracks.mjs"
   }
 }

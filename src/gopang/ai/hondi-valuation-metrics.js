@@ -6,7 +6,8 @@
  *
  * 지표(부동산 자동평가 업계 관행):
  *   - APE = |추정 − 실제| / 실제, MdAPE = APE 중앙값(이상치에 강함), MAPE = 평균
- *   - bias = 평균((추정 − 실제) / 실제): +면 체계적 과대평가
+ *   - bias = 평균((추정 − 실제) / 실제): +면 체계적 과대평가. 두꺼운 꼬리에서는 극단값에 무너지므로
+ *     bias_median(같은 값의 중앙값)을 함께 낸다 — 판정에는 bias_median을 쓴다.
  *   - PE10/PE20 = APE가 10%/20% 이내인 비율. 단, 이진 지표라 10.1% 빗나감과 30% 빗나감을 같게
  *     세므로 MdAPE·bias·하방 분위와 반드시 함께 본다.
  *   - ratio 분위수 = 실제/추정. 하위 분위(p05·p10)가 선지급률을 정하는 핵심 입력이다
@@ -44,11 +45,12 @@ export function evaluate(records) {
   }
   const n = ape.length;
   const base = { n_total: records.length, n_used: n, n_unrealized, n_invalid, low_sample: n < LOW_SAMPLE_N };
-  if (!n) return { ...base, mdape: null, mape: null, bias: null, pe10: null, pe20: null, ratio: null };
-  const apeS = [...ape].sort(asc), ratioS = [...ratio].sort(asc);
+  if (!n) return { ...base, mdape: null, mape: null, bias: null, bias_median: null, pe10: null, pe20: null, ratio: null };
+  const apeS = [...ape].sort(asc), ratioS = [...ratio].sort(asc), peS = [...pe].sort(asc);
   return {
     ...base,
     mdape: quantile(apeS, 0.5), mape: mean(ape), bias: mean(pe),
+    bias_median: quantile(peS, 0.5),   // 중앙값 편향 — 평균 백분율 오차는 실제가가 0에 가까운 극단값 하나에 무너지므로(두꺼운 꼬리) 판정에는 이쪽을 쓴다
     pe10: ape.filter(x => x <= 0.10).length / n, pe20: ape.filter(x => x <= 0.20).length / n,
     ratio: { p05: quantile(ratioS, 0.05), p10: quantile(ratioS, 0.10), p50: quantile(ratioS, 0.5), p90: quantile(ratioS, 0.9), p95: quantile(ratioS, 0.95) },
   };
