@@ -5,6 +5,7 @@ import {
   combineSigma, evidenceOk, reconcileLlmFigure, realizedAnnualVol,
   nationalAdjustment, regionalAdjustment, individualAdjustment, stagedValuation,
   deductLienFromCollateral, NATIONAL_SIGMA_NONE, DEFAULT_ANNUAL_VOL, REGIONAL_SIGMA_NONE,
+  INDIVIDUAL_DEFECT_SIGMA, INDIVIDUAL_DEFECT_SIGMA_SEVERE,
 } from '../../src/gopang/ai/hondi-staged-valuation.js';
 
 const near = (a, b, eps = 1e-6) => assert.ok(Math.abs(a - b) < eps, `${a} ≉ ${b}`);
@@ -191,6 +192,78 @@ test('individualAdjustment — 출처 없는 금액 주장은 차감하지 않�
   assert.equal(r.assumed_burden_deduction, 0);
 });
 
+// ───────────────────────────── 가압류·가처분·유치권 → 전체 거부(2026-09-28 3차) ─────────────────────────────
+
+test('individualAdjustment — 등기부 확인됐어도 가압류가 확인되면 말소기준권리 판정 없이 전체 거부한다', () => {
+  const r = individualAdjustment({
+    registry: {
+      confirmed: ev(),
+      unresolved_encumbrances: [{ type: 'provisional_attachment', evidence: ev() }],
+    },
+  });
+  assert.equal(r.rejected, true);
+  assert.equal(r.sigma_individual, null);
+  assert.equal(r.registry_flags.unknown_senior_claims, false);
+  assert.equal(r.registry_flags.high_severity_legal_issue, true);
+});
+
+test('individualAdjustment — 가처분·유치권도 동일하게 거부하고, 라벨이 이유에 포함된다', () => {
+  const r1 = individualAdjustment({ registry: { confirmed: ev(), unresolved_encumbrances: [{ type: 'injunction', evidence: ev() }] } });
+  assert.equal(r1.rejected, true);
+  assert.ok(r1.reasons.some(x => x.includes('가처분')));
+
+  const r2 = individualAdjustment({ registry: { confirmed: ev(), unresolved_encumbrances: [{ type: 'possessory_lien', evidence: ev() }] } });
+  assert.equal(r2.rejected, true);
+  assert.ok(r2.reasons.some(x => x.includes('유치권')));
+});
+
+test('individualAdjustment — 출처 없는 가압류 주장은 채택하지 않고 정상 진행한다(지어내지 않는다 원칙)', () => {
+  const r = individualAdjustment({
+    registry: {
+      confirmed: ev(),
+      unresolved_encumbrances: [{ type: 'provisional_attachment', evidence: { source: '', asof: '2026-09-01' } }],
+    },
+  });
+  assert.equal(r.rejected, false);
+});
+
+test('individualAdjustment — 알 수 없는 encumbrance type은 무시한다(화이트리스트 밖)', () => {
+  const r = individualAdjustment({
+    registry: { confirmed: ev(), unresolved_encumbrances: [{ type: 'unknown_type_xyz', evidence: ev() }] },
+  });
+  assert.equal(r.rejected, false);
+});
+
+test('individualAdjustment — 정상 케이스는 high_severity_legal_issue: false를 명시한다', () => {
+  const r = individualAdjustment({ registry: { confirmed: ev() } });
+  assert.equal(r.rejected, false);
+  assert.equal(r.registry_flags.high_severity_legal_issue, false);
+});
+
+// ───────────────────────────── 맹지 등 건축 제약형 하자 → σ 가산치 확대(2026-09-28 3차) ─────────────────────────────
+
+test('individualAdjustment — road_access_blocked 하자는 일반 하자보다 σ가 크다', () => {
+  const normal = individualAdjustment({
+    registry: { confirmed: ev() },
+    defects: [{ type: '누수', evidence: ev() }],
+  });
+  const severe = individualAdjustment({
+    registry: { confirmed: ev() },
+    defects: [{ type: 'road_access_blocked', evidence: ev() }],
+  });
+  assert.ok(severe.sigma_individual > normal.sigma_individual);
+  assert.ok(INDIVIDUAL_DEFECT_SIGMA_SEVERE > INDIVIDUAL_DEFECT_SIGMA);
+});
+
+test('individualAdjustment — 출처 없는 road_access_blocked 주장은 채택하지 않는다', () => {
+  const r1 = individualAdjustment({ registry: { confirmed: ev() } });
+  const r2 = individualAdjustment({
+    registry: { confirmed: ev() },
+    defects: [{ type: 'road_access_blocked', evidence: { source: '', asof: '2026-09-01' } }],
+  });
+  near(r1.sigma_individual, r2.sigma_individual, 1e-9);
+});
+
 // ───────────────────────────── 종합 ─────────────────────────────
 
 test('stagedValuation — 가상 사례: 사례 3건 중앙값 1억, 지수 100→97.5, 정비구역 초기+인구감소, 제3자 근저당 5천만', () => {
@@ -223,6 +296,19 @@ test('stagedValuation — 등기부 미확인이면 전체를 거부하고 fair_
   assert.equal(r.rejected, true);
   assert.equal(r.fair_value, null);
   assert.equal(r.registry_flags.unknown_senior_claims, true);
+});
+
+test('stagedValuation — 등기부는 확인됐지만 가압류가 있으면 전체를 거부하고 high_severity_legal_issue를 세운다', () => {
+  const r = stagedValuation({
+    comps: [{ price: 100_000_000, txn_date: '2026-01-01', index_at_txn: null }],
+    valuation_date: '2026-09-28',
+    registry: { confirmed: ev(), unresolved_encumbrances: [{ type: 'provisional_attachment', evidence: ev() }] },
+    model_version: 'staged-v0.1',
+  });
+  assert.equal(r.rejected, true);
+  assert.equal(r.fair_value, null);
+  assert.equal(r.registry_flags.unknown_senior_claims, false);
+  assert.equal(r.registry_flags.high_severity_legal_issue, true);
 });
 
 test('stagedValuation — model_version 없으면 던진다', () => {

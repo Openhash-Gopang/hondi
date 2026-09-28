@@ -20,6 +20,17 @@
  *      등기부를 확인하지 못했으면 "선순위 권리 불명"으로 거부한다(hondi-advance-rate.js의
  *      unknown_senior_claims veto 플래그와 그대로 연결된다).
  *
+ * ★ 2026-09-28(3차) 추가 — docs/kestate/valuation-methodology.md 갭 분석 반영:
+ *   ④ 가압류·가처분·유치권은 "말소기준권리" 순위 판정(어떤 권리가 매각으로 소멸되고 어떤 권리가
+ *      인수되는지)이 필요한 복잡한 법적 판단이라, 이 코드는 그 판정을 시도하지 않는다. 등기부에서
+ *      이런 권리가 하나라도 확인되면(evidence 있음) 전체를 거부한다(hondi-advance-rate.js의
+ *      high_severity_legal_issue veto 플래그로 연결 — K-Law·변호사 상담 필요). 이는 "확실하지 않으면
+ *      계산하지 않고 거부한다"는 ①·③의 원칙을 그대로 확장한 것이다. 말소기준권리 순위를 실제로
+ *      계산하는 로직은 이번 버전에 포함하지 않는다(향후 과제, valuation-methodology.md §4-1).
+ *   ⑤ 개별 하자(defects) 중 "맹지·도로 미접합"처럼 건축 가능성 자체를 제약하는 유형은 일반 물리적
+ *      하자보다 σ 가산치를 더 크게 둔다(INDIVIDUAL_DEFECT_SEVERE_TYPES) — valuation-methodology.md
+ *      §3-D의 "차량 진입 가능 여부는 지역요인이 아니라 개별요인" 판단을 반영.
+ *
  * 세 단계의 σ는 서로 독립이라 가정하고 분산으로 합친다: σ² = σ_국가² + σ_지역² + σ_개별²
  * (hondi-advance-rate.js의 σ² = σ_pred² + σ_drift² + σ_model² 과 같은 합성 방식).
  * 산출된 fair_value·sigma는 hondi-valuation-tracks.js의 mediationEstimate/lendingEstimate에
@@ -229,6 +240,17 @@ export function regionalAdjustment({ price_level_ratio = null, risk_factors = []
 
 export const INDIVIDUAL_SIGMA_NONE = 0.01;   // ★ 가정, 미보정
 export const INDIVIDUAL_DEFECT_SIGMA = 0.01; // ★ 가정, 미보정 — 물리적 하자 1건당 σ 가산치
+// ★ 2026-09-28(3차) 추가, 가정·미보정 — 맹지·도로 미접합 등 건축 가능성 자체를 제약하는 하자는
+// 일반 하자보다 σ를 더 크게 둔다(valuation-methodology.md §3-D). 목록에 없는 type은 일반 하자로 취급.
+export const INDIVIDUAL_DEFECT_SEVERE_TYPES = ['road_access_blocked'];
+export const INDIVIDUAL_DEFECT_SIGMA_SEVERE = 0.03; // ★ 가정, 미보정
+
+// ★ 2026-09-28(3차) 추가 — 이 목록에 있는 유형이 등기부에서 하나라도 확인되면(evidence 있음)
+// 말소기준권리 순위를 판정하지 않고 전체를 거부한다(위 파일 머리 ④ 참조).
+export const UNRESOLVED_ENCUMBRANCE_TYPES = ['provisional_attachment', 'injunction', 'possessory_lien'];
+const UNRESOLVED_ENCUMBRANCE_LABEL = {
+  provisional_attachment: '가압류', injunction: '가처분', possessory_lien: '유치권',
+};
 
 /**
  * 개별(개별요인 + 권리 차감): 등기부를 확인하지 못했으면 거부한다(선순위 권리 불명).
@@ -236,8 +258,10 @@ export const INDIVIDUAL_DEFECT_SIGMA = 0.01; // ★ 가정, 미보정 — 물리
  *   confirmed: {source, asof}|null,                              // 등기부 열람·확인 여부(사실 확인, 없으면 거부)
  *   assumed_burdens: [{amount, type, evidence:{source,asof}}],    // 매수인이 인수 — 공정가치에서 차감
  *   third_party_liens: [{amount, type, evidence:{source,asof}}],  // 제3자 근저당 — 담보가치(분배 순대금)에서만 차감
+ *   unresolved_encumbrances: [{type, evidence:{source,asof}}],    // 가압류·가처분·유치권 등 — 확인되면 전체 거부
  * }
- * defects: [{ type, evidence:{source,asof} }]  — 물리적 하자 등, σ만 가산
+ * defects: [{ type, evidence:{source,asof} }]  — 물리적 하자 등, σ만 가산(type이
+ *   INDIVIDUAL_DEFECT_SEVERE_TYPES에 있으면 더 큰 σ)
  */
 export function individualAdjustment({ registry, defects = [] }) {
   const confirmed = registry && evidenceOk({ value: 1, ...registry.confirmed });
@@ -245,10 +269,26 @@ export function individualAdjustment({ registry, defects = [] }) {
     return Object.freeze({
       rejected: true, assumed_burden_deduction: 0, third_party_lien_total: 0,
       sigma_individual: null,
-      registry_flags: { unknown_senior_claims: true },
+      registry_flags: { unknown_senior_claims: true, high_severity_legal_issue: false },
       reasons: ['등기부 확인 안 됨(출처·조회일 필요) → 선순위 권리 불명으로 거부(선지급 차단, hondi-advance-rate.js veto 플래그로 전달)'],
     });
   }
+
+  const unresolvedEncumbrances = (Array.isArray(registry.unresolved_encumbrances) ? registry.unresolved_encumbrances : [])
+    .filter(x => x && UNRESOLVED_ENCUMBRANCE_TYPES.includes(x.type) && x.evidence && evidenceOk({ value: 1, ...x.evidence }));
+  if (unresolvedEncumbrances.length > 0) {
+    const labels = unresolvedEncumbrances.map(x => UNRESOLVED_ENCUMBRANCE_LABEL[x.type] || x.type).join(', ');
+    return Object.freeze({
+      rejected: true, assumed_burden_deduction: 0, third_party_lien_total: 0, sigma_individual: null,
+      registry_flags: { unknown_senior_claims: false, high_severity_legal_issue: true },
+      reasons: [
+        `등기부 확인됨(출처: ${registry.confirmed.source}, 조회일 ${registry.confirmed.asof})`,
+        `중대 법적 쟁점 확인됨(${labels}) → 말소기준권리 순위 판정은 이 코드의 범위 밖이라 전체 거부` +
+          '(K-Law·변호사 상담 필요, hondi-advance-rate.js VETO_FLAGS.high_severity_legal_issue로 전달)',
+      ],
+    });
+  }
+
   const sumEvidenced = list => (Array.isArray(list) ? list : [])
     .filter(x => Number.isFinite(x.amount) && x.amount > 0 && evidenceOk({ value: x.amount, ...x.evidence }))
     .reduce((s, x) => s + Math.round(x.amount), 0);
@@ -256,16 +296,19 @@ export function individualAdjustment({ registry, defects = [] }) {
   const third_party_lien_total = sumEvidenced(registry.third_party_liens);
 
   const adoptedDefects = (Array.isArray(defects) ? defects : []).filter(d => d.evidence && evidenceOk({ value: 1, ...d.evidence }));
-  const sigma_individual = combineSigma([INDIVIDUAL_SIGMA_NONE, ...adoptedDefects.map(() => INDIVIDUAL_DEFECT_SIGMA)]);
+  const defectSigmas = adoptedDefects.map(d => INDIVIDUAL_DEFECT_SEVERE_TYPES.includes(d.type) ? INDIVIDUAL_DEFECT_SIGMA_SEVERE : INDIVIDUAL_DEFECT_SIGMA);
+  const sigma_individual = combineSigma([INDIVIDUAL_SIGMA_NONE, ...defectSigmas]);
+  const severeCount = adoptedDefects.filter(d => INDIVIDUAL_DEFECT_SEVERE_TYPES.includes(d.type)).length;
 
   return Object.freeze({
     rejected: false, assumed_burden_deduction, third_party_lien_total, sigma_individual,
-    registry_flags: { unknown_senior_claims: false },
+    registry_flags: { unknown_senior_claims: false, high_severity_legal_issue: false },
     reasons: [
       `등기부 확인됨(출처: ${registry.confirmed.source}, 조회일 ${registry.confirmed.asof})`,
+      '가압류·가처분·유치권 없음(또는 미확인 — 확인됐다면 위에서 이미 거부됨)',
       assumed_burden_deduction > 0 ? `인수 부담(선순위 임차보증금 등) ${assumed_burden_deduction.toLocaleString()}원 → 공정가치에서 차감` : '인수 부담 없음',
       third_party_lien_total > 0 ? `제3자 근저당 ${third_party_lien_total.toLocaleString()}원 → 자산 공정가치는 그대로, 대출 담보가치(분배 순대금)에서만 차감 예정` : '제3자 근저당 없음',
-      `물리적 하자 등 개별 위험 요인 ${adoptedDefects.length}건 채택(σ 가산)`,
+      `물리적 하자 등 개별 위험 요인 ${adoptedDefects.length}건 채택(σ 가산, 그중 건축 제약형 ${severeCount}건)`,
     ],
   });
 }

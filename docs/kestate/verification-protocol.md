@@ -36,7 +36,9 @@ sp-catalog.json에 등록되지 않은 초안이다. 실제 사건에 쓰기 전
 추가로 단계별 원인 분석을 위해 `cause_tags`에 다음을 포함할 수 있다:
 `national_index_missing`(시점수정 자료 없이 진행됨), `regional_ratio_missing`
 (지역 가격 수준비 없이 진행됨), `registry_unconfirmed_rejected`(등기부
-미확인으로 거부됨).
+미확인으로 거부됨), `unresolved_encumbrance_rejected`(2026-09-28 3차 신설
+— 가압류·가처분·유치권 확인으로 거부됨, `high_severity_legal_issue` veto와
+연결).
 
 ## 채택 기준값 — 비워 둠
 
