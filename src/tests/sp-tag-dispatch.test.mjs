@@ -260,7 +260,11 @@ describe('SD — GWP_REGISTRY 구조적 위생 점검', () => {
     // ★ 2026-09-28 갱신 — kestate-appraisal(SP-24a, status:'pending') 신설로
     // 31 → 32. status가 'pending'이라 candidate-prefilter.js/call-ai.js의
     // active 전용 필터를 통과하지 못해 실사용자에게는 서빙되지 않는다.
-    assert.equal(GWP_REGISTRY.length, 32, `엔트리 수 변경 감지(현재 ${GWP_REGISTRY.length}) — 이 숫자가 바뀌면 다른 곳(문서 등)도 갱신 필요할 수 있음, 실패 아니라 확인 신호로만 취급해도 됨`);
+    // ★ 2026-09-28(2차) 갱신 — kestate-search(SP-24b, status:'pending') 신설로
+    // 32 → 33. 이 항목도 메인 앱 트리거 디스패치는 안 거치지만(estate.hondi.net
+    // 위젯이 시스템 프롬프트를 직접 번들링해 /ai/chat 호출), 등록 자체는
+    // 이 레지스트리의 카탈로그 역할을 위해 추가한다.
+    assert.equal(GWP_REGISTRY.length, 33, `엔트리 수 변경 감지(현재 ${GWP_REGISTRY.length}) — 이 숫자가 바뀌면 다른 곳(문서 등)도 갱신 필요할 수 있음, 실패 아니라 확인 신호로만 취급해도 됨`);
     for (const e of GWP_REGISTRY) {
       assert.ok(Array.isArray(e.triggers) && e.triggers.length > 0, `${e.id}: triggers 비어있음`);
     }

@@ -387,6 +387,28 @@ const GWP_REGISTRY = [
       '부동산 담보 대출 감정','공정가치 산정',
     ],
   },
+  {
+    id: 'kestate-search', name: 'K-Estate 매물 검색 도우미', category: 'ECO',
+    type: 'switch',
+    sp_key: 'SP-24b_kestate_search',
+    // 2026-09-28 신설 — estate.hondi.net 상단 채팅창 전용. SP-24_kestate의
+    // "search" 모드 하나만 떼어내 로그인/생태계 맥락 없이 단독 동작하도록
+    // 다시 쓴 것(list·manage·consent_sale은 범위 밖). status는 다른 신규
+    // SP와 동일하게 'pending'이지만, 다른 pending SP와 달리 이 SP는 이미
+    // "라이브"다 — estate.hondi.net의 assets/estate-search-widget.js가
+    // 이 SP 본문을 시스템 프롬프트로 직접 번들링해 call-ai.js를 거치지
+    // 않고 /ai/chat을 바로 호출한다. 여기 status:'pending'은 오직
+    // "메인 hondi 앱(desktop.html) 안에서 자동 트리거 디스패치로는 아직
+    // 호출되지 않는다"는 뜻이며, SWITCH_SP_LOADERS 로더 함수도 아직
+    // 추가하지 않았다(추가하면 메인 앱에서도 트리거될 수 있음 — 이 SP가
+    // 메인 앱 내 다른 부동산 SP(kestate)와 겹치지 않는지 별도 검토 후
+    // 진행). 상세: prompts/SP-24b_kestate_search_v0_1.txt [배포 형태].
+    status: 'pending', priority: 6, threshold: 0.70,
+    description: '지역·건물유형·가격대(및 사용자가 자발적으로 준 추가 조건)를 대화로 수집해 실거래·매물 사이트를 웹 검색하고, 출처·조회일이 붙은 링크 목록을 제출. 가격 평가·추천은 하지 않음(SP-24a 3단계 가치평가와 역할 분리).',
+    triggers: [
+      '매물 검색','집 찾아줘','전세 매물','월세 매물','매매 매물 검색',
+    ],
+  },
 
   // ── 2026-09-02 신설 — K-Plan/K-Watch/K-Job. 셋 다 K-Telecom/K-Estate와
   // 동일한 이유(별도 저장소·도메인이 필요 없는 SP)로 type:'switch'로

@@ -96,6 +96,11 @@ const ALLOWED_ORIGINS = [
   'https://watch.hondi.net',
   'https://job.hondi.net',
   'https://mail.hondi.net',
+  // 2026-09-28 신설 — estate.hondi.net(별도 GitHub Pages 저장소, K-Estate
+  // 소개+매물 검색 채팅창)이 /ai/chat을 직접 호출한다(SP-24b_kestate_search,
+  // assets/estate-search-widget.js). 다른 서브도메인과 동일한 수준(Origin
+  // 검사만, 로그인·과금 게이트 없음)의 노출이며 별도 rate-limit은 없다.
+  'https://estate.hondi.net',
 
   'https://users.hondi.net',
   'https://l1-hanlim.hondi.net',
