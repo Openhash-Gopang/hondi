@@ -1,0 +1,203 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {
+  ENDPOINTS,
+  parseFlatItems,
+  extractHeader,
+  fetchTrades,
+  MolitEndpointNotConfiguredError,
+  MolitApiError,
+} from '../../src/gopang/verification/molit-client.js';
+import { parseDealAmount, compareToComps } from '../../src/gopang/verification/molit-compare.js';
+
+const FIXTURE_OK = `<?xml version="1.0" encoding="UTF-8"?>
+<response>
+  <header>
+    <resultCode>00</resultCode>
+    <resultMsg>NORMAL SERVICE.</resultMsg>
+  </header>
+  <body>
+    <items>
+      <item>
+        <거래금액>   85,000</거래금액>
+        <건축년도>2005</건축년도>
+        <년>2026</년>
+        <법정동> 역삼동</법정동>
+        <아파트>역삼래미안</아파트>
+        <월>8</월>
+        <일>15</일>
+        <전용면적>84.97</전용면적>
+        <지번>123</지번>
+        <지역코드>11680</지역코드>
+        <층>10</층>
+      </item>
+      <item>
+        <거래금액>   82,500</거래금액>
+        <건축년도>2005</건축년도>
+        <년>2026</년>
+        <법정동> 역삼동</법정동>
+        <아파트>역삼래미안</아파트>
+        <월>8</월>
+        <일>22</일>
+        <전용면적>84.97</전용면적>
+        <지번>123</지번>
+        <지역코드>11680</지역코드>
+        <층>3</층>
+      </item>
+    </items>
+    <numOfRows>10</numOfRows>
+    <pageNo>1</pageNo>
+    <totalCount>2</totalCount>
+  </body>
+</response>`;
+
+const FIXTURE_ERROR = `<?xml version="1.0" encoding="UTF-8"?>
+<response>
+  <header>
+    <resultCode>30</resultCode>
+    <resultMsg>SERVICE_KEY_IS_NOT_REGISTERED_ERROR</resultMsg>
+  </header>
+</response>`;
+
+const FIXTURE_EMPTY = `<?xml version="1.0" encoding="UTF-8"?>
+<response>
+  <header>
+    <resultCode>00</resultCode>
+    <resultMsg>NORMAL SERVICE.</resultMsg>
+  </header>
+  <body>
+    <items></items>
+    <numOfRows>10</numOfRows>
+    <pageNo>1</pageNo>
+    <totalCount>0</totalCount>
+  </body>
+</response>`;
+
+// ───────────────────────────── parseFlatItems / extractHeader ─────────────────────────────
+
+test('parseFlatItems — item 여러 건을 평면 필드로 추출', () => {
+  const items = parseFlatItems(FIXTURE_OK);
+  assert.equal(items.length, 2);
+  assert.equal(items[0]['거래금액'].replace(/\s/g, ''), '85,000');
+  assert.equal(items[0]['아파트'], '역삼래미안');
+  assert.equal(items[1]['층'], '3');
+});
+
+test('parseFlatItems — item이 없으면 빈 배열', () => {
+  assert.deepEqual(parseFlatItems(FIXTURE_EMPTY), []);
+});
+
+test('extractHeader — resultCode/resultMsg/totalCount 추출', () => {
+  const h = extractHeader(FIXTURE_OK);
+  assert.equal(h.resultCode, '00');
+  assert.equal(h.resultMsg, 'NORMAL SERVICE.');
+  assert.equal(h.totalCount, 2);
+});
+
+// ───────────────────────────── fetchTrades ─────────────────────────────
+
+test('fetchTrades — 엔드포인트 미확인 데이터셋은 MolitEndpointNotConfiguredError', async () => {
+  await assert.rejects(
+    () => fetchTrades('offi_trade', { lawdCd: '11680', dealYmd: '202608', serviceKey: 'x' }),
+    MolitEndpointNotConfiguredError
+  );
+});
+
+test('fetchTrades — 알 수 없는 데이터셋 키는 즉시 에러', async () => {
+  await assert.rejects(() =>
+    fetchTrades('does_not_exist', { lawdCd: '11680', dealYmd: '202608', serviceKey: 'x' })
+  );
+});
+
+test('fetchTrades — 필수 파라미터 누락 시 명시적 에러(추측하지 않음)', async () => {
+  await assert.rejects(() => fetchTrades('apt_trade', { dealYmd: '202608', serviceKey: 'x' }));
+  await assert.rejects(() => fetchTrades('apt_trade', { lawdCd: '11680', serviceKey: 'x' }));
+  await assert.rejects(() => fetchTrades('apt_trade', { lawdCd: '11680', dealYmd: '202608' }));
+});
+
+test('fetchTrades — 정상 응답을 파싱해 items를 반환(fetch는 모킹)', async () => {
+  const calls = [];
+  const fetchImpl = async (url) => {
+    calls.push(url);
+    return { ok: true, status: 200, text: async () => FIXTURE_OK };
+  };
+  const result = await fetchTrades('apt_trade', {
+    lawdCd: '11680',
+    dealYmd: '202608',
+    serviceKey: 'DUMMY_KEY',
+    fetchImpl,
+  });
+  assert.equal(result.items.length, 2);
+  assert.equal(result.totalCount, 2);
+  assert.equal(result.label, '아파트 매매');
+  assert.ok(calls[0].includes(ENDPOINTS.apt_trade.url));
+  assert.ok(calls[0].includes('serviceKey=DUMMY_KEY'));
+  assert.ok(calls[0].includes('LAWD_CD=11680'));
+  assert.ok(calls[0].includes('DEAL_YMD=202608'));
+});
+
+test('fetchTrades — resultCode가 00이 아니면 MolitApiError', async () => {
+  const fetchImpl = async () => ({ ok: true, status: 200, text: async () => FIXTURE_ERROR });
+  await assert.rejects(
+    () => fetchTrades('apt_trade', { lawdCd: '11680', dealYmd: '202608', serviceKey: 'bad', fetchImpl }),
+    MolitApiError
+  );
+});
+
+test('fetchTrades — HTTP 오류 상태는 그대로 에러로 전파', async () => {
+  const fetchImpl = async () => ({ ok: false, status: 500, text: async () => 'Internal Server Error' });
+  await assert.rejects(() =>
+    fetchTrades('apt_trade', { lawdCd: '11680', dealYmd: '202608', serviceKey: 'x', fetchImpl })
+  );
+});
+
+// ───────────────────────────── parseDealAmount / compareToComps ─────────────────────────────
+
+test('parseDealAmount — 쉼표·공백 포함 만원 단위 문자열을 원 단위로 변환', () => {
+  assert.equal(parseDealAmount('   85,000'), 850000000);
+  assert.equal(parseDealAmount('1,234'), 12340000);
+  assert.equal(parseDealAmount(null), null);
+  assert.equal(parseDealAmount('abc'), null);
+});
+
+test('compareToComps — comps 없으면 matched:false', () => {
+  const r = compareToComps({ fairValue: 800000000, items: [] });
+  assert.equal(r.matched, false);
+  assert.equal(r.comp_count, 0);
+});
+
+test('compareToComps — fairValue가 숫자가 아니면 에러', () => {
+  assert.throws(() => compareToComps({ fairValue: 'x', items: [] }));
+});
+
+test('compareToComps — 중위값·편차·허용범위(sigma_total 기준) 계산', () => {
+  const items = [{ 거래금액: '85,000' }, { 거래금액: '82,500' }];
+  // median = (850000000+825000000)/2 = 837500000, fairValue를 그 근처로 설정
+  const r = compareToComps({ fairValue: 840000000, sigmaTotal: 0.08, items });
+  assert.equal(r.matched, true);
+  assert.equal(r.comp_count, 2);
+  assert.equal(r.comp_median, 837500000);
+  assert.equal(r.tolerance_basis, 'sigma_total');
+  assert.equal(r.within_tolerance, true);
+});
+
+test('compareToComps — 편차가 sigma_total 허용범위 밖이면 within_tolerance:false', () => {
+  const items = [{ 거래금액: '85,000' }, { 거래금액: '82,500' }];
+  // median = 837500000, sigma_total 0.01 → 허용폭이 매우 좁음
+  const r = compareToComps({ fairValue: 950000000, sigmaTotal: 0.01, items });
+  assert.equal(r.within_tolerance, false);
+});
+
+test('compareToComps — sigma_total 없으면 comp_stdev를 기준으로 사용', () => {
+  const items = [{ 거래금액: '85,000' }, { 거래금액: '82,500' }];
+  const r = compareToComps({ fairValue: 837500000, items });
+  assert.equal(r.tolerance_basis, 'comp_stdev');
+  assert.notEqual(r.within_tolerance, null);
+});
+
+test('compareToComps — 기준을 계산할 근거가 전혀 없으면(comp 1건, sigma 없음) 판정하지 않음', () => {
+  const items = [{ 거래금액: '85,000' }];
+  const r = compareToComps({ fairValue: 850000000, items });
+  // comp 1건이면 stdev=0 → toleranceBasis 0 → within_tolerance는 null(판정 보류), false 아님
+  assert.equal(r.within_tolerance, null);
+});
