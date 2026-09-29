@@ -57,6 +57,10 @@ export class MolitEndpointNotConfiguredError extends Error {
   }
 }
 
+// 공공데이터포털 공통 오류 규격의 성공 코드('00')와, RTMS 서비스 자체가
+// 실제로 쓰는 성공 코드('000', 2026-09-29 실 호출로 확인)를 모두 인정한다.
+const SUCCESS_RESULT_CODES = new Set(['00', '000']);
+
 export class MolitApiError extends Error {
   constructor(resultCode, resultMsg) {
     super(`[MOLIT] API 오류 (resultCode=${resultCode}): ${resultMsg}`);
@@ -141,9 +145,13 @@ export async function fetchTrades(datasetKey, params) {
     throw new Error(`[MOLIT] HTTP ${res.status} — ${text.slice(0, 300)}`);
   }
   const header = extractHeader(text);
-  // resultCode가 존재하고 '00'이 아니면 오류(스키마상 header 자체가
-  // 없는 정상 응답도 있어 "없으면 정상"으로 취급).
-  if (header.resultCode && header.resultCode !== '00') {
+  // ★ 2026-09-29 실제 API 호출로 확인 — 공공데이터포털 공통 오류 규격은
+  // 성공 코드가 '00'이지만, 이 RTMS 서비스 자체는 성공 시 '000'/'OK'를
+  // 반환한다(실 호출 결과 resultCode=000, resultMsg=OK로 확인됨). 두
+  // 규격이 섞여 있어 '00'만 성공으로 보면 정상 응답을 오류로 오판한다.
+  // resultCode가 존재하고 SUCCESS_RESULT_CODES에 없으면만 오류로 처리
+  // (스키마상 header 자체가 없는 정상 응답도 있어 "없으면 정상"으로 취급).
+  if (header.resultCode && !SUCCESS_RESULT_CODES.has(header.resultCode)) {
     throw new MolitApiError(header.resultCode, header.resultMsg);
   }
   const items = parseFlatItems(text);

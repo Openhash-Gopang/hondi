@@ -59,6 +59,36 @@ const FIXTURE_ERROR = `<?xml version="1.0" encoding="UTF-8"?>
   </header>
 </response>`;
 
+// ★ 2026-09-29 — 실제 API 호출로 확인된 실제 성공 응답 형태(resultCode=000,
+// resultMsg=OK). RTMS 서비스는 공공데이터포털 공통 규격('00')이 아니라
+// 이 규격을 쓴다. 이 픽스처가 회귀 테스트다 — 이전 버전은 이 응답을
+// MolitApiError로 오판했다.
+const FIXTURE_OK_000 = `<?xml version="1.0" encoding="UTF-8"?>
+<response>
+  <header>
+    <resultCode>000</resultCode>
+    <resultMsg>OK</resultMsg>
+  </header>
+  <body>
+    <items>
+      <item>
+        <거래금액>   30,000</거래금액>
+        <년>2026</년>
+        <법정동> 이도이동</법정동>
+        <아파트>제주아파트</아파트>
+        <월>8</월>
+        <일>10</일>
+        <전용면적>59.9</전용면적>
+        <지역코드>50110</지역코드>
+        <층>5</층>
+      </item>
+    </items>
+    <numOfRows>10</numOfRows>
+    <pageNo>1</pageNo>
+    <totalCount>1</totalCount>
+  </body>
+</response>`;
+
 const FIXTURE_EMPTY = `<?xml version="1.0" encoding="UTF-8"?>
 <response>
   <header>
@@ -136,7 +166,19 @@ test('fetchTrades — 정상 응답을 파싱해 items를 반환(fetch는 모킹
   assert.ok(calls[0].includes('DEAL_YMD=202608'));
 });
 
-test('fetchTrades — resultCode가 00이 아니면 MolitApiError', async () => {
+test('fetchTrades — resultCode=000/OK(RTMS 서비스 자체 성공 규격)도 정상 처리(회귀 테스트)', async () => {
+  const fetchImpl = async () => ({ ok: true, status: 200, text: async () => FIXTURE_OK_000 });
+  const result = await fetchTrades('apt_trade', {
+    lawdCd: '50110',
+    dealYmd: '202608',
+    serviceKey: 'DUMMY_KEY',
+    fetchImpl,
+  });
+  assert.equal(result.items.length, 1);
+  assert.equal(result.totalCount, 1);
+});
+
+test('fetchTrades — resultCode가 00도 000도 아니면 MolitApiError', async () => {
   const fetchImpl = async () => ({ ok: true, status: 200, text: async () => FIXTURE_ERROR });
   await assert.rejects(
     () => fetchTrades('apt_trade', { lawdCd: '11680', dealYmd: '202608', serviceKey: 'bad', fetchImpl }),
