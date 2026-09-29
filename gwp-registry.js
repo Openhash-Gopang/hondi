@@ -409,6 +409,26 @@ const GWP_REGISTRY = [
       '매물 검색','집 찾아줘','전세 매물','월세 매물','매매 매물 검색',
     ],
   },
+  {
+    id: 'kestate-listing', name: 'K-Estate 물건 소개서 작성 도우미', category: 'ECO',
+    type: 'switch',
+    sp_key: 'SP-24c_kestate_listing',
+    // 2026-09-30 신설 — 매도인/경매 신청자가 직접 작성하는 "물건
+    // 소개서"(법원 현황조사서 항목 참고 + 장단점 객관적 기술 + 현장
+    // 방문·사진 촬영 + 드론 촬영 첨부)를 돕는 SP. status는 다른 신규
+    // K-Estate SP(kestate-appraisal·kestate-search)와 동일하게
+    // 'pending'이다 — sp24a-dry-run.mjs 같은 실행 검증 도구가 아직
+    // 이 SP용으로 없고, 동반 비전 프롬프트(SP-24c-IMG)를 호출하는
+    // 코드(physical-scan.js에 대응하는 모듈)도 아직 작성하지 않았다.
+    // call-ai.js의 SWITCH_SP_LOADERS·[CALL_...] 배선도 하지 않는다.
+    // 상세: prompts/SP-24c_kestate_listing_v0_1.txt.
+    status: 'pending', priority: 6, threshold: 0.70,
+    description: '매도인·경매 신청자가 작성하는 물건 소개서(기본 현황·장단점의 객관적 근거 기술·현장 방문 사진·드론 촬영 첨부) 작성 도우미. 가격 평가는 하지 않음(SP-24a 소관)이며, 법원 공식 현황조사서·매각물건명세서를 대신하지 않는다. 아직 실행 검증 전이라 실사용자에게 서빙되지 않는다.',
+    triggers: [
+      '물건 소개서','경매 물건 소개','매물 소개서 작성','현황조사서 참고',
+      '집 소개 자료','경매 신청자 물건 설명',
+    ],
+  },
 
   // ── 2026-09-02 신설 — K-Plan/K-Watch/K-Job. 셋 다 K-Telecom/K-Estate와
   // 동일한 이유(별도 저장소·도메인이 필요 없는 SP)로 type:'switch'로
