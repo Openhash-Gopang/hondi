@@ -12,11 +12,18 @@
  * 그럴듯한 범위에 있는가"를 보는 즉시 대조 점검(sanity check)뿐이며,
  * 이 모듈은 그 점검 전용이다. hondi-valuation-metrics.js의 채점 기준을
  * 대체하지 않는다.
+ *
+ * ★ 2026-09-29 실제 API 호출로 확인 — apt_trade(RTMSDataSvcAptTrade)
+ * 응답 필드는 한글이 아니라 영문 camelCase다(예: dealAmount, aptNm,
+ * excluUseAr, sggCd, umdNm, dealYear/dealMonth/dealDay). "국토부 API는
+ * 한글 필드명을 쓴다"는 통념과 달리 이 엔드포인트는 영문 필드명이었다 —
+ * 최초 구현 때 문서를 확인하지 못해 '거래금액'으로 잘못 가정했던 것을
+ * 실제 응답을 보고 고쳤다.
  */
 
-export const DEAL_AMOUNT_FIELD = '거래금액'; // 만원 단위, 쉼표/공백 포함 문자열로 옴
+export const DEAL_AMOUNT_FIELD = 'dealAmount'; // 만원 단위, 쉼표/공백 포함 문자열로 옴
 
-/** MOLIT 응답의 "거래금액" 필드(예: " 50,000")를 원 단위 숫자로 변환. */
+/** MOLIT 응답의 dealAmount 필드(예: " 50,000")를 원 단위 숫자로 변환. */
 export function parseDealAmount(raw) {
   if (raw == null) return null;
   const n = Number(String(raw).replace(/[,\s]/g, ''));
