@@ -81,8 +81,15 @@ const MAX_TURNS = 40; // 대화가 끝없이 이어지는 걸 막는 안전판
 // 1800 토큰을 다 씀). max_tokens를 넉넉히 잡고, 그래도 모자라면 자동으로
 // 한 단계 더 올려 재시도한다(이 스크립트는 사람이 수동으로 돌리는
 // 검증용 CLI라 비용보다 검증 완주가 우선).
-const INITIAL_MAX_TOKENS = 6000;
-const RETRY_MAX_TOKENS = 12000;
+//
+// ★ 2026-09-29 추가 발견 — 2단계(12000)로도 부족한 사례를 실제로
+// 확인했다: `/molit`로 실제 15건 실거래 데이터를 주입한 뒤 comps를
+// 골라내는 턴은 추론량이 훨씬 커서, 12000 토큰도 reasoning_content
+// 하나로 다 쓰고 content가 여전히 비었다. 그래서 3단계(20000)를
+// 추가했다 — 실거래 데이터처럼 항목 수가 많고 비교·판단이 필요한
+// 입력일수록 추론 토큰이 더 필요하다는 뜻이므로, 이후에도 같은 증상이
+// 재현되면 단계를 하나 더 늘리는 방향으로 대응한다.
+const MAX_TOKENS_TIERS = [6000, 12000, 20000];
 
 function loadSystemPrompt() {
   return readFileSync(PROMPT_PATH, 'utf8');
@@ -125,18 +132,27 @@ async function callChatOnce(system, messages, maxTokens) {
 }
 
 async function callChat(system, messages) {
-  try {
-    return await callChatOnce(system, messages, INITIAL_MAX_TOKENS);
-  } catch (e) {
-    if (isReasoningExhausted(e.raw)) {
+  let lastError;
+  for (let i = 0; i < MAX_TOKENS_TIERS.length; i += 1) {
+    const maxTokens = MAX_TOKENS_TIERS[i];
+    try {
+      return await callChatOnce(system, messages, maxTokens);
+    } catch (e) {
+      lastError = e;
+      if (!isReasoningExhausted(e.raw)) throw e;
+      const nextTier = MAX_TOKENS_TIERS[i + 1];
+      if (nextTier === undefined) break; // 마지막 단계까지 소진 — 아래에서 던짐
       console.warn(
-        `  [경고] 모델이 추론(reasoning)에 max_tokens(${INITIAL_MAX_TOKENS})를 전부 쓰고 답변을 못 냈습니다 — ` +
-          `max_tokens=${RETRY_MAX_TOKENS}로 재시도합니다.`
+        `  [경고] 모델이 추론(reasoning)에 max_tokens(${maxTokens})를 전부 쓰고 답변을 못 냈습니다 — ` +
+          `max_tokens=${nextTier}로 재시도합니다.`
       );
-      return await callChatOnce(system, messages, RETRY_MAX_TOKENS);
     }
-    throw e;
   }
+  lastError.message =
+    `${lastError.message} (max_tokens 최고 단계(${MAX_TOKENS_TIERS[MAX_TOKENS_TIERS.length - 1]})까지 ` +
+    `올려도 reasoning_content만 소진되고 답변을 못 냈습니다 — 이 턴의 입력이 특히 추론량이 ` +
+    `많다는 뜻이니, MAX_TOKENS_TIERS에 단계를 하나 더 추가하는 걸 고려하세요.)`;
+  throw lastError;
 }
 
 /** call-ai.js의 _handleWebSearchTag와 동일한 응답 포맷팅. */
@@ -234,6 +250,12 @@ async function main() {
         reply = await resolveTurn(system, messages);
       } catch (e) {
         console.error(`[오류] ${e.message}`);
+        // ★ 2026-09-29 추가 — 여기서 그냥 break만 하면 지금까지의 대화가
+        // 아무 데도 남지 않고 사라진다. max_tokens를 최고 단계까지 올려도
+        // 실패하는 사례가 실제로 있었으므로(위 MAX_TOKENS_TIERS 참고),
+        // 최소한 실패 시점까지의 transcript는 저장해 사람이 나중에
+        // 검토·재현할 수 있게 한다.
+        await saveDryRun(messages, { turn_error: e.message });
         break;
       }
       messages.push({ role: 'assistant', content: reply });
