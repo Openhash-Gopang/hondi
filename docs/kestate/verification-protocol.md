@@ -119,13 +119,40 @@ comp 100건 조회·중위값 계산·편차(%) 산출·허용범위 판정까�
 - 검증 표본 최소 건수(`hondi-valuation-metrics.js`의 `LOW_SAMPLE_N=30`을
   잠정 차용하되, 3단계 평가 전용 기준은 별도로 정해야 한다)
 
+## SP-24a 실행 검증 도구 (2026-09-29 신설)
+
+`scripts/kestate/sp24a-dry-run.mjs` — SP-24a가 실제 대화에서 (1) 규칙대로
+[WEB_SEARCH]를 실제로 쓰는지(지어내지 않는지), (2) 스키마에 맞는
+[STAGED_VALUATION] JSON을 내는지, (3) 그 JSON이 `stagedValuation()`에
+크래시 없이 들어가는지를 사람이 직접 대화하며 확인하는 대화형 CLI다.
+
+- `gwp-registry.js`·`call-ai.js`·`candidate-prefilter.js`를 전혀 건드리지
+  않는다 — SP-24a가 `status:'pending'`으로 묶여 있는 것과 무관하게, 이
+  스크립트로 아무리 실행해도 실사용자에게 노출될 경로가 구조적으로 없다
+  (SP-24b_estate-search-widget.js와 같은 "디스패치 우회" 패턴).
+- `[WEB_SEARCH: query=...]` 태그는 `call-ai.js`의 `_handleWebSearchTag`와
+  동일한 프로토콜(POST `/web-search` → 결과 재주입 → 재호출)을 재구현해
+  실제로 검색을 수행한다. **2026-09-29 확인 — `/ai/chat`(handleAIChat)은
+  순수 패스스루라 이 태그를 직접 처리하지 않는다.** 이 재구현 없이는
+  SP-24a의 핵심 원칙("웹검색으로 찾은 값만 쓴다")을 실제로 검증할 수
+  없었다.
+- 실행: `node scripts/kestate/sp24a-dry-run.mjs`(별도 API 키 불필요 —
+  DEEPSEEK_API_KEY·WEB_SEARCH_API_KEY는 이미 Worker 시크릿으로 설정돼
+  있음). 대화 기록과 `stagedValuation()` 실행 결과는
+  `docs/kestate/dry-runs/`(git 추적 안 함, `.gitignore`)에 저장된다 —
+  "채택 기준값"에 반영할 내용은 사람이 검토 후 이 문서에 직접 옮겨 적는다.
+- **이 도구는 SP-24a의 금전 계산 로직을 활성화하지 않는다.** 콘솔 출력과
+  로컬 로그 파일만 만든다. `status`를 `'active'`로 바꾸고 `call-ai.js`에
+  배선하는 것은 이 도구의 실행 결과를 사람이 검토한 뒤 별도로 결정한다.
+
 ## 한계
 
 - SP-24a는 `gwp-registry.js`에 `status:'pending'`으로만 등록돼 있고
   (2026-09-28) call-ai.js 디스패치 배선은 아직 없어, 지금은 코드 계산
   로직만 유닛 테스트로 검증된 상태다(`tests/settlement/
-  staged-valuation.test.mjs`). 이 규약은 SP-24a가 실제 운영에 배선된
-  이후에나 실행할 수 있다.
+  staged-valuation.test.mjs`). 위 실행 검증 도구로 사람이 직접 검증한
+  뒤에야 이 규약(표본 오염 방지·채점 기준)을 실제 운영 데이터로 돌릴 수
+  있다.
 - **2026-09-28 확인 — 이 저장소 어디에도 실제 정산 완료 사건(추정가·
   실제 매각가 쌍) 데이터가 없다.** `*.csv`, `*transaction*.json`,
   `*realized*.json` 패턴으로 전수 검색했지만 real-estate 실거래·정산

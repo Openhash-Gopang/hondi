@@ -17,3 +17,8 @@ sync_*.py
 migrate_*.py
 
 tests/live_smoketest/pa_live_results_debug.json
+
+# SP-24a 실행 검증 대화 기록(scripts/kestate/sp24a-dry-run.mjs) — 로컬
+# 검토용 스크래치 데이터라 커밋하지 않는다. verification-protocol.md의
+# "채택 기준값"에 반영할 내용은 사람이 검토 후 문서에 직접 옮겨 적는다.
+docs/kestate/dry-runs/
