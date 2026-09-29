@@ -58,11 +58,30 @@ const FAKE_ORIGIN = 'https://hondi.net';
 const MAX_WEB_SEARCH_HOPS = 6; // 한 턴 안에서 SP가 연속으로 검색을 반복할 때의 안전판
 const MAX_TURNS = 40; // 대화가 끝없이 이어지는 걸 막는 안전판
 
+// ★ 2026-09-29 실행 검증 중 발견 — SP-24a는 규칙이 많은 긴 시스템
+// 프롬프트라 deepseek-v4-flash(추론형)가 reasoning_content에 토큰을
+// 다 쓰고 최종 답변(content)을 한 글자도 못 낸 채 finish_reason=
+// "length"로 끝나는 사례를 실제로 확인했다(1800으로 시작, 추론만
+// 1800 토큰을 다 씀). max_tokens를 넉넉히 잡고, 그래도 모자라면 자동으로
+// 한 단계 더 올려 재시도한다(이 스크립트는 사람이 수동으로 돌리는
+// 검증용 CLI라 비용보다 검증 완주가 우선).
+const INITIAL_MAX_TOKENS = 6000;
+const RETRY_MAX_TOKENS = 12000;
+
 function loadSystemPrompt() {
   return readFileSync(PROMPT_PATH, 'utf8');
 }
 
-async function callChat(system, messages) {
+/** DeepSeek가 reasoning_content만 채우고 content 없이 length로 끝났는지 판별. */
+function isReasoningExhausted(rawErrorMessage) {
+  return (
+    typeof rawErrorMessage === 'string' &&
+    rawErrorMessage.includes('"finish_reason":"length"') &&
+    rawErrorMessage.includes('"content":""')
+  );
+}
+
+async function callChatOnce(system, messages, maxTokens) {
   const res = await fetch(`${WORKER_URL}/ai/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Origin: FAKE_ORIGIN },
@@ -71,13 +90,37 @@ async function callChat(system, messages) {
       model: 'deepseek-v4-flash',
       system,
       messages,
-      max_tokens: 1800,
+      max_tokens: maxTokens,
     }),
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(`/ai/chat HTTP ${res.status}: ${JSON.stringify(data)}`);
-  if (!data.content) throw new Error(`/ai/chat 응답에 content 없음: ${JSON.stringify(data)}`);
+  if (!res.ok) {
+    const msg = data.message || JSON.stringify(data);
+    const err = new Error(`/ai/chat HTTP ${res.status}: ${msg}`);
+    err.raw = msg;
+    throw err;
+  }
+  if (!data.content) {
+    const err = new Error(`/ai/chat 응답에 content 없음: ${JSON.stringify(data)}`);
+    err.raw = JSON.stringify(data);
+    throw err;
+  }
   return data.content;
+}
+
+async function callChat(system, messages) {
+  try {
+    return await callChatOnce(system, messages, INITIAL_MAX_TOKENS);
+  } catch (e) {
+    if (isReasoningExhausted(e.raw)) {
+      console.warn(
+        `  [경고] 모델이 추론(reasoning)에 max_tokens(${INITIAL_MAX_TOKENS})를 전부 쓰고 답변을 못 냈습니다 — ` +
+          `max_tokens=${RETRY_MAX_TOKENS}로 재시도합니다.`
+      );
+      return await callChatOnce(system, messages, RETRY_MAX_TOKENS);
+    }
+    throw e;
+  }
 }
 
 /** call-ai.js의 _handleWebSearchTag와 동일한 응답 포맷팅. */

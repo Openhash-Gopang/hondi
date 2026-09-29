@@ -145,6 +145,19 @@ comp 100건 조회·중위값 계산·편차(%) 산출·허용범위 판정까�
   로컬 로그 파일만 만든다. `status`를 `'active'`로 바꾸고 `call-ai.js`에
   배선하는 것은 이 도구의 실행 결과를 사람이 검토한 뒤 별도로 결정한다.
 
+**2026-09-29 첫 실제 실행에서 발견한 문제(수정 완료)**: 초기값
+`max_tokens=1800`으로 실행했더니 deepseek-v4-flash(추론형)가
+`reasoning_content`에 토큰을 전부 쓰고 최종 답변(`content`)을 한 글자도
+못 낸 채 `finish_reason:"length"`로 끝났다(SP-24a 시스템 프롬프트가
+규칙이 많아 길고, 추론 분량도 그만큼 필요했던 것으로 보인다). 이 SP는
+프롬프트가 유독 길어 다른 K-서비스 SP보다 추론 여유가 더 필요할 수
+있다는 뜻이다. `INITIAL_MAX_TOKENS=6000`으로 올리고, 그래도 같은
+증상(reasoning 소진)이 재현되면 `RETRY_MAX_TOKENS=12000`로 자동
+재시도하도록 고쳤다(`sp24a-dry-run.mjs`의 `isReasoningExhausted` 참조).
+실사용자에게 서빙할 때(`call-ai.js` 배선 시점)도 이 SP만큼은 다른
+K-서비스보다 높은 max_tokens를 쓰거나 별도 처리가 필요할 수 있다는
+점을 배선 작업 시 함께 확인해야 한다.
+
 ## 한계
 
 - SP-24a는 `gwp-registry.js`에 `status:'pending'`으로만 등록돼 있고
