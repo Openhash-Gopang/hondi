@@ -35,10 +35,25 @@
  * status를 'active'로 바꾸거나 call-ai.js에 배선하는 것은 이 스크립트가
  * 아니라 사람이 결과를 검토한 뒤 별도로 한다.
  *
+ * ★ 2026-09-29 실행 검증 중 두 번째 발견 — [WEB_SEARCH] 자체는 신뢰하지
+ * 못해 SP가 "저는 직접 접속할 수 없습니다"라며 이용자에게 조회를 떠넘기는
+ * 사례를 실제로 확인했다(모델이 자기 태그의 실행이 보장되는지 확신하지
+ * 못해 스스로 포기하는 패턴). 국토부 실거래가만큼은 이미 검증된
+ * molit-client.js(apt_trade, 2026-09-29 실 호출 검증됨)가 있으므로, 이
+ * 데이터에 한해 LLM의 판단에 맡기지 않고 **대화 중 사람이 `/molit` 명령
+ * 으로 코드가 직접 조회한 값을 주입**한다 — "LLM은 계산하지 않는다"는
+ * 원칙을 "LLM은 이 데이터를 직접 가져오지도 않는다"로 확장한 것.
+ *
  * 사용법:
  *   node scripts/kestate/sp24a-dry-run.mjs
  * (hondi-proxy 호출에 별도 API 키는 필요 없다 — DEEPSEEK_API_KEY·
- * WEB_SEARCH_API_KEY는 이미 Cloudflare Worker 시크릿으로 설정돼 있다.)
+ * WEB_SEARCH_API_KEY는 이미 Cloudflare Worker 시크릿으로 설정돼 있다.
+ * /molit 명령을 쓰려면 MOLIT_SERVICE_KEY 환경변수가 필요하다.)
+ *
+ * 대화 중 사용할 수 있는 명령:
+ *   /molit <법정동코드 5자리> <계약년월 YYYYMM>
+ *     — molit-client.js로 실제 아파트 매매 실거래가를 조회해 대화에
+ *       주입한다(현재 apt_trade만 지원 — 다른 유형은 End Point 미확인).
  */
 import { readFileSync } from 'node:fs';
 import { createInterface } from 'node:readline/promises';
@@ -46,6 +61,7 @@ import { stdin, stdout } from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { stagedValuation } from '../../src/gopang/ai/hondi-staged-valuation.js';
+import { fetchTrades } from '../../src/gopang/verification/molit-client.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, '..', '..');
@@ -151,6 +167,31 @@ function extractStagedValuation(text) {
   return m[1].trim();
 }
 
+/** /molit <lawdCd> <dealYmd> 명령을 실제 조회 → 대화 주입 텍스트로 변환. */
+async function fetchMolitInjection(lawdCd, dealYmd) {
+  const serviceKey = process.env.MOLIT_SERVICE_KEY;
+  if (!serviceKey) {
+    return null;
+  }
+  const result = await fetchTrades('apt_trade', { lawdCd, dealYmd, serviceKey });
+  const items = result.items || [];
+  const lines = items.slice(0, 15).map((it) => {
+    const amt = String(it.dealAmount || '').replace(/\s/g, '');
+    const date = `${it.dealYear}-${String(it.dealMonth).padStart(2, '0')}-${String(it.dealDay).padStart(2, '0')}`;
+    return `- ${it.aptNm || '(단지명 없음)'} · 전용 ${it.excluUseAr}㎡ · ${it.floor}층 · ${date} · ${amt}만원`;
+  });
+  const today = new Date().toISOString().slice(0, 10);
+  return (
+    `[국토부 실거래가 API 조회 결과 — 출처: 공공데이터포털 실거래가 공개시스템(molit-client.js, apt_trade), 조회일 ${today}] ` +
+    `법정동코드 ${lawdCd}, 계약년월 ${dealYmd}, 총 ${items.length}건 중 최근 ${lines.length}건:\n` +
+    (lines.length > 0 ? lines.join('\n') : '(해당 조건 조회 결과 0건)') +
+    `\n\n이 값은 실제로 API에서 조회된 데이터입니다(추측 아님). 이 중 대상 물건과 조건이 ` +
+    `비슷하고 최근 12개월 이내인 거래를 comps로 채택하십시오. index_at_txn(지수)은 ` +
+    `여전히 실제로 확인된 값만 반영하고, 확인되지 않으면 null로 두십시오 — 이 조회 결과에는 ` +
+    `지수가 포함돼 있지 않습니다.`
+  );
+}
+
 let searchCallCount = 0;
 
 /** 어시스턴트가 [WEB_SEARCH]를 낼 때까지 재귀적으로 검색→재주입→재호출한다. */
@@ -181,33 +222,63 @@ async function main() {
   const messages = [{ role: 'user', content: '감정평가를 받고 싶습니다.' }];
 
   console.log('=== SP-24a 실행 검증 대화 (Ctrl+C로 중단) ===\n');
-  console.log('당신은 "이용자" 역할입니다. SP의 질문에 실제 답을 입력하세요.\n');
+  console.log('당신은 "이용자" 역할입니다. SP의 질문에 실제 답을 입력하세요.');
+  console.log('명령: /molit <법정동코드 5자리> <계약년월 YYYYMM> — 실제 실거래가 조회 후 대화에 주입\n');
+
+  let pendingReplyNeeded = true;
 
   for (let turn = 0; turn < MAX_TURNS; turn += 1) {
-    let reply;
-    try {
-      reply = await resolveTurn(system, messages);
-    } catch (e) {
-      console.error(`[오류] ${e.message}`);
-      break;
-    }
-    messages.push({ role: 'assistant', content: reply });
+    if (pendingReplyNeeded) {
+      let reply;
+      try {
+        reply = await resolveTurn(system, messages);
+      } catch (e) {
+        console.error(`[오류] ${e.message}`);
+        break;
+      }
+      messages.push({ role: 'assistant', content: reply });
 
-    const staged = extractStagedValuation(reply);
-    if (staged) {
-      const shown = reply.replace(/\[STAGED_VALUATION\][\s\S]*?\[\/STAGED_VALUATION\]/, '[STAGED_VALUATION 블록 — 아래 별도 출력]');
-      console.log(`\nSP: ${shown}\n`);
-      await handleStagedValuation(staged, messages);
-      break;
+      const staged = extractStagedValuation(reply);
+      if (staged) {
+        const shown = reply.replace(/\[STAGED_VALUATION\][\s\S]*?\[\/STAGED_VALUATION\]/, '[STAGED_VALUATION 블록 — 아래 별도 출력]');
+        console.log(`\nSP: ${shown}\n`);
+        await handleStagedValuation(staged, messages);
+        break;
+      }
+
+      console.log(`\nSP: ${reply}\n`);
     }
 
-    console.log(`\nSP: ${reply}\n`);
     const userInput = await rl.question('나: ');
     if (!userInput.trim()) {
       console.log('(빈 입력 — 종료)');
       break;
     }
+
+    const molitMatch = userInput.trim().match(/^\/molit\s+(\d{5})\s+(\d{6})\s*$/);
+    if (molitMatch) {
+      const [, lawdCd, dealYmd] = molitMatch;
+      if (!process.env.MOLIT_SERVICE_KEY) {
+        console.log('MOLIT_SERVICE_KEY 환경변수가 설정돼 있지 않습니다. /molit 명령을 쓰려면 먼저 설정하세요.\n');
+        pendingReplyNeeded = false;
+        continue;
+      }
+      console.log(`  [MOLIT] 법정동코드 ${lawdCd}, 계약년월 ${dealYmd} 조회 중...`);
+      let injection;
+      try {
+        injection = await fetchMolitInjection(lawdCd, dealYmd);
+      } catch (e) {
+        console.log(`  [MOLIT 오류] ${e.message}\n`);
+        pendingReplyNeeded = false;
+        continue;
+      }
+      messages.push({ role: 'user', content: injection });
+      pendingReplyNeeded = true;
+      continue;
+    }
+
     messages.push({ role: 'user', content: userInput });
+    pendingReplyNeeded = true;
   }
 
   rl.close();
