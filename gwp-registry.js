@@ -429,6 +429,31 @@ const GWP_REGISTRY = [
       '집 소개 자료','경매 신청자 물건 설명',
     ],
   },
+  {
+    id: 'kestate-register', name: 'K-Estate 물건 등록 도우미', category: 'ECO',
+    type: 'switch',
+    sp_key: 'SP-24d_kestate_register',
+    // 2026-09-30 신설 — estate.hondi.net 히어로 섹션의 "물건 등록" 버튼 +
+    // 실시간 필드 패널 전용. SP-24_kestate의 "list" 모드(매물 등록,
+    // 기존엔 <<<STATE>>> 마커 하나에 extra 자유 텍스트만 누적하던 얕은
+    // 구조)를 SP-24b가 "search" 모드를 뗀 것과 같은 방식으로 구조화해
+    // 뗐다. status는 'pending'이지만 SP-24b_kestate_search와 동일한
+    // 예외로 **이미 라이브다** — estate.hondi.net의
+    // assets/estate-register-widget.js가 이 SP 본문을 그대로 번들링해
+    // call-ai.js를 거치지 않고 /ai/chat을 바로 호출한다. 여기
+    // status:'pending'은 메인 hondi 앱 자동 트리거 디스패치로는 아직
+    // 호출되지 않는다는 뜻일 뿐이다. ★ SP-24a와 달리 별도 실행 검증
+    // 도구(dry-run CLI) 없이 배포했다 — SP-24b와 동일한 위험을 인지한
+    // 채 배포 후 실사용 관찰로 대체하는 경로를 그대로 따른 것이며,
+    // 이 SP도 실제 매물 게시 DB가 없어 대화 결과를 화면에 정리해
+    // 보여줄 뿐임을 SP 자신이 대화 끝에 고지한다(R9). 상세:
+    // prompts/SP-24d_kestate_register_v0_1.txt.
+    status: 'pending', priority: 6, threshold: 0.70,
+    description: '매도인·집주인이 대화로 매물 정보(면적·층·관리비·주차·가격·고지사항 등)를 채워나가는 물건 등록 도우미. 가격 평가는 하지 않고, 실제 매물 게시 DB도 없어 화면에 정리해 보여줄 뿐임을 대화 끝에 고지한다. SP-24c(경매 소개서)와 달리 법적 톤이 가볍고 진입장벽이 낮은 일반 매물 등록용.',
+    triggers: [
+      '물건 등록','매물 등록','집 내놓기','매물 올리기','집주인 등록',
+    ],
+  },
 
   // ── 2026-09-02 신설 — K-Plan/K-Watch/K-Job. 셋 다 K-Telecom/K-Estate와
   // 동일한 이유(별도 저장소·도메인이 필요 없는 SP)로 type:'switch'로
