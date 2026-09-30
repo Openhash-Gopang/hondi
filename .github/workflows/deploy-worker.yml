@@ -42,3 +42,11 @@ jobs:
           # 실패했었다(빌드 에러로 조기 종료돼 Cloudflare엔 반영조차 안 됨,
           # 데이터 손상 위험은 없었음). 버전을 명시해 이 실패 유형을 없앤다.
           wranglerVersion: '4.121.0'
+          # ★2026-09-30 — K-Doctor 전용 DeepSeek 키. GitHub Actions 시크릿 DEEPSEEK_DOCTOR_KEY를 배포 때마다
+          # Worker 시크릿으로 밀어 넣는다(wrangler-action의 secrets 입력). worker.js의 handleAIChat이
+          # doctor.hondi.net Origin 요청에만 이 키를 쓴다. 기존 DEEPSEEK_API_KEY 등은 Cloudflare 쪽에 직접 설정돼
+          # 있어 이 목록에 없다.
+          secrets: |
+            DEEPSEEK_DOCTOR_KEY
+        env:
+          DEEPSEEK_DOCTOR_KEY: ${{ secrets.DEEPSEEK_DOCTOR_KEY }}

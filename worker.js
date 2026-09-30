@@ -20233,14 +20233,21 @@ builtMessages=_insertSystemNote(builtMessages,_buildLocationNote(currentLocation
 builtMessages=_insertSystemNote(builtMessages,_buildDateNote());
 _dlog(env, JSON.stringify({tag:'AI_PROXY_CALL',fn:'handleAIChat',ts:new Date().toISOString(),provider,model,...meta}));
 try{if(provider!=='anthropic'){
-  const _orKey=env.OPENROUTER_API_KEY||env.DEEPSEEK_API_KEY;
-  const _orUrl=env.OPENROUTER_API_KEY?OR_URL:DEEPSEEK_URL;
-  const _orMdl=model||(env.OPENROUTER_API_KEY?OR_MODEL_FAST:DEEPSEEK_MODEL);
-  const _orHdr={'Content-Type':'application/json','Authorization':`Bearer ${_orKey}`,...(env.OPENROUTER_API_KEY?{'HTTP-Referer':'https://hondi.net','X-Title':'Hondi'}:{})};
+  // ★ 2026-09-30 신설 — doctor.hondi.net(K-Doctor 상담 창) 요청은 전용 키 DEEPSEEK_DOCTOR_KEY로 DeepSeek를 직접
+  // 호출한다(OpenRouter·공용 DEEPSEEK_API_KEY를 거치지 않음 — 비용을 서비스별로 분리). 전용 키가 없으면 공용 키로
+  // 조용히 폴백하지 않고 오류를 낸다(과금 분리가 깨지는 것을 막기 위함). Origin은 브라우저가 보내는 헤더이며 비브라우저
+  // 호출은 위조할 수 있으나, 위조해도 얻는 것은 "doctor 키로 과금되는 호출"뿐이다.
+  const _isDoctor=meta?.origin==='https://doctor.hondi.net';
+  if(_isDoctor&&!env.DEEPSEEK_DOCTOR_KEY)return _err(500,'DEEPSEEK_DOCTOR_KEY_MISSING','DEEPSEEK_DOCTOR_KEY secret 미설정',corsHeaders);
+  const _useOR=!_isDoctor&&!!env.OPENROUTER_API_KEY;
+  const _orKey=_isDoctor?env.DEEPSEEK_DOCTOR_KEY:(env.OPENROUTER_API_KEY||env.DEEPSEEK_API_KEY);
+  const _orUrl=_useOR?OR_URL:DEEPSEEK_URL;
+  const _orMdl=model||(_useOR?OR_MODEL_FAST:DEEPSEEK_MODEL);
+  const _orHdr={'Content-Type':'application/json','Authorization':`Bearer ${_orKey}`,...(_useOR?{'HTTP-Referer':'https://hondi.net','X-Title':'Hondi'}:{})};
   const res=await fetch(_orUrl,{method:'POST',headers:_orHdr,body:JSON.stringify({model:_orMdl,max_tokens,messages:builtMessages})});
   const data=await res.json();const content=data.choices?.[0]?.message?.content;
   if(!content)throw new Error('AI 응답 없음: '+JSON.stringify(data));
-  return new Response(JSON.stringify({content,provider:env.OPENROUTER_API_KEY?'openrouter':'deepseek',model:_orMdl}),{status:200,headers:corsHeaders});}else{
+  return new Response(JSON.stringify({content,provider:_useOR?'openrouter':'deepseek',model:_orMdl}),{status:200,headers:corsHeaders});}else{
   const _anthropicSystem=_universalInjected?(system?_universalInjected+'\n\n---\n\n'+system:_universalInjected):system;
   const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':env.ANTHROPIC_API_KEY||env.OpenAI,'anthropic-version':'2023-06-01'},body:JSON.stringify({model:model||'claude-sonnet-4-20250514',max_tokens,...(_anthropicSystem?{system:_anthropicSystem}:{}),messages:_insertSystemNote(messages||[],[_buildLocationNote(currentLocation),_buildDateNote()].filter(Boolean).join(''))})});const data=await res.json();const content=data.content?.find(c=>c.type==='text')?.text;return new Response(JSON.stringify({content,provider:'anthropic'}),{status:200,headers:corsHeaders});}}catch(e){return _err(502,'AI_ERROR',e.message,corsHeaders);}}
 async function callOpenAIFromGeminiBody(bodyText,env,corsHeaders,meta=null){const apiKey=env.OpenAI;if(!apiKey)return _err(500,'CONFIG_ERROR','OpenAI key not configured',corsHeaders);let geminiBody;try{geminiBody=JSON.parse(bodyText);}catch{return _err(400,'INVALID_JSON','Invalid JSON body',corsHeaders);}const systemPrompt=geminiBody.system_instruction?.parts?.[0]?.text||'';const parts=geminiBody.contents?.[0]?.parts||[];const textPart=parts.find(p=>p.text)?.text||'';const imagePart=parts.find(p=>p.inline_data);const maxTokens=geminiBody.generationConfig?.maxOutputTokens||1500;const messages=[];if(systemPrompt)messages.push({role:'system',content:systemPrompt});if(imagePart?.inline_data){messages.push({role:'user',content:[{type:'image_url',image_url:{url:`data:${imagePart.inline_data.mime_type};base64,${imagePart.inline_data.data}`}},{type:'text',text:textPart||'이미지를 분석하여 JSON으로만 출력하라.'}]});}else{messages.push({role:'user',content:textPart});}
