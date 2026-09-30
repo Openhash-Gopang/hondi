@@ -12,6 +12,9 @@ import { _patchL1LedgerUserHash, _patchPdvChainHeight,
 import { summarizeTranscript6W } from '../ai/report-utils.js';
 import { _handleGwpSignRequest } from './sign.js';
 import { GWP_ALLOWED_ORIGINS } from './allowed-origins.js';
+// ★ 2026-10-01 — 건강 기록(병력·가족력·생활습관) PDV 요청·갱신 제안 처리(health.* 필드 전용, 허용 서비스 allowlist·그룹별 승인·접근 기록).
+import { handleHealthPdvRequest, handleHealthUpdateProposal, getAcHealthStore } from './pdv-health-handler.js';
+import { isHealthField } from '../pdv/health-profile.js';
 // ★ 2026-07-31 신설 — "AC가 다른 SP를 호출할 때 위치·주소 전달을 코드로
 // 강제하라"(주피터 지시)는 요구를 호출부 하나하나가 아니라 이 함수
 // 자신에게 건다. 지금까지는 호출부(call-ai.js)가 _buildRoutingFacts()를
@@ -392,6 +395,10 @@ function _readPdvField(field) {
 }
 
 function _handlePdvRequest(msg, source, origin) {
+  // health.* 필드가 하나라도 있으면 건강 기록 전용 경로(allowlist·그룹 승인·접근 기록). 일반 프로필 필드와 섞어 요청하지 않는다.
+  if (Array.isArray(msg?.fields) && msg.fields.some((f) => isHealthField(f))) {
+    return handleHealthPdvRequest({ msg, source, origin, service: _gwpService, appendBubble, getEl: (id) => document.getElementById(id), store: getAcHealthStore() });
+  }
   const { request_id, requesting_sp, fields = [], reason } = msg;
   const svcName = _gwpService?.name || origin;
 
@@ -546,6 +553,11 @@ window.addEventListener('message', (e) => {
       // JEJU-GOV-COMMON §13 — PDV는 나만의 AI 비서만 읽는다. 다른 SP(새 탭)는
       // 이 메시지로 필드를 요청하고, 사용자 승인 후에만 값을 돌려받는다.
       _handlePdvRequest(msg, e.source, e.origin);
+      break;
+    }
+    case 'GWP_PDV_UPDATE_PROPOSAL': {
+      // 서비스가 이번 상담에서 사용자가 말한 지속적 사실(병력·복용약·알레르기 등)의 저장을 제안 — 사용자가 항목별로 승인한 것만 PDV에 저장.
+      handleHealthUpdateProposal({ msg, source: e.source, origin: e.origin, service: _gwpService, appendBubble, getEl: (id) => document.getElementById(id), store: getAcHealthStore() });
       break;
     }
     case 'GWP_DOC_REQUEST': {
