@@ -158,6 +158,111 @@
    "name_ko": "예방의학과",
    "file": "SP-29z_kdoctor_preventive-medicine_v0_1.txt",
    "kind": "symptom"
+  },
+  {
+   "id": "kdoctor-cardiology",
+   "name_ko": "순환기내과",
+   "file": "SP-29b1_kdoctor_cardiology_v0_1.txt",
+   "kind": "symptom",
+   "parent": "kdoctor-internal"
+  },
+  {
+   "id": "kdoctor-pulmonology",
+   "name_ko": "호흡기내과",
+   "file": "SP-29b2_kdoctor_pulmonology_v0_1.txt",
+   "kind": "symptom",
+   "parent": "kdoctor-internal"
+  },
+  {
+   "id": "kdoctor-gastroenterology",
+   "name_ko": "소화기내과",
+   "file": "SP-29b3_kdoctor_gastroenterology_v0_1.txt",
+   "kind": "symptom",
+   "parent": "kdoctor-internal"
+  },
+  {
+   "id": "kdoctor-endocrinology",
+   "name_ko": "내분비대사내과",
+   "file": "SP-29b4_kdoctor_endocrinology_v0_1.txt",
+   "kind": "symptom",
+   "parent": "kdoctor-internal"
+  },
+  {
+   "id": "kdoctor-nephrology",
+   "name_ko": "신장내과",
+   "file": "SP-29b5_kdoctor_nephrology_v0_1.txt",
+   "kind": "symptom",
+   "parent": "kdoctor-internal"
+  },
+  {
+   "id": "kdoctor-hematology-oncology",
+   "name_ko": "혈액종양내과",
+   "file": "SP-29b6_kdoctor_hematology-oncology_v0_1.txt",
+   "kind": "symptom",
+   "parent": "kdoctor-internal"
+  },
+  {
+   "id": "kdoctor-infectious-disease",
+   "name_ko": "감염내과",
+   "file": "SP-29b7_kdoctor_infectious-disease_v0_1.txt",
+   "kind": "symptom",
+   "parent": "kdoctor-internal"
+  },
+  {
+   "id": "kdoctor-allergy",
+   "name_ko": "알레르기내과",
+   "file": "SP-29b8_kdoctor_allergy_v0_1.txt",
+   "kind": "symptom",
+   "parent": "kdoctor-internal"
+  },
+  {
+   "id": "kdoctor-rheumatology",
+   "name_ko": "류마티스내과",
+   "file": "SP-29b9_kdoctor_rheumatology_v0_1.txt",
+   "kind": "symptom",
+   "parent": "kdoctor-internal"
+  },
+  {
+   "id": "kdoctor-neonatology",
+   "name_ko": "신생아(생후 28일 이내)",
+   "file": "SP-29c1_kdoctor_neonatology_v0_1.txt",
+   "kind": "symptom",
+   "parent": "kdoctor-pediatrics"
+  },
+  {
+   "id": "kdoctor-pediatric-infectious",
+   "name_ko": "소아감염",
+   "file": "SP-29c2_kdoctor_pediatric-infectious_v0_1.txt",
+   "kind": "symptom",
+   "parent": "kdoctor-pediatrics"
+  },
+  {
+   "id": "kdoctor-pediatric-gastro-nutrition",
+   "name_ko": "소아소화영양",
+   "file": "SP-29c3_kdoctor_pediatric-gastro-nutrition_v0_1.txt",
+   "kind": "symptom",
+   "parent": "kdoctor-pediatrics"
+  },
+  {
+   "id": "kdoctor-pediatric-respiratory-allergy",
+   "name_ko": "소아호흡알레르기",
+   "file": "SP-29c4_kdoctor_pediatric-respiratory-allergy_v0_1.txt",
+   "kind": "symptom",
+   "parent": "kdoctor-pediatrics"
+  },
+  {
+   "id": "kdoctor-pediatric-neurology",
+   "name_ko": "소아신경",
+   "file": "SP-29c5_kdoctor_pediatric-neurology_v0_1.txt",
+   "kind": "symptom",
+   "parent": "kdoctor-pediatrics"
+  },
+  {
+   "id": "kdoctor-pediatric-cardiology",
+   "name_ko": "소아심장",
+   "file": "SP-29c6_kdoctor_pediatric-cardiology_v0_1.txt",
+   "kind": "symptom",
+   "parent": "kdoctor-pediatrics"
   }
  ]
 }

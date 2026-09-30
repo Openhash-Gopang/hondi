@@ -14,7 +14,8 @@ K-Estate가 평가 SP 하나인 것과 달리, K-Doctor는 **진료과목별 전
 | `prompts/SP-29_kdoctor_v0_1.txt` | 총괄: 접수·위험 신호 선별·감별 공방·종합·경과 관찰 |
 | `prompts/SP-29-COMMON_kdoctor_specialist_base_v0_1.txt` | 과목 SP 공통 골격(규칙 C1~C8, 소견 형식) |
 | `prompts/SP-29a` ~ `SP-29z` (`_kdoctor_{과목}_v0_1.txt`) | 전문과목 26개 전부의 과목 훅(위험 신호·필수 확인·can't-miss·처치 범위). 영상의학·방사선종양·병리·진단검사·핵의학은 환자가 제공한 보고서를 설명하는 자문 과목(`kind: report_consult`) |
-| `prompts/kdoctor-specialties.json` | 과목 레지스트리 정본(id·이름·파일·kind). 총괄 SP·과목 SP 안의 `kdoctor-*` id는 전부 여기 있어야 한다(테스트가 검사) |
+| `prompts/SP-29b1`~`b9`, `SP-29c1`~`c6` | 세부 분과 15개: 내과(순환기·호흡기·소화기·내분비대사·신장·혈액종양·감염·알레르기·류마티스), 소아(신생아·소아감염·소아소화영양·소아호흡알레르기·소아신경·소아심장). 레지스트리에 `parent`가 있고 부모 SP가 handoff로 분과 id를 안내한다 |
+| `prompts/kdoctor-specialties.json` | 과목 레지스트리 정본 41개(id·이름·파일·kind·parent). 총괄 SP·과목 SP 안의 `kdoctor-*` id는 전부 여기 있어야 한다(테스트가 검사) |
 | `assets/kdoctor-chat-widget.js` + `kdoctor-chat-core.js` | doctor.hondi.net 상단 진료 상담 창. SP 정본을 hondi.net에서 fetch, `[CONSULT_SPECIALIST]`를 위젯이 대행(턴당 최대 3회), 결과는 검증기로 재계산 후 카드로만 표시, 실패 시 1회 재생성 후 페일세이프 |
 | `prompts/SP-29-IMG_…vision_prompt` | 증상 사진 관찰 전용(진단 금지, 미성년자 은밀 부위 거부) |
 | `src/gopang/ai/hondi-doctor-verdict.js` | 결정론적 검증기(코드가 다시 계산) |
@@ -63,7 +64,11 @@ K-Estate가 평가 SP 하나인 것과 달리, K-Doctor는 **진료과목별 전
 "미배제 can't-miss"의 정의는 단순하다: `must_not_miss=true`이면서 유효한 근거 유형이 붙은 반대 근거가
 하나도 없는 가설. 이 정의가 임상적으로 충분한지는 전문의 검토가 필요하다.
 
-## 5. 과목 추가 방법 (26개 과목 확장 템플릿)
+## 4-1. 총괄의 협진 호출 시점
+
+총괄(SP-29 STEP A-2)은 위험 신호 선별(STEP T)과 가설 추출(A-1) **이후**에만, 좁은 질문 하나로 호출한다. 호출 시점 7가지(순위 변동·can't-miss 배제·과목 경계·처치 금기·보고서 해석·경과 불변 시 재배정 등)와 호출하지 않는 경우(단순 정보 질문, 즉시 응급 안내, 반복 질문)를 명시했다. 세부 분과 SP가 있으면 상위 과목 대신 분과를 부른다. 한 턴 최대 3회는 위젯이 코드로 강제한다. **총괄이 실제로 이 시점 규칙을 지키는지는 실행 검증 전이다.**
+
+## 5. 과목 추가 방법 (과목·분과 확장 템플릿)
 
 0. `prompts/kdoctor-specialties.json`에 항목 추가(알파벳이 z를 넘으면 파일명 규칙을 먼저 정할 것).
 1. `prompts/SP-29{알파벳}_kdoctor_{과목}_v0_1.txt` 생성. 머리 메타에 `id: kdoctor-{과목}`, 그 아래 `@@BASE_INCLUDE@@` 한 줄.
@@ -71,7 +76,7 @@ K-Estate가 평가 SP 하나인 것과 달리, K-Doctor는 **진료과목별 전
    H-4 과목 고유 규칙 / H-5 처치 범위·용량 규칙 / H-6 handoff 기준. 공통 규칙은 약화할 수 없다(lint가 막는다).
 3. 총괄 SP-29 STEP A-2의 "등록된 id" 목록에 추가하고, `tests/doctor/assemble-specialist.test.mjs`의 개수 기대값을 갱신.
 4. 전문의 검토를 거치기 전에는 draft 상태를 유지한다.
-5. 내과처럼 넓은 과목은 분과 SP로 쪼갤지 여부를 사용 빈도와 전문의 의견으로 정한다(v0.1은 일반 내과 하나).
+5. 분과 SP는 파일명을 `SP-29{부모글자}{번호}_…`로 하고, 머리에 `부모: kdoctor-…`를 쓰며, 레지스트리에 `parent`를 넣고, 부모 SP의 handoff에 분과 id를 추가한다. 외과·산부인과·정형외과 등 나머지 과목의 분과는 사용 빈도와 전문의 의견으로 정한다(아직 없음).
 
 ## 6. 구현되지 않은 것 (정직한 갭)
 

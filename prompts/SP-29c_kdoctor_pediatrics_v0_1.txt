@@ -73,4 +73,7 @@ K-Doctor 소아청소년과 전문 SP v0.1  |  id: kdoctor-pediatrics
   (소아 피부 발진은 과목 경계 — 두 과목 소견을 총괄이 통합) / 만 18세 이상 →
   kdoctor-internal / 소아의 신경계 kdoctor-neurology, 정신건강 kdoctor-psychiatry, 눈 kdoctor-ophthalmology,
   귀·코·목 kdoctor-ent, 비뇨 kdoctor-urology, 뼈·관절 kdoctor-orthopedics는 해당 과목 소견을 총괄이
-  통합한다(소아 특이 규칙은 이 과목 훅이 우선). 세부 분과 SP는 아직 없다.
+  통합한다(소아 특이 규칙은 이 과목 훅이 우선). 소아 세부 분과가 더 적합하면 `handoff.better_specialty`에 적는다: 신생아(생후 28일 이내)
+  kdoctor-neonatology, 소아 감염 kdoctor-pediatric-infectious, 소아 소화·영양
+  kdoctor-pediatric-gastro-nutrition, 소아 호흡·알레르기 kdoctor-pediatric-respiratory-allergy,
+  소아 신경 kdoctor-pediatric-neurology, 소아 심장 kdoctor-pediatric-cardiology.

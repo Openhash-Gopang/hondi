@@ -7,15 +7,35 @@ import { assemble, lintSpecialist, baseBody, INCLUDE_MARK, DEFAULT_BASE } from '
 
 const PROMPTS = join(dirname(fileURLToPath(import.meta.url)), '../../prompts');
 const base = readFileSync(DEFAULT_BASE, 'utf8');
-const specs = readdirSync(PROMPTS).filter((f) => /^SP-29[a-z]_kdoctor_.*\.txt$/.test(f));
+const specs = readdirSync(PROMPTS).filter((f) => /^SP-29[a-z]\d?_kdoctor_.*\.txt$/.test(f));
 
 const REG = JSON.parse(readFileSync(join(PROMPTS, 'kdoctor-specialties.json'), 'utf8'));
 
-test('과목 SP 26종(전문과목 전부)이 레지스트리와 파일로 일치한다', () => {
-  assert.equal(REG.specialties.length, 26);
-  assert.equal(specs.length, 26);
+test('과목 SP 41종(전문과목 26 + 내과 분과 9 + 소아 분과 6)이 레지스트리와 파일로 일치한다', () => {
+  assert.equal(REG.specialties.length, 41);
+  assert.equal(specs.length, 41);
   assert.deepEqual(REG.specialties.map((s) => s.file).sort(), [...specs].sort());
-  assert.equal(new Set(REG.specialties.map((s) => s.id)).size, 26);
+  assert.equal(new Set(REG.specialties.map((s) => s.id)).size, 41);
+  assert.equal(REG.specialties.filter((s) => !s.parent).length, 26);
+  assert.equal(REG.specialties.filter((s) => s.parent === 'kdoctor-internal').length, 9);
+  assert.equal(REG.specialties.filter((s) => s.parent === 'kdoctor-pediatrics').length, 6);
+});
+
+test('분과의 parent는 레지스트리의 최상위 과목이고, 파일 머리의 `부모:` 줄과 일치한다', () => {
+  const top = new Set(REG.specialties.filter((s) => !s.parent).map((s) => s.id));
+  for (const s of REG.specialties.filter((x) => x.parent)) {
+    assert.ok(top.has(s.parent), `${s.id}: parent ${s.parent}`);
+    const text = readFileSync(join(PROMPTS, s.file), 'utf8');
+    assert.ok(text.includes('부모: ' + s.parent) || new RegExp('부모[^\\n]*' + s.parent).test(text), `${s.file}: 부모 줄 없음`);
+  }
+});
+
+test('부모 과목 SP가 자기 분과 id를 handoff로 안내한다', () => {
+  for (const parent of ['kdoctor-internal', 'kdoctor-pediatrics']) {
+    const pf = REG.specialties.find((s) => s.id === parent).file;
+    const text = readFileSync(join(PROMPTS, pf), 'utf8');
+    for (const c of REG.specialties.filter((x) => x.parent === parent)) assert.ok(text.includes(c.id), `${parent} → ${c.id} 안내 없음`);
+  }
 });
 
 for (const f of specs) {
@@ -32,10 +52,11 @@ for (const f of specs) {
 
 test('파일의 id 메타·레지스트리·총괄 SP 목록이 모두 같다', () => {
   const orch = readFileSync(join(PROMPTS, 'SP-29_kdoctor_v0_1.txt'), 'utf8');
+  assert.ok(orch.includes('41개'));
   for (const s of REG.specialties) {
     const meta = lintSpecialist(readFileSync(join(PROMPTS, s.file), 'utf8')).id;
     assert.equal(meta, s.id, s.file);
-    assert.ok(orch.includes(s.id.replace('kdoctor-', '')), `${s.id}가 총괄 SP에 없음`);
+    assert.ok(orch.includes(s.id.replace('kdoctor-', '') + '('), `${s.id}가 총괄 SP 목록에 없음`);
   }
 });
 
