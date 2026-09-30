@@ -15,6 +15,14 @@ on:
         description: "Parallel scenarios (default 4)"
         required: false
         default: "4"
+      orch_max_tokens:
+        description: "Diagnostic: override orchestrator max_tokens (blank = widget default 3500)"
+        required: false
+        default: ""
+      label:
+        description: "Result label (blank = run number). Results go to branch results/live-smoketest-kdoctor-consult-<label>"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -38,7 +46,11 @@ jobs:
           DEEPSEEK_DOCTOR_KEY: ${{ secrets.DEEPSEEK_DOCTOR_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: |
-          ARGS="--scenarios scenarios_kdoctor_consult_100_20261001.json --out ../../results/kdoctor-consult --resume --concurrency ${{ github.event.inputs.concurrency || '4' }}"
+          LABEL="${{ github.event.inputs.label }}"
+          if [ -z "$LABEL" ]; then LABEL="run${{ github.run_number }}"; fi
+          echo "LABEL=$LABEL" >> "$GITHUB_ENV"
+          ARGS="--scenarios scenarios_kdoctor_consult_100_20261001.json --out ../../results/kdoctor-consult-$LABEL --resume --concurrency ${{ github.event.inputs.concurrency || '4' }}"
+          if [ -n "${{ github.event.inputs.orch_max_tokens }}" ]; then ARGS="$ARGS --orch-max-tokens ${{ github.event.inputs.orch_max_tokens }}"; fi
           if [ -n "${{ github.event.inputs.limit }}" ]; then ARGS="$ARGS --limit ${{ github.event.inputs.limit }}"; fi
           if [ -n "${{ github.event.inputs.group }}" ]; then ARGS="$ARGS --group ${{ github.event.inputs.group }}"; fi
           node kdoctor_consult_live_smoketest.mjs $ARGS
@@ -48,10 +60,10 @@ jobs:
         run: |
           git config user.name "hondi-live-smoketest-bot"
           git config user.email "actions@users.noreply.github.com"
-          git checkout -B results/live-smoketest-kdoctor-consult
+          git checkout -B results/live-smoketest-kdoctor-consult-${LABEL:-run}
           git add -f results/
           git diff --cached --quiet || git commit -m "chore: kdoctor consult live smoketest results ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
-          git push --force origin HEAD:results/live-smoketest-kdoctor-consult
+          git push --force origin HEAD:results/live-smoketest-kdoctor-consult-${LABEL:-run}
 
       - name: Upload artifact (backup)
         if: always()

@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { loadResources } from '../../scripts/kdoctor/eval/eval-run.mjs';
-import { scoreRecord, runScenario, makeMockFor, summarize } from '../live_smoketest/kdoctor_consult_live_smoketest.mjs';
+import { noReportReason, scoreRecord, runScenario, makeMockFor, summarize } from '../live_smoketest/kdoctor_consult_live_smoketest.mjs';
 
 const scen = JSON.parse(readFileSync(new URL('../live_smoketest/scenarios_kdoctor_consult_100_20261001.json', import.meta.url), 'utf8'));
 const reg = JSON.parse(readFileSync(new URL('../../prompts/kdoctor-specialties.json', import.meta.url), 'utf8'));
@@ -40,4 +40,12 @@ test('모의 제공자로 전체 파이프라인(runTurn→협진→검증)이 �
   for (const sc of pick) recs.push(await runScenario(sc, { llm: makeMockFor(sc, resources.orchestratorSP), resources }));
   assert.ok(recs.every((r) => r.score.status === 'LIVE-PASS'), JSON.stringify(recs.map((r) => r.score)));
   assert.equal(summarize(recs).total.pass, 2);
+});
+
+test('noReportReason: 잘림·검증 실패·태그 없음·닫힘 없음을 구분한다', () => {
+  const c = (o) => ({ orchestrator_calls: [{ finish_reason: 'stop', has_open_tag: true, has_close_tag: true, ...o }], validation_errors: [] });
+  assert.equal(noReportReason(c({ finish_reason: 'length' })), 'no_report_truncated');
+  assert.equal(noReportReason({ ...c({}), validation_errors: [['x']] }), 'no_report_invalid');
+  assert.equal(noReportReason(c({ has_open_tag: false, has_close_tag: false })), 'no_report_no_tag');
+  assert.equal(noReportReason(c({ has_close_tag: false })), 'no_report_unclosed');
 });
