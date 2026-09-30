@@ -57,12 +57,12 @@
   {
     "no": 6,
     "utterance": "졸업논문 주제를 아직도 못 정했는데 방향을 좀 잡아줄 사람이 필요해요",
-    "expected_type": "GWP",
-    "expected_id": "kedu",
-    "expected_name": "K-School",
-    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "expected_type": "EXPERT",
+    "expected_id": "professor",
+    "expected_name": "교수(1:1 맞춤교육)",
+    "category": "회귀(R1 패치 재검증 — 기대값 정정: 2026-09-30, AC-PRO-CORE professor 행과 일치)",
     "static_verdict": "PASS",
-    "basis": "gwp-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
+    "basis": "AC-PRO-CORE_v1_15.txt §CATALOG-EXPERT professor 행에 \"도와줄 사람이 필요해요\"류 표현이 명시적으로 professor 위임의도 예시로 등재돼 있음(2026-08-08 갱신분). 이 발화(\"방향을 좀 잡아줄 사람이 필요해요\")가 거의 그대로 일치. 실측(live_results.json)에서도 [EXPERT: professor]로 정확히 라우팅됨을 확인. 기존 expected(kedu)는 이 professor 위임의도 규칙이 명문화되기 전(원본 batch2) 기준.",
     "source_batch2_no": 28
   },
   {
@@ -178,12 +178,12 @@
   {
     "no": 17,
     "utterance": "변호사한테 맡겨서 소송을 진행하고 싶어요",
-    "expected_type": "GWP",
-    "expected_id": "klaw",
-    "expected_name": "K-Law",
-    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "expected_type": "EXPERT",
+    "expected_id": "lawyer",
+    "expected_name": "변호사",
+    "category": "회귀(R1 패치 재검증 — 기대값 정정: 2026-09-30 주피터 확정, klaw=가상판결 시뮬레이션 vs lawyer=실제 위임 경계 명확화)",
     "static_verdict": "PASS",
-    "basis": "prompts/SP_lawyer.md 주석: '소송·고소·고발'은 klaw 담당이라 lawyer triggers에서 의도적으로 뺀 이력 — klaw가 이겨야 하는 경계",
+    "basis": "2026-09-30 주피터 확정: klaw는 이미 발생한 사건에 대한 AI 가상 대법원 판결 시뮬레이션이고, lawyer는 문자 그대로 사적 법률자문(실제 위임)이다. 이 발화는 \"변호사한테 맡겨서\"(명시적 위임 대상 지정)+\"진행하고 싶다\"(실제 소송 행위 의뢰)로 후자에 해당 — 판결이 어떻게 날지 묻는 제도적 관점(klaw)이 아니라 실제로 변호사에게 사건을 맡기겠다는 의도. expert-registry-lawyer.js의 lawyer.triggers에 이미 '변호사에게 맡기고 싶어'가 이 발화와 거의 동일한 문구로 등록돼 있음(2026-07-25 정책: GWP 기본값 원칙 + EXPERT 위임의도 명시 시 우선 — '소송·고소·고발' 단일어는 klaw/lawyer 둘 다에 해당해 모호하므로 제거하고, 위임 의도가 명확한 구만 남긴 설계). 실측에서도 [EXPERT: lawyer]로 정확히 라우팅됨을 확인. 기존 basis는 이 설계 의도를 'klaw가 항상 이겨야 한다'로 잘못 단순화한 것이었음 — AC-PRO-CORE §CATALOG의 klaw/lawyer 두 행 모두 이 경계를 명문화하도록 별도 커밋에서 같이 정정.",
     "source_batch2_no": 119
   },
   {
@@ -354,12 +354,12 @@
   {
     "no": 33,
     "utterance": "이거 지금 사는 게 맞는지 다른 데랑 가격 비교부터 해보고 싶어요",
-    "expected_type": "EXPERT",
-    "expected_id": "advisor",
-    "expected_name": "K-Advisor(구매자문)",
-    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "expected_type": "GWP",
+    "expected_id": "kcommerce",
+    "expected_name": "K-Market",
+    "category": "회귀(R1 패치 재검증 — 기대값 정정: 2026-09-30, AC-PRO-CORE advisor 행 정의와 일치)",
     "static_verdict": "PASS",
-    "basis": "src/gopang/ai/expert-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
+    "basis": "AC-PRO-CORE_v1_15.txt §CATALOG-EXPERT advisor 행이 스스로 \"K-Market(SP-KMARKET — 검색·비교·중개만 담당)이 하지 않는 가격공정성·구매 필요성 직접 평가·조언 담당\"이라고 명시 — 즉 단순 가격 비교 자체는 advisor가 아니라 kcommerce(K-Market)의 정의된 역할이다. 이 발화(\"다른 데랑 가격 비교부터 해보고 싶어요\")는 가격 공정성 평가나 구매 필요성 조언이 아니라 순수 비교 요청이므로 kcommerce가 정답. 실측에서도 [GWP: kcommerce]로 정확히 라우팅됨을 확인. 기존 expected(EXPERT advisor)는 이 advisor/kcommerce 역할 분리가 명문화되기 전(원본 batch2) 기준.",
     "source_batch2_no": 265
   },
   {
