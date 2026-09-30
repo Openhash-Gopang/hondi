@@ -3,6 +3,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:unit": "node --test doctor-verdict.test.mjs assemble-specialist.test.mjs chat-core.test.mjs eval.test.mjs"
+    "test:unit": "node --test doctor-verdict.test.mjs assemble-specialist.test.mjs chat-core.test.mjs eval.test.mjs attach.test.mjs"
   }
 }

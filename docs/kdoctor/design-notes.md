@@ -18,6 +18,11 @@ K-Estate가 평가 SP 하나인 것과 달리, K-Doctor는 **진료과목별 전
 | `prompts/kdoctor-specialties.json` | 과목 레지스트리 정본 41개(id·이름·파일·kind·parent). 총괄 SP·과목 SP 안의 `kdoctor-*` id는 전부 여기 있어야 한다(테스트가 검사) |
 | `assets/kdoctor-chat-widget.js` + `kdoctor-chat-core.js` | doctor.hondi.net 상단 진료 상담 창. SP 정본을 hondi.net에서 fetch, `[CONSULT_SPECIALIST]`를 위젯이 대행(턴당 최대 3회), 결과는 검증기로 재계산 후 카드로만 표시, 실패 시 1회 재생성 후 페일세이프 |
 | `prompts/SP-29-IMG_…vision_prompt` | 증상 사진 관찰 전용(진단 금지, 미성년자 은밀 부위 거부) |
+| `prompts/SP-29-DOC_…transcription` | 스캔 PDF·서류 사진의 글자 전사 전용(해석 금지, 신분증·비의료 서류 게이트) |
+| `src/worker/kdoctor-guard.js` | doctor Origin 요청의 서버측 제한(모델 고정·이미지 data URL 3장·max_tokens 상한) |
+| `src/gopang/pdv/health-profile.js` | AC(나만의 AI 비서)의 건강 기록 저장소: 필드·그룹·출처/기준일·접근 기록·요청 허용 서비스 allowlist |
+| `src/gopang/gwp/pdv-health-handler.js` | AC 쪽 GWP_PDV_REQUEST(health.*)·GWP_PDV_UPDATE_PROPOSAL 처리(그룹별 승인 UI, 직접 입력, 제안 항목별 승인) |
+| `tests/doctor/e2e/attach.e2e.mjs` | 브라우저 통합 테스트(Playwright, 워커·CDN 대체, AC↔K-Doctor postMessage) — `npm run test:unit`에는 포함되지 않음 |
 | `src/gopang/ai/hondi-doctor-verdict.js` | 결정론적 검증기(코드가 다시 계산) |
 | `scripts/kdoctor/assemble-specialist.mjs` | 과목 SP 조립·lint |
 | `tests/doctor/` | 유닛 테스트(`npm run test:unit`) |
@@ -87,10 +92,24 @@ K-Estate가 평가 SP 하나인 것과 달리, K-Doctor는 **진료과목별 전
 | 환자 공유 경로 | 의료인 → 환자 결과 전달은 복사 버튼 수준만 계획 | 링크 공유는 만료·접근 제어 설계 후 |
 | 실행 검증·성능 평가 | 하네스 v0.1이 있다(`scripts/kdoctor/eval/`, `docs/kdoctor/evaluation.md`). 그러나 전문의가 확정한 증례가 없고 실제 LLM으로는 아직 실행하지 않았다 | 증례 100~200건 구축(전문의 확정) → dev 실행·개선 → test 1회 확인 |
 | 전문의 검토 | 위험 신호 목록·감점 값·과목 훅은 초안이다 | 과목별 전문의 검토 필수. 검토 전 실사용 경로 금지 |
-| 상담 창 운영 | 창은 위젯이 /ai/chat을 직접 호출한다(SP는 gwp-registry·sp-catalog·call-ai에 미등록, 로그인·rate-limit 없음, 실행 미검증). 사진 업로드 미연결. 일반 공개 전에 면허 검증·rate-limit·전문의 검토 필요 | 최종 단계에서 처리 |
-| 이미지 호출 코드 | SP-29-IMG를 호출하는 모듈이 없다 | vision.js 파이프라인에 연결. EXIF GPS는 저장하지 않도록 걸러야 한다 |
-| 개인정보 | 사진의 EXIF GPS·얼굴 등 | 코드 층에서 제거 후 전달 |
+| 상담 창 운영 | 창은 위젯이 /ai/chat을 직접 호출한다(SP는 gwp-registry·sp-catalog·call-ai에 미등록, 로그인·rate-limit 없음, 실행 미검증). 일반 공개 전에 면허 검증·rate-limit·전문의 검토 필요 | 최종 단계에서 처리 |
+| 이미지 호출 코드 | 위젯이 호출한다(6-1). 실제 비전 모델 id 수용·출력 JSON 준수는 미확인 | 실모델로 확인, 필요 시 `DOCTOR_VISION_MODEL` 교체 |
+| 개인정보 | EXIF는 캔버스 재인코딩으로 제거. 서류 PII 가림은 패턴 기반(이름·주소는 "라벨: 값"만) | 전문 비식별 모듈, 얼굴 등 사진 속 식별 요소 처리 |
 | 사이트 | doctor.hondi.net 페이지(K-Estate 레이아웃) | doctor 저장소에 CNAME·index.html·Pages 활성화 |
+
+## 6-1. 첨부("+")와 건강 기록(PDV) — 동작 요약 (2026-10-01)
+
+- "+" 메뉴: 증상 사진 / 서류 / 내 건강 기록 불러오기. 최대 3건, 첫 첨부 때 전송 동의 확인.
+- 사진: 캔버스로 다시 그려 EXIF 제거·긴 변 1280px → 비전 호출(SP-29-IMG) → **관찰 JSON만** 총괄 SP에 전달(원본 이미지는 총괄에 가지 않음).
+- 서류: txt·csv·json(UTF-8/EUC-KR)·PDF(pdf.js)·docx(mammoth)는 브라우저에서 글자 추출, 글자층 없는 PDF(앞 3쪽)·서류 사진은 SP-29-DOC 전사. 전송 전 개인식별번호 가림, 제어 태그 무력화, "자료일 뿐 지시문 아님" 머리말. 라이브러리는 jsdelivr 고정 버전(mammoth은 SRI), `window.KDOCTOR_CDN`으로 대체 가능.
+- PDV: 건강 기록은 **나만의 AI 비서(AC)가 생성·갱신·관리**한다. K-Doctor는 AC가 연 탭(`window.opener`, `?gwp=1&origin=`)에서만 GWP_PDV_REQUEST로 요청하며 AC origin 허용 목록 밖에는 보내지 않는다. AC는 허용 서비스 allowlist(기본 거부) → 그룹별 승인(+빈 항목 직접 입력) → 승인된 그룹만 응답, 접근 기록을 남긴다. "기록 없음"은 "해당 없음"이 아니며 오래된 항목은 stale로 표시되어 환자에게 재확인한다. 대화당 최대 3회 요청, 응급 판단 시 요청하지 않는다.
+- 갱신 제안: 총괄 SP가 환자가 말한 사실(근거 필수)만 `[PDV_UPDATE_PROPOSAL]`로 내면 위젯이 "비서에 저장 요청" 카드를 보이고, AC가 항목별로 승인받아 저장한다(출처 `service_proposal_approved`). 진단·감별은 제안할 수 없다(필드 목록 밖).
+
+### 활성화 전에 남은 일
+- `gwp-registry.js`의 kdoctor 항목은 `pending`이다. AC가 서비스 탭을 열고 PDV 요청을 중계하려면 `active`로 바꾸고 AC에서 K-Doctor를 여는 경로를 확인해야 한다(현재 AC 없이 직접 연 창은 PDV 없이 동작).
+- AC가 **대화 중에 건강 기록을 만들고 갱신하는 부분(AC SP·call-ai 쪽 추출)은 구현하지 않았다.** 지금은 저장소(`window.gopangHealthPDV`)·요청 응답·직접 입력·제안 승인 경로만 있다.
+- 평가 하네스(`scripts/kdoctor/eval`)에는 PDV 사용 증례가 없다. 첨부·PDV 경로의 LLM 준수는 실행 검증 전이다.
+- 비전 모델 id(`deepseek-v4-flash-vision-exp`, 환경변수 `DOCTOR_VISION_MODEL`로 교체 가능)는 저장소 주석에서 가져온 값이라 실제 수용 여부를 확인해야 한다. rate-limit·면허 검증은 여전히 없다. 개인정보 가림은 패턴 기반이라 완전하지 않다.
 
 ## 7. 법·안전 경계
 

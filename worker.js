@@ -12,6 +12,7 @@
 // ═══════════════════════════════════════════════════════════
 
 import { handleAiChat, handleEscalate } from './src/worker/ai-chat-handler.js';
+import { prepareDoctorRequest } from './src/worker/kdoctor-guard.js';
 import { handleOrderQueue } from './src/worker/order-queue-handler.js';
 import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
 import { profilePhoneFilter, last8Filter, pickGuidByLast8 } from './src/worker/phone-lookup.js';
@@ -20239,12 +20240,14 @@ try{if(provider!=='anthropic'){
   // 호출은 위조할 수 있으나, 위조해도 얻는 것은 "doctor 키로 과금되는 호출"뿐이다.
   const _isDoctor=meta?.origin==='https://doctor.hondi.net';
   if(_isDoctor&&!env.DEEPSEEK_DOCTOR_KEY)return _err(500,'DEEPSEEK_DOCTOR_KEY_MISSING','DEEPSEEK_DOCTOR_KEY secret 미설정',corsHeaders);
+  // ★ 2026-10-01 — doctor 요청의 모델·이미지·토큰 상한은 서버가 정한다(src/worker/kdoctor-guard.js). 첨부 이미지는 user 메시지의 data URL만 허용, 이미지가 있으면 비전 모델로 전환.
+  let _dReq=null;if(_isDoctor){_dReq=prepareDoctorRequest({messages,model,max_tokens},env);if(!_dReq.ok)return _err(_dReq.status,_dReq.code,_dReq.message,corsHeaders);}
   const _useOR=!_isDoctor&&!!env.OPENROUTER_API_KEY;
   const _orKey=_isDoctor?env.DEEPSEEK_DOCTOR_KEY:(env.OPENROUTER_API_KEY||env.DEEPSEEK_API_KEY);
   const _orUrl=_useOR?OR_URL:DEEPSEEK_URL;
-  const _orMdl=model||(_useOR?OR_MODEL_FAST:DEEPSEEK_MODEL);
+  const _orMdl=_isDoctor?_dReq.model:(model||(_useOR?OR_MODEL_FAST:DEEPSEEK_MODEL));
   const _orHdr={'Content-Type':'application/json','Authorization':`Bearer ${_orKey}`,...(_useOR?{'HTTP-Referer':'https://hondi.net','X-Title':'Hondi'}:{})};
-  const res=await fetch(_orUrl,{method:'POST',headers:_orHdr,body:JSON.stringify({model:_orMdl,max_tokens,messages:builtMessages})});
+  const res=await fetch(_orUrl,{method:'POST',headers:_orHdr,body:JSON.stringify({model:_orMdl,max_tokens:_isDoctor?_dReq.max_tokens:max_tokens,messages:builtMessages})});
   const data=await res.json();const content=data.choices?.[0]?.message?.content;
   if(!content)throw new Error('AI 응답 없음: '+JSON.stringify(data));
   return new Response(JSON.stringify({content,provider:_useOR?'openrouter':'deepseek',model:_orMdl}),{status:200,headers:corsHeaders});}else{

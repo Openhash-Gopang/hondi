@@ -251,7 +251,7 @@ describe('SD — kemergency 하드 게이트 (_estimateGovImportance)', () => {
 // 오판했던 것 자체가 SD-05형 실수였음, 문서 참고).
 // ═══════════════════════════════════════════════════════════
 describe('SD — GWP_REGISTRY 구조적 위생 점검', () => {
-  test('SD-14: 전체 32개 엔트리 각각 비어있지 않은 triggers 배열을 가짐', () => {
+  test('SD-14: 전체 36개 엔트리 각각 비어있지 않은 triggers 배열을 가짐', () => {
     // ★ 2026-09-02 갱신 — 실제 GWP_REGISTRY가 31개로, 이전 기대값(27)은
     // 그 사이 레지스트리 구성이 바뀌며(K-Mail 신설로 28, K-Plan/K-Watch/
     // K-Job의 AC 오케스트레이션 편입으로 +3 → 31) 노후화된 숫자였다. 이
@@ -264,7 +264,9 @@ describe('SD — GWP_REGISTRY 구조적 위생 점검', () => {
     // 32 → 33. 이 항목도 메인 앱 트리거 디스패치는 안 거치지만(estate.hondi.net
     // 위젯이 시스템 프롬프트를 직접 번들링해 /ai/chat 호출), 등록 자체는
     // 이 레지스트리의 카탈로그 역할을 위해 추가한다.
-    assert.equal(GWP_REGISTRY.length, 33, `엔트리 수 변경 감지(현재 ${GWP_REGISTRY.length}) — 이 숫자가 바뀌면 다른 곳(문서 등)도 갱신 필요할 수 있음, 실패 아니라 확인 신호로만 취급해도 됨`);
+    // ★ 2026-10-01 갱신 — 이 점검은 이미 노후화돼 있었다(기대값 33, 실제 35). kdoctor(SP-29, status:'pending', type:'tab') 신설로 36.
+    // pending이라 실사용자에게 라우팅되지 않는다. 35 → 36 외의 차이 2건은 이번 변경과 무관한 선행 누락 갱신이다.
+    assert.equal(GWP_REGISTRY.length, 36, `엔트리 수 변경 감지(현재 ${GWP_REGISTRY.length}) — 이 숫자가 바뀌면 다른 곳(문서 등)도 갱신 필요할 수 있음, 실패 아니라 확인 신호로만 취급해도 됨`);
     for (const e of GWP_REGISTRY) {
       assert.ok(Array.isArray(e.triggers) && e.triggers.length > 0, `${e.id}: triggers 비어있음`);
     }
