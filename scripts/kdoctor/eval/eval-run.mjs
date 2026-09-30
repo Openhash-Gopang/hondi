@@ -25,6 +25,7 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { runTurn, parseConsults, extractReport, assembleSpecialist } from '../../../assets/kdoctor-chat-core.js';
 import { validateDiagnosis, audienceView } from '../../../src/gopang/ai/hondi-doctor-verdict.js';
+import { createHealthStore, memoryAdapter, answerHealthRequest, HEALTH_GROUPS } from '../../../src/gopang/pdv/health-profile.js';
 import { validateCase, caseVignette, scoreCase, aggregate, groupBy, consistency, compareScores, renderReport } from './eval-lib.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -193,11 +194,27 @@ export async function runCase(c, o) {
   const knownIds = new Set(resources.registry.specialties.map((s) => s.id));
   const rec = {
     case_id: c.id, arm, repeat, mode, transcript: [], view_type: null, validated: null, raw_report: null, attempts: [],
-    requested_ids: [], called_ids: [], requested_unknown: 0, turns: 0, n_llm_calls: 0, error: null,
+    requested_ids: [], called_ids: [], requested_unknown: 0, turns: 0, n_llm_calls: 0, error: null, pdv_requests: [],
+  };
+  // PDV(건강 기록) 시뮬레이션: 증례의 가상 PDV 내용으로 응답한다. 모든 그룹을 승인한 사용자로 가정하고(c.pdv.deny면 거부),
+  // PDV가 없는 증례는 "AC 없이 연 창"처럼 unavailable로 답한다. 기준선(SP 없는 모델) arm은 PDV 요청 경로가 없다.
+  const pdvState = { count: 0 };
+  const requestPdv = arm === 'baseline' ? undefined : async (fields, reason) => {
+    rec.pdv_requests.push({ fields, reason });
+    if (!c.pdv) return { status: 'unavailable' };
+    if (c.pdv.deny) return { status: 'denied' };
+    const fixedNow = Date.parse('2026-10-01T00:00:00Z');
+    const store = createHealthStore({ records: memoryAdapter(), access: memoryAdapter([]), now: () => fixedNow });
+    for (const [id, v] of Object.entries(c.pdv.records ?? {})) {
+      const isObj = v && typeof v === 'object' && !Array.isArray(v);
+      store.set(id, isObj ? v.value : v, { source: 'user_stated', asof: isObj ? v.asof : undefined });
+    }
+    const ans = answerHealthRequest(store, fields, Object.keys(HEALTH_GROUPS));
+    return { status: 'ok', values: ans.values };
   };
   let turnValidated = null;
   const deps = {
-    orchestratorSP: orchSP, registry, loadSpecialist: resources.loadSpecialist, audience: undefined, audienceView,
+    orchestratorSP: orchSP, registry, loadSpecialist: resources.loadSpecialist, audience: undefined, audienceView, pdvState, requestPdv,
     callLLM: async (system, messages, max) => {
       rec.n_llm_calls++;
       const out = await llm(system, messages, max, 'doctor');

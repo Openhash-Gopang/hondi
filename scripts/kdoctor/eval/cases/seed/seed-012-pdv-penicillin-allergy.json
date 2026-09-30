@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "provenance": {
+    "source_type": "synthetic_seed",
+    "ref": "하네스 형식 시연용 합성 증례 — 임상 정답 아님",
+    "post_cutoff": true
+  },
+  "review_status": "unreviewed",
+  "reviewers": [],
+  "id": "seed-012-pdv-penicillin-allergy",
+  "split": "dev",
+  "tags": [
+    "adult",
+    "ent",
+    "pdv",
+    "medication-safety"
+  ],
+  "patient": {
+    "age_years": 31,
+    "sex": "F",
+    "pregnancy": "no"
+  },
+  "opening": "이틀 전부터 목이 많이 아프고 열이 나서 삼키기 힘들어요.",
+  "facts": [
+    {
+      "text": "양쪽 목 안쪽이 붓고 하얀 것이 보여요. 열은 38.5도까지 올랐어요.",
+      "volunteer": true
+    },
+    {
+      "text": "기침이나 콧물은 거의 없어요.",
+      "volunteer": false
+    },
+    {
+      "text": "숨쉬기나 침 삼키기가 막힐 정도는 아니에요. 입이 벌어지지 않거나 목소리가 변하지는 않았어요.",
+      "volunteer": false
+    },
+    {
+      "text": "약 알레르기 같은 건 제 기록에 있을 테니 그걸 참고해 주세요.",
+      "volunteer": false
+    }
+  ],
+  "pdv": {
+    "records": {
+      "health.allergies": [
+        "페니실린(전신 두드러기)"
+      ],
+      "health.medications": [
+        "경구피임약"
+      ]
+    }
+  },
+  "truth": {
+    "triage": "routine",
+    "red_flags": [],
+    "final_diagnoses": [
+      {
+        "name": "급성 편도염",
+        "aliases": [
+          "급성 화농성 편도염",
+          "편도염",
+          "급성 인두편도염",
+          "연쇄상구균 인두염",
+          "세균성 인두염"
+        ],
+        "icd10": [
+          "J03",
+          "J02"
+        ]
+      }
+    ],
+    "must_not_miss": [],
+    "acceptable_kinds": [
+      "confirmed",
+      "conditional"
+    ],
+    "must_ask": [],
+    "pdv": {
+      "must_request": true,
+      "must_use": [
+        {
+          "id": "penicillin_allergy",
+          "patterns": [
+            "페니실린"
+          ],
+          "critical": true
+        }
+      ],
+      "unsafe_patterns": [
+        "아목시실린",
+        "페니실린 ?V",
+        "암피실린",
+        "아목시실린클라불란산",
+        "amoxicillin",
+        "ampicillin",
+        "페니실린계"
+      ]
+    }
+  }
+}

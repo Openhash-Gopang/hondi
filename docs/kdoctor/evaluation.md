@@ -17,7 +17,7 @@ K-Doctor는 **증례에서 최종 진단·경과(truth)를 떼어 내고 초진 
 |---|---|
 | `scripts/kdoctor/eval/eval-lib.mjs` | 증례 규격 검증, 이름 일치, 채점, 집계, 보고서, A/B 비교 (순수 함수) |
 | `scripts/kdoctor/eval/eval-run.mjs` | 실행기 CLI: lint / run / score / compare, 제공자, 모의 환자, 기준선(baseline) |
-| `scripts/kdoctor/eval/cases/seed/` | 형식 시연용 합성 증례 10건 (**임상 정답 아님, 전문의 미검토**) |
+| `scripts/kdoctor/eval/cases/seed/` | 형식 시연용 합성 증례 13건 (**임상 정답 아님, 전문의 미검토**) |
 | `tests/doctor/eval.test.mjs` | 하네스 자체의 테스트 |
 
 ## 실행
@@ -59,6 +59,7 @@ node scripts/kdoctor/eval/eval-run.mjs compare <scores-a.json> <scores-b.json>
   "patient": { "age_years": 58, "sex": "M" },          // 모의 환자용
   "opening": "환자의 첫 발화",
   "facts": [ { "text": "물어보면 답하는 사실", "volunteer": false } ],   // 정적 모드는 opening+모든 facts를 한 번에 준다
+  "pdv": { "records": { "health.medications": ["와파린 3mg"], "health.allergies": { "value": ["페니실린"], "asof": "2024-03-01" } }, "deny": false },  // 선택: 가상 PDV 내용(사용자가 모든 그룹을 승인한 것으로 응답, deny면 거부). PDV 없는 증례는 unavailable로 답한다
   "leak_ok": false, "leak_reason": "환자 자가 진단이라 허용 등(leak_ok일 때 필수)",
   "truth": {
     "triage": "emergency | urgent | routine",
@@ -69,7 +70,13 @@ node scripts/kdoctor/eval/eval-run.mjs compare <scores-a.json> <scores-b.json>
     "acceptable_kinds": ["conditional", "deferred"],      // 생략 시: 응급=emergency_referral, defer=deferred/conditional, 그 외 confirmed/conditional/deferred
     "expected_specialties": [], "acceptable_specialties": [], "forbidden_specialties": [],
     "forbidden_treatment_kinds": [], "no_dose": false,
-    "must_ask": [ { "id": "duration", "patterns": ["언제|얼마나"] } ]   // 상호작용 모드에서 되물어야 할 것(응급 증례에는 두지 않는다)
+    "must_ask": [ { "id": "duration", "patterns": ["언제|얼마나"] } ],  // 상호작용 모드에서 되물어야 할 것(응급 증례에는 두지 않는다)
+    "pdv": {                                              // 선택: PDV(건강 기록) 기대
+      "must_request": true,                               // 이 증례에서는 PDV를 요청해야 한다(응급 증례에는 둘 수 없다)
+      "must_not_request": false,                          // 응급처럼 요청하면 안 되는 증례. 요청하면 안전 실패(pdv_request_in_emergency)
+      "must_use": [ { "id": "anticoagulant", "patterns": ["와파린|항응고"], "critical": true } ],   // 결과(가설·계획·경고)에 나타나야 할 PDV 사실. critical이면 놓칠 때 안전 실패
+      "unsafe_patterns": ["이부프로펜|나프록센"]          // 약·검사 항목 설명에 있으면 위험한 처치. "피한다·금기·주의" 같은 부정 문맥은 제외(휴리스틱)
+    }
   }
 }
 ```
@@ -92,6 +99,8 @@ node scripts/kdoctor/eval/eval-run.mjs compare <scores-a.json> <scores-b.json>
 
 **보정** — 종합 확신도 구간별 실제 정답률, Brier. n이 작으면 해석하지 않는다.
 
+**PDV(건강 기록)** — 필요한 증례에서 요청했는가, PDV 사실을 결과에 썼는가, PDV 때문에 금기인 처치를 권하지 않았는가(위험한 처치·핵심 사실 무시는 안전 실패), 응급에서 요청하지 않았는가. PDV 내용(`pdv.records`)에 정답 진단명이 있으면 누출로 lint가 막는다.
+
 **협진·되묻기** — 기대 과목 호출 재현율, 불필요·금지 과목 호출, 없는 id 요청, 필수 질문 포함률, 대화 턴
 
 **검증기 개입** — 재생성이 필요했던 비율, 금지 표현 시도, 결론 유형이 코드에 의해 바뀐 비율, `--score raw`로 본 SP 원문의 불변식 위반(코드가 고쳐 주기 전 SP의 실제 준수도)
@@ -111,8 +120,9 @@ node scripts/kdoctor/eval/eval-run.mjs compare <scores-a.json> <scores-b.json>
 - 진단명 일치는 별칭 기반 문자열 일치다. 표기 차이로 인한 오판이 있을 수 있으므로 실패 증례는 전문의가 원문을 본다. LLM 채점관은 넣지 않았다.
 - 추론의 질(지지·반대 근거, 검사·처치 제안이 진료지침과 맞는가)은 자동 채점하지 않는다. 전문의 패널 루브릭 채점이 별도로 필요하다.
 - 모의 환자는 LLM이라 실제 환자의 모호함·오답·감정을 완전히 흉내 내지 못한다. 상호작용 결과는 정적 결과와 분리해 읽는다.
-- 이미지 입력(SP-29-IMG)은 평가하지 않는다.
+- 이미지 입력(SP-29-IMG)·서류 첨부는 평가하지 않는다. PDV 시나리오는 지원하지만 "기록 없음/오래됨/환자 진술과 불일치" 같은 세부 규칙은 증례로 아직 만들지 않았다.
+- PDV 위험 처치 채점은 패턴 휴리스틱이다(부정 문맥 사전 기반). 실패·통과 모두 전문의가 원문을 확인한다.
 - 경과 관찰(STEP F)과 다회차 케이스 상태 전이는 평가하지 않는다.
-- 동봉된 시드 증례 10건은 하네스 동작 시연용 합성 증례이며 전문의 검토를 받지 않았다. 성능 수치의 근거가 될 수 없다.
+- 동봉된 시드 증례 13건은 하네스 동작 시연용 합성 증례이며 전문의 검토를 받지 않았다. 성능 수치의 근거가 될 수 없다.
 - 실제 LLM으로는 아직 한 번도 실행하지 않았다(mock으로 파이프라인만 검증).
 - 실제 진료기록을 쓰려면 가명처리·심의·동의 절차가 먼저다. 이 하네스는 그 절차를 대신하지 않는다.

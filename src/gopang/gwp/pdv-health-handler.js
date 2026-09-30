@@ -26,6 +26,8 @@ export function getAcHealthStore() {
     globalThis.gopangHealthPDV = {
       get: (id) => store.get(id), set: (id, v, meta) => store.set(id, v, meta), merge: (id, v, meta) => store.merge(id, v, meta),
       remove: (id) => store.remove(id), snapshot: () => store.snapshot(), log: () => store.log(),
+      // 대화 중 건강 사실 자동 추출(health-capture.js) 켜기/끄기 — 기본 켜짐, 저장은 항상 사용자 승인 후
+      setCapture: (on) => { try { globalThis.localStorage.setItem('gopang_health_capture', on ? 'on' : 'off'); } catch { /* 저장소 불가 시 무시 */ } },
     };
   }
   return globalThis.__gopangHealthStore;

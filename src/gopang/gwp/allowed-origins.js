@@ -19,6 +19,7 @@ export const GWP_ALLOWED_ORIGINS = [
   'https://hondi.net',
   'https://911.hondi.net',
   'https://democracy.hondi.net',
+  'https://doctor.hondi.net',
   'https://gdc.hondi.net',
   'https://health.hondi.net',
   'https://insurance.hondi.net',

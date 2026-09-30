@@ -363,6 +363,8 @@ const SWITCH_SP_LOADERS = {
 // (콘솔에서 정확히 2회씩 쌍으로 재현 확인, Uncaught SyntaxError 동반).
 // 이 플래그가 true인 동안엔 switch 타입 자동복구를 다시 트리거하지 않는다.
 let _gwpSwitchRecoveryInFlight = false;
+// 테스트 관찰용(2026-10-01): 고정 sleep 대신 이 값이 false가 될 때까지 기다리게 한다(sp-tag-dispatch.test.mjs). 동작에는 영향 없음.
+export function _isSwitchRecoveryInFlight() { return _gwpSwitchRecoveryInFlight; }
 
 // ── SP 전환 스택 (2026-07-08 신설) ───────────────────────────────
 // 기존 _switchToAssistantSP()/_switchToProfileAssistantSP()는 CFG.system을

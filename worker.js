@@ -12,7 +12,7 @@
 // ═══════════════════════════════════════════════════════════
 
 import { handleAiChat, handleEscalate } from './src/worker/ai-chat-handler.js';
-import { prepareDoctorRequest } from './src/worker/kdoctor-guard.js';
+import { prepareDoctorRequest, doctorRateLimits } from './src/worker/kdoctor-guard.js';
 import { handleOrderQueue } from './src/worker/order-queue-handler.js';
 import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
 import { profilePhoneFilter, last8Filter, pickGuidByLast8 } from './src/worker/phone-lookup.js';
@@ -20241,13 +20241,20 @@ try{if(provider!=='anthropic'){
   const _isDoctor=meta?.origin==='https://doctor.hondi.net';
   if(_isDoctor&&!env.DEEPSEEK_DOCTOR_KEY)return _err(500,'DEEPSEEK_DOCTOR_KEY_MISSING','DEEPSEEK_DOCTOR_KEY secret 미설정',corsHeaders);
   // ★ 2026-10-01 — doctor 요청의 모델·이미지·토큰 상한은 서버가 정한다(src/worker/kdoctor-guard.js). 첨부 이미지는 user 메시지의 data URL만 허용, 이미지가 있으면 비전 모델로 전환.
-  let _dReq=null;if(_isDoctor){_dReq=prepareDoctorRequest({messages,model,max_tokens},env);if(!_dReq.ok)return _err(_dReq.status,_dReq.code,_dReq.message,corsHeaders);}
+  let _dReq=null;if(_isDoctor){_dReq=prepareDoctorRequest({messages,model,max_tokens},env);if(!_dReq.ok)return _err(_dReq.status,_dReq.code,_dReq.message,corsHeaders);
+    // ★ 2026-10-01 — doctor 전용 키의 비용 보호: IP별 분·시간당, 사진은 별도, 전체 시간당 상한(RATE_LIMIT_KV 고정 구간 카운터, KV 없으면 통과).
+    for(const _r of doctorRateLimits({ip:meta?.ip,imageCount:_dReq.imageCount,nowMs:Date.now(),env})){
+      if(!await _checkRateLimitN(env,_r.key,_r.action,_r.limit,_r.ttl)){
+        console.warn(JSON.stringify({tag:'DOCTOR_RATE_LIMITED',action:_r.action,...meta}));
+        return new Response(JSON.stringify({ok:false,error:'RATE_LIMITED',message:'요청이 많아 잠시 후 다시 시도해 주세요.',detail:_r.action}),{status:429,headers:{...corsHeaders,'Retry-After':String(_r.retryAfter)}});
+      }
+    }}
   const _useOR=!_isDoctor&&!!env.OPENROUTER_API_KEY;
   const _orKey=_isDoctor?env.DEEPSEEK_DOCTOR_KEY:(env.OPENROUTER_API_KEY||env.DEEPSEEK_API_KEY);
   const _orUrl=_useOR?OR_URL:DEEPSEEK_URL;
   const _orMdl=_isDoctor?_dReq.model:(model||(_useOR?OR_MODEL_FAST:DEEPSEEK_MODEL));
   const _orHdr={'Content-Type':'application/json','Authorization':`Bearer ${_orKey}`,...(_useOR?{'HTTP-Referer':'https://hondi.net','X-Title':'Hondi'}:{})};
-  const res=await fetch(_orUrl,{method:'POST',headers:_orHdr,body:JSON.stringify({model:_orMdl,max_tokens:_isDoctor?_dReq.max_tokens:max_tokens,messages:builtMessages})});
+  const res=await fetch(_orUrl,{method:'POST',headers:_orHdr,body:JSON.stringify({model:_orMdl,max_tokens:_isDoctor?_dReq.max_tokens:max_tokens,messages:builtMessages,...(_isDoctor?{thinking:_dReq.thinking}:{})})});
   const data=await res.json();const content=data.choices?.[0]?.message?.content;
   if(!content)throw new Error('AI 응답 없음: '+JSON.stringify(data));
   return new Response(JSON.stringify({content,provider:_useOR?'openrouter':'deepseek',model:_orMdl}),{status:200,headers:corsHeaders});}else{

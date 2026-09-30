@@ -115,6 +115,11 @@ export async function sendMessage() {
     // 실제 전송을 막지 않도록 완전히 비동기(fire-and-forget)로 호출한다.
     _runPipelineBackground(text);
 
+    // 2026-10-01 — 나만의 AI 비서가 대화에서 본인의 건강 사실(병력·알레르기·복용약·가족력·생활습관)을 알아채면
+    // "건강 기록에 저장할까요?"를 묻는다(저장은 사용자 승인 후). 조회·삭제는 "내 건강 기록 보여줘".
+    if (_isHealthRecordCommandLocal(text)) { _showHealthRecordsLocal(); return; }
+    if (!_peer && (aiActive || _isRegistered())) _captureHealthBackground(text);
+
     if (_peer) {
       // 사람과 대화 → WebRTC P2P 전송 (등록/비등록 모두 가능)
       await _sendP2P(text);
@@ -206,6 +211,28 @@ function _buildPhase7LlmCaller() {
     const data = await res.json();
     return data.choices?.[0]?.message?.content ?? '';
   };
+}
+
+// ── 건강 기록 자동 추출·조회 — 2026-10-01 (pdv/health-capture.js, 프롬프트·call-ai.js 무변경) ──
+function _isHealthRecordCommandLocal(text) {
+  try { return /건강\s*기록|건강기록/.test(text) && text.trim().length <= 40 && /보여|삭제|지워|내\s*건강/.test(text); } catch { return false; }
+}
+async function _showHealthRecordsLocal() {
+  try {
+    const [{ showHealthRecords }, { getAcHealthStore }] = await Promise.all([import('../pdv/health-capture.js'), import('../gwp/pdv-health-handler.js')]);
+    showHealthRecords({ store: getAcHealthStore(), appendBubble, getEl: (id) => document.getElementById(id) });
+  } catch (e) { console.warn('[HealthRecords]', e.message); }
+}
+async function _captureHealthBackground(text) {
+  try {
+    const cap = await import('../pdv/health-capture.js');
+    if (!cap.shouldExtract(text)) return; // 대부분의 메시지는 여기서 끝난다(추가 LLM 호출 없음)
+    const { getAcHealthStore } = await import('../gwp/pdv-health-handler.js');
+    await cap.captureHealthFromMessage(text, {
+      callLLM: cap.buildCaptureLlmCaller({ endpoint: CFG.endpoint, guid: _USER?.ipv6 || USER_GUID || null }),
+      store: getAcHealthStore(), appendBubble, getEl: (id) => document.getElementById(id), enabled: cap.isCaptureEnabled(),
+    });
+  } catch (e) { console.warn('[HealthCapture]', e.message); }
 }
 
 async function _runPipelineBackground(text) {

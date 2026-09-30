@@ -620,6 +620,7 @@ kregionalgov_20260809.json no.14·no.16)로 실측됐다 — 사용자는 이미
   kpolice        | K-Police       | 경찰(범죄·절도·스토킹 등)
   ksecurity      | K-Security     | 사이버 보안·개인정보 침해
   khealth        | K-Health       | 의료(증상·병원·처방 등)
+  kdoctor        | K-Doctor       | 의료인 전용 임상 의사결정 지원 — 의료인이 감별진단·진단 참고·처방/처치 제안을 청하거나 "K-Doctor"를 직접 지목한 경우에만(진료과목별 AI 협진, 진단서·처방전 발급 안 함). ★ 일반 시민의 증상·병원·약 문의는 khealth 소관이다 — "아파요"·"열나요" 같은 일상어는 kdoctor로 보내지 않는다. 새 탭으로 열며 [GWP: kdoctor]로 낸다.
   kedu           | K-School       | 교육(학습·진로·시험 등)
   kgdc           | GDC            | 결제·송금·환전 + 예금·적금·대출·신용평가·투자(재무제표 기반, github.com/Openhash-Gopang/gdc README §5 참고). ★ "은행"이라는 단어를 쓰지 않는다 — GDC 자체 규칙(SP-GDC_v2_0, 인가 없이 은행업을 표방하지 않기 위함). 신용·체크카드 상품은 아직 없음.
   kfinance       | K-Stock        | 투자·주식·포트폴리오
