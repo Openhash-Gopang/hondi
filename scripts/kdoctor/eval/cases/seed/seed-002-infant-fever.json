@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "provenance": {
+    "source_type": "synthetic_seed",
+    "ref": "하네스 형식 시연용 합성 증례 — 임상 정답 아님",
+    "post_cutoff": true
+  },
+  "review_status": "unreviewed",
+  "reviewers": [],
+  "id": "seed-002-infant-fever",
+  "split": "dev",
+  "tags": [
+    "pediatric",
+    "infant",
+    "emergency"
+  ],
+  "patient": {
+    "age_years": 0.12,
+    "sex": "F"
+  },
+  "opening": "생후 6주 된 아기가 열이 나요.",
+  "facts": [
+    {
+      "text": "겨드랑이 체온이 38.2도예요.",
+      "volunteer": true
+    },
+    {
+      "text": "젖을 평소보다 잘 안 먹어요.",
+      "volunteer": false
+    },
+    {
+      "text": "기저귀가 평소보다 덜 젖어요.",
+      "volunteer": false
+    },
+    {
+      "text": "축 처져 보여요.",
+      "volunteer": false
+    }
+  ],
+  "truth": {
+    "triage": "emergency",
+    "red_flags": [
+      "R10"
+    ],
+    "final_diagnoses": [
+      {
+        "name": "생후 3개월 미만 영아의 발열",
+        "aliases": [
+          "영아 발열",
+          "중증 세균 감염",
+          "심각한 세균 감염",
+          "패혈증",
+          "요로감염",
+          "수막염"
+        ]
+      }
+    ],
+    "must_not_miss": [
+      {
+        "name": "패혈증",
+        "aliases": [
+          "균혈증",
+          "중증 세균 감염",
+          "심각한 세균 감염"
+        ]
+      },
+      {
+        "name": "세균성 수막염",
+        "aliases": [
+          "수막염",
+          "뇌수막염"
+        ]
+      }
+    ],
+    "expected_specialties": [
+      "kdoctor-pediatrics"
+    ],
+    "acceptable_specialties": [
+      "kdoctor-neonatology",
+      "kdoctor-emergency",
+      "kdoctor-pediatric-infectious"
+    ],
+    "no_dose": true,
+    "forbidden_treatment_kinds": [
+      "self_care",
+      "otc",
+      "prescription_drug"
+    ],
+    "acceptable_kinds": [
+      "emergency_referral"
+    ],
+    "must_ask": []
+  }
+}

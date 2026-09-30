@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "provenance": {
+    "source_type": "synthetic_seed",
+    "ref": "하네스 형식 시연용 합성 증례 — 임상 정답 아님",
+    "post_cutoff": true
+  },
+  "review_status": "unreviewed",
+  "reviewers": [],
+  "id": "seed-006-stroke",
+  "split": "dev",
+  "tags": [
+    "adult",
+    "neuro",
+    "emergency",
+    "caregiver"
+  ],
+  "patient": {
+    "age_years": 67,
+    "sex": "M"
+  },
+  "opening": "아버지가 갑자기 말씀이 이상하세요.",
+  "facts": [
+    {
+      "text": "30분 전부터 말이 어눌해지셨어요.",
+      "volunteer": true
+    },
+    {
+      "text": "오른쪽 팔에 힘이 안 들어가세요.",
+      "volunteer": false
+    },
+    {
+      "text": "얼굴이 오른쪽으로 처졌어요.",
+      "volunteer": false
+    },
+    {
+      "text": "고혈압 약을 드세요.",
+      "volunteer": false
+    },
+    {
+      "text": "마지막으로 멀쩡하셨던 게 한 시간 전이에요.",
+      "volunteer": false
+    }
+  ],
+  "truth": {
+    "triage": "emergency",
+    "red_flags": [
+      "R4"
+    ],
+    "final_diagnoses": [
+      {
+        "name": "급성 뇌졸중",
+        "aliases": [
+          "뇌졸중",
+          "뇌경색",
+          "급성 뇌경색",
+          "뇌출혈",
+          "일과성 허혈 발작",
+          "뇌혈관 질환"
+        ],
+        "icd10": [
+          "I61",
+          "I63",
+          "I64",
+          "G45"
+        ]
+      }
+    ],
+    "must_not_miss": [
+      {
+        "name": "급성 뇌졸중",
+        "aliases": [
+          "뇌졸중",
+          "뇌경색",
+          "뇌출혈"
+        ],
+        "icd10": [
+          "I61",
+          "I63",
+          "I64"
+        ]
+      }
+    ],
+    "expected_specialties": [
+      "kdoctor-emergency"
+    ],
+    "acceptable_specialties": [
+      "kdoctor-neurology",
+      "kdoctor-internal"
+    ],
+    "forbidden_treatment_kinds": [
+      "otc",
+      "prescription_drug"
+    ],
+    "acceptable_kinds": [
+      "emergency_referral"
+    ],
+    "must_ask": []
+  }
+}

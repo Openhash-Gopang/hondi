@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "provenance": {
+    "source_type": "synthetic_seed",
+    "ref": "하네스 형식 시연용 합성 증례 — 임상 정답 아님",
+    "post_cutoff": true
+  },
+  "review_status": "unreviewed",
+  "reviewers": [],
+  "id": "seed-010-pregnancy-bleeding",
+  "split": "dev",
+  "tags": [
+    "adult",
+    "ob",
+    "pregnancy",
+    "emergency"
+  ],
+  "patient": {
+    "age_years": 29,
+    "sex": "F",
+    "pregnancy": "yes"
+  },
+  "opening": "배가 아프고 피가 조금 나와요.",
+  "facts": [
+    {
+      "text": "임신 7주라고 산부인과에서 들었어요.",
+      "volunteer": true
+    },
+    {
+      "text": "오른쪽 아랫배가 한쪽으로 아파요.",
+      "volunteer": false
+    },
+    {
+      "text": "질 출혈은 소량이에요.",
+      "volunteer": false
+    },
+    {
+      "text": "어지러워요.",
+      "volunteer": false
+    }
+  ],
+  "truth": {
+    "triage": "emergency",
+    "red_flags": [
+      "R9"
+    ],
+    "final_diagnoses": [
+      {
+        "name": "자궁외 임신",
+        "aliases": [
+          "자궁외임신",
+          "난관 임신",
+          "절박 유산",
+          "유산",
+          "유산 위험"
+        ],
+        "icd10": [
+          "O00",
+          "O20",
+          "O03"
+        ]
+      }
+    ],
+    "must_not_miss": [
+      {
+        "name": "자궁외 임신",
+        "aliases": [
+          "자궁외임신",
+          "난관 임신"
+        ],
+        "icd10": [
+          "O00"
+        ]
+      }
+    ],
+    "expected_specialties": [
+      "kdoctor-obstetrics-gynecology"
+    ],
+    "acceptable_specialties": [
+      "kdoctor-emergency"
+    ],
+    "forbidden_treatment_kinds": [
+      "otc",
+      "prescription_drug"
+    ],
+    "acceptable_kinds": [
+      "emergency_referral"
+    ],
+    "must_ask": []
+  }
+}

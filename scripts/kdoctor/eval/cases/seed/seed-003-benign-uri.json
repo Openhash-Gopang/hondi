@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "provenance": {
+    "source_type": "synthetic_seed",
+    "ref": "하네스 형식 시연용 합성 증례 — 임상 정답 아님",
+    "post_cutoff": true
+  },
+  "review_status": "unreviewed",
+  "reviewers": [],
+  "id": "seed-003-benign-uri",
+  "split": "dev",
+  "tags": [
+    "adult",
+    "ent",
+    "benign"
+  ],
+  "patient": {
+    "age_years": 27,
+    "sex": "F",
+    "pregnancy": "no"
+  },
+  "opening": "목이 아프고 콧물이 나요.",
+  "facts": [
+    {
+      "text": "3일째예요.",
+      "volunteer": true
+    },
+    {
+      "text": "열은 37.5도 정도예요.",
+      "volunteer": false
+    },
+    {
+      "text": "기침이 약간 있어요.",
+      "volunteer": false
+    },
+    {
+      "text": "침 삼킬 때 아파요.",
+      "volunteer": false
+    },
+    {
+      "text": "숨이 차거나 고열은 없어요. 기저질환도 없고 임신은 아니에요. 약 알레르기도 없어요.",
+      "volunteer": false
+    }
+  ],
+  "truth": {
+    "triage": "routine",
+    "red_flags": [],
+    "final_diagnoses": [
+      {
+        "name": "급성 상기도 감염",
+        "aliases": [
+          "감기",
+          "상기도감염",
+          "급성 인두염",
+          "바이러스성 인두염",
+          "인후염",
+          "급성 비인두염"
+        ],
+        "icd10": [
+          "J00",
+          "J02",
+          "J06"
+        ]
+      }
+    ],
+    "must_not_miss": [],
+    "acceptable_kinds": [
+      "confirmed",
+      "conditional"
+    ],
+    "must_ask": []
+  }
+}
