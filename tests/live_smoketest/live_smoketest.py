@@ -65,6 +65,20 @@ USERSEARCH_TAG_RE = re.compile(r"\[\s*SEARCH\s*:[^\]]*type\s*=\s*user", re.IGNOR
 KTELECOM_TAG_RE = re.compile(r"\[\s*CALL_KTELECOM\s*:", re.IGNORECASE)
 KESTATE_TAG_RE = re.compile(r"\[\s*CALL_KESTATE\s*:", re.IGNORECASE)
 
+# 2026-09-30 추가 — gwp-registry.js 전수 확인 결과, ktelecom/kestate와 똑같이
+# type:'switch'(전용 [CALL_...:] 태그, GWP_TAG_RE로는 못 잡음)인 서비스가
+# 더 있었다: kplan·kwatch·kjob. ktelecom/kestate만 특례 처리하고 이후 추가된
+# switch 서비스는 이 파일에 반영을 안 해서, kjob이 scenarios_regression_
+# R1_20260801.json #7("자소서 방향부터 다 막막해요" — kjob.triggers에
+# '자기소개서'·'자소서' 명시)에서 실제로 [CALL_KJOB: ...]가 정확히 발동했는데도
+# 이 채점기가 그 태그를 몰라 "라우팅 태그 없음"으로 오채점하고 있었다(raw_
+# response 직접 대조로 확인). 새 switch 서비스가 추가될 때마다 이 목록도
+# 같이 갱신해야 하는 구조적 결함 — gwp-registry.js를 다시 훑을 계기가 있을
+# 때마다 여기도 함께 점검할 것.
+KPLAN_TAG_RE = re.compile(r"\[\s*CALL_KPLAN\s*:", re.IGNORECASE)
+KWATCH_TAG_RE = re.compile(r"\[\s*CALL_KWATCH\s*:", re.IGNORECASE)
+KJOB_TAG_RE = re.compile(r"\[\s*CALL_KJOB\s*:", re.IGNORECASE)
+
 # 2026-08-01 — 위기개입(crisis-intervention)은 태그가 아니라 서술형 지지
 # 응답 + 상담 자원 안내가 정답이다(§SAFETY, SP_common_medical_safety M5).
 # 태그 유무가 아니라 실제 위기상담 자원(1393/1577-0199/129 등)이 언급됐는지로
@@ -227,6 +241,37 @@ def grade(scenario, raw_text, call_err):
         if extracted_id is None and CLARIFY_RE.search(raw_text or ""):
             return "LIVE-CLARIFY", "태그 없이 되물음 — §CORE 되묻기 지침에 따른 정상 동작일 수 있음"
         return "LIVE-FAIL", f"[CALL_KESTATE: ...] 미발동 (추출된 다른 태그: {extracted_type}:{extracted_id})"
+
+    # 2026-09-30 추가 — kplan/kwatch/kjob도 ktelecom/kestate와 동일한
+    # switch-type 예외. 구식 [GWP: id]/[EXPERT: id] 출력에 대한 자동복구
+    # PASS 인정도 동일하게 적용한다(§TAGS 예외, 2026-08-31 채점기준 개정과
+    # 같은 근거).
+    if expected_type == "GWP" and expected_id == "kplan":
+        if KPLAN_TAG_RE.search(raw_text or ""):
+            return "LIVE-PASS", "[CALL_KPLAN: ...] 발동 확인"
+        if extracted_type == "GWP" and extracted_id == "kplan":
+            return "LIVE-PASS", "구식 [GWP: kplan] 출력이지만 call-ai.js 자동복구로 [CALL_KPLAN:]과 동등 — PASS(§TAGS 예외)"
+        if extracted_id is None and CLARIFY_RE.search(raw_text or ""):
+            return "LIVE-CLARIFY", "태그 없이 되물음 — §CORE 되묻기 지침에 따른 정상 동작일 수 있음"
+        return "LIVE-FAIL", f"[CALL_KPLAN: ...] 미발동 (추출된 다른 태그: {extracted_type}:{extracted_id})"
+
+    if expected_type == "GWP" and expected_id == "kwatch":
+        if KWATCH_TAG_RE.search(raw_text or ""):
+            return "LIVE-PASS", "[CALL_KWATCH: ...] 발동 확인"
+        if extracted_type == "GWP" and extracted_id == "kwatch":
+            return "LIVE-PASS", "구식 [GWP: kwatch] 출력이지만 call-ai.js 자동복구로 [CALL_KWATCH:]과 동등 — PASS(§TAGS 예외)"
+        if extracted_id is None and CLARIFY_RE.search(raw_text or ""):
+            return "LIVE-CLARIFY", "태그 없이 되물음 — §CORE 되묻기 지침에 따른 정상 동작일 수 있음"
+        return "LIVE-FAIL", f"[CALL_KWATCH: ...] 미발동 (추출된 다른 태그: {extracted_type}:{extracted_id})"
+
+    if expected_type == "GWP" and expected_id == "kjob":
+        if KJOB_TAG_RE.search(raw_text or ""):
+            return "LIVE-PASS", "[CALL_KJOB: ...] 발동 확인"
+        if extracted_type == "GWP" and extracted_id == "kjob":
+            return "LIVE-PASS", "구식 [GWP: kjob] 출력이지만 call-ai.js 자동복구로 [CALL_KJOB:]과 동등 — PASS(§TAGS 예외)"
+        if extracted_id is None and CLARIFY_RE.search(raw_text or ""):
+            return "LIVE-CLARIFY", "태그 없이 되물음 — §CORE 되묻기 지침에 따른 정상 동작일 수 있음"
+        return "LIVE-FAIL", f"[CALL_KJOB: ...] 미발동 (추출된 다른 태그: {extracted_type}:{extracted_id})"
 
     # 2026-08-01 신설 — 위기개입은 태그가 아니라 지지적 서술 + 상담 자원
     # 안내가 정답이다. GWP/EXPERT 태그로 딴 데로 라우팅해버리면 그 자체가

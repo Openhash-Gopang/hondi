@@ -69,11 +69,11 @@
     "no": 7,
     "utterance": "취업 준비하는데 자소서 방향부터 다 막막해요",
     "expected_type": "GWP",
-    "expected_id": "kedu",
-    "expected_name": "K-School",
-    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "expected_id": "kjob",
+    "expected_name": "K-Job",
+    "category": "회귀(R1 패치 재검증 — 기대값 정정: 2026-09-30, kjob이 kedu보다 더 구체적으로 정답)",
     "static_verdict": "PASS",
-    "basis": "gwp-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
+    "basis": "kjob.triggers(gwp-registry.js)에 '자기소개서'·'자소서'가 명시돼 있어 kedu(일반 교육)보다 kjob(구직자 개인용 이력서·자소서 전담)이 더 정확한 정답. 실측(live_results.json)에서 모델은 실제로 [CALL_KJOB: ...]를 정확히 발동했으나(kjob은 ktelecom/kestate와 동일한 type:'switch' 서비스), live_smoketest.py의 grade()가 CALL_KJOB 태그를 몰라(KTELECOM/KESTATE만 특례 처리돼 있었음) LIVE-FAIL로 오채점하고 있었다 — 별도 커밋으로 live_smoketest.py에 KJOB_TAG_RE 처리를 추가해 같이 수정.",
     "source_batch2_no": 29
   },
   {
