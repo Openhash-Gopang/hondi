@@ -38,20 +38,37 @@ import json
 import sys
 from collections import Counter
 
+# 2026-09-30 추가 — DeepSeek는 temperature=0으로 호출해도(live_smoketest.py
+# 참고) MoE(전문가 혼합) 구조상 배치 구성에 따라 완전한 결정론이 보장되지
+# 않는다는 게 실사로 확인됐다(같은 프롬프트·같은 배치를 재실행했더니 서로
+# 다른 5건이 새로 실패/통과함, #1/#8/#15/#22/#29). 단일 실행의 PASS율은
+# 그래서 "이 변경이 실제로 더 나쁘게 만들었는가"를 판단하는 근거로 쓰기엔
+# 노이즈가 크다 — --results에 여러 실행의 live_results.json을 넘기면 전부
+# 합쳐서(같은 시나리오 번호가 여러 번 나와도 그대로 각각의 독립 시행으로
+# 취급) 하나의 분모로 판정한다. 반복 실행 자체는 이 스크립트가 하지 않고
+# (비용은 호출하는 쪽 책임), 이미 만들어진 결과 파일 여러 개를 합산하는
+# 것만 담당한다.
+
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--results", required=True,
-                     help="path to live_results.json (per-scenario, has static_verdict)")
+    ap.add_argument("--results", required=True, nargs="+",
+                     help="path(s) to live_results.json (per-scenario, has static_verdict). "
+                          "여러 개 넘기면 반복 실행 결과를 합쳐서 판정한다(DeepSeek MoE "
+                          "non-determinism 완화).")
     ap.add_argument("--threshold", type=float, default=0.80,
                      help="minimum PASS/(PASS+FAIL) ratio among static_verdict=PASS entries, default 0.80")
     ap.add_argument("--label", default="", help="display label for this batch")
     args = ap.parse_args()
 
-    with open(args.results, "r", encoding="utf-8") as f:
-        results = json.load(f)
+    results = []
+    for path in args.results:
+        with open(path, "r", encoding="utf-8") as f:
+            results.extend(json.load(f))
 
     label = args.label or "(unnamed batch)"
+    if len(args.results) > 1:
+        label = f"{label}, {len(args.results)}회 반복 합산"
 
     strict = [r for r in results if r.get("static_verdict") == "PASS"]
     informational = [r for r in results if r.get("static_verdict") != "PASS"]
