@@ -112,12 +112,12 @@
   {
     "no": 11,
     "utterance": "이사 가는 집에 인터넷 새로 깔아야 하는데 어떻게 신청해요",
-    "expected_type": "PLATFORM",
-    "expected_id": "direct-response",
-    "expected_name": "라우팅 불필요(ktelecom 여전히 실질 미구현)",
-    "category": "회귀(R1 패치 재검증 — 기대값 정정: 2026-08-01 발견 — ktelecom은 gwp-registry.j...)",
+    "expected_type": "GWP",
+    "expected_id": "ktelecom",
+    "expected_name": "K-Telecom",
+    "category": "회귀(R1 패치 재검증 — 기대값 정정: 2026-09-30 실측 확인, ktelecom active 상태에서 정상 라우팅)",
     "static_verdict": "PASS",
-    "basis": "2026-08-01 발견 — ktelecom은 gwp-registry.js status:'active'인데 AC-PRO-CORE는 '미구현, 태그 내지 말고 텍스트로만 안내'라고 명시. 이 불일치는 아직 안 고쳤으므로 무라우팅(텍스트 안내)이 현재 정답.",
+    "basis": "2026-09-30 실측(live_results.json)에서 [GWP: ktelecom]으로 정확히 라우팅됨을 확인. 기존 expected(direct-response)는 2026-08-01 15:53 작성 당시의 '미구현' 오판을 근거로 했으나, 그 판단은 같은 날 16:48(커밋 112dba60)에 정정되어 지금까지 status:'active' 유지 중. ktelecom triggers에 '인터넷 설치'가 명시돼 있어 트리거 설계와도 일치.",
     "source_batch2_no": 49
   },
   {
@@ -127,8 +127,8 @@
     "expected_id": "direct-response",
     "expected_name": "라우팅 불필요(ktelecom 여전히 실질 미구현)",
     "category": "회귀(R1 패치 재검증 — 기대값 정정: 위 no=49와 동일 사유....)",
-    "static_verdict": "PASS",
-    "basis": "위 no=49와 동일 사유.",
+    "static_verdict": "WARN",
+    "basis": "위 no=49와 동일 사유. | 2026-09-30 실측 추가: [GWP: kpolice]로 라우팅됨. ktelecom triggers에도 '휴대폰 분실'이 명시돼 있어 ktelecom도 유력 후보 — 분실물 신고(kpolice) vs 통신사 절차(ktelecom) 중 설계 의도상 정답이 무엇인지 제품 판단 필요. 정답 미확정으로 엄격판정 제외.",
     "source_batch2_no": 50
   },
   {
@@ -332,12 +332,12 @@
   {
     "no": 31,
     "utterance": "살 집을 계약하는데 중개사님께 직접 계약을 맡기고 싶어요",
-    "expected_type": "EXPERT",
-    "expected_id": "real-estate-agent",
-    "expected_name": "공인중개사",
-    "category": "회귀(R1 패치 재검증 — 기대값 정정: kestate가 막혀있어 EXPERT(real-estate-agent)가...)",
+    "expected_type": "GWP",
+    "expected_id": "kestate",
+    "expected_name": "K-Estate",
+    "category": "회귀(R1 패치 재검증 — 기대값 정정: 2026-09-30 실측 확인, kestate active 상태에서 정상 라우팅)",
     "static_verdict": "PASS",
-    "basis": "kestate가 막혀있어 EXPERT(real-estate-agent)가 유일한 정답 경로 — R1 축 검증 목적상 기대값 유지.",
+    "basis": "2026-09-30 실측에서 [GWP: kestate]로 라우팅되고, 최종 계약 체결은 공인중개사 몫이라는 kestate 자신의 안내까지 포함해 응답함을 확인. 기존 expected(EXPERT real-estate-agent)는 'kestate가 막혀있어 EXPERT가 유일한 정답 경로'라는 전제였으나, 그 전제(#11과 동일한 2026-08-01 오판)가 이미 무효화됨.",
     "source_batch2_no": 181
   },
   {
@@ -398,12 +398,12 @@
   {
     "no": 37,
     "utterance": "보증금을 못 돌려받고 있는데 이거 절차상 어떻게 진행해야 하는지 알고 싶어요",
-    "expected_type": "PLATFORM",
-    "expected_id": "direct-response",
-    "expected_name": "라우팅 불필요(kestate 여전히 실질 미구현)",
-    "category": "회귀(R1 패치 재검증 — 기대값 정정: no=281은 원래 kestate GWP 자체를 기대했던 케이스라(EXP...)",
+    "expected_type": "GWP",
+    "expected_id": "klaw",
+    "expected_name": "K-Law",
+    "category": "회귀(R1 패치 재검증 — 기대값 정정: 2026-09-30 실측 확인, klaw 라우팅을 정답으로 인정)",
     "static_verdict": "PASS",
-    "basis": "no=281은 원래 kestate GWP 자체를 기대했던 케이스라(EXPERT 위임 의도 없음) ktelecom과 동일하게 무라우팅 텍스트 안내가 현재 정답. klaw로 간 것도 대안으로는 합리적이나, 채점 기준은 '태그 없음'으로 통일한다.",
+    "basis": "2026-09-30 실측에서 [GWP: klaw]로 라우팅됨을 확인. 원래 basis(no=281 유래)도 'klaw로 간 것도 대안으로는 합리적이나 채점 기준을 kestate/ktelecom 무라우팅 그룹과 통일하기 위해 direct-response로 강제한다'고 스스로 밝혔던 항목 — 그 통일 근거였던 kestate/ktelecom 미구현 전제가 무효화됐으므로 klaw를 정답으로 인정.",
     "source_batch2_no": 281
   },
   {
@@ -413,8 +413,8 @@
     "expected_id": "direct-response",
     "expected_name": "라우팅 불필요(ktelecom 여전히 실질 미구현)",
     "category": "회귀(R1 패치 재검증 — 기대값 정정: 위 no=49와 동일 사유....)",
-    "static_verdict": "PASS",
-    "basis": "위 no=49와 동일 사유.",
+    "static_verdict": "WARN",
+    "basis": "위 no=49와 동일 사유. | 2026-09-30 실측 추가: [GWP: kregionalgov]로 라우팅됨. 정전 확인은 실질적으로 한전(전력공사) 소관에 가까운데 카탈로그에 전력 전용 GWP가 없어 kregionalgov가 최선의 근사치인지 무라우팅이 나은지 확정 안 됨. 정답 미확정으로 엄격판정 제외.",
     "source_batch2_no": 284
   },
   {
@@ -424,8 +424,8 @@
     "expected_id": "kbusiness",
     "expected_name": "K-Business(산업전환 SP 연계 가능성)",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "PASS",
-    "basis": "prompts/SP-INDUSTRY-TRANSFORM-COMMON 존재 근거, 실제 라우팅 진입점은 kbusiness 경유 여부 확인 필요",
+    "static_verdict": "WARN",
+    "basis": "prompts/SP-INDUSTRY-TRANSFORM-COMMON 존재 근거, 실제 라우팅 진입점은 kbusiness 경유 여부 확인 필요 | 2026-09-30 실측 추가: [GWP_REGISTRY_SEARCH]로 지원사업을 직접 검색해 답변함(kbusiness 핸드오프 아님). kbusiness보다 나은 UX일 가능성이 있으나 채점 스크립트가 이 메커니즘을 정답으로 인정하도록 설계돼 있지 않아 제품 판단 필요. 정답 미확정으로 엄격판정 제외.",
     "source_batch2_no": 291
   }
 ]
