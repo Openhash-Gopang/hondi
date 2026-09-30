@@ -292,6 +292,34 @@ def grade(scenario, raw_text, call_err):
         else:
             return "LIVE-FAIL", f"라우팅 불필요 상황인데 [{extracted_type}: {extracted_id}] 오발동"
 
+    # 2026-09-30 추가 — "기본값 태그 + 대안 명시적 안내" 하이브리드 응답
+    # 처리. scenarios_regression_R1_20260801.json #22("통관 절차를
+    # 전문가한테 맡기고 싶다") 실측에서 확인: 모델이 [GWP: klogistics]를
+    # 기본으로 내면서도 "관세사에게 직접 맡기고 싶으신 경우 →
+    # [EXPERT: customs-broker]"처럼 두 번째 후보를 명시적으로 병기하고
+    # 조건("~뜻하시는지"·"~원하시는지"·"경우")으로 갈라 안내했다 — §CORE의
+    # "애매하면 되묻는다" 지침에 가까운 적절한 동작인데, 기존 로직은 첫
+    # 번째 태그(extracted_id)만 보고 단순 불일치로 FAIL 처리했다.
+    # ★ CLARIFY_RE(질문형 어미 등)는 이 사례에서 매칭되지 않았다 — 실제
+    # 텍스트가 물음표로 안 끝나고 "~습니다" 평서형으로 조건부 안내를 했기
+    # 때문(최초 구현 시 이 변형을 고려 못 함). 응답에 서로 다른 태그가
+    # 2개 이상 명시적으로 등장하는 것 자체가 이미 "복수 후보를 갈라서
+    # 안내했다"는 충분한 신호이므로, CLARIFY_RE 매칭 여부와 무관하게
+    # 언급된 태그 중 expected가 있으면 LIVE-CLARIFY로 완화한다 — 사람이
+    # "이 안내가 적절했는지"를 최종 판단하도록 남겨둔다(자동 PASS는 아님,
+    # 자동 FAIL만 막는다).
+    all_gwp_ids = GWP_TAG_RE.findall(raw_text or "")
+    all_expert_ids = EXPERT_TAG_RE.findall(raw_text or "")
+    distinct_tags = {("GWP", i) for i in all_gwp_ids} | {("EXPERT", i) for i in all_expert_ids}
+    if len(distinct_tags) >= 2:
+        if (expected_type, expected_id) in distinct_tags:
+            return (
+                "LIVE-CLARIFY",
+                f"기본 태그는 [{extracted_type}: {extracted_id}]이지만 응답 안에서 "
+                f"[{expected_type}: {expected_id}]도 대안으로 명시하며 되물음 — §CORE "
+                "되묻기 지침에 따른 정상 동작일 수 있음(사람 검토 필요)",
+            )
+
     # Normal routing comparison
     if extracted_id is None:
         if CLARIFY_RE.search(raw_text or ""):

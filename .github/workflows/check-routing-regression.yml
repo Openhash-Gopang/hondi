@@ -34,10 +34,26 @@ on:
       - "prompts/PROFESSIONAL-common_v*.md"
       - "gwp-registry.js"
       - "src/gopang/ai/expert-registry.js"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      repeat_count:
+        description: >-
+          시나리오 배치당 반복 실행 횟수(1~5). 2026-09-30 신설 — DeepSeek는
+          temperature=0이어도 MoE 구조상 완전한 결정론이 보장되지 않아
+          같은 프롬프트·같은 배치를 재실행하면 몇 건씩 결과가 흔들리는 게
+          실사로 확인됐다(예: #1/#8/#15/#22/#29가 한 실행에서만 새로
+          실패). 게이트의 실제 신뢰도를 보려면 여러 번 돌려 합산해야
+          단일 실행의 노이즈에 안 속는다. push 트리거(자동)는 비용·시간
+          때문에 항상 1회만 돈다 — 이 입력은 workflow_dispatch(수동
+          실행)에서만 의미가 있다.
+        required: false
+        default: "1"
 
 permissions:
   contents: write
+
+env:
+  REPEAT_COUNT: ${{ github.event.inputs.repeat_count || '1' }}
 
 # 2026-08-06 신설(주피터 지적) — AC-PRO-CORE_v1_1.txt를 이 세션에서만도
 # 여러 번 고쳤는데, 그때마다 이 워크플로가 새로 트리거된다. cancel-
@@ -111,16 +127,19 @@ jobs:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: |
           set -e
+          echo "REPEAT_COUNT=$REPEAT_COUNT (push 트리거는 항상 1)"
           for SCEN in \
             scenarios_regression_R1_20260801.json \
             scenarios_expert_routing_paraphrase_hard_20260806.json \
             scenarios_gwp_priority_no_expert_20260806.json ; do
             BASE=$(basename "$SCEN" .json)
-            OUT="../../results/${BASE}"
-            echo "=== running $SCEN -> $OUT (AC-PRO-CORE: $AC_PRO_CORE_FILE) ==="
-            python3 live_smoketest.py --scenarios "$SCEN" \
-              --system-prompt "../../prompts/$AC_PRO_CORE_FILE" \
-              --out "$OUT" --resume
+            for REP in $(seq 1 "$REPEAT_COUNT"); do
+              OUT="../../results/${BASE}_run${REP}"
+              echo "=== running $SCEN -> $OUT (반복 ${REP}/${REPEAT_COUNT}, AC-PRO-CORE: $AC_PRO_CORE_FILE) ==="
+              python3 live_smoketest.py --scenarios "$SCEN" \
+                --system-prompt "../../prompts/$AC_PRO_CORE_FILE" \
+                --out "$OUT" --resume
+            done
           done
 
       - name: Check thresholds (fails the build below baseline)
@@ -128,14 +147,26 @@ jobs:
         run: |
           set -e
           FAILED=0
+          # 2026-09-30 개정 — REPEAT_COUNT회 실행 결과를 전부 모아 합산
+          # 판정한다(check_routing_regression_threshold.py --results가
+          # 이제 여러 파일을 받아 병합한다). REPEAT_COUNT=1(기본, push
+          # 트리거)이면 결과는 예전과 동일하게 파일 하나만 본다.
+          R1_FILES=""
+          PARA_FILES=""
+          GWP_FILES=""
+          for REP in $(seq 1 "$REPEAT_COUNT"); do
+            R1_FILES="$R1_FILES ../../results/scenarios_regression_R1_20260801_run${REP}/live_results.json"
+            PARA_FILES="$PARA_FILES ../../results/scenarios_expert_routing_paraphrase_hard_20260806_run${REP}/live_results.json"
+            GWP_FILES="$GWP_FILES ../../results/scenarios_gwp_priority_no_expert_20260806_run${REP}/live_results.json"
+          done
           python3 check_routing_regression_threshold.py \
-            --results ../../results/scenarios_regression_R1_20260801/live_results.json \
+            --results $R1_FILES \
             --threshold 0.85 --label "R1 회귀(2026-08-01 canonical, 39건)" || FAILED=1
           python3 check_routing_regression_threshold.py \
-            --results ../../results/scenarios_expert_routing_paraphrase_hard_20260806/live_results.json \
+            --results $PARA_FILES \
             --threshold 0.85 --label "패러프레이즈 하드모드(30건)" || FAILED=1
           python3 check_routing_regression_threshold.py \
-            --results ../../results/scenarios_gwp_priority_no_expert_20260806/live_results.json \
+            --results $GWP_FILES \
             --threshold 0.65 --label "GWP 우선(25건) — kestate/ktelecom 태그문법·kbusiness/ktax 혼동 기지 이슈로 임계치 낮춤" || FAILED=1
           exit $FAILED
 
