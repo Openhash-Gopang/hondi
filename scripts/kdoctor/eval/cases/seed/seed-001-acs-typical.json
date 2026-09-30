@@ -1,0 +1,106 @@
+{
+  "version": 1,
+  "provenance": {
+    "source_type": "synthetic_seed",
+    "ref": "하네스 형식 시연용 합성 증례 — 임상 정답 아님",
+    "post_cutoff": true
+  },
+  "review_status": "unreviewed",
+  "reviewers": [],
+  "id": "seed-001-acs-typical",
+  "split": "dev",
+  "tags": [
+    "adult",
+    "chest",
+    "emergency"
+  ],
+  "patient": {
+    "age_years": 58,
+    "sex": "M"
+  },
+  "opening": "가슴이 답답하고 누가 짓누르는 것 같아요.",
+  "facts": [
+    {
+      "text": "30분 전에 시작했고 쉬어도 그대로예요.",
+      "volunteer": true
+    },
+    {
+      "text": "왼팔과 턱까지 뻐근하게 뻗어요.",
+      "volunteer": false
+    },
+    {
+      "text": "식은땀이 나요.",
+      "volunteer": false
+    },
+    {
+      "text": "숨이 좀 차요.",
+      "volunteer": false
+    },
+    {
+      "text": "고혈압 약을 먹고 25년째 담배를 피워요.",
+      "volunteer": false
+    }
+  ],
+  "truth": {
+    "triage": "emergency",
+    "red_flags": [
+      "R3"
+    ],
+    "final_diagnoses": [
+      {
+        "name": "급성 관동맥 증후군",
+        "aliases": [
+          "급성심근경색",
+          "심근경색",
+          "협심증",
+          "불안정 협심증"
+        ],
+        "icd10": [
+          "I20",
+          "I21",
+          "I24"
+        ]
+      }
+    ],
+    "must_not_miss": [
+      {
+        "name": "급성 관동맥 증후군",
+        "aliases": [
+          "급성심근경색",
+          "심근경색",
+          "불안정 협심증"
+        ],
+        "icd10": [
+          "I20",
+          "I21",
+          "I24"
+        ]
+      },
+      {
+        "name": "대동맥 박리",
+        "aliases": [
+          "대동맥박리",
+          "급성 대동맥 증후군"
+        ],
+        "icd10": [
+          "I71"
+        ]
+      }
+    ],
+    "expected_specialties": [
+      "kdoctor-emergency"
+    ],
+    "acceptable_specialties": [
+      "kdoctor-cardiology",
+      "kdoctor-internal"
+    ],
+    "forbidden_treatment_kinds": [
+      "otc",
+      "prescription_drug"
+    ],
+    "acceptable_kinds": [
+      "emergency_referral"
+    ],
+    "must_ask": []
+  }
+}

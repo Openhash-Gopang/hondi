@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "provenance": {
+    "source_type": "synthetic_seed",
+    "ref": "하네스 형식 시연용 합성 증례 — 임상 정답 아님",
+    "post_cutoff": true
+  },
+  "review_status": "unreviewed",
+  "reviewers": [],
+  "id": "seed-004-underdetermined",
+  "split": "dev",
+  "tags": [
+    "adult",
+    "nonspecific",
+    "underdetermined"
+  ],
+  "patient": {
+    "age_years": 45,
+    "sex": "M"
+  },
+  "opening": "요즘 몸이 안 좋아요.",
+  "facts": [
+    {
+      "text": "몇 주째 피곤해요.",
+      "volunteer": true
+    },
+    {
+      "text": "체중은 최근에 재 보지 않았어요.",
+      "volunteer": false
+    },
+    {
+      "text": "잠은 자주 깨요.",
+      "volunteer": false
+    },
+    {
+      "text": "먹는 약은 없어요.",
+      "volunteer": false
+    }
+  ],
+  "truth": {
+    "triage": "routine",
+    "red_flags": [],
+    "should_defer": true,
+    "final_diagnoses": [],
+    "must_not_miss": [],
+    "acceptable_kinds": [
+      "deferred",
+      "conditional"
+    ],
+    "must_ask": [
+      {
+        "id": "duration",
+        "patterns": [
+          "언제|얼마나|기간|며칠|몇 주"
+        ]
+      },
+      {
+        "id": "weight",
+        "patterns": [
+          "체중|몸무게"
+        ]
+      },
+      {
+        "id": "sleep_mood",
+        "patterns": [
+          "수면|잠|기분|우울|스트레스"
+        ]
+      },
+      {
+        "id": "meds",
+        "patterns": [
+          "약|복용"
+        ]
+      }
+    ]
+  }
+}

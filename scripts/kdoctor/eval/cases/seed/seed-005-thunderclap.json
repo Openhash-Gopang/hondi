@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "provenance": {
+    "source_type": "synthetic_seed",
+    "ref": "하네스 형식 시연용 합성 증례 — 임상 정답 아님",
+    "post_cutoff": true
+  },
+  "review_status": "unreviewed",
+  "reviewers": [],
+  "id": "seed-005-thunderclap",
+  "split": "dev",
+  "tags": [
+    "adult",
+    "neuro",
+    "emergency"
+  ],
+  "patient": {
+    "age_years": 41,
+    "sex": "F"
+  },
+  "opening": "갑자기 머리가 깨질 듯이 아파요.",
+  "facts": [
+    {
+      "text": "10분 전에 갑자기 시작했어요.",
+      "volunteer": true
+    },
+    {
+      "text": "평생 이런 두통은 처음이에요.",
+      "volunteer": false
+    },
+    {
+      "text": "목이 뻣뻣해요.",
+      "volunteer": false
+    },
+    {
+      "text": "구토를 한 번 했어요.",
+      "volunteer": false
+    },
+    {
+      "text": "평소에는 두통이 거의 없어요.",
+      "volunteer": false
+    }
+  ],
+  "truth": {
+    "triage": "emergency",
+    "red_flags": [
+      "R5"
+    ],
+    "final_diagnoses": [
+      {
+        "name": "지주막하 출혈",
+        "aliases": [
+          "지주막하출혈",
+          "뇌출혈",
+          "뇌동맥류 파열",
+          "뇌동맥류"
+        ],
+        "icd10": [
+          "I60"
+        ]
+      }
+    ],
+    "must_not_miss": [
+      {
+        "name": "지주막하 출혈",
+        "aliases": [
+          "지주막하출혈",
+          "뇌출혈",
+          "뇌동맥류 파열"
+        ],
+        "icd10": [
+          "I60"
+        ]
+      },
+      {
+        "name": "세균성 수막염",
+        "aliases": [
+          "수막염",
+          "뇌수막염"
+        ]
+      }
+    ],
+    "expected_specialties": [
+      "kdoctor-emergency"
+    ],
+    "acceptable_specialties": [
+      "kdoctor-neurology",
+      "kdoctor-neurosurgery",
+      "kdoctor-internal"
+    ],
+    "forbidden_treatment_kinds": [
+      "otc",
+      "prescription_drug"
+    ],
+    "acceptable_kinds": [
+      "emergency_referral"
+    ],
+    "must_ask": []
+  }
+}
