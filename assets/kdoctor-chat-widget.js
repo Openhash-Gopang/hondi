@@ -14,7 +14,7 @@
      - [DIAGNOSIS_REPORT]는 src/gopang/ai/hondi-doctor-verdict.js로 재계산·제한한 뒤 카드로만 보여 준다.
        검증 실패는 1회 재생성 후 페일세이프(대면 진료 + 119·109 안내).
    호출 경로: POST https://hondi-proxy.tensor-city.workers.dev/ai/chat (Origin 화이트리스트만, 로그인 없음 —
-   worker.js ALLOWED_ORIGINS에 https://doctor.hondi.net 등록 필요). 별도 rate-limit은 없다.
+   worker.js ALLOWED_ORIGINS에 https://doctor.hondi.net 등록 필요). rate-limit은 워커(doctor 경로, IP·시간·전체)에서 건다.
 
    첨부("+", 2026-10-01): 증상 사진 → SP-29-IMG 비전 관찰 JSON, 서류 → 브라우저 글자 추출(txt·PDF·docx) 또는 SP-29-DOC 전사(스캔·사진)
      → 개인식별번호 가림·제어 태그 무력화 후 [ATTACHED_*] 블록으로 총괄 SP에 전달. 사진 원본은 총괄 SP에 보내지 않는다.
@@ -163,6 +163,7 @@ import { validateDiagnosis, audienceView } from '../src/gopang/ai/hondi-doctor-v
         method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: ctl.signal,
         body: JSON.stringify({ provider: 'deepseek', model: 'deepseek-v4-flash', system: system, messages: messages, max_tokens: maxTokens }),
       });
+      if (res.status === 429) { var rl = new Error('Worker 429'); rl.rateLimited = true; throw rl; }
       if (!res.ok) throw new Error('Worker ' + res.status);
       var data = await res.json();
       if (!data.content) throw new Error('empty');
@@ -332,7 +333,8 @@ import { validateDiagnosis, audienceView } from '../src/gopang/ai/hondi-doctor-v
     } catch (err) {
       console.error('[kdoctor-chat-widget] attach', err);
       entry.status = 'error';
-      entry.label = cls.kind === 'pdf' || cls.kind === 'docx' ? '읽지 못했습니다(문서 해석 모듈을 불러오지 못했거나 파일이 손상됨)' : '처리하지 못했습니다. 다시 시도해 주세요';
+      entry.label = err && err.rateLimited ? '요청이 많아 처리하지 못했습니다. 잠시 후 다시 시도해 주세요'
+        : cls.kind === 'pdf' || cls.kind === 'docx' ? '읽지 못했습니다(문서 해석 모듈을 불러오지 못했거나 파일이 손상됨)' : '처리하지 못했습니다. 다시 시도해 주세요';
     }
   }
 
@@ -486,7 +488,7 @@ import { validateDiagnosis, audienceView } from '../src/gopang/ai/hondi-doctor-v
       statusEl.textContent = used.length ? '협진: ' + used.join(', ') : '';
     } catch (err) {
       typing.remove();
-      append('ai', renderMarkdown('상담 서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.\n\n' + FAILSAFE_TEXT));
+      append('ai', renderMarkdown((err && err.rateLimited ? '요청이 많아 잠시 쉬어 갑니다. 1분쯤 뒤에 다시 보내 주세요.' : '상담 서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.') + '\n\n' + FAILSAFE_TEXT));
       statusEl.textContent = '';
       console.error('[kdoctor-chat-widget]', err);
     }

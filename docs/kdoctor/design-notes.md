@@ -92,7 +92,7 @@ K-Estate가 평가 SP 하나인 것과 달리, K-Doctor는 **진료과목별 전
 | 환자 공유 경로 | 의료인 → 환자 결과 전달은 복사 버튼 수준만 계획 | 링크 공유는 만료·접근 제어 설계 후 |
 | 실행 검증·성능 평가 | 하네스 v0.1이 있다(`scripts/kdoctor/eval/`, `docs/kdoctor/evaluation.md`). 그러나 전문의가 확정한 증례가 없고 실제 LLM으로는 아직 실행하지 않았다 | 증례 100~200건 구축(전문의 확정) → dev 실행·개선 → test 1회 확인 |
 | 전문의 검토 | 위험 신호 목록·감점 값·과목 훅은 초안이다 | 과목별 전문의 검토 필수. 검토 전 실사용 경로 금지 |
-| 상담 창 운영 | 창은 위젯이 /ai/chat을 직접 호출한다(SP는 gwp-registry·sp-catalog·call-ai에 미등록, 로그인·rate-limit 없음, 실행 미검증). 일반 공개 전에 면허 검증·rate-limit·전문의 검토 필요 | 최종 단계에서 처리 |
+| 상담 창 운영 | 창은 위젯이 /ai/chat을 직접 호출한다(로그인 없음, rate-limit은 IP·시간·전체 상한만, 실행 미검증). gwp-registry에는 active로 등록됨(6-1). 일반 공개 전에 면허 검증·전문의 검토 필요 | 최종 단계에서 처리 |
 | 이미지 호출 코드 | 위젯이 호출한다(6-1). 실제 비전 모델 id 수용·출력 JSON 준수는 미확인 | 실모델로 확인, 필요 시 `DOCTOR_VISION_MODEL` 교체 |
 | 개인정보 | EXIF는 캔버스 재인코딩으로 제거. 서류 PII 가림은 패턴 기반(이름·주소는 "라벨: 값"만) | 전문 비식별 모듈, 얼굴 등 사진 속 식별 요소 처리 |
 | 사이트 | doctor.hondi.net 페이지(K-Estate 레이아웃) | doctor 저장소에 CNAME·index.html·Pages 활성화 |
@@ -105,11 +105,13 @@ K-Estate가 평가 SP 하나인 것과 달리, K-Doctor는 **진료과목별 전
 - PDV: 건강 기록은 **나만의 AI 비서(AC)가 생성·갱신·관리**한다. K-Doctor는 AC가 연 탭(`window.opener`, `?gwp=1&origin=`)에서만 GWP_PDV_REQUEST로 요청하며 AC origin 허용 목록 밖에는 보내지 않는다. AC는 허용 서비스 allowlist(기본 거부) → 그룹별 승인(+빈 항목 직접 입력) → 승인된 그룹만 응답, 접근 기록을 남긴다. "기록 없음"은 "해당 없음"이 아니며 오래된 항목은 stale로 표시되어 환자에게 재확인한다. 대화당 최대 3회 요청, 응급 판단 시 요청하지 않는다.
 - 갱신 제안: 총괄 SP가 환자가 말한 사실(근거 필수)만 `[PDV_UPDATE_PROPOSAL]`로 내면 위젯이 "비서에 저장 요청" 카드를 보이고, AC가 항목별로 승인받아 저장한다(출처 `service_proposal_approved`). 진단·감별은 제안할 수 없다(필드 목록 밖).
 
-### 활성화 전에 남은 일
-- `gwp-registry.js`의 kdoctor 항목은 `pending`이다. AC가 서비스 탭을 열고 PDV 요청을 중계하려면 `active`로 바꾸고 AC에서 K-Doctor를 여는 경로를 확인해야 한다(현재 AC 없이 직접 연 창은 PDV 없이 동작).
-- AC가 **대화 중에 건강 기록을 만들고 갱신하는 부분(AC SP·call-ai 쪽 추출)은 구현하지 않았다.** 지금은 저장소(`window.gopangHealthPDV`)·요청 응답·직접 입력·제안 승인 경로만 있다.
-- 평가 하네스(`scripts/kdoctor/eval`)에는 PDV 사용 증례가 없다. 첨부·PDV 경로의 LLM 준수는 실행 검증 전이다.
-- 비전 모델 id(`deepseek-v4-flash-vision-exp`, 환경변수 `DOCTOR_VISION_MODEL`로 교체 가능)는 저장소 주석에서 가져온 값이라 실제 수용 여부를 확인해야 한다. rate-limit·면허 검증은 여전히 없다. 개인정보 가림은 패턴 기반이라 완전하지 않다.
+### 활성화 상태와 남은 일 (2026-10-01 갱신)
+- **레지스트리 활성화:** `gwp-registry.js`의 kdoctor를 `active`로 바꾸고, AC §CATALOG(AC-PRO-CORE)에 "의료인이 감별진단·진단 참고를 청하거나 K-Doctor를 직접 지목한 경우에만" 행을 추가했다(일상어 증상 문의는 khealth 소관임을 명시). 서명 릴레이 허용 origin(`allowed-origins.js`)에 doctor.hondi.net을 넣었다. 되돌리려면 status를 `pending`으로. **AC 라우팅 회귀(live_smoketest)는 이 환경에서 돌리지 못했다** — 배포 후 khealth 증상 문의가 kdoctor로 새지 않는지 확인할 것.
+- **AC의 건강 기록 생성·갱신:** `src/gopang/pdv/health-capture.js`. 사용자 메시지에 건강 사실이 있을 법할 때만(키워드 게이트) 전용 추출 프롬프트로 JSON을 뽑고, 근거 문장이 원문에 없으면 버리며, 이미 있는 값은 빼고, 사용자가 "저장" 버튼을 눌러야 저장한다(출처 `ac_conversation`). "내 건강 기록 보여줘"로 조회·항목별 삭제, `gopangHealthPDV.setCapture(false)`로 끄기. AC 핵심 프롬프트·call-ai.js는 건드리지 않고 send-message.js에 위험분석 훅과 같은 방식의 호출만 더했다. LLM 호출은 기존 Phase 7과 같은 `/deepseek`(본인 guid, hondi-flash) 경로다.
+- **비전 모델:** DeepSeek 공식 문서(api-docs.deepseek.com) 기준 현재 이름은 `deepseek-flash`(텍스트·이미지 겸용, V4.1-Flash). 옛 이름 `deepseek-v4-flash`·`deepseek-v4-flash-vision-exp`는 같은 모델로 연결되는 폐기 별칭이라 공식 이름으로 바꿨다. thinking 모드는 기본 켜짐이고 max_tokens를 먼저 써서 빈 응답이 나온 전례가 있어 doctor 요청은 끈다(`DOCTOR_THINKING=enabled`로 켬). **실제 키로 호출해 본 것은 아니다.**
+- **rate-limit:** doctor 경로에 IP별 분당 40·시간당 400, 사진 시간당 20, 전체 시간당 5,000(`RATE_LIMIT_KV` 고정 구간 카운터, 초과 시 429+Retry-After, KV가 없으면 통과). KV는 최종적 일관성이라 정확한 한도가 아니라 폭주 방지용이다. 값은 초안.
+- **평가 하네스:** PDV 시나리오(가상 PDV, 요청 필요/금지, 사실 활용, 금기 처치) 지원과 시드 3건 추가. 실제 LLM으로는 아직 돌리지 않았다.
+- **남은 일:** 면허 검증(`VERIFICATION_ENFORCED`)·전문의 검토·실제 LLM 실행 검증·AC 라우팅 회귀 확인. 개인정보 가림은 패턴 기반이라 완전하지 않다.
 
 ## 7. 법·안전 경계
 

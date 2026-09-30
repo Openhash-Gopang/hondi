@@ -46,12 +46,21 @@ mock.module(new URL('../gopang/gwp/engine.js', import.meta.url), {
 });
 
 await import(new URL('../../gwp-registry.js', import.meta.url));
-const { _parseAgentTags, _estimateGovImportance, _selectGovVerificationMode } =
+const { _parseAgentTags, _estimateGovImportance, _selectGovVerificationMode, _isSwitchRecoveryInFlight } =
   await import(new URL('../gopang/ai/call-ai.js', import.meta.url));
 const { handleExpertTag } = await import(new URL('../gopang/ai/expert-session.js', import.meta.url));
 const { getService, GWP_REGISTRY } = globalThis;
 
 function resetLaunch() { _launched = null; }
+
+// 앞 테스트가 태운 자동복구(fire-and-forget callAI)가 끝나 재진입 가드가 풀릴 때까지 기다린다.
+// 예전에는 고정 sleep(100~250ms)이었는데, 복구가 끝나는 시간이 환경마다 달라(느린 환경에서 SD-05b/c가 "재진입"으로 오판)
+// 실패가 간헐적이었다. 가드 자체는 이 테스트가 검증하는 대상이라 풀리는 시간만 기다린다(최대 15초).
+async function settleRecovery(maxMs = 15000) {
+  const t0 = Date.now();
+  while (_isSwitchRecoveryInFlight() && Date.now() - t0 < maxMs) await new Promise((r) => setTimeout(r, 50));
+  assert.equal(_isSwitchRecoveryInFlight(), false, '이전 자동복구가 끝나지 않음(가드가 풀리지 않음)');
+}
 
 // ═══════════════════════════════════════════════════════════
 describe('SD — [GWP:] 태그 디스패치 (_parseAgentTags)', () => {
@@ -116,7 +125,7 @@ describe('SD — [GWP:] 태그 디스패치 (_parseAgentTags)', () => {
     // .finally()로 리셋된다 — 타이밍에 따라 SD-05b가 "재진입"으로
     // 오판되는 걸(라이브에서 실제로 발견한 루프 방지 가드) 막기 위해
     // SD-05의 잔여 async 작업이 정리될 시간을 준다.
-    await new Promise(resolve => setTimeout(resolve, 250));
+    await settleRecovery();
     const svc = getService('kestate');
     assert.equal(svc?.type, 'switch');
     resetLaunch();
@@ -147,7 +156,7 @@ describe('SD — [GWP:] 태그 디스패치 (_parseAgentTags)', () => {
     // 안 남) _gwpLaunch(새 탭)도 여전히 안 되는지만 확인한다 — 첫 번째
     // 호출의 fire-and-forget 내부(_forwardSwitchSP/callAI)가 실제로
     // 완료되는지는 이 하네스로 검증 못 한다(SD-05b와 같은 한계).
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await settleRecovery();
     resetLaunch();
     const infoCalls = [];
     const warnCalls = [];
@@ -264,7 +273,7 @@ describe('SD — GWP_REGISTRY 구조적 위생 점검', () => {
     // 32 → 33. 이 항목도 메인 앱 트리거 디스패치는 안 거치지만(estate.hondi.net
     // 위젯이 시스템 프롬프트를 직접 번들링해 /ai/chat 호출), 등록 자체는
     // 이 레지스트리의 카탈로그 역할을 위해 추가한다.
-    // ★ 2026-10-01 갱신 — 이 점검은 이미 노후화돼 있었다(기대값 33, 실제 35). kdoctor(SP-29, status:'pending', type:'tab') 신설로 36.
+    // ★ 2026-10-01 갱신 — 이 점검은 이미 노후화돼 있었다(기대값 33, 실제 35). kdoctor(SP-29, type:'tab') 신설로 36.
     // pending이라 실사용자에게 라우팅되지 않는다. 35 → 36 외의 차이 2건은 이번 변경과 무관한 선행 누락 갱신이다.
     assert.equal(GWP_REGISTRY.length, 36, `엔트리 수 변경 감지(현재 ${GWP_REGISTRY.length}) — 이 숫자가 바뀌면 다른 곳(문서 등)도 갱신 필요할 수 있음, 실패 아니라 확인 신호로만 취급해도 됨`);
     for (const e of GWP_REGISTRY) {

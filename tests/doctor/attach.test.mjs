@@ -7,7 +7,7 @@ import {
   maskPII, neutralizeControlTags, classifyFile, decodeTextBytes, prepareDocumentText, buildAttachmentBlock, composeUserText,
   describeObservation, parseVisionJson, parsePdvRequests, buildPdvBlock, extractPdvProposals, runTurn, ATTACH_LIMITS,
 } from '../../assets/kdoctor-chat-core.js';
-import { prepareDoctorRequest, DOCTOR_TEXT_MODEL, MAX_OUTPUT_TOKENS } from '../../src/worker/kdoctor-guard.js';
+import { prepareDoctorRequest, doctorRateLimits, DOCTOR_TEXT_MODEL, MAX_OUTPUT_TOKENS } from '../../src/worker/kdoctor-guard.js';
 import {
   createHealthStore, memoryAdapter, answerHealthRequest, normalizeProposals, applyProposals, isPermittedRequester, validateValue, fieldDef, isStale,
 } from '../../src/gopang/pdv/health-profile.js';
@@ -153,7 +153,9 @@ test('prepareDoctorRequest', () => {
   assert.equal(r.ok, true); assert.equal(r.model, DOCTOR_TEXT_MODEL); assert.equal(r.max_tokens, MAX_OUTPUT_TOKENS);
   r = prepareDoctorRequest({ messages: [img(good)], model: 'x' }, { DOCTOR_VISION_MODEL: 'vis-1' });
   assert.equal(r.ok, true); assert.equal(r.model, 'vis-1'); assert.equal(r.imageCount, 1);
-  assert.equal(prepareDoctorRequest({ messages: [img(good)] }).model, 'deepseek-v4-flash-vision-exp');
+  assert.equal(prepareDoctorRequest({ messages: [img(good)] }).model, 'deepseek-flash');
+  assert.deepEqual(r.thinking, { type: 'disabled' });
+  assert.deepEqual(prepareDoctorRequest({ messages: [] }, { DOCTOR_THINKING: 'enabled' }).thinking, { type: 'enabled' });
   assert.equal(prepareDoctorRequest({ messages: [img('https://evil/x.png')] }).code, 'INVALID_ATTACHMENT');
   assert.equal(prepareDoctorRequest({ messages: [img('data:image/svg+xml;base64,AAAA')] }).code, 'INVALID_ATTACHMENT');
   assert.equal(prepareDoctorRequest({ messages: [img('data:image/jpeg;base64,' + 'A'.repeat(3_000_001))] }).status, 413);
@@ -254,7 +256,10 @@ test('requestedHealthFields: health.* 만, 중복 제거', () => {
 test('engine.js·레지스트리·SP 배선', () => {
   const e = read('src/gopang/gwp/engine.js');
   assert.ok(e.includes("from './pdv-health-handler.js'") && e.includes('handleHealthPdvRequest') && e.includes('handleHealthUpdateProposal'));
-  assert.ok(/id:\s*'kdoctor'[\s\S]{0,400}status:\s*'pending'/.test(read('gwp-registry.js')), 'kdoctor는 활성화 전까지 pending');
+  assert.ok(/id:\s*'kdoctor'[\s\S]{0,400}status:\s*'active'/.test(read('gwp-registry.js')), 'kdoctor 활성');
+  assert.ok(read('src/gopang/gwp/allowed-origins.js').includes("'https://doctor.hondi.net'"), '서명 릴레이 허용 origin');
+  const cat = read('prompts/AC-PRO-CORE_v1_15.txt').split('\n').find((l) => /^\s+kdoctor\s+\|/.test(l)) ?? '';
+  assert.ok(cat.includes('직접 지목') && cat.includes('khealth'), 'AC 카탈로그 행은 의료인·직접 지목으로 좁히고 일상어는 khealth로');
   const sp = read('prompts/SP-29_kdoctor_v0_1.txt');
   for (const k of ['PDV_REQUEST', 'PDV_UPDATE_PROPOSAL', 'ATTACHED_DOCUMENT', 'ATTACHED_IMAGE_OBSERVATION']) assert.ok(sp.includes(k), k);
   const w = read('worker.js');
@@ -264,4 +269,27 @@ test('위젯: "+" 메뉴·입력·PDV 배선이 있다', () => {
   const w = read('assets/kdoctor-chat-widget.js');
   for (const k of ['id="kd-plus"', 'kd-file-photo', 'kd-file-doc', 'GWP_PDV_REQUEST', 'GWP_PDV_UPDATE_PROPOSAL', 'e.origin !== acOrigin', 'window.opener']) assert.ok(w.includes(k), k);
   assert.ok(!/postMessage\([^)]*'\*'\)/.test(w), "targetOrigin '*' 금지");
+});
+
+test('doctorRateLimits: 구간 버킷·사진 한도·전체 한도·env 조정·IP 정리', () => {
+  const t0 = Date.parse('2026-10-01T10:00:30Z');
+  const r = doctorRateLimits({ ip: '1.2.3.4', imageCount: 0, nowMs: t0 });
+  assert.deepEqual(r.map((x) => x.action), ['doctor_min', 'doctor_hour', 'doctor_global_hour']);
+  assert.equal(r[0].retryAfter, 30); assert.equal(r[1].retryAfter, 3570);
+  assert.ok(r[0].key.startsWith('1.2.3.4:') && r[2].key.startsWith('all:'));
+  const next = doctorRateLimits({ ip: '1.2.3.4', nowMs: t0 + 60000 });
+  assert.notEqual(next[0].key, r[0].key, '분이 바뀌면 새 버킷');
+  assert.equal(next[1].key, r[1].key, '같은 시간 안에서는 시간 버킷 유지');
+  const withImg = doctorRateLimits({ ip: 'x', imageCount: 2, nowMs: t0 });
+  assert.ok(withImg.some((x) => x.action === 'doctor_img_hour' && x.limit === 20));
+  assert.equal(doctorRateLimits({ ip: 'x', nowMs: t0, env: { DOCTOR_RL_MIN: '5', DOCTOR_RL_HOUR: 'abc' } }).map((x) => x.limit).slice(0, 2).join(), '5,400');
+  assert.ok(!doctorRateLimits({ ip: '1.2.3.4/../x<script>', nowMs: t0 })[0].key.includes('<'));
+  assert.equal(doctorRateLimits({ nowMs: t0 })[0].key.split(':')[0], 'unknown');
+});
+test('worker.js: doctor 분기에서 속도 제한 후 429+Retry-After, 위젯은 429를 구분한다', () => {
+  const w = read('worker.js');
+  assert.ok(w.includes('doctorRateLimits({ip:meta?.ip'));
+  assert.ok(w.includes("'Retry-After':String(_r.retryAfter)") && w.includes("status:429"));
+  assert.ok(w.indexOf('prepareDoctorRequest({messages') < w.indexOf('doctorRateLimits({ip:meta?.ip') && w.indexOf('doctorRateLimits({ip:meta?.ip') < w.indexOf('const _useOR=!_isDoctor'));
+  assert.ok(read('assets/kdoctor-chat-widget.js').includes('rateLimited'));
 });

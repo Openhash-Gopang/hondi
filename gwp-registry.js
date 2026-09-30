@@ -173,18 +173,19 @@ const GWP_REGISTRY = [
     ],
   },
 
-  // ── K-Doctor (MED) — tab, 2026-10-01 신설 ────────────────────
-  // doctor.hondi.net(진단 참고·처방/처치 제안, SP-29 총괄 + 과목별 SP 41종). status는 의도적으로 'pending' —
-  // 실행 검증·전문의 검토·면허 검증 전이라 AC가 이 서비스로 라우팅하지 않는다(candidate-prefilter·call-ai는 active만 본다).
-  // 이 등록의 목적은 활성화 시 (1) AC가 새 탭으로 열 수 있게 하고 (2) GWP_PDV_REQUEST로 병력·가족력·생활습관을 사용자 승인 하에
-  // 받는 경로(gwp/pdv-health-handler.js, 건강 기록 요청 허용 서비스 allowlist의 'kdoctor')를 잇는 것이다.
-  // triggers는 K-Health(khealth)의 일상어 트리거와 겹치지 않게 서비스명·방법론 용어만 둔다(pending이라 매칭에 쓰이지 않음).
+  // ── K-Doctor (MED) — tab, 2026-10-01 신설·활성화 ────────────────────
+  // doctor.hondi.net(진단 참고·처방/처치 제안, SP-29 총괄 + 과목별 SP 41종). 의료인 대상 임상 의사결정 지원.
+  // 일반 시민의 증상 상담은 khealth 소관이다 — AC §CATALOG 행도 "의료인이 감별진단·진단 참고를 청하거나 K-Doctor를 직접 지목한 경우"로 좁혔다.
+  // 활성화로 (1) AC가 새 탭으로 열 수 있고 (2) GWP_PDV_REQUEST로 병력·가족력·생활습관을 사용자 승인 하에 받는 경로
+  // (gwp/pdv-health-handler.js, 요청 허용 서비스 allowlist의 'kdoctor')가 이어진다.
+  // 면허 검증(VERIFICATION_ENFORCED)·전문의 검토는 아직이다 — 최종 단계에서 추가. 되돌리려면 status를 'pending'으로.
+  // triggers는 khealth의 일상어 트리거와 겹치지 않게 서비스명·방법론 용어만 둔다.
   {
     id: 'kdoctor', name: 'K-Doctor', category: 'MED',
     type: 'tab',
     url: 'https://doctor.hondi.net/',
     sp_key: 'SP-29_kdoctor',
-    status: 'pending', priority: 3, threshold: 0.70,
+    status: 'active', priority: 3, threshold: 0.70,
     description: '진료과목별 AI가 참여하는 진단 참고·처방/처치 제안(의료인 대상 임상 의사결정 지원). 진단서·처방전을 발급하지 않는다.',
     triggers: ['K-Doctor','케이닥터','진단 참고','감별진단','진료과목별 상담'],
   },
