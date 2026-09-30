@@ -191,3 +191,14 @@ test('위젯이 import하는 상대경로 파일이 실제로 존재한다', () 
 test('worker.js ALLOWED_ORIGINS에 doctor.hondi.net이 있다', () => {
   assert.ok(readFileSync(join(ROOT, 'worker.js'), 'utf8').includes("'https://doctor.hondi.net'"));
 });
+
+test('doctor 전용 DeepSeek 키 배선: worker.js가 doctor Origin에만 DEEPSEEK_DOCTOR_KEY를 쓰고 배포 워크플로가 시크릿을 전달한다', () => {
+  const w = readFileSync(join(ROOT, 'worker.js'), 'utf8');
+  assert.ok(w.includes("meta?.origin==='https://doctor.hondi.net'"));
+  assert.ok(w.includes('env.DEEPSEEK_DOCTOR_KEY'));
+  assert.ok(w.includes("'DEEPSEEK_DOCTOR_KEY_MISSING'"), '전용 키가 없으면 공용 키로 폴백하지 않고 오류를 내야 함');
+  const y = readFileSync(join(ROOT, '.github/workflows/deploy-worker.yml'), 'utf8');
+  assert.ok(y.includes('DEEPSEEK_DOCTOR_KEY: ${{ secrets.DEEPSEEK_DOCTOR_KEY }}'));
+  assert.ok(/secrets: \|\n\s+DEEPSEEK_DOCTOR_KEY/.test(y));
+  assert.ok(!/DEEPSEEK_DOCTOR_KEY\s*[:=]\s*['"]?sk-/.test(w + y), '키 값이 코드에 들어가면 안 됨');
+});
