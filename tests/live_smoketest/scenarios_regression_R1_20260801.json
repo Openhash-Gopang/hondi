@@ -6,7 +6,7 @@
     "expected_id": "klaw",
     "expected_name": "K-Law",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "gwp-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 7
   },
@@ -17,7 +17,7 @@
     "expected_id": "klaw",
     "expected_name": "K-Law",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "gwp-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 8
   },
@@ -28,7 +28,7 @@
     "expected_id": "klaw",
     "expected_name": "K-Law",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "gwp-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 10
   },
@@ -39,7 +39,7 @@
     "expected_id": "ksecurity",
     "expected_name": "K-Security",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "gwp-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 16
   },
@@ -50,7 +50,7 @@
     "expected_id": "khealth",
     "expected_name": "K-Health",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "gwp-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 24
   },
@@ -61,7 +61,7 @@
     "expected_id": "kedu",
     "expected_name": "K-School",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "gwp-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 28
   },
@@ -72,7 +72,7 @@
     "expected_id": "kedu",
     "expected_name": "K-School",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "gwp-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 29
   },
@@ -83,7 +83,7 @@
     "expected_id": "kfinance",
     "expected_name": "K-Stock",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "gwp-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 34
   },
@@ -94,7 +94,7 @@
     "expected_id": "kfinance",
     "expected_name": "K-Stock",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "gwp-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 36
   },
@@ -105,7 +105,7 @@
     "expected_id": "kgdc",
     "expected_name": "GDC",
     "category": "회귀(R1 패치 재검증 — 기대값 정정: 2026-08-01 kbank 철회(PR#164) — kbank는 더 이...)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "2026-08-01 kbank 철회(PR#164) — kbank는 더 이상 존재하지 않고 kgdc가 은행 기능을 흡수했다. kgdc triggers에 '대출'·'상환' 등이 추가됐으므로 이제 kgdc로 라우팅되는 게 정답.",
     "source_batch2_no": 47
   },
@@ -116,7 +116,7 @@
     "expected_id": "direct-response",
     "expected_name": "라우팅 불필요(ktelecom 여전히 실질 미구현)",
     "category": "회귀(R1 패치 재검증 — 기대값 정정: 2026-08-01 발견 — ktelecom은 gwp-registry.j...)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "2026-08-01 발견 — ktelecom은 gwp-registry.js status:'active'인데 AC-PRO-CORE는 '미구현, 태그 내지 말고 텍스트로만 안내'라고 명시. 이 불일치는 아직 안 고쳤으므로 무라우팅(텍스트 안내)이 현재 정답.",
     "source_batch2_no": 49
   },
@@ -127,7 +127,7 @@
     "expected_id": "direct-response",
     "expected_name": "라우팅 불필요(ktelecom 여전히 실질 미구현)",
     "category": "회귀(R1 패치 재검증 — 기대값 정정: 위 no=49와 동일 사유....)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "위 no=49와 동일 사유.",
     "source_batch2_no": 50
   },
@@ -138,7 +138,7 @@
     "expected_id": "ktransport",
     "expected_name": "K-Traffic",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "gwp-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 70
   },
@@ -149,7 +149,7 @@
     "expected_id": "klogistics",
     "expected_name": "K-Logistics",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "gwp-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 75
   },
@@ -160,7 +160,7 @@
     "expected_id": "kbusiness",
     "expected_name": "K-Business",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "gwp-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 88
   },
@@ -171,7 +171,7 @@
     "expected_id": "professor",
     "expected_name": "AI 교수(1:1 맞춤교습)",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "WARN",
     "basis": "gwp-registry.js kedu 주석: '과외'는 K-School(AI 직접 교습) 트리거지만 professor 페르소나(SP_professor triggers: '1:1 교습','개인 교사','맞춤 교육','AI 교수','과외')와도 겹침 — 어느 쪽이든 사람 과외 선생님 매칭이 아니라 AI가 직접 가르친다고 정직하게 밝히는지가 핵심 관찰 포인트",
     "source_batch2_no": 116
   },
@@ -182,7 +182,7 @@
     "expected_id": "klaw",
     "expected_name": "K-Law",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "prompts/SP_lawyer.md 주석: '소송·고소·고발'은 klaw 담당이라 lawyer triggers에서 의도적으로 뺀 이력 — klaw가 이겨야 하는 경계",
     "source_batch2_no": 119
   },
@@ -193,7 +193,7 @@
     "expected_id": "judicial-scrivener",
     "expected_name": "법무사",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "src/gopang/ai/expert-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 124
   },
@@ -204,7 +204,7 @@
     "expected_id": "appraiser",
     "expected_name": "감정평가사",
     "category": "회귀(R1 패치 재검증 — 기대값 정정: 2026-08-01 발견 — kestate도 ktelecom과 동일한 미...)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "2026-08-01 발견 — kestate도 ktelecom과 동일한 미해결 불일치 상태. 다만 이 케이스는 원래도 R1(GWP↔EXPERT) 축 문제였다 — kestate가 막혀있으므로 appraiser(EXPERT)로 가는 게 유일한 정답 경로가 됨, R1 패치 검증 목적상 EXPERT 기대값은 유지.",
     "source_batch2_no": 125
   },
@@ -215,7 +215,7 @@
     "expected_id": "labor-attorney",
     "expected_name": "공인노무사",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "src/gopang/ai/expert-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 129
   },
@@ -226,7 +226,7 @@
     "expected_id": "patent-attorney",
     "expected_name": "변리사",
     "category": "회귀(R1 패치 재검증 — 기대값 정정: R1(GWP↔EXPERT) 축 문제 — klaw가 아니라 patent-a...)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "R1(GWP↔EXPERT) 축 문제 — klaw가 아니라 patent-attorney로 가야 하는 게 원래 쟁점이었다(kestate 불일치와 무관). 기대값 유지.",
     "source_batch2_no": 131
   },
@@ -237,7 +237,7 @@
     "expected_id": "customs-broker",
     "expected_name": "관세사",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "src/gopang/ai/expert-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 132
   },
@@ -248,7 +248,7 @@
     "expected_id": "medical-lab-technologist",
     "expected_name": "임상병리사",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "src/gopang/ai/expert-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 145
   },
@@ -259,7 +259,7 @@
     "expected_id": "dental-technician",
     "expected_name": "치과기공사",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "src/gopang/ai/expert-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 149
   },
@@ -270,7 +270,7 @@
     "expected_id": "paramedic",
     "expected_name": "응급구조사",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "src/gopang/ai/expert-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 152
   },
@@ -281,7 +281,7 @@
     "expected_id": "professional-engineer",
     "expected_name": "기술사",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "src/gopang/ai/expert-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 169
   },
@@ -292,7 +292,7 @@
     "expected_id": "industrial-safety-consultant",
     "expected_name": "산업안전·보건지도사",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "src/gopang/ai/expert-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 174
   },
@@ -303,7 +303,7 @@
     "expected_id": "fire-safety-manager",
     "expected_name": "소방시설관리사",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "src/gopang/ai/expert-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 176
   },
@@ -314,7 +314,7 @@
     "expected_id": "surveying-engineer",
     "expected_name": "측량 및 지형공간정보기술사",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "src/gopang/ai/expert-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 178
   },
@@ -325,7 +325,7 @@
     "expected_id": "electrical-safety-engineer",
     "expected_name": "전기안전기술사",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "src/gopang/ai/expert-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 179
   },
@@ -336,7 +336,7 @@
     "expected_id": "real-estate-agent",
     "expected_name": "공인중개사",
     "category": "회귀(R1 패치 재검증 — 기대값 정정: kestate가 막혀있어 EXPERT(real-estate-agent)가...)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "kestate가 막혀있어 EXPERT(real-estate-agent)가 유일한 정답 경로 — R1 축 검증 목적상 기대값 유지.",
     "source_batch2_no": 181
   },
@@ -347,7 +347,7 @@
     "expected_id": "security-engineer",
     "expected_name": "정보보안전문가",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "src/gopang/ai/expert-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 182
   },
@@ -358,7 +358,7 @@
     "expected_id": "advisor",
     "expected_name": "K-Advisor(구매자문)",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "src/gopang/ai/expert-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 265
   },
@@ -369,7 +369,7 @@
     "expected_id": "architect",
     "expected_name": "건축사",
     "category": "회귀(R1 패치 재검증 — 기대값 정정: kestate와 무관한 순수 R1(GWP↔EXPERT) 축 문제(엉뚱하게...)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "kestate와 무관한 순수 R1(GWP↔EXPERT) 축 문제(엉뚱하게 kcommerce로 샜던 사례) — 기대값 유지.",
     "source_batch2_no": 268
   },
@@ -380,7 +380,7 @@
     "expected_id": "security-engineer",
     "expected_name": "정보보안전문가",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "src/gopang/ai/expert-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 270
   },
@@ -391,7 +391,7 @@
     "expected_id": "teacher",
     "expected_name": "정교사",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "src/gopang/ai/expert-registry.js triggers 배열 근거, 원문 트리거 미사용 패러프레이즈",
     "source_batch2_no": 271
   },
@@ -402,7 +402,7 @@
     "expected_id": "direct-response",
     "expected_name": "라우팅 불필요(kestate 여전히 실질 미구현)",
     "category": "회귀(R1 패치 재검증 — 기대값 정정: no=281은 원래 kestate GWP 자체를 기대했던 케이스라(EXP...)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "no=281은 원래 kestate GWP 자체를 기대했던 케이스라(EXPERT 위임 의도 없음) ktelecom과 동일하게 무라우팅 텍스트 안내가 현재 정답. klaw로 간 것도 대안으로는 합리적이나, 채점 기준은 '태그 없음'으로 통일한다.",
     "source_batch2_no": 281
   },
@@ -413,7 +413,7 @@
     "expected_id": "direct-response",
     "expected_name": "라우팅 불필요(ktelecom 여전히 실질 미구현)",
     "category": "회귀(R1 패치 재검증 — 기대값 정정: 위 no=49와 동일 사유....)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "위 no=49와 동일 사유.",
     "source_batch2_no": 284
   },
@@ -424,7 +424,7 @@
     "expected_id": "kbusiness",
     "expected_name": "K-Business(산업전환 SP 연계 가능성)",
     "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
-    "static_verdict": "N/A",
+    "static_verdict": "PASS",
     "basis": "prompts/SP-INDUSTRY-TRANSFORM-COMMON 존재 근거, 실제 라우팅 진입점은 kbusiness 경유 여부 확인 필요",
     "source_batch2_no": 291
   }
