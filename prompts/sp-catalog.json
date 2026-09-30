@@ -552,6 +552,8 @@
   "SP-10_kpublic": "SP-10_kpublic_v3.25.txt",
   "SP-12_kdemocracy": "SP-12_kdemocracy_v3_2.txt",
   "SP-13_klogistics": "SP-13_klogistics_v3_0.txt",
+  "SP-14-IMG_kcleaner_vision_prompt": "SP-14-IMG_kcleaner_vision_prompt_v1.1.txt",
+  "SP-14_kcleaner": "SP-14_kcleaner_v1.4.txt",
   "SP-15-IMG_profile-scan_vision_prompt": "SP-15-IMG_profile-scan_vision_prompt_v1.0.txt",
   "SP-16_kinsurance": "SP-16_kinsurance_v3_0.txt",
   "SP-17_profile-classifier": "SP-17_profile-classifier_v1.0.txt",
@@ -565,8 +567,8 @@
   "SP-24_kestate": "SP-24_kestate_v1.0.txt",
   "SP-24a_kestate_appraisal": "SP-24a_kestate_appraisal_v0_1.txt",
   "SP-24b_kestate_search": "SP-24b_kestate_search_v0_1.txt",
-  "SP-24c_kestate_listing": "SP-24c_kestate_listing_v0_1.txt",
   "SP-24c-IMG_kestate_site_survey_vision_prompt": "SP-24c-IMG_kestate_site_survey_vision_prompt_v0_1.txt",
+  "SP-24c_kestate_listing": "SP-24c_kestate_listing_v0_1.txt",
   "SP-24d_kestate_register": "SP-24d_kestate_register_v0_1.txt",
   "SP-25_kmail": "SP-25_kmail_v1_30.txt",
   "SP-26_kaddress": "SP-26_kaddress_v1_7.txt",
@@ -652,10 +654,9 @@
   "SP-INDUSTRY-TRANSFORM-01": "SP-INDUSTRY-TRANSFORM-01_agriculture_v1.0.txt",
   "SP-INDUSTRY-TRANSFORM-10": "SP-INDUSTRY-TRANSFORM-10_food-manufacturing_v1.0.txt",
   "SP-INDUSTRY-TRANSFORM-56": "SP-INDUSTRY-TRANSFORM-56_restaurants-bars_v1.0.txt",
+  "SP-PATH-VERIFIER": "SP-PATH-VERIFIER_v1_0.md",
   "k-job": "k-job_v1_0.md",
   "k-plan": "k-plan_v1_3.md",
   "k-watch": "k-watch_v1_0.md",
-  "CONTROL-TOWER-PRINCIPLE": "CONTROL-TOWER-PRINCIPLE_v1_1.md",
-  "SP-14_kcleaner": "SP-14_kcleaner_v1.4.txt",
-  "SP-14-IMG_kcleaner_vision_prompt": "SP-14-IMG_kcleaner_vision_prompt_v1.1.txt"
+  "CONTROL-TOWER-PRINCIPLE": "CONTROL-TOWER-PRINCIPLE_v1_1.md"
 }

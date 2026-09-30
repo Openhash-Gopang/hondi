@@ -354,6 +354,47 @@ for f in PROMPTS.iterdir():
 for code in sorted(industry_transform_groups):
     manifest[f'SP-INDUSTRY-TRANSFORM-{code}'] = best(industry_transform_groups[code])
 
+# 7) SP-PATH-VERIFIER · k-job · k-plan · k-watch — 2026-09-30 발견 및 신설
+#    사용자 지시로 "build_manifest.py가 계속 실패하는 5개 미인식 파일"을
+#    직접 조사한 결과:
+#      · SP-PATH-VERIFIER_v1_0.md — worker.js(약 6068행)가
+#        `manifest['SP-PATH-VERIFIER']`로 직접 조회하고, 키가 없으면
+#        즉시 throw하도록 돼 있다. 그런데 이 스크립트엔 애초에 이 파일을
+#        위한 스캔 블록이 없었고, 지금 sp-catalog.json에도 이 키가 실제로
+#        없다 — 즉 이 파일이 추가된 이후 지금까지 이 스크립트가 성공적으로
+#        재생성된 적이 없어서, 목표경로 자기검증(SP-PATH-VERIFIER) 기능이
+#        호출될 때마다 실제로 에러를 던지고 있었을 것으로 보인다(운영 중인
+#        버그, CI 표시만의 문제가 아니었다).
+#      · k-job_v1_0.md·k-plan_v1_3.md — call-ai.js가 각각 'k-job'·'k-plan'
+#        키로 manifest를 조회한다(K-Job/K-Plan/K-Watch 스위치형 SP 로더).
+#        지금까지 스캔 블록 없이 sp-catalog.json에 수동으로만 값이
+#        맞춰져 있었다 — k-plan은 실제로 v1.0→v1.3 버전업 때 ALLOWLIST_
+#        PREFIXES의 'k-plan_v1_0'(버전 고정 문자열)가 더 이상 매치되지
+#        않게 되면서 이미 한 번 이 문제를 실제로 겪었다.
+#      · k-watch_v1_0.md — call-ai.js가 `_loadSpByKey('k-watch', 'K-Watch')`로
+#        마찬가지로 manifest를 조회한다. 지금은 ALLOWLIST_PREFIXES의
+#        'k-watch_v1_0'가 우연히 현재 버전과 일치해 자기검증을 통과하고
+#        있을 뿐, k-plan과 똑같은 잠재적 재발 대상이었다.
+#    네 파일 모두 단일 키·단일 파일 패턴이라 _scan_single로 충분하다.
+_scan_single(r'^SP-PATH-VERIFIER_v', '.md', 'SP-PATH-VERIFIER')
+_scan_single(r'^k-job_v', '.md', 'k-job')
+_scan_single(r'^k-plan_v', '.md', 'k-plan')
+_scan_single(r'^k-watch_v', '.md', 'k-watch')
+
+# 7-b) CONTROL-TOWER-PRINCIPLE — 2026-09-30, 위 조사 과정에서 훨씬 더 심각한
+#      사례로 발견. 이 문서는 "모든 SP 제1원칙"으로 worker.js/expert-session.js가
+#      `_fetchByManifestKeyFromGithub('CONTROL-TOWER-PRINCIPLE')`로 서버측에서
+#      강제 주입하는, 사실상 이 저장소에서 가장 광범위하게 걸리는 manifest
+#      키인데도 — 2026-09-01에 ALLOWLIST_PREFIXES에 "카탈로그 대상 아닌 설계
+#      문서로 추정"이라고 잘못 분류돼 들어가 있었다. 이번에 실제로 스크립트를
+#      끝까지 실행해 보고서야(자기검증만으론 못 잡음 — allowlist에 있으면
+#      애초에 검사 대상에서 빠지므로) 재생성판에서 이 키가 통째로 사라지는
+#      걸 발견했다 — 지금 커밋된 sp-catalog.json에 남아있는 값은 이 스크립트가
+#      아니라 과거 수작업 편집의 잔재였던 것으로 보인다. 다른 4개와 같은
+#      단일 파일 패턴이라 스캔 블록만 추가하면 된다(아래 ALLOWLIST_PREFIXES
+#      에서도 제거).
+_scan_single(r'^CONTROL-TOWER-PRINCIPLE_v', '.md', 'CONTROL-TOWER-PRINCIPLE')
+
 # ── 잔여 파일 자기검증 (2026-07-29 신설) ────────────────────────────────
 # prompts/ 최상위(하위 폴더 제외)의 .md/.txt 파일 중 위 어떤 패턴에도
 # 안 걸리는 게 있으면, 카탈로그 대상이 원래 아닌 문서(설계도·감사록 등,
@@ -377,9 +418,32 @@ ALLOWLIST_PREFIXES = (
     # k-plan/k-social-match/k-watch 세 개는 실제 서비스 기획 문서일
     # 가능성도 있어 이후 확인이 필요함(현재는 안전한 기본값으로 보수적
     # 배제만 함 — 카탈로그 등록이 아니라 문서 취급).
-    'CONTROL-TOWER-PRINCIPLE', 'GOV-TASK-POST-ACCEPTANCE-REVIEW',
-    'ROUTING-BRANCH-REFERENCE', 'k-plan_v1_0', 'k-social-match_v1_0',
-    'k-watch_v1_0',
+    'GOV-TASK-POST-ACCEPTANCE-REVIEW',
+    'ROUTING-BRANCH-REFERENCE',
+    # 2026-09-30 수정 — 위 세 파일 중 k-plan·k-watch는 실사 결과 call-ai.js가
+    # manifest 키로 실제 조회하는(카탈로그 대상이 맞는) 서비스 SP였다 —
+    # §7의 _scan_single로 옮기고 여기서는 제거한다. k-social-match만
+    # worker.js에 JS 문자열 상수로 직접 인라인돼 있어(manifest 조회 없음)
+    # 진짜 문서 취급이 맞다 — 버전 고정 문자열 대신 접두사만 남겨, k-plan이
+    # 이미 한 번 겪은 "버전업하면 허용목록에서 조용히 빠지는" 재발을 막는다.
+    'k-social-match',
+    # 2026-09-30 추가 — SP-24d 관련 CI 실패 조사 중 함께 발견. 코드베이스
+    # 전체(worker.js/*.js/pages/*.html)에서 manifest 키 조회 여부를 직접
+    # grep으로 확인했다:
+    #   · SP-EDITOR_v1_0.md — pages/sp-editor.html이 실제로 라이브 페이지이고,
+    #     SP-AUTHOR와 동일한 방식으로 REPO_RAW + 'prompts/SP-EDITOR_v1_0.md'를
+    #     "하드코딩된 파일명"으로 직접 fetch한다(manifest 경유 아님) — 카탈로그
+    #     대상이 아닌 게 맞다. 단, 버전 번호가 fetch URL에 그대로 박혀 있어
+    #     v1.1로 올리면 SP-AUTHOR_v1_15 하드코딩과 같은 방식으로 조용히
+    #     구버전을 계속 쓰게 된다(이건 이 스크립트가 아니라 pages/sp-editor.html
+    #     쪽 결함이라 이번엔 건드리지 않았다 — 별도 확인 필요).
+    #   · SP-FS-COMPOSER_v1_1.md — 코드베이스 전체(worker.js·src/**/*.js·
+    #     pages/**/*.html·docs/**)에서 이 이름을 참조하는 곳이 이 파일
+    #     자신 말고 단 한 곳도 없었다. SP-EDITOR처럼 하드코딩 fetch도,
+    #     manifest 조회도 없다 — 작성만 되고 아직 어디에도 연결 안 된
+    #     상태로 보인다(k-plan/k-watch가 처음 추가됐을 때와 같은 종류).
+    #     카탈로그 대상은 아니지만, 연결이 빠진 게 의도적인지는 확인 필요.
+    'SP-EDITOR', 'SP-FS-COMPOSER',
 )
 
 unrecognized = []
