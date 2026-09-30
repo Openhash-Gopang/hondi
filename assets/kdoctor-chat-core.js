@@ -21,6 +21,8 @@ export const MAX_CONSULTS_PER_TURN = 3;
 export const MAX_PDV_REQUESTS_PER_CONVERSATION = 3;
 export const MAX_CONSULT_ROUNDS = 3;
 export const MAX_RETRY_ON_INVALID = 1;
+// 총괄 응답 출력 한도. 3500에서는 라이브 스모크 총괄 호출의 70%가 잘렸다(2026-10-01). 워커 상한(kdoctor-guard MAX_OUTPUT_TOKENS) 이하여야 한다.
+export const ORCHESTRATOR_MAX_TOKENS = 8000;
 
 export const FAILSAFE_TEXT =
   '지금은 결과를 안전하게 확인하지 못했습니다. 대면 진료를 받아 보세요. 숨쉬기 어렵거나 의식이 흐리거나 가슴이 조이는 등 위급하면 즉시 119에 연락하세요. 자해·자살 생각이 있으면 자살예방상담전화 109(24시간)에 연락하세요.';
@@ -202,7 +204,7 @@ export async function runTurn(history, userText, deps) {
   }
 
   for (let round = 0; round <= MAX_CONSULT_ROUNDS; round++) {
-    reply = await deps.callLLM(deps.orchestratorSP, work, 3500);
+    reply = await deps.callLLM(deps.orchestratorSP, work, ORCHESTRATOR_MAX_TOKENS);
     const wanted = parseConsults(reply);
     const pdvAsks = parsePdvRequests(reply);
     if ((!wanted.length && !pdvAsks.length) || round === MAX_CONSULT_ROUNDS) break;
@@ -244,8 +246,8 @@ export async function runTurn(history, userText, deps) {
   for (let retry = 0; retry < MAX_RETRY_ON_INVALID && (!validated || !validated.ok); retry++) {
     const why = !ex.report ? ex.error : validated.errors.join(', ');
     work.push({ role: 'assistant', content: reply });
-    work.push({ role: 'user', content: `[시스템] 결과 검증 실패(${why}). 부록 A 형식과 강제규칙을 지켜 [DIAGNOSIS_REPORT]를 다시 내라. 금지 표현(확진·진단서·처방전·퇴원·완치 판정)을 쓰지 말고, 복귀 기준(return_if)을 포함하라.` });
-    reply = await deps.callLLM(deps.orchestratorSP, work, 3500);
+    work.push({ role: 'user', content: `[시스템] 결과 검증 실패(${why}). 부록 A 형식과 강제규칙을 지켜 고친 [DIAGNOSIS_REPORT]만 다시 내라(정정 내역·설명 없이). 발급 문서 명칭이나 확정 진단·퇴원·완치 판정 표현은 부정문이나 점검 문구로도 적지 말고, 복귀 기준(return_if)을 포함하라.` });
+    reply = await deps.callLLM(deps.orchestratorSP, work, ORCHESTRATOR_MAX_TOKENS);
     ex = extractReport(reply);
     validated = ex.report ? deps.validate(ex.report, deps.audience) : null;
   }
