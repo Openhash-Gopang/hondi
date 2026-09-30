@@ -101,6 +101,11 @@ const ALLOWED_ORIGINS = [
   // assets/estate-search-widget.js). 다른 서브도메인과 동일한 수준(Origin
   // 검사만, 로그인·과금 게이트 없음)의 노출이며 별도 rate-limit은 없다.
   'https://estate.hondi.net',
+  // 2026-09-30 신설 — doctor.hondi.net(별도 GitHub Pages 저장소, K-Doctor 소개+진료 상담 창)이
+  // /ai/chat을 직접 호출한다(assets/kdoctor-chat-widget.js). estate와 같은 수준(Origin 검사만,
+  // 로그인·과금 게이트 없음, 별도 rate-limit 없음)이다. 의료인 면허 검증 전 초안 단계이므로
+  // 남용·오용이 관측되면 게이트를 추가할 것.
+  'https://doctor.hondi.net',
 
   'https://users.hondi.net',
   'https://l1-hanlim.hondi.net',

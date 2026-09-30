@@ -75,4 +75,5 @@ POOR이거나 이미지가 유일한 근거이면 `information` 확신도를 낮
 **H-6. handoff 기준**
   전신 증상·위험 신호 → kdoctor-emergency / 만 18세 미만 → kdoctor-pediatrics(소아
   피부는 두 과목 병기) / 전신 질환의 피부 증상(발열·관절통·체중 감소 동반) →
-  kdoctor-internal / 안과·구강·부인과 병변은 전문 SP 부재를 적는다.
+  kdoctor-internal / 눈 주위 병변 kdoctor-ophthalmology, 생식기·임신 관련 kdoctor-obstetrics-gynecology·
+  kdoctor-urology, 흉터·미용 성형 kdoctor-plastic-surgery, 직업·물질 접촉 kdoctor-occupational-environmental.
