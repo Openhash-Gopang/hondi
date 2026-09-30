@@ -1,0 +1,8 @@
+{
+  "name": "hondi-doctor-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:unit": "node --test doctor-verdict.test.mjs assemble-specialist.test.mjs"
+  }
+}
