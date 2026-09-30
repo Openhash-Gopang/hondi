@@ -49,3 +49,13 @@ test('noReportReason: 잘림·검증 실패·태그 없음·닫힘 없음을 구
   assert.equal(noReportReason(c({ has_open_tag: false, has_close_tag: false })), 'no_report_no_tag');
   assert.equal(noReportReason(c({ has_close_tag: false })), 'no_report_unclosed');
 });
+
+test('총괄 출력 한도: 위젯 값이 워커 상한 이하이고, SP-29에 간결 원칙 절이 있다', async () => {
+  const { ORCHESTRATOR_MAX_TOKENS } = await import('../../assets/kdoctor-chat-core.js');
+  const { MAX_OUTPUT_TOKENS } = await import('../../src/worker/kdoctor-guard.js');
+  assert.ok(ORCHESTRATOR_MAX_TOKENS <= MAX_OUTPUT_TOKENS, '워커가 위젯 요청을 깎으면 다시 잘린다');
+  assert.ok(ORCHESTRATOR_MAX_TOKENS > 3500);
+  const sp = readFileSync(new URL('../../prompts/SP-29_kdoctor_v0_1.txt', import.meta.url), 'utf8');
+  assert.match(sp, /\[출력 분량과 형식 — 간결 원칙/);
+  assert.match(sp, /금지 표현은 어디에도 쓰지 않는다/);
+});

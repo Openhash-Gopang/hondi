@@ -14,7 +14,7 @@ export const DOCTOR_TEXT_MODEL = 'deepseek-flash';
 export const DOCTOR_VISION_MODEL_DEFAULT = 'deepseek-flash';
 export const MAX_IMAGES_PER_REQUEST = 3;
 export const MAX_IMAGE_DATAURL_CHARS = 3_000_000; // base64 약 2.2MB — 클라이언트가 1280px JPEG로 줄여 보낸다
-export const MAX_OUTPUT_TOKENS = 4000;
+export const MAX_OUTPUT_TOKENS = 8192; // 총괄 응답(ORCHESTRATOR_MAX_TOKENS 8000)이 들어가야 한다
 const DATA_URL = /^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
 
 /**
