@@ -11,6 +11,7 @@
  *   export DEEPSEEK_DOCTOR_KEY=sk-xxxx      # 없으면 DEEPSEEK_API_KEY
  *   node kdoctor_consult_live_smoketest.mjs --scenarios scenarios_kdoctor_consult_100_20261001.json --out ../../results/kdoctor-consult --resume
  *   옵션: --limit N  --group doctor|patient  --concurrency 4  --max-turns 3  --model deepseek-flash  --provider deepseek|mock
+ *         --orch-max-tokens N   (진단용: 총괄 호출의 max_tokens를 바꾼다. 기본은 위젯과 같은 3500)
  *
  * 채점(시나리오별, docs/kdoctor/live-smoke-consult.md):
  *   협진 기대: 호출된 과목 중 expect_ids ∪ accept_ids 와 겹치면 LIVE-PASS (match=primary|accept), 호출은 있었으나 겹치지 않으면 LIVE-FAIL(wrong_specialty),
@@ -28,7 +29,10 @@ import { loadResources, makeMockLLM } from '../../scripts/kdoctor/eval/eval-run.
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const MODEL_DEFAULT = 'deepseek-flash';
-const NUDGE = '위에 적은 내용이 제가 아는 전부입니다. 지금까지의 정보로 진행해 주세요.';
+// 총괄은 위험 신호를 확인할 수 없으면 질문하고, 답이 없으면 응급으로 처리하도록 설계돼 있다(SP-29 STEP T). 협진 기대 시나리오는 응급이 아닌 증례이므로
+// 되물음에는 "위험 신호 없음 + 이게 전부"로 답한다. (1차 라이브에서 이 문구가 "아는 전부"뿐일 때 doctor-02가 응급으로 끝났다.)
+const NUDGE_CONSULT = '위에 적은 것 외에 응급 위험 신호(의식 소실, 흉통, 호흡곤란, 신경학적 이상, 출혈, 임신 가능성 등)는 없고, 다른 병력·복용약도 특이사항 없습니다. 이 정보로 진행해 주세요.';
+const NUDGE_OTHER = '위에 적은 내용이 제가 아는 전부입니다. 지금까지의 정보로 진행해 주세요.';
 const EMERGENCY_RE = /119|109/;
 
 export function parseArgs(argv) {
@@ -56,7 +60,7 @@ async function withRetry(fn, tries = 3) {
 
 export function makeDeepseekLLM({ key, model = MODEL_DEFAULT, fetchImpl = fetch }) {
   if (!key) throw new Error('DEEPSEEK_DOCTOR_KEY(또는 DEEPSEEK_API_KEY) 환경변수가 필요하다');
-  return (system, messages, maxTokens) => withRetry(async () => {
+  return (system, messages, maxTokens, _role, meta) => withRetry(async () => {
     const res = await fetchImpl('https://api.deepseek.com/chat/completions', {
       method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
       // thinking 기본 켜짐은 사고 과정이 max_tokens를 먼저 써서 content가 빈 문자열로 오는 사고가 있었다(kdoctor-guard.js와 동일하게 끈다).
@@ -66,6 +70,7 @@ export function makeDeepseekLLM({ key, model = MODEL_DEFAULT, fetchImpl = fetch 
     if (!res.ok) { const e = new Error('deepseek ' + res.status); e.retryable = res.status === 429 || res.status >= 500; throw e; }
     const data = await res.json();
     const text = data.choices?.[0]?.message?.content;
+    if (meta) { meta.finish_reason = data.choices?.[0]?.finish_reason ?? null; meta.completion_tokens = data.usage?.completion_tokens ?? null; meta.max_tokens = maxTokens; }
     if (!text) { const e = new Error('deepseek empty content'); e.retryable = true; throw e; }
     return text;
   });
@@ -83,6 +88,17 @@ export function makeMockFor(sc, orchestratorSP) {
   };
 }
 
+/** 보고서가 없을 때 원인을 나눈다: 출력 한도로 잘림 / 태그 없음 / 형식·검증 실패. */
+export function noReportReason(rec) {
+  const calls = rec.orchestrator_calls ?? [];
+  const last = calls[calls.length - 1];
+  if (last?.finish_reason === 'length') return 'no_report_truncated';
+  if (rec.validation_errors?.length) return 'no_report_invalid';
+  if (last && !last.has_open_tag) return 'no_report_no_tag';
+  if (last && last.has_open_tag && !last.has_close_tag) return 'no_report_unclosed';
+  return 'no_report';
+}
+
 export function scoreRecord(sc, rec) {
   if (rec.error) return { status: 'LIVE-ERROR', reason: rec.error };
   const called = rec.called_ids;
@@ -96,29 +112,34 @@ export function scoreRecord(sc, rec) {
   const hitP = called.some((id) => primary.has(id)), hitA = called.some((id) => accept.has(id));
   if (!hitP && !hitA) return { status: 'LIVE-FAIL', reason: 'wrong_specialty' };
   const match = hitP ? 'primary' : 'accept';
-  if (rec.view_type !== 'report' || !rec.validated_ok) return { status: 'LIVE-FAIL', reason: 'no_report', match };
+  if (rec.view_type !== 'report' || !rec.validated_ok) return { status: 'LIVE-FAIL', reason: noReportReason(rec), match };
   return { status: 'LIVE-PASS', reason: 'consulted_and_reported', match };
 }
 
-export async function runScenario(sc, { llm, resources, maxTurns = 3 }) {
+export async function runScenario(sc, { llm, resources, maxTurns = 3, orchMaxTokens = null }) {
   const t0 = Date.now();
   const rec = { id: sc.id, group: sc.group, utterance: sc.utterance, expect_ids: sc.expect_ids, accept_ids: sc.accept_ids, expect_consult: sc.expect_consult,
     requested_ids: [], called_ids: [], consult_questions: [], view_type: null, validated_ok: false, turns: 0, first_consult_turn: null,
-    n_llm_calls: 0, all_text: '', orchestrator_replies: [], error: null };
+    n_llm_calls: 0, all_text: '', orchestrator_replies: [], orchestrator_calls: [], validation_errors: [], error: null };
   let turnNo = 0;
   const deps = {
     orchestratorSP: resources.orchestratorSP, registry: resources.registry, loadSpecialist: resources.loadSpecialist, audience: undefined, audienceView,
     callLLM: async (system, messages, max) => {
       rec.n_llm_calls++;
-      const out = await llm(system, messages, max, 'doctor');
-      if (system === resources.orchestratorSP) {
-        rec.orchestrator_replies.push(out.slice(0, 4000));
+      const isOrch = system === resources.orchestratorSP;
+      const meta = {};
+      const useMax = isOrch && orchMaxTokens ? orchMaxTokens : max; // 진단용: 총괄 출력 한도를 바꿔 잘림 가설을 검증한다(기본은 위젯과 같은 값).
+      const out = await llm(system, messages, useMax, 'doctor', meta);
+      if (isOrch) {
+        rec.orchestrator_replies.push(out);
+        rec.orchestrator_calls.push({ chars: out.length, finish_reason: meta.finish_reason ?? null, completion_tokens: meta.completion_tokens ?? null, max_tokens: useMax,
+          has_open_tag: out.includes('[DIAGNOSIS_REPORT]'), has_close_tag: out.includes('[/DIAGNOSIS_REPORT]') });
         rec.all_text += '\n' + out;
         for (const w of parseConsults(out)) { rec.requested_ids.push(w.id); rec.consult_questions.push({ id: w.id, question: w.question }); }
       }
       return out;
     },
-    validate: (r, a) => { const v = validateDiagnosis(r, a); if (v.ok) rec.validated_ok = true; return v; },
+    validate: (r, a) => { const v = validateDiagnosis(r, a); if (v.ok) rec.validated_ok = true; else rec.validation_errors.push(v.errors); return v; },
   };
   try {
     let history = [];
@@ -136,7 +157,7 @@ export async function runScenario(sc, { llm, resources, maxTurns = 3 }) {
       if (out.view.html) rec.all_text += '\n' + out.view.html.replace(/<[^>]+>/g, ' ');
       if (out.view.type !== 'text') break;
       if (!sc.expect_consult && EMERGENCY_RE.test(out.view.text ?? '')) break; // 응급 안내가 나왔으면 더 끌지 않는다
-      userText = NUDGE;
+      userText = sc.expect_consult ? NUDGE_CONSULT : NUDGE_OTHER;
     }
   } catch (e) { rec.error = String(e?.message ?? e); }
   rec.ms = Date.now() - t0;
@@ -157,6 +178,8 @@ export function summarize(records) {
     fail_reasons: Object.fromEntries(Object.entries(by((r) => r.score.reason)).filter(([, v]) => v.some((r) => r.score.status !== 'LIVE-PASS')).map(([k, v]) => [k, v.filter((r) => r.score.status !== 'LIVE-PASS').length])),
     accept_only_pass: consultRecs.filter((r) => r.score.match === 'accept' && r.score.status === 'LIVE-PASS').map((r) => r.id),
     avg_consults_per_case: +(consultRecs.reduce((s, r) => s + r.called_ids.length, 0) / Math.max(1, consultRecs.length)).toFixed(2),
+    truncated_orchestrator_calls: records.reduce((n, r) => n + (r.orchestrator_calls ?? []).filter((c) => c.finish_reason === 'length').length, 0),
+    orchestrator_calls_total: records.reduce((n, r) => n + (r.orchestrator_calls ?? []).length, 0),
     avg_ms: Math.round(records.reduce((s, r) => s + (r.ms ?? 0), 0) / Math.max(1, records.length)),
   };
   return summary;
@@ -167,7 +190,7 @@ export function renderMarkdown(summary, records) {
   const L = ['# K-Doctor 협진 호출 라이브 스모크', '', `전체 ${summary.total.n}건 — PASS ${summary.total.pass} / FAIL ${summary.total.fail} / ERROR ${summary.total.error} (${pct(summary.total)})`, '',
     '| 구분 | 건수 | PASS | FAIL | ERROR | 통과율 |', '|---|---|---|---|---|---|'];
   for (const [k, s] of Object.entries(summary.by_group_kind)) L.push(`| ${k} | ${s.n} | ${s.pass} | ${s.fail} | ${s.error} | ${pct(s)} |`);
-  L.push('', `협진 기대 건당 평균 호출 과목 수: ${summary.avg_consults_per_case}`, '', '## 실패 사유', '');
+  L.push('', `협진 기대 건당 평균 호출 과목 수: ${summary.avg_consults_per_case}`, `총괄 호출 ${summary.orchestrator_calls_total}회 중 출력 한도로 잘린 호출(finish_reason=length): ${summary.truncated_orchestrator_calls}회`, '', '## 실패 사유', '');
   for (const [k, n] of Object.entries(summary.fail_reasons)) L.push(`- ${k}: ${n}건`);
   if (summary.accept_only_pass.length) L.push('', '## 대체 허용(accept_ids)으로만 통과 — 사람 검토', '', summary.accept_only_pass.join(', '));
   const fails = records.filter((r) => r.score.status !== 'LIVE-PASS');
@@ -203,13 +226,13 @@ async function main() {
   console.log(`시나리오 ${scenarios.length}건 (이미 완료 ${done.size}, 실행 ${todo.length}) provider=${provider} model=${model} sp_hash=${resources.sp_hash}`);
   await pool(todo, Number(a.concurrency ?? 4), async (sc) => {
     const llm = real ?? makeMockFor(sc, resources.orchestratorSP);
-    const rec = await runScenario(sc, { llm, resources, maxTurns: Number(a['max-turns'] ?? 3) });
+    const rec = await runScenario(sc, { llm, resources, maxTurns: Number(a['max-turns'] ?? 3), orchMaxTokens: a['orch-max-tokens'] ? Number(a['orch-max-tokens']) : null });
     done.set(sc.id, rec);
     appendFileSync(jsonl, JSON.stringify(rec) + '\n');
     console.log(`${rec.score.status.padEnd(10)} ${sc.id} called=[${[...new Set(rec.called_ids)].map((x) => x.replace('kdoctor-', '')).join(',')}] ${rec.score.reason}`);
   });
   const records = scenarios.map((s) => done.get(s.id)).filter(Boolean);
-  const summary = { ...summarize(records), meta: { provider, model, sp_hash: resources.sp_hash, scenarios: scenariosPath.split(/[\\/]/).pop(), finished: new Date().toISOString() } };
+  const summary = { ...summarize(records), meta: { provider, model, orch_max_tokens: a['orch-max-tokens'] ?? 'widget-default(3500)', sp_hash: resources.sp_hash, scenarios: scenariosPath.split(/[\\/]/).pop(), finished: new Date().toISOString() } };
   writeFileSync(join(outDir, 'live_results.json'), JSON.stringify(records, null, 2));
   writeFileSync(join(outDir, 'live_summary.json'), JSON.stringify(summary, null, 2));
   const md = renderMarkdown(summary, records);
