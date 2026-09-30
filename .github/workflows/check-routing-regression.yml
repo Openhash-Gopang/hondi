@@ -20,10 +20,18 @@ on:
   push:
     branches: [main]
     paths:
-      - "prompts/AC-PRO-CORE_v1_1.txt"
-      - "prompts/AC-PRO-CORE_v1_0.txt"
-      - "prompts/UNIVERSAL-common_v1_10.md"
-      - "prompts/PROFESSIONAL-common_v2_0.md"
+      # 2026-09-30 수정 — 아래 세 문서는 버전이 자주 올라가는 활성 편집
+      # 대상인데, 경로 필터를 정확한 파일명으로 고정해뒀더니 버전이
+      # 올라갈 때마다 이 워크플로가 그 파일의 변경에 대해 조용히 트리거를
+      # 멈추는 문제가 있었다(실제로 AC-PRO-CORE_v1_1.txt는 이미 오래전에
+      # v1_15로 바뀌어 사라졌는데 트리거 경로는 그대로였다 — 다행히
+      # 아래 --prompt/--system-prompt 인자가 똑같이 v1_1을 하드코딩하고
+      # 있어서 그쪽 크래시로 먼저 발견됐다). 버전 부분을 글롭으로 바꿔
+      # 재발을 막는다 — GitHub Actions의 paths 필터는 "**" 없이도 파일명
+      # 안의 "*"를 글롭으로 해석한다.
+      - "prompts/AC-PRO-CORE_v*.txt"
+      - "prompts/UNIVERSAL-common_v*.md"
+      - "prompts/PROFESSIONAL-common_v*.md"
       - "gwp-registry.js"
       - "src/gopang/ai/expert-registry.js"
   workflow_dispatch: {}
@@ -61,6 +69,27 @@ jobs:
       - name: Install deps
         run: pip install requests
 
+      # ── AC-PRO-CORE 현재 파일명 확정 (2026-09-30 신설 — 실제 운영 버그
+      #    수정) ────────────────────────────────────────────────────────
+      # 배경: 아래 두 단계가 지금까지 "prompts/AC-PRO-CORE_v1_1.txt"를
+      # 하드코딩하고 있었다. 이 파일은 v1_15까지 여러 번 버전업됐는데
+      # 그때마다 이 두 줄을 안 고쳐서, 최소 9/20 이후 기록된 13번의 실행
+      # 전부가 "Check domain keyword collisions" 단계에서
+      # FileNotFoundError로 즉시 죽고 있었다(실행 시간이 전부 14~21초인
+      # 게 그 증거 — 실제 라이브 API를 부르는 "Run routing-focused
+      # scenario batches"까지 한 번도 도달하지 못했다). SP-AUTHOR_v1_15·
+      # SP-EDITOR_v1_0 하드코딩 fetch와 정확히 같은 종류의 결함이다.
+      # prompts/sp-catalog.json이 이미 'AC-PRO-CORE' 키로 현재 파일명을
+      # 정확히 유지하고 있으므로(build_manifest.py가 자동 생성), 이걸
+      # 매번 읽어 $GITHUB_ENV에 기록하고 아래 두 단계에서 재사용한다 —
+      # 다음 버전업부터는 이 워크플로 파일을 다시 고칠 필요가 없다.
+      - name: Resolve current AC-PRO-CORE filename from sp-catalog.json
+        run: |
+          set -e
+          FILE=$(python3 -c "import json; print(json.load(open('prompts/sp-catalog.json'))['AC-PRO-CORE'])")
+          echo "AC-PRO-CORE 현재 파일: $FILE"
+          echo "AC_PRO_CORE_FILE=$FILE" >> "$GITHUB_ENV"
+
       # ── 도메인 키워드 충돌 검사 (2026-08-06 신설) ──────────────────
       # 배경: 이 워크플로가 잡는 "행동적 정확도" 회귀와는 다른 층위의
       # 문제 — R1류 조항에 새 예시를 추가할 때 그 단어가 이미 다른 GWP의
@@ -74,7 +103,7 @@ jobs:
       # 안 씀, 오탐 소지가 check_no_hardcoded_sp_refs.py류 구조적 검사
       # 보다 커서).
       - name: Check domain keyword collisions (informational)
-        run: python3 tools/check_domain_keyword_collision.py --prompt prompts/AC-PRO-CORE_v1_1.txt
+        run: python3 tools/check_domain_keyword_collision.py --prompt "prompts/$AC_PRO_CORE_FILE"
 
       - name: Run routing-focused scenario batches
         working-directory: tests/live_smoketest
@@ -88,9 +117,9 @@ jobs:
             scenarios_gwp_priority_no_expert_20260806.json ; do
             BASE=$(basename "$SCEN" .json)
             OUT="../../results/${BASE}"
-            echo "=== running $SCEN -> $OUT ==="
+            echo "=== running $SCEN -> $OUT (AC-PRO-CORE: $AC_PRO_CORE_FILE) ==="
             python3 live_smoketest.py --scenarios "$SCEN" \
-              --system-prompt ../../prompts/AC-PRO-CORE_v1_1.txt \
+              --system-prompt "../../prompts/$AC_PRO_CORE_FILE" \
               --out "$OUT" --resume
           done
 
