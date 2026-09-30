@@ -1,0 +1,61 @@
+name: Live Smoketest — K-Doctor 협진 호출 (총괄 SP → 과목별 SP)
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Debug: only run first N scenarios (blank = all 100)"
+        required: false
+        default: ""
+      group:
+        description: "doctor | patient (blank = both)"
+        required: false
+        default: ""
+      concurrency:
+        description: "Parallel scenarios (default 4)"
+        required: false
+        default: "4"
+
+permissions:
+  contents: write
+
+jobs:
+  run-kdoctor-consult-smoketest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Run K-Doctor consult live smoketest
+        working-directory: tests/live_smoketest
+        env:
+          DEEPSEEK_DOCTOR_KEY: ${{ secrets.DEEPSEEK_DOCTOR_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          ARGS="--scenarios scenarios_kdoctor_consult_100_20261001.json --out ../../results/kdoctor-consult --resume --concurrency ${{ github.event.inputs.concurrency || '4' }}"
+          if [ -n "${{ github.event.inputs.limit }}" ]; then ARGS="$ARGS --limit ${{ github.event.inputs.limit }}"; fi
+          if [ -n "${{ github.event.inputs.group }}" ]; then ARGS="$ARGS --group ${{ github.event.inputs.group }}"; fi
+          node kdoctor_consult_live_smoketest.mjs $ARGS
+
+      - name: Commit results to results branch
+        if: always()
+        run: |
+          git config user.name "hondi-live-smoketest-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout -B results/live-smoketest-kdoctor-consult
+          git add -f results/
+          git diff --cached --quiet || git commit -m "chore: kdoctor consult live smoketest results ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+          git push --force origin HEAD:results/live-smoketest-kdoctor-consult
+
+      - name: Upload artifact (backup)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-smoketest-kdoctor-consult-results
+          path: results/
