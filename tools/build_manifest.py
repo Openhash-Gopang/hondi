@@ -289,7 +289,16 @@ _scan_single_subdir('gov-tree/09-national/overlays', r'^NATIONAL-SP-OVERLAY-TEMP
 #    자체는 점·밑줄 모두 허용해 최신판 선택은 정상이었지만, 키 이름 오염은
 #    별개 문제 — 로컬 재현으로 발견). 밑줄도 허용해 슬러그와 버전이 항상
 #    정확히 분리되도록 한다.
-_SP_NN_PAT = r'^(SP-[\d]+-?(?:IMG)?)_(.+?)(?:_v[\d._]+)?\.txt$'
+#    2026-09-30 수정 — K-Estate 계열(SP-24a/24b/24c/24d, SP-24c-IMG)이 이
+#    정규식에 전혀 매칭되지 않아 매 push마다 "잔여 파일 자기검증"에 걸려
+#    build-manifest 워크플로가 exit 1로 죽고 있었다(PR #476 머지 직후
+#    "Generate prompts manifest" 런 실패로 발견 — SP-24a가 추가된 시점부터
+#    계속 이 상태였을 것으로 보임, 그동안 sp-catalog.json은 수작업 편집만
+#    반영되고 자동 재생성은 안 되고 있었다). 원인: 이 정규식은 SP 번호
+#    뒤에 곧장 "-"(선택)+"IMG"(선택)+"_"만 허용해, 번호에 알파벳 한 글자가
+#    바로 붙는 명명(24a, 24b, 24c, 24d)을 인식하지 못했다. 번호 뒤 소문자
+#    한 글자를 그룹 1에 포함하도록 넓혀 재발을 막는다.
+_SP_NN_PAT = r'^(SP-[\d]+[a-z]?-?(?:IMG)?)_(.+?)(?:_v[\d._]+)?\.txt$'
 RECOGNIZED_PATTERNS.append(_SP_NN_PAT)
 sp_groups: dict[str, list[str]] = defaultdict(list)
 for f in PROMPTS.iterdir():
