@@ -6,6 +6,7 @@ import {
   nationalAdjustment, regionalAdjustment, individualAdjustment, stagedValuation,
   deductLienFromCollateral, NATIONAL_SIGMA_NONE, DEFAULT_ANNUAL_VOL, REGIONAL_SIGMA_NONE,
   INDIVIDUAL_DEFECT_SIGMA, INDIVIDUAL_DEFECT_SIGMA_SEVERE,
+  floorComparison, propertyScopeCheck, FLOOR_WINDOW, MIN_FLOOR_MATCHED_COMPS, FLOOR_UNMATCHED_SIGMA, SUPPORTED_PROPERTY_TYPES,
 } from '../../src/gopang/ai/hondi-staged-valuation.js';
 
 const near = (a, b, eps = 1e-6) => assert.ok(Math.abs(a - b) < eps, `${a} ≉ ${b}`);
@@ -313,6 +314,152 @@ test('stagedValuation — 등기부는 확인됐지만 가압류가 있으면 �
 
 test('stagedValuation — model_version 없으면 던진다', () => {
   assert.throws(() => stagedValuation({ comps: [{ price: 1, txn_date: '2026-01-01' }], valuation_date: '2026-09-28', registry: { confirmed: ev() } }), RangeError);
+});
+
+// ───────────────────────────── 층(floor) 비교 · 물건 유형 범위 가드 (2026-09-30) ─────────────────────────────
+
+const floorComps = (floors_prices) => floors_prices.map(([floor, price]) => ({ floor, price, txn_date: '2026-06-01', index_at_txn: null }));
+
+test('floorComparison — 대상 층이 없으면 아무것도 하지 않고 사유도 남기지 않는다(하위호환)', () => {
+  const comps = floorComps([[3, 100], [11, 200]]);
+  const r = floorComparison({ comps });
+  assert.equal(r.applied, false);
+  assert.strictEqual(r.comps, comps);
+  assert.equal(r.sigma_floor, 0);
+  assert.deepEqual(r.reasons, []);
+});
+
+test('floorComparison — 대상 층 ±FLOOR_WINDOW 사례가 충분하면 그 사례만 쓴다(계수 조정 없음, 가격은 그대로)', () => {
+  const comps = floorComps([[10, 430], [11, 430], [12, 440], [15, 410], [2, 380]]);
+  const r = floorComparison({ comps, subject_floor: src(11) });
+  assert.equal(r.applied, true);
+  assert.deepEqual(r.comps.map(c => c.floor), [10, 11, 12]);   // 15층(차이 4)·2층(차이 9)은 제외
+  assert.deepEqual(r.comps.map(c => c.price), [430, 430, 440]);  // 가격 값은 손대지 않는다
+  assert.equal(r.sigma_floor, 0);
+  assert.equal(r.n_before, 5); assert.equal(r.n_after, 3);
+  assert.ok(FLOOR_WINDOW === 3 && MIN_FLOOR_MATCHED_COMPS === 3);
+});
+
+test('floorComparison — 경계: 정확히 FLOOR_WINDOW 차이는 포함, 그보다 1층 더 멀면 제외', () => {
+  const comps = floorComps([[8, 1], [11, 1], [14, 1], [15, 1]]);   // 대상 11층: 8(−3)·11·14(+3) 포함, 15(+4) 제외
+  const r = floorComparison({ comps, subject_floor: src(11) });
+  assert.deepEqual(r.comps.map(c => c.floor), [8, 11, 14]);
+});
+
+test('floorComparison — 비슷한 층 사례가 부족하면 전체를 쓰고 σ를 키운다', () => {
+  const comps = floorComps([[10, 1], [11, 1], [20, 1], [21, 1]]);   // 대상 11층 근처는 2건뿐
+  const r = floorComparison({ comps, subject_floor: src(11) });
+  assert.equal(r.applied, false);
+  assert.strictEqual(r.comps, comps);
+  assert.equal(r.sigma_floor, FLOOR_UNMATCHED_SIGMA);
+  assert.ok(r.reasons[0].includes('전체 4건 사용'));
+});
+
+test('floorComparison — 비교사례에 floor가 없거나 비정수면 확인 불가로 선별에서 제외한다', () => {
+  const comps = floorComps([[undefined, 1], [null, 1], [11.5, 1], ['11', 1], [11, 1], [12, 1]]);
+  const r = floorComparison({ comps, subject_floor: src(11) });
+  assert.equal(r.applied, false);            // 유효한 근접 사례는 2건(11, 12)뿐 → 최소 3건 미달
+  assert.equal(r.sigma_floor, FLOOR_UNMATCHED_SIGMA);
+});
+
+test('floorComparison — 대상 층 증거가 출처·조회일 없거나 정수가 아니면 채택하지 않는다(σ 가산도 없음)', () => {
+  const comps = floorComps([[10, 1], [11, 1], [12, 1]]);
+  for (const bad of [{ value: 11, source: '', asof: '2026-09-01' }, { value: 11, source: 'x', asof: '2026-02-31' }, src(0), src(-2), src(11.5)]) {
+    const r = floorComparison({ comps, subject_floor: bad });
+    assert.equal(r.applied, false);
+    assert.strictEqual(r.comps, comps);
+    assert.equal(r.sigma_floor, 0);
+    assert.equal(r.reasons.length, 1);
+  }
+});
+
+test('stagedValuation — 층 선별이 실제로 중앙값을 바꾼다: 저층 3건이 섞이면 전체 중앙값이 끌려 내려가지만 대상 층 근처만 쓰면 그렇지 않다', () => {
+  const base = {
+    comps: [
+      { price: 430_000_000, floor: 10, txn_date: '2026-06-01', index_at_txn: null },
+      { price: 430_000_000, floor: 11, txn_date: '2026-06-02', index_at_txn: null },
+      { price: 440_000_000, floor: 12, txn_date: '2026-06-03', index_at_txn: null },
+      { price: 300_000_000, floor: 1, txn_date: '2026-06-04', index_at_txn: null },
+      { price: 300_000_000, floor: 2, txn_date: '2026-06-05', index_at_txn: null },
+      { price: 300_000_000, floor: 1, txn_date: '2026-06-06', index_at_txn: null },
+    ],
+    valuation_date: '2026-09-28', registry: { confirmed: ev() }, model_version: 'staged-v0.2',
+  };
+  const without = stagedValuation(base);
+  const withFloor = stagedValuation({ ...base, subject_floor: src(11) });
+  assert.equal(without.fair_value, 365_000_000);           // 6건 중앙값 (300+430)/2
+  assert.equal(withFloor.fair_value, 430_000_000);         // 10·11·12층 3건 중앙값
+  assert.ok(withFloor.stages.floor.applied);
+  assert.equal(withFloor.stages.floor.n_after, 3);
+  assert.ok(withFloor.reasons.some(r => r.startsWith('층 비교:')));
+  assert.equal(without.stages.floor.applied, false);
+  assert.ok(!without.reasons.some(r => r.startsWith('층 비교:')));   // 하위호환: 층 미제출이면 사유 문장도 안 늘어난다
+  // 대상이 저층이면 반대로 저층 사례만 쓴다
+  const low = stagedValuation({ ...base, subject_floor: src(2) });
+  assert.equal(low.fair_value, 300_000_000);
+});
+
+test('stagedValuation — 층 사례가 부족하면 σ가 정확히 √(σ_개별²+σ_층²) 방식으로만 커진다', () => {
+  const base = {
+    comps: [
+      { price: 100_000_000, floor: 20, txn_date: '2026-06-01', index_at_txn: null },
+      { price: 100_000_000, floor: 21, txn_date: '2026-06-02', index_at_txn: null },
+      { price: 100_000_000, floor: 22, txn_date: '2026-06-03', index_at_txn: null },
+    ],
+    valuation_date: '2026-09-28', registry: { confirmed: ev() }, model_version: 'staged-v0.2',
+  };
+  const a = stagedValuation(base);
+  const b = stagedValuation({ ...base, subject_floor: src(3) });   // 대상 3층 — 근접 사례 0건
+  assert.equal(b.fair_value, a.fair_value);                          // 값은 그대로(전체 사용)
+  const expected = combineSigma([a.stages.national.sigma_national, a.stages.regional.sigma_regional, combineSigma([a.stages.individual.sigma_individual, FLOOR_UNMATCHED_SIGMA])]);
+  near(b.sigma, expected, 1e-12);
+  assert.ok(b.sigma > a.sigma);
+});
+
+test('stagedValuation — 층 비교로 선별 후 등기부 거부 경로에서도 stages.floor가 남는다', () => {
+  const r = stagedValuation({
+    comps: floorComps([[10, 100], [11, 100], [12, 100]]).map(c => ({ ...c, index_at_txn: null })),
+    valuation_date: '2026-09-28', registry: { confirmed: null }, subject_floor: src(11), model_version: 'staged-v0.2',
+  });
+  assert.equal(r.rejected, true);
+  assert.equal(r.stages.floor.applied, true);
+});
+
+test('propertyScopeCheck — property_type 미제출이면 null(가드 안 함), apartment만 지원', () => {
+  assert.equal(propertyScopeCheck(undefined), null);
+  assert.equal(propertyScopeCheck(null), null);
+  assert.equal(propertyScopeCheck('apartment').supported, true);
+  for (const t of ['commercial', 'officetel', 'land', 'detached_house', '', 42, {}]) assert.equal(propertyScopeCheck(t).supported, false);
+  assert.deepEqual([...SUPPORTED_PROPERTY_TYPES], ['apartment']);
+});
+
+test('stagedValuation — 지원하지 않는 물건 유형이면 값을 내지 않고 out_of_scope로 거부한다(등기부 veto 플래그와 구분)', () => {
+  const r = stagedValuation({
+    comps: [{ price: 100_000_000, txn_date: '2026-01-01', index_at_txn: null }],
+    valuation_date: '2026-09-28', registry: { confirmed: ev() }, property_type: 'commercial', model_version: 'staged-v0.2',
+  });
+  assert.equal(r.rejected, true);
+  assert.equal(r.out_of_scope, true);
+  assert.equal(r.fair_value, null);
+  assert.equal(r.sigma, null);
+  assert.equal(r.registry_flags.unknown_senior_claims, false);
+  assert.equal(r.registry_flags.high_severity_legal_issue, false);
+  assert.ok(r.reasons[0].includes('commercial'));
+});
+
+test('stagedValuation — apartment이면 정상 산출, out_of_scope 키는 정상 결과에 없다', () => {
+  const r = stagedValuation({
+    comps: [{ price: 100_000_000, txn_date: '2026-01-01', index_at_txn: null }],
+    valuation_date: '2026-09-28', registry: { confirmed: ev() }, property_type: 'apartment', model_version: 'staged-v0.2',
+  });
+  assert.equal(r.rejected, false);
+  assert.equal(r.out_of_scope, undefined);
+  assert.equal(r.fair_value, 100_000_000);
+});
+
+test('stagedValuation — 물건 유형 가드는 comps 검증보다 먼저다(지원 밖 유형은 comps 형식 오류로 던지지 않는다)', () => {
+  const r = stagedValuation({ comps: [], valuation_date: '2026-09-28', registry: { confirmed: ev() }, property_type: 'land', model_version: 'staged-v0.2' });
+  assert.equal(r.out_of_scope, true);
 });
 
 // ───────────────────────────── 제3자 근저당 → 담보가치만 차감 ─────────────────────────────

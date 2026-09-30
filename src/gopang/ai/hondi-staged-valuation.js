@@ -31,6 +31,17 @@
  *      하자보다 σ 가산치를 더 크게 둔다(INDIVIDUAL_DEFECT_SEVERE_TYPES) — valuation-methodology.md
  *      §3-D의 "차량 진입 가능 여부는 지역요인이 아니라 개별요인" 판단을 반영.
  *
+ * ★ 2026-09-30 추가 — docs/kestate/valuation-methodology.md §6·§9·§10 우선순위 갭 반영:
+ *   ⑥ 층(floor) 비교(floorComparison): 대상 물건의 층과 가까운 비교사례가 충분하면(FLOOR_WINDOW 이내가
+ *      MIN_FLOOR_MATCHED_COMPS건 이상) 그 사례만으로 중앙값을 구한다 — "관측 가능한 값은 중앙값 조정 대상,
+ *      정량화가 애매하면 σ 확대"(§6) 중 앞쪽이다. 층별 가격 프리미엄 계수를 지어내지 않고 비교사례 선별만
+ *      한다(계수 신설은 보정 표본이 없어 불가). 충분한 사례가 없으면 전체를 쓰되 σ를 키운다.
+ *      대상 층은 출처·조회일이 붙은 증거({value, source, asof})여야 채택한다(건축물대장·등기부 등).
+ *   ⑦ 물건 유형 범위 가드: property_type이 제출됐고 SUPPORTED_PROPERTY_TYPES에 없으면(상가·오피스텔·토지·
+ *      단독주택 등) 값을 내지 않고 거부한다(§9 — "억지로 값을 내면 안 된다"). 유형 미제출은 하위호환을 위해
+ *      가드하지 않지만 SP-24a는 항상 제출해야 한다.
+ *   말소기준권리 순위 계산은 법률 검토 선행이라 이번에도 구현하지 않는다(④ 그대로).
+ *
  * 세 단계의 σ는 서로 독립이라 가정하고 분산으로 합친다: σ² = σ_국가² + σ_지역² + σ_개별²
  * (hondi-advance-rate.js의 σ² = σ_pred² + σ_drift² + σ_model² 과 같은 합성 방식).
  * 산출된 fair_value·sigma는 hondi-valuation-tracks.js의 mediationEstimate/lendingEstimate에
@@ -236,6 +247,57 @@ export function regionalAdjustment({ price_level_ratio = null, risk_factors = []
   return Object.freeze({ applied, central_multiplier, sigma_regional, adopted_risk_factors: adopted, rejected_risk_factors: rejected, reasons });
 }
 
+// ───────────────────────────── STEP 2-b: 물건 유형 범위 가드 ─────────────────────────────
+
+// ★ valuation-methodology.md §9 — 지금 안전하게 다룰 수 있는 범위는 "아파트(구분소유 공동주택) 매매"뿐이다.
+export const SUPPORTED_PROPERTY_TYPES = Object.freeze(['apartment']);
+
+/** property_type이 없으면 null(가드하지 않음, 하위호환). 있으면 지원 범위 안인지 판정한다. */
+export function propertyScopeCheck(property_type) {
+  if (property_type == null) return null;
+  const supported = typeof property_type === 'string' && SUPPORTED_PROPERTY_TYPES.includes(property_type);
+  return Object.freeze({
+    supported,
+    reason: supported
+      ? `물건 유형 '${property_type}' — 지원 범위(아파트 매매) 안`
+      : `물건 유형 ${JSON.stringify(property_type)}은(는) 이 평가 범위 밖(현재 아파트 매매만 지원 — 상가·오피스텔·토지·단독주택은 주방식이 달라 값을 내지 않음)`,
+  });
+}
+
+// ───────────────────────────── STEP 3-a: 개별요인 — 층(floor) 비교 ─────────────────────────────
+
+export const FLOOR_WINDOW = 3;                  // ★ 가정, 미보정 — 대상 층과 이 차이 이내인 비교사례를 "비슷한 층"으로 본다
+export const MIN_FLOOR_MATCHED_COMPS = 3;       // ★ 가정, 미보정 — 선별 후에도 남아야 하는 최소 비교사례 수(SP-24a R1과 동일)
+export const FLOOR_UNMATCHED_SIGMA = 0.015;     // ★ 가정, 미보정 — 비슷한 층 사례가 부족해 전체를 쓸 때의 σ 가산치
+
+const isFloor = f => Number.isInteger(f) && f >= 1;
+
+/**
+ * 층 비교: 대상 층과 비슷한 층의 비교사례로 좁힌다(계수 조정 아님 — 사례 선별).
+ * subject_floor: {value(정수 ≥1), source, asof}|null|undefined — 없으면 아무것도 하지 않는다(하위호환).
+ * comps[].floor: 정수 ≥1 — 국토부 실거래 응답의 floor 필드. 없거나 이상하면 그 사례는 층 일치 여부를 확인할 수 없어 선별에서 제외된다.
+ * 반환: { applied, comps(선별 결과 — 미적용이면 원본 그대로), sigma_floor, n_before, n_after, reasons }
+ */
+export function floorComparison({ comps, subject_floor = null }) {
+  const untouched = (reasons = [], sigma_floor = 0) => Object.freeze({
+    applied: false, comps, sigma_floor, n_before: comps.length, n_after: comps.length, reasons,
+  });
+  if (subject_floor == null) return untouched();
+  if (!evidenceOk(subject_floor) || !isFloor(subject_floor.value)) {
+    return untouched([`대상 층 증거가 채택 조건(정수 층수 + 출처·조회일)을 못 채워 층 비교 미적용: ${JSON.stringify(subject_floor?.value ?? null)}`]);
+  }
+  const near = comps.filter(c => isFloor(c.floor) && Math.abs(c.floor - subject_floor.value) <= FLOOR_WINDOW);
+  if (near.length >= MIN_FLOOR_MATCHED_COMPS) {
+    return Object.freeze({
+      applied: true, comps: near, sigma_floor: 0, n_before: comps.length, n_after: near.length,
+      reasons: [`층 비교: 대상 ${subject_floor.value}층(출처: ${subject_floor.source}, 조회일 ${subject_floor.asof}) ±${FLOOR_WINDOW}층 비교사례 ${near.length}/${comps.length}건만 사용`],
+    });
+  }
+  return untouched([
+    `층 비교: 대상 ${subject_floor.value}층 ±${FLOOR_WINDOW}층 비교사례가 ${near.length}건뿐(최소 ${MIN_FLOOR_MATCHED_COMPS}건 필요) → 전체 ${comps.length}건 사용, σ +${FLOOR_UNMATCHED_SIGMA}`,
+  ], FLOOR_UNMATCHED_SIGMA);
+}
+
 // ───────────────────────────── STEP 3: 개별(개별요인 + 권리 차감) ─────────────────────────────
 
 export const INDIVIDUAL_SIGMA_NONE = 0.01;   // ★ 가정, 미보정
@@ -320,32 +382,49 @@ export function individualAdjustment({ registry, defects = [] }) {
  * 순서: 국가(지수보정, 사례별) → 중앙값 → 지역(가격수준비, 배율) → 개별(인수 부담 차감, 금액).
  * 제3자 근저당은 여기서 빼지 않는다 — 대출 트랙 산출 후 deductLienFromCollateral로 별도 처리한다.
  */
-export function stagedValuation({ comps, valuation_index = null, index_series = null, valuation_date, regional = {}, registry, defects = [], model_version }) {
+export function stagedValuation({ comps, valuation_index = null, index_series = null, valuation_date, regional = {}, registry, defects = [], model_version, property_type = null, subject_floor = null }) {
   if (typeof model_version !== 'string' || !model_version) throw new RangeError('model_version이 필요합니다');
-  const national = nationalAdjustment({ comps, valuation_index, index_series, valuation_date });
+
+  // ⑦ 물건 유형 범위 가드 — 지원하지 않는 유형이면 계산 자체를 하지 않는다(valuation-methodology.md §9).
+  const scope = propertyScopeCheck(property_type);
+  if (scope && !scope.supported) {
+    return Object.freeze({
+      model_version, valuation_date, rejected: true, out_of_scope: true, fair_value: null, sigma: null,
+      registry_flags: { unknown_senior_claims: false, high_severity_legal_issue: false },
+      stages: null,
+      reasons: [scope.reason, '평가 범위 밖 물건이라 값을 산출하지 않음(등기부 미확인·법적 쟁점 거부와는 다른 사유 — veto 플래그 없음)'],
+    });
+  }
+
+  // ⑥ 층 비교 — 국가 단계 전에 비교사례를 선별한다(comps 형식 오류는 아래 nationalAdjustment가 그대로 던진다).
+  const floor = Array.isArray(comps) ? floorComparison({ comps, subject_floor }) : null;
+  const national = nationalAdjustment({ comps: floor ? floor.comps : comps, valuation_index, index_series, valuation_date });
   const median_after_national = median(national.adjusted_prices);
   const regionalResult = regionalAdjustment(regional);
   const before_individual = Math.round(median_after_national * regionalResult.central_multiplier);
   const individualResult = individualAdjustment({ registry, defects });
+  const floorReasons = floor ? floor.reasons : [];
 
   if (individualResult.rejected) {
     return Object.freeze({
       model_version, valuation_date, rejected: true, fair_value: null, sigma: null,
       registry_flags: individualResult.registry_flags,
-      stages: { national, regional: regionalResult, individual: individualResult },
-      reasons: [...national.reasons, ...regionalResult.reasons, ...individualResult.reasons, '개별 단계 거부로 전체 가치평가를 산출하지 않음(선지급은 veto 플래그로 별도 차단됨)'],
+      stages: { national, regional: regionalResult, individual: individualResult, floor },
+      reasons: [...floorReasons, ...national.reasons, ...regionalResult.reasons, ...individualResult.reasons, '개별 단계 거부로 전체 가치평가를 산출하지 않음(선지급은 veto 플래그로 별도 차단됨)'],
     });
   }
   const fair_value = Math.max(0, before_individual - individualResult.assumed_burden_deduction);
-  const sigma = combineSigma([national.sigma_national, regionalResult.sigma_regional, individualResult.sigma_individual]);
+  // 층은 개별요인이므로 σ_개별에 합성한다: σ_개별' = √(σ_개별² + σ_층²) — 층 정보가 없으면 σ_층=0이라 기존 결과와 같다.
+  const sigma_individual_total = combineSigma([individualResult.sigma_individual, floor ? floor.sigma_floor : 0]);
+  const sigma = combineSigma([national.sigma_national, regionalResult.sigma_regional, sigma_individual_total]);
   return Object.freeze({
     model_version, valuation_date, rejected: false, fair_value, sigma,
     third_party_lien_total: individualResult.third_party_lien_total,
     registry_flags: individualResult.registry_flags,
-    stages: { national, regional: regionalResult, individual: individualResult },
+    stages: { national, regional: regionalResult, individual: individualResult, floor },
     reasons: [
-      ...national.reasons, ...regionalResult.reasons, ...individualResult.reasons,
-      `종합: 국가 보정 후 중앙값 ${median_after_national.toLocaleString()}원 → 지역 배율 ${regionalResult.central_multiplier.toFixed(4)} → ${before_individual.toLocaleString()}원 → 개별 인수부담 차감 → 공정가치 ${fair_value.toLocaleString()}원, σ=${sigma.toFixed(4)}(=√(σ국가²+σ지역²+σ개별²))`,
+      ...floorReasons, ...national.reasons, ...regionalResult.reasons, ...individualResult.reasons,
+      `종합: 국가 보정 후 중앙값 ${median_after_national.toLocaleString()}원 → 지역 배율 ${regionalResult.central_multiplier.toFixed(4)} → ${before_individual.toLocaleString()}원 → 개별 인수부담 차감 → 공정가치 ${fair_value.toLocaleString()}원, σ=${sigma.toFixed(4)}(=√(σ국가²+σ지역²+σ개별²), 개별에 층 σ 포함)`,
     ],
   });
 }
