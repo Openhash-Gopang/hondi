@@ -9,10 +9,13 @@ const PROMPTS = join(dirname(fileURLToPath(import.meta.url)), '../../prompts');
 const base = readFileSync(DEFAULT_BASE, 'utf8');
 const specs = readdirSync(PROMPTS).filter((f) => /^SP-29[a-z]_kdoctor_.*\.txt$/.test(f));
 
-test('과목 SP 4종이 존재한다', () => {
-  assert.deepEqual(specs.sort(), [
-    'SP-29a_kdoctor_emergency_v0_1.txt', 'SP-29b_kdoctor_internal_v0_1.txt',
-    'SP-29c_kdoctor_pediatrics_v0_1.txt', 'SP-29d_kdoctor_dermatology_v0_1.txt']);
+const REG = JSON.parse(readFileSync(join(PROMPTS, 'kdoctor-specialties.json'), 'utf8'));
+
+test('과목 SP 26종(전문과목 전부)이 레지스트리와 파일로 일치한다', () => {
+  assert.equal(REG.specialties.length, 26);
+  assert.equal(specs.length, 26);
+  assert.deepEqual(REG.specialties.map((s) => s.file).sort(), [...specs].sort());
+  assert.equal(new Set(REG.specialties.map((s) => s.id)).size, 26);
 });
 
 for (const f of specs) {
@@ -27,11 +30,37 @@ for (const f of specs) {
   });
 }
 
-test('총괄 SP가 호출하는 4개 id와 과목 SP의 id가 일치한다', () => {
+test('파일의 id 메타·레지스트리·총괄 SP 목록이 모두 같다', () => {
   const orch = readFileSync(join(PROMPTS, 'SP-29_kdoctor_v0_1.txt'), 'utf8');
-  const ids = specs.map((f) => lintSpecialist(readFileSync(join(PROMPTS, f), 'utf8')).id).sort();
-  assert.deepEqual(ids, ['kdoctor-dermatology', 'kdoctor-emergency', 'kdoctor-internal', 'kdoctor-pediatrics']);
-  for (const id of ids) assert.ok(orch.includes(id), `${id}가 총괄 SP에 없음`);
+  for (const s of REG.specialties) {
+    const meta = lintSpecialist(readFileSync(join(PROMPTS, s.file), 'utf8')).id;
+    assert.equal(meta, s.id, s.file);
+    assert.ok(orch.includes(s.id.replace('kdoctor-', '')), `${s.id}가 총괄 SP에 없음`);
+  }
+});
+
+test('어느 SP에 등장하든 kdoctor-* id는 레지스트리에 있어야 한다(지어낸 id 금지)', () => {
+  const ids = new Set(REG.specialties.map((s) => s.id));
+  for (const f of ['SP-29_kdoctor_v0_1.txt', ...specs]) {
+    const text = readFileSync(join(PROMPTS, f), 'utf8');
+    for (const m of text.matchAll(/kdoctor-([a-z]+(?:-[a-z]+)*)/g)) {
+      if (['kdoctor-specialties'].includes(m[0])) continue;
+      assert.ok(ids.has(m[0]), `${f}: 알 수 없는 id ${m[0]}`);
+    }
+  }
+});
+
+test('보고서 자문 과목 5종은 kind=report_consult, 나머지는 symptom', () => {
+  const rc = REG.specialties.filter((s) => s.kind === 'report_consult').map((s) => s.id).sort();
+  assert.deepEqual(rc, ['kdoctor-laboratory-medicine', 'kdoctor-nuclear-medicine', 'kdoctor-pathology', 'kdoctor-radiation-oncology', 'kdoctor-radiology']);
+});
+
+test('과목 SP에 약물 용량·검사 수치 형태의 숫자 표기가 없다', () => {
+  for (const f of specs) {
+    const text = readFileSync(join(PROMPTS, f), 'utf8');
+    const m = text.match(/\d+(?:\.\d+)?\s?(?:mg|㎎|mcg|µg|mL|ml|IU|mmHg|mmol|mg\/dL)/);
+    assert.equal(m, null, `${f}: ${m && m[0]}`);
+  }
 });
 
 test('lint — 훅이 공통 규칙을 약화하면 거부', () => {

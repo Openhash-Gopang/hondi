@@ -1,0 +1,163 @@
+{
+ "version": "0.1",
+ "base": "SP-29-COMMON_kdoctor_specialist_base_v0_1.txt",
+ "orchestrator": "SP-29_kdoctor_v0_1.txt",
+ "specialties": [
+  {
+   "id": "kdoctor-emergency",
+   "name_ko": "응급의학과",
+   "file": "SP-29a_kdoctor_emergency_v0_1.txt",
+   "kind": "symptom"
+  },
+  {
+   "id": "kdoctor-internal",
+   "name_ko": "내과",
+   "file": "SP-29b_kdoctor_internal_v0_1.txt",
+   "kind": "symptom"
+  },
+  {
+   "id": "kdoctor-pediatrics",
+   "name_ko": "소아청소년과",
+   "file": "SP-29c_kdoctor_pediatrics_v0_1.txt",
+   "kind": "symptom"
+  },
+  {
+   "id": "kdoctor-dermatology",
+   "name_ko": "피부과",
+   "file": "SP-29d_kdoctor_dermatology_v0_1.txt",
+   "kind": "symptom"
+  },
+  {
+   "id": "kdoctor-family",
+   "name_ko": "가정의학과",
+   "file": "SP-29e_kdoctor_family_v0_1.txt",
+   "kind": "symptom"
+  },
+  {
+   "id": "kdoctor-neurology",
+   "name_ko": "신경과",
+   "file": "SP-29f_kdoctor_neurology_v0_1.txt",
+   "kind": "symptom"
+  },
+  {
+   "id": "kdoctor-psychiatry",
+   "name_ko": "정신건강의학과",
+   "file": "SP-29g_kdoctor_psychiatry_v0_1.txt",
+   "kind": "symptom"
+  },
+  {
+   "id": "kdoctor-surgery",
+   "name_ko": "외과",
+   "file": "SP-29h_kdoctor_surgery_v0_1.txt",
+   "kind": "symptom"
+  },
+  {
+   "id": "kdoctor-orthopedics",
+   "name_ko": "정형외과",
+   "file": "SP-29i_kdoctor_orthopedics_v0_1.txt",
+   "kind": "symptom"
+  },
+  {
+   "id": "kdoctor-neurosurgery",
+   "name_ko": "신경외과",
+   "file": "SP-29j_kdoctor_neurosurgery_v0_1.txt",
+   "kind": "symptom"
+  },
+  {
+   "id": "kdoctor-thoracic-surgery",
+   "name_ko": "흉부외과",
+   "file": "SP-29k_kdoctor_thoracic-surgery_v0_1.txt",
+   "kind": "symptom"
+  },
+  {
+   "id": "kdoctor-plastic-surgery",
+   "name_ko": "성형외과",
+   "file": "SP-29l_kdoctor_plastic-surgery_v0_1.txt",
+   "kind": "symptom"
+  },
+  {
+   "id": "kdoctor-anesthesiology-pain",
+   "name_ko": "마취통증의학과",
+   "file": "SP-29m_kdoctor_anesthesiology-pain_v0_1.txt",
+   "kind": "symptom"
+  },
+  {
+   "id": "kdoctor-obstetrics-gynecology",
+   "name_ko": "산부인과",
+   "file": "SP-29n_kdoctor_obstetrics-gynecology_v0_1.txt",
+   "kind": "symptom"
+  },
+  {
+   "id": "kdoctor-ophthalmology",
+   "name_ko": "안과",
+   "file": "SP-29o_kdoctor_ophthalmology_v0_1.txt",
+   "kind": "symptom"
+  },
+  {
+   "id": "kdoctor-ent",
+   "name_ko": "이비인후과",
+   "file": "SP-29p_kdoctor_ent_v0_1.txt",
+   "kind": "symptom"
+  },
+  {
+   "id": "kdoctor-urology",
+   "name_ko": "비뇨의학과",
+   "file": "SP-29q_kdoctor_urology_v0_1.txt",
+   "kind": "symptom"
+  },
+  {
+   "id": "kdoctor-radiology",
+   "name_ko": "영상의학과",
+   "file": "SP-29r_kdoctor_radiology_v0_1.txt",
+   "kind": "report_consult"
+  },
+  {
+   "id": "kdoctor-radiation-oncology",
+   "name_ko": "방사선종양학과",
+   "file": "SP-29s_kdoctor_radiation-oncology_v0_1.txt",
+   "kind": "report_consult"
+  },
+  {
+   "id": "kdoctor-pathology",
+   "name_ko": "병리과",
+   "file": "SP-29t_kdoctor_pathology_v0_1.txt",
+   "kind": "report_consult"
+  },
+  {
+   "id": "kdoctor-laboratory-medicine",
+   "name_ko": "진단검사의학과",
+   "file": "SP-29u_kdoctor_laboratory-medicine_v0_1.txt",
+   "kind": "report_consult"
+  },
+  {
+   "id": "kdoctor-tuberculosis",
+   "name_ko": "결핵과",
+   "file": "SP-29v_kdoctor_tuberculosis_v0_1.txt",
+   "kind": "symptom"
+  },
+  {
+   "id": "kdoctor-rehabilitation",
+   "name_ko": "재활의학과",
+   "file": "SP-29w_kdoctor_rehabilitation_v0_1.txt",
+   "kind": "symptom"
+  },
+  {
+   "id": "kdoctor-nuclear-medicine",
+   "name_ko": "핵의학과",
+   "file": "SP-29x_kdoctor_nuclear-medicine_v0_1.txt",
+   "kind": "report_consult"
+  },
+  {
+   "id": "kdoctor-occupational-environmental",
+   "name_ko": "직업환경의학과",
+   "file": "SP-29y_kdoctor_occupational-environmental_v0_1.txt",
+   "kind": "symptom"
+  },
+  {
+   "id": "kdoctor-preventive-medicine",
+   "name_ko": "예방의학과",
+   "file": "SP-29z_kdoctor_preventive-medicine_v0_1.txt",
+   "kind": "symptom"
+  }
+ ]
+}

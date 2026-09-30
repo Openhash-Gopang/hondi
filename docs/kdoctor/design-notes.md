@@ -13,7 +13,9 @@ K-Estate가 평가 SP 하나인 것과 달리, K-Doctor는 **진료과목별 전
 |---|---|
 | `prompts/SP-29_kdoctor_v0_1.txt` | 총괄: 접수·위험 신호 선별·감별 공방·종합·경과 관찰 |
 | `prompts/SP-29-COMMON_kdoctor_specialist_base_v0_1.txt` | 과목 SP 공통 골격(규칙 C1~C8, 소견 형식) |
-| `prompts/SP-29a_…emergency` / `29b_…internal` / `29c_…pediatrics` / `29d_…dermatology` | 과목 훅(위험 신호·필수 확인·can't-miss·처치 범위) |
+| `prompts/SP-29a` ~ `SP-29z` (`_kdoctor_{과목}_v0_1.txt`) | 전문과목 26개 전부의 과목 훅(위험 신호·필수 확인·can't-miss·처치 범위). 영상의학·방사선종양·병리·진단검사·핵의학은 환자가 제공한 보고서를 설명하는 자문 과목(`kind: report_consult`) |
+| `prompts/kdoctor-specialties.json` | 과목 레지스트리 정본(id·이름·파일·kind). 총괄 SP·과목 SP 안의 `kdoctor-*` id는 전부 여기 있어야 한다(테스트가 검사) |
+| `assets/kdoctor-chat-widget.js` + `kdoctor-chat-core.js` | doctor.hondi.net 상단 진료 상담 창. SP 정본을 hondi.net에서 fetch, `[CONSULT_SPECIALIST]`를 위젯이 대행(턴당 최대 3회), 결과는 검증기로 재계산 후 카드로만 표시, 실패 시 1회 재생성 후 페일세이프 |
 | `prompts/SP-29-IMG_…vision_prompt` | 증상 사진 관찰 전용(진단 금지, 미성년자 은밀 부위 거부) |
 | `src/gopang/ai/hondi-doctor-verdict.js` | 결정론적 검증기(코드가 다시 계산) |
 | `scripts/kdoctor/assemble-specialist.mjs` | 과목 SP 조립·lint |
@@ -63,10 +65,11 @@ K-Estate가 평가 SP 하나인 것과 달리, K-Doctor는 **진료과목별 전
 
 ## 5. 과목 추가 방법 (26개 과목 확장 템플릿)
 
+0. `prompts/kdoctor-specialties.json`에 항목 추가(알파벳이 z를 넘으면 파일명 규칙을 먼저 정할 것).
 1. `prompts/SP-29{알파벳}_kdoctor_{과목}_v0_1.txt` 생성. 머리 메타에 `id: kdoctor-{과목}`, 그 아래 `@@BASE_INCLUDE@@` 한 줄.
 2. `[과목 훅 — 과목명]` 절에 다음을 쓴다: H-1 필수 확인 항목 / H-2 과목별 위험 신호 / H-3 can't-miss 목록 /
    H-4 과목 고유 규칙 / H-5 처치 범위·용량 규칙 / H-6 handoff 기준. 공통 규칙은 약화할 수 없다(lint가 막는다).
-3. 총괄 SP-29 STEP A-2의 "등록된 id" 목록에 추가하고, `tests/doctor/assemble-specialist.test.mjs`의 기대 목록을 갱신.
+3. 총괄 SP-29 STEP A-2의 "등록된 id" 목록에 추가하고, `tests/doctor/assemble-specialist.test.mjs`의 개수 기대값을 갱신.
 4. 전문의 검토를 거치기 전에는 draft 상태를 유지한다.
 5. 내과처럼 넓은 과목은 분과 SP로 쪼갤지 여부를 사용 빈도와 전문의 의견으로 정한다(v0.1은 일반 내과 하나).
 
@@ -79,6 +82,7 @@ K-Estate가 평가 SP 하나인 것과 달리, K-Doctor는 **진료과목별 전
 | 환자 공유 경로 | 의료인 → 환자 결과 전달은 복사 버튼 수준만 계획 | 링크 공유는 만료·접근 제어 설계 후 |
 | 실행 검증 CLI | K-Estate의 격리 실행 검증에 해당하는 K-Doctor 도구가 없다 | 시나리오 세트(흉통·소아 발열·피부 발진 등)로 SP 준수 여부 측정 |
 | 전문의 검토 | 위험 신호 목록·감점 값·과목 훅은 초안이다 | 과목별 전문의 검토 필수. 검토 전 실사용 경로 금지 |
+| 상담 창 운영 | 창은 위젯이 /ai/chat을 직접 호출한다(SP는 gwp-registry·sp-catalog·call-ai에 미등록, 로그인·rate-limit 없음, 실행 미검증). 사진 업로드 미연결. 일반 공개 전에 면허 검증·rate-limit·전문의 검토 필요 | 최종 단계에서 처리 |
 | 이미지 호출 코드 | SP-29-IMG를 호출하는 모듈이 없다 | vision.js 파이프라인에 연결. EXIF GPS는 저장하지 않도록 걸러야 한다 |
 | 개인정보 | 사진의 EXIF GPS·얼굴 등 | 코드 층에서 제거 후 전달 |
 | 사이트 | doctor.hondi.net 페이지(K-Estate 레이아웃) | doctor 저장소에 CNAME·index.html·Pages 활성화 |
