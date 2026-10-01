@@ -59,3 +59,16 @@ test('총괄 출력 한도: 위젯 값이 워커 상한 이하이고, SP-29에 �
   assert.match(sp, /\[출력 분량과 형식 — 간결 원칙/);
   assert.match(sp, /금지 표현은 어디에도 쓰지 않는다/);
 });
+
+test('findForbiddenWords: 걸린 단어를 찾아 재생성 요청에 알려 준다', async () => {
+  const { findForbiddenWords, runTurn } = await import('../../assets/kdoctor-chat-core.js');
+  assert.deepEqual(findForbiddenWords({ a: 'AF 확진 전 참고', b: ['퇴원', '확진'] }).sort(), ['퇴원', '확진'].sort());
+  assert.deepEqual(findForbiddenWords({ a: '확인 필요' }), []);
+  // 재생성 요청 문구에 단어가 실리는지
+  const calls = [];
+  const bad = '[DIAGNOSIS_REPORT]{"x":"확진 전"}[/DIAGNOSIS_REPORT]';
+  const deps = { orchestratorSP: 'SP', registry: { specialties: [] }, loadSpecialist: async () => '', audienceView: () => ({}),
+    callLLM: async (s, m) => { calls.push(m.at(-1).content); return bad; }, validate: () => ({ ok: false, errors: ['forbidden_issuance_wording'] }) };
+  await runTurn([], '증상', deps);
+  assert.ok(calls.length >= 2 && calls.at(-1).includes('발견된 금지 표현: 확진'));
+});

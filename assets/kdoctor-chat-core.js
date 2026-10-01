@@ -179,6 +179,14 @@ export function renderReportHtml(view, validated) {
  * }
  * @returns {{ history, view: {type:'text'|'report'|'failsafe', text?, html?, consults:[{id,ok}]} }}
  */
+/** 검증기(hondi-doctor-verdict.js)의 금지 표현과 같은 목록. 재생성 요청에 "어느 단어가 걸렸는지"를 알려 주려는 용도(검증은 여전히 검증기가 한다). */
+const FORBIDDEN_WORDS_RE = /(진단서|처방전|소견서|진료확인서|확진|퇴원|완치\s*판정)/g;
+export function findForbiddenWords(report) {
+  let text = '';
+  try { text = JSON.stringify(report) ?? ''; } catch { text = ''; }
+  return [...new Set((text.match(FORBIDDEN_WORDS_RE) ?? []).map((w) => w.replace(/\s+/g, ' ')))];
+}
+
 export async function runTurn(history, userText, deps) {
   const registry = new Map((deps.registry?.specialties ?? []).map((s) => [s.id, s]));
   const work = [...history, { role: 'user', content: userText }];
@@ -245,8 +253,10 @@ export async function runTurn(history, userText, deps) {
   let validated = ex.report ? deps.validate(ex.report, deps.audience) : null;
   for (let retry = 0; retry < MAX_RETRY_ON_INVALID && (!validated || !validated.ok); retry++) {
     const why = !ex.report ? ex.error : validated.errors.join(', ');
+    const found = ex.report ? findForbiddenWords(ex.report) : [];
+    const hint = found.length ? ` 보고서에서 발견된 금지 표현: ${found.join(', ')} — 뜻이 같은 허용 표현으로 바꿔라(예: "확진"→"확인"·"판정"·"확정 검사", "퇴원"→"경과 관찰 종료").` : '';
     work.push({ role: 'assistant', content: reply });
-    work.push({ role: 'user', content: `[시스템] 결과 검증 실패(${why}). 부록 A 형식과 강제규칙을 지켜 고친 [DIAGNOSIS_REPORT]만 다시 내라(정정 내역·설명 없이). 발급 문서 명칭이나 확정 진단·퇴원·완치 판정 표현은 부정문이나 점검 문구로도 적지 말고, 복귀 기준(return_if)을 포함하라.` });
+    work.push({ role: 'user', content: `[시스템] 결과 검증 실패(${why}). 부록 A 형식과 강제규칙을 지켜 고친 [DIAGNOSIS_REPORT]만 다시 내라(정정 내역·설명 없이). 발급 문서 명칭이나 확정 진단·퇴원·완치 판정 표현은 부정문이나 점검 문구로도 적지 말고, 복귀 기준(return_if)을 포함하라.${hint}` });
     reply = await deps.callLLM(deps.orchestratorSP, work, ORCHESTRATOR_MAX_TOKENS);
     ex = extractReport(reply);
     validated = ex.report ? deps.validate(ex.report, deps.audience) : null;
