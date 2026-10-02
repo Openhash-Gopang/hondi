@@ -72,3 +72,33 @@ test('findForbiddenWords: 걸린 단어를 찾아 재생성 요청에 알려 준
   await runTurn([], '증상', deps);
   assert.ok(calls.length >= 2 && calls.at(-1).includes('발견된 금지 표현: 확진'));
 });
+
+test('isEmergencyTriage·sanitizeConsultText·retryHints', async () => {
+  const m = await import('../../assets/kdoctor-chat-core.js');
+  assert.equal(m.isEmergencyTriage('[STEP-T-COMPLETE | 점검 | 확인 신호 R3 | 분류 emergency → STEMI]'), true);
+  assert.equal(m.isEmergencyTriage('[STEP-T-COMPLETE | 점검 | 분류 **emergency**]'), true);
+  assert.equal(m.isEmergencyTriage('[STEP-T-COMPLETE | 분류=emergency]'), true);
+  assert.equal(m.isEmergencyTriage('[STEP-T-COMPLETE | 분류 urgent — emergency는 아님]'), false);
+  assert.equal(m.isEmergencyTriage('일반 문장 emergency'), false);
+  assert.equal(m.sanitizeConsultText('확진 전·확진 후 격리, 퇴원 기준, 진단서 발급'), '확정 진단 전·확정 진단 후 격리, 퇴실 기준, 진단 문서 발급');
+  assert.match(m.retryHints(['primary_not_in_hypotheses']), /hypotheses\[\]\.name/);
+  assert.equal(m.retryHints(['unknown']), '');
+});
+
+test('runTurn: emergency 분류 응답의 협진 태그는 호출하지 않고 emergency 보고서를 요청한다', async () => {
+  const { runTurn } = await import('../../assets/kdoctor-chat-core.js');
+  const sent = []; let specialistCalls = 0;
+  const first = '[STEP-T-COMPLETE | R3 | 분류 emergency]\n[CONSULT_SPECIALIST: id=kdoctor-cardiology, question=q]';
+  const second = '지금 바로 119에 연락하십시오.';
+  let n = 0;
+  const deps = { orchestratorSP: 'SP', registry: { specialties: [{ id: 'kdoctor-cardiology', name_ko: '순환기내과' }] },
+    loadSpecialist: async () => { specialistCalls++; return 'S'; }, audienceView: () => ({}),
+    callLLM: async (s, m) => { sent.push(m.at(-1).content); return s === 'SP' ? (n++ === 0 ? first : second) : 'x'; },
+    validate: () => ({ ok: true, errors: [], kind: 'emergency_referral' }) };
+  const out = await runTurn([], '흉통', deps);
+  assert.equal(specialistCalls, 0);
+  assert.ok(sent.some((x) => String(x).includes('협진을 호출하지 않았다')));
+  assert.equal(out.view.consults.length, 1);
+  assert.equal(out.view.consults[0].skipped, 'emergency');
+  assert.match(out.view.text, /119/);
+});
