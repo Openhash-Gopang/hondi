@@ -214,3 +214,20 @@ test('검수 파일럿: 구조(결함 10·정상 3)와 채점', async () => {
   assert.equal(scoreCheck({ kind: 'clean', expected_modules: [] }, { verdict: null, findings: [] }).status, 'UNPARSED');
   assert.equal(summarizePilot([{ kind: 'clean', score: { status: 'CLEAN-OK' } }]).clean.ok, 1);
 });
+
+test('caseDetail·build_doctor_rounds: 사건 상세와 manifest 갱신', async () => {
+  const { caseDetail } = await import('../live_smoketest/kdoctor_consult_live_smoketest.mjs');
+  const { buildSlim, csvOf, updateManifest } = await import('../live_smoketest/build_doctor_rounds.mjs');
+  const rec = { id: 'x1', group: 'doctor', utterance: '순환기 자문 "부탁"', expect_consult: true, expect_ids: ['kdoctor-cardiology'], accept_ids: [], called_ids: ['kdoctor-cardiology', 'kdoctor-cardiology'],
+    consult_questions: [{ id: 'kdoctor-cardiology', question: 'q' }], view_type: 'report', validated_ok: true, turns: 1, ms: 5, score: { status: 'LIVE-PASS', reason: 'consulted_and_reported', match: 'primary' },
+    orchestrator_replies: ['앞', '[DIAGNOSIS_REPORT]\n{"k":1}\n[/DIAGNOSIS_REPORT]'], reviews: [{ status: 'done', verdict: '재검토 불요', check_text: 'T' }],
+    artifacts: { consult_texts: ['[CONSULT_SPECIALIST 결과 — 순환기내과]\n소견'], check: 'CHK', reconcile: null, final_report: '[DIAGNOSIS_REPORT]{"k":2}[/DIAGNOSIS_REPORT]' } };
+  const d = caseDetail(rec, 6);
+  assert.deepEqual(d.called, ['cardiology']); assert.deepEqual(d.report, { k: 1 }); assert.deepEqual(d.final_report, { k: 2 });
+  assert.equal(d.check, 'CHK'); assert.equal(d.reviews[0].check_text, undefined);
+  const s = buildSlim(rec, d);
+  assert.equal(s.art.consults, true); assert.equal(s.art.check, true); assert.equal(s.art.reconcile, false); assert.equal(s.art.final, true);
+  assert.match(csvOf([s]), /"순환기 자문 ""부탁"""/);
+  const man = updateManifest({ rounds: [{ round: 5 }, { round: 6, old: 1 }], pending: [{ round: 6 }, { round: 0 }] }, { round: 6, label: 'R6' });
+  assert.deepEqual(man.rounds.map((r) => r.round), [5, 6]); assert.equal(man.rounds[1].old, undefined); assert.deepEqual(man.pending, [{ round: 0 }]);
+});
