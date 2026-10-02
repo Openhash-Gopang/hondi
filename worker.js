@@ -12322,7 +12322,7 @@ async function _sweepBridgeOutbox(env) {
 
 // 2026-07-18 신설 — 테스트 목적 named export. 런타임 동작에는 영향 없음
 // (default export의 fetch 핸들러는 그대로 pathname 매칭으로 호출).
-export { handleGdcDepositClose, handleGdcDaoProposalCreate, handleGdcDaoVote, handleGdcDaoProposalsList, handleFeeRate, handleInsClaimCreate, handleInsClaimsList, handleVerifyAdmin, _natAgencyExtractName, _parseInstanceEnrichTag };
+export { handleGdcTestLoanApply, _gdcCheckLoanLimits, handleGdcDepositClose, handleGdcDaoProposalCreate, handleGdcDaoVote, handleGdcDaoProposalsList, handleFeeRate, handleInsClaimCreate, handleInsClaimsList, handleVerifyAdmin, _natAgencyExtractName, _parseInstanceEnrichTag };
 
 // ═══════════════════════════════════════════════════════════
 // K-TRAFFIC / K-LOGISTICS 실매칭 백엔드 (2026-07-26 신설)
@@ -15823,6 +15823,54 @@ function _gdcEvaluateCreditServer(bsCash, fs) {
            ratios: { liquidity, debtRatio, operatingMargin, cashFlowRatio } };
 }
 
+// ═══════════════════════════════════════════════════════════
+// 2026-10-03 신설 — GDC 필드테스트 대출 한도 (gdc 저장소
+// library/labs/method/limits_v0_1.md 명세와 js/gdc-limits.js 기준 구현의
+// 서버측 이식). 값과 검사 순서는 그 명세와 반드시 같아야 한다 — 같은
+// 시나리오 파일(test/fixtures/gdc_loan_limit_scenarios.json)로 양쪽을
+// 대조한다. 값 대부분이 근거가 약한 GDC 설계값이다(명세 §1~§2).
+// 검사 순서: 금액 유효성 -> 1건 상한 -> 잔액 합계 -> 순자산 비율 -> 소득 -> DSR.
+// ═══════════════════════════════════════════════════════════
+const GDC_TEST_LIMITS = Object.freeze({
+  loanPerLoan: 3000,          // 대출 1건 원금 상한(₮)
+  loanOutstandingTotal: 5000, // 미상환 원금 + 신규 원금 합계 상한(₮)
+  loanEquityRatio: 0.7,       // 원금 <= 순자산 x 0.7
+  dsrCap: 0.40,               // 연 원리금 상환액 / 연 소득
+  stressSpread: 0.015,        // DSR 계산용 가산금리
+  assumedTermMonths: 12,      // gdc_test_loans에 만기 필드가 없어 가정하는 만기
+});
+
+function _gdcMonthlyPayment(principal, annualRate, n) {
+  const r = annualRate / 12;
+  if (r === 0) return principal / n;
+  return (principal * r) / (1 - Math.pow(1 + r, -n));
+}
+
+function _gdcCheckLoanLimits({ principal, outstanding = 0, annualRate, annualIncome, equity,
+                               existingAnnualDebtService = 0, termMonths = GDC_TEST_LIMITS.assumedTermMonths }) {
+  const fail = (code, detail) => ({ ok: false, code, detail });
+  if (typeof principal !== 'number' || !Number.isFinite(principal) || principal <= 0) {
+    return fail('AMOUNT_INVALID', '대출 원금은 0보다 큰 유한한 숫자여야 합니다.');
+  }
+  if (principal > GDC_TEST_LIMITS.loanPerLoan) {
+    return fail('LOAN_PER_LIMIT', `1건 한도 ₮${GDC_TEST_LIMITS.loanPerLoan} 초과`);
+  }
+  if (outstanding + principal > GDC_TEST_LIMITS.loanOutstandingTotal) {
+    return fail('LOAN_TOTAL_LIMIT', `잔액 합계 한도 ₮${GDC_TEST_LIMITS.loanOutstandingTotal} 초과 (미상환 ₮${outstanding})`);
+  }
+  const equityCap = Math.max(0, equity || 0) * GDC_TEST_LIMITS.loanEquityRatio;
+  if (principal > equityCap) {
+    return fail('LOAN_EQUITY_LIMIT', `순자산의 ${GDC_TEST_LIMITS.loanEquityRatio * 100}% (₮${equityCap}) 초과`);
+  }
+  if (!(annualIncome > 0)) return fail('NO_INCOME', '소득(영업이익)이 0 이하여서 DSR을 계산할 수 없습니다.');
+  const annualService = _gdcMonthlyPayment(principal, annualRate + GDC_TEST_LIMITS.stressSpread, termMonths) * 12;
+  const dsr = (existingAnnualDebtService + annualService) / annualIncome;
+  if (dsr > GDC_TEST_LIMITS.dsrCap) {
+    return { ok: false, code: 'DSR_EXCEEDED', detail: `DSR ${(dsr * 100).toFixed(1)}% > ${GDC_TEST_LIMITS.dsrCap * 100}%`, dsr };
+  }
+  return { ok: true, code: 'OK', dsr };
+}
+
 async function _gdcFindTestFsByGuid(env, userGuid) {
   const token = await _l1AdminToken(env);
   const filter = encodeURIComponent(`user_guid='${String(userGuid).replace(/'/g, "\\'")}'`);
@@ -15903,7 +15951,10 @@ async function handleGdcTestLoanApply(request, env, corsHeaders) {
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
   const { user_guid, principal, pubkey, signature, ts } = body;
   if (!user_guid) return _err(400, 'MISSING_FIELD', 'user_guid 필수', corsHeaders);
-  if (!(principal > 0)) return _err(400, 'INVALID_AMOUNT', 'principal은 0보다 커야 합니다', corsHeaders);
+  // 2026-10-03: 문자열 숫자("100")와 Infinity가 `> 0` 비교를 통과하던 것을 막는다(한도 명세 §4).
+  if (typeof principal !== 'number' || !Number.isFinite(principal) || principal <= 0) {
+    return _err(400, 'INVALID_AMOUNT', 'principal은 0보다 큰 유한한 숫자여야 합니다', corsHeaders);
+  }
 
   const authOk = await _verifyClaimsRequester(env, {
     guid: user_guid, pubkey, signature, ts,
@@ -15923,6 +15974,38 @@ async function handleGdcTestLoanApply(request, env, corsHeaders) {
   const balData = await balRes.json().catch(() => ({ balance: 0 }));
   const bsCash = Number(balData.balance) || 0;
   const credit = _gdcEvaluateCreditServer(bsCash, fs);
+
+  // ── 2026-10-03 신설 — 대출 한도 검사 (지급 블록을 만들기 전에 수행) ──────
+  // 기존 활성 대출을 조회할 수 없으면 한도를 검사할 수 없으므로 대출을 거절한다(fail-closed).
+  let activeLoans;
+  try {
+    const lf = encodeURIComponent(`user_guid='${String(user_guid).replace(/'/g, "\\'")}'&&status='active'`);
+    const lres = await fetch(`${L1_DEFAULT}/api/collections/gdc_test_loans/records?filter=${lf}&perPage=200`, { headers });
+    if (!lres.ok) {
+      return _err(502, 'L1_UNREACHABLE', '기존 대출을 조회하지 못해 한도 검사를 할 수 없습니다(대출을 거절합니다)', corsHeaders);
+    }
+    const ldata = await lres.json().catch(() => null);
+    if (!ldata || !Array.isArray(ldata.items) || (typeof ldata.totalItems === 'number' && ldata.totalItems > ldata.items.length)) {
+      return _err(502, 'LOAN_LIST_INCOMPLETE', '기존 대출 목록이 불완전해 한도 검사를 할 수 없습니다(대출을 거절합니다)', corsHeaders);
+    }
+    activeLoans = ldata.items;
+  } catch (e) {
+    return _err(502, 'L1_UNREACHABLE', '기존 대출 조회 실패(대출을 거절합니다): ' + e.message, corsHeaders);
+  }
+  const outstandingTotal = activeLoans.reduce((s, l) => s + (Number(l.outstanding_principal) || 0), 0);
+  // 기존 대출의 상환 일정이 없어, 미상환 원금을 같은 가정(만기 12개월, 등급 금리 + 가산금리)으로 환산한다.
+  const existingAnnualDebtService = activeLoans.reduce((s, l) =>
+    s + _gdcMonthlyPayment(Number(l.outstanding_principal) || 0,
+        (Number(l.annual_rate) || 0) + GDC_TEST_LIMITS.stressSpread, GDC_TEST_LIMITS.assumedTermMonths) * 12, 0);
+  const annualIncome = (Number(fs.pl_revenue) || 0) - (Number(fs.pl_cogs) || 0) - (Number(fs.pl_opex) || 0);
+  const limitCheck = _gdcCheckLoanLimits({
+    principal, outstanding: outstandingTotal, annualRate: credit.annualRate, annualIncome,
+    equity: Number(fs.bs_equity) || 0, existingAnnualDebtService,
+  });
+  if (!limitCheck.ok) {
+    console.warn(`[GDC Test Loan] 한도 거부 ${limitCheck.code} user=${String(user_guid).slice(0, 8)} principal=${principal}`);
+    return _err(409, limitCheck.code, limitCheck.detail, corsHeaders);
+  }
 
   // 지급 블록 생성 — vault → user (mint/deposit-close와 동일 패턴,
   // vault는 실제 개인키가 없는 시스템 계정이라 관리자 권한으로 직접 생성).
@@ -15966,6 +16049,7 @@ async function handleGdcTestLoanApply(request, env, corsHeaders) {
   return new Response(JSON.stringify({
     ok: true, loan_id: loanRow?.id, tx_hash: contentHash,
     grade: credit.grade, annual_rate: credit.annualRate, credit_snapshot: credit,
+    dsr: limitCheck.dsr,
   }), { status: 200, headers: corsHeaders });
 }
 

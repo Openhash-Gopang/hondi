@@ -1,0 +1,207 @@
+{
+  "_source": "Openhash-Gopang/gdc library/labs/rounds/r01/scenarios.json 의 loan_limit 시나리오 (kind=loan_limit) — gdc 저장소의 한도 명세·기준 구현과 이 서버 구현이 같은 결과를 내는지 대조하는 회귀 기준. 명세가 바뀌면 양쪽을 함께 갱신한다.",
+  "scenarios": [
+    {
+      "id": "loan-001",
+      "kind": "loan_limit",
+      "product": "loan",
+      "moves_balance": true,
+      "note": "정상 — 등급 A(1.5%), 소득 5000",
+      "inputs": {
+        "principal": 1000,
+        "outstanding": 0,
+        "annualRate": 0.015,
+        "annualIncome": 5000,
+        "equity": 5000
+      },
+      "expected": {
+        "ok": true,
+        "code": "OK",
+        "dsr": 0.2033
+      }
+    },
+    {
+      "id": "loan-002",
+      "kind": "loan_limit",
+      "product": "loan",
+      "moves_balance": true,
+      "note": "1건 상한 +1",
+      "inputs": {
+        "principal": 3001,
+        "outstanding": 0,
+        "annualRate": 0.015,
+        "annualIncome": 100000,
+        "equity": 10000
+      },
+      "expected": {
+        "ok": false,
+        "code": "LOAN_PER_LIMIT"
+      }
+    },
+    {
+      "id": "loan-003",
+      "kind": "loan_limit",
+      "product": "loan",
+      "moves_balance": true,
+      "note": "잔액 합계 5001",
+      "inputs": {
+        "principal": 2000,
+        "outstanding": 3001,
+        "annualRate": 0.015,
+        "annualIncome": 100000,
+        "equity": 10000
+      },
+      "expected": {
+        "ok": false,
+        "code": "LOAN_TOTAL_LIMIT"
+      }
+    },
+    {
+      "id": "loan-004",
+      "kind": "loan_limit",
+      "product": "loan",
+      "moves_balance": true,
+      "note": "순자산 2000의 70% = 1400 < 2000",
+      "inputs": {
+        "principal": 2000,
+        "outstanding": 0,
+        "annualRate": 0.015,
+        "annualIncome": 100000,
+        "equity": 2000
+      },
+      "expected": {
+        "ok": false,
+        "code": "LOAN_EQUITY_LIMIT"
+      }
+    },
+    {
+      "id": "loan-005",
+      "kind": "loan_limit",
+      "product": "loan",
+      "moves_balance": true,
+      "note": "DSR 초과 — 등급 C(5%)+가산 1.5%p, 소득 2000",
+      "inputs": {
+        "principal": 3000,
+        "outstanding": 0,
+        "annualRate": 0.05,
+        "annualIncome": 2000,
+        "equity": 10000
+      },
+      "expected": {
+        "ok": false,
+        "code": "DSR_EXCEEDED",
+        "dsr": 1.5533
+      }
+    },
+    {
+      "id": "loan-006",
+      "kind": "loan_limit",
+      "product": "loan",
+      "moves_balance": true,
+      "note": "소득 0",
+      "inputs": {
+        "principal": 1000,
+        "outstanding": 0,
+        "annualRate": 0.015,
+        "annualIncome": 0,
+        "equity": 5000
+      },
+      "expected": {
+        "ok": false,
+        "code": "NO_INCOME"
+      }
+    },
+    {
+      "id": "loan-007",
+      "kind": "loan_limit",
+      "product": "loan",
+      "moves_balance": true,
+      "note": "DSR 40% 직전 — 소득 7600(DSR 39.9%)",
+      "inputs": {
+        "principal": 3000,
+        "outstanding": 0,
+        "annualRate": 0.005,
+        "annualIncome": 7600,
+        "equity": 10000
+      },
+      "expected": {
+        "ok": true,
+        "code": "OK",
+        "dsr": 0.399
+      }
+    },
+    {
+      "id": "loan-008",
+      "kind": "loan_limit",
+      "product": "loan",
+      "moves_balance": true,
+      "note": "DSR 40% 직후 — 소득 7500(DSR 40.4%)",
+      "inputs": {
+        "principal": 3000,
+        "outstanding": 0,
+        "annualRate": 0.005,
+        "annualIncome": 7500,
+        "equity": 10000
+      },
+      "expected": {
+        "ok": false,
+        "code": "DSR_EXCEEDED",
+        "dsr": 0.4043
+      }
+    },
+    {
+      "id": "loan-009",
+      "kind": "loan_limit",
+      "product": "loan",
+      "moves_balance": true,
+      "note": "원금 0",
+      "inputs": {
+        "principal": 0,
+        "outstanding": 0,
+        "annualRate": 0.015,
+        "annualIncome": 5000,
+        "equity": 5000
+      },
+      "expected": {
+        "ok": false,
+        "code": "AMOUNT_INVALID"
+      }
+    },
+    {
+      "id": "loan-010",
+      "kind": "loan_limit",
+      "product": "loan",
+      "moves_balance": true,
+      "note": "순자산 0",
+      "inputs": {
+        "principal": 1000,
+        "outstanding": 0,
+        "annualRate": 0.015,
+        "annualIncome": 5000,
+        "equity": 0
+      },
+      "expected": {
+        "ok": false,
+        "code": "LOAN_EQUITY_LIMIT"
+      }
+    },
+    {
+      "id": "loan-011",
+      "kind": "loan_limit",
+      "product": "loan",
+      "moves_balance": true,
+      "note": "1건 상한 3000과 합계 상한 5000 정확히 — 통과(경계 포함), 소득 충분",
+      "inputs": {
+        "principal": 3000,
+        "outstanding": 2000,
+        "annualRate": 0.015,
+        "annualIncome": 100000,
+        "equity": 10000
+      },
+      "expected": {
+        "ok": true,
+        "code": "OK"
+      }
+    }
+  ]
+}
