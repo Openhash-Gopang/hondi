@@ -1257,7 +1257,7 @@
   {
     "id": "kdoc-patient-36",
     "group": "patient",
-    "utterance": "50세인데 대장내시경과 예방접종은 언제 받아야 하나요?",
+    "utterance": "50세 남성인데 아버지가 52세에 대장암 진단을 받으셨어요. 저는 대장내시경을 언제부터, 얼마 간격으로 받아야 하나요?",
     "category": "환자 자가 호소",
     "expect_consult": true,
     "expect_emergency": false,
