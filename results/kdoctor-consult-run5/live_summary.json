@@ -1,0 +1,96 @@
+{
+  "total": {
+    "n": 100,
+    "pass": 88,
+    "fail": 12,
+    "error": 0,
+    "pass_rate": 0.88
+  },
+  "by_group": {
+    "doctor": {
+      "n": 50,
+      "pass": 49,
+      "fail": 1,
+      "error": 0,
+      "pass_rate": 0.98
+    },
+    "patient": {
+      "n": 50,
+      "pass": 39,
+      "fail": 11,
+      "error": 0,
+      "pass_rate": 0.78
+    }
+  },
+  "by_kind": {
+    "consult": {
+      "n": 88,
+      "pass": 77,
+      "fail": 11,
+      "error": 0,
+      "pass_rate": 0.875
+    },
+    "emergency": {
+      "n": 12,
+      "pass": 11,
+      "fail": 1,
+      "error": 0,
+      "pass_rate": 0.917
+    }
+  },
+  "by_group_kind": {
+    "doctor/consult": {
+      "n": 44,
+      "pass": 43,
+      "fail": 1,
+      "error": 0,
+      "pass_rate": 0.977
+    },
+    "doctor/emergency": {
+      "n": 6,
+      "pass": 6,
+      "fail": 0,
+      "error": 0,
+      "pass_rate": 1
+    },
+    "patient/consult": {
+      "n": 44,
+      "pass": 34,
+      "fail": 10,
+      "error": 0,
+      "pass_rate": 0.773
+    },
+    "patient/emergency": {
+      "n": 6,
+      "pass": 5,
+      "fail": 1,
+      "error": 0,
+      "pass_rate": 0.833
+    }
+  },
+  "fail_reasons": {
+    "no_consult": 9,
+    "no_report": 1,
+    "no_report_no_tag": 1,
+    "consult_in_emergency": 1
+  },
+  "accept_only_pass": [
+    "kdoc-doctor-23",
+    "kdoc-doctor-41",
+    "kdoc-patient-25",
+    "kdoc-patient-27",
+    "kdoc-patient-40"
+  ],
+  "avg_consults_per_case": 1.66,
+  "truncated_orchestrator_calls": 0,
+  "orchestrator_calls_total": 244,
+  "avg_ms": 42861,
+  "meta": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "orch_max_tokens": "widget-default(3500)",
+    "sp_hash": "cb852779b0c0",
+    "scenarios": "scenarios_kdoctor_consult_100_20261001.json",
+    "finished": "2026-10-02T06:58:46.129Z"
+  }
+}
