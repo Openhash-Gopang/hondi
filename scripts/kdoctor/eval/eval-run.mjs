@@ -217,6 +217,7 @@ export async function runCase(c, o) {
   let turnValidated = null;
   const deps = {
     orchestratorSP: orchSP, registry, loadSpecialist: resources.loadSpecialist, audience: undefined, audienceView, pdvState, requestPdv,
+    consultGate: false, // 평가 기준선 유지: 협진 게이트(2026-10-03)는 라이브 스모크가 측정한다
     callLLM: async (system, messages, max) => {
       rec.n_llm_calls++;
       const out = await llm(system, messages, max, 'doctor');

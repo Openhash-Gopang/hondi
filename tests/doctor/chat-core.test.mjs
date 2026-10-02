@@ -34,9 +34,9 @@ const mkDeps = (replies, extra = {}) => {
   return {
     calls,
     deps: {
-      callLLM: async (system, messages) => { calls.push({ system, messages }); const r = replies[Math.min(i++, replies.length - 1)]; return typeof r === 'function' ? r(system, messages) : r; },
+      callLLM: async (system, messages) => { calls.push({ system, messages: messages.slice() }); const r = replies[Math.min(i++, replies.length - 1)]; return typeof r === 'function' ? r(system, messages) : r; },
       orchestratorSP: 'ORCH', registry: REG,
-      loadSpecialist: async (id) => 'SPEC:' + id, validate: validateDiagnosis, audienceView, audience: undefined, ...extra,
+      loadSpecialist: async (id) => 'SPEC:' + id, validate: validateDiagnosis, audienceView, audience: undefined, consultGate: false, ...extra,
     },
   };
 };
@@ -201,4 +201,77 @@ test('doctor 전용 DeepSeek 키 배선: worker.js가 doctor Origin에만 DEEPSE
   assert.ok(y.includes('DEEPSEEK_DOCTOR_KEY: ${{ secrets.DEEPSEEK_DOCTOR_KEY }}'));
   assert.ok(/secrets: \|\n\s+DEEPSEEK_DOCTOR_KEY/.test(y));
   assert.ok(!/DEEPSEEK_DOCTOR_KEY\s*[:=]\s*['"]?sk-/.test(w + y), '키 값이 코드에 들어가면 안 됨');
+});
+
+// ─────────────── 2026-10-03: R5 환자 증례 분석에서 나온 보정 ───────────────
+
+test('extractReport 관용: 태그 오타·`**`+코드펜스·여는 태그 누락·닫힘 누락(R5 patient-02·41)', () => {
+  const j = JSON.stringify(goodReport());
+  assert.equal(extractReport(`[DIGNOSIS_REPORT]\n${j}\n[/DIAGNOSIS_REPORT]`).report.case_id, 'C1');
+  assert.equal(extractReport(`[DIAGNOSIS_REPORT]**\n\`\`\`json\n${j}\n\`\`\` [/DIAGNOSIS_REPORT]`).report.case_id, 'C1');
+  assert.equal(extractReport(`앞 설명\n\`\`\`json\n${j}\n\`\`\`\n[/DIAGNOSIS_REPORT]`).report.case_id, 'C1');
+  assert.equal(extractReport(`[DIAGNOSIS_REPORT]\n${j}`).report.case_id, 'C1');            // 닫힘 누락, JSON은 온전
+  assert.equal(extractReport(`[DIAGNOSIS_REPORT]\n${j.slice(0, 120)}`).found, false);      // 닫힘 누락 + 잘림 → 보고서 없음
+  assert.equal(extractReport('[DIAGNOSIS_REPORT]\n{"a":1}\n[/DIAGNOSIS_REPORT]').report.a, 1);
+  // PDV 제안 같은 다른 JSON은 보고서로 오인하지 않는다
+  assert.equal(extractReport('[PDV_UPDATE_PROPOSAL] [{"field":"x","value":[]}] [/PDV_UPDATE_PROPOSAL]').found, false);
+});
+
+test('stripInternal: 오타 태그·닫힘 없는 보고서도 이용자에게 보이지 않는다', () => {
+  const j = JSON.stringify(goodReport());
+  assert.ok(!stripInternal(`안내\n[DIGNOSIS_REPORT]${j}[/DIGNOSIS_REPORT]`).includes('model_version'));
+  const t = stripInternal(`안내\n[DIAGNOSIS_REPORT]\n${j.slice(0, 100)}`);
+  assert.ok(!t.includes('model_version') && t.includes('안내'));
+});
+
+test('consultGateMessage: 협진 없는 첫 보고서·서술뿐인 호출만 걸러낸다', async () => {
+  const { consultGateMessage, claimsCallWithoutTag } = await import('../../assets/kdoctor-chat-core.js');
+  const rep = wrap(goodReport());
+  assert.match(consultGateMessage(rep, {}), /협진 없이/);
+  const narrated = '[STEP-A-2-COMPLETE | 배정 과목 pediatric-cardiology | 호출: 1회 — "3개월 영아 ..." | 통합 대기]';
+  assert.equal(claimsCallWithoutTag(narrated), true);
+  assert.match(consultGateMessage(narrated, {}), /서술만으로는 호출되지 않는다/);
+  assert.equal(claimsCallWithoutTag(narrated + '[CONSULT_SPECIALIST: id=kdoctor-pediatrics, question=q]'), false);
+  assert.equal(consultGateMessage(rep + '[CONSULT_SPECIALIST: id=kdoctor-internal, question=q]', {}), null);   // 이미 호출 태그가 있다
+  assert.equal(consultGateMessage(rep, { consultLog: [{ id: 'kdoctor-internal', ok: true }] }), null);          // 이 턴에 협진했다
+  assert.equal(consultGateMessage('몇 가지만 여쭙겠습니다. 언제부터 아프셨나요?', {}), null);                    // 되묻기는 그대로
+  assert.equal(consultGateMessage('[STEP-T-COMPLETE | 점검 | 분류 emergency]\n' + rep, {}), null);              // 응급
+  assert.equal(consultGateMessage('[STEP-A-2-COMPLETE | 호출 0회 | 사유: 단순정보]\n' + rep, {}), null);        // 사유를 적었다
+  assert.equal(consultGateMessage(rep, { history: [{ role: 'assistant', content: wrap(goodReport()) }] }), null); // 앞 턴에 보고서가 있었다
+});
+
+test('runTurn 협진 게이트: 협진 없이 보고서가 나오면 1회 되물어 협진하게 한다', async () => {
+  const consultReply = '[STEP-A-2-COMPLETE | 호출 1회]\n[CONSULT_SPECIALIST: id=kdoctor-internal, question=인후통 3일, 연령 미상 — 배제할 진단은?]';
+  const { deps, calls } = mkDeps([wrap(goodReport()), consultReply, wrap(goodReport())], { consultGate: true });
+  const out = await runTurn([], '인후통 3일', deps);
+  assert.equal(out.view.type, 'report');
+  assert.equal(out.view.gates, 1);
+  assert.deepEqual(out.view.consults.map((c) => c.id), ['kdoctor-internal']);
+  assert.ok(calls.some((c) => c.messages.at(-1).content.includes('협진 없이 [DIAGNOSIS_REPORT]를 냈다')));
+});
+
+test('runTurn 협진 게이트: 호출하지 않는 사유를 적으면 그대로 통과하고 되묻기는 1회뿐이다', async () => {
+  const skip = '[STEP-A-2-COMPLETE | 호출 0회 | 사유: 단순정보]\n' + wrap(goodReport());
+  const { deps, calls } = mkDeps([wrap(goodReport()), skip], { consultGate: true });
+  const out = await runTurn([], '인후통 3일', deps);
+  assert.equal(out.view.type, 'report');
+  assert.equal(out.view.gates, 1);
+  assert.equal(out.view.consults.length, 0);
+  assert.equal(calls.length, 2);
+  // 같은 응답이 계속 협진 없이 와도 게이트는 1회만 건다
+  const { deps: d2, calls: c2 } = mkDeps([wrap(goodReport())], { consultGate: true });
+  assert.equal((await runTurn([], '인후통 3일', d2)).view.gates, 1);
+  assert.equal(c2.length, 2);
+  // 끌 수 있다(평가용)
+  const { deps: d3, calls: c3 } = mkDeps([wrap(goodReport())], { consultGate: false });
+  assert.equal((await runTurn([], '인후통 3일', d3)).view.gates, 0);
+  assert.equal(c3.length, 1);
+});
+
+test('SP-29: 협진 호출 보강 4~7(발화자 무관·태그 출력·A-2 필수·태그 철자)이 있다', () => {
+  const sp = readFileSync(join(ROOT, 'prompts/SP-29_kdoctor_v0_1.txt'), 'utf8');
+  assert.match(sp, /호출 규칙은 말한 사람과 무관하다/);
+  assert.match(sp, /호출은 태그를 출력해야 이뤄진다/);
+  assert.match(sp, /STEP A-2를 건너뛰고 \[DIAGNOSIS_REPORT\]를 내지 않는다/);
+  assert.match(sp, /보고서 태그는 철자 그대로/);
 });
