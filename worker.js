@@ -20225,7 +20225,7 @@ async function _geocodeAddressForward(env, address) {
   }
 }
 async function handleKakaoAppKey(request,env,corsHeaders){const appkey=env.KAKAO_JS_KEY||env.KAKAO_REST_KEY;if(!appkey)return _err(500,'CONFIG_ERROR','Kakao key not configured',corsHeaders);return new Response(JSON.stringify({appkey}),{status:200,headers:{...corsHeaders,'Cache-Control':'public, max-age=300'}});}
-async function handleAIChat(bodyText,env,corsHeaders,meta=null){let body;try{body=JSON.parse(bodyText);}catch{return _err(400,'INVALID_JSON','Invalid JSON',corsHeaders);}const{provider='deepseek',model,system,messages,max_tokens=2000,currentLocation}=body;let builtMessages=[...(system?[{role:'system',content:system}]:[]),...(messages||[])];
+async function handleAIChat(bodyText,env,corsHeaders,meta=null){let body;try{body=JSON.parse(bodyText);}catch{return _err(400,'INVALID_JSON','Invalid JSON',corsHeaders);}const{provider='deepseek',model,system,messages,max_tokens=2000,currentLocation,check:_checkCall}=body;let builtMessages=[...(system?[{role:'system',content:system}]:[]),...(messages||[])];
 // ★ 2026-08-09 수정 — 이전에는 handleAIChat이 순수 패스스루라 UNIVERSAL 공통규칙(UNIVERSAL-INTEGRITY·TASK-DELEGATION-GUIDE·CONTROL-TOWER-PRINCIPLE)이 전혀 안 붙았다(school.html·stock.html은 이미 /deepseek로 이전했지만, desktop.html 메인 방문자 채팅 위젯(_loadVisitorSP)과 profiles/2537012854.html은 여전히 이 경로를 쓰면서 관제탑 원칙을 한 번도 받은 적이 없었다 — 2026-08-09 전수조사로 확인됨). handleLLMRelay·handleKlawRelay 등과 같은 패턴으로 _fetchUniversalLayers()를 서버측에서 항상 강제 주입한다 — 이 엔드포인트는 service_id 기반 화이트리스트(UNIVERSAL_FORCED_K_SERVICES)가 없으므로 예외 없이 모든 호출에 적용한다(특정 클라이언트만 제외할 이유가 없음 — 이 경로 자체가 "임의 system을 그대로 통과"시키는 용도라 서버측 단일 지험이 유일한 안전망).
 const _universalInjected=await _fetchUniversalLayers();
 if(_universalInjected){builtMessages=[{role:'system',content:_universalInjected},...builtMessages];}
@@ -20250,7 +20250,8 @@ try{if(provider!=='anthropic'){
       }
     }}
   const _useOR=!_isDoctor&&!!env.OPENROUTER_API_KEY;
-  const _orKey=_isDoctor?env.DEEPSEEK_DOCTOR_KEY:(env.OPENROUTER_API_KEY||env.DEEPSEEK_API_KEY);
+  // ★ 2026-10-02 — 독립 검수(K-Doctor-Check) 호출은 별도 키 DEEPSEEK_CHECK_KEY를 쓴다(없으면 doctor 키로 폴백 — 같은 모델·같은 키는 독립성이 약하다. 상용에선 다른 모델로 교체).
+  const _orKey=_isDoctor?((_checkCall===true&&env.DEEPSEEK_CHECK_KEY)||env.DEEPSEEK_DOCTOR_KEY):(env.OPENROUTER_API_KEY||env.DEEPSEEK_API_KEY);
   const _orUrl=_useOR?OR_URL:DEEPSEEK_URL;
   const _orMdl=_isDoctor?_dReq.model:(model||(_useOR?OR_MODEL_FAST:DEEPSEEK_MODEL));
   const _orHdr={'Content-Type':'application/json','Authorization':`Bearer ${_orKey}`,...(_useOR?{'HTTP-Referer':'https://hondi.net','X-Title':'Hondi'}:{})};

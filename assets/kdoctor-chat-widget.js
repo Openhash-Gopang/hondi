@@ -142,8 +142,9 @@ import { validateDiagnosis, audienceView } from '../src/gopang/ai/hondi-doctor-v
       fetchText(BASE + '/prompts/kdoctor-specialties.json'),
       fetchText(BASE + '/prompts/SP-29_kdoctor_v0_1.txt'),
       fetchText(BASE + '/prompts/SP-29-COMMON_kdoctor_specialist_base_v0_1.txt'),
+      fetchText(BASE + '/prompts/SP-29K_kdoctor_check_v0_1.txt').catch(function () { return ''; }),
     ]);
-    resources = { registry: JSON.parse(results[0]), orchestratorSP: results[1], baseText: results[2] };
+    resources = { registry: JSON.parse(results[0]), orchestratorSP: results[1], baseText: results[2], checkSP: results[3] };
     return resources;
   }
   async function loadSpecialist(id) {
@@ -155,13 +156,13 @@ import { validateDiagnosis, audienceView } from '../src/gopang/ai/hondi-doctor-v
     specCache[id] = assembleSpecialist(text, res.baseText);
     return specCache[id];
   }
-  async function callLLM(system, messages, maxTokens) {
+  async function callLLM(system, messages, maxTokens, isCheck) {
     var ctl = new AbortController();
     var t = setTimeout(function () { ctl.abort(); }, 90000);
     try {
       var res = await fetch(WORKER_URL + '/ai/chat', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: ctl.signal,
-        body: JSON.stringify({ provider: 'deepseek', model: 'deepseek-v4-flash', system: system, messages: messages, max_tokens: maxTokens }),
+        body: JSON.stringify({ provider: 'deepseek', model: 'deepseek-v4-flash', system: system, messages: messages, max_tokens: maxTokens, check: isCheck ? true : undefined }),
       });
       if (res.status === 429) { var rl = new Error('Worker 429'); rl.rateLimited = true; throw rl; }
       if (!res.ok) throw new Error('Worker ' + res.status);
@@ -475,7 +476,7 @@ import { validateDiagnosis, audienceView } from '../src/gopang/ai/hondi-doctor-v
     try {
       var res = await loadResources();
       var out = await runTurn(history, composed.text, {
-        callLLM: callLLM, orchestratorSP: res.orchestratorSP, registry: res.registry, loadSpecialist: loadSpecialist,
+        callLLM: callLLM, callCheck: function (sp, msgs, max) { return callLLM(sp, msgs, max, true); }, checkSP: res.checkSP, orchestratorSP: res.orchestratorSP, registry: res.registry, loadSpecialist: loadSpecialist,
         validate: validateDiagnosis, audienceView: audienceView, audience: undefined,
         pdvState: pdvState, requestPdv: acOrigin ? requestPdv : undefined,
       });
@@ -485,7 +486,9 @@ import { validateDiagnosis, audienceView } from '../src/gopang/ai/hondi-doctor-v
       if (v.type === 'report') { holder = append('ai', v.html); renderProposals(v.pdvProposals, holder); }
       else append('ai', renderMarkdown(v.text));
       var used = (v.consults || []).filter(function (c) { return c.ok; }).map(function (c) { return c.id.replace('kdoctor-', ''); });
-      statusEl.textContent = used.length ? '협진: ' + used.join(', ') : '';
+      var rv = v.review;
+      var rvTxt = rv && rv.verdict ? ' · 검수: ' + rv.verdict + (rv.reconciled ? '(재조정 반영)' : '') : (rv && rv.status === 'error' ? ' · 검수 실패(원 결과 표시)' : '');
+      statusEl.textContent = (used.length ? '협진: ' + used.join(', ') : '') + rvTxt;
     } catch (err) {
       typing.remove();
       append('ai', renderMarkdown((err && err.rateLimited ? '요청이 많아 잠시 쉬어 갑니다. 1분쯤 뒤에 다시 보내 주세요.' : '상담 서버에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.') + '\n\n' + FAILSAFE_TEXT));
