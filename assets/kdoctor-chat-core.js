@@ -210,10 +210,61 @@ export function retryHints(errors) {
   return [...new Set(errors ?? [])].map((e) => H[e]).filter(Boolean).join(' ');
 }
 
+
+// ─────────────── 독립 검수(K-Doctor-Check)와 재조정 (2026-10-02) ───────────────
+// K-Law의 "생성 → 독립 검수 → 재조정" 3단계를 옮겼다. 검수는 별도 호출(다른 키·가능하면 다른 모델)로 하고,
+// 총괄은 지적마다 [수용]/[반박]과 결론 영향을 쓴 뒤 완결된 [DIAGNOSIS_REPORT]를 다시 낸다.
+export const CHECK_MAX_TOKENS = 4000;
+export const CHECK_VERDICTS = ['재검토 불요', '재검토 권고', '결론 무효 소지'];
+
+/** 의료인이 특정 분야 자문·협진을 명시적으로 요청했는지. 응급이어도 이 경우엔 요청한 과목을 호출한다(2026-10-02 결정). */
+export function explicitConsultRequest(text) {
+  return /(자문|협진|컨설트|consult)/i.test(String(text ?? ''));
+}
+
+export function parseCheckVerdict(text) {
+  const t = String(text ?? '');
+  const m = /\[CHECK_VERDICT:\s*(재검토 불요|재검토 권고|결론 무효 소지)\s*(?:\|\s*지적\s*(\d+)\s*건)?/.exec(t);
+  const findings = [];
+  const re = /\[FINDING\s*\|\s*(C-\d)\s*\|\s*(HIGH|MED|LOW)\s*\|\s*결론영향\s*:\s*(있음|없음|불명)\s*\|([^\]]*)\]/g;
+  let f;
+  while ((f = re.exec(t)) !== null) findings.push({ module: f[1], severity: f[2], impact: f[3], text: f[4].trim() });
+  return { verdict: m ? m[1] : null, declared: m && m[2] ? Number(m[2]) : null, findings };
+}
+
+/** 검수자에게 줄 입력: 사례 원문 + 협진 소견 원문 + 보고서. 총괄의 사고 과정·정답은 주지 않는다. */
+export function buildCheckInput({ caseText, consultTexts, report }) {
+  let rep = '';
+  try { rep = JSON.stringify(report, null, 1); } catch { rep = String(report); }
+  return '[사례 원문]\n' + String(caseText ?? '') + '\n\n[협진 소견 원문]\n' + (consultTexts?.length ? consultTexts.join('\n\n') : '(없음)') + '\n\n[검수 대상 보고서]\n' + rep;
+}
+
+export function buildReconcileMessage(checkText) {
+  return '[독립 검수 결과 — K-Doctor-Check]\n' + String(checkText).slice(0, 6000) + '\n\n' +
+    '[재조정 지시] 위 검수는 별도 검수자가 입력 자료와 대조해 낸 지적이다. 지적을 사실로 자동 취급하지 말고 항목마다 판정한다.\n' +
+    '  1. 지적마다 한 줄: `[수용|반박] C-n — 근거 인용(입력 자료의 구절 또는 "입력에 없음")`. 인용 없는 판정은 무효다.\n' +
+    '  2. 수용한 지적마다 `결론 영향 있음|없음|불명 — 한 줄 근거`를 쓴다. 불명이면 결론을 조건부(conditional) 또는 deferred로 낮춘다.\n' +
+    '  3. 수용 항목의 정정(용량 삭제, 가설 추가, 대상 값 정정, 위험·미검증 표시)을 반영한 **완결된** [DIAGNOSIS_REPORT]를 다시 낸다. 일부만 고친 조각이 아니다.\n' +
+    '  4. 마지막 태그: `[STEP-RECONCILE-COMPLETE | 지적 N건 | 수용 A건 | 반박 B건 | 결론 유지 또는 번복]`\n' +
+    '  5. triage.level이 emergency이면 그대로 둔다. 검수 때문에 응급 안내를 낮추지 않는다.\n' +
+    '  6. 금지 표현(발급 문서 명칭, 확정 진단, 퇴원·완치 판정)은 부정문으로도 쓰지 않는다.';
+}
+
+export function parseReconcileTag(text) {
+  const m = /\[STEP-RECONCILE-COMPLETE[^\]]*지적\s*(\d+)\s*건[^\]]*수용\s*(\d+)\s*건[^\]]*반박\s*(\d+)\s*건[^\]]*\]/.exec(String(text ?? ''));
+  return m ? { findings: +m[1], accepted: +m[2], rebutted: +m[3] } : null;
+}
+
+function reportBlock(text) {
+  const m = /\[DIAGNOSIS_REPORT\][\s\S]*?\[\/DIAGNOSIS_REPORT\]/.exec(String(text ?? ''));
+  return m ? m[0] : String(text ?? '');
+}
+
 export async function runTurn(history, userText, deps) {
   const registry = new Map((deps.registry?.specialties ?? []).map((s) => [s.id, s]));
   const work = [...history, { role: 'user', content: userText }];
   const consultLog = [];
+  const consultTexts = [];
   let calls = 0;
   let reply = '';
   // PDV(건강 기록) 요청: 대화당 한도는 deps.pdvState(위젯이 대화 동안 유지)로 센다. 받은 자료는 다음 턴에도 보이도록
@@ -240,8 +291,8 @@ export async function runTurn(history, userText, deps) {
     const pdvAsks = parsePdvRequests(reply);
     if ((!wanted.length && !pdvAsks.length) || round === MAX_CONSULT_ROUNDS) break;
     work.push({ role: 'assistant', content: reply });
-    if (wanted.length && isEmergencyTriage(reply)) {
-      // 응급이면 협진을 부르지 않는다(SP 규칙 1). 의료인이 자문을 요청했더라도 같다 — 재관류·응급 처치 안내가 먼저다.
+    if (wanted.length && isEmergencyTriage(reply) && !explicitConsultRequest(userText)) {
+      // 응급이면 협진을 부르지 않는다(SP 규칙 1) — 환자가 직접 말한 경우와 자문 요청이 없는 경우. 의료인이 자문을 명시 요청하면(2026-10-02 결정) 호출한다.
       consultLog.push(...wanted.map((w) => ({ id: w.id, ok: false, skipped: 'emergency' })));
       work.push({ role: 'user', content: '[CONSULT_SPECIALIST 결과 — 호출 안 함]\n위험 신호가 emergency로 확인돼 협진을 호출하지 않았다. 119·응급실 안내와 그 사이 할 일을 포함해 emergency_referral 결과 [DIAGNOSIS_REPORT]를 내라.' });
       continue;
@@ -260,7 +311,9 @@ export async function runTurn(history, userText, deps) {
         const sp = await deps.loadSpecialist(w.id);
         const out = await deps.callLLM(sp, [{ role: 'user', content: w.question }], 2500);
         consultLog.push({ id: w.id, ok: true });
-        results.push(`[CONSULT_SPECIALIST 결과 — ${spec.name_ko}]\n${sanitizeConsultText(String(out).slice(0, 6000))}`);
+        const consultBlock = `[CONSULT_SPECIALIST 결과 — ${spec.name_ko}]\n${sanitizeConsultText(String(out).slice(0, 6000))}`;
+        consultTexts.push(consultBlock);
+        results.push(consultBlock);
       } catch (err) {
         consultLog.push({ id: w.id, ok: false });
         results.push(`[CONSULT_SPECIALIST 결과 — 오류]\n${spec.name_ko} 협진 호출 실패. 이 과목 소견 없이 판단하고 그 사실을 결과에 밝혀라.`);
@@ -296,10 +349,48 @@ export async function runTurn(history, userText, deps) {
     newHistory.push({ role: 'assistant', content: '(결과 검증 실패로 표시하지 않음 — 판단 유보, 대면 진료 권고)' });
     return { history: newHistory, view: { type: 'failsafe', text: FAILSAFE_TEXT, consults: consultLog } };
   }
-  newHistory.push({ role: 'assistant', content: reply });
-  const view = deps.audienceView(validated, deps.audience);
+  // 독립 검수(항상) → 재조정. 검수 호출이 실패하면 원래 보고서를 그대로 쓰고 검수 상태만 남긴다.
+  let finalReply = reply;
+  let finalValidated = validated;
+  const review = { status: 'skipped', verdict: null, findings: [], reconciled: false, reconcile: null };
+  if (typeof deps.callCheck === 'function' && deps.checkSP) {
+    try {
+      const caseText = userEntry().content;
+      const checkOut = await deps.callCheck(deps.checkSP, [{ role: 'user', content: buildCheckInput({ caseText, consultTexts, report: ex.report }) }], CHECK_MAX_TOKENS);
+      const pc = parseCheckVerdict(checkOut);
+      review.checkText = String(checkOut);
+      review.findings = pc.findings;
+      if (!pc.verdict) { review.status = 'unparsed'; }
+      else {
+        review.verdict = pc.verdict; review.status = 'done';
+        if (pc.verdict !== '재검토 불요') {
+          const origKind = validated.kind;
+          const w2 = [...work, { role: 'assistant', content: reply }, { role: 'user', content: buildReconcileMessage(checkOut) }];
+          let r2 = await deps.callLLM(deps.orchestratorSP, w2, ORCHESTRATOR_MAX_TOKENS);
+          let ex2 = extractReport(r2);
+          let v2 = ex2.report ? deps.validate(ex2.report, deps.audience) : null;
+          if (!v2 || !v2.ok) {
+            const found = ex2.report ? findForbiddenWords(ex2.report) : [];
+            w2.push({ role: 'assistant', content: r2 });
+            w2.push({ role: 'user', content: `[시스템] 재조정 결과 검증 실패(${!ex2.report ? ex2.error ?? 'no_report' : v2.errors.join(', ')}). 판정 줄 없이 고친 [DIAGNOSIS_REPORT]만 다시 내라.${found.length ? ' 금지 표현: ' + found.join(', ') + '.' : ''} ${retryHints(v2?.errors)}` });
+            r2 = await deps.callLLM(deps.orchestratorSP, w2, ORCHESTRATOR_MAX_TOKENS);
+            ex2 = extractReport(r2);
+            v2 = ex2.report ? deps.validate(ex2.report, deps.audience) : null;
+          }
+          review.reconcile = parseReconcileTag(r2);
+          if (v2 && v2.ok && !(origKind === 'emergency_referral' && v2.kind !== 'emergency_referral')) {
+            finalReply = reportBlock(r2); finalValidated = v2; review.reconciled = true;
+          } else {
+            review.reconcile_failed = true; // 재조정 결과가 무효이거나 응급을 낮추려 했다 → 원래 보고서 유지
+          }
+        }
+      }
+    } catch (err) { review.status = 'error'; review.error = String(err?.message ?? err); }
+  }
+  newHistory.push({ role: 'assistant', content: finalReply });
+  const view = deps.audienceView(finalValidated, deps.audience);
   // 카드만 보여 준다: 검증기가 다시 계산·제한한 값이므로, 원문 자연어 요약(미검증 표현이 섞일 수 있음)은 숨긴다.
-  return { history: newHistory, view: { type: 'report', html: renderReportHtml(view, validated), kind: validated.kind, consults: consultLog, pdvProposals: extractPdvProposals(reply) } };
+  return { history: newHistory, view: { type: 'report', html: renderReportHtml(view, finalValidated), kind: finalValidated.kind, consults: consultLog, review, pdvProposals: extractPdvProposals(finalReply) } };
 }
 
 // ─────────────────────────── PDV(건강 기록) 요청 (2026-10-01) ───────────────────────────

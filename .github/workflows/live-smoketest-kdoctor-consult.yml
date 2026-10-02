@@ -19,6 +19,10 @@ on:
         description: "Diagnostic: override orchestrator max_tokens (blank = widget default 3500)"
         required: false
         default: ""
+      review:
+        description: "on | off — 독립 검수(K-Doctor-Check)와 재조정 (기본 on)"
+        required: false
+        default: "on"
       label:
         description: "Result label (blank = run number). Results go to branch results/live-smoketest-kdoctor-consult-<label>"
         required: false
@@ -45,11 +49,12 @@ jobs:
         env:
           DEEPSEEK_DOCTOR_KEY: ${{ secrets.DEEPSEEK_DOCTOR_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          DEEPSEEK_CHECK_KEY: ${{ secrets.DEEPSEEK_CHECK_KEY }}
         run: |
           LABEL="${{ github.event.inputs.label }}"
           if [ -z "$LABEL" ]; then LABEL="run${{ github.run_number }}"; fi
           echo "LABEL=$LABEL" >> "$GITHUB_ENV"
-          ARGS="--scenarios scenarios_kdoctor_consult_100_20261001.json --out ../../results/kdoctor-consult-$LABEL --resume --concurrency ${{ github.event.inputs.concurrency || '4' }}"
+          ARGS="--scenarios scenarios_kdoctor_consult_100_20261001.json --out ../../results/kdoctor-consult-$LABEL --resume --concurrency ${{ github.event.inputs.concurrency || '4' }} --review ${{ github.event.inputs.review || 'on' }}"
           if [ -n "${{ github.event.inputs.orch_max_tokens }}" ]; then ARGS="$ARGS --orch-max-tokens ${{ github.event.inputs.orch_max_tokens }}"; fi
           if [ -n "${{ github.event.inputs.limit }}" ]; then ARGS="$ARGS --limit ${{ github.event.inputs.limit }}"; fi
           if [ -n "${{ github.event.inputs.group }}" ]; then ARGS="$ARGS --group ${{ github.event.inputs.group }}"; fi

@@ -40,6 +40,8 @@ export function loadResources(promptsDir = join(ROOT, 'prompts')) {
   const registry = JSON.parse(readFileSync(join(promptsDir, 'kdoctor-specialties.json'), 'utf8'));
   const orchestratorSP = readFileSync(join(promptsDir, 'SP-29_kdoctor_v0_1.txt'), 'utf8');
   const baseText = readFileSync(join(promptsDir, registry.base), 'utf8');
+  const checkPath = join(promptsDir, 'SP-29K_kdoctor_check_v0_1.txt');
+  const checkSP = existsSync(checkPath) ? readFileSync(checkPath, 'utf8') : undefined;
   const cache = new Map();
   const loadSpecialist = async (id) => {
     if (cache.has(id)) return cache.get(id);
@@ -50,9 +52,9 @@ export function loadResources(promptsDir = join(ROOT, 'prompts')) {
     return text;
   };
   const h = createHash('sha256');
-  h.update(orchestratorSP); h.update(baseText); h.update(JSON.stringify(registry));
+  h.update(orchestratorSP); h.update(checkSP ?? ''); h.update(baseText); h.update(JSON.stringify(registry));
   for (const s of registry.specialties) h.update(readFileSync(join(promptsDir, s.file), 'utf8'));
-  return { registry, orchestratorSP, baseText, loadSpecialist, sp_hash: h.digest('hex').slice(0, 12) };
+  return { registry, orchestratorSP, checkSP, baseText, loadSpecialist, sp_hash: h.digest('hex').slice(0, 12) };
 }
 
 export function loadCases(path = DEFAULT_CASES) {

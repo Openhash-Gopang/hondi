@@ -48,5 +48,7 @@ jobs:
           # 있어 이 목록에 없다.
           secrets: |
             DEEPSEEK_DOCTOR_KEY
+            DEEPSEEK_CHECK_KEY
         env:
           DEEPSEEK_DOCTOR_KEY: ${{ secrets.DEEPSEEK_DOCTOR_KEY }}
+          DEEPSEEK_CHECK_KEY: ${{ secrets.DEEPSEEK_CHECK_KEY }}

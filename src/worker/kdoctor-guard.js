@@ -57,7 +57,7 @@ function fail(status, code, message) { return { ok: false, status, code, message
 
 /**
  * 속도 제한 항목(워커가 _checkRateLimitN으로 검사한다: KV 카운터, 고정 구간 버킷, 요청마다 +1).
- * 한 번의 상담 턴이 총괄 호출과 협진 호출을 합쳐 여러 번의 /ai/chat을 부르므로(턴당 최대 약 8회) 분당 한도는 그 배수로 잡았다.
+ * 한 번의 상담 턴이 총괄 호출과 협진 호출을 합쳐 여러 번의 /ai/chat을 부르므로(턴당 최대 약 8회, 독립 검수·재조정 추가로 최대 약 12회) 분당 한도는 그 배수로 잡았다.
  * 값은 초안이다 — env(DOCTOR_RL_MIN / _HOUR / _IMG_HOUR / _GLOBAL_HOUR)로 조정한다. KV가 없으면 워커가 통과시킨다(fail-open).
  * @returns {{action:string, key:string, limit:number, ttl:number, retryAfter:number}[]}
  */
@@ -67,7 +67,7 @@ export function doctorRateLimits({ ip, imageCount = 0, nowMs = Date.now(), env =
   const min = Math.floor(nowMs / 60000); const hr = Math.floor(nowMs / 3600000);
   const left = (unitMs) => Math.max(1, Math.ceil(((Math.floor(nowMs / unitMs) + 1) * unitMs - nowMs) / 1000));
   const out = [
-    { action: 'doctor_min', key: `${who}:${min}`, limit: n(env.DOCTOR_RL_MIN, 40), ttl: 120, retryAfter: left(60000) },
+    { action: 'doctor_min', key: `${who}:${min}`, limit: n(env.DOCTOR_RL_MIN, 60), ttl: 120, retryAfter: left(60000) },
     { action: 'doctor_hour', key: `${who}:${hr}`, limit: n(env.DOCTOR_RL_HOUR, 400), ttl: 7200, retryAfter: left(3600000) },
   ];
   if (imageCount > 0) out.push({ action: 'doctor_img_hour', key: `${who}:${hr}`, limit: n(env.DOCTOR_RL_IMG_HOUR, 20), ttl: 7200, retryAfter: left(3600000) });
