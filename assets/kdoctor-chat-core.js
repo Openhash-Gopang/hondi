@@ -187,6 +187,29 @@ export function findForbiddenWords(report) {
   return [...new Set((text.match(FORBIDDEN_WORDS_RE) ?? []).map((w) => w.replace(/\s+/g, ' ')))];
 }
 
+/** 총괄이 같은 응답에서 STEP T 결과를 emergency로 분류했는지. 라이브 스모크에서 의료인이 "자문을 구해 주세요"라고 요청한 응급 증례 4건이 협진을 호출했다. */
+export function isEmergencyTriage(reply) {
+  return /\[STEP-T-COMPLETE[^\]]*분류[^\]A-Za-z가-힣]{0,6}emergency/i.test(String(reply ?? ''));
+}
+
+/** 과목 소견은 총괄이 그대로 인용하기 쉬워서, "확진 전·후" 같은 표현이 최종 보고서의 금지 표현 검증에 걸린다. 같은 뜻의 허용 표현으로 바꿔 넘긴다. */
+export function sanitizeConsultText(text) {
+  return String(text ?? '')
+    .replace(/확진/g, '확정 진단')
+    .replace(/진단서/g, '진단 문서').replace(/처방전/g, '처방 문서').replace(/소견서/g, '소견 문서').replace(/진료확인서/g, '확인 문서')
+    .replace(/퇴원/g, '퇴실').replace(/완치\s*판정/g, '완치 여부 판단');
+}
+
+/** 검증 오류 코드별 고치는 법. 재생성 요청에 붙여 같은 오류를 되풀이하지 않게 한다. */
+export function retryHints(errors) {
+  const H = {
+    primary_not_in_hypotheses: 'final.primary.name은 hypotheses[].name 중 하나와 글자까지 똑같아야 한다(복사해서 쓴다).',
+    primary_missing: 'final.claimed_kind가 confirmed·conditional이면 final.primary.name을 채워라. 정할 수 없으면 deferred로 낸다.',
+    return_if_missing: 'plan.followup.return_if에 복귀 기준(구체 증상)을 한 개 이상 적어라.',
+  };
+  return [...new Set(errors ?? [])].map((e) => H[e]).filter(Boolean).join(' ');
+}
+
 export async function runTurn(history, userText, deps) {
   const registry = new Map((deps.registry?.specialties ?? []).map((s) => [s.id, s]));
   const work = [...history, { role: 'user', content: userText }];
@@ -217,6 +240,12 @@ export async function runTurn(history, userText, deps) {
     const pdvAsks = parsePdvRequests(reply);
     if ((!wanted.length && !pdvAsks.length) || round === MAX_CONSULT_ROUNDS) break;
     work.push({ role: 'assistant', content: reply });
+    if (wanted.length && isEmergencyTriage(reply)) {
+      // 응급이면 협진을 부르지 않는다(SP 규칙 1). 의료인이 자문을 요청했더라도 같다 — 재관류·응급 처치 안내가 먼저다.
+      consultLog.push(...wanted.map((w) => ({ id: w.id, ok: false, skipped: 'emergency' })));
+      work.push({ role: 'user', content: '[CONSULT_SPECIALIST 결과 — 호출 안 함]\n위험 신호가 emergency로 확인돼 협진을 호출하지 않았다. 119·응급실 안내와 그 사이 할 일을 포함해 emergency_referral 결과 [DIAGNOSIS_REPORT]를 내라.' });
+      continue;
+    }
     const results = [];
     const seen = new Set();
     for (const w of wanted) {
@@ -231,7 +260,7 @@ export async function runTurn(history, userText, deps) {
         const sp = await deps.loadSpecialist(w.id);
         const out = await deps.callLLM(sp, [{ role: 'user', content: w.question }], 2500);
         consultLog.push({ id: w.id, ok: true });
-        results.push(`[CONSULT_SPECIALIST 결과 — ${spec.name_ko}]\n${String(out).slice(0, 6000)}`);
+        results.push(`[CONSULT_SPECIALIST 결과 — ${spec.name_ko}]\n${sanitizeConsultText(String(out).slice(0, 6000))}`);
       } catch (err) {
         consultLog.push({ id: w.id, ok: false });
         results.push(`[CONSULT_SPECIALIST 결과 — 오류]\n${spec.name_ko} 협진 호출 실패. 이 과목 소견 없이 판단하고 그 사실을 결과에 밝혀라.`);
@@ -256,7 +285,7 @@ export async function runTurn(history, userText, deps) {
     const found = ex.report ? findForbiddenWords(ex.report) : [];
     const hint = found.length ? ` 보고서에서 발견된 금지 표현: ${found.join(', ')} — 뜻이 같은 허용 표현으로 바꿔라(예: "확진"→"확인"·"판정"·"확정 검사", "퇴원"→"경과 관찰 종료").` : '';
     work.push({ role: 'assistant', content: reply });
-    work.push({ role: 'user', content: `[시스템] 결과 검증 실패(${why}). 부록 A 형식과 강제규칙을 지켜 고친 [DIAGNOSIS_REPORT]만 다시 내라(정정 내역·설명 없이). 발급 문서 명칭이나 확정 진단·퇴원·완치 판정 표현은 부정문이나 점검 문구로도 적지 말고, 복귀 기준(return_if)을 포함하라.${hint}` });
+    work.push({ role: 'user', content: `[시스템] 결과 검증 실패(${why}). 부록 A 형식과 강제규칙을 지켜 고친 [DIAGNOSIS_REPORT]만 다시 내라(정정 내역·설명 없이). 발급 문서 명칭이나 확정 진단·퇴원·완치 판정 표현은 부정문이나 점검 문구로도 적지 말고, 복귀 기준(return_if)을 포함하라.${hint}${retryHints(validated?.errors) ? ' ' + retryHints(validated.errors) : ''}` });
     reply = await deps.callLLM(deps.orchestratorSP, work, ORCHESTRATOR_MAX_TOKENS);
     ex = extractReport(reply);
     validated = ex.report ? deps.validate(ex.report, deps.audience) : null;
