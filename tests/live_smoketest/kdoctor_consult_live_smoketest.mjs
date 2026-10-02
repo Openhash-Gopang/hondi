@@ -102,7 +102,7 @@ export function noReportReason(rec) {
   return 'no_report';
 }
 
-export function scoreRecord(sc, rec) {
+function scoreBase(sc, rec) {
   if (rec.error) return { status: 'LIVE-ERROR', reason: rec.error };
   const called = rec.called_ids;
   if (!sc.expect_consult) {
@@ -122,6 +122,31 @@ export function scoreRecord(sc, rec) {
   const match = hitP ? 'primary' : 'accept';
   if (rec.view_type !== 'report' || !rec.validated_ok) return { status: 'LIVE-FAIL', reason: noReportReason(rec), match };
   return { status: 'LIVE-PASS', reason: 'consulted_and_reported', match };
+}
+
+/** 복합 사례: 최종 보고서(JSON 문자열)가 시나리오의 핵심 맥락 항목(가족력·과거력·약물·경과 등)을 얼마나 반영했는지 키워드로 센다. 의미 판단이 아닌 대리 지표다. */
+export function contextCoverage(sc, rec) {
+  const facts = sc.facts ?? [];
+  const rep = rec.artifacts?.final_report ? extractReport(rec.artifacts.final_report).report : extractReport(rec.orchestrator_replies?.[rec.orchestrator_replies.length - 1] ?? '').report;
+  const hay = JSON.stringify(rep ?? {}).toLowerCase();
+  const missing = [], hits = [];
+  for (const f of facts) (f.any ?? []).some((t) => hay.includes(String(t).toLowerCase())) ? hits.push(f.label) : missing.push(f.label);
+  return { total: facts.length, hits: hits.length, need: sc.facts_min ?? facts.length, missing, report: rep };
+}
+
+export function scoreRecord(sc, rec) {
+  const base = scoreBase(sc, rec);
+  if (!sc.complex || base.status !== 'LIVE-PASS' || !sc.expect_consult) return base;
+  const pool = new Set([...(sc.expect_ids ?? []), ...(sc.accept_ids ?? [])]);
+  const distinct = new Set(rec.called_ids.filter((id) => pool.has(id)));
+  const need = sc.min_hits ?? 1;
+  const cov = contextCoverage(sc, rec);
+  const context = { total: cov.total, hits: cov.hits, need: cov.need, missing: cov.missing };
+  if (distinct.size < need) return { status: 'LIVE-FAIL', reason: 'too_few_specialties', match: base.match, distinct: distinct.size, context };
+  const lvl = cov.report?.triage?.level;
+  if (sc.triage_any?.length && !sc.triage_any.includes(lvl)) return { status: 'LIVE-FAIL', reason: 'triage_mismatch', match: base.match, triage: lvl ?? null, context };
+  if (cov.hits < cov.need) return { status: 'LIVE-FAIL', reason: 'context_gap', match: base.match, context };
+  return { status: 'LIVE-PASS', reason: 'complex_ok', match: base.match, distinct: distinct.size, context };
 }
 
 export async function runScenario(sc, { llm, resources, maxTurns = 3, orchMaxTokens = null, checkLlm = null }) {
@@ -189,7 +214,7 @@ export function caseDetail(rec, round = null) {
     status: rec.score.status, reason: rec.score.reason, match: rec.score.match ?? null, called: [...new Set(rec.called_ids)].map(strip),
     consult_questions: (rec.consult_questions ?? []).map((q) => ({ id: strip(q.id), question: q.question })), consult_texts: a.consult_texts?.length ? a.consult_texts : null,
     orchestrator: (rec.orchestrator_replies ?? []).map((r) => r.slice(0, 12000)), view_type: rec.view_type, validated_ok: rec.validated_ok, validation_errors: rec.validation_errors ?? [],
-    report: rec.view_type === 'report' ? parse(lastRep) : null, check: a.check ?? null, reconcile: a.reconcile ?? null, final_report: a.final_report ? parse(a.final_report) : null,
+    report: rec.view_type === 'report' ? parse(lastRep) : null, context: rec.score.context ?? null, check: a.check ?? null, reconcile: a.reconcile ?? null, final_report: a.final_report ? parse(a.final_report) : null,
     reviews: (rec.reviews ?? []).map(({ check_text, ...r }) => r), gates: rec.gates ?? 0, turns: rec.turns, ms: rec.ms };
 }
 function writeCaseFile(outDir, rec) {
@@ -213,6 +238,7 @@ export function summarize(records) {
     truncated_orchestrator_calls: records.reduce((n, r) => n + (r.orchestrator_calls ?? []).filter((c) => c.finish_reason === 'length').length, 0),
     orchestrator_calls_total: records.reduce((n, r) => n + (r.orchestrator_calls ?? []).length, 0),
     review: (() => { const rv = records.flatMap((r) => r.reviews ?? []); const c = (f) => rv.filter(f).length; return { n: rv.length, ok_none: c((x) => x.verdict === '재검토 불요'), recommend: c((x) => x.verdict === '재검토 권고'), invalid_suspect: c((x) => x.verdict === '결론 무효 소지'), unparsed: c((x) => x.status === 'unparsed'), error: c((x) => x.status === 'error'), reconciled: c((x) => x.reconciled), reconcile_failed: c((x) => x.reconcile_failed), findings_by_module: rv.flatMap((x) => x.findings ?? []).reduce((m, f) => { m[f.module] = (m[f.module] ?? 0) + 1; return m; }, {}) }; })(),
+    complex_context: (() => { const cs = records.filter((r) => r.score.context); if (!cs.length) return null; return { n: cs.length, avg_hit_ratio: +(cs.reduce((a, r) => a + r.score.context.hits / Math.max(1, r.score.context.total), 0) / cs.length).toFixed(3), gap_cases: cs.filter((r) => r.score.reason === 'context_gap').map((r) => r.id) }; })(),
     avg_ms: Math.round(records.reduce((s, r) => s + (r.ms ?? 0), 0) / Math.max(1, records.length)),
   };
   return summary;
@@ -225,6 +251,7 @@ export function renderMarkdown(summary, records) {
   for (const [k, s] of Object.entries(summary.by_group_kind)) L.push(`| ${k} | ${s.n} | ${s.pass} | ${s.fail} | ${s.error} | ${pct(s)} |`);
   const rv = summary.review;
   if (rv && rv.n) L.push('', '## 독립 검수 (K-Doctor-Check)', '', `검수 ${rv.n}건 — 재검토 불요 ${rv.ok_none} / 재검토 권고 ${rv.recommend} / 결론 무효 소지 ${rv.invalid_suspect} / 판정 파싱 실패 ${rv.unparsed} / 호출 오류 ${rv.error}`, `재조정 반영 ${rv.reconciled}건, 재조정 실패(원 보고서 유지) ${rv.reconcile_failed}건`, `모듈별 지적 수: ${Object.entries(rv.findings_by_module).map(([k, n]) => k + '=' + n).join(', ') || '-'}`);
+  if (summary.complex_context) L.push('', `복합 사례 맥락 반영: 평균 ${(summary.complex_context.avg_hit_ratio * 100).toFixed(0)}% (맥락 누락 ${summary.complex_context.gap_cases.length}건)`);
   L.push('', `협진 기대 건당 평균 호출 과목 수: ${summary.avg_consults_per_case}`, `총괄 호출 ${summary.orchestrator_calls_total}회 중 출력 한도로 잘린 호출(finish_reason=length): ${summary.truncated_orchestrator_calls}회`, '', '## 실패 사유', '');
   for (const [k, n] of Object.entries(summary.fail_reasons)) L.push(`- ${k}: ${n}건`);
   if (summary.accept_only_pass.length) L.push('', '## 대체 허용(accept_ids)으로만 통과 — 사람 검토', '', summary.accept_only_pass.join(', '));

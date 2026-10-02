@@ -1,0 +1,1393 @@
+[
+  {
+    "id": "kdoc-cx-patient-01",
+    "group": "patient",
+    "category": "복합 증례(환자)",
+    "complex": true,
+    "utterance": "45세 여성입니다. 석 달째 아침에 손가락 마디가 한 시간 가까이 뻣뻣하고 손가락이 부어요. 최근엔 눈이 뻑뻑하고 입이 자꾸 말라요. 어머니가 류마티스 관절염이셨고, 저는 몇 년 전 갑상선 기능 저하로 레보티록신을 계속 먹고 있어요. 작년에 무릎이 아파서 소염진통제를 처방받았는데 속이 너무 쓰려서 중간에 끊었어요. 어떤 병일 가능성이 있고 어떤 순서로 검사와 치료를 받게 될지 알고 싶어요.",
+    "expect_consult": true,
+    "expect_emergency": false,
+    "expect_ids": [
+      "kdoctor-rheumatology",
+      "kdoctor-endocrinology"
+    ],
+    "accept_ids": [
+      "kdoctor-internal",
+      "kdoctor-family",
+      "kdoctor-gastroenterology",
+      "kdoctor-ophthalmology"
+    ],
+    "min_hits": 2,
+    "triage_any": [
+      "routine",
+      "urgent"
+    ],
+    "facts": [
+      {
+        "label": "가족력(어머니 류마티스 관절염)",
+        "any": [
+          "어머니",
+          "가족력"
+        ]
+      },
+      {
+        "label": "과거력(갑상선 기능 저하·레보티록신)",
+        "any": [
+          "갑상선",
+          "레보티록신"
+        ]
+      },
+      {
+        "label": "약물 경험(소염진통제 위장 불편)",
+        "any": [
+          "소염진통제",
+          "NSAID",
+          "위장",
+          "속쓰림"
+        ]
+      },
+      {
+        "label": "동반 증상(안구·구강 건조)",
+        "any": [
+          "건조",
+          "쇼그렌",
+          "안구",
+          "구강"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "류마티스내과·내분비대사내과"
+  },
+  {
+    "id": "kdoc-cx-patient-02",
+    "group": "patient",
+    "category": "복합 증례(환자)",
+    "complex": true,
+    "utterance": "58세 남성입니다. 두 달 전부터 오래 서 있으면 숨이 차고 발목이 붓고, 밤엔 베개를 두 개 베야 편해요. 아버지가 60세에 심근경색, 형이 심부전이었어요. 5년 전부터 고혈압약, 3년 전부터 당뇨로 메트포르민을 먹고, 무릎이 아파서 작년부터 이부프로펜을 자주 먹었어요. 건강검진에서 신장 수치가 조금 높다는 말을 들었고, 담배는 2년 전에 끊었습니다. 지금 약을 그대로 먹어도 되는지, 앞으로 경과가 어떨지 궁금합니다.",
+    "expect_consult": true,
+    "expect_emergency": false,
+    "expect_ids": [
+      "kdoctor-cardiology",
+      "kdoctor-nephrology"
+    ],
+    "accept_ids": [
+      "kdoctor-internal",
+      "kdoctor-endocrinology",
+      "kdoctor-family"
+    ],
+    "min_hits": 2,
+    "triage_any": [
+      "urgent",
+      "routine"
+    ],
+    "facts": [
+      {
+        "label": "가족력(아버지 심근경색·형 심부전)",
+        "any": [
+          "아버지",
+          "형",
+          "가족력"
+        ]
+      },
+      {
+        "label": "약물(이부프로펜·신기능)",
+        "any": [
+          "이부프로펜",
+          "NSAID",
+          "신기능",
+          "신장"
+        ]
+      },
+      {
+        "label": "당뇨·메트포르민",
+        "any": [
+          "메트포르민",
+          "당뇨"
+        ]
+      },
+      {
+        "label": "심부전 징후",
+        "any": [
+          "심부전",
+          "부종",
+          "호흡곤란"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "순환기내과·신장내과"
+  },
+  {
+    "id": "kdoc-cx-patient-03",
+    "group": "patient",
+    "category": "복합 증례(환자)",
+    "complex": true,
+    "utterance": "34세 여성, 임신 10주입니다. 2주 전부터 하루 서너 번씩 토하고 체중이 3kg 줄었고 일어서면 어지러워요. 물은 겨우 마실 수 있어요. 첫째 때도 입덧이 심해서 입원했었습니다. 저는 그레이브스병(갑상선 기능 항진)으로 약을 먹다가 임신을 알고 나서 임의로 끊었어요. 어머니도 갑상선 질환이 있으세요. 지금 상태가 입덧 때문인지 갑상선 때문인지, 약은 다시 먹어야 하는지 알고 싶어요.",
+    "expect_consult": true,
+    "expect_emergency": false,
+    "expect_ids": [
+      "kdoctor-obstetrics-gynecology",
+      "kdoctor-endocrinology"
+    ],
+    "accept_ids": [
+      "kdoctor-internal",
+      "kdoctor-gastroenterology",
+      "kdoctor-family"
+    ],
+    "min_hits": 2,
+    "triage_any": [
+      "urgent"
+    ],
+    "facts": [
+      {
+        "label": "임신 상태 반영",
+        "any": [
+          "임신"
+        ]
+      },
+      {
+        "label": "과거력(그레이브스병·약 중단)",
+        "any": [
+          "그레이브스",
+          "갑상선 기능 항진",
+          "갑상선"
+        ]
+      },
+      {
+        "label": "이전 임신 경과(입덧 입원)",
+        "any": [
+          "입원",
+          "입덧",
+          "과거 임신"
+        ]
+      },
+      {
+        "label": "가족력(어머니 갑상선 질환)",
+        "any": [
+          "어머니",
+          "가족력"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "산부인과·내분비대사내과"
+  },
+  {
+    "id": "kdoc-cx-patient-04",
+    "group": "patient",
+    "category": "복합 증례(보호자)",
+    "complex": true,
+    "utterance": "7살 아들 엄마입니다. 석 달째 밥 먹고 나면 배꼽 주변이 아프다고 하고, 묽은 변을 하루 두세 번 봐요. 반년 동안 체중이 거의 안 늘었어요. 아빠가 크론병이에요. 아이는 2년 전 맹장 수술을 받았고, 변비 때문에 락툴로스를 먹었는데 설사가 심해져 끊었어요. 최근엔 입안이 자꾸 헐어요. 어떤 검사가 필요하고, 치료하면 잘 자랄 수 있을지 궁금합니다.",
+    "expect_consult": true,
+    "expect_emergency": false,
+    "expect_ids": [
+      "kdoctor-pediatric-gastro-nutrition",
+      "kdoctor-pediatrics"
+    ],
+    "accept_ids": [
+      "kdoctor-family",
+      "kdoctor-gastroenterology",
+      "kdoctor-pediatric-infectious"
+    ],
+    "min_hits": 2,
+    "triage_any": [
+      "urgent",
+      "routine"
+    ],
+    "facts": [
+      {
+        "label": "가족력(아버지 크론병)",
+        "any": [
+          "크론",
+          "아버지",
+          "가족력"
+        ]
+      },
+      {
+        "label": "과거력(맹장 수술)",
+        "any": [
+          "맹장",
+          "충수"
+        ]
+      },
+      {
+        "label": "약물 경험(락툴로스 후 설사)",
+        "any": [
+          "락툴로스",
+          "변비약",
+          "설사"
+        ]
+      },
+      {
+        "label": "성장 부진·체중",
+        "any": [
+          "체중",
+          "성장"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "소아소화영양·소아청소년과"
+  },
+  {
+    "id": "kdoc-cx-patient-05",
+    "group": "patient",
+    "category": "복합 증례(환자)",
+    "complex": true,
+    "utterance": "67세 남성입니다. 한 달 전부터 소변 줄기가 약해지고 밤에 서너 번 깨요. 허리와 엉덩이 뼈가 아프고 체중이 5kg 빠졌어요. 형이 전립선암으로 치료받았습니다. 5년 전 전립선비대로 탐술로신을 먹다가 2년 전에 끊었고, 지난주 감기약(항히스타민 성분)을 먹은 뒤에는 소변이 잘 안 나왔어요. 어떤 병을 의심해야 하는지, 검사 후 치료와 경과는 어떨지 알고 싶습니다.",
+    "expect_consult": true,
+    "expect_emergency": false,
+    "expect_ids": [
+      "kdoctor-urology",
+      "kdoctor-hematology-oncology"
+    ],
+    "accept_ids": [
+      "kdoctor-internal",
+      "kdoctor-family",
+      "kdoctor-radiology",
+      "kdoctor-orthopedics"
+    ],
+    "min_hits": 2,
+    "triage_any": [
+      "urgent"
+    ],
+    "facts": [
+      {
+        "label": "가족력(형 전립선암)",
+        "any": [
+          "형",
+          "전립선암",
+          "가족력"
+        ]
+      },
+      {
+        "label": "과거 약(탐술로신·전립선비대)",
+        "any": [
+          "탐술로신",
+          "전립선비대"
+        ]
+      },
+      {
+        "label": "감기약 후 배뇨 악화",
+        "any": [
+          "항히스타민",
+          "감기약",
+          "요폐",
+          "요저류"
+        ]
+      },
+      {
+        "label": "경고 징후(체중 감소·뼈 통증)",
+        "any": [
+          "체중",
+          "골전이",
+          "뼈",
+          "허리"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "비뇨의학과·혈액종양내과"
+  },
+  {
+    "id": "kdoc-cx-patient-06",
+    "group": "patient",
+    "category": "복합 증례(환자)",
+    "complex": true,
+    "utterance": "29세 여성입니다. 한 달 전부터 가슴이 두근거리고 손이 떨리고 더위를 못 참아요. 식욕은 늘었는데 체중이 6kg 줄었고 잠을 못 자요. 이모가 갑상선암이셨어요. 3년 전 공황장애로 SSRI를 먹다가 1년 전에 끊었고, 지금은 경구피임약을 먹고 있습니다. 불안한 증상이 공황이 다시 온 건지, 다른 병인지 알고 싶어요.",
+    "expect_consult": true,
+    "expect_emergency": false,
+    "expect_ids": [
+      "kdoctor-endocrinology",
+      "kdoctor-psychiatry"
+    ],
+    "accept_ids": [
+      "kdoctor-internal",
+      "kdoctor-family",
+      "kdoctor-cardiology"
+    ],
+    "min_hits": 2,
+    "triage_any": [
+      "urgent",
+      "routine"
+    ],
+    "facts": [
+      {
+        "label": "가족력(이모 갑상선암)",
+        "any": [
+          "이모",
+          "가족력",
+          "갑상선암"
+        ]
+      },
+      {
+        "label": "과거력(공황장애·SSRI)",
+        "any": [
+          "공황",
+          "SSRI"
+        ]
+      },
+      {
+        "label": "경구피임약",
+        "any": [
+          "피임약",
+          "경구피임약",
+          "임신"
+        ]
+      },
+      {
+        "label": "갑상선 항진 징후",
+        "any": [
+          "갑상선",
+          "떨림",
+          "체중"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "내분비대사내과·정신건강의학과"
+  },
+  {
+    "id": "kdoc-cx-patient-07",
+    "group": "patient",
+    "category": "복합 증례(환자)",
+    "complex": true,
+    "utterance": "50세 여성입니다. 반년째 열이 확 오르는 느낌과 불면이 있고, 요즘엔 질 출혈이 불규칙하게 조금씩 있어요. 어머니가 55세에 유방암, 언니가 난소암이었습니다. 5년 전 자궁근종 수술을 받았어요. 친구가 호르몬 치료가 좋다고 해서 시작해 볼까 하는데 저한테 괜찮은지, 출혈은 검사가 필요한지 알고 싶습니다.",
+    "expect_consult": true,
+    "expect_emergency": false,
+    "expect_ids": [
+      "kdoctor-obstetrics-gynecology",
+      "kdoctor-hematology-oncology"
+    ],
+    "accept_ids": [
+      "kdoctor-family",
+      "kdoctor-endocrinology",
+      "kdoctor-preventive-medicine",
+      "kdoctor-surgery"
+    ],
+    "min_hits": 2,
+    "triage_any": [
+      "urgent",
+      "routine"
+    ],
+    "facts": [
+      {
+        "label": "가족력(어머니 유방암·언니 난소암)",
+        "any": [
+          "유방암",
+          "난소암",
+          "가족력",
+          "BRCA"
+        ]
+      },
+      {
+        "label": "과거력(자궁근종 수술)",
+        "any": [
+          "근종"
+        ]
+      },
+      {
+        "label": "호르몬 치료 고려",
+        "any": [
+          "호르몬"
+        ]
+      },
+      {
+        "label": "비정상 출혈 평가",
+        "any": [
+          "질 출혈",
+          "질출혈",
+          "자궁내막",
+          "비정상"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "산부인과·혈액종양내과"
+  },
+  {
+    "id": "kdoc-cx-patient-08",
+    "group": "patient",
+    "category": "복합 증례(환자)",
+    "complex": true,
+    "utterance": "40세 남성 직장인입니다. 두 달째 밤에 마른기침이 나고 가슴이 답답해요. 코가 자주 막히고 코를 골며 낮에 많이 졸려요. 체중도 늘었어요. 아버지가 천식이 있으셨고, 저는 3년 전 폐렴을 앓았습니다. 6개월 전 혈압약으로 라미프릴을 시작했어요. 담배는 안 피웁니다. 기침 원인이 무엇일지, 약이 관련 있는지 알고 싶어요.",
+    "expect_consult": true,
+    "expect_emergency": false,
+    "expect_ids": [
+      "kdoctor-pulmonology",
+      "kdoctor-ent"
+    ],
+    "accept_ids": [
+      "kdoctor-internal",
+      "kdoctor-family",
+      "kdoctor-allergy",
+      "kdoctor-cardiology"
+    ],
+    "min_hits": 2,
+    "triage_any": [
+      "routine",
+      "urgent"
+    ],
+    "facts": [
+      {
+        "label": "가족력(아버지 천식)",
+        "any": [
+          "아버지",
+          "천식",
+          "가족력"
+        ]
+      },
+      {
+        "label": "혈압약(라미프릴·ACE 억제제 기침)",
+        "any": [
+          "라미프릴",
+          "ACE",
+          "혈압약"
+        ]
+      },
+      {
+        "label": "수면 호흡 문제",
+        "any": [
+          "수면무호흡",
+          "코골이",
+          "수면"
+        ]
+      },
+      {
+        "label": "과거 폐렴",
+        "any": [
+          "폐렴"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "호흡기내과·이비인후과"
+  },
+  {
+    "id": "kdoc-cx-patient-09",
+    "group": "patient",
+    "category": "복합 증례(환자)",
+    "complex": true,
+    "utterance": "63세 남성입니다. 반년 전부터 걸으면 엉덩이와 종아리가 저리고 아파서 쉬면 나아져요. 허리를 숙이면 편합니다. 발이 차갑고요. 당뇨가 10년째라 인슐린을 쓰고, 담배는 40년 폈습니다. 형이 뇌졸중이었고, 저는 3년 전 허리 디스크(L4-5) 수술을 받았어요. 척추 때문인지 혈관 때문인지, 수술이나 시술이 필요한지 궁금합니다.",
+    "expect_consult": true,
+    "expect_emergency": false,
+    "expect_ids": [
+      "kdoctor-neurosurgery",
+      "kdoctor-surgery"
+    ],
+    "accept_ids": [
+      "kdoctor-orthopedics",
+      "kdoctor-cardiology",
+      "kdoctor-rehabilitation",
+      "kdoctor-endocrinology",
+      "kdoctor-neurology",
+      "kdoctor-radiology",
+      "kdoctor-family",
+      "kdoctor-internal"
+    ],
+    "min_hits": 2,
+    "triage_any": [
+      "routine",
+      "urgent"
+    ],
+    "facts": [
+      {
+        "label": "당뇨·인슐린",
+        "any": [
+          "당뇨",
+          "인슐린"
+        ]
+      },
+      {
+        "label": "흡연력",
+        "any": [
+          "흡연",
+          "담배"
+        ]
+      },
+      {
+        "label": "가족력(형 뇌졸중)",
+        "any": [
+          "형",
+          "뇌졸중",
+          "가족력"
+        ]
+      },
+      {
+        "label": "과거 척추 수술",
+        "any": [
+          "디스크",
+          "L4",
+          "수술"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "신경외과·외과(혈관)"
+  },
+  {
+    "id": "kdoc-cx-patient-10",
+    "group": "patient",
+    "category": "복합 증례(보호자)",
+    "complex": true,
+    "utterance": "80세 어머니 일로 문의합니다. 1년 사이 건망증이 심해졌고 최근 석 달은 방에 아이가 있다고 하시고 낮밤이 바뀌었어요. 두 번 넘어지셨습니다. 드시는 약이 졸피뎀, 방광약(옥시부티닌), 혈압약 세 가지, 위장약이에요. 외삼촌도 치매였습니다. 얼마 전 요로감염으로 항생제를 드신 뒤 더 나빠졌어요. 치매인지, 약이나 감염 때문인지, 좋아질 수 있는지 알고 싶습니다.",
+    "expect_consult": true,
+    "expect_emergency": false,
+    "expect_ids": [
+      "kdoctor-neurology",
+      "kdoctor-psychiatry"
+    ],
+    "accept_ids": [
+      "kdoctor-family",
+      "kdoctor-internal",
+      "kdoctor-infectious-disease",
+      "kdoctor-nephrology"
+    ],
+    "min_hits": 2,
+    "triage_any": [
+      "urgent",
+      "routine"
+    ],
+    "facts": [
+      {
+        "label": "약물(졸피뎀·옥시부티닌)",
+        "any": [
+          "졸피뎀",
+          "옥시부티닌",
+          "수면제",
+          "항콜린"
+        ]
+      },
+      {
+        "label": "낙상",
+        "any": [
+          "낙상",
+          "넘어"
+        ]
+      },
+      {
+        "label": "가족력(외삼촌 치매)",
+        "any": [
+          "외삼촌",
+          "가족력"
+        ]
+      },
+      {
+        "label": "요로감염·섬망",
+        "any": [
+          "요로감염",
+          "섬망"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "신경과·정신건강의학과"
+  },
+  {
+    "id": "kdoc-cx-patient-11",
+    "group": "patient",
+    "category": "복합 증례(응급)",
+    "complex": true,
+    "utterance": "72세 어머니가 어제부터 오른쪽 눈이 갑자기 뿌옇게 잘 안 보이고, 오늘은 오른쪽 이마와 머리 옆이 아프고 음식을 씹으면 턱이 아프다고 하세요. 몇 주 전부터 어깨가 뻐근했고 미열이 있어요. 골다공증으로 알렌드로네이트를 드시고, 5년 전 대상포진을 앓았고, 이모가 류마티스성 다발근통이었어요. 며칠 전부터 저용량 아스피린을 드시기 시작했어요.",
+    "expect_consult": false,
+    "expect_emergency": true,
+    "expect_ids": [],
+    "accept_ids": [],
+    "min_hits": 0,
+    "triage_any": [
+      "emergency"
+    ],
+    "facts": [
+      {
+        "label": "시력 이상",
+        "any": [
+          "시력",
+          "눈",
+          "실명"
+        ]
+      },
+      {
+        "label": "과거력(대상포진·골다공증)",
+        "any": [
+          "대상포진",
+          "골다공증",
+          "알렌드로네이트"
+        ]
+      },
+      {
+        "label": "아스피린 복용",
+        "any": [
+          "아스피린"
+        ]
+      },
+      {
+        "label": "가족력(이모 다발근통)",
+        "any": [
+          "이모",
+          "다발근통",
+          "가족력"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "응급 안내",
+    "expect_text_any": [
+      "119",
+      "109"
+    ]
+  },
+  {
+    "id": "kdoc-cx-patient-12",
+    "group": "patient",
+    "category": "복합 증례(응급)",
+    "complex": true,
+    "utterance": "아버지(70세)가 심방세동으로 와파린을 드세요. 어제 욕실에서 미끄러져 뒤통수를 부딪혔는데 그땐 괜찮다고 하셨어요. 오늘은 두통이 점점 심해지고 두 번 토하셨고 자꾸 졸려 하세요. 평소 INR을 한 달에 한 번 재는데 지난달엔 약간 높았어요. 형도 뇌출혈로 돌아가셨습니다.",
+    "expect_consult": false,
+    "expect_emergency": true,
+    "expect_ids": [],
+    "accept_ids": [],
+    "min_hits": 0,
+    "triage_any": [
+      "emergency"
+    ],
+    "facts": [
+      {
+        "label": "항응고제 복용",
+        "any": [
+          "와파린",
+          "항응고"
+        ]
+      },
+      {
+        "label": "두부 외상 후 악화",
+        "any": [
+          "두개내",
+          "뇌출혈",
+          "머리",
+          "두부"
+        ]
+      },
+      {
+        "label": "INR",
+        "any": [
+          "INR"
+        ]
+      },
+      {
+        "label": "가족력(형 뇌출혈)",
+        "any": [
+          "형",
+          "뇌출혈",
+          "가족력"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "응급 안내",
+    "expect_text_any": [
+      "119",
+      "109"
+    ]
+  },
+  {
+    "id": "kdoc-cx-doctor-01",
+    "group": "doctor",
+    "category": "복합 증례(의사 자문)",
+    "complex": true,
+    "utterance": "68세 남성, 2형 당뇨(HbA1c 8.9%), eGFR 38(CKD 3b). 3개월째 우측 1족지 궤양(괴사 없음), 족배동맥 맥박 감소, 흡연력 있고 부친은 심근경색. 메트포르민 1000mg bid, 글리메피리드, 최근 시작한 엠파글리플로진 이후 요로감염 1회. 혈당·신기능에 맞는 약물 조정과 하지 허혈 평가, 상처 예후에 대해 해당 분야 자문을 구해 진단 참고와 처치 제안을 정리해 주세요.",
+    "expect_consult": true,
+    "expect_emergency": false,
+    "expect_ids": [
+      "kdoctor-endocrinology",
+      "kdoctor-nephrology"
+    ],
+    "accept_ids": [
+      "kdoctor-surgery",
+      "kdoctor-infectious-disease",
+      "kdoctor-cardiology",
+      "kdoctor-radiology",
+      "kdoctor-internal"
+    ],
+    "min_hits": 2,
+    "triage_any": [
+      "urgent",
+      "routine"
+    ],
+    "facts": [
+      {
+        "label": "신기능(eGFR·CKD)",
+        "any": [
+          "eGFR",
+          "신기능",
+          "CKD",
+          "신장"
+        ]
+      },
+      {
+        "label": "메트포르민 용량",
+        "any": [
+          "메트포르민"
+        ]
+      },
+      {
+        "label": "족부 궤양·하지 허혈",
+        "any": [
+          "궤양",
+          "하지 허혈",
+          "허혈",
+          "혈관"
+        ]
+      },
+      {
+        "label": "SGLT2 억제제·요로감염",
+        "any": [
+          "엠파글리플로진",
+          "SGLT2",
+          "요로감염"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "내분비대사내과·신장내과"
+  },
+  {
+    "id": "kdoc-cx-doctor-02",
+    "group": "doctor",
+    "category": "복합 증례(의사 자문)",
+    "complex": true,
+    "utterance": "38세 여성, SLE 4년, 하이드록시클로로퀸과 프레드니손 5mg 유지 중. 계획하지 않은 임신 8주. 최근 거품뇨와 하지 부종, 혈압 146/94, 소변 단백 2+. 항인지질항체 양성이고 유산 2회 병력, 모친도 SLE. 루푸스 신염과 전자간증 감별, 약물 조정, 임신 경과 예후에 대해 해당 분야 자문을 구해 정리해 주세요.",
+    "expect_consult": true,
+    "expect_emergency": false,
+    "expect_ids": [
+      "kdoctor-rheumatology",
+      "kdoctor-obstetrics-gynecology"
+    ],
+    "accept_ids": [
+      "kdoctor-nephrology",
+      "kdoctor-internal",
+      "kdoctor-hematology-oncology"
+    ],
+    "min_hits": 2,
+    "triage_any": [
+      "urgent",
+      "emergency"
+    ],
+    "facts": [
+      {
+        "label": "임신 상태",
+        "any": [
+          "임신"
+        ]
+      },
+      {
+        "label": "루푸스 신염·단백뇨",
+        "any": [
+          "루푸스",
+          "신염",
+          "단백뇨"
+        ]
+      },
+      {
+        "label": "항인지질항체·유산력",
+        "any": [
+          "항인지질",
+          "유산",
+          "항응고",
+          "아스피린"
+        ]
+      },
+      {
+        "label": "가족력·약물",
+        "any": [
+          "모친",
+          "어머니",
+          "가족력",
+          "하이드록시클로로퀸"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "류마티스내과·산부인과"
+  },
+  {
+    "id": "kdoc-cx-doctor-03",
+    "group": "doctor",
+    "category": "복합 증례(의사 자문)",
+    "complex": true,
+    "utterance": "72세 남성, 심방세동(CHA2DS2-VASc 4)으로 와파린 복용 중이며 INR 변동이 큽니다. 3개월 전부터 간헐적 혈변과 Hb 9.1의 철결핍성 빈혈이 있고, 3년 전 대장내시경에서 용종 절제, 형은 62세 대장암입니다. NSAID는 쓰지 않습니다. 출혈원 평가와 항응고 조정(중단·대체)의 위험·이득, 예후에 대해 해당 분야 자문을 구해 주세요.",
+    "expect_consult": true,
+    "expect_emergency": false,
+    "expect_ids": [
+      "kdoctor-gastroenterology",
+      "kdoctor-cardiology"
+    ],
+    "accept_ids": [
+      "kdoctor-hematology-oncology",
+      "kdoctor-internal",
+      "kdoctor-surgery"
+    ],
+    "min_hits": 2,
+    "triage_any": [
+      "urgent"
+    ],
+    "facts": [
+      {
+        "label": "와파린·INR",
+        "any": [
+          "와파린",
+          "INR",
+          "항응고"
+        ]
+      },
+      {
+        "label": "혈변·빈혈",
+        "any": [
+          "빈혈",
+          "혈변",
+          "Hb"
+        ]
+      },
+      {
+        "label": "가족력(형 대장암)",
+        "any": [
+          "형",
+          "대장암",
+          "가족력"
+        ]
+      },
+      {
+        "label": "용종·대장내시경",
+        "any": [
+          "용종",
+          "대장내시경"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "소화기내과·순환기내과"
+  },
+  {
+    "id": "kdoc-cx-doctor-04",
+    "group": "doctor",
+    "category": "복합 증례(의사 자문)",
+    "complex": true,
+    "utterance": "45세 남성, HBsAg 양성 보균자. 류마티스관절염 진단이 임박해 메토트렉세이트와 TNF 억제제 시작을 계획 중입니다. AST/ALT 62/70, 소주 주 3회 1병 음주력, 부친은 58세 간암. 생물학적 제제 전 B형간염 재활성 예방과 간 평가, 치료 계획의 예후에 대해 해당 분야 자문을 구해 정리해 주세요.",
+    "expect_consult": true,
+    "expect_emergency": false,
+    "expect_ids": [
+      "kdoctor-gastroenterology",
+      "kdoctor-rheumatology"
+    ],
+    "accept_ids": [
+      "kdoctor-infectious-disease",
+      "kdoctor-internal"
+    ],
+    "min_hits": 2,
+    "triage_any": [
+      "urgent",
+      "routine"
+    ],
+    "facts": [
+      {
+        "label": "B형간염 재활성",
+        "any": [
+          "B형간염",
+          "HBsAg",
+          "HBV",
+          "재활성"
+        ]
+      },
+      {
+        "label": "음주력",
+        "any": [
+          "알코올",
+          "음주"
+        ]
+      },
+      {
+        "label": "가족력(부친 간암)",
+        "any": [
+          "부친",
+          "아버지",
+          "간암",
+          "가족력"
+        ]
+      },
+      {
+        "label": "면역억제제 계획",
+        "any": [
+          "메토트렉세이트",
+          "TNF",
+          "생물학"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "소화기내과·류마티스내과"
+  },
+  {
+    "id": "kdoc-cx-doctor-05",
+    "group": "doctor",
+    "category": "복합 증례(의사 자문)",
+    "complex": true,
+    "utterance": "29세 여성, 양극성장애 II형으로 리튬 3년 복용 중. 설사·구토 이틀 후 손떨림과 오심이 생겼고 월경통으로 나프록센을 병용했습니다. 혈중 리튬 1.4 mEq/L(참고 0.6~1.2). 모친도 양극성장애. 약물 상호작용과 신기능 평가, 리튬 조정 시 기분 안정과 예후에 대해 해당 분야 자문을 구해 주세요.",
+    "expect_consult": true,
+    "expect_emergency": false,
+    "expect_ids": [
+      "kdoctor-psychiatry",
+      "kdoctor-nephrology"
+    ],
+    "accept_ids": [
+      "kdoctor-internal",
+      "kdoctor-neurology",
+      "kdoctor-laboratory-medicine",
+      "kdoctor-obstetrics-gynecology"
+    ],
+    "min_hits": 2,
+    "triage_any": [
+      "urgent",
+      "emergency"
+    ],
+    "facts": [
+      {
+        "label": "리튬",
+        "any": [
+          "리튬"
+        ]
+      },
+      {
+        "label": "NSAID 상호작용",
+        "any": [
+          "나프록센",
+          "NSAID",
+          "상호작용"
+        ]
+      },
+      {
+        "label": "탈수",
+        "any": [
+          "설사",
+          "구토",
+          "탈수"
+        ]
+      },
+      {
+        "label": "가족력(모친 양극성장애)",
+        "any": [
+          "모친",
+          "어머니",
+          "가족력",
+          "양극성"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "정신건강의학과·신장내과"
+  },
+  {
+    "id": "kdoc-cx-doctor-06",
+    "group": "doctor",
+    "category": "복합 증례(의사 자문)",
+    "complex": true,
+    "utterance": "52세 여성, 5년 전 유방암 수술 후 타목시펜 복용 중. 흉부 CT에서 우상엽 12mm 신규 결절, 경미한 기침. 모친·이모가 유방암이고 본인은 BRCA2 변이 양성, 3년 전 폐렴 병력, 비흡연. 전이 대 원발성 폐암 대 감염의 감별과 조직 확인 계획, 추적 및 예후에 대해 해당 분야 자문을 구해 정리해 주세요.",
+    "expect_consult": true,
+    "expect_emergency": false,
+    "expect_ids": [
+      "kdoctor-pulmonology",
+      "kdoctor-hematology-oncology"
+    ],
+    "accept_ids": [
+      "kdoctor-radiology",
+      "kdoctor-thoracic-surgery",
+      "kdoctor-nuclear-medicine",
+      "kdoctor-pathology"
+    ],
+    "min_hits": 2,
+    "triage_any": [
+      "urgent",
+      "routine"
+    ],
+    "facts": [
+      {
+        "label": "BRCA2 변이",
+        "any": [
+          "BRCA"
+        ]
+      },
+      {
+        "label": "가족력(모친·이모 유방암)",
+        "any": [
+          "모친",
+          "이모",
+          "어머니",
+          "가족력"
+        ]
+      },
+      {
+        "label": "타목시펜",
+        "any": [
+          "타목시펜"
+        ]
+      },
+      {
+        "label": "폐 결절 평가",
+        "any": [
+          "결절",
+          "12mm"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "호흡기내과·혈액종양내과"
+  },
+  {
+    "id": "kdoc-cx-doctor-07",
+    "group": "doctor",
+    "category": "복합 증례(의사 자문)",
+    "complex": true,
+    "utterance": "8세 남아, 소아 천식으로 흡입 스테로이드 중. 이번 달 야간 기침이 늘었고 2주 전 중이염으로 아목시실린-클라불란산 복용 후 설사, 이어 두드러기 1회. 부친이 아토피·알레르기 비염, 체중 하위 5백분위. 급성 악화 징후는 없습니다. 천식 조절 평가, 항생제 반응의 알레르기 여부, 성장 예후에 대해 해당 분야 자문을 구해 주세요.",
+    "expect_consult": true,
+    "expect_emergency": false,
+    "expect_ids": [
+      "kdoctor-pediatric-respiratory-allergy",
+      "kdoctor-allergy"
+    ],
+    "accept_ids": [
+      "kdoctor-pediatrics",
+      "kdoctor-pediatric-gastro-nutrition",
+      "kdoctor-pediatric-infectious",
+      "kdoctor-ent"
+    ],
+    "min_hits": 2,
+    "triage_any": [
+      "routine",
+      "urgent"
+    ],
+    "facts": [
+      {
+        "label": "천식·흡입 스테로이드",
+        "any": [
+          "천식",
+          "흡입",
+          "스테로이드"
+        ]
+      },
+      {
+        "label": "항생제 반응",
+        "any": [
+          "아목시실린",
+          "클라불란산",
+          "두드러기",
+          "약물 알레르기"
+        ]
+      },
+      {
+        "label": "가족력(부친 아토피)",
+        "any": [
+          "부친",
+          "아버지",
+          "아토피",
+          "가족력"
+        ]
+      },
+      {
+        "label": "성장·체중",
+        "any": [
+          "체중",
+          "성장"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "소아호흡알레르기·알레르기내과"
+  },
+  {
+    "id": "kdoc-cx-doctor-08",
+    "group": "doctor",
+    "category": "복합 증례(의사 자문)",
+    "complex": true,
+    "utterance": "60세 남성, 고혈압·이상지질혈증으로 아토르바스타틴 80mg 복용 중. 호흡기 감염으로 클래리스로마이신을 처방받은 뒤 근육통과 갈색뇨 이틀. CK 8,500 U/L, 크레아티닌 1.6(기저 1.0). 형도 스타틴 근병증 병력. 횡문근융해와 급성 신손상 평가, 수액·약물 중단 및 재투여 가능성과 예후에 대해 해당 분야 자문을 구해 정리해 주세요.",
+    "expect_consult": true,
+    "expect_emergency": false,
+    "expect_ids": [
+      "kdoctor-nephrology",
+      "kdoctor-cardiology"
+    ],
+    "accept_ids": [
+      "kdoctor-internal",
+      "kdoctor-neurology",
+      "kdoctor-emergency",
+      "kdoctor-infectious-disease",
+      "kdoctor-rheumatology"
+    ],
+    "min_hits": 2,
+    "triage_any": [
+      "urgent",
+      "emergency"
+    ],
+    "facts": [
+      {
+        "label": "스타틴·약물 조정",
+        "any": [
+          "아토르바스타틴",
+          "스타틴"
+        ]
+      },
+      {
+        "label": "마크로라이드 상호작용",
+        "any": [
+          "클래리스로마이신",
+          "마크로라이드",
+          "상호작용",
+          "CYP3A4"
+        ]
+      },
+      {
+        "label": "횡문근융해·CK",
+        "any": [
+          "횡문근융해",
+          "CK"
+        ]
+      },
+      {
+        "label": "급성 신손상",
+        "any": [
+          "크레아티닌",
+          "AKI",
+          "급성 신손상",
+          "신기능"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "신장내과·순환기내과"
+  },
+  {
+    "id": "kdoc-cx-doctor-09",
+    "group": "doctor",
+    "category": "복합 증례(의사 자문)",
+    "complex": true,
+    "utterance": "33세 여성, 전조 편두통 12년. 복합 경구피임약(에티닐에스트라디올) 시작 2개월 후 전조 지속시간이 늘고 우측 손 저림이 20분 있었습니다. 모친이 50세에 뇌졸중, 흡연 하루 5개비, 혈압 128/82. 피임약 지속 가능 여부와 뇌졸중 위험 평가, 대체 피임법과 경과 예후에 대해 해당 분야 자문을 구해 정리해 주세요.",
+    "expect_consult": true,
+    "expect_emergency": false,
+    "expect_ids": [
+      "kdoctor-neurology",
+      "kdoctor-obstetrics-gynecology"
+    ],
+    "accept_ids": [
+      "kdoctor-family",
+      "kdoctor-cardiology",
+      "kdoctor-radiology",
+      "kdoctor-neurosurgery"
+    ],
+    "min_hits": 2,
+    "triage_any": [
+      "urgent",
+      "emergency"
+    ],
+    "facts": [
+      {
+        "label": "복합 경구피임약 금기",
+        "any": [
+          "피임약",
+          "에스트로겐",
+          "금기"
+        ]
+      },
+      {
+        "label": "전조 편두통",
+        "any": [
+          "전조"
+        ]
+      },
+      {
+        "label": "가족력(모친 뇌졸중)",
+        "any": [
+          "모친",
+          "어머니",
+          "뇌졸중",
+          "가족력"
+        ]
+      },
+      {
+        "label": "흡연",
+        "any": [
+          "흡연"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "신경과·산부인과"
+  },
+  {
+    "id": "kdoc-cx-doctor-10",
+    "group": "doctor",
+    "category": "복합 증례(의사 자문)",
+    "complex": true,
+    "utterance": "76세 여성, 낙상으로 고관절 골절 후 인공관절 반치환술 2주차. 골다공증으로 알렌드로네이트 4년, CKD 3a, 모친도 고관절 골절. 재활 중 기립성 어지럼, 어제부터 좌하지 종창, 에녹사파린 예방 투여는 1주 전 종료. 심부정맥혈전증 평가와 항응고 선택(신기능 고려), 재활 진행과 예후에 대해 해당 분야 자문을 구해 주세요.",
+    "expect_consult": true,
+    "expect_emergency": false,
+    "expect_ids": [
+      "kdoctor-orthopedics",
+      "kdoctor-rehabilitation"
+    ],
+    "accept_ids": [
+      "kdoctor-cardiology",
+      "kdoctor-hematology-oncology",
+      "kdoctor-radiology",
+      "kdoctor-internal",
+      "kdoctor-endocrinology",
+      "kdoctor-nephrology",
+      "kdoctor-family"
+    ],
+    "min_hits": 2,
+    "triage_any": [
+      "urgent",
+      "emergency"
+    ],
+    "facts": [
+      {
+        "label": "골다공증 약물",
+        "any": [
+          "골다공증",
+          "알렌드로네이트",
+          "비스포스포네이트"
+        ]
+      },
+      {
+        "label": "심부정맥혈전증",
+        "any": [
+          "심부정맥",
+          "DVT",
+          "혈전"
+        ]
+      },
+      {
+        "label": "에녹사파린·항응고",
+        "any": [
+          "에녹사파린",
+          "항응고",
+          "혈전예방"
+        ]
+      },
+      {
+        "label": "신기능·가족력",
+        "any": [
+          "신기능",
+          "CKD",
+          "모친",
+          "어머니",
+          "가족력"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "정형외과·재활의학과"
+  },
+  {
+    "id": "kdoc-cx-doctor-11",
+    "group": "doctor",
+    "category": "복합 증례(의사 자문·응급)",
+    "complex": true,
+    "utterance": "55세 여성, 2년 전 폐색전증으로 와파린 후 리바록사반으로 변경. 현재 무릎 인공관절 수술 후 5일째 갑작스러운 호흡곤란과 흉막성 흉통, 심박수 118, SpO2 90%, 한쪽 종아리 부종. 모친도 정맥혈전증. 순환기·호흡기 분야 자문을 구해 진단 참고를 정리해 주세요.",
+    "expect_consult": false,
+    "expect_emergency": true,
+    "expect_ids": [],
+    "accept_ids": [],
+    "min_hits": 0,
+    "triage_any": [
+      "emergency"
+    ],
+    "facts": [
+      {
+        "label": "폐색전증 병력",
+        "any": [
+          "폐색전증"
+        ]
+      },
+      {
+        "label": "항응고제 변경 이력",
+        "any": [
+          "와파린",
+          "리바록사반",
+          "항응고"
+        ]
+      },
+      {
+        "label": "수술 후 혈전 위험",
+        "any": [
+          "수술",
+          "혈전",
+          "심부정맥"
+        ]
+      },
+      {
+        "label": "가족력(모친 정맥혈전증)",
+        "any": [
+          "모친",
+          "어머니",
+          "가족력"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "응급 안내",
+    "expect_text_any": [
+      "119",
+      "109"
+    ]
+  },
+  {
+    "id": "kdoc-cx-doctor-12",
+    "group": "doctor",
+    "category": "복합 증례(의사 자문·응급)",
+    "complex": true,
+    "utterance": "24세 여성, 1형 당뇨. 3일 전 감기 후 식사량이 줄어 인슐린을 임의로 감량. 구토·복통과 깊고 빠른 호흡, 혈당 480, 소변 케톤 강양성. 모친도 1형 당뇨. 내분비 분야 자문을 구해 진단 참고와 처치 제안을 정리해 주세요.",
+    "expect_consult": false,
+    "expect_emergency": true,
+    "expect_ids": [],
+    "accept_ids": [],
+    "min_hits": 0,
+    "triage_any": [
+      "emergency"
+    ],
+    "facts": [
+      {
+        "label": "당뇨병 케톤산증",
+        "any": [
+          "케톤산증",
+          "DKA",
+          "케톤"
+        ]
+      },
+      {
+        "label": "인슐린 임의 감량",
+        "any": [
+          "인슐린"
+        ]
+      },
+      {
+        "label": "감염 유발 요인",
+        "any": [
+          "감기",
+          "감염"
+        ]
+      },
+      {
+        "label": "가족력(모친 1형 당뇨)",
+        "any": [
+          "모친",
+          "어머니",
+          "가족력"
+        ]
+      }
+    ],
+    "facts_min": 3,
+    "target_name": "응급 안내",
+    "expect_text_any": [
+      "119",
+      "109"
+    ]
+  }
+]

@@ -23,6 +23,10 @@ on:
         description: "on | off — 독립 검수(K-Doctor-Check)와 재조정 (기본 on)"
         required: false
         default: "on"
+      scenarios:
+        description: "Scenario file name under tests/live_smoketest (default: the 100-case set)"
+        required: false
+        default: "scenarios_kdoctor_consult_100_20261001.json"
       label:
         description: "Result label (blank = run number). Results go to branch results/live-smoketest-kdoctor-consult-<label>"
         required: false
@@ -54,7 +58,10 @@ jobs:
           LABEL="${{ github.event.inputs.label }}"
           if [ -z "$LABEL" ]; then LABEL="run${{ github.run_number }}"; fi
           echo "LABEL=$LABEL" >> "$GITHUB_ENV"
-          ARGS="--scenarios scenarios_kdoctor_consult_100_20261001.json --out ../../results/kdoctor-consult-$LABEL --resume --concurrency ${{ github.event.inputs.concurrency || '4' }} --review ${{ github.event.inputs.review || 'on' }}"
+          SC="${{ github.event.inputs.scenarios }}"
+          if [ -z "$SC" ]; then SC="scenarios_kdoctor_consult_100_20261001.json"; fi
+          if ! echo "$SC" | grep -Eq '^[A-Za-z0-9_.-]+\.json$'; then echo "bad scenarios name"; exit 1; fi
+          ARGS="--scenarios $SC --out ../../results/kdoctor-consult-$LABEL --resume --concurrency ${{ github.event.inputs.concurrency || '4' }} --review ${{ github.event.inputs.review || 'on' }}"
           if [ -n "${{ github.event.inputs.orch_max_tokens }}" ]; then ARGS="$ARGS --orch-max-tokens ${{ github.event.inputs.orch_max_tokens }}"; fi
           if [ -n "${{ github.event.inputs.limit }}" ]; then ARGS="$ARGS --limit ${{ github.event.inputs.limit }}"; fi
           if [ -n "${{ github.event.inputs.group }}" ]; then ARGS="$ARGS --group ${{ github.event.inputs.group }}"; fi
