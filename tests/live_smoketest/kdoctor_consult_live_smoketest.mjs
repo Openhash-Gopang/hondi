@@ -26,7 +26,7 @@
 import { readFileSync, writeFileSync, appendFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runTurn, parseConsults, extractReport, explicitConsultRequest } from '../../assets/kdoctor-chat-core.js';
+import { runTurn, parseConsults, extractReport, explicitConsultRequest, REPORT_OPEN_RE, REPORT_CLOSE_RE } from '../../assets/kdoctor-chat-core.js';
 import { validateDiagnosis, audienceView } from '../../src/gopang/ai/hondi-doctor-verdict.js';
 import { loadResources, makeMockLLM } from '../../scripts/kdoctor/eval/eval-run.mjs';
 
@@ -127,7 +127,7 @@ export function scoreRecord(sc, rec) {
 export async function runScenario(sc, { llm, resources, maxTurns = 3, orchMaxTokens = null, checkLlm = null }) {
   const t0 = Date.now();
   const rec = { id: sc.id, group: sc.group, utterance: sc.utterance, expect_ids: sc.expect_ids, accept_ids: sc.accept_ids, expect_consult: sc.expect_consult,
-    requested_ids: [], called_ids: [], consult_questions: [], view_type: null, validated_ok: false, turns: 0, first_consult_turn: null,
+    gates: 0, requested_ids: [], called_ids: [], consult_questions: [], view_type: null, validated_ok: false, turns: 0, first_consult_turn: null,
     n_llm_calls: 0, all_text: '', orchestrator_replies: [], orchestrator_calls: [], validation_errors: [], reviews: [], artifacts: { consult_texts: [], check: null, reconcile: null, final_report: null }, error: null };
   let turnNo = 0;
   const deps = {
@@ -141,7 +141,7 @@ export async function runScenario(sc, { llm, resources, maxTurns = 3, orchMaxTok
       if (isOrch) {
         rec.orchestrator_replies.push(out);
         rec.orchestrator_calls.push({ chars: out.length, finish_reason: meta.finish_reason ?? null, completion_tokens: meta.completion_tokens ?? null, max_tokens: useMax,
-          has_open_tag: out.includes('[DIAGNOSIS_REPORT]'), has_close_tag: out.includes('[/DIAGNOSIS_REPORT]') });
+          has_open_tag: REPORT_OPEN_RE.test(out), has_close_tag: REPORT_CLOSE_RE.test(out) });
         rec.all_text += '\n' + out;
         for (const w of parseConsults(out)) { rec.requested_ids.push(w.id); rec.consult_questions.push({ id: w.id, question: w.question }); }
       }
@@ -158,6 +158,7 @@ export async function runScenario(sc, { llm, resources, maxTurns = 3, orchMaxTok
       rec.validated_ok = false;
       const out = await runTurn(history, userText, deps);
       rec.turns++;
+      rec.gates += out.view.gates ?? 0;
       history = out.history;
       const ok = (out.view.consults ?? []).filter((c) => c.ok).map((c) => c.id);
       if (ok.length && rec.first_consult_turn === null) rec.first_consult_turn = turnNo + 1;
@@ -182,14 +183,14 @@ export async function runScenario(sc, { llm, resources, maxTurns = 3, orchMaxTok
 export function caseDetail(rec, round = null) {
   const strip = (x) => String(x).replace(/^kdoctor-/, '');
   const lastRep = rec.orchestrator_replies?.[rec.orchestrator_replies.length - 1] ?? '';
-  const parse = (t) => { const m = /\[DIAGNOSIS_REPORT\]([\s\S]*?)\[\/DIAGNOSIS_REPORT\]/.exec(t ?? ''); if (!m) return null; try { return JSON.parse(m[1].trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim()); } catch { return null; } };
+  const parse = (t) => extractReport(t ?? '').report ?? null;
   const a = rec.artifacts ?? {};
   return { round, id: rec.id, group: rec.group, utterance: rec.utterance, expect_consult: rec.expect_consult, expect: (rec.expect_ids ?? []).map(strip), accept: (rec.accept_ids ?? []).map(strip),
     status: rec.score.status, reason: rec.score.reason, match: rec.score.match ?? null, called: [...new Set(rec.called_ids)].map(strip),
     consult_questions: (rec.consult_questions ?? []).map((q) => ({ id: strip(q.id), question: q.question })), consult_texts: a.consult_texts?.length ? a.consult_texts : null,
     orchestrator: (rec.orchestrator_replies ?? []).map((r) => r.slice(0, 12000)), view_type: rec.view_type, validated_ok: rec.validated_ok, validation_errors: rec.validation_errors ?? [],
     report: rec.view_type === 'report' ? parse(lastRep) : null, check: a.check ?? null, reconcile: a.reconcile ?? null, final_report: a.final_report ? parse(a.final_report) : null,
-    reviews: (rec.reviews ?? []).map(({ check_text, ...r }) => r), turns: rec.turns, ms: rec.ms };
+    reviews: (rec.reviews ?? []).map(({ check_text, ...r }) => r), gates: rec.gates ?? 0, turns: rec.turns, ms: rec.ms };
 }
 function writeCaseFile(outDir, rec) {
   try { mkdirSync(join(outDir, 'cases'), { recursive: true }); writeFileSync(join(outDir, 'cases', rec.id + '.json'), JSON.stringify(caseDetail(rec))); } catch (e) { console.warn('case file 저장 실패', rec.id, e.message); }
@@ -208,6 +209,7 @@ export function summarize(records) {
     fail_reasons: Object.fromEntries(Object.entries(by((r) => r.score.reason)).filter(([, v]) => v.some((r) => r.score.status !== 'LIVE-PASS')).map(([k, v]) => [k, v.filter((r) => r.score.status !== 'LIVE-PASS').length])),
     accept_only_pass: consultRecs.filter((r) => r.score.match === 'accept' && r.score.status === 'LIVE-PASS').map((r) => r.id),
     avg_consults_per_case: +(consultRecs.reduce((s, r) => s + r.called_ids.length, 0) / Math.max(1, consultRecs.length)).toFixed(2),
+    consult_gates_total: records.reduce((n, r) => n + (r.gates ?? 0), 0),
     truncated_orchestrator_calls: records.reduce((n, r) => n + (r.orchestrator_calls ?? []).filter((c) => c.finish_reason === 'length').length, 0),
     orchestrator_calls_total: records.reduce((n, r) => n + (r.orchestrator_calls ?? []).length, 0),
     review: (() => { const rv = records.flatMap((r) => r.reviews ?? []); const c = (f) => rv.filter(f).length; return { n: rv.length, ok_none: c((x) => x.verdict === '재검토 불요'), recommend: c((x) => x.verdict === '재검토 권고'), invalid_suspect: c((x) => x.verdict === '결론 무효 소지'), unparsed: c((x) => x.status === 'unparsed'), error: c((x) => x.status === 'error'), reconciled: c((x) => x.reconciled), reconcile_failed: c((x) => x.reconcile_failed), findings_by_module: rv.flatMap((x) => x.findings ?? []).reduce((m, f) => { m[f.module] = (m[f.module] ?? 0) + 1; return m; }, {}) }; })(),

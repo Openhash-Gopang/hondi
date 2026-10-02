@@ -140,7 +140,8 @@ test('parseCheckVerdict / parseReconcileTag', async () => {
 function reviewDeps(over = {}) {
   const rep = (kind) => '[DIAGNOSIS_REPORT]\n{"k":"' + kind + '"}\n[/DIAGNOSIS_REPORT]';
   let orchCalls = 0;
-  const deps = { orchestratorSP: 'SP', registry: { specialties: [] }, loadSpecialist: async () => 'S', audienceView: () => ({ view: 'clinician', report: {} }), checkSP: 'CHK',
+  const deps = { orchestratorSP: 'SP', registry: { specialties: [] }, loadSpecialist: async () => 'S', audienceView: () => ({ view: 'clinician', report: {} }), checkSP: 'CHK', consultGate: false, // 이 시험들은 검수·재조정만 본다(협진 게이트는 chat-core.test.mjs)
+   
     callLLM: async () => { orchCalls++; return orchCalls === 1 ? rep('orig') : '[수용] C-1 — 입력에 없음\n결론 영향 있음\n' + rep('fixed') + '\n[STEP-RECONCILE-COMPLETE | 지적 1건 | 수용 1건 | 반박 0건 | 결론 번복]'; },
     validate: (r) => ({ ok: true, errors: [], kind: r.k === 'fixed' ? 'conditional' : 'conditional' }),
     callCheck: async () => '[FINDING | C-1 | HIGH | 결론영향:있음 | x | 근거: 입력에 없음]\n[CHECK_VERDICT: 결론 무효 소지 | 지적 1건]', ...over };

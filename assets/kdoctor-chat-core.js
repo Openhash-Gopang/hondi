@@ -37,18 +37,54 @@ export function parseConsults(text) {
   return out;
 }
 
+/**
+ * 보고서 태그는 모델이 철자를 틀리거나(`[DIGNOSIS_REPORT]`) 태그 뒤에 `**`·코드펜스를 붙이는 일이 있다(라이브 스모크 R5: patient-02·41).
+ * 협진까지 정상이었는데 추출기가 못 읽어 결과가 버려졌다. 태그 철자는 느슨하게, JSON은 첫 `{`~마지막 `}`로 읽는다.
+ * 읽은 JSON의 채택 여부는 여전히 결정론 검증기가 정한다.
+ */
+export const REPORT_OPEN_RE = /\[\s*D[A-Z]*GNOSIS[_\s]*REPORT\s*\]/i;
+export const REPORT_CLOSE_RE = /\[\s*\/\s*D[A-Z]*GNOSIS[_\s]*REPORT\s*\]/i;
+const REPORT_BLOCK_RE = /\[\s*D[A-Z]*GNOSIS[_\s]*REPORT\s*\][\s\S]*?\[\s*\/\s*D[A-Z]*GNOSIS[_\s]*REPORT\s*\]/gi;
+const REPORT_TAG_RE = /\[\s*\/?\s*D[A-Z]*GNOSIS[_\s]*REPORT\s*\]/gi;
+
+function parseReportBody(body) {
+  const s = String(body ?? '');
+  const a = s.indexOf('{');
+  const b = s.lastIndexOf('}');
+  if (a < 0 || b < a) return { report: null, error: 'json_parse_failed' };
+  try { return { report: JSON.parse(s.slice(a, b + 1)), error: null }; }
+  catch { return { report: null, error: 'json_parse_failed' }; }
+}
+
 export function extractReport(text) {
-  const m = /\[DIAGNOSIS_REPORT\]([\s\S]*?)\[\/DIAGNOSIS_REPORT\]/.exec(String(text ?? ''));
-  if (!m) return { found: false, report: null, error: null };
-  let body = m[1].trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
-  try { return { found: true, report: JSON.parse(body), error: null }; }
-  catch (e) { return { found: true, report: null, error: 'json_parse_failed' }; }
+  const t = String(text ?? '');
+  const open = REPORT_OPEN_RE.exec(t);
+  if (open) {
+    const rest = t.slice(open.index + open[0].length);
+    const close = REPORT_CLOSE_RE.exec(rest);
+    const r = parseReportBody(close ? rest.slice(0, close.index) : rest);
+    // 닫는 태그가 없고 JSON도 읽히지 않으면(출력 잘림) 보고서가 없는 것으로 본다.
+    if (!close && !r.report) return { found: false, report: null, error: null };
+    return { found: true, ...r };
+  }
+  // 여는 태그가 통째로 빠졌어도 보고서 JSON(model_version·triage)이 온전하면 읽는다.
+  const close = REPORT_CLOSE_RE.exec(t);
+  const cands = [];
+  for (const m of t.matchAll(/```(?:json)?\s*([\s\S]*?)```/gi)) cands.push(m[1]);
+  cands.push(close ? t.slice(0, close.index) : t);
+  for (const c of cands) {
+    const r = parseReportBody(c);
+    if (r.report && typeof r.report === 'object' && 'model_version' in r.report && 'triage' in r.report) return { found: true, ...r };
+  }
+  return { found: false, report: null, error: null };
 }
 
 /** 사용자에게 보이면 안 되는 내부 표식을 제거한다. */
 export function stripInternal(text) {
   return String(text ?? '')
-    .replace(/\[DIAGNOSIS_REPORT\][\s\S]*?\[\/DIAGNOSIS_REPORT\]/g, '')
+    .replace(REPORT_BLOCK_RE, '')
+    .replace(/\[\s*D[A-Z]*GNOSIS[_\s]*REPORT\s*\][\s\S]*$/i, '')
+    .replace(REPORT_TAG_RE, '')
     .replace(/\[CASE_STATE\][\s\S]*?\[\/CASE_STATE\]/g, '')
     .replace(/\[CONSULT_SPECIALIST:[^\]]*\]/g, '')
     .replace(/\[PDV_REQUEST:[^\]]*\](?:[^\]]*\])?/g, '')
@@ -256,8 +292,43 @@ export function parseReconcileTag(text) {
 }
 
 function reportBlock(text) {
-  const m = /\[DIAGNOSIS_REPORT\][\s\S]*?\[\/DIAGNOSIS_REPORT\]/.exec(String(text ?? ''));
+  const m = new RegExp(REPORT_BLOCK_RE.source, 'i').exec(String(text ?? ''));
   return m ? m[0] : String(text ?? '');
+}
+
+/**
+ * 협진 게이트 (2026-10-03, 라이브 스모크 R5 환자 증례 분석).
+ * R5에서 환자 주도 증례 10건이 협진 없이 끝났다. 원인은 (가) 총괄이 STEP A-2를 건너뛰고 바로 보고서를 낸 경우,
+ * (나) A-2 태그에 "호출 1회"라고만 쓰고 [CONSULT_SPECIALIST] 태그는 내지 않은 경우였다(서술은 호출이 아니다).
+ * 협진을 강제하지는 않는다. 협진 없이 첫 보고서가 나오려는 순간 1회만 되물어, 호출하거나 호출하지 않는 사유를 적게 한다.
+ */
+export const MAX_CONSULT_GATES = 1;
+const A2_CLAIM_RE = /\[STEP-A-2[^\]]*호출\s*[:：]?\s*[1-9]\s*(?:회|건)/;
+const A2_SKIP_REASON_RE = /\[STEP-A-2[^\]]*호출\s*[:：]?\s*0\s*(?:회|건)[^\]]*사유/;
+
+/** A-2 태그에 호출했다고 적었지만 실제 호출 태그는 없는 응답. */
+export function claimsCallWithoutTag(reply) {
+  const t = String(reply ?? '');
+  return A2_CLAIM_RE.test(t) && parseConsults(t).length === 0;
+}
+
+/** 이 턴에서 협진 없이 첫 보고서가 나오려는지 보고 되물을 문구를 돌려준다(해당 없으면 null). */
+export function consultGateMessage(reply, { history = [], consultLog = [] } = {}) {
+  if (consultLog.length) return null;
+  const t = String(reply ?? '');
+  if (parseConsults(t).length) return null;
+  const narrated = claimsCallWithoutTag(t);
+  const ex = extractReport(t);
+  if (!narrated && !ex.found) return null;                         // 보고서도 서술도 없는 응답(되묻기 등)은 그대로 둔다
+  if (isEmergencyTriage(t) || ex.report?.triage?.level === 'emergency') return null;
+  if (!narrated && A2_SKIP_REASON_RE.test(t)) return null;          // 호출하지 않는 사유를 이미 적었다
+  const earlier = (history ?? []).some((m) => m?.role === 'assistant' && typeof m.content === 'string' && (A2_CLAIM_RE.test(m.content) || REPORT_OPEN_RE.test(m.content)));
+  if (earlier && !narrated) return null;                            // 앞선 턴에서 이미 협진했거나 보고서를 냈다
+  return '[시스템] ' + (narrated
+    ? 'A-2 태그에 호출했다고 적었지만 [CONSULT_SPECIALIST: id=…, question=…] 태그가 없어 아무 과목도 호출되지 않았다(서술만으로는 호출되지 않는다). '
+    : '협진 없이 [DIAGNOSIS_REPORT]를 냈다. ') +
+    'STEP A-2 호출 시점 ②~⑦ 중 하나라도 해당하면(증상 상담은 대개 해당한다) 보고서를 내지 말고 지금 [CONSULT_SPECIALIST] 태그를 출력해 호출하라(좁은 질문 하나, 최대 3회, 부족한 정보는 질문에 "미상"으로 적는다). ' +
+    '"호출하지 않는 경우" 4종(단순 정보 질문·총괄 범위 경증·응급 안내로 종결·같은 질문 반복) 중 하나에 해당하면 `[STEP-A-2-COMPLETE | 호출 0회 | 사유: <4종 중 하나>]` 한 줄을 적고 보고서를 다시 내라.';
 }
 
 export async function runTurn(history, userText, deps) {
@@ -285,10 +356,15 @@ export async function runTurn(history, userText, deps) {
     return buildPdvBlock(res, fields);
   }
 
+  let gates = 0;
   for (let round = 0; round <= MAX_CONSULT_ROUNDS; round++) {
     reply = await deps.callLLM(deps.orchestratorSP, work, ORCHESTRATOR_MAX_TOKENS);
     const wanted = parseConsults(reply);
     const pdvAsks = parsePdvRequests(reply);
+    if (!wanted.length && !pdvAsks.length && round < MAX_CONSULT_ROUNDS && gates < MAX_CONSULT_GATES && deps.consultGate !== false) {
+      const gateMsg = consultGateMessage(reply, { history, consultLog });
+      if (gateMsg) { gates++; work.push({ role: 'assistant', content: reply }); work.push({ role: 'user', content: gateMsg }); continue; }
+    }
     if ((!wanted.length && !pdvAsks.length) || round === MAX_CONSULT_ROUNDS) break;
     work.push({ role: 'assistant', content: reply });
     if (wanted.length && isEmergencyTriage(reply) && !explicitConsultRequest(userText)) {
@@ -330,7 +406,7 @@ export async function runTurn(history, userText, deps) {
   let ex = extractReport(reply);
   if (!ex.found) {
     const text = stripInternal(reply) || FAILSAFE_TEXT;
-    return { history: [...history, userEntry(), { role: 'assistant', content: reply }], view: { type: 'text', text, consults: consultLog } };
+    return { history: [...history, userEntry(), { role: 'assistant', content: reply }], view: { type: 'text', text, consults: consultLog, gates } };
   }
   let validated = ex.report ? deps.validate(ex.report, deps.audience) : null;
   for (let retry = 0; retry < MAX_RETRY_ON_INVALID && (!validated || !validated.ok); retry++) {
@@ -347,7 +423,7 @@ export async function runTurn(history, userText, deps) {
   if (!validated || !validated.ok) {
     // 페일세이프. 검증에 실패한 원문은 사용자에게 보이지 않고 대화 이력에도 넣지 않는다.
     newHistory.push({ role: 'assistant', content: '(결과 검증 실패로 표시하지 않음 — 판단 유보, 대면 진료 권고)' });
-    return { history: newHistory, view: { type: 'failsafe', text: FAILSAFE_TEXT, consults: consultLog } };
+    return { history: newHistory, view: { type: 'failsafe', text: FAILSAFE_TEXT, consults: consultLog, gates } };
   }
   // 독립 검수(항상) → 재조정. 검수 호출이 실패하면 원래 보고서를 그대로 쓰고 검수 상태만 남긴다.
   let finalReply = reply;
@@ -391,7 +467,7 @@ export async function runTurn(history, userText, deps) {
   newHistory.push({ role: 'assistant', content: finalReply });
   const view = deps.audienceView(finalValidated, deps.audience);
   // 카드만 보여 준다: 검증기가 다시 계산·제한한 값이므로, 원문 자연어 요약(미검증 표현이 섞일 수 있음)은 숨긴다.
-  return { history: newHistory, view: { type: 'report', html: renderReportHtml(view, finalValidated), kind: finalValidated.kind, consults: consultLog, review, consultTexts, reportText: finalReply, pdvProposals: extractPdvProposals(finalReply) } };
+  return { history: newHistory, view: { type: 'report', html: renderReportHtml(view, finalValidated), kind: finalValidated.kind, consults: consultLog, gates, review, consultTexts, reportText: finalReply, pdvProposals: extractPdvProposals(finalReply) } };
 }
 
 // ─────────────────────────── PDV(건강 기록) 요청 (2026-10-01) ───────────────────────────
