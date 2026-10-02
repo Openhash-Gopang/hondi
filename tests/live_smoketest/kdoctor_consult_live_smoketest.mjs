@@ -128,7 +128,7 @@ export async function runScenario(sc, { llm, resources, maxTurns = 3, orchMaxTok
   const t0 = Date.now();
   const rec = { id: sc.id, group: sc.group, utterance: sc.utterance, expect_ids: sc.expect_ids, accept_ids: sc.accept_ids, expect_consult: sc.expect_consult,
     requested_ids: [], called_ids: [], consult_questions: [], view_type: null, validated_ok: false, turns: 0, first_consult_turn: null,
-    n_llm_calls: 0, all_text: '', orchestrator_replies: [], orchestrator_calls: [], validation_errors: [], reviews: [], error: null };
+    n_llm_calls: 0, all_text: '', orchestrator_replies: [], orchestrator_calls: [], validation_errors: [], reviews: [], artifacts: { consult_texts: [], check: null, reconcile: null, final_report: null }, error: null };
   let turnNo = 0;
   const deps = {
     orchestratorSP: resources.orchestratorSP, registry: resources.registry, loadSpecialist: resources.loadSpecialist, audience: undefined, audienceView,
@@ -163,6 +163,8 @@ export async function runScenario(sc, { llm, resources, maxTurns = 3, orchMaxTok
       if (ok.length && rec.first_consult_turn === null) rec.first_consult_turn = turnNo + 1;
       rec.called_ids.push(...ok);
       rec.view_type = out.view.type;
+      if (out.view.consultTexts?.length) rec.artifacts.consult_texts.push(...out.view.consultTexts);
+      if (out.view.type === 'report') { rec.artifacts.final_report = out.view.reportText ?? null; if (out.view.review) { rec.artifacts.check = out.view.review.checkText ?? null; rec.artifacts.reconcile = out.view.review.reconcileText ?? null; } }
       if (out.view.review) rec.reviews.push({ turn: turnNo + 1, status: out.view.review.status, verdict: out.view.review.verdict, findings: out.view.review.findings, reconciled: out.view.review.reconciled, reconcile_failed: !!out.view.review.reconcile_failed, reconcile: out.view.review.reconcile, final_kind: out.view.kind, error: out.view.review.error ?? null, check_text: out.view.review.checkText ?? null });
       if (out.view.text) rec.all_text += '\n' + out.view.text;
       if (out.view.html) rec.all_text += '\n' + out.view.html.replace(/<[^>]+>/g, ' ');
@@ -174,6 +176,23 @@ export async function runScenario(sc, { llm, resources, maxTurns = 3, orchMaxTok
   rec.ms = Date.now() - t0;
   Object.assign(rec, { score: scoreRecord(sc, rec) });
   return rec;
+}
+
+/** 사건별 상세 파일(doctor.hondi.net/case.html이 읽는 형식). 총괄 응답·협진 소견·검수·재조정·최종 보고서를 담는다. */
+export function caseDetail(rec, round = null) {
+  const strip = (x) => String(x).replace(/^kdoctor-/, '');
+  const lastRep = rec.orchestrator_replies?.[rec.orchestrator_replies.length - 1] ?? '';
+  const parse = (t) => { const m = /\[DIAGNOSIS_REPORT\]([\s\S]*?)\[\/DIAGNOSIS_REPORT\]/.exec(t ?? ''); if (!m) return null; try { return JSON.parse(m[1].trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim()); } catch { return null; } };
+  const a = rec.artifacts ?? {};
+  return { round, id: rec.id, group: rec.group, utterance: rec.utterance, expect_consult: rec.expect_consult, expect: (rec.expect_ids ?? []).map(strip), accept: (rec.accept_ids ?? []).map(strip),
+    status: rec.score.status, reason: rec.score.reason, match: rec.score.match ?? null, called: [...new Set(rec.called_ids)].map(strip),
+    consult_questions: (rec.consult_questions ?? []).map((q) => ({ id: strip(q.id), question: q.question })), consult_texts: a.consult_texts?.length ? a.consult_texts : null,
+    orchestrator: (rec.orchestrator_replies ?? []).map((r) => r.slice(0, 12000)), view_type: rec.view_type, validated_ok: rec.validated_ok, validation_errors: rec.validation_errors ?? [],
+    report: rec.view_type === 'report' ? parse(lastRep) : null, check: a.check ?? null, reconcile: a.reconcile ?? null, final_report: a.final_report ? parse(a.final_report) : null,
+    reviews: (rec.reviews ?? []).map(({ check_text, ...r }) => r), turns: rec.turns, ms: rec.ms };
+}
+function writeCaseFile(outDir, rec) {
+  try { mkdirSync(join(outDir, 'cases'), { recursive: true }); writeFileSync(join(outDir, 'cases', rec.id + '.json'), JSON.stringify(caseDetail(rec))); } catch (e) { console.warn('case file 저장 실패', rec.id, e.message); }
 }
 
 export function summarize(records) {
@@ -248,6 +267,7 @@ async function main() {
     const rec = await runScenario(sc, { llm, resources, checkLlm, maxTurns: Number(a['max-turns'] ?? 3), orchMaxTokens: a['orch-max-tokens'] ? Number(a['orch-max-tokens']) : null });
     done.set(sc.id, rec);
     appendFileSync(jsonl, JSON.stringify(rec) + '\n');
+    writeCaseFile(outDir, rec);
     console.log(`${rec.score.status.padEnd(10)} ${sc.id} called=[${[...new Set(rec.called_ids)].map((x) => x.replace('kdoctor-', '')).join(',')}] ${rec.score.reason}`);
   });
   const records = scenarios.map((s) => done.get(s.id)).filter(Boolean);

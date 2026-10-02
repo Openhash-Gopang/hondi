@@ -378,6 +378,7 @@ export async function runTurn(history, userText, deps) {
             v2 = ex2.report ? deps.validate(ex2.report, deps.audience) : null;
           }
           review.reconcile = parseReconcileTag(r2);
+          review.reconcileText = String(r2);
           if (v2 && v2.ok && !(origKind === 'emergency_referral' && v2.kind !== 'emergency_referral')) {
             finalReply = reportBlock(r2); finalValidated = v2; review.reconciled = true;
           } else {
@@ -390,7 +391,7 @@ export async function runTurn(history, userText, deps) {
   newHistory.push({ role: 'assistant', content: finalReply });
   const view = deps.audienceView(finalValidated, deps.audience);
   // 카드만 보여 준다: 검증기가 다시 계산·제한한 값이므로, 원문 자연어 요약(미검증 표현이 섞일 수 있음)은 숨긴다.
-  return { history: newHistory, view: { type: 'report', html: renderReportHtml(view, finalValidated), kind: finalValidated.kind, consults: consultLog, review, pdvProposals: extractPdvProposals(finalReply) } };
+  return { history: newHistory, view: { type: 'report', html: renderReportHtml(view, finalValidated), kind: finalValidated.kind, consults: consultLog, review, consultTexts, reportText: finalReply, pdvProposals: extractPdvProposals(finalReply) } };
 }
 
 // ─────────────────────────── PDV(건강 기록) 요청 (2026-10-01) ───────────────────────────
