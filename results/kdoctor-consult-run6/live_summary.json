@@ -1,0 +1,116 @@
+{
+  "total": {
+    "n": 100,
+    "pass": 97,
+    "fail": 3,
+    "error": 0,
+    "pass_rate": 0.97
+  },
+  "by_group": {
+    "doctor": {
+      "n": 50,
+      "pass": 50,
+      "fail": 0,
+      "error": 0,
+      "pass_rate": 1
+    },
+    "patient": {
+      "n": 50,
+      "pass": 47,
+      "fail": 3,
+      "error": 0,
+      "pass_rate": 0.94
+    }
+  },
+  "by_kind": {
+    "consult": {
+      "n": 88,
+      "pass": 85,
+      "fail": 3,
+      "error": 0,
+      "pass_rate": 0.966
+    },
+    "emergency": {
+      "n": 12,
+      "pass": 12,
+      "fail": 0,
+      "error": 0,
+      "pass_rate": 1
+    }
+  },
+  "by_group_kind": {
+    "doctor/consult": {
+      "n": 44,
+      "pass": 44,
+      "fail": 0,
+      "error": 0,
+      "pass_rate": 1
+    },
+    "doctor/emergency": {
+      "n": 6,
+      "pass": 6,
+      "fail": 0,
+      "error": 0,
+      "pass_rate": 1
+    },
+    "patient/consult": {
+      "n": 44,
+      "pass": 41,
+      "fail": 3,
+      "error": 0,
+      "pass_rate": 0.932
+    },
+    "patient/emergency": {
+      "n": 6,
+      "pass": 6,
+      "fail": 0,
+      "error": 0,
+      "pass_rate": 1
+    }
+  },
+  "fail_reasons": {
+    "no_consult": 1,
+    "no_report_no_tag": 1,
+    "wrong_specialty": 1
+  },
+  "accept_only_pass": [
+    "kdoc-doctor-33",
+    "kdoc-doctor-38",
+    "kdoc-patient-16",
+    "kdoc-patient-25",
+    "kdoc-patient-26",
+    "kdoc-patient-27"
+  ],
+  "avg_consults_per_case": 1.8,
+  "consult_gates_total": 2,
+  "truncated_orchestrator_calls": 0,
+  "orchestrator_calls_total": 294,
+  "review": {
+    "n": 93,
+    "ok_none": 32,
+    "recommend": 54,
+    "invalid_suspect": 6,
+    "unparsed": 1,
+    "error": 0,
+    "reconciled": 60,
+    "reconcile_failed": 0,
+    "findings_by_module": {
+      "C-5": 9,
+      "C-2": 81,
+      "C-1": 79,
+      "C-4": 26,
+      "C-6": 35,
+      "C-3": 5
+    }
+  },
+  "avg_ms": 55170,
+  "meta": {
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "review": "on(separate key)",
+    "orch_max_tokens": "widget-default(3500)",
+    "sp_hash": "1ecb581424a5",
+    "scenarios": "scenarios_kdoctor_consult_100_20261001.json",
+    "finished": "2026-10-02T19:44:56.184Z"
+  }
+}
