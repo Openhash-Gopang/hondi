@@ -232,3 +232,44 @@ test('caseDetail·build_doctor_rounds: 사건 상세와 manifest 갱신', async 
   const man = updateManifest({ rounds: [{ round: 5 }, { round: 6, old: 1 }], pending: [{ round: 6 }, { round: 0 }] }, { round: 6, label: 'R6' });
   assert.deepEqual(man.rounds.map((r) => r.round), [5, 6]); assert.equal(man.rounds[1].old, undefined); assert.deepEqual(man.pending, [{ round: 0 }]);
 });
+
+// ── 복합 사례 라운드(2026-10-03) ──
+const cx = JSON.parse(readFileSync(new URL('../live_smoketest/scenarios_kdoctor_complex_20261003.json', import.meta.url), 'utf8'));
+
+test('복합 시나리오 24건 구조: 의사 12·환자 12, 응급 4, id 고유·등록, min_hits가 후보 풀 이하', () => {
+  assert.equal(cx.length, 24);
+  assert.equal(cx.filter((x) => x.group === 'doctor').length, 12);
+  assert.equal(cx.filter((x) => x.group === 'patient').length, 12);
+  assert.equal(cx.filter((x) => !x.expect_consult).length, 4);
+  assert.equal(new Set(cx.map((x) => x.id)).size, 24);
+  for (const x of cx) {
+    assert.ok(x.complex);
+    for (const id of [...x.expect_ids, ...(x.accept_ids ?? [])]) assert.ok(ids.has(id), id);
+    if (x.expect_consult) {
+      assert.ok(x.min_hits <= new Set([...x.expect_ids, ...(x.accept_ids ?? [])]).size, x.id);
+      assert.ok(x.facts.length >= x.facts_min && x.facts_min >= 1, x.id);
+      assert.ok(x.triage_any?.length, x.id);
+    }
+  }
+});
+
+test('scoreRecord(복합): 전문과 부족·트리아지 불일치·맥락 누락을 가르고, 모두 맞으면 complex_ok', () => {
+  const sc = { complex: true, expect_consult: true, expect_ids: ['kdoctor-cardiology'], accept_ids: ['kdoctor-nephrology'], min_hits: 2, triage_any: ['urgent', 'semi_urgent'], facts_min: 2,
+    facts: [{ label: '가족력', any: ['가족력', '아버지'] }, { label: '약물', any: ['와파린'] }, { label: '신기능', any: ['egfr', '신기능'] }] };
+  const rep = (o) => '[DIAGNOSIS_REPORT]' + JSON.stringify({ model_version: 'x', triage: { level: 'urgent' }, note: o }) + '[/DIAGNOSIS_REPORT]';
+  const base = { error: null, requested_ids: [], called_ids: ['kdoctor-cardiology', 'kdoctor-nephrology'], view_type: 'report', validated_ok: true, all_text: '', orchestrator_replies: [rep('아버지 가족력, 와파린 복용')], artifacts: {} };
+  const ok = scoreRecord(sc, base);
+  assert.equal(ok.reason, 'complex_ok'); assert.equal(ok.context.hits, 2);
+  assert.equal(scoreRecord(sc, { ...base, called_ids: ['kdoctor-cardiology'] }).reason, 'too_few_specialties');
+  assert.equal(scoreRecord(sc, { ...base, orchestrator_replies: [rep('아버지 가족력, 와파린 복용').replace('"urgent"', '"routine"')] }).reason, 'triage_mismatch');
+  const gap = scoreRecord(sc, { ...base, orchestrator_replies: [rep('특이사항 없음')] });
+  assert.equal(gap.reason, 'context_gap'); assert.deepEqual(gap.context.missing.length, 3);
+  assert.equal(summarize([{ ...base, group: 'doctor', expect_consult: true, score: ok, ms: 1 }]).complex_context.n, 1);
+});
+
+test('워크플로: scenarios 입력은 파일명 정규식으로 검증된다', () => {
+  const y = readFileSync(new URL('../../.github/workflows/live-smoketest-kdoctor-consult.yml', import.meta.url), 'utf8');
+  assert.match(y, /scenarios:\n\s+description/);
+  assert.match(y, /--scenarios \$SC/);
+  assert.ok(y.includes('^[A-Za-z0-9_.-]+\\.json$'));
+});
