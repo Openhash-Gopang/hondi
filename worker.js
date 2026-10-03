@@ -15962,6 +15962,12 @@ async function _gdcEnforceTesterTransferLimits(env, { senderGuid, outputs, corsH
     if (a > 0) { amount += a; recipients.push(o.recipient_guid); }
   }
 
+  // 2026-10-03 3단계: 수취인이 전부 대출금고인 거래(대출 상환)는 한도 대상이 아니다.
+  // 목적지가 GDC 자체 금고이고 금액은 상환 처리(handleGdcTestLoanRepay)가 대출 잔액으로 따로 검증한다.
+  // 한도 때문에 상환이 막히면(1회 ₮1,000, 대출금고는 '처음 보내는 수취인' ₮100) 상환 능력 시험이 한도 시험으로 오염된다.
+  // 출력 중 하나라도 다른 수취인이 섞여 있으면 면제하지 않는다. 상환 금액은 1일 유출 누적에도 넣지 않는다(아래).
+  if (recipients.length > 0 && recipients.every(r => r === GDC_LOAN_VAULT_GUID)) return null;
+
   let items, truncated;
   try {
     const bf = encodeURIComponent(`buyer_guid='${String(senderGuid).replace(/'/g, "\\'")}'&&block_type!='ai_usage_charge'`);
@@ -15989,7 +15995,7 @@ async function _gdcEnforceTesterTransferLimits(env, { senderGuid, outputs, corsH
     for (const o of outs) if (o && o.recipient_guid) knownRecipients.add(o.recipient_guid);
     // 시각을 읽을 수 없는 블록은 오늘 것으로 보아 합산한다(보수적).
     if (!(ms < dayStart)) {
-      for (const o of outs) outflowToday += Number(o && o.amount) || 0;
+      for (const o of outs) if (!(o && o.recipient_guid === GDC_LOAN_VAULT_GUID)) outflowToday += Number(o && o.amount) || 0;
     }
   }
   // 이력이 200건을 넘고 가장 오래된 조회분까지 오늘이면, 오늘 누적을 알 수 없다.
