@@ -12322,7 +12322,7 @@ async function _sweepBridgeOutbox(env) {
 
 // 2026-07-18 신설 — 테스트 목적 named export. 런타임 동작에는 영향 없음
 // (default export의 fetch 핸들러는 그대로 pathname 매칭으로 호출).
-export { handleBizOrder, handleGdcTransfer, _gdcCheckTransferLimits, _gdcKstDayStartMs, handleGdcTestLoanApply, _gdcCheckLoanLimits, handleGdcDepositClose, handleGdcDaoProposalCreate, handleGdcDaoVote, handleGdcDaoProposalsList, handleFeeRate, handleInsClaimCreate, handleInsClaimsList, handleVerifyAdmin, _natAgencyExtractName, _parseInstanceEnrichTag };
+export { _gdcEvaluateCreditServer, handleBizOrder, handleGdcTransfer, _gdcCheckTransferLimits, _gdcKstDayStartMs, handleGdcTestLoanApply, _gdcCheckLoanLimits, handleGdcDepositClose, handleGdcDaoProposalCreate, handleGdcDaoVote, handleGdcDaoProposalsList, handleFeeRate, handleInsClaimCreate, handleInsClaimsList, handleVerifyAdmin, _natAgencyExtractName, _parseInstanceEnrichTag };
 
 // ═══════════════════════════════════════════════════════════
 // K-TRAFFIC / K-LOGISTICS 실매칭 백엔드 (2026-07-26 신설)
@@ -15815,7 +15815,9 @@ function _gdcScoreToGrade(score) {
 }
 function _gdcSafeRatio(n, d) { return (d > 0) ? n / d : null; }
 function _gdcScoreLiquidity(r) { if (r == null) return 0; if (r >= 2.0) return 100; if (r >= 1.5) return 80; if (r >= 1.0) return 60; if (r >= 0.5) return 30; return 10; }
-function _gdcScoreDebt(r) { if (r == null) return 50; if (r <= 0.3) return 100; if (r <= 0.7) return 80; if (r <= 1.5) return 55; if (r <= 3.0) return 25; return 5; }
+// v1.0(gdc_credit_v1_0.md §3): 순자산 <= 0 이면 비율 대신 부호로 판단 — 음수 5점, 0이면 부채가 있을 때 5점, 둘 다 0이면 50점.
+// 순자산 > 0 인 구간표는 v0과 같다. 클라이언트 js/gdc-credit.js scoreDebt 와 반드시 같아야 한다.
+function _gdcScoreDebt(r, debt, equity) { if (equity < 0) return 5; if (!(equity > 0)) return debt > 0 ? 5 : 50; if (r == null) return 50; if (r <= 0.3) return 100; if (r <= 0.7) return 80; if (r <= 1.5) return 55; if (r <= 3.0) return 25; return 5; }
 function _gdcScoreMargin(r) { if (r == null) return 0; if (r >= 0.20) return 100; if (r >= 0.10) return 75; if (r >= 0.05) return 50; if (r >= 0) return 25; return 0; }
 function _gdcScoreCashFlow(r) { if (r == null) return 50; if (r >= 0.5) return 100; if (r >= 0.25) return 75; if (r >= 0.1) return 50; if (r >= 0) return 20; return 0; }
 
@@ -15830,7 +15832,7 @@ function _gdcEvaluateCreditServer(bsCash, fs) {
 
   const score =
     _gdcScoreLiquidity(liquidity) * 0.25 +
-    _gdcScoreDebt(debtRatio) * 0.25 +
+    _gdcScoreDebt(debtRatio, fs.bs_debt || 0, fs.bs_equity) * 0.25 +
     _gdcScoreMargin(operatingMargin) * 0.30 +
     _gdcScoreCashFlow(cashFlowRatio) * 0.20;
 

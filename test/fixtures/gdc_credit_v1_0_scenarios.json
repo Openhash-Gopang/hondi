@@ -1,0 +1,1238 @@
+{
+  "schema": 1,
+  "source": "gdc 저장소 library/labs/rounds/r02/scenarios.json (신용평가 방법론 v1.0), TESTER_ONLY 시나리오 제외",
+  "scenarios": [
+    {
+      "id": "cred2-001",
+      "note": "순자산 0, 부채 있음 → 5점 (v0은 50)",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 500,
+          "bs_equity": 0,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "A",
+        "annualRate": 0.015,
+        "score": 71.3
+      }
+    },
+    {
+      "id": "cred2-002",
+      "note": "순자산 음수, 부채 있음 → 5점 (v0은 50)",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 500,
+          "bs_equity": -300,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "A",
+        "annualRate": 0.015,
+        "score": 71.3
+      }
+    },
+    {
+      "id": "cred2-003",
+      "note": "순자산 음수, 부채 없음 → 5점 (v0은 50)",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 0,
+          "bs_equity": -300,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "A",
+        "annualRate": 0.015,
+        "score": 66.3
+      }
+    },
+    {
+      "id": "cred2-004",
+      "note": "순자산 0, 부채 0 → 50점 (판단 불가, v0과 같음)",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 0,
+          "bs_equity": 0,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "A",
+        "annualRate": 0.015,
+        "score": 77.5
+      }
+    },
+    {
+      "id": "cred2-005",
+      "note": "순자산 양수, 부채 0 → 100점",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 0,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "AAA",
+        "annualRate": 0.005,
+        "score": 90.0
+      }
+    },
+    {
+      "id": "cred2-006",
+      "note": "유동비율 경계: 정확히 2.0 → 100",
+      "inputs": {
+        "bsCash": 2000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 1000,
+          "bs_debt": 200,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "AAA",
+        "annualRate": 0.005,
+        "score": 100.0
+      }
+    },
+    {
+      "id": "cred2-007",
+      "note": "유동비율 경계: 2.0 바로 아래 → 80",
+      "inputs": {
+        "bsCash": 1999,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 1000,
+          "bs_debt": 200,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "AAA",
+        "annualRate": 0.005,
+        "score": 95.0
+      }
+    },
+    {
+      "id": "cred2-008",
+      "note": "유동비율 경계: 정확히 1.5 → 80",
+      "inputs": {
+        "bsCash": 1500,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 1000,
+          "bs_debt": 200,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "AAA",
+        "annualRate": 0.005,
+        "score": 95.0
+      }
+    },
+    {
+      "id": "cred2-009",
+      "note": "유동비율 경계: 1.5 바로 아래 → 60",
+      "inputs": {
+        "bsCash": 1499,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 1000,
+          "bs_debt": 200,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "AAA",
+        "annualRate": 0.005,
+        "score": 90.0
+      }
+    },
+    {
+      "id": "cred2-010",
+      "note": "유동비율 경계: 정확히 1.0 → 60",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 1000,
+          "bs_debt": 200,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "AAA",
+        "annualRate": 0.005,
+        "score": 90.0
+      }
+    },
+    {
+      "id": "cred2-011",
+      "note": "유동비율 경계: 1.0 바로 아래 → 30",
+      "inputs": {
+        "bsCash": 999,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 1000,
+          "bs_debt": 200,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "AA",
+        "annualRate": 0.01,
+        "score": 82.5
+      }
+    },
+    {
+      "id": "cred2-012",
+      "note": "유동비율 경계: 정확히 0.5 → 30",
+      "inputs": {
+        "bsCash": 500,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 1000,
+          "bs_debt": 200,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "AA",
+        "annualRate": 0.01,
+        "score": 82.5
+      }
+    },
+    {
+      "id": "cred2-013",
+      "note": "유동비율 경계: 0.5 바로 아래 → 10",
+      "inputs": {
+        "bsCash": 499,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 1000,
+          "bs_debt": 200,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "A",
+        "annualRate": 0.015,
+        "score": 77.5
+      }
+    },
+    {
+      "id": "cred2-014",
+      "note": "유동비율 경계: 현금 0 → 10",
+      "inputs": {
+        "bsCash": 0,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 1000,
+          "bs_debt": 200,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "A",
+        "annualRate": 0.015,
+        "score": 77.5
+      }
+    },
+    {
+      "id": "cred2-015",
+      "note": "매입채무 0 → 유동비율 판단 불가 0점",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 0,
+          "bs_debt": 200,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "A",
+        "annualRate": 0.015,
+        "score": 75.0
+      }
+    },
+    {
+      "id": "cred2-016",
+      "note": "부채비율 경계: 정확히 0.3 → 100",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 300,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 300
+        }
+      },
+      "expected": {
+        "grade": "AAA",
+        "annualRate": 0.005,
+        "score": 100.0
+      }
+    },
+    {
+      "id": "cred2-017",
+      "note": "부채비율 경계: 0.3 바로 위 → 80",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 301,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 301
+        }
+      },
+      "expected": {
+        "grade": "AAA",
+        "annualRate": 0.005,
+        "score": 95.0
+      }
+    },
+    {
+      "id": "cred2-018",
+      "note": "부채비율 경계: 정확히 0.7 → 80",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 700,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 700
+        }
+      },
+      "expected": {
+        "grade": "AAA",
+        "annualRate": 0.005,
+        "score": 95.0
+      }
+    },
+    {
+      "id": "cred2-019",
+      "note": "부채비율 경계: 0.7 바로 위 → 55",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 701,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 701
+        }
+      },
+      "expected": {
+        "grade": "AA",
+        "annualRate": 0.01,
+        "score": 88.8
+      }
+    },
+    {
+      "id": "cred2-020",
+      "note": "부채비율 경계: 정확히 1.5 → 55",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 1500,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 1500
+        }
+      },
+      "expected": {
+        "grade": "AA",
+        "annualRate": 0.01,
+        "score": 88.8
+      }
+    },
+    {
+      "id": "cred2-021",
+      "note": "부채비율 경계: 1.5 바로 위 → 25",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 1501,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 1501
+        }
+      },
+      "expected": {
+        "grade": "AA",
+        "annualRate": 0.01,
+        "score": 81.3
+      }
+    },
+    {
+      "id": "cred2-022",
+      "note": "부채비율 경계: 정확히 3.0 → 25",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 3000,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 3000
+        }
+      },
+      "expected": {
+        "grade": "AA",
+        "annualRate": 0.01,
+        "score": 81.3
+      }
+    },
+    {
+      "id": "cred2-023",
+      "note": "부채비율 경계: 3.0 바로 위 → 5",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 3001,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 3001
+        }
+      },
+      "expected": {
+        "grade": "A",
+        "annualRate": 0.015,
+        "score": 76.3
+      }
+    },
+    {
+      "id": "cred2-024",
+      "note": "영업이익률 경계: 정확히 0.20 → 100",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 200,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 8000,
+          "pl_opex": 0,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "AAA",
+        "annualRate": 0.005,
+        "score": 100.0
+      }
+    },
+    {
+      "id": "cred2-025",
+      "note": "영업이익률 경계: 0.20 바로 아래 → 75",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 200,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 8001,
+          "pl_opex": 0,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "AAA",
+        "annualRate": 0.005,
+        "score": 92.5
+      }
+    },
+    {
+      "id": "cred2-026",
+      "note": "영업이익률 경계: 정확히 0.10 → 75",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 200,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 9000,
+          "pl_opex": 0,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "AAA",
+        "annualRate": 0.005,
+        "score": 92.5
+      }
+    },
+    {
+      "id": "cred2-027",
+      "note": "영업이익률 경계: 0.10 바로 아래 → 50",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 200,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 9001,
+          "pl_opex": 0,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "AA",
+        "annualRate": 0.01,
+        "score": 85.0
+      }
+    },
+    {
+      "id": "cred2-028",
+      "note": "영업이익률 경계: 정확히 0.05 → 50",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 200,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 9500,
+          "pl_opex": 0,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "AA",
+        "annualRate": 0.01,
+        "score": 85.0
+      }
+    },
+    {
+      "id": "cred2-029",
+      "note": "영업이익률 경계: 0.05 바로 아래 → 25",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 200,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 9501,
+          "pl_opex": 0,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "A",
+        "annualRate": 0.015,
+        "score": 77.5
+      }
+    },
+    {
+      "id": "cred2-030",
+      "note": "영업이익률 경계: 정확히 0 → 25",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 200,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 10000,
+          "pl_opex": 0,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "A",
+        "annualRate": 0.015,
+        "score": 77.5
+      }
+    },
+    {
+      "id": "cred2-031",
+      "note": "영업이익률 경계: 영업손실 → 0",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 200,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 10001,
+          "pl_opex": 0,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "A",
+        "annualRate": 0.015,
+        "score": 70.0
+      }
+    },
+    {
+      "id": "cred2-032",
+      "note": "매출 0 → 영업이익률 판단 불가 0점",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 200,
+          "bs_equity": 1000,
+          "pl_revenue": 0,
+          "pl_cogs": 0,
+          "pl_opex": 0,
+          "cf_op": 200
+        }
+      },
+      "expected": {
+        "grade": "A",
+        "annualRate": 0.015,
+        "score": 70.0
+      }
+    },
+    {
+      "id": "cred2-033",
+      "note": "현금흐름비율 경계: 정확히 0.5 → 100",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 1000,
+          "bs_equity": 10000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 500
+        }
+      },
+      "expected": {
+        "grade": "AAA",
+        "annualRate": 0.005,
+        "score": 100.0
+      }
+    },
+    {
+      "id": "cred2-034",
+      "note": "현금흐름비율 경계: 0.5 바로 아래 → 75",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 1000,
+          "bs_equity": 10000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 499
+        }
+      },
+      "expected": {
+        "grade": "AAA",
+        "annualRate": 0.005,
+        "score": 95.0
+      }
+    },
+    {
+      "id": "cred2-035",
+      "note": "현금흐름비율 경계: 정확히 0.25 → 75",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 1000,
+          "bs_equity": 10000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 250
+        }
+      },
+      "expected": {
+        "grade": "AAA",
+        "annualRate": 0.005,
+        "score": 95.0
+      }
+    },
+    {
+      "id": "cred2-036",
+      "note": "현금흐름비율 경계: 0.25 바로 아래 → 50",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 1000,
+          "bs_equity": 10000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 249
+        }
+      },
+      "expected": {
+        "grade": "AAA",
+        "annualRate": 0.005,
+        "score": 90.0
+      }
+    },
+    {
+      "id": "cred2-037",
+      "note": "현금흐름비율 경계: 정확히 0.1 → 50",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 1000,
+          "bs_equity": 10000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 100
+        }
+      },
+      "expected": {
+        "grade": "AAA",
+        "annualRate": 0.005,
+        "score": 90.0
+      }
+    },
+    {
+      "id": "cred2-038",
+      "note": "현금흐름비율 경계: 0.1 바로 아래 → 20",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 1000,
+          "bs_equity": 10000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 99
+        }
+      },
+      "expected": {
+        "grade": "AA",
+        "annualRate": 0.01,
+        "score": 84.0
+      }
+    },
+    {
+      "id": "cred2-039",
+      "note": "현금흐름비율 경계: 정확히 0 → 20",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 1000,
+          "bs_equity": 10000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": 0
+        }
+      },
+      "expected": {
+        "grade": "AA",
+        "annualRate": 0.01,
+        "score": 84.0
+      }
+    },
+    {
+      "id": "cred2-040",
+      "note": "현금흐름비율 경계: 음수 → 0",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 1000,
+          "bs_equity": 10000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": -1
+        }
+      },
+      "expected": {
+        "grade": "AA",
+        "annualRate": 0.01,
+        "score": 80.0
+      }
+    },
+    {
+      "id": "cred2-041",
+      "note": "무차입이면 영업현금흐름이 음수여도 중립 50점",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 500,
+          "bs_debt": 0,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 7000,
+          "pl_opex": 1000,
+          "cf_op": -500
+        }
+      },
+      "expected": {
+        "grade": "AAA",
+        "annualRate": 0.005,
+        "score": 90.0
+      }
+    },
+    {
+      "id": "cred2-042",
+      "note": "건실한 중견: 전 지표 상위",
+      "inputs": {
+        "bsCash": 2000,
+        "fs": {
+          "bs_ar": 1000,
+          "bs_ap": 1000,
+          "bs_debt": 500,
+          "bs_equity": 3000,
+          "pl_revenue": 20000,
+          "pl_cogs": 12000,
+          "pl_opex": 4000,
+          "cf_op": 1500
+        }
+      },
+      "expected": {
+        "grade": "AAA",
+        "annualRate": 0.005,
+        "score": 100.0
+      }
+    },
+    {
+      "id": "cred2-043",
+      "note": "보통 기업",
+      "inputs": {
+        "bsCash": 600,
+        "fs": {
+          "bs_ar": 400,
+          "bs_ap": 800,
+          "bs_debt": 1200,
+          "bs_equity": 1500,
+          "pl_revenue": 8000,
+          "pl_cogs": 5600,
+          "pl_opex": 1700,
+          "cf_op": 250
+        }
+      },
+      "expected": {
+        "grade": "BBB",
+        "annualRate": 0.025,
+        "score": 53.8
+      }
+    },
+    {
+      "id": "cred2-044",
+      "note": "영업손실이지만 재무구조는 양호 (한계 §7-2)",
+      "inputs": {
+        "bsCash": 1500,
+        "fs": {
+          "bs_ar": 500,
+          "bs_ap": 500,
+          "bs_debt": 100,
+          "bs_equity": 5000,
+          "pl_revenue": 10000,
+          "pl_cogs": 8500,
+          "pl_opex": 3500,
+          "cf_op": 300
+        }
+      },
+      "expected": {
+        "grade": "A",
+        "annualRate": 0.015,
+        "score": 70.0
+      }
+    },
+    {
+      "id": "cred2-045",
+      "note": "지급불능에 가까운 기업: 자본잠식 + 영업손실",
+      "inputs": {
+        "bsCash": 100,
+        "fs": {
+          "bs_ar": 100,
+          "bs_ap": 2000,
+          "bs_debt": 3000,
+          "bs_equity": -500,
+          "pl_revenue": 5000,
+          "pl_cogs": 4000,
+          "pl_opex": 2500,
+          "cf_op": -400
+        }
+      },
+      "expected": {
+        "grade": "C",
+        "annualRate": 0.05,
+        "score": 3.8
+      }
+    },
+    {
+      "id": "cred2-046",
+      "note": "개인 사업자: 무차입, 소규모",
+      "inputs": {
+        "bsCash": 300,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 100,
+          "bs_debt": 0,
+          "bs_equity": 800,
+          "pl_revenue": 2400,
+          "pl_cogs": 600,
+          "pl_opex": 900,
+          "cf_op": 700
+        }
+      },
+      "expected": {
+        "grade": "AAA",
+        "annualRate": 0.005,
+        "score": 90.0
+      }
+    },
+    {
+      "id": "cred2-047",
+      "note": "빈 재무제표: 현금만 있음",
+      "inputs": {
+        "bsCash": 500,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 0,
+          "bs_debt": 0,
+          "bs_equity": 0,
+          "pl_revenue": 0,
+          "pl_cogs": 0,
+          "pl_opex": 0,
+          "cf_op": 0
+        }
+      },
+      "expected": {
+        "grade": "C",
+        "annualRate": 0.05,
+        "score": 22.5
+      }
+    },
+    {
+      "id": "cred2-048",
+      "note": "총점이 정확히 90점 (유동 100, 부채 100, 마진 100, 현금흐름 50) → 경계값은 위 등급",
+      "inputs": {
+        "bsCash": 2000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 1000,
+          "bs_debt": 300,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 8000,
+          "pl_opex": 0,
+          "cf_op": 30
+        }
+      },
+      "expected": {
+        "grade": "AAA",
+        "annualRate": 0.005,
+        "score": 90.0
+      }
+    },
+    {
+      "id": "cred2-049",
+      "note": "총점이 정확히 90점 (유동 60, 부채 100, 마진 100, 현금흐름 100) → 경계값은 위 등급",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 1000,
+          "bs_debt": 300,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 8000,
+          "pl_opex": 0,
+          "cf_op": 300
+        }
+      },
+      "expected": {
+        "grade": "AAA",
+        "annualRate": 0.005,
+        "score": 90.0
+      }
+    },
+    {
+      "id": "cred2-050",
+      "note": "총점이 정확히 65점 (유동 100, 부채 100, 마진 50, 현금흐름 0) → 경계값은 위 등급",
+      "inputs": {
+        "bsCash": 2000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 1000,
+          "bs_debt": 300,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 9500,
+          "pl_opex": 0,
+          "cf_op": -1
+        }
+      },
+      "expected": {
+        "grade": "A",
+        "annualRate": 0.015,
+        "score": 65.0
+      }
+    },
+    {
+      "id": "cred2-051",
+      "note": "총점이 정확히 65점 (유동 10, 부채 80, 마진 75, 현금흐름 100) → 경계값은 위 등급",
+      "inputs": {
+        "bsCash": 0,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 1000,
+          "bs_debt": 700,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 9000,
+          "pl_opex": 0,
+          "cf_op": 700
+        }
+      },
+      "expected": {
+        "grade": "A",
+        "annualRate": 0.015,
+        "score": 65.0
+      }
+    },
+    {
+      "id": "cred2-052",
+      "note": "총점이 정확히 50점 (유동 100, 부채 100, 마진 0, 현금흐름 0) → 경계값은 위 등급",
+      "inputs": {
+        "bsCash": 2000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 1000,
+          "bs_debt": 300,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 10001,
+          "pl_opex": 0,
+          "cf_op": -1
+        }
+      },
+      "expected": {
+        "grade": "BBB",
+        "annualRate": 0.025,
+        "score": 50.0
+      }
+    },
+    {
+      "id": "cred2-053",
+      "note": "총점이 정확히 50점 (유동 10, 부채 80, 마진 25, 현금흐름 100) → 경계값은 위 등급",
+      "inputs": {
+        "bsCash": 0,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 1000,
+          "bs_debt": 700,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 10000,
+          "pl_opex": 0,
+          "cf_op": 700
+        }
+      },
+      "expected": {
+        "grade": "BBB",
+        "annualRate": 0.025,
+        "score": 50.0
+      }
+    },
+    {
+      "id": "cred2-054",
+      "note": "총점이 정확히 35점 (유동 60, 부채 80, 마진 0, 현금흐름 0) → 경계값은 위 등급",
+      "inputs": {
+        "bsCash": 1000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 1000,
+          "bs_debt": 700,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 10001,
+          "pl_opex": 0,
+          "cf_op": -1
+        }
+      },
+      "expected": {
+        "grade": "BB",
+        "annualRate": 0.035,
+        "score": 35.0
+      }
+    },
+    {
+      "id": "cred2-055",
+      "note": "총점이 정확히 35점 (유동 10, 부채 100, 마진 25, 현금흐름 0) → 경계값은 위 등급",
+      "inputs": {
+        "bsCash": 0,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 1000,
+          "bs_debt": 300,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 10000,
+          "pl_opex": 0,
+          "cf_op": -1
+        }
+      },
+      "expected": {
+        "grade": "BB",
+        "annualRate": 0.035,
+        "score": 35.0
+      }
+    },
+    {
+      "id": "cred2-056",
+      "note": "총점 77.50점, 78점 바로 아래 → 아래 등급 (유동 100, 부채 100, 마진 25, 현금흐름 100)",
+      "inputs": {
+        "bsCash": 2000,
+        "fs": {
+          "bs_ar": 0,
+          "bs_ap": 1000,
+          "bs_debt": 300,
+          "bs_equity": 1000,
+          "pl_revenue": 10000,
+          "pl_cogs": 10000,
+          "pl_opex": 0,
+          "cf_op": 300
+        }
+      },
+      "expected": {
+        "grade": "A",
+        "annualRate": 0.015,
+        "score": 77.5
+      }
+    }
+  ]
+}
