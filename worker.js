@@ -12322,7 +12322,7 @@ async function _sweepBridgeOutbox(env) {
 
 // 2026-07-18 신설 — 테스트 목적 named export. 런타임 동작에는 영향 없음
 // (default export의 fetch 핸들러는 그대로 pathname 매칭으로 호출).
-export { handleGdcTestLoanApply, _gdcCheckLoanLimits, handleGdcDepositClose, handleGdcDaoProposalCreate, handleGdcDaoVote, handleGdcDaoProposalsList, handleFeeRate, handleInsClaimCreate, handleInsClaimsList, handleVerifyAdmin, _natAgencyExtractName, _parseInstanceEnrichTag };
+export { handleBizOrder, handleGdcTransfer, _gdcCheckTransferLimits, _gdcKstDayStartMs, handleGdcTestLoanApply, _gdcCheckLoanLimits, handleGdcDepositClose, handleGdcDaoProposalCreate, handleGdcDaoVote, handleGdcDaoProposalsList, handleFeeRate, handleInsClaimCreate, handleInsClaimsList, handleVerifyAdmin, _natAgencyExtractName, _parseInstanceEnrichTag };
 
 // ═══════════════════════════════════════════════════════════
 // K-TRAFFIC / K-LOGISTICS 실매칭 백엔드 (2026-07-26 신설)
@@ -14468,6 +14468,22 @@ async function handleBizOrder(request, env, corsHeaders, ctx) {
     }
   }
 
+  // ── 2026-10-03 2단계: 필드테스터 계정의 이체·예치 한도 ──────────────────
+  // items 가 비어 있는 거래(= P2P 이체, 예금금고 예치. 카탈로그 구매에는 항상 items 가 있다)에서만,
+  // 그리고 보내는 계정이 필드테스터일 때만 적용한다. 일반 회원과 K-Market 구매는 영향받지 않는다.
+  // 보내는 계정은 호출자가 주장하는 from_guid 가 아니라 서명 대상인 tx.input.owner_guid 로 본다.
+  if (txItems.length === 0) {
+    const limitOutputs = Array.isArray(tx?.outputs) ? tx.outputs
+      : Array.isArray(outputs) ? outputs
+      : [{ recipient_guid: seller_guid, amount: seller_net || 0 },
+         { recipient_guid: 'gopang-platform', amount: fee || 0 }];
+    const limitResp = await _gdcEnforceTesterTransferLimits(env, {
+      senderGuid: tx?.input?.owner_guid || from_guid,
+      outputs: limitOutputs, corsHeaders,
+    });
+    if (limitResp) return limitResp;
+  }
+
   // ── STEP 08: L1 위임 — Worker는 검증 로직 없음 ───────────
   const buyerNodeId = l1_node || 'KR-JEJU-JEJU-HANLIM';
   const l1Base = L1_NODE_MAP[buyerNodeId] || L1_DEFAULT;
@@ -15838,6 +15854,10 @@ const GDC_TEST_LIMITS = Object.freeze({
   dsrCap: 0.40,               // 연 원리금 상환액 / 연 소득
   stressSpread: 0.015,        // DSR 계산용 가산금리
   assumedTermMonths: 12,      // gdc_test_loans에 만기 필드가 없어 가정하는 만기
+  // ── 2026-10-03 2단계: 이체·예치 한도 (명세 limits_v0_1.md §2, 테스터 계정에만 적용) ──
+  transferPerTx: 1000,        // 1회 이체·예치 상한(₮)
+  outflowPerDay: 2000,        // 1일(KST 달력일) 유출 합계 상한(₮)
+  newRecipientPerTx: 100,     // 처음 보내는 수취인에게 1회 상한(₮)
 });
 
 function _gdcMonthlyPayment(principal, annualRate, n) {
@@ -15869,6 +15889,120 @@ function _gdcCheckLoanLimits({ principal, outstanding = 0, annualRate, annualInc
     return { ok: false, code: 'DSR_EXCEEDED', detail: `DSR ${(dsr * 100).toFixed(1)}% > ${GDC_TEST_LIMITS.dsrCap * 100}%`, dsr };
   }
   return { ok: true, code: 'OK', dsr };
+}
+
+// ── 2026-10-03 2단계 — 이체·예치 한도 (테스터 계정에만 적용) ─────────────
+// gdc 저장소 js/gdc-limits.js 의 checkTransfer 와 같은 값·같은 검사 순서:
+//   금액 유효성 -> 1회 상한 -> 신규 수취인 상한 -> 1일 누적 상한 (경계값 포함)
+function _gdcCheckTransferLimits({ amount, outflowToday = 0, recipientKnown = true }) {
+  const fail = (code, detail) => ({ ok: false, code, detail });
+  if (typeof amount !== 'number' || !Number.isFinite(amount) || amount <= 0) {
+    return fail('AMOUNT_INVALID', '금액은 0보다 큰 유한한 숫자여야 합니다.');
+  }
+  if (amount > GDC_TEST_LIMITS.transferPerTx) {
+    return fail('PER_TX_LIMIT', `1회 한도 ₮${GDC_TEST_LIMITS.transferPerTx} 초과`);
+  }
+  if (!recipientKnown && amount > GDC_TEST_LIMITS.newRecipientPerTx) {
+    return fail('NEW_RECIPIENT_LIMIT', `처음 보내는 수취인 한도 ₮${GDC_TEST_LIMITS.newRecipientPerTx} 초과`);
+  }
+  if (outflowToday + amount > GDC_TEST_LIMITS.outflowPerDay) {
+    return fail('DAILY_LIMIT', `1일 한도 ₮${GDC_TEST_LIMITS.outflowPerDay} 초과 (오늘 누적 ₮${outflowToday})`);
+  }
+  return { ok: true, code: 'OK' };
+}
+
+// KST(UTC+9) 달력일의 시작 시각(ms). 한도의 "1일"은 KST 자정 기준이다.
+function _gdcKstDayStartMs(nowMs) {
+  const KST_MS = 9 * 3600 * 1000, DAY_MS = 86400000;
+  return Math.floor((nowMs + KST_MS) / DAY_MS) * DAY_MS - KST_MS;
+}
+
+function _gdcBlockOutputs(block) {
+  let outs = block && block.outputs;
+  if (typeof outs === 'string') { try { outs = JSON.parse(outs); } catch { outs = []; } }
+  return Array.isArray(outs) ? outs : [];
+}
+
+// handleBizOrder 가 L1 에 보내기 전에 호출한다. 보내는 계정(tx.input.owner_guid)이
+// gdc_test_financial_statements 에 등록된 필드테스터일 때만 한도를 검사하고,
+// 한도를 넘으면 거절 Response 를, 통과하거나 테스터가 아니면 null 을 돌려준다.
+// 테스터 여부나 이력을 확인하지 못하면 거절한다(fail-closed) — 이 요청은 어차피
+// L1 이 있어야 처리되므로, L1 조회 실패 시 막아도 정상 경로를 추가로 해치지 않는다.
+// 한계: 값 대부분이 근거 약한 GDC 설계값(명세 §1~§2). 검사와 L1 기록 사이의 경쟁 상태
+// (동시 요청 두 건이 각각 통과)는 막지 못한다 — 필드테스트 규모에서는 낮은 위험으로 본다.
+async function _gdcEnforceTesterTransferLimits(env, { senderGuid, outputs, corsHeaders, nowMs = Date.now() }) {
+  let headers;
+  try {
+    const token = await _l1AdminToken(env);
+    headers = { 'Authorization': `Bearer ${token}` };
+    const sf = encodeURIComponent(`user_guid='${String(senderGuid).replace(/'/g, "\\'")}'`);
+    const fres = await fetch(`${L1_DEFAULT}/api/collections/gdc_test_financial_statements/records?filter=${sf}&perPage=1`, { headers });
+    if (!fres.ok) {
+      return _err(502, 'L1_UNREACHABLE', '테스터 여부를 확인하지 못해 이체를 거절합니다', corsHeaders);
+    }
+    const fdata = await fres.json().catch(() => null);
+    if (!fdata || !Array.isArray(fdata.items)) {
+      return _err(502, 'L1_UNREACHABLE', '테스터 여부 응답이 올바르지 않아 이체를 거절합니다', corsHeaders);
+    }
+    if (fdata.items.length === 0) return null; // 필드테스터가 아님 — 한도 대상 아님
+  } catch (e) {
+    return _err(502, 'L1_UNREACHABLE', '테스터 여부 확인 실패(이체를 거절합니다): ' + e.message, corsHeaders);
+  }
+
+  // 금액·수취인은 서명 대상인 tx.outputs 에서만 읽는다(호출자가 따로 주장하는 amount 는 믿지 않는다).
+  let amount = 0;
+  const recipients = [];
+  for (const o of (Array.isArray(outputs) ? outputs : [])) {
+    const a = o && o.amount;
+    if (typeof a !== 'number' || !Number.isFinite(a) || a < 0) {
+      return _err(400, 'AMOUNT_INVALID', '출력 금액이 올바르지 않습니다', corsHeaders);
+    }
+    if (a > 0) { amount += a; recipients.push(o.recipient_guid); }
+  }
+
+  let items, truncated;
+  try {
+    const bf = encodeURIComponent(`buyer_guid='${String(senderGuid).replace(/'/g, "\\'")}'&&block_type!='ai_usage_charge'`);
+    const bres = await fetch(`${L1_DEFAULT}/api/collections/blocks/records?filter=${bf}&sort=-created&perPage=200`, { headers });
+    if (!bres.ok) {
+      return _err(502, 'L1_UNREACHABLE', '거래 이력을 조회하지 못해 이체를 거절합니다', corsHeaders);
+    }
+    const bdata = await bres.json().catch(() => null);
+    if (!bdata || !Array.isArray(bdata.items)) {
+      return _err(502, 'L1_UNREACHABLE', '거래 이력 응답이 올바르지 않아 이체를 거절합니다', corsHeaders);
+    }
+    items = bdata.items;
+    truncated = typeof bdata.totalItems === 'number' && bdata.totalItems > items.length;
+  } catch (e) {
+    return _err(502, 'L1_UNREACHABLE', '거래 이력 조회 실패(이체를 거절합니다): ' + e.message, corsHeaders);
+  }
+
+  const dayStart = _gdcKstDayStartMs(nowMs);
+  const createdMs = (b) => Date.parse(String(b.created || '').replace(' ', 'T'));
+  let outflowToday = 0;
+  const knownRecipients = new Set();
+  for (const b of items) {
+    const ms = createdMs(b);
+    const outs = _gdcBlockOutputs(b);
+    for (const o of outs) if (o && o.recipient_guid) knownRecipients.add(o.recipient_guid);
+    // 시각을 읽을 수 없는 블록은 오늘 것으로 보아 합산한다(보수적).
+    if (!(ms < dayStart)) {
+      for (const o of outs) outflowToday += Number(o && o.amount) || 0;
+    }
+  }
+  // 이력이 200건을 넘고 가장 오래된 조회분까지 오늘이면, 오늘 누적을 알 수 없다.
+  if (truncated && items.length > 0 && !(createdMs(items[items.length - 1]) < dayStart)) {
+    return _err(502, 'LIMIT_HISTORY_INCOMPLETE', '오늘 거래 이력이 너무 많아 한도를 계산할 수 없습니다(이체를 거절합니다)', corsHeaders);
+  }
+
+  // 예금금고는 GDC 자체 상품이므로 '처음 보내는 수취인'으로 보지 않는다.
+  const recipientKnown = recipients.every(r => r === GDC_DEPOSIT_VAULT_GUID || knownRecipients.has(r));
+  const check = _gdcCheckTransferLimits({ amount, outflowToday, recipientKnown });
+  if (!check.ok) {
+    console.warn(`[GDC Test Transfer] 한도 거부 ${check.code} sender=${String(senderGuid).slice(0, 8)} amount=${amount}`);
+    return _err(409, check.code, check.detail, corsHeaders);
+  }
+  return null;
 }
 
 async function _gdcFindTestFsByGuid(env, userGuid) {

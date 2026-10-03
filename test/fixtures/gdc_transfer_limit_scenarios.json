@@ -1,0 +1,181 @@
+{
+  "_source": "Openhash-Gopang/gdc library/labs/rounds/r01/scenarios.json 의 transfer 시나리오 (kind=transfer) — gdc 저장소의 한도 명세·기준 구현과 이 서버 구현이 같은 결과를 내는지 대조하는 회귀 기준. 명세가 바뀌면 양쪽을 함께 갱신한다.",
+  "scenarios": [
+    {
+      "id": "xfer-001",
+      "kind": "transfer",
+      "product": "wallet",
+      "moves_balance": true,
+      "note": "1회 상한과 같은 금액 — 통과(경계 포함)",
+      "inputs": {
+        "amount": 1000,
+        "outflowToday": 0,
+        "recipientKnown": true
+      },
+      "expected": {
+        "ok": true,
+        "code": "OK"
+      }
+    },
+    {
+      "id": "xfer-002",
+      "kind": "transfer",
+      "product": "wallet",
+      "moves_balance": true,
+      "note": "1회 상한 +1",
+      "inputs": {
+        "amount": 1001,
+        "outflowToday": 0,
+        "recipientKnown": true
+      },
+      "expected": {
+        "ok": false,
+        "code": "PER_TX_LIMIT"
+      }
+    },
+    {
+      "id": "xfer-003",
+      "kind": "transfer",
+      "product": "wallet",
+      "moves_balance": true,
+      "note": "오늘 누적 + 금액 = 2000 정확히 — 통과",
+      "inputs": {
+        "amount": 500,
+        "outflowToday": 1500,
+        "recipientKnown": true
+      },
+      "expected": {
+        "ok": true,
+        "code": "OK"
+      }
+    },
+    {
+      "id": "xfer-004",
+      "kind": "transfer",
+      "product": "wallet",
+      "moves_balance": true,
+      "note": "1일 상한 +1",
+      "inputs": {
+        "amount": 501,
+        "outflowToday": 1500,
+        "recipientKnown": true
+      },
+      "expected": {
+        "ok": false,
+        "code": "DAILY_LIMIT"
+      }
+    },
+    {
+      "id": "xfer-005",
+      "kind": "transfer",
+      "product": "wallet",
+      "moves_balance": true,
+      "note": "신규 수취인 상한과 같은 금액 — 통과",
+      "inputs": {
+        "amount": 100,
+        "outflowToday": 0,
+        "recipientKnown": false
+      },
+      "expected": {
+        "ok": true,
+        "code": "OK"
+      }
+    },
+    {
+      "id": "xfer-006",
+      "kind": "transfer",
+      "product": "wallet",
+      "moves_balance": true,
+      "note": "신규 수취인 상한 +1",
+      "inputs": {
+        "amount": 101,
+        "outflowToday": 0,
+        "recipientKnown": false
+      },
+      "expected": {
+        "ok": false,
+        "code": "NEW_RECIPIENT_LIMIT"
+      }
+    },
+    {
+      "id": "xfer-007",
+      "kind": "transfer",
+      "product": "wallet",
+      "moves_balance": true,
+      "note": "금액 0",
+      "inputs": {
+        "amount": 0,
+        "outflowToday": 0,
+        "recipientKnown": true
+      },
+      "expected": {
+        "ok": false,
+        "code": "AMOUNT_INVALID"
+      }
+    },
+    {
+      "id": "xfer-008",
+      "kind": "transfer",
+      "product": "wallet",
+      "moves_balance": true,
+      "note": "음수 금액",
+      "inputs": {
+        "amount": -5,
+        "outflowToday": 0,
+        "recipientKnown": true
+      },
+      "expected": {
+        "ok": false,
+        "code": "AMOUNT_INVALID"
+      }
+    },
+    {
+      "id": "xfer-009",
+      "kind": "transfer",
+      "product": "wallet",
+      "moves_balance": true,
+      "note": "검사 순서: 1회 상한과 신규 수취인·1일 상한을 동시에 넘으면 1회 상한이 먼저",
+      "inputs": {
+        "amount": 1001,
+        "outflowToday": 1990,
+        "recipientKnown": false
+      },
+      "expected": {
+        "ok": false,
+        "code": "PER_TX_LIMIT"
+      }
+    },
+    {
+      "id": "xfer-010",
+      "kind": "transfer",
+      "product": "wallet",
+      "moves_balance": true,
+      "note": "검사 순서: 신규 수취인 상한이 1일 상한보다 먼저",
+      "inputs": {
+        "amount": 150,
+        "outflowToday": 1990,
+        "recipientKnown": false
+      },
+      "expected": {
+        "ok": false,
+        "code": "NEW_RECIPIENT_LIMIT"
+      }
+    },
+    {
+      "id": "xfer-011",
+      "kind": "transfer",
+      "product": "wallet",
+      "moves_balance": true,
+      "note": "숫자가 아닌 금액(문자열)",
+      "inputs": {
+        "amount": "100",
+        "outflowToday": 0,
+        "recipientKnown": true
+      },
+      "expected": {
+        "ok": false,
+        "code": "AMOUNT_INVALID"
+      }
+    }
+  ]
+}
