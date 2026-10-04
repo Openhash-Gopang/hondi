@@ -1107,6 +1107,12 @@ async function _continueAfterOrchestrationTag() {
 // 찾아 보여준다. 결과가 없으면 없다고 정직하게 알린다(C39-4).
 async function _connectHumanExpert(occupationKeyword, escReason = 'success') {
   _escalationReason = escReason; // §7 how 필드 판정용 — C39-5 반영(2026-07-20)
+  // 2026-10-04 변호사법 정비 — 혼디는 변호사·법률사무소 등을 소개·연결·추천하지 않는다.
+  // 법률 직군 키워드는 market 조회를 하지 않고 직접 상담을 안내한다.
+  if (/변호사|법률|법무|변리사/.test(occupationKeyword || '')) {
+    appendBubble('ai', '혼디는 변호사·법률사무소를 소개·연결·추천하지 않습니다. 상담이 필요하시면 직접 선택하신 변호사와 상담해 주세요. 무료·저비용 법률구조가 필요하시면 대한법률구조공단 등 공적 기관의 안내를 확인하실 수 있습니다.');
+    return;
+  }
   const box = appendBubble('ai', `<i>market에서 "${escHtml(occupationKeyword)}" 관련 등록
     사업자를 찾는 중…</i>`);
   try {
