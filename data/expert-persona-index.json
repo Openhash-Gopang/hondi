@@ -360,7 +360,7 @@
 "경매",
 "소액사건"
 ],
-"spPath":"prompts/SP_judicial-scrivener_v2_2.md"
+"spPath":"prompts/SP_judicial-scrivener_v2_3.md"
 },
 "labor-attorney":{
 "label":"공인노무사",
@@ -394,7 +394,7 @@
 "행정소송 전문 변호사",
 "영업정지 이의"
 ],
-"spPath":"prompts/SP_lawyer-administrative_v1_0.md"
+"spPath":"prompts/SP_lawyer-administrative_v1_1.md"
 },
 "lawyer-antitrust":{
 "label":"공정거래",
@@ -404,7 +404,7 @@
 "공정거래 전문 변호사",
 "가맹사업 분쟁"
 ],
-"spPath":"prompts/SP_lawyer-antitrust_v1_0.md"
+"spPath":"prompts/SP_lawyer-antitrust_v1_1.md"
 },
 "lawyer-arbitration":{
 "label":"중재",
@@ -414,7 +414,7 @@
 "상사중재 신청",
 "중재조항 해석"
 ],
-"spPath":"prompts/SP_lawyer-arbitration_v1_0.md"
+"spPath":"prompts/SP_lawyer-arbitration_v1_1.md"
 },
 "lawyer-auction":{
 "label":"등기·경매",
@@ -424,7 +424,7 @@
 "경매 전문 변호사",
 "명도소송 상담"
 ],
-"spPath":"prompts/SP_lawyer-auction_v1_0.md"
+"spPath":"prompts/SP_lawyer-auction_v1_1.md"
 },
 "lawyer-broadcasting":{
 "label":"방송통신",
@@ -434,7 +434,7 @@
 "방송통신 인허가",
 "방송통신 제재처분"
 ],
-"spPath":"prompts/SP_lawyer-broadcasting_v1_0.md"
+"spPath":"prompts/SP_lawyer-broadcasting_v1_1.md"
 },
 "lawyer-civil":{
 "label":"민사법",
@@ -444,7 +444,7 @@
 "민사법 상담",
 "민사 전문 변호사"
 ],
-"spPath":"prompts/SP_lawyer-civil_v1_0.md"
+"spPath":"prompts/SP_lawyer-civil_v1_1.md"
 },
 "lawyer-collection":{
 "label":"채권추심",
@@ -454,7 +454,7 @@
 "채권추심 전문 변호사",
 "지급명령 상담"
 ],
-"spPath":"prompts/SP_lawyer-collection_v1_0.md"
+"spPath":"prompts/SP_lawyer-collection_v1_1.md"
 },
 "lawyer-commercial":{
 "label":"상사법",
@@ -464,7 +464,7 @@
 "상사법 상담",
 "어음수표 소송"
 ],
-"spPath":"prompts/SP_lawyer-commercial_v1_0.md"
+"spPath":"prompts/SP_lawyer-commercial_v1_1.md"
 },
 "lawyer-constitutional":{
 "label":"헌법재판",
@@ -474,7 +474,7 @@
 "헌법소원 상담",
 "헌법재판 전문 변호사"
 ],
-"spPath":"prompts/SP_lawyer-constitutional_v1_0.md"
+"spPath":"prompts/SP_lawyer-constitutional_v1_1.md"
 },
 "lawyer-construction":{
 "label":"건설",
@@ -485,7 +485,7 @@
 "하자보수 청구",
 "지체상금 청구"
 ],
-"spPath":"prompts/SP_lawyer-construction_v1_0.md"
+"spPath":"prompts/SP_lawyer-construction_v1_1.md"
 },
 "lawyer-corporate":{
 "label":"기업법무",
@@ -496,7 +496,7 @@
 "기업 전문 변호사",
 "M&A 법률 자문"
 ],
-"spPath":"prompts/SP_lawyer-corporate_v1_0.md"
+"spPath":"prompts/SP_lawyer-corporate_v1_1.md"
 },
 "lawyer-criminal":{
 "label":"형사법",
@@ -506,7 +506,7 @@
 "형사법 상담",
 "형사 전문 변호사"
 ],
-"spPath":"prompts/SP_lawyer-criminal_v1_0.md"
+"spPath":"prompts/SP_lawyer-criminal_v1_1.md"
 },
 "lawyer-damages":{
 "label":"손해배상",
@@ -516,7 +516,7 @@
 "손해배상 전문 변호사",
 "의료소송 상담"
 ],
-"spPath":"prompts/SP_lawyer-damages_v1_0.md"
+"spPath":"prompts/SP_lawyer-damages_v1_1.md"
 },
 "lawyer-energy":{
 "label":"에너지",
@@ -526,7 +526,7 @@
 "에너지 사업 인허가",
 "PPA 계약 분쟁"
 ],
-"spPath":"prompts/SP_lawyer-energy_v1_0.md"
+"spPath":"prompts/SP_lawyer-energy_v1_1.md"
 },
 "lawyer-entertainment":{
 "label":"엔터테인먼트",
@@ -536,7 +536,7 @@
 "전속계약 검토",
 "연예인 수익배분 분쟁"
 ],
-"spPath":"prompts/SP_lawyer-entertainment_v1_0.md"
+"spPath":"prompts/SP_lawyer-entertainment_v1_1.md"
 },
 "lawyer-environmental":{
 "label":"환경",
@@ -546,7 +546,7 @@
 "환경 전문 변호사",
 "환경오염 손해배상"
 ],
-"spPath":"prompts/SP_lawyer-environmental_v1_0.md"
+"spPath":"prompts/SP_lawyer-environmental_v1_1.md"
 },
 "lawyer-execution":{
 "label":"민사집행",
@@ -556,7 +556,7 @@
 "민사집행 상담",
 "채권압류 상담"
 ],
-"spPath":"prompts/SP_lawyer-execution_v1_0.md"
+"spPath":"prompts/SP_lawyer-execution_v1_1.md"
 },
 "lawyer-expropriation":{
 "label":"수용 및 보상",
@@ -566,7 +566,7 @@
 "토지수용 상담",
 "보상금 소송 변호사"
 ],
-"spPath":"prompts/SP_lawyer-expropriation_v1_0.md"
+"spPath":"prompts/SP_lawyer-expropriation_v1_1.md"
 },
 "lawyer-family":{
 "label":"가사법",
@@ -577,7 +577,7 @@
 "이혼 전문 변호사",
 "양육권 상담"
 ],
-"spPath":"prompts/SP_lawyer-family_v1_0.md"
+"spPath":"prompts/SP_lawyer-family_v1_1.md"
 },
 "lawyer-finance":{
 "label":"금융",
@@ -587,7 +587,7 @@
 "금융 전문 변호사",
 "대출 약관 분쟁"
 ],
-"spPath":"prompts/SP_lawyer-finance_v1_0.md"
+"spPath":"prompts/SP_lawyer-finance_v1_1.md"
 },
 "lawyer-foodpharma":{
 "label":"식품·의약",
@@ -597,7 +597,7 @@
 "식품 의약 전문 변호사",
 "제조물책임 소송"
 ],
-"spPath":"prompts/SP_lawyer-foodpharma_v1_0.md"
+"spPath":"prompts/SP_lawyer-foodpharma_v1_1.md"
 },
 "lawyer-government-contract":{
 "label":"국가계약",
@@ -608,7 +608,7 @@
 "입찰 무효 상담",
 "부정당업자 제재"
 ],
-"spPath":"prompts/SP_lawyer-government-contract_v1_0.md"
+"spPath":"prompts/SP_lawyer-government-contract_v1_1.md"
 },
 "lawyer-guardianship":{
 "label":"성년후견",
@@ -618,7 +618,7 @@
 "성년후견 개시 심판",
 "후견인 선임 상담"
 ],
-"spPath":"prompts/SP_lawyer-guardianship_v1_0.md"
+"spPath":"prompts/SP_lawyer-guardianship_v1_1.md"
 },
 "lawyer-immigration":{
 "label":"이주 및 비자",
@@ -629,7 +629,7 @@
 "강제퇴거 대응",
 "비자 상담"
 ],
-"spPath":"prompts/SP_lawyer-immigration_v1_0.md"
+"spPath":"prompts/SP_lawyer-immigration_v1_1.md"
 },
 "lawyer-inheritance":{
 "label":"상속",
@@ -640,7 +640,7 @@
 "유류분 상담",
 "상속포기 상담"
 ],
-"spPath":"prompts/SP_lawyer-inheritance_v1_0.md"
+"spPath":"prompts/SP_lawyer-inheritance_v1_1.md"
 },
 "lawyer-insolvency":{
 "label":"도산",
@@ -651,7 +651,7 @@
 "법인파산 상담",
 "기업회생 전문 변호사"
 ],
-"spPath":"prompts/SP_lawyer-insolvency_v1_0.md"
+"spPath":"prompts/SP_lawyer-insolvency_v1_1.md"
 },
 "lawyer-insurance":{
 "label":"보험",
@@ -661,7 +661,7 @@
 "보험 전문 변호사",
 "보험금 지급거절 상담"
 ],
-"spPath":"prompts/SP_lawyer-insurance_v1_0.md"
+"spPath":"prompts/SP_lawyer-insurance_v1_1.md"
 },
 "lawyer-international-arbitration":{
 "label":"국제중재",
@@ -671,7 +671,7 @@
 "국제중재 신청",
 "외국 중재판정 집행"
 ],
-"spPath":"prompts/SP_lawyer-international-arbitration_v1_0.md"
+"spPath":"prompts/SP_lawyer-international-arbitration_v1_1.md"
 },
 "lawyer-international-relations":{
 "label":"국제관계법",
@@ -681,7 +681,7 @@
 "국제법 자문",
 "조약 해석"
 ],
-"spPath":"prompts/SP_lawyer-international-relations_v1_0.md"
+"spPath":"prompts/SP_lawyer-international-relations_v1_1.md"
 },
 "lawyer-international-transactions":{
 "label":"국제거래",
@@ -691,7 +691,7 @@
 "국제거래계약 검토",
 "크로스보더 계약 분쟁"
 ],
-"spPath":"prompts/SP_lawyer-international-transactions_v1_0.md"
+"spPath":"prompts/SP_lawyer-international-transactions_v1_1.md"
 },
 "lawyer-it":{
 "label":"IT",
@@ -701,7 +701,7 @@
 "IT 개발계약 분쟁",
 "서비스 이용약관 검토"
 ],
-"spPath":"prompts/SP_lawyer-it_v1_0.md"
+"spPath":"prompts/SP_lawyer-it_v1_1.md"
 },
 "lawyer-juvenile":{
 "label":"소년법",
@@ -711,7 +711,7 @@
 "소년법 상담",
 "소년보호사건 변호사"
 ],
-"spPath":"prompts/SP_lawyer-juvenile_v1_0.md"
+"spPath":"prompts/SP_lawyer-juvenile_v1_1.md"
 },
 "lawyer-legislation":{
 "label":"입법",
@@ -721,7 +721,7 @@
 "법안 검토 자문",
 "입법영향평가"
 ],
-"spPath":"prompts/SP_lawyer-legislation_v1_0.md"
+"spPath":"prompts/SP_lawyer-legislation_v1_1.md"
 },
 "lawyer-maritime":{
 "label":"해상",
@@ -731,7 +731,7 @@
 "해상사고 상담",
 "선박 관련 계약분쟁"
 ],
-"spPath":"prompts/SP_lawyer-maritime_v1_0.md"
+"spPath":"prompts/SP_lawyer-maritime_v1_1.md"
 },
 "lawyer-military":{
 "label":"군형법",
@@ -741,7 +741,7 @@
 "군형법 상담",
 "군사법원 변호사"
 ],
-"spPath":"prompts/SP_lawyer-military_v1_0.md"
+"spPath":"prompts/SP_lawyer-military_v1_1.md"
 },
 "lawyer-overseas-investment":{
 "label":"해외투자",
@@ -751,7 +751,7 @@
 "해외투자 구조 설계",
 "해외 M&A 자문"
 ],
-"spPath":"prompts/SP_lawyer-overseas-investment_v1_0.md"
+"spPath":"prompts/SP_lawyer-overseas-investment_v1_1.md"
 },
 "lawyer-realestate":{
 "label":"부동산",
@@ -761,7 +761,7 @@
 "부동산 전문 변호사",
 "임대차 분쟁 상담"
 ],
-"spPath":"prompts/SP_lawyer-realestate_v1_0.md"
+"spPath":"prompts/SP_lawyer-realestate_v1_1.md"
 },
 "lawyer-redevelopment":{
 "label":"재개발·재건축",
@@ -771,7 +771,7 @@
 "재개발 조합 분쟁",
 "관리처분계획 불복"
 ],
-"spPath":"prompts/SP_lawyer-redevelopment_v1_0.md"
+"spPath":"prompts/SP_lawyer-redevelopment_v1_1.md"
 },
 "lawyer-religious":{
 "label":"종교",
@@ -781,7 +781,7 @@
 "종교단체 재산분쟁",
 "종교단체 내부 징계"
 ],
-"spPath":"prompts/SP_lawyer-religious_v1_0.md"
+"spPath":"prompts/SP_lawyer-religious_v1_1.md"
 },
 "lawyer-school-violence":{
 "label":"학교폭력",
@@ -791,7 +791,7 @@
 "학교폭력 심의 대응",
 "학폭 처분 불복"
 ],
-"spPath":"prompts/SP_lawyer-school-violence_v1_0.md"
+"spPath":"prompts/SP_lawyer-school-violence_v1_1.md"
 },
 "lawyer-securities":{
 "label":"증권",
@@ -801,7 +801,7 @@
 "증권 전문 변호사",
 "불공정거래 대응"
 ],
-"spPath":"prompts/SP_lawyer-securities_v1_0.md"
+"spPath":"prompts/SP_lawyer-securities_v1_1.md"
 },
 "lawyer-shipbuilding":{
 "label":"조선",
@@ -811,7 +811,7 @@
 "선박건조계약 분쟁",
 "인도지연 대응"
 ],
-"spPath":"prompts/SP_lawyer-shipbuilding_v1_0.md"
+"spPath":"prompts/SP_lawyer-shipbuilding_v1_1.md"
 },
 "lawyer-sports":{
 "label":"스포츠",
@@ -821,7 +821,7 @@
 "선수계약 검토",
 "스포츠 징계 불복"
 ],
-"spPath":"prompts/SP_lawyer-sports_v1_0.md"
+"spPath":"prompts/SP_lawyer-sports_v1_1.md"
 },
 "lawyer-startup":{
 "label":"스타트업",
@@ -831,7 +831,7 @@
 "투자계약 검토",
 "스타트업 지분구조 설계"
 ],
-"spPath":"prompts/SP_lawyer-startup_v1_0.md"
+"spPath":"prompts/SP_lawyer-startup_v1_1.md"
 },
 "lawyer-trade":{
 "label":"무역",
@@ -841,7 +841,7 @@
 "무역계약 분쟁",
 "수출입 대금 미지급"
 ],
-"spPath":"prompts/SP_lawyer-trade_v1_0.md"
+"spPath":"prompts/SP_lawyer-trade_v1_1.md"
 },
 "lawyer-traffic":{
 "label":"교통사고",
@@ -850,7 +850,7 @@
 "triggers":[
 "교통사고 전문 변호사"
 ],
-"spPath":"prompts/SP_lawyer-traffic_v1_0.md"
+"spPath":"prompts/SP_lawyer-traffic_v1_1.md"
 },
 "librarian":{
 "label":"사서",

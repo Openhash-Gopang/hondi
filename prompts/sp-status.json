@@ -1007,14 +1007,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-administrative_v1_0.md",
+      "file": "prompts/SP_lawyer-administrative_v1_1.md",
       "name": "변호사 - 행정법",
       "cat": "prof-lawyer--administrative",
       "cat_label": "전문직 페르소나 · 변호사 - 행정법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 행정법 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 행정법 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "행정법 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 81,
       "breakdown": [
         {
@@ -1055,14 +1055,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-antitrust_v1_0.md",
+      "file": "prompts/SP_lawyer-antitrust_v1_1.md",
       "name": "변호사 - 공정거래법",
       "cat": "prof-lawyer--antitrust",
       "cat_label": "전문직 페르소나 · 변호사 - 공정거래법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 공정거래법 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 공정거래법 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "공정거래법 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 78,
       "breakdown": [
         {
@@ -1103,14 +1103,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-arbitration_v1_0.md",
+      "file": "prompts/SP_lawyer-arbitration_v1_1.md",
       "name": "변호사 - 중재",
       "cat": "prof-lawyer--arbitration",
       "cat_label": "전문직 페르소나 · 변호사 - 중재",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 중재 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 중재 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "중재 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 78,
       "breakdown": [
         {
@@ -1151,14 +1151,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-auction_v1_0.md",
+      "file": "prompts/SP_lawyer-auction_v1_1.md",
       "name": "변호사 - 경매",
       "cat": "prof-lawyer--auction",
       "cat_label": "전문직 페르소나 · 변호사 - 경매",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 등기·경매 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 등기·경매 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "등기·경매 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 80,
       "breakdown": [
         {
@@ -1199,14 +1199,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-broadcasting_v1_0.md",
+      "file": "prompts/SP_lawyer-broadcasting_v1_1.md",
       "name": "변호사 - 방송법",
       "cat": "prof-lawyer--broadcasting",
       "cat_label": "전문직 페르소나 · 변호사 - 방송법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 방송통신 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 방송통신 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "방송통신 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 77,
       "breakdown": [
         {
@@ -1247,14 +1247,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-civil_v1_0.md",
+      "file": "prompts/SP_lawyer-civil_v1_1.md",
       "name": "변호사 - 민사법",
       "cat": "prof-lawyer--civil",
       "cat_label": "전문직 페르소나 · 변호사 - 민사법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 민사법 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 민사법 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "민사법 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 81,
       "breakdown": [
         {
@@ -1295,14 +1295,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-collection_v1_0.md",
+      "file": "prompts/SP_lawyer-collection_v1_1.md",
       "name": "변호사 - 채권추심",
       "cat": "prof-lawyer--collection",
       "cat_label": "전문직 페르소나 · 변호사 - 채권추심",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 채권추심 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 채권추심 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "채권추심 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 80,
       "breakdown": [
         {
@@ -1343,14 +1343,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-commercial_v1_0.md",
+      "file": "prompts/SP_lawyer-commercial_v1_1.md",
       "name": "변호사 - 상법",
       "cat": "prof-lawyer--commercial",
       "cat_label": "전문직 페르소나 · 변호사 - 상법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 상사법 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 상사법 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "상사법 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 78,
       "breakdown": [
         {
@@ -1391,14 +1391,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-constitutional_v1_0.md",
+      "file": "prompts/SP_lawyer-constitutional_v1_1.md",
       "name": "변호사 - 헌법",
       "cat": "prof-lawyer--constitutional",
       "cat_label": "전문직 페르소나 · 변호사 - 헌법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 헌법재판 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 헌법재판 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "헌법재판 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 81,
       "breakdown": [
         {
@@ -1439,14 +1439,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-construction_v1_0.md",
+      "file": "prompts/SP_lawyer-construction_v1_1.md",
       "name": "변호사 - 건설법",
       "cat": "prof-lawyer--construction",
       "cat_label": "전문직 페르소나 · 변호사 - 건설법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 건설 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 건설 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "건설 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 78,
       "breakdown": [
         {
@@ -1487,14 +1487,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-corporate_v1_0.md",
+      "file": "prompts/SP_lawyer-corporate_v1_1.md",
       "name": "변호사 - 기업법무",
       "cat": "prof-lawyer--corporate",
       "cat_label": "전문직 페르소나 · 변호사 - 기업법무",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 기업법무 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 기업법무 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "기업법무 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 79,
       "breakdown": [
         {
@@ -1535,14 +1535,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-criminal_v1_0.md",
+      "file": "prompts/SP_lawyer-criminal_v1_1.md",
       "name": "변호사 - 형사법",
       "cat": "prof-lawyer--criminal",
       "cat_label": "전문직 페르소나 · 변호사 - 형사법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 형사법 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 형사법 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "형사법 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 81,
       "breakdown": [
         {
@@ -1583,14 +1583,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-damages_v1_0.md",
+      "file": "prompts/SP_lawyer-damages_v1_1.md",
       "name": "변호사 - 손해배상",
       "cat": "prof-lawyer--damages",
       "cat_label": "전문직 페르소나 · 변호사 - 손해배상",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 손해배상 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 손해배상 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "손해배상 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 80,
       "breakdown": [
         {
@@ -1631,14 +1631,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-energy_v1_0.md",
+      "file": "prompts/SP_lawyer-energy_v1_1.md",
       "name": "변호사 - 에너지법",
       "cat": "prof-lawyer--energy",
       "cat_label": "전문직 페르소나 · 변호사 - 에너지법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 에너지 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 에너지 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "에너지 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 77,
       "breakdown": [
         {
@@ -1679,14 +1679,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-entertainment_v1_0.md",
+      "file": "prompts/SP_lawyer-entertainment_v1_1.md",
       "name": "변호사 - 엔터테인먼트법",
       "cat": "prof-lawyer--entertainment",
       "cat_label": "전문직 페르소나 · 변호사 - 엔터테인먼트법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 엔터테인먼트(지재권 제외) 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 엔터테인먼트(지재권 제외) 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "엔터테인먼트(지재권 제외) 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 76,
       "breakdown": [
         {
@@ -1727,14 +1727,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-environmental_v1_0.md",
+      "file": "prompts/SP_lawyer-environmental_v1_1.md",
       "name": "변호사 - 환경법",
       "cat": "prof-lawyer--environmental",
       "cat_label": "전문직 페르소나 · 변호사 - 환경법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 환경 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 환경 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "환경 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 78,
       "breakdown": [
         {
@@ -1775,14 +1775,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-execution_v1_0.md",
+      "file": "prompts/SP_lawyer-execution_v1_1.md",
       "name": "변호사 - 강제집행",
       "cat": "prof-lawyer--execution",
       "cat_label": "전문직 페르소나 · 변호사 - 강제집행",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 민사집행 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 민사집행 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "민사집행 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 78,
       "breakdown": [
         {
@@ -1823,14 +1823,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-expropriation_v1_0.md",
+      "file": "prompts/SP_lawyer-expropriation_v1_1.md",
       "name": "변호사 - 수용·보상",
       "cat": "prof-lawyer--expropriation",
       "cat_label": "전문직 페르소나 · 변호사 - 수용·보상",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 수용 및 보상 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 수용 및 보상 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "수용 및 보상 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 79,
       "breakdown": [
         {
@@ -1871,14 +1871,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-family_v1_0.md",
+      "file": "prompts/SP_lawyer-family_v1_1.md",
       "name": "변호사 - 가사법",
       "cat": "prof-lawyer--family",
       "cat_label": "전문직 페르소나 · 변호사 - 가사법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 가사법(이혼 통합) 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 가사법(이혼 통합) 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "가사법(이혼 통합) 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 80,
       "breakdown": [
         {
@@ -1919,14 +1919,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-finance_v1_0.md",
+      "file": "prompts/SP_lawyer-finance_v1_1.md",
       "name": "변호사 - 금융법",
       "cat": "prof-lawyer--finance",
       "cat_label": "전문직 페르소나 · 변호사 - 금융법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 금융 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 금융 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "금융 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 77,
       "breakdown": [
         {
@@ -1967,14 +1967,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-foodpharma_v1_0.md",
+      "file": "prompts/SP_lawyer-foodpharma_v1_1.md",
       "name": "변호사 - 식품·의약법",
       "cat": "prof-lawyer--foodpharma",
       "cat_label": "전문직 페르소나 · 변호사 - 식품·의약법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 식품·의약 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 식품·의약 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "식품·의약 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 78,
       "breakdown": [
         {
@@ -2015,14 +2015,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-government-contract_v1_0.md",
+      "file": "prompts/SP_lawyer-government-contract_v1_1.md",
       "name": "변호사 - 정부계약",
       "cat": "prof-lawyer--government-contract",
       "cat_label": "전문직 페르소나 · 변호사 - 정부계약",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 국가계약 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 국가계약 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "국가계약 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 78,
       "breakdown": [
         {
@@ -2063,14 +2063,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-guardianship_v1_0.md",
+      "file": "prompts/SP_lawyer-guardianship_v1_1.md",
       "name": "변호사 - 성년후견",
       "cat": "prof-lawyer--guardianship",
       "cat_label": "전문직 페르소나 · 변호사 - 성년후견",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 성년후견 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 성년후견 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "성년후견 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 77,
       "breakdown": [
         {
@@ -2111,14 +2111,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-immigration_v1_0.md",
+      "file": "prompts/SP_lawyer-immigration_v1_1.md",
       "name": "변호사 - 이민법",
       "cat": "prof-lawyer--immigration",
       "cat_label": "전문직 페르소나 · 변호사 - 이민법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 이주 및 비자 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 이주 및 비자 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "이주 및 비자 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 78,
       "breakdown": [
         {
@@ -2159,14 +2159,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-inheritance_v1_0.md",
+      "file": "prompts/SP_lawyer-inheritance_v1_1.md",
       "name": "변호사 - 상속법",
       "cat": "prof-lawyer--inheritance",
       "cat_label": "전문직 페르소나 · 변호사 - 상속법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 상속 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 상속 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "상속 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 79,
       "breakdown": [
         {
@@ -2207,14 +2207,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-insolvency_v1_0.md",
+      "file": "prompts/SP_lawyer-insolvency_v1_1.md",
       "name": "변호사 - 도산·회생",
       "cat": "prof-lawyer--insolvency",
       "cat_label": "전문직 페르소나 · 변호사 - 도산·회생",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 도산(법인) 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 도산(법인) 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "도산(법인) 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 78,
       "breakdown": [
         {
@@ -2255,14 +2255,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-insurance_v1_0.md",
+      "file": "prompts/SP_lawyer-insurance_v1_1.md",
       "name": "변호사 - 보험법",
       "cat": "prof-lawyer--insurance",
       "cat_label": "전문직 페르소나 · 변호사 - 보험법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 보험 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 보험 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "보험 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 79,
       "breakdown": [
         {
@@ -2303,14 +2303,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-international-arbitration_v1_0.md",
+      "file": "prompts/SP_lawyer-international-arbitration_v1_1.md",
       "name": "변호사 - 국제중재",
       "cat": "prof-lawyer--international-arbitration",
       "cat_label": "전문직 페르소나 · 변호사 - 국제중재",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 국제중재 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 국제중재 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "국제중재 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 77,
       "breakdown": [
         {
@@ -2351,14 +2351,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-international-relations_v1_0.md",
+      "file": "prompts/SP_lawyer-international-relations_v1_1.md",
       "name": "변호사 - 국제관계법",
       "cat": "prof-lawyer--international-relations",
       "cat_label": "전문직 페르소나 · 변호사 - 국제관계법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 국제관계법 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 국제관계법 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "국제관계법 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 75,
       "breakdown": [
         {
@@ -2399,14 +2399,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-international-transactions_v1_0.md",
+      "file": "prompts/SP_lawyer-international-transactions_v1_1.md",
       "name": "변호사 - 국제거래",
       "cat": "prof-lawyer--international-transactions",
       "cat_label": "전문직 페르소나 · 변호사 - 국제거래",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 국제거래 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 국제거래 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "국제거래 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 78,
       "breakdown": [
         {
@@ -2447,14 +2447,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-it_v1_0.md",
+      "file": "prompts/SP_lawyer-it_v1_1.md",
       "name": "변호사 - IT법",
       "cat": "prof-lawyer--it",
       "cat_label": "전문직 페르소나 · 변호사 - IT법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 IT 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 IT 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "IT 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 78,
       "breakdown": [
         {
@@ -2495,14 +2495,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-juvenile_v1_0.md",
+      "file": "prompts/SP_lawyer-juvenile_v1_1.md",
       "name": "변호사 - 소년법",
       "cat": "prof-lawyer--juvenile",
       "cat_label": "전문직 페르소나 · 변호사 - 소년법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 소년법 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 소년법 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "소년법 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 78,
       "breakdown": [
         {
@@ -2543,14 +2543,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-legislation_v1_0.md",
+      "file": "prompts/SP_lawyer-legislation_v1_1.md",
       "name": "변호사 - 입법",
       "cat": "prof-lawyer--legislation",
       "cat_label": "전문직 페르소나 · 변호사 - 입법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 입법 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 입법 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "입법 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 75,
       "breakdown": [
         {
@@ -2591,14 +2591,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-maritime_v1_0.md",
+      "file": "prompts/SP_lawyer-maritime_v1_1.md",
       "name": "변호사 - 해상법",
       "cat": "prof-lawyer--maritime",
       "cat_label": "전문직 페르소나 · 변호사 - 해상법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 해상 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 해상 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "해상 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 77,
       "breakdown": [
         {
@@ -2639,14 +2639,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-military_v1_0.md",
+      "file": "prompts/SP_lawyer-military_v1_1.md",
       "name": "변호사 - 군사법",
       "cat": "prof-lawyer--military",
       "cat_label": "전문직 페르소나 · 변호사 - 군사법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 군형법 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 군형법 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "군형법 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 78,
       "breakdown": [
         {
@@ -2687,14 +2687,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-overseas-investment_v1_0.md",
+      "file": "prompts/SP_lawyer-overseas-investment_v1_1.md",
       "name": "변호사 - 해외투자",
       "cat": "prof-lawyer--overseas-investment",
       "cat_label": "전문직 페르소나 · 변호사 - 해외투자",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 해외투자 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 해외투자 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "해외투자 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 77,
       "breakdown": [
         {
@@ -2735,14 +2735,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-realestate_v1_0.md",
+      "file": "prompts/SP_lawyer-realestate_v1_1.md",
       "name": "변호사 - 부동산법",
       "cat": "prof-lawyer--realestate",
       "cat_label": "전문직 페르소나 · 변호사 - 부동산법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 부동산(임대차 통합) 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 부동산(임대차 통합) 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "부동산(임대차 통합) 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 79,
       "breakdown": [
         {
@@ -2783,14 +2783,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-redevelopment_v1_0.md",
+      "file": "prompts/SP_lawyer-redevelopment_v1_1.md",
       "name": "변호사 - 재개발·재건축",
       "cat": "prof-lawyer--redevelopment",
       "cat_label": "전문직 페르소나 · 변호사 - 재개발·재건축",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 재개발·재건축 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 재개발·재건축 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "재개발·재건축 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 77,
       "breakdown": [
         {
@@ -2831,14 +2831,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-religious_v1_0.md",
+      "file": "prompts/SP_lawyer-religious_v1_1.md",
       "name": "변호사 - 종교법",
       "cat": "prof-lawyer--religious",
       "cat_label": "전문직 페르소나 · 변호사 - 종교법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 종교 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 종교 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "종교 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 74,
       "breakdown": [
         {
@@ -2879,14 +2879,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-school-violence_v1_0.md",
+      "file": "prompts/SP_lawyer-school-violence_v1_1.md",
       "name": "변호사 - 학교폭력",
       "cat": "prof-lawyer--school-violence",
       "cat_label": "전문직 페르소나 · 변호사 - 학교폭력",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 학교폭력 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 학교폭력 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "학교폭력 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 78,
       "breakdown": [
         {
@@ -2927,14 +2927,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-securities_v1_0.md",
+      "file": "prompts/SP_lawyer-securities_v1_1.md",
       "name": "변호사 - 증권법",
       "cat": "prof-lawyer--securities",
       "cat_label": "전문직 페르소나 · 변호사 - 증권법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 증권 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 증권 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "증권 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 78,
       "breakdown": [
         {
@@ -2975,14 +2975,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-shipbuilding_v1_0.md",
+      "file": "prompts/SP_lawyer-shipbuilding_v1_1.md",
       "name": "변호사 - 조선·해양플랜트",
       "cat": "prof-lawyer--shipbuilding",
       "cat_label": "전문직 페르소나 · 변호사 - 조선·해양플랜트",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 조선 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 조선 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "조선 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 76,
       "breakdown": [
         {
@@ -3023,14 +3023,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-sports_v1_0.md",
+      "file": "prompts/SP_lawyer-sports_v1_1.md",
       "name": "변호사 - 스포츠법",
       "cat": "prof-lawyer--sports",
       "cat_label": "전문직 페르소나 · 변호사 - 스포츠법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 스포츠 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 스포츠 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "스포츠 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 74,
       "breakdown": [
         {
@@ -3071,14 +3071,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-startup_v1_0.md",
+      "file": "prompts/SP_lawyer-startup_v1_1.md",
       "name": "변호사 - 스타트업법무",
       "cat": "prof-lawyer--startup",
       "cat_label": "전문직 페르소나 · 변호사 - 스타트업법무",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 스타트업 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 스타트업 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "스타트업 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 78,
       "breakdown": [
         {
@@ -3119,14 +3119,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-trade_v1_0.md",
+      "file": "prompts/SP_lawyer-trade_v1_1.md",
       "name": "변호사 - 통상법",
       "cat": "prof-lawyer--trade",
       "cat_label": "전문직 페르소나 · 변호사 - 통상법",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 무역 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 무역 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "무역 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 78,
       "breakdown": [
         {
@@ -3167,14 +3167,14 @@
       ]
     },
     {
-      "file": "prompts/SP_lawyer-traffic_v1_0.md",
+      "file": "prompts/SP_lawyer-traffic_v1_1.md",
       "name": "변호사 - 교통사고",
       "cat": "prof-lawyer--traffic",
       "cat_label": "전문직 페르소나 · 변호사 - 교통사고",
-      "purpose": "K-Law AI 법률 자문가(변호사 페르소나)의 교통사고 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
+      "purpose": "K-Law AI 법률 정보 안내(법률 페르소나, 변호사 아님)의 교통사고 세부분야 — 부모 SP(lawyer)의 STEP 0~D 골격은 재서술하지 않고 경계·Tier·심화모듈·STEP R 훅만 추가하는 얇은 오버레이.",
       "goal": "교통사고 관련 사안에서 인접 세부분야·페르소나와 정확히 구분되는 역할을 수행하고, 최종 판단은 인증된 변호사(M3)에게 넘기는 것이 목표.",
-      "version": "v1.0",
-      "version_date": "2026-08-07",
+      "version": "v1.1",
+      "version_date": "2026-10-04",
       "completeness": 79,
       "breakdown": [
         {
@@ -4703,13 +4703,13 @@
       ]
     },
     {
-      "file": "prompts/SP_judicial-scrivener_v2_2.md",
+      "file": "prompts/SP_judicial-scrivener_v2_3.md",
       "name": "법무사",
       "cat": "prof-judicial-scrivener",
       "cat_label": "전문직 페르소나 · 법무사",
       "purpose": "SP-LAW-02 · K-Health/K-Law/K-전문직 AI 법무사 자문가 — 등기·경매 등 절차 실무 자문.",
       "goal": "HT:1(금전·법적 불가역성) 위험등급에 맞는 절차적 안전장치(확신도 라벨·강제전환 트리거·[위험 고지] 블록·L2/L3 예외)를 갖추고, lawyer 페르소나를 기준으로 한 시스템 전체 품질평가에서 발견된 결함을 지속적으로 보완하는 것이 목표.",
-      "version": "v2.2",
+      "version": "v2.3",
       "version_date": "2026-08-08",
       "completeness": 84,
       "breakdown": [
