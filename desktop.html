@@ -1313,7 +1313,7 @@ document.addEventListener('keydown', function (e) {
     { l1: '쓰면 쓸수록 똑똑해지는', l2: '나만의 AI 비서, 혼디', href: '#core-philosophy' },
     // 2026-09-14 추가 — '혼디란?' 소개 자료 20편(about-hondi.html 카드) 문구를
     // 히어로 로테이션용으로 재구성. href는 about-hondi.html의 실제 링크와 동일하게 맞춤.
-    { l1: '판결 예측 일치도 85% vs 45%,', l2: '혼디는 챗GPT와 다릅니다.', href: './reports/hondi-vs-chatgpt.html' },
+    { l1: '판결 예측 일치도 74% vs 45%,', l2: '혼디는 챗GPT와 다릅니다.', href: './reports/hondi-vs-chatgpt.html' },
     { l1: '카톡보다 100배 나은 혼디,', l2: '현장 베타 테스트를 시작합니다.', href: './reports/hondi-vs-chatgpt.html' },
     { l1: '메신저, AI, 그리고 블록체인', l2: '이 셋을 하나로 합쳤습니다.', href: './reports/hondi-vs-kakao-ai-blockchain.html' },
     { l1: '박사 수백 명을 쓸 수는 없지만,', l2: '나만의 AI 비서, 혼디가 있습니다.', href: './reports/hondi-mine-ai-secretary.html' },
@@ -1938,7 +1938,7 @@ document.addEventListener('keydown', function (e) {
     <p class="bh-p">그 방법은 콜럼버스의 달걀처럼 단순합니다.</p>
     <p class="bh-p">어떤 질문에도 답하려 드는 거대 LLM과 달리, <strong>혼디</strong>는 거대 LLM을 업무별로 잘게 쪼갰습니다. 법률 <strong>혼디</strong>는 법률만, 의료 <strong>혼디</strong>는 의학만 다룹니다. 더 잘게 쪼개면, 민법 <strong>혼디</strong>는 민법만, 영상의학 <strong>혼디</strong>는 MRI·CT·X-ray 등 영상 데이터만 다룹니다. 이렇게 업무와 기능별로 나눈 수천 개의 조각 하나하나를, 국내 소형 LLM이 그 업무 하나만큼은 가장 잘 수행하도록 훈련합니다. 이 훈련 과정을 <strong>파인튜닝(Fine-tuning)</strong>이라 부릅니다.</p>
     <div class="bh-analogy">비유하자면, 해외 거대 LLM은 짜장면 한 그릇을 배달하는 데도 테슬라 자율주행 트럭을 보내는 셈입니다. <b><strong>혼디</strong>는 딱 짜장면만 담은 작은 자율주행 로봇을 보냅니다.</b></div>
-    <div class="bh-notice"><span class="bh-h">법률 분야 자체 테스트</span>대법원 공개 판례 300건으로 테스트한 결과, 거대 AI가 예상한 판결문과 1심·2심 판결문의 대법원 판결문 일치도는 45%, <strong>혼디</strong>(K-Law)의 일치도는 90%였습니다. <strong>혼디</strong>는 소송을 접수하기도 전에, 수년 뒤 나올 대법원 판결문을 90%의 정확도로 예측할 수 있습니다(자체 테스트).</div>
+    <div class="bh-notice"><span class="bh-h">법률 분야 자체 테스트</span>대법원 공개 판례 300여 건으로 테스트한 결과, 1심·2심 판결문의 대법원 판결문 일치도는 약 40~45% 수준인 경향이 있고, <strong>혼디</strong>(K-Law)의 일치도는 약 74%(10점 만점 평균 7.44점, 최초 평가 기준)였습니다. <strong>혼디</strong>는 소송을 접수하기도 전에, 수년 뒤 나올 대법원 판결문을 이 수준의 일치도로 가늠해 볼 수 있습니다(자체 테스트, <a href="/pages/klaw-simulation-record.html">시뮬레이션 결과</a> 참조).</div>
     <p class="bh-p">이렇게 <strong>혼디</strong>는 정부 기관 각각, 기관 안의 부서 각각, 부서 안의 직책 각각은 물론, 은행·증권·보험·대학·초중고·교통·물류·시장·산업 등 우리 사회 전체 부문 각각에도 저마다의 분신을 만들고, 수만 개의 <strong>혼디</strong> AI를 하나의 네트워크 — <strong>혼디</strong>넷 — 으로 연결하였습니다. 이 네트워크가 <strong>혼디</strong>의 가장 큰 강점 중 하나입니다.</p>
     <div class="bh-notice"><span class="bh-h">현장 테스트 기간 중 안내</span>현재 베타 테스트 기간 동안에는, <strong>혼디</strong> 각 모듈의 시뮬레이션 과정에 DeepSeek을 활용하고 있습니다.</div>
 
@@ -2145,7 +2145,7 @@ document.addEventListener('keydown', function (e) {
     <div class="steps-grid" style="grid-template-columns:repeat(3,1fr)">
       <div class="step-card">
         <h3 class="has-doc-link">혼디는 챗GPT와 무엇이 다를까요?</h3>
-        <p>대법원 판례 300건 자체 테스트 기준 판결 예측 일치도 약 85%(1심·2심의 대법원 일치도는 45%). MoTE·전문가 AI·정부 AI·나만의 AI 비서까지, 혼디의 정체성과 성능을 8가지로 설명합니다.</p>
+        <p>대법원 판례 300건 자체 테스트 기준 판결 예측 일치도 약 74%(1심·2심의 대법원 일치도는 공개 판례 기준 약 40~45%). MoTE·전문가 AI·정부 AI·나만의 AI 비서까지, 혼디의 정체성과 성능을 8가지로 설명합니다.</p>
         <a class="doc-link" href="./reports/hondi-vs-chatgpt.html" target="_blank" rel="noopener">더 자세히<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
       </div>
       <div class="step-card">
@@ -2338,7 +2338,7 @@ document.addEventListener('keydown', function (e) {
         </tbody>
       </table>
     </div>
-    <p class="cmp-summary">혼디의 수백 개 AI 기능 중 하나인 <strong>K-Law</strong>는 사실관계와 헌법·법률·판례를 근거로 가상의 대법원 판결문을 3~5분 만에 작성합니다. 대법원 공개 판례 대상 자체 측정 기준, K-Law 가상 판결문의 대법원 실제 판결 일치도는 약 75~90%로, 공개 판례의 1~2심 법원 일치도(45~48%)보다 현저히 높습니다. 파산·면책 절차에도 같은 방식을 적용해 K-Law가 진행안 초안을 작성하고, 사람 판사가 검증해 최종 결정을 내립니다. 바로가기(링크 <a href="https://klaw.hondi.net" target="_blank" style="color:inherit;text-decoration:underline;text-decoration-color:var(--brand);text-underline-offset:2px">klaw.hondi.kr</a>)</p>
+    <p class="cmp-summary">혼디의 수백 개 AI 기능 중 하나인 <strong>K-Law</strong>는 사실관계와 헌법·법률·판례를 근거로 가상의 대법원 판결문을 3~5분 만에 작성합니다. 대법원 공개 판례 대상 자체 측정 기준, K-Law 가상 판결문의 대법원 실제 판결 일치도는 약 74%(10점 만점 평균 7.44점, 최초 평가 기준)로, 공개 판례의 1~2심 법원 일치도(약 40~45%)보다 높게 나타났습니다. 파산·면책 절차에도 같은 방식을 적용해 K-Law가 진행안 초안을 작성하고, 사람 판사가 검증해 최종 결정을 내립니다. 바로가기(링크 <a href="https://klaw.hondi.net" target="_blank" style="color:inherit;text-decoration:underline;text-decoration-color:var(--brand);text-underline-offset:2px">klaw.hondi.kr</a>)</p>
     <div class="doc-link-row">
       <a class="doc-link" href="./reports/hondi-bankruptcy-automation-scenario.html" target="_blank" rel="noopener">개인파산 시나리오 더 자세히<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
       <a class="doc-link" href="./reports/hondi-legal-arbitration-scenario.html" target="_blank" rel="noopener">K-Law 화해계약 사례 더 자세히<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
@@ -2410,7 +2410,7 @@ document.addEventListener('keydown', function (e) {
     <div class="steps-grid" style="grid-template-columns:repeat(3,1fr)">
       <div class="step-card">
         <h3>사법</h3>
-        <p>혼디의 사법 모듈(K-Law)은 사건 발생 시점의 데이터를 기반으로 미래 대법원 판결을 예측하는 실험에서 97.0%의 예측 정확도를 나타냈습니다. (99% 신뢰수준, 오차범위 ±2.5%)</p>
+        <p>혼디의 사법 모듈(K-Law)은 대법원 공개 판례를 대상으로 한 자체 테스트에서 가상 판결문과 실제 대법원 판결의 일치도 약 74%(10점 만점 평균 7.44점, 최초 평가 기준)를 나타냈습니다. (<a href="/pages/klaw-simulation-record.html">시뮬레이션 결과</a> 참조)</p>
       </div>
       <div class="step-card">
         <h3>입법</h3>
