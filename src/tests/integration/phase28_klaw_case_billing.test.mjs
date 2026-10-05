@@ -212,16 +212,16 @@ describe('KLAW-FEE: 8단계 세분화 정액표 경계값 (사고실험 #1~4, #1
     assert.equal(aiChargeCalls[0].krw_amount, 10_000);
   });
 
-  it('KF-04: claim=35억원 → 최상위 구간(100,000원)', async () => {
+  it('KF-04: claim=35억원 → 최상위 구간(50,000원)', async () => {
     balances['guid-테스트'] = 200_000;
     await callKlaw(baseKlawBody({ step_cycle: true, case_id: 'case-d', claim_amount_krw: 3_500_000_000 }));
-    assert.equal(aiChargeCalls[0].krw_amount, 100_000);
+    assert.equal(aiChargeCalls[0].krw_amount, 50_000);
   });
 
-  it('KF-19: claim=999억원(상한 없음) → 여전히 100,000원', async () => {
+  it('KF-19: claim=999억원(상한 없음) → 여전히 50,000원', async () => {
     balances['guid-테스트'] = 200_000;
     await callKlaw(baseKlawBody({ step_cycle: true, case_id: 'case-e', claim_amount_krw: 99_900_000_000 }));
-    assert.equal(aiChargeCalls[0].krw_amount, 100_000);
+    assert.equal(aiChargeCalls[0].krw_amount, 50_000);
   });
 
   it('KF-18: claim=음수 → 정액과금 미실행(무효 판정), ai-charge 호출 안 됨', async () => {
