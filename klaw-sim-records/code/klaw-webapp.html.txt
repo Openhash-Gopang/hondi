@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>K-Law — AI 판결 시뮬레이터</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary:       #1A237E;
+  --primary-dark:  #0D1654;
+  --primary-light: #E8EAF6;
+  --accent:        #C62828;
+  --accent-light:  #FFEBEE;
+  --gold:          #F57F17;
+  --gold-light:    #FFF8E1;
+  --text:          #1A1A1A;
+  --muted:         #767676;
+  --border:        #E0E0E0;
+  --bg:            #F5F6FA;
+  --white:         #fff;
+  --radius:        14px;
+  --shadow:        0 4px 20px rgba(0,0,0,0.1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; background: var(--bg); font-family: 'Noto Sans KR', sans-serif; }
+
+#app {
+  max-width: 430px; margin: 0 auto;
+  height: 100vh; display: flex; flex-direction: column;
+  background: var(--bg); position: relative; overflow: hidden;
+}
+
+/* ── SCREENS ── */
+.screen {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s;
+  background: var(--bg); overflow-y: auto; padding-bottom: 72px;
+}
+.screen.hidden  { transform: translateX(100%); opacity: 0; pointer-events: none; }
+.screen.slide-out { transform: translateX(-100%); opacity: 0; pointer-events: none; }
+
+/* ── TOP BAR ── */
+.topbar {
+  background: var(--white); padding: 14px 18px 12px;
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 10;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+}
+.topbar-logo {
+  width: 32px; height: 32px; background: var(--primary);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 900; color: #fff; letter-spacing: -1px;
+}
+.topbar-info { flex: 1; }
+.topbar-title { font-size: 16px; font-weight: 700; color: var(--text); }
+.topbar-sub   { font-size: 11px; color: var(--muted); }
+.topbar-back {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--bg);
+  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: var(--text);
+}
+
+/* ── HOME BANNER ── */
+.home-banner {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+  padding: 28px 20px 32px; color: #fff; position: relative; overflow: hidden;
+}
+.home-banner::after {
+  content: ''; position: absolute; bottom: -40px; right: -40px;
+  width: 140px; height: 140px; border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+}
+.home-banner-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 600; margin-bottom: 10px;
+}
+.live-dot {
+  width: 6px; height: 6px; background: #4CAF50;
+  border-radius: 50%; animation: blink 1.5s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.home-banner h2 { font-size: 22px; font-weight: 700; line-height: 1.3; margin-bottom: 6px; }
+.home-banner p  { font-size: 13px; color: rgba(255,255,255,0.75); line-height: 1.6; }
+
+.home-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  background: var(--white); border-bottom: 1px solid var(--border);
+}
+.home-stat { text-align: center; padding: 14px 8px; border-right: 1px solid var(--border); }
+.home-stat:last-child { border-right: none; }
+.home-stat-val   { font-size: 20px; font-weight: 700; color: var(--primary); display: block; }
+.home-stat-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+.section-heading {
+  font-size: 12px; font-weight: 700; color: var(--muted);
+  letter-spacing: 1.5px; text-transform: uppercase; padding: 18px 20px 8px;
+}
+
+/* ── SIM CTA BUTTON ── */
+.sim-cta {
+  margin: 0 16px 16px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  border: none; border-radius: var(--radius); padding: 20px;
+  display: flex; align-items: center; gap: 14px;
+  cursor: pointer; width: calc(100% - 32px); text-align: left;
+  box-shadow: 0 4px 16px rgba(26,35,126,0.3);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.sim-cta:active { transform: scale(0.98); }
+.sim-cta-icon {
+  width: 52px; height: 52px; background: rgba(255,255,255,0.2);
+  border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  font-size: 26px; flex-shrink: 0;
+}
+.sim-cta-text { color: #fff; }
+.sim-cta-title { font-size: 17px; font-weight: 700; display: block; margin-bottom: 3px; }
+.sim-cta-sub   { font-size: 12px; opacity: 0.85; }
+
+/* ── CASE TYPE GRID ── */
+.case-type-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; padding: 0 16px 16px;
+}
+.case-type-btn {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px 12px;
+  text-align: left; cursor: pointer; transition: all 0.15s;
+}
+.case-type-btn:active { transform: scale(0.97); background: var(--primary-light); border-color: var(--primary); }
+.case-type-icon  { font-size: 24px; display: block; margin-bottom: 8px; }
+.case-type-title { font-size: 13px; font-weight: 600; color: var(--text); display: block; margin-bottom: 2px; }
+.case-type-tag   { font-size: 10px; color: var(--muted); }
+
+/* ── RECENT LIST ── */
+.recent-list { padding: 0 16px 100px; }
+.recent-item {
+  background: var(--white); border-radius: 12px; border: 1px solid var(--border);
+  padding: 14px; margin-bottom: 10px; display: flex; gap: 12px; align-items: center;
+}
+.recent-icon {
+  width: 48px; height: 48px; border-radius: 8px; background: var(--primary-light);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 22px;
+}
+.recent-info { flex: 1; min-width: 0; }
+.recent-title { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.recent-sub   { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.recent-badge {
+  font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 10px; flex-shrink: 0;
+}
+.badge-win    { background: #E8F5E9; color: #2E7D32; }
+.badge-lose   { background: #FFEBEE; color: #C62828; }
+.badge-partial{ background: #FFF8E1; color: #F57F17; }
+.badge-pend   { background: var(--primary-light); color: var(--primary); }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 430px; height: 72px;
+  background: var(--white); border-top: 1px solid var(--border);
+  display: flex; z-index: 200; box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+}
+.nav-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 3px; cursor: pointer; border: none; background: none;
+  padding-bottom: 8px; transition: color 0.15s; color: var(--muted);
+}
+.nav-item.active { color: var(--primary); }
+.nav-item-icon  { font-size: 22px; line-height: 1; }
+.nav-item-label { font-size: 10px; font-weight: 500; }
+
+/* ── INPUT SCREEN ── */
+.input-scroll { padding: 16px 16px 120px; }
+.form-group   { margin-bottom: 14px; }
+.form-label   { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 6px; display: block; }
+.form-label span { color: var(--accent); }
+.form-select, .form-textarea, .form-input {
+  width: 100%; background: var(--white);
+  border: 1.5px solid var(--border); border-radius: 10px;
+  padding: 12px 14px; font-size: 14px;
+  font-family: 'Noto Sans KR', sans-serif; color: var(--text);
+  outline: none; transition: border-color 0.15s; appearance: none;
+}
+.form-select:focus, .form-textarea:focus, .form-input:focus { border-color: var(--primary); }
+.form-textarea { min-height: 120px; resize: none; line-height: 1.7; }
+.form-select-wrap { position: relative; }
+.form-select-wrap::after {
+  content: '▾'; position: absolute; right: 14px; top: 50%;
+  transform: translateY(-50%); pointer-events: none; color: var(--muted);
+}
+
+.law-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.law-chip {
+  background: var(--primary-light); border: 1px solid #C5CAE9;
+  border-radius: 20px; padding: 4px 12px; font-size: 11px;
+  font-weight: 600; color: var(--primary); cursor: pointer; transition: all 0.15s;
+}
+.law-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+.submit-btn {
+  width: 100%; background: var(--primary); color: #fff; border: none;
+  border-radius: var(--radius); padding: 17px; font-size: 16px; font-weight: 700;
+  font-family: 'Noto Sans KR', sans-serif; cursor: pointer; transition: all 0.2s;
+  margin-top: 6px; display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.submit-btn:active   { transform: scale(0.98); background: var(--primary-dark); }
+.submit-btn:disabled { background: #B0B0B0; cursor: not-allowed; }
+
+/* ── ANALYSIS SCREEN ── */
+.analysis-screen { background: var(--white); }
+.analysis-header {
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+  padding: 28px 20px; color: #fff;
+}
+.analysis-header h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+.analysis-header p  { font-size: 12px; opacity: 0.8; }
+
+.ai-thinking { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.ai-step-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; background: var(--bg); border-radius: 10px;
+  border: 1px solid var(--border); opacity: 0; transform: translateY(10px);
+  transition: all 0.4s;
+}
+.ai-step-item.visible { opacity: 1; transform: translateY(0); }
+.ai-step-dot {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; flex-shrink: 0; background: var(--border); color: var(--muted);
+}
+.ai-step-dot.active { background: var(--primary); color: #fff; }
+.ai-step-dot.done   { background: #2E7D32; color: #fff; }
+.ai-step-text  { font-size: 12px; color: var(--text); flex: 1; }
+.ai-step-text strong { color: var(--primary); font-weight: 700; }
+.ai-step-spinner {
+  width: 16px; height: 16px; border: 2px solid var(--primary);
+  border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── RESULT SCREEN ── */
+.result-header {
+  padding: 32px 20px 28px; text-align: center; color: #fff;
+}
+.result-header.win  { background: linear-gradient(135deg,#1B5E20,#2E7D32); }
+.result-header.lose { background: linear-gradient(135deg,#7F0000,#C62828); }
+.result-header.part { background: linear-gradient(135deg,#E65100,#F57F17); }
+.result-header.pend { background: linear-gradient(135deg,#1A237E,#283593); }
+.result-icon {
+  width: 72px; height: 72px; background: rgba(255,255,255,0.25);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 36px; margin: 0 auto 14px;
+}
+.result-header h2 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+.result-header p  { font-size: 13px; opacity: 0.85; }
+.result-id { font-family: 'IBM Plex Mono', monospace; font-size: 12px; opacity: 0.7; margin-top: 8px; }
+
+.result-body { padding: 16px; }
+.result-card {
+  background: var(--white); border-radius: 12px; border: 1px solid var(--border);
+  padding: 16px; margin-bottom: 12px;
+}
+.result-card-title { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+.result-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 6px 0; border-bottom: 1px solid var(--bg); }
+.result-row:last-child { border-bottom: none; }
+.result-row-key { font-size: 12px; color: var(--muted); flex-shrink: 0; width: 80px; }
+.result-row-val { font-size: 13px; color: var(--text); font-weight: 500; text-align: right; flex: 1; }
+
+.prob-bar {
+  background: var(--bg); border-radius: 8px; height: 10px; margin: 8px 0 4px; overflow: hidden;
+}
+.prob-fill { height: 100%; border-radius: 8px; background: var(--primary); transition: width 1s ease; }
+
+.issue-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.issue-item {
+  display: flex; gap: 8px; align-items: flex-start;
+  padding: 8px 10px; background: var(--bg); border-radius: 8px; font-size: 12px;
+}
+.issue-num {
+  width: 20px; height: 20px; border-radius: 50%; background: var(--primary); color: #fff;
+  font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+
+.law-list { display: flex; flex-direction: column; gap: 6px; }
+.law-item {
+  background: var(--primary-light); border-left: 3px solid var(--primary);
+  padding: 8px 12px; border-radius: 0 8px 8px 0;
+}
+.law-item-code { font-size: 11px; font-weight: 700; color: var(--primary); font-family: 'IBM Plex Mono', monospace; }
+.law-item-desc { font-size: 12px; color: var(--text); margin-top: 2px; }
+
+.reasoning-text {
+  font-size: 13px; line-height: 1.8; color: var(--text);
+  white-space: pre-wrap; padding: 4px 0;
+}
+
+.action-bar {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; padding-bottom: 20px;
+}
+.action-bar-btn {
+  padding: 14px; border-radius: 12px; border: 1.5px solid var(--border);
+  background: var(--white); font-size: 13px; font-weight: 600;
+  color: var(--text); cursor: pointer; text-align: center; font-family: 'Noto Sans KR', sans-serif;
+}
+.action-bar-btn.primary {
+  background: var(--primary); color: #fff; border-color: var(--primary);
+}
+
+/* ── HISTORY SCREEN ── */
+.history-body { padding: 16px 16px 100px; }
+.history-filter {
+  display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px;
+}
+.hf-chip {
+  background: var(--white); border: 1.5px solid var(--border); border-radius: 20px;
+  padding: 6px 14px; font-size: 12px; font-weight: 600; color: var(--muted);
+  cursor: pointer; white-space: nowrap; flex-shrink: 0; font-family: 'Noto Sans KR', sans-serif;
+  transition: all 0.15s;
+}
+.hf-chip.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+.history-card {
+  background: var(--white); border-radius: 12px; border: 1px solid var(--border);
+  padding: 14px; margin-bottom: 10px; cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+.history-card:active { box-shadow: 0 2px 12px rgba(26,35,126,0.15); }
+.hc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.hc-type { font-size: 13px; font-weight: 700; color: var(--text); }
+.hc-date { font-size: 11px; color: var(--muted); }
+.hc-summary { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hc-bottom { display: flex; align-items: center; gap: 8px; }
+.hc-id { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); flex: 1; }
+
+/* ── spinner util ── */
+.spinner {
+  width: 20px; height: 20px; border: 2px solid var(--primary);
+  border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ══ HOME SCREEN ══ -->
+<div class="screen" id="screen-home">
+  <div class="topbar">
+    <div class="topbar-logo">K⚖</div>
+    <div class="topbar-info">
+      <div class="topbar-title">K-Law</div>
+      <div class="topbar-sub">AI 판결 시뮬레이터 v15</div>
+    </div>
+    <div style="font-size:20px; cursor:pointer;" onclick="navTo('screen-history')">📋</div>
+  </div>
+
+  <div class="home-banner">
+    <div class="home-banner-badge"><div class="live-dot"></div> LIVE · 실시간 시뮬레이션</div>
+    <h2>K-Law 판결<br>AI 시뮬레이터</h2>
+    <p>사건 개요를 입력하면 AI가 대한민국 판례 기반<br>판결 결과와 승소 확률을 예측합니다.</p>
+  </div>
+
+  <div class="home-stats">
+    <div class="home-stat"><span class="home-stat-val" id="statTotal">—</span><div class="home-stat-label">총 시뮬레이션</div></div>
+    <div class="home-stat"><span class="home-stat-val" id="statToday">—</span><div class="home-stat-label">오늘</div></div>
+    <div class="home-stat"><span class="home-stat-val" id="statAccuracy">미측정</span><div class="home-stat-label">예측 정확도</div></div>
+  </div>
+
+  <div class="section-heading">빠른 사건 입력</div>
+  <button class="sim-cta" onclick="navTo('screen-input')">
+    <div class="sim-cta-icon">⚖️</div>
+    <div class="sim-cta-text">
+      <span class="sim-cta-title">새 판결 시뮬레이션</span>
+      <span class="sim-cta-sub">사건 개요 → AI 판결 예측 · 평균 15초</span>
+    </div>
+  </button>
+
+  <div class="section-heading">사건 유형 선택</div>
+  <div class="case-type-grid">
+    <button class="case-type-btn" onclick="quickSim('민사')">
+      <span class="case-type-icon">📝</span>
+      <span class="case-type-title">민사</span>
+      <span class="case-type-tag">계약·손해배상·소유권</span>
+    </button>
+    <button class="case-type-btn" onclick="quickSim('형사')">
+      <span class="case-type-icon">🔒</span>
+      <span class="case-type-title">형사</span>
+      <span class="case-type-tag">고소·고발·형량 예측</span>
+    </button>
+    <button class="case-type-btn" onclick="quickSim('가사')">
+      <span class="case-type-icon">👨‍👩‍👧</span>
+      <span class="case-type-title">가사</span>
+      <span class="case-type-tag">이혼·양육·상속</span>
+    </button>
+    <button class="case-type-btn" onclick="quickSim('행정')">
+      <span class="case-type-icon">🏛️</span>
+      <span class="case-type-title">행정</span>
+      <span class="case-type-tag">처분취소·국가배상</span>
+    </button>
+    <button class="case-type-btn" onclick="quickSim('노동')">
+      <span class="case-type-icon">👷</span>
+      <span class="case-type-title">노동</span>
+      <span class="case-type-tag">해고·임금·산재</span>
+    </button>
+    <button class="case-type-btn" onclick="quickSim('국제')">
+      <span class="case-type-icon">🌏</span>
+      <span class="case-type-title">국제</span>
+      <span class="case-type-tag">조약·외국인·무역</span>
+    </button>
+  </div>
+
+  <div class="section-heading">최근 시뮬레이션</div>
+  <div class="recent-list" id="recentList">
+    <div style="text-align:center;padding:30px;color:var(--muted);">불러오는 중…</div>
+  </div>
+</div>
+
+<!-- ══ INPUT SCREEN ══ -->
+<div class="screen hidden" id="screen-input">
+  <div class="topbar">
+    <button class="topbar-back" onclick="navBack()">←</button>
+    <div class="topbar-info">
+      <div class="topbar-title">사건 입력</div>
+      <div class="topbar-sub">AI 판결 시뮬레이션</div>
+    </div>
+  </div>
+
+  <div class="input-scroll">
+    <div class="form-group">
+      <label class="form-label">사건 유형 <span>*</span></label>
+      <div class="form-select-wrap">
+        <select class="form-select" id="caseTypeSelect">
+          <option value="">선택하세요</option>
+          <option value="민사">민사 (계약·손해배상·소유권)</option>
+          <option value="형사">형사 (고소·고발·형사처벌)</option>
+          <option value="가사">가사 (이혼·양육·상속)</option>
+          <option value="행정">행정 (처분취소·국가배상)</option>
+          <option value="노동">노동 (해고·임금·산재)</option>
+          <option value="헌법">헌법 (기본권·위헌심판)</option>
+          <option value="지재">지재 (특허·저작권·상표)</option>
+          <option value="세무">세무 (세금불복·부당이득)</option>
+          <option value="국제">국제 (조약·외국인·무역)</option>
+          <option value="기타">기타</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">세부 유형</label>
+      <div class="form-select-wrap">
+        <select class="form-select" id="caseSubtypeSelect">
+          <option value="">선택하세요 (선택)</option>
+          <option value="계약불이행">계약불이행</option>
+          <option value="손해배상">손해배상</option>
+          <option value="부당이득반환">부당이득반환</option>
+          <option value="소유권확인">소유권확인</option>
+          <option value="이혼">이혼</option>
+          <option value="양육권">양육권</option>
+          <option value="상속분쟁">상속분쟁</option>
+          <option value="해고무효">해고무효</option>
+          <option value="임금체불">임금체불</option>
+          <option value="행정처분취소">행정처분취소</option>
+          <option value="국가배상">국가배상</option>
+          <option value="사기">사기</option>
+          <option value="폭행상해">폭행·상해</option>
+          <option value="업무상과실">업무상과실치사상</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">사건 개요 <span>*</span></label>
+      <textarea class="form-textarea" id="caseSummary" rows="6"
+        placeholder="사건 내용을 자세히 입력하세요.&#10;예) 피고는 2024년 3월 원고와 1억원 매매계약을 체결하였으나, 대금 수령 후 소유권 이전을 거부하고 있습니다..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">관련 법령 (선택)</label>
+      <div class="law-chips" id="lawChips">
+        <div class="law-chip" onclick="toggleChip(this)">민법</div>
+        <div class="law-chip" onclick="toggleChip(this)">형법</div>
+        <div class="law-chip" onclick="toggleChip(this)">근로기준법</div>
+        <div class="law-chip" onclick="toggleChip(this)">행정소송법</div>
+        <div class="law-chip" onclick="toggleChip(this)">가사소송법</div>
+        <div class="law-chip" onclick="toggleChip(this)">특허법</div>
+        <div class="law-chip" onclick="toggleChip(this)">국가배상법</div>
+        <div class="law-chip" onclick="toggleChip(this)">주택임대차보호법</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">입장 (선택)</label>
+      <div class="form-select-wrap">
+        <select class="form-select" id="partySelect">
+          <option value="원고">원고 (소 제기자)</option>
+          <option value="피고">피고 (소 대응자)</option>
+          <option value="중립">중립 분석</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="submitBtn" onclick="startSimulation()">
+      ⚖️ &nbsp; K-Law 판결 시뮬레이션 시작
+    </button>
+  </div>
+</div>
+
+<!-- ══ ANALYSIS SCREEN ══ -->
+<div class="screen hidden analysis-screen" id="screen-analysis">
+  <div class="analysis-header">
+    <h3>⚖️ K-Law 분석 중</h3>
+    <p>판례 데이터베이스 검색 및 AI 판결 예측</p>
+  </div>
+
+  <div class="ai-thinking">
+    <div class="ai-step-item" id="step1">
+      <div class="ai-step-dot" id="dot1"><span id="sp1" style="display:none" class="ai-step-spinner"></span><span id="ck1" style="display:none">✓</span></div>
+      <div class="ai-step-text"><strong>사건 분류</strong> — 유형 및 쟁점 추출</div>
+    </div>
+    <div class="ai-step-item" id="step2">
+      <div class="ai-step-dot" id="dot2"><span id="sp2" style="display:none" class="ai-step-spinner"></span><span id="ck2" style="display:none">✓</span></div>
+      <div class="ai-step-text"><strong>판례 검색</strong> — 유사 대법원·고등법원 판결</div>
+    </div>
+    <div class="ai-step-item" id="step3">
+      <div class="ai-step-dot" id="dot3"><span id="sp3" style="display:none" class="ai-step-spinner"></span><span id="ck3" style="display:none">✓</span></div>
+      <div class="ai-step-text"><strong>법령 분석</strong> — 적용 조문 및 요건 검토</div>
+    </div>
+    <div class="ai-step-item" id="step4">
+      <div class="ai-step-dot" id="dot4"><span id="sp4" style="display:none" class="ai-step-spinner"></span><span id="ck4" style="display:none">✓</span></div>
+      <div class="ai-step-text"><strong>판결 예측</strong> — K-Law v15 추론 엔진</div>
+    </div>
+    <div class="ai-step-item" id="step5">
+      <div class="ai-step-dot" id="dot5"><span id="sp5" style="display:none" class="ai-step-spinner"></span><span id="ck5" style="display:none">✓</span></div>
+      <div class="ai-step-text"><strong>데이터 저장</strong> — Supabase 기록</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RESULT SCREEN ══ -->
+<div class="screen hidden" id="screen-result">
+  <div class="result-header pend" id="resultHeader">
+    <div class="result-icon" id="resultIcon">⚖️</div>
+    <h2 id="resultVerdict">분석 중</h2>
+    <p id="resultSubtitle">판결 예측 완료</p>
+    <div class="result-id" id="resultId">SIM-2026-????</div>
+  </div>
+
+  <div class="result-body">
+    <!-- 승소 확률 -->
+    <div class="result-card">
+      <div class="result-card-title">승소 확률</div>
+      <div id="probLabel" style="font-size:28px;font-weight:700;color:var(--primary);margin-bottom:6px;">—%</div>
+      <div class="prob-bar"><div class="prob-fill" id="probFill" style="width:0%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:4px;">
+        <span>0%</span><span>50%</span><span>100%</span>
+      </div>
+    </div>
+
+    <!-- 사건 개요 -->
+    <div class="result-card">
+      <div class="result-card-title">판결 요약</div>
+      <div class="result-row"><span class="result-row-key">사건 유형</span><span class="result-row-val" id="resType">—</span></div>
+      <div class="result-row"><span class="result-row-key">주문</span><span class="result-row-val" id="resVerdict">—</span></div>
+      <div class="result-row"><span class="result-row-key">인용 금액</span><span class="result-row-val" id="resDamages">—</span></div>
+      <div class="result-row"><span class="result-row-key">신뢰도</span><span class="result-row-val" id="resConf">—</span></div>
+    </div>
+
+    <!-- 주요 쟁점 -->
+    <div class="result-card">
+      <div class="result-card-title">주요 쟁점</div>
+      <ul class="issue-list" id="issueList"></ul>
+    </div>
+
+    <!-- 적용 법령 -->
+    <div class="result-card">
+      <div class="result-card-title">적용 법령</div>
+      <div class="law-list" id="lawList"></div>
+    </div>
+
+    <!-- 판결 이유 -->
+    <div class="result-card">
+      <div class="result-card-title">판결 이유</div>
+      <div class="reasoning-text" id="reasoningText">—</div>
+    </div>
+
+    <!-- 면책 -->
+    <div style="background:var(--gold-light);border:1px solid #FFE082;border-radius:10px;padding:12px 14px;margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:4px;">⚠️ 법적 고지</div>
+      <div style="font-size:11px;color:#795548;line-height:1.6;">본 결과는 K-Law AI의 예측이며 실제 법원 판결과 다를 수 있습니다. 중요 법률 문제는 반드시 변호사와 상담하세요.</div>
+    </div>
+
+    <div class="action-bar">
+      <button class="action-bar-btn" onclick="navTo('screen-home')">🏠 홈으로</button>
+      <button class="action-bar-btn primary" onclick="navTo('screen-input')">⚖️ 재시뮬레이션</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ HISTORY SCREEN ══ -->
+<div class="screen hidden" id="screen-history">
+  <div class="topbar">
+    <button class="topbar-back" onclick="navBack()">←</button>
+    <div class="topbar-info">
+      <div class="topbar-title">시뮬레이션 기록</div>
+      <div class="topbar-sub">Supabase 실시간</div>
+    </div>
+  </div>
+
+  <div class="history-body">
+    <div class="history-filter" id="histFilter">
+      <button class="hf-chip active" onclick="filterHistory(this,'')">전체</button>
+      <button class="hf-chip" onclick="filterHistory(this,'민사')">민사</button>
+      <button class="hf-chip" onclick="filterHistory(this,'형사')">형사</button>
+      <button class="hf-chip" onclick="filterHistory(this,'가사')">가사</button>
+      <button class="hf-chip" onclick="filterHistory(this,'행정')">행정</button>
+      <button class="hf-chip" onclick="filterHistory(this,'노동')">노동</button>
+      <button class="hf-chip" onclick="filterHistory(this,'국제')">국제</button>
+    </div>
+    <div id="historyList">
+      <div style="text-align:center;padding:30px;color:var(--muted);">불러오는 중…</div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="nav-item active" id="nav-home" onclick="navTo('screen-home')">
+    <span class="nav-item-icon">🏛️</span><span class="nav-item-label">홈</span>
+  </button>
+  <button class="nav-item" id="nav-input" onclick="navTo('screen-input')">
+    <span class="nav-item-icon">⚖️</span><span class="nav-item-label">시뮬레이션</span>
+  </button>
+  <button class="nav-item" id="nav-history" onclick="navTo('screen-history')">
+    <span class="nav-item-icon">📋</span><span class="nav-item-label">기록</span>
+  </button>
+</div>
+
+</div><!-- /app -->
+
+<!-- ══════════════════════════════════════════════ -->
+<!--  GWP SDK v2.0 인라인 (gopang-widget-protocol) -->
+<!-- ══════════════════════════════════════════════ -->
+<script>
+;(function() {
+  const _isWidget = window.self !== window.top || new URLSearchParams(location.search).has('gwp');
+  class GopangWidget {
+    static get isWidget() { return _isWidget; }
+    constructor(handlers) {
+      this._handlers = handlers || {};
+      window.addEventListener('message', e => this._onMessage(e));
+    }
+    _onMessage(e) {
+      const d = e.data;
+      if (!d || d.source !== 'gopang') return;
+      if (d.type === 'gwp_init' && this._handlers.onInit) this._handlers.onInit(d.payload || {});
+      if (d.type === 'gwp_input' && this._handlers.onInput) this._handlers.onInput(d.text, d.file);
+    }
+    ready(meta) { this._post('gwp_ready', meta); }
+    done(result) { this._post('gwp_done', result); }
+    _post(type, payload) {
+      const msg = { source: 'klaw', type, payload };
+      if (window.parent !== window) window.parent.postMessage(msg, '*');
+    }
+  }
+  window.GopangWidget = GopangWidget;
+})();
+</script>
+
+<script>
+// ══════════════════════════════════════════════════
+// 설정
+// ══════════════════════════════════════════════════
+const PROXY_URL    = 'https://gopang-proxy.tensor-city.workers.dev';
+const DEEPSEEK_KEY = 'sk-REDACTED';
+const SB_URL       = 'https://ebbecjfrwaswbdybbgiu.supabase.co';
+const SB_KEY       = 'SUPABASE_ANON_KEY_REDACTED';
+const SB_TABLE     = 'klaw_simulations';
+
+// ── 앱 상태
+let currentScreen  = 'screen-home';
+let previousScreen = 'screen-home';
+let _histFilter    = '';
+
+// ── 네비게이션
+function navTo(id, caseType) {
+  const prev = document.getElementById(currentScreen);
+  const next = document.getElementById(id);
+  if (!next || id === currentScreen) return;
+  prev.classList.add('slide-out');
+  next.classList.remove('hidden', 'slide-out');
+  previousScreen = currentScreen;
+  currentScreen  = id;
+  setTimeout(() => prev.classList.add('hidden'), 350);
+  // nav indicator
+  ['home','input','history'].forEach(k => {
+    const el = document.getElementById('nav-' + k);
+    if (el) el.classList.toggle('active', id.includes(k));
+  });
+  if (id === 'screen-history') _loadHistory();
+  if (id === 'screen-home')    _loadStats();
+  if (id === 'screen-input' && caseType) {
+    setTimeout(() => { document.getElementById('caseTypeSelect').value = caseType; }, 100);
+  }
+}
+function navBack() { navTo(previousScreen === currentScreen ? 'screen-home' : previousScreen); }
+function quickSim(type) { navTo('screen-input', type); }
+
+// ── 칩 토글
+function toggleChip(el) { el.classList.toggle('active'); }
+
+// ── Supabase 헬퍼
+function _nowKST() {
+  const kst = new Date(Date.now() + 9 * 3600000);
+  return kst.toISOString().replace('Z', '+09:00');
+}
+async function _sbFetch(path, method='GET', body=null) {
+  const opts = {
+    method,
+    headers: {
+      'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'POST' ? 'return=representation' : '',
+    },
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(SB_URL + '/rest/v1/' + path, opts);
+  if (!res.ok) throw new Error('Supabase ' + res.status + ' ' + await res.text());
+  return res.json();
+}
+
+// ── DeepSeek 호출 (직접 → Worker fallback)
+async function _deepseekChat(messages, maxTokens=2000) {
+  const payload = { model: 'deepseek-chat', messages, max_tokens: maxTokens, temperature: 0.3 };
+  try {
+    const r = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${DEEPSEEK_KEY}` },
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(40000),
+    });
+    if (r.ok) return await r.json();
+  } catch(e) { console.warn('[DeepSeek] 직접 실패:', e.message); }
+  const r2 = await fetch(`${PROXY_URL}/deepseek`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!r2.ok) throw new Error('DeepSeek proxy ' + r2.status);
+  return r2.json();
+}
+
+// ── 판결 시뮬레이션 메인
+async function runKLawSimulation(caseType, subtype, summary, laws, party) {
+  const systemPrompt = `당신은 대한민국 최고법원 판례를 학습한 K-Law v15 AI 판결 예측 시스템입니다.
+사건 정보를 분석하여 판결을 예측하고 반드시 다음 JSON 형식으로만 응답하세요. JSON 외 다른 텍스트 금지.
+
+{
+  "verdict": "원고승|피고승|일부인용|기각|각하|화해권고|무죄|유죄|집행유예",
+  "verdict_prob": 승소확률숫자(0~100),
+  "damages": 인용금액숫자(원,없으면null),
+  "sentence": "형사일때형량문자열(없으면null)",
+  "key_issues": ["쟁점1","쟁점2","쟁점3"],
+  "applicable_laws": [
+    {"law":"민법 제750조","desc":"불법행위 손해배상"},
+    {"law":"민사소송법 제202조","desc":"자유심증주의"}
+  ],
+  "reasoning": "판결 이유 3~5문장. 유사 판례 인용 포함.",
+  "risk_level": "LOW|MED|HIGH|CRITICAL",
+  "confidence": 신뢰도숫자(0~100)
+}
+
+판례 검색 규칙:
+- 유사 대법원·고등법원 판결 2~3건 reasoning에 인용
+- 사건 유형에 따른 핵심 법리 적용
+- 승소 확률은 판례 통계 기반 현실적 수치`;
+
+  const userMsg = `사건 유형: ${caseType}${subtype ? ' > ' + subtype : ''}
+의뢰인 입장: ${party}
+관련 법령: ${laws.length > 0 ? laws.join(', ') : '미지정'}
+
+사건 개요:
+${summary}
+
+위 사건에 대해 K-Law v15 판결 예측을 JSON으로 출력하라.`;
+
+  const data = await _deepseekChat([
+    { role: 'system', content: systemPrompt },
+    { role: 'user',   content: userMsg },
+  ], 2000);
+
+  const raw = data.choices?.[0]?.message?.content || '{}';
+  try {
+    return JSON.parse(raw.replace(/```json|```/g,'').trim());
+  } catch {
+    return { verdict:'분석불가', verdict_prob:0, reasoning: raw.slice(0,300), risk_level:'MED', confidence:0, key_issues:[], applicable_laws:[] };
+  }
+}
+
+// ── 시뮬레이션 시작
+async function startSimulation() {
+  const type    = document.getElementById('caseTypeSelect').value;
+  const subtype = document.getElementById('caseSubtypeSelect').value;
+  const summary = document.getElementById('caseSummary').value.trim();
+  const party   = document.getElementById('partySelect').value;
+  const laws    = [...document.querySelectorAll('.law-chip.active')].map(el => el.textContent);
+
+  if (!type)    { alert('사건 유형을 선택하세요.'); return; }
+  if (!summary) { alert('사건 개요를 입력하세요.'); return; }
+
+  navTo('screen-analysis');
+  const setStep = (n, done=false) => {
+    for (let i=1; i<=5; i++) {
+      const dot = document.getElementById(`dot${i}`);
+      const sp  = document.getElementById(`sp${i}`);
+      const ck  = document.getElementById(`ck${i}`);
+      if (!dot) continue;
+      document.getElementById(`step${i}`)?.classList.add('visible');
+      if (i < n)      { dot.className='ai-step-dot done'; sp.style.display='none'; ck.style.display='block'; }
+      else if (i===n) { dot.className='ai-step-dot active'; sp.style.display='block'; ck.style.display='none'; }
+      else            { dot.className='ai-step-dot'; sp.style.display='none'; ck.style.display='none'; }
+    }
+  };
+
+  let result = null;
+  const simId = 'SIM-2026-' + (Math.floor(Math.random()*90000)+10000);
+
+  try {
+    setStep(1); await _sleep(400);
+    setStep(2); await _sleep(600);
+    setStep(3); await _sleep(400);
+    setStep(4);
+
+    result = await runKLawSimulation(type, subtype, summary, laws, party);
+
+    setStep(5);
+
+    // Supabase 저장
+    const payload = {
+      id:           simId,
+      created_at:   _nowKST(),
+      case_type:    type,
+      case_subtype: subtype || null,
+      case_summary: summary,
+      reporter:     localStorage.getItem('gopang_phone') || null,
+      source:       GopangWidget.isWidget ? 'gopang' : 'webapp',
+      verdict:      result.verdict || null,
+      verdict_prob: result.verdict_prob ?? null,
+      damages:      result.damages ?? null,
+      sentence:     result.sentence || null,
+      key_issues:   result.key_issues || [],
+      applicable_laws: result.applicable_laws || [],
+      reasoning:    result.reasoning || null,
+      risk_level:   result.risk_level || 'MED',
+      confidence:   result.confidence ?? null,
+      status:       '완료',
+      analysis:     result,
+    };
+    try { await _sbFetch(SB_TABLE, 'POST', payload); } catch(e) { console.warn('[SB저장실패]', e.message); }
+
+    await _sleep(500);
+    showResult(simId, type, result);
+
+    // GWP 복귀
+    if (GopangWidget.isWidget) {
+      setTimeout(() => {
+        window.__gwpInstance?.done({
+          summary: `${type} 판결 시뮬레이션: ${result.verdict} (승소확률 ${result.verdict_prob}%)`,
+          pdvData: {
+            when: new Date().toISOString(),
+            what: `K-Law 판결 예측 — ${simId}`,
+            how:  'text',
+            why:  `${type} 법률 시뮬레이션 요청`,
+            data: { simId, caseType: type, verdict: result.verdict, prob: result.verdict_prob },
+          },
+        });
+      }, 3000);
+    }
+
+  } catch(e) {
+    console.error('[K-Law 오류]', e);
+    result = { verdict:'분석불가', verdict_prob:0, reasoning:'AI 분석 중 오류가 발생했습니다: ' + e.message, risk_level:'MED', confidence:0, key_issues:[], applicable_laws:[] };
+    showResult(simId, type, result);
+  }
+}
+
+function _sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── 결과 화면
+function showResult(simId, caseType, r) {
+  navTo('screen-result');
+
+  const verdictStyle = {
+    '원고승':   { cls:'win',  icon:'🏆', sub:'원고 승소' },
+    '무죄':     { cls:'win',  icon:'✅', sub:'무죄 판결' },
+    '피고승':   { cls:'lose', icon:'❌', sub:'피고 승소 (원고 패소)' },
+    '기각':     { cls:'lose', icon:'🚫', sub:'청구 기각' },
+    '각하':     { cls:'lose', icon:'⛔', sub:'소각하' },
+    '유죄':     { cls:'lose', icon:'⚠️', sub:'유죄 판결' },
+    '일부인용': { cls:'part', icon:'⚖️', sub:'일부 인용' },
+    '집행유예': { cls:'part', icon:'🔔', sub:'집행유예' },
+    '화해권고': { cls:'part', icon:'🤝', sub:'화해 권고' },
+  };
+  const vs = verdictStyle[r.verdict] || { cls:'pend', icon:'⚖️', sub:'분석 완료' };
+
+  const hdr = document.getElementById('resultHeader');
+  hdr.className = 'result-header ' + vs.cls;
+  document.getElementById('resultIcon').textContent    = vs.icon;
+  document.getElementById('resultVerdict').textContent = r.verdict || '—';
+  document.getElementById('resultSubtitle').textContent = vs.sub;
+  document.getElementById('resultId').textContent      = simId;
+
+  const prob = r.verdict_prob ?? 0;
+  document.getElementById('probLabel').textContent = `${prob}%`;
+  setTimeout(() => { document.getElementById('probFill').style.width = prob + '%'; }, 100);
+
+  document.getElementById('resType').textContent    = caseType;
+  document.getElementById('resVerdict').textContent = r.verdict || '—';
+  document.getElementById('resDamages').textContent = r.damages ? `₩${Number(r.damages).toLocaleString()}` : (r.sentence || '해당없음');
+  document.getElementById('resConf').textContent    = r.confidence ? `${r.confidence}%` : '—';
+
+  // 쟁점
+  const il = document.getElementById('issueList');
+  il.innerHTML = (r.key_issues || []).map((iss, i) =>
+    `<li class="issue-item"><div class="issue-num">${i+1}</div><span style="font-size:12px;">${iss}</span></li>`
+  ).join('') || '<li class="issue-item">쟁점 정보 없음</li>';
+
+  // 법령
+  const ll = document.getElementById('lawList');
+  ll.innerHTML = (r.applicable_laws || []).map(l =>
+    `<div class="law-item"><div class="law-item-code">${l.law || ''}</div><div class="law-item-desc">${l.desc || ''}</div></div>`
+  ).join('') || '<div style="font-size:12px;color:var(--muted);">법령 정보 없음</div>';
+
+  document.getElementById('reasoningText').textContent = r.reasoning || '—';
+}
+
+// ── 홈 통계 로드
+async function _loadStats() {
+  try {
+    const today = new Date().toISOString().slice(0,10);
+    const [all, tod] = await Promise.all([
+      _sbFetch(`${SB_TABLE}?select=id&limit=1&head=true`).catch(() => null),
+      _sbFetch(`${SB_TABLE}?select=id&created_at=gte.${today}T00:00:00+09:00`).catch(() => []),
+    ]);
+    // total via count header는 head=true 필요 → 간단히 배열 조회
+    const allRows = await _sbFetch(`${SB_TABLE}?select=id`).catch(() => []);
+    document.getElementById('statTotal').textContent = allRows.length || '0';
+    document.getElementById('statToday').textContent = (Array.isArray(tod) ? tod.length : 0);
+  } catch(e) { console.warn('[stats]', e.message); }
+
+  // 최근 목록
+  try {
+    const rows = await _sbFetch(`${SB_TABLE}?select=id,case_type,case_summary,verdict,verdict_prob,created_at&order=created_at.desc&limit=5`);
+    const rl = document.getElementById('recentList');
+    if (!rows.length) { rl.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);">아직 시뮬레이션이 없습니다.</div>'; return; }
+    const typeIcon = t => ({'민사':'📝','형사':'🔒','가사':'👨‍👩‍👧','행정':'🏛️','노동':'👷','국제':'🌏','헌법':'🇰🇷','지재':'💡','세무':'💰'}[t] || '⚖️');
+    const verdictBadge = v => {
+      const m = {'원고승':'badge-win','무죄':'badge-win','피고승':'badge-lose','기각':'badge-lose','각하':'badge-lose','일부인용':'badge-partial','화해권고':'badge-partial','유죄':'badge-lose','집행유예':'badge-partial'};
+      return m[v] || 'badge-pend';
+    };
+    rl.innerHTML = rows.map(r => `
+      <div class="recent-item">
+        <div class="recent-icon">${typeIcon(r.case_type)}</div>
+        <div class="recent-info">
+          <div class="recent-title">${r.case_type}${r.case_summary ? ' — ' + r.case_summary.slice(0,30) + '…' : ''}</div>
+          <div class="recent-sub">${r.id} · ${r.created_at ? new Date(r.created_at).toLocaleDateString('ko-KR',{timeZone:'Asia/Seoul'}) : ''}</div>
+        </div>
+        <span class="recent-badge ${verdictBadge(r.verdict)}">${r.verdict || '처리중'}</span>
+      </div>`).join('');
+  } catch(e) { console.warn('[recentList]', e.message); }
+}
+
+// ── 기록 화면
+let _histRows = [];
+async function _loadHistory(filter) {
+  if (filter !== undefined) _histFilter = filter;
+  const list = document.getElementById('historyList');
+  list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);">불러오는 중…</div>';
+  try {
+    let q = `${SB_TABLE}?select=id,case_type,case_subtype,case_summary,verdict,verdict_prob,created_at,risk_level&order=created_at.desc&limit=50`;
+    if (_histFilter) q += `&case_type=eq.${encodeURIComponent(_histFilter)}`;
+    _histRows = await _sbFetch(q);
+    _renderHistory(_histRows);
+  } catch(e) {
+    list.innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);">불러오기 실패<br><small>${e.message}</small></div>`;
+  }
+}
+
+function filterHistory(el, filter) {
+  document.querySelectorAll('.hf-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  _loadHistory(filter);
+}
+
+function _renderHistory(rows) {
+  const list = document.getElementById('historyList');
+  if (!rows.length) { list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted);">결과가 없습니다.</div>'; return; }
+  const typeIcon = t => ({'민사':'📝','형사':'🔒','가사':'👨‍👩‍👧','행정':'🏛️','노동':'👷','국제':'🌏','헌법':'🇰🇷','지재':'💡','세무':'💰'}[t] || '⚖️');
+  const verdictBadge = v => {
+    const m = {'원고승':'badge-win','무죄':'badge-win','피고승':'badge-lose','기각':'badge-lose','각하':'badge-lose','일부인용':'badge-partial','화해권고':'badge-partial','유죄':'badge-lose','집행유예':'badge-partial'};
+    return m[v] || 'badge-pend';
+  };
+  list.innerHTML = rows.map(r => `
+    <div class="history-card">
+      <div class="hc-top">
+        <div class="hc-type">${typeIcon(r.case_type)} ${r.case_type}${r.case_subtype ? ' · ' + r.case_subtype : ''}</div>
+        <div class="hc-date">${r.created_at ? new Date(r.created_at).toLocaleDateString('ko-KR',{timeZone:'Asia/Seoul'}) : ''}</div>
+      </div>
+      <div class="hc-summary">${r.case_summary || '—'}</div>
+      <div class="hc-bottom">
+        <div class="hc-id">${r.id}</div>
+        <span class="recent-badge ${verdictBadge(r.verdict)}">${r.verdict || '처리중'}</span>
+        ${r.verdict_prob != null ? `<span style="font-size:11px;color:var(--muted);">${r.verdict_prob}%</span>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+// GWP 초기화
+// ══════════════════════════════════════════════════
+window.addEventListener('load', async () => {
+  _loadStats();
+
+  if (GopangWidget.isWidget) {
+    const gwp = new GopangWidget({
+      onInit({ token, context, desc }) {
+        if (token) localStorage.setItem('gopang_phone', token);
+        if (desc) {
+          setTimeout(() => {
+            navTo('screen-input');
+            const ta = document.getElementById('caseSummary');
+            if (ta) ta.value = desc;
+            // 사건 유형 자동 감지 힌트
+            const typeMap = [
+              { keywords:['이혼','양육','상속','가사'], type:'가사' },
+              { keywords:['해고','임금','산재','근로'], type:'노동' },
+              { keywords:['행정','처분','취소','공무원'], type:'행정' },
+              { keywords:['폭행','사기','형사','고소','고발'], type:'형사' },
+              { keywords:['계약','손해','소유권','민사'], type:'민사' },
+            ];
+            for (const { keywords, type } of typeMap) {
+              if (keywords.some(k => desc.includes(k))) {
+                document.getElementById('caseTypeSelect').value = type;
+                break;
+              }
+            }
+            setTimeout(() => startSimulation(), 800);
+          }, 500);
+        } else {
+          setTimeout(() => navTo('screen-input'), 500);
+        }
+      },
+      onInput(text) {
+        const ta = document.getElementById('caseSummary');
+        if (ta && text) ta.value = text;
+      },
+    });
+    window.__gwpInstance = gwp;
+    gwp.ready({
+      title:       'K-Law 판결 시뮬레이터',
+      placeholder: '⚖️ 법률 사건 내용을 입력하세요 (예: 계약 분쟁, 이혼 소송 등)',
+      accept:      'text',
+      showCamera:  false,
+    });
+  }
+});
+</script>
+</body>
+</html>
