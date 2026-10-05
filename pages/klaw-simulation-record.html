@@ -51,8 +51,27 @@ ul.docs{margin:6px 0 4px 18px}ul.docs li{margin:2px 0}ul.docs a{color:var(--bran
 small{color:var(--text4)}
 .scroll{max-height:420px;overflow:auto}
 @media(max-width:600px){.card{padding:16px}.bar{width:40%}}
+
+.ver-notice{display:flex;gap:14px;align-items:flex-start;background:#fff7e0;border:2px solid #f59e0b;border-left-width:8px;border-radius:12px;padding:18px 22px;margin:0 0 18px;box-shadow:0 4px 14px rgba(245,158,11,.25)}
+.ver-notice .vn-ico{flex:none;width:34px;height:34px;border-radius:50%;background:#f59e0b;color:#fff;font-weight:800;font-size:20px;display:flex;align-items:center;justify-content:center;line-height:1}
+.ver-notice .vn-body{color:#451a03;font-size:15.5px;line-height:1.7}
+.ver-notice .vn-body b{font-size:16.5px}
+.ver-notice .vn-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.ver-notice a{display:inline-block;background:#0e1c3f;color:#fff;text-decoration:none;font-weight:700;font-size:13.5px;padding:7px 14px;border-radius:20px}
+.ver-notice a:hover{background:#0c6cc3}
+@media(max-width:600px){.ver-notice{padding:14px 14px}.ver-notice .vn-body{font-size:14.5px}}
 </style>
 <main class="wrap">
+
+<div class="ver-notice" role="note">
+<div class="vn-ico">!</div>
+<div class="vn-body">
+<b>이 페이지는 K-Law v15 이전 테스트만 다룹니다.</b><br>
+K-Law v17 이상의 테스트는 <a href="https://klaw.hondi.net/library.html" target="_blank" rel="noopener" style="background:none;color:#0c4a8a;padding:0;font-size:inherit;text-decoration:underline">K-Law 자료실</a>과 <a href="https://klaw.hondi.net/rounds.html" target="_blank" rel="noopener" style="background:none;color:#0c4a8a;padding:0;font-size:inherit;text-decoration:underline">K-Law 라운드별 시험 기록</a> 페이지를 참고하십시오.
+<div class="vn-links"><a href="https://klaw.hondi.net/library.html" target="_blank" rel="noopener">K-Law 자료실 →</a><a href="https://klaw.hondi.net/rounds.html" target="_blank" rel="noopener">K-Law 라운드별 시험 기록 →</a></div>
+</div>
+</div>
+
 
 <section class="card">
 <h2>1. 게재 문구와 이 페이지의 역할</h2>
