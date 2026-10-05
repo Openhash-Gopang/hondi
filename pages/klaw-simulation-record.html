@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<link rel="icon" href="data:,">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<title>가상 판결문 생성 테스트 기록 — 혼디</title>
+</head>
+<body>
+<script>
+window.PAGE_HERO = {
+  badge: 'K-Law 시뮬레이션 결과',
+  l1: '가상 판결문 생성',
+  l2: '테스트 기록',
+  sub: '대법원 공개 판례를 대상으로 K-Law가 작성한 가상 판결문과 실제 판결문의 일치도를 평가한 기록입니다. 수치의 산출 기준과 한계를 함께 공개합니다.',
+  actions: []
+};
+</script>
+<link rel="stylesheet" href="/assets/site-header.css">
+<script src="/assets/site-header.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#eef1f6;--surface:#fff;--border:#e2e8f0;--navy:#0e1c3f;--brand:#0c6cc3;--text:#0f172a;--text3:#475569;--text4:#64748b;--warn:#92400e;--warnbg:#fffbeb;--warnbd:#fcd34d}
+body{background:var(--bg);color:var(--text);font-family:'Pretendard',-apple-system,'Malgun Gothic',sans-serif;font-size:14px;line-height:1.8;-webkit-font-smoothing:antialiased}
+.wrap{max-width:900px;margin:0 auto;padding:32px 20px 72px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px 26px;margin-bottom:18px}
+h2{font-size:17px;font-weight:800;margin:0 0 10px;color:var(--navy)}
+h3{font-size:14px;font-weight:700;margin:14px 0 6px}
+p{margin:0 0 9px;color:var(--text3)}
+.claim{border-left:4px solid var(--brand);background:#f3f7fc;padding:12px 16px;border-radius:0 8px 8px 0;color:var(--text);font-weight:600}
+table{width:100%;border-collapse:collapse;margin:8px 0 4px;font-size:13px}
+th{text-align:left;background:#f8fafc;border-bottom:1.5px solid var(--navy);padding:7px 9px;font-weight:700}
+td{padding:7px 9px;border-bottom:1px solid var(--border);vertical-align:middle}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tr.hl td{background:#f3f7fc;font-weight:700}
+.note{border:1px solid var(--warnbd);background:var(--warnbg);color:var(--warn);border-radius:8px;padding:11px 14px;margin:10px 0;font-size:13px;line-height:1.7}
+.note b{color:#78350f}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}
+.kpi{border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center}
+.kpi b{display:block;font-size:24px;color:var(--navy);line-height:1.2}
+.kpi span{font-size:12px;color:var(--text4)}
+.bar{display:inline-block;width:60%;height:9px;background:#e5eaf2;border-radius:5px;vertical-align:middle;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--brand)}
+td span{margin-left:8px;font-size:12px;color:var(--text3)}
+.hist{display:flex;align-items:flex-end;gap:6px;height:150px;margin:12px 0 4px}
+.col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
+.cb{width:100%;background:var(--brand);border-radius:3px 3px 0 0;min-height:2px}
+.col b{font-size:12px;margin-top:4px}.col em{font-size:11px;color:var(--text4);font-style:normal}
+ul.docs{margin:6px 0 4px 18px}ul.docs li{margin:2px 0}ul.docs a{color:var(--brand);text-decoration:none}ul.docs a:hover{text-decoration:underline}
+small{color:var(--text4)}
+.scroll{max-height:420px;overflow:auto}
+@media(max-width:600px){.card{padding:16px}.bar{width:40%}}
+</style>
+<main class="wrap">
+
+<section class="card">
+<h2>1. 게재 문구와 이 페이지의 역할</h2>
+<p class="claim">대법원이 공개한 판례를 최신 순으로 300건을 수집하여, K-Law 방법론 v15.1로 가상 판결문 작성 혹은 실제 대법원 판결문 예측 테스트를 진행한 결과, 70~75%의 일치도를 보였습니다(1심, 2심 일치도는 40~45%).</p>
+<p>이 페이지는 위 문구의 근거가 되는 시뮬레이션 기록(평가 점수표, 보고서, 방법론 문서, 코드, 원자료)을 한곳에 모은 자료실입니다. 아래 수치는 보관된 사건별 평가 파일을 그대로 집계한 것이며, 산출 기준과 한계를 함께 적었습니다.</p>
+</section>
+
+<section class="card">
+<h2>2. 기록에서 확인되는 수치</h2>
+<p>평가 기준 v1.6(10점 만점: 결론 방향 4 + 핵심 법리 3 + 세부 논증 3), 평가 기간 2026-05-12 ~ 2026-05-15. 평가 대상은 고유 사건 <b>348건</b>이며, 이 중 점수가 부여된 사건은 <b>337건</b>입니다.</p>
+<div class="grid">
+<div class="kpi"><b>7.44 / 10</b><span>최초 평가 평균 (74%)</span></div>
+<div class="kpi"><b>67.1%</b><span>최초 평가 7점 이상 비율</span></div>
+<div class="kpi"><b>7.97 / 10</b><span>재평가 반영 최종 평균 (80%)</span></div>
+<div class="kpi"><b>76.0%</b><span>최종 평가 7점 이상 비율</span></div>
+</div>
+<table>
+<thead><tr><th>기준</th><th class="n">평균 점수</th><th class="n">7점 이상</th><th class="n">8점 이상</th><th class="n">9점 이상</th></tr></thead>
+<tbody>
+<tr class="hl"><td>사건별 최초 평가 (n=337)</td><td class="n">7.44</td><td class="n">67.1%</td><td class="n">65.0%</td><td class="n">61.7%</td></tr>
+<tr><td>사건별 최종 평가, 재평가 반영 (n=337)</td><td class="n">7.97</td><td class="n">76.0%</td><td class="n">73.6%</td><td class="n">68.2%</td></tr>
+</tbody></table>
+<div class="note"><b>"70~75%"의 의미.</b> 게재 문구의 일치도는 결론이 같은 사건의 비율이 아니라, <b>10점 만점 평균 점수를 백분율로 환산한 값</b>에 해당합니다. 최초 평가 평균 7.44점(74%)이 이에 가깝습니다. 7점 이상을 "일치"로 볼 경우 비율은 67.1%입니다. 재평가 후 최종 평균(7.97점)은 점수가 낮은 사건에 방법론 갱신을 적용해 다시 평가한 결과(90건)이므로, 새로운 사건에 대한 예측력이 아니라 <b>개선 후 점수</b>로 읽어야 합니다.</div>
+<h3>최초 평가 점수 분포 (사건 수)</h3>
+<div class="hist"><div class="col"><div class="cb" style="height:22%"></div><b>0</b><em>28</em></div><div class="col"><div class="cb" style="height:11%"></div><b>1</b><em>14</em></div><div class="col"><div class="cb" style="height:12%"></div><b>2</b><em>15</em></div><div class="col"><div class="cb" style="height:6%"></div><b>3</b><em>8</em></div><div class="col"><div class="cb" style="height:14%"></div><b>4</b><em>18</em></div><div class="col"><div class="cb" style="height:7%"></div><b>5</b><em>9</em></div><div class="col"><div class="cb" style="height:15%"></div><b>6</b><em>19</em></div><div class="col"><div class="cb" style="height:6%"></div><b>7</b><em>7</em></div><div class="col"><div class="cb" style="height:9%"></div><b>8</b><em>11</em></div><div class="col"><div class="cb" style="height:65%"></div><b>9</b><em>82</em></div><div class="col"><div class="cb" style="height:100%"></div><b>10</b><em>126</em></div></div>
+<p style="text-align:center;font-size:12px;color:#64748b">점수(소수점 버림, 10점은 만점) — 극단(0~2점, 9~10점)에 몰린 양극화 분포입니다.</p>
+</section>
+
+<section class="card">
+<h2>3. 1심·2심 일치도(40~45%)에 대하여</h2>
+<p>게재 문구의 "1심, 2심 일치도 40~45%"는 <b>대법원이 공개하는 판례(법리상 쟁점이 있어 상고심에서 다뤄진 사건)에 한정</b>한 일반적 경향에 대한 연구팀의 설명값입니다. 공개 판례는 상고 단계까지 다툼이 이어진 사건 가운데 선별된 것이라, 이 모집단에서는 1심·2심 결론과 대법원 결론이 어긋나는 비중이 높게 나타나는 추세가 있습니다. 전체 소송 사건에서 1심·2심 판결과 대법원 판결 간의 일치도는 이보다 현저히 높으므로, <b>이 수치를 1심·2심 판결 일반의 정확도로 해석해서는 안 됩니다.</b></p>
+<div class="note"><b>측정 방식 구분.</b> 이 수치는 위 평가 파일에서 실측한 값이 아닙니다. 보관된 평가 파일에는 AI(평가 모델)가 1심·2심 결론을 <b>추정하여</b> 매긴 참고 점수가 있으며, 평균은 1심 6.25점(n=168), 2심 6.28점(n=156) / 10점입니다. 1심·2심 판결문이 평가 입력에 포함되지 않았으므로 이 점수도 실제 1심·2심 판결문과의 비교 결과가 아닙니다. 1심·2심 판결문과 대법원 판결문을 직접 대조한 별도 측정은 현재 기록에 없습니다.</div>
+</section>
+
+<section class="card">
+<h2>4. 측정 조건과 한계</h2>
+<ul class="docs">
+<li><b>입력:</b> 판결 요지(사건요지, 한글 약 5,000자 분량)만 제공하고 K-Law가 가상 판결문을 작성했습니다.</li>
+<li><b>채점:</b> 평가 모델(DeepSeek)이 가상 판결문과 실제 대법원 판결문을 비교해 채점했습니다. 법률 전문가의 독립 검증(평가자 간 일치도)은 아직 수행되지 않았습니다.</li>
+<li><b>모집단:</b> 대법원이 공개한 판례로 한정되며, 법리상 쟁점이 있는 사건이 많아 일반 소송 사건보다 어려운 편입니다. 반대로 전체 사건 대비 대표성은 검증되지 않았습니다.</li>
+<li><b>재평가:</b> 90건은 방법론 갱신 후 같은 사건으로 재평가되었습니다. 최초 평가 수치와 최종 수치를 구분해 표기합니다.</li>
+<li><b>방법론 버전:</b> 회차마다 생성 방법론 버전이 달랐습니다(v15.0, v15.1, v15.2 갱신 제안 등). 개별 회차 기록과 보고서에서 확인하십시오.</li>
+<li>참고용 연구 자료이며 법률 자문이 아닙니다. 구체적 사건의 판단은 자격을 갖춘 변호사에게 확인해야 합니다.</li>
+</ul>
+</section>
+
+<section class="card">
+<h2>5. 평가 회차별 기록</h2>
+<p>평가 파일이 남아 있는 20개 회차입니다(같은 사건이 여러 회차에 재평가되어 건수 합계는 사건 수보다 큽니다).</p>
+<div class="scroll"><table>
+<thead><tr><th>회차</th><th class="n">평가 건수</th><th class="n">평균 점수</th><th>7점 이상 비율</th></tr></thead>
+<tbody><tr><td>4회차</td><td class="n">14</td><td class="n">8.14</td><td><div class="bar"><i style="width:64.3%"></i></div><span>64.3%</span></td></tr><tr><td>5회차</td><td class="n">40</td><td class="n">7.07</td><td><div class="bar"><i style="width:62.5%"></i></div><span>62.5%</span></td></tr><tr><td>6회차</td><td class="n">10</td><td class="n">9.80</td><td><div class="bar"><i style="width:100.0%"></i></div><span>100.0%</span></td></tr><tr><td>7회차</td><td class="n">14</td><td class="n">9.54</td><td><div class="bar"><i style="width:100.0%"></i></div><span>100.0%</span></td></tr><tr><td>8회차</td><td class="n">17</td><td class="n">7.36</td><td><div class="bar"><i style="width:58.8%"></i></div><span>58.8%</span></td></tr><tr><td>9회차</td><td class="n">19</td><td class="n">5.86</td><td><div class="bar"><i style="width:52.6%"></i></div><span>52.6%</span></td></tr><tr><td>10회차</td><td class="n">18</td><td class="n">7.11</td><td><div class="bar"><i style="width:61.1%"></i></div><span>61.1%</span></td></tr><tr><td>11회차</td><td class="n">17</td><td class="n">8.31</td><td><div class="bar"><i style="width:82.4%"></i></div><span>82.4%</span></td></tr><tr><td>12회차</td><td class="n">16</td><td class="n">8.20</td><td><div class="bar"><i style="width:75.0%"></i></div><span>75.0%</span></td></tr><tr><td>13회차</td><td class="n">17</td><td class="n">8.49</td><td><div class="bar"><i style="width:82.4%"></i></div><span>82.4%</span></td></tr><tr><td>14회차</td><td class="n">17</td><td class="n">5.11</td><td><div class="bar"><i style="width:35.3%"></i></div><span>35.3%</span></td></tr><tr><td>16회차</td><td class="n">19</td><td class="n">7.48</td><td><div class="bar"><i style="width:63.2%"></i></div><span>63.2%</span></td></tr><tr><td>18회차</td><td class="n">18</td><td class="n">7.19</td><td><div class="bar"><i style="width:72.2%"></i></div><span>72.2%</span></td></tr><tr><td>19회차</td><td class="n">42</td><td class="n">5.87</td><td><div class="bar"><i style="width:38.1%"></i></div><span>38.1%</span></td></tr><tr><td>20회차</td><td class="n">89</td><td class="n">6.97</td><td><div class="bar"><i style="width:62.9%"></i></div><span>62.9%</span></td></tr><tr><td>21회차</td><td class="n">14</td><td class="n">7.22</td><td><div class="bar"><i style="width:71.4%"></i></div><span>71.4%</span></td></tr><tr><td>22회차</td><td class="n">9</td><td class="n">6.03</td><td><div class="bar"><i style="width:55.6%"></i></div><span>55.6%</span></td></tr><tr><td>24회차</td><td class="n">10</td><td class="n">6.13</td><td><div class="bar"><i style="width:60.0%"></i></div><span>60.0%</span></td></tr><tr><td>25회차</td><td class="n">13</td><td class="n">5.77</td><td><div class="bar"><i style="width:53.8%"></i></div><span>53.8%</span></td></tr><tr><td>26회차</td><td class="n">14</td><td class="n">6.38</td><td><div class="bar"><i style="width:57.1%"></i></div><span>57.1%</span></td></tr></tbody></table></div>
+</section>
+
+<section class="card">
+<h2>6. 기록 문서 (다운로드)</h2>
+<h3>평가 데이터</h3>
+<ul class="docs">
+<li><a href="/klaw-sim-records/data/case_scores.csv">사건별 점수표 (337건, 최초·최종)</a></li>
+<li><a href="/klaw-sim-records/data/rounds_summary.csv">회차별 집계</a></li>
+<li><a href="/klaw-sim-records/data/summary.json">집계 요약(JSON)</a></li>
+<li><a href="/klaw-sim-records/data/evaluation_list_4월_요약목록.csv">4월 사건 요약 처리 목록</a></li>
+</ul>
+<h3>보고서</h3>
+<ul class="docs">
+<li><a href="/klaw-sim-records/reports/K-Law_실증결과_1차보고서_v1.6.docx">K-Law 실증결과 1차 보고서 (v1.6)</a></li>
+<li><a href="/klaw-sim-records/reports/K-Law_실증결과_갱신본_v2.0.md">K-Law 실증결과 갱신본 (v2.0)</a></li>
+<li><a href="/klaw-sim-records/reports/batch1_report_v15.0.md">가상 판결문 작성 보고서 — 배치 1</a></li>
+<li><a href="/klaw-sim-records/reports/batch2_report_v15.0.md">가상 판결문 작성 보고서 — 배치 2</a></li>
+<li><a href="/klaw-sim-records/reports/renewal_proposals/renewal_proposal_20260519_053556.txt">방법론 갱신 제안서 (2026-05-19)</a></li>
+<li><a href="/klaw-sim-records/reports/renewal_proposals/renewal_proposal_20260518_203123.txt">방법론 갱신 제안서 (2026-05-18, 3차)</a></li>
+<li><a href="/klaw-sim-records/reports/klaw_한페이지요약.pdf">K-Law 한 페이지 요약</a></li>
+<li><a href="/klaw-sim-records/reports/klaw_booklet_v3.1.docx">K-Law 소개 책자 v3.1</a></li>
+</ul>
+<h3>방법론 문서</h3>
+<ul class="docs">
+<li><a href="/klaw-sim-records/methodology/가상판결_출력형식_v13.2.md">가상 판결 출력 형식 v13.2</a></li>
+<li><a href="/klaw-sim-records/methodology/klaw_v15_1_en.txt">K-Law 방법론 v15.1 (영문)</a></li>
+<li><a href="/klaw-sim-records/methodology/klaw_patch_v15_2.md">K-Law 방법론 패치 v15.2</a></li>
+<li><a href="/klaw-sim-records/methodology/일치도평가기준_current_evaluation.txt">일치도 평가 기준</a></li>
+</ul>
+<h3>논문 초안</h3>
+<ul class="docs">
+<li><a href="/klaw-sim-records/papers/paper1_v1_8.docx">논문 초안 1 (v1.8)</a></li>
+<li><a href="/klaw-sim-records/papers/paper2_v2_0_6.docx">논문 초안 2 (v2.0.6)</a></li>
+<li><a href="/klaw-sim-records/papers/paper3_v7_0.docx">논문 초안 3 (v7.0)</a></li>
+<li><a href="/klaw-sim-records/papers/paper4_v2_0.docx">논문 초안 4 (v2.0)</a></li>
+</ul>
+<h3>코드와 원자료</h3>
+<ul class="docs">
+<li><a href="/klaw-sim-records/raw/scores_v1.6.zip">사건별 평가 결과 원문 (zip)</a></li>
+<li><a href="/klaw-sim-records/raw/verdicts_evaluated.zip">평가 완료 가상 판결문 (zip)</a></li>
+<li><a href="/klaw-sim-records/raw/reasoning.zip">추론 기록 (zip)</a></li>
+<li><a href="/klaw-sim-records/raw/평가_실행로그_2026-05-12_to_15.txt">평가 실행 로그</a></li>
+<li><a href="/klaw-sim-records/code/run_verdicts.py">가상 판결문 생성 스크립트</a></li>
+<li><a href="/klaw-sim-records/code/klaw_steps.py">STEP 단계 호출 스크립트</a></li>
+<li><a href="/klaw-sim-records/code/klaw_ensemble.py">앙상블 검증 스크립트</a></li>
+<li><a href="/klaw-sim-records/code/evaluate_verdicts.py">일치도 평가 스크립트</a></li>
+<li><a href="/klaw-sim-records/code/klaw-schema.sql">시뮬레이션 저장 스키마</a></li>
+<li><a href="/klaw-sim-records/code/klaw-webapp.html.txt">웹앱 소스(참고용)</a></li>
+<li><a href="/klaw-sim-records/code/klaw-dashboard.html.txt">대시보드 소스(참고용)</a></li>
+</ul>
+<p style="margin-top:10px"><small>코드 파일의 API 키는 삭제(sk-REDACTED)했습니다. 이후 기록(2026년 9월 100건 벤치마크, 4라운드 시험)은 <a href="https://klaw.hondi.net/rounds.html" target="_blank">K-Law 라운드별 시험 기록</a>에서 볼 수 있습니다.</small></p>
+</section>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K-Law Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════ */
+/* DESIGN TOKENS — Supabase-inspired dark palette */
+/* ═══════════════════════════════════════════════ */
+:root {
+  --bg:           #0f0f10;
+  --surface:      #1c1c1e;
+  --surface-2:    #242427;
+  --surface-3:    #2c2c30;
+  --border:       #2e2e33;
+  --border-2:     #3a3a40;
+  --text:         #ededef;
+  --text-2:       #a0a0ab;
+  --text-3:       #6b6b78;
+  --primary:      #3ecf8e;
+  --primary-dim:  rgba(62,207,142,0.12);
+  --primary-glow: rgba(62,207,142,0.25);
+  --accent:       #6e56cf;
+  --accent-dim:   rgba(110,86,207,0.15);
+  --red:          #f04040;
+  --red-dim:      rgba(240,64,64,0.12);
+  --gold:         #f5a623;
+  --gold-dim:     rgba(245,166,35,0.12);
+  --blue:         #3b82f6;
+  --blue-dim:     rgba(59,130,246,0.12);
+  --radius-sm:    6px;
+  --radius:       10px;
+  --radius-lg:    14px;
+  --shadow:       0 4px 24px rgba(0,0,0,0.5);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Noto Sans KR', -apple-system, sans-serif;
+  font-size: 14px; line-height: 1.5; min-height: 100vh;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0; width: 240px;
+  background: var(--surface); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; z-index: 100;
+}
+.sidebar-logo {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-badge {
+  width: 32px; height: 32px; background: var(--primary);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 900; color: #0a2417; letter-spacing: -1px;
+}
+.logo-name { font-size: 16px; font-weight: 700; color: var(--text); }
+.logo-ver  { font-size: 10px; color: var(--text-3); font-family: 'IBM Plex Mono', monospace; }
+
+.sidebar-section { padding: 16px 12px 8px; }
+.sidebar-label { font-size: 10px; font-weight: 700; color: var(--text-3); letter-spacing: 1.5px; text-transform: uppercase; padding: 0 8px 6px; }
+.sidebar-nav { display: flex; flex-direction: column; gap: 2px; }
+.nav-link {
+  display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+  border-radius: var(--radius-sm); color: var(--text-2); text-decoration: none;
+  cursor: pointer; border: none; background: none; width: 100%;
+  font-family: 'Noto Sans KR', sans-serif; font-size: 13px; font-weight: 500;
+  transition: all 0.15s;
+}
+.nav-link:hover { background: var(--surface-2); color: var(--text); }
+.nav-link.active { background: var(--primary-dim); color: var(--primary); }
+.nav-icon { width: 18px; text-align: center; font-size: 15px; }
+
+.sidebar-footer {
+  margin-top: auto; padding: 16px; border-top: 1px solid var(--border);
+}
+.status-badge {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface-2); border-radius: var(--radius-sm);
+  padding: 8px 10px; font-size: 11px; color: var(--text-2);
+}
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); animation: blink 2s infinite; flex-shrink: 0; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+/* ── MAIN ── */
+.main {
+  margin-left: 240px; min-height: 100vh;
+  display: flex; flex-direction: column;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 14px 28px; display: flex; align-items: center; gap: 16px;
+  position: sticky; top: 0; z-index: 50;
+}
+.topbar-title { font-size: 18px; font-weight: 700; color: var(--text); flex: 1; }
+.topbar-sub { font-size: 12px; color: var(--text-3); }
+.btn {
+  padding: 7px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--surface-2); color: var(--text); font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: 'Noto Sans KR', sans-serif; transition: all 0.15s;
+  display: flex; align-items: center; gap: 6px; text-decoration: none;
+}
+.btn:hover { border-color: var(--primary); color: var(--primary); }
+.btn-primary { background: var(--primary); color: #0a2417; border-color: var(--primary); }
+.btn-primary:hover { background: #34b87a; color: #0a2417; border-color: #34b87a; }
+
+/* ── CONTENT ── */
+.content { padding: 28px; flex: 1; }
+
+/* ── FILTER BAR ── */
+.filter-bar {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 18px; margin-bottom: 24px;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.filter-bar label { font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: 1px; }
+.filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+  padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border);
+  background: transparent; color: var(--text-2); font-size: 11px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s; font-family: 'Noto Sans KR', sans-serif;
+}
+.chip:hover { border-color: var(--primary); color: var(--primary); }
+.chip.active { background: var(--primary-dim); border-color: var(--primary); color: var(--primary); }
+.filter-sep { width: 1px; height: 20px; background: var(--border); }
+.filter-date {
+  padding: 5px 10px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--surface-2);
+  color: var(--text-2); font-size: 12px; font-family: 'IBM Plex Mono', monospace;
+  outline: none;
+}
+.filter-date:focus { border-color: var(--primary); color: var(--text); }
+.filter-refresh { margin-left: auto; }
+
+/* ── KPI CARDS ── */
+.kpi-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;
+}
+.kpi-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 20px; position: relative; overflow: hidden;
+  transition: border-color 0.2s;
+}
+.kpi-card:hover { border-color: var(--border-2); }
+.kpi-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+}
+.kpi-card.green::before  { background: var(--primary); }
+.kpi-card.purple::before { background: var(--accent); }
+.kpi-card.red::before    { background: var(--red); }
+.kpi-card.gold::before   { background: var(--gold); }
+.kpi-card.blue::before   { background: var(--blue); }
+.kpi-label { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.kpi-val   { font-size: 32px; font-weight: 700; color: var(--text); font-family: 'IBM Plex Mono', monospace; margin-bottom: 6px; }
+.kpi-sub   { font-size: 11px; color: var(--text-3); }
+.kpi-icon  { position: absolute; top: 18px; right: 18px; font-size: 22px; opacity: 0.4; }
+.kpi-trend { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+.trend-up   { background: var(--primary-dim); color: var(--primary); }
+.trend-down { background: var(--red-dim); color: var(--red); }
+
+/* ── CHARTS ROW ── */
+.charts-row { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; margin-bottom: 24px; }
+.chart-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px;
+}
+.chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.chart-title  { font-size: 14px; font-weight: 700; color: var(--text); }
+.chart-sub    { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.chart-area   { height: 200px; position: relative; }
+
+/* SVG bars */
+.bar-chart { width: 100%; height: 100%; }
+.bar-label { font-size: 10px; fill: var(--text-3); font-family: 'Noto Sans KR', sans-serif; }
+.bar-val   { font-size: 10px; fill: var(--text-2); font-family: 'IBM Plex Mono', monospace; }
+
+/* donut */
+.donut-wrap { display: flex; align-items: center; gap: 20px; height: 100%; }
+.donut-svg  { flex-shrink: 0; }
+.donut-legend { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.legend-item { display: flex; align-items: center; gap: 8px; }
+.legend-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.legend-label{ font-size: 11px; color: var(--text-2); flex: 1; }
+.legend-val  { font-size: 12px; font-weight: 700; color: var(--text); font-family: 'IBM Plex Mono', monospace; }
+
+/* ── SECOND ROW ── */
+.mid-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+
+/* Verdict breakdown */
+.verdict-list { display: flex; flex-direction: column; gap: 8px; }
+.verdict-item { display: flex; align-items: center; gap: 10px; }
+.verdict-label { font-size: 12px; color: var(--text-2); width: 70px; flex-shrink: 0; }
+.verdict-bar-bg { flex: 1; height: 6px; background: var(--surface-3); border-radius: 3px; overflow: hidden; }
+.verdict-bar-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+.verdict-count { font-size: 11px; color: var(--text-3); width: 30px; text-align: right; font-family: 'IBM Plex Mono', monospace; }
+
+/* Risk heatmap */
+.risk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.risk-cell {
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px; text-align: center;
+}
+.risk-cell-val   { font-size: 24px; font-weight: 700; font-family: 'IBM Plex Mono', monospace; display: block; }
+.risk-cell-label { font-size: 10px; color: var(--text-3); margin-top: 4px; }
+.risk-CRITICAL { border-color: var(--red); background: var(--red-dim); }
+.risk-HIGH     { border-color: var(--gold); background: var(--gold-dim); }
+.risk-MED      { border-color: var(--blue); background: var(--blue-dim); }
+.risk-LOW      { border-color: var(--primary); background: var(--primary-dim); }
+.risk-CRITICAL .risk-cell-val { color: var(--red); }
+.risk-HIGH     .risk-cell-val { color: var(--gold); }
+.risk-MED      .risk-cell-val { color: var(--blue); }
+.risk-LOW      .risk-cell-val { color: var(--primary); }
+
+/* Accuracy gauge */
+.gauge-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 12px; }
+.gauge-num  { font-size: 44px; font-weight: 700; color: var(--primary); font-family: 'IBM Plex Mono', monospace; }
+.gauge-sub  { font-size: 12px; color: var(--text-3); text-align: center; }
+.gauge-bar  { width: 100%; height: 8px; background: var(--surface-3); border-radius: 4px; overflow: hidden; }
+.gauge-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); border-radius: 4px; }
+
+/* ── TABLE ── */
+.table-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.table-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.table-title  { font-size: 14px; font-weight: 700; }
+.table-wrap   { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  background: var(--surface-2); padding: 10px 16px;
+  font-size: 11px; font-weight: 700; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: 1px; text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--surface-2); }
+tbody td { padding: 12px 16px; font-size: 13px; color: var(--text-2); }
+.td-id { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text-3); }
+.td-type { font-weight: 600; color: var(--text); }
+
+/* badges */
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;
+}
+.badge-win    { background: rgba(62,207,142,0.15); color: #3ecf8e; }
+.badge-lose   { background: rgba(240,64,64,0.15);  color: #f04040; }
+.badge-part   { background: rgba(245,166,35,0.15); color: #f5a623; }
+.badge-pend   { background: rgba(110,86,207,0.15); color: #6e56cf; }
+.badge-crit   { background: rgba(240,64,64,0.15);  color: #f04040; }
+.badge-high   { background: rgba(245,166,35,0.15); color: #f5a623; }
+.badge-med    { background: rgba(59,130,246,0.15); color: #3b82f6; }
+.badge-low    { background: rgba(62,207,142,0.15); color: #3ecf8e; }
+
+/* prob bar inline */
+.prob-inline { display: flex; align-items: center; gap: 6px; }
+.prob-bar-sm { flex: 1; height: 4px; background: var(--surface-3); border-radius: 2px; overflow: hidden; min-width: 60px; }
+.prob-fill-sm { height: 100%; background: var(--primary); border-radius: 2px; }
+.prob-text { font-size: 11px; font-family: 'IBM Plex Mono', monospace; color: var(--text-2); width: 34px; }
+
+/* pagination */
+.pagination { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; border-top: 1px solid var(--border); }
+.page-info { font-size: 12px; color: var(--text-3); }
+.page-btns { display: flex; gap: 6px; }
+.page-btn {
+  padding: 5px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--surface-2); color: var(--text-2); font-size: 12px; cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif; transition: all 0.15s;
+}
+.page-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+.page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* loading skeleton */
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
+  background-size: 200% 100%; animation: shimmer 1.5s infinite;
+  border-radius: 4px; height: 14px;
+}
+@keyframes shimmer { 0%{background-position:200%} 100%{background-position:-200%} }
+
+/* ── TIME SERIES ── */
+.timeline-chart { height: 160px; position: relative; }
+.tl-svg { width: 100%; height: 100%; overflow: visible; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1200px) {
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .charts-row { grid-template-columns: 1fr; }
+  .mid-row { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .mid-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-badge">K⚖</div>
+    <div>
+      <div class="logo-name">K-Law</div>
+      <div class="logo-ver">Dashboard v1.0</div>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">메인</div>
+    <div class="sidebar-nav">
+      <button class="nav-link active" onclick="scrollTo(0,0)">
+        <span class="nav-icon">📊</span> 개요
+      </button>
+      <button class="nav-link" onclick="document.getElementById('sec-cases').scrollIntoView({behavior:'smooth'})">
+        <span class="nav-icon">📋</span> 시뮬레이션 목록
+      </button>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">분류</div>
+    <div class="sidebar-nav" id="sideTypeNav">
+      <button class="nav-link" onclick="applyTypeFilter('')">
+        <span class="nav-icon">🔍</span> 전체 사건
+      </button>
+      <button class="nav-link" onclick="applyTypeFilter('민사')"><span class="nav-icon">📝</span> 민사</button>
+      <button class="nav-link" onclick="applyTypeFilter('형사')"><span class="nav-icon">🔒</span> 형사</button>
+      <button class="nav-link" onclick="applyTypeFilter('가사')"><span class="nav-icon">👨‍👩‍👧</span> 가사</button>
+      <button class="nav-link" onclick="applyTypeFilter('행정')"><span class="nav-icon">🏛️</span> 행정</button>
+      <button class="nav-link" onclick="applyTypeFilter('노동')"><span class="nav-icon">👷</span> 노동</button>
+      <button class="nav-link" onclick="applyTypeFilter('국제')"><span class="nav-icon">🌏</span> 국제</button>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">외부 링크</div>
+    <div class="sidebar-nav">
+      <a class="nav-link" href="https://klaw.openhash.kr" target="_blank"><span class="nav-icon">⚖️</span> K-Law 웹앱</a>
+      <a class="nav-link" href="https://gopang.net" target="_blank"><span class="nav-icon">💬</span> 고팡 앱</a>
+      <a class="nav-link" href="https://ebbecjfrwaswbdybbgiu.supabase.co" target="_blank"><span class="nav-icon">🗄️</span> Supabase</a>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="status-badge">
+      <div class="status-dot"></div>
+      <div>
+        <div style="font-weight:600;font-size:12px;color:var(--text);">Supabase 연결됨</div>
+        <div id="lastSync" style="font-size:10px;color:var(--text-3);">동기화 중…</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">K-Law 판결 시뮬레이션 대시보드</div>
+      <div class="topbar-sub">AI City Inc. · K-Law v15 · 실시간 Supabase 연동</div>
+    </div>
+    <button class="btn" onclick="refreshAll()">🔄 새로고침</button>
+    <a class="btn btn-primary" href="https://klaw.openhash.kr" target="_blank">⚖️ 시뮬레이션 시작</a>
+  </div>
+
+  <div class="content">
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+      <label>사건 유형</label>
+      <div class="filter-chips" id="typeChips">
+        <button class="chip active" onclick="setTypeChip(this,'')">전체</button>
+        <button class="chip" onclick="setTypeChip(this,'민사')">민사</button>
+        <button class="chip" onclick="setTypeChip(this,'형사')">형사</button>
+        <button class="chip" onclick="setTypeChip(this,'가사')">가사</button>
+        <button class="chip" onclick="setTypeChip(this,'행정')">행정</button>
+        <button class="chip" onclick="setTypeChip(this,'노동')">노동</button>
+        <button class="chip" onclick="setTypeChip(this,'국제')">국제</button>
+        <button class="chip" onclick="setTypeChip(this,'헌법')">헌법</button>
+        <button class="chip" onclick="setTypeChip(this,'지재')">지재</button>
+        <button class="chip" onclick="setTypeChip(this,'세무')">세무</button>
+      </div>
+      <div class="filter-sep"></div>
+      <label>기간</label>
+      <input type="date" class="filter-date" id="dateFrom" oninput="refreshAll()">
+      <span style="color:var(--text-3);font-size:12px;">—</span>
+      <input type="date" class="filter-date" id="dateTo" oninput="refreshAll()">
+      <button class="btn filter-refresh" onclick="refreshAll()">적용</button>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid">
+      <div class="kpi-card green">
+        <div class="kpi-icon">⚖️</div>
+        <div class="kpi-label">총 시뮬레이션</div>
+        <div class="kpi-val" id="kpiTotal">—</div>
+        <div class="kpi-sub">누적 판결 예측</div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-icon">📅</div>
+        <div class="kpi-label">오늘</div>
+        <div class="kpi-val" id="kpiToday">—</div>
+        <div class="kpi-sub">금일 시뮬레이션</div>
+      </div>
+      <div class="kpi-card purple">
+        <div class="kpi-icon">🎯</div>
+        <div class="kpi-label">평균 승소확률</div>
+        <div class="kpi-val" id="kpiAvgProb">—</div>
+        <div class="kpi-sub">원고 기준</div>
+      </div>
+      <div class="kpi-card gold">
+        <div class="kpi-icon">🏆</div>
+        <div class="kpi-label">원고 승소율</div>
+        <div class="kpi-val" id="kpiWinRate">—</div>
+        <div class="kpi-sub">원고승 / 일부인용 포함</div>
+      </div>
+    </div>
+
+    <!-- CHARTS ROW -->
+    <div class="charts-row">
+      <!-- Daily timeline -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">일별 시뮬레이션 추이</div>
+            <div class="chart-sub">최근 14일</div>
+          </div>
+          <span id="chartTotalBadge" class="badge badge-pend">—건</span>
+        </div>
+        <div class="timeline-chart">
+          <svg class="tl-svg" id="timelineSvg" viewBox="0 0 600 140" preserveAspectRatio="none"></svg>
+        </div>
+      </div>
+
+      <!-- Case type donut -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">사건 유형 분포</div>
+            <div class="chart-sub">전체 기준</div>
+          </div>
+        </div>
+        <div class="chart-area">
+          <div class="donut-wrap">
+            <svg class="donut-svg" width="120" height="120" viewBox="0 0 120 120" id="donutSvg">
+              <text x="60" y="65" text-anchor="middle" style="font-size:11px;fill:var(--text-3);font-family:'Noto Sans KR',sans-serif;" id="donutCenter">집계중</text>
+            </svg>
+            <div class="donut-legend" id="donutLegend">
+              <div class="skeleton" style="height:12px;width:80%;"></div>
+              <div class="skeleton" style="height:12px;width:60%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MID ROW -->
+    <div class="mid-row">
+      <!-- Verdict breakdown -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">판결 유형 분포</div>
+            <div class="chart-sub">주문별 집계</div>
+          </div>
+        </div>
+        <div class="verdict-list" id="verdictList" style="padding-top:8px;">
+          <div class="skeleton" style="height:16px;"></div>
+          <div class="skeleton" style="height:16px;"></div>
+          <div class="skeleton" style="height:16px;"></div>
+        </div>
+      </div>
+
+      <!-- Risk heatmap -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">위험도 분포</div>
+            <div class="chart-sub">K-Law 위험도 평가</div>
+          </div>
+        </div>
+        <div class="risk-grid" id="riskGrid" style="padding-top:8px;">
+          <div class="risk-cell risk-CRITICAL"><span class="risk-cell-val" id="riskCRIT">—</span><div class="risk-cell-label">🔴 위험</div></div>
+          <div class="risk-cell risk-HIGH"><span class="risk-cell-val" id="riskHIGH">—</span><div class="risk-cell-label">🟠 높음</div></div>
+          <div class="risk-cell risk-MED"><span class="risk-cell-val" id="riskMED">—</span><div class="risk-cell-label">🔵 보통</div></div>
+          <div class="risk-cell risk-LOW"><span class="risk-cell-val" id="riskLOW">—</span><div class="risk-cell-label">🟢 낮음</div></div>
+        </div>
+      </div>
+
+      <!-- Confidence gauge -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">K-Law 신뢰도</div>
+            <div class="chart-sub">평균 예측 신뢰도</div>
+          </div>
+        </div>
+        <div class="gauge-wrap">
+          <div class="gauge-num" id="gaugeVal">—</div>
+          <div class="gauge-bar"><div class="gauge-fill" id="gaugeFill" style="width:0%"></div></div>
+          <div class="gauge-sub">판례 기반 K-Law v15<br>예측 신뢰도</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card" id="sec-cases">
+      <div class="table-header">
+        <div>
+          <div class="table-title">시뮬레이션 목록</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:2px;" id="tableCount">불러오는 중…</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn" onclick="exportCSV()">⬇ CSV 내보내기</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>시뮬레이션 ID</th>
+              <th>사건 유형</th>
+              <th>사건 개요</th>
+              <th>판결</th>
+              <th>승소확률</th>
+              <th>위험도</th>
+              <th>날짜</th>
+            </tr>
+          </thead>
+          <tbody id="simTable">
+            <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-3);">데이터를 불러오는 중…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <div class="page-info" id="pageInfo">— / — 페이지</div>
+        <div class="page-btns">
+          <button class="page-btn" id="btnPrev" onclick="changePage(-1)" disabled>← 이전</button>
+          <button class="page-btn" id="btnNext" onclick="changePage(1)" disabled>다음 →</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+// ══════════════════════════════════════════════════
+// 설정
+// ══════════════════════════════════════════════════
+const SB_URL   = 'https://ebbecjfrwaswbdybbgiu.supabase.co';
+const SB_KEY   = 'SUPABASE_ANON_KEY_REDACTED';
+const SB_TABLE = 'klaw_simulations';
+const PAGE_SIZE = 20;
+
+// ── 상태
+let _typeFilter = '';
+let _page = 0;
+let _totalRows = 0;
+
+// ── Supabase fetch
+async function _sb(path) {
+  const res = await fetch(SB_URL + '/rest/v1/' + path, {
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' }
+  });
+  if (!res.ok) throw new Error('SB ' + res.status);
+  return res.json();
+}
+
+// ── 필터 쿼리 빌더
+function _buildFilter(extra='') {
+  const parts = [];
+  if (_typeFilter) parts.push(`case_type=eq.${encodeURIComponent(_typeFilter)}`);
+  const df = document.getElementById('dateFrom')?.value;
+  const dt = document.getElementById('dateTo')?.value;
+  if (df) parts.push(`created_at=gte.${df}T00:00:00+09:00`);
+  if (dt) parts.push(`created_at=lte.${dt}T23:59:59+09:00`);
+  const q = parts.join('&');
+  return (q ? q + '&' : '') + extra;
+}
+
+// ── KPI
+async function loadKPIs() {
+  try {
+    const q  = _buildFilter(`select=id,verdict,verdict_prob,confidence,risk_level,created_at`);
+    const rows = await _sb(`${SB_TABLE}?${q}&order=created_at.desc&limit=1000`);
+
+    const total = rows.length;
+    const today = new Date().toISOString().slice(0,10);
+    const todayCnt = rows.filter(r => r.created_at?.slice(0,10) === today).length;
+    const probs = rows.filter(r => r.verdict_prob != null).map(r => r.verdict_prob);
+    const avgProb = probs.length ? (probs.reduce((a,b)=>a+b,0)/probs.length).toFixed(1) : '—';
+    const wins = rows.filter(r => ['원고승','무죄','일부인용'].includes(r.verdict)).length;
+    const winRate = total ? Math.round(wins/total*100) + '%' : '—';
+
+    document.getElementById('kpiTotal').textContent   = total.toLocaleString();
+    document.getElementById('kpiToday').textContent   = todayCnt;
+    document.getElementById('kpiAvgProb').textContent = avgProb !== '—' ? avgProb + '%' : '—';
+    document.getElementById('kpiWinRate').textContent  = winRate;
+    document.getElementById('chartTotalBadge').textContent = total + '건';
+    _totalRows = total;
+
+    // pass rows to charts
+    renderTimeline(rows);
+    renderDonut(rows);
+    renderVerdictBreakdown(rows);
+    renderRisk(rows);
+    renderGauge(rows);
+
+    document.getElementById('lastSync').textContent = '마지막 동기화: ' + new Date().toLocaleTimeString('ko-KR');
+  } catch(e) {
+    console.error('[KPI]', e);
+  }
+}
+
+// ── Timeline (14일)
+function renderTimeline(rows) {
+  const svg = document.getElementById('timelineSvg');
+  svg.innerHTML = '';
+  if (!rows.length) return;
+
+  const days = [];
+  for (let i=13; i>=0; i--) {
+    const d = new Date(Date.now() - i*86400000);
+    days.push(d.toISOString().slice(0,10));
+  }
+  const counts = days.map(d => rows.filter(r => r.created_at?.slice(0,10) === d).length);
+  const maxC = Math.max(...counts, 1);
+
+  const W = 600, H = 140, pad = { left:30, right:10, top:10, bottom:25 };
+  const bW = (W - pad.left - pad.right) / days.length;
+
+  // bars
+  days.forEach((d, i) => {
+    const bH = ((counts[i] / maxC) * (H - pad.top - pad.bottom)) || 2;
+    const x = pad.left + i * bW;
+    const y = H - pad.bottom - bH;
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('x', x + 2);
+    rect.setAttribute('y', y);
+    rect.setAttribute('width', bW - 4);
+    rect.setAttribute('height', bH);
+    rect.setAttribute('rx', '3');
+    rect.setAttribute('fill', counts[i] ? '#3ecf8e' : '#242427');
+    rect.setAttribute('opacity', '0.85');
+    svg.appendChild(rect);
+
+    if (i % 2 === 0 || i === days.length-1) {
+      const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      lbl.setAttribute('x', x + bW/2);
+      lbl.setAttribute('y', H - 8);
+      lbl.setAttribute('text-anchor', 'middle');
+      lbl.setAttribute('class', 'bar-label');
+      lbl.textContent = d.slice(5); // MM-DD
+      svg.appendChild(lbl);
+    }
+
+    if (counts[i]) {
+      const val = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      val.setAttribute('x', x + bW/2);
+      val.setAttribute('y', y - 3);
+      val.setAttribute('text-anchor', 'middle');
+      val.setAttribute('class', 'bar-val');
+      val.textContent = counts[i];
+      svg.appendChild(val);
+    }
+  });
+}
+
+// ── Donut chart
+const COLORS = ['#3ecf8e','#6e56cf','#3b82f6','#f5a623','#f04040','#14b8a6','#f472b6','#a78bfa','#34d399'];
+function renderDonut(rows) {
+  const typeCount = {};
+  rows.forEach(r => { typeCount[r.case_type] = (typeCount[r.case_type]||0) + 1; });
+  const sorted = Object.entries(typeCount).sort((a,b)=>b[1]-a[1]);
+  const total = rows.length || 1;
+
+  const svg = document.getElementById('donutSvg');
+  // clear old paths
+  [...svg.querySelectorAll('path,circle')].forEach(el => el.remove());
+
+  const cx=60, cy=60, r=45, ir=28;
+  let angle = -Math.PI/2;
+
+  sorted.forEach(([type, cnt], i) => {
+    const sweep = (cnt/total) * Math.PI * 2;
+    const x1 = cx + r*Math.cos(angle), y1 = cy + r*Math.sin(angle);
+    const x2 = cx + r*Math.cos(angle+sweep), y2 = cy + r*Math.sin(angle+sweep);
+    const ix1 = cx + ir*Math.cos(angle), iy1 = cy + ir*Math.sin(angle);
+    const ix2 = cx + ir*Math.cos(angle+sweep), iy2 = cy + ir*Math.sin(angle+sweep);
+    const large = sweep > Math.PI ? 1 : 0;
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d', `M${ix1},${iy1} L${x1},${y1} A${r},${r} 0 ${large} 1 ${x2},${y2} L${ix2},${iy2} A${ir},${ir} 0 ${large} 0 ${ix1},${iy1} Z`);
+    path.setAttribute('fill', COLORS[i % COLORS.length]);
+    svg.insertBefore(path, svg.querySelector('text'));
+    angle += sweep;
+  });
+
+  document.getElementById('donutCenter').textContent = total + '건';
+
+  const legend = document.getElementById('donutLegend');
+  legend.innerHTML = sorted.slice(0,6).map(([type,cnt],i) =>
+    `<div class="legend-item">
+      <div class="legend-dot" style="background:${COLORS[i%COLORS.length]}"></div>
+      <div class="legend-label">${type}</div>
+      <div class="legend-val">${cnt}</div>
+    </div>`
+  ).join('');
+}
+
+// ── Verdict breakdown
+function renderVerdictBreakdown(rows) {
+  const types = ['원고승','일부인용','피고승','기각','각하','화해권고','무죄','유죄','집행유예'];
+  const colors = { '원고승':'#3ecf8e','일부인용':'#f5a623','피고승':'#f04040','기각':'#f04040','각하':'#6b6b78','화해권고':'#6e56cf','무죄':'#3ecf8e','유죄':'#f04040','집행유예':'#f5a623' };
+  const cnt = {};
+  rows.forEach(r => r.verdict && (cnt[r.verdict]=(cnt[r.verdict]||0)+1));
+  const max = Math.max(...Object.values(cnt),1);
+  const total = rows.length || 1;
+
+  const filtered = types.filter(t => cnt[t]);
+  const vl = document.getElementById('verdictList');
+  vl.innerHTML = filtered.length ? filtered.map(t =>
+    `<div class="verdict-item">
+      <div class="verdict-label">${t}</div>
+      <div class="verdict-bar-bg"><div class="verdict-bar-fill" style="width:${Math.round((cnt[t]||0)/max*100)}%;background:${colors[t]||'var(--primary)'}"></div></div>
+      <div class="verdict-count">${cnt[t]||0}</div>
+    </div>`
+  ).join('') : '<div style="color:var(--text-3);font-size:12px;padding:8px;">데이터 없음</div>';
+}
+
+// ── Risk heatmap
+function renderRisk(rows) {
+  const cnt = { CRITICAL:0, HIGH:0, MED:0, LOW:0 };
+  rows.forEach(r => r.risk_level && (cnt[r.risk_level]=(cnt[r.risk_level]||0)+1));
+  document.getElementById('riskCRIT').textContent = cnt.CRITICAL;
+  document.getElementById('riskHIGH').textContent = cnt.HIGH;
+  document.getElementById('riskMED').textContent  = cnt.MED;
+  document.getElementById('riskLOW').textContent  = cnt.LOW;
+}
+
+// ── Gauge
+function renderGauge(rows) {
+  const confs = rows.filter(r=>r.confidence!=null).map(r=>r.confidence);
+  const avg = confs.length ? (confs.reduce((a,b)=>a+b,0)/confs.length).toFixed(1) : null;
+  document.getElementById('gaugeVal').textContent = avg ? avg + '%' : '—';
+  setTimeout(() => { document.getElementById('gaugeFill').style.width = (avg||0) + '%'; }, 200);
+}
+
+// ── Table
+async function loadTable() {
+  const tbody = document.getElementById('simTable');
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-3);">로딩 중…</td></tr>';
+  try {
+    const q = _buildFilter(`select=id,case_type,case_subtype,case_summary,verdict,verdict_prob,risk_level,confidence,created_at`);
+    const rows = await _sb(`${SB_TABLE}?${q}&order=created_at.desc&limit=${PAGE_SIZE}&offset=${_page*PAGE_SIZE}`);
+
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-3);">결과 없음</td></tr>';
+      document.getElementById('tableCount').textContent = '0건';
+      return;
+    }
+
+    const verdictBadge = v => {
+      const m = {'원고승':'badge-win','무죄':'badge-win','피고승':'badge-lose','기각':'badge-lose','각하':'badge-lose','일부인용':'badge-part','화해권고':'badge-part','유죄':'badge-lose','집행유예':'badge-part'};
+      return m[v] || 'badge-pend';
+    };
+    const riskBadge = r => ({'CRITICAL':'badge-crit','HIGH':'badge-high','MED':'badge-med','LOW':'badge-low'}[r] || 'badge-pend');
+    const typeIcon  = t => ({'민사':'📝','형사':'🔒','가사':'👨‍👩‍👧','행정':'🏛️','노동':'👷','국제':'🌏','헌법':'🇰🇷','지재':'💡','세무':'💰'}[t]||'⚖️');
+
+    tbody.innerHTML = rows.map(r => {
+      const prob = r.verdict_prob ?? null;
+      const probHtml = prob != null
+        ? `<div class="prob-inline"><div class="prob-bar-sm"><div class="prob-fill-sm" style="width:${prob}%"></div></div><span class="prob-text">${prob}%</span></div>`
+        : '<span style="color:var(--text-3)">—</span>';
+      const date = r.created_at ? new Date(r.created_at).toLocaleDateString('ko-KR',{timeZone:'Asia/Seoul'}) : '—';
+      const summary = r.case_summary ? r.case_summary.slice(0,40) + (r.case_summary.length>40?'…':'') : '—';
+      return `<tr>
+        <td class="td-id">${r.id}</td>
+        <td class="td-type">${typeIcon(r.case_type)} ${r.case_type}${r.case_subtype ? '<br><span style="font-size:10px;color:var(--text-3);">'+r.case_subtype+'</span>' : ''}</td>
+        <td style="max-width:200px;color:var(--text-2);">${summary}</td>
+        <td>${r.verdict ? `<span class="badge ${verdictBadge(r.verdict)}">${r.verdict}</span>` : '<span style="color:var(--text-3)">—</span>'}</td>
+        <td>${probHtml}</td>
+        <td>${r.risk_level ? `<span class="badge ${riskBadge(r.risk_level)}">${r.risk_level}</span>` : '—'}</td>
+        <td style="color:var(--text-3);font-size:12px;">${date}</td>
+      </tr>`;
+    }).join('');
+
+    const cnt = rows.length;
+    document.getElementById('tableCount').textContent = `${_page*PAGE_SIZE+1}–${_page*PAGE_SIZE+cnt}건 표시`;
+    document.getElementById('pageInfo').textContent    = `${_page+1} 페이지`;
+    document.getElementById('btnPrev').disabled = _page === 0;
+    document.getElementById('btnNext').disabled = cnt < PAGE_SIZE;
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-3);">${e.message}</td></tr>`;
+  }
+}
+
+// ── Pagination
+function changePage(dir) {
+  _page = Math.max(0, _page + dir);
+  loadTable();
+}
+
+// ── Type filter
+function setTypeChip(el, type) {
+  document.querySelectorAll('#typeChips .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  _typeFilter = type;
+  _page = 0;
+  refreshAll();
+}
+function applyTypeFilter(type) {
+  _typeFilter = type;
+  _page = 0;
+  refreshAll();
+  // sync chips
+  document.querySelectorAll('#typeChips .chip').forEach(c => {
+    const match = (c.textContent === '전체' && !type) || c.textContent === type;
+    c.classList.toggle('active', match);
+  });
+}
+
+// ── Refresh
+async function refreshAll() {
+  await Promise.all([loadKPIs(), loadTable()]);
+}
+
+// ── CSV export
+async function exportCSV() {
+  try {
+    const q = _buildFilter('select=id,case_type,case_subtype,case_summary,verdict,verdict_prob,risk_level,confidence,created_at,source');
+    const rows = await _sb(`${SB_TABLE}?${q}&order=created_at.desc&limit=5000`);
+    const headers = ['ID','사건유형','세부유형','사건개요','판결','승소확률','위험도','신뢰도','날짜','소스'];
+    const csv = [headers.join(','), ...rows.map(r => [
+      r.id, r.case_type, r.case_subtype||'', `"${(r.case_summary||'').replace(/"/g,'""')}"`,
+      r.verdict||'', r.verdict_prob??'', r.risk_level||'', r.confidence??'',
+      r.created_at?.slice(0,10)||'', r.source||''
+    ].join(','))].join('\n');
+    const a = Object.assign(document.createElement('a'), {
+      href: 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv),
+      download: `klaw-export-${new Date().toISOString().slice(0,10)}.csv`
+    });
+    a.click();
+  } catch(e) { alert('내보내기 실패: ' + e.message); }
+}
+
+// ── Auto refresh 30s
+setInterval(refreshAll, 30000);
+
+// ── Init
+window.addEventListener('load', () => {
+  // default date range: last 30 days
+  const to   = new Date().toISOString().slice(0,10);
+  const from = new Date(Date.now()-30*86400000).toISOString().slice(0,10);
+  document.getElementById('dateFrom').value = from;
+  document.getElementById('dateTo').value   = to;
+  refreshAll();
+});
+</script>
+</body>
+</html>

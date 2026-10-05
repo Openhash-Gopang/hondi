@@ -54,6 +54,7 @@
         '<a href="/pages/k-services.html"><span class="dot"></span><span class="label-text">K-서비스</span></a>' +
         '<a href="/pages/expert-personas.html"><span class="dot"></span><span class="label-text">전문가 페르소나</span></a>' +
         '<a href="/pages/k-government.html"><span class="dot"></span><span class="label-text">K-정부</span></a>' +
+        '<a href="/pages/klaw-simulation-record.html"><span class="dot"></span><span class="label-text">시뮬레이션 결과</span></a>' +
       '</div>' +
     '</div>' +
     '<div class="site-strip">' +
