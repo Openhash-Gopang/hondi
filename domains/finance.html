@@ -187,7 +187,7 @@ window.PAGE_HERO = {
   badge: '금융 · GDC',
   l1: '재무제표가 곧 화폐이고,',
   l2: '그 재무제표가 곧 신용입니다',
-  sub: 'GDC(Gopang Digital Currency)는 은행·보험·증권·거래소·금융감독을 별개 기관이 아니라, 위변조 불가능한 하나의 재무제표로 묶으려는 혼디의 화폐입니다.',
+  sub: 'GDC(Gopang Digital Currency)는 은행·보험·증권·거래소·금융감독을 별개 기관이 아니라, 위변조 방지를 목표로 하는 하나의 재무제표로 묶으려는 혼디의 화폐입니다.',
   actions: [
     { label: '혼디넷과 GDC — 화폐 하나에 담은 은행·보험·증권', href: '../reports/hondi-gdc-currency-scenario.html', style: 'primary' }
   ]
@@ -328,7 +328,7 @@ window.PAGE_HERO = {
         var b = bond();
         return '<h4>3. 발행자의 재무제표 기반 신용도를 확인합니다</h4>' +
           '<div class="sim-card"><b>' + b.issuer + '</b><br>' + b.credit + '</div>' +
-          '<div class="sim-card">이 신용평가는 발행자의 실제 재무제표를 OpenHash로 자동 연동·기록한 결과입니다 — 주관적 심사가 아니라, 위변조 불가능한 거래 기록 자체가 신용도를 증명합니다.</div>' +
+          '<div class="sim-card">이 신용평가는 발행자의 실제 재무제표를 OpenHash로 자동 연동·기록한 결과입니다 — 주관적 심사가 아니라, 위변조 방지를 목표로 하는 거래 기록 자체가 신용도를 증명합니다.</div>' +
           '<p style="margin-top:10px;color:var(--text4);font-size:12px">개별 발행자 하나에 집중 투자하는 대신, 여러 지역 단위로 분산된 <b>채권 POOL</b>을 선택할 수도 있습니다(이전 단계에서 "채권 POOL" 전환).</p>';
       },
       // 3. 투자 실행
@@ -407,7 +407,7 @@ window.PAGE_HERO = {
         <thead><tr><th>원칙</th><th>의미</th></tr></thead>
         <tbody>
           <tr><td class="cmp-axis">재무제표가 곧 화폐</td><td>OpenHash와 혼디 AI가 모든 개인·기관의 재무제표를 자동 기록·갱신하고 상호 연동시킵니다. 그 현금 계정이 GDC 잔액입니다.</td></tr>
-          <tr><td class="cmp-axis">재무제표가 곧 신용</td><td>은행 담당자의 주관적 판단이 아니라, 위변조 불가능한 재무 기록 자체가 신용도를 증명합니다.</td></tr>
+          <tr><td class="cmp-axis">재무제표가 곧 신용</td><td>은행 담당자의 주관적 판단이 아니라, 위변조 방지를 목표로 하는 재무 기록 자체가 신용도를 증명합니다.</td></tr>
           <tr><td class="cmp-axis">채권 발행이 곧 대출</td><td>은행에서 "빌리는" 대신 본인의 재무제표 신용도로 직접 채권을 발행합니다. 다른 GDC 보유자가 사들이는 것이 대출 실행입니다.</td></tr>
           <tr><td class="cmp-axis">거래 자체가 감독</td><td>모든 재무제표가 실시간으로 맞물려 있어, 거래가 일어나는 과정 자체가 감독 기능을 겸합니다.</td></tr>
         </tbody>
