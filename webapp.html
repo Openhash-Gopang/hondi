@@ -5297,6 +5297,7 @@ window.closePDV = closePDV;
 <script type="module">
 import { startScanner, stopScanner, lookupDigitProfile, analyzePhoto }
   from './src/gopang/ai/hondi-digit-scanner.js';
+import { ORG_SITES, findSiteByDigitCode } from './src/gopang/gov/org-sites.js';
 
 let _profileUrl = null;
 
@@ -5314,6 +5315,18 @@ function _startScan() {
     /* 인식 성공 */
     async (shortId) => {
       _scannerActive = false;  // 스캐너 완전 종료 — 재인식 없음
+      // 2026-10-08: 기관 AI 웹사이트 코드(제주도청·제주테크노파크 등)는 프로필이
+      // 아니라 해당 기관 AI 대화창을 새 탭으로 연다(pages/org-ai.html).
+      const _siteId = findSiteByDigitCode(shortId);
+      if (_siteId) {
+        const _url = '/pages/org-ai.html?site=' + encodeURIComponent(_siteId);
+        _setStatus(ORG_SITES[_siteId].name + ' AI를 여는 중...');
+        // 카메라 콜백은 사용자 제스처가 아니라 팝업 차단될 수 있다 — 차단되면 같은 탭으로 연다.
+        const _w = window.open(_url, '_blank');
+        if (!_w) { window.location.href = _url; return; }
+        window.closeHondiScanner();
+        return;
+      }
       _setStatus('프로필 조회 중...');
       try {
         // 2026-07-27: 숫자 코드 전환 — "혼디" 공식 계정의 digit_code_id가
