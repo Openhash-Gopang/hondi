@@ -123,6 +123,7 @@ import { mountChatInput, THEME_LINE_GREEN } from '/src/gopang/ui/chat-input.js';
 // 새로 만들지 않고 그대로 재사용한다 — sendFn만 이 페이지의 비-스트리밍
 // 구조에 맞게 새로 만든다(아래 _callAI 내부 참고).
 import { _handleGovTaskTags, _parseAgentTags } from '/src/gopang/ai/call-ai.js';
+import { ORG_SITES } from '/src/gopang/gov/org-sites.js';
 // ★ 2026-09-17 신설(2) — [GWP: serviceId] 태그 처리 공백 해소. A-2
 // 전수조사가 발견한 짝(EXPERT 태그는 아래에서 별도 배선함) — 이 페이지엔
 // GWP 태그 처리(_parseAgentTags)도 handleExpertTag만큼이나 전혀 없었다.
@@ -365,6 +366,9 @@ const ci = mountChatInput(document.getElementById('chat-input-slot'), {
   multiple: false,
   allowStop: false,
   onSend: async (text, files) => {
+    // AI 웹사이트 모드: 방문자는 로그인 없이 인사말을 먼저 보고, 첫 발화를
+    // 보내는 시점에 비로소 전화번호 인증을 받는다(init 참고).
+    if (_site && !_loadUser()?.ipv6 && window.KAuth) await KAuth.ensureLogin();
     const imageFile = files.find(f => f.isImage);
     let userMsg;
     if (imageFile) {
@@ -561,7 +565,17 @@ function _resolveLocationHint() {
 // ctx/url에 담긴 코드를 첫 턴에만 assembleGovSystemPrompt로 전달한다.
 // 첫 턴 이후(사용자가 실제로 타이핑한 다음 질문)에는 더 이상 강제하지
 // 않는다 — 대화가 다른 기관으로 자연스럽게 옮겨갈 수도 있으므로.
-const _govDirectCode = _qs.get('gov_code') || null;
+// ★ 2026-10-08 신설 — AI 웹사이트 모드(?site=<id>, pages/org-ai.html에서 진입).
+// 기관 설정(인사말·직행 코드·지역)은 URL이 아니라 org-sites.js 표에서만
+// 읽는다(링크로 임의 인사말을 주입하는 사칭 방지). 사이트 모드에서는
+// 첫 턴 이후에도 직행 코드를 유지해 대화가 다른 기관으로 흘러가지 않게 하고,
+// 고정 인사말만 보여준 뒤 방문자의 첫 발화를 기다린다.
+const _site = ORG_SITES[_qs.get('site')] || null;
+if (_site) {
+  document.title = `${_site.name} AI`;
+  if (_site.locationHint && !_urlFactsLocation) _urlFactsLocation = _site.locationHint;
+}
+const _govDirectCode = _site ? _site.govCode : (_qs.get('gov_code') || null);
 let _govDirectCodeUsed = false;
 
 async function _callAI(latestUserText, typingEl) {
@@ -574,7 +588,7 @@ async function _callAI(latestUserText, typingEl) {
     // 원칙을 지키려면 라우팅이 그 확보를 안 기다리고 앞서가면 안 된다.
     if (!_urlFactsLocation) await _waitForLocationReady();
     const directCode = (_govDirectCode && !_govDirectCodeUsed) ? _govDirectCode : null;
-    _govDirectCodeUsed = true;
+    if (!_site) _govDirectCodeUsed = true;
     const r = await assembleGovSystemPrompt(latestUserText, _resolveLocationHint(), _govClassifyFn, (msg) => {
       if (typingEl) typingEl.querySelector('span').textContent = msg;
     }, directCode);
@@ -610,7 +624,7 @@ async function _callAI(latestUserText, typingEl) {
   // 호출된 "제주시청 AI"가 보이도록 도청 라벨보다 우선한다).
   const agencyDisplayName = resolveAgencyDisplayName(trace);
   const provinceLabel = { jeju: '제주도청', seoul: '서울시청', busan: '부산시청', gyeonggi: '경기도청' }[provinceCode];
-  document.title = agencyDisplayName ? `${agencyDisplayName} AI`
+  if (!_site) document.title = agencyDisplayName ? `${agencyDisplayName} AI`
     : (provinceLabel ? `${provinceLabel} AI` : '전국 지방행정 AI');
 
   return _govRelayCompletion(sp, messages, agency, provinceCode, _lastTaskKey, _taskRoundtrips).then(async (rawReply) => {
@@ -673,7 +687,9 @@ async function _callAI(latestUserText, typingEl) {
 // ── 초기화 ─────────────────────────────────────────────────────
 (async function init() {
   let user = _loadUser();
-  if (!user?.ipv6) {
+  // AI 웹사이트 모드는 인사말을 로그인보다 먼저 보여준다(로그인은 첫 발화 시).
+  if (_site && !GWP_CTX) appendBubble('ai', escHtml(_site.greeting));
+  if (!user?.ipv6 && !_site) {
     // 2026-09-07 이전: 여기서 곧바로 "다른 페이지에서 로그인하고
     // 오세요" 정적 안내만 띄우고 끝냈다 — 지갑(기기 종속)이 없으면
     // 무조건 로그인 안 된 것으로 취급했기 때문. 이제 기기 무관
@@ -706,7 +722,9 @@ async function _callAI(latestUserText, typingEl) {
   // 사용자가 실제로 입력한 발화가 없으므로, 자기소개를 요청하는 시드
   // 발화를 GWP_CTX와 동일한 방식(공용 chat-input에 채워 넣고 전송)으로
   // 대신 보낸다 — 그 응답에는 이제 올바른 기관명이 반영된다.
-  if (!GWP_CTX && !_govDirectCode) {
+  if (_site && !GWP_CTX) {
+    // 인사말은 위에서 이미 표시했다.
+  } else if (!GWP_CTX && !_govDirectCode) {
     appendBubble('ai',
       '안녕하세요, 전국 지방행정 AI입니다. 광역시도청·시군구청·읍면동사무소 관련 무엇이든 말씀해 주세요.'
     );

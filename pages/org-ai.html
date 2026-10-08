@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<link rel="icon" href="data:,">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>혼디 AI</title>
+<meta name="description" content="혼디 숫자 코드로 여는 기관 AI 웹사이트 — 방문자에게 용건을 묻고 그에 맞게 응대합니다.">
+<!--
+  2026-10-08 신설 — 혼디 AI 웹사이트 진입점.
+  숫자 코드를 읽으면 이 페이지가 새 탭으로 열려(?code=숫자 또는 ?site=기관id)
+  해당 기관의 AI 대화창(pages/regional-gov.html, 사이트 모드)으로 넘긴다.
+  게시할 정보는 없다: 방문자에게 용건을 묻고 그에 맞게 대응하는 것이 전부.
+  기관 설정은 src/gopang/gov/org-sites.js 한 곳에서만 관리한다.
+-->
+</head>
+<body style="font-family:sans-serif;padding:24px;color:#444">
+<p id="msg">연결 중…</p>
+<script type="module">
+import { ORG_SITES, findSiteByDigitCode } from '/src/gopang/gov/org-sites.js';
+const q = new URLSearchParams(location.search);
+const id = ORG_SITES[q.get('site')] ? q.get('site') : findSiteByDigitCode(q.get('code'));
+if (id) {
+  location.replace('/pages/regional-gov.html?site=' + encodeURIComponent(id));
+} else {
+  document.getElementById('msg').textContent = '연결된 기관을 찾을 수 없습니다. 숫자 코드를 다시 확인해 주세요.';
+}
+</script>
+</body>
+</html>
