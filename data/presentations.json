@@ -1,0 +1,42 @@
+{
+  "_help": "프레젠테이션을 추가하려면 items에 한 항목을 더하면 됩니다. order가 작을수록 앞에 옵니다(10 단위로 비워 두었으니 사이에 끼워 넣으세요). series는 아래 series의 id입니다. status: ready(공개 가능) | draft(검토 중). url은 Slides 문서 주소입니다.",
+  "series": [
+    { "id": "intro",   "order": 10, "title": "혼디 이해하기", "desc": "혼디가 무엇이고 웹이 어떻게 달라지는지" },
+    { "id": "region",  "order": 20, "title": "지역과 기관에 적용하기", "desc": "제주를 비롯한 지역과 기관에 혼디를 적용하는 구상" },
+    { "id": "seminar", "order": 30, "title": "기관 대상 세미나", "desc": "특정 기관 임직원을 위한 맞춤 발표 자료" }
+  ],
+  "items": [
+    {
+      "id": "field-test", "order": 10, "series": "intro", "status": "ready",
+      "title": "나만의 AI 비서, 혼디 필드 테스트",
+      "summary": "시민 한 사람마다 AI 비서를 갖고, 기관과 서비스의 AI 비서와 대화하는 혼디를 소개하고 필드 테스트를 제안합니다.",
+      "slides": 18, "audience": "일반 · 파트너 기관", "date": "2026-10-09",
+      "tags": ["소개", "필드 테스트"],
+      "url": "https://claude.ai/artifact/8t72dJwci5k6b8vmdgBmW8"
+    },
+    {
+      "id": "new-web", "order": 20, "series": "intro", "status": "ready",
+      "title": "새로운 형식의 웹",
+      "summary": "기존 웹사이트를 혼디 프로필로 바꾸면 무엇이 달라지는지, 항공권 예매를 비유로 한 장씩 비교합니다.",
+      "slides": 11, "audience": "일반", "date": "2026-10-09",
+      "tags": ["개념", "프로필", "결제"],
+      "url": "https://claude.ai/artifact/BUL96TA8FNF7nczZZJ4Scv"
+    },
+    {
+      "id": "ai-jeju", "order": 10, "series": "region", "status": "ready",
+      "title": "AI + 제주특별자치도",
+      "summary": "시민, 기관, 부서마다 혼디 프로필을 할당해 제주의 혼디 웹을 구성하고, 교육·의료·금융·도청·시장·사업자·국세청·법원의 업무 흐름을 그려 봅니다.",
+      "slides": 16, "audience": "제주 지역 기관 · 지자체", "date": "2026-10-09",
+      "tags": ["제주", "행정", "분야별 흐름"],
+      "url": "https://claude.ai/artifact/Dj2ixn2CkKEbUMihvFzLXx"
+    },
+    {
+      "id": "tp-seminar", "order": 10, "series": "seminar", "status": "draft",
+      "title": "테크노파크의 일을 AI 비서와 나누는 방법",
+      "summary": "테크노파크 임직원을 위한 세미나 자료. 문의·접수·예약 업무를 AI 비서와 나누는 방법을 보이고, 현장에서 요청받은 기능을 바로 만들어 시연합니다.",
+      "slides": 16, "audience": "테크노파크 임직원", "date": "2026-10-09",
+      "tags": ["테크노파크", "세미나", "시연"],
+      "url": "https://claude.ai/artifact/K2bK2uLwF3tPEUHFvfKrhy"
+    }
+  ]
+}

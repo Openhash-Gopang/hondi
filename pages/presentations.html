@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>혼디 프레젠테이션</title>
+<meta name="description" content="혼디를 설명하고 제안하는 프레젠테이션 문서 모음. 시리즈별로 묶어 카드로 보여 주고, 검색과 분류로 찾을 수 있습니다.">
+<!--
+  2026-10-09 신설 — desktop.html "프레젠테이션" 버튼의 목적지.
+  문서가 수십 개로 늘어도 이 파일은 고치지 않는다: data/presentations.json 에 항목 하나를 더하면 된다.
+   · 기본 보기 = 시리즈(흐름 순서)별 묶음 + 시리즈 안에서는 order 오름차순
+   · 검색어나 분류 칩을 쓰면 시리즈 구분 없이 일치하는 카드만 평평하게 보여 준다
+   · 카드는 모두 같은 크기·같은 칸 배치(auto-fill) — 개수가 늘어도 줄만 늘어난다
+-->
+<style>
+:root{
+  --navy:#0e1c3f; --brand:#0c6cc3; --brand-bg:#e8f1fb; --ink:#14213a; --sub:#4a5b70; --hint:#74839a;
+  --bg:#f4f7fb; --surface:#fff; --line:#dbe4f0; --amber:#8a5a00; --amber-bg:#fdf1d6; --green:#17663a; --green-bg:#e3f4ea;
+  --font:'Pretendard',-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--font)}
+a{color:inherit}
+.top{background:var(--navy);color:#fff}
+.top-in{max-width:1160px;margin:0 auto;padding:18px 24px 26px;display:flex;flex-direction:column;gap:14px}
+.back{align-self:flex-start;font-size:14px;color:#c9d8f0;text-decoration:none;padding:6px 0}
+.back:hover{color:#fff}
+h1{margin:0;font-size:30px;line-height:1.25;letter-spacing:-.3px}
+.lede{margin:0;color:#c9d8f0;max-width:720px}
+.bar{max-width:1160px;margin:0 auto;padding:18px 24px 0;display:flex;flex-direction:column;gap:12px}
+.search{display:flex;gap:10px;align-items:center}
+.search input{flex:1;min-width:0;height:46px;border:1px solid var(--line);border-radius:8px;padding:0 14px;font:inherit;background:var(--surface);color:var(--ink)}
+.search input:focus{outline:2px solid var(--brand);outline-offset:1px}
+.count{font-size:14px;color:var(--sub);white-space:nowrap}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--sub);border-radius:999px;padding:7px 14px;font:inherit;font-size:14px;cursor:pointer}
+.chip:hover{border-color:var(--brand);color:var(--brand)}
+.chip[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
+main{max-width:1160px;margin:0 auto;padding:8px 24px 64px}
+.series{padding-top:28px}
+.series h2{margin:0;font-size:20px;letter-spacing:-.2px}
+.series p.desc{margin:2px 0 14px;color:var(--sub);font-size:14px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.card{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;text-decoration:none;box-shadow:0 1px 2px rgba(14,28,63,.06);transition:box-shadow .15s ease,transform .12s ease,border-color .15s ease}
+.card:hover,.card:focus-visible{box-shadow:0 6px 18px rgba(14,28,63,.14);transform:translateY(-2px);border-color:#b8cde8}
+.card:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.cover{height:96px;padding:14px 16px;display:flex;justify-content:space-between;align-items:flex-start;color:#fff;background:linear-gradient(135deg,var(--c1),var(--c2))}
+.cover .no{font-size:34px;font-weight:800;line-height:1;opacity:.92;font-variant-numeric:tabular-nums}
+.badge{font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;background:rgba(255,255,255,.92);color:var(--navy)}
+.badge.draft{background:var(--amber-bg);color:var(--amber)}
+.body{display:flex;flex-direction:column;gap:8px;padding:16px;flex:1}
+.body h3{margin:0;font-size:17px;line-height:1.35;letter-spacing:-.2px}
+.body p{margin:0;color:var(--sub);font-size:14px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.meta{margin-top:auto;padding-top:6px;display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:var(--hint)}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:12px;background:var(--brand-bg);color:var(--brand);border-radius:6px;padding:2px 8px}
+.open{padding:12px 16px;border-top:1px solid var(--line);font-size:14px;font-weight:700;color:var(--brand);display:flex;justify-content:space-between}
+.empty,.err{margin:48px 0;text-align:center;color:var(--sub)}
+.err{color:#a3261b}
+@media (max-width:680px){
+  .top-in,.bar,main{padding-left:16px;padding-right:16px}
+  h1{font-size:25px}
+  .grid{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){.card{transition:none}.card:hover{transform:none}}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <a class="back" href="../desktop.html">← 혼디 홈으로</a>
+  <h1>프레젠테이션</h1>
+  <p class="lede">혼디를 설명하고 제안하는 문서 모음입니다. 처음 보신다면 위에서부터 차례로 보시면 흐름이 이어집니다.</p>
+</div></header>
+
+<section class="bar" aria-label="찾기">
+  <div class="search">
+    <input id="q" type="search" placeholder="제목, 내용, 대상으로 찾기" aria-label="프레젠테이션 검색" autocomplete="off">
+    <span id="count" class="count" aria-live="polite"></span>
+  </div>
+  <div id="chips" class="chips" role="group" aria-label="분류"></div>
+</section>
+
+<main id="list"><p class="empty">불러오는 중…</p></main>
+<noscript><p class="empty">이 페이지는 JavaScript가 필요합니다.</p></noscript>
+
+<script>
+(function () {
+  var COVERS = [['#1f5fbf','#0c3d7a'],['#0f7b8a','#0a4f5a'],['#5a4fcf','#352c8f'],['#b45f06','#7a3d00'],['#1b7a4a','#0f4f2f'],['#a8323e','#6e1a24']];
+  var state = { data: null, q: '', tag: '' };
+  var $ = function (id) { return document.getElementById(id); };
+
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function safeUrl(u) { return /^https:\/\//i.test(u || '') ? u : null; }
+  function hay(it) { return [it.title, it.summary, it.audience].concat(it.tags || []).join(' ').toLowerCase(); }
+
+  function sorted(data) {
+    var so = {}; data.series.forEach(function (s) { so[s.id] = s.order; });
+    return data.items.slice().sort(function (a, b) {
+      return ((so[a.series] != null ? so[a.series] : 1e9) - (so[b.series] != null ? so[b.series] : 1e9)) || (a.order - b.order) || a.title.localeCompare(b.title, 'ko');
+    });
+  }
+
+  function card(it, n) {
+    var url = safeUrl(it.url);
+    var a = el(url ? 'a' : 'div', 'card');
+    if (url) { a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer'; }
+    var c = COVERS[(n - 1) % COVERS.length];
+    var cover = el('div', 'cover'); cover.style.setProperty('--c1', c[0]); cover.style.setProperty('--c2', c[1]);
+    cover.appendChild(el('span', 'no', String(n).padStart(2, '0')));
+    cover.appendChild(el('span', 'badge' + (it.status === 'draft' ? ' draft' : ''), it.status === 'draft' ? '검토 중' : '공개 가능'));
+    var body = el('div', 'body');
+    body.appendChild(el('h3', '', it.title));
+    body.appendChild(el('p', '', it.summary || ''));
+    if (it.tags && it.tags.length) { var t = el('div', 'tags'); it.tags.forEach(function (x) { t.appendChild(el('span', 'tag', x)); }); body.appendChild(t); }
+    var meta = el('div', 'meta');
+    if (it.slides) meta.appendChild(el('span', '', '슬라이드 ' + it.slides + '장'));
+    if (it.audience) meta.appendChild(el('span', '', it.audience));
+    if (it.date) meta.appendChild(el('span', '', it.date));
+    body.appendChild(meta);
+    a.appendChild(cover); a.appendChild(body);
+    a.appendChild(el('div', 'open', url ? '' : '준비 중'));
+    if (url) { var o = a.lastChild; o.appendChild(el('span', '', '열기')); o.appendChild(el('span', '', '↗')); }
+    return a;
+  }
+
+  function chips() {
+    var box = $('chips'); box.textContent = '';
+    var tags = {}; state.data.items.forEach(function (it) { (it.tags || []).forEach(function (t) { tags[t] = (tags[t] || 0) + 1; }); });
+    var names = Object.keys(tags).sort(function (a, b) { return tags[b] - tags[a] || a.localeCompare(b, 'ko'); });
+    // 문서가 많아지면 분류도 늘어난다 — 자주 쓰이는 8개만 먼저 보이고 나머지는 "더 보기"로 펼친다(선택된 분류는 항상 보임).
+    var LIMIT = 8, vis = state.moreTags ? names : names.slice(0, LIMIT);
+    if (state.tag && vis.indexOf(state.tag) < 0) vis = vis.concat(state.tag);
+    [''].concat(vis).forEach(function (t) {
+      var b = el('button', 'chip', t || '전체'); b.type = 'button'; b.setAttribute('aria-pressed', String(state.tag === t));
+      b.onclick = function () { state.tag = t; chips(); render(); };
+      box.appendChild(b);
+    });
+    if (names.length > LIMIT) {
+      var m = el('button', 'chip', state.moreTags ? '접기' : '+' + (names.length - LIMIT) + ' 더 보기'); m.type = 'button';
+      m.setAttribute('aria-expanded', String(!!state.moreTags));
+      m.onclick = function () { state.moreTags = !state.moreTags; chips(); };
+      box.appendChild(m);
+    }
+  }
+
+  function render() {
+    var list = $('list'); list.textContent = '';
+    var all = sorted(state.data), q = state.q.trim().toLowerCase();
+    var num = {}; all.forEach(function (it, i) { num[it.id] = i + 1; });          // 번호는 항상 전체 흐름 기준
+    var shown = all.filter(function (it) { return (!q || hay(it).indexOf(q) >= 0) && (!state.tag || (it.tags || []).indexOf(state.tag) >= 0); });
+    $('count').textContent = (q || state.tag) ? shown.length + ' / ' + all.length + '개' : '전체 ' + all.length + '개';
+    if (!shown.length) { list.appendChild(el('p', 'empty', '조건에 맞는 프레젠테이션이 없습니다.')); return; }
+    if (q || state.tag) {
+      var g = el('div', 'grid'); g.style.paddingTop = '24px';
+      shown.forEach(function (it) { g.appendChild(card(it, num[it.id])); }); list.appendChild(g); return;
+    }
+    state.data.series.slice().sort(function (a, b) { return a.order - b.order; }).forEach(function (s) {
+      var its = shown.filter(function (it) { return it.series === s.id; });
+      if (!its.length) return;
+      var sec = el('section', 'series'); sec.appendChild(el('h2', '', s.title));
+      if (s.desc) sec.appendChild(el('p', 'desc', s.desc));
+      var g = el('div', 'grid'); its.forEach(function (it) { g.appendChild(card(it, num[it.id])); });
+      sec.appendChild(g); list.appendChild(sec);
+    });
+    var orphan = shown.filter(function (it) { return !state.data.series.some(function (s) { return s.id === it.series; }); });
+    if (orphan.length) { var sec2 = el('section', 'series'); sec2.appendChild(el('h2', '', '기타')); var g2 = el('div', 'grid'); orphan.forEach(function (it) { g2.appendChild(card(it, num[it.id])); }); sec2.appendChild(g2); list.appendChild(sec2); }
+  }
+
+  var timer; $('q').addEventListener('input', function (e) { clearTimeout(timer); timer = setTimeout(function () { state.q = e.target.value; render(); }, 120); });
+
+  fetch('../data/presentations.json', { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function (d) { state.data = { series: d.series || [], items: d.items || [] }; chips(); render(); })
+    .catch(function () { var l = $('list'); l.textContent = ''; l.appendChild(el('p', 'err', '목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.')); });
+})();
+</script>
+</body>
+</html>
