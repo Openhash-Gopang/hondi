@@ -109,9 +109,9 @@ test('양도·폐기 전 과정 + 폐기 번호 재청구 불가 + 제3자 양�
 
 test('저장소가 변조되면(체인 손상) 500 CHAIN_CORRUPT — 조용히 넘어가지 않는다', async () => {
   const { l1, users, post, get } = await setup();
-  await post(await makeClaim(users.alice, '31000'), 'guid-alice');
+  await post(await makeClaim(users.alice, '31407'), 'guid-alice');
   l1.rows[0].owner = users.eve.publicKeyB64u;                       // DB 직접 조작
-  const r = await get('/digit/status?serial=31000');
+  const r = await get('/digit/status?serial=31407');
   assert.equal(r.status, 500); assert.equal(r.body.code, 'CHAIN_CORRUPT');
 });
 
@@ -147,4 +147,20 @@ test('/digit/mine — 저장소가 findSerialsByOwner를 지원하지 않으면 
   const get = async (path) => { const u = new URL('https://x' + path); const res = await h.handle(new Request(u), u, {}); return { status: res.status, body: await res.json() }; };
   assert.equal((await get('/digit/mine?guid=g')).status, 501);
   assert.equal((await get('/digit/status?serial=1234')).status, 200); // 다른 라우트는 영향 없음
+});
+
+test('GET /digit/next — 가입 순번대로 5자리부터 배정, 이미 청구된 번호는 건너뜀', async () => {
+  const { l1, users, post, get } = await setup();
+  l1.countClaims = async () => l1.rows.filter(r => r.seq === 0).length;
+  const a = await get('/digit/next');
+  assert.equal(a.status, 200);
+  assert.equal(a.body.serial, '10002');
+  const rec = await makeClaim(users.alice, a.body.serial);
+  assert.equal((await post(rec, 'guid-alice')).status, 200);
+  const b = await get('/digit/next');
+  assert.equal(b.body.serial, '10003');
+  // 직접 고른 번호가 순번과 겹치는 경우 → 다음 open 번호로 넘어간다
+  assert.equal((await post(await makeClaim(users.bob, '10004'), 'guid-bob')).status, 200);
+  const c = await get('/digit/next');
+  assert.equal(c.body.serial, '10005');
 });

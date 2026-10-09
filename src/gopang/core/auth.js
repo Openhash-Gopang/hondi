@@ -2726,6 +2726,16 @@ async function _initGdcWalletAndFs(guid) {
   }
   console.info('[GDC] 지갑 공개키 등록 완료:', guid.slice(0, 20));
 
+  // ①-2 혼디 숫자 코드 자동 발급 (2026-10-09) — 가입 순번대로 5자리부터 번호를 배정하고 지갑 서명으로 등록한다.
+  // 본인 인증은 방금 끝난 폰 인증이 대신하므로 별도 인증은 없다. 실패해도 가입은 유지 —
+  // 숫자 코드 페이지(pages/digit-code.html)를 처음 열 때 번호가 없으면 같은 함수로 다시 시도한다.
+  try {
+    const { issueDigitCode } = await import('../ai/hondi-digit-issue.js');
+    const issued = await issueDigitCode({ guid, wallet, worker: PROXY_URL });
+    if (issued.ok) console.info('[Digit] 숫자 코드 발급:', issued.serial);
+    else console.warn('[Digit] 숫자 코드 발급 보류:', issued.code, issued.message);
+  } catch (e) { console.warn('[Digit] 숫자 코드 발급 실패(가입은 유지):', e.message); }
+
   // ② 재무제표 명시적 0 초기화 — 이미 거래 이력이 있는 재가입 등은
   // 덮어쓰지 않는다(로컬에 이미 뭔가 있으면 건드리지 않음).
   const existingFs = await wallet.getFinancialState();
