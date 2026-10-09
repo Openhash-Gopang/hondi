@@ -106,6 +106,7 @@
 import { generateDigitCodeCanvas } from '/src/gopang/ai/hondi-digit-render.js';
 import { startScanner, stopScanner, ROI_ASPECT } from '/src/gopang/ai/hondi-digit-scanner-v2.js';
 import { isValidSerial } from '/src/gopang/ai/hondi-digit-core.js';
+import { ORG_SITES, findSiteByDigitCode } from '/src/gopang/gov/org-sites.js';
 import { classifySerial, canonical, recordHash, verifySig, CLAIM_VERSION, CLAIM_NS, GENESIS_PREV } from '/src/gopang/ai/hondi-digit-claim.js';
 
 const $ = id => document.getElementById(id);
@@ -360,6 +361,19 @@ $('dl').onclick = async () => {
 // 소유자 본인인지 여부는 아예 따지지 않는다 — 어느 쪽이든 결과는 같다.
 async function showProfileForSerial(serial) {
   const box = $('profileLookup');
+  // 기관 AI 웹사이트 코드(제주도청·제주테크노파크 등)는 프로필이 아니라 해당 기관 AI 대화창을 새 탭으로 연다.
+  const siteId = findSiteByDigitCode(serial);
+  if (siteId) {
+    const url = '/pages/org-ai.html?site=' + encodeURIComponent(siteId);
+    box.className = 'scanResult ok'; box.style.display = 'block'; box.replaceChildren();
+    box.append(document.createTextNode(ORG_SITES[siteId].name + ' AI 웹사이트 — '));
+    const a = document.createElement('a');
+    a.href = url; a.target = '_blank'; a.textContent = '열기 ↗';
+    box.append(a);
+    // 카메라 콜백은 사용자 제스처가 아니라 팝업이 차단될 수 있다 — 차단되면 위 링크로 열 수 있다.
+    window.open(url, '_blank');
+    return;
+  }
   box.className = 'scanResult'; box.style.display = 'block'; box.textContent = '프로필 확인 중…';
   try {
     const sv = await serverStatus(serial);
