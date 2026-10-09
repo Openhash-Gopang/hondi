@@ -21,6 +21,18 @@ import { phoneToDigits, generateDigitCodeDataURL } from '../ai/hondi-digit-code.
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const DEV_MODE = false;
 
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 🧪 SIMPLE_SIGNUP_TEST — 테스트용 가입 간소화 (2026-10-09, 주피터 지시, 잠정)
+//   true이면 신규 가입은 "전화번호 SMS 인증 + 닉네임(ID) 입력"만으로 끝나고
+//   곧바로 자동 로그인된다. 이 값이 true인 동안 건너뛰는 단계:
+//     · PC 가입 확인/차단 다이얼로그(_confirmMobileRegistration)
+//     · 가입 직후 생체인증(WebAuthn) 기본 등록 시도
+//   유지하는 것: SMS OTP(발송·검증·재전송 제한), 약관 동의, 서버(pb_hooks)의
+//   phone_verify_token 검증, 지문 계정 재가입 시의 BIOMETRIC_REQUIRED 방어.
+//   테스트가 끝나면 false로만 되돌리면 원래 흐름이 복원된다.
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const SIMPLE_SIGNUP_TEST = true;
+
 // DEV_MODE: _issueSession 서명 검증 우회 → 항상 ok
 // DEV_MODE: initAuth / initAuthWithPhone → handle만 있으면 즉시 로그인
 //
@@ -2107,7 +2119,7 @@ function _showPhonePopup(resolve) {
     // 그걸로 "디폴트 활성화"가 완성되고, 브라우저가 제스처 부족으로
     // 거부하면 조용히 실패하고 넘어간다(설정 화면의 수동 등록 버튼이
     // 폴백으로 남아있음 — 무한정 재시도하며 성가시게 하지 않는다).
-    if (typeof window.GopangWallet !== 'undefined') {
+    if (!SIMPLE_SIGNUP_TEST && typeof window.GopangWallet !== 'undefined') {
       window.GopangWallet.enrollStepUpBiometric(ipv6).then(bioResult => {
         if (bioResult.ok) {
           console.info('[가입][생체인증] 고액 거래 재인증 기본 등록 완료');
@@ -2199,7 +2211,7 @@ function _showPhonePopup(resolve) {
       }
       termsErr.style.display = 'none';
 
-      if (!_isMobileDevice()) {
+      if (!SIMPLE_SIGNUP_TEST && !_isMobileDevice()) {
         btn.style.opacity = '1'; btn.style.pointerEvents = '';
         const ok = await _confirmMobileRegistration();
         if (!ok) {
