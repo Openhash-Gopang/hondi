@@ -18,6 +18,8 @@ import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
 import { profilePhoneFilter, last8Filter, pickGuidByLast8 } from './src/worker/phone-lookup.js';
 import { makeDigitClaimHandler } from './src/worker/digit-claim-handler.js';
 import { makePocketBaseDigitStore } from './src/worker/digit-claim-store.js';
+import { makeOrgSiteHandler } from './src/worker/org-site-handler.js';
+import { makePocketBaseOrgSiteStore } from './src/worker/org-site-store.js';
 import { makeConsentSaleHandler } from './src/worker/consent-sale-handler.js';
 import { makeConsentSaleStore } from './src/worker/consent-sale-store.js';
 import { verifyPhoneAndStepUp } from './src/worker/phone-token.js';
@@ -5485,6 +5487,16 @@ function handleDigitRoutes(request, url, env, corsHeaders) {
     authorityPubKey: env.DIGIT_AUTHORITY_PUBKEY || null,
     // 본인 확인: 가입 때 폰 인증으로 확립된 계정에 핀(pin)된 지갑 키의 서명 하나로 충분하다(2026-10-09 — 가입 순번 번호는
     // 가입 시 본인 인증을 이미 마친 계정에 자동 배정되므로 번호 발급 때 문자(SMS)를 다시 받지 않는다). verifyPhoneToken은 주입하지 않는다.
+  });
+  return handler.handle(request, url, env, corsHeaders);
+}
+
+// ── 혼디 AI 웹사이트 라이브 설정(2026-10-09 신설) — 기관 AI 사이트의 인사말·지침·지식·블록을 버전으로 저장.
+// 수정은 ORG_SITE_ADMINS(guid 또는 공개키, 쉼표 구분)에 든 계정의 지갑 서명으로만 가능.
+function handleOrgSiteRoutes(request, url, env, corsHeaders) {
+  const handler = makeOrgSiteHandler({
+    store: makePocketBaseOrgSiteStore({ base: L1_DEFAULT, getToken: () => _l1AdminToken(env) }),
+    getPinnedPubKey: async (e, guid) => (await _l1FindProfileByGuid(e, guid))?.pubkey_ed25519 || null,
   });
   return handler.handle(request, url, env, corsHeaders);
 }
@@ -13577,6 +13589,7 @@ export default {
     // ── 혼디 숫자코드 무수수료 결제(POS) — 사업자 티어 마지막 항목 (2026-08-11 신설) ──
     // ── 혼디 숫자 번호 — 서명된 청구 레코드(중복 확인·청구·양도·폐기, 2026-09-24 신설) ──
     if (pathname.startsWith('/digit/')) return handleDigitRoutes(request, url, env, corsHeaders);
+    if (pathname.startsWith('/org-site/')) return handleOrgSiteRoutes(request, url, env, corsHeaders);
     if (pathname.startsWith('/consent-sale/')) return handleConsentSaleRoutes(request, url, env, corsHeaders);
     if (pathname === '/pay/code/mine' && request.method === 'GET') return handlePayCodeMine(request, url, env, corsHeaders);
     if (pathname === '/pay/code/resolve' && request.method === 'GET') return handlePayCodeResolve(request, url, env, corsHeaders);

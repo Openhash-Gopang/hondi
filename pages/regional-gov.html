@@ -124,6 +124,10 @@ import { mountChatInput, THEME_LINE_GREEN } from '/src/gopang/ui/chat-input.js';
 // 구조에 맞게 새로 만든다(아래 _callAI 내부 참고).
 import { _handleGovTaskTags, _parseAgentTags } from '/src/gopang/ai/call-ai.js';
 import { ORG_SITES } from '/src/gopang/gov/org-sites.js';
+// ★ 2026-10-09 신설 — 라이브 설정: 관리자가 저장한 인사말·지침·지식·블록을 서버에서 읽어 기본값 위에 덮는다.
+import { fetchLiveConfig } from '/src/gopang/gov/org-site-client.js';
+import { buildPromptAddon, parseBlockTags } from '/src/gopang/gov/org-site-config.js';
+import { renderBlock } from '/src/gopang/gov/org-blocks.js';
 // ★ 2026-09-17 신설(2) — [GWP: serviceId] 태그 처리 공백 해소. A-2
 // 전수조사가 발견한 짝(EXPERT 태그는 아래에서 별도 배선함) — 이 페이지엔
 // GWP 태그 처리(_parseAgentTags)도 handleExpertTag만큼이나 전혀 없었다.
@@ -406,7 +410,13 @@ const ci = mountChatInput(document.getElementById('chat-input-slot'), {
     try {
       const reply = await _callAI(text, typing);
       typing.remove();
-      appendBubble('ai', escHtml(reply).replace(/\n/g, '<br>'));
+      let shown = reply, blocks = [];
+      if (_live) { const p = parseBlockTags(reply, _live.config.blocks); shown = p.text; blocks = p.blocks; }
+      if (shown) appendBubble('ai', escHtml(shown).replace(/\n/g, '<br>'));
+      for (const b of blocks) {
+        const node = renderBlock(b, _live.config, { onAsk: (t) => { ci.setText(t); ci.el.sendBtn.click(); } });
+        if (node) { const th = document.getElementById('chat-thread'); th.appendChild(node); th.scrollTop = th.scrollHeight; }
+      }
       // 2026-08-13 변경 — messages.push(assistant)를 여기서 하지 않는다.
       // _callAI 내부에 GOV_TASK 태그 처리 루프가 생기면서, 태그가 여러
       // 차례 오간 경우 중간 턴들도 messages에 반드시 남아야 모델이 문맥을
@@ -575,6 +585,10 @@ if (_site) {
   document.title = `${_site.name} AI`;
   if (_site.locationHint && !_urlFactsLocation) _urlFactsLocation = _site.locationHint;
 }
+// 라이브 설정(없으면 null → 기존 동작 그대로). 사이트 모드에서만 읽는다.
+let _live = null;
+const _siteId = _site ? _qs.get('site') : null;
+const _applyLiveName = () => { if (_live && _live.config.name) document.title = `${_live.config.name} AI`; };
 const _govDirectCode = _site ? _site.govCode : (_qs.get('gov_code') || null);
 let _govDirectCodeUsed = false;
 
@@ -624,6 +638,7 @@ async function _callAI(latestUserText, typingEl) {
   // 호출된 "제주시청 AI"가 보이도록 도청 라벨보다 우선한다).
   const agencyDisplayName = resolveAgencyDisplayName(trace);
   const provinceLabel = { jeju: '제주도청', seoul: '서울시청', busan: '부산시청', gyeonggi: '경기도청' }[provinceCode];
+  if (_live && _live.config) sp += buildPromptAddon(_live.config);
   if (!_site) document.title = agencyDisplayName ? `${agencyDisplayName} AI`
     : (provinceLabel ? `${provinceLabel} AI` : '전국 지방행정 AI');
 
@@ -688,7 +703,16 @@ async function _callAI(latestUserText, typingEl) {
 (async function init() {
   let user = _loadUser();
   // AI 웹사이트 모드는 인사말을 로그인보다 먼저 보여준다(로그인은 첫 발화 시).
-  if (_site && !GWP_CTX) appendBubble('ai', escHtml(_site.greeting));
+  if (_site) {
+    _live = await fetchLiveConfig(PROXY, _siteId);
+    _applyLiveName();
+    // 시연 중 관리자가 설정을 바꾸면 새로고침 없이 다음 응답부터 반영한다(5초마다 버전 확인).
+    setInterval(async () => {
+      const n = await fetchLiveConfig(PROXY, _siteId);
+      if (n && (!_live || n.version !== _live.version)) { _live = n; _applyLiveName(); console.info('[OrgSite] 설정 갱신 v' + n.version); }
+    }, 5000);
+  }
+  if (_site && !GWP_CTX) appendBubble('ai', escHtml((_live && _live.config.greeting) || _site.greeting));
   if (!user?.ipv6 && !_site) {
     // 2026-09-07 이전: 여기서 곧바로 "다른 페이지에서 로그인하고
     // 오세요" 정적 안내만 띄우고 끝냈다 — 지갑(기기 종속)이 없으면

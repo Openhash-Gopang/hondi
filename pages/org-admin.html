@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<link rel="icon" href="data:,">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>혼디 AI 사이트 관리</title>
+<!--
+  2026-10-09 신설 — 기관 AI 웹사이트 라이브 설정 편집기.
+  설정(JSON)을 고쳐 저장하면 새 버전이 쌓이고, 열려 있는 AI 사이트는 5초 안에 다음 응답부터 반영한다.
+  저장은 관리자 계정의 지갑 서명으로만 된다(서버 ORG_SITE_ADMINS 목록). 롤백 = 옛 버전을 불러와 다시 저장.
+-->
+<style>
+ body{font:14px/1.5 system-ui,sans-serif;margin:0;padding:16px;color:#14213a;background:#f4f8fd}
+ main{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+ .card{background:#fff;border:1px solid #d6e3f3;border-radius:12px;padding:12px}
+ textarea{width:100%;box-sizing:border-box;min-height:340px;font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;border:1px solid #c5d5ea;border-radius:8px;padding:8px}
+ input,select{border:1px solid #c5d5ea;border-radius:8px;padding:8px;font:inherit}
+ button{border:0;border-radius:8px;padding:8px 12px;font:inherit;font-weight:600;background:#1f5fbf;color:#fff;cursor:pointer}
+ button.sub{background:#e6eefa;color:#1f5fbf}
+ .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+ .bad{color:#b3261e}.ok{color:#17663a}.mut{color:#51607a;font-size:12px}
+ li{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid #eef3fa}
+ ul{list-style:none;margin:0;padding:0}
+</style>
+</head>
+<body>
+<main>
+ <div class="card">
+  <div class="row">
+   <b>혼디 AI 사이트 관리</b>
+   <select id="site"></select>
+   <span id="ver" class="mut"></span>
+   <a id="preview" target="_blank" rel="noopener">AI 사이트 열기 ↗</a>
+  </div>
+  <div id="who" class="mut"></div>
+ </div>
+ <div class="card">
+  <div class="row"><button class="sub" id="bSeed" hidden>제주TP 시연 데이터 불러오기</button><span class="mut">설정 JSON — 이름·인사말·지침·지식·켜는 블록·지원사업·장비·담당 부서</span></div>
+  <textarea id="ed" spellcheck="false"></textarea>
+  <div id="check" class="mut"></div>
+  <div class="row"><input id="note" placeholder="변경 메모(선택)" maxlength="200" style="flex:1;min-width:200px"><button id="bSave">저장 (지갑 서명)</button></div>
+  <div id="msg" class="mut"></div>
+ </div>
+ <div class="card"><b>버전 기록</b><ul id="hist"></ul></div>
+</main>
+<script src="/gopang-wallet.js"></script>
+<script type="module">
+import { ORG_SITES } from '/src/gopang/gov/org-sites.js';
+import { sanitizeConfig, stableStringify } from '/src/gopang/gov/org-site-config.js';
+import { sha256Hex, signedMessage } from '/src/worker/org-site-handler.js';
+import { JTP_DEMO_CONFIG } from '/src/gopang/gov/demo/jtp-demo-config.js';
+
+const WORKER = 'https://hondi-proxy.tensor-city.workers.dev';
+const $ = id => document.getElementById(id);
+const me = (() => { try { const u = JSON.parse(localStorage.getItem('gopang_user_v4') || 'null'); return u && !u.isGuest && !u.isTemp && u.ipv6 ? { guid: u.ipv6, handle: u.handle || u.nickname || u.name || '' } : null; } catch { return null; } })();
+let baseVersion = 0;
+const say = (t, cls) => { $('msg').textContent = t; $('msg').className = cls || 'mut'; };
+
+$('who').textContent = me ? `로그인: ${me.handle || ''} · guid ${me.guid}` : '로그인이 필요합니다. 혼디 앱에 로그인한 뒤 다시 열어 주세요.';
+for (const id of Object.keys(ORG_SITES)) $('site').appendChild(Object.assign(document.createElement('option'), { value: id, textContent: `${ORG_SITES[id].name} (${id})` }));
+const q = new URLSearchParams(location.search); if (ORG_SITES[q.get('site')]) $('site').value = q.get('site');
+
+const siteId = () => $('site').value;
+function validate() {
+  try {
+    const r = sanitizeConfig(JSON.parse($('ed').value));
+    $('check').textContent = r.ok ? '✓ 형식이 올바릅니다.' : '✗ ' + r.errors.join(' / ');
+    $('check').className = r.ok ? 'ok' : 'bad';
+    return r.ok ? r.config : null;
+  } catch (e) { $('check').textContent = '✗ JSON 오류: ' + e.message; $('check').className = 'bad'; return null; }
+}
+$('ed').addEventListener('input', validate);
+
+async function load() {
+  $('preview').href = '/pages/regional-gov.html?site=' + encodeURIComponent(siteId());
+  $('bSeed').hidden = siteId() !== 'jtp';
+  const r = await fetch(`${WORKER}/org-site/config?site=${siteId()}`, { cache: 'no-store' }).then(x => x.json()).catch(() => null);
+  if (!r || !r.ok) { say('설정을 불러오지 못했습니다.', 'bad'); return; }
+  baseVersion = r.version;
+  $('ver').textContent = r.version ? `현재 v${r.version}` : '저장된 설정 없음(코드 기본값 사용 중)';
+  const base = r.config || { name: ORG_SITES[siteId()].name, greeting: ORG_SITES[siteId()].greeting, instructions: '', knowledge: '', demoNotice: '', blocks: [], programs: [], facilities: [], contacts: [] };
+  $('ed').value = JSON.stringify(base, null, 2); validate();
+  const h = await fetch(`${WORKER}/org-site/history?site=${siteId()}`, { cache: 'no-store' }).then(x => x.json()).catch(() => null);
+  const ul = $('hist'); ul.textContent = '';
+  for (const v of (h && h.versions) || []) {
+    const li = document.createElement('li');
+    const t = document.createElement('span'); t.textContent = `v${v.version} · ${new Date(v.ts).toLocaleString('ko-KR')} · ${v.note || ''}`;
+    const b = document.createElement('button'); b.className = 'sub'; b.textContent = '이 버전 불러오기';
+    b.onclick = async () => {
+      const x = await fetch(`${WORKER}/org-site/version?site=${siteId()}&version=${v.version}`, { cache: 'no-store' }).then(r => r.json()).catch(() => null);
+      if (x && x.ok) { $('ed').value = JSON.stringify(x.config, null, 2); $('note').value = `v${v.version}로 되돌림`; validate(); say(`v${v.version}을 편집창에 불러왔습니다. 저장하면 새 버전으로 적용됩니다.`); }
+    };
+    li.append(t, b); ul.appendChild(li);
+  }
+}
+$('site').onchange = load;
+$('bSeed').onclick = () => { $('ed').value = JSON.stringify(JTP_DEMO_CONFIG, null, 2); validate(); say('시연 데이터를 불러왔습니다. 저장해야 적용됩니다.'); };
+
+async function getWallet() {
+  const t0 = Date.now();
+  while (window.gopangWallet === undefined && Date.now() - t0 < 2500) await new Promise(r => setTimeout(r, 150));
+  let w = window.gopangWallet || null;
+  if (!w && window.GopangWallet) { w = await window.GopangWallet.load(); if (w) { try { w.setIdentity({ guid: me.guid, handle: me.handle || null }); } catch {} window.gopangWallet = w; } }
+  if (!w || typeof w.signPayload !== 'function') throw new Error('이 기기에서 지갑을 열 수 없습니다.');
+  return w;
+}
+$('bSave').onclick = async () => {
+  if (!me) return say('로그인이 필요합니다.', 'bad');
+  const config = validate(); if (!config) return say('설정 형식을 먼저 고쳐 주세요.', 'bad');
+  $('bSave').disabled = true;
+  try {
+    const wallet = await getWallet();
+    const ts = Date.now();
+    const hash = await sha256Hex(stableStringify(config));
+    let sig = await wallet.signPayload(signedMessage(siteId(), baseVersion, ts, hash));
+    if (sig && typeof sig === 'object' && sig.signature) sig = sig.signature;
+    const res = await fetch(`${WORKER}/org-site/save`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ site: siteId(), config, baseVersion, note: $('note').value, guid: me.guid, ts, sig }) });
+    const j = await res.json().catch(() => ({}));
+    if (j.ok) { say(`v${j.version} 저장됨 — 열려 있는 AI 사이트에 5초 안에 반영됩니다.`, 'ok'); $('note').value = ''; await load(); }
+    else say(`${j.message || '저장하지 못했습니다.'}${j.code === 'NOT_ADMIN' ? ' (관리자 목록에 이 guid를 추가해야 합니다: ' + me.guid + ')' : ''}`, 'bad');
+  } catch (e) { say(e.message || '저장하지 못했습니다.', 'bad'); }
+  finally { $('bSave').disabled = false; }
+};
+load();
+</script>
+</body>
+</html>
