@@ -23,13 +23,12 @@ const DEV_MODE = false;
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🧪 SIMPLE_SIGNUP_TEST — 테스트용 가입 간소화 (2026-10-09, 주피터 지시, 잠정)
-//   true이면 신규 가입은 "전화번호 SMS 인증 + 닉네임(ID) 입력"만으로 끝나고
-//   곧바로 자동 로그인된다. 이 값이 true인 동안 건너뛰는 단계:
-//     · PC 가입 확인/차단 다이얼로그(_confirmMobileRegistration)
-//     · 가입 직후 생체인증(WebAuthn) 기본 등록 시도
-//   유지하는 것: SMS OTP(발송·검증·재전송 제한), 약관 동의, 서버(pb_hooks)의
-//   phone_verify_token 검증, 지문 계정 재가입 시의 BIOMETRIC_REQUIRED 방어.
-//   테스트가 끝나면 false로만 되돌리면 원래 흐름이 복원된다.
+//   1단계(서버 스위치와 무관): PC 가입 확인/차단 다이얼로그, 가입 직후 생체인증
+//     자동 등록을 건너뛴다. 문자 인증은 유지.
+//   2단계(서버 env.SIMPLE_AUTH_TEST==='1'일 때만): 문자 인증 없이 "아이디"만으로
+//     계정 생성·재입장(폰/PC 제한 없음). 상단에 '보안 모듈 잠정 중단' 고시를 띄운다.
+//     서버 스위치가 꺼져 있으면 자동으로 기존(문자 인증) 흐름으로 돌아간다.
+//   테스트가 끝나면 이 값을 false로 되돌리고 서버 변수 SIMPLE_AUTH_TEST를 지운다.
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const SIMPLE_SIGNUP_TEST = true;
 
@@ -1212,6 +1211,8 @@ export async function initAuth() {
 // 문제로 정상 계정을 로그아웃시키는 사고를 만들지 않는다. 진짜로 서버가
 // "레코드 없음"이라고 명확히 응답했을 때만 로그아웃 처리한다.
 export async function _verifyStoredAccountStillExists(stored) {
+  // 🧪 테스트 계정(is_public:false)은 공개 조회에 안 보일 수 있어 '없음'으로 오판→강제 로그아웃될 수 있다. 건너뛴다.
+  if (stored?.test_account) return;
   const _checkOnce = async () => {
     const filter = encodeURIComponent(`guid='${stored.ipv6}'`);
     const res  = await fetch(`${L1_URL}?filter=${filter}&perPage=1`);
@@ -1336,7 +1337,96 @@ export async function initAuthWithPhone(digits, countryKey = 'KR', phoneType = '
 //   - 전화번호가 이미 가입된 번호면 닉네임 입력값은 무시하고 로그인으로 처리.
 //   - 전화번호가 새 번호면 닉네임(+약관 동의)을 반드시 채운 뒤 그 자리에서 가입 완료.
 //   디자인은 기존 "닉네임 설정" 카드 스타일(둥근 카드·타이틀+부제·파란 버튼)을 그대로 사용.
+// ── 🧪 테스트 고시 배너 + ID 전용 입장 화면 (2026-10-09, 잠정) ───────────
+function _showTestNoticeBanner() {
+  if (document.getElementById('_test-notice-banner')) return;
+  const bar = document.createElement('div');
+  bar.id = '_test-notice-banner';
+  bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:10000;background:#b45309;color:#fff;' +
+    'font-size:12.5px;line-height:1.5;padding:6px 12px;text-align:center;font-family:inherit';
+  bar.textContent = '⚠️ [고시] 테스트 기간 중 보안 모듈(전화 인증·기기 인증)이 잠정 중단되어 있습니다. ' +
+    '실명·연락처·금융정보 등 실제 개인정보를 입력하지 마세요.';
+  document.body.appendChild(bar);
+  document.body.style.paddingTop = (bar.offsetHeight || 32) + 'px';
+}
+
+async function _isTestAuthEnabled() {
+  if (!SIMPLE_SIGNUP_TEST) return false;
+  try {
+    const r = await fetch(`${PROXY_URL}/auth/test-mode`);
+    const d = await r.json().catch(() => ({}));
+    return !!d.enabled;
+  } catch { return false; }
+}
+
+function _showTestIdPopup(resolve) {
+  _showTestNoticeBanner();
+  const overlay = document.createElement('div');
+  overlay.id = '_test-id-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.4);display:flex;' +
+    'align-items:center;justify-content:center;padding:24px;box-sizing:border-box';
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:20px;padding:28px 22px;width:100%;max-width:360px;box-sizing:border-box">
+      <div style="font-size:18px;font-weight:700;margin-bottom:6px;color:#111">혼디 테스트 입장</div>
+      <p style="font-size:13px;color:#6b7280;line-height:1.6;margin:0 0 14px">
+        아이디만 입력하면 바로 시작돼요. 같은 아이디로 폰과 PC 어디서든 들어올 수 있습니다.<br>
+        <b style="color:#b45309">테스트 기간 중 보안 모듈 잠정 중단 상태</b>이니 실제 개인정보는 넣지 마세요.
+      </p>
+      <input id="_tid-input" type="text" maxlength="20" autocomplete="off" autocapitalize="off" placeholder="아이디 (2~20자)"
+        style="width:100%;box-sizing:border-box;padding:13px;border:1px solid #e5e7eb;border-radius:10px;font-size:15px;margin-bottom:6px;font-family:inherit">
+      <div id="_tid-err" style="display:none;font-size:12px;color:#dc2626;margin-bottom:8px"></div>
+      <button id="_tid-btn" style="width:100%;padding:13px;border:none;border-radius:10px;background:#16a34a;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit">시작하기</button>
+    </div>`;
+  document.body.appendChild(overlay);
+  const input = overlay.querySelector('#_tid-input');
+  const err = overlay.querySelector('#_tid-err');
+  const btn = overlay.querySelector('#_tid-btn');
+  input.focus();
+
+  const submit = async () => {
+    const id = input.value.trim().toLowerCase();
+    err.style.display = 'none';
+    if (!/^[a-z0-9가-힣_-]{2,20}$/.test(id)) {
+      err.textContent = '아이디는 2~20자의 한글·영문 소문자·숫자·_·- 만 쓸 수 있어요.';
+      err.style.display = 'block';
+      return;
+    }
+    btn.disabled = true; btn.textContent = '입장 중...';
+    try {
+      const r = await fetch(`${PROXY_URL}/auth/test-enter`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || !d.ok) throw new Error(d.detail || d.message || ('HTTP ' + r.status));
+      const user = {
+        ipv6: d.guid, handle: d.handle, e164: '', country_code: 'KR',
+        nickname: d.nickname, region: '', name: d.nickname,
+        isGuest: false, isTemp: false, test_account: true,
+        registeredAt: new Date().toISOString(),
+      };
+      localStorage.setItem(STORE_KEY, JSON.stringify(user));
+      if (d.token) { try { localStorage.setItem('gopang_test_token', d.token); } catch {} }
+      setUser(user);
+      overlay.remove();
+      resolve(user);
+    } catch (e) {
+      err.textContent = '입장에 실패했습니다: ' + e.message;
+      err.style.display = 'block';
+      btn.disabled = false; btn.textContent = '시작하기';
+    }
+  };
+  btn.onclick = submit;
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+}
+
 function _showPhonePopup(resolve) {
+  // 서버 테스트 스위치가 켜져 있으면 ID 전용 화면, 꺼져 있으면 기존 흐름.
+  _isTestAuthEnabled().then((on) => { if (on) { _showTestIdPopup(resolve); } else { _showPhonePopupLegacy(resolve); } });
+}
+
+function _showPhonePopupLegacy(resolve) {
   let selectedCountry = DEFAULT_COUNTRY;
 
   const overlay = document.createElement('div');
