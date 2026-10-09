@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<!--
+  이 문서가 다루는 범위: 2026-10-09 도입한 "테스트 기간 간편 입장(한국어 아이디 자동 발급)"과
+  "GDC 무료 테스트 모드"의 동작 구조, 켜기·끄기, 그리고 테스트 종료 후 정상화(복구) 절차.
+  관련 PR: #537(f10f8012) · #538(92207bd4) · #539(8d7419ab)
+  관련 문서: AUTH_LOGIN_WHITEPAPER_v1_0_20260829.html(원래의 로그인 설계),
+             GDC_BILLING_DEVELOPER_MANUAL_v1_0_20260903.md(과금 파이프라인)
+  (desktop.html 좌측 사이드바 "🛠 개발자 문서" 섹션에서 링크됨)
+  v1.0(2026-10-09): 최초 작성
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>테스트 기간 간편 입장·GDC 무료 모드 매뉴얼 — 켜기·끄기·종료 후 정상화 · 혼디</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+:root {
+  --ink:      #111111;
+  --ink-2:    #3a3a3a;
+  --ink-3:    #6b6b6b;
+  --ink-4:    #8a8a8a;
+  --line:     #e2e2e2;
+  --line-2:   #cfcfcf;
+  --bg:       #ffffff;
+  --bg-2:     #fafafa;
+  --bg-3:     #f2f2f2;
+  --accent:   #34495e;
+  --accent-lt:#eef1f4;
+  --warn:     #9a3412;
+  --warn-lt:  #fff7ed;
+  --mono:     'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  --radius:   4px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Pretendard', -apple-system, 'Helvetica Neue', sans-serif;
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+/* ── 헤더 ── */
+.doc-header { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.doc-header-inner { max-width: 1200px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.doc-logo { display: flex; align-items: center; gap: 9px; font-size: 15px; font-weight: 700; color: var(--ink); text-decoration: none; letter-spacing: -0.2px; }
+.doc-logo svg { color: var(--ink-3); }
+.doc-header-sub { font-size: 13px; color: var(--ink-4); font-weight: 400; padding-left: 9px; border-left: 1px solid var(--line-2); margin-left: 2px; }
+.doc-back { font-size: 13px; color: var(--ink-3); text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+.doc-back:hover { color: var(--ink); }
+
+/* ── 레이아웃 ── */
+.doc-layout { max-width: 1200px; margin: 0 auto; padding: 40px 24px 100px; display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 48px; }
+.doc-toc { position: sticky; top: 84px; align-self: start; display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
+.doc-toc-title { font-size: 13px; font-weight: 700; color: var(--ink-4); letter-spacing: .4px; margin-bottom: 8px; }
+.doc-toc a { color: var(--ink-3); text-decoration: none; padding: 5px 10px; border-left: 2px solid var(--line); line-height: 1.5; }
+.doc-toc a:hover { color: var(--ink); border-left-color: var(--ink); }
+.doc-content { min-width: 0; }
+
+/* ── 히어로 ── */
+.doc-hero { padding-bottom: 28px; border-bottom: 1px solid var(--line); margin-bottom: 30px; }
+.doc-hero-eyebrow { font-size: 13px; font-weight: 700; color: var(--ink-4); letter-spacing: .5px; margin-bottom: 10px; font-family: var(--mono); }
+.doc-hero-title { font-size: 28px; line-height: 1.35; letter-spacing: -0.6px; font-weight: 800; margin-bottom: 14px; }
+.doc-hero-desc { color: var(--ink-2); font-size: 16px; max-width: 760px; }
+.doc-hero-meta { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 14px; color: var(--ink-3); }
+.doc-hero-meta strong { color: var(--ink-2); font-weight: 600; margin-right: 5px; }
+
+/* ── 본문 요소 ── */
+h2 { font-size: 21px; font-weight: 800; letter-spacing: -0.4px; margin: 46px 0 14px; padding-top: 6px; scroll-margin-top: 80px; }
+h3 { font-size: 17px; font-weight: 700; margin: 28px 0 8px; letter-spacing: -0.2px; scroll-margin-top: 80px; }
+p { margin: 10px 0; color: var(--ink-2); }
+ul, ol { margin: 8px 0 8px 22px; color: var(--ink-2); }
+li { margin: 4px 0; }
+a { color: var(--accent); }
+code { font-family: var(--mono); font-size: 13px; background: var(--bg-3); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; color: var(--ink-2); word-break: break-word; }
+pre { background: #16181d; color: #e6e8ec; border-radius: var(--radius); padding: 14px 16px; overflow-x: auto; margin: 12px 0; font-size: 13.5px; line-height: 1.65; }
+pre code { background: none; border: none; color: inherit; padding: 0; font-size: inherit; word-break: normal; }
+.tbl-wrap { overflow-x: auto; margin: 12px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { background: var(--bg-2); font-weight: 700; color: var(--ink); font-size: 13px; }
+th, td { border: 1px solid var(--line); padding: 9px 13px; text-align: left; line-height: 1.65; vertical-align: top; }
+.callout { border: 1px solid var(--line); border-left: 3px solid var(--ink); border-radius: 0 var(--radius) var(--radius) 0; padding: 13px 17px; margin: 15px 0; font-size: 14.5px; color: var(--ink-2); line-height: 1.8; }
+.callout b { color: var(--ink); }
+.callout.warn { border-left-color: var(--warn); background: var(--warn-lt); }
+.callout.stop { border: 1px solid var(--warn); border-left: 4px solid var(--warn); background: var(--warn-lt); }
+.badge { display: inline-block; font-size: 12.5px; font-weight: 600; padding: 2px 9px; border-radius: 99px; font-family: var(--mono); border: 1px solid var(--line-2); color: var(--ink-3); vertical-align: 1px; }
+.badge.on { color: #166534; border-color: #86efac; background: #f0fdf4; }
+.step { counter-increment: step; position: relative; border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 18px 12px 56px; margin: 14px 0; background: var(--bg); }
+.step::before { content: counter(step); position: absolute; left: 16px; top: 13px; width: 28px; height: 28px; border-radius: 50%; background: var(--ink); color: #fff; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+.step h3 { margin: 0 0 4px; font-size: 16px; }
+.steps { counter-reset: step; }
+.check { list-style: none; margin-left: 0; }
+.check li { padding-left: 26px; position: relative; }
+.check li::before { content: '☐'; position: absolute; left: 0; color: var(--ink-3); }
+
+@media (max-width: 880px) {
+  .doc-layout { grid-template-columns: 1fr; gap: 20px; padding: 24px 16px 80px; }
+  .doc-toc { position: static; flex-direction: row; flex-wrap: wrap; gap: 6px; }
+  .doc-toc-title { width: 100%; }
+  .doc-toc a { border: 1px solid var(--line); border-radius: 99px; padding: 4px 12px; }
+  .doc-hero-title { font-size: 23px; }
+  .step { padding-left: 52px; }
+}
+</style>
+</head>
+<body>
+
+<header class="doc-header">
+  <div class="doc-header-inner">
+    <a class="doc-logo" href="../desktop.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      혼디 · Gopang
+      <span class="doc-header-sub">개발자 문서</span>
+    </a>
+    <a class="doc-back" href="../desktop.html">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      데스크톱으로 돌아가기
+    </a>
+  </div>
+</header>
+
+<div class="doc-layout">
+
+  <nav class="doc-toc">
+    <div class="doc-toc-title">목차</div>
+    <a href="#status">현재 상태·비상 정지</a>
+    <a href="#behavior">사용자에게 보이는 동작</a>
+    <a href="#structure">동작 구조</a>
+    <a href="#gdc">GDC 무료 모드</a>
+    <a href="#switch">켜기·끄기·확인</a>
+    <a href="#restore">종료 후 정상화 절차</a>
+    <a href="#limits">알려진 한계</a>
+    <a href="#history">작업 중 발견한 결함</a>
+    <a href="#verify">검증 방법</a>
+    <a href="#related">관련 문서</a>
+  </nav>
+
+  <main class="doc-content">
+
+    <div class="doc-hero">
+      <div class="doc-hero-eyebrow">TEST_PERIOD_SIMPLE_ENTRY_MANUAL v1.0</div>
+      <h1 class="doc-hero-title">테스트 기간 간편 입장과 GDC 무료 모드 — 켜는 법, 끄는 법, 끝난 뒤 되돌리는 법</h1>
+      <p class="doc-hero-desc">
+        테스트 기간 동안 사용자는 접속만 하면 <strong>쉬운 한국어 단어 아이디</strong>(예: 푸른바다)를 자동으로 받고,
+        전화 인증 없이 폰과 PC 어디서든 혼디의 모든 서비스를 <strong>GDC 충전 없이 제한 없이</strong> 이용한다.
+        두 기능은 모두 Cloudflare 스위치 하나로 켜고 끄며, <strong>꺼져 있으면 코드는 원래 동작과 같다.</strong>
+        이 문서는 구조와 한계, 그리고 테스트가 끝난 뒤 정상 상태로 복구하는 절차를 기록한다.
+      </p>
+      <div class="doc-hero-meta">
+        <span><strong>작성일</strong> 2026-10-09</span>
+        <span><strong>대상</strong> hondi-proxy Worker · 웹앱 · KAuth</span>
+        <span><strong>PR</strong> #537 · #538 · #539</span>
+      </div>
+    </div>
+
+    <!-- ───────────────────────── 현재 상태 ───────────────────────── -->
+    <h2 id="status">현재 상태와 비상 정지</h2>
+
+    <div class="tbl-wrap"><table>
+      <tr><th style="width:200px">스위치(Worker Secret)</th><th>역할</th><th>2026-10-09 상태</th></tr>
+      <tr><td><code>SIMPLE_AUTH_TEST</code></td><td>아이디 자동 발급·전화 인증 없는 입장·고시 배너</td><td><span class="badge on">ON (값 1)</span></td></tr>
+      <tr><td><code>GDC_FREE_TEST</code></td><td>GDC 차감·잔액 확인·무료 한도 소진 중단</td><td><span class="badge on">ON (값 1)</span></td></tr>
+    </table></div>
+    <p>테스트 종료 예정일: <strong>미정</strong> — 결정되면 이 줄에 기재하고, 종료 후 실제 복구일도 함께 적는다.</p>
+
+    <div class="callout stop">
+      <b>비상 정지 — 문제가 생기면 즉시 이 두 줄.</b> 몇 초 안에 반영된다.
+      <pre><code>npx wrangler secret delete SIMPLE_AUTH_TEST --name hondi-proxy
+npx wrangler secret delete GDC_FREE_TEST --name hondi-proxy</code></pre>
+      삭제하면 이미 발급된 테스트 토큰도 서버가 즉시 거부하고, 화면은 원래 로그인 흐름으로 돌아간다. 데이터는 지워지지 않는다.
+    </div>
+
+    <div class="callout">
+      <b>원래 원칙과의 관계.</b> 혼디의 원래 설계는 "PC는 인증 기기가 아니며, 폰에서 전화번호로 본인 인증한 사용자만 등록되고, PC에서 로그인하려면 자기 폰에서 확인 버튼을 누른다"이다(2026-09-18 사고 기록 §7). 테스트 모드는 <strong>이 원칙과 문자 인증을 테스트 기간 동안 잠정 중단</strong>하는 것이며(주피터 지시, 2026-10-09), 종료하면 원칙이 그대로 복원된다. 이번 변경은 메인 채팅의 인증 경로(<code>MANDATORY_AUTH_PATHS</code>, 지갑 세션)를 바꾸지 않았다. 2026-09-18에 KAuth를 메인 채팅에 이식했다가 기존 지갑 세션과 충돌해 전면 롤백한 전례가 있어, 이번에는 새 인증 오버레이를 띄우지 않고 기존 토큰 형식에 얹는 방식을 택했다.
+    </div>
+
+    <!-- ───────────────────────── 동작 ───────────────────────── -->
+    <h2 id="behavior">사용자에게 보이는 동작</h2>
+    <ul>
+      <li><strong>첫 접속</strong>: 팝업 없이 아이디가 자동 발급되어 로그인된다. 아이디는 "형용사 + 명사"(예: <code>푸른바다</code>, <code>향긋한해녀</code>)이고, 이미 있으면 다른 조합을 먼저 시도한 뒤 마지막에만 숫자 두 자리를 붙인다.</li>
+      <li><strong>고시 배너</strong>: 화면 상단에 "테스트 기간 중 보안 모듈 잠정 중단 · GDC 충전 없이 무제한 이용 · 실제 개인정보는 입력하지 마세요"와 <strong>내 아이디</strong>가 표시된다.</li>
+      <li><strong>재접속</strong>: 같은 기기에서는 발급된 아이디로 자동 로그인된다. 복구 순서는 ① 공용 쿠키 <code>hondi_pvt</code> → ② 이 기기의 로그인 정보 <code>gopang_user_v4</code> → ③ 기기에 백업한 <code>hondi_test_id</code>.</li>
+      <li><strong>모든 서비스 공유</strong>: 쿠키가 <code>.hondi.net</code> 전체에 걸리므로 hondi.net에서 받은 아이디가 klaw·plan·mail 등 KAuth를 쓰는 서비스에서도 그대로 인식된다.</li>
+      <li><strong>폰과 PC</strong>: 기기마다 처음 접속 때 각자 새 아이디를 받는다. 같은 계정으로 쓰려면 한쪽 배너의 <strong>"다른 아이디로 입장"</strong>에 상대 기기의 아이디를 입력한다. 같은 아이디면 같은 계정이다.</li>
+      <li><strong>기존(전화 인증) 사용자</strong>: 이미 전화 인증으로 로그인한 사용자는 자동 입장 대상이 아니며 로그인이 그대로 유지된다. 로그인이 없는 기존 사용자는 배너·입장 화면의 <strong>"기존 계정으로 로그인"</strong>으로 원래 로그인 화면에 돌아갈 수 있다.</li>
+    </ul>
+
+    <!-- ───────────────────────── 구조 ───────────────────────── -->
+    <h2 id="structure">동작 구조</h2>
+
+    <h3>서버 (worker.js)</h3>
+    <div class="tbl-wrap"><table>
+      <tr><th style="width:230px">엔드포인트 / 함수</th><th>설명</th></tr>
+      <tr><td><code>GET /auth/test-mode</code></td><td><code>{"ok":true,"enabled":…,"gdc_free":…}</code> — 두 스위치의 현재 상태. 클라이언트가 접속 때마다 확인한다.</td></tr>
+      <tr><td><code>POST /auth/test-enter</code> <code>{id?}</code></td><td>아이디가 없으면 새로 발급, 있으면 그 계정으로 입장(없으면 그 이름으로 생성). 응답에 <code>phone_verify_token</code>·<code>expires_at</code>·<code>id</code>·<code>guid</code> 포함.</td></tr>
+      <tr><td><code>_generateTestId</code></td><td>형용사 20 × 명사 30 = 600개 조합을 먼저 시도하고, 충돌이 계속되면 숫자 두 자리를 붙인다.</td></tr>
+      <tr><td><code>_mintTestPhoneToken</code></td><td>테스트 토큰 발급(아래 형식).</td></tr>
+      <tr><td><code>_resolveGuidFromPhoneVerifyToken</code></td><td>토큰 해석 공용 지점. e164 자리가 <code>tid-</code>로 시작하면 테스트 토큰으로 보고 스위치를 확인한 뒤 해당 프로필의 guid를 돌려준다.</td></tr>
+      <tr><td><code>handleUserGdcBalance</code></td><td>GDC 잔액 조회에서도 테스트 토큰을 같은 방식으로 받는다.</td></tr>
+    </table></div>
+
+    <h3>테스트 토큰 — 기존 phone_verify_token과 같은 형식</h3>
+    <pre><code>tid-&lt;아이디&gt;:&lt;만료ms&gt;.&lt;HMAC-SHA256(PHONE_VERIFY_SECRET, "tid-&lt;아이디&gt;:&lt;만료ms&gt;")&gt;</code></pre>
+    <p>전화번호(e164) 자리에 <code>tid-&lt;아이디&gt;</code>가 들어간 것이 전부다. 실제 전화번호는 <code>+</code>로 시작하므로 충돌하지 않는다. 그래서 이 토큰을 받는 모든 곳 — K-서비스 공용 인증 게이트(<code>_kAuth.resolveGuid</code>), <code>MANDATORY_AUTH_PATHS</code>의 릴레이(klaw·kplan·kjit·kcity·gov), 토큰 갱신(<code>/auth/refresh-token</code>) — 이 별도 수정 없이 같은 계정으로 확정한다. 유효기간은 기존과 같은 30일이며 활동 중이면 슬라이딩 갱신된다.</p>
+
+    <h3>계정 (PocketBase profiles)</h3>
+    <ul>
+      <li><code>handle = tid-&lt;아이디&gt;</code>, <code>nickname = &lt;아이디&gt;</code>, <code>is_public = false</code>(공개 검색에 안 나옴), <code>extra.test_account = true</code>.</li>
+      <li><code>guid</code>는 기존 가입과 같은 형식의 무작위 값(<code>2601:db80:…</code>)이다. 생성은 L1 기본 노드(<code>l1-hanlim</code>)에만 한다.</li>
+      <li>프로필 생성 직후 훅(<code>pb_hooks/main.pb.js</code>의 K-Mail 기본 주소 배정)이 동작하면 <code>kmail_user_settings</code> 레코드가 함께 생긴다. 정리할 때 같이 지워야 한다.</li>
+    </ul>
+
+    <h3>클라이언트</h3>
+    <div class="tbl-wrap"><table>
+      <tr><th style="width:260px">파일</th><th>역할</th></tr>
+      <tr><td><code>src/gopang/core/auth.js</code></td><td>웹앱(hondi.net)의 로그인 모듈. 로그인 정보가 없고 테스트 모드가 켜져 있으면 아이디를 자동 발급받는다. 배너·"다른 아이디로 입장"·"기존 계정으로 로그인"도 여기 있다.</td></tr>
+      <tr><td><code>auth/k-service-auth-client.js</code></td><td>KAuth. klaw·plan·mail 등 위성 서비스가 <code>https://hondi.net/auth/k-service-auth-client.js</code>로 불러 쓰므로, 이 파일 하나를 바꾸면 모든 위성에 적용된다.</td></tr>
+    </table></div>
+    <p>두 모듈이 한 페이지에 같이 있을 때 계정이 두 번 생기지 않도록 <code>window.__hondiTestEnter</code>로 진행 중인 요청을 공유한다. 브라우저에 남는 흔적은 아래와 같다.</p>
+    <div class="tbl-wrap"><table>
+      <tr><th style="width:240px">저장 위치</th><th>내용</th></tr>
+      <tr><td>쿠키 <code>hondi_pvt</code>, <code>hondi_pvt_exp</code> (<code>.hondi.net</code>)</td><td>테스트 토큰과 만료 시각 — 서비스 간 로그인 공유</td></tr>
+      <tr><td>localStorage <code>gopang_user_v4</code></td><td>웹앱 로그인 정보(<code>test_account: true</code>)</td></tr>
+      <tr><td>localStorage <code>hondi_test_id</code></td><td>쿠키가 사라져도 아이디를 되찾기 위한 백업</td></tr>
+      <tr><td>localStorage <code>hondi_test_optout</code></td><td>"기존 계정으로 로그인"을 고른 기기 — 자동 입장을 하지 않는다</td></tr>
+    </table></div>
+
+    <h3>안전장치</h3>
+    <div class="tbl-wrap"><table>
+      <tr><th style="width:230px">장치</th><th>내용</th></tr>
+      <tr><td>스위치 기본 꺼짐</td><td>Secret이 없으면 <code>/auth/test-enter</code>는 403이고 테스트 토큰은 모두 거부된다.</td></tr>
+      <tr><td><code>tid-</code> 범위 제한</td><td>이 경로로 로그인되는 것은 핸들이 <code>tid-</code>로 시작하는 테스트 계정뿐이다. 전화 인증으로 만든 계정은 아이디만으로 절대 열리지 않는다.</td></tr>
+      <tr><td>실사용자 보호</td><td>전화 인증 토큰이 살아 있는 사용자는 자동 입장을 건너뛰며, 로그인을 덮어쓰지 않는다.</td></tr>
+      <tr><td>생성 속도 제한</td><td>신규 아이디 생성은 IP당 시간당 30개(<code>RATE_LIMIT_KV</code>, <code>wrangler.toml</code>에 바인딩됨). 한 공유기를 쓰는 곳에서 단체 테스트를 하면 429가 날 수 있다.</td></tr>
+      <tr><td>4초 타임아웃</td><td>테스트 모드 확인이 멈춰도 원래 로그인 화면이 4초 안에 뜬다.</td></tr>
+      <tr><td>한글 정규화</td><td>입력기가 분해형 한글(NFD)로 보내도 같은 아이디로 취급한다.</td></tr>
+    </table></div>
+
+    <!-- ───────────────────────── GDC ───────────────────────── -->
+    <h2 id="gdc">GDC 무료 모드</h2>
+    <p><code>GDC_FREE_TEST=1</code>이면 아래 지점이 바뀐다. <strong>적용 대상은 테스트 계정만이 아니라 모든 사용자</strong>다. 사용자 간 GDC 결제·충전·예약 보증금은 사용료가 아니므로 건드리지 않는다.</p>
+    <div class="tbl-wrap"><table>
+      <tr><th style="width:250px">지점 (worker.js)</th><th>켜졌을 때</th></tr>
+      <tr><td><code>_gdcFreeQuotaGate</code></td><td>무료 한도·잔액 확인 게이트를 통과시킨다(402 없음).</td></tr>
+      <tr><td><code>_settleAiUsage</code></td><td>AI 사용량 정산에서 GDC 차감과 "평생 무료 100원" 소진을 모두 생략한다. → 테스트가 끝나도 무료 한도가 그대로 남는다.</td></tr>
+      <tr><td><code>_chargeGdcForAiUsage</code></td><td>실제 차감 없이 <code>{ok:true, test_free:true}</code>를 돌려준다(K-Law 판결 정액, 정부 수수료, K-Mail 초과분 등).</td></tr>
+      <tr><td>K-Law 판결 사전 잔액 확인</td><td>생략.</td></tr>
+      <tr><td><strong>예외</strong>: <code>admin-correction</code></td><td>관리자 수동 차감은 켜져 있어도 <strong>실제로 차감</strong>한다(정정 도구가 거짓 성공을 내면 안 되므로).</td></tr>
+      <tr><td>사용량 기록 <code>_recordAiUsage</code></td><td>그대로 남긴다 — 테스트 중 실제 원가를 나중에 집계할 수 있다.</td></tr>
+    </table></div>
+    <div class="callout warn">
+      <b>비용 주의.</b> 차감이 없고 누구나 아이디를 만들 수 있으므로, 테스트 주소가 외부에 알려지면 DeepSeek 호출 비용은 그대로 발생한다. 아이디 생성은 속도 제한이 있지만 <strong>한 아이디가 쓰는 호출량에는 한도가 없다.</strong> 테스트 기간에는 Cloudflare Workers 요청 수와 DeepSeek 사용량을 가끔 확인한다.
+    </div>
+
+    <!-- ───────────────────────── 스위치 ───────────────────────── -->
+    <h2 id="switch">켜기·끄기·확인</h2>
+
+    <h3>켜기</h3>
+    <pre><code>cd C:\Users\주피터\Downloads\hondi
+npx wrangler secret put SIMPLE_AUTH_TEST --name hondi-proxy    # 값 입력창에 1
+npx wrangler secret put GDC_FREE_TEST    --name hondi-proxy    # 값 입력창에 1</code></pre>
+    <p>대시보드로 하려면 Cloudflare → Workers &amp; Pages → <code>hondi-proxy</code> → Settings → Variables and Secrets → Add에서 <strong>Type을 Secret</strong>으로 하고 이름과 값 <code>1</code>을 넣은 뒤 Deploy한다.</p>
+
+    <div class="callout warn">
+      <b>반드시 지킬 것 3가지</b>
+      <ol>
+        <li><strong>Secret 타입으로 넣는다.</strong> 이 저장소는 worker 관련 파일이 main에 머지될 때마다 GitHub Actions(<code>deploy-worker.yml</code>)가 자동 배포하는데, 이 워크플로는 <code>--keep-vars</code>를 쓰지 않는다. 대시보드의 일반 텍스트 변수는 다음 자동 배포 때 지워질 수 있다(Wrangler의 기본 동작으로 알고 있으며 직접 확인하지는 않았다). Secret은 배포해도 유지된다. 코드는 <code>=== '1'</code>로 비교하므로 Secret이어도 똑같이 동작한다.</li>
+        <li><strong><code>--name hondi-proxy</code>를 반드시 붙인다.</strong> 2026-10-09에 이름 없이 실행했더니 Wrangler가 <code>wrangler.toml</code>을 읽지 못하고 기본 이름 <code>my-worker</code>로 새 워커를 만들려고 했다. 그 질문에 y를 누르면 엉뚱한 워커에 Secret이 쌓인다. 같은 질문이 또 나오면 <code>n</code>으로 취소한다.</li>
+        <li><strong>값 입력 때 별표(<code>*</code>)가 보이는지 확인한다.</strong> 같은 날 첫 시도에서 별표 없이 Enter를 눌렀더니 <strong>빈 값으로 "Success"</strong>가 떴고, 스위치가 켜지지 않았다. Wrangler는 빈 값도 성공으로 처리한다. 반드시 아래 확인 주소로 실제 상태를 본다.</li>
+      </ol>
+    </div>
+
+    <h3>확인</h3>
+    <p>브라우저 주소창에 아래를 연다.</p>
+    <pre><code>https://hondi-proxy.tensor-city.workers.dev/auth/test-mode</code></pre>
+    <div class="tbl-wrap"><table>
+      <tr><th style="width:290px">응답</th><th>의미</th></tr>
+      <tr><td><code>{"ok":true,"enabled":true,"gdc_free":true}</code></td><td>두 스위치 모두 켜짐.</td></tr>
+      <tr><td><code>"enabled":false</code> 또는 <code>"gdc_free":false</code></td><td>해당 Secret이 없거나 값이 <code>1</code>이 아님(빈 값 포함). 다시 <code>put</code>.</td></tr>
+      <tr><td>404·오류</td><td>새 Worker 코드가 아직 배포되지 않음. GitHub Actions의 <strong>Deploy hondi-proxy Worker</strong> 결과를 확인.</td></tr>
+    </table></div>
+    <p>그다음 시크릿 창에서 hondi.net에 처음 접속해 상단 배너와 아이디가 뜨는지 본다. 이전 스크립트가 캐시되어 있으면 Ctrl+Shift+R로 강력 새로고침한다.</p>
+
+    <!-- ───────────────────────── 복구 ───────────────────────── -->
+    <h2 id="restore">테스트 종료 후 정상화(복구) 절차</h2>
+    <p>순서대로 진행한다. <strong>1~2단계(끄기)는 데이터를 지우지 않고 되돌릴 수 있다.</strong> 3단계(계정 삭제)부터는 되돌릴 수 없으므로 반드시 백업과 건수 확인 뒤에 진행한다.</p>
+
+    <div class="steps">
+
+      <div class="step">
+        <h3>종료 시점 확정과 사전 점검</h3>
+        <ul class="check">
+          <li>종료 시각을 정하고, 테스트 참가자에게 "종료 후에는 전화 인증 로그인으로 돌아가며 테스트 아이디는 삭제된다"고 알린다.</li>
+          <li>테스트 중 사용량을 집계한다. Cloudflare Workers 요청 수와 DeepSeek 사용량(원가)을 기록한다. 사용량 로그(<code>_recordAiUsage</code>)는 계속 남아 있으므로 서비스별 원가 집계에 쓸 수 있다.</li>
+          <li><strong>PocketBase 백업(스냅샷)</strong>을 만든다. 3단계에서 삭제가 일어나기 전에 반드시 필요하다.</li>
+        </ul>
+      </div>
+
+      <div class="step">
+        <h3>스위치 끄기</h3>
+        <pre><code>npx wrangler secret delete SIMPLE_AUTH_TEST --name hondi-proxy
+npx wrangler secret delete GDC_FREE_TEST    --name hondi-proxy</code></pre>
+        <p>확인 주소를 다시 열어 <code>{"ok":true,"enabled":false,"gdc_free":false}</code>가 나오는지 본다. 끄면 다음이 <strong>자동으로</strong> 일어난다.</p>
+        <ul>
+          <li>이미 발급된 테스트 토큰을 서버가 모두 거부한다(<code>TOKEN_INVALID</code>, "테스트 기간이 종료되어 인증 토큰이 만료되었습니다").</li>
+          <li>테스트 계정으로 로그인해 있던 브라우저는 다음 접속 때 테스트 로그인 정보와 공용 쿠키를 스스로 지우고 원래 로그인 화면으로 돌아간다.</li>
+          <li>KAuth는 남은 <code>tid-</code> 토큰을 지우고 전화 인증(device-link) 오버레이를 보여 준다.</li>
+          <li>GDC 과금·잔액 확인이 원래대로 동작한다. 무료 한도(평생 100원)는 테스트 중 소진되지 않았으므로 그대로 남아 있다.</li>
+        </ul>
+      </div>
+
+      <div class="step">
+        <h3>Cloudflare에서 흔적 확인</h3>
+        <p>대시보드 <code>hondi-proxy</code> → Settings → Variables and Secrets 목록에 <code>SIMPLE_AUTH_TEST</code>와 <code>GDC_FREE_TEST</code>가 <strong>없는지</strong> 확인한다. 실수로 <code>my-worker</code>가 만들어졌다면 Workers 목록에서 삭제한다.</p>
+      </div>
+
+      <div class="step">
+        <h3>테스트 계정 정리 (되돌릴 수 없음)</h3>
+        <p>PocketBase 관리자 화면에서 진행한다. 테스트 계정은 <code>worker.js</code>의 <code>L1_DEFAULT = 'https://l1-hanlim.hondi.net'</code>가 가리키는 L1 기본 노드에만 만들어졌다.</p>
+        <div class="callout stop">
+          <b>엉뚱한 인스턴스를 지우지 말 것.</b> 같은 서버(<code>l1-hanlim-new</code>)에는 이름이 비슷한 PocketBase 인스턴스가 40개 넘게 떠 있다(<code>l1-aewol</code>, <code>l1-ara</code>…, <code>l2-jeju</code>, <code>l3-jejudo</code>, <code>l4-kr</code>, <code>l5-global</code> 등). 삭제할 대상은 <code>L1_DEFAULT</code>와 정확히 같은 인스턴스(<code>gopang-pb-hanlim.service</code>, 접두사 없는 <code>hanlim</code>)여야 한다. 2026-09-18 조사에서 <code>l3-jejudo</code> 같은 이름이 비슷한 다른 DB를 한참 들여다본 실수가 있었다. 삭제 전에 화면의 접속 주소가 <code>l1-hanlim.hondi.net</code>인지 확인한다.
+        </div>
+        <ol>
+          <li><code>profiles</code> 컬렉션에서 필터 <code>handle ~ 'tid-%'</code>로 목록과 <strong>건수</strong>를 확인한다. <code>%</code>를 직접 쓰면 앞부분 일치로 동작한다. 실사용자 계정의 핸들은 전화번호 숫자이므로 이 필터에 섞이지 않아야 한다. 건수와 샘플을 눈으로 확인한 뒤 진행한다.</li>
+          <li>해당 <code>guid</code> 목록을 따로 저장해 둔다(연관 데이터 정리와 사후 감사용).</li>
+          <li>guid로 연결된 연관 레코드를 먼저 지운다. 대표적으로 <code>kmail_user_settings</code>(<code>owner_user_guid</code>). 그 밖에 테스트 중 대화·세션·PDV·감사 로그 등이 어느 컬렉션에 쌓였는지는 컬렉션 목록에서 guid 필드로 확인한다.</li>
+          <li><code>profiles</code>의 <code>tid-</code> 레코드를 삭제한다.</li>
+        </ol>
+        <div class="callout warn">
+          서버에는 <strong>프로필 하드 삭제 방어 훅</strong>(<code>pb_hooks/main.pb.js</code>)이 있어, 잔액이 0이 아니거나 거래 이력이 있는 계정의 삭제 요청을 거부한다. 테스트 중 GDC 거래를 일으킨 계정은 삭제가 거부될 수 있다. 이 훅을 끄지 말고, 거부된 계정은 따로 목록을 만들어 원인(잔액·거래)을 확인한 뒤 판단한다.
+        </div>
+      </div>
+
+      <div class="step">
+        <h3>코드 처리 결정</h3>
+        <p><strong>옵션 A — 코드는 그대로 둔다 (기본 권장).</strong> 스위치가 꺼져 있으면 코드는 원래 동작과 같다(시뮬레이션과 회귀 시나리오로 확인). 다음 테스트 기간에 Secret 두 개만 다시 넣으면 재사용할 수 있다. 정리할 것은 없다.</p>
+        <p><strong>옵션 B — 코드를 완전히 제거한다.</strong> 머지된 세 PR을 최신순으로 되돌린다(모두 squash 머지이므로 일반 revert로 된다).</p>
+        <pre><code>cd C:\Users\주피터\Downloads\hondi
+git checkout main
+git pull
+git checkout -b revert/test-period-simple-entry
+git revert --no-edit 8d7419ab 92207bd4 f10f8012
+git push -u origin revert/test-period-simple-entry
+gh pr create --base main --head revert/test-period-simple-entry --title "revert: 테스트 기간 간편 입장·GDC 무료 모드 제거" --body "테스트 종료에 따라 #537 #538 #539 되돌림."
+gh pr merge --squash --delete-branch</code></pre>
+        <p>revert 중 충돌이 나면 그 사이에 같은 파일(<code>worker.js</code>·<code>auth.js</code>·<code>k-service-auth-client.js</code>)을 고친 변경이 있다는 뜻이므로, 충돌 부분을 보고 직접 판단한다. 머지·배포 후에는 이 문서의 "현재 상태"를 "제거됨"으로 고친다.</p>
+      </div>
+
+      <div class="step">
+        <h3>정상화 검증</h3>
+        <ul class="check">
+          <li><code>/auth/test-mode</code> → <code>enabled:false</code>, <code>gdc_free:false</code></li>
+          <li><code>POST /auth/test-enter</code> → 403 <code>TEST_AUTH_OFF</code></li>
+          <li>시크릿 창에서 hondi.net 접속 → <strong>고시 배너 없음</strong>, 아이디 자동 발급 없음, 기존 로그인(전화 인증) 화면 표시</li>
+          <li>klaw·plan·mail 접속 → 전화 인증(device-link) 오버레이 표시</li>
+          <li>전화 인증으로 만든 실계정 로그인이 정상이고, 로그인이 유지된다</li>
+          <li>무료 한도를 소진한 테스트용 실계정으로 AI를 호출했을 때, 잔액이 없으면 <strong>402 "GDC 잔액 부족"</strong>이 나온다(과금이 다시 동작함)</li>
+          <li>관리자 수동 차감(<code>admin-correction</code>)이 정상 차감된다</li>
+          <li>Cloudflare Secrets 목록에 두 항목이 없다</li>
+        </ul>
+      </div>
+
+      <div class="step">
+        <h3>기록</h3>
+        <p>이 문서 "현재 상태"의 <strong>종료일</strong>과 복구 완료일을 기재하고, 테스트 중 집계한 사용량·원가를 작업 이력에 남긴다. 테스트 중 발견한 문제는 아래 "작업 중 발견한 결함"에 이어서 적는다.</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <b>일부만 복구하려면.</b> GDC 과금만 먼저 되돌리려면 <code>GDC_FREE_TEST</code>만 삭제한다(아이디 입장은 유지). 아이디 입장만 끄려면 <code>SIMPLE_AUTH_TEST</code>만 삭제한다(GDC 무료는 유지되어 <strong>모든 사용자</strong>의 차감이 계속 중단된다는 점에 주의).
+    </div>
+
+    <!-- ───────────────────────── 한계 ───────────────────────── -->
+    <h2 id="limits">알려진 한계</h2>
+    <ul>
+      <li><strong>전화번호가 필요한 기능</strong>(혼디 숫자 번호 등록 등)은 쓸 수 없다. 방금 한 문자 인증 토큰과 지갑 서명이 필요하다.</li>
+      <li><strong>지갑 서명 전용 경로</strong>는 막힐 수 있다. 테스트 계정은 프로필에 핀(pin)된 지갑 키가 없다. 전화 인증 토큰을 받는 경로는 모두 통과하지만, 서명만 받는 엔드포인트는 전수 확인하지 못했다.</li>
+      <li><strong>기기마다 새 아이디</strong>가 발급되고, 쿠키·저장소가 둘 다 사라지면(시크릿 모드·브라우저 데이터 삭제·iOS Safari 7일 제한·iOS 홈 화면 앱처럼 저장소가 분리된 경우) 새 아이디가 발급된다. 옛 아이디를 입력하면 복귀한다. 처음 받은 아이디는 DB에 남아 정리 대상이 된다.</li>
+      <li><strong>테스트 계정은 공개 검색에 나오지 않는다</strong>(<code>is_public=false</code>). 테스트 사용자끼리 서로 찾는 기능은 어렵다.</li>
+      <li>메인 채팅(<code>/chat/completions</code>·<code>/deepseek</code>)은 2026-09-18 롤백 이후 <code>MANDATORY_AUTH_PATHS</code>에 없고, 요청 본문의 <code>guid</code>를 그대로 사용한다. 이번 변경이 만든 것이 아닌 기존 구조이며, 이번에도 바꾸지 않았다.</li>
+      <li>스위치가 켜진 동안 <strong>모든 사용자의 GDC 차감이 중단</strong>되고, 로그인 없는 기존 사용자는 배너의 "기존 계정으로 로그인"을 눌러야 원래 로그인 화면이 나온다.</li>
+      <li>정산 재시도 큐(아웃박스)에 테스트 전부터 대기 중이던 항목이 있었다면, 테스트 중 처리될 때 차감 없이 끝났을 수 있다(코드 흐름으로 추정, 미확인).</li>
+    </ul>
+
+    <!-- ───────────────────────── 이력 ───────────────────────── -->
+    <h2 id="history">작업 중 발견한 결함</h2>
+    <div class="tbl-wrap"><table>
+      <tr><th style="width:42%">결함</th><th>조치</th></tr>
+      <tr><td><strong>실사용자 로그인 덮어쓰기</strong> — 스위치 ON 상태에서 전화 인증으로 로그인한 사용자가 접속하면 공용 쿠키가 테스트 토큰으로 바뀌었다(KAuth와 웹앱 두 경로 모두, 시뮬레이션으로 재현). #538에 들어갔던 결함.</td><td>#539에서 수정: 실사용자 토큰이 살아 있으면 자동 입장 건너뜀, "기존 계정으로 로그인" 탈출구 추가, 테스트 모드 확인에 4초 타임아웃.</td></tr>
+      <tr><td>웹앱이 먼저 아이디를 만들면 KAuth가 그 결과를 반영하지 못해 전화 인증 팝업이 뜰 수 있었다.</td><td>공유 결과를 KAuth도 반영하도록 수정(#538).</td></tr>
+      <tr><td>쿠키가 사라지면 아이디를 잃어 새 아이디가 발급될 수 있었다.</td><td>기기 저장소에 <code>hondi_test_id</code> 백업(#538).</td></tr>
+      <tr><td>두 사이트에서 서로 다른 아이디로 입장하면 방문 때마다 아이디가 번갈아 바뀔 수 있었다.</td><td>공유 쿠키의 아이디를 우선하도록 수정(#538).</td></tr>
+      <tr><td>맥·iOS 입력기의 분해형 한글(NFD) 아이디가 거부될 수 있었다.</td><td>서버와 화면에서 NFC로 정규화(#538).</td></tr>
+      <tr><td>머지 완료된 #537 위에 누적 패치를 적용하려다 충돌.</td><td>머지된 PR과 내용이 같은지 먼저 확인하고, 최신 main 기준 차이분만 패치로 만든다(운영 규칙).</td></tr>
+    </table></div>
+
+    <!-- ───────────────────────── 검증 ───────────────────────── -->
+    <h2 id="verify">검증 방법</h2>
+    <p>실제 <code>worker.js</code>를 모의 L1(가짜 DB) 위에서 돌리고, 클라이언트는 <code>jsdom</code>(가짜 브라우저)으로 폰과 PC를 각각 별개 브라우저로 흉내 냈다. 실제 브라우저·실제 PocketBase로는 확인하지 못했다.</p>
+    <ul>
+      <li>PC 첫 접속 → 아이디 발급·배너·공용 쿠키, 재접속 자동 로그인, 같은 PC의 다른 서비스(KAuth)에서 같은 아이디, 서버 공용 게이트가 같은 계정으로 확정</li>
+      <li>폰 첫 접속 → 다른 아이디 발급, PC 아이디 입력으로 같은 계정 전환, 폰 재접속 자동 로그인</li>
+      <li>쿠키만 삭제된 경우 복구, 쿠키·저장소 모두 삭제된 경우 새 아이디, 웹앱과 KAuth 동시 로드 경합(계정 1개만 생성)</li>
+      <li>스위치 OFF 후 정리·토큰 거부, 위조 토큰 거부, 토큰 갱신, GDC 잔액 조회</li>
+      <li>실사용자 보호(KAuth·웹앱), "기존 계정으로 로그인" 탈출, 테스트 모드 응답 지연 시 4초 뒤 원래 화면</li>
+      <li>GDC 무료 모드: 스위치 OFF에서는 게이트·차감이 L1을 호출하고, ON에서는 호출하지 않으며 관리자 차감만 호출한다</li>
+    </ul>
+    <p>종료 후 실제 환경에서의 확인은 위 "정상화 검증" 체크리스트를 따른다.</p>
+
+    <h2 id="related">관련 문서</h2>
+    <ul>
+      <li><a href="./AUTH_LOGIN_WHITEPAPER_v1_0_20260829.html">AUTH_LOGIN_WHITEPAPER</a> — 원래의 로그인·인증 설계</li>
+      <li><a href="./PHONE_VERIFY_TOKEN_KAUTH_WALLET_CONFLICT_INCIDENT_2026_09_18.md">PHONE_VERIFY_TOKEN_KAUTH_WALLET_CONFLICT_INCIDENT</a> — KAuth와 지갑 세션의 충돌 사고, "PC는 인증 기기가 아니다" 원칙, L1 인스턴스 혼동 교훈</li>
+      <li><a href="./L1_INSTANCE_TOPOLOGY_AND_DEVICE_MANAGEMENT_REFERENCE_2026_09_19.md">L1_INSTANCE_TOPOLOGY_AND_DEVICE_MANAGEMENT_REFERENCE</a> — L1 PocketBase 인스턴스 구성(계정 정리 전 확인)</li>
+      <li><a href="./GDC_BILLING_DEVELOPER_MANUAL_v1_0_20260903.md">GDC_BILLING_DEVELOPER_MANUAL</a> — GDC 과금 파이프라인</li>
+    </ul>
+
+  </main>
+</div>
+
+</body>
+</html>

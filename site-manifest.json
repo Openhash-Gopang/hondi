@@ -1,5 +1,24 @@
 [
   {
+    "path": "/docs/AC-ROUTING-ARCHITECTURE_v1_0_2026-09-14.md",
+    "title": "AC 라우팅 구조 정리 — GWP/EXPERT/공공기관 3계층 판단 기준·경계, professor 2단계 게이트, kregionalgov 오판 방지 체크리스트(0914) ↗",
+    "description": "AC 라우팅 구조 정리 — GWP/EXPERT/공공기관 3계층 판단 기준·경계, professor 2단계 게이트, kregionalgov 오판 방지 체크리스트(0914) ↗",
+    "keywords": [
+      "AC 라우팅 구조 정리",
+      "GWP",
+      "EXPERT",
+      "공공기관 3계층 판단 기준 경계",
+      "professor 2단계 게이트",
+      "kregionalgov 오판 방지 체크리스트 0914",
+      "AC",
+      "라우팅"
+    ],
+    "pc_url": "https://hondi.net/docs/AC-ROUTING-ARCHITECTURE_v1_0_2026-09-14.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-14"
+  },
+  {
     "path": "/docs/AC_SP_COMMUNICATION_ARCHITECTURE_MANUAL_v1_0.md",
     "title": "AC↔SP 통신 아키텍처(3대 시나리오) ↗",
     "description": "AC↔SP 통신 아키텍처(3대 시나리오) ↗",
@@ -160,6 +179,25 @@
     "source": "menu"
   },
   {
+    "path": "/docs/DIGIT_CODE_PHONE_AUTH_SEQ_ZERO_INCIDENT_2026_09_25.md",
+    "title": "숫자 코드 본인 인증 — 전화번호 표기 형식·저장된 해시·비밀값을 차례로 의심하며 반나절을 헤맸으나 그 검증 단계 자체가 불필요했고, 걷어내자 드러난 진짜 원인은 PocketBase가 seq=0을 값 없음으로 오판한 결함. 서버 오류가 로그·화면 어디에도 안 남던 문제, Cloudflare 캐시 비밀값 이름 불일치, 마이그레이션 재실행 결함까지 (2026-09-25~26) ↗",
+    "description": "숫자 코드 본인 인증 — 전화번호 표기 형식·저장된 해시·비밀값을 차례로 의심하며 반나절을 헤맸으나 그 검증 단계 자체가 불필요했고, 걷어내자 드러난 진짜 원인은 PocketBase가 seq=0을 값 없음으로 오판한 결함. 서버 오류가 로그·화면 어디에도 안 남던 문제, Cloudflare 캐시 비밀값 이름 불일치, 마이그레이션 재실행 결함까지 (2026-09-25~26) ↗",
+    "keywords": [
+      "숫자 코드 본인 인증",
+      "전화번호 표기 형식 저장된 해시 비밀값을 차례로 의심하며 반나절을 헤맸으나 그 검증 단계 자체가 불필요했고",
+      "걷어내자 드러난 진짜 원인은 PocketBase가 seq=0을 값 없음으로 오판한 결함. 서버 오류가 로그 화면 어디에도 안 남던 문제",
+      "Cloudflare 캐시 비밀값 이름 불일치",
+      "마이그레이션 재실행 결함까지",
+      "~26",
+      "숫자",
+      "코드"
+    ],
+    "pc_url": "https://hondi.net/docs/DIGIT_CODE_PHONE_AUTH_SEQ_ZERO_INCIDENT_2026_09_25.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-25"
+  },
+  {
     "path": "/docs/GDC_AUTO_CHARGE_INTEGRATION_CHECKLIST_20260810_v1_0.html",
     "title": "GDC 충전 자동화 연동 체크리스트(오픈뱅킹·PG) ↗",
     "description": "GDC 충전 자동화 연동 체크리스트(오픈뱅킹·PG) ↗",
@@ -288,6 +326,82 @@
     "source": "menu"
   },
   {
+    "path": "/docs/HANDOFF_2026-09-14_profile-dashboard-vision.md",
+    "title": "인수인계서 — profile-assistant 근본개선(entity_type 8종 완결성 레지스트리, v2.20→v2.32)·프로필 다국어 자동번역(캐시 자기파괴 버그 발견수정)·AI 점원 채팅 버그 3건(영업시간 죽은 필드·K-Market 미등록 메뉴 폴백·근거 확장)·대시보드 폼 편집기 신설(사진/영상 업로드·문서 자동판독·가격/영업시간 통상추정)·GDC 탭 이식·지갑 로그인 버그 2건·비전 모델 3전(DeepSeek→Gemini→DeepSeek)(0914) ↗",
+    "description": "인수인계서 — profile-assistant 근본개선(entity_type 8종 완결성 레지스트리, v2.20→v2.32)·프로필 다국어 자동번역(캐시 자기파괴 버그 발견수정)·AI 점원 채팅 버그 3건(영업시간 죽은 필드·K-Market 미등록 메뉴 폴백·근거 확장)·대시보드 폼 편집기 신설(사진/영상 업로드·문서 자동판독·가격/영업시간 통상추정)·GDC 탭 이식·지갑 로그인 버그 2건·비전 모델 3전(DeepSeek→Gemini→DeepSeek)(0914) ↗",
+    "keywords": [
+      "인수인계서",
+      "profile",
+      "assistant 근본개선 entity_type 8종 완결성 레지스트리",
+      "v2.20→v2.32",
+      "프로필 다국어 자동번역 캐시 자기파괴 버그 발견수정",
+      "AI 점원 채팅 버그 3건 영업시간 죽은 필드 K",
+      "Market 미등록 메뉴 폴백 근거 확장",
+      "대시보드 폼 편집기 신설 사진"
+    ],
+    "pc_url": "https://hondi.net/docs/HANDOFF_2026-09-14_profile-dashboard-vision.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-14"
+  },
+  {
+    "path": "/docs/HANDOFF_2026-09-14_routing-precision-testing.md",
+    "title": "인수인계서 — AC 라우팅 정밀도 전수 테스트(K-서비스·전문가 페르소나·정부24 공공기관 350건), 하네스 재작성·프로덕션 max_tokens 수정·SP-NAT-EDUCERT 신설 등(0914) ↗",
+    "description": "인수인계서 — AC 라우팅 정밀도 전수 테스트(K-서비스·전문가 페르소나·정부24 공공기관 350건), 하네스 재작성·프로덕션 max_tokens 수정·SP-NAT-EDUCERT 신설 등(0914) ↗",
+    "keywords": [
+      "인수인계서",
+      "AC 라우팅 정밀도 전수 테스트 K",
+      "서비스 전문가 페르소나 정부24 공공기관 350건",
+      "하네스 재작성 프로덕션 max_tokens 수정 SP",
+      "NAT",
+      "EDUCERT 신설 등 0914",
+      "AC",
+      "라우팅"
+    ],
+    "pc_url": "https://hondi.net/docs/HANDOFF_2026-09-14_routing-precision-testing.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-14"
+  },
+  {
+    "path": "/docs/HANDOFF_2026-09-18_gov-clarify-runnerup-a1-a5-verification.md",
+    "title": "인수인계서 — gov-router CLARIFY runnerUp 2단계 A1~A10 전수 검증(classifyFn 소비 지점 14곳 100% 커버, 구조적 결함 A6 1건 발견·수정) + JILES 평생교육팀 중복 SP 정리(0918) ↗",
+    "description": "인수인계서 — gov-router CLARIFY runnerUp 2단계 A1~A10 전수 검증(classifyFn 소비 지점 14곳 100% 커버, 구조적 결함 A6 1건 발견·수정) + JILES 평생교육팀 중복 SP 정리(0918) ↗",
+    "keywords": [
+      "인수인계서",
+      "gov",
+      "router CLARIFY runnerUp 2단계 A1~A10 전수 검증 classifyFn 소비 지점 14곳 100% 커버",
+      "구조적 결함 A6 1건 발견 수정",
+      "+ JILES 평생교육팀 중복 SP 정리 0918",
+      "router",
+      "CLARIFY",
+      "runnerUp"
+    ],
+    "pc_url": "https://hondi.net/docs/HANDOFF_2026-09-18_gov-clarify-runnerup-a1-a5-verification.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-18"
+  },
+  {
+    "path": "/docs/HANDOFF_2026-09-19_jeju-sp-quality-evaluation.md",
+    "title": "인수인계서 — 520개 제주 지역 SP 개별 내용 품질 평가(사무분장 정합성·최신성·환각 여부 — 형식 준수와 별개 축) (2026-09-19) ↗",
+    "description": "인수인계서 — 520개 제주 지역 SP 개별 내용 품질 평가(사무분장 정합성·최신성·환각 여부 — 형식 준수와 별개 축) (2026-09-19) ↗",
+    "keywords": [
+      "인수인계서",
+      "520개 제주 지역 SP 개별 내용 품질 평가 사무분장 정합성 최신성 환각 여부",
+      "형식 준수와 별개 축",
+      "520개",
+      "제주",
+      "지역",
+      "SP",
+      "개별"
+    ],
+    "pc_url": "https://hondi.net/docs/HANDOFF_2026-09-19_jeju-sp-quality-evaluation.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-19"
+  },
+  {
     "path": "/docs/HANDOFF_20260902.md",
     "title": "인수인계서 — K-Mail 캠페인→K-Plan→K-Recompose 파이프라인(0902) ↗",
     "description": "인수인계서 — K-Mail 캠페인→K-Plan→K-Recompose 파이프라인(0902) ↗",
@@ -379,6 +493,25 @@
     "source": "menu"
   },
   {
+    "path": "/docs/HONDI_PAGE_DESIGN_PRINCIPLES_v1_0.md",
+    "title": "혼디 페이지 디자인 원칙 v1.0 — 원자로 제어실·ICU 모니터·SOC 관제센터 조사 기반, GDC 탭 리디자인에서 확정한 색·타이포·레이아웃 토큰 (2026-09-23) ↗",
+    "description": "혼디 페이지 디자인 원칙 v1.0 — 원자로 제어실·ICU 모니터·SOC 관제센터 조사 기반, GDC 탭 리디자인에서 확정한 색·타이포·레이아웃 토큰 (2026-09-23) ↗",
+    "keywords": [
+      "혼디 페이지 디자인 원칙 v1.0",
+      "원자로 제어실 ICU 모니터 SOC 관제센터 조사 기반",
+      "GDC 탭 리디자인에서 확정한 색 타이포 레이아웃 토큰",
+      "혼디",
+      "페이지",
+      "디자인",
+      "원칙",
+      "v1.0"
+    ],
+    "pc_url": "https://hondi.net/docs/HONDI_PAGE_DESIGN_PRINCIPLES_v1_0.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-23"
+  },
+  {
     "path": "/docs/HONDI_TEST_PLAN_v1_0.html",
     "title": "혼디 시스템 테스트 방법론 + 상세 케이스(0811, 786항목 전수파싱) ↗",
     "description": "혼디 시스템 테스트 방법론 + 상세 케이스(0811, 786항목 전수파싱) ↗",
@@ -413,6 +546,25 @@
     "pc_url": "https://hondi.net/docs/HONDI_TEST_STALENESS_PREVENTION_MANUAL_v1_0.md",
     "audience": "dev",
     "source": "menu"
+  },
+  {
+    "path": "/docs/INCIDENT_2026-09-18_l1-hanlim-pocketbase-crashloop-recovery.md",
+    "title": "인시던트 — l1-hanlim 서버 PocketBase 48개 인스턴스 중 46개 crash-loop 발견·복구(마이그레이션 잔재 충돌·환경변수 누락), 삭제 전 검증 훅 _balanceUtils 버그 발견(0918) ↗",
+    "description": "인시던트 — l1-hanlim 서버 PocketBase 48개 인스턴스 중 46개 crash-loop 발견·복구(마이그레이션 잔재 충돌·환경변수 누락), 삭제 전 검증 훅 _balanceUtils 버그 발견(0918) ↗",
+    "keywords": [
+      "인시던트",
+      "l1",
+      "hanlim 서버 PocketBase 48개 인스턴스 중 46개 crash",
+      "loop 발견 복구 마이그레이션 잔재 충돌 환경변수 누락",
+      "삭제 전 검증 훅 _balanceUtils 버그 발견 0918",
+      "hanlim",
+      "서버",
+      "PocketBase"
+    ],
+    "pc_url": "https://hondi.net/docs/INCIDENT_2026-09-18_l1-hanlim-pocketbase-crashloop-recovery.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-18"
   },
   {
     "path": "/docs/JEJU_SVC_ID_ALIAS_REGRESSION_2026_07_22.md",
@@ -508,6 +660,25 @@
     "date": "2026-07-21"
   },
   {
+    "path": "/docs/L1_INSTANCE_TOPOLOGY_AND_DEVICE_MANAGEMENT_REFERENCE_2026_09_19.md",
+    "title": "레퍼런스 — L1 PocketBase 인스턴스 토폴로지(hanlim vs l1-지역명 vs l2/l3/l4/l5, 이름 혼동 주의) + 기기(push) 관리 API(GET /account/devices, POST /account/remove-device) + SessionSignProxy 인터페이스 스펙 (2026-09-19) ↗",
+    "description": "레퍼런스 — L1 PocketBase 인스턴스 토폴로지(hanlim vs l1-지역명 vs l2/l3/l4/l5, 이름 혼동 주의) + 기기(push) 관리 API(GET /account/devices, POST /account/remove-device) + SessionSignProxy 인터페이스 스펙 (2026-09-19) ↗",
+    "keywords": [
+      "레퍼런스",
+      "L1 PocketBase 인스턴스 토폴로지 hanlim vs l1",
+      "지역명 vs l2",
+      "l3",
+      "l4",
+      "l5",
+      "이름 혼동 주의",
+      "+ 기기 push"
+    ],
+    "pc_url": "https://hondi.net/docs/L1_INSTANCE_TOPOLOGY_AND_DEVICE_MANAGEMENT_REFERENCE_2026_09_19.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-19"
+  },
+  {
     "path": "/docs/L1_POCKETBASE_MANUAL_v1_0.md",
     "title": "L1 PocketBase 매뉴얼 ↗",
     "description": "L1 PocketBase 매뉴얼 ↗",
@@ -589,6 +760,25 @@
     "pc_url": "https://hondi.net/docs/OWNER_PDV_GOVERNANCE_MANUAL_v1_0.md",
     "audience": "dev",
     "source": "menu"
+  },
+  {
+    "path": "/docs/PHONE_VERIFY_TOKEN_KAUTH_WALLET_CONFLICT_INCIDENT_2026_09_18.md",
+    "title": "메인 챗 /deepseek 인증 회귀 → 잘못된 대응(KAuth 도입, 기존 지갑 세션과 충돌) → 전면 롤백 → SW skipWaiting 자체호출로 push 붕괴 → 공용 PC 로그인 기능이 원래 고장나 있었음 발견·수정 → 기기 오등록으로 엉뚱한 DB 인스턴스까지 뒤진 하루 (2026-09-18~19) ↗",
+    "description": "메인 챗 /deepseek 인증 회귀 → 잘못된 대응(KAuth 도입, 기존 지갑 세션과 충돌) → 전면 롤백 → SW skipWaiting 자체호출로 push 붕괴 → 공용 PC 로그인 기능이 원래 고장나 있었음 발견·수정 → 기기 오등록으로 엉뚱한 DB 인스턴스까지 뒤진 하루 (2026-09-18~19) ↗",
+    "keywords": [
+      "메인 챗",
+      "deepseek 인증 회귀 → 잘못된 대응 KAuth 도입",
+      "기존 지갑 세션과 충돌",
+      "→ 전면 롤백 → SW skipWaiting 자체호출로 push 붕괴 → 공용 PC 로그인 기능이 원래 고장나 있었음 발견 수정 → 기기 오등록으로 엉뚱한 DB 인스턴스까지 뒤진 하루",
+      "~19",
+      "메인",
+      "deepseek",
+      "인증"
+    ],
+    "pc_url": "https://hondi.net/docs/PHONE_VERIFY_TOKEN_KAUTH_WALLET_CONFLICT_INCIDENT_2026_09_18.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-18"
   },
   {
     "path": "/docs/PLAN_DPAPER_WALLET-ELIGIBILITY_ISMS-P-MOIS-RECOGNITION_20260828_v1_0.html",
@@ -683,25 +873,6 @@
     "audience": "dev",
     "source": "menu",
     "date": "2026-07-23"
-  },
-  {
-    "path": "/docs/SESSION_LESSONS_AC_ROUTING_MODEL_20260913_v1_0.html",
-    "title": "AC 라우팅 모델 확정 + ac-intent-router 설계 — 2,000개 질문으로 검증(정밀도 95.1%), K-서비스 internal/federated 실측 분류, qna 도메인 SP 버그 수정 (0913)",
-    "description": "AC 라우팅 모델 확정 + ac-intent-router 설계 — 2,000개 질문으로 검증(정밀도 95.1%), K-서비스 internal/federated 실측 분류, qna 도메인 SP 버그 수정 (0913)",
-    "keywords": [
-      "AC 라우팅 모델 확정 + ac",
-      "intent",
-      "router 설계",
-      "000개 질문으로 검증 정밀도 95.1%",
-      "서비스 internal",
-      "federated 실측 분류",
-      "qna 도메인 SP 버그 수정",
-      "0913"
-    ],
-    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_AC_ROUTING_MODEL_20260913_v1_0.html",
-    "audience": "dev",
-    "source": "menu",
-    "date": "2026-09-13"
   },
   {
     "path": "/docs/SESSION_LESSONS_BIOMETRIC_E164_DEPLOYMENT_20260907_v1_0.html",
@@ -908,6 +1079,44 @@
     "source": "menu"
   },
   {
+    "path": "/docs/SESSION_LESSONS_PANEL_MAINCHAT_UNIFICATION_20260914_v1_0.md",
+    "title": "세션 전체 기록 — 오늘 하루 버그 7건(fetch 타임아웃 22곳·태그누락 자동복구·원본응답 진단도구·버전배너 디바운스·Cloudflare 캐시·GPS watchPosition 스팸·패널 위치컨텍스트 누락) + AUTH·K-Law감시·OpenHash앵커링 추가 이식(jejuro님 leaf 5종 이식과 병행)(0914) ↗",
+    "description": "세션 전체 기록 — 오늘 하루 버그 7건(fetch 타임아웃 22곳·태그누락 자동복구·원본응답 진단도구·버전배너 디바운스·Cloudflare 캐시·GPS watchPosition 스팸·패널 위치컨텍스트 누락) + AUTH·K-Law감시·OpenHash앵커링 추가 이식(jejuro님 leaf 5종 이식과 병행)(0914) ↗",
+    "keywords": [
+      "세션 전체 기록",
+      "오늘 하루 버그 7건 fetch 타임아웃 22곳 태그누락 자동복구 원본응답 진단도구 버전배너 디바운스 Cloudflare 캐시 GPS watchPosition 스팸 패널 위치컨텍스트 누락",
+      "+ AUTH K",
+      "Law감시 OpenHash앵커링 추가 이식 jejuro님 leaf 5종 이식과 병행",
+      "0914",
+      "세션",
+      "전체",
+      "기록"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_PANEL_MAINCHAT_UNIFICATION_20260914_v1_0.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-14"
+  },
+  {
+    "path": "/docs/SESSION_LESSONS_PANEL_VS_MAIN_CHAT_AUDIT_20260914_v1_0.md",
+    "title": "인수인계서 — \"AI 메신저 테스트 버전\" ↔ 메인 채팅(callAI) 구조 분리 감사: 위치 컨텍스트 배선 누락·leaf 액션 태그 5종 미이식 발견·수정, 이름표를 \"최신 버전\"으로 정정(0914) ↗",
+    "description": "인수인계서 — \"AI 메신저 테스트 버전\" ↔ 메인 채팅(callAI) 구조 분리 감사: 위치 컨텍스트 배선 누락·leaf 액션 태그 5종 미이식 발견·수정, 이름표를 \"최신 버전\"으로 정정(0914) ↗",
+    "keywords": [
+      "인수인계서",
+      "\"AI 메신저 테스트 버전\" ↔ 메인 채팅 callAI",
+      "구조 분리 감사: 위치 컨텍스트 배선 누락 leaf 액션 태그 5종 미이식 발견 수정",
+      "이름표를 \"최신 버전\"으로 정정 0914",
+      "\"AI",
+      "메신저",
+      "테스트",
+      "버전\""
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_PANEL_VS_MAIN_CHAT_AUDIT_20260914_v1_0.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-14"
+  },
+  {
     "path": "/docs/SESSION_LESSONS_PDV_BIDIRECTIONAL_FS_LIVE_TEST_20260908_v1_0.html",
     "title": "PDV 양방향 거래명세서 + 재무제표 검증 — _recordOrderPdv 편측 기록 발견·수정, 라이브 스모크테스트 신규 작성·디버깅 실전 교훈(0908) ↗",
     "description": "PDV 양방향 거래명세서 + 재무제표 검증 — _recordOrderPdv 편측 기록 발견·수정, 라이브 스모크테스트 신규 작성·디버깅 실전 교훈(0908) ↗",
@@ -1035,6 +1244,25 @@
     "source": "menu"
   },
   {
+    "path": "/docs/SESSION_SUMMARY_CONTROL_TOWER_LIVE_SMOKETEST_20260919_v1_0.md",
+    "title": "세션 기록 — 520개 gov-tree SP 관제탑 원칙 전수 라이브 스모크테스트: do-dept 104건 중 99% 위반 발견 → 원인 규명(프롬프트 중간 매몰) → 프롬프트 끝 재확인 문구 추가(PR #377) → 5개 카테고리 60건 재검증 전부 PASS (2026-09-19) ↗",
+    "description": "세션 기록 — 520개 gov-tree SP 관제탑 원칙 전수 라이브 스모크테스트: do-dept 104건 중 99% 위반 발견 → 원인 규명(프롬프트 중간 매몰) → 프롬프트 끝 재확인 문구 추가(PR #377) → 5개 카테고리 60건 재검증 전부 PASS (2026-09-19) ↗",
+    "keywords": [
+      "세션 기록",
+      "520개 gov",
+      "tree SP 관제탑 원칙 전수 라이브 스모크테스트: do",
+      "dept 104건 중 99% 위반 발견 → 원인 규명 프롬프트 중간 매몰",
+      "→ 프롬프트 끝 재확인 문구 추가 PR #377",
+      "→ 5개 카테고리 60건 재검증 전부 PASS",
+      "세션",
+      "기록"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_CONTROL_TOWER_LIVE_SMOKETEST_20260919_v1_0.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-19"
+  },
+  {
     "path": "/docs/SESSION_SUMMARY_GDC_LOAN_CREDIT_LIVE_TEST_20260906_v1_0.html",
     "title": "GDC 대출·신용평가 라이브 테스트 — LEGAL-HOLD 조건부 재개·재무제표 스키마 신설·credit_snapshot maxSize 누락 등 실결함 5건 발견·수정, 전 구간 [PASS](0906) ↗",
     "description": "GDC 대출·신용평가 라이브 테스트 — LEGAL-HOLD 조건부 재개·재무제표 스키마 신설·credit_snapshot maxSize 누락 등 실결함 5건 발견·수정, 전 구간 [PASS](0906) ↗",
@@ -1054,6 +1282,25 @@
     "date": "2026-09-06"
   },
   {
+    "path": "/docs/SESSION_SUMMARY_GOVTREE_AGENCY_COLLEGIAL_EXPANSION_20260925_v1_0.md",
+    "title": "세션 기록 — gov-tree 누락 15개 기관 신설(공공정책연수원~소방서 4곳)·합의제행정기관 새 K-FOI tier(collegial) 신설·명칭 충돌 3건 정리·신설 SP 라우팅 라이브 스모크테스트 2종(22건→42건) (2026-09-25) ↗",
+    "description": "세션 기록 — gov-tree 누락 15개 기관 신설(공공정책연수원~소방서 4곳)·합의제행정기관 새 K-FOI tier(collegial) 신설·명칭 충돌 3건 정리·신설 SP 라우팅 라이브 스모크테스트 2종(22건→42건) (2026-09-25) ↗",
+    "keywords": [
+      "세션 기록",
+      "gov",
+      "tree 누락 15개 기관 신설 공공정책연수원~소방서 4곳",
+      "합의제행정기관 새 K",
+      "FOI tier collegial",
+      "신설 명칭 충돌 3건 정리 신설 SP 라우팅 라이브 스모크테스트 2종 22건→42건",
+      "세션",
+      "기록"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_GOVTREE_AGENCY_COLLEGIAL_EXPANSION_20260925_v1_0.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-25"
+  },
+  {
     "path": "/docs/SESSION_SUMMARY_GOV_ROUTER_STRUCTURAL_NORMALIZATION_20260823_v1_0.html",
     "title": "혼디 라우팅 근본적 정상화 — BUG-023~035(계층충돌 통합판단·시청 국 LLM 구제망·키워드 매칭 어절경계·EMD 비대칭 제거) + 정부24 350건 라이브 검증 ↗",
     "description": "혼디 라우팅 근본적 정상화 — BUG-023~035(계층충돌 통합판단·시청 국 LLM 구제망·키워드 매칭 어절경계·EMD 비대칭 제거) + 정부24 350건 라이브 검증 ↗",
@@ -1070,6 +1317,25 @@
     "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_GOV_ROUTER_STRUCTURAL_NORMALIZATION_20260823_v1_0.html",
     "audience": "dev",
     "source": "menu"
+  },
+  {
+    "path": "/docs/SESSION_SUMMARY_JEJU_SP_QUALITY_AND_KSERVICES_REDESIGN_20260920_v1_0.md",
+    "title": "세션 기록 — 「제주 AI 행정」 SP 342개 정비 전 과정: 페이지-저장소 정합성 감사·공통 SP 7단 체인 재확인·관제탑 §2 템플릿 근본원인 발견/수정(112개 영향)·CONTROL-TOWER-PRINCIPLE 매니페스트 버그(핵심 서비스 9~10개 영향)·콘텐츠품질 NEEDS-REVIEW 4건 재작성·페르소나 구버전 307개 정리·k-services.html 내부 파이프라인 6개 다이어그램/아코디언 신설 (2026-09-20) ↗",
+    "description": "세션 기록 — 「제주 AI 행정」 SP 342개 정비 전 과정: 페이지-저장소 정합성 감사·공통 SP 7단 체인 재확인·관제탑 §2 템플릿 근본원인 발견/수정(112개 영향)·CONTROL-TOWER-PRINCIPLE 매니페스트 버그(핵심 서비스 9~10개 영향)·콘텐츠품질 NEEDS-REVIEW 4건 재작성·페르소나 구버전 307개 정리·k-services.html 내부 파이프라인 6개 다이어그램/아코디언 신설 (2026-09-20) ↗",
+    "keywords": [
+      "세션 기록",
+      "「제주 AI 행정」 SP 342개 정비 전 과정: 페이지",
+      "저장소 정합성 감사 공통 SP 7단 체인 재확인 관제탑 §2 템플릿 근본원인 발견",
+      "수정 112개 영향",
+      "CONTROL",
+      "TOWER",
+      "PRINCIPLE 매니페스트 버그 핵심 서비스 9~10개 영향",
+      "콘텐츠품질 NEEDS"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_JEJU_SP_QUALITY_AND_KSERVICES_REDESIGN_20260920_v1_0.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-20"
   },
   {
     "path": "/docs/SESSION_SUMMARY_JEJU_UNIVERSITY_SCENARIO_GAP_20260820_v1_0.html",
@@ -1107,6 +1373,25 @@
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-11"
+  },
+  {
+    "path": "/docs/SESSION_SUMMARY_KCLEAN_MIGRATION_TOKEN_ROTATION_20260922_v1_0.md",
+    "title": "세션 기록 — clean.hondi.net(구 fiil.kr) 실사 소스 이식·Supabase 완전 제거→hondi-proxy/L1 PocketBase 전환·R2 사진업로드 신설·Cloudflare 배포 토큰 인증오류 근본원인 규명·서비스명 K-Cleaner→K-Clean 전면 정정 (2026-09-22) ↗",
+    "description": "세션 기록 — clean.hondi.net(구 fiil.kr) 실사 소스 이식·Supabase 완전 제거→hondi-proxy/L1 PocketBase 전환·R2 사진업로드 신설·Cloudflare 배포 토큰 인증오류 근본원인 규명·서비스명 K-Cleaner→K-Clean 전면 정정 (2026-09-22) ↗",
+    "keywords": [
+      "세션 기록",
+      "clean.hondi.net 구 fiil.kr",
+      "실사 소스 이식 Supabase 완전 제거→hondi",
+      "proxy",
+      "L1 PocketBase 전환 R2 사진업로드 신설 Cloudflare 배포 토큰 인증오류 근본원인 규명 서비스명 K",
+      "Cleaner→K",
+      "Clean 전면 정정",
+      "세션"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_KCLEAN_MIGRATION_TOKEN_ROTATION_20260922_v1_0.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-09-22"
   },
   {
     "path": "/docs/SESSION_SUMMARY_KGOV_IDV_BILLING_PRICING_20260814_v1_0.html",
@@ -1290,6 +1575,25 @@
     "audience": "dev",
     "source": "menu",
     "date": "2026-07-22"
+  },
+  {
+    "path": "/docs/TEST_PERIOD_SIMPLE_ENTRY_MANUAL_v1_0_20261009.html",
+    "title": "테스트 기간 간편 입장(한국어 아이디 자동 발급)·GDC 무료 모드 — 켜기·끄기·종료 후 정상화 절차(1009) ↗",
+    "description": "테스트 기간 간편 입장(한국어 아이디 자동 발급)·GDC 무료 모드 — 켜기·끄기·종료 후 정상화 절차(1009) ↗",
+    "keywords": [
+      "테스트 기간 간편 입장 한국어 아이디 자동 발급",
+      "GDC 무료 모드",
+      "켜기 끄기 종료 후 정상화 절차 1009",
+      "테스트",
+      "기간",
+      "간편",
+      "입장",
+      "한국어"
+    ],
+    "pc_url": "https://hondi.net/docs/TEST_PERIOD_SIMPLE_ENTRY_MANUAL_v1_0_20261009.html",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-10-09"
   },
   {
     "path": "/docs/THOUGHT_EXPERIMENT_kakaotalk-to-hondi-2030-cost-estimate.html",
@@ -1764,6 +2068,19 @@
     "pc_url": "https://hondi.net/desktop.html#openhash",
     "audience": "user",
     "source": "menu"
+  },
+  {
+    "path": "/pages/klaw-simulation-record.html",
+    "title": "klaw-simulation-record",
+    "description": "klaw-simulation-record",
+    "keywords": [
+      "klaw",
+      "simulation",
+      "record"
+    ],
+    "pc_url": "https://hondi.net/pages/klaw-simulation-record.html",
+    "audience": "user",
+    "source": "loose_anchor"
   },
   {
     "path": "/pages/project-support.html",
