@@ -401,41 +401,71 @@
   function hasRealLogin() { return hasValidLogin() && !isTestToken(token); }
   // 사용자가 '기존 계정으로 로그인'을 골랐다면(이 사이트 저장소 플래그) 자동 입장을 하지 않는다.
   function testOptedOut() { try { return global.localStorage.getItem('hondi_test_optout') === '1'; } catch (e) { return false; } }
+  // 안내(고시) 표시 규칙 — 같은 기기에서 단 한 번, 총 10초. src/gopang/core/auth.js 와 같은 기록
+  // (hondi_tn 쿠키, .hondi.net)을 써서 hondi.net 에서 본 사람은 klaw·plan·mail 에서 다시 보지 않는다.
+  var NOTICE_MS = 10000;
+  function writeNoticeUntil(until) {
+    try { global.localStorage.setItem('hondi_test_notice_until', String(until)); } catch (e) {}
+    writeCookie('hondi_tn', String(until), 31536000);
+  }
+  function noticeRemaining() {
+    var c = Number(readCookie('hondi_tn') || 0), l = 0;
+    try { l = Number(global.localStorage.getItem('hondi_test_notice_until') || 0); } catch (e) {}
+    var until = Math.max(c || 0, l || 0);
+    if (!until) { writeNoticeUntil(Date.now() + NOTICE_MS); return NOTICE_MS; } // 이 기기에서 처음
+    return Math.max(0, until - Date.now());                                      // 진행 중이면 남은 시간, 끝났으면 0
+  }
+  function hideTestBanner() {
+    var bar = document.getElementById('_test-notice-banner');
+    if (bar) { bar.remove(); document.body.style.paddingTop = ''; }
+  }
   function showTestBanner(id) {
+    var remaining = noticeRemaining();
+    if (remaining <= 0) { hideTestBanner(); return; } // 이미 본 기기 — 다시 표시하지 않는다
     var bar = document.getElementById('_test-notice-banner');
     if (!bar) {
       bar = document.createElement('div');
       bar.id = '_test-notice-banner';
-      bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:10000;background:#b45309;color:#fff;' +
-        'font-size:12.5px;line-height:1.5;padding:6px 12px;text-align:center;font-family:inherit';
+      bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:2147483000;background:#b45309;color:#fff;' +
+        'font-size:13px;line-height:1.55;padding:8px 12px;text-align:center;font-family:inherit';
       document.body.appendChild(bar);
-      document.body.style.paddingTop = '34px';
+      document.body.style.paddingTop = '40px';
     }
     bar.innerHTML = '';
     var span = document.createElement('span');
     span.textContent = '⚠️ [고시] 테스트 기간 중 보안 모듈 잠정 중단 · GDC 충전 없이 무제한 이용 · 실제 개인정보는 입력하지 마세요. 내 아이디: ';
     var b = document.createElement('b'); b.textContent = id;
-    var btn = document.createElement('button');
-    btn.textContent = '다른 아이디로 입장';
-    btn.style.cssText = 'margin-left:8px;padding:2px 8px;border:1px solid #fff;background:transparent;color:#fff;border-radius:6px;cursor:pointer;font-size:12px';
-    btn.onclick = function () {
+    bar.appendChild(span); bar.appendChild(b);
+    function mk(label, fn) {
+      var x = document.createElement('button');
+      x.textContent = label;
+      x.style.cssText = 'margin:2px 0 0 8px;padding:2px 8px;border:1px solid #fff;background:transparent;color:#fff;border-radius:6px;cursor:pointer;font-size:12.5px';
+      x.onclick = fn; bar.appendChild(x); return x;
+    }
+    mk('다른 아이디로 입장', function () {
       var nid = global.prompt('입장할 아이디를 입력하세요 (같은 아이디면 폰·PC 어디서든 같은 계정입니다)', id);
       if (!nid) return;
       try { global.localStorage.removeItem('hondi_test_optout'); } catch (e) {}
       enterTest(nid.trim().toLowerCase().normalize('NFC'), true).then(function (d) {
         if (d) location.reload(); else global.alert('입장에 실패했습니다. 아이디는 2~20자의 한글·영문 소문자·숫자·_·- 만 가능합니다.');
       });
-    };
+    });
+    // 다른 기기에서 같은 계정으로 들어오는 링크(안내가 사라진 뒤에도 ?testid=<아이디> 로 언제든 가능)
+    var copyBtn = mk('다른 기기용 링크 복사', function () {
+      var link = location.origin + '/?testid=' + encodeURIComponent(id);
+      var done = function () { copyBtn.textContent = '복사됨 ✓'; };
+      if (global.navigator.clipboard && global.navigator.clipboard.writeText) {
+        global.navigator.clipboard.writeText(link).then(done, function () { global.prompt('이 링크를 다른 기기에서 여세요', link); });
+      } else { global.prompt('이 링크를 다른 기기에서 여세요', link); }
+    });
     // 탈출구: 전화 인증으로 만든 기존 계정을 쓰는 사용자는 테스트 아이디를 끄고 원래 로그인으로 돌아간다.
-    var legacy = document.createElement('button');
-    legacy.textContent = '기존 계정으로 로그인';
-    legacy.style.cssText = btn.style.cssText;
-    legacy.onclick = function () {
+    mk('기존 계정으로 로그인', function () {
       try { global.localStorage.setItem('hondi_test_optout', '1'); } catch (e) {}
       if (isTestToken(token)) clear();
       location.reload();
-    };
-    bar.appendChild(span); bar.appendChild(b); bar.appendChild(btn); bar.appendChild(legacy);
+    });
+    clearTimeout(global.__hondiNoticeTimer);
+    global.__hondiNoticeTimer = setTimeout(hideTestBanner, remaining);
   }
   // 서버 응답을 이 모듈의 로그인 상태로 반영(쿠키 + 이 사이트 저장소에 아이디 백업 + 배너)
   function adoptTest(d) {
@@ -455,9 +485,26 @@
       return d;
     }).catch(function () { return null; });
   }
+  // 주소 파라미터 ?testid=… (안내가 사라진 뒤에도 쓸 수 있는 조작 수단)
+  //   ?testid=<아이디> 이 기기를 그 아이디로 전환 / ?testid=show 내 아이디 확인용(안내 10초 재표시) / ?testid=off 전화 인증 로그인으로 복귀
+  function readTestParam() {
+    try {
+      var u = new URL(location.href), raw = u.searchParams.get('testid');
+      if (raw === null) return null;
+      u.searchParams.delete('testid');
+      global.history.replaceState(null, '', u.pathname + u.search + u.hash);
+      return String(raw).trim().toLowerCase().normalize('NFC') || null;
+    } catch (e) { return null; }
+  }
   function autoTestEnter() {
     if (global.__hondiTestEnter) return global.__hondiTestEnter;
-    if (hasRealLogin() || testOptedOut()) {
+    var param = readTestParam();
+    var paramId = (param && param !== 'show' && param !== 'off' && /^[a-z0-9가-힣_-]{2,20}$/.test(param)) ? param : null;
+    if (param === 'off') {
+      try { global.localStorage.setItem('hondi_test_optout', '1'); } catch (e) {}
+      if (isTestToken(token)) clear();
+    }
+    if (param === 'off' || hasRealLogin() || (testOptedOut() && !paramId)) {
       global.__hondiTestEnter = Promise.resolve(null); // 실사용자·'기존 계정' 선택자는 테스트 입장 대상이 아니다
       return global.__hondiTestEnter;
     }
@@ -465,13 +512,17 @@
     var ctl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
     var timer = ctl ? setTimeout(function () { ctl.abort(); }, 4000) : null;
     global.__hondiTestEnter = fetch(PROXY + '/auth/test-mode', ctl ? { signal: ctl.signal } : undefined).then(function (r) {
-      return r.json().catch(function () { return {}; });
+      return r.ok ? r.json().catch(function () { return null; }) : null;
     }).then(function (m) {
       if (timer) clearTimeout(timer);
-      if (!m || !m.enabled) {
-        if (isTestToken(token)) clear(); // 테스트 종료 — 남은 테스트 토큰 정리
+      // 서버가 분명히 답하지 않은 경우(오류·타임아웃·이상한 응답)는 '모름' — 저장된 토큰을 건드리지 않는다
+      if (!m || m.ok !== true) return null;
+      if (!m.enabled) {
+        if (isTestToken(token)) clear(); // 서버가 '종료'라고 분명히 답함 — 남은 테스트 토큰 정리
         return null;
       }
+      if (param === 'show') writeNoticeUntil(Date.now() + NOTICE_MS);
+      if (paramId) { try { global.localStorage.removeItem('hondi_test_optout'); } catch (e) {} return enterTest(paramId, true); }
       var id = null;
       if (isTestToken(token)) id = token.slice(4, token.indexOf(':')); // 이미 가진 아이디 재사용
       else { try { id = global.localStorage.getItem('hondi_test_id'); } catch (e) {} } // 쿠키가 사라졌어도 이 기기의 아이디 복구
