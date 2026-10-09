@@ -13302,6 +13302,9 @@ export default {
 
     // ── SSO 인증 ──────────────────────────────────────────
     if (pathname === '/auth/issue')              return handleIssue(request, env, corsHeaders);
+    // 🧪 테스트 전용 ID 입장(2026-10-09) — env.SIMPLE_AUTH_TEST==='1'일 때만 동작. 기본 꺼짐.
+    if (pathname === '/auth/test-mode')          return handleTestAuthMode(request, env, corsHeaders);
+    if (pathname === '/auth/test-enter')         return handleTestAuthEnter(request, env, corsHeaders);
     if (pathname === '/auth/confirm-backup')      return handleConfirmBackup(request, env, corsHeaders);
     if (pathname === '/auth/verify')             return handleVerify(request, env, corsHeaders);
     if (pathname === '/auth/refresh')            return handleRefresh(request, env, corsHeaders);
@@ -20305,6 +20308,84 @@ async function parseToken(env,token){
     if(payload.exp<Math.floor(Date.now()/1000))return null;
     return payload;
   }catch{return null;}
+}
+
+// ═══════════════════════════════════════════════════════════
+// 🧪 테스트 전용 ID 입장 — 2026-10-09 (주피터 지시, 잠정)
+//   전화 인증·기기 키(Ed25519) 없이 "아이디"만으로 계정을 만들고, 같은 아이디로
+//   폰/PC 어디서든 다시 들어올 수 있게 한다. 보안 모듈 잠정 중단 상태.
+//
+//   안전장치(테스트 기간에도 유지):
+//   1) 스위치: env.SIMPLE_AUTH_TEST === '1' 일 때만 동작(Cloudflare 대시보드
+//      변수로 켜고 끈다. wrangler.toml에는 넣지 않는다 → 기본 꺼짐, 즉시 차단 가능).
+//   2) 범위: handle이 'tid-'로 시작하는 "테스트 계정"만 대상이다. 전화 인증으로
+//      만들어진 실계정(잔액·PDV 보유)은 이 경로로 절대 로그인되지 않는다.
+//   3) 테스트 계정에는 지갑 키가 없어 서명이 필요한 기능(GDC 결제 등)은 동작하지 않는다.
+// ═══════════════════════════════════════════════════════════
+const TEST_ID_PREFIX = 'tid-';
+function _testAuthOn(env) { return env && env.SIMPLE_AUTH_TEST === '1'; }
+
+async function handleTestAuthMode(request, env, corsHeaders) {
+  return new Response(JSON.stringify({ ok: true, enabled: _testAuthOn(env) }), { status: 200, headers: corsHeaders });
+}
+
+// POST /auth/test-enter { id } — 없으면 만들고, 있으면 그 계정으로 입장. 세션 토큰 발급.
+async function handleTestAuthEnter(request, env, corsHeaders) {
+  if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+  if (!_testAuthOn(env)) return _err(403, 'TEST_AUTH_OFF', '테스트 간편 입장이 꺼져 있습니다', corsHeaders);
+  const body = await request.json().catch(() => null);
+  const id = String(body?.id || '').trim().toLowerCase();
+  if (!/^[a-z0-9가-힣_-]{2,20}$/.test(id)) {
+    return _err(400, 'INVALID_ID', '아이디는 2~20자의 한글·영문 소문자·숫자·_·- 만 쓸 수 있습니다', corsHeaders);
+  }
+  const handle = TEST_ID_PREFIX + id;
+
+  let profile;
+  try {
+    profile = await _l1FindProfileByHandle(env, handle);
+  } catch (e) {
+    return _err(502, 'L1_UNREACHABLE', 'L1 연결 실패: ' + e.message, corsHeaders);
+  }
+
+  let created = false;
+  if (!profile) {
+    const rnd = crypto.getRandomValues(new Uint8Array(12));
+    const hex = Array.from(rnd).map(b => b.toString(16).padStart(2, '0')).join('');
+    const groups = ['2601', 'db80'];
+    for (let i = 0; i < 6; i++) groups.push(hex.slice(i * 4, i * 4 + 4));
+    const guid = groups.join(':');
+    const hashBuf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('tid:' + id));
+    const nickname_hash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    try {
+      const token = await _l1AdminToken(env);
+      const res = await fetch(`${L1_DEFAULT}/api/collections/profiles/records`, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          guid, handle, nickname: id, nickname_hash,
+          country_code: 'KR', native_lang: 'ko',
+          is_public: false, // 테스트 계정은 공개 검색에 노출하지 않는다
+          extra: { test_account: true },
+        }),
+      });
+      if (!res.ok) return _err(500, 'L1_INSERT_ERROR', await res.text(), corsHeaders);
+      profile = await res.json();
+      created = true;
+    } catch (e) {
+      return _err(502, 'L1_UNREACHABLE', 'L1 PocketBase 등록 실패: ' + e.message, corsHeaders);
+    }
+  }
+
+  // 방어: 조회된 레코드가 테스트 계정이 아니면(이론상 불가) 거부
+  if (!String(profile.handle || '').startsWith(TEST_ID_PREFIX)) {
+    return _err(403, 'NOT_TEST_ACCOUNT', '테스트 계정이 아닙니다', corsHeaders);
+  }
+
+  const token = await buildToken(env, profile.guid, 'L0', 'gopang');
+  return new Response(JSON.stringify({
+    ok: true, created, guid: profile.guid, handle: profile.handle,
+    nickname: profile.nickname || id, token,
+  }), { status: 200, headers: { ...corsHeaders, 'Set-Cookie': buildCookie(token) } });
 }
 
 // POST /auth/issue — v6.0: Ed25519 서명 + TOFU(Trust-On-First-Use) 검증 후에만 세션 발급
