@@ -5483,15 +5483,8 @@ function handleDigitRoutes(request, url, env, corsHeaders) {
     l1: makePocketBaseDigitStore({ base: L1_DEFAULT, getToken: () => _l1AdminToken(env) }),
     getPinnedPubKey: async (e, guid) => (await _l1FindProfileByGuid(e, guid))?.pubkey_ed25519 || null,
     authorityPubKey: env.DIGIT_AUTHORITY_PUBKEY || null,
-    // 본인 확인: 지갑 서명 + 방금(10분 이내) 문자(SMS) 인증한 토큰. 지문(WebAuthn) 계정은 기존 재가입 규칙과 같이 지문 step-up도 필요.
-    // 토큰은 /biz/phone-otp-verify 가 guid를 묶어 발급한 것이어야 한다.
-    verifyPhoneToken: async (e, token, guid, extra) => verifyPhoneAndStepUp({
-      secret: e.PHONE_VERIFY_SECRET, token, guid,
-      profile: await _l1FindProfileByGuid(e, guid).catch(() => null),
-      ttlMs: PHONE_VERIFY_TOKEN_TTL_MS, freshMs: 10 * 60 * 1000,
-      stepUpToken: extra?.step_up_token,
-      verifyStepUp: (t, g, tx) => _verifyStepUpToken(e, t, g, tx),
-    }),
+    // 본인 확인: 가입 때 폰 인증으로 확립된 계정에 핀(pin)된 지갑 키의 서명 하나로 충분하다(2026-10-09 — 가입 순번 번호는
+    // 가입 시 본인 인증을 이미 마친 계정에 자동 배정되므로 번호 발급 때 문자(SMS)를 다시 받지 않는다). verifyPhoneToken은 주입하지 않는다.
   });
   return handler.handle(request, url, env, corsHeaders);
 }

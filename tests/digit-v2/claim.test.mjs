@@ -148,3 +148,15 @@ test('canonical 형식이 고정되어 있음(필드 순서 변경 시 서명 �
   assert.equal(c.prev, GENESIS_PREV);
   assert.equal(c.hash, await recordHash(c));
 });
+
+test('순번 배정: 반복·수열·회문·0끝·묶음 반복은 제외, nthOpenSerial은 10000부터 open만', async () => {
+  const { nthOpenSerial, nextOpenSerialFrom } = await import('../../src/gopang/ai/hondi-digit-claim.js');
+  for (const s of ['10000', '10001', '11111', '55555', '12121', '13579', '12000', '21111', '123123', '112233']) {
+    assert.notEqual(classifySerial(s).tier, 'open', s);
+  }
+  for (const s of ['10002', '48210', '10234']) assert.equal(classifySerial(s).tier, 'open', s);
+  assert.equal(nthOpenSerial(0), '10002');
+  let prev = 0;
+  for (let n = 0; n < 300; n++) { const s = nthOpenSerial(n); assert.equal(classifySerial(s).tier, 'open'); assert.ok(+s > prev); prev = +s; }
+  assert.equal(nextOpenSerialFrom(11111), '11120');
+});

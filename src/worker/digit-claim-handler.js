@@ -4,6 +4,7 @@
 // 엔드포인트
 //   GET  /digit/status?serial=NNNN   번호 상태(available/claimed/revoked/reserved/blocked) + 정책 등급
 //   GET  /digit/chain?serial=NNNN    레코드 체인 전체(공개) — 누구나 verifyChain()으로 서버 없이 검증
+//   GET  /digit/next                 가입 순번 배정 — 다음 번호(5자리부터, 외우기 쉬운 번호 제외)
 //   GET  /digit/mine?guid=GUID       이 계정이 현재 소유한 번호 목록(대시보드 "이 숫자 코드로 등록된
 //                                    프로필" 표시용, 2026-09-27 신설) — 공개 체인 데이터의 재조합일 뿐
 //                                    이라 새로운 권한을 필요로 하지 않는다.
@@ -35,7 +36,7 @@
 // ═════════════════════════════════════════════════
 
 import {
-  applyRecord, verifyChain, classifySerial, checkClaimPolicy,
+  applyRecord, verifyChain, classifySerial, checkClaimPolicy, nthOpenSerial, nextOpenSerialFrom,
 } from '../gopang/ai/hondi-digit-claim.js';
 import { isValidSerial } from '../gopang/ai/hondi-digit-core.js';
 
@@ -97,6 +98,21 @@ export function makeDigitClaimHandler({ l1, getPinnedPubKey, authorityPubKey = n
           }
         }
         return json({ ok: true, serials: mine }, 200, cors);
+      }
+
+      // 2026-10-09 신설 — 가입 순번 배정. 지금까지 청구된 수(n)번째 'open' 번호를 돌려주고,
+      // 이미 누가 가져간 번호(직접 고른 과거 청구 등)면 다음 open 번호로 넘어간다.
+      // 배정은 안내일 뿐 점유가 아니다 — 실제 점유는 /digit/record 의 청구 레코드이며 동시 요청은 RACE_LOST로 가려진다.
+      if (request.method === 'GET' && path === '/digit/next') {
+        if (typeof l1.countClaims !== 'function') return err(501, 'NOT_IMPLEMENTED', '이 저장소 어댑터는 /digit/next를 지원하지 않습니다.', cors);
+        const n = await l1.countClaims();
+        let serial = nthOpenSerial(n, { premiumList });
+        for (let i = 0; i < 200; i++) {
+          const { state } = await loadState(serial);
+          if (!state) return json({ ok: true, serial, order: n + 1 }, 200, cors);
+          serial = nextOpenSerialFrom(+serial + 1, { premiumList });
+        }
+        return err(503, 'BUSY', '번호를 배정하지 못했습니다. 잠시 후 다시 시도해 주세요.', cors);
       }
 
       if (request.method === 'POST' && path === '/digit/record') {

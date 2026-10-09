@@ -65,5 +65,14 @@ export function makePocketBaseDigitStore({ base, getToken, fetchImpl = fetch }) 
     return [...new Set((data.items || []).map(r => r.serial))];
   }
 
-  return { listRecords, appendRecord, findSerialsByOwner };
+  // 지금까지 최초 청구(seq=0)된 번호의 수 — 가입 순번 배정(/digit/next)의 기준
+  async function countClaims() {
+    const filter = encodeURIComponent('seq=0');
+    const res = await fetchImpl(url(`?filter=${filter}&perPage=1&fields=id`), { headers: await auth() });
+    if (!res.ok) throw new Error(`L1 조회 실패 (HTTP ${res.status})`);
+    const data = await res.json();
+    return Number(data.totalItems) || 0;
+  }
+
+  return { listRecords, appendRecord, findSerialsByOwner, countClaims };
 }

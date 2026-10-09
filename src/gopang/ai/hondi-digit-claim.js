@@ -139,6 +139,12 @@ const isRepeat = s => /^(\d)\1+$/.test(s);
 const isRun = s => s.length >= 3 && ([...s].every((c, i) => i === 0 || +c === +s[i-1] + 1) || [...s].every((c, i) => i === 0 || +c === +s[i-1] - 1));
 const isPalin = s => s.length >= 3 && s === [...s].reverse().join('');
 const trailingZeros = s => s.length >= 4 && /^[1-9]0+$/.test(s);
+// 2026-10-09 가입 순번 배정용 확장 — 외우기 쉬운/반복적인 번호를 순번에서 제외한다
+const zerosTail = s => s.length >= 5 && /0{3,}$/.test(s);                       // 12000, 450000
+const longSame = s => /(\d)\1{3,}/.test(s);                                      // 4개 이상 같은 숫자가 이어짐 (21111, 70000)
+const periodic = s => { for (let p = 1; p <= Math.floor(s.length / 2); p++) { if ([...s].every((c, i) => i < p || c === s[i - p])) return true; } return false; };  // 12121, 123123, 1212
+const pairs = s => s.length >= 4 && s.length % 2 === 0 && /^(\d)\1(\d)\2(\d)?\3?$/.test(s) && s.length <= 6;   // 1122, 112233
+const arith = s => { if (s.length < 4) return false; const d = +s[1] - +s[0]; return d !== 0 && [...s].every((c, i) => i === 0 || +c - +s[i - 1] === d); };  // 13579, 24680, 97531
 
 /**
  * @param {string} serial
@@ -154,8 +160,38 @@ export function classifySerial(serial, cfg = {}) {
   if (isRun(s)) reasons.push('연속 수열');
   if (isPalin(s)) reasons.push('회문');
   if (trailingZeros(s)) reasons.push('뒤가 모두 0');
+  if (zerosTail(s)) reasons.push('끝이 0 세 개 이상');
+  if (longSame(s)) reasons.push('같은 숫자 4개 이상 연속');
+  if (periodic(s) && !isRepeat(s)) reasons.push('같은 묶음 반복');
+  if (pairs(s)) reasons.push('쌍으로 반복');
+  if (arith(s) && !isRun(s)) reasons.push('등차 수열');
   if (cfg.premiumList?.has(s)) reasons.push('지정 프리미엄 번호');
   return reasons.length ? { tier: 'reserved-premium', reasons } : { tier: 'open', reasons: [] };
+}
+
+/** 가입 순번 배정의 시작 번호(5자리) */
+export const SEQUENTIAL_START = 10000;
+
+/**
+ * 가입 순번 n(0부터)에 해당하는 번호 — 10000부터 오름차순으로 'open' 등급만 센다.
+ * 즉 외우기 쉽거나 반복적인 번호(classifySerial이 open이 아닌 것)는 건너뛴다.
+ */
+export function nthOpenSerial(n, cfg = {}) {
+  if (!Number.isInteger(n) || n < 0) throw new Error('nthOpenSerial: n은 0 이상의 정수');
+  let k = 0;
+  for (let v = SEQUENTIAL_START; v < 1e10; v++) {
+    const s = String(v);
+    if (classifySerial(s, cfg).tier !== 'open') continue;
+    if (k === n) return s;
+    k++;
+  }
+  throw new Error('nthOpenSerial: 범위를 벗어났습니다.');
+}
+
+/** serial 이상에서 처음 나오는 open 번호 */
+export function nextOpenSerialFrom(serial, cfg = {}) {
+  for (let v = Math.max(+serial, SEQUENTIAL_START); v < 1e10; v++) { const s = String(v); if (classifySerial(s, cfg).tier === 'open') return s; }
+  throw new Error('nextOpenSerialFrom: 범위를 벗어났습니다.');
 }
 
 /**
