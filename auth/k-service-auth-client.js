@@ -397,6 +397,10 @@
   // 스위치가 꺼지면 남아 있는 테스트 토큰은 지우고 원래의 전화 인증(device-link) 흐름으로 돌아간다.
   // window.__hondiTestEnter 는 src/gopang/core/auth.js 와 같은 페이지에서 중복 생성을 막는 공용 약속이다.
   function isTestToken(t) { return !!t && String(t).indexOf('tid-') === 0; }
+  // 전화 인증으로 로그인한 '실사용자'의 토큰이 살아 있으면 테스트 자동 입장은 절대 건드리지 않는다.
+  function hasRealLogin() { return hasValidLogin() && !isTestToken(token); }
+  // 사용자가 '기존 계정으로 로그인'을 골랐다면(이 사이트 저장소 플래그) 자동 입장을 하지 않는다.
+  function testOptedOut() { try { return global.localStorage.getItem('hondi_test_optout') === '1'; } catch (e) { return false; } }
   function showTestBanner(id) {
     var bar = document.getElementById('_test-notice-banner');
     if (!bar) {
@@ -417,11 +421,21 @@
     btn.onclick = function () {
       var nid = global.prompt('입장할 아이디를 입력하세요 (같은 아이디면 폰·PC 어디서든 같은 계정입니다)', id);
       if (!nid) return;
-      enterTest(nid.trim().toLowerCase()).then(function (d) {
+      try { global.localStorage.removeItem('hondi_test_optout'); } catch (e) {}
+      enterTest(nid.trim().toLowerCase().normalize('NFC'), true).then(function (d) {
         if (d) location.reload(); else global.alert('입장에 실패했습니다. 아이디는 2~20자의 한글·영문 소문자·숫자·_·- 만 가능합니다.');
       });
     };
-    bar.appendChild(span); bar.appendChild(b); bar.appendChild(btn);
+    // 탈출구: 전화 인증으로 만든 기존 계정을 쓰는 사용자는 테스트 아이디를 끄고 원래 로그인으로 돌아간다.
+    var legacy = document.createElement('button');
+    legacy.textContent = '기존 계정으로 로그인';
+    legacy.style.cssText = btn.style.cssText;
+    legacy.onclick = function () {
+      try { global.localStorage.setItem('hondi_test_optout', '1'); } catch (e) {}
+      if (isTestToken(token)) clear();
+      location.reload();
+    };
+    bar.appendChild(span); bar.appendChild(b); bar.appendChild(btn); bar.appendChild(legacy);
   }
   // 서버 응답을 이 모듈의 로그인 상태로 반영(쿠키 + 이 사이트 저장소에 아이디 백업 + 배너)
   function adoptTest(d) {
@@ -429,21 +443,31 @@
     try { global.localStorage.setItem('hondi_test_id', d.id); } catch (e) {}
     showTestBanner(d.id);
   }
-  function enterTest(id) {
+  function enterTest(id, force) {
+    if (!force && hasRealLogin()) return Promise.resolve(null); // 자동 경로는 실사용자 로그인을 덮어쓰지 않는다
     return fetch(PROXY + '/auth/test-enter', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(id ? { id: id } : {}),
     }).then(function (r) { return r.json().catch(function () { return {}; }); }).then(function (d) {
       if (!d || !d.ok || !d.phone_verify_token) return null;
+      if (!force && hasRealLogin()) return null; // 응답을 기다리는 사이 실사용자 로그인이 생겼다면 양보
       adoptTest(d);
       return d;
     }).catch(function () { return null; });
   }
   function autoTestEnter() {
     if (global.__hondiTestEnter) return global.__hondiTestEnter;
-    global.__hondiTestEnter = fetch(PROXY + '/auth/test-mode').then(function (r) {
+    if (hasRealLogin() || testOptedOut()) {
+      global.__hondiTestEnter = Promise.resolve(null); // 실사용자·'기존 계정' 선택자는 테스트 입장 대상이 아니다
+      return global.__hondiTestEnter;
+    }
+    // 테스트 모드 확인이 느리거나 멈춰도 원래 로그인 화면이 막히지 않도록 4초 타임아웃
+    var ctl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = ctl ? setTimeout(function () { ctl.abort(); }, 4000) : null;
+    global.__hondiTestEnter = fetch(PROXY + '/auth/test-mode', ctl ? { signal: ctl.signal } : undefined).then(function (r) {
       return r.json().catch(function () { return {}; });
     }).then(function (m) {
+      if (timer) clearTimeout(timer);
       if (!m || !m.enabled) {
         if (isTestToken(token)) clear(); // 테스트 종료 — 남은 테스트 토큰 정리
         return null;
@@ -451,13 +475,13 @@
       var id = null;
       if (isTestToken(token)) id = token.slice(4, token.indexOf(':')); // 이미 가진 아이디 재사용
       else { try { id = global.localStorage.getItem('hondi_test_id'); } catch (e) {} } // 쿠키가 사라졌어도 이 기기의 아이디 복구
-      return enterTest(id || null);
+      return enterTest(id || null, false);
     }).then(function (d) {
       // 같은 페이지의 src/gopang/core/auth.js 가 먼저 만든 결과를 공유받은 경우: 이 모듈은 아직
       // 자기 상태를 모르므로 여기서 반영한다(안 하면 ensureLogin 이 전화 인증 팝업을 띄운다).
       if (d && d.phone_verify_token && !hasValidLogin()) adoptTest(d);
       return d;
-    }).catch(function () { return null; });
+    }).catch(function () { if (timer) clearTimeout(timer); return null; });
     return global.__hondiTestEnter;
   }
 
