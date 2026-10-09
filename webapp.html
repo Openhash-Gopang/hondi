@@ -5236,7 +5236,7 @@ window.closePDV = closePDV;
                 pointer-events:none">
       <span style="background:rgba(0,0,0,.55);color:#ddd;font-size:12px;
                    padding:4px 14px;border-radius:20px">
-        "혼디" 글자를 화면 안에 맞춰주세요
+        "hondi.net" 로고와 숫자를 화면에 맞춰주세요
       </span>
     </div>
 
@@ -5295,11 +5295,38 @@ window.closePDV = closePDV;
 </style>
 
 <script type="module">
-import { startScanner, stopScanner, lookupDigitProfile, analyzePhoto }
-  from './src/gopang/ai/hondi-digit-scanner.js';
+// 2026-10-09: 스캐너를 v2(로고 "hondi.net" 기준, 1~10자리)로 교체. 인식 기준점은
+// "혼디" 글자가 아니라 "hondi.net" 로고다(hondi-digit-scanner-v2.js).
+import { startScanner, stopScanner, analyzePhoto, lookupSerial }
+  from './src/gopang/ai/hondi-digit-scanner-v2.js';
 import { ORG_SITES, findSiteByDigitCode } from './src/gopang/gov/org-sites.js';
 
 let _profileUrl = null;
+
+// v2 번호 → 프로필: /digit/status의 owner(pubkey)로 /profile?pubkey= 조회(pages/digit-code.html과 동일 경로).
+const _DIGIT_WORKER = 'https://hondi-proxy.tensor-city.workers.dev';
+async function lookupDigitProfile(serial) {
+  const sv = await lookupSerial(serial, _DIGIT_WORKER);
+  if (!sv || sv.status !== 'claimed') throw new Error('등록되지 않은 코드 (' + serial + ')');
+  const r = await fetch(_DIGIT_WORKER + '/profile?pubkey=' + encodeURIComponent(sv.owner), { signal: AbortSignal.timeout(8000) });
+  const j = await r.json().catch(() => null);
+  if (!(r.ok && j && j.ok && j.profile)) throw new Error('아직 프로필을 작성하지 않은 코드 (' + serial + ')');
+  const handle = (j.profile.handle || '').replace(/^@/, '');
+  return { handle, name: j.profile.name || ('@' + handle), url: '/profile.html?handle=' + encodeURIComponent(handle) };
+}
+
+// 기관 AI 웹사이트 코드(제주도청·제주테크노파크 등)면 해당 기관 AI 대화창을 새 탭으로 연다.
+// 카메라 콜백은 사용자 제스처가 아니라 팝업 차단될 수 있다 — 차단되면 같은 탭으로 연다.
+function _openOrgSiteIfAny(serial) {
+  const id = findSiteByDigitCode(serial);
+  if (!id) return false;
+  const url = '/pages/org-ai.html?site=' + encodeURIComponent(id);
+  _setStatus(ORG_SITES[id].name + ' AI를 여는 중...');
+  const w = window.open(url, '_blank');
+  if (!w) { window.location.href = url; return true; }
+  window.closeHondiScanner();
+  return true;
+}
 
 /* ── 스캔 시작 헬퍼 ── */
 let _scannerActive = false;  // 중복 시작 방지 플래그
@@ -5315,18 +5342,7 @@ function _startScan() {
     /* 인식 성공 */
     async (shortId) => {
       _scannerActive = false;  // 스캐너 완전 종료 — 재인식 없음
-      // 2026-10-08: 기관 AI 웹사이트 코드(제주도청·제주테크노파크 등)는 프로필이
-      // 아니라 해당 기관 AI 대화창을 새 탭으로 연다(pages/org-ai.html).
-      const _siteId = findSiteByDigitCode(shortId);
-      if (_siteId) {
-        const _url = '/pages/org-ai.html?site=' + encodeURIComponent(_siteId);
-        _setStatus(ORG_SITES[_siteId].name + ' AI를 여는 중...');
-        // 카메라 콜백은 사용자 제스처가 아니라 팝업 차단될 수 있다 — 차단되면 같은 탭으로 연다.
-        const _w = window.open(_url, '_blank');
-        if (!_w) { window.location.href = _url; return; }
-        window.closeHondiScanner();
-        return;
-      }
+      if (_openOrgSiteIfAny(shortId)) return;
       _setStatus('프로필 조회 중...');
       try {
         // 2026-07-27: 숫자 코드 전환 — "혼디" 공식 계정의 digit_code_id가
@@ -5413,6 +5429,7 @@ window.hsTakePhoto = function () {
   _setStatus('사진 분석 중...');
   analyzePhoto(imgData,
     async (shortId) => {
+      if (_openOrgSiteIfAny(shortId)) return;
       try {
         const p = await lookupDigitProfile(shortId);
         _profileUrl = p.url;
