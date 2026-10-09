@@ -390,12 +390,90 @@
     }));
   }
 
+  // ── 🧪 테스트 기간 아이디 자동 입장 (2026-10-09, 주피터 지시, 잠정) ──────
+  // 서버 스위치(SIMPLE_AUTH_TEST)가 켜져 있으면, 접속 즉시 쉬운 한국어 단어 아이디(예: 푸른바다)를
+  // 자동으로 만들고 phone_verify_token 형식의 테스트 토큰을 쿠키(hondi_pvt)로 .hondi.net 전체에 공유한다.
+  // → 이 토큰을 받는 모든 서비스(K-Law·K-Plan·K-Gov·K-Business·K-Mail·GDC 등)에서 그대로 통한다.
+  // 스위치가 꺼지면 남아 있는 테스트 토큰은 지우고 원래의 전화 인증(device-link) 흐름으로 돌아간다.
+  // window.__hondiTestEnter 는 src/gopang/core/auth.js 와 같은 페이지에서 중복 생성을 막는 공용 약속이다.
+  function isTestToken(t) { return !!t && String(t).indexOf('tid-') === 0; }
+  function showTestBanner(id) {
+    var bar = document.getElementById('_test-notice-banner');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = '_test-notice-banner';
+      bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:10000;background:#b45309;color:#fff;' +
+        'font-size:12.5px;line-height:1.5;padding:6px 12px;text-align:center;font-family:inherit';
+      document.body.appendChild(bar);
+      document.body.style.paddingTop = '34px';
+    }
+    bar.innerHTML = '';
+    var span = document.createElement('span');
+    span.textContent = '⚠️ [고시] 테스트 기간 중 보안 모듈 잠정 중단 · GDC 충전 없이 무제한 이용 · 실제 개인정보는 입력하지 마세요. 내 아이디: ';
+    var b = document.createElement('b'); b.textContent = id;
+    var btn = document.createElement('button');
+    btn.textContent = '다른 아이디로 입장';
+    btn.style.cssText = 'margin-left:8px;padding:2px 8px;border:1px solid #fff;background:transparent;color:#fff;border-radius:6px;cursor:pointer;font-size:12px';
+    btn.onclick = function () {
+      var nid = global.prompt('입장할 아이디를 입력하세요 (같은 아이디면 폰·PC 어디서든 같은 계정입니다)', id);
+      if (!nid) return;
+      enterTest(nid.trim().toLowerCase()).then(function (d) {
+        if (d) location.reload(); else global.alert('입장에 실패했습니다. 아이디는 2~20자의 한글·영문 소문자·숫자·_·- 만 가능합니다.');
+      });
+    };
+    bar.appendChild(span); bar.appendChild(b); bar.appendChild(btn);
+  }
+  // 서버 응답을 이 모듈의 로그인 상태로 반영(쿠키 + 이 사이트 저장소에 아이디 백업 + 배너)
+  function adoptTest(d) {
+    persist(d.phone_verify_token, new Date(d.expires_at).getTime());
+    try { global.localStorage.setItem('hondi_test_id', d.id); } catch (e) {}
+    showTestBanner(d.id);
+  }
+  function enterTest(id) {
+    return fetch(PROXY + '/auth/test-enter', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(id ? { id: id } : {}),
+    }).then(function (r) { return r.json().catch(function () { return {}; }); }).then(function (d) {
+      if (!d || !d.ok || !d.phone_verify_token) return null;
+      adoptTest(d);
+      return d;
+    }).catch(function () { return null; });
+  }
+  function autoTestEnter() {
+    if (global.__hondiTestEnter) return global.__hondiTestEnter;
+    global.__hondiTestEnter = fetch(PROXY + '/auth/test-mode').then(function (r) {
+      return r.json().catch(function () { return {}; });
+    }).then(function (m) {
+      if (!m || !m.enabled) {
+        if (isTestToken(token)) clear(); // 테스트 종료 — 남은 테스트 토큰 정리
+        return null;
+      }
+      var id = null;
+      if (isTestToken(token)) id = token.slice(4, token.indexOf(':')); // 이미 가진 아이디 재사용
+      else { try { id = global.localStorage.getItem('hondi_test_id'); } catch (e) {} } // 쿠키가 사라졌어도 이 기기의 아이디 복구
+      return enterTest(id || null);
+    }).then(function (d) {
+      // 같은 페이지의 src/gopang/core/auth.js 가 먼저 만든 결과를 공유받은 경우: 이 모듈은 아직
+      // 자기 상태를 모르므로 여기서 반영한다(안 하면 ensureLogin 이 전화 인증 팝업을 띄운다).
+      if (d && d.phone_verify_token && !hasValidLogin()) adoptTest(d);
+      return d;
+    }).catch(function () { return null; });
+    return global.__hondiTestEnter;
+  }
+
   // ── 공개 API ─────────────────────────────────────────────────
-  function ensureLogin() {
-    if (hasValidLogin()) return Promise.resolve(token);
+  function legacyEnsureLogin() {
     return new Promise(function (resolve) {
       waiters.push(resolve);
       showOverlay();
+    });
+  }
+  function ensureLogin() {
+    if (hasValidLogin() && !isTestToken(token)) return Promise.resolve(token);
+    return autoTestEnter().then(function (d) {
+      if (d && hasValidLogin()) return token;
+      if (hasValidLogin()) return token;
+      return legacyEnsureLogin();
     });
   }
   function getToken() { return hasValidLogin() ? token : null; }
@@ -455,6 +533,9 @@
 
   // ── 초기화 ───────────────────────────────────────────────────
   loadFromCookie();
+  // 🧪 테스트 기간: 접속하면 자동으로 아이디 생성/입장(스위치가 꺼져 있으면 아무 일도 없음)
+  var _bootTest = function () { autoTestEnter(); };
+  if (document.body) _bootTest(); else document.addEventListener('DOMContentLoaded', _bootTest);
 
   global.KAuth = {
     ensureLogin: ensureLogin,
