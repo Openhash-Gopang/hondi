@@ -7,6 +7,7 @@
              GDC_BILLING_DEVELOPER_MANUAL_v1_0_20260903.md(과금 파이프라인)
   (desktop.html 좌측 사이드바 "🛠 개발자 문서" 섹션에서 링크됨)
   v1.0(2026-10-09): 최초 작성
+  v1.1(2026-10-09): 안내(고시) 기기당 1회·10초 표시, 아이디 기억 보강(일시 오류로 지우지 않음), ?testid= 주소 파라미터
 -->
 <html lang="ko">
 <head>
@@ -143,7 +144,7 @@ th, td { border: 1px solid var(--line); padding: 9px 13px; text-align: left; lin
   <main class="doc-content">
 
     <div class="doc-hero">
-      <div class="doc-hero-eyebrow">TEST_PERIOD_SIMPLE_ENTRY_MANUAL v1.0</div>
+      <div class="doc-hero-eyebrow">TEST_PERIOD_SIMPLE_ENTRY_MANUAL v1.1</div>
       <h1 class="doc-hero-title">테스트 기간 간편 입장과 GDC 무료 모드 — 켜는 법, 끄는 법, 끝난 뒤 되돌리는 법</h1>
       <p class="doc-hero-desc">
         테스트 기간 동안 사용자는 접속만 하면 <strong>쉬운 한국어 단어 아이디</strong>(예: 푸른바다)를 자동으로 받고,
@@ -183,12 +184,22 @@ npx wrangler secret delete GDC_FREE_TEST --name hondi-proxy</code></pre>
     <h2 id="behavior">사용자에게 보이는 동작</h2>
     <ul>
       <li><strong>첫 접속</strong>: 팝업 없이 아이디가 자동 발급되어 로그인된다. 아이디는 "형용사 + 명사"(예: <code>푸른바다</code>, <code>향긋한해녀</code>)이고, 이미 있으면 다른 조합을 먼저 시도한 뒤 마지막에만 숫자 두 자리를 붙인다.</li>
-      <li><strong>고시 배너</strong>: 화면 상단에 "테스트 기간 중 보안 모듈 잠정 중단 · GDC 충전 없이 무제한 이용 · 실제 개인정보는 입력하지 마세요"와 <strong>내 아이디</strong>가 표시된다.</li>
-      <li><strong>재접속</strong>: 같은 기기에서는 발급된 아이디로 자동 로그인된다. 복구 순서는 ① 공용 쿠키 <code>hondi_pvt</code> → ② 이 기기의 로그인 정보 <code>gopang_user_v4</code> → ③ 기기에 백업한 <code>hondi_test_id</code>.</li>
+      <li><strong>고시 배너(기기당 단 1회, 10초)</strong>: 처음 접속한 기기에서만 화면 상단에 "테스트 기간 중 보안 모듈 잠정 중단 · GDC 충전 없이 무제한 이용 · 실제 개인정보는 입력하지 마세요"와 <strong>내 아이디</strong>가 <strong>10초 동안</strong> 표시되고 스스로 사라진다. 그 기기에서는 이후 어떤 페이지(hondi.net·klaw·plan·mail 등)에서도 다시 나타나지 않는다. 표시 시작 시각을 저장해 두므로, 그 사이 페이지가 새로고침돼도(서비스 워커 첫 설치 직후의 자동 새로고침 등) 남은 시간만큼 이어서 보인다. 배너에는 "다른 아이디로 입장", "다른 기기용 링크 복사", "기존 계정으로 로그인" 버튼이 있다.</li>
+      <li><strong>재접속</strong>: 같은 기기에서는 <strong>배너 없이</strong> 발급된 아이디로 자동 로그인된다. 서버 확인이 일시적으로 실패(타임아웃·502 등)해도 기억한 아이디는 지워지지 않는다. 복구 순서는 ① 공용 쿠키 <code>hondi_pvt</code> → ② 이 기기의 로그인 정보 <code>gopang_user_v4</code> → ③ 기기에 백업한 <code>hondi_test_id</code>.</li>
       <li><strong>모든 서비스 공유</strong>: 쿠키가 <code>.hondi.net</code> 전체에 걸리므로 hondi.net에서 받은 아이디가 klaw·plan·mail 등 KAuth를 쓰는 서비스에서도 그대로 인식된다.</li>
-      <li><strong>폰과 PC</strong>: 기기마다 처음 접속 때 각자 새 아이디를 받는다. 같은 계정으로 쓰려면 한쪽 배너의 <strong>"다른 아이디로 입장"</strong>에 상대 기기의 아이디를 입력한다. 같은 아이디면 같은 계정이다.</li>
+      <li><strong>폰과 PC</strong>: 기기마다 처음 접속 때 각자 새 아이디를 받는다. 같은 계정으로 쓰려면 아래 <strong>주소 파라미터</strong>를 쓴다(배너는 10초 뒤 사라지므로). 같은 아이디면 같은 계정이다.</li>
       <li><strong>기존(전화 인증) 사용자</strong>: 이미 전화 인증으로 로그인한 사용자는 자동 입장 대상이 아니며 로그인이 그대로 유지된다. 로그인이 없는 기존 사용자는 배너·입장 화면의 <strong>"기존 계정으로 로그인"</strong>으로 원래 로그인 화면에 돌아갈 수 있다.</li>
     </ul>
+
+    <h3>안내가 사라진 뒤의 조작 — 주소 파라미터 <code>?testid=</code></h3>
+    <p>배너가 없어도 아이디를 확인하거나 바꿀 수 있도록 주소 뒤에 붙이는 파라미터를 둔다. 주소창에는 남지 않으며(새로고침해도 반복되지 않음), 테스트 모드가 꺼져 있으면 무시된다. 폰에서도 <code>hondi.net</code>으로 열면 그대로 전달된다.</p>
+    <div class="tbl-wrap"><table>
+      <tr><th style="width:360px">주소</th><th>동작</th></tr>
+      <tr><td><code>https://hondi.net/?testid=<em>푸른바다</em></code></td><td>이 기기를 그 아이디로 전환한다(다른 기기에서 쓰던 아이디로 들어올 때). 배너의 "다른 기기용 링크 복사"가 이 주소를 만들어 준다.</td></tr>
+      <tr><td><code>https://hondi.net/?testid=show</code></td><td>내 아이디를 확인하려고 안내를 10초간 다시 표시한다.</td></tr>
+      <tr><td><code>https://hondi.net/?testid=off</code></td><td>이 기기의 테스트 아이디를 끄고 전화 인증 로그인으로 돌아간다(이후 자동 발급 안 함).</td></tr>
+    </table></div>
+    <p>전화 인증으로 로그인한 실사용자의 로그인은 이 파라미터로 덮어쓰이지 않는다(<code>off</code>만 예외).</p>
 
     <!-- ───────────────────────── 구조 ───────────────────────── -->
     <h2 id="structure">동작 구조</h2>
@@ -228,6 +239,7 @@ npx wrangler secret delete GDC_FREE_TEST --name hondi-proxy</code></pre>
       <tr><td>localStorage <code>gopang_user_v4</code></td><td>웹앱 로그인 정보(<code>test_account: true</code>)</td></tr>
       <tr><td>localStorage <code>hondi_test_id</code></td><td>쿠키가 사라져도 아이디를 되찾기 위한 백업</td></tr>
       <tr><td>localStorage <code>hondi_test_optout</code></td><td>"기존 계정으로 로그인"을 고른 기기 — 자동 입장을 하지 않는다</td></tr>
+      <tr><td>쿠키 <code>hondi_tn</code> (<code>.hondi.net</code>, 1년) + localStorage <code>hondi_test_notice_until</code></td><td>안내 표시 종료 시각(ms). 값이 없으면 "처음", 미래면 "표시 중(남은 시간만큼 이어서)", 과거면 "이미 봄(다시 표시 안 함)". 쿠키와 저장소 중 하나라도 있으면 이미 본 것으로 본다.</td></tr>
     </table></div>
 
     <h3>안전장치</h3>
@@ -237,6 +249,7 @@ npx wrangler secret delete GDC_FREE_TEST --name hondi-proxy</code></pre>
       <tr><td><code>tid-</code> 범위 제한</td><td>이 경로로 로그인되는 것은 핸들이 <code>tid-</code>로 시작하는 테스트 계정뿐이다. 전화 인증으로 만든 계정은 아이디만으로 절대 열리지 않는다.</td></tr>
       <tr><td>실사용자 보호</td><td>전화 인증 토큰이 살아 있는 사용자는 자동 입장을 건너뛰며, 로그인을 덮어쓰지 않는다.</td></tr>
       <tr><td>생성 속도 제한</td><td>신규 아이디 생성은 IP당 시간당 30개(<code>RATE_LIMIT_KV</code>, <code>wrangler.toml</code>에 바인딩됨). 한 공유기를 쓰는 곳에서 단체 테스트를 하면 429가 날 수 있다.</td></tr>
+      <tr><td>3상태 확인(켜짐/꺼짐/모름)</td><td><code>/auth/test-mode</code>가 오류·타임아웃·이상한 응답이면 "모름"으로 보고 저장된 로그인·토큰을 건드리지 않는다. 서버가 <code>enabled:false</code>라고 분명히 답한 때만 테스트 정리를 한다.</td></tr>
       <tr><td>4초 타임아웃</td><td>테스트 모드 확인이 멈춰도 원래 로그인 화면이 4초 안에 뜬다.</td></tr>
       <tr><td>한글 정규화</td><td>입력기가 분해형 한글(NFD)로 보내도 같은 아이디로 취급한다.</td></tr>
     </table></div>
@@ -310,6 +323,7 @@ npx wrangler secret delete GDC_FREE_TEST    --name hondi-proxy</code></pre>
           <li>이미 발급된 테스트 토큰을 서버가 모두 거부한다(<code>TOKEN_INVALID</code>, "테스트 기간이 종료되어 인증 토큰이 만료되었습니다").</li>
           <li>테스트 계정으로 로그인해 있던 브라우저는 다음 접속 때 테스트 로그인 정보와 공용 쿠키를 스스로 지우고 원래 로그인 화면으로 돌아간다.</li>
           <li>KAuth는 남은 <code>tid-</code> 토큰을 지우고 전화 인증(device-link) 오버레이를 보여 준다.</li>
+          <li>브라우저에 남는 <code>hondi_tn</code>(쿠키)·<code>hondi_test_notice_until</code>·<code>hondi_test_id</code>·<code>hondi_test_optout</code> 값은 스위치가 꺼진 뒤에는 아무 동작도 하지 않는 무해한 흔적이다. 다음 테스트 기간에 다시 켜면 <strong>이미 본 기기는 안내가 나오지 않는다</strong>(새 기간에 안내를 다시 보이려면 이 쿠키 값이 지워져야 한다).</li>
           <li>GDC 과금·잔액 확인이 원래대로 동작한다. 무료 한도(평생 100원)는 테스트 중 소진되지 않았으므로 그대로 남아 있다.</li>
         </ul>
       </div>
@@ -396,6 +410,8 @@ gh pr merge --squash --delete-branch</code></pre>
       <tr><td>쿠키가 사라지면 아이디를 잃어 새 아이디가 발급될 수 있었다.</td><td>기기 저장소에 <code>hondi_test_id</code> 백업(#538).</td></tr>
       <tr><td>두 사이트에서 서로 다른 아이디로 입장하면 방문 때마다 아이디가 번갈아 바뀔 수 있었다.</td><td>공유 쿠키의 아이디를 우선하도록 수정(#538).</td></tr>
       <tr><td>맥·iOS 입력기의 분해형 한글(NFD) 아이디가 거부될 수 있었다.</td><td>서버와 화면에서 NFC로 정규화(#538).</td></tr>
+      <tr><td><strong>안내가 0.1초만 보임</strong>(폰 시크릿탭 첫 접속, 2026-10-09 주피터 실사). 서비스 워커가 활성화 때 <code>clients.claim()</code>을 하고 PWA 코드의 <code>controllerchange</code> 핸들러가 첫 설치 여부를 가리지 않고 <code>location.reload()</code>를 하므로, 새 시크릿탭에서는 로드 직후 페이지가 한 번 새로고침된다. 이것이 유력한 원인이다(폰 기기에서 직접 확인하지는 못함). 또한 배너가 영구 표시 전제였던 것도 문제였다.</td><td>안내를 "기기당 1회·10초"로 바꾸고 시작 시각을 저장해, 새로고침이 끼어도 남은 시간을 이어서 표시(시뮬레이션: 0.3초 뒤 새로고침 후 남은 ≈9.2초 표시). 서비스 워커의 첫 설치 새로고침 자체는 건드리지 않았다.</td></tr>
+      <tr><td><strong>일시적인 서버 확인 실패가 "테스트 종료"로 오판됨</strong> — <code>/auth/test-mode</code>가 502이거나 4초간 응답이 없으면 저장된 테스트 로그인과 쿠키를 지우고 새로고침했다(수정 전 코드로 재현). 재접속 때 "아이디를 기억"하는 요구와 정면으로 충돌.</td><td>3상태(켜짐/꺼짐/모름)로 바꿔, 서버가 분명히 <code>enabled:false</code>라고 답할 때만 정리(수정 후 재현: 502·무응답 모두 아이디·쿠키 유지, 새로고침 없음).</td></tr>
       <tr><td>머지 완료된 #537 위에 누적 패치를 적용하려다 충돌.</td><td>머지된 PR과 내용이 같은지 먼저 확인하고, 최신 main 기준 차이분만 패치로 만든다(운영 규칙).</td></tr>
     </table></div>
 
@@ -408,6 +424,8 @@ gh pr merge --squash --delete-branch</code></pre>
       <li>쿠키만 삭제된 경우 복구, 쿠키·저장소 모두 삭제된 경우 새 아이디, 웹앱과 KAuth 동시 로드 경합(계정 1개만 생성)</li>
       <li>스위치 OFF 후 정리·토큰 거부, 위조 토큰 거부, 토큰 갱신, GDC 잔액 조회</li>
       <li>실사용자 보호(KAuth·웹앱), "기존 계정으로 로그인" 탈출, 테스트 모드 응답 지연 시 4초 뒤 원래 화면</li>
+      <li>안내 규칙: 첫 접속 10초 표시 → 0.3초 뒤 새로고침에도 남은 시간만 이어서 표시 → 11초 뒤 재접속은 배너 없이 같은 아이디 자동 로그인 → 다른 서비스(KAuth)에서도 안 보임, 실제 대기로 5초 시점 표시·10.4초 뒤 자동 소멸</li>
+      <li>일시 장애(502·무응답)에서 아이디 유지, <code>?testid=</code> 전환·<code>show</code>·<code>off</code>, 실사용자 로그인이 파라미터로도 덮어쓰이지 않음</li>
       <li>GDC 무료 모드: 스위치 OFF에서는 게이트·차감이 L1을 호출하고, ON에서는 호출하지 않으며 관리자 차감만 호출한다</li>
     </ul>
     <p>종료 후 실제 환경에서의 확인은 위 "정상화 검증" 체크리스트를 따른다.</p>

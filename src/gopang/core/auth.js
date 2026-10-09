@@ -1178,6 +1178,7 @@ function _loadStored() {
 
 // ── 사용자 초기화 (앱 시작 시 1회) ──────────────────────
 export async function initAuth() {
+  await _handleTestIdParam(); // 🧪 ?testid=… (없으면 즉시 반환)
   const stored = _loadStored();
   if (stored?.ipv6) {
     console.info('[Auth] 자동 로그인 ✅', stored.ipv6);
@@ -1374,15 +1375,39 @@ function _readCookie(name) {
   return m ? decodeURIComponent(m[1]) : null;
 }
 
+// ── 🧪 안내(고시) 표시 규칙 (2026-10-09, 주피터 지시) ───────────────────────
+// 같은 기기에서 단 한 번, 총 10초만 표시한다. 시작 시각을 저장해 두므로 그 사이 페이지가 새로고침돼도
+// (예: 서비스 워커 첫 설치 직후의 자동 새로고침) 남은 시간만큼 이어서 보이고, 시간이 지난 뒤에는 어떤
+// 페이지에서도 다시 나타나지 않는다. 기록은 공용 쿠키(hondi_tn, .hondi.net)와 이 사이트 저장소
+// (hondi_test_notice_until)에 함께 남기며, 둘 중 하나라도 있으면 '이미 봤다'로 본다.
+const TEST_NOTICE_MS = 10000;
+function _writeNoticeUntil(until) {
+  try { localStorage.setItem('hondi_test_notice_until', String(until)); } catch {}
+  try { document.cookie = 'hondi_tn=' + until + '; domain=.hondi.net; path=/; max-age=31536000; secure; samesite=lax'; } catch {}
+}
+function _noticeRemainingMs() {
+  const c = Number(_readCookie('hondi_tn') || 0);
+  let l = 0; try { l = Number(localStorage.getItem('hondi_test_notice_until') || 0); } catch {}
+  const until = Math.max(c || 0, l || 0);
+  if (!until) { _writeNoticeUntil(Date.now() + TEST_NOTICE_MS); return TEST_NOTICE_MS; } // 이 기기에서 처음
+  return Math.max(0, until - Date.now());                                                  // 진행 중이면 남은 시간, 끝났으면 0
+}
+function _hideTestNotice() {
+  const bar = document.getElementById('_test-notice-banner');
+  if (bar) { bar.remove(); document.body.style.paddingTop = ''; }
+}
+
 function _showTestNoticeBanner(id) {
+  const remaining = _noticeRemainingMs();
+  if (remaining <= 0) { _hideTestNotice(); return; }   // 이미 본 기기 — 다시 표시하지 않는다
   let bar = document.getElementById('_test-notice-banner');
   if (!bar) {
     bar = document.createElement('div');
     bar.id = '_test-notice-banner';
-    bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:10000;background:#b45309;color:#fff;' +
-      'font-size:12.5px;line-height:1.5;padding:6px 12px;text-align:center;font-family:inherit';
+    bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:2147483000;background:#b45309;color:#fff;' +
+      'font-size:13px;line-height:1.55;padding:8px 12px;text-align:center;font-family:inherit';
     document.body.appendChild(bar);
-    document.body.style.paddingTop = '34px';
+    document.body.style.paddingTop = '40px';
   }
   bar.innerHTML = '';
   const span = document.createElement('span');
@@ -1390,33 +1415,43 @@ function _showTestNoticeBanner(id) {
   bar.appendChild(span);
   if (id) {
     const b = document.createElement('b'); b.textContent = id; bar.appendChild(b);
-    const btn = document.createElement('button');
-    btn.textContent = '다른 아이디로 입장';
-    btn.style.cssText = 'margin-left:8px;padding:2px 8px;border:1px solid #fff;background:transparent;color:#fff;border-radius:6px;cursor:pointer;font-size:12px';
-    btn.onclick = () => _showTestIdPopup((u) => { if (u) location.reload(); });
-    bar.appendChild(btn);
+    const mk = (label, fn) => {
+      const x = document.createElement('button');
+      x.textContent = label;
+      x.style.cssText = 'margin:2px 0 0 8px;padding:2px 8px;border:1px solid #fff;background:transparent;color:#fff;border-radius:6px;cursor:pointer;font-size:12.5px';
+      x.onclick = fn; bar.appendChild(x); return x;
+    };
+    mk('다른 아이디로 입장', () => _showTestIdPopup((u) => { if (u) location.reload(); }));
+    // 다른 기기에서 같은 계정으로 들어오는 링크(안내가 사라진 뒤에도 ?testid=<아이디> 로 언제든 가능)
+    const copyBtn = mk('다른 기기용 링크 복사', async () => {
+      const link = location.origin + '/?testid=' + encodeURIComponent(id);
+      try { await navigator.clipboard.writeText(link); copyBtn.textContent = '복사됨 ✓'; }
+      catch { window.prompt('이 링크를 다른 기기에서 여세요', link); }
+    });
     // 탈출구: 전화 인증으로 만든 기존 계정을 쓰는 사용자는 테스트 아이디를 끄고 원래 로그인으로 돌아간다.
-    const legacyBtn = document.createElement('button');
-    legacyBtn.textContent = '기존 계정으로 로그인';
-    legacyBtn.style.cssText = btn.style.cssText;
-    legacyBtn.onclick = () => {
+    mk('기존 계정으로 로그인', () => {
       try { localStorage.setItem('hondi_test_optout', '1'); } catch {}
       try { if (_loadStored()?.test_account) localStorage.removeItem(STORE_KEY); } catch {}
       if ((_readCookie('hondi_pvt') || '').startsWith('tid-')) _clearSharedPvtCookie();
       location.reload();
-    };
-    bar.appendChild(legacyBtn);
+    });
   }
+  clearTimeout(window.__hondiNoticeTimer);
+  window.__hondiNoticeTimer = setTimeout(_hideTestNotice, remaining);
 }
 
+// 반환: true(켜짐) / false(서버가 꺼졌다고 분명히 답함) / null(확인 불가 — 네트워크 등). 'null'을 '꺼짐'으로
+// 오판하면 일시적인 네트워크 오류 한 번에 저장된 테스트 아이디가 지워지므로 반드시 구분한다.
 async function _isTestAuthEnabled() {
   if (!SIMPLE_SIGNUP_TEST) return false;
   try {
     // 느리거나 멈춰도 원래 로그인 화면이 막히지 않도록 4초 타임아웃
     const r = await fetch(`${PROXY_URL}/auth/test-mode`, { signal: AbortSignal.timeout(4000) });
-    const d = await r.json().catch(() => ({}));
-    return !!d.enabled;
-  } catch { return false; }
+    if (!r.ok) return null;                                  // 서버 오류 — '모름'
+    const d = await r.json().catch(() => null);
+    if (!d || d.ok !== true) return null;                    // 응답 형식 이상 — '모름'
+    return !!d.enabled;                                      // 서버가 분명히 답한 경우에만 true/false
+  } catch { return null; }                                   // 타임아웃·네트워크 오류 — '모름'
 }
 
 // 서버 응답(d)을 이 앱의 로그인 상태 + 공용 쿠키로 반영한다.
@@ -1519,7 +1554,8 @@ function _showTestIdPopup(resolve) {
 // 꺼졌다면(테스트 종료) 테스트 로그인 상태를 정리하고 원래 로그인 화면으로 돌려보낸다.
 async function _refreshTestSession(stored) {
   try {
-    if (await _isTestAuthEnabled()) {
+    const on = await _isTestAuthEnabled();
+    if (on === true) {
       // 공유 쿠키의 아이디가 이 앱의 아이디와 다르면(다른 사이트에서 '다른 아이디로 입장'을 한 경우) 쿠키를 따른다
       const ck = _readCookie('hondi_pvt');
       const ckId = (ck && ck.startsWith('tid-')) ? ck.slice(4, ck.indexOf(':')) : null;
@@ -1528,19 +1564,53 @@ async function _refreshTestSession(stored) {
         _applyTestEnter(d);
         if (d.guid !== stored.ipv6) location.reload(); // 앱이 이전 아이디로 떠 있으면 새 아이디로 다시 시작
       } else { _showTestNoticeBanner(stored.nickname); }
-    } else {
+    } else if (on === false) {
+      // 서버가 '테스트 종료'라고 분명히 답한 경우에만 정리한다
       try { localStorage.removeItem(STORE_KEY); } catch {}
       _clearSharedPvtCookie();
       location.reload();
+    } else {
+      _showTestNoticeBanner(stored.nickname); // 확인 불가 — 로그인(기억한 아이디)은 그대로 두고 안내 규칙만 적용
     }
   } catch { /* 네트워크 오류 — 판단 보류 */ }
+}
+
+// 주소 파라미터 ?testid=… (안내가 사라진 뒤에도 쓸 수 있는 조작 수단, 2026-10-09)
+//   ?testid=<아이디>  이 기기를 그 아이디로 전환(다른 기기에서 쓰던 아이디로 들어올 때)
+//   ?testid=show      내 아이디 확인용 — 안내를 10초간 다시 표시
+//   ?testid=off       테스트 아이디를 끄고 전화 인증 로그인으로 복귀
+// 테스트 모드가 꺼져 있으면 무시한다. 주소창에는 파라미터를 남기지 않는다(새로고침해도 반복되지 않음).
+async function _handleTestIdParam() {
+  let raw = null;
+  try {
+    const u = new URL(location.href);
+    raw = u.searchParams.get('testid');
+    if (raw === null) return;
+    u.searchParams.delete('testid');
+    history.replaceState(null, '', u.pathname + u.search + u.hash);
+  } catch { return; }
+  if ((await _isTestAuthEnabled()) !== true) return;
+  const v = String(raw).trim().toLowerCase().normalize('NFC');
+  if (v === 'show') { _writeNoticeUntil(Date.now() + TEST_NOTICE_MS); return; }
+  if (v === 'off') {
+    try { localStorage.setItem('hondi_test_optout', '1'); } catch {}
+    try { if (_loadStored()?.test_account) localStorage.removeItem(STORE_KEY); } catch {}
+    if ((_readCookie('hondi_pvt') || '').startsWith('tid-')) _clearSharedPvtCookie();
+    return;
+  }
+  if (!/^[a-z0-9가-힣_-]{2,20}$/.test(v) || _hasRealSharedLogin()) return; // 전화 인증 로그인은 덮어쓰지 않는다
+  try {
+    try { localStorage.removeItem('hondi_test_optout'); } catch {}
+    const d = await _testEnter(v);
+    _applyTestEnter(d, true);
+  } catch (e) { console.warn('[Auth] ?testid 전환 실패:', e.message); }
 }
 
 function _showPhonePopup(resolve) {
   // 서버 테스트 스위치가 켜져 있으면 아이디 자동 생성 입장, 꺼져 있으면 기존(문자 인증) 흐름.
   _isTestAuthEnabled().then(async (on) => {
     // 테스트 모드가 꺼졌거나, 이미 전화 인증으로 로그인한 실사용자이거나, '기존 계정' 로그인을 고른 경우는 원래 흐름
-    if (!on || _hasRealSharedLogin() || _testOptedOut()) { _showPhonePopupLegacy(resolve); return; }
+    if (on !== true || _hasRealSharedLogin() || _testOptedOut()) { _showPhonePopupLegacy(resolve); return; }
     try {
       let d = await _testEnter(null);
       if (!d) { window.__hondiTestEnter = null; d = await _testEnter(null); } // 공유 시도가 일시 실패했다면 1회 재시도
