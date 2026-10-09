@@ -652,6 +652,18 @@ async function _resolveGuidFromPhoneVerifyToken(env, phoneVerifyToken) {
   const expectedSig = await _hmacSha256Hex(env.PHONE_VERIFY_SECRET, payload);
   if (expectedSig !== sig) return { ok: false, code: 'TOKEN_INVALID', message: '전화번호 인증 토큰 서명이 유효하지 않습니다' };
 
+  // 🧪 테스트 아이디 토큰(2026-10-09): e164 자리가 'tid-<아이디>'. 서버 스위치가 꺼지면 즉시 무효.
+  if (e164.startsWith(TEST_ID_PREFIX)) {
+    if (!_testAuthOn(env)) return { ok: false, code: 'TOKEN_INVALID', message: '테스트 기간이 종료되어 인증 토큰이 만료되었습니다' };
+    try {
+      const prof = await _l1FindProfileByHandle(env, e164);
+      if (!prof) return { ok: false, code: 'PROFILE_NOT_FOUND', message: '이 아이디로 등록된 프로필이 없습니다' };
+      return { ok: true, guid: prof.guid, e164 };
+    } catch (e) {
+      return { ok: false, code: 'L1_ERROR', message: '아이디 조회 실패: ' + e.message };
+    }
+  }
+
   try {
     const l1Token = await _l1AdminToken(env);
     // 2026-09-03 수정 — profiles 컬렉션 실제 스키마는 e164 필드다(phone
@@ -724,6 +736,15 @@ async function handleUserGdcBalance(request, env, corsHeaders) {
   if (Date.now() > exp) return _err(401, 'TOKEN_EXPIRED', '전화번호 인증 토큰이 만료됐습니다', corsHeaders);
   const expectedSig = await _hmacSha256Hex(env.PHONE_VERIFY_SECRET, payload);
   if (expectedSig !== sig) return _err(401, 'TOKEN_INVALID', '전화번호 인증 토큰 서명이 유효하지 않습니다', corsHeaders);
+
+  // 🧪 테스트 아이디 토큰(2026-10-09) — GDC 무료 테스트 중이라 잔액 0이어도 이용에는 영향 없음
+  if (e164.startsWith(TEST_ID_PREFIX)) {
+    if (!_testAuthOn(env)) return _err(401, 'TOKEN_INVALID', '테스트 기간이 종료되어 인증 토큰이 만료되었습니다', corsHeaders);
+    const prof = await _l1FindProfileByHandle(env, e164).catch(() => null);
+    if (!prof) return _err(404, 'PROFILE_NOT_FOUND', '이 아이디로 등록된 프로필이 없습니다', corsHeaders);
+    const bal = await getBalanceGdcForStatus(prof.guid).catch(() => null);
+    return new Response(JSON.stringify({ ok: true, guid: prof.guid, balance: bal ?? 0, test_account: true }), { status: 200, headers: corsHeaders });
+  }
 
   // 2026-09-03 수정 — profiles 컬렉션 실제 스키마는 e164 필드다(phone
   // 필드는 존재하지 않음, pb_migrations/1781467666_updated_profiles.js
@@ -1857,7 +1878,21 @@ async function _l1GetBalanceKRW(guid) {
 //  이 함수를 쓰도록 같이 리팩터했다(아래 callDeepSeek 수정 참고).
 //  반환값: null이면 통과, Response 객체면 그 응답으로 즉시 차단해야 한다
 //  (호출부에서 `if (blocked) return blocked;` 패턴으로 사용).
+// ═══════════════════════════════════════════════════════════
+// 🧪 GDC 무료 테스트 모드 — 2026-10-09 (주피터 지시, 잠정)
+//   env.GDC_FREE_TEST === '1' 인 동안 GDC 충전 없이 무제한 이용:
+//   · 무료 한도/잔액 확인 게이트(_gdcFreeQuotaGate)와 K-Law 판결 사전 잔액 확인을 건너뜀
+//   · AI 사용량 정산(_settleAiUsage) 시 GDC 차감과 '평생 무료 100원' 소진을 모두 건너뜀
+//     (→ 테스트가 끝나면 모든 사용자의 무료 한도가 그대로 남아 있다)
+//   · _chargeGdcForAiUsage 호출 전반(K-Law 판결 정액, 정부 수수료, K-Mail 초과분)을 무과금 성공으로 처리
+//   예외(반드시 실제 차감): 관리자 수동 차감 'admin-correction' — 정정 도구가 거짓 성공을 내면 안 됨.
+//   사용량 기록(_recordAiUsage)은 그대로 남는다 — 테스트 중 원가를 나중에 집계할 수 있도록.
+//   끄는 법: Cloudflare 변수 GDC_FREE_TEST 삭제(또는 0). 기본 꺼짐. wrangler.toml에는 넣지 않는다.
+// ═══════════════════════════════════════════════════════════
+function _gdcFreeTestOn(env) { return !!env && env.GDC_FREE_TEST === '1'; }
+
 async function _gdcFreeQuotaGate(env, guid, corsHeaders, meta) {
+  if (_gdcFreeTestOn(env)) return null; // 🧪 GDC 무료 테스트 모드
   if (!guid || !FREE_QUOTA_ENFORCEMENT_ENABLED) return null;
   const kv = env.AI_SETUP_SEALS_KV;
   if (!kv) return null;
@@ -1910,6 +1945,11 @@ async function _chargeGdcForAiUsage(env, {
   guid, krwAmount, serviceId, model, hitTokens, missTokens, outTokens, costKRW, memo, settlementKey,
 }) {
   if (!guid || !(krwAmount > 0)) return null;
+  // 🧪 GDC 무료 테스트 모드 — 실제 차감 없이 성공으로 돌려준다(관리자 수동 차감 제외).
+  if (_gdcFreeTestOn(env) && serviceId !== 'admin-correction') {
+    console.log(JSON.stringify({ tag: 'GDC_FREE_TEST_SKIP_CHARGE', guid, krwAmount, serviceId: serviceId || 'hondi-chat', ts: new Date().toISOString() }));
+    return { ok: true, test_free: true, charged_gdc: 0 };
+  }
   const txHash = settlementKey || ('aicharge-' + (crypto.randomUUID?.() || (Date.now() + '-' + Math.random().toString(36).slice(2))));
   try {
     const res = await fetch(`${L1_DEFAULT}/api/ai-charge`, {
@@ -1952,6 +1992,7 @@ async function _chargeGdcForAiUsage(env, {
 // 평생 100원 무료"라는 약속이 요청 경계와 무관하게 정확히 지켜진다.
 async function _settleAiUsage(env, guid, bill, meta = {}, ctx = null, settlementKey = null) {
   if (!guid || !bill) return;
+  if (_gdcFreeTestOn(env)) return; // 🧪 GDC 무료 테스트 모드 — 차감·무료한도 소진 모두 생략
   const kv = env.AI_SETUP_SEALS_KV;
   let spentBefore = 0;
   if (kv) {
@@ -20326,43 +20367,75 @@ const TEST_ID_PREFIX = 'tid-';
 function _testAuthOn(env) { return env && env.SIMPLE_AUTH_TEST === '1'; }
 
 async function handleTestAuthMode(request, env, corsHeaders) {
-  return new Response(JSON.stringify({ ok: true, enabled: _testAuthOn(env) }), { status: 200, headers: corsHeaders });
+  return new Response(JSON.stringify({ ok: true, enabled: _testAuthOn(env), gdc_free: _gdcFreeTestOn(env) }), { status: 200, headers: corsHeaders });
 }
 
-// POST /auth/test-enter { id } — 없으면 만들고, 있으면 그 계정으로 입장. 세션 토큰 발급.
+// ── 쉬운 한국어 단어 아이디 자동 생성 (2026-10-09) ─────────────────────
+// "형용사 + 명사"(예: 푸른바다, 맑은감귤). 외우기 쉽도록 짧은 일상어만 쓰고,
+// 이미 있으면 다른 조합을 먼저 시도한 뒤 마지막에만 숫자 두 자리를 붙인다.
+const TEST_ID_ADJ = ['푸른','맑은','고운','밝은','빠른','높은','깊은','착한','귀한','새로운','든든한','따뜻한','시원한','포근한','씩씩한','느긋한','향긋한','반가운','즐거운','튼튼한'];
+const TEST_ID_NOUN = ['하늘','바다','구름','바람','파도','노을','별빛','달빛','호수','나무','꽃잎','감귤','한라산','오름','해녀','조랑말','고래','거북이','나비','다람쥐','고양이','강아지','토끼','사슴','돌하르방','유채꽃','동백꽃','갈매기','물결','햇살'];
+function _randInt(n) { return crypto.getRandomValues(new Uint32Array(1))[0] % n; }
+async function _generateTestId(env) {
+  for (let i = 0; i < 12; i++) {
+    const id = TEST_ID_ADJ[_randInt(TEST_ID_ADJ.length)] + TEST_ID_NOUN[_randInt(TEST_ID_NOUN.length)];
+    if (!(await _l1FindProfileByHandle(env, TEST_ID_PREFIX + id))) return id;
+  }
+  for (let i = 0; i < 40; i++) { // 흔한 조합이 이미 많이 찼다면 숫자 두 자리를 붙인다
+    const id = TEST_ID_ADJ[_randInt(TEST_ID_ADJ.length)] + TEST_ID_NOUN[_randInt(TEST_ID_NOUN.length)] + String(10 + _randInt(90));
+    if (!(await _l1FindProfileByHandle(env, TEST_ID_PREFIX + id))) return id;
+  }
+  throw new Error('아이디를 만들지 못했습니다');
+}
+
+// 모든 서비스가 이미 받는 phone_verify_token 형식 그대로 발급한다:
+//   "tid-<아이디>:<만료ms>.<hmac>"  ← 전화번호(e164) 자리에 'tid-<아이디>'가 들어간다.
+// → _resolveGuidFromPhoneVerifyToken(K-Law·K-Plan·K-Gov·K-Business·K-Mail 공용 게이트),
+//   /user/gdc-balance, /auth/refresh-token 이 이 토큰을 그대로 해석한다. 쿠키 hondi_pvt로
+//   .hondi.net 전체에 공유된다. 실제 전화번호는 '+'로 시작하므로 충돌하지 않는다.
+async function _mintTestPhoneToken(env, id) {
+  if (!env.PHONE_VERIFY_SECRET) return null;
+  const exp = Date.now() + PHONE_VERIFY_TOKEN_TTL_MS;
+  const payload = `${TEST_ID_PREFIX}${id}:${exp}`;
+  const sig = await _hmacSha256Hex(env.PHONE_VERIFY_SECRET, payload);
+  return { token: payload + '.' + sig, exp };
+}
+
+// POST /auth/test-enter { id? } — id가 없으면 새 한국어 단어 아이디를 자동 생성,
+// 있으면(다른 기기에서 같은 아이디로 입장) 그 계정으로 입장하고 없으면 만든다.
 async function handleTestAuthEnter(request, env, corsHeaders) {
   if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
   if (!_testAuthOn(env)) return _err(403, 'TEST_AUTH_OFF', '테스트 간편 입장이 꺼져 있습니다', corsHeaders);
-  const body = await request.json().catch(() => null);
-  const id = String(body?.id || '').trim().toLowerCase();
-  if (!/^[a-z0-9가-힣_-]{2,20}$/.test(id)) {
+  if (!env.PHONE_VERIFY_SECRET) return _err(500, 'SECRET_NOT_SET', 'PHONE_VERIFY_SECRET이 설정되지 않았습니다', corsHeaders);
+  const body = await request.json().catch(() => ({})) || {};
+  let id = String(body.id || '').trim().toLowerCase().normalize('NFC'); // 맥/iOS 입력기의 분해형 한글(NFD)도 같은 아이디로 취급
+  if (id && !/^[a-z0-9가-힣_-]{2,20}$/.test(id)) {
     return _err(400, 'INVALID_ID', '아이디는 2~20자의 한글·영문 소문자·숫자·_·- 만 쓸 수 있습니다', corsHeaders);
   }
-  const handle = TEST_ID_PREFIX + id;
 
-  let profile;
+  let profile = null, created = false;
   try {
-    profile = await _l1FindProfileByHandle(env, handle);
-  } catch (e) {
-    return _err(502, 'L1_UNREACHABLE', 'L1 연결 실패: ' + e.message, corsHeaders);
-  }
-
-  let created = false;
-  if (!profile) {
-    const rnd = crypto.getRandomValues(new Uint8Array(12));
-    const hex = Array.from(rnd).map(b => b.toString(16).padStart(2, '0')).join('');
-    const groups = ['2601', 'db80'];
-    for (let i = 0; i < 6; i++) groups.push(hex.slice(i * 4, i * 4 + 4));
-    const guid = groups.join(':');
-    const hashBuf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('tid:' + id));
-    const nickname_hash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
-    try {
+    if (id) profile = await _l1FindProfileByHandle(env, TEST_ID_PREFIX + id);
+    if (!profile) {
+      // 신규 생성은 IP당 시간당 30개로 제한(RATE_LIMIT_KV가 바인딩된 경우) — 자동 생성 남용 방지
+      const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+      if (!(await _checkRateLimitN(env, ip, 'test-create', 30, 3600))) {
+        return _err(429, 'TEST_CREATE_RATE_LIMIT', '잠시 후 다시 시도해 주세요', corsHeaders);
+      }
+      if (!id) id = await _generateTestId(env);
+      const rnd = crypto.getRandomValues(new Uint8Array(12));
+      const hex = Array.from(rnd).map(b => b.toString(16).padStart(2, '0')).join('');
+      const groups = ['2601', 'db80'];
+      for (let i = 0; i < 6; i++) groups.push(hex.slice(i * 4, i * 4 + 4));
+      const guid = groups.join(':');
+      const hashBuf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('tid:' + id));
+      const nickname_hash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
       const token = await _l1AdminToken(env);
       const res = await fetch(`${L1_DEFAULT}/api/collections/profiles/records`, {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          guid, handle, nickname: id, nickname_hash,
+          guid, handle: TEST_ID_PREFIX + id, nickname: id, nickname_hash,
           country_code: 'KR', native_lang: 'ko',
           is_public: false, // 테스트 계정은 공개 검색에 노출하지 않는다
           extra: { test_account: true },
@@ -20371,20 +20444,23 @@ async function handleTestAuthEnter(request, env, corsHeaders) {
       if (!res.ok) return _err(500, 'L1_INSERT_ERROR', await res.text(), corsHeaders);
       profile = await res.json();
       created = true;
-    } catch (e) {
-      return _err(502, 'L1_UNREACHABLE', 'L1 PocketBase 등록 실패: ' + e.message, corsHeaders);
     }
+  } catch (e) {
+    return _err(502, 'L1_UNREACHABLE', 'L1 처리 실패: ' + e.message, corsHeaders);
   }
 
-  // 방어: 조회된 레코드가 테스트 계정이 아니면(이론상 불가) 거부
+  // 방어: 테스트 계정이 아니면(이론상 불가) 거부
   if (!String(profile.handle || '').startsWith(TEST_ID_PREFIX)) {
     return _err(403, 'NOT_TEST_ACCOUNT', '테스트 계정이 아닙니다', corsHeaders);
   }
+  const shownId = String(profile.handle).slice(TEST_ID_PREFIX.length);
 
+  const pv = await _mintTestPhoneToken(env, shownId);
   const token = await buildToken(env, profile.guid, 'L0', 'gopang');
   return new Response(JSON.stringify({
-    ok: true, created, guid: profile.guid, handle: profile.handle,
-    nickname: profile.nickname || id, token,
+    ok: true, created, id: shownId, guid: profile.guid, handle: profile.handle,
+    nickname: profile.nickname || shownId, token,
+    phone_verify_token: pv.token, expires_at: new Date(pv.exp).toISOString(),
   }), { status: 200, headers: { ...corsHeaders, 'Set-Cookie': buildCookie(token) } });
 }
 
@@ -21110,7 +21186,7 @@ async function handleKlawRelay(bodyText, env, corsHeaders, meta = null, ctx = nu
   const _klawBetaActive = _klawBetaUsageBillingActive();
   const _klawFlatFee = (!_klawBetaActive && step_cycle) ? _klawFlatFeeForClaimAmount(claim_amount_krw) : null;
   const _klawIsCaseFlow = !_klawBetaActive && !!case_id;
-  if (!_klawFreeTier && step_cycle && _klawFlatFee) {
+  if (!_gdcFreeTestOn(env) && !_klawFreeTier && step_cycle && _klawFlatFee) { // 🧪 무료 테스트 모드면 사전 잔액 확인 생략
     let _klawWillChargeNow = true; // 기본: 이번 호출에서 실제로 청구 시도됨
     if (_klawIsCaseFlow) {
       // 사건단위 흐름 — 이미 결제된 사건이면(재생성) 이번엔 청구가 없다.
