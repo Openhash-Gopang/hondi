@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>혼디 관리자</title>
+<title>나비 관리자</title>
 <link rel="icon" href="/favicon.ico">
-<link rel="apple-touch-icon" href="/icons/icon-180.png">
+<link rel="apple-touch-icon" href="/icons/navi-icon-180.png">
 <link rel="manifest" href="/manifest.json">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
@@ -48,7 +48,7 @@
 <body>
 <div id="admin-page">
   <div id="admin-page-header">
-    <span class="title">혼디 관리자</span>
+    <span class="title">나비 관리자</span>
     <div class="right">
       <span id="logout-btn" onclick="_adminLogout()">로그아웃</span>
       <a href="./desktop.html">← 사이트로</a>
@@ -82,6 +82,17 @@
 
     <!-- 대시보드 본문 -->
     <div id="admin-body" style="display:none;padding:22px 26px">
+
+      <!-- ⓪ 사업 계획 메뉴 (2026-10-12 신설 — 주피터 지시: 관리자 대시보드에 사업 계획 메뉴와 K-Law 사업계획서 추가)
+           문서가 늘면 아래 목록에 항목만 추가한다. -->
+      <details id="admin-bizplan-menu" style="border:1px solid var(--ad-line,#3c3f46);border-radius:0;margin-bottom:16px">
+        <summary style="cursor:pointer;padding:12px 18px;font-size:14px;font-weight:600;list-style:none">사업 계획</summary>
+        <div style="padding:4px 18px 14px;border-top:1px solid var(--ad-line,#3c3f46)">
+          <ul style="margin:10px 0 0;padding-left:20px;font-size:14px;line-height:2">
+            <li><a href="./admin/klaw-business-plan.html" target="_blank" rel="noopener">K-Law 사업계획서 (마케팅 방안 포함, 2026-10-12) ↗</a></li>
+          </ul>
+        </div>
+      </details>
 
       <!-- ① 통계 -->
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;
@@ -130,7 +141,7 @@
           </div>
         </div>
         <div id="gdc-summary-note" style="font-size:10.5px;color:var(--ad-faint,#6e737a);margin-top:12px;line-height:1.6">
-          사용자 간 결제(혼디마켓 P2P)와 원장 무결성(BIVM) 검증은 아직 집계가 배선되지 않았습니다 — 별도 작업 예정.
+          사용자 간 결제(나비마켓 P2P)와 원장 무결성(BIVM) 검증은 아직 집계가 배선되지 않았습니다 — 별도 작업 예정.
         </div>
       </div>
 
@@ -726,7 +737,7 @@ async function _loadGdcSummary() {
     document.getElementById('gdc-ai-usage-count').textContent = `${ai.count.toLocaleString()}건 · ${fmtGdc(ai.total_gdc)} GDC 차감`;
 
     const noteParts = [];
-    if (data.p2p_market == null) noteParts.push('사용자 간 결제(혼디마켓 P2P) 집계 미배선');
+    if (data.p2p_market == null) noteParts.push('사용자 간 결제(나비마켓 P2P) 집계 미배선');
     if (data.bivm_check == null) noteParts.push('BIVM 원장 무결성 검증 미배선');
     document.getElementById('gdc-summary-note').textContent =
       noteParts.length ? noteParts.join(' · ') : '집계 정상';
