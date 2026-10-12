@@ -124,7 +124,7 @@ def build_gwp_payload(rec):
     return {
         "entity_type": "platform",
         "name": rec["name"],
-        "description": rec["description"] or f"{rec['name']} — 혼디 핵심 GWP 서비스",
+        "description": rec["description"] or f"{rec['name']} — 나비 핵심 GWP 서비스",
         "tags": ["core-gwp", rec["category"]] + (["core-status:" + rec["core_status"]] if rec["core_status"] else []),
         "occupation": "AI 서비스",
         "entity_subtype": f"gwp:{rec['gwp_id']}",

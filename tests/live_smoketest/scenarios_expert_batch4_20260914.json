@@ -90,10 +90,10 @@
    "variant": "implied", "utterance": "고등학생인 우리 애가 요즘 방에서 안 나오고 말도 잘 안 하는데 전문적으로 얘기 나눠줄 사람이 필요해요",
    "expect_tag": "[EXPERT: youth-counselor]"},
 
-  {"id": "expert-hondi-guide-A-named", "tier": "expert", "target_id": "hondi-guide", "target_name": "혼디 SP",
-   "variant": "named", "utterance": "혼디 SP 연결해줘, 전문가 페르소나가 몇 명이나 있는지 정확히 알고 싶어",
+  {"id": "expert-hondi-guide-A-named", "tier": "expert", "target_id": "hondi-guide", "target_name": "나비 SP",
+   "variant": "named", "utterance": "나비 SP 연결해줘, 전문가 페르소나가 몇 명이나 있는지 정확히 알고 싶어",
    "expect_tag": "[EXPERT: hondi-guide]"},
-  {"id": "expert-hondi-guide-B-implied", "tier": "expert", "target_id": "hondi-guide", "target_name": "혼디 SP",
+  {"id": "expert-hondi-guide-B-implied", "tier": "expert", "target_id": "hondi-guide", "target_name": "나비 SP",
    "variant": "implied", "utterance": "이 서비스 쓰다가 버그를 발견했는데 개발팀한테 신고하고 싶어",
    "expect_tag": "[EXPERT: hondi-guide]"},
 

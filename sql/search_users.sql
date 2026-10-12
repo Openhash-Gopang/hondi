@@ -1,5 +1,5 @@
 -- ============================================================
--- search_users.sql — 고팡 사용자/프로필 통합 검색 RPC
+-- search_users.sql — 나비 사용자/프로필 통합 검색 RPC
 -- 저장위치: gopang/sql/search_users.sql
 -- 실행: Supabase SQL Editor (search_index.sql 실행 후)
 -- ============================================================

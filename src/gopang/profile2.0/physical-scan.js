@@ -2,7 +2,7 @@
 // ============================================================
 // 물리자료 Profile 스캔 모듈
 //
-// 혼디 숫자코드 스캔(src/gopang/gwp/engine.js)과 동일한 패턴을 따른다:
+// 나비 숫자코드 스캔(src/gopang/gwp/engine.js)과 동일한 패턴을 따른다:
 //   캡처 → 인식(비전 AI) → 구조화(JSON) → 사용자 확인 → Profile 필드 병합
 //
 // 호출 비전 프롬프트: prompts/sp-catalog.json 의 "SP-15-IMG_profile-scan_vision_prompt" 키로 결정

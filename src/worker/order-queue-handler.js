@@ -96,7 +96,7 @@ async function handleOrderQueue(request, env, corsHeaders, deps) {
   if (sellerClaimStatus === 'unclaimed') {
     return new Response(JSON.stringify({
       ok: true, accepted: false, reason: 'SELLER_UNCLAIMED',
-      message: '이 업체는 아직 Hondi 정식 가입자가 아니에요(AI가 검색으로 확인만 한 정보예요). ' +
+      message: '이 업체는 아직 나비 정식 가입자가 아니에요(AI가 검색으로 확인만 한 정보예요). ' +
         '주문·결제는 지원되지 않으니, 안내된 연락처로 직접 문의해 보시겠어요?',
     }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }

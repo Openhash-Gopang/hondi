@@ -1,12 +1,12 @@
-# 혼디 정부 수수료 기준표 — PocketBase 연동 시드
+# 나비 정부 수수료 기준표 — PocketBase 연동 시드
 
 ## 구성
 - `schema/gov_fee_schedule.collection.json` — PocketBase 컬렉션 스키마 (Admin UI > Settings > Import collections 로 가져오기)
 - `scripts/gov_fee_calc.mjs` — 순수 계산 함수 (formula_json 기반, 하드코딩 세율표 없음). gov-router.js 등에서 import해서 재사용.
-- `scripts/seed_gov_fee_schedule.mjs` — 엑셀(혼디_정부수수료_기준표_초안.xlsx) → PocketBase 레코드 변환/upsert
+- `scripts/seed_gov_fee_schedule.mjs` — 엑셀(나비_정부수수료_기준표_초안.xlsx) → PocketBase 레코드 변환/upsert
 
 ## 설계 요약
-- GDC 청구액은 **혼디 서비스 수수료 전용**입니다 (2026-08-15 결정). 정부에 실제로 납부하는 금액은
+- GDC 청구액은 **나비 서비스 수수료 전용**입니다 (2026-08-15 결정). 정부에 실제로 납부하는 금액은
   포함하지 않으며, 사용자가 공식 채널로 직접 납부합니다.
 - `hondi_service_fee = gov_reference_fee × gdc_multiplier` (기본 배율 2, 과금 원칙 ③).
 - `scope: national` (인지세·법원 인지대·송달료)은 지역 무관 전국 공통이며, `formula_json`에 구간표를
@@ -26,7 +26,7 @@
 새 지역(예: 제주시)을 추가하려면:
 
 1. 그 지역 지자체 홈페이지의 "민원사무편람" 게시판에서 엑셀을 받는다(각 지자체가 자체 게시 —
-   `혼디_정부수수료_기준표_초안.xlsx`와 같은 컬럼 구조를 갖는지 먼저 확인, 다르면 스크립트의
+   `나비_정부수수료_기준표_초안.xlsx`와 같은 컬럼 구조를 갖는지 먼저 확인, 다르면 스크립트의
    `parseBaselineSheet()` 컬럼 매핑을 그 파일에 맞게 조정 필요).
 2. 그 지역 고유의 `--region` 코드로 시드한다 — **반드시 `gov-router.js`의 실제 시코드와 일치시킬 것**
    (도코드 접두 형태, 예: 제주시는 `jeju_jejusi`). `gov-router.js`의 `_makeMetroCityTable`/
@@ -46,16 +46,16 @@
 ```bash
 npm install
 # 1) 먼저 dry-run으로 파싱 결과만 확인 (PocketBase 연결 없이)
-node scripts/seed_gov_fee_schedule.mjs --file ./혼디_정부수수료_기준표_초안.xlsx --dry-run
+node scripts/seed_gov_fee_schedule.mjs --file ./나비_정부수수료_기준표_초안.xlsx --dry-run
 
 # 2) 실제 반영 (BASELINE 자체를 시드/갱신하는 경우)
 export POCKETBASE_URL=https://your-l1-node
 export POCKETBASE_ADMIN_EMAIL=admin@example.com
 export POCKETBASE_ADMIN_PASSWORD=********
-node scripts/seed_gov_fee_schedule.mjs --file ./혼디_정부수수료_기준표_초안.xlsx --region baseline --multiplier 2
+node scripts/seed_gov_fee_schedule.mjs --file ./나비_정부수수료_기준표_초안.xlsx --region baseline --multiplier 2
 
 # 2-1) 천안시 자신의 실제 지역 데이터로도 별도 시드 (baseline과는 독립된 레코드)
-node scripts/seed_gov_fee_schedule.mjs --file ./혼디_정부수수료_기준표_초안.xlsx --region chungnam_cheonan --multiplier 2
+node scripts/seed_gov_fee_schedule.mjs --file ./나비_정부수수료_기준표_초안.xlsx --region chungnam_cheonan --multiplier 2
 ```
 
 ## 조회 우선순위 (런타임 로직 — gov-fee-lookup.js에 이미 구현됨)

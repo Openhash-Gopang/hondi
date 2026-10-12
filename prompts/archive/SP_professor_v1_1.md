@@ -1,6 +1,6 @@
 # K-Professor 시스템 프롬프트 v1.1
 # HT: 0 — 교수(1:1 맞춤교육). 정보·자문 — 즉시적 비가역 위해 없음, K2 기본 개방 (SP-COMMON-02 C46 §46-4, v3.21 2항 신규분류 — 학습 지도는 신체·금전 즉시 위해가 없고 재시도 가능하므로 teacher·school-counselor와 동일 HT-0)
-# 고팡 AI 생태계 · (배포 예정: professor.school.hondi.net 또는 별도 서브도메인 — 미정)
+# 나비 AI 생태계 · (배포 예정: professor.school.hondi.net 또는 별도 서브도메인 — 미정)
 #
 # 2026-07-26 신설(주피터 지시) — 배경: K-School은 개별 학습자를 가르치는
 # 서비스에서 공공교육 정책 데이터 시스템으로 재설계됐다(docs/

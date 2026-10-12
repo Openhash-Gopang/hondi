@@ -148,7 +148,7 @@ export async function sendMessage() {
     } else {
       // 미등록(Guest) → 등록 유도
       appendBubble('ai',
-        '<b>고팡 아이디를 등록</b>하면 AI 비서와 대화할 수 있습니다.<br>' +
+        '<b>나비 아이디를 등록</b>하면 AI 비서와 대화할 수 있습니다.<br>' +
         '<span style="font-size:12px;color:var(--txt3)">상단 <b>AI</b> 버튼을 탭하여 등록하세요.</span>',
         true
       );
@@ -163,7 +163,7 @@ export async function sendMessage() {
   }
 }
 
-// ── 고팡 파이프라인 백그라운드 실행 ─────────────────────
+// ── 나비 파이프라인 백그라운드 실행 ─────────────────────
 // 대화 중 결과를 표시하지 않음 — 사용자 요청 시 showRiskAnalysis() 호출
 // (2026-07-18: 결과 저장은 이 파일 로컬 변수가 아니라 core/state.js의
 // _lastPipelineResult/setLastPipelineResult 공유 상태를 쓴다 — 이전엔
@@ -318,7 +318,7 @@ function _buildPoliceReportDraft(text, result, source) {
   const reasoning  = result?.overallAssessment?.reasoning ?? '';
   const anchorHash = result?.anchorHash ?? '';
   return [
-    '[혼디 신고 초안 — 사용자 확인 후 제출, 자동 전송 아님]',
+    '[나비 신고 초안 — 사용자 확인 후 제출, 자동 전송 아님]',
     `시각: ${ts}`,
     `분류: ${level}${source === 'PHASE7' ? ' (AI 종합판단·recommend_review)' : ' (규칙기반 즉시감지)'}`,
     flags     ? `관련 카테고리: ${flags}` : null,

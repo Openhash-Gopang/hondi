@@ -1,5 +1,5 @@
 /**
- * ai/routing-engine.js — 혼디 라우팅 엔진 v2.0
+ * ai/routing-engine.js — 나비 라우팅 엔진 v2.0
  *
  * 설계 원칙:
  *   1. 그림자 AI(AGENT-COMMON)는 먼저 GWP_REGISTRY를 검색
@@ -157,7 +157,7 @@ ${webContext.slice(0, 2000)}
   appendBubble('ai', `✍️ "${intent}" SP 생성 중...`);
 
   return await _callLLM([
-    { role: 'system', content: '너는 혼디 Agent SP 작성 전문가다.' },
+    { role: 'system', content: '너는 나비 Agent SP 작성 전문가다.' },
     { role: 'user',   content: prompt },
   ], { max_tokens: TOKEN_BUDGET.SP_GENERATE, temperature: 0.3 });
 }
@@ -268,7 +268,7 @@ async function _invokeTool(svc, userText) {
       who:  _USER?.nickname || '사용자',
       what: userText,
       when: new Date().toISOString(),
-      where: '혼디',
+      where: '나비',
       how:  svc.name + ' Tool',
       result,
     });
@@ -307,7 +307,7 @@ async function _handleAgentReport(agentReply, svc) {
       summary:   report6w.what || report6w.result || '',
       who:       report6w.who   || _USER?.nickname,
       when:      report6w.when  || new Date().toISOString(),
-      where:     report6w.where || '혼디',
+      where:     report6w.where || '나비',
       what:      report6w.what  || '',
       how:       report6w.how   || svc.name,
       why:       report6w.why   || '',

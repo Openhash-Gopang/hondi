@@ -162,7 +162,7 @@ _EMPLOYMENT_MARKER_RE = re.compile(r"(회사|직장|근무|다니|소속|병원�
 _BUSINESS_MARKER_RE = re.compile(r"(가게|차렸|운영|장사|개업|사업|원장|대표|매장|점포)")
 
 # (c) 사물/개념(무인기기·자율주행차·AI 등)의 프로필인지, 그걸 소유·운영하는
-#     사업자 자신의 프로필인지 애매한 경우 — "무인 키오스크...㈜혼디카페
+#     사업자 자신의 프로필인지 애매한 경우 — "무인 키오스크...㈜나비카페
 #     운영" 류(소유주체가 명시돼 있어 신호가 강함).
 _THING_INDICATOR_RE = re.compile(r"(무인|자율주행|로봇|키오스크|셔틀|AI\s*페르소나|AI\s*에이전트)")
 _OWNER_INDICATOR_RE = re.compile(r"(운영|소유|주식회사|\(주\)|㈜)")
@@ -238,7 +238,7 @@ def _load_composited_sp(repo_root):
 def _persona_system_prompt(scenario):
     facts = scenario['persona_facts']
     directives = '\n'.join(f'- {d}' for d in scenario['persona_directives'])
-    return f"""당신은 혼디(Hondi)라는 앱에서 프로필을 등록하려는 가상의 사용자입니다.
+    return f"""당신은 나비(Navi)라는 앱에서 프로필을 등록하려는 가상의 사용자입니다.
 AI 비서(상대방)가 프로필 작성을 도와주는 대화 상대이고, 당신은 실제 사람처럼 자연스럽게 답합니다.
 
 당신의 배경 사실(대화 중 자연스럽게, AI가 물어볼 때만 답하세요 — 먼저 전부 나열하지 마세요):

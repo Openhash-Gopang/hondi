@@ -4,7 +4,7 @@
 <link rel="icon" href="data:,">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>고팡 인증</title>
+<title>나비 인증</title>
 <script src="/gopang-wallet.js"></script>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -203,13 +203,13 @@
 <div id="auth-card">
   <div class="auth-logo">
     <div class="auth-logo-icon">G</div>
-    <span class="auth-logo-text">고팡</span>
+    <span class="auth-logo-text">나비</span>
     <span class="auth-service" id="svc-label"></span>
   </div>
 
-  <h2 id="auth-title">고팡 로그인</h2>
+  <h2 id="auth-title">나비 로그인</h2>
   <p class="auth-desc" id="auth-desc">
-    고팡 계정으로 로그인하면 모든 하위 서비스를 이용할 수 있습니다.
+    나비 계정으로 로그인하면 모든 하위 서비스를 이용할 수 있습니다.
   </p>
 
   <!-- 2026-07-19 삭제 — "폰으로 QR 스캔해 이 기기 승인" 방식은 폐기됐다
@@ -438,7 +438,7 @@ async function _runRedirectMode() {
     title.textContent = '이 기기는 등록된 기기가 아닙니다';
     desc.textContent  = 'hondi.net에서 전화번호로 다시 로그인해주세요.';
   } else {
-    title.textContent = '고팡 로그인이 필요합니다';
+    title.textContent = '나비 로그인이 필요합니다';
     desc.textContent  = 'hondi.net에서 전화번호로 로그인해주세요.';
   }
 }

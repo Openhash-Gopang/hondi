@@ -2,7 +2,7 @@
 """
 tools/check_capabilities_registry.py
 -----------------------------------
-prompts/HONDI-CAPABILITIES-COMMON_v1_0.md("혼디가 지금 실제로 할 수 있는
+prompts/HONDI-CAPABILITIES-COMMON_v1_0.md("나비가 지금 실제로 할 수 있는
 것"의 단일 소스)의 각 항목은 `검증-서버:`/`검증-클라이언트:` 줄에
 "파일경로::문자열" 형식으로 실제 코드 근거를 명시한다. 이 스크립트는
 그 문자열이 실제로 그 파일 안에 있는지 매번 직접 확인한다.

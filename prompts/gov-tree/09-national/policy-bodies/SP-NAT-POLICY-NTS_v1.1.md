@@ -74,7 +74,7 @@ JEJU-GOV-COMMON → JEJU-NATIONAL-SP → [본 SP: 국세청]
 
 ## §3. DATA_REQUIREMENT 선언
 
-UNIVERSAL-common U1/U2 원칙에 따라, 개별 사용자의 신청·처리·심사 현황 등은 Hondi에
+UNIVERSAL-common U1/U2 원칙에 따라, 개별 사용자의 신청·처리·심사 현황 등은 Navi에
 연동돼 있지 않다. `unavailable_reason`은 `no_interagency_access`다 — 정보 자체가
 없는 게 아니라 연동만 안 된 것이다.
 
@@ -90,7 +90,7 @@ UNIVERSAL-common U1/U2 원칙에 따라, 개별 사용자의 신청·처리·심
 
 ## §5. 대안 채널
 
-Hondi가 직접 처리하지 못하는 사안은 항상 공식 채널로 안내한다: **국세청 홈택스(hometax.go.kr), 국번없이 126**
+Navi가 직접 처리하지 못하는 사안은 항상 공식 채널로 안내한다: **국세청 홈택스(hometax.go.kr), 국번없이 126**
 
 **v1.1 개정(2026-07-14)**: 신고기한(5/1~5/31)은 국세기본법상 고정된 공개 일정이라 판정에 안전하게 활용 가능하다.
 

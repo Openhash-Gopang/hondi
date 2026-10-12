@@ -224,11 +224,11 @@ describe('SW: push 이벤트 핸들러 — 태그별 분기', () => {
     // 작성된 시점엔 없던 동작. "일반 메시지는 postMessage 전혀 없음"이
     // 아니라 "PLAY_SOUND 하나만 있고 SYNC_AI_SETTING/CHECK_FOR_UPDATE는
     // 없음"으로 갱신.
-    const event = makePushEvent({ title: '고팡', body: '안녕', tag: 'gopang-msg', sound: 'ping' });
+    const event = makePushEvent({ title: '나비', body: '안녕', tag: 'gopang-msg', sound: 'ping' });
     pushHandler(event);
     await event._settled;
     assert.equal(notifyCalls.length, 1);
-    assert.equal(notifyCalls[0].title, '고팡');
+    assert.equal(notifyCalls[0].title, '나비');
     assert.equal(notifyCalls[0].opts.tag, 'gopang-msg');
     assert.equal(clientMessages.length, 1, 'PLAY_SOUND 브로드캐스트 1건만 있어야 함');
     assert.equal(clientMessages[0].type, 'PLAY_SOUND');
@@ -246,7 +246,7 @@ describe('SW: push 이벤트 핸들러 — 태그별 분기', () => {
   });
 
   it('SW-03: 버전 업데이트 태그 — 알림 표시 + PLAY_SOUND + CHECK_FOR_UPDATE 브로드캐스트', async () => {
-    const event = makePushEvent({ title: '고팡 업데이트', body: '새 버전이 준비됐습니다.', tag: 'gopang-version-update' });
+    const event = makePushEvent({ title: '나비 업데이트', body: '새 버전이 준비됐습니다.', tag: 'gopang-version-update' });
     pushHandler(event);
     await event._settled;
     assert.equal(notifyCalls.length, 1, '버전 업데이트도 알림은 그대로 표시되어야 함');
@@ -259,7 +259,7 @@ describe('SW: push 이벤트 핸들러 — 태그별 분기', () => {
     const event = makePushEvent(null, '순수 텍스트 메시지');
     pushHandler(event);
     await event._settled;
-    assert.equal(notifyCalls[0].title, '고팡');
+    assert.equal(notifyCalls[0].title, '나비');
     assert.equal(notifyCalls[0].opts.body, '순수 텍스트 메시지');
   });
 });

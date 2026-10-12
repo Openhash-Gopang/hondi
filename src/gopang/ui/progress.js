@@ -65,7 +65,7 @@ export function _topLogoSetProgress(active) {
     textEl.style.color = 'rgba(255,255,255,0.95)';
     if (dotEl) dotEl.style.display = 'inline-block';
   } else {
-    textEl.textContent = '고팡';
+    textEl.textContent = '나비';
     textEl.style.color = 'rgba(255,255,255,0.90)';
     if (dotEl) dotEl.style.display = 'none';
     _progressJob = null;

@@ -11,7 +11,7 @@ import { GWP_ALLOWED_ORIGINS } from './allowed-origins.js';
 export { GWP_ALLOWED_ORIGINS };
 
 // ── GWP_SIGN_REQUEST 핸들러 (STEP 22) ────────────────────────
-// 흐름: market 탭 → GWP_SIGN_REQUEST → 고팡 서명 확인 UI
+// 흐름: market 탭 → GWP_SIGN_REQUEST → 나비 서명 확인 UI
 //       → [서명하여 결제] 클릭 → gopang-wallet.js Ed25519 서명
 //       → GWP_SIGN_RESPONSE → market 탭 → Worker /biz/order POST
 //

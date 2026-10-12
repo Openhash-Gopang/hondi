@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>교통/물류 — 혼디 (Hondi)</title>
+<title>교통/물류 — 나비 (Navi)</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
@@ -189,7 +189,7 @@ window.PAGE_HERO = {
   badge: '교통/물류 · 이동과 배송의 조율자',
   l1: '움직이는 모든 것을',
   l2: '실시간으로 조율합니다',
-  sub: '혼디는 배송 상태를 대신 추적하고, 대중교통 경로를 실시간으로 다시 짜며, 자율주행·물류 로봇과도 AI 대 AI로 소통합니다. 다만 안전과 관련된 최종 판단은 언제나 사람의 몫으로 남깁니다.',
+  sub: '나비는 배송 상태를 대신 추적하고, 대중교통 경로를 실시간으로 다시 짜며, 자율주행·물류 로봇과도 AI 대 AI로 소통합니다. 다만 안전과 관련된 최종 판단은 언제나 사람의 몫으로 남깁니다.',
   actions: [
     { label: '관제탑 원칙 자세히 보기', href: '../desktop.html#control-tower-principle', style: 'primary' },
     { label: '입법·사법·행정 통합 체계', href: '../integrated-system.html', style: 'outline' }
@@ -206,7 +206,7 @@ window.PAGE_HERO = {
     <span class="section-tag">체험해보기 · 1</span>
     <h2 class="section-title">출발지와 목적지를 <strong>말하면 바로 매칭</strong></h2>
     <div class="section-body">
-      <p>제주도 내 출발지·목적지를 입력하면, 혼디 앱을 설치한 자가용·택시·버스 운전자들의 동선을 실시간으로 파악해 가장 적합한 이동 수단을 매칭합니다. DeepSeek API를 실제로 호출하는 데모이며, 실제 차량 위치 데이터가 없어 AI가 그럴듯한 가상 동선을 생성해 매칭하는 방식입니다 — 실제 배차가 아닙니다.</p>
+      <p>제주도 내 출발지·목적지를 입력하면, 나비 앱을 설치한 자가용·택시·버스 운전자들의 동선을 실시간으로 파악해 가장 적합한 이동 수단을 매칭합니다. DeepSeek API를 실제로 호출하는 데모이며, 실제 차량 위치 데이터가 없어 AI가 그럴듯한 가상 동선을 생성해 매칭하는 방식입니다 — 실제 배차가 아닙니다.</p>
     </div>
     <div class="sim-box">
       <div class="sim-stepper" id="simPStepper"></div>
@@ -404,10 +404,10 @@ window.PAGE_HERO = {
 <section class="section" id="principle">
   <div class="section-inner">
     <span class="section-tag">교통/물류의 원칙</span>
-    <h2 class="section-title">배차·경로는 혼디가, <strong>정지 판단은 사람이</strong></h2>
+    <h2 class="section-title">배차·경로는 나비가, <strong>정지 판단은 사람이</strong></h2>
     <div class="section-body">
-      <p>교통/물류 분야에서 혼디가 대행하는 일은 크게 셋입니다 — <b>택배·배송 상태 조회 및 재조정</b>, <b>K-Traffic을 통한 이동 수단 통합 관제</b>, 그리고 <b>K-Logistics를 통한 배송·물류 최적화</b>(자율주행 차량 포함)입니다. 세 영역 모두 배차·경로 최적화까지는 혼디가 자동으로 수행하지만, 그 결과가 사람의 신체 안전에 영향을 미치는 순간 — 예를 들어 자율주행차의 긴급 정지 여부 — 는 항상 사람이 개입할 여지를 남깁니다.</p>
-      <p>이는 사이트 전체를 관통하는 <b>"관제탑 원칙"</b>과 같은 구조입니다. 관제탑이 조종사 대신 비행기를 조종하지 않고 절차만 안내하듯, 혼디도 이동·배송의 흐름을 조율할 뿐 최종 물리적 판단을 대신하지 않습니다.</p>
+      <p>교통/물류 분야에서 나비가 대행하는 일은 크게 셋입니다 — <b>택배·배송 상태 조회 및 재조정</b>, <b>K-Traffic을 통한 이동 수단 통합 관제</b>, 그리고 <b>K-Logistics를 통한 배송·물류 최적화</b>(자율주행 차량 포함)입니다. 세 영역 모두 배차·경로 최적화까지는 나비가 자동으로 수행하지만, 그 결과가 사람의 신체 안전에 영향을 미치는 순간 — 예를 들어 자율주행차의 긴급 정지 여부 — 는 항상 사람이 개입할 여지를 남깁니다.</p>
+      <p>이는 사이트 전체를 관통하는 <b>"관제탑 원칙"</b>과 같은 구조입니다. 관제탑이 조종사 대신 비행기를 조종하지 않고 절차만 안내하듯, 나비도 이동·배송의 흐름을 조율할 뿐 최종 물리적 판단을 대신하지 않습니다.</p>
     </div>
   </div>
 </section>
@@ -417,16 +417,16 @@ window.PAGE_HERO = {
     <span class="section-tag">배송·택배</span>
     <h2 class="section-title">택배사 AI에게 <strong>대신 물어봅니다</strong></h2>
     <div class="section-body">
-      <p>"그 택배 오늘 안에 와?"라는 한 문장은 원래 택배사 앱을 열어 송장번호를 찾고, 배송 조회 페이지에 붙여넣는 절차를 줄인 것입니다. 혼디에서는 이 절차 자체를 사용자의 혼디가 각 택배사의 AI에게 직접 조회해 대신 처리합니다. 여러 택배사에서 동시에 물건이 오는 경우, 사용자는 하나하나 앱을 오갈 필요 없이 혼디에게 한 번만 물으면 됩니다.</p>
+      <p>"그 택배 오늘 안에 와?"라는 한 문장은 원래 택배사 앱을 열어 송장번호를 찾고, 배송 조회 페이지에 붙여넣는 절차를 줄인 것입니다. 나비에서는 이 절차 자체를 사용자의 나비가 각 택배사의 AI에게 직접 조회해 대신 처리합니다. 여러 택배사에서 동시에 물건이 오는 경우, 사용자는 하나하나 앱을 오갈 필요 없이 나비에게 한 번만 물으면 됩니다.</p>
     </div>
     <div class="dialogue-box">
       <p class="spk"><strong>이용자</strong> "어제 시킨 거 두 개 있는데, 오늘 안에 다 와?"</p>
-      <p class="spk"><strong>혼디</strong> 확인하겠습니다. 첫 번째 상품은 CJ대한통운 AI에서 오늘 오후 도착 예정으로 확인됩니다. 두 번째 상품은 한진택배 AI 기준 내일 오전으로 지연 안내가 떠 있습니다.</p>
+      <p class="spk"><strong>나비</strong> 확인하겠습니다. 첫 번째 상품은 CJ대한통운 AI에서 오늘 오후 도착 예정으로 확인됩니다. 두 번째 상품은 한진택배 AI 기준 내일 오전으로 지연 안내가 떠 있습니다.</p>
       <p class="spk"><strong>이용자</strong> "지연된 거, 왜 늦는지도 알 수 있어?"</p>
-      <p class="spk"><strong>혼디</strong> 사유는 "권역 내 물량 초과"로 안내되고 있습니다. 정확한 도착 시각까지는 택배사 시스템도 확정하지 않은 상태라, 확정되는 대로 다시 알려드리겠습니다.</p>
+      <p class="spk"><strong>나비</strong> 사유는 "권역 내 물량 초과"로 안내되고 있습니다. 정확한 도착 시각까지는 택배사 시스템도 확정하지 않은 상태라, 확정되는 대로 다시 알려드리겠습니다.</p>
     </div>
     <div class="callout-info">
-      <strong>혼디가 하지 않는 일:</strong> 배송 경로 자체를 강제로 바꾸거나, 택배 기사의 동선을 지시하지 않습니다. 각 택배사 시스템이 제공하는 정보를 조회하고 정리해 전달할 뿐이며, 배송 지연에 대한 최종 처리(재배송·환불 등)는 해당 택배사·판매자의 소관입니다.
+      <strong>나비가 하지 않는 일:</strong> 배송 경로 자체를 강제로 바꾸거나, 택배 기사의 동선을 지시하지 않습니다. 각 택배사 시스템이 제공하는 정보를 조회하고 정리해 전달할 뿐이며, 배송 지연에 대한 최종 처리(재배송·환불 등)는 해당 택배사·판매자의 소관입니다.
     </div>
   </div>
 </section>
@@ -436,13 +436,13 @@ window.PAGE_HERO = {
     <span class="section-tag">대중교통 — K-Traffic</span>
     <h2 class="section-title">이동 수단을 <strong>한 번에 비교·통합 관제</strong></h2>
     <div class="section-body">
-      <p>혼디의 <b>K-Traffic</b>(교통·이동수단 통합 관제)은 실시간 이동 패턴을 분석해 택시·카풀·버스·자율주행 차량을 통합 관리하고 최적 조합을 제안합니다. 목적지와 희망 시간을 말하면 가용 수단과 예상 시간·요금을 비교해 제시하고, 사용자가 그중 하나를 선택하면 탑승 중에는 K-Security의 블랙박스 감시와 K-Insurance의 자동 여행자보험이 함께 적용되며, 도착 후에는 GDC로 자동 결제되고 K-Tax가 실시간 정산합니다.</p>
+      <p>나비의 <b>K-Traffic</b>(교통·이동수단 통합 관제)은 실시간 이동 패턴을 분석해 택시·카풀·버스·자율주행 차량을 통합 관리하고 최적 조합을 제안합니다. 목적지와 희망 시간을 말하면 가용 수단과 예상 시간·요금을 비교해 제시하고, 사용자가 그중 하나를 선택하면 탑승 중에는 K-Security의 블랙박스 감시와 K-Insurance의 자동 여행자보험이 함께 적용되며, 도착 후에는 GDC로 자동 결제되고 K-Tax가 실시간 정산합니다.</p>
     </div>
     <div class="dialogue-box">
       <p class="spk"><strong>이용자</strong> "버스 도착 시간을 알려줘."</p>
-      <p class="spk"><strong>혼디</strong> 실시간 도착 정보를 확인해 알려드리겠습니다.</p>
+      <p class="spk"><strong>나비</strong> 실시간 도착 정보를 확인해 알려드리겠습니다.</p>
       <p class="spk"><strong>이용자</strong> "내일 오전 9시까지 공항 가야 해요."</p>
-      <p class="spk"><strong>혼디</strong> 택시·카풀·버스 옵션을 비교해 드리겠습니다. 가장 저렴한 방법을 원하시면 저비용 옵션을 우선 제시해 드릴까요?</p>
+      <p class="spk"><strong>나비</strong> 택시·카풀·버스 옵션을 비교해 드리겠습니다. 가장 저렴한 방법을 원하시면 저비용 옵션을 우선 제시해 드릴까요?</p>
     </div>
     <div class="callout-info">
       <strong>사업자 정책이 우선합니다:</strong> 이동 전 과정이 PDV와 Openhash에 기록되어 분쟁 시 객관적으로 확인할 수 있지만, 실제 운행과 요금 확정은 각 운송 수단 사업자(택시회사·버스회사 등)의 정책을 따릅니다.
@@ -456,13 +456,13 @@ window.PAGE_HERO = {
     <span class="section-tag">배송·물류 — K-Logistics</span>
     <h2 class="section-title">빈 차량의 <strong>빈 공간을 재활용합니다</strong></h2>
     <div class="section-body">
-      <p>혼디의 <b>K-Logistics</b>는 소화물·화물·음식 배달을 통합하는 물류 플랫폼으로, K-Traffic과 연동해 이동 중인 차량의 빈 공간을 물류에 활용합니다. 배송 요청이 들어오면 K-Traffic의 이동 중 차량 중 빈 공간이 있는 차량을 우선 매칭하고, 여러 배송 건을 묶어 최적 경로를 계산한 뒤, 배송 완료가 확인되면 GDC로 자동 결제됩니다. 배달앱·택배사가 각자 차량을 따로 운영하는 기존 방식과 달리, 이미 이동 중인 차량을 재활용하는 방식이라 배송 전용 차량 운행 자체를 줄입니다.</p>
+      <p>나비의 <b>K-Logistics</b>는 소화물·화물·음식 배달을 통합하는 물류 플랫폼으로, K-Traffic과 연동해 이동 중인 차량의 빈 공간을 물류에 활용합니다. 배송 요청이 들어오면 K-Traffic의 이동 중 차량 중 빈 공간이 있는 차량을 우선 매칭하고, 여러 배송 건을 묶어 최적 경로를 계산한 뒤, 배송 완료가 확인되면 GDC로 자동 결제됩니다. 배달앱·택배사가 각자 차량을 따로 운영하는 기존 방식과 달리, 이미 이동 중인 차량을 재활용하는 방식이라 배송 전용 차량 운행 자체를 줄입니다.</p>
     </div>
     <div class="dialogue-box">
       <p class="spk"><strong>이용자</strong> "이 서류를 강남으로 보내야 해요."</p>
-      <p class="spk"><strong>혼디</strong> 가까운 이동 차량을 매칭해 드리겠습니다.</p>
+      <p class="spk"><strong>나비</strong> 가까운 이동 차량을 매칭해 드리겠습니다.</p>
       <p class="spk"><strong>이용자</strong> "배송 상태를 확인하고 싶어요."</p>
-      <p class="spk"><strong>혼디</strong> 실시간 위치 정보를 안내해 드리겠습니다. 물건이 파손되어 도착한 경우에는 K-Insurance 연계로 확인해 드릴 수 있습니다.</p>
+      <p class="spk"><strong>나비</strong> 실시간 위치 정보를 안내해 드리겠습니다. 물건이 파손되어 도착한 경우에는 K-Insurance 연계로 확인해 드릴 수 있습니다.</p>
     </div>
     <a class="doc-link" href="https://logistics.hondi.net" target="_blank" rel="noopener">K-Logistics 바로가기(logistics.hondi.net) →</a>
   </div>
@@ -473,10 +473,10 @@ window.PAGE_HERO = {
     <span class="section-tag">자율주행</span>
     <h2 class="section-title">선택지에는 넣되, <strong>정지 버튼은 사람에게</strong></h2>
     <div class="section-body">
-      <p>K-Traffic이 비교하는 이동 수단에는 택시·카풀·버스와 함께 자율주행 차량도 포함됩니다. 사용자가 "자율주행 차량도 이용할 수 있나요"라고 물으면 혼디는 가용 지역 여부를 확인해 안내합니다. 다만 이는 여러 이동 수단 중 하나를 비교·매칭하는 수준이며, 차량의 물리적 주행 판단(장애물 감지, 긴급 정지 등) 자체를 혼디가 대신 내리지 않습니다 — 그 판단은 각 자율주행 서비스 사업자의 안전 시스템과 관련 법규를 따릅니다.</p>
+      <p>K-Traffic이 비교하는 이동 수단에는 택시·카풀·버스와 함께 자율주행 차량도 포함됩니다. 사용자가 "자율주행 차량도 이용할 수 있나요"라고 물으면 나비는 가용 지역 여부를 확인해 안내합니다. 다만 이는 여러 이동 수단 중 하나를 비교·매칭하는 수준이며, 차량의 물리적 주행 판단(장애물 감지, 긴급 정지 등) 자체를 나비가 대신 내리지 않습니다 — 그 판단은 각 자율주행 서비스 사업자의 안전 시스템과 관련 법규를 따릅니다.</p>
     </div>
     <div class="flow-diagram">
-      <span class="fd-box">사용자의 혼디</span>
+      <span class="fd-box">사용자의 나비</span>
       <span class="fd-arrow">↔</span>
       <span class="fd-box fd-brand">K-Traffic</span>
       <span class="fd-arrow">→</span>
@@ -505,7 +505,7 @@ window.PAGE_HERO = {
     </div>
     <p class="section-body" style="margin-top:16px">기존 방식(User Equilibrium)에서는 각 차량이 개별적으로 최단 경로를 택해 특정 경로에 정체가 몰립니다. 이 구조(System Optimum)에서는 중앙 에이전트가 전체 차량의 경로를 동시에 고려해, 일부는 더 긴 경로를 가더라도 전체 이동 시간을 줄이는 배분을 수행합니다.</p>
     <div class="callout-warn">
-      <strong>정직하게 밝힙니다.</strong> 이 3계층 구조는 특허 출원 단계의 설계이며, 현재 혼디 코드에 실제 배포된 기능이 아닙니다. AWS 시뮬레이션 환경에서의 실증 결과(차량 감축률 92.8%, 비용 절감 84.2%, 시스템 효율성 149.2%)는 검증된 조건 하의 수치로, 실제 도로 환경과는 차이가 있을 수 있습니다.
+      <strong>정직하게 밝힙니다.</strong> 이 3계층 구조는 특허 출원 단계의 설계이며, 현재 나비 코드에 실제 배포된 기능이 아닙니다. AWS 시뮬레이션 환경에서의 실증 결과(차량 감축률 92.8%, 비용 절감 84.2%, 시스템 효율성 149.2%)는 검증된 조건 하의 수치로, 실제 도로 환경과는 차이가 있을 수 있습니다.
     </div>
   </div>
 </section>
@@ -524,10 +524,10 @@ window.PAGE_HERO = {
 <section class="section" style="background:var(--bg-alt)" id="authority">
   <div class="section-inner">
     <span class="section-tag">사람의 권한</span>
-    <h2 class="section-title">혼디가 <strong>할 수 없는 일</strong></h2>
+    <h2 class="section-title">나비가 <strong>할 수 없는 일</strong></h2>
     <div class="cmp-table-wrap">
       <table class="cmp-table">
-        <thead><tr><th>구분</th><th>혼디가 하는 일</th><th class="cmp-hondi">사람이 하는 일</th></tr></thead>
+        <thead><tr><th>구분</th><th>나비가 하는 일</th><th class="cmp-hondi">사람이 하는 일</th></tr></thead>
         <tbody>
           <tr><td class="cmp-axis">배송 조회</td><td>여러 택배사 AI에 동시 조회, 지연 사유 정리</td><td class="cmp-hondi">환불·재배송 등 최종 처리 요청</td></tr>
           <tr><td class="cmp-axis">대중교통(K-Traffic)</td><td>수단 비교·매칭, 실시간 도착 정보 제공</td><td class="cmp-hondi">운행·요금 확정은 운송 사업자 소관</td></tr>
@@ -537,7 +537,7 @@ window.PAGE_HERO = {
         </tbody>
       </table>
     </div>
-    <p class="section-body" style="margin-top:16px">교통/물류에서도 사이트 전체의 원칙은 그대로입니다 — <b>혼디는 효율을 만들고, 사람은 안전을 책임집니다.</b></p>
+    <p class="section-body" style="margin-top:16px">교통/물류에서도 사이트 전체의 원칙은 그대로입니다 — <b>나비는 효율을 만들고, 사람은 안전을 책임집니다.</b></p>
     <a class="doc-link" href="../integrated-system.html" target="_blank" rel="noopener">입법·사법·행정 통합 체계에서 관제탑 원칙 자세히 보기 →</a>
   </div>
 </section>

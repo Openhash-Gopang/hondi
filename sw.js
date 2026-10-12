@@ -1,5 +1,5 @@
 ﻿// ═══════════════════════════════════════════════════════════
-// sw.js — 고팡 Service Worker v1.0
+// sw.js — 나비 Service Worker v1.0
 // PWA 오프라인 지원 + 캐시 전략
 // ═══════════════════════════════════════════════════════════
 
@@ -33,7 +33,7 @@ const PRECACHE_URLS = [
   // ── GWP 레지스트리
   '/gwp-registry.js',
 
-  // ── 고팡 JS 모듈
+  // ── 나비 JS 모듈
   '/src/pwa/gopang-pwa.js',
   // src/auth/gopang-auth.js: 2026-07-01(20e267b) 죽은 중복 인증파일로 삭제됨.
   // 이 목록에 남아있어도 Promise.allSettled+개별 catch 덕에 설치는 안 깨지지만
@@ -45,8 +45,8 @@ const PRECACHE_URLS = [
   '/auth/subsystem-auth.js',
 
   // ── 아이콘
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
+  '/icons/navi-icon-192.png',
+  '/icons/navi-icon-512.png',
 ];
 
 // ── 설치 ───────────────────────────────────────────────────
@@ -143,7 +143,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // ── 고팡 자체 리소스: Network First ─────────────────────
+  // ── 나비 자체 리소스: Network First ─────────────────────
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
@@ -215,9 +215,9 @@ function _reportConsentReceipt(tag, event) {
 // ── Push 알림 수신 ─────────────────────────────────────────
 self.addEventListener('push', (event) => {
   let data = {};
-  try { data = event.data?.json() || {}; } catch { data = { title: '고팡', body: event.data?.text() || '새 메시지' }; }
+  try { data = event.data?.json() || {}; } catch { data = { title: '나비', body: event.data?.text() || '새 메시지' }; }
 
-  const title   = data.title || '고팡';
+  const title   = data.title || '나비';
   const body    = data.body  || '새 메시지가 도착했습니다.';
   const sound   = data.sound || 'ping';
   const tag     = data.tag   || 'gopang-msg';
@@ -250,8 +250,8 @@ self.addEventListener('push', (event) => {
     Promise.all([
       self.registration.showNotification(title, {
         body,
-        icon:  '/icons/icon-192.png',
-        badge: '/icons/icon-192.png',
+        icon:  '/icons/navi-icon-192.png',
+        badge: '/icons/navi-icon-192.png',
         tag,
         data:  { url, sound },
         vibrate: [200, 100, 200],
@@ -295,7 +295,7 @@ self.addEventListener('notificationclick', (event) => {
   // 사용자가 명시적으로 특정 화면(코드 확인·승인 화면)으로 가려고 누른
   // 것인데, 앱이 이미 열려있으면 아래 로직이 "포커스만 하고 postMessage엔
   // url을 아예 안 담아" 보내서 기존 창이 원래 있던 화면(보통 채팅창)에
-  // 그대로 머물렀다 — 실사로 확인(알림을 눌러도 혼디 앱은 열리는데
+  // 그대로 머물렀다 — 실사로 확인(알림을 눌러도 나비 앱은 열리는데
   // 코드 화면이 안 뜨던 원인).
   //
   // ★ 2026-07-20 2차 수정 — 위 1차 수정에서 client.navigate()를 썼더니

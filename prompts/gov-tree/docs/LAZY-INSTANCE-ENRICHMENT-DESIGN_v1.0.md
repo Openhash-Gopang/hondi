@@ -42,7 +42,7 @@
 
 - `pb_migrations/1786900001_created_instance_enrichment_drafts.js` — §3-2 스키마 그대로 신설.
 - `worker.js` — `_parseInstanceEnrichTag`(§3-1 태그 파서, `_parseMetaTableTag`와 동일 괄호 깊이 인식 재사용) + `_writeInstanceEnrichmentDraft`(`_writeOwnerPdvRecord`와 동일한 guid 해싱 패턴 재사용) + `handleGovRelay` 내 세 번째 처리 블록(AGY_VAULT_STORE·META_TABLE_UPDATE 바로 다음, 동일하게 얼리리턴 없음).
-- `prompts/UNIVERSAL-common_v1_9.md` U0-3 신설 — "혼디는 안내가 아니라 실행이 주된 목표"를 인스턴스 데이터 정정에도 명시적으로 적용, 모든 이미 인스턴스화된 SP에 개별 수정 없이 자동 적용(U0-1이 AGY_VAULT_STORE로 이미 증명한 방식).
+- `prompts/UNIVERSAL-common_v1_9.md` U0-3 신설 — "나비는 안내가 아니라 실행이 주된 목표"를 인스턴스 데이터 정정에도 명시적으로 적용, 모든 이미 인스턴스화된 SP에 개별 수정 없이 자동 적용(U0-1이 AGY_VAULT_STORE로 이미 증명한 방식).
 - 단위 테스트: `test/instance_enrich.test.mjs`(파서 6건).
 - §6에서 명시한 대로 **읽기 경로는 손대지 않았다** — git `*-master-data.json`이 여전히 유일한 확정 계층이고, 이 초안은 사람이 검증해 patch로 승격하기 전까지 어떤 응답에도 영향을 주지 않는다.
 - §7의 열린 질문(정부기관 AC의 실제 web_search 도구 보유 여부, 승격 빈도·담당, 국가기관 지사 디렉터리 항목별 승격 UI)은 **구현 완료와 무관하게 여전히 열려있다** — 이번 구현은 "쓰기 경로"만 완성했고, 그 초안을 사람이 실제로 어떻게 검토·승격할지는 별도 결정이 필요하다.

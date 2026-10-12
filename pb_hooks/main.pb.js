@@ -3180,7 +3180,7 @@ routerAdd("POST", "/api/mint", (c) => {
 
     // ── 2026-07-18 신설, 2026-07-21 통합 — 재무제표 원장(ledger_entries) 기록 (Phase 5
     // 발행잔액 추적의 전제). 발행(mint)은 수취인 입장에서 credit(bs-cash
-    // 증가) — 대변 상대방이 "혼디(발행자)"라 복식부기 상대 계정은 만들지
+    // 증가) — 대변 상대방이 "나비(발행자)"라 복식부기 상대 계정은 만들지
     // 않는다(발행자 자신의 부채 계정을 추적하는 건 이번 범위 밖). 실패해도
     // 이미 완료된 발행(blockRecord 저장)은 되돌리지 않는다.
     //
@@ -4537,7 +4537,7 @@ onRecordBeforeCreateRequest((e) => {
   }
 
   // ── e164 평문 저장 제거 (2026-09-07 신설, 사용자 지시) ────────────────
-  // "혼디는 서버에 개인정보를 저장하지 않는다"는 로컬 우선 원칙과 이
+  // "나비는 서버에 개인정보를 저장하지 않는다"는 로컬 우선 원칙과 이
   // 컬렉션의 e164 평문 저장이 충돌한다는 지적에서 시작된 변경. e164는
   // 세 가지 용도로 쓰이는데(①재가입 시 동일 번호 중복탐지, ②device-link
   // SMS 재발송에 필요한 실제 번호, ③"숫자코드" 기능의 뒷자리 부분일치
@@ -4763,7 +4763,7 @@ onRecordAfterCreateRequest((e) => {
       const rec = new Record(collection);
       rec.set("owner_user_guid", guid);
       rec.set("mail_id", candidate);
-      rec.set("sender_display_name", "혼디 K-Mail");
+      rec.set("sender_display_name", "나비 K-Mail");
       $app.dao().saveRecord(rec);
       console.log(`[MAIL-ID-DEFAULT] guid=${guid} → mail_id=${candidate} 자동배정 완료(${counter + 1}회 시도)`);
       return;

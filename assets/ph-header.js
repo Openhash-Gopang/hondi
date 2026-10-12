@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════════
-   ph-header.js — 혼디 "4대 메뉴" 공용 헤더 스크립트 (단일 소스)
+   ph-header.js — 나비 "4대 메뉴" 공용 헤더 스크립트 (단일 소스)
 
    대상 페이지(4개, desktop.html 히어로 상단 4개 버튼과 1:1 대응):
      - pages/k-services.html
@@ -62,7 +62,7 @@
     return (
       '<nav class="topnav">' +
         '<div class="topnav-inner">' +
-          '<a href="/desktop.html" class="topnav-logo" onclick="return __hondiBack(event);"><span class="topnav-logo-icon">H</span>혼디</a>' +
+          '<a href="/desktop.html" class="topnav-logo" onclick="return __hondiBack(event);"><span class="topnav-logo-icon">H</span>나비</a>' +
           '<div class="topnav-links">' + links + '</div>' +
           '<div class="topnav-right">' +
             '<div class="topnav-status"><span class="status-dot-green"></span>로그인 불필요 · 열람 전용</div>' +

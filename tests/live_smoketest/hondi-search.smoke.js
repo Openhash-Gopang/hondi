@@ -1,7 +1,7 @@
 /**
  * tests/live_smoketest/hondi-search.smoke.js
  *
- * 혼디 검색(Hondi Search) 실제 운영 엔드포인트 대상 라이브 스모크 테스트.
+ * 나비 검색(Navi Search) 실제 운영 엔드포인트 대상 라이브 스모크 테스트.
  * 기존 tests/live_smoketest 컨벤션에 맞춘 독립 실행 스크립트 (외부 의존성 없음, Node 18+ 내장 fetch 사용).
  *
  * 실행:
@@ -114,7 +114,7 @@ async function testClarifyThenNavigate(manifest) {
 
   const turn2 = await postSearch({
     conversation_id: conversationId,
-    message: "혼디 메일 시스템",
+    message: "나비 메일 시스템",
   });
   const turn2Ok =
     turn2.status === 200 &&
@@ -183,7 +183,7 @@ async function testDelegatesToKSearch() {
   );
 }
 
-// 7. 회귀 테스트(2026-09-13) — "혼디 숫자 코드" 페이지가 desktop.html
+// 7. 회귀 테스트(2026-09-13) — "나비 숫자 코드" 페이지가 desktop.html
 // 메가메뉴엔 있었지만 손으로 쓴 site-manifest.json엔 등록되지 않아,
 // 전혀 무관한 "하이라이트 번호" 후보를 제시하던 사고. tools/
 // generate_site_manifest.py로 매니페스트를 자동 생성한 뒤에도 이
@@ -192,7 +192,7 @@ async function testHondiDigitCodeRegression(manifest) {
   const conversationId = uuid();
   const { status, json } = await postSearch({
     conversation_id: conversationId,
-    message: "혼디 사이트에서 혼디 숫자 코드 페이지를 찾아주세요",
+    message: "나비 사이트에서 나비 숫자 코드 페이지를 찾아주세요",
     scope: "user",
   });
   const expected = manifest.find((m) => m.path === "/scenarios");
@@ -202,7 +202,7 @@ async function testHondiDigitCodeRegression(manifest) {
     !!expected &&
     json?.url === expected.pc_url;
   record(
-    "회귀: '혼디 숫자 코드' 질의 → 정확한 navigate (2026-09-13 사고 재발 확인)",
+    "회귀: '나비 숫자 코드' 질의 → 정확한 navigate (2026-09-13 사고 재발 확인)",
     ok,
     `status=${status}, type=${json?.type}, url=${json?.url}, 기대 pc_url=${expected?.pc_url}` +
       (json?.type === "clarify" || json?.type === "candidates"
@@ -239,7 +239,7 @@ async function testScopeIsolation(manifest) {
 }
 
 async function main() {
-  console.log(`혼디 검색 라이브 스모크 테스트 시작 (BASE_URL=${BASE_URL})\n`);
+  console.log(`나비 검색 라이브 스모크 테스트 시작 (BASE_URL=${BASE_URL})\n`);
 
   await testManifestIsLive();
 

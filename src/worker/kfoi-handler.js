@@ -8,7 +8,7 @@
 //   2) /kfoi/campaigns/* — 청구 건(캠페인) 저장·조회·종료·재개·공유·삭제.
 //      청구는 대개 1회로 끝나지 않고 후속 청구로 이어지므로 한 건에 회차(rounds)를 쌓고,
 //      얻고 싶은 정보(items)마다 상태를 추적한다.
-//   3) /kfoi/archive/* — 종료·보관된 건 중 사용자가 공유를 선택한 것을 혼디 사용자 전체가
+//   3) /kfoi/archive/* — 종료·보관된 건 중 사용자가 공유를 선택한 것을 나비 사용자 전체가
 //      검색한다. 다른 사용자가 같은 정보를 청구하려 할 때 SP가 웹 조사보다 먼저 이걸 본다.
 //
 // 이 파일이 worker.js와 분리된 이유: worker.js는 4만 줄에 가까운 공유 파일이라 동시에 여러
@@ -34,7 +34,7 @@ export const KFOI_MAX_RESEARCH_STEPS = 8;       // 한 번의 질문에서 아�
 const MAX_LLM_ROUNDS_PER_CALL = 2;              // HTTP 요청 하나에서 돌리는 LLM 왕복 수(나머지는 클라이언트가 이어 호출)
 const MAX_MESSAGES = 60;
 const MAX_MESSAGE_CHARS = 40000;
-const MAX_DIGEST_CALLS = 12;          // 한 대화에서 KFOI_DIGEST(혼디 SP 요약 조회)를 쓸 수 있는 횟수. 조사 횟수에는 넣지 않되 이 한도가 있다       // 사용자 메시지 하나(첨부 파일 내용 포함)의 상한
+const MAX_DIGEST_CALLS = 12;          // 한 대화에서 KFOI_DIGEST(나비 SP 요약 조회)를 쓸 수 있는 횟수. 조사 횟수에는 넣지 않되 이 한도가 있다       // 사용자 메시지 하나(첨부 파일 내용 포함)의 상한
 const MAX_TOTAL_CHARS = 90000;
 const MAX_CAMPAIGNS_PER_USER = 200;
 const COLLECTION = 'foi_campaigns';
@@ -534,18 +534,18 @@ export function makeKfoiHandlers(deps) {
   async function runTool(env, ctx, tag, digestCalls = 0) {
     const a = tag.args || {};
     if (tag.name === 'DIGEST') {
-      // 혼디 「제주 AI 행정」 SP 요약 조회 — 저장소를 LLM이 직접 뒤지게 하는 대신, 미리 만든 요약본(tools/build_kfoi_digest.mjs)을
+      // 나비 「제주 AI 행정」 SP 요약 조회 — 저장소를 LLM이 직접 뒤지게 하는 대신, 미리 만든 요약본(tools/build_kfoi_digest.mjs)을
       // 유형별로 잘라 준다. 조사 횟수에는 넣지 않지만(한도 12회), 한도를 넘으면 일반 조사와 같이 횟수에 넣어 무한 왕복을 막는다.
       const limited = digestCalls >= MAX_DIGEST_CALLS;
-      if (limited) return { label: `혼디 SP 요약 조회 한도(${MAX_DIGEST_CALLS}회)에 도달`, kind: 'digest', text: '{"error":"DIGEST_LIMIT","message":"요약 조회 한도에 도달했습니다. 지금까지 본 것으로 정리하세요."}' };
-      if (typeof fetchDigest !== 'function') return { label: '혼디 SP 요약을 쓸 수 없음', kind: 'digest', uncounted: true, text: '{"error":"DIGEST_UNAVAILABLE"}' };
+      if (limited) return { label: `나비 SP 요약 조회 한도(${MAX_DIGEST_CALLS}회)에 도달`, kind: 'digest', text: '{"error":"DIGEST_LIMIT","message":"요약 조회 한도에 도달했습니다. 지금까지 본 것으로 정리하세요."}' };
+      if (typeof fetchDigest !== 'function') return { label: '나비 SP 요약을 쓸 수 없음', kind: 'digest', uncounted: true, text: '{"error":"DIGEST_UNAVAILABLE"}' };
       let digest;
       try { digest = await fetchDigest(env); } catch (e) {
-        return { label: '혼디 SP 요약을 불러오지 못함', kind: 'digest', uncounted: true, text: '{"error":"DIGEST_UNAVAILABLE","message":"요약본을 불러오지 못했습니다. 이 도구 없이 진행하고 unverified에 적으세요."}' };
+        return { label: '나비 SP 요약을 불러오지 못함', kind: 'digest', uncounted: true, text: '{"error":"DIGEST_UNAVAILABLE","message":"요약본을 불러오지 못했습니다. 이 도구 없이 진행하고 unverified에 적으세요."}' };
       }
       const r = digestQuery(digest, { tier: oneLine(a.tier, 20), q: oneLine(a.q, 60), offset: a.offset });
       const where = r.tier ? `${r.label}${a.q ? ' · ' + oneLine(a.q, 30) : ''}${r.offset ? ' (이어서)' : ''}` : '유형별 요약';
-      return { label: `혼디 SP 요약 조회: ${where}`, kind: 'digest', uncounted: true, text: clipJsonForLlm(r, 6800) };
+      return { label: `나비 SP 요약 조회: ${where}`, kind: 'digest', uncounted: true, text: clipJsonForLlm(r, 6800) };
     }
     if (tag.name === 'ARCHIVE_SEARCH') {
       const r = await archiveSearchCore(env, { q: oneLine(a.q, 200), agency: oneLine(a.agency, 80), limit: 5, strict: true });
@@ -565,7 +565,7 @@ export function makeKfoiHandlers(deps) {
       if (isBlockedFetchHost(target)) {
         return {
           label: '코드 저장소는 조사 대상이 아니라 건너뜀', kind: 'fetch', uncounted: true,
-          text: '{"error":"HOST_NOT_ALLOWED","message":"코드 저장소(GitHub 등)는 청구 조사에 쓰지 않습니다. 혼디 「제주 AI 행정」의 구성은 프롬프트 §0-A 요약을 쓰고, 조사 횟수는 청구 대상 기관의 공개 자료 확인에 쓰세요."}',
+          text: '{"error":"HOST_NOT_ALLOWED","message":"코드 저장소(GitHub 등)는 청구 조사에 쓰지 않습니다. 나비 「제주 AI 행정」의 구성은 프롬프트 §0-A 요약을 쓰고, 조사 횟수는 청구 대상 기관의 공개 자료 확인에 쓰세요."}',
         };
       }
       const r = await urlFetch(env, ctx, target);

@@ -1,4 +1,4 @@
-# 고팡 (Gopang) 파일 명세서
+# 나비 (Navi) 파일 명세서
 > 저장소: https://github.com/Openhash-Gopang/gopang  
 > 배포: https://hondi.net (GitHub Pages)  
 > 작성일: 2026-06-14
@@ -79,7 +79,7 @@
 | `src/gopang/services/kcleaner.js` | K-Clean 이미지 분석 진행 관리 |
 | `src/gopang/services/fiil.js` | FIIL.kr 환경 신고 전송 (Supabase) |
 
-### 3-5. GWP (Gopang Widget Protocol)
+### 3-5. GWP (Navi Widget Protocol)
 
 | 파일 | 역할 |
 |------|------|

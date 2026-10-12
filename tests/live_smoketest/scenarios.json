@@ -844,7 +844,7 @@
     "utterance": "앱 사용법 좀 처리해줘",
     "expected_type": "GWP",
     "expected_id": "profile-assistant",
-    "expected_name": "혼디 안내(튜토리얼·프로필)",
+    "expected_name": "나비 안내(튜토리얼·프로필)",
     "category": "정상경로(카탈로그 트리거 기반)",
     "static_verdict": "WARN",
     "basis": "OK / OK([GWP:id] 표준 태그) / GAP(resolvedId=profile-assistant) / OK"
@@ -854,7 +854,7 @@
     "utterance": "사용법 알려줘 관련 절차 알려줘",
     "expected_type": "GWP",
     "expected_id": "profile-assistant",
-    "expected_name": "혼디 안내(튜토리얼·프로필)",
+    "expected_name": "나비 안내(튜토리얼·프로필)",
     "category": "정상경로(카탈로그 트리거 기반)",
     "static_verdict": "WARN",
     "basis": "OK / OK([GWP:id] 표준 태그) / GAP(resolvedId=profile-assistant) / OK"
@@ -864,7 +864,7 @@
     "utterance": "요즘 튜토리얼 때문에 골치 아파요",
     "expected_type": "GWP",
     "expected_id": "profile-assistant",
-    "expected_name": "혼디 안내(튜토리얼·프로필)",
+    "expected_name": "나비 안내(튜토리얼·프로필)",
     "category": "정상경로(카탈로그 트리거 기반)",
     "static_verdict": "WARN",
     "basis": "OK / OK([GWP:id] 표준 태그) / GAP(resolvedId=profile-assistant) / OK"
@@ -874,7 +874,7 @@
     "utterance": "프로필 수정 관련해서 도와줘",
     "expected_type": "GWP",
     "expected_id": "profile-assistant",
-    "expected_name": "혼디 안내(튜토리얼·프로필)",
+    "expected_name": "나비 안내(튜토리얼·프로필)",
     "category": "정상경로(카탈로그 트리거 기반)",
     "static_verdict": "WARN",
     "basis": "OK / OK([GWP:id] 표준 태그) / GAP(resolvedId=profile-assistant) / OK"
@@ -1044,7 +1044,7 @@
     "utterance": "자격 요건 때문에 그러는데, 좀 도와주세요",
     "expected_type": "GWP",
     "expected_id": "kqna",
-    "expected_name": "Gopang QnA",
+    "expected_name": "Navi QnA",
     "category": "정상경로(카탈로그 트리거 기반)",
     "static_verdict": "WARN",
     "basis": "OK / OK([GWP:id] 표준 태그) / GAP(resolvedId=kqna) / OK"
@@ -1054,7 +1054,7 @@
     "utterance": "궁금해 알아보려고 하는데 어떻게 해야 해?",
     "expected_type": "GWP",
     "expected_id": "kqna",
-    "expected_name": "Gopang QnA",
+    "expected_name": "Navi QnA",
     "category": "정상경로(카탈로그 트리거 기반)",
     "static_verdict": "WARN",
     "basis": "OK / OK([GWP:id] 표준 태그) / GAP(resolvedId=kqna) / OK"
@@ -1064,7 +1064,7 @@
     "utterance": "저 필요한 서류 문제가 생겼어요",
     "expected_type": "GWP",
     "expected_id": "kqna",
-    "expected_name": "Gopang QnA",
+    "expected_name": "Navi QnA",
     "category": "정상경로(카탈로그 트리거 기반)",
     "static_verdict": "WARN",
     "basis": "OK / OK([GWP:id] 표준 태그) / GAP(resolvedId=kqna) / OK"
@@ -1074,7 +1074,7 @@
     "utterance": "문의에 대해 상담받고 싶어요",
     "expected_type": "GWP",
     "expected_id": "kqna",
-    "expected_name": "Gopang QnA",
+    "expected_name": "Navi QnA",
     "category": "정상경로(카탈로그 트리거 기반)",
     "static_verdict": "WARN",
     "basis": "OK / OK([GWP:id] 표준 태그) / GAP(resolvedId=kqna) / OK"
@@ -1084,7 +1084,7 @@
     "utterance": "프로필 찾아줘 좀 처리해줘",
     "expected_type": "GWP",
     "expected_id": "kusers",
-    "expected_name": "Gopang Users",
+    "expected_name": "Navi Users",
     "category": "정상경로(카탈로그 트리거 기반)",
     "static_verdict": "WARN",
     "basis": "OK / OK([GWP:id] 표준 태그) / GAP(resolvedId=kusers) / OK"
@@ -1094,7 +1094,7 @@
     "utterance": "가입자 조회 관련 절차 알려줘",
     "expected_type": "GWP",
     "expected_id": "kusers",
-    "expected_name": "Gopang Users",
+    "expected_name": "Navi Users",
     "category": "정상경로(카탈로그 트리거 기반)",
     "static_verdict": "WARN",
     "basis": "OK / OK([GWP:id] 표준 태그) / GAP(resolvedId=kusers) / OK"
@@ -1104,7 +1104,7 @@
     "utterance": "요즘 연락처 찾아줘 때문에 골치 아파요",
     "expected_type": "GWP",
     "expected_id": "kusers",
-    "expected_name": "Gopang Users",
+    "expected_name": "Navi Users",
     "category": "정상경로(카탈로그 트리거 기반)",
     "static_verdict": "WARN",
     "basis": "OK / OK([GWP:id] 표준 태그) / GAP(resolvedId=kusers) / OK"
@@ -1114,7 +1114,7 @@
     "utterance": "누구세요 관련해서 도와줘",
     "expected_type": "GWP",
     "expected_id": "kusers",
-    "expected_name": "Gopang Users",
+    "expected_name": "Navi Users",
     "category": "정상경로(카탈로그 트리거 기반)",
     "static_verdict": "WARN",
     "basis": "OK / OK([GWP:id] 표준 태그) / GAP(resolvedId=kusers) / OK"
@@ -2621,10 +2621,10 @@
   },
   {
     "no": 263,
-    "utterance": "다른기기 연결 QR(혼디 숫자 코드) 보여줘",
+    "utterance": "다른기기 연결 QR(나비 숫자 코드) 보여줘",
     "expected_type": "PLATFORM",
     "expected_id": "device-link-code",
-    "expected_name": "기기 간 지갑 이전(혼디 숫자 코드 생성)",
+    "expected_name": "기기 간 지갑 이전(나비 숫자 코드 생성)",
     "category": "정상경로",
     "static_verdict": "PASS",
     "basis": "openDeviceLinkQR()이 phoneToDigits→generateDigitCodeDataURL로 렌더링, 헤드리스 크롬 검증 완료"
@@ -2641,20 +2641,20 @@
   },
   {
     "no": 265,
-    "utterance": "이 사람 혼디 코드 스캔해서 프로필 보고 싶어",
+    "utterance": "이 사람 나비 코드 스캔해서 프로필 보고 싶어",
     "expected_type": "PLATFORM",
     "expected_id": "hondi-code-scan",
-    "expected_name": "혼디 숫자 코드(타인 프로필 조회)",
+    "expected_name": "나비 숫자 코드(타인 프로필 조회)",
     "category": "정상경로",
     "static_verdict": "PASS",
     "basis": "openHondiScanner()→lookupDigitProfile() 경로 확인됨(webapp.html)"
   },
   {
     "no": 266,
-    "utterance": "내 혼디 코드 이미지로 저장해줘",
+    "utterance": "내 나비 코드 이미지로 저장해줘",
     "expected_type": "PLATFORM",
     "expected_id": "hondi-code-download",
-    "expected_name": "혼디 코드(내 코드 다운로드)",
+    "expected_name": "나비 코드(내 코드 다운로드)",
     "category": "정상경로",
     "static_verdict": "PASS",
     "basis": "_downloadHondiCode() 존재 확인"
@@ -2934,7 +2934,7 @@
     "utterance": "이 사람 정보 좀 찾아서 알려줘, 이름은 김민준이고 제주시에 살아",
     "expected_type": "GWP",
     "expected_id": "kusers",
-    "expected_name": "Gopang Users(엔티티 검색)",
+    "expected_name": "Navi Users(엔티티 검색)",
     "category": "정상경로(카탈로그 트리거 기반)",
     "static_verdict": "WARN",
     "basis": "users.hondi.net/webapp.html 파일은 존재하나 SVC_ALIAS 미매핑(PDV 등록 갭)"

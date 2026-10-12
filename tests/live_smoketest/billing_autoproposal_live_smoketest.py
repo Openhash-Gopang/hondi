@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-혼디 자율 과금 제안 시스템 LIVE smoketest.
+나비 자율 과금 제안 시스템 LIVE smoketest.
 
 klaw_billing_live_smoketest.py와 동일한 원칙 — 실제 worker.js(hondi-proxy)
 /gov/relay 엔드포인트를 HTTP로 진짜 호출하고, "부수효과"(PocketBase
@@ -86,7 +86,7 @@ def call_gov_relay(worker_base, guid, task_key, roundtrips):
         "guid": guid, "agency": TEST_AGENCY,
         "agencyPrompt": "You are a test harness call. Reply with exactly one short sentence.",
         "messages": [
-            {"role": "user", "content": "이 요청은 혼디 자율 과금 제안 시스템 라이브 스모크테스트입니다. 아주 짧게 한 문장으로만 답하세요."},
+            {"role": "user", "content": "이 요청은 나비 자율 과금 제안 시스템 라이브 스모크테스트입니다. 아주 짧게 한 문장으로만 답하세요."},
         ],
         "max_tokens": 40, "stream": False, "tier": "gov-flash",
         "task_key": task_key, "gov_task_roundtrips": roundtrips,

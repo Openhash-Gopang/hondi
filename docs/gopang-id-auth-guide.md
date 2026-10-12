@@ -1,4 +1,4 @@
-# 고팡 ID·인증 통합 가이드 (Gopang ID & Auth Guide)
+# 나비 ID·인증 통합 가이드 (Navi ID & Auth Guide)
 
 **버전 1.0 · 2026년 6월 · AI City Inc.**
 
@@ -44,7 +44,7 @@
 - 4.5 wallet 자동 할당 보장
 
 **5. 하위 시스템 SSO 인증**
-- 5.1 핵심 원칙 — 고팡이 유일한 인증 포털
+- 5.1 핵심 원칙 — 나비가 유일한 인증 포털
 - 5.2 도메인 요건 (서브도메인 · HTTPS)
 - 5.3 1단계 — subsystem-auth.js 한 줄 삽입
 - 5.4 2단계 — gopang-sso.js의 4가지 경로
@@ -98,9 +98,9 @@
 
 ### 1.1 문서의 목적과 통합 대상
 
-고팡(Gopang)은 현실 세계의 모든 기관·사물·개인의 AI 쌍둥이로 구축한 AI 평행 세계 플랫폼입니다. 사용자는 단일 정체성(IPv6 주소)으로 K-Law, K-Market, K-Tax, K-Health 등 수백 개의 하위 시스템에 접근합니다.
+나비(Navi)은 현실 세계의 모든 기관·사물·개인의 AI 쌍둥이로 구축한 AI 평행 세계 플랫폼입니다. 사용자는 단일 정체성(IPv6 주소)으로 K-Law, K-Market, K-Tax, K-Health 등 수백 개의 하위 시스템에 접근합니다.
 
-본 문서는 고팡의 ID 생성, 인증 레벨, SSO, 사용자 검색(GDUDA), 그리고 2026년 6월 K-Market 통합테스트에서 새로 도출된 온보딩/프로필등록 인증 설계를 하나의 문서로 통합합니다.
+본 문서는 나비의 ID 생성, 인증 레벨, SSO, 사용자 검색(GDUDA), 그리고 2026년 6월 K-Market 통합테스트에서 새로 도출된 온보딩/프로필등록 인증 설계를 하나의 문서로 통합합니다.
 
 ### 1.2 핵심 설계 철학
 
@@ -129,7 +129,7 @@
   검색·AI 상담·프로필 등록 등 핵심 기능을 이용할 수 있어야 합니다.
 ```
 
-| 항목 | 기존 방식 | 고팡 방식 |
+| 항목 | 기존 방식 | 나비 방식 |
 |------|-----------|-----------|
 | 신원 증명 | ID + 비밀번호 | IPv6 + 생체 |
 | 서버 저장 | 개인정보 전체 | 공개키만 |
@@ -163,7 +163,7 @@ DID 방식:  did:gopang:a3f8c2...  → "신원을 증명하는 문서"
 IPv6 방식: 2601:db80:a3f8:c291:  → "신원 그 자체이자 통신 주소"
 ```
 
-IPv6 주소 공간(2¹²⁸ ≈ 3.4×10³⁸)은 지구의 모든 인류·사물·AI 쌍둥이에게 고유 주소를 부여하기에 충분합니다. 정체성과 통신 주소가 하나로 통합되어 고팡의 AI 평행 세계 철학과 일치합니다.
+IPv6 주소 공간(2¹²⁸ ≈ 3.4×10³⁸)은 지구의 모든 인류·사물·AI 쌍둥이에게 고유 주소를 부여하기에 충분합니다. 정체성과 통신 주소가 하나로 통합되어 나비의 AI 평행 세계 철학과 일치합니다.
 
 ### 2.2 식별자 3단계 분리 — Primary GUID / Current IPv6 / Nickname Hash
 
@@ -181,7 +181,7 @@ GAS(`Gopang_Auth_and_Discovery.html` §2.1)는 정체성·통신주소·검색�
 |------|-----------|-----------|------|
 | Primary GUID | SHA-256(공개키) | 영구 불변 | 정체성, DB 기본키 |
 | Current IPv6 | SHA-256(기기 핑거프린트) | 기기 변경 시 갱신 | 통신 주소, P2P 연결 |
-| Nickname Hash | SHA-256(고팡ID) | 닉네임 변경 시 갱신 | 검색 키 |
+| Nickname Hash | SHA-256(나비ID) | 닉네임 변경 시 갱신 | 검색 키 |
 
 > **현재 구현 상태**: `user_profiles` 테이블은 `guid`(text)와 `current_ipv6`(text) 컬럼을 모두 갖고 있으나, 실제 클라이언트(`gopang-app.js`)는 `USER_GUID = _USER.ipv6`로 **두 값을 동일하게 사용**합니다. 즉 Primary GUID와 Current IPv6가 아직 분리되지 않았습니다. §6에서 도입한 Ed25519 `pubkey_ed25519`가 향후 Primary GUID(=SHA-256(pubkey)) 분리의 기반이 될 수 있습니다.
 
@@ -342,7 +342,7 @@ navigator.credentials.get() [인증]
 
 ```
 사용자 입력: "제주 파란 파도 2018"
-  → PBKDF2 (SHA-256, 100,000 iterations, 고팡 전용 salt)
+  → PBKDF2 (SHA-256, 100,000 iterations, 나비 전용 salt)
   → 256비트 시드 바이트
   → PDV에 해시값만 저장 (원문 절대 미저장)
 ```
@@ -481,7 +481,7 @@ gopang-wallet.js 로드
 > **⚠️ 스토리지 키 주의**: 현재 구현은 `gopang_user_v4`를 사용합니다. 구버전 `gopang_user_v4` 참조 코드는 모두 `v4`로 교체해야 합니다 (`gopang-wallet.js` 싱글턴 초기화 포함).
 ## 5. 하위 시스템 SSO 인증
 
-### 5.1 핵심 원칙 — 고팡이 유일한 인증 포털
+### 5.1 핵심 원칙 — 나비가 유일한 인증 포털
 
 하위 서비스(K-Law, K-Market, K-Tax, K-Security 등)는 **독자적인 인증 시스템을 구현하지 않습니다.** 모든 인증은 `hondi.net`에 위임합니다.
 
@@ -541,7 +541,7 @@ hondi.net/auth/
 
 ```
 경로 1: GWP 토큰 (URL의 gwp_token 파라미터, HMAC 서명)
-   → 고팡 앱이 _gwpLaunch로 하위 서비스를 호출한 경우, 사용자 인지 없이 즉시 완료
+   → 나비 앱이 _gwpLaunch로 하위 서비스를 호출한 경우, 사용자 인지 없이 즉시 완료
 
 경로 2-A: sessionStorage 캐시 (gopang_sso_token)
    → 이전 인증 결과 재사용
@@ -675,7 +675,7 @@ global.gopangWallet = wallet;
 
 ### 6.5 SSO(§5)와의 관계 — 별도 인증 경로인 이유
 
-§5의 SSO는 **"고팡 계정으로 다른 *.hondi.net 서비스에 로그인"**하는 시나리오를 위한 것이고, §6의 Ed25519 인증은 **"users.hondi.net 자체에서 본인 프로필을 쓰기(write)"**하는 시나리오를 위한 것입니다.
+§5의 SSO는 **"나비 계정으로 다른 *.hondi.net 서비스에 로그인"**하는 시나리오를 위한 것이고, §6의 Ed25519 인증은 **"users.hondi.net 자체에서 본인 프로필을 쓰기(write)"**하는 시나리오를 위한 것입니다.
 
 - `register-profile.html`은 `users.hondi.net` 자체 페이지이므로 크로스도메인 SSO(silent-auth.html, iframe, 리다이렉트)가 필요 없습니다 — `window.gopangWallet`을 직접 사용
 - `/profile`, `/ai-setup`의 쓰기 요청은 "이 요청이 정말 이 guid의 개인키 소유자가 보낸 것인가"를 증명해야 하며, 이는 SSO 토큰(HMAC, 세션 캐시 가능)보다 **매 요청 서명(Ed25519)**이 더 강한 보장을 제공합니다
@@ -759,7 +759,7 @@ v2 (개정): nickname_hash = SHA-256("ko:" + "홍길동") = SHA-256("ko:홍길�
 
 닉네임 중복을 허용하면 닉네임은 **식별자(Identifier)**에서 **표시 이름(Display Name)**으로 역할이 바뀝니다. Primary GUID의 유일성은 그대로 유지되지만, 최종 식별 부담이 다음 3계층으로 분산됩니다.
 
-**① 고팡 핸들 — `@닉네임#태그`**
+**① 나비 핸들 — `@닉네임#태그`**
 ```
 handle = "@" + display_name + "#" + GUID[:4] (16진수)
 
@@ -1132,15 +1132,15 @@ Phase 3 — 고도화
 |---|---|
 | PDV | Private Data Vault — 사용자 개인 데이터 저장소 (기기 로컬) |
 | OpenHash | 5계층(L1~L5) 분산 해시체인 네트워크. 위변조 불가 영구 기록 |
-| GDUDA | Gopang Distributed User Discovery — 분산 사용자 검색 알고리즘 |
-| GAS | Gopang Address System — 고팡 주소(IPv6 정체성) 체계 |
+| GDUDA | Navi Distributed User Discovery — 분산 사용자 검색 알고리즘 |
+| GAS | Navi Address System — 나비 주소(IPv6 정체성) 체계 |
 | fpHex | 기기 핑거프린트의 SHA-256 해시 (64 hex) |
 | ipv6 / Current IPv6 | `2601:db80:` + fpHex 기반 변환 주소. 현재 구현의 사용자 식별자 |
 | Primary GUID | (제안) SHA-256(공개키) 기반 불변 정체성. 현재는 ipv6와 동일하게 취급 |
 | Nickname Hash | 닉네임의 SHA-256(또는 언어코드 포함 SHA-256, §7.3) — 검색 키 |
-| GWP | Gopang Wallet Protocol — 고팡 앱이 하위 서비스를 호출하는 토큰 전달 방식 |
+| GWP | Navi Wallet Protocol — 나비 앱이 하위 서비스를 호출하는 토큰 전달 방식 |
 | TOFU | Trust-On-First-Use — 최초 등록 시의 공개키를 신뢰하고, 이후 동일 키만 허용 |
 | PAR | Public Attribute Record — IPv6 키 기반 분산 공개 속성 레코드 |
 | handle | `@닉네임#GUID앞4자리` 형식의 유일 식별자 (표시이름과 분리) |
 | L0~L3 | 인증 레벨 — 기기/얼굴/지문/시드 |
-| GDC | 고팡 발행 화폐 단위 (₮) |
+| GDC | 나비 발행 화폐 단위 (₮) |

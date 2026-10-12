@@ -255,9 +255,9 @@
     "id": "expert-hondi-guide-A-named",
     "tier": "expert",
     "target_id": "hondi-guide",
-    "target_name": "혼디 SP",
+    "target_name": "나비 SP",
     "variant": "named",
-    "utterance": "혼디 SP가 필요해, 바로 연결해줘.",
+    "utterance": "나비 SP가 필요해, 바로 연결해줘.",
     "expect_tag": "[EXPERT: hondi-guide]"
   },
   {

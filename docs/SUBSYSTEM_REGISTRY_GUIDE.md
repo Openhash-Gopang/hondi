@@ -1,5 +1,5 @@
-# 고팡 하위 시스템 등록 안내서
-## Gopang Subsystem Registry Guide v1.0
+# 나비 하위 시스템 등록 안내서
+## Navi Subsystem Registry Guide v1.0
 
 > **저장소:** `Openhash-Gopang/gopang_v2`  
 > **파일:** `gwp-registry.js`  
@@ -11,8 +11,8 @@
 
 ## § 1. 개요
 
-고팡은 수백 종의 하위 시스템으로 구성된 AI 평행 세계입니다.  
-사용자가 고팡 앱에 자연어로 요청하면, **GWP 라우터**가 `gwp-registry.js`를 읽어  
+나비는 수백 종의 하위 시스템으로 구성된 AI 평행 세계입니다.  
+사용자가 나비 앱에 자연어로 요청하면, **GWP 라우터**가 `gwp-registry.js`를 읽어  
 가장 적합한 하위 시스템을 자동으로 호출합니다.
 
 **핵심 원칙:**
@@ -129,7 +129,7 @@ SP-{서비스ID대문자}-v{버전}.txt
 모든 하위 시스템은 `</body>` 직전에 **한 줄**만 추가합니다.
 
 ```html
-<!-- 고팡 SSO 인증 — 이 한 줄이 전부 -->
+<!-- 나비 SSO 인증 — 이 한 줄이 전부 -->
 <script type="module"
   src="https://hondi.net/auth/subsystem-auth.js">
 </script>
@@ -174,7 +174,7 @@ await fetch('https://gopang-proxy.tensor-city.workers.dev/pdv/report', {
       },
       where: { svc_url: 'https://farm.hondi.net/webapp.html' },
       what:  { summary: '농업 AI 자문 접속' },
-      how:   { method: '고팡 SSO 자동 인증' },
+      how:   { method: '나비 SSO 자동 인증' },
       why:   { goal:   '농업 정보 조회' },
     }
   })
@@ -225,7 +225,7 @@ feat: {서비스명} ({서비스ID}) 레지스트리 등록
 | `LEG` | 입법·정책 | K-Democracy |
 | `SOC` | 사회·복지 | (예정) |
 | `IOT` | IoT·사물 | (예정) |
-| `DIRECT` | 고팡 직접 | gopang-direct |
+| `DIRECT` | 나비 직접 | gopang-direct |
 
 ---
 
@@ -299,7 +299,7 @@ triggers: [
 
 ## § 8. GWP 파라미터 활용
 
-고팡 앱이 하위 서비스를 호출할 때 URL 파라미터를 전달합니다.
+나비 앱이 하위 서비스를 호출할 때 URL 파라미터를 전달합니다.
 
 ```
 https://farm.hondi.net/webapp.html
@@ -323,7 +323,7 @@ if (isGWP && ctx) {
   processUserInput(decodeURIComponent(ctx));
 }
 
-// 고팡으로 복귀 버튼
+// 나비로 복귀 버튼
 document.getElementById('back-btn').href = returnTo || 'https://hondi.net';
 ```
 
@@ -331,7 +331,7 @@ document.getElementById('back-btn').href = returnTo || 'https://hondi.net';
 
 ## § 9. 도메인 설정
 
-고팡 하위 시스템은 `*.hondi.net` 서브도메인을 사용합니다.  
+나비 하위 시스템은 `*.hondi.net` 서브도메인을 사용합니다.  
 도메인 설정은 `dev@hondi.net`으로 요청하십시오.
 
 ### GitHub Pages 배포 기준
@@ -365,9 +365,9 @@ T3 □ subsystem-auth.js 로드 확인 (Console 오류 없음)
 T4 □ _onGopangAuth(user) 호출 확인 (user.ipv6 수신)
 T5 □ PDV /pdv/report 200 응답 확인
 T6 □ Supabase pdv_log 저장 확인
-T7 □ 고팡 앱에서 트리거 키워드 입력 → 자동 라우팅 확인
+T7 □ 나비 앱에서 트리거 키워드 입력 → 자동 라우팅 확인
 T8 □ GWP ctx 파라미터 수신 및 활용 확인
-T9 □ 복귀 버튼 (→ 고팡) 동작 확인
+T9 □ 복귀 버튼 (→ 나비) 동작 확인
 ```
 
 ---
@@ -381,13 +381,13 @@ T9 □ 복귀 버튼 (→ 고팡) 동작 확인
 | 코드 리뷰 | AI City Inc. 팀 검토 | 3영업일 내 |
 | 테스트 | T1~T9 체크리스트 공동 확인 | 1영업일 |
 | 병합 | `main` 브랜치 merge | 즉시 |
-| 라우팅 활성화 | 고팡 앱 자동 반영 | merge 후 즉시 |
+| 라우팅 활성화 | 나비 앱 자동 반영 | merge 후 즉시 |
 
 ---
 
 ## § 12. 자주 묻는 질문
 
-**Q. 고팡 서브도메인 없이 외부 도메인으로 등록할 수 있나요?**  
+**Q. 나비 서브도메인 없이 외부 도메인으로 등록할 수 있나요?**  
 A. 가능합니다. `dev@hondi.net`으로 도메인 허용 요청 후 등록하십시오. (예: `fiil.kr`)
 
 **Q. triggers 키워드가 다른 서비스와 겹쳐도 되나요?**  
@@ -417,4 +417,4 @@ A. `dev@hondi.net`으로 제안하십시오. DAWN 투표를 통해 추가됩니�
 ---
 
 *© 2026 AI City Inc. · DAWN: Democracy is All We Need*  
-*고팡은 참여하는 시민들이 스스로 통치하는 디지털 민주주의입니다.*
+*나비는 참여하는 시민들이 스스로 통치하는 디지털 민주주의입니다.*

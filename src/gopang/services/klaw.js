@@ -89,7 +89,7 @@ export async function _klawReview(source, payload) {
         .map(m => `[${m.role === 'user' ? '사용자' : 'AI'}] ${m.content}`)
         .join('\n');
       if (!recent || recent.length < 50) { setKlawBusy(false); return; }
-      reviewText = `## 검토 대상: 고팡 대화 내용\n\n${recent}`;
+      reviewText = `## 검토 대상: 나비 대화 내용\n\n${recent}`;
 
     } else if (source === 'service') {
       // 서비스 완료 결과 (pdvData)

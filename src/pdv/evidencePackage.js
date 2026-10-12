@@ -247,7 +247,7 @@ export function generateCourtSummary(pkg) {
     entryHash:      pkg.openHashProof?.entryHash,
     proofWeight:    pkg.proofWeight,
     verifyUrl:      pkg.verificationUrl,
-    disclaimer:     '본 보고서는 고팡 PDV+OpenHash 자기완결 증거 구조에 기반합니다. ' +
+    disclaimer:     '본 보고서는 나비 PDV+OpenHash 자기완결 증거 구조에 기반합니다. ' +
                     '법원 제출 전 Verification API를 통해 독립 검증을 권고합니다.',
   }
 }

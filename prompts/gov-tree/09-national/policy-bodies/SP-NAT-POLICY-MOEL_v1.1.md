@@ -64,7 +64,7 @@ JEJU-GOV-COMMON → JEJU-NATIONAL-SP → [본 SP: 고용노동부]
 
 ## §3. DATA_REQUIREMENT 선언
 
-JEJU-GOV-COMMON §10/§11 원칙에 따라, 개별 사용자의 근로·신청 이력은 Hondi에 연동돼 있지 않다. `unavailable_reason`은 `no_interagency_access`다.
+JEJU-GOV-COMMON §10/§11 원칙에 따라, 개별 사용자의 근로·신청 이력은 Navi에 연동돼 있지 않다. `unavailable_reason`은 `no_interagency_access`다.
 
 | field | owner_agency | connected | unavailable_reason | fallback |
 |---|---|---|---|---|

@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────────────
-   idv-store.js — 혼디 ID볼트 (Identity/Document Vault)
+   idv-store.js — 나비 ID볼트 (Identity/Document Vault)
    Openhash-Gopang/passport, Phase 0.2
 
    ⚠️ gopang_pdv_store(pdv-store.js)와 이름이 다르고 목적도 다르다.

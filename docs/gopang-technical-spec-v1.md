@@ -1,4 +1,4 @@
-# Gopang Technical Specification v1.0
+# Navi Technical Specification v1.0
 **작성** AI City Inc. 팀 주피터 | 2026-06-11  
 **작성자** Claude Sonnet 4.6 (대화 분석 기반)
 
@@ -6,7 +6,7 @@
 
 ## 1. 시스템 개요
 
-**플랫폼명** 고팡 (Gopang)  
+**플랫폼명** 나비 (Navi)  
 **운영조직** AI City Inc. / 팀 주피터  
 **파일럿** 제주도 한림읍  
 **철학** DAWN — Democracy is All We Need
@@ -15,10 +15,10 @@
 
 | # | 원칙 |
 |---|---|
-| P1 | 고팡이 허브, 하위 시스템은 스포크. 시스템 간 직접 교신 없음 |
-| P2 | PDV는 고팡 Worker만 직접 기록·조회. 하위 시스템은 `/pdv/report` 경유 필수 |
+| P1 | 나비가 허브, 하위 시스템은 스포크. 시스템 간 직접 교신 없음 |
+| P2 | PDV는 나비 Worker만 직접 기록·조회. 하위 시스템은 `/pdv/report` 경유 필수 |
 | P3 | 모든 PDV 기록은 6하 원칙(who/when/where/what/how/why) 필수 |
-| P4 | OpenHash 앵커링은 고팡 Worker의 단독 책임 |
+| P4 | OpenHash 앵커링은 나비 Worker의 단독 책임 |
 | P5 | 다중 시스템 세션에서 PDV 보고는 최하위 이행 시스템 1회만. session_id로 중복 방지 |
 | P6 | 재무제표 갱신 권한은 사용자 본인에게만 있음 |
 
@@ -30,7 +30,7 @@
 
 | 서비스 | 도메인 | GitHub 저장소 | 로컬 경로 |
 |---|---|---|---|
-| 고팡 메인 | hondi.net | Openhash-Gopang/gopang | C:\Users\주피터\Downloads\gopang\ |
+| 나비 메인 | hondi.net | Openhash-Gopang/gopang | C:\Users\주피터\Downloads\gopang\ |
 | K-Market | market.hondi.net | Openhash-Gopang/market | C:\Users\주피터\Downloads\market\ |
 | 사용자 프로필 | users.hondi.net | Openhash-Gopang/users | C:\Users\주피터\Downloads\users\ |
 
@@ -168,7 +168,7 @@ users/
 
 ## 4. AI 아키텍처
 
-### 4.1 SP-00 (고팡 메인 AI) — 중요: 실제 파일 없음
+### 4.1 SP-00 (나비 메인 AI) — 중요: 실제 파일 없음
 
 - **명칭** "SP-00 v10.0"
 - **실체** `gopang-app.js` 내 `CFG.system` 필드에 하드코딩된 문자열
@@ -264,7 +264,7 @@ fetch(SP_URL + '?t=' + Date.now())
 
 ---
 
-## 5. GWP (Gopang Widget Protocol)
+## 5. GWP (Navi Widget Protocol)
 
 ### 5.1 gwp-registry.js
 
@@ -893,7 +893,7 @@ req.onsuccess = e => {
 
 ## 18. Hash 값 모듈 간 일관성 (핵심)
 
-이 섹션은 고팡 결제 시스템에서 가장 중요한 불변 조건을 기술한다.  
+이 섹션은 나비 결제 시스템에서 가장 중요한 불변 조건을 기술한다.  
 **hash 값 일관성이 깨지면 모든 거래가 STALE_STATE(409)로 실패한다.**
 
 ### 18.1 hash 값 흐름 전체 다이어그램
@@ -1084,7 +1084,7 @@ window.opener.postMessage({
 
 ---
 
-*Gopang Technical Specification v1.0 (patch 적용 완료)*  
+*Navi Technical Specification v1.0 (patch 적용 완료)*  
 *AI City Inc. 팀 주피터 | 2026-06-11*
   
 *AI City Inc. 팀 주피터 | 2026-06-11*

@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════════
-   site-header.js — 혼디 공용 헤더 스크립트 (단일 소스)
+   site-header.js — 나비 공용 헤더 스크립트 (단일 소스)
 
    이 스크립트를 불러오는 페이지는 로드 시 자동으로:
      1) 상단 안내 띠 + 내비게이션 바 + 돌아가기 화살표를 <body> 맨 앞에 삽입
@@ -32,8 +32,8 @@
   var NAV_HTML =
     '<div class="site-nav">' +
       '<a class="site-nav-logo" href="/desktop.html" onclick="return __hondiBack(event);">' +
-        '<img src="/icons/icon-192.png" alt="혼디">' +
-        '<span>혼디</span>' +
+        '<img src="/icons/navi-icon-192.png" alt="나비">' +
+        '<span>나비</span>' +
       '</a>' +
       '<nav class="site-nav-links">' +
         '<a href="/pages/usage-guide.html">이용방법</a>' +
@@ -48,7 +48,7 @@
         '</a>' +
         '<a href="/pages/ai-engine.html">AI 엔진</a>' +
         '<a href="/pages/openhash.html">오픈해시</a>' +
-        '<a href="/pages/hondi-market.html">혼디마켓</a>' +
+        '<a href="/pages/hondi-market.html">나비마켓</a>' +
       '</nav>' +
       '<div class="site-nav-highlight">' +
         '<a href="/pages/k-services.html"><span class="dot"></span><span class="label-text">K-서비스</span></a>' +
@@ -59,7 +59,7 @@
     '</div>' +
     '<div class="site-strip">' +
       '<a class="site-strip-text" href="https://github.com/Openhash-Gopang/hondi" target="_blank">2026년 9월 1일 테스트 시작 · 2027년 완전한 AI 정부 구현 목표 · 오픈소스 코드 공개</a>' +
-      '<a class="site-strip-support-btn" href="/pages/project-support.html">혼디 프로젝트 지원</a>' +
+      '<a class="site-strip-support-btn" href="/pages/project-support.html">나비 프로젝트 지원</a>' +
     '</div>';
 
   var BACK_ARROW_HTML =
@@ -90,8 +90,8 @@
     if (config.badge) {
       html += '<span class="site-hero-badge"><span class="dot"></span>' + escapeHtml(config.badge) + '</span>';
     }
-    html += '<a class="site-hero-corner-logo" href="/desktop.html" onclick="return __hondiBack(event);" title="혼디">' +
-              '<img src="/icons/hondi-hero-badge.png" alt="혼디 로고">' +
+    html += '<a class="site-hero-corner-logo" href="/desktop.html" onclick="return __hondiBack(event);" title="나비">' +
+              '<img src="/icons/navi-hero-badge.png" alt="나비 로고">' +
             '</a>';
     if (config.l1 || config.l2) {
       html += '<h1>';

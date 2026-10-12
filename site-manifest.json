@@ -69,13 +69,15 @@
   },
   {
     "path": "/docs/AUTH_LOGIN_WHITEPAPER_v1_0_20260829.html",
-    "title": "혼디 사용자 인증 및 로그인 백서 — 지갑 기반 인증·device-link·Web Push·세션 TTL·남용 방지(0829) ↗",
-    "description": "혼디 사용자 인증 및 로그인 백서 — 지갑 기반 인증·device-link·Web Push·세션 TTL·남용 방지(0829) ↗",
+    "title": "나비 사용자 인증 및 로그인 백서 — 지갑 기반 인증·device-link·Web Push·세션 TTL·남용 방지(0829) ↗",
+    "description": "나비 사용자 인증 및 로그인 백서 — 지갑 기반 인증·device-link·Web Push·세션 TTL·남용 방지(0829) ↗",
     "keywords": [
       "혼디 사용자 인증 및 로그인 백서",
+      "나비 사용자 인증 및 로그인 백서",
       "지갑 기반 인증 device",
       "link Web Push 세션 TTL 남용 방지 0829",
       "혼디",
+      "나비",
       "사용자",
       "인증",
       "로그인",
@@ -440,16 +442,18 @@
   },
   {
     "path": "/docs/HANDOFF_HONDI_SEARCH_RELAY_MIGRATION_20260909_v1_0.md",
-    "title": "인수인계서 — 혼디 검색이 hondi-search-relay 전용 Worker/저장소로 이관 완료(0909, 1042 원인 재확인·D안 실증 검증·라이브 재검증까지) ↗",
-    "description": "인수인계서 — 혼디 검색이 hondi-search-relay 전용 Worker/저장소로 이관 완료(0909, 1042 원인 재확인·D안 실증 검증·라이브 재검증까지) ↗",
+    "title": "인수인계서 — 나비 검색이 hondi-search-relay 전용 Worker/저장소로 이관 완료(0909, 1042 원인 재확인·D안 실증 검증·라이브 재검증까지) ↗",
+    "description": "인수인계서 — 나비 검색이 hondi-search-relay 전용 Worker/저장소로 이관 완료(0909, 1042 원인 재확인·D안 실증 검증·라이브 재검증까지) ↗",
     "keywords": [
       "인수인계서",
       "혼디 검색이 hondi",
+      "나비 검색이 hondi",
       "search",
       "relay 전용 Worker",
       "저장소로 이관 완료 0909",
       "1042 원인 재확인 D안 실증 검증 라이브 재검증까지",
       "혼디",
+      "나비",
       "검색이"
     ],
     "pc_url": "https://hondi.net/docs/HANDOFF_HONDI_SEARCH_RELAY_MIGRATION_20260909_v1_0.md",
@@ -494,13 +498,15 @@
   },
   {
     "path": "/docs/HONDI_PAGE_DESIGN_PRINCIPLES_v1_0.md",
-    "title": "혼디 페이지 디자인 원칙 v1.0 — 원자로 제어실·ICU 모니터·SOC 관제센터 조사 기반, GDC 탭 리디자인에서 확정한 색·타이포·레이아웃 토큰 (2026-09-23) ↗",
-    "description": "혼디 페이지 디자인 원칙 v1.0 — 원자로 제어실·ICU 모니터·SOC 관제센터 조사 기반, GDC 탭 리디자인에서 확정한 색·타이포·레이아웃 토큰 (2026-09-23) ↗",
+    "title": "나비 페이지 디자인 원칙 v1.0 — 원자로 제어실·ICU 모니터·SOC 관제센터 조사 기반, GDC 탭 리디자인에서 확정한 색·타이포·레이아웃 토큰 (2026-09-23) ↗",
+    "description": "나비 페이지 디자인 원칙 v1.0 — 원자로 제어실·ICU 모니터·SOC 관제센터 조사 기반, GDC 탭 리디자인에서 확정한 색·타이포·레이아웃 토큰 (2026-09-23) ↗",
     "keywords": [
       "혼디 페이지 디자인 원칙 v1.0",
+      "나비 페이지 디자인 원칙 v1.0",
       "원자로 제어실 ICU 모니터 SOC 관제센터 조사 기반",
       "GDC 탭 리디자인에서 확정한 색 타이포 레이아웃 토큰",
       "혼디",
+      "나비",
       "페이지",
       "디자인",
       "원칙",
@@ -513,12 +519,14 @@
   },
   {
     "path": "/docs/HONDI_TEST_PLAN_v1_0.html",
-    "title": "혼디 시스템 테스트 방법론 + 상세 케이스(0811, 786항목 전수파싱) ↗",
-    "description": "혼디 시스템 테스트 방법론 + 상세 케이스(0811, 786항목 전수파싱) ↗",
+    "title": "나비 시스템 테스트 방법론 + 상세 케이스(0811, 786항목 전수파싱) ↗",
+    "description": "나비 시스템 테스트 방법론 + 상세 케이스(0811, 786항목 전수파싱) ↗",
     "keywords": [
       "혼디 시스템 테스트 방법론 + 상세 케이스 0811",
+      "나비 시스템 테스트 방법론 + 상세 케이스 0811",
       "786항목 전수파싱",
       "혼디",
+      "나비",
       "시스템",
       "테스트",
       "방법론",
@@ -987,16 +995,18 @@
   },
   {
     "path": "/docs/SESSION_LESSONS_HONDI_SEARCH_MANIFEST_SCOPE_20260913_v1_0.html",
-    "title": "혼디 검색 매니페스트 전면 갱신 + scope 분리 — '혼디 숫자 코드' 오매칭 사고 근본원인(수기 매니페스트 23개 vs 실제 119개)·자동 생성기/CI가드 신설·검색범위(user/dev) 토글·기존 스모크테스트 assertion 버그 발견수정·배포 실전 함정(0913) ↗",
-    "description": "혼디 검색 매니페스트 전면 갱신 + scope 분리 — '혼디 숫자 코드' 오매칭 사고 근본원인(수기 매니페스트 23개 vs 실제 119개)·자동 생성기/CI가드 신설·검색범위(user/dev) 토글·기존 스모크테스트 assertion 버그 발견수정·배포 실전 함정(0913) ↗",
+    "title": "나비 검색 매니페스트 전면 갱신 + scope 분리 — '나비 숫자 코드' 오매칭 사고 근본원인(수기 매니페스트 23개 vs 실제 119개)·자동 생성기/CI가드 신설·검색범위(user/dev) 토글·기존 스모크테스트 assertion 버그 발견수정·배포 실전 함정(0913) ↗",
+    "description": "나비 검색 매니페스트 전면 갱신 + scope 분리 — '나비 숫자 코드' 오매칭 사고 근본원인(수기 매니페스트 23개 vs 실제 119개)·자동 생성기/CI가드 신설·검색범위(user/dev) 토글·기존 스모크테스트 assertion 버그 발견수정·배포 실전 함정(0913) ↗",
     "keywords": [
       "혼디 검색 매니페스트 전면 갱신 + scope 분리",
-      "'혼디 숫자 코드' 오매칭 사고 근본원인 수기 매니페스트 23개 vs 실제 119개",
+      "나비 검색 매니페스트 전면 갱신 + scope 분리",
+      "'혼디 숫자 코드', '나비 숫자 코드' 오매칭 사고 근본원인 수기 매니페스트 23개 vs 실제 119개",
       "자동 생성기",
       "CI가드 신설 검색범위 user",
       "dev",
       "토글 기존 스모크테스트 assertion 버그 발견수정 배포 실전 함정 0913",
       "혼디",
+      "나비",
       "검색"
     ],
     "pc_url": "https://hondi.net/docs/SESSION_LESSONS_HONDI_SEARCH_MANIFEST_SCOPE_20260913_v1_0.html",
@@ -1006,10 +1016,11 @@
   },
   {
     "path": "/docs/SESSION_LESSONS_HONDI_SEARCH_RELAY_1042_ISOLATION_20260909_v1_0.html",
-    "title": "혼디 검색 hondi-search-relay 분리 · 1042 격리 실전 교훈 매뉴얼 — Worker 단위 격리 실증, 테스트 프로브 방법론, Windows Application Data 배포 함정, curl 한글 인코딩 재발, 코드 추적 습관(0909) ↗",
-    "description": "혼디 검색 hondi-search-relay 분리 · 1042 격리 실전 교훈 매뉴얼 — Worker 단위 격리 실증, 테스트 프로브 방법론, Windows Application Data 배포 함정, curl 한글 인코딩 재발, 코드 추적 습관(0909) ↗",
+    "title": "나비 검색 hondi-search-relay 분리 · 1042 격리 실전 교훈 매뉴얼 — Worker 단위 격리 실증, 테스트 프로브 방법론, Windows Application Data 배포 함정, curl 한글 인코딩 재발, 코드 추적 습관(0909) ↗",
+    "description": "나비 검색 hondi-search-relay 분리 · 1042 격리 실전 교훈 매뉴얼 — Worker 단위 격리 실증, 테스트 프로브 방법론, Windows Application Data 배포 함정, curl 한글 인코딩 재발, 코드 추적 습관(0909) ↗",
     "keywords": [
       "혼디 검색 hondi",
+      "나비 검색 hondi",
       "search",
       "relay 분리",
       "1042 격리 실전 교훈 매뉴얼",
@@ -1025,10 +1036,11 @@
   },
   {
     "path": "/docs/SESSION_LESSONS_HONDI_SEARCH_ROUTING_DNS_20260909_v1_0.html",
-    "title": "혼디 검색 라우팅·DNS·git 작업 실전 교훈 매뉴얼 — GitHub Pages 미러링 함정, Route/DNS 구분법, git 브랜치 사고, PowerShell 한글 인코딩 함정, PR 제목-내용 불일치 재발까지(0909) ↗",
-    "description": "혼디 검색 라우팅·DNS·git 작업 실전 교훈 매뉴얼 — GitHub Pages 미러링 함정, Route/DNS 구분법, git 브랜치 사고, PowerShell 한글 인코딩 함정, PR 제목-내용 불일치 재발까지(0909) ↗",
+    "title": "나비 검색 라우팅·DNS·git 작업 실전 교훈 매뉴얼 — GitHub Pages 미러링 함정, Route/DNS 구분법, git 브랜치 사고, PowerShell 한글 인코딩 함정, PR 제목-내용 불일치 재발까지(0909) ↗",
+    "description": "나비 검색 라우팅·DNS·git 작업 실전 교훈 매뉴얼 — GitHub Pages 미러링 함정, Route/DNS 구분법, git 브랜치 사고, PowerShell 한글 인코딩 함정, PR 제목-내용 불일치 재발까지(0909) ↗",
     "keywords": [
       "혼디 검색 라우팅 DNS git 작업 실전 교훈 매뉴얼",
+      "나비 검색 라우팅 DNS git 작업 실전 교훈 매뉴얼",
       "GitHub Pages 미러링 함정",
       "Route",
       "DNS 구분법",
@@ -1173,15 +1185,17 @@
   },
   {
     "path": "/docs/SESSION_LESSONS_ROUTING_STRUCTURAL_NORMALIZATION_20260823_v1_0.html",
-    "title": "혼디 라우팅 지침서 — 구조적 정상화 세션 작업자 실수 복기(0823, BUG-023~035·DECISION-01) ↗",
-    "description": "혼디 라우팅 지침서 — 구조적 정상화 세션 작업자 실수 복기(0823, BUG-023~035·DECISION-01) ↗",
+    "title": "나비 라우팅 지침서 — 구조적 정상화 세션 작업자 실수 복기(0823, BUG-023~035·DECISION-01) ↗",
+    "description": "나비 라우팅 지침서 — 구조적 정상화 세션 작업자 실수 복기(0823, BUG-023~035·DECISION-01) ↗",
     "keywords": [
       "혼디 라우팅 지침서",
+      "나비 라우팅 지침서",
       "구조적 정상화 세션 작업자 실수 복기 0823",
       "BUG",
       "023~035 DECISION",
       "01",
       "혼디",
+      "나비",
       "라우팅",
       "지침서"
     ],
@@ -1302,14 +1316,16 @@
   },
   {
     "path": "/docs/SESSION_SUMMARY_GOV_ROUTER_STRUCTURAL_NORMALIZATION_20260823_v1_0.html",
-    "title": "혼디 라우팅 근본적 정상화 — BUG-023~035(계층충돌 통합판단·시청 국 LLM 구제망·키워드 매칭 어절경계·EMD 비대칭 제거) + 정부24 350건 라이브 검증 ↗",
-    "description": "혼디 라우팅 근본적 정상화 — BUG-023~035(계층충돌 통합판단·시청 국 LLM 구제망·키워드 매칭 어절경계·EMD 비대칭 제거) + 정부24 350건 라이브 검증 ↗",
+    "title": "나비 라우팅 근본적 정상화 — BUG-023~035(계층충돌 통합판단·시청 국 LLM 구제망·키워드 매칭 어절경계·EMD 비대칭 제거) + 정부24 350건 라이브 검증 ↗",
+    "description": "나비 라우팅 근본적 정상화 — BUG-023~035(계층충돌 통합판단·시청 국 LLM 구제망·키워드 매칭 어절경계·EMD 비대칭 제거) + 정부24 350건 라이브 검증 ↗",
     "keywords": [
       "혼디 라우팅 근본적 정상화",
+      "나비 라우팅 근본적 정상화",
       "BUG",
       "023~035 계층충돌 통합판단 시청 국 LLM 구제망 키워드 매칭 어절경계 EMD 비대칭 제거",
       "+ 정부24 350건 라이브 검증",
       "혼디",
+      "나비",
       "라우팅",
       "근본적",
       "정상화"
@@ -1597,12 +1613,14 @@
   },
   {
     "path": "/docs/THOUGHT_EXPERIMENT_kakaotalk-to-hondi-2030-cost-estimate.html",
-    "title": "카톡→혼디 2030 컴퓨팅·사회적비용 절감 사고실험(0816, 시장규모 교차검증) ↗",
-    "description": "카톡→혼디 2030 컴퓨팅·사회적비용 절감 사고실험(0816, 시장규모 교차검증) ↗",
+    "title": "카톡→나비 2030 컴퓨팅·사회적비용 절감 사고실험(0816, 시장규모 교차검증) ↗",
+    "description": "카톡→나비 2030 컴퓨팅·사회적비용 절감 사고실험(0816, 시장규모 교차검증) ↗",
     "keywords": [
       "카톡→혼디 2030 컴퓨팅 사회적비용 절감 사고실험 0816",
+      "카톡→나비 2030 컴퓨팅 사회적비용 절감 사고실험 0816",
       "시장규모 교차검증",
       "카톡→혼디",
+      "카톡→나비",
       "2030",
       "컴퓨팅",
       "사회적비용",
@@ -1914,11 +1932,13 @@
   },
   {
     "path": "/docs/hondi_interactive_manual.html",
-    "title": "혼디 사용법",
-    "description": "혼디 사용법",
+    "title": "나비 사용법",
+    "description": "나비 사용법",
     "keywords": [
       "혼디 사용법",
+      "나비 사용법",
       "혼디",
+      "나비",
       "사용법"
     ],
     "pc_url": "https://hondi.net/docs/hondi_interactive_manual.html",
@@ -1966,11 +1986,13 @@
   },
   {
     "path": "/docs/legacy_overview_20260821.html",
-    "title": "혼디 시스템 개요 ↗",
-    "description": "혼디 시스템 개요 ↗",
+    "title": "나비 시스템 개요 ↗",
+    "description": "나비 시스템 개요 ↗",
     "keywords": [
       "혼디 시스템 개요",
+      "나비 시스템 개요",
       "혼디",
+      "나비",
       "시스템",
       "개요"
     ],
@@ -2016,10 +2038,11 @@
   },
   {
     "path": "/hondi-market",
-    "title": "혼디장",
-    "description": "혼디장",
+    "title": "나비장",
+    "description": "나비장",
     "keywords": [
-      "혼디장"
+      "혼디장",
+      "나비장"
     ],
     "pc_url": "https://hondi.net/desktop.html#hondi-market",
     "audience": "user",
@@ -2084,11 +2107,13 @@
   },
   {
     "path": "/pages/project-support.html",
-    "title": "혼디 프로젝트를 지원하는 방법",
-    "description": "혼디 프로젝트를 지원하는 방법",
+    "title": "나비 프로젝트를 지원하는 방법",
+    "description": "나비 프로젝트를 지원하는 방법",
     "keywords": [
       "혼디 프로젝트를 지원하는 방법",
+      "나비 프로젝트를 지원하는 방법",
       "혼디",
+      "나비",
       "프로젝트를",
       "지원하는",
       "방법"
@@ -2139,11 +2164,13 @@
   },
   {
     "path": "/scenarios",
-    "title": "혼디 숫자 코드",
-    "description": "혼디 숫자 코드",
+    "title": "나비 숫자 코드",
+    "description": "나비 숫자 코드",
     "keywords": [
       "혼디 숫자 코드",
+      "나비 숫자 코드",
       "혼디",
+      "나비",
       "숫자",
       "코드"
     ],

@@ -73,7 +73,7 @@ JEJU-GOV-COMMON → JEJU-NATIONAL-SP → [본 SP: 관세청]
 
 ## §3. DATA_REQUIREMENT 선언
 
-UNIVERSAL-common U1/U2 원칙에 따라, 개별 사용자의 신청·처리·심사 현황 등은 Hondi에
+UNIVERSAL-common U1/U2 원칙에 따라, 개별 사용자의 신청·처리·심사 현황 등은 Navi에
 연동돼 있지 않다. `unavailable_reason`은 `no_interagency_access`다 — 정보 자체가
 없는 게 아니라 연동만 안 된 것이다.
 
@@ -89,7 +89,7 @@ UNIVERSAL-common U1/U2 원칙에 따라, 개별 사용자의 신청·처리·심
 
 ## §5. 대안 채널
 
-Hondi가 직접 처리하지 못하는 사안은 항상 공식 채널로 안내한다: **관세청 유니패스(unipass.customs.go.kr), 국번없이 125**
+Navi가 직접 처리하지 못하는 사안은 항상 공식 채널로 안내한다: **관세청 유니패스(unipass.customs.go.kr), 국번없이 125**
 
 **v1.1 개정(2026-07-14)**: 800달러 한도·15%/45% 세율·30%/40%/60% 가산세율 전부 웹서치로 2026년 기준 재확인했다 — 관세는 금액이 큰 만큼 오차의 실질적 피해가 커서 표본 우선 검증 대상으로 삼았다.
 

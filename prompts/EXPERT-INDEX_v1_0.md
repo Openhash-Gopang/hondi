@@ -1,4 +1,4 @@
-# EXPERT-INDEX v1.1 — 전문가 페르소나 일련번호 목록 (61개, 2026-07-20 혼디 추가)
+# EXPERT-INDEX v1.1 — 전문가 페르소나 일련번호 목록 (61개, 2026-07-20 나비 추가)
 
 > 소스: `src/gopang/ai/expert-registry.js` (EXPERT_REGISTRY, 2026-07-19 실사 기준 60개)
 > 번호 체계: 전체 일련번호(No.) + 카테고리 코드(EXPERT-{CAT}-{순번})
@@ -65,7 +65,7 @@
 | 058 | EXPERT-SPORTS-01 | 생활스포츠지도사 | `sports-instructor` | 🏃 | ✅ | `SP_sports-instructor` |
 | 059 | EXPERT-BEAUTY-01 | 미용사 | `hairdresser` | 💇 | — | `SP_hairdresser` |
 | 060 | EXPERT-CULINARY-01 | 조리사 | `chef` | 👨‍🍳 | — | `SP_chef` |
-| 061 | EXPERT-PLATFORM-01 | 혼디 안내 | `hondi` | 🏝️ | — | `SP_hondi` |
+| 061 | EXPERT-PLATFORM-01 | 나비 안내 | `hondi` | 🏝️ | — | `SP_hondi` |
 | 062 | EXPERT-EDU-11 | 교수(1:1 맞춤교육) | `professor` | 🎓 | — | `SP_professor` |
 
 ## 카테고리별 개수
@@ -87,7 +87,7 @@
 | 플랫폼 안내 | PLATFORM | 1 |
 | **합계** | | **62** |
 
-> **2026-07-20 추가**: No.061 혼디(`hondi`)는 다른 60개와 근본적으로 다르다 —
+> **2026-07-20 추가**: No.061 나비(`hondi`)는 다른 60개와 근본적으로 다르다 —
 > 자격을 요구하는 전문직이 아니라 플랫폼 자체를 안내하는 페르소나이며, C5의
 > "인간 전문가 전속"이 이 페르소나에서는 "개발팀 전속"으로 해석된다. 기존
 > `hondi_visitor_sp`(어떤 코드에서도 로드되지 않던 phantom SP)의 지식을

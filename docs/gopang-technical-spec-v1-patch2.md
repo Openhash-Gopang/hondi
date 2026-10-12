@@ -1,4 +1,4 @@
-# Gopang Technical Specification — v1 Patch Notes v2
+# Navi Technical Specification — v1 Patch Notes v2
 **버전** v1.1 → v1.2  
 **작성일** 2026-06-11  
 **작성자** Claude Sonnet 4.6 (대화 세션 분석 기반)  
@@ -343,7 +343,7 @@ req.onsuccess = e => {
 ```
 2. null이면 GWP_DONE 포워딩 경로 확인
 3. market 탭 콘솔에서 `[MARKET MSG] GWP_DONE` 로그 확인
-4. gopang 탭 콘솔에서 `[GOPANG MSG] GWP_DONE` 로그 확인
+4. gopang 탭 콘솔에서 `[NAVI MSG] GWP_DONE` 로그 확인
 
 ### L1 블록 초기화
 

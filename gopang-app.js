@@ -65,7 +65,7 @@ if (new URLSearchParams(location.search).get('debug') === '1') {
 // 때까지(=가입 또는 로그인 완료) 이 아래 어떤 코드도 #app을 공개하지 않는다.
 //
 // #app은 CSS에서 기본적으로 visibility:hidden이며(webapp.html 참조),
-// body에 gopang-authed 클래스가 붙어야만 보인다 — 즉 "혼디 대화창을 그렸지만
+// body에 gopang-authed 클래스가 붙어야만 보인다 — 즉 "나비 대화창을 그렸지만
 // 팝업으로 가려놨다"가 아니라 "애초에 그려서 보여주지 않는다". initAuth()의
 // 전화번호 입력 팝업에는 닫기(X) 버튼이나 바깥 클릭 닫기가 없으므로(의도적),
 // 가입/로그인을 완료하지 않고는 이 await를 빠져나갈 방법이 없다.
@@ -268,7 +268,7 @@ try {
 
 // ── 신규 가입 직후 처리 ────────────────────────────────────────────
 // v3.3(2026-07-01): LLM 선택 창(ai-setup-mobile.html)으로 강제 이동시키던
-// 로직을 완전히 제거했다. 이제 혼디는 가입 즉시 DeepSeek V4 Flash를
+// 로직을 완전히 제거했다. 이제 나비는 가입 즉시 DeepSeek V4 Flash를
 // 무료 한도(1,000원) 내에서 기본 제공한다(call-ai.js _buildCallCandidates()의
 // 'deepseek-default' 안전망) — 사용자가 LLM을 고르거나 키를 입력할 필요가
 // 전혀 없다. 플래그만 정리하고 그대로 대화창을 보여준다.
@@ -444,7 +444,7 @@ const _boot = async () => {
   }
 
   // 4-1. 부트스트랩 (src/app.js)
-  // ⚠️ 2026-07-18: src/app.js/shell-ui.js/core/plugin-registry.js는 "고팡 v2"
+  // ⚠️ 2026-07-18: src/app.js/shell-ui.js/core/plugin-registry.js는 "나비 v2"
   //    시절(K서비스 klaw·khealth 2개뿐이던 초기 아키텍처) 유산이다. 지금은
   //    GWP_REGISTRY + SP 파일 + 18개 K서비스 저장소 체계가 이 역할을 완전히
   //    대체했고, bootstrap()의 마지막 단계(ShellUI.render)는 #gopang-shell
@@ -773,14 +773,14 @@ if ('serviceWorker' in navigator) {
     if (event.data?.type === 'REFRESH_GDC_BALANCE' && window.gopangWallet?.refreshBalanceUI) {
       console.info('[GDC] 충전 확정 푸시 수신 — 잔액 즉시 재대사');
       window.gopangWallet.refreshBalanceUI().catch(() => {});
-      // 2026-08-28 추가 — 헤더 숫자뿐 아니라, 지갑 시트(Gopang Wallet)를
+      // 2026-08-28 추가 — 헤더 숫자뿐 아니라, 지갑 시트(Navi Wallet)를
       // 지금 열어보고 있는 중이라면 지출/수입/거래내역까지 포함해 통째로
       // 다시 그린다. 시트 타이틀로 판별하는 이유: _openSheet()가 여러
       // 화면(설정/지갑/거래상세 등)이 같은 DOM(#_gopang-sheet-body)을
       // 공유해서 덮어쓰는 구조라, 지갑이 아닌 다른 화면을 보고 있을 때
       // 무턱대고 openGopangWallet()을 부르면 엉뚱한 화면을 덮어써버린다.
       const sheetTitleEl = document.getElementById('_gopang-sheet-title');
-      if (sheetTitleEl && sheetTitleEl.textContent === 'Gopang Wallet' && typeof window.openGopangWallet === 'function') {
+      if (sheetTitleEl && sheetTitleEl.textContent === 'Navi Wallet' && typeof window.openGopangWallet === 'function') {
         window.openGopangWallet();
       }
     }

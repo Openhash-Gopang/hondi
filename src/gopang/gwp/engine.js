@@ -1,5 +1,5 @@
 /**
- * gwp/engine.js — Gopang Widget Protocol 엔진 (새 탭 방식)
+ * gwp/engine.js — Navi Widget Protocol 엔진 (새 탭 방식)
  */
 import { _gwpActive, _gwpService, _gwpTab, _gwpTabTimer,
          setGwpActive, setGwpService, setGwpTab, setGwpTabTimer,
@@ -44,9 +44,9 @@ async function _recordPDVAndBumpRegistry(record) {
   return result;
 }
 
-// Gopang Widget Protocol (GWP) 호스트 엔진 v2.0 — 새 탭 방식
+// Navi Widget Protocol (GWP) 호스트 엔진 v2.0 — 새 탭 방식
 // iframe 방식 제거 → JS 전역 충돌·SyntaxError·CFG 미초기화 문제 원천 해결
-// 새 탭이 닫히면 고팡 탭이 자동으로 포커스를 되찾고 복귀 메시지 표시
+// 새 탭이 닫히면 나비 탭이 자동으로 포커스를 되찾고 복귀 메시지 표시
 // ══════════════════════════════════════════════════════════════════════
 
 // ── 서비스 레지스트리 ─────────────────────────────────────────────
@@ -157,7 +157,7 @@ export async function _gwpLaunch(service, context, _preTab = null, facts = null)
   }
 
   // ★ 2026-09-22 — K-Clean(fiil.kr → clean.hondi.net) 실사 결과, GPS가
-  // "혼디 비서가 자동으로 전달"되지 않고 매번 새로 요청하다 시간 초과되는
+  // "나비 비서가 자동으로 전달"되지 않고 매번 새로 요청하다 시간 초과되는
   // 결함을 확인. 원인은 새 계약(facts/facts_enc, currentLocation)만
   // 보내고 있었는데, 수신 측 gwp-sdk.js는 여전히 구버전 계약인 평문
   // gps_addr 파라미터만 읽고 있었던 것 — 즉 위치 정보 자체는 항상 정상
@@ -191,7 +191,7 @@ export async function _gwpLaunch(service, context, _preTab = null, facts = null)
 
   appendBubble('ai',
     `${svcIcon} <b>${svcName}</b>을 새 탭에서 열었습니다.<br>` +
-    `<span style="font-size:12px;color:var(--label-3);">탭을 닫으면 고팡으로 자동 복귀합니다.</span>`,
+    `<span style="font-size:12px;color:var(--label-3);">탭을 닫으면 나비로 자동 복귀합니다.</span>`,
     true
   );
   console.info('[GWP] 새 탭 실행:', service.id, svcUrl.toString());
@@ -204,7 +204,7 @@ export async function _gwpLaunch(service, context, _preTab = null, facts = null)
   }, 200));
 }
 
-// ── 새 탭이 닫혔을 때 → 고팡 복귀 처리 ─────────────────────────
+// ── 새 탭이 닫혔을 때 → 나비 복귀 처리 ─────────────────────────
 function _gwpOnTabClose() {
   clearInterval(_gwpTabTimer);
   setGwpTabTimer(null);
@@ -219,15 +219,15 @@ function _gwpOnTabClose() {
   setGwpActive(false);
   setGwpService(null);
 
-  // 고팡 탭 포커스
+  // 나비 탭 포커스
   window.focus();
 
   if (reported) {
     appendBubble('ai',
-      `✅ <b>${svcIcon} ${svcName}</b> 탭이 닫혔습니다. 고팡으로 돌아왔습니다.`,
+      `✅ <b>${svcIcon} ${svcName}</b> 탭이 닫혔습니다. 나비로 돌아왔습니다.`,
       true
     );
-    console.info('[GWP] 새 탭 닫힘 — 고팡 복귀(보고 수신됨)');
+    console.info('[GWP] 새 탭 닫힘 — 나비 복귀(보고 수신됨)');
   } else {
     // ── "예외 없이 보고" 원칙 — GWP_DONE 없이 닫힌 경우 강제 폴백 ──
     _gwpFallbackReport(svc).catch(e =>
@@ -275,7 +275,7 @@ async function _gwpFallbackReport(svc) {
         const fields = Object.keys(partial).slice(0, 6).join(', ');
         setPaHandoffPending({
           summary: `프로필 작성 탭이 완료 보고 없이 닫힘(${step ? step + '/6단계 진행' : '진행 정보 없음'})`,
-          who: null, when: new Date().toISOString(), where: '혼디 프로필 작성',
+          who: null, when: new Date().toISOString(), where: '나비 프로필 작성',
           what: `미완료 — 지금까지 확보된 정보: ${fields || '없음'}`,
           how: 'gwp_tab_closed_no_report', why: null,
         });
@@ -292,7 +292,7 @@ async function _gwpFallbackReport(svc) {
     summary:   summaryText,
     who:       report6w?.who   || _USER?.nickname || _USER?.ipv6 || null,
     when:      report6w?.when  || new Date().toISOString(),
-    where:     report6w?.where || '혼디',
+    where:     report6w?.where || '나비',
     what:      report6w?.what  || summaryText,
     how:       report6w?.how   || (hasLog ? 'gwp_tab_closed_llm_summary' : 'gwp_tab_closed_no_report'),
     why:       report6w?.why   || '',
@@ -308,7 +308,7 @@ async function _gwpFallbackReport(svc) {
   console.info('[GWP] 폴백 보고 완료 | hasLog:', hasLog, '| 요약:', summaryText);
 }
 
-// ── 탭 강제 종료 (고팡에서 직접 닫기) ─────────────────────────
+// ── 탭 강제 종료 (나비에서 직접 닫기) ─────────────────────────
 export function _gwpClose(showReturn = true) {
   if (!_gwpActive) return;
   clearInterval(_gwpTabTimer);
@@ -337,11 +337,11 @@ export function _gwpClose(showReturn = true) {
 
   if (showReturn) {
     appendBubble('ai',
-      `✅ <b>${svcIcon} ${svcName}</b>을 닫고 고팡으로 돌아왔습니다.`,
+      `✅ <b>${svcIcon} ${svcName}</b>을 닫고 나비로 돌아왔습니다.`,
       true
     );
   }
-  console.info('[GWP] 탭 종료, 고팡 복귀 | 보고수신:', reported);
+  console.info('[GWP] 탭 종료, 나비 복귀 | 보고수신:', reported);
 }
 
 // ── PDV 중개 접근 (JEJU-GOV-COMMON §13) ─────────────────────────
@@ -523,14 +523,14 @@ function _handleDocAcquireRequest(msg, source, origin) {
   };
 }
 
-// ── postMessage 수신 (서비스 새 탭 → 고팡) ─────────────────────
-// 새 탭에서 작업 완료·오류·서명 요청 시 고팡에 결과 전달
+// ── postMessage 수신 (서비스 새 탭 → 나비) ─────────────────────
+// 새 탭에서 작업 완료·오류·서명 요청 시 나비에 결과 전달
 window.addEventListener('message', (e) => {
   const msg = e.data;
   if (!msg?.type?.startsWith('GWP_')) return;
 
   // ── GWP_SIGN_REQUEST: 서명 요청은 _gwpActive 무관하게 처리 ──
-  // market 탭이 구매자 서명을 고팡에 위임. gopang-wallet.js가 서명 수행.
+  // market 탭이 구매자 서명을 나비에 위임. gopang-wallet.js가 서명 수행.
   // origin: GWP_ALLOWED_ORIGINS(allowed-origins.js)에 등록된 hondi.net 계열만 허용
   if (msg.type === 'GWP_SIGN_REQUEST') {
     if (!GWP_ALLOWED_ORIGINS.includes(e.origin)) {
@@ -583,7 +583,7 @@ window.addEventListener('message', (e) => {
       break;
     }
     case 'GWP_MESSAGE': {
-      // 서비스에서 고팡 채팅창에 메시지 추가
+      // 서비스에서 나비 채팅창에 메시지 추가
       appendBubble(msg.role === 'user' ? 'user' : 'ai', msg.html || msg.text || '', !!msg.html);
       // 보고 없이 탭이 닫힐 경우의 폴백 요약 재료로 누적
       _gwpMessageLog.push({
@@ -652,7 +652,7 @@ window.addEventListener('message', (e) => {
           _patchL1LedgerUserHash(msg.block_hash, chainRec.local_hash);
 
           if (!reporterSvc) {
-            // 고팡이 직접 PDV 기록
+            // 나비가 직접 PDV 기록
             const p = msg.pdvData || {};
             _recordPDVAndBumpRegistry({
               type:             'service_task',

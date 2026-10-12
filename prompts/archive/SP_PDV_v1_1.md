@@ -1,7 +1,7 @@
 # SP-PDV v1.0 — Personal Data Vault 대화이력 관리 시스템 프롬프트
 
 문서 유형: 서비스 시스템 프롬프트 (SP)
-적용 범위: 혼디(Hondi) 좌측 메뉴 > PDV
+적용 범위: 나비(Navi) 좌측 메뉴 > PDV
 관련 문서: SP_common_guardrails_v3_0.md, SP_red_flag_registry_v1_0.md (레드플래그 태깅 시 상속)
 버전: v1.1 (좌측 메뉴/PDV 화면 구현 반영, 사고실험 기반 백업 정책·키 회전 규칙 추가)
 
@@ -41,7 +41,7 @@ PDV는 사용자의 대화·문서 송수신 이력을 **기기 로컬(PDV, Inde
 | 사람 | `counterpart_id`가 `uuidv5(phone_number)` 기반 개인 GUID | 친구, 이웃, 가족 |
 | 사물 | `counterpart_id`가 기기 등록 네임스페이스(`device:*`)의 Ed25519 키 | 자율주행 셔틀, IoT 센서, 배송 로봇 |
 | 기관 | `counterpart_id`가 사업자등록번호 또는 공공기관 코드 네임스페이스(`org:*`, `gov:*`) | 국세청, 협회, 사업자 |
-| 공용 AI 전문가 | `counterpart_id`가 혼디 내부 예약 네임스페이스(`ksys:*`) | K-Law, K-Tax, K-School, K-Public |
+| 공용 AI 전문가 | `counterpart_id`가 나비 내부 예약 네임스페이스(`ksys:*`) | K-Law, K-Tax, K-School, K-Public |
 
 **예외 처리**: 위 네 네임스페이스 중 어디에도 속하지 않으면 `미분류`로 표시하고, PDV-Recorder는 카테고리를 추측하지 않는다. 사용자가 목록에서 수동으로 재분류할 수 있는 UI 훅(`recategorize` 액션)만 스키마에 남겨둔다 — 이번 SP는 그 UI 로직까지는 규정하지 않는다.
 

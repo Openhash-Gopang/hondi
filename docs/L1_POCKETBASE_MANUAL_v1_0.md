@@ -129,7 +129,7 @@ gopang-pb-{node}.service
 ### 3.7 기타
 | 컬렉션 | 용도 |
 |---|---|
-| `gwp_registry` | GWP(Gopang Wallet Protocol) 레지스트리 |
+| `gwp_registry` | GWP(Navi Wallet Protocol) 레지스트리 |
 | `svc_registry` | 하위 서비스 등록(레벨·PDV 권한 등, `_getSvcRegistration`이 조회) |
 | `feedback` / `user_feedback` | 피드백(2종 — 용도 차이 재확인 필요) |
 | `webrtc_signals` | WebRTC 시그널링(SDP/ICE) — 메시지 자체는 저장 안 함, 신호만 임시 저장 |

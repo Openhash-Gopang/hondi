@@ -4,7 +4,7 @@
 <link rel="icon" href="data:,">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
-<title>혼디 프로필 작성</title>
+<title>나비 프로필 작성</title>
 <meta name="description" content="앱 사용법 튜토리얼 + 프로필 작성 — profile-assistant, GWP 방식 새 탭 (2026-07-11 신설, 구 CALL_PROFILE_ASSISTANT 같은 창 전환 방식에서 이관).">
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
@@ -449,7 +449,7 @@ function _buildCandidates(tierOverride) {
     candidates.push({ provider: 'legacy', baseUrl: cfg.endpoint.replace(/\/+$/,''), model: cfg.model || 'gpt-4o-mini', apiKey: cfg.apiKey });
   }
   // tierOverride(예: 'hondi-pro')가 오면 커스텀 provider 후보에는 영향을
-  // 주지 않고(그쪽은 사용자가 직접 등록한 모델이라 임의로 못 바꿈), 혼디
+  // 주지 않고(그쪽은 사용자가 직접 등록한 모델이라 임의로 못 바꿈), 나비
   // 기본 제공 키 경로에만 적용한다 — §ESCALATE-TO-PRO 승격용.
   candidates.push({ provider: 'deepseek-default', baseUrl: RELAY_ENDPOINT, model: tierOverride || 'hondi-flash', apiKey: null });
   return candidates;

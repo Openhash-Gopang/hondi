@@ -44,7 +44,7 @@
 > 상태다 — 후속 작업으로 남는다.**
 > - `pages/k-services.html` `#kplan` — K-Plan 탭 사용자 대면 초안
 > - `pages/plan-architecture.html` — K-Plan 처리 흐름 다이어그램
-> - `highlights/hondi-network.html` — K-Plan을 언급하는 혼디넷 소개 페이지
+> - `highlights/hondi-network.html` — K-Plan을 언급하는 나비넷 소개 페이지
 
 ---
 

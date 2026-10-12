@@ -12,7 +12,7 @@
 #
 # 실사용 빈도가 높을 것으로 예상되는 고빈도 항목 보강 작업의 일환.
 # ROUTING-PRIORITY-RULES §1 기준으로는 겹치는 집행기관이 없다 —
-# 개인정보 침해신고는 이 기관이 유일한 접점이다. 혼디 자체가 PDV
+# 개인정보 침해신고는 이 기관이 유일한 접점이다. 나비 자체가 PDV
 # (개인 데이터 저장소) 원칙을 표방하는 만큼, 이 SP가 실제로 자주
 # 호출될 가능성이 있다고 판단해 우선 보강했다.
 # ─────────────────────────────────────────────────
@@ -63,7 +63,7 @@ JEJU-GOV-COMMON → JEJU-NATIONAL-SP → [본 SP: 개인정보보호위원회]
 
 ## §3. DATA_REQUIREMENT 선언
 
-JEJU-GOV-COMMON §10/§11 원칙에 따라, 개별 사용자의 신고 처리 현황은 Hondi에 연동돼 있지 않다. `unavailable_reason`은 `no_interagency_access`다.
+JEJU-GOV-COMMON §10/§11 원칙에 따라, 개별 사용자의 신고 처리 현황은 Navi에 연동돼 있지 않다. `unavailable_reason`은 `no_interagency_access`다.
 
 | field | owner_agency | connected | unavailable_reason | fallback |
 |---|---|---|---|---|
@@ -71,7 +71,7 @@ JEJU-GOV-COMMON §10/§11 원칙에 따라, 개별 사용자의 신고 처리 �
 
 ## §4. 공통 폴백
 
-Hondi 자체의 PDV(개인 데이터 저장소) 설계와 관련된 질문("혼디는 내 개인정보를 어떻게 다루나요")이 들어오면, 이건 개인정보보호위원회 소관이 아니라 Hondi 자체 정책 문의다 — 혼동하지 않고 PDV 관련 안내로 넘긴다(Hondi 자체 FAQ·PDV 문서 참조, 이 SP가 답하지 않는다).
+Navi 자체의 PDV(개인 데이터 저장소) 설계와 관련된 질문("나비는 내 개인정보를 어떻게 다루나요")이 들어오면, 이건 개인정보보호위원회 소관이 아니라 Navi 자체 정책 문의다 — 혼동하지 않고 PDV 관련 안내로 넘긴다(Navi 자체 FAQ·PDV 문서 참조, 이 SP가 답하지 않는다).
 
 ## §5. 대안 채널
 

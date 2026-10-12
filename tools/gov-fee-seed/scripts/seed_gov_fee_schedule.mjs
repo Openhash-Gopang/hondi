@@ -1,9 +1,9 @@
 // seed_gov_fee_schedule.mjs
 //
 // 사용법:
-//   node scripts/seed_gov_fee_schedule.mjs --file ./혼디_정부수수료_기준표_초안.xlsx --dry-run
-//   node scripts/seed_gov_fee_schedule.mjs --file ./혼디_정부수수료_기준표_초안.xlsx
-//   node scripts/seed_gov_fee_schedule.mjs --file ./혼디_정부수수료_기준표_초안.xlsx --embed --worker-url https://hondi-proxy.example.workers.dev
+//   node scripts/seed_gov_fee_schedule.mjs --file ./나비_정부수수료_기준표_초안.xlsx --dry-run
+//   node scripts/seed_gov_fee_schedule.mjs --file ./나비_정부수수료_기준표_초안.xlsx
+//   node scripts/seed_gov_fee_schedule.mjs --file ./나비_정부수수료_기준표_초안.xlsx --embed --worker-url https://hondi-proxy.example.workers.dev
 //
 // 환경변수 (PocketBase 실제 반영 시 필요, --dry-run이면 불필요):
 //   POCKETBASE_URL, POCKETBASE_ADMIN_EMAIL, POCKETBASE_ADMIN_PASSWORD
@@ -12,7 +12,7 @@
 // 옵션:
 //   --file <path>       엑셀 파일 경로 (필수)
 //   --region <code>     기준표(천안시) 시트를 어느 region_code로 저장할지 (기본: chungnam_cheonan)
-//   --multiplier <n>    gdc_multiplier 기본값 (기본: 2, 혼디 과금 원칙 ③)
+//   --multiplier <n>    gdc_multiplier 기본값 (기본: 2, 나비 과금 원칙 ③)
 //   --dry-run           PocketBase에 쓰지 않고 파싱 결과만 콘솔에 출력 + JSON으로 저장
 //   --embed             PocketBase 반영 후, worker.js POST /orchestration/gov-fee-embed-index로
 //                        REAL 레코드를 bge-m3+Vectorize(hondi-gov-fee-schedule 인덱스)에 색인

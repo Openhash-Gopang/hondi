@@ -1,4 +1,4 @@
-# Gopang Technical Specification — v1 Patch Notes
+# Navi Technical Specification — v1 Patch Notes
 **버전** v1.0 → v1.1  
 **작성일** 2026-06-11  
 **작성자** Claude Sonnet 4.6 (대화 세션 분석 기반)  
@@ -68,7 +68,7 @@ function _gwpLaunch(service, context, _preTab = null) {
   }
 ```
 
-**문제**: market 탭이 이미 열려있는 상태에서 고팡에 새 주문이 들어오면, 기존 탭에 포커스만 이동하고 새 ctx를 전달하지 않음. market webapp은 아무 동작도 하지 않고 멈춤.
+**문제**: market 탭이 이미 열려있는 상태에서 나비에 새 주문이 들어오면, 기존 탭에 포커스만 이동하고 새 ctx를 전달하지 않음. market webapp은 아무 동작도 하지 않고 멈춤.
 
 **수정 후**:
 ```javascript
@@ -392,7 +392,7 @@ body: JSON.stringify({
 
 ---
 
-*Gopang Technical Specification v1 Patch Notes*  
+*Navi Technical Specification v1 Patch Notes*  
 *AI City Inc. 팀 주피터 | 2026-06-11*
 
 ---
@@ -401,7 +401,7 @@ body: JSON.stringify({
 
 ### P11.1 메시지 전달 토폴로지
 
-고팡 GWP는 세 도메인(hondi.net / market.hondi.net / users.hondi.net)이 `window.postMessage`로 통신한다. 브라우저 Same-Origin 정책상 탭 간 직접 통신이 불가하므로 **market webapp이 중계자(relay)** 역할을 한다.
+나비 GWP는 세 도메인(hondi.net / market.hondi.net / users.hondi.net)이 `window.postMessage`로 통신한다. 브라우저 Same-Origin 정책상 탭 간 직접 통신이 불가하므로 **market webapp이 중계자(relay)** 역할을 한다.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -791,5 +791,5 @@ console.log('prevSettleHash:', prevSettleHash);
 
 ---
 
-*Gopang Technical Specification v1 Patch Notes (최종)*  
+*Navi Technical Specification v1 Patch Notes (최종)*  
 *AI City Inc. 팀 주피터 | 2026-06-11*

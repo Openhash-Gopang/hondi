@@ -2,9 +2,9 @@
 """
 tools/generate_site_manifest.py
 --------------------------------
-혼디 검색(/hondi-search)이 참조하는 site-manifest.json을 desktop.html의
+나비 검색(/hondi-search)이 참조하는 site-manifest.json을 desktop.html의
 실제 내비게이션 구조에서 "자동 생성"한다 — 손으로 쓰는 매니페스트는
-구조적으로 누락이 발생한다(2026-09-13, "혼디 숫자 코드" 페이지 검색
+구조적으로 누락이 발생한다(2026-09-13, "나비 숫자 코드" 페이지 검색
 실패 사고가 그 증거: 메가메뉴엔 있었지만 수기 매니페스트엔 없었음).
 
 소스 4곳을 통합한다:
@@ -16,7 +16,7 @@ tools/generate_site_manifest.py
      변수라 처음엔 놓쳤다. 이런 "또 다른 소스"가 계속 나올 수 있다는
      전제로 ④를 안전망으로 둔다)
   4. desktop.html 본문에 흩어진 순수 `<a href="...">` 앵커(메가메뉴 밖,
-     예: 하단 지원 배너 "혼디 프로젝트를 지원하는 방법", 헤더의 "사용법"
+     예: 하단 지원 배너 "나비 프로젝트를 지원하는 방법", 헤더의 "사용법"
      링크). JS 구조가 아니라 정규식으로 전체 문서를 훑으며, 이미 ①~③에서
      찾은 것과 겹치면 add()의 중복 방지로 자동 무시된다. .css/.js/이미지
      등 페이지가 아닌 링크는 확장자로 걸러낸다.
@@ -59,9 +59,9 @@ PAGE_LIKE_EXTENSIONS = (".html", ".md")
 # href의 파일명을 그대로 title로 쓰기 전에, 사람이 읽을 만한 라벨을 알고
 # 있으면 여기 채운다. 모르면 비워두고 자동 초안(파일명)을 그대로 둔다.
 KNOWN_ANCHOR_LABELS = {
-    "./docs/legacy_overview_20260821.html": "혼디 시스템 개요",
-    "./docs/hondi_interactive_manual.html": "혼디 사용법",
-    "/pages/project-support.html": "혼디 프로젝트를 지원하는 방법",
+    "./docs/legacy_overview_20260821.html": "나비 시스템 개요",
+    "./docs/hondi_interactive_manual.html": "나비 사용법",
+    "/pages/project-support.html": "나비 프로젝트를 지원하는 방법",
 }
 
 # loadPage() 이외의 onclick 핸들러 — 페이지 이동이 아니라 같은 화면의
@@ -145,7 +145,7 @@ def derive_keywords(label: str, extra=()):
     parts = [p.strip() for p in SPLIT_RE.split(cleaned) if p.strip()]
     parts = [p for p in parts if len(p) > 1]
     # 전체 구(phrase) 키워드 외에, 부분 질의도 맞도록 공백 단위 단어도
-    # 추가한다("혼디 숫자 코드" 전체 구 하나만 있으면 "숫자 코드"만
+    # 추가한다("나비 숫자 코드" 전체 구 하나만 있으면 "숫자 코드"만
     # 물어본 질의를 놓칠 수 있다) — 단, 원본 label 자체가 이미 한 단어면
     # 중복이니 스킵.
     word_level = []

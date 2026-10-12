@@ -17,7 +17,7 @@
 > 유효하지 않습니다 — 현재 AC-PA 연동이 어느 파일 기준인지는 재검증
 > 필요.
 
-이 문서는 profile-assistant(PA — 혼디 프로필 작성·갱신 담당 AI)와 AGENT-COMMON
+이 문서는 profile-assistant(PA — 나비 프로필 작성·갱신 담당 AI)와 AGENT-COMMON
 (AC — 메인 비서)의 협업 구조를 2026-07-27 기준으로 다룹니다. `docs/manual/`
 6부작이 코드베이스 전반을 다루는 것과 달리, 이 문서는 PA 하나에 집중합니다 —
 그만큼 오늘 하루 사이 실질적인 서브시스템으로 커졌기 때문입니다.
@@ -126,7 +126,7 @@ STEP3(GDC)과 STEP3A(계좌 이체)는 **업종과 무관하게 모든 사업자
 ## 4. §DIGITAL-BRIDGE — 아날로그→디지털 전환 제안
 
 사용자가 "종이로/수기로/전화로만" 같은 아날로그 절차를 언급하면, 업종별
-대본이 아니라 **원칙**("이 사람이 지금 아날로그로 하는 일 중 혼디가 이미
+대본이 아니라 **원칙**("이 사람이 지금 아날로그로 하는 일 중 나비가 이미
 가진 도구로 대체할 수 있는가")으로 판단해 자연스러운 순간에 1회만
 제안합니다.
 
@@ -143,7 +143,7 @@ STEP3(GDC)과 STEP3A(계좌 이체)는 **업종과 무관하게 모든 사업자
 
 ## 5. HONDI-CAPABILITIES-COMMON — 단일 소스 원칙
 
-`prompts/HONDI-CAPABILITIES-COMMON_v1_0.md`는 "혼디가 지금 실제로 할 수
+`prompts/HONDI-CAPABILITIES-COMMON_v1_0.md`는 "나비가 지금 실제로 할 수
 있는 것"의 유일한 소스입니다. 이 문서가 필요했던 이유: PA SP 안에 이
 목록을 프로즈로 직접 박아뒀다면, `call-ai.js`와 `pages/profile-assistant.html`이
 `[TEMPLATE_LOOKUP]` 태그를 두고 서로 다른 사본을 갖다가 한쪽만 갱신되며

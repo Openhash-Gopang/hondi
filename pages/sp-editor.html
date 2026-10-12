@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
-<title>SP 편집기 — 혼디</title>
+<title>SP 편집기 — 나비</title>
 <meta name="description" content="기존 SP 문서를 대화로 개정하는 관리자용 도구">
 <link rel="icon" href="data:,">
 
 <!-- 로그인 여부만 가볍게 확인한다(SP-EDITOR §5 — 접근 자체를 막는 인증
-     체계는 아직 없음). 2026-09-07: 구 고팡 지갑 SSO(subsystem-auth.js,
+     체계는 아직 없음). 2026-09-07: 구 나비 지갑 SSO(subsystem-auth.js,
      크로스 도메인 릴레이 버그로 고장난 상태였음)를 K-서비스 공용
      전화번호 인증 모듈로 교체. -->
 <script>
@@ -166,7 +166,7 @@ let currentPath = _initialPath;
 
     const box = document.getElementById('personaInfo');
     box.innerHTML =
-      `이 SP는 혼디 전문가 페르소나 <strong>${entry.parentLabel} — ${entry.label}</strong>입니다. ` +
+      `이 SP는 나비 전문가 페르소나 <strong>${entry.parentLabel} — ${entry.label}</strong>입니다. ` +
       `<a href="${entry.chatUrl}" target="_blank" rel="noopener">이 AI와 바로 대화하기 ↗</a>`;
     box.hidden = false;
   } catch (e) {

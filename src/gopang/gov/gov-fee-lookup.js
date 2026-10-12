@@ -5,7 +5,7 @@
  * 어느 기관/부서로 매칭했는지는 이미 trace 배열로 알 수 있다(resolveProvinceCode,
  * resolveAgencyDisplayName, resolveHandlerCodeFromTrace 등 기존 export 재사용).
  * 이 파일은 그 결과를 받아 PocketBase의 gov_fee_schedule 컬렉션에서 요금을
- * 찾고, GDC 청구액(혼디 서비스 수수료)을 계산해 반환하는 "능력"만 추가한다.
+ * 찾고, GDC 청구액(나비 서비스 수수료)을 계산해 반환하는 "능력"만 추가한다.
  *
  * ★ gov-router.js의 라우팅 로직 자체는 건드리지 않는다 — resolveAgencyDisplayName
  * 등 기존 함수들의 주석에 이미 명시된 이 파일의 설계 원칙을 그대로 따른다.
@@ -329,7 +329,7 @@ export async function resolveGovFee(pb, userText, trace, calcInputs = {}, option
       isBaselineFallback: false,
       isAmbiguousMatch: true,
       matchedBy,
-      message: `"${match.service_name}"으로 추정되지만 비슷한 이름의 다른 서비스와 점수 차이가 근소합니다(혼디 서비스 수수료 ${hondiServiceFee}원). 맞는지 확인 부탁드립니다.`,
+      message: `"${match.service_name}"으로 추정되지만 비슷한 이름의 다른 서비스와 점수 차이가 근소합니다(나비 서비스 수수료 ${hondiServiceFee}원). 맞는지 확인 부탁드립니다.`,
     };
   }
 
@@ -341,6 +341,6 @@ export async function resolveGovFee(pb, userText, trace, calcInputs = {}, option
     isBaselineFallback: false,
     isAmbiguousMatch: false,
     matchedBy,
-    message: `${match.service_name} — 혼디 서비스 수수료 ${hondiServiceFee}원 (참고: 정부 납부 기준액 ${govReferenceFee}원, 실제 정부 납부는 사용자 직접 처리)`,
+    message: `${match.service_name} — 나비 서비스 수수료 ${hondiServiceFee}원 (참고: 정부 납부 기준액 ${govReferenceFee}원, 실제 정부 납부는 사용자 직접 처리)`,
   };
 }

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<title>대시보드 — 혼디</title>
+<title>대시보드 — 나비</title>
 <script src="/gopang-wallet.js"></script>
 <!-- 2026-09-13 신설 — GDC 대시보드 탭 이식(K-서비스 공용 전화번호 인증 모듈,
      desktop.html의 "내 GDC 대시보드" 모달과 동일한 스크립트). -->
@@ -17,7 +17,7 @@
 html { -webkit-font-smoothing: antialiased; }
 
 :root {
-  /* ── 혼디 사이트 공통 톤(K-서비스·전문가 페르소나 문서와 동일) ── */
+  /* ── 나비 사이트 공통 톤(K-서비스·전문가 페르소나 문서와 동일) ── */
   --bg:        #eef1f6;
   --surface:   #ffffff;
   --surface-container: #f4f6fa;
@@ -461,7 +461,7 @@ code, pre, kbd, samp, input, button, textarea, select {
         <div class="ug-header-mark">H</div>
         <div>
           <h1 id="topbarTitle">홈</h1>
-          <div class="ug-sub" id="topbarSub">오늘 혼디가 나를 위해 한 일</div>
+          <div class="ug-sub" id="topbarSub">오늘 나비가 나를 위해 한 일</div>
         </div>
       </div>
       <div class="ug-header-right">
@@ -562,8 +562,8 @@ code, pre, kbd, samp, input, button, textarea, select {
             </div>
             <div class="gdc-pane active" id="gdc-pane-charge"><div class="gdc-rows" id="gdcChargeRows"></div></div>
             <div class="gdc-pane" id="gdc-pane-usage"><div class="gdc-rows" id="gdcUsageRows"></div></div>
-            <div class="gdc-pane" id="gdc-pane-buy"><div class="gdc-empty">혼디마켓 구매 내역은 아직 실제 데이터와 연결되지 않았습니다.</div></div>
-            <div class="gdc-pane" id="gdc-pane-sell"><div class="gdc-empty">혼디마켓 판매 내역은 아직 실제 데이터와 연결되지 않았습니다.</div></div>
+            <div class="gdc-pane" id="gdc-pane-buy"><div class="gdc-empty">나비마켓 구매 내역은 아직 실제 데이터와 연결되지 않았습니다.</div></div>
+            <div class="gdc-pane" id="gdc-pane-sell"><div class="gdc-empty">나비마켓 판매 내역은 아직 실제 데이터와 연결되지 않았습니다.</div></div>
           </div>
           <button class="mini-btn" id="gdcSwitchAccountBtn" type="button" style="margin-top:8px">다른 번호로 조회</button>
         </div>
@@ -985,7 +985,7 @@ code, pre, kbd, samp, input, button, textarea, select {
         </div>
       </div>
 
-      <div class="page-footer">혼디 개발자 대표 도영민 · 제주특별자치도 제주시 한림읍 · tensor.city@gmail.com · hondi.net</div>
+      <div class="page-footer">나비 개발자 대표 도영민 · 제주특별자치도 제주시 한림읍 · tensor.city@gmail.com · hondi.net</div>
     </div>
 
 </div>
@@ -993,7 +993,7 @@ code, pre, kbd, samp, input, button, textarea, select {
 <script>
 var TITLES = {
   gdc: ['GDC', '잔액·충전·이용료 내역을 확인합니다'],
-  home: ['홈', '오늘 혼디가 나를 위해 한 일'],
+  home: ['홈', '오늘 나비가 나를 위해 한 일'],
   pdv: ['내 기록 검색', '24시간 기록된 PDV에서 검색합니다'],
   financials: ['재무제표', '손익계산서 · 대차대조표 · 현금흐름표'],
   tax: ['세무', '재무제표를 근거로 한 절세 전략 수립 · 실행'],
@@ -2335,7 +2335,7 @@ document.getElementById('hometaxQueryBtn')?.addEventListener('click', async () =
     'hondi-chat': 'AI 비서 사용료', 'klaw': 'K-Law 사용료', 'klaw-verdict': 'K-Law 판결 조회 사용료',
     'kplan': 'K-Plan 사용료', 'kjit': 'K-JIT 사용료', 'kcity': 'K-City 사용료',
     'kmail-quota-overage': 'K-Mail 발송 한도 초과 사용료', 'kmail-storage-overage': 'K-Mail 저장공간 초과 사용료',
-    'hondi-subscription': '혼디 구독료', 'expert-persona-subscription': '전문가 페르소나 구독료',
+    'hondi-subscription': '나비 구독료', 'expert-persona-subscription': '전문가 페르소나 구독료',
   };
   function _aiUsageLabel(serviceId, model) {
     if (serviceId) {

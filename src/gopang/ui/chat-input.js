@@ -32,7 +32,7 @@
  * 미사용) — 페이지에 여러 인스턴스를 마운트해도 충돌하지 않는다.
  *
  * ── 마이크 상태를 외부에 알리는 방법 ──
- * 기존 webapp.html의 "혼디야" 상시대기 wake-word 스크립트는
+ * 기존 webapp.html의 "나비야" 상시대기 wake-word 스크립트는
  * document.getElementById('ai-panel-mic-btn')/('btn-mic')로 특정 페이지의
  * 특정 id를 직접 참조해 마이크 충돌을 피했다. 이 모듈은 그 대신
  * container에서 버블링되는 CustomEvent를 쏜다:
@@ -215,7 +215,7 @@ async function _extractFileText(file) {
  *   theme          {primary, primaryDark, primaryBg} — 기본 THEME_LINE_GREEN
  *   colors         theme과 동일한 형태, theme보다 우선 적용(둘 다 주면 colors가 이김)
  *   placeholder    입력창 placeholder (기본 '메시지를 입력하세요…')
- *   cameraTitle    카메라 버튼 title/aria (페이지마다 의미가 다름 — 예: 혼디 코드 스캔 vs 사진 촬영)
+ *   cameraTitle    카메라 버튼 title/aria (페이지마다 의미가 다름 — 예: 나비 코드 스캔 vs 사진 촬영)
  *   fileAccept     첨부 input의 accept (기본 'image/*,.pdf,.txt,.docx')
  *   multiple       다중 파일 선택 허용 (기본 true)
  *   allowStop      생성 중 전송버튼을 "중단" 버튼으로 전환할지 (기본 true)

@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<title>K-서비스 — 혼디</title>
+<title>K-서비스 — 나비</title>
 </head>
 <body>
 <style>
@@ -77,7 +77,7 @@ body {
   .svc-tabs { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* ── 내부 인프라 탭(사용자에게 공개된 K-서비스가 아니라 혼디 내부 처리 단계) ── */
+/* ── 내부 인프라 탭(사용자에게 공개된 K-서비스가 아니라 나비 내부 처리 단계) ── */
 .svc-internal-label {
   font-size: 11px; font-weight: 700; color: rgba(255,255,255,.45);
   letter-spacing: .3px; margin: 16px 0 8px;
@@ -216,7 +216,7 @@ window.PAGE_HEADER = {
   active: 'k-services',
   badge: 'K-서비스',
   h1: '법률·세무·의료·교육 등<br>20개 공익 서비스를 한 플랫폼에서',
-  sub: '사고나 응급 상황이 감지되면, 혼디가 신고 접수와 동시에 중증도 분류·출동 배차·응급처치 안내까지 자동으로 진행합니다.',
+  sub: '사고나 응급 상황이 감지되면, 나비가 신고 접수와 동시에 중증도 분류·출동 배차·응급처치 안내까지 자동으로 진행합니다.',
   extraHtml: '<div class="svc-internal-label">내부 처리 단계(사용자에게 직접 노출되는 K-서비스가 아님)</div>' +
     '<div class="svc-tabs-internal" id="svcTabsInternal">' +
       '<div class="svc-tab" data-svc="kintent">의도 파악(내부)</div>' +
@@ -296,7 +296,7 @@ window.PAGE_HEADER = {
   </div>
 
   <footer class="ug-footer">
-    혼디 개발자 대표 도영민 · 제주특별자치도 제주시 한림읍 · tensor.city@gmail.com · hondi.net
+    나비 개발자 대표 도영민 · 제주특별자치도 제주시 한림읍 · tensor.city@gmail.com · hondi.net
   </footer>
 
 </div>
@@ -312,7 +312,7 @@ var SVC_CONTENT = {
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
         911.hondi.net 바로가기
       </a>
-      <p class="svc-lead">사고나 응급 상황이 감지되면, 혼디가 신고 접수와 동시에 중증도 분류·출동 배차·응급처치 안내까지 자동으로 진행합니다.</p>
+      <p class="svc-lead">사고나 응급 상황이 감지되면, 나비가 신고 접수와 동시에 중증도 분류·출동 배차·응급처치 안내까지 자동으로 진행합니다.</p>
 
       <h3>처리 흐름</h3>
       <ol class="svc-flow">
@@ -339,7 +339,7 @@ var SVC_CONTENT = {
       <h3>기존 119 신고와 무엇이 다른가</h3>
       <div class="svc-table-wrap">
         <table class="svc-table">
-          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 K-119</th></tr></thead>
+          <thead><tr><th>구분</th><th>기존 방식</th><th>나비 K-119</th></tr></thead>
           <tbody>
             <tr><td>상황 설명</td><td>신고자가 위치·상황을 직접 설명</td><td class="svc-hondi">위치·상황 자동 파악, 신고자는 확인만</td></tr>
             <tr><td>중증도 판단</td><td>상담원이 청취 후 판단</td><td class="svc-hondi">AI가 즉시 1~4급 자동 분류</td></tr>
@@ -370,10 +370,10 @@ var SVC_CONTENT = {
       <p style="font-size:12px; color:var(--text4); margin-top:8px;">위 시나리오는 이해를 돕기 위한 예시이며, 실제 분류·처리 결과는 상황에 따라 달라질 수 있습니다.</p>
 
       <div class="svc-callout">
-        위험 신호(폭력·사기·의료 응급 키워드) 감지의 실측 응답 시간은 <b>0.246ms</b>로, 목표치 대비 3.3배를 초과 달성했습니다 (혼디 자체 측정 결과).
+        위험 신호(폭력·사기·의료 응급 키워드) 감지의 실측 응답 시간은 <b>0.246ms</b>로, 목표치 대비 3.3배를 초과 달성했습니다 (나비 자체 측정 결과).
       </div>
       <div class="svc-callout important">
-        실제 출동 여부 판단과 현장 처치는 언제나 소방 당국의 권한입니다. 혼디는 신고 접수와 정보 전달을 신속하게 중개하는 역할을 합니다.
+        실제 출동 여부 판단과 현장 처치는 언제나 소방 당국의 권한입니다. 나비는 신고 접수와 정보 전달을 신속하게 중개하는 역할을 합니다.
       </div>
     </div>
   `,
@@ -409,7 +409,7 @@ var SVC_CONTENT = {
       <h3>기존 방식과 무엇이 다른가</h3>
       <div class="svc-table-wrap">
         <table class="svc-table">
-          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <thead><tr><th>구분</th><th>기존 방식</th><th>나비 방식</th></tr></thead>
           <tbody>
             <tr><td>처리 기간</td><td>절차가 길고 단계가 많음</td><td class="svc-hondi">시간을 현저히 줄임</td></tr>
             <tr><td>비용</td><td>절차별 비용 부담이 큼</td><td class="svc-hondi">비용을 현저히 줄임</td></tr>
@@ -477,7 +477,7 @@ var SVC_CONTENT = {
       <h3>기존 방식과 무엇이 다른가</h3>
       <div class="svc-table-wrap">
         <table class="svc-table">
-          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <thead><tr><th>구분</th><th>기존 방식</th><th>나비 방식</th></tr></thead>
           <tbody>
             <tr><td>신고 방식</td><td>전화로 상황을 직접 설명</td><td class="svc-hondi">위험 감지 시 자동 신고 또는 대화 중 즉시 요청</td></tr>
             <tr><td>정보 전달</td><td>현장에서 반복 진술</td><td class="svc-hondi">맥락이 자동 정리되어 한 번에 전달</td></tr>
@@ -510,7 +510,7 @@ var SVC_CONTENT = {
         위험 키워드 감지는 30초 쿨다운 간격의 경량 모니터링으로 이뤄져, 일상 대화의 사생활을 상시 들여다보지 않습니다(백서 §4-2 기준).
       </div>
       <div class="svc-callout important">
-        실제 수사·체포 등 공권력 행사는 언제나 경찰 당국의 권한입니다. 혼디는 신고 접수와 정보 정리를 돕는 역할만 합니다.
+        실제 수사·체포 등 공권력 행사는 언제나 경찰 당국의 권한입니다. 나비는 신고 접수와 정보 정리를 돕는 역할만 합니다.
       </div>
     </div>
   `, ksecurity: `
@@ -544,7 +544,7 @@ var SVC_CONTENT = {
       <h3>기존 방식과 무엇이 다른가</h3>
       <div class="svc-table-wrap">
         <table class="svc-table">
-          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <thead><tr><th>구분</th><th>기존 방식</th><th>나비 방식</th></tr></thead>
           <tbody>
             <tr><td>보안 방식</td><td>개별 기기마다 별도 앱·계정 관리</td><td class="svc-hondi">하나의 창구로 통합 감시</td></tr>
             <tr><td>대응 시점</td><td>사건 발생 후 확인</td><td class="svc-hondi">실시간 이상탐지 + 즉시 알림</td></tr>
@@ -612,7 +612,7 @@ var SVC_CONTENT = {
       <h3>기존 방식과 무엇이 다른가</h3>
       <div class="svc-table-wrap">
         <table class="svc-table">
-          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <thead><tr><th>구분</th><th>기존 방식</th><th>나비 방식</th></tr></thead>
           <tbody>
             <tr><td>병력 관리</td><td>병원마다 다시 설명</td><td class="svc-hondi">PDV에 누적된 기록을 그대로 활용</td></tr>
             <tr><td>진료 연계</td><td>환자가 직접 예약·수소문</td><td class="svc-hondi">증상 기반 적합 병원 자동 매칭</td></tr>
@@ -651,7 +651,7 @@ var SVC_CONTENT = {
       <h3>보조하되, 확진·처방은 하지 않습니다</h3>
       <div class="svc-table-wrap">
         <table class="svc-table">
-          <thead><tr><th>구분</th><th>혼디가 하는 일</th><th>사람 의사가 하는 일</th></tr></thead>
+          <thead><tr><th>구분</th><th>나비가 하는 일</th><th>사람 의사가 하는 일</th></tr></thead>
           <tbody>
             <tr><td>진단</td><td class="svc-hondi">가능성 순서의 감별진단 목록 제시</td><td>검사·대면진찰을 통한 확정 진단</td></tr>
             <tr><td>처방</td><td class="svc-hondi">약물의 일반적 작용 기전·원리 설명</td><td>개인화된 처방·용량 결정(조제는 약사)</td></tr>
@@ -704,7 +704,7 @@ var SVC_CONTENT = {
       <h3>기존 방식과 무엇이 다른가</h3>
       <div class="svc-table-wrap">
         <table class="svc-table">
-          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <thead><tr><th>구분</th><th>기존 방식</th><th>나비 방식</th></tr></thead>
           <tbody>
             <tr><td>진도 방식</td><td>학급 단위 획일적 진도</td><td class="svc-hondi">학생 개인별 속도·목표에 맞춘 진도</td></tr>
             <tr><td>교재</td><td>공통 교재 중심</td><td class="svc-hondi">취약점 기반 맞춤 자료</td></tr>
@@ -764,7 +764,7 @@ var SVC_CONTENT = {
           </tbody>
         </table>
       </div>
-      <p class="svc-note">세션 기록은 사후 수정이 불가능합니다 — 평가자(교수)가 곧 평가 대상(정책 통계의 원천 데이터)이 되는 구조라, 혼디 스스로도 매 세션 기록을 고칠 수 없습니다.</p>
+      <p class="svc-note">세션 기록은 사후 수정이 불가능합니다 — 평가자(교수)가 곧 평가 대상(정책 통계의 원천 데이터)이 되는 구조라, 나비 스스로도 매 세션 기록을 고칠 수 없습니다.</p>
 
       <p style="font-size:12px; color:var(--text4); margin-top:8px;">1:1 맞춤 교육의 전체 흐름을 학습자 유형별(초등~직장인)로 체험해볼 수 있는 인터랙티브 시뮬레이터는 <a href="../domains/education.html" style="color:var(--brand-dk); font-weight:600;">여기</a>에서 확인할 수 있습니다.</p>
     </div>
@@ -776,7 +776,7 @@ var SVC_CONTENT = {
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
         gdc.hondi.net 바로가기
       </a>
-      <p class="svc-lead">혼디 생태계의 결제 인프라입니다. 국적 통화를 입금하는 순간 그만큼 GDC가 즉시 발행되며, 193개국 통화를 하나의 POOL로 통합해 수수료 없이 0.1초 내 환전합니다.</p>
+      <p class="svc-lead">나비 생태계의 결제 인프라입니다. 국적 통화를 입금하는 순간 그만큼 GDC가 즉시 발행되며, 193개국 통화를 하나의 POOL로 통합해 수수료 없이 0.1초 내 환전합니다.</p>
 
       <h3>처리 흐름</h3>
       <ol class="svc-flow">
@@ -800,11 +800,11 @@ var SVC_CONTENT = {
       <h3>기존 방식과 무엇이 다른가</h3>
       <div class="svc-table-wrap">
         <table class="svc-table">
-          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <thead><tr><th>구분</th><th>기존 방식</th><th>나비 방식</th></tr></thead>
           <tbody>
             <tr><td>환전</td><td>은행 영업시간 내, 수수료 부과, 며칠 소요</td><td class="svc-hondi">0.1초 내, 수수료 없음</td></tr>
             <tr><td>발행 방식</td><td>중앙은행·기관의 사전 발행</td><td class="svc-hondi">입금 즉시 그만큼만 발행</td></tr>
-            <tr><td>적용 범위</td><td>서비스마다 별도 결제수단 필요</td><td class="svc-hondi">혼디 전 서비스 공통 결제수단</td></tr>
+            <tr><td>적용 범위</td><td>서비스마다 별도 결제수단 필요</td><td class="svc-hondi">나비 전 서비스 공통 결제수단</td></tr>
           </tbody>
         </table>
       </div>
@@ -817,7 +817,7 @@ var SVC_CONTENT = {
             <tr><td>"GDC 충전은 어떻게 하나요"</td><td>충전 문의</td><td class="svc-hondi">충전 절차 안내(최소 1만원)</td></tr>
             <tr><td>"해외에 있는데 환전이 필요해요"</td><td>해외 환전</td><td class="svc-hondi">POOL 기반 즉시 환전 안내</td></tr>
             <tr><td>"GDC 잔액을 확인하고 싶어요"</td><td>잔액 조회</td><td class="svc-hondi">현재 잔액 및 이용 내역 제공</td></tr>
-            <tr><td>"GDC로 결제할 수 있는 곳이 어디예요"</td><td>결제처 문의</td><td class="svc-hondi">GDC 수락 서비스·혼디마켓 안내</td></tr>
+            <tr><td>"GDC로 결제할 수 있는 곳이 어디예요"</td><td>결제처 문의</td><td class="svc-hondi">GDC 수락 서비스·나비마켓 안내</td></tr>
             <tr><td>"환전 수수료가 얼마나 드나요"</td><td>수수료 문의</td><td class="svc-hondi">무수수료 원칙 안내</td></tr>
             <tr><td>"GDC 가치는 어떻게 결정되나요"</td><td>가치 산정 문의</td><td class="svc-hondi">POOL 투자 수익 반영 구조 설명</td></tr>
             <tr><td>"베타 기간 환율이 궁금해요"</td><td>환율 문의</td><td class="svc-hondi">현재 1:1(KRW) 적용 안내</td></tr>
@@ -842,7 +842,7 @@ var SVC_CONTENT = {
         <table class="svc-table">
           <thead><tr><th>원칙</th><th>의미</th></tr></thead>
           <tbody>
-            <tr><td>재무제표가 곧 화폐</td><td>OpenHash와 혼디 AI가 모든 개인·기관의 재무제표를 자동 기록·갱신·연동. 그 현금 계정이 GDC 잔액</td></tr>
+            <tr><td>재무제표가 곧 화폐</td><td>OpenHash와 나비 AI가 모든 개인·기관의 재무제표를 자동 기록·갱신·연동. 그 현금 계정이 GDC 잔액</td></tr>
             <tr><td>재무제표가 곧 신용</td><td>은행 담당자의 주관적 판단이 아니라, 위변조 방지를 목표로 하는 재무 기록 자체가 신용도를 증명</td></tr>
             <tr><td>채권 발행이 곧 대출</td><td>본인의 재무제표 신용도로 직접 채권을 발행 — 다른 GDC 보유자가 사들이는 것이 대출 실행</td></tr>
             <tr><td>거래 자체가 감독</td><td>모든 재무제표가 실시간으로 맞물려 있어, 거래가 일어나는 과정 자체가 감독 기능을 겸함</td></tr>
@@ -851,15 +851,15 @@ var SVC_CONTENT = {
       </div>
 
       <h3>LIVE와 VISION의 경계</h3>
-      <p class="svc-note">은행·보험·증권 융합은 혼디가 지향하는 목표이며, 지금 전부 동작하는 것은 아닙니다. 라이선스를 가진 금융기관과의 컨소시엄 구성 이후 열리는 범위와, 지금 바로 쓸 수 있는 범위를 구분해 안내합니다.</p>
+      <p class="svc-note">은행·보험·증권 융합은 나비가 지향하는 목표이며, 지금 전부 동작하는 것은 아닙니다. 라이선스를 가진 금융기관과의 컨소시엄 구성 이후 열리는 범위와, 지금 바로 쓸 수 있는 범위를 구분해 안내합니다.</p>
       <div class="svc-table-wrap">
         <table class="svc-table">
           <thead><tr><th>기능</th><th>상태</th><th>설명</th></tr></thead>
           <tbody>
-            <tr><td>구독료·서비스 결제</td><td><span class="tier-badge live" style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534;">LIVE</span></td><td>혼디 월 구독료, K-Law 등 건별 이용료를 GDC 잔액에서 결제</td></tr>
+            <tr><td>구독료·서비스 결제</td><td><span class="tier-badge live" style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534;">LIVE</span></td><td>나비 월 구독료, K-Law 등 건별 이용료를 GDC 잔액에서 결제</td></tr>
             <tr><td>가입 축하 충전</td><td><span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534;">LIVE</span></td><td>가입 직후 0.1 GDC 1회 자동 충전, 실사용량만큼 차감</td></tr>
-            <tr><td>개인 간 P2P 송금</td><td><span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534;">LIVE</span></td><td>혼디 코드 스캔으로 상대를 확인하고 즉시 이체</td></tr>
-            <tr><td>DAWN 내부 거버넌스 가중 투표</td><td><span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534;">LIVE</span></td><td>고팡 자체 규칙 개정 시 GDC 보유량이 투표권 4요소 중 하나로 반영</td></tr>
+            <tr><td>개인 간 P2P 송금</td><td><span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534;">LIVE</span></td><td>나비 코드 스캔으로 상대를 확인하고 즉시 이체</td></tr>
+            <tr><td>DAWN 내부 거버넌스 가중 투표</td><td><span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534;">LIVE</span></td><td>나비 자체 규칙 개정 시 GDC 보유량이 투표권 4요소 중 하나로 반영</td></tr>
             <tr><td>은행·보험·증권 라이선스 기반 예치·투자</td><td><span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#e2e8f0;color:#475569;">VISION</span></td><td>라이선스를 가진 금융기관과의 컨소시엄 구성 이후 시작</td></tr>
           </tbody>
         </table>
@@ -867,7 +867,7 @@ var SVC_CONTENT = {
 
       <h3>P2P 송금 — 코드를 스캔하면 바로</h3>
       <ol class="svc-flow">
-        <li><b>상대 확인</b> — 혼디 코드(전화번호를 인코딩한 시각 코드) 스캔으로 수신자를 확보합니다. 자기 자신에게는 송금할 수 없습니다.</li>
+        <li><b>상대 확인</b> — 나비 코드(전화번호를 인코딩한 시각 코드) 스캔으로 수신자를 확보합니다. 자기 자신에게는 송금할 수 없습니다.</li>
         <li><b>서명</b> — WebAuthn 또는 저장된 개인키로 거래를 서명합니다.</li>
         <li><b>L1 원장 검증</b> — L1이 블록 원장을 재생해 잔액을 직접 검증합니다(STALE_STATE·INSUFFICIENT_BALANCE·INVALID_SIGNATURE·UNREGISTERED_KEY 네 가지 사유로 거부될 수 있음).</li>
         <li><b>기록</b> — 송신자 PDV에 6하원칙으로 이체 내역이 기록되고, 수신자는 다음 접속 시 잔액이 자동 반영됩니다.</li>
@@ -907,7 +907,7 @@ var SVC_CONTENT = {
       <h3>기존 방식과 무엇이 다른가</h3>
       <div class="svc-table-wrap">
         <table class="svc-table">
-          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <thead><tr><th>구분</th><th>기존 방식</th><th>나비 방식</th></tr></thead>
           <tbody>
             <tr><td>자문 방식</td><td>고액 자문료의 PB(프라이빗뱅킹) 서비스</td><td class="svc-hondi">누구나 이용 가능한 자동화 자산관리</td></tr>
             <tr><td>리밸런싱</td><td>투자자가 직접 판단·매매</td><td class="svc-hondi">시장 변화에 따라 자동 조정</td></tr>
@@ -974,7 +974,7 @@ var SVC_CONTENT = {
       <h3>기존 방식과 무엇이 다른가</h3>
       <div class="svc-table-wrap">
         <table class="svc-table">
-          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <thead><tr><th>구분</th><th>기존 방식</th><th>나비 방식</th></tr></thead>
           <tbody>
             <tr><td>가입 방식</td><td>매번 개별 상품 가입</td><td class="svc-hondi">상황 감지로 자동 적용</td></tr>
             <tr><td>청구 절차</td><td>사고 후 직접 서류 준비</td><td class="svc-hondi">자동으로 청구서류 생성</td></tr>
@@ -1041,7 +1041,7 @@ var SVC_CONTENT = {
       <h3>기존 방식과 무엇이 다른가</h3>
       <div class="svc-table-wrap">
         <table class="svc-table">
-          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <thead><tr><th>구분</th><th>기존 방식</th><th>나비 방식</th></tr></thead>
           <tbody>
             <tr><td>정산 주기</td><td>연 1회 세무사를 통한 정산</td><td class="svc-hondi">거래 즉시 자동 정산</td></tr>
             <tr><td>오류 위험</td><td>수기 작성에 따른 누락·오류 가능</td><td class="svc-hondi">거래 시점에 자동 분리로 위험 감소</td></tr>
@@ -1074,7 +1074,7 @@ var SVC_CONTENT = {
         현재는 매출 통계를 세무 신고의 참고 자료로 제공하는 단계이며, 국세청 API가 전면 개방되면 완전 자동 신고·납부로 확대될 예정입니다.
       </div>
       <div class="svc-callout important">
-        실제 신고서 작성·제출은 홈택스를 통해 직접 진행하시거나 세무사와 상담하세요 — 혼디는 현재 자동 신고를 대행하지 않습니다.
+        실제 신고서 작성·제출은 홈택스를 통해 직접 진행하시거나 세무사와 상담하세요 — 나비는 현재 자동 신고를 대행하지 않습니다.
       </div>
     </div>
   `, kmarket: `
@@ -1109,7 +1109,7 @@ var SVC_CONTENT = {
       <h3>기존 방식과 무엇이 다른가</h3>
       <div class="svc-table-wrap">
         <table class="svc-table">
-          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <thead><tr><th>구분</th><th>기존 방식</th><th>나비 방식</th></tr></thead>
           <tbody>
             <tr><td>검색·비교</td><td>여러 앱을 오가며 수동 비교</td><td class="svc-hondi">대화 한 번으로 처리</td></tr>
             <tr><td>추천 방식</td><td>클릭 유도·매출 극대화 알고리즘</td><td class="svc-hondi">PDV 기반 개인 맞춤 추천</td></tr>
@@ -1211,7 +1211,7 @@ var SVC_CONTENT = {
       <h3>기존 방식과 무엇이 다른가</h3>
       <div class="svc-table-wrap">
         <table class="svc-table">
-          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <thead><tr><th>구분</th><th>기존 방식</th><th>나비 방식</th></tr></thead>
           <tbody>
             <tr><td>수단 비교</td><td>앱마다 따로 켜서 비교</td><td class="svc-hondi">대화 한 번으로 통합 비교</td></tr>
             <tr><td>결제</td><td>수단별로 각각 결제</td><td class="svc-hondi">도착 후 GDC 자동 결제</td></tr>
@@ -1253,7 +1253,7 @@ var SVC_CONTENT = {
       <h3>3계층 AI 에이전트 — 특허 출원 개념</h3>
       <p class="svc-note">중앙 교통관제(제1)·도로 구간별(제2)·개별 차량별(제3) 에이전트가 서로 다른 목적함수를 갖고 Nash Equilibrium 기반 협력-경쟁 학습으로 균형점을 찾는 구조가 특허 출원돼 있습니다. 기존 방식(User Equilibrium)이 각 차량의 개별 최단 경로를 우선하는 것과 달리, 이 구조(System Optimum)는 중앙 에이전트가 전체 차량 경로를 동시에 고려해 전체 이동 시간을 줄입니다.</p>
       <div class="svc-callout important">
-        3계층 구조는 특허 출원 단계의 설계이며, 현재 혼디 코드에 실제 배포된 기능이 아닙니다. AWS 시뮬레이션 환경 실증 결과는 검증된 조건 하의 수치로, 실제 도로 환경과는 차이가 있을 수 있습니다.
+        3계층 구조는 특허 출원 단계의 설계이며, 현재 나비 코드에 실제 배포된 기능이 아닙니다. AWS 시뮬레이션 환경 실증 결과는 검증된 조건 하의 수치로, 실제 도로 환경과는 차이가 있을 수 있습니다.
       </div>
     </div>
   `,
@@ -1288,7 +1288,7 @@ var SVC_CONTENT = {
       <h3>기존 방식과 무엇이 다른가</h3>
       <div class="svc-table-wrap">
         <table class="svc-table">
-          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <thead><tr><th>구분</th><th>기존 방식</th><th>나비 방식</th></tr></thead>
           <tbody>
             <tr><td>차량 운용</td><td>배달앱·택배사 각자 운영</td><td class="svc-hondi">이동 중인 차량의 빈 공간 재활용</td></tr>
             <tr><td>경로</td><td>건별로 개별 배송</td><td class="svc-hondi">여러 건을 묶어 최적 경로 계산</td></tr>
@@ -1354,7 +1354,7 @@ var SVC_CONTENT = {
       <h3>기존 방식과 무엇이 다른가</h3>
       <div class="svc-table-wrap">
         <table class="svc-table">
-          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <thead><tr><th>구분</th><th>기존 방식</th><th>나비 방식</th></tr></thead>
           <tbody>
             <tr><td>신고 방식</td><td>상황을 말로 설명 후 접수</td><td class="svc-hondi">사진 한 장으로 즉시 분석</td></tr>
             <tr><td>판독</td><td>담당자 육안 판독 대기</td><td class="svc-hondi">AI가 즉시 1차 분석</td></tr>
@@ -1421,7 +1421,7 @@ var SVC_CONTENT = {
       <h3>기존 방식과 무엇이 다른가</h3>
       <div class="svc-table-wrap">
         <table class="svc-table">
-          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <thead><tr><th>구분</th><th>기존 방식</th><th>나비 방식</th></tr></thead>
           <tbody>
             <tr><td>접근 방식</td><td>기관마다 따로 방문·로그인</td><td class="svc-hondi">하나의 창구로 전체 처리</td></tr>
             <tr><td>처리 시간</td><td>방문·대기, 며칠~수 주</td><td class="svc-hondi">수 초 내외</td></tr>
@@ -1454,7 +1454,7 @@ var SVC_CONTENT = {
         이 자동화는 마이데이터법(개인정보 전송요구권)과 공공데이터 API(data.go.kr) 등 이미 법제화된 인프라 위에서 작동합니다.
       </div>
       <div class="svc-callout important">
-        혼디의 AI 행정 기관은 정부를 대체하지 않으며, 실제 심사·결정 권한은 언제나 담당 공무원에게 있습니다. 기관마다 API 개방 수준이 달라 일부 기관은 절차 안내에 그칠 수 있습니다.
+        나비의 AI 행정 기관은 정부를 대체하지 않으며, 실제 심사·결정 권한은 언제나 담당 공무원에게 있습니다. 기관마다 API 개방 수준이 달라 일부 기관은 절차 안내에 그칠 수 있습니다.
       </div>
     </div>
   `, kdemocracy: `
@@ -1464,7 +1464,7 @@ var SVC_CONTENT = {
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
         democracy.hondi.net 바로가기
       </a>
-      <p class="svc-lead">고팡 시스템의 변경 사항을 DAWN(Democracy is All We Need) 투표로 결정하는 민주적 거버넌스 플랫폼입니다. 국민동의청원 확산 허브 역할도 합니다.</p>
+      <p class="svc-lead">나비 시스템의 변경 사항을 DAWN(Democracy is All We Need) 투표로 결정하는 민주적 거버넌스 플랫폼입니다. 국민동의청원 확산 허브 역할도 합니다.</p>
 
       <h3>처리 흐름</h3>
       <ol class="svc-flow">
@@ -1488,7 +1488,7 @@ var SVC_CONTENT = {
       <h3>기존 방식과 무엇이 다른가</h3>
       <div class="svc-table-wrap">
         <table class="svc-table">
-          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <thead><tr><th>구분</th><th>기존 방식</th><th>나비 방식</th></tr></thead>
           <tbody>
             <tr><td>정책 결정</td><td>플랫폼 사업자가 일방적으로 결정</td><td class="svc-hondi">이용자 투표(DAWN)로 결정</td></tr>
             <tr><td>투표권</td><td>해당 없음(플랫폼이 결정)</td><td class="svc-hondi">GDC 1단위 이상 보유자 1인 1표</td></tr>
@@ -1518,10 +1518,10 @@ var SVC_CONTENT = {
       <p style="font-size:12px; color:var(--text4); margin-top:8px;">위 시나리오는 이해를 돕기 위한 예시이며, 실제 분류·처리 결과는 상황에 따라 달라질 수 있습니다.</p>
 
       <div class="svc-callout">
-        고팡에는 주주·임직원·이사회가 없으며, 사용자=운영자=수혜자 구조로 운영됩니다.
+        나비에는 주주·임직원·이사회가 없으며, 사용자=운영자=수혜자 구조로 운영됩니다.
       </div>
       <div class="svc-callout important">
-        DAWN은 국회의 입법 절차 자체를 대체하지 않으며, 혼디/고팡 생태계 내부 의사결정과 청원 확산을 지원하는 시민 참여 메커니즘입니다.
+        DAWN은 국회의 입법 절차 자체를 대체하지 않으며, 나비/나비 생태계 내부 의사결정과 청원 확산을 지원하는 시민 참여 메커니즘입니다.
       </div>
     </div>
   `, ktelecom: `
@@ -1563,18 +1563,18 @@ var SVC_CONTENT = {
       <p>명의도용·소액결제 피해를 막기 위한 임시 정지 신청 절차는 즉시 안내하되, 실제 정지 처리(본인인증 필요)는 통신사 앱·고객센터(114 등)로 연결합니다.</p>
 
       <div class="svc-callout important">
-        전기통신사업법 등 통신 관련 법령상 본인확인이 필수인 최종 실행은 혼디가 대신 완료했다고 안내하지 않습니다 — 절차 안내까지가 혼디의 역할입니다.
+        전기통신사업법 등 통신 관련 법령상 본인확인이 필수인 최종 실행은 나비가 대신 완료했다고 안내하지 않습니다 — 절차 안내까지가 나비의 역할입니다.
       </div>
     </div>
   `, ksearch: `
     <div class="svc-detail">
-      <h2>K-Search — 혼디 통합 검색 에이전트</h2>
+      <h2>K-Search — 나비 통합 검색 에이전트</h2>
       <a href="https://search.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
         search.hondi.net 바로가기
       </a>
       <span class="svc-badge svc-badge-partial">부분 가동</span>
-      <p class="svc-lead">혼디 생태계 전체의 유일한 검색 실행 에이전트입니다. 사람·AI비서 식별은 물론, K-Market 등 다른 서비스가 위임하는 판매자·상품 탐색까지 전담합니다.</p>
+      <p class="svc-lead">나비 생태계 전체의 유일한 검색 실행 에이전트입니다. 사람·AI비서 식별은 물론, K-Market 등 다른 서비스가 위임하는 판매자·상품 탐색까지 전담합니다.</p>
 
       <h3>처리 흐름</h3>
       <ol class="svc-flow">
@@ -1615,7 +1615,7 @@ var SVC_CONTENT = {
       <p class="svc-note">시군구별 담당 부서 실시간 조회, 반경 내 상권·경쟁 밀집도 분석, 리뷰 답글 초안 작성은 오늘 기준 실제로 동작(LIVE)합니다. 사업자등록·영업신고 서류 자체의 자동 작성, 4대보험·세금 신고 기한의 자동 추적은 아직 로드맵 단계입니다.</p>
 
       <h3>산업재해 — 사고 직후, 무엇부터 신고해야 하는지</h3>
-      <p class="svc-note">산업재해가 발생하면 사업주는 산재보험 신고(근로복지공단)와 함께 중대재해 여부에 따라 관할 노동청·경찰 신고 기한까지 동시에 챙겨야 합니다. 혼디는 사고 정황을 먼저 정리해 묻고, 어떤 기관에 어떤 순서로 신고해야 하는지 한 번에 하나씩 안내합니다. 다만 사고 경위에 대한 법적 판단, 과실 여부 확정은 대신하지 않으며 즉시 노무사·변호사 등 전문가 연결로 이어집니다.</p>
+      <p class="svc-note">산업재해가 발생하면 사업주는 산재보험 신고(근로복지공단)와 함께 중대재해 여부에 따라 관할 노동청·경찰 신고 기한까지 동시에 챙겨야 합니다. 나비는 사고 정황을 먼저 정리해 묻고, 어떤 기관에 어떤 순서로 신고해야 하는지 한 번에 하나씩 안내합니다. 다만 사고 경위에 대한 법적 판단, 과실 여부 확정은 대신하지 않으며 즉시 노무사·변호사 등 전문가 연결로 이어집니다.</p>
 
       <h3>특허·지재권 — 출원 전, 먼저 확인할 것들</h3>
       <p class="svc-note">특허·상표·디자인 출원은 선행기술 조사부터 시작합니다. 키프리스(KIPRIS) 등 공개 데이터베이스에서 유사 선행 사례를 조회·정리하고, 출원 절차(특허청 접수 → 방식심사 → 실체심사 → 등록)의 각 단계에서 무엇을 준비해야 하는지 안내합니다. 다만 발명의 신규성·진보성에 대한 실체적 판단, 명세서 청구항 작성은 변리사의 전문 영역으로 남습니다.</p>
@@ -1639,7 +1639,7 @@ var SVC_CONTENT = {
       <p class="svc-note">K-Biz·K-Market 같은 실행형 모듈은 사용자가 요청한 업무를 그대로 처리합니다. K-Plan은 다릅니다 — 요청을 곧바로 수행하기 전에, 그 요청이 목표 달성의 최선 경로인지부터 평가합니다. 더 나은 경로가 있다면 반드시 제시하되, 사용자가 원래 요청을 고수하면 그 결정을 존중해 그대로 지원합니다.</p>
 
       <h3>처리 흐름 — AC 표준 5단계 체인을 그대로 사용합니다</h3>
-      <p class="svc-note">K-Plan은 새로운 파이프라인을 따로 만들지 않고, 혼디의 다른 실행형 모듈과 똑같은 K-Intent → K-Compose → K-Execute → K-Deliver → K-Report 5단계 체인을 그대로 씁니다. K-Plan만의 차별점은 이 체인이 아니라, K-Report 이후 자동으로 이어지는 반추와 경험의 공유입니다.</p>
+      <p class="svc-note">K-Plan은 새로운 파이프라인을 따로 만들지 않고, 나비의 다른 실행형 모듈과 똑같은 K-Intent → K-Compose → K-Execute → K-Deliver → K-Report 5단계 체인을 그대로 씁니다. K-Plan만의 차별점은 이 체인이 아니라, K-Report 이후 자동으로 이어지는 반추와 경험의 공유입니다.</p>
       <ol class="svc-flow">
         <li><b>K-Intent — 목표 파싱 · PDV 종합</b> — 가장 먼저 의도의 합리성·타당성부터 평가합니다. 물리적으로 불가능하거나 터무니없는 목표(예: "화성에 갈 우주선을 우리집 창고에서 만들겠다")는 여기서부터 차단합니다. 그다음 사용자의 의도를 추측하거나 넘겨짚지 않습니다 — 모호하거나 여러 갈래로 해석될 수 있으면 그럴듯한 해석 하나를 임의로 고르지 않고 반드시 되물어 대화로 확증한 뒤에야 다음 단계로 넘어갑니다. PDV의 일정·예산·인맥·과거 결정 패턴도 함께 대조해 근거로 삼습니다.</li>
         <li><b>K-Compose — 달성 경로 설계</b> — 방안을 짜기 전에 달성 가능성부터 점검합니다. 낮다고 판단되면 이를 숨기지 않고, 대안 경로(제3의 매개체 경유, 선행 조건 확보 후 재시도 등)를 함께 제시합니다.</li>
@@ -1739,7 +1739,7 @@ var SVC_CONTENT = {
   `,
   kmail: `
     <div class="svc-detail">
-      <h2>K-Mail — 혼디 사용자 간 메일 발송·주소록, 그리고 K-Mail끼리의 대화</h2>
+      <h2>K-Mail — 나비 사용자 간 메일 발송·주소록, 그리고 K-Mail끼리의 대화</h2>
       <a href="https://mail.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
         mail.hondi.net 바로가기
@@ -1810,7 +1810,7 @@ var SVC_CONTENT = {
       <h3>기존 조달 방식과 무엇이 다른가</h3>
       <div class="svc-table-wrap">
         <table class="svc-table">
-          <thead><tr><th>구분</th><th>기존 JIT</th><th>혼디 K-JIT</th></tr></thead>
+          <thead><tr><th>구분</th><th>기존 JIT</th><th>나비 K-JIT</th></tr></thead>
           <tbody>
             <tr><td>최적화 기준</td><td>개별 주체의 비용·재고 최소화</td><td class="svc-hondi">사회 전체 총비용 최소화(외부효과 포함)</td></tr>
             <tr><td>손해 발생 시</td><td>해당 주체가 그대로 부담</td><td class="svc-hondi">차등보상으로 상쇄, 그래도 손해면 참여 강제 안 함</td></tr>
@@ -1859,7 +1859,7 @@ var SVC_CONTENT = {
       <h3>기존 도시계획 방식과 무엇이 다른가</h3>
       <div class="svc-table-wrap">
         <table class="svc-table">
-          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 K-City</th></tr></thead>
+          <thead><tr><th>구분</th><th>기존 방식</th><th>나비 K-City</th></tr></thead>
           <tbody>
             <tr><td>부문 검토</td><td>부문별로 별도 용역·개별 검토</td><td class="svc-hondi">7개 부문 통합 최적화를 한 번에 계산</td></tr>
             <tr><td>대안 비교</td><td>단일안 위주로 제시</td><td class="svc-hondi">예산·우선순위별 복수 시나리오 병렬 제시</td></tr>
@@ -1879,7 +1879,7 @@ var SVC_CONTENT = {
       <p class="svc-lead">AC(에이전트 코어)가 다기관·다절차 오케스트레이션이 필요하다고 판별한 요청을 넘겨받아, 이용자가 실제로 손에 쥐고 싶은 최종 결과가 무엇인지 구조화합니다. 도메인은 가리지 않습니다 — 주문이든 소송이든 동일한 절차로 처리합니다.</p>
 
       <div class="svc-callout">
-        K-Intent → K-Compose → K-Execute → K-Deliver → K-Report는 사용자가 개별적으로 선택하는 서비스가 아니라, 혼디가 다기관·다절차 요청을 처리할 때마다 내부적으로 항상 이 순서로 실행하는 5단계 오케스트레이션 파이프라인입니다. 아래는 각 단계가 실제로 하는 일을 투명하게 공개한 것이며, 별도의 진입 채팅창은 없습니다.
+        K-Intent → K-Compose → K-Execute → K-Deliver → K-Report는 사용자가 개별적으로 선택하는 서비스가 아니라, 나비가 다기관·다절차 요청을 처리할 때마다 내부적으로 항상 이 순서로 실행하는 5단계 오케스트레이션 파이프라인입니다. 아래는 각 단계가 실제로 하는 일을 투명하게 공개한 것이며, 별도의 진입 채팅창은 없습니다.
       </div>
 
       <h3>개요 다이어그램</h3>
@@ -1958,7 +1958,7 @@ var SVC_CONTENT = {
       <p class="svc-lead">K-Intent가 확정한 목표를 받아, gwp-registry에 등록된 어떤 서비스·기관·사업자·개인을 어떤 순서로 조합해야 그 목표가 실현되는지 결정합니다. 5개 단계 중 분기가 가장 많은 단계입니다.</p>
 
       <div class="svc-callout">
-        K-Intent → K-Compose → K-Execute → K-Deliver → K-Report는 사용자가 개별적으로 선택하는 서비스가 아니라, 혼디가 다기관·다절차 요청을 처리할 때마다 내부적으로 항상 이 순서로 실행하는 5단계 오케스트레이션 파이프라인입니다. 아래는 각 단계가 실제로 하는 일을 투명하게 공개한 것이며, 별도의 진입 채팅창은 없습니다.
+        K-Intent → K-Compose → K-Execute → K-Deliver → K-Report는 사용자가 개별적으로 선택하는 서비스가 아니라, 나비가 다기관·다절차 요청을 처리할 때마다 내부적으로 항상 이 순서로 실행하는 5단계 오케스트레이션 파이프라인입니다. 아래는 각 단계가 실제로 하는 일을 투명하게 공개한 것이며, 별도의 진입 채팅창은 없습니다.
       </div>
 
       <h3>개요 다이어그램 — mode에 따라 세 갈래로 갈립니다</h3>
@@ -2069,7 +2069,7 @@ var SVC_CONTENT = {
       <p class="svc-lead">K-Compose가 확정한 실행 계획을 받아, AI Agent로서 그 계획을 실제로 수행합니다. 병렬·팬아웃 그룹 처리와 일치도 검증 게이트가 이 단계의 핵심입니다.</p>
 
       <div class="svc-callout">
-        K-Intent → K-Compose → K-Execute → K-Deliver → K-Report는 사용자가 개별적으로 선택하는 서비스가 아니라, 혼디가 다기관·다절차 요청을 처리할 때마다 내부적으로 항상 이 순서로 실행하는 5단계 오케스트레이션 파이프라인입니다. 아래는 각 단계가 실제로 하는 일을 투명하게 공개한 것이며, 별도의 진입 채팅창은 없습니다.
+        K-Intent → K-Compose → K-Execute → K-Deliver → K-Report는 사용자가 개별적으로 선택하는 서비스가 아니라, 나비가 다기관·다절차 요청을 처리할 때마다 내부적으로 항상 이 순서로 실행하는 5단계 오케스트레이션 파이프라인입니다. 아래는 각 단계가 실제로 하는 일을 투명하게 공개한 것이며, 별도의 진입 채팅창은 없습니다.
       </div>
 
       <h3>개요 다이어그램</h3>
@@ -2162,7 +2162,7 @@ var SVC_CONTENT = {
       <p class="svc-lead">K-Execute가 실행한 결과를 받아, 이용자가 실제로 받아볼 수 있는 최종 산출물로 정리합니다. 인간 전속 경계를 다시 한번 명확히 고지하는 것도 이 단계의 몫입니다.</p>
 
       <div class="svc-callout">
-        K-Intent → K-Compose → K-Execute → K-Deliver → K-Report는 사용자가 개별적으로 선택하는 서비스가 아니라, 혼디가 다기관·다절차 요청을 처리할 때마다 내부적으로 항상 이 순서로 실행하는 5단계 오케스트레이션 파이프라인입니다. 아래는 각 단계가 실제로 하는 일을 투명하게 공개한 것이며, 별도의 진입 채팅창은 없습니다.
+        K-Intent → K-Compose → K-Execute → K-Deliver → K-Report는 사용자가 개별적으로 선택하는 서비스가 아니라, 나비가 다기관·다절차 요청을 처리할 때마다 내부적으로 항상 이 순서로 실행하는 5단계 오케스트레이션 파이프라인입니다. 아래는 각 단계가 실제로 하는 일을 투명하게 공개한 것이며, 별도의 진입 채팅창은 없습니다.
       </div>
 
       <h3>개요 다이어그램</h3>
@@ -2242,7 +2242,7 @@ var SVC_CONTENT = {
       <p class="svc-lead">K-Deliver가 이용자에게 전달을 마친 결과를 받아, 이 사건과 관련해 법적·행정적으로 통지·신고 의무가 있는 이해당사자를 식별하고, 5단계 파이프라인의 마지막을 마무리합니다.</p>
 
       <div class="svc-callout">
-        K-Intent → K-Compose → K-Execute → K-Deliver → K-Report는 사용자가 개별적으로 선택하는 서비스가 아니라, 혼디가 다기관·다절차 요청을 처리할 때마다 내부적으로 항상 이 순서로 실행하는 5단계 오케스트레이션 파이프라인입니다. 아래는 각 단계가 실제로 하는 일을 투명하게 공개한 것이며, 별도의 진입 채팅창은 없습니다.
+        K-Intent → K-Compose → K-Execute → K-Deliver → K-Report는 사용자가 개별적으로 선택하는 서비스가 아니라, 나비가 다기관·다절차 요청을 처리할 때마다 내부적으로 항상 이 순서로 실행하는 5단계 오케스트레이션 파이프라인입니다. 아래는 각 단계가 실제로 하는 일을 투명하게 공개한 것이며, 별도의 진입 채팅창은 없습니다.
       </div>
 
       <h3>개요 다이어그램</h3>
@@ -2377,7 +2377,7 @@ var SVC_CONTENT = {
           <div class="svc-acc-head"><span><span class="svc-acc-step-no">K3</span>계획 수립 — 새 로직 없이 기존 부품 조립</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
           <div class="svc-acc-body"><div class="svc-acc-body-inner">
             <p>① JURISDICTION-RESOLVER-SCHEMA로 하위 절차마다 tier·기관 판별 → ② DOCUMENT-TYPE-REGISTRY로 절차 간 선행조건(depends_on) 확인 → ③ 결과를 <code>GOV_TASK_CHAIN_PLAN</code>(DAG, 병렬 가능)으로 조립합니다. 서로 독립적인 절차는 <code>GOV_TASK_BROADCAST</code>로 별도 처리합니다.</p>
-            <p>기관 SP가 아직 없는 절차를 만나면 <code>issuing_gov_task=null</code>로 표시하고 "이 부분은 아직 Hondi가 자동화하지 못했다"고 정직하게 안내합니다 — 그 자리에서 즉석으로 새 SP를 만들지 않고, 다음 배치 작업 후보로만 로그에 남깁니다.</p>
+            <p>기관 SP가 아직 없는 절차를 만나면 <code>issuing_gov_task=null</code>로 표시하고 "이 부분은 아직 나비가 자동화하지 못했다"고 정직하게 안내합니다 — 그 자리에서 즉석으로 새 SP를 만들지 않고, 다음 배치 작업 후보로만 로그에 남깁니다.</p>
           </div></div>
         </div>
         <div class="svc-acc-item">
@@ -2417,7 +2417,7 @@ var SVC_CONTENT = {
   ksocial: `
     <div class="svc-detail">
       <h2>K-Social-Match — 사교 모임 추천<span class="svc-badge svc-badge-design">설계 단계</span></h2>
-      <p class="svc-lead">혼디에 등록된 열려있는 모임 목록을 사용자의 성향·취미와 대조해, 관련성 높아 보이는 후보를 추천하는 보조 AI입니다. 알고리즘 매칭 엔진이 아니라 이미 존재하는 모임 데이터를 사용자 맥락에 맞게 정리해 보여주는 역할이며, "이 사람과 잘 맞습니다" 같은 확정적 궁합 판정은 내리지 않습니다.</p>
+      <p class="svc-lead">나비에 등록된 열려있는 모임 목록을 사용자의 성향·취미와 대조해, 관련성 높아 보이는 후보를 추천하는 보조 AI입니다. 알고리즘 매칭 엔진이 아니라 이미 존재하는 모임 데이터를 사용자 맥락에 맞게 정리해 보여주는 역할이며, "이 사람과 잘 맞습니다" 같은 확정적 궁합 판정은 내리지 않습니다.</p>
       <div class="svc-callout important">
         문서 자체가 "설계 단계 초안"이며 "아직 실제 서비스 백엔드의 표준 페르소나 파이프라인에 연결되지 않았다"고 명시합니다. 실시간 데모(<code>/social/demo-match</code>)는 이 SP로 DeepSeek를 직접 호출하지만, PDV 조회는 시뮬레이션(사용자가 입력한 텍스트를 PDV 요약 대신 사용)입니다 — 실제 PDV 자동 조회는 아직 연결되지 않았습니다.
       </div>

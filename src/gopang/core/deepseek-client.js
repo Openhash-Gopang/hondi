@@ -46,7 +46,7 @@ export function resolveDeepseekModel(model) {
 // 2026-0X-XX 신설 — DeepSeek 공식 문서 확인 결과 deepseek-v4-flash/-pro를
 // model 파라미터로 직접 호출하면 thinking(사고) 모드가 기본값 enabled,
 // effort는 기본 high다("The thinking toggle defaults to enabled" — 공식
-// Thinking Mode 가이드). 레거시 별칭 시절 "혼디 Flash"="deepseek-chat"은
+// Thinking Mode 가이드). 레거시 별칭 시절 "나비 Flash"="deepseek-chat"은
 // 명시적으로 비사고 모드였는데(위 파일 헤더 원 설계 의도), 별칭을 정식
 // ID로 바꾸면서 이 파라미터를 명시하지 않아 그동안 조용히 사고 모드로
 // 돌고 있었을 가능성이 높다(응답당 2~5배 느려지고 출력 토큰도 그만큼

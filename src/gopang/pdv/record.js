@@ -158,7 +158,7 @@ export function _buildPDVNote() {
 }
 
 
-// 고팡 내부 전용. /pdv/report 경유(위 recordPDV()와 동일 경로, 2026-07-19 이관).
+// 나비 내부 전용. /pdv/report 경유(위 recordPDV()와 동일 경로, 2026-07-19 이관).
 // 하위 시스템은 위 recordPDV()를 직접 사용.
 export async function _recordPDV(record) {
   try {

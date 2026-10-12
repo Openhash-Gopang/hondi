@@ -1,7 +1,7 @@
 /**
  * phase17_share_target.test.mjs
  *
- * "정부24 앱과 혼디를 앱 대 앱으로 연동" 구현 검증. Web Share Target
+ * "정부24 앱과 나비를 앱 대 앱으로 연동" 구현 검증. Web Share Target
  * API로 정부24가 공유한 문서를 받는 sw.js 로직(_parseShareTargetForm,
  * _handleShareTarget)과, 그걸 클라이언트에서 읽어오는 src/gopang/pdv/
  * share-inbox.js를 함께 검증한다.

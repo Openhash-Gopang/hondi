@@ -4,7 +4,7 @@
 <link rel="icon" href="data:,">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>핵심 프롬프트 — 혼디</title>
+<title>핵심 프롬프트 — 나비</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <link rel="stylesheet" href="/assets/site-header.css">
@@ -75,8 +75,8 @@
 
 <div class="site-nav">
   <a class="site-nav-logo" href="../desktop.html">
-    <img src="../icons/icon-192.png" alt="혼디">
-    <span>혼디</span>
+    <img src="../icons/navi-icon-192.png" alt="나비">
+    <span>나비</span>
   </a>
   <nav class="site-nav-links">
     <a href="prompts.html">프롬프트</a>
@@ -108,7 +108,7 @@
         <span class="cp-card-badge always">서버 강제 주입</span>
       </div>
       <div class="cp-card-role"><b>용도:</b> 모든 SP가 지켜야 할 최우선 원칙 — 안내만 하고 끝내지 않기</div>
-      <div class="cp-card-desc">"안내로 끝내지 않는다"는 혼디의 제1공리. 세 강제 문서 중 하나.</div>
+      <div class="cp-card-desc">"안내로 끝내지 않는다"는 나비의 제1공리. 세 강제 문서 중 하나.</div>
     </div>
     <div class="cp-card">
       <div class="cp-card-head">
@@ -116,7 +116,7 @@
         <span class="cp-card-badge always">서버 강제 주입</span>
       </div>
       <div class="cp-card-role"><b>용도:</b> 정보 제공이 아니라 실제 업무 대행을 하도록 강제하는 지침</div>
-      <div class="cp-card-desc">"혼디의 본래 용도는 업무 대행이지 문의 응답이 아니다"를 명시.</div>
+      <div class="cp-card-desc">"나비의 본래 용도는 업무 대행이지 문의 응답이 아니다"를 명시.</div>
     </div>
     <div class="cp-card">
       <div class="cp-card-head">
@@ -168,7 +168,7 @@
       <span class="cp-tier-num">2단계</span>
       <span class="cp-tier-title">업무 실행 파이프라인 (모델이 태그를 낼 때 조건부 호출)</span>
     </div>
-    <p class="cp-tier-desc">AC-PRO-CORE가 실제 업무 처리가 필요하다고 판단하면 <code>[CALL_KINTENT]</code> 같은 태그를 출력하고, call-ai.js의 <code>_parseAgentTags()</code>가 이를 감지해 <code>_forwardSwitchSP()</code>로 아래 SP들에 순서대로 넘깁니다. 매 턴 무조건 도는 건 아니지만, "업무 대행"이라는 혼디의 핵심 가치가 실제로 구현되는 자리입니다.</p>
+    <p class="cp-tier-desc">AC-PRO-CORE가 실제 업무 처리가 필요하다고 판단하면 <code>[CALL_KINTENT]</code> 같은 태그를 출력하고, call-ai.js의 <code>_parseAgentTags()</code>가 이를 감지해 <code>_forwardSwitchSP()</code>로 아래 SP들에 순서대로 넘깁니다. 매 턴 무조건 도는 건 아니지만, "업무 대행"이라는 나비의 핵심 가치가 실제로 구현되는 자리입니다.</p>
 
     <div class="cp-card">
       <div class="cp-card-head">
@@ -184,8 +184,8 @@
         <span class="cp-card-name">K-Search (SP-18)</span>
         <span class="cp-card-badge conditional">전담 검색 에이전트</span>
       </div>
-      <div class="cp-card-role"><b>용도:</b> 혼디 전체에서 실제 웹·정보 검색을 수행하는 유일한 창구</div>
-      <div class="cp-card-desc">gwp-registry.js에 "혼디 생태계 전체의 유일한 검색 실행 에이전트"로 명시. 다른 SP가 위임하는 검색까지 전부 이곳으로 모입니다.</div>
+      <div class="cp-card-role"><b>용도:</b> 나비 전체에서 실제 웹·정보 검색을 수행하는 유일한 창구</div>
+      <div class="cp-card-desc">gwp-registry.js에 "나비 생태계 전체의 유일한 검색 실행 에이전트"로 명시. 다른 SP가 위임하는 검색까지 전부 이곳으로 모입니다.</div>
     </div>
     <div class="cp-card">
       <div class="cp-card-head">

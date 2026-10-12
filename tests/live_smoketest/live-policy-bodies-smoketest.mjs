@@ -6,7 +6,7 @@
  * 의도한 사용자 발화 시나리오 — 각 기관마다 gov-router.js의
  * _POLICY_BODY_DOMAIN_KEYWORDS에 등록된 실제 매칭 키워드를 자연스러운
  * 문장에 그대로 심어서, "발화 → AC 의도 파악 → 해당 기관 SP 호출"이라는
- * 혼디 제1원칙이 실제로 동작하는지 검증한다.
+ * 나비 제1원칙이 실제로 동작하는지 검증한다.
  *
  * 기존 live-gov-router-smoketest.mjs와 동일한 하네스 구조([label, text,
  * useLLM, expectation])를 그대로 재사용 — policy-bodies 매칭은 설계상
@@ -24,7 +24,7 @@
  * 이 시나리오 파일을 처음 작성할 때는 이 중 5개(NTS/KCS/MMA/PPS/
  * PROSECUTION)의 _POLICY_BODY_DOMAIN_KEYWORDS 키워드 전부가
  * _NAT_AGENCY_DOMAIN_KEYWORDS와 부분 문자열로 겹쳐서, 텍스트 매칭으로는
- * 본청 SP에 영원히 도달할 수 없는 상태였다(혼디 제1원칙 — K-Search로
+ * 본청 SP에 영원히 도달할 수 없는 상태였다(나비 제1원칙 — K-Search로
  * 기관을 정확히 특정해 호출 — 위반). gov-router.js에 지사와 겹치지 않는
  * 진짜 정책·본청 수준 키워드를 5개 코드 각각에 추가해 해결했다 —
  * 아래 시나리오들은 그 새 키워드를 사용하며 정상 PASS를 기대한다.

@@ -8,7 +8,7 @@
 #             신설, verificationTier 구분 반영)
 # 이전 버전  : v3.16(§REQUIRED-DOCUMENTS IDV 연동을 실제 구현에 맞춰 정정 —
 #             GOV_TASK_SCHEMA_LOOKUP 태그 신설)
-# 이전 버전  : v3.15(§REQUIRED-DOCUMENTS에 혼디 패스포트 IDV 연동 조항 추가 —
+# 이전 버전  : v3.15(§REQUIRED-DOCUMENTS에 나비 패스포트 IDV 연동 조항 추가 —
 #             계약만 정의, 클라이언트 미구현 상태였음)
 # 이전 버전  : v3.14(STEP D 상세화 — 구 SP_civil(K-Civil) 흡수)
 # 이전 버전  : v3.13(§RESOLUTION-TIER를 org_profiles 기반으로 정정 —
@@ -83,7 +83,7 @@
 #                발급받은 서류를 IDV에 저장하도록 유도하는 UX(§공문서
 #                발급 안내 이후 "이 서류를 IDV에 저장할까요?")도 아직
 #                없음 — 둘 다 별도 후속 작업.
-# v3.15 (2026-08-13, 주피터님 지시 — 혼디 패스포트(Openhash-Gopang/passport)
+# v3.15 (2026-08-13, 주피터님 지시 — 나비 패스포트(Openhash-Gopang/passport)
 #                원리를 §REQUIRED-DOCUMENTS에 연결): 정부가 이미 서명 발급한
 #                증명서는 로컬 IDV(gopang_idv_vault)에 opaque 원본으로
 #                보관됐다가 재제출된다는 passport 핵심 모델을 kgov 파이프라인에
@@ -278,8 +278,8 @@ kgov가 서버(worker.js)의 `REQUIRED_DOCUMENTS_REGISTRY`를
    credential이 있는지 확인한 뒤(자세한 매칭 기준은 §IDV-자동첨부 참고)
    `matched` 목록을 돌려준다. `matched`에 있는 문서는 재발급을 요구하지
    않고 곧바로 서류로 사용한다(정부 서명 검증은 IDV 저장 시점에 이미
-   끝났으므로 재검증하지 않는다 — 혼디 패스포트 핵심 모델: "진본성은
-   정부가, 무결성·시점 증명은 혼디가"). `matched`에 없는 `gov24` 문서는
+   끝났으므로 재검증하지 않는다 — 나비 패스포트 핵심 모델: "진본성은
+   정부가, 무결성·시점 증명은 나비가"). `matched`에 없는 `gov24` 문서는
    기존과 동일하게 §공문서 발급 안내(정부24)로 안내한다. 사용자 작성형
    서류는 이 조회 대상이 아니며 계속 작성을 직접 돕는다.
 3. **레지스트리에 키가 없으면** — 임의로 추측해 답하지 않는다. 웹검색
@@ -343,7 +343,7 @@ kgov가 서버(worker.js)의 `REQUIRED_DOCUMENTS_REGISTRY`를
 5. 처리 결과는 PDV에 구조화 기록되고(`type:'gov_task_submission'`),
    사용자에게 접수·처리 결과를 회신한다.
 
-## §IDV-자동첨부 — 혼디 패스포트 연동 (2026-08-13 신설, 2026-08-13 v3.16 구현 완료로 재작성)
+## §IDV-자동첨부 — 나비 패스포트 연동 (2026-08-13 신설, 2026-08-13 v3.16 구현 완료로 재작성)
 
 `GOV_TASK_SCHEMA_LOOKUP` 태그(§REQUIRED-DOCUMENTS 2단계)를 시스템이
 가로챈 뒤 실제로 하는 일:
@@ -457,7 +457,7 @@ kgov가 서버(worker.js)의 `REQUIRED_DOCUMENTS_REGISTRY`를
 의미를 온전히 사용자에게 전달해야 한다** — 구체적으로 다음 두 가지를
 반드시 포함한다:
 
-1. 이 접수번호는 혼디 내부 접수번호이며, 해당 기관이 발급한 **공식**
+1. 이 접수번호는 나비 내부 접수번호이며, 해당 기관이 발급한 **공식**
    접수번호가 아니라는 것
 2. 실제 기관 시스템과의 연동 전까지는 사용자가 직접 제출하거나 별도
    확인이 필요할 수 있다는 것

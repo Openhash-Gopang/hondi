@@ -1,21 +1,21 @@
 [
   {
     "no": 1,
-    "utterance": "혼디가 정확히 어떤 서비스예요?",
+    "utterance": "나비가 정확히 어떤 서비스예요?",
     "expected_type": "EXPERT",
     "expected_id": "hondi-guide",
-    "expected_name": "혼디 SP",
-    "category": "정상경로(혼디 자체 안내)",
-    "basis": "expert-registry-core.js hondi-guide.triggers('혼디가 뭐예요') 정확 매칭 + AC-PRO-CORE §CATALOG-EXPERT hondi-guide 행",
+    "expected_name": "나비 SP",
+    "category": "정상경로(나비 자체 안내)",
+    "basis": "expert-registry-core.js hondi-guide.triggers('나비가 뭐예요') 정확 매칭 + AC-PRO-CORE §CATALOG-EXPERT hondi-guide 행",
     "static_verdict": "PASS"
   },
   {
     "no": 2,
-    "utterance": "혼디 K-서비스가 몇 개나 있어요?",
+    "utterance": "나비 K-서비스가 몇 개나 있어요?",
     "expected_type": "EXPERT",
     "expected_id": "hondi-guide",
-    "expected_name": "혼디 SP",
-    "category": "정상경로(혼디 자체 안내)",
+    "expected_name": "나비 SP",
+    "category": "정상경로(나비 자체 안내)",
     "basis": "hondi-guide.triggers('K-서비스가 몇 개') 매칭 — SP_hondi-guide_v1_0.md §1 지식 범위",
     "static_verdict": "PASS"
   },
@@ -24,8 +24,8 @@
     "utterance": "GDC가 정확히 뭔가요?",
     "expected_type": "EXPERT",
     "expected_id": "hondi-guide",
-    "expected_name": "혼디 SP",
-    "category": "정상경로(혼디 자체 안내)",
+    "expected_name": "나비 SP",
+    "category": "정상경로(나비 자체 안내)",
     "basis": "hondi-guide.triggers('GDC가 뭐예요') 매칭 — 2026-08-31 라이브 스모크테스트에서 'GDC 충전 방법' 문구는 실제 GDC 충전 실행 GWP(kgdc)와 겹쳐 [GWP: kgdc]로 새는 것을 확인, 트리거를 개념 설명형('GDC가 뭐예요')으로 정정하고 발화도 그에 맞춰 수정",
     "static_verdict": "PASS"
   },
@@ -34,8 +34,8 @@
     "utterance": "PDV가 정확히 뭔가요?",
     "expected_type": "EXPERT",
     "expected_id": "hondi-guide",
-    "expected_name": "혼디 SP",
-    "category": "정상경로(혼디 자체 안내)",
+    "expected_name": "나비 SP",
+    "category": "정상경로(나비 자체 안내)",
     "basis": "hondi-guide.triggers('PDV가 뭐예요') 매칭",
     "static_verdict": "PASS"
   },
@@ -44,69 +44,69 @@
     "utterance": "Openhash는 어떤 기술이에요?",
     "expected_type": "EXPERT",
     "expected_id": "hondi-guide",
-    "expected_name": "혼디 SP",
-    "category": "정상경로(혼디 자체 안내)",
+    "expected_name": "나비 SP",
+    "category": "정상경로(나비 자체 안내)",
     "basis": "hondi-guide.triggers('Openhash가 뭐예요') 매칭",
     "static_verdict": "PASS"
   },
   {
     "no": 6,
-    "utterance": "혼디 요금 체계가 궁금해요, 무료인가요?",
+    "utterance": "나비 요금 체계가 궁금해요, 무료인가요?",
     "expected_type": "EXPERT",
     "expected_id": "hondi-guide",
-    "expected_name": "혼디 SP",
-    "category": "정상경로(혼디 자체 안내)",
-    "basis": "hondi-guide.triggers('혼디 요금 체계') 매칭 — 특정 K-서비스 개별 결제가 아니라 혼디 전체 요금 구조 문의",
+    "expected_name": "나비 SP",
+    "category": "정상경로(나비 자체 안내)",
+    "basis": "hondi-guide.triggers('나비 요금 체계') 매칭 — 특정 K-서비스 개별 결제가 아니라 나비 전체 요금 구조 문의",
     "static_verdict": "PASS"
   },
   {
     "no": 7,
-    "utterance": "혼디는 지금 얼마나 완성됐고 언제 다 돼요?",
+    "utterance": "나비는 지금 얼마나 완성됐고 언제 다 돼요?",
     "expected_type": "EXPERT",
     "expected_id": "hondi-guide",
-    "expected_name": "혼디 SP",
-    "category": "정상경로(혼디 자체 안내)",
+    "expected_name": "나비 SP",
+    "category": "정상경로(나비 자체 안내)",
     "basis": "SP_hondi-guide_v1_0.md §3 처리 원칙 — 로드맵/구현 현황 문의는 hondi-guide 소관",
     "static_verdict": "PASS"
   },
   {
     "no": 8,
-    "utterance": "혼디 쓰다가 버그를 발견했는데 어디에 신고해야 해요?",
+    "utterance": "나비 쓰다가 버그를 발견했는데 어디에 신고해야 해요?",
     "expected_type": "EXPERT",
     "expected_id": "hondi-guide",
-    "expected_name": "혼디 SP",
-    "category": "정상경로(혼디 자체 안내)",
-    "basis": "hondi-guide.triggers('혼디 버그 신고') 매칭 — SP_hondi-guide_v1_0.md §3 제안·개선 요청 접수(feedback.html 안내)",
+    "expected_name": "나비 SP",
+    "category": "정상경로(나비 자체 안내)",
+    "basis": "hondi-guide.triggers('나비 버그 신고') 매칭 — SP_hondi-guide_v1_0.md §3 제안·개선 요청 접수(feedback.html 안내)",
     "static_verdict": "PASS"
   },
   {
     "no": 9,
-    "utterance": "혼디에 이런 기능이 있으면 좋겠는데 제안하고 싶어요",
+    "utterance": "나비에 이런 기능이 있으면 좋겠는데 제안하고 싶어요",
     "expected_type": "EXPERT",
     "expected_id": "hondi-guide",
-    "expected_name": "혼디 SP",
-    "category": "정상경로(혼디 자체 안내)",
-    "basis": "hondi-guide.triggers('혼디 기능 제안') 매칭 — 혼디 시스템 자체에 대한 개선 제안",
+    "expected_name": "나비 SP",
+    "category": "정상경로(나비 자체 안내)",
+    "basis": "hondi-guide.triggers('나비 기능 제안') 매칭 — 나비 시스템 자체에 대한 개선 제안",
     "static_verdict": "PASS"
   },
   {
     "no": 10,
-    "utterance": "혼디 개발에 참여하려면 어떻게 해야 하나요?",
+    "utterance": "나비 개발에 참여하려면 어떻게 해야 하나요?",
     "expected_type": "EXPERT",
     "expected_id": "hondi-guide",
-    "expected_name": "혼디 SP",
-    "category": "정상경로(혼디 자체 안내)",
-    "basis": "hondi-guide.triggers('혼디 개발 참여') 매칭",
+    "expected_name": "나비 SP",
+    "category": "정상경로(나비 자체 안내)",
+    "basis": "hondi-guide.triggers('나비 개발 참여') 매칭",
     "static_verdict": "PASS"
   },
   {
     "no": 11,
-    "utterance": "혼디 SP 연결해줘",
+    "utterance": "나비 SP 연결해줘",
     "expected_type": "EXPERT",
     "expected_id": "hondi-guide",
-    "expected_name": "혼디 SP",
+    "expected_name": "나비 SP",
     "category": "정상경로(위임의도 명시)",
-    "basis": "hondi-guide.triggers('혼디 SP') 정확 매칭 — 페르소나명 직접 호출",
+    "basis": "hondi-guide.triggers('나비 SP') 정확 매칭 — 페르소나명 직접 호출",
     "static_verdict": "PASS"
   },
   {
@@ -114,49 +114,49 @@
     "utterance": "K-Plan은 정확히 뭘 해주는 서비스예요?",
     "expected_type": "EXPERT",
     "expected_id": "hondi-guide",
-    "expected_name": "혼디 SP",
-    "category": "정상경로(혼디 자체 안내)",
+    "expected_name": "나비 SP",
+    "category": "정상경로(나비 자체 안내)",
     "basis": "K-Plan은 설계 단계라 자체 GWP 라우팅이 없음(prompts/k-plan_v1_0.md) — 개별 K-서비스 설명 문의는 hondi-guide가 안내",
     "static_verdict": "PASS"
   },
   {
     "no": 13,
-    "utterance": "DAWN이 뭔가요? 혼디 철학이라고 들었어요",
+    "utterance": "DAWN이 뭔가요? 나비 철학이라고 들었어요",
     "expected_type": "EXPERT",
     "expected_id": "hondi-guide",
-    "expected_name": "혼디 SP",
-    "category": "정상경로(혼디 자체 안내)",
+    "expected_name": "나비 SP",
+    "category": "정상경로(나비 자체 안내)",
     "basis": "SP_hondi-guide_v1_0.md §0 IDENTITY — DAWN 철학은 hondi-guide 지식 범위",
     "static_verdict": "PASS"
   },
   {
     "no": 14,
-    "utterance": "혼디 전문가 페르소나가 총 몇 명이에요?",
+    "utterance": "나비 전문가 페르소나가 총 몇 명이에요?",
     "expected_type": "EXPERT",
     "expected_id": "hondi-guide",
-    "expected_name": "혼디 SP",
-    "category": "정상경로(혼디 자체 안내)",
+    "expected_name": "나비 SP",
+    "category": "정상경로(나비 자체 안내)",
     "basis": "전문가 페르소나 체계 자체에 대한 메타 질문 — pages/expert-personas.html 현황을 hondi-guide가 안내",
     "static_verdict": "PASS"
   },
   {
     "no": 15,
-    "utterance": "혼디 회원가입은 무료인가요? 가입하면 뭐가 좋아요?",
+    "utterance": "나비 회원가입은 무료인가요? 가입하면 뭐가 좋아요?",
     "expected_type": "EXPERT",
     "expected_id": "hondi-guide",
-    "expected_name": "혼디 SP",
-    "category": "정상경로(혼디 자체 안내)",
-    "basis": "hondi-guide.triggers('혼디 이용 방법') 인접 — 가입·이용 절차 문의",
+    "expected_name": "나비 SP",
+    "category": "정상경로(나비 자체 안내)",
+    "basis": "hondi-guide.triggers('나비 이용 방법') 인접 — 가입·이용 절차 문의",
     "static_verdict": "PASS"
   },
   {
     "no": 16,
-    "utterance": "혼디야 안녕!",
+    "utterance": "나비야 안녕!",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
     "expected_name": "인사 — 태그 없이 직접 응답",
     "category": "부정테스트(단순 호칭·잡담 — hondi-guide 오발동 방지)",
-    "basis": "AC-PRO-CORE hondi-guide 행 주의사항 — \"혼디야\"처럼 AC 자신을 부르는 것은 hondi-guide 위임이 아님. 구체적 질문·제안이 없으면 태그 없이 직접 응답",
+    "basis": "AC-PRO-CORE hondi-guide 행 주의사항 — \"나비야\"처럼 AC 자신을 부르는 것은 hondi-guide 위임이 아님. 구체적 질문·제안이 없으면 태그 없이 직접 응답",
     "static_verdict": "PASS"
   },
   {
@@ -165,18 +165,18 @@
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
     "expected_name": "잡담/감정표현 — 태그 없이 직접 응답",
-    "category": "부정테스트(혼디와 무관한 잡담 — hondi-guide 오발동 방지)",
+    "category": "부정테스트(나비와 무관한 잡담 — hondi-guide 오발동 방지)",
     "basis": "구체적 요청 없는 감정 토로. scenarios_no_name_leak 계열과 동일 패턴 — 태그 없이 직접 응답",
     "static_verdict": "PASS"
   },
   {
     "no": 18,
-    "utterance": "혼디로 병원 예약 좀 해줘",
+    "utterance": "나비로 병원 예약 좀 해줘",
     "expected_type": "GWP",
     "expected_id": "khealth",
     "expected_name": "K-Health",
     "category": "부정테스트(GWP-hondi-guide 인접쌍 판별 — AC 호칭 vs 실제 위임)",
-    "basis": "\"혼디\"는 여기서 AC 자신을 부르는 호칭일 뿐 — 실제 의도는 병원 예약(khealth) 실행. hondi-guide로 새면 오발동",
+    "basis": "\"나비\"는 여기서 AC 자신을 부르는 호칭일 뿐 — 실제 의도는 병원 예약(khealth) 실행. hondi-guide로 새면 오발동",
     "static_verdict": "PASS"
   },
   {
@@ -186,7 +186,7 @@
     "expected_id": "kgov",
     "expected_name": "K-Public",
     "category": "부정테스트(제안 유사어 — hondi-guide 오발동 방지, 정답은 kgov)",
-    "basis": "\"제안\"이라는 단어가 있어도 혼디 시스템에 대한 제안이 아니므로 hondi-guide로 새면 안 됨. 2026-08-31 라이브 테스트에서 최초 기대값(kdemocracy)이 틀렸던 것으로 확인 — gwp-registry.js kdemocracy 항목 주석에 \"국민동의청원·입법예고 등 실제 국가기관 청원/의견 시스템은 kgov 소관\"이라고 명시돼 있음(K-Democracy는 혼디 자체 거버넌스 DAWN 전용). 정정 후 정답은 kgov",
+    "basis": "\"제안\"이라는 단어가 있어도 나비 시스템에 대한 제안이 아니므로 hondi-guide로 새면 안 됨. 2026-08-31 라이브 테스트에서 최초 기대값(kdemocracy)이 틀렸던 것으로 확인 — gwp-registry.js kdemocracy 항목 주석에 \"국민동의청원·입법예고 등 실제 국가기관 청원/의견 시스템은 kgov 소관\"이라고 명시돼 있음(K-Democracy는 나비 자체 거버넌스 DAWN 전용). 정정 후 정답은 kgov",
     "static_verdict": "PASS"
   },
   {
@@ -196,7 +196,7 @@
     "expected_id": "kpolice",
     "expected_name": "K-Police",
     "category": "부정테스트(신고 유사어 — K-Police vs hondi-guide 판별)",
-    "basis": "\"신고\"라는 단어가 있어도 이건 혼디 버그 신고가 아니라 범죄 신고 — kpolice가 정답. hondi-guide로 새면 오발동",
+    "basis": "\"신고\"라는 단어가 있어도 이건 나비 버그 신고가 아니라 범죄 신고 — kpolice가 정답. hondi-guide로 새면 오발동",
     "static_verdict": "PASS"
   },
   {
@@ -205,8 +205,8 @@
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
     "expected_name": "일반 문서 작성 — 태그 없이 직접 응답",
-    "category": "부정테스트(제안 유사어 — 혼디와 무관한 제안)",
-    "basis": "\"제안\"이 있어도 혼디 시스템과 전혀 무관한 회사 내부 제도 개선 — hondi-guide로 새면 오발동. 태그 없이 AC가 직접 문서 작성 지원",
+    "category": "부정테스트(제안 유사어 — 나비와 무관한 제안)",
+    "basis": "\"제안\"이 있어도 나비 시스템과 전혀 무관한 회사 내부 제도 개선 — hondi-guide로 새면 오발동. 태그 없이 AC가 직접 문서 작성 지원",
     "static_verdict": "PASS"
   },
   {
@@ -226,7 +226,7 @@
     "expected_id": "direct-response",
     "expected_name": "일반 지식 질문 — 태그 없이 직접 응답",
     "category": "부정테스트(어형 유사어 — GDP vs GDC 혼동 방지)",
-    "basis": "GDC(혼디 디지털 화폐)와 철자·발음이 비슷한 GDP(국내총생산)는 전혀 무관한 경제 상식 질문 — hondi-guide로 새면 오발동",
+    "basis": "GDC(나비 디지털 화폐)와 철자·발음이 비슷한 GDP(국내총생산)는 전혀 무관한 경제 상식 질문 — hondi-guide로 새면 오발동",
     "static_verdict": "PASS"
   },
   {
@@ -246,7 +246,7 @@
     "expected_id": "ktax",
     "expected_name": "K-Tax",
     "category": "부정테스트(다른 GWP — hondi-guide와 무관)",
-    "basis": "혼디 요금 체계 문의(#6)와 표면적으로 비슷해 보이지만 실제로는 사용자 개인의 국세 신고 — ktax가 정답",
+    "basis": "나비 요금 체계 문의(#6)와 표면적으로 비슷해 보이지만 실제로는 사용자 개인의 국세 신고 — ktax가 정답",
     "static_verdict": "PASS"
   },
   {
@@ -281,12 +281,12 @@
   },
   {
     "no": 29,
-    "utterance": "저희 집 강아지 이름을 혼디라고 지었어요, 어때요?",
+    "utterance": "저희 집 강아지 이름을 나비라고 지었어요, 어때요?",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
     "expected_name": "이름 우연 언급 — 태그 없이 직접 응답",
     "category": "부정테스트(이름 우연 일치 — hondi-guide 오발동 방지)",
-    "basis": "\"혼디\"라는 단어가 등장하지만 플랫폼과 무관한 반려동물 이름 얘기 — 리터럴 트리거 오매칭 방지가 핵심 검증 포인트",
+    "basis": "\"나비\"라는 단어가 등장하지만 플랫폼과 무관한 반려동물 이름 얘기 — 리터럴 트리거 오매칭 방지가 핵심 검증 포인트",
     "static_verdict": "PASS"
   },
   {
@@ -296,7 +296,7 @@
     "expected_id": "direct-response",
     "expected_name": "단순 정보 질문 — 태그 없이 직접 응답",
     "category": "부정테스트(범용 사소 질문 — hondi-guide 오발동 방지)",
-    "basis": "혼디와 전혀 무관한 사소 질문 — 태그 없이 직접 응답",
+    "basis": "나비와 전혀 무관한 사소 질문 — 태그 없이 직접 응답",
     "static_verdict": "PASS"
   }
 ]

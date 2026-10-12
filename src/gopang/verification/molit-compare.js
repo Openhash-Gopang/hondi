@@ -1,5 +1,5 @@
 /**
- * verification/molit-compare.js — 혼디 추정치 vs 실거래가 대조
+ * verification/molit-compare.js — 나비 추정치 vs 실거래가 대조
  *
  * ★ 2026-09-29 신설. hondi-staged-valuation.js의 stagedValuation() 출력
  * (fair_value, sigma_total)을 molit-client.js가 가져온 실거래 comps와

@@ -4,11 +4,11 @@
 <link rel="icon" href="data:,">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>혼디 — 코드로 기기 연결</title>
+<title>나비 — 코드로 기기 연결</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <!--
-  2026-07-31 신설 — "다른 기기 연결" QR을 혼디 숫자 코드로 교체하면서
+  2026-07-31 신설 — "다른 기기 연결" QR을 나비 숫자 코드로 교체하면서
   짝을 이루는 스캔 페이지. 로그인 여부와 무관하게(=이 페이지 자체는
   webapp.html의 인증 흐름을 거치지 않는 새 기기가 열 수 있어야 하므로)
   독립 페이지로 둔다 — auth/device-link.html·auth/qr-login.html과 같은
@@ -72,7 +72,7 @@
 
 <div id="top-bar">
   <div>
-    <div class="title">혼디 숫자 코드 스캔</div>
+    <div class="title">나비 숫자 코드 스캔</div>
     <div class="sub">다른 기기의 "다른기기 연결" 화면에 뜬 코드를 비춰주세요</div>
   </div>
   <button id="close-btn" onclick="_lsClose()">✕</button>
@@ -82,7 +82,7 @@
   <video id="ls-video" autoplay playsinline muted></video>
   <canvas id="ls-canvas"></canvas>
   <canvas id="ls-overlay"></canvas>
-  <div id="guide"><span>"혼디" 글자와 숫자열을 화면 안에 맞춰주세요</span></div>
+  <div id="guide"><span>"나비" 글자와 숫자열을 화면 안에 맞춰주세요</span></div>
 </div>
 
 <div id="status-bar">카메라를 시작하는 중...</div>
@@ -140,7 +140,7 @@ async function _startScan() {
         }, 600);
       } catch (e) {
         // 인식은 됐지만 전화번호 형식이 아님(예: 다른 사용자의 프로필용
-        // 혼디 코드를 잘못 비춘 경우) — 다시 스캔하게 안내한다.
+        // 나비 코드를 잘못 비춘 경우) — 다시 스캔하게 안내한다.
         setStatus('전화번호 코드가 아닙니다: ' + e.message + ' — 다시 시도해주세요.', 'error');
         fallbackEl.style.display = 'block';
         setTimeout(() => { if (!scannerActive) _startScan(); }, 1800);

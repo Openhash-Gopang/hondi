@@ -4,7 +4,7 @@
 <link rel="icon" href="data:,">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>PDV 조회 동의 — 혼디</title>
+<title>PDV 조회 동의 — 나비</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 :root{
@@ -55,7 +55,7 @@ body{font-family:var(--font);color:#111;background:#f9fafb;-webkit-font-smoothin
 <div class="wrap">
   <div class="brand">
     <div class="brand-dot"><i class="ti ti-shield-lock"></i></div>
-    <div class="brand-name">혼디 · PDV 조회 동의</div>
+    <div class="brand-name">나비 · PDV 조회 동의</div>
   </div>
 
   <!-- 로딩 -->
@@ -213,7 +213,7 @@ body{font-family:var(--font);color:#111;background:#f9fafb;-webkit-font-smoothin
     try { stored = JSON.parse(localStorage.getItem('gopang_user_v4') || 'null'); } catch { stored = null; }
     myIpv6 = stored?.ipv6 || '';
     if (!myIpv6) {
-      showError('로그인이 필요합니다', '혼디 앱에서 먼저 로그인한 뒤 이 링크를 다시 열어주세요.');
+      showError('로그인이 필요합니다', '나비 앱에서 먼저 로그인한 뒤 이 링크를 다시 열어주세요.');
       return;
     }
     if (ipv6Hash) {

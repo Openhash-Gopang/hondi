@@ -11,7 +11,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>자동 갱신 매뉴얼 — SP Refresh · Feedback Triage · Gopang</title>
+<title>자동 갱신 매뉴얼 — SP Refresh · Feedback Triage · Navi</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
@@ -269,7 +269,7 @@ body {
   <div class="doc-header-inner">
     <a class="doc-logo" href="../desktop.html">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-      혼디 · Gopang
+      나비 · Navi
       <span class="doc-header-sub">개발자 문서</span>
     </a>
     <a class="doc-back" href="../desktop.html">
@@ -302,7 +302,7 @@ body {
       <div class="doc-hero-eyebrow">AUTO_REFRESH_MANUAL v1.1</div>
       <h1 class="doc-hero-title">SP<em>가</em> 스스로 낡지 않게 만드는 세 개의 자동 갱신 파이프라인</h1>
       <p class="doc-hero-desc">
-        혼디의 SP(Service Persona)는 시간이 지나면 수치·법령·연락처가 바뀌어 낡는다.
+        나비의 SP(Service Persona)는 시간이 지나면 수치·법령·연락처가 바뀌어 낡는다.
         사람이 수백 개의 SP를 매번 순회하며 낡은 곳을 찾는 건 비현실적이라,
         <strong>“무엇을 갱신해야 하는지 찾아서 큐에 올리는 일”</strong>만 자동화했다.
         실제 문안 작성과 반영 승인은 이 문서 전체에서 예외 없이 사람(주피터님) 몫이다.
@@ -410,7 +410,7 @@ flowchart LR
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             원칙
           </div>
-          <strong>허위는 절대 안됩니다</strong>라는 혼디 전체 원칙과 맞닿아 있다 — 근거 부족한
+          <strong>허위는 절대 안됩니다</strong>라는 나비 전체 원칙과 맞닿아 있다 — 근거 부족한
           상태에서 자동으로 “이게 맞다”고 SP를 고쳐버리면 그 오류가 실제 민원 응대에
           그대로 흘러간다. 그래서 표본이 부족하거나(③의 최소 클러스터 크기 3건),
           귀속이 모호하면(② 반복 3건 미만, ③ 대상 SP가 둘 이상) 아예 큐에 올리지
@@ -716,7 +716,7 @@ stateDiagram-v2
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             철학과의 관계
           </div>
-          <strong>혼디는 안내가 아니라 실행이 주된 목적</strong>이라는 철학과, 이 게이트가
+          <strong>나비는 안내가 아니라 실행이 주된 목적</strong>이라는 철학과, 이 게이트가
           충돌하는 것처럼 보일 수 있지만 그렇지 않다 — “실행”은 사용자를 향한
           서비스 응답에 적용되는 원칙이고, SP 자체를 고치는 일(플랫폼의 지식
           원본을 바꾸는 일)은 항상 사람 승인을 거친다. 여기서 자동화가 대신하는

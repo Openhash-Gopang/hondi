@@ -14,7 +14,7 @@
    분류 근거 (2026-07-01 저장소 실사 결과 — SP-PDV보다 이 주석이 최신 진실):
    - 실제 _recordPDV() 호출부(expert-session.js, routing-engine.js,
      gwp/engine.js, klaw.js)를 전수 확인한 결과, 지금 기록되는 PDV는
-     전부 "Hondi 자체 AI 서브시스템/에이전트와의 상호작용"이다.
+     전부 "나비 자체 AI 서브시스템/에이전트와의 상호작용"이다.
      GWP_REGISTRY(gwp-registry.js)에 svc/serviceId가 존재하면 무조건
      공용 AI 전문가로 분류한다 — 신뢰도 높음, 실제 데이터 있음.
    - "기관"은 GWP_REGISTRY category가 MKT(K-Market 등 실거래)인 경우로
@@ -120,7 +120,7 @@
       return 'uncategorized';
     }
     if (entry.category === 'MKT') return 'org'; // 근사치 — 위 파일 헤더 주석 참고
-    return 'ai'; // GWP_REGISTRY 항목은 전부 Hondi 자체 AI 서브시스템
+    return 'ai'; // GWP_REGISTRY 항목은 전부 나비 자체 AI 서브시스템
   }
 
   function normalizeSummary6w(record) {

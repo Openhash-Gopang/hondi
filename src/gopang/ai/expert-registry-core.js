@@ -650,9 +650,9 @@ export const CORE_REGISTRY = {
     triggers: ['조리사', '요리 상담', '메뉴 개발'],
   },
   'hondi-guide': {
-    label: '혼디 SP', icon: '📘', category: 'PLATFORM', ownerAgency: 'gopang',
+    label: '나비 SP', icon: '📘', category: 'PLATFORM', ownerAgency: 'gopang',
     key: 'SP_hondi-guide', needsMedicalSafety: false,
-    // 2026-08-31 신설(주피터 지시) — 혼디 자체(철학·K-서비스·GDC·PDV·Openhash·
+    // 2026-08-31 신설(주피터 지시) — 나비 자체(철학·K-서비스·GDC·PDV·Openhash·
     // 요금·이용법)를 다루는 안내 전문가. domain-taxonomy.js의 'onboarding'
     // 도메인(PLATFORM 카테고리)에 속해 패러프레이즈 도메인 분류 후보에는
     // 안 들어간다 — 아래 리터럴 트리거로만 직접 호출된다(prompts/
@@ -661,9 +661,9 @@ export const CORE_REGISTRY = {
     // 트리거가 실제 GDC 충전 실행 GWP(kgdc)와 겹쳐 [GWP: kgdc]로
     // 정상 이탈하는 걸 확인. 실행 요청이 아니라 개념 설명으로 트리거
     // 재정의('GDC가 뭐예요') — kgdc와의 경계를 명확히 함.
-    triggers: ['혼디가 뭐예요', '혼디는 뭐하는 서비스', '혼디 사용법', '혼디 이용 방법',
-      'K-서비스가 몇 개', '혼디 요금 체계', 'GDC가 뭐예요', 'PDV가 뭐예요',
-      'Openhash가 뭐예요', '혼디 SP', '혼디 버그 신고', '혼디 기능 제안', '혼디 개발 참여',
-      '혼디 개발자가 누구', '혼디 만든 사람'],
+    triggers: ['혼디가 뭐예요', '나비가 뭐예요', '혼디는 뭐하는 서비스', '나비는 뭐하는 서비스', '혼디 사용법', '나비 사용법', '혼디 이용 방법', '나비 이용 방법',
+      'K-서비스가 몇 개', '혼디 요금 체계', '나비 요금 체계', 'GDC가 뭐예요', 'PDV가 뭐예요',
+      'Openhash가 뭐예요', '혼디 SP', '나비 SP', '혼디 버그 신고', '나비 버그 신고', '혼디 기능 제안', '나비 기능 제안', '혼디 개발 참여', '나비 개발 참여',
+      '혼디 개발자가 누구', '나비 개발자가 누구', '혼디 만든 사람', '나비 만든 사람'],
   },
 };

@@ -5,8 +5,8 @@ tools/check_site_manifest_sync.py
 site-manifest.json이 desktop.html의 실제 내비게이션(MEGA_MENU_SECTIONS +
 STANDALONE_PAGES)과 어긋나 있으면 CI를 실패시킨다.
 
-배경(2026-09-13): "혼디 숫자 코드" 메뉴 항목이 desktop.html엔 있었지만
-site-manifest.json엔 등록되지 않아, 혼디 검색이 해당 질의에 엉뚱한
+배경(2026-09-13): "나비 숫자 코드" 메뉴 항목이 desktop.html엔 있었지만
+site-manifest.json엔 등록되지 않아, 나비 검색이 해당 질의에 엉뚱한
 답을 낸 사고가 있었다. tools/check_capabilities_registry.py와 동일한
 철학 — "갱신 원칙이 문서에 적혀 있다"는 것과 "실제로 지켜지고 있다"는
 것은 다른 이야기이므로, 매번 직접 대조한다.

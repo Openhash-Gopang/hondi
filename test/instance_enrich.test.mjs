@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { _parseInstanceEnrichTag } from '../worker.js';
 
 // 2026-07-24 신설 — LAZY-INSTANCE-ENRICHMENT-DESIGN_v1.0.md §3-1 구현
-// (주피터 지시로 승인·구현: "혼디는 안내가 아니라 실행이 주된 목표").
+// (주피터 지시로 승인·구현: "나비는 안내가 아니라 실행이 주된 목표").
 describe('_parseInstanceEnrichTag', () => {
   test('필수 필드 7개가 모두 있으면 정상 파싱된다', () => {
     const raw = 'layer=city, province=busan, instance_id=haeundae, ' +

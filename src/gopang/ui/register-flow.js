@@ -69,7 +69,7 @@ function _buildRegisterModal({ pendingPeer, subtitle, peerCard, btnLabel, onSucc
                 width:100%;max-width:480px;padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))">
       <div style="width:36px;height:4px;background:#e5e7eb;border-radius:2px;margin:0 auto 20px"></div>
       ${peerCardHTML}
-      <p style="font-weight:700;font-size:18px;margin:0 0 6px;color:#111;display:flex;align-items:center;gap:8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A73E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> 고팡 아이디 등록</p>
+      <p style="font-weight:700;font-size:18px;margin:0 0 6px;color:#111;display:flex;align-items:center;gap:8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A73E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> 나비 아이디 등록</p>
       <p style="font-size:13px;color:#6b7280;margin:0 0 18px;line-height:1.6">${subtitle}</p>
       <div style="background:#f9fafb;border-radius:10px;padding:12px 14px;margin-bottom:18px;font-size:12px;color:#374151;line-height:1.7">
         <b style="color:#1A73E8">등록 사용자 혜택</b><br>

@@ -1,6 +1,6 @@
 <svg width="680" height="340" viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg" role="img">
-<title>혼디는 지시를 신속 정확하게 수행합니다</title>
-<desc>사람 A와 사람 B가 동시에 각자의 혼디에게 지시하면, 혼디 A와 혼디 B가 빛의 속도로 정보를 교환한 뒤, 그 결과를 각자의 사람에게 동시에 보고하는 3단계가 화살촉이 화살대와 함께 움직이며 순서대로 나타났다 사라지기를 반복(8초 주기)</desc>
+<title>나비는 지시를 신속 정확하게 수행합니다</title>
+<desc>사람 A와 사람 B가 동시에 각자의 나비에게 지시하면, 나비 A와 나비 B가 빛의 속도로 정보를 교환한 뒤, 그 결과를 각자의 사람에게 동시에 보고하는 3단계가 화살촉이 화살대와 함께 움직이며 순서대로 나타났다 사라지기를 반복(8초 주기)</desc>
 <style>
 .phase1{animation:showPhase1 8s ease-in-out infinite}
 .phase3{animation:showPhase3 8s ease-in-out infinite}
@@ -42,7 +42,7 @@
 }
 </style>
 <rect x="0" y="0" width="680" height="340" fill="#0E1B3A"/>
-<text x="340" y="30" text-anchor="middle" font-size="21" font-weight="600" fill="#E7EAF5" font-family="sans-serif">혼디는 지시를 신속 정확하게 수행합니다.</text>
+<text x="340" y="30" text-anchor="middle" font-size="21" font-weight="600" fill="#E7EAF5" font-family="sans-serif">나비는 지시를 신속 정확하게 수행합니다.</text>
 
 <rect x="100" y="60" width="160" height="56" rx="8" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.4)" stroke-width="0.5"/>
 <text x="180" y="80" text-anchor="middle" dominant-baseline="central" font-size="18" font-weight="500" fill="#E7EAF5" font-family="sans-serif">사람 A</text>
@@ -62,11 +62,11 @@
 </g>
 
 <rect x="100" y="200" width="160" height="56" rx="8" fill="#2F55D4" stroke="#7C93FF" stroke-width="0.5"/>
-<text x="180" y="220" text-anchor="middle" dominant-baseline="central" font-size="18" font-weight="500" fill="#FFFFFF" font-family="sans-serif">혼디 A</text>
+<text x="180" y="220" text-anchor="middle" dominant-baseline="central" font-size="18" font-weight="500" fill="#FFFFFF" font-family="sans-serif">나비 A</text>
 <text x="180" y="238" text-anchor="middle" dominant-baseline="central" font-size="16" fill="#C7D2FE" font-family="sans-serif">IQ &gt;300</text>
 
 <rect x="420" y="200" width="160" height="56" rx="8" fill="#2F55D4" stroke="#7C93FF" stroke-width="0.5"/>
-<text x="500" y="220" text-anchor="middle" dominant-baseline="central" font-size="18" font-weight="500" fill="#FFFFFF" font-family="sans-serif">혼디 B</text>
+<text x="500" y="220" text-anchor="middle" dominant-baseline="central" font-size="18" font-weight="500" fill="#FFFFFF" font-family="sans-serif">나비 B</text>
 <text x="500" y="238" text-anchor="middle" dominant-baseline="central" font-size="16" fill="#C7D2FE" font-family="sans-serif">IQ &gt;300</text>
 
 <path d="M338,142 L346,142 L340,156 L348,156 L336,172 L340,158 L332,158 Z" fill="#C7D2FE"/>

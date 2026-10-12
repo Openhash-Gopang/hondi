@@ -14,7 +14,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>혼디 진로설계 워크숍 — 고등학생 2일차 · SP 작성 요령</title>
+<title>나비 진로설계 워크숍 — 고등학생 2일차 · SP 작성 요령</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
@@ -193,8 +193,8 @@ p.body-p b{font-weight:800}
 
 <!-- ══════════════════════ 표지 ══════════════════════ -->
 <div class="cover"><div class="cover-inner">
-  <div class="kicker">HONDI WORKSHOP · GRADE 10-11 · DAY 2 OF 2</div>
-  <h1>혼디 진로설계 워크숍 —<br><span class="accent">AI는 어떻게 "설계"되는가</span></h1>
+  <div class="kicker">NAVI WORKSHOP · GRADE 10-11 · DAY 2 OF 2</div>
+  <h1>나비 진로설계 워크숍 —<br><span class="accent">AI는 어떻게 "설계"되는가</span></h1>
   <p class="lede">2일 과정의 둘째 날입니다. 어제는 AI를 잘 쓰는 법을 배웠다면, 오늘은 AI 페르소나(SP, System Prompt)가 실제로 어떤 구조로 만들어지고 검증·등록되는지 배웁니다. 직접 미니 SP 초안을 써보고, 짝과 서로 검토해보는 실습까지 포함합니다.</p>
   <div class="stat-row">
     <div class="stat-cell"><div class="s-num">8h</div><div class="s-label">오늘 수업 시간</div></div>
@@ -239,16 +239,16 @@ p.body-p b{font-weight:800}
     </div>
   </div>
 
-  <p class="body-p">지금까지 여러분은 혼디의 여러 전문가 페르소나(학교상담사, 청소년상담사 등)와 대화해봤어요. 그 전문가들은 각자 <b>SP(System Prompt)</b>라는 설계도로 만들어져 있어요. 오늘은 그 설계도가 실제로 어떤 구조인지, 어떻게 검증되고 등록되는지 배웁니다.</p>
+  <p class="body-p">지금까지 여러분은 나비의 여러 전문가 페르소나(학교상담사, 청소년상담사 등)와 대화해봤어요. 그 전문가들은 각자 <b>SP(System Prompt)</b>라는 설계도로 만들어져 있어요. 오늘은 그 설계도가 실제로 어떤 구조인지, 어떻게 검증되고 등록되는지 배웁니다.</p>
 
   <div class="concept">
     <div class="c-label">비유로 이해하기</div>
-    <p>아이폰(하드웨어) 위에 여러 앱이 설치되듯, <b>LLM(AI 모델)이라는 하나의 "런타임" 위에 여러 SP가 즉시 전환</b>되며 실행돼요. 앱스토어에 앱을 등록하려면 심사를 거치듯, SP도 혼디장(Hondi Market)에 등록되기 전 검증 절차를 거쳐요.</p>
+    <p>아이폰(하드웨어) 위에 여러 앱이 설치되듯, <b>LLM(AI 모델)이라는 하나의 "런타임" 위에 여러 SP가 즉시 전환</b>되며 실행돼요. 앱스토어에 앱을 등록하려면 심사를 거치듯, SP도 나비장(Navi Market)에 등록되기 전 검증 절차를 거쳐요.</p>
     <p>다만 결정적 차이가 있어요 — 앱은 설치·독립 실행되지만, SP는 <b>같은 AI 위에서 그냥 전환</b>돼요. 그래서 진입장벽은 훨씬 낮지만, 한 SP의 결함이 다른 SP·AI 전체의 신뢰까지 흔들 수 있어요. 그래서 오늘 배울 <b>공통 안전장치</b>가 특히 중요해요.</p>
   </div>
 
   <div class="teacher-note">
-    <p>오늘은 실제 혼디 생태계 문서(SP 생태계 운용 지침, L1/L2/L3 작성 표준)를 교육용으로 눈높이를 낮춘 내용입니다. 목표는 <b>실제 등록 가능한 SP를 완성하는 것이 아니라, "AI 페르소나가 왜 신뢰할 수 있는 구조로 설계되는지"를 이해</b>하는 것입니다. 실습 소재는 학교생활과 관련된 친숙한 것(동아리 추천, 급식 리뷰 등)으로 한정해주세요.</p>
+    <p>오늘은 실제 나비 생태계 문서(SP 생태계 운용 지침, L1/L2/L3 작성 표준)를 교육용으로 눈높이를 낮춘 내용입니다. 목표는 <b>실제 등록 가능한 SP를 완성하는 것이 아니라, "AI 페르소나가 왜 신뢰할 수 있는 구조로 설계되는지"를 이해</b>하는 것입니다. 실습 소재는 학교생활과 관련된 친숙한 것(동아리 추천, 급식 리뷰 등)으로 한정해주세요.</p>
   </div>
 </section>
 
@@ -282,7 +282,7 @@ p.body-p b{font-weight:800}
   </div>
 
   <h3 class="block-title">🧩 모든 SP가 공유하는 것</h3>
-  <p class="body-p">혼디에는 법률·세무·의료 등 다양한 분야의 SP가 수십 개 있어요. 이들은 전부 <b>공통 커널</b>이라는, 모든 SP가 반드시 지켜야 하는 안전 규칙 묶음을 상속해요 — 마치 모든 아이폰 앱이 iOS의 공통 규칙(권한 요청, 개인정보 보호 등)을 따르는 것처럼요.</p>
+  <p class="body-p">나비에는 법률·세무·의료 등 다양한 분야의 SP가 수십 개 있어요. 이들은 전부 <b>공통 커널</b>이라는, 모든 SP가 반드시 지켜야 하는 안전 규칙 묶음을 상속해요 — 마치 모든 아이폰 앱이 iOS의 공통 규칙(권한 요청, 개인정보 보호 등)을 따르는 것처럼요.</p>
 
   <div class="concept">
     <div class="c-label">개념 정리 — 공통 커널이 다루는 것</div>
@@ -337,7 +337,7 @@ p.body-p b{font-weight:800}
   </div>
 
   <h3 class="block-title">🏗️ 하나의 SP가 아니라 세 계층</h3>
-  <p class="body-p">실제 K-Law(가상 판결 시뮬레이션)를 뜯어보면, SP가 1개가 아니라 <b>3개 계층</b>이 함께 작동하고 있어요. 이 구조는 혼디 생태계의 모든 SP가 따르는 표준이에요.</p>
+  <p class="body-p">실제 K-Law(가상 판결 시뮬레이션)를 뜯어보면, SP가 1개가 아니라 <b>3개 계층</b>이 함께 작동하고 있어요. 이 구조는 나비 생태계의 모든 SP가 따르는 표준이에요.</p>
 
   <div class="layer-stack">
     <div class="layer l1">
@@ -360,7 +360,7 @@ p.body-p b{font-weight:800}
   <div class="concept">
     <div class="c-label">개념 정리 — 왜 하나로 합치지 않을까</div>
     <p>만약 "어떻게 생각할지"와 "어떻게 출력할지"가 한 문서에 뒤섞이면, 출력 형식만 바꾸고 싶어도 판단 로직까지 건드리게 될 위험이 있어요. <b>분리하면 각 계층을 독립적으로 개선</b>할 수 있어요 — 마치 건물의 설계도(구조)와 인테리어(마감)를 따로 관리하는 것과 비슷해요.</p>
-    <p>혼디 생태계의 SP 48개 중 이 3계층을 모두 갖춘, 즉 <b>"검증된 SP"</b>는 아직 K-Law 1개뿐이에요(2026년 6월 기준). 나머지는 L1만 있는 "구조적으로 완성됐지만 미검증" 상태예요.</p>
+    <p>나비 생태계의 SP 48개 중 이 3계층을 모두 갖춘, 즉 <b>"검증된 SP"</b>는 아직 K-Law 1개뿐이에요(2026년 6월 기준). 나머지는 L1만 있는 "구조적으로 완성됐지만 미검증" 상태예요.</p>
   </div>
 
   <div class="think-box">
@@ -712,7 +712,7 @@ STEP 3: 추천 동아리 1~2개와 이유 제시</div>
   <p class="body-p">내 SP의 공리·강제규칙·STEP·출력형식을 순서대로 소개하고, 짝이 남긴 동료심사 피드백 중 하나를 공유하세요. 청중은 발표가 끝나면 예외 상황을 하나씩 질문해보세요.</p>
 
   <div class="portfolio">
-    <h2>📁 나의 혼디 활용 포트폴리오 — 2일차 완료</h2>
+    <h2>📁 나의 나비 활용 포트폴리오 — 2일차 완료</h2>
     <div class="p-sub">1일차 포트폴리오와 함께 보관하세요</div>
     <div class="worksheet">
       <div class="ws-row"><span class="ws-label">이름</span><span class="blank-line" style="max-width:180px"></span></div>
@@ -727,7 +727,7 @@ STEP 3: 추천 동아리 1~2개와 이유 제시</div>
   </div>
 </section>
 
-<div class="footer-note">HONDI WORKSHOP · 고등학생 2일 과정 · 2일차 · 교사 지도 필수</div>
+<div class="footer-note">NAVI WORKSHOP · 고등학생 2일 과정 · 2일차 · 교사 지도 필수</div>
 
 </div>
 

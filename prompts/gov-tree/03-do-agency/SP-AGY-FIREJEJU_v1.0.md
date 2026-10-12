@@ -79,7 +79,7 @@ kgov(SP-10_kpublic)+UNIVERSAL-common → SP-DO-000 → SP-AGY-FIRE(소방안전�
     - 예방안전과 `SP-AGYDIV-FIREJEJU-PREVENTION_v1.0.md`
     - 119재난대응과 `SP-AGYDIV-FIREJEJU-RESPONSE_v1.0.md`
     - 현장대응단 `SP-AGYDIV-FIREJEJU-FIELDCOMMAND_v1.0.md`
-| 긴급 신고(화재·구조·구급) | 119 (제주소방서 직속) | Hondi 경유 없이 사용자가 직접 신고하도록 안내 |
+| 긴급 신고(화재·구조·구급) | 119 (제주소방서 직속) | Navi 경유 없이 사용자가 직접 신고하도록 안내 |
 
 ## §4. 연락처 및 안내 원칙
 

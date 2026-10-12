@@ -41,13 +41,13 @@
   },
   {
     "no": 9504,
-    "utterance": "혼디 거버넌스에 안건을 제안하고 싶어요",
+    "utterance": "나비 거버넌스에 안건을 제안하고 싶어요",
     "expected_type": "GWP",
     "expected_id": "kdemocracy",
     "expected_name": "K-Democracy",
     "category": "SP전수커버리지-GWP-LEG",
     "static_verdict": "PASS",
-    "basis": "기존 배치 scenarios_full_routing_300_20260808.json(no=37) 취합. §CATALOG kdemocracy(고팡 직접 민주주의 플랫폼(DAWN) 전용 — 국민동의청원·입법예고 등 실제 국가기관 청원/의견 시스템은 kgov 소관.)"
+    "basis": "기존 배치 scenarios_full_routing_300_20260808.json(no=37) 취합. §CATALOG kdemocracy(나비 직접 민주주의 플랫폼(DAWN) 전용 — 국민동의청원·입법예고 등 실제 국가기관 청원/의견 시스템은 kgov 소관.)"
   },
   {
     "no": 9505,
@@ -164,10 +164,10 @@
     "utterance": "어느 부처가 담당인지 몰라서 그냥 물어보고 싶은데, 신청 자격이 되는지랑 필요한 서류가 뭔지 좀 확인해주세요",
     "expected_type": "GWP",
     "expected_id": "kqna",
-    "expected_name": "Gopang QnA",
+    "expected_name": "Navi QnA",
     "category": "SP전수커버리지-GWP-GOV",
     "static_verdict": "PASS",
-    "basis": "2026-08-31 재작성 — kqna는 \"범부처 질의응답 라우터\"(자격요건·필요서류 등 절차 문의)인데, 원본은 \"혼디 자체 FAQ 목록\"을 물어 profile-assistant 소관과 혼동됨(테스트 저작 오류)"
+    "basis": "2026-08-31 재작성 — kqna는 \"범부처 질의응답 라우터\"(자격요건·필요서류 등 절차 문의)인데, 원본은 \"나비 자체 FAQ 목록\"을 물어 profile-assistant 소관과 혼동됨(테스트 저작 오류)"
   },
   {
     "no": 9517,
@@ -224,17 +224,17 @@
     "utterance": "예전에 연락했던 그 담당자 프로필을 다시 찾아보고 싶어요",
     "expected_type": "GWP",
     "expected_id": "kusers",
-    "expected_name": "Gopang Users",
+    "expected_name": "Navi Users",
     "category": "SP전수커버리지-GWP-GOV",
     "static_verdict": "PASS",
     "basis": "2026-08-31 재작성 — kusers는 \"타인/기관 엔티티 검색\"인데, 원본은 \"본인 계정 설정 변경\"을 물어 profile-assistant 소관과 혼동됨(테스트 저작 오류)"
   },
   {
     "no": 9523,
-    "utterance": "혼디 사용법을 알려줘",
+    "utterance": "나비 사용법을 알려줘",
     "expected_type": "GWP",
     "expected_id": "profile-assistant",
-    "expected_name": "혼디 안내(튜토리얼·프로필)",
+    "expected_name": "나비 안내(튜토리얼·프로필)",
     "category": "SP전수커버리지-GWP-ONB",
     "static_verdict": "PASS",
     "basis": "기존 배치 scenarios_full_routing_300_20260808.json(no=41) 취합. §CATALOG profile-assistant(앱 사용법 튜토리얼(PHASE -1) 및 프로필 작성/수정(PHASE 0/1). 중단해도 다음 호출 시 이어서 진행.)"

@@ -1,6 +1,6 @@
 /**
  * @file plugin-interface.js
- * @description 모든 고팡 도메인 플러그인이 구현해야 하는 인터페이스 계약
+ * @description 모든 나비 도메인 플러그인이 구현해야 하는 인터페이스 계약
  * @version 1.0.0
  * @author AI City Inc.
  *

@@ -70,7 +70,7 @@
     sp: 'HONDI_VISITOR_SP',
     context: '',
     label: '무엇이든 요청하세요.',
-    greeting: '안녕하세요! 혼디 플랫폼 이용과 관련해 무엇이든 요청하거나 지시해주세요. 😊',
+    greeting: '안녕하세요! 나비 플랫폼 이용과 관련해 무엇이든 요청하거나 지시해주세요. 😊',
     serviceLabel: document.title || 'K-서비스',
     requireAuth: true,
   }, window.HONDI_CHAT_WIDGET_CONFIG || {});
@@ -139,7 +139,7 @@
     '<div id="hcw-overlay"></div>' +
     '<div id="hcw-panel" role="dialog" aria-label="AI 채팅">' +
       '<div id="hcw-panel-header">' +
-        '<div id="hcw-panel-title"><span class="hcw-dot"></span>혼디 AI에게 요청하세요</div>' +
+        '<div id="hcw-panel-title"><span class="hcw-dot"></span>나비 AI에게 요청하세요</div>' +
         '<button id="hcw-panel-close" title="닫기 (ESC)">' +
           '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
         '</button>' +
@@ -189,7 +189,7 @@
       return sp;
     } catch (e) {
       console.error('[chat-widget] SP(' + CFG.sp + ') 원격 로드 실패, 최소 폴백 사용:', e.message);
-      return '당신은 혼디(Hondi) 공식 안내 AI입니다. 한국어로 간결히 답하세요. ' +
+      return '당신은 나비(Navi) 공식 안내 AI입니다. 한국어로 간결히 답하세요. ' +
              '모르는 내용은 지어내지 말고 hondi.net에서 검색 후 안내한다고 말하세요.';
     }
   }

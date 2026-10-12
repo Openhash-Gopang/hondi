@@ -4,7 +4,7 @@
 <link rel="icon" href="data:,">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>사용량 — 혼디</title>
+<title>사용량 — 나비</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
@@ -218,9 +218,9 @@ body{font-family:'Pretendard',-apple-system,'Helvetica Neue',sans-serif;
     </div>
 
     <div class="charge-manual-notice">
-      <b>혼디는 정기 자동결제를 쓰지 않습니다.</b><br>
+      <b>나비는 정기 자동결제를 쓰지 않습니다.</b><br>
       월 정액 자동이체는 판매자에게는 유리하지만, 사용자도 모르게 결제가 계속
-      이어질 수 있습니다. 혼디는 오직 사용자가 직접 은행 앱에서 계좌 이체를
+      이어질 수 있습니다. 나비는 오직 사용자가 직접 은행 앱에서 계좌 이체를
       실행하는 방식만 사용합니다 — 필요한 만큼만, 필요할 때만 충전하시면 됩니다.
     </div>
 
@@ -543,7 +543,7 @@ async function _checkPushRequired() {
 
   // ── iOS + 미설치: 권한 요청 자체가 무의미(항상 실패) — 설치부터 안내 ──
   if (isIOS && !standalone) {
-    textEl.textContent = '🔔 충전 확인 알림을 받으려면 먼저 혼디를 홈 화면에 설치된 앱으로 열어야 해요.';
+    textEl.textContent = '🔔 충전 확인 알림을 받으려면 먼저 나비를 홈 화면에 설치된 앱으로 열어야 해요.';
     btnEl.style.display = 'none';
     installGuideEl.style.display = 'block';
     banner.style.display = 'block';
@@ -564,7 +564,7 @@ async function _checkPushRequired() {
 
   if (Notification.permission === 'denied') {
     textEl.textContent = standalone
-      ? '🔔 알림 권한이 꺼져 있어요. GDC 입금이 확인돼도 알림을 못 받아요. 기기의 앱 설정 → 알림에서 혼디를 허용해 주세요.'
+      ? '🔔 알림 권한이 꺼져 있어요. GDC 입금이 확인돼도 알림을 못 받아요. 기기의 앱 설정 → 알림에서 나비를 허용해 주세요.'
       : '🔔 알림 권한이 꺼져 있어요. GDC 입금이 확인돼도 알림을 못 받아요. 브라우저 설정 → 알림에서 이 사이트를 허용해 주세요.';
     banner.style.display = 'block';
   } else if (Notification.permission !== 'granted') {
@@ -600,7 +600,7 @@ window._retryPushSubscription = async function () {
     } else if (result.reason === 'permission_denied') {
       const standalone = _isStandaloneWebApp();
       alert(standalone
-        ? '🔔 알림 권한이 꺼져 있어요. 기기의 앱 설정 → 알림에서 혼디를 직접 허용해 주셔야 합니다(웹앱이 되돌릴 수 없는 시스템 정책이에요).'
+        ? '🔔 알림 권한이 꺼져 있어요. 기기의 앱 설정 → 알림에서 나비를 직접 허용해 주셔야 합니다(웹앱이 되돌릴 수 없는 시스템 정책이에요).'
         : '🔔 알림 권한이 브라우저에서 꺼져 있어요. 브라우저 설정 → 사이트 설정 → 알림에서 직접 허용해 주셔야 합니다(웹사이트가 되돌릴 수 없는 브라우저 자체 정책이에요).');
     } else {
       alert('⚠️ 알림 등록 실패: ' + (result.reason || '알 수 없는 오류'));

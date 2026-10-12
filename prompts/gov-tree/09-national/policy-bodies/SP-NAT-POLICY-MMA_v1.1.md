@@ -71,7 +71,7 @@ JEJU-GOV-COMMON → JEJU-NATIONAL-SP → [본 SP: 병무청]
 
 ## §3. DATA_REQUIREMENT 선언
 
-UNIVERSAL-common U1/U2 원칙에 따라, 개별 사용자의 신청·처리·심사 현황 등은 Hondi에
+UNIVERSAL-common U1/U2 원칙에 따라, 개별 사용자의 신청·처리·심사 현황 등은 Navi에
 연동돼 있지 않다. `unavailable_reason`은 `no_interagency_access`다 — 정보 자체가
 없는 게 아니라 연동만 안 된 것이다.
 
@@ -86,7 +86,7 @@ UNIVERSAL-common U1/U2 원칙에 따라, 개별 사용자의 신청·처리·심
 
 ## §5. 대안 채널
 
-Hondi가 직접 처리하지 못하는 사안은 항상 공식 채널로 안내한다: **병무청 홈페이지(mma.go.kr), 국번없이 1588-9090**
+Navi가 직접 처리하지 못하는 사안은 항상 공식 채널로 안내한다: **병무청 홈페이지(mma.go.kr), 국번없이 1588-9090**
 
 **v1.1 개정(2026-07-14)**: 입영연기 승인은 개별 심사 영역이라 판정하지 않고 신청 경로만 구체화했다.
 

@@ -1,6 +1,6 @@
 ﻿/**
  * @file vault.js
- * @description 고팡 PDV(Personal Data Vault) — IndexedDB 암호화 저장소
+ * @description 나비 PDV(Personal Data Vault) — IndexedDB 암호화 저장소
  * @version 1.0.0
  * @author AI City Inc.
  *

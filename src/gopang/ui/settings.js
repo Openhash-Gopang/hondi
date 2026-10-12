@@ -78,7 +78,7 @@ export function openSettings() {
     }
   }
 
-  // 2-1. 혼디 코드 썸네일
+  // 2-1. 나비 코드 썸네일
   if (registered) _renderHondiCodeThumb();
   else { const t = document.getElementById('hondi-code-thumb'); if (t) t.style.display = 'none'; }
 
@@ -193,7 +193,7 @@ async function _loadFreeQuotaStatus() {
     const pct = Math.min(Math.round((d.spent_krw / d.limit_krw) * 100), 100);
     box.innerHTML = `
       <div style="font-size:12.5px;color:#374151;margin-bottom:6px">
-        혼디 무료 제공분 <b>${d.spent_krw.toLocaleString()}원</b> / ${d.limit_krw.toLocaleString()}원 사용
+        나비 무료 제공분 <b>${d.spent_krw.toLocaleString()}원</b> / ${d.limit_krw.toLocaleString()}원 사용
       </div>
       <div style="height:6px;border-radius:3px;background:#eee;overflow:hidden;margin-bottom:8px">
         <div style="height:100%;width:${pct}%;background:${pct >= 90 ? '#dc2626' : '#1A73E8'}"></div>
@@ -753,7 +753,7 @@ export function openHashChain() {
 // 2026-09-12 신설(주피터 지시: "AI 사용료로 일괄하지 말고 가능한 상세
 // 내용을 표시") — ledger_entries에는 이미 service_id가 서비스별로
 // 정확히 구분돼 기록되고 있었다(_settleAiUsage → _chargeGdcForAiUsage
-// → L1 /api/ai-charge, worker.js 확인). 지금까지 화면(Gopang Wallet)만
+// → L1 /api/ai-charge, worker.js 확인). 지금까지 화면(Navi Wallet)만
 // source==='ai_usage'인 모든 건을 "AI 사용료" 한 줄로 뭉뚱그려 보여주고
 // 있었을 뿐 — 백엔드·데이터 변경 없이 이 라벨 매핑만 추가하면 된다.
 // worker.js 전체에서 실제 쓰이는 serviceId 값을 기준으로 작성했다.
@@ -766,7 +766,7 @@ const _AI_SERVICE_LABEL = {
   'kcity': 'K-City 사용료',
   'kmail-quota-overage': 'K-Mail 발송 한도 초과 사용료',
   'kmail-storage-overage': 'K-Mail 저장공간 초과 사용료',
-  'hondi-subscription': '혼디 구독료',
+  'hondi-subscription': '나비 구독료',
   'expert-persona-subscription': '전문가 페르소나 구독료',
 };
 const _AI_SERVICE_ICON = {
@@ -795,7 +795,7 @@ function _aiUsageIcon(serviceId) {
 }
 
 // ══════════════════════════════════════════════════════════════
-// ③ Gopang Wallet
+// ③ Navi Wallet
 // ══════════════════════════════════════════════════════════════
 export async function openGopangWallet() {
   // 2026-09-16 신설(주피터 지시: "무엇보다 사용자 인증을 거친 뒤 페이지
@@ -825,7 +825,7 @@ export async function openGopangWallet() {
   const _phoneDigits = ((user.e164 || _USER?.e164 || '') + '').replace(/\D/g, '');
   const senderLast8 = _phoneDigits.slice(-8);
 
-  _openSheet('Gopang Wallet', '<div style="padding:40px 16px;text-align:center;color:#9ca3af;font-size:14px">로딩 중...</div>', displayName);
+  _openSheet('Navi Wallet', '<div style="padding:40px 16px;text-align:center;color:#9ca3af;font-size:14px">로딩 중...</div>', displayName);
 
   try {
     const { PROXY } = await import('../core/state.js');
@@ -938,7 +938,7 @@ export async function openGopangWallet() {
     window._gopangWalletTimeline = timeline;
 
     // 2026-09-16 수정(주피터 지시) — 베타 기간 중 실제로 동작하는 활성
-    // 기능은 "GDC 충전"과 "혼디 이용료(사용량 기준 종량제)" 두 가지뿐이다.
+    // 기능은 "GDC 충전"과 "나비 이용료(사용량 기준 종량제)" 두 가지뿐이다.
     // 예전의 지출/수입 누적 합계는 계좌 카드·거래 내역과 정보가 겹치므로
     // 제거하고, 대신 사용량 기준 이용료를 오늘/이번 주/이번 달로 나눠
     // 보여준다. 다른 결제 수단(서비스별 결제·P2P·증권·예금대출보험)은
@@ -988,7 +988,7 @@ export async function openGopangWallet() {
       <div style="padding:26px 16px 22px;border-bottom:1px solid #e5e7eb;text-align:center">
         <div style="font-size:11px;font-weight:600;letter-spacing:.06em;color:#9ca3af;text-transform:uppercase;margin-bottom:10px">GDC 잔액</div>
         <div style="font-size:34px;font-weight:700;color:#111827;letter-spacing:-.5px;font-variant-numeric:tabular-nums">${Math.trunc(balance).toLocaleString()}T</div>
-        <div style="font-size:11px;font-weight:600;letter-spacing:.05em;color:#9ca3af;text-transform:uppercase;margin-top:24px;margin-bottom:10px">혼디 이용료 (사용량 기준)</div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:.05em;color:#9ca3af;text-transform:uppercase;margin-top:24px;margin-bottom:10px">나비 이용료 (사용량 기준)</div>
         <div style="display:flex;justify-content:center">
           <div style="text-align:center;padding:0 16px;border-right:1px solid #e5e7eb">
             <div style="font-size:10.5px;color:#9ca3af;margin-bottom:5px">오늘</div>
@@ -1036,8 +1036,8 @@ export async function openGopangWallet() {
       </div>
       <div style="padding:0 16px 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">
         ${[
-          ['서비스별 결제', 'K-Law 등 혼디 서비스별 건당 결제 (예: 1만원)'],
-          ['사용자 간 송금·결제', '혼디 이용자 간 송금 및 매장 결제'],
+          ['서비스별 결제', 'K-Law 등 나비 서비스별 건당 결제 (예: 1만원)'],
+          ['사용자 간 송금·결제', '나비 이용자 간 송금 및 매장 결제'],
           ['증권 투자', '주식 등 투자 상품'],
           ['예금·대출·보험', '제휴 금융기관 연계 예금/대출/보험'],
         ].map(([title, desc]) => `
@@ -1061,7 +1061,7 @@ export async function openGopangWallet() {
 // 2026-09-16 신설(주피터 지시) — GDC 지갑 시트 상단 입금 계좌 복사 버튼.
 // pages/dashboard.html의 충전 탭(#wallet-deposit-account, 데스크톱 전용
 // 페이지)에 이미 같은 계좌·문구가 있었으나, 폰의 설정 메뉴에서 열리는
-// 이 시트(Gopang Wallet)에는 없었다 — 두 화면이 서로 몰랐던 별개 UI.
+// 이 시트(Navi Wallet)에는 없었다 — 두 화면이 서로 몰랐던 별개 UI.
 // 표시는 하이픈 포함(가독성), 복사는 하이픈 제거(은행 앱 붙여넣기 호환).
 window._copyGdcAccountNumber = async function() {
   const digitsOnly = '315-092028-04-011'.replace(/-/g, '');
@@ -1672,7 +1672,7 @@ export async function openBackupKey() {
       <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;
                   padding:12px 14px;font-size:12px;color:#92400e;line-height:1.6;margin-bottom:20px">
         이 키를 아는 사람은 누구나 이 계정이 될 수 있습니다.<br>
-        캡처/공유하지 말고, 본인만 아는 안전한 곳(예: 비밀번호 관리자)에<br>보관하세요. 고팡은 이 키를 서버에 저장하지 않습니다.
+        캡처/공유하지 말고, 본인만 아는 안전한 곳(예: 비밀번호 관리자)에<br>보관하세요. 나비는 이 키를 서버에 저장하지 않습니다.
       </div>
 
       <p style="font-size:13px;font-weight:600;color:#111827;margin-bottom:8px">내 백업 키 내보내기</p>
@@ -1771,7 +1771,7 @@ export async function openBackupKey() {
   };
 }
 
-// ── 혼디 코드 썸네일 렌더링 ──────────────────────────────────
+// ── 나비 코드 썸네일 렌더링 ──────────────────────────────────
 export function _renderHondiCodeThumb() {
   const thumb = document.getElementById('hondi-code-thumb');
   if (!thumb) return;
@@ -1800,7 +1800,7 @@ export function _renderHondiCodeThumb() {
   } catch {}
 }
 
-// ── 혼디 코드 모달 열기/닫기 ────────────────────────────────
+// ── 나비 코드 모달 열기/닫기 ────────────────────────────────
 export function openHondiCodeModal() {
   const modal    = document.getElementById('hondi-code-modal');
   const modalImg = document.getElementById('hondi-code-modal-img');
@@ -1845,21 +1845,21 @@ function _parseE164Kr(e164) {
   return null;
 }
 
-// ── 다른 기기 연결 모달 (2026-07-31 신설, 같은 날 QR→혼디 숫자 코드로 교체) ──
+// ── 다른 기기 연결 모달 (2026-07-31 신설, 같은 날 QR→나비 숫자 코드로 교체) ──
 // "폰이나 PC에서 자신의 계정을 간단히 호출할 방안"(주피터 요청) — 이미
-// 로그인돼 있는 기기(예: PC)에서 코드를 띄우면, 새 기기(예: 폰)가 혼디
+// 로그인돼 있는 기기(예: PC)에서 코드를 띄우면, 새 기기(예: 폰)가 나비
 // 앱 자체의 카메라 스캐너(auth/link-scan.html)로 그 코드를 찍는 것만으로
 // auth/device-link.html이 전화번호 입력 없이 곧바로 승인 요청을 전송한다.
 // auth/device-link.html은 ?phone= 쿼리가 있으면(PREFILLED_PHONE) 전화번호
 // 입력 화면을 건너뛰고 즉시 요청을 보내도록 이미 구현돼 있다(2026-07-28
-// 변경분 참고) — 여기서는 그 전화번호를 혼디 숫자 코드로 인코딩해
+// 변경분 참고) — 여기서는 그 전화번호를 나비 숫자 코드로 인코딩해
 // 보여주기만 하면 된다.
 //
 // ★ 2026-07-31 교체 — 원래는 외부 api.qrserver.com으로 일반 QR을
-// 생성했으나, 저장소 안에 이미 "혼디 숫자 코드"(hondi-digit-code.js)라는
+// 생성했으나, 저장소 안에 이미 "나비 숫자 코드"(hondi-digit-code.js)라는
 // 자체 시각코드 체계가 있고, 그 인코더가 phoneToDigits()라는 전화번호
 // 전용 인코딩까지 이미 갖추고 있었다(docs/pages/scenarios.html의 "QR
-// Code vs. 혼디 코드" 비교표에도 "전화번호를 직접 인코딩 — 등록된
+// Code vs. 나비 코드" 비교표에도 "전화번호를 직접 인코딩 — 등록된
 // 전화번호와 정확히 일치해야 하며, 위조 방지는 L1 서버의 실시간 대조로
 // 이뤄짐"이라고 이미 설계돼 있던 용도). 외부 서비스 호출 없이(전화번호
 // 유래 코드를 제3자 QR API로 보내지 않아도 되고) 100% 클라이언트에서

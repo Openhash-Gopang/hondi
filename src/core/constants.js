@@ -1,6 +1,6 @@
 /**
  * @file constants.js
- * @description 고팡 플랫폼 전역 상수 — 모든 매직 넘버는 여기서 관리
+ * @description 나비 플랫폼 전역 상수 — 모든 매직 넘버는 여기서 관리
  * @version 1.0.0
  * @author AI City Inc.
  *

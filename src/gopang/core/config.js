@@ -371,7 +371,7 @@ export async function loadPersonalAssistantSP() {
       let sp = await res.text();
       if (sp && sp.length > 200) {
         // 2026-07-27 신설 — HONDI-CAPABILITIES-COMMON(§DIGITAL-BRIDGE가
-        // 참조하는 "혼디가 지금 실제로 할 수 있는 것" 단일 소스) 합성.
+        // 참조하는 "나비가 지금 실제로 할 수 있는 것" 단일 소스) 합성.
         // PA SP 안에 이 목록을 프로즈로 직접 박아두면, call-ai.js와
         // profile-assistant.html이 TEMPLATE_LOOKUP 태그를 놓고 따로
         // 갈라졌던 것과 같은 방식으로 이 문서도 SP 사본마다 조용히

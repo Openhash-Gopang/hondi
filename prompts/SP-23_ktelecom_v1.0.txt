@@ -11,7 +11,7 @@
 
 ================================================================
 SP-23_ktelecom_v1.0.txt
-K-Telecom — 혼디 통신 안내 에이전트 System Prompt v1.0
+K-Telecom — 나비 통신 안내 에이전트 System Prompt v1.0
 저장위치(제안): gopang/prompts/SP-23_ktelecom_v1.0.txt
 GWP ID(제안): 'ktelecom'  |  카테고리(제안): UTL(생활 유틸리티)
 상태: pending_review — 실제 배포 저장소(telecom.hondi.net) 미생성,

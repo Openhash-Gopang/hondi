@@ -1,8 +1,8 @@
-# 고팡 하위 시스템 보고서 작성 및 전송 매뉴얼
+# 나비 하위 시스템 보고서 작성 및 전송 매뉴얼
 
 > **이 문서가 다루는 범위**: 하위 시스템이 PDV 6하원칙 보고서를 작성·전송하는 스키마와 API
 > **전체 문서 지도**: [MANUAL_INDEX.md](MANUAL_INDEX.md)
-**Gopang Subsystem Report Manual**
+**Navi Subsystem Report Manual**
 버전 1.0 · 2026년 5월 · AI City Inc.
 
 ---
@@ -26,10 +26,10 @@
 
 ## 1. 개요 및 목적
 
-고팡의 모든 하위 시스템(K-Law, K-School, K-Market, K-Health 등)은 사용자 활동과 결과를 주기적으로 고팡에 보고합니다. 고팡은 이를 사용자의 **PDV(Private Data Vault)**에 6하원칙(누가·언제·어디서·무엇을·어떻게·왜)에 따라 기록하고, 해당 사용자의 AI 비서가 종합적 맥락을 갖추도록 합니다.
+나비의 모든 하위 시스템(K-Law, K-School, K-Market, K-Health 등)은 사용자 활동과 결과를 주기적으로 나비에 보고합니다. 나비는 이를 사용자의 **PDV(Private Data Vault)**에 6하원칙(누가·언제·어디서·무엇을·어떻게·왜)에 따라 기록하고, 해당 사용자의 AI 비서가 종합적 맥락을 갖추도록 합니다.
 
 ```
-하위 시스템                      고팡 (PDV)
+하위 시스템                      나비 (PDV)
 K-School ──보고서 전송──▶ hondi.net/api/report ──▶ 사용자 PDV 기록
 K-Health                                           ──▶ AI 비서 업데이트
 K-Law                                              ──▶ 수신 확인 반환
@@ -236,7 +236,7 @@ const REPORT_ENDPOINT =
   'https://gopang-proxy.tensor-city.workers.dev/pdv/report';
 
 /**
- * 고팡 PDV에 보고서 전송
+ * 나비 PDV에 보고서 전송
  * @param {object} report  - 6하원칙 보고서 객체
  * @param {string} ipv6    - 사용자 IPv6
  * @returns {object}       - ACK 응답
@@ -322,7 +322,7 @@ function _dateStr() {
 ### 6.1 ACK 흐름
 
 ```
-하위 시스템              고팡 Worker              PDV
+하위 시스템              나비 Worker              PDV
     │                       │                      │
     │── POST /pdv/report ──▶│                      │
     │                       │── PDV 기록 ─────────▶│
@@ -386,7 +386,7 @@ async function sendReportOnce(report) {
 
 ### 7.1 PDV 항목 구조
 
-고팡이 보고서를 수신하면 다음 형식으로 PDV에 기록합니다.
+나비가 보고서를 수신하면 다음 형식으로 PDV에 기록합니다.
 
 ```json
 {
@@ -428,7 +428,7 @@ async function sendReportOnce(report) {
 ### 7.3 요약 자동 생성 (AI 비서용)
 
 ```javascript
-// 고팡 Worker가 보고서를 받으면 AI 요약 생성
+// 나비 Worker가 보고서를 받으면 AI 요약 생성
 function generate6WSummary(report) {
   const r = report.report;
   return {
@@ -556,7 +556,7 @@ function scheduleWeeklyReport(learnerIpv6) {
 ### 8.2 수신자별 알림
 
 ```javascript
-// 고팡이 PDV 기록 후 수신자에게 알림
+// 나비가 PDV 기록 후 수신자에게 알림
 // 이 로직은 Cloudflare Worker에서 실행됨
 
 async function notifyRecipients(report, pdvEntryId) {
@@ -746,7 +746,7 @@ PDV 기록 제외:
 - [ ] 6하원칙(who/when/where/what/how/why) 모든 필드 포함
 - [ ] `report.id` 형식: `RPT-{svc}-{YYYYMMDD}-{uuid}`
 - [ ] `report.svc` 가 GWP_REGISTRY에 등록된 ID와 일치
-- [ ] `who.ipv6` 가 유효한 고팡 IPv6 형식
+- [ ] `who.ipv6` 가 유효한 나비 IPv6 형식
 
 ### 전송
 - [ ] `gopang-report.js` 라이브러리 사용
@@ -871,5 +871,5 @@ import { sendReport, sendReportOnce, flushReportQueue }
 
 ---
 
-*본 매뉴얼은 고팡 플랫폼의 기술 발전에 따라 지속적으로 갱신됩니다.*
+*본 매뉴얼은 나비 플랫폼의 기술 발전에 따라 지속적으로 갱신됩니다.*
 *© 2026 AI City Inc. All rights reserved.*

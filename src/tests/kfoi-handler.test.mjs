@@ -509,7 +509,7 @@ await test('형식 보정: 정리 문장이 있으면 추가 호출이 없다', 
   assert.equal(calls.deepseek.length, 1);
 });
 
-// ═════════════ C4. 혼디 SP 요약(KFOI_DIGEST) ═════════════
+// ═════════════ C4. 나비 SP 요약(KFOI_DIGEST) ═════════════
 const FAKE_DIGEST = { tiers: {
   do: { label: '도청', stats: { total: 2, draft: 1, revised: 1, gapped: 0, template: 0 }, entries: [
     { name: '기후환경국 자원순환과', parent: '기후환경국', state: 'draft', handles: '폐기물 재활용 문의', does: ['분리배출 안내'] },
@@ -524,7 +524,7 @@ await test('DIGEST 도구: 요약을 조회해 LLM에 전달하고, 조사 횟�
   const pb = makePb(); const { h, calls, script } = makeDeps(pb, { fetchDigest: async () => FAKE_DIGEST });
   script.deepseek = ['유형별 규모를 봅니다\n[KFOI_DIGEST {"tier":"do","q":"환경"}]', '제주특별자치도로 정리했습니다. 청구할 문서는 1건입니다.\n[KFOI_FILL {"agency":"제주특별자치도","items":[{"title":"부서별 사무분장표"}]}]'];
   const d = await (await h.chat(chatBody([{ role: 'user', content: '제주 AI 행정 SP 갱신' }]), ENV, CORS, {})).json();
-  assert.equal(d.research_steps, 0, 'DIGEST가 조사 횟수에 들어감'); assert.ok(d.progress.some(p => p.startsWith('혼디 SP 요약 조회')), JSON.stringify(d.progress));
+  assert.equal(d.research_steps, 0, 'DIGEST가 조사 횟수에 들어감'); assert.ok(d.progress.some(p => p.startsWith('나비 SP 요약 조회')), JSON.stringify(d.progress));
   const sent = calls.deepseek[1].messages.map(m => m.content).join('\n');
   assert.ok(sent.includes('KFOI_RESULT digest') && sent.includes('기후환경국 자원순환과'), '요약이 LLM에 전달되지 않음');
   assert.ok(!sent.includes('경제활력국 경제정책과'), 'q로 거르지 않음');
@@ -553,7 +553,7 @@ await test('DIGEST 도구: 이 도구가 없는 배포(fetchDigest 미주입)에
 await test('DIGEST 한도(12회): 넘으면 오류를 돌려주고 일반 조사 횟수에 넣어 무한 왕복을 막는다', async () => {
   const pb = makePb(); const { h, calls, script } = makeDeps(pb, { fetchDigest: async () => FAKE_DIGEST });
   const hist = [{ role: 'user', content: '제주 AI 행정' }];
-  for (let i = 0; i < 12; i++) { hist.push({ role: 'assistant', content: 'x' }); hist.push({ role: 'user', content: '[KFOI_RESULT digest — 혼디 저장소 요약]\n{}' }); }
+  for (let i = 0; i < 12; i++) { hist.push({ role: 'assistant', content: 'x' }); hist.push({ role: 'user', content: '[KFOI_RESULT digest — 나비 저장소 요약]\n{}' }); }
   script.deepseek = ['또 봅니다\n[KFOI_DIGEST {"tier":"do"}]', '어느 기관인가요?'];
   const d = await (await h.chat(chatBody(hist), ENV, CORS, {})).json();
   assert.equal(d.research_steps, 1, '한도를 넘긴 DIGEST는 조사 횟수에 들어가야 함');
@@ -586,7 +586,7 @@ await test('extractTrailingTag: 모르는 도구도 "KFOI_이름 {" 꼴이면 �
 });
 await test('모르는 도구를 부르면 원문 태그를 화면에 노출하지 않고 "지원하지 않는 도구"로 돌려주며 이어간다(실사용 사고 재현)', async () => {
   const pb = makePb(); const { h, calls, script } = makeDeps(pb);
-  script.deepseek = ['먼저 규모를 확인하겠습니다.\n\n[KFOI_MAGIC {"tier":"summary"}]', '제주특별자치도로 정리했습니다. 청구할 문서는 1건입니다. 혼디 SP 요약은 참고하지 못했습니다.\n[KFOI_FILL {"agency":"제주특별자치도","items":[{"title":"부서별 사무분장표"}]}]'];
+  script.deepseek = ['먼저 규모를 확인하겠습니다.\n\n[KFOI_MAGIC {"tier":"summary"}]', '제주특별자치도로 정리했습니다. 청구할 문서는 1건입니다. 나비 SP 요약은 참고하지 못했습니다.\n[KFOI_FILL {"agency":"제주특별자치도","items":[{"title":"부서별 사무분장표"}]}]'];
   const d = await (await h.chat(chatBody([{ role: 'user', content: '제주 AI 행정 SP 갱신' }]), ENV, CORS, {})).json();
   assert.ok(!d.reply.includes('KFOI_') && !d.progress.join('\n').includes('[KFOI_MAGIC'), '사용자에게 보이는 답변·진행 표시에 원문 태그가 남음');
   assert.ok(d.progress.some(p => p.includes('지원하지 않는 도구')), JSON.stringify(d.progress));

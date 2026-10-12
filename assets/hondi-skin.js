@@ -1,5 +1,5 @@
 /**
- * assets/hondi-skin.js — 혼디 스킨(강조색) 공유 팔레트
+ * assets/hondi-skin.js — 나비 스킨(강조색) 공유 팔레트
  *
  * 이전에는 left-menu.html / right-menu.html이 같은 SKIN_COLORS 객체를
  * 각자 파일 안에 복사해 두고 있었다(문서가 분리된 iframe이라 변수를

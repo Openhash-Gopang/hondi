@@ -1,6 +1,6 @@
 ================================================================
 SP-22_kbank_v1.0.txt
-K-Bank — 혼디 은행업무 안내 에이전트 System Prompt v1.0
+K-Bank — 나비 은행업무 안내 에이전트 System Prompt v1.0
 저장위치(제안): gopang/prompts/SP-22_kbank_v1.0.txt
 GWP ID(제안): 'kbank'  |  카테고리(제안): ECO(경제)
 상태: pending_review — 실제 배포 저장소(bank.hondi.net) 미생성,

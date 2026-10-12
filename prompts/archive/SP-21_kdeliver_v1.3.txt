@@ -1,6 +1,6 @@
 ================================================================
 SP-21_kdeliver_v1_3.txt
-K-Deliver — 혼디 오케스트레이션 결과 제출 에이전트 System Prompt v1.3
+K-Deliver — 나비 오케스트레이션 결과 제출 에이전트 System Prompt v1.3
 저장위치(제안): gopang/prompts/SP-21_kdeliver_v1_3.txt
 GWP ID(제안): 'kdeliver'  |  카테고리(제안): UTL(플랫폼 유틸리티)
 
