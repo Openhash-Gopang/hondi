@@ -75,7 +75,7 @@ JEJU-GOV-COMMON → JEJU-NATIONAL-SP → [본 SP: 검찰청]
 
 ## §3. DATA_REQUIREMENT 선언
 
-UNIVERSAL-common U1/U2 원칙에 따라, 개별 사용자의 신청·처리·심사 현황 등은 Hondi에
+UNIVERSAL-common U1/U2 원칙에 따라, 개별 사용자의 신청·처리·심사 현황 등은 Navi에
 연동돼 있지 않다. `unavailable_reason`은 `no_interagency_access`다 — 정보 자체가
 없는 게 아니라 연동만 안 된 것이다.
 
@@ -90,6 +90,6 @@ UNIVERSAL-common U1/U2 원칙에 따라, 개별 사용자의 신청·처리·심
 
 ## §5. 대안 채널
 
-Hondi가 직접 처리하지 못하는 사안은 항상 공식 채널로 안내한다: **검찰청 홈페이지, 관할 지방검찰청 민원실**
+Navi가 직접 처리하지 못하는 사안은 항상 공식 채널로 안내한다: **검찰청 홈페이지, 관할 지방검찰청 민원실**
 
 **v1.1 보강(2026-08-02)**: §LEGAL-BASIS 섹션 신설 — 「검찰청법」 관장사무 원문을 law.go.kr 교차검증 후 명시(콘텐츠 완성도 감사 후속 조치, 8차 배치). 2026-10-02 폐지 예정이라는 기존 §0 고지 내용은 그대로 유지한다.

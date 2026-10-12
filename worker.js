@@ -213,7 +213,7 @@ function _mintSecret(env) {
 }
 
 // (2026-07-14: GDC 충전 — "고정계좌 + 입금자명 매칭" 방식. PG·카드 배제
-//  확정(사고실험 세션 2026-07-14 "혼디의 GDC 환전 및 판매 체계 설계"
+//  확정(사고실험 세션 2026-07-14 "나비의 GDC 환전 및 판매 체계 설계"
 //  참고) — 은행 API 없이 지금 코드만으로 구현 가능한 옵션을 택했다.
 //  2026-09-12 개편 — 계좌번호만 정확히 복사할 수 있어야 해서(usage.html
 //  "계좌번호 복사" 버튼) 문자열 하나가 아니라 필드별로 분리해 반환한다.
@@ -320,7 +320,7 @@ async function _alertAdminOnSecretFailure(env, source, detail) {
         console.warn('[SecretAlert] 쿨다운 KV 조회/기록 실패(경보는 계속 진행):', e.message);
       }
     }
-    const text = `[혼디 경보] ${source} 시크릿 불일치(FORBIDDEN) 감지${detail ? ' — ' + detail : ''}. 즉시 확인 필요.`;
+    const text = `[나비 경보] ${source} 시크릿 불일치(FORBIDDEN) 감지${detail ? ' — ' + detail : ''}. 즉시 확인 필요.`;
     await _sendSolapiSms(env, env.ADMIN_ALERT_PHONE, text);
     console.log('[SecretAlert] 관리자 SMS 발송 완료:', source);
   } catch (e) {
@@ -482,7 +482,7 @@ async function handlePhoneOtpRequest(request, env, corsHeaders) {
     // 반드시 메시지 맨 끝 줄이어야 하고, 그 뒤에 다른 텍스트가 있으면
     // 안 된다(WebOTP 표준 요구사항).
     await _sendSolapiSms(env, e164,
-      `[혼디] 인증번호는 ${code}입니다. ${Math.floor(OTP_TTL_SECONDS / 60)}분 이내에 입력해 주세요.\n\n@hondi.net #${code}`);
+      `[나비] 인증번호는 ${code}입니다. ${Math.floor(OTP_TTL_SECONDS / 60)}분 이내에 입력해 주세요.\n\n@hondi.net #${code}`);
   } catch (e) {
     console.warn('[PhoneOTP] SOLAPI 발송 실패:', e.message);
     return _err(502, 'SMS_SEND_FAILED', '인증번호 발송에 실패했습니다: ' + e.message, corsHeaders);
@@ -789,7 +789,7 @@ async function handleUserGdcBalance(request, env, corsHeaders) {
 // 없음)를 그대로 따랐다. 더 강한 인증이 필요하다고 판단되면 이 세
 // 엔드포인트를 한꺼번에 강화해야 한다(TODO로 남김).
 //
-// 혼디마켓 P2P 구매·판매 내역은 포함하지 않는다 — handleAdminGdcSummary
+// 나비마켓 P2P 구매·판매 내역은 포함하지 않는다 — handleAdminGdcSummary
 // 주석에 이미 남긴 것과 같은 이유로, 그 거래가 blocks에 어떤
 // block_type·필드로 기록되는지 이 저장소에서 아직 확인하지 못했다.
 async function handleUserGdcHistory(request, url, env, corsHeaders) {
@@ -1206,7 +1206,7 @@ async function handleDeviceLinkResendSms(request, env, corsHeaders) {
   const approveUrl = `https://hondi.net/auth/device-link-approve.html?sessionId=${encodeURIComponent(sessionId)}`;
   try {
     await _sendSolapiSms(env, record.e164,
-      `[혼디] PC 로그인 확인: ${approveUrl} (${Math.floor(DEVICE_LINK_SMS_TTL_SECONDS / 60)}분 이내)`);
+      `[나비] PC 로그인 확인: ${approveUrl} (${Math.floor(DEVICE_LINK_SMS_TTL_SECONDS / 60)}분 이내)`);
   } catch (e) {
     console.warn('[DeviceLink] SMS 발송 실패:', e.message);
     return _err(502, 'SMS_SEND_FAILED', '문자 발송에 실패했습니다: ' + e.message, corsHeaders);
@@ -1510,13 +1510,13 @@ const DEEPSEEK_MODEL = 'deepseek-v4-flash'; // ★ 2026-07-16 정정 — 기존 
 // 맞춰져 있었는데 이 상수만 예전 값으로 남아 있던 걸 발견해 통일한다(주피터님 지시:
 // "LLM은 디폴트로 deepseek v4 flash로 상정").
 // ══════════════════════════════════════════════════════════
-// 혼디 제공 무료 기본 키(deepseek-default) — Flash/Pro 티어 + 비용 산정
+// 나비 제공 무료 기본 키(deepseek-default) — Flash/Pro 티어 + 비용 산정
 // ══════════════════════════════════════════════════════════
 //
 // [자체 서버 전환 설계 — 2026-07-01]
 // 현재는 두 티어 모두 api.deepseek.com(공식 API)을 그대로 호출하며,
-// "혼디 Flash"="deepseek-chat"(비사고), "혼디 Pro"="deepseek-reasoner"(사고)
-// 라는 모델 파라미터 차이만으로 구분한다. 나중에 혼디 자체 GPU 추론 서버
+// "나비 Flash"="deepseek-chat"(비사고), "나비 Pro"="deepseek-reasoner"(사고)
+// 라는 모델 파라미터 차이만으로 구분한다. 나중에 나비 자체 GPU 추론 서버
 // (한국어 파인튜닝 패치 모델)가 준비되면, 아래 두 시크릿만 등록하면 자동
 // 전환된다 — 클라이언트 코드는 전혀 안 건드려도 됨:
 //   wrangler secret put HONDI_SELFHOST_URL       (예: https://infer.hondi.net/v1/chat/completions)
@@ -2066,7 +2066,7 @@ async function _settleAiUsage(env, guid, bill, meta = {}, ctx = null, settlement
 // 배경: 1천만 명 규모에서는 새 task_key가 나올 때마다 관리자에게 물어
 // 과금 여부를 정하는 게 비현실적이다. 기본값은 항상 안전한 쪽(기존
 // 토큰과금 × BILLING_MULTIPLIER_DEFAULT, 변경 없음)이고, 표본이 쌓여야만
-// 혼디가 스스로 배율을 제안한다 — 그것도 완전히 새 숫자를 지어내는 게
+// 나비가 스스로 배율을 제안한다 — 그것도 완전히 새 숫자를 지어내는 게
 // 아니라 항상 기존 K-서비스 가격 구조(KLAW_TIER_MODELS)에서 보간한다.
 // 제안은 만들어지는 즉시 활성화되어 청구에 반영되고(승인 대기 없음),
 // 관리자는 사후에 배치로 검토해 confirmed/rejected로 정리한다.
@@ -3201,7 +3201,7 @@ async function _l1AdminToken(env) {
 // GOV_OPEN_DATA_MAP — KOSIS 리졸버 (2026-07-16 배선)
 // 선행 문서: GOV_OPEN_DATA_MAP-통합설계_v1.0, resolveGovData-최소버전설계_v1.0
 //
-// 핵심 원칙: 트랙4/57건류 예시를 정적으로 미리 채워두지 않는다. 혼디 사용자
+// 핵심 원칙: 트랙4/57건류 예시를 정적으로 미리 채워두지 않는다. 나비 사용자
 // (공무원 SP·K-Public)의 실제 질의마다 KOSIS 통합검색을 호출해 그때그때
 // 대응 통계표를 찾고, 확정된 것만 GOV_DATA_KV에 캐싱해 재사용한다.
 //
@@ -3762,13 +3762,13 @@ async function handleHealthDemoConsult(request, env, corsHeaders) {
 // domains/logistics.html의 이동·배송 매칭 시뮬레이션에서 호출한다.
 // handleHealthDemoConsult와 동일한 원칙 — DEEPSEEK_API_KEY는 서버(Worker)
 // 안에서만 사용, 클라이언트에 노출하지 않는다. 실제 차량 위치 데이터가
-// 연동돼 있지 않으므로, AI가 "제주도 내 혼디 앱 설치 차량"의 그럴듯한
+// 연동돼 있지 않으므로, AI가 "제주도 내 나비 앱 설치 차량"의 그럴듯한
 // 가상 동선 몇 대를 생성하고 그중 최적 매칭을 고르는 시뮬레이션이다 —
 // 실제 배차가 아니라는 점을 응답에 항상 포함시킨다.
 // ═══════════════════════════════════════════════════════════
 
 const _LOGISTICS_DEMO_PERSON_SYSTEM = `당신은 K-Traffic AI입니다. 사용자가 제공한 출발지·목적지·인원 등을
-바탕으로, 제주도 내에서 혼디 앱을 설치하고 운행 중인 자가용·택시·버스
+바탕으로, 제주도 내에서 나비 앱을 설치하고 운행 중인 자가용·택시·버스
 운전자들의 그럴듯한 가상 동선 데이터를 생성하고, 그중 사용자의 출발지·
 목적지에 가장 잘 맞는 이동 수단을 실시간으로 매칭해 추천합니다.
 
@@ -3793,7 +3793,7 @@ const _LOGISTICS_DEMO_PERSON_SYSTEM = `당신은 K-Traffic AI입니다. 사용�
 }`;
 
 const _LOGISTICS_DEMO_GOODS_SYSTEM = `당신은 K-Logistics AI입니다. 사용자가 제공한 출발지·목적지·물품 특성
-(냉장 필요 여부, 크기·무게, 긴급도 등)을 바탕으로, 제주도 내에서 혼디
+(냉장 필요 여부, 크기·무게, 긴급도 등)을 바탕으로, 제주도 내에서 나비
 앱을 설치하고 운행 중인 화물차·냉동차·이동 중인 일반 차량(빈 공간
 활용)의 그럴듯한 가상 동선 데이터를 생성하고, 그중 최적의 배송 수단을
 실시간으로 매칭해 추천합니다.
@@ -4099,7 +4099,7 @@ async function handleInsuranceCalcSave(request, env, corsHeaders) {
 // 세션이 만든 pb_migrations/1787300002~004(feat/klaw-pocketbase-collections
 // 브랜치, 커밋 5754b1ee)를 그대로 채택했고, klaw_admin_users만 이 세션에서
 // 신설(1787400001). 인증 없는 공개 MVP 컨벤션(insurance_calc_results와
-// 동일) — klaw 자체가 고팡 wallet 서명 인증 체계 밖의 별도 guid/기기지문
+// 동일) — klaw 자체가 나비 wallet 서명 인증 체계 밖의 별도 guid/기기지문
 // 시스템이라 handleTxHistory류의 서명 인증은 적용하지 않는다.
 // ═══════════════════════════════════════════════════════════
 
@@ -4847,7 +4847,7 @@ async function handleGroupCreate(request, env, corsHeaders) {
 }
 
 // POST /community/groups/join — 참여 의사만 기록(카운트 +1). 실제 채팅
-// 연결은 기존 고팡 P2P 메시징(사용자 간 채팅)으로 넘어간다 — 이 엔드포인트가
+// 연결은 기존 나비 P2P 메시징(사용자 간 채팅)으로 넘어간다 — 이 엔드포인트가
 // 새 채팅 시스템을 만들지는 않는다.
 async function handleGroupJoin(request, env, corsHeaders) {
   let body;
@@ -4886,7 +4886,7 @@ async function handleGroupJoin(request, env, corsHeaders) {
 // 높은 후보를 추천한다 — 모임 데이터는 진짜, PDV 조회는 시뮬레이션.
 // ═══════════════════════════════════════════════════════════
 
-const _SOCIAL_MATCH_SYSTEM = `당신은 k-social-match입니다. 혼디에 등록된 열려있는 모임 목록을
+const _SOCIAL_MATCH_SYSTEM = `당신은 k-social-match입니다. 나비에 등록된 열려있는 모임 목록을
 사용자의 성향·취미와 대조해, 관련성이 높아 보이는 모임 후보를 추천합니다.
 
 원칙:
@@ -4959,7 +4959,7 @@ async function handleSocialDemoMatch(request, env, corsHeaders) {
 // ═══════════════════════════════════════════════════════════
 // 시민 신고(안전신문고식) — 시민 티어 신규 항목 (2026-08-11 신설)
 // K-Clean(fiil-kcleaner, 환경쓰레기)와 동일 패턴을 교통위반·바가지
-// 요금 등 다른 민원 범주로 확장한다. Hondi가 직접 관공서로 접수를
+// 요금 등 다른 민원 범주로 확장한다. Navi가 직접 관공서로 접수를
 // 대행하지는 않는다(그건 법적 대리 행위 소지가 있음) — 신고 내용을
 // 구조화해 정리해주고, 실제 접수는 안전신문고(safepatrol.go.kr) 등
 // 정식 채널로 안내한다.
@@ -4993,7 +4993,7 @@ async function handleCitizenReportSubmit(request, env, corsHeaders) {
     const rec = await res.json();
     return new Response(JSON.stringify({
       ok: true, report: rec,
-      guidance: '이 기록은 참고용 정리본입니다. 실제 신고 접수는 안전신문고(safepatrol.go.kr) 앱/웹에서 진행해 주세요 — 혼디는 관공서에 직접 접수를 대행하지 않습니다.',
+      guidance: '이 기록은 참고용 정리본입니다. 실제 신고 접수는 안전신문고(safepatrol.go.kr) 앱/웹에서 진행해 주세요 — 나비는 관공서에 직접 접수를 대행하지 않습니다.',
     }), { headers: corsHeaders });
   } catch (e) {
     return _err(502, 'CITIZEN_REPORT_FAILED', e.message, corsHeaders);
@@ -5313,7 +5313,7 @@ async function handleProfessorUsageConsume(request, env, corsHeaders) {
 // 실거래(order_queue)를 근거로 실제 매출 현황을 집계한다.
 //
 // ⚠️ 정직한 한계: 이건 완전한 "재무제표"(대차대조표+손익계산서)가 아니다.
-// 대차대조표(자산·부채)에 필요한 은행 잔액·대출·고정자산 데이터를 Hondi가
+// 대차대조표(자산·부채)에 필요한 은행 잔액·대출·고정자산 데이터를 Navi가
 // 가지고 있지 않다. 매출(revenue)은 실거래 기반 확정치이지만, 이익
 // (profit)은 판매자가 원가(cost_price, 위 마이그레이션으로 추가된 선택
 // 필드)를 입력한 상품에 한해서만 계산된다 — 입력 안 하면 매출까지만
@@ -5408,7 +5408,7 @@ async function handleFinanceRevenueReport(request, url, env, corsHeaders) {
       note: '최근 추세를 단순 연장한 참고치입니다. 계절성·이벤트·신제품 출시 등은 반영하지 않습니다.',
       projected_next_period_revenue_krw: projectedNextPeriod,
     },
-    vat_reference_note: '부가세 등 실제 세무 신고는 이 매출 통계를 참고자료로만 활용하고, 실제 신고서 작성·제출은 홈택스에서 직접 진행하거나 세무사와 상담하세요 — 혼디는 자동 신고를 대행하지 않습니다.',
+    vat_reference_note: '부가세 등 실제 세무 신고는 이 매출 통계를 참고자료로만 활용하고, 실제 신고서 작성·제출은 홈택스에서 직접 진행하거나 세무사와 상담하세요 — 나비는 자동 신고를 대행하지 않습니다.',
   }), { headers: corsHeaders });
 }
 
@@ -5452,7 +5452,7 @@ async function handleSetProductCostPrice(request, env, corsHeaders) {
 
 
 // ═══════════════════════════════════════════════════════════
-// 혼디 숫자코드 무수수료 결제(POS) — 사업자 티어 스코프만 항목 해소
+// 나비 숫자코드 무수수료 결제(POS) — 사업자 티어 스코프만 항목 해소
 // (2026-08-11, 주피터 지시). hondi-digit-code.js(코드 인코딩·시각 렌더링)와
 // gopang-wallet.js sendGdc({purpose:'purchase'})는 이미 성숙했지만,
 // "이 숫자코드 = 어느 판매자" 매핑이 없어 실제로 이어붙일 수 없었다.
@@ -5477,7 +5477,7 @@ function _randomShortId() {
 // 관례가 존재)를 발견해 그걸 그대로 재사용하도록 바꿨다. 새 테이블을
 // 만들면 "코드=신원"이라는 기존 설계와 별개로 "코드=결제대상"이라는
 // 두 번째 진실의 원천이 생겨 혼란만 커진다.
-// ── 혼디 숫자 번호: 서명된 청구 레코드 API (GET /digit/status·/digit/chain, POST /digit/record) ──
+// ── 나비 숫자 번호: 서명된 청구 레코드 API (GET /digit/status·/digit/chain, POST /digit/record) ──
 // 서명한 키는 그 guid 계정에 핀(pin)된 지갑 키(profiles.pubkey_ed25519)여야 한다.
 // 예약 번호(5자리 미만 등) 청구 권한 서명 검증용 공개키는 env.DIGIT_AUTHORITY_PUBKEY (없으면 예약 번호 청구 불가).
 function handleDigitRoutes(request, url, env, corsHeaders) {
@@ -5491,7 +5491,7 @@ function handleDigitRoutes(request, url, env, corsHeaders) {
   return handler.handle(request, url, env, corsHeaders);
 }
 
-// ── 혼디 AI 웹사이트 라이브 설정(2026-10-09 신설) — 기관 AI 사이트의 인사말·지침·지식·블록을 버전으로 저장.
+// ── 나비 AI 웹사이트 라이브 설정(2026-10-09 신설) — 기관 AI 사이트의 인사말·지침·지식·블록을 버전으로 저장.
 // 수정은 ORG_SITE_ADMINS(guid 또는 공개키, 쉼표 구분)에 든 계정의 지갑 서명으로만 가능.
 function handleOrgSiteRoutes(request, url, env, corsHeaders) {
   const handler = makeOrgSiteHandler({
@@ -5502,7 +5502,7 @@ function handleOrgSiteRoutes(request, url, env, corsHeaders) {
 }
 
 // ── K-Estate 통합 "합의매각" API (2026-09-27 신설) ── 채권자·채무자 두 계정이
-// 각자 지갑으로 서명해야만 등록이 확정된다(혼디 숫자 코드와 같은 서명 원리를
+// 각자 지갑으로 서명해야만 등록이 확정된다(나비 숫자 코드와 같은 서명 원리를
 // consent-sale-handler.js가 별도 프로토콜로 재사용). "경매"라는 말은 쓰지
 // 않는다 — 법원 개시결정에 의한 절차가 아니라 순수 당사자 합의 절차이므로.
 function handleConsentSaleRoutes(request, url, env, corsHeaders) {
@@ -6350,7 +6350,7 @@ async function _writeMetaTableRecord(env, sessionAgency, fields) {
 }
 
 // ── INSTANCE_ENRICH 태그 파싱/기록 — LAZY-INSTANCE-ENRICHMENT-DESIGN_v1.0.md
-// §3-1/§3-2 구현 (2026-07-24 신설, 주피터 지시로 승인·구현: "혼디는
+// §3-1/§3-2 구현 (2026-07-24 신설, 주피터 지시로 승인·구현: "나비는
 // 안내가 아니라 실행이 주된 목표"). _parseMetaTableTag와 동일한 괄호
 // 깊이 인식 방식을 재사용한다 — 새 파서를 발명하지 않는다.
 // 태그 형식: [INSTANCE_ENRICH: layer=city, province=busan,
@@ -13412,7 +13412,7 @@ export default {
     // ── search (v4.7) ────────────────────────────────────
     if (pathname === '/search' && request.method === 'POST') return handleSearch(request, env, corsHeaders);
 
-    // 2026-09-08 신설 — 혼디 검색(Hondi Search): 사이트 내 페이지 내비게이션 대화형 검색.
+    // 2026-09-08 신설 — 나비 검색(Navi Search): 사이트 내 페이지 내비게이션 대화형 검색.
     // '/search'(위, K-Search/엔티티 검색)와 이름이 비슷하지만 역할이 다르다 — 혼동 주의.
     if (pathname === '/hondi-search' && request.method === 'POST')
       return handleHondiSearch(request, env, corsHeaders, { _err });
@@ -13471,7 +13471,7 @@ export default {
     // ── 메일 발송(수신은 미구현) — 시민 티어 신규 항목 (2026-08-11 신설) ──
     // K-Mail 사용자 발신(2026-09-01, handleMailSend 대체 — 위 표식 참고).
     // gov-mail(hondi.org, 관리자 전용)과 도메인·인증 방식 모두 별개 —
-    // 혼디 사용자 본인 지갑 서명으로 <guid>@hondi.kr에서 발송한다.
+    // 나비 사용자 본인 지갑 서명으로 <guid>@hondi.kr에서 발송한다.
     if (pathname === '/mail/send' && request.method === 'POST') return handleUserMailSend(request, env, corsHeaders);
     // K-Mail 수신자 확정 파이프라인(2026-09-01) — propose(리서치 후보 스테이징)
     // → list(사용자 확인) → decide(승인/거부). confirmed만 캠페인 발송 대상.
@@ -13586,8 +13586,8 @@ export default {
     // ── 재무제표·경영진단·매출분석·재무계획 (2026-08-11 신설) ──
     if (pathname === '/biz/finance/revenue-report' && request.method === 'GET') return handleFinanceRevenueReport(request, url, env, corsHeaders);
     if (pathname === '/biz/products/set-cost-price' && request.method === 'POST') return handleSetProductCostPrice(request, env, corsHeaders);
-    // ── 혼디 숫자코드 무수수료 결제(POS) — 사업자 티어 마지막 항목 (2026-08-11 신설) ──
-    // ── 혼디 숫자 번호 — 서명된 청구 레코드(중복 확인·청구·양도·폐기, 2026-09-24 신설) ──
+    // ── 나비 숫자코드 무수수료 결제(POS) — 사업자 티어 마지막 항목 (2026-08-11 신설) ──
+    // ── 나비 숫자 번호 — 서명된 청구 레코드(중복 확인·청구·양도·폐기, 2026-09-24 신설) ──
     if (pathname.startsWith('/digit/')) return handleDigitRoutes(request, url, env, corsHeaders);
     if (pathname.startsWith('/org-site/')) return handleOrgSiteRoutes(request, url, env, corsHeaders);
     if (pathname.startsWith('/consent-sale/')) return handleConsentSaleRoutes(request, url, env, corsHeaders);
@@ -13816,7 +13816,7 @@ export default {
     if (pathname.startsWith('/biz/profile/'))   return handleBizProfile(request, env, corsHeaders);
     if (pathname === '/gwp/register-key' && request.method === 'POST') return handleRegisterKey(request, env, corsHeaders);
     if (pathname === '/biz/order'   && request.method === 'POST') return handleBizOrder(request, env, corsHeaders, ctx);
-    // 2026-07-18 신설 — GDC P2P 이체(혼디 코드 스캔 → 프로필 → 이체).
+    // 2026-07-18 신설 — GDC P2P 이체(나비 코드 스캔 → 프로필 → 이체).
     // handleBizOrder를 재구현하지 않고, 필드를 매핑해 그대로 위임한다 —
     // handleBizOrder는 이미 items가 비어있으면(P2P 성격) 카탈로그 가격·
     // 수수료 검증을 건너뛰므로 재사용에 적합하다(설계문서
@@ -13827,7 +13827,7 @@ export default {
     // 2026-07-18 신설 — 재무제표 대사. 설계문서 Phase 4.
     if (pathname === '/ledger/reconcile' && request.method === 'GET') return handleLedgerReconcile(request, env, corsHeaders);
     // 2026-08-28 신설(주피터 지시) — "GDC는 충전 용도만이 아니라 사용자
-    // 간 결제 수단(상품 구매 등)으로도 쓰인다"는 지적에 따라, Gopang
+    // 간 결제 수단(상품 구매 등)으로도 쓰인다"는 지적에 따라, Navi
     // Wallet의 거래 내역을 charge_requests(입금/충전)만이 아니라
     // 실제 회계 원장인 ledger_entries(충전 mint·마켓 구매 market·P2P
     // 이체 gdc_transfer·AI 사용료 ai_usage 4종을 전부 포괄)까지 합쳐
@@ -14950,7 +14950,7 @@ async function handleLedgerIssuanceSummary(request, env, corsHeaders) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// 2026-08-28 신설(주피터 지시) — Gopang Wallet 통합 거래 내역용. 본인
+// 2026-08-28 신설(주피터 지시) — Navi Wallet 통합 거래 내역용. 본인
 // guid의 ledger_entries를 최신순으로 반환한다. source 필드로 4가지
 // 거래 유형을 구분한다: 'mint'(GDC 충전), 'market'(마켓 상품 구매),
 // 'gdc_transfer'(사용자 간 P2P 이체), 'ai_usage'(AI 사용료 차감).
@@ -15022,7 +15022,7 @@ async function handleLedgerReconcile(request, env, corsHeaders) {
 
 // ═══════════════════════════════════════════════════════════
 // 2026-07-18 신설 — GDC P2P 이체 (/wallet/gdc-transfer)
-// 혼디 코드 스캔 → 프로필 연결 → "GDC 보내기"에서 호출된다.
+// 나비 코드 스캔 → 프로필 연결 → "GDC 보내기"에서 호출된다.
 // 설계문서: docs/gdc_transfer_design_v0_1.md
 //
 // handleBizOrder를 다시 구현하지 않고 필드만 매핑해 위임한다 — 이미
@@ -16689,7 +16689,7 @@ async function handleAdminTxRecent(request, env, corsHeaders) {
 //   - 'ai_usage_charge'   : AI 사용량 차감. outputs[0]에 cost_krw·model.
 //
 // ⚠️ 정직한 한계 표시 — 다음 두 가지는 이번 배치에 포함하지 않았다:
-//   1. 사용자 간 GDC 결제(혼디마켓 P2P, handleGdcTransfer가 만드는
+//   1. 사용자 간 GDC 결제(나비마켓 P2P, handleGdcTransfer가 만드는
 //      block_type)는 이 저장소에서 실제 값을 확인하지 못해 집계에서
 //      제외했다. L1 main.pb.js(별도 저장소) 쪽에서 handleGdcTransfer가
 //      만드는 블록의 block_type·purpose 저장 방식을 먼저 확인해야
@@ -16857,7 +16857,7 @@ async function handleBizSupply(request, env, corsHeaders) {
 // 2026-07-14 재적용: 낡은 로컬 clone 위에서 작업해 첫 배포 시 유실됨 —
 // 이번엔 origin/main 최신 HEAD(ede6c2d) 위에서 다시 붙였다.)
 //
-// PG·카드는 배제하고 계좌 입금만 쓴다(사고실험 세션 "혼디의 GDC 환전
+// PG·카드는 배제하고 계좌 입금만 쓴다(사고실험 세션 "나비의 GDC 환전
 // 및 판매 체계 설계" 2026-07-14 확정 — GDC↔KRW 환전은 "환급"으로
 // 재정의, 충전은 계좌입금 전용). 은행 API(가상계좌) 없이 지금 코드
 // 만으로 구현 가능한 옵션 B(고정계좌 + 입금자명 매칭)를 택했다:
@@ -16866,7 +16866,7 @@ async function handleBizSupply(request, env, corsHeaders) {
 //      → 서버가 짧은 매칭 코드(HDxxxxxx) 발급, charge_requests에
 //        status="pending"으로 기록
 //   2. 사용자가 회사 고정계좌로 직접 이체하면서, "보내는 분 표시"에
-//      그 매칭 코드를 포함시킨다(예: "혼디HD482910")
+//      그 매칭 코드를 포함시킨다(예: "나비HD482910")
 //   3. 관리자(주피터)가 은행 앱에서 입금 내역을 직접 눈으로 확인하고,
 //      /biz/charge-confirm으로 그 신청을 확정
 //   4. 확정 즉시 L1 /api/mint 호출 → GDC 발행, charge_requests를
@@ -19484,7 +19484,7 @@ async function _draftFeedbackPatch(env, { sp_id, quotes, category, context_sps }
   // 도구(triage_feedback.py 파이프라인) 전용 메타 프롬프트 — 성격이
   // 달라 prompts/ 디렉터리로 옮기지 않음(2026-07-28, check_no_embedded_sp
   // 실사로 발견).
-  const systemPrompt = `당신은 오픈소스 프로젝트 "혼디"의 유지보수를 돕는 검토 보조입니다.
+  const systemPrompt = `당신은 오픈소스 프로젝트 "나비"의 유지보수를 돕는 검토 보조입니다.
 사용자 여러 명이 비슷한 취지로 남긴 피드백 클러스터를 보고, 관련 SP(시스템
 프롬프트) 원문을 참고해 **사람 개발자가 검토할 구체적인 패치 초안**을
 작성하는 것이 당신의 유일한 임무입니다.
@@ -19836,7 +19836,7 @@ async function handlePdvQuery(request,env,corsHeaders){
       const expiresAt=Math.floor(Date.now()/1000)+300;
       await _storeConsentRequest(env,reqId,query,expiresAt);
       const consentUrl='https://hondi.net/consent'+`?req=${encodeURIComponent(reqId)}&svc=${encodeURIComponent(query.svc)}`+`&scope=${encodeURIComponent(query.scope.join(','))}`+`&purpose=${encodeURIComponent(query.purpose||'')}`+`&ipv6_hash=${encodeURIComponent(await _sha256Hex(query.ipv6))}`+`&return_to=${encodeURIComponent(origin)}`;
-      return new Response(JSON.stringify({ok:false,status:'CONSENT_REQUIRED',consent:{request_id:reqId,expires_at:expiresAt,consent_url:consentUrl,message:'사용자가 고팡 앱에서 PDV 조회에 동의해야 합니다.'}}),{status:202,headers:corsHeaders});
+      return new Response(JSON.stringify({ok:false,status:'CONSENT_REQUIRED',consent:{request_id:reqId,expires_at:expiresAt,consent_url:consentUrl,message:'사용자가 나비 앱에서 PDV 조회에 동의해야 합니다.'}}),{status:202,headers:corsHeaders});
     }
     const consentOk=await _verifyConsentToken(env,query.consent_token,query.request_id,query.ipv6);
     if(!consentOk)return _err(401,'CONSENT_INVALID','동의 토큰이 유효하지 않습니다',corsHeaders);
@@ -20643,7 +20643,7 @@ try{if(provider!=='anthropic'){
   const _orKey=_isDoctor?((_checkCall===true&&env.DEEPSEEK_CHECK_KEY)||env.DEEPSEEK_DOCTOR_KEY):(env.OPENROUTER_API_KEY||env.DEEPSEEK_API_KEY);
   const _orUrl=_useOR?OR_URL:DEEPSEEK_URL;
   const _orMdl=_isDoctor?_dReq.model:(model||(_useOR?OR_MODEL_FAST:DEEPSEEK_MODEL));
-  const _orHdr={'Content-Type':'application/json','Authorization':`Bearer ${_orKey}`,...(_useOR?{'HTTP-Referer':'https://hondi.net','X-Title':'Hondi'}:{})};
+  const _orHdr={'Content-Type':'application/json','Authorization':`Bearer ${_orKey}`,...(_useOR?{'HTTP-Referer':'https://hondi.net','X-Title':'Navi'}:{})};
   const res=await fetch(_orUrl,{method:'POST',headers:_orHdr,body:JSON.stringify({model:_orMdl,max_tokens:_isDoctor?_dReq.max_tokens:max_tokens,messages:builtMessages,...(_isDoctor?{thinking:_dReq.thinking}:{})})});
   const data=await res.json();const content=data.choices?.[0]?.message?.content;
   if(!content)throw new Error('AI 응답 없음: '+JSON.stringify(data));
@@ -20693,7 +20693,7 @@ async function callDeepSeek(bodyText,env,corsHeaders,fallbackFrom=null,meta=null
   let outboundBody = parsedBody ? { ...parsedBody, model: backendModel } : null;
   if (outboundBody) delete outboundBody.guid; // 벤더 API는 guid 필드를 모름
   // 2026-0X-XX 신설 — deepseek-v4-flash/-pro를 model로 직접 호출하면 thinking이
-  // 기본값 enabled(공식 문서 확인)라, 이 파라미터 없이는 "혼디 Flash"=비사고라는
+  // 기본값 enabled(공식 문서 확인)라, 이 파라미터 없이는 "나비 Flash"=비사고라는
   // 원 설계 의도(위 HONDI_TIER_MODELS 윗쪽 주석 참조)와 달리 매 호출이 조용히
   // 사고 모드로 돌고 있었을 가능성이 높다(응답 지연·과금 토큰 모두 몇 배 증가).
   // pro 티어(구 별칭 deepseek-reasoner)는 원래도 사고 모드가 의도였으므로 유지.
@@ -20734,13 +20734,13 @@ async function callDeepSeek(bodyText,env,corsHeaders,fallbackFrom=null,meta=null
   const _gateBlocked = await _gdcFreeQuotaGate(env, guid, corsHeaders, meta);
   if (_gateBlocked) return _gateBlocked;
 
-  // ── 백엔드 선택: 혼디 자체 서버(준비되면) > OpenRouter > 공식 DeepSeek API ──
+  // ── 백엔드 선택: 나비 자체 서버(준비되면) > OpenRouter > 공식 DeepSeek API ──
   const _useSelfHost = _selfHostReady(env);
   const _useOR = !_useSelfHost && !!env.OPENROUTER_API_KEY;
   const _url = _useSelfHost ? env.HONDI_SELFHOST_URL : (_useOR ? OR_URL : DEEPSEEK_URL);
   const _key = _useSelfHost ? env.HONDI_SELFHOST_API_KEY : (_useOR ? env.OPENROUTER_API_KEY : env.DEEPSEEK_API_KEY);
   _dlog(env, JSON.stringify({tag:'AI_PROXY_CALL',fn:'callDeepSeek',ts:new Date().toISOString(),target:_useSelfHost?'hondi-selfhost':(_useOR?'openrouter':'deepseek'),tier:tierKey,model:backendModel,guid,fallbackFrom,...meta}));
-  const res=await fetch(_url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${_key}`,...(_useOR?{'HTTP-Referer':'https://hondi.net','X-Title':'Hondi'}:{})},body:outboundBodyText});
+  const res=await fetch(_url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${_key}`,...(_useOR?{'HTTP-Referer':'https://hondi.net','X-Title':'Navi'}:{})},body:outboundBodyText});
   if(!res.ok){const errText=await res.text();let errMsg;try{errMsg=JSON.parse(errText)?.error?.message;}catch{}return new Response(JSON.stringify({error:errMsg||`HTTP ${res.status}`}),{status:res.status,headers:corsHeaders});}
 
   const spendTier = tierKey || 'hondi-flash'; // 레거시 호출은 flash 단가로 보수적 계산
@@ -20898,7 +20898,7 @@ async function handleLLMRelay(bodyText, env, corsHeaders, meta = null) {
   const isStream  = !!stream;
 
   const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` };
-  if (provider === 'openrouter') { headers['HTTP-Referer'] = 'https://hondi.net'; headers['X-Title'] = 'Hondi'; }
+  if (provider === 'openrouter') { headers['HTTP-Referer'] = 'https://hondi.net'; headers['X-Title'] = 'Navi'; }
 
   const payload = { model, messages: relayMessages, stream: isStream };
   if (max_tokens  != null) payload.max_tokens  = max_tokens;
@@ -21508,7 +21508,7 @@ const KPLAN_WEB_SEARCH_TAG_STRIP_RE = /\[WEB_SEARCH:[^\]]*\]\s*$/;
 // 상수는 그 초안의 요지를 압축한 것이다(전체를 그대로 옮긴 사본이
 // 아님) — v0.1 단일 티어 최소 구현이라 이렇게 두되, 두 파일이
 // 벌어지지 않도록 저 초안을 고칠 때 이 요지도 함께 확인할 것.
-const KJIT_SYSTEM_PROMPT = `당신은 혼디넷의 K-JIT입니다. 가계·기업·기관이 필요로 하는 물자·인원·서비스의 조달을 계획합니다.
+const KJIT_SYSTEM_PROMPT = `당신은 나비넷의 K-JIT입니다. 가계·기업·기관이 필요로 하는 물자·인원·서비스의 조달을 계획합니다.
 
 기존 JIT(Just-In-Time)과 달리, 개별 주체의 비용·재고 최소화가 아니라 사회 전체의 효용 극대화·총비용 최소화(물류 혼잡·재고 낭비·탄소배출 등 외부효과 포함)를 기준으로 조달 계획을 제안하세요.
 
@@ -21522,7 +21522,7 @@ const KJIT_SYSTEM_PROMPT = `당신은 혼디넷의 K-JIT입니다. 가계·기�
 // ALLOW-EMBEDDED-SP: 위 KJIT_SYSTEM_PROMPT와 동일 근거(K-Plan·K-Law식
 // 서버 강제 주입) — 진짜 원문은 Openhash-Gopang/city 저장소의
 // SP-27_kcity_v0_1.txt 초안이며, 아래는 그 요지를 압축한 것이다.
-const KCITY_SYSTEM_PROMPT = `당신은 혼디넷의 K-City입니다. 도시(읍·면·동 단위 포함) 전체의 시민 복지 총합(주거·의료·교육·금융·교통·통신·레저 등)이 최상이 되도록 시설의 물리적 조합(입지·규모·용량 배분)을 설계하는 자문 서비스입니다.
+const KCITY_SYSTEM_PROMPT = `당신은 나비넷의 K-City입니다. 도시(읍·면·동 단위 포함) 전체의 시민 복지 총합(주거·의료·교육·금융·교통·통신·레저 등)이 최상이 되도록 시설의 물리적 조합(입지·규모·용량 배분)을 설계하는 자문 서비스입니다.
 
 부문마다 따로 검토하지 말고, 예산·토지 제약 안에서 여러 부문을 함께 고려한 통합적인 조합을 제안하세요. 가능하면 예산·우선순위별로 최소 2개 이상의 대안을 나란히 제시하세요.
 
@@ -22446,7 +22446,7 @@ async function _fetchKPublicCommon() {
 // CONTROL-TOWER-PRINCIPLE — 모든 SP 제1원칙 (2026-08-06 신설, 서버측 배선)
 //
 // 배경: 이 원칙은 SP_common_guardrails C50으로 먼저 만들어졌다가,
-// "혼디의 모든 SP가 예외 없이 지켜야 할 제1원칙"이라는 취지에 맞게
+// "나비의 모든 SP가 예외 없이 지켜야 할 제1원칙"이라는 취지에 맞게
 // prompts/CONTROL-TOWER-PRINCIPLE_v1_0.md로 독립시켜 클라이언트
 // manifest-loader.js(_loadSpByKey)가 로드하는 모든 SP에 UNIVERSAL-
 // INTEGRITY·TASK-DELEGATION-GUIDE와 동일한 방식으로 자동 결합되도록
@@ -24761,7 +24761,7 @@ const REQUIRED_DOCUMENTS_REGISTRY = {
   // 카테고리 전반에 있는 "읍면동 전용, REQUIRED_DOCUMENTS_REGISTRY 패턴
   // 자체가 안 맞음" 우려(HANDOFF §5)와 달리, 이 두 항목은 본부가 직접
   // 창구가 될 수 있는 근거가 있어 그대로 등록한다 — 다만 읍면동·정부24로도
-  // 낼 수 있다는 사실은 note에 명시해 Hondi가 창구 선택을 사용자에게
+  // 낼 수 있다는 사실은 note에 명시해 Navi가 창구 선택을 사용자에게
   // 안내하도록 한다.
   'jeju:water_leak_fee_reduction': {
     agency: 'jeju', agency_name: '제주특별자치도 상하수도본부',
@@ -24779,7 +24779,7 @@ const REQUIRED_DOCUMENTS_REGISTRY = {
       { id: 'repair_photos',  name: '누수 수리 전·중·후 사진', required: true, acquisition: 'user_authored' },
       { id: 'repair_invoice', name: '수리 영수증(또는 자가수선 확인서)', required: true, acquisition: 'user_authored' },
     ],
-    note: '감면액 계산식(직전 3개월 평균 초과분의 50%, 3개월 한도)은 타 지자체 공통값 참고 — 제주 조례 원문 확정 전까지 안내 시 "추정치"임을 명시할 것(SP-AGY-WATER §5-1과 동일 TBD). 접수는 이 본부·읍면동 행정복지센터·정부24 중 택1 가능 — Hondi는 세 창구를 안내하고 온라인(이 GOV_TASK 경로 또는 정부24) 희망 여부를 먼저 확인한다.',
+    note: '감면액 계산식(직전 3개월 평균 초과분의 50%, 3개월 한도)은 타 지자체 공통값 참고 — 제주 조례 원문 확정 전까지 안내 시 "추정치"임을 명시할 것(SP-AGY-WATER §5-1과 동일 TBD). 접수는 이 본부·읍면동 행정복지센터·정부24 중 택1 가능 — 나비는 세 창구를 안내하고 온라인(이 GOV_TASK 경로 또는 정부24) 희망 여부를 먼저 확인한다.',
   },
   'jeju:water_social_fee_reduction': {
     agency: 'jeju', agency_name: '제주특별자치도 상하수도본부',
@@ -24816,7 +24816,7 @@ const REQUIRED_DOCUMENTS_REGISTRY = {
       { id: 'purpose_proof',   name: '목적 증빙(학술연구는 소속 대학·연구기관 확인서, 그 외는 사유서)', required: true, acquisition: 'user_authored' },
       { id: 'insurance_proof', name: '산행·조사 관련 보험 가입 증빙', required: false, acquisition: 'user_authored' },
     ],
-    note: '탐방로 정기예약(성판악·관음사 등 일반 탐방)은 이 항목이 아니다 — 그건 국립공원 탐방예약시스템(별도 온라인, SP §3 참조)이 처리하며 Hondi가 대행하지 않는다. 이 항목은 특별보호구역·통제탐방로처럼 자연공원법 제28조가 원칙적으로 막아둔 구역에 학술조사 등 예외 사유로 들어가려는 경우만 해당.',
+    note: '탐방로 정기예약(성판악·관음사 등 일반 탐방)은 이 항목이 아니다 — 그건 국립공원 탐방예약시스템(별도 온라인, SP §3 참조)이 처리하며 나비가 대행하지 않는다. 이 항목은 특별보호구역·통제탐방로처럼 자연공원법 제28조가 원칙적으로 막아둔 구역에 학술조사 등 예외 사유로 들어가려는 경우만 해당.',
   },
   // ★ 2026-08-20 추가 — 03-do-agency GOV-TASK-904-GAP 배치, SP-AGY-POLICE
   // 산하 교통과 실작업. 교통과 SP §3이 스스로 "주차단속 현재 소관은
@@ -25007,7 +25007,7 @@ const REQUIRED_DOCUMENTS_REGISTRY = {
       { id: 'lease_contract',   name: '임대차계약서 사본', required: true, acquisition: 'user_authored' },
       { id: 'registry_cert',    name: '부동산등기사항전부증명서(등기부등본)', required: true, acquisition: 'government_issued', max_age_days: 30 }, // HUG 공식 안내: 신청일 기준 1개월 이내 발급분
     ],
-    note: '★ 정직하게 밝힘 — 신청 방법은 HUG 지사·위탁은행 방문 또는 모바일(네이버부동산·카카오페이·토스·안심전세App)이 공식 경로다. Hondi는 서류 준비·정리까지만 능동적으로 돕고(UNIVERSAL-common U1 원칙), 실제 신용조사·보증심사·보증서 발급은 HUG가 확정한다. 소득증빙·혼인관계증명서 등 신청인 상황별(다자녀·신혼부부·한부모 등) 추가서류가 있을 수 있어 위 목록이 전부가 아닐 수 있음 — HUG 홈페이지 "상황별 추가 필요서류" 표 참조 권장. 전세계약기간 1/2 경과 전까지 신청 필요.',
+    note: '★ 정직하게 밝힘 — 신청 방법은 HUG 지사·위탁은행 방문 또는 모바일(네이버부동산·카카오페이·토스·안심전세App)이 공식 경로다. 나비는 서류 준비·정리까지만 능동적으로 돕고(UNIVERSAL-common U1 원칙), 실제 신용조사·보증심사·보증서 발급은 HUG가 확정한다. 소득증빙·혼인관계증명서 등 신청인 상황별(다자녀·신혼부부·한부모 등) 추가서류가 있을 수 있어 위 목록이 전부가 아닐 수 있음 — HUG 홈페이지 "상황별 추가 필요서류" 표 참조 권장. 전세계약기간 1/2 경과 전까지 신청 필요.',
   },
   // ★ 2026-08-23 추가 — 09-national/qgov(준정부기관) 최초 등록 2건.
   // enterprises·qgov·other 라우팅 인프라(같은 세션 신설) 위에 실제
@@ -25023,7 +25023,7 @@ const REQUIRED_DOCUMENTS_REGISTRY = {
       { id: 'single_parent_cert', name: '한부모가족증명서', required: false, acquisition: 'government_issued' },
       { id: 'disability_cert', name: '장애인등록증(또는 장애인증명서)', required: false, acquisition: 'government_issued' },
     ],
-    note: '★ 정직하게 밝힘 — 국가장학금 신청 자체는 필수서류 없이 온라인으로 완결된다(한국장학재단 홈페이지·모바일 앱). 위 서류들은 재단이 보유한 확인정보와 신청정보가 불일치할 때만(신청 후 1~3일 뒤 "서류제출대상자" 여부 표시) 선택적으로 제출한다 — 불일치 사유별로 요구서류가 다르므로 위 목록이 전부가 아닐 수 있음. 소득분위 산정 자체는 국세청·건강보험공단 연계자료 기반 실시간 심사라 Hondi가 직접 계산하지 않는다(기존 §2 고지와 동일 원칙).',
+    note: '★ 정직하게 밝힘 — 국가장학금 신청 자체는 필수서류 없이 온라인으로 완결된다(한국장학재단 홈페이지·모바일 앱). 위 서류들은 재단이 보유한 확인정보와 신청정보가 불일치할 때만(신청 후 1~3일 뒤 "서류제출대상자" 여부 표시) 선택적으로 제출한다 — 불일치 사유별로 요구서류가 다르므로 위 목록이 전부가 아닐 수 있음. 소득분위 산정 자체는 국세청·건강보험공단 연계자료 기반 실시간 심사라 나비가 직접 계산하지 않는다(기존 §2 고지와 동일 원칙).',
   },
   'ts:driving_license_renewal_postponement': {
     agency: 'ts', agency_name: '한국도로교통공단',
@@ -25355,11 +25355,11 @@ function _resolveDeptTarget(agency, task_key) {
 //   'external_insurer'— 정부기관도 정부24도 아닌 제3자(보험사)에게서 받는
 //                        서류.
 //
-// idv_type / max_age_days (2026-08-13 신설 — 혼디 패스포트 원리 적용):
+// idv_type / max_age_days (2026-08-13 신설 — 나비 패스포트 원리 적용):
 //   acquisition:'gov24' 문서에만 붙인다. §REQUIRED-DOCUMENTS 2단계가 정부24
 //   안내로 넘어가기 전에 사용자 로컬 IDV(gopang_idv_vault, Openhash-Gopang/
 //   passport 저장소)를 먼저 조회해 이미 보관된 credential이 있으면 재발급
-//   요구 없이 즉시 사용한다 — "정부가 서명 발급 → 혼디는 원본 그대로 보관·
+//   요구 없이 즉시 사용한다 — "정부가 서명 발급 → 나비는 원본 그대로 보관·
 //   재제출"이라는 passport 핵심 모델을 여기 연결하는 지점.
 //   - idv_type: IDV credential의 `type` 배열 값(credential-schema.json).
 //     새 문서 추가 시 새 타입을 또 만들지 말고 우선 기존 idv.identity.*/
@@ -25889,7 +25889,7 @@ async function handleGovTaskSubmit(bodyText, env, corsHeaders) {
   const now = new Date().toISOString();
 
   // ── 2026-08-15 신설(4단계 배선 — 조회만, 아직 청구 안 함) ──────────
-  // gov_fee_schedule에서 이 task의 혼디 서비스 수수료를 조회한다.
+  // gov_fee_schedule에서 이 task의 나비 서비스 수수료를 조회한다.
   // status==='accepted'일 때만 의미가 있다(pending_documents는 아직
   // 실행이 아니므로 조회 자체를 건너뛴다 — 불필요한 검색 호출 절약).
   // body.trace(클라이언트가 실어 보내면)에서 지역코드를 뽑아 쓰고,
@@ -25952,7 +25952,7 @@ async function handleGovTaskSubmit(bodyText, env, corsHeaders) {
       if (govFee.status === 'OK') {
         const charge = await _chargeGdcForAiUsage(env, {
           guid, krwAmount: govFee.hondiServiceFee, serviceId: `gov-fee:${agency}`,
-          memo: `혼디 서비스 수수료: ${govFee.record?.service_name || schema.task_name} (접수번호 ${receiptNo})`,
+          memo: `나비 서비스 수수료: ${govFee.record?.service_name || schema.task_name} (접수번호 ${receiptNo})`,
         });
         govFeeChargeStatus = charge?.ok ? 'charged' : 'charge_failed';
         await fetch(`${L1_DEFAULT}/api/collections/gov_fee_charges/records`, {
@@ -26101,7 +26101,7 @@ async function handleGovTaskSubmit(bodyText, env, corsHeaders) {
     // 분리해서 보여주지 말고 항상 같은 말풍선에 이어붙여야 한다
     // (아래 KNOWN_LIMITATIONS #3 참조 — 실제 기관 시스템 미연동).
     disclaimer: receiptNo
-      ? `${receiptNo}는 혼디 내부 접수번호이며, ${schema.agency_name}이(가) 발급한 공식 접수번호가 아닙니다. 실제 기관 시스템과의 연동 전까지는 사용자님이 직접 제출하거나 별도 확인이 필요합니다.`
+      ? `${receiptNo}는 나비 내부 접수번호이며, ${schema.agency_name}이(가) 발급한 공식 접수번호가 아닙니다. 실제 기관 시스템과의 연동 전까지는 사용자님이 직접 제출하거나 별도 확인이 필요합니다.`
          + (verified ? '' : ' 아울러 이 서류 목록 자체가 아직 사람 검토를 거치지 않은 임시 조사 결과이니, 최종 제출 전 관할 기관 공식 안내로 다시 확인해 주세요.')
       : null,
     schema_verified: verified,
@@ -26350,7 +26350,7 @@ async function handleGovFeeApprove(bodyText, env, corsHeaders) {
 
   const charge = await _chargeGdcForAiUsage(env, {
     guid, krwAmount: record.hondi_service_fee, serviceId: `gov-fee:${record.agency}`,
-    memo: `혼디 서비스 수수료(승인 후 청구): 접수번호 ${receipt_no}`,
+    memo: `나비 서비스 수수료(승인 후 청구): 접수번호 ${receipt_no}`,
   });
   const now = new Date().toISOString();
   const newStatus = charge?.ok ? 'approved_charged' : 'charge_failed';
@@ -26778,7 +26778,7 @@ async function handleGovRelay(bodyText, env, corsHeaders, meta = null, ctx = nul
 
   // ── INSTANCE_ENRICH 서버측 처리 (2026-07-24 신설) ──────────────────
   // LAZY-INSTANCE-ENRICHMENT-DESIGN_v1.0.md §3-3 구현 — 주피터 지시로
-  // 승인·구현: "혼디는 안내가 아니라 실행이 주된 목표"라는 철학을
+  // 승인·구현: "나비는 안내가 아니라 실행이 주된 목표"라는 철학을
   // 인스턴스 데이터 자체에도 반영한다. AGY_VAULT_STORE/META_TABLE_UPDATE와
   // 같은 자리, 같은 이유로 canDelegate 여부와 무관하게 모든 세션에
   // 적용한다(얼리리턴 없음 — 위 AGY_VAULT_STORE 주석의 알려진 한계와
@@ -27575,7 +27575,7 @@ async function handleWalletX25519Get(request, env, corsHeaders) {
   if (!pubkey) {
     return new Response(JSON.stringify({
       ok: false, registered: false,
-      message: '암호화 키가 아직 준비되지 않았습니다. 휴대폰에서 고팡 앱을 한 번 완전히 종료한 뒤 다시 열어 주세요. (가입이 안 되어 있다면 먼저 가입을 완료해 주세요.)',
+      message: '암호화 키가 아직 준비되지 않았습니다. 휴대폰에서 나비 앱을 한 번 완전히 종료한 뒤 다시 열어 주세요. (가입이 안 되어 있다면 먼저 가입을 완료해 주세요.)',
     }), { status: 200, headers: corsHeaders });
   }
   return new Response(JSON.stringify({ ok: true, registered: true, x25519_pubkey: pubkey, ed25519_pubkey: ed25519Pubkey }),
@@ -27644,7 +27644,7 @@ async function handleWalletX25519Post(request, env, corsHeaders) {
 //   - full-reset은 L1 + Supabase 9개 테이블 + KV까지 전부 지우고, 클라이언트도
 //     로컬 데이터(PDV·지갑)까지 전부 초기화한다 — "완전 초기화" 용도.
 //   - 이 엔드포인트는 L1 profiles(전화번호·guid 연결 정보) 딱 하나만 지운다.
-//     PDV·지갑 같은 로컬 데이터는 이용자 기기에 그대로 남아있으므로(혼디는
+//     PDV·지갑 같은 로컬 데이터는 이용자 기기에 그대로 남아있으므로(나비는
 //     서버에 원본 데이터를 두지 않는다는 설계 원칙), 나중에 같은 번호로
 //     다시 가입하면 로컬에 남아있던 기록과 함께 이전 상태로 자연스럽게
 //     이어진다 — 서버가 곧 원본인 기존 SNS와 근본적으로 다른 지점이다.
@@ -28002,7 +28002,7 @@ async function _l1FindProfileByGuid(env, guid) {
   return data.items?.[0] || null;
 }
 
-// 2026-09-27 신설 — 혼디 숫자 코드 "프로필 연결" 1단계. /digit/status가 돌려주는
+// 2026-09-27 신설 — 나비 숫자 코드 "프로필 연결" 1단계. /digit/status가 돌려주는
 // owner는 Ed25519 pubkey뿐이라(guid가 없음), 그 pubkey로 프로필을 바로 찾아야
 // 하는 수요(숫자 코드 스캔 → 프로필 표시)가 생겼다. digit_claim_records의
 // submitter_guid는 쓰지 않는다 — transfer 레코드의 제출자는 항상 "양도 전"
@@ -29045,7 +29045,7 @@ async function handleProfileGet(request, env, corsHeaders) {
 
   const rawHandle = decodeURIComponent(url.pathname.replace('/profile/', '').replace('/profile', ''));
   const guidParam = url.searchParams.get('guid');
-  // 2026-09-27 신설 — 혼디 숫자 코드 "프로필 연결". /digit/status는 owner를
+  // 2026-09-27 신설 — 나비 숫자 코드 "프로필 연결". /digit/status는 owner를
   // Ed25519 pubkey로만 돌려주므로(guid를 모름), 그 pubkey로 바로 프로필을
   // 찾을 경로가 필요하다. _l1FindProfileByPubkey 주석 참고.
   const pubkeyParam = url.searchParams.get('pubkey');
@@ -32782,7 +32782,7 @@ async function handlePushBroadcast(request, env, corsHeaders) {
   catch (e) { return _err(502, 'L1_UNREACHABLE', 'L1 조회 실패: ' + e.message, corsHeaders); }
 
   const payload = JSON.stringify({
-    title: body.title || '고팡 업데이트',
+    title: body.title || '나비 업데이트',
     body:  body.body  || '새 버전이 준비됐습니다.',
     tag:   'gopang-version-update',
     url:   body.url   || '/webapp.html',
@@ -32897,7 +32897,7 @@ async function handlePushSend(request, env, corsHeaders) {
   if (!rows.length) return new Response(JSON.stringify({ ok: true, sent: 0, reason: 'NO_SUBSCRIPTION', source }), { status: 200, headers: corsHeaders });
 
   const payload = JSON.stringify({
-    title: body.title || '고팡',
+    title: body.title || '나비',
     body:  body.body  || '새 메시지가 도착했습니다.',
     sound: rows[0].sound || body.sound || 'ping',
     url:   body.url   || '/webapp.html',
@@ -33154,7 +33154,7 @@ async function handleFeedbackPost(request, env, corsHeaders) {
     const aiRes = await fetch(_fbUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${_fbKey}`,
-                 ...(env.OPENROUTER_API_KEY ? {'HTTP-Referer':'https://hondi.net','X-Title':'Hondi'} : {}) },
+                 ...(env.OPENROUTER_API_KEY ? {'HTTP-Referer':'https://hondi.net','X-Title':'Navi'} : {}) },
       body: JSON.stringify({
         model: env.OPENROUTER_API_KEY ? OR_MODEL_FAST : 'deepseek/deepseek-r1:free',
         max_tokens: 10,
@@ -33528,7 +33528,7 @@ async function _ghCommitViaPR(env, path, newContent, baseSha, adminName, message
       content: _b64EncodeUtf8(newContent),
       sha:     baseSha,
       branch,
-      committer: { name: 'Gopang Prompt Editor', email: 'noreply@hondi.net' },
+      committer: { name: 'Navi Prompt Editor', email: 'noreply@hondi.net' },
     }),
   });
   if (!putRes.ok) {
@@ -33846,7 +33846,7 @@ async function handleAdminLetterSendEmail(request, env, corsHeaders) {
   const fromAddr = `letter-${letter_id}@hondi.org`;
   try {
     await env.EMAIL.send({
-      to, from: { email: fromAddr, name: '혼디 (AI City Inc.)' }, subject, text,
+      to, from: { email: fromAddr, name: '나비 (AI City Inc.)' }, subject, text,
     });
   } catch (e) {
     return _err(502, 'EMAIL_SEND_FAILED', '메일 발송 실패: ' + e.message, corsHeaders);
@@ -33879,7 +33879,7 @@ async function handleAdminLetterSendEmail(request, env, corsHeaders) {
 
 // ═══════════════════════════════════════════════════════════
 // K-Mail — 2026-09-01 신설. gov-mail(hondi.org, 관리자 전용)과 완전히
-// 분리된, 혼디 사용자 전체가 쓰는 사용자 간 메일 기능. 도메인도
+// 분리된, 나비 사용자 전체가 쓰는 사용자 간 메일 기능. 도메인도
 // hondi.kr로 별도(설계 §0) — 다우오피스(hondi.net)를 건드리지 않는다.
 //
 // 이 패치는 "발신 + 5일 이동평균 쿼터 과금" 골격만 담는다. 자연어 명령
@@ -33933,7 +33933,7 @@ async function _kmailIncrementSendLog(env, guid, todayRecord) {
 }
 
 // 5일 이동평균 발송 쿼터(주피터 지시, 2026-09-01): 관리자를 제외한
-// 혼디 사용자는 "이번 1통을 포함한 최근 5일 평균"이 하루 100통을
+// 나비 사용자는 "이번 1통을 포함한 최근 5일 평균"이 하루 100통을
 // 넘기면 그 1통마다 GDC 10(₮10) 부과. 캠페인 단위가 아니라 1통 단위로
 // 판정한다 — 캠페인 하나가 50통이면 그중 초과분만 과금 대상이 될 수
 // 있으므로, 이 함수는 발신 루프에서 수신자 1명당 한 번씩 호출된다.
@@ -34239,7 +34239,7 @@ async function _kmailLinkAttachmentsToMessage(env, attachmentIds, messageId) {
 
 // ═══════════════════════════════════════════════════════════
 // K-Mail ID(mail_id) — 2026-09-12 신설(주피터 지시). 전화번호가
-// 혼디의 유일 식별자이지만 전화번호 자체는 타인에게 노출하면 안 되므로,
+// 나비의 유일 식별자이지만 전화번호 자체는 타인에게 노출하면 안 되므로,
 // "검색/호출용" + "메일 로컬파트"를 겸하는 별도 식별자를 둔다.
 //
 // 설계 원칙(대화 기록 참고):
@@ -34336,7 +34336,7 @@ async function _kmailGetUserSettings(env, guid) {
   const row = data.items && data.items[0];
   return {
     signature: row?.signature || '',
-    sender_display_name: row?.sender_display_name || '혼디 K-Mail',
+    sender_display_name: row?.sender_display_name || '나비 K-Mail',
     auto_reply_enabled: row?.auto_reply_enabled || false,
     auto_reply_text: row?.auto_reply_text || '',
     auto_reply_until: row?.auto_reply_until || null,
@@ -34355,7 +34355,7 @@ async function _kmailGetUserSettings(env, guid) {
 // 자연히 <guid>@hondi.kr(발신 주소 그대로)로 온다).
 // signature/senderName: 호출부가 _kmailGetUserSettings로 한 번만
 // 불러서 넘긴다(위 주석 참고) — 생략하면 서명 없이, 이름은
-// '혼디 K-Mail'로 발송된다.
+// '나비 K-Mail'로 발송된다.
 // ═══════════════════════════════════════════════════════════
 // guid ↔ 이메일 로컬파트 안전 변환 (2026-09-12 긴급 수정, 주피터 지시)
 //
@@ -34390,7 +34390,7 @@ function _emailLocalPartToGuid(localPart) {
 async function _kmailSendOneEmail(env, { guid, to, subject, text, sessionId, replyTo, signature, senderName, attachmentIds, preResolvedAttachments }) {
   const fromAddr = `${_guidToEmailLocalPart(guid)}@hondi.kr`;
   const finalText = signature ? `${text}\n\n${signature}` : text;
-  const sendParams = { to, from: { email: fromAddr, name: senderName || '혼디 K-Mail' }, subject, text: finalText };
+  const sendParams = { to, from: { email: fromAddr, name: senderName || '나비 K-Mail' }, subject, text: finalText };
   if (replyTo) sendParams.replyTo = replyTo;
 
   // preResolvedAttachments가 주어지면(캠페인 발송처럼 수신자 N명에게
@@ -34459,7 +34459,7 @@ async function handleUserMailSend(request, env, corsHeaders) {
       'send_email 바인딩이 설정되지 않았습니다 — wrangler.toml 확인 및 재배포 필요', corsHeaders);
   }
 
-  const settings = await _kmailGetUserSettings(env, guid).catch(() => ({ signature: '', sender_display_name: '혼디 K-Mail' }));
+  const settings = await _kmailGetUserSettings(env, guid).catch(() => ({ signature: '', sender_display_name: '나비 K-Mail' }));
 
   let result;
   try {
@@ -36361,7 +36361,7 @@ async function handleKmailCampaignDraftState(request, url, env, corsHeaders) {
 async function _kmailSendCampaign(env, campaign) {
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-  const settings = await _kmailGetUserSettings(env, campaign.owner_user_guid).catch(() => ({ signature: '', sender_display_name: '혼디 K-Mail' }));
+  const settings = await _kmailGetUserSettings(env, campaign.owner_user_guid).catch(() => ({ signature: '', sender_display_name: '나비 K-Mail' }));
   // 수신자 수만큼 같은 첨부를 반복 조회하지 않도록 한 번만 해석한다.
   const preResolvedAttachments = await _kmailResolveAttachmentsForSend(env, campaign.owner_user_guid, campaign.attachment_ids).catch(e => {
     console.warn('[K-Mail Campaign] 첨부 변환 실패(첨부 없이 발송 계속):', e.message);
@@ -37110,7 +37110,7 @@ async function _handleKmailInboundEmail(message, env, ctx) {
       // 발송 자체는 승인/거절 판단이 아니라 "확인 중" 안내일 뿐이라
       // 위임 승인과 달리 사람 에스컬레이션(아래)을 대체하지 않는다.
       try {
-        const settings = await _kmailGetUserSettings(env, ownerGuid).catch(() => ({ signature: '', sender_display_name: '혼디 K-Mail' }));
+        const settings = await _kmailGetUserSettings(env, ownerGuid).catch(() => ({ signature: '', sender_display_name: '나비 K-Mail' }));
         const emailMatch = fromAddr.match(/[^\s<>]+@[^\s<>]+/);
         const replyToEmail = emailMatch ? emailMatch[0] : fromAddr;
         await _kmailSendOneEmail(env, {
@@ -37141,7 +37141,7 @@ async function _handleKmailInboundEmail(message, env, ctx) {
     // 태그는 "이건 특히 봐주세요"라는 덧표시다.
     if (!isBlocked && !matchedDelete && delegation.decision === 'approve') {
       try {
-        const settings = await _kmailGetUserSettings(env, ownerGuid).catch(() => ({ signature: '', sender_display_name: '혼디 K-Mail' }));
+        const settings = await _kmailGetUserSettings(env, ownerGuid).catch(() => ({ signature: '', sender_display_name: '나비 K-Mail' }));
         const emailMatch = fromAddr.match(/[^\s<>]+@[^\s<>]+/);
         const replyToEmail = emailMatch ? emailMatch[0] : fromAddr;
         const replyBody = await deepseekChatText({
@@ -37254,7 +37254,7 @@ async function _handleKmailInboundEmail(message, env, ctx) {
 async function _kmailSendAutoReply(env, guid, toEmail, replyText, sessionId, senderDisplayName) {
   if (!env.EMAIL) return;
   const fromAddr = `${_guidToEmailLocalPart(guid)}@hondi.kr`;
-  await env.EMAIL.send({ to: toEmail, from: { email: fromAddr, name: senderDisplayName || '혼디 K-Mail' }, subject: '자동 응답: 부재중 안내', text: replyText });
+  await env.EMAIL.send({ to: toEmail, from: { email: fromAddr, name: senderDisplayName || '나비 K-Mail' }, subject: '자동 응답: 부재중 안내', text: replyText });
   await _writeAiMessage(env, {
     session_id: sessionId,
     sender_guid: guid,

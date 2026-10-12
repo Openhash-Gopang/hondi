@@ -181,7 +181,7 @@ _scan_single(r'^business-kr_v', '.md', 'business-kr')
 _scan_single(r'^UNIVERSAL-job-assist_v', '.md', 'UNIVERSAL-job-assist')
 
 # 2-c-3) TASK-DELEGATION-GUIDE — prompts/TASK-DELEGATION-GUIDE_vX_Y.md
-#      2026-07-17 신설(주피터님 지시): "혼디는 안내가 아니라 업무 대행이
+#      2026-07-17 신설(주피터님 지시): "나비는 안내가 아니라 업무 대행이
 #      본래 용도" 제1원칙을 모든 SP에 강제 주입하기 위해 UNIVERSAL-
 #      INTEGRITY와 동일한 패턴으로 추가. UNIVERSAL-INTEGRITY 바로 다음에
 #      결합된다(manifest-loader.js _loadSpByKey 참조) — 판단이 애매할 때

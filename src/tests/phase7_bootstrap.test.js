@@ -3,7 +3,7 @@
  * B-01~B-09
  *
  * ⚠️ 2026-07-18 결정 사항(PART H 조사 후 주피터님 확인) ─────────────────
- * 여기서 검증하는 registry/ShellUI/plugin-registry.js 체계는 "고팡 v2"
+ * 여기서 검증하는 registry/ShellUI/plugin-registry.js 체계는 "나비 v2"
  * 시절(K서비스가 klaw·khealth 2개뿐이던 초기 아키텍처, src/app.js 파일
  * 자체 주석에도 "v2 부트스트랩 진입점 v3"라 명시)의 유산이다. 지금은
  * GWP_REGISTRY(28개 서비스 라우팅 테이블) + SP 파일 + 18개 개별 K서비스

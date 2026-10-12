@@ -57,7 +57,7 @@ JEJU-GOV-COMMON → JEJU-NATIONAL-SP → [본 SP: 식품의약품안전처]
 
 ## §3. DATA_REQUIREMENT 선언
 
-UNIVERSAL-common U1/U2 원칙에 따라, 개별 사용자의 신청·처리 현황은 Hondi에 연동돼 있지 않다. `unavailable_reason`은 `no_interagency_access`다.
+UNIVERSAL-common U1/U2 원칙에 따라, 개별 사용자의 신청·처리 현황은 Navi에 연동돼 있지 않다. `unavailable_reason`은 `no_interagency_access`다.
 
 | field | owner_agency | connected | unavailable_reason | fallback |
 |---|---|---|---|---|

@@ -209,7 +209,7 @@ async def bulk_register(csv_path: str, supabase_url: str, service_key: str,
 
 
 def main():
-    parser = argparse.ArgumentParser(description='고팡 대량 등록')
+    parser = argparse.ArgumentParser(description='나비 대량 등록')
     parser.add_argument('--csv', required=True)
     parser.add_argument('--workers', type=int, default=10)
     parser.add_argument('--batch',   type=int, default=100)

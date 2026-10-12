@@ -412,9 +412,9 @@ export async function handleIncomingOffer(signal) {
   try {
     if (Notification.permission === 'granted' && 'serviceWorker' in navigator) {
       const reg = await navigator.serviceWorker.ready;
-      await reg.showNotification('혼디', {
+      await reg.showNotification('나비', {
         body: `${fromHandle}님이 대화를 요청했습니다`,
-        icon: '/icons/icon-192.png',
+        icon: '/icons/navi-icon-192.png',
         tag:  'gopang-incoming-call',
         vibrate: [300, 100, 300],
         silent: false,

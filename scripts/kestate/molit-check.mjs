@@ -71,7 +71,7 @@ async function main() {
       `comp 건수: ${cmp.comp_count}`,
       `comp 중위값: ${cmp.comp_median.toLocaleString()}원`,
       `comp 범위: ${cmp.comp_min.toLocaleString()} ~ ${cmp.comp_max.toLocaleString()}원`,
-      `혼디 추정치: ${cmp.fair_value.toLocaleString()}원`,
+      `나비 추정치: ${cmp.fair_value.toLocaleString()}원`,
       `편차: ${cmp.deviation_pct.toFixed(2)}%`,
       `허용범위 판정 기준: ${cmp.tolerance_basis}`,
       `허용범위 내: ${cmp.within_tolerance === null ? '판정 불가(기준 없음)' : cmp.within_tolerance ? '예' : '아니오 — 확인 필요'}`,

@@ -2,7 +2,7 @@
 """
 tests/live_smoketest/hondi_search_scope_smoketest.py
 -------------------------------------------------------
-혼디 검색(/hondi-search) LIVE 스모크테스트 — hondi-search-relay 배포
+나비 검색(/hondi-search) LIVE 스모크테스트 — hondi-search-relay 배포
 이후 실제 엔드포인트를 대상으로 실행한다(로컬 재구현이 아니라 실제
 POST 호출).
 
@@ -51,7 +51,7 @@ def fixed_cases(manifest_by_path):
             "id": "regression-hondi-digit-code",
             "category": "regression",
             "scope": "user",
-            "message": "혼디 사이트에서 혼디 숫자 코드 페이지를 찾아주세요",
+            "message": "나비 사이트에서 나비 숫자 코드 페이지를 찾아주세요",
             "expected_type": "navigate",
             "expected_url": scenarios_entry["pc_url"],
         })

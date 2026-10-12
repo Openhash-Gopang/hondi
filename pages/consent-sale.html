@@ -70,7 +70,7 @@
     <label for="myRole">내 역할</label>
     <select id="myRole"><option value="creditor">채권자</option><option value="debtor">채무자</option></select>
     <label for="cpGuid">상대방 계정(GUID)</label>
-    <input id="cpGuid" type="text" placeholder="상대방의 혼디 계정 GUID">
+    <input id="cpGuid" type="text" placeholder="상대방의 나비 계정 GUID">
     <div class="row2">
       <div><label for="region">지역</label><input id="region" type="text" placeholder="예: 부산 영도구"></div>
       <div><label for="ptype">유형</label>
@@ -135,7 +135,7 @@ async function getWallet() {
     w = await window.GopangWallet.load();
     if (w) { try { w.setIdentity({ guid: me.guid, handle: me.handle || null }); } catch {} window.gopangWallet = w; }
   }
-  if (!w || typeof w.signPayload !== 'function') throw new Error('이 기기에서 지갑을 열 수 없습니다. 혼디 앱에 로그인한 뒤 다시 시도해 주세요.');
+  if (!w || typeof w.signPayload !== 'function') throw new Error('이 기기에서 지갑을 열 수 없습니다. 나비 앱에 로그인한 뒤 다시 시도해 주세요.');
   return w;
 }
 async function signCanonical(payload) {
@@ -190,7 +190,7 @@ $('nlQuery').addEventListener('keydown', e => { if (e.key === 'Enter') $('bSearc
 (() => {
   const b = $('loginBanner');
   if (me) { b.className = 'banner server'; b.textContent = '로그인 계정 확인됨' + (me.handle ? ' (' + me.handle + ')' : '') + '.'; }
-  else { b.className = 'banner'; b.textContent = '로그인한 계정을 찾지 못했습니다. 혼디 앱에서 로그인한 뒤 다시 열어 주세요.'; $('bPropose').disabled = true; }
+  else { b.className = 'banner'; b.textContent = '로그인한 계정을 찾지 못했습니다. 나비 앱에서 로그인한 뒤 다시 열어 주세요.'; $('bPropose').disabled = true; }
 })();
 
 $('bPropose').onclick = async () => {

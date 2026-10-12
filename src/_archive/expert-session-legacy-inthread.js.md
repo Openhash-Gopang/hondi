@@ -148,7 +148,7 @@ export async function endExpertSession(reason = 'unknown') {
     summary:   summaryText,
     who:       report6w?.who   || _USER?.nickname || _USER?.ipv6 || null,
     when:      report6w?.when  || new Date().toISOString(),
-    where:     report6w?.where || '혼디',
+    where:     report6w?.where || '나비',
     what:      report6w?.what  || summaryText,
     how:       report6w?.how   || `expert_session_${reason}`,
     why:       report6w?.why   || '',

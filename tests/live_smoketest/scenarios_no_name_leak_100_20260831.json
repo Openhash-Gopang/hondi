@@ -784,7 +784,7 @@
     "utterance": "이름이랑 연락처 같은 제 기본 정보를 다시 확인하고 고치고 싶어요",
     "expected_type": "GWP",
     "expected_id": "profile-assistant",
-    "expected_name": "혼디 안내(튜토리얼·프로필)",
+    "expected_name": "나비 안내(튜토리얼·프로필)",
     "category": "3단계-INFO경로-플랫폼자체",
     "static_verdict": "PASS",
     "basis": "개인 기본 정보 수정 요청 — 플랫폼 자체 기능(SP명 미노출로 재작성)"
@@ -794,7 +794,7 @@
     "utterance": "이 앱을 처음 쓰는데 사용법을 차근차근 알려주세요",
     "expected_type": "GWP",
     "expected_id": "profile-assistant",
-    "expected_name": "혼디 안내(튜토리얼·프로필)",
+    "expected_name": "나비 안내(튜토리얼·프로필)",
     "category": "3단계-INFO경로-플랫폼자체",
     "static_verdict": "PASS",
     "basis": "앱 사용법 튜토리얼은 플랫폼 자체 기능"

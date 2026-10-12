@@ -11,7 +11,7 @@
 # ═══════════════════════════════════════════════════
 #
 # 실사용 빈도가 높을 것으로 예상되는 고빈도 항목 보강 작업의 일환.
-# K-Market(혼디 소상공인 거래 플랫폼)에서 발생할 수 있는 소비자
+# K-Market(나비 소상공인 거래 플랫폼)에서 발생할 수 있는 소비자
 # 분쟁·불공정거래 신고와 직결될 가능성이 있어 우선 보강했다.
 # ROUTING-PRIORITY-RULES §3에 따라 "신고" 자체가 이 기관의 본연
 # 업무이므로 겹치는 집행기관이 없다.
@@ -63,7 +63,7 @@ JEJU-GOV-COMMON → JEJU-NATIONAL-SP → [본 SP: 공정거래위원회]
 
 ## §3. DATA_REQUIREMENT 선언
 
-JEJU-GOV-COMMON §10/§11 원칙에 따라, 개별 사용자의 신고 처리 현황은 Hondi에 연동돼 있지 않다. `unavailable_reason`은 `no_interagency_access`다.
+JEJU-GOV-COMMON §10/§11 원칙에 따라, 개별 사용자의 신고 처리 현황은 Navi에 연동돼 있지 않다. `unavailable_reason`은 `no_interagency_access`다.
 
 | field | owner_agency | connected | unavailable_reason | fallback |
 |---|---|---|---|---|

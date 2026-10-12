@@ -13,7 +13,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>테스트 기간 간편 입장·GDC 무료 모드 매뉴얼 — 켜기·끄기·종료 후 정상화 · 혼디</title>
+<title>테스트 기간 간편 입장·GDC 무료 모드 매뉴얼 — 켜기·끄기·종료 후 정상화 · 나비</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
@@ -115,7 +115,7 @@ th, td { border: 1px solid var(--line); padding: 9px 13px; text-align: left; lin
   <div class="doc-header-inner">
     <a class="doc-logo" href="../desktop.html">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-      혼디 · Gopang
+      나비 · Navi
       <span class="doc-header-sub">개발자 문서</span>
     </a>
     <a class="doc-back" href="../desktop.html">
@@ -148,7 +148,7 @@ th, td { border: 1px solid var(--line); padding: 9px 13px; text-align: left; lin
       <h1 class="doc-hero-title">테스트 기간 간편 입장과 GDC 무료 모드 — 켜는 법, 끄는 법, 끝난 뒤 되돌리는 법</h1>
       <p class="doc-hero-desc">
         테스트 기간 동안 사용자는 접속만 하면 <strong>쉬운 한국어 단어 아이디</strong>(예: 푸른바다)를 자동으로 받고,
-        전화 인증 없이 폰과 PC 어디서든 혼디의 모든 서비스를 <strong>GDC 충전 없이 제한 없이</strong> 이용한다.
+        전화 인증 없이 폰과 PC 어디서든 나비의 모든 서비스를 <strong>GDC 충전 없이 제한 없이</strong> 이용한다.
         두 기능은 모두 Cloudflare 스위치 하나로 켜고 끄며, <strong>꺼져 있으면 코드는 원래 동작과 같다.</strong>
         이 문서는 구조와 한계, 그리고 테스트가 끝난 뒤 정상 상태로 복구하는 절차를 기록한다.
       </p>
@@ -177,7 +177,7 @@ npx wrangler secret delete GDC_FREE_TEST --name hondi-proxy</code></pre>
     </div>
 
     <div class="callout">
-      <b>원래 원칙과의 관계.</b> 혼디의 원래 설계는 "PC는 인증 기기가 아니며, 폰에서 전화번호로 본인 인증한 사용자만 등록되고, PC에서 로그인하려면 자기 폰에서 확인 버튼을 누른다"이다(2026-09-18 사고 기록 §7). 테스트 모드는 <strong>이 원칙과 문자 인증을 테스트 기간 동안 잠정 중단</strong>하는 것이며(주피터 지시, 2026-10-09), 종료하면 원칙이 그대로 복원된다. 이번 변경은 메인 채팅의 인증 경로(<code>MANDATORY_AUTH_PATHS</code>, 지갑 세션)를 바꾸지 않았다. 2026-09-18에 KAuth를 메인 채팅에 이식했다가 기존 지갑 세션과 충돌해 전면 롤백한 전례가 있어, 이번에는 새 인증 오버레이를 띄우지 않고 기존 토큰 형식에 얹는 방식을 택했다.
+      <b>원래 원칙과의 관계.</b> 나비의 원래 설계는 "PC는 인증 기기가 아니며, 폰에서 전화번호로 본인 인증한 사용자만 등록되고, PC에서 로그인하려면 자기 폰에서 확인 버튼을 누른다"이다(2026-09-18 사고 기록 §7). 테스트 모드는 <strong>이 원칙과 문자 인증을 테스트 기간 동안 잠정 중단</strong>하는 것이며(주피터 지시, 2026-10-09), 종료하면 원칙이 그대로 복원된다. 이번 변경은 메인 채팅의 인증 경로(<code>MANDATORY_AUTH_PATHS</code>, 지갑 세션)를 바꾸지 않았다. 2026-09-18에 KAuth를 메인 채팅에 이식했다가 기존 지갑 세션과 충돌해 전면 롤백한 전례가 있어, 이번에는 새 인증 오버레이를 띄우지 않고 기존 토큰 형식에 얹는 방식을 택했다.
     </div>
 
     <!-- ───────────────────────── 동작 ───────────────────────── -->
@@ -392,7 +392,7 @@ gh pr merge --squash --delete-branch</code></pre>
     <!-- ───────────────────────── 한계 ───────────────────────── -->
     <h2 id="limits">알려진 한계</h2>
     <ul>
-      <li><strong>전화번호가 필요한 기능</strong>(혼디 숫자 번호 등록 등)은 쓸 수 없다. 방금 한 문자 인증 토큰과 지갑 서명이 필요하다.</li>
+      <li><strong>전화번호가 필요한 기능</strong>(나비 숫자 번호 등록 등)은 쓸 수 없다. 방금 한 문자 인증 토큰과 지갑 서명이 필요하다.</li>
       <li><strong>지갑 서명 전용 경로</strong>는 막힐 수 있다. 테스트 계정은 프로필에 핀(pin)된 지갑 키가 없다. 전화 인증 토큰을 받는 경로는 모두 통과하지만, 서명만 받는 엔드포인트는 전수 확인하지 못했다.</li>
       <li><strong>기기마다 새 아이디</strong>가 발급되고, 쿠키·저장소가 둘 다 사라지면(시크릿 모드·브라우저 데이터 삭제·iOS Safari 7일 제한·iOS 홈 화면 앱처럼 저장소가 분리된 경우) 새 아이디가 발급된다. 옛 아이디를 입력하면 복귀한다. 처음 받은 아이디는 DB에 남아 정리 대상이 된다.</li>
       <li><strong>테스트 계정은 공개 검색에 나오지 않는다</strong>(<code>is_public=false</code>). 테스트 사용자끼리 서로 찾는 기능은 어렵다.</li>

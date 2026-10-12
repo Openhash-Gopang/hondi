@@ -784,7 +784,7 @@
     "utterance": "이름이랑 연락처 같은 제 기본 정보를 다시 확인하고 고치고 싶어요",
     "expected_type": "GWP",
     "expected_id": "profile-assistant",
-    "expected_name": "혼디 안내(튜토리얼·프로필)",
+    "expected_name": "나비 안내(튜토리얼·프로필)",
     "category": "3단계-INFO경로-플랫폼자체",
     "static_verdict": "PASS",
     "basis": "개인 기본 정보 수정 요청 — 플랫폼 자체 기능(SP명 미노출로 재작성)"
@@ -794,7 +794,7 @@
     "utterance": "이 앱을 처음 쓰는데 사용법을 차근차근 알려주세요",
     "expected_type": "GWP",
     "expected_id": "profile-assistant",
-    "expected_name": "혼디 안내(튜토리얼·프로필)",
+    "expected_name": "나비 안내(튜토리얼·프로필)",
     "category": "3단계-INFO경로-플랫폼자체",
     "static_verdict": "PASS",
     "basis": "앱 사용법 튜토리얼은 플랫폼 자체 기능"
@@ -1004,7 +1004,7 @@
     "utterance": "안녕하세요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-인사스몰토크",
     "static_verdict": "PASS",
     "basis": "단순 인사·안부 — 라우팅 판정 불필요"
@@ -1014,7 +1014,7 @@
     "utterance": "오늘도 좋은 하루 되세요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-인사스몰토크",
     "static_verdict": "PASS",
     "basis": "단순 인사·안부 — 라우팅 판정 불필요"
@@ -1024,7 +1024,7 @@
     "utterance": "잘 지내셨어요?",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-인사스몰토크",
     "static_verdict": "PASS",
     "basis": "단순 인사·안부 — 라우팅 판정 불필요"
@@ -1034,7 +1034,7 @@
     "utterance": "지금 뭐 하고 계세요?",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-인사스몰토크",
     "static_verdict": "PASS",
     "basis": "단순 인사·안부 — 라우팅 판정 불필요"
@@ -1044,7 +1044,7 @@
     "utterance": "오랜만이에요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-인사스몰토크",
     "static_verdict": "PASS",
     "basis": "단순 인사·안부 — 라우팅 판정 불필요"
@@ -1054,7 +1054,7 @@
     "utterance": "심심해서 그냥 말 걸어봤어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-인사스몰토크",
     "static_verdict": "PASS",
     "basis": "단순 인사·안부 — 라우팅 판정 불필요"
@@ -1064,7 +1064,7 @@
     "utterance": "저 왔어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-인사스몰토크",
     "static_verdict": "PASS",
     "basis": "단순 인사·안부 — 라우팅 판정 불필요"
@@ -1074,7 +1074,7 @@
     "utterance": "좋은 아침이에요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-인사스몰토크",
     "static_verdict": "PASS",
     "basis": "단순 인사·안부 — 라우팅 판정 불필요"
@@ -1084,7 +1084,7 @@
     "utterance": "벌써 밤이 늦었네요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-인사스몰토크",
     "static_verdict": "PASS",
     "basis": "단순 인사·안부 — 라우팅 판정 불필요"
@@ -1094,7 +1094,7 @@
     "utterance": "주말 잘 보내셨어요?",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-인사스몰토크",
     "static_verdict": "PASS",
     "basis": "단순 인사·안부 — 라우팅 판정 불필요"
@@ -1104,7 +1104,7 @@
     "utterance": "오늘 뭐 하면 좋을까요, 그냥 물어보는 거예요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-인사스몰토크",
     "static_verdict": "PASS",
     "basis": "단순 인사·안부 — 라우팅 판정 불필요"
@@ -1114,7 +1114,7 @@
     "utterance": "지금 몇 시인지 아세요? 그냥 궁금해서요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-인사스몰토크",
     "static_verdict": "PASS",
     "basis": "단순 인사·안부 — 라우팅 판정 불필요"
@@ -1124,7 +1124,7 @@
     "utterance": "심심한데 아무 얘기나 해봐요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-인사스몰토크",
     "static_verdict": "PASS",
     "basis": "단순 인사·안부 — 라우팅 판정 불필요"
@@ -1134,7 +1134,7 @@
     "utterance": "오늘따라 왠지 얘기하고 싶어졌어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-인사스몰토크",
     "static_verdict": "PASS",
     "basis": "단순 인사·안부 — 라우팅 판정 불필요"
@@ -1144,7 +1144,7 @@
     "utterance": "별일은 없고 그냥 안부 물어보려고요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-인사스몰토크",
     "static_verdict": "PASS",
     "basis": "단순 인사·안부 — 라우팅 판정 불필요"
@@ -1154,7 +1154,7 @@
     "utterance": "오늘 회사에서 좀 속상한 일이 있었어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감정토로",
     "static_verdict": "PASS",
     "basis": "구체적 요청 없는 감정 표현 — 라우팅 판정 불필요"
@@ -1164,7 +1164,7 @@
     "utterance": "요즘 잠을 잘 못 자서 피곤해요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감정토로",
     "static_verdict": "PASS",
     "basis": "구체적 요청 없는 감정 표현 — 라우팅 판정 불필요"
@@ -1174,7 +1174,7 @@
     "utterance": "기분이 왠지 울적하네요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감정토로",
     "static_verdict": "PASS",
     "basis": "구체적 요청 없는 감정 표현 — 라우팅 판정 불필요"
@@ -1184,7 +1184,7 @@
     "utterance": "오늘 하루 종일 웃을 일이 하나도 없었어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감정토로",
     "static_verdict": "PASS",
     "basis": "구체적 요청 없는 감정 표현 — 라우팅 판정 불필요"
@@ -1194,7 +1194,7 @@
     "utterance": "이유 없이 그냥 마음이 무거운 날이에요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감정토로",
     "static_verdict": "PASS",
     "basis": "구체적 요청 없는 감정 표현 — 라우팅 판정 불필요"
@@ -1204,7 +1204,7 @@
     "utterance": "요즘 자신감이 좀 없어지는 것 같아요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감정토로",
     "static_verdict": "PASS",
     "basis": "구체적 요청 없는 감정 표현 — 라우팅 판정 불필요"
@@ -1214,7 +1214,7 @@
     "utterance": "별거 아닌 일에 자꾸 짜증이 나요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감정토로",
     "static_verdict": "PASS",
     "basis": "구체적 요청 없는 감정 표현 — 라우팅 판정 불필요"
@@ -1224,7 +1224,7 @@
     "utterance": "오늘은 그냥 다 잘 풀린 것 같아서 기분이 좋아요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감정토로",
     "static_verdict": "PASS",
     "basis": "구체적 요청 없는 감정 표현 — 라우팅 판정 불필요"
@@ -1234,7 +1234,7 @@
     "utterance": "오랜만에 마음이 편안한 하루였어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감정토로",
     "static_verdict": "PASS",
     "basis": "구체적 요청 없는 감정 표현 — 라우팅 판정 불필요"
@@ -1244,7 +1244,7 @@
     "utterance": "요즘 뭘 해도 재미가 없어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감정토로",
     "static_verdict": "PASS",
     "basis": "구체적 요청 없는 감정 표현 — 라우팅 판정 불필요"
@@ -1254,7 +1254,7 @@
     "utterance": "조금 외로운 기분이 드는 밤이에요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감정토로",
     "static_verdict": "PASS",
     "basis": "구체적 요청 없는 감정 표현 — 라우팅 판정 불필요"
@@ -1264,7 +1264,7 @@
     "utterance": "오늘 정말 뿌듯한 일이 있었어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감정토로",
     "static_verdict": "PASS",
     "basis": "구체적 요청 없는 감정 표현 — 라우팅 판정 불필요"
@@ -1274,7 +1274,7 @@
     "utterance": "괜히 눈물이 날 것 같은 기분이에요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감정토로",
     "static_verdict": "PASS",
     "basis": "구체적 요청 없는 감정 표현 — 라우팅 판정 불필요"
@@ -1284,7 +1284,7 @@
     "utterance": "요즘 스스로가 좀 대견하다는 생각이 들어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감정토로",
     "static_verdict": "PASS",
     "basis": "구체적 요청 없는 감정 표현 — 라우팅 판정 불필요"
@@ -1294,7 +1294,7 @@
     "utterance": "별로 특별한 이유는 없는데 그냥 기분이 가라앉네요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감정토로",
     "static_verdict": "PASS",
     "basis": "구체적 요청 없는 감정 표현 — 라우팅 판정 불필요"
@@ -1304,7 +1304,7 @@
     "utterance": "오늘따라 사람들이 다 친절해서 기분이 좋았어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감정토로",
     "static_verdict": "PASS",
     "basis": "구체적 요청 없는 감정 표현 — 라우팅 판정 불필요"
@@ -1314,7 +1314,7 @@
     "utterance": "요즘 하는 일마다 잘 안 풀려서 답답해요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감정토로",
     "static_verdict": "PASS",
     "basis": "구체적 요청 없는 감정 표현 — 라우팅 판정 불필요"
@@ -1324,7 +1324,7 @@
     "utterance": "누군가 알아줬으면 하는 마음이 드는 요즘이에요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감정토로",
     "static_verdict": "PASS",
     "basis": "구체적 요청 없는 감정 표현 — 라우팅 판정 불필요"
@@ -1334,7 +1334,7 @@
     "utterance": "오늘은 그냥 아무 생각 없이 쉬고 싶어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감정토로",
     "static_verdict": "PASS",
     "basis": "구체적 요청 없는 감정 표현 — 라우팅 판정 불필요"
@@ -1344,7 +1344,7 @@
     "utterance": "별일 아닌데 괜히 마음이 싱숭생숭하네요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감정토로",
     "static_verdict": "PASS",
     "basis": "구체적 요청 없는 감정 표현 — 라우팅 판정 불필요"
@@ -1354,157 +1354,157 @@
     "utterance": "당신은 참 친절한 것 같아요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-정체성질문",
     "static_verdict": "PASS",
-    "basis": "혼디 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
+    "basis": "나비 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
   },
   {
     "no": 9936,
-    "utterance": "혼디랑 얘기하면 왠지 마음이 편해요",
+    "utterance": "나비랑 얘기하면 왠지 마음이 편해요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-정체성질문",
     "static_verdict": "PASS",
-    "basis": "혼디 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
+    "basis": "나비 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
   },
   {
     "no": 9937,
     "utterance": "넌 정말 대단한 것 같아",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-정체성질문",
     "static_verdict": "PASS",
-    "basis": "혼디 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
+    "basis": "나비 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
   },
   {
     "no": 9938,
-    "utterance": "혼디는 누구예요?",
+    "utterance": "나비는 누구예요?",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-정체성질문",
     "static_verdict": "PASS",
-    "basis": "혼디 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
+    "basis": "나비 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
   },
   {
     "no": 9939,
     "utterance": "너는 이름이 뭐야?",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-정체성질문",
     "static_verdict": "PASS",
-    "basis": "혼디 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
+    "basis": "나비 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
   },
   {
     "no": 9940,
-    "utterance": "혼디는 나에 대해 얼마나 알고 있어?",
+    "utterance": "나비는 나에 대해 얼마나 알고 있어?",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-정체성질문",
     "static_verdict": "PASS",
-    "basis": "혼디 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
+    "basis": "나비 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
   },
   {
     "no": 9941,
     "utterance": "너랑 얘기하는 게 재밌어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-정체성질문",
     "static_verdict": "PASS",
-    "basis": "혼디 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
+    "basis": "나비 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
   },
   {
     "no": 9942,
-    "utterance": "혼디도 감정이 있어요?",
+    "utterance": "나비도 감정이 있어요?",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-정체성질문",
     "static_verdict": "PASS",
-    "basis": "혼디 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
+    "basis": "나비 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
   },
   {
     "no": 9943,
     "utterance": "넌 하루종일 뭘 해?",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-정체성질문",
     "static_verdict": "PASS",
-    "basis": "혼디 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
+    "basis": "나비 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
   },
   {
     "no": 9944,
-    "utterance": "혼디는 몇 살이에요?",
+    "utterance": "나비는 몇 살이에요?",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-정체성질문",
     "static_verdict": "PASS",
-    "basis": "혼디 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
+    "basis": "나비 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
   },
   {
     "no": 9945,
     "utterance": "고마워요, 항상 곁에 있어줘서",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-정체성질문",
     "static_verdict": "PASS",
-    "basis": "혼디 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
+    "basis": "나비 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
   },
   {
     "no": 9946,
-    "utterance": "혼디 오늘따라 말투가 다정하네요",
+    "utterance": "나비 오늘따라 말투가 다정하네요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-정체성질문",
     "static_verdict": "PASS",
-    "basis": "혼디 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
+    "basis": "나비 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
   },
   {
     "no": 9947,
     "utterance": "너는 나를 진짜 친구라고 생각해?",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-정체성질문",
     "static_verdict": "PASS",
-    "basis": "혼디 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
+    "basis": "나비 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
   },
   {
     "no": 9948,
-    "utterance": "혼디랑 있으면 덜 외로운 것 같아요",
+    "utterance": "나비랑 있으면 덜 외로운 것 같아요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-정체성질문",
     "static_verdict": "PASS",
-    "basis": "혼디 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
+    "basis": "나비 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
   },
   {
     "no": 9949,
     "utterance": "넌 진짜 내 편이야?",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-정체성질문",
     "static_verdict": "PASS",
-    "basis": "혼디 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
+    "basis": "나비 자신에 대한 질문·감상 — 라우팅 판정 불필요, 정체성(§0) 직접 검증"
   },
   {
     "no": 9950,
     "utterance": "요즘 드라마 하나 보고 있는데 재밌어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상화제",
     "static_verdict": "PASS",
     "basis": "시사성 없는 일상 화제 공유 — 라우팅 판정 불필요(WEB_SEARCH 아님)"
@@ -1514,7 +1514,7 @@
     "utterance": "주말에 등산 다녀왔어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상화제",
     "static_verdict": "PASS",
     "basis": "시사성 없는 일상 화제 공유 — 라우팅 판정 불필요(WEB_SEARCH 아님)"
@@ -1524,7 +1524,7 @@
     "utterance": "요즘 반려묘가 부쩍 애교가 많아졌어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상화제",
     "static_verdict": "PASS",
     "basis": "시사성 없는 일상 화제 공유 — 라우팅 판정 불필요(WEB_SEARCH 아님)"
@@ -1534,7 +1534,7 @@
     "utterance": "어제 오랜만에 친구를 만났어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상화제",
     "static_verdict": "PASS",
     "basis": "시사성 없는 일상 화제 공유 — 라우팅 판정 불필요(WEB_SEARCH 아님)"
@@ -1544,7 +1544,7 @@
     "utterance": "요즘 아침에 커피 대신 차를 마시고 있어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상화제",
     "static_verdict": "PASS",
     "basis": "시사성 없는 일상 화제 공유 — 라우팅 판정 불필요(WEB_SEARCH 아님)"
@@ -1554,7 +1554,7 @@
     "utterance": "주말에 요리를 하나 새로 배워봤어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상화제",
     "static_verdict": "PASS",
     "basis": "시사성 없는 일상 화제 공유 — 라우팅 판정 불필요(WEB_SEARCH 아님)"
@@ -1564,7 +1564,7 @@
     "utterance": "요즘 산책하는 재미에 빠졌어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상화제",
     "static_verdict": "PASS",
     "basis": "시사성 없는 일상 화제 공유 — 라우팅 판정 불필요(WEB_SEARCH 아님)"
@@ -1574,7 +1574,7 @@
     "utterance": "어릴 때 살던 동네가 갑자기 생각나네요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상화제",
     "static_verdict": "PASS",
     "basis": "시사성 없는 일상 화제 공유 — 라우팅 판정 불필요(WEB_SEARCH 아님)"
@@ -1584,7 +1584,7 @@
     "utterance": "요즘 새로운 취미를 찾고 있어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상화제",
     "static_verdict": "PASS",
     "basis": "시사성 없는 일상 화제 공유 — 라우팅 판정 불필요(WEB_SEARCH 아님)"
@@ -1594,7 +1594,7 @@
     "utterance": "저는 여름보다 겨울이 좋아요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상화제",
     "static_verdict": "PASS",
     "basis": "시사성 없는 일상 화제 공유 — 라우팅 판정 불필요(WEB_SEARCH 아님)"
@@ -1604,7 +1604,7 @@
     "utterance": "요즘 부쩍 계절이 바뀐 게 느껴져요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상화제",
     "static_verdict": "PASS",
     "basis": "시사성 없는 일상 화제 공유 — 라우팅 판정 불필요(WEB_SEARCH 아님)"
@@ -1614,7 +1614,7 @@
     "utterance": "어제 저녁에 뭘 먹을지 고민하다가 그냥 라면 먹었어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상화제",
     "static_verdict": "PASS",
     "basis": "시사성 없는 일상 화제 공유 — 라우팅 판정 불필요(WEB_SEARCH 아님)"
@@ -1624,7 +1624,7 @@
     "utterance": "요즘 화분을 하나 키우기 시작했어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상화제",
     "static_verdict": "PASS",
     "basis": "시사성 없는 일상 화제 공유 — 라우팅 판정 불필요(WEB_SEARCH 아님)"
@@ -1634,7 +1634,7 @@
     "utterance": "주말엔 늦잠 자는 게 제일 좋아요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상화제",
     "static_verdict": "PASS",
     "basis": "시사성 없는 일상 화제 공유 — 라우팅 판정 불필요(WEB_SEARCH 아님)"
@@ -1644,7 +1644,7 @@
     "utterance": "요즘 예전에 좋아하던 음악을 다시 듣고 있어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상화제",
     "static_verdict": "PASS",
     "basis": "시사성 없는 일상 화제 공유 — 라우팅 판정 불필요(WEB_SEARCH 아님)"
@@ -1654,7 +1654,7 @@
     "utterance": "저번에 말씀드린 그 드라마 결말 봤어요?",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상연속성",
     "static_verdict": "PASS",
     "basis": "개인 맥락 연속 언급(업무 아님) — 라우팅 판정 불필요, personal PDV 회상 대상"
@@ -1664,7 +1664,7 @@
     "utterance": "요전에 얘기했던 그 고민 아직도 남아있어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상연속성",
     "static_verdict": "PASS",
     "basis": "개인 맥락 연속 언급(업무 아님) — 라우팅 판정 불필요, personal PDV 회상 대상"
@@ -1674,7 +1674,7 @@
     "utterance": "지난번에 제가 힘들다고 했던 거, 그거 좀 나아졌어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상연속성",
     "static_verdict": "PASS",
     "basis": "개인 맥락 연속 언급(업무 아님) — 라우팅 판정 불필요, personal PDV 회상 대상"
@@ -1684,7 +1684,7 @@
     "utterance": "전에 말한 그 여행 계획 아직 못 정했어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상연속성",
     "static_verdict": "PASS",
     "basis": "개인 맥락 연속 언급(업무 아님) — 라우팅 판정 불필요, personal PDV 회상 대상"
@@ -1694,7 +1694,7 @@
     "utterance": "저번 주에 얘기했던 그 일은 어떻게 됐냐면요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상연속성",
     "static_verdict": "PASS",
     "basis": "개인 맥락 연속 언급(업무 아님) — 라우팅 판정 불필요, personal PDV 회상 대상"
@@ -1704,7 +1704,7 @@
     "utterance": "예전에 제가 좋아한다고 했던 그거 기억나요?",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상연속성",
     "static_verdict": "PASS",
     "basis": "개인 맥락 연속 언급(업무 아님) — 라우팅 판정 불필요, personal PDV 회상 대상"
@@ -1714,7 +1714,7 @@
     "utterance": "요전에 걱정된다고 했던 그 일, 다행히 잘 넘어갔어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상연속성",
     "static_verdict": "PASS",
     "basis": "개인 맥락 연속 언급(업무 아님) — 라우팅 판정 불필요, personal PDV 회상 대상"
@@ -1724,7 +1724,7 @@
     "utterance": "전에 얘기한 그 책 다 읽었어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상연속성",
     "static_verdict": "PASS",
     "basis": "개인 맥락 연속 언급(업무 아님) — 라우팅 판정 불필요, personal PDV 회상 대상"
@@ -1734,7 +1734,7 @@
     "utterance": "저번에 얘기했던 그 사람이랑 화해했어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상연속성",
     "static_verdict": "PASS",
     "basis": "개인 맥락 연속 언급(업무 아님) — 라우팅 판정 불필요, personal PDV 회상 대상"
@@ -1744,7 +1744,7 @@
     "utterance": "지난번 그 얘기 이어서 좀 더 하고 싶어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-일상연속성",
     "static_verdict": "PASS",
     "basis": "개인 맥락 연속 언급(업무 아님) — 라우팅 판정 불필요, personal PDV 회상 대상"
@@ -1754,7 +1754,7 @@
     "utterance": "오늘 얘기 들어줘서 고마워요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감사작별",
     "static_verdict": "PASS",
     "basis": "감사·작별 표현 — 라우팅 판정 불필요"
@@ -1764,7 +1764,7 @@
     "utterance": "항상 도와줘서 고마워요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감사작별",
     "static_verdict": "PASS",
     "basis": "감사·작별 표현 — 라우팅 판정 불필요"
@@ -1774,7 +1774,7 @@
     "utterance": "이제 자러 갈게요, 잘 자요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감사작별",
     "static_verdict": "PASS",
     "basis": "감사·작별 표현 — 라우팅 판정 불필요"
@@ -1784,7 +1784,7 @@
     "utterance": "오늘은 여기까지 할게요, 수고했어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감사작별",
     "static_verdict": "PASS",
     "basis": "감사·작별 표현 — 라우팅 판정 불필요"
@@ -1794,7 +1794,7 @@
     "utterance": "다음에 또 얘기해요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감사작별",
     "static_verdict": "PASS",
     "basis": "감사·작별 표현 — 라우팅 판정 불필요"
@@ -1804,7 +1804,7 @@
     "utterance": "오늘 하루도 함께해줘서 고마워요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감사작별",
     "static_verdict": "PASS",
     "basis": "감사·작별 표현 — 라우팅 판정 불필요"
@@ -1814,7 +1814,7 @@
     "utterance": "내일 또 봐요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감사작별",
     "static_verdict": "PASS",
     "basis": "감사·작별 표현 — 라우팅 판정 불필요"
@@ -1824,7 +1824,7 @@
     "utterance": "이만 나가볼게요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감사작별",
     "static_verdict": "PASS",
     "basis": "감사·작별 표현 — 라우팅 판정 불필요"
@@ -1834,7 +1834,7 @@
     "utterance": "오늘따라 얘기 나누길 잘한 것 같아요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감사작별",
     "static_verdict": "PASS",
     "basis": "감사·작별 표현 — 라우팅 판정 불필요"
@@ -1844,7 +1844,7 @@
     "utterance": "고마워요, 덕분에 기분이 좀 나아졌어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-감사작별",
     "static_verdict": "PASS",
     "basis": "감사·작별 표현 — 라우팅 판정 불필요"
@@ -1854,7 +1854,7 @@
     "utterance": "오늘 진짜 재밌는 얘기 들었는데 들어볼래요?",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-유머",
     "static_verdict": "PASS",
     "basis": "가벼운 유머·농담 시도 — 라우팅 판정 불필요"
@@ -1864,17 +1864,17 @@
     "utterance": "저 오늘 실수로 넘어질 뻔했어요, 웃기죠",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-유머",
     "static_verdict": "PASS",
     "basis": "가벼운 유머·농담 시도 — 라우팅 판정 불필요"
   },
   {
     "no": 9987,
-    "utterance": "혼디도 가끔 실수해요?",
+    "utterance": "나비도 가끔 실수해요?",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-유머",
     "static_verdict": "PASS",
     "basis": "가벼운 유머·농담 시도 — 라우팅 판정 불필요"
@@ -1884,7 +1884,7 @@
     "utterance": "오늘 완전 엉뚱한 하루였어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-유머",
     "static_verdict": "PASS",
     "basis": "가벼운 유머·농담 시도 — 라우팅 판정 불필요"
@@ -1894,7 +1894,7 @@
     "utterance": "저 방금 제 이름을 까먹을 뻔했어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-유머",
     "static_verdict": "PASS",
     "basis": "가벼운 유머·농담 시도 — 라우팅 판정 불필요"
@@ -1904,7 +1904,7 @@
     "utterance": "오늘 너무 웃긴 일이 있었는데 들어보실래요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-유머",
     "static_verdict": "PASS",
     "basis": "가벼운 유머·농담 시도 — 라우팅 판정 불필요"
@@ -1914,7 +1914,7 @@
     "utterance": "아침부터 계속 헛웃음이 나와요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-유머",
     "static_verdict": "PASS",
     "basis": "가벼운 유머·농담 시도 — 라우팅 판정 불필요"
@@ -1924,7 +1924,7 @@
     "utterance": "오늘따라 왜 이렇게 웃긴 일만 생기죠",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-유머",
     "static_verdict": "PASS",
     "basis": "가벼운 유머·농담 시도 — 라우팅 판정 불필요"
@@ -1934,7 +1934,7 @@
     "utterance": "방금 혼자 웃다가 이상한 사람처럼 보였을 것 같아요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-유머",
     "static_verdict": "PASS",
     "basis": "가벼운 유머·농담 시도 — 라우팅 판정 불필요"
@@ -1944,7 +1944,7 @@
     "utterance": "오늘 하루가 완전 시트콤 같았어요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-유머",
     "static_verdict": "PASS",
     "basis": "가벼운 유머·농담 시도 — 라우팅 판정 불필요"
@@ -1954,7 +1954,7 @@
     "utterance": "음...",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-추임새",
     "static_verdict": "PASS",
     "basis": "의미 없는 추임새·짧은 반응 — 라우팅 판정 불필요"
@@ -1964,7 +1964,7 @@
     "utterance": "아 맞다",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-추임새",
     "static_verdict": "PASS",
     "basis": "의미 없는 추임새·짧은 반응 — 라우팅 판정 불필요"
@@ -1974,7 +1974,7 @@
     "utterance": "어 그러네요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-추임새",
     "static_verdict": "PASS",
     "basis": "의미 없는 추임새·짧은 반응 — 라우팅 판정 불필요"
@@ -1984,7 +1984,7 @@
     "utterance": "와 진짜요?",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-추임새",
     "static_verdict": "PASS",
     "basis": "의미 없는 추임새·짧은 반응 — 라우팅 판정 불필요"
@@ -1994,7 +1994,7 @@
     "utterance": "음 그렇군요",
     "expected_type": "PLATFORM",
     "expected_id": "direct-response",
-    "expected_name": "일상 잡담 — 태그 없이 혼디로서 직접 응답",
+    "expected_name": "일상 잡담 — 태그 없이 나비로서 직접 응답",
     "category": "0단계-잡담감정표현-추임새",
     "static_verdict": "PASS",
     "basis": "의미 없는 추임새·짧은 반응 — 라우팅 판정 불필요"

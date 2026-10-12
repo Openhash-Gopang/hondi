@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════
-// gwp-registry.js v2.2 — 혼디 서비스 레지스트리
+// gwp-registry.js v2.2 — 나비 서비스 레지스트리
 //
 // v2.0 변경사항:
 //   - type 필드 추가: 'inline' | 'tab' | 'tool'
@@ -259,7 +259,7 @@ const GWP_REGISTRY = [
     description: '결제·송금·환전 + 예금·적금·대출·신용평가·투자(재무제표 기반) — 국적통화 FIAT POOL 연동, 무위험 자산 담보 디지털 화폐. (신용·체크카드 상품은 아직 없음 — GDC_ROADMAP.md 기준 미제공) 투자 상품 가입·잔고 조회 자체가 목적이면 여기, 자산 분석·포트폴리오 조언이 목적이면 kfinance(K-Stock) 소관.',
     triggers: [
       'GDC','결제','송금','이체','잔고',
-      '고팡 화폐','디지털 화폐','GDC 충전','글로벌 결제',
+      '고팡 화폐', '나비 화폐','디지털 화폐','GDC 충전','글로벌 결제',
       '예금','적금','저금','대출','빌리다','융자','이자','금리',
       '신용평가','신용등급','대출 한도','상환','환전','해외 송금',
       '투자','펀드','국민성장펀드','ETF',
@@ -702,13 +702,13 @@ const GWP_REGISTRY = [
     // ★ 2026-07-12 정정 — "국민동의청원에 서명해줘"·"입법예고에 의견
     // 제출해줘"(750건 사고실험 #611/612)가 "청원"·"의견 제출"이라는
     // 단어 때문에 이 서비스의 "안건 제안"과 혼동될 위험을 발견해 경계를
-    // 명시한다. K-Democracy는 혼디 자체 거버넌스(DAWN) 전용이지 국회·
+    // 명시한다. K-Democracy는 나비 자체 거버넌스(DAWN) 전용이지 국회·
     // 정부의 실제 청원·입법예고 시스템이 아니다 — 그건 kgov(K-Public)
     // 소관이다.
-    description: '고팡 직접 민주주의 플랫폼(DAWN) 전용 — 국민동의청원·입법예고 등 실제 국가기관 청원/의견 시스템은 kgov 소관.',
+    description: '나비 직접 민주주의 플랫폼(DAWN) 전용 — 국민동의청원·입법예고 등 실제 국가기관 청원/의견 시스템은 kgov 소관.',
     triggers: [
       '투표','안건','민주주의','정책','DAWN','의결',
-      '안건 제안','고팡 운영','배심원','찬성','반대','발의',
+      '안건 제안','고팡 운영', '나비 운영','배심원','찬성','반대','발의',
     ],
   },
 
@@ -769,7 +769,7 @@ const GWP_REGISTRY = [
   // 애매한 발화로 오발동하지 않게 하고, AC의 명시적 판단(§0-1/§0-E)에
   // 주로 의존한다.
   {
-    id: 'profile-assistant', name: '혼디 안내(튜토리얼·프로필)', category: 'ONB',
+    id: 'profile-assistant', name: '나비 안내(튜토리얼·프로필)', category: 'ONB',
     type: 'tab',
     url: '/pages/profile-assistant.html',
     status: 'active', priority: 5, threshold: 0.85,
@@ -784,7 +784,7 @@ const GWP_REGISTRY = [
   // ★ 2026-09-21 — fiil.kr → clean.hondi.net(Openhash-Gopang/clean)으로 이전.
   // 이전 사유: fiil.kr 화면이 _gwpLaunch()가 이미 넘겨주던 token(GUID)·
   // facts(currentLocation 등) 쿼리 파라미터를 전혀 소비하지 않아 (a) 실제
-  // 로그인 사용자 대신 더미 데이터가 표시되고 (b) 혼디가 이미 확보한 위치를
+  // 로그인 사용자 대신 더미 데이터가 표시되고 (b) 나비가 이미 확보한 위치를
   // 무시한 채 자체 navigator.geolocation을 다시 호출해 GPS 시간 초과가
   // 반복되던 결함이 실사로 확인됨. clean.hondi.net 쪽 webapp.html에서
   // token→프로필 조회, facts→위치 사용을 구현해 해소(clean 저장소 README 참고).
@@ -820,7 +820,7 @@ const GWP_REGISTRY = [
     // (RULE-06 6-B, [CALL_KSEARCH])은 market 레포 자체 구현이라 여기
     // 등록과 무관하다. AC 자신의 라우팅(예: [GWP: kcommerce])은 이
     // 변경으로 바뀌지 않는다 — AGENT-COMMON v3.34 참조.
-    description: '혼디 생태계 전체의 유일한 검색 실행 에이전트 — 사람·AI비서 식별은 물론 K-Market 등 타 SP가 위임하는 판매자·상품 탐색까지 전담. 모호하면 되묻고, 없으면 솔직히 안내.',
+    description: '나비 생태계 전체의 유일한 검색 실행 에이전트 — 사람·AI비서 식별은 물론 K-Market 등 타 SP가 위임하는 판매자·상품 탐색까지 전담. 모호하면 되묻고, 없으면 솔직히 안내.',
     triggers: [
       '찾아줘','연결해줘','불러줘','아는 사람','그분','그 사람',
       '누구였지','아이디 찾','핸들 찾','프로필 찾',
@@ -887,7 +887,7 @@ const GWP_REGISTRY = [
   },
 
   // ── 2026-09-01 신설, 2026-09-08 mail.hondi.net으로 이관 — K-Mail:
-  // 혼디 사용자 간 메일 발송·수신·주소록. 관리자 전용 공문(hondi.org,
+  // 나비 사용자 간 메일 발송·수신·주소록. 관리자 전용 공문(hondi.org,
   // gov-mail)과 도메인·인증·목적 모두 별개. K-Law와 동일하게 전용
   // 서브도메인(mail.hondi.net)의 webapp.html로 연결한다 — 더 이상
   // /pages/kmail-assistant.html에 자체 구현을 두지 않는다(중복 방지).
@@ -898,7 +898,7 @@ const GWP_REGISTRY = [
     url: 'https://mail.hondi.net/webapp.html',
     sp_key: 'SP-25_kmail',
     status: 'active', priority: 8, threshold: 0.75,
-    description: '혼디 사용자 간 메일 발송·수신·주소록 관리(예약발송·회신취합·자동삭제 규칙). 관리자 전용 공문과 무관.',
+    description: '나비 사용자 간 메일 발송·수신·주소록 관리(예약발송·회신취합·자동삭제 규칙). 관리자 전용 공문과 무관.',
     triggers: [
       '메일 보내', '메일 보내줘', '메일 확인', '메일함', '메일 정리',
       '이메일 보내', '이메일 확인', '주소록에 추가', '주소록 검색',

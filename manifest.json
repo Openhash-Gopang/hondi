@@ -1,7 +1,7 @@
 {
-  "name": "혼디 (Hondi)",
-  "short_name": "혼디",
-  "description": "혼디 AI 시민 플랫폼 — 카메라로 혼디 코드를 스캔하고 AI 비서와 대화하세요.",
+  "name": "나비 (Navi)",
+  "short_name": "나비",
+  "description": "나비 AI 시민 플랫폼 — 카메라로 나비 코드를 스캔하고 AI 비서와 대화하세요.",
   "start_url": "/webapp.html?pwa=1",
   "scope": "/",
   "display": "standalone",
@@ -22,25 +22,25 @@
   ],
   "icons": [
     {
-      "src": "/icons/icon-192.png",
+      "src": "/icons/navi-icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "/icons/navi-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-192.png",
+      "src": "/icons/navi-icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "/icons/navi-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -48,11 +48,11 @@
   ],
   "screenshots": [
     {
-      "src": "/icons/icon-512.png",
+      "src": "/icons/navi-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "혼디 AI 비서 — 카메라 스캔"
+      "label": "나비 AI 비서 — 카메라 스캔"
     }
   ],
   "shortcuts": [
@@ -63,19 +63,19 @@
       "url": "/webapp.html?ai=1",
       "icons": [
         {
-          "src": "/icons/icon-192.png",
+          "src": "/icons/navi-icon-192.png",
           "sizes": "192x192"
         }
       ]
     },
     {
-      "name": "혼디 코드 스캔",
+      "name": "나비 코드 스캔",
       "short_name": "스캔",
-      "description": "카메라로 혼디 코드를 스캔합니다",
+      "description": "카메라로 나비 코드를 스캔합니다",
       "url": "/webapp.html?scan=1",
       "icons": [
         {
-          "src": "/icons/icon-192.png",
+          "src": "/icons/navi-icon-192.png",
           "sizes": "192x192"
         }
       ]

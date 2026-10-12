@@ -26,7 +26,7 @@
 <div id="top-bar">
   <div id="tb-icon">🤝</div>
   <div id="tb-sub">로딩 중…</div>
-  <button id="tb-back">고팡으로</button>
+  <button id="tb-back">나비로</button>
 </div>
 
 <div id="err-banner"></div>
@@ -135,7 +135,7 @@ if (!def) {
   document.getElementById('tb-sub').textContent = '알 수 없는 전문가입니다';
   const banner = document.getElementById('err-banner');
   banner.style.display = 'block';
-  banner.textContent = `전문가 페르소나를 찾을 수 없습니다 (persona=${_qs.get('persona') || '(없음)'}). 고팡으로 돌아가 다시 시도해 주세요.`;
+  banner.textContent = `전문가 페르소나를 찾을 수 없습니다 (persona=${_qs.get('persona') || '(없음)'}). 나비로 돌아가 다시 시도해 주세요.`;
 
   // 2026-07-06: "초안 작성 + 검토 대기열" 원칙 — 존재하지 않는 전문가를
   // 자동으로 만들어 즉시 배포하지 않는다(자격·법적 책임이 걸린 분야에서
@@ -297,7 +297,7 @@ async function _composeConsultPrompt(childDef) {
 
 // ══════════════════════════════════════════════════════════════
 // AI 호출 — call-ai.js의 후보 폴백 로직을 그대로 이식(legacy → BYOK relay
-// → 혼디 무료 기본 키). 같은 오리진(hondi.net)이라 localStorage를 그대로
+// → 나비 무료 기본 키). 같은 오리진(hondi.net)이라 localStorage를 그대로
 // 공유해서 읽을 수 있다.
 // ══════════════════════════════════════════════════════════════
 function _loadCfg() {
@@ -318,7 +318,7 @@ function _buildCandidates() {
   if (!candidates.length && cfg.apiKey && cfg.endpoint && !cfg.endpoint.includes('workers.dev')) {
     candidates.push({ provider: 'legacy', baseUrl: cfg.endpoint.replace(/\/+$/,''), model: cfg.model || 'gpt-4o-mini', apiKey: cfg.apiKey });
   }
-  // 최종 안전망 — 혼디 제공 무료 기본 키
+  // 최종 안전망 — 나비 제공 무료 기본 키
   candidates.push({ provider: 'deepseek-default', baseUrl: RELAY_ENDPOINT, model: 'hondi-flash', apiKey: null });
   return candidates;
 }
@@ -795,7 +795,7 @@ async function sendTurn(text, attachment) {
     if (TERMINATION_RE.test(text) || doneTagMatch) {
       // 45-3(SP_common_guardrails C45) — 정규식(빠른 경로)과 [EXPERT_DONE]
       // (페르소나 판단) 중 하나라도 트리거되면 종료. 둘 다 걸려도 문구는 하나만.
-      appendBubble('ai', `상담을 종료합니다. 고팡 화면으로 돌아갑니다…`);
+      appendBubble('ai', `상담을 종료합니다. 나비 화면으로 돌아갑니다…`);
       await _recordExpertOwnerPDV(doneTagMatch && !TERMINATION_RE.test(text) ? 'expert_judged' : 'user_phrase'); // §7 기관측 PDV
       setTimeout(() => { location.href = RETURN; }, 1200);
     }
@@ -812,7 +812,7 @@ async function sendTurn(text, attachment) {
 // emit되도록 설계됐다. EXPERT 페르소나가 이 태그를 직접 쓰는 건 K-Search
 // 본체(및 그 RULE-01 안전장치)를 거치지 않는 지름길이므로, 최소한 결과
 // 보고 형식만큼은 K-Search RULE-07 [7-A] 대체형과 동일하게 맞춘다(아래
-// searchInject) — "Hondi 내부에서 검증된 게 아닌 웹 참고정보"임을 명시.
+// searchInject) — "나비 내부에서 검증된 게 아닌 웹 참고정보"임을 명시.
 // RULE-01의 실행 전 판단(전수조사·감시추적 정황·민감정보·전화번호 역조회
 // 금지 등)은 SP_common_guardrails C43-1+에 요지가 반영돼 있고, 판단 자체는
 // (이 코드가 아니라) 페르소나 자신이 C43 지시에 따라 검색 실행 전에 한다 —
@@ -902,11 +902,11 @@ async function _maybeHandleWebSearch(fullReply, depth = 0) {
 
   box.innerHTML = `<i>"${escHtml(query)}" 검색 완료</i>`;
 
-  // K-Search RULE-07 [7-A] 대체형과 동일한 보고 형식 — "Hondi 내부에서
-  // 검증된 게 아닌 웹 참고정보"임을 명시(guid 등 Hondi 검증 필드와 구분).
+  // K-Search RULE-07 [7-A] 대체형과 동일한 보고 형식 — "나비 내부에서
+  // 검증된 게 아닌 웹 참고정보"임을 명시(guid 등 나비 검증 필드와 구분).
   const searchInject =
     `[웹 검색결과 — 미검증, 출처: 웹, K-Search RULE-07 [7-A] 대체형 준용] ${resultText}\n\n` +
-    `이 정보는 Hondi 내부에서 검증된 게 아닙니다. 이 결과를 반영해 답하되, ` +
+    `이 정보는 나비 내부에서 검증된 게 아닙니다. 이 결과를 반영해 답하되, ` +
     `여전히 불확실한 부분은 [VERIFY] 표시와 함께 사용자 본인 확인을 권하세요. ` +
     `검색 결과에 없는 제3자의 정보(나이·거래이력 등)를 추정해 채우지 마세요(RULE-01 금지-10).`;
   messages.push({ role: 'user', content: searchInject });
@@ -1107,10 +1107,10 @@ async function _continueAfterOrchestrationTag() {
 // 찾아 보여준다. 결과가 없으면 없다고 정직하게 알린다(C39-4).
 async function _connectHumanExpert(occupationKeyword, escReason = 'success') {
   _escalationReason = escReason; // §7 how 필드 판정용 — C39-5 반영(2026-07-20)
-  // 2026-10-04 변호사법 정비 — 혼디는 변호사·법률사무소 등을 소개·연결·추천하지 않는다.
+  // 2026-10-04 변호사법 정비 — 나비는 변호사·법률사무소 등을 소개·연결·추천하지 않는다.
   // 법률 직군 키워드는 market 조회를 하지 않고 직접 상담을 안내한다.
   if (/변호사|법률|법무|변리사/.test(occupationKeyword || '')) {
-    appendBubble('ai', '혼디는 변호사·법률사무소를 소개·연결·추천하지 않습니다. 상담이 필요하시면 직접 선택하신 변호사와 상담해 주세요. 무료·저비용 법률구조가 필요하시면 대한법률구조공단 등 공적 기관의 안내를 확인하실 수 있습니다.');
+    appendBubble('ai', '나비는 변호사·법률사무소를 소개·연결·추천하지 않습니다. 상담이 필요하시면 직접 선택하신 변호사와 상담해 주세요. 무료·저비용 법률구조가 필요하시면 대한법률구조공단 등 공적 기관의 안내를 확인하실 수 있습니다.');
     return;
   }
   const box = appendBubble('ai', `<i>market에서 "${escHtml(occupationKeyword)}" 관련 등록
@@ -1250,7 +1250,7 @@ function clearAttach() {
 // ── 마이크(음성 입력) — 단발 토글, 1초 무음 시 자동 전송 ──────────
 // 2026-07-19 재수정 — 이전 버전은 주석만 "webapp.html의 ai-panel-mic-btn과
 // 동일한 패턴"이라 해놓고 실제 설정은 그게 아니라 웹앱의 별개 기능(상시
-// 대기 "혼디야" 호출어 리스너)의 설정(continuous:true)을 잘못 베껴온
+// 대기 "나비야" 호출어 리스너)의 설정(continuous:true)을 잘못 베껴온
 // 것이었다(실사용자 신고 — "활성화됐다가 바로 stop"). 진짜 ai-panel-mic-btn
 // 구현(webapp.html 3137행대)은 continuous:false를 쓰고, 결정적으로
 // "무음 타이머"를 클릭 직후가 아니라 **결과가 한 번이라도 들어온 뒤에만**
@@ -1383,7 +1383,7 @@ let _idleTimer = null;
 function _resetIdle() {
   if (_idleTimer) clearTimeout(_idleTimer);
   _idleTimer = setTimeout(() => {
-    appendBubble('ai', '10분간 응답이 없어 상담을 종료합니다. 고팡 화면으로 돌아갑니다…');
+    appendBubble('ai', '10분간 응답이 없어 상담을 종료합니다. 나비 화면으로 돌아갑니다…');
     _recordExpertOwnerPDV('timeout'); // §7 기관측 PDV (2026-07-20) — await 없이 발사(페이지 곧 이동)
     setTimeout(() => { location.href = RETURN; }, 1500);
   }, 10 * 60 * 1000);

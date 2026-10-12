@@ -2,7 +2,7 @@
  * ⚠ 이 파일은 삭제 검토 대상이었으나(2026-09-13), 다른 코드가 여전히
  * import하고 있을 가능성을 배제할 수 없어 우선 스텁으로 남긴다.
  *
- * 혼디 검색(/hondi-search)의 실제 구현은 이 레포에 없다 — 별도 저장소/
+ * 나비 검색(/hondi-search)의 실제 구현은 이 레포에 없다 — 별도 저장소/
  * Worker인 Openhash-Gopang/hondi-search-relay(src/hondi-search-worker.js)로
  * 완전히 이관됐다(2026-09-09, docs/HANDOFF_HONDI_SEARCH_RELAY_MIGRATION_20260909_v1_0.md
  * 참고 — Cloudflare Error 1042 회피가 이관 사유).

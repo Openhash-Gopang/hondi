@@ -105,10 +105,11 @@
   },
   {
     "id": "hondi-code",
-    "label": "혼디코드",
+    "label": "나비코드",
     "file": "hondi-code.txt",
     "triggers": [
       "혼디코드",
+      "나비코드",
       "숫자 코드",
       "숫자코드",
       "색상 코드",
@@ -279,7 +280,7 @@
   },
   {
     "id": "overview",
-    "label": "혼디가 뭐하는 앱인가요",
+    "label": "나비가 뭐하는 앱인가요",
     "file": "overview.txt",
     "triggers": [
       "뭐하는 앱",

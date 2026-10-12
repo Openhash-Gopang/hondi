@@ -28,7 +28,7 @@
  *   <div id="tb-icon">🏛</div>
  *   <div id="tb-sub">로딩 중…</div>
  *   <div id="trace-badge"></div>              (선택)
- *   <button id="tb-back">고팡으로</button>
+ *   <button id="tb-back">나비로</button>
  * </div>
  * <div id="err-banner"></div>
  * <div id="chat-thread"></div>

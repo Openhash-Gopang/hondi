@@ -1,4 +1,4 @@
-# Gopang webapp.html — 설계 명세 및 검증 보고서
+# Navi webapp.html — 설계 명세 및 검증 보고서
 
 > **이 문서가 다루는 범위**: webapp.html의 설계 명세와 검증 이력(SP-00 v10.0 적용본, v4.0)
 > **전체 문서 지도**: [MANUAL_INDEX.md](MANUAL_INDEX.md)
@@ -26,7 +26,7 @@
 
 ## 1. 개요
 
-`webapp.html`은 고팡(Gopang) AI 메신저 플랫폼의 핵심 진입점이다.
+`webapp.html`은 나비(Navi) AI 메신저 플랫폼의 핵심 진입점이다.
 v3.0에서 단일 파일(221KB)을 **HTML 골격 + 4개 JS 모듈**로 분리하여
 유지보수성과 로딩 효율을 대폭 개선했다.
 
@@ -63,7 +63,7 @@ gopang/
 <!-- GWP 레지스트리 (head에서 선로드) -->
 <script src="/gwp-registry.js"></script>
 
-<!-- 고팡 모듈 — DOM 완성 후 로드 (</body> 직전) -->
+<!-- 나비 모듈 — DOM 완성 후 로드 (</body> 직전) -->
 <script src="/src/pwa/gopang-pwa.js"></script>   <!-- IIFE 외부: PWA -->
 <script src="/src/auth/gopang-auth.js"></script>  <!-- IIFE 외부: 인증 -->
 <script src="/gopang-app.js"></script>             <!-- IIFE 전체: 앱 코어 -->
@@ -288,7 +288,7 @@ input.focus();
 
 | 하위 시스템 | 저장소 | 마이크 구현 | v3.6 패턴 적용 |
 |------------|--------|------------|--------------|
-| 고팡 (gopang) | Openhash-Gopang/gopang | ✅ | ✅ v3.6 |
+| 나비 (gopang) | Openhash-Gopang/gopang | ✅ | ✅ v3.6 |
 | K-Market | Openhash-Gopang/market | ✅ | ⬜ 미적용 |
 | K-Health | — | ⬜ 미구현 | ⬜ |
 | K-School | — | ⬜ 미구현 | ⬜ |
@@ -317,8 +317,8 @@ const PRECACHE_URLS = [
   '/gopang-app.js',
   '/auth/gopang-sso.js',
   '/auth/subsystem-auth.js',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
+  '/icons/navi-icon-192.png',
+  '/icons/navi-icon-512.png',
 ];
 ```
 
@@ -397,9 +397,9 @@ sendMessage()
 | `[GWP:klogistics]` | K-Logistics | 택배·배송·물류·운송·추적 |
 | `[GWP:fiil-kcleaner]` | K-Clean | 쓰레기·환경오염·불법투기·신고 |
 | `[GWP:kgov]` | K-Gov | 민원·등본·허가·면허·행정심판 |
-| `[GWP:kdemocracy]` | K-Democracy | 투표·안건·청원·고팡 의회 |
+| `[GWP:kdemocracy]` | K-Democracy | 투표·안건·청원·나비 의회 |
 
-### 6-3. 하위 시스템 → 고팡 보고 (postMessage)
+### 6-3. 하위 시스템 → 나비 보고 (postMessage)
 
 ```javascript
 // 작업 완료 보고
@@ -493,7 +493,7 @@ const ctx = ctxRaw
 | `callAI(text, file)` | gopang-app.js | SP-00 LLM 호출 + [GWP:id] 태그 감지 |
 | `loadSystemPrompt()` | K-Market webapp.js | GitHub raw URL에서 SP 동적 로드 |
 | `_gwpLaunch(svc, ctx)` | gopang-app.js | 새 탭으로 하위 시스템 실행 |
-| `_gwpOnTabClose()` | gopang-app.js | 탭 닫힘 감지 → 고팡 복귀 |
+| `_gwpOnTabClose()` | gopang-app.js | 탭 닫힘 감지 → 나비 복귀 |
 | `_gwpClose(show)` | gopang-app.js | 강제 탭 종료 |
 | `_recordPDV(record)` | gopang-app.js | localStorage + Supabase PDV 기록 |
 | `_initLocation()` | gopang-app.js | GPS → IP 폴백 위치 초기화 |
@@ -511,7 +511,7 @@ const ctx = ctxRaw
 |---|---|---|
 | 높음 | dead code 제거 | `_gwpMatch()`, `runRouter()`, `_loadRouterPrompt()` 함수 정의 제거 |
 | 높음 | gopang-auth.js 분리 완성 | `src/auth/gopang-auth.js` 내용 검증 및 테스트 |
-| 중 | callAI PDV 기록 | 고팡 AI 직접 응답도 PDV에 기록 |
+| 중 | callAI PDV 기록 | 나비 AI 직접 응답도 PDV에 기록 |
 | 중 | 다른 하위 시스템 SP 동적 로드 적용 | K-Law, K-Health 등도 GitHub raw URL 방식으로 전환 |
 | 낮음 | 서비스 URL 중앙화 | gwp-registry.js URL을 config.js로 통합 |
 

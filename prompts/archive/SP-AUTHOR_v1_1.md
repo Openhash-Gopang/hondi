@@ -110,13 +110,13 @@ PHASE B-0에서 확정한 INPUT_SCHEMA/OUTPUT_SCHEMA를 뼈대로, 그 사이를
 
 1. **PROCEDURE** — PHASE C 결과 (DATA_REQUIREMENT 형식)
 2. **REQUIRED_USER_FIELDS** — PHASE B-0의 `INPUT_SCHEMA`를 그대로 인용한다
-   (자유서술 재작성 금지). Hondi 기존 스키마에 최대한 매핑, `min_level`은
+   (자유서술 재작성 금지). Navi 기존 스키마에 최대한 매핑, `min_level`은
    `DOCUMENT-TYPE-REGISTRY`에 등재된 값을 그대로 쓴다. L3는 `PDV-TRANSFER-
    PROTOCOL` §2에 따라 매 건 동의 필수로 자동 표시한다(SP-AUTHOR가 이
    표시를 빠뜨리면 §7 검수에서 반려).
 3. **ISSUED_DOCUMENTS** — PHASE B-0의 `OUTPUT_SCHEMA`를 그대로 인용한다.
    각 `doc_type`은 `gov_tickets` 컬렉션 저장 스펙과 함께 기록한다.
-4. **AUTH_MODEL** — Ed25519 위임 서명 토큰 모델. 이 기관이 Hondi API를
+4. **AUTH_MODEL** — Ed25519 위임 서명 토큰 모델. 이 기관이 Navi API를
    아직 받아들이지 않으면(대부분) `CAPABILITIES`에 `referral_only`로
    명시하고 자동 로그인·자동 제출을 절대 설계하지 않는다.
 5. **`§CAPABILITIES` 바로 뒤에 `HUMAN-AUTHORITY-GATE-SCHEMA_v1_0.md`

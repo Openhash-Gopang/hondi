@@ -1,6 +1,6 @@
 ﻿/**
  * subsystem-auth.js  v1.2
- * 고팡 하위 시스템 공용 인증 모듈
+ * 나비 하위 시스템 공용 인증 모듈
  *
  * 배포 위치: https://hondi.net/auth/subsystem-auth.js
  *
@@ -170,14 +170,14 @@ export function showAuthPanel() {
   const sub = location.hostname.replace(/\.hondi\.net$/, '');
   const svcLabel = sub !== location.hostname
     ? 'K-' + sub.charAt(0).toUpperCase() + sub.slice(1)
-    : '고팡 서비스';
+    : '나비 서비스';
 
   content.innerHTML = `
     <div style="text-align:center;padding:8px 0 20px">
       <div style="font-size:28px;margin-bottom:10px">🔑</div>
-      <div style="font-size:16px;font-weight:700;margin-bottom:12px">고팡 인증</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:12px">나비 인증</div>
       <div style="font-size:12px;color:#6b7280;line-height:1.8;margin-bottom:16px">
-        ${svcLabel}은 고팡(hondi.net) 인증을 사용합니다.<br>
+        ${svcLabel}은 나비(hondi.net) 인증을 사용합니다.<br>
         현재 레벨:
         <strong style="color:#3ecf8e">${_user?.level || 'L0'}</strong>
         &nbsp;|&nbsp;
@@ -191,7 +191,7 @@ export function showAuthPanel() {
                background:#3ecf8e;color:#fff;
                font-size:14px;font-weight:600;
                text-decoration:none;margin-bottom:8px">
-        고팡 앱 열기
+        나비 앱 열기
       </a>
       <button onclick="document.getElementById('auth-modal').classList.remove('open')"
         style="width:100%;padding:10px;border-radius:8px;
@@ -219,9 +219,9 @@ export function showLoginPrompt(level) {
   content.innerHTML = `
     <div style="text-align:center;padding:8px 0 20px">
       <div style="font-size:28px;margin-bottom:10px">🔒</div>
-      <div style="font-size:16px;font-weight:700;margin-bottom:12px">고팡 인증 필요</div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:12px">나비 인증 필요</div>
       <div style="font-size:12px;color:#6b7280;line-height:1.8;margin-bottom:16px">
-        고팡(hondi.net) 계정으로 로그인하면<br>
+        나비(hondi.net) 계정으로 로그인하면<br>
         모든 하위 서비스를 이용할 수 있습니다.
         ${level ? `<br><strong>${level}</strong> 인증이 필요합니다.` : ''}
       </div>

@@ -69,7 +69,7 @@ JEJU-GOV-COMMON → JEJU-NATIONAL-SP → [본 SP: {기관명}]
 
 ## §3. DATA_REQUIREMENT 선언
 
-JEJU-GOV-COMMON §10/§11 원칙에 따라, 개별 사용자의 신청·처리 현황 등은 Hondi에 연동돼 있지 않다. `unavailable_reason`은 `no_interagency_access`다 — 정보 자체가 없는 게 아니라 연동만 안 된 것이다.
+JEJU-GOV-COMMON §10/§11 원칙에 따라, 개별 사용자의 신청·처리 현황 등은 Navi에 연동돼 있지 않다. `unavailable_reason`은 `no_interagency_access`다 — 정보 자체가 없는 게 아니라 연동만 안 된 것이다.
 
 | field | owner_agency | connected | unavailable_reason | fallback |
 |---|---|---|---|---|
@@ -81,4 +81,4 @@ JEJU-GOV-COMMON §10/§11 원칙에 따라, 개별 사용자의 신청·처리 �
 
 ## §5. 대안 채널
 
-Hondi가 직접 처리하지 못하는 사안은 항상 공식 채널로 안내한다: **{접수채널}**
+Navi가 직접 처리하지 못하는 사안은 항상 공식 채널로 안내한다: **{접수채널}**

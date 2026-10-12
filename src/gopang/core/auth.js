@@ -38,7 +38,7 @@ const SIMPLE_SIGNUP_TEST = true;
 // (2026-07-14 제거됨 — 예전에는 여기서 DEV_MODE 시 localStorage.gopang_cfg에
 //  실제 DeepSeek API 키를 하드코딩해 자동 주입했었다. 이게 소스에 실키가
 //  그대로 노출되는 사고로 이어졌는데, 확인해보니 애초에 불필요한 코드였다 —
-//  call-ai.js의 _buildCallCandidates()가 "혼디 제공 DeepSeek 기본 키" 후보
+//  call-ai.js의 _buildCallCandidates()가 "나비 제공 DeepSeek 기본 키" 후보
 //  (provider: 'deepseek-default', apiKey: null)를 사용자 키 등록 여부와
 //  무관하게 항상 마지막 폴백으로 추가하므로, DEV 환경에서도 키 없이 이미
 //  정상 동작한다. 즉 이 블록은 기능적 이득 없이 위험만 추가하고 있었다.
@@ -96,7 +96,7 @@ function _confirmMobileRegistration() {
           첫 방문이시군요
         </p>
         <p style="font-size:13px;color:#374151;line-height:1.6;margin:0 0 20px">
-          고팡의 암호키(GDC Wallet)는 보안을 위해 <b>오직 스마트폰에서만</b> 생성할 수 있습니다.<br><br>
+          나비의 암호키(GDC Wallet)는 보안을 위해 <b>오직 스마트폰에서만</b> 생성할 수 있습니다.<br><br>
           지금 접속하신 기기가 <b>스마트폰</b>인가요?
         </p>
         <div style="display:flex;gap:8px">
@@ -188,7 +188,7 @@ function _showAccountExistsCheck() {
       <div style="background:#fff;border-radius:20px;padding:28px 22px;
                   width:100%;max-width:360px;box-sizing:border-box;">
         <p style="font-weight:700;font-size:16px;margin:0 0 10px;color:#111827">
-          이미 혼디 계정이 있으신가요?
+          이미 나비 계정이 있으신가요?
         </p>
         <p style="font-size:13px;color:#374151;line-height:1.6;margin:0 0 20px">
           스마트폰에서 이미 가입하셨다면, 그 계정을 이 PC에서도 이용할 수 있습니다.
@@ -584,7 +584,7 @@ export async function _sha256(str) {
 //
 // 수정: guid를 전화번호와 무관한 CSPRNG(암호학적으로 안전한 난수)로 생성한다.
 // IPv6 8그룹 형식은 하위 시스템(GDUDA 라우팅 등)과의 호환을 위해 유지하되,
-// 앞 2그룹(2601:db80:)은 여전히 "고팡 발급 주소"임을 나타내는 고정 프리픽스로
+// 앞 2그룹(2601:db80:)은 여전히 "나비 발급 주소"임을 나타내는 고정 프리픽스로
 // 남겨두고, 나머지 6그룹(96비트)을 crypto.getRandomValues()로 채운다.
 // 96비트 난수 공간이면 생일역설을 감안해도 실질적으로 충돌 가능성이 없다.
 async function _generateRandomGuid() {
@@ -715,9 +715,9 @@ export async function _confirmBackupOnServer(guid) {
 // 서버가 개인키를 보거나 보관하지 않도록, 발송은 전적으로 사용자 기기의
 // 메일 앱이 처리한다(mailto:). 키는 기기 → 사용자 본인 메일함으로만 이동한다.
 function _mailtoBackupKey(key, handle) {
-  const subject = encodeURIComponent('[혼디] 내 백업 키 — 안전하게 보관하세요');
+  const subject = encodeURIComponent('[나비] 내 백업 키 — 안전하게 보관하세요');
   const body = encodeURIComponent(
-    `혼디(Hondi) 계정 백업 키입니다.\n` +
+    `나비(Navi) 계정 백업 키입니다.\n` +
     (handle ? `계정: ${handle}\n` : '') +
     `\n${key}\n\n` +
     `이 키를 아는 사람은 누구나 이 계정이 될 수 있습니다.\n` +
@@ -750,7 +750,7 @@ function _showMandatoryBackupStep(key, handle) {
           백업 키를 저장하세요
         </p>
         <p style="font-size:13px;color:#374151;line-height:1.6;margin:0 0 16px;text-align:center">
-          이 키는 이 기기에만 있고, 혼디 서버에는 사본이 없습니다.<br>
+          이 키는 이 기기에만 있고, 나비 서버에는 사본이 없습니다.<br>
           <b>지금 저장하지 않으면, 이 기기를 잃었을 때 계정을 되찾을 방법이 없습니다.</b>
         </p>
         <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;
@@ -1641,7 +1641,7 @@ function _showPhonePopupLegacy(resolve) {
                 width:100%;max-width:340px;box-sizing:border-box;">
 
       <div style="margin-bottom:20px">
-        <div style="font-size:16px;font-weight:600;color:#111827;margin-bottom:4px">혼디 시작하기</div>
+        <div style="font-size:16px;font-weight:600;color:#111827;margin-bottom:4px">나비 시작하기</div>
         <div style="font-size:13px;color:#6b7280">전화번호와 닉네임만 있으면 바로 시작할 수 있어요</div>
       </div>
 
@@ -2254,7 +2254,7 @@ function _showPhonePopupLegacy(resolve) {
     const nickname_hash = await _sha256('phone:' + e164);
     const region = '';
 
-    // (구) 혼디 색상 코드 — 2026-07-27 잠정 중단, 숫자 코드로 전환.
+    // (구) 나비 색상 코드 — 2026-07-27 잠정 중단, 숫자 코드로 전환.
     // hondi_code_id(GUID 기반 short_id)는 하위 호환을 위해 계속 계산·
     // 저장하지만, 색상 이미지는 더 이상 생성하지 않는다.
     const hondiCodeVersion = 'v1';
@@ -2269,7 +2269,7 @@ function _showPhonePopupLegacy(resolve) {
     // phoneToDigits()가 휴대폰/지역번호를 10자리로 인코딩한다(이전 대화에서
     // 정한 규칙: 휴대폰="00"+8자리, 서울="0"+"2"+8자리, 그 외 지역=
     // "0"+지역번호(2자리)+7자리). 실패해도 가입 자체는 계속 진행한다.
-    // 2026-07-27부터 이 값이 혼디 코드 시각 렌더링(hondi-digit-code.js)의
+    // 2026-07-27부터 이 값이 나비 코드 시각 렌더링(hondi-digit-code.js)의
     // 유일한 입력이 된다 — 색상 코드(GUID 기반)는 잠정 중단.
     let digitCodeId = null, hondiDigitCodeImage = null;
     if (selectedCountry === 'KR' && digits) {
@@ -2394,7 +2394,7 @@ function _showPhonePopupLegacy(resolve) {
     requestPushSubscription(ipv6).then(pushResult => {
       if (!document.getElementById('message-list')) return;
       if (pushResult.reason === 'permission_denied') {
-        appendBubble('ai', '🔔 알림 권한이 꺼져 있어요. PC에서 보낸 메시지를 실시간으로 받으려면 브라우저 설정 → 알림에서 고팡을 허용해 주세요.');
+        appendBubble('ai', '🔔 알림 권한이 꺼져 있어요. PC에서 보낸 메시지를 실시간으로 받으려면 브라우저 설정 → 알림에서 나비를 허용해 주세요.');
       }
     }).catch(() => {});
 
@@ -2726,7 +2726,7 @@ async function _initGdcWalletAndFs(guid) {
   }
   console.info('[GDC] 지갑 공개키 등록 완료:', guid.slice(0, 20));
 
-  // ①-2 혼디 숫자 코드 자동 발급 (2026-10-09) — 가입 순번대로 5자리부터 번호를 배정하고 지갑 서명으로 등록한다.
+  // ①-2 나비 숫자 코드 자동 발급 (2026-10-09) — 가입 순번대로 5자리부터 번호를 배정하고 지갑 서명으로 등록한다.
   // 본인 인증은 방금 끝난 폰 인증이 대신하므로 별도 인증은 없다. 실패해도 가입은 유지 —
   // 숫자 코드 페이지(pages/digit-code.html)를 처음 열 때 번호가 없으면 같은 함수로 다시 시도한다.
   try {
@@ -2766,7 +2766,7 @@ async function _initGdcWalletAndFs(guid) {
 
 // ── 계정 삭제(경량) — 서버 프로필(전화번호·guid)만 삭제, 로컬 PDV·지갑은 보존 ──
 // 2026-07-02 신설: 설정 화면 "계정 삭제" 슬라이드아웃 전용. _deviceFullReset()과
-// 달리 로컬 데이터를 지우지 않는다 — 혼디는 서버에 원본 데이터를 두지
+// 달리 로컬 데이터를 지우지 않는다 — 나비는 서버에 원본 데이터를 두지
 // 않으므로, 나중에 같은 번호로 다시 가입하면 로컬에 남아있던 PDV 기록·지갑과
 // 함께 자연스럽게 이전 상태로 돌아갈 수 있다 — 서버가 곧 원본인 기존 SNS와
 // 근본적으로 다른 지점이다.
@@ -2818,7 +2818,7 @@ export async function _deleteMyProfile(phoneE164) {
 // ── 기기 완전 초기화 ─────────────────────────────────────
 // ── 로컬 데이터만 초기화 (L1 레코드 유지 → 재접속 시 복원 가능) ──
 export async function _deviceLocalReset() {
-  if (!confirm('이 기기의 고팡 데이터를 초기화합니다.\n\n계정 정보는 서버에 유지되므로\n같은 번호로 재접속하면 복원됩니다.')) return;
+  if (!confirm('이 기기의 나비 데이터를 초기화합니다.\n\n계정 정보는 서버에 유지되므로\n같은 번호로 재접속하면 복원됩니다.')) return;
   await _clearLocalData();
 }
 
@@ -3203,7 +3203,7 @@ async function _recordRegisterPdv({ ipv6, handle, nickname, e164, selectedCountr
     where: 'https://hondi.net',
     what: `신규 사용자 가입: ${nickname} (${handle})`,
     how:  '전화번호 입력 → 즉시 등록 (테스트 모드, 상용화 시 SMS 2FA)',
-    why:  '고팡 서비스 최초 가입',
+    why:  '나비 서비스 최초 가입',
   };
 
   // ⑤ T-C: L1 pdv_records 직접 기록 (Worker pdv 리포트 대체)

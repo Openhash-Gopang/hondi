@@ -187,7 +187,7 @@ await test('E-06', '법원 요약 보고서 필수 필드 존재', async () => {
   for (const f of required) {
     assert(summary[f] !== undefined && summary[f] !== null, `필드 존재: ${f}`)
   }
-  assert(summary.disclaimer.includes('고팡'), 'disclaimer에 고팡 포함')
+  assert(summary.disclaimer.includes('나비'), 'disclaimer에 나비 포함')
 })
 
 // E-07: ZKP proof_weight 등급

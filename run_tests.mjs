@@ -624,13 +624,13 @@ await test('M-08', "settings.js — L1 응답 형식(items[]) 처리", async () 
   assert(src.includes('items?.[0]'), 'L1 items[0] 파싱 없음')
 })
 
-await test('M-09', "MeiliSearch 선택 근거 — 혼디 요구사항 정합성", async () => {
+await test('M-09', "MeiliSearch 선택 근거 — 나비 요구사항 정합성", async () => {
   // 한국어 형태소, 메모리, 분산, 라이선스 체크
   const criteria = {
     한국어: true,   // lindera 내장
     메모리200MB: true,  // 100k 문서 기준
     단일바이너리: true,
-    BUSL라이선스_SaaS재판매아님: true,  // 혼디는 SaaS 재판매 아님
+    BUSL라이선스_SaaS재판매아님: true,  // 나비는 SaaS 재판매 아님
     FederatedSearch: true,  // L2/L3 분산 인덱스
   }
   for (const [k, v] of Object.entries(criteria)) {

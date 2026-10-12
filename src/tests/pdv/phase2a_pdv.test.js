@@ -66,7 +66,7 @@ await test('P-01', 'Ed25519 키쌍 생성', async () => {
 // P-02: 서명 후 검증 → true
 await test('P-02', '서명 후 검증 성공', async () => {
   const { publicKey, privateKey, publicKeyB64 } = await generateKeyPair()
-  const msg = '안녕하세요 고팡 테스트 메시지입니다.'
+  const msg = '안녕하세요 나비 테스트 메시지입니다.'
   const sig = await signMessage(msg, privateKey)
   const valid = await verifySignature(msg, sig, publicKeyB64)
   assert(valid === true, `서명 검증 결과: ${valid}`)

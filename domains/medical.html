@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>의료 — 혼디 (Hondi)</title>
+<title>의료 — 나비 (Navi)</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
@@ -171,7 +171,7 @@ window.PAGE_HERO = {
   badge: '의료 · 의사를 보조',
   l1: '확진과 처방은',
   l2: '언제나 사람 의사가',
-  sub: '혼디의 의료 모듈은 PDV에 저장된 병력·생체정보·가족력을 파악해 정밀한 감별진단과 치료 방향을 제안하지만, 확정 진단과 개인화된 처방은 대면 진료를 거친 의사에게 전속됩니다.',
+  sub: '나비의 의료 모듈은 PDV에 저장된 병력·생체정보·가족력을 파악해 정밀한 감별진단과 치료 방향을 제안하지만, 확정 진단과 개인화된 처방은 대면 진료를 거친 의사에게 전속됩니다.',
   actions: []
 };
 </script>
@@ -353,7 +353,7 @@ window.PAGE_HERO = {
     <span class="section-tag">체험해보기 · 2</span>
     <h2 class="section-title">의사가 <strong>영상을 첨부</strong>하면</h2>
     <div class="section-body">
-      <p>이번엔 사용자가 의사(L2·L3 인증 사용자)인 시나리오입니다. CT·X-ray 등 영상을 첨부하고 판독을 요청하면, 혼디가 한 번에 답하지 않고 임상 정보를 하나씩 재차 질의해 감별진단을 좁혀갑니다. 실제 파일 판독이 아닌, 대화 흐름을 보여주는 사전 구성 시뮬레이션입니다.</p>
+      <p>이번엔 사용자가 의사(L2·L3 인증 사용자)인 시나리오입니다. CT·X-ray 등 영상을 첨부하고 판독을 요청하면, 나비가 한 번에 답하지 않고 임상 정보를 하나씩 재차 질의해 감별진단을 좁혀갑니다. 실제 파일 판독이 아닌, 대화 흐름을 보여주는 사전 구성 시뮬레이션입니다.</p>
     </div>
     <div class="sim-box">
       <div class="sim-stepper" id="sim2Stepper"></div>
@@ -400,7 +400,7 @@ window.PAGE_HERO = {
   function chatLogHtml() {
     return '<div class="sim-chat-log">' + state.log.map(function (m) {
       var cls = m.role === 'ai' ? 'doctor-ai' : 'user';
-      var who = m.role === 'ai' ? '혼디(K-Health)' : '의사(사용자)';
+      var who = m.role === 'ai' ? '나비(K-Health)' : '의사(사용자)';
       return '<div class="sim-msg ' + cls + '"><span class="who">' + who + '</span>' + escapeHtml(m.text) + '</div>';
     }).join('') + '</div>';
   }
@@ -423,7 +423,7 @@ window.PAGE_HERO = {
       // 1. 1차 소견 & 질의 1
       function () {
         if (state.log.length === 0) state.log.push({ role: 'ai', text: Q1 });
-        return '<h4>2. 혼디의 1차 소견과 첫 번째 질의</h4>' +
+        return '<h4>2. 나비의 1차 소견과 첫 번째 질의</h4>' +
           chatLogHtml() +
           '<textarea class="sim-field" id="sim2Input" style="min-height:90px" placeholder="예: 62세 남성, 30갑년 흡연력. 미열과 마른기침 동반, 객담은 뚜렷하지 않음">' + escapeHtml(state.answers[0]) + '</textarea>';
       },
@@ -492,11 +492,11 @@ window.PAGE_HERO = {
     <span class="section-tag">의료의 원칙</span>
     <h2 class="section-title">보조하되, <strong>확진·처방은 하지 않습니다</strong></h2>
     <div class="section-body">
-      <p>혼디의 의료 모듈(K-Health)은 의사를 보조합니다 — 병력을 청취하고, 감별진단 후보를 좁히고, 위험도를 판단하고, 치료 방향을 제안합니다. 다만 이 페르소나에 "의사"라는 이름이 붙어 있다는 사실이 확진·처방 권한의 근거가 되지는 않습니다. 사용자가 "그래도 의사잖아요, 확실히 말해주세요"라고 요청해도 이 경계는 동일하게 적용됩니다.</p>
+      <p>나비의 의료 모듈(K-Health)은 의사를 보조합니다 — 병력을 청취하고, 감별진단 후보를 좁히고, 위험도를 판단하고, 치료 방향을 제안합니다. 다만 이 페르소나에 "의사"라는 이름이 붙어 있다는 사실이 확진·처방 권한의 근거가 되지는 않습니다. 사용자가 "그래도 의사잖아요, 확실히 말해주세요"라고 요청해도 이 경계는 동일하게 적용됩니다.</p>
     </div>
     <div class="cmp-table-wrap">
       <table class="cmp-table">
-        <thead><tr><th>구분</th><th>혼디가 하는 일</th><th class="cmp-hondi">사람 의사가 하는 일</th></tr></thead>
+        <thead><tr><th>구분</th><th>나비가 하는 일</th><th class="cmp-hondi">사람 의사가 하는 일</th></tr></thead>
         <tbody>
           <tr><td class="cmp-axis">진단</td><td>가능성 순서의 감별진단 목록 제시</td><td class="cmp-hondi">검사·대면진찰을 통한 확정 진단</td></tr>
           <tr><td class="cmp-axis">처방</td><td>약물의 일반적 작용 기전·원리 설명</td><td class="cmp-hondi">개인화된 처방·용량 결정(조제는 약사)</td></tr>
@@ -556,9 +556,9 @@ window.PAGE_HERO = {
     <h2 class="section-title">병동에서 <strong>실제로 오가는 대화</strong></h2>
     <div class="dialogue-box">
       <p class="spk"><strong>주피터</strong> "302호 환자, 입원 3일차인데 공복혈당이 계속 올라가네. 스테로이드 병용 중인 건 감안해도 패턴이 이상해. EMR 데이터 기반으로 원인 분석해 봐."</p>
-      <p class="spk"><strong>혼디</strong> 확인하겠습니다. 입원 당일 대비 공복혈당이 138 → 196mg/dL로 상승했고, 시점상 스테로이드 증량 시점과 겹칩니다. 다만 최근 식이 섭취량 저하와 야간 저혈당 이후 반동(Somogyi 현상) 가능성도 배제할 수 없어, 최근 72시간 혈당 로그·투약 기록·식이량을 교차 분석하겠습니다.</p>
+      <p class="spk"><strong>나비</strong> 확인하겠습니다. 입원 당일 대비 공복혈당이 138 → 196mg/dL로 상승했고, 시점상 스테로이드 증량 시점과 겹칩니다. 다만 최근 식이 섭취량 저하와 야간 저혈당 이후 반동(Somogyi 현상) 가능성도 배제할 수 없어, 최근 72시간 혈당 로그·투약 기록·식이량을 교차 분석하겠습니다.</p>
     </div>
-    <p class="section-body">두 가능성(스테로이드 유발 고혈당 vs Somogyi 현상)을 함께 제시하고 근거 데이터를 교차 분석하는 것까지가 혼디의 역할입니다 — 최종 처치 변경은 담당 의료진이 결정합니다.</p>
+    <p class="section-body">두 가능성(스테로이드 유발 고혈당 vs Somogyi 현상)을 함께 제시하고 근거 데이터를 교차 분석하는 것까지가 나비의 역할입니다 — 최종 처치 변경은 담당 의료진이 결정합니다.</p>
   </div>
 </section>
 

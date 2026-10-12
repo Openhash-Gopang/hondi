@@ -100,7 +100,7 @@ UNIVERSAL-INTEGRITY_v1_0.md  (U0~U7 — 안내로 끝내지 않기, 확신도 �
    일부가 실제로는 2026-07-04 시점 기준이라는 걸 감안해서 읽어야 한다.
 
 ## 4. UNIVERSAL-INTEGRITY 부록(2026-07-18 신설) 참고
-UNIVERSAL-INTEGRITY_v1_0.md에 "부록. 혼디 플랫폼 자체의 유지보수 세션
+UNIVERSAL-INTEGRITY_v1_0.md에 "부록. 나비 플랫폼 자체의 유지보수 세션
 참고사항"이 추가되어, `docs/HONDI_GAP_REMEDIATION_DIRECTIVE_v1_0.md`
 (16개 저장소 점검 세션의 미비점 보완 지시서)를 조건부로 참조한다 —
 TASK-DELEGATION-GUIDE와 달리 manifest-loader.js가 강제 주입하지는
@@ -110,7 +110,7 @@ TASK-DELEGATION-GUIDE와 달리 manifest-loader.js가 강제 주입하지는
 
 ## 4. 다국가 확장 설계 (개념 단계, 2026-07-04 추가)
 
-`GLOBAL-LOCAL-COMPLIANCE_v1_0.md` — K-서비스를 "보편원칙 계층(혼디 자체
+`GLOBAL-LOCAL-COMPLIANCE_v1_0.md` — K-서비스를 "보편원칙 계층(나비 자체
 규약, 국가 무관, 자동 적용)"과 "국가모듈 계층(실정법 반영 + 실제 관할
 인간 승인)"으로 나누는 설계. 지금 `K-Public_common_v1_3.md`은 이 구조의
 "한국모듈" 인스턴스로 재해석되며, 실제 코드 상 두 층위 분리는 아직 안

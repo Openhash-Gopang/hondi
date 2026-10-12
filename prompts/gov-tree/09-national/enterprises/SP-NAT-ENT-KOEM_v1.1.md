@@ -113,7 +113,7 @@ SP-ORG-JEA 등 지방출자기관 SP와 동일한 원칙).
 
 ## §3. DATA_REQUIREMENT 선언
 
-UNIVERSAL-common U1/U2 원칙에 따라, 개별 계약·공급·채용 현황 등은 Hondi에
+UNIVERSAL-common U1/U2 원칙에 따라, 개별 계약·공급·채용 현황 등은 Navi에
 연동돼 있지 않다. `unavailable_reason`은 `no_interagency_access`다.
 
 | field | owner_agency | connected | unavailable_reason | fallback |

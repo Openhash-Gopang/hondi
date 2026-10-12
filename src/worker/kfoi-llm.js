@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
 // K-FOI — 사용자가 고른 LLM(BYOK: 자기 API 키) 호출 어댑터. 2026-09-21 신설.
 //
-// mail.hondi.net "정보 공개 청구"의 대화 창에서 사용자가 기본 모델(혼디 기본) 대신 다른 LLM을 고르면
+// mail.hondi.net "정보 공개 청구"의 대화 창에서 사용자가 기본 모델(나비 기본) 대신 다른 LLM을 고르면
 // 그 회사의 API 키를 입력하게 하고, 그 키로 이 어댑터가 해당 회사 API를 부른다.
 //
 // 설계 원칙
@@ -33,7 +33,7 @@ const CUSTOM_MODEL_RE = /^[A-Za-z0-9][A-Za-z0-9._:\-\/]{0,79}$/;
 const ANTHROPIC_MAX_TOKENS = 8000;
 const DEFAULT_TIMEOUT_MS = 90000;
 
-// 화면에서 온 llm 선택과 키를 검증한다. provider가 없거나 'default'이면 혼디 기본 모델(키 불필요).
+// 화면에서 온 llm 선택과 키를 검증한다. provider가 없거나 'default'이면 나비 기본 모델(키 불필요).
 export function parseLlmChoice(rawLlm, rawKey) {
   const llm = rawLlm && typeof rawLlm === 'object' ? rawLlm : {};
   const effort = Object.prototype.hasOwnProperty.call(EFFORT_STEPS, llm.effort) ? llm.effort : 'medium';

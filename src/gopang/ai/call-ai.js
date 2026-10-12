@@ -2065,7 +2065,7 @@ export async function _handleOrchestrationTags(fullReply, bubble, sendFn = callA
   // 반환해 fullReply가 평범한 채팅 답변인 것처럼 화면에 그대로 뿌려졌다.
   // 실사 재검증(2026-08-06)에서 EXPERT 위임 실패 후 K-Compose가 계획만
   // 세워놓고 HANDOFF 없이 안내문으로 응답을 끝내버리는 사례가 발견됐는데,
-  // 이게 바로 "혼디가 정보 안내만 하고 실행은 안 하는 FAQ 봇처럼 보이는"
+  // 이게 바로 "나비가 정보 안내만 하고 실행은 안 하는 FAQ 봇처럼 보이는"
   // 근본 원인이었다(사용자 지적, 2026-08-06) — steps/atom_id/org_id까지
   // 다 준비해놓고 K-Execute를 못 불러 실행 이관이 조용히 실패한 것.
   // 1회에 한해 정정 요청을 보내고, 그래도 반복되면(모델이 계속 규칙을
@@ -2394,13 +2394,13 @@ export async function _handleWebSearchTag(fullReply, bubble, sendFn = callAI, us
     _stopTicker();
   }
 
-  // RULE-07 [7-A] 대체형 — Hondi 검증 필드(guid 등)와 구분해 "웹 참고정보"
+  // RULE-07 [7-A] 대체형 — Navi 검증 필드(guid 등)와 구분해 "웹 참고정보"
   // 임을 명시하고, K-Search가 [KSEARCH_RESULT: status=external_info_only,
   // source=..., info=...] 형식으로 위임자에게 반환하도록 안내한다.
   const searchInject =
     `[웹 검색결과 — 미검증, 출처: 웹] ${resultText}\n\n` +
-    `이 정보는 Hondi 내부에서 검증된 게 아닙니다(guid 없음). ` +
-    `K-Search RULE-07 [7-A] 대체형에 따라 이용자에게는 "Hondi에 등록된 ` +
+    `이 정보는 나비 내부에서 검증된 게 아닙니다(guid 없음). ` +
+    `K-Search RULE-07 [7-A] 대체형에 따라 이용자에게는 "나비에 등록된 ` +
     `업체가 아니라 웹 검색 결과"임을 분명히 밝히고, [KSEARCH_RESULT: ` +
     `status=external_info_only, source=웹검색, info=...] 형식으로 ` +
     `위임자에게 반환하세요.`;
@@ -2856,7 +2856,7 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
     if (_usb) _usb(bubble, text);
   };
 
-  // ── GOV_TASK_SCHEMA_LOOKUP (2026-08-13 신설 — 혼디 패스포트 IDV 연동) ──
+  // ── GOV_TASK_SCHEMA_LOOKUP (2026-08-13 신설 — 나비 패스포트 IDV 연동) ──
   // kgov(§REQUIRED-DOCUMENTS 2단계)가 이미 등록된 agency:task_key를
   // 인식했을 때 사용자에게 서류를 요구하기 전에 먼저 이 태그를 낸다.
   // 새 서버 엔드포인트를 만들지 않고 기존 /gov/task/schema/lookup
@@ -3001,7 +3001,7 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
         headers: { 'Content-Type': 'application/json' },
         // 2026-08-15 신설(3단계 배선) — trace를 실어 보내면 서버가
         // extractCityCodeFromTrace()로 지역코드를 뽑아 gov-fee-lookup.js의
-        // resolveGovFee()에 넘긴다(혼디 서비스 수수료 계산용). trace가 없는
+        // resolveGovFee()에 넘긴다(나비 서비스 수수료 계산용). trace가 없는
         // 호출부(kgov 인라인 등, gov-router.js의 시/도 판별을 안 쓰는 흐름)는
         // 기본값 []로 조용히 넘어가고, 서버 쪽은 지역 무관(전국공통/BASELINE만)
         // 매칭으로 그레이스풀 디그레이드한다 — 에러 없음.
@@ -3393,14 +3393,14 @@ export function _buildFirstContactContext() {
     // 자영업자 1건 외엔 전부 무관하거나 어색했던 문제를 해소하기 위함.
     return (
       `[FIRST_CONTACT: 아래 문구를 토씨 하나 바꾸지 말고 그대로 출력하십시오.` +
-      ` **나만의 AI 비서**·**혼디**·**프로필**은 마크다운 굵은 글씨로 표시합니다.` +
+      ` **나만의 AI 비서**·**나비**·**프로필**은 마크다운 굵은 글씨로 표시합니다.` +
       ` 단, 이번 사용자 메시지가 실질적인 질문이나 요청이라면(단순 첫 접속이` +
       ` 아니라 진짜 궁금한 점을 물었다면) 아래 문구를 출력하기 전에 그 질문에` +
       ` 1~2문장으로 먼저 답한 뒤 자연스럽게 아래 문구로 이어가십시오 —` +
       ` 사용자의 실제 발화를 무시하지 마십시오. 그 외의 경우(세션의 첫` +
       ` 메시지 등)엔 아래 문구만 출력하고 반드시 거기서 멈추십시오.\n` +
       `---\n` +
-      `저는 **${nickname}**님과 평생을 함께할 **나만의 AI 비서** **혼디**입니다.` +
+      `저는 **${nickname}**님과 평생을 함께할 **나만의 AI 비서** **나비**입니다.` +
       ` 저는 오직 ${nickname}님만을 위해 일하며, ${nickname}님의 일상과 업무를 돕고,` +
       ` 기록하며, 지시하신 각종 업무를 수행할 것입니다. 앱 사용법이 궁금하실 땐` +
       ` 언제든 저에게 편하게 물어봐 주세요.\n\n` +
@@ -3753,7 +3753,7 @@ async function _buildEnhancedUserContent(userContent) {
   // 지키기 위해 만들어졌으나, 정작 이 함수(매 턴 프롬프트 조립부)가 한
   // 번도 호출하지 않고 있었다 — 즉 GPS/프로필 조회가 끝나기 전에 이미
   // _buildLocNote()가 빈 값으로 지나가 버리는 사고가 실사로 확인됐다
-  // (사용자 리포트: "혼디가 내 위치를 모른다고 함"). 최대 4초까지만
+  // (사용자 리포트: "나비가 내 위치를 모른다고 함"). 최대 4초까지만
   // 대기하므로(services/location.js), 위치 권한을 거부한 사용자도 무한정
   // 멈추지 않는다.
   await _waitForLocationReady();
@@ -3877,7 +3877,7 @@ async function _buildEnhancedUserContent(userContent) {
   // v1.6 — 최초 인사/이름짓기 1회성 블록(있을 때만, 평생 1~2턴)
   const firstContact = _buildFirstContactContext();
 
-  // HONDI-FAQ(2026-07-01 신설) — 혼디 생태계 지식(PDV·GDC·OpenHash 등)을
+  // HONDI-FAQ(2026-07-01 신설) — 나비 생태계 지식(PDV·GDC·OpenHash 등)을
   // AGENT-COMMON에 전부 넣는 대신, 사용자 발화 키워드가 매칭될 때만 해당
   // 주제의 상세 설명을 이번 턴의 user 메시지에만 끼워 넣는다(system
   // prefix는 그대로라 DeepSeek 캐시 적중률에 영향 없음). industry-router.js
@@ -3991,7 +3991,7 @@ export async function callAI(userText, imageFile = null, _preTab = null, modelTi
   try {
     await _callAIInner(userText, imageFile, _preTab, modelTier, onFailure);
   } catch (e) {
-    // 2026-09-12 신설(주피터 지시: "어떤 경우에도 혼디가 응답하지 않으면
+    // 2026-09-12 신설(주피터 지시: "어떤 경우에도 나비가 응답하지 않으면
     // 안 됩니다") — 지금까지 이 바깥쪽 wrapper는 try/finally만 있고
     // catch가 없었다. _callAIInner 내부의 거의 모든 실패 경로는 자체적
     // 으로 appendBubble을 호출해 처리하지만, 그 방어망을 통과하는 예외
@@ -4035,7 +4035,7 @@ export async function callAI(userText, imageFile = null, _preTab = null, modelTi
 // 우선순위는 getPriorityOrder()(config.js)가 결정한다. 기본값은
 // OpenRouter(무료풀) → Claude → Gemini → DeepSeek → ChatGPT → Grok 이지만,
 // 사용자가 ai-setup-mobile.html에서 드래그로 순서를 바꿨으면 그 순서가 우선 적용된다.
-// → 마지막 안전망으로 고팡 프록시(키 불필요)
+// → 마지막 안전망으로 나비 프록시(키 불필요)
 // OR 풀 내부는 기본적으로 컨텍스트·파라미터 기준 품질 순서다. 단, Claude·Grok이
 // OpenRouter에 무료 모델을 새로 올리면 free-model-pool.js가 발견 즉시 풀 최상단으로
 // 자동 승격한다(OR_AUTO_PROMOTE_VENDORS 참고) — 오늘은 보통 해당 없음.
@@ -4383,12 +4383,12 @@ function _buildCallCandidates(userText, messages, modelTier = null) {
     }
   }
 
-  // 3) 최종 안전망 — 혼디 제공 DeepSeek 기본 키 (v3.2, 2026-07-01)
+  // 3) 최종 안전망 — 나비 제공 DeepSeek 기본 키 (v3.2, 2026-07-01)
   // 사용자 키 등록 여부와 무관하게 항상 마지막 후보로 추가된다. 서버가
   // 자신의 키로 호출하므로 클라이언트는 apiKey가 필요 없다 — "1,000원 무료
   // 제공" 정책의 실제 구현체. model은 실제 벤더 모델명이 아니라 "hondi-flash"/
   // "hondi-pro" 논리 티어 이름이며, worker.js가 실제 백엔드(공식 DeepSeek API
-  // 또는 나중에 붙을 혼디 자체 추론 서버)로 매핑한다.
+  // 또는 나중에 붙을 나비 자체 추론 서버)로 매핑한다.
   // v3.2: 사용자가 직접 고르던 Flash/Pro 수동 선택을 제거하고, 이번 턴
   // 질문의 복잡도를 보고 _resolveHondiTier()가 자동으로 고른다.
   // v4.0(2026-07-28, Pro/Flash 재설계): 주피터님 지시 — "AC는 처음부터
@@ -4487,7 +4487,7 @@ export async function _callLLM(messages, options = {}) {
       }
       // 'legacy'(사용자가 직접 운영하는 커스텀 엔드포인트)는 알려진 벤더가
       // 아니므로 중계 허용목록에 없다 — 이 경로만 예외적으로 직접 호출한다.
-      // 'deepseek-default'는 혼디 제공 무료 기본 키(hondi-flash/hondi-pro) —
+      // 'deepseek-default'는 나비 제공 무료 기본 키(hondi-flash/hondi-pro) —
       // apiKey 없이 /deepseek(서버가 자체 키·티어별 모델 매핑 처리)로 직행한다.
       const attempt = c.provider === 'legacy'
         ? await fetch(`${c.baseUrl}/chat/completions`, {
@@ -4585,7 +4585,7 @@ async function _delegateToFlash(task, context) {
     // 발생하는 이상 똑같이 과금·한도 대상이어야 한다. 메인 스트리밍 호출과
     // 동일한 표현식(_USER?.ipv6 || USER_GUID || null)을 그대로 쓴다.
     // 엔드포인트도 메인 호출과 동일하게 /deepseek로 맞춘다(/chat/completions와
-    // 같은 핸들러로 가긴 하지만, "혼디 제공 기본 키" 경로라는 의도를
+    // 같은 핸들러로 가긴 하지만, "나비 제공 기본 키" 경로라는 의도를
     // 코드에서도 드러내기 위해 통일).
     // BUG-FIX(2026-09-14, #250 후속) — 타임아웃 신설(나머지 20개 배치).
     // 이 호출 결과가 곧 사용자에게 보이는 최종 응답이 되므로, 타임아웃
@@ -5156,7 +5156,7 @@ export function _parseAgentTags(fullReply, bubble, userText, _preTab) {
     console.warn('[Tags] GWP 처리 오류 (무시):', e.message);
   }
 
-  // [SEARCH: query={검색어}, type=user] — 혼디 사용자 검색 패널 오픈
+  // [SEARCH: query={검색어}, type=user] — 나비 사용자 검색 패널 오픈
   // (같은 탭 오버레이 — 그림자 AI가 대화 맥락 안에서 후보를 잠깐 보여줄 때)
   //
   // [SEARCH: query={검색어}, type=user, mode=tab] — 2026-07-07 신설
@@ -5328,7 +5328,7 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
   }
 
   // urgent=true → kemergency면 경고 표시 후 계속 처리
-  // (고팡 비서가 추가로 응급 가이드 제공)
+  // (나비 비서가 추가로 응급 가이드 제공)
 
   // ── 위치 준비 대기 (최대 6초, race condition 방지) ──────
   if (_locationPending) {
@@ -5484,7 +5484,7 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
 
   // ── 호출 후보 목록 생성 (순차 페일오버) ──────────────────
   // 사용자가 등록한 BYOK provider들 순서대로 시도한 뒤, 마지막엔 항상
-  // 혼디 제공 DeepSeek 기본 키(hondi-flash/hondi-pro)로 폴백한다 —
+  // 나비 제공 DeepSeek 기본 키(hondi-flash/hondi-pro)로 폴백한다 —
   // 그래서 candidates는 절대 0개가 되지 않는다. 티어는 이번 턴 원본
   // userText(가공 전)의 복잡도를 보고 자동으로 정해진다.
   const candidates = _buildCallCandidates(typeof userText === 'string' ? userText : '', messages, modelTier);
@@ -5540,7 +5540,7 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
         // 한 번 거쳐서 보낸다(여전히 사용자 본인 키·본인이 고른 모델 그대로).
         // 'legacy'(사용자가 직접 운영하는 커스텀 엔드포인트)는 알려진 벤더가
         // 아니므로 중계 허용목록에 없다 — 이 경로만 예외적으로 직접 호출한다.
-        // 'deepseek-default'는 혼디 제공 무료 기본 키(hondi-flash/hondi-pro) —
+        // 'deepseek-default'는 나비 제공 무료 기본 키(hondi-flash/hondi-pro) —
         // apiKey 없이 /deepseek(서버가 자체 키·티어별 모델 매핑 처리)로 직행한다.
         const attempt = c.provider === 'legacy'
           ? await fetch(`${c.baseUrl}/chat/completions`, {
@@ -5984,7 +5984,7 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
     } else if (_isQuotaMsg) {
       // BUG FIX(2026-07-01): 이전엔 사용자 키 미등록 시 대화창을 벗어나
       // ai-setup-mobile.html로 강제 이동시켰다 — 가입 직후 강제 LLM 설정
-      // 이동을 없앤 것과 정면으로 모순되는 잔재였다. deepseek-default(혼디
+      // 이동을 없앤 것과 정면으로 모순되는 잔재였다. deepseek-default(나비
       // 제공 무료 기본 키)가 항상 마지막 안전망으로 있으므로, 여기 도달했다는
       // 건 "무료 한도까지 다 썼다"는 뜻이다. 페이지 이동 없이 대화창 안에서
       // 안내하고, 설정으로 가는 버튼만 제공한다.

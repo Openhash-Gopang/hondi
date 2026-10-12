@@ -1,6 +1,6 @@
 /**
  * @file plugin-registry.js
- * @description 고팡 플러그인 레지스트리 — 등록·업데이트·조회·버전 관리
+ * @description 나비 플러그인 레지스트리 — 등록·업데이트·조회·버전 관리
  * @version 1.0.0
  * @author AI City Inc.
  *

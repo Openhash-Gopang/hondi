@@ -10,7 +10,7 @@
 # 소속      : 행정각부
 # ═══════════════════════════════════════════════════
 #
-# 정부24·주민등록 등 혼디의 킬러 유즈케이스(등본 발급 등)와 가장
+# 정부24·주민등록 등 나비의 킬러 유즈케이스(등본 발급 등)와 가장
 # 직결되는 부처라 우선 보강. ROUTING-PRIORITY-RULES §1에 따르면
 # 제주스마트쉼센터(internet, msit와 공동소관) 정도만 겹치고, 실제
 # 대부분의 행정안전부 소관 민원(주민등록등본 등)은 읍면동 주민센터
@@ -64,7 +64,7 @@ JEJU-GOV-COMMON → JEJU-NATIONAL-SP → [본 SP: 행정안전부]
 
 ## §3. DATA_REQUIREMENT 선언
 
-JEJU-GOV-COMMON §10/§11 원칙에 따라, 개별 사용자의 주민등록 정보는 Hondi에 연동돼 있지 않다. `unavailable_reason`은 `no_interagency_access`다.
+JEJU-GOV-COMMON §10/§11 원칙에 따라, 개별 사용자의 주민등록 정보는 Navi에 연동돼 있지 않다. `unavailable_reason`은 `no_interagency_access`다.
 
 | field | owner_agency | connected | unavailable_reason | fallback |
 |---|---|---|---|---|

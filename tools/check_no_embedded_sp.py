@@ -40,7 +40,7 @@ NAME_PATTERN = re.compile(r'(?:const|let|var)\s+(\w*SYSTEM_?PROMPT\w*|\w*_SP_\w*
 
 # SP 특유 마커 — AGENT-COMMON/각 서비스 SP들이 공통으로 쓰는 표현들
 CONTENT_MARKERS = [
-    '당신은 혼디', '너는 혼디', '나만의 AI 비서', '[정체성]', '[핵심 명제]',
+    '당신은 나비', '너는 나비', '나만의 AI 비서', '[정체성]', '[핵심 명제]',
     'AGENT-COMMON', '[GWP:', '[EXPERT:', 'ROUTER-CONFIDENCE',
 ]
 

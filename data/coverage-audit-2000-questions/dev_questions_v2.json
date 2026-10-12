@@ -432,7 +432,7 @@
   {
     "id": "dev-0087",
     "category": "1_멀티레포_아키텍처_총론",
-    "question": "hondi.net이 아닌 다른 서비스 도메인에서도 AC 이름이 '혼디'로 통일돼 있나요?"
+    "question": "hondi.net이 아닌 다른 서비스 도메인에서도 AC 이름이 '나비'로 통일돼 있나요?"
   },
   {
     "id": "dev-0088",
@@ -1347,7 +1347,7 @@
   {
     "id": "dev-0270",
     "category": "2_K서비스_개별구현",
-    "question": "market 레포는 혼디장(K-Market) 전체 백엔드를 담당하나요?"
+    "question": "market 레포는 나비장(K-Market) 전체 백엔드를 담당하나요?"
   },
   {
     "id": "dev-0271",

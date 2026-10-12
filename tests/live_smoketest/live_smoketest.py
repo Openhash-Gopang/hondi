@@ -50,7 +50,7 @@ EXPERT_TAG_RE = re.compile(r"\[\s*EXPERT\s*:\s*([\w\-]+)\s*\]", re.IGNORECASE)
 KINTENT_TAG_RE = re.compile(r"\[\s*CALL_KINTENT\s*:", re.IGNORECASE)
 KSEARCH_TAG_RE = re.compile(r"\[\s*KSEARCH_HANDOFF\s*:", re.IGNORECASE)
 WEBSEARCH_TAG_RE = re.compile(r"\[\s*WEB_SEARCH\s*:", re.IGNORECASE)
-# 2026-08-31 추가 — [SEARCH: query=..., type=user] (혼디 사용자/엔티티
+# 2026-08-31 추가 — [SEARCH: query=..., type=user] (나비 사용자/엔티티
 # 검색, §TAGS 참조)도 WEB_SEARCH와 같은 사각지대였다 — scenarios_no_name_
 # leak_100_20260831.json no=9776에서 정상 발동([SEARCH: query=상담 이력,
 # type=user])했는데도 채점 분기가 없어 LIVE-FAIL로 오채점됐다.

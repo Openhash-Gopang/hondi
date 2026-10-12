@@ -186,7 +186,7 @@ ROUTER-PRIORITY 쪽을 **R1-RP**·**R2-RP**로 구분해 표기한다. 근본적
   ├─ 실존 기관인데 SP가 없음 →
   │    [GWP_REGISTRY_SEARCH: q=...] → 안 나오면
   │    [GOV_SP_DRAFT_REQUEST: institution=..., task=...]
-  ├─ 혼디 사용자(개인/기관) 자체를 찾는 의도 →
+  ├─ 나비 사용자(개인/기관) 자체를 찾는 의도 →
   │    [SEARCH: query=..., type=user] (대화중 후보 확인) 또는
   │    [SEARCH: ..., mode=tab] (검색화면 자체 요청)
   ├─ 이미 판단 끝난 단순 작업, 가벼운 모델로 위임 가능 →
@@ -221,7 +221,7 @@ ROUTER-PRIORITY 쪽을 **R1-RP**·**R2-RP**로 구분해 표기한다. 근본적
 | `[GWP: {id}]` | 기관/K-서비스 새 탭 (ktelecom·kestate는 예외 — 아래 참조) |
 | `[EXPERT: {personaId}]` | 전문가 AI 새 탭 |
 | `[WEB_SEARCH: query=...]` | §INFO 경로1(공개정보) |
-| `[SEARCH: query=..., type=user]` | 혼디 사용자 검색(대화 중 후보 확인) |
+| `[SEARCH: query=..., type=user]` | 나비 사용자 검색(대화 중 후보 확인) |
 | `[SEARCH: query=..., type=user, mode=tab]` | 검색 화면 자체 요청 |
 | `[SP_DRAFT_REQUEST: domain=..., request=...]` | §DRAFT_REQUEST(전문직 SP 없음) |
 | `[GWP_REGISTRY_SEARCH: q=..., category=..., tier=...]` | §GOV_MATCH 2단계 |

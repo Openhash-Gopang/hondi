@@ -361,12 +361,12 @@
   },
   {
     "no": 37,
-    "utterance": "혼디 거버넌스에 안건을 제안하고 싶어요",
+    "utterance": "나비 거버넌스에 안건을 제안하고 싶어요",
     "expected_type": "GWP",
     "expected_id": "kdemocracy",
     "expected_name": "K-Democracy",
     "category": "GWP-정상",
-    "basis": "§CATALOG kdemocracy(고팡 직접 민주주의 플랫폼(DAWN) 전용 — 국민동의청원·입법예고 등 실제 국가기관 청원/의견 시스템은 kgov 소관.)",
+    "basis": "§CATALOG kdemocracy(나비 직접 민주주의 플랫폼(DAWN) 전용 — 국민동의청원·입법예고 등 실제 국가기관 청원/의견 시스템은 kgov 소관.)",
     "static_verdict": "PASS"
   },
   {
@@ -376,7 +376,7 @@
     "expected_id": "kdemocracy",
     "expected_name": "K-Democracy",
     "category": "GWP-패러프레이즈",
-    "basis": "§CATALOG kdemocracy(고팡 직접 민주주의 플랫폼(DAWN) 전용 — 국민동의청원·입법예고 등 실제 국가기관 청원/의견 시스템은 kgov 소관.)",
+    "basis": "§CATALOG kdemocracy(나비 직접 민주주의 플랫폼(DAWN) 전용 — 국민동의청원·입법예고 등 실제 국가기관 청원/의견 시스템은 kgov 소관.)",
     "static_verdict": "PASS"
   },
   {
@@ -401,10 +401,10 @@
   },
   {
     "no": 41,
-    "utterance": "혼디 사용법을 알려줘",
+    "utterance": "나비 사용법을 알려줘",
     "expected_type": "GWP",
     "expected_id": "profile-assistant",
-    "expected_name": "혼디 안내(튜토리얼·프로필)",
+    "expected_name": "나비 안내(튜토리얼·프로필)",
     "category": "GWP-정상",
     "basis": "§CATALOG profile-assistant(앱 사용법 튜토리얼(PHASE -1) 및 프로필 작성/수정(PHASE 0/1). 중단해도 다음 호출 시 이어서 진행.)",
     "static_verdict": "PASS"
@@ -414,7 +414,7 @@
     "utterance": "이 앱 처음 쓰는데 어떻게 시작하나요",
     "expected_type": "GWP",
     "expected_id": "profile-assistant",
-    "expected_name": "혼디 안내(튜토리얼·프로필)",
+    "expected_name": "나비 안내(튜토리얼·프로필)",
     "category": "GWP-패러프레이즈",
     "basis": "§CATALOG profile-assistant(앱 사용법 튜토리얼(PHASE -1) 및 프로필 작성/수정(PHASE 0/1). 중단해도 다음 호출 시 이어서 진행.)",
     "static_verdict": "PASS"
@@ -481,10 +481,10 @@
   },
   {
     "no": 49,
-    "utterance": "혼디 자주 묻는 질문 목록 보여줘",
+    "utterance": "나비 자주 묻는 질문 목록 보여줘",
     "expected_type": "GWP",
     "expected_id": "kqna",
-    "expected_name": "Gopang QnA",
+    "expected_name": "Navi QnA",
     "category": "GWP-정상",
     "basis": "§CATALOG kqna(범부처 질의응답 라우터. SP-CORE + 도메인별 SP(BIZ/ECONOMY/EDU/GOV/INFRA/IP/LEGAL/LOGISTICS/SAFETY) 자체 라우팅.)",
     "static_verdict": "PASS"
@@ -494,7 +494,7 @@
     "utterance": "이거 다른 사람들도 궁금해했던 건가요",
     "expected_type": "GWP",
     "expected_id": "kqna",
-    "expected_name": "Gopang QnA",
+    "expected_name": "Navi QnA",
     "category": "GWP-패러프레이즈",
     "basis": "§CATALOG kqna(범부처 질의응답 라우터. SP-CORE + 도메인별 SP(BIZ/ECONOMY/EDU/GOV/INFRA/IP/LEGAL/LOGISTICS/SAFETY) 자체 라우팅.)",
     "static_verdict": "PASS"
@@ -504,9 +504,9 @@
     "utterance": "제 계정 설정을 바꾸고 싶어요",
     "expected_type": "GWP",
     "expected_id": "kusers",
-    "expected_name": "Gopang Users",
+    "expected_name": "Navi Users",
     "category": "GWP-정상",
-    "basis": "§CATALOG kusers(개인/기관 엔티티 검색·해석. GAS(Gopang Address System) v1.6 기반. SP-USERS 자체 라우팅.)",
+    "basis": "§CATALOG kusers(개인/기관 엔티티 검색·해석. GAS(Navi Address System) v1.6 기반. SP-USERS 자체 라우팅.)",
     "static_verdict": "PASS"
   },
   {
@@ -514,9 +514,9 @@
     "utterance": "프로필 정보를 수정하고 싶어요",
     "expected_type": "GWP",
     "expected_id": "kusers",
-    "expected_name": "Gopang Users",
+    "expected_name": "Navi Users",
     "category": "GWP-패러프레이즈",
-    "basis": "§CATALOG kusers(개인/기관 엔티티 검색·해석. GAS(Gopang Address System) v1.6 기반. SP-USERS 자체 라우팅.)",
+    "basis": "§CATALOG kusers(개인/기관 엔티티 검색·해석. GAS(Navi Address System) v1.6 기반. SP-USERS 자체 라우팅.)",
     "static_verdict": "PASS"
   },
   {
@@ -2626,7 +2626,7 @@
     "expected_id": "direct-response",
     "expected_name": "라우팅 불필요(사각지대(예상: 없음))",
     "category": "사각지대(예상: 없음)",
-    "basis": "kdemocracy는 혼디 자체 거버넌스 전용, 실제 국회 지원 아님",
+    "basis": "kdemocracy는 나비 자체 거버넌스 전용, 실제 국회 지원 아님",
     "static_verdict": "PASS"
   },
   {

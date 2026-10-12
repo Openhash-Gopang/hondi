@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  이 문서가 다루는 범위: 혼디 활용과 한계 — 일상·업무 시나리오, PDV/AC 개념 설명 (desktop.html 좌측 사이드바에서 링크됨)
+  이 문서가 다루는 범위: 나비 활용과 한계 — 일상·업무 시나리오, PDV/AC 개념 설명 (desktop.html 좌측 사이드바에서 링크됨)
   전체 문서 지도: MANUAL_INDEX.html
   (2026-07-19 메타 매뉴얼 정리 작업으로 추가된 주석 — 화면에는 표시되지 않습니다)
 -->
@@ -9,7 +9,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>혼디 활용과 한계 — 일상·업무 전체 가이드</title>
+<title>나비 활용과 한계 — 일상·업무 전체 가이드</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
@@ -340,7 +340,7 @@ body {
 <header class="guide-header">
   <div class="guide-header-inner">
     <a href="https://hondi.net" class="guide-logo">
-      <span class="guide-logo-dot"></span>혼디
+      <span class="guide-logo-dot"></span>나비
     </a>
     <a href="./user-guide.html" class="guide-back">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
@@ -355,10 +355,10 @@ body {
   <nav class="guide-toc" id="toc">
     <div class="guide-toc-title">목차</div>
     <a href="#how-to-read">이 문서를 읽는 법</a>
-    <a href="#foundation">PDV와 AC — 혼디의 작동 원리</a>
-    <a href="#ecosystem">혼디 생태계 한눈에 보기 (+ GDC)</a>
-    <a href="#daily">일상에서의 혼디</a>
-    <a href="#work">업무에서의 혼디</a>
+    <a href="#foundation">PDV와 AC — 나비의 작동 원리</a>
+    <a href="#ecosystem">나비 생태계 한눈에 보기 (+ GDC)</a>
+    <a href="#daily">일상에서의 나비</a>
+    <a href="#work">업무에서의 나비</a>
     <a href="#principles">공통 원칙</a>
     <a href="#virtual">가상 시나리오</a>
   </nav>
@@ -368,11 +368,11 @@ body {
 
     <!-- 히어로 -->
     <div class="guide-hero reveal">
-      <div class="guide-hero-eyebrow">HONDI · 활용과 한계 전체 가이드</div>
-      <h1 class="guide-hero-title">혼디로 <em>무엇까지</em> 가능하고,<br><em>어디부터</em> 사람이 해야 할까요?</h1>
+      <div class="guide-hero-eyebrow">NAVI · 활용과 한계 전체 가이드</div>
+      <h1 class="guide-hero-title">나비로 <em>무엇까지</em> 가능하고,<br><em>어디부터</em> 사람이 해야 할까요?</h1>
       <p class="guide-hero-desc">
-        일상과 업무에서 혼디에게 "혼디야, ~"라고 말했을 때 실제로 무엇이 처리되는지, 그리고 지금 시점에서 어디까지가 한계인지를 정리했습니다.
-        상대 기관(국세청·시청·경찰청 등)도 혼디 호환 에이전트를 도입하면 어떻게 달라지는지도 함께 다룹니다.
+        일상과 업무에서 나비에게 "나비야, ~"라고 말했을 때 실제로 무엇이 처리되는지, 그리고 지금 시점에서 어디까지가 한계인지를 정리했습니다.
+        상대 기관(국세청·시청·경찰청 등)도 나비 호환 에이전트를 도입하면 어떻게 달라지는지도 함께 다룹니다.
       </p>
     </div>
 
@@ -390,20 +390,20 @@ body {
         <div class="gs-case-grid" style="margin:16px 0">
           <div class="gs-case-col gs-case-col-ok">
             <span class="gs-case-col-label">현재 가능 범위</span>
-            지금 혼디가 단독으로 바로 처리할 수 있는 일입니다.
+            지금 나비가 단독으로 바로 처리할 수 있는 일입니다.
           </div>
           <div class="gs-case-col gs-case-col-limit">
             <span class="gs-case-col-label">현재 한계</span>
-            지금은 혼디가 할 수 없거나, 반드시 사용자 확인이 필요한 부분입니다.
+            지금은 나비가 할 수 없거나, 반드시 사용자 확인이 필요한 부분입니다.
           </div>
         </div>
         <div class="gs-case-interop">
-          🔗 <strong>상호운용 시 확장 가능성</strong> — 상대 기관도 혼디(또는 호환 AI 에이전트)를 운영할 경우, 어디까지 자동화되고 어디서부터 여전히 사람이 확인해야 하는지를 보여줍니다.
+          🔗 <strong>상호운용 시 확장 가능성</strong> — 상대 기관도 나비(또는 호환 AI 에이전트)를 운영할 경우, 어디까지 자동화되고 어디서부터 여전히 사람이 확인해야 하는지를 보여줍니다.
         </div>
       </div>
     </section>
 
-    <!-- 0-1. PDV와 AC — 혼디의 작동 원리 -->
+    <!-- 0-1. PDV와 AC — 나비의 작동 원리 -->
     <section class="gs reveal" id="foundation">
       <div class="gs-head">
         <div class="gs-icon">🔐</div>
@@ -413,7 +413,7 @@ body {
         </div>
       </div>
       <div class="gs-body">
-        <p>일상·업무 사례를 보기 전에, 혼디가 이런 일들을 할 수 있는 근본 원리 두 가지를 먼저 알아두면 이해가 훨씬 쉽습니다.</p>
+        <p>일상·업무 사례를 보기 전에, 나비가 이런 일들을 할 수 있는 근본 원리 두 가지를 먼저 알아두면 이해가 훨씬 쉽습니다.</p>
 
         <div class="gs-case-grid" style="margin:16px 0">
           <div class="gs-case-col gs-case-col-ok">
@@ -427,23 +427,23 @@ body {
         </div>
 
         <div class="gs-highlight">
-          💡 <strong>요약</strong>: 이 문서에서 "혼디가 ~을 안다", "혼디가 ~을 기억한다"고 설명하는 부분은 모두 <strong>내 PDV 안에서만 일어나는 일</strong>입니다. 그리고 혼디가 갈수록 내 말을 더 잘 알아듣는 것처럼 느껴진다면, 그것은 <strong>AC가 개인화되고 있다는 증거</strong>입니다.
+          💡 <strong>요약</strong>: 이 문서에서 "나비가 ~을 안다", "나비가 ~을 기억한다"고 설명하는 부분은 모두 <strong>내 PDV 안에서만 일어나는 일</strong>입니다. 그리고 나비가 갈수록 내 말을 더 잘 알아듣는 것처럼 느껴진다면, 그것은 <strong>AC가 개인화되고 있다는 증거</strong>입니다.
         </div>
       </div>
     </section>
 
-    <!-- 00-2. 혼디 생태계 한눈에 보기 + GDC -->
+    <!-- 00-2. 나비 생태계 한눈에 보기 + GDC -->
     <section class="gs reveal" id="ecosystem">
       <div class="gs-head">
         <div class="gs-icon">🗺️</div>
         <div class="gs-head-text">
-          <div class="gs-num">00-2 · 혼디 생태계</div>
+          <div class="gs-num">00-2 · 나비 생태계</div>
           <div class="gs-title">내 비서 하나가 아니라, 서로 연결된 여러 AI가 함께 일합니다</div>
         </div>
       </div>
       <div class="gs-body">
         <p>
-          혼디는 "나만의 AI 비서" 하나로 끝나는 서비스가 아닙니다. 내
+          나비는 "나만의 AI 비서" 하나로 끝나는 서비스가 아닙니다. 내
           비서(AC)가 필요할 때마다 <strong>다른 종류의 AI들을 대신 불러
           연결해 주는 생태계</strong>에 더 가깝습니다. 아래 네 가지가
           그 안에서 서로 다른 역할을 맡습니다.
@@ -469,14 +469,14 @@ body {
             남습니다(내 신원은 익명 처리됩니다).
           </div>
           <div class="gs-case-col gs-case-col-limit">
-            <span class="gs-case-col-label">혼디장 (K-Market)</span>
+            <span class="gs-case-col-label">나비장 (K-Market)</span>
             물건을 사고파는 장터입니다. 시세 비교, 주문 준비, 결제까지
             내 AC가 도와줍니다.
           </div>
         </div>
 
         <div class="gs-highlight">
-          💡 <strong>요약</strong>: "혼디에게 말한다"는 건 사실 내 AC에게
+          💡 <strong>요약</strong>: "나비에게 말한다"는 건 사실 내 AC에게
           말하는 것이고, 그 AC가 상황에 맞는 다른 AI(정부기관 AC, 전문가
           페르소나, K-Market)를 대신 찾아 연결해 주는 구조입니다. 저는
           어떤 AI와 이야기하는지 매번 신경 쓸 필요가 없습니다.
@@ -508,12 +508,12 @@ body {
       </div>
     </section>
 
-    <!-- 1. 일상에서의 혼디 -->
+    <!-- 1. 일상에서의 나비 -->
     <section class="gs reveal" id="daily">
       <div class="gs-head">
         <div class="gs-icon">🏠</div>
         <div class="gs-head-text">
-          <div class="gs-num">01 · 일상에서의 혼디</div>
+          <div class="gs-num">01 · 일상에서의 나비</div>
           <div class="gs-title">정보 조회부터 결제·신고까지</div>
         </div>
       </div>
@@ -521,7 +521,7 @@ body {
 
         <div class="gs-cat-label"><span class="gs-cat-badge">한계 적음</span>정보 조회·추천</div>
         <div class="gs-case">
-          <div class="gs-case-q">"혼디야, 일어났어" / "협재 근처 점심 맛집 알려줘" / "102번 버스 언제 와?" / "오늘 점심은 뭐 먹을까?" / "주말에 뭐하고 놀까?" / "이 동네 상권이 어때?"</div>
+          <div class="gs-case-q">"나비야, 일어났어" / "협재 근처 점심 맛집 알려줘" / "102번 버스 언제 와?" / "오늘 점심은 뭐 먹을까?" / "주말에 뭐하고 놀까?" / "이 동네 상권이 어때?"</div>
           <div class="gs-case-grid">
             <div class="gs-case-col gs-case-col-ok">
               <span class="gs-case-col-label">가능</span>
@@ -536,7 +536,7 @@ body {
 
         <div class="gs-cat-label"><span class="gs-cat-badge limit">조언 가능 / 진단 불가</span>건강·의료</div>
         <div class="gs-case">
-          <div class="gs-case-q">"혼디야, 며칠 전부터 오른쪽 아랫배가 아픈데, 이유가 뭘까?" / "내일 병원 진료 예약해 줘"</div>
+          <div class="gs-case-q">"나비야, 며칠 전부터 오른쪽 아랫배가 아픈데, 이유가 뭘까?" / "내일 병원 진료 예약해 줘"</div>
           <div class="gs-case-grid">
             <div class="gs-case-col gs-case-col-ok">
               <span class="gs-case-col-label">가능</span>
@@ -544,15 +544,15 @@ body {
             </div>
             <div class="gs-case-col gs-case-col-limit">
               <span class="gs-case-col-label">한계</span>
-              혼디는 의료 진단을 내리지 않음 — 정확한 원인은 의사의 진찰이 필요
+              나비는 의료 진단을 내리지 않음 — 정확한 원인은 의사의 진찰이 필요
             </div>
           </div>
-          <div class="gs-case-interop">🔗 병원이 혼디를 운영하면 예약 접수까지 자동화되지만, <strong>예약 확정과 진단은 의료진의 최종 승인</strong>이 필요합니다.</div>
+          <div class="gs-case-interop">🔗 병원이 나비를 운영하면 예약 접수까지 자동화되지만, <strong>예약 확정과 진단은 의료진의 최종 승인</strong>이 필요합니다.</div>
         </div>
 
         <div class="gs-cat-label"><span class="gs-cat-badge limit">확인 필수</span>결제·재정</div>
         <div class="gs-case">
-          <div class="gs-case-q">"혼디야, 이 가격에 이 아파트(상품) 괜찮은 것 같아?" / "여름 샌들 하나 사 줘" / "짜장면 두 그릇 시켜 줘"</div>
+          <div class="gs-case-q">"나비야, 이 가격에 이 아파트(상품) 괜찮은 것 같아?" / "여름 샌들 하나 사 줘" / "짜장면 두 그릇 시켜 줘"</div>
           <div class="gs-case-grid">
             <div class="gs-case-col gs-case-col-ok">
               <span class="gs-case-col-label">가능</span>
@@ -567,7 +567,7 @@ body {
 
         <div class="gs-cat-label"><span class="gs-cat-badge limit">전문가 상담 필요</span>법률·분쟁</div>
         <div class="gs-case">
-          <div class="gs-case-q">"혼디야, 이 계약서 내용이 어때? 나한테 불리하지 않아?" / "방금 걸려온 전화가 보이스피싱 같지?"</div>
+          <div class="gs-case-q">"나비야, 이 계약서 내용이 어때? 나한테 불리하지 않아?" / "방금 걸려온 전화가 보이스피싱 같지?"</div>
           <div class="gs-case-grid">
             <div class="gs-case-col gs-case-col-ok">
               <span class="gs-case-col-label">가능</span>
@@ -582,7 +582,7 @@ body {
 
         <div class="gs-cat-label"><span class="gs-cat-badge limit">초안만 가능</span>행정·신고</div>
         <div class="gs-case">
-          <div class="gs-case-q">"혼디야, 앞에 가는 차 매연이 너무 심해. 신고해줘" / 마을 도로 공사 의견 제출(K-Democracy)</div>
+          <div class="gs-case-q">"나비야, 앞에 가는 차 매연이 너무 심해. 신고해줘" / 마을 도로 공사 의견 제출(K-Democracy)</div>
           <div class="gs-case-grid">
             <div class="gs-case-col gs-case-col-ok">
               <span class="gs-case-col-label">가능</span>
@@ -593,18 +593,18 @@ body {
               환경부·지자체와 실시간 연동이 없는 현재는, 신고서를 사용자가 최종 제출해야 함
             </div>
           </div>
-          <div class="gs-case-interop">🔗 환경부·지자체가 혼디를 운영하면 자동 전송·접수확인까지 가능하나, <strong>단속·처분은 담당 공무원의 최종 승인</strong>이 원칙입니다.</div>
+          <div class="gs-case-interop">🔗 환경부·지자체가 나비를 운영하면 자동 전송·접수확인까지 가능하나, <strong>단속·처분은 담당 공무원의 최종 승인</strong>이 원칙입니다.</div>
         </div>
 
       </div>
     </section>
 
-    <!-- 2. 업무에서의 혼디 -->
+    <!-- 2. 업무에서의 나비 -->
     <section class="gs reveal" id="work">
       <div class="gs-head">
         <div class="gs-icon">💼</div>
         <div class="gs-head-text">
-          <div class="gs-num">02 · 업무에서의 혼디</div>
+          <div class="gs-num">02 · 업무에서의 나비</div>
           <div class="gs-title">자문·인허가·사업분석까지</div>
         </div>
       </div>
@@ -612,7 +612,7 @@ body {
 
         <div class="gs-cat-label"><span class="gs-cat-badge limit">예측 아님</span>법률 자문·소송 전망</div>
         <div class="gs-case">
-          <div class="gs-case-q">"혼디야, 이런 다툼이 있는데, 법원 소송으로 가면 3~4년 뒤 대법원 판결문이 어떻게 나올까?" / "법원 판결문이 이상한데 너가 설명해 줘" / "경찰이 뭐 조사할 게 있다는데 대응 방안을 알려줘"</div>
+          <div class="gs-case-q">"나비야, 이런 다툼이 있는데, 법원 소송으로 가면 3~4년 뒤 대법원 판결문이 어떻게 나올까?" / "법원 판결문이 이상한데 너가 설명해 줘" / "경찰이 뭐 조사할 게 있다는데 대응 방안을 알려줘"</div>
           <div class="gs-case-grid">
             <div class="gs-case-col gs-case-col-ok">
               <span class="gs-case-col-label">가능</span>
@@ -620,14 +620,14 @@ body {
             </div>
             <div class="gs-case-col gs-case-col-limit">
               <span class="gs-case-col-label">한계</span>
-              <strong>혼디는 미래 판결을 예언하지 않음</strong> — 실제 결과는 사실관계·증거·재판부 판단에 따라 달라짐. 구체적 대응전략은 변호사 상담 필요
+              <strong>나비는 미래 판결을 예언하지 않음</strong> — 실제 결과는 사실관계·증거·재판부 판단에 따라 달라짐. 구체적 대응전략은 변호사 상담 필요
             </div>
           </div>
         </div>
 
         <div class="gs-cat-label"><span class="gs-cat-badge limit">서류 준비만</span>인허가·등록·법인 설립</div>
         <div class="gs-case">
-          <div class="gs-case-q">"혼디야, 시청에 건축 인허가 문서제출해 줘" / "법인 하나 설립해 줘" / "국세청에 사업자 등록해줘"</div>
+          <div class="gs-case-q">"나비야, 시청에 건축 인허가 문서제출해 줘" / "법인 하나 설립해 줘" / "국세청에 사업자 등록해줘"</div>
           <div class="gs-case-grid">
             <div class="gs-case-col gs-case-col-ok">
               <span class="gs-case-col-label">가능</span>
@@ -635,17 +635,17 @@ body {
             </div>
             <div class="gs-case-col gs-case-col-limit">
               <span class="gs-case-col-label">한계</span>
-              실제 제출·등기·등록은 정부24·홈택스·등기소에 본인이 인증 후 진행. <strong>혼디가 "제출했습니다"라고 답하는 일은 없음</strong>
+              실제 제출·등기·등록은 정부24·홈택스·등기소에 본인이 인증 후 진행. <strong>나비가 "제출했습니다"라고 답하는 일은 없음</strong>
             </div>
           </div>
           <div class="gs-case-interop">
-            🔗 <strong>시청·국세청·등기소가 혼디를 도입한 경우</strong>의 4단계 구조 —
+            🔗 <strong>시청·국세청·등기소가 나비를 도입한 경우</strong>의 4단계 구조 —
             <div class="gs-table-wrap" style="margin-top:8px">
               <table class="gs-table">
                 <tr><th>단계</th><th>처리 주체</th></tr>
-                <tr><td>신청서 작성·검증</td><td>혼디(사용자 측) 자동 처리</td></tr>
+                <tr><td>신청서 작성·검증</td><td>나비(사용자 측) 자동 처리</td></tr>
                 <tr><td><strong>전송(의사표시)</strong></td><td><strong>사용자 본인 최종 확인 필수</strong></td></tr>
-                <tr><td>접수·검토 큐 등록</td><td>기관측 혼디 자동 처리</td></tr>
+                <tr><td>접수·검토 큐 등록</td><td>기관측 나비 자동 처리</td></tr>
                 <tr><td><strong>승인/처분</strong></td><td><strong>담당 공무원 최종 검토·승인 필수</strong></td></tr>
               </table>
             </div>
@@ -655,7 +655,7 @@ body {
 
         <div class="gs-cat-label"><span class="gs-cat-badge limit">확정 예측 아님</span>시장 분석·사업 전망</div>
         <div class="gs-case">
-          <div class="gs-case-q">"혼디야, 새로운 사업을 시작하려는데 시장을 분석하고 성공 여부를 전망해 봐"</div>
+          <div class="gs-case-q">"나비야, 새로운 사업을 시작하려는데 시장을 분석하고 성공 여부를 전망해 봐"</div>
           <div class="gs-case-grid">
             <div class="gs-case-col gs-case-col-ok">
               <span class="gs-case-col-label">가능</span>
@@ -670,7 +670,7 @@ body {
 
         <div class="gs-cat-label"><span class="gs-cat-badge limit">결제 확인 필수</span>숙박·여행 예약</div>
         <div class="gs-case">
-          <div class="gs-case-q">"혼디야, 가족들이랑 1박 2일 여행 코스 짜 줘" / "숙소 예약해 줘"</div>
+          <div class="gs-case-q">"나비야, 가족들이랑 1박 2일 여행 코스 짜 줘" / "숙소 예약해 줘"</div>
           <div class="gs-case-grid">
             <div class="gs-case-col gs-case-col-ok">
               <span class="gs-case-col-label">가능</span>
@@ -692,21 +692,21 @@ body {
         <div class="gs-icon">⚖️</div>
         <div class="gs-head-text">
           <div class="gs-num">03 · 공통 원칙</div>
-          <div class="gs-title">혼디가 지키는 3가지 선</div>
+          <div class="gs-title">나비가 지키는 3가지 선</div>
         </div>
       </div>
       <div class="gs-body">
         <p>위의 모든 사례에 공통으로 적용되는 원칙입니다.</p>
         <div class="gs-table-wrap">
           <table class="gs-table">
-            <tr><th>구분</th><th>혼디의 역할</th><th>인간이 반드시 개입하는 지점</th></tr>
+            <tr><th>구분</th><th>나비의 역할</th><th>인간이 반드시 개입하는 지점</th></tr>
             <tr><td><strong>정보·추천</strong></td><td>즉답, 데이터 기반 분석 제공</td><td>가치 판단(좋다/나쁘다, 합리적이다)은 사용자 본인</td></tr>
             <tr><td><strong>의료·법률 자문</strong></td><td>일반 정보, 절차 안내, 전문가 상담 권유</td><td>진단, 확정 판결, 수사 처분은 전문가·기관 고유 권한</td></tr>
             <tr><td><strong>금전·행정 실행</strong></td><td>신청서 작성, 신고 초안, 주문 준비</td><td><strong>발신(사용자 확인)</strong>과 <strong>승인(기관/담당자 검토)</strong> 두 지점은 항상 인간이 직접 처리</td></tr>
           </table>
         </div>
         <div class="gs-highlight">
-          💡 <strong>요약</strong>: 상대 기관이 혼디(또는 호환 AI 에이전트)를 도입하면 "작성 → 전송 → 접수확인"의 속도와 자동화 수준은 크게 높아집니다. 그러나 <strong>법적 효력이 발생하는 의사표시(사용자 발신)</strong>와 <strong>행정처분·진단·판결(기관 측 최종 승인)</strong>, 이 두 지점만큼은 AI가 아무리 빨라도 인간이 직접 확인하는 것을 원칙으로 합니다.
+          💡 <strong>요약</strong>: 상대 기관이 나비(또는 호환 AI 에이전트)를 도입하면 "작성 → 전송 → 접수확인"의 속도와 자동화 수준은 크게 높아집니다. 그러나 <strong>법적 효력이 발생하는 의사표시(사용자 발신)</strong>와 <strong>행정처분·진단·판결(기관 측 최종 승인)</strong>, 이 두 지점만큼은 AI가 아무리 빨라도 인간이 직접 확인하는 것을 원칙으로 합니다.
         </div>
       </div>
     </section>
@@ -717,35 +717,35 @@ body {
         <div class="gs-icon">🔮</div>
         <div class="gs-head-text">
           <div class="gs-num">04 · 가상 시나리오</div>
-          <div class="gs-title">기관이 혼디를 도입한 미래의 하루</div>
+          <div class="gs-title">기관이 나비를 도입한 미래의 하루</div>
         </div>
       </div>
       <div class="gs-body">
         <p>
-          아래는 <strong>현재 시점에서는 불가능하지만, 상대 기관(시청·국세청·경찰청·병원 등)이 혼디 호환 에이전트를 도입했다고 가정할 때</strong> 어떤 모습이 될지 보여주는 가상 내레이션입니다. 실제 서비스가 아니며, 향후 로드맵 논의를 위한 참고 자료입니다.
+          아래는 <strong>현재 시점에서는 불가능하지만, 상대 기관(시청·국세청·경찰청·병원 등)이 나비 호환 에이전트를 도입했다고 가정할 때</strong> 어떤 모습이 될지 보여주는 가상 내레이션입니다. 실제 서비스가 아니며, 향후 로드맵 논의를 위한 참고 자료입니다.
         </p>
 
         <div class="gs-vscenario">
           <div class="gs-vscenario-title">① 건축 인허가, 접수까지 9분</div>
-          <div class="gs-vscenario-body">"혼디야, 시청에 건축 인허가 문서제출해 줘"라고 말하면 토지대장·설계도면·소유 확인 서류가 자동 정리되어 신청서 초안이 만들어집니다. 제출 확인 후 제주시청 인허가 담당 에이전트로 전송되어 9분 만에 접수 완료 알림이 오고, 3일 뒤 담당 공무원이 현장 여건을 확인해 최종 승인합니다.</div>
+          <div class="gs-vscenario-body">"나비야, 시청에 건축 인허가 문서제출해 줘"라고 말하면 토지대장·설계도면·소유 확인 서류가 자동 정리되어 신청서 초안이 만들어집니다. 제출 확인 후 제주시청 인허가 담당 에이전트로 전송되어 9분 만에 접수 완료 알림이 오고, 3일 뒤 담당 공무원이 현장 여건을 확인해 최종 승인합니다.</div>
           <div class="gs-checkpoint">✅ <strong>인간이 누른 버튼</strong>: ① 사용자의 제출 확인 ② 담당 공무원의 최종 승인</div>
         </div>
 
         <div class="gs-vscenario">
           <div class="gs-vscenario-title">② 사업자등록, 그날 오후에 완료</div>
-          <div class="gs-vscenario-body">"혼디야, 국세청에 사업자 등록해줘"라고 말하면 신청서가 작성되고, 본인 서명 후 전송 여부를 확인합니다. 홈택스 에이전트가 자동 검증을 거치고, 세무서 담당자가 소재지·업종 코드를 확인 후 승인하면 그날 오후 사업자등록번호가 발급됩니다.</div>
+          <div class="gs-vscenario-body">"나비야, 국세청에 사업자 등록해줘"라고 말하면 신청서가 작성되고, 본인 서명 후 전송 여부를 확인합니다. 홈택스 에이전트가 자동 검증을 거치고, 세무서 담당자가 소재지·업종 코드를 확인 후 승인하면 그날 오후 사업자등록번호가 발급됩니다.</div>
           <div class="gs-checkpoint">✅ <strong>인간이 누른 버튼</strong>: ① 사용자의 전송 확인 ② 세무서 담당자의 등록 승인</div>
         </div>
 
         <div class="gs-vscenario">
           <div class="gs-vscenario-title">③ 매연 신고, 자동 증거 수집</div>
-          <div class="gs-vscenario-body">"혼디야, 앞에 가는 차 매연이 너무 심해. 신고해줘"라고 말하면 차량 번호판·시간·위치·영상이 자동 캡처되어 신고서가 구성됩니다. 사용자 승인 후 환경부 에이전트로 전송되고, 현장 단속 공무원이 실제 검사로 위반 여부를 최종 판정합니다.</div>
+          <div class="gs-vscenario-body">"나비야, 앞에 가는 차 매연이 너무 심해. 신고해줘"라고 말하면 차량 번호판·시간·위치·영상이 자동 캡처되어 신고서가 구성됩니다. 사용자 승인 후 환경부 에이전트로 전송되고, 현장 단속 공무원이 실제 검사로 위반 여부를 최종 판정합니다.</div>
           <div class="gs-checkpoint">✅ <strong>인간이 누른 버튼</strong>: ① 사용자의 신고 확인 ② 단속 공무원의 위반 판정</div>
         </div>
 
         <div class="gs-vscenario">
           <div class="gs-vscenario-title">④ 응급실 연계, 진료 전 정보가 먼저 도착</div>
-          <div class="gs-vscenario-body">"혼디야, 119"라고 외치면 K-911이 위치를 즉시 전달하고, 사전 동의된 기저질환·복용약물 정보가 응급실 에이전트로 전송됩니다. 구급차 도착 전 의료진이 환자 정보를 미리 확인해 진료를 준비합니다.</div>
+          <div class="gs-vscenario-body">"나비야, 119"라고 외치면 K-911이 위치를 즉시 전달하고, 사전 동의된 기저질환·복용약물 정보가 응급실 에이전트로 전송됩니다. 구급차 도착 전 의료진이 환자 정보를 미리 확인해 진료를 준비합니다.</div>
           <div class="gs-checkpoint">✅ <strong>인간이 누른 버튼</strong>: ① (사전) 사용자의 의료정보 공유 동의 ② 의료진의 진료 판단</div>
         </div>
 
@@ -763,14 +763,14 @@ body {
 
         <div class="gs-vscenario">
           <div class="gs-vscenario-title">⑦ 보험 갱신, 비교 견적부터 가입까지</div>
-          <div class="gs-vscenario-body">혼디가 먼저 더 저렴한 보험 견적을 알려주고, 사용자가 동의하면 새 보험사 에이전트로 기존 계약 정보를 전송해 견적을 확정받습니다. 보험사 언더라이터가 운전 경력·사고 이력을 최종 검토해 가입을 승인합니다.</div>
+          <div class="gs-vscenario-body">나비가 먼저 더 저렴한 보험 견적을 알려주고, 사용자가 동의하면 새 보험사 에이전트로 기존 계약 정보를 전송해 견적을 확정받습니다. 보험사 언더라이터가 운전 경력·사고 이력을 최종 검토해 가입을 승인합니다.</div>
           <div class="gs-checkpoint">✅ <strong>인간이 누른 버튼</strong>: ① 사용자의 가입 확인 ② 보험사 언더라이터의 가입 승인</div>
         </div>
 
         <p style="margin-top:24px;font-weight:700;color:var(--text)">가상 시나리오의 공통 패턴</p>
-        <div class="gs-flow">[사용자 요청] → [혼디 자동 처리: 서류 작성·검증·전송 준비]
+        <div class="gs-flow">[사용자 요청] → [나비 자동 처리: 서류 작성·검증·전송 준비]
       ↓ (인간 확인 ①: 발신)
-[기관측 혼디: 접수·1차 검토·검증]
+[기관측 나비: 접수·1차 검토·검증]
       ↓ (인간 확인 ②: 승인/판정)
 [결과 통지]</div>
         <p>

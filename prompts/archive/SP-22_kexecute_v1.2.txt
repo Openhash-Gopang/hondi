@@ -1,6 +1,6 @@
 ================================================================
 SP-22_kexecute_v1_2.txt
-K-Execute — 혼디 오케스트레이션 실행 에이전트 System Prompt v1.2
+K-Execute — 나비 오케스트레이션 실행 에이전트 System Prompt v1.2
 저장위치(제안): gopang/prompts/SP-22_kexecute_v1_2.txt
 GWP ID(제안): 'kexecute'  |  카테고리(제안): UTL(플랫폼 유틸리티)
 

@@ -518,7 +518,7 @@
   },
   {
     "no": 48,
-    "utterance": "고팡 화폐를 좀 더 채워 넣고 싶은데 어떻게 해요",
+    "utterance": "나비 화폐를 좀 더 채워 넣고 싶은데 어떻게 해요",
     "expected_type": "GWP",
     "expected_id": "kgdc",
     "expected_name": "GDC",

@@ -61,7 +61,7 @@ DATA_REQUIREMENT-SCHEMA 형식으로 기록 — 지어내지 않는다).
 ```
 
 기관 SP가 없는 절차(법원 등 — SP-AUTHOR가 아직 안 만든 것)를 만나면
-`issuing_gov_task=null`로 표시하고, 그 지점은 "이 부분은 아직 Hondi가
+`issuing_gov_task=null`로 표시하고, 그 지점은 "이 부분은 아직 Navi가
 자동화하지 못했다"고 정직하게 안내한다 — 억지로 즉석에서 SP-AUTHOR를
 호출하지 않는다(§PROACTIVE-SWEEP 우선순위를 지킨다). 다만 이 gap을
 `[GOV_SP_DRAFT_REQUEST]` 후보로 로그에 남겨, 다음 §PROACTIVE-SWEEP

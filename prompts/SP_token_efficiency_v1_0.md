@@ -8,7 +8,7 @@
 
 ## 배경
 
-혼디의 모든 서브시스템은 DeepSeek API 계정 **하나**를 수백 명이 공유한다
+나비의 모든 서브시스템은 DeepSeek API 계정 **하나**를 수백 명이 공유한다
 (`worker.js`의 `env.DEEPSEEK_API_KEY`). DeepSeek을 비롯한 대부분의 LLM
 벤더는 **동일 API 키로 들어오는 요청들의 프롬프트 앞부분(prefix)이 바이트
 단위로 일치하면** 그 구간을 캐시 히트로 처리해 훨씬 싼 단가를 적용한다

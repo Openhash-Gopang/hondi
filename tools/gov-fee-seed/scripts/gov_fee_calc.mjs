@@ -69,7 +69,7 @@ export function calcServiceMail(formula, { parties, count }) {
 /**
  * gov_fee_schedule 레코드 하나와 입력값을 받아 "정부 납부 기준액(참조값)"을 계산한다.
  * 이 값은 실제로 GDC에서 차감되는 금액이 아니라 참고용 기준액이다 — 실제 정부 납부는
- * 사용자가 공식 채널로 직접 한다 (2026-08-15 결정: GDC는 혼디 서비스 수수료 전용).
+ * 사용자가 공식 채널로 직접 한다 (2026-08-15 결정: GDC는 나비 서비스 수수료 전용).
  */
 export function calcGovReference(record, inputs = {}) {
   switch (record.fee_type) {
@@ -100,7 +100,7 @@ export function calcGovReference(record, inputs = {}) {
 }
 
 /**
- * 혼디 서비스 수수료(GDC 청구액) = 정부 납부 기준액 × gdc_multiplier.
+ * 나비 서비스 수수료(GDC 청구액) = 정부 납부 기준액 × gdc_multiplier.
  * fee_type이 free/ordinance_ref/unknown이라 참조값을 못 구하면 null을 반환하고
  * 상위 로직에서 "확인 필요" 처리를 하도록 한다 (자동으로 0원 청구하지 않는다).
  */

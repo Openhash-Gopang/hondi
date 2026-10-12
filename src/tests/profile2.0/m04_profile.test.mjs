@@ -69,7 +69,7 @@ function buildOGMeta(profile, reviewSummary) {
   const count   = reviewSummary?.overall?.count;
   const ratingStr = avg ? `★${avg} (${count}건)` : '';
   return {
-    'og:title':       `${profile.name} — 고팡`,
+    'og:title':       `${profile.name} — 나비`,
     'og:description': `${profile.address || ''} ${ratingStr}`.trim(),
     'og:image':       `https://gopang-proxy.tensor-city.workers.dev/qr/${profile.handle}`,
     'og:url':         `https://users.hondi.net/profile.html?handle=${profile.handle}`,
@@ -211,7 +211,7 @@ await test('PR08', 'OG meta — og:title/description/image/url 생성', () => {
   const og = buildOGMeta(profile, reviewSummary);
 
   assert(og['og:title'].includes('금능반점'),              'og:title에 name 없음');
-  assert(og['og:title'].includes('고팡'),                  'og:title에 고팡 없음');
+  assert(og['og:title'].includes('나비'),                  'og:title에 나비 없음');
   assert(og['og:description'].includes('한림읍'),           'og:description에 주소 없음');
   assert(og['og:description'].includes('★4.1'),            'og:description에 평점 없음');
   assert(og['og:image'].includes('@hallim_geumneung'),     'og:image에 handle 없음');

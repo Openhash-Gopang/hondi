@@ -1,10 +1,10 @@
 /**
  * pdv/share-inbox.js — Web Share Target으로 받은 문서 관리
  *
- * 2026-07-09 신설 — "정부24 앱과 혼디를 앱 대 앱으로 연동하자"는 제안의
+ * 2026-07-09 신설 — "정부24 앱과 나비를 앱 대 앱으로 연동하자"는 제안의
  * 구현. 정부 API 서버 연동(자격증명 없어 불가) 대신, 정부24가 이미
  * 지원하는 표준 OS 공유 기능("공유하기")으로 발급받은 문서(PDF)를
- * 사용자가 혼디에 직접 보내는 방식 — 표준 웹기술(Web Share Target
+ * 사용자가 나비에 직접 보내는 방식 — 표준 웹기술(Web Share Target
  * API)만으로 가능하고 정부 협조가 필요 없다.
  *
  * sw.js의 _handleShareTarget이 받은 파일을 'hondi-share-inbox'라는
@@ -97,8 +97,8 @@ const GOV24_IOS_APP_STORE_ID = '586454505';
  */
 export function buildGov24LaunchInfo(platform, docName) {
   const guidance = docName
-    ? `정부24 앱에서 "${docName}"을(를) 검색해 발급받은 뒤, 발급 완료 화면에서 "공유하기"를 눌러 혼디로 보내주세요.`
-    : '정부24 앱에서 필요한 서류를 발급받은 뒤, 발급 완료 화면에서 "공유하기"를 눌러 혼디로 보내주세요.';
+    ? `정부24 앱에서 "${docName}"을(를) 검색해 발급받은 뒤, 발급 완료 화면에서 "공유하기"를 눌러 나비로 보내주세요.`
+    : '정부24 앱에서 필요한 서류를 발급받은 뒤, 발급 완료 화면에서 "공유하기"를 눌러 나비로 보내주세요.';
 
   if (platform === 'android') {
     return {
@@ -132,8 +132,8 @@ const NPS_WEB_FALLBACK = 'https://minwon.nps.or.kr/';
 
 export function buildNpsLaunchInfo(platform, docName) {
   const guidance = docName
-    ? `국민연금공단 앱("내 곁에 국민연금")에서 "${docName}"을(를) 발급받은 뒤 "공유하기"로 혼디로 보내주세요. 정부24 앱에서도 발급 가능합니다.`
-    : '국민연금공단 앱("내 곁에 국민연금")에서 필요한 증명서를 발급받은 뒤 "공유하기"로 혼디로 보내주세요.';
+    ? `국민연금공단 앱("내 곁에 국민연금")에서 "${docName}"을(를) 발급받은 뒤 "공유하기"로 나비로 보내주세요. 정부24 앱에서도 발급 가능합니다.`
+    : '국민연금공단 앱("내 곁에 국민연금")에서 필요한 증명서를 발급받은 뒤 "공유하기"로 나비로 보내주세요.';
 
   if (platform === 'android') {
     return {

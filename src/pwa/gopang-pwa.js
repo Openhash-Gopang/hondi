@@ -581,7 +581,7 @@ function dismissIOSInstall() {
 // ── 사용자가 직접 설치 요청 (홈 화면 추가 버튼 등) ─────────
 function requestInstall() {
   if (_isInStandaloneMode()) {
-    appendBubble?.('ai', '✅ 혼디는 이미 홈 화면에 설치되어 있습니다.');
+    appendBubble?.('ai', '✅ 나비는 이미 홈 화면에 설치되어 있습니다.');
     return;
   }
   if (_deferredInstallPrompt) {
@@ -627,7 +627,7 @@ window.addEventListener('DOMContentLoaded', () => {
 // AI 비서가 "홈에 설치해줘" 지시 받을 때도 호출됨
 window._requestInstall = requestInstall;
 // ══════════════════════════════════════════════════════════
-// 고팡 사용자 신원 시스템 v2.0
+// 나비 사용자 신원 시스템 v2.0
 // IPv6 형식 정체성 + 4단어 시드 + MediaPipe 얼굴 인식
 // 다단계 인증 L0(기기) ~ L3(기기+얼굴+지문+4단어)
 // private key 저장 없음 — 생체+시드로 매번 재생성

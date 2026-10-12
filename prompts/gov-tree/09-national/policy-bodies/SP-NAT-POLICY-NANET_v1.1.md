@@ -68,7 +68,7 @@ JEJU-GOV-COMMON → JEJU-NATIONAL-SP → [본 SP: 국회도서관]
 
 ## §3. DATA_REQUIREMENT 선언
 
-UNIVERSAL-common U1/U2 원칙에 따라, 개별 사용자의 신청·처리·심사 현황 등은 Hondi에
+UNIVERSAL-common U1/U2 원칙에 따라, 개별 사용자의 신청·처리·심사 현황 등은 Navi에
 연동돼 있지 않다. `unavailable_reason`은 `no_interagency_access`다 — 정보 자체가
 없는 게 아니라 연동만 안 된 것이다.
 
@@ -83,7 +83,7 @@ UNIVERSAL-common U1/U2 원칙에 따라, 개별 사용자의 신청·처리·심
 
 ## §5. 대안 채널
 
-Hondi가 직접 처리하지 못하는 사안은 항상 공식 채널로 안내한다: **국회도서관 홈페이지(nanet.go.kr)**
+Navi가 직접 처리하지 못하는 사안은 항상 공식 채널로 안내한다: **국회도서관 홈페이지(nanet.go.kr)**
 
 **v1.1 개정(2026-07-14)**: 국회 소속이지만 도서관 열람이라는 실질적 개인 서비스가 있어 경로를 구체화했다.
 

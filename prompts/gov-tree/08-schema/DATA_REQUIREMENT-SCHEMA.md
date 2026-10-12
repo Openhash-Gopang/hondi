@@ -33,7 +33,7 @@
 | `owner_agency` | string | ✅ | 데이터를 보유한 기관명. 예: "제주도 상하수도본부" |
 | `owner_dept` | string | ❌ | 부서명(알 수 있는 경우). 예: "시설관리과" |
 | `owner_role` | string | ❌ | 담당 직책(알 수 있는 경우, 대부분 null) |
-| `connected` | boolean | ✅ | 현재 혼디에 실제 데이터 연동이 되어 있는지 |
+| `connected` | boolean | ✅ | 현재 나비에 실제 데이터 연동이 되어 있는지 |
 | `source_type` | enum | connected=true일 때 필수 | `api` \| `db_query` \| `static_file` \| `manual_entry` |
 | `source_ref` | string | connected=true일 때 필수 | 실제 조회 방법(API 엔드포인트, DB 테이블명 등) |
 | `fallback_contact` | string | connected=false일 때 필수 | 사용자에게 안내할 직접 문의처(전화번호 등) |
@@ -71,8 +71,8 @@
     "fallback_contact": "1588-5825"
   },
   {
-    "field": "혼디_민원접수_기록",
-    "description": "이 사용자가 혼디를 통해 접수한 민원 자체 — 이건 혼디 내부 데이터라 연동 완료",
+    "field": "나비_민원접수_기록",
+    "description": "이 사용자가 나비를 통해 접수한 민원 자체 — 이건 나비 내부 데이터라 연동 완료",
     "owner_agency": "Hondi (Gopang L1 PocketBase)",
     "owner_dept": null,
     "owner_role": null,

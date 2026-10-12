@@ -274,13 +274,13 @@ PHASE B-0에서 확정한 INPUT_SCHEMA/OUTPUT_SCHEMA를 뼈대로, 그 사이를
 
 1. **PROCEDURE** — PHASE C 결과 (DATA_REQUIREMENT 형식)
 2. **REQUIRED_USER_FIELDS** — PHASE B-0의 `INPUT_SCHEMA`를 그대로 인용한다
-   (자유서술 재작성 금지). Hondi 기존 스키마에 최대한 매핑, `min_level`은
+   (자유서술 재작성 금지). Navi 기존 스키마에 최대한 매핑, `min_level`은
    `DOCUMENT-TYPE-REGISTRY`에 등재된 값을 그대로 쓴다. L3는 `PDV-TRANSFER-
    PROTOCOL` §2에 따라 매 건 동의 필수로 자동 표시한다(SP-AUTHOR가 이
    표시를 빠뜨리면 §7 검수에서 반려).
 3. **ISSUED_DOCUMENTS** — PHASE B-0의 `OUTPUT_SCHEMA`를 그대로 인용한다.
    각 `doc_type`은 `gov_tickets` 컬렉션 저장 스펙과 함께 기록한다.
-4. **AUTH_MODEL** — Ed25519 위임 서명 토큰 모델. 이 기관이 Hondi API를
+4. **AUTH_MODEL** — Ed25519 위임 서명 토큰 모델. 이 기관이 Navi API를
    아직 받아들이지 않으면(대부분) `CAPABILITIES`에 `referral_only`로
    명시하고 자동 로그인·자동 제출을 절대 설계하지 않는다.
    `identity_basis`를 `"hondi_wallet"`(기본값, 국내 거주 전제) 또는
@@ -349,7 +349,7 @@ PHASE B-0에서 확정한 INPUT_SCHEMA/OUTPUT_SCHEMA를 뼈대로, 그 사이를
   reviewer=@주피터, artifact_path={초안 파일 경로}]
 ```
 
-## §PROACTIVE-SWEEP — 혼디가 모든 시나리오의 최초 실행자다
+## §PROACTIVE-SWEEP — 나비가 모든 시나리오의 최초 실행자다
 
 지난 사고실험에서 확인된 문제: 실사용 요청이 처음 들어온 그 순간부터
 PHASE 0~E를 돌리면, 그 첫 신청자는 자동화 혜택을 전혀 못 받고 승인 대기
@@ -401,7 +401,7 @@ PHASE(-1)은 조사를 전혀 하지 않는다(웹검색·data.go.kr 호출 없�
   없으므로). PHASE B-0(입출력 스키마 조사)·PHASE C(절차 조사)만
   수행하고, 실제 서류 제출·결제·최종 신고(PHASE 이후의 실행 단계)는
   **애초에 하지 않는다** — 조사와 초안 작성이 이 모드의 전부다.
-- PHASE E를 통과한 초안은 여전히 `pending_review`다. "혼디가 먼저
+- PHASE E를 통과한 초안은 여전히 `pending_review`다. "나비가 먼저
   했다"는 것이 사람 승인을 생략하는 이유가 되지 않는다(HUMAN-AUTHORITY-
   GATE-SCHEMA G5는 합성 신원이 만든 초안에도 예외 없이 적용).
 - 우선순위(scope) 결정 기준: ① 이미 실사용에서 갭이 확인된 것(예:
@@ -412,7 +412,7 @@ PHASE(-1)은 조사를 전혀 하지 않는다(웹검색·data.go.kr 호출 없�
   나중).
 
 이 모드가 실행되고 나면, 실사용자는 통계적으로 항상 "재사용자"가 된다
-— 진짜 최초 실행은 혼디 자신이 사람 승인 대기 시간까지 미리 흡수했기
+— 진짜 최초 실행은 나비 자신이 사람 승인 대기 시간까지 미리 흡수했기
 때문이다.
 
 ## §MID-CHAIN-NOTE — 문서 재순환은 버그가 아니라 계측 목적이다

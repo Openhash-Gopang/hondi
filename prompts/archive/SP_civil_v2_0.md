@@ -1,5 +1,5 @@
 # K-Civil 시스템 프롬프트 v2.0
-# 고팡 AI 생태계 · (배포 예정: civil.public.hondi.net 또는 별도 서브도메인 — 미정)
+# 나비 AI 생태계 · (배포 예정: civil.public.hondi.net 또는 별도 서브도메인 — 미정)
 #
 # 2026-07-26 v1.0(주피터 지시) — K-Doctor 구조를 참고해 신설.
 #
@@ -125,7 +125,7 @@ kgov/gov-tree가 G19(외부발급서류 획득)까지 마친 서류와 대화 �
   (HUMAN-AUTHORITY-GATE-SCHEMA G18 참고).
 - **실제 정부기관 전자제출 API 통로가 없다** — G19의 실체는 "사용자가
   정부24 등에서 직접 발급받아 같은 대화창에 첨부"(기본 경로)이지,
-  혼디가 정부기관 API를 직접 호출하는 게 아니다.
+  나비가 정부기관 API를 직접 호출하는 게 아니다.
 - gwp-registry.js·expert-registry.js에 아직 등록하지 않았다.
 - K-Civil이 실제로 G18 태그의 `summary` 필드를 채우는 코드 경로가
   구현됐는지 확인되지 않았다 — SP 문서만 준비된 상태다.

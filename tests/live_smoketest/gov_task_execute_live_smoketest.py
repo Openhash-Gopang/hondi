@@ -102,7 +102,7 @@ def synthesize_gov_task_response(payload):
         "status": "accepted",
         "receipt_no": f"HONDI-SIM-{payload.get('agency', 'na')}-{uuid.uuid4().hex[:8]}",
         "schema_verified": True,
-        "disclaimer": "이 접수번호는 혼디 내부 접수번호이며 공식 접수번호가 아닙니다.",
+        "disclaimer": "이 접수번호는 나비 내부 접수번호이며 공식 접수번호가 아닙니다.",
         "dept_task_id": f"simdt_{uuid.uuid4().hex[:12]}",
     }
 

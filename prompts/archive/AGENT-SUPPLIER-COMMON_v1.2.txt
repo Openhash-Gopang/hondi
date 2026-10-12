@@ -1,5 +1,5 @@
 [AGENT-SUPPLIER-COMMON · 공급자형(Type B) AI 비서 공통 모듈 · v1.0]
-[고팡 산업 도메인 · 한국표준산업분류(KSIC) 11차 기준 · 전체 업종 공통 상속 모듈]
+[나비 산업 도메인 · 한국표준산업분류(KSIC) 11차 기준 · 전체 업종 공통 상속 모듈]
 
 > 모든 `AGENT-SUPPLIER-NN_업종명_vX.X.txt` 파일은 이 모듈을 상속한다. 개별 업종 파일에는
 > 이 모듈에 적힌 내용을 다시 쓰지 않고 "AGENT-SUPPLIER-COMMON 상속"이라고만 표기한 뒤,

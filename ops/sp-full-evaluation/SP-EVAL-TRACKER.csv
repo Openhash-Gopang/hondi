@@ -16,7 +16,7 @@
 2-핵심SP,시스템 코어·공통 규칙,prompts/AC-PRO-CORE_v1_7.txt,AI 비서(AC) 본체,재평가완료,79,문서 제목줄이 v1.1로 고정된 채 본문은 v1.7까지 진행 — 핵심 SP 중 버전 표기 관리가 가장 허술. 정식 버전 이력 섹션 부재,,2026-08-30
 2-핵심SP,시스템 코어·공통 규칙,prompts/CONTROL-TOWER-PRINCIPLE_v1_1.md,관제탑 원칙,재평가완료,81,,,2026-08-30
 2-핵심SP,시스템 코어·공통 규칙,prompts/TASK-DELEGATION-GUIDE_v1_0.md,업무대행 지침,재평가완료,68,파일명(v1_0)이 헤더 버전(v1.1)과 불일치. 수록 서비스가 1건뿐(주민등록 등본) — 커버리지 확장 필요,,2026-08-30
-2-핵심SP,시스템 코어·공통 규칙,prompts/hondi_visitor_sp_v1_2.txt,혼디 방문자 기본 SP,재평가완료,62,'전문 AI 22개+' 등 수치·서비스 예시가 sp-catalog(K-서비스 20개)와 정확히 일치하는지 재확인 필요. 정식 변경이력 섹션 없음,,2026-08-30
+2-핵심SP,시스템 코어·공통 규칙,prompts/hondi_visitor_sp_v1_2.txt,나비 방문자 기본 SP,재평가완료,62,'전문 AI 22개+' 등 수치·서비스 예시가 sp-catalog(K-서비스 20개)와 정확히 일치하는지 재확인 필요. 정식 변경이력 섹션 없음,,2026-08-30
 3-고위험전문직,간호사,prompts/SP_nurse_v3_7.md,간호사,재평가완료,84,,,2026-08-30
 3-고위험전문직,감정평가사,prompts/SP_appraiser_v1_9.md,감정평가사,재평가완료,84,,,2026-08-30
 3-고위험전문직,공인중개사,prompts/SP_real-estate-agent_v2_0.md,공인중개사,재평가완료,84,,,2026-08-30
@@ -1820,8 +1820,8 @@
 5-나머지,시스템 코어·공통 규칙,prompts/SP-17_profile-classifier_v1.0.txt,프로필 분류기 SP,미착수,,,,
 5-나머지,시스템 코어·공통 규칙,prompts/SP-15-IMG_profile-scan_vision_prompt_v1.0.txt,프로필 사진 인식 SP,미착수,,,,
 5-나머지,시스템 코어·공통 규칙,prompts/GOV-TASK-POST-ACCEPTANCE-REVIEW_v2_1.md,행정 업무 접수 후 검토 SP,미착수,,,,
-5-나머지,시스템 코어·공통 규칙,prompts/HONDI-CAPABILITIES-COMMON_v1_0.md,혼디 기능 공통 안내,미착수,,,,
-5-나머지,시스템 코어·공통 규칙,prompts/SP_hondi_v1_2.md,혼디 기본 인격 SP,미착수,,,,
+5-나머지,시스템 코어·공통 규칙,prompts/HONDI-CAPABILITIES-COMMON_v1_0.md,나비 기능 공통 안내,미착수,,,,
+5-나머지,시스템 코어·공통 규칙,prompts/SP_hondi_v1_2.md,나비 기본 인격 SP,미착수,,,,
 5-나머지,안경사,prompts/SP_optician_v1_6.md,안경사,미착수,,,,
 5-나머지,안내·프로필 온보딩,prompts/HONDI-FAQ/gdc.txt,GDC(포인트) 안내,미착수,,,,
 5-나머지,안내·프로필 온보딩,prompts/HONDI-FAQ/gwp-vs-expert.txt,GWP·전문가 페르소나 차이 안내,미착수,,,,
@@ -1841,7 +1841,7 @@
 5-나머지,안내·프로필 온보딩,prompts/HONDI-FAQ/withdrawal.txt,탈퇴 안내,미착수,,,,
 5-나머지,안내·프로필 온보딩,prompts/HONDI-FAQ/tutorial-redo.txt,튜토리얼 다시보기,미착수,,,,
 5-나머지,안내·프로필 온보딩,prompts/profile-assistant/profile-assistant-v2_31.txt,프로필 어시스턴트(가입 대화) 안내,미착수,,,,
-5-나머지,안내·프로필 온보딩,prompts/HONDI-FAQ/hondi-code.txt,혼디코드 안내,미착수,,,,
+5-나머지,안내·프로필 온보딩,prompts/HONDI-FAQ/hondi-code.txt,나비코드 안내,미착수,,,,
 5-나머지,안내·프로필 온보딩,prompts/HONDI-FAQ/signup.txt,회원가입 안내,미착수,,,,
 5-나머지,언어재활사,prompts/SP_speech-language-pathologist_v1_6.md,언어재활사,미착수,,,,
 5-나머지,업종별 공급자 페르소나,prompts/AGENT-SUPPLIER-01_agriculture_v3.0.txt,Supplier 01 Agriculture,미착수,,,,

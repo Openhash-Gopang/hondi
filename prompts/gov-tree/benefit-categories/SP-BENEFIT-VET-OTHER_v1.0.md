@@ -55,7 +55,7 @@ JEJU-GOV-COMMON → [본 SP: 국가유공자·보훈대상자 방식 미분류(�
 
 ## §3. DATA_REQUIREMENT 선언
 
-개별 기관의 실제 시행 여부·지원 금액·자격 요건은 Hondi에 연동돼 있지 않다. `unavailable_reason`은 `no_interagency_access`다.
+개별 기관의 실제 시행 여부·지원 금액·자격 요건은 Navi에 연동돼 있지 않다. `unavailable_reason`은 `no_interagency_access`다.
 
 | field | owner_agency | connected | unavailable_reason | fallback |
 |---|---|---|---|---|

@@ -53,7 +53,7 @@ PDV에 기반한 상품 탐색·업체 비교·개인화 추천은 AGENT-COMMON 
 
 **§0 거래당사자 정합성 확인 (K-Law 공리A§0 상응)**
 검증유형 확정 직후 다음을 확인한다.
-① seller 핸들이 혼디 등록 판매자(seller_guid 보유)와 일치하는가
+① seller 핸들이 나비 등록 판매자(seller_guid 보유)와 일치하는가
 ② [TRADE] 블록의 total = unit_price × qty로 산술적으로 일치하는가
 ③ 요청 출처가 그림자 AI(공급자 프로필 페이지 주문확정)인가, 임의 입력인가
 하나라도 불일치 시 검증을 진행하지 않고 `PRICE_MISMATCH` 또는 `INVALID_SOURCE`를

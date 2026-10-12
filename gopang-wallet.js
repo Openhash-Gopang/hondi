@@ -1,5 +1,5 @@
 ﻿/**
- * gopang-wallet.js — Gopang 클라이언트 지갑 공통 모듈
+ * gopang-wallet.js — Navi 클라이언트 지갑 공통 모듈
  * Version  : 1.0.0
  * Spec     : GDUDA 5-Layer / OpenHash L1
  * Crypto   : Web Crypto API (Ed25519) — 외부 의존 없음
@@ -746,7 +746,7 @@
     }
 
     /**
-     * 2026-07-18 신설 — GDC P2P 이체 (혼디 코드 스캔 → 프로필 → 이체)
+     * 2026-07-18 신설 — GDC P2P 이체 (나비 코드 스캔 → 프로필 → 이체)
      * 새 tx 빌더를 만들지 않고 위의 sign()을 그대로 재사용한다 — outputs에
      * 'gopang-platform' 항목을 안 넣으면 sign() 내부에서 platformFee=0으로
      * 계산돼(sellerOut/platformOut 분리 로직) 결과적으로 수수료 없는 이체가
@@ -1491,11 +1491,11 @@
 
       const cred = await navigator.credentials.create({
         publicKey: {
-          rp: { id: WEBAUTHN_RP_ID, name: 'Hondi Wallet' },
+          rp: { id: WEBAUTHN_RP_ID, name: 'Navi Wallet' },
           user: {
             id: b64uToBuf(record.publicKeyB64u),
             name: localStorage.getItem(LS_HANDLE) || 'gopang-wallet',
-            displayName: 'Gopang Wallet',
+            displayName: 'Navi Wallet',
           },
           challenge: crypto.getRandomValues(new Uint8Array(32)),
           pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
@@ -1561,11 +1561,11 @@
 
       const cred = await navigator.credentials.create({
         publicKey: {
-          rp: { id: WEBAUTHN_RP_ID, name: 'Hondi Wallet' },
+          rp: { id: WEBAUTHN_RP_ID, name: 'Navi Wallet' },
           user: {
             id: crypto.getRandomValues(new Uint8Array(16)),
             name: localStorage.getItem(LS_HANDLE) || 'gopang-wallet',
-            displayName: 'Gopang Wallet (재인증 전용)',
+            displayName: 'Navi Wallet (재인증 전용)',
           },
           challenge: crypto.getRandomValues(new Uint8Array(32)),
           pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
@@ -1762,7 +1762,7 @@
   }
 
   /* ────────────────────────────────────────────────
-   *  TX 타입 상수 (전체 Gopang 공통)
+   *  TX 타입 상수 (전체 Navi 공통)
    * ──────────────────────────────────────────────── */
   GopangWallet.TX = Object.freeze({
     USER_REGISTER      : 'USER_REGISTER',
@@ -2128,7 +2128,7 @@
                    + ' | guid:', wallet.guid || '미연결');
 
       // ── 같은 오리진 탭 간 SSO 서명 릴레이 (2026-07-21 신설) ──────────
-      // 오픈해시/고팡 원칙: "서명이 곧 증명, 서버는 검증만 한다" — 그런데
+      // 오픈해시/나비 원칙: "서명이 곧 증명, 서버는 검증만 한다" — 그런데
       // 하위 서비스(klaw 등)가 SSO 확인용으로 만드는 보이지 않는 iframe은
       // 사용자 제스처가 없어 WebAuthn(지문)을 새로 못 띄운다(실사로 확인).
       // 이 문제를 서버 세션/쿠키로 우회하면 원칙이 깨지므로, 대신 "이미

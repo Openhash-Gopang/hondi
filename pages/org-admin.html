@@ -4,7 +4,7 @@
 <link rel="icon" href="data:,">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>혼디 AI 사이트 관리</title>
+<title>나비 AI 사이트 관리</title>
 <!--
   2026-10-09 신설 — 기관 AI 웹사이트 라이브 설정 편집기.
   설정(JSON)을 고쳐 저장하면 새 버전이 쌓이고, 열려 있는 AI 사이트는 5초 안에 다음 응답부터 반영한다.
@@ -28,7 +28,7 @@
 <main>
  <div class="card">
   <div class="row">
-   <b>혼디 AI 사이트 관리</b>
+   <b>나비 AI 사이트 관리</b>
    <select id="site"></select>
    <span id="ver" class="mut"></span>
    <a id="preview" target="_blank" rel="noopener">AI 사이트 열기 ↗</a>
@@ -57,7 +57,7 @@ const me = (() => { try { const u = JSON.parse(localStorage.getItem('gopang_user
 let baseVersion = 0;
 const say = (t, cls) => { $('msg').textContent = t; $('msg').className = cls || 'mut'; };
 
-$('who').textContent = me ? `로그인: ${me.handle || ''} · guid ${me.guid}` : '로그인이 필요합니다. 혼디 앱에 로그인한 뒤 다시 열어 주세요.';
+$('who').textContent = me ? `로그인: ${me.handle || ''} · guid ${me.guid}` : '로그인이 필요합니다. 나비 앱에 로그인한 뒤 다시 열어 주세요.';
 for (const id of Object.keys(ORG_SITES)) $('site').appendChild(Object.assign(document.createElement('option'), { value: id, textContent: `${ORG_SITES[id].name} (${id})` }));
 const q = new URLSearchParams(location.search); if (ORG_SITES[q.get('site')]) $('site').value = q.get('site');
 

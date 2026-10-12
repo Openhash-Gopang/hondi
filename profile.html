@@ -6,14 +6,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <!-- ── SEO / OpenGraph (JS로 동적 교체) ── -->
-<title>고팡 프로필</title>
+<title>나비 프로필</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <meta name="description" content="">
 <meta property="og:type"        content="profile">
 <meta property="og:title"       content="">
 <meta property="og:description" content="">
-<meta property="og:image"       content="https://hondi.net/icons/icon-512.png">
+<meta property="og:image"       content="https://hondi.net/icons/navi-icon-512.png">
 <meta property="og:url"         content="">
 <meta name="twitter:card"       content="summary">
 
@@ -317,11 +317,11 @@ watchHondiSkin({
     </div>
   </div>
 
-  <!-- 혼디 숫자 코드 -->
+  <!-- 나비 숫자 코드 -->
   <div class="card hidden" id="bp-card-code">
-    <div class="card-title">내 혼디 코드</div>
+    <div class="card-title">내 나비 코드</div>
     <div style="padding:16px;display:flex;flex-direction:column;align-items:center;gap:12px">
-      <img id="bp-code-img" alt="내 혼디 숫자 코드" style="max-width:100%;width:280px;border:1px solid #f3f4f6;border-radius:10px;background:#fff">
+      <img id="bp-code-img" alt="내 나비 숫자 코드" style="max-width:100%;width:280px;border:1px solid #f3f4f6;border-radius:10px;background:#fff">
       <div style="font-size:11.5px;color:#9ca3af;text-align:center;line-height:1.6">
         이 코드를 출입문이나 명함에 인쇄하면, 다른 사람이 카메라로 비추기만 해도<br>바로 이 프로필로 연결됩니다.
       </div>
@@ -375,7 +375,7 @@ watchHondiSkin({
     </button>
   </div>
 
-  <!-- 퀵 액션 (메시지/P2P/공유/혼디코드/저장) -->
+  <!-- 퀵 액션 (메시지/P2P/공유/나비코드/저장) -->
   <div class="quick-actions" id="quick-actions">
     <button class="qa-item" id="qa-msg" onclick="contactOwner()">
       <span class="qa-circle primary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
@@ -391,7 +391,7 @@ watchHondiSkin({
     </button>
     <button class="qa-item" id="qa-code" onclick="openMyHondiCode()">
       <span class="qa-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><line x1="14" y1="14" x2="21" y2="14"/><line x1="14" y1="21" x2="21" y2="21"/><line x1="17.5" y1="14" x2="17.5" y2="21"/></svg></span>
-      <span class="qa-label">혼디코드</span>
+      <span class="qa-label">나비코드</span>
     </button>
     <button class="qa-item" onclick="shareProfile()">
       <span class="qa-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></span>
@@ -498,7 +498,7 @@ watchHondiSkin({
         <button class="btn-pill-outline" onclick="_editPayoutAccount()">계좌 등록/수정</button>
       </div>
       <div style="font-size:12px;color:#8a8f98;margin-top:6px;">
-        이 계좌 정보는 프로필 방문자에게 표시됩니다. Hondi는 이 계좌에서 직접 돈을 인출하지 않습니다.
+        이 계좌 정보는 프로필 방문자에게 표시됩니다. Navi는 이 계좌에서 직접 돈을 인출하지 않습니다.
       </div>
     </div>
     <div id="payout-account-viewer" class="hidden">
@@ -793,7 +793,7 @@ async function loadProfile() {
 
 // ── 상세 프로필(사업자 등록 등)이 아직 없을 때의 대체 화면 ──────
 // 조회 중인 handle이 "나 자신"의 계정일 때만 기본 정보(이름·핸들·위치·
-// 혼디 숫자 코드)를 보여준다. 남의 미작성/비공개 프로필은 그대로 에러 표시.
+// 나비 숫자 코드)를 보여준다. 남의 미작성/비공개 프로필은 그대로 에러 표시.
 async function renderBasicOrError() {
   let stored = null;
   try {
@@ -817,7 +817,7 @@ async function renderBasicOrError() {
     document.getElementById('bp-card-location').classList.remove('hidden');
   }
 
-  // ── 혼디 숫자 코드 — 캐시 우선, 없으면 digit_code_id로 즉시 재생성 ──
+  // ── 나비 숫자 코드 — 캐시 우선, 없으면 digit_code_id로 즉시 재생성 ──
   // (구 색상 코드는 2026-07-27 잠정 중단)
   try {
     let codeImg = localStorage.getItem('hondi_digit_code_image_v1');
@@ -1528,7 +1528,7 @@ function toggleSaveProfile() {
   try { localStorage.setItem(_SAVED_PROFILES_KEY, JSON.stringify(saved)); } catch {}
 }
 
-// ── 혼디 숫자 코드 보기 (이 프로필의 digit_code_id 기준) ──────
+// ── 나비 숫자 코드 보기 (이 프로필의 digit_code_id 기준) ──────
 // (구 색상 코드는 2026-07-27 잠정 중단)
 async function openMyHondiCode() {
   if (!_profile?.digit_code_id) { alert('코드를 생성할 수 없습니다.'); return; }
@@ -1537,7 +1537,7 @@ async function openMyHondiCode() {
     const dataURL = await generateDigitCodeDataURL(_profile.digit_code_id);
     _showHondiCodeModal(dataURL);
   } catch (e) {
-    console.warn('[Profile] 혼디 코드 생성 실패:', e.message);
+    console.warn('[Profile] 나비 코드 생성 실패:', e.message);
     alert('코드를 불러오지 못했습니다.');
   }
 }
@@ -2320,7 +2320,7 @@ async function _submitOrder(signedTx) {
       reporter_svc: 'kmarket',
     }, _openerOrigin);
 
-    // 2026-07-15 신설 — 구매자 리뷰 → 판매자 혼디 온도 갱신 파이프라인
+    // 2026-07-15 신설 — 구매자 리뷰 → 판매자 나비 온도 갱신 파이프라인
     // 완성. 지금까지 POST /biz/trade-rating을 호출하는 UI가 세 레포
     // 어디에도 없어(2026-07-15 사고실험에서 발견), 실거래가 쌓여도
     // 온도가 절대 안 움직였다. tx_hash가 이미 확보된 이 시점(결제 직후)
@@ -2357,7 +2357,7 @@ function startP2P() {
 // ── 공유 ─────────────────────────────────────────────────
 async function shareProfile() {
   const url   = location.href;
-  const title = _profile?.name || '고팡 프로필';
+  const title = _profile?.name || '나비 프로필';
   if (navigator.share) {
     await navigator.share({ title, url }).catch(()=>{});
   } else {
@@ -2368,7 +2368,7 @@ async function shareProfile() {
 
 // ── SEO: OpenGraph + JSON-LD ─────────────────────────────
 function injectSEO(p, ident, tags) {
-  const title = `${p.name||'프로필'} — 고팡`;
+  const title = `${p.name||'프로필'} — 나비`;
   const desc  = (ident.description || p.description || tags.join(', ')).slice(0, 160);
   const url   = location.href;
 

@@ -255,7 +255,7 @@ async function run(name, queue, payload) {
 {
   const { data, calls } = await run('실사용 A: 도청→국가기관(국세) 위임', [
     JSON.stringify({ sp_call: { target: 'gov_national', purpose: '국세 체납액 확인', query: '국세 체납액이 얼마인지 확인해줘' } }),
-    '국세 체납 조회는 홈택스 로그인 후 "나의 세금 조회"에서 확인 가능합니다. Hondi와는 아직 직접 연동돼 있지 않습니다.',
+    '국세 체납 조회는 홈택스 로그인 후 "나의 세금 조회"에서 확인 가능합니다. 나비와는 아직 직접 연동돼 있지 않습니다.',
     '지방세(취득세·재산세) 체납액은 0원으로 확인됩니다. 국세는 제주세무서(국가기관) 확인 결과, 홈택스에서 직접 조회하셔야 합니다 — 두 세목은 관할이 달라 따로 안내드립니다.',
   ], { guid: 'jeju1', agency: 'gov_do', agencyPrompt: '[SP-DO-PLAN — 지방세 담당]', provinceCode: 'jeju', messages: [{ role: 'user', content: '국세랑 지방세 체납액 합쳐서 알려줘' }], stream: false });
 

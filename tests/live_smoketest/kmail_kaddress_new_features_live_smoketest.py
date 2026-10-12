@@ -267,13 +267,13 @@ def run_ai_scenario(scn, api_key, catalog):
 AI_SCENARIOS = [
     {"no": 5, "name": "K-Mail: 이름 붙은 그룹 언급 시 되묻기 전에 주소록 조회",
      "kind": "kmail_group_lookup_first",
-     "user_utterance": "팀 주피터 멤버들에게 혼디 최근 개발 상황을 요약해서 보내줘"},
+     "user_utterance": "팀 주피터 멤버들에게 나비 최근 개발 상황을 요약해서 보내줘"},
     {"no": 6, "name": "K-Mail: URL 요약 요청에 FETCH_CONTENT 사용(FETCH_PAGE 오용 금지)",
      "kind": "kmail_fetch_content_not_fetch_page",
      "user_utterance": "https://github.com/Openhash-Gopang/hondi/ 이 저장소 최근 진행 상황을 파악해서 메일 본문 초안에 넣어줘"},
     {"no": 7, "name": "K-Address: 발송 요청에 안내만 하지 않고 K-Mail 직접 호출",
      "kind": "kaddress_handoff_not_guide_only",
-     "user_utterance": "팀 주피터 멤버들에게 혼디 최근 개발 상황을 요약해서 보내줘"},
+     "user_utterance": "팀 주피터 멤버들에게 나비 최근 개발 상황을 요약해서 보내줘"},
 ]
 
 
