@@ -1,18 +1,21 @@
-// 사용: node run_tests.mjs [cases.json] [--out results.json]
+// 사용: node run_tests.mjs [cases.json] [--out results.json] [--rgba]
+//   --rgba : 컬러 프레임을 analyzeRGBA(옛 배치 + 새 배치 자동 판별)로 분석한다. 없으면 옛 방식(R+G+B 평균 회색조, analyzeGray).
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PNG } from 'pngjs';
-import { analyzeGray } from '../../src/gopang/ai/hondi-digit-core.js';
+import { analyzeGray, analyzeRGBA } from '../../src/gopang/ai/hondi-digit-core.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const casesFile = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : path.join(HERE, 'cases.json');
 const outIdx = process.argv.indexOf('--out');
 const outFile = outIdx > 0 ? process.argv[outIdx + 1] : path.join(HERE, 'results.json');
 
+const RGBA = process.argv.includes('--rgba');
 function loadGray(p) {
   const png = PNG.sync.read(fs.readFileSync(p));
   const { width: W, height: H, data } = png;
+  if (RGBA) return { g: null, W, H, data };
   const g = new Uint8Array(W * H);
   for (let i = 0; i < W * H; i++) g[i] = Math.round((data[i*4] + data[i*4+1] + data[i*4+2]) / 3);  // 스캐너와 동일 공식
   return { g, W, H };
@@ -21,9 +24,9 @@ function loadGray(p) {
 const cases = JSON.parse(fs.readFileSync(casesFile, 'utf8'));
 const rows = [];
 for (const c of cases) {
-  const { g, W, H } = loadGray(path.join(HERE, c.path));
+  const { g, W, H, data } = loadGray(path.join(HERE, c.path));
   const t0 = performance.now();
-  const r = analyzeGray(g, W, H);
+  const r = RGBA ? analyzeRGBA(data, W, H) : analyzeGray(g, W, H);
   const ms = performance.now() - t0;
   let verdict;
   if (c.expect) {                       // 코드가 있는 프레임
@@ -34,7 +37,7 @@ for (const c of cases) {
     verdict = !r.ok ? 'reject' : 'FALSE-ACCEPT';
   }
   rows.push({ id: c.id, suite: c.suite, level: c.level, expect: c.expect, serial: c.serial,
-              got: r.ok ? r.serial : null, reason: r.ok ? null : r.reason, verdict, ms,
+              got: r.ok ? r.serial : null, layout: r.ok ? (r.layout || 'stacked') : null, reason: r.ok ? null : r.reason, verdict, ms,
               cert: r.ok ? r.certainty : null });
 }
 fs.writeFileSync(outFile, JSON.stringify(rows));

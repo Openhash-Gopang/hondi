@@ -1,22 +1,23 @@
 /**
- * hondi-digit-scanner-v2.js — 혼디 숫자 코드 스캐너 v2 (가변 자릿수 1~10, 로고 기준)
+ * hondi-digit-scanner-v2.js — 숫자 코드 스캐너 v2 (가변 자릿수 1~10, 로고 기준)
+ * 두 배치를 모두 읽는다: 새 배치(나비 로고 칸 + 숫자열 한 줄)와 옛 배치(hondi.net 로고 위 + 숫자 아래). 판별은 코어의 analyzeRGBA()가 한다.
  * 분석 로직은 전부 hondi-digit-core.js(브라우저/Node 공용, 시뮬레이션 테스트 대상). 여기는 카메라·확정·UI 연결만 한다.
  * 기존 hondi-digit-scanner.js(고정 10칸, 전화번호 방식)는 건드리지 않는다 — link-scan.html 등이 아직 사용 중.
  */
-import { analyzeGray } from './hondi-digit-core.js';
+import { analyzeRGBA } from './hondi-digit-core.js';
 
 const SCAN_MS = Math.round(1000 / 15);
 export const LOCK_FRAMES = 3;
-// 분석 창(ROI): 숫자 코드는 가로로 긴 모양(로고+숫자열 ≈ 2.8:1)이라 프레임 중앙의 가로띠만 본다.
+// 분석 창(ROI): 숫자 코드는 가로로 긴 모양(옛 배치 ≈ 2.8:1, 새 배치 ≈ 7.5:1)이라 프레임 중앙의 가로띠만 본다.
 // 테스트 페이지의 뷰파인더도 같은 비율로 보여 주므로 화면에 보이는 것 = 분석하는 것이다(다른 화면 요소가 덜 섞인다).
 export const ROI_ASPECT = 2.7;
 
 const REASON_HINT = {
   'no-ink': '코드를 화면에 비춰주세요.',
-  'logo-mismatch': '"hondi.net" 로고가 또렷하게 보이도록 비춰주세요. (다른 글자·무늬는 코드로 읽지 않아요)',
-  'no-digit-row': '로고는 찾았어요. 로고 바로 아래 숫자 칸이 전부 보이게 비춰주세요.',
+  'logo-mismatch': '나비 로고가 또렷하게 보이도록 비춰주세요. (다른 글자·무늬는 코드로 읽지 않아요)',
+  'no-digit-row': '로고는 찾았어요. 로고 옆(옛 코드는 아래)의 숫자 칸이 전부 보이게 비춰주세요.',
   'box-off-grid': '칸 위치가 로고와 맞지 않아요. 정면에서 비춰주세요.',
-  'no-logo': '"hondi.net" 로고와 숫자가 함께 보이도록 비춰주세요.',
+  'no-logo': '나비 로고와 숫자가 함께 보이도록 비춰주세요.',
   'row-clipped': '숫자열이 화면 끝에 걸렸어요. 조금 더 멀리서 비춰주세요.',
   'not-left-aligned': '숫자열이 잘렸을 수 있어요. 로고와 숫자를 모두 화면 안에 넣어주세요.',
   'too-wide': '숫자열이 로고보다 넓어요. 코드 전체가 보이게 다시 비춰주세요.',
@@ -31,18 +32,18 @@ const REASON_HINT = {
 };
 
 let _stream = null, _rafId = null, _lastTime = 0, _lockCount = 0, _lastKey = null, _locked = false;
-let _hint = null, _frameNo = 0;      // 직전에 성공한 회전/원근 보정값(추적) · 프레임 번호
+let _hint = null, _hintLayout = null, _frameNo = 0;      // 직전에 성공한 회전/원근 보정값(추적)·배치 · 프레임 번호
 let _onResult = null, _onStatus = null, _onFrame = null, _overlay = null;
 
 export async function startScanner(video, canvas, overlayCanvas, onResult, onStatus, onFrame) {
   _onResult = onResult; _onStatus = onStatus; _onFrame = onFrame; _overlay = overlayCanvas;
-  _lockCount = 0; _lastKey = null; _locked = false; _hint = null; _frameNo = 0;
+  _lockCount = 0; _lastKey = null; _locked = false; _hint = null; _hintLayout = null; _frameNo = 0;
   try {
     _stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false,
     });
     video.srcObject = _stream; await video.play();
-    _onStatus?.('"hondi.net" 로고와 숫자열이 함께 보이게 비춰주세요.');
+    _onStatus?.('나비 로고와 숫자열이 함께 보이게 비춰주세요.');
     _schedule(video, canvas);
   } catch (e) {
     const msg = e.name === 'NotAllowedError' ? '카메라 권한이 거부됐습니다. 설정에서 허용해 주세요.'
@@ -63,14 +64,9 @@ function _schedule(video, canvas) {
   });
 }
 
-function toGray(imageData) {
-  const d = imageData.data, n = imageData.width * imageData.height, g = new Uint8Array(n);
-  for (let i = 0; i < n; i++) g[i] = Math.round((d[i*4] + d[i*4+1] + d[i*4+2]) / 3);   // 기존 스캐너와 동일 공식
-  return g;
-}
 function analyzeImageData(imageData, opts = {}) {
   const t0 = performance.now();
-  const r = analyzeGray(toGray(imageData), imageData.width, imageData.height, opts);
+  const r = analyzeRGBA(imageData.data, imageData.width, imageData.height, opts);   // 컬러 그대로 — 새 배치는 빨강 채널, 옛 배치는 R+G+B 평균으로 읽는다
   r.ms = performance.now() - t0;
   return r;
 }
@@ -84,8 +80,8 @@ function _frame(video, canvas) {
   ctx.drawImage(video, 0, y0, W, H, 0, 0, W, H);
   // 회전·원근 보정 탐색은 비싸다(수백 ms) → 매 6번째 프레임에서만 시도하고, 성공하면 그 보정값을 다음 프레임에 재사용한다.
   _frameNo++;
-  const r = analyzeImageData(ctx.getImageData(0, 0, W, H), { transformHint: _hint, noRescue: _frameNo % 6 !== 0 });
-  if (r.ok) _hint = r.transform || null;
+  const r = analyzeImageData(ctx.getImageData(0, 0, W, H), { transformHint: _hint, hintLayout: _hintLayout, noRescue: _frameNo % 6 !== 0 });
+  if (r.ok) { _hint = r.transform || null; _hintLayout = r.layout || null; }
   _drawOverlay(r, W, H);
   _onFrame?.(r);                                    // 테스트 페이지용: 프레임마다 결과/사유 전달
   if (!r.ok) { _lockCount = 0; _lastKey = null; _onStatus?.(REASON_HINT[r.reason] || `인식 중… (${r.reason})`); return; }
