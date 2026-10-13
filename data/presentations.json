@@ -1,11 +1,20 @@
 {
   "_help": "프레젠테이션을 추가하려면 items에 한 항목을 더하면 됩니다. order가 작을수록 앞에 옵니다(10 단위로 비워 두었으니 사이에 끼워 넣으세요). series는 아래 series의 id입니다. status: ready(공개 가능) | draft(검토 중). url은 Slides 문서 주소입니다.",
   "series": [
+    { "id": "web",     "order": 5,  "title": "나비웹", "desc": "나비 코드 샘플과 기관 사이트 시연 화면" },
     { "id": "intro",   "order": 10, "title": "나비 이해하기", "desc": "나비가 무엇이고 웹이 어떻게 달라지는지" },
     { "id": "region",  "order": 20, "title": "지역과 기관에 적용하기", "desc": "제주를 비롯한 지역과 기관에 나비를 적용하는 구상" },
     { "id": "seminar", "order": 30, "title": "기관 대상 세미나", "desc": "특정 기관 임직원을 위한 맞춤 발표 자료" }
   ],
   "items": [
+    {
+      "id": "naviwb", "order": 10, "no": 0, "series": "web", "status": "ready",
+      "title": "나비웹",
+      "summary": "나비 숫자 코드 샘플 10종과, 제주도청·대법원 누리집을 나비의 AI 비서 화면과 나란히 비교하는 HTML 문서입니다.",
+      "audience": "일반 · 파트너 기관", "date": "2026-10-13",
+      "tags": ["HTML", "시연"],
+      "url": "naviwb.html"
+    },
     {
       "id": "field-test", "order": 10, "series": "intro", "status": "ready",
       "title": "나만의 AI 비서, 나비 필드 테스트",
