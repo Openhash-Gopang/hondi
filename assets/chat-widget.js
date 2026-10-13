@@ -44,7 +44,7 @@
          label: 'K-정부에 물어보기',    // FAB 라벨 문구(선택)
          greeting: '안녕하세요! ...',   // 채팅창 첫 인사(선택)
          serviceLabel: 'K-정부',        // KAuth 로그인 UI 표시명(선택)
-         requireAuth: true              // 기본값 true
+         requireAuth: true              // 기본값 true  ·  선택 옵션: position('left'), maxTokens, panelTitle, transformReply(reply)→string, onReply(reply, bubble) · 공개 API: window.HondiChatWidget.open()/send(text)
        };
      </script>
      <script src="/assets/chat-widget.js"></script>
@@ -72,7 +72,7 @@
     label: '무엇이든 요청하세요.',
     greeting: '안녕하세요! 나비 플랫폼 이용과 관련해 무엇이든 요청하거나 지시해주세요. 😊',
     serviceLabel: document.title || 'K-서비스',
-    requireAuth: true,
+    requireAuth: true, position: 'right', maxTokens: 1000, panelTitle: '', transformReply: null, onReply: null,
   }, window.HONDI_CHAT_WIDGET_CONFIG || {});
 
   // ── 스타일 (desktop.html #ask-bubble / #chat-panel 디자인을 hcw- 접두로 재사용) ──
@@ -123,7 +123,9 @@
     '#hcw-input::placeholder{color:#6b7280}' +
     '#hcw-send{width:38px;height:38px;border-radius:50%;border:none;background:#3b82f6;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s,transform .12s}' +
     '#hcw-send:hover{background:#1d4ed8;transform:scale(1.06)}#hcw-send:disabled{background:#e5e7eb;cursor:not-allowed;transform:none}' +
-    '@media (max-width:600px){#hcw-fab{bottom:18px;right:16px}#hcw-fab-btn{width:50px;height:50px}#hcw-panel{right:12px;left:12px;width:auto;bottom:82px}}';
+    '@media (max-width:600px){#hcw-fab{bottom:18px;right:16px}#hcw-fab-btn{width:50px;height:50px}#hcw-panel{right:12px;left:12px;width:auto;bottom:82px}}' +
+    '#hcw-fab.hcw-left{right:auto;left:28px;flex-direction:row-reverse}#hcw-fab.hcw-left #hcw-fab-label{border-radius:20px 20px 4px 20px;transform:translateX(-8px)}#hcw-fab.hcw-left:hover #hcw-fab-label{opacity:1;transform:translateX(0)}#hcw-panel.hcw-left{right:auto;left:28px}' +
+    '@media (max-width:600px){#hcw-fab.hcw-left{right:auto;left:16px}#hcw-panel.hcw-left{left:12px;right:12px}}';
   document.head.appendChild(style);
 
   var wrap = document.createElement('div');
@@ -163,6 +165,8 @@
   var input    = document.getElementById('hcw-input');
   var sendBtn  = document.getElementById('hcw-send');
   var closeBtn = document.getElementById('hcw-panel-close');
+  if (CFG.position === 'left') { document.getElementById('hcw-fab').classList.add('hcw-left'); panel.classList.add('hcw-left'); }
+  if (CFG.panelTitle) { var ttl = document.getElementById('hcw-panel-title'); if (ttl && ttl.lastChild) ttl.lastChild.textContent = CFG.panelTitle; }
 
   fabLabel.textContent = CFG.label;
   fabBtn.title = CFG.label;
@@ -277,7 +281,7 @@
         model: 'deepseek-v4-flash',
         system: composedSP,
         messages: history,
-        max_tokens: 1000,
+        max_tokens: CFG.maxTokens || 1000,
       });
 
       var res;
@@ -302,7 +306,10 @@
       var reply = data.content || '죄송합니다, 답변을 가져오지 못했습니다.';
       history.push({ role: 'assistant', content: reply });
       removeTyping();
-      appendMsg('ai', reply);
+      var shown = reply;
+      if (typeof CFG.transformReply === 'function') { try { var tr = CFG.transformReply(reply); if (typeof tr === 'string') shown = tr; } catch (e2) { console.error('[chat-widget] transformReply', e2); } }
+      var bub = appendMsg('ai', shown);
+      if (typeof CFG.onReply === 'function') { try { CFG.onReply(reply, bub); } catch (e3) { console.error('[chat-widget] onReply', e3); } }
     } catch (err) {
       removeTyping();
       appendMsg('ai', '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
@@ -351,4 +358,16 @@
   }
   fabBtn.addEventListener('click', onFabClick);
   fabLabel.addEventListener('click', onFabClick);
+  // 선택적 공개 API — 페이지가 목록 등에서 대화를 시작할 수 있게 한다(기본 동작에는 영향 없음).
+  window.HondiChatWidget = {
+    open: onFabClick,
+    send: async function (text) {
+      await onFabClick();
+      if (!panel.classList.contains('open')) return;
+      input.value = String(text || '');
+      autoResize();
+      return send();
+    },
+    isBusy: function () { return busy; }
+  };
 })();
