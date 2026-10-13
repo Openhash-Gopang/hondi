@@ -44,3 +44,9 @@
 .ph-hero h1 { font-size: 21px; font-weight: 700; letter-spacing: -.3px; line-height: 1.4; margin-bottom: 10px; max-width: 760px; }
 .ph-hero-instruction { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.6; max-width: 700px; margin-bottom: 6px; }
 .ph-hero p { font-size: 12.5px; color: rgba(255,255,255,.60); line-height: 1.65; max-width: 700px; }
+
+/* ── 면책 안내 띠 — 히어로 바로 아래(PAGE_HEADER.disclaimer 로 켬) ── */
+.ph-disclaimer { background: #fff8e6; border-bottom: 1px solid #f0d58a; color: #5c4400; }
+.ph-disclaimer-inner { max-width: 1160px; margin: 0 auto; padding: 10px 24px; display: flex; align-items: flex-start; gap: 9px; }
+.ph-disclaimer-mark { flex: 0 0 auto; width: 16px; height: 16px; margin-top: 1px; border-radius: 50%; background: #b7791f; color: #fff; font-size: 11px; font-weight: 800; line-height: 16px; text-align: center; }
+.ph-disclaimer p { margin: 0; font-size: 12.5px; font-weight: 600; line-height: 1.6; word-break: keep-all; }

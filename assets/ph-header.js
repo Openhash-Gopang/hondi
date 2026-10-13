@@ -23,6 +23,7 @@
          instruction: '굵게 강조할 안내 문장(선택)',
          sub: '설명 문단(선택, html 허용)',
          extraHtml: '<div class="pp-explainer">...</div>',  // 히어로(어두운 배경) 안에 그대로 넣을 페이지 전용 콘텐츠(선택)
+         disclaimer: true,                  // 히어로 바로 아래에 면책 안내 띠를 표시(선택). true면 아래 DEFAULT_DISCLAIMER, 문자열이면 그 문구(텍스트로만 취급)
          subnav: [                          // 보조 탭 줄(선택) — 프롬프트 페이지 전용
            { label: '프롬프트', href: 'prompts.html', active: true },
            { label: 'SP의 계층 구조', href: 'sp-hierarchy.html' }
@@ -47,6 +48,9 @@
     { key: 'usage-guide',     label: '이용방법',        href: '/pages/usage-guide.html' },
     { key: 'ai-assistant',    label: 'AI 비서',         href: '/pages/ai-assistant.html' }
   ];
+
+  // 보조 AI 면책 문구(단일 소스). 페이지가 PAGE_HEADER.disclaimer: true 로 켠다.
+  var DEFAULT_DISCLAIMER = '관계 법령에 따라, 모든 보조 AI는 인간 전문가의 업무를 보조하며, 단독으로 기능하지 않는다.';
 
   function escapeHtml(s) {
     var div = document.createElement('div');
@@ -103,6 +107,20 @@
     return html;
   }
 
+  // 히어로 바로 아래의 면책 안내 띠. 문구는 항상 escapeHtml을 거쳐 텍스트로만 넣는다.
+  function renderDisclaimer(config) {
+    if (!config || !config.disclaimer) return '';
+    var text = (typeof config.disclaimer === 'string') ? config.disclaimer : DEFAULT_DISCLAIMER;
+    return (
+      '<div class="ph-disclaimer" role="note">' +
+        '<div class="ph-disclaimer-inner">' +
+          '<span class="ph-disclaimer-mark" aria-hidden="true">!</span>' +
+          '<p>' + escapeHtml(text) + '</p>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
   // 오버레이(SPA) 안에서 열렸으면 오버레이를 닫고, 아니면(새 탭/직접 접속으로
   // 열렸으면) 그냥 href를 따라 /desktop.html로 실제 이동한다.
   window.__hondiBack = function (e) {
@@ -123,7 +141,7 @@
     var container = THIS_SCRIPT ? THIS_SCRIPT.parentNode : document.body;
     var config = window.PAGE_HEADER || {};
 
-    var html = renderNav(config.active) + renderSubnav(config.subnav) + renderHero(config);
+    var html = renderNav(config.active) + renderSubnav(config.subnav) + renderHero(config) + renderDisclaimer(config);
 
     var temp = document.createElement('div');
     temp.innerHTML = html;
