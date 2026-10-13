@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>혼디 숫자 코드</title>
+<title>나비 숫자 코드</title>
 <link rel="stylesheet" href="/assets/fonts.css">
 <style>
   :root { --bg:#f6f7f9; --card:#fff; --line:#e3e6ea; --text:#111827; --sub:#4b5563; --ok:#0a7d33; --okbg:#e3f5e9; --bad:#b42318; --warn:#8a5a00; --warnbg:#fff1d6; --acc:#1e4fd8; --accbg:#e8eefc; }
@@ -55,11 +55,11 @@
 </head>
 <body>
 <main>
-  <h1>혼디 숫자 코드</h1>
+  <h1>나비 숫자 코드</h1>
 
   <section class="card" id="s3">
     <h2>① 코드 스캔</h2>
-    <p class="sub" style="margin:0 0 10px">혼디 숫자 코드를 카메라로 비춰 읽어 보세요. 다른 화면이나 인쇄물에 띄운 코드를 비추면 됩니다.</p>
+    <p class="sub" style="margin:0 0 10px">나비 숫자 코드를 카메라로 비춰 읽어 보세요. 다른 화면이나 인쇄물에 띄운 코드를 비추면 됩니다.</p>
     <div class="cam" id="cam"><video id="v" playsinline muted></video><canvas class="ov" id="ov"></canvas><div class="guide"></div><div class="hint" id="camHint">코드(로고+숫자)를 이 창 안에 가로로 맞추세요</div></div>
     <canvas id="work" style="display:none"></canvas>
     <div id="status" role="status"></div>
@@ -75,7 +75,7 @@
     <div id="regMsg" class="msg" role="status"></div>
     <div id="reg" class="reg">
       <div>내 번호 <b id="regNo"></b> <span id="regOrder"></span></div>
-      <img id="codeImg" class="codeImg" alt="내 혼디 숫자 코드">
+      <img id="codeImg" class="codeImg" alt="내 나비 숫자 코드">
       <div class="regBtns">
         <a id="bSave" class="btnlink" download="hondi-digit-code.png">이미지 저장</a>
         <button id="bWriteProfile" class="ghost" style="margin:0">프로필 작성 및 갱신하기 ↗</button>
@@ -143,13 +143,13 @@ async function getWallet() {
     w = await window.GopangWallet.load();      // 사용자 동작 안에서 부르므로 지문/Face ID 창이 정상적으로 뜬다
     if (w) { try { w.setIdentity({ guid: me.guid, handle: me.handle || null, e164: me.e164 }); } catch {} window.gopangWallet = w; }
   }
-  if (!w || typeof w.signPayload !== 'function') throw new Error('이 기기에서 지갑을 열 수 없습니다. 혼디 앱에 로그인한 뒤 다시 시도해 주세요.');
+  if (!w || typeof w.signPayload !== 'function') throw new Error('이 기기에서 지갑을 열 수 없습니다. 나비 앱에 로그인한 뒤 다시 시도해 주세요.');
   return w;
 }
 async function ownerPubKey(guid) {
   const r = await fetch(`${WORKER}/wallet/x25519?guid=${encodeURIComponent(guid)}`, { signal: AbortSignal.timeout(8000) });
   const j = await r.json().catch(() => ({}));
-  if (!j.ed25519_pubkey) throw new Error('계정의 지갑 키를 찾지 못했습니다. 혼디 앱에서 다시 로그인해 주세요.');
+  if (!j.ed25519_pubkey) throw new Error('계정의 지갑 키를 찾지 못했습니다. 나비 앱에서 다시 로그인해 주세요.');
   return j.ed25519_pubkey;
 }
 async function showRegistered(serial, order) {
@@ -275,7 +275,7 @@ document.addEventListener('visibilitychange', () => {
 
 // 가입 때 만들어진 내 번호를 보여 준다. (번호가 아직 없는 기존 계정은 처음 열 때 한 번 자동 배정한다.)
 (async () => {
-  if (!me) { msg('로그인한 계정을 찾지 못했습니다. 혼디 앱에서 로그인한 뒤 숫자 코드 아이콘으로 열어 주세요.', 'warn'); return; }
+  if (!me) { msg('로그인한 계정을 찾지 못했습니다. 나비 앱에서 로그인한 뒤 숫자 코드 아이콘으로 열어 주세요.', 'warn'); return; }
   try {
     const r = await fetch(WORKER + '/digit/mine?guid=' + encodeURIComponent(me.guid), { signal: AbortSignal.timeout(6000) });
     const j = await r.json().catch(() => null);

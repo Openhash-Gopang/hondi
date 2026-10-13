@@ -751,6 +751,10 @@ export function layoutDigitCodeV3(serial) {
 export const LOGO3_GX = 24, LOGO3_GY = 16;
 export const LOGO3_TEMPLATE = [0,0,0,0,0,0.01,0.56,0.96,0.79,0.14,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.46,1,1,1,0.85,0.06,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.03,0.94,1,0.73,0.06,0.11,0.35,0,0,0,0.06,0.48,0.79,0.92,0.76,0.24,0,0,0,0,0,0,0,0,0.28,1,0.98,0.1,0,0,0.06,0.06,0,0.28,0.88,1,0.97,0.92,1,0.85,0.03,0,0,0,0,0,0,0,0.51,1,0.67,0,0,0,0,0,0.49,0.99,1,0.62,0.06,0,0.67,0.94,0.05,0,0,0,0.33,0,0,0,0.62,1,0.33,0,0,0,0,0.55,1,0.98,0.45,0,0,0,0.74,0.7,0.01,0,0,0,0.63,0.11,0,0,0.61,0.95,0.07,0,0,0,0.54,1,0.87,0.2,0,0,0,0.18,0.99,0.31,0,0,0,0,0.09,0.41,0,0,0.54,0.78,0,0,0,0.41,1,0.76,0.09,0,0,0,0.01,0.76,0.67,0.01,0,0,0,0,0,0.11,0.24,0,0.29,0.67,0,0,0.28,0.99,0.63,0.02,0,0,0,0,0.61,0.89,0.05,0,0,0,0,0,0,0,0.08,0.29,0.04,0.32,0,0.1,0.92,0.57,0.01,0,0,0,0,0.43,1,0.64,0.2,0.01,0,0,0,0,0,0,0.19,0.79,0.82,0.36,0.03,0.42,0.53,0,0,0,0,0,0,0.02,0.33,0.74,1,0.91,0.6,0.25,0.01,0,0,0,0,0.28,0.75,0.99,0.89,0.47,0.25,0.12,0.01,0,0,0,0,0,0,0,0.28,0.73,1,0.99,0.74,0.16,0,0,0,0,0,0.04,0.17,0.39,0.91,0.95,0.64,0.62,0.69,0.6,0.48,0.36,0.24,0.12,0.02,0,0.29,0.98,1,0.95,0,0,0,0,0,0,0,0,0.16,0.85,0.8,0.04,0.05,0.26,0.46,0.65,0.81,0.94,0.92,0.81,0.79,0.96,0.72,0.32,0,0,0,0,0,0,0.21,0.77,0.81,0.32,0.64,0.7,0.02,0,0,0,0,0,0.03,0.08,0.09,0.02,0,0,0,0,0,0,0,0,0.2,0.72,0.72,0.21,0.01,0.42,0.43,0,0,0,0,0,0,0,0,0,0,0];   // tests/digit-v2/make-logo3-template.mjs 로 생성
 export const LOGO3_MIN_NCC = 0.6;
+// 노란 블록 기준점 경로용 거친 검증(8×10)과 문턱. 실제 폰으로 작고 흐리게 찍은 진짜 로고 ≈ 0.75~0.85, 절반만 있는 가짜 ≈ 0.53~0.60, 막대·블록·줄무늬·점은 더 낮다 (tests/digit-v2/make-logo3c-template.mjs)
+export const LOGO3C_GX = 8, LOGO3C_GY = 10;
+export const LOGO3C_TEMPLATE = [0,0.05,0.86,0.13,0,0,0,0,0,0.31,0.68,0.2,0.04,0.58,0.28,0,0,0.47,0.29,0.02,0.61,0.62,0.6,0,0.14,0.54,0.1,0.22,0.75,0.01,0.49,0,0.19,0.47,0,0.66,0.13,0.19,0.29,0,0.09,0.29,0.17,0.43,0,0.53,0.01,0,0.04,0.57,0.34,0.02,0,0.44,0.68,0.11,0,0.31,0.59,0.43,0.25,0.04,0.36,0.83,0,0,0.14,0.54,0.28,0.59,0.57,0.54,0,0,0.63,0.35,0.09,0,0,0];
+export const LOGO3C_MIN_NCC = 0.65;
 
 // 열 투영에서 "덩어리"로 묶기: 간격이 gapTol 이하면 한 덩어리
 function colGroups(gray, W, thr, y1, y2, gapTol, minC) {
@@ -788,7 +792,7 @@ function inkRowsIn(gray, W, thr, x1, x2, y1, y2) {
  *       → ④ 예측 위치에서 숫자열 테두리선 → ⑤ 칸 검출·교차 검증 → ⑥ 칸 읽기(표준 패턴 정확 일치).
  * 로고가 곧 기준점이라 코드 옆·위·아래의 다른 화면 요소에는 영향받지 않는다.
  */
-export function _analyzeSide(gray, W, H, thr) {
+export function _analyzeSide(gray, W, H, thr, anchors = null) {
   if (LOGO3_TEMPLATE.length !== LOGO3_GX * LOGO3_GY) return { ok: false, reason: 'no-logo' };
   const paper = Math.max(thr + 30, sampleLevel(gray, 0.95));
   const thrRow = thr + 0.25 * (paper - thr);
@@ -798,11 +802,12 @@ export function _analyzeSide(gray, W, H, thr) {
   const minDark = Math.max(3, Math.round(base * 3 + W * 0.003));
   const minLen = Math.max(6, Math.round(H * 0.015));
   const rowBlobs = mergeRuns(runs(rp, minDark, 1), Math.max(2, Math.round(H * 0.008))).filter(r => r.p2 - r.p1 >= minLen);
-  if (!rowBlobs.length) return { ok: false, reason: 'no-ink' };
+  if (!rowBlobs.length && !(anchors && anchors.length)) return { ok: false, reason: 'no-ink' };
 
   let fail = { ok: false, reason: 'no-logo' }, failRank = 0;
   const bump = (rank, obj) => { if (rank > failRank) { failRank = rank; fail = obj; } };
 
+  const bests = [];
   for (const rb of rowBlobs) {
     const bandH = rb.p2 - rb.p1;
     if (bandH < 8) continue;
@@ -824,6 +829,17 @@ export function _analyzeSide(gray, W, H, thr) {
     }
     if (!best) continue;
     if (best.score < LOGO3_MIN_NCC) { bump(1, { ok: false, reason: 'logo-mismatch', logoScore: best.score }); continue; }
+    bests.push(best);
+  }
+  // 노란 블록 기준점(색): 나비 그림이 작거나 흐려서 모양 검증을 못 넘어도, 노란 블록은 또렷하다 — 블록 위치·크기로 로고를 정하고
+  // 블록 안 그림은 거친 격자로만 확인한다. 이후 숫자열 테두리선·칸 읽기는 같은 엄격한 검사를 그대로 거친다.
+  for (const a of anchors || []) {
+    const inkLevelA = levelIn(gray, W, a.g.min, a.g.max, a.rows.p1, a.rows.p2, 0.03);
+    const cs = ncc(logoDescriptor(gray, W, H, { min: a.g.min, max: a.g.max }, a.rows, paper, inkLevelA, LOGO3C_GX, LOGO3C_GY), LOGO3C_TEMPLATE);
+    if (!(cs >= LOGO3C_MIN_NCC)) { bump(1, { ok: false, reason: 'logo-mismatch', logoScore: cs }); continue; }
+    bests.push({ g: a.g, rows: a.rows, score: cs, anchor: true });
+  }
+  for (const best of bests) {
 
     const aw = best.g.max - best.g.min, ah = best.rows.p2 - best.rows.p1;
     const scW = aw / V3_ART_W, scH = ah / V3_ART_H;
@@ -900,7 +916,60 @@ function _readRowSide(gray, W, H, thr, lineThr, digitRow, xa, xb, geo) {
 }
 
 // 레이아웃 v3 전체 흐름(analyzeGray와 같은 구조: 여러 이진화 → 회전·원근 보정 → 로고 기준 각도 탐색)
-function _sideBoth(gray, W, H, thr) { return _analyzeSide(gray, W, H, thr); }
+function _sideBoth(gray, W, H, thr, anchors = null) { return _analyzeSide(gray, W, H, thr, anchors); }
+
+/** 노란 바탕 픽셀 판별 평면(255 = 노랑). 노랑은 R 높음·G 중간·B 낮음 — 종이(R≈G≈B)·검정과 구별되고, 카메라 노출·화이트밸런스가 달라도 이 비율은 유지된다. */
+export function yellowPlane(rgba, W, H) {
+  const n = W * H, yp = new Uint8Array(n);
+  for (let i = 0; i < n; i++) {
+    const r = rgba[i * 4], g = rgba[i * 4 + 1], b = rgba[i * 4 + 2];
+    if (r >= 40 && b <= 0.42 * r && g >= 0.42 * r && g <= 0.97 * r && r - b >= 0.35 * r) yp[i] = 255;
+  }
+  return yp;
+}
+
+/**
+ * 노란 블록 후보 → 로고 그림 위치(art 잉크 상자) 후보. 블록은 120×98 단위의 노란 직사각형이다.
+ * 축소 격자에서 연결 성분을 찾아 가로세로비·채움률을 보고, 블록 위치·크기로 그림 상자를 계산한다.
+ */
+export function findYellowAnchors(yp, W, H, maxN = 3) {
+  const f = Math.max(1, Math.round(W / 400)), gw = Math.ceil(W / f), gh = Math.ceil(H / f);
+  const cell = new Uint8Array(gw * gh);
+  for (let y = 0; y < H; y++) { const r = y * W, gr = ((y / f) | 0) * gw; for (let x = 0; x < W; x++) if (yp[r + x]) { const gi = gr + ((x / f) | 0); if (cell[gi] < 255) cell[gi]++; } }
+  const thrC = Math.max(1, Math.round(f * f * 0.3));
+  const on = new Uint8Array(gw * gh);
+  for (let i = 0; i < on.length; i++) on[i] = cell[i] >= thrC ? 1 : 0;
+  const seen = new Uint8Array(gw * gh), out = [], stack = [];
+  for (let st = 0; st < on.length; st++) {
+    if (!on[st] || seen[st]) continue;
+    let x1 = gw, x2 = -1, y1 = gh, y2 = -1, cnt = 0;
+    stack.length = 0; stack.push(st); seen[st] = 1;
+    while (stack.length) {
+      const c = stack.pop(), cx = c % gw, cy = (c / gw) | 0;
+      cnt++; if (cx < x1) x1 = cx; if (cx > x2) x2 = cx; if (cy < y1) y1 = cy; if (cy > y2) y2 = cy;
+      if (cx > 0 && on[c - 1] && !seen[c - 1]) { seen[c - 1] = 1; stack.push(c - 1); }
+      if (cx < gw - 1 && on[c + 1] && !seen[c + 1]) { seen[c + 1] = 1; stack.push(c + 1); }
+      if (cy > 0 && on[c - gw] && !seen[c - gw]) { seen[c - gw] = 1; stack.push(c - gw); }
+      if (cy < gh - 1 && on[c + gw] && !seen[c + gw]) { seen[c + gw] = 1; stack.push(c + gw); }
+    }
+    const bw = x2 - x1 + 1, bh = y2 - y1 + 1;
+    if (bw < 5 || bh < 5) continue;
+    const asp = bw / bh;
+    if (asp < 0.8 || asp > 1.8) continue;                       // 설계 1.22 (회전·원근 여유)
+    if (cnt / (bw * bh) < 0.5) continue;
+    out.push({ x1: x1 * f, x2: (x2 + 1) * f, y1: y1 * f, y2: (y2 + 1) * f, area: cnt });
+  }
+  out.sort((a, b) => b.area - a.area);
+  const kx = V3.block.w, ky = V3.block.h;
+  return out.slice(0, maxN).map(b => {
+    const ux = (b.x2 - b.x1) / kx, uy = (b.y2 - b.y1) / ky;
+    return {
+      g: { min: Math.round(b.x1 + (V3.art.x1 - V3.block.x) * ux), max: Math.round(b.x1 + (V3.art.x2 - V3.block.x) * ux) },
+      rows: { p1: Math.round(b.y1 + (V3.art.y1 - V3.block.y) * uy), p2: Math.round(b.y1 + (V3.art.y2 - V3.block.y) * uy) },
+      block: b,
+    };
+  }).filter(a => a.g.max > a.g.min && a.rows.p2 > a.rows.p1);
+}
 
 function boxBlur3(g, W, H) {
   const tmp = new Uint16Array(W * H), out = new Uint8Array(W * H);
@@ -909,12 +978,12 @@ function boxBlur3(g, W, H) {
   return out;
 }
 
-function _sideTryBase(gray, W, H) {
+function _sideTryBase(gray, W, H, anchors = null) {
   const t1 = otsuThreshold(gray);
-  const first = _sideBoth(gray, W, H, t1);
+  const first = _sideBoth(gray, W, H, t1, anchors);
   if (first.ok) return { ...first, threshold: t1 };
   const ff = flatField(gray, W, H), tf = otsuThreshold(ff);
-  const rf = _sideBoth(ff, W, H, tf);
+  const rf = _sideBoth(ff, W, H, tf, anchors);
   if (rf.ok) return { ...rf, threshold: tf, flat: true };
   const pb = paperBox(gray, W, H, t1);
   if (pb) {
@@ -928,38 +997,42 @@ function _sideTryBase(gray, W, H) {
     }
   }
   const t2 = otsuThreshold(gray, 0, t1);
-  if (t2 < t1 - 8) { const r = _sideBoth(gray, W, H, t2); if (r.ok) return { ...r, threshold: t2 }; }
+  if (t2 < t1 - 8) { const r = _sideBoth(gray, W, H, t2, anchors); if (r.ok) return { ...r, threshold: t2 }; }
   // 노이즈가 아주 큰 화면: 3×3 평균으로 알갱이를 눌러서 한 번 더 (실패한 프레임에서만 비용을 낸다)
-  const dn = boxBlur3(gray, W, H), rd = _sideBoth(dn, W, H, otsuThreshold(dn));
+  const dn = boxBlur3(gray, W, H), rd = _sideBoth(dn, W, H, otsuThreshold(dn), anchors);
   if (rd.ok) return { ...rd, denoised: true };
   return first.logoScore != null ? first : (rf.logoScore != null ? rf : (rd.logoScore != null ? rd : first));      // 로고를 찾은 쪽의 실패 사유를 돌려 준다
 }
 
 /** 레이아웃 v3만 분석. gray는 반드시 "빨강 채널"(노랑 바탕이 종이처럼 밝게 보이는 채널) 회색조. */
 export function analyzeSideGray(gray, W, H, opts = {}) {
+  const yp = opts.yp || null;                                  // 노란 바탕 평면(없으면 노란 블록 기준점 경로는 쓰지 않는다)
+  const ancOf = (pl, w, h) => (pl ? findYellowAnchors(pl, w, h) : null);
   if (opts.transformHint) {
     const w = warpGray(gray, W, H, opts.transformHint);
-    const r = _sideTryBase(w, W, H);
+    const r = _sideTryBase(w, W, H, ancOf(yp && warpGray(yp, W, H, opts.transformHint), W, H));
     if (r.ok) return { ...r, transform: opts.transformHint };
   }
-  const r0 = _sideTryBase(gray, W, H);
+  const r0 = _sideTryBase(gray, W, H, ancOf(yp, W, H));
   if (r0.ok || !GEOM_REASONS.has(r0.reason) || opts.noRescue) return r0;
   const src = flatField(gray, W, H);
   // 새 배치는 가로로 아주 긴 띠(≈7.5:1)라 같은 원근에서도 옆으로 훨씬 크게 밀린다 → 밀림·키스톤 탐색 범위를 넓힌다(±0.7)
   const cands = estimateTransforms(src, W, H, 4, 0.7, 0.07).filter(tf => tf.deg !== 0 || tf.a !== 0 || tf.b !== 0);
   for (const tf of cands) {
     const w = warpGray(src, W, H, tf);
-    const r = _sideBoth(w, W, H, otsuThreshold(w));
+    const r = _sideBoth(w, W, H, otsuThreshold(w), ancOf(yp && warpGray(yp, W, H, tf), W, H));
     if (r.ok) return { ...r, transform: tf };
   }
   const W2 = W >> 1, H2 = H >> 1, half = new Uint8Array(W2 * H2);
   for (let y = 0; y < H2; y++) { const r0i = 2 * y * W, ro = y * W2; for (let x = 0; x < W2; x++) { const i = r0i + 2 * x; half[ro + x] = (src[i] + src[i + 1] + src[i + W] + src[i + W + 1]) >> 2; } }
+  let halfYp = null;
+  if (yp) { halfYp = new Uint8Array(W2 * H2); for (let y = 0; y < H2; y++) for (let x = 0; x < W2; x++) { const i = 2 * y * W + 2 * x; halfYp[y * W2 + x] = (yp[i] | yp[i + 1] | yp[i + W] | yp[i + W + 1]) ? 255 : 0; } }
   for (const deg of [1.5, -1.5, 3, -3, 4.5, -4.5, 6, -6, 8, -8, 10, -10, 12.5, -12.5, 15, -15, 18, -18, 22, -22]) {
     const w2 = warpGray(half, W2, H2, { deg, a: 0, b: 0 });
-    const r2 = _analyzeSide(w2, W2, H2, otsuThreshold(w2));
+    const r2 = _analyzeSide(w2, W2, H2, otsuThreshold(w2), ancOf(halfYp && warpGray(halfYp, W2, H2, { deg, a: 0, b: 0 }), W2, H2));
     if (!r2.ok && !(r2.logoScore != null && r2.logoScore >= LOGO3_MIN_NCC)) continue;      // 이 각도에서는 로고가 안 잡힘
     const w = warpGray(src, W, H, { deg, a: 0, b: 0 });
-    const r = _analyzeSide(w, W, H, otsuThreshold(w));
+    const r = _analyzeSide(w, W, H, otsuThreshold(w), ancOf(yp && warpGray(yp, W, H, { deg, a: 0, b: 0 }), W, H));
     if (r.ok) return { ...r, transform: { deg, a: 0, b: 0 } };
   }
   return r0;
@@ -981,7 +1054,7 @@ export function analyzeRGBA(rgba, W, H, opts = {}) {
   }
   const run = {
     stacked: o => analyzeGray(avg, W, H, o),
-    side: o => analyzeSideGray(red, W, H, o),
+    side: o => analyzeSideGray(red, W, H, { ...o, yp: yellowPlane(rgba, W, H) }),
   };
   const order = opts.layout ? [opts.layout] : (opts.hintLayout === 'side' ? ['side', 'stacked'] : ['stacked', 'side']);
   const tag = (r, layout) => (r.ok ? { ...r, layout } : r);
