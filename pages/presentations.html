@@ -58,6 +58,15 @@ main{max-width:1160px;margin:0 auto;padding:8px 24px 64px}
 .open{padding:12px 16px;border-top:1px solid var(--line);font-size:14px;font-weight:700;color:var(--brand);display:flex;justify-content:space-between}
 .empty,.err{margin:48px 0;text-align:center;color:var(--sub)}
 .err{color:#a3261b}
+.rail{position:relative;padding-top:28px}
+.track{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x proximity;padding:4px 2px 18px;scrollbar-width:thin}
+.track .card{flex:0 0 300px;scroll-snap-align:start}
+.sentinel{flex:0 0 1px}
+.ser{font-size:12px;font-weight:700;color:var(--brand);letter-spacing:.2px}
+.nav{position:absolute;top:50%;z-index:2;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--navy);font-size:22px;line-height:1;cursor:pointer;box-shadow:0 2px 8px rgba(14,28,63,.18)}
+.nav.prev{left:-12px}.nav.next{right:-12px}
+.nav:hover{border-color:var(--brand);color:var(--brand)}
+@media (max-width:680px){.nav{display:none}.track .card{flex-basis:82%}}
 @media (max-width:680px){
   .top-in,.bar,main{padding-left:16px;padding-right:16px}
   h1{font-size:25px}
@@ -115,23 +124,40 @@ main{max-width:1160px;margin:0 auto;padding:8px 24px 64px}
     return a;
   }
 
+  // 가로 한 줄 트랙 + 동적 로딩: 처음 BATCH장만 그리고, 오른쪽 끝에 가까워지면 다음 BATCH장씩 이어 붙인다.
+  var BATCH = 4;
   function render() {
     var list = $('list'); list.textContent = '';
-    var all = sorted(state.data), shown = all;
+    var all = sorted(state.data);
     var num = {}, k = 0; all.forEach(function (it) { num[it.id] = (it.no != null) ? it.no : ++k; });   // 번호는 전체 흐름 기준(it.no가 있으면 그 번호, 예: 00)
-    if (!shown.length) { list.appendChild(el('p', 'empty', '등록된 프레젠테이션이 없습니다.')); return; }
-    state.data.series.slice().sort(function (a, b) { return a.order - b.order; }).forEach(function (s) {
-      var its = shown.filter(function (it) { return it.series === s.id; });
-      if (!its.length) return;
-      var sec = el('section', 'series'); sec.appendChild(el('h2', '', s.title));
-      if (s.desc) sec.appendChild(el('p', 'desc', s.desc));
-      var g = el('div', 'grid'); its.forEach(function (it) { g.appendChild(card(it, num[it.id])); });
-      sec.appendChild(g); list.appendChild(sec);
-    });
-    var orphan = shown.filter(function (it) { return !state.data.series.some(function (s) { return s.id === it.series; }); });
-    if (orphan.length) { var sec2 = el('section', 'series'); sec2.appendChild(el('h2', '', '기타')); var g2 = el('div', 'grid'); orphan.forEach(function (it) { g2.appendChild(card(it, num[it.id])); }); sec2.appendChild(g2); list.appendChild(sec2); }
+    if (!all.length) { list.appendChild(el('p', 'empty', '등록된 프레젠테이션이 없습니다.')); return; }
+    var stitle = {}; state.data.series.forEach(function (s) { stitle[s.id] = s.title; });
+    var wrap = el('div', 'rail'), track = el('div', 'track'), sentinel = el('div', 'sentinel');
+    track.setAttribute('role', 'list'); track.tabIndex = 0; track.setAttribute('aria-label', '프레젠테이션 목록(가로 스크롤)');
+    var prev = el('button', 'nav prev', '‹'), next = el('button', 'nav next', '›');
+    prev.type = next.type = 'button'; prev.setAttribute('aria-label', '이전'); next.setAttribute('aria-label', '다음');
+    function step() { return Math.max(240, track.clientWidth * 0.8); }
+    prev.onclick = function () { track.scrollBy({ left: -step(), behavior: 'smooth' }); };
+    next.onclick = function () { track.scrollBy({ left: step(), behavior: 'smooth' }); };
+    wrap.appendChild(prev); wrap.appendChild(track); wrap.appendChild(next); list.appendChild(wrap);
+    var shownN = 0, io = null;
+    function more() {
+      if (sentinel.parentNode) track.removeChild(sentinel);
+      all.slice(shownN, shownN + BATCH).forEach(function (it) {
+        var c = card(it, num[it.id]); c.setAttribute('role', 'listitem');
+        var sn = stitle[it.series]; if (sn) { var lab = el('span', 'ser', sn); c.querySelector('.body').insertBefore(lab, c.querySelector('.body').firstChild); }
+        track.appendChild(c);
+      });
+      shownN = Math.min(all.length, shownN + BATCH);
+      if (shownN < all.length) { track.appendChild(sentinel); if (io) io.observe(sentinel); }
+      else if (io) io.disconnect();
+    }
+    if ('IntersectionObserver' in window) {
+      io = new IntersectionObserver(function (es) { if (es.some(function (e) { return e.isIntersecting; })) { io.unobserve(sentinel); more(); } }, { root: track, rootMargin: '0px 240px 0px 0px' });
+    }
+    more();
+    if (!io) { while (shownN < all.length) more(); }   // 구형 브라우저: 한 번에 모두 표시
   }
-
 
   fetch('../data/presentations.json', { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then(function (d) { state.data = { series: d.series || [], items: d.items || [] }; render(); })
