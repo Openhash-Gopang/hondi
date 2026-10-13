@@ -73,26 +73,17 @@ main{max-width:1160px;margin:0 auto;padding:8px 24px 64px}
   <p class="lede">나비를 설명하고 제안하는 문서 모음입니다. 처음 보신다면 위에서부터 차례로 보시면 흐름이 이어집니다.</p>
 </div></header>
 
-<section class="bar" aria-label="찾기">
-  <div class="search">
-    <input id="q" type="search" placeholder="제목, 내용, 대상으로 찾기" aria-label="프레젠테이션 검색" autocomplete="off">
-    <span id="count" class="count" aria-live="polite"></span>
-  </div>
-  <div id="chips" class="chips" role="group" aria-label="분류"></div>
-</section>
-
 <main id="list"><p class="empty">불러오는 중…</p></main>
 <noscript><p class="empty">이 페이지는 JavaScript가 필요합니다.</p></noscript>
 
 <script>
 (function () {
   var COVERS = [['#1f5fbf','#0c3d7a'],['#0f7b8a','#0a4f5a'],['#5a4fcf','#352c8f'],['#b45f06','#7a3d00'],['#1b7a4a','#0f4f2f'],['#a8323e','#6e1a24']];
-  var state = { data: null, q: '', tag: '' };
+  var state = { data: null };
   var $ = function (id) { return document.getElementById(id); };
 
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
-  function safeUrl(u) { return /^https:\/\//i.test(u || '') ? u : null; }
-  function hay(it) { return [it.title, it.summary, it.audience].concat(it.tags || []).join(' ').toLowerCase(); }
+  function safeUrl(u) { return /^(https:\/\/|[\w-]+\.html$)/i.test(u || '') ? u : null; }   // https 주소 또는 같은 폴더의 .html
 
   function sorted(data) {
     var so = {}; data.series.forEach(function (s) { so[s.id] = s.order; });
@@ -105,7 +96,7 @@ main{max-width:1160px;margin:0 auto;padding:8px 24px 64px}
     var url = safeUrl(it.url);
     var a = el(url ? 'a' : 'div', 'card');
     if (url) { a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer'; }
-    var c = COVERS[(n - 1) % COVERS.length];
+    var c = COVERS[(n + COVERS.length - 1) % COVERS.length];
     var cover = el('div', 'cover'); cover.style.setProperty('--c1', c[0]); cover.style.setProperty('--c2', c[1]);
     cover.appendChild(el('span', 'no', String(n).padStart(2, '0')));
     cover.appendChild(el('span', 'badge' + (it.status === 'draft' ? ' draft' : ''), it.status === 'draft' ? '검토 중' : '공개 가능'));
@@ -124,37 +115,11 @@ main{max-width:1160px;margin:0 auto;padding:8px 24px 64px}
     return a;
   }
 
-  function chips() {
-    var box = $('chips'); box.textContent = '';
-    var tags = {}; state.data.items.forEach(function (it) { (it.tags || []).forEach(function (t) { tags[t] = (tags[t] || 0) + 1; }); });
-    var names = Object.keys(tags).sort(function (a, b) { return tags[b] - tags[a] || a.localeCompare(b, 'ko'); });
-    // 문서가 많아지면 분류도 늘어난다 — 자주 쓰이는 8개만 먼저 보이고 나머지는 "더 보기"로 펼친다(선택된 분류는 항상 보임).
-    var LIMIT = 8, vis = state.moreTags ? names : names.slice(0, LIMIT);
-    if (state.tag && vis.indexOf(state.tag) < 0) vis = vis.concat(state.tag);
-    [''].concat(vis).forEach(function (t) {
-      var b = el('button', 'chip', t || '전체'); b.type = 'button'; b.setAttribute('aria-pressed', String(state.tag === t));
-      b.onclick = function () { state.tag = t; chips(); render(); };
-      box.appendChild(b);
-    });
-    if (names.length > LIMIT) {
-      var m = el('button', 'chip', state.moreTags ? '접기' : '+' + (names.length - LIMIT) + ' 더 보기'); m.type = 'button';
-      m.setAttribute('aria-expanded', String(!!state.moreTags));
-      m.onclick = function () { state.moreTags = !state.moreTags; chips(); };
-      box.appendChild(m);
-    }
-  }
-
   function render() {
     var list = $('list'); list.textContent = '';
-    var all = sorted(state.data), q = state.q.trim().toLowerCase();
-    var num = {}; all.forEach(function (it, i) { num[it.id] = i + 1; });          // 번호는 항상 전체 흐름 기준
-    var shown = all.filter(function (it) { return (!q || hay(it).indexOf(q) >= 0) && (!state.tag || (it.tags || []).indexOf(state.tag) >= 0); });
-    $('count').textContent = (q || state.tag) ? shown.length + ' / ' + all.length + '개' : '전체 ' + all.length + '개';
-    if (!shown.length) { list.appendChild(el('p', 'empty', '조건에 맞는 프레젠테이션이 없습니다.')); return; }
-    if (q || state.tag) {
-      var g = el('div', 'grid'); g.style.paddingTop = '24px';
-      shown.forEach(function (it) { g.appendChild(card(it, num[it.id])); }); list.appendChild(g); return;
-    }
+    var all = sorted(state.data), shown = all;
+    var num = {}, k = 0; all.forEach(function (it) { num[it.id] = (it.no != null) ? it.no : ++k; });   // 번호는 전체 흐름 기준(it.no가 있으면 그 번호, 예: 00)
+    if (!shown.length) { list.appendChild(el('p', 'empty', '등록된 프레젠테이션이 없습니다.')); return; }
     state.data.series.slice().sort(function (a, b) { return a.order - b.order; }).forEach(function (s) {
       var its = shown.filter(function (it) { return it.series === s.id; });
       if (!its.length) return;
@@ -167,10 +132,9 @@ main{max-width:1160px;margin:0 auto;padding:8px 24px 64px}
     if (orphan.length) { var sec2 = el('section', 'series'); sec2.appendChild(el('h2', '', '기타')); var g2 = el('div', 'grid'); orphan.forEach(function (it) { g2.appendChild(card(it, num[it.id])); }); sec2.appendChild(g2); list.appendChild(sec2); }
   }
 
-  var timer; $('q').addEventListener('input', function (e) { clearTimeout(timer); timer = setTimeout(function () { state.q = e.target.value; render(); }, 120); });
 
   fetch('../data/presentations.json', { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then(function (d) { state.data = { series: d.series || [], items: d.items || [] }; chips(); render(); })
+    .then(function (d) { state.data = { series: d.series || [], items: d.items || [] }; render(); })
     .catch(function () { var l = $('list'); l.textContent = ''; l.appendChild(el('p', 'err', '목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.')); });
 })();
 </script>
