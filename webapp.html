@@ -5244,7 +5244,7 @@ window.closePDV = closePDV;
                 pointer-events:none">
       <span style="background:rgba(0,0,0,.55);color:#ddd;font-size:12px;
                    padding:4px 14px;border-radius:20px">
-        "hondi.net" 로고와 숫자를 화면에 맞춰주세요
+        나비 로고와 숫자를 화면에 맞춰주세요
       </span>
     </div>
 
@@ -5303,8 +5303,8 @@ window.closePDV = closePDV;
 </style>
 
 <script type="module">
-// 2026-10-09: 스캐너를 v2(로고 "hondi.net" 기준, 1~10자리)로 교체. 인식 기준점은
-// "나비" 글자가 아니라 "hondi.net" 로고다(hondi-digit-scanner-v2.js).
+// 2026-10-09: 스캐너를 v2(로고 기준, 1~10자리)로 교체. 인식 기준점은 글자가 아니라 로고 그림이다.
+// 2026-10-13: 새 배치(노란 바탕 나비 로고 칸 + 숫자열 한 줄)를 읽도록 확장 — 예전 "hondi.net" 로고 코드도 계속 읽힌다(hondi-digit-scanner-v2.js).
 import { startScanner, stopScanner, analyzePhoto, lookupSerial }
   from './src/gopang/ai/hondi-digit-scanner-v2.js';
 import { ORG_SITES, findSiteByDigitCode } from './src/gopang/gov/org-sites.js';
