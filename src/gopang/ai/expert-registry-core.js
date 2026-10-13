@@ -23,6 +23,14 @@ export const CORE_REGISTRY = {
     triggers: ['법무사', '등기', '경매', '소액사건'],
   },
 
+  // ── 행정사 (SP-LAW-08, 2026-10-13 신설·주피터 지시) — 행정사법 제2조 업무를 보조하는 도구 ──
+  'administrative-scrivener': {
+    label: '행정사 보조 AI', icon: '📑', category: 'LAW', ownerAgency: 'klaw',
+    key: 'SP_administrative-scrivener', needsMedicalSafety: false,
+    // 트리거는 '행정사' 하나로 최소화 — 변호사(행정법)의 '행정법 상담' 등 기존 트리거와 겹치지 않게 한다
+    triggers: ['행정사'],
+  },
+
   // ── 재무·세무 (SP-FIN-01, 2026-07-04 신설) ────────────
   'tax-accountant': {
     label: '세무사', icon: '🧾', category: 'FIN', ownerAgency: 'ktax',
