@@ -16,7 +16,7 @@
 
 export const CORE_REGISTRY = {
   'judicial-scrivener': {
-    label: '법무사', icon: '📜', category: 'LAW', ownerAgency: 'klaw',
+    label: '법무사 보조 AI', icon: '📜', category: 'LAW', ownerAgency: 'klaw',
     key: 'SP_judicial-scrivener', needsMedicalSafety: false,
     // 2026-07-25 신설(주피터 지시) — 인접쌍(변호사↔법무사) 구분 키워드 그대로 사용 — GWP와 겹치는 게 없어 정책 조정
     // 불필요

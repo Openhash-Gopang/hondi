@@ -351,8 +351,8 @@
 "spPath":"prompts/SP_industrial-safety-consultant_v3_3.md"
 },
 "judicial-scrivener":{
-"label":"법무사",
-"parentLabel":"법무사",
+"label":"법무사 보조 AI",
+"parentLabel":"법무사 보조 AI",
 "chatUrl":"/pages/expert-chat.html?persona=judicial-scrivener",
 "triggers":[
 "법무사",
@@ -360,7 +360,7 @@
 "경매",
 "소액사건"
 ],
-"spPath":"prompts/SP_judicial-scrivener_v2_3.md"
+"spPath":"prompts/SP_judicial-scrivener_v3_1.md"
 },
 "labor-attorney":{
 "label":"공인노무사",

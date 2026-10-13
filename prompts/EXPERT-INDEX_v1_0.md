@@ -6,7 +6,7 @@
 | No. | 코드 | 이름 | key | 아이콘 | 의료안전모듈 | SP 파일 |
 |---|---|---|---|---|---|---|
 | 001 | EXPERT-LAW-01 | 변호사 | `lawyer` | ⚖️ | — | `SP_lawyer` |
-| 002 | EXPERT-LAW-02 | 법무사 | `judicial-scrivener` | 📜 | — | `SP_judicial-scrivener` |
+| 002 | EXPERT-LAW-02 | 법무사 보조 AI | `judicial-scrivener` | 📜 | — | `SP_judicial-scrivener` |
 | 003 | EXPERT-LAW-03 | 감정평가사 | `appraiser` | 🏷️ | — | `SP_appraiser` |
 | 004 | EXPERT-LAW-04 | 손해사정사 | `loss-adjuster` | 📋 | — | `SP_loss-adjuster` |
 | 005 | EXPERT-LAW-05 | 공인노무사 | `labor-attorney` | 👷 | — | `SP_labor-attorney` |
