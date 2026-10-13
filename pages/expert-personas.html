@@ -189,7 +189,7 @@ mark { background: #ffe58a; color: var(--ink); border-radius: 0; padding: 0 1px;
   border-radius: 3px; border: 1px solid var(--line); color: var(--ink-dim); opacity: .8;
   background: var(--bg-2, transparent); cursor: help; white-space: nowrap;
 }
-.section-link-ico { color: var(--ink-dim); opacity: .45; flex-shrink: 0; margin-left: auto; transition: opacity .1s, color .1s; }
+.section-link-ico { color: var(--ink-dim); opacity: .45; flex-shrink: 0; margin-left: auto; transition: opacity .1s, color .1s; } .section-page-link { display: flex; align-items: center; justify-content: center; padding: 0 10px; flex-shrink: 0; color: var(--ink-dim); opacity: .45; transition: opacity .1s, color .1s; } .section-page-link:hover { opacity: 1; color: var(--cat-c); } .section-page-link .section-link-ico { opacity: inherit; margin-left: 0; }
 .section-row-link:hover .section-link-ico { opacity: 1; color: var(--cat-c); }
 
 .panel-stack { display: none; } /* 더 이상 사용하지 않음 — 패널이 각자의 버튼 옆(같은 그리드 줄)으로 되돌아감 */
@@ -397,7 +397,7 @@ function expertChatUrl(personaId){
 // 전체 이름("상위 분류 · 세부분야 — 상담 시작"). 세부분야 라벨이 상위
 // 분류 라벨과 같으면(단일 페르소나 섹션) 중복 표기하지 않는다.
 var CHAT_ICO_SVG = '<svg class="chat-ico-inline" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
-function personaChatTitle(secLabel, personaLabel){
+var SECTION_PAGE_LINKS = { 'judicial-scrivener': { url: '/pages/judicial-scrivener.html', title: '법무사 보조 AI 페이지' } }; var ARROW_ICO_SVG = '<svg class="section-link-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>'; function personaChatTitle(secLabel, personaLabel){
   var full = (personaLabel && personaLabel !== secLabel) ? (secLabel + ' · ' + personaLabel) : secLabel;
   return full + ' — 상담 시작';
 }
@@ -420,14 +420,14 @@ function buildButtonHtml(sec, q, isOpen){
           '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="11" x2="13" y2="11"/></svg>' +
         '</a>'
       : '';
-    var draftBadge = personaDraftBadge(sec.personas[0].id);
+    var draftBadge = personaDraftBadge(sec.personas[0].id); var pageLink = SECTION_PAGE_LINKS[sec.id] || SECTION_PAGE_LINKS[sec.personas[0].id]; var pageIco = pageLink ? '<a class="section-page-link" href="' + esc(pageLink.url) + '" target="_blank" rel="noopener" title="' + esc(pageLink.title) + '">' + ARROW_ICO_SVG + '</a>' : '';
     return '<span class="section-row section-row-link-wrap' + hiddenCls + '" data-id="' + sec.id + '">' +
         '<a class="section-row-link-main" href="' + esc(expertChatUrl(sec.personas[0].id)) + '" target="_blank" rel="noopener" title="' + esc(personaChatTitle(sec.label, null)) + '">' +
           CHAT_ICO_SVG +
           '<span class="section-label">' + hl(sec.label, q) + '</span>' +
-          '<svg class="section-link-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>' +
+          (pageLink ? '' : ARROW_ICO_SVG) +
         '</a>' +
-        draftBadge +
+        pageIco + draftBadge +
         editIco +
       '</span>';
   }
