@@ -1,0 +1,175 @@
+/* pro-doc-page.css — 전문직 "서류 목록 → 대화 작성 → MD 제출" 페이지 공통 스타일 (2026-10-13)
+   pages/k-services.html 의 레이아웃·색상을 재사용하고, 서류 표·작성된 문서 카드 스타일을 더했다.
+   법무사 페이지(pages/judicial-scrivener.html)와 동일한 외형이다. */
+
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+:root {
+  --bg:        #eef1f6;
+  --surface:   #ffffff;
+  --border:    #e2e8f0;
+  --navy:      #0e1c3f;
+  --brand:     #0c6cc3;
+  --brand-dk:  #094a86;
+  --text:      #0f172a;
+  --text3:     #475569;
+  --text4:     #64748b;
+  --radius:    8px;
+  --radius-lg: 12px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+  font-size: 14px;
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+}
+
+.ug-doc { max-width: 1040px; margin: 0 auto; padding: 40px 24px 80px; }
+
+/* ── 헤더 ── */
+.ug-header {
+  background: var(--navy); color: #fff; border-radius: var(--radius-lg); padding: 28px 32px; margin-bottom: 24px;
+  box-shadow: 0 4px 14px rgba(14,28,63,0.18), 0 1px 4px rgba(14,28,63,0.12);
+}
+.ug-header h1 { font-size: 26px; font-weight: 600; margin-bottom: 8px; }
+.ug-header .ug-sub { font-size: 13.5px; color: #b3bfd1; }
+
+/* ── 서비스 탭 (2행 x 8열) ── */
+.svc-tabs {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.svc-tab {
+  background: var(--surface); border: none; border-radius: 10px;
+  padding: 10px 6px; text-align: center; cursor: pointer;
+  font-size: 12.5px; font-weight: 600; color: var(--text3);
+  box-shadow: 0 1px 3px rgba(15,23,42,0.10), 0 1px 2px rgba(15,23,42,0.07);
+  transition: box-shadow 0.18s ease, transform 0.18s ease, color 0.18s ease;
+  white-space: nowrap;
+}
+.svc-tab:hover {
+  color: var(--brand-dk); transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(15,23,42,0.14), 0 2px 6px rgba(15,23,42,0.08);
+}
+.svc-tab.active {
+  background: var(--brand); color: #fff;
+  box-shadow: 0 6px 16px rgba(12,108,195,0.35), 0 2px 6px rgba(12,108,195,0.2);
+}
+@media (max-width: 900px) {
+  .svc-tabs { grid-template-columns: repeat(4, 1fr); }
+  .svc-tab { font-size: 12px; padding: 9px 4px; }
+}
+@media (max-width: 560px) {
+  .svc-tabs { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── 본문 콘텐츠 ── */
+.svc-content {
+  background: var(--surface); border: none; border-radius: var(--radius-lg);
+  padding: 40px; min-height: 320px;
+  box-shadow: 0 2px 10px rgba(15,23,42,0.08), 0 1px 3px rgba(15,23,42,0.06);
+}
+.svc-content-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 260px; color: var(--text4); text-align: center; gap: 8px;
+}
+.svc-content-empty .svc-empty-title { font-size: 15px; font-weight: 600; color: var(--text3); }
+.svc-content-empty .svc-empty-sub { font-size: 13px; }
+
+/* ── 서비스 상세 콘텐츠 (전문적 스타일) ── */
+.svc-detail h2 { display: inline-block; font-size: 20px; font-weight: 700; color: var(--navy); margin-bottom: 10px; }
+.svc-badge {
+  display: inline-block; margin-left: 10px; padding: 3px 9px; border-radius: 999px;
+  font-size: 11px; font-weight: 700; vertical-align: middle; letter-spacing: 0.02em;
+}
+.svc-badge-live { background: #dcfce7; color: #15803d; }
+.svc-badge-partial { background: #fef3c7; color: #b45309; }
+.svc-badge-design { background: #e5e7eb; color: #475569; }
+.svc-detail .svc-lead { font-size: 14.5px; color: var(--text3); line-height: 1.7; margin: 12px 0 28px; }
+.svc-list { margin: 0 0 4px; padding-left: 20px; }
+.svc-list li { font-size: 13.5px; color: var(--text3); line-height: 1.9; }
+.svc-note { font-size: 13.5px; color: var(--text3); line-height: 1.7; margin: 0 0 12px; }
+.svc-detail h3 {
+  font-size: 15px; font-weight: 600; color: var(--navy);
+  margin: 28px 0 12px; padding-bottom: 8px; border-bottom: 2px solid var(--border);
+}
+.svc-detail h3:first-of-type { margin-top: 0; }
+.svc-flow { counter-reset: flow; margin: 0 0 4px; padding: 0; list-style: none; }
+.svc-flow li {
+  counter-increment: flow; position: relative; padding: 0 0 18px 34px; font-size: 13.5px;
+  color: var(--text3); line-height: 1.6;
+}
+.svc-flow li::before {
+  content: counter(flow); position: absolute; left: 0; top: -1px;
+  width: 22px; height: 22px; border-radius: 50%; background: var(--brand); color: #fff;
+  font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+}
+.svc-flow li::after {
+  content: ''; position: absolute; left: 11px; top: 22px; bottom: 0; width: 1px; background: var(--border);
+}
+.svc-flow li:last-child::after { display: none; }
+.svc-flow li b { color: var(--text); }
+.svc-table-wrap { overflow-x: auto; margin: 8px 0 4px; }
+table.svc-table { width: 100%; border-collapse: collapse; font-size: 13px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(15,23,42,0.08); }
+table.svc-table th, table.svc-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+table.svc-table thead th { background: #f1f5f9; color: var(--navy); font-weight: 600; white-space: nowrap; }
+table.svc-table tbody tr:last-child td { border-bottom: none; }
+table.svc-table td.svc-hondi { color: var(--brand-dk); font-weight: 600; }
+.svc-callout {
+  background: #eff6ff; border: 1px solid #93c5fd; border-left: 4px solid var(--brand);
+  border-radius: 8px; padding: 12px 16px; margin: 16px 0; font-size: 13px; color: #1e3a5f;
+}
+.svc-callout.important { background: #fff7ed; border-color: #fbbf24; border-left-color: #d97706; color: #7c4a03; }
+
+/* ── 외부 링크 칩 (Material outlined button) ── */
+.svc-link-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: #fff; border: 1.5px solid var(--brand);
+  color: var(--brand-dk); font-weight: 700; font-size: 13.5px;
+  padding: 8px 18px; border-radius: 24px; text-decoration: none;
+  margin-bottom: 18px; box-shadow: 0 1px 3px rgba(12,108,195,0.15);
+  transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease, color 0.18s ease;
+}
+.svc-link-btn:hover {
+  background: var(--brand); color: #fff;
+  box-shadow: 0 6px 16px rgba(12,108,195,0.35), 0 2px 6px rgba(12,108,195,0.2);
+  transform: translateY(-2px);
+}
+.svc-link-btn:active { transform: translateY(0); box-shadow: 0 2px 6px rgba(12,108,195,0.25); }
+.svc-link-btn svg { flex-shrink: 0; }
+
+.ug-footer { text-align: center; font-size: 12px; color: var(--text4); border-top: 1px solid var(--border); padding-top: 18px; margin-top: 40px; }
+
+/* ── 법무사 보조 AI 페이지 전용 ── */
+.svc-content + .svc-content { margin-top: 24px; }
+.doc-intro { margin-bottom: 4px; }
+.svc-badge-meta { background: #e5e7eb; color: #475569; margin-left: 0; margin-bottom: 14px; display: inline-block; }
+table.svc-table td.doc-title { font-weight: 600; color: var(--navy); }
+table.svc-table td.doc-detail { color: var(--text3); }
+table.svc-table td.doc-act { width: 1%; white-space: nowrap; text-align: right; }
+button.svc-link-btn { cursor: pointer; font-family: inherit; line-height: 1.4; }
+.svc-link-btn.sm { padding: 6px 14px; font-size: 12.5px; margin-bottom: 0; }
+.svc-link-btn.solid { background: var(--brand); color: #fff; }
+.svc-link-btn.solid:hover { background: var(--brand-dk); }
+.doc-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
+.doc-toolbar .svc-link-btn { margin-bottom: 0; }
+.draft-item { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-top: 12px; background: #fff; }
+.draft-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px 16px; flex-wrap: wrap; }
+.draft-title { font-size: 14.5px; font-weight: 700; color: var(--navy); }
+.draft-time { font-size: 12px; color: var(--text4); }
+.draft-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; margin-left: auto; } /* 왼쪽 채팅창에 가려지지 않도록 오른쪽 정렬 */
+.draft-actions .svc-link-btn { margin-bottom: 0; }
+.draft-pre { display: none; margin-top: 12px; max-height: 360px; overflow: auto; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font: 12.5px/1.7 Menlo, Consolas, 'Malgun Gothic', monospace; color: var(--text); white-space: pre-wrap; word-break: break-word; }
+.draft-item.open .draft-pre { display: block; }
+.draft-flash { animation: draft-flash 1.4s ease; }
+@keyframes draft-flash { from { box-shadow: 0 0 0 3px rgba(12,108,195,.45); } to { box-shadow: 0 0 0 0 rgba(12,108,195,0); } }
+/* 작업용 페이지 — 채팅창을 열어 둔 채로 목록·작성된 문서 버튼을 쓸 수 있도록 위젯의 전체 화면 오버레이를 끈다(닫기는 X 또는 ESC). */
+#hcw-overlay.open { display: none !important; }
+@media (max-width: 700px) { .svc-content { padding: 24px 18px; } table.svc-table td.doc-act { white-space: normal; } }

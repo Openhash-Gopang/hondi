@@ -362,6 +362,15 @@
 ],
 "spPath":"prompts/SP_judicial-scrivener_v3_1.md"
 },
+"administrative-scrivener":{
+"label":"행정사 보조 AI",
+"parentLabel":"행정사 보조 AI",
+"chatUrl":"/pages/expert-chat.html?persona=administrative-scrivener",
+"triggers":[
+"행정사"
+],
+"spPath":"prompts/SP_administrative-scrivener_v1_0.md"
+},
 "labor-attorney":{
 "label":"공인노무사",
 "parentLabel":"공인노무사",
