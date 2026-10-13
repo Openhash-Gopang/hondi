@@ -61,10 +61,11 @@ def render_code_v3(serial, logo='art', with_outline=True):
     b = V3['block']
     if logo == 'art':
         im.paste(ART.resize((b['w'] * SS, b['h'] * SS), Image.LANCZOS), (b['x'] * SS, b['y'] * SS))
-    elif logo in ('wings_only', 'text_only'):
+    elif logo in ('half_left', 'half_right'):       # 나비 그림의 절반만 있는 가짜 — 거절이 정상
         blk = ART.copy(); d2 = ImageDraw.Draw(blk); w, h = blk.size
-        if logo == 'wings_only': d2.rectangle([0, int(h * 0.60), int(w * 0.64), h], fill=YELLOW); d2.rectangle([0, 0, int(w * 0.60), h], fill=YELLOW)
-        else: d2.rectangle([int(w * 0.62), 0, w, int(h * 0.60)], fill=YELLOW)
+        cx = int(w * ((V3['art']['x1'] + V3['art']['x2']) / 2 - V3['block']['x']) / V3['block']['w'])
+        if logo == 'half_left': d2.rectangle([cx, 0, w, h], fill=YELLOW)
+        else: d2.rectangle([0, 0, cx, h], fill=YELLOW)
         im.paste(blk.resize((b['w'] * SS, b['h'] * SS), Image.LANCZOS), (b['x'] * SS, b['y'] * SS))
     elif logo not in ('none', None):
         im.paste(Image.new('RGB', (b['w'] * SS, b['h'] * SS), YELLOW), (b['x'] * SS, b['y'] * SS))
@@ -160,7 +161,7 @@ def build_specs():
     n0 = len(specs)
     rng = random.Random(20261013)
     extra = []
-    for kind in ['wings_only', 'text_only', 'hondi_wordmark']:       # 로고의 일부만 있거나 옛 로고인 경우(거절이 정상)
+    for kind in ['half_left', 'half_right', 'hondi_wordmark']:       # 로고의 일부만 있거나 옛 로고인 경우(거절이 정상)
         for _ in range(10):
             s = G.rand_serial(rng.randint(1, 10), rng)
             extra.append(dict(suite='S6_fake_logo', level=kind, serial=s, expect=None, kw=dict(_fake=kind)))
