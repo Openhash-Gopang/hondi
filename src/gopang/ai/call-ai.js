@@ -30,6 +30,7 @@ import { inviteByHandle } from '../ui/p2p-chat.js';
 import { _openProfilePanel } from '../ui/settings.js';
 import { _gwpLaunch } from '../gwp/engine.js';
 import { handleExpertTag, _composeExpertPrompt } from './expert-session.js';
+import { rememberImages } from './attach-memory.js';
 import { getExpertDef, resolveExpertId, EXPERT_REGISTRY } from './expert-registry.js';
 import { buildHondiFaqContext } from './hondi-faq-router.js';
 import { buildGoalPathContext } from './goal-path-router.js';
@@ -5429,6 +5430,7 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
           type: 'image_url',
           image_url: { url: `data:${mimeType};base64,${base64}` },
         });
+        rememberImages([`data:${mimeType};base64,${base64}`]);   // 2026-10-14: 전문가 호출 시 새 탭으로 인계
         // 텍스트 없이 이미지만 전송 시 — 의도 자율 파악 지시
         if (!userText) {
           userContent.push({
