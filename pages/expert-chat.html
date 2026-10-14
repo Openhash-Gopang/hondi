@@ -74,6 +74,7 @@
   </div>
 </div>
 </div>
+<script src="/gopang-wallet.js"></script>
 <script type="module">
 import { EXPERT_REGISTRY, UNIVERSAL_INTEGRITY_KEY, COMMON_GUARDRAILS_KEY,
          COMMON_MEDICAL_SAFETY_KEY, EXPERT_BASE_KEY, isConsultableChild, resolveExpertId }
@@ -101,7 +102,10 @@ import { EXPERT_REGISTRY, UNIVERSAL_INTEGRITY_KEY, COMMON_GUARDRAILS_KEY,
 // UNIVERSAL-INTEGRITY·TASK-DELEGATION-GUIDE를 앞에 붙이므로 상위 계층은
 // _loadSpRawByKey(원문만, 자동 결합 없음)로 받아 정확히 한 번만 조립한다.
 import { _loadSpByKey, _loadSpRawByKey } from '/src/gopang/ai/manifest-loader.js';
-import { _missingNextStepMarker } from '/src/gopang/ai/expert-session.js';
+import { _missingNextStepMarker, _needsDocForm } from '/src/gopang/ai/expert-session.js';
+import { DOC_FORM_KEY } from '/src/gopang/ai/expert-registry.js';
+import { parseLookup, parseProposal, stripFormTags, findForm, lookupResultText, precheckProposal, saveForm, attachmentToText, TEXT_EXT }
+  from '/src/gopang/ai/doc-form-client.js';
 // 2026-07-20: §7(기관측 PDV, SP_PDV v1.2) 기록 — 이 페이지가 EXPERT 페르소나의
 // 실제 라이브 경로이므로(위 주석 참조), 세션 종료 리포팅도 여기 붙여야 실제로
 // 동작한다. expert-session.js의 endExpertSession()에 붙이면 죽은 코드에
@@ -229,6 +233,14 @@ async function composeExpertPrompt() {
   // 설명하고 있다)은 그대로 유지한다.
   parts.push(await _loadSpRawByKey(EXPERT_BASE_KEY, 'EXPERT_BASE')
     .catch(e => { throw new Error('EXPERT_BASE 로드 실패: ' + e.message); }));
+
+  // 2026-10-14 신설 — 서류를 작성하는 직역에만 서식 SP(SP_DOC_FORM)를 EXPERT_BASE 다음에 한 번 결합한다.
+  // expert-session.js의 _composeExpertPrompt()에는 이미 있었지만 이 페이지는 독립 구현이라 빠져 있었다.
+  // 서식 SP가 없어도 상담은 가능하므로 실패해도 경고만 남기고 진행한다(다른 계층과 달리 throw 하지 않음).
+  if (_needsDocForm(def)) {
+    try { parts.push(await _loadSpRawByKey(DOC_FORM_KEY, 'DOC_FORM')); }
+    catch (e) { console.warn('[Expert] DOC_FORM 로드 실패:', e.message); }
+  }
 
   if (def.parentKey) {
     // 2026-09-04 수정(사고실험으로 발견한 결함 시정) — 예전엔 "부모의
@@ -715,7 +727,7 @@ async function sendTurn(text, attachment) {
         { type: 'image_url', image_url: { url: attachment.dataUrl } },
       ];
     } else if (attachment) {
-      content = `${text ? text + '\n\n' : ''}[첨부 파일: ${attachment.name}]`;
+      content = `${text ? text + '\n\n' : ''}${attachmentToText(attachment)}`;
     }
 
     messages.push({ role: 'user', content });
@@ -767,6 +779,7 @@ async function sendTurn(text, attachment) {
     // 뜻이다(주피터 지적으로 발견). AC와 동일한 백엔드(/web-search)를 그대로
     // 재사용하고, 결과 재주입 후 한 번 더 응답을 받는 흐름도 동일하게 맞춘다.
     await _maybeHandleWebSearch(full);
+    await _maybeHandleFormTags(full, aiBubble);
     await _maybeHandleOrchestrationTags(full);
 
     // ── [CONNECT_HUMAN_EXPERT: 업종키워드] 태그 감지 (2026-07-06, C39 신설) ──
@@ -924,6 +937,93 @@ async function _maybeHandleWebSearch(fullReply, depth = 0) {
   // 이어진 응답이 또 검색을 요청하면(예: 1차 검색으로 부족했던 경우) depth+1로
   // 재귀 — 2회 한도에 도달하면 위에서 조용히 종료.
   await _maybeHandleWebSearch(full, depth + 1);
+}
+
+// ── 서식 DB 태그 처리 (2026-10-14 신설) — SP_DOC_FORM §6 ─────────────────
+//   [FORM_LOOKUP: …]        서식 DB 조회 → 결과를 대화에 되먹여 이어서 답하게 한다(최대 2회).
+//   [FORM_SAVE_PROPOSAL: …] 빈 서식 저장 제안 → 이용자 동의 카드. 동의·지갑 서명이 있어야만 저장한다.
+// 태그와 제안 본문은 말풍선에서 지운다(제안 본문은 카드의 "내용 보기"에서만 보인다).
+const WORKER = RELAY_ENDPOINT;
+function _meGuid() {
+  const u = _loadUser();
+  return u && !u.isGuest && !u.isTemp && u.ipv6 ? u.ipv6 : null;
+}
+async function _getWallet(guid) {
+  const t0 = Date.now();
+  while (window.gopangWallet === undefined && Date.now() - t0 < 2500) await new Promise(r => setTimeout(r, 150));
+  let w = window.gopangWallet || null;
+  if (!w && window.GopangWallet) {
+    w = await window.GopangWallet.load();          // 저장 버튼을 누른 동작 안에서 부르므로 지문/Face ID 창이 정상적으로 뜬다
+    if (w) { try { w.setIdentity({ guid }); } catch {} window.gopangWallet = w; }
+  }
+  if (!w || typeof w.signPayload !== 'function') throw new Error('이 기기에서 지갑을 열 수 없습니다. 나비 앱에 로그인한 뒤 다시 시도해 주세요.');
+  return w;
+}
+
+async function _maybeHandleFormTags(fullReply, aiBubble, depth = 0) {
+  const proposal = parseProposal(fullReply);
+  const lookup = proposal ? null : parseLookup(fullReply);
+  if (!proposal && !lookup) return;
+  aiBubble.innerHTML = escHtml(stripFormTags(fullReply)).replace(/\n/g, '<br>');
+  if (messages.length && messages[messages.length - 1].role === 'assistant') messages[messages.length - 1].content = stripFormTags(fullReply);
+
+  if (proposal) { _renderFormSaveCard(proposal); return; }
+
+  if (depth >= 2) { console.warn('[Expert] FORM_LOOKUP 반복 한도(2회) 도달'); return; }
+  const note = appendBubble('ai', `<i>"${escHtml(lookup.name)}" 서식을 서식 DB에서 찾는 중…</i>`);
+  let resultText;
+  try {
+    const form = await findForm(WORKER, lookup);
+    note.innerHTML = `<i>"${escHtml(lookup.name)}" ${form ? '서식 DB에서 찾음' : '서식 DB에 없음'}</i>`;
+    resultText = lookupResultText(form, lookup);
+  } catch (e) {
+    note.innerHTML = `<i>서식 DB에 닿지 못했습니다</i>`;
+    resultText = `[서식 DB 조회 실패] ${e.message}. 이용자에게 이 사실을 알리고 SP_DOC_FORM §3-1의 다음 순서(첨부 요청 → 임의 구성)로 진행하세요.`;
+  }
+  messages.push({ role: 'user', content: resultText });
+  let shown = false;
+  const bubble = appendBubble('ai', '');
+  bubble.style.display = 'none';
+  const full = await callExpertAI(messages, (delta, fullText) => {
+    if (!shown) { bubble.style.display = ''; shown = true; }
+    bubble.innerHTML = escHtml(stripFormTags(fullText)).replace(/\n/g, '<br>');
+    document.getElementById('chat-thread').scrollTop = 1e9;
+  });
+  messages.push({ role: 'assistant', content: full });
+  await _maybeHandleFormTags(full, bubble, depth + 1);
+}
+
+function _renderFormSaveCard(p) {
+  const chk = precheckProposal(p);
+  const guid = _meGuid();
+  const box = appendBubble('ai', '');
+  box.innerHTML =
+    `<b>이 서식을 나비 서식 DB에 저장할까요?</b><br>` +
+    `<span style="font-size:13px;color:var(--label-2,#666)">${escHtml(p.agency)} · ${escHtml(p.name)}${p.formNo ? ' (' + escHtml(p.formNo) + ')' : ''}</span>` +
+    `<details style="margin:8px 0"><summary style="cursor:pointer;font-size:13px">저장될 내용 보기 (빈 서식)</summary>` +
+    `<pre style="white-space:pre-wrap;font-size:12px;max-height:240px;overflow:auto;margin:6px 0 0">${escHtml(p.body)}</pre></details>` +
+    (chk.ok ? '' : `<div style="color:#c0392b;font-size:13px;margin:6px 0">개인정보로 보이는 값(${escHtml(chk.found.join(', '))})이 있어 저장할 수 없습니다. 값을 지운 서식으로 다시 만들어 달라고 요청해 주세요.</div>`) +
+    `<label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin:8px 0">` +
+    `<input type="checkbox" class="fs-consent" style="margin-top:3px"${chk.ok && guid ? '' : ' disabled'}>` +
+    `<span>다른 이용자도 쓸 수 있도록 <b>빈 서식</b>만 공용 저장하는 것에 동의합니다. 제 개인정보와 사안 내용은 저장되지 않으며, 저장된 서식은 "공식 확인 전" 표시와 함께 제공됩니다.</span></label>` +
+    (guid ? '' : `<div style="font-size:13px;color:#c0392b">저장은 나비 로그인 후에 할 수 있습니다.</div>`) +
+    `<div style="display:flex;gap:8px"><button type="button" class="fs-save" disabled style="padding:7px 14px;border-radius:10px;border:0;background:var(--pri,#2563eb);color:#fff;font-size:13px">저장</button>` +
+    `<button type="button" class="fs-skip" style="padding:7px 14px;border-radius:10px;border:1px solid var(--bdr,#ccc);background:none;font-size:13px">저장 안 함</button></div>` +
+    `<div class="fs-msg" style="font-size:13px;margin-top:6px"></div>`;
+  const consent = box.querySelector('.fs-consent'), save = box.querySelector('.fs-save'), skip = box.querySelector('.fs-skip'), msg = box.querySelector('.fs-msg');
+  consent.addEventListener('change', () => { save.disabled = !consent.checked; });
+  skip.addEventListener('click', () => { box.innerHTML = '<i>서식은 저장하지 않았습니다. 이 대화에서만 사용합니다.</i>'; });
+  save.addEventListener('click', async () => {
+    save.disabled = true; msg.textContent = '저장하는 중…';
+    try {
+      const wallet = await _getWallet(guid);
+      const r = await saveForm(WORKER, wallet, guid, p, { persona: PERSONA, sourceNote: p.source === 'user_attached' ? '이용자 첨부(빈 서식으로 정리)' : 'AI 구성' });
+      if (!r.ok) { msg.textContent = r.message; save.disabled = !consent.checked; return; }
+      box.innerHTML = r.duplicate
+        ? '<i>이미 같은 서식이 저장되어 있습니다. 다음 이용자는 첨부 없이 바로 쓸 수 있습니다.</i>'
+        : '<i>서식 DB에 저장했습니다(공식 확인 전). 다음 이용자는 첨부 없이 바로 쓸 수 있습니다.</i>';
+    } catch (e) { msg.textContent = e.message || '저장하지 못했습니다.'; save.disabled = !consent.checked; }
+  });
 }
 
 // ── PROCEDURE_MAP_LOOKUP/DRAFT/UPDATE + CALL_GOVSYS 처리 (2026-07-20 신설) ──
@@ -1225,18 +1325,53 @@ document.getElementById('attach-remove').addEventListener('click', clearAttach);
 fileInput.addEventListener('change', () => handleFileSelect(fileInput.files?.[0]));
 cameraInput.addEventListener('change', () => handleFileSelect(cameraInput.files?.[0]));
 
-function handleFileSelect(file) {
+// 이미지는 긴 변 1600px JPEG로 줄여 보낸다(폰 사진 5~10MB를 그대로 base64로 보내면 전송·모델 한도에 걸린다).
+// 서식 사진은 글자가 읽혀야 하므로 해상도를 너무 낮추지 않는다.
+function _downscaleImage(file, maxSide = 1600, quality = 0.85) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const r = Math.min(1, maxSide / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.width * r); c.height = Math.round(img.height * r);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        resolve(c.toDataURL('image/jpeg', quality));
+      } catch (e) { reject(e); } finally { URL.revokeObjectURL(url); }
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('이미지를 열 수 없습니다.')); };
+    img.src = url;
+  });
+}
+function _readAs(file, how) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    how === 'text' ? reader.readAsText(file) : reader.readAsDataURL(file);
+  });
+}
+
+async function handleFileSelect(file) {
   if (!file) return;
   const isImage = file.type.startsWith('image/');
-  const reader = new FileReader();
-  reader.onload = () => {
-    _attachedFile = { name: file.name, dataUrl: reader.result, isImage };
+  try {
+    let att;
+    if (isImage) {
+      let dataUrl;
+      try { dataUrl = await _downscaleImage(file); } catch { dataUrl = await _readAs(file, 'url'); }
+      att = { name: file.name, dataUrl, isImage: true };
+    } else if (TEXT_EXT.test(file.name) || file.type.startsWith('text/')) {
+      att = { name: file.name, isImage: false, text: await _readAs(file, 'text') };
+    } else {
+      att = { name: file.name, isImage: false, text: null };   // PDF·DOC·DOCX 등: 읽지 못함 → attachmentToText가 모델에 명시
+    }
+    _attachedFile = att;
     previewName.textContent = `📎 ${file.name}`;
     preview.style.display = 'flex';
     updateSendBtn();
-  };
-  reader.onerror = () => console.warn('[Expert] 파일 읽기 실패:', reader.error);
-  reader.readAsDataURL(file);
+  } catch (e) { console.warn('[Expert] 파일 읽기 실패:', e); }
 }
 
 function clearAttach() {

@@ -109,7 +109,7 @@ export function _missingNextStepMarker(fullReply) {
 // 서식 SP(SP_DOC_FORM) 결합 대상 판정 — 자기 key 또는 parentKey 체인의 어느 조상
 // key가 DOC_FORM_ROOT_KEYS에 있으면 true. 순환 참조·과잉 체인은 방문 집합과 최대
 // 깊이(5단)로 막는다(조상 체인 로드와 같은 기준).
-function _needsDocForm(def) {
+export function _needsDocForm(def) {
   const roots = new Set(DOC_FORM_ROOT_KEYS);
   const visited = new Set();
   let cur = def;
