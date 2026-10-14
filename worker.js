@@ -20,6 +20,8 @@ import { makeDigitClaimHandler } from './src/worker/digit-claim-handler.js';
 import { makePocketBaseDigitStore } from './src/worker/digit-claim-store.js';
 import { makeOrgSiteHandler } from './src/worker/org-site-handler.js';
 import { makePocketBaseOrgSiteStore } from './src/worker/org-site-store.js';
+import { makeDocFormHandler } from './src/worker/doc-form-handler.js';
+import { makePocketBaseDocFormStore } from './src/worker/doc-form-store.js';
 import { makeConsentSaleHandler } from './src/worker/consent-sale-handler.js';
 import { makeConsentSaleStore } from './src/worker/consent-sale-store.js';
 import { verifyPhoneAndStepUp } from './src/worker/phone-token.js';
@@ -5496,6 +5498,16 @@ function handleDigitRoutes(request, url, env, corsHeaders) {
 function handleOrgSiteRoutes(request, url, env, corsHeaders) {
   const handler = makeOrgSiteHandler({
     store: makePocketBaseOrgSiteStore({ base: L1_DEFAULT, getToken: () => _l1AdminToken(env) }),
+    getPinnedPubKey: async (e, guid) => (await _l1FindProfileByGuid(e, guid))?.pubkey_ed25519 || null,
+  });
+  return handler.handle(request, url, env, corsHeaders);
+}
+
+// ── 나비 서식 DB(2026-10-14 신설) — 전문가 페르소나가 쓰는 빈 서식 저장·조회. SP_DOC_FORM §4.
+// 저장은 지갑 서명 + 공용 저장 동의, 검토 상태 변경은 DOC_FORM_ADMINS(guid 또는 공개키, 쉼표 구분)만.
+function handleDocFormRoutes(request, url, env, corsHeaders) {
+  const handler = makeDocFormHandler({
+    store: makePocketBaseDocFormStore({ base: L1_DEFAULT, getToken: () => _l1AdminToken(env) }),
     getPinnedPubKey: async (e, guid) => (await _l1FindProfileByGuid(e, guid))?.pubkey_ed25519 || null,
   });
   return handler.handle(request, url, env, corsHeaders);
@@ -13590,6 +13602,7 @@ export default {
     // ── 나비 숫자 번호 — 서명된 청구 레코드(중복 확인·청구·양도·폐기, 2026-09-24 신설) ──
     if (pathname.startsWith('/digit/')) return handleDigitRoutes(request, url, env, corsHeaders);
     if (pathname.startsWith('/org-site/')) return handleOrgSiteRoutes(request, url, env, corsHeaders);
+    if (pathname.startsWith('/doc-form/')) return handleDocFormRoutes(request, url, env, corsHeaders);
     if (pathname.startsWith('/consent-sale/')) return handleConsentSaleRoutes(request, url, env, corsHeaders);
     if (pathname === '/pay/code/mine' && request.method === 'GET') return handlePayCodeMine(request, url, env, corsHeaders);
     if (pathname === '/pay/code/resolve' && request.method === 'GET') return handlePayCodeResolve(request, url, env, corsHeaders);
