@@ -12,7 +12,8 @@ SECTIONS = json.loads(re.search(r'var SECTIONS = (\[.*?\]);\n', src, re.S).group
 IDX = json.loads(re.search(r'var EXPERT_SP_PATH_INDEX\s*=\s*(\{.*?\});\n', src, re.S).group(1))
 CAT = json.load(open(os.path.join(ROOT, 'prompts/sp-catalog.json'), encoding='utf-8'))
 blk = re.search(r"var SECTION_PAGE_LINKS\s*=\s*(\{.*?\});\n", src, re.S).group(1)
-HAVE = {m.group(1) for m in re.finditer(r"'([^']+)':\s*\{\s*url:", blk)}
+HAVE_URL = {m.group(1): m.group(2) for m in re.finditer(r"'([^']+)':\s*\{\s*url:\s*'([^']+)'", blk)}
+HAVE = set(HAVE_URL)
 e = html.escape
 
 def sp_key(pid):
@@ -37,7 +38,7 @@ def page(pid, label, cat, spk, triggers, parent=None, children=None):
     chat = '/pages/expert-chat.html?persona=' + pid
     lead = ('아래에서 상담할 분야를 고르십시오.' if children else
             '궁금한 점을 말씀하시면 필요한 정보를 순서대로 여쭙고 정리해 드립니다.')
-    back = ('<p class="svc-lead"><a href="/pages/%s.html">← %s</a></p>' % (parent[0], e(parent[1]))) if parent else ''
+    back = ('<p class="svc-lead"><a href="%s">← %s</a></p>' % (parent[0], e(parent[1]))) if parent else ''
     if children:
         rows = ''.join('<tr><td class="doc-title"><a href="/pages/%s.html">%s</a></td><td class="doc-detail">%s</td></tr>' %
                        (c['id'], e(c['label']), e(' · '.join(c['triggers'][:3]))) for c in children)
@@ -109,14 +110,13 @@ for s in SECTIONS:
     if s['cat'] in EXCLUDE_CATS: continue
     single = len(s['personas']) <= 1
     if single and (s['id'] in HAVE or s['personas'][0]['id'] in HAVE): continue
-    if not single and s['id'] in HAVE: continue
     todo = []
     if single:
         p = s['personas'][0]; todo.append((s['id'], s['label'], sp_key(p['id']) or sp_key(s['id']), p['triggers'], None, None))
     else:
         todo.append((s['id'], s['label'], sp_key(s['id']), [], None, s['personas']))
         for p in s['personas']:
-            todo.append((p['id'], p['label'], sp_key(p['id']), p['triggers'], (s['id'], s['label']), None))
+            todo.append((p['id'], p['label'], sp_key(p['id']), p['triggers'], (HAVE_URL.get(s['id'], '/pages/%s.html' % s['id']), s['label']), None))
     for pid, label, spk, trg, parent, kids in todo:
         path = os.path.join(ROOT, 'pages', pid + '.html')
         if os.path.exists(path): continue
