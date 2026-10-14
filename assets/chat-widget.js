@@ -121,6 +121,11 @@
     '#hcw-input-row{display:flex;align-items:flex-end;gap:8px;padding:10px 14px 14px;flex-shrink:0}' +
     '#hcw-input{flex:1;resize:none;border:none;outline:none;background:rgba(241,243,245,.75);border-radius:12px;padding:10px 14px;font-family:Pretendard,sans-serif;font-size:13.5px;color:#0f172a;line-height:1.5;max-height:120px;min-height:40px;overflow-y:auto}' +
     '#hcw-input::placeholder{color:#6b7280}' +
+    '.hcw-ibtn{width:34px;height:38px;border-radius:10px;border:none;background:transparent;color:#475569;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s,color .15s}' +
+    '.hcw-ibtn:hover{background:rgba(59,130,246,.12);color:#1d4ed8}.hcw-ibtn:disabled{opacity:.4;cursor:not-allowed}' +
+    '#hcw-attach{display:none;align-items:center;gap:8px;margin:0 14px;padding:6px 10px;background:rgba(59,130,246,.1);border-radius:10px;font-family:Pretendard,sans-serif;font-size:12.5px;color:#1e3a8a;flex-shrink:0}' +
+    '#hcw-attach.on{display:flex}#hcw-attach-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
+    '#hcw-attach-x{border:none;background:transparent;color:#475569;cursor:pointer;font-size:16px;line-height:1;padding:0 2px}' +
     '#hcw-send{width:38px;height:38px;border-radius:50%;border:none;background:#3b82f6;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s,transform .12s}' +
     '#hcw-send:hover{background:#1d4ed8;transform:scale(1.06)}#hcw-send:disabled{background:#e5e7eb;cursor:not-allowed;transform:none}' +
     '@media (max-width:600px){#hcw-fab{bottom:18px;right:16px}#hcw-fab-btn{width:50px;height:50px}#hcw-panel{right:12px;left:12px;width:auto;bottom:82px}}' +
@@ -148,7 +153,12 @@
       '</div>' +
       '<div id="hcw-messages"></div>' +
       '<div id="hcw-divider"></div>' +
+      '<div id="hcw-attach"><span id="hcw-attach-name"></span><button type="button" id="hcw-attach-x" title="첨부 취소">×</button></div>' +
       '<div id="hcw-input-row">' +
+        '<button type="button" class="hcw-ibtn" id="hcw-cam" title="카메라로 서류 촬영"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></button>' +
+        '<button type="button" class="hcw-ibtn" id="hcw-clip" title="파일 첨부"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>' +
+        '<input type="file" id="hcw-file" hidden accept="image/*,.pdf,.docx,.hwpx,.txt,.md,.csv">' +
+        '<input type="file" id="hcw-camfile" hidden accept="image/*" capture="environment">' +
         '<textarea id="hcw-input" placeholder="메시지를 입력하세요…" rows="1"></textarea>' +
         '<button id="hcw-send" title="전송">' +
           '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>' +
@@ -260,16 +270,68 @@
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
   });
 
+  // ── 첨부(카메라·파일) — 글자는 뽑아 본문에 붙이고, 사진·스캔본은 image_url 블록으로 보낸다 ──
+  var pending = null; // { name, text?, images?, note?, reason? }
+  var attachBox = document.getElementById('hcw-attach'), attachName = document.getElementById('hcw-attach-name');
+  var fileEl = document.getElementById('hcw-file'), camEl = document.getElementById('hcw-camfile');
+  function showAttach(label) { attachName.textContent = label; attachBox.classList.add('on'); }
+  function clearAttach() { pending = null; fileEl.value = ''; camEl.value = ''; attachBox.classList.remove('on'); }
+  function readUrl(file) { return new Promise(function (ok, no) { var r = new FileReader(); r.onload = function () { ok(r.result); }; r.onerror = function () { no(r.error); }; r.readAsDataURL(file); }); }
+  async function downscale(file) {
+    var url = await readUrl(file);
+    var img = await new Promise(function (ok, no) { var i = new Image(); i.onload = function () { ok(i); }; i.onerror = no; i.src = url; });
+    var k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+    var cv = document.createElement('canvas'); cv.width = Math.max(1, Math.round(img.naturalWidth * k)); cv.height = Math.max(1, Math.round(img.naturalHeight * k));
+    var cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(img, 0, 0, cv.width, cv.height);
+    return cv.toDataURL('image/jpeg', 0.85);
+  }
+  async function onPick(file) {
+    if (!file) return;
+    showAttach('📎 ' + file.name + ' 읽는 중…');
+    try {
+      var att;
+      if (file.type && file.type.indexOf('image/') === 0) {
+        var du; try { du = await downscale(file); } catch (e) { du = await readUrl(file); }
+        att = { name: file.name, images: [du] };
+      } else {
+        var mod = await import('/src/gopang/ai/file-extract.js');
+        if (mod.classifyFile(file.name, file.type) === 'text') att = { name: file.name, text: await file.text() };
+        else {
+          var r = await mod.extractFile(file);
+          if (r.kind === 'text') att = { name: file.name, text: r.text, note: r.note };
+          else if (r.kind === 'images') att = { name: file.name, images: r.images, note: r.note };
+          else att = { name: file.name, reason: r.reason };
+        }
+      }
+      pending = att;
+      showAttach('📎 ' + file.name + (att.reason ? ' (읽지 못함)' : ''));
+    } catch (e) { console.warn('[chat-widget] 첨부 읽기 실패', e); clearAttach(); appendMsg('ai', '첨부 파일을 읽지 못했습니다. 사진으로 촬영해 보내 주세요.'); }
+  }
+  document.getElementById('hcw-clip').addEventListener('click', function () { fileEl.click(); });
+  document.getElementById('hcw-cam').addEventListener('click', function () { camEl.click(); });
+  fileEl.addEventListener('change', function () { onPick(fileEl.files && fileEl.files[0]); });
+  camEl.addEventListener('change', function () { onPick(camEl.files && camEl.files[0]); });
+  document.getElementById('hcw-attach-x').addEventListener('click', clearAttach);
+
   async function send() {
     var text = input.value.trim();
-    if (!text || busy) return;
+    var att = pending;
+    if ((!text && !att) || busy) return;
     busy = true;
     sendBtn.disabled = true;
     input.value = '';
     input.style.height = 'auto';
 
-    appendMsg('user', text);
-    history.push({ role: 'user', content: text });
+    var content = text;
+    if (att) {
+      if (att.images) content = [{ type: 'text', text: (text || '(첨부한 서류를 확인해 주세요)') + '\n[첨부: ' + att.name + (att.note ? ' — ' + att.note : '') + ']' }]
+        .concat(att.images.map(function (u) { return { type: 'image_url', image_url: { url: u } }; }));
+      else if (att.text) content = (text ? text + '\n\n' : '') + '[첨부 파일: ' + att.name + ']\n' + att.text.slice(0, 20000);
+      else content = (text ? text + '\n\n' : '') + '[첨부 파일: ' + att.name + ' — 읽지 못함: ' + (att.reason || '') + ']';
+    }
+    clearAttach();
+    appendMsg('user', (text || '') + (att ? (text ? '\n' : '') + '📎 ' + att.name : ''));
+    var hIdx = history.push({ role: 'user', content: content }) - 1;
     appendTyping();
 
     try {
@@ -305,6 +367,8 @@
       var data = await res.json();
       var reply = data.content || '죄송합니다, 답변을 가져오지 못했습니다.';
       history.push({ role: 'assistant', content: reply });
+      // 사진은 다음 턴부터 글로만 남겨 요청 크기를 줄인다.
+      if (Array.isArray(history[hIdx].content)) history[hIdx].content = history[hIdx].content[0].text;
       removeTyping();
       var shown = reply;
       if (typeof CFG.transformReply === 'function') { try { var tr = CFG.transformReply(reply); if (typeof tr === 'string') shown = tr; } catch (e2) { console.error('[chat-widget] transformReply', e2); } }
