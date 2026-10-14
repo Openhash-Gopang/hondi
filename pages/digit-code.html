@@ -115,7 +115,31 @@
     <input type="file" id="formPickInput" accept="image/*" multiple hidden>
     <div id="formShootMsg" class="msg" role="status"></div>
     <div id="formShots" aria-live="polite"></div>
-    <p class="sub" style="margin:10px 0 0;font-size:14px">촬영한 사진은 이 기기 화면에서만 보이며 아직 어디에도 전송되지 않습니다. 전문가 페르소나에게 전달하는 기능은 준비 중입니다.</p>
+    <div id="formSend" style="display:none;margin-top:12px">
+      <label for="formPersona" style="display:block;font-size:14px;margin-bottom:4px"><b>어느 전문가에게 보일까요?</b></label>
+      <select id="formPersona" style="width:100%;padding:9px;border-radius:10px;border:1px solid var(--bdr,#ccc);font-size:15px">
+        <option value="lawyer">변호사</option>
+        <option value="judicial-scrivener">법무사 보조 AI</option>
+        <option value="administrative-scrivener">행정사 보조 AI</option>
+        <option value="tax-accountant">세무사</option>
+        <option value="accountant">공인회계사</option>
+        <option value="appraiser">감정평가사</option>
+        <option value="architect">건축사</option>
+        <option value="customs-broker">관세사</option>
+        <option value="electrical-safety-engineer">전기안전기술사</option>
+        <option value="fire-safety-manager">소방시설관리사</option>
+        <option value="gas-safety-engineer">가스기술사</option>
+        <option value="industrial-safety-consultant">산업안전·보건지도사</option>
+        <option value="labor-attorney">공인노무사</option>
+        <option value="landscape-engineer">조경기술사</option>
+        <option value="loss-adjuster">손해사정사</option>
+        <option value="patent-attorney">변리사</option>
+        <option value="real-estate-agent">공인중개사</option>
+        <option value="surveying-engineer">측량 및 지형공간정보기술사</option>
+      </select>
+      <button id="bFormSend" type="button" style="margin-top:10px">전문가 상담 화면으로 보내기</button>
+    </div>
+    <p class="sub" style="margin:10px 0 0;font-size:14px">촬영한 사진은 이 기기 화면에서만 보입니다. 「보내기」를 누르면 사진이 전문가 상담 화면으로 넘어가며, 거기서 <b>전송 버튼을 한 번 더 눌러야</b> 전문가 AI에게 전달됩니다.</p>
   </section>
 </main>
 
@@ -322,10 +346,10 @@ document.addEventListener('visibilitychange', () => {
 })();
 </script>
 <script>
-// ③ 서식 촬영 — 촬영·선택한 사진을 이 화면에서 미리보기로만 보여 준다(서버 전송 없음).
+// ③ 서식 촬영 — 촬영·선택한 사진을 미리보기로 보여 주고, 「보내기」를 누르면 같은 기기에서 전문가 상담 화면으로 넘긴다(서버 전송 없음 — 전송은 상담 화면에서 이용자가 한 번 더 눌러야 한다).
 (function () {
   var MAX_SHOTS = 10, MAX_BYTES = 15 * 1024 * 1024;
-  var shots = []; // { url, name }
+  var shots = []; // { url, name, file }
   var $ = function (id) { return document.getElementById(id); };
   function say(t, cls) { var m = $('formShootMsg'); m.textContent = t; m.className = 'msg ' + (cls || ''); }
   function render() {
@@ -339,6 +363,7 @@ document.addEventListener('visibilitychange', () => {
       del.addEventListener('click', function () { URL.revokeObjectURL(s.url); shots.splice(i, 1); render(); say(shots.length ? shots.length + '장 촬영됨' : '', ''); });
       cap.appendChild(label); cap.appendChild(del); fig.appendChild(img); fig.appendChild(cap); box.appendChild(fig);
     });
+    $('formSend').style.display = shots.length ? 'block' : 'none';
   }
   function add(files) {
     var added = 0, skipped = 0;
@@ -346,7 +371,7 @@ document.addEventListener('visibilitychange', () => {
       if (!f || !/^image\//.test(f.type)) { skipped++; return; }
       if (f.size > MAX_BYTES) { skipped++; return; }
       if (shots.length >= MAX_SHOTS) { skipped++; return; }
-      shots.push({ url: URL.createObjectURL(f), name: f.name }); added++;
+      shots.push({ url: URL.createObjectURL(f), name: f.name, file: f }); added++;
     });
     render();
     if (skipped) say('일부 사진은 추가하지 못했습니다(이미지가 아니거나 15MB 초과, 또는 최대 ' + MAX_SHOTS + '장 초과).', 'warn');
@@ -356,6 +381,17 @@ document.addEventListener('visibilitychange', () => {
   $('bFormPick').addEventListener('click', function () { $('formPickInput').click(); });
   $('formShootInput').addEventListener('change', function (e) { add(e.target.files); e.target.value = ''; });
   $('formPickInput').addEventListener('change', function (e) { add(e.target.files); e.target.value = ''; });
+  $('bFormSend').addEventListener('click', async function () {
+    if (!shots.length) return;
+    var btn = $('bFormSend'); btn.disabled = true; say('사진을 준비하는 중…', '');
+    try {
+      var H = await import('/src/gopang/ai/form-shots-handoff.js');
+      var urls = [];
+      for (var i = 0; i < shots.length; i++) urls.push(await H.downscaleImage(shots[i].file));
+      await H.putShots(urls);
+      location.href = '/pages/expert-chat.html?persona=' + encodeURIComponent($('formPersona').value) + '&' + H.HANDOFF_PARAM + '=1';
+    } catch (e) { say('사진을 넘기지 못했습니다. 이 브라우저에서 저장 공간 사용이 막혀 있을 수 있습니다.', 'bad'); btn.disabled = false; }
+  });
   window.addEventListener('pagehide', function () { shots.forEach(function (s) { URL.revokeObjectURL(s.url); }); });
 })();
 </script>
