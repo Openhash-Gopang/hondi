@@ -35,215 +35,55 @@ if ('serviceWorker' in navigator) {
         if (msgType === 'CHECK_FOR_UPDATE') {
           console.log('[PWA] 배포 push 수신 — 즉시 업데이트 체크');
           reg.update().then(() => {
-            if (reg.waiting && navigator.serviceWorker.controller) _autoApplyUpdate(reg);
+            _noticeUpdateOnce(reg);
           }).catch(() => {});
         }
       });
 
-      // ★ _AUTO_UPDATE_PATCH_APPLIED_
-      // ══════════════════════════════════════════════════
-      // 이중 자동 업데이트 강제 적용
-      //
-      // 경로 ①: 새 SW 설치 완료 → 5초 후 자동 skipWaiting + 새로고침
-      //          (사용자 입력 불필요, 배너는 카운트다운용으로만 표시)
-      // 경로 ②: 30분마다 주기적 update() 체크
-      //          (탭을 장시간 열어두는 사용자 대응)
-      // ══════════════════════════════════════════════════
-
-      // 자동 적용 타이머 ID (중복 방지)
-      let _autoApplyTimer = null;
-      let _autoApplyReloadTimer = null;
-      // BUG-FIX(2026-09-14, 재발) — 위 두 타이머로 진행 중인 사이클이
-      // "어떤 워커"를 대상으로 하는지 추적한다. reg.waiting은 동일한
-      // 워커가 계속 대기 중인 동안은 매번 같은 객체 참조를 반환하므로,
-      // ===로 "진짜 새 버전인지 vs 같은 버전을 또 감지했을 뿐인지"를
-      // 구분할 수 있다 — 아래 _autoApplyUpdate 참고.
-      let _pendingApplySW = null;
-
-      // BUG-FIX(2026-09-14) — "새 버전이 있습니다" 배너가 짧은 시간에 여러
-      // 번 잇달아 뜨는 문제. 원인: 병합이 연달아 여러 번 일어나면(각 병합마다
-      // bump-app-version.yml이 version.json/sw.js CACHE_NAME을 갱신)
-      // 배포 하나가 끝나 자동 새로고침되자마자, 그 사이 이미 배포된 *다음*
-      // 버전을 곧바로 또 감지해 배너가 또 뜨는 일이 반복된다 — 병합 10번이면
-      // 배너도 10번 뜨는 것처럼 보였다. 아래 두 가지로 고친다:
-      //
-      // 1) 디바운스 — 같은 페이지 안에서 짧은 간격으로 여러 번 감지되면
-      //    (푸시 알림·포그라운드 복귀·30분 주기 체크가 겹치는 경우 등)
-      //    매번 새로 반응하지 않고, 감지가 잠잠해질 때까지 기다렸다가
-      //    그 시점에 실제로 대기 중인(=가장 최신) 버전 하나에 대해서만
-      //    배너를 띄운다. reg.waiting은 항상 최신 설치본을 가리키므로
-      //    (더 새 버전이 설치되면 브라우저가 이전 대기본을 자동으로
-      //    교체한다) 디바운스가 끝나는 시점에 한 번만 확인해도 안전하다.
-      // 2) 새로고침 후 쿨다운 연장 — 기존 루프 방지 회로차단기(20초)는
-      //    CDN 전파 지연 같은 즉각적 재발만 막기엔 충분했지만, 연속
-      //    병합처럼 분 단위로 이어지는 배포 러시는 못 막았다. 90초로
-      //    늘리고, 쿨다운 중 감지된 버전은 배너로 즉시 알리지 않는 대신
-      //    쿨다운이 끝나는 시점에 맞춰 한 번만 다시 확인하도록 예약한다
-      //    (그 사이 몇 번을 다시 감지하든 예약은 하나만 유지된다).
-      const _AUTO_UPDATE_DEBOUNCE_MS = 3000;
-      const LOOP_KEY = 'gopang_last_auto_reload';
-      const LOOP_COOLDOWN_MS = 90000;
-      let _cooldownRecheckTimer = null;
-
-      function _autoApplyUpdate(reg) {
-        const lastReload = Number(sessionStorage.getItem(LOOP_KEY) || 0);
-        const sinceReload = Date.now() - lastReload;
-        if (sinceReload < LOOP_COOLDOWN_MS) {
-          // 방금 자동 새로고침했다 — 지금 뜬 배너를 또 띄우지 않고,
-          // 쿨다운이 끝나는 시점에 딱 한 번만 재확인을 예약한다(이미
-          // 예약돼 있으면 새로 잡지 않음 — 그 사이 몇 번을 더 감지해도
-          // 재확인은 하나만 남는다).
-          if (!_cooldownRecheckTimer) {
-            const remain = LOOP_COOLDOWN_MS - sinceReload;
-            console.log(`[PWA] 쿨다운 중(${Math.ceil(remain / 1000)}초 남음) — 배너 억제, 쿨다운 종료 시 재확인 예약`);
-            _cooldownRecheckTimer = setTimeout(() => {
-              _cooldownRecheckTimer = null;
-              reg.update().then(() => {
-                if (reg.waiting && navigator.serviceWorker.controller) _autoApplyUpdate(reg);
-              }).catch(() => {});
-            }, remain + 500);
-          }
-          return;
+      // ★ 업데이트 정책(2026-10-14, 주피터 지시) — 사용자가 원할 때만, 한 번만 갱신한다 ★
+      // 이전에는 새 버전이 감지되면 배너와 카운트다운을 띄우고 5초 뒤 스스로 새로고침했다. 배포가 잦은 날에는
+      // 이것이 끊임없이 반복돼 사용 중인 화면이 사라지고 배너가 다시 떴다. 이제는:
+      //   · 새 버전은 조용히 내려받아 대기시킨다. 자동 적용·자동 새로고침·카운트다운은 없다.
+      //   · 안내 배너는 이 탭(세션)에서 한 번만 보여 준다. 「나중에」를 누르면 닫히고, 이 세션에서는 다시 뜨지 않는다.
+      //   · 갱신은 「지금 적용」(또는 설정의 「최신 버전으로 갱신」)을 눌렀을 때 한 번만 일어난다.
+      const _NOTICE_KEY = 'gopang_update_notice_shown';
+      function _noticeUpdateOnce(reg) {
+        if (!reg.waiting || !navigator.serviceWorker.controller) return;   // 대기 중인 새 버전이 없으면 안내하지 않는다
+        try {
+          if (sessionStorage.getItem(_NOTICE_KEY)) return;
+          sessionStorage.setItem(_NOTICE_KEY, '1');
+        } catch (e) {                                                       // 저장소를 못 쓰면 메모리로 한 번만
+          if (window._updateNoticeShownMem) return;
+          window._updateNoticeShownMem = true;
         }
-
-        // ★ BUG-FIX(2026-09-14, 실사 재현 — 직전 수정이 새로 만든 회귀) ★
-        // 직전 수정("배너 표시부터 적용까지 전체 구간을 취소 가능하게")이
-        // 만든 새 버그: visibilitychange(포그라운드 복귀)는 화면을 잠깐
-        // 껐다 켜거나 알림창을 내렸다 올리기만 해도 자주 발생하는데, 그때
-        // 마다 reg.update() 후 reg.waiting이 여전히 참(아직 같은 버전이
-        // 대기 중)이면 무조건 _autoApplyUpdate(reg)를 다시 불렀다(147·
-        // 176·187행 등 4곳 모두 "새 버전인지"를 구분하지 않고 "대기 중인
-        // 게 있는지"만 본다). 직전 수정 이후로는 이게 "정말 새 버전이
-        // 왔다"와 구분되지 않은 채 매번 진행 중이던 카운트다운을 통째로
-        // 취소하고 처음부터 다시 시작해버려, 화면을 자주 들여다보는
-        // 실사용 환경에서는 카운트다운이 0초에 도달하지 못하고 배너가
-        // 무한히 반복되는 것처럼 보였다(실사 재현 확인).
-        //
-        // reg.waiting은 진짜 새 버전이 설치되지 않는 한 동일한 워커
-        // 객체 참조를 계속 반환한다 — 그 성질을 이용해 "지금 사이클이
-        // 이미 처리 중인 워커와 같은 워커인지"를 먼저 확인한다. 같으면
-        // (=재확인일 뿐, 새 버전 아님) 진행 중이던 카운트다운을 그대로
-        // 두고 아무것도 하지 않는다. 다르면(=진짜 새 버전) 이전 사이클을
-        // 취소하고 새로 시작한다 — 이 분기가 "누적된 이전 버전은 무시
-        // 하고 최근 버전만 적용" 요구사항의 본래 의도였다.
-        if ((_autoApplyTimer || _autoApplyReloadTimer) && reg.waiting === _pendingApplySW) {
-          console.log('[PWA] 이미 처리 중인 것과 같은 버전 재감지(단순 재확인) — 진행 중인 카운트다운 유지');
-          return;
-        }
-
-        if (_autoApplyTimer) { clearTimeout(_autoApplyTimer); _autoApplyTimer = null; }
-        if (_autoApplyReloadTimer) { clearTimeout(_autoApplyReloadTimer); _autoApplyReloadTimer = null; }
-        const _staleBanner = document.getElementById('update-banner');
-        if (_staleBanner) _staleBanner.remove(); // 이전 사이클의 배너(카운트다운 중이었을 수도)를 정리하고 새로 그린다
-        _pendingApplySW = reg.waiting;
-
-        _autoApplyTimer = setTimeout(() => {
-          _autoApplyTimer = null;
-          console.log('[PWA] 새 버전 감지(안정화됨) — 5초 후 자동 적용');
-          _showUpdateBanner(5);         // 카운트다운 배너 표시
-          _autoApplyReloadTimer = setTimeout(function _fireReload() {
-            // BUG-FIX(2026-09-18, 주피터 실사 재현) — KAuth 로그인 오버레이가
-            // 떠 있는 동안(전화번호 device-link 인증 진행 중) 이 자동
-            // 새로고침이 끼어들면, 폰에서 방금 "본인 확인"을 눌러 인증이
-            // 실제로는 성공했는데도 그 결과를 받아 persist()하기 전에
-            // 페이지가 통째로 새로 열려버려 토큰이 저장되지 않는다 —
-            // 사용자 입장에서는 "인증은 성공하는데 다음 지시를 내리면
-            // 또 인증을 요구한다"가 무한 반복되는 것으로 보인다. 이 세션
-            // 동안 배포가 잦아(짧은 간격으로 새 버전이 계속 감지됨) 매
-            // 상호작용마다 이 경합이 재현될 조건이 갖춰져 있었다.
-            // 오버레이가 떠 있으면 새로고침을 걸지 않고 1초 뒤 다시
-            // 확인한다 — 오버레이가 사라질 때까지(로그인 완료 또는 사용자
-            // 취소) 계속 미룬다.
-            // BUG-FIX(2026-09-23, 주피터 실사 재현 — 09-18 사고의 재발) —
-            // 위 09-18 수정은 #ksa-overlay(공용 KAuth 모듈)만 확인했다.
-            // dashboard.html의 메인 지갑 로그인은 별도 ID(#loginScreen)를
-            // 쓰는데, 그 페이지에는 #ksa-overlay 자체가 없어 이 가드가
-            // 전혀 작동하지 않았다 — 그래서 같은 "인증은 성공하는데
-            // 다음 지시를 내리면 또 요구한다" 무한 반복이 dashboard.html
-            // 에서만 재현됐다(09-18 당시엔 이 페이지가 없었거나 이 가드
-            // 적용 대상에서 빠져있었던 것으로 보임). #loginScreen도 함께
-            // 확인하도록 확장 — display:none이 아니면(=아직 로그인 중)
-            // 새로고침을 그대로 미룬다.
-            var overlay = document.getElementById('ksa-overlay');
-            var loginScreenEl = document.getElementById('loginScreen');
-            var loginScreenShowing = loginScreenEl && getComputedStyle(loginScreenEl).display !== 'none';
-            // BUG-FIX(2026-09-23, 2차 재발 — 주피터 실사: "폰 확인까지
-            // 다 했는데 또 뜬다") — 위 loginScreenShowing 체크만으로는
-            // 부족했다. completeLogin()이 loginScreen을 감추는 바로 그
-            // 틈에, GopangWallet.restoreFromPrivateKey()가 IndexedDB에
-            // 쓴 개인키가 아직 커밋 전일 수 있다(요청의 onsuccess는
-            // 트랜잭션 커밋보다 먼저 끝날 수 있음) — 이 좁은 창에서
-            // 새로고침이 끼어들면 재시작된 페이지가 방금 저장된 지갑을
-            // 못 읽어 처음부터(전화번호 입력) 다시 요구한다. dashboard.
-            // html의 completeLogin()이 로그인 성공 시점에 심어두는
-            // window._hondiAuthGraceUntil(약 4초짜리 유예 타임스탬프)도
-            // 함께 확인해, loginScreen이 막 사라진 뒤에도 커밋이 끝날
-            // 시간을 확실히 준다.
-            var inAuthGrace = window._hondiAuthGraceUntil && Date.now() < window._hondiAuthGraceUntil;
-            if ((overlay && overlay.classList.contains('show')) || loginScreenShowing || inAuthGrace) {
-              console.log('[PWA] 로그인 진행 중(또는 유예 시간) — 자동 새로고침 보류, 1초 후 재확인');
-              _autoApplyReloadTimer = setTimeout(_fireReload, 1000);
-              return;
-            }
-            _autoApplyReloadTimer = null;
-            _pendingApplySW = null;
-            sessionStorage.setItem(LOOP_KEY, String(Date.now()));
-            const sw = reg.waiting;
-            if (sw) {
-              sw.postMessage({ type: 'SKIP_WAITING' });
-            } else {
-              window.location.reload();
-            }
-          }, 5000);
-        }, _AUTO_UPDATE_DEBOUNCE_MS);
+        _showUpdateBanner();
       }
 
-      // 경로 ①: 새 SW 설치 완료 → 자동 적용
+      // 새 SW 설치 완료 → 안내만(한 번)
       reg.addEventListener('updatefound', () => {
         const newSW = reg.installing;
         if (!newSW) return;
         newSW.addEventListener('statechange', () => {
-          if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
-            _autoApplyUpdate(reg);
-          }
+          if (newSW.state === 'installed') _noticeUpdateOnce(reg);
         });
       });
 
-      // SW 교체 완료(controllerchange) → 즉시 새로고침
-      // (forceUpdateApp이 수동 갱신 중이면 자체적으로 새로고침을 처리하므로 건너뜀)
+      // SW 교체(controllerchange) → 사용자가 「지금 적용」을 눌러 시작한 경우에만 새로고침한다.
+      // (처음 설치될 때의 clients.claim() 등 다른 이유의 controllerchange로는 새로고침하지 않는다.)
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (window._manualUpdateInProgress) return;
-        console.log('[PWA] 새 버전 적용 — 자동 새로고침');
-        window.location.reload();
+        if (!window._userApplyingUpdate || window._manualUpdateInProgress) return;
+        window._userApplyingUpdate = false;
+        _reloadPage();
       });
 
-      // 앱 시작 시 이미 waiting 중인 SW → 즉시 자동 적용
-      if (reg.waiting && navigator.serviceWorker.controller) {
-        console.log('[PWA] 시작 시 대기 중 버전 감지 → 자동 적용');
-        _autoApplyUpdate(reg);
-      }
+      // 앱 시작 시 이미 대기 중인 새 버전이 있으면 안내(한 번)
+      _noticeUpdateOnce(reg);
 
-      // 포그라운드 복귀 시 즉시 업데이트 체크
+      // 포그라운드 복귀·30분 주기: 새 버전 확인만 한다. 안내는 위 규칙(세션당 한 번)을 따른다.
       document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-          reg.update().then(() => {
-            console.log('[PWA] 포그라운드 복귀 — SW 업데이트 체크');
-            if (reg.waiting && navigator.serviceWorker.controller) {
-              _autoApplyUpdate(reg);
-            }
-          }).catch(() => {});
-        }
+        if (document.visibilityState === 'visible') reg.update().then(() => _noticeUpdateOnce(reg)).catch(() => {});
       });
-
-      // 경로 ②: 30분마다 주기적 업데이트 체크
-      setInterval(() => {
-        reg.update().then(() => {
-          console.log('[PWA] 주기 체크(30분) — SW 업데이트 확인');
-          if (reg.waiting && navigator.serviceWorker.controller) {
-            _autoApplyUpdate(reg);
-          }
-        }).catch(() => {});
-      }, 30 * 60 * 1000);
+      setInterval(() => { reg.update().then(() => _noticeUpdateOnce(reg)).catch(() => {}); }, 30 * 60 * 1000);
 
     } catch (err) {
       console.warn('[PWA] SW 등록 실패:', err);
@@ -251,8 +91,10 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// ── 앱 갱신 알림 배너 (카운트다운 자동 적용) ───────────────────
-function _showUpdateBanner(seconds = 0) {
+// ── 앱 갱신 안내 배너 — 세션당 한 번, 자동 적용 없음 ───────────────
+function _reloadPage() { window.location.reload(); }
+
+function _showUpdateBanner() {
   if (document.getElementById('update-banner')) return;
 
   const banner = document.createElement('div');
@@ -260,54 +102,34 @@ function _showUpdateBanner(seconds = 0) {
   banner.style.cssText = `
     position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
     background: #1C1C1E; border: 1px solid #3A3A3C;
-    border-radius: 14px; padding: 12px 20px;
-    display: flex; align-items: center; gap: 12px;
+    border-radius: 14px; padding: 12px 16px;
+    display: flex; align-items: center; gap: 10px;
     font-size: 14px; color: #F2F2F7;
     box-shadow: 0 8px 32px rgba(0,0,0,.6);
     z-index: 9999; white-space: nowrap;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   `;
-
-  const countdownLabel = seconds > 0
-    ? `<span id="update-countdown" style="color:#8E8E93;font-size:12px">${seconds}초 후 자동 적용</span>`
-    // 2026-07-19 수정 — seconds=0(루프 방지 회로차단기로 자동적용을 건너뛴
-    // 경우)일 때 지금까지 아무 문구도 안 붙어서, 사용자에게는 "새 버전이
-    // 있습니다"만 뜨고 그 뒤로 아무 일도 안 일어나는 것처럼 보였다(실사
-    // 신고 계기). 자동 적용을 안 한다는 것과 수동으로 눌러야 한다는 걸
-    // 명시적으로 알려준다.
-    : `<span style="color:#8E8E93;font-size:12px">아래 버튼을 눌러 적용하세요</span>`;
-
   banner.innerHTML = `
     <span>🆕 새 버전이 있습니다</span>
-    ${countdownLabel}
     <button id="update-apply-btn" onclick="_applyUpdate()" style="
       background:#0057A8; color:#fff; border:none;
       border-radius:8px; padding:6px 14px;
       font-size:13px; font-weight:600; cursor:pointer;">
       지금 적용
     </button>
+    <button id="update-later-btn" onclick="document.getElementById('update-banner').remove()" style="
+      background:none; color:#8E8E93; border:1px solid #3A3A3C;
+      border-radius:8px; padding:6px 12px;
+      font-size:13px; cursor:pointer;">
+      나중에
+    </button>
   `;
   document.body.appendChild(banner);
-
-  // 카운트다운 표시
-  if (seconds > 0) {
-    let remain = seconds;
-    const cd = setInterval(() => {
-      remain--;
-      const el = document.getElementById('update-countdown');
-      if (el) el.textContent = `${remain}초 후 자동 적용`;
-      if (remain <= 0) clearInterval(cd);
-    }, 1000);
-  }
 }
 
-// ── 업데이트 적용 (skipWaiting 메시지 전송) ──────────────────
-// 2026-07-19 수정 — 클릭해도 아무 반응이 없어 "실제로 진행되는지 알 수
-// 없다"는 실사용자 신고 계기. forceUpdateApp()(설정 패널 버튼)은 이미
-// "갱신 중…" → "✅ 갱신 완료" 피드백이 있었는데, 배너 쪽 버튼에는 그게
-// 없었다 — 같은 원칙을 여기도 적용. controllerchange가 예상보다 안 오는
-// 경우(SW 상태 이상 등)를 위한 안전장치도 추가: 6초 안에 반응이 없으면
-// 강제 새로고침으로 대체(무한정 "적용 중…"에 멈춰있지 않도록).
+// ── 업데이트 적용 — 사용자가 「지금 적용」을 눌렀을 때 한 번 ──────────
+// 대기 중인 새 SW에 SKIP_WAITING을 보내고, controllerchange가 오면(위 리스너) 한 번 새로고침한다.
+// 6초 안에 반응이 없으면(SW 상태 이상 등) 강제 새로고침으로 대신한다(무한정 "적용 중…"에 멈추지 않도록).
 function _applyUpdate() {
   const btn = document.getElementById('update-apply-btn');
   if (btn) {
@@ -315,31 +137,29 @@ function _applyUpdate() {
     btn.style.pointerEvents = 'none';
     btn.style.opacity = '0.7';
   }
-  // 주의: _manualUpdateInProgress를 여기서 세우지 않는다 — 그 플래그는
-  // 상단의 전역 controllerchange 리스너(실제 새로고침 담당)를 억제하는
-  // 용도라, 여기서 세우면 "적용 중…"만 뜨고 아무도 새로고침을 안 하는
-  // 상태로 6초를 그냥 흘려보내게 된다(직접 만들 뻔한 버그). 배너 쪽은
-  // 전역 리스너가 그대로 새로고침을 처리하게 두고, 여기서는 그 신호를
-  // 기다려 안전장치 타이머만 해제한다.
+  const later = document.getElementById('update-later-btn');
+  if (later) later.style.display = 'none';
+  window._userApplyingUpdate = true;
   const fallback = setTimeout(() => {
-    console.warn('[PWA] 배너 수동 적용 — 6초 내 응답 없음, 강제 새로고침으로 대체');
-    window.location.reload();
+    console.warn('[PWA] 수동 적용 — 6초 내 응답 없음, 강제 새로고침으로 대체');
+    window._userApplyingUpdate = false;
+    _reloadPage();
   }, 6000);
 
   navigator.serviceWorker.ready.then((reg) => {
     if (reg.waiting) {
-      // 실제 새로고침은 상단의 전역 controllerchange 리스너가 처리한다 —
-      // 여기서는 그게 왔다는 신호로 안전장치 타이머만 끈다.
       navigator.serviceWorker.addEventListener('controllerchange', () => clearTimeout(fallback), { once: true });
       reg.waiting.postMessage({ type: 'SKIP_WAITING' });
     } else {
       clearTimeout(fallback);
-      window.location.reload();
+      window._userApplyingUpdate = false;
+      _reloadPage();
     }
   }).catch((err) => {
-    console.warn('[PWA] 배너 수동 적용 실패 — 강제 새로고침으로 대체:', err.message);
+    console.warn('[PWA] 수동 적용 실패 — 강제 새로고침으로 대체:', err.message);
     clearTimeout(fallback);
-    window.location.reload();
+    window._userApplyingUpdate = false;
+    _reloadPage();
   });
 }
 // ★ 진짜 원인(2026-07-19) ★ — 이 함수는 window.addEventListener('load', ...)
