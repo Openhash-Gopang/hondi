@@ -633,7 +633,7 @@ procedure-map/update`·`/orchestration/execute-atom`)와 `pages/expert-chat.html
 사용자: "빚을 도저히 못 갚겠어요, 파산 신청 좀 해주세요" (실현형, v4.0 예시) →
 `[STEP-0]` 자문범위: 구체적 사안+실행 / 요청유형: 실현형 / 계층: L0 →
 `[STEP-A]` 절차적쟁점: 소멸시효 무관(파산은 채무 전체 대상) / 성격결정: 개인파산·면책 →
-`[STEP-B]` 전략: 파산+면책 동시신청 권고, 확신도 7 →
+`[STEP-B]` 검토 방향: 파산+면책 동시신청 가능성 검토(확정 아님), 확신도 7 →
 `[STEP-R]` R-1 목표="채무 면책" → R-2 PROCEDURE_MAP 캐시 미스(최초) → R-2-B
 [WEB_SEARCH: query="서울회생법원 대한법률구조공단 신용회복위원회 연락처"]로 관련 기관 확인 후
 [PROCEDURE_MAP_DRAFT: goal=개인파산 면책, steps=[...]] 등재 → R-3 소득 낮으면 법률구조공단
