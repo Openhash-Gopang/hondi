@@ -1259,14 +1259,25 @@ async function _connectHumanExpert(occupationKeyword, escReason = 'success') {
 // (아래 호출부 참고). 순수 종량제 과금은 여전히 call-ai.js 쪽 기존
 // FREE_QUOTA_EXCEEDED/GDC_INSUFFICIENT_BALANCE 경로가 그대로 처리한다.
 
-function startGreeting() {
+// 2026-10-14 신설 — 다른 화면(서식 촬영·AI 비서)에서 넘어온 사진. 한 번만 읽고(읽으면 지워짐) 아래 두 곳이 같은 결과를 나눠 쓴다.
+//  · ctx가 있으면(AI 비서에서 호출) 첫 턴에 사진을 함께 보낸다 — 아니면 첫 답변이 사진 없이 만들어져
+//    "이미지가 전달되지 않았다"고 하게 된다.
+//  · ctx가 없으면(서식 촬영 화면에서 직접) 입력창에 첨부와 안내 문구만 채우고 이용자가 직접 전송한다.
+const _handoffShots = _qs.get(HANDOFF_PARAM) ? takeShots().catch(() => []) : null;
+
+async function startGreeting() {
   // GWP_CTX(그림자 AI로부터 전달된, 사용자가 방금 한 발화 원문)가 있으면
   // 정적 인사·재질문 없이 그 발화를 곧바로 첫 턴으로 사용한다 — klaw 등
   // 기관 서비스와 완전히 동일한 원칙.
   if (GWP_CTX && !_gwpSeedUsed) {
     _gwpSeedUsed = true;
-    appendBubble('user', `<i>(AI 비서로부터 전달됨)</i><br>${escHtml(GWP_CTX).replace(/\n/g,'<br>')}`);
-    sendTurn(GWP_CTX);
+    let _seedAtt = null;
+    if (_handoffShots) {
+      try { const imgs = await _handoffShots; if (imgs.length) _seedAtt = shotsToAttachment(imgs); } catch (e) { console.warn('[Expert] 인계 사진 읽기 실패:', e); }
+    }
+    appendBubble('user', `<i>(AI 비서로부터 전달됨)</i><br>${escHtml(GWP_CTX).replace(/\n/g,'<br>')}` +
+      (_seedAtt ? `<br>📎 ${escHtml(_seedAtt.name)}` : ''));
+    sendTurn(GWP_CTX, _seedAtt);
     return;
   }
   // 2026-09-04 신설 — 카탈로그에서 곧바로 들어온 경우(ctx 없음)도
@@ -1497,8 +1508,8 @@ updateSendBtn();
 // ── 서식 촬영 페이지(digit-code)에서 넘어온 사진 (2026-10-14 신설) ──────────
 // 사진은 같은 기기의 IndexedDB에만 있다가 여기서 읽는 즉시 지워진다. 자동 전송하지 않는다 —
 // 첨부와 안내 문구만 채워 두고, 이용자가 내용을 더하거나 고친 뒤 전송 버튼을 직접 누른다.
-if (_qs.get(HANDOFF_PARAM)) {
-  takeShots().then(images => {
+if (_handoffShots && !GWP_CTX) {
+  _handoffShots.then(images => {
     if (!images.length) {
       appendBubble('ai', '넘어온 서식 사진을 찾지 못했습니다(시간이 지났거나 이 기기에서 열지 않았을 수 있습니다). 첨부 버튼으로 다시 올려 주세요.');
       return;

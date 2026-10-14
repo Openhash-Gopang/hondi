@@ -31,3 +31,21 @@ describe('서식 촬영 → 전문가 채팅 전달', () => {
     assert.ok(!/sendTurn\(|doSend\(\)/.test(blk.slice(0, blk.indexOf('}).catch'))));
   });
 });
+
+describe('인계 사진: 첫 턴 동봉(AI 비서에서 호출된 경우)', () => {
+  const html = read('pages/expert-chat.html');
+  it('사진은 한 번만 읽어 두 경로가 공유한다', () => {
+    assert.equal((html.match(/takeShots\(\)/g) || []).length, 1);
+    assert.match(html, /const _handoffShots = _qs\.get\(HANDOFF_PARAM\) \? takeShots\(\)/);
+  });
+  it('ctx 첫 턴에 사진을 함께 보낸다(사진 없이 먼저 답하지 않는다)', () => {
+    assert.match(html, /sendTurn\(GWP_CTX, _seedAtt\)/);
+    assert.match(html, /async function startGreeting\(\)/);
+  });
+  it('ctx가 없을 때만 입력창에 채운다(이중 처리 방지)', () => {
+    assert.match(html, /if \(_handoffShots && !GWP_CTX\)/);
+  });
+  it('메인 채팅 기록의 이미지 자리표시는 추측 금지 문구를 담는다', () => {
+    assert.match(read('src/gopang/ai/call-ai.js'), /이 이미지의 내용을 지금은 볼 수 없으니 추측해서 말하지 말고/);
+  });
+});
