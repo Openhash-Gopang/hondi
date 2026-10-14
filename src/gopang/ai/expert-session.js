@@ -19,7 +19,7 @@ import { CFG } from '../core/config.js';
 import { history } from '../core/state.js';
 import { appendBubble } from '../ui/bubble.js';
 import { EXPERT_REGISTRY, UNIVERSAL_INTEGRITY_KEY, COMMON_GUARDRAILS_KEY, COMMON_MEDICAL_SAFETY_KEY,
-         EXPERT_BASE_KEY, DOC_FORM_KEY, DOC_FORM_ROOT_KEYS,
+         EXPERT_BASE_KEY, DOC_FORM_KEY, DOC_FORM_ROOT_KEYS, DOC_FORM_LEARNING_ROOT_KEYS,
          CONTROL_TOWER_PRINCIPLE_KEY, getExpertGwpDef, resolveExpertId }
   from './expert-registry.js';
 import { refineToLeaf } from './subject-gate.js';
@@ -112,7 +112,7 @@ export function _missingNextStepMarker(fullReply) {
 // key가 DOC_FORM_ROOT_KEYS에 있으면 true. 순환 참조·과잉 체인은 방문 집합과 최대
 // 깊이(5단)로 막는다(조상 체인 로드와 같은 기준).
 export function _needsDocForm(def) {
-  const roots = new Set(DOC_FORM_ROOT_KEYS);
+  const roots = new Set([...DOC_FORM_ROOT_KEYS, ...DOC_FORM_LEARNING_ROOT_KEYS]);
   const visited = new Set();
   let cur = def;
   for (let depth = 0; cur && depth <= 5; depth++) {

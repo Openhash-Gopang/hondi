@@ -161,3 +161,14 @@
     init();
   }
 })();
+
+// 2026-10-15(주피터 지시) — 전문가 직역 페이지(/pages/<직역id>.html)에 "이용자가 알려 준 서식" 목록을 게시한다.
+// 서류 목록을 모르는 직역은 이용자가 서식을 알려 주고, 그 서식이 이 페이지에 쌓여 다른 이용자가 쓴다(SP_DOC_FORM v1.2 §8).
+// 페이지가 PAGE_HEADER.sharedForms: false 로 끌 수 있다.
+(function () {
+  var c = window.PAGE_HEADER || {};
+  if (c.active !== 'expert-personas' || c.sharedForms === false) return;
+  var m = location.pathname.match(/\/pages\/([a-z0-9-]+)\.html$/i);
+  if (!m || ['expert-personas', 'expert-personas-docs', 'expert-chat'].indexOf(m[1]) >= 0) return;
+  var s = document.createElement('script'); s.src = '/assets/expert-shared-forms.js'; document.body.appendChild(s);
+})();

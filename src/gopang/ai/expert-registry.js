@@ -81,6 +81,21 @@ export const DOC_FORM_ROOT_KEYS = [
   'SP_real-estate-agent', 'SP_surveying-engineer',
 ];
 
+// 2026-10-15 신설(주피터 지시) — "서식 학습형" 직역. 서류 목록을 미리 알 수 없는 직역은 이용자가 첨부·사진·대화로 서식을 알려 주고,
+// 그 서식이 해당 전문가 페이지에 게시돼 다른 이용자가 쓰게 한다(SP_DOC_FORM v1.2 §8). 이 직역들도 SP_DOC_FORM을 결합한다.
+// 위 DOC_FORM_ROOT_KEYS(서류 작성 직역)와 분리한 것은 서식 촬영 화면의 직역 선택지(digit-code.html)가 그 목록을 따르기 때문이다.
+export const DOC_FORM_LEARNING_ROOT_KEYS = [
+  'SP_dentist', 'SP_traditional-medicine-doctor', 'SP_pharmacist', 'SP_veterinarian', 'SP_nurse',
+  'SP_physical-therapist', 'SP_medical-lab-technologist', 'SP_radiologic-technologist',
+  'SP_dental-hygienist', 'SP_occupational-therapist', 'SP_dental-technician',
+  'SP_advanced-practice-nurse', 'SP_dietitian', 'SP_paramedic', 'SP_midwife',
+  'SP_speech-language-pathologist', 'SP_optician', 'SP_sanitarian', 'SP_health-educator',
+  'SP_financial-planner', 'SP_advisor', 'SP_professional-engineer', 'SP_marine-pilot',
+  'SP_naval-architect', 'SP_navigation-officer', 'SP_marine-engineer', 'SP_weather-forecaster',
+  'SP_security-engineer', 'SP_translator-interpreter', 'SP_tour-guide', 'SP_sports-instructor',
+  'SP_hairdresser', 'SP_chef', 'SP_physician',
+];
+
 import { PHYSICIAN_REGISTRY } from './expert-registry-physician.js';
 import { LAWYER_REGISTRY } from './expert-registry-lawyer.js';
 import { PROFESSOR_REGISTRY } from './expert-registry-professor.js';

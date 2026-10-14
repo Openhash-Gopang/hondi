@@ -2,7 +2,7 @@
 // 나비 서식 DB API (2026-10-14 신설) — SP_DOC_FORM §4의 코드 쪽 구현
 //
 //   GET  /doc-form/find?agency=&name=&form_no=   같은 서식의 최신 버전(본문 포함). 없으면 {found:false}
-//   GET  /doc-form/list?agency=&q=               서식 목록(본문 제외, 서식별 최신 버전)
+//   GET  /doc-form/list?agency=&q=&persona=      서식 목록(본문 제외, 서식별 최신 버전). persona=직역 id(상위 id는 하위 포함) — 전문가 페이지 게시용
 //   POST /doc-form/save                          { agency,name,form_no?,form_class,body,fields?,version_date?,source,source_note?,persona?,consent,guid,ts,sig }
 //   POST /doc-form/review                        { keyHash,version,status,official_url?,guid,ts,sig }  (운영자 전용)
 //
@@ -55,7 +55,7 @@ export function findPii(text) {
 
 const pub = (r, withBody) => ({
   keyHash: r.key_hash, version: r.version, agency: r.agency, name: r.name, formNo: r.form_no || '',
-  formClass: r.form_class, status: r.status, versionDate: r.version_date || '', source: r.source,
+  formClass: r.form_class, persona: r.persona || '', status: r.status, versionDate: r.version_date || '', source: r.source,
   officialUrl: r.official_url || '', ts: r.ts, notice: NOTICE[r.status] || '',
   ...(withBody ? { body: r.body, fields: r.fields ?? null, sourceNote: r.source_note || '' } : {}),
 });
@@ -81,7 +81,8 @@ export function makeDocFormHandler({ store, getPinnedPubKey, now = () => Date.no
 
       if (request.method === 'GET' && path === '/doc-form/list') {
         const agency = (url.searchParams.get('agency') || '').slice(0, 60), kw = (url.searchParams.get('q') || '').slice(0, 60);
-        const items = await store.search({ agency, q: kw, limit: 50 });
+        const persona = (url.searchParams.get('persona') || '').replace(/[^a-z0-9-]/gi, '').slice(0, 60);
+        const items = await store.search({ agency, q: kw, persona, limit: 50 });
         return json({ ok: true, forms: items.map(r => pub(r, false)) }, 200, nocache);
       }
 
