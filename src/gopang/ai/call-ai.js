@@ -5467,7 +5467,7 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
 
   // 3) user 레코드는 원본(userContent)으로 history에 저장
   //    → enhancedUserContent(컨텍스트 포함)는 messages 전송용으로만 사용
-  const userRecord = { role: 'user', content: typeof userContent === 'string' ? userContent : '[첨부: 이미지]' };
+  const userRecord = { role: 'user', content: typeof userContent === 'string' ? userContent : '[첨부: 이미지 — 이 기록에는 이미지가 남지 않았습니다. 이 이미지의 내용을 지금은 볼 수 없으니 추측해서 말하지 말고, 필요하면 이용자에게 다시 첨부해 달라고 하세요]' };
   history.push(userRecord);
 
   // 4) messages 구성
