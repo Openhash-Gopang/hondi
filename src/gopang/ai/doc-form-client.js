@@ -94,12 +94,13 @@ export async function saveForm(worker, wallet, guid, p, { persona = '', sourceNo
 export const TEXT_EXT = /\.(txt|md|csv)$/i;
 export const MAX_TEXT_CHARS = 20000;
 
-// 첨부를 대화 메시지 내용으로 바꾼다. 읽지 못한 형식은 "읽지 못함"을 명시해 모델이 내용을 지어내지 않게 한다(SP_DOC_FORM §3-2).
+// 첨부를 대화 메시지 내용으로 바꾼다. 읽지 못한 형식은 "읽지 못함"과 이유를 명시해 모델이 내용을 지어내지 않게 한다(SP_DOC_FORM §3-2).
 export function attachmentToText(att) {
   if (att.text != null) {
     const t = att.text.length > MAX_TEXT_CHARS ? att.text.slice(0, MAX_TEXT_CHARS) + '\n…(이하 생략)' : att.text;
-    return `[첨부 파일: ${att.name} — 본문]\n${t}`;
+    return `[첨부 파일: ${att.name} — 본문${att.note ? ' · ' + att.note : ''}]\n${t}`;
   }
-  return `[첨부 파일: ${att.name} — 내용을 읽지 못함. 이 형식(${(att.name.split('.').pop() || '').toUpperCase()})은 아직 열 수 없습니다. ` +
-    `내용을 추측하지 말고, 이용자에게 사진 촬영(또는 .txt로 붙여넣기)을 요청하세요.]`;
+  const why = att.reason || `이 형식(${(att.name.split('.').pop() || '').toUpperCase()})은 아직 열 수 없습니다.`;
+  return `[첨부 파일: ${att.name} — 내용을 읽지 못함. ${why} ` +
+    `내용을 추측하지 말고, 이용자에게 사진 촬영(또는 텍스트 붙여넣기)을 요청하세요.]`;
 }
