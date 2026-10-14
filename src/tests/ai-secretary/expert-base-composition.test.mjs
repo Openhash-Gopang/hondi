@@ -268,9 +268,16 @@ describe('SP-COMMON-07 — 서식 SP(SP_DOC_FORM) 조립', () => {
     assert.equal(composed.split('서식 SP 원문').length - 1, 1, '서식 SP는 정확히 1회여야 함');
   });
 
-  test('서류 작성이 없는 페르소나(의사): 서식 SP를 결합하지 않음', async () => {
+  test('서식 학습형 직역(의사): 서식 SP를 결합(서류 목록을 이용자가 알려 주는 직역)', async () => {
     const def = { key: 'SP_physician', label: '의사', needsMedicalSafety: true };
     const composed = await _composeExpertPrompt(def);
-    assert.ok(!composed.includes('서식 SP 원문'), '서류 작성이 없는 페르소나에 서식 SP가 결합됨');
+    assert.ok(composed.includes('서식 SP 원문'), '서식 학습형 직역에 서식 SP가 결합되지 않음');
+    assert.equal(composed.split('서식 SP 원문').length - 1, 1, '서식 SP는 정확히 1회여야 함');
+  });
+
+  test('서식 작업 대상이 아닌 페르소나(교수): 서식 SP를 결합하지 않음', async () => {
+    const def = { key: 'SP_professor-law', label: '법학 교수', needsMedicalSafety: false };
+    const composed = await _composeExpertPrompt(def);
+    assert.ok(!composed.includes('서식 SP 원문'), '교수 페르소나에 서식 SP가 결합됨');
   });
 });

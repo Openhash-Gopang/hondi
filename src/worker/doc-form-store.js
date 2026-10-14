@@ -21,14 +21,17 @@ export function makePocketBaseDocFormStore({ base, getToken, fetchImpl = fetch }
   return {
     async latest(keyHash) { return (await query(`key_hash='${q(keyHash)}'`, '-version', 1))[0] || null; },
     async get(keyHash, version) { return (await query(`key_hash='${q(keyHash)}' && version=${Number(version) | 0}`, '-version', 1))[0] || null; },
-    async search({ agency = '', q: kw = '', limit = 50 } = {}) {
+    async search({ agency = '', q: kw = '', persona = '', limit = 50 } = {}) {
       const conds = [];
+      if (persona) conds.push(`persona~'${q(persona)}'`);
       if (agency) conds.push(`agency='${q(agency)}'`);
       if (kw) conds.push(`name~'${q(kw)}'`);
       const items = await query(conds.join(' && ') || "version>0", '-ts', 200,
-        'id,key_hash,version,agency,name,form_no,form_class,status,version_date,source,ts');
+        'id,key_hash,version,agency,name,form_no,form_class,status,version_date,source,persona,ts');
       const seen = new Map();
-      for (const it of items) { const p = seen.get(it.key_hash); if (!p || it.version > p.version) seen.set(it.key_hash, it); }
+      for (const it of items) {
+        // persona는 직역 id(예: lawyer-criminal). 상위 직역(lawyer) 페이지에서는 하위(lawyer-*)까지 포함한다.
+        if (persona && !(it.persona === persona || String(it.persona || '').startsWith(persona + '-'))) continue; const p = seen.get(it.key_hash); if (!p || it.version > p.version) seen.set(it.key_hash, it); }
       return [...seen.values()].slice(0, limit);
     },
     async append(rec) {

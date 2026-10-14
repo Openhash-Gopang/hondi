@@ -14,7 +14,7 @@ function memStore() {
     rows,
     async latest(k) { return rows.filter(r => r.key_hash === k).sort((a, b) => b.version - a.version)[0] || null; },
     async get(k, v) { return rows.find(r => r.key_hash === k && r.version === v) || null; },
-    async search({ agency, q }) { return rows.filter(r => (!agency || r.agency === agency) && (!q || r.name.includes(q))); },
+    async search({ agency, q, persona }) { return rows.filter(r => (!agency || r.agency === agency) && (!q || r.name.includes(q)) && (!persona || r.persona === persona || String(r.persona || '').startsWith(persona + '-'))); },
     async append(r) { if (rows.some(x => x.key_hash === r.key_hash && x.version === r.version)) throw new Error('CONFLICT'); rows.push({ ...r }); },
     async setStatus(k, v, p) { const r = await this.get(k, v); if (!r) return false; Object.assign(r, p); return true; },
     async countSince(c, ts) { return rows.filter(r => r.contributor === c && r.ts >= ts).length; },
@@ -83,6 +83,24 @@ describe('서식 DB — 조회', () => {
     const { save, call } = await setup(); await save();
     const l = await call('/doc-form/list?agency=대법원', null, 'GET');
     assert.equal(l.j.forms.length, 1); assert.ok(!('body' in l.j.forms[0]));
+  });
+});
+
+describe('서식 DB — 직역별 목록(전문가 페이지 게시)', () => {
+  it('save 의 persona 가 list 에 나오고, persona 로 거른다(상위 id는 하위 포함)', async () => {
+    const { save, call } = await setup();
+    await save({ name: '치과 동의서', persona: 'dentist' });
+    await save({ name: '형사 고소장', persona: 'lawyer-criminal' });
+    await save({ name: '민사 소장', persona: 'lawyer-civil' });
+    const d = await call('/doc-form/list?persona=dentist', null, 'GET');
+    assert.deepEqual(d.j.forms.map(f => f.name), ['치과 동의서']); assert.equal(d.j.forms[0].persona, 'dentist');
+    const l = await call('/doc-form/list?persona=lawyer', null, 'GET');
+    assert.deepEqual(l.j.forms.map(f => f.name).sort(), ['민사 소장', '형사 고소장']);
+    assert.equal((await call('/doc-form/list?persona=nobody', null, 'GET')).j.forms.length, 0);
+  });
+  it('persona 파라미터의 특수문자는 제거된다', async () => {
+    const { call } = await setup();
+    assert.equal((await call("/doc-form/list?persona=a'%20||%201=1", null, 'GET')).status, 200);
   });
 });
 
