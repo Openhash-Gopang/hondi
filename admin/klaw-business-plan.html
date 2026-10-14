@@ -1,23 +1,120 @@
 <!DOCTYPE html>
-<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow">
-<title>K-Law 사업계획서 · 나비 관리자</title><link rel="icon" href="/favicon.ico"><link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<style>
-body{--ad-bg:#f4f5f6;--ad-panel:#fff;--ad-panel2:#eef0f2;--ad-line:#d9dce1;--ad-text:#1a1d21;--ad-dim:#4b5563;--ad-faint:#78808c}
-*{box-sizing:border-box} html,body{margin:0;padding:0;background:var(--ad-bg)}
-body{font-family:'Pretendard',sans-serif;color:var(--ad-text);line-height:1.7;font-size:16px}
-#wrap{max-width:920px;margin:0 auto;padding:0 20px 64px}
-header{display:flex;align-items:center;justify-content:space-between;padding:20px 0;border-bottom:1px solid var(--ad-line);margin-bottom:24px}
-header .t{font-size:16px;font-weight:600} header a{font-size:14px;color:var(--ad-dim);text-decoration:none}
-main{background:var(--ad-panel);border:1px solid var(--ad-line);padding:28px 32px}
-h1{font-size:24px;margin:0 0 4px} .meta{font-size:14px;color:var(--ad-faint);margin-bottom:24px}
-h2{font-size:19px;margin:32px 0 10px;padding-top:20px;border-top:1px solid var(--ad-line)}
-h2:first-of-type{border-top:0;padding-top:0;margin-top:8px} h3{font-size:16px;margin:22px 0 8px}
-p,li{font-size:16px} ul,ol{padding-left:22px} a{color:#2c5a86}
-.tbl{overflow-x:auto;margin:14px 0} table{border-collapse:collapse;width:100%;font-size:15px;min-width:560px}
-th,td{border:1px solid var(--ad-line);padding:8px 10px;text-align:left;vertical-align:top} th{background:var(--ad-panel2);font-weight:600}
-@media(max-width:600px){main{padding:20px 16px}}
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>K-Law 사업계획서 · 나비 관리자</title>
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;700&display=swap">
+<style>/* Layout: fixed left table of contents + one chapter per page, e-book style */
+:root{--bg:#f5f6f8;--panel:#eceef2;--fg:#1c2330;--mut:#5d6778;--line:#d5dae3;--acc:#2a5ca8;--accbg:#e3ebf7;--card:#fff;--code:#e8ebf1;
+--serif:"Noto Serif KR","Batang",serif;--sans:"Noto Sans KR",system-ui,-apple-system,"Malgun Gothic",sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12161d;--panel:#191f29;--fg:#e3e7ee;--mut:#9aa5b8;--line:#2b3442;--acc:#7fa8e8;--accbg:#1f2c44;--card:#171c25;--code:#262e3b;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12161d;--panel:#191f29;--fg:#e3e7ee;--mut:#9aa5b8;--line:#2b3442;--acc:#7fa8e8;--accbg:#1f2c44;--card:#171c25;--code:#262e3b;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font:16px/1.8 var(--sans);overflow-x:hidden}
+.app{display:flex;height:100%}
+#side{width:300px;flex:none;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.brand{display:flex;gap:12px;align-items:center;padding:20px 18px 16px;border-bottom:1px solid var(--line)}
+.mark{width:30px;height:30px;flex:none;border-radius:50% 50% 50% 4px;background:var(--acc);transform:rotate(-20deg)}
+.bt{font:700 15px/1.35 var(--serif)}.bs{font-size:12px;color:var(--mut);margin-top:2px}
+#nav{overflow-y:auto;padding:10px 10px 40px;flex:1;min-height:0}
+.ch{margin:2px 0}
+.chl,.subs a{display:block;text-decoration:none;color:var(--fg);border-radius:6px}
+.chl{padding:7px 10px;font-size:14px;font-weight:500;line-height:1.45}
+.chl:hover,.subs a:hover{background:var(--accbg)}
+.subs{display:none;margin:2px 0 6px 10px;padding-left:8px;border-left:1px solid var(--line)}
+.ch.open .subs{display:block}
+.subs a{padding:4px 10px;font-size:13px;color:var(--mut);line-height:1.45}
+.ch.cur>.chl{background:var(--accbg);color:var(--acc);font-weight:700}
+.subs a.on{color:var(--acc);font-weight:700}
+#main{flex:1;min-width:0;overflow-y:auto;scroll-behavior:smooth}
+.top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:8px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px));background:var(--bg);border-bottom:1px solid var(--line)}
+.top button{background:none;border:1px solid var(--line);color:var(--fg);border-radius:8px;min-width:36px;height:36px;padding:0 10px;font-size:13px;cursor:pointer}
+#menu{display:none}
+#crumb{flex:1;font-size:13px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#book{max-width:820px;margin:0 auto;padding:28px max(24px,env(safe-area-inset-right,0px)) 80px max(24px,env(safe-area-inset-left,0px))}
+.cover{padding:28px 0 22px;border-bottom:2px solid var(--fg);margin-bottom:28px}
+.cover h1{font:700 clamp(26px,4.4vw,38px)/1.3 var(--serif);margin:0 0 10px;text-wrap:balance}
+.meta{margin:0;color:var(--mut);font-size:13px}
+.prose{min-width:0}
+.prose h2{font:700 27px/1.4 var(--serif);margin:0 0 18px;padding-bottom:10px;border-bottom:1px solid var(--line);text-wrap:balance}
+.prose h4{font:700 16px/1.5 var(--sans);margin:26px 0 8px;color:var(--acc)}
+.prose h3{font:700 20px/1.45 var(--serif);margin:36px 0 10px;scroll-margin-top:60px}
+.prose p{margin:0 0 14px;max-width:70ch}
+.prose ul,.prose ol{margin:0 0 16px;padding-left:1.4em;max-width:70ch}
+.prose li{margin:5px 0}
+.prose li>p{margin:0}
+.prose code{background:var(--code);padding:1px 6px;border-radius:4px;font-size:.9em}
+.prose a{color:var(--acc);overflow-wrap:anywhere}
+.tw{overflow-x:auto;margin:6px 0 22px;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.55;font-variant-numeric:tabular-nums}
+th,td{padding:8px 12px;word-break:keep-all;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);min-width:84px}
+th{background:var(--panel);font-weight:700;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td{overflow-wrap:break-word}
+.fig{margin:8px 0 26px;display:flex;flex-direction:column;gap:0;align-items:stretch}
+.fig>div{border:1px solid var(--line);background:var(--card);padding:14px 18px;position:relative;text-align:center}
+.fig small{display:block;color:var(--mut);font-size:12.5px;line-height:1.5;margin-top:4px;font-weight:400}
+.fig b{font-weight:700}
+.fg-top{background:var(--acc)!important;color:#fff;font:700 18px var(--serif);border-radius:10px 10px 0 0;border-color:var(--acc)!important}
+.fg-top small{color:#fff;opacity:.85}
+.fg-mid{border-top:0!important}
+.fg-bot{border-top:0!important;border-radius:0 0 10px 10px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:10px}
+.chips span{background:var(--accbg);color:var(--acc);border-radius:99px;padding:3px 12px;font-size:13px;font-weight:500}
+.fig figcaption{font-size:12.5px;color:var(--mut);margin-top:8px;text-align:center}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:48px;padding-top:18px;border-top:1px solid var(--line)}
+.pager a{flex:1;min-width:0;text-decoration:none;color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:14px;background:var(--card)}
+.pager a small{display:block;color:var(--mut);font-size:12px}
+.pager a:empty{visibility:hidden}
+#next{text-align:right}
+#scrim{display:none}
+a:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+@media (max-width:860px){
+#menu{display:block}
+#side{position:fixed;z-index:20;left:0;top:0;bottom:0;transform:translateX(-102%);transition:transform .2s;width:min(86vw,320px);padding-top:env(safe-area-inset-top,0px)}
+body.open #side{transform:none}
+body.open #scrim{display:block;position:fixed;inset:0;z-index:10;background:rgba(0,0,0,.4)}
+.prose h2{font-size:23px}
+}
+@media (prefers-reduced-motion:reduce){#side{transition:none}#main{scroll-behavior:auto}}
+/* Desktop: menu stays hidden until the pointer reaches the left edge */
+.edge{display:none}
+@media (min-width:861px){
+#side{position:fixed;z-index:20;left:0;top:0;bottom:0;transform:translateX(-100%);transition:transform .18s ease;box-shadow:none}
+body.peek #side,#side:hover,#side:focus-within{transform:none;box-shadow:6px 0 24px rgba(0,0,0,.18)}
+.edge{display:flex;align-items:center;justify-content:center;position:fixed;z-index:19;left:0;top:0;bottom:0;width:18px;background:linear-gradient(90deg,var(--accbg),transparent);color:var(--acc);font-size:11px;writing-mode:vertical-rl;letter-spacing:.2em;opacity:.9}
+body.peek .edge{opacity:0}
+#menu{display:block}
+}
 
-</style></head><body><div id="wrap"><header><span class="t">나비 관리자 · 사업 계획</span><a href="../admin.html">← 관리자 대시보드</a></header><main><h1>K-Law 사업계획서</h1><div class="meta">2026-10-12 · 도영민 · 가정값 포함 초안(대상 인원 일부 미검증, 기업 가치는 시나리오 추정이며 공식 평가 아님)</div><h2>요약</h2>
+.num{color:var(--acc);font-variant-numeric:tabular-nums;margin-right:.35em}
+.grp{margin:16px 10px 4px;font-size:12px;font-weight:700;letter-spacing:.02em;color:var(--mut);border-bottom:1px solid var(--line);padding-bottom:4px}
+.kick{font-size:12px;color:var(--mut);margin-bottom:6px}
+.grp{font-size:15px;color:var(--fg);margin-top:18px;display:flex;gap:.4em}
+.grp .num{min-width:1.2em}
+.chl{font-size:14px;display:flex;gap:.2em}.chl .num{flex:none;min-width:2.3em;margin:0}
+.subs a{font-size:12.5px;display:flex}.subs a .num{flex:none;min-width:3.1em;margin:0}
+#nav .num{margin-right:0}
+.ch{padding-left:12px}
+.subs{margin-left:calc(10px + 2.3em);padding-left:6px}
+.subs a{padding-left:6px}
+
+.tt{flex:1;min-width:0}
+.exb{display:inline-block;background:var(--acc);color:var(--bg);font-size:11px;font-weight:700;line-height:1;padding:3px 7px;border-radius:99px;margin-right:6px;vertical-align:1px}
+.exb.sm{margin:0 0 0 6px;background:var(--accbg);color:var(--acc);font-size:10.5px;font-weight:700;white-space:nowrap}
+.subs a.ex{background:var(--accbg);color:var(--fg);font-weight:600}
+.tbl{overflow-x:auto;margin:14px 0}.tbl table{min-width:520px}@media(max-width:600px){.smp{grid-template-columns:1fr}.smp img{width:70%}}.back{display:block;margin:10px 18px 0;font-size:13px;color:var(--mut);text-decoration:none}.back:hover{color:var(--acc)}</style>
+</head>
+<body>
+<div class="edge" id="edge">목차</div><div class="app"><aside id="side"><div class="brand"><span class="mark" aria-hidden="true"></span><div><div class="bt">K-Law 사업계획서</div><div class="bs">2026-10-12 · 도영민</div></div></div>
+<a class="back" href="../admin.html">← 관리자 대시보드</a>
+<nav id="nav"><div class="ch" data-k="0"><a class="chl" href="#s1"><span class="num">1</span> <span class="tt">요약</span></a></div><div class="ch" data-k="1"><a class="chl" href="#s2"><span class="num">2</span> <span class="tt">문제 정의와 해결 방안</span></a></div><div class="ch" data-k="2"><a class="chl" href="#s3"><span class="num">3</span> <span class="tt">K-Law의 경쟁력</span></a></div><div class="ch" data-k="3"><a class="chl" href="#s4"><span class="num">4</span> <span class="tt">목표 시장과 고객</span></a></div><div class="ch" data-k="4"><a class="chl" href="#s5"><span class="num">5</span> <span class="tt">수익 모델</span></a></div><div class="ch" data-k="5"><a class="chl" href="#s6"><span class="num">6</span> <span class="tt">재무 계획</span></a></div><div class="ch" data-k="6"><a class="chl" href="#s7"><span class="num">7</span> <span class="tt">마케팅 방안</span></a><div class="subs"><a href="#s8"><span class="num">7.1</span> <span class="tt">단계별 전략</span></a><a href="#s9"><span class="num">7.2</span> <span class="tt">채널</span></a><a href="#s10"><span class="num">7.3</span> <span class="tt">핵심 지표</span></a></div></div><div class="ch" data-k="7"><a class="chl" href="#s11"><span class="num">8</span> <span class="tt">조직과 운영</span></a></div><div class="ch" data-k="8"><a class="chl" href="#s12"><span class="num">9</span> <span class="tt">리스크와 대응</span></a></div><div class="ch" data-k="9"><a class="chl" href="#s13"><span class="num">10</span> <span class="tt">실행 로드맵</span></a></div><div class="ch" data-k="10"><a class="chl" href="#s14"><span class="num">11</span> <span class="tt">기업 가치 추정(K-Law Inc.)</span></a><div class="subs"><a href="#s15"><span class="num">11.1</span> <span class="tt">평가 방법과 가정</span></a><a href="#s16"><span class="num">11.2</span> <span class="tt">결과(억 원)</span></a><a href="#s17"><span class="num">11.3</span> <span class="tt">할인율 민감도(기업 가치, 억 원)</span></a><a href="#s18"><span class="num">11.4</span> <span class="tt">시장 배수 교차 확인</span></a><a href="#s19"><span class="num">11.5</span> <span class="tt">가치를 좌우하는 요인</span></a><a href="#s20"><span class="num">11.6</span> <span class="tt">한계</span></a></div></div></nav></aside><div id="scrim"></div>
+<main id="main"><header class="top"><button id="menu" aria-label="목차 열기">목차</button><span id="crumb"></span><button id="theme" aria-label="테마 전환">테마</button></header>
+<article id="book"><div class="cover"><h1>K-Law 사업계획서</h1><p class="meta">2026-10-12 · 도영민 · 가정값 포함 초안(대상 인원 일부 미검증, 기업 가치는 시나리오 추정이며 공식 평가 아님)</p></div><section class="chap" id="c0" hidden><div class="prose"><h2 id="s1"><span class="num">1</span> 요약</h2>
 <p>K-Law는 법률 전문직과 기업·기관 법무 인력 약 95,400명을 대상으로 한 월 구독형 법률 AI 서비스이며, 가입률 10%만 달성해도 연 영업이익 약 28억 원(마케팅 10% 기준)이 가능합니다.</p>
 <ul>
 <li>전체 시장(가입률 100%): 월 약 35.7억 원, 연 약 429억 원(부가세 포함가 기준)</li>
@@ -27,7 +124,7 @@ th,td{border:1px solid var(--ad-line);padding:8px 10px;text-align:left;vertical-
 <li>핵심 변수: 수익성이 아니라 가입자 확보 속도</li>
 </ul>
 <p>단, 대상 인원의 약 23%(기업·기관 구간)와 행정사 수는 검증되지 않은 가정값입니다. 영업 전에 실측이 필요합니다.</p>
-<h2>문제 정의와 해결 방안</h2>
+</div></section><section class="chap" id="c1" hidden><div class="prose"><h2 id="s2"><span class="num">2</span> 문제 정의와 해결 방안</h2>
 <p>법률 실무자는 판례·법령 조사, 서면 초안, 계약 검토 같은 반복 업무에 시간을 많이 쓰지만, 이를 줄여 줄 신뢰할 만한 국내 법률 특화 도구는 부족합니다.</p>
 <ul>
 <li>문제: 조사·초안·검토에 업무 시간이 몰리고, 일반 AI는 국내 법령·판례 맥락과 출처 검증이 약합니다.</li>
@@ -35,14 +132,14 @@ th,td{border:1px solid var(--ad-line);padding:8px 10px;text-align:left;vertical-
 <li>차별점: 나비(나만의 AI 비서의 약칭) 플랫폼의 전문가 AI 페르소나, 과금 체계(GDC), 정부 라우팅 인프라와 같은 기반을 공유합니다.</li>
 </ul>
 <p>법률 판단의 최종 책임은 이용자(자격자·담당자)에게 있고, K-Law는 보조 도구로 위치시킵니다.</p>
-<h2>K-Law의 경쟁력</h2>
+</div></section><section class="chap" id="c2" hidden><div class="prose"><h2 id="s3"><span class="num">3</span> K-Law의 경쟁력</h2>
 <p>K-Law의 경쟁력은 전문가 페르소나, 불변 기록, 나비 사용자 기반이라는 세 가지 축에서 나옵니다.</p>
 <ol>
 <li>수백 개 전문가 페르소나: 의료, 교육, 금융 등 사회 각 분야를 대표하는 전문가 페르소나를 호출해 법적 판단의 자문을 제공합니다.</li>
 <li>불변 기록(PDV): 나비의 PDV(Private Data Vault)가 기록의 불변성을 보장하므로, 1심과 2심 사실심 절차를 대폭 간소화합니다.</li>
 <li>나비 사용자 증가: 카카오톡을 대체하는 것이 목표인 나비 플랫폼의 사용자 수가 늘수록 법률 상담 수요가 커지고, 이것이 나비 법률 서비스 구독자 매출로 연결됩니다.</li>
 </ol>
-<h2>목표 시장과 고객</h2>
+</div></section><section class="chap" id="c3" hidden><div class="prose"><h2 id="s4"><span class="num">4</span> 목표 시장과 고객</h2>
 <p>목표 고객은 법률 전문직 3개 직군과 기업·기관 법무 인력 3개 구간, 합계 약 95,400명이며 평균 객단가는 월 약 3.7만 원입니다.</p>
 <div class="tbl"><table>
 <thead>
@@ -107,7 +204,7 @@ th,td{border:1px solid var(--ad-line);padding:8px 10px;text-align:left;vertical-
 </tbody>
 </table></div>
 <p>변호사는 개업 회원만 집계했습니다. 사내변호사는 대부분 휴업·미개업 회원이라 겹치지 않는다고 보았습니다. 기업 법무팀 비변호사 10,000명과 공공부문 12,000명, 합계 22,000명은 모두 추정치이고 행정사 30,000명도 가정값입니다.</p>
-<h2>수익 모델</h2>
+</div></section><section class="chap" id="c4" hidden><div class="prose"><h2 id="s5"><span class="num">5</span> 수익 모델</h2>
 <p>수익은 직군별 월 정액 구독이며, 월 5만 원(변호사)과 3만 원(그 외)을 부가세 포함가로 책정합니다.</p>
 <ul>
 <li>가격: 변호사·사내변호사 월 5만 원, 법무사·행정사·기업 및 공공 법무 담당 월 3만 원</li>
@@ -117,7 +214,7 @@ th,td{border:1px solid var(--ad-line);padding:8px 10px;text-align:left;vertical-
 <li>원가: LLM 원가는 매출의 5%, 결제 수수료는 0%로 가정했습니다.</li>
 </ul>
 <p>세금계산서 발행과 신고 방식은 세무사 확인이 필요합니다.</p>
-<h2>재무 계획</h2>
+</div></section><section class="chap" id="c5" hidden><div class="prose"><h2 id="s6"><span class="num">6</span> 재무 계획</h2>
 <p>마케팅비를 매출의 10%로 잡아도 가입률 10%에서 영업이익률 71%, 연 영업이익 27.7억 원이 나옵니다. 모든 수치는 공급가액(부가세 제외) 기준이고, 법인세는 제외했습니다.</p>
 <p>가정: LLM 5%, 인프라 1%, 마케팅 프로그램비 10%, 인건비 연 5억 원(5명 × 1억 원, 4대보험·퇴직금 제외, 포함 시 약 10% 추가).</p>
 <div class="tbl"><table>
@@ -182,15 +279,15 @@ th,td{border:1px solid var(--ad-line);padding:8px 10px;text-align:left;vertical-
 </table></div>
 <p>손익분기 가입자는 마케팅 1%일 때 약 1,300명, 10%일 때 약 1,460명, 20%일 때 약 1,650명입니다. 마케팅 비중을 올려도 손익분기는 거의 변하지 않으므로, 마케팅은 비용 절감 대상이 아니라 가입률을 끌어올리는 투자입니다.</p>
 <p>현실적 범위는 가입률 10~30%이며, 50% 이상은 상한선으로만 봅니다. 영업·고객지원 인력, 법무 리스크 대응비, 법인세는 이 표에 없습니다.</p>
-<h2>마케팅 방안</h2>
+</div></section><section class="chap" id="c6" hidden><div class="prose"><h2 id="s7"><span class="num">7</span> 마케팅 방안</h2>
 <p>마케팅은 가입률 10%(약 9,500명) 달성을 1차 목표로, 신뢰가 중요한 전문직 시장에 맞춰 협회·커뮤니티·무료 체험 중심으로 운영합니다. 초기에는 매출 비율 대신 고정 예산이 필요합니다. 매출 10%는 가입률 10% 시점에 연 3.9억 원 수준이며, 이는 가입자 1인당 연 약 4만 원입니다. 전문직 B2B 고객 획득비는 이보다 높을 수 있습니다.</p>
-<h3>단계별 전략</h3>
+<h3 id="s8"><span class="num">7.1</span> 단계별 전략</h3>
 <ol>
 <li>1단계(0~6개월, 씨앗 고객 500명): 개업 변호사·법무사 중심 무료 체험(14~30일)과 초기 가입 할인. 변호사 커뮤니티와 소규모 법률 사무소에서 사례를 확보합니다.</li>
 <li>2단계(6~18개월, 1,500명 돌파): 손익분기선을 넘기는 구간. 후기·사용 사례 콘텐츠, 협회 및 지역 지부 제휴, 세미나와 웨비나를 확대합니다.</li>
 <li>3단계(18개월 이후, 가입률 10%): 행정사·기업 법무·공공으로 확장하고, 법인 계약과 좌석 수 할인 상품을 출시합니다.</li>
 </ol>
-<h3>채널</h3>
+<h3 id="s9"><span class="num">7.2</span> 채널</h3>
 <ul>
 <li>직군별 협회·학회·연수 행사: 신뢰를 빠르게 얻는 핵심 채널입니다. 법적 한계(광고 규정)를 사전에 확인합니다.</li>
 <li>콘텐츠 마케팅: 판례·법령 변경 요약, 서면 초안 예시, 시간 절감 사례를 블로그·뉴스레터로 제공합니다.</li>
@@ -199,7 +296,7 @@ th,td{border:1px solid var(--ad-line);padding:8px 10px;text-align:left;vertical-
 <li>기업·공공 영업: 사내변호사 → 법무팀 전체 확산, 공공은 조달·시범사업 경로를 이용합니다.</li>
 <li>나비 플랫폼 연계: 나비 이용자와 다른 K-서비스(K-Mail, K-Plan, K-Estate 등)에서 교차 노출합니다.</li>
 </ul>
-<h3>핵심 지표</h3>
+<h3 id="s10"><span class="num">7.3</span> 핵심 지표</h3>
 <div class="tbl"><table>
 <thead>
 <tr>
@@ -227,7 +324,7 @@ th,td{border:1px solid var(--ad-line);padding:8px 10px;text-align:left;vertical-
 </tbody>
 </table></div>
 <p>마케팅 인력 3명의 인건비는 이미 연 5억 원에 포함되어 있어, 위 예산은 광고·행사·제휴 같은 프로그램비입니다.</p>
-<h2>조직과 운영</h2>
+</div></section><section class="chap" id="c7" hidden><div class="prose"><h2 id="s11"><span class="num">8</span> 조직과 운영</h2>
 <p>운영은 5명 체제(개발 2명, 마케팅 3명, 평균 연봉 1억 원, 인건비 연 5억 원)로 시작하며, 인프라비는 매출의 1%로 잡았습니다.</p>
 <ul>
 <li>개발 2명: 법률 AI 기능, 품질·출처 검증, 플랫폼 연동</li>
@@ -235,7 +332,7 @@ th,td{border:1px solid var(--ad-line);padding:8px 10px;text-align:left;vertical-
 <li>기반: 나비 플랫폼의 전문가 페르소나, GDC 과금, 정부 라우팅 인프라를 공유</li>
 <li>가입자가 늘면 고객지원과 법무·컴플라이언스 인력이 추가로 필요합니다(현 계획에는 미반영).</li>
 </ul>
-<h2>리스크와 대응</h2>
+</div></section><section class="chap" id="c8" hidden><div class="prose"><h2 id="s12"><span class="num">9</span> 리스크와 대응</h2>
 <p>가장 큰 리스크는 변호사법상 법률서비스 범위와 가정값에 기댄 시장 규모입니다.</p>
 <div class="tbl"><table>
 <thead>
@@ -279,7 +376,7 @@ th,td{border:1px solid var(--ad-line);padding:8px 10px;text-align:left;vertical-
 </tbody>
 </table></div>
 <p>공공부문은 조달과 예산 절차 때문에 판매 주기가 길어 초기 수익 전망에서 비중을 낮춰 봅니다.</p>
-<h2>실행 로드맵</h2>
+</div></section><section class="chap" id="c9" hidden><div class="prose"><h2 id="s13"><span class="num">10</span> 실행 로드맵</h2>
 <ol>
 <li>0~3개월: 가정값 실측(행정사 수, 기업·공공 법무 인원), 변호사법 자문, 가격·체험 정책 확정</li>
 <li>3~6개월: 개업 변호사·법무사 대상 무료 체험 출시, 씨앗 고객 500명 확보</li>
@@ -287,9 +384,9 @@ th,td{border:1px solid var(--ad-line);padding:8px 10px;text-align:left;vertical-
 <li>18개월 이후: 행정사·기업·공공 확장, 법인 계약 상품과 조달 경로 구축, 가입률 10% 도전</li>
 <li>상시: 가입률별 손익표를 실측 값으로 갱신하고 마케팅 예산을 고정 예산으로 전환</li>
 </ol>
-<h2>기업 가치 추정(K-Law Inc.)</h2>
+</div></section><section class="chap" id="c10" hidden><div class="prose"><h2 id="s14"><span class="num">11</span> 기업 가치 추정(K-Law Inc.)</h2>
 <p>K-Law의 수입 시나리오(가입률 10%, 30%, 50%)를 현금흐름할인(DCF)으로 평가하면 K-Law Inc.의 기업 가치는 약 115억~696억 원이고, 실패 가능성을 반영한 확률 가중 가치는 약 226억 원(약 1,600만 달러)입니다. 이 추정은 투자 권유나 공식 감정평가가 아니며, 모든 입력값이 이 문서의 가정에 의존합니다.</p>
-<h3>평가 방법과 가정</h3>
+<h3 id="s15"><span class="num">11.1</span> 평가 방법과 가정</h3>
 <ul>
 <li>수입 시나리오: 앞의 재무 계획과 같은 순매출(공급가액)입니다. 가입률 10%는 39.0억 원, 30%는 116.9억 원, 50%는 194.9억 원이며, 가입률은 5년에 걸쳐 목표의 10%, 30%, 55%, 80%, 100%로 오르고 이후 연 3% 성장합니다.</li>
 <li>비용: LLM 5%, 인프라 1%, 마케팅 10%, 인건비 연 5억 원(연 3% 증가)입니다. 4대보험·퇴직금(약 10%)은 넣지 않았습니다.</li>
@@ -298,7 +395,7 @@ th,td{border:1px solid var(--ad-line);padding:8px 10px;text-align:left;vertical-
 <li>할인율과 성장률: 할인율 15%, 영구성장률 2%, 평가 시점은 2026년 10월(첫 현금흐름은 2027년)입니다.</li>
 <li>확률: 실패(가입자가 손익분기 약 1,460명에 못 미쳐 가치 0) 30%, 보수 30%, 기준 30%, 낙관 10%로 두었고 모두 제 가정입니다.</li>
 </ul>
-<h3>결과(억 원)</h3>
+<h3 id="s16"><span class="num">11.2</span> 결과(억 원)</h3>
 <div class="tbl"><table>
 <thead>
 <tr>
@@ -366,7 +463,7 @@ th,td{border:1px solid var(--ad-line);padding:8px 10px;text-align:left;vertical-
 </tbody>
 </table></div>
 <p>환율 1,400원을 가정하면 보수 약 820만 달러, 기준 약 2,890만 달러, 낙관 약 4,970만 달러, 확률 가중 약 1,610만 달러입니다.</p>
-<h3>할인율 민감도(기업 가치, 억 원)</h3>
+<h3 id="s17"><span class="num">11.3</span> 할인율 민감도(기업 가치, 억 원)</h3>
 <div class="tbl"><table>
 <thead>
 <tr>
@@ -408,7 +505,7 @@ th,td{border:1px solid var(--ad-line);padding:8px 10px;text-align:left;vertical-
 </tr>
 </tbody>
 </table></div>
-<h3>시장 배수 교차 확인</h3>
+<h3 id="s18"><span class="num">11.4</span> 시장 배수 교차 확인</h3>
 <p>법률 AI 기업의 평가 배수(연 반복매출 대비 기업 가치, Sacra 추정)는 Harvey 약 33~44배(110억 달러), Legora 약 56배(56억 달러), Filevine 약 16배(30억 달러), Clio 약 12.5배(50억 달러), 성숙 사업자인 Thomson Reuters 약 4.8배입니다. <a href="https://sacra.com/research/clio-vs-filevine/">Sacra 법률 AI 비교</a>, <a href="https://sacra.com/research/100m-year-harvey-for-the-rest-of-the-world/">Sacra Harvey·Legora</a></p>
 <p>5년차 순매출에 배수를 곱해 15%로 5년 할인한 값은 다음과 같습니다.</p>
 <div class="tbl"><table>
@@ -442,18 +539,60 @@ th,td{border:1px solid var(--ad-line);padding:8px 10px;text-align:left;vertical-
 </tbody>
 </table></div>
 <p>DCF 값은 8배 안팎의 결과와 비슷합니다. 고성장 글로벌 사업자의 33~56배는 한국 시장, 규제, 대상 인원(약 95,400명)의 상한, 성장 속도의 차이를 고려해 적용하지 않았습니다.</p>
-<h3>가치를 좌우하는 요인</h3>
+<h3 id="s19"><span class="num">11.5</span> 가치를 좌우하는 요인</h3>
 <ul>
 <li>가입률: 10%에서 30%로 오르면 기업 가치가 약 3.5배가 됩니다. 마케팅 비율보다 가입자 확보 속도가 가치를 더 크게 움직입니다.</li>
 <li>계량하지 않은 상승 요인: 나비 플랫폼 사용자 증가에 따른 법률 상담 수요(경쟁력 3번), 개인·기업 상담 시장 확대, 가상 판결·중재 서비스, 전문가 페르소나와 법률 데이터 자산은 수입 시나리오에 넣지 않았습니다.</li>
 <li>하락 요인: 변호사법상 서비스 범위, 대상 인원 중 약 23%(기업·기관 구간)와 행정사 수의 미검증, 법인 계약의 가격 할인, LLM 원가 변화, 공공 조달의 긴 판매 주기, 해외 법률 AI와의 경쟁입니다.</li>
 <li>지분 가치: 투자 유치에 따른 희석은 반영하지 않았으며, 창업자 지분의 가치는 기업 가치에 지분율을 곱해 별도로 구해야 합니다.</li>
 </ul>
-<h3>한계</h3>
+<h3 id="s20"><span class="num">11.6</span> 한계</h3>
 <ul>
 <li>가입률 도달 속도, 확률, 할인율은 근거 문헌 없는 가정이며, 아직 수입이 없는 초기 사업이라 결과의 범위가 넓습니다.</li>
 <li>서비스 가격과 가입률은 실측이 아니라 이 문서의 재무 계획 가정이고, 대상 인원 일부가 추정치입니다.</li>
 <li>법률 서비스 규제와 법적 책임에 따른 비용·위험은 반영하지 않았습니다.</li>
 <li>평가 배수는 비공시 기업에 대한 외부 추정치이고 미국·유럽 기업 기준입니다.</li>
 <li>공식 기업 가치 평가나 투자 판단에는 전문 평가기관의 검토가 필요합니다.</li>
-</ul></main></div></body></html>
+</ul></div></section>
+<div class="pager"><a id="prev" href="#"></a><a id="next" href="#"></a></div></article></main></div>
+<script>(function(){
+var secs=[].slice.call(document.querySelectorAll('.chap')),navs=[].slice.call(document.querySelectorAll('.ch'));
+var main=document.getElementById('main'),crumb=document.getElementById('crumb');
+var titles=navs.map(function(n){return n.querySelector('.chl').textContent});
+function chapOf(id){var el=document.getElementById(id);if(!el)return 0;var s=el.closest('.chap');return s?secs.indexOf(s):0}
+function show(k,id){
+ secs.forEach(function(s,i){s.hidden=i!==k});
+ navs.forEach(function(n,i){n.classList.toggle('cur',i===k);n.classList.toggle('open',i===k)});
+ crumb.textContent=titles[k];
+ var p=document.getElementById('prev'),n=document.getElementById('next');
+ function fill(a,j,lab){if(j<0||j>=secs.length){a.innerHTML='';a.removeAttribute('href');return}
+  a.href='#'+navs[j].querySelector('.chl').getAttribute('href').slice(1);a.innerHTML='<small>'+lab+'</small>'+titles[j]}
+ fill(p,k-1,'이전');fill(n,k+1,'다음');
+ var cv=document.querySelector('.cover');cv.hidden=k!==0;
+ var t=id&&document.getElementById(id);
+ if(t&&t.tagName!=='SECTION'&&id!==navs[k].querySelector('.chl').getAttribute('href').slice(1)){t.scrollIntoView()}else{main.scrollTop=0}
+ [].forEach.call(document.querySelectorAll('.subs a'),function(a){a.classList.toggle('on',id&&a.getAttribute('href')==='#'+id)});
+ document.body.classList.remove('open','peek');
+ try{localStorage.setItem('nw-last',id||'')}catch(e){}
+}
+function route(){var id=location.hash.slice(1);
+ if(!id){var s='';try{s=localStorage.getItem('nw-last')||''}catch(e){}
+  if(s&&document.getElementById(s))id=s}
+ if(!id)id=navs[0].querySelector('.chl').getAttribute('href').slice(1);
+ show(chapOf(id),id)}
+window.addEventListener('hashchange',route);route();
+document.getElementById('menu').onclick=function(){if(matchMedia('(min-width:861px)').matches)document.body.classList.toggle('peek');else document.body.classList.toggle('open')};
+document.getElementById('scrim').onclick=function(){document.body.classList.remove('open')};
+var edge=document.getElementById('edge'),side=document.getElementById('side'),tm;
+function peek(v){clearTimeout(tm);if(v)document.body.classList.add('peek');else tm=setTimeout(function(){document.body.classList.remove('peek')},180)}
+edge.addEventListener('mouseenter',function(){peek(true)});
+side.addEventListener('mouseenter',function(){peek(true)});
+side.addEventListener('mouseleave',function(){peek(false)});
+var r=document.documentElement;
+document.getElementById('theme').onclick=function(){
+ var dark=r.getAttribute('data-theme')==='dark'||(!r.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme:dark)').matches);
+ r.setAttribute('data-theme',dark?'light':'dark')};
+})();
+</script>
+</body>
+</html>
