@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<link rel="icon" href="data:,">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="/assets/pro-doc-page.css">
+<title>소년법 상담 AI — 나비</title>
+</head>
+<body>
+
+<script>
+window.PAGE_HEADER = {
+  active: 'expert-personas',
+  badge: "전문가 페르소나 · 소년법 상담 AI",
+  h1: "소년법 상담을<br>대화로 시작합니다",
+  sub: "궁금한 점을 말씀하시면 필요한 정보를 순서대로 여쭙고 정리해 드립니다.",
+  disclaimer: true
+};
+</script>
+<link rel="stylesheet" href="/assets/ph-header.css">
+<script src="/assets/ph-header.js"></script>
+<script>
+  window.K_AUTH_CONFIG = { serviceLabel: "소년법 상담 AI" };
+  window.HONDI_CHAT_WIDGET_CONFIG = {
+    sp: "SP_lawyer-juvenile",
+    position: "left",
+    maxTokens: 4096,
+    panelTitle: "소년법 상담 AI",
+    label: "궁금한 점을 말씀하세요",
+    greeting: "안녕하세요! 소년법 상담 AI입니다. 궁금한 점을 말씀해 주세요.",
+    serviceLabel: "소년법 상담 AI"
+  };
+</script>
+<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
+<script src="/assets/chat-widget.js"></script>
+
+<div class="ug-doc">
+  <div class="doc-intro">
+    <p class="svc-lead"><a href="/pages/lawyer.html">← 법률(변호사 보조)</a></p>
+    <div class="svc-callout important"><b>안내</b> 소년법 상담 AI는 변호사가 아니며 법률 자문·소송 대리·서류 제출을 대신하지 않습니다. 구체적인 사건은 변호사와 상담하십시오.</div>
+  </div>
+
+  <div class="svc-content"><div class="svc-detail"><h2>상담 예시</h2><ul style="margin:8px 0 0;padding-left:20px;line-height:1.9;font-size:13.5px"><li>소년법 상담</li><li>소년보호사건 변호사</li></ul></div></div>
+
+  <div class="doc-toolbar" style="margin-top:20px">
+    <a class="svc-link-btn solid" href="/pages/expert-chat.html?persona=lawyer-juvenile">전문가 채팅에서 상담하기</a>
+  </div>
+
+  <div class="ug-footer">소년법 상담 AI는 정보 제공을 돕는 도구입니다. 변호사가 아니며 법률 자문·소송 대리·서류 제출을 대신하지 않습니다. 구체적인 사건은 변호사와 상담하십시오.</div>
+</div>
+</body>
+</html>
