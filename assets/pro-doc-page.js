@@ -228,5 +228,9 @@
     else if (act === 'toggle') { item.classList.toggle('open'); b.textContent = item.classList.contains('open') ? '내용 접기' : '내용 보기'; }
   });
 
-  selectCategory(DOC_CATALOG[0].id);
+  (function () {
+    var h = ''; try { h = decodeURIComponent((location.hash || '').slice(1)); } catch (e) {}
+    var hit = DOC_CATALOG.filter(function (x) { return x.id === h; })[0];
+    selectCategory(hit ? hit.id : DOC_CATALOG[0].id);
+  })();
 })();
