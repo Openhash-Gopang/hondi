@@ -19,7 +19,8 @@ import { CFG } from '../core/config.js';
 import { history } from '../core/state.js';
 import { appendBubble } from '../ui/bubble.js';
 import { EXPERT_REGISTRY, UNIVERSAL_INTEGRITY_KEY, COMMON_GUARDRAILS_KEY, COMMON_MEDICAL_SAFETY_KEY,
-         EXPERT_BASE_KEY, CONTROL_TOWER_PRINCIPLE_KEY, getExpertGwpDef, resolveExpertId }
+         EXPERT_BASE_KEY, DOC_FORM_KEY, DOC_FORM_ROOT_KEYS,
+         CONTROL_TOWER_PRINCIPLE_KEY, getExpertGwpDef, resolveExpertId }
   from './expert-registry.js';
 import { refineToLeaf } from './subject-gate.js';
 import { _loadSpByKey, _loadSpRawByKey } from './manifest-loader.js';
@@ -105,6 +106,23 @@ export function _missingNextStepMarker(fullReply) {
 // 공통 가드레일(C1~C43)·의료 안전모듈이 빠진 반쪽 프롬프트가 되므로,
 // 오케스트레이션 하위 호출이라고 해서 이 합성 과정을 생략하면 안 된다
 // — 로직을 중복 구현하지 않고 여기 하나만 있게 유지한다.
+// 서식 SP(SP_DOC_FORM) 결합 대상 판정 — 자기 key 또는 parentKey 체인의 어느 조상
+// key가 DOC_FORM_ROOT_KEYS에 있으면 true. 순환 참조·과잉 체인은 방문 집합과 최대
+// 깊이(5단)로 막는다(조상 체인 로드와 같은 기준).
+function _needsDocForm(def) {
+  const roots = new Set(DOC_FORM_ROOT_KEYS);
+  const visited = new Set();
+  let cur = def;
+  for (let depth = 0; cur && depth <= 5; depth++) {
+    if (roots.has(cur.key)) return true;
+    const next = cur.parentKey;
+    if (!next || visited.has(next)) return false;
+    visited.add(next);
+    cur = EXPERT_REGISTRY[next];
+  }
+  return false;
+}
+
 export async function _composeExpertPrompt(def) {
   if (_promptCache.has(def.key)) return _promptCache.get(def.key);
 
@@ -154,6 +172,15 @@ export async function _composeExpertPrompt(def) {
   try {
     parts.push(await _loadSpRawByKey(EXPERT_BASE_KEY, 'EXPERT_BASE'));
   } catch (e) { console.warn('[Expert] EXPERT_BASE 로드 실패:', e.message); }
+
+  // 서식 SP(SP-COMMON-07, 2026-10-14 신설) — 서류 초안을 작성하는 페르소나에만
+  // EXPERT_BASE 바로 다음, 부모/리프 SP 이전에 한 번 결합한다. 대상은 자기 key
+  // 또는 부모 체인의 어느 조상 key가 DOC_FORM_ROOT_KEYS에 있는 페르소나다.
+  if (_needsDocForm(def)) {
+    try {
+      parts.push(await _loadSpRawByKey(DOC_FORM_KEY, 'DOC_FORM'));
+    } catch (e) { console.warn('[Expert] DOC_FORM 로드 실패:', e.message); }
+  }
 
   // 조상(상위 직업군/계열) SP 체인 — 2026-08-07 신설 → 2026-08-08 N단 재귀로
   // 확장(§6-4 개정, HANDOFF_교수-교과계열-계층설계). 기존에는 "부모 1단만"
