@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- scripts/gen-expert-pages.py 로 생성한 페이지 — 직접 고치지 말고 생성기를 고친다 -->
 <html lang="ko">
 <head>
 <link rel="icon" href="data:,">
@@ -6,31 +7,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <link rel="stylesheet" href="/assets/pro-doc-page.css">
-<title>법률(변호사 보조) 상담 AI — 나비</title>
+<title>법률(변호사 보조) 업무 보조 AI — 나비</title>
 </head>
 <body>
 
 <script>
 window.PAGE_HEADER = {
   active: 'expert-personas',
-  badge: "전문가 페르소나 · 법률(변호사 보조) 상담 AI",
-  h1: "법률(변호사 보조) 상담을<br>대화로 시작합니다",
-  sub: "아래에서 상담할 분야를 고르십시오.",
+  badge: "전문가 페르소나 · 법률(변호사 보조) 업무 보조 AI",
+  h1: "법률(변호사 보조) 업무의 서류 작성을<br>대화로 보조합니다",
+  sub: "아래에서 업무 분야를 고르십시오.",
   disclaimer: true
 };
 </script>
 <link rel="stylesheet" href="/assets/ph-header.css">
 <script src="/assets/ph-header.js"></script>
 <script>
-  window.K_AUTH_CONFIG = { serviceLabel: "법률(변호사 보조) 상담 AI" };
+  window.K_AUTH_CONFIG = { serviceLabel: "법률(변호사 보조) 업무 보조 AI" };
   window.HONDI_CHAT_WIDGET_CONFIG = {
     sp: "SP_lawyer",
     position: "left",
     maxTokens: 4096,
-    panelTitle: "법률(변호사 보조) 상담 AI",
-    label: "궁금한 점을 말씀하세요",
-    greeting: "안녕하세요! 법률(변호사 보조) 상담 AI입니다. 궁금한 점을 말씀해 주세요.",
-    serviceLabel: "법률(변호사 보조) 상담 AI"
+    panelTitle: "법률(변호사 보조) 업무 보조 AI",
+    label: "작성할 서류를 말씀하세요",
+    greeting: "안녕하세요! 법률(변호사 보조) 업무 보조 AI입니다. 작성하실 서류를 말씀해 주세요. 필요한 정보를 순서대로 여쭙고 초안 작성을 보조합니다.",
+    serviceLabel: "법률(변호사 보조) 업무 보조 AI"
   };
 </script>
 <script src="https://hondi.net/auth/k-service-auth-client.js"></script>
@@ -39,16 +40,16 @@ window.PAGE_HEADER = {
 <div class="ug-doc">
   <div class="doc-intro">
     
-    <div class="svc-callout important"><b>안내</b> 법률(변호사 보조) 상담 AI는 변호사가 아니며 법률 자문·소송 대리·서류 제출을 대신하지 않습니다. 구체적인 사건은 변호사와 상담하십시오.</div>
+    <div class="svc-callout important"><b>안내</b> 법률(변호사 보조) 업무 보조 AI는 해당 분야 전문가와 소속 직원의 서류 작성을 대화로 보조하는 도구입니다. 전문가가 아니며 법률 자문·소송 대리·서류 제출 대행은 하지 않고, 작성된 서류는 전문가가 검토·확정해야 합니다.</div>
   </div>
 
-  <div class="svc-content"><div class="svc-detail"><h2>상담 분야</h2><div class="svc-table-wrap"><table class="svc-table"><thead><tr><th>분야</th><th>상담 예시</th></tr></thead><tbody><tr><td class="doc-title"><a href="/pages/lawyer-criminal.html">형사법</a></td><td class="doc-detail">형사법 상담 · 형사 전문 변호사</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-civil.html">민사법</a></td><td class="doc-detail">민사법 상담 · 민사 전문 변호사</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-corporate.html">기업법무</a></td><td class="doc-detail">기업법무 상담 · 기업 전문 변호사 · M&amp;A 법률 자문</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-family.html">가사법</a></td><td class="doc-detail">가사법 상담 · 이혼 전문 변호사 · 양육권 상담</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-inheritance.html">상속</a></td><td class="doc-detail">상속 전문 변호사 · 유류분 상담 · 상속포기 상담</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-realestate.html">부동산</a></td><td class="doc-detail">부동산 전문 변호사 · 임대차 분쟁 상담</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-traffic.html">교통사고</a></td><td class="doc-detail">교통사고 전문 변호사</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-damages.html">손해배상</a></td><td class="doc-detail">손해배상 전문 변호사 · 의료소송 상담</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-auction.html">등기·경매</a></td><td class="doc-detail">경매 전문 변호사 · 명도소송 상담</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-commercial.html">상사법</a></td><td class="doc-detail">상사법 상담 · 어음수표 소송</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-execution.html">민사집행</a></td><td class="doc-detail">민사집행 상담 · 채권압류 상담</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-collection.html">채권추심</a></td><td class="doc-detail">채권추심 전문 변호사 · 지급명령 상담</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-insolvency.html">도산</a></td><td class="doc-detail">법인회생 상담 · 법인파산 상담 · 기업회생 전문 변호사</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-securities.html">증권</a></td><td class="doc-detail">증권 전문 변호사 · 불공정거래 대응</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-finance.html">금융</a></td><td class="doc-detail">금융 전문 변호사 · 대출 약관 분쟁</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-insurance.html">보험</a></td><td class="doc-detail">보험 전문 변호사 · 보험금 지급거절 상담</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-government-contract.html">국가계약</a></td><td class="doc-detail">국가계약 상담 · 입찰 무효 상담 · 부정당업자 제재</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-antitrust.html">공정거래</a></td><td class="doc-detail">공정거래 전문 변호사 · 가맹사업 분쟁</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-military.html">군형법</a></td><td class="doc-detail">군형법 상담 · 군사법원 변호사</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-juvenile.html">소년법</a></td><td class="doc-detail">소년법 상담 · 소년보호사건 변호사</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-administrative.html">행정법</a></td><td class="doc-detail">행정법 상담 · 행정소송 전문 변호사 · 영업정지 이의</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-constitutional.html">헌법재판</a></td><td class="doc-detail">헌법소원 상담 · 헌법재판 전문 변호사</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-environmental.html">환경</a></td><td class="doc-detail">환경 전문 변호사 · 환경오염 손해배상</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-expropriation.html">수용 및 보상</a></td><td class="doc-detail">토지수용 상담 · 보상금 소송 변호사</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-foodpharma.html">식품·의약</a></td><td class="doc-detail">식품 의약 전문 변호사 · 제조물책임 소송</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-maritime.html">해상</a></td><td class="doc-detail">해상사고 상담 · 선박 관련 계약분쟁</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-trade.html">무역</a></td><td class="doc-detail">무역계약 분쟁 · 수출입 대금 미지급</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-shipbuilding.html">조선</a></td><td class="doc-detail">선박건조계약 분쟁 · 인도지연 대응</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-arbitration.html">중재</a></td><td class="doc-detail">상사중재 신청 · 중재조항 해석</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-it.html">IT</a></td><td class="doc-detail">IT 개발계약 분쟁 · 서비스 이용약관 검토</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-broadcasting.html">방송통신</a></td><td class="doc-detail">방송통신 인허가 · 방송통신 제재처분</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-energy.html">에너지</a></td><td class="doc-detail">에너지 사업 인허가 · PPA 계약 분쟁</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-international-relations.html">국제관계법</a></td><td class="doc-detail">국제법 자문 · 조약 해석</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-international-transactions.html">국제거래</a></td><td class="doc-detail">국제거래계약 검토 · 크로스보더 계약 분쟁</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-international-arbitration.html">국제중재</a></td><td class="doc-detail">국제중재 신청 · 외국 중재판정 집행</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-immigration.html">이주 및 비자</a></td><td class="doc-detail">체류자격 신청 · 강제퇴거 대응 · 비자 상담</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-overseas-investment.html">해외투자</a></td><td class="doc-detail">해외투자 구조 설계 · 해외 M&amp;A 자문</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-sports.html">스포츠</a></td><td class="doc-detail">선수계약 검토 · 스포츠 징계 불복</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-religious.html">종교</a></td><td class="doc-detail">종교단체 재산분쟁 · 종교단체 내부 징계</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-guardianship.html">성년후견</a></td><td class="doc-detail">성년후견 개시 심판 · 후견인 선임 상담</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-startup.html">스타트업</a></td><td class="doc-detail">투자계약 검토 · 스타트업 지분구조 설계</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-school-violence.html">학교폭력</a></td><td class="doc-detail">학교폭력 심의 대응 · 학폭 처분 불복</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-legislation.html">입법</a></td><td class="doc-detail">법안 검토 자문 · 입법영향평가</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-entertainment.html">엔터테인먼트</a></td><td class="doc-detail">전속계약 검토 · 연예인 수익배분 분쟁</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-construction.html">건설</a></td><td class="doc-detail">건설공사계약 분쟁 · 하자보수 청구 · 지체상금 청구</td></tr><tr><td class="doc-title"><a href="/pages/lawyer-redevelopment.html">재개발·재건축</a></td><td class="doc-detail">재개발 조합 분쟁 · 관리처분계획 불복</td></tr></tbody></table></div></div></div>
+  <div class="svc-content"><div class="svc-detail"><h2>업무 분야</h2><div class="svc-table-wrap"><table class="svc-table"><thead><tr><th>업무 분야</th></tr></thead><tbody><tr><td class="doc-title"><a href="/pages/lawyer-criminal.html">형사법</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-civil.html">민사법</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-corporate.html">기업법무</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-family.html">가사법</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-inheritance.html">상속</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-realestate.html">부동산</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-traffic.html">교통사고</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-damages.html">손해배상</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-auction.html">등기·경매</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-commercial.html">상사법</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-execution.html">민사집행</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-collection.html">채권추심</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-insolvency.html">도산</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-securities.html">증권</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-finance.html">금융</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-insurance.html">보험</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-government-contract.html">국가계약</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-antitrust.html">공정거래</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-military.html">군형법</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-juvenile.html">소년법</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-administrative.html">행정법</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-constitutional.html">헌법재판</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-environmental.html">환경</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-expropriation.html">수용 및 보상</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-foodpharma.html">식품·의약</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-maritime.html">해상</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-trade.html">무역</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-shipbuilding.html">조선</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-arbitration.html">중재</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-it.html">IT</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-broadcasting.html">방송통신</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-energy.html">에너지</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-international-relations.html">국제관계법</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-international-transactions.html">국제거래</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-international-arbitration.html">국제중재</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-immigration.html">이주 및 비자</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-overseas-investment.html">해외투자</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-sports.html">스포츠</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-religious.html">종교</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-guardianship.html">성년후견</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-startup.html">스타트업</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-school-violence.html">학교폭력</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-legislation.html">입법</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-entertainment.html">엔터테인먼트</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-construction.html">건설</a></td></tr><tr><td class="doc-title"><a href="/pages/lawyer-redevelopment.html">재개발·재건축</a></td></tr></tbody></table></div></div></div>
 
   <div class="doc-toolbar" style="margin-top:20px">
-    <a class="svc-link-btn solid" href="/pages/expert-chat.html?persona=lawyer">전문가 채팅에서 상담하기</a>
+    <a class="svc-link-btn solid" href="/pages/expert-chat.html?persona=lawyer">대화로 서류 작성 시작하기</a>
   </div>
 
-  <div class="ug-footer">법률(변호사 보조) 상담 AI는 정보 제공을 돕는 도구입니다. 변호사가 아니며 법률 자문·소송 대리·서류 제출을 대신하지 않습니다. 구체적인 사건은 변호사와 상담하십시오.</div>
+  <div class="ug-footer">법률(변호사 보조) 업무 보조 AI는 해당 분야 전문가와 소속 직원의 서류 작성을 대화로 보조하는 도구입니다. 전문가가 아니며 법률 자문·소송 대리·서류 제출 대행은 하지 않고, 작성된 서류는 전문가가 검토·확정해야 합니다.</div>
 </div>
 </body>
 </html>
