@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<link rel="icon" href="data:,">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="/assets/pro-doc-page.css">
+<title>항해사 상담 AI — 나비</title>
+</head>
+<body>
+
+<script>
+window.PAGE_HEADER = {
+  active: 'expert-personas',
+  badge: "전문가 페르소나 · 항해사 상담 AI",
+  h1: "항해사 상담을<br>대화로 시작합니다",
+  sub: "궁금한 점을 말씀하시면 필요한 정보를 순서대로 여쭙고 정리해 드립니다.",
+  disclaimer: true
+};
+</script>
+<link rel="stylesheet" href="/assets/ph-header.css">
+<script src="/assets/ph-header.js"></script>
+<script>
+  window.K_AUTH_CONFIG = { serviceLabel: "항해사 상담 AI" };
+  window.HONDI_CHAT_WIDGET_CONFIG = {
+    sp: "SP_navigation-officer",
+    position: "left",
+    maxTokens: 4096,
+    panelTitle: "항해사 상담 AI",
+    label: "궁금한 점을 말씀하세요",
+    greeting: "안녕하세요! 항해사 상담 AI입니다. 궁금한 점을 말씀해 주세요.",
+    serviceLabel: "항해사 상담 AI"
+  };
+</script>
+<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
+<script src="/assets/chat-widget.js"></script>
+
+<div class="ug-doc">
+  <div class="doc-intro">
+    
+    <div class="svc-callout important"><b>안내</b> 항해사 상담 AI는 해당 분야 기술사·면허 자격자의 확인·서명을 대체하지 않습니다. 안전과 직결된 판단은 반드시 자격자와 확인하십시오.</div>
+  </div>
+
+  <div class="svc-content"><div class="svc-detail"><h2>상담 예시</h2><ul style="margin:8px 0 0;padding-left:20px;line-height:1.9;font-size:13.5px"><li>항해사</li><li>항해</li><li>선박 운항</li></ul></div></div>
+
+  <div class="doc-toolbar" style="margin-top:20px">
+    <a class="svc-link-btn solid" href="/pages/expert-chat.html?persona=navigation-officer">전문가 채팅에서 상담하기</a>
+  </div>
+
+  <div class="ug-footer">항해사 상담 AI는 정보 제공을 돕는 도구입니다. 해당 분야 기술사·면허 자격자의 확인·서명을 대체하지 않습니다. 안전과 직결된 판단은 반드시 자격자와 확인하십시오.</div>
+</div>
+</body>
+</html>
