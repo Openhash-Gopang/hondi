@@ -33,6 +33,8 @@ import { _loadSpByKey, _loadSpRawByKey } from './manifest-loader.js';
 import { _gwpLaunch } from '../gwp/engine.js';
 import { _buildRoutingFacts } from '../services/location.js';
 import { summarizeHandoffContext6W } from './report-utils.js';
+import { recallImages } from './attach-memory.js';
+import { HANDOFF_PARAM, downscaleDataUrl, putShots } from './form-shots-handoff.js';
 
 // 합성된 System Prompt 캐시 (같은 페르소나 재호출 시 재요청 방지 — K-Compose
 // nested 위임처럼 한 세션 안에서 같은 페르소나가 반복 호출될 수 있다)
@@ -441,6 +443,25 @@ export async function handleExpertTag(fullReply, userText, _preTab) {
       `${candLines}\n\n${finalCtx}`;
   }
 
-  _gwpLaunch(gwpDef, finalCtx, _preTab, _buildRoutingFacts());
+  // 2026-10-14 신설 — AI 비서 대화에서 방금 첨부한 사진(서식 등)을 전문가 탭으로 함께 넘긴다.
+  // 대화 기록에는 사진이 "[첨부: 이미지]" 글자로만 남아 있어, 이 처리가 없으면 전문가가 사진을 볼 수 없고
+  // 이용자가 같은 사진을 다시 올려야 했다. 사진은 같은 기기의 IndexedDB를 거치며 서버로 가지 않는다.
+  // 실패해도 호출 자체는 그대로 진행한다(사진 없이 열림).
+  let launchDef = gwpDef;
+  try {
+    const imgs = recallImages();
+    if (imgs.length) {
+      const small = [];
+      for (const u of imgs) small.push(await downscaleDataUrl(u));
+      await putShots(small);
+      const u = new URL(gwpDef.url);
+      u.searchParams.set(HANDOFF_PARAM, '1');
+      launchDef = { ...gwpDef, url: u.href };
+    }
+  } catch (e) {
+    console.warn('[Expert] 첨부 사진 인계 실패(사진 없이 진행):', e.message);
+  }
+
+  _gwpLaunch(launchDef, finalCtx, _preTab, _buildRoutingFacts());
   return true;
 }
