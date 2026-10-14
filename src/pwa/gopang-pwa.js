@@ -27,63 +27,17 @@ if ('serviceWorker' in navigator) {
       const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
       console.log('[PWA] SW 등록 완료:', reg.scope);
 
-      // 서버 push 즉시 반응 — 배포 시 push로 받는 CHECK_FOR_UPDATE를 처리한다.
-      // (PLAY_SOUND는 gopang-app.js에서 처리한다 — 예전에는 이 파일에도
-      //  동일 리스너가 있어 사운드가 두 번 겹쳐 재생되는 버그가 있었음)
+      // ★ 업데이트 정책(2026-10-14, 주피터 지시) — 「새 버전이 있습니다」 배너를 완전히 없앴다 ★
+      // 안내 배너·「지금 적용」·카운트다운·자동 새로고침은 모두 없다. 새 버전은 조용히 내려받아 대기시키고,
+      // 앱을 완전히 닫았다가 다시 열 때(또는 설정의 「최신 버전으로 갱신」을 눌렀을 때) 적용된다.
+      // (PLAY_SOUND는 gopang-app.js에서 처리한다.)
       navigator.serviceWorker.addEventListener('message', (event) => {
-        const msgType = event.data?.type;
-        if (msgType === 'CHECK_FOR_UPDATE') {
-          console.log('[PWA] 배포 push 수신 — 즉시 업데이트 체크');
-          reg.update().then(() => {
-            _noticeUpdateOnce(reg);
-          }).catch(() => {});
-        }
+        if (event.data?.type === 'CHECK_FOR_UPDATE') reg.update().catch(() => {});
       });
-
-      // ★ 업데이트 정책(2026-10-14, 주피터 지시) — 사용자가 원할 때만, 한 번만 갱신한다 ★
-      // 이전에는 새 버전이 감지되면 배너와 카운트다운을 띄우고 5초 뒤 스스로 새로고침했다. 배포가 잦은 날에는
-      // 이것이 끊임없이 반복돼 사용 중인 화면이 사라지고 배너가 다시 떴다. 이제는:
-      //   · 새 버전은 조용히 내려받아 대기시킨다. 자동 적용·자동 새로고침·카운트다운은 없다.
-      //   · 안내 배너는 이 탭(세션)에서 한 번만 보여 준다. 「나중에」를 누르면 닫히고, 이 세션에서는 다시 뜨지 않는다.
-      //   · 갱신은 「지금 적용」(또는 설정의 「최신 버전으로 갱신」)을 눌렀을 때 한 번만 일어난다.
-      const _NOTICE_KEY = 'gopang_update_notice_shown';
-      function _noticeUpdateOnce(reg) {
-        if (!reg.waiting || !navigator.serviceWorker.controller) return;   // 대기 중인 새 버전이 없으면 안내하지 않는다
-        try {
-          if (sessionStorage.getItem(_NOTICE_KEY)) return;
-          sessionStorage.setItem(_NOTICE_KEY, '1');
-        } catch (e) {                                                       // 저장소를 못 쓰면 메모리로 한 번만
-          if (window._updateNoticeShownMem) return;
-          window._updateNoticeShownMem = true;
-        }
-        _showUpdateBanner();
-      }
-
-      // 새 SW 설치 완료 → 안내만(한 번)
-      reg.addEventListener('updatefound', () => {
-        const newSW = reg.installing;
-        if (!newSW) return;
-        newSW.addEventListener('statechange', () => {
-          if (newSW.state === 'installed') _noticeUpdateOnce(reg);
-        });
-      });
-
-      // SW 교체(controllerchange) → 사용자가 「지금 적용」을 눌러 시작한 경우에만 새로고침한다.
-      // (처음 설치될 때의 clients.claim() 등 다른 이유의 controllerchange로는 새로고침하지 않는다.)
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (!window._userApplyingUpdate || window._manualUpdateInProgress) return;
-        window._userApplyingUpdate = false;
-        _reloadPage();
-      });
-
-      // 앱 시작 시 이미 대기 중인 새 버전이 있으면 안내(한 번)
-      _noticeUpdateOnce(reg);
-
-      // 포그라운드 복귀·30분 주기: 새 버전 확인만 한다. 안내는 위 규칙(세션당 한 번)을 따른다.
       document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') reg.update().then(() => _noticeUpdateOnce(reg)).catch(() => {});
+        if (document.visibilityState === 'visible') reg.update().catch(() => {});
       });
-      setInterval(() => { reg.update().then(() => _noticeUpdateOnce(reg)).catch(() => {}); }, 30 * 60 * 1000);
+      setInterval(() => { reg.update().catch(() => {}); }, 30 * 60 * 1000);
 
     } catch (err) {
       console.warn('[PWA] SW 등록 실패:', err);
@@ -91,85 +45,6 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// ── 앱 갱신 안내 배너 — 세션당 한 번, 자동 적용 없음 ───────────────
-function _reloadPage() { window.location.reload(); }
-
-function _showUpdateBanner() {
-  if (document.getElementById('update-banner')) return;
-
-  const banner = document.createElement('div');
-  banner.id = 'update-banner';
-  banner.style.cssText = `
-    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
-    background: #1C1C1E; border: 1px solid #3A3A3C;
-    border-radius: 14px; padding: 12px 16px;
-    display: flex; align-items: center; gap: 10px;
-    font-size: 14px; color: #F2F2F7;
-    box-shadow: 0 8px 32px rgba(0,0,0,.6);
-    z-index: 9999; white-space: nowrap;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  `;
-  banner.innerHTML = `
-    <span>🆕 새 버전이 있습니다</span>
-    <button id="update-apply-btn" onclick="_applyUpdate()" style="
-      background:#0057A8; color:#fff; border:none;
-      border-radius:8px; padding:6px 14px;
-      font-size:13px; font-weight:600; cursor:pointer;">
-      지금 적용
-    </button>
-    <button id="update-later-btn" onclick="document.getElementById('update-banner').remove()" style="
-      background:none; color:#8E8E93; border:1px solid #3A3A3C;
-      border-radius:8px; padding:6px 12px;
-      font-size:13px; cursor:pointer;">
-      나중에
-    </button>
-  `;
-  document.body.appendChild(banner);
-}
-
-// ── 업데이트 적용 — 사용자가 「지금 적용」을 눌렀을 때 한 번 ──────────
-// 대기 중인 새 SW에 SKIP_WAITING을 보내고, controllerchange가 오면(위 리스너) 한 번 새로고침한다.
-// 6초 안에 반응이 없으면(SW 상태 이상 등) 강제 새로고침으로 대신한다(무한정 "적용 중…"에 멈추지 않도록).
-function _applyUpdate() {
-  const btn = document.getElementById('update-apply-btn');
-  if (btn) {
-    btn.textContent = '적용 중…';
-    btn.style.pointerEvents = 'none';
-    btn.style.opacity = '0.7';
-  }
-  const later = document.getElementById('update-later-btn');
-  if (later) later.style.display = 'none';
-  window._userApplyingUpdate = true;
-  const fallback = setTimeout(() => {
-    console.warn('[PWA] 수동 적용 — 6초 내 응답 없음, 강제 새로고침으로 대체');
-    window._userApplyingUpdate = false;
-    _reloadPage();
-  }, 6000);
-
-  navigator.serviceWorker.ready.then((reg) => {
-    if (reg.waiting) {
-      navigator.serviceWorker.addEventListener('controllerchange', () => clearTimeout(fallback), { once: true });
-      reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-    } else {
-      clearTimeout(fallback);
-      window._userApplyingUpdate = false;
-      _reloadPage();
-    }
-  }).catch((err) => {
-    console.warn('[PWA] 수동 적용 실패 — 강제 새로고침으로 대체:', err.message);
-    clearTimeout(fallback);
-    window._userApplyingUpdate = false;
-    _reloadPage();
-  });
-}
-// ★ 진짜 원인(2026-07-19) ★ — 이 함수는 window.addEventListener('load', ...)
-// 클로저 안에 선언돼 있어 전역이 아니다. 배너의 onclick="_applyUpdate()"는
-// 전역 스코프에서 이름을 찾으므로 지금까지 "_applyUpdate is not defined"로
-// 조용히 실패해왔다(콘솔에만 찍히고 화면엔 무반응) — forceUpdateApp()은
-// 아래 window.forceUpdateApp = forceUpdateApp;가 있어서 정상 작동했던 것과
-// 대조된다. 오늘 추가한 진행상태 피드백 로직 자체는 문제가 없었다 —애초에
-// 실행될 수 없었을 뿐이다.
-window._applyUpdate = _applyUpdate;
 
 // ── 버전 확인 헬퍼 ───────────────────────────────────────────
 // /version.json은 .github/workflows/bump-app-version.yml이 main에
