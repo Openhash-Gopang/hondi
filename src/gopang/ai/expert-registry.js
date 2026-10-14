@@ -66,6 +66,21 @@ export const EXPERT_BASE_KEY           = 'SP_EXPERT_BASE'; // 2026-08-07 신설(
 // 로드(_loadSpRawByKey) 패턴을 따른다 — 개별 SP는 이 문서가 이미 정의한
 // STEP 0-(-1)/STEP R 본체/STEP D 본체/C50 NEXT_STEP을 재서술하지 않는다.
 
+// 2026-10-14 신설(주피터 지시) — SP_DOC_FORM_v1_0.md(SP-COMMON-07, 서식 작성 공통
+// 원칙). 서류 초안을 작성하는 페르소나에만 EXPERT_BASE 다음·부모/리프 SP 이전에
+// 결합한다(서류 작성이 없는 상담형 페르소나에는 붙이지 않는다). 아래 목록은 서류
+// 카탈로그를 가진 직역의 루트 SP 키이며, 이 키를 부모로 가진 세부분야 페르소나도
+// 부모 체인을 따라 결합 대상이 된다(예: 변호사 하위 분야).
+export const DOC_FORM_KEY = 'SP_DOC_FORM';
+export const DOC_FORM_ROOT_KEYS = [
+  'SP_lawyer', 'SP_judicial-scrivener', 'SP_administrative-scrivener',
+  'SP_tax-accountant', 'SP_accountant', 'SP_appraiser', 'SP_architect',
+  'SP_customs-broker', 'SP_electrical-safety-engineer', 'SP_fire-safety-manager',
+  'SP_gas-safety-engineer', 'SP_industrial-safety-consultant', 'SP_labor-attorney',
+  'SP_landscape-engineer', 'SP_loss-adjuster', 'SP_patent-attorney',
+  'SP_real-estate-agent', 'SP_surveying-engineer',
+];
+
 import { PHYSICIAN_REGISTRY } from './expert-registry-physician.js';
 import { LAWYER_REGISTRY } from './expert-registry-lawyer.js';
 import { PROFESSOR_REGISTRY } from './expert-registry-professor.js';

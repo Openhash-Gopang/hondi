@@ -40,9 +40,11 @@ const SP_FILES = {
     'SP_common_guardrails': 'SP_common_guardrails_v1_0.md',
     'SP_common_medical_safety': 'SP_common_medical_safety_v1_0.md',
     'SP_EXPERT_BASE': 'SP_EXPERT_BASE_v1_0.md',
+    'SP_DOC_FORM': 'SP_DOC_FORM_v1_0.md',
     'SP_physician': 'SP_physician_v1_0.md',
     'SP_physician-internal-medicine': 'SP_physician-internal-medicine_v1_0.md',
     'SP_lawyer': 'SP_lawyer_v4_8.md',
+    'SP_lawyer-criminal': 'SP_lawyer-criminal_v1_0.md',
     // §6-4 경고 케이스(부모의 부모) 검증용 가상 픽스처
     'SP_grandparent': 'SP_grandparent_v1_0.md',
     'SP_parent-with-own-parent': 'SP_parent-with-own-parent_v1_0.md',
@@ -56,9 +58,11 @@ const SP_FILES = {
   'SP_common_guardrails_v1_0.md': '[공통 가드레일 원문]',
   'SP_common_medical_safety_v1_0.md': '[의료 안전모듈 원문]',
   'SP_EXPERT_BASE_v1_0.md': '[EXPERT_BASE 골격 원문]',
+  'SP_DOC_FORM_v1_0.md': '[서식 SP 원문]',
   'SP_physician_v1_0.md': '[의사(부모) SP 원문]',
   'SP_physician-internal-medicine_v1_0.md': '[내과(자식) SP 원문]',
   'SP_lawyer_v4_8.md': '[변호사 페르소나 SP 원문]',
+  'SP_lawyer-criminal_v1_0.md': '[형사법(변호사 자식) SP 원문]',
   'SP_grandparent_v1_0.md': '[조부모 SP 원문 — 로드되면 안 됨]',
   'SP_parent-with-own-parent_v1_0.md': '[부모(자기도 parentKey 있음) SP 원문]',
   'SP_child-of-bad-parent_v1_0.md': '[자식(3단 초과 케이스) SP 원문]',
@@ -238,5 +242,35 @@ describe('§6-2 회귀 — 기존 조립 동작 유지', () => {
     ]) {
       assert.ok(composed.includes(marker), `${marker} 결합이 EXPERT_BASE 신설로 인해 깨짐 — 회귀`);
     }
+  });
+});
+
+describe('SP-COMMON-07 — 서식 SP(SP_DOC_FORM) 조립', () => {
+  test('서류 작성 페르소나(변호사): EXPERT_BASE → 서식 SP → 리프 SP 순서로 정확히 1회 결합', async () => {
+    const def = { key: 'SP_lawyer', label: '변호사', needsMedicalSafety: false };
+    const composed = await _composeExpertPrompt(def);
+    const idxBase = composed.indexOf('EXPERT_BASE 골격 원문');
+    const idxForm = composed.indexOf('서식 SP 원문');
+    const idxLeaf = composed.indexOf('변호사 페르소나 SP 원문');
+    assert.ok(idxForm >= 0, '서식 SP가 조립에서 빠짐');
+    assert.ok(idxBase < idxForm, '서식 SP가 EXPERT_BASE보다 먼저 옴 — 순서 위반');
+    assert.ok(idxForm < idxLeaf, '서식 SP가 리프 SP보다 뒤에 옴 — 순서 위반');
+    assert.equal(composed.split('서식 SP 원문').length - 1, 1, '서식 SP는 정확히 1회여야 함');
+  });
+
+  test('서류 작성 직역의 세부분야(parentKey 체인): 서식 SP가 부모 SP 앞에 결합', async () => {
+    const childDef = { key: 'SP_lawyer-criminal', label: '변호사(형사법)', needsMedicalSafety: false, parentKey: 'lawyer' };
+    const composed = await _composeExpertPrompt(childDef);
+    const idxForm = composed.indexOf('서식 SP 원문');
+    const idxParent = composed.indexOf('변호사 페르소나 SP 원문');
+    assert.ok(idxForm >= 0, '세부분야에 서식 SP가 결합되지 않음');
+    assert.ok(idxForm < idxParent, '서식 SP가 부모 SP보다 뒤에 옴 — 순서 위반');
+    assert.equal(composed.split('서식 SP 원문').length - 1, 1, '서식 SP는 정확히 1회여야 함');
+  });
+
+  test('서류 작성이 없는 페르소나(의사): 서식 SP를 결합하지 않음', async () => {
+    const def = { key: 'SP_physician', label: '의사', needsMedicalSafety: true };
+    const composed = await _composeExpertPrompt(def);
+    assert.ok(!composed.includes('서식 SP 원문'), '서류 작성이 없는 페르소나에 서식 SP가 결합됨');
   });
 });
