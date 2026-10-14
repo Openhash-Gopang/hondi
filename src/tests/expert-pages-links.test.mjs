@@ -18,8 +18,8 @@ test('업종(supplier)·교수(edu)를 뺀 단일 직역은 모두 페이지가 
     assert.ok(links.some(([id]) => id === s.id || id === s.personas[0].id), `${s.id} 페이지 없음`);
   }
 });
-test('법률·의사 펼침 분류와 그 하위 분야 전부에 페이지가 있다', () => {
-  for (const sid of ['lawyer', 'physician']) {
+test('법률·의사·변리사·공인회계사 펼침 분류와 그 하위 분야 전부에 페이지가 있다', () => {
+  for (const sid of ['lawyer', 'physician', 'patent-attorney', 'accountant']) {
     const s = SECTIONS.find(x => x.id === sid);
     assert.ok(links.some(([id]) => id === sid), `${sid} 상위 페이지`);
     for (const p of s.personas) assert.ok(links.some(([id]) => id === p.id), `${p.id} 페이지 없음`);
