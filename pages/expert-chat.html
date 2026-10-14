@@ -60,7 +60,7 @@
       </svg>
     </button>
   </div>
-  <input type="file" id="file-input" accept="image/*,.pdf,.doc,.docx,.txt" style="display:none">
+  <input type="file" id="file-input" accept="image/*,.pdf,.doc,.docx,.hwp,.hwpx,.txt" style="display:none">
   <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none">
   <div id="input-wrap">
     <textarea id="chat-input" rows="1" placeholder="메시지를 입력하세요…"></textarea>
@@ -104,9 +104,10 @@ import { EXPERT_REGISTRY, UNIVERSAL_INTEGRITY_KEY, COMMON_GUARDRAILS_KEY,
 import { _loadSpByKey, _loadSpRawByKey } from '/src/gopang/ai/manifest-loader.js';
 import { _missingNextStepMarker, _needsDocForm } from '/src/gopang/ai/expert-session.js';
 import { DOC_FORM_KEY } from '/src/gopang/ai/expert-registry.js';
-import { parseLookup, parseProposal, stripFormTags, findForm, lookupResultText, precheckProposal, saveForm, attachmentToText, TEXT_EXT }
+import { parseLookup, parseProposal, stripFormTags, findForm, lookupResultText, precheckProposal, saveForm, attachmentToText }
   from '/src/gopang/ai/doc-form-client.js';
 import { HANDOFF_PARAM, downscaleImage, takeShots, shotsToAttachment } from '/src/gopang/ai/form-shots-handoff.js';
+import { classifyFile, extractFile } from '/src/gopang/ai/file-extract.js';
 // 2026-07-20: §7(기관측 PDV, SP_PDV v1.2) 기록 — 이 페이지가 EXPERT 페르소나의
 // 실제 라이브 경로이므로(위 주석 참조), 세션 종료 리포팅도 여기 붙여야 실제로
 // 동작한다. expert-session.js의 endExpertSession()에 붙이면 죽은 코드에
@@ -724,7 +725,7 @@ async function sendTurn(text, attachment) {
       // 날 수 있음 — 이 페이지 범위에서는 형식만 맞추고 모델별 지원 여부는
       // 별도로 확인하지 않는다.)
       content = [
-        { type: 'text', text: text || '(첨부 이미지를 봐주세요)' },
+        { type: 'text', text: (text || '(첨부 이미지를 봐주세요)') + (attachment.note ? `\n[${attachment.name} — ${attachment.note}]` : '') },
         ...(attachment.images || [attachment.dataUrl]).map(u => ({ type: 'image_url', image_url: { url: u } })),
       ];
     } else if (attachment) {
@@ -1355,10 +1356,16 @@ async function handleFileSelect(file) {
       let dataUrl;
       try { dataUrl = await downscaleImage(file); } catch { dataUrl = await _readAs(file, 'url'); }
       att = { name: file.name, dataUrl, isImage: true };
-    } else if (TEXT_EXT.test(file.name) || file.type.startsWith('text/')) {
+    } else if (classifyFile(file.name, file.type) === 'text') {
       att = { name: file.name, isImage: false, text: await _readAs(file, 'text') };
     } else {
-      att = { name: file.name, isImage: false, text: null };   // PDF·DOC·DOCX 등: 읽지 못함 → attachmentToText가 모델에 명시
+      // PDF·DOCX·HWPX는 글자를 뽑고, 스캔 PDF는 앞쪽 몇 쪽을 그림으로 읽는다. 그 밖의 형식은 이유와 함께 "읽지 못함".
+      previewName.textContent = `📎 ${file.name} 읽는 중…`;
+      preview.style.display = 'flex';
+      const r = await extractFile(file);
+      if (r.kind === 'text') att = { name: file.name, isImage: false, text: r.text, note: r.note };
+      else if (r.kind === 'images') att = { name: file.name, isImage: true, dataUrl: r.images[0], images: r.images, note: r.note };
+      else att = { name: file.name, isImage: false, text: null, reason: r.reason };
     }
     _attachedFile = att;
     previewName.textContent = `📎 ${file.name}`;
