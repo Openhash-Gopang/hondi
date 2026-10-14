@@ -402,6 +402,7 @@ function expertChatUrl(personaId){
 // 전체 이름("상위 분류 · 세부분야 — 상담 시작"). 세부분야 라벨이 상위
 // 분류 라벨과 같으면(단일 페르소나 섹션) 중복 표기하지 않는다.
 var CHAT_ICO_SVG = '<svg class="chat-ico-inline" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+var CHAT_ICO_SVG_SIDE = '<svg class="section-link-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
 var SECTION_PAGE_LINKS = { 'judicial-scrivener': { url: '/pages/judicial-scrivener.html', title: '법무사 보조 AI 페이지' }, 'administrative-scrivener': { url: '/pages/administrative-scrivener.html', title: '행정사 보조 AI 페이지' }, 'tax-accountant': { url: '/pages/tax-accountant.html', title: '세무사 보조 AI 페이지' }, 'customs-broker': { url: '/pages/customs-broker.html', title: '관세사 보조 AI 페이지' }, 'accountant': { url: '/pages/accountant.html', title: '회계사 보조 AI 페이지' }, 'labor-attorney': { url: '/pages/labor-attorney.html', title: '노무사 보조 AI 페이지' }, 'loss-adjuster': { url: '/pages/loss-adjuster.html', title: '손해사정사 보조 AI 페이지' }, 'appraiser': { url: '/pages/appraiser.html', title: '감정평가사 보조 AI 페이지' }, 'patent-attorney': { url: '/pages/patent-attorney.html', title: '변리사 보조 AI 페이지' }, 'real-estate-agent': { url: '/pages/real-estate-agent.html', title: '공인중개사 보조 AI 페이지' }, 'architect': { url: '/pages/architect.html', title: '건축사 보조 AI 페이지' }, 'industrial-safety-consultant': { url: '/pages/industrial-safety-consultant.html', title: '산업안전·보건지도사 보조 AI 페이지' }, 'fire-safety-manager': { url: '/pages/fire-safety-manager.html', title: '소방시설관리사 보조 AI 페이지' }, 'surveying-engineer': { url: '/pages/surveying-engineer.html', title: '측량 및 지형공간정보기술사 보조 AI 페이지' }, 'electrical-safety-engineer': { url: '/pages/electrical-safety-engineer.html', title: '전기안전기술사 보조 AI 페이지' }, 'gas-safety-engineer': { url: '/pages/gas-safety-engineer.html', title: '가스기술사 보조 AI 페이지' }, 'landscape-engineer': { url: '/pages/landscape-engineer.html', title: '조경기술사 보조 AI 페이지' } }; var ARROW_ICO_SVG = '<svg class="section-link-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>'; function personaChatTitle(secLabel, personaLabel){
   var full = (personaLabel && personaLabel !== secLabel) ? (secLabel + ' · ' + personaLabel) : secLabel;
   return full + ' — 상담 시작';
@@ -425,14 +426,17 @@ function buildButtonHtml(sec, q, isOpen){
           '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="11" x2="13" y2="11"/></svg>' +
         '</a>'
       : '';
-    var draftBadge = personaDraftBadge(sec.personas[0].id); var pageLink = SECTION_PAGE_LINKS[sec.id] || SECTION_PAGE_LINKS[sec.personas[0].id]; var pageIco = pageLink ? '<a class="section-page-link" href="' + esc(pageLink.url) + '" target="_blank" rel="noopener" title="' + esc(pageLink.title) + '">' + ARROW_ICO_SVG + '</a>' : '';
+    var draftBadge = personaDraftBadge(sec.personas[0].id); var pageLink = SECTION_PAGE_LINKS[sec.id] || SECTION_PAGE_LINKS[sec.personas[0].id];
+    // 2026-10-15(주피터 지시) — 전문가 페이지가 있으면 버튼 본체는 그 페이지로, 상담(채팅)은 오른쪽 아이콘(예전 페이지 이동 아이콘 자리)으로 옮겼다.
+    // 페이지가 없는 직역은 종전대로 본체가 상담으로 연결된다.
+    var chatIco = pageLink ? '<a class="section-page-link" href="' + esc(expertChatUrl(sec.personas[0].id)) + '" target="_blank" rel="noopener" title="' + esc(personaChatTitle(sec.label, null)) + '">' + CHAT_ICO_SVG_SIDE + '</a>' : '';
     return '<span class="section-row section-row-link-wrap' + hiddenCls + '" data-id="' + sec.id + '">' +
-        '<a class="section-row-link-main" href="' + esc(expertChatUrl(sec.personas[0].id)) + '" target="_blank" rel="noopener" title="' + esc(personaChatTitle(sec.label, null)) + '">' +
-          CHAT_ICO_SVG +
+        '<a class="section-row-link-main" href="' + esc(pageLink ? pageLink.url : expertChatUrl(sec.personas[0].id)) + '" target="_blank" rel="noopener" title="' + esc(pageLink ? pageLink.title : personaChatTitle(sec.label, null)) + '">' +
+          (pageLink ? '' : CHAT_ICO_SVG) +
           '<span class="section-label">' + hl(sec.label, q) + '</span>' +
           (pageLink ? '' : ARROW_ICO_SVG) +
         '</a>' +
-        pageIco + draftBadge +
+        chatIco + draftBadge +
         editIco +
       '</span>';
   }
