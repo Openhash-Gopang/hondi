@@ -476,7 +476,7 @@ function _maybeHandleServiceRedirectSuggestion(fullReply, aiBubble) {
     (reason ? `<br><span style="font-size:12px">(${escHtml(reason)})</span>` : '') +
     `</div>` +
     `<button type="button" class="redirect-suggestion-btn" style="margin-right:8px;padding:7px 14px;border-radius:8px;border:none;background:var(--pri,#2563EB);color:#fff;font-size:12.5px;font-weight:600;cursor:pointer;">${escHtml(target.name)}로 이동</button>` +
-    `<button type="button" class="redirect-suggestion-dismiss" style="padding:7px 14px;border-radius:8px;border:1px solid var(--separator,#d1d1d6);background:transparent;color:var(--label-2,#666);font-size:12.5px;cursor:pointer;">계속 여기서 상담</button>`;
+    `<button type="button" class="redirect-suggestion-dismiss" style="padding:7px 14px;border-radius:8px;border:1px solid var(--separator,#d1d1d6);background:transparent;color:var(--label-2,#666);font-size:12.5px;cursor:pointer;">계속 여기서 작성</button>`;
   banner.querySelector('.redirect-suggestion-btn').onclick = () => {
     window.open(target.url, '_blank');
     banner.remove();
@@ -526,7 +526,7 @@ function _captureExplicitRating() {
     const finish = (v) => { if (done) return; done = true; resolve(v); };
     const box = appendBubble('ai',
       `<div style="display:flex;align-items:center;gap:10px">
-        <span>이번 상담, 도움이 되셨나요?</span>
+        <span>이번 서류 작성, 도움이 되셨나요?</span>
         <button id="rate-up" style="border:none;background:none;font-size:20px;cursor:pointer">👍</button>
         <button id="rate-down" style="border:none;background:none;font-size:20px;cursor:pointer">👎</button>
       </div>`
@@ -587,7 +587,7 @@ async function _recordExpertOwnerPDV(reason) {
   const lastUserTurn = [...messages].reverse().find(m => m.role === 'user');
   const what = typeof lastUserTurn?.content === 'string'
     ? lastUserTurn.content.slice(0, 80)
-    : `${def.label} AI 상담 (${exchanged}턴)`;
+    : `${def.label} 업무 보조 AI (${exchanged}턴)`;
 
   // ── §U0-1 6하원칙 "why" (2026-08-10 수정) ──────────────────────────
   // 기존엔 항상 null로 하드코딩돼 있었다(recordOwnerPDV() 함수 자체는
@@ -657,9 +657,9 @@ async function ensureSystemPrompt() {
         const lines = hist.recent.map(r =>
           `- ${r.when || '(시각 미상)'} | ${r.persona_key || PERSONA} | ${r.what || '(내용 미상)'} | 결과: ${r.how}`
         ).join('\n');
-        histNote = `[PDV_SELF_HISTORY_RESULT]\n이 사용자와의 과거 상담 총 ${hist.total_visits}건 중 최근 ${hist.recent.length}건:\n${lines}\n이 정보로 인사말에 과거 맥락을 반영하세요(U0-2). 대화 전문이 아니라 요약이므로, 세부 내용이 필요하면 사용자에게 자연스럽게 확인하세요.`;
+        histNote = `[PDV_SELF_HISTORY_RESULT]\n이 사용자와의 과거 대화 총 ${hist.total_visits}건 중 최근 ${hist.recent.length}건:\n${lines}\n이 정보로 인사말에 과거 맥락을 반영하세요(U0-2). 대화 전문이 아니라 요약이므로, 세부 내용이 필요하면 사용자에게 자연스럽게 확인하세요.`;
       } else if (hist?.ok && !hist.found) {
-        histNote = `[PDV_SELF_HISTORY_RESULT]\n이 사용자와의 과거 상담 기록이 없습니다(첫 방문으로 보입니다).`;
+        histNote = `[PDV_SELF_HISTORY_RESULT]\n이 사용자와의 과거 대화 기록이 없습니다(첫 방문으로 보입니다).`;
       } else {
         histNote = `[PDV_SELF_HISTORY_RESULT]\n조회에 실패했습니다 — 기록이 없다고 단정하지 말고, 필요하면 사용자에게 이전 대화 여부를 자연스럽게 물어보세요.`;
       }
@@ -810,7 +810,7 @@ async function sendTurn(text, attachment) {
     if (TERMINATION_RE.test(text) || doneTagMatch) {
       // 45-3(SP_common_guardrails C45) — 정규식(빠른 경로)과 [EXPERT_DONE]
       // (페르소나 판단) 중 하나라도 트리거되면 종료. 둘 다 걸려도 문구는 하나만.
-      appendBubble('ai', `상담을 종료합니다. 나비 화면으로 돌아갑니다…`);
+      appendBubble('ai', `대화를 종료합니다. 나비 화면으로 돌아갑니다…`);
       await _recordExpertOwnerPDV(doneTagMatch && !TERMINATION_RE.test(text) ? 'expert_judged' : 'user_phrase'); // §7 기관측 PDV
       setTimeout(() => { location.href = RETURN; }, 1200);
     }
@@ -1083,7 +1083,7 @@ async function _maybeHandleOrchestrationTags(fullReply) {
         { role: 'user', content:
           `[ORCHESTRATION_SUBTASK 요청 — scope=orchestration_subtask]\n` +
           `다른 전문가 페르소나(${EXPERT_REGISTRY[PERSONA]?.label || PERSONA})가 진행 중인 ` +
-          `상담에서 당신의 세부분야 소견만 필요합니다. STEP A~D 전체를 밟지 말고, 아래 ` +
+          `이 대화에서 당신의 세부분야 소견만 필요합니다. STEP A~D 전체를 밟지 말고, 아래 ` +
           `질문에 대해 STEP A-2급 깊이(사실확인 수준)로만 답한 뒤 반드시 다음 형식으로 ` +
           `마무리하세요:\n` +
           `[ORCHESTRATION_SUBTASK_RESULT: verdict={결론 요약 한두 문장}, confidence={0~10}, needs_full_consultation={true|false}]\n\n` +
@@ -1289,7 +1289,7 @@ async function startGreeting() {
   // 자동 적용된다(각 SP의 정체성 절이 곧 소개 내용이 됨) — 위 GWP_CTX
   // 경로가 "정적 인사 없이 실제 발화를 첫 턴으로" 쓰는 것과 동일 원칙을
   // ctx가 없는 경우에도 확장한 것.
-  sendTurn('[INTERNAL: 사용자가 방금 상담을 시작했습니다(입력한 발화 없음). ' +
+  sendTurn('[INTERNAL: 사용자가 방금 대화를 시작했습니다(입력한 발화 없음). ' +
     '당신의 정체성과 도와드릴 수 있는 범위를 짧게 소개하고, 무엇을 도와드릴지 ' +
     '자연스럽게 물으며 대화를 시작하십시오. 이 지시문 자체는 사용자에게 노출되지 않습니다.]');
 }
@@ -1537,7 +1537,7 @@ let _idleTimer = null;
 function _resetIdle() {
   if (_idleTimer) clearTimeout(_idleTimer);
   _idleTimer = setTimeout(() => {
-    appendBubble('ai', '10분간 응답이 없어 상담을 종료합니다. 나비 화면으로 돌아갑니다…');
+    appendBubble('ai', '10분간 응답이 없어 대화를 종료합니다. 나비 화면으로 돌아갑니다…');
     _recordExpertOwnerPDV('timeout'); // §7 기관측 PDV (2026-07-20) — await 없이 발사(페이지 곧 이동)
     setTimeout(() => { location.href = RETURN; }, 1500);
   }, 10 * 60 * 1000);
