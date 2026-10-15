@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -55,15 +55,15 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="description" content="나비(Navi) AI 메신저 플랫폼">
-<link rel="manifest" href="/manifest.json?v=20260624">
-<link rel="apple-touch-icon" href="/icons/navi-icon-192.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/navi-icon-180.png">
-<link rel="icon" type="image/png" href="/icons/navi-icon-192.png">
+<link rel="manifest" href="/manifest.json?v=20261015">
+<link rel="apple-touch-icon" href="/icons/navi-icon-192.png?v=20261015">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/navi-icon-180.png?v=20261015">
+<link rel="icon" type="image/png" href="/icons/navi-icon-192.png?v=20261015">
 <title>나비</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" as="style" crossorigin
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
-<script src="/gopang-wallet.js?v=20260624"></script>
+<script src="/gopang-wallet.js?v=20261015"></script>
 <script>
 function gopangLogout() {
   if (!confirm('로그아웃 하시겠습니까?\n(아이디·설정이 초기화됩니다)')) return;
@@ -161,11 +161,11 @@ function _updateLogoutBtn() {
   }
 }
 </script>
-<script src="/gwp-registry.js?v=20260624"></script>
+<script src="/gwp-registry.js?v=20261015"></script>
 <!-- pdv-store.js는 GWP_REGISTRY(위 스크립트) 로드 이후여야 classify()가 서비스 분류를
      제대로 찾는다. record.js의 _recordPDV()가 발행하는 'gopang:pdv-recorded' 이벤트를
      이 인스턴스가 직접 받아 IndexedDB(gopang_pdv_store)에 기록한다. -->
-<script src="/pdv-store.js?v=20260702"></script>
+<script src="/pdv-store.js?v=20261015"></script>
 <style>
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -1335,13 +1335,16 @@ body:not(.gopang-authed) .install-banner.show{display:none!important}
       </div>
       <!-- 숫자 코드 버튼 (우, 설정 버튼 왼쪽) — 2026-09-24(주피터 지시): 스캔 프레임 모서리 + 7세그먼트 "8"
            아이콘. 누르면 숫자 코드 만들기·카메라 인식 테스트 페이지가 새 탭으로 열린다(앱 상태 유지). -->
+      <!-- 2026-10-15(주피터 지시): 아이콘을 스캔 프레임+"8"에서 QR 모양(내 코드)으로 교체. 하단 "스캔" 카메라 버튼과
+           프레임 모양이 겹쳐 헷갈린다는 지적. 기능(숫자 코드 페이지 새 탭 열기)은 그대로. -->
       <a id="ai-panel-digit" href="https://hondi.net/pages/digit-code.html" target="_blank" rel="noopener"
-         title="숫자 코드" aria-label="숫자 코드">
+         title="내 코드 (숫자 코드)" aria-label="내 코드 (숫자 코드)">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 8V6a2 2 0 0 1 2-2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/>
-          <path d="M20 16v2a2 2 0 0 1-2 2h-2"/><path d="M8 20H6a2 2 0 0 1-2-2v-2"/>
-          <rect x="9" y="8" width="6" height="8" rx=".6"/><path d="M9 12h6"/>
+          <rect x="3.5" y="3.5" width="7" height="7" rx="1.2"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.2"/>
+          <rect x="3.5" y="13.5" width="7" height="7" rx="1.2"/>
+          <path d="M6.5 6.5h1M16.5 6.5h1M6.5 16.5h1"/>
+          <path d="M14 14h2.5v2.5M20.5 14v.01M14 20.5h.01M17 18.5v2h3.5M20.5 17v.01"/>
         </svg>
       </a>
       <!-- 설정 버튼 (우) — 기존 "닫기" 버튼 자리 재사용.
@@ -2447,14 +2450,14 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
 </script>
 
 <!-- 나비 모듈 -->
-<script src="/src/pwa/gopang-pwa.js?v=20260914"></script>
+<script src="/src/pwa/gopang-pwa.js?v=20261015"></script>
 <!-- BUG FIX: /src/auth/gopang-auth.js는 src/gopang/core/auth.js의 오래된 죽은 복사본이며
      import 구문을 쓰는데 type="module" 없이 로드되어 매 페이지 로드마다
      "Cannot use import statement outside a module" 에러를 던지고 있었음.
      실제 사용되는 인증 모듈은 gopang-app.js가 import하는 src/gopang/core/auth.js뿐이므로
      이 죽은 script 태그를 제거함(파일 자체도 git rm 권장 — 커밋 안내 참조). -->
 <!-- v3: ES Module 진입점 -->
-<script type="module" src="/gopang-app.js?v=20260630"></script>
+<script type="module" src="/gopang-app.js?v=20261015"></script>
 
 <script>
 // ── 알림 소리 설정 ────────────────────────────────────────
