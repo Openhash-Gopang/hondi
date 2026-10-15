@@ -599,6 +599,13 @@ body.gopang-authed #gopang-auth-gate{display:none}
 .ia-btn.ia-scan.used{width:35.91px;padding:0;gap:0}
 .ia-btn.ia-scan.used .ia-scan-label{display:none}
 .ia-btn.mic-recording{color:#3b82f6;animation:mic-pulse .9s ease-in-out infinite}
+/* 2026-10-16 마이크 버튼 확대·진하게 — AI 비서 입력창(chat-input.js)의 마이크 아이콘만
+   크기 +10%(15.5px→17.05px), 선 굵기 2→2.5, 색 #9CA3AF→#4B5563. 녹음 중(.mic-active)은 기존 스타일 유지.
+   공용 assets/chat-input.css 는 수정하지 않고 webapp.html 안에서만 덮어쓴다. */
+#ai-panel-input-slot .ci-mic-btn svg{width:17.05px;height:17.05px;stroke-width:2.5}
+#ai-panel-input-slot .ci-mic-btn:not(.mic-active){color:#4B5563}
+#ai-panel-input-slot .ci-mic-btn:not(.mic-active):hover,
+#ai-panel-input-slot .ci-mic-btn:not(.mic-active):active{color:#111}
 @keyframes mic-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
 
 /* Navi 버전 뱃지 — 2026-07-08: 상단 바 삭제로 로고·베타뱃지가 사라지면서
