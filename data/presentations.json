@@ -3,6 +3,7 @@
   "series": [
     { "id": "web",     "order": 5,  "title": "나비웹", "desc": "나비 코드 샘플과 기관 사이트 시연 화면" },
     { "id": "intro",   "order": 10, "title": "나비 이해하기", "desc": "나비가 무엇이고 웹이 어떻게 달라지는지" },
+    { "id": "persona", "order": 15, "title": "전문가 페르소나", "desc": "수백 종의 전문가 AI 중 직업별 업무 보조 AI를 소개합니다" },
     { "id": "region",  "order": 20, "title": "지역과 기관에 적용하기", "desc": "제주를 비롯한 지역과 기관에 나비를 적용하는 구상" },
     { "id": "seminar", "order": 30, "title": "기관 대상 세미나", "desc": "특정 기관 임직원을 위한 맞춤 발표 자료" }
   ],
@@ -46,6 +47,22 @@
       "audience": "지자체 · 파트너 기관", "date": "2026-10-15",
       "tags": ["사업계획", "전국 확산", "PDF"],
       "url": "https://hondi.net/assets/presentations/nabiweb-intro-business-plan-20261015-r2.pdf"
+    },
+    {
+      "id": "user-manual", "order": 30, "series": "intro", "status": "ready",
+      "title": "나비 사용자 매뉴얼",
+      "summary": "처음 쓰는 사람도 따라 할 수 있게 접속, 말로 전문가 부르기, 메뉴·설정, 앱 설치, 나비 숫자 코드, GDC 지갑, 나의 기록 금고(PDV), OpenHash를 화면 18장과 함께 설명합니다.",
+      "audience": "일반 · 처음 쓰는 사용자", "date": "2026-10-16",
+      "tags": ["매뉴얼", "PDF", "사용법"],
+      "url": "https://hondi.net/assets/presentations/navi-user-manual-20261016.pdf"
+    },
+    {
+      "id": "persona-scrivener", "order": 10, "series": "persona", "status": "ready",
+      "title": "전문가 페르소나 — 법무사 업무 보조 AI",
+      "summary": "법무사와 사무소 직원의 업무를 돕는 법무사 AI를 소개합니다. 은행 예금 압류·가압류 절차를 예시로, 관제탑 원칙에 따라 한 번에 하나씩 지시하는 현재 방식과 법원 dpaper API 공개 후의 일괄 처리를 설명합니다.",
+      "audience": "법무사 · 법무사 사무소", "date": "2026-10-16",
+      "tags": ["전문가 페르소나", "법무사", "PDF"],
+      "url": "https://hondi.net/assets/presentations/expert-persona-judicial-scrivener-20261016.pdf"
     },
     {
       "id": "tp-seminar", "order": 10, "series": "seminar", "status": "draft",
