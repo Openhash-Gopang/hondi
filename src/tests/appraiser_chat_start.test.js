@@ -13,7 +13,7 @@ import { dirname, join } from 'node:path';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
 
-describe('감정평가사 보조 AI — 시작 영역(감정 평가 시작·방법론 안내 + 입력창)', () => {
+describe('감정평가사 보조 AI — 시작 영역(감정 평가·방법론 + 입력창)', () => {
   const page = read('pages/appraiser.html');
   const widget = read('assets/chat-widget.js');
   const css = read('assets/pro-doc-page.css');
@@ -25,7 +25,7 @@ describe('감정평가사 보조 AI — 시작 영역(감정 평가 시작·방�
   });
 
   it('A-02: 시작 영역에 탭 2개·입력창·첨부·마이크가 있고 위젯 공개 API(open/send)를 호출한다', () => {
-    assert.ok(page.includes('id="startBox"') && page.includes('>감정 평가 시작<') && page.includes('>방법론 안내<'), '탭 2개 없음');
+    assert.ok(page.includes('id="startBox"') && page.includes('>감정 평가<') && page.includes('>방법론<'), '탭 2개 없음');
     assert.ok(page.includes('id="startInput"') && page.includes('id="startAttach"') && page.includes('id="startMic"'), '입력창/첨부/마이크 없음');
     assert.ok(!page.includes('id="startChat"') && !page.includes('start-chat-btn'), '옛 시작 버튼이 남아 있음');
     assert.ok(/HondiChatWidget/.test(page) && /W\(\)\.open\(\)/.test(page) && /W\(\)\.send\(/.test(page), '위젯 open/send 호출 없음');
