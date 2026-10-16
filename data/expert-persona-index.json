@@ -369,7 +369,7 @@
 "triggers":[
 "행정사"
 ],
-"spPath":"prompts/SP_administrative-scrivener_v1_0.md"
+"spPath":"prompts/SP_administrative-scrivener_v1_1.md"
 },
 "labor-attorney":{
 "label":"공인노무사",
