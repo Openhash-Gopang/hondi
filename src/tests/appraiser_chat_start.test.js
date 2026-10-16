@@ -57,9 +57,9 @@ describe('감정평가사 보조 AI — 시작 영역(감정 평가·방법론 +
   it('A-05: 공용 CSS의 알약형 탭과 위젯의 인라인 확장(세로 전환) 규칙이 있다', () => {
     assert.ok(/\.start-tabs\s*\{[^}]*border-radius:\s*999px/.test(css), '탭 묶음 알약 스타일 없음');
     assert.ok(/\.start-tab\.active\s*\{[^}]*background:\s*#ffffff/.test(css), '활성 탭 스타일 없음');
-    assert.ok(widget.includes('#hcw-panel.hcw-inline #hcw-messages{flex:none;max-height:0'), '접힌 상태(메시지 높이 0) 규칙 없음');
-    assert.ok(widget.includes('#hcw-panel.hcw-inline.open #hcw-messages{max-height:min(460px,60vh)'), '펼침 상태 규칙 없음');
-    assert.ok(/#hcw-messages\{[^']*transition:max-height/.test(widget.replace(/\n/g,'')) || widget.includes('transition:max-height .45s'), '높이 전환(애니메이션) 없음');
+    assert.ok(widget.includes('#hcw-panel.hcw-inline #hcw-messages{box-sizing:border-box;flex:none;height:0'), '접힌 상태(메시지 높이 0) 규칙 없음');
+    assert.ok(widget.includes('#hcw-panel.hcw-inline.open #hcw-messages{height:var(--hcw-inline-h)'), '펼침 상태 규칙 없음');
+    assert.ok(/#hcw-messages\{[^']*transition:max-height/.test(widget.replace(/\n/g,'')) || widget.includes('transition:height var(--hcw-dur) var(--hcw-ease)'), '높이 전환(애니메이션) 없음');
     assert.ok(widget.includes('#hcw-panel.hcw-slide.open{visibility:visible;transform:translateX(0)'), '기존 슬라이드 규칙이 지워짐');
   });
 

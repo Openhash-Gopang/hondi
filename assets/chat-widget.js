@@ -146,18 +146,20 @@
     '@media (max-width:600px){#hcw-panel.hcw-slide,#hcw-panel.hcw-slide.hcw-left{left:0;right:0;width:100vw;border-radius:0}#hcw-panel.hcw-slide.hcw-right{left:auto;right:0}}' +
     // ── 2026-10-17: 인라인 모드(옵트인) — 한 줄 입력창이 제자리에서 세로로 늘어나 대화창이 된다 ──
     '#hcw-panel.hcw-inline-pending{display:none}' +
-    '#hcw-panel.hcw-inline{position:static;width:100%;max-width:640px;max-height:none;margin:0 auto;opacity:1;transform:none;pointer-events:auto;background:#fff;backdrop-filter:none;-webkit-backdrop-filter:none;border:1px solid #d9e2ec;border-radius:28px;box-shadow:0 1px 2px rgba(0,0,0,.04);text-align:left;transition:border-radius .4s cubic-bezier(.22,.8,.26,1),box-shadow .4s ease,border-color .3s ease}' +
+    // 펼침은 "위쪽 가장자리는 고정, 아래쪽으로만 자란다". 메시지 영역 높이를 고정 목표값(--hcw-inline-h)으로 0.6초 동안 같은 가속도로 키우고,
+    // 머리줄·테두리 모서리·입력칸 배경도 같은 시간·같은 곡선으로 함께 바꿔 한 덩어리로 늘어나 보이게 한다(내용 길이와 무관하게 일정).
+    '#hcw-panel.hcw-inline{--hcw-inline-h:min(420px,52vh);--hcw-ease:cubic-bezier(.4,0,.2,1);--hcw-dur:.6s;position:static;width:100%;max-width:640px;max-height:none;margin:0 auto;opacity:1;transform:none;pointer-events:auto;background:#fff;backdrop-filter:none;-webkit-backdrop-filter:none;border:1px solid #d9e2ec;border-radius:28px;box-shadow:0 1px 2px rgba(0,0,0,.04);text-align:left;overflow:hidden;transition:border-radius var(--hcw-dur) var(--hcw-ease),box-shadow var(--hcw-dur) var(--hcw-ease),border-color var(--hcw-dur) var(--hcw-ease)}' +
     '#hcw-panel.hcw-inline.open{border-radius:20px;border-color:#cbd5e1;box-shadow:0 10px 32px rgba(15,23,42,.12)}' +
-    '#hcw-panel.hcw-inline #hcw-panel-header{max-height:0;padding:0 18px;opacity:0;overflow:hidden;transition:max-height .4s cubic-bezier(.22,.8,.26,1),padding .4s cubic-bezier(.22,.8,.26,1),opacity .3s ease}' +
-    '#hcw-panel.hcw-inline.open #hcw-panel-header{max-height:64px;padding:14px 18px 6px;opacity:1}' +
-    '#hcw-panel.hcw-inline #hcw-messages{flex:none;max-height:0;padding:0 16px;opacity:0;overflow-y:hidden;transition:max-height .45s cubic-bezier(.22,.8,.26,1),padding .45s cubic-bezier(.22,.8,.26,1),opacity .35s ease}' +
-    '#hcw-panel.hcw-inline.open #hcw-messages{max-height:min(460px,60vh);padding:8px 16px;opacity:1;overflow-y:auto}' +
-    '#hcw-panel.hcw-inline #hcw-divider{opacity:0;transition:opacity .3s ease}#hcw-panel.hcw-inline.open #hcw-divider{opacity:1}' +
+    '#hcw-panel.hcw-inline #hcw-panel-header{max-height:0;padding:0 18px;opacity:0;overflow:hidden;transition:max-height var(--hcw-dur) var(--hcw-ease),padding var(--hcw-dur) var(--hcw-ease),opacity .4s ease}' +
+    '#hcw-panel.hcw-inline.open #hcw-panel-header{max-height:64px;padding:14px 18px 6px;opacity:1;transition-delay:0s,0s,.15s}' +
+    '#hcw-panel.hcw-inline #hcw-messages{box-sizing:border-box;flex:none;height:0;max-height:none;padding:0 16px;opacity:0;overflow-y:hidden;scroll-behavior:auto;transition:height var(--hcw-dur) var(--hcw-ease),padding var(--hcw-dur) var(--hcw-ease),opacity .45s ease}' +
+    '#hcw-panel.hcw-inline.open #hcw-messages{height:var(--hcw-inline-h);padding:8px 16px;opacity:1;overflow-y:auto;transition-delay:0s,0s,.1s}' +
+    '#hcw-panel.hcw-inline #hcw-divider{opacity:0;transition:opacity .4s ease}#hcw-panel.hcw-inline.open #hcw-divider{opacity:1;transition-delay:.2s}' +
     '#hcw-panel.hcw-inline #hcw-input-row{align-items:center;padding:8px 10px;gap:6px}' +
-    '#hcw-panel.hcw-inline #hcw-input{background:transparent;font-size:14px;min-height:36px;padding:8px 6px;transition:background .3s ease,padding .3s ease}' +
-    '#hcw-panel.hcw-inline.open #hcw-input{background:rgba(241,243,245,.85);padding:8px 14px}' +
+    '#hcw-panel.hcw-inline #hcw-input{background:rgba(241,243,245,0);font-size:14px;min-height:36px;padding:8px 14px;transition:background-color var(--hcw-dur) var(--hcw-ease)}' +
+    '#hcw-panel.hcw-inline.open #hcw-input{background:rgba(241,243,245,.85)}' +
     '#hcw-panel.hcw-inline .hcw-ibtn{border-radius:50%;width:34px;height:34px}' +
-    '#hcw-panel.hcw-inline #hcw-send{width:0;padding:0;opacity:0;margin-left:-6px;overflow:hidden;pointer-events:none;transition:width .35s cubic-bezier(.22,.8,.26,1),opacity .25s ease,margin .35s ease,background .15s}' +
+    '#hcw-panel.hcw-inline #hcw-send{width:0;padding:0;opacity:0;margin-left:-6px;overflow:hidden;pointer-events:none;transition:width var(--hcw-dur) var(--hcw-ease),opacity .4s ease,margin var(--hcw-dur) var(--hcw-ease),background .15s}' +
     '#hcw-panel.hcw-inline.open #hcw-send{width:38px;opacity:1;margin-left:0;pointer-events:auto}' +
     '#hcw-panel.hcw-inline .hcw-bubble{font-size:14px}' +
     '@media (prefers-reduced-motion:reduce){#hcw-panel.hcw-inline,#hcw-panel.hcw-inline *{transition-duration:.01ms!important}}';
@@ -488,7 +490,7 @@
 
     busy = false;
     sendBtn.disabled = false;
-    input.focus();
+    if (inline) { try { input.focus({ preventScroll: true }); } catch (e4) { input.focus(); } } else input.focus();
   }
   sendBtn.addEventListener('click', send);
 
@@ -499,7 +501,7 @@
     }
     if (inline) {
       panel.classList.add('open'); // 접혀 있던 한 줄 입력창이 CSS 전환으로 제자리에서 늘어난다
-      (window.requestAnimationFrame || setTimeout)(function () { input.focus(); });
+      (window.requestAnimationFrame || setTimeout)(function () { try { input.focus({ preventScroll: true }); } catch (e) { input.focus(); } }); // 화면이 따라 움직이지 않게
       return;
     }
     if (CFG.panelMode === 'slide') lastFocus = document.activeElement;
