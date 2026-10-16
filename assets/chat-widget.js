@@ -45,6 +45,7 @@
          greeting: '안녕하세요! ...',   // 채팅창 첫 인사(선택)
          serviceLabel: 'K-정부',        // KAuth 로그인 UI 표시명(선택)
          requireAuth: true              // 기본값 true  ·  선택 옵션: position('left'), maxTokens, panelTitle, transformReply(reply)→string, onReply(reply, bubble) · 공개 API: window.HondiChatWidget.open()/send(text)
+                                       ·  2026-10-17 신설 선택 옵션(기본값은 기존 동작 그대로): panelMode:'slide'(패널을 position 쪽 화면 가장자리에서 밀려 나오는 전체 높이 패널로 표시), mic:true(입력창 오른쪽에 음성 입력 버튼, Web Speech API — Chrome·Edge), camera:'touch'|false(카메라 버튼을 터치 기기에만 보이거나 숨김)
        };
      </script>
      <script src="/assets/chat-widget.js"></script>
@@ -73,6 +74,7 @@
     greeting: '안녕하세요! 나비 플랫폼 이용과 관련해 무엇이든 요청하거나 지시해주세요. 😊',
     serviceLabel: document.title || 'K-서비스',
     requireAuth: true, position: 'right', maxTokens: 1000, panelTitle: '', transformReply: null, onReply: null,
+    panelMode: 'popup', mic: false, camera: true,
   }, window.HONDI_CHAT_WIDGET_CONFIG || {});
 
   // ── 스타일 (desktop.html #ask-bubble / #chat-panel 디자인을 hcw- 접두로 재사용) ──
@@ -130,7 +132,18 @@
     '#hcw-send:hover{background:#1d4ed8;transform:scale(1.06)}#hcw-send:disabled{background:#e5e7eb;cursor:not-allowed;transform:none}' +
     '@media (max-width:600px){#hcw-fab{bottom:18px;right:16px}#hcw-fab-btn{width:50px;height:50px}#hcw-panel{right:12px;left:12px;width:auto;bottom:82px}}' +
     '#hcw-fab.hcw-left{right:auto;left:28px;flex-direction:row-reverse}#hcw-fab.hcw-left #hcw-fab-label{border-radius:20px 20px 4px 20px;transform:translateX(-8px)}#hcw-fab.hcw-left:hover #hcw-fab-label{opacity:1;transform:translateX(0)}#hcw-panel.hcw-left{right:auto;left:28px}' +
-    '@media (max-width:600px){#hcw-fab.hcw-left{right:auto;left:16px}#hcw-panel.hcw-left{left:12px;right:12px}}';
+    '@media (max-width:600px){#hcw-fab.hcw-left{right:auto;left:16px}#hcw-panel.hcw-left{left:12px;right:12px}}' +
+    // ── 2026-10-17: 마이크 버튼 · 카메라(터치 전용) · 슬라이드 아웃 패널 (모두 옵트인) ──
+    '#hcw-mic.listening{background:rgba(220,38,38,.12);color:#dc2626;animation:hcw-mic-pulse 1.4s ease-in-out infinite}' +
+    '@keyframes hcw-mic-pulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.35)}50%{box-shadow:0 0 0 6px rgba(220,38,38,0)}}' +
+    '@media (hover:hover) and (pointer:fine){#hcw-cam.hcw-touch-only{display:none}}' +
+    '#hcw-panel.hcw-slide{top:0;bottom:0;left:0;right:auto;width:min(440px,100vw);max-height:none;height:100vh;height:100dvh;border-radius:0 20px 20px 0;background:rgba(255,255,255,.97);opacity:1;visibility:hidden;transform:translateX(-104%);transition:transform .32s cubic-bezier(.22,.8,.26,1),visibility 0s linear .32s}' +
+    '#hcw-panel.hcw-slide.hcw-right{left:auto;right:0;border-radius:20px 0 0 20px;transform:translateX(104%)}' +
+    '#hcw-panel.hcw-slide.open{visibility:visible;transform:translateX(0);transition:transform .32s cubic-bezier(.22,.8,.26,1),visibility 0s}' +
+    '#hcw-overlay.hcw-slide-ov.open{background:rgba(15,23,42,.28)}' +
+    'body.hcw-slide-open #hcw-fab{display:none}' +
+    '#hcw-panel.hcw-slide .hcw-bubble,#hcw-panel.hcw-slide #hcw-input{font-size:15px}#hcw-panel.hcw-slide #hcw-panel-title{font-size:16px}' +
+    '@media (max-width:600px){#hcw-panel.hcw-slide,#hcw-panel.hcw-slide.hcw-left{left:0;right:0;width:100vw;border-radius:0}#hcw-panel.hcw-slide.hcw-right{left:auto;right:0}}';
   document.head.appendChild(style);
 
   var wrap = document.createElement('div');
@@ -176,6 +189,17 @@
   var sendBtn  = document.getElementById('hcw-send');
   var closeBtn = document.getElementById('hcw-panel-close');
   if (CFG.position === 'left') { document.getElementById('hcw-fab').classList.add('hcw-left'); panel.classList.add('hcw-left'); }
+  // 슬라이드 아웃 패널(옵트인): position 쪽 가장자리에서 밀려 나온다. 닫힌 동안은 visibility:hidden 이라 Tab 키가 들어가지 않는다.
+  if (CFG.panelMode === 'slide') { panel.classList.add('hcw-slide'); overlay.classList.add('hcw-slide-ov'); if (CFG.position !== 'left') panel.classList.add('hcw-right'); }
+  // 마이크 버튼(옵트인): [첨부]…[입력창][마이크][전송] 순서가 되도록 전송 버튼 앞에 넣는다.
+  if (CFG.mic) {
+    var micEl = document.createElement('button');
+    micEl.type = 'button'; micEl.className = 'hcw-ibtn'; micEl.id = 'hcw-mic'; micEl.title = '음성으로 입력'; micEl.setAttribute('aria-label', '음성으로 입력'); micEl.setAttribute('aria-pressed', 'false');
+    micEl.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>';
+    sendBtn.parentNode.insertBefore(micEl, sendBtn);
+  }
+  var camBtnEl = document.getElementById('hcw-cam');
+  if (CFG.camera === false) camBtnEl.style.display = 'none'; else if (CFG.camera === 'touch') camBtnEl.classList.add('hcw-touch-only');
   if (CFG.panelTitle) { var ttl = document.getElementById('hcw-panel-title'); if (ttl && ttl.lastChild) ttl.lastChild.textContent = CFG.panelTitle; }
 
   fabLabel.textContent = CFG.label;
@@ -313,7 +337,46 @@
   camEl.addEventListener('change', function () { onPick(camEl.files && camEl.files[0]); });
   document.getElementById('hcw-attach-x').addEventListener('click', clearAttach);
 
+  // ── 마이크(음성 입력) — CFG.mic=true 일 때만. Web Speech API(Chrome·Edge, ko-KR) ──
+  // 누르면 듣기 시작, 다시 누르면 중지. 인식된 글자는 입력창에 채워질 뿐 자동 전송하지 않는다(서류 정보는 보내기 전에 확인·수정).
+  // iOS Safari 등 Web Speech 미지원 브라우저에서는 버튼이 비활성으로 표시된다(voice-input.js 와 같은 한계).
+  // 주의: Chrome 의 음성 인식은 소리를 브라우저 제공사의 인식 서비스로 보내 처리한다.
+  var micBtn = document.getElementById('hcw-mic');
+  var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var rec = null, listening = false, micBase = '';
+  function setListening(on) {
+    listening = on;
+    if (micBtn) { micBtn.classList.toggle('listening', on); micBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); micBtn.title = on ? '음성 입력 중지' : '음성으로 입력'; }
+  }
+  function stopMic() { if (rec) { try { rec.stop(); } catch (e) {} } }
+  function startMic() {
+    if (!SpeechRec || listening) return;
+    rec = new SpeechRec();
+    rec.lang = 'ko-KR'; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1;
+    micBase = input.value;
+    rec.onresult = function (e) {
+      var fin = '', interim = '';
+      for (var i = 0; i < e.results.length; i++) { var r = e.results[i]; if (r.isFinal) fin += r[0].transcript; else interim += r[0].transcript; }
+      var sep = micBase && !/\s$/.test(micBase) ? ' ' : '';
+      input.value = micBase + sep + (fin + interim).trim();
+      autoResize();
+    };
+    rec.onerror = function (e) {
+      var code = e && e.error;
+      if (code === 'not-allowed' || code === 'service-not-allowed') appendMsg('ai', '마이크 사용이 허용되지 않았습니다. 브라우저 주소창의 마이크 권한을 허용한 뒤 다시 눌러 주세요.');
+      else if (code === 'network') appendMsg('ai', '음성 인식 서비스에 연결하지 못했습니다. 잠시 후 다시 시도하거나 글로 입력해 주세요.');
+      else if (code === 'audio-capture') appendMsg('ai', '마이크를 찾지 못했습니다. 마이크 연결을 확인해 주세요.');
+    };
+    rec.onend = function () { setListening(false); rec = null; };
+    try { rec.start(); setListening(true); } catch (e) { setListening(false); rec = null; }
+  }
+  if (micBtn) {
+    if (!SpeechRec) { micBtn.disabled = true; micBtn.title = '이 브라우저는 음성 입력을 지원하지 않습니다(Chrome·Edge에서 사용하세요)'; }
+    else micBtn.addEventListener('click', function () { if (listening) stopMic(); else startMic(); });
+  }
+
   async function send() {
+    stopMic();
     var text = input.value.trim();
     var att = pending;
     if ((!text && !att) || busy) return;
@@ -391,13 +454,23 @@
       appendMsg('ai', CFG.greeting);
       opened = true;
     }
+    if (CFG.panelMode === 'slide') lastFocus = document.activeElement;
     panel.classList.add('open');
     overlay.classList.add('open');
-    input.focus();
+    if (CFG.panelMode === 'slide') {
+      document.body.classList.add('hcw-slide-open');
+      (window.requestAnimationFrame || setTimeout)(function () { input.focus(); });
+    } else input.focus();
   }
+  var lastFocus = null;
   function closePanel() {
+    stopMic();
     panel.classList.remove('open');
     overlay.classList.remove('open');
+    if (CFG.panelMode === 'slide') {
+      document.body.classList.remove('hcw-slide-open');
+      if (lastFocus && lastFocus.focus) { try { lastFocus.focus(); } catch (e) {} }
+    }
   }
   closeBtn.addEventListener('click', closePanel);
   overlay.addEventListener('click', function (e) { if (!panel.contains(e.target)) closePanel(); });
