@@ -37,7 +37,7 @@
 import { describe, it, beforeEach, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -155,7 +155,8 @@ describe('Phase 7 — 부트스트랩 + Shell UI', () => {
   it('B-06: ShellUI.getState()가 플러그인 목록을 반영한다', async () => {
     // shell-ui.js import (EventBus 모의 주입)
     // Node 환경: document 없으므로 DOM 작업 생략, 상태만 검증
-    const { ShellUI } = await import(join(ROOT, 'src/shell-ui.js'));
+    // Windows 에서는 절대 경로(C:\...)를 import()에 그대로 넘기면 ERR_UNSUPPORTED_ESM_URL_SCHEME 이므로 file:// URL 로 변환한다.
+    const { ShellUI } = await import(pathToFileURL(join(ROOT, 'src/shell-ui.js')).href);
 
     const plugins = [
       new MockPlugin('k-law',    '⚖️', 'K-Law'),
@@ -171,7 +172,8 @@ describe('Phase 7 — 부트스트랩 + Shell UI', () => {
 
   // ── B-07: ShellUI.switchTab() 활성 탭 변경 ───────────────
   it('B-07: switchTab()이 activeTab을 변경한다', async () => {
-    const { ShellUI } = await import(join(ROOT, 'src/shell-ui.js'));
+    // Windows 에서는 절대 경로(C:\...)를 import()에 그대로 넘기면 ERR_UNSUPPORTED_ESM_URL_SCHEME 이므로 file:// URL 로 변환한다.
+    const { ShellUI } = await import(pathToFileURL(join(ROOT, 'src/shell-ui.js')).href);
 
     ShellUI.switchTab('k-health');
     const state = ShellUI.getState();
