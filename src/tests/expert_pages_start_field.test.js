@@ -71,3 +71,17 @@ describe('전문가 페르소나 페이지 전체 — 시작 영역', () => {
     }
   });
 });
+
+describe('전문가 페르소나 페이지 전체 — 노란 경고 띠 한 줄', () => {
+  for (const n of names) {
+    it(`B-09 ${n}: 경고 띠에 초안 사용 조건까지 합쳐 있고, 안내 상자는 없다`, () => {
+      const h = read(`pages/${n}.html`);
+      const m = h.match(/disclaimer:\s*(['"])(.*?)\1,/);
+      assert.ok(m, '경고 띠 문구(문자열)가 없음');
+      assert.ok(m[2].startsWith('관계 법령에 따라, 모든 보조 AI는 인간 전문가의 업무를 보조하며'), '공통 문구로 시작해야 함');
+      assert.match(m[2], /작성된 초안은 .+의 검토·확정 전에는 사용할 수 없다\.$/);
+      const intro = h.slice(h.indexOf('class="doc-intro"'), h.indexOf('id="startBox"') + 400);
+      assert.ok(!/svc-callout important/.test(intro.split('id="startBox"')[1] || ''), '입력창 아래에 주황 안내 상자가 남음');
+    });
+  }
+});
