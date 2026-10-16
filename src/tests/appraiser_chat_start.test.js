@@ -68,4 +68,32 @@ describe('감정평가사 보조 AI — 시작 영역(감정 평가·방법론 +
     const others = ['pages/k-government.html', 'pages/nurse.html'].map(read).join('');
     assert.ok(!others.includes('inlineMount'), '다른 페이지에 inline 설정이 새어 들어감');
   });
+
+  it('A-07: 「방법론」 탭이 SP 원문을 본문 폭 MD 서식으로 펼친다(Pretendard)', () => {
+    assert.ok(page.includes('id="spView"') && page.includes('id="spMd"') && page.includes('/assets/md-view.js'), '방법론 보기 영역/MD 변환기 없음');
+    assert.ok(page.includes("['SP_appraiser-assistant']") && page.includes('HondiMd.render'), 'SP 원문을 가져와 변환하는 코드 없음');
+    assert.ok(/\.sp-md\s*\{[^}]*font-family:\s*'Pretendard'/.test(css), '방법론 본문 폰트가 Pretendard가 아님');
+    assert.ok(css.includes('grid-template-rows: 0fr') && css.includes('.sp-view.open { grid-template-rows: 1fr'), '펼침 애니메이션 규칙 없음');
+    assert.ok(css.includes('.doc-start.is-method #startChatMount { display: none; }'), '방법론 탭에서 입력창을 접는 규칙 없음');
+    assert.ok(/\.sp-md\s*\{[^}]*max-height:\s*min\(80vh[^}]*overflow-y:\s*auto/.test(css), '긴 원문의 높이 제한(내부 스크롤) 규칙 없음');
+  });
+
+  it('A-08: MD 변환기는 글자를 이스케이프하고 실제 SP(표·인용·코드·목록)를 온전히 바꾼다', () => {
+    const win = {}; new Function('window', read('assets/md-view.js'))(win);
+    const R = win.HondiMd.render;
+    const evil = R('# 제목 <script>alert(1)</script>\n\n[x](javascript:alert(1)) [ok](https://hondi.net) **굵게** `a<b`');
+    assert.ok(!/<script/i.test(evil) && !evil.includes('href="javascript'), '이스케이프/링크 제한 실패: ' + evil);
+    assert.ok(evil.includes('<strong>굵게</strong>') && evil.includes('<code>a&lt;b</code>') && evil.includes('href="https://hondi.net"'), '기본 서식 변환 실패');
+    const t = R('| A | B |\n|---|---|\n| 1 | 2 |');
+    assert.ok(t.includes('<th>A</th>') && t.includes('<td>2</td>') && !t.includes('|---'), '표 변환 실패');
+    const nest = R('- 가\n  - 나\n- 다');
+    assert.ok(/<ul><li>가<ul><li>나<\/li><\/ul><\/li><li>다<\/li><\/ul>/.test(nest), '중첩 목록 실패: ' + nest);
+    const catalog = JSON.parse(read('prompts/sp-catalog.json'));
+    const sp = read('prompts/' + catalog['SP_appraiser-assistant']);
+    const html = R(sp);
+    const tables = (sp.match(/^\s*\|[\s:|-]+\|\s*$/gm) || []).length;
+    assert.equal((html.match(/<table>/g) || []).length, tables, '표 개수가 원문과 다름');
+    assert.ok(!/<script/i.test(html) && !html.includes('|---') && !/\u0000/.test(html), '변환 결과에 원문 잔재가 남음');
+    assert.equal((html.match(/<pre>/g) || []).length, Math.floor((sp.match(/^\s*```/gm) || []).length / 2), '코드 블록 개수가 원문과 다름');
+  });
 });
