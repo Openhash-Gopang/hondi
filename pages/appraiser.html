@@ -49,19 +49,7 @@ window.PAGE_HEADER = {
 <div class="ug-doc">
 
   <div class="doc-intro">
-    <div class="doc-start" id="startBox">
-      <div class="start-tabs" role="tablist" aria-label="시작 방식">
-        <button type="button" class="start-tab active" role="tab" aria-selected="true" data-mode="appraise">감정 평가</button>
-        <button type="button" class="start-tab" role="tab" aria-selected="false" data-mode="method">방법론</button>
-      </div>
-      <div id="startChatMount"></div>
-    </div>
-    <section class="sp-view" id="spView" aria-label="감정평가사 보조 AI 방법론(시스템 프롬프트 원문)" aria-hidden="true">
-      <div class="sp-view-inner">
-        <div class="sp-view-bar"><span class="sp-view-title">감정평가사 보조 AI 방법론 — 시스템 프롬프트(SP) 원문</span><a class="sp-view-raw" id="spRaw" href="#" target="_blank" rel="noopener noreferrer" hidden>원문(MD) 열기</a></div>
-        <article class="sp-md" id="spMd"><p class="sp-state">「방법론」 탭을 누르면 불러옵니다.</p></article>
-      </div>
-    </section>
+    <div class="doc-start" id="startBox"></div>
     <div class="svc-callout"><b>작성 방법</b> ① 위 입력창에 작성할 서류를 말씀하시거나(「감정 평가」), 아래 탭에서 서류를 고르고 「대화로 작성」을 누릅니다. ② 대화로 필요한 정보를 알려 주시면 초안이 작성됩니다. ③ 페이지 아래 「작성된 문서」에서 내용을 확인하고 웹 표준 서식으로 제출(내려받기)합니다.</div>
   </div>
 
@@ -106,60 +94,7 @@ window.PRO_DOC_PAGE = {"catalog":[{"id":"A-1","tab":"감정평가서","title":"�
 </script>
 <script src="/assets/md-view.js"></script>
 <script src="/assets/pro-doc-page.js"></script>
-<script>
-  // 시작 영역: 탭 2개.
-  //  · 「감정 평가」 — 아래 한 줄 입력창이 곧 대화창이다. 보내는 순간 같은 자리에서 늘어난다(chat-widget inline 모드). 로그인은 위젯이 확인한다.
-  //  · 「방법론」 — 감정평가사 보조 AI의 SP(prompts/ 의 MD 원문)를 본문 폭으로 펼쳐 보여 준다(Pretendard, MD 서식). 대화창은 접어 두고 대화 내용은 유지한다.
-  (function () {
-    var box = document.getElementById('startBox');
-    var view = document.getElementById('spView');
-    var md = document.getElementById('spMd');
-    var raw = document.getElementById('spRaw');
-    var tabs = box.querySelectorAll('.start-tab');
-    var loaded = false, loading = false;
-
-    function showState(text, retry) {
-      md.innerHTML = '';
-      var p = document.createElement('p'); p.className = 'sp-state'; p.textContent = text; md.appendChild(p);
-      if (retry) { var b = document.createElement('button'); b.type = 'button'; b.className = 'svc-link-btn sm'; b.textContent = '다시 불러오기'; b.addEventListener('click', loadSP); p.appendChild(document.createTextNode(' ')); p.appendChild(b); }
-    }
-    async function loadSP() {
-      if (loaded || loading) return;
-      loading = true; showState('방법론(시스템 프롬프트)을 불러오는 중입니다…');
-      try {
-        var cat = await fetch('/prompts/sp-catalog.json', { cache: 'no-cache' });
-        if (!cat.ok) throw new Error('catalog ' + cat.status);
-        var name = (await cat.json())['SP_appraiser-assistant'];
-        if (!name) throw new Error('catalog key');
-        var res = await fetch('/prompts/' + name, { cache: 'no-cache' });
-        if (!res.ok) throw new Error('sp ' + res.status);
-        var text = await res.text();
-        md.innerHTML = window.HondiMd.render(text);
-        raw.href = '/prompts/' + name; raw.hidden = false;
-        loaded = true;
-      } catch (e) {
-        console.error('[appraiser] SP 로드 실패', e);
-        showState('방법론을 불러오지 못했습니다.', true);
-      }
-      loading = false;
-    }
-
-    Array.prototype.forEach.call(tabs, function (t) {
-      t.addEventListener('click', function () {
-        var method = t.getAttribute('data-mode') === 'method';
-        Array.prototype.forEach.call(tabs, function (o) {
-          var on = o === t;
-          o.classList.toggle('active', on);
-          o.setAttribute('aria-selected', on ? 'true' : 'false');
-        });
-        box.classList.toggle('is-method', method);
-        view.classList.toggle('open', method);
-        view.setAttribute('aria-hidden', method ? 'false' : 'true');
-        if (method) loadSP();
-        else { var inp = document.getElementById('hcw-input'); if (inp) inp.focus(); }
-      });
-    });
-  })();
-</script>
+<script>window.START_FIELD = { firstTab: '감정 평가', secondTab: '방법론', placeholder: '작성할 감정평가 서류를 입력하세요. 예: 담보 감정평가서 작성' };</script>
+<script src="/assets/start-field.js"></script>
 </body>
 </html>

@@ -24,21 +24,19 @@ describe('감정평가사 보조 AI — 시작 영역(감정 평가·방법론 +
     assert.ok(!intro.includes('svc-callout important'), 'doc-intro 안에 노란 경고문이 남아 있음');
   });
 
-  it('A-02: 탭 2개가 있고, 입력창은 위젯 inline 모드가 탭 아래 자리에 그린다(옛 시작 버튼·별도 패널 없음)', () => {
-    assert.ok(page.includes('id="startBox"') && page.includes('>감정 평가<') && page.includes('>방법론<'), '탭 2개 없음');
-    assert.ok(page.includes('id="startChatMount"'), '입력창을 붙일 자리 없음');
+  it('A-02: 탭 이름(감정 평가·방법론)과 inline 설정, 공용 스크립트를 쓴다(옛 시작 버튼·별도 패널 없음)', () => {
+    assert.ok(page.includes('id="startBox"') && page.includes("firstTab: '감정 평가'") && page.includes("secondTab: '방법론'"), '시작 영역/탭 이름 설정 없음');
+    assert.ok(page.indexOf('/assets/md-view.js') > 0 && page.indexOf('/assets/md-view.js') < page.indexOf('/assets/start-field.js'), 'md-view.js → start-field.js 순서가 아님');
     assert.ok(page.includes('panelMode: "inline"') && page.includes('inlineMount: "#startChatMount"'), 'inline 모드 설정 없음');
-    assert.ok(!page.includes('id="startChat"') && !page.includes('start-chat-btn') && !page.includes('id="startInput"'), '옛 시작 버튼/별도 입력창이 남아 있음');
-    assert.ok(!page.includes('panelMode: "slide"'), '옆에서 밀려 나오는 패널이 남아 있음');
+    assert.ok(!page.includes('id="startChat"') && !page.includes('start-chat-btn') && !page.includes('id="startInput"') && !page.includes('panelMode: "slide"'), '옛 시작 버튼/패널이 남아 있음');
   });
 
-  it('A-02b: 경고문에 「다시 보지 않기」(옵트인)가 있고 다른 페이지 동작은 그대로다', () => {
+  it('A-02b: 경고문 「다시 보지 않기」는 옵트인이다(헤더 구현 + 이 페이지 키)', () => {
     assert.ok(page.includes("disclaimerDismissKey: 'appraiser'"), '이 페이지의 다시 보지 않기 키 없음');
     const hdr = read('assets/ph-header.js');
     assert.ok(hdr.includes('다시 보지 않기') && hdr.includes('ph-disclaimer-x') && hdr.includes('localStorage'), '헤더에 다시 보지 않기 구현 없음');
     assert.ok(/dismissible\s*=\s*typeof config\.disclaimerDismissKey === 'string'/.test(hdr), '옵트인 조건이 아님');
-    const other = read('pages/nurse.html');
-    assert.ok(!other.includes('disclaimerDismissKey'), '다른 페이지에 옵션이 새어 들어감');
+    assert.ok(!read('pages/expert-personas.html').includes('disclaimerDismissKey'), '옵션이 목록 페이지에 새어 들어감');
   });
 
   it('A-03: 감정평가사 SP를 쓰고 마이크 옵션을 켠다', () => {
@@ -63,15 +61,16 @@ describe('감정평가사 보조 AI — 시작 영역(감정 평가·방법론 +
     assert.ok(widget.includes('#hcw-panel.hcw-slide.open{visibility:visible;transform:translateX(0)'), '기존 슬라이드 규칙이 지워짐');
   });
 
-  it('A-06: inline 모드 기본값은 꺼져 있어 다른 페이지 동작이 그대로다', () => {
+  it('A-06: inline 모드 기본값은 꺼져 있어 옵트인하지 않은 페이지 동작이 그대로다', () => {
     assert.ok(/panelMode:\s*'popup'/.test(widget) && /inlineMount:\s*''/.test(widget) && /beforeSend:\s*null/.test(widget), '기본값이 기존 동작이 아님');
-    const others = ['pages/k-government.html', 'pages/nurse.html'].map(read).join('');
-    assert.ok(!others.includes('inlineMount'), '다른 페이지에 inline 설정이 새어 들어감');
+    assert.ok(!read('pages/k-government.html').includes('inlineMount'), '다른 페이지에 inline 설정이 새어 들어감');
   });
 
-  it('A-07: 「방법론」 탭이 SP 원문을 본문 폭 MD 서식으로 펼친다(Pretendard)', () => {
-    assert.ok(page.includes('id="spView"') && page.includes('id="spMd"') && page.includes('/assets/md-view.js'), '방법론 보기 영역/MD 변환기 없음');
-    assert.ok(page.includes("['SP_appraiser-assistant']") && page.includes('HondiMd.render'), 'SP 원문을 가져와 변환하는 코드 없음');
+  it('A-07: 공용 start-field.js가 탭·방법론(SP 원문, MD)·복귀를 구현하고, CSS는 Pretendard·펼침 애니메이션을 가진다', () => {
+    const sf = read('assets/start-field.js');
+    assert.ok(sf.includes("'data-mode': 'method'") && sf.includes("/prompts/sp-catalog.json") && sf.includes('HondiMd.render') && sf.includes('W.sp'), '방법론(SP 원문) 구현 없음');
+    assert.ok(sf.includes("'hcw:inline-open'") && widget.includes("'hcw:inline-open'"), '대화창이 열릴 때 첫 탭으로 돌아오는 연결 없음');
+    assert.ok(sf.includes("getElementById('ask-bubble')"), '위젯이 없는 환경(데스크톱 오버레이)의 대체 경로 없음');
     assert.ok(/\.sp-md\s*\{[^}]*font-family:\s*'Pretendard'/.test(css), '방법론 본문 폰트가 Pretendard가 아님');
     assert.ok(css.includes('grid-template-rows: 0fr') && css.includes('.sp-view.open { grid-template-rows: 1fr'), '펼침 애니메이션 규칙 없음');
     assert.ok(css.includes('.doc-start.is-method #startChatMount { display: none; }'), '방법론 탭에서 입력창을 접는 규칙 없음');

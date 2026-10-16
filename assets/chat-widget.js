@@ -500,6 +500,8 @@
       opened = true;
     }
     if (inline) {
+      // 방법론 보기 등으로 입력창이 가려져 있으면 페이지가 먼저 되돌릴 수 있게 알린다(assets/start-field.js).
+      try { document.dispatchEvent(new CustomEvent('hcw:inline-open')); } catch (e0) {}
       panel.classList.add('open'); // 접혀 있던 한 줄 입력창이 CSS 전환으로 제자리에서 늘어난다
       (window.requestAnimationFrame || setTimeout)(function () { try { input.focus({ preventScroll: true }); } catch (e) { input.focus(); } }); // 화면이 따라 움직이지 않게
       return;
@@ -546,11 +548,14 @@
   fabBtn.addEventListener('click', onFabClick);
   fabLabel.addEventListener('click', onFabClick);
   // 선택적 공개 API — 페이지가 목록 등에서 대화를 시작할 수 있게 한다(기본 동작에는 영향 없음).
+  // 인라인 모드에서 페이지 버튼(서류 목록 등)이 대화를 시작하면, 입력창이 화면 밖에 있을 수 있으므로 보이는 곳으로 스크롤한다.
+  function revealInline() { if (inline && panel.classList.contains('open')) { try { panel.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e5) {} } }
   window.HondiChatWidget = {
-    open: onFabClick,
+    open: async function () { await onFabClick(); revealInline(); },
     send: async function (text) {
       await onFabClick();
       if (!panel.classList.contains('open')) return;
+      revealInline();
       input.value = String(text || '');
       autoResize();
       return send();

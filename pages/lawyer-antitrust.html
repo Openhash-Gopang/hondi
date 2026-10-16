@@ -16,8 +16,9 @@ window.PAGE_HEADER = {
   active: 'expert-personas',
   badge: "전문가 페르소나 · 공정거래 업무 보조 AI",
   h1: "공정거래 업무의 서류 작성을<br>대화로 보조합니다",
-  sub: "전문가와 소속 직원이 서류를 작성할 때, 필요한 정보를 순서대로 여쭙고 초안 작성을 보조합니다.",
-  disclaimer: true
+  sub: "아래 입력창에 작성할 서류를 말씀하시면, 필요한 정보를 순서대로 여쭙고 초안 작성을 보조합니다.",
+  disclaimer: true,
+  disclaimerDismissKey: "lawyer-antitrust"
 };
 </script>
 <link rel="stylesheet" href="/assets/ph-header.css">
@@ -26,7 +27,10 @@ window.PAGE_HEADER = {
   window.K_AUTH_CONFIG = { serviceLabel: "공정거래 업무 보조 AI" };
   window.HONDI_CHAT_WIDGET_CONFIG = {
     sp: "SP_lawyer-antitrust",
-    position: "left",
+    panelMode: "inline",
+    inlineMount: "#startChatMount",
+    mic: true,
+    camera: "touch",
     maxTokens: 4096,
     panelTitle: "공정거래 업무 보조 AI",
     label: "작성할 서류를 말씀하세요",
@@ -40,16 +44,15 @@ window.PAGE_HEADER = {
 <div class="ug-doc">
   <div class="doc-intro">
     <p class="svc-lead"><a href="/pages/lawyer.html">← 법률(변호사 보조)</a></p>
+    <div class="doc-start" id="startBox"></div>
     <div class="svc-callout important"><b>안내</b> 공정거래 업무 보조 AI는 해당 분야 전문가와 소속 직원의 서류 작성을 대화로 보조하는 도구입니다. 전문가가 아니며 법률 자문·소송 대리·서류 제출 대행은 하지 않고, 작성된 서류는 전문가가 검토·확정해야 합니다.</div>
   </div>
 
   
 
-  <div class="doc-toolbar" style="margin-top:20px">
-    <a class="svc-link-btn solid" href="/pages/expert-chat.html?persona=lawyer-antitrust">대화로 서류 작성 시작하기</a>
-  </div>
-
   <div class="ug-footer">공정거래 업무 보조 AI는 해당 분야 전문가와 소속 직원의 서류 작성을 대화로 보조하는 도구입니다. 전문가가 아니며 법률 자문·소송 대리·서류 제출 대행은 하지 않고, 작성된 서류는 전문가가 검토·확정해야 합니다.</div>
 </div>
+<script src="/assets/md-view.js"></script>
+<script src="/assets/start-field.js"></script>
 </body>
 </html>

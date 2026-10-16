@@ -2,7 +2,9 @@
 """전문가 페이지 생성기 — pages/expert-personas.html 의 SECTIONS 데이터를 읽어, 전문가 페이지가 없는 직역
 (업종별 공급자(KSIC)·교수 페르소나 제외)의 pages/<id>.html 을 만든다. 이미 있는 파일은 덮어쓰지 않는다.
 사용: python3 scripts/gen-expert-pages.py            (저장소 루트에서)
-출력 마지막 줄은 expert-personas.html 의 SECTION_PAGE_LINKS 에 넣을 JS 항목이다."""
+출력 마지막 줄은 expert-personas.html 의 SECTION_PAGE_LINKS 에 넣을 JS 항목이다.
+2026-10-17: 시작 영역을 별도 채팅 페이지 링크에서 "탭 2개(서류 작성·방법론) + 제자리에서 늘어나는 입력창"(assets/start-field.js, chat-widget inline 모드)으로 바꿨다.
+생성기가 만든 페이지는 '이미 있는 파일은 덮어쓰지 않는다'의 예외로, 생성 표시(gen-expert-pages)가 있는 파일은 다시 생성한다."""
 import json, re, os, html, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -43,9 +45,8 @@ def title_of(label): return label if label.endswith('AI') else label + ' 업무 
 def page(pid, label, cat, spk, triggers, parent=None, children=None):
     title = title_of(label)
     disc = disclaimer(title, cat)
-    chat = '/pages/expert-chat.html?persona=' + pid
-    lead = ('아래에서 업무 분야를 고르십시오.' if children else
-            '전문가와 소속 직원이 서류를 작성할 때, 필요한 정보를 순서대로 여쭙고 초안 작성을 보조합니다.')
+    lead = ('아래에서 업무 분야를 고르거나 입력창으로 요청하십시오.' if children else
+            '아래 입력창에 작성할 서류를 말씀하시면, 필요한 정보를 순서대로 여쭙고 초안 작성을 보조합니다.')
     back = ('<p class="svc-lead"><a href="%s">← %s</a></p>' % (parent[0], e(parent[1]))) if parent else ''
     if children:
         rows = ''.join('<tr><td class="doc-title"><a href="/pages/%s.html">%s</a></td></tr>' %
@@ -75,7 +76,8 @@ window.PAGE_HEADER = {{
   badge: {json.dumps('전문가 페르소나 · ' + title, ensure_ascii=False)},
   h1: {json.dumps(e(label) + ' 업무의 서류 작성을<br>대화로 보조합니다', ensure_ascii=False)},
   sub: {json.dumps(lead, ensure_ascii=False)},
-  disclaimer: true
+  disclaimer: true,
+  disclaimerDismissKey: {json.dumps(pid)}
 }};
 </script>
 <link rel="stylesheet" href="/assets/ph-header.css">
@@ -84,7 +86,10 @@ window.PAGE_HEADER = {{
   window.K_AUTH_CONFIG = {{ serviceLabel: {json.dumps(title, ensure_ascii=False)} }};
   window.HONDI_CHAT_WIDGET_CONFIG = {{
     {cfg_sp}
-    position: "left",
+    panelMode: "inline",
+    inlineMount: "#startChatMount",
+    mic: true,
+    camera: "touch",
     maxTokens: 4096,
     panelTitle: {json.dumps(title, ensure_ascii=False)},
     label: "작성할 서류를 말씀하세요",
@@ -98,17 +103,16 @@ window.PAGE_HEADER = {{
 <div class="ug-doc">
   <div class="doc-intro">
     {back}
+    <div class="doc-start" id="startBox"></div>
     <div class="svc-callout important"><b>안내</b> {e(disc)}</div>
   </div>
 
   {body}
 
-  <div class="doc-toolbar" style="margin-top:20px">
-    <a class="svc-link-btn solid" href="{chat}">대화로 서류 작성 시작하기</a>
-  </div>
-
   <div class="ug-footer">{e(disc)}</div>
 </div>
+<script src="/assets/md-view.js"></script>
+<script src="/assets/start-field.js"></script>
 </body>
 </html>
 '''
