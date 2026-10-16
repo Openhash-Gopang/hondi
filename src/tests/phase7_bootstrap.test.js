@@ -105,11 +105,21 @@ describe('Phase 7 — 부트스트랩 + Shell UI', () => {
   //  또는 desktop.html(PC 정적 랜딩)로 즉시 리다이렉트만 하는 라우터
   //  페이지다. #gopang-shell/#boot-splash/src/app.js 참조는 더 이상
   //  존재하지 않는 게 정상이므로, 실제 역할에 맞는 항목으로 교체했다.)
-  it('B-03: index.html이 기기 판별 후 webapp.html/desktop.html로 리다이렉트한다', () => {
+  it('B-03: index.html이 기기 판별 후 webapp.html(모바일/SSO) 또는 persona.html(PC)로 리다이렉트한다', () => {
     const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
     assert.ok(html.includes('webapp.html'),          'webapp.html(모바일/SSO 진입점) 리다이렉트 대상 없음');
-    assert.ok(html.includes('desktop.html'),         'desktop.html(PC 정적 랜딩) 리다이렉트 대상 없음');
+    assert.ok(html.includes('persona.html'),         'persona.html(PC 메인 페이지) 리다이렉트 대상 없음');
     assert.ok(html.includes('window.location.replace'), '리다이렉트 로직(location.replace) 없음');
+    // 2026-10-17: PC 기본 목적지는 persona.html, 모바일·SSO는 webapp.html (삼항식의 두 분기를 고정한다)
+    assert.ok(/\?\s*'webapp\.html'\s*:\s*'persona\.html'/.test(html), 'PC=persona.html / 모바일·SSO=webapp.html 삼항식이 아님');
+  });
+
+  // ── B-03b: persona.html — PC 메인 페이지(홈 버튼이 desktop.html로 연결) ──
+  it('B-03b: persona.html이 존재하고 좌측 상단 홈 버튼이 desktop.html을 가리킨다', () => {
+    const html = readFileSync(join(ROOT, 'persona.html'), 'utf8');
+    assert.ok(/<header class="topbar">[\s\S]*?href="\/desktop\.html"[\s\S]*?홈[\s\S]*?<\/header>/.test(html), '홈 버튼(→ /desktop.html) 없음');
+    assert.ok(html.includes('/pages/expert-personas.html'), '전문가 페르소나 더 보기 링크 없음');
+    assert.ok(html.includes('/pages/k-services.html'),      '인프라 더 보기 링크 없음');
   });
 
   // ── B-04: bootstrap() 부트 순서 (코어→레이어→플러그인→AI→네트워크→UI) ──

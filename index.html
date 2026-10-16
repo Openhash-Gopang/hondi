@@ -31,10 +31,12 @@
     if (forceView === 'desktop') isMobile = false;
 
     // SSO 리다이렉트(register=1 또는 svc=)로 들어온 경우, PC라도
-    // desktop.html(정적 마케팅 페이지, 인증 로직 없음)로 보내면 안 된다 —
+    // PC 페이지(persona.html·desktop.html: 정적 페이지, 인증 로직 없음)로 보내면 안 된다 —
     // 실제 initAuth()/전화번호 팝업은 webapp.html에만 있다.
+    // 2026-10-17: PC 기본 진입 페이지를 desktop.html → persona.html 로 변경(주피터님 지시).
+    // persona.html 좌측 상단 「홈」 버튼이 desktop.html 로 연결된다.
     var hasAuthParams = params.get('register') || params.get('svc');
-    var target = (isMobile || hasAuthParams) ? 'webapp.html' : 'desktop.html';
+    var target = (isMobile || hasAuthParams) ? 'webapp.html' : 'persona.html';
     var qs     = window.location.search;
     var hash   = window.location.hash;
 
