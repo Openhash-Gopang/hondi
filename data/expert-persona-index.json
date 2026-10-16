@@ -121,7 +121,7 @@
 "부동산 가치평가",
 "자산 가치평가"
 ],
-"spPath":"prompts/SP_appraiser_v1_9.md"
+"spPath":"prompts/SP_appraiser_v1_10.md"
 },
 "architect":{
 "label":"건축사",
@@ -195,7 +195,7 @@
 "관세 신고를 대행",
 "통관 절차"
 ],
-"spPath":"prompts/SP_customs-broker_v1_7.md"
+"spPath":"prompts/SP_customs-broker_v1_8.md"
 },
 "dental-hygienist":{
 "label":"치과위생사",
@@ -360,7 +360,7 @@
 "경매",
 "소액사건"
 ],
-"spPath":"prompts/SP_judicial-scrivener_v3_1.md"
+"spPath":"prompts/SP_judicial-scrivener_v3_2.md"
 },
 "administrative-scrivener":{
 "label":"행정사 보조 AI",
@@ -369,7 +369,7 @@
 "triggers":[
 "행정사"
 ],
-"spPath":"prompts/SP_administrative-scrivener_v1_1.md"
+"spPath":"prompts/SP_administrative-scrivener_v1_2.md"
 },
 "labor-attorney":{
 "label":"공인노무사",
@@ -913,7 +913,7 @@
 "도선사",
 "도선"
 ],
-"spPath":"prompts/SP_marine-pilot_v3_3.md"
+"spPath":"prompts/SP_marine-pilot_v3_4.md"
 },
 "medical-lab-technologist":{
 "label":"임상병리사",
@@ -4993,7 +4993,7 @@
 "세무사 자문",
 "개인 절세 전략"
 ],
-"spPath":"prompts/SP_tax-accountant_v2_4.md"
+"spPath":"prompts/SP_tax-accountant_v2_5.md"
 },
 "teacher":{
 "label":"교사(정교사)",
