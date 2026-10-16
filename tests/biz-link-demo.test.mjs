@@ -52,4 +52,10 @@ assert.ok(c.payBlockers(base,{vatPayable:800000}).some(m=>m.includes('한도')))
 assert.ok(c.payBlockers(base,{vatPayable:0}).some(m=>m.includes('납부할')));
 // 8) 세율 입력 경계
 assert.strictEqual(c.taxCalc(tb,ev,'confirmed',999).rate,0.4); assert.strictEqual(c.taxCalc(tb,ev,'confirmed',-5).corp,0);
+// 9) 회계사 모드: 세무대리업무 미등록 회계사는 신고·납부 불가(세무사법 제20조의2), 등록 시 통과
+const cpa = { ...base, requireReg: true, reg: false };
+assert.ok(c.payBlockers(cpa, { vatPayable: 700000 }).some(m => m.includes('세무대리업무에 등록')));
+assert.deepStrictEqual(c.payBlockers({ ...cpa, reg: true }, { vatPayable: 700000 }), []);
+// 세무사 모드(requireReg 없음)는 영향 없음
+assert.deepStrictEqual(c.payBlockers(base, { vatPayable: 700000 }), []);
 console.log('biz-link-demo core tests passed');

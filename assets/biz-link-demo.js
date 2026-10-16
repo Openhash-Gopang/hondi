@@ -1,6 +1,9 @@
-/* biz-link-demo.js — 「사업자·세무사 연동 시연」 시뮬레이션 (2026-10-16 신설)
+/* biz-link-demo.js — 「사업자·세무사/회계사 연동 시연」 시뮬레이션 (2026-10-16 신설, 같은 날 회계사 모드 추가)
 
-   세무사 보조 AI 페이지(pages/tax-accountant.html)의 STEP L(사업자 연동)을 화면에서 보여 주는 시연 모듈이다.
+   세무사 보조 AI 페이지(pages/tax-accountant.html)와 회계사 보조 AI 페이지(pages/accountant.html)의 STEP L(사업자 연동)을
+   화면에서 보여 주는 시연 모듈이다. 페이지가 window.BIZ_LINK_DEMO_CONFIG = { mode: 'cpa' } 를 먼저 두면 회계사 모드로 동작한다
+   (기본은 세무사 모드). 회계사 모드는 SP_accountant-assistant_v1_1 STEP L의 ① 독립성 게이트(감사 수임 회사는 연동 불가)와
+   ② 세무 신고는 세무대리업무 등록 회계사만(세무사법 제20조의2)을 화면에서 강제하고, 문구를 「회계사」·「회사」로 바꿔 보여 준다.
    거래 발생 → 잠정 장부·재무제표 갱신 → 세금 계산 → 인간 세무사 검토·확정 → 전자신고(시연) → 자동 납부(시연).
 
    ── 이 시연이 하는 일과 하지 않는 일 ─────────────────────────────────────────────
@@ -14,13 +17,15 @@
      (소유 증명은 /profile/verify-owner 서명 흐름이 필요하다). 세무사·회계사의 자격(L3) 인증 정보는 플랫폼에서 읽지
      못하므로 시연에서는 자격이 확인된 것으로 가정한다고 화면에 밝힌다.
    · 세율·기한·가산세율 등은 시연용 가정값이며 화면에 그렇게 표시한다(실제는 현행 법령 조회).
-   · SP_tax-accountant-assistant_v1_1 STEP L-0 원칙을 따른다: 잠정·미확정 표시, 세무사 승인 전 확정 불가, 신고는 세무사가
+   · SP_tax-accountant-assistant_v1_1 / SP_accountant-assistant_v1_1 STEP L-0 원칙을 따른다: 잠정·미확정 표시, 세무사 승인 전 확정 불가, 신고는 세무사가
      한다(AI는 신고하지 않음), 연동되지 않은 것은 미연동으로 표시. */
 
 (function (root) {
   'use strict';
 
   var PROXY = 'https://hondi-proxy.tensor-city.workers.dev';
+  var CFG = (typeof root !== 'undefined' && root && root.BIZ_LINK_DEMO_CONFIG) || {};
+  var MODE = CFG.mode === 'cpa' ? 'cpa' : 'tax';
 
   // ───────────────────────── 순수 로직 (node 테스트 대상) ─────────────────────────
   var ACCT = {
@@ -126,6 +131,7 @@
     var r = [];
     if (!s.gate.ok) r.push('두 사람이 모두 나비 회원으로 확인되어야 합니다');
     if (!s.confirmed) r.push('세무사·회계사의 확정이 필요합니다');
+    if (s.requireReg && !s.reg) r.push('세무대리업무에 등록한 회계사만 신고할 수 있습니다(세무사법 제20조의2)');
     if (!s.filed) r.push('세무사·회계사의 전자신고(시연)가 필요합니다');
     if (!s.consent) r.push('사업자 나비의 자동납부 동의가 필요합니다');
     if (s.confirmed && tax.vatPayable <= 0) r.push('납부할 부가가치세가 없습니다(환급·0원) — 납부 단계 없음');
@@ -143,22 +149,33 @@
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
   function $(id) { return document.getElementById(id); }
 
+  // 회계사 모드 문구 치환 — 고정 문구에만 적용한다. 회원 이름은 토큰으로 두었다가 마지막에 넣어 바뀌지 않게 한다.
+  var TK_B = '\uE000B\uE001', TK_P = '\uE000P\uE001';
+  function T(str) {
+    if (MODE !== 'cpa') return str;
+    return str.replace(/세무사·회계사/g, '회계사').replace(/세무사(?!법)/g, '회계사').replace(/사업자/g, '회사');
+  }
+  function fin(html) {
+    var g = S.gate;
+    return T(html).split(TK_B).join(g.biz ? esc(g.biz.name) : '').split(TK_P).join(g.pro ? esc(g.pro.name) : '');
+  }
+
   var S;
   function fresh() {
     return {
       view: 'biz', // biz | pro
-      gate: { ok: false, login: false, biz: null, pro: null, bizCode: '', proCode: '', msg: '', busy: false },
+      gate: { ok: false, login: false, biz: null, pro: null, bizCode: '', proCode: '', msg: '', busy: false, audit: '' },
       events: [], journals: [], seq: 0,
-      confirmed: false, filed: false, filedNo: '', consent: false, consentLimit: 0, paidAmount: 0,
+      confirmed: false, filed: false, filedNo: '', consent: false, consentLimit: 0, paidAmount: 0, reg: false, requireReg: MODE === 'cpa',
       due: false, paid: false, payStatus: '', lowBalance: false, rate: DEFAULT_RATE, log: []
     };
   }
-  function log(who, msg) { S.log.push({ t: new Date().toLocaleTimeString('ko-KR'), who: who, msg: msg }); }
+  function log(who, msg) { S.log.push({ t: new Date().toLocaleTimeString('ko-KR'), who: T(who), msg: T(msg) }); }
 
   function recomputeGate() {
     var g = S.gate;
     g.login = !!(root.KAuth && root.KAuth.hasValidLogin && root.KAuth.hasValidLogin());
-    g.ok = !!(g.login && g.biz && g.pro && g.biz.guid !== g.pro.guid);
+    g.ok = !!(g.login && g.biz && g.pro && g.biz.guid !== g.pro.guid && (MODE !== 'cpa' || g.audit === 'no'));
   }
 
   function resolveCode(role) {
@@ -221,7 +238,7 @@
     S.confirmed = true; log('세무사·회계사', '장부·재무제표 확정(승인분만 반영)');
   }
   function file() {
-    if (!S.confirmed || S.filed) return;
+    if (!S.confirmed || S.filed || (S.requireReg && !S.reg)) return;
     S.filed = true; S.filedNo = 'DEMO-' + String(1000 + S.seq * 7).slice(-4) + '-' + String(S.log.length).padStart(4, '0');
     log('세무사·회계사', '전자신고(시연) 완료 — 가상 접수번호 ' + S.filedNo + ' (실제 접수 아님)');
   }
@@ -256,7 +273,7 @@
       return '<div class="bld-row"><label class="bld-lab">' + label + '</label>' +
         '<input class="bld-in" inputmode="numeric" maxlength="10" placeholder="나비 숫자 코드 10자리" value="' + esc(g[key]) + '" data-code="' + role + '"' + (g.busy ? ' disabled' : '') + '>' +
         '<button type="button" class="svc-link-btn" data-act="resolve" data-role="' + role + '"' + (g.busy ? ' disabled' : '') + '>회원 확인</button>' +
-        (m ? chip('✓ 나비 회원 · ' + m.name, 'ok') : chip('미확인', 'no')) + '</div>';
+        (m ? chip('✓ 나비 회원 · ' + (role === 'biz' ? TK_B : TK_P), 'ok') : chip('미확인', 'no')) + '</div>';
     }
     return '<div class="bld-step"><div class="bld-h"><b>0. 참여 회원 확인</b>' + (g.ok ? chip('통과', 'ok') : chip('잠김', 'no')) + '</div>' +
       '<p class="bld-p">사업자와 세무사·회계사가 <b>모두 나비 회원</b>이어야 시연할 수 있습니다. 보는 분의 로그인과 두 사람의 나비 숫자 코드를 확인합니다.</p>' +
@@ -264,7 +281,21 @@
       (g.login ? chip('✓ 나비 회원 로그인됨', 'ok') : '<button type="button" class="svc-link-btn solid" data-act="login">나비 로그인</button>' + chip('로그인 필요', 'no')) + '</div>' +
       row('biz', '사업자 코드') + row('pro', '세무사·회계사 코드') +
       (g.msg ? '<p class="bld-warn">' + esc(g.msg) + '</p>' : '') +
+      renderAudit() +
       '<p class="bld-note">확인하는 정보는 숫자 코드로 조회한 회원 여부와 이름뿐이며, 코드 외의 어떤 데이터도 서버로 보내지 않습니다. 이 시연은 보는 분이 그 코드의 주인인지 서명으로 증명하지는 않습니다. 세무사·회계사의 자격(L3) 인증 정보는 이 화면에서 읽지 못해, 시연에서는 자격이 확인된 것으로 가정합니다.</p></div>';
+  }
+
+  // 회계사 모드 전용 — SP STEP L-0 2 독립성 게이트: 감사(증명 업무) 수임 회사는 기장·재무제표 작성 연동을 시작하지 않는다.
+  function renderAudit() {
+    var g = S.gate;
+    if (MODE !== 'cpa' || !(g.login && g.biz && g.pro)) return '';
+    return '<div class="bld-row" style="align-items:flex-start"><label class="bld-lab">독립성 확인</label><div>' +
+      '<div class="bld-p" style="margin:0 0 6px">이 사업자에 대해 외부감사 등 증명 업무를 수행 중이거나 수행할 예정입니까? 같은 회사의 감사와 회계기록·재무제표 작성을 함께 하면 감사인의 독립성을 해칠 수 있어(공인회계사법·외부감사법 독립성 규정, 조문 확인 필요) 연동 시작 전에 확인합니다.</div>' +
+      '<label class="bld-chk"><input type="radio" name="bld-audit" data-audit="1" value="no"' + (g.audit === 'no' ? ' checked' : '') + '> 아니오(해당 없음)</label> ' +
+      '<label class="bld-chk"><input type="radio" name="bld-audit" data-audit="1" value="yes"' + (g.audit === 'yes' ? ' checked' : '') + '> 예(감사 수임 회사)</label>' +
+      (g.audit === 'yes' ? '<p class="bld-warn">감사 수임 회사는 기장·재무제표 작성 연동 대상이 아닙니다. 연동을 시작하지 않고 회계사에게 보고합니다. 연동 데이터를 감사증거나 감사의견의 근거로 제시하는 것도 하지 않습니다.</p>' : '') +
+      (g.audit === '' ? '<p class="bld-note">선택해야 시연을 시작할 수 있습니다.</p>' : '') +
+      '</div></div>';
   }
 
   function renderEvents() {
@@ -350,15 +381,17 @@
       ['납부 기한일 도래(시연 날짜)', S.due ? 'done' : 'todo'],
       ['자동 납부 실행(가상)', S.paid ? 'done' : (S.payStatus === 'failed' ? 'fail' : 'todo')]
     ].map(function (s, i) { return '<li class="bld-li ' + s[1] + '"><span class="bld-n">' + (i + 1) + '</span>' + esc(s[0]) + ' ' + (s[1] === 'done' ? chip('완료', 'ok') : s[1] === 'fail' ? chip('실패', 'no') : chip('대기', 'wait')) + '</li>'; }).join('');
+    var regBox = MODE === 'cpa' ? '<div><label class="bld-chk"><input type="checkbox" data-reg="1"' + (S.reg ? ' checked' : '') + (S.view !== 'pro' || S.filed ? ' disabled' : '') + '> 세무대리업무에 등록한 회계사입니다(시연 가정 — 회계사 화면에서만 변경)</label></div>' : '';
     var consentBox = '<label class="bld-chk"><input type="checkbox" data-consent="1"' + (S.consent ? ' checked' : '') + (S.view !== 'biz' || S.paid ? ' disabled' : '') + '> 자동납부 동의(사업자 나비 화면에서만 변경) — 한도: 확정된 납부세액 이하, 기한일 1회</label>';
     return '<div class="bld-step"><div class="bld-h"><b>4. 자동 납부 시연(시뮬레이션)</b>' + (S.paid ? chip('가상 납부 완료', 'ok') : chip('진행 전', 'wait')) + '</div>' +
       '<p class="bld-p">납부 자동화는 <b>사업자 본인의 사전 동의</b>가 있을 때만 작동하며, 신고는 AI가 아니라 <b>세무사·회계사가 확정·전자신고</b>한 뒤에만 이어집니다. 아래는 모두 가상입니다.</p>' +
-      '<ol class="bld-ol">' + steps + '</ol>' + consentBox +
+      '<ol class="bld-ol">' + steps + '</ol>' + consentBox + regBox +
       '<div class="bld-actions">' +
-      '<button type="button" class="svc-link-btn" data-act="file"' + (pro && S.confirmed && !S.filed ? '' : ' disabled') + '>전자신고(시연) — 세무사·회계사 화면</button> ' +
+      '<button type="button" class="svc-link-btn" data-act="file"' + (pro && S.confirmed && !S.filed && (!S.requireReg || S.reg) ? '' : ' disabled') + '>전자신고(시연) — 세무사·회계사 화면</button> ' +
       '<button type="button" class="svc-link-btn solid" data-act="due"' + (S.due ? ' disabled' : '') + '>시연 날짜를 납부 기한일(7월 25일)로 이동</button> ' +
       '<label class="bld-chk"><input type="checkbox" data-low="1"' + (S.lowBalance ? ' checked' : '') + (S.paid ? ' disabled' : '') + '> 잔액 부족 상황으로 시연</label>' +
       (S.payStatus === 'failed' && !S.paid ? ' <button type="button" class="svc-link-btn" data-act="retry">잔액 부족 해소 후 재시도(사업자 승인)</button>' : '') + '</div>' +
+      (MODE === 'cpa' ? '<p class="bld-note">세무 신고·납부는 세무대리업무에 등록한 회계사만 할 수 있습니다(세무사법 제20조의2). 감사 수임 회사는 독립성 게이트에서 연동 대상에서 제외됩니다.</p>' : '') +
       (S.filedNo ? '<p class="bld-note">가상 접수번호 ' + esc(S.filedNo) + ' — 실제 접수가 아닙니다.</p>' : '') +
       (S.due && !S.paid && b.length ? '<p class="bld-warn">자동 납부가 실행되지 않은 이유: ' + b.map(esc).join(' / ') + '</p>' : '') +
       '<p class="bld-note">실제 서비스에는 이 시연에 없는 구성요소가 필요합니다 — 홈택스 전자신고 연계(저장소의 기존 세무 실행 코드도 국세청 공식 제출 API가 없어 연계 인프라 미확보 상태로 응답합니다), 국세 납부 수단 연결(저장소에서 국세 납부 연동 코드는 찾지 못했습니다), 세무사 자격 인증 연동, 승인 대기열의 서버 저장.</p></div>';
@@ -372,11 +405,11 @@
       '<p class="svc-lead">사업자의 나비와 세무사·회계사의 나비를 연동했을 때의 흐름을 가상 데이터로 보여 줍니다. <b>실제 신고·납부가 아니며</b> 국세청·홈택스·GDC 지갑·원장에 어떤 요청도 보내지 않습니다.</p>' +
       '<div class="svc-callout important">시연 데이터는 이 브라우저에만 있고 새로 고치면 사라집니다. 모든 수치는 세무사·회계사가 확정하기 전까지 「잠정·미확정」이며, 세율·가산세율·기한은 시연용 가정값입니다.</div>';
     h += renderGate();
-    if (!g.ok) { el.innerHTML = h + '</div>'; return; }
+    if (!g.ok) { el.innerHTML = fin(h + '</div>'); return; }
 
     h += '<div class="bld-bar"><span class="bld-sub2">현재 화면</span>' +
-      '<button type="button" class="svc-link-btn' + (S.view === 'biz' ? ' solid' : '') + '" data-act="view" data-v="biz">사업자 나비 — ' + esc(g.biz.name) + '</button>' +
-      '<button type="button" class="svc-link-btn' + (S.view === 'pro' ? ' solid' : '') + '" data-act="view" data-v="pro">세무사·회계사 나비 — ' + esc(g.pro.name) + '</button>' +
+      '<button type="button" class="svc-link-btn' + (S.view === 'biz' ? ' solid' : '') + '" data-act="view" data-v="biz">사업자 나비 — ' + TK_B + '</button>' +
+      '<button type="button" class="svc-link-btn' + (S.view === 'pro' ? ' solid' : '') + '" data-act="view" data-v="pro">세무사·회계사 나비 — ' + TK_P + '</button>' +
       '<button type="button" class="svc-link-btn" data-act="reset">처음부터 다시</button></div>';
 
     var sam = SAMPLES.map(function (x) {
@@ -390,7 +423,7 @@
 
     h += '<div class="bld-step"><div class="bld-h"><b>기록(감사 로그)</b></div><ul class="bld-log">' +
       (S.log.length ? S.log.slice().reverse().map(function (l) { return '<li><span class="bld-sub">' + esc(l.t) + '</span> <b>' + esc(l.who) + '</b> ' + esc(l.msg) + '</li>'; }).join('') : '<li class="bld-sub">아직 기록이 없습니다.</li>') + '</ul></div></div>';
-    el.innerHTML = h;
+    el.innerHTML = fin(h);
   }
 
   // ───────── 이벤트 ─────────
@@ -419,7 +452,9 @@
       if (S.view !== 'biz') return;
       S.consent = t.checked; S.consentLimit = S.consent ? Math.max(currentTax().vatPayable, 0) : 0;
       log('사업자 나비', S.consent ? '자동납부 동의(한도 ' + won(S.consentLimit) + ', 기한일 1회)' : '자동납부 동의 철회');
-    } else if (t.matches && t.matches('[data-low]')) { S.lowBalance = t.checked; }
+    } else if (t.matches && t.matches('[data-audit]')) { S.gate.audit = t.value === 'yes' ? 'yes' : 'no'; recomputeGate(); }
+    else if (t.matches && t.matches('[data-reg]')) { if (S.view !== 'pro' || S.filed) return; S.reg = t.checked; log('세무사·회계사', t.checked ? '세무대리업무 등록 확인(시연 가정)' : '세무대리업무 등록 확인 해제'); }
+    else if (t.matches && t.matches('[data-low]')) { S.lowBalance = t.checked; }
     else if (t.matches && t.matches('[data-acct]')) { if (S.view === 'pro') changeAccount(t.getAttribute('data-acct'), t.value); }
     else if (t.matches && t.matches('[data-rate]')) { var v = Number(t.value); S.rate = isFinite(v) ? Math.max(0, Math.min(40, v)) : DEFAULT_RATE; }
     else return;
