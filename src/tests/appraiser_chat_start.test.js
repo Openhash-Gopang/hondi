@@ -24,12 +24,12 @@ describe('감정평가사 보조 AI — 시작 영역(감정 평가·방법론 +
     assert.ok(!intro.includes('svc-callout important'), 'doc-intro 안에 노란 경고문이 남아 있음');
   });
 
-  it('A-02: 시작 영역에 탭 2개·입력창·첨부·마이크가 있고 위젯 공개 API(open/send)를 호출한다', () => {
+  it('A-02: 탭 2개가 있고, 입력창은 위젯 inline 모드가 탭 아래 자리에 그린다(옛 시작 버튼·별도 패널 없음)', () => {
     assert.ok(page.includes('id="startBox"') && page.includes('>감정 평가<') && page.includes('>방법론<'), '탭 2개 없음');
-    assert.ok(page.includes('id="startInput"') && page.includes('id="startAttach"') && page.includes('id="startMic"'), '입력창/첨부/마이크 없음');
-    assert.ok(!page.includes('id="startChat"') && !page.includes('start-chat-btn'), '옛 시작 버튼이 남아 있음');
-    assert.ok(/HondiChatWidget/.test(page) && /W\(\)\.open\(\)/.test(page) && /W\(\)\.send\(/.test(page), '위젯 open/send 호출 없음');
-    assert.ok(page.includes("classList.add('has-start-field')"), '말풍선 숨김 클래스 없음');
+    assert.ok(page.includes('id="startChatMount"'), '입력창을 붙일 자리 없음');
+    assert.ok(page.includes('panelMode: "inline"') && page.includes('inlineMount: "#startChatMount"'), 'inline 모드 설정 없음');
+    assert.ok(!page.includes('id="startChat"') && !page.includes('start-chat-btn') && !page.includes('id="startInput"'), '옛 시작 버튼/별도 입력창이 남아 있음');
+    assert.ok(!page.includes('panelMode: "slide"'), '옆에서 밀려 나오는 패널이 남아 있음');
   });
 
   it('A-02b: 경고문에 「다시 보지 않기」(옵트인)가 있고 다른 페이지 동작은 그대로다', () => {
@@ -41,9 +41,9 @@ describe('감정평가사 보조 AI — 시작 영역(감정 평가·방법론 +
     assert.ok(!other.includes('disclaimerDismissKey'), '다른 페이지에 옵션이 새어 들어감');
   });
 
-  it('A-03: 감정평가사 SP를 쓰고 슬라이드·마이크 옵션을 켠다', () => {
+  it('A-03: 감정평가사 SP를 쓰고 마이크 옵션을 켠다', () => {
     assert.ok(page.includes('sp: "SP_appraiser-assistant"'), 'SP_appraiser-assistant 키가 아님');
-    assert.ok(page.includes('panelMode: "slide"') && page.includes('mic: true'), '슬라이드/마이크 옵션 없음');
+    assert.ok(page.includes('mic: true'), '마이크 옵션 없음');
     const catalog = JSON.parse(read('prompts/sp-catalog.json'));
     assert.ok(catalog['SP_appraiser-assistant'], 'sp-catalog.json 에 SP_appraiser-assistant 키 없음');
     assert.ok(read('prompts/' + catalog['SP_appraiser-assistant']).length > 50, 'SP 파일이 비어 있음');
@@ -51,14 +51,21 @@ describe('감정평가사 보조 AI — 시작 영역(감정 평가·방법론 +
 
   it('A-04: 위젯이 슬라이드·마이크·카메라 옵션을 지원하고 기본값은 기존 동작이다', () => {
     assert.ok(/panelMode:\s*'popup',\s*mic:\s*false,\s*camera:\s*true/.test(widget), '새 옵션의 기본값이 기존 동작이 아님');
-    assert.ok(widget.includes("CFG.panelMode === 'slide'") && widget.includes("id = 'hcw-mic'") && widget.includes("lang = 'ko-KR'"), '슬라이드/마이크 구현 없음');
+    assert.ok(widget.includes("CFG.panelMode === 'slide'") && widget.includes("CFG.panelMode === 'inline'") && widget.includes("id = 'hcw-mic'") && widget.includes("lang = 'ko-KR'"), '슬라이드/인라인/마이크 구현 없음');
   });
 
-  it('A-05: 공용 CSS에 알약형 탭·입력창 규칙과 슬라이드 패널 규칙이 있다', () => {
+  it('A-05: 공용 CSS의 알약형 탭과 위젯의 인라인 확장(세로 전환) 규칙이 있다', () => {
     assert.ok(/\.start-tabs\s*\{[^}]*border-radius:\s*999px/.test(css), '탭 묶음 알약 스타일 없음');
     assert.ok(/\.start-tab\.active\s*\{[^}]*background:\s*#ffffff/.test(css), '활성 탭 스타일 없음');
-    assert.ok(/\.start-field\s*\{[^}]*border-radius:\s*999px/.test(css), '입력창 알약 스타일 없음');
-    assert.ok(css.includes('body.has-start-field #hcw-fab { display: none; }'), 'FAB 숨김 규칙 없음');
-    assert.ok(widget.includes('#hcw-panel.hcw-slide.open{visibility:visible;transform:translateX(0)'), '슬라이드 열림 규칙 없음');
+    assert.ok(widget.includes('#hcw-panel.hcw-inline #hcw-messages{flex:none;max-height:0'), '접힌 상태(메시지 높이 0) 규칙 없음');
+    assert.ok(widget.includes('#hcw-panel.hcw-inline.open #hcw-messages{max-height:min(460px,60vh)'), '펼침 상태 규칙 없음');
+    assert.ok(/#hcw-messages\{[^']*transition:max-height/.test(widget.replace(/\n/g,'')) || widget.includes('transition:max-height .45s'), '높이 전환(애니메이션) 없음');
+    assert.ok(widget.includes('#hcw-panel.hcw-slide.open{visibility:visible;transform:translateX(0)'), '기존 슬라이드 규칙이 지워짐');
+  });
+
+  it('A-06: inline 모드 기본값은 꺼져 있어 다른 페이지 동작이 그대로다', () => {
+    assert.ok(/panelMode:\s*'popup'/.test(widget) && /inlineMount:\s*''/.test(widget) && /beforeSend:\s*null/.test(widget), '기본값이 기존 동작이 아님');
+    const others = ['pages/k-government.html', 'pages/nurse.html'].map(read).join('');
+    assert.ok(!others.includes('inlineMount'), '다른 페이지에 inline 설정이 새어 들어감');
   });
 });

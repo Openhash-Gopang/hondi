@@ -45,7 +45,7 @@
          greeting: '안녕하세요! ...',   // 채팅창 첫 인사(선택)
          serviceLabel: 'K-정부',        // KAuth 로그인 UI 표시명(선택)
          requireAuth: true              // 기본값 true  ·  선택 옵션: position('left'), maxTokens, panelTitle, transformReply(reply)→string, onReply(reply, bubble) · 공개 API: window.HondiChatWidget.open()/send(text)
-                                       ·  2026-10-17 신설 선택 옵션(기본값은 기존 동작 그대로): panelMode:'slide'(패널을 position 쪽 화면 가장자리에서 밀려 나오는 전체 높이 패널로 표시), mic:true(입력창 오른쪽에 음성 입력 버튼, Web Speech API — Chrome·Edge), camera:'touch'|false(카메라 버튼을 터치 기기에만 보이거나 숨김)
+                                       ·  2026-10-17 신설 선택 옵션(기본값은 기존 동작 그대로): panelMode:'slide'(패널을 position 쪽 화면 가장자리에서 밀려 나오는 전체 높이 패널로 표시), mic:true(입력창 오른쪽에 음성 입력 버튼, Web Speech API — Chrome·Edge), camera:'touch'|false(카메라 버튼을 터치 기기에만 보이거나 숨김) · panelMode:'inline'+inlineMount:'#선택자'(패널을 그 자리에 붙여, 한 줄 입력창이 보내는 순간 아래로 늘어나며 대화창이 됨 — 말풍선 FAB 없음, 닫기·ESC 는 다시 한 줄로 접음) · placeholder:'입력창 안내 문구' · beforeSend(text)→string(모델에 보낼 글만 바꿈, 화면에 보이는 글은 그대로)
        };
      </script>
      <script src="/assets/chat-widget.js"></script>
@@ -74,7 +74,7 @@
     greeting: '안녕하세요! 나비 플랫폼 이용과 관련해 무엇이든 요청하거나 지시해주세요. 😊',
     serviceLabel: document.title || 'K-서비스',
     requireAuth: true, position: 'right', maxTokens: 1000, panelTitle: '', transformReply: null, onReply: null,
-    panelMode: 'popup', mic: false, camera: true,
+    panelMode: 'popup', mic: false, camera: true, inlineMount: '', placeholder: '', beforeSend: null,
   }, window.HONDI_CHAT_WIDGET_CONFIG || {});
 
   // ── 스타일 (desktop.html #ask-bubble / #chat-panel 디자인을 hcw- 접두로 재사용) ──
@@ -143,7 +143,24 @@
     '#hcw-overlay.hcw-slide-ov.open{background:rgba(15,23,42,.28)}' +
     'body.hcw-slide-open #hcw-fab{display:none}' +
     '#hcw-panel.hcw-slide .hcw-bubble,#hcw-panel.hcw-slide #hcw-input{font-size:15px}#hcw-panel.hcw-slide #hcw-panel-title{font-size:16px}' +
-    '@media (max-width:600px){#hcw-panel.hcw-slide,#hcw-panel.hcw-slide.hcw-left{left:0;right:0;width:100vw;border-radius:0}#hcw-panel.hcw-slide.hcw-right{left:auto;right:0}}';
+    '@media (max-width:600px){#hcw-panel.hcw-slide,#hcw-panel.hcw-slide.hcw-left{left:0;right:0;width:100vw;border-radius:0}#hcw-panel.hcw-slide.hcw-right{left:auto;right:0}}' +
+    // ── 2026-10-17: 인라인 모드(옵트인) — 한 줄 입력창이 제자리에서 세로로 늘어나 대화창이 된다 ──
+    '#hcw-panel.hcw-inline-pending{display:none}' +
+    '#hcw-panel.hcw-inline{position:static;width:100%;max-width:640px;max-height:none;margin:0 auto;opacity:1;transform:none;pointer-events:auto;background:#fff;backdrop-filter:none;-webkit-backdrop-filter:none;border:1px solid #d9e2ec;border-radius:28px;box-shadow:0 1px 2px rgba(0,0,0,.04);text-align:left;transition:border-radius .4s cubic-bezier(.22,.8,.26,1),box-shadow .4s ease,border-color .3s ease}' +
+    '#hcw-panel.hcw-inline.open{border-radius:20px;border-color:#cbd5e1;box-shadow:0 10px 32px rgba(15,23,42,.12)}' +
+    '#hcw-panel.hcw-inline #hcw-panel-header{max-height:0;padding:0 18px;opacity:0;overflow:hidden;transition:max-height .4s cubic-bezier(.22,.8,.26,1),padding .4s cubic-bezier(.22,.8,.26,1),opacity .3s ease}' +
+    '#hcw-panel.hcw-inline.open #hcw-panel-header{max-height:64px;padding:14px 18px 6px;opacity:1}' +
+    '#hcw-panel.hcw-inline #hcw-messages{flex:none;max-height:0;padding:0 16px;opacity:0;overflow-y:hidden;transition:max-height .45s cubic-bezier(.22,.8,.26,1),padding .45s cubic-bezier(.22,.8,.26,1),opacity .35s ease}' +
+    '#hcw-panel.hcw-inline.open #hcw-messages{max-height:min(460px,60vh);padding:8px 16px;opacity:1;overflow-y:auto}' +
+    '#hcw-panel.hcw-inline #hcw-divider{opacity:0;transition:opacity .3s ease}#hcw-panel.hcw-inline.open #hcw-divider{opacity:1}' +
+    '#hcw-panel.hcw-inline #hcw-input-row{align-items:center;padding:8px 10px;gap:6px}' +
+    '#hcw-panel.hcw-inline #hcw-input{background:transparent;font-size:14px;min-height:36px;padding:8px 6px;transition:background .3s ease,padding .3s ease}' +
+    '#hcw-panel.hcw-inline.open #hcw-input{background:rgba(241,243,245,.85);padding:8px 14px}' +
+    '#hcw-panel.hcw-inline .hcw-ibtn{border-radius:50%;width:34px;height:34px}' +
+    '#hcw-panel.hcw-inline #hcw-send{width:0;padding:0;opacity:0;margin-left:-6px;overflow:hidden;pointer-events:none;transition:width .35s cubic-bezier(.22,.8,.26,1),opacity .25s ease,margin .35s ease,background .15s}' +
+    '#hcw-panel.hcw-inline.open #hcw-send{width:38px;opacity:1;margin-left:0;pointer-events:auto}' +
+    '#hcw-panel.hcw-inline .hcw-bubble{font-size:14px}' +
+    '@media (prefers-reduced-motion:reduce){#hcw-panel.hcw-inline,#hcw-panel.hcw-inline *{transition-duration:.01ms!important}}';
   document.head.appendChild(style);
 
   var wrap = document.createElement('div');
@@ -191,6 +208,24 @@
   if (CFG.position === 'left') { document.getElementById('hcw-fab').classList.add('hcw-left'); panel.classList.add('hcw-left'); }
   // 슬라이드 아웃 패널(옵트인): position 쪽 가장자리에서 밀려 나온다. 닫힌 동안은 visibility:hidden 이라 Tab 키가 들어가지 않는다.
   if (CFG.panelMode === 'slide') { panel.classList.add('hcw-slide'); overlay.classList.add('hcw-slide-ov'); if (CFG.position !== 'left') panel.classList.add('hcw-right'); }
+  // 인라인 모드(옵트인): 패널을 inlineMount 자리에 붙인다. 위젯 스크립트가 그 요소보다 먼저 실행될 수 있어 DOM 이 준비된 뒤에도 한 번 더 시도하고,
+  // 끝내 못 찾으면 기본 팝업 모드로 되돌려 기존처럼 말풍선(FAB)으로 연다.
+  var inline = CFG.panelMode === 'inline';
+  if (inline) {
+    panel.classList.add('hcw-inline', 'hcw-inline-pending');
+    document.getElementById('hcw-fab').style.display = 'none';
+    var mountInline = function () {
+      var host = CFG.inlineMount && document.querySelector(CFG.inlineMount);
+      if (!host) return false;
+      host.appendChild(panel); panel.classList.remove('hcw-inline-pending'); return true;
+    };
+    var giveUpInline = function () { inline = false; panel.classList.remove('hcw-inline', 'hcw-inline-pending'); document.getElementById('hcw-fab').style.display = ''; };
+    if (!mountInline()) {
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { if (!mountInline()) giveUpInline(); });
+      else giveUpInline();
+    }
+  }
+  if (CFG.placeholder) input.placeholder = CFG.placeholder;
   // 마이크 버튼(옵트인): [첨부]…[입력창][마이크][전송] 순서가 되도록 전송 버튼 앞에 넣는다.
   if (CFG.mic) {
     var micEl = document.createElement('button');
@@ -377,20 +412,28 @@
 
   async function send() {
     stopMic();
+    // 인라인 모드: 접힌 입력창에서 바로 보내는 경우에도 로그인 확인 → 펼침을 먼저 거친다(말풍선 방식의 onFabClick 과 같은 경로).
+    if (inline && !panel.classList.contains('open')) {
+      if (!input.value.trim() && !pending) return;
+      await onFabClick();
+      if (!panel.classList.contains('open')) return;
+    }
     var text = input.value.trim();
     var att = pending;
+    var ctext = text;
+    if (typeof CFG.beforeSend === 'function') { try { ctext = CFG.beforeSend(text) || text; } catch (eb) { console.error('[chat-widget] beforeSend', eb); } }
     if ((!text && !att) || busy) return;
     busy = true;
     sendBtn.disabled = true;
     input.value = '';
     input.style.height = 'auto';
 
-    var content = text;
+    var content = ctext;
     if (att) {
-      if (att.images) content = [{ type: 'text', text: (text || '(첨부한 서류를 확인해 주세요)') + '\n[첨부: ' + att.name + (att.note ? ' — ' + att.note : '') + ']' }]
+      if (att.images) content = [{ type: 'text', text: (ctext || '(첨부한 서류를 확인해 주세요)') + '\n[첨부: ' + att.name + (att.note ? ' — ' + att.note : '') + ']' }]
         .concat(att.images.map(function (u) { return { type: 'image_url', image_url: { url: u } }; }));
-      else if (att.text) content = (text ? text + '\n\n' : '') + '[첨부 파일: ' + att.name + ']\n' + att.text.slice(0, 20000);
-      else content = (text ? text + '\n\n' : '') + '[첨부 파일: ' + att.name + ' — 읽지 못함: ' + (att.reason || '') + ']';
+      else if (att.text) content = (ctext ? ctext + '\n\n' : '') + '[첨부 파일: ' + att.name + ']\n' + att.text.slice(0, 20000);
+      else content = (ctext ? ctext + '\n\n' : '') + '[첨부 파일: ' + att.name + ' — 읽지 못함: ' + (att.reason || '') + ']';
     }
     clearAttach();
     appendMsg('user', (text || '') + (att ? (text ? '\n' : '') + '📎 ' + att.name : ''));
@@ -453,6 +496,11 @@
     if (!opened) {
       appendMsg('ai', CFG.greeting);
       opened = true;
+    }
+    if (inline) {
+      panel.classList.add('open'); // 접혀 있던 한 줄 입력창이 CSS 전환으로 제자리에서 늘어난다
+      (window.requestAnimationFrame || setTimeout)(function () { input.focus(); });
+      return;
     }
     if (CFG.panelMode === 'slide') lastFocus = document.activeElement;
     panel.classList.add('open');
