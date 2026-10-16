@@ -31,6 +31,8 @@ ROLE = {
   'eng': '기술 확인이나 서명',
 }
 ROLE_DEFAULT = '전문 자문'
+# 노란 경고 띠 한 줄(감정평가사 페이지와 같은 형식): 공통 문구 + 초안 사용 조건
+BANNER = '관계 법령에 따라, 모든 보조 AI는 인간 전문가의 업무를 보조하며, 단독으로 기능하지 않는다. 작성된 초안은 전문가의 검토·확정 전에는 사용할 수 없다.'
 
 def eun(w):
     c = ord(w[-1]) - 0xAC00
@@ -76,7 +78,7 @@ window.PAGE_HEADER = {{
   badge: {json.dumps('전문가 페르소나 · ' + title, ensure_ascii=False)},
   h1: {json.dumps(e(label) + ' 업무의 서류 작성을<br>대화로 보조합니다', ensure_ascii=False)},
   sub: {json.dumps(lead, ensure_ascii=False)},
-  disclaimer: true,
+  disclaimer: {json.dumps(BANNER, ensure_ascii=False)},
   disclaimerDismissKey: {json.dumps(pid)}
 }};
 </script>
@@ -104,7 +106,6 @@ window.PAGE_HEADER = {{
   <div class="doc-intro">
     {back}
     <div class="doc-start" id="startBox"></div>
-    <div class="svc-callout important"><b>안내</b> {e(disc)}</div>
   </div>
 
   {body}
