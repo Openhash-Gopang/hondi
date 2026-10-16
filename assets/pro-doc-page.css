@@ -150,18 +150,34 @@ table.svc-table td.svc-hondi { color: var(--brand-dk); font-weight: 600; }
 /* ── 법무사 보조 AI 페이지 전용 ── */
 .svc-content + .svc-content { margin-top: 24px; }
 .doc-intro { margin-bottom: 4px; }
-/* 2026-10-17 신설 — 대화창을 여는 시작 버튼(흰 바탕·둥근 사각형, 마우스를 올리면 옅은 회색) */
-.doc-start { margin: 16px 0 4px; }
-.start-chat-btn {
-  display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 32px;
-  background: #ffffff; color: #111111; border: 1px solid #cbd5e1; border-radius: 12px;
-  font-family: inherit; font-size: 17px; font-weight: 700; line-height: 1.4; cursor: pointer;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06); transition: background-color .15s ease;
-  -webkit-tap-highlight-color: transparent;
+/* 2026-10-17 — 시작 영역: 두 탭(알약형) + 입력창(첨부·마이크). 입력하면 슬라이드 아웃 대화창(chat-widget)이 열린다.
+   이 영역이 있는 페이지는 body 에 has-start-field 클래스를 붙여, 대화창을 여는 말풍선(FAB)을 숨긴다. */
+.doc-start { margin: 16px auto 8px; max-width: 640px; text-align: center; }
+.start-tabs { display: inline-flex; gap: 2px; padding: 4px; margin-bottom: 12px; background: #e2e7ef; border-radius: 999px; }
+.start-tab {
+  min-height: 36px; padding: 0 22px; border: none; border-radius: 999px; background: transparent; color: #475569;
+  font-family: inherit; font-size: 14px; font-weight: 600; line-height: 1.4; cursor: pointer; white-space: nowrap;
+  transition: background-color .15s ease, color .15s ease; -webkit-tap-highlight-color: transparent;
 }
-.start-chat-btn:hover { background: #f3f4f6; }
-.start-chat-btn:active { background: #e5e7eb; }
-.start-chat-btn:focus-visible { outline: 2px solid #111111; outline-offset: 2px; }
+.start-tab:hover { color: #1e293b; }
+.start-tab.active { background: #ffffff; color: #1e3a8a; font-weight: 700; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.14); }
+.start-tab:focus-visible { outline: 2px solid #1e3a8a; outline-offset: 2px; }
+.start-field {
+  display: flex; align-items: center; gap: 6px; margin: 0; padding: 8px 10px; background: #ffffff;
+  border: 1px solid #d9e2ec; border-radius: 999px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04); text-align: left;
+}
+.start-field:focus-within { border-color: #94a3b8; }
+.start-field input[type="text"] { flex: 1; min-width: 0; border: none; outline: none; background: transparent; font-family: inherit; font-size: 14px; color: #0f172a; padding: 6px 4px; }
+.start-icon-btn {
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 34px; height: 34px;
+  border: none; border-radius: 50%; background: transparent; color: #55606b; cursor: pointer;
+}
+.start-icon-btn:hover:not(:disabled) { background: #f0f2f5; }
+.start-icon-btn:disabled { opacity: .4; cursor: not-allowed; }
+.start-icon-btn.has-file { color: #1e3a8a; background: #e8f0fe; }
+.start-icon-btn.listening { color: #dc2626; background: #fee2e2; }
+.start-icon-btn:focus-visible { outline: 2px solid #1e3a8a; outline-offset: 1px; }
+body.has-start-field #hcw-fab { display: none; }
 .svc-badge-meta { background: #e5e7eb; color: #475569; margin-left: 0; margin-bottom: 14px; display: inline-block; }
 table.svc-table td.doc-title { font-weight: 600; color: var(--navy); }
 table.svc-table td.doc-detail { color: var(--text3); }

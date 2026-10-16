@@ -50,3 +50,7 @@
 .ph-disclaimer-inner { max-width: 1160px; margin: 0 auto; padding: 10px 24px; display: flex; align-items: flex-start; gap: 9px; }
 .ph-disclaimer-mark { flex: 0 0 auto; width: 16px; height: 16px; margin-top: 1px; border-radius: 50%; background: #b7791f; color: #fff; font-size: 11px; font-weight: 800; line-height: 16px; text-align: center; }
 .ph-disclaimer p { margin: 0; font-size: 12.5px; font-weight: 600; line-height: 1.6; word-break: keep-all; }
+/* 「다시 보지 않기 ✕」 — PAGE_HEADER.disclaimerDismissKey 를 준 페이지에만 나타난다(2026-10-17) */
+.ph-disclaimer-x { margin-left: auto; flex: 0 0 auto; align-self: center; display: inline-flex; align-items: center; gap: 5px; padding: 3px 4px; border: none; background: transparent; color: #7a5a10; font: inherit; font-size: 12px; font-weight: 600; line-height: 1.4; cursor: pointer; white-space: nowrap; border-radius: 4px; }
+.ph-disclaimer-x:hover { color: #3d2d00; text-decoration: underline; }
+.ph-disclaimer-x:focus-visible { outline: 2px solid #b7791f; outline-offset: 2px; }
