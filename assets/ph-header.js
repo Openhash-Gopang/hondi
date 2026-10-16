@@ -24,6 +24,7 @@
          sub: '설명 문단(선택, html 허용)',
          extraHtml: '<div class="pp-explainer">...</div>',  // 히어로(어두운 배경) 안에 그대로 넣을 페이지 전용 콘텐츠(선택)
          disclaimer: true,                  // 히어로 바로 아래에 면책 안내 띠를 표시(선택). true면 아래 DEFAULT_DISCLAIMER, 문자열이면 그 문구(텍스트로만 취급)
+         disclaimerDismissKey: 'my-page',   // 선택(2026-10-17 신설, 기본은 꺼짐) — 문자열을 주면 띠 오른쪽에 「다시 보지 않기 ✕」가 생기고, 누르면 이 브라우저(localStorage)에서 다시 표시하지 않는다
          subnav: [                          // 보조 탭 줄(선택) — 프롬프트 페이지 전용
            { label: '프롬프트', href: 'prompts.html', active: true },
            { label: 'SP의 계층 구조', href: 'sp-hierarchy.html' }
@@ -107,15 +108,25 @@
     return html;
   }
 
+  // 「다시 보지 않기」 선택 기록(localStorage). 저장소를 못 쓰는 환경(시크릿 창 등)에서는 기록 없이 동작한다.
+  function dismissStoreKey(config) { return 'ph-disclaimer-dismissed:' + config.disclaimerDismissKey; }
+  function isDismissed(config) {
+    if (!config || typeof config.disclaimerDismissKey !== 'string' || !config.disclaimerDismissKey) return false;
+    try { return localStorage.getItem(dismissStoreKey(config)) === '1'; } catch (e) { return false; }
+  }
+
   // 히어로 바로 아래의 면책 안내 띠. 문구는 항상 escapeHtml을 거쳐 텍스트로만 넣는다.
   function renderDisclaimer(config) {
     if (!config || !config.disclaimer) return '';
+    if (isDismissed(config)) return '';
     var text = (typeof config.disclaimer === 'string') ? config.disclaimer : DEFAULT_DISCLAIMER;
+    var dismissible = typeof config.disclaimerDismissKey === 'string' && config.disclaimerDismissKey;
     return (
       '<div class="ph-disclaimer" role="note">' +
         '<div class="ph-disclaimer-inner">' +
           '<span class="ph-disclaimer-mark" aria-hidden="true">!</span>' +
           '<p>' + escapeHtml(text) + '</p>' +
+          (dismissible ? '<button type="button" class="ph-disclaimer-x" aria-label="이 안내를 다시 보지 않기">다시 보지 않기 <span aria-hidden="true">&#10005;</span></button>' : '') +
         '</div>' +
       '</div>'
     );
@@ -152,6 +163,14 @@
       } else {
         container.insertBefore(node, container.firstChild);
       }
+    });
+    nodes.forEach(function (node) {
+      var x = node.querySelector && node.querySelector('.ph-disclaimer-x');
+      if (!x) return;
+      x.addEventListener('click', function () {
+        try { localStorage.setItem(dismissStoreKey(config), '1'); } catch (e) {}
+        if (node.parentNode) node.parentNode.removeChild(node);
+      });
     });
   }
 

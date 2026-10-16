@@ -13,7 +13,7 @@ import { dirname, join } from 'node:path';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
 
-describe('감정평가사 보조 AI — 대화로 서류 작성 시작하기', () => {
+describe('감정평가사 보조 AI — 시작 영역(감정 평가 시작·방법론 안내 + 입력창)', () => {
   const page = read('pages/appraiser.html');
   const widget = read('assets/chat-widget.js');
   const css = read('assets/pro-doc-page.css');
@@ -24,9 +24,21 @@ describe('감정평가사 보조 AI — 대화로 서류 작성 시작하기', (
     assert.ok(!intro.includes('svc-callout important'), 'doc-intro 안에 노란 경고문이 남아 있음');
   });
 
-  it('A-02: 시작 버튼이 있고 위젯 공개 API(open)를 호출한다', () => {
-    assert.ok(page.includes('id="startChat"') && page.includes('대화로 서류 작성 시작하기'), '시작 버튼 없음');
-    assert.ok(/getElementById\('startChat'\)[\s\S]*HondiChatWidget\.open\(\)/.test(page), '버튼이 HondiChatWidget.open()을 호출하지 않음');
+  it('A-02: 시작 영역에 탭 2개·입력창·첨부·마이크가 있고 위젯 공개 API(open/send)를 호출한다', () => {
+    assert.ok(page.includes('id="startBox"') && page.includes('>감정 평가 시작<') && page.includes('>방법론 안내<'), '탭 2개 없음');
+    assert.ok(page.includes('id="startInput"') && page.includes('id="startAttach"') && page.includes('id="startMic"'), '입력창/첨부/마이크 없음');
+    assert.ok(!page.includes('id="startChat"') && !page.includes('start-chat-btn'), '옛 시작 버튼이 남아 있음');
+    assert.ok(/HondiChatWidget/.test(page) && /W\(\)\.open\(\)/.test(page) && /W\(\)\.send\(/.test(page), '위젯 open/send 호출 없음');
+    assert.ok(page.includes("classList.add('has-start-field')"), '말풍선 숨김 클래스 없음');
+  });
+
+  it('A-02b: 경고문에 「다시 보지 않기」(옵트인)가 있고 다른 페이지 동작은 그대로다', () => {
+    assert.ok(page.includes("disclaimerDismissKey: 'appraiser'"), '이 페이지의 다시 보지 않기 키 없음');
+    const hdr = read('assets/ph-header.js');
+    assert.ok(hdr.includes('다시 보지 않기') && hdr.includes('ph-disclaimer-x') && hdr.includes('localStorage'), '헤더에 다시 보지 않기 구현 없음');
+    assert.ok(/dismissible\s*=\s*typeof config\.disclaimerDismissKey === 'string'/.test(hdr), '옵트인 조건이 아님');
+    const other = read('pages/nurse.html');
+    assert.ok(!other.includes('disclaimerDismissKey'), '다른 페이지에 옵션이 새어 들어감');
   });
 
   it('A-03: 감정평가사 SP를 쓰고 슬라이드·마이크 옵션을 켠다', () => {
@@ -42,9 +54,11 @@ describe('감정평가사 보조 AI — 대화로 서류 작성 시작하기', (
     assert.ok(widget.includes("CFG.panelMode === 'slide'") && widget.includes("id = 'hcw-mic'") && widget.includes("lang = 'ko-KR'"), '슬라이드/마이크 구현 없음');
   });
 
-  it('A-05: 공용 CSS에 시작 버튼(흰 바탕·둥근 사각형·호버 회색)과 슬라이드 패널 규칙이 있다', () => {
-    assert.ok(/\.start-chat-btn\s*\{[^}]*background:\s*#ffffff[^}]*border-radius:\s*12px/.test(css), '시작 버튼 기본 스타일 없음');
-    assert.ok(/\.start-chat-btn:hover\s*\{\s*background:\s*#f3f4f6/.test(css), '호버 회색 없음');
+  it('A-05: 공용 CSS에 알약형 탭·입력창 규칙과 슬라이드 패널 규칙이 있다', () => {
+    assert.ok(/\.start-tabs\s*\{[^}]*border-radius:\s*999px/.test(css), '탭 묶음 알약 스타일 없음');
+    assert.ok(/\.start-tab\.active\s*\{[^}]*background:\s*#ffffff/.test(css), '활성 탭 스타일 없음');
+    assert.ok(/\.start-field\s*\{[^}]*border-radius:\s*999px/.test(css), '입력창 알약 스타일 없음');
+    assert.ok(css.includes('body.has-start-field #hcw-fab { display: none; }'), 'FAB 숨김 규칙 없음');
     assert.ok(widget.includes('#hcw-panel.hcw-slide.open{visibility:visible;transform:translateX(0)'), '슬라이드 열림 규칙 없음');
   });
 });
