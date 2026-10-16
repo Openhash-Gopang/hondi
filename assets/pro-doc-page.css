@@ -150,6 +150,18 @@ table.svc-table td.svc-hondi { color: var(--brand-dk); font-weight: 600; }
 /* ── 법무사 보조 AI 페이지 전용 ── */
 .svc-content + .svc-content { margin-top: 24px; }
 .doc-intro { margin-bottom: 4px; }
+/* 2026-10-17 신설 — 대화창을 여는 시작 버튼(흰 바탕·둥근 사각형, 마우스를 올리면 옅은 회색) */
+.doc-start { margin: 16px 0 4px; }
+.start-chat-btn {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 32px;
+  background: #ffffff; color: #111111; border: 1px solid #cbd5e1; border-radius: 12px;
+  font-family: inherit; font-size: 17px; font-weight: 700; line-height: 1.4; cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06); transition: background-color .15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.start-chat-btn:hover { background: #f3f4f6; }
+.start-chat-btn:active { background: #e5e7eb; }
+.start-chat-btn:focus-visible { outline: 2px solid #111111; outline-offset: 2px; }
 .svc-badge-meta { background: #e5e7eb; color: #475569; margin-left: 0; margin-bottom: 14px; display: inline-block; }
 table.svc-table td.doc-title { font-weight: 600; color: var(--navy); }
 table.svc-table td.doc-detail { color: var(--text3); }
