@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-18 05:03 KST · 기준 커밋 e810c178
+- 갱신: 2026-10-18 05:10 KST · 기준 커밋 0e8d773e
 - 전문가 페르소나 전용 페이지 143개 · 등록된 SP 863건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-18 feat(presentations): 업무 보조 AI의 법률 검토 PDF 추가
 - 2026-10-18 feat(presentations): K-Law의 본래 목적 PDF 추가
 - 2026-10-18 feat(presentations): K-Law 안내문 PDF 추가
 - 2026-10-18 feat(presentations): 나비 LLM의 족보 PDF 추가
@@ -43,7 +44,6 @@
 - 2026-10-17 전문가 페이지 서류 목록 구조 정리: SP 부록 A를 정본으로 목록형 페이지 생성, 도선사 SP v3.6·페이지 전환
 - 2026-10-17 Merge pull request #649 from Openhash-Gopang/docs/session-docform-reward-20261017
 - 2026-10-17 docs: 도선사 서류 조사·서식 평가/GDC 보상 세션 요약, 워커 API 레퍼런스 §3.8, 작업기록 인덱스
-- 2026-10-17 feat(admin): 공동 설립 참여 제안서 묶음을 개정본(MD 전용)으로 교체, 공통 설립 원칙·나비로 제안서 추가
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
