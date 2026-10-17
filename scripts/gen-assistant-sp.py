@@ -394,6 +394,26 @@ def register(pid, name, fname):
 CHECK = False  # --check: 파일을 쓰지 않고, 데이터와 다른 SP 가 있으면 종료 코드 1
 
 
+_JOSA = [('을(를)', '을', '를'), ('은(는)', '은', '는'), ('이(가)', '이', '가'), ('와(과)', '과', '와'), ('으로(로)', '으로', '로')]
+
+
+def fix_josa(text):
+    """데이터의 "을(를)" 같은 조사 표기를 앞 글자의 받침에 맞게 확정한다. 받침 없음 → 두 번째, 있음 → 첫 번째 (으로(로)는 ㄹ 받침도 '로')."""
+    def sub(m):
+        w, mark = m.group(1), m.group(2)
+        c = ord(w) - 0xAC00
+        jong = c % 28 if 0 <= c < 11172 else None
+        if jong is None: return m.group(0)
+        for k, a, b in _JOSA:
+            if k == mark:
+                if k == '으로(로)': return w + ('로' if jong in (0, 8) else '으로')
+                if k == '와(과)': return w + ('과' if jong else '와')
+                return w + (a if jong else b)
+        return m.group(0)
+    text = re.sub(r'([가-힣])(을\(를\)|은\(는\)|이\(가\)|와\(과\)|으로\(로\))', sub, text)
+    return text.replace('등를', '등을').replace('등는', '등은').replace('등가 ', '등이 ')
+
+
 def build(pid):
     d = json.load(open(os.path.join(ROOT, 'data/assistant-sp/%s.json' % pid), encoding='utf-8'))
     ap = os.path.join(ROOT, 'data/assistant-sp/%s.appendix-a.md' % pid)
@@ -403,7 +423,7 @@ def build(pid):
     if not d.get('code'): d['code'] = (code + 'A') if code else None
     if not d.get('ht_line'): d['ht_line'] = ht
     if not d['code'] or not d['ht_line']: raise SystemExit('%s: code/ht_line 을 데이터에 적어야 합니다' % pid)
-    text = fill(TEMPLATE, d)
+    text = fix_josa(fill(TEMPLATE, d))
     fname = 'SP_%s-assistant_v1_0.md' % pid
     path = os.path.join(ROOT, 'prompts', fname)
     old = open(path, encoding='utf-8', newline='').read() if os.path.exists(path) else None

@@ -95,3 +95,9 @@ C-2가 없는 SP로는 목록만 보이고 「작성된 문서」가 작동하�
 - 결과: `prompts/SP_<자식id>-assistant_v1_0.md` = 부모 SP(§LEGAL-LIMIT~부록) + §0-4 세부 분야 절 + 부록 A 끝의 분야 특화 서류 1절.
 - 등록: `sp-catalog.json`(`SP_<자식id>-assistant`), `sp-catalog-categories.json`(`prof-<자식id>-assistant`, total+1).
 - 부모 SP를 고치면 `python3 scripts/gen-assistant-child-sp.py --all` 로 자식을 다시 만든다. `--check --all` 은 테스트 C-04가 부른다.
+
+## 9. 페이지의 미비점·한계 블록과 점검 문서 (2026-10-17)
+
+- 모든 전문가 페이지(생성 페이지, 수작업 서류 목록형 페이지, 법무사 페이지)에 `id="pageLimits"` 블록이 있다. 생성기 `limits_html()`이 만들고, 수작업 페이지에는 `<!--limits-->`…`<!--/limits-->` 표지 사이에 멱등으로 넣는다. 확인 수준은 SP 머리의 「근거 확인 범위」 문장에서 읽는다(세부 분야는 부모 SP 문장과 분야 서류의 유의문).
+- SP별 점검 결과와 추후 작업은 `docs/research/전문가용_SP_점검과_추후작업_20261017.md`에 있다.
+- 생성기 조사 확정: `gen-assistant-sp.py`의 `fix_josa()`가 "을(를)" 등을 받침에 맞게 바꾼다. 데이터에는 "을(를)" 표기를 그대로 써도 된다.

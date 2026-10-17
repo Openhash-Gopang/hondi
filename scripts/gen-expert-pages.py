@@ -95,6 +95,70 @@ def sp_key(pid):
     k = base.split('_')[0]
     return k if k in CAT else None
 
+# ── 페이지별 "미비점·한계와 추후 작업" 블록 (2026-10-17 지시) — 확인 수준은 SP 에서 읽고, 공통 한계·추후 작업은 여기서 정한다
+LIMITS_COMMON = [
+    '서류 목록은 SP 부록 A가 정본이며 법정 서식과 실무 사례가 섞여 있습니다. 표시가 없는 항목은 법정 서식 번호·기재사항·기한을 확인하지 못한 것으로 보십시오.',
+    '작성된 초안은 전문가의 검토·확정·서명 전에는 사용할 수 없습니다. 전문가 판단이 필요한 칸은 AI가 채우지 않고 비워 둡니다(AI 후보는 따로 표시).',
+    '전문가용 SP를 서버가 전문가 인증으로 막는 장치는 아직 없습니다. 지금은 화면과 SP의 규칙으로만 제한되므로, 인증 연동 전에는 전문가 외 이용을 기술적으로 막지 못합니다.',
+    '일반인용 SP에는 전문가용으로 옮기기 전의 L2·L3 분기 문구가 남아 있습니다(정리 예정).',
+    '이 도구는 AI이며 사람이 아닙니다. 서명·날인·접수·제출·대리를 하지 않습니다.',
+]
+LIMITS_TODO = [
+    '해당 직역 전문가의 검수(서류 목록의 누락·과잉, 실무 용어, 판단 경계)를 받아 반영합니다.',
+    '법령 원문을 읽을 수 있게 되면 서식 번호·기재사항·기한을 확정하고 SP 부록 A에 표시를 갱신합니다.',
+    '전문가 인증(면허 확인)과 서버 측 접근 통제를 연동합니다.',
+    '일반인용 SP의 L2·L3 분기를 정리하고, 전문가용 SP와의 역할 경계를 다시 점검합니다.',
+]
+
+def _limits_scope(spk, pid):
+    """SP 머리의 '근거 확인 범위' 문장. 세부 분야는 부모 SP 의 문장과 분야 서류의 유의문을 함께 보인다."""
+    def scope_of(path):
+        t = open(path, encoding='utf-8').read()
+        m = re.search(r'\*\*근거 확인 범위\*\*\s*[:：]\s*(.+)', t)
+        return m.group(1).strip().replace('`', '') if m else None
+    out = []
+    cj = os.path.join(ROOT, 'data/assistant-child-sp/%s.json' % pid)
+    if os.path.exists(cj):
+        d = json.load(open(cj, encoding='utf-8'))
+        pp = sp_file('SP_%s-assistant' % d['parent'])
+        sc = scope_of(pp) if pp else None
+        if sc: out.append('상위 직역(%s)의 확인 범위: %s' % (d['parent'], sc))
+        out.append('이 세부 분야의 특화 서류(부록 A 마지막 절)는 실무 문서이며, ' + (d['docs'].get('note') or '법정 서식 번호는 확인하지 못했습니다.'))
+    else:
+        pth = sp_file(spk)
+        sc = scope_of(pth) if pth else None
+        out.append(sc or 'SP에 확인 범위가 따로 적혀 있지 않습니다. SP §0-1과 부록 A의 표시를 보십시오.')
+    return out
+
+def limits_html(pid, spk, kind=None):
+    """kind: None=자동 판별. 'child'(세부 분야), 'hand'(수작업 SP), 'gen'(생성기 SP), 'input'(서류 목록 없음)"""
+    cj = os.path.join(ROOT, 'data/assistant-child-sp/%s.json' % pid)
+    gj = os.path.join(ROOT, 'data/assistant-sp/%s.json' % pid)
+    if kind is None:
+        kind = 'child' if os.path.exists(cj) else ('gen' if os.path.exists(gj) else ('hand' if spk and spk.endswith('-assistant') else 'input'))
+    scope = _limits_scope(spk, pid) if spk and sp_file(spk) and kind not in ('input', 'unsplit') else []
+    todo = list(LIMITS_TODO)
+    extra = []
+    if kind == 'child':
+        extra.append('부모 직역의 서류와 겹치는 항목이 있는지 정리하고, 이 분야만의 법령·서식을 따로 조사합니다.')
+        extra.append('세부 분야 SP는 부모 SP 전체를 복사한 파일이라, 부모 SP를 고치면 생성기(gen-assistant-child-sp.py)로 다시 만들어야 합니다.')
+    elif kind == 'hand':
+        extra.append('이 직역의 서류 목록과 법적 근거는 이전에 손으로 작성한 것이라 최신 법령으로 다시 조사해야 합니다.')
+    elif kind == 'unsplit':
+        extra.append('이 직역은 아직 전문가용 SP로 분리되지 않아 일반인용 SP가 쓰이고 있습니다. 서류 목록을 다시 조사하고 전문가용 SP를 새로 만들어야 합니다.')
+    elif kind == 'input':
+        extra.append('이 페이지는 아직 서류 목록이 없고 입력창만 있습니다. 서류 조사 후 목록형으로 전환합니다.')
+    else:
+        extra.append('법령 본문을 읽지 못한 조문은 제목만 확인한 것으로 표시했습니다. 본문 확인 후 갱신합니다.')
+    lis = lambda xs: ''.join('<li>%s</li>' % e(x) for x in xs)
+    sc_html = ('<h3>근거 확인 수준</h3><ul>%s</ul>' % lis(scope)) if scope else ''
+    return ('<!--limits-->\n  <div class="svc-content" id="pageLimits"><div class="svc-detail"><h2>이 페이지의 미비점·한계와 추후 작업</h2>'
+            '<p class="svc-lead">이 페이지와 전문가용 AI는 초안 단계입니다. 아래는 현재 알려진 한계와 앞으로 할 일입니다.</p>'
+            '%s<h3>알려진 한계</h3><ul>%s</ul><h3>추후 작업</h3><ul>%s</ul></div></div>\n  <!--/limits-->'
+            % (sc_html, lis(LIMITS_COMMON), lis(extra + todo)))
+
+LIMITS_RE = re.compile(r'<!--limits-->.*?<!--/limits-->', re.S)
+
 ROLE = {
   'law': '법률 자문·소송 대리·서류 제출 대행',
   'health': '진단·처방·치료',
@@ -181,6 +245,8 @@ window.PAGE_HEADER = {{
   </div>
 
   {body}
+
+  {limits_html(pid, spk, 'input')}
 
   <div class="ug-footer">{e(disc)}</div>
 </div>
@@ -292,6 +358,8 @@ window.PAGE_HEADER = {{
     </div>
   </div>
 
+  {limits_html(pid, spk)}
+
   <div class="ug-footer">{e(disc)}</div>
 </div>
 <script>
@@ -337,5 +405,20 @@ for s in SECTIONS:
         open(path, 'w', encoding='utf-8').write(page(pid, label, s['cat'], spk, trg, parent, kids, catalog_for(spk)))
         made.append(pid)
         links.append("'%s': { url: '/pages/%s.html', title: %s }" % (pid, pid, json.dumps(title_of(label) + ' 페이지', ensure_ascii=False)))
+# 손으로 만든 서류 목록형 페이지에도 같은 블록을 넣는다(표지 사이 <!--limits--> 로 멱등)
+patched = []
+for fn_ in sorted(os.listdir(os.path.join(ROOT, 'pages'))):
+    if not fn_.endswith('.html'): continue
+    path = os.path.join(ROOT, 'pages', fn_)
+    t = open(path, encoding='utf-8').read()
+    pid = fn_[:-5]
+    if pid != 'judicial-scrivener' and ('window.PRO_DOC_PAGE' not in t or 'gen-expert-pages' in t): continue
+    spk = sp_key(pid)
+    blk_ = limits_html(pid, spk, 'unsplit' if pid == 'judicial-scrivener' else ('hand' if spk and spk.endswith('-assistant') else None))
+    if '<!--limits-->' in t: nt = LIMITS_RE.sub(lambda m: blk_, t, count=1)
+    elif '<div class="ug-footer">' in t: nt = t.replace('<div class="ug-footer">', blk_ + '\n\n  <div class="ug-footer">', 1)
+    else: continue
+    if nt != t: open(path, 'w', encoding='utf-8', newline='').write(nt); patched.append(pid)
+print('수작업 페이지 갱신 %d개: %s' % (len(patched), ','.join(patched)), file=sys.stderr)
 print('생성 %d개' % len(made), file=sys.stderr)
 print(', '.join(links))
