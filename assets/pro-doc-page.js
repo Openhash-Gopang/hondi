@@ -5,6 +5,7 @@
 
      window.PRO_DOC_PAGE = {
        catalog: [ { id, tab, title, meta, lead, notes:[…], items:[{t, d}] } ],   // 업무 영역 → 대표 서류
+       detailHead: '…',                           // 선택: 서류 표의 설명 열 제목(기본 '핵심 기재 · 첨부·확인')
        askOtherMessage: '…',                      // 선택: "목록에 없는 서류" 버튼 문구
        startMessage: function (title) { … }       // 선택: 서류 선택 시 첫 메시지
      };
@@ -49,7 +50,7 @@
     var h = '<div class="svc-detail"><h2>' + esc(c.title) + '</h2><br><span class="svc-badge svc-badge-meta">' + esc(c.meta) + '</span>';
     if (c.lead) h += '<p class="svc-lead">' + esc(c.lead) + '</p>';
     c.notes.forEach(function (n) { h += '<div class="svc-callout important">' + esc(n) + '</div>'; });
-    h += '<div class="svc-table-wrap"><table class="svc-table"><thead><tr><th>서류</th>' + (showDetail ? '<th>핵심 기재 · 첨부·확인</th>' : '') + '<th></th></tr></thead><tbody>';
+    h += '<div class="svc-table-wrap"><table class="svc-table"><thead><tr><th>서류</th>' + (showDetail ? '<th>' + esc(CFG.detailHead || '핵심 기재 · 첨부·확인') + '</th>' : '') + '<th></th></tr></thead><tbody>';
     c.items.forEach(function (it, i) {
       h += '<tr><td class="doc-title">' + esc(it.t) + '</td>' + (showDetail ? '<td class="doc-detail">' + (it.d ? esc(it.d) : '—') + '</td>' : '') +
         '<td class="doc-act"><button type="button" class="svc-link-btn sm" data-doc="' + i + '">' + CHAT_SVG + '대화로 작성</button></td></tr>';

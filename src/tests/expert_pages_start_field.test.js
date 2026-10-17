@@ -51,6 +51,8 @@ describe('전문가 페르소나 페이지 전체 — 시작 영역', () => {
     cpSync(join(ROOT, 'pages'), join(tmp, 'pages'), { recursive: true });
     cpSync(join(ROOT, 'scripts/gen-expert-pages.py'), join(tmp, 'scripts/gen-expert-pages.py'));
     cpSync(join(ROOT, 'prompts/sp-catalog.json'), join(tmp, 'prompts/sp-catalog.json'));
+    // 생성기는 SP 부록 A 에서 서류 목록을 읽는다 — 카탈로그가 가리키는 SP 원문도 함께 복사한다.
+    for (const f of new Set(Object.values(catalog))) if (existsSync(join(ROOT, 'prompts', f))) cpSync(join(ROOT, 'prompts', f), join(tmp, 'prompts', f));
     const r = spawnSync('python3', ['scripts/gen-expert-pages.py'], { cwd: tmp, encoding: 'utf8' });
     assert.equal(r.status, 0, '생성기 실행 실패: ' + r.stderr);
     let checked = 0;
@@ -61,6 +63,53 @@ describe('전문가 페르소나 페이지 전체 — 시작 영역', () => {
       checked++;
     }
     assert.ok(checked >= 120, `생성 페이지 확인 수가 적음: ${checked}`);
+  });
+
+  it('B-04: 서류 목록형으로 생성된 페이지 — 서류 목록이 SP 부록 A와 같고, SP 에 서식 출력 규격(C-2)이 있다', () => {
+    let checked = 0;
+    for (const n of names) {
+      const t = read(`pages/${n}.html`);
+      if (!t.includes('gen-expert-pages.py') || !t.includes('window.PRO_DOC_PAGE')) continue;
+      const sp = (t.match(/sp:\s*"([^"]+)"/) || [])[1];
+      const md = read('prompts/' + catalog[sp]);
+      assert.ok(/^#{2,3} (?:STEP )?C-2\.? /m.test(md), `${n}: SP(${sp})에 C-2 서식 출력 규격이 없음`);
+      assert.ok(/^## 부록 A/m.test(md), `${n}: SP(${sp})에 부록 A 서류 카탈로그가 없음`);
+      assert.ok(t.includes('id="askOther"') && t.includes('id="draftsCard"') && t.includes('id="svcTabs"') && t.includes('/assets/pro-doc-page.js'), `${n}: 서류 목록 요소 누락`);
+      assert.ok(t.indexOf('/assets/md-view.js') < t.indexOf('/assets/pro-doc-page.js') && t.indexOf('/assets/pro-doc-page.js') < t.indexOf('/assets/start-field.js'), `${n}: 스크립트 순서`);
+      assert.ok(t.includes('transformReply'), `${n}: 작성된 문서 연동(transformReply) 누락`);
+      const cfg = JSON.parse(t.match(/window\.PRO_DOC_PAGE = (\{.*\});\n/)[1].replace(/<\\\//g, '</'));
+      const tabs = (md.match(/^### A-\d+\./gm) || []).length;
+      assert.ok(cfg.catalog.length >= 1 && cfg.catalog.length <= tabs, `${n}: 탭 수 이상`);
+      for (const c of cfg.catalog) for (const it of c.items) assert.ok(md.includes(it.t), `${n}: 서류 "${it.t}"가 SP 부록 A에 없음`);
+      checked++;
+    }
+    assert.ok(checked >= 1, '서류 목록형으로 생성된 페이지가 하나도 없음');
+  });
+
+  it('B-05: 손으로 만든 서류 목록형 페이지의 서류 목록(항목·설명·안내)이 SP 부록 A와 같다(SP가 정본)', (t) => {
+    if (spawnSync('python3', ['--version']).status !== 0) return t.skip('python3 없음');
+    let checked = 0;
+    for (const n of names) {
+      const h = read(`pages/${n}.html`);
+      if (h.includes('gen-expert-pages.py')) continue;
+      const m = h.match(/window\.PRO_DOC_PAGE = (\{.*\});\n/);
+      if (!m) continue;
+      const sp = (h.match(/sp:\s*"([^"]+)"/) || [])[1];
+      const r = spawnSync('python3', ['scripts/gen-expert-pages.py', '--catalog-json', join(ROOT, 'prompts', catalog[sp])], { cwd: ROOT, encoding: 'utf8' });
+      assert.equal(r.status, 0, `${n}: SP 목록 읽기 실패: ${r.stderr}`);
+      const fromSp = JSON.parse(r.stdout), onPage = JSON.parse(m[1]).catalog;
+      assert.equal(onPage.length, fromSp.length, `${n}: 탭(업무 영역) 수가 SP 부록 A와 다름 — 페이지 ${onPage.length} / SP ${fromSp.length}`);
+      for (let i = 0; i < fromSp.length; i++) {
+        const a = fromSp[i], b = onPage[i];
+        assert.equal(b.id, a.id, `${n}: ${i + 1}번째 탭 id`);
+        assert.deepEqual(b.items, a.items, `${n} ${a.id}: 서류 항목이 SP 부록 A와 다름 — SP를 고쳤다면 페이지의 목록도 같이 고치세요`);
+        assert.deepEqual(b.notes, a.notes, `${n} ${a.id}: 안내(유의)가 SP 부록 A와 다름`);
+        assert.equal(b.lead, a.lead, `${n} ${a.id}: 소개 문단이 SP 부록 A와 다름`);
+        assert.equal(b.meta, a.meta, `${n} ${a.id}: 제출처·근거 표시가 SP 부록 A와 다름`);
+      }
+      checked++;
+    }
+    assert.ok(checked >= 16, `손으로 만든 목록형 페이지 확인 수가 적음: ${checked}`);
   });
 
   it('B-03: 생성기가 만들지 않는 페이지(서류 목록형·법무사·감정평가사)는 서류 목록/위젯 연동 기능을 그대로 가진다', () => {
