@@ -76,3 +76,13 @@ C-2가 없는 SP로는 목록만 보이고 「작성된 문서」가 작동하�
 - **등록**: `sp-catalog.json`(키 `SP_<id>-assistant`), `sp-catalog-categories.json`(카테고리 `prof-<id>-assistant`, item, `total` +1).
 - **임상 판단**(의사 등): 전문가용 SP에서 진단·처방·사망 원인 등은 **전문가가 지시한 값만** 확정으로 쓰고, 지시하지 않은 칸은 `[의사 기재]`로 비운다. AI 제안은 `[AI 후보 — 의사 확인]`으로 구분한다.
 - **접근 통제의 한계(미해결)**: `/ai/chat`은 Origin만 확인하고 SP는 브라우저가 공개 파일을 받아 `system`으로 보낸다. 그래서 SP 키만 바꾸면 전문가용 SP를 누구나 호출할 수 있다. SP의 L2·L3 판정은 화면 컨텍스트에 의존하며, 서버가 면허 인증을 확인하는 지점은 없다. 면허 인증 후 전문가 세션을 발급하고 `/ai/chat`에서 전문가용 SP 호출을 막는 서버 작업은 별도 과제다.
+
+## 7. 전문가용 SP 생성기 (`scripts/gen-assistant-sp.py`)
+
+전문가용 SP를 직역마다 손으로 400줄씩 쓰면 서로 어긋나므로, 공통 골격(STEP 0~D)은 생성기가 갖고 직역 고유 내용은 데이터로 둔다.
+
+- 데이터: `data/assistant-sp/<id>.json`(법적 근거, 금지 사항, 점검 항목, 서식 front matter, 부록 B, Tier 표 등)과 `<id>.appendix-a.md`(부록 A 서류 표). 일반인용 SP에서 SP 번호와 HT 줄을 읽어 `-A` 번호로 쓴다.
+- 실행: `python3 scripts/gen-assistant-sp.py <id>…` — `prompts/SP_<id>-assistant_v1_0.md`를 쓰고 `sp-catalog.json`·`sp-catalog-categories.json`에 등록한다(멱등). `--check --all`은 데이터와 SP가 일치하는지만 확인한다(테스트 `assistant_sp_pairs.test.js` C-01).
+- 이어서 `python3 scripts/gen-expert-pages.py`로 페이지를 만든다. 공통 흐름을 고칠 때는 생성기의 TEMPLATE과 손으로 쓴 원형 `SP_physician-assistant_v1_0.md`를 함께 본다.
+- 이 방식으로 만든 직역: 치과의사, 한의사, 수의사, 약사, 간호사(2026-10-17). 의사는 원형이라 손으로 썼다.
+- 확인 수준은 서류마다 다르므로 부록 A·§0-1에 원문 확인 / 정리본 기준 / 미확인을 그대로 적는다. 조문·서식 번호를 확인하지 못했으면 지어내지 않는다.
