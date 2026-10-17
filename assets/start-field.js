@@ -233,4 +233,18 @@
     else addNavBtn();
     if (location.hash === '#legal-review') select('review', false);
   }
+  // 2026-10-17: 상단 메뉴의 「제안 및 질문」 버튼 — 모든 전문가 페르소나 페이지 공통. 공용 페이지 /pages/suggest.html 로 연결한다.
+  (function () {
+    var m = location.pathname.match(/\/pages\/([a-z0-9-]+)\.html$/i);
+    var from = C.personaId || (m ? m[1] : '');
+    var addSq = function () {
+      var navRight = document.querySelector('.topnav-right');
+      if (!navRight || document.getElementById('sqNavBtn')) return;
+      var a = el('a', { id: 'sqNavBtn', 'class': 'sq-nav-btn', href: '/pages/suggest.html' + (from ? '?from=' + encodeURIComponent(from) : ''), title: '혼디에 바라는 점이나 궁금한 점을 말씀해 주세요' }, '💬 제안 및 질문');
+      navRight.insertBefore(a, navRight.firstChild);
+    };
+    // 상단 메뉴(ph-header.js)는 DOMContentLoaded 에 그려지므로 그 뒤에 끼운다.
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(addSq, 0); });
+    else addSq();
+  })();
 })();

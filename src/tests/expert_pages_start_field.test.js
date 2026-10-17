@@ -14,7 +14,7 @@ import { spawnSync } from 'node:child_process';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
-const EXCLUDE = new Set(['expert-personas', 'expert-personas-docs']);
+const EXCLUDE = new Set(['expert-personas', 'expert-personas-docs', 'suggest']);
 const names = readdirSync(join(ROOT, 'pages')).filter((f) => f.endsWith('.html')).map((f) => f.slice(0, -5))
   .filter((n) => !EXCLUDE.has(n) && /active:\s*'expert-personas'/.test(read(`pages/${n}.html`)));
 const catalog = JSON.parse(read('prompts/sp-catalog.json'));

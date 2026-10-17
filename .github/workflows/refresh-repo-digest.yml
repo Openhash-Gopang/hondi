@@ -1,0 +1,49 @@
+name: Refresh repo digest (suggest & question)
+
+# ── 배경 ────────────────────────────────────────────────────
+# 「제안 및 질문」 SP(SP_SUGGEST_QUESTION)는 hondi.net 저장소의 최신 내용을 근거로 답한다. 저장소를 실시간으로
+# 읽을 수는 없으므로, tools/build_repo_digest.mjs 가 최근 변경·페이지 목록·로드맵 발췌를 data/repo-digest.md 로
+# 요약해 두고 페이지(/pages/suggest.html)가 이 파일을 읽어 대화 컨텍스트에 붙인다.
+# main 에 머지될 때마다, 그리고 하루 한 번(안전망) 다시 만들고 변경이 있을 때만 [skip ci] 커밋으로 반영한다.
+# (refresh-kfoi-digest.yml, bump-app-version.yml 과 같은 방식 — 요약본만 바뀌는 푸시에는 반응하지 않는다.)
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'data/repo-digest.md'
+  schedule:
+    - cron: '17 18 * * *'   # 매일 03:17 KST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-digest:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Rebuild digest
+        run: node tools/build_repo_digest.mjs
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "hondi-digest-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/repo-digest.md
+          if git diff --cached --quiet; then
+            echo "요약본 변경 없음 — 커밋 생략"
+            exit 0
+          fi
+          git commit -m "chore: refresh repo digest for suggest page [skip ci]"
+          git pull --rebase origin main || { echo "rebase 실패 — 다음 실행 때 다시 만들어집니다"; exit 0; }
+          git push
