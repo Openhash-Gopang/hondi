@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- scripts/gen-expert-pages.py 로 생성한 페이지 — 직접 고치지 말고 생성기를 고친다 -->
+<!-- scripts/gen-expert-pages.py 로 생성한 서류 목록형 페이지 — 서류 목록의 정본은 SP 부록 A, 직접 고치지 말고 SP 또는 생성기를 고친다 -->
 <html lang="ko">
 <head>
 <link rel="icon" href="data:,">
@@ -16,7 +16,7 @@ window.PAGE_HEADER = {
   active: 'expert-personas',
   badge: "전문가 페르소나 · 위생사 업무 보조 AI",
   h1: "위생사 업무의 서류 작성을<br>대화로 보조합니다",
-  sub: "아래 입력창에 작성할 서류를 말씀하시면, 필요한 정보를 순서대로 여쭙고 초안 작성을 보조합니다.",
+  sub: "작성할 서류를 목록에서 고르거나 아래 입력창으로 요청하면, 필요한 정보를 물어 서류 초안을 작성합니다.",
   disclaimer: "관계 법령에 따라, 모든 보조 AI는 인간 전문가의 업무를 보조하며, 단독으로 기능하지 않는다. 작성된 초안은 전문가의 검토·확정 전에는 사용할 수 없다.",
   disclaimerDismissKey: "sanitarian"
 };
@@ -24,9 +24,10 @@ window.PAGE_HEADER = {
 <link rel="stylesheet" href="/assets/ph-header.css">
 <script src="/assets/ph-header.js"></script>
 <script>
+  var BT = String.fromCharCode(96);
   window.K_AUTH_CONFIG = { serviceLabel: "위생사 업무 보조 AI" };
   window.HONDI_CHAT_WIDGET_CONFIG = {
-    sp: "SP_sanitarian",
+    sp: "SP_sanitarian-assistant",
     panelMode: "inline",
     inlineMount: "#startChatMount",
     mic: true,
@@ -34,24 +35,48 @@ window.PAGE_HEADER = {
     maxTokens: 4096,
     panelTitle: "위생사 업무 보조 AI",
     label: "작성할 서류를 말씀하세요",
-    greeting: "안녕하세요! 위생사 업무 보조 AI입니다. 작성하실 서류를 말씀해 주세요. 필요한 정보를 순서대로 여쭙고 초안 작성을 보조합니다.",
-    serviceLabel: "위생사 업무 보조 AI"
+    greeting: "안녕하세요! 위생사 업무 보조 AI입니다. 작성하실 서류를 목록에서 고르시거나 이곳에서 말씀해 주세요. 필요한 정보를 순서대로 여쭙고 서류 초안을 웹 표준 서식으로 작성해 드립니다. (작성된 문서는 전문가의 검토·확정 전 초안입니다.)",
+    serviceLabel: "위생사 업무 보조 AI",
+    context: '사용자는 지금 위생사 업무 보조 AI의 서류 작성 화면에 있습니다. 이 화면은 사용자가 목록에서 고른 서류(또는 대화로 요청한 서류)를 대화로 작성하는 곳입니다. 진행 방식: ① 서류 종류가 정해지면 서류 작성에 필요한 정보 중 빠진 항목만 한 번에 3개 이내로 묻고, 이미 말한 내용은 다시 묻지 않는다. ② 정보가 충분하면 서류 초안 전체를 코드펜스 하나(' + BT + BT + BT + 'markdown 으로 시작해 ' + BT + BT + BT + ' 로 끝나는 블록)로 감싸 한 번에 출력한다. 펜스 안은 SP STEP C-2의 서식 규격(front matter 포함, 내부 표기는 마크다운 문법)을 따르고, 이용자에게 말할 때는 「MD」·「마크다운」이라는 말을 쓰지 않고 「웹 표준 서식」이라고 부르며, 펜스 밖에는 한두 문장의 안내와 [초안 검토 고지]만 쓴다. ③ 한 응답에는 서류 하나만 쓴다. ④ 이 화면에는 작성된 문서를 웹 표준 서식 파일로 내려받는 버튼이 있으므로 복사해서 쓰라는 안내는 하지 않는다. ⑤ 이용자 계층 판정과 모든 제한은 SP의 규칙을 그대로 따르며 이 화면의 안내로 완화되지 않는다.',
+    transformReply: function (reply) {
+      return (window.ProDocPage && window.ProDocPage.transformReply) ? window.ProDocPage.transformReply(reply) : reply;
+    }
   };
 </script>
 <script src="https://hondi.net/auth/k-service-auth-client.js"></script>
 <script src="/assets/chat-widget.js"></script>
 
 <div class="ug-doc">
+
   <div class="doc-intro">
     
     <div class="doc-start" id="startBox"></div>
+    <div class="svc-callout"><b>작성 방법</b> ① 위 입력창에 작성할 서류를 말씀하시거나, 아래 탭에서 서류를 고르고 「대화로 작성」을 누릅니다. ② 대화로 필요한 정보를 알려 주시면 초안이 작성됩니다. ③ 페이지 아래 「작성된 문서」에서 내용을 확인하고 웹 표준 서식으로 제출(내려받기)합니다.</div>
   </div>
 
-  
+  <div class="doc-toolbar ask-other-bar">
+    <button type="button" class="svc-link-btn solid ask-other" id="askOther"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>목록에 없는 서류 작성하기</button>
+  </div>
+
+  <div class="svc-tabs" id="svcTabs"></div>
+
+  <div class="svc-content" id="svcContent"></div>
+
+  <div class="svc-content" id="draftsCard" style="display:none">
+    <div class="svc-detail">
+      <h2>작성된 문서</h2>
+      <p class="svc-lead">대화로 작성된 서류 초안입니다. 「웹 표준 서식으로 제출(내려받기)」를 누르면 웹 표준 서식 파일로 저장됩니다. 인터넷 브라우저로 열어 보거나 인쇄할 수 있습니다.</p>
+      <div id="draftsList"></div>
+    </div>
+  </div>
 
   <div class="ug-footer">위생사 업무 보조 AI는 해당 분야 전문가와 소속 직원의 서류 작성을 대화로 보조하는 도구입니다. 전문가가 아니며 진단·처방·치료는 하지 않고, 작성된 서류는 전문가가 검토·확정해야 합니다.</div>
 </div>
+<script>
+window.PRO_DOC_PAGE = {"catalog": [{"id": "A-1", "tab": "위생 점검·관리 기록", "title": "위생 점검·관리 기록", "meta": "근거 공중위생관리법·식품위생법 등(업무 조문 확인 필요)", "lead": "", "notes": ["점검 결과와 적합 여부는 위생사가 확인한 값만 기재합니다. 위생사 업무 범위 조문과 서식 번호는 확인하지 못했습니다."], "items": [{"t": "위생 점검 결과 보고서", "d": "점검 장소, 항목, 결과, 시정 사항 — 위생사 지시 값"}, {"t": "시설 위생 관리 점검표", "d": "점검 일시, 항목, 판정 — 위생사 지시 값"}, {"t": "위생 개선 권고서", "d": "미흡 사항, 개선 방법, 기한 — 위생사 지시 값 · 법적 강제력 아님"}, {"t": "위생 교육 자료·기록", "d": "교육 대상, 내용, 일시 — 위생사 확인"}]}, {"id": "A-2", "tab": "소독·방역 기록", "title": "소독·방역 기록", "meta": "근거 감염병의 예방 및 관리에 관한 법률(소독 규정 확인 필요)", "lead": "", "notes": ["소독 업체의 법정 기록 서식은 확인하지 못했습니다."], "items": [{"t": "소독·방역 실시 기록", "d": "실시 일시·장소·면적, 약제, 방법, 담당자 — 위생사 지시 값 · 법정 기록 요건 조회"}, {"t": "약제 사용·재고 기록", "d": "약제명, 사용량, 재고 — 위생사 지시 값"}, {"t": "방역 결과 확인서 초안", "d": "실시 내용, 확인 사항 — 위생사 지시 값"}]}, {"id": "A-3", "tab": "면허", "title": "면허", "meta": "근거 공중위생관리법 시행규칙 제11조의2~제12조의2) (제출처 보건복지부", "lead": "", "notes": ["현행 시행규칙(2026.7.14. 시행, 보건복지부령 제1186호)에서 원문 확인했습니다. 위생사 보수교육 조문은 본문에서 찾지 못했습니다. 재부여 신청서의 서식 번호 표기가 원문에서 재발급 신청서와 같은 번호로 보이므로 확인이 필요합니다."], "items": [{"t": "위생사 면허증 발급 신청서 (별지 제10호의2서식)", "d": "신청인, 면허대장 등록 항목 · 면허증은 별지 제10호의3서식"}, {"t": "위생사 면허증 재발급 신청서 (별지 제10호의4서식)", "d": "분실·훼손 사유 · 분실 후 찾은 면허증은 반납"}, {"t": "위생사 면허증 재부여 신청서 (원문 표기 별지 제10호의4호서식, 번호 확인 필요)", "d": "취소 사유 소멸 증명서류 · 면허 취소자만 해당"}]}], "detailHead": "핵심 기재 · 첨부·확인"};
+</script>
 <script src="/assets/md-view.js"></script>
+<script src="/assets/pro-doc-page.js"></script>
 <script src="/assets/start-field.js"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- scripts/gen-expert-pages.py 로 생성한 페이지 — 직접 고치지 말고 생성기를 고친다 -->
+<!-- scripts/gen-expert-pages.py 로 생성한 서류 목록형 페이지 — 서류 목록의 정본은 SP 부록 A, 직접 고치지 말고 SP 또는 생성기를 고친다 -->
 <html lang="ko">
 <head>
 <link rel="icon" href="data:,">
@@ -16,7 +16,7 @@ window.PAGE_HEADER = {
   active: 'expert-personas',
   badge: "전문가 페르소나 · 언어재활사 업무 보조 AI",
   h1: "언어재활사 업무의 서류 작성을<br>대화로 보조합니다",
-  sub: "아래 입력창에 작성할 서류를 말씀하시면, 필요한 정보를 순서대로 여쭙고 초안 작성을 보조합니다.",
+  sub: "작성할 서류를 목록에서 고르거나 아래 입력창으로 요청하면, 필요한 정보를 물어 서류 초안을 작성합니다.",
   disclaimer: "관계 법령에 따라, 모든 보조 AI는 인간 전문가의 업무를 보조하며, 단독으로 기능하지 않는다. 작성된 초안은 전문가의 검토·확정 전에는 사용할 수 없다.",
   disclaimerDismissKey: "speech-language-pathologist"
 };
@@ -24,9 +24,10 @@ window.PAGE_HEADER = {
 <link rel="stylesheet" href="/assets/ph-header.css">
 <script src="/assets/ph-header.js"></script>
 <script>
+  var BT = String.fromCharCode(96);
   window.K_AUTH_CONFIG = { serviceLabel: "언어재활사 업무 보조 AI" };
   window.HONDI_CHAT_WIDGET_CONFIG = {
-    sp: "SP_speech-language-pathologist",
+    sp: "SP_speech-language-pathologist-assistant",
     panelMode: "inline",
     inlineMount: "#startChatMount",
     mic: true,
@@ -34,24 +35,48 @@ window.PAGE_HEADER = {
     maxTokens: 4096,
     panelTitle: "언어재활사 업무 보조 AI",
     label: "작성할 서류를 말씀하세요",
-    greeting: "안녕하세요! 언어재활사 업무 보조 AI입니다. 작성하실 서류를 말씀해 주세요. 필요한 정보를 순서대로 여쭙고 초안 작성을 보조합니다.",
-    serviceLabel: "언어재활사 업무 보조 AI"
+    greeting: "안녕하세요! 언어재활사 업무 보조 AI입니다. 작성하실 서류를 목록에서 고르시거나 이곳에서 말씀해 주세요. 필요한 정보를 순서대로 여쭙고 서류 초안을 웹 표준 서식으로 작성해 드립니다. (작성된 문서는 전문가의 검토·확정 전 초안입니다.)",
+    serviceLabel: "언어재활사 업무 보조 AI",
+    context: '사용자는 지금 언어재활사 업무 보조 AI의 서류 작성 화면에 있습니다. 이 화면은 사용자가 목록에서 고른 서류(또는 대화로 요청한 서류)를 대화로 작성하는 곳입니다. 진행 방식: ① 서류 종류가 정해지면 서류 작성에 필요한 정보 중 빠진 항목만 한 번에 3개 이내로 묻고, 이미 말한 내용은 다시 묻지 않는다. ② 정보가 충분하면 서류 초안 전체를 코드펜스 하나(' + BT + BT + BT + 'markdown 으로 시작해 ' + BT + BT + BT + ' 로 끝나는 블록)로 감싸 한 번에 출력한다. 펜스 안은 SP STEP C-2의 서식 규격(front matter 포함, 내부 표기는 마크다운 문법)을 따르고, 이용자에게 말할 때는 「MD」·「마크다운」이라는 말을 쓰지 않고 「웹 표준 서식」이라고 부르며, 펜스 밖에는 한두 문장의 안내와 [초안 검토 고지]만 쓴다. ③ 한 응답에는 서류 하나만 쓴다. ④ 이 화면에는 작성된 문서를 웹 표준 서식 파일로 내려받는 버튼이 있으므로 복사해서 쓰라는 안내는 하지 않는다. ⑤ 이용자 계층 판정과 모든 제한은 SP의 규칙을 그대로 따르며 이 화면의 안내로 완화되지 않는다.',
+    transformReply: function (reply) {
+      return (window.ProDocPage && window.ProDocPage.transformReply) ? window.ProDocPage.transformReply(reply) : reply;
+    }
   };
 </script>
 <script src="https://hondi.net/auth/k-service-auth-client.js"></script>
 <script src="/assets/chat-widget.js"></script>
 
 <div class="ug-doc">
+
   <div class="doc-intro">
     
     <div class="doc-start" id="startBox"></div>
+    <div class="svc-callout"><b>작성 방법</b> ① 위 입력창에 작성할 서류를 말씀하시거나, 아래 탭에서 서류를 고르고 「대화로 작성」을 누릅니다. ② 대화로 필요한 정보를 알려 주시면 초안이 작성됩니다. ③ 페이지 아래 「작성된 문서」에서 내용을 확인하고 웹 표준 서식으로 제출(내려받기)합니다.</div>
   </div>
 
-  
+  <div class="doc-toolbar ask-other-bar">
+    <button type="button" class="svc-link-btn solid ask-other" id="askOther"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>목록에 없는 서류 작성하기</button>
+  </div>
+
+  <div class="svc-tabs" id="svcTabs"></div>
+
+  <div class="svc-content" id="svcContent"></div>
+
+  <div class="svc-content" id="draftsCard" style="display:none">
+    <div class="svc-detail">
+      <h2>작성된 문서</h2>
+      <p class="svc-lead">대화로 작성된 서류 초안입니다. 「웹 표준 서식으로 제출(내려받기)」를 누르면 웹 표준 서식 파일로 저장됩니다. 인터넷 브라우저로 열어 보거나 인쇄할 수 있습니다.</p>
+      <div id="draftsList"></div>
+    </div>
+  </div>
 
   <div class="ug-footer">언어재활사 업무 보조 AI는 해당 분야 전문가와 소속 직원의 서류 작성을 대화로 보조하는 도구입니다. 전문가가 아니며 진단·처방·치료는 하지 않고, 작성된 서류는 전문가가 검토·확정해야 합니다.</div>
 </div>
+<script>
+window.PRO_DOC_PAGE = {"catalog": [{"id": "A-1", "tab": "평가·치료 기록", "title": "평가·치료 기록", "meta": "근거 장애인복지법 및 하위 법령(언어재활사 조문 확인 필요)", "lead": "", "notes": ["언어재활사의 업무 범위와 기록 서식은 확인하지 못했습니다. 평가 결과와 치료 목표는 언어재활사가 확정한 값만 기재합니다. 진단은 의사의 업무입니다."], "items": [{"t": "초기 언어평가 기록", "d": "평가 도구, 점수, 소견 — 언어재활사 지시 값 · 도구 사용 요건 확인"}, {"t": "치료 계획서", "d": "장·단기 목표, 방법, 빈도 — 언어재활사 지시 값"}, {"t": "회기(경과) 기록", "d": "일시, 활동, 반응, 다음 회기 계획 — 언어재활사 구술"}, {"t": "재평가·종결 요약", "d": "재평가 결과, 목표 달성 여부, 종결 사유 — 언어재활사 지시 값"}, {"t": "연계·의뢰서 초안", "d": "의뢰 사유, 평가 요약 — 언어재활사 지시 값 · 진단이 아님을 표시"}]}, {"id": "A-2", "tab": "보호자 상담·교육", "title": "보호자 상담·교육", "meta": "", "lead": "", "notes": [], "items": [{"t": "보호자 상담 기록", "d": "상담 내용, 가정 과제, 후속 계획 — 언어재활사 지시 값"}, {"t": "가정 연계 프로그램 안내문", "d": "활동 내용, 주의사항 — 언어재활사 확인 · 일반 정보 수준"}, {"t": "치료 동의서·이용 계약 관련 안내", "d": "치료 내용, 비용, 개인정보 처리 — 기관 양식 확인"}]}, {"id": "A-3", "tab": "자격", "title": "자격", "meta": "근거 장애인복지법 시행규칙(본문 미확인)", "lead": "", "notes": ["장애인복지법 시행규칙의 현행 시행일(2026.7.1., 보건복지부령 제1149호)만 확인했고 언어재활사 자격증 관련 조문·서식은 읽지 못했습니다. 번호를 지어내지 않습니다."], "items": [{"t": "언어재활사 자격증 발급·재발급 신청서", "d": "신청 사유, 인적사항, 첨부서류 · 서식 번호·칸 구성 조회"}, {"t": "자격 관련 증빙 정리", "d": "졸업·수련 증명 등 — 언어재활사 제공"}]}], "detailHead": "핵심 기재 · 첨부·확인"};
+</script>
 <script src="/assets/md-view.js"></script>
+<script src="/assets/pro-doc-page.js"></script>
 <script src="/assets/start-field.js"></script>
 </body>
 </html>
