@@ -20,7 +20,7 @@ const catalog = JSON.parse(read('prompts/sp-catalog.json'));
 const JOBS = [
   ['SP_appraiser', 'SP_appraiser_v1_10.md', 'SP_appraiser_v1_9.md', 'v1.10'],
   ['SP_customs-broker', 'SP_customs-broker_v1_8.md', 'SP_customs-broker_v1_7.md', 'v1.8'],
-  ['SP_marine-pilot', 'SP_marine-pilot_v3_4.md', 'SP_marine-pilot_v3_3.md', 'v3.4'],
+  ['SP_marine-pilot', 'SP_marine-pilot_v3_5.md', 'SP_marine-pilot_v3_4.md', 'v3.5'],
   ['SP_judicial-scrivener', 'SP_judicial-scrivener_v3_2.md', 'SP_judicial-scrivener_v3_1.md', 'v3.2'],
   ['SP_patent-attorney', 'SP_patent-attorney_v1_9.md', 'SP_patent-attorney_v1_8.md', 'v1.9'],
   ['SP_lawyer', 'SP_lawyer_v5_6.md', 'SP_lawyer_v5_5.md', 'v5.6'],
