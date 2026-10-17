@@ -7,10 +7,12 @@
 <meta name="description" content="나비를 설명하고 제안하는 프레젠테이션 문서 모음. 시리즈별로 묶어 카드로 보여 주고, 검색과 분류로 찾을 수 있습니다.">
 <!--
   2026-10-09 신설 — desktop.html "프레젠테이션" 버튼의 목적지.
+  2026-10-18 레이아웃 변경 — 가로 한 줄 트랙(좌우 스크롤)을 주제(시리즈)별 세로 섹션으로 바꿨다.
   문서가 수십 개로 늘어도 이 파일은 고치지 않는다: data/presentations.json 에 항목 하나를 더하면 된다.
-   · 기본 보기 = 시리즈(흐름 순서)별 묶음 + 시리즈 안에서는 order 오름차순
-   · 검색어나 분류 칩을 쓰면 시리즈 구분 없이 일치하는 카드만 평평하게 보여 준다
+   · 시리즈(주제)마다 제목·설명이 붙은 섹션 하나, 섹션 안의 카드는 order 오름차순
+   · 시리즈 순서는 series.order, 맨 위 바로가기 목차도 같은 순서
    · 카드는 모두 같은 크기·같은 칸 배치(auto-fill) — 개수가 늘어도 줄만 늘어난다
+   · series 에 없는 id 를 쓴 항목은 맨 아래 "기타" 섹션에 모인다
 -->
 <style>
 :root{
@@ -38,9 +40,14 @@ h1{margin:0;font-size:30px;line-height:1.25;letter-spacing:-.3px}
 .chip:hover{border-color:var(--brand);color:var(--brand)}
 .chip[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
 main{max-width:1160px;margin:0 auto;padding:8px 24px 64px}
-.series{padding-top:28px}
-.series h2{margin:0;font-size:20px;letter-spacing:-.2px}
-.series p.desc{margin:2px 0 14px;color:var(--sub);font-size:14px}
+.toc{max-width:1160px;margin:0 auto;padding:18px 24px 0;display:flex;flex-wrap:wrap;gap:8px}
+.toc:empty{display:none}
+.toc a{border:1px solid var(--line);background:var(--surface);color:var(--sub);border-radius:999px;padding:7px 14px;font-size:14px;text-decoration:none}
+.toc a:hover,.toc a:focus-visible{border-color:var(--brand);color:var(--brand)}
+.series{padding-top:40px;scroll-margin-top:8px}
+.series h2{margin:0;padding-bottom:10px;border-bottom:2px solid var(--line);font-size:22px;letter-spacing:-.2px;display:flex;align-items:baseline;gap:10px}
+.series h2 .cnt{font-size:14px;font-weight:400;color:var(--hint)}
+.series p.desc{margin:10px 0 18px;color:var(--sub);font-size:15px}
 .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
 .card{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;text-decoration:none;box-shadow:0 1px 2px rgba(14,28,63,.06);transition:box-shadow .15s ease,transform .12s ease,border-color .15s ease}
 .card:hover,.card:focus-visible{box-shadow:0 6px 18px rgba(14,28,63,.14);transform:translateY(-2px);border-color:#b8cde8}
@@ -58,17 +65,8 @@ main{max-width:1160px;margin:0 auto;padding:8px 24px 64px}
 .open{padding:12px 16px;border-top:1px solid var(--line);font-size:14px;font-weight:700;color:var(--brand);display:flex;justify-content:space-between}
 .empty,.err{margin:48px 0;text-align:center;color:var(--sub)}
 .err{color:#a3261b}
-.rail{position:relative;padding-top:28px}
-.track{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x proximity;padding:4px 2px 18px;scrollbar-width:thin}
-.track .card{flex:0 0 300px;scroll-snap-align:start}
-.sentinel{flex:0 0 1px}
-.ser{font-size:12px;font-weight:700;color:var(--brand);letter-spacing:.2px}
-.nav{position:absolute;top:50%;z-index:2;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--navy);font-size:22px;line-height:1;cursor:pointer;box-shadow:0 2px 8px rgba(14,28,63,.18)}
-.nav.prev{left:-12px}.nav.next{right:-12px}
-.nav:hover{border-color:var(--brand);color:var(--brand)}
-@media (max-width:680px){.nav{display:none}.track .card{flex-basis:82%}}
 @media (max-width:680px){
-  .top-in,.bar,main{padding-left:16px;padding-right:16px}
+  .top-in,.bar,.toc,main{padding-left:16px;padding-right:16px}
   h1{font-size:25px}
   .grid{grid-template-columns:1fr}
 }
@@ -79,8 +77,10 @@ main{max-width:1160px;margin:0 auto;padding:8px 24px 64px}
 <header class="top"><div class="top-in">
   <a class="back" href="../desktop.html">← 나비 홈으로</a>
   <h1>프레젠테이션</h1>
-  <p class="lede">나비를 설명하고 제안하는 문서 모음입니다. 처음 보신다면 위에서부터 차례로 보시면 흐름이 이어집니다.</p>
+  <p class="lede">나비를 설명하고 제안하는 문서 모음입니다. 주제별로 나누어 정리했습니다. 처음 보신다면 위에서부터 차례로 보시면 흐름이 이어집니다.</p>
 </div></header>
+
+<nav class="toc" id="toc" aria-label="주제별 바로가기"></nav>
 
 <main id="list"><p class="empty">불러오는 중…</p></main>
 <noscript><p class="empty">이 페이지는 JavaScript가 필요합니다.</p></noscript>
@@ -124,39 +124,32 @@ main{max-width:1160px;margin:0 auto;padding:8px 24px 64px}
     return a;
   }
 
-  // 가로 한 줄 트랙 + 동적 로딩: 처음 BATCH장만 그리고, 오른쪽 끝에 가까워지면 다음 BATCH장씩 이어 붙인다.
-  var BATCH = 4;
+  // 주제(시리즈)별 세로 섹션: 시리즈마다 제목·설명 + 카드 격자. 맨 위 목차는 섹션으로 이동하는 링크.
   function render() {
-    var list = $('list'); list.textContent = '';
+    var list = $('list'), toc = $('toc'); list.textContent = ''; toc.textContent = '';
     var all = sorted(state.data);
-    var num = {}, k = 0; all.forEach(function (it) { num[it.id] = (it.no != null) ? it.no : ++k; });   // 번호는 전체 흐름 기준(it.no가 있으면 그 번호, 예: 00)
     if (!all.length) { list.appendChild(el('p', 'empty', '등록된 프레젠테이션이 없습니다.')); return; }
-    var stitle = {}; state.data.series.forEach(function (s) { stitle[s.id] = s.title; });
-    var wrap = el('div', 'rail'), track = el('div', 'track'), sentinel = el('div', 'sentinel');
-    track.setAttribute('role', 'list'); track.tabIndex = 0; track.setAttribute('aria-label', '프레젠테이션 목록(가로 스크롤)');
-    var prev = el('button', 'nav prev', '‹'), next = el('button', 'nav next', '›');
-    prev.type = next.type = 'button'; prev.setAttribute('aria-label', '이전'); next.setAttribute('aria-label', '다음');
-    function step() { return Math.max(240, track.clientWidth * 0.8); }
-    prev.onclick = function () { track.scrollBy({ left: -step(), behavior: 'smooth' }); };
-    next.onclick = function () { track.scrollBy({ left: step(), behavior: 'smooth' }); };
-    wrap.appendChild(prev); wrap.appendChild(track); wrap.appendChild(next); list.appendChild(wrap);
-    var shownN = 0, io = null;
-    function more() {
-      if (sentinel.parentNode) track.removeChild(sentinel);
-      all.slice(shownN, shownN + BATCH).forEach(function (it) {
-        var c = card(it, num[it.id]); c.setAttribute('role', 'listitem');
-        var sn = stitle[it.series]; if (sn) { var lab = el('span', 'ser', sn); c.querySelector('.body').insertBefore(lab, c.querySelector('.body').firstChild); }
-        track.appendChild(c);
-      });
-      shownN = Math.min(all.length, shownN + BATCH);
-      if (shownN < all.length) { track.appendChild(sentinel); if (io) io.observe(sentinel); }
-      else if (io) io.disconnect();
-    }
-    if ('IntersectionObserver' in window) {
-      io = new IntersectionObserver(function (es) { if (es.some(function (e) { return e.isIntersecting; })) { io.unobserve(sentinel); more(); } }, { root: track, rootMargin: '0px 240px 0px 0px' });
-    }
-    more();
-    if (!io) { while (shownN < all.length) more(); }   // 구형 브라우저: 한 번에 모두 표시
+    var num = {}, k = 0; all.forEach(function (it) { num[it.id] = (it.no != null) ? it.no : ++k; });   // 번호는 전체 흐름 기준(it.no가 있으면 그 번호, 예: 00)
+
+    var known = {}, groups = {};
+    state.data.series.forEach(function (s) { known[s.id] = true; });
+    all.forEach(function (it) { var g = known[it.series] ? it.series : '_etc'; (groups[g] = groups[g] || []).push(it); });
+
+    var secs = state.data.series.slice().sort(function (a, b) { return a.order - b.order; })
+      .filter(function (s) { return groups[s.id]; })
+      .map(function (s) { return { id: s.id, title: s.title, desc: s.desc, items: groups[s.id] }; });
+    if (groups._etc) secs.push({ id: '_etc', title: '기타', desc: '', items: groups._etc });
+
+    secs.forEach(function (s) {
+      var sec = el('section', 'series'); sec.id = 's-' + s.id;
+      var h = el('h2', '', s.title); h.appendChild(el('span', 'cnt', s.items.length + '편'));
+      sec.appendChild(h);
+      if (s.desc) sec.appendChild(el('p', 'desc', s.desc));
+      var grid = el('div', 'grid'); grid.setAttribute('role', 'list');
+      s.items.forEach(function (it) { var c = card(it, num[it.id]); c.setAttribute('role', 'listitem'); grid.appendChild(c); });
+      sec.appendChild(grid); list.appendChild(sec);
+      var a = el('a', '', s.title); a.href = '#s-' + s.id; toc.appendChild(a);
+    });
   }
 
   fetch('../data/presentations.json', { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
