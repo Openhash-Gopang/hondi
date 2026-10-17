@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-17 18:51 KST · 기준 커밋 05540a04
+- 갱신: 2026-10-17 19:10 KST · 기준 커밋 f6b27194
 - 전문가 페르소나 전용 페이지 143개 · 등록된 SP 863건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-17 feat(suggest): shared "suggestions & questions" page + SP + repo digest + top-nav button on every persona page
 - 2026-10-17 fix(legal-review): legal-review tab shows only the chat box and its own intro text
 - 2026-10-17 feat(legal-review): legal-review tab on persona pages + inherited legal-review SPs
 - 2026-10-17 Merge pull request #667 from Openhash-Gopang/docs/expert-sp-session-summary
@@ -43,7 +44,6 @@
 - 2026-10-17 feat(admin): 공동 설립 참여 제안서 묶음을 개정본(MD 전용)으로 교체, 공통 설립 원칙·나비로 제안서 추가
 - 2026-10-17 feat(admin): 공동 설립 참여 제안서 묶음을 개정본(MD 전용)으로 교체, 공통 설립 원칙·나비로 제안서 추가
 - 2026-10-17 Merge pull request #642 from Openhash-Gopang/feature/sp-klaw-v151-10jobs
-- 2026-10-17 전문가 SP 10개 직군: K-Law v15.1 표본 이식(SP_EXPERT_BASE v1.3 §3-B + STEP B+ 훅)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
