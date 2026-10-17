@@ -1,6 +1,7 @@
 // 전문가용 보조 AI SP(SP_<id>-assistant) 점검 — 일반인용/전문가용 이분화 (2026-10-17)
 // C-01 데이터(data/assistant-sp)에서 생성한 SP 가 저장소의 SP 와 한 글자도 다르지 않다
 // C-02 전문가용 SP 마다 필수 골격(§LEGAL-LIMIT, 부록 A, 서식 출력 규격 C-2, 금지 태그 안내)이 있고, 일반인용 SP 가 짝으로 있다
+// C-04 세부 분야 전문가용 SP(data/assistant-child-sp)가 부모 SP+데이터로 만든 결과와 한 글자도 다르지 않다
 // C-03 sp-catalog-categories.json 의 total 이 최상위 카테고리 count 합계와 같다
 import test from 'node:test';
 import assert from 'node:assert';
@@ -41,4 +42,12 @@ test('C-03 카테고리 total', () => {
   const sum = c.categories.filter((x) => !x.parent).reduce((a, x) => a + x.count, 0);
   assert.strictEqual(c.total, sum, 'total 과 최상위 카테고리 count 합계가 다름');
   for (const it of c.items) if (it.cat.endsWith('-assistant')) assert.ok(fs.existsSync(path.join(ROOT, it.file)), `item 파일 없음 ${it.file}`);
+});
+
+test('C-04 세부 분야 전문가용 SP 일치', (t) => {
+  const dir = path.join(ROOT, 'data/assistant-child-sp');
+  if (!fs.existsSync(dir) || !fs.readdirSync(dir).some((f) => f.endsWith('.json'))) return;
+  if (spawnSync('python3', ['--version']).status !== 0) return t.skip('python3 없음');
+  const r = spawnSync('python3', ['scripts/gen-assistant-child-sp.py', '--check', '--all'], { cwd: ROOT, encoding: 'utf8' });
+  assert.strictEqual(r.status, 0, (r.stdout || '') + (r.stderr || ''));
 });
