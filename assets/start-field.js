@@ -177,6 +177,21 @@
     applyPlaceholder();
   }
 
+  // ── 상단 소개 문구: 법률 검토 탭에서는 서류 작성 소개 대신 법률 검토 소개를 보인다(원문은 보관했다가 되돌린다) ──
+  var LR_H1 = '인간 변호사에게 묻기 전에<br>AI로 법률 쟁점을 먼저 점검합니다';
+  var LR_SUB = '상황을 알려 주시면 쟁점·기한·준비할 자료를 정리해 드립니다. 구체적 사건의 법률 판단은 변호사에게 확인하세요.';
+  var heroOrig = null;
+  function heroApply() {
+    var h1 = document.querySelector('.ph-hero h1');
+    if (!h1) return;
+    var sub = h1.parentNode.querySelector('p:not([class])');
+    if (!heroOrig) heroOrig = { h1: h1.innerHTML, sub: sub ? sub.innerHTML : null };
+    var on = mode === 'review';
+    h1.innerHTML = on ? LR_H1 : heroOrig.h1;
+    if (sub && heroOrig.sub !== null) sub.innerHTML = on ? LR_SUB : heroOrig.sub;
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(heroApply, 0); });
+
   // ── 탭 전환 ── mode: 'write' | 'review' | 'method'  (대화 모드는 write↔review 사이에서만 바뀐다)
   async function select(next, focus) {
     if (next === 'review' && !t3) next = 'write';
@@ -190,6 +205,8 @@
     });
     box.classList.toggle('is-method', method);
     box.classList.toggle('is-review', next === 'review');
+    document.body.classList.toggle('lr-mode', next === 'review');   // hide drafting-only UI, keep tabs + same chat box
+    heroApply();
     lrShowBanner(next === 'review');
     view.classList.toggle('open', method);
     view.setAttribute('aria-hidden', method ? 'false' : 'true');
