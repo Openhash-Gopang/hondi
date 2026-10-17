@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-17 19:10 KST · 기준 커밋 f6b27194
+- 갱신: 2026-10-18 03:50 KST · 기준 커밋 ed120a09
 - 전문가 페르소나 전용 페이지 143개 · 등록된 SP 863건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-18 feat(brand): replace the H logo mark with the butterfly logo
+- 2026-10-18 chore(suggest): rebuild repo digest from current main
 - 2026-10-17 feat(suggest): shared "suggestions & questions" page + SP + repo digest + top-nav button on every persona page
 - 2026-10-17 fix(legal-review): legal-review tab shows only the chat box and its own intro text
 - 2026-10-17 feat(legal-review): legal-review tab on persona pages + inherited legal-review SPs
@@ -42,8 +44,6 @@
 - 2026-10-17 도선사 서류 조사 반영(SP_marine-pilot v3.5) + 서식 평가·GDC 보상 알고리즘(SP_DOC_FORM v1.3)
 - 2026-10-17 feat(admin): 공동 설립 참여 제안서 묶음을 개정본(MD 전용)으로 교체, 공통 설립 원칙·나비로 제안서 추가
 - 2026-10-17 feat(admin): 공동 설립 참여 제안서 묶음을 개정본(MD 전용)으로 교체, 공통 설립 원칙·나비로 제안서 추가
-- 2026-10-17 feat(admin): 공동 설립 참여 제안서 묶음을 개정본(MD 전용)으로 교체, 공통 설립 원칙·나비로 제안서 추가
-- 2026-10-17 Merge pull request #642 from Openhash-Gopang/feature/sp-klaw-v151-10jobs
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
