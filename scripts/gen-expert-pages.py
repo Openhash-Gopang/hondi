@@ -88,6 +88,8 @@ def catalog_for(spk):
     return cat if cat and has_c2(md) else None
 
 def sp_key(pid):
+    # 전문가용(보조 AI) SP 가 있으면 그것이 전문가 페이지의 SP 다 — 일반인용 상담 SP(SP_<id>)와 분리한다 (2026-10-17)
+    if 'SP_' + pid + '-assistant' in CAT: return 'SP_' + pid + '-assistant'
     if 'SP_' + pid in CAT: return 'SP_' + pid
     base = os.path.basename(IDX.get(pid, ''))
     k = base.split('_')[0]
@@ -114,7 +116,7 @@ def disclaimer(title, cat):
 def title_of(label): return label if label.endswith('AI') else label + ' 업무 보조 AI'
 
 def page(pid, label, cat, spk, triggers, parent=None, children=None, catalog=None):
-    if catalog: return catalog_page(pid, label, cat, spk, parent, catalog)
+    if catalog: return catalog_page(pid, label, cat, spk, parent, catalog, children)
     title = title_of(label)
     disc = disclaimer(title, cat)
     lead = ('아래에서 업무 분야를 고르거나 입력창으로 요청하십시오.' if children else
@@ -195,7 +197,7 @@ def detail_head(catalog):
     multi = any(c.get('hdr') and len(c['hdr']) > 2 for c in catalog)
     return heads.pop() if len(heads) == 1 and not multi else '세부 내용'
 
-def catalog_page(pid, label, cat, spk, parent, catalog):
+def catalog_page(pid, label, cat, spk, parent, catalog, children=None):
     """서류 목록형 페이지 — 목록은 SP 부록 A에서 읽은 것(정본은 SP). 서류 작성 SP 의 C-2 서식 규격과 짝으로 동작한다."""
     title = title_of(label)
     role = ROLE.get(cat, ROLE_DEFAULT)
@@ -213,6 +215,11 @@ def catalog_page(pid, label, cat, spk, parent, catalog):
            "③ 한 응답에는 서류 하나만 쓴다. ④ 이 화면에는 작성된 문서를 웹 표준 서식 파일로 내려받는 버튼이 있으므로 복사해서 쓰라는 안내는 하지 않는다. "
            "⑤ 이용자 계층 판정과 모든 제한은 SP의 규칙을 그대로 따르며 이 화면의 안내로 완화되지 않는다." % title)
     cfg_sp = ('sp: %s,' % json.dumps(spk)) if spk else ''
+    kids_html = ''
+    if children:  # 세부 분야가 있는 직역: 서류 목록 아래에 세부 분야 링크 표를 둔다
+        rows = ''.join('<tr><td class="doc-title"><a href="/pages/%s.html">%s</a></td></tr>' % (c['id'], e(c['label'])) for c in children)
+        kids_html = ('<div class="svc-content"><div class="svc-detail"><h2>세부 분야</h2><div class="svc-table-wrap"><table class="svc-table">'
+                     '<thead><tr><th>세부 분야</th></tr></thead><tbody>%s</tbody></table></div></div></div>' % rows)
     return f'''<!DOCTYPE html>
 <!-- scripts/gen-expert-pages.py 로 생성한 서류 목록형 페이지 — 서류 목록의 정본은 SP 부록 A, 직접 고치지 말고 SP 또는 생성기를 고친다 -->
 <html lang="ko">
@@ -275,7 +282,7 @@ window.PAGE_HEADER = {{
 
   <div class="svc-tabs" id="svcTabs"></div>
 
-  <div class="svc-content" id="svcContent"></div>
+  <div class="svc-content" id="svcContent"></div>{kids_html}
 
   <div class="svc-content" id="draftsCard" style="display:none">
     <div class="svc-detail">
@@ -327,7 +334,7 @@ for s in SECTIONS:
     for pid, label, spk, trg, parent, kids in todo:
         path = os.path.join(ROOT, 'pages', pid + '.html')
         if os.path.exists(path) and not is_generated(path): continue
-        open(path, 'w', encoding='utf-8').write(page(pid, label, s['cat'], spk, trg, parent, kids, None if kids else catalog_for(spk)))
+        open(path, 'w', encoding='utf-8').write(page(pid, label, s['cat'], spk, trg, parent, kids, catalog_for(spk)))
         made.append(pid)
         links.append("'%s': { url: '/pages/%s.html', title: %s }" % (pid, pid, json.dumps(title_of(label) + ' 페이지', ensure_ascii=False)))
 print('생성 %d개' % len(made), file=sys.stderr)
