@@ -114,6 +114,14 @@
       "url": "https://hondi.net/assets/presentations/navi-llm-genealogy-guide-20261018.pdf"
     },
     {
+      "id": "legal-review-purpose", "order": 8, "series": "persona", "status": "ready",
+      "title": "나비의 업무 보조 AI에는 \"법률 검토\"가 있습니다. 이것이 K-Law의 본래 목적입니다.",
+      "summary": "직업군과 세부 분야별 업무 보조 AI 페이지마다 있는 [법률 검토]가 무엇을 해 주고 무엇을 하지 않는지, 왜 K-Law의 본래 목적인지, 중앙정부와 지자체 부서의 업무 보조 AI에는 어떻게 넣고 있는지 설명합니다.",
+      "audience": "일반", "date": "2026-10-18",
+      "tags": ["법률 검토", "K-Law", "PDF"],
+      "url": "https://hondi.net/assets/presentations/legal-review-purpose-guide-20261018.pdf"
+    },
+    {
       "id": "persona-scrivener", "order": 10, "series": "persona", "status": "ready",
       "title": "전문가 페르소나 — 법무사 업무 보조 AI",
       "summary": "법무사와 사무소 직원의 업무를 돕는 법무사 AI를 소개합니다. 은행 예금 압류·가압류 절차를 예시로, 관제탑 원칙에 따라 한 번에 하나씩 지시하는 현재 방식과 법원 dpaper API 공개 후의 일괄 처리를 설명합니다.",
