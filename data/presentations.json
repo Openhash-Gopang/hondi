@@ -3,11 +3,36 @@
   "series": [
     { "id": "web",     "order": 5,  "title": "나비웹", "desc": "나비 코드 샘플과 기관 사이트 시연 화면" },
     { "id": "intro",   "order": 10, "title": "나비 이해하기", "desc": "나비가 무엇이고 웹이 어떻게 달라지는지" },
+    { "id": "kservice", "order": 12, "title": "K-서비스", "desc": "응급·법률·금융·물류 등 나비가 생활 속 일을 대신 처리하는 서비스 모음" },
     { "id": "persona", "order": 15, "title": "전문가 페르소나", "desc": "수백 종의 전문가 AI 중 직업별 업무 보조 AI를 소개합니다" },
     { "id": "region",  "order": 20, "title": "지역과 기관에 적용하기", "desc": "제주를 비롯한 지역과 기관에 나비를 적용하는 구상" },
     { "id": "seminar", "order": 30, "title": "기관 대상 세미나", "desc": "특정 기관 임직원을 위한 맞춤 발표 자료" }
   ],
   "items": [
+    {
+      "id": "navi-naviweb-guide", "order": 5, "series": "intro", "status": "ready",
+      "title": "나비와 나비웹 안내서",
+      "summary": "나비는 나만의 AI 비서, 나비웹은 그 나비들이 모이는 메신저입니다. 나비로 할 수 있는 일, 내 정보를 내 데이터 금고에만 두는 방식, 구독 요금, 안전하게 쓰기 위한 약속을 쉬운 말로 설명합니다.",
+      "audience": "일반", "date": "2026-10-18",
+      "tags": ["안내서", "나비웹", "PDF"],
+      "url": "https://hondi.net/assets/presentations/navi-naviweb-guide-20261018.pdf"
+    },
+    {
+      "id": "k-services-guide", "order": 10, "series": "kservice", "status": "ready",
+      "title": "K-서비스 안내",
+      "summary": "응급·법률·금융·물류·구직·메일·도시 설계 등 K-서비스가 어떤 일을 대신 해 주는지 서비스별로 소개합니다. 지금 쓸 수 있는 서비스와 준비 중인 서비스를 구분해 안내합니다.",
+      "audience": "일반", "date": "2026-10-18",
+      "tags": ["K-서비스", "PDF"],
+      "url": "https://hondi.net/assets/presentations/k-services-guide-20261018.pdf"
+    },
+    {
+      "id": "persona-guide", "order": 5, "series": "persona", "status": "ready",
+      "title": "전문가 페르소나 안내",
+      "summary": "변호사·세무사·의사 등 직종 63개의 전문가 AI가 서류 작업을 돕는 방식과 [법률 검토], 사람 전문가의 검토·승인 원칙, 직종 목록을 소개합니다.",
+      "audience": "일반", "date": "2026-10-18",
+      "tags": ["전문가 페르소나", "PDF"],
+      "url": "https://hondi.net/assets/presentations/expert-personas-guide-20261018.pdf"
+    },
     {
       "id": "naviwb", "order": 10, "no": 0, "series": "web", "status": "ready",
       "title": "나비웹",
