@@ -564,3 +564,46 @@ GDUDA Phase 1 — HLR(Home Location Register) 역할의 사용자 등록.
 **중요**: GDC 발행(mint)·거래(tx)·잔액조회(balance)의 핵심 로직은 `worker.js`가 아니라 **`pb_hooks/main.pb.js`**(`/api/mint`, `/api/tx`, `/api/balance`, `/api/ai-charge`)에 있습니다. `worker.js`의 `/wallet/gdc-transfer`, `/biz/balance`, `/biz/order` 등은 이 pb_hooks 엔드포인트를 감싸거나 관련 처리를 하는 앞단입니다 — 실제 잔액 계산·이중지불 방지·해시체인 로직을 찾으신다면 `pb_hooks/main.pb.js`를 먼저 보세요(상세는 [`L1_POCKETBASE_MANUAL_v1_0.md` §4](./L1_POCKETBASE_MANUAL_v1_0.md)).
 
 `/biz/*` 아래 35개 엔드포인트(K-Market 주문, GDC 입출금, 보험金 청구, 판매자 인증, DAO 투표 등)는 이번 조사에서 요약표(§2) 수준까지만 다뤘습니다 — 분량이 커서 다음 라운드에서 이어가는 걸 권장합니다.
+
+---
+
+### 3.8 서식 평가·보상 — `/doc-form/rate` · `/doc-form/stats` · `/doc-form/mine` · `/doc-form/reward-admin` (2026-10-17 신설)
+
+구현: `src/worker/doc-form-reward.js`(핸들러), `src/worker/doc-form-reward-store.js`(PocketBase 어댑터). `worker.js`의 `handleDocFormRoutes`가 이 핸들러를 먼저 호출하고, 다루지 않는 경로는 기존 서식 DB 핸들러(`/doc-form/save`·`find`·`list`·`review` 등)로 넘긴다. 규칙·운영 절차는 [`DOC_FORM_REWARD_정책_20261017.md`](./DOC_FORM_REWARD_정책_20261017.md), 세션 배경은 [`SESSION_SUMMARY_DOCFORM_REWARD_MARINE_PILOT_20261017_v1_0.md`](./SESSION_SUMMARY_DOCFORM_REWARD_MARINE_PILOT_20261017_v1_0.md).
+
+**서명 메시지는 엔드포인트마다 다르다**(§1.2와 같은 주의). 줄바꿈은 `\n`, `ts`는 밀리초이며 서버 시각과 `maxSkewMs` 이내여야 한다.
+
+| 엔드포인트 | 서명 대상 메시지 |
+|---|---|
+| `/doc-form/rate` | `hondi-doc-form-rate\n${key_hash}\n${version}\n${rating}\n${ts}` |
+| `/doc-form/mine` | `hondi-doc-form-mine\n${guid}\n${ts}` |
+| `/doc-form/reward-admin` | `hondi-doc-form-reward-admin\n${action}\n${key_hash}\n${version}\n${kind}\n${ts}` |
+
+서명은 L1에 핀된 공개키(`getPinnedPubKey`)로 검증한다. 오류 응답은 `{ ok:false, code, message }`.
+
+#### `POST /doc-form/rate`
+- **요청**: `{ key_hash(64자 hex), version(정수≥1), rating(1~5 정수), used:true, guid, ts, sig }` — `used`가 `true`가 아니면 `400 NOT_USED`(써 보지 않은 서식은 평가 불가).
+- **응답**: `{ ok:true, counted, stats:{count, avg} }`. `counted:false`는 가입 7일 미만 계정이라 **저장은 됐지만 집계에서 제외**됐다는 뜻. 지급 여부·기여자·다른 평가자 정보는 돌려주지 않는다.
+- **오류**: `400 MISSING|NOT_USED|STALE_TS`, `401 BAD_SIG`, `403 SELF_RATING`(본인 서식), `404 NO_ACCOUNT|NO_FORM`, `429 RATE`(하루 30건; 이미 평가한 서식의 수정은 제외), `500 INTERNAL`.
+- 같은 평가자가 같은 (key_hash, version)을 다시 보내면 덮어쓴다(유일 인덱스: key_hash+version+rater).
+- 평가를 저장한 뒤 `settle()`로 지급 조건을 점검한다. 점검이 실패해도 평가 응답은 성공으로 돌려준다(오류는 로그만).
+
+#### `GET /doc-form/stats?keys=<key_hash>:<version>,…`
+- 공개. 한 번에 최대 20개. 형식이 틀렸거나 없는 서식은 건너뛴다. `Cache-Control: public, max-age=60`.
+- **응답**: `{ ok:true, stats:{ "<key_hash>:<version>": {count, avg} } }`(`avg`는 소수 첫째 자리). 집계에는 인정 평가만 들어간다.
+
+#### `POST /doc-form/mine`
+- **요청**: `{ guid, ts, sig }`. 본인 서명으로만 열린다.
+- 본인이 올린 서식(최대 50건)에 대해 version 1이면 `settle()`을 한 번 돌린 뒤 돌려준다.
+- **응답**: `{ ok:true, rewardsEnabled, items:[{ keyHash, version, agency, name, savedTs, rewardEligible, stats:{count,avg}, rewards:[{kind, status, amountKrw, paidTs}] }] }`. `rewardsEnabled`는 `DOC_FORM_REWARD_KRW > 0` 여부.
+
+#### `POST /doc-form/reward-admin`
+- **요청**: `{ action:'void'|'retry', key_hash, version, kind:'qualified'|'excellent', guid, ts, sig }`. 서명자는 운영자(`DOC_FORM_ADMINS`)여야 한다(`403 NOT_ADMIN`).
+- `void`: 보상 기록을 무효로 바꿔 이후 지급하지 않는다. `retry`: 운영자가 L1 원장에서 **실제로 지급되지 않았음을 확인한** `failed`/`unknown` 건의 재시도 횟수를 비우고 다시 점검한다.
+- 상태가 `paid`·`minting`이면 `409 ALREADY` — 바꿀 수 없다.
+
+#### 지급 (`_mintFormReward`)
+- L1 `${L1_DEFAULT}/api/mint`에 `{guid, krw_amount, secret, memo}`를 보낸다(`memo`: `form_reward:<kind>:<key_hash 앞 12자>:v<version>`). 수취인 guid는 `_l1FindProfileByPubkey`로 기여자 공개키에서 찾는다.
+- L1이 **명시적으로 거절**하면 `{ok:false}` → 보상 `failed`(5분 간격 최대 3회 재시도). 응답을 읽지 못하거나 네트워크 오류면 예외 → 보상 `unknown`(자동 재시도 안 함 — 이중 지급 방지).
+- 환경변수: `DOC_FORM_REWARD_KRW`(양수일 때만 지급), `DOC_FORM_ADMINS`(운영자 목록, 기존 서식 검토에서 쓰는 것과 같다).
+- 로그: 지급 성공 시 `{"tag":"DOC_FORM_REWARD_PAID",…}` 한 줄, 응답 불명 시 `[DocFormReward] mint 응답 불명 …`.
