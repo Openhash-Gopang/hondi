@@ -90,6 +90,14 @@
       "url": "https://hondi.net/assets/presentations/navi-ai-engine-domestic-development-20261018.pdf"
     },
     {
+      "id": "navi-llm-genealogy", "order": 50, "series": "intro", "status": "ready",
+      "title": "나비 LLM의 족보",
+      "summary": "분야마다 따로 훈련한 작은 AI 중 알맞은 하나만 불러 쓰는 나비의 방식과, 웹앱 단계와 상용화 단계에서 쓰는 AI의 차이를 설명합니다. 나비 LLM의 뿌리를 A.X 4.0, Qwen, LLaMA, Transformer를 거쳐 캐나다 토론토 대학의 연구까지 거슬러 올라가 보여 줍니다.",
+      "audience": "일반", "date": "2026-10-18",
+      "tags": ["나비 LLM", "족보", "PDF"],
+      "url": "https://hondi.net/assets/presentations/navi-llm-genealogy-guide-20261018.pdf"
+    },
+    {
       "id": "persona-scrivener", "order": 10, "series": "persona", "status": "ready",
       "title": "전문가 페르소나 — 법무사 업무 보조 AI",
       "summary": "법무사와 사무소 직원의 업무를 돕는 법무사 AI를 소개합니다. 은행 예금 압류·가압류 절차를 예시로, 관제탑 원칙에 따라 한 번에 하나씩 지시하는 현재 방식과 법원 dpaper API 공개 후의 일괄 처리를 설명합니다.",
