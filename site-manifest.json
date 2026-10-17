@@ -1277,6 +1277,25 @@
     "date": "2026-09-19"
   },
   {
+    "path": "/docs/SESSION_SUMMARY_EXPERT_ASSISTANT_SP_SPLIT_20261017_v1_0.md",
+    "title": "세션 기록 — 전문가용 보조 AI SP 이분화·작성 문서 목록 개편(의사·회계사·변리사·변호사 등 세부 분야 SP 88개), 점검 결과·한계·추후 작업 (2026-10-17) ↗",
+    "description": "세션 기록 — 전문가용 보조 AI SP 이분화·작성 문서 목록 개편(의사·회계사·변리사·변호사 등 세부 분야 SP 88개), 점검 결과·한계·추후 작업 (2026-10-17) ↗",
+    "keywords": [
+      "세션 기록",
+      "전문가용 보조 AI SP 이분화 작성 문서 목록 개편 의사 회계사 변리사 변호사 등 세부 분야 SP 88개",
+      "점검 결과 한계 추후 작업",
+      "세션",
+      "기록",
+      "전문가용",
+      "보조",
+      "AI"
+    ],
+    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_EXPERT_ASSISTANT_SP_SPLIT_20261017_v1_0.md",
+    "audience": "dev",
+    "source": "menu",
+    "date": "2026-10-17"
+  },
+  {
     "path": "/docs/SESSION_SUMMARY_GDC_LOAN_CREDIT_LIVE_TEST_20260906_v1_0.html",
     "title": "GDC 대출·신용평가 라이브 테스트 — LEGAL-HOLD 조건부 재개·재무제표 스키마 신설·credit_snapshot maxSize 누락 등 실결함 5건 발견·수정, 전 구간 [PASS](0906) ↗",
     "description": "GDC 대출·신용평가 라이브 테스트 — LEGAL-HOLD 조건부 재개·재무제표 스키마 신설·credit_snapshot maxSize 누락 등 실결함 5건 발견·수정, 전 구간 [PASS](0906) ↗",
