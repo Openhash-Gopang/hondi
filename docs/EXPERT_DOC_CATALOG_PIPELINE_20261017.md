@@ -86,3 +86,12 @@ C-2가 없는 SP로는 목록만 보이고 「작성된 문서」가 작동하�
 - 이어서 `python3 scripts/gen-expert-pages.py`로 페이지를 만든다. 공통 흐름을 고칠 때는 생성기의 TEMPLATE과 손으로 쓴 원형 `SP_physician-assistant_v1_0.md`를 함께 본다.
 - 이 방식으로 만든 직역: 치과의사, 한의사, 수의사, 약사, 간호사(2026-10-17). 의사는 원형이라 손으로 썼다.
 - 확인 수준은 서류마다 다르므로 부록 A·§0-1에 원문 확인 / 정리본 기준 / 미확인을 그대로 적는다. 조문·서식 번호를 확인하지 못했으면 지어내지 않는다.
+
+## 8. 세부 분야 전문가용 SP 생성기 (`scripts/gen-assistant-child-sp.py`, 2026-10-17)
+
+세부 분야(의사 23개 등)는 페이지가 SP 파일 하나만 불러 쓰므로(부모를 상속하지 않음) 부모 전문가용 SP 전체에 분야 절을 덧붙인 독립 파일로 만든다.
+
+- 데이터: `data/assistant-child-sp/<자식id>.json` (parent, label, code_suffix, scope, judge_extra, boundaries, checks, tier2, forced, docs).
+- 결과: `prompts/SP_<자식id>-assistant_v1_0.md` = 부모 SP(§LEGAL-LIMIT~부록) + §0-4 세부 분야 절 + 부록 A 끝의 분야 특화 서류 1절.
+- 등록: `sp-catalog.json`(`SP_<자식id>-assistant`), `sp-catalog-categories.json`(`prof-<자식id>-assistant`, total+1).
+- 부모 SP를 고치면 `python3 scripts/gen-assistant-child-sp.py --all` 로 자식을 다시 만든다. `--check --all` 은 테스트 C-04가 부른다.
