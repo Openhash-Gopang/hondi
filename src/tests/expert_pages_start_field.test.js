@@ -51,6 +51,9 @@ describe('전문가 페르소나 페이지 전체 — 시작 영역', () => {
     cpSync(join(ROOT, 'pages'), join(tmp, 'pages'), { recursive: true });
     cpSync(join(ROOT, 'scripts/gen-expert-pages.py'), join(tmp, 'scripts/gen-expert-pages.py'));
     cpSync(join(ROOT, 'prompts/sp-catalog.json'), join(tmp, 'prompts/sp-catalog.json'));
+    // 페이지의 '한계와 추후 작업' 블록이 직역 데이터(직역별·세부 분야별)를 읽으므로 함께 복사한다.
+    mkdirSync(join(tmp, 'data'));
+    for (const d of ['assistant-sp', 'assistant-child-sp']) if (existsSync(join(ROOT, 'data', d))) cpSync(join(ROOT, 'data', d), join(tmp, 'data', d), { recursive: true });
     // 생성기는 SP 부록 A 에서 서류 목록을 읽는다 — 카탈로그가 가리키는 SP 원문도 함께 복사한다.
     for (const f of new Set(Object.values(catalog))) if (existsSync(join(ROOT, 'prompts', f))) cpSync(join(ROOT, 'prompts', f), join(tmp, 'prompts', f));
     const r = spawnSync('python3', ['scripts/gen-expert-pages.py'], { cwd: tmp, encoding: 'utf8' });
