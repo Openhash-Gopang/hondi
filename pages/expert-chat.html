@@ -104,7 +104,7 @@ import { EXPERT_REGISTRY, UNIVERSAL_INTEGRITY_KEY, COMMON_GUARDRAILS_KEY,
 import { _loadSpByKey, _loadSpRawByKey } from '/src/gopang/ai/manifest-loader.js';
 import { _missingNextStepMarker, _needsDocForm } from '/src/gopang/ai/expert-session.js';
 import { DOC_FORM_KEY } from '/src/gopang/ai/expert-registry.js';
-import { parseLookup, parseProposal, stripFormTags, findForm, lookupResultText, precheckProposal, saveForm, attachmentToText }
+import { parseLookup, parseProposal, stripFormTags, findForm, lookupResultText, precheckProposal, saveForm, attachmentToText, rateForm, fetchMine, SHARE_NOTICE, REWARD_NOTICE, REWARD_STATUS_LABEL, statsLine }
   from '/src/gopang/ai/doc-form-client.js';
 import { HANDOFF_PARAM, downscaleImage, takeShots, shotsToAttachment } from '/src/gopang/ai/form-shots-handoff.js';
 import { classifyFile, extractFile } from '/src/gopang/ai/file-extract.js';
@@ -973,9 +973,9 @@ async function _maybeHandleFormTags(fullReply, aiBubble, depth = 0) {
 
   if (depth >= 2) { console.warn('[Expert] FORM_LOOKUP 반복 한도(2회) 도달'); return; }
   const note = appendBubble('ai', `<i>"${escHtml(lookup.name)}" 서식을 서식 DB에서 찾는 중…</i>`);
-  let resultText;
+  let resultText, foundForm = null;
   try {
-    const form = await findForm(WORKER, lookup);
+    const form = await findForm(WORKER, lookup); foundForm = form;
     note.innerHTML = `<i>"${escHtml(lookup.name)}" ${form ? '서식 DB에서 찾음' : '서식 DB에 없음'}</i>`;
     resultText = lookupResultText(form, lookup);
   } catch (e) {
@@ -993,6 +993,7 @@ async function _maybeHandleFormTags(fullReply, aiBubble, depth = 0) {
   });
   messages.push({ role: 'assistant', content: full });
   await _maybeHandleFormTags(full, bubble, depth + 1);
+  if (foundForm && _meGuid()) _renderRatingCard(foundForm);      // 2026-10-17: 서식 DB의 서식을 써 본 이용자에게 평가를 청한다
 }
 
 function _renderFormSaveCard(p) {
@@ -1008,6 +1009,7 @@ function _renderFormSaveCard(p) {
     `<label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;margin:8px 0">` +
     `<input type="checkbox" class="fs-consent" style="margin-top:3px"${chk.ok && guid ? '' : ' disabled'}>` +
     `<span>다른 이용자도 쓸 수 있도록 <b>빈 서식</b>만 공용 저장하는 것에 동의합니다. 제 개인정보와 사안 내용은 저장되지 않으며, 저장된 서식은 "공식 확인 전" 표시와 함께 제공됩니다.</span></label>` +
+    `<div style="font-size:12px;color:var(--label-2,#666);margin:0 0 8px;line-height:1.5">${escHtml(SHARE_NOTICE(def.label))}<br>${escHtml(REWARD_NOTICE(p.source))}</div>` +
     (guid ? '' : `<div style="font-size:13px;color:#c0392b">저장은 나비 로그인 후에 할 수 있습니다.</div>`) +
     `<div style="display:flex;gap:8px"><button type="button" class="fs-save" disabled style="padding:7px 14px;border-radius:10px;border:0;background:var(--pri,#2563eb);color:#fff;font-size:13px">저장</button>` +
     `<button type="button" class="fs-skip" style="padding:7px 14px;border-radius:10px;border:1px solid var(--bdr,#ccc);background:none;font-size:13px">저장 안 함</button></div>` +
@@ -1022,10 +1024,52 @@ function _renderFormSaveCard(p) {
       const r = await saveForm(WORKER, wallet, guid, p, { persona: PERSONA, sourceNote: p.source === 'user_attached' ? '이용자 첨부(빈 서식으로 정리)' : 'AI 구성' });
       if (!r.ok) { msg.textContent = r.message; save.disabled = !consent.checked; return; }
       box.innerHTML = r.duplicate
-        ? '<i>이미 같은 서식이 저장되어 있습니다. 다음 이용자는 첨부 없이 바로 쓸 수 있습니다.</i>'
-        : '<i>서식 DB에 저장했습니다(공식 확인 전). 다음 이용자는 첨부 없이 바로 쓸 수 있습니다.</i>';
+        ? '<i>이미 같은 서식이 저장되어 있습니다. 다음 이용자는 첨부 없이 바로 쓸 수 있습니다. (이미 있던 서식은 보상 대상이 아닙니다.)</i>'
+        : '<i>서식 DB에 저장했습니다(공식 확인 전). 이 직역 전문가 페이지에 게시되어 다른 이용자가 첨부 없이 바로 쓸 수 있습니다.</i>' +
+          ' <button type="button" class="fs-mine" style="margin-left:6px;padding:3px 10px;border-radius:8px;border:1px solid var(--bdr,#ccc);background:none;font-size:12px">내 서식 현황</button><div class="fs-mine-out" style="font-size:12px;margin-top:6px"></div>';
+      const mineBtn = box.querySelector('.fs-mine'); if (mineBtn) mineBtn.addEventListener('click', () => _showMyForms(guid, box.querySelector('.fs-mine-out')));
     } catch (e) { msg.textContent = e.message || '저장하지 못했습니다.'; save.disabled = !consent.checked; }
   });
+}
+
+// ── 서식 평가 카드 (2026-10-17 신설) — 서식 DB에서 받은 서식으로 작성해 본 이용자가 1~5점으로 평가한다.
+// 평가는 지갑 서명으로 보내며, 처음 올린 이용자의 GDC 보상 판정에 쓰인다(서버 규칙: src/worker/doc-form-reward.js).
+// 본인이 올린 서식은 서버가 거절한다. 평가를 강요하지 않는다 — 건너뛰기 가능.
+function _renderRatingCard(form) {
+  const guid = _meGuid(); if (!guid || !form.keyHash) return;
+  const box = appendBubble('ai', '');
+  const stars = [1, 2, 3, 4, 5].map(n => `<button type="button" class="rt-star" data-n="${n}" style="padding:6px 12px;border-radius:10px;border:1px solid var(--bdr,#ccc);background:none;font-size:14px;margin-right:4px">${n}</button>`).join('');
+  box.innerHTML =
+    `<b>이 서식이 도움이 되었나요?</b><br>` +
+    `<span style="font-size:13px;color:var(--label-2,#666)">${escHtml(form.agency)} · ${escHtml(form.name)} — 이 서식으로 서류를 작성해 보셨다면 점수를 남겨 주세요(1 별로 · 5 매우 유용). 다른 이용자가 서식을 고르는 데 쓰이고, 처음 올린 분의 보상 심사에 반영됩니다.</span>` +
+    `<div style="margin:8px 0">${stars}<button type="button" class="rt-skip" style="padding:6px 12px;border-radius:10px;border:0;background:none;font-size:13px;color:var(--label-2,#666)">건너뛰기</button></div>` +
+    `<div class="rt-msg" style="font-size:13px"></div>`;
+  const msg = box.querySelector('.rt-msg');
+  box.querySelector('.rt-skip').addEventListener('click', () => { box.innerHTML = '<i>평가하지 않았습니다.</i>'; });
+  box.querySelectorAll('.rt-star').forEach(b => b.addEventListener('click', async () => {
+    box.querySelectorAll('.rt-star').forEach(x => { x.disabled = true; }); msg.textContent = '평가를 보내는 중…';
+    try {
+      const wallet = await _getWallet(guid);
+      const r = await rateForm(WORKER, wallet, guid, { keyHash: form.keyHash, version: form.version, rating: Number(b.dataset.n) });
+      if (!r.ok) { msg.textContent = r.message; box.querySelectorAll('.rt-star').forEach(x => { x.disabled = false; }); return; }
+      box.innerHTML = '<i>평가해 주셔서 감사합니다.' + (r.counted ? '' : ' (가입 후 7일이 지나면 집계에 반영됩니다.)') + '</i>';
+    } catch (e) { msg.textContent = e.message || '평가를 보내지 못했습니다.'; box.querySelectorAll('.rt-star').forEach(x => { x.disabled = false; }); }
+  }));
+}
+
+// 내가 올린 서식의 평가 현황과 보상 상태 (본인 서명으로만 열린다).
+async function _showMyForms(guid, out) {
+  out.textContent = '불러오는 중…';
+  try {
+    const r = await fetchMine(WORKER, await _getWallet(guid), guid);
+    if (!r.ok) { out.textContent = r.message; return; }
+    if (!r.items.length) { out.textContent = '아직 올린 서식이 없습니다.'; return; }
+    out.innerHTML = r.items.map(i =>
+      `<div style="margin:4px 0"><b>${escHtml(i.name)}</b> (${escHtml(i.agency)}) — ${escHtml(statsLine(i.stats))}` +
+      (i.rewardEligible
+        ? ' · 보상: ' + (i.rewards.length ? i.rewards.map(w => escHtml(REWARD_STATUS_LABEL[w.status] || w.status)).join(', ') : (r.rewardsEnabled ? '평가 진행 중' : '보상 제도 준비 중'))
+        : ' · 보상 대상 아님(개정본이거나 AI 구성 서식)') + `</div>`).join('');
+  } catch (e) { out.textContent = e.message || '현황을 불러오지 못했습니다.'; }
 }
 
 // ── PROCEDURE_MAP_LOOKUP/DRAFT/UPDATE + CALL_GOVSYS 처리 (2026-07-20 신설) ──

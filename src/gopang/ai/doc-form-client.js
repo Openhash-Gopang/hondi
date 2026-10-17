@@ -9,6 +9,7 @@
 // 순수 함수 + 주입형 fetch/지갑이라 node 테스트가 가능하다. 서명 메시지·개인정보 탐지는 서버 핸들러의 것을 그대로 가져다 쓴다(드리프트 방지).
 // ═════════════════════════════════════════════════
 import { findPii, normBody, sha256Hex, saveMessage } from '../../worker/doc-form-handler.js';
+import { REWARD_RULES, rateMessage, mineMessage } from '../../worker/doc-form-reward.js';
 
 export const LOOKUP_RE = /\[FORM_LOOKUP:\s*([^\]]*)\]/;
 export const PROPOSAL_RE = /\[FORM_SAVE_PROPOSAL:\s*([^\]]*)\]([\s\S]*?)\[\/FORM_SAVE_PROPOSAL\]/;
@@ -104,3 +105,52 @@ export function attachmentToText(att) {
   return `[첨부 파일: ${att.name} — 내용을 읽지 못함. ${why} ` +
     `내용을 추측하지 말고, 이용자에게 사진 촬영(또는 텍스트 붙여넣기)을 요청하세요.]`;
 }
+
+// ── 공유·평가·보상 (2026-10-17 신설) ─────────────────────
+// 저장 동의 카드와 저장 직후 안내에 쓰는 고지문. 보상 조건 숫자는 서버 규칙(REWARD_RULES)에서 가져와 어긋나지 않게 한다.
+export const SHARE_NOTICE = (personaLabel) =>
+  `저장하면 ${personaLabel ? '"' + personaLabel + '" ' : ''}전문가 페이지에 게시되어 다른 이용자가 이 서식을 활용할 수 있습니다. 개인정보와 사안 내용은 저장되지 않습니다.`;
+export const REWARD_NOTICE = (source) => source === 'ai_composed'
+  ? 'AI가 구성한 서식은 GDC 보상 대상이 아닙니다.'
+  : `이 서식을 처음 올린 것이고, 다른 이용자 ${REWARD_RULES.MIN_RATERS}명 이상이 써 본 뒤 높이 평가하면 GDC 보상이 지급될 수 있습니다. 지급 여부와 금액은 운영 정책에 따르며 보장되지 않고, 이미 서식 DB에 있는 서식은 대상이 아닙니다.`;
+
+// 서식을 써 본 이용자의 평가 — 지갑 서명(점수를 바꾸면 서명이 깨진다).
+export async function rateForm(worker, wallet, guid, { keyHash, version, rating }, { now = Date.now, fetchImpl = fetch } = {}) {
+  const ts = now();
+  const sig = await wallet.signPayload(rateMessage(keyHash, version, rating, ts));
+  const res = await fetchImpl(`${worker}/doc-form/rate`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key_hash: keyHash, version, rating, used: true, guid, ts, sig }),
+  });
+  const j = await res.json().catch(() => ({}));
+  if (!res.ok || !j.ok) return { ok: false, code: j.code || 'HTTP_' + res.status, message: j.message || '평가를 저장하지 못했습니다.' };
+  return { ok: true, counted: !!j.counted, stats: j.stats };
+}
+
+// 공개 집계 — pairs: [{keyHash, version}] (최대 20). 실패하면 빈 객체(부가 정보라 화면을 막지 않는다).
+export async function fetchStats(worker, pairs, fetchImpl = fetch) {
+  const keys = pairs.slice(0, 20).map(p => `${p.keyHash}:${p.version}`).join(',');
+  if (!keys) return {};
+  try {
+    const res = await fetchImpl(`${worker}/doc-form/stats?keys=${encodeURIComponent(keys)}`);
+    const j = await res.json();
+    return res.ok && j.ok ? j.stats : {};
+  } catch { return {}; }
+}
+
+// 내가 올린 서식의 집계와 보상 상태 — 본인 서명.
+export async function fetchMine(worker, wallet, guid, { now = Date.now, fetchImpl = fetch } = {}) {
+  const ts = now();
+  const sig = await wallet.signPayload(mineMessage(guid, ts));
+  const res = await fetchImpl(`${worker}/doc-form/mine`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ guid, ts, sig }) });
+  const j = await res.json().catch(() => ({}));
+  if (!res.ok || !j.ok) return { ok: false, message: j.message || '현황을 불러오지 못했습니다.' };
+  return { ok: true, rewardsEnabled: !!j.rewardsEnabled, items: j.items || [] };
+}
+
+// 평가 카드·현황에 쓰는 한 줄 요약.
+export function statsLine(s) {
+  if (!s || !s.count) return '평가 모으는 중';
+  return `★${s.avg} · ${s.count}명 평가`;
+}
+export const REWARD_STATUS_LABEL = { minting: '지급 처리 중', paid: '지급됨', failed: '지급 재시도 대기', unknown: '운영자 확인 중', void: '취소됨' };

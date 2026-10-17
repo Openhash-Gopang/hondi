@@ -22,6 +22,8 @@ import { makeOrgSiteHandler } from './src/worker/org-site-handler.js';
 import { makePocketBaseOrgSiteStore } from './src/worker/org-site-store.js';
 import { makeDocFormHandler } from './src/worker/doc-form-handler.js';
 import { makePocketBaseDocFormStore } from './src/worker/doc-form-store.js';
+import { makeDocFormRewardHandler } from './src/worker/doc-form-reward.js';
+import { makePocketBaseRatingStore, makePocketBaseRewardStore } from './src/worker/doc-form-reward-store.js';
 import { makeConsentSaleHandler } from './src/worker/consent-sale-handler.js';
 import { makeConsentSaleStore } from './src/worker/consent-sale-store.js';
 import { verifyPhoneAndStepUp } from './src/worker/phone-token.js';
@@ -5505,12 +5507,40 @@ function handleOrgSiteRoutes(request, url, env, corsHeaders) {
 
 // ── 나비 서식 DB(2026-10-14 신설) — 전문가 페르소나가 쓰는 빈 서식 저장·조회. SP_DOC_FORM §4.
 // 저장은 지갑 서명 + 공용 저장 동의, 검토 상태 변경은 DOC_FORM_ADMINS(guid 또는 공개키, 쉼표 구분)만.
-function handleDocFormRoutes(request, url, env, corsHeaders) {
-  const handler = makeDocFormHandler({
-    store: makePocketBaseDocFormStore({ base: L1_DEFAULT, getToken: () => _l1AdminToken(env) }),
-    getPinnedPubKey: async (e, guid) => (await _l1FindProfileByGuid(e, guid))?.pubkey_ed25519 || null,
+async function handleDocFormRoutes(request, url, env, corsHeaders) {
+  const cfg = { base: L1_DEFAULT, getToken: () => _l1AdminToken(env) };
+  const formStore = makePocketBaseDocFormStore(cfg);
+  const getPinnedPubKey = async (e, guid) => (await _l1FindProfileByGuid(e, guid))?.pubkey_ed25519 || null;
+  // 서식 평가·GDC 보상(2026-10-17 신설) — /doc-form/rate|stats|mine|reward-admin. 해당 경로가 아니면 null.
+  const rewards = makeDocFormRewardHandler({
+    formStore, ratingStore: makePocketBaseRatingStore(cfg), rewardStore: makePocketBaseRewardStore(cfg),
+    getPinnedPubKey,
+    getAccount: async (e, guid) => {
+      const created = (await _l1FindProfileByGuid(e, guid))?.created;           // PocketBase "YYYY-MM-DD HH:mm:ss.SSSZ"
+      const ts = created ? Date.parse(String(created).replace(' ', 'T')) : NaN;
+      return { createdTs: Number.isFinite(ts) ? ts : null };
+    },
+    mint: (e, a) => _mintFormReward(e, a),
   });
+  const handled = await rewards.handle(request, url, env, corsHeaders);
+  if (handled) return handled;
+  const handler = makeDocFormHandler({ store: formStore, getPinnedPubKey });
   return handler.handle(request, url, env, corsHeaders);
+}
+
+// 서식 보상 지급 — _grantSignupBonus 와 같은 L1 /api/mint 경로(감사 추적용 별도 엔드포인트를 만들지 않는다), memo 로 구분.
+// 반환: { ok:true, gdc, contentHash } | { ok:false, error }  — L1이 명시적으로 거절한 경우만 ok:false.
+// 요청 전송 후 응답을 못 받으면 throw → 호출부(doc-form-reward.js)가 'unknown'으로 두고 자동 재시도하지 않는다.
+async function _mintFormReward(env, { pubkey, krw, memo }) {
+  const profile = await _l1FindProfileByPubkey(env, pubkey);
+  if (!profile?.guid) return { ok: false, error: 'NO_PROFILE' };
+  const res = await fetch(`${L1_DEFAULT}/api/mint`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ guid: profile.guid, krw_amount: krw, secret: _mintSecret(env), memo }),
+  });
+  const data = await res.json();                       // 파싱 실패 = 결과 불명 → throw
+  if (!data.ok) return { ok: false, error: String(data.error || 'MINT_FAILED') };
+  return { ok: true, gdc: data.amount, contentHash: data.content_hash };
 }
 
 // ── K-Estate 통합 "합의매각" API (2026-09-27 신설) ── 채권자·채무자 두 계정이

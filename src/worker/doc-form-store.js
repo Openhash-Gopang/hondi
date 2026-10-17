@@ -5,6 +5,8 @@
 //   append(rec)                  → 저장. (key_hash,version) 중복이면 Error('CONFLICT')
 //   setStatus(keyHash,version,p) → 상태·공식 URL·검토자 갱신
 //   countSince(contributor, ts)  → 이 기여자가 ts 이후 올린 서식 수(일일 한도용)
+//   earlierSameBody(bodyHash, ts, keyHash) → 다른 서식으로 먼저 저장된 같은 본문이 있는가 (보상 중복 방지, 2026-10-17)
+//   listByContributor(contributor, limit)  → 이 기여자의 서식 행(본문 포함, 최신순) (본인 현황용, 2026-10-17)
 const COLLECTION = 'doc_forms';
 const q = s => String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
@@ -46,6 +48,14 @@ export function makePocketBaseDocFormStore({ base, getToken, fetchImpl = fetch }
       const res = await fetchImpl(url(`/${row.id}`), { method: 'PATCH', headers: await auth(), body: JSON.stringify(patch) });
       if (!res.ok) throw new Error(`L1 갱신 실패 (HTTP ${res.status})`);
       return true;
+    },
+    // 보상 점검용(2026-10-17): 같은 본문이 다른 서식으로 먼저 저장돼 있는지 / 이 기여자가 올린 서식(최신순).
+    async earlierSameBody(bodyHash, ts, keyHash) {
+      const items = await query(`body_hash='${q(bodyHash)}' && key_hash!='${q(keyHash)}' && ts<${Number(ts) | 0}`, 'ts', 1, 'id');
+      return items.length > 0;
+    },
+    async listByContributor(contributor, limit = 50) {
+      return query(`contributor='${q(contributor)}'`, '-ts', Math.min(Number(limit) | 0 || 50, 200));
     },
     async countSince(contributor, ts) {
       const res = await fetchImpl(url(`?filter=${encodeURIComponent(`contributor='${q(contributor)}' && ts>=${Number(ts) | 0}`)}&perPage=1&fields=id`), { headers: await auth() });
