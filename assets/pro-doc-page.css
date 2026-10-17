@@ -172,6 +172,9 @@ table.svc-table td.svc-hondi { color: var(--brand-dk); font-weight: 600; }
 .lr-banner-x { flex: 0 0 auto; align-self: center; padding: 3px 4px; border: none; background: transparent; color: #7a5a10; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; border-radius: 4px; text-decoration: underline; }
 .lr-banner-x:hover { color: #3d2d00; }
 .lr-banner-x:focus-visible { outline: 2px solid #b7791f; outline-offset: 2px; }
+/* legal-review tab: hide drafting-only UI (how-to callout, document catalog, statute table...), keep the start area (tabs + chat box) and the footer */
+body.lr-mode .ug-doc > :not(.doc-intro):not(.ug-footer) { display: none !important; }
+body.lr-mode .doc-intro > .svc-callout { display: none; }
 .lr-state { margin: 0 0 12px; font-size: 13px; color: #475569; text-align: left; }
 .lr-nav-btn { align-self: center; margin-right: 10px; padding: 5px 12px; border: 1px solid #d9a441; border-radius: 999px; background: rgba(217, 164, 65, .16); color: #ffe6b0; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
 .lr-nav-btn:hover { background: #d9a441; color: #2b1d00; }
