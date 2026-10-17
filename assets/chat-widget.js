@@ -243,6 +243,7 @@
   fabBtn.title = CFG.label;
 
   var history = [];
+  var _modeOverride = null; // 2026-10-17: 법률 검토 탭 등 — {system, context, greeting, maxTokens}. null이면 페이지 기본 SP.
   var busy = false;
   var opened = false; // 최초 오픈 시에만 인사말/포커스 처리
 
@@ -443,15 +444,16 @@
     appendTyping();
 
     try {
-      var basePrompt = await loadSP();
-      var composedSP = CFG.context ? basePrompt + '\n\n---\n[현재 화면 컨텍스트]\n' + CFG.context : basePrompt;
+      var basePrompt = (_modeOverride && _modeOverride.system) ? _modeOverride.system : await loadSP();
+      var _ctxText = _modeOverride ? (_modeOverride.context || '') : CFG.context;
+      var composedSP = _ctxText ? basePrompt + '\n\n---\n[현재 화면 컨텍스트]\n' + _ctxText : basePrompt;
 
       var body = JSON.stringify({
         provider: 'deepseek',
         model: 'deepseek-v4-flash',
         system: composedSP,
         messages: history,
-        max_tokens: CFG.maxTokens || 1000,
+        max_tokens: (_modeOverride && _modeOverride.maxTokens) || CFG.maxTokens || 1000,
       });
 
       var res;
@@ -496,7 +498,7 @@
 
   function openPanel() {
     if (!opened) {
-      appendMsg('ai', CFG.greeting);
+      appendMsg('ai', (_modeOverride && _modeOverride.greeting) || CFG.greeting);
       opened = true;
     }
     if (inline) {
@@ -560,6 +562,17 @@
       autoResize();
       return send();
     },
-    isBusy: function () { return busy; }
+    isBusy: function () { return busy; },
+    // 2026-10-17: 대화 모드 전환(법률 검토 탭). opts={system, context, greeting, maxTokens} 또는 null(페이지 기본으로 복귀).
+    // 모드가 다르면 시스템 프롬프트도 다르므로 대화를 새로 시작한다. 응답을 기다리는 중이면 바꾸지 않고 false를 돌려준다.
+    setMode: function (opts) {
+      if (busy) return false;
+      _modeOverride = opts || null;
+      history = [];
+      msgsEl.textContent = '';
+      opened = false;
+      if (panel.classList.contains('open')) { appendMsg('ai', (_modeOverride && _modeOverride.greeting) || CFG.greeting); opened = true; }
+      return true;
+    }
   };
 })();

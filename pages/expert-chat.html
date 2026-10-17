@@ -19,6 +19,18 @@
 @keyframes mic-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
 #attach-preview span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #attach-preview button{background:none;border:none;color:var(--hint);cursor:pointer;font-size:13px;flex-shrink:0}
+/* 법률 검토 (2026-10-17) */
+#tb-review{margin-left:auto;flex-shrink:0;border:1px solid #D9A441;background:rgba(217,164,65,.16);color:#FFE6B0;
+  font:600 12px var(--font);padding:6px 11px;border-radius:999px;cursor:pointer;white-space:nowrap}
+#tb-review.on{background:#D9A441;color:#2B1D00}
+#tb-review[hidden]{display:none}
+#tb-review + #tb-back{margin-left:8px}
+#lr-banner{display:flex;align-items:flex-start;gap:10px;padding:9px 14px;background:#FFF6DD;color:#5A4300;
+  border-bottom:1px solid #F0DFA8;font-size:12.5px;line-height:1.5}
+#lr-banner[hidden]{display:none}
+.lr-banner-text{flex:1;min-width:0}
+.lr-banner-close{flex-shrink:0;border:none;background:none;color:#7A5C00;font:500 11.5px var(--font);cursor:pointer;
+  text-decoration:underline;padding:2px 0;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -26,8 +38,10 @@
 <div id="top-bar">
   <div id="tb-icon">🤝</div>
   <div id="tb-sub">로딩 중…</div>
+  <button id="tb-review" type="button" title="인간 변호사에게 묻기 전에 AI로 쟁점을 먼저 점검합니다">⚖ 법률 검토</button>
   <button id="tb-back">나비로</button>
 </div>
+<div id="lr-banner" hidden></div>
 
 <div id="err-banner"></div>
 <div id="chat-thread"></div>
@@ -114,6 +128,9 @@ import { classifyFile, extractFile } from '/src/gopang/ai/file-extract.js';
 // 연결하는 셈이라 아무 효과가 없다.
 import { recordOwnerPDV, queryOwnerPdvSelfHistory, recordUserPdvForExpert } from '/src/gopang/gwp/gwp-report-client.js';
 import { escHtml, appendBubble, appendTyping as _sharedAppendTyping } from '/src/gopang/ui/chat-shell.js';
+// 2026-10-17: 법률 검토 모드(상위 SP_LEGAL_REVIEW_BASE + 직업군 훅) — 조립은 legal-review.js, 배너는 legal-review-ui.js
+import { _composeLegalReviewPrompt, LEGAL_REVIEW_DISCLAIMER } from '/src/gopang/ai/legal-review.js';
+import { renderLegalReviewBanner } from '/src/gopang/ui/legal-review-ui.js';
 
 const RELAY_ENDPOINT = 'https://hondi-proxy.tensor-city.workers.dev';
 
@@ -137,6 +154,8 @@ let _gwpSeedUsed = false;
 document.getElementById('tb-back').onclick = () => { location.href = RETURN; };
 
 const def = EXPERT_REGISTRY[PERSONA];
+// 법률 검토 모드: ?mode=review 로 열거나 상단 [법률 검토] 버튼으로 전환한다.
+let REVIEW_MODE = _qs.get('mode') === 'review';
 if (!def) {
   document.getElementById('tb-sub').textContent = '알 수 없는 전문가입니다';
   const banner = document.getElementById('err-banner');
@@ -170,6 +189,33 @@ if (!def) {
 document.getElementById('tb-icon').textContent  = def.icon || '🤝';
 document.getElementById('tb-sub').textContent   = '자격직 전문가 페르소나 · 최종 법적/의료적 행위는 인간 전속';
 document.title = def.label + ' 업무 보조 AI';
+
+const _lrBtn = document.getElementById('tb-review');
+const _lrBanner = document.getElementById('lr-banner');
+function _refreshReviewChrome() {
+  _lrBtn.classList.toggle('on', REVIEW_MODE);
+  _lrBtn.textContent = REVIEW_MODE ? '⚖ 법률 검토 중' : '⚖ 법률 검토';
+  document.getElementById('tb-sub').textContent = REVIEW_MODE
+    ? def.label + ' · 법률 검토 (참고용 · 인간 변호사 자문 대체 불가)'
+    : '자격직 전문가 페르소나 · 최종 법적/의료적 행위는 인간 전속';
+  document.title = def.label + (REVIEW_MODE ? ' 법률 검토' : ' 업무 보조 AI');
+  renderLegalReviewBanner(_lrBanner, REVIEW_MODE);
+}
+function _reviewGreeting() {
+  return `${LEGAL_REVIEW_DISCLAIMER}\n\n${def.label} 분야에서 변호사에게 묻기 전에 확인하고 싶은 사안을 알려주세요. ` +
+    `쟁점과 기한, 준비할 자료를 정리해 드립니다.`;
+}
+function setReviewMode(on) {
+  if (on === REVIEW_MODE) return;
+  REVIEW_MODE = on;
+  systemPrompt = null; messages = [];   // 모드가 다르면 시스템 프롬프트도 다르다 — 새 대화로 시작
+  _refreshReviewChrome();
+  appendBubble('ai', escHtml(on
+    ? _reviewGreeting() + '\n\n(법률 검토 모드로 새 대화를 시작합니다. 이전 대화 내용은 이 검토에 전달되지 않습니다.)'
+    : `일반 상담 모드로 돌아왔습니다. 저는 ${def.label} AI입니다. 무엇을 도와드릴까요?`).replace(/\n/g, '<br>'));
+}
+_lrBtn.addEventListener('click', () => setReviewMode(!REVIEW_MODE));
+_refreshReviewChrome();
 
 // ══════════════════════════════════════════════════════════════
 // 채팅 UI 헬퍼 — 2026-07-22부터 공용 모듈(chat-shell.js) 사용.
@@ -634,6 +680,13 @@ async function _recordExpertOwnerPDV(reason) {
 
 async function ensureSystemPrompt() {
   if (systemPrompt) return systemPrompt;
+  if (REVIEW_MODE) {
+    const p = await _composeLegalReviewPrompt(PERSONA);
+    if (!p) throw new Error('법률 검토 모드의 공통 골격을 불러오지 못했습니다. 일반 상담 모드를 이용해 주세요.');
+    systemPrompt = p;
+    messages = [{ role: 'system', content: systemPrompt }];
+    return systemPrompt;   // 과거 상담 이력(PDV) 조회는 법률 검토에 쓰지 않는다
+  }
   systemPrompt = await composeExpertPrompt();
   messages = [{ role: 'system', content: systemPrompt }];
 
@@ -1325,6 +1378,7 @@ async function startGreeting() {
     sendTurn(GWP_CTX, _seedAtt);
     return;
   }
+  if (REVIEW_MODE) { appendBubble('ai', escHtml(_reviewGreeting()).replace(/\n/g, '<br>')); return; }
   // 2026-09-04 신설 — 카탈로그에서 곧바로 들어온 경우(ctx 없음)도
   // "안녕하세요, OO AI입니다" 같은 정적 한 줄 대신, 페르소나 자신의 SP
   // 정체성(Q1 등)에 따라 스스로 소개하도록 내부 지시를 첫 턴으로 조용히

@@ -165,6 +165,18 @@ table.svc-table td.svc-hondi { color: var(--brand-dk); font-weight: 600; }
 #startChatMount { text-align: left; }
 /* 「방법론」 탭 — SP(MD 원문)를 본문 폭으로 펼친다. 높이는 0fr→1fr 전환으로 부드럽게 늘어나고, 원문이 길어(약 1.4만 px) 화면 높이의 80%까지만 펼친 뒤 안에서 스크롤한다. */
 .doc-start.is-method #startChatMount { display: none; }
+/* 2026-10-17 — 「법률 검토」 탭: 인간 변호사 비대체 안내 띠(다시 보지 않기 가능) + 상단 메뉴 버튼 */
+.lr-banner { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 12px; padding: 10px 14px; text-align: left; background: #fff8e6; border: 1px solid #f0d58a; border-radius: 12px; color: #5c4400; font-size: 12.5px; font-weight: 600; line-height: 1.6; word-break: keep-all; }
+.lr-banner[hidden] { display: none; }
+.lr-banner-text { flex: 1; min-width: 0; }
+.lr-banner-x { flex: 0 0 auto; align-self: center; padding: 3px 4px; border: none; background: transparent; color: #7a5a10; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; border-radius: 4px; text-decoration: underline; }
+.lr-banner-x:hover { color: #3d2d00; }
+.lr-banner-x:focus-visible { outline: 2px solid #b7791f; outline-offset: 2px; }
+.lr-state { margin: 0 0 12px; font-size: 13px; color: #475569; text-align: left; }
+.lr-nav-btn { align-self: center; margin-right: 10px; padding: 5px 12px; border: 1px solid #d9a441; border-radius: 999px; background: rgba(217, 164, 65, .16); color: #ffe6b0; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.lr-nav-btn:hover { background: #d9a441; color: #2b1d00; }
+.lr-nav-btn:focus-visible { outline: 2px solid #ffe6b0; outline-offset: 2px; }
+@media (max-width: 700px) { .lr-nav-btn { padding: 4px 9px; font-size: 11.5px; margin-right: 6px; } }
 .sp-view { display: grid; grid-template-rows: 0fr; margin-top: 0; transition: grid-template-rows .5s cubic-bezier(.22,.8,.26,1), margin-top .5s cubic-bezier(.22,.8,.26,1); }
 .sp-view.open { grid-template-rows: 1fr; margin-top: 12px; }
 .sp-view-inner { min-height: 0; overflow: hidden; opacity: 0; transition: opacity .35s ease; background: #ffffff; border: 1px solid transparent; border-radius: 14px; }
