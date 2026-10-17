@@ -86,9 +86,8 @@ code, pre, kbd, samp, input, button, textarea, select {
 .ug-header-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .ug-header-brand { display: flex; align-items: center; gap: 12px; }
 .ug-header-mark {
-  width: 32px; height: 32px; border-radius: var(--r-sm); background: var(--brand);
-  display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700;
-  flex-shrink: 0;
+  width: 32px; height: 32px; border-radius: 8px; object-fit: cover;
+  display: block; flex-shrink: 0;
 }
 .ug-header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
 .ug-header .ug-sub { font-size: 12.5px; color: #a9b8d4; margin-top: 2px; }
@@ -458,7 +457,7 @@ code, pre, kbd, samp, input, button, textarea, select {
   <div class="ug-header">
     <div class="ug-header-top">
       <div class="ug-header-brand">
-        <div class="ug-header-mark">H</div>
+        <img class="ug-header-mark" src="/icons/navi-icon-192.png" alt="" width="32" height="32">
         <div>
           <h1 id="topbarTitle">홈</h1>
           <div class="ug-sub" id="topbarSub">오늘 나비가 나를 위해 한 일</div>

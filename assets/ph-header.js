@@ -67,7 +67,7 @@
     return (
       '<nav class="topnav">' +
         '<div class="topnav-inner">' +
-          '<a href="/desktop.html" class="topnav-logo" onclick="return __hondiBack(event);"><span class="topnav-logo-icon">H</span>나비</a>' +
+          '<a href="/desktop.html" class="topnav-logo" onclick="return __hondiBack(event);"><img class="topnav-logo-icon" src="/icons/navi-icon-192.png" alt="" width="26" height="26">나비</a>' +
           '<div class="topnav-links">' + links + '</div>' +
           '<div class="topnav-right">' +
             '<div class="topnav-status"><span class="status-dot-green"></span>로그인 불필요 · 열람 전용</div>' +
