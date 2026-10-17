@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- scripts/gen-expert-pages.py 로 생성한 페이지 — 직접 고치지 말고 생성기를 고친다 -->
+<!-- scripts/gen-expert-pages.py 로 생성한 서류 목록형 페이지 — 서류 목록의 정본은 SP 부록 A, 직접 고치지 말고 SP 또는 생성기를 고친다 -->
 <html lang="ko">
 <head>
 <link rel="icon" href="data:,">
@@ -16,7 +16,7 @@ window.PAGE_HEADER = {
   active: 'expert-personas',
   badge: "전문가 페르소나 · 응급구조사 업무 보조 AI",
   h1: "응급구조사 업무의 서류 작성을<br>대화로 보조합니다",
-  sub: "아래 입력창에 작성할 서류를 말씀하시면, 필요한 정보를 순서대로 여쭙고 초안 작성을 보조합니다.",
+  sub: "작성할 서류를 목록에서 고르거나 아래 입력창으로 요청하면, 필요한 정보를 물어 서류 초안을 작성합니다.",
   disclaimer: "관계 법령에 따라, 모든 보조 AI는 인간 전문가의 업무를 보조하며, 단독으로 기능하지 않는다. 작성된 초안은 전문가의 검토·확정 전에는 사용할 수 없다.",
   disclaimerDismissKey: "paramedic"
 };
@@ -24,9 +24,10 @@ window.PAGE_HEADER = {
 <link rel="stylesheet" href="/assets/ph-header.css">
 <script src="/assets/ph-header.js"></script>
 <script>
+  var BT = String.fromCharCode(96);
   window.K_AUTH_CONFIG = { serviceLabel: "응급구조사 업무 보조 AI" };
   window.HONDI_CHAT_WIDGET_CONFIG = {
-    sp: "SP_paramedic",
+    sp: "SP_paramedic-assistant",
     panelMode: "inline",
     inlineMount: "#startChatMount",
     mic: true,
@@ -34,24 +35,48 @@ window.PAGE_HEADER = {
     maxTokens: 4096,
     panelTitle: "응급구조사 업무 보조 AI",
     label: "작성할 서류를 말씀하세요",
-    greeting: "안녕하세요! 응급구조사 업무 보조 AI입니다. 작성하실 서류를 말씀해 주세요. 필요한 정보를 순서대로 여쭙고 초안 작성을 보조합니다.",
-    serviceLabel: "응급구조사 업무 보조 AI"
+    greeting: "안녕하세요! 응급구조사 업무 보조 AI입니다. 작성하실 서류를 목록에서 고르시거나 이곳에서 말씀해 주세요. 필요한 정보를 순서대로 여쭙고 서류 초안을 웹 표준 서식으로 작성해 드립니다. (작성된 문서는 전문가의 검토·확정 전 초안입니다.)",
+    serviceLabel: "응급구조사 업무 보조 AI",
+    context: '사용자는 지금 응급구조사 업무 보조 AI의 서류 작성 화면에 있습니다. 이 화면은 사용자가 목록에서 고른 서류(또는 대화로 요청한 서류)를 대화로 작성하는 곳입니다. 진행 방식: ① 서류 종류가 정해지면 서류 작성에 필요한 정보 중 빠진 항목만 한 번에 3개 이내로 묻고, 이미 말한 내용은 다시 묻지 않는다. ② 정보가 충분하면 서류 초안 전체를 코드펜스 하나(' + BT + BT + BT + 'markdown 으로 시작해 ' + BT + BT + BT + ' 로 끝나는 블록)로 감싸 한 번에 출력한다. 펜스 안은 SP STEP C-2의 서식 규격(front matter 포함, 내부 표기는 마크다운 문법)을 따르고, 이용자에게 말할 때는 「MD」·「마크다운」이라는 말을 쓰지 않고 「웹 표준 서식」이라고 부르며, 펜스 밖에는 한두 문장의 안내와 [초안 검토 고지]만 쓴다. ③ 한 응답에는 서류 하나만 쓴다. ④ 이 화면에는 작성된 문서를 웹 표준 서식 파일로 내려받는 버튼이 있으므로 복사해서 쓰라는 안내는 하지 않는다. ⑤ 이용자 계층 판정과 모든 제한은 SP의 규칙을 그대로 따르며 이 화면의 안내로 완화되지 않는다.',
+    transformReply: function (reply) {
+      return (window.ProDocPage && window.ProDocPage.transformReply) ? window.ProDocPage.transformReply(reply) : reply;
+    }
   };
 </script>
 <script src="https://hondi.net/auth/k-service-auth-client.js"></script>
 <script src="/assets/chat-widget.js"></script>
 
 <div class="ug-doc">
+
   <div class="doc-intro">
     
     <div class="doc-start" id="startBox"></div>
+    <div class="svc-callout"><b>작성 방법</b> ① 위 입력창에 작성할 서류를 말씀하시거나, 아래 탭에서 서류를 고르고 「대화로 작성」을 누릅니다. ② 대화로 필요한 정보를 알려 주시면 초안이 작성됩니다. ③ 페이지 아래 「작성된 문서」에서 내용을 확인하고 웹 표준 서식으로 제출(내려받기)합니다.</div>
   </div>
 
-  
+  <div class="doc-toolbar ask-other-bar">
+    <button type="button" class="svc-link-btn solid ask-other" id="askOther"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>목록에 없는 서류 작성하기</button>
+  </div>
+
+  <div class="svc-tabs" id="svcTabs"></div>
+
+  <div class="svc-content" id="svcContent"></div>
+
+  <div class="svc-content" id="draftsCard" style="display:none">
+    <div class="svc-detail">
+      <h2>작성된 문서</h2>
+      <p class="svc-lead">대화로 작성된 서류 초안입니다. 「웹 표준 서식으로 제출(내려받기)」를 누르면 웹 표준 서식 파일로 저장됩니다. 인터넷 브라우저로 열어 보거나 인쇄할 수 있습니다.</p>
+      <div id="draftsList"></div>
+    </div>
+  </div>
 
   <div class="ug-footer">응급구조사 업무 보조 AI는 해당 분야 전문가와 소속 직원의 서류 작성을 대화로 보조하는 도구입니다. 전문가가 아니며 진단·처방·치료는 하지 않고, 작성된 서류는 전문가가 검토·확정해야 합니다.</div>
 </div>
+<script>
+window.PRO_DOC_PAGE = {"catalog": [{"id": "A-1", "tab": "출동·처치·인계 기록", "title": "출동·처치·인계 기록", "meta": "근거 응급의료법 시행규칙 제4조·제10조·제40조) (제출처 인계 병원·구급 기관·대지급 청구 기관", "lead": "", "notes": ["출동 및 처치기록은 응급구조사가 실제로 수행·관찰한 사실만 기재합니다. 별지 서식명은 원문에서 확인했으나 기재사항(제40조)·보존기간은 확인하지 못했습니다. 이 도구는 수행하지 않은 처치나 측정하지 않은 수치를 만들지 않습니다."], "items": [{"t": "출동 및 처치기록지 (별지 제16호서식)", "d": "출동·도착·이송·인계 시각, 환자 상태, 활력징후, 응급처치 내용, 의료지도 내용, 인계 병원 — 응급구조사 구술 · 기재사항(제40조) 조회, 미수금 대지급 청구 첨부 서식"}, {"t": "응급환자진료의뢰서 (별지 제2호서식)", "d": "환자, 의뢰 사유, 진료 요약, 이송 병원 · 의사 작성 서식 — 응급구조사는 정리만 · 의무기록·방사선 필름 사본 등 첨부(제4조 제3항)"}, {"t": "병원 인계 보고", "d": "환자 상태, 처치, 이송 시각, 특이사항 — 응급구조사 지시 값"}, {"t": "응급처치 거부·이송 거부 확인 기록", "d": "환자·보호자 의사, 설명 내용, 일시 — 응급구조사 지시 값 · 서식·요건 미확인"}]}, {"id": "A-2", "tab": "이송 비용", "title": "이송 비용", "meta": "근거 응급의료법 시행규칙 제10조·제11조) (", "lead": "", "notes": ["청구 판단은 기관의 몫입니다."], "items": [{"t": "이송처치료 영수증 (별지 제5호서식)", "d": "이송 구간, 처치 내용, 금액 · 요금 기준 조회"}, {"t": "미수금 대지급 청구 첨부서류 정리", "d": "출동 및 처치기록지, 영수증, 증빙 목록 · 청구 요건·기한 조회"}]}, {"id": "A-3", "tab": "자격·신고·보수교육", "title": "자격·신고·보수교육", "meta": "근거 응급의료법 시행규칙 제29조~제31조의2, 제35조) (제출처 보건복지부 등", "lead": "", "notes": ["별지 번호는 원문 확인, 서식의 칸 구성과 보수교육 본문(제35조)은 조회가 필요합니다."], "items": [{"t": "응급구조사 자격증 재교부 신청서 (별지 제13호서식)", "d": "재교부 사유 · 헐은 자격증, 분실 시 사유서, 사진 1장"}, {"t": "응급구조사 취업상황 등 신고서 (별지 제13호의2서식)", "d": "근무 기관, 취업 상황 · 3년마다 신고(3년이 되는 해 12월 31일까지, 원문 확인), 보수교육 면제 확인서(별지 제14호의2) 또는 이수증(별지 제15호) 첨부"}, {"t": "보수교육 면제 확인서·이수증 관련 서류", "d": "교육 과정, 시간, 이수일 · 보수교육 요건(제35조) 조회"}]}, {"id": "A-4", "tab": "안전·감염", "title": "안전·감염", "meta": "", "lead": "", "notes": [], "items": [{"t": "감염 노출·사고 보고서", "d": "발생 경위, 노출 정도, 조치 · 기관 보고 체계 확인"}, {"t": "차량·장비 점검 기록", "d": "점검 항목, 일시, 결과 — 응급구조사 지시 값"}]}, {"id": "A-5", "tab": "교육·학술", "title": "교육·학술", "meta": "", "lead": "", "notes": ["환자 식별정보는 제거(비식별화)하고 동의 및 IRB 요건을 확인합니다."], "items": [{"t": "구조 및 응급처치 교육 수료 관련 서류 (별지 제3호서식 연계)", "d": "교육 과정, 대상, 일시 · 서식 조회"}, {"t": "사례보고·사후 검토 보고서 초안", "d": "사례 요약, 처치, 결과, 고찰 — 응급구조사 제공 자료 · 비식별화"}]}], "detailHead": "핵심 기재 · 첨부·확인"};
+</script>
 <script src="/assets/md-view.js"></script>
+<script src="/assets/pro-doc-page.js"></script>
 <script src="/assets/start-field.js"></script>
 </body>
 </html>
