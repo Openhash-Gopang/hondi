@@ -191,3 +191,13 @@
   if (!m || ['expert-personas', 'expert-personas-docs', 'expert-chat'].indexOf(m[1]) >= 0) return;
   var s = document.createElement('script'); s.src = '/assets/expert-shared-forms.js'; document.body.appendChild(s);
 })();
+
+// 2026-10-18(주피터 지시) — 전문가 페르소나 페이지에 「나비 매뉴얼」 배너를 게시한다(assets/manual-banner.js).
+// 배너의 「다시 보지 않기 (X)」를 누르면 이 브라우저에서 모든 페이지의 배너가 사라진다.
+// 페이지가 PAGE_HEADER.manualBanner: false 로 끌 수 있다. 다른 페이지로 넓힐 때는 그 페이지에서
+// /assets/manual-banner.js 를 직접 불러오면 된다(이 조건을 고칠 필요 없음).
+(function () {
+  var c = window.PAGE_HEADER || {};
+  if (c.active !== 'expert-personas' || c.manualBanner === false) return;
+  var s = document.createElement('script'); s.src = '/assets/manual-banner.js'; document.body.appendChild(s);
+})();
