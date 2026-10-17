@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-18 04:22 KST · 기준 커밋 d8474ba0
+- 갱신: 2026-10-18 04:29 KST · 기준 커밋 d218a3b9
 - 전문가 페르소나 전용 페이지 143개 · 등록된 SP 863건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-18 feat(presentations): K-Law 안내문 PDF 추가
 - 2026-10-18 feat(presentations): 나비 LLM의 족보 PDF 추가
 - 2026-10-18 feat(presentations): 나비와 AI 엔진의 국내 개발 필요성 PDF 추가
 - 2026-10-18 feat(presentations): 주제별 세로 섹션 레이아웃으로 변경, 안내서 PDF 3종 추가
@@ -43,7 +44,6 @@
 - 2026-10-17 docs: 도선사 서류 조사·서식 평가/GDC 보상 세션 요약, 워커 API 레퍼런스 §3.8, 작업기록 인덱스
 - 2026-10-17 feat(admin): 공동 설립 참여 제안서 묶음을 개정본(MD 전용)으로 교체, 공통 설립 원칙·나비로 제안서 추가
 - 2026-10-17 Merge pull request #647 from Openhash-Gopang/feature/marine-pilot-docs-form-reward
-- 2026-10-17 feat(admin): 공동 설립 참여 제안서 묶음 개정(MD 전용)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
