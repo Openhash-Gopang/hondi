@@ -17,6 +17,7 @@
 
 | 날짜 | 문서 | 요약 |
 |---|---|---|
+| 2026-10-17 | [`SESSION_SUMMARY_DOCFORM_REWARD_MARINE_PILOT_20261017_v1_0.md`](./SESSION_SUMMARY_DOCFORM_REWARD_MARINE_PILOT_20261017_v1_0.md) | 도선사 서류 조사 반영(SP_marine-pilot v3.5) + 서식 공유·평가·GDC 보상 알고리즘(SP_DOC_FORM v1.3, PR #647). 정책 [`DOC_FORM_REWARD_정책_20261017.md`](./DOC_FORM_REWARD_정책_20261017.md), 엔드포인트 [`API_REFERENCE_worker_v1_0.md`](./API_REFERENCE_worker_v1_0.md) §3.8 |
 | 2026-07-27 | [`WORKLOG_MANUAL_2026_07_27.md`](./WORKLOG_MANUAL_2026_07_27.md) | 프로필 사진저장·§IMAGE-SCAN 확장·계좌이체 원칙·§DIGITAL-BRIDGE·§PROFILE-UPDATE-MODE·AC-PA 실시간 채널·OSS 피드백 파이프라인 완성. 신규 매뉴얼 [`PROFILE_ASSISTANT_MANUAL_v1_0.md`](./PROFILE_ASSISTANT_MANUAL_v1_0.md) 신설 |
 | 2026-07-25 | [`DOCUMENTATION_SWEEP_2026_07_25.md`](./DOCUMENTATION_SWEEP_2026_07_25.md) | 문서 생태계 점검(일반 사용자·개발자 커버리지) — MANUAL_INDEX 최종수정 갱신, 버그 로그 BUG-012~021 소급 반영, 시스템맵에 저장소 토폴로지(jeju 별도 저장소) 신설 |
 | 2026-07-23 | [`PUSH_SUBSCRIPTION_MULTIDEVICE_2026_07_23.md`](./PUSH_SUBSCRIPTION_MULTIDEVICE_2026_07_23.md) | device-link 알림 PC 오발송 근본 수정 — push_subscription을 기기별 배열로 변경(§PUSH_SUBSCRIPTION_HIJACK_2026_07_21.md §4 후속) |
