@@ -1,0 +1,62 @@
+/* suggest-page.css — 「제안 및 질문」 페이지 전용 (2026-10-17). 기본 틀은 pro-doc-page.css 를 쓰고 여기서는 게시판·정리 카드만 더한다. */
+.sq-wrap { display: flex; flex-direction: column; gap: 36px; }
+.sq-fresh { margin: 10px 0 0; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12.5px; color: #475569; }
+.sq-fresh::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #16a34a; }
+.sq-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 12px auto 0; max-width: 640px; }
+.sq-chip { min-height: 36px; padding: 0 14px; border: 1px solid #d9e2ec; border-radius: 999px; background: #fff; color: #334155; font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
+.sq-chip:hover { border-color: #94a3b8; color: #0f172a; }
+.sq-chip:focus-visible, .sq-btn:focus-visible, .sq-tag:focus-visible, .sq-filter:focus-visible { outline: 2px solid #1e3a8a; outline-offset: 2px; }
+
+/* 게시판 */
+.sq-board-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.sq-board-head h2 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -.2px; color: #0f172a; }
+.sq-board-head p { margin: 4px 0 0; font-size: 13px; color: #475569; }
+.sq-filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.sq-filter { height: 34px; padding: 0 14px; border: 1px solid #d9e2ec; border-radius: 999px; background: #fff; color: #334155; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.sq-filter.on { border-color: #1e3a8a; background: #1e3a8a; color: #fff; font-weight: 700; }
+.sq-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.sq-tag { height: 24px; padding: 0 10px; border: none; border-radius: 6px; background: #e2e8f0; color: #334155; font: inherit; font-size: 11.5px; font-weight: 500; cursor: pointer; }
+.sq-tag.on { background: #1e3a8a; color: #fff; font-weight: 700; }
+.sq-list { background: #fff; border: 1px solid #d9e2ec; border-radius: 14px; box-shadow: 0 4px 18px rgba(15, 23, 42, .05); overflow: hidden; }
+.sq-list-h, .sq-row { display: grid; grid-template-columns: 72px minmax(0, 1fr) 132px 96px; gap: 16px; align-items: start; padding: 16px 20px; }
+.sq-list-h { padding: 10px 20px; background: #f8fafc; font-size: 12px; font-weight: 700; color: #475569; }
+.sq-row { border-top: 1px solid #e2e8f0; text-align: left; }
+.sq-row.sq-new { background: #f5f7ff; box-shadow: inset 4px 0 0 #6366f1; }
+.sq-main { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.sq-titleline { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.sq-title { font-size: 15px; font-weight: 700; line-height: 1.5; color: #0f172a; overflow-wrap: anywhere; }
+.sq-body { margin: 0; font-size: 13.5px; line-height: 1.65; color: #475569; white-space: pre-line; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.sq-taglist { display: flex; flex-wrap: wrap; gap: 6px; }
+.sq-tagchip { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 6px; background: #e2e8f0; color: #334155; font-size: 11.5px; }
+.sq-meta { display: flex; flex-direction: column; gap: 3px; font-size: 12.5px; color: #475569; min-width: 0; overflow-wrap: anywhere; }
+.sq-meta b { color: #0f172a; font-weight: 700; }
+.sq-reward { font-size: 12.5px; color: #64748b; }
+.sq-empty { margin: 0; padding: 28px 20px; text-align: center; font-size: 14px; color: #64748b; border-top: 1px solid #e2e8f0; }
+.sq-pill { display: inline-flex; align-items: center; height: 22px; padding: 0 9px; border-radius: 999px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+.sq-p { background: #dbeafe; color: #1e3a8a; }
+.sq-q { background: #fef3c7; color: #7a4b00; }
+.sq-st-new, .sq-st-hold { background: #e2e8f0; color: #334155; }
+.sq-st-rev { background: #e0e7ff; color: #312e81; }
+.sq-st-ok { background: #dcfce7; color: #14532d; }
+.sq-st-just { background: #6366f1; color: #fff; }
+
+/* 대화 안의 정리 카드 */
+.sq-card { margin-top: 12px; padding: 14px 16px; border: 1px solid #c7d2fe; background: #f5f7ff; border-radius: 14px; display: flex; flex-direction: column; gap: 10px; }
+.sq-card-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14.5px; color: #0f172a; }
+.sq-kv { margin: 0; display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 6px 12px; font-size: 13px; line-height: 1.6; }
+.sq-kv dt { margin: 0; color: #64748b; font-weight: 700; }
+.sq-kv dd { margin: 0; color: #0f172a; overflow-wrap: anywhere; white-space: pre-line; }
+.sq-kv dd.sq-dim { color: #64748b; }
+.sq-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.sq-btn { min-height: 40px; padding: 0 18px; border: 1px solid #cbd5e1; border-radius: 999px; background: #fff; color: #334155; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; }
+.sq-btn-main { border-color: #1e3a8a; background: #1e3a8a; color: #fff; }
+.sq-btn:disabled { opacity: .6; cursor: not-allowed; }
+.sq-note { margin: 0; font-size: 12px; line-height: 1.6; color: #64748b; }
+
+@media (max-width: 760px) {
+  .sq-list-h, .sq-row { grid-template-columns: 64px minmax(0, 1fr); gap: 12px; padding: 14px 16px; }
+  .sq-list-h .sq-h-meta, .sq-reward { display: none; }
+  .sq-meta { grid-column: 2; flex-direction: row; flex-wrap: wrap; gap: 4px 10px; }
+  .sq-kv { grid-template-columns: 1fr; gap: 2px; }
+  .sq-kv dd { margin-bottom: 6px; }
+}

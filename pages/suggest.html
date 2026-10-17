@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<link rel="icon" href="data:,">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="/assets/pro-doc-page.css">
+<link rel="stylesheet" href="/assets/suggest-page.css">
+<title>제안 및 질문 — 나비</title>
+</head>
+<body>
+
+<script>
+window.PAGE_HEADER = {
+  active: 'expert-personas',
+  badge: '혼디 · 제안 및 질문',
+  h1: '혼디에 바라는 점과 궁금한 점을<br>대화로 말씀해 주세요',
+  sub: '질문에는 hondi.net 저장소의 최신 내용을 기준으로 답하고, 제안은 AI가 의도를 되물어 정리한 뒤 아래 게시판에 기록합니다.',
+  disclaimer: '게시판에 기록된 제안·질문은 작성자 아이디·날짜와 함께 공개됩니다. 가치에 상응하는 GDC 보상이 지급되며, 지급 방식은 추후 정해집니다.',
+  disclaimerDismissKey: 'suggest-question'
+};
+</script>
+<link rel="stylesheet" href="/assets/ph-header.css">
+<script src="/assets/ph-header.js"></script>
+<script>
+  window.K_AUTH_CONFIG = { serviceLabel: "제안 및 질문" };
+</script>
+<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
+
+<div class="ug-doc">
+  <div class="sq-wrap">
+
+    <section class="doc-intro" aria-label="제안 및 질문 입력">
+      <div class="doc-start" id="sqStart">
+        <div class="start-tabs" role="tablist" aria-label="구분">
+          <button type="button" class="start-tab active" role="tab" aria-selected="true" data-sq-mode="">자동 구분</button>
+          <button type="button" class="start-tab" role="tab" aria-selected="false" data-sq-mode="제안">제안</button>
+          <button type="button" class="start-tab" role="tab" aria-selected="false" data-sq-mode="질문">질문</button>
+        </div>
+        <div id="startChatMount"></div>
+        <div class="sq-chips">
+          <button type="button" class="sq-chip" data-sq-ask="법률 검토 탭은 어떤 기능인가요?">법률 검토 탭은 어떤 기능인가요?</button>
+          <button type="button" class="sq-chip" data-sq-ask="서류 목록에 양식을 추가하고 싶어요.">서류 목록에 양식을 추가하고 싶어요</button>
+          <button type="button" class="sq-chip" data-sq-ask="GDC 보상은 어떻게 받나요?">GDC 보상은 어떻게 받나요?</button>
+        </div>
+        <p class="sq-fresh" id="sqFresh">저장소 요약을 불러오는 중입니다…</p>
+      </div>
+    </section>
+
+    <section id="sqBoard" aria-label="게시판">
+      <div class="sq-board-head">
+        <div>
+          <h2>게시판</h2>
+          <p>대화로 의도를 확인한 제안·질문만 기록됩니다. 최신 글이 위에 옵니다.</p>
+        </div>
+        <div class="sq-filters" role="group" aria-label="구분 필터">
+          <button type="button" class="sq-filter on" data-sq-kind="">전체</button>
+          <button type="button" class="sq-filter" data-sq-kind="제안">제안</button>
+          <button type="button" class="sq-filter" data-sq-kind="질문">질문</button>
+        </div>
+      </div>
+      <div class="sq-tags" id="sqTags" role="group" aria-label="태그 필터"></div>
+      <div class="sq-list">
+        <div class="sq-list-h"><span>구분</span><span>내용</span><span class="sq-h-meta">작성자 · 일시</span><span class="sq-h-meta">GDC 보상</span></div>
+        <div id="sqList"><p class="sq-empty">게시판을 불러오는 중입니다…</p></div>
+      </div>
+    </section>
+
+  </div>
+  <div class="ug-footer">제안·질문 AI는 hondi.net 저장소의 공개 내용을 기준으로 답하며, 확정되지 않은 계획은 확정으로 말하지 않습니다. 작성 내용은 게시판에 공개됩니다.</div>
+</div>
+
+<script src="/assets/suggest-board.js"></script>
+</body>
+</html>
