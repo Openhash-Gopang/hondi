@@ -28,7 +28,17 @@ window.GOV_CONTENT_INDEX = {
   'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-CONSTRUCTION-TRAFFIC': 'seogwipo-passenger.js',
   'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-CONSTRUCTION-CITY': 'seogwipo-city.js',
   'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-CONSTRUCTION-CONSTRUCT': 'seogwipo-road.js',
-  'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-CONSTRUCTION-WATER': 'seogwipo-water.js'
+  'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-CONSTRUCTION-WATER': 'seogwipo-water.js',
+  'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-WELFARE-HYGIENE': 'seogwipo-hygiene.js',
+  'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-WELFARE-DISABLED': 'seogwipo-disability.js',
+  'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-WELFARE-ELDERLY': 'seogwipo-elderly.js',
+  'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-WELFARE-WOMENFAMILY': 'seogwipo-womenfamily.js',
+  'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-WELFARE-RESIDENT': 'seogwipo-resident.js',
+  'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-CLIMATE-ENVMGMT': 'seogwipo-airenv.js',
+  'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-CLIMATE-PARKS': 'seogwipo-parks.js',
+  'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-CULTURE-TOURISM': 'seogwipo-tourism.js',
+  'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-JACHI-VILLAGE': 'seogwipo-village.js',
+  'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-JACHI-TAX': 'seogwipo-tax.js'
 };
 
 /* 도메인 키: 시·도 부서(do-dept)·직속기관(do-agency)·국가기관 지역사무소(nat-agency)는 시·도마다 같은 템플릿 SP 를 쓰므로 시·도를 뺀 키를 쓴다. */
