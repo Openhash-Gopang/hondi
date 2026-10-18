@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-19 01:47 KST · 기준 커밋 9b953052
+- 갱신: 2026-10-19 01:52 KST · 기준 커밋 a2cccca8
 - 전문가 페르소나 전용 페이지 144개 · 등록된 SP 864건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-19 feat: 건축과·위생관리과·장애인복지과 조사, SP 없음 표시, 열린 문제 #11~#14
 - 2026-10-19 feat: task 연결 12건 확대(SP 선언 근거), 기초생활보장과 조사, 열린 문제 갱신
 - 2026-10-19 feat: 접수 연동 민원 탭(서버 task 레지스트리), 차량관리과 조사, 세무과 서식 번호 정정, SP 교차 점검
 - 2026-10-19 docs: 제주시 세무과 시범 — 법령 본문 직접 확인 결과 반영
@@ -43,7 +44,6 @@
 - 2026-10-17 feat(legal-review): legal-review tab on persona pages + inherited legal-review SPs
 - 2026-10-17 Merge pull request #667 from Openhash-Gopang/docs/expert-sp-session-summary
 - 2026-10-17 docs: 전문가용 보조 AI SP 이분화 세션 기록을 desktop.html 개발자 문서에 추가
-- 2026-10-17 Merge pull request #666 from Openhash-Gopang/feature/expert-assistant-sp-all3
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
