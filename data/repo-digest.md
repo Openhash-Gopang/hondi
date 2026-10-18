@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-18 16:18 KST · 기준 커밋 3a39ae2c
+- 갱신: 2026-10-18 17:00 KST · 기준 커밋 2fd9102e
 - 전문가 페르소나 전용 페이지 143개 · 등록된 SP 863건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-18 fix: remove accidental submodule gitlinks (estate, hondi) that break GitHub Pages build
 - 2026-10-18 fix: make form controls inherit Pretendard on equity bid test page
 - 2026-10-18 feat: add equity bid system test page (not a real bidding) and header button on expert personas page
 - 2026-10-18 docs: add PDFs of plan and public-purpose docs; restructure consortium to 10 profession corporations, add public-interest safeguards doc and PDFs (5 pct auction, founder-held management, public-interest board)
@@ -43,7 +44,6 @@
 - 2026-10-17 feat(admin): 공동 설립 참여 제안서 묶음 v10 개정(재무모델 엑셀 추가)(MD 전용)
 - 2026-10-17 feat(admin): 공동 설립 참여 제안서 묶음 v9 개정(11개 법인, 1페이지 요약 추가)(MD 전용)
 - 2026-10-17 feat(admin): 공동 설립 참여 제안서 묶음 v8 개정(11개 법인, 서버 점진 증설)(MD 전용)
-- 2026-10-17 feat(persona): 전문가 페르소나 버튼에 나비 통합 재무 모델의 11개 직종 반영(기존 버튼 유지)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
