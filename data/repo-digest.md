@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-18 15:01 KST · 기준 커밋 93dbf870
+- 갱신: 2026-10-18 15:17 KST · 기준 커밋 951d9fc1
 - 전문가 페르소나 전용 페이지 143개 · 등록된 SP 863건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-18 docs: restructure consortium to 10 profession corporations, add public-interest safeguards doc (5 pct auction, founder-held management, public-interest board)
 - 2026-10-18 docs: restructure consortium to 10 profession corporations (5 pct auction, founder-held management, public-interest board)
 - 2026-10-18 docs: add consortium full document bundling the summary, review request and all 10 proposals
 - 2026-10-18 docs: rewrite group formation plan on a royalty basis (final) and point plans 1 and 2 to it
@@ -43,7 +44,6 @@
 - 2026-10-17 의료·보건 2묶음(임상병리사·방사선사·물리치료사·작업치료사·치과위생사·치과기공사·안경사·응급구조사) 전문가용 SP
 - 2026-10-17 feat(admin): 공동 설립 참여 제안서 묶음 v7 개정(11개 법인)(MD 전용)
 - 2026-10-17 Merge pull request #654 from Openhash-Gopang/feature/health-assistant-sp-batch1
-- 2026-10-17 전문가용 보조 AI SP 생성기 신설 + 의료·보건 1묶음(치과의사·한의사·수의사·약사·간호사) 전문가용 SP
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
