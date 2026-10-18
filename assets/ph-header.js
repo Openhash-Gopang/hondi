@@ -25,6 +25,7 @@
          extraHtml: '<div class="pp-explainer">...</div>',  // 히어로(어두운 배경) 안에 그대로 넣을 페이지 전용 콘텐츠(선택)
          disclaimer: true,                  // 히어로 바로 아래에 면책 안내 띠를 표시(선택). true면 아래 DEFAULT_DISCLAIMER, 문자열이면 그 문구(텍스트로만 취급)
          disclaimerDismissKey: 'my-page',   // 선택(2026-10-17 신설, 기본은 꺼짐) — 문자열을 주면 띠 오른쪽에 「다시 보지 않기 ✕」가 생기고, 누르면 이 브라우저(localStorage)에서 다시 표시하지 않는다
+         subnavPosition: 'bottom',          // 선택(2026-10-18 신설) — 'bottom'이면 보조 탭 줄을 히어로 아래(헤더 하단)에 둔다. 기본은 상단 메뉴 바로 아래
          subnav: [                          // 보조 탭 줄(선택) — 프롬프트 페이지 전용
            { label: '프롬프트', href: 'prompts.html', active: true },
            { label: 'SP의 계층 구조', href: 'sp-hierarchy.html' }
@@ -84,13 +85,14 @@
     );
   }
 
-  function renderSubnav(subnav) {
+  // position === 'bottom' 이면 히어로 아래(헤더 하단)에 놓는 변형 클래스를 붙인다(2026-10-18, 주피터 지시).
+  function renderSubnav(subnav, position) {
     if (!subnav || !subnav.length) return '';
     var links = subnav.map(function (item) {
       var cls = item.active ? ' class="active"' : '';
       return '<a href="' + item.href + '"' + cls + '>' + escapeHtml(item.label) + '</a>';
     }).join('');
-    return '<div class="topsubnav"><div class="topsubnav-inner">' + links + '</div></div>';
+    return '<div class="topsubnav' + (position === 'bottom' ? ' topsubnav-bottom' : '') + '"><div class="topsubnav-inner">' + links + '</div></div>';
   }
 
   function renderHero(config) {
@@ -161,7 +163,10 @@
     var container = THIS_SCRIPT ? THIS_SCRIPT.parentNode : document.body;
     var config = window.PAGE_HEADER || {};
 
-    var html = renderNav(config.active) + renderSubnav(config.subnav) + renderHero(config) + renderDisclaimer(config);
+    // 보조 탭 줄의 위치: 기본은 상단 메뉴 바로 아래, subnavPosition:'bottom' 이면 히어로 바로 아래(면책 띠 앞)
+    var bottom = config.subnavPosition === 'bottom';
+    var sub = renderSubnav(config.subnav, bottom ? 'bottom' : 'top');
+    var html = renderNav(config.active) + (bottom ? '' : sub) + renderHero(config) + (bottom ? sub : '') + renderDisclaimer(config);
 
     var temp = document.createElement('div');
     temp.innerHTML = html;
