@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-18 15:52 KST · 기준 커밋 3bd55c5a
+- 갱신: 2026-10-18 15:55 KST · 기준 커밋 4c527462
 - 전문가 페르소나 전용 페이지 143개 · 등록된 SP 863건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-18 docs: add PDFs of plan and public-purpose docs; restructure consortium to 10 profession corporations, add public-interest safeguards doc and PDFs (5 pct auction, founder-held management, public-interest board)
 - 2026-10-18 docs: restructure consortium to 10 profession corporations, add public-interest safeguards doc and PDF (5 pct auction, founder-held management, public-interest board)
 - 2026-10-18 docs: restructure consortium to 10 profession corporations, add public-interest safeguards doc (5 pct auction, founder-held management, public-interest board)
 - 2026-10-18 docs: restructure consortium to 10 profession corporations, add public-interest safeguards doc (5 pct auction, founder-held management, public-interest board)
@@ -43,7 +44,6 @@
 - 2026-10-17 feat(persona): 전문가 페르소나 버튼에 나비 통합 재무 모델의 11개 직종 반영(기존 버튼 유지)
 - 2026-10-17 feat(persona): 전문가 페르소나 버튼을 나비 통합 재무 모델의 11개 직종으로 변경
 - 2026-10-17 Merge pull request #656 from Openhash-Gopang/feature/health-assistant-sp-batch2
-- 2026-10-17 의료·보건 2묶음(임상병리사·방사선사·물리치료사·작업치료사·치과위생사·치과기공사·안경사·응급구조사) 전문가용 SP
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
