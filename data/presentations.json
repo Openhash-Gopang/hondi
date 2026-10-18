@@ -58,6 +58,14 @@
       "url": "naviwb.html"
     },
     {
+      "id": "naviweb-announcement", "order": 20, "series": "web", "status": "ready",
+      "title": "나비와 나비웹",
+      "summary": "나비웹이 무엇이고 기존 웹과 무엇이 다른지, 업종마다 하나의 AI 법인이 대표하는 구조, 모든 공공기관 나비의 안전장치인 법률 검토, 행정기관 나비 페이지의 현황과 이용 시 유의사항, hondi.net 주요 페이지 링크를 쉬운 말로 안내합니다.",
+      "audience": "일반", "date": "2026-10-19",
+      "tags": ["나비웹", "안내문", "PDF"],
+      "url": "https://hondi.net/assets/presentations/navi-naviweb-announcement-20261019.pdf"
+    },
+    {
       "id": "field-test", "order": 10, "series": "intro", "status": "ready",
       "title": "나만의 AI 비서, 나비 필드 테스트",
       "summary": "시민 한 사람마다 AI 비서를 갖고, 기관과 서비스의 AI 비서와 대화하는 나비를 소개하고 필드 테스트를 제안합니다.",
