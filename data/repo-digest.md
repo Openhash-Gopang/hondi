@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-19 02:26 KST · 기준 커밋 537759bc
+- 갱신: 2026-10-19 02:33 KST · 기준 커밋 23737c03
 - 전문가 페르소나 전용 페이지 144개 · 등록된 SP 864건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-19 Merge pull request #711 from Openhash-Gopang/feat/gov-agency-round10
+- 2026-10-19 feat: 서귀포시 복지위생·청정환경·문화관광·자치행정 10개 과 조사, 열린 문제 #36
 - 2026-10-19 Merge pull request #710 from Openhash-Gopang/feat/gov-agency-round9
 - 2026-10-19 feat: 서귀포시 안전도시건설국 6개 과 조사, 열린 문제 #32~#35
 - 2026-10-19 Merge pull request #709 from Openhash-Gopang/feat/gov-agency-round8
@@ -42,8 +44,6 @@
 - 2026-10-18 feat(presentations): 업무 보조 AI의 법률 검토 PDF 추가
 - 2026-10-18 feat(presentations): K-Law의 본래 목적 PDF 추가
 - 2026-10-18 feat(presentations): K-Law 안내문 PDF 추가
-- 2026-10-18 feat(presentations): 나비 LLM의 족보 PDF 추가
-- 2026-10-18 feat(presentations): 나비와 AI 엔진의 국내 개발 필요성 PDF 추가
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
