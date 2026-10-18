@@ -1,0 +1,1596 @@
+{
+ "source": "제주시 부서(시청)",
+ "generated": "2026-10-18",
+ "units": [
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-ENVGUIDE_v1.1.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-CLIMATE-ENVGUIDE",
+     "name": "제주시청 청정환경국 환경지도과"
+    }
+   ],
+   "version": "1.1",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-CLIMATE-AGENT-COMMON_v1.0.md (제주시청 청정환경국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "토양환경보전에 관한 사항",
+    "유해화학물질 관리에 관한 사항",
+    "대기 및 수질 환경보전에 관한 사항",
+    "소음진동에 관한 사항",
+    "환경보건에 관한 사항",
+    "다중이용시설 등의 실내공기질 관리에 관한 사항",
+    "비산먼지 발생 사업장 관리",
+    "자동차 배출가스 관리",
+    "다중이용시설 실내 공기질 관리에 관한 사항(지도·단속·개선명령·보고·검사 등)",
+    "악취방지에 관한 사항",
+    "환경오염관련 신문고 운영 및 포상에 관한 사항",
+    "가축분뇨 배출시설 지도 및 점검",
+    "가축분뇨 배출시설 인·허가에 관한 사항",
+    "가축사육 제한지역 관리",
+    "건설폐기물 처리업(중간·수집운반업) 인허가 및 지도·점검 등",
+    "사업장폐기물(생활계·배출시설계) 처리업 인허가 및 지도·점검 등",
+    "사업장폐기물 배출자 신고 및 관리",
+    "지정폐기물(의료폐기물을 포함한다) 처리계획 신고 및 관리",
+    "폐기물 처리시설 설치신고 및 관리",
+    "잔류성 유기오염물질의 신고 및 관리",
+    "휘발성 유기화합물질 배출시설 신고 및 관리",
+    "빛 방사허용기준의 준수의 정기검사 등 사무",
+    "비상저감조치 운행제한 단속 및 과태료 부과·징수 사무",
+    "노후경유차 조기폐차 지원에 관한 사무",
+    "석면건축물 안전관리에 관한 사무",
+    "그 밖에 환경지도 및 단속에 관한 사무"
+   ],
+   "referrals": [
+    {
+     "area": "도 전체 환경정책",
+     "handler": "도청 기후환경국",
+     "sp": "SP-DO-CLIMATE"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT_v1.1.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT",
+     "name": "제주시청 청정환경국 환경관리과"
+    }
+   ],
+   "version": "1.1",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-CLIMATE-AGENT-COMMON_v1.0.md (제주시청 청정환경국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "소규모 배출시설 설치 신고 접수 및 절차 안내."
+   ],
+   "referrals": [
+    {
+     "area": "도 전체 환경정책·탄소중립",
+     "handler": "도청 기후환경국",
+     "sp": "SP-DO-CLIMATE"
+    },
+    {
+     "area": "대규모 환경영향평가(국가사무)",
+     "handler": "영산강유역환경청 제주주재사무실(국가기관)",
+     "sp": "외부 안내"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-FACILITY_v1.0.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-CLIMATE-FACILITY",
+     "name": "제주시청 청정환경국 환경시설관리소"
+    }
+   ],
+   "version": "1.0",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-CLIMATE-AGENT-COMMON_v1.0.md (제주시청 청정환경국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "사업장 폐기물 반입 신청 접수 및 반입기준 안내."
+   ],
+   "referrals": [
+    {
+     "area": "생활폐기물 배출 관련(가정)",
+     "handler": "생활환경과",
+     "sp": "SP-CITYDIV-JEJUSI-CLIMATE-LIVINGENV"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-JEOLMUL_v1.1.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-CLIMATE-JEOLMUL",
+     "name": "제주시청 청정환경국 절물생태관리소"
+    }
+   ],
+   "version": "1.1",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-CLIMATE-AGENT-COMMON_v1.0.md (제주시청 청정환경국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "절물휴양림 조성 및 운영·관리",
+    "노루생태원 운영 및 관리"
+   ],
+   "referrals": [
+    {
+     "area": "타 지역 자연휴양림(도 전체)",
+     "handler": "도청 기후환경국 산하 산림 관련 부서",
+     "sp": "SP-DO-CLIMATE"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-LIVINGENV_v1.1.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-CLIMATE-LIVINGENV",
+     "name": "제주시청 청정환경국 생활환경과"
+    }
+   ],
+   "version": "1.1",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-CLIMATE-AGENT-COMMON_v1.0.md (제주시청 청정환경국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "생활쓰레기 종합관리 및 기본계획 수립",
+    "국토대청결 및 환경 정비에 관한 사항",
+    "생활쓰레기(사업장폐기물을 포함한다) 수집 및 운반",
+    "청소업무 종사자(청소차량 운전원·환경미화원) 복무관리 및 임금지급 등에 관한 사항",
+    "청소업무 종사자의 산업안전 및 재해에 관한 사항",
+    "쓰레기 규격(종량제)봉투의 제작·공급 및 판매 등에 관한 사항",
+    "생활폐기물 불법투기 및 지도·단속",
+    "청결유지명령제 및 신고포상금 운영",
+    "청소차량 및 각종 장비 관리",
+    "생활쓰레기 배출 선진 시스템 전반에 관한 사항",
+    "대형폐기물 신고 및 수집·운반",
+    "클린하우스시설의 설치 및 관리 전반에 관한 사항",
+    "음식물쓰레기 수집·운반 및 재활용 촉진에 관한 사항",
+    "음식물 쓰레기 수수료 부과·징수",
+    "음식물 쓰레기 감량 및 감량의무사업장 관리",
+    "자원재활용 제도 운영",
+    "1회 용품 및 포장 폐기물 규제에 관한 사항",
+    "친환경상품 구매 촉진에 관한 사항",
+    "EPR(생산자책임재활용제도)에 관한 사항",
+    "그 밖에 청소 및 환경자원에 관한 사무"
+   ],
+   "referrals": [
+    {
+     "area": "폐기물 처리시설(소각·매립) 운영",
+     "handler": "환경시설관리소",
+     "sp": "SP-CITYDIV-JEJUSI-CLIMATE-FACILITY"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-CLIMATE-PARKS_v1.2.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-CLIMATE-PARKS",
+     "name": "제주시청 청정환경국 공원녹지과"
+    }
+   ],
+   "version": "1.2",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-CLIMATE-AGENT-COMMON_v1.0.md (제주시청 청정환경국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "도시녹화계획의 수립",
+    "도시공원조성계획의 수립 및 도시공원 관리업무 2의",
+    "도시공원 부지에서의 개발행위 등에 관한 특례",
+    "도시공원 내 어린이 놀이시설의 설치·관리 및 안전관리에 관한 사항",
+    "어린이공원 등의 조성 및 지원에 관한 사항(위임된 사무에 한정한다)",
+    "도시숲 등 조성·관리계획의 수립 및 도시숲 조성·관리 업무(도시숲·학교숲·마을숲)",
+    "도시녹화(가로수·소공원·꽃길) 관리",
+    "자생식물원 조성 및 관리",
+    "등반로(숲길) 및 산책로 시설 등에 관한 사항",
+    "임도의 설치 및 유지·관리",
+    "산림경영계획 인가 등에 관한 사항",
+    "입목의 벌채 및 신고 등에 관한 사항",
+    "산지관리에 관한 사항",
+    "조림 및 육림사업에 관한 사항",
+    "채석허가·산지전용 및 대체 산림자원 조성비 부과·징수",
+    "석재산업에 관한 사항(위임된 사무에 한정한다)",
+    "사방사업에 관한 사무",
+    "임업통계조사 등에 관한 사무",
+    "산림조합 및 임업단체 육성",
+    "산림자원육성 및 보호장비 관리",
+    "임산물 생산 유통 지원",
+    "공유재산 관리",
+    "산림재해의 예방 및 복구",
+    "산림유전자원 보호림에 관한 사항",
+    "산불의 예방 및 진화에 관한 사항",
+    "산림병 해충의 구제예방에 관한 사항",
+    "소나무재선충병 방제에 관한 사항",
+    "국유림(산림청 소관) 관리",
+    "자연휴양림에 관한 사항(위임된 사무에 한한다)",
+    "산림욕장 등 조성에 관한 사항(위임된 사무에 한한다)",
+    "숲길 조성 및 관리에 관한 사항(위임된 사무에 한한다)",
+    "숲경영체험림 조성계획(변경) 승인에 관한 사항",
+    "임산물(농림축산식품장관이 고시한 “농산물 등의 원산지 표시대상” 품목 중 버섯, 산채, 수실류 등 임산물 품목에 한정한다) 원산지 단속에 관한 사항",
+    "그 밖에 공원녹지에 관한 사무"
+   ],
+   "referrals": [
+    {
+     "area": "도 전체 산림·녹지정책",
+     "handler": "도청 기후환경국",
+     "sp": "SP-DO-CLIMATE"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-CULTURE-ARTCENTER_v1.1.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-CULTURE-ARTCENTER",
+     "name": "제주시청 문화관광체육국 제주아트센터"
+    }
+   ],
+   "version": "1.1",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-CULTURE-AGENT-COMMON_v1.0.md (제주시청 문화관광체육국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "제주아트센터 운영에 관한 사항",
+    "제주아트센터 공연 및 대관에 관한 사항",
+    "제주아트센터 사용료 수납 및 감면 등에 관한 사항"
+   ],
+   "referrals": [
+    {
+     "area": "공연 예매 자체",
+     "handler": "인터파크 등 외부 예매처",
+     "sp": "외부 안내(민간 서비스 링크 안내만, U3 특정업체 이익대변 금지 원칙상 예매 대행은 하지 않음)"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-CULTURE-ART_v1.1.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-CULTURE-ART",
+     "name": "제주시청 문화관광체육국 문화예술과"
+    }
+   ],
+   "version": "1.1",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-CULTURE-AGENT-COMMON_v1.0.md (제주시청 문화관광체육국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "문화예술축제 및 행사에 관한 사항",
+    "문화예술단체 활동 지원",
+    "지역문화 예술진흥에 관한 사항",
+    "지방문화원 지원 및 종교 관련 업무",
+    "문화기반시설(박물관 및 미술관을 포함한다) 운영·관리 및 지도",
+    "노래연습장·PC방·게임장·복합유통제공업·비디오물 및 소극장업 등의 등록·관리와 지도·감독",
+    "영화상영업 신고·등록",
+    "공연장 등록 및 지도 관리",
+    "건축물의 미술 장식에 관한 사항",
+    "문화콘텐츠사업에 관한 사항",
+    "도립제주예술단 운영",
+    "시민회관 운영 및 관리",
+    "해변공연장 운영 및 관리",
+    "도서관(작은도서관을 포함한다) 육성 지원 및 지도·감독",
+    "마을향토지 발간 지원",
+    "문화재 지원에 관한 사항",
+    "국내외 도시 간 교류증진",
+    "재외도민에 관한 업무",
+    "그 밖에 문화예술에 관한 사무 및 국 내 다른 과에 속하지 아니하는 사무"
+   ],
+   "referrals": [
+    {
+     "area": "도 전체 문화정책",
+     "handler": "도청 문화체육교육국",
+     "sp": "SP-DO-CULTURE"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-CULTURE-SPORTS_v1.1.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-CULTURE-SPORTS",
+     "name": "제주시청 문화관광체육국 체육진흥과"
+    }
+   ],
+   "version": "1.1",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-CULTURE-AGENT-COMMON_v1.0.md (제주시청 문화관광체육국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "체육 진흥에 관한 계획 수립 및 시행",
+    "생활체육시설 조성에 관한 사항",
+    "스포츠대회 개최 및 출전 지원",
+    "전문·생활 체육단체 육성 및 행사개최에 따른 지원",
+    "전지훈련 유치 및 지원",
+    "스포츠바우처 및 유소년 체육육성 운영",
+    "전문·공공체육시설 설치 등에 관한 사항",
+    "생활체육시설 설치 등에 관한 사항",
+    "제주시체육회, 제주시장애인체육회 지원 및 지도·감독",
+    "종합경기장 운영 및 관리",
+    "국민체육센터 운영 및 관리",
+    "애월국민체육센터 운영 및 관리",
+    "노형미리내공원 운영 및 관리",
+    "그 밖에 체육진흥 및 체육시설 운영·관리에 관한 사무"
+   ],
+   "referrals": [
+    {
+     "area": "도 전체 체육정책·엘리트체육",
+     "handler": "도청 문화체육교육국",
+     "sp": "SP-DO-CULTURE"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-CULTURE-TAMNALIB_v1.1.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-CULTURE-TAMNALIB",
+     "name": "제주시청 문화관광체육국 탐라도서관"
+    }
+   ],
+   "version": "1.1",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-CULTURE-AGENT-COMMON_v1.0.md (제주시청 문화관광체육국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "탐라도서관 운영 및 관리",
+    "지역도서관 협력지원에 관한 사항",
+    "애월도서관·한경도서관 운영 및 관리",
+    "그 밖에 관할 도서관 운영에 관한 사무"
+   ],
+   "referrals": [
+    {
+     "area": "타 시립도서관(우당도서관 등) 자료",
+     "handler": "우당도서관",
+     "sp": "SP-CITYDIV-JEJUSI-CULTURE-UDANGLIB"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-CULTURE-TOURISM_v1.2.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-CULTURE-TOURISM",
+     "name": "제주시청 문화관광체육국 관광진흥과"
+    }
+   ],
+   "version": "1.2",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-CULTURE-AGENT-COMMON_v1.0.md (제주시청 문화관광체육국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "관광활성화에 관한 사항",
+    "지역축제 및 관광축제에 관한 사항",
+    "관광·회의사업(국제회의업·관광숙박업·관광객이용시설업·여행업 등)의 등록 및 지도·감독",
+    "관광숙박업·관광객이용시설업 및 국제회의업 사업계획(변경) 승인에 관한 사항",
+    "관광숙박업·관광객이용시설업의 분양 또는 회원모집에 관한 사항",
+    "관광홍보 및 마케팅에 관한 사항",
+    "관광안내소 및 관광안내원 운영·관리",
+    "관광지 및 관광자원 개발·지원",
+    "관광지 지정 신청에 관한 사항",
+    "유원지에 관한 도시계획시설사업의 시행, 실시계획 작성(행정시장이 직접 시행하는 사업에 한정한다)",
+    "유원시설업 허가(신고) 및 지도·감독",
+    "관광 편의시설업 지정 및 지도·감독",
+    "국내·외 투자 유치 및 지원에 관한 사항",
+    "휴양펜션업 등록 및 사업계획 승인",
+    "별빛누리공원 운영 및 관리",
+    "올레에 관한 사항",
+    "미신고 불법 숙박업소 지도점검 총괄",
+    "미신고 불법 숙박업소 합동 단속반 운영(총괄)",
+    "미신고 불법 숙박업 관련 민원접수 및 처리, 유관기관 통보 등",
+    "그 밖에 관광진흥에 관한 사무"
+   ],
+   "referrals": [
+    {
+     "area": "도 전체 관광정책·해외마케팅",
+     "handler": "도청 관광교류국",
+     "sp": "SP-DO-TOURISM"
+    },
+    {
+     "area": "공항 시설 관련",
+     "handler": "한국공항공사 제주공항(공기업)",
+     "sp": "외부 안내"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-CULTURE-UDANGLIB_v1.1.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-CULTURE-UDANGLIB",
+     "name": "제주시청 문화관광체육국 우당도서관"
+    }
+   ],
+   "version": "1.1",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-CULTURE-AGENT-COMMON_v1.0.md (제주시청 문화관광체육국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "우당도서관 운영 및 관리",
+    "기적의도서관 운영 및 관리",
+    "지역도서관 협력지원에 관한 사항",
+    "조천읍도서관 운영 및 관리",
+    "그 밖에 관할 도서관 운영에 관한 사무"
+   ],
+   "referrals": [
+    {
+     "area": "타 시립도서관(탐라도서관 등) 자료",
+     "handler": "탐라도서관",
+     "sp": "SP-CITYDIV-JEJUSI-CULTURE-TAMNALIB"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-ECON-JOBENERGY_v1.1.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-ECON-JOBENERGY",
+     "name": "제주시청 경제일자리국 일자리에너지과"
+    }
+   ],
+   "version": "1.1",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-ECON-AGENT-COMMON_v1.0.md (제주시청 경제일자리국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "공공근로사업에 관한 사항",
+    "직업소개소 등록 및 지도·감독",
+    "일자리창출사업에 관한 사항",
+    "취업정보센터운영",
+    "청년일자리 창출에 관한 사항",
+    "청년활동 지원에 관한 사항",
+    "청년 교육프로그램 운영지원에 관한 사항",
+    "청년 인재 육성·역량개발 및 교류 등에 관한 사항",
+    "대한민국 인재상 추천에 관한 사항",
+    "에너지이용 합리화에 관한 사항",
+    "도서지역 에너지 수급 관리",
+    "지역에너지 절약사업에 관한 사항",
+    "스마트그리드 사업에 관한 사항",
+    "신재생 에너지 개발에 관한 사항",
+    "발전소 주변지역 지원사업에 관한 사항",
+    "연탄수송비 지원",
+    "전기시설물 안전관리",
+    "전력기술 관리",
+    "전기사업 관리",
+    "농어촌 전기 공급사업에 관한 사항",
+    "도시가스·고압가스·액화석유가스·석유판매업·석탄사업 허가 등록 및 관리",
+    "환경친화적 자동차 충전구역 및 전용주차구역 관리에 관한 사항(위임된 사무에 한정한다)",
+    "그 밖에 일자리, 에너지에 관한 사무"
+   ],
+   "referrals": [
+    {
+     "area": "도 전체 일자리·에너지 정책",
+     "handler": "도청 경제활력국·혁신산업국",
+     "sp": "SP-DO-ECON, SP-DO-INNOV"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-ECON-SMB_v1.1.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-ECON-SMB",
+     "name": "제주시청 경제일자리국 경제소상공인과"
+    }
+   ],
+   "version": "1.1",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-ECON-AGENT-COMMON_v1.0.md (제주시청 경제일자리국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "지역경제 활성화에 관한 사항",
+    "주요경제동향 분석 관리",
+    "자유무역협정(FTA)에 관한 사항",
+    "사회적기업에 관한 사항",
+    "협동조합 설립 및 운영",
+    "소비자생활협동조합에 관한 사항",
+    "소상공인 지원에 관한 사항",
+    "노동조합 설립신고 등 노정에 관한 사항",
+    "지역경제 단체 운영지원",
+    "물가조사 및 관리",
+    "대부업 등록 및 지도·감독",
+    "새마을금고 지원 및 지도",
+    "소비자 상담 및 민원처리",
+    "담배도매업 또는 소매인에 관한 사항",
+    "복권판매업소 지도 및 감독",
+    "계량기 등록 및 검사",
+    "방문 및 전화권유 판매업 신고 및 지도·점검",
+    "중소기업 애로상담 및 해소",
+    "제조업창업중소기업의 부담금 면제 제도에 관한 사항",
+    "농공단지 관리",
+    "공장설립에 관한 업무",
+    "공정거래·부정경쟁 방지 등 유통질서 확립",
+    "공산품 단속관리",
+    "지식산업육성 및 과학기술 진흥에 관한 사항",
+    "전통시장 활성화 및 육성",
+    "전통시장 상인(단체) 등록 및 운영·관리",
+    "문화관광형 시범시장사업에 관한 사항",
+    "인정시장의 등록 및 운영·관리",
+    "시장활성화 구역 지정 및 운영·관리",
+    "대규모 점포 개설 등록 및 관리",
+    "대규모 점포 독립 및 임대단독점포 어린이놀이시설 안전관리 사무",
+    "통상진흥에 관한 사항",
+    "수출·입에 관한 사항",
+    "수입물품(공산품) 등의 원산지 표시 등에 관한 사항",
+    "골목형상점가 지정 및 운영관리에 관한 사무",
+    "그 밖에 지역경제, 소상공인에 관한 사무 및 국 내 다른 과에 속하지 아니하는 사무"
+   ],
+   "referrals": [
+    {
+     "area": "도 전체 소상공인 정책·중기부 연계",
+     "handler": "도청 경제활력국",
+     "sp": "SP-DO-ECON"
+    },
+    {
+     "area": "소상공인 정책자금(중앙정부)",
+     "handler": "소상공인시장진흥공단(국가기관)",
+     "sp": "외부 안내"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-ECON-VILLAGE_v1.2.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-ECON-VILLAGE",
+     "name": "제주시청 경제일자리국 마을활력과"
+    }
+   ],
+   "version": "1.2",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-ECON-AGENT-COMMON_v1.0.md (제주시청 경제일자리국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "베스트 특화마을 육성 및 지원",
+    "주민역량강화 교육 운영",
+    "창조적 마을 만들기 사업에 관한 사항",
+    "마을기업 육성 및 지원",
+    "농촌마을 종합개발사업에 관한 사항",
+    "전원·문화마을 조성사업",
+    "희망마을 조성사업 및 지역공동체 활성화 사업에 관한 사항",
+    "녹색농촌체험마을 육성 및 지원",
+    "색깔 있는 마을 만들기 사업에 관한 사항",
+    "농촌 현장포럼에 관한 사항",
+    "지역행복생활권에 관한 사항",
+    "지역균형발전에 관한 사항",
+    "귀농·귀촌지원 및 교육 운영",
+    "정착주민에 관한 사항",
+    "그 밖에 마을활력 사업에 관한 사무"
+   ],
+   "referrals": [
+    {
+     "area": "읍면동 행정·주민자치위원회 운영",
+     "handler": "자치행정과",
+     "sp": "SP-CITYDIV-JEJUSI-JACHI-SELFGOV"
+    },
+    {
+     "area": "도 전체 균형발전 정책",
+     "handler": "도청 균형발전 관련 부서",
+     "sp": "SP-DO-BALANCE"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-JACHI-BASICGOVPREP_v1.2.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-JACHI-BASICGOVPREP",
+     "name": "제주시청 자치행정국 기초자치단체 설치준비지원단"
+    }
+   ],
+   "version": "1.2",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-JACHI-AGENT-COMMON_v1.2.md (제주시청 자치행정국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "배경 설명: 민선8기(오영훈 도정)에서 \"15분 도시 제주\"와 함께 기초자치단체 도입을 추진했으나 뚜렷한 성과 없이 예산만 소요됐다는 비판이 있었고, 2026년 출범이 사실상 불가능해졌음을 도정이 인정했다.",
+    "민선9기(위성곤 도정)는 취임 전부터 기초자치단체 도입에 힘을 쏟지 않겠다는 입장을 밝혀왔으며, 2026-07-03 공개된 조직개편안에서도 도청 실·국 개편(15실·국으로 축소, 기후에너지국 신설 등)에 기초자치단체 관련 신규 조직 확대는 포함되지 않은 것으로 확인된다.",
+    "이 부서(기초자치단체 설치준비지원단) 자체의 존폐·기능 변경 여부는 이번 조사로 확인하지 못했다 — 조직도상 명칭은 남아 있으나 실질 업무가 무엇으로 전환됐는지(예: 다른 자치제도 업무로 흡수) 불확실하다. 이용자가 관련 문의를 하면 이 불확실성을 그대로 전달하고, 확답이 필요하면 부서 직접 문의 또는 정보공개청구를 안내한다."
+   ],
+   "referrals": [
+    {
+     "area": "도 전체 행정체제 개편 방향",
+     "handler": "도청(도지사·도의회)",
+     "sp": "외부 공식 발표 안내만"
+    },
+    {
+     "area": "조직개편 확정 내용 확인",
+     "handler": "정보공개청구",
+     "sp": "정보공개포털(open.go.kr) 안내"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장하되, 이 부서는 최신 현황 불확실성이 크므로 직접 문의를 특히 강하게 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-JACHI-BUDGET_v1.3.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-JACHI-BUDGET",
+     "name": "제주시청 자치행정국 기획예산과"
+    }
+   ],
+   "version": "1.3",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-JACHI-AGENT-COMMON_v1.2.md (제주시청 자치행정국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "시정 주요업무계획 수립 및 관리",
+    "각종 지시사항 전파 관리 및 제도개선에 관한 사항",
+    "주요 시책업무 기획 및 추진",
+    "시정조정협의회 운영",
+    "각종 위원회 운영",
+    "지방행정혁신에 관한 사항",
+    "업무제휴·협약 등 체결에 관한 사항(위임된 범위에 한정한다)",
+    "학습동아리 운영",
+    "정책실명제 운영",
+    "예산편성 관리",
+    "국비보조사업 신청 및 관리",
+    "용역과제 사전심사",
+    "지방재정 계획 수립",
+    "지방재정 투융자 심사",
+    "경영수익사업 개발 및 평가",
+    "주민참여예산제도 운영",
+    "공직기강 감찰",
+    "감사지원",
+    "규제 관련 법령 등 해석 지원",
+    "업무의 적법성 및 타당성 검토 등 적극 행정 지원",
+    "시민불편사항 점검",
+    "공직자 재산등록 및 청렴대책에 관한 사항",
+    "청렴도 향상에 관한 사항",
+    "청렴교육 운영 및 홍보에 관한 사항",
+    "성과관리(BSC)업무 및 시정평가",
+    "행정시 소관 주요업무에 대한 심사 및 분석",
+    "직무성과계약제 운영",
+    "도의회에 관한 사항",
+    "법무 및 소송에 관한 사항",
+    "규제개혁에 관한 사항",
+    "납세 관련 고충민원 처리 등 납세자보호관 운영"
+   ],
+   "referrals": [
+    {
+     "area": "도 전체 예산·조직개편 방향",
+     "handler": "도청 기획조정실",
+     "sp": "SP-DO-PLAN"
+    },
+    {
+     "area": "개별 사업 예산 편성 여부",
+     "handler": "시의회 심의 절차",
+     "sp": "외부 절차 안내만"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-JACHI-GENERAL_v1.3.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-JACHI-GENERAL",
+     "name": "제주시청 자치행정국 총무과"
+    }
+   ],
+   "version": "1.3",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-JACHI-AGENT-COMMON_v1.2.md (제주시청 자치행정국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "의전 및 행사에 관한 사항",
+    "보안업무",
+    "공무원 복무관리",
+    "공무원단체 관련 업무",
+    "공무원의 후생복지에 관한 사항",
+    "상훈 및 직장교육",
+    "직장민방위대 운영",
+    "기구 및 정원·현원 관리",
+    "지방 4급 이하 공무원의 승진 및 전보 등 임용과 공모직위 운영에 관한 사항",
+    "공무원 교육훈련 및 상시학습제도 운영",
+    "청원경찰·공무직 임용 및 관리",
+    "공직자 공무국외출장 허가",
+    "지방 4급 이하 공무원의 연봉 책정, 호봉 획정과 승급 및 성과상여금 지급",
+    "공사·물품·용역의 계약업무",
+    "토목·건축·설비분야 공사 및 민간위탁의 원가계산, 계약방법 심사",
+    "물품의 조달 및 출납관리",
+    "관용차량 운행 및 유지·관리",
+    "세출예산 집행 및 결산",
+    "유가증권 취급에 관한 사항",
+    "세입세출외현금 출납 사무",
+    "복식부기에 관한 사항",
+    "청사시설 유지·관리",
+    "기록물수집 및 관리",
+    "공인관리",
+    "통계업무",
+    "행정자료실 운영",
+    "그 밖에 다른 과에 속하지 아니하는 사무"
+   ],
+   "referrals": [
+    {
+     "area": "개별 채용·인사 결과",
+     "handler": "시청 내부 인사부서",
+     "sp": "외부(내부) 절차 안내만"
+    },
+    {
+     "area": "정보공개청구 실제 처리",
+     "handler": "각 국·과 정보공개 담당",
+     "sp": "정보공개포털 안내만"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다.",
+    "정보공개청구는 정보공개포털(open.go.kr)을 안내한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-JACHI-PROPERTYTAX_v1.3.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-JACHI-PROPERTYTAX",
+     "name": "제주시청 자치행정국 재산세과"
+    }
+   ],
+   "version": "1.3",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-JACHI-AGENT-COMMON_v1.2.md (제주시청 자치행정국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "도세 부과·징수(재산세·자동차세·도시계획세·공동시설세)",
+    "도세 세원조사 및 구제",
+    "도세 전산 운영",
+    "지방세 제증명 발급",
+    "제주시 소관 자금 관리",
+    "도세 세입관리",
+    "세외수입업무 총괄",
+    "제주시 소관 총괄채권 관리",
+    "국·공유재산 관리(위임된 사무에 한정한다)"
+   ],
+   "referrals": [
+    {
+     "area": "취득세·등록면허세 신고",
+     "handler": "세무과",
+     "sp": "SP-CITYDIV-JEJUSI-JACHI-TAX"
+    },
+    {
+     "area": "국세 관련 문의",
+     "handler": "제주세무서(국가기관)",
+     "sp": "외부 기관 안내"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다.",
+    "정확한 세액은 위택스(wetax.go.kr) 또는 재산세과 직접 문의로 재확인하도록 안내한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-JACHI-SELFGOV_v1.3.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-JACHI-SELFGOV",
+     "name": "제주시청 자치행정국 자치행정과"
+    }
+   ],
+   "version": "1.3",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-JACHI-AGENT-COMMON_v1.2.md (제주시청 자치행정국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "읍·면·동 행정지원 및 지도·감독",
+    "이·통 행정 지원",
+    "대화행정에 관한 사항",
+    "주민자치센터지원 및 운영 활성화",
+    "소규모 주민숙원사업에 관한 사항",
+    "통·반 구역 조정 및 법정구역 경계조정 사무 지원",
+    "제주4·3사건 진상규명 및 희생자 명예회복에 관한 사항(위임된 사무에 한정한다)",
+    "제주4·3사건 희생자 직권재심 사실조사 지원",
+    "대일항쟁기 강제동원에 관한 사항",
+    "과거사 진상규명 및 민주화에 관한 사항",
+    "인재육성 및 학교일반 업무",
+    "민주평화통일자문회의 운영 지원",
+    "제안제도 운영 및 고객만족행정에 관한 사항",
+    "지역여론(동향) 관리",
+    "읍·면·동 마을제 관리에 관한 사항(문화재 또는 향토유산으로 지정된 사항은 제외한다)",
+    "국민·주민 투표 및 선거에 관한 사항",
+    "사회단체 지원",
+    "국민운동단체 및 청년단체 지원 육성",
+    "비영리 민간단체 지원 및 관리",
+    "읍·면·동 종합복지회관 및 마을회관 관리",
+    "적십자사 지원",
+    "새마을 문고 지원 및 지도",
+    "평생학습업무 전반에 관한 사항",
+    "평생학습 관련 교육부 공모 지원 사업에 관한 사항",
+    "교육지원에 관한 사항",
+    "비정규학교 운영지원에 관한 사항",
+    "자원봉사에 관한 사항",
+    "행정시 권한강화 및 기능개선에 관한 사항",
+    "인구감소 및 지방 소멸 대책에 관한 사항"
+   ],
+   "referrals": [
+    {
+     "area": "특정 읍면동 개별 민원",
+     "handler": "해당 읍면동 사무소",
+     "sp": "SP-EMD-{읍면동}"
+    },
+    {
+     "area": "선거 관리 자체(투표소 지정 등)",
+     "handler": "제주도선거관리위원회(국가기관, 도청·시청과 별개)",
+     "sp": "외부 안내만"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-JACHI-TAX_v1.4.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-JACHI-TAX",
+     "name": "제주시청 자치행정국 세무과"
+    }
+   ],
+   "version": "1.4",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-JACHI-AGENT-COMMON_v1.2.md (제주시청 자치행정국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "도세 종합 조정",
+    "도세 제도운영 및 연구",
+    "도세 부과·징수(취득세·등록면허세·주민세·레저세·지방소득세· 지역자원시설세·지방교육세)",
+    "도세 세원조사 및 구제업무",
+    "취득세 탈루·은닉세원 발굴 및 세무조사",
+    "도세 과표 산정",
+    "개별주택 가격 조사 및 가격 결정 공시",
+    "체납액 징수 및 정리",
+    "압류재산 공매"
+   ],
+   "referrals": [
+    {
+     "area": "국세(종합소득세·부가세·법인세)",
+     "handler": "제주세무서(국세청, 국가기관)",
+     "sp": "외부 기관 안내 — 도청·시청 소관 아님을 명확히 고지"
+    },
+    {
+     "area": "재산세·자동차세 부과",
+     "handler": "재산세과",
+     "sp": "SP-CITYDIV-JEJUSI-JACHI-PROPERTYTAX"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-SAFETY-GENERAL_v1.2.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-SAFETY-GENERAL",
+     "name": "제주시청 안전교통국 안전총괄과"
+    }
+   ],
+   "version": "1.2",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-SAFETY-AGENT-COMMON_v1.0.md (제주시청 안전교통국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "안전관리종합계획 수립 및 결과 평가",
+    "안전관리 정책·제도 개선사항 발굴 및 건의",
+    "국가안전정책(4대악 등) 총괄·조정 및 관리",
+    "범시민 안전문화운동 확산",
+    "지역 안전공동체 육성 및 지원",
+    "재난안전대책 본부 및 재난종합상황실 운영",
+    "재난관리기금의 출납 및 회계 관리",
+    "재해·재난 대비 종합대책에 관한 사항",
+    "풍수해 보험에 관한 사항",
+    "지역자율방재단 운영 및 관리",
+    "재난 예보·경보시스템 유지 관리",
+    "자연재해위험 개선지구의 지정 및 고시",
+    "자연재해위험 개선지구 정비공사 시행 및 유지·관리",
+    "재해피해 조사 및 복구업무 총괄",
+    "소하천 정비 기본·중기시행 계획 수립",
+    "소하천 정비공사 시행 및 유지·관리",
+    "소하천의 공작물 설치·점용허가 및 점용료 부과·징수",
+    "국유재산(구거·하천) 관리",
+    "비관리청의 하천(소하천·지방하천) 공사 및 준공 인가",
+    "서민밀집위험지역 정비사업에 관한 사항",
+    "급경사지 재해예방에 관한 사항",
+    "특정관리 대상 시설의 지정·고시 및 재난취약시설 안점점검 등에 관한 사항",
+    "시설물안전법 대상 시설의 지도·점검",
+    "시설물의 안전 관리",
+    "지하안전관리에 관한 사항",
+    "국가기반보호 및 상황 관리",
+    "어린이 놀이시설 안전 관리",
+    "민방위대 편성·동원 및 교육훈련",
+    "민방위 시설 장비 및 주민신고망 유지·관리",
+    "을지연습 종합계획 수립",
+    "통합방위협의회 및 방위지원 본부 운영",
+    "인력동원에 관한 사항",
+    "비상대비(통합방위 지원본부 운영을 포함한다) 총괄",
+    "승강기 안전관리에 관한 사항",
+    "지방하천 정비 기본․중기시행 계획 수립",
+    "지방하천 정비공사 시행 및 유지·관리",
+    "지방하천의 공작물 설치·점용허가 및 점용료 부과·징수",
+    "비관리청의 지방하천공사 및 준공 인가(지방하천)",
+    "국유재산(하천)관리 및 용도 폐지",
+    "하천편입용지 보상 협의",
+    "「산업안전보건법」에 따른 안전관리에 관한 사항",
+    "안전감찰 업무 지원(안잔감찰 자료 수합, 지적사항 관리 등)",
+    "그 밖에 안전관리에 관한 사무 및 국 내 다른 과에 속하지 아니하는 사무"
+   ],
+   "referrals": [
+    {
+     "area": "도 전체 재난관리 정책·예산",
+     "handler": "도청 도민안전건강실",
+     "sp": "SP-DO-SAFETY"
+    },
+    {
+     "area": "대형 재난 시 소방·구조 실행",
+     "handler": "소방서(도 직속기관)",
+     "sp": "SP-AGY-FIRE"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-SAFETY-TRAFFIC_v1.2.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-SAFETY-TRAFFIC",
+     "name": "제주시청 안전교통국 교통행정과"
+    }
+   ],
+   "version": "1.2",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-SAFETY-AGENT-COMMON_v1.0.md (제주시청 안전교통국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "화물자동차운송사업 허가에 관한 사항",
+    "화물자동차운송사업 지도·단속 및 행정처분",
+    "사업용(화물자동차·개인택시)자동차 차고지 설치 확인 및 사후관리(읍·면 지역은 제외한다)",
+    "사업용자동차 밤샘주차 단속 및 행정처분(읍·면 지역은 제외한다)",
+    "무단방치차량 처리 및 불법구조변경 지도·단속",
+    "자동차관리사업(전문정비업·매매업·해체재활용업) 등록에 관한 사항",
+    "자동차관리사업(전문정비업·매매업·해체재활용업) 관리 및 지도·단속",
+    "교통 관련 봉사단체 지원",
+    "특수여객자동차 운송사업(등록, 각종 신고수리)에 관한 사항",
+    "무허가 자가용 자동차 유상운송 행위 지도 및 단속",
+    "개인형이동장치 이용 안전 관련 사항",
+    "공영버스사업 운영 및 특별회계 운용",
+    "공영버스 종사자 복무 관리 및 임금 지급에 관한 사항",
+    "버스정류소·승차대·표지판 등 교통시설물 설치 및 관리",
+    "교통안전표지판 등 교통안전시설 설치 및 유지관리 (차선도색 및 과속방지턱에 관한 사항은 제외한다)",
+    "제주시 관할 도로반사경 설치 및 정비",
+    "횡단보도 조명등 시설정비에 관한 사항",
+    "이면도로 일방통행로 지정",
+    "공항소음 피해대책 지역 주민 지원에 관한 사항",
+    "불법 주정차 신고접수 및 민원처리",
+    "불법 주정차 지도단속에 관한 사항",
+    "과태료 부과ㆍ징수 및 체납액 관리",
+    "주정차 위반에 따른 압류 등록 및 해제",
+    "주정차 CCTV 설치ㆍ관리 및 단속 등",
+    "의견진술 및 이의제기 처리",
+    "의견진술심의위원회 운영",
+    "주정차 과태료 차량 번호판 영치",
+    "견인 및 보관업무 대행자 지정과 대행업무 수행에 관한 필요한 조치 및 교육명령",
+    "주정차 금지구역 지정ㆍ해제 및 관리",
+    "주정차 단속요원 인력 및 장비 운용관리",
+    "화물자동차 사용자에 대한 유가보조금 지급에 관한 사항",
+    "그 밖에 교통에 관한 사무"
+   ],
+   "referrals": [
+    {
+     "area": "도 전체 대중교통 정책·요금·노선 조정",
+     "handler": "도청 교통항공국",
+     "sp": "SP-DO-TRANSPORT"
+    },
+    {
+     "area": "국가경찰 관할 교통단속(신호위반 등)",
+     "handler": "제주지방경찰청(국가기관)",
+     "sp": "외부 안내"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-SAFETY-VEHICLE_v1.2.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-SAFETY-VEHICLE",
+     "name": "제주시청 안전교통국 차량관리과"
+    }
+   ],
+   "version": "1.2",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-SAFETY-AGENT-COMMON_v1.0.md (제주시청 안전교통국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "차고지증명제 운영 계획 수립",
+    "차고지증명제 운영 전반에 관한 사항",
+    "차고지 관리실태 지도 및 점검",
+    "주차장(무료·공영·부설 주차장을 포함한다) 설치 및 관리",
+    "민영주차장 지도관리",
+    "주차환경개선지구 지정 고시",
+    "부설주차장에 관한 사항(건축과로 사무분장 된 부설주차장 업무는 제외한다)",
+    "기계식 주차장 관리",
+    "자기 차고지 갖기 사업에 관한 사항",
+    "자동차등록·과태료 부과 및 체납액 관리",
+    "이륜차 등록 관리 등에 관한 사항",
+    "그 밖에 주차관리에 관한 사무"
+   ],
+   "referrals": [
+    {
+     "area": "자동차 검사(정기검사 등)",
+     "handler": "한국교통안전공단(국가기관)",
+     "sp": "외부 안내"
+    },
+    {
+     "area": "자동차세 부과",
+     "handler": "시청 재산세과",
+     "sp": "SP-CITYDIV-JEJUSI-JACHI-PROPERTYTAX"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-BUILDING_v1.0.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-BUILDING",
+     "name": "제주시청 도시건설국 건축과"
+    }
+   ],
+   "version": "1.0",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "개별 처분(건축허가·사용승인) 근거: 건축법, 건축법 시행령, 건축법 시행규칙(수수료 별표 4 포함)",
+    "legal_basis_last_verified: 2026-08-20"
+   ],
+   "tasks": [],
+   "referrals": [],
+   "contacts": [],
+   "inheritsLegalBasis": false,
+   "legalBasisVerified": "2026-08-20"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CITYPLAN_v1.0.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CITYPLAN",
+     "name": "제주시청 도시건설국 도시계획과"
+    }
+   ],
+   "version": "1.0",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 근거: 제주특별자치도 설치 및 국제자유도시 조성을 위한 특별법 — 제주시는 법인격 없는 행정시, 시장은 도지사 임명",
+    "도시계획 관련 처분 근거: 국토의 계획 및 이용에 관한 법률(국토계획법), 제주특별자치도 도시계획 조례",
+    "legal_basis_last_verified: 2026-08-20"
+   ],
+   "tasks": [],
+   "referrals": [],
+   "contacts": [],
+   "inheritsLegalBasis": false,
+   "legalBasisVerified": "2026-08-20"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CONSTRUCT_v1.0.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CONSTRUCT",
+     "name": "제주시청 도시건설국 건설과"
+    }
+   ],
+   "version": "1.0",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "도로점용허가 근거: 도로법",
+    "legal_basis_last_verified: 2026-08-20"
+   ],
+   "tasks": [],
+   "referrals": [],
+   "contacts": [],
+   "inheritsLegalBasis": false,
+   "legalBasisVerified": "2026-08-20"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-HOUSING_v1.0.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-HOUSING",
+     "name": "제주시청 도시건설국 주택과"
+    }
+   ],
+   "version": "1.0",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "공동주택 관리·주택사업계획승인 근거: 주택법, 공동주택관리법",
+    "legal_basis_last_verified: 2026-08-20"
+   ],
+   "tasks": [],
+   "referrals": [],
+   "contacts": [],
+   "inheritsLegalBasis": false,
+   "legalBasisVerified": "2026-08-20"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-REGEN_v1.0.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-REGEN",
+     "name": "제주시청 도시건설국 도시재생과"
+    }
+   ],
+   "version": "1.0",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "도시재생 사업 근거: 도시재생 활성화 및 지원에 관한 특별법",
+    "legal_basis_last_verified: 2026-08-20"
+   ],
+   "tasks": [],
+   "referrals": [],
+   "contacts": [],
+   "inheritsLegalBasis": false,
+   "legalBasisVerified": "2026-08-20"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-WATER_v1.1.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-WATER",
+     "name": "제주시청 도시건설국 상하수도과"
+    }
+   ],
+   "version": "1.1",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상하수도 공사 승인 근거: 수도법, 하수도법",
+    "legal_basis_last_verified: 2026-08-20"
+   ],
+   "tasks": [],
+   "referrals": [],
+   "contacts": [],
+   "inheritsLegalBasis": false,
+   "legalBasisVerified": "2026-08-20"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-WELFARE-BASICLIVELIHOOD_v1.2.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-WELFARE-BASICLIVELIHOOD",
+     "name": "제주시청 복지위생국 기초생활보장과"
+    }
+   ],
+   "version": "1.2",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-WELFARE-AGENT-COMMON_v1.0.md (제주시청 복지위생국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "국민기초생활보장사업에 관한 업무",
+    "기초생활급여 결정 및 통지, 급여지급, 보장비용의 징수",
+    "의료급여사업에 관한 사항",
+    "의료급여수급자 선정 관리",
+    "의료급여수급자 사례관리사업에 관한 사항",
+    "사회복지 통합 관리망 운영",
+    "복지급여 신청에 따른 통합 조사",
+    "복지급여대상자 변동 통합 사후관리",
+    "자활 및 생활안정기금에 관한 사항",
+    "자활근로사업 운영",
+    "저소득 주거 지원",
+    "희망키움 및 내일키움통장에 관한 사항",
+    "지역자활센터 운영 지원",
+    "일을 통한 빈곤탈출 상담 지원",
+    "한부모 가족 선정 및 자립 지원",
+    "한부모 가족 복지시설 운영 지원 및 지도·감독",
+    "미혼모·부자 가정 및 조손가정 지원",
+    "그 밖에 기초생활보장에 관한 사무"
+   ],
+   "referrals": [
+    {
+     "area": "도 전체 복지정책",
+     "handler": "도청 복지가족국",
+     "sp": "SP-DO-WELFARE"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-WELFARE-DISABLED_v1.2.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-WELFARE-DISABLED",
+     "name": "제주시청 복지위생국 장애인복지과"
+    }
+   ],
+   "version": "1.2",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-WELFARE-AGENT-COMMON_v1.0.md (제주시청 복지위생국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "장애인편의시설 증진사업에 관한 사항",
+    "장애인복지시설 운영 지원 및 기능보강",
+    "장애인복지단체 육성 및 지원",
+    "장애인 일자리사업 및 고용촉진에 관한 사무",
+    "저소득 재가 장애인 복지증진사업에 관한 사항",
+    "장애인 출산비용 지원에 관한 사항",
+    "장애인 생활안정 및 자립지원에 관한 사무",
+    "발달장애인 개인별 지원계획 및 활동서비스에 관한 업무",
+    "장애인연금 등 장애인복지 급여 운영 및 지원",
+    "장애인차별금지 이행에 관한 사항",
+    "중증장애인자립생활지원센터 운영 지원",
+    "노숙인 및 행려자 관리",
+    "노숙인 복지시설 운영 지원 및 기능보강",
+    "정신보건시설 운영 지원 및 기능보강",
+    "장애인직업재활시설 운영 지원 및 기능보강",
+    "장애인 돌봄사업에 관한 사무",
+    "장애인가족지원센터 운영 지원",
+    "중증장애인생산품 우선구매 촉진에 관한 사항",
+    "장애인활동지원에 관한 사항",
+    "장애인재활보조기구에 관한 사항",
+    "장애인전용주차구역의 지도·단속 및 과태료 부과",
+    "그 밖에 장애인 복지 및 지원에 관한 사무"
+   ],
+   "referrals": [
+    {
+     "area": "장애 정도 심사",
+     "handler": "국민연금공단(국가기관, 보건복지부 위탁)",
+     "sp": "외부 안내"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-WELFARE-ELDERLY_v1.2.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-WELFARE-ELDERLY",
+     "name": "제주시청 복지위생국 노인복지과"
+    }
+   ],
+   "version": "1.2",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-WELFARE-AGENT-COMMON_v1.0.md (제주시청 복지위생국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "노인 단체 육성 및 지원",
+    "각종 노인복지급여 결정 및 지급",
+    "노인일자리사업에 관한 사항",
+    "기초연금 운영 및 지원",
+    "저소득 재가 노인 복지증진사업 추진",
+    "노인여가복지시설 지원",
+    "노인장기요양보험제도 운영",
+    "노인복지시설 설치·운영에 관한 사항",
+    "노인의료복지시설·노인보호전문기관·학대피해노인전용 쉼터 설치·운영에 관한 사항",
+    "장수수당·장수축하금 지원",
+    "노인 틀니·보청기 지원에 관한 사항",
+    "노인고용촉진 장려금 지원",
+    "홀로사는노인지원센터 운영",
+    "묘지 관련 업무",
+    "장사문화 개선에 관한 사항",
+    "무연고 시체 등의 처리에 관한 사항",
+    "공설 장사시설 설치 및 운영",
+    "사설 장사시설 설치신고·인·허가 및 지도·단속",
+    "자연장지(어승생한울누리공원, 용강별숲공원) 조성 및 운영·관리",
+    "노인맞춤돌봄사업에 관한 사무",
+    "어버이날 및 노인의 날 행사에 관한 사항",
+    "그 밖에 노인 복지 및 지원에 관한 사무"
+   ],
+   "referrals": [
+    {
+     "area": "국민연금 수급 이력 조회",
+     "handler": "국민연금공단 제주지역본부(국가기관)",
+     "sp": "외부 안내"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-WELFARE-RESIDENT_v1.2.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-WELFARE-RESIDENT",
+     "name": "제주시청 복지위생국 주민복지과"
+    }
+   ],
+   "version": "1.2",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-WELFARE-AGENT-COMMON_v1.0.md (제주시청 복지위생국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "종합사회복지관 및 기초푸드뱅크·마켓 운영 및 지원",
+    "저출산·고령화 대책에 관한 사항",
+    "출산장려금 지원 및 환수에 관한 사항",
+    "통합사례관리 및 방문형 서비스 협력체계 운영",
+    "지역자원조사 및 발굴·동원·관리 및 제공 기관 간 연계",
+    "긴급복지지원사업에 관한 사항",
+    "북한이탈주민 정착 지원",
+    "지역사회보장계획 수립",
+    "저소득층 복지시책 및 어려운 이웃돕기 지원",
+    "읍·면·동 복지사업 지원관리",
+    "사회서비스 전자바우처사업에 관한 사항",
+    "사회서비스 제공기관 등록 및 폐업",
+    "지역사회보장협의체 운영 및 지원",
+    "읍·면·동 지역사회보장협의체 운영 및 지원",
+    "충혼묘지 관리",
+    "모충사 관리",
+    "재해구호에 관한 사항",
+    "보훈 업무 지원",
+    "의사상자 관리",
+    "아동복지사업 전반에 관한 사항",
+    "입양가정 지원",
+    "아동급식 지원업무",
+    "보호를 필요로 하는 아동에 관한 사무",
+    "아동복지시설 운영 및 지원",
+    "지역아동센터 운영 지원 및 관리",
+    "아동발달지원계좌(디딤씨앗통장) 지원 사업",
+    "아동복지교사 운영",
+    "아동수당의 신청 및 지급 등에 관한 사항",
+    "드림스타트 관련 복지계획 수립",
+    "드림스타트 사례 관리 및 복지프로그램 수행",
+    "그 밖에 주민복지에 관한 사무 및 국 내 다른 과에 속하지 아니하는 사무"
+   ],
+   "referrals": [
+    {
+     "area": "기초생활보장(국민기초생활보장법)",
+     "handler": "기초생활보장과",
+     "sp": "SP-CITYDIV-JEJUSI-WELFARE-BASICLIVELIHOOD"
+    },
+    {
+     "area": "도 전체 복지정책·예산",
+     "handler": "도청 복지가족국",
+     "sp": "SP-DO-WELFARE"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  },
+  {
+   "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-WELFARE-WOMENFAMILY_v1.2.md",
+   "agencies": [
+    {
+     "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-WELFARE-WOMENFAMILY",
+     "name": "제주시청 복지위생국 여성가족과"
+    }
+   ],
+   "version": "1.2",
+   "legalBasis": [
+    "페르소나 유형: 기관 페르소나 (Institutional Persona)",
+    "상위 국 SP-CITY-JEJUSI-WELFARE-AGENT-COMMON_v1.0.md (제주시청 복지위생국)의 §LEGAL-BASIS를 그대로 상속 — 과 자체의 독립된 개별법은 없음",
+    "legal_basis_last_verified: 2026-07-23"
+   ],
+   "tasks": [
+    "여성가족정책 종합계획 수립",
+    "여성의 권익 증진에 관한 사항",
+    "여성의 사회참여 및 능력개발사업에 관한 사항",
+    "여성 단체(행사) 육성·지원 및 사회교육 정책에 관한 사항",
+    "동거부부 합동결혼식에 관한 사항",
+    "결혼중개업 등록 및 신고에 관한 사항",
+    "결혼중개업 지도·점검 및 종사자 관리",
+    "다문화가족 및 거주외국인 지원",
+    "다문화가족지원센터 운영 지원 및 관리",
+    "이주여성보호시설 운영 지원 및 관리",
+    "성희롱 방지에 관한 사항",
+    "성(가정)폭력·성매매 피해자 상담소 및 보호시설 운영지원",
+    "아이돌보미 지원 사업",
+    "가족해체 예방사업 및 여성폭력 피해자 구제활동 지원",
+    "보육료 및 양육수당 지원대상자 선정 및 지원",
+    "어린이집 인·허가 업무",
+    "국공립 어린이집 설치 및 운영지원",
+    "국공립어린이집 운영 위탁에 관한 사항",
+    "어린이집 특수보육 및 특수시책에 관한 사항",
+    "어린이집 보육 교직원 및 아동관리",
+    "어린이집 운영비 지원",
+    "사회복지법인 어린이집 임원 변경",
+    "어린이집 운영 지도·점검",
+    "어린이집 기능보강사업",
+    "어린이집 평가인증",
+    "육아종합지원센터 설치 및 운영(행정시장이 직접 설치 하는 경우에 한정한다)",
+    "청소년 육성·활동·보호에 관한 사항",
+    "청소년 복지시설 설치신고 및 지도·감독",
+    "청소년 수련시설 설치허가 및 등록 및 지도·감독",
+    "가출청소년 쉼터 및 청소년 공부방 운영지원",
+    "참사랑 문화의 집 운영 및 관리",
+    "건강가정지원센터 운영 및 관리",
+    "청소년성문화센터 운영 및 관리",
+    "청소년 문화의집 운영 및 관리",
+    "그 밖에 여성·가족 지원에 관한 사무"
+   ],
+   "referrals": [
+    {
+     "area": "도 전체 여성정책",
+     "handler": "도청 복지가족국",
+     "sp": "SP-DO-WELFARE"
+    }
+   ],
+   "contacts": [
+    "제주콜센터(064-120, 07:00~22:00, 유료)로 확인을 권장한다."
+   ],
+   "inheritsLegalBasis": true,
+   "legalBasisVerified": "2026-07-23"
+  }
+ ],
+ "noSp": [
+  {
+   "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-ECON-INFOSUPPORT",
+   "name": "제주시청 경제일자리국 정보화지원과"
+  },
+  {
+   "code": "city-dept:jejusi:SP-CITYDIV-JEJUSI-WELFARE-HYGIENE",
+   "name": "제주시청 복지위생국 위생관리과"
+  }
+ ]
+}
