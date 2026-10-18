@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<link rel="icon" href="data:,">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<title>요금·매출 (시스템 테스트) — 나비</title>
+<link rel="stylesheet" href="/assets/equity-bid-pages.css">
+</head>
+<body>
+<script src="/assets/equity-bid-tabs.js"></script>
+<script>
+window.PAGE_HEADER = {
+  active: '',
+  badge: '시스템 테스트 · 요금과 매출 · 실제 입찰 아님',
+  h1: '기본료 연 99,000원과 종량제,<br>직역별 매출 가정',
+  instruction: '회원 1인의 요금 구조, 단위 경제, 손익분기, 직역별 연 매출을 계산합니다.',
+  sub: '종량제는 관리자 문서에서 근거가 가장 약한 가정입니다. 가정을 바꿔 가며 결과가 어떻게 달라지는지 확인하십시오.',
+  disclaimer: '시스템 테스트 용도입니다. 실제 입찰이 아니며 개시일은 미정입니다. 이 화면의 숫자는 모두 가정에 따른 계산이며 수익을 예측하거나 약속하지 않습니다.',
+  subnav: window.equityBidSubnav('pricing')
+};
+</script>
+<link rel="stylesheet" href="/assets/ph-header.css">
+<script src="/assets/ph-header.js"></script>
+
+<main class="ebp-wrap" id="ebp" data-page="pricing"><noscript><div class="ebp-testbar">이 화면은 자바스크립트가 필요합니다.</div></noscript></main>
+
+<script src="/assets/equity-bid-model.js"></script>
+<script src="/assets/equity-bid-pages.js"></script>
+</body>
+</html>
