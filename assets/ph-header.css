@@ -43,8 +43,13 @@
 .ph-hero-tag-dot { width: 5px; height: 5px; border-radius: 50%; background: #f0b429; }
 .ph-hero h1 { font-size: 21px; font-weight: 700; letter-spacing: -.3px; line-height: 1.4; margin-bottom: 10px; max-width: 760px; }
 .ph-hero-instruction { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.6; max-width: 700px; margin-bottom: 6px; }
-/* 히어로 아래 가운데 행동 버튼(PAGE_HEADER.heroButton, 2026-10-18) — 글자는 넉넉하게 */
+/* 히어로 오른쪽 빈 공간 세로 중앙의 행동 버튼(PAGE_HEADER.heroButton, 2026-10-18) — 글자는 넉넉하게.
+   폭이 좁아 글과 겹칠 수 있으면(1080px 이하) 히어로 맨 아래 가운데로 내려온다. */
+.ph-hero-inner.has-cta { position: relative; }
 .ph-hero-cta-row { display: flex; justify-content: center; margin-top: 24px; }
+@media (min-width: 1081px) {
+  .ph-hero-inner.has-cta .ph-hero-cta-row { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); margin-top: 0; }
+}
 .ph-hero-cta { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 28px; border-radius: 6px; background: #f0b429; color: #14181f; font-size: 16px; font-weight: 800; letter-spacing: -.1px; text-decoration: none; text-align: center; }
 .ph-hero-cta:hover { background: #ffc94d; }
 .ph-hero-cta:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
