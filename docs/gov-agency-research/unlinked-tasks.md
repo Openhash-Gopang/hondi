@@ -1,14 +1,14 @@
-# 미연결 서버 task 정리 (열린 문제 #5, 2026-10-19 13회차)
+# 미연결 서버 task 정리 (열린 문제 #5, 2026-10-19 13·14회차)
 
-서버 task 145개 중 기관 페이지에 연결되지 않은 것은 처음 29개였고, 이번에 1건을 연결해 28개가 남았다. 연결 규칙은 `tools/extract-gov-tasks.cjs` 머리말과 같다: ① 그 기관의 SP 가 task_key 를 자기 접수 업무로 직접 적고 ② 서버 `AGENCY_TO_DEPT_TARGET` 의 부서 지정과 모순이 없을 때만 `TASK_AGENCY_OVERRIDE` 에 올린다(테스트가 ①을 검사). 추측으로 잇지 않는다.
+서버 task 145개 중 기관 페이지에 연결되지 않은 것은 처음 29개였고, 13회차에 1건, 14회차에 12건을 연결해 16개가 남았다. 연결 규칙은 `tools/extract-gov-tasks.cjs` 머리말과 같다: ① 그 기관의 SP 가 task_key 를 자기 접수 업무로 직접 적고 ② 서버 `AGENCY_TO_DEPT_TARGET` 의 부서 지정과 모순이 없을 때만 `TASK_AGENCY_OVERRIDE` 에 올린다(테스트가 ①을 검사). 추측으로 잇지 않는다.
 
 ## 이번에 연결한 것 (1건)
 | task | 기관 | 근거 |
 |---|---|---|
 | `seogwipo:basic_livelihood_benefit_application` | `city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-WELFARE-RESIDENT` | SP v1.2(59행)가 「서귀포시청은 기초생활보장과가 별도로 없어 이 과가 겸한다」고 밝히고 task_key 를 직접 적음. 서버 지정 `city-dept:seogwipo:welfare` 와 모순 없음 |
 
-## A. 후보 SP 가 하나로 좁혀지지만 SP 가 task_key 를 적지 않은 것 (SP 담당자 확인 후 연결 가능)
-SP 의 「입력」 줄이 같은 업무를 다루고 서버 부서(국 단위)가 SP 의 소속 국과 일치한다. 연결하려면 해당 SP 에 task_key 접수 선언을 추가해야 한다(테스트 규칙).
+## A. 14회차에 연결한 12건 (SP 에 §1-2 접수 연동 선언을 추가함)
+SP 의 「입력」 줄이 같은 업무를 다루고 서버 부서(국 단위)가 SP 의 소속 국과 일치한다. 해당 SP 12개에 「§1-2. GOV_TASK 접수 연동 task」를 추가하고(접수는 `GOV_TASK_SUBMIT_REQUEST` 가 처리, 서버 부서 지정은 상위 단위, 최종 결정은 SP 가 내리지 않음) `TASK_AGENCY_OVERRIDE` 에 올렸다. SP 파일명의 버전은 올리지 않았다.
 
 | task | 후보 기관 코드 | SP 근거(입력 줄) |
 |---|---|---|
@@ -41,4 +41,4 @@ SP 의 「입력」 줄이 같은 업무를 다루고 서버 부서(국 단위)�
 | `kcc:location_service_registration`, `court:personal_bankruptcy_filing` | 중앙기관·법원 task. 이 저장소의 기관 색인에 대응 항목 없음(지역 기관 페이지 대상이 아님) |
 
 ## 다음 단계
-A표의 12건은 SP 담당자가 task_key 접수 선언을 SP 에 추가하면 같은 방식으로 연결할 수 있다. B표는 담당자가 기관을 정해 주어야 한다.
+B표 16건은 담당자가 기관을 정해 주어야 한다. A표 SP 12개의 §1-2 는 서버가 부서 알림을 과 단위로 세분하면(`AGENCY_TO_DEPT_TARGET`) 해당 문장을 고쳐야 한다. SP 템플릿(`04-city/templates/`)에는 반영하지 않았다.

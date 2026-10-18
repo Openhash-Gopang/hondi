@@ -8,7 +8,7 @@
 | 2 | 제주시 건축과 SP 는 접수 task `occupancy_inspection`(사용승인)을 선언하는데 서버 레지스트리에는 `seogwipo:occupancy_inspection` 만 있고 `jejusi:occupancy_inspection` 이 없다 | `tools/extract-gov-sp.cjs` 교차 점검 | 제주시 사용승인 필수 서류 등록 여부 |
 | 3 | 도시건설국 6개 SP(건축·도시계획·건설·주택·도시재생·상하수도)는 사무분장 원문을 직접 확인하지 못한 잠정 초안이다(SP §6) | SP 본문 | 제주시 사무분장 조례 시행규칙 별표(법령 원문)로 대조 |
 | 4 | 저장소에 SP 파일이 없는 기관 25곳(제주 세부과 등, `GOV_AGENCY_VERBOSE=1 node tools/build-gov-agencies.cjs`)과 SP 자체가 없는 읍·면·동 86곳 | 색인 생성 | SP 신설 여부 |
-| 5 | **(13회차: 1건 연결, 28개 남음. 후보 정리는 `docs/gov-agency-research/unlinked-tasks.md`)** 서버 task 29개가 기관 색인에 연결되지 않는다(3회차에 41 → 29: SP가 task_key 를 직접 선언하고 서버 부서 지정과 모순 없는 12건을 `TASK_AGENCY_OVERRIDE` 에 연결). 남은 것: 도서관·체육시설·공연장·휴양림·폐기물, 제주도청 실·국, 공공기관·센터 등 SP가 task_key 를 선언하지 않는 기관 | `tools/extract-gov-tasks.cjs` | 해당 기관 SP 에 task_key 선언을 추가하거나, 담당자가 연결을 확인해 `TASK_AGENCY_OVERRIDE` 에 추가 |
+| 5 | **(13·14회차: 13건 연결, 16개 남음. 남은 것의 사정은 `docs/gov-agency-research/unlinked-tasks.md` B표)** 서버 task 29개가 기관 색인에 연결되지 않는다(3회차에 41 → 29: SP가 task_key 를 직접 선언하고 서버 부서 지정과 모순 없는 12건을 `TASK_AGENCY_OVERRIDE` 에 연결). 남은 것: 도서관·체육시설·공연장·휴양림·폐기물, 제주도청 실·국, 공공기관·센터 등 SP가 task_key 를 선언하지 않는 기관 | `tools/extract-gov-tasks.cjs` | 해당 기관 SP 에 task_key 선언을 추가하거나, 담당자가 연결을 확인해 `TASK_AGENCY_OVERRIDE` 에 추가 |
 | 6 | 제주 단층제에서 도세 신고서·이의신청서를 내는 실제 창구(행정시 세무과 경유 여부). 서식 원문은 특별자치도세는 특별자치도지사에게 제출하도록 안내 | 세무과 시범 | 제주시청 세무과에 직접 확인 |
 | 7 | 지방세법 시행규칙 제9조의 2026.7.1. 시행본 본문, 지방세기본법 제88조·제90조·제91조 조문 본문 | 세무과 시범 | 법제처 Open API 로 조문 본문 대조(인증키 필요) |
 | 8 | 소방시설 완공검사(`jejufire:fire_facility_completion_inspection`)는 SP(소방안전본부, `SP-AGY-FIRE`)가 자기 접수 업무로 선언하는데, 서버 부서 알림 지정(`AGENCY_TO_DEPT_TARGET`)은 `do-dept:safety`(도민안전건강실)이다 | 3회차 task 교차 확인 | 알림이 소방안전본부가 아닌 도민안전건강실로 가는 것이 의도인지 |
