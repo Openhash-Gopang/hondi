@@ -32,7 +32,24 @@ const AG = w.GOV_AGENCIES;
 const byName = {}; Object.entries(AG).forEach(([c, v]) => { (byName[v[0]] = byName[v[0]] || []).push(c); });
 
 // 사람이 확인한 연결만 적는다. 형식: 'task키': ['기관 코드', …]
-const TASK_AGENCY_OVERRIDE = {};
+// 근거 기준(2026-10-19): ① 그 기관의 SP 가 이 task_key 를 자기 접수 업무로 직접 선언한다(SP 파일의 줄을 확인) ② 서버 AGENCY_TO_DEPT_TARGET 의 부서 지정과 모순되지 않는다.
+// 둘 다 만족하지 못하거나 후보가 둘 이상이면 연결하지 않는다 — 열린 문제(docs/gov-agency-research/open-issues.md)에 둔다.
+// 이 표의 모든 항목은 테스트(src/tests/gov-agency-page.test.mjs)가 "SP 본문에 task_key 가 실제로 적혀 있는가"를 검사한다.
+const TASK_AGENCY_OVERRIDE = {
+  'jeju:jeju43_victim_compensation_claim':        ['do-dept:jeju:SP-DIV-JACHI-43SUPPORT'],      // SP-DIV-JACHI-43SUPPORT_v1.2.md 49행 · 서버 do-dept:jachi
+  'jeju:public_property_use_permit':              ['do-dept:jeju:SP-DIV-JACHI-ACCOUNTING'],     // SP-DIV-JACHI-ACCOUNTING_v1.2.md 43행 · 서버 do-dept:jachi
+  'jejufire:fire_facility_completion_inspection': ['do-agency:jeju:SP-AGY-FIRE'],               // SP-AGY-FIRE_v1.1.md 63행 · 서버는 do-dept:safety(열린 문제 #8)
+  'jeju:water_leak_fee_reduction':                ['do-agency:jeju:SP-AGY-WATER'],              // SP-AGY-WATER_v1.3.md 40행 · 서버 do-agency:WATER
+  'jeju:water_social_fee_reduction':              ['do-agency:jeju:SP-AGY-WATER'],              // SP-AGY-WATER_v1.3.md 41행 · 서버 do-agency:WATER
+  'jeju:parking_violation_fine_objection':        ['do-agency:jeju:SP-AGYDIV-POLICE-TRAFFIC'],  // SP-AGYDIV-POLICE-TRAFFIC_v1.1.md 43행 · 서버 do-agency:POLICE
+  'jeju:water_connection_application':            ['do-agency:jeju:SP-AGYDIV-WATER-WATERSUPPLY'], // SP-AGYDIV-WATER-WATERSUPPLY_v1.1.md 49행 · 서버 do-agency:WATER
+  'jejufire:hazardous_material_facility_permit':  ['do-agency:jeju:SP-AGYDIV-FIRE-PREVENTION'], // SP-AGYDIV-FIRE-PREVENTION_v1.1.md 48행 · 서버 do-agency:FIRE
+  'jeju:groundwater_quality_test_request':        ['do-agency:jeju:SP-AGY-BOHWAN'],             // SP-AGY-BOHWAN_v1.1.md 58행 · 서버 do-agency:BOHWAN
+  'jeju:pest_diagnosis_request':                  ['do-agency:jeju:SP-AGY-AGRITECH'],           // SP-AGY-AGRITECH_v1.1.md 65행 · 서버 do-agency:AGRITECH
+  'jeju:livestock_inseminator_license':           ['do-agency:jeju:SP-AGY-CHUKSAN'],            // SP-AGY-CHUKSAN_v1.1.md 69행 · 서버 do-agency:CHUKSAN
+  'jeju:heritage_alteration_permit':              ['do-agency:jeju:SP-AGYDIV-HERITAGE-MANAGEMENT'] // SP-AGYDIV-HERITAGE-MANAGEMENT_v1.1.md 55행 · 서버 do-agency:HERITAGE
+};
+module.exports = module.exports || {}; module.exports.TASK_AGENCY_OVERRIDE = TASK_AGENCY_OVERRIDE;
 
 const tasks = {}, byAgency = {}, unlinked = [];
 Object.entries(REG).forEach(([key, t]) => {
