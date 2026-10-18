@@ -29,6 +29,26 @@
 
   var BANNER = '<div class="ebp-testbar" role="note">시스템 테스트 — 실제 입찰이 아닙니다. 이 화면의 모든 숫자는 가정에 따른 계산이며 확정값이 아니고, 수익을 예측하거나 약속하지 않습니다.</div>';
 
+  /* ── 쉽게 이해하기: 초보 독자용 안내 부품 ── */
+  var ROAD = [
+    ['입찰 테스트', '지분을 어떻게 사는지 연습해 봅니다'],
+    ['잠재 가입자', '손님이 될 수 있는 사람이 몇 명인가요?'],
+    ['요금·매출', '손님 한 명에게 얼마를 받고, 얼마가 드나요?'],
+    ['점유율 시나리오', '손님을 얼마나 모으면 내 지분은 얼마를 받나요?'],
+    ['경쟁력 분석', '비슷한 서비스보다 값이 합리적인가요?']
+  ];
+  function roadmap(cur) {
+    return '<p style="margin:12px 0 4px"><b>이 5개 탭은 한 가지 질문에 차례로 답합니다.</b> “나비웹이 직업별 회사를 만들어 지분 5%를 전문가에게 판다면, 그 지분은 살 만한가?”</p><ol class="ebp-road">' +
+      ROAD.map(function (r, n) { return '<li' + (n === cur ? ' class="cur"' : '') + '><b>' + (n + 1) + '. ' + esc(r[0]) + (n === cur ? ' (지금 보는 탭)' : '') + '</b><br>' + esc(r[1]) + '</li>'; }).join('') + '</ol>';
+  }
+  function gloss(items) { return '<dl class="ebp-gloss">' + items.map(function (it) { return '<dt>' + esc(it[0]) + '</dt><dd>' + it[1] + '</dd>'; }).join('') + '</dl>'; }
+  function glossBox(title, items) { return '<details class="ebp-det" open><summary><span>' + esc(title) + '</span></summary><div class="body">' + gloss(items) + '</div></details>'; }
+  function readme(html) { return '<p class="ebp-readme"><b>이 표 읽는 법</b> — ' + html + '</p>'; }
+  function story(html) { return '<div class="ebp-story">' + html + '</div>'; }
+  function won0(n) { return W(Math.abs(n)); }
+  // 시장 규모 · 점유율을 "10명 중 N명"으로 풀어 쓴다
+  function tenOf(share) { return '10명 중 ' + (share * 10) + '명'; }
+
   /* ── 공용: 가정 패널(프리셋 + 종량제 배수 + 비용 비율) ── */
   function assumptionPanel() {
     var a = A();
@@ -99,7 +119,26 @@
         '<p><b>기준 가입자·목표 회원</b> — 시장의 10%인 ' + I(p.market * M.BASE_SHARE) + '명(개시 판단 기준), 30%인 ' + I(p.market * M.TARGET_SHARE) + '명(관리자 문서 2.6의 목표 회원).</p>' +
         '</div></details>';
     }).join('');
-    root.innerHTML = BANNER +
+    var LW = M.findProfession('lawyer'), PT = M.findProfession('patent-attorney');
+    var sorted = M.PROFESSIONS.slice().sort(function (x, y) { return y.market - x.market; }), big = sorted[0], small = sorted[sorted.length - 1];
+    var guideSub = '<section class="ebp-card ebp-guide"><h2>먼저 쉽게 이해하기</h2>' +
+      '<p class="lead">이 페이지는 <b>“이 회사의 손님이 될 수 있는 사람이 모두 몇 명인가?”</b>를 알려 드립니다.</p>' +
+      '<p>동네에 가게를 열 때 “이 동네에 사는 사람이 몇 명이지?”부터 따져 보지요? 그것과 같은 질문입니다. 나비웹은 직업(직역)마다 회사를 하나씩 만들어, 그 직업을 가진 분들에게 AI 도구를 구독으로 제공하려고 합니다. 그래서 <b>그 직업을 가진 사람의 수가 곧 손님이 될 수 있는 최대 인원</b>입니다.</p>' +
+      story('<b>예를 들어 볼까요?</b> 변호사는 약 <b>' + I(LW.market) + '명</b>입니다. 이 중 <b>' + tenOf(0.1) + '(10%)</b>이 가입하면 ' + I(LW.market * 0.1) + '명, <b>' + tenOf(0.3) + '(30%)</b>이 가입하면 ' + I(LW.market * 0.3) + '명이 됩니다. 변리사는 시장이 ' + I(PT.market) + '명뿐이라 같은 30%여도 ' + I(PT.market * 0.3) + '명에 그칩니다.') +
+      '<p>10개 직역 중 가장 큰 시장은 <b>' + esc(big.name) + '(약 ' + I(big.market) + '명)</b>이고 가장 작은 시장은 <b>' + esc(small.name) + '(약 ' + I(small.market) + '명)</b>으로, 약 <b>' + Math.round(big.market / small.market) + '배</b> 차이가 납니다.</p>' +
+      glossBox('이 페이지에 나오는 말', [
+        ['시장 규모(잠재 가입자)', '그 직업을 가진 사람의 수입니다. “가입할 수 있는 사람”이지 “가입할 사람”이 아닙니다.'],
+        ['기준 가입자(10%)', '시장 규모의 10%입니다. 제안서는 <b>최소한 이만큼 모여야 서비스를 계속할지 판단</b>하고, 그전에는 서버 구입 같은 큰돈을 쓰지 않겠다고 했습니다.'],
+        ['목표 회원(30%)', '관리자 문서가 매출을 계산할 때 쓴 목표입니다. 시장의 30%가 가입한다고 가정한 값입니다.'],
+        ['5% 매각 목표', '법인 지분 5%를 팔아 모으려는 돈입니다. 시장이 큰 직역일수록 목표 금액도 큽니다.'],
+        ['근사치', '정확한 통계가 아니라 “대략 이 정도”라는 값입니다. 아래 직역별 설명에서 근거와 한계를 확인하실 수 있습니다.']
+      ]) +
+      '<p><b>이 페이지에서 꼭 기억하실 세 가지</b></p><ul class="ebp-list">' +
+        '<li>숫자는 모두 <b>대략적인 추정</b>입니다.</li>' +
+        '<li>시장이 클수록 같은 점유율에서 회원이 많아집니다. 하지만 큰 시장에는 큰 경쟁자와 까다로운 규제가 있을 수 있습니다.</li>' +
+        '<li>시장이 작은 직역은 회사를 운영하는 최소 비용을 감당하기 어려울 수 있습니다(요금·매출 탭에서 확인).</li></ul>' +
+      roadmap(1) + '</section>';
+    root.innerHTML = BANNER + guideSub +
       '<section class="ebp-card"><h2>잠재 가입자 수</h2>' +
       '<p class="ebp-hint">10개 직역 법인이 각각 상대하는 시장입니다. 관리자 「자회사 10개 설립과 이사진 구성」 2.1의 시장 규모를 그대로 썼으며, 모두 <b>근사치이고 참여 규모를 약속하는 값이 아닙니다</b>.</p>' +
       '<div class="ebp-kpis">' +
@@ -107,6 +146,7 @@
         '<div class="ebp-kpi"><div class="k">기준 가입자(시장의 10%)</div><div class="v">' + I(total * M.BASE_SHARE) + '명</div><div class="s">개시 여부를 가르는 기준</div></div>' +
         '<div class="ebp-kpi"><div class="k">목표 회원(시장의 30%)</div><div class="v">' + I(total * M.TARGET_SHARE) + '명</div><div class="s">문서 2.6의 연 환산 기준</div></div>' +
       '</div>' +
+      readme('가로로 한 줄이 한 직역입니다. <b>시장 규모</b>는 그 직업의 전체 인원, <b>비중</b>은 10개 직역 전체에서 차지하는 몫(노란 막대가 길수록 큼), <b>기준 가입자</b>와 <b>목표 회원</b>은 시장의 10%와 30%, <b>5% 매각 목표</b>는 법인 지분 5%로 모으려는 돈입니다.') +
       '<div class="ebp-tw"><table class="ebp-table"><thead><tr><th>직역</th><th class="num">시장 규모</th><th>비중</th><th class="num">기준 가입자(10%)</th><th class="num">목표 회원(30%)</th><th class="num">5% 매각 목표</th></tr></thead><tbody>' + rows +
       '<tr class="total"><td>합계</td><td class="num">' + I(total) + '명</td><td></td><td class="num">' + I(total * M.BASE_SHARE) + '명</td><td class="num">' + I(total * M.TARGET_SHARE) + '명</td><td class="num">5억 원</td></tr></tbody></table></div>' +
       '<p class="ebp-hint" style="margin-top:10px">직역별 목표 회원은 문서 2.6에서 반올림한 값(예: 변호사 9,600명)을 쓰므로 여기의 30% 계산과 소수 자리에서 조금 다를 수 있습니다.</p></section>' +
@@ -119,7 +159,7 @@
 
   /* ════════ 2) 요금·매출 ════════ */
   function pagePricing() {
-    root.innerHTML = BANNER + '<div id="ebpAssump"></div><div id="ebpBody"></div>';
+    root.innerHTML = BANNER + '<div id="ebpGuide"></div><div id="ebpAssump"></div><div id="ebpBody"></div>';
     function draw() {
       document.getElementById('ebpAssump').innerHTML = assumptionPanel();
       bindAssumptionPanel(function () { draw(); });
@@ -128,6 +168,31 @@
       var contrib = rev - roy - rd - sup - mkt - adm;
       var gross = M.payPerMemberGross(a);
       var bep1 = M.breakEvenMembers(state.params, false), bep2 = M.breakEvenMembers(state.params, true);
+      var LW = M.findProfession('lawyer'), AD = M.findProfession('administrative-scrivener'), pr0 = presetLabel();
+      var keep = rev > 0 ? contrib / rev : 0;
+      var storyPay = '<b>지금 고른 가정(' + esc(pr0 ? pr0.label : '직접 입력') + ')으로 풀어 보면</b> — 회원 한 분이 1년에 내는 돈(부가세 포함)은 약 <b>' + I(gross) + '원</b>, 한 달로 나누면 약 <b>' + I(gross / 12) + '원</b>입니다. 회사 매출은 부가세를 뺀 <b>' + I(rev) + '원</b>입니다. ' +
+        '이 중 ' + I(roy) + '원은 나비웹에 내는 로열티(LLM 서버 사용료), ' + I(rd) + '원은 연구개발, ' + I(sup) + '원은 지원·운영 인건비, ' + I(mkt) + '원은 마케팅, ' + I(adm) + '원은 관리비로 나갑니다. ' +
+        (contrib > 0 ? '모두 쓰고 나면 <b>' + I(contrib) + '원</b>이 남습니다. <b>100원을 받으면 약 ' + Math.round(keep * 100) + '원이 남는 셈</b>입니다.' : '모두 쓰고 나면 <b>남는 돈이 없습니다.</b> 이 가정에서는 손님이 늘어도 이익이 나지 않습니다.');
+      var storyBep = bep2 == null ? '이 가정에서는 손님이 아무리 많아도 흑자가 나지 않습니다.' :
+        '<b>가게에 비유하면</b>, 손익분기는 월세와 직원 월급을 겨우 낼 수 있는 손님 수입니다. 이 가정에서 변호사 법인은 약 <b>' + I(Math.ceil(bep2)) + '명</b>(변호사 전체의 ' + P(bep2 / LW.market, 0) + ')이 가입해야 적자를 면합니다. ' +
+        (bep2 > AD.market ? '행정사 법인은 필요한 인원(' + I(Math.ceil(bep2)) + '명)이 행정사 시장 전체(' + I(AD.market) + '명)보다 많아서, <b>모든 행정사가 가입해도 적자</b>입니다.' : '행정사 법인은 시장의 ' + P(bep2 / AD.market, 0) + '가 가입해야 합니다.');
+      document.getElementById('ebpGuide').innerHTML = '<section class="ebp-card ebp-guide"><h2>먼저 쉽게 이해하기</h2>' +
+        '<p class="lead">이 페이지는 <b>“손님 한 명에게 얼마를 받고, 그중 얼마가 회사에 남는가?”</b>를 알려 드립니다.</p>' +
+        '<p>휴대폰 요금제와 비슷합니다. 매달 내는 <b>기본요금</b>(기본료 연 99,000원)이 있고, 쓴 만큼 더 내는 요금(<b>종량제</b>, 전기·수도요금처럼)이 붙습니다. 종량제 금액은 아직 정해지지 않았고, 관리자 문서가 “서버 원가의 몇 배”로 가정한 값입니다. 아래 <b>계산 가정</b>의 버튼으로 바꿔 가며 결과가 어떻게 달라지는지 보세요.</p>' +
+        story(storyPay) + story(storyBep) +
+        glossBox('이 페이지에 나오는 말', [
+          ['기본료', '누구나 내는 정액 요금입니다. 연 99,000원(부가세 포함)이며 월로 나누면 8,250원입니다.'],
+          ['종량제', '쓴 만큼 더 내는 요금입니다. <b>얼마를 받을지는 미확정</b>이고 근거가 가장 약한 가정이라, 하한은 0으로 두었습니다.'],
+          ['부가세', '요금에 붙는 10% 세금입니다. 회사는 이를 나라에 내므로 매출에서는 뺍니다(99,000원 → 90,000원).'],
+          ['나비웹 로열티', '법인이 나비웹의 AI와 서버를 쓰는 대가입니다. 여기서는 LLM 서버 비용으로 보고 매출의 30%를 가정했습니다.'],
+          ['연구개발비', '직업별 기능을 만들고 정확한지 확인하는 비용입니다.'],
+          ['지원·운영 인건비', '손님의 문의에 답하고 서비스를 돌보는 직원들의 월급입니다.'],
+          ['마케팅·영업비', '서비스를 알리고 가입자를 모으는 비용입니다.'],
+          ['일반관리비', '사무실, 회계, 보험처럼 회사를 꾸려 가는 데 드는 비용입니다.'],
+          ['기여이익', '손님 한 명에게서 받은 돈에서 위 비용을 뺀, <b>그 손님 덕분에 남는 돈</b>입니다. 이 값이 클수록 손님이 늘수록 유리합니다.'],
+          ['손익분기', '들어오는 돈과 나가는 돈이 같아지는 지점입니다. 이 손님 수에 못 미치면 적자입니다.'],
+          ['연 최소 비용', '손님이 적어도 회사에는 최소한의 팀과 비용이 듭니다. 그래서 비율과 별개로 일정 금액이 깔립니다.']
+        ]) + roadmap(2) + '</section>';
       var line = function (label, v, note, cls) { return '<tr class="' + (cls || '') + '"><td>' + label + '</td><td class="num">' + (v < 0 ? '-' : '') + I(Math.abs(v)) + '</td><td class="num">' + P(Math.abs(v) / rev, 1) + '</td><td class="wrap">' + note + '</td></tr>'; };
       var rowsBep = M.PROFESSIONS.map(function (p) {
         var pct = bep2 == null ? null : bep2 / p.market, risky = pct == null || pct > M.BASE_SHARE;
@@ -146,6 +211,7 @@
         '</div>' +
         '<p class="ebp-hint" style="margin-top:10px">사무소 직원도 각각 연 99,000원 + 종량제입니다. 종량제는 쓴 만큼 늘어나므로 <b>회원이 내는 금액이 사용량에 따라 달라져 예측하기 어렵다</b>는 점이 경쟁력 분석 탭에서 다시 다뤄집니다.</p></section>' +
         '<section class="ebp-card"><h2>회원 1인 단위 경제(연, 규모가 충분히 커진 뒤)</h2><p class="ebp-hint">연 최소 비용을 덮을 만큼 커진 뒤의 회원 1인 기준입니다. 규모가 작을 때의 최소 비용은 아래 손익분기에서 반영됩니다.</p>' +
+        readme('위에서 아래로 <b>손님 한 명</b>의 1년을 따라갑니다. 먼저 받는 돈(매출)이 나오고, 그다음 줄들은 <b>나가는 돈</b>(앞에 - 표시)입니다. 맨 아래 <b>기여이익</b>이 손님 한 명에게서 남는 돈입니다. 오른쪽 “매출 대비”는 받은 돈 100원 중 몇 원인지입니다.') +
         '<div class="ebp-tw"><table class="ebp-table"><thead><tr><th>항목</th><th class="num">금액(원/년)</th><th class="num">매출 대비</th><th class="wrap">가정</th></tr></thead><tbody>' +
           line('연회비 공급가', M.feeSupply(a), '99,000원 ÷ 1.1') +
           line('종량제 수입', meter, '서버 원가 × ' + a.meterMultiple + '배(가정)') +
@@ -159,18 +225,35 @@
         '</tbody></table></div></section>' +
         '<section class="ebp-card"><h2>손익분기와 직역별 연 매출</h2>' +
           '<p class="ebp-hint">비용(연 최소 비용 포함)과 유지비를 덮어 영업이익이 0이 되는 회원 수입니다. 유지비만 반영하면 <b>' + (bep1 == null ? '흑자 없음' : '약 ' + I(Math.ceil(bep1)) + '명') + '</b>, 임원 보수까지 반영하면 <b>' + (bep2 == null ? '흑자 없음' : '약 ' + I(Math.ceil(bep2)) + '명') + '</b>입니다.</p>' +
+          readme('직역마다 <b>적자를 면하려면 몇 명이 가입해야 하는지</b>와, 그 인원이 그 직업 전체의 몇 %인지를 보여 줍니다. 붉은 글씨 줄은 시장의 10%(기준 가입자)보다 많이 모아야 한다는 뜻이고, “시장 전체보다 많음”은 그 직업 사람이 모두 가입해도 적자라는 뜻입니다.') +
           '<div class="ebp-tw"><table class="ebp-table"><thead><tr><th>직역</th><th class="num">시장 규모</th><th class="num">손익분기 회원(임원 보수 포함)</th><th class="num">시장 대비</th><th class="wrap">판단</th></tr></thead><tbody>' + rowsBep + '</tbody></table></div>' +
           '<h3>점유율 10%·30%일 때 직역별 연 매출과 영업이익</h3>' +
+          readme('<b>점유율 10%</b>는 그 직업 10명 중 1명이, <b>30%</b>는 10명 중 3명이 가입했을 때입니다. <b>영업이익</b>은 매출에서 모든 비용을 뺀 값으로, <b>마이너스(-)면 적자</b>입니다.') +
           '<div class="ebp-tw"><table class="ebp-table"><thead><tr><th>직역</th><th class="num">매출(10%)</th><th class="num">영업이익(10%)</th><th class="num">매출(30%)</th><th class="num">영업이익(30%)</th></tr></thead><tbody>' + rowsRev + '</tbody></table></div>' +
           '<p class="ebp-hint" style="margin-top:10px">영업이익은 법인세 차감 전이고 위 비용을 모두 뺀 값입니다. 5개 점유율 전체와 지분 배당은 「점유율 시나리오」 탭에 있습니다.</p></section>';
     }
     draw();
   }
 
+  // 선택한 직역(또는 합계)의 한 점유율을 "한 걸음씩" 풀어 쓴 문장
+  function scenarioStory(selProf, sh, a) {
+    var all = selProf === '__all', prof = all ? null : M.findProfession(selProf);
+    var r = all ? M.computeAll(sh, a) : M.compute(prof, sh, a);
+    var who = all ? '10개 직역 전체를 합쳐' : esc(prof.name) + ' 법인';
+    var share5 = all ? '10개 법인 지분 5%를 모두 샀다면' : '이 법인의 지분 5%를 샀다면';
+    var t = '<b>' + who + ', 점유율 ' + Math.round(sh * 100) + '%(' + tenOf(sh) + ' 가입)</b>일 때를 한 걸음씩 따라가 보겠습니다. 회원은 <b>' + I(r.members) + '명</b>이고 1년 매출은 <b>' + W(r.revenue) + '</b>입니다. 비용으로 <b>' + W(r.costTotal) + '</b>이 나가서 ';
+    if (r.operatingProfit > 0) {
+      t += '회사에 남는 돈(영업이익)은 <b>' + W(r.operatingProfit) + '</b>입니다. 법인세 ' + W(r.tax) + '을 빼면 주주 몫으로 <b>' + W(r.netIncome) + '</b>이 남습니다. ' + share5 + ', 그 5%인 <b>' + W(r.stakeDividend) + '</b>이 해마다 배당으로 들어옵니다. 지분을 산 값 ' + W(r.stakeCost) + '에 견주면 <b>연 ' + P(r.yieldPct, 0) + '</b>이고, 1,000만 원을 넣었다면 해마다 약 ' + W(r.yieldPct * 10000000) + '을 받는 셈입니다.';
+    } else {
+      t += '<b>모자라는 돈(적자)이 ' + W(Math.abs(r.operatingProfit)) + '</b>입니다. 이익이 없으니 ' + share5 + ' <b>받을 배당이 없습니다.</b>';
+    }
+    return t;
+  }
+
   /* ════════ 3) 점유율 시나리오 ════════ */
   var selProf = 'lawyer';
   function pageScenarios() {
-    root.innerHTML = BANNER +
+    root.innerHTML = BANNER + '<div id="ebpGuide"></div>' +
       '<div class="ebp-caution" role="note"><b>이 표를 읽기 전에</b><ul>' +
         '<li>"수익률"은 <b>5% 지분을 낙찰가(관리자 문서 2.4의 참고 가격)에 샀을 때, 법인 세후 이익 전액을 배당한다고 가정한 연 배당수익률</b>입니다. 배당 정책은 정해지지 않았고, 나비웹이 90% 이상을 보유해 소수 주주의 배당 권한은 약합니다.</li>' +
         '<li>연구개발비·지원 인건비·마케팅비·관리비와 <b>LLM 서버 비용(나비웹 로열티)</b>을 반영했습니다. 반영하지 않은 이전 계산은 가정 프리셋 <b>문서 원안</b>에서 비교할 수 있습니다.</li>' +
@@ -214,14 +297,44 @@
         '<section class="ebp-card"><h2>점유율별 시나리오</h2>' +
         '<div class="ebp-row"><div class="ebp-field"><label for="ebpProf">직역</label><select id="ebpProf">' + opts + '</select></div></div>' +
         '<p class="ebp-hint">' + esc(head) + ' · 5% 지분 취득가 <b>' + W(cost) + '</b>(5,000주 × 참고 주당 가격, 실제 낙찰가는 입찰로 정해집니다) · 현재 가정 <b>' + esc(presetLabel() ? presetLabel().label : '직접 입력') + '</b></p>' +
+        readme('한 줄이 하나의 점유율입니다. 왼쪽에서 오른쪽으로 <b>회원 수 → 매출 → 영업이익 → 세후 이익 → 내 지분 배당 → 연 수익률</b> 순으로 이어집니다. <b>마이너스(-)는 적자</b>이고, 적자인 줄은 수익률이 0%입니다.') +
         '<div class="ebp-tw"><table class="ebp-table"><thead><tr><th>시장 점유율</th><th class="num">회원 수</th><th class="num">연 매출</th><th class="num">영업이익</th><th class="num">영업이익률</th><th class="num">세후 이익</th><th class="num">5% 지분 배당(연)</th><th class="num">연 배당수익률</th><th class="num">원금 회수 기간</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
         '<p class="ebp-hint" style="margin-top:10px">점유율 10% 이상에서는 임원 보수(연 3,600만 원)가 붙는다고 가정했습니다. 법인세는 2억 원 이하 9%, 200억 원 이하 19%(지방소득세 제외)를 적용했고 적자는 다음 해로 넘기지 않습니다.</p></section>' +
         '<section class="ebp-card"><h2>비용 반영 전후 비교(' + esc(head) + ')</h2><p class="ebp-hint">이전 계산(문서 원안: 서버 원가와 고정비만 반영)과 지금 가정(비용 전부 반영)을 같은 점유율에서 비교합니다.</p>' +
+        readme('같은 점유율에서 <b>이전 계산(원안)</b>과 <b>지금 가정</b>을 나란히 놓았습니다. 비용을 빼놓았던 원안은 영업이익률이 90% 안팎으로 나왔지만, 비용을 모두 반영한 지금은 훨씬 낮아집니다. 비용을 넣으면 숫자가 얼마나 달라지는지 보시는 표입니다.') +
         '<div class="ebp-tw"><table class="ebp-table"><thead><tr><th>시장 점유율</th><th class="num">영업이익률(원안)</th><th class="num">영업이익률(지금)</th><th class="num">연 배당수익률(원안)</th><th class="num">연 배당수익률(지금)</th></tr></thead><tbody>' + cmpRows + '</tbody></table></div></section>' +
         '<section class="ebp-card"><h2>비용 구조(' + esc(head) + ')</h2><p class="ebp-hint">점유율별로 매출이 어디에 쓰이는지 보여 줍니다. 괄호는 매출 대비 비율입니다. 규모가 작을 때는 연 최소 비용 때문에 비율이 크게 올라갑니다.</p>' +
+        readme('위에서 아래로 <b>매출이 어디에 쓰이는지</b> 보여 줍니다. 괄호 안은 매출 100원 중 몇 원인지입니다. 점유율이 낮을 때 지원·운영 인건비 비율이 크게 높은 것은, 손님이 적어도 직원 몇 명의 월급은 나가기 때문입니다.') +
         '<div class="ebp-tw"><table class="ebp-table"><thead><tr><th>항목</th>' + M.SHARES.map(function (s) { return '<th class="num">' + Math.round(s * 100) + '%</th>'; }).join('') + '</tr></thead><tbody>' + costRows + '</tbody></table></div></section>' +
         '<section class="ebp-card"><h2>직역별 연 배당수익률 한눈에 보기</h2><p class="ebp-hint">같은 가정에서 직역·점유율별 연 배당수익률(5% 지분, 세후 이익 전액 배당 가정)입니다. 시장이 작은 직역은 고정비 비중이 커서 낮은 점유율에서 수익률이 낮거나 배당이 없을 수 있습니다.</p>' +
+        readme('가로로 한 줄이 한 직역이고, 오른쪽 칸들은 점유율별 <b>연 배당수익률</b>입니다. 0%는 적자라서 배당이 없다는 뜻입니다. 시장이 작은 직역은 낮은 점유율에서 0%가 많습니다.') +
         '<div class="ebp-tw"><table class="ebp-table"><thead><tr><th>직역</th><th class="num">5% 취득가</th>' + M.SHARES.map(function (s) { return '<th class="num">' + Math.round(s * 100) + '%</th>'; }).join('') + '</tr></thead><tbody>' + matrix + '</tbody></table></div></section>';
+      var stories = story(scenarioStory(selProf, 0.3, a)) + story(scenarioStory(selProf, 0.5, a));
+      document.getElementById('ebpGuide').innerHTML = '<section class="ebp-card ebp-guide"><h2>먼저 쉽게 이해하기</h2>' +
+        '<p class="lead">이 페이지는 <b>“손님을 얼마나 모으느냐에 따라 회사가 얼마를 벌고, 내가 산 5% 지분은 해마다 얼마를 돌려주는가?”</b>를 보여 드립니다.</p>' +
+        '<p>아래 표는 <b>점유율</b>(그 직업 10명 중 몇 명이 쓰는지)을 10%부터 90%까지 바꿔 가며 계산한 것입니다. 숫자는 이런 순서로 이어집니다.</p>' +
+        '<ol class="ebp-steps">' +
+          '<li><b>회원 수</b> — 시장 규모 × 점유율</li>' +
+          '<li><b>매출</b> — 회원 수 × 한 사람이 내는 돈</li>' +
+          '<li><b>영업이익</b> — 매출에서 로열티·연구개발·인건비·마케팅·관리비를 뺀, 회사에 남는 돈(마이너스면 적자)</li>' +
+          '<li><b>세후 이익</b> — 영업이익에서 법인세를 뺀 돈</li>' +
+          '<li><b>5% 지분 배당</b> — 세후 이익의 5%. 회사가 이익을 주주에게 나눠 주는 돈입니다</li>' +
+          '<li><b>연 배당수익률</b> — 내 배당 ÷ 지분을 산 값. “1,000만 원을 넣으면 해마다 얼마를 받는가”입니다</li>' +
+          '<li><b>원금 회수 기간</b> — 산 값을 배당으로 다 돌려받는 데 걸리는 햇수</li></ol>' +
+        '<p><b>지금 선택한 직역과 가정으로 예를 들면</b></p>' + stories +
+        glossBox('가정 버튼은 이런 뜻입니다', [
+          ['하한', '가장 나쁜 쪽에 가깝습니다. <b>종량제 수입이 하나도 없고 기본료만</b> 받으며, 비용은 모두 냅니다. 처음 화면입니다.'],
+          ['보수', '종량제 수입이 조금(서버 원가의 1배) 있다고 보는 조심스러운 가정입니다.'],
+          ['문서 매출', '관리자 문서가 기대한 만큼 종량제 수입이 생긴다고 보되, 비용은 모두 냅니다. 종량제는 근거가 약해서 <b>낙관적인 쪽</b>입니다.'],
+          ['문서 원안', '비용을 거의 빼놓고 계산한 <b>이전 계산</b>입니다. 이익이 부풀려져 비현실적이므로 비교용으로만 보세요.']
+        ]) +
+        glossBox('이 페이지에 나오는 말', [
+          ['시장 점유율', '그 직업을 가진 사람 중 서비스를 쓰는 사람의 비율입니다. 10%면 10명 중 1명입니다.'],
+          ['영업이익률', '매출 100원 중 회사에 남는 돈입니다. 높을수록 장사가 잘되는 것입니다.'],
+          ['배당', '회사가 번 돈을 주주들에게 나눠 주는 것입니다. <b>회사가 배당하기로 해야 받을 수 있고</b>, 이 화면은 이익 전부를 배당한다고 가정했습니다.'],
+          ['참고용 상한', '점유율 70%·90%는 현실적으로 도달하기 어려운 칸입니다. “이론상 최대”를 보는 용도입니다.'],
+          ['원금 회수 기간', '“회수 불가”는 이 가정에서는 배당이 없어서 산 값을 돌려받지 못한다는 뜻입니다.']
+        ]) + roadmap(3) + '</section>';
       document.getElementById('ebpProf').addEventListener('change', function (e) { selProf = e.target.value; draw(); });
     }
     draw();
@@ -326,9 +439,23 @@
     }).join('');
     var srcList = Object.keys(SRC).map(function (k) { return '<li>[' + k + '] ' + esc(SRC[k].t) + ' — <a href="' + esc(SRC[k].u) + '" target="_blank" rel="noopener noreferrer">' + esc(SRC[k].u) + '</a></li>'; }).join('');
 
-    root.innerHTML = BANNER +
+    var guideComp = '<section class="ebp-card ebp-guide"><h2>먼저 쉽게 이해하기</h2>' +
+      '<p class="lead">이 페이지는 <b>“비슷한 일을 해 주는 다른 서비스가 이미 있는데, 나비웹은 값과 서비스로 경쟁할 만한가?”</b>를 살펴봅니다.</p>' +
+      '<p>새 식당을 열기 전에 근처 식당들의 메뉴와 가격부터 보는 것과 같습니다. 손님 입장에서는 “이미 쓰는 서비스보다 싸거나 더 편해야” 옮길 이유가 생깁니다.</p>' +
+      story('<b>가격을 한마디로 줄이면</b> — 기본료만 받는다면 연 99,000원(월 약 ' + I(99000 / 12) + '원)으로, 범용 AI 구독(월 약 ' + I(BM_AI / 12) + '원)의 약 <b>' + P(99000 / BM_AI, 0) + '</b>이고 변호사용 법률 AI(월 69,900원 상당)의 약 <b>' + P(99000 / BM_LBOX, 0) + '</b>입니다. 하지만 종량제까지 문서 기준으로 더하면 연 약 ' + I(docV) + '원(월 약 ' + I(docV / 12) + '원)이 되어 <b>범용 AI 구독과 비슷한 값</b>이 됩니다. 값이 싼지는 종량제를 얼마로 정하느냐에 달려 있습니다.') +
+      '<p><b>그래프 읽는 법</b> — 노란 막대는 나비웹, 회색 막대는 다른 서비스입니다. <b>막대가 짧을수록 1년에 내는 돈이 적습니다.</b></p>' +
+      glossBox('이 페이지에 나오는 말', [
+        ['대체재', '같은 일을 대신해 주는 서비스입니다. 예를 들어 범용 AI 구독은 거의 모든 직업의 대체재가 됩니다.'],
+        ['보완재', '기존 서비스와 <b>함께 쓰면 더 좋아지는</b> 서비스입니다. 경쟁하기보다 같이 쓰이는 길을 찾는 것이 합리적일 때가 많습니다.'],
+        ['갈아타기 비용', '이미 익숙한 프로그램에서 새 프로그램으로 옮길 때 드는 수고와 위험입니다. 클수록 새 서비스가 파고들기 어렵습니다.'],
+        ['경쟁 강도', '비슷한 서비스가 얼마나 많고 강한지입니다. 이 페이지의 등급은 조사자의 <b>추정</b>이며 확정이 아닙니다.'],
+        ['종량제의 불확실성', '쓴 만큼 내는 요금은 <b>한 해에 얼마가 나올지 미리 알기 어렵습니다.</b> 전문직 이용자는 예측 가능한 정액 요금을 선호하는 경우가 많습니다.'],
+        ['출처 확인 / 미확인·추정', '<span class="ebp-badge ok">출처 확인</span>은 기사 등 출처로 확인한 사실, <span class="ebp-badge un">미확인·추정</span>은 확인하지 못했거나 추정한 내용입니다. 후자는 가격이나 기능을 단정하지 않았습니다.']
+      ]) + roadmap(4) + '</section>';
+    root.innerHTML = BANNER + guideComp +
       '<section class="ebp-card"><h2>가격 경쟁력 총평</h2>' +
       '<p class="ebp-hint">회원 1인이 1년에 내는 금액(부가세 포함)을 비교합니다. 비교 대상은 이번에 출처를 확인한 것만 넣었습니다.</p>' +
+      readme('한 줄이 하나의 서비스입니다. 가운데 막대의 길이가 <b>회원 한 명이 1년에 내는 돈(부가세 포함)</b>이고, 오른쪽에 연 금액과 월 환산 금액을 적었습니다. 나비웹 줄은 가정(하한·보수·문서 매출)에 따라 세 가지로 나눠 보여 줍니다.') +
       '<div class="ebp-tw"><table class="ebp-table"><thead><tr><th>서비스</th><th>연 부담액</th><th>설명</th></tr></thead><tbody>' + bars + '</tbody></table></div>' +
       '<div class="ebp-two">' +
         '<div class="ebp-box"><h4>읽는 법</h4><ul>' +
@@ -341,9 +468,11 @@
         '</ul></div>' +
       '</div></section>' +
       '<section class="ebp-card"><h2>직역별 서비스·가격 경쟁력 보고서</h2>' +
+      '<p class="ebp-hint">직역을 고르면 그 직업의 <b>경쟁 서비스, 가격 비교, 강점과 약점, 먼저 확인할 법적 쟁점, 종합 의견</b>이 차례로 나옵니다. “다음에 확인할 것”은 아직 조사가 필요한 숙제입니다.</p>' +
       '<div class="ebp-row"><div class="ebp-field"><label for="ebpComp">직역</label><select id="ebpComp">' + opts + '</select></div></div>' +
       '<div id="ebpCompBody"></div></section>' +
       '<section class="ebp-card"><h2>직역별 한눈에 보기</h2><p class="ebp-hint">경쟁 강도와 가격 민감도는 이 보고서 작성 시점의 <b>분석 의견(추정)</b>입니다.</p>' +
+      readme('직역마다 <b>시장 규모</b>, 비슷한 서비스가 얼마나 강한지(<b>경쟁 강도</b>), 가격을 비교할 때 무엇을 기준으로 삼아야 하는지(<b>가격 기준선</b>)를 한 줄로 요약했습니다.') +
       '<div class="ebp-tw"><table class="ebp-table"><thead><tr><th>직역</th><th class="num">시장 규모</th><th>경쟁 강도</th><th class="wrap">가격 기준선</th></tr></thead><tbody>' + sum + '</tbody></table></div></section>' +
       '<div class="ebp-caution" role="note"><b>이 보고서의 한계</b><ul>' +
         '<li><span class="ebp-badge ok">출처 확인</span>은 아래 출처에서 확인한 사실이고, <span class="ebp-badge un">미확인·추정</span>은 이번에 확인하지 못했거나 추정한 내용입니다. 후자는 가격·기능을 단정하지 않았습니다.</li>' +
