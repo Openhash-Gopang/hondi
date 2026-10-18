@@ -59,14 +59,14 @@
     return div.innerHTML;
   }
 
-  // 2026-10-18(주피터 지시) — 헤더 오른쪽 여백의 행동 버튼(선택). PAGE_HEADER.rightButton = { label, href, title }.
+  // 2026-10-18(주피터 지시) — 히어로 아래 가운데에 놓는 행동 버튼(선택). PAGE_HEADER.heroButton = { label, href, title }.
   // href는 사이트 안 경로('/'로 시작)만 허용한다. 문구는 escapeHtml을 거친다.
-  function renderCta(config) {
-    var b = config && config.rightButton;
+  function renderHeroCta(config) {
+    var b = config && config.heroButton;
     if (!b || !b.label || typeof b.href !== 'string' || b.href.charAt(0) !== '/' || b.href.charAt(1) === '/') return '';
-    return '<a class="topnav-cta" href="' + escapeHtml(b.href).replace(/"/g, '&quot;') + '"' + (b.title ? ' title="' + escapeHtml(b.title).replace(/"/g, '&quot;') + '"' : '') + '>' + escapeHtml(b.label) + '</a>';
+    return '<div class="ph-hero-cta-row"><a class="ph-hero-cta" href="' + escapeHtml(b.href).replace(/"/g, '&quot;') + '"' + (b.title ? ' title="' + escapeHtml(b.title).replace(/"/g, '&quot;') + '"' : '') + '>' + escapeHtml(b.label) + '</a></div>';
   }
-  function renderNav(activeKey, config) {
+  function renderNav(activeKey) {
     var links = NAV_ITEMS.map(function (item) {
       var cls = item.key === activeKey ? ' class="active"' : '';
       return '<a href="' + item.href + '"' + cls + '>' + escapeHtml(item.label) + '</a>';
@@ -77,7 +77,6 @@
           '<a href="/desktop.html" class="topnav-logo" onclick="return __hondiBack(event);"><img class="topnav-logo-icon" src="/icons/navi-icon-192.png" alt="" width="26" height="26">나비</a>' +
           '<div class="topnav-links">' + links + '</div>' +
           '<div class="topnav-right">' +
-            renderCta(config) +
             '<div class="topnav-status"><span class="status-dot-green"></span>로그인 불필요 · 열람 전용</div>' +
           '</div>' +
         '</div>' +
@@ -112,6 +111,7 @@
     if (config.extraHtml) {
       html += config.extraHtml;
     }
+    html += renderHeroCta(config);
     html += '</div></div>';
     return html;
   }
@@ -160,7 +160,7 @@
     var container = THIS_SCRIPT ? THIS_SCRIPT.parentNode : document.body;
     var config = window.PAGE_HEADER || {};
 
-    var html = renderNav(config.active, config) + renderSubnav(config.subnav) + renderHero(config) + renderDisclaimer(config);
+    var html = renderNav(config.active) + renderSubnav(config.subnav) + renderHero(config) + renderDisclaimer(config);
 
     var temp = document.createElement('div');
     temp.innerHTML = html;
