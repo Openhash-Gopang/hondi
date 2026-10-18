@@ -47,6 +47,24 @@ body { font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif; ba
 .bt-result .big { font-size: 18px; font-weight: 800; }
 @media (max-width: 640px) { .bt-wrap { padding: 14px 14px 48px; } .bt-field input, .bt-field select { min-width: 0; width: 100%; } .bt-field { flex: 1 1 100%; } }
 button, input, select, textarea { font-family: inherit; }
+.bt-guide { background: #f3f8ff; border: 1px solid #b9d0f5; border-left: 6px solid #3b6cf6; border-radius: 10px; padding: 20px 22px; font-size: 16px; line-height: 1.85; }
+.bt-guide h2 { font-size: 20px; font-weight: 800; margin: 0 0 6px; }
+.bt-guide .lead { font-size: 17px; margin: 8px 0 10px; }
+.bt-guide p { margin: 6px 0; }
+.bt-guide .bt-story { background: #fff; border: 1px dashed #8aa4d6; border-radius: 8px; padding: 12px 16px; margin: 12px 0; }
+.bt-guide ol.bt-steps { margin: 6px 0 10px 22px; padding: 0; }
+.bt-guide ol.bt-steps li { margin: 5px 0; }
+.bt-guide dl.bt-gloss { display: grid; grid-template-columns: minmax(120px, 200px) 1fr; gap: 8px 18px; margin: 8px 0 0; font-size: 15.5px; line-height: 1.75; }
+.bt-guide dl.bt-gloss dt { font-weight: 800; color: #1e3a8a; }
+.bt-guide dl.bt-gloss dd { margin: 0; }
+.bt-guide .bt-ex { width: 100%; border-collapse: collapse; font-size: 15px; background: #fff; }
+.bt-guide .bt-ex th, .bt-guide .bt-ex td { border: 1px solid #dbe3ef; padding: 8px 10px; text-align: right; }
+.bt-guide .bt-ex th:first-child, .bt-guide .bt-ex td:first-child { text-align: left; }
+.bt-guide .bt-ex th { background: #f6f8fb; }
+.bt-guide .bt-ex tr.in td { background: #fff9e6; }
+.bt-guide .bt-exw { overflow-x: auto; }
+.bt-guide .bt-note { font-size: 14.5px; color: #475569; margin: 6px 0 0; }
+@media (max-width: 720px) { .bt-guide dl.bt-gloss { grid-template-columns: 1fr; gap: 2px; } .bt-guide dl.bt-gloss dd { margin-bottom: 10px; } }
 </style>
 
 <script src="/assets/equity-bid-tabs.js"></script>
@@ -67,6 +85,41 @@ window.PAGE_HEADER = {
 
 <main class="bt-wrap" id="btApp">
   <div class="bt-testbar" role="note">시스템 테스트 — 실제 입찰이 아닙니다. 개시일은 미정이며, 여기서 낸 입찰은 어떤 효력도 없고 어디에도 제출되지 않습니다.</div>
+
+  <section class="bt-guide" aria-label="먼저 쉽게 이해하기">
+    <h2>먼저 쉽게 이해하기</h2>
+    <p class="lead">이 페이지는 <b>“나비웹이 만들 직업별 회사의 지분 5%를, 어떤 방식으로 사는가”</b>를 <b>연습</b>해 보는 화면입니다.</p>
+    <p>실제 돈이나 주식은 오가지 않고, 입력한 내용은 이 브라우저에만 저장됩니다. 부담 없이 눌러 보셔도 됩니다.</p>
+    <p><b>사용하는 순서는 세 단계입니다.</b></p>
+    <ol class="bt-steps">
+      <li><b>직역 고르기</b> — 직업마다 회사가 따로 있고 입찰도 따로 열립니다.</li>
+      <li><b>인증하기</b> — 그 직업의 전문가(또는 기관)임을 확인합니다. 이 테스트는 번호의 <b>형식만</b> 검사하고, 실제 자격 조회는 하지 않습니다.</li>
+      <li><b>입찰하기</b> — “몇 주를 한 주에 얼마에 사겠다”를 적어 냅니다.</li>
+    </ol>
+    <p><b>입찰 방식은 “균일가 입찰”(구글 방식)입니다.</b> 보통 경매는 높게 쓴 사람이 자기가 쓴 값을 냅니다. 균일가 입찰은 다릅니다. <b>높은 가격부터 차례로 5,000주가 다 찰 때까지 낙찰자를 뽑고, 마지막으로 채워진 가격 하나를 낙찰자 모두가 똑같이 냅니다.</b> 더 높게 써도 같은 값만 내므로, 너무 비싸게 쓸까 걱정하는 눈치싸움이 줄어듭니다.</p>
+    <div class="bt-story">
+      <p style="margin-top:0"><b>예를 들어 5명이 이렇게 입찰했다고 해 보겠습니다.</b> (판매 5,000주)</p>
+      <div class="bt-exw"><table class="bt-ex">
+        <thead><tr><th>입찰자</th><th>희망 수량</th><th>희망 가격(1주)</th><th>결과</th></tr></thead>
+        <tbody>
+          <tr class="in"><td>A</td><td>1,500주</td><td>5,000원</td><td>1,500주 낙찰</td></tr>
+          <tr class="in"><td>B</td><td>1,000주</td><td>4,500원</td><td>1,000주 낙찰</td></tr>
+          <tr class="in"><td>C</td><td>2,000주</td><td>4,000원</td><td>2,000주 낙찰</td></tr>
+          <tr class="in"><td>D</td><td>1,500주</td><td>3,500원</td><td>500주만 낙찰(남은 수량)</td></tr>
+          <tr><td>E</td><td>1,000주</td><td>3,000원</td><td>낙찰 없음</td></tr>
+        </tbody></table></div>
+      <p>높은 가격부터 채우면 A·B·C가 합쳐 4,500주이고, D가 3,500원에서 남은 500주를 채워 <b>5,000주가 다 찹니다.</b> 마지막으로 채워진 가격 <b>3,500원이 낙찰가</b>입니다. 5,000원을 쓴 A도 <b>3,500원</b>만 내고, 모두 3,500원에 삽니다. 총 거래 가격은 5,000주 × 3,500원 = <b>17,500,000원</b>입니다.</p>
+    </div>
+    <p>낙찰되면 거래 가격의 <b>10%(약정액)</b>를 먼저 내고, 나머지 <b>90%는 잔금</b>으로 냅니다. 위 예에서는 약정액이 1,750,000원입니다.</p>
+    <dl class="bt-gloss">
+      <dt>주(株)</dt><dd>회사 지분을 잘게 나눈 단위입니다. 이 입찰에서는 한 법인당 <b>5,000주</b>(지분 5%)를 팝니다.</dd>
+      <dt>액면가</dt><dd>주식 한 주에 처음 붙은 기준 금액으로 100원입니다. 실제 거래 가격은 입찰로 정해집니다.</dd>
+      <dt>낙찰가</dt><dd>입찰이 끝난 뒤 정해진 한 주의 가격이며, 낙찰자 모두에게 같은 값이 적용됩니다.</dd>
+      <dt>약정액</dt><dd>낙찰 뒤 먼저 내는 거래 가격의 10%입니다.</dd>
+      <dt>하한가·1인 한도</dt><dd>너무 낮은 가격이나 한 사람이 너무 많이 사는 것을 막는 기준인데, <b>아직 정해지지 않았습니다.</b> 이 테스트는 임시로 액면가·5,000주로 둡니다.</dd>
+    </dl>
+    <p class="bt-note">이 지분이 얼마나 가치가 있을지는 다른 탭(잠재 가입자 → 요금·매출 → 점유율 시나리오 → 경쟁력 분석)에서 순서대로 살펴보실 수 있습니다. 모든 숫자는 가정이며 확정된 것이 아닙니다.</p>
+  </section>
 
   <section class="bt-card">
     <h2><span class="n">1</span>직역 선택</h2>

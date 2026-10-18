@@ -59,4 +59,19 @@ details.ebp-det .body { padding: 2px 16px 14px; }
 .ebp-src li { margin: 3px 0; word-break: break-all; }
 .ebp-src a { color: #1d4ed8; }
 .ebp-hl { background: #ffe58a; border-radius: 2px; padding: 0 2px; }
+/* ── 쉽게 이해하기(초보 독자용 안내) ── */
+.ebp-card.ebp-guide { background: #f3f8ff; border: 1px solid #b9d0f5; border-left: 6px solid #3b6cf6; font-size: 16px; line-height: 1.85; }
+.ebp-guide h2 { font-size: 20px; }
+.ebp-guide .lead { font-size: 17px; margin: 8px 0 10px; }
+.ebp-story { background: #fff; border: 1px dashed #8aa4d6; border-radius: 8px; padding: 12px 16px; margin: 12px 0; font-size: 16px; }
+.ebp-readme { font-size: 14.5px; line-height: 1.7; background: #f6f8fb; border-left: 4px solid #94a3b8; border-radius: 4px; padding: 9px 14px; margin: 10px 0 0; color: #334155; }
+.ebp-steps { margin: 6px 0 10px 22px; padding: 0; }
+.ebp-steps li { margin: 5px 0; }
+.ebp-road { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; list-style: none; padding: 0; margin: 8px 0 2px; }
+.ebp-road li { border: 1px solid #cbd5e1; background: #fff; border-radius: 8px; padding: 9px 12px; font-size: 14.5px; line-height: 1.55; }
+.ebp-road li.cur { border-color: #3b6cf6; background: #e4eeff; }
+.ebp-gloss { display: grid; grid-template-columns: minmax(140px, 220px) 1fr; gap: 8px 18px; margin: 6px 0; font-size: 15.5px; line-height: 1.75; }
+.ebp-gloss dt { font-weight: 800; color: #1e3a8a; }
+.ebp-gloss dd { margin: 0; }
+@media (max-width: 720px) { .ebp-gloss { grid-template-columns: 1fr; gap: 2px; } .ebp-gloss dd { margin-bottom: 10px; } }
 @media (max-width: 720px) { .ebp-wrap { padding: 16px 14px 60px; } .ebp-card { padding: 16px 14px; } .ebp-kpi .v { font-size: 20px; } }
