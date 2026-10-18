@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-18 17:16 KST · 기준 커밋 2f73f0f0
+- 갱신: 2026-10-18 17:58 KST · 기준 커밋 cc404b54
 - 전문가 페르소나 전용 페이지 143개 · 등록된 SP 863건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-18 feat: add equity bid analysis pages with cost-adjusted share scenarios and header tabs
 - 2026-10-18 feat: place hero bid button in right empty space, vertically centered
 - 2026-10-18 feat: move bid button to hero center and rename to 지분 입찰 테스트
 - 2026-10-18 fix: remove accidental submodule gitlinks (estate, hondi) that break GitHub Pages build
@@ -43,7 +44,6 @@
 - 2026-10-17 feat(admin): 공동 설립 참여 제안서 묶음 v11 개정(1회차 모집 목표액 1페이지 추가)(MD 전용)
 - 2026-10-17 Merge pull request #662 from Openhash-Gopang/feature/health-assistant-sp-batch3
 - 2026-10-17 의료·보건 3묶음(전문간호사·영양사·조산사·위생사·보건교육사·언어재활사) 전문가용 SP
-- 2026-10-17 feat(admin): 공동 설립 참여 제안서 묶음 v10 개정(재무모델 엑셀 추가)(MD 전용)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
@@ -56,6 +56,10 @@
 - /pages/core-prompts.html — 핵심 프롬프트
 - /pages/dashboard.html — 대시보드
 - /pages/digit-code.html — 나비 숫자 코드
+- /pages/equity-bid-competition.html — 서비스·가격 경쟁력 분석 (시스템 테스트)
+- /pages/equity-bid-pricing.html — 요금·매출 (시스템 테스트)
+- /pages/equity-bid-scenarios.html — 점유율 시나리오 (시스템 테스트)
+- /pages/equity-bid-subscribers.html — 직역별 잠재 가입자 (시스템 테스트)
 - /pages/equity-bid-test.html — 자회사 지분 5% 입찰 (시스템 테스트)
 - /pages/expert-chat.html — 전문가 업무 보조 AI
 - /pages/expert-personas-docs.html — 문서 양식 — 전문가 페르소나
