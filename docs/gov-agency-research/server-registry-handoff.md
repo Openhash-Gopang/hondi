@@ -99,3 +99,19 @@ A-1의 신청서 누락 패턴(#26)에 상하수도 배수설비 설치신고서
 | `seogwipo:occupancy_inspection` (#32) | 감리완료보고서, 시공사진, 소방/전기 안전점검 결과, 정화조 준공 확인(선택) | (임시)사용승인 신청서(별지 제17호서식) 없음. 감리완료보고서는 감리자를 지정한 경우의 서류(시행규칙 제16조 제1호) | 중간 | `seogwipo-building` |
 | `seogwipo:development_act_permit` (#33) | 개발행위계획서, 토지이용계획확인서, 배치도 | 개발행위허가신청서(별지 제5호서식) 없음. 첨부서류 7종은 개발행위 종류별(시행규칙 제9조 ①) | 중간 | `seogwipo-city` |
 | `seogwipo:passenger_transport_registration` (#34) | 사업계획서, 차고지 증빙, 보험가입증명 | 등록신청서(별지 제9호서식) 없음, 보험가입증명의 근거 미확인, 대상 업종은 마을버스·전세버스·특수여객뿐 | 중간 | `seogwipo-passenger` |
+
+## H. 10회차 — 서귀포시 복지위생·청정환경·문화관광·자치행정 (2026-10-19)
+서귀포시 task 10건은 제주시 대응 task와 서류 목록·근거 법령이 같다(`assets/gov-agency-tasks.js` 비교). 그래서 A~F의 아래 항목은 `seogwipo:` 키에도 같은 수정이 필요하다.
+
+| 서귀포 task 키 | 해당 항목(제주시 키와 같음) |
+|---|---|
+| `seogwipo:food_business_report` · `seogwipo:public_sanitation_business_report` | #12, #13 (A-4) |
+| `seogwipo:disability_registration` | #14 (B) |
+| `seogwipo:basic_pension_application` | #15 (A-3) |
+| `seogwipo:single_parent_family_support_application` | #16 (A-2) |
+| `seogwipo:emergency_welfare_support_request` | #17 (A-2) |
+| `seogwipo:tourism_business_registration` | #18 (A-3) |
+| `seogwipo:air_emission_facility_report` | #19 (A-2, D) |
+| `seogwipo:park_occupancy_permit` | #20 (A-2, D) |
+| `seogwipo:village_enterprise_designation` | #21 (A-2, B) — 서귀포 task 근거 문구도 「국가법령 근거 없음」으로 같아 정정 필요 |
+| `seogwipo:tax_objection` | #6, #7 (D) |
