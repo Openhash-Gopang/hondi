@@ -48,7 +48,19 @@ const TASK_AGENCY_OVERRIDE = {
   'jeju:pest_diagnosis_request':                  ['do-agency:jeju:SP-AGY-AGRITECH'],           // SP-AGY-AGRITECH_v1.1.md 65행 · 서버 do-agency:AGRITECH
   'jeju:livestock_inseminator_license':           ['do-agency:jeju:SP-AGY-CHUKSAN'],            // SP-AGY-CHUKSAN_v1.1.md 69행 · 서버 do-agency:CHUKSAN
   'jeju:heritage_alteration_permit':              ['do-agency:jeju:SP-AGYDIV-HERITAGE-MANAGEMENT'], // SP-AGYDIV-HERITAGE-MANAGEMENT_v1.1.md 55행 · 서버 do-agency:HERITAGE
-  'seogwipo:basic_livelihood_benefit_application': ['city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-WELFARE-RESIDENT'] // SP-CITYDIV-SEOGWIPO-WELFARE-RESIDENT_v1.2.md 59행(이 과가 기초생활보장과를 겸한다고 직접 밝힘) · 서버 city-dept:seogwipo:welfare
+  'seogwipo:basic_livelihood_benefit_application': ['city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-WELFARE-RESIDENT'], // SP-CITYDIV-SEOGWIPO-WELFARE-RESIDENT_v1.2.md 59행(이 과가 기초생활보장과를 겸한다고 직접 밝힘) · 서버 city-dept:seogwipo:welfare
+  'seogwipo:library_membership_registration': ['city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-CULTURE-LIBRARYMGMT'], // SP-CITYDIV-SEOGWIPO-CULTURE-LIBRARYMGMT_v1.1.md §1-2 · 서버 city-dept:seogwipo:culture
+  'seogwipo:performance_hall_rental': ['city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-CULTURE-ARTSHALL'], // SP-CITYDIV-SEOGWIPO-CULTURE-ARTSHALL_v1.1.md §1-2 · 서버 city-dept:seogwipo:culture
+  'seogwipo:sports_facility_rental': ['city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-CULTURE-SPORTS'], // SP-CITYDIV-SEOGWIPO-CULTURE-SPORTS_v1.1.md §1-2 · 서버 city-dept:seogwipo:culture
+  'jejusi:sports_facility_rental': ['city-dept:jejusi:SP-CITYDIV-JEJUSI-CULTURE-SPORTS'], // SP-CITYDIV-JEJUSI-CULTURE-SPORTS_v1.1.md §1-2 · 서버 city-dept:jeju:culture
+  'seogwipo:forest_recreation_facility_reservation': ['city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-CLIMATE-FORESTRECREATION'], // SP-CITYDIV-SEOGWIPO-CLIMATE-FORESTRECREATION_v1.1.md §1-2 · 서버 city-dept:seogwipo:climate
+  'seogwipo:citrus_shipment_report': ['city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-AGRIECONOMY-CITRUS'], // SP-CITYDIV-SEOGWIPO-AGRIECONOMY-CITRUS_v1.0.md §1-2 · 서버 city-dept:seogwipo:agrieconomy
+  'seogwipo:eco_friendly_farming_certification': ['city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-AGRIECONOMY-ECOFARM'], // SP-CITYDIV-SEOGWIPO-AGRIECONOMY-ECOFARM_v1.0.md §1-2 · 서버 city-dept:seogwipo:agrieconomy
+  'jejusi:bulky_waste_disposal_sticker': ['city-dept:jejusi:SP-CITYDIV-JEJUSI-CLIMATE-LIVINGENV'], // SP-CITYDIV-JEJUSI-CLIMATE-LIVINGENV_v1.1.md §1-2 · 서버 city-dept:jeju:climate
+  'seogwipo:bulky_waste_disposal_sticker': ['city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-CLIMATE-LIVINGENV'], // SP-CITYDIV-SEOGWIPO-CLIMATE-LIVINGENV_v1.1.md §1-2 · 서버 city-dept:seogwipo:climate
+  'jejusi:waste_disposal_facility_intake': ['city-dept:jejusi:SP-CITYDIV-JEJUSI-CLIMATE-FACILITY'], // SP-CITYDIV-JEJUSI-CLIMATE-FACILITY_v1.0.md §1-2 · 서버 city-dept:jeju:climate
+  'jeju:youth_inflow_incentive_application': ['do-dept:jeju:SP-DIV-PLAN-POPULATION'], // SP-DIV-PLAN-POPULATION_v1.0.md §1-2 · 서버 do-dept:plan
+  'jeju:hospital_establishment_permit': ['do-dept:jeju:SP-DIV-SAFETY-HEALTHPOLICY'] // SP-DIV-SAFETY-HEALTHPOLICY_v1.1.md §1-2 · 서버 do-dept:safety
 };
 module.exports = module.exports || {}; module.exports.TASK_AGENCY_OVERRIDE = TASK_AGENCY_OVERRIDE;
 
