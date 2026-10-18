@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-18 12:29 KST · 기준 커밋 41588c6b
+- 갱신: 2026-10-18 12:38 KST · 기준 커밋 1f747d01
 - 전문가 페르소나 전용 페이지 143개 · 등록된 SP 863건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-18 docs: rewrite group formation plan on a royalty basis (final) and point plans 1 and 2 to it
 - 2026-10-18 docs: state that Naviweb holds no shares in expert corporations and receives royalty only
 - 2026-10-18 docs: add staged issuance (7.6) to consortium proposals and consortium notice to group formation plans 1 and 2
 - 2026-10-18 관리자 사업 계획 메뉴: 직능별 컨소시엄 참여 제안서 10종(MD·PDF)과 공통 문서 추가, 기존 신설 법인 방식 문서는 이전안으로 표시
@@ -43,7 +44,6 @@
 - 2026-10-17 전문가용 보조 AI SP 생성기 신설 + 의료·보건 1묶음(치과의사·한의사·수의사·약사·간호사) 전문가용 SP
 - 2026-10-17 feat(admin): 공동 설립 참여 제안서 묶음 v5 개정(MD 전용)
 - 2026-10-17 Merge pull request #652 from Openhash-Gopang/feature/physician-assistant-sp-split
-- 2026-10-17 의사 SP 이분화 시범: 전문가용 의사 보조 AI(SP-HEALTH-16A) 신설, 의사 페이지 서류 목록형 전환
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
