@@ -44,6 +44,7 @@
     "석면건축물 안전관리에 관한 사무",
     "그 밖에 환경지도 및 단속에 관한 사무"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "도 전체 환경정책",
@@ -74,6 +75,7 @@
    "tasks": [
     "소규모 배출시설 설치 신고 접수 및 절차 안내."
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "도 전체 환경정책·탄소중립",
@@ -109,6 +111,7 @@
    "tasks": [
     "사업장 폐기물 반입 신청 접수 및 반입기준 안내."
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "생활폐기물 배출 관련(가정)",
@@ -140,6 +143,7 @@
     "절물휴양림 조성 및 운영·관리",
     "노루생태원 운영 및 관리"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "타 지역 자연휴양림(도 전체)",
@@ -189,6 +193,7 @@
     "EPR(생산자책임재활용제도)에 관한 사항",
     "그 밖에 청소 및 환경자원에 관한 사무"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "폐기물 처리시설(소각·매립) 운영",
@@ -252,6 +257,7 @@
     "임산물(농림축산식품장관이 고시한 “농산물 등의 원산지 표시대상” 품목 중 버섯, 산채, 수실류 등 임산물 품목에 한정한다) 원산지 단속에 관한 사항",
     "그 밖에 공원녹지에 관한 사무"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "도 전체 산림·녹지정책",
@@ -284,6 +290,7 @@
     "제주아트센터 공연 및 대관에 관한 사항",
     "제주아트센터 사용료 수납 및 감면 등에 관한 사항"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "공연 예매 자체",
@@ -332,6 +339,7 @@
     "재외도민에 관한 업무",
     "그 밖에 문화예술에 관한 사무 및 국 내 다른 과에 속하지 아니하는 사무"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "도 전체 문화정책",
@@ -375,6 +383,7 @@
     "노형미리내공원 운영 및 관리",
     "그 밖에 체육진흥 및 체육시설 운영·관리에 관한 사무"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "도 전체 체육정책·엘리트체육",
@@ -408,6 +417,7 @@
     "애월도서관·한경도서관 운영 및 관리",
     "그 밖에 관할 도서관 운영에 관한 사무"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "타 시립도서관(우당도서관 등) 자료",
@@ -457,6 +467,7 @@
     "미신고 불법 숙박업 관련 민원접수 및 처리, 유관기관 통보 등",
     "그 밖에 관광진흥에 관한 사무"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "도 전체 관광정책·해외마케팅",
@@ -496,6 +507,7 @@
     "조천읍도서관 운영 및 관리",
     "그 밖에 관할 도서관 운영에 관한 사무"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "타 시립도서관(탐라도서관 등) 자료",
@@ -548,6 +560,7 @@
     "환경친화적 자동차 충전구역 및 전용주차구역 관리에 관한 사항(위임된 사무에 한정한다)",
     "그 밖에 일자리, 에너지에 관한 사무"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "도 전체 일자리·에너지 정책",
@@ -613,6 +626,7 @@
     "골목형상점가 지정 및 운영관리에 관한 사무",
     "그 밖에 지역경제, 소상공인에 관한 사무 및 국 내 다른 과에 속하지 아니하는 사무"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "도 전체 소상공인 정책·중기부 연계",
@@ -662,6 +676,7 @@
     "정착주민에 관한 사항",
     "그 밖에 마을활력 사업에 관한 사무"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "읍면동 행정·주민자치위원회 운영",
@@ -699,6 +714,7 @@
     "민선9기(위성곤 도정)는 취임 전부터 기초자치단체 도입에 힘을 쏟지 않겠다는 입장을 밝혀왔으며, 2026-07-03 공개된 조직개편안에서도 도청 실·국 개편(15실·국으로 축소, 기후에너지국 신설 등)에 기초자치단체 관련 신규 조직 확대는 포함되지 않은 것으로 확인된다.",
     "이 부서(기초자치단체 설치준비지원단) 자체의 존폐·기능 변경 여부는 이번 조사로 확인하지 못했다 — 조직도상 명칭은 남아 있으나 실질 업무가 무엇으로 전환됐는지(예: 다른 자치제도 업무로 흡수) 불확실하다. 이용자가 관련 문의를 하면 이 불확실성을 그대로 전달하고, 확답이 필요하면 부서 직접 문의 또는 정보공개청구를 안내한다."
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "도 전체 행정체제 개편 방향",
@@ -764,6 +780,7 @@
     "규제개혁에 관한 사항",
     "납세 관련 고충민원 처리 등 납세자보호관 운영"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "도 전체 예산·조직개편 방향",
@@ -825,6 +842,7 @@
     "행정자료실 운영",
     "그 밖에 다른 과에 속하지 아니하는 사무"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "개별 채용·인사 결과",
@@ -869,6 +887,7 @@
     "제주시 소관 총괄채권 관리",
     "국·공유재산 관리(위임된 사무에 한정한다)"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "취득세·등록면허세 신고",
@@ -933,6 +952,7 @@
     "행정시 권한강화 및 기능개선에 관한 사항",
     "인구감소 및 지방 소멸 대책에 관한 사항"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "특정 읍면동 개별 민원",
@@ -976,6 +996,7 @@
     "체납액 징수 및 정리",
     "압류재산 공매"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "국세(종합소득세·부가세·법인세)",
@@ -1053,6 +1074,7 @@
     "안전감찰 업무 지원(안잔감찰 자료 수합, 지적사항 관리 등)",
     "그 밖에 안전관리에 관한 사무 및 국 내 다른 과에 속하지 아니하는 사무"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "도 전체 재난관리 정책·예산",
@@ -1119,6 +1141,7 @@
     "화물자동차 사용자에 대한 유가보조금 지급에 관한 사항",
     "그 밖에 교통에 관한 사무"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "도 전체 대중교통 정책·요금·노선 조정",
@@ -1165,6 +1188,7 @@
     "이륜차 등록 관리 등에 관한 사항",
     "그 밖에 주차관리에 관한 사무"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "자동차 검사(정기검사 등)",
@@ -1198,10 +1222,25 @@
     "legal_basis_last_verified: 2026-08-20"
    ],
    "tasks": [],
+   "pipelineTasks": [
+    {
+     "taskKey": "building_permit",
+     "docs": "설계도서, 구조계산서, 토지이용계획확인서 등",
+     "fee": "건축법 시행규칙 별표 4 기준"
+    },
+    {
+     "taskKey": "occupancy_inspection",
+     "docs": "감리완료보고서, 시공사진, 소방/전기 안전점검 결과, 정화조 준공 확인 등",
+     "fee": "사용승인 자체는 무료. 부수 인허가만 개별 수수료"
+    }
+   ],
    "referrals": [],
    "contacts": [],
    "inheritsLegalBasis": false,
-   "legalBasisVerified": "2026-08-20"
+   "legalBasisVerified": "2026-08-20",
+   "unregistered": [
+    "jejusi:occupancy_inspection"
+   ]
   },
   {
    "file": "prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CITYPLAN_v1.0.md",
@@ -1219,6 +1258,13 @@
     "legal_basis_last_verified: 2026-08-20"
    ],
    "tasks": [],
+   "pipelineTasks": [
+    {
+     "taskKey": "urban_management_plan_change",
+     "docs": "변경계획서, 토지이용현황도 등",
+     "fee": "★ REQUIRED_DOCUMENTS_REGISTRY 미등록"
+    }
+   ],
    "referrals": [],
    "contacts": [],
    "inheritsLegalBasis": false,
@@ -1239,6 +1285,13 @@
     "legal_basis_last_verified: 2026-08-20"
    ],
    "tasks": [],
+   "pipelineTasks": [
+    {
+     "taskKey": "road_occupancy_permit",
+     "docs": "점용계획서, 위치도, 시공계획서 등",
+     "fee": "★ REQUIRED_DOCUMENTS_REGISTRY 미등록"
+    }
+   ],
    "referrals": [],
    "contacts": [],
    "inheritsLegalBasis": false,
@@ -1259,6 +1312,13 @@
     "legal_basis_last_verified: 2026-08-20"
    ],
    "tasks": [],
+   "pipelineTasks": [
+    {
+     "taskKey": "housing_project_plan_approval",
+     "docs": "사업계획서, 설계도서, 자금조달계획서 등",
+     "fee": "★ REQUIRED_DOCUMENTS_REGISTRY 미등록"
+    }
+   ],
    "referrals": [],
    "contacts": [],
    "inheritsLegalBasis": false,
@@ -1279,6 +1339,13 @@
     "legal_basis_last_verified: 2026-08-20"
    ],
    "tasks": [],
+   "pipelineTasks": [
+    {
+     "taskKey": "urban_regeneration_project",
+     "docs": "사업계획서, 주민동의서 등",
+     "fee": "★ REQUIRED_DOCUMENTS_REGISTRY 미등록"
+    }
+   ],
    "referrals": [],
    "contacts": [],
    "inheritsLegalBasis": false,
@@ -1299,6 +1366,13 @@
     "legal_basis_last_verified: 2026-08-20"
    ],
    "tasks": [],
+   "pipelineTasks": [
+    {
+     "taskKey": "water_sewer_construction_approval",
+     "docs": "시설설계도, 배치도, 시공계획서 등",
+     "fee": "★ REQUIRED_DOCUMENTS_REGISTRY 미등록"
+    }
+   ],
    "referrals": [],
    "contacts": [],
    "inheritsLegalBasis": false,
@@ -1338,6 +1412,7 @@
     "미혼모·부자 가정 및 조손가정 지원",
     "그 밖에 기초생활보장에 관한 사무"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "도 전체 복지정책",
@@ -1389,6 +1464,7 @@
     "장애인전용주차구역의 지도·단속 및 과태료 부과",
     "그 밖에 장애인 복지 및 지원에 관한 사무"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "장애 정도 심사",
@@ -1440,6 +1516,7 @@
     "어버이날 및 노인의 날 행사에 관한 사항",
     "그 밖에 노인 복지 및 지원에 관한 사무"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "국민연금 수급 이력 조회",
@@ -1500,6 +1577,7 @@
     "드림스타트 사례 관리 및 복지프로그램 수행",
     "그 밖에 주민복지에 관한 사무 및 국 내 다른 과에 속하지 아니하는 사무"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "기초생활보장(국민기초생활보장법)",
@@ -1569,6 +1647,7 @@
     "청소년 문화의집 운영 및 관리",
     "그 밖에 여성·가족 지원에 관한 사무"
    ],
+   "pipelineTasks": [],
    "referrals": [
     {
      "area": "도 전체 여성정책",

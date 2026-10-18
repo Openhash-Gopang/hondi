@@ -92,6 +92,25 @@
     footer: pick('footer', '근거 법령: 민원 처리에 관한 법률 외 · ' + displayName + ' AI 는 민원 작성을 돕는 도구이며 처분·접수·법률 자문을 제공하지 않습니다.')
   };
 
+  /* ── 접수 연동 민원: 서버가 실제로 접수하는 task(worker.js REQUIRED_DOCUMENTS_REGISTRY)와 필수 서류 ─────────────
+     assets/gov-agency-tasks.js(tools/extract-gov-tasks.cjs 로 생성)가 정본이다. 이 기관에 연결된 task 가 있으면 목록 맨 앞 탭으로 둔다. */
+  var taskKeys = (window.GOV_TASK_BY_AGENCY || {})[code] || [];
+  if (taskKeys.length && window.GOV_TASKS) {
+    var tItems = taskKeys.map(function (k) {
+      var tk = window.GOV_TASKS[k]; if (!tk) return null;
+      var req = tk.docs.filter(function (d) { return d[1]; }).map(function (d) { return d[0]; });
+      var opt = tk.docs.filter(function (d) { return !d[1]; }).map(function (d) { return d[0]; });
+      return { t: tk.name, d: (tk.basis ? '근거 ' + tk.basis + ' / ' : '') + '필수 서류: ' + (req.join(', ') || '—') + (opt.length ? ' / 선택: ' + opt.join(', ') : '') };
+    }).filter(Boolean);
+    if (tItems.length) CFG.catalog = [{
+      id: 'N-1', tab: '접수 연동 민원', title: '나비 접수 연동 민원',
+      meta: '서버 등록 서류 기준(worker.js 필수 서류 목록)',
+      lead: '나비의 접수 절차에 등록된 민원과 필수 서류입니다. 대화로 서류를 갖추면 접수까지 이어집니다.',
+      notes: ['접수는 담당 공무원의 심사·결재를 거쳐 확정됩니다. 목록은 서버에 등록된 범위이며, 기관의 모든 민원을 뜻하지 않습니다.'],
+      items: tItems
+    }].concat(CFG.catalog);
+  }
+
   /* ── 헤더·서류 목록 설정: ph-header.js / pro-doc-page.js 가 읽기 전에 채운다 ── */
   document.title = (rec ? displayName + ' AI' : '행정기관') + ' — 나비';
   window.PAGE_HEADER = {
