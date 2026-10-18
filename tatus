@@ -1,0 +1,233 @@
+  add-gov-ai-test-2026-card                                      [m 7eb38f48 about-hondi: add 전자동 AI 정부 테스트(2026.9.1-12.31) card + report page
+  chore/pb-migrations-safety-check                               [m 1dea72aa chore: pb_migrations 안전성 검사 CI 신설 — 삭제 금지 + 이름 충돌 사전탐지 (hanlim L1 크래시 루프 재발 방지)
+  debug/gov-clarify-empty-response                               [m c7533608 [[34morigin/debug/gov-clarify-empty-response[m] debug: gov-clarify 하네스에 빈응답 원인 진단 로그 추가(finish_reason/reasoning_content_len)
+  debug/gov-clarify-emptyresponse-diag                           [m 8989d8e7 [[34morigin/debug/gov-clarify-emptyresponse-diag[m] debug: gov-clarify 빈 응답 근본원인 진단 — 재현된 5건을 max_tokens=12000으로 재실행(하네스에 --max-tokens 옵션 추가)
+  debug/l1-balance-raw-response-diag-20260917                    [m 6aebe8dd debug(worker): L1 잔액 조회 원문 응답 임시 로깅 추가
+  debug/pdv-order-smoketest-diagnostics                          [m 9af2ad14 [[34morigin/debug/pdv-order-smoketest-diagnostics[m] fix/pdv bidirectional order record v2 (#137)
+  devdoc-session-summary-20260907                                [m 4419b919 pb: fs_snapshots/fs_merkle_anchors 컬렉션 신설 — 재무제표 OpenHash 앵커링용
+  docs-devicelink-e164-session-lessons                           [m d3c2538b docs: device-link 레이스 컨디션 + e164_hash 배포 유실 세션 교훈 문서 추가
+  docs/desktop-menu-0918-entries                                 [m 40234ff6 [[34morigin/docs/desktop-menu-0918-entries[m] chore: bump build version to 20260918-101503-bf776361 [skip ci]
+  docs/founder-info                                              [m 40b7dfe9 docs: 개발자(도영민) 정보 governance.txt에 명시
+  docs/gdc-deposit-matching-timing-incident-20260917             [m a9c503a2 docs: GDC 입금 매칭 불통 사고 문서 작성 + 개발자 문서 메뉴 등록 (2026-09-17)
+  docs/gdc-loan-credit-live-test-0906                            [m e0b6f59c docs: GDC 대출·신용평가 라이브 테스트(0906) 개발자 문서 신설
+  docs/gdc-secret-incident-20260916                              [m 8f38edc5 [[34morigin/docs/gdc-secret-incident-20260916[m] fix: 히어로 상단 버튼 5개 두 줄 표시 (제목/예시 분리), ':' 삭제
+  docs/gov-clarify-a1-a5-handoff                                 [m 439946be [[34morigin/docs/gov-clarify-a1-a5-handoff[m] docs: gov-clarify runnerUp A1~A5 라이브 검증 인수인계서
+  docs/gov-clarify-a6-institution-l2-handoff                     [m 9531182e [[34morigin/docs/gov-clarify-a6-institution-l2-handoff[m] docs(handoff): A6(institution↔L2 강한매칭 안전망) 발견·수정·검증 결과 반영
+  docs/gov-clarify-a7-a10-handoff                                [m 78aab98a [[34morigin/docs/gov-clarify-a7-a10-handoff[m] docs: A7~A10 라이브 검증 결과 및 JILES 중복 데이터 발견 사항 반영
+  docs/gov-clarify-maxtokens-reverify-results                    [m cae7d809 [[34morigin/docs/gov-clarify-maxtokens-reverify-results[m] docs(handoff): gov-clarify max_tokens fix 재검증 결과 반영 (A1/A3/A5 31건, 빈응답 0건)
+  docs/gov-clarify-nondeterminism-findings                       [m 264ce931 [[34morigin/docs/gov-clarify-nondeterminism-findings[m] docs(handoff): diag-04류 비결정성 직접 검증 결과 반영 (진짜 비결정성 확인, ~17% 잔여실패율)
+  docs/kaddress-kmail-session-summary-and-manual                 [m aabb4d5e docs: K-Address/K-Mail 세션 요약 문서 + 사용자 매뉴얼 Mail 챕터 3단계 신설
+  docs/live-smoketest-plan-20260917                              [m 601e49e5 [[34morigin/main[m: ahead 8, behind 97] fix(routing): regional-gov.html에 handleExpertTag 배선 — [EXPERT: ...] 태그가 이 화면에서 전혀 처리 안 되던 결함 수정(A-3)
+  docs/mark-stale-expert-registry-header                         [m aa0deb44 chore: bump build version to 20260914-215617-9d992818 [skip ci]
+  docs/pdv-bidirectional-devdoc-and-manual-chapters              [m 724a6801 [[34morigin/docs/pdv-bidirectional-devdoc-and-manual-chapters[m] docs: PDV 양방향화 개발자 문서 + 사용자 매뉴얼 신규 장 2개 추가
+  docs/pocketbase-l1-hanlim-recovery-2026-09-18                  [m e1cb7ccc [[34morigin/docs/pocketbase-l1-hanlim-recovery-2026-09-18[m] docs: JILES-LIFELONG PocketBase 레코드 삭제 완료 및 인프라 장애 기록
+  docs/session-summary-20260905                                  [m d0d1c6b0 개발자 문서 — 0905 세션 요약(K-JIT/K-City·전문가 페르소나·K-정부 카탈로그·SP 편집기·저장소 이관) 신설 및 메뉴 연결
+  e164-backfill-2026-09-07                                       [m 6ca82cdf feat: 기존 profiles의 평문 e164 → e164_hash/e164_enc/e164_last8 백필 (2026-09-07)
+  e164-migration-2026-09-07                                      [m 7bde761a feat: profiles.e164 평문 저장 제거 — e164_hash/e164_enc/e164_last8 분리 (2026-09-07)
+  feat/beta-promo-dismissible-banner                             [m f2527c96 desktop.html — 베타 가입 혜택 배너 신설(소개 섹션 상단, 다시 보지 않기 체크박스 포함)
+  feat/desktop-4page-pagination                                  [m 14e178c4 desktop.html — 4페이지 구조로 전면 개편(1:브로슈어 2:예시대화 3:철학정체성카드 4:실용정보+참여카드), 카드 4장 누락 버그 수정
+  feat/desktop-brochure-and-cards                                [m dad3560a desktop.html — 첨부 브로슈어를 메인 콘텐츠로 이식, 나머지 11개 섹션은 카드+slide-out으로 압축(원문 손실 없음)
+  feat/desktop-info-banner                                       [m 676c2553 feat(desktop): 전문가 SP 안내 배너 신설(왼쪽) + 베타 혜택 배너 오른쪽 이동
+  feat/expert-ambiguity-ask-back                                 [m 9f70ebf8 [[34morigin/feat/expert-ambiguity-ask-back[m] test: 애매함-되묻기 기능 검증용 시나리오 52건(회귀30+인접혼동22) + 워크플로
+  feat/expert-chat-auto-intro                                    [m 5ab37ff9 expert-chat.html — 정적 한 줄 인사 대신 AI가 SP 정체성에 따라 스스로 소개하는 첫 턴 자동 발화
+  feat/expert-personas-leaf-icons                                [m f6753c63 전문가 페르소나 — 세부분야(최말단) 칩에도 채팅/SP편집 아이콘 각각 추가
+  feat/expert-personas-trigger-search                            [m af1a60d2 전문가 페르소나 페이지 — 레지스트리 triggers 기반 자연어 검색 매칭 추가
+  feat/gdc-charge-nav-button                                     [m c9ad2136 [[34morigin/feat/gdc-charge-nav-button[m] feat(desktop): 상단 메뉴 우측 여백에 강조색 "GDC 충전" 버튼 추가
+  feat/gdc-wallet-account-copy                                   [m f7cd8988 [[34morigin/feat/gdc-wallet-account-copy[m] feat(gdc-wallet): Gopang Wallet 시트 상단에 입금 계좌+복사 버튼 추가
+  feat/goal-path-full-pipeline                                   [m a3de6c17 feat: 다기관 목표 경로 갱신 파이프라인 — 자기검증+인간승인 2단계 게이트, 전 도메인 적용
+  feat/goal-path-phase-a                                         [m b7a9d35c feat: 목표-경로 Phase A(순수 기록) + 개인회생·파산 플레이북 v0.1
+  feat/goal-path-time-cost-criterion                             [m 4efb32dd docs: 간략 인수인계서 신설 — gov24_corpus 후속 작업 우선순위 정리
+  feat/gov-city-emd-tabs                                         [m bae9b987 feat(k-services): 나머지 8건 전부 노출 — 내부 파이프라인 5개 + 승인대기 2개 + 설계단계 1개
+  feat/gov-clarify-runnerup-redesign                             [m aadf4e7d [[34morigin/feat/gov-clarify-runnerup-redesign[m] feat: gov-router _govClassifyFn을 자기선고 CLARIFY에서 code+runnerUp 2단계 분리로 재설계(subject-gate.js 검증 방식 이식)
+  feat/hero-buttons-bug-report                                   [m 50189cd2 desktop.html — 히어로 첫 버튼 텍스트를 법치 국가로 변경, 버그 신고 버튼 추가
+  feat/jeju-70dept-corpus                                        [m 8aecfd22 [[34morigin/feat/jeju-70dept-corpus[m] feat(docs): 70과 민원/내부지시 코퍼스 680건 생성(68개 확인 부서 × 10건)
+  feat/jeju-ai-gov-hero-button                                   [m 1206a595 [[34morigin/feat/jeju-ai-gov-hero-button[m] feat(desktop): "제주 행정 자동화" → "제주 AI 행정"으로 명칭 통일 + 히어로 5번째 버튼 추가
+  feat/jeju-division-sp-wiring                                   [m 2246d286 [[34morigin/feat/jeju-division-sp-wiring[m] feat(gov-tree): L2 키워드 보강 + 과 단위 라이브 스모크테스트 134건(95→133 통과)
+  feat/jeju-merchant-section                                     [m 31961214 feat(desktop): add 제주 사업자를 위한 혼디 section to overview page 2
+  feat/jeju-org-chart-new-units-20260916                         [m 21aa079b [[34morigin/feat/jeju-org-chart-new-units-20260916[m] feat(docs): 70과 민원/내부지시 코퍼스 680건 생성(68개 확인 부서 × 10건)
+  feat/jejusi-agri-health-wiring                                 [m 3449644a [[34morigin/feat/jejusi-agri-health-wiring[m] feat: 과 단위 SP 라우팅 배선 + 라이브 스모크테스트 134건(133 통과) (#279)
+  feat/jejusi-remaining-departments                              [m 1836e893 [[34morigin/feat/jejusi-remaining-departments[m] feat(gdc-secret): FORBIDDEN 실시간 관리자 SMS 경보 + dry_run 시크릿 검증 모드
+  feat/jejusi-smoketest-and-fixes                                [m 1936c317 [[34morigin/feat/jejusi-smoketest-and-fixes[m] fix(gov-tree): 제주시 라우팅 실버그 2건 수정 + 51개 리프 SP 스모크테스트 102건
+  feat/k-government-admin-collapse                               [m 7b8f687a K-정부 — 행정 탭의 긴 설명 블록(계층구조·실사현황·정책정합성)을 slide-out 패널로 접기
+  feat/k-government-catalog                                      [m f620d5f7 K-정부 행정부 기관 카탈로그 신설(648개, 전문가 페르소나와 동일 레이아웃) + qgov/enterprise/other directCode tier 추가
+  feat/k-government-catalog-to-top                               [m e3da65a7 K-정부 — 입법/사법 탭의 기관 목록(검색+카탈로그)을 페이지 최상단으로 이동
+  feat/k-government-legislative-judicial                         [m a8a90c10 K-정부 — 입법부(6)·사법부(5) 카탈로그 신설, 행정부 카테고리에서 잘못 남아있던 5개 분리
+  feat/k-government-local-jeju                                   [m 81fb2322 K-정부 카탈로그 — 제주 지방자치기관 27개, 출자출연기관 26개 추가 발견분 반영(701개)
+  feat/k-government-region-tabs                                  [m ef547203 K-정부 카탈로그를 지역 탭 구조로 재구성, 강원·대구 부서 데이터 신설, do-dept/do-agency 도 구분 라우팅 버그 수정
+  feat/kaddress-category-fix                                     [m 69b3c8f6 fix(kaddress): CSV 자동분류 category 값이 select 필드 허용값과 불일치하던 버그 수정 + 카테고리 건수 집계 엔드포인트 신설
+  feat/kaddress-csv-import                                       [m 01c0a7e0 feat(kaddress): CSV/엑셀 일괄 업로드용 순수 REST 등록 엔드포인트 추가
+  feat/kjit-kcity-relay                                          [m a151eb88 K-JIT·K-City relay 백엔드 추가 (/kjit/relay, /kcity/relay)
+  feat/kjit-kcity-tabs                                           [m 335521ed K-JIT·K-City 탭 추가 (SP-26/27 v0.1 초안 반영)
+  feat/kmail-draft-to-editor-bridge                              [m 5d3e3f86 feat(kmail): 초안 저장/체크포인트 액션에 subject·body를 실어 보냄
+  feat/kmail-tab-backend                                         [m b17f0fe0 feat(kmail): 메일 탭 신설을 위한 백엔드 준비 — mailbox/drafts/message-state 인증 이관 + 상태 목록 GET 신설
+  feat/kplan-relay-and-webapp-backend                            [m eaadc927 feat: K-Telecom·K-Search·K-Biz·K-Watch·K-Job 5개 사이트 신규 배포 - k-services 패널 바로가기 + hondi.net 서비스 메뉴 링크 추가 (#13)
+  feat/page-chat-widget-sso                                      [m a2de6e62 [[34morigin/feat/page-chat-widget-sso[m] feat(expert-personas): 페르소나 링크마다 채팅 아이콘 + 전체 이름 툴팁 부착
+  feat/page-reorder-and-js-fix                                   [m e5fdab11 desktop.html — 페이지 순서 재배치(2↔4 교체 방식: 새2=실용정보, 새3=예시대화, 새4=철학정체성), 하단 페이지번호 클릭 안 되던 JS 버그 수정
+  feat/pages-full-content-no-cards                               [m 7ef05796 desktop.html — 3·4페이지 카드 방식 제거하고 전체 내용 그대로 표시, 2·3·4페이지 하단에도 페이지 번호 추가
+  feat/pdv-domain-split-smoketest                                [m c62ae37c [[34morigin/feat/pdv-domain-split-smoketest[m] test: PDV domain split(personal/work) live smoketest 추가
+  feat/regional-gov-pdv-address-wiring                           [m 03e8849e [[34morigin/feat/regional-gov-pdv-address-wiring[m] fix(regional-gov): PDV 등록주소 우선 조회 배선 — 지금까지 GPS 현재위치만 쓰던 공백 해소
+  feat/seogwipo-gaps-and-verification                            [m e9596b28 [[34morigin/feat/seogwipo-gaps-and-verification[m] feat(gov-tree): 서귀포시 1차 사료(2026-03 기구표)로 갭 2건 채우고 L2 키워드 대량 보강
+  feat/sp-editor-tool                                            [m 3668052c SP 편집기 신설(SP-EDITOR 메타-SP + 편집 화면) — K-정부·전문가 페르소나 카탈로그에 편집 아이콘 연결
+  feat/tri-entity-mixed-smoketest                                [m 1439185a [[34morigin/feat/tri-entity-mixed-smoketest[m] fix(gov-tree): 도청·시청 혼합 스모크테스트 322건(269→305 통과) + L2 키워드 대량 보강
+  feat/voice-question-mark                                       [m 69d59e69 feat: 음성입력 의문형 어미 자동 '?' 삽입 (억양 대신 문법적 어미 기반)
+  feature/admin-page-redesign-2026-09-17                         [m 09d857eb [[34morigin/feature/admin-page-redesign-2026-09-17[m] 관리자 대시보드를 admin.html 독립 페이지로 분리 + 밝은 관제판 스타일 적용, 사업계획 문서 추가
+  feature/ai-lie-paragraph                                       [m 9ae40e72 [[34morigin/feature/ai-lie-paragraph[m] 오픈해시 섹션(6번)에 'AI 거짓말 차단' 문단 추가
+  feature/biometric-hardening-2026-09-07                         [m 76d28be6 feat: 지문 인증 강제 — device-link/전화번호 재클레임 (2026-09-07)
+  feature/desktop-search-widget                                  [m a0a6ec6f [[34morigin/feature/desktop-search-widget[m] feat: desktop.html 헤더에 혼디 검색 위젯 삽입 + 스모크 테스트 경로 버그 수정
+  feature/hero-button-labels                                     [m 33c570f4 [[34morigin/feature/hero-button-labels[m] desktop.html 상단 4개 버튼 문구 변경
+  feature/hondi-gdc-loan-credit-smoketest-workflow-v2            [m 98c8f948 ci: GDC 대출·신용평가 목업 라이브 스모크테스트 워크플로 신설
+  feature/hondi-gdc-test-fs-admin-upsert-v2                      [m 98db274e feat(worker): 관리자 전용 POST /biz/gdc-test-financial-statement 신설
+  feature/hondi-gdc-test-loan-endpoints-v2                       [m e6c4e983 feat(worker): GDC 대출.신용평가 목업 엔드포인트 3종 (필드테스터 한정)
+  feature/intro-section-split                                    [m 3e67c382 [[34morigin/feature/intro-section-split[m] '혼디 소개' 섹션을 새 내용으로, 기존 브로슈어는 '혼디 적용 예시: AI 정부'로 분리
+  feature/k-service-sso                                          [m d3a361b1 [[34morigin/feature/k-service-sso[m] desktop.html GDC 대시보드를 공용 인증 모듈(KAuth)로 전환
+  feature/k-service-sso-docs                                     [m 92e458f7 [[34morigin/feature/k-service-sso-docs[m] 문서: K-서비스 로그인 SSO 통합(0906) 개발자 문서 신설, desktop.html 개발자 문서 메뉴에 추가
+  feature/kservices-relabel                                      [m 3706fbcb [[34morigin/feature/kservices-relabel[m] K-서비스 탭 문구를 브랜드명에서 사용자 친화적 문구로 교체
+  feature/openhash-section                                       [m 05effd7f [[34morigin/feature/openhash-section[m] '혼디 적용 예시: AI 정부'에 6번 섹션(오픈해시) 신설, 이후 번호 1씩 밀림
+  feature/ph-header-unify                                        [m a98e871a [[34morigin/feature/ph-header-unify[m] 4대 메뉴(K-서비스·전문가 페르소나·K-정부·프롬프트) 헤더 공용 모듈화
+  feature/scope-toggle-user-dev                                  [m a003c55d docs: 2026-09-12 세션(mail_id/콜론버그/핸드오프/FETCH_CONTENT) 문서화 (#216)
+  feature/section34-intro-v2                                     [m 34805bc5 [[34morigin/feature/section34-intro-v2[m] ci: GDC 대출·신용평가 목업 라이브 스모크테스트 워크플로 신설 (#93)
+  feature/section34-intro-v3                                     [m 90ceff58 [[34morigin/feature/section34-intro-v3[m] '혼디 적용 예시: AI 정부' 3·4번 소제목에 도입 문장 추가
+  feature/version-verify-update                                  [m 1ff68a31 [[34morigin/feature/version-verify-update[m] feat: 혼디 버전 관리 시스템 신설 — '최신 버전으로 갱신' 실제 검증
+  fix-devicelink-autoresend-race                                 [m 45f0eb01 fix: device-link 자동 재전송이 옛 세션 폴링을 버려서 생기던 레이스 컨디션 수정
+  fix-e164-hash-lookup-in-worker                                 [m 05cabb58 docs: 재고자산 도입 + L1 인프라 장애복구 세션 기록 추가 (v1.1)
+  fix-persona-navigate-target-sp-editor                          [m 58de45d4 [[34morigin/fix-persona-navigate-target-sp-editor[m] fix: 혼디 검색의 전문가 페르소나 매칭 목적지를 sp-editor.html로 수정
+  fix/ac-intent-router-wiring                                    [m e3369ac8 feat(ac): classifyIntent() 실제 배선 + scope 파라미터 신설
+  fix/ac-location-search-2026-09-06                              [m 9622e665 [[34morigin/fix/ac-location-search-2026-09-06[m] fix: 위치 대기 배선 누락 + 검색태그 진단로그 + GPS실패시 IP폴백
+  fix/ac-pro-core-location-answer                                [m bf7d123c [[34morigin/fix/ac-pro-core-location-answer[m] fix(AC-PRO-CORE): add §LOCATION-ANSWER — AC was denying an already-implemented GPS/IP location feature
+  fix/add-charge-self-report-endpoint                            [m 77137820 feat: POST /biz/charge-self-report + 코드없는 입금의 금액 단독 자동매칭 폴백
+  fix/admin-panel-control-room-2026-09-17                        [m 95a8e290 [[34morigin/fix/admin-panel-control-room-2026-09-17[m] 관리자 페이지: 각진 프레임·정적 로딩 표시로 제어반 원칙 정합
+  fix/ai-settlement-outbox                                       [m bc6edfbf fix: GPS 드리프트로 인한 /geocode 폭주 스로틀 — /deepseek 지연·K-Search 타임아웃 루프 원인 해결
+  fix/ai-settlement-outbox-retry                                 [m 6442d2d2 chore: bump build version to 20260914-080726-d619cf9d [skip ci]
+  fix/ai-settlement-outbox-v2                                    [m 71572d51 fix: AI 정산 아웃박스 신설 — ctx.waitUntil 취소로 인한 과금 유실 방지 (settlement_key 멱등 재정산 스윕)
+  fix/ai-usage-service-breakdown                                 [m b4b689e2 GDC 지출 내역 서비스별 세분화 — /user/gdc-history에 service_id 노출
+  fix/ambiguity-prompt-named-triggers                            [m afad8b77 [[34morigin/fix/ambiguity-prompt-named-triggers[m] fix: ambiguous 게이트 프롬프트를 이름 붙인 트리거 조건으로 재작성(첫 버전은 실사에서 0/22건 미사용 확인)
+  fix/ambiguity-two-call-runnerup                                [m 209e4a1d [[34morigin/fix/ambiguity-two-call-runnerup[m] fix: 애매함 감지를 자기선고형(2회 시도 모두 0/22 실패)에서 id+runnerUp 2단계 분리 방식으로 재설계
+  fix/card-flexwrap-and-order                                    [m e8323938 desktop.html — 카드를 flex-wrap 방식으로 전면 교체(분리선·카드어긋남 근본 수정), 카드 그룹을 예시 대화 2건 뒤로 재배치
+  fix/card-grid-dense-and-notice-position                        [m 77485993 [[34morigin/fix/card-grid-dense-and-notice-position[m] desktop.html — 공지 바를 히어로 제목+알약버튼 다음으로 재배치
+  fix/charge-amount-fallback-date-format                         [m 1c11a0cc fix: 금액 단독 매칭 폴백의 PocketBase 날짜 필터 형식 버그 수정
+  fix/charge-amount-fallback-diagnostic-logging                  [m 67090429 feat: 금액 단독 매칭 폴백 진단 로그 보강 (amount_guess, raw_text 일부)
+  fix/charge-bidirectional-amount-matching                       [m 411d84de fix: 자가신고와 입금 알림의 도착 순서가 바뀌어도 매칭되도록 양방향 로직 추가
+  fix/charge-bonus-and-account-info                              [m f7940365 GDC 충전 보너스 배율 + 계좌정보 필드분리 + charge-info 엔드포인트
+  fix/charge-confirm-patch-retry                                 [m 2390be65 fix: mint 성공 후 pending→matched PATCH 실패 시 재시도 + 실패 이유 로깅
+  fix/db-card-grid-material-columns                              [m a0f2347d desktop.html — 카드 그리드에 Material Design 반응형 브레이크포인트 적용(좁은 화면에서도 2열 이상)
+  fix/desktop-hero-buttons-position                              [m bb74bc4d desktop.html — 히어로 4버튼을 공지 바 바로 아래로 재배치, 글자 크기 +2px
+  fix/desktop-hero-buttons-position-2                            [m 952083e1 desktop.html — 히어로 4버튼을 공지 바 바로 아래로 재배치, 글자 크기 +2px
+  fix/desktop-remove-api-key-notice                              [m 4c24e5ae docs: AC 라우팅 구조 정리 문서 신설 — GWP/EXPERT/공공기관 3계층 판단기준·경계
+  fix/desktop-restore-cards-and-iq                               [m fd7ac6bd desktop.html — IQ 300 롤백 복구 + 브로슈어 메인 콘텐츠 이식 + 11개 섹션 카드화 재적용
+  fix/desktop-wallet-auth-redirect                               [m 207ecc1d fix: desktop.html GDC 충전 버튼, 미인증 시 로그인 팝업 있는 dashboard.html로 안내
+  fix/device-link-only                                           [m 8fcccb1a [[34morigin/fix/device-link-only[m] 긴급 수정: 공용 인증 모듈에서 SMS 인증번호 직접입력 UI 완전 제거 — device-link 단일 경로로 복원(v2.0)
+  fix/devicelink-race                                            [m ebbe5cb8 [[34morigin/fix/devicelink-race[m] fix: 위치 대기 배선 누락 + 검색태그 진단로그 + GPS실패시 IP폴백 (#86)
+  fix/emd-team-clarify-signal-gap                                [m 1da7650c [[34morigin/fix/emd-team-clarify-signal-gap[m] fix(gov-router): 읍면동 팀 계층 애매함 되묻기(NeedsClarificationSignal) 신호 누락 수정
+  fix/expert-persona-chat-wiring                                 [m 54dea7bc 사고실험으로 발견한 결함 수정: 카탈로그→실제 상담 연결, 교수 세부전공 174명의 중간 계층(중계열 SP) 누락 수정
+  fix/fs-snapshot-anchoring                                      [m e97e57ac fs: 재무제표 스냅샷 git-commit식 해시체이닝 + OpenHash 앵커링 + /fs/verify
+  fix/gdc-test-loans-maxsize-v2                                  [m e9e8c017 fix(pb): gdc_test_loans.credit_snapshot json 필드 maxSize 누락 수정
+  fix/gdc-test-migrations-to-hondi-v3                            [m f5222c22 fix(pb): gdc_test_* 마이그레이션 3건을 hondi로 이관 — 자동배포 파이프라인 태우기
+  fix/gdc-test-smoketest-tofu-v2                                 [m 474e8f39 fix(tools): 라이브 스모크테스트에 프로필 TOFU 등록 단계 추가
+  fix/gdc-transfer-undefined-cfg-endpoint                        [m 98bb2eb2 Merge branch 'main' of https://github.com/Openhash-Gopang/hondi into fix/gdc-transfer-undefined-cfg-endpoint
+  fix/geocode-flood-throttle                                     [m bc6edfbf fix: GPS 드리프트로 인한 /geocode 폭주 스로틀 — /deepseek 지연·K-Search 타임아웃 루프 원인 해결
+  fix/gopang-wallet-auth-gate                                    [m ac52e5b1 fix: Gopang Wallet 시트 열기 전 인증 게이트 추가 (미인증 시 시트 자체를 열지 않음)
+  fix/gopang-wallet-balance-and-currency-format                  [m 635b0c0a fix: GDC 잔액을 /biz/balance 서버 단일 원장에서 직접 조회 + 통화 표기 '숫자T'로 변경
+  fix/gopang-wallet-charge-self-report-ui                        [m 8545150b feat: Gopang Wallet에 입금 자가신고 미니폼 추가
+  fix/gopang-wallet-deposit-method-choice                        [m 32337aa3 feat: 입금 계좌 안내를 방법 1(자가신고 우선, 추천)/방법 2(전화번호 뒷자리) 선택 UI로 재구성
+  fix/gopang-wallet-future-services                              [m f6056f5c feat: Gopang Wallet에 일/주/월 이용료 요약 + 준비 중인 서비스(비활성) 섹션 추가
+  fix/gopang-wallet-loading-latency                              [m 644a2661 fix: Gopang Wallet 로딩 지연 — 중복 /biz/balance 순차 대기 제거
+  fix/gopang-wallet-material-redesign                            [m 345479f3 fix: Gopang Wallet 시트 Material Design 개편 — 이모지 아이콘 제거, 은행 입출금 내역 스타일
+  fix/gopang-wallet-method1-name-deposit-notice                  [m d3414b8f fix: 방법 1 설명에 이름으로 이미 입금한 경우 안내 추가
+  fix/gopang-wallet-pending-progress-bar                         [m 04fca611 feat: 입금 대기 카드에 진행률 표시 바 추가
+  fix/gopang-wallet-reconcile-stale-pending                      [m 474fe81f fix: 이미 충전 반영된 입금 신청이 계속 '입금 대기'로 표시되는 문제 수정
+  fix/gopang-wallet-responsive-card-grid                         [m 466006f6 fix: Gopang Wallet 거래 내역/준비 중 서비스를 반응형 카드 그리드로 재구성
+  fix/gopang-wallet-self-report-link-text                        [m 80a8f314 fix: 자가신고 링크 문구 수정
+  fix/gopang-wallet-sender-name-notice                           [m 0b65330c feat: 입금 계좌 안내에 보낸이(휴대폰 뒷자리 8자) 표기 규칙 강조 문구 추가
+  fix/gopang-wallet-username-display                             [m a0a8c33a feat: Gopang Wallet 시트 우측 상단에 인증된 사용자 이름 표시
+  fix/gov-clarify-harness-maxtokens-sync                         [m 03211944 [[34morigin/fix/gov-clarify-harness-maxtokens-sync[m] fix: gov-clarify 하네스 max_tokens를 production(2000)과 동기화 — 재검증에서도 6/6 빈응답이었던 원인
+  fix/gov-clarify-maxtokens-12000                                [m 9228f791 [[34morigin/fix/gov-clarify-maxtokens-12000[m] fix(gov-router): _callGovClassifyModel max_tokens 4000→12000 — 진단 결과 반영, 빈 응답 재현 5건 중 4건 해소 확인
+  fix/gov-clarify-maxtokens-4000-retest                          [m 99c49361 [[34morigin/fix/gov-clarify-maxtokens-4000-retest[m] fix: _govClassifyFn max_tokens 2000→4000(subject-gate.js와 동일값) — A1 17건 중 3건 빈응답 재발
+  fix/gov-classify-max-tokens                                    [m 21825251 [[34morigin/fix/gov-classify-max-tokens[m] fix: _govClassifyFn max_tokens 30→2000 — 추론모델이 30 전량을 reasoning에 소진해 실제 응답을 한 번도 못 낸 문제(gov-clarify 최초 라이브 검증에서 6/6 재현)
+  fix/gov-router-province-identity-leak                          [m d813be75 gov-router.js — directCode 경로에서 _loadDoSp가 window.HONDI_PROVINCE_CODE(접속 위치)로 새는 버그 수정, 확정된 도를 명시적으로 전달
+  fix/hero-illustration-restore                                  [m d65162d4 [[34morigin/fix/hero-illustration-restore[m] fix(desktop): 히어로 우측 일러스트 애니메이션 스크립트 복원
+  fix/hero-title-rotation-restore                                [m 53d63a52 [[34morigin/fix/hero-title-rotation-restore[m] fix(desktop): 히어로 제목 로테이션 스크립트 복원
+  fix/hondi-guide-1-3-facts                                      [m 09f100da chore: retrigger pages build
+  fix/hondi-search-kv-id-v3                                      [m a8ff12c9 [[34morigin/fix/hondi-search-kv-id-v3[m] fix: HONDI_SEARCH_HISTORY KV 네임스페이스 실제 id 반영
+  fix/hondi-search-sp-strengthen                                 [m fca06bbc [[34morigin/fix/hondi-search-sp-strengthen[m] Merge branch 'main' of https://github.com/Openhash-Gopang/hondi
+  fix/hondi-search-wiring                                        [m e66fa511 [[34morigin/fix/hondi-search-wiring[m] fix: 혼디 검색 라우트를 실제 worker.js 라우터에 배선
+  fix/hondi-search-worker-route                                  [m 4b626ee3 [[34morigin/fix/hondi-search-worker-route[m] feat: desktop.html 헤더에 혼디 검색 위젯 삽입 + 스모크 테스트 경로 버그 수정 (#152)
+  fix/hondi-self-name-recognition                                [m a3745e77 fix: SP가 '혼디'를 자기 이름으로 인식하도록 (U14 신설, FAQ 라우터 트리거 추가)
+  fix/info-banner-copy-hide                                      [m 2b85c46e [[34morigin/main[m: behind 483] fix(desktop): 전문가 SP 안내 배너 문구 수정 + 다시 보지 않기 체크박스 추가
+  fix/inventory-accounting                                       [m eef51b7c fs: 재고자산(bs-inventory) 도입 — 매입/매출원가 인식시점 불일치 해소
+  fix/iq-metaphor-wording                                        [m 35e45cac IQ 300 -> 200으로 수정 및 비유적 표현임을 명시(4개 파일)
+  fix/jiles-lifelong-dup-cleanup                                 [m 27fa132b [[34morigin/fix/jiles-lifelong-dup-cleanup[m: ahead 2, behind 1] docs: 오늘의 인증 회귀·KAuth 충돌·SW skipWaiting·push 붕괴 사고 전체 기록 + 주의 메뉴 등록
+  fix/k-government-legislative-init-order                        [m b75323f5 hotfix: 입법/사법 탭 초기 렌더링이 데이터 정의보다 먼저 실행되던 순서 버그 수정
+  fix/kaddress-contacts-dedup                                    [m 51cf66e6 fix(kaddress): 연락처 등록 경로 3곳 모두 저장 전 중복 확인하도록 통일
+  fix/kaddress-csv-import-failure-logging                        [m e8fd7229 fix(kaddress): CSV 업로드 레코드 생성 실패를 로그·응답에 남김
+  fix/kaddress-smoketest-phone-normalize                         [m 543c4697 fix(smoketest): 전화번호를 어떤 형식으로 넣어도 뒷자리 8자리로 정규화
+  fix/kaddress-total-count-accuracy                              [m cf8487b8 fix(kaddress): 주소록 총 건수 질문에 200건 캡 샘플 크기를 답하던 문제 수정
+  fix/klaw-sso-cors-0903                                         [m 330d060a [[34morigin/fix/klaw-sso-cors-0903[m] fix: K-Law noopener 제거 + CORS 누락 6개 서비스 추가 + 전화번호 8자리 정규화
+  fix/klaw-usage-billing-smoketest-exit-code                     [m 9b3e3f77 fix(test): klaw_usage_billing_live_smoketest.py가 LIVE-FAIL/LIVE-ERROR에도 exit 0으로 끝나던 결함 수정
+  fix/kmail-fetch-page-and-session-limit                         [m 8ed9d527 fix(kmail): 검색 스니펫에 이메일 없을 때 직접 페이지 열람(KMAIL_FETCH_PAGE 신설) + 세션 메시지 상한 40→200 완화
+  fix/kmail-smoketest-round1-clarify-false-positive              [m c352610e fix(kmail-smoketest): 대상이 특정 안 된 시나리오에서 검색 전 되묻는 정당한 응답을 '말만 하고 태그 누락'으로 오탐하던 것 수정
+  fix/kmail-smoketest-unexpected-fetch-crash                     [m ce841076 fix(kmail-smoketest): mock_fetch_result 없는 시나리오에서 모델이 예상 밖 KMAIL_FETCH_PAGE를 호출하면 KeyError로 죽던 것을 NEEDS-REVIEW로 안전 처리
+  fix/kmail-tag-bracket-tolerance                                [m 6782ace6 fix(kmail): 태그가 대괄호/괄호로 감싸져 나올 때 정규식이 매칭 못하던 실제 버그 수정
+  fix/kmail-tag-narration-without-execution                      [m fc564fc2 fix(kmail): '말만 하고 태그 누락' 회귀 수정 + 스모크테스트 오탐 규칙 보정
+  fix/l1-balance-cache-bypass-20260917                           [m 5c6fb7f7 chore: bump build version to 20260917-094933-4ebf68ef [skip ci]
+  fix/l1-timeout-and-snapshot-bug                                [m c55f9d17 fix: fs_snapshot bs 키 중복 버그 수정 + _resolveHomeL1Node 타임아웃 추가
+  fix/mechanicaleng-synonyms-and-harness-maxtokens               [m a186a026 [[34morigin/fix/mechanicaleng-synonyms-and-harness-maxtokens[m] fix: professor-mechanicaleng-series 동의어 보강 + 하네스 max_tokens를 production(4000)과 동기화
+  fix/migrate-content-repo-gopang-to-hondi                       [m 34d3566b 긴급: 콘텐츠 fetch 대상을 폐기된 gopang에서 hondi로 전면 전환(15곳) — 그동안 hondi 전용 콘텐츠 수정이 서비스에 반영 안 되고 있었음
+  fix/notice-after-hero-title-pills                              [m facfeb39 desktop.html — 공지 바를 헤더 바로 아래로 재배치, 브로슈어 제목 8개의 flex-gap 띄어쓰기 버그 수정 (#58)
+  fix/notice-position-and-heading-spacing                        [m fd928d61 desktop.html — 공지 바를 헤더 바로 아래로 재배치, 브로슈어 제목 8개의 flex-gap 띄어쓰기 버그 수정
+  fix/notice-strip-text-update                                   [m 4debd1fd desktop.html — 상단 공지 문구 갱신(혼디 현장 테스트 기간·AI 정부 출시 시점 명확화)
+  fix/pagination-scroll-to-top                                   [m 52461e0a desktop.html — 페이지 전환 시 항상 해당 페이지 최상단으로 스크롤하도록 수정
+  fix/pc-search-webapp-routing                                   [m 87d19ebf [[34morigin/fix/pc-search-webapp-routing[m] fix(hondi-search): stop navigate URLs from resolving to webapp.html on PC search
+  fix/pdv-bidirectional-order-record-v2                          [m ce87327c [[34morigin/fix/pdv-bidirectional-order-record-v2[m] test: PDV 양방향 거래명세서 + 재무제표 반영 라이브 스모크테스트 추가
+  fix/pdv-order-smoketest-json-field-parsing                     [m 3b8f73b8 [[34morigin/fix/pdv-order-smoketest-json-field-parsing[m] debug: PDV 양방향 스모크테스트에 원본 레코드 로그 추가 (#138)
+  fix/pdv-order-smoketest-settle-ledger-pl-nesting               [m 1813325b [[34morigin/fix/pdv-order-smoketest-settle-ledger-pl-nesting[m] fix: PDV 스모크테스트 — /biz/settle-ledger 응답이 pl 하위 객체임을 반영
+  fix/regional-gov-directcode-greeting                           [m 57821699 regional-gov.html — _govDirectCode 경로에서 일반 인사말 대신 자기소개 시드 발화로 전환
+  fix/remove-dead-pdv-query-call                                 [m d2056fb1 fix: 결과를 쓰지 않는 죽은 /pdv/query 호출 제거 (410 Gone 콘솔 에러 원인)
+  fix/site-manifest-path                                         [m 33ee312a [[34morigin/fix/site-manifest-path[m] fix: site-manifest.json을 리포 루트로 이동 (GitHub Pages 경로 미러링 불일치 수정)
+  fix/sp-hondi-guide-hardcoded-ref                               [m 92dd072f fix: SP_hondi-guide의 하드코딩된 SP_PDV_v1_2 참조를 SP-TREE-REGISTRY 경유로 수정
+  fix/test-create-product                                        [m 8e94791c test: /admin/test-create-product 신설 — 재고자산 스모크 테스트용 상품 생성
+  fix/test-create-product-required-fields                        [m 94433e35 fix: /admin/test-create-product에 seller_products 필수 필드(category, product_id) 추가
+  fix/test-register-profile                                      [m d99cf04e test: /admin/test-register-profile 신설 — mockup 계정으로 재무제표 대칭 기록 스모크 테스트 가능하게
+  fix/unmatched-capture-missing-content-type                     [m 3972b95d fix: unmatched_deposit_captures 저장 요청에 Content-Type 헤더 누락 수정
+  fix/user-dashboard-auth-style-unify                            [m 748bd0b5 desktop.html — 내 GDC 대시보드 인증 UI를 plan.hondi.net(K-Plan)과 통일(색상 팔레트·뒷자리 8자리 입력 방식)
+  handoff-expert-chat-failed-to-fetch                            [m b6bd506d [[34morigin/handoff-expert-chat-failed-to-fetch[m] docs: expert-chat.html Failed to fetch 버그 인수인계서
+  handoff-sitewide-1042-cors-block                               [m a7ed2432 [[34morigin/handoff-sitewide-1042-cors-block[m] docs: 사이트 전역 API가 Cloudflare Error 1042로 차단되는 심각한 문제 인수인계서
+  hondi-search-debug-logging-v2                                  [m 6a41332e [[34morigin/hondi-search-debug-logging-v2[m] debug: 페르소나 매칭 진단 로그 재추가 (v2)
+  hondi-search-fixes-persona-routing                             [m e7404508 [[34morigin/hondi-search-fixes-persona-routing[m] fix: 검색창 입력 유지 버그 + 전문가 페르소나 라우팅 신설
+  hotfix/k-services-svc-content-comma                            [m 9d6b4141 hotfix: SVC_CONTENT kmail/kjit 사이 쉼표 누락 수정 — 전체 K-서비스 탭 먹통 해결
+  kmail-a2a-v1                                                   [m 420e441b Merge pull request #29 from Openhash-Gopang/kmail-a2a-v1
+  kmail-consolidate-to-mail-hondi-net                            [m c2de3ea4 Merge pull request #116 from Openhash-Gopang/kmail-consolidate-to-mail-hondi-net
+  kplan-kmail-batch-v1                                           [m 76c04112 docs: K-Plan=전략/정치, K-Mail=전술/전쟁 지휘체계 명시 + 육하원칙 브리프 포맷
+  kplan-v1.2-and-handoff                                         [m 104da04c docs: 2026-09-04 K-Plan↔K-Mail A2A 세션 인수인계서
+* [32mmain                                                           [m a683d7af [[34morigin/main[m: ahead 1] docs: desktop.html 개발자 문서 메뉴에 0918 인수인계서·인시던트 문서 추가
+  manual-biometric-gdc-2026-09-07                                [m efd3676c docs: 사용자 매뉴얼에 지문 인증·GDC 결제 문턱값 반영 (7장 수정, 15장 보강, 9장 참조 추가, 33장 신설)
+  polish/kmail-vague-defer-and-clarify-recognition               [m 2f729f70 polish(kmail): 모호한 미루기 방지 문구 강화 + 스모크테스트 오탐 규칙 추가 개선
+  protective-settings-2026-09-07                                 [m 1985aefc feat: 보호 설정(K-서비스 결제 문턱값·device-link 지문 필수 여부) — 완화는 지문+24시간 유예, 강화는 즉시 (2026-09-07)
+  push-json-fix                                                  [m 8cf014d3 fix: PDV 스모크테스트 — summary_6w가 이미 파싱된 객체임을 반영
+  security/guid-nondeterministic-and-stepup-signing-fix          [m e4c8f0a8 보안: guid를 전화번호 결정론적 해시 대신 CSPRNG로 생성, 번호 재클레임 시 이전 레코드 supersede, 프로필 하드삭제 방어, TOFU 최초 바인딩 재인증 강화, step-up 문턱값 서명 검증 추가
+  security/server-pubkey-reuse-detection                         [m ab5f4f37 보안: 서버측 pubkey 재사용 탐지 추가(§2.4)
+  sp-tax-accountant-v2_3-2026-09-07                              [m 8d81ebf3 feat: SP_tax-accountant v2.2→v2.3 — 세무사법 제2조 업무범위 전수 커버리지 신설 + 인간 세무사 검토·승인 원칙 전산출물 일반화
+  temp-push-diagnostics                                          [m e2274f7a debug: PDV 양방향 스모크테스트에 원본 레코드 로그 추가
+  test/expert-leaf-named-453-full-coverage                       [m 02b8388e [[34morigin/test/expert-leaf-named-453-full-coverage[m] ci: EXPERT 리프 453개 A-named 라우팅 스모크테스트 워크플로 추가
+  test/gov-clarify-a1-batch2                                     [m 1006aaaf [[34morigin/test/gov-clarify-a1-batch2[m] test: gov-clarify A1 배치2 — 신규 인접쌍 6건 + 재시도 2건 + id190 재현 1건 + 통제 2건, 하네스에 오탐 채점 지원 추가
+  test/gov-clarify-a10-division-tie                              [m b1e0448c [[34morigin/test/gov-clarify-a10-division-tie[m] test(gov-clarify): A10 — 기관 산하 division 동점(_resolveDoAgencyDivision/_resolveOrgDivision) 라이브 검증
+  test/gov-clarify-a2-live-verification                          [m 597ca5b0 [[34morigin/test/gov-clarify-a2-live-verification[m] test: gov-clarify A2(과 레벨) 최초 라이브 검증 — division-tables.js 자체주석에 명시된 인접·혼동 위험 쌍 8건 + 통제 시나리오 2건
+  test/gov-clarify-a3-live-verification                          [m d996354a [[34morigin/test/gov-clarify-a3-live-verification[m] test: gov-clarify A3(읍면동 팀 레벨) 최초 라이브 검증 — 주민복지팀↔찾아가는복지팀 6쌍 + 통제 2건
+  test/gov-clarify-a4-live-verification                          [m 662f127a [[34morigin/test/gov-clarify-a4-live-verification[m] test: gov-clarify A4(국가기관↔지방행정 계층충돌) 최초 라이브 검증 — 실제 재현된 원래 버그 발화 포함 6쌍 + 통제 2건
+  test/gov-clarify-a5-live-verification                          [m db9a6de7 [[34morigin/test/gov-clarify-a5-live-verification[m] test: gov-clarify A5(natMatch 지사형 집행기관↔지방행정 계층충돌) 최초 라이브 검증 — 태풍/환경영향평가/동물검역 4쌍 + 통제 2건
+  test/gov-clarify-a7-citydept-zeromatch                         [m bd4894e5 [[34morigin/test/gov-clarify-a7-citydept-zeromatch[m] test(gov-clarify): A7 — 시청 국 키워드 완전매칭 실패 구제망(_resolveCityDeptMatch) 검증 시나리오
+  test/gov-clarify-a8-institution-weakzero                       [m d8fd1c86 [[34morigin/test/gov-clarify-a8-institution-weakzero[m] test(gov-clarify): A8 — _resolveInstitutionMatch topScore===0/1 분기 라이브 검증 시나리오
+  test/gov-clarify-a9-institution-tie                            [m dbd6737a [[34morigin/test/gov-clarify-a9-institution-tie[m] test(gov-clarify): A9 — 기관간 순수 동점(tied.length>1) 분기 라이브 검증 시나리오
+  test/gov-clarify-first-live-verification                       [m 7e116502 [[34morigin/test/gov-clarify-first-live-verification[m] test: gov-router.js CLARIFY 되묻기 신호 최초 라이브 검증(6건, 자체주석에 명시된 인접부서쌍)
+  test/gov-clarify-nondeterminism-probe                          [m 93cb1570 [[34morigin/test/gov-clarify-nondeterminism-probe[m] test(gov-clarify): diag-04류 비결정성 직접 검증용 반복호출 시나리오+워크플로 추가
+  test/hierarchical-gate-full5-395                               [m 617d8901 [[34morigin/test/hierarchical-gate-full5-395[m] test: subject-gate 2단계 리프 정밀화 하네스 5개 트리로 범용화(395개 리프)
+  test/hondi-guide-50-live-test-v2                               [m 5b2a161f test(hondi-guide): 실제 시스템 프롬프트 조립 재현 + 50개 라이브 테스트 스크립트
+  test/hondi-search-route-readd                                  [m d5c1b061 fix: hondi.net/hondi-search Route 제거 - Cloudflare Error 1042(zone-Origin workers.dev 차단) 원인으로 확정, 사이트 전역 정상화
+  test/hondi-search-smoke                                        [m d9e3fbae fix: 혼디 검색 SP 플레이스홀더 미치환 버그 수정 및 실제 site-manifest 연결 (#146)
+  test/kaddress-contacts-live-smoketest                          [m e0e138c4 test: K-Address 주소록 등록/중복방지/분류 라이브 스모크테스트 신설
+  test/klaw-billing-phone-token-bypass                           [m d8186192 fix(test): klaw_usage_billing_live_smoketest.py — phone_verify_token 오프라인 발급으로 LOGIN_REQUIRED 해소
+  test/klaw-usage-billing-beta-smoketest                         [m 675a7c79 test: K-Law 베타 토큰 종량제(GDC ×10) 라이브 스모크테스트 신설
+  test/kmail-fetch-page-live-smoketest                           [m fc8599db test(kmail): KMAIL_FETCH_PAGE 라이브 스모크테스트 신설 + searchContext 문구/연쇄 처리 버그 수정
+  test/pdv-order-smoketest-tx-retry                              [m d954ac31 [[34morigin/test/pdv-order-smoketest-tx-retry[m] test: PDV 스모크테스트 — TX_HASH_MISMATCH 재시도 로직 추가
+  test/regional-gov-expert-popup-redirect-live-smoketest-20260917[m 0cb4db8d test: regional-gov.html [EXPERT:] 배선(0008) 팝업/리다이렉트 end-to-end 라이브 스모크테스트
+  widget-attach-button-v3                                        [m 18a31f91 [[34morigin/widget-attach-button-v3[m] fix: 첨부 버튼을 pill 왼쪽에 직접 배치, 상단 첨부 칩 제거, placeholder 변경
+  widget-move-attempt3                                           [m 9052744e [[34morigin/widget-move-attempt3[m] feat: 혼디 검색 위치 이동(헤더→4버튼 아래) + Claude 스타일 pill 입력창 + 파일 첨부

@@ -1,0 +1,2481 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+<link rel="icon" href="data:,">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<title>K-서비스 — 혼디</title>
+</head>
+<body>
+<style>
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+:root {
+  --bg:        #eef1f6;
+  --surface:   #ffffff;
+  --border:    #e2e8f0;
+  --navy:      #0e1c3f;
+  --brand:     #0c6cc3;
+  --brand-dk:  #094a86;
+  --text:      #0f172a;
+  --text3:     #475569;
+  --text4:     #64748b;
+  --radius:    8px;
+  --radius-lg: 12px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+  font-size: 14px;
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+}
+
+.ug-doc { max-width: 1040px; margin: 0 auto; padding: 40px 24px 80px; }
+
+/* ── 헤더 ── */
+.ug-header {
+  background: var(--navy); color: #fff; border-radius: var(--radius-lg); padding: 28px 32px; margin-bottom: 24px;
+  box-shadow: 0 4px 14px rgba(14,28,63,0.18), 0 1px 4px rgba(14,28,63,0.12);
+}
+.ug-header h1 { font-size: 26px; font-weight: 600; margin-bottom: 8px; }
+.ug-header .ug-sub { font-size: 13.5px; color: #b3bfd1; }
+
+/* ── 서비스 탭 (2행 x 8열) ── */
+.svc-tabs {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.svc-tab {
+  background: var(--surface); border: none; border-radius: 10px;
+  padding: 10px 6px; text-align: center; cursor: pointer;
+  font-size: 12.5px; font-weight: 600; color: var(--text3);
+  box-shadow: 0 1px 3px rgba(15,23,42,0.10), 0 1px 2px rgba(15,23,42,0.07);
+  transition: box-shadow 0.18s ease, transform 0.18s ease, color 0.18s ease;
+  white-space: nowrap;
+}
+.svc-tab:hover {
+  color: var(--brand-dk); transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(15,23,42,0.14), 0 2px 6px rgba(15,23,42,0.08);
+}
+.svc-tab.active {
+  background: var(--brand); color: #fff;
+  box-shadow: 0 6px 16px rgba(12,108,195,0.35), 0 2px 6px rgba(12,108,195,0.2);
+}
+@media (max-width: 900px) {
+  .svc-tabs { grid-template-columns: repeat(4, 1fr); }
+  .svc-tab { font-size: 12px; padding: 9px 4px; }
+}
+@media (max-width: 560px) {
+  .svc-tabs { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── 내부 인프라 탭(사용자에게 공개된 K-서비스가 아니라 혼디 내부 처리 단계) ── */
+.svc-internal-label {
+  font-size: 11px; font-weight: 700; color: rgba(255,255,255,.45);
+  letter-spacing: .3px; margin: 16px 0 8px;
+}
+.svc-tabs-internal {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+.svc-tabs-internal .svc-tab {
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14);
+  color: rgba(255,255,255,.65); box-shadow: none;
+}
+.svc-tabs-internal .svc-tab:hover {
+  color: #fff; border-color: rgba(255,255,255,.3); transform: translateY(-2px);
+}
+.svc-tabs-internal .svc-tab.active {
+  background: rgba(255,255,255,.18); color: #fff; box-shadow: none;
+  border-color: rgba(255,255,255,.4);
+}
+@media (max-width: 900px) {
+  .svc-tabs-internal { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 560px) {
+  .svc-tabs-internal { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── 본문 콘텐츠 ── */
+.svc-content {
+  background: var(--surface); border: none; border-radius: var(--radius-lg);
+  padding: 40px; min-height: 320px;
+  box-shadow: 0 2px 10px rgba(15,23,42,0.08), 0 1px 3px rgba(15,23,42,0.06);
+}
+.svc-content-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 260px; color: var(--text4); text-align: center; gap: 8px;
+}
+.svc-content-empty .svc-empty-title { font-size: 15px; font-weight: 600; color: var(--text3); }
+.svc-content-empty .svc-empty-sub { font-size: 13px; }
+
+/* ── 서비스 상세 콘텐츠 (전문적 스타일) ── */
+.svc-detail h2 { display: inline-block; font-size: 20px; font-weight: 700; color: var(--navy); margin-bottom: 10px; }
+.svc-badge {
+  display: inline-block; margin-left: 10px; padding: 3px 9px; border-radius: 999px;
+  font-size: 11px; font-weight: 700; vertical-align: middle; letter-spacing: 0.02em;
+}
+.svc-badge-live { background: #dcfce7; color: #15803d; }
+.svc-badge-partial { background: #fef3c7; color: #b45309; }
+.svc-badge-design { background: #e5e7eb; color: #475569; }
+.svc-detail .svc-lead { font-size: 14.5px; color: var(--text3); line-height: 1.7; margin: 12px 0 28px; }
+.svc-list { margin: 0 0 4px; padding-left: 20px; }
+.svc-list li { font-size: 13.5px; color: var(--text3); line-height: 1.9; }
+.svc-note { font-size: 13.5px; color: var(--text3); line-height: 1.7; margin: 0 0 12px; }
+.svc-detail h3 {
+  font-size: 15px; font-weight: 600; color: var(--navy);
+  margin: 28px 0 12px; padding-bottom: 8px; border-bottom: 2px solid var(--border);
+}
+.svc-detail h3:first-of-type { margin-top: 0; }
+.svc-flow { counter-reset: flow; margin: 0 0 4px; padding: 0; list-style: none; }
+.svc-flow li {
+  counter-increment: flow; position: relative; padding: 0 0 18px 34px; font-size: 13.5px;
+  color: var(--text3); line-height: 1.6;
+}
+.svc-flow li::before {
+  content: counter(flow); position: absolute; left: 0; top: -1px;
+  width: 22px; height: 22px; border-radius: 50%; background: var(--brand); color: #fff;
+  font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+}
+.svc-flow li::after {
+  content: ''; position: absolute; left: 11px; top: 22px; bottom: 0; width: 1px; background: var(--border);
+}
+.svc-flow li:last-child::after { display: none; }
+.svc-flow li b { color: var(--text); }
+.svc-table-wrap { overflow-x: auto; margin: 8px 0 4px; }
+table.svc-table { width: 100%; border-collapse: collapse; font-size: 13px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(15,23,42,0.08); }
+table.svc-table th, table.svc-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+table.svc-table thead th { background: #f1f5f9; color: var(--navy); font-weight: 600; white-space: nowrap; }
+table.svc-table tbody tr:last-child td { border-bottom: none; }
+table.svc-table td.svc-hondi { color: var(--brand-dk); font-weight: 600; }
+.svc-callout {
+  background: #eff6ff; border: 1px solid #93c5fd; border-left: 4px solid var(--brand);
+  border-radius: 8px; padding: 12px 16px; margin: 16px 0; font-size: 13px; color: #1e3a5f;
+}
+.svc-callout.important { background: #fff7ed; border-color: #fbbf24; border-left-color: #d97706; color: #7c4a03; }
+
+/* ── 외부 링크 칩 (Material outlined button) ── */
+.svc-link-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: #fff; border: 1.5px solid var(--brand);
+  color: var(--brand-dk); font-weight: 700; font-size: 13.5px;
+  padding: 8px 18px; border-radius: 24px; text-decoration: none;
+  margin-bottom: 18px; box-shadow: 0 1px 3px rgba(12,108,195,0.15);
+  transition: background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease, color 0.18s ease;
+}
+.svc-link-btn:hover {
+  background: var(--brand); color: #fff;
+  box-shadow: 0 6px 16px rgba(12,108,195,0.35), 0 2px 6px rgba(12,108,195,0.2);
+  transform: translateY(-2px);
+}
+.svc-link-btn:active { transform: translateY(0); box-shadow: 0 2px 6px rgba(12,108,195,0.25); }
+.svc-link-btn svg { flex-shrink: 0; }
+
+.ug-footer { text-align: center; font-size: 12px; color: var(--text4); border-top: 1px solid var(--border); padding-top: 18px; margin-top: 40px; }
+
+/* ── STEP 아코디언(파이프라인 SP 상세 알고리즘용) ── */
+.svc-diagram { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin: 16px 0 22px; overflow-x: auto; }
+.svc-diagram svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+.svc-accordion { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin: 0 0 18px; }
+.svc-acc-item + .svc-acc-item { border-top: 1px solid var(--border); }
+.svc-acc-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 13px 16px; cursor: pointer; background: var(--surface);
+  font-size: 14px; font-weight: 700; color: var(--text2);
+  transition: background 0.15s ease;
+}
+.svc-acc-head:hover { background: #f1f5f9; }
+.svc-acc-head .svc-acc-step-no {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 22px; height: 22px; padding: 0 6px; border-radius: 6px;
+  background: var(--brand); color: #fff; font-size: 11.5px; font-weight: 800; margin-right: 10px;
+}
+.svc-acc-head .svc-acc-arrow { flex-shrink: 0; transition: transform 0.2s ease; color: var(--text4); }
+.svc-acc-item.open .svc-acc-head .svc-acc-arrow { transform: rotate(180deg); }
+.svc-acc-body { max-height: 0; overflow: hidden; transition: max-height 0.25s ease; background: #fff; }
+.svc-acc-item.open .svc-acc-body { max-height: 2000px; }
+.svc-acc-body-inner { padding: 4px 16px 16px 48px; font-size: 13px; color: var(--text3); line-height: 1.75; }
+.svc-acc-body-inner p { margin: 0 0 10px; }
+.svc-acc-body-inner ul { margin: 0 0 10px; padding-left: 18px; }
+.svc-acc-body-inner li { margin-bottom: 5px; }
+.svc-acc-body-inner code { background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+.svc-acc-gate { display: inline-block; background: #fef3c7; color: #b45309; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; margin: 0 0 8px; }
+</style>
+
+<script>
+window.PAGE_HEADER = {
+  active: 'k-services',
+  badge: 'K-서비스',
+  h1: '법률·세무·의료·교육 등<br>20개 공익 서비스를 한 플랫폼에서',
+  sub: '사고나 응급 상황이 감지되면, 혼디가 신고 접수와 동시에 중증도 분류·출동 배차·응급처치 안내까지 자동으로 진행합니다.',
+  extraHtml: '<div class="svc-internal-label">내부 처리 단계(사용자에게 직접 노출되는 K-서비스가 아님)</div>' +
+    '<div class="svc-tabs-internal" id="svcTabsInternal">' +
+      '<div class="svc-tab" data-svc="kintent">의도 파악(내부)</div>' +
+      '<div class="svc-tab" data-svc="kcompose">실행계획 조합(내부)</div>' +
+      '<div class="svc-tab" data-svc="kexecute">오케스트레이션 실행(내부)</div>' +
+      '<div class="svc-tab" data-svc="kdeliver">결과 전달(내부)</div>' +
+      '<div class="svc-tab" data-svc="kreport">이해당사자 통지(내부)</div>' +
+      '<div class="svc-tab" data-svc="kcase">복합 사안 총괄</div>' +
+    '</div>'
+};
+</script>
+<link rel="stylesheet" href="/assets/ph-header.css">
+<script src="/assets/ph-header.js"></script>
+<!-- hcw-attach:v1 (scripts/attach-chat-widget.cjs가 삽입, 손으로 지우지 마세요) -->
+<script>
+  window.K_AUTH_CONFIG = { serviceLabel: "K-서비스" };
+  window.HONDI_CHAT_WIDGET_CONFIG = {
+    sp: "HONDI_VISITOR_SP",
+    context: "사용자는 지금 K-서비스 전체 목록 섹션에 있습니다. K-Law, K-Tax, K-Market, GDC 등 16개 K-서비스 위성 저장소를 개괄합니다.",
+    label: "K-서비스에 물어보기",
+    greeting: "안녕하세요! K-서비스 전체 목록과 관련해 궁금한 점을 물어보세요. 😊",
+    serviceLabel: "K-서비스",
+  };
+</script>
+<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
+<script src="/assets/chat-widget.js"></script>
+<!-- hcw-attach:v1 (scripts/attach-chat-widget.js가 삽입, 손으로 지우지 마세요) -->
+<script>
+  window.K_AUTH_CONFIG = { serviceLabel: "K-서비스" };
+  window.HONDI_CHAT_WIDGET_CONFIG = {
+    sp: "HONDI_VISITOR_SP",
+    context: "사용자는 지금 K-서비스 전체 목록 섹션에 있습니다. K-Law, K-Tax, K-Market, GDC 등 16개 K-서비스 위성 저장소를 개괄합니다.",
+    label: "K-서비스에 물어보기",
+    greeting: "안녕하세요! K-서비스 전체 목록과 관련해 궁금한 점을 물어보세요. 😊",
+    serviceLabel: "K-서비스",
+  };
+</script>
+<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
+<script src="/assets/chat-widget.js"></script>
+
+<div class="ug-doc">
+
+
+
+  <div class="svc-tabs" id="svcTabs">
+    <div class="svc-tab" data-svc="kmail">메일</div>
+    <div class="svc-tab active" data-svc="k119">응급</div>
+    <div class="svc-tab" data-svc="klaw">법률</div>
+    <div class="svc-tab" data-svc="kpolice">치안 신고</div>
+    <div class="svc-tab" data-svc="ksecurity">보안</div>
+    <div class="svc-tab" data-svc="khealth">의료</div>
+    <div class="svc-tab" data-svc="kschool">교육</div>
+    <div class="svc-tab" data-svc="gdc">금융</div>
+    <div class="svc-tab" data-svc="kstock">투자</div>
+    <div class="svc-tab" data-svc="kinsurance">보험</div>
+    <div class="svc-tab" data-svc="ktax">세무</div>
+    <div class="svc-tab" data-svc="kmarket">쇼핑·거래</div>
+    <div class="svc-tab" data-svc="ktraffic">교통</div>
+    <div class="svc-tab" data-svc="klogistics">물류</div>
+    <div class="svc-tab" data-svc="kcleaner">환경</div>
+    <div class="svc-tab" data-svc="kpublic">행정</div>
+    <div class="svc-tab" data-svc="kdemocracy">정책</div>
+    <div class="svc-tab" data-svc="ktelecom">통신</div>
+    <div class="svc-tab" data-svc="ksearch">검색</div>
+    <div class="svc-tab" data-svc="kbiz">사업자</div>
+    <div class="svc-tab" data-svc="kplan">목표·기획</div>
+    <div class="svc-tab" data-svc="kwatch">신고</div>
+    <div class="svc-tab" data-svc="kjob">직업</div>
+    <div class="svc-tab" data-svc="kjit">조달</div>
+    <div class="svc-tab" data-svc="kcity">도시 설계</div>
+    <div class="svc-tab" data-svc="kestate">부동산</div>
+    <div class="svc-tab" data-svc="ksocial">모임</div>
+  </div>
+
+  <div class="svc-content" id="svcContent">
+    <!-- 각 탭의 본문이 이 안에 렌더링됩니다. 지금은 전부 빈 상태(준비 중)입니다. -->
+  </div>
+
+  <footer class="ug-footer">
+    혼디 개발자 대표 도영민 · 제주특별자치도 제주시 한림읍 · tensor.city@gmail.com · hondi.net
+  </footer>
+
+</div>
+
+<script>
+// 서비스별 본문 콘텐츠 저장소 — 지금은 전부 비어있는 상태(빈 문서).
+// 나중에 각 키에 실제 HTML을 채우면 해당 탭 클릭 시 그대로 표시됩니다.
+var SVC_CONTENT = {
+  k119: `
+    <div class="svc-detail">
+      <h2>K-119 — 응급 신고·구조 자동화</h2>
+      <a href="https://911.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        911.hondi.net 바로가기
+      </a>
+      <p class="svc-lead">사고나 응급 상황이 감지되면, 혼디가 신고 접수와 동시에 중증도 분류·출동 배차·응급처치 안내까지 자동으로 진행합니다.</p>
+
+      <h3>처리 흐름</h3>
+      <ol class="svc-flow">
+        <li><b>사고 감지</b> — 차량 블랙박스 충격 감지 또는 사용자의 직접 신고로 시작됩니다.</li>
+        <li><b>중증도 자동 분류</b> — AI가 상황을 즉시 1~4급으로 분류합니다.</li>
+        <li><b>출동번호 발급</b> — 예: <code>FD-20260604-XXXX</code> 형식의 고유 번호가 즉시 발급됩니다.</li>
+        <li><b>최근접 소방서·구급대 자동 배치</b> — Haversine 거리 계산으로 가장 가까운 가용 자원을 자동 배차합니다.</li>
+        <li><b>응급처치 가이드 실시간 제공</b> — 구급대 도착 전까지 AI가 현장 대응을 안내합니다.</li>
+        <li><b>가용 응급실 자동 매칭</b> — 수용 가능한 응급실을 찾아 환자 정보를 사전 전송합니다.</li>
+      </ol>
+
+      <h3>다른 서비스와의 자동 연계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>상황</th><th>자동 연동</th></tr></thead>
+          <tbody>
+            <tr><td>범죄 연루 의심 시</td><td class="svc-hondi">K-Police 자동 연동 — 별도 경찰 출동번호 발급</td></tr>
+            <tr><td>사고 기록</td><td class="svc-hondi">K-Law 자동 연동 — 법적 책임 소재 AI 분석</td></tr>
+            <tr><td>보험 처리</td><td class="svc-hondi">K-Insurance 자동 연동 — 청구 서류 자동 생성</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>기존 119 신고와 무엇이 다른가</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 K-119</th></tr></thead>
+          <tbody>
+            <tr><td>상황 설명</td><td>신고자가 위치·상황을 직접 설명</td><td class="svc-hondi">위치·상황 자동 파악, 신고자는 확인만</td></tr>
+            <tr><td>중증도 판단</td><td>상담원이 청취 후 판단</td><td class="svc-hondi">AI가 즉시 1~4급 자동 분류</td></tr>
+            <tr><td>배차</td><td>관할 소방서 수동 확인</td><td class="svc-hondi">최근접 자원 자동 계산·배치</td></tr>
+            <tr><td>후속 처리</td><td>경찰·보험 별도로 각각 신고</td><td class="svc-hondi">K-Police·K-Law·K-Insurance 자동 연동</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>사용자 발화 시나리오</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>사용자 발화</th><th>자동 분류</th><th>처리</th></tr></thead>
+          <tbody>
+            <tr><td>"차 사고 났어요, 사람이 안 움직여요"</td><td>교통사고 · 중증(1급 의심)</td><td class="svc-hondi">구급대+경찰 동시 출동, CPR 필요 여부 확인 안내</td></tr>
+            <tr><td>"집에 불이 났어요!"</td><td>화재</td><td class="svc-hondi">소방서 자동 출동, 대피 경로 실시간 안내</td></tr>
+            <tr><td>"아빠가 갑자기 쓰러졌어요, 숨을 안 쉬어요"</td><td>심정지 의심 · 1급</td><td class="svc-hondi">최우선 배차, CPR 가이드 실시간 제공</td></tr>
+            <tr><td>"아이가 목에 뭐가 걸렸어요"</td><td>기도 폐쇄</td><td class="svc-hondi">하임리히법 즉시 안내, 구급대 동시 배차</td></tr>
+            <tr><td>"등산하다 발목이 부러진 것 같은데 여기 위치를 모르겠어요"</td><td>산악 조난·골절</td><td class="svc-hondi">GPS 위치 자동 확인 후 산악구조대 연동</td></tr>
+            <tr><td>"가스 냄새가 심하게 나요"</td><td>가스 누출 의심</td><td class="svc-hondi">소방서+가스안전공사 동시 연동, 대피 안내</td></tr>
+            <tr><td>"물에 빠진 사람을 봤어요"</td><td>익수 사고</td><td class="svc-hondi">최근접 구조대 자동 배차, 목격자 안전 안내</td></tr>
+            <tr><td>"화상을 입었어요, 손이 다 부풀었어요"</td><td>화상(중등도 이상 의심)</td><td class="svc-hondi">응급 처치 안내 + 화상 전문 응급실 자동 매칭</td></tr>
+            <tr><td>"친구가 알레르기 쇼크가 온 것 같아요, 에피펜이 없어요"</td><td>아나필락시스 의심 · 1급</td><td class="svc-hondi">최근접 응급실 매칭, 응급처치 실시간 안내</td></tr>
+            <tr><td>"밤에 혼자 있는데 누가 침입하려고 해요"</td><td>범죄 위험(응급 아님)</td><td class="svc-hondi">K-Police 우선 자동 연동, 상황에 따라 K-119 대기</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text4); margin-top:8px;">위 시나리오는 이해를 돕기 위한 예시이며, 실제 분류·처리 결과는 상황에 따라 달라질 수 있습니다.</p>
+
+      <div class="svc-callout">
+        위험 신호(폭력·사기·의료 응급 키워드) 감지의 실측 응답 시간은 <b>0.246ms</b>로, 목표치 대비 3.3배를 초과 달성했습니다 (혼디 자체 측정 결과).
+      </div>
+      <div class="svc-callout important">
+        실제 출동 여부 판단과 현장 처치는 언제나 소방 당국의 권한입니다. 혼디는 신고 접수와 정보 전달을 신속하게 중개하는 역할을 합니다.
+      </div>
+    </div>
+  `,
+  klaw: `
+    <div class="svc-detail">
+      <h2>K-Law — 사법, 가상 판결 시뮬레이션</h2>
+      <a href="https://klaw.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        klaw.hondi.net 바로가기
+      </a>
+      <p class="svc-lead">사실관계와 관련 판례를 근거로 3분 만에 가상 판결문을 작성합니다. 당사자가 그 결론에 합의하면 민법상 화해계약(제731·732조)으로서 즉시 법적 구속력이 발생합니다.</p>
+
+      <h3>처리 흐름</h3>
+      <ol class="svc-flow">
+        <li><b>당사자 신청</b> — 분쟁 당사자 양측이 K-Law의 판단에 따르기로 동의합니다.</li>
+        <li><b>사실관계 대조</b> — 양측이 제출한 사실관계 중 다투지 않는 부분과 실제 쟁점을 구분합니다.</li>
+        <li><b>판례 매칭</b> — 유사 대법원 판례를 검색해 법리 근거로 제시합니다.</li>
+        <li><b>가상 판결문 작성</b> — 결론과 근거 법리, 판례 인용을 포함한 판결문을 3분 내 작성합니다.</li>
+        <li><b>화해계약 성립</b> — 양측이 결론에 합의하면 그 순간 화해계약(민법 제731·732조)이 성립합니다.</li>
+      </ol>
+
+      <h3>다른 서비스와의 자동 연계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>상황</th><th>자동 연동</th></tr></thead>
+          <tbody>
+            <tr><td>강제집행이 필요한 경우</td><td class="svc-hondi">인간 중재인의 정식 중재판정 필요(중재법 제35조)</td></tr>
+            <tr><td>합의 불성립 시</td><td class="svc-hondi">헌법 제27조 재판청구권에 따라 소송 진행 가능</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>기존 방식과 무엇이 다른가</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <tbody>
+            <tr><td>처리 기간</td><td>1심~대법원 평균 3년 이상</td><td class="svc-hondi">3분(자체측정)</td></tr>
+            <tr><td>비용</td><td>심급당 착수금 300만~700만원+성공보수</td><td class="svc-hondi">이용료 수준(수천원대)</td></tr>
+            <tr><td>판례 조사</td><td>변호사 수십~수백 시간</td><td class="svc-hondi">K-Law가 즉시 매칭·제시</td></tr>
+            <tr><td>법적 구속력</td><td>확정판결·중재판정과 동일한 강제집행력</td><td class="svc-hondi">화해계약 구속력(강제집행엔 별도 중재 필요)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>사용자 발화 시나리오</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>사용자 발화</th><th>자동 분류</th><th>처리</th></tr></thead>
+          <tbody>
+            <tr><td>"상거래 대금 미지급 건, K-Law 판단으로 끝내고 싶어요"</td><td>상거래 분쟁 화해 시도</td><td class="svc-hondi">사실관계 대조 후 가상 판결문 3분 작성</td></tr>
+            <tr><td>"임대차 보증금 반환 문제로 집주인과 다투고 있어요"</td><td>임대차 분쟁</td><td class="svc-hondi">관련 판례 매칭, 화해 결론 제시</td></tr>
+            <tr><td>"교통사고 과실비율에 서로 의견이 달라요"</td><td>과실비율 분쟁</td><td class="svc-hondi">보험사 자료와 판례 대조 후 판단</td></tr>
+            <tr><td>"온라인에서 산 물건이 하자가 있는데 환불을 안 해줘요"</td><td>전자상거래 분쟁</td><td class="svc-hondi">소비자 보호 판례 기반 결론 제시</td></tr>
+            <tr><td>"동업자와 이익 배분 문제로 갈등 중이에요"</td><td>동업 계약 분쟁</td><td class="svc-hondi">계약서·판례 검토 후 화해안 제시</td></tr>
+            <tr><td>"층간소음으로 이웃과 소송 직전이에요"</td><td>민사 분쟁(생활)</td><td class="svc-hondi">유사 판례 기반 조정안 제시</td></tr>
+            <tr><td>"프리랜서 용역비를 못 받았어요"</td><td>용역대금 분쟁</td><td class="svc-hondi">계약 이행 여부 판단 후 결론 제시</td></tr>
+            <tr><td>"이혼 시 재산분할 비율이 궁금해요"</td><td>가사 분쟁</td><td class="svc-hondi">단, 신분관계 사항은 별도 법률상담 권고</td></tr>
+            <tr><td>"회사에서 부당해고를 당한 것 같아요"</td><td>노동 분쟁</td><td class="svc-hondi">노동 판례 매칭, 다만 노동위원회 절차 별도 안내</td></tr>
+            <tr><td>"상속 재산 분배로 형제간 다툼이 있어요"</td><td>상속 분쟁</td><td class="svc-hondi">단, 상속은 신분관계 결부되어 전문가 상담 권고</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text4); margin-top:8px;">위 시나리오는 이해를 돕기 위한 예시이며, 실제 분류·처리 결과는 상황에 따라 달라질 수 있습니다.</p>
+
+      <div class="svc-callout">
+        대법원 공개 판례 300건 기준 자체 실증 결과, 1·2심 판결과 대법원 판결의 일치도는 43~48%였던 데 비해 K-Law는 v20 기준 약 90%로 나타났습니다(자체측정).
+      </div>
+      <div class="svc-callout important">
+        K-Law의 가상 판결문은 그 자체로 법원 판결이 아닙니다. 화해는 양 당사자의 자발적 합의가 반드시 있어야 성립하며, 재판청구권은 항상 보장됩니다.
+      </div>
+    </div>
+  `, kpolice: `
+    <div class="svc-detail">
+      <h2>K-Police — 치안, 신고·접수 자동화</h2>
+      <a href="https://police.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        police.hondi.net 바로가기
+      </a>
+      <p class="svc-lead">위험 신호(폭력·사기 등)가 감지되면 자동으로 신고 접수와 사건 기록을 처리합니다. K-119·K-Law 등과 자동으로 연계됩니다.</p>
+
+      <h3>처리 흐름</h3>
+      <ol class="svc-flow">
+        <li><b>위험 신호 감지</b> — 대화·상황 중 폭력·사기 등 위험 키워드를 실시간 감지합니다.</li>
+        <li><b>신고 접수 자동화</b> — 신고자의 위치·상황 정보를 자동으로 정리해 접수합니다.</li>
+        <li><b>출동번호 발급</b> — 경찰 출동번호(예: KP-20260604-XXXX)가 자동 발급됩니다.</li>
+        <li><b>사건 기록 연동</b> — 사건 경과가 K-Law에 자동 전달되어 법적 책임 소재 분석에 활용됩니다.</li>
+      </ol>
+
+      <h3>다른 서비스와의 자동 연계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>상황</th><th>자동 연동</th></tr></thead>
+          <tbody>
+            <tr><td>응급 상황 동반 시</td><td class="svc-hondi">K-119 자동 연동 — 구급대 동시 출동</td></tr>
+            <tr><td>법적 분쟁으로 이어질 경우</td><td class="svc-hondi">K-Law 자동 연동 — 사건 기록 기반 책임 소재 분석</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>기존 방식과 무엇이 다른가</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <tbody>
+            <tr><td>신고 방식</td><td>전화로 상황을 직접 설명</td><td class="svc-hondi">위험 감지 시 자동 신고 또는 대화 중 즉시 요청</td></tr>
+            <tr><td>정보 전달</td><td>현장에서 반복 진술</td><td class="svc-hondi">맥락이 자동 정리되어 한 번에 전달</td></tr>
+            <tr><td>후속 연계</td><td>경찰·법원 등 개별 방문</td><td class="svc-hondi">K-Law 등과 자동 연동</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>사용자 발화 시나리오</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>사용자 발화</th><th>자동 분류</th><th>처리</th></tr></thead>
+          <tbody>
+            <tr><td>"누가 저를 스토킹하는 것 같아요"</td><td>스토킹 위험</td><td class="svc-hondi">신고 접수 자동화, 근거 자료 정리</td></tr>
+            <tr><td>"보이스피싱을 당한 것 같아요"</td><td>사기 피해 의심</td><td class="svc-hondi">피해 내역 정리 후 신고 접수</td></tr>
+            <tr><td>"밤길에 위협을 느껴요"</td><td>신변 위협</td><td class="svc-hondi">위치 공유 및 근접 지구대 안내</td></tr>
+            <tr><td>"온라인에서 사기를 당했어요"</td><td>전자상거래 사기</td><td class="svc-hondi">거래 내역 정리 후 사이버수사 신고 지원</td></tr>
+            <tr><td>"이웃이 계속 협박성 문자를 보내요"</td><td>협박 신고</td><td class="svc-hondi">증거(문자) 정리 지원</td></tr>
+            <tr><td>"교통사고 뺑소니를 당했어요"</td><td>뺑소니 사고</td><td class="svc-hondi">블랙박스 자료 기반 신고 지원</td></tr>
+            <tr><td>"가정폭력 상황이에요"</td><td>가정폭력</td><td class="svc-hondi">즉시 신고 접수 + 관련 기관 연계 안내</td></tr>
+            <tr><td>"분실물을 찾고 싶어요"</td><td>분실 신고</td><td class="svc-hondi">분실물 신고 접수 지원</td></tr>
+            <tr><td>"불법촬영이 의심돼요"</td><td>불법촬영 신고</td><td class="svc-hondi">증거 확보 안내 + 신고 접수</td></tr>
+            <tr><td>"음주운전 차량을 목격했어요"</td><td>목격 신고</td><td class="svc-hondi">위치·차량정보 정리 후 신고</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text4); margin-top:8px;">위 시나리오는 이해를 돕기 위한 예시이며, 실제 분류·처리 결과는 상황에 따라 달라질 수 있습니다.</p>
+
+      <div class="svc-callout">
+        위험 키워드 감지는 30초 쿨다운 간격의 경량 모니터링으로 이뤄져, 일상 대화의 사생활을 상시 들여다보지 않습니다(백서 §4-2 기준).
+      </div>
+      <div class="svc-callout important">
+        실제 수사·체포 등 공권력 행사는 언제나 경찰 당국의 권한입니다. 혼디는 신고 접수와 정보 정리를 돕는 역할만 합니다.
+      </div>
+    </div>
+  `, ksecurity: `
+    <div class="svc-detail">
+      <h2>K-Security — 디지털·물리 보안 통합 감시</h2>
+      <a href="https://security.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        security.hondi.net 바로가기
+      </a>
+      <p class="svc-lead">CCTV·스마트 잠금장치·차량 블랙박스의 이상 접근을 실시간 감지하고, 해킹·랜섬웨어 피해 시 즉각 대응합니다. K-Police와 자동 연동됩니다.</p>
+
+      <h3>처리 흐름</h3>
+      <ol class="svc-flow">
+        <li><b>연결 기기 등록</b> — CCTV, 스마트락, 블랙박스 등 보안 관련 기기를 등록합니다.</li>
+        <li><b>이상 감지</b> — 평소와 다른 접근·침입 시도를 실시간으로 감지합니다.</li>
+        <li><b>즉시 알림</b> — 이상 감지 즉시 사용자에게 알리고 대응 방법을 안내합니다.</li>
+        <li><b>자동 연계</b> — 심각한 위협(침입·해킹)으로 판단되면 K-Police에 자동 연동됩니다.</li>
+      </ol>
+
+      <h3>다른 서비스와의 자동 연계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>상황</th><th>자동 연동</th></tr></thead>
+          <tbody>
+            <tr><td>침입·범죄 감지 시</td><td class="svc-hondi">K-Police 자동 연동</td></tr>
+            <tr><td>차량 탑승 중 감시</td><td class="svc-hondi">K-Traffic 이동 중 블랙박스 감시와 연계</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>기존 방식과 무엇이 다른가</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <tbody>
+            <tr><td>보안 방식</td><td>개별 기기마다 별도 앱·계정 관리</td><td class="svc-hondi">하나의 창구로 통합 감시</td></tr>
+            <tr><td>대응 시점</td><td>사건 발생 후 확인</td><td class="svc-hondi">실시간 이상탐지 + 즉시 알림</td></tr>
+            <tr><td>신고 연계</td><td>사용자가 직접 신고</td><td class="svc-hondi">위협 판단 시 자동 연동</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>사용자 발화 시나리오</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>사용자 발화</th><th>자동 분류</th><th>처리</th></tr></thead>
+          <tbody>
+            <tr><td>"우리 집 CCTV에 낯선 사람이 찍혔어요"</td><td>이상 접근 감지</td><td class="svc-hondi">즉시 알림, 필요 시 신고 연계</td></tr>
+            <tr><td>"스마트도어락이 자꾸 이상하게 작동해요"</td><td>기기 이상 감지</td><td class="svc-hondi">점검 안내 및 이상 접근 여부 확인</td></tr>
+            <tr><td>"내 계정이 해킹당한 것 같아요"</td><td>계정 보안 위협</td><td class="svc-hondi">즉시 대응 절차 안내</td></tr>
+            <tr><td>"랜섬웨어에 걸린 것 같아요"</td><td>랜섬웨어 감염 의심</td><td class="svc-hondi">격리 및 대응 가이드 제공</td></tr>
+            <tr><td>"주차 중 차량 블랙박스에 수상한 사람이 찍혔어요"</td><td>차량 주변 이상 감지</td><td class="svc-hondi">기록 보존 및 신고 지원</td></tr>
+            <tr><td>"회사 서버에 비정상 접근 시도가 있었어요"</td><td>기업 보안 위협</td><td class="svc-hondi">이상 접근 로그 분석 지원</td></tr>
+            <tr><td>"스마트홈 기기가 해킹된 것 같아요"</td><td>IoT 기기 보안</td><td class="svc-hondi">기기 격리 안내</td></tr>
+            <tr><td>"누군가 제 와이파이에 무단 접속한 것 같아요"</td><td>네트워크 무단접속</td><td class="svc-hondi">접속 기기 확인 지원</td></tr>
+            <tr><td>"현관문이 억지로 열린 흔적이 있어요"</td><td>물리적 침입 의심</td><td class="svc-hondi">즉시 K-Police 연동 여부 확인</td></tr>
+            <tr><td>"개인정보가 유출된 것 같아요"</td><td>개인정보 유출 의심</td><td class="svc-hondi">피해 확인 및 대응 절차 안내</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text4); margin-top:8px;">위 시나리오는 이해를 돕기 위한 예시이며, 실제 분류·처리 결과는 상황에 따라 달라질 수 있습니다.</p>
+
+      <div class="svc-callout">
+        K-Security는 대화 모니터링이 아니라, 사용자가 직접 연결한 보안 기기의 이상 신호만 감시 대상으로 합니다.
+      </div>
+      <div class="svc-callout important">
+        실제 수사·법적 조치는 관계 당국의 권한이며, K-Security는 이상 감지와 정보 전달을 지원하는 역할만 합니다.
+      </div>
+    </div>
+  `, khealth: `
+    <div class="svc-detail">
+      <h2>K-Health — 의료, PDV 기반 AI 주치의</h2>
+      <a href="https://health.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        health.hondi.net 바로가기
+      </a>
+      <p class="svc-lead">PDV(개인 데이터 금고)에 저장된 사용자의 건강 데이터를 기반으로 증상 분석, 병원 예약, 약 복용 관리를 통합 제공합니다. 응급 상황 감지 시 K-119와 자동 연동합니다.</p>
+
+      <h3>처리 흐름</h3>
+      <ol class="svc-flow">
+        <li><b>건강 기록 축적</b> — 진료·복약 이력이 PDV에 지속적으로 기록됩니다.</li>
+        <li><b>증상 분석</b> — 사용자가 증상을 말하면 축적된 병력을 참고해 분석합니다.</li>
+        <li><b>병원 예약</b> — 필요 시 적합한 진료과·병원 예약을 대행합니다.</li>
+        <li><b>복약 관리</b> — 복용 시간과 상호작용 여부를 관리합니다.</li>
+        <li><b>응급 연동</b> — 응급 징후 감지 시 K-119에 자동 연동됩니다.</li>
+      </ol>
+
+      <h3>다른 서비스와의 자동 연계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>상황</th><th>자동 연동</th></tr></thead>
+          <tbody>
+            <tr><td>응급 증상 감지</td><td class="svc-hondi">K-119 자동 연동</td></tr>
+            <tr><td>보험 청구 필요 시</td><td class="svc-hondi">K-Insurance 자동 연동 — 청구서류 생성</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>기존 방식과 무엇이 다른가</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <tbody>
+            <tr><td>병력 관리</td><td>병원마다 다시 설명</td><td class="svc-hondi">PDV에 누적된 기록을 그대로 활용</td></tr>
+            <tr><td>진료 연계</td><td>환자가 직접 예약·수소문</td><td class="svc-hondi">증상 기반 적합 병원 자동 매칭</td></tr>
+            <tr><td>복약 관리</td><td>환자 본인이 기억·관리</td><td class="svc-hondi">자동 알림 및 상호작용 확인</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>사용자 발화 시나리오</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>사용자 발화</th><th>자동 분류</th><th>처리</th></tr></thead>
+          <tbody>
+            <tr><td>"며칠째 두통이 심해요"</td><td>증상 상담</td><td class="svc-hondi">병력 참고 분석, 필요 시 진료과 안내</td></tr>
+            <tr><td>"이 약이랑 저 약이랑 같이 먹어도 되나요"</td><td>약물 상호작용 확인</td><td class="svc-hondi">복약 이력 기반 확인</td></tr>
+            <tr><td>"소아과 예약 좀 잡아주세요"</td><td>진료 예약 대행</td><td class="svc-hondi">적합 병원 예약 지원</td></tr>
+            <tr><td>"건강검진 결과가 이해가 안 돼요"</td><td>검진 결과 설명</td><td class="svc-hondi">PDV 기록 참고해 쉽게 설명</td></tr>
+            <tr><td>"약을 먹을 시간을 자꾸 놓쳐요"</td><td>복약 관리</td><td class="svc-hondi">알림 설정 지원</td></tr>
+            <tr><td>"알레르기가 있는데 이 음식 먹어도 될까요"</td><td>알레르기 확인</td><td class="svc-hondi">PDV 알레르기 기록 참고 안내</td></tr>
+            <tr><td>"만성질환 관리를 어떻게 해야 하나요"</td><td>만성질환 관리</td><td class="svc-hondi">맞춤 관리 계획 안내</td></tr>
+            <tr><td>"해외여행 전에 예방접종이 필요한가요"</td><td>여행 의료 상담</td><td class="svc-hondi">여행지 기준 안내</td></tr>
+            <tr><td>"임신 중인데 이 증상이 괜찮은가요"</td><td>임신 관련 상담</td><td class="svc-hondi">단, 산모·태아 관련은 전문의 상담 권고</td></tr>
+            <tr><td>"갑자기 가슴이 답답하고 숨이 차요"</td><td>응급 징후 의심</td><td class="svc-hondi">K-119 자동 연동 검토</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text4); margin-top:8px;">위 시나리오는 이해를 돕기 위한 예시이며, 실제 분류·처리 결과는 상황에 따라 달라질 수 있습니다.</p>
+
+      <div class="svc-callout">
+        진료 이력은 사용자 본인의 PDV에만 저장되어, 병원을 옮겨도 그 사람의 건강 기록으로 온전히 이어집니다.
+      </div>
+      <div class="svc-callout important">
+        K-Health는 진단을 대체하지 않습니다. 정확한 진단과 처방은 반드시 의료진의 진료를 통해 받으셔야 합니다.
+      </div>
+
+      <h3>보조하되, 확진·처방은 하지 않습니다</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>구분</th><th>혼디가 하는 일</th><th>사람 의사가 하는 일</th></tr></thead>
+          <tbody>
+            <tr><td>진단</td><td class="svc-hondi">가능성 순서의 감별진단 목록 제시</td><td>검사·대면진찰을 통한 확정 진단</td></tr>
+            <tr><td>처방</td><td class="svc-hondi">약물의 일반적 작용 기전·원리 설명</td><td>개인화된 처방·용량 결정(조제는 약사)</td></tr>
+            <tr><td>시술·수술</td><td class="svc-hondi">필요성·시기에 대한 일반 원리 논의</td><td>실제 시행</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="svc-note">"의사"라는 이름이 붙어 있다는 사실이 확진·처방 권한의 근거가 되지 않습니다 — 사용자가 "그래도 의사잖아요, 확실히 말해주세요"라고 요청해도 이 경계는 동일하게 적용됩니다.</p>
+
+      <h3>응급 최우선 트리아지</h3>
+      <p class="svc-note">갑작스러운 극심한 두통·흉통, 호흡곤란, 의식변화·마비·언어장애, 심한 출혈·외상, 고열+경부강직, 자살·자해 의도, 알레르기성 전신반응 — 이런 적색신호가 하나라도 있으면 다른 어떤 단계보다 먼저 응급실·119 안내를 최우선 출력합니다. 병력청취는 OLDCARTS(발생시점·위치·지속시간·양상·악화완화요인·방사통·시간패턴·중증도) 표준 문진 틀을 따릅니다.</p>
+
+      <h3>감별진단은 항상 두 갈래로</h3>
+      <p class="svc-note">유병률이 높고 예후가 양호한 <b>흔한 원인</b>과, 유병률은 낮아도 지연되면 치명적이거나 되돌릴 수 없는 손상을 남기는 <b>놓치면 위험한 원인</b>을 나란히 제시합니다. 흔한 것만 말하면 안심하고 병원에 안 갈 위험이 있고, 위험한 것만 나열하면 불필요한 공포를 줄 수 있기 때문입니다. 이와 별개로 위험도 층화(지금 응급실 / 오늘 중 병원 / 며칠 내 병원 / 경과 관찰)를 명시합니다.</p>
+
+      <h3>23개 세부분야, 인접 직역과의 경계</h3>
+      <p class="svc-note">내과·외과·안과·피부과·성형외과·정형외과 등 23개 세부분야가 등록돼 있으며, 필요하면 담당 교수가 해당 세부분야 자문을 호출합니다. 각 진료과는 안경사·미용사·물리치료사 등 인접 직역과의 경계를 명확히 구분해 안내합니다.</p>
+
+      <div class="svc-callout important">
+        진단서·소견서·진료의뢰서의 서식 초안 작성은 가능하지만, 확정 발급과 서명은 대면진료를 거친 의사 전속입니다.
+      </div>
+    </div>
+  `, kschool: `
+    <div class="svc-detail">
+      <h2>K-School — 교육, AI 개인 교사</h2>
+      <a href="https://school.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        school.hondi.net 바로가기
+      </a>
+      <p class="svc-lead">PDV에 축적된 학습 수준과 목표를 분석해 맞춤 커리큘럼을 생성하는 AI 개인 교사 시스템입니다. T2~T7 테스트를 전체 통과한 검증된 시스템입니다.</p>
+
+      <h3>처리 흐름</h3>
+      <ol class="svc-flow">
+        <li><b>학습 이력 분석</b> — PDV에 쌓인 학습 기록으로 현재 수준을 파악합니다.</li>
+        <li><b>목표 설정</b> — 사용자가 원하는 학습 목표를 확인합니다.</li>
+        <li><b>맞춤 커리큘럼 생성</b> — 수준과 목표에 맞는 학습 경로를 설계합니다.</li>
+        <li><b>진도 관리 및 조정</b> — 학습 진행에 따라 커리큘럼을 지속적으로 조정합니다.</li>
+      </ol>
+
+      <h3>다른 서비스와의 자동 연계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>상황</th><th>자동 연동</th></tr></thead>
+          <tbody>
+            <tr><td>입시·진학 상담이 필요할 때</td><td class="svc-hondi">전문가 페르소나(교육 컨설턴트)와 연계 가능</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>기존 방식과 무엇이 다른가</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <tbody>
+            <tr><td>진도 방식</td><td>학급 단위 획일적 진도</td><td class="svc-hondi">학생 개인별 속도·목표에 맞춘 진도</td></tr>
+            <tr><td>교재</td><td>공통 교재 중심</td><td class="svc-hondi">취약점 기반 맞춤 자료</td></tr>
+            <tr><td>피드백</td><td>정기 시험으로만 확인</td><td class="svc-hondi">학습 과정에서 실시간 피드백</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>사용자 발화 시나리오</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>사용자 발화</th><th>자동 분류</th><th>처리</th></tr></thead>
+          <tbody>
+            <tr><td>"수학 함수 단원이 너무 어려워요"</td><td>취약 단원 학습</td><td class="svc-hondi">기초 개념부터 맞춤 설명</td></tr>
+            <tr><td>"영어 단어를 자꾸 까먹어요"</td><td>암기 학습 관리</td><td class="svc-hondi">반복 주기에 맞춘 복습 일정 제공</td></tr>
+            <tr><td>"고등학교 수준의 물리를 배우고 싶어요"</td><td>심화 학습 요청</td><td class="svc-hondi">수준에 맞는 커리큘럼 구성</td></tr>
+            <tr><td>"이번 시험 범위를 정리해주세요"</td><td>시험 대비</td><td class="svc-hondi">범위 내 취약점 위주 정리</td></tr>
+            <tr><td>"코딩을 처음부터 배우고 싶어요"</td><td>신규 학습 시작</td><td class="svc-hondi">기초부터 단계별 커리큘럼</td></tr>
+            <tr><td>"아이 학습 진도가 궁금해요"</td><td>학부모 진도 확인</td><td class="svc-hondi">학습 현황 리포트 제공</td></tr>
+            <tr><td>"논술 첨삭을 받고 싶어요"</td><td>글쓰기 첨삭</td><td class="svc-hondi">작성 글 분석 및 개선점 제시</td></tr>
+            <tr><td>"자격증 시험을 준비하고 있어요"</td><td>자격증 학습 계획</td><td class="svc-hondi">시험 일정에 맞춘 학습 계획</td></tr>
+            <tr><td>"수업을 따라가기 벅차요"</td><td>학습 격차 해소</td><td class="svc-hondi">현재 수준 진단 후 보충 계획</td></tr>
+            <tr><td>"방학 동안 무엇을 공부하면 좋을까요"</td><td>방학 학습 계획</td><td class="svc-hondi">개인 목표에 맞는 계획 제안</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text4); margin-top:8px;">위 시나리오는 이해를 돕기 위한 예시이며, 실제 분류·처리 결과는 상황에 따라 달라질 수 있습니다.</p>
+
+      <div class="svc-callout">
+        K-School은 T2~T7 테스트를 전체 통과한 검증된 시스템입니다(백서 §4-5 기준).
+      </div>
+      <div class="svc-callout important">
+        입시 등 중요한 진학 결정은 학교 및 전문 진학 상담과 함께 검토하시길 권장합니다.
+      </div>
+
+      <h3>K-Professor — 과목별 교수 + 전속 교수</h3>
+      <p class="svc-note">K-School이 다수 학습자·다수 교수 세션의 PDV를 모아 만드는 공공 교육정책 데이터 시스템이라면, K-Professor는 학습자 개인과 실제로 가르치고 배우는 반대편 층위입니다. 두 층위는 서로를 대신하지 않으며, 학습 세션 데이터는 동의 하에 익명·집계 형태로만 정책 통계에 쓰입니다.</p>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>구분</th><th>범위</th><th>역할</th></tr></thead>
+          <tbody>
+            <tr><td>과목별 AI 교수</td><td>국어·수학·영어·과학·역사 등 과목마다 1명</td><td>해당 과목의 개념 설명·형성평가·단계별 진도 전담</td></tr>
+            <tr><td>전속 AI 교수</td><td>학습자 1인당 1명(전 과목 총괄)</td><td class="svc-hondi">과목 간 학습 균형·전체 진로 방향 조율, 필요한 과목 교수를 불러 연결</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="svc-note">개념 설명에 들어가기 전 학습자의 현재 수준과 목표부터 확인하며, Bloom 6단계(암기→이해→적용→분석→평가→창조)를 임의로 건너뛰지 않습니다 — 한 단계의 이해가 확인되지 않으면 다음 단계로 넘어가지 않습니다.</p>
+
+      <h3>정직한 한계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>기능</th><th>한계 고지</th></tr></thead>
+          <tbody>
+            <tr><td>형성평가·이해도 확인</td><td>참고용 자료일 뿐, 학교의 공식 성적을 대체하지 않음 — 채점 기준(rubric)과 모델 버전을 함께 기록</td></tr>
+            <tr><td>진로·역량 탐색</td><td>선택지와 근거만 제시 — 확정적 진로를 지시하지 않음. 심층 상담은 전문 상담교사·진로상담 전문가AI로 연계</td></tr>
+            <tr><td>제출 자료 1차 스캔</td><td>표절·대리작성 의심 정황이나 위기 신호가 보이면 학습 지도보다 우선 안내</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="svc-note">세션 기록은 사후 수정이 불가능합니다 — 평가자(교수)가 곧 평가 대상(정책 통계의 원천 데이터)이 되는 구조라, 혼디 스스로도 매 세션 기록을 고칠 수 없습니다.</p>
+
+      <p style="font-size:12px; color:var(--text4); margin-top:8px;">1:1 맞춤 교육의 전체 흐름을 학습자 유형별(초등~직장인)로 체험해볼 수 있는 인터랙티브 시뮬레이터는 <a href="../domains/education.html" style="color:var(--brand-dk); font-weight:600;">여기</a>에서 확인할 수 있습니다.</p>
+    </div>
+  `,
+  gdc: `
+    <div class="svc-detail">
+      <h2>GDC — 글로벌 디지털 통화</h2>
+      <a href="https://gdc.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        gdc.hondi.net 바로가기
+      </a>
+      <p class="svc-lead">혼디 생태계의 결제 인프라입니다. 국적 통화를 입금하는 순간 그만큼 GDC가 즉시 발행되며, 193개국 통화를 하나의 POOL로 통합해 수수료 없이 0.1초 내 환전합니다.</p>
+
+      <h3>처리 흐름</h3>
+      <ol class="svc-flow">
+        <li><b>입금</b> — 사용자가 자국 통화를 충전합니다.</li>
+        <li><b>즉시 발행</b> — 입금액에 해당하는 GDC가 즉시 발행됩니다(사전 발행·중앙 채굴 없음).</li>
+        <li><b>POOL 통합</b> — 193개국 통화가 하나의 POOL로 통합되어 관리됩니다.</li>
+        <li><b>환전·결제</b> — 필요 시 0.1초 내 무수수료로 환전되어 각 서비스 결제에 사용됩니다.</li>
+      </ol>
+
+      <h3>다른 서비스와의 자동 연계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>상황</th><th>자동 연동</th></tr></thead>
+          <tbody>
+            <tr><td>각종 유료 서비스 결제</td><td class="svc-hondi">K-Law·K-School·K-Tax 등 결제 수단으로 공통 사용</td></tr>
+            <tr><td>투자 연계</td><td class="svc-hondi">K-Stock — POOL 자산이 각국 지수 증권에 투자되어 수익이 GDC 가치에 반영</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>기존 방식과 무엇이 다른가</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <tbody>
+            <tr><td>환전</td><td>은행 영업시간 내, 수수료 부과, 며칠 소요</td><td class="svc-hondi">0.1초 내, 수수료 없음</td></tr>
+            <tr><td>발행 방식</td><td>중앙은행·기관의 사전 발행</td><td class="svc-hondi">입금 즉시 그만큼만 발행</td></tr>
+            <tr><td>적용 범위</td><td>서비스마다 별도 결제수단 필요</td><td class="svc-hondi">혼디 전 서비스 공통 결제수단</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>사용자 발화 시나리오</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>사용자 발화</th><th>자동 분류</th><th>처리</th></tr></thead>
+          <tbody>
+            <tr><td>"GDC 충전은 어떻게 하나요"</td><td>충전 문의</td><td class="svc-hondi">충전 절차 안내(최소 1만원)</td></tr>
+            <tr><td>"해외에 있는데 환전이 필요해요"</td><td>해외 환전</td><td class="svc-hondi">POOL 기반 즉시 환전 안내</td></tr>
+            <tr><td>"GDC 잔액을 확인하고 싶어요"</td><td>잔액 조회</td><td class="svc-hondi">현재 잔액 및 이용 내역 제공</td></tr>
+            <tr><td>"GDC로 결제할 수 있는 곳이 어디예요"</td><td>결제처 문의</td><td class="svc-hondi">GDC 수락 서비스·혼디마켓 안내</td></tr>
+            <tr><td>"환전 수수료가 얼마나 드나요"</td><td>수수료 문의</td><td class="svc-hondi">무수수료 원칙 안내</td></tr>
+            <tr><td>"GDC 가치는 어떻게 결정되나요"</td><td>가치 산정 문의</td><td class="svc-hondi">POOL 투자 수익 반영 구조 설명</td></tr>
+            <tr><td>"베타 기간 환율이 궁금해요"</td><td>환율 문의</td><td class="svc-hondi">현재 1:1(KRW) 적용 안내</td></tr>
+            <tr><td>"GDC를 다시 원화로 바꿀 수 있나요"</td><td>환전 가능 여부</td><td class="svc-hondi">정책 및 절차 안내</td></tr>
+            <tr><td>"자동 충전을 설정하고 싶어요"</td><td>자동 충전 설정</td><td class="svc-hondi">설정 방법 안내</td></tr>
+            <tr><td>"결제 내역에 오류가 있는 것 같아요"</td><td>결제 오류 문의</td><td class="svc-hondi">내역 확인 및 정정 절차 안내</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text4); margin-top:8px;">위 시나리오는 이해를 돕기 위한 예시이며, 실제 분류·처리 결과는 상황에 따라 달라질 수 있습니다.</p>
+
+      <div class="svc-callout">
+        각국 POOL 자산은 해당 국가의 지수 증권에 투자되며, 수익은 즉시 GDC 가치에 반영됩니다(백서 §4-3 기준).
+      </div>
+      <div class="svc-callout important">
+        베타 기간 환율(1₮=1원)은 정식 서비스 환율(1₮=1,000원 기준가)과 다릅니다. 정식 전환 시점은 별도 공지됩니다.
+      </div>
+
+      <h3>중개자의 자리에 재무제표 그 자체를</h3>
+      <p class="svc-note">기존 금융기관은 중개자입니다 — 은행은 예금을 모아 심사 후 빌려주고, 증권사는 발행 절차를 대행하며, 보험사는 위험을 모아 상품으로 팝니다. GDC는 그 중개자의 자리에 재무제표 그 자체를 놓는다는 목표를 지향합니다.</p>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>원칙</th><th>의미</th></tr></thead>
+          <tbody>
+            <tr><td>재무제표가 곧 화폐</td><td>OpenHash와 혼디 AI가 모든 개인·기관의 재무제표를 자동 기록·갱신·연동. 그 현금 계정이 GDC 잔액</td></tr>
+            <tr><td>재무제표가 곧 신용</td><td>은행 담당자의 주관적 판단이 아니라, 위변조 불가능한 재무 기록 자체가 신용도를 증명</td></tr>
+            <tr><td>채권 발행이 곧 대출</td><td>본인의 재무제표 신용도로 직접 채권을 발행 — 다른 GDC 보유자가 사들이는 것이 대출 실행</td></tr>
+            <tr><td>거래 자체가 감독</td><td>모든 재무제표가 실시간으로 맞물려 있어, 거래가 일어나는 과정 자체가 감독 기능을 겸함</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>LIVE와 VISION의 경계</h3>
+      <p class="svc-note">은행·보험·증권 융합은 혼디가 지향하는 목표이며, 지금 전부 동작하는 것은 아닙니다. 라이선스를 가진 금융기관과의 컨소시엄 구성 이후 열리는 범위와, 지금 바로 쓸 수 있는 범위를 구분해 안내합니다.</p>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>기능</th><th>상태</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td>구독료·서비스 결제</td><td><span class="tier-badge live" style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534;">LIVE</span></td><td>혼디 월 구독료, K-Law 등 건별 이용료를 GDC 잔액에서 결제</td></tr>
+            <tr><td>가입 축하 충전</td><td><span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534;">LIVE</span></td><td>가입 직후 0.1 GDC 1회 자동 충전, 실사용량만큼 차감</td></tr>
+            <tr><td>개인 간 P2P 송금</td><td><span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534;">LIVE</span></td><td>혼디 코드 스캔으로 상대를 확인하고 즉시 이체</td></tr>
+            <tr><td>DAWN 내부 거버넌스 가중 투표</td><td><span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534;">LIVE</span></td><td>고팡 자체 규칙 개정 시 GDC 보유량이 투표권 4요소 중 하나로 반영</td></tr>
+            <tr><td>은행·보험·증권 라이선스 기반 예치·투자</td><td><span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#e2e8f0;color:#475569;">VISION</span></td><td>라이선스를 가진 금융기관과의 컨소시엄 구성 이후 시작</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>P2P 송금 — 코드를 스캔하면 바로</h3>
+      <ol class="svc-flow">
+        <li><b>상대 확인</b> — 혼디 코드(전화번호를 인코딩한 시각 코드) 스캔으로 수신자를 확보합니다. 자기 자신에게는 송금할 수 없습니다.</li>
+        <li><b>서명</b> — WebAuthn 또는 저장된 개인키로 거래를 서명합니다.</li>
+        <li><b>L1 원장 검증</b> — L1이 블록 원장을 재생해 잔액을 직접 검증합니다(STALE_STATE·INSUFFICIENT_BALANCE·INVALID_SIGNATURE·UNREGISTERED_KEY 네 가지 사유로 거부될 수 있음).</li>
+        <li><b>기록</b> — 송신자 PDV에 6하원칙으로 이체 내역이 기록되고, 수신자는 다음 접속 시 잔액이 자동 반영됩니다.</li>
+      </ol>
+
+      <div class="svc-callout important">
+        대화 중 보이스피싱 등 최고 위험(S3) 신호가 감지되면 K-Law가 관련 GDC 거래에 자동 에스크로(임시 동결)를 제안합니다 — 최종 집행 여부는 사용자 확인을 거칩니다.
+      </div>
+    </div>
+  `, kstock: `
+    <div class="svc-detail">
+      <h2>K-Stock — 투자, AI 자산관리</h2>
+      <a href="https://stock.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        stock.hondi.net 바로가기
+      </a>
+      <p class="svc-lead">GDC POOL 자산의 투자 현황을 관리합니다. 사용자별 위험 성향에 맞는 포트폴리오를 AI가 추천하고 자동으로 리밸런싱합니다.</p>
+
+      <h3>처리 흐름</h3>
+      <ol class="svc-flow">
+        <li><b>위험 성향 파악</b> — 투자 목표와 위험 감내 수준을 확인합니다.</li>
+        <li><b>포트폴리오 추천</b> — 성향에 맞는 자산 배분을 AI가 제안합니다.</li>
+        <li><b>자동 리밸런싱</b> — 시장 변화에 따라 포트폴리오 비중을 자동 조정합니다.</li>
+        <li><b>현황 리포트</b> — 투자 현황과 성과를 정기적으로 안내합니다.</li>
+      </ol>
+
+      <h3>다른 서비스와의 자동 연계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>상황</th><th>자동 연동</th></tr></thead>
+          <tbody>
+            <tr><td>결제·자산 기반</td><td class="svc-hondi">GDC POOL 투자 구조와 연동</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>기존 방식과 무엇이 다른가</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <tbody>
+            <tr><td>자문 방식</td><td>고액 자문료의 PB(프라이빗뱅킹) 서비스</td><td class="svc-hondi">누구나 이용 가능한 자동화 자산관리</td></tr>
+            <tr><td>리밸런싱</td><td>투자자가 직접 판단·매매</td><td class="svc-hondi">시장 변화에 따라 자동 조정</td></tr>
+            <tr><td>접근성</td><td>고액 자산가 중심</td><td class="svc-hondi">이용 금액과 무관하게 이용 가능</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>사용자 발화 시나리오</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>사용자 발화</th><th>자동 분류</th><th>처리</th></tr></thead>
+          <tbody>
+            <tr><td>"안정적으로 투자하고 싶어요"</td><td>보수적 성향 포트폴리오</td><td class="svc-hondi">위험 낮은 자산 위주 추천</td></tr>
+            <tr><td>"공격적으로 수익을 내고 싶어요"</td><td>공격적 성향 포트폴리오</td><td class="svc-hondi">고위험·고수익 자산 비중 확대</td></tr>
+            <tr><td>"내 포트폴리오 현황이 궁금해요"</td><td>현황 조회</td><td class="svc-hondi">현재 자산 배분·수익률 안내</td></tr>
+            <tr><td>"시장이 불안한데 리밸런싱이 필요할까요"</td><td>리밸런싱 문의</td><td class="svc-hondi">현재 시장 상황 기반 조정 여부 안내</td></tr>
+            <tr><td>"매달 일정 금액을 자동 투자하고 싶어요"</td><td>정기 투자 설정</td><td class="svc-hondi">자동 투자 설정 지원</td></tr>
+            <tr><td>"특정 국가에 투자하고 싶어요"</td><td>지역별 투자 요청</td><td class="svc-hondi">해당 국가 POOL 투자 비중 조정</td></tr>
+            <tr><td>"투자 손실이 났는데 왜 그런가요"</td><td>손익 설명</td><td class="svc-hondi">시장 상황과 포트폴리오 근거 설명</td></tr>
+            <tr><td>"은퇴 준비를 위한 투자를 하고 싶어요"</td><td>장기 목표 투자</td><td class="svc-hondi">장기 목표에 맞는 배분 제안</td></tr>
+            <tr><td>"위험 성향을 다시 진단받고 싶어요"</td><td>위험 성향 재진단</td><td class="svc-hondi">재진단 절차 진행</td></tr>
+            <tr><td>"투자 수익에 대한 세금은 어떻게 되나요"</td><td>세금 문의</td><td class="svc-hondi">K-Tax 자동 정산 연계 안내</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text4); margin-top:8px;">위 시나리오는 이해를 돕기 위한 예시이며, 실제 분류·처리 결과는 상황에 따라 달라질 수 있습니다.</p>
+
+      <div class="svc-callout">
+        포트폴리오 추천과 리밸런싱은 사용자가 설정한 위험 성향을 기준으로 이뤄집니다.
+      </div>
+      <div class="svc-callout important">
+        투자에는 원금 손실 위험이 따르며, K-Stock의 추천은 투자 자문이 아닌 참고 정보입니다. 최종 투자 판단과 책임은 본인에게 있습니다.
+      </div>
+    </div>
+  `, kinsurance: `
+    <div class="svc-detail">
+      <h2>K-Insurance — 상황 기반 자동 보험</h2>
+      <a href="https://insurance.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        insurance.hondi.net 바로가기
+      </a>
+      <p class="svc-lead">카풀 탑승, 해외 여행, 스포츠 활동 등 상황을 자동 감지해 적합한 보험을 적용하고, 사고 발생 시 청구 서류를 자동 생성합니다.</p>
+
+      <h3>처리 흐름</h3>
+      <ol class="svc-flow">
+        <li><b>상황 감지</b> — 이동수단 탑승, 여행, 스포츠 활동 등 특정 상황을 자동으로 인식합니다.</li>
+        <li><b>보험 자동 적용</b> — 해당 상황에 맞는 보험이 자동으로 적용됩니다.</li>
+        <li><b>사고 발생 시</b> — 사고 정보를 자동 수집합니다.</li>
+        <li><b>청구 서류 자동 생성</b> — 필요한 청구 서류를 자동으로 작성합니다.</li>
+      </ol>
+
+      <h3>다른 서비스와의 자동 연계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>상황</th><th>자동 연동</th></tr></thead>
+          <tbody>
+            <tr><td>이동 중 사고</td><td class="svc-hondi">K-Traffic·K-119과 자동 연동</td></tr>
+            <tr><td>의료 관련 청구</td><td class="svc-hondi">K-Health 진료 기록과 연동</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>기존 방식과 무엇이 다른가</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <tbody>
+            <tr><td>가입 방식</td><td>매번 개별 상품 가입</td><td class="svc-hondi">상황 감지로 자동 적용</td></tr>
+            <tr><td>청구 절차</td><td>사고 후 직접 서류 준비</td><td class="svc-hondi">자동으로 청구서류 생성</td></tr>
+            <tr><td>보장 범위</td><td>가입 시점에 고정</td><td class="svc-hondi">상황별로 유연하게 적용</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>사용자 발화 시나리오</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>사용자 발화</th><th>자동 분류</th><th>처리</th></tr></thead>
+          <tbody>
+            <tr><td>"카풀 타고 공항 가는데 보험이 되나요"</td><td>이동 중 보험 적용</td><td class="svc-hondi">탑승 중 자동 여행자보험 적용</td></tr>
+            <tr><td>"해외여행 가는데 보험 가입해야 하나요"</td><td>여행자 보험</td><td class="svc-hondi">여행 일정 감지 시 자동 적용</td></tr>
+            <tr><td>"등산하다 다쳤는데 보험 처리 되나요"</td><td>스포츠 활동 보험</td><td class="svc-hondi">활동 감지 기반 보장 확인</td></tr>
+            <tr><td>"교통사고가 났는데 보험금 청구는 어떻게 하나요"</td><td>사고 청구</td><td class="svc-hondi">사고 정보 기반 서류 자동 생성</td></tr>
+            <tr><td>"자전거 타다 넘어졌어요"</td><td>레저 활동 사고</td><td class="svc-hondi">활동 상황 기반 보장 확인</td></tr>
+            <tr><td>"반려동물 보험도 되나요"</td><td>반려동물 보험 문의</td><td class="svc-hondi">가입 가능 여부 안내</td></tr>
+            <tr><td>"보험료가 왜 이렇게 청구됐나요"</td><td>보험료 문의</td><td class="svc-hondi">적용 상황 및 산정 근거 설명</td></tr>
+            <tr><td>"여행 중 짐을 잃어버렸어요"</td><td>여행자 보험 청구</td><td class="svc-hondi">분실물 보상 청구 지원</td></tr>
+            <tr><td>"운동하다 부상당했는데 보상받을 수 있나요"</td><td>스포츠 상해 청구</td><td class="svc-hondi">활동 기록 기반 청구 지원</td></tr>
+            <tr><td>"보험 가입 이력을 확인하고 싶어요"</td><td>가입 이력 조회</td><td class="svc-hondi">현재 적용 중인 보험 목록 제공</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text4); margin-top:8px;">위 시나리오는 이해를 돕기 위한 예시이며, 실제 분류·처리 결과는 상황에 따라 달라질 수 있습니다.</p>
+
+      <div class="svc-callout">
+        상황 감지는 사용자가 동의한 위치·활동 정보를 기반으로만 이뤄집니다.
+      </div>
+      <div class="svc-callout important">
+        실제 보험금 지급 심사와 최종 결정은 보험사의 권한입니다. K-Insurance는 청구 준비를 돕는 역할을 합니다.
+      </div>
+    </div>
+  `, ktax: `
+    <div class="svc-detail">
+      <h2>K-Tax — 세무, 실시간 자동 정산</h2>
+      <a href="https://tax.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        tax.hondi.net 바로가기
+      </a>
+      <p class="svc-lead">모든 거래에서 세금을 실시간으로 자동 정산합니다. 부가세·소득세·법인세를 거래 즉시 분리하여 국세청 시스템과 연동하며, 연말정산과 종합소득세 신고를 자동 완료합니다.</p>
+
+      <h3>처리 흐름</h3>
+      <ol class="svc-flow">
+        <li><b>거래 발생</b> — GDC 거래가 발생합니다.</li>
+        <li><b>세금 실시간 분리</b> — 거래 즉시 부가세·소득세 등 해당 세목을 자동 계산·분리합니다.</li>
+        <li><b>국세청 연동</b> — 분리된 세금 정보가 국세청 시스템과 연동됩니다.</li>
+        <li><b>정기 신고 자동 완료</b> — 연말정산·종합소득세 신고가 자동으로 완료됩니다.</li>
+      </ol>
+
+      <h3>다른 서비스와의 자동 연계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>상황</th><th>자동 연동</th></tr></thead>
+          <tbody>
+            <tr><td>모든 유료 거래</td><td class="svc-hondi">GDC 결제와 자동 연동되어 즉시 정산</td></tr>
+            <tr><td>사업자 재무 관리</td><td class="svc-hondi">K-Market 판매자의 재무제표 자동 생성과 연계</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>기존 방식과 무엇이 다른가</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <tbody>
+            <tr><td>정산 주기</td><td>연 1회 세무사를 통한 정산</td><td class="svc-hondi">거래 즉시 자동 정산</td></tr>
+            <tr><td>오류 위험</td><td>수기 작성에 따른 누락·오류 가능</td><td class="svc-hondi">거래 시점에 자동 분리로 위험 감소</td></tr>
+            <tr><td>신고 절차</td><td>서류 준비 후 직접/세무사 신고</td><td class="svc-hondi">연말정산·종합소득세 자동 완료</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>사용자 발화 시나리오</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>사용자 발화</th><th>자동 분류</th><th>처리</th></tr></thead>
+          <tbody>
+            <tr><td>"이번 달 부가세가 얼마나 나왔나요"</td><td>부가세 조회</td><td class="svc-hondi">실시간 정산 내역 제공</td></tr>
+            <tr><td>"종합소득세 신고를 어떻게 하나요"</td><td>종합소득세 신고</td><td class="svc-hondi">자동 완료 여부 및 절차 안내</td></tr>
+            <tr><td>"연말정산 서류를 준비해야 하나요"</td><td>연말정산 문의</td><td class="svc-hondi">자동 정산 결과 안내</td></tr>
+            <tr><td>"사업자인데 세금 신고가 걱정이에요"</td><td>사업자 세무</td><td class="svc-hondi">실시간 자동 정산 구조 설명</td></tr>
+            <tr><td>"세금계산서를 발행해야 하는데 도와주세요"</td><td>세금계산서 발행</td><td class="svc-hondi">발행 절차 지원</td></tr>
+            <tr><td>"작년 세금 신고 내역을 확인하고 싶어요"</td><td>과거 신고 내역 조회</td><td class="svc-hondi">이력 제공</td></tr>
+            <tr><td>"부업 소득도 신고해야 하나요"</td><td>부업 소득 신고</td><td class="svc-hondi">소득 유형별 신고 필요 여부 안내</td></tr>
+            <tr><td>"세금을 잘못 낸 것 같아요"</td><td>세금 정정</td><td class="svc-hondi">정정 절차 안내</td></tr>
+            <tr><td>"환급금이 있는지 확인하고 싶어요"</td><td>환급 조회</td><td class="svc-hondi">환급 대상 여부 확인</td></tr>
+            <tr><td>"국세청 API 연동은 언제부터 되나요"</td><td>제도 관련 문의</td><td class="svc-hondi">API 개방 시점부터 순차 확대 예정</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text4); margin-top:8px;">위 시나리오는 이해를 돕기 위한 예시이며, 실제 분류·처리 결과는 상황에 따라 달라질 수 있습니다.</p>
+
+      <div class="svc-callout">
+        현재는 매출 통계를 세무 신고의 참고 자료로 제공하는 단계이며, 국세청 API가 전면 개방되면 완전 자동 신고·납부로 확대될 예정입니다.
+      </div>
+      <div class="svc-callout important">
+        실제 신고서 작성·제출은 홈택스를 통해 직접 진행하시거나 세무사와 상담하세요 — 혼디는 현재 자동 신고를 대행하지 않습니다.
+      </div>
+    </div>
+  `, kmarket: `
+    <div class="svc-detail">
+      <h2>K-Market — AI 기반 상거래 마켓</h2>
+      <a href="https://market.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        market.hondi.net 바로가기
+      </a>
+      <p class="svc-lead">음식 주문, 제품 구매, 서비스 예약을 자연어로 처리하는 AI 쌍둥이 마켓플레이스입니다. 등록 업체는 AI 점원(AI Twin)을 배정받습니다.</p>
+
+      <h3>처리 흐름</h3>
+      <ol class="svc-flow">
+        <li><b>자연어 주문</b> — 사용자가 원하는 것을 말로 표현합니다.</li>
+        <li><b>AI 점원 응대</b> — 판매자에게 배정된 AI Twin이 응대합니다.</li>
+        <li><b>개인 맞춤 추천</b> — PDV 기반으로 사용자에게 맞는 상품을 추천합니다.</li>
+        <li><b>결제 및 정산</b> — GDC 또는 지정 계좌로 결제, K-Tax 자동 정산.</li>
+      </ol>
+
+      <h3>다른 서비스와의 자동 연계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>상황</th><th>자동 연동</th></tr></thead>
+          <tbody>
+            <tr><td>결제</td><td class="svc-hondi">GDC 또는 판매자 지정 계좌</td></tr>
+            <tr><td>세무 처리</td><td class="svc-hondi">K-Tax 자동 정산 연동</td></tr>
+            <tr><td>경영 지원</td><td class="svc-hondi">상권분석·마케팅 제안·재고관리 등</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>기존 방식과 무엇이 다른가</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <tbody>
+            <tr><td>검색·비교</td><td>여러 앱을 오가며 수동 비교</td><td class="svc-hondi">대화 한 번으로 처리</td></tr>
+            <tr><td>추천 방식</td><td>클릭 유도·매출 극대화 알고리즘</td><td class="svc-hondi">PDV 기반 개인 맞춤 추천</td></tr>
+            <tr><td>판매자 지원</td><td>각자 별도 도구 사용</td><td class="svc-hondi">상권분석·마케팅·재고관리 통합 제공</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>사용자 발화 시나리오</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>사용자 발화</th><th>자동 분류</th><th>처리</th></tr></thead>
+          <tbody>
+            <tr><td>"짜장면 하나 시켜줘"</td><td>음식 주문</td><td class="svc-hondi">등록 업체 AI 점원 연결, 주문 처리</td></tr>
+            <tr><td>"이 근처에서 노트북 살 만한 곳 있어?"</td><td>제품 구매 탐색</td><td class="svc-hondi">개인 맞춤 추천</td></tr>
+            <tr><td>"미용실 예약 좀 해줘"</td><td>서비스 예약</td><td class="svc-hondi">가능 시간 확인 후 예약</td></tr>
+            <tr><td>"우리 가게 상품을 등록하고 싶어요"</td><td>판매자 등록</td><td class="svc-hondi">대화로 상품 정보 자동 구조화</td></tr>
+            <tr><td>"요즘 우리 가게 매출이 어때요"</td><td>경영 현황 문의</td><td class="svc-hondi">매출 통계 및 상권분석 제공</td></tr>
+            <tr><td>"리뷰에 대한 답글을 써줘"</td><td>리뷰 응대</td><td class="svc-hondi">답글 초안 자동 작성</td></tr>
+            <tr><td>"재고가 부족한 상품이 있나요"</td><td>재고 관리</td><td class="svc-hondi">재주문 시점 자동 계산</td></tr>
+            <tr><td>"오토바이를 사려고 하는데 추천해줘"</td><td>개인 맞춤 상품 추천</td><td class="svc-hondi">생활 습관·상황 고려한 추천</td></tr>
+            <tr><td>"직원을 새로 채용하고 싶어요"</td><td>인력 관리</td><td class="svc-hondi">채용 관리 지원</td></tr>
+            <tr><td>"이 거래처와 계속 거래해도 될까요"</td><td>거래처 진단</td><td class="svc-hondi">재무 데이터 기반 진단</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text4); margin-top:8px;">위 시나리오는 이해를 돕기 위한 예시이며, 실제 분류·처리 결과는 상황에 따라 달라질 수 있습니다.</p>
+
+      <div class="svc-callout">
+        거래 수수료는 극소액(₮0.001 수준)으로, 인프라 유지 목적에 한정됩니다(백서 §4-5 기준).
+      </div>
+      <div class="svc-callout important">
+        고액 거래의 가격 공정성 검증과 판매자 자격 확인(사업자등록 진위 등)은 계속 보강 중인 영역입니다.
+      </div>
+
+      <h3>소비자 데이터는 원천 차단합니다</h3>
+      <p class="svc-note">아마존·쿠팡 같은 기존 플랫폼은 개별 소비자의 구매 이력을 수집해 수요를 예측합니다. K-Market은 반대 방향을 택합니다 — 개별 소비자 데이터는 원천 차단하고, 판매자의 과거 판매량·재고 회전율·계절성 패턴만으로 수요를 예측합니다. 개인정보보호법·GDPR 등 강화되는 프라이버시 규제에 애초부터 저촉될 데이터를 수집하지 않는 방식입니다.</p>
+
+      <h3>설계 확정과 구상을 구분합니다</h3>
+      <p class="svc-note">39개 개선 항목을 5단계로 나눠 설계한 실제 아키텍처 문서가 있으며, 일부는 설계가 확정됐고 일부(특허 출원 개념)는 아직 설계 단계 이전의 구상입니다. 둘을 섞지 않고 구분해 안내합니다.</p>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>기능</th><th>상태</th><th>설명</th></tr></thead>
+          <tbody>
+            <tr><td>GDC 에스크로</td><td class="svc-hondi">설계 확정</td><td>거래 대금을 GDC로 예치했다가 조건 충족 시 지급</td></tr>
+            <tr><td>재무제표 위변조 방지</td><td class="svc-hondi">설계 확정</td><td>해시체인·append-only 기록, OpenHash 외부 앵커링</td></tr>
+            <tr><td>공정가격 검증</td><td class="svc-hondi">설계 확정</td><td>동종 상품 중위값과 비교해 가성비 지수 산출</td></tr>
+            <tr><td>비용연동 차등수수료</td><td class="svc-hondi">설계 확정</td><td>기본요율 + 사용량 가산(상한 캡) 하이브리드, 고정 수수료율 아님</td></tr>
+            <tr><td>재무제표 기반 신용평가</td><td class="svc-hondi">설계 확정</td><td>가중치 비공개 산식으로 신뢰 등급 산출, 대분류 기여도만 공개</td></tr>
+            <tr><td>충동구매 방지·판매자 이력 전용 분석</td><td>특허 출원 개념</td><td>구매 시각·소득 대비 비율 등으로 감지(패턴 실험 단계)</td></tr>
+            <tr><td>범용 상품 분류(GPID)·자동 재판매</td><td>특허 출원 개념</td><td>전세계 상품 단일 분류, 30일 미사용 제품 재판매 제안 — IoT 센서 부착 전제, 실제 구현 여부·시기 미정</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>단계적 확장 로드맵</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>단계</th><th>범위</th><th>규모</th></tr></thead>
+          <tbody>
+            <tr><td>1단계</td><td>제주도 파일럿</td><td>사용자 1,000명(상주민 700+관광객 300), 상품 1,200개 품목</td></tr>
+            <tr><td>2단계</td><td>전국 확대</td><td>사용자 500만 명, 읍면동 단위 완전 커버</td></tr>
+            <tr><td>3단계</td><td>글로벌 확장</td><td>동아시아 → 아시아태평양 → 전 세계 순차 확대</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="svc-note">GDC의 "재무제표가 곧 신용" 원칙과 같은 축입니다 — 판매자의 거래 기록이 위변조 불가능한 형태로 쌓이면, 그 기록 자체가 신용평가의 근거이자 공정가격 판단 기준이 됩니다.</p>
+    </div>
+  `, ktraffic: `
+    <div class="svc-detail">
+      <h2>K-Traffic — 교통, 이동수단 통합 관제</h2>
+      <a href="https://traffic.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        traffic.hondi.net 바로가기
+      </a>
+      <p class="svc-lead">실시간 이동 패턴을 분석해 택시·카풀·버스·자율주행 차량을 통합 관리하고 최적 조합을 제안합니다. 탑승 완료 후 GDC로 자동 결제됩니다.</p>
+
+      <h3>처리 흐름</h3>
+      <ol class="svc-flow">
+        <li><b>이동 요청</b> — 목적지와 희망 시간을 말합니다.</li>
+        <li><b>수단 비교</b> — 택시·카풀·버스 등 가용 수단과 예상 시간·요금을 비교합니다.</li>
+        <li><b>사용자 선택</b> — 제시된 옵션 중 하나를 선택합니다.</li>
+        <li><b>탑승 중 보안·보험</b> — 블랙박스 감시(K-Security)와 자동 여행자보험(K-Insurance)이 함께 적용됩니다.</li>
+        <li><b>도착 후 자동 결제</b> — GDC로 자동 결제되고 K-Tax가 실시간 정산합니다.</li>
+      </ol>
+
+      <h3>다른 서비스와의 자동 연계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>상황</th><th>자동 연동</th></tr></thead>
+          <tbody>
+            <tr><td>탑승 중 안전</td><td class="svc-hondi">K-Security 블랙박스 감시</td></tr>
+            <tr><td>탑승 중 보험</td><td class="svc-hondi">K-Insurance 자동 적용</td></tr>
+            <tr><td>짐 배송</td><td class="svc-hondi">K-Logistics 자동 연동</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>기존 방식과 무엇이 다른가</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <tbody>
+            <tr><td>수단 비교</td><td>앱마다 따로 켜서 비교</td><td class="svc-hondi">대화 한 번으로 통합 비교</td></tr>
+            <tr><td>결제</td><td>수단별로 각각 결제</td><td class="svc-hondi">도착 후 GDC 자동 결제</td></tr>
+            <tr><td>안전·보험</td><td>별도 가입 필요</td><td class="svc-hondi">탑승 중 자동 적용</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>사용자 발화 시나리오</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>사용자 발화</th><th>자동 분류</th><th>처리</th></tr></thead>
+          <tbody>
+            <tr><td>"내일 오전 9시까지 공항 가야 해요"</td><td>이동 수단 조합 요청</td><td class="svc-hondi">택시·카풀·버스 옵션 비교 제시</td></tr>
+            <tr><td>"가장 저렴한 방법으로 가고 싶어요"</td><td>비용 우선 조합</td><td class="svc-hondi">저비용 옵션 우선 제시</td></tr>
+            <tr><td>"짐이 많은데 같이 옮겨줄 수 있나요"</td><td>짐 배송 연계</td><td class="svc-hondi">K-Logistics 자동 연동</td></tr>
+            <tr><td>"카풀 상대방은 안전한가요"</td><td>탑승 안전 문의</td><td class="svc-hondi">블랙박스 감시 안내</td></tr>
+            <tr><td>"버스 도착 시간을 알려줘"</td><td>대중교통 정보</td><td class="svc-hondi">실시간 도착 정보 제공</td></tr>
+            <tr><td>"자율주행 차량도 이용할 수 있나요"</td><td>자율주행 옵션</td><td class="svc-hondi">가용 지역 여부 확인</td></tr>
+            <tr><td>"결제는 언제 되나요"</td><td>결제 문의</td><td class="svc-hondi">도착 후 자동 결제 안내</td></tr>
+            <tr><td>"탑승 중 사고가 났어요"</td><td>이동 중 사고</td><td class="svc-hondi">K-119·K-Insurance 자동 연동</td></tr>
+            <tr><td>"정기적으로 출퇴근 이동을 예약하고 싶어요"</td><td>정기 이동 설정</td><td class="svc-hondi">반복 이동 자동화 지원</td></tr>
+            <tr><td>"택시 기사님이 경로를 이상하게 가요"</td><td>경로 이상 문의</td><td class="svc-hondi">경로 기록 확인 지원</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text4); margin-top:8px;">위 시나리오는 이해를 돕기 위한 예시이며, 실제 분류·처리 결과는 상황에 따라 달라질 수 있습니다.</p>
+
+      <div class="svc-callout">
+        이동 전 과정이 PDV와 Openhash에 기록되어, 분쟁 발생 시 객관적으로 확인할 수 있습니다.
+      </div>
+      <div class="svc-callout important">
+        실제 운행과 요금 확정은 각 운송 수단 사업자(택시회사, 버스회사 등)의 정책을 따릅니다.
+      </div>
+
+      <h3>자율주행 — 선택지에는 넣되, 정지 버튼은 사람에게</h3>
+      <p class="svc-note">K-Traffic이 비교하는 이동 수단에는 자율주행 차량도 포함되지만, 차량의 물리적 주행 판단(장애물 감지, 긴급 정지 등)은 각 자율주행 서비스 사업자의 안전 시스템과 관련 법규를 따릅니다. 통신 두절이 3초 이상 지속되면 자동으로 Safe Mode(안전 속도 30km/h 감속, 가장 가까운 안전 지점 이동, 응급 서비스 자동 알림)로 전환하도록 설계돼 있습니다.</p>
+
+      <h3>3계층 AI 에이전트 — 특허 출원 개념</h3>
+      <p class="svc-note">중앙 교통관제(제1)·도로 구간별(제2)·개별 차량별(제3) 에이전트가 서로 다른 목적함수를 갖고 Nash Equilibrium 기반 협력-경쟁 학습으로 균형점을 찾는 구조가 특허 출원돼 있습니다. 기존 방식(User Equilibrium)이 각 차량의 개별 최단 경로를 우선하는 것과 달리, 이 구조(System Optimum)는 중앙 에이전트가 전체 차량 경로를 동시에 고려해 전체 이동 시간을 줄입니다.</p>
+      <div class="svc-callout important">
+        3계층 구조는 특허 출원 단계의 설계이며, 현재 혼디 코드에 실제 배포된 기능이 아닙니다. AWS 시뮬레이션 환경 실증 결과는 검증된 조건 하의 수치로, 실제 도로 환경과는 차이가 있을 수 있습니다.
+      </div>
+    </div>
+  `,
+  klogistics: `
+    <div class="svc-detail">
+      <h2>K-Logistics — 물류, 배송 경로 최적화</h2>
+      <a href="https://logistics.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        logistics.hondi.net 바로가기
+      </a>
+      <p class="svc-lead">소화물·화물·음식 배달을 통합하는 물류 플랫폼입니다. K-Traffic과 연동해 빈 차량을 물류에 활용합니다.</p>
+
+      <h3>처리 흐름</h3>
+      <ol class="svc-flow">
+        <li><b>배송 요청</b> — 보낼 물건과 목적지를 말합니다.</li>
+        <li><b>차량 매칭</b> — K-Traffic의 이동 중 차량 중 빈 공간이 있는 차량을 우선 매칭합니다.</li>
+        <li><b>경로 최적화</b> — 여러 배송 건을 묶어 최적 경로를 계산합니다.</li>
+        <li><b>배송 완료 및 결제</b> — 배송 완료 확인 후 GDC로 자동 결제됩니다.</li>
+      </ol>
+
+      <h3>다른 서비스와의 자동 연계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>상황</th><th>자동 연동</th></tr></thead>
+          <tbody>
+            <tr><td>차량 자원 공유</td><td class="svc-hondi">K-Traffic 이동 중 차량과 연동</td></tr>
+            <tr><td>결제</td><td class="svc-hondi">GDC 자동 결제</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>기존 방식과 무엇이 다른가</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <tbody>
+            <tr><td>차량 운용</td><td>배달앱·택배사 각자 운영</td><td class="svc-hondi">이동 중인 차량의 빈 공간 재활용</td></tr>
+            <tr><td>경로</td><td>건별로 개별 배송</td><td class="svc-hondi">여러 건을 묶어 최적 경로 계산</td></tr>
+            <tr><td>주문 방식</td><td>앱별로 따로 요청</td><td class="svc-hondi">자연어 한 번으로 요청</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>사용자 발화 시나리오</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>사용자 발화</th><th>자동 분류</th><th>처리</th></tr></thead>
+          <tbody>
+            <tr><td>"이 서류를 강남으로 보내야 해요"</td><td>소화물 배송</td><td class="svc-hondi">가까운 이동 차량 매칭</td></tr>
+            <tr><td>"음식 배달을 시키고 싶어요"</td><td>음식 배달</td><td class="svc-hondi">배달 가능 매장·차량 매칭</td></tr>
+            <tr><td>"이사할 때 짐을 옮겨야 해요"</td><td>화물 운송</td><td class="svc-hondi">화물용 차량 매칭</td></tr>
+            <tr><td>"배송이 얼마나 걸리나요"</td><td>배송 시간 문의</td><td class="svc-hondi">예상 도착 시간 제공</td></tr>
+            <tr><td>"긴급하게 오늘 안에 보내야 해요"</td><td>긴급 배송 요청</td><td class="svc-hondi">우선 배차 시도</td></tr>
+            <tr><td>"배송 상태를 확인하고 싶어요"</td><td>배송 추적</td><td class="svc-hondi">실시간 위치 정보 제공</td></tr>
+            <tr><td>"물건이 파손되어 도착했어요"</td><td>배송 사고 접수</td><td class="svc-hondi">K-Insurance 연계 확인</td></tr>
+            <tr><td>"정기적으로 물건을 보내야 해요"</td><td>정기 배송 설정</td><td class="svc-hondi">반복 배송 자동화</td></tr>
+            <tr><td>"택배 요금이 왜 이렇게 나왔나요"</td><td>요금 문의</td><td class="svc-hondi">경로·거리 기반 산정 근거 설명</td></tr>
+            <tr><td>"빈 차량을 이용한 배송이 뭔가요"</td><td>서비스 설명 요청</td><td class="svc-hondi">K-Traffic 연동 구조 설명</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text4); margin-top:8px;">위 시나리오는 이해를 돕기 위한 예시이며, 실제 분류·처리 결과는 상황에 따라 달라질 수 있습니다.</p>
+
+      <div class="svc-callout">
+        이동 중인 차량의 빈 공간을 재활용하는 방식이라, 배송 전용 차량 운행을 줄여 효율을 높입니다.
+      </div>
+      <div class="svc-callout important">
+        고가품·위험물 등 특수 화물은 별도 운송 규정이 적용될 수 있습니다.
+      </div>
+    </div>
+  `, kcleaner: `
+    <div class="svc-detail">
+      <h2>K-Clean — 환경 신고, 사진 기반 현장 분석</h2>
+      <a href="https://clean.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        clean.hondi.net 바로가기
+      </a>
+      <p class="svc-lead">사진 한 장으로 불법 투기 등 환경 문제를 신고할 수 있습니다. AI 이미지 분석과 EXIF 정보 처리로 현장 상황을 빠르게 파악합니다.</p>
+
+      <h3>처리 흐름</h3>
+      <ol class="svc-flow">
+        <li><b>사진 촬영·제출</b> — 문제 현장을 사진으로 찍어 제출합니다.</li>
+        <li><b>이미지 분석</b> — AI가 사진 속 상황(쓰레기 종류, 규모 등)을 분석합니다.</li>
+        <li><b>위치 정보 확인</b> — 사진의 EXIF 정보로 위치·시간을 확인합니다.</li>
+        <li><b>신고 접수</b> — 분석 결과와 함께 관계 기관에 신고가 접수됩니다.</li>
+      </ol>
+
+      <h3>다른 서비스와의 자동 연계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>상황</th><th>자동 연동</th></tr></thead>
+          <tbody>
+            <tr><td>행정 신고 처리</td><td class="svc-hondi">K-Public 행정 절차와 연계될 수 있음</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>기존 방식과 무엇이 다른가</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <tbody>
+            <tr><td>신고 방식</td><td>상황을 말로 설명 후 접수</td><td class="svc-hondi">사진 한 장으로 즉시 분석</td></tr>
+            <tr><td>판독</td><td>담당자 육안 판독 대기</td><td class="svc-hondi">AI가 즉시 1차 분석</td></tr>
+            <tr><td>위치 확인</td><td>신고자가 직접 위치 설명</td><td class="svc-hondi">사진 EXIF로 자동 확인</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>사용자 발화 시나리오</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>사용자 발화</th><th>자동 분류</th><th>처리</th></tr></thead>
+          <tbody>
+            <tr><td>"길가에 쓰레기가 무단으로 버려져 있어요"</td><td>불법 투기 신고</td><td class="svc-hondi">사진 분석 후 신고 접수</td></tr>
+            <tr><td>"공사장에서 먼지가 심하게 날려요"</td><td>환경 오염 신고</td><td class="svc-hondi">현장 상황 분석</td></tr>
+            <tr><td>"하천에 오염물질이 흘러가고 있어요"</td><td>수질 오염 신고</td><td class="svc-hondi">긴급도 판단 후 신고</td></tr>
+            <tr><td>"불법 소각 연기가 보여요"</td><td>대기오염 신고</td><td class="svc-hondi">현장 사진 기반 접수</td></tr>
+            <tr><td>"공원에 쓰레기가 방치되어 있어요"</td><td>공공장소 오염</td><td class="svc-hondi">위치 확인 후 신고</td></tr>
+            <tr><td>"악취가 심하게 나는 곳이 있어요"</td><td>악취 신고</td><td class="svc-hondi">현장 정보 정리 후 접수</td></tr>
+            <tr><td>"동물 사체가 방치되어 있어요"</td><td>환경위생 신고</td><td class="svc-hondi">긴급 처리 요청 접수</td></tr>
+            <tr><td>"재활용품이 뒤섞여 버려져 있어요"</td><td>분리수거 위반 신고</td><td class="svc-hondi">현장 사진 분석</td></tr>
+            <tr><td>"산에 쓰레기가 쌓여있어요"</td><td>산림 환경 신고</td><td class="svc-hondi">위치 기반 신고 접수</td></tr>
+            <tr><td>"신고한 내용이 어떻게 처리되고 있나요"</td><td>처리 현황 확인</td><td class="svc-hondi">진행 상황 안내</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text4); margin-top:8px;">위 시나리오는 이해를 돕기 위한 예시이며, 실제 분류·처리 결과는 상황에 따라 달라질 수 있습니다.</p>
+
+      <div class="svc-callout">
+        K-Clean는 Gemini Vision 기반 이미지 분석과 EXIF 처리로 신고 내용을 신속하게 1차 정리합니다.
+      </div>
+      <div class="svc-callout important">
+        최종 처리와 단속 여부는 관할 지방자치단체 및 관계 기관의 권한입니다.
+      </div>
+    </div>
+  `, kpublic: `
+    <div class="svc-detail">
+      <h2>K-Public — 행정, 전국 228개 기관 통합</h2>
+      <a href="https://public.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        public.hondi.net 바로가기
+      </a>
+      <p class="svc-lead">전국 228개 정부 기관 서비스를 통합합니다. 각종 증명서 발급, 민원 신청, 보조금 조회를 AI 비서 한마디로 처리합니다.</p>
+
+      <h3>처리 흐름</h3>
+      <ol class="svc-flow">
+        <li><b>요청</b> — 필요한 민원이나 서류를 말합니다.</li>
+        <li><b>기관 확인</b> — 어느 기관 소관인지 자동으로 파악합니다.</li>
+        <li><b>본인 인증</b> — 디지털 신분증으로 통합 인증합니다.</li>
+        <li><b>처리 및 전달</b> — 해당 기관 AI와 통신해 처리 결과를 전달받습니다.</li>
+      </ol>
+
+      <h3>다른 서비스와의 자동 연계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>상황</th><th>자동 연동</th></tr></thead>
+          <tbody>
+            <tr><td>사법 절차 연계</td><td class="svc-hondi">K-Law와 연계될 수 있음(예: 소송 관련 서류)</td></tr>
+            <tr><td>세무 연계</td><td class="svc-hondi">K-Tax와 연계(예: 소득 증명 등)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>기존 방식과 무엇이 다른가</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <tbody>
+            <tr><td>접근 방식</td><td>기관마다 따로 방문·로그인</td><td class="svc-hondi">하나의 창구로 전체 처리</td></tr>
+            <tr><td>처리 시간</td><td>방문·대기, 며칠~수 주</td><td class="svc-hondi">수 초 내외</td></tr>
+            <tr><td>이용 시간</td><td>평일 09~18시, 방문 필수</td><td class="svc-hondi">24시간·365일, 스마트폰</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>사용자 발화 시나리오</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>사용자 발화</th><th>자동 분류</th><th>처리</th></tr></thead>
+          <tbody>
+            <tr><td>"등본 두 통 발급해줘"</td><td>증명서 발급</td><td class="svc-hondi">행정복지센터 AI에 자동 요청</td></tr>
+            <tr><td>"소득금액증명원이 필요해요"</td><td>소득 증명 발급</td><td class="svc-hondi">국세청 연동 발급</td></tr>
+            <tr><td>"전입신고를 하고 싶어요"</td><td>민원 신청</td><td class="svc-hondi">절차 안내 및 신청 대행</td></tr>
+            <tr><td>"보조금 대상인지 확인해줘"</td><td>보조금 조회</td><td class="svc-hondi">자격 요건 확인</td></tr>
+            <tr><td>"인감증명서를 떼야 해요"</td><td>증명서 발급</td><td class="svc-hondi">발급 절차 대행</td></tr>
+            <tr><td>"건축 인허가는 어떻게 신청하나요"</td><td>인허가 신청</td><td class="svc-hondi">서류 준비 및 접수 대행</td></tr>
+            <tr><td>"여권을 갱신하고 싶어요"</td><td>여권 갱신</td><td class="svc-hondi">절차 안내</td></tr>
+            <tr><td>"차량 등록 관련 문의가 있어요"</td><td>차량 민원</td><td class="svc-hondi">관련 기관 연계</td></tr>
+            <tr><td>"실업급여를 신청하고 싶어요"</td><td>고용 관련 민원</td><td class="svc-hondi">고용센터 연계 안내</td></tr>
+            <tr><td>"내 민원 처리 상황을 알고 싶어요"</td><td>처리 현황 확인</td><td class="svc-hondi">실시간 진행 상황 안내</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text4); margin-top:8px;">위 시나리오는 이해를 돕기 위한 예시이며, 실제 분류·처리 결과는 상황에 따라 달라질 수 있습니다.</p>
+
+      <div class="svc-callout">
+        이 자동화는 마이데이터법(개인정보 전송요구권)과 공공데이터 API(data.go.kr) 등 이미 법제화된 인프라 위에서 작동합니다.
+      </div>
+      <div class="svc-callout important">
+        혼디의 AI 행정 기관은 정부를 대체하지 않으며, 실제 심사·결정 권한은 언제나 담당 공무원에게 있습니다. 기관마다 API 개방 수준이 달라 일부 기관은 절차 안내에 그칠 수 있습니다.
+      </div>
+    </div>
+  `, kdemocracy: `
+    <div class="svc-detail">
+      <h2>K-Democracy — 입법·정책, DAWN 거버넌스</h2>
+      <a href="https://democracy.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        democracy.hondi.net 바로가기
+      </a>
+      <p class="svc-lead">고팡 시스템의 변경 사항을 DAWN(Democracy is All We Need) 투표로 결정하는 민주적 거버넌스 플랫폼입니다. 국민동의청원 확산 허브 역할도 합니다.</p>
+
+      <h3>처리 흐름</h3>
+      <ol class="svc-flow">
+        <li><b>변경 제안</b> — 시스템·정책 변경안이 제안됩니다.</li>
+        <li><b>투표 안내</b> — GDC 1단위 이상 보유자에게 투표권이 부여됩니다(1인 1표).</li>
+        <li><b>투표 진행</b> — 제안에 대한 찬반 투표가 진행됩니다.</li>
+        <li><b>결과 반영</b> — 2/3 이상 찬성 시 자동 적용되고 Openhash에 영구 기록됩니다.</li>
+      </ol>
+
+      <h3>다른 서비스와의 자동 연계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>상황</th><th>자동 연동</th></tr></thead>
+          <tbody>
+            <tr><td>결제 기반</td><td class="svc-hondi">GDC 보유 여부가 투표권 기준</td></tr>
+            <tr><td>기록 보존</td><td class="svc-hondi">Openhash에 변경 이력 영구 기록</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>기존 방식과 무엇이 다른가</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 방식</th></tr></thead>
+          <tbody>
+            <tr><td>정책 결정</td><td>플랫폼 사업자가 일방적으로 결정</td><td class="svc-hondi">이용자 투표(DAWN)로 결정</td></tr>
+            <tr><td>투표권</td><td>해당 없음(플랫폼이 결정)</td><td class="svc-hondi">GDC 1단위 이상 보유자 1인 1표</td></tr>
+            <tr><td>기록</td><td>비공개 또는 사후 공지</td><td class="svc-hondi">Openhash에 영구 기록, 누구나 확인 가능</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>사용자 발화 시나리오</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>사용자 발화</th><th>자동 분류</th><th>처리</th></tr></thead>
+          <tbody>
+            <tr><td>"이번 시스템 변경안에 투표하고 싶어요"</td><td>투표 참여</td><td class="svc-hondi">현재 진행 중인 안건 안내</td></tr>
+            <tr><td>"국민동의청원을 알리고 싶어요"</td><td>청원 확산</td><td class="svc-hondi">확산 허브 기능 안내</td></tr>
+            <tr><td>"내 투표권이 몇 표인지 알고 싶어요"</td><td>투표권 확인</td><td class="svc-hondi">GDC 보유량 기준 안내</td></tr>
+            <tr><td>"지난 안건 결과가 궁금해요"</td><td>과거 안건 조회</td><td class="svc-hondi">기록된 투표 결과 제공</td></tr>
+            <tr><td>"새로운 정책을 제안하고 싶어요"</td><td>정책 제안</td><td class="svc-hondi">제안 절차 안내</td></tr>
+            <tr><td>"투표는 어떻게 진행되나요"</td><td>투표 절차 문의</td><td class="svc-hondi">투표 방식 설명</td></tr>
+            <tr><td>"반민주적 변경에 대한 거부권이 뭔가요"</td><td>거부권 설명</td><td class="svc-hondi">비영리 단체 DAWN의 역할 설명</td></tr>
+            <tr><td>"투표 결과가 실제로 반영되나요"</td><td>반영 여부 문의</td><td class="svc-hondi">2/3 이상 찬성 시 자동 적용 설명</td></tr>
+            <tr><td>"청원 참여자 수를 확인하고 싶어요"</td><td>청원 현황 조회</td><td class="svc-hondi">현재 참여 현황 제공</td></tr>
+            <tr><td>"거버넌스 구조에 대해 더 알고 싶어요"</td><td>구조 설명 요청</td><td class="svc-hondi">전체 거버넌스 원칙 설명</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px; color:var(--text4); margin-top:8px;">위 시나리오는 이해를 돕기 위한 예시이며, 실제 분류·처리 결과는 상황에 따라 달라질 수 있습니다.</p>
+
+      <div class="svc-callout">
+        고팡에는 주주·임직원·이사회가 없으며, 사용자=운영자=수혜자 구조로 운영됩니다.
+      </div>
+      <div class="svc-callout important">
+        DAWN은 국회의 입법 절차 자체를 대체하지 않으며, 혼디/고팡 생태계 내부 의사결정과 청원 확산을 지원하는 시민 참여 메커니즘입니다.
+      </div>
+    </div>
+  `, ktelecom: `
+    <div class="svc-detail">
+      <h2>K-Telecom — 통신 서비스 안내 에이전트</h2>
+      <a href="https://telecom.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        telecom.hondi.net 바로가기
+      </a>
+      <span class="svc-badge svc-badge-live">LIVE</span>
+      <p class="svc-lead">휴대폰 요금제·인터넷/IPTV·유심·로밍·결합상품 등 통신사 관련 요청을 대화형으로 파악해 절차를 안내합니다. 명의도용 방지를 위해 본인인증이 필요한 최종 실행(개통·명의변경·해지 등)은 이용자 본인이 통신사 앱·대리점에서 직접 완료해야 합니다.</p>
+
+      <h3>다루는 영역</h3>
+      <ul class="svc-list">
+        <li>요금제 변경·조회</li>
+        <li>인터넷·IPTV 신규설치·해지</li>
+        <li>유심 재발급·개통</li>
+        <li>국내외 로밍 신청</li>
+        <li>결합상품 가입, 통신사 멤버십 혜택 확인</li>
+        <li>기기변경(단말기 교체) 예약</li>
+        <li>공유기·인터넷 AS 신청, 통신요금 자동이체 등록</li>
+        <li>휴대폰 분실신고(회선 임시 정지 안내)</li>
+        <li>스팸문자 신고 접수</li>
+      </ul>
+
+      <h3>다른 서비스와의 경계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>상황</th><th>담당</th></tr></thead>
+          <tbody>
+            <tr><td>단말기 자체 구매(기기값 결제, 쇼핑몰 거래)</td><td class="svc-hondi">K-Market 소관</td></tr>
+            <tr><td>통신사 결합 프로그램형 기기변경</td><td class="svc-hondi">K-Telecom 소관</td></tr>
+            <tr><td>회선 개통·명의변경·해지 등 최종 실행</td><td class="svc-hondi">본인인증 후 통신사 앱·대리점에서 본인이 직접</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>분실신고는 예외적으로 신속 처리</h3>
+      <p>명의도용·소액결제 피해를 막기 위한 임시 정지 신청 절차는 즉시 안내하되, 실제 정지 처리(본인인증 필요)는 통신사 앱·고객센터(114 등)로 연결합니다.</p>
+
+      <div class="svc-callout important">
+        전기통신사업법 등 통신 관련 법령상 본인확인이 필수인 최종 실행은 혼디가 대신 완료했다고 안내하지 않습니다 — 절차 안내까지가 혼디의 역할입니다.
+      </div>
+    </div>
+  `, ksearch: `
+    <div class="svc-detail">
+      <h2>K-Search — 혼디 통합 검색 에이전트</h2>
+      <a href="https://search.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        search.hondi.net 바로가기
+      </a>
+      <span class="svc-badge svc-badge-partial">부분 가동</span>
+      <p class="svc-lead">혼디 생태계 전체의 유일한 검색 실행 에이전트입니다. 사람·AI비서 식별은 물론, K-Market 등 다른 서비스가 위임하는 판매자·상품 탐색까지 전담합니다.</p>
+
+      <h3>처리 흐름</h3>
+      <ol class="svc-flow">
+        <li><b>검색 요청 접수</b> — 사용자의 직접 검색 또는 다른 서비스로부터의 위임 요청으로 시작됩니다.</li>
+        <li><b>대상 판단</b> — 키워드·유형(주소·직업·닉네임·핸들·GDC 보유 여부·신뢰도 등)을 기준으로 검색 범위를 좁힙니다.</li>
+        <li><b>결과 제공</b> — 모호하면 되묻고, 결과가 없으면 지어내지 않고 솔직하게 안내합니다.</li>
+      </ol>
+
+      <h3>다른 서비스와의 관계</h3>
+      <p>"검색은 K-Search만 전담한다"는 원칙이 생태계 전체에 적용됩니다. K-Market이 판매자·상품을 탐색할 때도 자체 구현이 아닌 K-Search에 위임합니다.</p>
+
+      <div class="svc-callout important">
+        검색 라우팅의 핵심 기능은 가동 중이나, 미청구 프로필 자동 생성 등 일부 후속 기능은 아직 구현 중입니다. 현재 상태를 있는 그대로 표시합니다.
+      </div>
+    </div>
+  `, kbiz: `
+    <div class="svc-detail">
+      <h2>K-Biz — 사업자 행정 대행</h2>
+      <a href="https://biz.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        biz.hondi.net 바로가기
+      </a>
+      <span class="svc-badge svc-badge-partial">부분 가동</span>
+      <p class="svc-lead">사업체를 운영하면 "장사"와 "행정"이라는 두 가지 다른 일을 동시에 떠맡게 됩니다. K-Biz는 사업자등록·법인 설립부터 산업재해 신고, 특허·지재권 출원 안내까지 — 관할 부서를 확인하고 필요한 서류·순서를 한 번에 하나씩 안내합니다. 정부24·data.go.kr(서류 발급) → gdoc.go.kr(전자문서 제출) → dpaper.kr(진본 확인·보관)로 이어지는 공공데이터·전자정부 인프라 위에서 작동합니다.</p>
+
+      <h3>사업자 등록·법인 설립 — 순서가 꼬이면 전체가 밀립니다</h3>
+      <p class="svc-note">예를 들어 국숫집 창업이라면 사업자등록(홈택스·관할 세무서) → 위생교육 이수 → 영업신고(관할 시청·읍면동) → 소방시설 완비증명 → 원산지표시판 등록 순서를 거쳐야 하고, 직원을 채용하면 4대보험 성립신고까지 이어집니다. 순서가 꼬이면 — 예를 들어 위생교육을 먼저 듣지 않으면 영업신고 자체가 접수되지 않습니다.</p>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>인프라</th><th>역할</th><th>현재 상태</th></tr></thead>
+          <tbody>
+            <tr><td>data.go.kr(공공데이터 API)</td><td>사업자등록 관련 증명·소득 자료 등 서류 발급 요청</td><td>부분 구현 — API 개방 기관은 자동 처리</td></tr>
+            <tr><td>정부24 / gdoc.go.kr</td><td>서류 발급·제출 창구, 상시 제출·수신</td><td>부분 구현</td></tr>
+            <tr><td>dpaper.kr(정부 전자문서지갑)</td><td>제출 서류 진본 확인·위변조 방지</td><td>부분 구현 — 정식 이용 신청 접수, 승인 진행 중</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="svc-note">시군구별 담당 부서 실시간 조회, 반경 내 상권·경쟁 밀집도 분석, 리뷰 답글 초안 작성은 오늘 기준 실제로 동작(LIVE)합니다. 사업자등록·영업신고 서류 자체의 자동 작성, 4대보험·세금 신고 기한의 자동 추적은 아직 로드맵 단계입니다.</p>
+
+      <h3>산업재해 — 사고 직후, 무엇부터 신고해야 하는지</h3>
+      <p class="svc-note">산업재해가 발생하면 사업주는 산재보험 신고(근로복지공단)와 함께 중대재해 여부에 따라 관할 노동청·경찰 신고 기한까지 동시에 챙겨야 합니다. 혼디는 사고 정황을 먼저 정리해 묻고, 어떤 기관에 어떤 순서로 신고해야 하는지 한 번에 하나씩 안내합니다. 다만 사고 경위에 대한 법적 판단, 과실 여부 확정은 대신하지 않으며 즉시 노무사·변호사 등 전문가 연결로 이어집니다.</p>
+
+      <h3>특허·지재권 — 출원 전, 먼저 확인할 것들</h3>
+      <p class="svc-note">특허·상표·디자인 출원은 선행기술 조사부터 시작합니다. 키프리스(KIPRIS) 등 공개 데이터베이스에서 유사 선행 사례를 조회·정리하고, 출원 절차(특허청 접수 → 방식심사 → 실체심사 → 등록)의 각 단계에서 무엇을 준비해야 하는지 안내합니다. 다만 발명의 신규성·진보성에 대한 실체적 판단, 명세서 청구항 작성은 변리사의 전문 영역으로 남습니다.</p>
+
+      <div class="svc-callout important">
+        사고 경위의 법적 판단·과실 확정, 특허 청구항 작성 등 최종 판단이 필요한 영역은 노무사·변호사·변리사 등 전문가에게 반드시 연결됩니다. K-Biz는 절차 안내와 서류 준비를 대행할 뿐입니다.
+      </div>
+    </div>
+  `,
+  kplan: `
+    <div class="svc-detail">
+      <h2>K-Plan — 목표 달성의 최적 경로 찾기</h2>
+      <a href="https://plan.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        plan.hondi.net 바로가기
+      </a>
+      <span class="svc-badge svc-badge-partial">부분 가동</span>
+      <p class="svc-lead">사용자가 이루고 싶은 목표를 프라이빗 데이터 금고(PDV)와 종합해 최적의 방안을 도출하는 AI입니다. 국가기관·전문직 개인을 대신하거나 대신 실행하지 않고, 목표를 구체적인 경로로 분해하고 그 경로가 타당한지 검증하는 역할을 합니다. "오늘 점심 뭐 먹지"부터 "3년 안에 이직하고 싶다"까지 같은 엔진으로 처리합니다.</p>
+
+      <h3>다른 서비스와 다른 점 — 요청을 곧바로 실행하지 않습니다</h3>
+      <p class="svc-note">K-Biz·K-Market 같은 실행형 모듈은 사용자가 요청한 업무를 그대로 처리합니다. K-Plan은 다릅니다 — 요청을 곧바로 수행하기 전에, 그 요청이 목표 달성의 최선 경로인지부터 평가합니다. 더 나은 경로가 있다면 반드시 제시하되, 사용자가 원래 요청을 고수하면 그 결정을 존중해 그대로 지원합니다.</p>
+
+      <h3>처리 흐름 — AC 표준 5단계 체인을 그대로 사용합니다</h3>
+      <p class="svc-note">K-Plan은 새로운 파이프라인을 따로 만들지 않고, 혼디의 다른 실행형 모듈과 똑같은 K-Intent → K-Compose → K-Execute → K-Deliver → K-Report 5단계 체인을 그대로 씁니다. K-Plan만의 차별점은 이 체인이 아니라, K-Report 이후 자동으로 이어지는 반추와 경험의 공유입니다.</p>
+      <ol class="svc-flow">
+        <li><b>K-Intent — 목표 파싱 · PDV 종합</b> — 가장 먼저 의도의 합리성·타당성부터 평가합니다. 물리적으로 불가능하거나 터무니없는 목표(예: "화성에 갈 우주선을 우리집 창고에서 만들겠다")는 여기서부터 차단합니다. 그다음 사용자의 의도를 추측하거나 넘겨짚지 않습니다 — 모호하거나 여러 갈래로 해석될 수 있으면 그럴듯한 해석 하나를 임의로 고르지 않고 반드시 되물어 대화로 확증한 뒤에야 다음 단계로 넘어갑니다. PDV의 일정·예산·인맥·과거 결정 패턴도 함께 대조해 근거로 삼습니다.</li>
+        <li><b>K-Compose — 달성 경로 설계</b> — 방안을 짜기 전에 달성 가능성부터 점검합니다. 낮다고 판단되면 이를 숨기지 않고, 대안 경로(제3의 매개체 경유, 선행 조건 확보 후 재시도 등)를 함께 제시합니다.</li>
+        <li><b>K-Execute — 실행</b> — 접촉 대상 특정 → 사전 커뮤니케이션 초안 작성 → 회신 확인 → 세부 일정 확정 순으로, 날짜부터 먼저 정하지 않습니다. 실제 발송·결제·최종 확정은 항상 사용자 본인이 합니다.</li>
+        <li><b>K-Deliver — 결과 정리</b> — 실행 결과를 목표 대비 달성·부분 달성·미달성으로 정리하고, 아직 회신 대기 중인 항목과 완전히 종결된 항목을 구분합니다.</li>
+        <li><b>K-Report — 기록</b> — 최종 결과를 PDV에 실행 이력으로 남깁니다. 이 기록이 곧바로 반추의 입력이 됩니다.</li>
+      </ol>
+
+      <h3>예시로 보기</h3>
+      <p class="svc-note">"부산 출장을 준비해줘"라고만 말해도, K-Plan은 항공편·숙소 후보를 찾아 제시하는 데서 그치지 않습니다 — 출장의 목적(누구를 왜 만나는지)부터 되물어, 상대 기관의 의사결정 주기나 접촉 성격(신규·기존 관계)을 먼저 점검한 뒤에야 일정을 짭니다.</p>
+
+      <h3>반추 — 플랜은 끝나도 K-Plan의 일은 끝나지 않습니다</h3>
+      <p class="svc-note">K-Report로 기록이 남으면 반추 단계가 자동으로 트리거됩니다. 선택 기능이 아닙니다. 계획(K-Intent·K-Compose)과 실제 결과(K-Deliver·K-Report)를 대조해 어긋난 지점이 있다면 <b>계획 결함</b>(달성 가능성 평가가 부정확했는가), <b>실행 결함</b>(계획대로 실행되지 않았는가), <b>외부 변수</b>(담당자 교체 등 예측 불가능한 요인이었는가) 중 어디에 해당하는지 원인을 분류하고, 계획 결함으로 판단되면 같은 오판이 이 사용자의 다음 플랜에서 재발하지 않도록 PDV에 반영합니다. 결함은 숨기지 않고 요약해 사용자에게 보고합니다.</p>
+
+      <h3>경험의 공유 — 한 사람의 경험이 모두의 자산이 됩니다</h3>
+      <p class="svc-note">반추에서 나온 교훈은 개인 식별 정보를 제외한 모든 경험이 집단 학습 저장소에 쌓여, 다른 사용자의 K-Plan도 참조할 수 있습니다. 경험은 추상적인 사실 수준으로 충분합니다 — 고유명사(기관명·소속·인명 등)는 상위 카테고리로 치환됩니다. 예를 들어 "제주대학교 모 학과와 접촉했다"는 "대학의 학과와 접촉했다"로 추상화됩니다. 원본 PDV 데이터는 각자의 로컬에 남고, 저장소에는 이렇게 비식별화된 패턴만 전송됩니다. 이 저장소 역시 Openhash 위변조 방지 원칙 위에서 운영되어, 쌓인 교훈이 사후에 조작되지 않도록 보장합니다.</p>
+
+      <h3>K-Recompose — 중간 재평가, 그리고 K-Mail과의 관계</h3>
+      <p class="svc-note">플랜이 여러 단계·여러 주에 걸쳐 진행될 때, K-Compose가 미리 지정한 체크포인트(회신 마감 등)에 도달하면 아직 실행되지 않은 나머지 단계를 실제 결과로 재평가합니다 — 건너뛸 수 없는 강제 단계입니다. 이 체크포인트를 실제로 만들어내는 실행 채널이 K-Mail입니다: K-Mail이 다이제스트(회신 취합 결과)를 만들면 K-Recompose가 자동 트리거되고, 그 재평가 결과는 이제 plan 레코드(대화 이력·체크포인트 카운트)에 실제로 저장됩니다. 나아가 K-Mail이 인바운드 메일을 사람 확인 없이 처리해도 되는지 즉석에서 판단이 안 설 때, K-Mail은 K-Plan에게 실시간으로 물어보고 즉답을 받습니다(함수 API <code>_kplanDecideForKMail</code>) — 이때 K-Plan은 계획서뿐 아니라 <b>실시간 상태</b>(재고·영업시간 등 — 아직 사람이 직접 입력하며, K-JIT 같은 자동 연동은 미구현) 저장소(<code>kplan_plan_state</code>)와 <b>그 상대와의 과거 대화 이력</b>까지 판단 근거로 씁니다. K-Plan↔K-Mail의 전체 역할 분담·API 설계는 <code>docs/KPLAN_KMAIL_AGENT_TO_AGENT_ARCHITECTURE_v1_0_20260903.md</code> 참고.</p>
+
+      <div class="svc-callout important">
+        아직 없는 기능 — 담당자 연락처의 자동 조회·확정, 메일·공문의 자동 발송(K-Mail 위임 범위 밖 사안), 항공편·숙소의 자동 결제 확정, 상대방의 실제 의사결정 결과 예측은 아직 지원하지 않습니다. K-JIT(재고·실시간 운영 상태를 자동으로 조회해오는 모듈)은 아직 존재하지 않아, K-Recompose·사전 질의 판단은 사람이 직접 입력한 값이나 계획서의 정적 맥락에만 의존합니다. 대화창에서 실제로 호출(<code>[CALL_KPLAN: query=...]</code>)되도록 2026-09-02 AC 오케스트레이션에 편입되었습니다.
+      </div>
+      <p class="svc-note" style="margin-top:14px;color:var(--text4);font-size:12px;">이 탭의 정본(source of truth)은 <code>prompts/k-plan_v1_1.md</code>이고, K-Mail과의 관계는 <code>docs/KPLAN_KMAIL_AGENT_TO_AGENT_ARCHITECTURE_v1_0_20260903.md</code>가 정본입니다 — 이 문서들을 고칠 때는 반드시 그 문서를 먼저 갱신하세요.</p>
+    </div>
+  `,
+  kwatch: `
+    <div class="svc-detail">
+      <h2>K-Watch — 시민 신고, 접수부터 진행 상황 공개까지</h2>
+      <a href="https://watch.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        watch.hondi.net 바로가기
+      </a>
+      <span class="svc-badge svc-badge-partial">부분 가동</span>
+      <p class="svc-lead">사용자가 목격하거나 겪은, 국가 또는 공동체의 대응이 필요한 사건을 관련 기관에 신고하고 대응을 개시시키는 AI입니다. 강도·절도 같은 범죄뿐 아니라 길가의 쓰레기, 도로 위 동물 사체, 배기가스가 심한 차량, 갑작스런 끼어들기, 식당의 고객 차별, 진상 고객 행위 등 부당·불법·편법·오염·파손으로 분류되는 모든 사건이 대상입니다. 신고로 끝나지 않고 대응 기관을 선정하고, 대응 프로세스를 개시시키고, 진행 상황을 대중에 공개합니다.</p>
+
+      <h3>K-Police와 다른 점 — 제3자 목격 신고, 범위의 포괄성, 대중 공개</h3>
+      <p class="svc-note">K-Police는 대화 중 사용자 본인의 위험 신호를 자동 감지해 신고합니다. K-Watch는 사용자가 제3자로서 목격한 사건을 다루며, 범죄를 넘어 생활 속 부당·불법·편법·오염·파손까지 다룹니다. 그리고 대응 기관 선정부터 진행 상황의 대중 공개까지 책임집니다 — 예를 들어 불법 촬영 범죄를 목격해 신고하면, 그 신고가 관계 기관에 의해 어떻게 처리되고 있는지 다중에게 공개하고, 신고자에게는 지속적으로 알림을 전달합니다.</p>
+      <p class="svc-note"><a href="../citizen-report.html">기존 신고 정리 기능</a>(교통법규위반·바가지요금·불법주정차·기타 4종, 정리만 하고 접수는 사용자가 안전신문고에서 직접)이 K-Watch보다 먼저 있었습니다. K-Watch는 이를 대체·흡수해 범위를 넓히고, 접수까지 대신하는 것을 목표로 합니다.</p>
+
+      <h3>처리 흐름 — AC 표준 5단계 체인을 그대로 사용합니다</h3>
+      <p class="svc-note">K-Watch는 K-Plan과 마찬가지로 새로운 파이프라인을 따로 만들지 않고, K-Intent → K-Compose → K-Execute → K-Deliver → K-Report 5단계 체인을 그대로 씁니다. K-Watch만의 차별점은 K-Report 이후 자동으로 이어지는 반추와 경험의 공유입니다.</p>
+      <ol class="svc-flow">
+        <li><b>K-Intent — 신고 내용 파악 (최우선)</b> — 신고 내용의 정확한 파악이 가장 먼저입니다. 사용자가 제공한 문자·영상·음성·소리 등을 종합해 실제로 무슨 일이 있었는지 파악하며, 추측하거나 넘겨짚지 않습니다. 상황이 불분명하면 그럴듯한 해석 하나를 임의로 고르지 않고 반드시 되물어 확증한 뒤에야 다음 단계로 넘어갑니다. 사건의 성격(범죄/생활 신고)과 심각도도 함께 분류합니다.</li>
+        <li><b>K-Compose — 대응 기관 선정</b> — 자료를 곧바로 접수하지 않고 어느 기관이 맞는지부터 판단합니다. 하나의 사건에 여러 기관이 걸쳐 있으면(예: 도로 위 동물 사체 → 지자체 환경과 + 도로관리청) 병행 신고 여부도 판단합니다.</li>
+        <li><b>K-Execute — 신고 접수 실행</b> — 선정된 기관의 신고 창구에 문자·영상·음성 증거를 첨부해 접수하고, 접수 번호를 발급받습니다.</li>
+        <li><b>K-Deliver — 결과 정리</b> — 접수 확인, 담당 부서 배정, 처리 진행 단계를 한눈에 볼 수 있게 정리합니다. 여러 기관에 병행 신고한 경우 기관별로 구분해 보여줍니다.</li>
+        <li><b>K-Report — 기록 및 진행 상황 공개</b> — PDV에 신고 이력을 기록하고, 진행 상황을 대중에 공개하며, 신고자에게는 지속적으로 알림을 전달합니다.</li>
+      </ol>
+
+      <h3>반추 — 신고가 끝나도 K-Watch의 일은 끝나지 않습니다</h3>
+      <p class="svc-note">K-Report로 기록이 남으면 반추 단계가 자동으로 트리거됩니다. 신고 처리 결과를 대조해 <b>분류 결함</b>(애초에 잘못된 기관을 선정했는가), <b>처리 지연·미조치</b>(기관 선정은 맞았으나 대응이 늦었는가), <b>외부 변수</b>(관할 변경 등 예측 불가능한 요인이었는가) 중 어디에 해당하는지 분류하고, 분류 결함이면 같은 오판이 재발하지 않도록 반영합니다.</p>
+
+      <h3>경험의 공유 — 한 사람의 신고 경험이 모두의 자산이 됩니다</h3>
+      <p class="svc-note">반추에서 나온 교훈은 개인 식별 정보를 제외한 모든 경험이 집단 학습 저장소에 쌓여, 다른 사용자의 K-Watch도 참조할 수 있습니다. 고유명사는 상위 카테고리로 추상화됩니다 — 예를 들어 "제주시 한림읍 A식당에서 고객 차별을 신고했다"는 "한 지역 식당에서 고객 차별을 신고했다"로 추상화됩니다. 이 저장소 역시 Openhash 위변조 방지 원칙 위에서 운영됩니다.</p>
+
+      <div class="svc-callout important">
+        아직 없는 기능 — 기관 시스템에 대한 실제 자동 접수 연동(현재는 접수 서식 작성과 안내까지만), 신고 처리 결과의 자동 확인, 신고 대상자에 대한 신원 확인·특정, 반추 결과의 PDV 기록·진행 상황 대중 공개는 아직 지원하지 않습니다. 대화창에서 실제로 호출(<code>[CALL_KWATCH: query=...]</code>)되도록 2026-09-02 AC 오케스트레이션에 편입되었습니다.
+      </div>
+      <p class="svc-note" style="margin-top:14px;color:var(--text4);font-size:12px;">이 탭의 정본(source of truth)은 <code>prompts/k-watch_v1_0.md</code>입니다 — 이 문서를 고칠 때는 반드시 그 문서를 먼저 갱신하세요.</p>
+    </div>
+  `,
+  kjob: `
+    <div class="svc-detail">
+      <h2>K-Job — 구직 활동을 실행하는 AI</h2>
+      <a href="https://job.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        job.hondi.net 바로가기
+      </a>
+      <span class="svc-badge svc-badge-partial">부분 가동</span>
+      <p class="svc-lead">구직자 한 사람의 이력서·자기소개서 작성, 면접 준비, 구직 활동 전반을 곁에서 실행하는 AI입니다. 채용 공고에 대한 정보를 전달하는 데 그치지 않고, 실제로 문서 초안을 쓰고 모의 면접을 진행하고 지원 현황을 정리해 관리합니다. 최초 범위는 구직자 개인용이며, K-Biz처럼 업종별로 세분화하지 않고 단일 공통 모듈로 시작합니다.</p>
+
+      <h3>K-Plan·전문가 페르소나와 다른 점</h3>
+      <p class="svc-note">K-Plan은 "이직하고 싶다"는 목표 자체가 타당한 경로인지부터 평가하는 상위 계획 AI입니다. K-Job은 그 목표가 이미 구직 활동으로 확정된 뒤 실제 실행을 담당하는 도메인 특화 AI로, K-Plan 없이 곧바로 호출해도 동작합니다. 질의응답 중심의 EXPERT 전문가 페르소나와 달리, K-Job은 실행형입니다 — 채용 공고나 요청을 받으면 설명으로 끝내지 않고 실제 초안·연습·기록까지 만들어냅니다.</p>
+
+      <h3>처리 흐름 — AC 표준 5단계 체인을 그대로 사용합니다</h3>
+      <p class="svc-note">K-Job은 K-Plan·K-Watch와 마찬가지로 새로운 파이프라인을 따로 만들지 않고, K-Intent → K-Compose → K-Execute → K-Deliver → K-Report 5단계 체인을 그대로 씁니다.</p>
+      <ol class="svc-flow">
+        <li><b>K-Intent — 단계 파악</b> — 사용자가 이력서·자기소개서 작성, 면접 준비, 채용 공고 탐색, 지원 현황 관리 중 어느 단계에 있는지 먼저 파악합니다. 모호한 요청("이력서 봐줘")은 어떤 직무·공고를 겨냥한 것인지 되물어 확증한 뒤에야 다음 단계로 넘어갑니다.</li>
+        <li><b>K-Compose — 실행 방식 설계</b> — 어떤 경력을 어떤 순서로 강조할지, 어떤 유형의 면접 질문에 대비할지 먼저 설계한 뒤 실행으로 넘어갑니다.</li>
+        <li><b>K-Execute — 실행</b> — 이력서·자기소개서 초안을 작성하고, 모의 면접을 진행하며 구체적 피드백을 주고, 지원 현황을 기록합니다.</li>
+        <li><b>K-Deliver — 결과 정리</b> — 완성된 문서·면접 피드백·지원 현황을 공고별로 구분해 한눈에 보여줍니다.</li>
+        <li><b>K-Report — 기록</b> — 결과를 PDV에 구직 이력으로 남깁니다. 이 기록이 다음 지원 때 재사용할 경력 정보의 출처가 됩니다.</li>
+      </ol>
+
+      <h3>정확성 원칙 — 경력을 꾸며내지 않습니다</h3>
+      <p class="svc-note">이력서·자기소개서는 사용자가 제공한 사실에 기반해서만 작성하며, 더 좋아 보이게 하려고 없는 경력·자격·성과를 지어내지 않습니다. 서류 합격률 같은 수치를 확정된 통계처럼 제시하지 않고, 특정 채용 결과를 보장하는 표현도 쓰지 않습니다. 나이·성별·장애 여부 등 채용 과정에서 차별적으로 활용될 수 있는 정보는 법적으로 명시가 필요한 경우가 아니면 먼저 넣자고 제안하지 않습니다.</p>
+
+      <h3>반추와 경험의 공유</h3>
+      <p class="svc-note">서류 합격·불합격, 면접 결과가 PDV에 기록되면 반추 단계가 자동으로 트리거됩니다. 결과를 대조해 <b>문서 설계 결함</b>(강조한 경력이 공고 요구사항과 어긋났는가), <b>표현·완성도 문제</b>, <b>외부 변수</b> 중 어디에 해당하는지 분류하고, 같은 오판이 다음 지원에서 재발하지 않도록 반영합니다. 반추에서 나온 교훈은 개인 식별 정보·회사명을 제외한 비식별화된 패턴으로 집단 학습 저장소에 쌓여, 다른 사용자의 K-Job도 참조할 수 있습니다.</p>
+
+      <div class="svc-callout important">
+        아직 없는 기능 — 채용 사이트에 대한 실제 자동 지원 제출 연동, 실시간 채용 공고 크롤링·매칭, 영상 면접 분석(표정·음성 톤), 사업주 측 채용·인사·노무 대행 기능, 반추 결과의 PDV 기록·집단 학습 저장소는 아직 지원하지 않습니다. 대화창에서 실제로 호출(<code>[CALL_KJOB: query=...]</code>)되도록 2026-09-02 AC 오케스트레이션에 편입되었고, 과금 경로(구독자 기본 요금제와 동일 — GDC 무료 한도 소진 후 유료, flash/pro 자동 판단)도 worker.js에 연결되어 있습니다.
+      </div>
+      <p class="svc-note" style="margin-top:14px;color:var(--text4);font-size:12px;">이 탭의 정본(source of truth)은 <code>prompts/k-job_v1_0.md</code>입니다 — 이 문서를 고칠 때는 반드시 그 문서를 먼저 갱신하세요.</p>
+    </div>
+  `,
+  kmail: `
+    <div class="svc-detail">
+      <h2>K-Mail — 혼디 사용자 간 메일 발송·주소록, 그리고 K-Mail끼리의 대화</h2>
+      <a href="https://mail.hondi.net" target="_blank" rel="noopener" class="svc-link-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        mail.hondi.net 바로가기
+      </a>
+      <span class="svc-badge svc-badge-partial">부분 가동</span>
+      <p class="svc-lead">사용자 고유 주소(<code>&lt;guid&gt;@hondi.kr</code>)로 외부 이메일을 발송하고, 수신자를 대화로 확정해 예약 발송·다이제스트·주소록·규칙까지 처리하는 개인용 메일 비서입니다. 탄생 의도는 여기서 한 걸음 더 나갑니다 — 상대방도 K-Mail을 쓴다면, 사람과 사람이 며칠씩 주고받던 조율을 <b>K-Mail과 K-Mail이 직접 여러 차례 주고받는 방식</b>으로 바꿔 의사결정 속도·정확성·합리성을 끌어올리는 것이 목표입니다. 관리자 전용 공문 시스템(gov-mail, hondi.org)과는 도메인·인증·목적이 완전히 분리되어 있습니다.</p>
+
+      <h3>할 수 있는 일</h3>
+      <ol class="svc-flow">
+        <li><b>메일 발송</b> — 즉시 또는 예약, 한 명 또는 여러 명에게. 캠페인에 이름을 붙이고, 수신자마다 다른 본문(맞춤 초안)을 보낼 수 있습니다. 회신을 특정 시각까지 모아 다이제스트로 정리하며, 발송 대상은 자동으로 주소록에도 등록됩니다.</li>
+        <li><b>주소록 관리</b> — 이름·이메일·직업·소속·전공·관계·그룹(태그)으로 저장·검색, 그룹 부여/해제, 중복 연락처 병합.</li>
+        <li><b>규칙 등록</b> — "불필요한 메일은 도착 즉시 삭제해" 같은 자동삭제 규칙뿐 아니라, "이런 요청이면 확인 안 받고 알아서 답장해" 같은 <b>위임 처리 규칙</b>도 등록합니다.</li>
+        <li><b>캠페인 조회·보고서</b> — 과거 캠페인의 수신자 명단·본문을 그대로 다시 찾아볼 수 있고, 기관·카테고리별 응답률 보고서를 만들어 캠페인을 종료 처리할 수 있습니다.</li>
+      </ol>
+
+      <h3>K-Plan과의 관계 — 기획팀과 front line</h3>
+      <p class="svc-note">K-Mail은 무엇을·왜·누구에게 보낼지 스스로 기획하지 않습니다 — 그건 K-Plan의 역할입니다. K-Mail은 K-Plan의 계획을 실제 메일 왕복으로 구현하는 실무 담당입니다. 인바운드 메일 한 통이 오면 <b>[메일의 성격 × 지금의 실제 상태]</b>로 3단계(즉결 / 위임 범위 내 실행 / 신규 판단 필요) 중 하나로 처리하며, 위임 규칙만으로 판단이 안 서고 그 캠페인이 K-Plan 플랜에 속해 있으면 <code>_kplanDecideForKMail</code> 함수 API로 K-Plan에 실시간으로 판단을 구합니다(같은 Worker 안이라 HTTP 왕복 없이 함수 호출 1회로 즉답). K-Plan은 플랜의 계획서·<b>실시간 상태</b>(재고·영업시간 등 — 아직 사람이 직접 입력, K-JIT 같은 자동 연동은 미구현)·<b>이 상대와의 과거 대화 이력</b>까지 근거로 판단하고, 반복 가능한 패턴이면 위임 규칙으로 자동 승격하기도 합니다. 자세한 설계는 <code>docs/KPLAN_KMAIL_AGENT_TO_AGENT_ARCHITECTURE_v1_0_20260903.md</code> 참고.</p>
+
+      <h3>사람과의 관계 — 위임 범위 밖은 예외 없이 사람에게</h3>
+      <p class="svc-note">위임 범위를 정하는 건 K-Mail 스스로가 아니라 사람(또는 그 규칙을 승격시키는 K-Plan)입니다. 범위 밖이거나 애매한 사안, 금액·계약·확정적 약속이 걸린 사안은 항상 사람에게 올라갑니다(에스컬레이션). 급한 사안이면 K-Plan이 대기 응답 문구까지 정해 K-Mail에게 먼저 보내게 하지만, 이건 시간을 버는 것이지 판단을 대신하는 게 아닙니다 — 실제 결정은 사람 확인 후에만 나갑니다. 위임 규칙은 K-Plan이 자동 승격한 것도 포함해 언제든 사람이 고치거나 지울 수 있습니다.</p>
+
+      <h3>정직한 한계 — 수신자를 지어내지 않습니다</h3>
+      <p class="svc-note">K-Mail은 이메일 주소를 스스로 알지 못합니다. 수신자를 확보하는 방법은 (a) 사용자가 대화 중 이름과 이메일을 직접 알려주거나, (b) "서울대 컴퓨터 관련 학과 교수들"처럼 모호하게 서술하면 실제 웹 검색을 거쳐 검색 결과에서 실제로 확인되는 이름·이메일만 후보로 제시하는 두 경로뿐입니다. 검색 결과에 이메일이 안 보이면 지어내지 않고 직접 알려달라고 요청합니다.</p>
+
+      <h3>진입 경로 — mail.hondi.net으로 일원화</h3>
+      <p class="svc-note">K-Law·K-Plan과 동일하게 전용 서브도메인 <code>mail.hondi.net</code>(<a href="https://mail.hondi.net/webapp.html" target="_blank">webapp.html</a>)로 통합됐습니다(2026-09-08). 발송 전용 단순 폼("빠른 발송" 탭)과 대화형 비서·주소록·캠페인 관리가 한 웹앱 안에 공존하며, 로그인은 공용 인증 모듈(<code>k-service-auth-client.js</code>)로 plan.hondi.net·klaw.hondi.net과 세션을 공유합니다. 좌측 메뉴 "메일 보내기"와 "메일 보내줘"·"주소록 검색" 등 대화 발화 모두 이 웹앱으로 연결되며(gwp-registry.js, <code>id:'kmail'</code>), AC-PRO-CORE 태그 체계와 격리된 자체 프로토콜(KMAIL_SEND_CAMPAIGN 등)로 동작합니다. 기존 <code>/mail.html</code>·<code>/pages/kmail-assistant.html</code>·<code>/pages/kmail-contacts.html</code>는 폐기됐습니다 — 백엔드(<code>/mail/send</code>, <code>/kmail/*</code>)는 그대로 hondi Worker에 남아 있고 프론트만 이관됐습니다.</p>
+
+      <div class="svc-callout important">
+        아직 없는 기능 — 수신함(받은 메일 열람) UI는 아직 없습니다. 위임 규칙 자동 승격에 대한 사후 검토 절차, 재고·영업시간 같은 실시간 상태의 자동 연동(K-JIT 등)은 아직 사람이 수동으로 입력해야 합니다. 실사용자 채팅 경로에서의 K-Plan 사전 질의는 관리자 시딩 경로로만 검증됐고 라이브 트래픽 검증은 아직입니다.
+      </div>
+      <p class="svc-note" style="margin-top:14px;color:var(--text4);font-size:12px;">이 웹앱의 정본(source of truth)은 <code>prompts/SP-25_kmail_v1_11.txt</code>이고, K-Plan과의 관계는 <code>docs/KPLAN_KMAIL_AGENT_TO_AGENT_ARCHITECTURE_v1_0_20260903.md</code>가 정본입니다 — 이 문서들을 고칠 때는 반드시 그 문서를 먼저 갱신하세요.</p>
+    </div>
+  `,
+  kjit: `
+    <div class="svc-detail">
+      <h2>K-JIT — 사회효용 우선 적시조달 메커니즘</h2>
+      <p class="svc-lead">가계·기업·기관이 필요로 하는 물자·인원·서비스의 조달을 계획합니다. 기존 JIT(Just-In-Time)과 달리 개별 주체의 비용 최소화가 아니라 사회 전체의 효용 극대화·총비용 최소화를 기준으로 계획을 세웁니다.</p>
+
+      <div class="svc-callout important">
+        K-JIT는 아직 초안(v0.1) 단계입니다. 실제 배차·배송 실행은 K-Logistics·K-Market이 맡고, K-JIT는 그 위의 계획 레이어만 담당합니다.
+      </div>
+
+      <h3>기존 JIT과 무엇이 다른가</h3>
+      <p class="svc-note">예를 들어 A기업이 원재료를 조달하는 비용이 1만원인데, 사회 전체 관점(물류 혼잡·재고 낭비·탄소배출 등을 포함한 총비용)에서 최적인 경로의 비용이 1.1만원이라면, K-JIT는 후자를 선택합니다. 이때 A기업이 부담하는 차액은 보상 메커니즘으로 상쇄되며, 보상을 반영해도 손해라면 참여를 강제하지 않습니다.</p>
+
+      <h3>처리 흐름</h3>
+      <ol class="svc-flow">
+        <li><b>수요 집계</b> — 사용자들이 등록한 물자·인원·서비스 조달 요청(양·시점·위치·긴급도)을 모읍니다.</li>
+        <li><b>사회적 최적 계획 수립</b> — 개별 비용이 아니라 사회 전체 총비용을 기준으로 누가, 언제, 어떤 경로로 조달할지 계획합니다.</li>
+        <li><b>실행 위임</b> — 확정된 계획을 K-Logistics(물자 배차)·K-Market(인력·서비스 매칭)·GDC(보상 정산)에 넘깁니다.</li>
+        <li><b>피드백 반영</b> — 실행 결과(지연·초과비용·품질 이슈)를 지속적으로 모아 다음 계획에 반영합니다.</li>
+      </ol>
+
+      <h3>다른 서비스와의 자동 연계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>상황</th><th>자동 연동</th></tr></thead>
+          <tbody>
+            <tr><td>물자 실행 배차</td><td class="svc-hondi">K-Logistics 자동 연동 — 실시간 배차·배송</td></tr>
+            <tr><td>인력·용역 매칭</td><td class="svc-hondi">K-Market 자동 연동 — 실시간 매칭</td></tr>
+            <tr><td>보상·차액 정산</td><td class="svc-hondi">GDC 자동 연동 — 보상액 지급</td></tr>
+            <tr><td>긴급 의료·재난 물자</td><td class="svc-hondi">K-119·K-Health 신호 시 일반 조달 큐를 건너뛰어 최우선 배정</td></tr>
+            <tr><td>도시 시설 신설 시 장기 수요</td><td class="svc-hondi">K-City 설계안을 장기 조달 계획의 입력값으로 반영</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>기존 조달 방식과 무엇이 다른가</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>구분</th><th>기존 JIT</th><th>혼디 K-JIT</th></tr></thead>
+          <tbody>
+            <tr><td>최적화 기준</td><td>개별 주체의 비용·재고 최소화</td><td class="svc-hondi">사회 전체 총비용 최소화(외부효과 포함)</td></tr>
+            <tr><td>손해 발생 시</td><td>해당 주체가 그대로 부담</td><td class="svc-hondi">차등보상으로 상쇄, 그래도 손해면 참여 강제 안 함</td></tr>
+            <tr><td>실행 범위</td><td>개별 기업 내부 시스템</td><td class="svc-hondi">계획만 수립, 실행은 K-Logistics·K-Market에 위임</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="svc-callout">
+        참여는 원칙적으로 옵트인입니다. 사회적 최적 계획이 보상을 반영해도 개별 주체에게 불리하면, K-JIT는 계획을 강제하지 않고 차선책(개별 최적안)을 함께 제시합니다.
+      </div>
+    </div>
+  `,
+  kcity: `
+    <div class="svc-detail">
+      <h2>K-City — 시민 복지 총합 최적 도시 설계</h2>
+      <p class="svc-lead">도시(읍·면·동 단위 포함) 전체의 시민 복지 총합(주거·의료·교육·금융·교통·통신·레저 등)이 최상이 되도록, 각 시설의 물리적 조합(입지·규모·용량 배분)을 설계합니다.</p>
+
+      <div class="svc-callout important">
+        K-City는 아직 초안(v0.1) 단계입니다. 산출물은 자문 설계안이며, 실제 도시계획 결정·건축 인허가는 언제나 해당 지자체·국가기관의 법정 권한입니다.
+      </div>
+
+      <h3>처리 흐름</h3>
+      <ol class="svc-flow">
+        <li><b>현황·수요 데이터 집계</b> — 인구·연령 분포, 기존 시설 위치·용량, 접근성(이동시간·거리)을 모읍니다.</li>
+        <li><b>부문별 효용 모델링</b> — 주거·의료·교육·금융·교통·통신·레저 각 부문의 접근성·충족도를 계산합니다.</li>
+        <li><b>통합 최적화</b> — 예산·토지·인허가 제약 안에서 복지 총합을 최대화하는 시설 조합(신설·증설·이전·통폐합)을 찾습니다.</li>
+        <li><b>시나리오 비교</b> — 예산 수준·우선순위별로 최소 2개 이상의 대안을 나란히 제시합니다.</li>
+        <li><b>단계적 실행안 제시</b> — 우선순위와 예산 배분을 담은 초안을 작성합니다.</li>
+        <li><b>시민 피드백 반영</b> — 실행 이후 실측 이용률·만족도를 다음 설계 주기에 반영합니다.</li>
+      </ol>
+
+      <h3>다른 서비스와의 자동 연계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>상황</th><th>자동 연동</th></tr></thead>
+          <tbody>
+            <tr><td>신설 시설의 장기 조달 예측</td><td class="svc-hondi">K-JIT 자동 연동 — 장기 수요 데이터로 전달</td></tr>
+            <tr><td>시공 단계 자재 조달</td><td class="svc-hondi">K-Logistics 자동 연동</td></tr>
+            <tr><td>시민 심의·의사결정</td><td class="svc-hondi">K-Democracy 자동 연동 — 설계안을 심의 절차에 전달</td></tr>
+            <tr><td>교통·의료·교육 현황 데이터</td><td class="svc-hondi">K-Traffic·K-Health·K-School과 데이터 교환</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>기존 도시계획 방식과 무엇이 다른가</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>구분</th><th>기존 방식</th><th>혼디 K-City</th></tr></thead>
+          <tbody>
+            <tr><td>부문 검토</td><td>부문별로 별도 용역·개별 검토</td><td class="svc-hondi">7개 부문 통합 최적화를 한 번에 계산</td></tr>
+            <tr><td>대안 비교</td><td>단일안 위주로 제시</td><td class="svc-hondi">예산·우선순위별 복수 시나리오 병렬 제시</td></tr>
+            <tr><td>가중치 산정</td><td>담당 부서 내부 판단</td><td class="svc-hondi">인구 구성·시민 참여 절차를 반영해 조정</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="svc-callout">
+        복지 총합 계산에 쓰인 가중치·전제·트레이드오프는 시민이 검토할 수 있도록 투명하게 공개됩니다. 최종 채택 여부는 K-Democracy의 절차(공청회 등)를 거칩니다.
+      </div>
+    </div>
+  `,
+  kintent: `
+    <div class="svc-detail">
+      <h2>K-Intent — 의도·목표 구조화<span class="svc-badge svc-badge-partial">내부 전용</span></h2>
+      <p class="svc-lead">AC(에이전트 코어)가 다기관·다절차 오케스트레이션이 필요하다고 판별한 요청을 넘겨받아, 이용자가 실제로 손에 쥐고 싶은 최종 결과가 무엇인지 구조화합니다. 도메인은 가리지 않습니다 — 주문이든 소송이든 동일한 절차로 처리합니다.</p>
+
+      <div class="svc-callout">
+        K-Intent → K-Compose → K-Execute → K-Deliver → K-Report는 사용자가 개별적으로 선택하는 서비스가 아니라, 혼디가 다기관·다절차 요청을 처리할 때마다 내부적으로 항상 이 순서로 실행하는 5단계 오케스트레이션 파이프라인입니다. 아래는 각 단계가 실제로 하는 일을 투명하게 공개한 것이며, 별도의 진입 채팅창은 없습니다.
+      </div>
+
+      <h3>개요 다이어그램</h3>
+      <div class="svc-diagram">
+        <svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg" font-family="inherit">
+          <defs><marker id="arI" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#94a3b8"/></marker></defs>
+          <rect x="10" y="70" width="130" height="60" rx="10" fill="#eef2ff" stroke="#6366f1"/>
+          <text x="75" y="95" text-anchor="middle" font-size="12" font-weight="700" fill="#3730a3">STEP 1</text>
+          <text x="75" y="112" text-anchor="middle" font-size="11" fill="#4338ca">1차 추출</text>
+          <line x1="140" y1="100" x2="185" y2="100" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arI)"/>
+          <rect x="190" y="70" width="140" height="60" rx="10" fill="#fef3c7" stroke="#d97706"/>
+          <text x="260" y="90" text-anchor="middle" font-size="12" font-weight="700" fill="#92400e">STEP 2</text>
+          <text x="260" y="106" text-anchor="middle" font-size="11" fill="#92400e">확신도 게이트</text>
+          <text x="260" y="120" text-anchor="middle" font-size="10" fill="#92400e">(최대 2회 되묻기)</text>
+          <path d="M260,70 C260,30 260,30 220,70" fill="none" stroke="#d97706" stroke-width="1.3" stroke-dasharray="3,2" marker-end="url(#arI)"/>
+          <text x="235" y="45" font-size="9.5" fill="#b45309">불명확</text>
+          <line x1="330" y1="100" x2="375" y2="100" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arI)"/>
+          <rect x="380" y="55" width="150" height="95" rx="10" fill="#eef2ff" stroke="#6366f1"/>
+          <text x="455" y="75" text-anchor="middle" font-size="12" font-weight="700" fill="#3730a3">STEP 3</text>
+          <text x="455" y="90" text-anchor="middle" font-size="10.5" fill="#4338ca">mode 확정</text>
+          <text x="455" y="107" text-anchor="middle" font-size="9.5" fill="#4338ca">single · composite</text>
+          <text x="455" y="121" text-anchor="middle" font-size="9.5" fill="#4338ca">· project</text>
+          <line x1="530" y1="100" x2="575" y2="100" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arI)"/>
+          <rect x="580" y="70" width="170" height="60" rx="10" fill="#dcfce7" stroke="#16a34a"/>
+          <text x="665" y="95" text-anchor="middle" font-size="12" font-weight="700" fill="#166534">STEP 4</text>
+          <text x="665" y="112" text-anchor="middle" font-size="11" fill="#166534">K-Compose로 이관</text>
+        </svg>
+      </div>
+
+      <h3>STEP별 상세</h3>
+      <div class="svc-accordion" id="acc-kintent">
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">1</span>발화 원문에서 1차 추출</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>발화에서 <code>goal</code>·<code>domain</code>·<code>mode</code>를 1차로 뽑아냅니다. mode가 single/composite로 보이면 <code>initial_input</code>도 함께 채우고, project로 보이면 <code>project_brief</code>와 <code>human_authority_gate_needed</code>를 채웁니다.</p>
+          </div></div>
+        </div>
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">2</span>확신도 확인 (되묻기 루프)</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>목표가 "뭔가 좀 해결하고 싶은데" 수준으로 막연하면, 뚜렷해질 때까지 짧게 되묻습니다. 정보 없이 진행하지 않되, 과도하게 여러 번 묻지도 않습니다 — <b>최대 2회</b>.</p>
+          </div></div>
+        </div>
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">3</span>mode 확정 (single·composite·project)</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <ul>
+              <li><b>composite</b> — 발화에 이미 여러 갈래가 보이면(예: "장례 치르고 상속 정리까지"), 상위 목표 하나와 하위 목표들을 함께 정리합니다.</li>
+              <li><b>project</b> — 반복(팬아웃) 산출물·인간 전속 구간이 낀 프로젝트형이면, <code>initial_input</code> 대신 <code>project_brief</code>를 자연어로 자유 서술합니다(고정 스키마로 억지로 좁히지 않습니다).</li>
+              <li><b>확신이 안 서면</b> — mode=single로 두고 goal만 넓게 잡아, 실제 조합 판단은 K-Compose에게 맡깁니다.</li>
+            </ul>
+          </div></div>
+        </div>
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">4</span>K-Compose로 이관</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>mode가 확정되면 <code>[HANDOFF_TO_KCOMPOSE: goal=..., domain=..., mode=...]</code> 태그로 이관합니다. K-Intent는 여기서 임무를 마치고, 이후 대화에는 다시 관여하지 않습니다.</p>
+          </div></div>
+        </div>
+      </div>
+
+      <h3>절대 금지 원칙</h3>
+      <ul class="svc-note" style="padding-left:18px;">
+        <li>사용자가 말하지 않은 세부사항까지 goal에 지어내 채우지 않습니다.</li>
+        <li>K-Search·EXPERT·GWP를 직접 호출하지 않습니다 — 그건 K-Compose 이후의 몫입니다.</li>
+        <li>응급(R0) 신호를 감지하면 즉시 목표 구조화를 멈추고 AC로 되돌립니다.</li>
+        <li>mode=project를 고정 enum·필드 나열로 억지로 구조화하지 않습니다.</li>
+      </ul>
+
+      <p class="svc-note"><b>다음 단계</b>: K-Compose(실행계획 조합)</p>
+    </div>
+  `,
+  kcompose: `
+    <div class="svc-detail">
+      <h2>K-Compose — 실행계획 조합<span class="svc-badge svc-badge-partial">내부 전용</span></h2>
+      <p class="svc-lead">K-Intent가 확정한 목표를 받아, gwp-registry에 등록된 어떤 서비스·기관·사업자·개인을 어떤 순서로 조합해야 그 목표가 실현되는지 결정합니다. 5개 단계 중 분기가 가장 많은 단계입니다.</p>
+
+      <div class="svc-callout">
+        K-Intent → K-Compose → K-Execute → K-Deliver → K-Report는 사용자가 개별적으로 선택하는 서비스가 아니라, 혼디가 다기관·다절차 요청을 처리할 때마다 내부적으로 항상 이 순서로 실행하는 5단계 오케스트레이션 파이프라인입니다. 아래는 각 단계가 실제로 하는 일을 투명하게 공개한 것이며, 별도의 진입 채팅창은 없습니다.
+      </div>
+
+      <h3>개요 다이어그램 — mode에 따라 세 갈래로 갈립니다</h3>
+      <div class="svc-diagram">
+        <svg viewBox="0 0 760 320" xmlns="http://www.w3.org/2000/svg" font-family="inherit">
+          <defs><marker id="arC" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#94a3b8"/></marker></defs>
+          <rect x="10" y="130" width="120" height="55" rx="10" fill="#e0e7ff" stroke="#6366f1"/>
+          <text x="70" y="153" text-anchor="middle" font-size="11.5" font-weight="700" fill="#3730a3">STEP -1</text>
+          <text x="70" y="169" text-anchor="middle" font-size="10.5" fill="#4338ca">mode 분기</text>
+
+          <line x1="130" y1="145" x2="175" y2="55" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arC)"/>
+          <text x="145" y="90" font-size="9" fill="#64748b">발견형</text>
+          <rect x="180" y="20" width="165" height="65" rx="10" fill="#fce7f3" stroke="#db2777"/>
+          <text x="262" y="42" text-anchor="middle" font-size="11" font-weight="700" fill="#9d174d">STEP 0-DISCOVER</text>
+          <text x="262" y="57" text-anchor="middle" font-size="9.5" fill="#9d174d">의미기반 후보검색</text>
+          <text x="262" y="71" text-anchor="middle" font-size="9.5" fill="#9d174d">→ 후보대조 → 수렴</text>
+
+          <line x1="130" y1="157" x2="175" y2="157" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arC)"/>
+          <text x="140" y="150" font-size="9" fill="#64748b">사업명 앎</text>
+          <rect x="180" y="130" width="165" height="55" rx="10" fill="#fef3c7" stroke="#d97706"/>
+          <text x="262" y="152" text-anchor="middle" font-size="11" font-weight="700" fill="#92400e">STEP 1</text>
+          <text x="262" y="167" text-anchor="middle" font-size="9.5" fill="#92400e">PROCEDURE_MAP 조회</text>
+
+          <line x1="130" y1="170" x2="175" y2="255" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arC)"/>
+          <text x="145" y="220" font-size="9" fill="#64748b">프로젝트형</text>
+          <rect x="180" y="225" width="165" height="65" rx="10" fill="#dbeafe" stroke="#2563eb"/>
+          <text x="262" y="247" text-anchor="middle" font-size="11" font-weight="700" fill="#1e40af">STEP P</text>
+          <text x="262" y="262" text-anchor="middle" font-size="9.5" fill="#1e40af">execution_plan</text>
+          <text x="262" y="276" text-anchor="middle" font-size="9.5" fill="#1e40af">자연어 실행계획 서술</text>
+
+          <line x1="345" y1="52" x2="400" y2="140" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="3,2" marker-end="url(#arC)"/>
+          <line x1="345" y1="157" x2="400" y2="157" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arC)"/>
+          <line x1="345" y1="257" x2="475" y2="200" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arC)"/>
+
+          <rect x="405" y="130" width="150" height="55" rx="10" fill="#fef3c7" stroke="#d97706"/>
+          <text x="480" y="152" text-anchor="middle" font-size="11" font-weight="700" fill="#92400e">STEP 2·3</text>
+          <text x="480" y="167" text-anchor="middle" font-size="9.5" fill="#92400e">적합성 · 공익/사익 게이트</text>
+
+          <line x1="555" y1="157" x2="600" y2="157" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arC)"/>
+          <rect x="605" y="130" width="145" height="55" rx="10" fill="#dcfce7" stroke="#16a34a"/>
+          <text x="677" y="152" text-anchor="middle" font-size="11" font-weight="700" fill="#166534">STEP 4</text>
+          <text x="677" y="167" text-anchor="middle" font-size="9.5" fill="#166534">K-Execute로 이관</text>
+        </svg>
+      </div>
+
+      <h3>STEP별 상세</h3>
+      <div class="svc-accordion" id="acc-kcompose">
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">-1</span>mode 분기</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>K-Intent가 넘긴 mode를 먼저 확인합니다. single/composite면 STEP 0-DISCOVER로, project면 아래 STEP P로 곧장 가고(기존 STEP 0~3은 건너뜁니다).</p>
+          </div></div>
+        </div>
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">0</span>발견형 — 의미기반 검색으로 후보 찾기</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>goal이 특정 사업명이 아니라 "청년 지원 혜택 확인"처럼 카테고리+속성 형태면 이 갈래를 탑니다. 키워드로 쪼개지 않고, 아는 속성을 자연어 문장 하나로 합쳐(<code>"제주 거주 만 30세 청년이 받을 수 있는 지원 혜택 확인"</code>) 의미기반 검색(<code>BENEFIT_SEMANTIC_SEARCH</code>)을 한 번 돌립니다.</p>
+            <p>후보의 <code>score</code>(0.0~1.0 유사도)로 확신도를 가늠하고, 이미 아는 속성으로 <b>한 번의 추론</b>으로 적합성을 대조합니다(속성 하나씩 물어보며 여러 번 재검색하지 않습니다). 애매하면 판단을 가르는 속성 하나만 자연스럽게 묻고, 최대 3회까지 반복합니다. 그래도 안 좁혀지면 후보 목록을 그대로 보여주고 이용자가 직접 고르게 합니다.</p>
+          </div></div>
+        </div>
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">P</span>프로젝트형 — 실행계획을 자연어 한 편으로</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>project는 "이미 존재하는 절차를 찾는" 게 아니라, 이용자가 스스로 설계한 작업(예: 학원 12곳 실태조사)을 부분 수행하는 것이라 성격이 다릅니다. 산출물·순서·팬아웃 대상·인간 전속 구간을 <b>자연어 실행계획 한 편</b>으로 씁니다 — 고정 스키마(steps[] 25칸)를 폐기하고, "여기서부터는 이용자 본인이 직접 해야 함"이라는 문구만은 절대 애매하게 쓰지 않습니다.</p>
+          </div></div>
+        </div>
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">1</span>PROCEDURE_MAP 캐시 조회</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>사업명을 이미 아는 경우, 과거에 같은 목표를 처리하며 쌓아둔 캐시(<code>PROCEDURE_MAP</code>)를 먼저 조회합니다. <b>hit</b>(정상)이면 STEP 2로, <b>hit_pending_review</b>면 "아직 최종 점검 중"이라 고지 후 진행, <b>draft/miss</b>면 STEP 1-B(최초 조사)로 — draft의 절차 단계는 절대 재사용하지 않습니다.</p>
+          </div></div>
+        </div>
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">2</span><span class="svc-acc-gate">GATE</span> 목표 적합성 확인</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>캐시 히트여도 "이 절차가 정말 이 이용자에게 맞는지"는 항상 한 번 더 확인합니다(EXPERT 호출) — 인접한 다른 절차(예: 개인파산 vs 개인회생)가 더 맞을 수 있기 때문입니다. 부적합하면 그 절차로 STEP 1부터 다시 시작합니다.</p>
+          </div></div>
+        </div>
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">3</span><span class="svc-acc-gate">GATE · C40</span> 공익·사익 재분류 게이트</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>무료 공익 지원 경로가 있을 가능성이 있으면 먼저 안내합니다. 이용자가 무료로 전환하면 K-Execute를 거치지 않고 바로 K-Deliver로(STEP 5), 유료로 계속하면 STEP 4로 갑니다. 이 안내는 이용자의 선택을 기다려야 해서, 이번 턴은 여기서 일단 끝납니다.</p>
+          </div></div>
+        </div>
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">4</span>K-Execute로 이관 (병렬·팬아웃 지정 포함)</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>"무엇을, 어느 순서로"만 확정한 steps 배열을 넘깁니다. 서로 다른 기관에 대한 신고·통지가 여러 건 필요하고 순서가 결과에 영향을 안 주면 같은 <code>parallel_group</code>으로 묶고, 독립적이면 <code>notify</code>, 전원 승인이 필요하면 <code>join</code> 모드를 지정합니다.</p>
+          </div></div>
+        </div>
+      </div>
+
+      <h3>절대 금지 원칙</h3>
+      <ul class="svc-note" style="padding-left:18px;">
+        <li>존재하지 않는 기관·절차·자동화 수단을 지어내지 않습니다.</li>
+        <li>검토 대기(pending_review) 상태인 절차·기관 정보를 검토 완료인 것처럼 쓰지 않습니다.</li>
+        <li>무료 공익 지원 경로가 있을 가능성을 알면서 안내하지 않고 넘어가지 않습니다.</li>
+        <li>응급(R0) 신호를 어느 시점에 감지하든 즉시 중단하고 AC로 되돌립니다.</li>
+      </ul>
+
+      <p class="svc-note"><b>이전 단계</b>: K-Intent(의도·목표 구조화)</p>
+      <p class="svc-note"><b>다음 단계</b>: K-Execute(오케스트레이션 실행)</p>
+    </div>
+  `,
+  kexecute: `
+    <div class="svc-detail">
+      <h2>K-Execute — 오케스트레이션 실행<span class="svc-badge svc-badge-partial">내부 전용</span></h2>
+      <p class="svc-lead">K-Compose가 확정한 실행 계획을 받아, AI Agent로서 그 계획을 실제로 수행합니다. 병렬·팬아웃 그룹 처리와 일치도 검증 게이트가 이 단계의 핵심입니다.</p>
+
+      <div class="svc-callout">
+        K-Intent → K-Compose → K-Execute → K-Deliver → K-Report는 사용자가 개별적으로 선택하는 서비스가 아니라, 혼디가 다기관·다절차 요청을 처리할 때마다 내부적으로 항상 이 순서로 실행하는 5단계 오케스트레이션 파이프라인입니다. 아래는 각 단계가 실제로 하는 일을 투명하게 공개한 것이며, 별도의 진입 채팅창은 없습니다.
+      </div>
+
+      <h3>개요 다이어그램</h3>
+      <div class="svc-diagram">
+        <svg viewBox="0 0 760 260" xmlns="http://www.w3.org/2000/svg" font-family="inherit">
+          <defs><marker id="arE" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#94a3b8"/></marker></defs>
+          <rect x="10" y="95" width="110" height="55" rx="10" fill="#e0e7ff" stroke="#6366f1"/>
+          <text x="65" y="118" text-anchor="middle" font-size="11.5" font-weight="700" fill="#3730a3">STEP 0</text>
+          <text x="65" y="134" text-anchor="middle" font-size="10" fill="#4338ca">mode 분기</text>
+          <line x1="120" y1="122" x2="165" y2="122" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arE)"/>
+          <rect x="170" y="95" width="140" height="55" rx="10" fill="#fef3c7" stroke="#d97706"/>
+          <text x="240" y="118" text-anchor="middle" font-size="11.5" font-weight="700" fill="#92400e">STEP 1</text>
+          <text x="240" y="134" text-anchor="middle" font-size="10" fill="#92400e">실행 시작 고지</text>
+          <line x1="310" y1="122" x2="355" y2="122" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arE)"/>
+          <rect x="360" y="20" width="150" height="55" rx="10" fill="#fce7f3" stroke="#db2777"/>
+          <text x="435" y="42" text-anchor="middle" font-size="11" font-weight="700" fill="#9d174d">STEP 1-P</text>
+          <text x="435" y="58" text-anchor="middle" font-size="9.5" fill="#9d174d">병렬·팬아웃 그룹</text>
+          <text x="435" y="70" text-anchor="middle" font-size="8.5" fill="#9d174d">notify / join</text>
+          <rect x="360" y="95" width="150" height="55" rx="10" fill="#dbeafe" stroke="#2563eb"/>
+          <text x="435" y="117" text-anchor="middle" font-size="11" font-weight="700" fill="#1e40af">개별 step</text>
+          <text x="435" y="133" text-anchor="middle" font-size="9.5" fill="#1e40af">GOV_TASK_SUBMIT</text>
+          <rect x="360" y="170" width="150" height="65" rx="10" fill="#fee2e2" stroke="#dc2626"/>
+          <text x="435" y="190" text-anchor="middle" font-size="10.5" font-weight="700" fill="#991b1b">인간 전속 구간</text>
+          <text x="435" y="204" text-anchor="middle" font-size="9" fill="#991b1b">본인인증·서명 등</text>
+          <text x="435" y="217" text-anchor="middle" font-size="9" fill="#991b1b">→ 실행 멈추고 대기</text>
+          <line x1="310" y1="112" x2="355" y2="47" stroke="#94a3b8" stroke-width="1.1" stroke-dasharray="3,2" marker-end="url(#arE)"/>
+          <line x1="310" y1="122" x2="355" y2="122" stroke="#94a3b8" stroke-width="1.1"/>
+          <line x1="310" y1="132" x2="355" y2="200" stroke="#94a3b8" stroke-width="1.1" stroke-dasharray="3,2" marker-end="url(#arE)"/>
+          <line x1="510" y1="122" x2="555" y2="122" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arE)"/>
+          <rect x="560" y="95" width="150" height="55" rx="10" fill="#fef3c7" stroke="#d97706"/>
+          <text x="635" y="115" text-anchor="middle" font-size="11" font-weight="700" fill="#92400e">STEP 2</text>
+          <text x="635" y="130" text-anchor="middle" font-size="9.5" fill="#92400e">일치도 검증 게이트</text>
+          <text x="635" y="143" text-anchor="middle" font-size="8.5" fill="#92400e">match_score ≥ 0.7</text>
+        </svg>
+      </div>
+
+      <h3>STEP별 상세</h3>
+      <div class="svc-accordion" id="acc-kexecute">
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">1</span>실행 시작 고지 — 매 단계 예외 없이</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>단 1단계짜리 계획이라도, 착수 직전 반드시 <code>[ORCHESTRATION_PROGRESS: step=1/3, doing="세금 체납 여부 확인 중"]</code>처럼 이용자 눈높이로 진행상황을 먼저 알립니다. 라이브 테스트에서 발견된 "신호 없이 몇 분씩 멈춘 것처럼 보이는" 문제를 막기 위한 예외 없는 규칙입니다.</p>
+          </div></div>
+        </div>
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">1-P</span>병렬·팬아웃 그룹 처리 (notify vs join)</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>이 시스템은 턴 단위로 동작하므로 "병렬"은 동시 실행이 아니라 <b>"순서 의존관계가 없다"</b>는 뜻으로 재정의됩니다.</p>
+            <ul>
+              <li><b>notify</b>(통지형, 예: 폐업신고→세무서+국민연금+건강보험) — 서로 독립적이라 하나가 실패해도 나머지는 그대로 진행합니다.</li>
+              <li><b>join</b>(협의형, 예: 건축허가=건축과+소방서+환경과) — 전원 승인이 있어야 완료됩니다. 하나라도 거부되면 그룹 전체를 <code>partial_denied</code>로 처리하되, 이미 승인된 기관 결과를 왜곡해 전달하지 않습니다.</li>
+            </ul>
+          </div></div>
+        </div>
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">·</span><span class="svc-acc-gate">경계</span> 인간 전속 구간 도달 시 — 실행을 멈춘다</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>본인인증·서명처럼 이용자 본인만 할 수 있는 행동을 만나면, 그 행동을 대신 실행하지 않고 "여기서부터는 본인이 직접 하셔야 합니다"를 명확히 안내한 뒤 실행을 멈춥니다. 애매하면 멈추는 쪽이 기본값입니다 — 앞서 나가는 위험이, 한 번 더 확인받는 비용보다 큽니다.</p>
+            <p>멈추기 직전 <code>[PROJECT_STATE_SAVE: ...]</code>로 진행 상태를 PDV에 남겨, 나중에 <code>[RESUME_KEXECUTE]</code>로 정확히 그 지점부터 재개할 수 있게 합니다.</p>
+          </div></div>
+        </div>
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">2</span><span class="svc-acc-gate">GATE</span> 일치도 검증 게이트 (Intent-Match Gate)</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>후보 SP·기관·사업자를 실제로 호출하기 전, <code>domain_fit</code>(업종·소관이 실제로 일치하는가)과 <code>jurisdiction_fit</code>(처리 권한·관할이 있는가)을 각각 판단해 곱한 <code>match_score</code>(0.0~1.0)를 산정합니다.</p>
+            <ul>
+              <li><b>0.7 이상</b> — 채택, 실행 계속</li>
+              <li><b>0.7 미만</b> — 기각, 다음 후보로</li>
+              <li><b>후보 소진</b> — <code>GWP_REGISTRY_SEARCH</code>로 재시도, 거기서도 없으면 정부기관은 SP-Author에 초안 작성을 요청하고, 일반 사업자·개인이면 "못 찾았다"고 정직하게 고지합니다.</li>
+            </ul>
+          </div></div>
+        </div>
+      </div>
+
+      <h3>절대 금지 원칙</h3>
+      <ul class="svc-note" style="padding-left:18px;">
+        <li>본인인증·서명·최종제출 등 인간 전속 경계를 AI가 대신 넘지 않습니다.</li>
+        <li>K-Compose가 확정하지 않은 절차를 스스로 새로 판단해 끼워넣지 않습니다.</li>
+        <li>실패·거부된 단계를 AI가 자동으로 재시도하거나 이의신청하지 않습니다.</li>
+        <li>"이름이 비슷하다"는 것만으로 일치도를 높게 주지 않습니다.</li>
+      </ul>
+
+      <p class="svc-note"><b>이전 단계</b>: K-Compose(실행계획 조합)</p>
+      <p class="svc-note"><b>다음 단계</b>: K-Deliver(결과 정리·전달)</p>
+    </div>
+  `,
+  kdeliver: `
+    <div class="svc-detail">
+      <h2>K-Deliver — 결과 정리·전달<span class="svc-badge svc-badge-partial">내부 전용</span></h2>
+      <p class="svc-lead">K-Execute가 실행한 결과를 받아, 이용자가 실제로 받아볼 수 있는 최종 산출물로 정리합니다. 인간 전속 경계를 다시 한번 명확히 고지하는 것도 이 단계의 몫입니다.</p>
+
+      <div class="svc-callout">
+        K-Intent → K-Compose → K-Execute → K-Deliver → K-Report는 사용자가 개별적으로 선택하는 서비스가 아니라, 혼디가 다기관·다절차 요청을 처리할 때마다 내부적으로 항상 이 순서로 실행하는 5단계 오케스트레이션 파이프라인입니다. 아래는 각 단계가 실제로 하는 일을 투명하게 공개한 것이며, 별도의 진입 채팅창은 없습니다.
+      </div>
+
+      <h3>개요 다이어그램</h3>
+      <div class="svc-diagram">
+        <svg viewBox="0 0 760 160" xmlns="http://www.w3.org/2000/svg" font-family="inherit">
+          <defs><marker id="arD" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#94a3b8"/></marker></defs>
+          <rect x="10" y="50" width="115" height="55" rx="10" fill="#e0e7ff" stroke="#6366f1"/>
+          <text x="67" y="72" text-anchor="middle" font-size="11" font-weight="700" fill="#3730a3">STEP 1</text>
+          <text x="67" y="88" text-anchor="middle" font-size="9.5" fill="#4338ca">결과 조립</text>
+          <line x1="125" y1="77" x2="165" y2="77" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arD)"/>
+          <rect x="170" y="50" width="130" height="55" rx="10" fill="#fee2e2" stroke="#dc2626"/>
+          <text x="235" y="72" text-anchor="middle" font-size="11" font-weight="700" fill="#991b1b">STEP 2</text>
+          <text x="235" y="88" text-anchor="middle" font-size="9.5" fill="#991b1b">인간 경계 고지</text>
+          <line x1="300" y1="77" x2="340" y2="77" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arD)"/>
+          <rect x="345" y="50" width="130" height="55" rx="10" fill="#fef3c7" stroke="#d97706"/>
+          <text x="410" y="72" text-anchor="middle" font-size="10.5" font-weight="700" fill="#92400e">STEP 3</text>
+          <text x="410" y="88" text-anchor="middle" font-size="9" fill="#92400e">무료 이관 안내(조건부)</text>
+          <line x1="475" y1="77" x2="515" y2="77" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arD)"/>
+          <rect x="520" y="50" width="115" height="55" rx="10" fill="#e0e7ff" stroke="#6366f1"/>
+          <text x="577" y="72" text-anchor="middle" font-size="10.5" font-weight="700" fill="#3730a3">STEP 4</text>
+          <text x="577" y="88" text-anchor="middle" font-size="9" fill="#4338ca">PROCEDURE_MAP 갱신</text>
+          <line x1="635" y1="77" x2="675" y2="77" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arD)"/>
+          <rect x="680" y="50" width="75" height="55" rx="10" fill="#dcfce7" stroke="#16a34a"/>
+          <text x="717" y="72" text-anchor="middle" font-size="10.5" font-weight="700" fill="#166534">STEP 5</text>
+          <text x="717" y="88" text-anchor="middle" font-size="9" fill="#166534">K-Report로</text>
+        </svg>
+      </div>
+
+      <h3>STEP별 상세</h3>
+      <div class="svc-accordion" id="acc-kdeliver">
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">0</span>mode 분기 — project_paused는 지름길로</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>K-Execute가 인간 전속 구간에서 멈춘 상태(<code>case_type="project_paused"</code>)로 넘어왔으면, STEP 1만 간략히 거친 뒤 나머지를 다 건너뛰고 바로 AC로 반환합니다 — 사건이 아직 안 끝나서 K-Report에 넘길 것도 없습니다.</p>
+          </div></div>
+        </div>
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">1</span>결과 조립 — 기관별로 뭉뚱그리지 않는다</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>여러 기관에 걸친 처리 결과가 있으면(<code>batch_status</code>), "N개 기관 중 M곳 완료" 식으로 먼저 요약하고, 기관별 상태를 각각 명시합니다 — 승인된 기관을 거부된 것처럼, 혹은 그 반대로 섞어 전달하지 않습니다.</p>
+          </div></div>
+        </div>
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">2</span><span class="svc-acc-gate">경계</span> 인간 경계 고지 (C39 원칙)</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>본인인증 필요 단계 등이 있으면 "~는 본인이 직접 하셔야 해요"로 명확히 구분해 전달합니다. 이 고지는 절차 진행 중 매번 반복하지 않고, 여기서 한 번만 정리해서 알립니다.</p>
+          </div></div>
+        </div>
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">4</span>PROCEDURE_MAP 갱신 — 다음 이용자를 위한 캐싱</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>이번 세션에서 새로 확인·정정된 사실(연락처, 서류 요건 등)로 캐시를 갱신합니다. 절차 구조 자체가 바뀌면 <code>status</code>를 다시 검토 대기로 내리고, 단순 사실 갱신은 기존 상태를 유지합니다.</p>
+          </div></div>
+        </div>
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">5</span>K-Report로 이관</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>이용자 전달과 캐시 갱신까지 끝나면 AC로 바로 돌아가지 않고, 이 사건과 관련된 이해당사자 통지·신고까지 처리하도록 K-Report에게 넘깁니다.</p>
+          </div></div>
+        </div>
+      </div>
+
+      <h3>절대 금지 원칙</h3>
+      <ul class="svc-note" style="padding-left:18px;">
+        <li>K-Compose가 실행하지 않은 단계를 완료된 것처럼 전달하지 않습니다.</li>
+        <li>본인인증·서명 등 인간 전속 경계를 넘는 단계를 대신 처리한 것처럼 말하지 않습니다.</li>
+        <li>PROCEDURE_MAP 갱신 시 검토 안 된 추측을 검증된 사실처럼 적지 않습니다.</li>
+      </ul>
+
+      <p class="svc-note"><b>이전 단계</b>: K-Execute(오케스트레이션 실행)</p>
+      <p class="svc-note"><b>다음 단계</b>: K-Report(이해당사자 통지)</p>
+    </div>
+  `,
+  kreport: `
+    <div class="svc-detail">
+      <h2>K-Report — 이해당사자 통지<span class="svc-badge svc-badge-partial">내부 전용</span></h2>
+      <p class="svc-lead">K-Deliver가 이용자에게 전달을 마친 결과를 받아, 이 사건과 관련해 법적·행정적으로 통지·신고 의무가 있는 이해당사자를 식별하고, 5단계 파이프라인의 마지막을 마무리합니다.</p>
+
+      <div class="svc-callout">
+        K-Intent → K-Compose → K-Execute → K-Deliver → K-Report는 사용자가 개별적으로 선택하는 서비스가 아니라, 혼디가 다기관·다절차 요청을 처리할 때마다 내부적으로 항상 이 순서로 실행하는 5단계 오케스트레이션 파이프라인입니다. 아래는 각 단계가 실제로 하는 일을 투명하게 공개한 것이며, 별도의 진입 채팅창은 없습니다.
+      </div>
+
+      <h3>개요 다이어그램</h3>
+      <div class="svc-diagram">
+        <svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg" font-family="inherit">
+          <defs><marker id="arR" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#94a3b8"/></marker></defs>
+          <rect x="10" y="70" width="140" height="55" rx="10" fill="#e0e7ff" stroke="#6366f1"/>
+          <text x="80" y="92" text-anchor="middle" font-size="11" font-weight="700" fill="#3730a3">STEP 1</text>
+          <text x="80" y="108" text-anchor="middle" font-size="9.5" fill="#4338ca">이해당사자 식별</text>
+          <line x1="150" y1="97" x2="190" y2="97" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arR)"/>
+          <rect x="195" y="70" width="150" height="55" rx="10" fill="#fef3c7" stroke="#d97706"/>
+          <text x="270" y="92" text-anchor="middle" font-size="11" font-weight="700" fill="#92400e">STEP 2</text>
+          <text x="270" y="108" text-anchor="middle" font-size="9.5" fill="#92400e">처리방식 결정</text>
+          <line x1="345" y1="87" x2="390" y2="40" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arR)"/>
+          <text x="352" y="60" font-size="9" fill="#64748b">API 있음</text>
+          <rect x="395" y="15" width="160" height="55" rx="10" fill="#dcfce7" stroke="#16a34a"/>
+          <text x="475" y="37" text-anchor="middle" font-size="11" font-weight="700" fill="#166534">STEP 3</text>
+          <text x="475" y="53" text-anchor="middle" font-size="9.5" fill="#166534">직접 제출(CALL_GOVSYS)</text>
+          <line x1="345" y1="107" x2="390" y2="150" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arR)"/>
+          <text x="352" y="135" font-size="9" fill="#64748b">API 없음</text>
+          <rect x="395" y="125" width="160" height="55" rx="10" fill="#fee2e2" stroke="#dc2626"/>
+          <text x="475" y="147" text-anchor="middle" font-size="11" font-weight="700" fill="#991b1b">STEP 4</text>
+          <text x="475" y="163" text-anchor="middle" font-size="9.5" fill="#991b1b">초안 생성만</text>
+          <line x1="555" y1="42" x2="615" y2="90" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arR)"/>
+          <line x1="555" y1="152" x2="615" y2="105" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arR)"/>
+          <rect x="620" y="70" width="130" height="55" rx="10" fill="#e0e7ff" stroke="#6366f1"/>
+          <text x="685" y="92" text-anchor="middle" font-size="11" font-weight="700" fill="#3730a3">STEP 5</text>
+          <text x="685" y="108" text-anchor="middle" font-size="9.5" fill="#4338ca">AC로 최종 반환</text>
+        </svg>
+      </div>
+
+      <h3>STEP별 상세</h3>
+      <div class="svc-accordion" id="acc-kreport">
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">1</span>이해당사자 식별 — 근거 없이 넓게 잡지 않는다</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>K-Execute가 이미 성공적으로 통지·제출한 기관은 먼저 제외합니다(중복 통지 방지). 나머지만 세 갈래로 분류합니다: ① 원래 이용자 본인에게 신고 의무가 있는 경우(초안만 준비), ② 공개 제출 API가 있는 정기 통계·행정 제출(직접 제출 가능), ③ 당사자 간 사적 통지(대행 가능).</p>
+            <p>이해당사자가 하나도 없으면 STEP 2~4를 건너뛰고 곧장 STEP 5로 갑니다 — 모든 사건이 통지 대상을 갖는 건 아니며, 억지로 만들어내지 않습니다.</p>
+          </div></div>
+        </div>
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">2</span>이해당사자별 처리 방식 결정</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>식별된 이해당사자마다 <code>automation.level</code>을 확인합니다. <code>full_api</code>면 STEP 3(직접 제출), <code>assisted</code>/<code>manual_only</code>/미등록이면 STEP 4(초안 생성)로 갑니다.</p>
+          </div></div>
+        </div>
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">3</span>직접 제출 (공식 API가 있는 경우만)</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p><code>[CALL_GOVSYS: mode=submit]</code>로 실제 제출합니다. 성공하면 <code>submitted:true</code>를 남기고, 실패하면 성공한 것처럼 넘어가지 않고 STEP 4(초안 생성)로 전환하며 실패 사유를 함께 남깁니다.</p>
+          </div></div>
+        </div>
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">4</span><span class="svc-acc-gate">정직성</span> 초안 생성 — "제출했다"고 거짓말하지 않는다</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>공식 API가 없으면, 확보된 사실만으로 초안을 구성합니다(빈 항목은 "이용자가 직접 확인/입력"으로 명시). 매번 다음 취지의 고지를 반드시 포함합니다: <i>"OOO 앞으로 제출할 내용을 초안으로 준비했습니다. 지금은 공식 제출 API가 연동돼 있지 않아 자동 제출은 안 되고, 이 초안을 가지고 직접 제출하셔야 합니다."</i></p>
+          </div></div>
+        </div>
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">5</span>AC로 최종 반환 — 파이프라인 종료</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>K-Deliver의 전달 내용과 K-Report의 통지·초안 결과를 하나의 요약으로 합쳐 <code>[ORCHESTRATION_COMPLETE: ...]</code>로 AC에 반환합니다. 이용자가 해야 할 일(K-Deliver 안내 + STEP 4 제출 숙제)도 한 곳에 정리해서 전달합니다.</p>
+          </div></div>
+        </div>
+      </div>
+
+      <h3>절대 금지 원칙</h3>
+      <ul class="svc-note" style="padding-left:18px;">
+        <li>공식 API 연동이 없는 기관에 "제출했다"·"기록했다"고 말하지 않습니다.</li>
+        <li>통지·신고 의무가 있는지 불확실한 이해당사자를 지어내 포함하지 않습니다.</li>
+        <li>초안을 만들 때 K-Execute의 실제 실행 결과에 없는 사실을 채워넣지 않습니다.</li>
+      </ul>
+
+      <p class="svc-note"><b>이전 단계</b>: K-Deliver(결과 정리·전달)</p>
+    </div>
+  `,
+  kcase: `
+    <div class="svc-detail">
+      <h2>K-Case — 복합 사안 총괄 조정 AI<span class="svc-badge svc-badge-design">설계 단계</span></h2>
+      <p class="svc-lead">개인파산·상속·창업처럼 여러 기관·여러 절차에 걸치는 복합 목표를 받아, 어떤 기관과 어떤 절차의 SP를 어떤 순서로 호출할지 계획만 세우는 "지휘자" 역할의 AI입니다. 계획을 직접 실행하지는 않습니다 — 5단계 파이프라인(K-Intent~K-Report) 전체를 감싸는 상위 조정 레이어입니다.</p>
+      <div class="svc-callout important">
+        이 SP는 문서 자체에 <code>status: pending_review</code>로 명시되어 있고, HUMAN-AUTHORITY-GATE-SCHEMA 원칙("사람 승인 전 active 전환 금지")을 스스로 적용하고 있습니다. 즉 아직 사람의 최종 승인 전 단계이며, 실제 실행(각 기관과의 GOV_TASK 왕복, PDV 전송)은 사용자의 AI 비서와 각 기관 SP가 직접 수행합니다 — K-Case는 PDV를 취급하지 않습니다.
+      </div>
+
+      <h3>개요 다이어그램 — 5단계 파이프라인을 감싸는 지휘 레이어</h3>
+      <div class="svc-diagram">
+        <svg viewBox="0 0 760 220" xmlns="http://www.w3.org/2000/svg" font-family="inherit">
+          <defs><marker id="arCase" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#94a3b8"/></marker></defs>
+          <rect x="10" y="15" width="740" height="60" rx="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+          <text x="30" y="35" font-size="11" font-weight="800" fill="#5b21b6">K-Case — 지휘자 (계획만 수립, 실행은 안 함)</text>
+          <text x="30" y="52" font-size="10" fill="#6d28d9">K1 목표인식 → K2 목표분해 → K3 계획수립(DAG 조립) → K4 승인·위임</text>
+          <text x="30" y="66" font-size="9" fill="#7c3aed">JURISDICTION-RESOLVER · DOCUMENT-TYPE-REGISTRY 기존 부품을 그대로 호출</text>
+
+          <line x1="120" y1="75" x2="120" y2="105" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arCase)"/>
+          <line x1="270" y1="75" x2="270" y2="105" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arCase)"/>
+          <line x1="420" y1="75" x2="420" y2="105" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arCase)"/>
+          <line x1="570" y1="75" x2="570" y2="105" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arCase)"/>
+          <line x1="690" y1="75" x2="690" y2="105" stroke="#94a3b8" stroke-width="1.3" marker-end="url(#arCase)"/>
+
+          <g font-size="9.5" font-weight="700" text-anchor="middle">
+            <rect x="60" y="110" width="120" height="45" rx="8" fill="#eef2ff" stroke="#6366f1"/>
+            <text x="120" y="136" fill="#3730a3">K-Intent</text>
+            <rect x="210" y="110" width="120" height="45" rx="8" fill="#eef2ff" stroke="#6366f1"/>
+            <text x="270" y="136" fill="#3730a3">K-Compose</text>
+            <rect x="360" y="110" width="120" height="45" rx="8" fill="#eef2ff" stroke="#6366f1"/>
+            <text x="420" y="136" fill="#3730a3">K-Execute</text>
+            <rect x="510" y="110" width="120" height="45" rx="8" fill="#eef2ff" stroke="#6366f1"/>
+            <text x="570" y="136" fill="#3730a3">K-Deliver</text>
+            <rect x="630" y="110" width="120" height="45" rx="8" fill="#eef2ff" stroke="#6366f1"/>
+            <text x="690" y="136" fill="#3730a3">K-Report</text>
+          </g>
+          <text x="400" y="185" text-anchor="middle" font-size="10" fill="#64748b">개인파산 예시: 법원(신청)→재산목록→채권자통지(병렬: 국민연금·세무서·보험사)</text>
+          <text x="400" y="202" text-anchor="middle" font-size="9" fill="#94a3b8">각 하위 절차는 결국 이 5단계 파이프라인을 그대로 거칩니다 — K-Case는 새 실행 로직을 만들지 않습니다.</text>
+        </svg>
+      </div>
+
+      <h3>PHASE별 상세</h3>
+      <div class="svc-accordion" id="acc-kcase">
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">K1</span>목표 인식 — 복합 사안일 때만 개입</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>AGENT-COMMON이 "둘 이상의 서로 다른 tier/기관에 걸치는 것으로 추정되는 복합 사안"일 때만 K-Case로 라우팅합니다. 애매하면 일단 받은 뒤 K2에서 단일 기관으로 판명되면 즉시 그 기관 SP로 안내하고 스스로 종료합니다.</p>
+          </div></div>
+        </div>
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">K2</span>목표 분해 — 하위 절차 목록으로</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>이미 알려진 패턴(예: 개인파산 → 파산신청·재산목록제출·채권자통지·면책신청)이 있으면 그대로 쓰고, 없으면 웹검색으로 절차 개요만 파악합니다 — 지어내지 않습니다.</p>
+          </div></div>
+        </div>
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">K3</span>계획 수립 — 새 로직 없이 기존 부품 조립</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>① JURISDICTION-RESOLVER-SCHEMA로 하위 절차마다 tier·기관 판별 → ② DOCUMENT-TYPE-REGISTRY로 절차 간 선행조건(depends_on) 확인 → ③ 결과를 <code>GOV_TASK_CHAIN_PLAN</code>(DAG, 병렬 가능)으로 조립합니다. 서로 독립적인 절차는 <code>GOV_TASK_BROADCAST</code>로 별도 처리합니다.</p>
+            <p>기관 SP가 아직 없는 절차를 만나면 <code>issuing_gov_task=null</code>로 표시하고 "이 부분은 아직 Hondi가 자동화하지 못했다"고 정직하게 안내합니다 — 그 자리에서 즉석으로 새 SP를 만들지 않고, 다음 배치 작업 후보로만 로그에 남깁니다.</p>
+          </div></div>
+        </div>
+        <div class="svc-acc-item">
+          <div class="svc-acc-head"><span><span class="svc-acc-step-no">K4</span><span class="svc-acc-gate">GATE</span> 승인 및 위임 — 승인 후 손을 뗀다</span><svg class="svc-acc-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+          <div class="svc-acc-body"><div class="svc-acc-body-inner">
+            <p>전체 계획을 이용자에게 한 번에 보여주고 승인받습니다(<code>blocking=true</code>). 승인 후에는 각 단계의 실제 실행을 이용자의 AI 비서와 각 기관 SP에게 맡기고, K-Case는 사건(case_id) 단위로 진행상황을 통합 조회하는 역할만 유지합니다.</p>
+          </div></div>
+        </div>
+      </div>
+
+      <h3>검증된 사례</h3>
+      <p class="svc-note">개인파산(법원+세무서+시청+읍면동+국민연금공단+보험사)처럼 다기관이 얽힌 사안으로 설계·검증되었습니다.</p>
+    </div>
+  `,
+  kestate: `
+    <div class="svc-detail">
+      <h2>K-Estate — 부동산 매물 안내<span class="svc-badge svc-badge-design">설계 단계</span></h2>
+      <p class="svc-lead">부동산 매물(전세/월세/매매)을 대신 탐색·비교하고, 매물을 내놓으려는 이용자의 등록을 돕고, 임대차 계약 진행(공인중개사 연결, 계약 갱신 신청, 관리비·월세 자동이체 안내)을 지원합니다.</p>
+      <div class="svc-callout important">
+        이 SP는 문서 자체에 <code>상태: pending_review — 실제 배포 저장소(estate.hondi.net) 미생성, 승인 전까지 이용자에게 서빙되지 않음</code>이라고 명시되어 있습니다. 아직 정식 서비스가 아닙니다.
+      </div>
+      <h3>범위 경계</h3>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>요청</th><th>실제 담당</th></tr></thead>
+          <tbody>
+            <tr><td>계약서 법적 조항 검토·분쟁</td><td class="svc-hondi">K-Law 또는 변호사 전문가 페르소나</td></tr>
+            <tr><td>취득세·재산세 신고/납부</td><td class="svc-hondi">K-Tax</td></tr>
+            <tr><td>전입신고·확정일자·등기부등본</td><td class="svc-hondi">K-Public(행정)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>합의매각 <span class="svc-badge svc-badge-live">가동 중</span></h3>
+      <p class="svc-lead" style="margin:12px 0 16px;">채권자·채무자 두 계정이 각자 지갑으로 서명해야만 등록이 확정되는 부동산 매물입니다(2026-09-27 신설). 대법원 경매 사이트를 참고했지만, 법원의 개시결정에 의한 절차가 아니라 <b>당사자 합의</b>에 의한 매각 절차입니다 — 사법기관의 경매가 아닙니다. 자연어로 조건을 말하면("부산 영도구의 부동산 매물 중에서 5천만 원 미만 단독 주택을 검색해 줘") 매물을 찾아 주고, 등록된 매물에는 참고용 AI 감정가(법적 효력 없음)를 붙일 수 있습니다. 등록·서명·검색은 <a href="/pages/consent-sale.html">전용 화면</a>에서 진행합니다.</p>
+    </div>
+  `,
+  ksocial: `
+    <div class="svc-detail">
+      <h2>K-Social-Match — 사교 모임 추천<span class="svc-badge svc-badge-design">설계 단계</span></h2>
+      <p class="svc-lead">혼디에 등록된 열려있는 모임 목록을 사용자의 성향·취미와 대조해, 관련성 높아 보이는 후보를 추천하는 보조 AI입니다. 알고리즘 매칭 엔진이 아니라 이미 존재하는 모임 데이터를 사용자 맥락에 맞게 정리해 보여주는 역할이며, "이 사람과 잘 맞습니다" 같은 확정적 궁합 판정은 내리지 않습니다.</p>
+      <div class="svc-callout important">
+        문서 자체가 "설계 단계 초안"이며 "아직 실제 서비스 백엔드의 표준 페르소나 파이프라인에 연결되지 않았다"고 명시합니다. 실시간 데모(<code>/social/demo-match</code>)는 이 SP로 DeepSeek를 직접 호출하지만, PDV 조회는 시뮬레이션(사용자가 입력한 텍스트를 PDV 요약 대신 사용)입니다 — 실제 PDV 자동 조회는 아직 연결되지 않았습니다.
+      </div>
+    </div>
+  `,
+};
+var SVC_LABEL = {
+  k119: '응급', klaw: '법률', kpolice: '치안 신고', ksecurity: '보안',
+  khealth: '의료', kschool: '교육', gdc: '금융', kstock: '투자',
+  kinsurance: '보험', ktax: '세무', kmarket: '쇼핑·거래', ktraffic: '교통',
+  klogistics: '물류', kcleaner: '환경', kpublic: '행정', kdemocracy: '정책',
+  ktelecom: '통신', ksearch: '검색', kbiz: '사업자', kplan: '목표·기획', kwatch: '신고', kjob: '직업', kmail: '메일', kjit: '조달', kcity: '도시 설계',
+  kintent: '의도 파악(내부)', kcompose: '실행계획 조합(내부)', kexecute: '오케스트레이션 실행(내부)', kdeliver: '결과 전달(내부)', kreport: '이해당사자 통지(내부)', kcase: '복합 사안 총괄', kestate: '부동산', ksocial: '모임'
+};
+
+function renderSvc(key) {
+  var contentEl = document.getElementById('svcContent');
+  var html = SVC_CONTENT[key];
+  if (html && html.trim()) {
+    contentEl.innerHTML = html;
+  } else {
+    contentEl.innerHTML =
+      '<div class="svc-content-empty">' +
+        '<div class="svc-empty-title">' + SVC_LABEL[key] + ' — 준비 중</div>' +
+        '<div class="svc-empty-sub">이 서비스의 상세 내용은 곧 채워질 예정입니다.</div>' +
+      '</div>';
+  }
+}
+
+document.addEventListener('click', function (e) {
+  var tab = e.target.closest('.svc-tab');
+  if (tab) {
+    document.querySelectorAll('.svc-tab').forEach(function (t) { t.classList.remove('active'); });
+    tab.classList.add('active');
+    renderSvc(tab.getAttribute('data-svc'));
+    return;
+  }
+  var accHead = e.target.closest('.svc-acc-head');
+  if (accHead) {
+    accHead.closest('.svc-acc-item').classList.toggle('open');
+  }
+});
+
+(function () {
+  // desktop.html에서 특정 탭으로 바로 진입시키기 위한 딥링크 훅.
+  // window.__HONDI_SVC_TAB을 미리 지정해두면 해당 탭으로 열린다(없으면 기본 k119).
+  // 다른 페이지에서 pages/k-services.html#kplan 처럼 URL 해시로도 진입 가능
+  // (2026-08-31 신설 — highlights/hondi-network.html의 "K-Plan 바로 가기" 링크용).
+  var hashTab = (location.hash || '').replace('#', '');
+  var initTab = (window.__HONDI_SVC_TAB && SVC_LABEL[window.__HONDI_SVC_TAB]) ? window.__HONDI_SVC_TAB
+    : (hashTab && SVC_LABEL[hashTab]) ? hashTab
+    : 'k119';
+  window.__HONDI_SVC_TAB = null;
+  document.querySelectorAll('.svc-tab').forEach(function (t) {
+    t.classList.toggle('active', t.getAttribute('data-svc') === initTab);
+  });
+  renderSvc(initTab);
+})();
+</script>
+</body>
+</html>
