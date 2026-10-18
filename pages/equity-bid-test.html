@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<link rel="icon" href="data:,">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<title>자회사 지분 5% 입찰 (시스템 테스트) — 나비</title>
+</head>
+<body>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; }
+body { font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif; background: #eef1f6; color: #0f172a; line-height: 1.6; }
+.bt-wrap { max-width: 1160px; margin: 0 auto; padding: 22px 24px 60px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.bt-testbar { background: #fff1f0; border: 2px solid #d92d20; color: #7a1a12; border-radius: 8px; padding: 12px 16px; font-size: 14px; font-weight: 700; line-height: 1.6; }
+.bt-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px 20px; }
+.bt-card h2 { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
+.bt-card h2 .n { display: inline-block; min-width: 22px; height: 22px; line-height: 22px; text-align: center; border-radius: 50%; background: #14181f; color: #fff; font-size: 12px; margin-right: 8px; }
+.bt-hint { font-size: 12.5px; color: #475569; margin-bottom: 12px; }
+.bt-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+.bt-field { display: grid; gap: 4px; min-width: 0; }
+.bt-field label, .bt-field .lb { font-size: 12px; font-weight: 700; color: #334155; }
+.bt-field input, .bt-field select { font: inherit; font-size: 14px; padding: 8px 10px; border: 1px solid #94a3b8; border-radius: 6px; background: #fff; min-width: 170px; }
+.bt-field input:focus, .bt-field select:focus { outline: 2px solid #4338ca; outline-offset: 1px; }
+.bt-radio { display: flex; gap: 14px; font-size: 14px; padding: 8px 0; }
+.bt-radio label { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+.bt-field .bt-radio input { min-width: 0; width: auto; padding: 0; }
+.bt-btn { font: inherit; font-size: 14px; font-weight: 700; padding: 9px 16px; border-radius: 6px; border: 1px solid #14181f; background: #14181f; color: #fff; cursor: pointer; }
+.bt-btn.sec { background: #fff; color: #14181f; }
+.bt-btn:disabled { opacity: .4; cursor: not-allowed; }
+.bt-msg { margin-top: 10px; font-size: 13px; font-weight: 600; min-height: 1.4em; }
+.bt-msg.ok { color: #067647; } .bt-msg.err { color: #b42318; } .bt-msg.info { color: #475569; }
+.bt-facts { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: #334155; margin-top: 12px; }
+.bt-facts b { color: #0f172a; }
+.bt-tw { overflow-x: auto; margin-top: 8px; border: 1px solid #e2e8f0; border-radius: 8px; }
+.bt-table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+.bt-table th, .bt-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
+.bt-table th { background: #f1f5f9; font-weight: 700; }
+.bt-table td.num, .bt-table th.num { text-align: right; }
+.bt-table tr.win td { background: #f0fdf4; }
+.bt-table tr.mine td { font-weight: 700; }
+.bt-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.bt-total { font-size: 13px; color: #334155; margin-top: 8px; }
+.bt-total b { color: #0f172a; }
+.bt-result { margin-top: 12px; font-size: 14px; }
+.bt-result .big { font-size: 18px; font-weight: 800; }
+@media (max-width: 640px) { .bt-wrap { padding: 14px 14px 48px; } .bt-field input, .bt-field select { min-width: 0; width: 100%; } .bt-field { flex: 1 1 100%; } }
+</style>
+
+<script>
+window.PAGE_HEADER = {
+  active: '',
+  badge: '시스템 테스트 · 개시일 미정 · 실제 입찰 아님',
+  h1: '자회사 지분 5% 입찰<br>시스템 테스트',
+  instruction: '이 화면은 시스템 테스트 용도이며, 실제 입찰 절차가 아닙니다. 개시일은 미정입니다.',
+  sub: '입력한 내용은 서버로 전송되지 않고 이 브라우저에만 저장됩니다. 자격 조회, 결제, 주식 인도와 연결되어 있지 않습니다. 모든 규칙은 초안이며 언제든 변경될 수 있습니다.',
+  disclaimer: '시스템 테스트 용도입니다. 실제 입찰이 아니며 개시일은 미정입니다. 자격 인증은 번호 형식만 검사하고 실제 자격 조회와 연결되어 있지 않습니다.'
+};
+</script>
+<link rel="stylesheet" href="/assets/ph-header.css">
+<script src="/assets/ph-header.js"></script>
+
+<main class="bt-wrap" id="btApp">
+  <div class="bt-testbar" role="note">시스템 테스트 — 실제 입찰이 아닙니다. 개시일은 미정이며, 여기서 낸 입찰은 어떤 효력도 없고 어디에도 제출되지 않습니다.</div>
+
+  <section class="bt-card">
+    <h2><span class="n">1</span>직역 선택</h2>
+    <p class="bt-hint">자회사(직역)마다 입찰이 따로 열립니다. 직역을 바꾸면 인증을 다시 받아야 합니다.</p>
+    <div class="bt-row">
+      <div class="bt-field"><label for="btProf">직역</label><select id="btProf"></select></div>
+    </div>
+    <div class="bt-facts">
+      <span>판매 수량 <b>5,000주</b>(0.5만 주)</span>
+      <span>액면가 <b>100원</b></span>
+      <span>낙찰 방식 <b>구글 방식(균일가)</b></span>
+      <span>약정액 <b>거래 가격의 10%</b></span>
+      <span>하한가·1인 한도 <b>미정</b>(테스트는 액면가·5,000주로 둠)</span>
+    </div>
+  </section>
+
+  <section class="bt-card">
+    <h2><span class="n">2</span>전문가 인증</h2>
+    <p class="bt-hint">전문가는 자격 번호, 기관은 사업자등록번호를 입력합니다. 이 테스트는 번호 형식만 검사하며 실제 자격·사업자 조회는 하지 않습니다.</p>
+    <div class="bt-row">
+      <div class="bt-field"><span class="lb">구분</span>
+        <div class="bt-radio" role="radiogroup" aria-label="구분">
+          <label><input type="radio" name="btKind" value="expert" checked>전문가(개인)</label>
+          <label><input type="radio" name="btKind" value="org">기관(법인·사무소)</label>
+        </div>
+      </div>
+      <div class="bt-field"><label for="btId" id="btIdLabel">자격 번호</label><input id="btId" type="text" autocomplete="off" inputmode="text" placeholder="자격 번호"></div>
+      <button class="bt-btn" id="btAuth" type="button">인증(형식 검사)</button>
+    </div>
+    <div class="bt-msg info" id="btAuthMsg" aria-live="polite">인증 전에는 입찰 가격을 제시할 수 없습니다.</div>
+  </section>
+
+  <section class="bt-card">
+    <h2><span class="n">3</span>입찰</h2>
+    <p class="bt-hint">구매 희망 수량과 단가를 적습니다. 같은 인증 번호로 다시 제출하면 이전 입찰을 바꿉니다.</p>
+    <div class="bt-row">
+      <div class="bt-field"><label for="btQty">구매 희망 수량(주)</label><input id="btQty" type="number" min="1" max="5000" step="1" inputmode="numeric" disabled></div>
+      <div class="bt-field"><label for="btPrice">단가(원/주)</label><input id="btPrice" type="number" min="100" step="1" inputmode="numeric" disabled></div>
+      <div class="bt-field"><label for="btDate">입찰 날짜</label><input id="btDate" type="date" disabled></div>
+      <button class="bt-btn" id="btSubmit" type="button" disabled>입찰 제출(테스트)</button>
+    </div>
+    <div class="bt-total" id="btTotal">입찰 총액: —</div>
+    <div class="bt-msg info" id="btBidMsg" aria-live="polite"></div>
+  </section>
+
+  <section class="bt-card">
+    <h2><span class="n">4</span>이 직역의 테스트 입찰 현황</h2>
+    <p class="bt-hint">이 브라우저에 저장된 테스트 입찰입니다. 번호는 앞 3자리만 보입니다.</p>
+    <div class="bt-tw"><table class="bt-table" id="btList"></table></div>
+    <div class="bt-actions">
+      <button class="bt-btn sec" id="btSample" type="button">예시 입찰 불러오기</button>
+      <button class="bt-btn sec" id="btClear" type="button">이 직역 입찰 모두 지우기</button>
+    </div>
+  </section>
+
+  <section class="bt-card">
+    <h2><span class="n">5</span>마감·개봉 (테스트)</h2>
+    <p class="bt-hint">높은 가격부터 수량을 채워 5,000주가 소진되는 마지막 가격이 낙찰가이며, 낙찰자는 모두 이 가격을 냅니다. 경계 가격은 수량에 비례해 나눕니다.</p>
+    <div class="bt-actions" style="margin-top:0"><button class="bt-btn" id="btClose" type="button">마감·개봉(테스트)</button></div>
+    <div class="bt-result" id="btResult"></div>
+  </section>
+</main>
+
+<script src="/assets/equity-bid-core.js"></script>
+<script>
+(function () {
+  'use strict';
+  var C = window.EquityBidCore;
+  var KEY = 'equity-bid-test:v1';
+  var $ = function (id) { return document.getElementById(id); };
+  var state = { auth: null };   // { kind, id, prof }
+
+  function load() { try { var o = JSON.parse(localStorage.getItem(KEY) || '{}'); return Array.isArray(o.bids) ? o.bids : []; } catch (e) { return []; } }
+  function save(bids) { try { localStorage.setItem(KEY, JSON.stringify({ bids: bids })); return true; } catch (e) { return false; } }
+  function fmt(n) { return Number(n).toLocaleString('ko-KR'); }
+  function today() { var d = new Date(), z = function (x) { return (x < 10 ? '0' : '') + x; }; return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()); }
+  function prof() { return $('btProf').value; }
+  function profLabel(id) { for (var i = 0; i < C.PROFESSIONS.length; i++) if (C.PROFESSIONS[i].id === id) return C.PROFESSIONS[i].label; return id; }
+  function kind() { var r = document.querySelector('input[name="btKind"]:checked'); return r ? r.value : 'expert'; }
+  function mask(id) { id = String(id); return id.indexOf('SAMPLE-') === 0 ? '예시 ' + id.slice(7) : id.slice(0, 3) + '••••'; }
+  function setMsg(el, cls, text) { el.className = 'bt-msg ' + cls; el.textContent = text; }
+
+  function td(text, cls) { var c = document.createElement('td'); if (cls) c.className = cls; c.textContent = text; return c; }
+  function th(text, cls) { var c = document.createElement('th'); if (cls) c.className = cls; c.textContent = text; return c; }
+  function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+  function bidsHere() { var p = prof(); return load().filter(function (b) { return b.prof === p; }); }
+
+  function renderList() {
+    var t = $('btList'); clear(t);
+    var rows = bidsHere();
+    var head = document.createElement('tr');
+    ['번호', '구분', '수량(주)', '단가(원)', '입찰 총액(원)', '입찰 날짜', ''].forEach(function (h, i) { head.appendChild(th(h, i >= 2 && i <= 4 ? 'num' : '')); });
+    t.appendChild(head);
+    if (!rows.length) {
+      var r0 = document.createElement('tr'), c0 = td('아직 입찰이 없습니다.'); c0.colSpan = 7; r0.appendChild(c0); t.appendChild(r0); return;
+    }
+    rows.forEach(function (b) {
+      var tr = document.createElement('tr');
+      var mine = state.auth && state.auth.prof === b.prof && state.auth.id === b.id;
+      if (mine) tr.className = 'mine';
+      tr.appendChild(td(mask(b.id)));
+      tr.appendChild(td(b.kind === 'org' ? '기관' : '전문가'));
+      tr.appendChild(td(fmt(b.qty), 'num'));
+      tr.appendChild(td(fmt(b.price), 'num'));
+      tr.appendChild(td(fmt(b.qty * b.price), 'num'));
+      tr.appendChild(td(b.date));
+      var c = document.createElement('td');
+      if (mine || b.sample) {
+        var x = document.createElement('button'); x.type = 'button'; x.className = 'bt-btn sec'; x.style.padding = '3px 10px'; x.textContent = '취소';
+        x.addEventListener('click', function () { save(load().filter(function (o) { return !(o.prof === b.prof && o.id === b.id); })); renderList(); $('btResult').textContent = ''; });
+        c.appendChild(x);
+      }
+      tr.appendChild(c); t.appendChild(tr);
+    });
+  }
+
+  function updateTotal() {
+    var q = Number($('btQty').value), p = Number($('btPrice').value);
+    $('btTotal').textContent = (q > 0 && p > 0) ? '입찰 총액: ' + fmt(q * p) + '원 (낙찰되면 거래 가격 = 낙찰가 × 배정 수량, 약정액은 그 10%)' : '입찰 총액: —';
+  }
+
+  function setBidEnabled(on) {
+    ['btQty', 'btPrice', 'btDate', 'btSubmit'].forEach(function (id) { $(id).disabled = !on; });
+    if (on && !$('btDate').value) $('btDate').value = today();
+  }
+
+  function resetAuth(msg) {
+    state.auth = null; setBidEnabled(false);
+    setMsg($('btAuthMsg'), 'info', msg || '인증 전에는 입찰 가격을 제시할 수 없습니다.');
+    renderList();
+  }
+
+  function syncKindUi() {
+    var org = kind() === 'org';
+    $('btIdLabel').textContent = org ? '사업자등록번호' : '자격 번호';
+    $('btId').placeholder = org ? '000-00-00000' : '자격 번호';
+    $('btId').inputMode = org ? 'numeric' : 'text';
+  }
+
+  function onAuth() {
+    var r = C.validateIdentity(kind(), $('btId').value);
+    if (!r.ok) { state.auth = null; setBidEnabled(false); setMsg($('btAuthMsg'), 'err', r.reason); return; }
+    state.auth = { kind: kind(), id: r.normalized, prof: prof() };
+    setBidEnabled(true);
+    setMsg($('btAuthMsg'), 'ok', profLabel(prof()) + ' ' + (kind() === 'org' ? '기관' : '전문가') + ' 인증 완료(테스트 — 번호 형식만 검사): ' + r.normalized + '. 입찰 가격을 제시할 수 있습니다.');
+    var mine = bidsHere().filter(function (b) { return b.id === r.normalized; })[0];
+    if (mine) { $('btQty').value = mine.qty; $('btPrice').value = mine.price; $('btDate').value = mine.date; }
+    updateTotal(); renderList();
+  }
+
+  function onSubmit() {
+    if (!state.auth || state.auth.prof !== prof()) { setMsg($('btBidMsg'), 'err', '먼저 전문가 인증을 받으십시오.'); return; }
+    var bid = { qty: Number($('btQty').value), price: Number($('btPrice').value), date: $('btDate').value };
+    var v = C.validateBid(bid);
+    if (!v.ok) { setMsg($('btBidMsg'), 'err', v.errors.join(' ')); return; }
+    var all = load().filter(function (o) { return !(o.prof === state.auth.prof && o.id === state.auth.id); });
+    all.push({ prof: state.auth.prof, kind: state.auth.kind, id: state.auth.id, qty: bid.qty, price: bid.price, date: bid.date, submittedAt: new Date().toISOString() });
+    if (!save(all)) { setMsg($('btBidMsg'), 'err', '이 브라우저에 저장하지 못했습니다(저장소 사용 불가).'); return; }
+    setMsg($('btBidMsg'), 'ok', '테스트 입찰을 저장했습니다(' + fmt(bid.qty) + '주 × ' + fmt(bid.price) + '원). 실제 제출이 아닙니다.');
+    $('btResult').textContent = ''; renderList();
+  }
+
+  function onSample() {
+    var p = prof(), rest = load().filter(function (o) { return !(o.prof === p && o.sample); });
+    [['A', 1500, 5000], ['B', 1000, 4500], ['C', 2000, 4000], ['D', 1500, 3500], ['E', 1000, 3000]].forEach(function (s) {
+      rest.push({ prof: p, kind: 'expert', id: 'SAMPLE-' + s[0], sample: true, qty: s[1], price: s[2], date: today(), submittedAt: new Date().toISOString() });
+    });
+    save(rest); $('btResult').textContent = ''; renderList();
+  }
+
+  function onClearAll() { var p = prof(); save(load().filter(function (o) { return o.prof !== p; })); $('btResult').textContent = ''; renderList(); }
+
+  function onClose() {
+    var rows = bidsHere();
+    var res = C.clearAuction(rows.map(function (b) { return { id: b.id, qty: b.qty, price: b.price }; }));
+    var box = $('btResult'); clear(box);
+    var line = document.createElement('p');
+    if (!res.cleared) {
+      line.textContent = res.reason === 'no-bids' ? '입찰이 없습니다.' : '입찰 수량 합계 ' + fmt(res.demand) + '주가 판매 수량 5,000주에 ' + fmt(res.shortfall) + '주 모자랍니다. 수량 미달 시 처리(하한가 낙찰 또는 재입찰)는 아직 정하지 않았습니다.';
+      box.appendChild(line); return;
+    }
+    var big = document.createElement('span'); big.className = 'big'; big.textContent = '낙찰가 ' + fmt(res.price) + '원';
+    line.appendChild(big);
+    line.appendChild(document.createTextNode('  ·  배정 ' + fmt(res.soldShares) + '주  ·  거래 가격 합계 ' + fmt(res.totalPrice) + '원  ·  약정액(10%) 합계 ' + fmt(res.totalDeposit) + '원 (테스트 계산)'));
+    box.appendChild(line);
+    var wrap = document.createElement('div'); wrap.className = 'bt-tw';
+    var t = document.createElement('table'); t.className = 'bt-table';
+    var head = document.createElement('tr');
+    ['번호', '입찰 수량(주)', '입찰 단가(원)', '배정(주)', '내는 금액(원)', '약정액 10%(원)', '잔금 90%(원)'].forEach(function (h, i) { head.appendChild(th(h, i ? 'num' : '')); });
+    t.appendChild(head);
+    res.allocations.forEach(function (a) {
+      var tr = document.createElement('tr'); if (a.awarded > 0) tr.className = 'win';
+      tr.appendChild(td(mask(a.id)));
+      [a.qty, a.bidPrice, a.awarded, a.pay, a.deposit, a.balance].forEach(function (v) { tr.appendChild(td(fmt(v), 'num')); });
+      t.appendChild(tr);
+    });
+    wrap.appendChild(t); box.appendChild(wrap);
+    var note = document.createElement('p'); note.className = 'bt-hint'; note.style.marginTop = '8px';
+    note.textContent = '낙찰가보다 높게 쓴 입찰도 낙찰가를 냅니다. 이 계산은 테스트이며 주식 인도·대금 수납은 일어나지 않습니다.';
+    box.appendChild(note);
+  }
+
+  function init() {
+    var sel = $('btProf');
+    C.PROFESSIONS.forEach(function (p) { var o = document.createElement('option'); o.value = p.id; o.textContent = p.label; sel.appendChild(o); });
+    $('btDate').value = today();
+    sel.addEventListener('change', function () { resetAuth('직역이 바뀌어 인증을 다시 받아야 합니다.'); $('btResult').textContent = ''; $('btId').value = ''; });
+    Array.prototype.forEach.call(document.querySelectorAll('input[name="btKind"]'), function (r) { r.addEventListener('change', function () { syncKindUi(); resetAuth(); $('btId').value = ''; }); });
+    $('btId').addEventListener('input', function () { if (state.auth) resetAuth('번호가 바뀌어 인증을 다시 받아야 합니다.'); });
+    $('btId').addEventListener('keydown', function (e) { if (e.key === 'Enter') onAuth(); });
+    $('btAuth').addEventListener('click', onAuth);
+    $('btSubmit').addEventListener('click', onSubmit);
+    $('btQty').addEventListener('input', updateTotal); $('btPrice').addEventListener('input', updateTotal);
+    $('btSample').addEventListener('click', onSample);
+    $('btClear').addEventListener('click', onClearAll);
+    $('btClose').addEventListener('click', onClose);
+    syncKindUi(); renderList();
+  }
+  init();
+})();
+</script>
+</body>
+</html>
