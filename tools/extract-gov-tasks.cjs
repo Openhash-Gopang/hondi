@@ -47,7 +47,8 @@ const TASK_AGENCY_OVERRIDE = {
   'jeju:groundwater_quality_test_request':        ['do-agency:jeju:SP-AGY-BOHWAN'],             // SP-AGY-BOHWAN_v1.1.md 58행 · 서버 do-agency:BOHWAN
   'jeju:pest_diagnosis_request':                  ['do-agency:jeju:SP-AGY-AGRITECH'],           // SP-AGY-AGRITECH_v1.1.md 65행 · 서버 do-agency:AGRITECH
   'jeju:livestock_inseminator_license':           ['do-agency:jeju:SP-AGY-CHUKSAN'],            // SP-AGY-CHUKSAN_v1.1.md 69행 · 서버 do-agency:CHUKSAN
-  'jeju:heritage_alteration_permit':              ['do-agency:jeju:SP-AGYDIV-HERITAGE-MANAGEMENT'] // SP-AGYDIV-HERITAGE-MANAGEMENT_v1.1.md 55행 · 서버 do-agency:HERITAGE
+  'jeju:heritage_alteration_permit':              ['do-agency:jeju:SP-AGYDIV-HERITAGE-MANAGEMENT'], // SP-AGYDIV-HERITAGE-MANAGEMENT_v1.1.md 55행 · 서버 do-agency:HERITAGE
+  'seogwipo:basic_livelihood_benefit_application': ['city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-WELFARE-RESIDENT'] // SP-CITYDIV-SEOGWIPO-WELFARE-RESIDENT_v1.2.md 59행(이 과가 기초생활보장과를 겸한다고 직접 밝힘) · 서버 city-dept:seogwipo:welfare
 };
 module.exports = module.exports || {}; module.exports.TASK_AGENCY_OVERRIDE = TASK_AGENCY_OVERRIDE;
 
