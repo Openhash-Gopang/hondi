@@ -1,0 +1,62 @@
+/* equity-bid-pages.css — 지분 입찰 테스트 하위 4개 페이지(잠재 가입자·요금·시나리오·경쟁력) 공용 스타일 (2026-10-18)
+   글자는 넉넉하게: 본문 15px 이상, 표 14px 이상. 폰트는 Pretendard. */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-font-smoothing: antialiased; }
+body { margin: 0; font-family: 'Pretendard', -apple-system, 'Malgun Gothic', sans-serif; background: #eef1f6; color: #0f172a; line-height: 1.65; font-size: 15px; }
+.ebp-wrap { max-width: 1160px; margin: 0 auto; padding: 22px 24px 70px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.ebp-testbar { background: #fff1f0; border: 2px solid #d92d20; color: #7a1a12; border-radius: 8px; padding: 12px 16px; font-size: 15px; font-weight: 700; }
+.ebp-caution { background: #fff8e6; border: 1px solid #f0b429; border-left-width: 5px; color: #4a3500; border-radius: 8px; padding: 14px 18px; font-size: 15px; }
+.ebp-caution b { color: #7a4b00; }
+.ebp-caution ul { margin: 8px 0 0 20px; padding: 0; }
+.ebp-caution li { margin: 3px 0; }
+.ebp-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px 22px; }
+.ebp-card h2 { font-size: 18px; font-weight: 800; margin: 0 0 4px; letter-spacing: -.2px; }
+.ebp-card h3 { font-size: 16px; font-weight: 800; margin: 18px 0 6px; }
+.ebp-hint { font-size: 14.5px; color: #475569; margin: 0 0 12px; }
+.ebp-card p { margin: 6px 0; }
+.ebp-card ul.ebp-list { margin: 6px 0 6px 20px; padding: 0; }
+.ebp-card ul.ebp-list li { margin: 4px 0; }
+.ebp-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; margin: 10px 0 4px; }
+.ebp-field { display: grid; gap: 4px; min-width: 150px; }
+.ebp-field label, .ebp-field .lb { font-size: 14px; font-weight: 700; color: #334155; }
+.ebp-field input, .ebp-field select { font: inherit; font-size: 15px; padding: 9px 11px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: #0f172a; min-height: 42px; }
+.ebp-field input:focus, .ebp-field select:focus, .ebp-chip:focus-visible, summary:focus-visible { outline: 2px solid #3b6cf6; outline-offset: 2px; }
+.ebp-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.ebp-chip { font: inherit; font-size: 15px; font-weight: 700; padding: 9px 16px; min-height: 42px; border-radius: 999px; border: 1px solid #cbd5e1; background: #fff; color: #334155; cursor: pointer; }
+.ebp-chip[aria-pressed="true"] { background: #14181f; border-color: #14181f; color: #fff; }
+.ebp-preset-desc { font-size: 14.5px; color: #475569; margin: 8px 0 0; }
+.ebp-tw { overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px; margin-top: 10px; }
+.ebp-table { width: 100%; border-collapse: collapse; font-size: 14.5px; min-width: 640px; }
+.ebp-table th, .ebp-table td { padding: 10px 12px; border-bottom: 1px solid #eef2f7; text-align: left; vertical-align: top; white-space: nowrap; }
+.ebp-table td.wrap, .ebp-table th.wrap { white-space: normal; min-width: 220px; }
+.ebp-table th { background: #f6f8fb; font-weight: 800; color: #334155; position: sticky; top: 0; }
+.ebp-table td.num, .ebp-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.ebp-table tr.sel td { background: #fff9e6; }
+.ebp-table tr.total td { background: #f6f8fb; font-weight: 800; }
+.ebp-table tr.warn td { color: #7a1a12; }
+.ebp-bar { display: inline-block; height: 10px; border-radius: 2px; background: #f0b429; vertical-align: middle; margin-right: 8px; min-width: 2px; }
+.ebp-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 12px 0 4px; }
+.ebp-kpi { background: #f6f8fb; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; }
+.ebp-kpi .k { font-size: 13.5px; color: #475569; font-weight: 700; }
+.ebp-kpi .v { font-size: 22px; font-weight: 800; letter-spacing: -.3px; margin-top: 2px; }
+.ebp-kpi .s { font-size: 13.5px; color: #64748b; margin-top: 2px; }
+.ebp-badge { display: inline-block; font-size: 13px; font-weight: 800; padding: 1px 8px; border-radius: 999px; margin-right: 6px; vertical-align: 1px; }
+.ebp-badge.ok { background: #e3f6ea; color: #14632f; }
+.ebp-badge.un { background: #fdecea; color: #8a1f14; }
+.ebp-badge.op { background: #e8eefc; color: #1d3f9a; }
+details.ebp-det { border: 1px solid #e2e8f0; border-radius: 8px; margin: 8px 0; background: #fff; }
+details.ebp-det > summary { cursor: pointer; padding: 12px 14px; font-weight: 800; font-size: 15.5px; list-style: none; display: flex; justify-content: space-between; gap: 10px; }
+details.ebp-det > summary::-webkit-details-marker { display: none; }
+details.ebp-det > summary::after { content: '＋'; font-weight: 700; color: #64748b; }
+details.ebp-det[open] > summary::after { content: '－'; }
+details.ebp-det .body { padding: 2px 16px 14px; }
+.ebp-two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; margin-top: 8px; }
+.ebp-box { border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; background: #fbfcfe; }
+.ebp-box h4 { margin: 0 0 6px; font-size: 15px; font-weight: 800; }
+.ebp-box ul { margin: 0 0 0 18px; padding: 0; }
+.ebp-box li { margin: 3px 0; }
+.ebp-src { font-size: 13.5px; color: #475569; }
+.ebp-src li { margin: 3px 0; word-break: break-all; }
+.ebp-src a { color: #1d4ed8; }
+.ebp-hl { background: #ffe58a; border-radius: 2px; padding: 0 2px; }
+@media (max-width: 720px) { .ebp-wrap { padding: 16px 14px 60px; } .ebp-card { padding: 16px 14px; } .ebp-kpi .v { font-size: 20px; } }
