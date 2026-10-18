@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-19 01:22 KST · 기준 커밋 580edcdf
+- 갱신: 2026-10-19 01:26 KST · 기준 커밋 808544e5
 - 전문가 페르소나 전용 페이지 144개 · 등록된 SP 864건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-19 fix: 실수로 추가된 중첩 저장소 포인터(estate, hondi) 제거
 - 2026-10-19 feat: 행정기관 공통 페이지(gov-agency) — 페르소나 형태 통일, 임베드 엔진, 법률 검토 훅
 - 2026-10-18 feat: add plain-language guides, glossaries and table reading tips to equity bid tabs
 - 2026-10-18 feat: move equity bid tabs to header bottom with dark gray readable style
@@ -43,7 +44,6 @@
 - 2026-10-17 Merge pull request #665 from Openhash-Gopang/feature/expert-assistant-sp-all
 - 2026-10-17 전문가용 보조 AI SP 일괄 신설(의료보건·단독 직역·세부 분야) 및 비의료 문구 정정
 - 2026-10-17 Merge pull request #664 from Openhash-Gopang/feature/health-assistant-sp-batch4
-- 2026-10-17 단독 직역 4묶음(미용사·항해사·기관사·생활스포츠지도사·조리사·관광통역안내사) 전문가용 SP
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
