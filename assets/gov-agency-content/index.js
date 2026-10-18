@@ -38,7 +38,10 @@ window.GOV_CONTENT_INDEX = {
   'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-CLIMATE-PARKS': 'seogwipo-parks.js',
   'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-CULTURE-TOURISM': 'seogwipo-tourism.js',
   'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-JACHI-VILLAGE': 'seogwipo-village.js',
-  'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-JACHI-TAX': 'seogwipo-tax.js'
+  'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-JACHI-TAX': 'seogwipo-tax.js',
+  'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-AGRIECONOMY-FISHERY': 'seogwipo-fishery.js',
+  'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-HEALTH-ADMIN': 'seogwipo-medical.js',
+  'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-AGRIECONOMY-LIVESTOCK': 'seogwipo-livestock.js'
 };
 
 /* 도메인 키: 시·도 부서(do-dept)·직속기관(do-agency)·국가기관 지역사무소(nat-agency)는 시·도마다 같은 템플릿 SP 를 쓰므로 시·도를 뺀 키를 쓴다. */
