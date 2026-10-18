@@ -15,6 +15,8 @@
      laws:   [ { name, rel } ],                                                // 관계 법령 표
      lawsUnverified: '확인하지 못한 법령 안내',
      limits: ['이 기관 페이지의 한계·추후 작업', …],
+     sources: [ { title, url, date('YYYY-MM-DD') } ],                         // 조사 출처(화면 하단에 링크로 표시)
+     taskNotes: { 'jejusi:task_key': '서버 등록 정보와 다르게 확인된 사실' },  // 「접수 연동 민원」 탭의 해당 task 에 ※ 정정 안내로 덧붙임
      footer: '푸터 문구'
    }
 

@@ -11,7 +11,11 @@ window.GOV_CONTENT_INDEX = {
   'city-dept:jejusi:SP-CITYDIV-JEJUSI-WELFARE-DISABLED': 'jejusi-disability.js',
   'city-dept:jejusi:SP-CITYDIV-JEJUSI-WELFARE-ELDERLY': 'jejusi-elderly.js',
   'city-dept:jejusi:SP-CITYDIV-JEJUSI-WELFARE-WOMENFAMILY': 'jejusi-womenfamily.js',
-  'city-dept:jejusi:SP-CITYDIV-JEJUSI-WELFARE-RESIDENT': 'jejusi-resident.js'
+  'city-dept:jejusi:SP-CITYDIV-JEJUSI-WELFARE-RESIDENT': 'jejusi-resident.js',
+  'city-dept:jejusi:SP-CITYDIV-JEJUSI-CULTURE-TOURISM': 'jejusi-tourism.js',
+  'city-dept:jejusi:SP-CITYDIV-JEJUSI-CLIMATE-ENVMGMT': 'jejusi-airenv.js',
+  'city-dept:jejusi:SP-CITYDIV-JEJUSI-CLIMATE-PARKS': 'jejusi-parks.js',
+  'city-dept:jejusi:SP-CITYDIV-JEJUSI-ECON-VILLAGE': 'jejusi-village.js'
 };
 
 /* 도메인 키: 시·도 부서(do-dept)·직속기관(do-agency)·국가기관 지역사무소(nat-agency)는 시·도마다 같은 템플릿 SP 를 쓰므로 시·도를 뺀 키를 쓴다. */

@@ -85,6 +85,10 @@ test('내용 파일(gov-agency-content/)은 색인에 올라 있고, 서류·출
     }
     assert.ok(ov.lawsUnverified && ov.lawsUnverified.length > 10, key + ': 확인하지 못한 사항(lawsUnverified)을 적어야 합니다');
     assert.ok(ov.sources && ov.sources.length > 0 && ov.sources.every((s) => s.title && /^\d{4}-\d{2}-\d{2}$/.test(s.date)), key + ': 조사 출처와 조회일(YYYY-MM-DD)이 필요합니다');
+    if (ov.taskNotes) {
+      const tw = {}; vm.runInNewContext(read('assets/gov-agency-tasks.js'), { window: tw });
+      for (const k of Object.keys(ov.taskNotes)) assert.ok(tw.GOV_TASKS[k], key + ' taskNotes 가 없는 task 를 가리킵니다: ' + k);
+    }
     const note = file.replace(/\.js$/, '.md');
     assert.ok(fs.existsSync(path.join(root, 'docs/gov-agency-research/notes', note)), '조사 노트가 없습니다: docs/gov-agency-research/notes/' + note);
   }
