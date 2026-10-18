@@ -41,7 +41,18 @@ window.GOV_CONTENT_INDEX = {
   'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-JACHI-TAX': 'seogwipo-tax.js',
   'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-AGRIECONOMY-FISHERY': 'seogwipo-fishery.js',
   'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-HEALTH-ADMIN': 'seogwipo-medical.js',
-  'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-AGRIECONOMY-LIVESTOCK': 'seogwipo-livestock.js'
+  'city-dept:seogwipo:SP-CITYDIV-SEOGWIPO-AGRIECONOMY-LIVESTOCK': 'seogwipo-livestock.js',
+  'do-agency:*:SP-AGY-FIRE': 'fire.js',
+  'do-agency:*:SP-AGYDIV-FIRE-PREVENTION': 'fire.js',
+  'do-agency:*:SP-AGY-WATER': 'water.js',
+  'do-agency:*:SP-AGYDIV-WATER-WATERSUPPLY': 'water.js',
+  'do-agency:*:SP-AGYDIV-POLICE-TRAFFIC': 'police.js',
+  'do-agency:*:SP-AGYDIV-HERITAGE-MANAGEMENT': 'heritage.js',
+  'do-agency:*:SP-AGY-BOHWAN': 'bohwan.js',
+  'do-agency:*:SP-AGY-CHUKSAN': 'chuksan.js',
+  'do-agency:*:SP-AGYDIV-FOLKMUSEUM-ADMIN': 'rental.js',
+  'do-agency:*:SP-AGYDIV-ARTMUSEUM-MAIN': 'rental.js',
+  'do-agency:*:SP-AGYDIV-ARTMUSEUM-JHYUN': 'rental.js'
 };
 
 /* 도메인 키: 시·도 부서(do-dept)·직속기관(do-agency)·국가기관 지역사무소(nat-agency)는 시·도마다 같은 템플릿 SP 를 쓰므로 시·도를 뺀 키를 쓴다. */
