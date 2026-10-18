@@ -66,9 +66,14 @@
     '정식 접수·전자 제출은 이 페이지가 아니라 기관의 접수 창구(정부24, 국민신문고, 기관 누리집 등)에서 이루어집니다. 이 페이지의 어떤 내용도 접수를 대신하지 않습니다.'
   ];
 
+  /* ── 기관별 내용(조사한 서류·법령): 우선순위 기관 코드 > 도메인 > 유형 ─────────────────────
+     도메인 키 = 시·도 부서(do-dept)와 국가기관 지역사무소(nat-agency)는 시·도마다 같은 템플릿 SP 를 쓰므로, 시·도를 뺀 'do-dept:*:SP-DO-AGRI' 형태로
+     한 번만 조사해 전국에 적용한다. 내용 파일은 assets/gov-agency-content/ 에 두고, 색인(index.js)이 이 스크립트보다 먼저 해당 파일을 불러온다. */
+  var domain = (window.GOV_DOMAIN_KEY ? window.GOV_DOMAIN_KEY(code) : '');   // gov-agency-content/index.js 가 정의하고, 해당 내용 파일도 그 파일이 먼저 불러온다
   var tierOv = (window.GOV_TIER_OVERRIDES || {})[tier] || {};
+  var domOv = (domain && (window.GOV_AGENCY_OVERRIDES || {})[domain]) || {};
   var agOv = (window.GOV_AGENCY_OVERRIDES || {})[code] || {};
-  function pick(k, dflt) { return agOv[k] !== undefined ? agOv[k] : (tierOv[k] !== undefined ? tierOv[k] : dflt); }
+  function pick(k, dflt) { return agOv[k] !== undefined ? agOv[k] : (domOv[k] !== undefined ? domOv[k] : (tierOv[k] !== undefined ? tierOv[k] : dflt)); }
 
   // 시·도 부서처럼 이름만으로는 어느 지역인지 모호한 기관(예: 「기획조정실」)은 소속의 시·도 이름을 앞에 붙인다. 이미 지역 이름이 들어 있으면 그대로 둔다.
   var pm = group.match(/^(\S+) (?:부서|직속기관|출자출연기관|읍·면·동|부서 세부과|직속기관 세부과|출자출연기관 세부팀)$/);
@@ -83,6 +88,7 @@
     laws: pick('laws', DEFAULT_LAWS),
     lawsUnverified: pick('lawsUnverified', '법령 이름만 적었고 조번호·시행일은 확인하지 못했습니다. 개정될 수 있으므로 서류를 작성하기 전에 현행본을 확인하십시오.'),
     limits: pick('limits', DEFAULT_LIMITS),
+    sources: pick('sources', []),
     footer: pick('footer', '근거 법령: 민원 처리에 관한 법률 외 · ' + displayName + ' AI 는 민원 작성을 돕는 도구이며 처분·접수·법률 자문을 제공하지 않습니다.')
   };
 
@@ -134,7 +140,11 @@
     if (laws) laws.innerHTML = CFG.laws.map(function (l) { return '<tr><td class="doc-title">' + esc(l.name) + '</td><td class="doc-detail">' + esc(l.rel) + '</td></tr>'; }).join('');
     var lu = document.getElementById('govLawsUnverified'); if (lu) lu.innerHTML = '<b>확인하지 못한 법령</b> ' + esc(CFG.lawsUnverified);
     var lim = document.getElementById('govLimits');
-    if (lim) lim.innerHTML = '<div class="svc-detail"><h2>이 페이지의 미비점·한계와 추후 작업</h2><p class="svc-lead">이 페이지와 기관 AI 는 초안 단계입니다. 아래는 현재 알려진 한계와 앞으로 할 일입니다.</p><ul>' + CFG.limits.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul></div>';
+    if (lim) lim.innerHTML = '<div class="svc-detail"><h2>이 페이지의 미비점·한계와 추후 작업</h2><p class="svc-lead">이 페이지와 기관 AI 는 초안 단계입니다. 아래는 현재 알려진 한계와 앞으로 할 일입니다.</p><ul>' + CFG.limits.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') + '</ul>' +
+      (CFG.sources.length ? '<h3>조사 출처</h3><ul>' + CFG.sources.map(function (s) {
+        var u = /^https?:\/\//i.test(s.url || '') ? s.url : '';
+        return '<li>' + (u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(s.title) + '</a>' : esc(s.title)) + (s.date ? ' (조회 ' + esc(s.date) + ')' : '') + '</li>';
+      }).join('') + '</ul>' : '') + '</div>';
     var ft = document.getElementById('govFooter'); if (ft) ft.textContent = CFG.footer;
 
     if (!rec) {   // 기관을 못 찾은 경우: 시작 영역 대신 안내만

@@ -21,12 +21,28 @@ const code = picks.join('\n') + '\n' + lines.slice(fnStart, fnEnd + 1).join('\n'
 const ctx = vm.createContext({});
 const D = vm.runInContext(code, ctx);
 
+// SP 파일이 새 버전으로 올라가도 k-government.html 의 경로 표는 옛 버전에 머물러 있는 경우가 있다(2026-10-19 조사: 98개 중 73개).
+// 저장소에 그 파일이 없으면 같은 폴더의 같은 이름에서 가장 높은 버전을 대신 쓰고, 그것도 없으면 null 로 둔다(방법론 탭이 404 를 내지 않게).
+function latestExisting(p) {
+  if (!p) return { path: null };
+  if (fs.existsSync(path.join(root, p))) return { path: p };
+  const dir = path.dirname(p), stem = path.basename(p).replace(/_v[\d_.]+\.md$/, '');
+  let files = [];
+  try { files = fs.readdirSync(path.join(root, dir)); } catch (e) { return { path: null, missing: p }; }
+  const ver = (f) => (f.match(/_v([\d_.]+)\.md$/) || [, '0'])[1].split(/[_.]/).map(Number);
+  const cands = files.filter(f => f.startsWith(stem + '_v') && /_v[\d_.]+\.md$/.test(f) && f.slice(0, stem.length) === stem)
+    .sort((a, b) => { const x = ver(a), y = ver(b); for (let i = 0; i < Math.max(x.length, y.length); i++) { const d = (y[i] || 0) - (x[i] || 0); if (d) return d; } return 0; });
+  return cands.length ? { path: dir + '/' + cands[0], bumped: p } : { path: null, missing: p };
+}
+const bumped = [], missingSp = [];
 const out = {};      // govCode -> [이름, 소속(그룹), SP 경로|null]
 const dup = [];
 function add(item, group) {
   if (!item || !item.govCode) return;
   if (out[item.govCode]) { dup.push(item.govCode); return; }
-  out[item.govCode] = [item.label, group, D.govResolveSpPath(item.govCode) || null];
+  const r = latestExisting(D.govResolveSpPath(item.govCode) || null);
+  if (r.bumped) bumped.push(item.govCode); if (r.missing) missingSp.push([item.govCode, item.label, r.missing]);
+  out[item.govCode] = [item.label, group, r.path];
 }
 (D.GOV_NATIONAL || []).forEach(s => add(s, '중앙정부 · ' + (D.GOV_CAT_LABEL[s.cat] || s.cat)));
 (D.GOV_LEGISLATIVE || []).forEach(s => add(s, '입법'));
@@ -44,5 +60,7 @@ const body = '/* 자동 생성 — 직접 고치지 말고 `node tools/build-gov
   '   형식: { govCode: [이름, 소속, SP 원문 경로(prompts/… 또는 null)] } */\n' +
   'window.GOV_AGENCIES = ' + JSON.stringify(out) + ';\n';
 fs.writeFileSync(process.env.GOV_AGENCY_OUT || path.join(root, 'assets/gov-agency-data.js'), body);   // GOV_AGENCY_OUT: 테스트용 출력 경로
+if (process.env.GOV_AGENCY_VERBOSE) missingSp.forEach(m => console.log('  SP 파일 없음:', m.join(' | ')));
+console.log('최신 버전으로 보정 ' + bumped.length + '개, 저장소에 SP 파일이 없는 기관 ' + missingSp.length + '개(경로 null 처리)');
 console.log('기관 ' + Object.keys(out).length + '개 기록, 중복 govCode ' + dup.length + '개, SP 경로 없음 ' +
   Object.values(out).filter(v => !v[2]).length + '개, 크기 ' + (body.length / 1024).toFixed(0) + ' KB');

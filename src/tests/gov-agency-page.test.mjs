@@ -40,7 +40,7 @@ test('기관별 customization 표는 비어 있어도 안전하고, 공통 페�
   const w = loadWin('assets/gov-agency-overrides.js');
   assert.equal(typeof w.GOV_AGENCY_OVERRIDES, 'object'); assert.equal(typeof w.GOV_TIER_OVERRIDES, 'object');   // 비어 있거나 기관이 추가돼도 객체여야 한다
   const html = read('pages/gov-agency.html');
-  const order = ['gov-agency-data.js', 'gov-agency-overrides.js', 'gov-agency.js', 'ph-header.js', 'chat-widget.js', 'md-view.js', 'pro-doc-page.js'].map((s) => html.indexOf('/assets/' + s));
+  const order = ['gov-agency-data.js', 'gov-agency-overrides.js', 'gov-agency-content/index.js', 'gov-agency.js', 'ph-header.js', 'chat-widget.js', 'md-view.js', 'pro-doc-page.js'].map((s) => html.indexOf('/assets/' + s));
   assert.ok(order.every((i) => i > 0), '필요한 스크립트가 빠졌습니다');
   assert.deepEqual([...order], [...order].sort((a, b) => a - b), '스크립트 로드 순서가 바뀌었습니다(헤더 설정이 ph-header.js 보다 먼저여야 함)');
   for (const id of ['startBox', 'govHow', 'askOther', 'svcTabs', 'svcContent', 'draftsCard', 'draftsList', 'govLawRows', 'govLimits', 'govFooter']) {
@@ -62,4 +62,44 @@ test('regional-gov.html 임베드 모드는 같은 오리진·부모 창 메시�
   assert.ok(rg.includes('e.origin !== location.origin || e.source !== window.parent'));
   assert.ok(rg.includes("html.embed #bottom-dock"));
   assert.ok(rg.startsWith('\uFEFF<!DOCTYPE') && !rg.startsWith('\uFEFF\uFEFF'), 'BOM 이 이중이면 문서가 호환 모드(quirks)로 열립니다');
+});
+
+test('내용 파일(gov-agency-content/)은 색인에 올라 있고, 서류·출처·확인 못 한 사항을 빠뜨리지 않는다', () => {
+  const dir = path.join(root, 'assets/gov-agency-content');
+  const idx = loadWin('assets/gov-agency-content/index.js').GOV_CONTENT_INDEX;
+  const idxData = loadWin('assets/gov-agency-data.js').GOV_AGENCIES;
+  const files = fs.readdirSync(dir).filter((f) => f.endsWith('.js') && f !== 'index.js');
+  assert.deepEqual([...new Set(Object.values(idx))].sort(), files.sort(), '색인과 내용 파일 목록이 다릅니다');
+  for (const [key, file] of Object.entries(idx)) {
+    assert.match(file, /^[A-Za-z0-9._-]+\.js$/, file + ' 파일명 형식');
+    const w = loadWin('assets/gov-agency-content/' + file);
+    const ov = w.GOV_AGENCY_OVERRIDES[key];
+    assert.ok(ov, file + ' 이 ' + key + ' 를 등록하지 않았습니다');
+    if (!key.includes('*') && !/^[a-z-]+$/.test(key)) assert.ok(idxData[key], key + ' 는 기관 색인에 없는 코드입니다');
+    const ids = new Set();
+    assert.ok(ov.catalog.length > 0, key + ' 카탈로그가 비었습니다');
+    for (const c of ov.catalog) {
+      assert.ok(c.id && c.tab && c.title && c.meta && Array.isArray(c.notes) && Array.isArray(c.items) && c.items.length > 0, key + ' 카탈로그 항목 형식: ' + c.id);
+      assert.ok(!ids.has(c.id), key + ' 카탈로그 id 중복 ' + c.id); ids.add(c.id);
+      c.items.forEach((it) => assert.ok(it.t && it.d, key + ' 서류 항목에 이름과 설명이 있어야 합니다: ' + c.id));
+    }
+    assert.ok(ov.lawsUnverified && ov.lawsUnverified.length > 10, key + ': 확인하지 못한 사항(lawsUnverified)을 적어야 합니다');
+    assert.ok(ov.sources && ov.sources.length > 0 && ov.sources.every((s) => s.title && /^\d{4}-\d{2}-\d{2}$/.test(s.date)), key + ': 조사 출처와 조회일(YYYY-MM-DD)이 필요합니다');
+    const note = file.replace(/\.js$/, '.md');
+    assert.ok(fs.existsSync(path.join(root, 'docs/gov-agency-research/notes', note)), '조사 노트가 없습니다: docs/gov-agency-research/notes/' + note);
+  }
+});
+
+test('SP 업무 초안표 추출기가 제주시 세무과에서 분장사무 9건을 뽑는다', () => {
+  const out = fs.mkdtempSync(path.join(os.tmpdir(), 'gov-extract-'));
+  execFileSync('node', [path.join(root, 'tools/extract-gov-sp.cjs'), '--code', 'city-dept:jejusi:SP-CITYDIV-JEJUSI-JACHI-TAX'], { env: { ...process.env, GOV_EXTRACT_OUT: out }, stdio: 'pipe' });
+  const j = JSON.parse(fs.readFileSync(path.join(out, 'city-dept_jejusi_SP-CITYDIV-JEJUSI-JACHI-TAX.json'), 'utf8'));
+  assert.equal(j.units.length, 1);
+  assert.equal(j.units[0].tasks.length, 9);
+  assert.ok(j.units[0].legalBasis.length > 0 && j.units[0].referrals.length > 0);
+});
+
+test('색인의 SP 경로는 모두 저장소에 실제로 있는 파일이다', () => {
+  const missing = Object.entries(loadWin('assets/gov-agency-data.js').GOV_AGENCIES).filter(([, v]) => v[2] && !fs.existsSync(path.join(root, v[2]))).map(([c]) => c);
+  assert.deepEqual(missing, [], '없는 SP 경로: ' + missing.slice(0, 5).join(', '));
 });
