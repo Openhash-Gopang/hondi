@@ -100,7 +100,9 @@
       var tk = window.GOV_TASKS[k]; if (!tk) return null;
       var req = tk.docs.filter(function (d) { return d[1]; }).map(function (d) { return d[0]; });
       var opt = tk.docs.filter(function (d) { return !d[1]; }).map(function (d) { return d[0]; });
-      return { t: tk.name, d: (tk.basis ? '근거 ' + tk.basis + ' / ' : '') + '필수 서류: ' + (req.join(', ') || '—') + (opt.length ? ' / 선택: ' + opt.join(', ') : '') };
+      // taskNotes: 내용 파일이 서버 등록 정보와 다른 사실(예: 법 시행으로 바뀐 근거)을 확인했을 때 task 별로 덧붙이는 정정 안내
+      var note = (pick('taskNotes', {}) || {})[k];
+      return { t: tk.name, d: (tk.basis ? '근거 ' + tk.basis + ' / ' : '') + '필수 서류: ' + (req.join(', ') || '—') + (opt.length ? ' / 선택: ' + opt.join(', ') : '') + (note ? ' / ※ ' + note : '') };
     }).filter(Boolean);
     if (tItems.length) CFG.catalog = [{
       id: 'N-1', tab: '접수 연동 민원', title: '나비 접수 연동 민원',
