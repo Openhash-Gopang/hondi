@@ -133,3 +133,18 @@ test('추출기는 파이프라인형 SP(도시건설국 건축과)에서 접수
   assert.deepEqual(u.pipelineTasks.map((p) => p.taskKey).sort(), ['building_permit', 'occupancy_inspection']);
   assert.ok((u.unregistered || []).includes('jejusi:occupancy_inspection'), '미등록 task 를 짚어야 합니다(열린 문제 #2)');
 });
+
+test('task 수동 연결(TASK_AGENCY_OVERRIDE)은 모두 그 기관 SP 본문에 task_key 가 실제로 적혀 있다', () => {
+  const src = read('tools/extract-gov-tasks.cjs');
+  const block = src.slice(src.indexOf('const TASK_AGENCY_OVERRIDE = {'), src.indexOf('module.exports = module.exports'));
+  const pairs = [...block.matchAll(/'([a-z0-9_]+:[a-z0-9_]+)':\s*\[([^\]]*)\]/g)];
+  assert.ok(pairs.length >= 12, '수동 연결 항목이 읽히지 않았습니다');
+  const idx = loadWin('assets/gov-agency-data.js').GOV_AGENCIES;
+  for (const [, key, codes] of pairs) {
+    const taskKey = key.split(':')[1];
+    for (const code of [...codes.matchAll(/'([^']+)'/g)].map((m) => m[1])) {
+      assert.ok(idx[code] && idx[code][2], key + ' → ' + code + ': 기관 색인에 없거나 SP 가 없습니다');
+      assert.ok(read(idx[code][2]).includes(taskKey), key + ' → ' + code + ': SP 본문에 task_key 가 적혀 있지 않습니다(근거 없는 연결)');
+    }
+  }
+});
