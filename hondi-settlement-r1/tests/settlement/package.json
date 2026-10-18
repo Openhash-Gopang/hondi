@@ -1,0 +1,9 @@
+{
+  "name": "hondi-settlement-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:unit": "node --test settlement.test.mjs metrics.test.mjs",
+    "sim": "node sim-advance-yield.mjs"
+  }
+}
