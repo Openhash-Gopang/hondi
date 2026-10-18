@@ -124,3 +124,17 @@ A-1의 신청서 누락 패턴(#26)에 상하수도 배수설비 설치신고서
 | `seogwipo:fishery_permit` (#37) | 근거: 어업의 허가 및 신고 등에 관한 규칙 제6조 / 서류: 신청서, 어선검사증서·어선등록필증 사본, 교육 이수증명서(선택) | 근거 규칙은 폐지 표기(2023.2.3.). 현행은 수산업법 시행규칙 제37조(별지 제36호서식). 임차 시 선박등기부등본, 구획어업의 수면 위치·구역도·동의서 누락. 어선등록필증은 행정정보 공동이용 대체 | 중간(폐지 표기는 높음, 부칙 미확인) | `seogwipo-fishery` |
 | `seogwipo:medical_institution_report` (#38) | 개설신고서, 시설 및 장비 개요서 | 다른 지방자치단체 안내는 면허증 사본, 건물평면도·구조설명서, 근무인원 면허증, 범죄전력조회 동의서 등을 요구 | 낮음 | `seogwipo-medical` |
 | `seogwipo:livestock_business_permit` (#39) | 신청서, 배출시설 허가증/신고확인증, 처리시설 설치 증명서류 | 등록 첨부서류에 현황 서류, 처리·악취저감 계획, 교육 이수 증명 추가. 배출시설 설치 신고서·허가 신청서 누락. 허가와 등록은 서식이 다름 | 중간 | `seogwipo-livestock` |
+
+## J. 12회차 — 도 직속기관 (2026-10-19)
+법령 요지는 법령 DB(nepla.ai)로 확인했고 원문 확인이 필요하다. 상하수도·대관 task는 법령 본문을 열지 못해 검증하지 못했다.
+
+| task 키 | 서버 현재 | 확인된 사실 | 확신도 | 노트 |
+|---|---|---|---|---|
+| `jejufire:fire_facility_completion_inspection` (#41) | 소방시설완공검사신청서, 설계도서(선택) | 신청서 별지 제17호서식, 설계도서 생략 사유에 감리 결과 통보 추가, 부분완공 별지 제18호서식 없음. 신청 상대는 소방본부장·소방서장 | 중간 | `fire` |
+| `jejufire:hazardous_material_facility_permit` (#42) | 신청서, 도면, 소화설비 명세(선택) | 구조설비명세표, 화재탐지설비 설계도서 누락, 소화설비는 설계도서로 열거 | 중간 | `fire` |
+| `jeju:water_leak_fee_reduction` · `jeju:water_social_fee_reduction` · `jeju:water_connection_application` (#43) | 서버 근거에 조번호 TBD | 조례 본문 확인 못 함 | 낮음 | `water` |
+| `jeju:parking_violation_fine_objection` (#44) | 의견진술서·이의제기서, 증빙(선택) | 의견 제출(부과 전)과 이의제기(통지 후 60일)는 시기와 효과가 다름 | 중간 | `police` |
+| `jeju:heritage_alteration_permit` (#45) | 신청서, 사업계획서 | 시행규칙 제14조는 국가지정 기준, 현장 사진 누락 | 중간 | `heritage` |
+| `jeju:groundwater_quality_test_request` (#46) | 근거: 수질보전 등에 관한 규칙 제10조(폐지) | 현행 지하수법 시행규칙 제38조, 전문기관에 신청 | 중간 | `bohwan` |
+| `jeju:livestock_inseminator_license` (#47) | 신청서, 자격 증빙 | 건강진단서 누락, 근거는 시행규칙 제15조 | 중간 | `chuksan` |
+| `jeju:folkmuseum_facility_rental` · `jeju:artmuseum_main_facility_rental` · `jeju:artmuseum_jhyun_facility_rental` (#48) | 신청서, 이용계획서 | 확인 못 함 | 낮음 | `rental` |
