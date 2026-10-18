@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-18 15:55 KST · 기준 커밋 4c527462
+- 갱신: 2026-10-18 16:13 KST · 기준 커밋 927ada60
 - 전문가 페르소나 전용 페이지 143개 · 등록된 SP 863건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-18 feat: add equity bid system test page (not a real bidding) and header button on expert personas page
 - 2026-10-18 docs: add PDFs of plan and public-purpose docs; restructure consortium to 10 profession corporations, add public-interest safeguards doc and PDFs (5 pct auction, founder-held management, public-interest board)
 - 2026-10-18 docs: restructure consortium to 10 profession corporations, add public-interest safeguards doc and PDF (5 pct auction, founder-held management, public-interest board)
 - 2026-10-18 docs: restructure consortium to 10 profession corporations, add public-interest safeguards doc (5 pct auction, founder-held management, public-interest board)
@@ -43,7 +44,6 @@
 - 2026-10-17 feat(admin): 공동 설립 참여 제안서 묶음 v8 개정(11개 법인, 서버 점진 증설)(MD 전용)
 - 2026-10-17 feat(persona): 전문가 페르소나 버튼에 나비 통합 재무 모델의 11개 직종 반영(기존 버튼 유지)
 - 2026-10-17 feat(persona): 전문가 페르소나 버튼을 나비 통합 재무 모델의 11개 직종으로 변경
-- 2026-10-17 Merge pull request #656 from Openhash-Gopang/feature/health-assistant-sp-batch2
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
@@ -56,6 +56,7 @@
 - /pages/core-prompts.html — 핵심 프롬프트
 - /pages/dashboard.html — 대시보드
 - /pages/digit-code.html — 나비 숫자 코드
+- /pages/equity-bid-test.html — 자회사 지분 5% 입찰 (시스템 테스트)
 - /pages/expert-chat.html — 전문가 업무 보조 AI
 - /pages/expert-personas-docs.html — 문서 양식 — 전문가 페르소나
 - /pages/expert-personas.html — 전문가 페르소나
