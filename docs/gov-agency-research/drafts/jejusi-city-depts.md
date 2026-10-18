@@ -655,36 +655,50 @@
 - SP: `prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-BUILDING_v1.0.md` (v1.0)
 - 법적 근거, 마지막 확인 2026-08-20: 개별 처분(건축허가·사용승인) 근거: 건축법, 건축법 시행령, 건축법 시행규칙(수수료 별표 4 포함)
 - 완결 처리 업무 0건 — 없음(일반 템플릿일 가능성)
+- 접수 연동 task(SP §2 표)
+  - `building_permit` — 필요 서류: 설계도서, 구조계산서, 토지이용계획확인서 등 / 수수료: 건축법 시행규칙 별표 4 기준
+  - `occupancy_inspection` — 필요 서류: 감리완료보고서, 시공사진, 소방/전기 안전점검 결과, 정화조 준공 확인 등 / 수수료: 사용승인 자체는 무료. 부수 인허가만 개별 수수료
+- ⚠ 서버 레지스트리 미등록 task: jejusi:occupancy_inspection (SP 는 선언했으나 worker.js REQUIRED_DOCUMENTS_REGISTRY 에 없음)
 
 ## 제주시청 도시건설국 도시계획과
 
 - SP: `prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CITYPLAN_v1.0.md` (v1.0)
 - 법적 근거, 마지막 확인 2026-08-20: 상위 근거: 제주특별자치도 설치 및 국제자유도시 조성을 위한 특별법 — 제주시는 법인격 없는 행정시, 시장은 도지사 임명 / 도시계획 관련 처분 근거: 국토의 계획 및 이용에 관한 법률(국토계획법), 제주특별자치도 도시계획 조례
 - 완결 처리 업무 0건 — 없음(일반 템플릿일 가능성)
+- 접수 연동 task(SP §2 표)
+  - `urban_management_plan_change` — 필요 서류: 변경계획서, 토지이용현황도 등 / 수수료: ★ REQUIRED_DOCUMENTS_REGISTRY 미등록
 
 ## 제주시청 도시건설국 건설과
 
 - SP: `prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-CONSTRUCT_v1.0.md` (v1.0)
 - 법적 근거, 마지막 확인 2026-08-20: 도로점용허가 근거: 도로법
 - 완결 처리 업무 0건 — 없음(일반 템플릿일 가능성)
+- 접수 연동 task(SP §2 표)
+  - `road_occupancy_permit` — 필요 서류: 점용계획서, 위치도, 시공계획서 등 / 수수료: ★ REQUIRED_DOCUMENTS_REGISTRY 미등록
 
 ## 제주시청 도시건설국 주택과
 
 - SP: `prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-HOUSING_v1.0.md` (v1.0)
 - 법적 근거, 마지막 확인 2026-08-20: 공동주택 관리·주택사업계획승인 근거: 주택법, 공동주택관리법
 - 완결 처리 업무 0건 — 없음(일반 템플릿일 가능성)
+- 접수 연동 task(SP §2 표)
+  - `housing_project_plan_approval` — 필요 서류: 사업계획서, 설계도서, 자금조달계획서 등 / 수수료: ★ REQUIRED_DOCUMENTS_REGISTRY 미등록
 
 ## 제주시청 도시건설국 도시재생과
 
 - SP: `prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-REGEN_v1.0.md` (v1.0)
 - 법적 근거, 마지막 확인 2026-08-20: 도시재생 사업 근거: 도시재생 활성화 및 지원에 관한 특별법
 - 완결 처리 업무 0건 — 없음(일반 템플릿일 가능성)
+- 접수 연동 task(SP §2 표)
+  - `urban_regeneration_project` — 필요 서류: 사업계획서, 주민동의서 등 / 수수료: ★ REQUIRED_DOCUMENTS_REGISTRY 미등록
 
 ## 제주시청 도시건설국 상하수도과
 
 - SP: `prompts/gov-tree/04-city/divisions/SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-WATER_v1.1.md` (v1.1)
 - 법적 근거, 마지막 확인 2026-08-20: 상하수도 공사 승인 근거: 수도법, 하수도법
 - 완결 처리 업무 0건 — 없음(일반 템플릿일 가능성)
+- 접수 연동 task(SP §2 표)
+  - `water_sewer_construction_approval` — 필요 서류: 시설설계도, 배치도, 시공계획서 등 / 수수료: ★ REQUIRED_DOCUMENTS_REGISTRY 미등록
 
 ## 제주시청 복지위생국 기초생활보장과
 

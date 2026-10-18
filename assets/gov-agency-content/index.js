@@ -3,7 +3,8 @@
    값: 이 폴더의 파일명. 파일은 window.GOV_AGENCY_OVERRIDES[키] = { catalog, laws, lawsUnverified, limits, sources, … } 로 등록한다(형식: ../gov-agency-overrides.js).
    조사 절차와 출처 기록: docs/gov-agency-research/. 항목을 더하면 같은 PR 에서 해당 조사 노트도 함께 올린다. */
 window.GOV_CONTENT_INDEX = {
-  'city-dept:jejusi:SP-CITYDIV-JEJUSI-JACHI-TAX': 'jejusi-tax.js'
+  'city-dept:jejusi:SP-CITYDIV-JEJUSI-JACHI-TAX': 'jejusi-tax.js',
+  'city-dept:jejusi:SP-CITYDIV-JEJUSI-SAFETY-VEHICLE': 'jejusi-vehicle.js'
 };
 
 /* 도메인 키: 시·도 부서(do-dept)·직속기관(do-agency)·국가기관 지역사무소(nat-agency)는 시·도마다 같은 템플릿 SP 를 쓰므로 시·도를 뺀 키를 쓴다. */

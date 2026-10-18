@@ -40,7 +40,7 @@ test('기관별 customization 표는 비어 있어도 안전하고, 공통 페�
   const w = loadWin('assets/gov-agency-overrides.js');
   assert.equal(typeof w.GOV_AGENCY_OVERRIDES, 'object'); assert.equal(typeof w.GOV_TIER_OVERRIDES, 'object');   // 비어 있거나 기관이 추가돼도 객체여야 한다
   const html = read('pages/gov-agency.html');
-  const order = ['gov-agency-data.js', 'gov-agency-overrides.js', 'gov-agency-content/index.js', 'gov-agency.js', 'ph-header.js', 'chat-widget.js', 'md-view.js', 'pro-doc-page.js'].map((s) => html.indexOf('/assets/' + s));
+  const order = ['gov-agency-data.js', 'gov-agency-overrides.js', 'gov-agency-content/index.js', 'gov-agency-tasks.js', 'gov-agency.js', 'ph-header.js', 'chat-widget.js', 'md-view.js', 'pro-doc-page.js'].map((s) => html.indexOf('/assets/' + s));
   assert.ok(order.every((i) => i > 0), '필요한 스크립트가 빠졌습니다');
   assert.deepEqual([...order], [...order].sort((a, b) => a - b), '스크립트 로드 순서가 바뀌었습니다(헤더 설정이 ph-header.js 보다 먼저여야 함)');
   for (const id of ['startBox', 'govHow', 'askOther', 'svcTabs', 'svcContent', 'draftsCard', 'draftsList', 'govLawRows', 'govLimits', 'govFooter']) {
@@ -102,4 +102,34 @@ test('SP 업무 초안표 추출기가 제주시 세무과에서 분장사무 9�
 test('색인의 SP 경로는 모두 저장소에 실제로 있는 파일이다', () => {
   const missing = Object.entries(loadWin('assets/gov-agency-data.js').GOV_AGENCIES).filter(([, v]) => v[2] && !fs.existsSync(path.join(root, v[2]))).map(([c]) => c);
   assert.deepEqual(missing, [], '없는 SP 경로: ' + missing.slice(0, 5).join(', '));
+});
+
+test('접수 연동 task 파일(gov-agency-tasks.js)이 worker.js 레지스트리에서 다시 만든 결과와 같다', () => {
+  const tmp = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'gov-tasks-')), 'tasks.js');
+  execFileSync('node', [path.join(root, 'tools/extract-gov-tasks.cjs')], { env: { ...process.env, GOV_TASK_OUT: tmp }, stdio: 'pipe' });
+  assert.equal(fs.readFileSync(tmp, 'utf8'), read('assets/gov-agency-tasks.js'),
+    'worker.js 의 REQUIRED_DOCUMENTS_REGISTRY 가 바뀌었습니다 — node tools/extract-gov-tasks.cjs 를 실행해 assets/gov-agency-tasks.js 를 갱신하세요.');
+});
+
+test('task 연결은 실제 기관 색인의 코드만 가리키고, 모든 task 는 서류를 가진다', () => {
+  const w = {}; vm.runInNewContext(read('assets/gov-agency-tasks.js'), { window: w });
+  const idx = loadWin('assets/gov-agency-data.js').GOV_AGENCIES;
+  for (const [code, keys] of Object.entries(w.GOV_TASK_BY_AGENCY)) {
+    assert.ok(idx[code], code + ' 는 기관 색인에 없는 코드입니다');
+    keys.forEach((k) => assert.ok(w.GOV_TASKS[k], code + ' 가 없는 task 를 가리킵니다: ' + k));
+  }
+  for (const [k, t] of Object.entries(w.GOV_TASKS)) {
+    assert.ok(t.name && t.agency && Array.isArray(t.docs) && t.docs.length > 0, k + ' task 형식');
+    t.docs.forEach((d) => assert.ok(d[0] && (d[1] === 0 || d[1] === 1), k + ' 서류 형식'));
+  }
+  assert.ok(w.GOV_TASK_BY_AGENCY['city-dept:jejusi:SP-CITYDIV-JEJUSI-JACHI-TAX'].includes('jejusi:tax_objection'));
+});
+
+test('추출기는 파이프라인형 SP(도시건설국 건축과)에서 접수 task 를 읽고 레지스트리 미등록을 짚는다', () => {
+  const out = fs.mkdtempSync(path.join(os.tmpdir(), 'gov-extract2-'));
+  execFileSync('node', [path.join(root, 'tools/extract-gov-sp.cjs'), '--code', 'city-dept:jejusi:SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-BUILDING'], { env: { ...process.env, GOV_EXTRACT_OUT: out }, stdio: 'pipe' });
+  const j = JSON.parse(fs.readFileSync(path.join(out, 'city-dept_jejusi_SP-CITYDIV-JEJUSI-URBANCONSTRUCTION-BUILDING.json'), 'utf8'));
+  const u = j.units[0];
+  assert.deepEqual(u.pipelineTasks.map((p) => p.taskKey).sort(), ['building_permit', 'occupancy_inspection']);
+  assert.ok((u.unregistered || []).includes('jejusi:occupancy_inspection'), '미등록 task 를 짚어야 합니다(열린 문제 #2)');
 });
