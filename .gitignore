@@ -25,3 +25,5 @@ docs/kestate/dry-runs/
 
 # K-Doctor 평가 실행 결과 — 로컬 산출물
 kdoctor-eval-out/
+/estate/
+/hondi/
