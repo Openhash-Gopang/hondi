@@ -106,7 +106,8 @@
       id: 'N-1', tab: '접수 연동 민원', title: '나비 접수 연동 민원',
       meta: '서버 등록 서류 기준(worker.js 필수 서류 목록)',
       lead: '나비의 접수 절차에 등록된 민원과 필수 서류입니다. 대화로 서류를 갖추면 접수까지 이어집니다.',
-      notes: ['접수는 담당 공무원의 심사·결재를 거쳐 확정됩니다. 목록은 서버에 등록된 범위이며, 기관의 모든 민원을 뜻하지 않습니다.'],
+      notes: ['접수는 담당 공무원의 심사·결재를 거쳐 확정됩니다. 목록은 서버에 등록된 범위이며, 기관의 모든 민원을 뜻하지 않습니다.']
+        .concat(spPath ? [] : ['이 기관은 전용 시스템 프롬프트(SP) 파일이 아직 없습니다. 서버에 등록된 접수 서류를 기준으로 안내하며, 「방법론」 탭에는 기관 전용 원문이 없습니다.']),
       items: tItems
     }].concat(CFG.catalog);
   }
@@ -230,7 +231,7 @@
     }
     function loadSP() {
       if (spLoaded || spLoading) return;
-      if (!spPath) { spState('이 기관은 전용 시스템 프롬프트 파일이 아직 없습니다. 같은 종류 기관의 공통 템플릿과 지역 공통 SP 로 안내합니다.'); return; }
+      if (!spPath) { spState('이 기관은 전용 시스템 프롬프트(SP) 파일이 아직 없어 보여 드릴 원문이 없습니다.'); return; }
       spLoading = true; spState('방법론(시스템 프롬프트)을 불러오는 중입니다…');
       fetch('/' + spPath.replace(/^\//, ''), { cache: 'no-cache' }).then(function (r) {
         if (!r.ok) throw new Error('sp ' + r.status); return r.text();
