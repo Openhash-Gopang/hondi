@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-19 02:55 KST · 기준 커밋 5deb3a42
+- 갱신: 2026-10-19 02:59 KST · 기준 커밋 56226519
 - 전문가 페르소나 전용 페이지 144개 · 등록된 SP 864건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-19 Merge pull request #716 from Openhash-Gopang/feat/gov-agency-round14
+- 2026-10-19 feat: 미연결 task 12건 연결 — 문화체육·농정·환경·인구정책·보건의료 SP 12개에 접수 연동 선언 추가, 다이제스트 재생성(열린 문제 #5)
 - 2026-10-19 Merge pull request #715 from Openhash-Gopang/feat/gov-agency-round13
 - 2026-10-19 feat: 미연결 서버 task 정리 — 서귀포 기초생활보장 급여 신청 연결, 후보 문서 추가(열린 문제 #5)
 - 2026-10-19 Merge pull request #714 from Openhash-Gopang/feat/gov-agency-round12
@@ -42,8 +44,6 @@
 - 2026-10-18 docs: restructure consortium to 10 profession corporations, add public-interest safeguards doc (5 pct auction, founder-held management, public-interest board)
 - 2026-10-18 docs: restructure consortium to 10 profession corporations, add public-interest safeguards doc (5 pct auction, founder-held management, public-interest board)
 - 2026-10-18 docs: restructure consortium to 10 profession corporations (5 pct auction, founder-held management, public-interest board)
-- 2026-10-18 docs: add consortium full document bundling the summary, review request and all 10 proposals
-- 2026-10-18 docs: rewrite group formation plan on a royalty basis (final) and point plans 1 and 2 to it
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
