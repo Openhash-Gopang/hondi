@@ -59,7 +59,7 @@
     return div.innerHTML;
   }
 
-  // 2026-10-18(주피터 지시) — 히어로 아래 가운데에 놓는 행동 버튼(선택). PAGE_HEADER.heroButton = { label, href, title }.
+  // 2026-10-18(주피터 지시) — 히어로 오른쪽 빈 공간 세로 중앙에 놓는 행동 버튼(선택). PAGE_HEADER.heroButton = { label, href, title }.
   // href는 사이트 안 경로('/'로 시작)만 허용한다. 문구는 escapeHtml을 거친다.
   function renderHeroCta(config) {
     var b = config && config.heroButton;
@@ -95,7 +95,8 @@
 
   function renderHero(config) {
     if (!config) return '';
-    var html = '<div class="ph-hero"><div class="ph-hero-inner">';
+    var hasCta = !!renderHeroCta(config);
+    var html = '<div class="ph-hero"><div class="ph-hero-inner' + (hasCta ? ' has-cta' : '') + '">';
     if (config.badge) {
       html += '<div class="ph-hero-tag"><span class="ph-hero-tag-dot"></span>' + escapeHtml(config.badge) + '</div>';
     }
