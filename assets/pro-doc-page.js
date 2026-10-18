@@ -29,6 +29,8 @@
 
   /* ── 채팅 위젯 호출 ── */
   function askChat(msg) {
+    // 2026-10-19: 페이지가 대화 창구를 따로 가지면(pages/gov-agency.html — 대화창이 iframe) window.PRO_DOC_PAGE.send(msg) 로 보낸다.
+    if (typeof CFG.send === 'function') { CFG.send(msg); return; }
     if (window.HondiChatWidget && typeof window.HondiChatWidget.send === 'function') {
       window.HondiChatWidget.send(msg);
     } else {

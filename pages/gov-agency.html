@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<link rel="icon" href="data:,">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="/assets/pro-doc-page.css">
+<title>행정기관 AI — 나비</title>
+<!--
+  2026-10-19 신설 — 행정기관 공통 페이지(주피터님 지시: K-정부의 행정기관 페이지를 전문가 페르소나 페이지처럼 갱신).
+  기관마다 HTML 을 만들지 않고 이 파일 하나가 ?gov_code=<govCode> 로 모든 기관을 그린다. 기관별 달라지는 부분은 assets/gov-agency-overrides.js.
+    · 기관 이름·소속·SP 경로 색인: assets/gov-agency-data.js (자동 생성: node tools/build-gov-agencies.cjs, 원천 pages/k-government.html)
+    · 로직: assets/gov-agency.js      · 서류 목록·작성된 문서: assets/pro-doc-page.js (전문가 페르소나 페이지와 공용)
+    · 대화 엔진: pages/regional-gov.html?embed=1 (iframe) — 라우팅·GOV_TASK·직원 검토 게이트는 기존 엔진 그대로
+  pages/regional-gov.html 은 그대로 남는다(나비 AI 웹사이트 ?site=…, 숫자 코드, GWP 진입이 계속 쓴다).
+-->
+</head>
+<body>
+
+<script src="/assets/gov-agency-data.js"></script>
+<script src="/assets/gov-agency-overrides.js"></script>
+<script src="/assets/gov-agency.js"></script>
+<link rel="stylesheet" href="/assets/ph-header.css">
+<script src="/assets/ph-header.js"></script>
+<script>
+  // 법률 검토 탭이 쓰는 채팅 위젯(inline). 「민원 작성」 탭의 대화창은 iframe 엔진이므로 이 위젯은 법률 검토 전용이다.
+  window.HONDI_CHAT_WIDGET_CONFIG = {
+    sp: "SP_LEGAL_REVIEW_BASE",
+    panelMode: "inline",
+    inlineMount: "#startChatMount",
+    mic: true,
+    camera: "touch",
+    maxTokens: 2500,
+    panelTitle: "법률 검토",
+    label: "법률 문제를 알려 주세요",
+    greeting: "법률 검토 탭입니다. 변호사에게 묻기 전에 확인하고 싶은 사안을 알려 주세요.",
+    serviceLabel: "행정기관 법률 검토"
+  };
+</script>
+<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
+<script src="/assets/chat-widget.js"></script>
+
+<div class="ug-doc">
+
+  <div class="doc-intro">
+    <div class="doc-start" id="startBox"></div>
+    <div class="svc-callout" id="govHow"></div>
+  </div>
+
+  <div class="doc-toolbar ask-other-bar">
+    <button type="button" class="svc-link-btn solid ask-other" id="askOther"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>목록에 없는 민원 작성</button>
+  </div>
+
+  <div class="svc-tabs" id="svcTabs"></div>
+
+  <div class="svc-content" id="svcContent"></div>
+
+  <div class="svc-content" id="draftsCard" style="display:none">
+    <div class="svc-detail">
+      <h2>작성된 문서</h2>
+      <p class="svc-lead">대화로 작성된 민원서류 초안입니다. 「웹 표준 서식으로 제출(내려받기)」를 누르면 웹 표준 서식 파일로 저장됩니다. 저장한 파일을 기관의 접수 창구에 제출하십시오.</p>
+      <div id="draftsList"></div>
+    </div>
+  </div>
+
+  <div class="svc-content" id="lawsCard" style="margin-top:24px">
+    <div class="svc-detail">
+      <h2>관계 법령</h2>
+      <p class="svc-lead">이 페이지의 민원 목록과 기관 AI의 동작이 근거로 삼는 법령입니다. 시행일과 조번호는 개정될 수 있으므로 서류를 작성할 때 현행본을 확인하십시오.</p>
+      <div class="svc-table-wrap">
+        <table class="svc-table">
+          <thead><tr><th>법령</th><th>이 페이지와의 관계</th></tr></thead>
+          <tbody id="govLawRows"></tbody>
+        </table>
+      </div>
+      <div class="svc-callout important" style="margin-top:14px" id="govLawsUnverified"></div>
+    </div>
+  </div>
+
+  <!--limits-->
+  <div class="svc-content" id="govLimits"></div>
+  <!--/limits-->
+
+  <div class="ug-footer" id="govFooter"></div>
+</div>
+
+<script src="/assets/md-view.js"></script>
+<script src="/assets/pro-doc-page.js"></script>
+</body>
+</html>
