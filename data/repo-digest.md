@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-21 15:32 KST · 기준 커밋 d6b6a55e
+- 갱신: 2026-10-21 15:36 KST · 기준 커밋 5f017dff
 - 전문가 페르소나 전용 페이지 144개 · 등록된 SP 864건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-21 feat(sp): tax-accountant-assistant v1.2 - STEP T tax optimization track (7 stages) + tax-optimizer page
 - 2026-10-21 feat(patent): 변리사를 기본 이용자로 전환, 인간 변리사 최종 검토 단계(19단계) 추가
 - 2026-10-21 feat(patent): 변리사 보조 AI 신규 발명 특허 출원 준비 단계형 화면(18단계)
 - 2026-10-21 feat(sp): 변리사 보조 AI v1.3 — 발명 출원 트랙(STEP T) 통합 및 페이지 연결
@@ -43,7 +44,6 @@
 - 2026-10-18 feat: move bid button to hero center and rename to 지분 입찰 테스트
 - 2026-10-18 fix: remove accidental submodule gitlinks (estate, hondi) that break GitHub Pages build
 - 2026-10-18 fix: make form controls inherit Pretendard on equity bid test page
-- 2026-10-18 feat: add equity bid system test page (not a real bidding) and header button on expert personas page
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
@@ -99,6 +99,7 @@
 - /pages/sp-hierarchy.html — SP의 계층 구조
 - /pages/sp-writing-methodology.html — SP 작성 방법론
 - /pages/suggest.html — 제안 및 질문
+- /pages/tax-optimizer.html — 절세 최적화 — 세무사 보조 AI
 - /pages/teasers.html — teasers.html
 - /pages/usage-guide.html — 이용 방법
 - /pages/watch-architecture.html — K-Watch 아키텍처 — 나비 (Navi)
