@@ -4,6 +4,7 @@
 //   POST /pro-verify/apply    multipart: persona, role(professional|staff), license_no, supervisor_guid?(staff), guid, ts, sig, file
 //                             → 승인 대기 신청 생성. 서명 메시지는 applyMessage() 참고(파일 SHA-256 포함).
 //   GET  /pro-verify/status   ?guid=  → 내 인증 상태 목록(면허번호·사본 비노출)
+//   POST /pro-verify/session  { guid, ts, sig }  → 승인된 전문가에게 30분짜리 세션 토큰 { token, exp, personas } (전문가용 AI 호출 시 body.pro_session 으로 보냄)
 //   POST /pro-verify/pending  { guid, ts, sig }                  (운영자) 승인 대기 목록 — 면허번호는 마스킹본만
 //   POST /pro-verify/file     { id, guid, ts, sig }              (운영자) 면허증 사본 열람 — 열람 기록 남김
 //   POST /pro-verify/decide   { id, decision, note?, guid, ts, sig } (운영자) approve | reject | revoke
@@ -17,6 +18,7 @@
 //   · 전문가용 AI 호출 게이트(W1-5)는 activeVerification() 을 쓴다 — 이 파일은 인증 장부까지만 담당한다.
 // ═════════════════════════════════════════════════
 import { verifySig } from '../gopang/ai/hondi-digit-claim.js';
+import { issueSession } from './pro-session.js';
 
 const json = (body, status, cors = {}) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', ...cors } });
 const err = (status, code, message, cors, extra = {}) => json({ ok: false, code, message, ...extra }, status, cors);
@@ -33,6 +35,7 @@ export const applyMessage = (persona, role, licenseHash, fileSha, supervisorGuid
   `hondi-pro-verify\napply\n${persona}\n${role}\n${licenseHash}\n${fileSha}\n${supervisorGuid || ''}\n${ts}`;
 export const listMessage = ts => `hondi-pro-verify\npending\n${ts}`;
 export const fileMessage = (id, ts) => `hondi-pro-verify\nfile\n${id}\n${ts}`;
+export const sessionMessage = ts => `hondi-pro-verify\nsession\n${ts}`;
 export const decideMessage = (id, decision, ts) => `hondi-pro-verify\ndecide\n${id}\n${decision}\n${ts}`;
 
 const hex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
@@ -153,6 +156,25 @@ export function makeProVerifyHandler({ store, getPinnedPubKey, findPubKeyByGuid 
           const t = now();
           const rows = await store.listByPubkey(pinned);
           return json({ ok: true, items: rows.map(r => pubStatus(r, t)) }, 200, cors);
+        }
+
+        // ── 전문가 세션 발급 ──
+        if (request.method === 'POST' && path === '/pro-verify/session') {
+          const b = await request.json().catch(() => null) || {};
+          if (!b.guid || !b.sig || !Number.isInteger(b.ts)) return err(400, 'MISSING', '요청 형식이 올바르지 않습니다.', cors);
+          if (Math.abs(now() - b.ts) > maxSkewMs) return err(400, 'STALE_TS', '시각 차이가 너무 큽니다. 기기 시계를 확인해 주세요.', cors);
+          if (!env?.PRO_SESSION_SECRET) return err(503, 'NO_SECRET', '전문가 세션 서명 키가 설정되지 않았습니다(PRO_SESSION_SECRET).', cors);
+          const pinned = await getPinnedPubKey(env, b.guid);
+          if (!pinned) return err(404, 'NO_ACCOUNT', '계정을 찾을 수 없습니다.', cors);
+          if (!(await verifySig(pinned, sessionMessage(b.ts), b.sig))) return err(401, 'BAD_SIG', '서명이 유효하지 않습니다.', cors);
+          const t = now();
+          const personas = [];
+          for (const r of await store.listByPubkey(pinned)) {
+            if (r.status === 'approved' && r.expires_ts > t && !personas.includes(r.persona) && await activeVerification(store, pinned, r.persona, t)) personas.push(r.persona);
+          }
+          if (!personas.length) return err(403, 'NOT_VERIFIED', '면허 인증이 승인된 직역이 없습니다.', cors);
+          const { token, exp } = await issueSession(env.PRO_SESSION_SECRET, { pk: pinned, personas }, t);
+          return json({ ok: true, token, exp, personas }, 200, cors);
         }
 
         // ── 운영: 대기 목록 ──
