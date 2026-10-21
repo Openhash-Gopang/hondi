@@ -1,5 +1,5 @@
 /* 서류 작성하기 — 법무사·행정사 공통 단계 화면 (2026-10-21)
- * pages/scrivener-write.html?persona=judicial-scrivener | administrative-scrivener
+ * pages/scrivener-write.html?persona=judicial-scrivener | administrative-scrivener | loss-adjuster | labor-attorney | customs-broker
  * 대화는 /pages/expert-chat.html?embed=1 (iframe) 이 맡고, 이 파일은 진행 표시·단계별 버튼·제출 결과 기록을 맡는다.
  * 규약: 부모→자식 {type:'expert-embed-send', text}, 자식→부모 {type:'expert-embed-reply', text} / {type:'expert-embed-ready'}.
  * 상태 줄: [법무사 보조 AI | 서류 작성 트랙 | 현재: W-n | 서류: … | 서식: … | 게이트: …]  (SP STEP W-0 7)
@@ -14,6 +14,18 @@
     'administrative-scrivener': {
       role: '행정사', tool: '행정사 보조 AI', back: '/pages/administrative-scrivener.html',
       docHint: '예: 이의신청서, 영업신고서', toHint: '예: ○○시청 민원과'
+    },
+    'loss-adjuster': {
+      role: '손해사정사', tool: '손해사정사 보조 AI', back: '/pages/loss-adjuster.html',
+      docHint: '예: 손해사정서', toHint: '예: 보험회사'
+    },
+    'labor-attorney': {
+      role: '노무사', tool: '노무사 보조 AI', back: '/pages/labor-attorney.html',
+      docHint: '예: 진정서, 구제신청서', toHint: '예: 관할 지방고용노동관서, 노동위원회'
+    },
+    'customs-broker': {
+      role: '관세사', tool: '관세사 보조 AI', back: '/pages/customs-broker.html',
+      docHint: '예: 수입신고 관련 서류', toHint: '예: 관할 세관'
     }
   };
   var STEPS = [
