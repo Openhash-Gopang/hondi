@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <link rel="icon" href="data:,">
@@ -142,6 +142,11 @@ const RELAY_ENDPOINT = 'https://hondi-proxy.tensor-city.workers.dev';
 // GWP 파라미터 파싱 — klaw 등 기관 서비스와 완전히 동일한 규약
 // ══════════════════════════════════════════════════════════════
 const _qs       = new URLSearchParams(location.search);
+// 2026-10-21(주피터 지시): 교수 페르소나는 공통 페이지(professor-persona.html)에서 시작한다. 그 페이지의 「학습 상담」 탭(iframe)과
+// ?classic=1 열기, GWP 호출(token·ctx)은 기존 대화 화면을 그대로 쓴다.
+if (/^professor/.test(_qs.get('persona') || '') && !_qs.get('classic') && !_qs.get('token') && !_qs.get('ctx') && window.top === window.self) {
+  location.replace('/pages/professor-persona.html?persona=' + encodeURIComponent(_qs.get('persona')));
+}
 const PERSONA   = resolveExpertId(_qs.get('persona') || '');
 const GWP_TOKEN = _qs.get('token')  || '';
 const RETURN    = _qs.get('return') || 'https://hondi.net';

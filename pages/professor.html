@@ -107,7 +107,7 @@ window.HONDI_CHAT_WIDGET_CONFIG = {
 <body>
 <header class="topbar">
   <a class="topbar-brand" href="/">Hondi · K-Professor</a>
-  <div class="topbar-breadcrumb">홈 › 교육 › 학습 트랙</div>
+  <div class="topbar-breadcrumb">홈 › 교육 › <span id="bcPersona" hidden><a id="backPersona" href="/pages/expert-personas.html"></a> › </span>학습 트랙</div>
   <div class="topbar-right"><span id="clock">--:--:--</span></div>
 </header>
 <div class="notice-bar" role="note"><strong>⚠️ 공식 성적·학점·자격이 아닙니다.</strong> 이 화면의 시험과 점수는 학습을 돕는 형성평가 참고 지표입니다. 목표 점수 달성을 보장하지 않으며, 인간 교수의 승인도 공식 학적 기록이 아닙니다.</div>
@@ -204,9 +204,10 @@ window.HONDI_CHAT_WIDGET_CONFIG = {
     var w=window.HondiChatWidget;
     if(w&&w.send&&!(w.isBusy&&w.isBusy())){w.send(t);}else{toast('채팅창 준비 중이거나 응답 중입니다. 잠시 후 다시 눌러 주세요.');}
   }
+  var QPERSONA=(new URLSearchParams(location.search).get('persona')||'').trim();
   function ctxText(){
     var g=function(id){return document.getElementById(id).value.trim();};
-    return '희망 과목: '+(g('fSubject')||'(미입력)')+' / 단계: '+g('fLevel')+' / 목표: '+(g('fGoal')||'(미정)')+' / 기간: '+g('fSpan')+' / 주당 시간: '+(g('fHours')||'(미입력)')+' / 시험일: '+(g('fExam')||'(없음)');
+    return (st.profs.length?'담당 AI 교수: '+st.profs.map(function(p){return p.label;}).join(', ')+' / ':'')+'희망 과목: '+(g('fSubject')||'(미입력)')+' / 단계: '+g('fLevel')+' / 목표: '+(g('fGoal')||'(미정)')+' / 기간: '+g('fSpan')+' / 주당 시간: '+(g('fHours')||'(미입력)')+' / 시험일: '+(g('fExam')||'(없음)');
   }
   function render(){
     var pg=document.getElementById('progress'),box=document.getElementById('steps');pg.innerHTML='';box.innerHTML='';
@@ -260,7 +261,7 @@ window.HONDI_CHAT_WIDGET_CONFIG = {
     var c=document.getElementById('profChips');c.innerHTML='';
     st.profs.forEach(function(p,i){
       var el=document.createElement('span');el.className='chip';
-      var url='/pages/expert-chat.html?persona='+encodeURIComponent(p.id)+'&return='+encodeURIComponent(location.href)+'&ctx='+encodeURIComponent('학습 트랙 수업 시작. '+ctxText());
+      var url='/pages/expert-chat.html?persona='+encodeURIComponent(p.id)+'&classic=1&return='+encodeURIComponent(location.href)+'&ctx='+encodeURIComponent('학습 트랙 수업 시작. '+ctxText());
       el.innerHTML=esc(p.label)+' <a href="'+url+'">수업 시작</a><button title="제거" data-i="'+i+'">×</button>';
       el.querySelector('button').onclick=function(){st.profs.splice(i,1);save();renderProfs();};
       c.appendChild(el);
@@ -269,8 +270,20 @@ window.HONDI_CHAT_WIDGET_CONFIG = {
   window.ProfTrack={parse:parse,setRoster:function(list){
     ROSTER=list;var dl=document.getElementById('profList');dl.innerHTML='';
     list.forEach(function(r){var o=document.createElement('option');o.value=r.label;dl.appendChild(o);});
+    autoSelect();
     document.getElementById('profNote').textContent=list.length?('등록된 AI 교수 '+list.length+'명 중에서 고를 수 있습니다. 선택은 학습자가 합니다.'):'교수 목록을 불러오지 못했습니다. 과목명을 대화창에 말씀하시면 AI가 추천합니다.';
   }};
+  function autoSelect(){
+    if(!QPERSONA)return;
+    var r=ROSTER.filter(function(x){return x.id===QPERSONA;})[0];
+    if(!r)return;
+    var subj=String(r.label).replace(/^교수\((.*)\)$/,'$1').split(/,\s|\s+[—-]\s+/)[0];
+    if(!st.profs.some(function(p){return p.id===r.id;})){st.profs.push(r);save();}
+    var f=document.getElementById('fSubject');if(f&&!f.value)f.value=subj;
+    var a=document.getElementById('backPersona');
+    if(a){a.href='/pages/professor-persona.html?persona='+encodeURIComponent(r.id);a.textContent=subj+' 교수 보조 AI';document.getElementById('bcPersona').hidden=false;}
+    renderProfs();
+  }
   document.getElementById('btnAddProf').onclick=function(){
     var v=document.getElementById('fProf').value.trim();if(!v)return;
     var r=ROSTER.filter(function(x){return x.label===v;})[0];
