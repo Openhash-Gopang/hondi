@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-21 17:25 KST · 기준 커밋 6c9589c4
+- 갱신: 2026-10-21 17:36 KST · 기준 커밋 b555f080
 - 전문가 페르소나 전용 페이지 145개 · 등록된 SP 864건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-21 Merge pull request #728 from Openhash-Gopang/feature/pro-verify-frontend-w1
+- 2026-10-21 feat(pro-verify): 전문가 인증 신청 화면·pro_session 자동 첨부·관리자 승인 패널 (W1-6)
 - 2026-10-21 Merge pull request #727 from Openhash-Gopang/feature/pro-gate-w1
 - 2026-10-21 feat(pro-verify): 전문가 세션 발급과 전문가용 SP 서버 게이트 (W1-4·1-5)
 - 2026-10-21 feat(professor): common professor persona page (same layout as tax accountant page) + learning-start page per subject
@@ -42,8 +44,6 @@
 - 2026-10-19 feat: task 연결 12건 확대(SP 선언 근거), 기초생활보장과 조사, 열린 문제 갱신
 - 2026-10-19 feat: 접수 연동 민원 탭(서버 task 레지스트리), 차량관리과 조사, 세무과 서식 번호 정정, SP 교차 점검
 - 2026-10-19 docs: 제주시 세무과 시범 — 법령 본문 직접 확인 결과 반영
-- 2026-10-19 feat: 기관별 내용 구조(기관>도메인>유형)·SP 업무 초안표 추출기·제주시 세무과 시범, SP 경로 보정
-- 2026-10-19 fix: 실수로 추가된 중첩 저장소 포인터(estate, hondi) 제거
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
