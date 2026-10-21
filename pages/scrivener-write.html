@@ -7,7 +7,7 @@
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <!--
-  서류 작성하기 — 제출형 직역 공통 단계 화면 (2026-10-21). 한 페이지가 ?persona=judicial-scrivener | administrative-scrivener | loss-adjuster | labor-attorney | customs-broker 로 5개 직역을 그린다(정의: /assets/scrivener-write.js PERSONAS).
+  서류 작성하기 — 제출형 직역 공통 단계 화면 (2026-10-21). 한 페이지가 ?persona=judicial-scrivener | administrative-scrivener | loss-adjuster | labor-attorney | customs-broker | 건축·안전·측량 등 계열 C 제출형 7개 로 12개 직역을 그린다(정의: /assets/scrivener-write.js PERSONAS).
   로직: /assets/scrivener-write.js · 대화: /pages/expert-chat.html?embed=1 (서식 DB 태그·부모 체인 SP 결합을 그대로 쓰려고 iframe 으로 끼운다)
   진행 표시는 AI 응답의 상태 줄 "[… 보조 AI | 서류 작성 트랙 | 현재: W-n …]" 을 읽어 갱신한다(SP STEP W).
 -->
@@ -114,7 +114,7 @@ a{color:inherit;text-decoration:none}
   <section id="chooser" class="conf-block" hidden>
     <h3>직역을 선택하세요</h3>
     <p>주소에 직역이 지정되지 않았습니다. 서류를 작성할 직역을 고르세요.</p>
-    <div class="pick"><a href="/pages/scrivener-write.html?persona=judicial-scrivener">법무사 보조 AI</a><a href="/pages/scrivener-write.html?persona=administrative-scrivener">행정사 보조 AI</a><a href="/pages/scrivener-write.html?persona=loss-adjuster">손해사정사 보조 AI</a><a href="/pages/scrivener-write.html?persona=labor-attorney">노무사 보조 AI</a><a href="/pages/scrivener-write.html?persona=customs-broker">관세사 보조 AI</a></div>
+    <div class="pick"><a href="/pages/scrivener-write.html?persona=architect">건축사 보조 AI</a><a href="/pages/scrivener-write.html?persona=industrial-safety-consultant">산업안전·보건지도사 보조 AI</a><a href="/pages/scrivener-write.html?persona=fire-safety-manager">소방시설관리사 보조 AI</a><a href="/pages/scrivener-write.html?persona=landscape-engineer">조경기술사 보조 AI</a><a href="/pages/scrivener-write.html?persona=surveying-engineer">측량 및 지형공간정보기술사 보조 AI</a><a href="/pages/scrivener-write.html?persona=electrical-safety-engineer">전기안전기술사 보조 AI</a><a href="/pages/scrivener-write.html?persona=gas-safety-engineer">가스기술사 보조 AI</a><a href="/pages/scrivener-write.html?persona=judicial-scrivener">법무사 보조 AI</a><a href="/pages/scrivener-write.html?persona=administrative-scrivener">행정사 보조 AI</a><a href="/pages/scrivener-write.html?persona=loss-adjuster">손해사정사 보조 AI</a><a href="/pages/scrivener-write.html?persona=labor-attorney">노무사 보조 AI</a><a href="/pages/scrivener-write.html?persona=customs-broker">관세사 보조 AI</a></div>
   </section>
 
   <div id="app" hidden>

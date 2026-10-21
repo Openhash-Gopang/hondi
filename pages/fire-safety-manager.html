@@ -17,7 +17,8 @@ window.PAGE_HEADER = {
   h1: '소방시설관리사 업무 서류를<br>대화로 작성해 웹 표준 서식으로 제출합니다',
   sub: '작성할 서류를 목록에서 고르거나 아래 입력창으로 요청하면, 필요한 정보를 물어 서류 초안을 작성합니다.',
   disclaimer: '관계 법령에 따라, 모든 보조 AI는 인간 전문가의 업무를 보조하며, 단독으로 기능하지 않는다. 작성된 초안은 소방시설관리사의 검토·확정 전에는 사용할 수 없다.',
-  disclaimerDismissKey: 'fire-safety-manager'
+  disclaimerDismissKey: 'fire-safety-manager',
+  heroButton: { label: '서류 작성하기', href: '/pages/scrivener-write.html?persona=fire-safety-manager', title: '소방시설관리사 서류를 서식 결정부터 제출 결과 기록까지 9단계로 작성합니다' }
 };
 </script>
 <link rel="stylesheet" href="/assets/ph-header.css">
@@ -50,6 +51,7 @@ window.PAGE_HEADER = {
   <div class="doc-intro">
     <div class="doc-start" id="startBox"></div>
     <div class="svc-callout"><b>작성 방법</b> ① 위 입력창에 작성할 서류를 말씀하시거나, 아래 탭에서 서류를 고르고 「대화로 작성」을 누릅니다. ② 대화로 필요한 정보를 알려 주시면 초안이 작성됩니다. ③ 페이지 아래 「작성된 문서」에서 내용을 확인하고 웹 표준 서식으로 제출(내려받기)합니다.</div>
+    <div class="svc-callout"><b>서류 작성하기</b> 서식 결정 → 서식 승인 → 서식 DB 확인·저장 → 추가 자료 → 서류 작성 → 검증·승인 → 제출 준비 → 수수료 → 결과 기록 9단계로 한 건을 끝까지 진행하는 화면이 있습니다. 승인·기명날인·제출·납부는 자격자 또는 이용자 본인이 직접 하며, dpaper 연동은 아직 되지 않았습니다. <a href="/pages/scrivener-write.html?persona=fire-safety-manager">서류 작성하기 화면으로 이동</a></div>
   </div>
 
   <div class="doc-toolbar ask-other-bar">

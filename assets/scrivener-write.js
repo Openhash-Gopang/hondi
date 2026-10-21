@@ -7,6 +7,34 @@
 (function () {
   'use strict';
   var PERSONAS = {
+    'architect': {
+      role: '건축사', tool: '건축사 보조 AI', back: '/pages/architect.html',
+      docHint: '예: 건축허가 신청 서류', toHint: '예: 허가권자'
+    },
+    'industrial-safety-consultant': {
+      role: '산업안전·보건지도사', tool: '산업안전·보건지도사 보조 AI', back: '/pages/industrial-safety-consultant.html',
+      docHint: '예: 위험성평가 보고서', toHint: '예: 의뢰 사업장'
+    },
+    'fire-safety-manager': {
+      role: '소방시설관리사', tool: '소방시설관리사 보조 AI', back: '/pages/fire-safety-manager.html',
+      docHint: '예: 자체점검 결과 보고서', toHint: '예: 관할 소방 관련 기관'
+    },
+    'landscape-engineer': {
+      role: '조경기술사', tool: '조경기술사 보조 AI', back: '/pages/landscape-engineer.html',
+      docHint: '예: 조경 설계 검토서', toHint: '예: 관할 지방자치단체'
+    },
+    'surveying-engineer': {
+      role: '측량 및 지형공간정보기술사', tool: '측량 및 지형공간정보기술사 보조 AI', back: '/pages/surveying-engineer.html',
+      docHint: '예: 측량 성과 검토서', toHint: '예: 관할 기관'
+    },
+    'electrical-safety-engineer': {
+      role: '전기안전기술사', tool: '전기안전기술사 보조 AI', back: '/pages/electrical-safety-engineer.html',
+      docHint: '예: 점검 결과 보고서', toHint: '예: 설비 소유자'
+    },
+    'gas-safety-engineer': {
+      role: '가스기술사', tool: '가스기술사 보조 AI', back: '/pages/gas-safety-engineer.html',
+      docHint: '예: 안전성 평가 서류', toHint: '예: 사업자'
+    },
     'judicial-scrivener': {
       role: '법무사', tool: '법무사 보조 AI', back: '/pages/judicial-scrivener.html',
       docHint: '예: 소유권이전등기신청서', toHint: '예: 관할 등기소, 지방법원'

@@ -26,9 +26,20 @@ WRITE_TRACK = {
     'advanced-practice-nurse': '전문간호사', 'dietitian': '영양사', 'paramedic': '응급구조사', 'midwife': '조산사',
     'speech-language-pathologist': '언어재활사', 'optician': '안경사', 'sanitarian': '위생사', 'health-educator': '보건교육사',
     'financial-planner': '재무설계사',  # 2026-10-21 계열 A(기록형)
+    'professional-engineer': '기술사',  # 2026-10-21 계열 C(기록형)
+    'naval-architect': '조선사',  # 2026-10-21 계열 C(기록형)
+    'navigation-officer': '항해사',  # 2026-10-21 계열 C(기록형)
+    'marine-engineer': '기관사(선박)',  # 2026-10-21 계열 C(기록형)
+    'weather-forecaster': '기상예보사',  # 2026-10-21 계열 C(기록형)
 }
 # 안내 줄에서 "전문 판단"으로 부르는 예시(기본은 보건의료용). 직역이 다르면 여기서 바꾼다.
-WRITE_JUDGE = {'financial-planner': '재무 진단·상품 선택·투자 판단'}
+WRITE_JUDGE = {'financial-planner': '재무 진단·상품 선택·투자 판단',
+    'professional-engineer': '기술 검토·안전성 판단',
+    'naval-architect': '설계·적합성 판단',
+    'navigation-officer': '항해·운항 판단',
+    'marine-engineer': '기관 상태·운전 판단',
+    'weather-forecaster': '기상 현상 판단·예보',
+}
 
 # ── 서류 목록(SP 부록 A) 파서 — SP 가 서류 목록의 정본이고, 페이지의 PRO_DOC_PAGE 데이터는 여기서 만든다 (2026-10-17)
 # 형식: "## 부록 A …" 아래 "### A-n. 제목 (메타)" 절마다 표(첫 열 = 서류 이름) 또는 "- **서류**: 설명" 목록.
