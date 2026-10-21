@@ -7,6 +7,7 @@
 // 한계: 본문을 직접 고쳐 제목·고유 줄을 지우면 우회할 수 있다. 근본 해결은 전문가용 SP 를 서버에서만 조립하는 것(후속 과제).
 //   이 게이트는 "키만 바꿔 호출"하는 무단 이용을 막는 1차 장치이며, 이용은 어차피 GDC 과금 대상이다.
 //
+// 구독(W5): 인증이 맞아도 세션의 sub(구독·체험 만료 시각)가 지났으면 402 PRO_SUBSCRIPTION_REQUIRED — env.PRO_SUB_MODE 로 단계 도입.
 // 모드(env.PRO_GATE_MODE): 'off' | 'log'(기본 — 차단 없이 기록만) | 'enforce'. 프런트가 pro_session 을 보내기 시작한 뒤 enforce 로 전환한다.
 import { ASSISTANT_SP_CODES } from './assistant-sp-codes.js';
 import { verifySession } from './pro-session.js';
@@ -49,6 +50,15 @@ export async function checkProGate({ bodyText, env, now = Date.now() }) {
   let fail = null;
   if (!s) fail = { status: 401, code: 'PRO_SESSION_REQUIRED', message: '전문가용 AI는 면허 인증을 마친 전문가만 쓸 수 있습니다. 인증을 신청하거나 다시 로그인하세요.' };
   else if (det.persona ? !s.personas.some(p => personaCovers(p, det.persona)) : s.personas.length === 0) fail = { status: 403, code: 'PRO_PERSONA_MISMATCH', message: '이 직역에 대한 면허 인증이 없습니다.' };
+  // 구독·체험(W5) — env.PRO_SUB_MODE: off(기본) | log | enforce. 차단은 PRO_GATE_MODE 와 PRO_SUB_MODE 가 모두 enforce 일 때만.
+  // 세션 토큰의 sub(접근 가능 시각)만 본다 — 추가 DB 조회 없음. 부여·환불은 토큰 수명(4시간) 안에 반영된다.
+  const subMode = String(env?.PRO_SUB_MODE || 'off').toLowerCase();
+  let subFail = null;
+  if (!fail && subMode !== 'off' && !(s.sub > now)) subFail = { status: 402, code: 'PRO_SUBSCRIPTION_REQUIRED', message: '전문가용 AI는 구독이 필요합니다. 체험 기간이 끝났거나 구독이 만료되었습니다. 구독 안내를 확인하세요.' };
+  if (subFail) {
+    if (mode === 'enforce' && subMode === 'enforce') return { ok: false, ...subFail };
+    return { ok: true, bodyText, mode, wouldBlock: subFail.code, persona: det.persona };
+  }
   if (!fail) return { ok: true, bodyText, mode, persona: det.persona };
   if (mode === 'enforce') return { ok: false, ...fail };
   return { ok: true, bodyText, mode, wouldBlock: fail.code, persona: det.persona };

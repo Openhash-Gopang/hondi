@@ -509,7 +509,7 @@
     } catch (err) {
       removeTyping();
       if (err && err.message === 'PRO_BLOCKED') {
-        appendMsg('ai', '전문가용 AI는 면허 인증이 승인된 전문가만 쓸 수 있습니다. 열린 창에서 인증을 신청해 주세요.');
+        appendMsg('ai', (window.HondiPro && window.HondiPro.blockMessage) ? window.HondiPro.blockMessage() : '전문가용 AI는 면허 인증이 승인된 전문가만 쓸 수 있습니다. 열린 창에서 인증을 신청해 주세요.');
         try { window.HondiPro.openPanel(); } catch (eO) {}
       } else appendMsg('ai', '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
       console.error('[chat-widget]', err);

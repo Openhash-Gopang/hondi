@@ -19,6 +19,7 @@
 // ═════════════════════════════════════════════════
 import { verifySig } from '../gopang/ai/hondi-digit-claim.js';
 import { issueSession } from './pro-session.js';
+import { accessState, DEFAULT_TRIAL_DAYS } from './pro-sub-core.js';
 
 const json = (body, status, cors = {}) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json; charset=utf-8', ...cors } });
 const err = (status, code, message, cors, extra = {}) => json({ ok: false, code, message, ...extra }, status, cors);
@@ -77,7 +78,7 @@ function pubStatus(r, now) {
   return { id: r.id, persona: r.persona, role: r.role, status: r.status === 'approved' && !active ? 'expired' : r.status, license_no_masked: r.license_no_masked, applied_ts: r.ts, reviewed_ts: r.reviewed_ts || null, expires_ts: r.expires_ts || null, note: r.status === 'rejected' || r.status === 'revoked' ? (r.review_note || '') : '' };
 }
 
-export function makeProVerifyHandler({ store, getPinnedPubKey, findPubKeyByGuid = getPinnedPubKey, bearerAdmin = null, now = () => Date.now(), maxSkewMs = 5 * 60 * 1000 }) {
+export function makeProVerifyHandler({ store, subStore = null, getPinnedPubKey, findPubKeyByGuid = getPinnedPubKey, bearerAdmin = null, now = () => Date.now(), maxSkewMs = 5 * 60 * 1000 }) {
   if (!store || typeof getPinnedPubKey !== 'function') throw new Error('makeProVerifyHandler: store, getPinnedPubKey 필요');
 
   // 운영자 인증 두 가지: ① 관리자 페이지의 Bearer 토큰(bearerAdmin 주입 시) ② PRO_VERIFY_ADMINS 계정의 지갑 서명.
@@ -179,8 +180,14 @@ export function makeProVerifyHandler({ store, getPinnedPubKey, findPubKeyByGuid 
             if (r.status === 'approved' && r.expires_ts > t && !personas.includes(r.persona) && await activeVerification(store, pinned, r.persona, t)) personas.push(r.persona);
           }
           if (!personas.length) return err(403, 'NOT_VERIFIED', '면허 인증이 승인된 직역이 없습니다.', cors);
-          const { token, exp } = await issueSession(env.PRO_SESSION_SECRET, { pk: pinned, personas }, t);
-          return json({ ok: true, token, exp, personas }, 200, cors);
+          // 구독·체험(W5): 접근 가능 시각을 토큰에 싣는다. 게이트는 PRO_SUB_MODE 일 때만 이 값을 본다.
+          let access = { until: 0, notice: null, days_left: 0, in_trial: false };
+          if (subStore) {
+            const td = Number(env?.PRO_TRIAL_DAYS); 
+            access = accessState(await subStore.listByPubkey(pinned), await store.listByPubkey(pinned), t, Number.isFinite(td) && td >= 0 && td <= 90 ? td : DEFAULT_TRIAL_DAYS);
+          }
+          const { token, exp } = await issueSession(env.PRO_SESSION_SECRET, { pk: pinned, personas, sub: access.until }, t);
+          return json({ ok: true, token, exp, personas, sub_until: access.until, subscription: { notice: access.notice, days_left: access.days_left, in_trial: access.in_trial } }, 200, cors);
         }
 
         // ── 운영: 대기 목록 ──
