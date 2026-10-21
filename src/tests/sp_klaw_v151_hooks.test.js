@@ -21,12 +21,10 @@ const JOBS = [
   ['SP_appraiser', 'SP_appraiser_v1_10.md', 'SP_appraiser_v1_9.md', 'v1.10'],
   ['SP_customs-broker', 'SP_customs-broker_v1_8.md', 'SP_customs-broker_v1_7.md', 'v1.8'],
   ['SP_marine-pilot', 'SP_marine-pilot_v3_6.md', 'SP_marine-pilot_v3_5.md', 'v3.6'],
-  ['SP_judicial-scrivener', 'SP_judicial-scrivener_v3_3.md', 'SP_judicial-scrivener_v3_2.md', 'v3.3', 'v3.2'],
   ['SP_patent-attorney', 'SP_patent-attorney_v1_9.md', 'SP_patent-attorney_v1_8.md', 'v1.9'],
   ['SP_lawyer', 'SP_lawyer_v5_6.md', 'SP_lawyer_v5_5.md', 'v5.6'],
   ['SP_tax-accountant', 'SP_tax-accountant_v2_5.md', 'SP_tax-accountant_v2_4.md', 'v2.5'],
   ['SP_physician', 'SP_physician_v2_6.md', 'SP_physician_v2_5.md', 'v2.6'],
-  ['SP_administrative-scrivener', 'SP_administrative-scrivener_v1_3.md', 'SP_administrative-scrivener_v1_2.md', 'v1.3', 'v1.2'],
   ['SP_accountant', 'SP_accountant_v1_11.md', 'SP_accountant_v1_10.md', 'v1.11'],
 ];
 

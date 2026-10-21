@@ -25,7 +25,7 @@ const statusRe = /\[[^\]|]*보조 AI\s*\|\s*서류 작성 트랙\s*\|\s*현재:\
 for (const [pid, key, role] of JOBS) {
   describe(`${role} 서류 작성하기`, () => {
     const page = read(`pages/${pid}.html`);
-    const sp = read('prompts/' + catalog[key]);
+    const sp = read('prompts/' + catalog[key + '-assistant']);   // 서류 작성 도구는 전문가용(-assistant) SP 에만 있다(2026-10-21 분리)
     it('헤더 버튼이 서류 작성 화면을 가리키고 그 화면이 이 직역을 알고 있다', () => {
       assert.ok(page.includes(`heroButton: { label: '서류 작성하기', href: '/pages/scrivener-write.html?persona=${pid}'`));
       assert.ok(existsSync(join(ROOT, 'pages/scrivener-write.html')));

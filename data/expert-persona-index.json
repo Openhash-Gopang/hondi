@@ -360,7 +360,7 @@
 "경매",
 "소액사건"
 ],
-"spPath":"prompts/SP_judicial-scrivener_v3_3.md"
+"spPath":"prompts/SP_judicial-scrivener_v4_0.md"
 },
 "administrative-scrivener":{
 "label":"행정사 보조 AI",
@@ -369,7 +369,7 @@
 "triggers":[
 "행정사"
 ],
-"spPath":"prompts/SP_administrative-scrivener_v1_3.md"
+"spPath":"prompts/SP_administrative-scrivener_v2_0.md"
 },
 "labor-attorney":{
 "label":"공인노무사",

@@ -34,7 +34,7 @@ describe('전문가용 SP 식별', () => {
     assert.deepEqual(bad, []);
   });
   it('전문가용 SP 전 파일 — 식별된다 (생성기가 고유 줄·제목을 유지하는지 감시)', () => {
-    const miss = fs.readdirSync(prompts).filter(f => /-assistant_v\d+_\d+\.md$/.test(f) && !(detectAssistantSp({ system: read(f) }).assistant && CLASS_MARKS.every(m => read(f).includes(m))));
+    const miss = fs.readdirSync(prompts).filter(f => /-assistant_v\d+_\d+\.md$/.test(f) && !(detectAssistantSp({ system: read(f) }).assistant && (/^SP_(judicial|administrative)-scrivener-assistant_/.test(f) || CLASS_MARKS.every(m => read(f).includes(m)))));   // 법무사·행정사는 기존 SP 에서 분리한 파생본이라 생성기 표지 줄이 없다 — 제목 코드로 식별
     assert.deepEqual(miss, []);
   });
   it('assistant-sp-codes.js 가 prompts 와 일치 (SP 추가·개명 후 gen-assistant-sp-codes.mjs 재실행)', () => {
