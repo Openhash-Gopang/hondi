@@ -1,0 +1,860 @@
+[
+  {
+    "no": 1,
+    "utterance": "회사에서 갑자기 나가라고 하는데 이거 정당한 건지 판단 좀 받고 싶어",
+    "expected_type": "GWP",
+    "expected_id": "klaw",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "[GWP: kbusiness]\n\n사용자님, K-Business를 호출하겠습니다. 갑작스러운 퇴사 요구가 정당한지(해고 사유·절차·예고기간·서면통지 요건 등) 판단받으실 수 있도록 연결해드리겠습니다.",
+    "live_verdict": "LIVE-FAIL",
+    "live_note": "기대 [GWP: klaw] vs 실제 [GWP: kbusiness]",
+    "usage": {
+      "prompt_tokens": 30762,
+      "completion_tokens": 76,
+      "total_tokens": 30838,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 30762
+    },
+    "call_error": null
+  },
+  {
+    "no": 2,
+    "utterance": "인터넷에 제 욕하는 글이 올라왔는데 이거 처벌 가능한 수위인지 궁금해요",
+    "expected_type": "GWP",
+    "expected_id": "klaw",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "[GWP: klaw]\n\n{USER_NAME}님, K-Law를 호출하겠습니다. 인터넷 게시글이 처벌 가능한 수위인지(모욕·명예훼손 성립 여부)는 게시글의 구체적 표현과 공개 범위에 따라 갈리는 사안이라, K-Law에서 판단해 드리겠습니다.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[GWP: klaw] 일치",
+    "usage": {
+      "prompt_tokens": 30767,
+      "completion_tokens": 90,
+      "total_tokens": 30857,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 30767
+    },
+    "call_error": null
+  },
+  {
+    "no": 3,
+    "utterance": "배우자랑 갈라서기로 했는데 재산은 어떻게 나눠야 하는지 판단해줘",
+    "expected_type": "GWP",
+    "expected_id": "klaw",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "[GWP: klaw]\n\n이혼 시 재산분할이 어떻게 처리되는지, 제도적 관점에서 판단해드리겠습니다.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[GWP: klaw] 일치",
+    "usage": {
+      "prompt_tokens": 30762,
+      "completion_tokens": 35,
+      "total_tokens": 30797,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 30762
+    },
+    "call_error": null
+  },
+  {
+    "no": 4,
+    "utterance": "은행이라는 사람한테 전화 와서 계좌번호랑 비밀번호를 다 불러줬는데 사기인 거 같아요",
+    "expected_type": "GWP",
+    "expected_id": "ksecurity",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "[GWP: kpolice]\n\n지금 상황은 전형적인 보이스피싱(전화금융사기)입니다. 계좌번호와 비밀번호를 이미 알려주셨다면 즉시 조치가 필요합니다.\n\n**지금 바로 하실 일:**\n1. **해당 금융사 고객센터에 전화해 계좌 지급정지**를 요청하세요 — 피해금이 아직 인출되지 않았다면 지급정지로 막을 수 있습니다.\n2. **경찰(112 또는 182)** 에 신고하세요 — K-Police로 연결해 드리겠습니다.\n3. 통화 내용·상대 전화번호·송금 내역을 **증거로 남겨두세요**(통화기록 캡처, 문자 보관).\n\n**주의하실 점:**\n- 은행·검찰·경찰은 **절대 전화로 계좌 비밀번호나 OTP를 요구하지 않습니다.**\n- 이미 송금했다면 은행에 **지급정지 신청**을 먼저 하고, 경찰 신고 시 \"지급정지 신청 확인서\"를 요청하세요.\n- 추가로 상대가 다시 전화해 \"돈을 돌려주겠다\"며 접근해도 응하지 마세요.\n\nK-Police로 연결해 신고 접수를 도와드릴까요?",
+    "live_verdict": "LIVE-FAIL",
+    "live_note": "기대 [GWP: ksecurity] vs 실제 [GWP: kpolice]",
+    "usage": {
+      "prompt_tokens": 30768,
+      "completion_tokens": 322,
+      "total_tokens": 31090,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 30768
+    },
+    "call_error": null
+  },
+  {
+    "no": 5,
+    "utterance": "독감 예방주사 언제 맞으면 좋을지 상담받고 싶어요",
+    "expected_type": "GWP",
+    "expected_id": "khealth",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "[GWP: khealth]\n{USER_NAME}님, K-Health를 호출하겠습니다. 독감 예방접종 시기 상담을 진행해 드릴게요.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[GWP: khealth] 일치",
+    "usage": {
+      "prompt_tokens": 30755,
+      "completion_tokens": 42,
+      "total_tokens": 30797,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 30755
+    },
+    "call_error": null
+  },
+  {
+    "no": 6,
+    "utterance": "졸업논문 주제를 아직도 못 정했는데 방향을 좀 잡아줄 사람이 필요해요",
+    "expected_type": "EXPERT",
+    "expected_id": "professor",
+    "category": "회귀(R1 패치 재검증 — 기대값 정정: 2026-09-30, AC-PRO-CORE professor 행과 일치)",
+    "static_verdict": "PASS",
+    "raw_response": "[EXPERT: professor]\n\n졸업논문 주제를 함께 잡아줄 1:1 지도 교수를 연결하겠습니다.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[EXPERT: professor] 일치",
+    "usage": {
+      "prompt_tokens": 30766,
+      "completion_tokens": 34,
+      "total_tokens": 30800,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 174
+    },
+    "call_error": null
+  },
+  {
+    "no": 7,
+    "utterance": "취업 준비하는데 자소서 방향부터 다 막막해요",
+    "expected_type": "GWP",
+    "expected_id": "kjob",
+    "category": "회귀(R1 패치 재검증 — 기대값 정정: 2026-09-30, kjob이 kedu보다 더 구체적으로 정답)",
+    "static_verdict": "PASS",
+    "raw_response": "[GWP: kjob]\n취업 준비 중이시군요. 자소서 방향부터 막막하시다니, K-Job에서 함께 잡아드리겠습니다.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "구식 [GWP: kjob] 출력이지만 call-ai.js 자동복구로 [CALL_KJOB:]과 동등 — PASS(§TAGS 예외)",
+    "usage": {
+      "prompt_tokens": 30753,
+      "completion_tokens": 44,
+      "total_tokens": 30797,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 161
+    },
+    "call_error": null
+  },
+  {
+    "no": 8,
+    "utterance": "퇴직금 받은 거 그냥 두기 아까운데 어디에 굴려야 할지 모르겠어요",
+    "expected_type": "GWP",
+    "expected_id": "kfinance",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "[GWP: kplan]\n\n퇴직금을 그냥 두기 아까우시군요. 다만 \"어디에 굴릴지\"는 목적(생활비 보전·노후·목돈 마련)과 시점(언제 쓸 돈인지)에 따라 답이 완전히 달라지는 문제라, 제가 임의로 상품 하나를 골라드리는 게 오히려 위험할 수 있습니다. K-Plan이 PDV의 소득·지출·부채·목표를 종합해 최적 경로를 설계하도록 연결하겠습니다.",
+    "live_verdict": "LIVE-FAIL",
+    "live_note": "기대 [GWP: kfinance] vs 실제 [GWP: kplan]",
+    "usage": {
+      "prompt_tokens": 30766,
+      "completion_tokens": 145,
+      "total_tokens": 30911,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 174
+    },
+    "call_error": null
+  },
+  {
+    "no": 9,
+    "utterance": "연금저축 계좌 세금 좀 아끼는 방법 없을까요",
+    "expected_type": "GWP",
+    "expected_id": "kfinance",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "[GWP: ktax]\n\n연금저축 계좌 세액공제 관련해서 K-Tax를 호출하겠습니다.",
+    "live_verdict": "LIVE-FAIL",
+    "live_note": "기대 [GWP: kfinance] vs 실제 [GWP: ktax]",
+    "usage": {
+      "prompt_tokens": 30755,
+      "completion_tokens": 30,
+      "total_tokens": 30785,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 163
+    },
+    "call_error": null
+  },
+  {
+    "no": 10,
+    "utterance": "카드값이 너무 많이 나와서 나눠 갚을 수 있는 방법 좀 알아봐줘요",
+    "expected_type": "GWP",
+    "expected_id": "kgdc",
+    "category": "회귀(R1 패치 재검증 — 기대값 정정: 2026-08-01 kbank 철회(PR#164) — kbank는 더 이...)",
+    "static_verdict": "PASS",
+    "raw_response": "카드값 분할납부 방법을 알아보려는 상황이시군요. 나비에서 관련 서비스를 찾아 연결해드리겠습니다.\n\n[GWP: kgdc]\n\nK-GDC에서 카드값 분할납부·상환 방법을 함께 확인해보겠습니다.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[GWP: kgdc] 일치",
+    "usage": {
+      "prompt_tokens": 30763,
+      "completion_tokens": 67,
+      "total_tokens": 30830,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 171
+    },
+    "call_error": null
+  },
+  {
+    "no": 11,
+    "utterance": "이사 가는 집에 인터넷 새로 깔아야 하는데 어떻게 신청해요",
+    "expected_type": "GWP",
+    "expected_id": "ktelecom",
+    "category": "회귀(R1 패치 재검증 — 기대값 정정: 2026-09-30 실측 확인, ktelecom active 상태에서 정상 라우팅)",
+    "static_verdict": "PASS",
+    "raw_response": "[GWP: ktelecom]\n\n이사 가시는 집 인터넷 신청은 K-Telecom에서 진행하겠습니다. 설치 가능 여부 확인부터 요금제 비교, 개통 신청까지 대화로 도와드리고, 최종 개통은 본인 인증 후 통신사 앱에서 확정하시면 됩니다.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "구식 [GWP: ktelecom] 출력이지만 call-ai.js 자동복구로 [CALL_KTELECOM:]과 동등 — PASS(§TAGS 예외, 2026-08-31 채점기준 개정)",
+    "usage": {
+      "prompt_tokens": 30757,
+      "completion_tokens": 78,
+      "total_tokens": 30835,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 165
+    },
+    "call_error": null
+  },
+  {
+    "no": 12,
+    "utterance": "휴대폰을 잃어버린 것 같은데 어디다 신고해야 해요",
+    "expected_type": "PLATFORM",
+    "expected_id": "direct-response",
+    "category": "회귀(R1 패치 재검증 — 기대값 정정: 위 no=49와 동일 사유....)",
+    "static_verdict": "WARN",
+    "raw_response": "[GWP: kpolice]\n\n{USER_NAME}님, K-Police를 호출하겠습니다. 휴대폰 분실 신고는 경찰(112 또는 가까운 지구대·파출소)에 하시면 되고, 통신사 분실신고(기기 사용정지)도 함께 하시는 게 안전합니다.",
+    "live_verdict": "LIVE-FAIL",
+    "live_note": "라우팅 불필요 상황인데 [GWP: kpolice] 오발동",
+    "usage": {
+      "prompt_tokens": 30757,
+      "completion_tokens": 83,
+      "total_tokens": 30840,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 165
+    },
+    "call_error": null
+  },
+  {
+    "no": 13,
+    "utterance": "면허 갱신할 때가 다 됐는데 뭘 준비해야 하는지 알려줘요",
+    "expected_type": "GWP",
+    "expected_id": "ktransport",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "[GWP: ktransport]\n\n{USER_NAME}님, 운전면허 갱신 준비물 안내를 위해 K-Traffic을 호출하겠습니다.\n\n다만 갱신 대상이 어떤 면허인지에 따라 준비물이 달라질 수 있어요 — 1종/2종 운전면허 갱신을 말씀하시는 건가요, 아니면 다른 자격·업종 면허(예: 건설기계·선박·의료인 등)인가요?",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[GWP: ktransport] 일치",
+    "usage": {
+      "prompt_tokens": 30761,
+      "completion_tokens": 121,
+      "total_tokens": 30882,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 169
+    },
+    "call_error": null
+  },
+  {
+    "no": 14,
+    "utterance": "창고에 재고가 얼마나 남았는지 파악이 안 돼서 곤란해요",
+    "expected_type": "GWP",
+    "expected_id": "klogistics",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "재고 파악이 안 되면 정말 답답하시겠어요. 다만 이건 제가 지금 바로 답을 드릴 수 있는 종류가 아니라서, 어디로 연결할지 먼저 확인하고 싶습니다.\n\n두 갈래로 갈릴 것 같아요:\n\n1. **사업체 운영 중이시고, 재고·매입·판매 장부까지 같이 정리하고 싶으시다면** → K-Business(사업체 재무·세금·고용 보조) 쪽이 맞습니다.\n2. **창고 안 물건 자체를 세고 관리하는 시스템(입출고 기록·재고 수량 관리)이 필요하시다면** → 이건 §CATALOG에 전용 서비스가 없어서, K-Intent로 넘겨 담당 기관·서비스를 찾는 경로로 가야 합니다.\n\n어느 쪽에 가까우신가요? 그리고 창고가 **개인 보관용(취미·이사 짐 등)** 인지, **사업용 물류 창고**인지도 알려주시면 바로 좁혀드리겠습니다.",
+    "live_verdict": "LIVE-CLARIFY",
+    "live_note": "태그 없이 되물음 — §CORE 되묻기 지침에 따른 정상 동작일 수 있음 (1턴 테스트 한계, 사람 검토 필요)",
+    "usage": {
+      "prompt_tokens": 30760,
+      "completion_tokens": 265,
+      "total_tokens": 31025,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 168
+    },
+    "call_error": null
+  },
+  {
+    "no": 15,
+    "utterance": "소상공인한테 좋다는 공제 상품이 있다던데 저도 가입할 수 있나요",
+    "expected_type": "GWP",
+    "expected_id": "kbusiness",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "[GWP: kbusiness]\n\n소상공인 공제 상품(노란우산공제 등) 가입 자격과 절차를 K-Business에서 확인해드리겠습니다.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[GWP: kbusiness] 일치",
+    "usage": {
+      "prompt_tokens": 30760,
+      "completion_tokens": 43,
+      "total_tokens": 30803,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 168
+    },
+    "call_error": null
+  },
+  {
+    "no": 16,
+    "utterance": "우리 애 수학 과외 선생님을 구하고 있는데 사람으로 붙여줄 수 있어요?",
+    "expected_type": "EXPERT",
+    "expected_id": "professor",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "WARN",
+    "raw_response": "[EXPERT: professor]\n\n자녀분 수학 과외 선생님을 구하시는 거라면, 1:1 맞춤 교육을 담당하는 교수(professor) 전문가 AI로 연결해드리겠습니다. 학교 정교사가 아닌 개인 지도 형태의 과외를 원하시는 것으로 이해했습니다.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[EXPERT: professor] 일치",
+    "usage": {
+      "prompt_tokens": 30761,
+      "completion_tokens": 78,
+      "total_tokens": 30839,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 169
+    },
+    "call_error": null
+  },
+  {
+    "no": 17,
+    "utterance": "변호사한테 맡겨서 소송을 진행하고 싶어요",
+    "expected_type": "EXPERT",
+    "expected_id": "lawyer",
+    "category": "회귀(R1 패치 재검증 — 기대값 정정: 2026-09-30 주피터 확정, klaw=가상판결 시뮬레이션 vs lawyer=실제 위임 경계 명확화)",
+    "static_verdict": "PASS",
+    "raw_response": "[EXPERT: lawyer]\n\n소송 진행을 변호사에게 맡기고 싶으시군요. 변호사 AI를 호출하겠습니다.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[EXPERT: lawyer] 일치",
+    "usage": {
+      "prompt_tokens": 30752,
+      "completion_tokens": 35,
+      "total_tokens": 30787,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 160
+    },
+    "call_error": null
+  },
+  {
+    "no": 18,
+    "utterance": "경매로 나온 집을 낙찰받고 싶은데 절차를 아는 사람한테 물어보고 싶어요",
+    "expected_type": "EXPERT",
+    "expected_id": "judicial-scrivener",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "[EXPERT: judicial-scrivener]\n\n{USER_NAME}님, 경매·낙찰 절차를 다루는 법무사를 연결하겠습니다.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[EXPERT: judicial-scrivener] 일치",
+    "usage": {
+      "prompt_tokens": 30765,
+      "completion_tokens": 35,
+      "total_tokens": 30800,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 173
+    },
+    "call_error": null
+  },
+  {
+    "no": 19,
+    "utterance": "이 땅이 실제로 얼마짜리인지 정확하게 평가받고 싶어요",
+    "expected_type": "EXPERT",
+    "expected_id": "appraiser",
+    "category": "회귀(R1 패치 재검증 — 기대값 정정: 2026-08-01 발견 — kestate도 ktelecom과 동일한 미...)",
+    "static_verdict": "PASS",
+    "raw_response": "[EXPERT: appraiser]\n\n평가 대상 토지의 소재지와 지목·면적을 알려주시면 감정평가사에게 바로 연결해 드리겠습니다.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[EXPERT: appraiser] 일치",
+    "usage": {
+      "prompt_tokens": 30757,
+      "completion_tokens": 42,
+      "total_tokens": 30799,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 165
+    },
+    "call_error": null
+  },
+  {
+    "no": 20,
+    "utterance": "직장 내 괴롭힘 신고 절차를 전문가한테 상담받고 싶어요",
+    "expected_type": "EXPERT",
+    "expected_id": "labor-attorney",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "[EXPERT: labor-attorney]\n직장 내 괴롭힘 신고 절차 상담은 공인노무사가 정확할 것 같아요, 연결해드릴게요.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[EXPERT: labor-attorney] 일치",
+    "usage": {
+      "prompt_tokens": 30761,
+      "completion_tokens": 47,
+      "total_tokens": 30808,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 169
+    },
+    "call_error": null
+  },
+  {
+    "no": 21,
+    "utterance": "가게 이름을 상표로 등록하고 싶은데 도와줄 사람이 필요해요",
+    "expected_type": "EXPERT",
+    "expected_id": "patent-attorney",
+    "category": "회귀(R1 패치 재검증 — 기대값 정정: R1(GWP↔EXPERT) 축 문제 — klaw가 아니라 patent-a...)",
+    "static_verdict": "PASS",
+    "raw_response": "[EXPERT: patent-attorney]\n상표 등록은 변리사가 정확합니다, 연결해드릴게요.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[EXPERT: patent-attorney] 일치",
+    "usage": {
+      "prompt_tokens": 30757,
+      "completion_tokens": 29,
+      "total_tokens": 30786,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 165
+    },
+    "call_error": null
+  },
+  {
+    "no": 22,
+    "utterance": "해외에서 물건을 들여오는데 통관 절차를 전문가한테 맡기고 싶어요",
+    "expected_type": "EXPERT",
+    "expected_id": "customs-broker",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "[EXPERT: customs-broker]\n{USER_NAME}님, 관세사(customs-broker)를 호출하겠습니다. 수입 통관 절차를 전문가에게 맡기고 싶다는 요청이시니, 관세사 AI가 통관 절차·요건·대행 범위를 안내해 드릴 겁니다.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[EXPERT: customs-broker] 일치",
+    "usage": {
+      "prompt_tokens": 30761,
+      "completion_tokens": 82,
+      "total_tokens": 30843,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 169
+    },
+    "call_error": null
+  },
+  {
+    "no": 23,
+    "utterance": "혈액검사 수치가 뭘 의미하는지 전문가한테 물어보고 싶어요",
+    "expected_type": "EXPERT",
+    "expected_id": "medical-lab-technologist",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "[EXPERT: medical-lab-technologist]\n\n{USER_NAME}님, 임상병리사 전문가 AI를 호출하겠습니다. 혈액검사 수치 해석은 검사 결과를 직접 다루는 임상병리사가 가장 정확합니다.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[EXPERT: medical-lab-technologist] 일치",
+    "usage": {
+      "prompt_tokens": 30759,
+      "completion_tokens": 58,
+      "total_tokens": 30817,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 167
+    },
+    "call_error": null
+  },
+  {
+    "no": 24,
+    "utterance": "틀니를 새로 맞추려는데 만드는 과정을 전문가한테 여쭤보고 싶어요",
+    "expected_type": "EXPERT",
+    "expected_id": "dental-technician",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "[EXPERT: dental-technician]\n{USER_NAME}님, 틀니 제작 과정을 전문가에게 직접 여쭤보실 수 있도록 치과기공사(치과기공사 AI)를 연결해드리겠습니다.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[EXPERT: dental-technician] 일치",
+    "usage": {
+      "prompt_tokens": 30762,
+      "completion_tokens": 55,
+      "total_tokens": 30817,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 170
+    },
+    "call_error": null
+  },
+  {
+    "no": 25,
+    "utterance": "아이가 갑자기 쓰러졌을 때 어떻게 응급처치를 해야 하는지 미리 배워두고 싶어요",
+    "expected_type": "EXPERT",
+    "expected_id": "paramedic",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "[GWP: kemergency]\n{USER_NAME}님, 아이 응급처치를 미리 배워두시려는 상황이시군요 — K-Emergency로 연결해 응급처치 안내를 받으실 수 있게 하겠습니다.\n\n지금 아이가 실제로 쓰러진 상황은 아니고 미리 배우려는 것이라고 하셨으니, 응급 상황이 발생하면 즉시 119에 신고하시는 게 가장 먼저라는 점만 함께 기억해 주세요.",
+    "live_verdict": "LIVE-FAIL",
+    "live_note": "기대 [EXPERT: paramedic] vs 실제 [GWP: kemergency]",
+    "usage": {
+      "prompt_tokens": 30765,
+      "completion_tokens": 116,
+      "total_tokens": 30881,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 173
+    },
+    "call_error": null
+  },
+  {
+    "no": 26,
+    "utterance": "오래된 건물인데 안전한지 기술사님께 진단받고 싶어요",
+    "expected_type": "EXPERT",
+    "expected_id": "professional-engineer",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "[EXPERT: professional-engineer]\n{USER_NAME}님, 기술사(건축물 안전진단)를 호출하겠습니다.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[EXPERT: professional-engineer] 일치",
+    "usage": {
+      "prompt_tokens": 30757,
+      "completion_tokens": 32,
+      "total_tokens": 30789,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 165
+    },
+    "call_error": null
+  },
+  {
+    "no": 27,
+    "utterance": "공장 설비를 새로 들이는데 안전 컨설팅을 받고 싶어요",
+    "expected_type": "EXPERT",
+    "expected_id": "industrial-safety-consultant",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "[EXPERT: industrial-safety-consultant]\n{USER_NAME}님, 산업안전·보건지도사(industrial-safety-consultant)를 호출하겠습니다. 공장 설비 신규 도입 시 안전 컨설팅은 이 전문가의 소관입니다.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[EXPERT: industrial-safety-consultant] 일치",
+    "usage": {
+      "prompt_tokens": 30757,
+      "completion_tokens": 66,
+      "total_tokens": 30823,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 165
+    },
+    "call_error": null
+  },
+  {
+    "no": 28,
+    "utterance": "건물 소화전이랑 스프링클러가 제대로 작동하는지 점검받고 싶어요",
+    "expected_type": "EXPERT",
+    "expected_id": "fire-safety-manager",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "[GWP: kgov]\n\n소방시설 점검은 소방시설관리사(전문가) 또는 소방서 민원 창구를 통해 진행할 수 있습니다. 건물 용도·규모에 따라 점검 주기와 의무 대상이 달라지므로, K-Public에서 건물 정보를 확인한 뒤 적합한 점검 절차로 안내하겠습니다.",
+    "live_verdict": "LIVE-FAIL",
+    "live_note": "기대 [EXPERT: fire-safety-manager] vs 실제 [GWP: kgov]",
+    "usage": {
+      "prompt_tokens": 30761,
+      "completion_tokens": 89,
+      "total_tokens": 30850,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 169
+    },
+    "call_error": null
+  },
+  {
+    "no": 29,
+    "utterance": "땅 경계가 애매해서 정확히 측량을 받아보고 싶어요",
+    "expected_type": "EXPERT",
+    "expected_id": "surveying-engineer",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "[EXPERT: surveying-engineer]\n측량 및 지형공간정보기술사(측량 전문가)를 연결해드리겠습니다. 땅 경계 확인은 지적측량이 필요한 사안이라, 정확한 측량 절차와 비용, 필요 서류까지 전문가가 직접 안내해드릴 거예요.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[EXPERT: surveying-engineer] 일치",
+    "usage": {
+      "prompt_tokens": 30757,
+      "completion_tokens": 79,
+      "total_tokens": 30836,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 165
+    },
+    "call_error": null
+  },
+  {
+    "no": 30,
+    "utterance": "오래된 집 전기배선이 위험할까봐 전문가한테 점검받고 싶어요",
+    "expected_type": "EXPERT",
+    "expected_id": "electrical-safety-engineer",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "[EXPERT: electrical-safety-engineer]\n{USER_NAME}님, 전기안전기술사(전기안전 점검 전문가)를 호출하겠습니다. 오래된 배선의 누전·과열 위험, 차단기·접지 상태까지 점검 방향을 잡아드릴게요.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[EXPERT: electrical-safety-engineer] 일치",
+    "usage": {
+      "prompt_tokens": 30762,
+      "completion_tokens": 76,
+      "total_tokens": 30838,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 170
+    },
+    "call_error": null
+  },
+  {
+    "no": 31,
+    "utterance": "살 집을 계약하는데 중개사님께 직접 계약을 맡기고 싶어요",
+    "expected_type": "GWP",
+    "expected_id": "kestate",
+    "category": "회귀(R1 패치 재검증 — 기대값 정정: 2026-09-30 실측 확인, kestate active 상태에서 정상 라우팅)",
+    "static_verdict": "PASS",
+    "raw_response": "[EXPERT: real-estate-agent]\n{USER_NAME}님, 공인중개사님을 연결하겠습니다.",
+    "live_verdict": "LIVE-FAIL",
+    "live_note": "[CALL_KESTATE: ...] 미발동 (추출된 다른 태그: EXPERT:real-estate-agent)",
+    "usage": {
+      "prompt_tokens": 30758,
+      "completion_tokens": 27,
+      "total_tokens": 30785,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 166
+    },
+    "call_error": null
+  },
+  {
+    "no": 32,
+    "utterance": "회사 개인정보가 유출된 것 같아서 보안 전문가한테 진단받고 싶어요",
+    "expected_type": "EXPERT",
+    "expected_id": "security-engineer",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "[EXPERT: security-engineer]\n\n회사 개인정보 유출 의심 건이시군요. 정보보안전문가(security-engineer)를 호출하겠습니다.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[EXPERT: security-engineer] 일치",
+    "usage": {
+      "prompt_tokens": 30761,
+      "completion_tokens": 41,
+      "total_tokens": 30802,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 169
+    },
+    "call_error": null
+  },
+  {
+    "no": 33,
+    "utterance": "이거 지금 사는 게 맞는지 다른 데랑 가격 비교부터 해보고 싶어요",
+    "expected_type": "GWP",
+    "expected_id": "kcommerce",
+    "category": "회귀(R1 패치 재검증 — 기대값 정정: 2026-09-30, AC-PRO-CORE advisor 행 정의와 일치)",
+    "static_verdict": "PASS",
+    "raw_response": "[GWP: kcommerce]\n\n{USER_NAME}님, K-Market을 호출하겠습니다. 지금 보시는 상품의 가격 비교부터 시작하겠습니다.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[GWP: kcommerce] 일치",
+    "usage": {
+      "prompt_tokens": 30758,
+      "completion_tokens": 40,
+      "total_tokens": 30798,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 166
+    },
+    "call_error": null
+  },
+  {
+    "no": 34,
+    "utterance": "리모델링하려는 집 도면을 건축사님께 새로 그려달라고 하고 싶어요",
+    "expected_type": "EXPERT",
+    "expected_id": "architect",
+    "category": "회귀(R1 패치 재검증 — 기대값 정정: kestate와 무관한 순수 R1(GWP↔EXPERT) 축 문제(엉뚱하게...)",
+    "static_verdict": "PASS",
+    "raw_response": "[EXPERT: architect] {USER_NAME}님, 건축사님을 호출하겠습니다.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[EXPERT: architect] 일치",
+    "usage": {
+      "prompt_tokens": 30760,
+      "completion_tokens": 23,
+      "total_tokens": 30783,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 168
+    },
+    "call_error": null
+  },
+  {
+    "no": 35,
+    "utterance": "우리 회사 시스템이 뚫린 거 같은데 보안 전문가한테 원인 진단을 맡기고 싶어요",
+    "expected_type": "EXPERT",
+    "expected_id": "security-engineer",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "[EXPERT: security-engineer]\n\n{USER_NAME}님, 정보보안전문가를 호출하겠습니다.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[EXPERT: security-engineer] 일치",
+    "usage": {
+      "prompt_tokens": 30766,
+      "completion_tokens": 27,
+      "total_tokens": 30793,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 174
+    },
+    "call_error": null
+  },
+  {
+    "no": 36,
+    "utterance": "아이 성적표 보고 담임 선생님께 상담을 신청하고 싶어요",
+    "expected_type": "EXPERT",
+    "expected_id": "teacher",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "PASS",
+    "raw_response": "[EXPERT: teacher]\n{USER_NAME}님, 담임 선생님(교사) 상담 연결을 도와드리겠습니다.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[EXPERT: teacher] 일치",
+    "usage": {
+      "prompt_tokens": 30756,
+      "completion_tokens": 32,
+      "total_tokens": 30788,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 164
+    },
+    "call_error": null
+  },
+  {
+    "no": 37,
+    "utterance": "보증금을 못 돌려받고 있는데 이거 절차상 어떻게 진행해야 하는지 알고 싶어요",
+    "expected_type": "GWP",
+    "expected_id": "klaw",
+    "category": "회귀(R1 패치 재검증 — 기대값 정정: 2026-09-30 실측 확인, klaw 라우팅을 정답으로 인정)",
+    "static_verdict": "PASS",
+    "raw_response": "[GWP: klaw]\n\n{USER_NAME}님, K-Law를 호출하겠습니다. 보증금 반환 문제를 절차·제도 관점에서 판단해 드릴게요.\n\n다만 한 가지 먼저 확인하고 싶습니다 — 지금 원하시는 게 **\"이 사안이 법적으로 어떻게 처리되는지(내용증명 → 지급명령 → 소송 등 절차와 판단 기준)\"**인가요, 아니면 **\"변호사에게 직접 맡겨서 내 편에서 진행하고 싶다\"**인가요? 전자면 K-Law에서 그대로 진행하고, 후자면 변호사(EXPERT)로 연결해 드리겠습니다.",
+    "live_verdict": "LIVE-PASS",
+    "live_note": "[GWP: klaw] 일치",
+    "usage": {
+      "prompt_tokens": 30760,
+      "completion_tokens": 160,
+      "total_tokens": 30920,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 168
+    },
+    "call_error": null
+  },
+  {
+    "no": 38,
+    "utterance": "갑자기 정전이 됐는데 우리 동네만 그런 건지 확인하고 싶어요",
+    "expected_type": "PLATFORM",
+    "expected_id": "direct-response",
+    "category": "회귀(R1 패치 재검증 — 기대값 정정: 위 no=49와 동일 사유....)",
+    "static_verdict": "WARN",
+    "raw_response": "[GWP: kwatch]\n\n정전이 우리 동네만인지 확인하고 싶으시군요. K-Watch로 넘겨서 정전 신고·확인 절차를 진행하겠습니다.",
+    "live_verdict": "LIVE-FAIL",
+    "live_note": "라우팅 불필요 상황인데 [GWP: kwatch] 오발동",
+    "usage": {
+      "prompt_tokens": 30758,
+      "completion_tokens": 46,
+      "total_tokens": 30804,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 166
+    },
+    "call_error": null
+  },
+  {
+    "no": 39,
+    "utterance": "소상공인 스마트화 지원사업이 있다던데 저희 카페에도 해당되는지 알아봐줘요",
+    "expected_type": "GWP",
+    "expected_id": "kbusiness",
+    "category": "회귀(R1 패치 재검증 — 원본 batch2 기대값 유지)",
+    "static_verdict": "WARN",
+    "raw_response": "[GWP_REGISTRY_SEARCH: q=소상공인 스마트화 지원사업, category=중소벤처기업부]\n\n사장님, 소상공인 스마트화 지원사업이 카페에도 해당되는지 확인해보겠습니다.",
+    "live_verdict": "LIVE-FAIL",
+    "live_note": "기대된 라우팅 태그가 없고 되묻지도 않음 (직접 답변으로 종료)",
+    "usage": {
+      "prompt_tokens": 30765,
+      "completion_tokens": 62,
+      "total_tokens": 30827,
+      "prompt_tokens_details": {
+        "cached_tokens": 30592
+      },
+      "prompt_cache_hit_tokens": 30592,
+      "prompt_cache_miss_tokens": 173
+    },
+    "call_error": null
+  }
+]
