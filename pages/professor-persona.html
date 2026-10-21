@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<link rel="icon" href="data:,">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="/assets/pro-doc-page.css">
+<title>교수 보조 AI — 나비</title>
+<!--
+  2026-10-21 신설 — 교수 페르소나 공통 페이지(주피터님 지시: 세무사 페르소나 페이지와 같은 레이아웃으로 교수 페르소나 페이지 작성).
+  과목마다 HTML 을 만들지 않고 이 파일 하나가 ?persona=<교수 페르소나 id> 로 모든 교수 페르소나를 그린다. 과목별 본문은 그 과목 SP 에서 읽는다.
+    · 로직: assets/professor-persona.js      · 헤더 오른쪽 「학습 시작」: ph-header 의 heroButton → pages/professor.html?persona=<id> (학습 트랙 10단계)
+    · 대화창: pages/expert-chat.html?persona=<id> (iframe) — 부모 SP 를 포함한 SP 조립과 PDV 기록은 기존 엔진 그대로
+-->
+</head>
+<body>
+
+<script src="/assets/professor-persona.js"></script>
+<link rel="stylesheet" href="/assets/ph-header.css">
+<script src="/assets/ph-header.js"></script>
+
+<div class="ug-doc">
+
+  <div class="doc-intro">
+    <div class="doc-start" id="startBox"></div>
+    <div class="svc-callout" id="profHow"></div>
+  </div>
+
+  <div id="profBody">
+    <div class="svc-content" style="margin-top:24px"><div class="svc-detail" id="profRoles"></div></div>
+    <div class="svc-content" style="margin-top:24px"><div class="svc-detail" id="profScope"></div></div>
+    <div class="svc-content" style="margin-top:24px"><div class="svc-detail" id="profLearner"></div></div>
+    <div class="svc-content" style="margin-top:24px"><div class="svc-detail" id="profTier"></div></div>
+    <div class="svc-content" style="margin-top:24px"><div class="svc-detail" id="profRelated"></div></div>
+    <!--limits-->
+    <div class="svc-content" style="margin-top:24px"><div class="svc-detail" id="profLimits"></div></div>
+    <!--/limits-->
+  </div>
+
+  <div class="ug-footer">교수 보조 AI는 인간 교수의 업무를 보조하는 학습 도구이며, 공식 성적·학점·학위·자격을 판정하거나 인간 교수를 소개·연결하지 않습니다.</div>
+</div>
+
+<script src="/assets/md-view.js"></script>
+</body>
+</html>
