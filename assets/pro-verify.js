@@ -76,9 +76,21 @@
     }
   }
 
+  var lastBlockCode = null;
   async function isBlocked(res) {
-    if (!res || (res.status !== 401 && res.status !== 403)) return false;
-    try { var j = await res.clone().json(); return j && (j.code === 'PRO_SESSION_REQUIRED' || j.code === 'PRO_PERSONA_MISMATCH'); } catch (e) { return false; }
+    if (!res || (res.status !== 401 && res.status !== 402 && res.status !== 403)) return false;
+    try {
+      var j = await res.clone().json();
+      var hit = j && (j.code === 'PRO_SESSION_REQUIRED' || j.code === 'PRO_PERSONA_MISMATCH' || j.code === 'PRO_SUBSCRIPTION_REQUIRED');
+      if (hit) lastBlockCode = j.code;
+      return !!hit;
+    } catch (e) { return false; }
+  }
+  // 차단 사유에 맞는 안내 문구 — 구독 만료(402)와 인증 부족(401/403)을 구분한다.
+  function blockMessage() {
+    return lastBlockCode === 'PRO_SUBSCRIPTION_REQUIRED'
+      ? '전문가용 AI 구독이 필요합니다. 체험 기간이 끝났거나 구독이 만료되었습니다. 열린 창에서 구독 상태를 확인해 주세요.'
+      : '전문가용 AI는 면허 인증이 승인된 전문가만 쓸 수 있습니다. 열린 창에서 인증을 신청해 주세요.';
   }
 
   function pagePersona() {
@@ -94,6 +106,28 @@
 
   var overlay = null;
   function closePanel() { if (overlay) { overlay.remove(); overlay = null; } }
+
+  var SUB_NOTICE = {
+    expired: '구독이 없거나 만료되었습니다. 이용하려면 구독이 필요합니다.',
+    trial: '무료 체험 중입니다.', trial_ending: '무료 체험이 곧 끝납니다.',
+    expiring_30: '구독이 30일 이내에 만료됩니다.', expiring_7: '구독이 7일 이내에 만료됩니다.',
+  };
+  async function loadSub(box, guid) {
+    box.textContent = '';
+    try {
+      var r = await fetch(WORKER + '/pro-sub/status?guid=' + encodeURIComponent(guid));
+      var j = await r.json();
+      if (!j.ok) return;
+      var line = '<b>이용 기간</b> — ';
+      if (j.sub_until) line += '구독 ' + new Date(j.sub_until).toLocaleDateString('ko-KR') + '까지 (' + j.days_left + '일 남음)';
+      else if (j.in_trial) line += '무료 체험 ' + new Date(j.trial_until).toLocaleDateString('ko-KR') + '까지 (' + j.days_left + '일 남음)';
+      else line += '없음';
+      var warn = j.notice && SUB_NOTICE[j.notice] ? '<div style="color:' + (j.notice === 'expired' || j.notice === 'expiring_7' || j.notice === 'trial_ending' ? '#b42318' : '#555') + ';margin-top:2px">' + SUB_NOTICE[j.notice] + '</div>' : '';
+      var how = (j.notice === 'expired' || j.notice === 'expiring_7' || j.notice === 'expiring_30' || j.notice === 'trial_ending')
+        ? '<div style="color:#555;margin-top:2px">구독료는 연 ' + Number(j.price || 99000).toLocaleString('ko-KR') + '원입니다. 입금 후 운영자가 확인하면 이용 기간이 늘어납니다. 입금 방법은 운영자에게 문의하세요.</div>' : '';
+      box.innerHTML = '<div style="background:#f6f7f9;border-radius:6px;padding:8px 10px;margin-bottom:10px;font-size:12.5px">' + line + warn + how + '</div>';
+    } catch (e) { /* 구독 정보를 못 불러와도 인증 화면은 동작한다 */ }
+  }
 
   async function loadStatus(box, guid) {
     box.textContent = '인증 상태를 불러오는 중…';
@@ -126,6 +160,7 @@
       '<h3 style="margin:0 0 6px;font-size:16px">전문가 면허 인증</h3>' +
       '<p style="margin:0 0 10px;color:#555;font-size:13px">전문가용 AI는 면허가 확인된 전문가만 쓸 수 있습니다. 운영자가 면허증 사본을 확인해 승인합니다.</p>' +
       '<div style="background:#f3f6fb;border-radius:6px;padding:8px 10px;font-size:12.5px;margin-bottom:12px">면허증 사본은 승인 판단에만 쓰이며 <b>승인 또는 반려 즉시 삭제</b>됩니다. 서버에는 직역·면허번호 끝 4자리·승인일만 남습니다. 주민등록번호 등 불필요한 부분은 가리고 올려 주세요.</div>' +
+      '<div id="hpv-sub"></div>' +
       '<div id="hpv-status" style="font-size:13px;margin-bottom:12px"></div>' +
       '<form id="hpv-form" autocomplete="off">' +
       '<label style="display:block;margin-bottom:8px">직역(페이지 기준)<input id="hpv-persona" required pattern="[a-z][a-z0-9\\-]{1,59}" style="display:block;width:100%;padding:7px;box-sizing:border-box"></label>' +
@@ -141,6 +176,7 @@
     box.querySelector('#hpv-close').onclick = closePanel;
     box.querySelector('#hpv-role').onchange = function () { box.querySelector('#hpv-sup-wrap').style.display = this.value === 'staff' ? 'block' : 'none'; };
     loadStatus(box.querySelector('#hpv-status'), guid);
+    loadSub(box.querySelector('#hpv-sub'), guid);
 
     box.querySelector('#hpv-form').onsubmit = async function (ev) {
       ev.preventDefault();
@@ -176,5 +212,5 @@
     };
   }
 
-  window.HondiPro = { needsSession: needsSession, getSession: getSession, openPanel: openPanel, isBlocked: isBlocked, _sessionMessage: sessionMessage, _applyMessage: applyMessage, _licenseHash: licenseHash };
+  window.HondiPro = { needsSession: needsSession, getSession: getSession, openPanel: openPanel, isBlocked: isBlocked, blockMessage: blockMessage, _sessionMessage: sessionMessage, _applyMessage: applyMessage, _licenseHash: licenseHash };
 })();

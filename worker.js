@@ -26,6 +26,8 @@ import { makeDocFormRewardHandler } from './src/worker/doc-form-reward.js';
 import { makePocketBaseRatingStore, makePocketBaseRewardStore } from './src/worker/doc-form-reward-store.js';
 import { makeProVerifyHandler } from './src/worker/pro-verify-handler.js';
 import { makePocketBaseProVerifyStore } from './src/worker/pro-verify-store.js';
+import { makeProSubHandler } from './src/worker/pro-sub-handler.js';
+import { makePocketBaseProSubStore } from './src/worker/pro-sub-store.js';
 import { checkProGate } from './src/worker/pro-gate.js';
 import { makeConsentSaleHandler } from './src/worker/consent-sale-handler.js';
 import { makeConsentSaleStore } from './src/worker/consent-sale-store.js';
@@ -5513,7 +5515,21 @@ function handleOrgSiteRoutes(request, url, env, corsHeaders) {
 function handleProVerifyRoutes(request, url, env, corsHeaders) {
   const handler = makeProVerifyHandler({
     store: makePocketBaseProVerifyStore({ base: L1_DEFAULT, getToken: () => _l1AdminToken(env) }),
+    subStore: makePocketBaseProSubStore({ base: L1_DEFAULT, getToken: () => _l1AdminToken(env) }),
     bearerAdmin: async (req, e) => (await _requireAdmin(req, e))?.admin || null,   // 관리자 페이지(admin.html)의 Bearer 로그인으로 승인·열람
+    getPinnedPubKey: async (e, guid) => (await _l1FindProfileByGuid(e, guid))?.pubkey_ed25519 || null,
+  });
+  return handler.handle(request, url, env, corsHeaders);
+}
+
+// ── 전문가용 AI 구독(2026-10-21 신설, W5) — 수동 입금 확인 후 관리자 부여·환불. 접근권만 다루고 사용량은 GDC 종량 과금이 따로 한다.
+// 접근 통제는 env.PRO_SUB_MODE(off 기본 | log | enforce)와 PRO_GATE_MODE=enforce 가 함께일 때만 차단한다. 체험 일수는 env.PRO_TRIAL_DAYS(기본 7).
+function handleProSubRoutes(request, url, env, corsHeaders) {
+  const cfg = { base: L1_DEFAULT, getToken: () => _l1AdminToken(env) };
+  const handler = makeProSubHandler({
+    store: makePocketBaseProSubStore(cfg),
+    verStore: makePocketBaseProVerifyStore(cfg),
+    bearerAdmin: async (req, e) => (await _requireAdmin(req, e))?.admin || null,
     getPinnedPubKey: async (e, guid) => (await _l1FindProfileByGuid(e, guid))?.pubkey_ed25519 || null,
   });
   return handler.handle(request, url, env, corsHeaders);
@@ -13648,6 +13664,7 @@ export default {
     if (pathname.startsWith('/org-site/')) return handleOrgSiteRoutes(request, url, env, corsHeaders);
     if (pathname.startsWith('/doc-form/')) return handleDocFormRoutes(request, url, env, corsHeaders);
     if (pathname.startsWith('/pro-verify/')) return handleProVerifyRoutes(request, url, env, corsHeaders);
+    if (pathname.startsWith('/pro-sub/')) return handleProSubRoutes(request, url, env, corsHeaders);
     if (pathname.startsWith('/consent-sale/')) return handleConsentSaleRoutes(request, url, env, corsHeaders);
     if (pathname === '/pay/code/mine' && request.method === 'GET') return handlePayCodeMine(request, url, env, corsHeaders);
     if (pathname === '/pay/code/resolve' && request.method === 'GET') return handlePayCodeResolve(request, url, env, corsHeaders);

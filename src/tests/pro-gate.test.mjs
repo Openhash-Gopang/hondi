@@ -47,7 +47,7 @@ describe('세션 토큰', () => {
   it('발급 → 검증', async () => {
     const { token, exp } = await issueSession(SECRET, { pk: 'k', personas: ['lawyer'] }, NOW);
     assert.equal(exp, NOW + SESSION_TTL_MS);
-    assert.deepEqual(await verifySession(SECRET, token, NOW + 1000), { pk: 'k', personas: ['lawyer'], exp });
+    assert.deepEqual(await verifySession(SECRET, token, NOW + 1000), { pk: 'k', personas: ['lawyer'], exp, sub: 0 });
   });
   it('만료·변조·다른 키·형식 오류는 null', async () => {
     const { token } = await issueSession(SECRET, { pk: 'k', personas: ['lawyer'] }, NOW);
