@@ -235,6 +235,29 @@
         </div>
       </div>
 
+      <!-- ①-e 전문가 면허 인증 승인 (2026-10-21 신설 — /pro-verify/pending·file·decide 연동)
+           면허증 사본은 승인·반려 즉시 서버에서 삭제된다. 열람은 기록된다. -->
+      <div style="border:1px solid var(--ad-line,#3c3f46);border-radius:0;padding:16px 18px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+          <div style="font-size:12px;color:var(--ad-faint,#6e737a);letter-spacing:.3px">전문가 면허 인증 — 승인 대기</div>
+          <button onclick="_loadProVerifyList()" style="padding:5px 12px;background:var(--ad-panel2,#33363c);color:var(--ad-text,#d7d9dd);border:1px solid var(--ad-line-strong,#4a4e56);border-radius:0;font-size:11.5px;font-weight:500;cursor:pointer;font-family:inherit">새로고침</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:11.5px;min-width:640px">
+            <thead><tr style="text-align:left;color:var(--ad-faint,#6e737a)">
+              <th style="padding:0 8px 8px 0;font-weight:400">직역</th>
+              <th style="padding:0 8px 8px 0;font-weight:400;width:70px">구분</th>
+              <th style="padding:0 8px 8px 0;font-weight:400;width:110px">면허번호</th>
+              <th style="padding:0 8px 8px 0;font-weight:400;width:120px">신청자</th>
+              <th style="padding:0 8px 8px 0;font-weight:400;width:110px">신청 시각</th>
+              <th style="padding:0 0 8px;width:200px"></th>
+            </tr></thead>
+            <tbody id="pv-body"></tbody>
+          </table>
+        </div>
+        <div id="pv-empty" style="font-size:12.5px;color:var(--ad-faint,#6e737a);text-align:center;padding:18px">불러오는 중…</div>
+      </div>
+
       <!-- ①-d GDC 잔액 조정 (2026-09-23 신설 — 주피터 지시: 베타 기간 충전
            오류를 관리자가 쉽게 보정할 수 있는 패널. /admin/users/search로
            찾아 선택 → /admin/users/manual-charge(충전) 또는
@@ -705,6 +728,7 @@ function _showAdminBody() {
   _loadStats();
   _loadGdcSummary();
   _loadChargeList();
+  _loadProVerifyList();
   _loadCFCredentials();
   _renderSubdomainList();
   _loadAutoRefreshStatus();
@@ -792,6 +816,62 @@ async function _loadGdcSummary() {
 // 인증이라 브라우저 대시보드에 그대로 못 쓴다(개발자도구로 시크릿 노출).
 // 여기서는 이미 이 대시보드가 쓰고 있는 단기만료 Bearer 토큰
 // (_adminAuthHeaders)으로 인증한다.
+// ── 전문가 면허 인증 승인 (2026-10-21) ──
+async function _pvCall(path, body) {
+  return fetch(`${WORKER_URL}${path}`, { method: 'POST', signal: AbortSignal.timeout(20000),
+    headers: Object.assign({ 'Content-Type': 'application/json' }, _adminAuthHeaders()), body: JSON.stringify(body || {}) });
+}
+async function _loadProVerifyList() {
+  const tbody = document.getElementById('pv-body'), empty = document.getElementById('pv-empty');
+  if (!tbody || !empty) return;
+  empty.style.display = 'block'; empty.textContent = '불러오는 중…'; tbody.innerHTML = '';
+  try {
+    const res = await _pvCall('/pro-verify/pending');
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.message || 'API_ERROR');
+    if (!data.items.length) { empty.textContent = '승인 대기 중인 신청이 없습니다.'; return; }
+    empty.style.display = 'none';
+    tbody.innerHTML = data.items.map(r => {
+      const when = r.ts ? new Date(r.ts).toLocaleString('ko-KR', {timeZone:'Asia/Seoul', month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'}) : '—';
+      const id = _esc(String(r.id));
+      return `<tr style="border-top:1px solid var(--ad-line,#3c3f46)">
+        <td style="padding:7px 8px 7px 0">${_esc(String(r.persona))}</td>
+        <td style="padding:7px 8px 7px 0">${r.role === 'staff' ? '직원' : '전문가'}</td>
+        <td style="padding:7px 8px 7px 0;font-family:var(--ad-mono)">${_esc(String(r.license_no_masked))}</td>
+        <td style="padding:7px 8px 7px 0;font-family:var(--ad-mono)">${_esc(String(r.applicant))}…</td>
+        <td style="padding:7px 8px 7px 0;color:var(--ad-faint,#6e737a);font-family:var(--ad-mono)">${when}</td>
+        <td style="padding:7px 0;white-space:nowrap">
+          <button onclick="_pvView('${id}')" ${r.has_file ? '' : 'disabled'} style="padding:3px 8px;font-size:11px;cursor:pointer">사본 보기</button>
+          <button onclick="_pvDecide('${id}','approve')" style="padding:3px 8px;font-size:11px;cursor:pointer">승인</button>
+          <button onclick="_pvDecide('${id}','reject')" style="padding:3px 8px;font-size:11px;cursor:pointer">반려</button>
+        </td></tr>`;
+    }).join('');
+  } catch (e) { empty.textContent = '불러오지 못했습니다: ' + e.message; }
+}
+async function _pvView(id) {
+  try {
+    const res = await _pvCall('/pro-verify/file', { id });
+    if (!res.ok) { const j = await res.json().catch(() => ({})); alert(j.message || ('사본을 열 수 없습니다 (' + res.status + ')')); return; }
+    const blob = await res.blob(), url = URL.createObjectURL(blob);
+    const ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px';
+    ov.innerHTML = blob.type === 'application/pdf' ? `<iframe src="${url}" style="width:min(900px,95vw);height:92vh;background:#fff;border:0"></iframe>` : `<img src="${url}" style="max-width:95vw;max-height:92vh;background:#fff">`;
+    ov.onclick = () => { URL.revokeObjectURL(url); ov.remove(); };
+    document.body.appendChild(ov);
+  } catch (e) { alert('사본을 열 수 없습니다: ' + e.message); }
+}
+async function _pvDecide(id, decision) {
+  let note = '';
+  if (decision === 'reject') { note = prompt('반려 사유를 입력하세요 (신청자에게 보입니다)'); if (!note) return; }
+  else if (!confirm('면허증 사본을 확인했고 승인합니다. 승인하면 사본이 즉시 삭제됩니다.')) return;
+  try {
+    const res = await _pvCall('/pro-verify/decide', { id, decision, note });
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok || !j.ok) { alert(j.message || ('처리하지 못했습니다 (' + res.status + ')')); return; }
+    _loadProVerifyList();
+  } catch (e) { alert('처리하지 못했습니다: ' + e.message); }
+}
+
 async function _loadChargeList() {
   const tbody  = document.getElementById('charge-list-body');
   const empty  = document.getElementById('charge-list-empty');

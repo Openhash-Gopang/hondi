@@ -4,7 +4,7 @@
 //   POST /pro-verify/apply    multipart: persona, role(professional|staff), license_no, supervisor_guid?(staff), guid, ts, sig, file
 //                             → 승인 대기 신청 생성. 서명 메시지는 applyMessage() 참고(파일 SHA-256 포함).
 //   GET  /pro-verify/status   ?guid=  → 내 인증 상태 목록(면허번호·사본 비노출)
-//   POST /pro-verify/session  { guid, ts, sig }  → 승인된 전문가에게 30분짜리 세션 토큰 { token, exp, personas } (전문가용 AI 호출 시 body.pro_session 으로 보냄)
+//   POST /pro-verify/session  { guid, ts, sig }  → 승인된 전문가에게 4시간짜리 세션 토큰 { token, exp, personas } (전문가용 AI 호출 시 body.pro_session 으로 보냄)
 //   POST /pro-verify/pending  { guid, ts, sig }                  (운영자) 승인 대기 목록 — 면허번호는 마스킹본만
 //   POST /pro-verify/file     { id, guid, ts, sig }              (운영자) 면허증 사본 열람 — 열람 기록 남김
 //   POST /pro-verify/decide   { id, decision, note?, guid, ts, sig } (운영자) approve | reject | revoke
@@ -77,10 +77,16 @@ function pubStatus(r, now) {
   return { id: r.id, persona: r.persona, role: r.role, status: r.status === 'approved' && !active ? 'expired' : r.status, license_no_masked: r.license_no_masked, applied_ts: r.ts, reviewed_ts: r.reviewed_ts || null, expires_ts: r.expires_ts || null, note: r.status === 'rejected' || r.status === 'revoked' ? (r.review_note || '') : '' };
 }
 
-export function makeProVerifyHandler({ store, getPinnedPubKey, findPubKeyByGuid = getPinnedPubKey, now = () => Date.now(), maxSkewMs = 5 * 60 * 1000 }) {
+export function makeProVerifyHandler({ store, getPinnedPubKey, findPubKeyByGuid = getPinnedPubKey, bearerAdmin = null, now = () => Date.now(), maxSkewMs = 5 * 60 * 1000 }) {
   if (!store || typeof getPinnedPubKey !== 'function') throw new Error('makeProVerifyHandler: store, getPinnedPubKey 필요');
 
-  async function requireAdmin(env, b, message, cors) {
+  // 운영자 인증 두 가지: ① 관리자 페이지의 Bearer 토큰(bearerAdmin 주입 시) ② PRO_VERIFY_ADMINS 계정의 지갑 서명.
+  async function requireAdmin(env, b, message, cors, request) {
+    const auth = request?.headers?.get?.('Authorization') || '';
+    if (bearerAdmin && /^Bearer\s+\S+/i.test(auth)) {
+      const who = await bearerAdmin(request, env);
+      return who ? { pinned: 'admin:' + String(who).slice(0, 60) } : { res: err(401, 'UNAUTHORIZED', '관리자 인증이 필요합니다.', cors) };
+    }
     const admins = String(env?.PRO_VERIFY_ADMINS || '').split(',').map(s => s.trim()).filter(Boolean);
     if (!admins.length) return { res: err(503, 'NO_ADMIN', '운영자가 설정되지 않았습니다(PRO_VERIFY_ADMINS).', cors) };
     if (!b.guid || !b.sig || !Number.isInteger(b.ts)) return { res: err(400, 'MISSING', '요청 형식이 올바르지 않습니다.', cors) };
@@ -180,7 +186,7 @@ export function makeProVerifyHandler({ store, getPinnedPubKey, findPubKeyByGuid 
         // ── 운영: 대기 목록 ──
         if (request.method === 'POST' && path === '/pro-verify/pending') {
           const b = await request.json().catch(() => null) || {};
-          const a = await requireAdmin(env, b, listMessage(b.ts), cors); if (a.res) return a.res;
+          const a = await requireAdmin(env, b, listMessage(b.ts), cors, request); if (a.res) return a.res;
           const items = (await store.listPending(50)).map(r => ({ id: r.id, persona: r.persona, role: r.role, license_no_masked: r.license_no_masked, applicant: String(r.applicant_pubkey).slice(0, 12), supervisor: r.supervisor_pubkey ? String(r.supervisor_pubkey).slice(0, 12) : '', has_file: !!r.license_file, ts: r.ts }));
           return json({ ok: true, items }, 200, cors);
         }
@@ -189,7 +195,7 @@ export function makeProVerifyHandler({ store, getPinnedPubKey, findPubKeyByGuid 
         if (request.method === 'POST' && path === '/pro-verify/file') {
           const b = await request.json().catch(() => null) || {};
           if (!/^[a-z0-9]{15}$/.test(b.id || '')) return err(400, 'MISSING', 'id가 필요합니다.', cors);
-          const a = await requireAdmin(env, b, fileMessage(b.id, b.ts), cors); if (a.res) return a.res;
+          const a = await requireAdmin(env, b, fileMessage(b.id, b.ts), cors, request); if (a.res) return a.res;
           const rec = await store.get(b.id);
           if (!rec) return err(404, 'NO_RECORD', '신청을 찾을 수 없습니다.', cors);
           if (rec.status !== 'pending' || !rec.license_file) return err(410, 'FILE_GONE', '사본이 이미 삭제되었거나 대기 중인 신청이 아닙니다.', cors);
@@ -205,7 +211,7 @@ export function makeProVerifyHandler({ store, getPinnedPubKey, findPubKeyByGuid 
         if (request.method === 'POST' && path === '/pro-verify/decide') {
           const b = await request.json().catch(() => null) || {};
           if (!/^[a-z0-9]{15}$/.test(b.id || '') || !(b.decision in DECISIONS)) return err(400, 'MISSING', 'id, decision(approve|reject|revoke)이 필요합니다.', cors);
-          const a = await requireAdmin(env, b, decideMessage(b.id, b.decision, b.ts), cors); if (a.res) return a.res;
+          const a = await requireAdmin(env, b, decideMessage(b.id, b.decision, b.ts), cors, request); if (a.res) return a.res;
           const rec = await store.get(b.id);
           if (!rec) return err(404, 'NO_RECORD', '신청을 찾을 수 없습니다.', cors);
           const note = String(b.note || '').slice(0, 300);
