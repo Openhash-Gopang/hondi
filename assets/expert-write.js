@@ -7,6 +7,26 @@
 (function () {
   'use strict';
   var PERSONAS = {
+    'professional-engineer': {
+      role: '기술사', tool: '기술사 보조 AI', back: '/pages/professional-engineer.html', judge: '기술 검토·안전성 판단',
+      docHint: '예: 기술 검토서', toHint: '예: 의뢰인'
+    },
+    'naval-architect': {
+      role: '조선사', tool: '조선사 보조 AI', back: '/pages/naval-architect.html', judge: '설계·적합성 판단',
+      docHint: '예: 설계 검토서', toHint: '예: 의뢰인'
+    },
+    'navigation-officer': {
+      role: '항해사', tool: '항해사 보조 AI', back: '/pages/navigation-officer.html', judge: '항해·운항 판단',
+      docHint: '예: 항해 기록 정리', toHint: '예: 선사·관련 기관'
+    },
+    'marine-engineer': {
+      role: '기관사(선박)', tool: '기관사(선박) 보조 AI', back: '/pages/marine-engineer.html', judge: '기관 상태·운전 판단',
+      docHint: '예: 기관 기록 정리', toHint: '예: 선사·관련 기관'
+    },
+    'weather-forecaster': {
+      role: '기상예보사', tool: '기상예보사 보조 AI', back: '/pages/weather-forecaster.html', judge: '기상 현상 판단·예보',
+      docHint: '예: 기상 참고자료', toHint: '예: 내부 검토'
+    },
     'dentist': {
       role: '치과의사', tool: '치과의사 보조 AI', back: '/pages/dentist.html',
       docHint: '예: 진단서', toHint: '예: 환자'
