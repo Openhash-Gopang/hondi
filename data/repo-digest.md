@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-21 18:29 KST · 기준 커밋 b5b7b1ed
+- 갱신: 2026-10-21 18:35 KST · 기준 커밋 37239fc1
 - 전문가 페르소나 전용 페이지 145개 · 등록된 SP 866건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-21 Merge pull request #738 from Openhash-Gopang/docs/plan-v6-and-session-summary-20261021
+- 2026-10-21 docs: 나비 컨소시엄 사업 계획 요약 v6 등록(관리자 사업 계획) + 2026-10-21 세션 기록(개발자 문서)
 - 2026-10-21 Merge pull request #737 from Openhash-Gopang/fix/review-sheets-windows-encoding
 - 2026-10-21 fix(review): 검수 시트 생성기 Windows 인코딩(cp949) 오류 수정, 테스트가 python 도 찾도록
 - 2026-10-21 Merge pull request #734 from Openhash-Gopang/feature/pro-sub-w5
@@ -42,8 +44,6 @@
 - 2026-10-19 feat: 도 직속기관 소방·상하수도·자치경찰·세계유산·보건환경·축산·대관 조사, 열린 문제 #41~#48
 - 2026-10-19 Merge pull request #713 from Openhash-Gopang/feat/gov-agency-basis-audit
 - 2026-10-19 docs: 서버 근거 법령 폐지·개명 점검 결과(열린 문제 #40) — 폐지 2건, TBD 44건
-- 2026-10-19 Merge pull request #712 from Openhash-Gopang/feat/gov-agency-round11
-- 2026-10-19 feat: 서귀포시 어업·의료기관·가축사육업 조사, 어업 근거 규칙 폐지 확인, 열린 문제 #37~#40
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
