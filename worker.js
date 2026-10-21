@@ -26,6 +26,7 @@ import { makeDocFormRewardHandler } from './src/worker/doc-form-reward.js';
 import { makePocketBaseRatingStore, makePocketBaseRewardStore } from './src/worker/doc-form-reward-store.js';
 import { makeProVerifyHandler } from './src/worker/pro-verify-handler.js';
 import { makePocketBaseProVerifyStore } from './src/worker/pro-verify-store.js';
+import { checkProGate } from './src/worker/pro-gate.js';
 import { makeConsentSaleHandler } from './src/worker/consent-sale-handler.js';
 import { makeConsentSaleStore } from './src/worker/consent-sale-store.js';
 import { verifyPhoneAndStepUp } from './src/worker/phone-token.js';
@@ -14421,6 +14422,15 @@ export default {
       // 그대로 신뢰해도 된다(이미 이 자리에서 검증 끝남). 클라이언트가
       // 보낸 원래 guid/phone_verify_token은 폐기한다.
       bodyText = JSON.stringify({ ..._gateBody, guid: _authResult.guid, phone_verify_token: undefined });
+    }
+
+    // ── 전문가용 SP 서버 게이트(2026-10-21, 계획 W1-5) — 전문가용(-assistant) SP 가 실린 AI 호출은 유효한 전문가 세션(body.pro_session)이 있어야 한다.
+    // env.PRO_GATE_MODE: off | log(기본, 차단 없이 기록만) | enforce. 세션은 POST /pro-verify/session 으로 발급(env.PRO_SESSION_SECRET 필요).
+    if (isAiProxyPath) {
+      const _pg = await checkProGate({ bodyText, env });
+      if (_pg.wouldBlock) console.warn(JSON.stringify({ tag: 'HONDI_PRO_GATE_WOULD_BLOCK', path: pathname, code: _pg.wouldBlock, persona: _pg.persona || null, ..._meta }));
+      if (!_pg.ok) return _err(_pg.status, _pg.code, _pg.message, corsHeaders);
+      bodyText = _pg.bodyText;
     }
 
     if (pathname === '/chat/completions')        return callDeepSeek(bodyText, env, corsHeaders, null, _meta, ctx);
