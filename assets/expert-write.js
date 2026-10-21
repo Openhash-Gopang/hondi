@@ -7,6 +7,30 @@
 (function () {
   'use strict';
   var PERSONAS = {
+    'security-engineer': {
+      role: '정보보안전문가', tool: '정보보안전문가 보조 AI', back: '/pages/security-engineer.html', judge: '보안 위험 판단·취약점 평가',
+      docHint: '예: 보안 점검 결과 보고서', toHint: '예: 의뢰 기관'
+    },
+    'translator-interpreter': {
+      role: '통역사·번역사', tool: '통번역 보조 AI', back: '/pages/translator-interpreter.html', judge: '번역의 정확성·적합성 판단',
+      docHint: '예: 번역 확인서', toHint: '예: 의뢰인'
+    },
+    'tour-guide': {
+      role: '관광통역안내사', tool: '관광통역안내사 보조 AI', back: '/pages/tour-guide.html', judge: '관광 안내 내용 판단',
+      docHint: '예: 안내 일지', toHint: '예: 여행사'
+    },
+    'sports-instructor': {
+      role: '생활스포츠지도사', tool: '생활스포츠지도사 보조 AI', back: '/pages/sports-instructor.html', judge: '운동 처방·건강 상태 판단',
+      docHint: '예: 지도 기록', toHint: '예: 센터·수강생'
+    },
+    'hairdresser': {
+      role: '미용사', tool: '미용사 보조 AI', back: '/pages/hairdresser.html', judge: '시술 적합성·피부 상태 판단',
+      docHint: '예: 시술 기록', toHint: '예: 고객'
+    },
+    'chef': {
+      role: '조리사', tool: '조리사 보조 AI', back: '/pages/chef.html', judge: '식품 안전·위생 판단',
+      docHint: '예: 위생 점검 기록', toHint: '예: 업장 관리자'
+    },
     'professional-engineer': {
       role: '기술사', tool: '기술사 보조 AI', back: '/pages/professional-engineer.html', judge: '기술 검토·안전성 판단',
       docHint: '예: 기술 검토서', toHint: '예: 의뢰인'
