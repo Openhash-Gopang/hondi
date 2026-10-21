@@ -21,12 +21,12 @@ const JOBS = [
   ['SP_appraiser', 'SP_appraiser_v1_10.md', 'SP_appraiser_v1_9.md', 'v1.10'],
   ['SP_customs-broker', 'SP_customs-broker_v1_8.md', 'SP_customs-broker_v1_7.md', 'v1.8'],
   ['SP_marine-pilot', 'SP_marine-pilot_v3_6.md', 'SP_marine-pilot_v3_5.md', 'v3.6'],
-  ['SP_judicial-scrivener', 'SP_judicial-scrivener_v3_2.md', 'SP_judicial-scrivener_v3_1.md', 'v3.2'],
+  ['SP_judicial-scrivener', 'SP_judicial-scrivener_v3_3.md', 'SP_judicial-scrivener_v3_2.md', 'v3.3', 'v3.2'],
   ['SP_patent-attorney', 'SP_patent-attorney_v1_9.md', 'SP_patent-attorney_v1_8.md', 'v1.9'],
   ['SP_lawyer', 'SP_lawyer_v5_6.md', 'SP_lawyer_v5_5.md', 'v5.6'],
   ['SP_tax-accountant', 'SP_tax-accountant_v2_5.md', 'SP_tax-accountant_v2_4.md', 'v2.5'],
   ['SP_physician', 'SP_physician_v2_6.md', 'SP_physician_v2_5.md', 'v2.6'],
-  ['SP_administrative-scrivener', 'SP_administrative-scrivener_v1_2.md', 'SP_administrative-scrivener_v1_1.md', 'v1.2'],
+  ['SP_administrative-scrivener', 'SP_administrative-scrivener_v1_3.md', 'SP_administrative-scrivener_v1_2.md', 'v1.3', 'v1.2'],
   ['SP_accountant', 'SP_accountant_v1_11.md', 'SP_accountant_v1_10.md', 'v1.11'],
 ];
 
@@ -54,7 +54,8 @@ describe('SP_EXPERT_BASE v1.3 §3-B', () => {
   });
 });
 
-for (const [key, file, prev, ver] of JOBS) {
+// 5번째 값(histVer)은 K-Law v15.1 이식 개정이 기록된 버전 — 이후 개정(서류 작성 트랙 등)으로 파일 버전이 올라가도 그 이력 항목은 남는다.
+for (const [key, file, prev, ver, histVer = ver] of JOBS) {
   describe(`${key} ${ver}`, () => {
     const t = read('prompts/' + file);
     it('카탈로그가 새 파일을 가리키고 직전 파일이 남아 있다', () => {
@@ -87,7 +88,7 @@ for (const [key, file, prev, ver] of JOBS) {
       assert.ok(!/상담해 드립|상담 AI|상담을 제공|상담 서비스/.test(s));
     });
     it('변경 이력에 이번 개정이 기록된다', () => {
-      assert.match(t, new RegExp('- (\\*\\*)?' + ver.replace('.', '\\.') + ' \\(2026-10-17'));
+      assert.match(t, new RegExp('- (\\*\\*)?' + histVer.replace('.', '\\.') + ' \\(2026-10-17'));
     });
     it('직전 버전과 비교해 삭제된 줄은 1행(버전 표기)뿐이다 — 기존 절을 건드리지 않는다', () => {
       const a = read('prompts/' + prev).split('\n'), b = new Set(t.split('\n'));

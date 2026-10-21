@@ -19,6 +19,8 @@ const names = readdirSync(join(ROOT, 'pages')).filter((f) => f.endsWith('.html')
   .filter((n) => !EXCLUDE.has(n) && /active:\s*'expert-personas'/.test(read(`pages/${n}.html`)));
 const catalog = JSON.parse(read('prompts/sp-catalog.json'));
 const count = (s, sub) => s.split(sub).length - 1;
+// SP 부록 A 가 표가 아니라 문장으로 서류를 나열한 영역(생성기가 읽지 못함) — 해당 페이지는 이 탭들만 직접 유지한다.
+const PROSE_ONLY_TABS = { 'judicial-scrivener': ['A-7', 'A-9', 'A-10', 'A-11', 'A-12'] };
 
 describe('전문가 페르소나 페이지 전체 — 시작 영역', () => {
   it('B-00: 대상 페이지가 빠짐없이 잡힌다(143개 이상)', () => {
@@ -100,7 +102,11 @@ describe('전문가 페르소나 페이지 전체 — 시작 영역', () => {
       const sp = (h.match(/sp:\s*"([^"]+)"/) || [])[1];
       const r = spawnSync('python3', ['scripts/gen-expert-pages.py', '--catalog-json', join(ROOT, 'prompts', catalog[sp])], { cwd: ROOT, encoding: 'utf8' });
       assert.equal(r.status, 0, `${n}: SP 목록 읽기 실패: ${r.stderr}`);
-      const fromSp = JSON.parse(r.stdout), onPage = JSON.parse(m[1]).catalog;
+      // SP 부록 A 에서 표가 아닌 문장으로 쓰인 영역은 생성기가 읽지 못한다 — 그 탭만 페이지의 목록을 유지하고 나머지는 SP와 같아야 한다(2026-10-21).
+      const extra = PROSE_ONLY_TABS[n] || [];
+      const full = JSON.parse(m[1]).catalog;
+      for (const id of extra) assert.ok(full.some((c) => c.id === id), `${n}: 문장형 영역 ${id} 탭이 사라짐`);
+      const fromSp = JSON.parse(r.stdout).filter((c) => !extra.includes(c.id)), onPage = full.filter((c) => !extra.includes(c.id));
       assert.equal(onPage.length, fromSp.length, `${n}: 탭(업무 영역) 수가 SP 부록 A와 다름 — 페이지 ${onPage.length} / SP ${fromSp.length}`);
       for (let i = 0; i < fromSp.length; i++) {
         const a = fromSp[i], b = onPage[i];
