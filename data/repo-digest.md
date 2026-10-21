@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-21 18:35 KST · 기준 커밋 37239fc1
+- 갱신: 2026-10-21 18:36 KST · 기준 커밋 8a8c84fc
 - 전문가 페르소나 전용 페이지 145개 · 등록된 SP 866건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-21 feat(sp): family E counselling personas - STEP K step-by-step counselling track for 10 professions (teacher, school-counselor, clinical-psychologist, mental-health-professional, social-worker, curator, librarian, youth-counselor, childcare-teacher, lifelong-educator)
 - 2026-10-21 Merge pull request #738 from Openhash-Gopang/docs/plan-v6-and-session-summary-20261021
 - 2026-10-21 docs: 나비 컨소시엄 사업 계획 요약 v6 등록(관리자 사업 계획) + 2026-10-21 세션 기록(개발자 문서)
 - 2026-10-21 Merge pull request #737 from Openhash-Gopang/fix/review-sheets-windows-encoding
@@ -43,7 +44,6 @@
 - 2026-10-19 Merge pull request #714 from Openhash-Gopang/feat/gov-agency-round12
 - 2026-10-19 feat: 도 직속기관 소방·상하수도·자치경찰·세계유산·보건환경·축산·대관 조사, 열린 문제 #41~#48
 - 2026-10-19 Merge pull request #713 from Openhash-Gopang/feat/gov-agency-basis-audit
-- 2026-10-19 docs: 서버 근거 법령 폐지·개명 점검 결과(열린 문제 #40) — 폐지 2건, TBD 44건
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
@@ -63,6 +63,7 @@
 - /pages/equity-bid-subscribers.html — 직역별 잠재 가입자 (시스템 테스트)
 - /pages/equity-bid-test.html — 자회사 지분 5% 입찰 (시스템 테스트)
 - /pages/expert-chat.html — 전문가 업무 보조 AI
+- /pages/expert-counsel.html — 단계별 상담 — 상담 AI
 - /pages/expert-personas-docs.html — 문서 양식 — 전문가 페르소나
 - /pages/expert-personas.html — 전문가 페르소나
 - /pages/expert-write.html — 서류 작성하기 — 보건의료 보조 AI
