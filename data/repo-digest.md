@@ -1,9 +1,12 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-21 17:53 KST · 기준 커밋 a6d5493a
+- 갱신: 2026-10-21 18:11 KST · 기준 커밋 d2ad4a99
 - 전문가 페르소나 전용 페이지 145개 · 등록된 SP 866건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-21 Merge pull request #732 from Openhash-Gopang/feature/legal-terms-privacy-draft
+- 2026-10-21 docs(legal): 전문가용 AI 서비스 이용약관·개인정보 처리방침 초안 (법률 검토 전)
+- 2026-10-21 feat(sp): health-care assistant personas (19) STEP W document-writing track (SP v1.1) + shared 9-stage page + hero buttons
 - 2026-10-21 Merge pull request #730 from Openhash-Gopang/feature/scrivener-split
 - 2026-10-21 feat(sp): 법무사·행정사 SP 를 일반인용(안내)과 전문가용(-assistant)으로 분리
 - 2026-10-21 feat(sp): judicial/administrative scrivener STEP W document-writing track (9 stages) + common writing page + page layout refit
@@ -41,9 +44,6 @@
 - 2026-10-19 feat: 도시계획·도시재생·상하수도·안전총괄 조사, 열린 문제 #27~#31
 - 2026-10-19 Merge pull request #708 from Openhash-Gopang/feat/gov-agency-round7
 - 2026-10-19 feat: 건설과·주택과·교통행정과 조사, 서버 담당자 전달 문서, 열린 문제 #23~#26
-- 2026-10-19 feat: 관광진흥·환경관리·공원녹지·마을활력 조사, 마을기업법 시행 정정 안내(taskNotes), 열린 문제 #18~#22
-- 2026-10-19 feat: 노인복지과·여성가족과·주민복지과 조사, 열린 문제 #15~#17
-- 2026-10-19 feat: 건축과·위생관리과·장애인복지과 조사, SP 없음 표시, 열린 문제 #11~#14
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
@@ -65,6 +65,7 @@
 - /pages/expert-chat.html — 전문가 업무 보조 AI
 - /pages/expert-personas-docs.html — 문서 양식 — 전문가 페르소나
 - /pages/expert-personas.html — 전문가 페르소나
+- /pages/expert-write.html — 서류 작성하기 — 보건의료 보조 AI
 - /pages/hondi-market.html — hondi-market.html
 - /pages/jeju-gov-automation-draft.html — 제주 AI 행정 — 기관·실국과·읍면동 실행 지도
 - /pages/jeju-gov-automation.html — 제주 AI 행정 — 기관·실국과·읍면동 실행 지도
