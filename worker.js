@@ -24,6 +24,8 @@ import { makeDocFormHandler } from './src/worker/doc-form-handler.js';
 import { makePocketBaseDocFormStore } from './src/worker/doc-form-store.js';
 import { makeDocFormRewardHandler } from './src/worker/doc-form-reward.js';
 import { makePocketBaseRatingStore, makePocketBaseRewardStore } from './src/worker/doc-form-reward-store.js';
+import { makeProVerifyHandler } from './src/worker/pro-verify-handler.js';
+import { makePocketBaseProVerifyStore } from './src/worker/pro-verify-store.js';
 import { makeConsentSaleHandler } from './src/worker/consent-sale-handler.js';
 import { makeConsentSaleStore } from './src/worker/consent-sale-store.js';
 import { verifyPhoneAndStepUp } from './src/worker/phone-token.js';
@@ -5500,6 +5502,16 @@ function handleDigitRoutes(request, url, env, corsHeaders) {
 function handleOrgSiteRoutes(request, url, env, corsHeaders) {
   const handler = makeOrgSiteHandler({
     store: makePocketBaseOrgSiteStore({ base: L1_DEFAULT, getToken: () => _l1AdminToken(env) }),
+    getPinnedPubKey: async (e, guid) => (await _l1FindProfileByGuid(e, guid))?.pubkey_ed25519 || null,
+  });
+  return handler.handle(request, url, env, corsHeaders);
+}
+
+// ── 전문가 면허 인증(2026-10-21 신설) — 면허증 사본 업로드 → 운영자 수동 승인. 사본은 승인·반려 즉시 삭제.
+// 운영자는 env.PRO_VERIFY_ADMINS(guid 또는 공개키, 쉼표 구분)의 지갑 서명으로만 승인·열람한다.
+function handleProVerifyRoutes(request, url, env, corsHeaders) {
+  const handler = makeProVerifyHandler({
+    store: makePocketBaseProVerifyStore({ base: L1_DEFAULT, getToken: () => _l1AdminToken(env) }),
     getPinnedPubKey: async (e, guid) => (await _l1FindProfileByGuid(e, guid))?.pubkey_ed25519 || null,
   });
   return handler.handle(request, url, env, corsHeaders);
@@ -13633,6 +13645,7 @@ export default {
     if (pathname.startsWith('/digit/')) return handleDigitRoutes(request, url, env, corsHeaders);
     if (pathname.startsWith('/org-site/')) return handleOrgSiteRoutes(request, url, env, corsHeaders);
     if (pathname.startsWith('/doc-form/')) return handleDocFormRoutes(request, url, env, corsHeaders);
+    if (pathname.startsWith('/pro-verify/')) return handleProVerifyRoutes(request, url, env, corsHeaders);
     if (pathname.startsWith('/consent-sale/')) return handleConsentSaleRoutes(request, url, env, corsHeaders);
     if (pathname === '/pay/code/mine' && request.method === 'GET') return handlePayCodeMine(request, url, env, corsHeaders);
     if (pathname === '/pay/code/resolve' && request.method === 'GET') return handlePayCodeResolve(request, url, env, corsHeaders);
