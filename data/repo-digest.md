@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-21 17:36 KST · 기준 커밋 b555f080
+- 갱신: 2026-10-21 17:37 KST · 기준 커밋 e23ffd0a
 - 전문가 페르소나 전용 페이지 145개 · 등록된 SP 864건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-21 feat(sp): judicial/administrative scrivener STEP W document-writing track (9 stages) + common writing page + page layout refit
 - 2026-10-21 Merge pull request #728 from Openhash-Gopang/feature/pro-verify-frontend-w1
 - 2026-10-21 feat(pro-verify): 전문가 인증 신청 화면·pro_session 자동 첨부·관리자 승인 패널 (W1-6)
 - 2026-10-21 Merge pull request #727 from Openhash-Gopang/feature/pro-gate-w1
@@ -43,7 +44,6 @@
 - 2026-10-19 feat: 건축과·위생관리과·장애인복지과 조사, SP 없음 표시, 열린 문제 #11~#14
 - 2026-10-19 feat: task 연결 12건 확대(SP 선언 근거), 기초생활보장과 조사, 열린 문제 갱신
 - 2026-10-19 feat: 접수 연동 민원 탭(서버 task 레지스트리), 차량관리과 조사, 세무과 서식 번호 정정, SP 교차 점검
-- 2026-10-19 docs: 제주시 세무과 시범 — 법령 본문 직접 확인 결과 반영
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
@@ -95,6 +95,7 @@
 - /pages/rule-of-law.html — 법치국가
 - /pages/scenario-test.html — 시나리오 테스트
 - /pages/scenarios.html — scenarios.html
+- /pages/scrivener-write.html — 서류 작성하기 — 보조 AI
 - /pages/search-tab.html — 사용자 검색
 - /pages/sp-editor.html — SP 편집기
 - /pages/sp-evaluation-methodology.html — SP 평가 방법론
