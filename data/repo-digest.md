@@ -1,10 +1,16 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-21 18:26 KST · 기준 커밋 d5ca8d2e
+- 갱신: 2026-10-21 18:29 KST · 기준 커밋 b5b7b1ed
 - 전문가 페르소나 전용 페이지 145개 · 등록된 SP 866건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-21 Merge pull request #737 from Openhash-Gopang/fix/review-sheets-windows-encoding
+- 2026-10-21 fix(review): 검수 시트 생성기 Windows 인코딩(cp949) 오류 수정, 테스트가 python 도 찾도록
+- 2026-10-21 Merge pull request #734 from Openhash-Gopang/feature/pro-sub-w5
+- 2026-10-21 Merge pull request #736 from Openhash-Gopang/feature/review-package-w4
+- 2026-10-21 docs(review): 직역 전문가 검수 패키지 — 안내서·자문 계약 핵심 조항·단체 협조 공문 초안·검수 시트 11종 (W4)
 - 2026-10-21 feat(sp): family C assistant personas - STEP W document-writing track for 12 professions (architect, industrial-safety-consultant, fire-safety-manager, landscape-engineer, surveying-engineer, electrical-safety-engineer, gas-safety-engineer, professional-engineer, naval-architect, navigation-officer, marine-engineer, weather-forecaster)
+- 2026-10-21 feat(pro-sub): 전문가용 AI 구독 — 장부·부여/환불 API·세션 반영·게이트(PRO_SUB_MODE)·관리자 패널 (W5)
 - 2026-10-21 feat(sp): family A (law/finance) assistant personas - STEP W document-writing track for financial-planner, loss-adjuster, labor-attorney, customs-broker
 - 2026-10-21 Merge pull request #732 from Openhash-Gopang/feature/legal-terms-privacy-draft
 - 2026-10-21 docs(legal): 전문가용 AI 서비스 이용약관·개인정보 처리방침 초안 (법률 검토 전)
@@ -38,12 +44,6 @@
 - 2026-10-19 docs: 서버 근거 법령 폐지·개명 점검 결과(열린 문제 #40) — 폐지 2건, TBD 44건
 - 2026-10-19 Merge pull request #712 from Openhash-Gopang/feat/gov-agency-round11
 - 2026-10-19 feat: 서귀포시 어업·의료기관·가축사육업 조사, 어업 근거 규칙 폐지 확인, 열린 문제 #37~#40
-- 2026-10-19 Merge pull request #711 from Openhash-Gopang/feat/gov-agency-round10
-- 2026-10-19 feat: 서귀포시 복지위생·청정환경·문화관광·자치행정 10개 과 조사, 열린 문제 #36
-- 2026-10-19 Merge pull request #710 from Openhash-Gopang/feat/gov-agency-round9
-- 2026-10-19 feat: 서귀포시 안전도시건설국 6개 과 조사, 열린 문제 #32~#35
-- 2026-10-19 Merge pull request #709 from Openhash-Gopang/feat/gov-agency-round8
-- 2026-10-19 feat: 도시계획·도시재생·상하수도·안전총괄 조사, 열린 문제 #27~#31
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
