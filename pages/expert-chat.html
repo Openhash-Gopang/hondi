@@ -823,6 +823,7 @@ async function sendTurn(text, attachment) {
       full = _maybeHandleServiceRedirectSuggestion(full, aiBubble);
     }
     messages.push({ role: 'assistant', content: full });
+    _embedReply(full);
 
     // ── [EXPERT_DONE] 태그 감지 (2026-07-20, C45 신설) ──────────────
     // 정규식 기반 종료 감지(아래 TERMINATION_RE)의 오탐지 문제(상담 내용
@@ -1055,6 +1056,7 @@ async function _maybeHandleFormTags(fullReply, aiBubble, depth = 0) {
     document.getElementById('chat-thread').scrollTop = 1e9;
   });
   messages.push({ role: 'assistant', content: full });
+  _embedReply(full);
   await _maybeHandleFormTags(full, bubble, depth + 1);
   if (foundForm && _meGuid()) _renderRatingCard(foundForm);      // 2026-10-17: 서식 DB의 서식을 써 본 이용자에게 평가를 청한다
 }
@@ -1619,6 +1621,27 @@ function doSend() {
   sendTurn(text, attachment);
 }
 updateSendBtn();
+
+// ── 임베드 모드 연결 (2026-10-21 신설) — 서류 작성 페이지(scrivener-write.html)가 이 대화 화면을 iframe 으로 끼운다.
+// 서식 DB 태그(SP_DOC_FORM)와 부모 체인 SP 결합을 그대로 쓰기 위해 위젯이 아니라 이 화면을 쓴다.
+// 부모 → 이 페이지: {type:'expert-embed-send', text} 로 입력창에 글을 채워 보낸다.
+// 이 페이지 → 부모: {type:'expert-embed-reply', text} (AI 답변 전문 — 부모가 상태 줄을 읽어 진행 표시를 갱신).
+// ?embed=1 이고 같은 오리진·부모 창에서 온 메시지만 받는다. 일반 접속에는 영향이 없다.
+function _embedOn() { return _qs.get('embed') === '1' && window.parent !== window; }
+function _embedReply(text) {
+  if (!_embedOn()) return;
+  try { window.parent.postMessage({ type: 'expert-embed-reply', text: String(text || '') }, location.origin); } catch (e) { /* 부모가 없으면 무시 */ }
+}
+if (_embedOn()) {
+  window.addEventListener('message', (e) => {
+    if (e.origin !== location.origin || e.source !== window.parent || !e.data) return;
+    if (e.data.type === 'expert-embed-send' && typeof e.data.text === 'string' && e.data.text.trim()) {
+      input.value = e.data.text.slice(0, 4000);
+      doSend();
+    }
+  });
+  try { window.parent.postMessage({ type: 'expert-embed-ready' }, location.origin); } catch (e) { /* 무시 */ }
+}
 
 // ── 서식 촬영 페이지(digit-code)에서 넘어온 사진 (2026-10-14 신설) ──────────
 // 사진은 같은 기기의 IndexedDB에만 있다가 여기서 읽는 즉시 지워진다. 자동 전송하지 않는다 —
