@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>가치평가 — 감정평가사 보조 AI</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--bg:#f8f9fa;--sur:#fff;--bdr:#e5e7eb;--bdr2:#d1d5db;--txt:#111827;--txt2:#374151;--txt3:#6b7280;--txt4:#9ca3af;
+--pri:#3ecf8e;--pri-dk:#2baa74;--pri-bg:#f0fdf9;--pri-bd:#bbf7d0;--side-bg:#f9fafb;--side-sel:#f3f4f6;--side-w:220px;--side-col:52px;--head-h:48px;
+--red:#ef4444;--red-bg:#fef2f2;--org:#f59e0b;--org-bg:#fffbeb;--blue:#3b82f6;--blue-bg:#eff6ff;
+--font:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;--r:10px;--r-lg:16px;--ease:cubic-bezier(.4,0,.2,1)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:14px;line-height:1.6}
+a{color:inherit;text-decoration:none}
+.topbar{position:fixed;top:0;left:0;right:0;height:var(--head-h);background:var(--sur);border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:14px;padding:0 16px;z-index:50}
+.topbar-brand{font-weight:700;color:var(--pri-dk)}
+.topbar-breadcrumb{color:var(--txt3);font-size:13px;flex:1}
+.topbar-right{display:flex;gap:12px;align-items:center;color:var(--txt3);font-size:12px}
+.notice-bar{position:relative;margin:calc(var(--head-h) + 0px) 0 0 var(--side-col);padding:7px 16px;background:var(--org-bg);border-bottom:1px solid #fde68a;color:#92400e;font-size:12.5px}
+.notice-bar+.notice-bar{margin-top:0;background:var(--blue-bg);border-color:#bfdbfe;color:#1e40af}
+.sidebar{position:fixed;top:var(--head-h);bottom:0;left:0;width:var(--side-col);background:var(--side-bg);border-right:1px solid var(--bdr);overflow:hidden;transition:width .2s var(--ease);z-index:40}
+.sidebar:hover{width:var(--side-w)}
+.sidebar-label{padding:14px 16px 6px;font-size:11px;color:var(--txt4);white-space:nowrap;opacity:0}
+.sidebar:hover .sidebar-label{opacity:1}
+.nav-item{display:flex;align-items:center;gap:12px;padding:9px 18px;color:var(--txt2);white-space:nowrap;border:0;background:none;width:100%;font:inherit;cursor:pointer}
+.nav-item:hover,.nav-item.active{background:var(--side-sel)}
+.nav-item.active{color:var(--pri-dk);font-weight:600}
+.nav-ico{width:16px;text-align:center;flex:none}
+.main{margin-left:var(--side-col);padding:20px 24px 80px;max-width:1080px}
+.page-header h1{font-size:22px;font-weight:700}
+.page-header p{color:var(--txt3);margin-top:4px}
+.tabs{display:flex;gap:4px;margin:16px 0;border-bottom:1px solid var(--bdr)}
+.tab{padding:8px 14px;border:0;background:none;font:inherit;color:var(--txt3);cursor:pointer;border-bottom:2px solid transparent}
+.tab.active{color:var(--pri-dk);border-color:var(--pri);font-weight:600}
+.panel{display:none}.panel.active{display:block}
+.progress{display:flex;gap:6px;margin:6px 0 18px;flex-wrap:wrap}
+.pg{flex:1;min-width:92px;padding:8px 10px;border:1px solid var(--bdr);border-radius:var(--r);background:var(--sur);font-size:12px;color:var(--txt3)}
+.pg b{display:block;color:var(--txt2);font-size:12.5px}
+.pg.done{background:var(--pri-bg);border-color:var(--pri-bd)}.pg.done b{color:var(--pri-dk)}
+.pg.cur{border-color:var(--pri);box-shadow:0 0 0 2px var(--pri-bd)}
+.verdict-step{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r-lg);margin-bottom:12px;overflow:hidden}
+.verdict-step.cur{border-color:var(--pri)}
+.step-head{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer}
+.step-tag{font-size:11px;font-weight:700;color:#fff;background:var(--txt4);border-radius:6px;padding:2px 8px}
+.verdict-step.cur .step-tag{background:var(--pri-dk)}
+.verdict-step.done .step-tag{background:var(--pri)}
+.step-title{font-weight:600;flex:1}
+.step-state{font-size:12px;color:var(--txt4)}
+.step-body{padding:0 16px 14px;color:var(--txt2);display:none}
+.verdict-step.open .step-body{display:block}
+.step-body ul{margin:6px 0 0 18px}
+.step-body li{margin:2px 0}
+.gate{display:inline-block;margin-top:8px;padding:2px 9px;border-radius:20px;font-size:12px;background:var(--org-bg);color:#92400e;border:1px solid #fde68a}
+.step-complete{display:none;margin-top:10px;padding:8px 12px;border-radius:var(--r);background:var(--pri-bg);border:1px solid var(--pri-bd);color:var(--pri-dk);font-size:13px}
+.verdict-step.done .step-complete{display:block}
+.conf-block{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:14px}
+.conf-block h3{font-size:14px;margin-bottom:8px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row label{flex:1;min-width:180px;font-size:12px;color:var(--txt3)}
+.row textarea,.row select,.row input{display:block;width:100%;margin-top:3px;padding:8px 10px;border:1px solid var(--bdr2);border-radius:8px;font:inherit;color:var(--txt);background:#fff}
+.btn{margin-top:12px;padding:9px 18px;border:0;border-radius:8px;background:var(--pri);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--pri-dk)}
+.btn.sec{background:#fff;color:var(--txt2);border:1px solid var(--bdr2);margin-left:6px}
+#startChatMount{min-height:420px;border:1px solid var(--bdr);border-radius:var(--r-lg);background:var(--sur);overflow:hidden}
+.toast{position:fixed;right:18px;bottom:18px;background:#111827;color:#fff;padding:10px 14px;border-radius:10px;font-size:13px;opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none;z-index:99}
+.toast.on{opacity:1;transform:none}
+.limits{font-size:12.5px;color:var(--txt3);margin-top:18px;padding:12px 14px;border:1px dashed var(--bdr2);border-radius:var(--r)}
+@media(max-width:720px){.main{padding:16px 14px 80px}.notice-bar{margin-left:0}.sidebar{display:none}.main{margin-left:0}}
+.row textarea{min-height:64px;resize:vertical}.hide{display:none}
+</style>
+<script>
+window.K_AUTH_CONFIG = { serviceLabel: "감정평가사 보조 AI" };
+window.HONDI_CHAT_WIDGET_CONFIG = {
+  sp: "SP_appraiser-assistant",
+  panelMode: "inline",
+  inlineMount: "#startChatMount",
+  placeholder: "대상물 정보를 입력하거나 재무제표 등을 첨부하세요",
+  mic: true,
+  camera: "touch",
+  maxTokens: 4096,
+  panelTitle: "가치평가 — 감정평가사 보조 AI",
+  label: "대상물의 상세 정보를 알려 주세요",
+  serviceLabel: "감정평가사 보조 AI",
+  greeting: "안녕하세요! 감정평가사 보조 AI입니다. 인증된 감정평가사의 업무를 보조합니다. 대상물(부동산·동산·상품·기업·서비스 등)의 상세 정보를 알려 주시면 ① 정보 입력 → ② 감정(가치 판정 과정) → ③ 시장가치 시산 순서로 진행합니다. 기업은 재무제표를 첨부해 주세요(이미지·PDF·docx·txt·csv). 이 도구는 평가액을 정하지 않으며, 모든 수치는 감정평가사가 검토할 참고 시산입니다.",
+  context: '사용자는 감정평가사 보조 AI의 「가치평가」 화면(3단계 진행 화면)에 있습니다. 이 화면의 주 이용자는 인증된 인간 감정평가사입니다. 이 화면의 요청은 SP의 STEP V(가치평가 트랙, V-1 대상물 상세 정보 입력 → V-2 감정 → V-3 시장가치 시산)로 진행합니다. 기업은 국가 위험 → 산업 위험 → 기업 위험 순서로, 부동산은 인근 거래 이력과 시장 요인(국가 시장 추세·인구·지역 경제·범죄율·교육·의료·시장 인프라)으로, 상품은 시장 가격 동향으로 검토합니다. 매 응답 첫 줄에 SP가 정한 상태 줄을 표시하고 끝에 [NEXT_STEP: …]을 붙이세요. 평가액은 정하지 않고 [감정평가사 확정]으로 비우며, 수치는 참고 시산 범위로만 제시하고, 지표는 조회로 확인한 것만 근거로 쓰세요.',
+  onReply: function (reply) { try { window.ValOpt.parse(reply); } catch (e) { console.error(e); } }
+};
+</script>
+</head>
+<body>
+<header class="topbar">
+  <a class="topbar-brand" href="/pages/appraiser.html">Hondi · 감정평가사 보조 AI</a>
+  <div class="topbar-breadcrumb">홈 › 감정평가사 › 가치평가</div>
+  <div class="topbar-right"><span id="clock">--:--:--</span></div>
+</header>
+<div class="notice-bar" role="note"><strong>⚠️ 감정평가가 아닌 보조 도구입니다.</strong> 이 도구는 평가액을 정하지 않으며, 결과는 감정평가사가 검토할 참고 시산입니다. 평가액 결정과 감정평가서 발급·서명날인은 감정평가사가 합니다.</div>
+<div class="notice-bar" role="note"><strong>ℹ️ 안내:</strong> 특정 가액에 맞춘 평가 요청은 받지 않습니다. 지표와 사례는 조회로 확인한 것만 근거로 쓰고 확인하지 못한 것은 미확인으로 표시합니다.</div>
+
+<nav class="sidebar" aria-label="메뉴">
+  <div class="sidebar-label">감정평가 도구</div>
+  <a class="nav-item" href="/pages/appraiser.html"><span class="nav-ico">📄</span><span>서류 작성</span></a>
+  <button class="nav-item active"><span class="nav-ico">🏷️</span><span>가치평가</span></button>
+  <a class="nav-item" href="/"><span class="nav-ico">🏠</span><span>Hondi 홈</span></a>
+</nav>
+
+<main class="main">
+  <div class="page-header">
+    <h1>가치평가 3단계</h1>
+    <p>부동산·동산·상품·기업·서비스의 시장가치를 정보 입력 → 감정 → 시산 순서로 검토합니다.</p>
+  </div>
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-tab="run">진행</button>
+    <button class="tab" data-tab="guide">유형별 방법</button>
+  </div>
+
+  <section class="panel active" id="p-run">
+    <div class="conf-block">
+      <h3>1단계 입력 — 대상물 정보</h3>
+      <div class="row">
+        <label>대상물 유형
+          <select id="fType">
+            <option value="re">부동산</option><option value="mv">동산</option><option value="gd">유형 상품</option>
+            <option value="ig">무형 상품(특허·상표·SW 등)</option><option value="co">기업·지분</option><option value="sv">서비스</option><option value="ot">기타</option>
+          </select></label>
+        <label>평가 목적
+          <input id="fPurpose" placeholder="예: 담보, 매매, 소송, 재무보고"></label>
+        <label>기준시점
+          <input id="fDate" placeholder="예: 2026-10-21 (미정이면 비워 두기)"></label>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <label>대상 특정 <span id="hTarget">(소재지·지번·건물명)</span>
+          <input id="fTarget" placeholder="소재지 / 명칭 / 사업자 정보"></label>
+        <label>이용자
+          <select id="fRole"><option>감정평가사</option><option>감정평가사 사무직원</option><option>본인 사안 확인(일반 이용자)</option></select></label>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <label style="flex-basis:100%">상세 정보 <span id="hDetail">(면적·용도·구조·연식·임대차·권리관계·제한 등)</span>
+          <textarea id="fDetail" placeholder="아는 만큼 적어 주세요. 부족한 항목은 AI가 3개씩 되묻습니다."></textarea></label>
+      </div>
+      <p id="coHint" class="hide" style="margin-top:8px;color:var(--txt3);font-size:12.5px">기업은 재무상태표·손익계산서·현금흐름표(최근 3개 사업연도 이상)를 채팅창의 첨부 버튼으로 올려 주세요. 첨부가 없으면 잠정 검토만 가능합니다.</p>
+      <button class="btn" id="btnStart">입력 내용으로 1단계 시작</button>
+      <button class="btn sec" id="btnReset">진행 초기화</button>
+    </div>
+
+    <div class="progress" id="progress"></div>
+    <div id="steps"></div>
+
+    <div class="conf-block" style="margin-top:16px">
+      <h3>대화로 진행</h3>
+      <div id="startChatMount"></div>
+    </div>
+    <div class="limits">진행 표시는 AI 응답의 상태 줄을 읽어 갱신합니다. 시장가치 시산은 참고 범위이며 감정평가가 아닙니다. 평가액 결정과 감정평가서 발급은 감정평가사가 합니다.</div>
+  </section>
+
+  <section class="panel" id="p-guide">
+    <div class="conf-block"><h3>기업·지분</h3>
+      <ul style="margin-left:18px"><li>재무제표를 정상화한 뒤 위험을 <b>국가 → 산업 → 기업</b> 순서로 대입해 할인율 구성표를 만듭니다.</li><li>수익환원법을 중심으로 시장배수·순자산 접근으로 시산을 검증합니다.</li></ul></div>
+    <div class="conf-block"><h3>부동산</h3>
+      <ul style="margin-left:18px"><li>인근 유사 부동산의 거래 이력과 함께 국가 부동산 시장 추세, 인구 변동, 지역 경제 지표, 범죄율, 교육·의료·시장 인프라를 요인별로 검토합니다.</li><li>이미 거래 가격에 반영된 요인은 다시 가산하지 않습니다.</li></ul></div>
+    <div class="conf-block"><h3>동산·상품·서비스</h3>
+      <ul style="margin-left:18px"><li>유형·무형 상품은 시장 가격 동향과 거래 사례, 감가·진부화를 중심으로 봅니다.</li><li>서비스는 감정평가 대상이 아닐 수 있어 참고 의견으로 한정합니다.</li></ul></div>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
+<script src="/assets/chat-widget.js"></script>
+<script>
+(function(){
+  var STEPS=[
+   {k:'V-1',t:'대상물 정보 입력',s:'유형·목적·기준시점·대상 특정과 핵심 자료 확인 (기업은 재무제표 첨부)',l:['평가 목적·가치 기준·기준시점','권리관계·이용상황·제한','이해충돌·평가 범위 확인'],g:''},
+   {k:'V-2',t:'감정 — 가치 판정 과정',s:'유형별 방법으로 가치 요인을 분석하고 시산을 구성',l:['기업: 국가 위험 → 산업 위험 → 기업 위험 순차 대입','부동산: 거래 이력 + 시장 요인(인구·경제·치안·교육·의료·인프라)','상품: 시장 가격 동향과 감가'],g:''},
+   {k:'V-3',t:'시장가치 시산',s:'방법별 시산·합리성 검토·민감도와 참고 범위',l:['방법 간 차이와 가정의 민감도','참고 시산 범위 (평가액은 감정평가사 확정)','한계·미확인 사항'],g:'감정평가사 확정 대기'}
+  ];
+  var KEY='valopt_state_v1', st={cur:0,done:{}};
+  function load(){try{var v=JSON.parse(localStorage.getItem(KEY)||'null');if(v&&typeof v.cur==='number')st=v;}catch(e){}}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}}
+  function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on');},2200);}
+  function render(){
+    var pg=document.getElementById('progress'),box=document.getElementById('steps');pg.innerHTML='';box.innerHTML='';
+    STEPS.forEach(function(s,i){
+      var done=!!st.done[i],cur=i===st.cur;
+      var p=document.createElement('div');p.className='pg'+(done?' done':'')+(cur?' cur':'');p.innerHTML='<b>'+s.k+'</b>'+s.t;pg.appendChild(p);
+      var d=document.createElement('div');d.className='verdict-step'+(done?' done':'')+(cur?' cur open':'');
+      d.innerHTML='<div class="step-head"><span class="step-tag">'+s.k+'</span><span class="step-title">'+s.t+'</span><span class="step-state">'+(done?'완료':cur?'진행 중':'대기')+'</span></div>'+
+        '<div class="step-body"><p>'+s.s+'</p><ul>'+s.l.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>'+(s.g?'<span class="gate">'+s.g+'</span>':'')+
+        '<div class="step-complete">✓ 이 단계가 완료된 것으로 표시되었습니다.</div></div>';
+      d.querySelector('.step-head').onclick=function(){d.classList.toggle('open');};
+      box.appendChild(d);
+    });
+  }
+  function parse(reply){
+    var m=/\[감정평가사 보조 AI\s*\|\s*가치평가 트랙\s*\|\s*현재:\s*V-([1-3])/.exec(reply||'');
+    if(!m)return;
+    var n=parseInt(m[1],10)-1;
+    for(var i=0;i<n;i++)st.done[i]=true;
+    st.cur=n;save();render();
+  }
+  function send(t){
+    var w=window.HondiChatWidget;
+    if(w&&w.send&&!(w.isBusy&&w.isBusy())){w.send(t);}else{toast('채팅창 준비 중이거나 응답 중입니다. 잠시 후 다시 눌러 주세요.');}
+  }
+  var HINTS={
+    re:['(소재지·지번·건물명)','(면적·용도·구조·연식·임대차·권리관계·제한 등)'],
+    mv:['(종류·규격·수량 등)','(연식·상태·사용 이력·소유·보관 위치 등)'],
+    gd:['(상품명·규격)','(수량·상태·거래 시장·최근 거래가 등)'],
+    ig:['(권리명·등록번호)','(권리 범위·잔존 기간·사용 계약·수익 귀속 등)'],
+    co:['(기업명·사업자 정보·평가 대상 지분)','(업종·설립·사업 계획·지분 구조·주요 이슈 등)'],
+    sv:['(서비스명·제공자)','(계약 구조·매출 지속성·대체 가능성 등)'],
+    ot:['(대상 설명)','(특성·상태·권리관계 등)']
+  };
+  document.getElementById('fType').onchange=function(){
+    var h=HINTS[this.value]||HINTS.ot;
+    document.getElementById('hTarget').textContent=h[0];document.getElementById('hDetail').textContent=h[1];
+    document.getElementById('coHint').classList.toggle('hide',this.value!=='co');
+  };
+  document.getElementById('btnStart').onclick=function(){
+    var sel=document.getElementById('fType'),ty=sel.options[sel.selectedIndex].text;
+    var g=function(id){return document.getElementById(id).value.trim();};
+    send('가치평가 트랙(STEP V)을 시작합니다. 이용자: '+g('fRole')+' / 대상물 유형: '+ty+' / 평가 목적: '+(g('fPurpose')||'(미입력)')+' / 기준시점: '+(g('fDate')||'(미정)')+' / 대상: '+(g('fTarget')||'(미입력)')+' / 상세: '+(g('fDetail')||'(미입력)')+'. V-1부터 진행해 주시고 부족한 항목은 3개 이내로 먼저 물어봐 주세요.');
+  };
+  document.getElementById('btnReset').onclick=function(){st={cur:0,done:{}};save();render();toast('진행 표시를 초기화했습니다.');};
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'),function(b){b.onclick=function(){
+    Array.prototype.forEach.call(document.querySelectorAll('.tab'),function(x){x.classList.toggle('active',x===b);});
+    document.getElementById('p-run').classList.toggle('active',b.dataset.tab==='run');
+    document.getElementById('p-guide').classList.toggle('active',b.dataset.tab==='guide');};});
+  setInterval(function(){var c=document.getElementById('clock');if(c)c.textContent=new Date().toLocaleTimeString('ko-KR',{hour12:false,timeZone:'Asia/Seoul'});},1000);
+  load();render();
+  window.ValOpt={parse:parse};
+})();
+</script>
+</body>
+</html>
