@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-21 18:11 KST · 기준 커밋 d2ad4a99
+- 갱신: 2026-10-21 18:21 KST · 기준 커밋 d34cd32b
 - 전문가 페르소나 전용 페이지 145개 · 등록된 SP 866건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-21 feat(sp): family A (law/finance) assistant personas - STEP W document-writing track for financial-planner, loss-adjuster, labor-attorney, customs-broker
 - 2026-10-21 Merge pull request #732 from Openhash-Gopang/feature/legal-terms-privacy-draft
 - 2026-10-21 docs(legal): 전문가용 AI 서비스 이용약관·개인정보 처리방침 초안 (법률 검토 전)
 - 2026-10-21 feat(sp): health-care assistant personas (19) STEP W document-writing track (SP v1.1) + shared 9-stage page + hero buttons
@@ -43,7 +44,6 @@
 - 2026-10-19 Merge pull request #709 from Openhash-Gopang/feat/gov-agency-round8
 - 2026-10-19 feat: 도시계획·도시재생·상하수도·안전총괄 조사, 열린 문제 #27~#31
 - 2026-10-19 Merge pull request #708 from Openhash-Gopang/feat/gov-agency-round7
-- 2026-10-19 feat: 건설과·주택과·교통행정과 조사, 서버 담당자 전달 문서, 열린 문제 #23~#26
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
