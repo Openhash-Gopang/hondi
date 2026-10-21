@@ -6,7 +6,7 @@ SP 카탈로그에서 현재 전문가용 SP(-assistant)를 찾아, 직역마다
 사용:  python3 scripts/gen-review-packages.py          # 생성
        python3 scripts/gen-review-packages.py --check  # 저장소의 시트가 SP와 같은지 검사(다르면 종료코드 1)
 """
-import json, re, subprocess, sys
+import json, os, re, subprocess, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -47,7 +47,9 @@ def section(text, start_re, end_re):
 
 
 def catalog(fname):
-    r = subprocess.run([sys.executable, str(ROOT / 'scripts/gen-expert-pages.py'), '--catalog-json', str(ROOT / 'prompts' / fname)], capture_output=True, text=True, encoding='utf-8')
+    # Windows 에서 하위 프로세스의 stdout 이 cp949 로 나가 UTF-8 해석에 실패하던 문제(2026-10-21) — 하위 프로세스를 UTF-8 로 고정한다.
+    env = dict(os.environ, PYTHONUTF8='1', PYTHONIOENCODING='utf-8')
+    r = subprocess.run([sys.executable, '-X', 'utf8', str(ROOT / 'scripts/gen-expert-pages.py'), '--catalog-json', str(ROOT / 'prompts' / fname)], capture_output=True, text=True, encoding='utf-8', env=env)
     if r.returncode != 0:
         raise SystemExit(f'{fname}: 서류 목록 읽기 실패: {r.stderr}')
     return json.loads(r.stdout)

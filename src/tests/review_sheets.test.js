@@ -8,8 +8,10 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 test('검수 시트가 SP와 일치한다', (t) => {
-  if (spawnSync('python3', ['--version']).status !== 0) return t.skip('python3 없음');
-  const r = spawnSync('python3', ['scripts/gen-review-packages.py', '--check'], { cwd: ROOT, encoding: 'utf8' });
+  // Windows 는 python3 가 없고 python 만 있는 경우가 많다 — 둘 다 찾아본다.
+  const py = ['python3', 'python'].find((c) => spawnSync(c, ['--version']).status === 0);
+  if (!py) return t.skip('python 없음');
+  const r = spawnSync(py, ['scripts/gen-review-packages.py', '--check'], { cwd: ROOT, encoding: 'utf8' });
   assert.strictEqual(r.status, 0, (r.stdout || '') + (r.stderr || ''));
 });
 
