@@ -329,7 +329,10 @@ async function composeExpertPrompt() {
     }
   }
 
-  parts.push(await _loadSpRawByKey(def.key, def.label)
+  // 2026-10-21: 법무사·행정사 서류 작성하기(임베드)는 전문가용(-assistant) SP 를 쓴다 — 서류 작성 도구(STEP C·W)는 거기에만 있다.
+  const _spKey = (_embedOn() && _PRO_WRITE_PERSONAS.has(PERSONA)) ? def.key + '-assistant' : def.key;
+  window.__PRO_ASSISTANT_SP = _spKey !== def.key;
+  parts.push(await _loadSpRawByKey(_spKey, def.label)
     .catch(e => { throw new Error(`${def.label} SP 로드 실패: ` + e.message); }));
 
   return parts.join('\n\n---\n\n');
@@ -420,8 +423,20 @@ async function _pumpSSE(response, onJson) {
   }
 }
 
+const _PRO_WRITE_PERSONAS = new Set(['judicial-scrivener', 'administrative-scrivener']);
+let _proClientP = null;
+function _loadProClient() {
+  if (window.HondiPro) return Promise.resolve();
+  if (!_proClientP) _proClientP = new Promise((resolve) => { const s = document.createElement('script'); s.src = '/assets/pro-verify.js'; s.onload = resolve; s.onerror = resolve; document.head.appendChild(s); });
+  return _proClientP;
+}
+
 async function callExpertAI(messages, onChunk) {
   const candidates = _buildCandidates();
+  let proSession = null;
+  if (window.__PRO_ASSISTANT_SP) {
+    try { await _loadProClient(); if (window.HondiPro) proSession = await window.HondiPro.getSession(); } catch (eP) { console.warn('[Expert] 전문가 세션', eP); }
+  }
   const user = _loadUser();
   let lastErr = null;
   for (const c of candidates) {
@@ -437,13 +452,17 @@ async function callExpertAI(messages, onChunk) {
         ? await fetch(`${c.baseUrl}/deepseek`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...reqBody, guid: user?.ipv6 || null }),
+            body: JSON.stringify({ ...reqBody, guid: user?.ipv6 || null, pro_session: proSession || undefined }),
           })
         : await fetch(`${RELAY_ENDPOINT}/llm/relay`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ provider: c.provider, baseUrl: c.baseUrl, apiKey: c.apiKey, ...reqBody }),
+            body: JSON.stringify({ provider: c.provider, baseUrl: c.baseUrl, apiKey: c.apiKey, ...reqBody, pro_session: proSession || undefined }),
           });
+      if (window.__PRO_ASSISTANT_SP && c.provider !== 'legacy' && window.HondiPro && await window.HondiPro.isBlocked(resp.clone())) {
+        try { window.HondiPro.openPanel(); } catch (eO) {}
+        throw new Error('전문가용 AI는 면허 인증이 승인된 전문가만 쓸 수 있습니다. 열린 창에서 인증을 신청해 주세요.');
+      }
 
       let fullText = '';
       await _pumpSSE(resp, (json) => {
