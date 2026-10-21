@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-21 15:36 KST · 기준 커밋 5f017dff
+- 갱신: 2026-10-21 15:49 KST · 기준 커밋 34e52ee6
 - 전문가 페르소나 전용 페이지 144개 · 등록된 SP 864건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-21 feat(sp): tax-accountant-assistant v1.3 - STEP T-1A non-profit taxpayer rules
 - 2026-10-21 feat(sp): tax-accountant-assistant v1.2 - STEP T tax optimization track (7 stages) + tax-optimizer page
 - 2026-10-21 feat(patent): 변리사를 기본 이용자로 전환, 인간 변리사 최종 검토 단계(19단계) 추가
 - 2026-10-21 feat(patent): 변리사 보조 AI 신규 발명 특허 출원 준비 단계형 화면(18단계)
@@ -43,7 +44,6 @@
 - 2026-10-18 feat: place hero bid button in right empty space, vertically centered
 - 2026-10-18 feat: move bid button to hero center and rename to 지분 입찰 테스트
 - 2026-10-18 fix: remove accidental submodule gitlinks (estate, hondi) that break GitHub Pages build
-- 2026-10-18 fix: make form controls inherit Pretendard on equity bid test page
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
