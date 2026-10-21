@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-21 10:18 KST · 기준 커밋 e48668e4
+- 갱신: 2026-10-21 10:37 KST · 기준 커밋 cc38e7ed
 - 전문가 페르소나 전용 페이지 144개 · 등록된 SP 864건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-21 feat(patent): 변리사 보조 AI 신규 발명 특허 출원 준비 단계형 화면(18단계)
 - 2026-10-21 feat(sp): 변리사 보조 AI v1.3 — 발명 출원 트랙(STEP T) 통합 및 페이지 연결
 - 2026-10-19 Merge pull request #717 from Openhash-Gopang/feat/presentations-naviweb-announcement
 - 2026-10-19 feat: 프레젠테이션 나비웹 시리즈에 나비와 나비웹 안내(PDF) 추가, 기존 나비와 나비웹 안내서 대체
@@ -43,7 +44,6 @@
 - 2026-10-18 fix: make form controls inherit Pretendard on equity bid test page
 - 2026-10-18 feat: add equity bid system test page (not a real bidding) and header button on expert personas page
 - 2026-10-18 docs: add PDFs of plan and public-purpose docs; restructure consortium to 10 profession corporations, add public-interest safeguards doc and PDFs (5 pct auction, founder-held management, public-interest board)
-- 2026-10-18 docs: restructure consortium to 10 profession corporations, add public-interest safeguards doc and PDF (5 pct auction, founder-held management, public-interest board)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
