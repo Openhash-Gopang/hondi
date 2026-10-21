@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>절세 최적화 — 세무사 보조 AI</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--bg:#f8f9fa;--sur:#fff;--bdr:#e5e7eb;--bdr2:#d1d5db;--txt:#111827;--txt2:#374151;--txt3:#6b7280;--txt4:#9ca3af;
+--pri:#3ecf8e;--pri-dk:#2baa74;--pri-bg:#f0fdf9;--pri-bd:#bbf7d0;--side-bg:#f9fafb;--side-sel:#f3f4f6;--side-w:220px;--side-col:52px;--head-h:48px;
+--red:#ef4444;--red-bg:#fef2f2;--org:#f59e0b;--org-bg:#fffbeb;--blue:#3b82f6;--blue-bg:#eff6ff;
+--font:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;--r:10px;--r-lg:16px;--ease:cubic-bezier(.4,0,.2,1)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:14px;line-height:1.6}
+a{color:inherit;text-decoration:none}
+.topbar{position:fixed;top:0;left:0;right:0;height:var(--head-h);background:var(--sur);border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:14px;padding:0 16px;z-index:50}
+.topbar-brand{font-weight:700;color:var(--pri-dk)}
+.topbar-breadcrumb{color:var(--txt3);font-size:13px;flex:1}
+.topbar-right{display:flex;gap:12px;align-items:center;color:var(--txt3);font-size:12px}
+.notice-bar{position:relative;margin:calc(var(--head-h) + 0px) 0 0 var(--side-col);padding:7px 16px;background:var(--org-bg);border-bottom:1px solid #fde68a;color:#92400e;font-size:12.5px}
+.notice-bar+.notice-bar{margin-top:0;background:var(--blue-bg);border-color:#bfdbfe;color:#1e40af}
+.sidebar{position:fixed;top:var(--head-h);bottom:0;left:0;width:var(--side-col);background:var(--side-bg);border-right:1px solid var(--bdr);overflow:hidden;transition:width .2s var(--ease);z-index:40}
+.sidebar:hover{width:var(--side-w)}
+.sidebar-label{padding:14px 16px 6px;font-size:11px;color:var(--txt4);white-space:nowrap;opacity:0}
+.sidebar:hover .sidebar-label{opacity:1}
+.nav-item{display:flex;align-items:center;gap:12px;padding:9px 18px;color:var(--txt2);white-space:nowrap;border:0;background:none;width:100%;font:inherit;cursor:pointer}
+.nav-item:hover,.nav-item.active{background:var(--side-sel)}
+.nav-item.active{color:var(--pri-dk);font-weight:600}
+.nav-ico{width:16px;text-align:center;flex:none}
+.main{margin-left:var(--side-col);padding:20px 24px 80px;max-width:1080px}
+.page-header h1{font-size:22px;font-weight:700}
+.page-header p{color:var(--txt3);margin-top:4px}
+.tabs{display:flex;gap:4px;margin:16px 0;border-bottom:1px solid var(--bdr)}
+.tab{padding:8px 14px;border:0;background:none;font:inherit;color:var(--txt3);cursor:pointer;border-bottom:2px solid transparent}
+.tab.active{color:var(--pri-dk);border-color:var(--pri);font-weight:600}
+.panel{display:none}.panel.active{display:block}
+.progress{display:flex;gap:6px;margin:6px 0 18px;flex-wrap:wrap}
+.pg{flex:1;min-width:92px;padding:8px 10px;border:1px solid var(--bdr);border-radius:var(--r);background:var(--sur);font-size:12px;color:var(--txt3)}
+.pg b{display:block;color:var(--txt2);font-size:12.5px}
+.pg.done{background:var(--pri-bg);border-color:var(--pri-bd)}.pg.done b{color:var(--pri-dk)}
+.pg.cur{border-color:var(--pri);box-shadow:0 0 0 2px var(--pri-bd)}
+.verdict-step{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r-lg);margin-bottom:12px;overflow:hidden}
+.verdict-step.cur{border-color:var(--pri)}
+.step-head{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer}
+.step-tag{font-size:11px;font-weight:700;color:#fff;background:var(--txt4);border-radius:6px;padding:2px 8px}
+.verdict-step.cur .step-tag{background:var(--pri-dk)}
+.verdict-step.done .step-tag{background:var(--pri)}
+.step-title{font-weight:600;flex:1}
+.step-state{font-size:12px;color:var(--txt4)}
+.step-body{padding:0 16px 14px;color:var(--txt2);display:none}
+.verdict-step.open .step-body{display:block}
+.step-body ul{margin:6px 0 0 18px}
+.step-body li{margin:2px 0}
+.gate{display:inline-block;margin-top:8px;padding:2px 9px;border-radius:20px;font-size:12px;background:var(--org-bg);color:#92400e;border:1px solid #fde68a}
+.step-complete{display:none;margin-top:10px;padding:8px 12px;border-radius:var(--r);background:var(--pri-bg);border:1px solid var(--pri-bd);color:var(--pri-dk);font-size:13px}
+.verdict-step.done .step-complete{display:block}
+.conf-block{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:14px}
+.conf-block h3{font-size:14px;margin-bottom:8px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row label{flex:1;min-width:180px;font-size:12px;color:var(--txt3)}
+.row select,.row input{display:block;width:100%;margin-top:3px;padding:8px 10px;border:1px solid var(--bdr2);border-radius:8px;font:inherit;color:var(--txt);background:#fff}
+.btn{margin-top:12px;padding:9px 18px;border:0;border-radius:8px;background:var(--pri);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--pri-dk)}
+.btn.sec{background:#fff;color:var(--txt2);border:1px solid var(--bdr2);margin-left:6px}
+#startChatMount{min-height:420px;border:1px solid var(--bdr);border-radius:var(--r-lg);background:var(--sur);overflow:hidden}
+.toast{position:fixed;right:18px;bottom:18px;background:#111827;color:#fff;padding:10px 14px;border-radius:10px;font-size:13px;opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none;z-index:99}
+.toast.on{opacity:1;transform:none}
+.limits{font-size:12.5px;color:var(--txt3);margin-top:18px;padding:12px 14px;border:1px dashed var(--bdr2);border-radius:var(--r)}
+@media(max-width:720px){.main{padding:16px 14px 80px}.notice-bar{margin-left:0}.sidebar{display:none}.main{margin-left:0}}
+</style>
+<script>
+window.K_AUTH_CONFIG = { serviceLabel: "세무사 보조 AI" };
+window.HONDI_CHAT_WIDGET_CONFIG = {
+  sp: "SP_tax-accountant-assistant",
+  panelMode: "inline",
+  inlineMount: "#startChatMount",
+  mic: true,
+  camera: "touch",
+  maxTokens: 4096,
+  panelTitle: "절세 최적화 — 세무사 보조 AI",
+  label: "납세자 자격과 재무제표를 알려 주세요",
+  serviceLabel: "세무사 보조 AI",
+  greeting: "안녕하세요! 세무사 보조 AI입니다. 세무사·공인회계사님의 업무를 보조합니다. 납세자의 자격(개인·개인사업자·법인·중소기업·비영리 등)과 재무제표를 알려 주시면 ① 재무제표 분석 → ② 절세안 도출 → ③ 납세자 승인 → ④ 지출·비용 집행 기록 → ⑤ 세액 재계산 → ⑥ 세무사 최종 검토 → ⑦ 납부 준비 순서로 진행합니다. 모든 세액은 잠정 추정이며 확정은 세무사가 합니다.",
+  context: '사용자는 세무사 보조 AI의 「절세 최적화」 화면(7단계 진행 화면)에 있습니다. 이 화면의 주 이용자는 인증된 인간 세무사·공인회계사입니다. 이 화면의 요청은 SP의 STEP T(절세 최적화 트랙, T-1 재무제표 분석 → T-2 절세안 도출 → T-3 납세자 승인 → T-4 지출·비용 집행(준비·기록) → T-5 갱신 재무제표 기반 세액 계산 → T-6 세무사 최종 검토 → T-7 납부 준비)로 진행합니다. 매 응답 첫 줄에 SP가 정한 상태 줄을 표시하고 끝에 [NEXT_STEP: …]을 붙이세요. 세율·공제 요건은 조회로 확인하고, 세액은 확정하지 않으며, 집행·신고·납부는 납세자 또는 세무사·회계사가 본인 인증으로 직접 합니다.',
+  onReply: function (reply) { try { window.TaxOpt.parse(reply); } catch (e) { console.error(e); } }
+};
+</script>
+</head>
+<body>
+<header class="topbar">
+  <a class="topbar-brand" href="/pages/tax-accountant.html">Hondi · 세무사 보조 AI</a>
+  <div class="topbar-breadcrumb">홈 › 세무사 › 절세 최적화</div>
+  <div class="topbar-right"><span id="clock">--:--:--</span></div>
+</header>
+<div class="notice-bar" role="note"><strong>⚠️ 세무 자문이 아닌 보조 도구입니다.</strong> 이 도구는 세무사·공인회계사의 업무를 보조하며, 모든 세율·세액은 잠정 추정입니다. 확정과 신고·납부는 납세자 또는 세무사·회계사가 본인 인증으로 직접 합니다.</div>
+<div class="notice-bar" role="note"><strong>ℹ️ 안내:</strong> 지출을 늘려 줄어드는 세금은 지출액보다 작습니다. 사업상 필요 없는 지출은 권하지 않으며, 항목마다 순현금효과를 함께 표시합니다.</div>
+
+<nav class="sidebar" aria-label="메뉴">
+  <div class="sidebar-label">세무 도구</div>
+  <a class="nav-item" href="/pages/tax-accountant.html"><span class="nav-ico">📄</span><span>서류 작성</span></a>
+  <button class="nav-item active"><span class="nav-ico">⚖️</span><span>절세 최적화</span></button>
+  <a class="nav-item" href="/"><span class="nav-ico">🏠</span><span>Hondi 홈</span></a>
+</nav>
+
+<main class="main">
+  <div class="page-header">
+    <h1>절세 최적화 7단계</h1>
+    <p>납세자의 자격과 재무제표로 세율을 산정하고, 필요한 지출·비용 조정으로 세부담을 줄이는 방안을 단계별로 진행합니다.</p>
+  </div>
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-tab="run">진행</button>
+    <button class="tab" data-tab="guide">단계 안내</button>
+  </div>
+
+  <section class="panel active" id="p-run">
+    <div class="conf-block">
+      <h3>납세자 기본 정보</h3>
+      <div class="row">
+        <label>납세자 유형
+          <select id="fType">
+            <option>개인(근로·종합소득)</option><option>개인사업자</option><option>영리법인(일반)</option>
+            <option>중소기업 법인</option><option>비영리법인·공익법인</option><option>기타(직접 설명)</option>
+          </select></label>
+        <label>과세기간
+          <input id="fYear" placeholder="예: 2026 사업연도"></label>
+        <label>이용자
+          <select id="fRole"><option>세무사</option><option>공인회계사</option><option>납세자 본인</option></select></label>
+      </div>
+      <button class="btn" id="btnStart">1단계 시작 — 재무제표 분석</button>
+      <button class="btn sec" id="btnReset">진행 초기화</button>
+    </div>
+
+    <div class="progress" id="progress"></div>
+    <div id="steps"></div>
+
+    <div class="conf-block" style="margin-top:16px">
+      <h3>대화로 진행</h3>
+      <div id="startChatMount"></div>
+    </div>
+    <div class="limits">이 화면의 진행 표시는 AI 응답의 상태 줄을 읽어 갱신합니다. 승인(3단계)과 세무사 검토(6단계)는 사람이 직접 확인해야 하며, 4단계 집행과 7단계 납부는 이 도구가 대신하지 않습니다.</div>
+  </section>
+
+  <section class="panel" id="p-guide">
+    <div class="conf-block"><h3>이 트랙이 하지 않는 일</h3>
+      <ul style="margin-left:18px"><li>세액·환급액을 확정하거나 결과를 보장하지 않습니다.</li><li>지출을 집행하거나 신고서를 제출하거나 세금을 대신 납부하지 않습니다.</li><li>실질 없는 지출, 가공·허위 증빙, 소급 계약은 제안하지 않습니다.</li><li>세율·공제 요건은 매번 조회하며, 조회하지 못한 값은 미확인으로 표시합니다.</li></ul></div>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
+<script src="/assets/chat-widget.js"></script>
+<script>
+(function(){
+  var STEPS=[
+   {k:'T-1',t:'재무제표 분석',s:'납세자 자격 분류, 재무제표 입력, 과세표준·적용 세율·한계세율 정리',l:['자격(개인·법인·중소기업·비영리) 분류','과세표준 추정과 세율 구간','이월결손금·기납부세액·한도 항목 확인'],g:''},
+   {k:'T-2',t:'최적 절세안 도출',s:'공제·감면 후보와 지출 조정안을 순현금효과와 함께 비교',l:['후보별 근거 법령·요건·증빙','예상 세부담 감소 범위와 순현금효과','위험(부인·사후관리·최저한세)과 확신도'],g:''},
+   {k:'T-3',t:'납세자 승인',s:'채택 항목을 납세자가 직접 승인·보류·제외',l:['항목별 승인 요청서','고액·특수관계·저확신 항목은 세무사 사전 확인'],g:'게이트 1 — 납세자 승인'},
+   {k:'T-4',t:'지출·비용 집행',s:'승인된 항목의 집행 계획·증빙 체크리스트와 실제 집행 기록 (집행은 사람이)',l:['귀속 시기와 사업연도 말 이전 집행 점검','증빙 확보 여부 기록'],g:''},
+   {k:'T-5',t:'갱신 재무제표로 세액 계산',s:'집행 결과를 반영한 잠정 세액과 기준 세부담 비교',l:['과세표준→산출세액→공제·감면→최저한세','계산 과정·출처 표시, 잠정 추정'],g:''},
+   {k:'T-6',t:'인간 세무사 최종 검토',s:'세무사(또는 세무대리 자격의 공인회계사)가 검토·수정·확정',l:['검토 패키지와 미확인 사항 목록','수정 시 T-5로 되돌아가 재계산'],g:'게이트 2 — 세무사 검토'},
+   {k:'T-7',t:'세금 납부',s:'확정 이후 납부 준비 자료 (신고·납부는 본인 인증으로 직접)',l:['세목·기한·납부 방법 안내','납부 기록과 증빙 보관'],g:''}
+  ];
+  var KEY='taxopt_state_v1', st={cur:0,done:{}};
+  function load(){try{var v=JSON.parse(localStorage.getItem(KEY)||'null');if(v&&typeof v.cur==='number')st=v;}catch(e){}}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}}
+  function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on');},2200);}
+  function render(){
+    var pg=document.getElementById('progress'),box=document.getElementById('steps');pg.innerHTML='';box.innerHTML='';
+    STEPS.forEach(function(s,i){
+      var done=!!st.done[i],cur=i===st.cur;
+      var p=document.createElement('div');p.className='pg'+(done?' done':'')+(cur?' cur':'');p.innerHTML='<b>'+s.k+'</b>'+s.t;pg.appendChild(p);
+      var d=document.createElement('div');d.className='verdict-step'+(done?' done':'')+(cur?' cur open':'');
+      d.innerHTML='<div class="step-head"><span class="step-tag">'+s.k+'</span><span class="step-title">'+s.t+'</span><span class="step-state">'+(done?'완료':cur?'진행 중':'대기')+'</span></div>'+
+        '<div class="step-body"><p>'+s.s+'</p><ul>'+s.l.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>'+(s.g?'<span class="gate">'+s.g+'</span>':'')+
+        '<div class="step-complete">✓ 이 단계가 완료된 것으로 표시되었습니다.</div></div>';
+      d.querySelector('.step-head').onclick=function(){d.classList.toggle('open');};
+      box.appendChild(d);
+    });
+  }
+  function parse(reply){
+    var m=/\[세무사 보조 AI\s*\|\s*절세 최적화 트랙\s*\|\s*현재:\s*T-([1-7])/.exec(reply||'');
+    if(!m)return;
+    var n=parseInt(m[1],10)-1;
+    for(var i=0;i<n;i++)st.done[i]=true;
+    st.cur=n;save();render();
+  }
+  function send(t){
+    var w=window.HondiChatWidget;
+    if(w&&w.send&&!(w.isBusy&&w.isBusy())){w.send(t);}else{toast('채팅창 준비 중이거나 응답 중입니다. 잠시 후 다시 눌러 주세요.');}
+  }
+  document.getElementById('btnStart').onclick=function(){
+    var t=document.getElementById('fType').value,y=document.getElementById('fYear').value.trim()||'(미입력)',r=document.getElementById('fRole').value;
+    send('절세 최적화 트랙(STEP T)을 시작합니다. 이용자: '+r+' / 납세자 유형: '+t+' / 과세기간: '+y+'. T-1 재무제표 분석부터 진행해 주세요. 필요한 자료를 3개 이내로 먼저 물어봐 주세요.');
+  };
+  document.getElementById('btnReset').onclick=function(){st={cur:0,done:{}};save();render();toast('진행 표시를 초기화했습니다.');};
+  Array.prototype.forEach.call(document.querySelectorAll('.tab'),function(b){b.onclick=function(){
+    Array.prototype.forEach.call(document.querySelectorAll('.tab'),function(x){x.classList.toggle('active',x===b);});
+    document.getElementById('p-run').classList.toggle('active',b.dataset.tab==='run');
+    document.getElementById('p-guide').classList.toggle('active',b.dataset.tab==='guide');};});
+  setInterval(function(){var c=document.getElementById('clock');if(c)c.textContent=new Date().toLocaleTimeString('ko-KR',{hour12:false,timeZone:'Asia/Seoul'});},1000);
+  load();render();
+  window.TaxOpt={parse:parse};
+})();
+</script>
+</body>
+</html>
