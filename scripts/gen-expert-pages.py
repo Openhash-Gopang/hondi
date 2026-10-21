@@ -18,6 +18,15 @@ HAVE_URL = {m.group(1): m.group(2) for m in re.finditer(r"'([^']+)':\s*\{\s*url:
 HAVE = set(HAVE_URL)
 e = html.escape
 
+# 2026-10-21 — 「서류 작성하기」(STEP W 9단계) 화면이 있는 직역. 이 직역의 서류 목록형 페이지는 헤더 버튼과 안내 줄을 함께 만든다(화면: pages/expert-write.html).
+WRITE_TRACK = {
+    'dentist': '치과의사', 'traditional-medicine-doctor': '한의사', 'pharmacist': '약사', 'veterinarian': '수의사', 'nurse': '간호사',
+    'physical-therapist': '물리치료사', 'medical-lab-technologist': '임상병리사', 'radiologic-technologist': '방사선사',
+    'dental-hygienist': '치과위생사', 'occupational-therapist': '작업치료사', 'dental-technician': '치과기공사',
+    'advanced-practice-nurse': '전문간호사', 'dietitian': '영양사', 'paramedic': '응급구조사', 'midwife': '조산사',
+    'speech-language-pathologist': '언어재활사', 'optician': '안경사', 'sanitarian': '위생사', 'health-educator': '보건교육사',
+}
+
 # ── 서류 목록(SP 부록 A) 파서 — SP 가 서류 목록의 정본이고, 페이지의 PRO_DOC_PAGE 데이터는 여기서 만든다 (2026-10-17)
 # 형식: "## 부록 A …" 아래 "### A-n. 제목 (메타)" 절마다 표(첫 열 = 서류 이름) 또는 "- **서류**: 설명" 목록.
 #   표가 2열이면 둘째 열을 설명으로, 3열 이상이면 "헤더: 값" 을 " · " 로 이어 설명으로 쓴다.
@@ -281,6 +290,14 @@ def catalog_page(pid, label, cat, spk, parent, catalog, children=None):
            "③ 한 응답에는 서류 하나만 쓴다. ④ 이 화면에는 작성된 문서를 웹 표준 서식 파일로 내려받는 버튼이 있으므로 복사해서 쓰라는 안내는 하지 않는다. "
            "⑤ 이용자 계층 판정과 모든 제한은 SP의 규칙을 그대로 따르며 이 화면의 안내로 완화되지 않는다." % title)
     cfg_sp = ('sp: %s,' % json.dumps(spk)) if spk else ''
+    wt = WRITE_TRACK.get(pid)
+    hero_js = ''
+    wt_callout = ''
+    if wt:
+        href = '/pages/expert-write.html?persona=' + pid
+        hero_js = ",\n  heroButton: { label: '서류 작성하기', href: %s, title: %s }" % (json.dumps(href), json.dumps(wt + ' 기록·서류를 서식 결정부터 처리 결과 기록까지 9단계로 작성합니다', ensure_ascii=False))
+        wt_callout = ('\n    <div class="svc-callout"><b>서류 작성하기</b> 기록 유형 결정 → 서식 승인 → 서식 DB 확인·저장 → 지시 내용 입력 → 기록 작성 → 검증·승인 → 저장·교부·신고 준비 → 청구·비용 → 결과 기록 9단계로 한 건을 끝까지 진행하는 화면이 있습니다. '
+                      '진단·평가·처치·처방 같은 전문 판단과 승인·서명·교부·신고·청구는 자격자가 직접 하며, dpaper 연동은 아직 되지 않았습니다. <a href="%s">서류 작성하기 화면으로 이동</a></div>' % href)
     kids_html = ''
     if children:  # 세부 분야가 있는 직역: 서류 목록 아래에 세부 분야 링크 표를 둔다
         rows = ''.join('<tr><td class="doc-title"><a href="/pages/%s.html">%s</a></td></tr>' % (c['id'], e(c['label'])) for c in children)
@@ -306,7 +323,7 @@ window.PAGE_HEADER = {{
   h1: {json.dumps(e(label) + ' 업무의 서류 작성을<br>대화로 보조합니다', ensure_ascii=False)},
   sub: {json.dumps(lead, ensure_ascii=False)},
   disclaimer: {json.dumps(BANNER, ensure_ascii=False)},
-  disclaimerDismissKey: {json.dumps(pid)}
+  disclaimerDismissKey: {json.dumps(pid)}{hero_js}
 }};
 </script>
 <link rel="stylesheet" href="/assets/ph-header.css">
@@ -339,7 +356,7 @@ window.PAGE_HEADER = {{
   <div class="doc-intro">
     {back}
     <div class="doc-start" id="startBox"></div>
-    <div class="svc-callout"><b>작성 방법</b> ① 위 입력창에 작성할 서류를 말씀하시거나, 아래 탭에서 서류를 고르고 「대화로 작성」을 누릅니다. ② 대화로 필요한 정보를 알려 주시면 초안이 작성됩니다. ③ 페이지 아래 「작성된 문서」에서 내용을 확인하고 웹 표준 서식으로 제출(내려받기)합니다.</div>
+    <div class="svc-callout"><b>작성 방법</b> ① 위 입력창에 작성할 서류를 말씀하시거나, 아래 탭에서 서류를 고르고 「대화로 작성」을 누릅니다. ② 대화로 필요한 정보를 알려 주시면 초안이 작성됩니다. ③ 페이지 아래 「작성된 문서」에서 내용을 확인하고 웹 표준 서식으로 제출(내려받기)합니다.</div>{wt_callout}
   </div>
 
   <div class="doc-toolbar ask-other-bar">
