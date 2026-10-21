@@ -53,6 +53,9 @@ WRITE_JUDGE = {'financial-planner': '재무 진단·상품 선택·투자 판단
     'chef': '식품 안전·위생 판단',
 }
 
+# 2026-10-21 — 서류 작성이 아니라 단계별 자문 화면이 있는 직역(구매자문 K-Advisor). 서류 목록 없는 일반 페이지(page())가 헤더 버튼을 만든다(화면: pages/advisor-steps.html).
+STEP_TRACK = {'advisor': ('/pages/advisor-steps.html', '구매자문(K-Advisor)을 사기 징후·이해관계 확인부터 정리본까지 7단계로 진행합니다')}
+
 # ── 서류 목록(SP 부록 A) 파서 — SP 가 서류 목록의 정본이고, 페이지의 PRO_DOC_PAGE 데이터는 여기서 만든다 (2026-10-17)
 # 형식: "## 부록 A …" 아래 "### A-n. 제목 (메타)" 절마다 표(첫 열 = 서류 이름) 또는 "- **서류**: 설명" 목록.
 #   표가 2열이면 둘째 열을 설명으로, 3열 이상이면 "헤더: 값" 을 " · " 로 이어 설명으로 쓴다.
@@ -230,6 +233,8 @@ def page(pid, label, cat, spk, triggers, parent=None, children=None, catalog=Non
         body = ''
     cfg_sp = ('sp: %s,' % json.dumps(spk)) if spk else ''
     greet = '안녕하세요! %s입니다. 작성하실 서류를 말씀해 주세요. 필요한 정보를 순서대로 여쭙고 초안 작성을 보조합니다.' % title
+    st_ = STEP_TRACK.get(pid)
+    hero_js = (",\n  heroButton: { label: '단계별 구매 자문', href: %s, title: %s }" % (json.dumps(st_[0]), json.dumps(st_[1], ensure_ascii=False))) if st_ else ''
     return f'''<!DOCTYPE html>
 <!-- scripts/gen-expert-pages.py 로 생성한 페이지 — 직접 고치지 말고 생성기를 고친다 -->
 <html lang="ko">
@@ -250,7 +255,7 @@ window.PAGE_HEADER = {{
   h1: {json.dumps(e(label) + ' 업무의 서류 작성을<br>대화로 보조합니다', ensure_ascii=False)},
   sub: {json.dumps(lead, ensure_ascii=False)},
   disclaimer: {json.dumps(BANNER, ensure_ascii=False)},
-  disclaimerDismissKey: {json.dumps(pid)}
+  disclaimerDismissKey: {json.dumps(pid)}{hero_js}
 }};
 </script>
 <link rel="stylesheet" href="/assets/ph-header.css">

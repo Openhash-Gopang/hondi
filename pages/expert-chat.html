@@ -1670,6 +1670,17 @@ if (_embedOn()) {
   try { window.parent.postMessage({ type: 'expert-embed-ready' }, location.origin); } catch (e) { /* 무시 */ }
 }
 
+// ── 단계별 구매 자문 진입 링크 (2026-10-21 신설) — 구매자문(K-Advisor)은 pages/advisor-steps.html 로 이어진다. 구매자 본인용 SP 라 전문가 인증 목록에 넣지 않는다.
+if (!_embedOn() && PERSONA === 'advisor') {
+  try {
+    const _aa = document.createElement('a');
+    _aa.href = '/pages/advisor-steps.html';
+    _aa.textContent = '단계별 구매 자문으로 진행';
+    _aa.style.cssText = 'position:fixed;right:14px;bottom:84px;z-index:30;padding:8px 14px;border-radius:20px;background:#3ecf8e;color:#fff;font-size:13px;font-weight:600;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.15)';
+    document.body.appendChild(_aa);
+  } catch (e) { /* 링크를 못 만들어도 대화는 그대로 */ }
+}
+
 // ── 단계별 상담 진입 링크 (2026-10-21 신설) — 교육·복지 상담형 10개 직역은 pages/expert-counsel.html 로 이어진다.
 // 상담형 SP 는 일반인용(전문가 인증 없음)이라 _PRO_WRITE_PERSONAS 에 넣지 않는다.
 const _COUNSEL_PERSONAS = new Set(['teacher', 'school-counselor', 'clinical-psychologist', 'mental-health-professional', 'social-worker', 'curator', 'librarian', 'youth-counselor', 'childcare-teacher', 'lifelong-educator']);
