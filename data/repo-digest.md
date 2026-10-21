@@ -1,9 +1,12 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-21 16:04 KST · 기준 커밋 d592c1b0
+- 갱신: 2026-10-21 16:51 KST · 기준 커밋 cc7ebffd
 - 전문가 페르소나 전용 페이지 144개 · 등록된 SP 864건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-21 feat(sp): K-Professor v1.6 learning track (STEP P, 10 stages) + common learning page
+- 2026-10-21 Merge pull request #724 from Openhash-Gopang/feature/pro-verify-w1
+- 2026-10-21 feat(pro-verify): 전문가 면허 인증 신청·수동 승인 API (W1-1~1-3)
 - 2026-10-21 feat(sp): appraiser-assistant v1.2 - STEP V valuation track + appraiser-valuation page
 - 2026-10-21 feat(sp): tax-accountant-assistant v1.3 - STEP T-1A non-profit taxpayer rules
 - 2026-10-21 feat(sp): tax-accountant-assistant v1.2 - STEP T tax optimization track (7 stages) + tax-optimizer page
@@ -41,9 +44,6 @@
 - 2026-10-19 feat: 행정기관 공통 페이지(gov-agency) — 페르소나 형태 통일, 임베드 엔진, 법률 검토 훅
 - 2026-10-18 feat: add plain-language guides, glossaries and table reading tips to equity bid tabs
 - 2026-10-18 feat: move equity bid tabs to header bottom with dark gray readable style
-- 2026-10-18 feat: add equity bid analysis pages with cost-adjusted share scenarios and header tabs
-- 2026-10-18 feat: place hero bid button in right empty space, vertically centered
-- 2026-10-18 feat: move bid button to hero center and rename to 지분 입찰 테스트
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
@@ -83,6 +83,7 @@
 - /pages/plan-architecture.html — K-Plan 아키텍처 — 나비 (Navi)
 - /pages/presentations.html — 나비 프레젠테이션
 - /pages/professional-ai.html — 전문 분야(기관) AI 및 전문가 AI
+- /pages/professor.html — 학습 트랙 — K-Professor
 - /pages/profile-assistant.html — 나비 프로필 작성
 - /pages/project-support-technical.html — 기술적 상세 — 국내 서버 전환 검토
 - /pages/project-support.html — 나비 프로젝트 지원 — 국내 AI 서버 구축
