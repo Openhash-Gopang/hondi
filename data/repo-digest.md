@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-21 17:37 KST · 기준 커밋 e23ffd0a
-- 전문가 페르소나 전용 페이지 145개 · 등록된 SP 864건
+- 갱신: 2026-10-21 17:53 KST · 기준 커밋 a6d5493a
+- 전문가 페르소나 전용 페이지 145개 · 등록된 SP 866건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-21 Merge pull request #730 from Openhash-Gopang/feature/scrivener-split
+- 2026-10-21 feat(sp): 법무사·행정사 SP 를 일반인용(안내)과 전문가용(-assistant)으로 분리
 - 2026-10-21 feat(sp): judicial/administrative scrivener STEP W document-writing track (9 stages) + common writing page + page layout refit
 - 2026-10-21 Merge pull request #728 from Openhash-Gopang/feature/pro-verify-frontend-w1
 - 2026-10-21 feat(pro-verify): 전문가 인증 신청 화면·pro_session 자동 첨부·관리자 승인 패널 (W1-6)
@@ -42,8 +44,6 @@
 - 2026-10-19 feat: 관광진흥·환경관리·공원녹지·마을활력 조사, 마을기업법 시행 정정 안내(taskNotes), 열린 문제 #18~#22
 - 2026-10-19 feat: 노인복지과·여성가족과·주민복지과 조사, 열린 문제 #15~#17
 - 2026-10-19 feat: 건축과·위생관리과·장애인복지과 조사, SP 없음 표시, 열린 문제 #11~#14
-- 2026-10-19 feat: task 연결 12건 확대(SP 선언 근거), 기초생활보장과 조사, 열린 문제 갱신
-- 2026-10-19 feat: 접수 연동 민원 탭(서버 task 레지스트리), 차량관리과 조사, 세무과 서식 번호 정정, SP 교차 점검
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
