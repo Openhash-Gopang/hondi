@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <link rel="stylesheet" href="/assets/pro-doc-page.css">
+<link rel="stylesheet" href="/assets/patent-flow.css">
 <title>변리사 보조 AI — 나비</title>
 </head>
 <body>
@@ -14,8 +15,8 @@
 window.PAGE_HEADER = {
   active: 'expert-personas',
   badge: '전문가 페르소나 · 변리사 보조 AI',
-  h1: '변리사 업무 서류를<br>대화로 작성해 웹 표준 서식으로 제출합니다',
-  sub: '작성할 서류를 목록에서 고르거나 아래 입력창으로 요청하면, 필요한 정보를 물어 서류 초안을 작성합니다.',
+  h1: '신규 발명의 특허 출원을<br>단계별로 준비합니다',
+  sub: '핵심 아이디어를 입력하면 선행기술 조사, 차별화, 명세서·도면·청구항, 출원서까지 18단계로 안내합니다. 제출과 수수료 납부는 변리사 또는 본인이 직접 합니다. 그 밖의 서류는 아래 대화로 작성합니다.',
   disclaimer: '관계 법령에 따라, 모든 보조 AI는 인간 전문가의 업무를 보조하며, 단독으로 기능하지 않는다. 작성된 초안은 변리사의 검토·확정 전에는 사용할 수 없다.',
   disclaimerDismissKey: 'patent-attorney'
 };
@@ -46,6 +47,10 @@ window.PAGE_HEADER = {
 <script src="/assets/chat-widget.js"></script>
 
 <div class="ug-doc">
+
+  <section class="pf-root" id="pfRoot" aria-label="신규 발명 특허 출원 준비 단계"></section>
+
+  <div class="pf-other-hd">그 밖의 서류 작성 — 목록에서 고르거나 대화로 요청</div>
 
   <div class="doc-intro">
     <div class="doc-start" id="startBox"></div>
@@ -99,6 +104,7 @@ window.PRO_DOC_PAGE = {"catalog":[{"id":"A-1","tab":"특허·실용신안 출원
 </script>
 <script src="/assets/md-view.js"></script>
 <script src="/assets/pro-doc-page.js"></script>
+<script src="/assets/patent-flow.js"></script>
 <script src="/assets/start-field.js"></script>
 </body>
 </html>
