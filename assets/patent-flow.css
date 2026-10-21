@@ -9,7 +9,7 @@
 /* 진행 표시 */
 .pf-prog { background: var(--surface, #fff); border: 1px solid var(--border, #e2e8f0); border-radius: var(--radius-lg, 12px); padding: 14px 16px; margin-bottom: 14px; }
 .pf-prog-hd { font-size: 15px; margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.pf-segs, .pf-groups { display: grid; grid-template-columns: repeat(18, 1fr); gap: 3px; }
+.pf-segs, .pf-groups { display: grid; grid-template-columns: repeat(19, 1fr); gap: 3px; }
 .pf-seg { height: 10px; border: 0; border-radius: 3px; background: var(--border, #e2e8f0); cursor: pointer; padding: 0; }
 .pf-seg.done { background: var(--brand, #0c6cc3); }
 .pf-seg.cur { background: var(--navy, #0e1c3f); box-shadow: 0 0 0 2px rgba(12, 108, 195, .35); }

@@ -4,7 +4,7 @@
    기반 SP: prompts/SP_patent-attorney-assistant (STEP T 발명 출원 트랙) — SP는 이 파일에 복제하지 않고 매 호출마다 매니페스트로 받는다.
 
    ■ 이 화면이 하지 않는 일 (SP §LEGAL-LIMIT): 지식재산처에 제출하지 않고, 수수료를 납부하지 않고, 서명·날인하지 않는다.
-     17·18단계는 변리사 또는 이용자 본인이 직접 하는 일의 안내와 완료 기록이다.
+     18·19단계는 변리사 또는 이용자 본인이 직접 하는 일의 안내와 완료 기록이고, 17단계는 이 화면 밖에서 이루어지는 인간 변리사의 최종 검토 결과를 기록하는 단계다.
    ■ 평가 수치(PRI)는 참고 지표다. 사용자 등급(L2·L3)이 플랫폼 인증으로 확인된 경우(window.PATENT_FLOW_TIER)에만 수치를 보인다.
    ■ 검색은 워커의 POST /web-search(스니펫 상위 5건)뿐이다. 청구항 원문은 이용자가 첨부해야 "원문 확인"이 되며, 그렇지 않으면 조사확신도에 상한이 걸린다. */
 (function () {
@@ -32,10 +32,11 @@
     { id: 'claims',    n: 14, g: 4, t: '청구항 작성',                   kind: 'auto' },
     { id: 'claimeval', n: 15, g: 4, t: '청구범위·권리 확보 수준 평가',  kind: 'auto' },
     { id: 'confirm',   n: 16, g: 5, t: '최종 출원서 확정',              kind: 'user' },
-    { id: 'submit',    n: 17, g: 5, t: '출원서 제출 (직접)',            kind: 'manual' },
-    { id: 'fee',       n: 18, g: 5, t: '수수료 납부 (직접)',            kind: 'manual' }
+    { id: 'attorney',  n: 17, g: 5, t: '인간 변리사 최종 검토',          kind: 'user' },
+    { id: 'submit',    n: 18, g: 5, t: '출원서 제출 (직접)',            kind: 'manual' },
+    { id: 'fee',       n: 19, g: 5, t: '수수료 납부 (직접)',            kind: 'manual' }
   ];
-  var GROUPS = ['', '아이디어 입력', '선행기술·차별화', '명세서', '도면·청구범위', '출원·납부'];
+  var GROUPS = ['', '아이디어 입력', '선행기술·차별화', '명세서', '도면·청구범위', '검토·출원·납부'];
   var SEV_W = { Critical: 5, Major: 3, Minor: 1 };
 
   /* ───────── 유틸 ───────── */
@@ -138,7 +139,7 @@
 
   function fresh() {
     return {
-      v: 1, stage: 'idea', done: {}, round: 0, consent: false, who: 'self',
+      v: 1, stage: 'idea', done: {}, round: 0, consent: false, clientOk: false, who: 'attorney',   // 기본 이용자는 인간 변리사
       disclosure: { status: '', date: '' }, avoid: '', input: {},
       idea: { text: '', files: [] }, idr: '', idrOk: false,
       searches: [], docs: [], verified: {}, tasks: [], taskMd: '',
@@ -147,6 +148,7 @@
       figs: [], abstract: '', figDoc: '',
       claims: { body: '', mapping: '', v: 0 }, cdefects: [], creviews: [], claimScores: null,
       biblio: { who: 'person', name: '', addr: '', code: '', inventors: '' },
+      attorney: { type: 'self_attorney', name: '', firm: '', date: '', result: '', opinion: '', files: [], chk: {}, hist: [], skipped: false, typed: '' },
       confirmed: false, filing: { done: false, appNo: '', date: '' }, fee: { done: false, date: '', hits: [] }, docs_out: []
     };
   }
@@ -520,6 +522,7 @@
     prog('청구범위 작성 중…', 35);
     var fb = S.cdefects.filter(function (d) { return d.status === 'open'; });
     var input = '[최종 명세서]\n' + S.spec.body + '\n\n' + cmpBlock() + '\n\n[차별 구성 후보]\n' + ((S.cmp && S.cmp.gaps) || []).join('; ') + '\n\n[도면 부호]\n' + (S.figParts || '') + (fb.length ? '\n\n[이전 청구범위 검토에서 지적된 미해결 결함 — 반영할 것]\n' + fb.map(function (d) { return d.id + ' (' + d.sev + ') ' + d.loc + ' — ' + d.desc; }).join('\n') + '\n[직전 청구범위]\n' + S.claims.body : '');
+    if (S.claims.feedback) { input += '\n\n[인간 변리사 검토 의견 — 반드시 반영할 것. 이용자가 말하지 않은 구성은 추가하지 않는다]\n' + S.claims.feedback + (fb.length ? '' : '\n[직전 청구범위]\n' + S.claims.body); S.claims.feedback = ''; }
     var sec = parseSections(await llm(CTX_CLAIMS, input, { max: 5000 }));
     if (!sec.CLAIMS || sec.CLAIMS.length < 60) throw new Error('청구범위를 충분히 쓰지 못했습니다.');
     S.claims.v++; S.claims.body = sec.CLAIMS; S.claims.mapping = sec.MAP || ''; S.claims.ladder = sec.LADDER || '';
@@ -614,6 +617,9 @@
       S.done.claimeval = true; go('confirm'); return;
     }
     if (name === 'confirm') return confirmFiling();
+    if (name === 'atty-record') return recordAttorney();
+    if (name === 'atty-rework') return attorneyRework(id);
+    if (name === 'atty-waive') return waiveAttorney();
     if (name === 'dl-all') return dl('출원준비_패키지_' + today().replace(/-/g, '') + '.html', allDocsHtml(), 'text/html;charset=utf-8');
     if (name === 'dl-fig') { var f = S.figs.filter(function (x) { return String(x.no) === id; })[0]; if (f) dl('도' + f.no + '_' + f.title.replace(/[^\w가-힣]+/g, '_') + '.svg', f.svg, 'image/svg+xml'); return; }
     if (name === 'filed') return recordFiled();
@@ -637,13 +643,14 @@
     if (!S.disclosure.status) m.push('공개 이력(논문·전시·판매·SNS 등)이 있는지 선택해 주세요. 신규성에 직결됩니다.');
     if (S.disclosure.status === 'yes' && !S.disclosure.date) m.push('공개한 날짜를 적어 주세요(대략도 괜찮습니다).');
     if (!S.consent) m.push('기밀 고지에 동의해 주세요.');
+    if (A() && !S.clientOk) m.push('발명자(의뢰인)에게 AI 도구 사용을 알리고 필요한 동의를 받았는지 확인(체크)해 주세요. 변리사는 의뢰인 정보에 대한 비밀유지 의무가 있습니다.');
     if (m.length) { S.formErr = m; render(); return; }
     S.formErr = null; S.done.idea = true; go('search');
   }
   function submitIdeas(kind) {
     var txt = String((S.input && S.input[kind]) || '').trim(), files = (S.pend && S.pend[kind]) || [];
     if (txt.length < 20 && !files.length) { S.formErr = ['차별화(보완) 아이디어를 20자 이상 적거나 자료를 첨부해 주세요.']; render(); return; }
-    if (kind === 'diff' && !S.idrOk) { S.formErr = ['정리된 발명 특정서가 내가 말한 내용과 일치하는지 확인(체크)해 주세요.']; render(); return; }
+    if (kind === 'diff' && !S.idrOk) { S.formErr = [A() ? '정리된 발명 특정서가 발명자에게 확인한 내용과 일치하는지 확인(체크)해 주세요.' : '정리된 발명 특정서가 내가 말한 내용과 일치하는지 확인(체크)해 주세요.']; render(); return; }
     S.formErr = null;
     S.ideas.push({ kind: kind, round: kind === 'diff' ? 0 : S.round, text: txt, files: files.map(function (f) { return { name: f.name, text: f.text || '' }; }) });
     S.input[kind] = ''; S.pend[kind] = [];
@@ -660,6 +667,80 @@
     S.docs.forEach(function (d) { by[d.ref] = d; });
     (ana.docs || []).forEach(function (a) { var d = by[a && a.ref]; if (d) { d.relevance = ['high', 'mid', 'low'].indexOf(a.relevance) >= 0 ? a.relevance : d.relevance; d.note = String(a.note || d.note).slice(0, 300); } });
     S.cmp = { round: S.round, md: String(ana.comparison_md || ''), gaps: Array.isArray(ana.key_gaps) ? ana.key_gaps.slice(0, 8).map(String) : [], limits: String(ana.limits || '') };
+  }
+
+
+  /* ═════════════════ 인간 변리사 최종 검토 (이 화면 밖에서 이루어지는 일의 요청서 작성과 결과 기록) ═════════════════ */
+  var RESULT = { ok: '적합(그대로 출원)', minor: '경미한 수정 후 출원', major: '중대한 수정 필요', hold: '출원 보류' };
+  function attyLine() {
+    var a = S.attorney;
+    if (a.skipped) return '- 인간 변리사 최종 검토: 생략(본인 출원, 이용자가 위험을 이해하고 진행 — 기록됨)';
+    if (!a.result || !S.done.attorney) return '- 인간 변리사 최종 검토: 미완료(제출 전 필요)';
+    return '- 인간 변리사 최종 검토: ' + a.name + (a.firm ? '(' + a.firm + ')' : '') + ' · ' + RESULT[a.result] + ' · 검토일 ' + a.date + (a.files && a.files.length ? ' · 수정본·의견서 첨부 ' + a.files.length + '건' : '');
+  }
+  function pushSummary() {
+    var g1 = S.priHist.length ? S.priHist[S.priHist.length - 1] : null, sm = specMetrics(), cm = claimMetrics(), cv = coverage();
+    var sum = ['### 서류 목록·제출 순서', S.docs_out.filter(function (d) { return d.type !== '00_사안요약'; }).map(function (d, i) { return (i + 1) + '. ' + d.type; }).join('\n'), '',
+      '### 진행 기록', '- 차별화 라운드: ' + S.round + '회 / 내부 착수 기준 판정: ' + (g1 ? (g1.gate ? '통과' : '미통과') : '기록 없음'),
+      '- 선행기술 조사: 국내 ' + cv.dom + ' · 해외 ' + cv.foreign + ' · 비특허 ' + cv.np + ' 질의 성공, 청구항 원문 확인 ' + Object.keys(S.verified).length + '건(없으면 검색 스니펫 기준)',
+      '- 명세서 독립 검토: ' + sm.rounds + '회(서로 다른 AI 모델 ' + sm.models + '종), 결함 제거율 ' + Math.round(sm.rate * 100) + '%(참고 지표), 미해결 핵심 결함 ' + sm.openCritical + '건',
+      '- 청구범위 독립 검토: ' + cm.rounds + '회(서로 다른 AI 모델 ' + cm.models + '종), 미해결 핵심 결함 ' + cm.openCritical + '건', attyLine(), '- ' + waiverNote(), '',
+      '### 제출 전 체크리스트', '- [ ] 출원서 서지·발명자·출원인 일치', '- [ ] 도면 부호가 명세서 "부호의 설명"과 일치', '- [ ] 선행기술문헌 기재 확인(원문 확인 여부)', '- [ ] 인간 변리사의 최종 검토 완료와 청구범위 최종 확정', '- [ ] 공개 이력·공지예외 서류', '- [ ] 수수료 확인(현행 징수규칙)', '- [ ] 제출·납부는 출원인 본인 또는 변리사가 특허로에서 직접', '',
+      '이 도구는 지식재산처에 제출하거나 수수료를 납부하지 않으며, 평가 수치는 참고 지표입니다.'].join('\n');
+    var t2 = '00_사안요약 — ' + inventionTitle();
+    pushDoc('00_사안요약', t2, buildDoc({ type: '00_사안요약', title: t2, overview: '제출 서류가 아닌 내부 요약입니다.', body: sum, attach: attachList() }));
+  }
+  function pushReviewRequest() {
+    var last = S.creviews[S.creviews.length - 1], c = coverage(), sm = specMetrics(), cm = claimMetrics(), p = S.priHist[S.priHist.length - 1];
+    var all = S.defects.concat(S.cdefects), openD = all.filter(function (d) { return d.status === 'open'; }), rejD = all.filter(function (d) { return d.status === 'rejected'; });
+    var oi = openItems(S.spec.body) + openItems(S.claims.body);
+    var sc = last && last.scores ? Object.keys(CSC).map(function (k) { return CSC[k] + ': ' + ({ high: '높음', mid: '보통', low: '낮음' }[String(last.scores[k]).toLowerCase()] || '불명'); }).join(' / ') : '(기록 없음)';
+    var body = ['### 검토를 요청드리는 이유', (A() ? '이 서류는 변리사 보조 AI가 담당 변리사의 업무를 보조하기 위해 발명자의 진술과 공개 검색 결과를 바탕으로 작성한 **초안**입니다. 청구범위의 확정, 기재요건과 선행기술의 판단, 기명날인과 제출은 변리사의 업무이므로 제출 전 담당 변리사의 최종 검토·확정을 위한 검토 포인트를 정리했습니다.' : '이 서류는 변리사 보조 AI가 이용자(본인 출원 준비)의 진술과 공개 검색 결과를 바탕으로 작성한 **초안**입니다. 청구범위의 확정, 기재요건과 선행기술의 판단, 제출은 변리사의 업무이므로 제출 전 최종 검토를 요청드립니다.'), '',
+      '### 검토 대상 서류', S.docs_out.filter(function (d) { return d.type.indexOf('00_') !== 0; }).map(function (d) { return '- ' + d.type + ' — ' + d.title; }).join('\n'), '',
+      '### 특히 확인해 주실 사항',
+      '- [ ] 청구범위: 독립항의 권리범위 설정과 종속항 계단(보정 대비). AI 독립 검토의 참고 의견 — ' + sc,
+      '- [ ] 기재요건: 실시가능·뒷받침·명확. 명세서·청구범위에 확인이 필요하다고 표시된 곳 ' + oi + '곳',
+      '- [ ] 선행기술: 이 조사는 검색 결과의 제목·스니펫 기준이며 청구항 원문을 확인한 문헌은 ' + Object.keys(S.verified).length + '건입니다. 핵심 문헌의 원문 대비가 필요합니다.',
+      '- [ ] 공개 이력: ' + disclosureLabel() + ' — 공지예외 주장 필요 여부와 증명서류',
+      '- [ ] 출원인 적격(직무발명·공동발명자·정부과제 여부)과 서지사항',
+      '- [ ] 도면 제출 규격, 서식, 우선권·심사청구 시기, 수수료 감면 여부', '',
+      '### AI 평가 기록(참고)',
+      '- 차별화 라운드 ' + S.round + '회, 내부 착수 기준: ' + (p ? (p.gate ? '도달' : '미도달') : '기록 없음') + (showNum() && p ? ' (참고 지표 ' + p.pri + ')' : ''),
+      '- 선행기술 조사: 국내 ' + c.dom + ' · 해외 ' + c.foreign + ' · 비특허 ' + c.np + ' 질의 성공',
+      '- AI 독립 검토: 명세서 ' + sm.rounds + '회, 청구범위 ' + cm.rounds + '회 — 같은 공급자의 서로 다른 모델이며 인간 변리사의 검토를 대체하지 않습니다.', '- ' + waiverNote(), '',
+      '### 미해결·반려된 AI 지적', (openD.length ? openD.map(function (d) { return '- 미해결 ' + d.id + ' (' + d.sev + ') ' + d.loc + ' — ' + d.desc; }).join('\n') : '- 미해결 지적 없음'),
+      (rejD.length ? rejD.map(function (d) { return '- 반려 ' + d.id + ' (' + d.sev + ') ' + d.desc + ' — 이용자 사유: ' + (d.reason || ''); }).join('\n') : ''), '',
+      '### 한계', '- 평가 수치와 결함 제거율은 참고 지표이며 특허성 판단의 확정이 아닙니다.', '- 이 도구는 변리사를 소개·연결하지 않으며 변리사의 등록 여부를 확인하지 않습니다.'].join('\n');
+    var t = '변리사 검토 요청서 — ' + inventionTitle();
+    pushDoc('00_변리사 검토 요청서', t, buildDoc({ type: '00_변리사 검토 요청서', title: t, overview: '제출 서류가 아닙니다. 검토하시는 변리사께 전달하는 요청서입니다.', body: body, attach: attachList() }));
+  }
+  function recordAttorney() {
+    var a = S.attorney, c = a.chk || {}, m = [];
+    if (!String(a.name || '').trim()) m.push('검토한 변리사의 성명을 적어 주세요.');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(a.date || '').trim())) m.push('검토일을 날짜(YYYY-MM-DD)로 입력해 주세요.');
+    if (!RESULT[a.result]) m.push('검토 결과를 선택해 주세요.');
+    if (!c.a || !c.b) m.push('변리사가 청구범위와 선행기술·공개 이력을 직접 검토했다는 확인(체크 두 개)이 필요합니다.');
+    if (a.result === 'minor' && !c.c) m.push('경미한 수정 사항을 모두 반영했다는 확인이 필요합니다.');
+    if ((a.result === 'major' || a.result === 'hold' || a.result === 'minor') && !String(a.opinion || '').trim() && !(a.files && a.files.length)) m.push('수정이 필요하거나 보류인 경우 변리사의 의견을 적거나 의견서·수정본을 첨부해 주세요.');
+    if (m.length) { S.formErr = m; render(); return; }
+    S.formErr = null; a.hist = a.hist || [];
+    a.hist.push({ name: a.name.trim(), firm: a.firm, type: a.type, date: a.date, result: a.result, opinion: a.opinion, files: (a.files || []).map(function (f) { return f.name; }) });
+    if (a.result === 'ok' || a.result === 'minor') { S.done.attorney = true; pushSummary(); go('submit'); }
+    else { S.done.attorney = false; save(); render(); }
+  }
+  function attorneyRework(target) {
+    var a = S.attorney, op = String(a.opinion || '').trim() || ((a.files || []).map(function (f) { return '[첨부 ' + f.name + '] ' + (f.text || '').slice(0, 3000); }).join('\n'));
+    var clear = target === 'review' ? ['review', 'specfinal', 'draw', 'claims', 'claimeval', 'confirm', 'attorney'] : ['claims', 'claimeval', 'confirm', 'attorney'];
+    clear.forEach(function (k) { delete S.done[k]; }); S.confirmed = false;
+    if (target === 'review') S.spec.notes = '[인간 변리사 검토 의견]\n' + op + (S.spec.notes ? '\n\n' + S.spec.notes : '');
+    else S.claims.feedback = op;
+    a.result = ''; a.chk = {}; a.opinion = ''; a.files = [];
+    go(target === 'review' ? 'review' : 'claims');
+  }
+  function waiveAttorney() {
+    if (S.who !== 'self') return;
+    if (String(S.attorney.typed || '').replace(/\s/g, '') !== '검토없이진행') { S.formErr = ['「검토 없이 진행」이라고 직접 입력해 주세요.']; render(); return; }
+    S.formErr = null; S.attorney.skipped = true; S.waived.push('Gate-3(인간 변리사 최종 검토 생략)'); S.done.attorney = true; pushSummary(); go('submit');
   }
 
   /* ═════════════════ 출원서 확정 · 제출 · 납부 ═════════════════ */
@@ -684,26 +765,19 @@
       '주민등록번호·사업자등록번호·인증정보는 이 문서에 적지 않습니다 — 특허로에서 출원인(또는 변리사)이 직접 입력합니다.'].join('\n');
     var t1 = '특허출원서 — ' + inventionTitle();
     pushDoc('특허출원서', t1, buildDoc({ type: '특허출원서', title: t1, overview: '서지사항은 이용자가 입력한 값이며 서식·수수료는 변리사(또는 본인)가 특허로의 현행 서식으로 확인합니다.', body: body, attach: attachList() }));
-    var g1 = S.priHist.length ? S.priHist[S.priHist.length - 1] : null, sm = specMetrics(), cm = claimMetrics();
-    var sum = ['### 서류 목록·제출 순서', S.docs_out.map(function (d, i) { return (i + 1) + '. ' + d.type; }).join('\n'), '',
-      '### 진행 기록', '- 차별화 라운드: ' + S.round + '회 / 내부 착수 기준 판정: ' + (g1 ? (g1.gate ? '통과' : '미통과') : '기록 없음'),
-      '- 선행기술 조사: 국내 ' + coverage().dom + ' · 해외 ' + coverage().foreign + ' · 비특허 ' + coverage().np + ' 질의 성공, 청구항 원문 확인 ' + Object.keys(S.verified).length + '건(없으면 검색 스니펫 기준)',
-      '- 명세서 독립 검토: ' + sm.rounds + '회(서로 다른 AI ' + sm.models + '종), 결함 제거율 ' + Math.round(sm.rate * 100) + '%(참고 지표), 미해결 핵심 결함 ' + sm.openCritical + '건',
-      '- 청구범위 독립 검토: ' + cm.rounds + '회(서로 다른 AI ' + cm.models + '종), 미해결 핵심 결함 ' + cm.openCritical + '건', '- ' + waiverNote(), '',
-      '### 제출 전 체크리스트', '- [ ] 출원서 서지·발명자·출원인 일치', '- [ ] 도면 부호가 명세서 "부호의 설명"과 일치', '- [ ] 선행기술문헌 기재 확인(원문 확인 여부)', '- [ ] 청구범위 최종 확정(변리사 또는 본인)', '- [ ] 공개 이력·공지예외 서류', '- [ ] 수수료 확인(현행 징수규칙)', '- [ ] 제출·납부는 출원인 본인 또는 변리사가 특허로에서 직접', '',
-      '이 도구는 지식재산처에 제출하거나 수수료를 납부하지 않으며, 평가 수치는 참고 지표입니다.'].join('\n');
-    var t2 = '00_사안요약 — ' + inventionTitle();
-    pushDoc('00_사안요약', t2, buildDoc({ type: '00_사안요약', title: t2, overview: '제출 서류가 아닌 내부 요약입니다.', body: sum, attach: attachList() }));
-    S.confirmed = true; S.done.confirm = true; go('submit');
+    pushReviewRequest(); pushSummary();
+    S.confirmed = true; S.done.confirm = true; go('attorney');
   }
   function allDocsHtml() {
     var css = 'body{font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif;line-height:1.75;max-width:860px;margin:32px auto;padding:0 16px;color:#111;font-size:16px}h1{font-size:1.5em}h2{font-size:1.25em;margin-top:1.4em}h3{font-size:1.1em}table{border-collapse:collapse;margin:8px 0}td,th{border:1px solid #cbd5e1;padding:5px 9px}pre{background:#f1f5f9;padding:10px;white-space:pre-wrap;word-break:break-word;font-size:.85em}section{margin:0 0 3em;padding-bottom:2em;border-bottom:3px double #94a3b8}.fig{margin:1em 0;text-align:center}.fig svg{max-width:100%;height:auto;border:1px solid #e2e8f0;background:#fff}.note{background:#fff7ed;border:1px solid #fed7aa;padding:10px;border-radius:6px}';
-    var parts = S.docs_out.map(function (d) {
+    var ordered = S.docs_out.filter(function (d) { return d.type.indexOf('00_') === 0; }).concat(S.docs_out.filter(function (d) { return d.type.indexOf('00_') !== 0; }));
+    var parts = ordered.map(function (d) {
       var m = d.md.replace(/^---\n[\s\S]*?\n---\n/, function (fm) { return '```\n' + fm.trim() + '\n```\n'; });
       return '<section>' + md(m) + '</section>';
     });
+    var atty = (S.attorney.hist && S.attorney.hist.length) ? '<section><h2>인간 변리사 검토 기록</h2>' + S.attorney.hist.map(function (x) { return '<p><b>' + esc(x.date) + '</b> · ' + esc(x.name) + (x.firm ? ' (' + esc(x.firm) + ')' : '') + ' · ' + esc(RESULT[x.result]) + '</p><pre>' + esc(x.opinion || '') + '</pre>'; }).join('') + '</section>' : '';
     var figs = S.figs.length ? '<section><h2>도면</h2>' + S.figs.map(function (f) { return '<div class="fig"><h3>도 ' + f.no + ' — ' + esc(f.title) + '</h3>' + f.svg + '</div>'; }).join('') + '</section>' : '';
-    return '<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>특허 출원 준비 패키지</title><style>' + css + '</style></head><body><p class="note"><b>DRAFT — 변리사 검토·확정 전 제출 불가.</b> 변리사 보조 AI가 작성한 초안입니다. 이 도구는 제출·납부를 하지 않으며 평가 수치는 참고 지표입니다.</p>' + parts.join('') + figs + '</body></html>';
+    return '<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>특허 출원 준비 패키지</title><style>' + css + '</style></head><body><p class="note"><b>DRAFT — 변리사 검토·확정 전 제출 불가.</b> 변리사 보조 AI가 작성한 초안입니다. 이 도구는 제출·납부를 하지 않으며 평가 수치는 참고 지표입니다.</p>' + parts.join('') + figs + atty + '</body></html>';
   }
   function recordFiled() {
     var no = String(S.input.appNo || '').trim(), dt = String(S.input.appDate || '').trim();
@@ -804,6 +878,14 @@
     if (last && last.scores) h += '<div class="pf-meter">' + Object.keys(CSC).map(function (k) { var v = String(last.scores[k] || '').toLowerCase(), good = k === 'priorart_risk' ? (v === 'low' ? 'ok' : v === 'high' ? 'bad' : 'mid') : (v === 'high' ? 'ok' : v === 'low' ? 'bad' : 'mid'); return '<div class="pf-m"><span>' + CSC[k] + '</span>' + chip({ high: '높음', mid: '보통', low: '낮음' }[v] || '불명', good) + '</div>'; }).join('') + '</div>' + (last.verdict ? '<p>' + esc(last.verdict) + '</p>' : '');
     return h + gate2Box(claimMetrics()) + defTable(S.cdefects) + '<p class="pf-sub">※ 권리 확보 수준은 독립 검토 AI의 참고 의견입니다. 권리범위의 확정은 변리사의 전속 책임입니다.</p>';
   }
+  function attyResult() {
+    var a = S.attorney, h = '';
+    if (a.skipped) return '<p>' + chip('검토 생략', 'warn') + ' 본인 출원으로 인간 변리사의 검토 없이 진행하는 것으로 기록되었습니다.</p>';
+    if (a.hist && a.hist.length) h += '<div class="pf-tw"><table class="pf-table"><thead><tr><th>검토일</th><th>검토자</th><th>결과</th><th>의견·첨부</th></tr></thead><tbody>' + a.hist.map(function (x) {
+      return '<tr><td>' + esc(x.date) + '</td><td>' + esc(x.name) + (x.firm ? '<div class="pf-sub">' + esc(x.firm) + '</div>' : '') + '</td><td>' + chip(RESULT[x.result], x.result === 'ok' ? 'ok' : x.result === 'minor' ? 'mid' : 'bad') + '</td><td>' + esc(String(x.opinion || '').slice(0, 300)).replace(/\n/g, '<br>') + (x.files && x.files.length ? '<div class="pf-sub">첨부: ' + x.files.map(esc).join(', ') + '</div>' : '') + '</td></tr>';
+    }).join('') + '</tbody></table></div>';
+    return h;
+  }
   function resultHtml(id) {
     switch (id) {
       case 'idea': return '<p>' + esc((S.idea.text || '').slice(0, 400)) + (S.idea.text.length > 400 ? '…' : '') + '</p><p class="pf-sub">공개 이력: ' + esc(disclosureLabel()) + ' · 첨부 ' + S.idea.files.length + '개</p>';
@@ -818,6 +900,7 @@
       case 'claims': return S.claims.body ? resClaims() : '';
       case 'claimeval': return resClaimEval();
       case 'confirm': return S.confirmed ? '<p>' + chip('확정됨', 'ok') + ' ' + esc(waiverNote()) + '</p>' : '';
+      case 'attorney': return attyResult();
       case 'submit': return S.filing.done ? '<p>제출 기록: ' + esc(S.filing.appNo || '(출원번호 미입력)') + ' · 출원일 ' + esc(S.filing.date) + '</p>' : '';
       case 'fee': return S.fee.done ? '<p>납부 기록: ' + esc(S.fee.date) + '</p>' : '';
     } return '';
@@ -839,11 +922,14 @@
       case 'claims': return S.done.claims && S.claims.body ? resClaims() : '';
       case 'claimeval': return (S.claims.body ? detail('청구범위 보기', md(S.claims.body)) : '') + (S.creviews.length ? resClaimEval() : '');
       case 'confirm': return S.docs_out.length ? '<p class="pf-sub">확정하면 특허출원서와 00_사안요약이 만들어집니다. 지금까지 작성된 서류: ' + S.docs_out.map(function (d) { return esc(d.type); }).join(' · ') + '</p>' : '';
+      case 'attorney': return (S.confirmed ? '' : '') + attyResult();
       case 'submit': return resultHtml('submit');
       case 'fee': return resultHtml('fee');
     }
     return '';
   }
+  var STEPS_N = STAGES.length;
+  function A() { return S.who !== 'self'; }   // 기본: 변리사 업무 보조(이용자 = 변리사). 'self'는 변리사가 아닌 발명자 본인의 출원 준비
   /* ── 단계별 안내문 ── */
   var INTRO = {
     idea: '발명의 핵심 아이디어를 적어 주세요. 무엇을 풀려는 발명인지, 어떤 구성으로 어떻게 해결하는지, 기존 방법과 무엇이 다른지가 구체적일수록 조사가 정확해집니다.',
@@ -862,24 +948,38 @@
     claims: '명세서에 뒷받침되는 청구범위를 씁니다. 독립항은 차별 구성을 포함하고, 종속항은 보정 대비 계단으로 구성합니다.',
     claimeval: '청구범위의 권리 확보 수준을 독립 검토 AI가 평가합니다(범위의 넓이·뒷받침·회피설계·종속항 안전망·선행기술 위험).',
     confirm: '출원서에 들어갈 서지사항을 입력하고 최종 확정합니다. 확정 이후에도 제출은 이용자(또는 변리사)가 직접 합니다.',
+    attorney: '출원 전 인간 변리사의 최종 검토를 받습니다. 나비는 변리사를 소개·연결하지 않으니, 직접 선택하신 변리사에게 아래 검토 요청 패키지를 전달하고, 받으신 검토 결과를 이 단계에 기록해 주세요. 청구범위의 확정과 제출은 변리사의 업무입니다.',
     submit: '이 도구는 지식재산처에 서류를 제출하지 않습니다. 아래 서류를 내려받아 출원인 본인(또는 변리사)이 특허로에서 직접 제출한 뒤, 결과를 기록해 주세요.',
     fee: '수수료 납부도 이용자(또는 변리사)가 직접 합니다. 현행 금액을 조회해 확인하고 납부한 뒤 기록해 주세요.'
   };
+
+  var INTRO_A = {
+    idea: '발명자(의뢰인)로부터 받은 핵심 아이디어를 적어 주세요. 무엇을 풀려는 발명인지, 어떤 구성으로 어떻게 해결하는지, 기존 방법과 무엇이 다른지가 구체적일수록 조사가 정확해집니다. 발명자가 보낸 자료는 첨부 아이콘으로 올릴 수 있습니다.',
+    diff: '위 과제에 대해 발명자와 협의한 차별화 아이디어를 제출해 주세요. 확인하지 못한 과제는 "미확인"이라고 적어도 됩니다. 발명자가 말하지 않은 내용은 명세서에 만들어 넣지 않습니다.',
+    supp: '평가와 새 과제를 보고 발명자에게 확인한 보완 아이디어를 제출해 주세요. 기준에 이를 때까지 이 단계가 반복됩니다.',
+    review: '명세서의 확인 표시 항목과 아래 지적을 발명자에게 확인하고, 그 답변과 수정 사항을 적어 보완합니다. 작성과 분리된 새 AI가 결함을 찾는 독립 검토도 여기서 반복합니다.',
+    confirm: '출원서에 들어갈 서지사항을 입력하고 최종 확정합니다. 확정 이후에도 기명날인과 제출은 담당 변리사가 직접 합니다.',
+    attorney: '담당 변리사가 서류 전체를 직접 검토·수정하고 청구범위를 확정한 결과를 기록합니다. 사무소 내 다른 변리사나 외부 변리사의 검토를 받는 경우 검토자 구분을 바꿔 기록하세요. 나비는 다른 변리사를 소개·연결하지 않습니다. 기명날인과 제출은 변리사가 직접 합니다.',
+    submit: '이 도구는 지식재산처에 서류를 제출하지 않습니다. 아래 서류를 내려받아 담당 변리사가 특허로에서 직접 제출한 뒤, 결과를 기록해 주세요.',
+    fee: '수수료 납부도 담당 변리사가 직접 합니다. 현행 금액을 조회해 확인하고 납부한 뒤 기록해 주세요.'
+  };
+  function intro(id) { return (A() && INTRO_A[id]) || INTRO[id]; }
 
   /* ── 단계별 입력·작업 영역 ── */
   function actionsHtml(id) {
     var h = '';
     if (id === 'idea') {
-      h += '<div class="pf-warn">🔒 <b>개인정보·영업비밀 고유 명칭은 가명으로 바꿔 입력하세요.</b> 입력한 내용은 AI 서버로 전송되어 처리됩니다. 선행기술 검색에는 핵심 구성을 숨긴 일반 용어만 쓰지만, 이 화면의 내용을 외부에 게시하지 마세요(출원 전 공개는 신규성을 잃게 할 수 있습니다).</div>';
-      h += field('idea.text', 8, '예: 야간에 농작물 병해충을 조기에 감지하기 위해, 드론 카메라 영상에서 잎의 색 변화 패턴을 학습하여…\n문제 → 해결 구성 → 기존 방법과의 차이 순서로 적어 주세요.', { list: 'idea.files', img: true, btn: '<button type="button" class="pf-btn primary" data-act="start">분석 시작</button>' });
+      h += '<div class="pf-warn">🔒 ' + (A() ? '<b>의뢰인(발명자)의 정보는 필요한 범위에서 가명으로 바꿔 입력하세요.</b> 입력한 내용은 AI 서버로 전송되어 처리되므로, 변리사의 비밀유지 의무를 고려해 의뢰인에게 AI 도구 사용을 알리고 필요한 동의를 받아 주세요. ' : '<b>개인정보·영업비밀 고유 명칭은 가명으로 바꿔 입력하세요.</b> 입력한 내용은 AI 서버로 전송되어 처리됩니다. ') + '선행기술 검색에는 핵심 구성을 숨긴 일반 용어만 쓰지만, 이 화면의 내용을 외부에 게시하지 마세요(출원 전 공개는 신규성을 잃게 할 수 있습니다).</div>';
+      h += field('idea.text', 8, (A() ? '발명자가 전한 내용을 적어 주세요. ' : '') + '예: 야간에 농작물 병해충을 조기에 감지하기 위해, 드론 카메라 영상에서 잎의 색 변화 패턴을 학습하여…\n문제 → 해결 구성 → 기존 방법과의 차이 순서로 적어 주세요.', { list: 'idea.files', img: true, btn: '<button type="button" class="pf-btn primary" data-act="start">분석 시작</button>' });
       h += '<div class="pf-row"><b>공개 이력</b> <label><input type="radio" name="dis" data-k="disclosure.status" value="no"' + (S.disclosure.status === 'no' ? ' checked' : '') + '> 없음</label> <label><input type="radio" name="dis" data-k="disclosure.status" value="yes"' + (S.disclosure.status === 'yes' ? ' checked' : '') + '> 있음(논문·전시·판매·SNS 등)</label> <label><input type="radio" name="dis" data-k="disclosure.status" value="unknown"' + (S.disclosure.status === 'unknown' ? ' checked' : '') + '> 모름</label>' + (S.disclosure.status === 'yes' ? ' <input class="pf-in" data-k="disclosure.date" placeholder="공개일 예: 2026-03-10" value="' + esc(S.disclosure.date) + '">' : '') + '</div>';
       h += '<div class="pf-row"><b>검색에 쓰지 않을 고유 명칭</b> <input class="pf-in wide" data-k="avoid" placeholder="상표·회사명·제품명 등, 쉼표로 구분(선택)" value="' + esc(S.avoid) + '"></div>';
-      h += '<div class="pf-row"><b>사용 목적</b> <label><input type="radio" name="who" data-k="who" value="self"' + (S.who === 'self' ? ' checked' : '') + '> 본인 출원 준비</label> <label><input type="radio" name="who" data-k="who" value="attorney"' + (S.who === 'attorney' ? ' checked' : '') + '> 변리사 업무 보조</label></div>';
+      h += '<div class="pf-row"><b>사용 방식</b> <label><input type="radio" name="who" data-k="who" value="attorney"' + (A() ? ' checked' : '') + '> 변리사 업무 보조 (기본)</label> <label><input type="radio" name="who" data-k="who" value="self"' + (!A() ? ' checked' : '') + '> 변리사가 아닌 발명자 본인의 출원 준비</label></div>';
+      if (A()) h += '<label class="pf-row pf-consent"><input type="checkbox" data-k="clientOk"' + (S.clientOk ? ' checked' : '') + '> 발명자(의뢰인)에게 AI 도구 사용과 입력 정보의 처리 방식을 알렸고, 필요한 동의를 받았습니다.</label>';
       h += '<label class="pf-row pf-consent"><input type="checkbox" data-k="consent"' + (S.consent ? ' checked' : '') + '> 위 기밀 고지를 읽었고, 입력 내용이 AI 서버와 검색(일반 용어 질의)에 쓰이는 데 동의합니다. 이 도구는 AI이며 변리사가 아니고, 제출·납부·서명을 하지 않는다는 점을 이해했습니다.</label>';
     }
     if (id === 'diff' || id === 'supp') {
       if (id === 'supp' && S.tasks.length) h += '<div class="pf-q"><b>답해야 할 새 과제</b>' + resTasks() + '</div>';
-      if (id === 'diff') h += '<label class="pf-row pf-consent"><input type="checkbox" data-k="idrOk"' + (S.idrOk ? ' checked' : '') + '> 위 「발명 특정서」가 제가 말한 내용과 일치합니다. 다르면 아래 칸에 바로잡아 적겠습니다.</label>';
+      if (id === 'diff') h += '<label class="pf-row pf-consent"><input type="checkbox" data-k="idrOk"' + (S.idrOk ? ' checked' : '') + '> ' + (A() ? '위 「발명 특정서」가 발명자에게 확인한 내용과 일치합니다. 다르면 아래 칸에 바로잡아 적겠습니다.' : '위 「발명 특정서」가 제가 말한 내용과 일치합니다. 다르면 아래 칸에 바로잡아 적겠습니다.') + '</label>';
       h += field('input.' + id, 7, id === 'diff' ? '과제별로 답하거나, 선행 기술과 달리 가져가려는 구성·효과·근거(시험 결과, 수치)를 적어 주세요. 예) T1: …' : '새 과제에 대한 보완 아이디어와 근거 자료를 적어 주세요.', { list: 'pend.' + id, btn: '<button type="button" class="pf-btn primary" data-act="submit-' + id + '">제출</button>' });
     }
     if (id === 'pri' && S.halt) {
@@ -897,21 +997,41 @@
         '<label>출원인 성명(명칭) <input class="pf-in" data-k="biblio.name" value="' + esc(b.name) + '"></label><label>출원인 주소 <input class="pf-in" data-k="biblio.addr" value="' + esc(b.addr) + '"></label>' +
         '<label>특허고객번호(출원인코드) <input class="pf-in" data-k="biblio.code" placeholder="없으면 비워 두세요" value="' + esc(b.code) + '"></label><label>발명자 성명 <input class="pf-in" data-k="biblio.inventors" placeholder="여러 명이면 쉼표로" value="' + esc(b.inventors) + '"></label></div>' +
         '<p class="pf-sub">🔒 주민등록번호·사업자등록번호·인증서·비밀번호는 입력하지 마세요. 이 정보는 AI로 전송되지 않고 화면에서 출원서 초안에 직접 채워집니다.</p>' +
-        ['발명자·출원인 정보가 정확합니다.', '명세서의 모든 실시예·수치는 사실입니다(말하지 않은 내용이 들어 있지 않습니다).', '공개 이력을 모두 알렸습니다.', '출원 후에는 최초 명세서·도면에 없는 내용을 추가할 수 없고, 제출은 되돌릴 수 없음을 이해했습니다.'].map(function (t, i) { var k = 'abcd'[i]; return '<label class="pf-row pf-consent"><input type="checkbox" data-k="input.confirm.' + k + '"' + (c[k] ? ' checked' : '') + '> ' + t + '</label>'; }).join('') +
+        (A() ? ['발명자·출원인 정보가 정확합니다(발명자에게 확인했습니다).', '명세서의 모든 실시예·수치는 발명자에게 확인한 사실입니다(말하지 않은 내용이 들어 있지 않습니다).', '공개 이력을 발명자에게 확인했습니다.', '출원 후에는 최초 명세서·도면에 없는 내용을 추가할 수 없고, 제출은 되돌릴 수 없음을 이해했습니다.'] : ['발명자·출원인 정보가 정확합니다.', '명세서의 모든 실시예·수치는 사실입니다(말하지 않은 내용이 들어 있지 않습니다).', '공개 이력을 모두 알렸습니다.', '출원 후에는 최초 명세서·도면에 없는 내용을 추가할 수 없고, 제출은 되돌릴 수 없음을 이해했습니다.']).map(function (t, i) { var k = 'abcd'[i]; return '<label class="pf-row pf-consent"><input type="checkbox" data-k="input.confirm.' + k + '"' + (c[k] ? ' checked' : '') + '> ' + t + '</label>'; }).join('') +
         '<div class="pf-row">확정하려면 <b>확정</b>이라고 입력 <input class="pf-in" data-k="input.confirm.typed" value="' + esc(c.typed || '') + '"> <button type="button" class="pf-btn primary" data-act="confirm">최종 출원서 확정</button></div>';
+    }
+    if (id === 'attorney') {
+      var a = S.attorney, ch = a.chk || {}, last = (a.hist || [])[(a.hist || []).length - 1];
+      h += '<div class="pf-warn">⚖ ' + (A() ? '<b>이 단계는 이 화면 밖에서 담당 변리사가 하는 일입니다.</b> 서류 전체를 직접 검토·수정하고 청구범위를 확정한 뒤 그 결과를 기록해 주세요. 사무소 내 다른 변리사나 외부 변리사의 검토를 받는다면 검토자 구분을 바꿔 기록합니다. 나비는 다른 변리사를 소개·추천·연결하지 않으며 변리사의 등록 여부도 확인하지 않습니다. 기명날인과 특허청(지식재산처)에 대한 제출은 변리사의 업무입니다.' : '<b>이 단계는 이 화면 밖에서 이루어집니다.</b> 나비는 변리사를 소개·추천·연결하지 않으며 변리사의 등록 여부도 확인하지 않습니다. <b>직접 선택하신 변리사</b>에게 아래 패키지를 전달하고(등록 여부는 이용자가 직접 확인), 변리사가 검토한 결과를 아래에 기록해 주세요. 변리사법상 청구범위의 확정과 특허청에 대한 제출은 변리사의 업무입니다.') + '</div>';
+      h += '<div class="pf-acts"><button type="button" class="pf-btn primary" data-act="dl-all">검토 요청 패키지 내려받기 (전체 서류 + 검토 요청서)</button></div><p class="pf-sub">패키지 맨 앞에 「변리사 검토 요청서」가 들어 있고, 청구범위·선행기술 원문 확인 상태·미해결 지적이 정리되어 있습니다.</p>';
+      if (last && (last.result === 'major' || last.result === 'hold') && !S.done.attorney) {
+        h += '<div class="pf-halt"><b>' + (last.result === 'hold' ? '출원 보류 의견이 기록되었습니다.' : '중대한 수정이 필요하다는 의견이 기록되었습니다.') + '</b><p>' + (last.result === 'hold' ? '출원을 진행하지 않거나, 변리사와 상의해 보완한 뒤 다시 검토를 받으세요. 보완하려면 아래에서 되돌아갈 단계를 선택합니다.' : '변리사의 의견을 반영해 해당 단계로 돌아갑니다. 의견은 자동으로 전달되며, 말하지 않은 내용은 추가되지 않습니다.') + '</p><div class="pf-acts"><button type="button" class="pf-btn" data-act="atty-rework" data-id="review">명세서 보완으로 돌아가기(11단계)</button><button type="button" class="pf-btn" data-act="atty-rework" data-id="claims">청구범위 다시 쓰기(14단계)</button></div></div>';
+      }
+      h += '<h4>변리사 검토 결과 기록</h4><div class="pf-form">' +
+        '<label>검토자 구분 <select data-k="attorney.type">' + (A() ? '<option value="self_attorney"' + (a.type === 'self_attorney' ? ' selected' : '') + '>담당 변리사 본인</option><option value="external"' + (a.type === 'external' ? ' selected' : '') + '>다른 검토 변리사(사무소 내·외부)</option>' : '<option value="external" selected>직접 선택한 변리사</option>') + '</select></label>' +
+        '<label>' + (A() && a.type === 'self_attorney' ? '담당 변리사 성명(본인)' : '변리사 성명') + ' <input class="pf-in" data-k="attorney.name" value="' + esc(a.name) + '"></label><label>소속(특허법인·사무소, 선택) <input class="pf-in" data-k="attorney.firm" value="' + esc(a.firm) + '"></label>' +
+        '<label>검토일 <input class="pf-in" data-k="attorney.date" placeholder="YYYY-MM-DD" value="' + esc(a.date) + '"></label>' +
+        '<label>검토 결과 <select data-k="attorney.result"><option value="">선택</option>' + Object.keys(RESULT).map(function (k) { return '<option value="' + k + '"' + (a.result === k ? ' selected' : '') + '>' + RESULT[k] + '</option>'; }).join('') + '</select></label></div>';
+      h += field('attorney.opinion', 5, '변리사의 의견·수정 요청 사항을 적어 주세요(수정이 필요하거나 보류인 경우 필수). 의견서나 수정본 파일은 첨부 아이콘으로 올릴 수 있습니다.', { list: 'attorney.files', btn: '' });
+      h += '<label class="pf-row pf-consent"><input type="checkbox" data-k="attorney.chk.a"' + (ch.a ? ' checked' : '') + '> 변리사가 청구범위를 직접 검토했고, 권리범위의 설정은 변리사가 확정했습니다.</label>' +
+        '<label class="pf-row pf-consent"><input type="checkbox" data-k="attorney.chk.b"' + (ch.b ? ' checked' : '') + '> 변리사가 선행기술(원문 확인 상태 포함)과 공개 이력을 검토했습니다.</label>' +
+        (a.result === 'minor' ? '<label class="pf-row pf-consent"><input type="checkbox" data-k="attorney.chk.c"' + (ch.c ? ' checked' : '') + '> 변리사가 요청한 경미한 수정을 모두 반영했습니다(변리사 수정본이 있으면 제출은 그 파일 기준입니다).</label>' : '') +
+        '<div class="pf-acts"><button type="button" class="pf-btn primary" data-act="atty-record">검토 결과 기록</button></div>';
+      if (S.who === 'self') h += detail('변리사 검토 없이 진행하려면 (본인 출원만 · 기록됩니다)', '<p class="pf-sub">특허 명세서·청구범위는 출원 후 보충할 수 없고 권리범위는 청구범위로 정해집니다. 검토 없이 진행하면 그 위험은 이용자에게 있으며, 이 사실이 서류와 사안 요약에 기록됩니다.</p><div class="pf-row"><input class="pf-in" data-k="attorney.typed" placeholder="「검토 없이 진행」 입력" value="' + esc(a.typed || '') + '"> <button type="button" class="pf-btn warn" data-act="atty-waive">검토 없이 진행</button></div>');
+      else h += '<p class="pf-sub">변리사 업무 보조 모드에서는 이 단계를 생략할 수 없습니다. 본인이 등록 변리사이면 검토자 구분에서 「본인이 등록 변리사」를 선택해 직접 검토한 결과를 기록하세요.</p>';
     }
     if (id === 'submit') {
       h += '<div class="pf-halt"><b>이 도구는 제출하지 않습니다.</b> 변리사법상 특허청(지식재산처)에 대한 대리·제출은 변리사의 업무이고, 이 도구는 AI입니다. 출원인 본인(또는 변리사)이 직접 제출합니다.</div>';
       h += '<div class="pf-acts"><button type="button" class="pf-btn primary" data-act="dl-all">전체 서류 한 파일로 내려받기(웹 표준 서식)</button></div><p class="pf-sub">개별 서류와 도면(SVG)은 아래 「작성된 문서」·도면 목록에서도 내려받을 수 있습니다. 특허로 제출 형식은 현행 안내를 따르며 변환은 변리사(또는 본인)가 합니다.</p>';
       if (S.figs.length) h += '<div class="pf-acts">' + S.figs.map(function (f) { return '<button type="button" class="pf-btn sm" data-act="dl-fig" data-id="' + f.no + '">도 ' + f.no + ' SVG</button>'; }).join('') + '</div>';
       h += '<ol class="pf-steps"><li>특허고객번호(출원인코드)를 확보합니다(없으면 신규 발급).</li><li>특허로에서 이용할 인증 수단을 등록합니다(현행 방식은 특허로 안내 확인).</li><li>특허로의 전자출원(웹 작성/제출 또는 전자출원 SW)에서 출원서·명세서·청구범위·도면·요약서를 작성·첨부합니다.</li><li>제출 전 미리보기·오류를 점검합니다.</li><li>제출하고 접수번호를 확인합니다. <b>(출원인 본인 또는 변리사가 직접)</b></li></ol>';
-      h += '<div class="pf-row">출원번호 <input class="pf-in" data-k="input.appNo" placeholder="받으셨다면(선택)" value="' + esc(S.input.appNo || '') + '"> 출원일 <input class="pf-in" data-k="input.appDate" placeholder="YYYY-MM-DD" value="' + esc(S.input.appDate || '') + '"></div><label class="pf-row pf-consent"><input type="checkbox" data-k="input.filedOk"' + (S.input.filedOk ? ' checked' : '') + '> 제가(또는 변리사가) 직접 제출을 마쳤습니다.</label><div class="pf-acts"><button type="button" class="pf-btn primary" data-act="filed">제출 완료 기록</button></div>';
+      h += '<div class="pf-row">출원번호 <input class="pf-in" data-k="input.appNo" placeholder="받으셨다면(선택)" value="' + esc(S.input.appNo || '') + '"> 출원일 <input class="pf-in" data-k="input.appDate" placeholder="YYYY-MM-DD" value="' + esc(S.input.appDate || '') + '"></div><label class="pf-row pf-consent"><input type="checkbox" data-k="input.filedOk"' + (S.input.filedOk ? ' checked' : '') + '> ' + (A() ? '담당 변리사가 직접 제출을 마쳤습니다.' : '제가(또는 변리사가) 직접 제출을 마쳤습니다.') + '</label><div class="pf-acts"><button type="button" class="pf-btn primary" data-act="filed">제출 완료 기록</button></div>';
     }
     if (id === 'fee') {
       h += '<div class="pf-acts"><button type="button" class="pf-btn" data-act="fee-lookup">현행 수수료 안내 조회</button></div>';
       if (S.fee.err) h += '<p class="pf-err">' + esc(S.fee.err) + '</p>';
       if (S.fee.hits && S.fee.hits.length) h += '<div class="pf-tw"><table class="pf-table"><tbody>' + S.fee.hits.map(function (o) { return '<tr><td><a href="' + esc(o.link) + '" target="_blank" rel="noopener noreferrer">' + esc(o.title) + '</a><div class="pf-sub">' + esc(o.snippet) + '</div></td></tr>'; }).join('') + '</tbody></table></div><p class="pf-note">검색 결과 기준의 안내입니다. 금액·감면 여부는 <b>납부 직전에 특허로가 고지하는 금액</b>으로 확인하세요(청구항 수에 따라 달라지는 수수료가 있습니다).</p>';
-      h += '<p class="pf-sub">납부는 특허로에서 출원인 본인(또는 변리사)이 직접 합니다. 이 도구는 결제를 대행하지 않습니다.</p><div class="pf-row">납부일 <input class="pf-in" data-k="input.feeDate" placeholder="YYYY-MM-DD" value="' + esc(S.input.feeDate || '') + '"></div><label class="pf-row pf-consent"><input type="checkbox" data-k="input.feeOk"' + (S.input.feeOk ? ' checked' : '') + '> 제가(또는 변리사가) 직접 납부를 마쳤습니다.</label><div class="pf-acts"><button type="button" class="pf-btn primary" data-act="fee-done">납부 완료 기록</button></div>';
+      h += '<p class="pf-sub">납부는 특허로에서 출원인 본인(또는 변리사)이 직접 합니다. 이 도구는 결제를 대행하지 않습니다.</p><div class="pf-row">납부일 <input class="pf-in" data-k="input.feeDate" placeholder="YYYY-MM-DD" value="' + esc(S.input.feeDate || '') + '"></div><label class="pf-row pf-consent"><input type="checkbox" data-k="input.feeOk"' + (S.input.feeOk ? ' checked' : '') + '> ' + (A() ? '담당 변리사가 직접 납부를 마쳤습니다.' : '제가(또는 변리사가) 직접 납부를 마쳤습니다.') + '</label><div class="pf-acts"><button type="button" class="pf-btn primary" data-act="fee-done">납부 완료 기록</button></div>';
       if (S.fee.done && S.filing.date) h += '<div class="pf-done"><b>모든 단계를 마쳤습니다.</b> 출원일 ' + esc(S.filing.date) + ' 기준 후속 일정(법정 기한은 현행 규정으로 재확인):<div class="pf-tw"><table class="pf-table"><tbody>' + followDates(S.filing.date, S.disclosure.status === 'yes').map(function (r) { return '<tr><td>' + esc(r[0]) + '</td><td>' + r[1] + '</td></tr>'; }).join('') + '</tbody></table></div>심사 단계의 의견제출통지가 오면 기한 안에 변리사(또는 본인)가 대응해야 합니다. 통지서를 아래 「그 밖의 서류 작성」 대화창에 올려 의견서·보정서 초안을 요청할 수 있습니다.</div>';
     }
     return h;
@@ -931,10 +1051,10 @@
   function render() {
     var root = $('pfRoot'); if (!root) return;
     var cur = stageOf(S.stage), id = cur.id, html = '';
-    html += '<div class="pf-head"><h2>신규 발명 특허 출원 준비</h2><p>핵심 아이디어 → 선행기술 조사 → 차별화 → 명세서·도면·청구항 → 출원서까지 18단계로 진행합니다. <b>제출과 수수료 납부는 변리사 또는 이용자 본인이 직접</b> 하며, 이 도구는 AI로서 초안과 안내만 제공합니다.</p></div>';
+    html += '<div class="pf-head"><h2>신규 발명 특허 출원 업무 보조</h2><p>발명자로부터 받은 핵심 아이디어 → 선행기술 조사 → 차별화 → 명세서·도면·청구항 → 담당 변리사의 최종 검토 → 출원서 제출·납부까지 ' + STEPS_N + '단계로 지원합니다. ' + (A() ? '<b>서류는 변리사의 검토·확정 전에는 제출할 수 없는 초안이며, 기명날인·제출·수수료 납부는 담당 변리사가 직접</b> 합니다.' : '<b>제출과 수수료 납부는 이용자 본인이 직접</b> 하며, 변리사의 검토를 권합니다.') + ' 이 도구는 AI로서 초안과 안내만 제공합니다.</p></div>';
     html += progressHtml();
     if (S.peek && S.peek !== id) { var ps = stageOf(S.peek); var rh = resultHtml(S.peek); html += card(ps.n + '. ' + esc(ps.t) + ' <button type="button" class="pf-link" data-act="peek" data-id="' + S.peek + '">닫기</button>', rh || '<p class="pf-sub">아직 결과가 없습니다.</p>', 'peek'); }
-    var inner = '<p class="pf-intro">' + esc(INTRO[id]) + '</p>';
+    var inner = '<p class="pf-intro">' + esc(intro(id)) + '</p>';
     if (busy) inner += '<div class="pf-busy"><span class="pf-spin"></span> 작업 중입니다. 잠시만 기다려 주세요…</div>';
     var rr = currentResult(id); if (rr) inner += '<div class="pf-res">' + rr + '</div>';
     if (S.err && !busy) inner += errBox(); else if (S.formErr && S.formErr.length) inner += errBox();
@@ -954,12 +1074,14 @@
   function init() {
     var root = $('pfRoot'); if (!root) return;
     var loaded = load(); S = Object.assign(base(), loaded || {});
+    if (!S.attorney) S.attorney = base().attorney;   // 이전 버전에서 저장된 진행 파일 호환
+    if (S.done.confirm && !S.done.attorney && !S.filing.done && (S.stage === 'submit' || S.stage === 'fee')) S.stage = 'attorney';   // 이전 버전: 변리사 검토 없이 제출 단계에 있던 진행은 새 단계로
     var t = document.createElement('div'); t.id = 'pf-toast'; t.className = 'pf-toast'; t.innerHTML = '<div class="pf-toast-hd"><span class="pf-spin"></span><b>처리 중</b></div><div class="pf-toast-track"><div class="pf-toast-bar" id="pf-toast-bar"></div></div><div class="pf-toast-label" id="pf-toast-label"></div>'; document.body.appendChild(t);
     root.addEventListener('click', function (e) { var b = e.target.closest ? e.target.closest('[data-act]') : null; if (b) { e.preventDefault(); act(b.getAttribute('data-act'), b); } });
     root.addEventListener('input', function (e) { var k = e.target.getAttribute && e.target.getAttribute('data-k'); if (!k || e.target.type === 'checkbox' || e.target.type === 'radio') return; setPath(S, k, e.target.value); save(); });
     root.addEventListener('change', function (e) {
       var tg = e.target, k = tg.getAttribute && tg.getAttribute('data-k');
-      if (k) { if (tg.type === 'checkbox') setPath(S, k, tg.checked); else if (tg.type === 'radio') { if (tg.checked) { setPath(S, k, tg.value); save(); render(); return; } } else setPath(S, k, tg.value); save(); return; }
+      if (k) { if (tg.type === 'checkbox') setPath(S, k, tg.checked); else if (tg.type === 'radio') { if (tg.checked) { setPath(S, k, tg.value); if (k === 'who' && S.attorney) S.attorney.type = tg.value === 'self' ? 'external' : 'self_attorney'; save(); render(); return; } } else setPath(S, k, tg.value); save(); if (k === 'attorney.result' || k === 'attorney.type') render(); return; }
       if (tg.getAttribute && tg.getAttribute('data-attach') && tg.files && tg.files.length) { attachTo(tg.getAttribute('data-attach'), Array.prototype.slice.call(tg.files), !!tg.getAttribute('data-img')); return; }
       var v = tg.getAttribute && tg.getAttribute('data-verify');
       if (v && tg.files && tg.files[0]) { readAttachment(tg.files[0], false).then(function (a) { if (a.text) { S.verified[v] = { name: a.name, text: a.text }; save(); render(); } else window.alert('이 파일에서 글자를 읽지 못했습니다(' + (a.note || '') + '). 텍스트가 있는 PDF·DOCX·TXT로 첨부해 주세요.'); }); return; }
