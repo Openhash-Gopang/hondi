@@ -1,7 +1,7 @@
 // 전문가 세션 토큰 (2026-10-21) — 면허 인증이 승인된 계정에 발급하는 짧은 수명의 HMAC 서명 토큰.
 //   토큰 = base64url(JSON{pk, personas, iat, exp}) + '.' + base64url(HMAC-SHA256(secret, 앞부분))
-// 서버 게이트(pro-gate.js)가 전문가용 SP 호출에서 이 토큰을 확인한다. 수명을 짧게(30분) 두어 철회·만료가 곧 반영되게 한다.
-export const SESSION_TTL_MS = 30 * 60 * 1000;
+// 서버 게이트(pro-gate.js)가 전문가용 SP 호출에서 이 토큰을 확인한다. 철회·만료는 토큰 수명(4시간) 안에 반영된다.
+export const SESSION_TTL_MS = 4 * 60 * 60 * 1000;   // 4시간 — 짧으면 지갑 서명(생체인증) 창이 자주 뜬다. 철회·만료는 토큰 만료 시점에 반영된다.
 const enc = new TextEncoder();
 const b64u = bytes => btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 const unb64u = s => Uint8Array.from(atob(String(s).replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));

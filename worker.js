@@ -5513,6 +5513,7 @@ function handleOrgSiteRoutes(request, url, env, corsHeaders) {
 function handleProVerifyRoutes(request, url, env, corsHeaders) {
   const handler = makeProVerifyHandler({
     store: makePocketBaseProVerifyStore({ base: L1_DEFAULT, getToken: () => _l1AdminToken(env) }),
+    bearerAdmin: async (req, e) => (await _requireAdmin(req, e))?.admin || null,   // 관리자 페이지(admin.html)의 Bearer 로그인으로 승인·열람
     getPinnedPubKey: async (e, guid) => (await _l1FindProfileByGuid(e, guid))?.pubkey_ed25519 || null,
   });
   return handler.handle(request, url, env, corsHeaders);

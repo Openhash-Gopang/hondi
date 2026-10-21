@@ -154,3 +154,58 @@ describe('/pro-verify/session 발급', () => {
     assert.equal((await call({ PRO_SESSION_SECRET: SECRET }, { ts: NOW - 3600_000 })).j.code, 'STALE_TS');
   });
 });
+
+// ── 클라이언트(assets/pro-verify.js)와 서버의 서명 메시지·판정 일치 ──
+import vm from 'node:vm';
+import { applyMessage, licenseHashOf } from '../worker/pro-verify-handler.js';
+
+describe('클라이언트 ↔ 서버 일치', () => {
+  const code = fs.readFileSync(path.join(root, 'assets/pro-verify.js'), 'utf8');
+  const win = { crypto, TextEncoder, location: { pathname: '/pages/patent-attorney.html' }, document: {}, localStorage: { getItem: () => null }, sessionStorage: { getItem: () => null, setItem() {}, removeItem() {} } };
+  win.window = win;
+  vm.runInNewContext(code, win);
+  const P = win.HondiPro;
+
+  it('서명 메시지가 서버와 글자까지 같다', async () => {
+    assert.equal(P._sessionMessage(123), sessionMessage(123));
+    assert.equal(P._applyMessage('lawyer', 'staff', 'h', 'f', 'g9', 55), applyMessage('lawyer', 'staff', 'h', 'f', 'g9', 55));
+    assert.equal(P._applyMessage('lawyer', 'professional', 'h', 'f', '', 55), applyMessage('lawyer', 'professional', 'h', 'f', '', 55));
+  });
+  it('면허번호 해시가 서버와 같다 (공백·하이픈·소문자 차이 무시)', async () => {
+    for (const no of ['12-3456', ' ab 12-34 ', '제 12-3456호', 'ａｂ１２３']) assert.equal(await P._licenseHash('lawyer', no), await licenseHashOf('lawyer', no));
+  });
+  it('needsSession 판정이 서버 detectAssistantSp 와 같다 (전문가용 전 파일·일반 SP 전 파일)', () => {
+    const files = fs.readdirSync(prompts).filter(f => f.endsWith('.md'));
+    const diff = files.filter(f => { const t = fs.readFileSync(path.join(prompts, f), 'utf8'); return P.needsSession(t) !== detectAssistantSp({ system: t }).assistant; });
+    // 서버는 제목 코드가 표에 있는 것만 인정하고, 클라이언트는 제목 형식만 본다 — 아직 분리되지 않은 법무사·행정사 SP 만 차이가 허용된다
+    assert.deepEqual(diff.filter(f => !/^SP_(judicial|administrative)-scrivener_/.test(f)), []);
+  });
+});
+
+describe('운영자 Bearer 인증', () => {
+  const mk = bearerAdmin => {
+    const rows = [{ id: 'aaaaaaaaaaaaaaa', status: 'pending', role: 'professional', persona: 'lawyer', applicant_pubkey: 'k'.repeat(20), license_no_masked: '***1234', ts: NOW, license_file: 'x.png' }];
+    const store = { async listPending() { return rows; }, async get(id) { return rows.find(r => r.id === id) || null; }, async update() {}, async clearFile() {}, async listByPubkey() { return []; }, async findApprovedByLicense() { return []; } };
+    return makeProVerifyHandler({ store, getPinnedPubKey: async () => null, bearerAdmin, now: () => NOW });
+  };
+  const call = (h, path, body, auth) => h.handle(new Request('https://x' + path, { method: 'POST', headers: auth ? { Authorization: auth } : {}, body: JSON.stringify(body) }), new URL('https://x' + path), {});
+
+  it('유효한 관리자 Bearer 로 대기 목록을 본다 (지갑 서명 불필요)', async () => {
+    const r = await call(mk(async () => 'jupiter'), '/pro-verify/pending', {}, 'Bearer abc');
+    assert.equal(r.status, 200); assert.equal((await r.json()).items.length, 1);
+  });
+  it('유효하지 않은 Bearer 는 401', async () => {
+    const r = await call(mk(async () => null), '/pro-verify/pending', {}, 'Bearer bad');
+    assert.equal(r.status, 401);
+  });
+  it('Bearer 승인 시 reviewer 가 admin:이름 으로 기록된다', async () => {
+    const h = mk(async () => 'jupiter'); let patch;
+    const store = { async get() { return { id: 'aaaaaaaaaaaaaaa', status: 'pending', role: 'professional', persona: 'lawyer', applicant_pubkey: 'k', license_hash: 'h'.repeat(64), license_file: 'x' }; }, async update(id, p) { patch = p; }, async clearFile() {}, async findApprovedByLicense() { return []; }, async listByPubkey() { return []; } };
+    const h2 = makeProVerifyHandler({ store, getPinnedPubKey: async () => null, bearerAdmin: async () => 'jupiter', now: () => NOW });
+    const r = await call(h2, '/pro-verify/decide', { id: 'aaaaaaaaaaaaaaa', decision: 'approve' }, 'Bearer t');
+    assert.equal(r.status, 200); assert.equal(patch.reviewer, 'admin:jupiter'); assert.equal(patch.status, 'approved');
+  });
+  it('Bearer 가 없으면 기존 지갑 서명 경로(운영자 미설정이면 503)', async () => {
+    assert.equal((await call(mk(async () => 'jupiter'), '/pro-verify/pending', {}, null)).status, 503);
+  });
+});

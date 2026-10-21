@@ -247,6 +247,19 @@
   var busy = false;
   var opened = false; // 최초 오픈 시에만 인사말/포커스 처리
 
+  // ── 전문가용 SP 면허 인증 (2026-10-21) — 전문가용(-assistant) SP 를 쓰는 페이지는 인증 세션(pro_session)을 함께 보낸다. 서버: pro-gate.js
+  function _isProSp(t) {
+    t = String(t || '');
+    if (/^# SP-[A-Z]+-[0-9A-Za-z-]+ · [^\n]*보조 AI/m.test(t.slice(0, 600))) return true;
+    return t.indexOf('scope_note: "{경계 영역일 때 범위 확인 사유}"') >= 0 && t.indexOf('law_checked: {조회한 법령·서식·기준과 조회일') >= 0;
+  }
+  var _proClientP = null;
+  function _loadProClient() {
+    if (window.HondiPro) return Promise.resolve();
+    if (!_proClientP) _proClientP = new Promise(function (resolve) { var s = document.createElement('script'); s.src = '/assets/pro-verify.js'; s.onload = resolve; s.onerror = resolve; document.head.appendChild(s); });
+    return _proClientP;
+  }
+
   // ── SP 로딩 (desktop.html _loadVisitorSP과 동일 패턴, 임의 SP 키로 일반화) ──
   var _spCache = null;
   async function loadSP() {
@@ -448,10 +461,16 @@
       var _ctxText = _modeOverride ? (_modeOverride.context || '') : CFG.context;
       var composedSP = _ctxText ? basePrompt + '\n\n---\n[현재 화면 컨텍스트]\n' + _ctxText : basePrompt;
 
+      var _proSession = null;
+      if (_isProSp(composedSP)) {
+        try { await _loadProClient(); if (window.HondiPro) _proSession = await window.HondiPro.getSession(); } catch (eP) { console.warn('[chat-widget] 전문가 세션', eP); }
+      }
+
       var body = JSON.stringify({
         provider: 'deepseek',
         model: 'deepseek-v4-flash',
         system: composedSP,
+        pro_session: _proSession || undefined,
         messages: history,
         max_tokens: (_modeOverride && _modeOverride.maxTokens) || CFG.maxTokens || 1000,
       });
@@ -473,7 +492,10 @@
           body: body,
         });
       }
-      if (!res.ok) throw new Error('Worker ' + res.status);
+      if (!res.ok) {
+        if (window.HondiPro && await window.HondiPro.isBlocked(res)) throw new Error('PRO_BLOCKED');
+        throw new Error('Worker ' + res.status);
+      }
       var data = await res.json();
       var reply = data.content || '죄송합니다, 답변을 가져오지 못했습니다.';
       history.push({ role: 'assistant', content: reply });
@@ -486,7 +508,10 @@
       if (typeof CFG.onReply === 'function') { try { CFG.onReply(reply, bub); } catch (e3) { console.error('[chat-widget] onReply', e3); } }
     } catch (err) {
       removeTyping();
-      appendMsg('ai', '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+      if (err && err.message === 'PRO_BLOCKED') {
+        appendMsg('ai', '전문가용 AI는 면허 인증이 승인된 전문가만 쓸 수 있습니다. 열린 창에서 인증을 신청해 주세요.');
+        try { window.HondiPro.openPanel(); } catch (eO) {}
+      } else appendMsg('ai', '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
       console.error('[chat-widget]', err);
     }
 
