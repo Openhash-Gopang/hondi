@@ -79,6 +79,10 @@
       role: '위생사', tool: '위생사 보조 AI', back: '/pages/sanitarian.html',
       docHint: '예: 위생 점검 기록', toHint: '예: 관할 기관'
     },
+    'financial-planner': {
+      role: '재무설계사', tool: '재무설계사 보조 AI', back: '/pages/financial-planner.html', judge: '재무 진단·상품 선택·투자 판단',
+      docHint: '예: 재무설계서', toHint: '예: 고객'
+    },
     'health-educator': {
       role: '보건교육사', tool: '보건교육사 보조 AI', back: '/pages/health-educator.html',
       docHint: '예: 교육 기획안', toHint: '예: 대상 기관'
@@ -245,6 +249,7 @@
     $('h1').textContent = P.role + ' 서류 작성하기 9단계';
     $('sub').textContent = '기록 유형 결정 → 서식 승인 → 서식 DB → 지시 내용 입력 → 작성 → 검증·승인 → 저장·교부·신고 준비 → 청구·비용 → 결과 기록 순서로 진행합니다.';
     $('fDoc').placeholder = P.docHint; $('fTo').placeholder = P.toHint; $('optPro').textContent = P.role;
+    Array.prototype.forEach.call(document.querySelectorAll('.judge'), function (e) { e.textContent = P.judge || '진단·평가·처치·처방'; });
     frame = $('chatFrame');
     frame.src = '/pages/expert-chat.html?persona=' + encodeURIComponent(PID) + '&embed=1';
     $('btnStart').onclick = startMsg;

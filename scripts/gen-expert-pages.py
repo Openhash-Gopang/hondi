@@ -25,7 +25,10 @@ WRITE_TRACK = {
     'dental-hygienist': '치과위생사', 'occupational-therapist': '작업치료사', 'dental-technician': '치과기공사',
     'advanced-practice-nurse': '전문간호사', 'dietitian': '영양사', 'paramedic': '응급구조사', 'midwife': '조산사',
     'speech-language-pathologist': '언어재활사', 'optician': '안경사', 'sanitarian': '위생사', 'health-educator': '보건교육사',
+    'financial-planner': '재무설계사',  # 2026-10-21 계열 A(기록형)
 }
+# 안내 줄에서 "전문 판단"으로 부르는 예시(기본은 보건의료용). 직역이 다르면 여기서 바꾼다.
+WRITE_JUDGE = {'financial-planner': '재무 진단·상품 선택·투자 판단'}
 
 # ── 서류 목록(SP 부록 A) 파서 — SP 가 서류 목록의 정본이고, 페이지의 PRO_DOC_PAGE 데이터는 여기서 만든다 (2026-10-17)
 # 형식: "## 부록 A …" 아래 "### A-n. 제목 (메타)" 절마다 표(첫 열 = 서류 이름) 또는 "- **서류**: 설명" 목록.
@@ -297,7 +300,7 @@ def catalog_page(pid, label, cat, spk, parent, catalog, children=None):
         href = '/pages/expert-write.html?persona=' + pid
         hero_js = ",\n  heroButton: { label: '서류 작성하기', href: %s, title: %s }" % (json.dumps(href), json.dumps(wt + ' 기록·서류를 서식 결정부터 처리 결과 기록까지 9단계로 작성합니다', ensure_ascii=False))
         wt_callout = ('\n    <div class="svc-callout"><b>서류 작성하기</b> 기록 유형 결정 → 서식 승인 → 서식 DB 확인·저장 → 지시 내용 입력 → 기록 작성 → 검증·승인 → 저장·교부·신고 준비 → 청구·비용 → 결과 기록 9단계로 한 건을 끝까지 진행하는 화면이 있습니다. '
-                      '진단·평가·처치·처방 같은 전문 판단과 승인·서명·교부·신고·청구는 자격자가 직접 하며, dpaper 연동은 아직 되지 않았습니다. <a href="%s">서류 작성하기 화면으로 이동</a></div>' % href)
+                      '%s 같은 전문 판단과 승인·서명·교부·신고·청구는 자격자가 직접 하며, dpaper 연동은 아직 되지 않았습니다. <a href="%s">서류 작성하기 화면으로 이동</a></div>' % (WRITE_JUDGE.get(pid, '진단·평가·처치·처방'), href))
     kids_html = ''
     if children:  # 세부 분야가 있는 직역: 서류 목록 아래에 세부 분야 링크 표를 둔다
         rows = ''.join('<tr><td class="doc-title"><a href="/pages/%s.html">%s</a></td></tr>' % (c['id'], e(c['label'])) for c in children)

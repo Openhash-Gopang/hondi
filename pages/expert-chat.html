@@ -425,7 +425,9 @@ async function _pumpSSE(response, onJson) {
 
 const _PRO_WRITE_PERSONAS = new Set(['judicial-scrivener', 'administrative-scrivener',
   // 2026-10-21 보건의료 19개 직역(서류 작성하기 9단계, pages/expert-write.html)
-  'dentist', 'traditional-medicine-doctor', 'pharmacist', 'veterinarian', 'nurse', 'physical-therapist', 'medical-lab-technologist', 'radiologic-technologist', 'dental-hygienist', 'occupational-therapist', 'dental-technician', 'advanced-practice-nurse', 'dietitian', 'paramedic', 'midwife', 'speech-language-pathologist', 'optician', 'sanitarian', 'health-educator']);
+  'dentist', 'traditional-medicine-doctor', 'pharmacist', 'veterinarian', 'nurse', 'physical-therapist', 'medical-lab-technologist', 'radiologic-technologist', 'dental-hygienist', 'occupational-therapist', 'dental-technician', 'advanced-practice-nurse', 'dietitian', 'paramedic', 'midwife', 'speech-language-pathologist', 'optician', 'sanitarian', 'health-educator',
+  // 2026-10-21 계열 A(법률·금융) 4개 직역 — 노무사·손해사정사·관세사는 pages/scrivener-write.html, 재무설계사는 pages/expert-write.html
+  'financial-planner', 'loss-adjuster', 'labor-attorney', 'customs-broker']);
 let _proClientP = null;
 function _loadProClient() {
   if (window.HondiPro) return Promise.resolve();
