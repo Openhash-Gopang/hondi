@@ -1668,6 +1668,19 @@ if (_embedOn()) {
   try { window.parent.postMessage({ type: 'expert-embed-ready' }, location.origin); } catch (e) { /* 무시 */ }
 }
 
+// ── 단계별 상담 진입 링크 (2026-10-21 신설) — 교육·복지 상담형 10개 직역은 pages/expert-counsel.html 로 이어진다.
+// 상담형 SP 는 일반인용(전문가 인증 없음)이라 _PRO_WRITE_PERSONAS 에 넣지 않는다.
+const _COUNSEL_PERSONAS = new Set(['teacher', 'school-counselor', 'clinical-psychologist', 'mental-health-professional', 'social-worker', 'curator', 'librarian', 'youth-counselor', 'childcare-teacher', 'lifelong-educator']);
+if (!_embedOn() && _COUNSEL_PERSONAS.has(PERSONA)) {
+  try {
+    const _ca = document.createElement('a');
+    _ca.href = '/pages/expert-counsel.html?persona=' + encodeURIComponent(PERSONA);
+    _ca.textContent = '단계별 상담으로 진행';
+    _ca.style.cssText = 'position:fixed;right:14px;bottom:84px;z-index:30;padding:8px 14px;border-radius:20px;background:#3ecf8e;color:#fff;font-size:13px;font-weight:600;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.15)';
+    document.body.appendChild(_ca);
+  } catch (e) { /* 링크를 못 만들어도 대화는 그대로 */ }
+}
+
 // ── 서식 촬영 페이지(digit-code)에서 넘어온 사진 (2026-10-14 신설) ──────────
 // 사진은 같은 기기의 IndexedDB에만 있다가 여기서 읽는 즉시 지워진다. 자동 전송하지 않는다 —
 // 첨부와 안내 문구만 채워 두고, 이용자가 내용을 더하거나 고친 뒤 전송 버튼을 직접 누른다.
