@@ -31,6 +31,12 @@ WRITE_TRACK = {
     'navigation-officer': '항해사',  # 2026-10-21 계열 C(기록형)
     'marine-engineer': '기관사(선박)',  # 2026-10-21 계열 C(기록형)
     'weather-forecaster': '기상예보사',  # 2026-10-21 계열 C(기록형)
+    'security-engineer': '정보보안전문가',  # 2026-10-21 계열 D(기록형)
+    'translator-interpreter': '통역사·번역사',  # 2026-10-21 계열 D(기록형)
+    'tour-guide': '관광통역안내사',  # 2026-10-21 계열 D(기록형)
+    'sports-instructor': '생활스포츠지도사',  # 2026-10-21 계열 D(기록형)
+    'hairdresser': '미용사',  # 2026-10-21 계열 D(기록형)
+    'chef': '조리사',  # 2026-10-21 계열 D(기록형)
 }
 # 안내 줄에서 "전문 판단"으로 부르는 예시(기본은 보건의료용). 직역이 다르면 여기서 바꾼다.
 WRITE_JUDGE = {'financial-planner': '재무 진단·상품 선택·투자 판단',
@@ -39,6 +45,12 @@ WRITE_JUDGE = {'financial-planner': '재무 진단·상품 선택·투자 판단
     'navigation-officer': '항해·운항 판단',
     'marine-engineer': '기관 상태·운전 판단',
     'weather-forecaster': '기상 현상 판단·예보',
+    'security-engineer': '보안 위험 판단·취약점 평가',
+    'translator-interpreter': '번역의 정확성·적합성 판단',
+    'tour-guide': '관광 안내 내용 판단',
+    'sports-instructor': '운동 처방·건강 상태 판단',
+    'hairdresser': '시술 적합성·피부 상태 판단',
+    'chef': '식품 안전·위생 판단',
 }
 
 # ── 서류 목록(SP 부록 A) 파서 — SP 가 서류 목록의 정본이고, 페이지의 PRO_DOC_PAGE 데이터는 여기서 만든다 (2026-10-17)

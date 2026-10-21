@@ -424,6 +424,8 @@ async function _pumpSSE(response, onJson) {
 }
 
 const _PRO_WRITE_PERSONAS = new Set(['judicial-scrivener', 'administrative-scrivener',
+  // 2026-10-21 계열 D(보안·통번역·관광·스포츠·미용·조리) 6개 직역 — 기록형은 pages/expert-write.html
+  'security-engineer', 'translator-interpreter', 'tour-guide', 'sports-instructor', 'hairdresser', 'chef',
   // 2026-10-21 계열 C(건축·공학·안전·해사·측량) 12개 직역 — 제출형은 pages/scrivener-write.html, 기록형은 pages/expert-write.html
   'architect', 'industrial-safety-consultant', 'fire-safety-manager', 'landscape-engineer', 'surveying-engineer', 'electrical-safety-engineer', 'gas-safety-engineer', 'professional-engineer', 'naval-architect', 'navigation-officer', 'marine-engineer', 'weather-forecaster',
   // 2026-10-21 보건의료 19개 직역(서류 작성하기 9단계, pages/expert-write.html)
