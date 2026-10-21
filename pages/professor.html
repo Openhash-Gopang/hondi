@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>학습 트랙 — K-Professor</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--bg:#f8f9fa;--sur:#fff;--bdr:#e5e7eb;--bdr2:#d1d5db;--txt:#111827;--txt2:#374151;--txt3:#6b7280;--txt4:#9ca3af;
+--pri:#3ecf8e;--pri-dk:#2baa74;--pri-bg:#f0fdf9;--pri-bd:#bbf7d0;--side-bg:#f9fafb;--side-sel:#f3f4f6;--side-w:220px;--side-col:52px;--head-h:48px;
+--red:#ef4444;--red-bg:#fef2f2;--org:#f59e0b;--org-bg:#fffbeb;--blue:#3b82f6;--blue-bg:#eff6ff;
+--font:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;--r:10px;--r-lg:16px;--ease:cubic-bezier(.4,0,.2,1)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:14px;line-height:1.6}
+a{color:inherit;text-decoration:none}
+.topbar{position:fixed;top:0;left:0;right:0;height:var(--head-h);background:var(--sur);border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:14px;padding:0 16px;z-index:50}
+.topbar-brand{font-weight:700;color:var(--pri-dk)}
+.topbar-breadcrumb{color:var(--txt3);font-size:13px;flex:1}
+.topbar-right{display:flex;gap:12px;align-items:center;color:var(--txt3);font-size:12px}
+.notice-bar{position:relative;margin:calc(var(--head-h) + 0px) 0 0 var(--side-col);padding:7px 16px;background:var(--org-bg);border-bottom:1px solid #fde68a;color:#92400e;font-size:12.5px}
+.notice-bar+.notice-bar{margin-top:0;background:var(--blue-bg);border-color:#bfdbfe;color:#1e40af}
+.sidebar{position:fixed;top:var(--head-h);bottom:0;left:0;width:var(--side-col);background:var(--side-bg);border-right:1px solid var(--bdr);overflow:hidden;transition:width .2s var(--ease);z-index:40}
+.sidebar:hover{width:var(--side-w)}
+.sidebar-label{padding:14px 16px 6px;font-size:11px;color:var(--txt4);white-space:nowrap;opacity:0}
+.sidebar:hover .sidebar-label{opacity:1}
+.nav-item{display:flex;align-items:center;gap:12px;padding:9px 18px;color:var(--txt2);white-space:nowrap;border:0;background:none;width:100%;font:inherit;cursor:pointer}
+.nav-item:hover,.nav-item.active{background:var(--side-sel)}
+.nav-item.active{color:var(--pri-dk);font-weight:600}
+.nav-ico{width:16px;text-align:center;flex:none}
+.main{margin-left:var(--side-col);padding:20px 24px 80px;max-width:1080px}
+.page-header h1{font-size:22px;font-weight:700}
+.page-header p{color:var(--txt3);margin-top:4px}
+.tabs{display:flex;gap:4px;margin:16px 0;border-bottom:1px solid var(--bdr)}
+.tab{padding:8px 14px;border:0;background:none;font:inherit;color:var(--txt3);cursor:pointer;border-bottom:2px solid transparent}
+.tab.active{color:var(--pri-dk);border-color:var(--pri);font-weight:600}
+.panel{display:none}.panel.active{display:block}
+.progress{display:flex;gap:6px;margin:6px 0 18px;flex-wrap:wrap}
+.pg{flex:1;min-width:92px;padding:8px 10px;border:1px solid var(--bdr);border-radius:var(--r);background:var(--sur);font-size:12px;color:var(--txt3)}
+.pg b{display:block;color:var(--txt2);font-size:12.5px}
+.pg.done{background:var(--pri-bg);border-color:var(--pri-bd)}.pg.done b{color:var(--pri-dk)}
+.pg.cur{border-color:var(--pri);box-shadow:0 0 0 2px var(--pri-bd)}
+.verdict-step{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r-lg);margin-bottom:12px;overflow:hidden}
+.verdict-step.cur{border-color:var(--pri)}
+.step-head{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer}
+.step-tag{font-size:11px;font-weight:700;color:#fff;background:var(--txt4);border-radius:6px;padding:2px 8px}
+.verdict-step.cur .step-tag{background:var(--pri-dk)}
+.verdict-step.done .step-tag{background:var(--pri)}
+.step-title{font-weight:600;flex:1}
+.step-state{font-size:12px;color:var(--txt4)}
+.step-body{padding:0 16px 14px;color:var(--txt2);display:none}
+.verdict-step.open .step-body{display:block}
+.step-body ul{margin:6px 0 0 18px}
+.step-body li{margin:2px 0}
+.gate{display:inline-block;margin-top:8px;padding:2px 9px;border-radius:20px;font-size:12px;background:var(--org-bg);color:#92400e;border:1px solid #fde68a}
+.step-complete{display:none;margin-top:10px;padding:8px 12px;border-radius:var(--r);background:var(--pri-bg);border:1px solid var(--pri-bd);color:var(--pri-dk);font-size:13px}
+.verdict-step.done .step-complete{display:block}
+.conf-block{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:14px}
+.conf-block h3{font-size:14px;margin-bottom:8px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row label{flex:1;min-width:180px;font-size:12px;color:var(--txt3)}
+.row textarea,.row select,.row input{display:block;width:100%;margin-top:3px;padding:8px 10px;border:1px solid var(--bdr2);border-radius:8px;font:inherit;color:var(--txt);background:#fff}
+.btn{margin-top:12px;padding:9px 18px;border:0;border-radius:8px;background:var(--pri);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--pri-dk)}
+.btn.sec{background:#fff;color:var(--txt2);border:1px solid var(--bdr2);margin-left:6px}
+#startChatMount{min-height:420px;border:1px solid var(--bdr);border-radius:var(--r-lg);background:var(--sur);overflow:hidden}
+.toast{position:fixed;right:18px;bottom:18px;background:#111827;color:#fff;padding:10px 14px;border-radius:10px;font-size:13px;opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none;z-index:99}
+.toast.on{opacity:1;transform:none}
+.limits{font-size:12.5px;color:var(--txt3);margin-top:18px;padding:12px 14px;border:1px dashed var(--bdr2);border-radius:var(--r)}
+@media(max-width:720px){.main{padding:16px 14px 80px}.notice-bar{margin-left:0}.sidebar{display:none}.main{margin-left:0}}
+.row textarea{min-height:56px;resize:vertical}.hide{display:none}
+.main{max-width:1180px}
+.pg{min-width:104px}
+.weeks{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px}
+.wk{min-width:54px;text-align:center;padding:6px 8px;border:1px solid var(--bdr2);border-radius:8px;background:#fff;font-size:12px;color:var(--txt3)}
+.wk.pass{background:var(--pri-bg);border-color:var(--pri-bd);color:var(--pri-dk);font-weight:600}
+.wk.cur{border-color:var(--pri);box-shadow:0 0 0 2px var(--pri-bd);color:var(--txt)}
+.wk.fail{background:var(--red-bg);border-color:#fecaca;color:var(--red)}
+.wk.lock{opacity:.55}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--pri-bd);background:var(--pri-bg);border-radius:20px;font-size:12.5px}
+.chip a{color:var(--pri-dk);font-weight:600}
+.chip button{border:0;background:none;cursor:pointer;color:var(--txt3);font-size:14px;line-height:1}
+.mini{margin-top:8px;padding:5px 12px;border:1px solid var(--bdr2);border-radius:8px;background:#fff;font:inherit;font-size:12.5px;color:var(--txt2);cursor:pointer}
+.mini:hover{border-color:var(--pri);color:var(--pri-dk)}
+.gate-line{margin-top:10px;font-size:12.5px;color:var(--txt3)}
+</style>
+<script>
+window.K_AUTH_CONFIG = { serviceLabel: "K-Professor" };
+window.HONDI_CHAT_WIDGET_CONFIG = {
+  sp: "SP_professor",
+  panelMode: "inline",
+  inlineMount: "#startChatMount",
+  placeholder: "학습 목표나 질문을 입력하세요",
+  mic: true,
+  camera: "touch",
+  maxTokens: 4096,
+  panelTitle: "학습 트랙 — K-Professor",
+  label: "무엇을 배우고 싶은지 말씀해 주세요",
+  serviceLabel: "K-Professor",
+  greeting: "안녕하세요! K-Professor입니다. 배우고 싶은 과목과 지금의 수준을 알려 주세요. ① 현황 파악 → ② 목표 결정 → ③ 과목별 AI 교수 선정 → ④ 학습 계획 → ⑤ 콘텐츠 → ⑥ 시험 설계 → ⑦ 주간 학습(주간 시험 통과 시 다음 주) → ⑧ 최종 평가 → ⑨ 조기 이수·연장 → ⑩ 인간 교수 검증 순서로 함께 진행합니다. 이 도구의 시험과 점수는 학습을 돕는 참고 지표이며 공식 성적이 아닙니다.",
+  context: '사용자는 K-Professor의 공통 「학습 트랙」 화면(10단계 진행 화면)에 있습니다. 이 화면의 요청은 SP §3-10 학습 트랙(STEP P, P-1 현황 파악 → P-2 목표 결정 → P-3 과목별 AI 교수 선정 → P-4 학습 계획 → P-5 콘텐츠 구성 → P-6 시험 설계 → P-7 학습 개시와 주간 진행 → P-8 최종 평가 → P-9 조기 이수·기간 연장 → P-10 인간 교수 검증·승인)로 진행합니다. 매 응답 첫 줄에 SP가 정한 상태 줄을 표시하고 끝에 [NEXT_STEP: …]을 붙이세요. 시험·점수는 형성평가 참고 지표이며 공식 성적이 아니고, 결과를 보장하지 않으며, 인간 교수를 소개·추천하지 않고 승인을 대신 선언하지 않습니다.',
+  onReply: function (reply) { try { window.ProfTrack.parse(reply); } catch (e) { console.error(e); } }
+};
+</script>
+</head>
+<body>
+<header class="topbar">
+  <a class="topbar-brand" href="/">Hondi · K-Professor</a>
+  <div class="topbar-breadcrumb">홈 › 교육 › 학습 트랙</div>
+  <div class="topbar-right"><span id="clock">--:--:--</span></div>
+</header>
+<div class="notice-bar" role="note"><strong>⚠️ 공식 성적·학점·자격이 아닙니다.</strong> 이 화면의 시험과 점수는 학습을 돕는 형성평가 참고 지표입니다. 목표 점수 달성을 보장하지 않으며, 인간 교수의 승인도 공식 학적 기록이 아닙니다.</div>
+<div class="notice-bar" role="note"><strong>ℹ️ 안내:</strong> 학습 데이터는 동의 하에 익명·집계 형태로 공공교육 통계에 쓰일 수 있습니다. 위기 신호가 보이면 학습보다 전문 상담 연계를 우선합니다.</div>
+
+<nav class="sidebar" aria-label="메뉴">
+  <div class="sidebar-label">학습</div>
+  <button class="nav-item active"><span class="nav-ico">🎓</span><span>학습 트랙</span></button>
+  <a class="nav-item" href="/pages/expert-personas.html"><span class="nav-ico">👥</span><span>전문가 페르소나</span></a>
+  <a class="nav-item" href="/"><span class="nav-ico">🏠</span><span>Hondi 홈</span></a>
+</nav>
+
+<main class="main">
+  <div class="page-header">
+    <h1>학습 트랙 10단계</h1>
+    <p>목표를 정하고, 과목별 AI 교수와 계획을 세워, 주간 시험을 통과하며 진도를 나갑니다.</p>
+  </div>
+
+  <div class="conf-block">
+    <h3>시작하기</h3>
+    <div class="row">
+      <label>희망 과목·시험
+        <input id="fSubject" placeholder="예: 의학전문대학원 해부학"></label>
+      <label>현재 단계
+        <select id="fLevel"><option>초등</option><option>중등</option><option>고등</option><option>대학</option><option selected>대학원·수련</option><option>재직·평생교육</option></select></label>
+      <label>학습 목표
+        <input id="fGoal" placeholder="예: 해부학 시험 90점"></label>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <label>학습 기간
+        <select id="fSpan"><option>4주</option><option selected>8주</option><option>12주</option><option>6개월</option><option>1년</option><option>직접 설명</option></select></label>
+      <label>주당 학습 시간
+        <input id="fHours" placeholder="예: 10시간"></label>
+      <label>시험일(있다면)
+        <input id="fExam" placeholder="예: 2026-12-20"></label>
+    </div>
+    <button class="btn" id="btnStart">P-1 시작 — 현황 파악</button>
+    <button class="btn sec" id="btnReset">진행 초기화</button>
+  </div>
+
+  <div class="progress" id="progress"></div>
+  <div id="steps"></div>
+
+  <div class="conf-block">
+    <h3>주간 진행 (P-7)</h3>
+    <p style="color:var(--txt3);font-size:12.5px">주간 시험을 통과하면 다음 주가 열립니다. 아래 표시는 AI 응답의 상태 줄을 읽어 갱신됩니다.</p>
+    <div class="weeks" id="weeks"></div>
+    <div class="gate-line" id="gateLine">게이트: 없음</div>
+  </div>
+
+  <div class="conf-block">
+    <h3>과목별 AI 교수 (P-3)</h3>
+    <div class="row">
+      <label style="flex-basis:100%">교수 검색
+        <input id="fProf" list="profList" placeholder="과목명을 입력하면 등록된 AI 교수가 나타납니다 (예: 병리, 통계, 법학)"></label>
+      <datalist id="profList"></datalist>
+    </div>
+    <button class="mini" id="btnAddProf">선택한 교수 추가</button>
+    <button class="mini" id="btnAskProf">AI에게 추천 요청</button>
+    <div class="chips" id="profChips"></div>
+    <p id="profNote" style="color:var(--txt3);font-size:12px;margin-top:8px">교수 목록을 불러오는 중입니다.</p>
+  </div>
+
+  <div class="conf-block">
+    <h3>대화로 진행</h3>
+    <div id="startChatMount"></div>
+  </div>
+  <div class="limits">진행 표시는 AI 응답의 상태 줄을 읽어 갱신하며, 이 브라우저에만 저장됩니다. 주간 시험 통과·인간 교수 승인의 기록은 학습 참고용이며 공식 성적·학점·학위·자격이 아닙니다.</div>
+</main>
+<div class="toast" id="toast"></div>
+
+<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
+<script src="/assets/chat-widget.js"></script>
+<script>
+(function(){
+  var STEPS=[
+   {k:'P-1',t:'현황 파악',s:'희망 과목과 현재 지식 수준을 확인하고 진단 문항으로 영역별 강약을 정리',l:['과목·단계·가용 시간·교재','진단 문항 5~10개로 수준 파악'],q:'P-1 현황 파악을 진행해 주세요. 진단 문항도 내 주세요.'},
+   {k:'P-2',t:'학습 목표 결정',s:'대화로 측정 가능한 목표와 기한, 통과선을 정함',l:['목표 점수·범위·기한','현실성 점검과 최소 목표'],q:'P-2 학습 목표를 정하도록 도와주세요.'},
+   {k:'P-3',t:'과목별 AI 교수 선정',s:'과목마다 적합한 세부분야 AI 교수를 학습자가 선택',l:['후보와 선택 이유','선택은 학습자가'],q:'P-3 과목별 AI 교수를 추천해 주세요.'},
+   {k:'P-4',t:'학습 계획 작성',s:'주간·월간·분기·반기·연도 계획을 목표 기한에서 거꾸로 설계',l:['마일스톤과 단원 배치','휴식·예비 주, 주간 시험 통과선'],q:'P-4 학습 계획을 주간·월간·분기·반기·연도 단위로 작성해 주세요.'},
+   {k:'P-5',t:'콘텐츠 구성',s:'계획에 따른 텍스트·연습 문항·동영상(스크립트) 구성',l:['주차별 학습 자료','영상은 스크립트·스토리보드, 확인된 공개 강의만 안내'],q:'P-5 첫 2주분 콘텐츠를 구성해 주세요.'},
+   {k:'P-6',t:'시험 설계',s:'주간 시험·중간 점검·최종 평가의 구조와 채점 기준',l:['문항 수·난이도·시간·rubric','범위 매핑표'],q:'P-6 시험 구조와 채점 기준을 설계해 주세요.'},
+   {k:'P-7',t:'학습 개시·주간 진행',s:'주간 시험을 통과하면 다음 주로 진행, 미통과면 보충 후 재시험',l:['주차 학습 → 주간 시험 → 피드백','연속 미통과 시 계획 조정'],q:'이번 주 학습을 시작해 주세요.'},
+   {k:'P-8',t:'최종 평가',s:'목표 시험 형식을 모사한 평가와 결과 보고',l:['영역별 정답률·취약 영역','목표 대비 차이 (참고 지표)'],q:'P-8 최종 평가를 시작해 주세요.'},
+   {k:'P-9',t:'조기 이수·기간 연장',s:'결과에 따라 학습 기간을 줄이거나 늘려 계획을 재설계',l:['조기 이수: 단축·심화·다음 과목','연장: 취약 영역 중심 재설계'],q:'P-9 조기 이수 또는 기간 연장 여부를 검토해 주세요.'},
+   {k:'P-10',t:'인간 교수 검증·승인',s:'학습자가 직접 선택한 인간 교수가 계획과 결과를 검토',l:['검토 패키지 (목표·계획·시험·결과)','승인은 인간 교수가 직접, AI는 대신 선언하지 않음'],q:'P-10 인간 교수에게 가져갈 검토 패키지를 만들어 주세요.',g:'인간 교수 검토'}
+  ];
+  var KEY='proftrack_state_v1', st={cur:0,done:{},wa:0,wb:0,wk:{},gate:'없음',profs:[]};
+  function load(){try{var v=JSON.parse(localStorage.getItem(KEY)||'null');if(v&&typeof v.cur==='number'){st=v;st.profs=st.profs||[];st.wk=st.wk||{};}}catch(e){}}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}}
+  function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on');},2400);}
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function send(t){
+    var w=window.HondiChatWidget;
+    if(w&&w.send&&!(w.isBusy&&w.isBusy())){w.send(t);}else{toast('채팅창 준비 중이거나 응답 중입니다. 잠시 후 다시 눌러 주세요.');}
+  }
+  function ctxText(){
+    var g=function(id){return document.getElementById(id).value.trim();};
+    return '희망 과목: '+(g('fSubject')||'(미입력)')+' / 단계: '+g('fLevel')+' / 목표: '+(g('fGoal')||'(미정)')+' / 기간: '+g('fSpan')+' / 주당 시간: '+(g('fHours')||'(미입력)')+' / 시험일: '+(g('fExam')||'(없음)');
+  }
+  function render(){
+    var pg=document.getElementById('progress'),box=document.getElementById('steps');pg.innerHTML='';box.innerHTML='';
+    STEPS.forEach(function(s,i){
+      var done=!!st.done[i],cur=i===st.cur;
+      var p=document.createElement('div');p.className='pg'+(done?' done':'')+(cur?' cur':'');p.innerHTML='<b>'+s.k+'</b>'+s.t;pg.appendChild(p);
+      var d=document.createElement('div');d.className='verdict-step'+(done?' done':'')+(cur?' cur open':'');
+      d.innerHTML='<div class="step-head"><span class="step-tag">'+s.k+'</span><span class="step-title">'+s.t+'</span><span class="step-state">'+(done?'완료':cur?'진행 중':'대기')+'</span></div>'+
+        '<div class="step-body"><p>'+s.s+'</p><ul>'+s.l.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>'+(s.g?'<span class="gate">'+s.g+'</span>':'')+
+        '<div><button class="mini" data-q="'+i+'">이 단계 진행 요청</button></div><div class="step-complete">✓ 이 단계가 완료된 것으로 표시되었습니다.</div></div>';
+      d.querySelector('.step-head').onclick=function(){d.classList.toggle('open');};
+      d.querySelector('[data-q]').onclick=function(){send(STEPS[i].q+' ('+ctxText()+')');};
+      box.appendChild(d);
+    });
+    renderWeeks();renderProfs();
+    document.getElementById('gateLine').textContent='게이트: '+(st.gate||'없음');
+  }
+  function renderWeeks(){
+    var w=document.getElementById('weeks');w.innerHTML='';
+    if(!st.wb){w.innerHTML='<span style="color:var(--txt3);font-size:12.5px">학습 계획이 확정되면 주차가 표시됩니다.</span>';return;}
+    for(var i=1;i<=st.wb;i++){
+      var c=document.createElement('div'),v=st.wk[i];
+      var cls='wk';
+      if(v==='pass')cls+=' pass';else if(v==='fail')cls+=' fail';
+      else if(i===st.wa)cls+=' cur';else if(i>st.wa)cls+=' lock';
+      c.className=cls;c.textContent=i+'주'+(v==='pass'?' ✓':v==='fail'?' ✗':'');w.appendChild(c);
+    }
+  }
+  function parse(reply){
+    var m=/\[K-Professor\s*\|\s*학습 트랙\s*\|\s*현재:\s*P-(\d+)([^\]]*)\]/.exec(reply||'');
+    if(!m)return;
+    var n=parseInt(m[1],10)-1;if(n<0||n>=STEPS.length)return;
+    for(var i=0;i<n;i++)st.done[i]=true;
+    st.cur=n;
+    var rest=m[2]||'';
+    var w=/주차:\s*(\d+)\s*\/\s*(\d+)/.exec(rest);
+    if(w){st.wa=parseInt(w[1],10);st.wb=parseInt(w[2],10);}
+    var t=/주간시험:\s*([^|\]]+)/.exec(rest);
+    if(t&&st.wa){
+      var tv=t[1].trim();
+      if(tv==='통과'){st.wk[st.wa]='pass';}
+      else if(tv==='미통과'){st.wk[st.wa]='fail';}
+    }
+    var g=/게이트:\s*([^|\]]+)/.exec(rest);
+    if(g)st.gate=g[1].trim();
+    save();render();
+  }
+  /* AI professor roster (from the registry, if reachable) */
+  var ROSTER=[];
+  function renderProfs(){
+    var c=document.getElementById('profChips');c.innerHTML='';
+    st.profs.forEach(function(p,i){
+      var el=document.createElement('span');el.className='chip';
+      var url='/pages/expert-chat.html?persona='+encodeURIComponent(p.id)+'&return='+encodeURIComponent(location.href)+'&ctx='+encodeURIComponent('학습 트랙 수업 시작. '+ctxText());
+      el.innerHTML=esc(p.label)+' <a href="'+url+'">수업 시작</a><button title="제거" data-i="'+i+'">×</button>';
+      el.querySelector('button').onclick=function(){st.profs.splice(i,1);save();renderProfs();};
+      c.appendChild(el);
+    });
+  }
+  window.ProfTrack={parse:parse,setRoster:function(list){
+    ROSTER=list;var dl=document.getElementById('profList');dl.innerHTML='';
+    list.forEach(function(r){var o=document.createElement('option');o.value=r.label;dl.appendChild(o);});
+    document.getElementById('profNote').textContent=list.length?('등록된 AI 교수 '+list.length+'명 중에서 고를 수 있습니다. 선택은 학습자가 합니다.'):'교수 목록을 불러오지 못했습니다. 과목명을 대화창에 말씀하시면 AI가 추천합니다.';
+  }};
+  document.getElementById('btnAddProf').onclick=function(){
+    var v=document.getElementById('fProf').value.trim();if(!v)return;
+    var r=ROSTER.filter(function(x){return x.label===v;})[0];
+    if(!r){toast('목록에서 교수를 선택해 주세요.');return;}
+    if(st.profs.some(function(p){return p.id===r.id;})){toast('이미 추가된 교수입니다.');return;}
+    st.profs.push(r);save();renderProfs();document.getElementById('fProf').value='';
+    send('P-3 과목별 AI 교수로 「'+r.label+'」을 선택했습니다. 반영해 주세요.');
+  };
+  document.getElementById('btnAskProf').onclick=function(){send('P-3 과목별 AI 교수를 추천해 주세요. ('+ctxText()+')');};
+  document.getElementById('btnStart').onclick=function(){send('학습 트랙(STEP P)을 시작합니다. '+ctxText()+'. P-1부터 진행해 주시고, 부족한 항목은 3개 이내로 먼저 물어봐 주세요.');};
+  document.getElementById('btnReset').onclick=function(){st={cur:0,done:{},wa:0,wb:0,wk:{},gate:'없음',profs:[]};save();render();toast('진행 표시를 초기화했습니다.');};
+  setInterval(function(){var c=document.getElementById('clock');if(c)c.textContent=new Date().toLocaleTimeString('ko-KR',{hour12:false,timeZone:'Asia/Seoul'});},1000);
+  load();render();
+})();
+</script>
+<script type="module">
+try {
+  var mod = await import('/src/gopang/ai/expert-registry.js');
+  var reg = mod.EXPERT_REGISTRY || {};
+  var list = Object.keys(reg).filter(function (k) { return k.indexOf('professor') === 0 && reg[k] && reg[k].label; })
+    .map(function (k) { return { id: k, label: reg[k].label }; })
+    .sort(function (a, b) { return a.label.localeCompare(b.label, 'ko'); });
+  window.ProfTrack.setRoster(list);
+} catch (e) {
+  console.warn('[professor] 교수 목록 로드 실패', e);
+  window.ProfTrack.setRoster([]);
+}
+</script>
+</body>
+</html>
