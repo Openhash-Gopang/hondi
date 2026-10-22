@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-21 19:02 KST · 기준 커밋 0d5c7c51
+- 갱신: 2026-10-22 17:54 KST · 기준 커밋 84da8c9b
 - 전문가 페르소나 전용 페이지 145개 · 등록된 SP 868건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-22 Merge pull request #743 from Openhash-Gopang/feat/klaw-verdict-hero-button-20261022
+- 2026-10-22 feat(lawyer pages): add K-Law 가상 판결문 생성하기 hero button to lawyer persona pages
 - 2026-10-21 Merge pull request #742 from Openhash-Gopang/feat/doc-tx-sp-u15-20261021
 - 2026-10-21 feat(sp): 서류 요청·제공 SP 신설 및 UNIVERSAL-common U15 반영
 - 2026-10-21 feat(sp): family F - K-Advisor step-by-step purchase advice track (STEP K, 7 steps)
@@ -42,8 +44,6 @@
 - 2026-10-19 Merge pull request #717 from Openhash-Gopang/feat/presentations-naviweb-announcement
 - 2026-10-19 feat: 프레젠테이션 나비웹 시리즈에 나비와 나비웹 안내(PDF) 추가, 기존 나비와 나비웹 안내서 대체
 - 2026-10-19 Merge pull request #716 from Openhash-Gopang/feat/gov-agency-round14
-- 2026-10-19 feat: 미연결 task 12건 연결 — 문화체육·농정·환경·인구정책·보건의료 SP 12개에 접수 연동 선언 추가, 다이제스트 재생성(열린 문제 #5)
-- 2026-10-19 Merge pull request #715 from Openhash-Gopang/feat/gov-agency-round13
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
