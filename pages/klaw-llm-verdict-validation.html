@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<link rel="icon" href="data:,">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<title>K-Law 후보 LLM 가상 판결문 검증 — 나비</title>
+</head>
+<body>
+
+<script>
+window.PAGE_HEADER = {
+  active: 'expert-personas',
+  sharedForms: false,
+  badge: "K-Law · 후보 LLM 검증",
+  h1: "K-Law 후보 LLM의<br>가상 판결문을 검증합니다",
+  sub: "같은 사건 개요를 후보 LLM에 입력해 얻은 가상 판결문을 실제 판결문과 견주어 본 기록입니다.",
+  disclaimer: "이 페이지는 후보 LLM 검증 기록이며 법률 자문이 아니다. 가상 판결문은 참고용이며 실제 판결이 아니다.",
+  disclaimerDismissKey: "klaw-llm-verdict-validation",
+  subnavPosition: 'bottom',
+  subnav: [
+    { label: "사건의 개요", href: "#case-overview", active: true },
+    { label: "사건 개요 익명화", href: "#case-anonymized" },
+    { label: "대법원 판결문", href: "#supreme-court" },
+    { label: "고등법원 판결문", href: "#high-court" },
+    { label: "LLM 가상 판결문 비교표", href: "#llm-compare" }
+  ]
+};
+</script>
+<link rel="stylesheet" href="/assets/ph-header.css">
+<script src="/assets/ph-header.js"></script>
+
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: #eef1f6; color: #0f172a; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif; font-size: 14px; line-height: 1.8; }
+.vv-doc { max-width: 1160px; margin: 0 auto; padding: 32px 24px 72px; }
+.vv-pane { display: none; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 28px 30px; }
+.vv-pane.active { display: block; }
+.vv-pane h2 { margin: 0 0 6px; font-size: 20px; color: #0e1c3f; }
+.vv-pane .vv-lead { margin: 0 0 18px; color: #475569; }
+.vv-todo { border: 1px dashed #cbd5e1; border-radius: 8px; padding: 18px 20px; background: #f8fafc; color: #475569; }
+.vv-todo b { color: #0f172a; }
+.vv-foot { margin-top: 18px; color: #64748b; font-size: 12.5px; }
+@media (max-width: 720px) { .vv-doc { padding: 20px 14px 56px; } .vv-pane { padding: 20px 16px; } }
+</style>
+
+<div class="vv-doc">
+
+  <section class="vv-pane active" id="case-overview" role="tabpanel" aria-label="사건의 개요">
+    <h2>사건의 개요</h2>
+    <p class="vv-lead">실제 사건에서 판결 결과·이유를 뺀 중립 개요입니다.</p>
+    <div class="vv-todo"><b>내용 준비 중</b> — 중립화본(사건의_개요_중립화본.md)이 들어갑니다.</div>
+  </section>
+
+  <section class="vv-pane" id="case-anonymized" role="tabpanel" aria-label="사건 개요 익명화">
+    <h2>사건 개요 익명화</h2>
+    <p class="vv-lead">날짜·기관명·수치·법령 명칭을 바꿔 검색과 학습 기억으로 실제 사건을 찾을 수 없게 한 변형 개요입니다. LLM에는 이 개요만 입력합니다.</p>
+    <div class="vv-todo"><b>내용 준비 중</b> — 변형본 v2(사건의_개요_변형본_v2.md)와 변경 요지가 들어갑니다. 비공개 대응표는 게시하지 않습니다.</div>
+  </section>
+
+  <section class="vv-pane" id="supreme-court" role="tabpanel" aria-label="대법원 판결문">
+    <h2>대법원 판결문</h2>
+    <p class="vv-lead">비교 기준이 되는 실제 판결문입니다(2021두61741).</p>
+    <div class="vv-todo"><b>내용 준비 중</b> — 대법원_2021두61741_판결문.md가 들어갑니다.</div>
+  </section>
+
+  <section class="vv-pane" id="high-court" role="tabpanel" aria-label="고등법원 판결문">
+    <h2>고등법원 판결문</h2>
+    <p class="vv-lead">대법원이 파기한 원심 판결문입니다(서울고등법원 2020누37187).</p>
+    <div class="vv-todo"><b>내용 준비 중</b> — 서울고등법원_2020누37187_판결문.md가 들어갑니다.</div>
+  </section>
+
+  <section class="vv-pane" id="llm-compare" role="tabpanel" aria-label="LLM 가상 판결문 비교표">
+    <h2>LLM 가상 판결문 비교표</h2>
+    <p class="vv-lead">후보 LLM별 가상 판결문을 같은 기준표(주문, 핵심 결론, 경계 판단, 헌법 판단, 추론의 질, 파기 범위, 인용의 정확성)로 채점한 결과입니다.</p>
+    <div class="vv-todo"><b>내용 준비 중</b> — 모델별 점수표와 가상 판결문 원문 링크가 들어갑니다.</div>
+    <p class="vv-foot">점수는 1개 사건·모델당 1회 실행 기준의 참고 값이며, 검색 오염이 확인된 결과는 순위에서 제외합니다.</p>
+  </section>
+
+</div>
+
+<script>
+(function () {
+  var ids = ['case-overview', 'case-anonymized', 'supreme-court', 'high-court', 'llm-compare'];
+  function show(id) {
+    if (ids.indexOf(id) < 0) id = ids[0];
+    ids.forEach(function (k) {
+      var pane = document.getElementById(k);
+      if (pane) pane.classList.toggle('active', k === id);
+    });
+    var links = document.querySelectorAll('.topsubnav-inner a');
+    Array.prototype.forEach.call(links, function (a) {
+      var on = a.getAttribute('href') === '#' + id;
+      a.classList.toggle('active', on);
+      if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
+    return id;
+  }
+  function wire() {
+    var bar = document.querySelector('.topsubnav-inner');
+    if (bar) {
+      bar.setAttribute('role', 'tablist');
+      bar.addEventListener('click', function (e) {
+        var a = e.target.closest ? e.target.closest('a') : null;
+        if (!a || (a.getAttribute('href') || '').charAt(0) !== '#') return;
+        e.preventDefault();
+        var id = show(a.getAttribute('href').slice(1));
+        try { history.replaceState(null, '', '#' + id); } catch (err) {}
+      });
+    }
+    show(location.hash.slice(1));
+  }
+  window.addEventListener('hashchange', function () { show(location.hash.slice(1)); });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wire); else wire();
+})();
+</script>
+</body>
+</html>
