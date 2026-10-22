@@ -61,11 +61,15 @@
   }
 
   // 2026-10-18(주피터 지시) — 히어로 오른쪽 빈 공간 세로 중앙에 놓는 행동 버튼(선택). PAGE_HEADER.heroButton = { label, href, title }.
-  // href는 사이트 안 경로('/'로 시작)만 허용한다. 문구는 escapeHtml을 거친다.
+  // href는 사이트 안 경로('/'로 시작)와 https://klaw.hondi.net/ 주소만 허용한다. 문구는 escapeHtml을 거친다.
   function renderHeroCta(config) {
     var b = config && config.heroButton;
-    if (!b || !b.label || typeof b.href !== 'string' || b.href.charAt(0) !== '/' || b.href.charAt(1) === '/') return '';
-    return '<div class="ph-hero-cta-row"><a class="ph-hero-cta" href="' + escapeHtml(b.href).replace(/"/g, '&quot;') + '"' + (b.title ? ' title="' + escapeHtml(b.title).replace(/"/g, '&quot;') + '"' : '') + '>' + escapeHtml(b.label) + '</a></div>';
+    if (!b || !b.label || typeof b.href !== 'string') return '';
+    // 2026-10-22(주피터 지시) — 사이트 안 경로 외에, 아래 허용 목록의 K-Law 주소(https://klaw.hondi.net/...)만 새 창 링크로 허용한다.
+    var internal = b.href.charAt(0) === '/' && b.href.charAt(1) !== '/';
+    var external = b.href.indexOf('https://klaw.hondi.net/') === 0;
+    if (!internal && !external) return '';
+    return '<div class="ph-hero-cta-row"><a class="ph-hero-cta" href="' + escapeHtml(b.href).replace(/"/g, '&quot;') + '"' + (external ? ' target="_blank" rel="noopener"' : '') + (b.title ? ' title="' + escapeHtml(b.title).replace(/"/g, '&quot;') + '"' : '') + '>' + escapeHtml(b.label) + '</a></div>';
   }
   function renderNav(activeKey) {
     var links = NAV_ITEMS.map(function (item) {
