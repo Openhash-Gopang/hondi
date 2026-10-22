@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-22 20:11 KST · 기준 커밋 e1076419
+- 갱신: 2026-10-22 20:20 KST · 기준 커밋 d85b42b3
 - 전문가 페르소나 전용 페이지 145개 · 등록된 SP 868건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-22 Merge pull request #752 from Openhash-Gopang/feat/klaw-llm-verdict-validation-deepseek-klaw-compare-20261022
+- 2026-10-22 pages: klaw-llm-verdict-validation 점수순 정렬, K-Law 적용 전·후(DeepSeek) 비교 추가
 - 2026-10-22 Merge pull request #751 from Openhash-Gopang/feat/klaw-llm-verdict-validation-grok-v2-20261022
 - 2026-10-22 feat(pages): add Grok variant-v2 verdict and rescore comparison tables
 - 2026-10-22 Merge pull request #750 from Openhash-Gopang/feat/klaw-llm-verdict-validation-claude-v2-20261022
@@ -42,8 +44,6 @@
 - 2026-10-21 feat(sp): health-care assistant personas (19) STEP W document-writing track (SP v1.1) + shared 9-stage page + hero buttons
 - 2026-10-21 Merge pull request #730 from Openhash-Gopang/feature/scrivener-split
 - 2026-10-21 feat(sp): 법무사·행정사 SP 를 일반인용(안내)과 전문가용(-assistant)으로 분리
-- 2026-10-21 feat(sp): judicial/administrative scrivener STEP W document-writing track (9 stages) + common writing page + page layout refit
-- 2026-10-21 Merge pull request #728 from Openhash-Gopang/feature/pro-verify-frontend-w1
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
