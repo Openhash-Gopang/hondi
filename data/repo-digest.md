@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-22 19:56 KST · 기준 커밋 be86bbe9
+- 갱신: 2026-10-22 20:08 KST · 기준 커밋 6e3aa2f0
 - 전문가 페르소나 전용 페이지 145개 · 등록된 SP 868건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-22 Merge pull request #750 from Openhash-Gopang/feat/klaw-llm-verdict-validation-claude-v2-20261022
+- 2026-10-22 feat(pages): add Claude variant-v2 verdict and rescore comparison tables
 - 2026-10-22 Merge pull request #749 from Openhash-Gopang/feat/klaw-llm-verdict-validation-klaw-run2-20261022
 - 2026-10-22 feat(pages): add K-Law second run (new instance, variant v2) and rescore
 - 2026-10-22 Merge pull request #748 from Openhash-Gopang/feat/klaw-llm-verdict-validation-6tab-20261022
@@ -42,8 +44,6 @@
 - 2026-10-21 Merge pull request #728 from Openhash-Gopang/feature/pro-verify-frontend-w1
 - 2026-10-21 feat(pro-verify): 전문가 인증 신청 화면·pro_session 자동 첨부·관리자 승인 패널 (W1-6)
 - 2026-10-21 Merge pull request #727 from Openhash-Gopang/feature/pro-gate-w1
-- 2026-10-21 feat(pro-verify): 전문가 세션 발급과 전문가용 SP 서버 게이트 (W1-4·1-5)
-- 2026-10-21 feat(professor): common professor persona page (same layout as tax accountant page) + learning-start page per subject
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
