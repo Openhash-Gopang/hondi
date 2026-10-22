@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-22 20:28 KST · 기준 커밋 62759e09
+- 갱신: 2026-10-22 20:32 KST · 기준 커밋 c19dc6f3
 - 전문가 페르소나 전용 페이지 145개 · 등록된 SP 868건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-22 Merge pull request #755 from Openhash-Gopang/feat/klaw-llm-verdict-validation-simple-summary-20261022
+- 2026-10-22 pages: klaw-llm-verdict-validation 비교 탭 단순화 (시험 흐름, 순위, 핵심 정리, 접이식 상세)
 - 2026-10-22 Merge pull request #754 from Openhash-Gopang/feat/klaw-llm-verdict-validation-heading-v1-note-20261022
 - 2026-10-22 pages: klaw-llm-verdict-validation 표 제목 수정, DeepSeek v1 성적 게시와 v2보다 유리함 부기
 - 2026-10-22 Merge pull request #753 from Openhash-Gopang/feat/klaw-llm-verdict-validation-highlight-deepseek-pair-20261022
@@ -42,8 +44,6 @@
 - 2026-10-21 docs(review): 직역 전문가 검수 패키지 — 안내서·자문 계약 핵심 조항·단체 협조 공문 초안·검수 시트 11종 (W4)
 - 2026-10-21 feat(sp): family C assistant personas - STEP W document-writing track for 12 professions (architect, industrial-safety-consultant, fire-safety-manager, landscape-engineer, surveying-engineer, electrical-safety-engineer, gas-safety-engineer, professional-engineer, naval-architect, navigation-officer, marine-engineer, weather-forecaster)
 - 2026-10-21 feat(pro-sub): 전문가용 AI 구독 — 장부·부여/환불 API·세션 반영·게이트(PRO_SUB_MODE)·관리자 패널 (W5)
-- 2026-10-21 feat(sp): family A (law/finance) assistant personas - STEP W document-writing track for financial-planner, loss-adjuster, labor-attorney, customs-broker
-- 2026-10-21 Merge pull request #732 from Openhash-Gopang/feature/legal-terms-privacy-draft
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
