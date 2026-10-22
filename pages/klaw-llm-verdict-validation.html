@@ -34,6 +34,9 @@ window.PAGE_HEADER = {
 <style>
 *, *::before, *::after { box-sizing: border-box; }
 body { margin: 0; background: #eef1f6; color: #0f172a; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif; font-size: 14px; line-height: 1.8; }
+/* 헤더 하단 탭 글자 크기만 이 페이지에서 줄인다(공용 ph-header.css는 그대로 둔다) */
+.topsubnav-bottom .topsubnav-inner a { font-size: 14px; padding: 0 18px; }
+@media (max-width: 720px) { .topsubnav-bottom .topsubnav-inner a { font-size: 13px; padding: 0 12px; } }
 .vv-doc { max-width: 1160px; margin: 0 auto; padding: 32px 24px 72px; }
 .vv-pane { display: none; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 28px 30px; }
 .vv-pane.active { display: block; }
