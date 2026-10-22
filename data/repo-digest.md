@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-22 17:54 KST · 기준 커밋 84da8c9b
+- 갱신: 2026-10-22 19:12 KST · 기준 커밋 831d1d36
 - 전문가 페르소나 전용 페이지 145개 · 등록된 SP 868건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-22 Merge pull request #744 from Openhash-Gopang/feat/klaw-llm-verdict-validation-page-20261022
+- 2026-10-22 feat(pages): add K-Law LLM verdict validation page skeleton (header + 5 tabs)
 - 2026-10-22 Merge pull request #743 from Openhash-Gopang/feat/klaw-verdict-hero-button-20261022
 - 2026-10-22 feat(lawyer pages): add K-Law 가상 판결문 생성하기 hero button to lawyer persona pages
 - 2026-10-21 Merge pull request #742 from Openhash-Gopang/feat/doc-tx-sp-u15-20261021
@@ -42,8 +44,6 @@
 - 2026-10-21 feat(patent): 변리사 보조 AI 신규 발명 특허 출원 준비 단계형 화면(18단계)
 - 2026-10-21 feat(sp): 변리사 보조 AI v1.3 — 발명 출원 트랙(STEP T) 통합 및 페이지 연결
 - 2026-10-19 Merge pull request #717 from Openhash-Gopang/feat/presentations-naviweb-announcement
-- 2026-10-19 feat: 프레젠테이션 나비웹 시리즈에 나비와 나비웹 안내(PDF) 추가, 기존 나비와 나비웹 안내서 대체
-- 2026-10-19 Merge pull request #716 from Openhash-Gopang/feat/gov-agency-round14
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
@@ -73,6 +73,7 @@
 - /pages/jeju-gov-automation.html — 제주 AI 행정 — 기관·실국과·읍면동 실행 지도
 - /pages/k-government.html — K-정부
 - /pages/k-services.html — K-서비스
+- /pages/klaw-llm-verdict-validation.html — K-Law 후보 LLM 가상 판결문 검증
 - /pages/klaw-research.html — 법원 중심에서 당사자 합의 중심으로 축의 이동
 - /pages/klaw-simulation-record.html — 가상 판결문 생성 테스트 기록
 - /pages/klaw.html — K-Law
