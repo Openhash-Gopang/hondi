@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-22 19:19 KST · 기준 커밋 ef716f6e
+- 갱신: 2026-10-22 19:22 KST · 기준 커밋 c764e5c1
 - 전문가 페르소나 전용 페이지 145개 · 등록된 SP 868건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-22 Merge pull request #746 from Openhash-Gopang/feat/klaw-llm-verdict-validation-content-20261022
+- 2026-10-22 feat(pages): fill K-Law LLM verdict validation tabs (overview, anonymized, judgments, comparison)
 - 2026-10-22 Merge pull request #745 from Openhash-Gopang/fix/klaw-llm-verdict-validation-tab-font-20261022
 - 2026-10-22 style(pages): shrink bottom tab font on K-Law LLM verdict validation page
 - 2026-10-22 Merge pull request #744 from Openhash-Gopang/feat/klaw-llm-verdict-validation-page-20261022
@@ -42,8 +44,6 @@
 - 2026-10-21 feat(sp): appraiser-assistant v1.2 - STEP V valuation track + appraiser-valuation page
 - 2026-10-21 feat(sp): tax-accountant-assistant v1.3 - STEP T-1A non-profit taxpayer rules
 - 2026-10-21 feat(sp): tax-accountant-assistant v1.2 - STEP T tax optimization track (7 stages) + tax-optimizer page
-- 2026-10-21 feat(patent): 변리사를 기본 이용자로 전환, 인간 변리사 최종 검토 단계(19단계) 추가
-- 2026-10-21 feat(patent): 변리사 보조 AI 신규 발명 특허 출원 준비 단계형 화면(18단계)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
