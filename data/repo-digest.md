@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-22 20:26 KST · 기준 커밋 e6dcd449
+- 갱신: 2026-10-22 20:28 KST · 기준 커밋 62759e09
 - 전문가 페르소나 전용 페이지 145개 · 등록된 SP 868건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-22 Merge pull request #754 from Openhash-Gopang/feat/klaw-llm-verdict-validation-heading-v1-note-20261022
+- 2026-10-22 pages: klaw-llm-verdict-validation 표 제목 수정, DeepSeek v1 성적 게시와 v2보다 유리함 부기
 - 2026-10-22 Merge pull request #753 from Openhash-Gopang/feat/klaw-llm-verdict-validation-highlight-deepseek-pair-20261022
 - 2026-10-22 pages: klaw-llm-verdict-validation DeepSeek 단독/K-Law 적용 행 색상 구분, 변형본 v2 표에 DeepSeek 단독 행 추가
 - 2026-10-22 Merge pull request #752 from Openhash-Gopang/feat/klaw-llm-verdict-validation-deepseek-klaw-compare-20261022
@@ -42,8 +44,6 @@
 - 2026-10-21 feat(pro-sub): 전문가용 AI 구독 — 장부·부여/환불 API·세션 반영·게이트(PRO_SUB_MODE)·관리자 패널 (W5)
 - 2026-10-21 feat(sp): family A (law/finance) assistant personas - STEP W document-writing track for financial-planner, loss-adjuster, labor-attorney, customs-broker
 - 2026-10-21 Merge pull request #732 from Openhash-Gopang/feature/legal-terms-privacy-draft
-- 2026-10-21 docs(legal): 전문가용 AI 서비스 이용약관·개인정보 처리방침 초안 (법률 검토 전)
-- 2026-10-21 feat(sp): health-care assistant personas (19) STEP W document-writing track (SP v1.1) + shared 9-stage page + hero buttons
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
