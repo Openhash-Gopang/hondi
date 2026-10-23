@@ -23,8 +23,7 @@ window.PAGE_HEADER = {
   subnav: [
     { label: "테스트 방법", href: "#case-overview", active: true },
     { label: "사건 개요 익명화", href: "#case-anonymized" },
-    { label: "대법원 판결문", href: "#supreme-court" },
-    { label: "고등법원 판결문", href: "#high-court" },
+    { label: "실제 판결문", href: "#actual-judgment" },
     { label: "LLM 가상 판결문 비교표", href: "#llm-compare" },
     { label: "K-Law 가상 판결", href: "#klaw-verdict" }
   ]
@@ -125,6 +124,13 @@ body { margin: 0; background: #eef1f6; color: #0f172a; font-size: 14px; line-hei
 .vv-pc-tot { margin:8px 0 2px; display:flex; align-items:baseline; gap:6px; flex-wrap:wrap; } .vv-pc-tot small { flex-basis:100%; font-size:12px; color:#475569; } .vv-pc-tot b { font-size:30px; color:#0e1c3f; } .vv-pc-tot em { font-style:normal; font-size:12px; color:#64748b; }
 @media (max-width:900px) { .vv-rk { grid-template-columns:26px minmax(0,1fr) !important; } .vv-rk-tot, .vv-rk-sub { grid-column:2; } .vv-rk-sub { flex-direction:row; flex-wrap:wrap; gap:6px 18px; } }
 .vv-prompt { margin:0 0 10px; padding:14px 16px; border-left:4px solid #0e1c3f; background:#f1f5f9; border-radius:0 8px 8px 0; font-size:14.5px; line-height:1.75; color:#1e293b; }
+.vv-instance { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 16px; }
+.vv-it { font: inherit; font-size:14px; font-weight:700; padding:9px 18px; border:1px solid #cbd5e1; border-radius:8px; background:#fff; color:#0e1c3f; cursor:pointer; display:inline-flex; flex-direction:column; align-items:center; line-height:1.3; }
+.vv-it:hover:not([disabled]) { background:#f1f5f9; }
+.vv-it.active { background:#0e1c3f; color:#fff; border-color:#0e1c3f; }
+.vv-it[disabled] { background:#f1f5f9; color:#94a3b8; border:1px dashed #cbd5e1; cursor:not-allowed; }
+.vv-it small { font-size:11px; font-weight:500; }
+.vv-inst-pane { display:none; } .vv-inst-pane.active { display:block; }
 .vv-find { margin:0 0 8px; padding-left:20px; line-height:1.75; font-size:14.5px; }
 .vv-fine { font-size:12.5px; color:#64748b; line-height:1.6; margin:6px 0 14px; }
 @media (max-width:900px) { .vv-flow { grid-template-columns:repeat(2,1fr); } .vv-rk { grid-template-columns:26px minmax(0,1fr) auto; } .vv-rk-tags { grid-column:2 / 4; } }
@@ -266,7 +272,7 @@ body { margin: 0; background: #eef1f6; color: #0f172a; font-size: 14px; line-hei
 <li>적용된다면, 원고들이 주장하는 사정(정규 근무시간대 근무, 식사·휴식 없는 연속 근무)이 있는 경우에도 적용하는 것이 재산권 침해나 평등원칙 위반으로 헌법·법률에 위반되는가?</li>
 <li>원고들의 공제분 추가근무수당 청구권이 인정되는가? 인정된다면 범위는 어떻게 되는가?</li>
 </ol>
-</div></section><section class="vv-pane" id="supreme-court" role="tabpanel" aria-label="대법원 판결문"><h2>대법원 판결문</h2><p class="vv-lead">비교 기준이 되는 실제 판결문입니다(2021두61741). 출처는 사법정보공개포털입니다.</p><div class="vv-body"><h2>판시사항</h2>
+</div></section><section class="vv-pane" id="actual-judgment" role="tabpanel" aria-label="실제 판결문"><h2>실제 판결문</h2><p class="vv-lead">비교 기준이 되는 실제 판결문입니다. 심급을 골라 보세요. 이 사건에는 헌법재판소 판단이 없고 지방법원(1심) 판결문은 싣지 않아 두 탭은 비활성입니다.</p><div class="vv-instance" role="tablist" aria-label="심급"><button type="button" class="vv-it" disabled aria-disabled="true" title="이 사건에는 헌법재판소 판단이 없습니다">헌법재판소<small>해당 없음</small></button><button type="button" class="vv-it active" data-inst="supreme" role="tab" aria-selected="true">대법원 (3심)</button><button type="button" class="vv-it" data-inst="high" role="tab" aria-selected="false">고등법원 (2심)</button><button type="button" class="vv-it" disabled aria-disabled="true" title="이 사건의 지방법원(1심) 판결문은 싣지 않았습니다">지방법원 (1심)<small>해당 없음</small></button></div><section class="vv-inst-pane active" data-inst="supreme"><p class="vv-lead">대법원 2021두61741. 출처는 사법정보공개포털입니다.</p><div class="vv-body"><h2>판시사항</h2>
 <p>시간선택제채용공무원이 통상의 근무시간에 수행하는 시간외근무에 공무원수당 등에 관한 규정 제15조 제5항 제2호 (나)목을 적용할 수 있는지 여부(소극)</p>
 <h2>판결요지</h2>
 <p>현업공무원 등 외의 공무원이 공휴일 및 토요일 외의 날에 시간외근무를 하는 경우 해당 일의 시간외근무시간에서 1시간을 뺀 시간을 더하여 월별 시간외근무시간을 산정하도록 정한 공무원수당 등에 관한 규정 제15조 제5항 제2호 (나)목(이하 ‘공제조항’이라 한다)은 시간선택제채용공무원이 통상의 근무시간(9시부터 18시까지 중 점심시간 1시간을 제외한 8시간을 말한다. 이하 같다)에 수행하는 시간외근무에는 적용되지 않는다. 그 이유는 다음과 같다.</p>
@@ -331,7 +337,7 @@ body { margin: 0; background: #eef1f6; color: #0f172a; font-size: 14px; line-hei
 <p>대법관   서경환(재판장) 천대엽 신숙희 마용주(주심)</p>
 <hr>
 <p><em>(출처 : 대법원 2026. 5. 29. 선고 2021두61741 판결 | 사법정보공개포털 판례)</em></p>
-</div></section><section class="vv-pane" id="high-court" role="tabpanel" aria-label="고등법원 판결문"><h2>고등법원 판결문</h2><p class="vv-lead">대법원이 파기한 원심 판결문입니다(서울고등법원 2020누37187). 별지 ‘시간외근무내역’과 ‘관계법령’은 원문에서도 생략돼 있습니다.</p><div class="vv-body"><h2>전 문</h2>
+</div></section><section class="vv-inst-pane" data-inst="high"><p class="vv-lead">대법원이 파기한 원심 판결문입니다(서울고등법원 2020누37187). 별지 ‘시간외근무내역’과 ‘관계법령’은 원문에서도 생략돼 있습니다.</p><div class="vv-body"><h2>전 문</h2>
 <ul>
 <li><p><strong>원고, 피항소인</strong> 원고 1 외 1인 (원고들 소송대리인 변호사 차현일 외 2인)</p>
 </li>
@@ -443,7 +449,7 @@ body { margin: 0; background: #eef1f6; color: #0f172a; font-size: 14px; line-hei
 <p>판사   한규현(재판장) 김재호 권기훈</p>
 <hr>
 <p><em>(출처 : 서울고등법원 2021. 11. 17. 선고 2020누37187 판결 | 사법정보공개포털 판례)</em></p>
-</div></section><section class="vv-pane" id="llm-compare" role="tabpanel" aria-label="LLM 가상 판결문 비교"><h2>LLM 가상 판결문 비교</h2><p class="vv-lead">후보 LLM에 같은 사건을 판결문으로 쓰게 하고 실제 대법원 판결과 견준 결과입니다(2026-10-22 기준).</p><h3 class="vv-sec">시험은 이렇게 했습니다</h3><div class="vv-flow">
+</div></section></section><section class="vv-pane" id="llm-compare" role="tabpanel" aria-label="LLM 가상 판결문 비교"><h2>LLM 가상 판결문 비교</h2><p class="vv-lead">후보 LLM에 같은 사건을 판결문으로 쓰게 하고 실제 대법원 판결과 견준 결과입니다(2026-10-22 기준).</p><h3 class="vv-sec">시험은 이렇게 했습니다</h3><div class="vv-flow">
 <div class="vv-step"><b>1</b><span>실제 대법원 사건<br><small>시간선택제 공무원 시간외근무수당</small></span></div>
 <div class="vv-step"><b>2</b><span>사건 개요 익명화<br><small>날짜·기관·수치·법령명 변경</small></span></div>
 <div class="vv-step"><b>3</b><span>같은 문구로 LLM에 입력<br><small>“대법원 판사로서 판결문 작성”</small></span></div>
@@ -2703,8 +2709,18 @@ v1.6은 결론 방향·핵심 법리·세부 논증이 실제 판결과 같은�
 
 <script>
 (function () {
-  var ids = ['case-overview', 'case-anonymized', 'supreme-court', 'high-court', 'llm-compare', 'klaw-verdict', 'klaw-v151', 'output-format', 'match-method'];
+  var ids = ['case-overview', 'case-anonymized', 'actual-judgment', 'llm-compare', 'klaw-verdict', 'klaw-v151', 'output-format', 'match-method'];
+  var inst = 'supreme';
+  function showInst(k) {
+    inst = (k === 'high') ? 'high' : 'supreme';
+    Array.prototype.forEach.call(document.querySelectorAll('.vv-inst-pane'), function (p) { p.classList.toggle('active', p.getAttribute('data-inst') === inst); });
+    Array.prototype.forEach.call(document.querySelectorAll('.vv-it[data-inst]'), function (t) {
+      var on = t.getAttribute('data-inst') === inst;
+      t.classList.toggle('active', on); t.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+  }
   function show(id) {
+    if (id === 'supreme-court' || id === 'high-court') { showInst(id === 'high-court' ? 'high' : 'supreme'); id = 'actual-judgment'; }
     if (ids.indexOf(id) < 0) id = ids[0];
     ids.forEach(function (k) {
       var pane = document.getElementById(k);
@@ -2736,6 +2752,12 @@ v1.6은 결론 방향·핵심 법리·세부 논증이 실제 판결과 같은�
       try { history.replaceState(null, '', '#' + id); } catch (err) {}
       window.scrollTo(0, 0);
     }
+    Array.prototype.forEach.call(document.querySelectorAll('.vv-it[data-inst]'), function (t) {
+      t.addEventListener('click', function () {
+        showInst(t.getAttribute('data-inst'));
+        try { history.replaceState(null, '', t.getAttribute('data-inst') === 'high' ? '#high-court' : '#supreme-court'); } catch (err) {}
+      });
+    });
     if (bar) { bar.setAttribute('role', 'tablist'); bar.addEventListener('click', onClick); }
     if (hero) hero.querySelector('.vv-methodnav').addEventListener('click', onClick);
     show(location.hash.slice(1));
