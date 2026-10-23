@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-23 13:59 KST · 기준 커밋 c5e4b7fa
+- 갱신: 2026-10-23 14:09 KST · 기준 커밋 c0fa294a
 - 전문가 페르소나 전용 페이지 145개 · 등록된 SP 868건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-23 Merge pull request #757 from Openhash-Gopang/feat/lawyer-llm-eval-button-20261023
+- 2026-10-23 feat(header): 변호사 페이지 히어로에 'LLM 성능 평가' 버튼 추가, 히어로 버튼 크기 축소
 - 2026-10-23 Merge pull request #756 from Openhash-Gopang/feat/klaw-eval-criteria-v17-scope-bonus-20261023
 - 2026-10-23 일치도 평가 기준 v1.7: 범위 한정 가산 신설, 비교 페이지 재채점
 - 2026-10-22 Merge pull request #755 from Openhash-Gopang/feat/klaw-llm-verdict-validation-simple-summary-20261022
@@ -42,8 +44,6 @@
 - 2026-10-21 Merge pull request #737 from Openhash-Gopang/fix/review-sheets-windows-encoding
 - 2026-10-21 fix(review): 검수 시트 생성기 Windows 인코딩(cp949) 오류 수정, 테스트가 python 도 찾도록
 - 2026-10-21 Merge pull request #734 from Openhash-Gopang/feature/pro-sub-w5
-- 2026-10-21 Merge pull request #736 from Openhash-Gopang/feature/review-package-w4
-- 2026-10-21 docs(review): 직역 전문가 검수 패키지 — 안내서·자문 계약 핵심 조항·단체 협조 공문 초안·검수 시트 11종 (W4)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
