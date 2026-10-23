@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-24 08:31 KST · 기준 커밋 fc3e11b8
+- 갱신: 2026-10-24 08:42 KST · 기준 커밋 edc23878
 - 전문가 페르소나 전용 페이지 145개 · 등록된 SP 868건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-24 Merge pull request #760 from Openhash-Gopang/feat/klaw-llm-verdict-validation-actual-judgment-tab-20261024
+- 2026-10-24 pages: klaw-llm-verdict-validation 대법원·고등법원 판결문 탭을 '실제 판결문' 탭으로 통합 (심급 4탭)
 - 2026-10-24 Merge pull request #759 from Openhash-Gopang/feat/klaw-llm-verdict-validation-test-method-tab-20261024
 - 2026-10-24 pages: klaw-llm-verdict-validation '사건의 개요' 탭을 '테스트 방법' 탭으로 개편
 - 2026-10-24 Merge pull request #758 from Openhash-Gopang/feat/klaw-llm-verdict-validation-hero-text-20261024
@@ -42,8 +44,6 @@
 - 2026-10-21 feat(sp): 서류 요청·제공 SP 신설 및 UNIVERSAL-common U15 반영
 - 2026-10-21 feat(sp): family F - K-Advisor step-by-step purchase advice track (STEP K, 7 steps)
 - 2026-10-21 feat(sp): family D assistant personas - STEP W document-writing track for 6 professions (security-engineer, translator-interpreter, tour-guide, sports-instructor, hairdresser, chef)
-- 2026-10-21 feat(sp): family E counselling personas - STEP K step-by-step counselling track for 10 professions (teacher, school-counselor, clinical-psychologist, mental-health-professional, social-worker, curator, librarian, youth-counselor, childcare-teacher, lifelong-educator)
-- 2026-10-21 Merge pull request #738 from Openhash-Gopang/docs/plan-v6-and-session-summary-20261021
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
