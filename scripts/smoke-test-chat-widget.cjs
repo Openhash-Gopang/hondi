@@ -42,7 +42,7 @@ const WORKER_URL = 'https://hondi-proxy.tensor-city.workers.dev';
 const MIN_SP_LEN = 50;
 
 const PAGES = [
-  { path: '/pages/k-government.html', expectSp: 'HONDI_VISITOR_SP' },
+  { path: '/pages/k-government.html', expectSp: 'SP-12_kdemocracy' }   // 2026-10-24: 시작 영역(인라인) — 첫 탭(입법)의 SP. 탭마다 바뀐다,
   { path: '/pages/expert-personas.html', expectSp: 'SP_EXPERT_BASE' },
   { path: '/pages/k-services.html', expectSp: 'SP-02_k119' }   // 2026-10-24: 시작 영역(인라인) — 첫 서비스 탭(응급)의 SP. 탭마다 바뀐다,
 ];
