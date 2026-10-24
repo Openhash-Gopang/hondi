@@ -6,6 +6,7 @@
 <title>제주 AI 행정 — 기관·실국과·읍면동 실행 지도</title>
 <meta name="description" content="제주특별자치도청·제주시청·서귀포시청·43개 읍면동 행정복지센터의 AI 행정 SP를 기관 → 국·부서 → 과/팀 단위로 드릴다운하며, 각 단위의 SP 소스·설명 문서·실행 화면으로 바로 연결합니다.">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="/assets/start-field.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 :root {
@@ -153,6 +154,50 @@ footer{background:var(--gov-header);color:rgba(255,255,255,.5);padding:22px 0;ma
   <p>제주특별자치도청·제주시청·서귀포시청·43개 읍면동 행정복지센터·직속기관·출자출연기관을 기관 단위로 먼저 고르고, 그 아래 국(局)·과(課)·팀 단위 SP까지 내려가 바로 실행합니다. 각 카드는 SP 원문·설명 문서·실행 화면 세 곳으로 연결됩니다.<br>
   <span class="exec-note">"실행" 링크는 regional-gov.html의 <code style="background:rgba(0,0,0,.06);padding:1px 5px;border-radius:3px;">?gov_code=</code> 직행 파라미터(K-정부 카탈로그가 이미 쓰고 있는 실제 기능, gov-router.js 확인)로 해당 국·과·팀 SP를 바로 엽니다.</span></p>
 </div>
+
+<!-- 2026-10-24: 시작 영역(대화창) — 제주 행정 안내(SP-10_kpublic). 아래에서 고른 기관·부서는 보내는 말에 함께 실어 준다(beforeSend) -->
+<script>
+  window.K_AUTH_CONFIG = { serviceLabel: "제주 AI 행정" };
+  window.HONDI_CHAT_WIDGET_CONFIG = {
+    sp: "SP-10_kpublic",
+    panelMode: "inline",
+    inlineMount: "#startChatMount",
+    mic: true,
+    camera: "touch",
+    maxTokens: 2500,
+    panelTitle: "제주 AI 행정",
+    label: "민원이나 궁금한 점을 말씀하세요",
+    greeting: "안녕하세요! 제주 AI 행정입니다. 아래에서 기관·부서를 고르신 뒤 민원이나 궁금한 점을 말씀해 주세요. 고르지 않으셔도 됩니다.",
+    serviceLabel: "제주 AI 행정",
+    context: "사용자는 지금 제주 AI 행정 페이지(제주특별자치도청·제주시청·서귀포시청·읍면동의 기관·국·과·팀 실행 지도)에 있다. 이 화면의 대화는 행정 서비스 제공자(담당 공무원) 쪽 AI가 응대한다.",
+    // 사용자가 지도에서 기관·부서를 직접 바꿨을 때만, 그 사실을 다음 말에 덧붙인다(대화를 새로 시작하지 않고 맥락만 알려 준다).
+    // 처음 화면의 기본 선택은 사용자가 고른 것이 아니므로 싣지 않는다.
+    beforeSend: function (text) {
+      var sel = window.__jejuSelNow ? window.__jejuSelNow() : '';
+      if (!sel || sel === window.__jejuSel0 || sel === window.__jejuSelSent) return text;
+      window.__jejuSelSent = sel;
+      return '[화면에서 고른 기관·부서: ' + sel + ']\n' + text;
+    }
+  };
+</script>
+<script>
+  window.__jejuSelNow = function () {
+    try {
+      var inst = currentInst(); if (!inst) return '';
+      var sel = inst.name, b = currentBureau();
+      if (b && b.name) sel += ' · ' + b.name;
+      else if (currentEmd() && currentEmd().name) sel += ' · ' + currentEmd().name;
+      return sel;
+    } catch (e) { return ''; }
+  };
+  window.addEventListener('load', function () { window.__jejuSel0 = window.__jejuSelNow(); });
+</script>
+<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
+<script src="/assets/chat-widget.js"></script>
+<div style="max-width:1320px;margin:0 auto;padding:4px 24px 0;"><div class="doc-start" id="startBox"></div></div>
+<script src="/assets/md-view.js"></script>
+<script>window.START_FIELD = { firstTab: "서비스 이용", secondTab: "방법론", legalReview: false, suggestButton: false, placeholder: "민원이나 궁금한 점을 말씀하세요. 예: 전입신고는 어디서 하나요?" };</script>
+<script src="/assets/start-field.js"></script>
 
 <div class="main">
   <div class="inst-wrap">
