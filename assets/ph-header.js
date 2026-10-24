@@ -77,7 +77,17 @@
     var second = heroCtaLink(config && config.heroButton2, 'ph-hero-cta ph-hero-cta-2');
     return '<div class="ph-hero-cta-row">' + first + second + '</div>';
   }
-  function renderNav(activeKey) {
+  // 2026-10-24: 「K-Law」 버튼 — 인프라(K-서비스)·전문가 페르소나·K-정부(기관 페이지 포함) 문서의 오른쪽 상단.
+  // PAGE_HEADER.klaw === false 로 끄고, true 로 강제로 켤 수 있다.
+  var KLAW_URL = 'https://hondi.net/pages/klaw-llm-verdict-validation.html#case-overview';
+  var KLAW_KEYS = { 'k-services': 1, 'expert-personas': 1, 'k-government': 1 };
+  function wantsKlaw(config, activeKey) {
+    if (config && config.klaw === false) return false;
+    if (config && config.klaw === true) return true;
+    if (KLAW_KEYS[activeKey]) return true;
+    return /\/pages\/(gov-agency|professor-persona)\.html$/i.test(location.pathname);
+  }
+  function renderNav(activeKey, config) {
     var links = NAV_ITEMS.map(function (item) {
       var cls = item.key === activeKey ? ' class="active"' : '';
       return '<a href="' + item.href + '"' + cls + '>' + escapeHtml(item.label) + '</a>';
@@ -89,6 +99,7 @@
           '<div class="topnav-links">' + links + '</div>' +
           '<div class="topnav-right">' +
             '<div class="topnav-status"><span class="status-dot-green"></span>로그인 불필요 · 열람 전용</div>' +
+            (wantsKlaw(config, activeKey) ? '<a id="klawNavBtn" class="klaw-nav-btn" href="' + KLAW_URL + '" target="_blank" rel="noopener" title="K-Law 후보 LLM 가상 판결문 검증 (자체 실험 · 제3자 미검증)">K-Law</a>' : '') +
           '</div>' +
         '</div>' +
       '</nav>'
@@ -176,7 +187,7 @@
     // 보조 탭 줄의 위치: 기본은 상단 메뉴 바로 아래, subnavPosition:'bottom' 이면 히어로 바로 아래(면책 띠 앞)
     var bottom = config.subnavPosition === 'bottom';
     var sub = renderSubnav(config.subnav, bottom ? 'bottom' : 'top');
-    var html = renderNav(config.active) + (bottom ? '' : sub) + renderHero(config) + (bottom ? sub : '') + renderDisclaimer(config);
+    var html = renderNav(config.active, config) + (bottom ? '' : sub) + renderHero(config) + (bottom ? sub : '') + renderDisclaimer(config);
 
     var temp = document.createElement('div');
     temp.innerHTML = html;

@@ -27,6 +27,9 @@
 .topnav-links a:hover, .topnav-links a.active { background: rgba(255,255,255,.06); color: #fff; }
 .topnav-right { display: flex; align-items: center; gap: 10px; margin-left: auto; padding-left: 16px; flex-shrink: 0; }
 .topnav-status { display: flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 600; color: rgba(255,255,255,.55); white-space: nowrap; }
+.klaw-nav-btn { display: inline-flex; align-items: center; padding: 5px 13px; border: 1px solid #FECF01; border-radius: 999px; background: rgba(254,207,1,.14); color: #FECF01; font-size: 12px; font-weight: 700; letter-spacing: .2px; white-space: nowrap; text-decoration: none; }
+.klaw-nav-btn:hover { background: #FECF01; color: #1a1400; }
+.klaw-nav-btn:focus-visible { outline: 2px solid #FECF01; outline-offset: 2px; }
 .status-dot-green { width: 6px; height: 6px; border-radius: 50%; background: #34d399; box-shadow: 0 0 4px #34d399; }
 
 /* ── 보조 탭 줄 — 상단 탭 바로 아래, 페이지 자체 하위 메뉴용(선택적) ── */
