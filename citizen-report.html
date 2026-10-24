@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>불법행위 신고 정리 — 나비</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="/assets/start-field.css">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <script src="https://cdn.jsdelivr.net/gh/Openhash-Gopang/gopang@main/gopang-wallet.js"></script>
 <style>
@@ -36,6 +37,30 @@ h1{font-size:18px;margin-bottom:4px}
   <div class="sub">교통법규위반·바가지요금 등을 정리해드립니다.</div>
   <div class="note" style="background:#eff6ff;border-color:#bfdbfe;color:#1e3a5f;">이 페이지는 범위를 넓혀 <b>K-Watch</b>로 통합될 예정입니다 — 범죄부터 생활 속 부당·불법·편법·오염·파손까지 다루고, 대응 기관 선정부터 진행 상황 공개까지 이어집니다. <a href="./pages/k-services.html#kwatch" style="color:#1e3a5f;font-weight:600;">K-Watch 안내 보기 →</a></div>
   <div class="note">나비는 관공서에 직접 신고를 접수하지 않습니다. 여기서 내용을 정리해두면, 실제 접수는 <a href="https://www.safepatrol.go.kr" target="_blank" rel="noopener">안전신문고</a>에서 진행하실 수 있습니다.</div>
+
+<!-- 2026-10-24: 시작 영역(대화창) -->
+<script>
+  window.K_AUTH_CONFIG = { serviceLabel: "불법행위 신고 정리" };
+  window.HONDI_CHAT_WIDGET_CONFIG = {
+    sp: "k-watch",
+    panelMode: "inline",
+    inlineMount: "#startChatMount",
+    mic: true,
+    camera: "touch",
+    maxTokens: 2500,
+    panelTitle: "신고 정리 AI",
+    label: "목격하신 내용을 말씀하세요",
+    greeting: "안녕하세요! 목격하신 불법·부당 행위를 말씀해 주세요. 신고에 필요한 내용(언제·어디서·무엇을·증거)을 정리해 드립니다. 나비는 관공서에 직접 접수하지 않으며, 실제 접수는 안전신문고(safepatrol.go.kr)에서 직접 하셔야 합니다.",
+    serviceLabel: "불법행위 신고 정리",
+    context: "사용자는 지금 불법행위 신고 정리 화면에 있다. 이 화면은 신고 내용을 정리해 주는 단계까지만 하며, 나비는 관공서에 신고를 직접 접수하지 않는다. 실제 접수는 이용자가 안전신문고(safepatrol.go.kr) 등에서 직접 한다. 접수를 대신했다고 말하지 않는다. 위급한 상황이면 먼저 112·119에 연락하도록 안내한다.",
+  };
+</script>
+<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
+<script src="/assets/chat-widget.js"></script>
+<div class="doc-start" id="startBox" style="margin:0 auto 14px"></div>
+<script src="/assets/md-view.js"></script>
+<script>window.START_FIELD = { firstTab: "신고 정리", secondTab: "방법론", legalReview: false, suggestButton: false, placeholder: "목격하신 내용을 말씀하세요" };</script>
+<script src="/assets/start-field.js"></script>
 
   <div class="card">
     <label>유형</label>

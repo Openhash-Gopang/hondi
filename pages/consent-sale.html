@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>합의매각 — K-Estate</title>
 <link rel="stylesheet" href="/assets/fonts.css">
+<link rel="stylesheet" href="/assets/start-field.css">
 <style>
   :root { --bg:#f6f7f9; --card:#fff; --line:#e3e6ea; --text:#111827; --sub:#4b5563; --ok:#0a7d33; --okbg:#e3f5e9; --bad:#b42318; --warn:#8a5a00; --warnbg:#fff1d6; --acc:#1e4fd8; --accbg:#e8eefc; }
   * { box-sizing: border-box; }
@@ -46,6 +47,10 @@
   fieldset legend { padding:0 6px; color:var(--sub); font-size:14px; }
   .row2 { display:flex; gap:10px; } .row2 > * { flex:1; }
 </style>
+<style>
+/* 2026-10-24: 이 페이지의 전역 button 규칙이 시작 영역(대화창)의 첨부·마이크·닫기 버튼으로 새지 않게 되돌린다. 위젯 자체 클래스 규칙이 우선한다. */
+:where(#startBox) button { padding: 0; border: 0; border-radius: 0; background: none; color: inherit; font-size: inherit; }
+</style>
 </head>
 <body>
 <main>
@@ -53,6 +58,30 @@
   <p class="sub">채권자·채무자 두 계정이 각자 지갑으로 서명해야만 등록이 확정되는 부동산 매물입니다.
   대법원 경매 사이트를 참고했지만, 법원의 개시결정에 의한 절차가 아니라 <b>당사자 합의</b>에 의한
   매각 절차입니다 — 사법기관의 경매가 아닙니다.</p>
+
+<!-- 2026-10-24: 시작 영역(대화창) — K-Estate 안내(SP-24_kestate, mode=consent_sale). 검색·서명·등록은 아래 양식이 처리한다 -->
+<script>
+  window.K_AUTH_CONFIG = { serviceLabel: "합의매각" };
+  window.HONDI_CHAT_WIDGET_CONFIG = {
+    sp: "SP-24_kestate",
+    panelMode: "inline",
+    inlineMount: "#startChatMount",
+    mic: true,
+    camera: "touch",
+    maxTokens: 2500,
+    panelTitle: "K-Estate 합의매각",
+    label: "합의매각이 궁금하시면 물어보세요",
+    greeting: "안녕하세요! K-Estate 합의매각 안내입니다. 합의매각은 채권자·채무자가 합의해 진행하는 절차이며 법원 경매가 아닙니다. 궁금한 점을 말씀해 주세요. 매물 검색·서명·등록은 아래 양식에서 하실 수 있습니다.",
+    serviceLabel: "합의매각",
+    context: "사용자는 지금 합의매각 전용 화면(/pages/consent-sale.html)에 있다. mode=consent_sale. 이 화면의 아래 양식이 매물 검색·서명·등록·법적 검토를 처리하므로, 대화에서는 개념과 절차를 설명하고 해당 양식 사용을 안내한다. 합의매각은 법원의 개시결정에 의한 경매가 아니라 당사자 합의에 의한 절차이며, 채권자·채무자 두 계정이 각자 서명해야 등록이 확정된다는 점을 짚는다.",
+  };
+</script>
+<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
+<script src="/assets/chat-widget.js"></script>
+<div class="doc-start" id="startBox" style="margin:0 auto 14px"></div>
+<script src="/assets/md-view.js"></script>
+<script>window.START_FIELD = { firstTab: "합의매각 안내", secondTab: "방법론", legalReview: false, suggestButton: false, placeholder: "합의매각이 궁금하시면 물어보세요. 예: 경매와 무엇이 다른가요?" };</script>
+<script src="/assets/start-field.js"></script>
 
   <section class="card">
     <h2>매물 검색</h2>
