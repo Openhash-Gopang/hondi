@@ -20,6 +20,7 @@ window.PAGE_HERO = {
 </script>
 <link rel="stylesheet" href="/assets/site-header.css">
 <script src="/assets/site-header.js"></script>
+<link rel="stylesheet" href="/assets/start-field.css">
 <div id="site-hero-mount"></div>
 
 
@@ -180,6 +181,29 @@ body {
 }
 </style>
 
+<!-- 2026-10-24: 시작 영역(대화창) — 나비 안내(HONDI_VISITOR_SP) -->
+<script>
+  window.K_AUTH_CONFIG = { serviceLabel: "전문 분야 AI" };
+  window.HONDI_CHAT_WIDGET_CONFIG = {
+    sp: "HONDI_VISITOR_SP",
+    panelMode: "inline",
+    inlineMount: "#startChatMount",
+    mic: true,
+    camera: "touch",
+    maxTokens: 2500,
+    panelTitle: "나비 안내",
+    label: "전문 분야 AI가 궁금하시면 물어보세요. 예: 어떤 전문가 AI가 있나요?",
+    greeting: "안녕하세요! 나비 안내입니다. 나비에 대해 궁금한 점을 말씀해 주세요.",
+    serviceLabel: "전문 분야 AI",
+    context: "사용자는 지금 나비 전문 분야(기관) AI 및 전문가 AI 소개 페이지에 있다. 어떤 전문 분야·기관 AI가 있고 어떻게 쓰는지에 관한 질문에 답한다. 이 화면의 대화는 나비 안내 역할이며 특정 전문가나 기관의 역할이 아니다.",
+  };
+</script>
+<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
+<script src="/assets/chat-widget.js"></script>
+<div style="max-width:860px;margin:0 auto;padding:28px 20px 0;"><div class="doc-start" id="startBox" style="margin:0 auto 14px"></div></div>
+<script src="/assets/md-view.js"></script>
+<script>window.START_FIELD = { firstTab: "나비 안내", secondTab: "방법론", legalReview: false, suggestButton: false, placeholder: "전문 분야 AI가 궁금하시면 물어보세요. 예: 어떤 전문가 AI가 있나요?" };</script>
+<script src="/assets/start-field.js"></script>
 <!-- ── 헤더 / 개념 설명 ── -->
 <section class="section" id="professional-ai-intro" style="background:var(--bg-alt)">
   <div class="section-inner">
