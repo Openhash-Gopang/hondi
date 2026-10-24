@@ -229,29 +229,24 @@ window.PAGE_HEADER = {
 };
 </script>
 <link rel="stylesheet" href="/assets/ph-header.css">
+<link rel="stylesheet" href="/assets/start-field.css">
 <script src="/assets/ph-header.js"></script>
 <!-- hcw-attach:v1 (scripts/attach-chat-widget.cjs가 삽입, 손으로 지우지 마세요) -->
+<!-- 2026-10-24: 두 번 들어 있던 위젯 블록을 하나로 줄이고 인라인(시작 영역) 모드로 바꿨다. SP 는 서비스 탭을 누를 때 start-field.js(HondiStartField.setService)가 바꾼다. -->
 <script>
   window.K_AUTH_CONFIG = { serviceLabel: "K-서비스" };
   window.HONDI_CHAT_WIDGET_CONFIG = {
-    sp: "HONDI_VISITOR_SP",
-    context: "사용자는 지금 K-서비스 전체 목록 섹션에 있습니다. K-Law, K-Tax, K-Market, GDC 등 16개 K-서비스 위성 저장소를 개괄합니다.",
-    label: "K-서비스에 물어보기",
-    greeting: "안녕하세요! K-서비스 전체 목록과 관련해 궁금한 점을 물어보세요. 😊",
+    sp: "SP-02_k119",
+    panelMode: "inline",
+    inlineMount: "#startChatMount",
+    mic: true,
+    camera: "touch",
+    maxTokens: 2500,
+    panelTitle: "K-서비스",
+    label: "원하시는 서비스를 말씀하세요",
+    greeting: "안녕하세요! 위에서 서비스를 고르시고 원하시는 것을 말씀해 주세요.",
     serviceLabel: "K-서비스",
-  };
-</script>
-<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
-<script src="/assets/chat-widget.js"></script>
-<!-- hcw-attach:v1 (scripts/attach-chat-widget.js가 삽입, 손으로 지우지 마세요) -->
-<script>
-  window.K_AUTH_CONFIG = { serviceLabel: "K-서비스" };
-  window.HONDI_CHAT_WIDGET_CONFIG = {
-    sp: "HONDI_VISITOR_SP",
-    context: "사용자는 지금 K-서비스 전체 목록 섹션에 있습니다. K-Law, K-Tax, K-Market, GDC 등 16개 K-서비스 위성 저장소를 개괄합니다.",
-    label: "K-서비스에 물어보기",
-    greeting: "안녕하세요! K-서비스 전체 목록과 관련해 궁금한 점을 물어보세요. 😊",
-    serviceLabel: "K-서비스",
+    context: "사용자는 지금 K-서비스 페이지에서 서비스 탭을 고른 상태입니다. 이 화면의 대화는 선택한 서비스의 제공자(담당 직원) 쪽 AI가 응대합니다.",
   };
 </script>
 <script src="https://hondi.net/auth/k-service-auth-client.js"></script>
@@ -260,6 +255,8 @@ window.PAGE_HEADER = {
 <div class="ug-doc">
 
 
+
+  <div class="doc-start" id="startBox"></div>
 
   <div class="svc-tabs" id="svcTabs">
     <div class="svc-tab" data-svc="kmail">메일</div>
@@ -300,6 +297,10 @@ window.PAGE_HEADER = {
   </footer>
 
 </div>
+
+<script src="/assets/md-view.js"></script>
+<script>window.START_FIELD = { firstTab: "서비스 이용", secondTab: "방법론", legalReview: false, suggestButton: false, placeholder: "원하시는 것을 말씀하세요" };</script>
+<script src="/assets/start-field.js"></script>
 
 <script>
 // 서비스별 본문 콘텐츠 저장소 — 지금은 전부 비어있는 상태(빈 문서).
@@ -2424,6 +2425,54 @@ var SVC_CONTENT = {
     </div>
   `,
 };
+// ── 시작 영역(대화창) — 서비스 탭마다 서비스 제공자 쪽 SP 로 바꾼다 (2026-10-24) ──
+// sp: prompts/sp-catalog.json 의 키(gwp-registry.js 의 sp_key 와 같다). null 이면 전용 SP 미등록 → 입력창 비활성("준비 중").
+// 내부 처리 단계 탭(kintent~kcase)은 사용자가 직접 쓰는 서비스가 아니라 시작 영역을 숨긴다.
+var SVC_CHAT = {
+  k119:       { sp: 'SP-02_k119',       ph: '응급 상황을 알려 주세요. 위급하면 먼저 119에 전화하세요' },
+  klaw:       { sp: 'SP-01_klaw',       ph: '분쟁 내용을 말씀하세요. 예: 중고거래 대금 분쟁' },
+  kpolice:    { sp: 'SP-03_kpolice',    ph: '신고하실 내용을 말씀하세요. 긴급하면 먼저 112에 전화하세요' },
+  ksecurity:  { sp: null },
+  khealth:    { sp: 'SP-04_khealth',    ph: '증상이나 궁금한 점을 말씀하세요. 응급이면 먼저 119에 전화하세요' },
+  kschool:    { sp: 'SP-09_kschool',    ph: '교육 관련 용건을 말씀하세요. 예: 수강 신청, 학적 문의' },
+  gdc:        { sp: 'SP-08_gdc',        ph: '금융 관련 용건을 말씀하세요. 예: 계좌 개설 상담' },
+  kstock:     { sp: 'SP-11_kstock',     ph: '투자 관련 용건을 말씀하세요. 예: 상장·공시 문의' },
+  kinsurance: { sp: 'SP-16_kinsurance', ph: '보험 관련 용건을 말씀하세요. 예: 보험금 청구' },
+  ktax:       { sp: 'SP-07_ktax',       ph: '세금 관련 용건을 말씀하세요. 예: 종합소득세 신고' },
+  kmarket:    { sp: 'SP-05_kmarket',    ph: '쇼핑·거래 관련 용건을 말씀하세요. 예: 주문 취소, 판매자 입점' },
+  ktraffic:   { sp: 'SP-06_ktraffic' },
+  klogistics: { sp: 'SP-13_klogistics' },
+  kcleaner:   { sp: 'SP-14_kcleaner' },
+  kpublic:    { sp: 'SP-10_kpublic',    ph: '행정 관련 용건을 말씀하세요. 예: 전입신고, 증명서 발급' },
+  kdemocracy: { sp: 'SP-12_kdemocracy' },
+  ktelecom:   { sp: 'SP-23_ktelecom' },
+  ksearch:    { sp: 'SP-18_ksearch' },
+  kbiz:       { sp: null },
+  kplan:      { sp: 'k-plan' },
+  kwatch:     { sp: 'k-watch' },
+  kjob:       { sp: 'k-job' },
+  kjit:       { sp: null },
+  kcity:      { sp: null },
+  kestate:    { sp: 'SP-24_kestate' },
+  ksocial:    { sp: null },
+  kmail:      { sp: 'SP-25_kmail' },
+  kintent: { hidden: true }, kcompose: { hidden: true }, kexecute: { hidden: true },
+  kdeliver: { hidden: true }, kreport: { hidden: true }, kcase: { hidden: true }
+};
+function syncSvcChat(key) {
+  if (!window.HondiStartField) return;
+  var c = SVC_CHAT[key] || { sp: null };
+  var name = SVC_LABEL[key] || '';
+  window.HondiStartField.setService({
+    sp: c.sp || null,
+    hidden: !!c.hidden,
+    title: name + ' 서비스',
+    placeholder: c.ph || (name + ' 관련 용건을 말씀하세요'),
+    greeting: '안녕하세요! 나비 ' + name + ' 서비스입니다. 원하시는 것을 말씀해 주세요.',
+    context: '사용자는 지금 K-서비스 페이지의 「' + name + '」 서비스 탭에 있다. 이 화면의 대화는 해당 서비스 제공자(담당 직원) 쪽 AI가 응대한다.',
+    notice: name + ' 서비스의 대화 상담은 준비 중입니다.'
+  });
+}
 var SVC_LABEL = {
   k119: '응급', klaw: '법률', kpolice: '치안 신고', ksecurity: '보안',
   khealth: '의료', kschool: '교육', gdc: '금융', kstock: '투자',
@@ -2434,6 +2483,7 @@ var SVC_LABEL = {
 };
 
 function renderSvc(key) {
+  syncSvcChat(key);
   var contentEl = document.getElementById('svcContent');
   var html = SVC_CONTENT[key];
   if (html && html.trim()) {

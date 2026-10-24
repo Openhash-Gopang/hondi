@@ -103,9 +103,9 @@
   }
   async function loadSP() {
     if (loaded || loading) return;
+    if (!W.sp) { showState('이 서비스의 방법론(시스템 프롬프트)은 아직 준비 중입니다.'); return; }
     loading = true; showState('방법론(시스템 프롬프트)을 불러오는 중입니다…');
     try {
-      if (!W.sp) throw new Error('sp key 없음');
       var cat = await fetch('/prompts/sp-catalog.json', { cache: 'no-cache' });
       if (!cat.ok) throw new Error('catalog ' + cat.status);
       var name = (await cat.json())[W.sp];
@@ -233,10 +233,71 @@
     else addNavBtn();
     if (location.hash === '#legal-review') select('review', false);
   }
+  // ── 2026-10-24: 서비스 전환 API — 한 페이지에 서비스 탭이 여럿인 인프라 페이지(k-services.html)용 ──
+  // 탭(서비스)이 바뀌면 대화창의 SP·인사말·안내 문구와 「방법론」 탭의 SP 원문을 그 서비스 것으로 바꾼다.
+  //   HondiStartField.setService({ sp:'SP-07_ktax', title:'세무 서비스', placeholder, greeting, context })
+  //   sp 가 없으면(전용 SP 미등록) 입력창을 끄고 notice 를 보인다. hidden:true 면 시작 영역 전체를 숨긴다.
+  var spTextCache = {}, svcSeq = 0, curChatSp = null;
+  async function fetchSpText(key) {
+    if (spTextCache[key]) return spTextCache[key];
+    var cat = await fetch('/prompts/sp-catalog.json', { cache: 'no-cache' });
+    if (!cat.ok) throw new Error('catalog ' + cat.status);
+    var name = (await cat.json())[key];
+    if (!name) throw new Error('catalog key ' + key);
+    var res = await fetch('/prompts/' + name, { cache: 'no-cache' });
+    if (!res.ok) throw new Error('sp ' + res.status);
+    var txt = await res.text();
+    if (!txt || txt.length < 50) throw new Error('sp 내용이 비정상적으로 짧음');
+    return (spTextCache[key] = txt);
+  }
+  function setChatEnabled(on) {
+    mount.classList.toggle('is-disabled', !on);
+    var i = document.getElementById('hcw-input'), b = document.getElementById('hcw-send');
+    if (i) i.disabled = !on;
+    if (b) b.disabled = !on;
+  }
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  async function setService(o) {
+    o = o || {};
+    var seq = ++svcSeq;
+    box.hidden = !!o.hidden; view.hidden = !!o.hidden;
+    if (o.hidden) return true;
+    if (o.title) { title = o.title; var bt = bar.querySelector('.sp-view-title'); if (bt) bt.textContent = title + ' 방법론 — 시스템 프롬프트(SP) 원문'; view.setAttribute('aria-label', title + ' 방법론(시스템 프롬프트 원문)'); }
+    if (o.placeholder) C.placeholder = o.placeholder;
+    // 방법론 탭: 서비스가 바뀌면 SP 원문도 다시 불러온다.
+    W.sp = o.sp || null; loaded = false; raw.hidden = true;
+    if (mode === 'method') loadSP(); else showState('「' + secondLabel + '」 탭을 누르면 불러옵니다.');
+    if (!widgetActive()) return true;
+    if (!o.sp) {
+      curChatSp = null; setChatEnabled(false); lrNote(o.notice || '이 서비스의 전용 상담은 준비 중입니다.');
+      var i0 = document.getElementById('hcw-input'); if (i0) i0.placeholder = '준비 중인 서비스입니다';
+      return true;
+    }
+    lrNote('');
+    if (o.sp === curChatSp) { setChatEnabled(true); applyPlaceholder(); return true; }
+    try {
+      var sys = await fetchSpText(o.sp);
+      // 답변을 받는 중이면 끝날 때까지 기다린다(대화 모드는 응답 중에 바꿀 수 없다).
+      var until = Date.now() + 60000;
+      while (window.HondiChatWidget && window.HondiChatWidget.isBusy && window.HondiChatWidget.isBusy() && Date.now() < until) { await sleep(300); if (seq !== svcSeq) return false; }
+      if (seq !== svcSeq) return false;   // 그 사이 다른 서비스로 바뀜
+      if (!window.HondiChatWidget || !window.HondiChatWidget.setMode({ system: sys, context: o.context || '', greeting: o.greeting || '', maxTokens: o.maxTokens || 2500 })) throw new Error('setMode 실패');
+      curChatSp = o.sp; chatMode = 'write';
+      setChatEnabled(true); applyPlaceholder();
+      return true;
+    } catch (e) {
+      console.error('[start-field] 서비스 전환 실패', e);
+      curChatSp = null; setChatEnabled(false); lrNote('이 서비스의 상담을 불러오지 못했습니다. 다른 탭을 눌렀다가 다시 눌러 주세요.');
+      return false;
+    }
+  }
+  window.HondiStartField = { setService: setService };
+
   // 2026-10-17: 상단 메뉴의 「제안 및 질문」 버튼 — 모든 전문가 페르소나 페이지 공통. 공용 페이지 /pages/suggest.html 로 연결한다.
   (function () {
     var m = location.pathname.match(/\/pages\/([a-z0-9-]+)\.html$/i);
     var from = C.personaId || (m ? m[1] : '');
+    if (C.suggestButton === false) return;   // 2026-10-24: 인프라 페이지(k-services)는 쓰지 않는다
     var addSq = function () {
       var navRight = document.querySelector('.topnav-right');
       if (!navRight || document.getElementById('sqNavBtn')) return;
