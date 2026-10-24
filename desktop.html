@@ -80,6 +80,12 @@ body {
    조정 — site-header.css의 기존 margin-top:1cm에 1cm를 더해 총 2cm
    내림. 공용 파일은 다른 페이지도 함께 쓰므로 여기서만 오버라이드. */
 .site-hero-actions { margin-top: 2cm; }
+/* 2026-10-24 — 히어로 버튼 중 "사용법"만 로고 노란색(#FECF01)으로 강조(신규 이용자의 첫 진입점).
+   다른 버튼은 기존 남색 윤곽선 유지. 공용 site-header.css는 건드리지 않고 이 페이지에서만 덮어쓴다. */
+.site-hero-actions a.hero-cta { background: #FECF01; border-color: #FECF01; color: #0b1a3d; font-weight: 700; box-shadow: 0 2px 10px rgba(254,207,1,0.35); }
+.site-hero-actions a.hero-cta .dot { background: #0b1a3d; }
+.site-hero-actions a.hero-cta:hover { background: #ffdb3d; box-shadow: 0 3px 12px rgba(254,207,1,0.5); }
+.site-hero-actions a.hero-cta:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
 /* ── pw-* 클래스: 원래 통계 카드 5개(2026-08-29 본문 융합 후 삭제)의
    펼침 패널에서 쓰던 스타일. 카드는 사라졌지만 같은 클래스를 본문
@@ -1271,7 +1277,7 @@ document.addEventListener('keydown', function (e) {
 
   <div class="site-hero-actions">
     <a href="./integrated-system.html" class="outline"><span class="dot"></span><span class="label-text">법치 국가</span></a>
-    <a href="./docs/hondi_interactive_manual.html" class="outline"><span class="dot"></span><span class="label-text">사용법</span></a>
+    <a href="./docs/hondi_interactive_manual.html" class="outline hero-cta"><span class="dot"></span><span class="label-text">사용법</span></a>
     <!-- 2026-08-31 신설 — 사용자 발화가 어떻게 특정 SP 호출로 이어지는지
          보여주는 라우팅 아키텍처 페이지 진입점. 다른 두 개(입법·사법·행정
          통합 체계, 사용법)와 동일하게 SPA loadPage()를 거치지 않는
