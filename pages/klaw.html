@@ -22,8 +22,33 @@ window.PAGE_HERO = {
 };
 </script>
 <link rel="stylesheet" href="/assets/site-header.css">
+<link rel="stylesheet" href="/assets/start-field.css">
 <script src="/assets/site-header.js"></script>
 <div id="site-hero-mount"></div>
+
+<!-- 2026-10-24: 시작 영역(대화창) — K-Law 사건담당관(SP-01_klaw)이 사건 접수를 받는다 -->
+<script>
+  window.K_AUTH_CONFIG = { serviceLabel: "K-Law" };
+  window.HONDI_CHAT_WIDGET_CONFIG = {
+    sp: "SP-01_klaw",
+    panelMode: "inline",
+    inlineMount: "#startChatMount",
+    mic: true,
+    camera: "touch",
+    maxTokens: 2500,
+    panelTitle: "K-Law 사건담당관",
+    label: "사건을 말씀하세요",
+    greeting: "안녕하세요! K-Law 사건담당관입니다. 어떤 분쟁인지 말씀해 주세요. 양측이 합의해 맡기시는 사건과 한쪽이 먼저 접수하시는 사건을 모두 받습니다.",
+    serviceLabel: "K-Law",
+    context: "사용자는 지금 K-Law 소개 페이지에 있다. 이 화면의 대화는 K-Law 사건담당관이 사건 접수와 절차 안내를 한다.",
+  };
+</script>
+<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
+<script src="/assets/chat-widget.js"></script>
+<div style="padding: 28px 8% 0;"><div style="max-width: 860px; margin: 0 auto;"><div class="doc-start" id="startBox"></div></div></div>
+<script src="/assets/md-view.js"></script>
+<script>window.START_FIELD = { firstTab: "사건 접수", secondTab: "방법론", legalReview: false, suggestButton: false, placeholder: "사건을 말씀하세요. 예: 중고거래 대금 분쟁을 판단받고 싶습니다" };</script>
+<script src="/assets/start-field.js"></script>
 
 
 
