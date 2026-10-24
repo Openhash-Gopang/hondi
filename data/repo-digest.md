@@ -1,9 +1,13 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-24 09:13 KST · 기준 커밋 32c21b49
+- 갱신: 2026-10-24 09:59 KST · 기준 커밋 b6f3596c
 - 전문가 페르소나 전용 페이지 145개 · 등록된 SP 868건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-24 Merge pull request #763 from Openhash-Gopang/feat/klaw-nav-button-20261024
+- 2026-10-24 feat(nav): 인프라·전문가·정부·제주 AI 행정 문서 오른쪽 상단에 K-Law 버튼 추가
+- 2026-10-24 Merge pull request #762 from Openhash-Gopang/feat/hero-usage-button-yellow-20261024
+- 2026-10-24 feat(desktop): 히어로 '사용법' 버튼을 로고 노란색으로 강조
 - 2026-10-24 Merge pull request #761 from Openhash-Gopang/docs/user-manual-refresh-20261024
 - 2026-10-24 docs: 사용자 매뉴얼 전면 갱신 — 종량제 반영, 전문가 AI 서류 작성·K-Law 판결 예측 등 신규 6장, 장별 갱신일 표시, K-Clean 퀴즈 보강
 - 2026-10-24 Merge pull request #760 from Openhash-Gopang/feat/klaw-llm-verdict-validation-actual-judgment-tab-20261024
@@ -40,10 +44,6 @@
 - 2026-10-22 style(pages): shrink bottom tab font on K-Law LLM verdict validation page
 - 2026-10-22 Merge pull request #744 from Openhash-Gopang/feat/klaw-llm-verdict-validation-page-20261022
 - 2026-10-22 feat(pages): add K-Law LLM verdict validation page skeleton (header + 5 tabs)
-- 2026-10-22 Merge pull request #743 from Openhash-Gopang/feat/klaw-verdict-hero-button-20261022
-- 2026-10-22 feat(lawyer pages): add K-Law 가상 판결문 생성하기 hero button to lawyer persona pages
-- 2026-10-21 Merge pull request #742 from Openhash-Gopang/feat/doc-tx-sp-u15-20261021
-- 2026-10-21 feat(sp): 서류 요청·제공 SP 신설 및 UNIVERSAL-common U15 반영
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
