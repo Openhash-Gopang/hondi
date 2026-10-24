@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-24 08:42 KST · 기준 커밋 edc23878
+- 갱신: 2026-10-24 09:13 KST · 기준 커밋 32c21b49
 - 전문가 페르소나 전용 페이지 145개 · 등록된 SP 868건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-24 Merge pull request #761 from Openhash-Gopang/docs/user-manual-refresh-20261024
+- 2026-10-24 docs: 사용자 매뉴얼 전면 갱신 — 종량제 반영, 전문가 AI 서류 작성·K-Law 판결 예측 등 신규 6장, 장별 갱신일 표시, K-Clean 퀴즈 보강
 - 2026-10-24 Merge pull request #760 from Openhash-Gopang/feat/klaw-llm-verdict-validation-actual-judgment-tab-20261024
 - 2026-10-24 pages: klaw-llm-verdict-validation 대법원·고등법원 판결문 탭을 '실제 판결문' 탭으로 통합 (심급 4탭)
 - 2026-10-24 Merge pull request #759 from Openhash-Gopang/feat/klaw-llm-verdict-validation-test-method-tab-20261024
@@ -42,8 +44,6 @@
 - 2026-10-22 feat(lawyer pages): add K-Law 가상 판결문 생성하기 hero button to lawyer persona pages
 - 2026-10-21 Merge pull request #742 from Openhash-Gopang/feat/doc-tx-sp-u15-20261021
 - 2026-10-21 feat(sp): 서류 요청·제공 SP 신설 및 UNIVERSAL-common U15 반영
-- 2026-10-21 feat(sp): family F - K-Advisor step-by-step purchase advice track (STEP K, 7 steps)
-- 2026-10-21 feat(sp): family D assistant personas - STEP W document-writing track for 6 professions (security-engineer, translator-interpreter, tour-guide, sports-instructor, hairdresser, chef)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
