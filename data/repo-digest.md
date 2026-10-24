@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-24 11:18 KST · 기준 커밋 b2743f56
-- 전문가 페르소나 전용 페이지 150개 · 등록된 SP 875건
+- 갱신: 2026-10-24 11:22 KST · 기준 커밋 d707a84c
+- 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-24 Merge pull request #770 from Openhash-Gopang/feat/navi-guide-start-chat-20261024
+- 2026-10-24 feat(navi-guide): 소개 페이지 5곳에 나비 안내 시작 영역(대화창) 추가
 - 2026-10-24 Merge pull request #769 from Openhash-Gopang/feat/citizen-consent-start-chat-20261024
 - 2026-10-24 feat(citizen-report,consent-sale): 시작 영역(대화창) 추가 — 신고 정리(k-watch)·합의매각 안내(SP-24_kestate)
 - 2026-10-24 Merge pull request #768 from Openhash-Gopang/feat/jeju-start-chat-20261024
@@ -42,15 +44,12 @@
 - 2026-10-22 pages: klaw-llm-verdict-validation 점수순 정렬, K-Law 적용 전·후(DeepSeek) 비교 추가
 - 2026-10-22 Merge pull request #751 from Openhash-Gopang/feat/klaw-llm-verdict-validation-grok-v2-20261022
 - 2026-10-22 feat(pages): add Grok variant-v2 verdict and rescore comparison tables
-- 2026-10-22 Merge pull request #750 from Openhash-Gopang/feat/klaw-llm-verdict-validation-claude-v2-20261022
-- 2026-10-22 feat(pages): add Claude variant-v2 verdict and rescore comparison tables
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
 - /pages/administration-research.html — 행정 자동화의 경계
 - /pages/advisor-steps.html — 단계별 구매 자문 — K-Advisor
 - /pages/agents.html — 에이전트
-- /pages/ai-assistant.html — AI 비서
 - /pages/ai-engine.html — AI 엔진
 - /pages/ai-types.html — ai-types.html
 - /pages/appraiser-valuation.html — 가치평가 — 감정평가사 보조 AI
@@ -67,7 +66,6 @@
 - /pages/expert-personas-docs.html — 문서 양식 — 전문가 페르소나
 - /pages/expert-personas.html — 전문가 페르소나
 - /pages/expert-write.html — 서류 작성하기 — 보건의료 보조 AI
-- /pages/hondi-market.html — hondi-market.html
 - /pages/jeju-gov-automation-draft.html — 제주 AI 행정 — 기관·실국과·읍면동 실행 지도
 - /pages/klaw-llm-verdict-validation.html — K-Law 후보 LLM 가상 판결문 검증
 - /pages/klaw-research.html — 법원 중심에서 당사자 합의 중심으로 축의 이동
@@ -81,7 +79,6 @@
 - /pages/overview.html — 개요
 - /pages/plan-architecture.html — K-Plan 아키텍처 — 나비 (Navi)
 - /pages/presentations.html — 나비 프레젠테이션
-- /pages/professional-ai.html — 전문 분야(기관) AI 및 전문가 AI
 - /pages/professor.html — 학습 트랙 — K-Professor
 - /pages/profile-assistant.html — 나비 프로필 작성
 - /pages/project-support-technical.html — 기술적 상세 — 국내 서버 전환 검토
@@ -103,11 +100,10 @@
 - /pages/suggest.html — 제안 및 질문
 - /pages/tax-optimizer.html — 절세 최적화 — 세무사 보조 AI
 - /pages/teasers.html — teasers.html
-- /pages/usage-guide.html — 이용 방법
 - /pages/watch-architecture.html — K-Watch 아키텍처 — 나비 (Navi)
 
 ## 전문가 페르소나 전용 페이지 id
-accountant-audit, accountant-due-diligence, accountant-forensic, accountant-ifrs, accountant-internal-control, accountant-ipo, accountant-nonprofit-public, accountant-restructuring, accountant-valuation, accountant, administrative-scrivener, advanced-practice-nurse, advisor, appraiser, architect, chef, consent-sale, customs-broker, dental-hygienist, dental-technician, dentist, dietitian, electrical-safety-engineer, financial-planner, fire-safety-manager, gas-safety-engineer, gov-agency, hairdresser, health-educator, indtransform-01, indtransform-10, indtransform-56, industrial-safety-consultant, jeju-gov-automation, judicial-scrivener, k-government, k-services, klaw, labor-attorney, landscape-engineer, lawyer-administrative, lawyer-antitrust, lawyer-arbitration, lawyer-auction, lawyer-broadcasting, lawyer-civil, lawyer-collection, lawyer-commercial, lawyer-constitutional, lawyer-construction, lawyer-corporate, lawyer-criminal, lawyer-damages, lawyer-energy, lawyer-entertainment, lawyer-environmental, lawyer-execution, lawyer-expropriation, lawyer-family, lawyer-finance, lawyer-foodpharma, lawyer-government-contract, lawyer-guardianship, lawyer-immigration, lawyer-inheritance, lawyer-insolvency, lawyer-insurance, lawyer-international-arbitration, lawyer-international-relations, lawyer-international-transactions, lawyer-it, lawyer-juvenile, lawyer-legislation, lawyer-maritime, lawyer-military, lawyer-overseas-investment, lawyer-realestate, lawyer-redevelopment, lawyer-religious, lawyer-school-violence, lawyer-securities, lawyer-shipbuilding, lawyer-sports, lawyer-startup, lawyer-trade, lawyer-traffic, lawyer, loss-adjuster, marine-engineer, marine-pilot, medical-lab-technologist, midwife, naval-architect, navigation-officer, nurse, occupational-therapist, optician, paramedic, patent-attorney-bio-pharma, patent-attorney-chemistry-materials, patent-attorney-design, patent-attorney-ip-strategy, patent-attorney-it-software, patent-attorney-licensing, patent-attorney-mechanical-electrical, patent-attorney-pct-international, patent-attorney-trademark, patent-attorney-trial-litigation, patent-attorney, pharmacist, physical-therapist, physician-anesthesiology, physician-cardiothoracic, physician-dermatology, physician-emergency, physician-ent, physician-internal-medicine, physician-lab-medicine, physician-neurology, physician-nuclear-medicine, physician-obgyn, physician-occupational, physician-ophthalmology, physician-orthopedics, physician-pathology, physician-pediatrics, physician-plastic, physician-preventive, physician-psychiatry, physician-radiation-oncology, physician-radiology, physician-rehabilitation, physician-surgery, physician-urology, physician, professional-engineer, professor-persona, radiologic-technologist, real-estate-agent, sanitarian, security-engineer, speech-language-pathologist, sports-instructor, surveying-engineer, tax-accountant, tour-guide, traditional-medicine-doctor, translator-interpreter, veterinarian, weather-forecaster
+accountant-audit, accountant-due-diligence, accountant-forensic, accountant-ifrs, accountant-internal-control, accountant-ipo, accountant-nonprofit-public, accountant-restructuring, accountant-valuation, accountant, administrative-scrivener, advanced-practice-nurse, advisor, ai-assistant, appraiser, architect, chef, consent-sale, customs-broker, dental-hygienist, dental-technician, dentist, dietitian, electrical-safety-engineer, financial-planner, fire-safety-manager, gas-safety-engineer, gov-agency, hairdresser, health-educator, hondi-market, indtransform-01, indtransform-10, indtransform-56, industrial-safety-consultant, jeju-gov-automation, judicial-scrivener, k-government, k-services, klaw, labor-attorney, landscape-engineer, lawyer-administrative, lawyer-antitrust, lawyer-arbitration, lawyer-auction, lawyer-broadcasting, lawyer-civil, lawyer-collection, lawyer-commercial, lawyer-constitutional, lawyer-construction, lawyer-corporate, lawyer-criminal, lawyer-damages, lawyer-energy, lawyer-entertainment, lawyer-environmental, lawyer-execution, lawyer-expropriation, lawyer-family, lawyer-finance, lawyer-foodpharma, lawyer-government-contract, lawyer-guardianship, lawyer-immigration, lawyer-inheritance, lawyer-insolvency, lawyer-insurance, lawyer-international-arbitration, lawyer-international-relations, lawyer-international-transactions, lawyer-it, lawyer-juvenile, lawyer-legislation, lawyer-maritime, lawyer-military, lawyer-overseas-investment, lawyer-realestate, lawyer-redevelopment, lawyer-religious, lawyer-school-violence, lawyer-securities, lawyer-shipbuilding, lawyer-sports, lawyer-startup, lawyer-trade, lawyer-traffic, lawyer, loss-adjuster, marine-engineer, marine-pilot, medical-lab-technologist, midwife, naval-architect, navigation-officer, nurse, occupational-therapist, optician, paramedic, patent-attorney-bio-pharma, patent-attorney-chemistry-materials, patent-attorney-design, patent-attorney-ip-strategy, patent-attorney-it-software, patent-attorney-licensing, patent-attorney-mechanical-electrical, patent-attorney-pct-international, patent-attorney-trademark, patent-attorney-trial-litigation, patent-attorney, pharmacist, physical-therapist, physician-anesthesiology, physician-cardiothoracic, physician-dermatology, physician-emergency, physician-ent, physician-internal-medicine, physician-lab-medicine, physician-neurology, physician-nuclear-medicine, physician-obgyn, physician-occupational, physician-ophthalmology, physician-orthopedics, physician-pathology, physician-pediatrics, physician-plastic, physician-preventive, physician-psychiatry, physician-radiation-oncology, physician-radiology, physician-rehabilitation, physician-surgery, physician-urology, physician, professional-ai, professional-engineer, professor-persona, radiologic-technologist, real-estate-agent, sanitarian, security-engineer, speech-language-pathologist, sports-instructor, surveying-engineer, tax-accountant, tour-guide, traditional-medicine-doctor, translator-interpreter, usage-guide, veterinarian, weather-forecaster
 
 ## ROADMAP.md 발췌(계획 — 확정 아님)
 # ROADMAP — 나비 디지털 여권
