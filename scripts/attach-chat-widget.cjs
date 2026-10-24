@@ -38,6 +38,7 @@ const PAGES = [
     greeting: '안녕하세요! 전문가 페르소나(SP) 체계에 대해 궁금한 점을 물어보세요. 😊',
     serviceLabel: '전문가 페르소나',
   },
+  // 2026-10-24: k-services.html 은 시작 영역(인라인 대화창)으로 바뀌어 이 블록 대신 직접 관리한다(마커가 있어 재실행해도 건드리지 않는다).
   {
     file: 'pages/k-services.html',
     sp: 'HONDI_VISITOR_SP',

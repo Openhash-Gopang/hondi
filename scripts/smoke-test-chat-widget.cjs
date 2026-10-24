@@ -44,7 +44,7 @@ const MIN_SP_LEN = 50;
 const PAGES = [
   { path: '/pages/k-government.html', expectSp: 'HONDI_VISITOR_SP' },
   { path: '/pages/expert-personas.html', expectSp: 'SP_EXPERT_BASE' },
-  { path: '/pages/k-services.html', expectSp: 'HONDI_VISITOR_SP' },
+  { path: '/pages/k-services.html', expectSp: 'SP-02_k119' }   // 2026-10-24: 시작 영역(인라인) — 첫 서비스 탭(응급)의 SP. 탭마다 바뀐다,
 ];
 
 function extractConfig(html) {

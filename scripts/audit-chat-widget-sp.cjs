@@ -114,6 +114,19 @@ for (const rel of PAGES) {
   console.log('  ✓ sp: ' + spKey + ' → prompts/' + fname + ' (' + spContent.length + '자)');
   console.log('  ✓ context: ' + (cfg.context ? '"' + cfg.context.slice(0, 40) + (cfg.context.length > 40 ? '…' : '') + '"' : '(없음)'));
   console.log('  ✓ label: "' + (cfg.label || '(기본값)') + '"  greeting: "' + (cfg.greeting || '(기본값)').slice(0, 30) + '…"');
+
+  // 2026-10-24: k-services.html 은 서비스 탭마다 SP 가 바뀐다(SVC_CHAT). 탭별 sp 키도 같은 기준으로 검사한다.
+  const blk = html.match(/var SVC_CHAT\s*=\s*\{([\s\S]*?)\n\};/);
+  if (blk) {
+    const keys = [...blk[1].matchAll(/sp:\s*'([^']+)'/g)].map((x) => x[1]);
+    const bad = keys.filter((k) => {
+      const f = manifest[k];
+      return !f || !fs.existsSync(path.join(ROOT, 'prompts', f)) || fs.readFileSync(path.join(ROOT, 'prompts', f), 'utf8').length < MIN_SP_LEN;
+    });
+    const none = (blk[1].match(/sp:\s*null/g) || []).length;
+    if (bad.length) { console.log('  ✗ 서비스 탭 SP 이상: ' + bad.join(', ')); failCount++; }
+    else console.log('  ✓ 서비스 탭 SP ' + keys.length + '종 확인 (전용 SP 없음 ' + none + '종 → 입력창 비활성)');
+  }
 }
 
 console.log('\n' + (failCount === 0 ? '전수 감사 통과' : failCount + '건 실패') + (warnCount ? ' (경고 ' + warnCount + '건)' : ''));
