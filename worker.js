@@ -21,6 +21,7 @@ import { makePocketBaseDigitStore } from './src/worker/digit-claim-store.js';
 import { makeOrgSiteHandler } from './src/worker/org-site-handler.js';
 import { makePocketBaseOrgSiteStore } from './src/worker/org-site-store.js';
 import { makeDocFormHandler } from './src/worker/doc-form-handler.js';
+import { makeAdminProposalsHandler } from './src/worker/admin-proposals-handler.js';
 import { makePocketBaseDocFormStore } from './src/worker/doc-form-store.js';
 import { makeDocFormRewardHandler } from './src/worker/doc-form-reward.js';
 import { makePocketBaseRatingStore, makePocketBaseRewardStore } from './src/worker/doc-form-reward-store.js';
@@ -14233,6 +14234,10 @@ export default {
       return handlePushBroadcast(request, env, corsHeaders);
 
     // ── Prompt Editor (관리자 — L1 prompt_admins 인증 + GitHub PR) ──
+    // 관리자 전용 문서 보관소(2026-10-25) — 관리자 Bearer 토큰 확인 후 L1 admin_proposals 컬렉션만 사용
+    if (pathname === '/admin/proposals' || pathname.startsWith('/admin/proposals/'))
+      return handleAdminProposalsRoutes(request, url, env, corsHeaders);
+
     if (pathname === '/admin/login' && request.method === 'POST')
       return handleAdminLogin(request, env, corsHeaders);
 
@@ -33521,6 +33526,12 @@ async function parseAdminToken(env, token) {
     if (payload.exp < Math.floor(Date.now() / 1000)) return null;
     return payload;
   } catch { return null; }
+}
+
+// ── 관리자 전용 문서 보관소(2026-10-25 신설) — src/worker/admin-proposals-handler.js
+async function handleAdminProposalsRoutes(request, url, env, corsHeaders) {
+  const h = makeAdminProposalsHandler({ requireAdmin: _requireAdmin, base: L1_DEFAULT, getToken: () => _l1AdminToken(env) });
+  return (await h.handle(request, url, env, corsHeaders)) || _err(404, 'NOT_FOUND', '없는 경로입니다', corsHeaders);
 }
 
 async function _requireAdmin(request, env) {

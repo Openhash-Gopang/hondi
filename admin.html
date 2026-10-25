@@ -117,6 +117,7 @@
               <li>나비 신설 법인 공통 설립 원칙 (초안, 2026-10-17) — <a href="./docs/business-plan/founding-proposals/nabi-common-principles.md" target="_blank" rel="noopener">MD ↗</a></li>
               <li>나비 신설 법인 전문가 검토 요청서 (초안, 2026-10-17) — <a href="./docs/business-plan/founding-proposals/nabi-expert-review-request.md" target="_blank" rel="noopener">MD ↗</a></li>
               <li>나비로 사업 계획서 (법무사 AI) — <a href="./docs/business-plan/founding-proposals/nabiro-business-plan.md" target="_blank" rel="noopener">MD ↗</a></li>
+              <li><strong>직역 AI 법인 지분 매수 제안서 (비공개 · 관리자 DB 보관)</strong> — <a href="#" id="admin-proposals-load" onclick="_propList(event)">목록 불러오기</a><ul id="admin-proposals-list" style="margin:6px 0 0 0"></ul></li>
               <li>1. 나비로 공동 설립 참여 제안서 (법무사, 초안) — <a href="./docs/business-plan/founding-proposals/nabiro-proposal.md" target="_blank" rel="noopener">MD ↗</a></li>
               <li>2. 나비 행정 공동 설립 참여 제안서 (행정사, 초안) — <a href="./docs/business-plan/founding-proposals/nabi-haengjeong-proposal.md" target="_blank" rel="noopener">MD ↗</a></li>
               <li>3. 나비 변호사 공동 설립 참여 제안서 (개업 변호사, 초안) — <a href="./docs/business-plan/founding-proposals/nabi-byunhosa-proposal.md" target="_blank" rel="noopener">MD ↗</a></li>
@@ -717,6 +718,54 @@ function _openAdminPanel() {
 function _adminLogout() {
   localStorage.removeItem(LS_TOKEN);
   _openAdminPanel();
+}
+
+// ── 관리자 전용 문서 보관소(2026-10-25) — 문서는 정적 파일이 아니라 L1 admin_proposals 에 있고, Bearer 토큰으로만 받는다.
+async function _propFetch(path) {
+  const t = _adminToken();
+  if (!t) throw new Error('로그인이 필요합니다(30분 만료).');
+  return fetch(WORKER_URL + path, { headers: { 'Authorization': 'Bearer ' + t } });
+}
+async function _propList(ev) {
+  if (ev) ev.preventDefault();
+  const ul = document.getElementById('admin-proposals-list');
+  ul.textContent = '불러오는 중...';
+  try {
+    const r = await _propFetch('/admin/proposals');
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok || !d.ok) { ul.textContent = '불러오지 못했습니다: ' + (d.message || r.status); return; }
+    ul.textContent = '';
+    if (!d.items.length) { ul.textContent = '저장된 문서가 없습니다.'; return; }
+    d.items.forEach(function (it) {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = '#'; a.textContent = it.title;
+      a.onclick = function (e) { e.preventDefault(); _propOpen(it.slug, it.title); };
+      const meta = document.createElement('span');
+      meta.style.cssText = 'color:#888;font-size:12px;margin-left:6px';
+      meta.textContent = '(' + new Date(it.ts).toLocaleString('ko-KR') + ' · ' + Math.round(it.size / 1024) + 'KB · sha256 ' + String(it.sha256).slice(0, 8) + ')';
+      li.appendChild(a); li.appendChild(meta); ul.appendChild(li);
+    });
+  } catch (e) { ul.textContent = '오류: ' + e.message; }
+}
+async function _propOpen(slug, title) {
+  try {
+    const r = await _propFetch('/admin/proposals/' + encodeURIComponent(slug));
+    if (!r.ok) { alert('문서를 불러오지 못했습니다 (' + r.status + ')'); return; }
+    const html = await r.text();
+    const box = document.createElement('div');
+    box.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.55);display:flex;flex-direction:column';
+    const bar = document.createElement('div');
+    bar.style.cssText = 'background:#12305c;color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;font-size:14px';
+    const tt = document.createElement('span'); tt.textContent = title + ' · 비공개(관리자 전용)';
+    const x = document.createElement('button'); x.textContent = '닫기'; x.onclick = function () { box.remove(); };
+    bar.appendChild(tt); bar.appendChild(x);
+    const f = document.createElement('iframe');
+    f.setAttribute('sandbox', '');
+    f.style.cssText = 'flex:1;border:0;background:#fff;width:100%';
+    f.srcdoc = html;
+    box.appendChild(bar); box.appendChild(f); document.body.appendChild(box);
+  } catch (e) { alert('오류: ' + e.message); }
 }
 
 async function _adminLogin() {
