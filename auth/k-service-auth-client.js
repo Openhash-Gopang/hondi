@@ -440,7 +440,7 @@
     }
     bar.innerHTML = '';
     var span = document.createElement('span');
-    span.textContent = '⚠️ [고시] 테스트 기간 중 보안 모듈 잠정 중단 · GDC 충전 없이 무제한 이용 · 실제 개인정보는 입력하지 마세요. 내 아이디: ';
+    span.textContent = '⚠️ [고시] 테스트 기간 중 보안 모듈 잠정 중단 · 정해진 한도까지 무료 · 한도를 넘기면 24시간 안에 정식 아이디로 전환 · 실제 개인정보는 입력하지 마세요. 내 아이디: ';
     var b = document.createElement('b'); b.textContent = id;
     bar.appendChild(span); bar.appendChild(b);
     function mk(label, fn) {
@@ -609,6 +609,17 @@
         built = build();
         resp = await fetch(built[0], built[1]);
       }
+    }
+    // 2026-10-27: 테스트 한도 초과로 차단됐거나 이미 정식 계정으로 이동한 테스트 아이디라는 응답이면 배지(user-badge.js)에 알린다
+    if (resp.status === 402 || resp.status === 403) {
+      try {
+        resp.clone().json().then(function (d) {
+          var c = d && (d.error || d.code);
+          if (c === 'TEST_QUOTA_BLOCKED' || c === 'TEST_ACCOUNT_MIGRATED') {
+            global.dispatchEvent(new CustomEvent('hondi-test-quota', { detail: { code: c } }));
+          }
+        }).catch(function () { /* 본문이 JSON이 아니면 무시 */ });
+      } catch (e) { /* 구형 브라우저 */ }
     }
     return resp;
   }

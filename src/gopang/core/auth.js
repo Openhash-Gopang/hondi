@@ -1411,7 +1411,7 @@ function _showTestNoticeBanner(id) {
   }
   bar.innerHTML = '';
   const span = document.createElement('span');
-  span.textContent = '⚠️ [고시] 테스트 기간 중 보안 모듈 잠정 중단 · GDC 충전 없이 무제한 이용 · 실제 개인정보는 입력하지 마세요.' + (id ? ' 내 아이디: ' : '');
+  span.textContent = '⚠️ [고시] 테스트 기간 중 보안 모듈 잠정 중단 · 정해진 한도까지 무료 · 한도를 넘기면 24시간 안에 정식 아이디로 전환 · 실제 개인정보는 입력하지 마세요.' + (id ? ' 내 아이디: ' : '');
   bar.appendChild(span);
   if (id) {
     const b = document.createElement('b'); b.textContent = id; bar.appendChild(b);
