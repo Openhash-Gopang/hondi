@@ -89,16 +89,23 @@
     if (t && e && Date.now() < e - 30000) { token = t; tokenExp = e; return true; }
     return false;
   }
+  // 2026-10-27 신설 — 로그인 상태가 바뀌면 같은 페이지의 /auth/user-badge.js(우측 상단 아이디 표시)가
+  // 바로 다시 그리도록 알린다. 이벤트를 듣는 쪽이 없어도 아무 영향이 없다.
+  function notifyAuthChange() {
+    try { global.dispatchEvent(new CustomEvent('hondi-auth-change')); } catch (e) { /* 구형 브라우저 */ }
+  }
   function persist(t, exp) {
     token = t; tokenExp = exp;
     var maxAge = Math.max(1, Math.floor((exp - Date.now()) / 1000));
     writeCookie(COOKIE_TOKEN, t, maxAge);
     writeCookie(COOKIE_EXP, String(exp), maxAge);
+    notifyAuthChange();
   }
   function clear() {
     token = null; tokenExp = 0;
     clearCookie(COOKIE_TOKEN);
     clearCookie(COOKIE_EXP);
+    notifyAuthChange();
   }
   function hasValidLogin() { return !!token && Date.now() < tokenExp - 30000; }
 

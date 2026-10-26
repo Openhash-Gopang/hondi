@@ -56,6 +56,7 @@
         '<a href="/pages/k-government.html"><span class="dot"></span><span class="label-text">K-정부</span></a>' +
         '<a href="/pages/klaw-simulation-record.html" class="site-nav-klaw-result-btn"><span class="dot"></span><span class="label-text">K-Law 테스트 결과</span></a>' +
       '</div>' +
+      '<span class="site-nav-user" data-hondi-user-slot="dark"></span>' +
     '</div>' +
     '<div class="site-strip">' +
       '<a class="site-strip-text" href="https://github.com/Openhash-Gopang/hondi" target="_blank">2026년 9월 1일 테스트 시작 · 2027년 완전한 AI 정부 구현 목표 · 오픈소스 코드 공개</a>' +
