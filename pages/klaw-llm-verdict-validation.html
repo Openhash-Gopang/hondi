@@ -49,9 +49,11 @@ body { margin: 0; background: #eef1f6; color: #0f172a; font-size: 14px; line-hei
 .vv-methodnav a { display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border: 1px solid rgba(255,255,255,.28); border-radius: 4px; color: rgba(255,255,255,.85); font-size: 12.5px; font-weight: 600; text-decoration: none; background: rgba(255,255,255,.05); }
 .vv-methodnav a:hover { background: rgba(255,255,255,.14); color: #fff; }
 .vv-methodnav a.active { background: #f0b429; border-color: #f0b429; color: #14181f; }
-.vv-methodnav { flex-direction: column; align-items: flex-start; }
-.vv-navrow { display: flex; gap: 6px; flex-wrap: wrap; }
-@media (min-width: 900px) { .ph-hero-inner { position: relative; } .vv-methodnav { position: absolute; top: 0; right: 24px; margin-top: 0; justify-content: flex-end; align-items: flex-end; } }
+/* 버튼 6개: 3열 2행 격자(행·열 정렬). 두 줄 래퍼는 격자에 직접 참여하도록 풀어 둔다 */
+.vv-methodnav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; width: 100%; }
+.vv-navrow { display: contents; }
+.vv-methodnav a { justify-content: center; text-align: center; white-space: nowrap; padding: 0 6px; }
+@media (min-width: 900px) { .ph-hero-inner { position: relative; } .vv-methodnav { position: absolute; top: 0; right: 24px; margin-top: 0; width: 432px; grid-template-columns: repeat(3, 140px); } .vv-methodnav a { padding: 0 12px; } }
 .vv-table.g16 td:first-child { min-width: 190px; }
 .vv-table.g16 td:last-child { min-width: 240px; }
 .vv-table.g16 td, .vv-table.g16 th { white-space: nowrap; }
@@ -160,8 +162,6 @@ body { margin: 0; background: #eef1f6; color: #0f172a; font-size: 14px; line-hei
 .vv-embed { padding-bottom: 18px; }
 .vv-embed > h2:first-child { border-top: 0; margin-top: 14px; }
 .vv-box { margin: 14px 0; padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; }
-.vv-box.ok { background: #eaf6ef; border-color: #146c43; }
-.vv-box.warn { background: #fff4ea; border-color: #a3430f; }
 .vv-box b.t { display: block; margin-bottom: 3px; }
 .vv-small { color: #64748b; font-size: 12.5px; }
 .vv-body td.n, .vv-body th.n { text-align: right; font-variant-numeric: tabular-nums; }
@@ -3013,12 +3013,102 @@ v1.6은 결론 방향·핵심 법리·세부 논증이 실제 판결과 같은�
 
 <div class="vv-box warn"><b class="t">면책</b>본 문서는 자체 작성한 시험 계획 초안이며 제3자 검증을 거치지 않았습니다. 일부는 초안이므로 어떠한 용도로도 인용·이용하지 마십시오.</div>
 </div></section>
+<section class="vv-pane" id="klaw-deduction" role="tabpanel" aria-label="연역적 방법론"><h2>연역적 방법론</h2><p class="vv-lead">K-Law의 출발점은 "정의란 무엇인가"라는 질문에 대한 답이고, 핵심 엔진은 법철학입니다. 정의를 정의하고 그 정의를 공리로 명시해 결론을 도출하는 연역과, 판례 Fine-tuning의 귀납이 어떻게 다른지 설명합니다. · 2026-10-27</p><div class="vv-body vv-card vv-embed">
+<blockquote><p>이 문서는 당사가 K-Law의 설계 원칙을 설명하려고 직접 작성한 초안이며 제3자의 검증을 거치지 않았습니다. 설계 철학의 설명이지 성능에 대한 주장이나 보장이 아닙니다. 공리의 내용은 K-Law 방법론 v15.1(SP-01)에 근거하고, 공리와 법철학 개념의 대응은 당사의 해석입니다.</p></blockquote>
+
+<h2>요약</h2>
+<p>K-Law의 출발점은 "정의란 무엇인가"라는 질문에 대한 답이며, 정의를 정의하는 것이 판결문 작성의 출발점입니다. 방법론 v15.1은 헌법과 법률의 틀 안에서 법철학적 결단(가치의 우열, 해석의 우선순위, 증명·논증의 원칙)을 공리로 명시하고, 그 공리에서 사건의 결론을 단계적으로 도출하는 <b>연역</b>입니다. 판례 Fine-tuning은 많은 판결문의 통계적 규칙성을 가중치에 묻어 두는 <b>귀납</b>입니다. 두 작업은 개선 대상(방법 대 지식), 개선 수단(명시한 공리 대 가중치), 검증 방식(추론 과정 점검 대 결과 통계)이 모두 달라 서로 대체하지 않고 병행합니다.</p>
+
+<h2>1. 연역과 귀납의 차이</h2>
+<div class="vv-scroll"><table>
+<thead><tr><th>비교 항목</th><th>연역 (K-Law 방법론)</th><th>귀납 (판례 Fine-tuning)</th></tr></thead>
+<tbody>
+<tr><td>출발점</td><td>헌법·법률, 그리고 법철학적 결단을 담은 명시한 공리</td><td>대법원 판례 수만 건 등 사례 집합</td></tr>
+<tr><td>개선 대상</td><td>사건을 다루는 방법(가치 형량, 해석 우선순위, 사실·인과 분해, 증명책임, 판례 검증)</td><td>모델이 아는 지식(법령·판례 표현, 한국어 법률 문체)</td></tr>
+<tr><td>저장 위치</td><td>컨텍스트(시스템 프롬프트). 가중치는 그대로</td><td>모델 가중치</td></tr>
+<tr><td>결론의 근거</td><td>공리와 단계가 출력에 드러남(출력 형식 v13.2가 강제)</td><td>학습된 분포. 이유는 사후 설명에 가까움</td></tr>
+<tr><td>판례의 지위</td><td>법령의 의미를 구체화하는 논거 자원. 결론을 모방하지 않음</td><td>학습 대상 그 자체</td></tr>
+<tr><td>오류가 났을 때</td><td>어느 공리·단계가 틀렸는지 찾아 고칠 수 있음</td><td>어느 학습 사례 때문인지 특정하기 어려움</td></tr>
+<tr><td>갱신</td><td>공리·절차 텍스트 수정. 재학습 불필요, 되돌리기 쉬움</td><td>재학습 필요. 정밀한 되돌림이 어려움</td></tr>
+<tr><td>주된 약점</td><td>공리가 틀렸거나 빠지면 결론도 틀림. 공리를 충실히 적용하는지는 모델 능력에 좌우됨</td><td>학습 데이터의 편향·누락, 오래된 판례 경향을 그대로 일반화. 과거에 없던 쟁점에 취약</td></tr>
+</tbody></table></div>
+
+<h2>2. K-Law의 엔진: 법철학</h2>
+<h3>2-1. 출발점: 정의란 무엇인가</h3>
+<p>K-Law의 출발점은 "정의란 무엇인가"라는 질문에 대한 답입니다. 정의를 정의하는 것이 판결문 작성의 출발점이며, 무엇이 정의로운 결론인지가 정해져야 같은 사건에서 일관되게 결론을 도출하고 그 이유를 밝힐 수 있습니다. 정의의 정의 자체는 이 문서에서 다루지 않습니다. 아래에서 설명하는 공리 체계는 방법론 v15.1 기준의 구조입니다.</p>
+<h3>2-2. 방법론의 목적</h3>
+<p>방법론 v15.1의 서문은 목적을 "헌법과 법률로부터 법원의 논리적 추론 구조를 재현하는 것"으로 둡니다. 헌법과 법률이 1차 자료이고, 판례는 법령의 의미를 구체화하는 논거 자원이며, 특정 판례의 결론을 모방하거나 정답으로 취급하지 않습니다. 이 목적 자체가 연역입니다.</p>
+<h3>2-3. 공리 체계가 담고 있는 법철학적 결단</h3>
+<p>공리는 4개 계층이고, 계층이 충돌하면 상위 계층이 이깁니다. 공리 본문은 원칙·기준만 담고, 절차의 순서와 수량 기준은 별도 STEP에 둡니다.</p>
+<div class="vv-scroll"><table>
+<thead><tr><th>계층</th><th>공리</th><th>명시된 내용</th><th>대응하는 법철학적 문제 (당사의 해석)</th></tr></thead>
+<tbody>
+<tr><td>1 (변경 불가)</td><td>A 분쟁 명제의 완전 추출</td><td>무엇이 다투어지는지를 빠짐없이 명제로 확정</td><td>쟁점 확정, 판단 대상의 동일성</td></tr>
+<tr><td>1</td><td>B 역방향 검증과 균형</td><td>판단 전에 상대방의 가장 강력한 논거를 먼저 구성하고 양측을 동등한 깊이로 검증</td><td>양쪽 주장을 듣는 원칙, 무기 대등</td></tr>
+<tr><td>1</td><td>C 실질 우선, 강행규정·제재규범 병행</td><td>명칭이 아닌 경제적 실질로 판단하되 강행규정·제재규범은 먼저 확인</td><td>형식과 실질의 긴장</td></tr>
+<tr><td>1</td><td>D 가치 위계</td><td>생명·신체 &gt; 재정이익, 무고한 피해자 &gt; 가해자 재산권, 약자 보호 &gt; 계약자유, 법적 안정성 &gt; 구체적 타당성(헌법적 기본권 침해가 명백하면 예외), 절차적 요건 &gt; 실질적 권리(중대·명백한 당연무효는 예외)</td><td>가치 간 우열, 형식적 평등과 사회국가적 보호, 법적 안정성과 구체적 타당성의 긴장</td></tr>
+<tr><td>1</td><td>E 인과 분해</td><td>복수 원인을 성격·기여도·요건충족으로 나누어 평가, 책임 제한을 단계별로 검토</td><td>귀책과 책임의 배분</td></tr>
+<tr><td>1</td><td>F 증거법적 원칙</td><td>적법절차, 진술의 임의성, 절차적 약자 보호</td><td>적법절차와 절차적 정의</td></tr>
+<tr><td>1</td><td>G 불확실성과 확신도</td><td>법리·사실 확신도를 나누어 매기고 낮으면 판단 유보 또는 조건부 결론</td><td>판단의 한계를 인정하는 절차적 겸손</td></tr>
+<tr><td>1.5</td><td>S 의미 해석</td><td>핵심 문구의 의미를 정해진 단계로 확정한 뒤에만 해석 우선순위를 적용</td><td>법문 해석의 방법론</td></tr>
+<tr><td>2</td><td>H~L 해석 공리</td><td>문언이 명확하면 문언 우선(문언명확성 게이트) → 제재규범 엄격해석 → 실질 우선 → 보호규범 확장해석 → 효과적 권리구제</td><td>문언 존중과 목적론적 해석의 조정, 죄형법정주의 정신, 판례법적 사고</td></tr>
+<tr><td>3</td><td>M 판단 완전성, O 자기 갱신</td><td>모든 공격·방어방법에 판단과 이유를 설시, 갱신의 트리거와 한계</td><td>판단 이유 설시 의무, 방법론의 자기 규율</td></tr>
+</tbody></table></div>
+<p class="vv-small">마지막 열은 공리가 어떤 고전적 쟁점에 답하는지를 당사가 풀이한 것입니다. SP-01 본문은 특정 법철학자나 학파를 인용하지 않습니다.</p>
+<h3>2-4. 귀납이 되어서는 안 되는 이유</h3>
+<p>"정의란 무엇인가"에 대한 답과 그에 따른 가치 위계·해석 우선순위는 데이터에서 발견되는 사실이 아니라 선택되고 정당화되어야 하는 규범적 결단입니다. 이를 Fine-tuning으로 가중치에 굽는 순간 다음이 일어납니다.</p>
+<ul>
+<li>공리가 과거 판결 경향의 평균으로 바뀝니다. "법원이 그렇게 해 왔다"가 근거가 되고, 판례 변경이나 오류도 함께 일반화됩니다.</li>
+<li>전제를 읽을 수 없으므로 "왜 이 가치를 앞세웠는가"를 따져 물을 수 없고, 결과가 맞는지 틀리는지만 셀 수 있습니다.</li>
+<li>법철학적 입장을 바꾸려면(예: 우선순위 조정) 재학습해야 하고, 무엇이 바뀌었는지 확인하기 어렵습니다.</li>
+</ul>
+<p>재판의 기본 구조도 법적 삼단논법입니다. 대전제(법규·법리)에 소전제(확정된 사실)를 포섭해 결론(주문)을 내고, 판결문의 "이유"는 이 연결을 공개해 검증하게 하려는 것입니다. K-Law의 공리는 이 대전제를 구성하는 법철학적 원칙을 명시한 것입니다.</p>
+
+<h2>3. 연역이 구현되는 방식</h2>
+<ol>
+<li><b>공리의 명시</b> — 위 공리 체계를 SP-01(방법론 v15.1)에 문장으로 적습니다.</li>
+<li><b>절차의 강제</b> — STEP 0 → A → B → C의 순서를 고정하고 단계 건너뛰기를 금지합니다. 역방향 추론, 사실·인과 분해, 실질 우선·가치 형량, 증명책임·논증, 판례 검증을 순서대로 거칩니다.</li>
+<li><b>과정의 노출</b> — 가상판결 출력 형식 v13.2가 전제, 포섭, 결론, 확신도를 서식으로 드러내게 합니다.</li>
+<li><b>허위 근거의 차단</b> — 실재하지 않는 판례·조문을 근거로 삼지 못하게 하는 규칙을 둡니다(공리 J §7, 허위 인용 감점).</li>
+<li><b>접두부로서의 캐싱</b> — SP는 매 요청 앞에 그대로 붙는 명시적 컨텍스트입니다. 캐싱은 속도 최적화일 뿐 공리의 위치를 가중치로 옮기지 않습니다.</li>
+</ol>
+
+<h2>4. Fine-tuning과의 병행</h2>
+<p>판례 Fine-tuning은 폐기 대상이 아닙니다. 법령·판례 지식과 한국어 법률 문체를 모델에 입히는 지식의 개선이고, K-Law는 법철학에 기반한 방법의 개선이라 서로 다른 축에 있습니다. 2×2 비교 시험은 두 축의 효과를 분리해 측정하려는 설계이며, 어느 쪽이 더 높게 나오든 두 작업이 별개라는 원칙은 달라지지 않습니다.</p>
+<div class="vv-scroll"><table>
+<thead><tr><th></th><th>SP 없음</th><th>K-Law SP 적용</th></tr></thead>
+<tbody>
+<tr><td>기본 Gemma 4 31B</td><td>기준선 (C군)</td><td>방법론 단독 (B군)</td></tr>
+<tr><td>판례 Fine-tuning 모델</td><td>지식 단독 (A군)</td><td>결합 (A+K군)</td></tr>
+</tbody></table></div>
+
+<h2>5. 갱신 원칙</h2>
+<p>일치도 평가에서 허점이 나오면 K-Law를 고칩니다. 이 과정이 귀납으로 흘러가지 않도록 방법론은 다음을 규정하거나 전제합니다.</p>
+<ul>
+<li><b>공리는 개별 판례나 법령 변경으로 고치지 않습니다.</b> O 공리는 공리(1부)가 개별 사건으로 개정되지 않고, 판례·법령 변경에 따른 갱신은 부록 B(예외법리 점검표)에만 반영한다고 정합니다. 절차 흐름의 변경은 2부에서 합니다.</li>
+<li><b>사건별 패치를 하지 않습니다.</b> 수정은 법철학과 법리에서 정당화되는 일반적 보완이어야 하며, 특정 사건의 결과에 맞추는 수정은 허용하지 않습니다(2026-09-29 결정).</li>
+<li><b>결과는 가설의 단서일 뿐입니다.</b> 불일치는 "어떤 공리나 절차가 빠졌는가"를 묻는 계기이지, 그 사건의 정답을 방법론에 넣을 근거가 아닙니다.</li>
+<li><b>트리거로 점검합니다.</b> 연속 2개 배치에서 전원합의체 누락, 허위 판례, 강행규정 과소 적용 등이 기준치를 넘으면 해당 공리·STEP의 수정을 검토합니다.</li>
+<li><b>검증은 보지 않은 사건으로 합니다.</b> 갱신에 쓰지 않은 봉인 사건(sealed holdout)에서 최종 일치도를 측정해, 갱신 사건에 맞춰진 것이 아닌지 가립니다.</li>
+</ul>
+<blockquote><p><b>주의할 경계</b> 부록 B처럼 사건 결과를 보고 고치는 영역은 연역과 귀납의 경계에 있습니다. 여기서도 "그 사건이 그렇게 끝났다"가 아니라 "법리상 이 예외가 일반적으로 성립한다"는 근거로 정당화될 때만 반영해야 합니다. 갱신 계획의 버전 규칙(승인한 변경마다 +0.1)도 O 공리의 규정(공리 자체의 수정이 필요할 때만 버전 상향)과 어떻게 맞출지 시험 전에 정해야 합니다.</p></blockquote>
+
+<h2>6. 한계와 정확한 표현</h2>
+<ul>
+<li><b>"순수 연역"은 방법의 구조에 대한 말입니다.</b> 이를 수행하는 LLM은 사전학습(귀납)으로 만들어진 모델이므로 모델 내부가 순수 연역이라는 뜻이 아닙니다. 그래서 B군은 "순수 연역"이 아니라 "방법론 단독 군"이라고 부릅니다.</li>
+<li><b>법철학적 전제 자체가 논쟁 대상입니다.</b> 가치 위계와 해석 우선순위는 하나의 입장이며 다른 입장이 가능합니다. 일치도가 높다고 이 입장이 옳다는 증명이 되지는 않으므로, 법철학·법학 전문가의 검토를 받아야 합니다.</li>
+<li><b>공리를 충실히 적용하는지는 모델의 능력입니다.</b> 모델이 공리를 빠뜨리거나 잘못 적용할 수 있고, 출력에 과정이 드러나는 것은 이런 오류를 찾아내기 위해서입니다.</li>
+<li><b>Fine-tuning이 더 높은 일치도를 낼 수도 있습니다.</b> 그 경우에도 전제의 명시, 검증 가능성, 갱신의 용이성이라는 설계 기준은 일치도와 별개로 남으며, 두 방식의 득실을 따져 결정할 사안입니다.</li>
+<li>이 문서의 이점 설명은 설계상의 근거이며, 실제 효과는 시험으로 확인해야 합니다.</li>
+</ul>
+<p class="vv-small">근거 문서: K-Law 판결 방법론 v15.1(SP-01). 관련 문서: K-Law 비교 실험, K-Law 갱신 계획.</p>
+</div></section>
 
 </div>
 
 <script>
 (function () {
-  var ids = ['case-overview', 'case-anonymized', 'actual-judgment', 'llm-compare', 'klaw-verdict', 'klaw-v151', 'output-format', 'match-method', 'klaw-compare', 'klaw-update'];
+  var ids = ['case-overview', 'case-anonymized', 'actual-judgment', 'llm-compare', 'klaw-verdict', 'klaw-v151', 'output-format', 'match-method', 'klaw-compare', 'klaw-update', 'klaw-deduction'];
   var inst = 'supreme';
   function showInst(k) {
     inst = (k === 'high') ? 'high' : 'supreme';
@@ -3051,7 +3141,7 @@ v1.6은 결론 방향·핵심 법리·세부 논증이 실제 판결과 같은�
       mn.className = 'vv-methodnav';
       mn.setAttribute('aria-label', '방법론 문서');
       mn.innerHTML = '<div class="vv-navrow"><a href="#klaw-v151">K-Law v15.1</a><a href="#output-format">출력 형식 v13.2</a><a href="#match-method">일치도 평가 방법</a></div>' +
-        '<div class="vv-navrow"><a href="#klaw-compare">K-Law 비교 실험</a><a href="#klaw-update">K-Law 갱신 계획</a></div>';
+        '<div class="vv-navrow"><a href="#klaw-compare">K-Law 비교 실험</a><a href="#klaw-update">K-Law 갱신 계획</a><a href="#klaw-deduction">연역적 방법론</a></div>';
       hero.appendChild(mn);
     }
     function onClick(e) {
