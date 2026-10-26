@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-27 07:16 KST · 기준 커밋 0f212e0c
+- 갱신: 2026-10-27 07:17 KST · 기준 커밋 af2a5994
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-27 feat: 직역 전문가 페이지 헤더에 기술 소개 버튼(새 탭) + 소개서 5종
 - 2026-10-27 Merge pull request #786 from Openhash-Gopang/feat/sido-proposal-button
 - 2026-10-27 gov-agency: add 사업 제안 header button showing per-province nabi digit code proposal
 - 2026-10-27 Merge pull request #785 from Openhash-Gopang/feat/admin-eight-sido-nabi-code-plan
@@ -43,7 +44,6 @@
 - 2026-10-24 feat(sp): K-Law 인프라 SP(SP-01_klaw v2.0) 신설 — 서비스 제공자 쪽 사건담당관
 - 2026-10-24 Merge pull request #763 from Openhash-Gopang/feat/klaw-nav-button-20261024
 - 2026-10-24 feat(nav): 인프라·전문가·정부·제주 AI 행정 문서 오른쪽 상단에 K-Law 버튼 추가
-- 2026-10-24 Merge pull request #762 from Openhash-Gopang/feat/hero-usage-button-yellow-20261024
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
@@ -66,6 +66,11 @@
 - /pages/expert-personas-docs.html — 문서 양식 — 전문가 페르소나
 - /pages/expert-personas.html — 전문가 페르소나
 - /pages/expert-write.html — 서류 작성하기 — 보건의료 보조 AI
+- /pages/intro-administrative-scrivener.html — 행정사 보조 AI 소개서
+- /pages/intro-appraiser.html — 감정평가사 보조 AI 소개서
+- /pages/intro-judicial-scrivener.html — 법무사 보조 AI 소개서
+- /pages/intro-patent-attorney.html — 변리사 보조 AI 소개서
+- /pages/intro-tax-accounting.html — 세무·회계 보조 AI 소개서
 - /pages/jeju-gov-automation-draft.html — 제주 AI 행정 — 기관·실국과·읍면동 실행 지도
 - /pages/klaw-llm-verdict-validation.html — K-Law 후보 LLM 가상 판결문 검증
 - /pages/klaw-research.html — 법원 중심에서 당사자 합의 중심으로 축의 이동
