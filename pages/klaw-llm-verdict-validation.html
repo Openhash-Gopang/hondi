@@ -49,7 +49,9 @@ body { margin: 0; background: #eef1f6; color: #0f172a; font-size: 14px; line-hei
 .vv-methodnav a { display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border: 1px solid rgba(255,255,255,.28); border-radius: 4px; color: rgba(255,255,255,.85); font-size: 12.5px; font-weight: 600; text-decoration: none; background: rgba(255,255,255,.05); }
 .vv-methodnav a:hover { background: rgba(255,255,255,.14); color: #fff; }
 .vv-methodnav a.active { background: #f0b429; border-color: #f0b429; color: #14181f; }
-@media (min-width: 900px) { .ph-hero-inner { position: relative; } .vv-methodnav { position: absolute; top: 0; right: 24px; margin-top: 0; justify-content: flex-end; } }
+.vv-methodnav { flex-direction: column; align-items: flex-start; }
+.vv-navrow { display: flex; gap: 6px; flex-wrap: wrap; }
+@media (min-width: 900px) { .ph-hero-inner { position: relative; } .vv-methodnav { position: absolute; top: 0; right: 24px; margin-top: 0; justify-content: flex-end; align-items: flex-end; } }
 .vv-table.g16 td:first-child { min-width: 190px; }
 .vv-table.g16 td:last-child { min-width: 240px; }
 .vv-table.g16 td, .vv-table.g16 th { white-space: nowrap; }
@@ -2741,7 +2743,8 @@ v1.6은 결론 방향·핵심 법리·세부 논증이 실제 판결과 같은�
       var mn = document.createElement('nav');
       mn.className = 'vv-methodnav';
       mn.setAttribute('aria-label', '방법론 문서');
-      mn.innerHTML = '<a href="#klaw-v151">K-Law v15.1</a><a href="#output-format">출력 형식 v13.2</a><a href="#match-method">일치도 평가 방법</a>';
+      mn.innerHTML = '<div class="vv-navrow"><a href="#klaw-v151">K-Law v15.1</a><a href="#output-format">출력 형식 v13.2</a><a href="#match-method">일치도 평가 방법</a></div>' +
+        '<div class="vv-navrow"><a href="../docs/gopang-klaw-2x2-test-design-v2-20261026.html" target="_blank" rel="noopener">K-Law 비교 실험</a><a href="../docs/gopang-klaw-update-plan-v15-1-to-v20-1-20261026.html" target="_blank" rel="noopener">K-Law 갱신 계획</a></div>';
       hero.appendChild(mn);
     }
     function onClick(e) {
