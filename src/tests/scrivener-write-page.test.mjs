@@ -13,21 +13,24 @@ import { dirname, join } from 'node:path';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
 const catalog = JSON.parse(read('prompts/sp-catalog.json'));
+// [직역 id, 카탈로그 키, 직역명, §LEGAL-LIMIT 비교용 직전 SP 파일, 페이지 헤더 버튼 필드]
 const JOBS = [
-  ['judicial-scrivener', 'SP_judicial-scrivener', '법무사'],
-  ['administrative-scrivener', 'SP_administrative-scrivener', '행정사'],
+  ['judicial-scrivener', 'SP_judicial-scrivener', '법무사', 'SP_judicial-scrivener_v3_2.md', 'heroButton'],
+  ['administrative-scrivener', 'SP_administrative-scrivener', '행정사', 'SP_administrative-scrivener_v1_2.md', 'heroButton'],
+  // 2026-10-27 변호사 — 페이지에 이미 버튼 둘(가상 판결문 생성하기·LLM 성능 평가)이 있어 셋째 버튼(heroButton3)으로 붙는다.
+  ['lawyer', 'SP_lawyer', '변호사', 'SP_lawyer-assistant_v1_0.md', 'heroButton3'],
 ];
 const js = read('assets/scrivener-write.js');
 const html = read('pages/scrivener-write.html');
 const chat = read('pages/expert-chat.html');
 const statusRe = /\[[^\]|]*보조 AI\s*\|\s*서류 작성 트랙\s*\|\s*현재:\s*W-([1-9])([^\]]*)\]/;
 
-for (const [pid, key, role] of JOBS) {
+for (const [pid, key, role, prevSp, btn] of JOBS) {
   describe(`${role} 서류 작성하기`, () => {
     const page = read(`pages/${pid}.html`);
     const sp = read('prompts/' + catalog[key + '-assistant']);   // 서류 작성 도구는 전문가용(-assistant) SP 에만 있다(2026-10-21 분리)
     it('헤더 버튼이 서류 작성 화면을 가리키고 그 화면이 이 직역을 알고 있다', () => {
-      assert.ok(page.includes(`heroButton: { label: '서류 작성하기', href: '/pages/scrivener-write.html?persona=${pid}'`));
+      assert.ok(page.includes(`${btn}: { label: `) && page.includes(`href: "/pages/scrivener-write.html?persona=${pid}"`) || page.includes(`${btn}: { label: '서류 작성하기', href: '/pages/scrivener-write.html?persona=${pid}'`));
       assert.ok(existsSync(join(ROOT, 'pages/scrivener-write.html')));
       assert.ok(js.includes(`'${pid}': {`) && js.includes(`role: '${role}'`));
     });
@@ -53,11 +56,39 @@ for (const [pid, key, role] of JOBS) {
     });
     it('SP의 §LEGAL-LIMIT 절은 직전 버전과 같다', () => {
       const cut = (t) => t.slice(t.indexOf('## §LEGAL-LIMIT'), t.indexOf('## 0. IDENTITY'));
-      const prev = key === 'SP_judicial-scrivener' ? 'SP_judicial-scrivener_v3_2.md' : 'SP_administrative-scrivener_v1_2.md';
-      assert.equal(cut(sp), cut(read('prompts/' + prev)));
+      assert.equal(cut(sp), cut(read('prompts/' + prevSp)));
     });
   });
 }
+
+describe('변호사 서류 작성하기 — 변호사 전용·전문 판단 규율', () => {
+  const sp = read('prompts/' + catalog['SP_lawyer-assistant']);
+  const sec = sp.slice(sp.search(/^## STEP W — /m), sp.search(/^## 부록 A — /m));
+  it('화면이 변호사를 알고, 일반 이용자(본인 사안) 선택지를 두지 않는다', () => {
+    assert.ok(js.includes("'lawyer': {") && js.includes("proOnly: true"));
+    assert.ok(js.includes('if (P.proOnly)'));
+    assert.ok(html.includes('?persona=lawyer'));
+  });
+  it('서류 작성 대화는 전문가용 SP 로 열리고 서버 게이트 코드가 변호사에 매핑돼 있다', () => {
+    assert.ok(/_PRO_WRITE_PERSONAS = new Set\(\[[^\]]*'lawyer'/s.test(chat));
+    assert.ok(sp.startsWith('# SP-LAW-01A ·'));
+    assert.ok(read('src/worker/assistant-sp-codes.js').includes('"SP-LAW-01A": "lawyer"'));
+  });
+  it('STEP W 가 변호사 전용·전문 판단 비대행·기한 우선·가상 판결문 참고자료 규율을 담는다', () => {
+    assert.ok(sec.includes('변호사 전용 트랙') && sec.includes('L0·L1'));
+    assert.ok(sec.includes('전문 판단은 변호사의 것이다') && sec.includes('[변호사 기재: …]'));
+    assert.ok(sec.includes('기한이 먼저다'));
+    assert.ok(sec.includes('K-Law 가상 판결문은 참고자료일 뿐이다'));
+  });
+  it('K-Law 고지 문구를 STEP W 안에서 되풀이하지 않는다(한 번만)', () => {
+    assert.ok((sec.match(/법률 자문 아님/g) || []).length === 0);
+    assert.ok((sec.match(/법적 효력/g) || []).length <= 1);
+  });
+  it('헤더가 셋째 버튼을 그린다', () => {
+    const ph = read('assets/ph-header.js');
+    assert.ok(ph.includes('heroButton3') && ph.includes('ph-hero-cta-3'));
+  });
+});
 
 describe('서류 작성 화면과 대화 화면 연결', () => {
   it('화면은 dpaper 미연동과 제출 버튼 비활성을 표시한다', () => {

@@ -75,7 +75,9 @@
     var first = heroCtaLink(config && config.heroButton, 'ph-hero-cta');
     if (!first) return '';
     var second = heroCtaLink(config && config.heroButton2, 'ph-hero-cta ph-hero-cta-2');
-    return '<div class="ph-hero-cta-row">' + first + second + '</div>';
+    // 2026-10-27 — 셋째 버튼 PAGE_HEADER.heroButton3 (변호사 페이지의 「서류 작성하기」). 둘째 버튼이 있을 때만 그 오른쪽에 놓는다.
+    var third = second ? heroCtaLink(config && config.heroButton3, 'ph-hero-cta ph-hero-cta-2 ph-hero-cta-3') : '';
+    return '<div class="ph-hero-cta-row">' + first + second + third + '</div>';
   }
   // 2026-10-24: 「K-Law」 버튼 — 인프라(K-서비스)·전문가 페르소나·K-정부(기관 페이지 포함) 문서의 오른쪽 상단.
   // PAGE_HEADER.klaw === false 로 끄고, true 로 강제로 켤 수 있다.
