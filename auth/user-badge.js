@@ -19,6 +19,10 @@
      · 전화 인증 실사용자 → 토큰 안의 전화번호는 화면에 절대 풀어 쓰지 않고
          뒤 4자리만 보여 준다(예: ●●●● 5678).
 
+   ■ 테스트 아이디 메뉴의 두 버튼(2026-10-27)
+     · "정식 아이디로 로그인" — 테스트 아이디에서 나온 뒤 전화 인증 로그인 창을 바로 연다(로그아웃 → 로그인을 한 번에).
+     · "정식 아이디 만들기" — hondi.net 가입 화면(SIGNUP_URL)으로 이동한다.
+
    ■ 기능 제한(선언형) — 로그인 필요 기능에 속성만 붙이면 됩니다.
        <button data-requires-login="메일 보내기">보내기</button>
        <form data-requires-login="정보 공개 청구"> … </form>
@@ -73,6 +77,23 @@
   }
   function testIdSaved() {
     try { return global.localStorage.getItem('hondi_test_id') || ''; } catch (e) { return ''; }
+  }
+
+  // ── 테스트 아이디 → 정식 아이디 ──────────────────────────────
+  var SIGNUP_URL = 'https://hondi.net/desktop.html';        // 정식 아이디 가입 화면(메인 앱)
+  function startFormalLogin() {
+    if (identity().kind === 'test') { try { global.localStorage.setItem('hondi_test_optout', '1'); } catch (e) {} } // 접속하면 다시 테스트 아이디로 자동 입장하지 않도록
+    if (global.KAuth) { global.KAuth.logout(); } else { clearCookie(C_TOKEN); clearCookie(C_EXP); }
+    render(true);
+    return login();
+  }
+  function startSignup() { global.location.href = SIGNUP_URL; }
+  function appendFormalButtons(menu) {
+    var b1 = el('button', 'hub-btn hub-primary', '정식 아이디로 로그인'); b1.type = 'button';
+    b1.addEventListener('click', function () { setMenu(false); startFormalLogin(); });
+    var b2 = el('button', 'hub-btn', '정식 아이디 만들기'); b2.type = 'button';
+    b2.addEventListener('click', startSignup);
+    menu.appendChild(b1); menu.appendChild(b2);
   }
 
   // ── 로그인 창(K-서비스 공용 모듈) ────────────────────────────
@@ -203,7 +224,7 @@
     if (id.loggedIn) {
       var p = el('div'); p.appendChild(doc.createTextNode('로그인됨 · 아이디 ')); p.appendChild(el('b', '', id.label));
       menu.appendChild(p);
-      if (id.kind === 'test') menu.appendChild(el('p', 'hub-note', '테스트 기간에 자동으로 만들어진 임시 아이디입니다.'));
+      if (id.kind === 'test') { menu.appendChild(el('p', 'hub-note', '테스트 기간에 자동으로 만들어진 임시 아이디입니다.')); appendFormalButtons(menu); }
       var out = el('button', 'hub-btn', '로그아웃'); out.type = 'button';
       out.addEventListener('click', function () { setMenu(false); logout(); });
       menu.appendChild(out);
@@ -262,6 +283,7 @@
     },
     login: login,
     logout: logout,
+    startFormalLogin: startFormalLogin,
     refresh: function () { render(true); },
   };
 
