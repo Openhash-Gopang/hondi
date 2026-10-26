@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-27 04:26 KST · 기준 커밋 3966f64d
+- 갱신: 2026-10-27 04:36 KST · 기준 커밋 6a841060
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-27 Merge pull request #775 from Openhash-Gopang/feat/klaw-header-two-lines-20261027
+- 2026-10-27 fix(klaw): 검증 페이지 헤더 제목을 두 줄로 표시
 - 2026-10-27 Merge pull request #774 from Openhash-Gopang/feat/klaw-deduction-tab-v2-20261027
 - 2026-10-27 feat(klaw): 연역적 방법론 탭 추가, 버튼 3x2 격자 정렬, 안내 박스 중립 스타일
 - 2026-10-27 Merge pull request #773 from Openhash-Gopang/feat/klaw-embed-tabs-20261026
@@ -42,8 +44,6 @@
 - 2026-10-23 Merge pull request #756 from Openhash-Gopang/feat/klaw-eval-criteria-v17-scope-bonus-20261023
 - 2026-10-23 일치도 평가 기준 v1.7: 범위 한정 가산 신설, 비교 페이지 재채점
 - 2026-10-22 Merge pull request #755 from Openhash-Gopang/feat/klaw-llm-verdict-validation-simple-summary-20261022
-- 2026-10-22 pages: klaw-llm-verdict-validation 비교 탭 단순화 (시험 흐름, 순위, 핵심 정리, 접이식 상세)
-- 2026-10-22 Merge pull request #754 from Openhash-Gopang/feat/klaw-llm-verdict-validation-heading-v1-note-20261022
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
