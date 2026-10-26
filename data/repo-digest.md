@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-27 05:56 KST · 기준 커밋 5a9e516b
+- 갱신: 2026-10-27 05:57 KST · 기준 커밋 15a9a9f6
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-27 feat(lawyer): add 서류 작성하기 (STEP W 9-step court filing track) for lawyer
 - 2026-10-27 feat(auth): 테스트 아이디 메뉴에 '정식 아이디로 로그인'·'정식 아이디 만들기' 버튼 추가
 - 2026-10-27 feat(gdc): 최소 충전 금액 100원, 충전 화면 기본 선택 1,000원
 - 2026-10-27 feat(auth): 우측 상단 로그인 상태·아이디 표시 + 비로그인 기능 제한
@@ -43,7 +44,6 @@
 - 2026-10-24 Merge pull request #758 from Openhash-Gopang/feat/klaw-llm-verdict-validation-hero-text-20261024
 - 2026-10-24 pages: klaw-llm-verdict-validation 헤더 문구 수정
 - 2026-10-23 Merge pull request #757 from Openhash-Gopang/feat/lawyer-llm-eval-button-20261023
-- 2026-10-23 feat(header): 변호사 페이지 히어로에 'LLM 성능 평가' 버튼 추가, 히어로 버튼 크기 축소
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
