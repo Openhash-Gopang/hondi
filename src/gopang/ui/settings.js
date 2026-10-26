@@ -972,8 +972,11 @@ export async function openGopangWallet() {
               <span style="font-size:11px;font-weight:600;color:#007b8b;background:#e6f4f6;padding:2px 7px;border-radius:4px">추천</span>
             </div>
             <div style="font-size:12px;color:#6b7280;margin-bottom:8px;line-height:1.5">입금하실 금액을 먼저 등록하고, 그 금액 그대로 입금해 주세요. 보낸이는 본인 이름 그대로여도 됩니다. 폰 번호가 아니라 이름으로 이미 입금하셨어도, 여기에 입금 금액을 적어 주세요.</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+              ${[100, 1000, 5000, 10000].map(v => `<button type="button" onclick="_setChargeAmount(${v})" style="padding:6px 12px;border:1px solid #007b8b;border-radius:999px;background:#fff;color:#007b8b;font-size:13px;font-weight:600;cursor:pointer">${v.toLocaleString()}원</button>`).join('')}
+            </div>
             <div style="display:flex;gap:8px">
-              <input id="_charge-self-report-amount" type="number" placeholder="입금하실 금액(원)" style="flex:1;min-width:0;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px" />
+              <input id="_charge-self-report-amount" type="number" inputmode="numeric" min="100" step="1" value="1000" placeholder="입금하실 금액(원) · 최소 100원" style="flex:1;min-width:0;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px" />
               <button onclick="_submitChargeSelfReport()" style="flex-shrink:0;padding:8px 14px;border:none;border-radius:6px;background:#007b8b;color:#fff;font-size:12.5px;font-weight:600;cursor:pointer">등록</button>
             </div>
             <div id="_charge-self-report-status" style="font-size:12px;margin-top:8px"></div>
@@ -1083,12 +1086,19 @@ window._copyGdcAccountNumber = async function() {
 // 본인이 스스로 신고하는 1차 경로부터") — 코드 없이 본인 실명으로
 // 입금한 사용자가 자진 신고하는 미니폼. worker.js의
 // POST /biz/charge-self-report와 짝을 이룬다.
+// 2026-10-27(주피터 지시) — 최소 충전 100원, 화면 기본 선택 1,000원. 서버 CHARGE_MIN_KRW(worker.js)와 같은 값이어야 한다.
+const _CHARGE_MIN_KRW_UI = 100;
+const _CHARGE_DEFAULT_KRW_UI = 1000;
+window._setChargeAmount = function(v) {
+  const el = document.getElementById('_charge-self-report-amount');
+  if (el) { el.value = String(v); el.focus(); }
+};
 window._submitChargeSelfReport = async function() {
   const statusEl = document.getElementById('_charge-self-report-status');
   const amountEl = document.getElementById('_charge-self-report-amount');
   const amount = Number(amountEl?.value);
-  if (!(amount > 0)) {
-    if (statusEl) { statusEl.textContent = '입금액을 정확히 입력해 주세요.'; statusEl.style.color = '#dc2626'; }
+  if (!(Number.isInteger(amount) && amount >= _CHARGE_MIN_KRW_UI)) {
+    if (statusEl) { statusEl.textContent = `최소 충전 금액은 ${_CHARGE_MIN_KRW_UI}원입니다. ${_CHARGE_MIN_KRW_UI}원 이상의 정수로 입력해 주세요.`; statusEl.style.color = '#dc2626'; }
     return;
   }
   const user = JSON.parse(localStorage.getItem('gopang_user_v4') || sessionStorage.getItem('gopang_user_v4') || '{}');
@@ -1111,7 +1121,7 @@ window._submitChargeSelfReport = async function() {
       return;
     }
     if (statusEl) { statusEl.textContent = '접수됐습니다. 확인 후 반영해 드립니다.'; statusEl.style.color = '#0f9d58'; }
-    if (amountEl) amountEl.value = '';
+    if (amountEl) amountEl.value = String(_CHARGE_DEFAULT_KRW_UI);
     setTimeout(() => { openGopangWallet(); }, 1200);
   } catch (e) {
     if (statusEl) { statusEl.textContent = '신고 접수 중 오류가 발생했습니다.'; statusEl.style.color = '#dc2626'; }

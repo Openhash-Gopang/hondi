@@ -17027,7 +17027,10 @@ async function _phoneMatchKey(env, guid) {
   return digits.slice(-8);
 }
 
-const CHARGE_MIN_KRW = 1000;    // 너무 작은 신청은 매칭 단서(전화번호 뒷자리)만으로 은행 명세서 대조가 더 번거로워짐
+// 2026-10-27(주피터 지시) — 최소 충전 금액 1,000원 → 100원. 화면의 기본 선택은 1,000원(settings.js).
+// 100원 미만은 한 번 쓰고 나면 최소 예약 잔액(AI_CHARGE_MIN_RESERVE_KRW=3)과의 차이가 거의 없고, 코드 없는
+// 입금을 금액만으로 맞추는 대체 경로(CHARGE_SELF_REPORT_MATCH_WINDOW_HOURS)에서 같은 금액이 겹쳐 모호해지기 쉬워 하한으로 두지 않는다.
+const CHARGE_MIN_KRW = 100;
 const CHARGE_EXPIRE_HOURS = 48; // 이 시간 안에 입금 안 되면 UI/관리자 화면에서 만료로 표시(레코드 자체는 감사 보존을 위해 삭제하지 않음)
 // 2026-09-17 신설 — 코드 없는 입금 알림의 "금액 단독 자동매칭" 폴백이
 // 되돌아볼 수 있는 최대 시간창. CHARGE_EXPIRE_HOURS(48h)보다 짧게 잡아,
