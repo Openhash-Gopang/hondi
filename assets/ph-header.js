@@ -62,22 +62,45 @@
 
   // 2026-10-18(주피터 지시) — 히어로 오른쪽 빈 공간 세로 중앙에 놓는 행동 버튼(선택). PAGE_HEADER.heroButton = { label, href, title }.
   // href는 사이트 안 경로('/'로 시작)와 https://klaw.hondi.net/ 주소만 허용한다. 문구는 escapeHtml을 거친다.
-  function heroCtaLink(b, cls) {
+  function heroCtaLink(b, cls, newTab) {
     if (!b || !b.label || typeof b.href !== 'string') return '';
     // 2026-10-22(주피터 지시) — 사이트 안 경로 외에, 아래 허용 목록의 K-Law 주소(https://klaw.hondi.net/...)만 새 창 링크로 허용한다.
     var internal = b.href.charAt(0) === '/' && b.href.charAt(1) !== '/';
     var external = b.href.indexOf('https://klaw.hondi.net/') === 0;
     if (!internal && !external) return '';
-    return '<a class="' + cls + '" href="' + escapeHtml(b.href).replace(/"/g, '&quot;') + '"' + (external ? ' target="_blank" rel="noopener"' : '') + (b.title ? ' title="' + escapeHtml(b.title).replace(/"/g, '&quot;') + '"' : '') + '>' + escapeHtml(b.label) + '</a>';
+    return '<a class="' + cls + '" href="' + escapeHtml(b.href).replace(/"/g, '&quot;') + '"' + ((external || newTab) ? ' target="_blank" rel="noopener"' : '') + (b.title ? ' title="' + escapeHtml(b.title).replace(/"/g, '&quot;') + '"' : '') + '>' + escapeHtml(b.label) + '</a>';
   }
   // 2026-10-23(주피터 지시) — 둘째 버튼 PAGE_HEADER.heroButton2 = { label, href, title }. 첫째 버튼 오른쪽에 나란히 놓는다(첫째 버튼이 있을 때만).
+  // 2026-10-27(주피터 지시) — 「기술 소개」 버튼: 직역 전문가 페이지(법무사·행정사·변호사·세무사·회계사·변리사·감정평가사와
+  // 그 세부 분야)의 히어로 오른쪽 버튼 줄 맨 끝에 놓고, 직역별 소개서를 새 탭으로 연다.
+  // PAGE_HEADER.introButton === false 로 끄고, { label, href, title } 로 바꿀 수 있다.
+  var INTRO_MAP = [
+    [/^lawyer(-|$)/, 'https://klaw.hondi.net/klaw_intro.html'],
+    [/^judicial-scrivener(-|$)/, '/pages/intro-judicial-scrivener.html'],
+    [/^administrative-scrivener(-|$)/, '/pages/intro-administrative-scrivener.html'],
+    [/^(tax-accountant|tax-optimizer|accountant)(-|$)/, '/pages/intro-tax-accounting.html'],
+    [/^patent-attorney(-|$)/, '/pages/intro-patent-attorney.html'],
+    [/^appraiser(-|$)/, '/pages/intro-appraiser.html']
+  ];
+  function introButtonFor(config) {
+    if (config && config.introButton === false) return null;
+    if (config && config.introButton && config.introButton.href) return config.introButton;
+    var slug = '';
+    try { slug = (location.pathname.split('/').pop() || '').replace(/\.html$/, ''); } catch (e) { return null; }
+    for (var i = 0; i < INTRO_MAP.length; i++) {
+      if (INTRO_MAP[i][0].test(slug)) return { label: '기술 소개', href: INTRO_MAP[i][1], title: '이 서비스의 기술과 차별점을 소개합니다 (새 탭)' };
+    }
+    return null;
+  }
   function renderHeroCta(config) {
     var first = heroCtaLink(config && config.heroButton, 'ph-hero-cta');
-    if (!first) return '';
-    var second = heroCtaLink(config && config.heroButton2, 'ph-hero-cta ph-hero-cta-2');
+    var second = first ? heroCtaLink(config && config.heroButton2, 'ph-hero-cta ph-hero-cta-2') : '';
     // 2026-10-27 — 셋째 버튼 PAGE_HEADER.heroButton3 (변호사 페이지의 「서류 작성하기」). 둘째 버튼이 있을 때만 그 오른쪽에 놓는다.
     var third = second ? heroCtaLink(config && config.heroButton3, 'ph-hero-cta ph-hero-cta-2 ph-hero-cta-3') : '';
-    return '<div class="ph-hero-cta-row">' + first + second + third + '</div>';
+    var intro = heroCtaLink(introButtonFor(config), 'ph-hero-cta ph-hero-cta-2 ph-hero-cta-intro', true);
+    if (!first && !intro) return '';
+    var count = (first ? 1 : 0) + (second ? 1 : 0) + (third ? 1 : 0) + (intro ? 1 : 0);
+    return '<div class="ph-hero-cta-row' + (count >= 4 ? ' ph-hero-cta-row-wide' : '') + '">' + first + second + third + intro + '</div>';
   }
   // 2026-10-24: 「K-Law」 버튼 — 인프라(K-서비스)·전문가 페르소나·K-정부(기관 페이지 포함) 문서의 오른쪽 상단.
   // PAGE_HEADER.klaw === false 로 끄고, true 로 강제로 켤 수 있다.
