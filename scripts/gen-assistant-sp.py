@@ -3,6 +3,9 @@
 
 직역별 데이터(data/assistant-sp/<id>.json)와 공통 골격(아래 TEMPLATE)으로
 prompts/SP_<id>-assistant_v1_0.md 를 만들고, sp-catalog.json·sp-catalog-categories.json 에 등록한다.
+2026-10-21 추가: data/assistant-sp/write-track.json 에 직역이 있으면 v1_0 에 STEP W(서류 작성 트랙, W-1~W-9)를 더한
+prompts/SP_<id>-assistant_v1_1.md 도 만들고 카탈로그는 v1_1 을 가리킨다(골격: data/assistant-sp/step-w.tmpl.md).
+v1_0 은 원형으로 남기고, 서비스가 읽는 것은 STEP W 가 들어간 v1_1 이다. 이미 배포된 v1_1 과 --check 로 바이트까지 같음을 확인했다.
 
 사용: python3 scripts/gen-assistant-sp.py <id> [<id> ...]     (저장소 루트에서)
       python3 scripts/gen-assistant-sp.py --check --all         (데이터와 SP 가 일치하는지만 확인)
@@ -355,6 +358,47 @@ def fill(tpl, d):
     return out
 
 
+# ── STEP W(서류 작성 트랙) — v1_0 원형에서 v1_1 을 만든다 (2026-10-21) ──
+WT_FLOW = '기록 유형 결정 → 서식 승인 → 서식 DB 확인·신규 서식 저장 → 지시 내용 입력 → 기록 작성 → 검증·승인 → 저장·교부·신고 준비 → 청구·비용 준비 → 처리 결과 기록'
+WT_ENTRY = ('*v1.1 (2026-10-21) — STEP W(서류 작성 트랙, W-1~W-9) 신설. 기록 유형·서식 결정과 승인, 서식 DB 조회·신규 서식 저장 제안(SP_DOC_FORM), 지시 내용 입력, 기록 작성, 검증·승인, '
+            '저장·교부·신고 준비(dpaper 미연동 — 패키지 정리까지), 청구·비용 준비, 처리 결과 기록. 전문 판단·승인·교부·신고·청구·서명·날인은 사람이 한다. 기존 절은 유지.*')
+
+
+def write_track_params(pid):
+    p = os.path.join(ROOT, 'data/assistant-sp/write-track.json')
+    if not os.path.exists(p): return None
+    return json.load(open(p, encoding='utf-8')).get(pid)
+
+
+def apply_step_w(base, prof, tool, p):
+    """v1.0 본문(base)에 STEP W 를 더해 v1.1 본문을 돌려준다. p: act(수행 대상 문구) · ph(자리표시자 이름, 기본=직역명) · role(문장 속 직역명, 기본=prof) · extra(§LEGAL-LIMIT 3 이상 추가 규칙 문장, 기본=자동)."""
+    role = p.get('role', prof)
+    tmpl = open(os.path.join(ROOT, 'data/assistant-sp/step-w.tmpl.md'), encoding='utf-8').read()
+    first, rest = base.split('\n', 1)
+    if not first.endswith(' v1.0'): raise SystemExit('첫 줄이 v1.0 으로 끝나지 않습니다: ' + first)
+    first = first[:-4] + 'v1.1'
+    ll = base[base.index('## §LEGAL-LIMIT'):base.index('## 0. IDENTITY')]
+    items = dict(re.findall(r'\n(\d)\. \*\*([^*]+)\*\*', ll))
+    sg = [n for n, x in items.items() if x.startswith('서명')]
+    if len(sg) != 1: raise SystemExit('§LEGAL-LIMIT 에서 서명 항목을 하나로 정하지 못했습니다: %s' % items)
+    if 'extra' in p: extra = p['extra']
+    else:
+        ex = [str(n) for n in range(3, int(sg[0]))]
+        extra = (' §LEGAL-LIMIT ' + '·'.join('%s(%s)' % (n, items[n]) for n in ex) + '도 이 트랙에 그대로 적용한다.') if ex else ''
+    step = (tmpl.replace('__VER__', 'v1.1').replace('__ROLE__', role).replace('__PH__', p.get('ph', role)).replace('__TOOL__', tool)
+            .replace('__ACT__', p['act']).replace('__SIGNITEM__', sg[0]).replace('__EXTRA1__', extra))
+    left = re.findall(r'__[A-Z0-9]+__', step)
+    if left: raise SystemExit('STEP W 자리표시자 미충족: %s' % sorted(set(left)))
+    tail = '전문 판단은 %s가 하고, 승인·저장·교부·신고·청구와 서명·날인도 사람이 한다. dpaper 연동은 현재 미연동이라 처리 패키지 정리까지만 한다.' % role
+    note = ('\n> **v1.1 (2026-10-21, 주피터님 지시 — 서류 작성 트랙)**: `## STEP W — 서류 작성 트랙` 신설(W-1~W-9: %s). 서식 DB는 SP_DOC_FORM 태그로 조회·저장 제안한다. %s '
+            '§LEGAL-LIMIT·§0-2·부록 A는 변경하지 않았다.\n') % (WT_FLOW, tail)
+    t = first + '\n' + note + rest
+    a = '## 부록 A — 문서 카탈로그 (직접 작성 대상)'
+    if t.count(a) != 1: raise SystemExit('부록 A 제목을 한 번만 찾지 못했습니다')
+    t = t.replace(a, step + a)
+    return t.rstrip('\n') + '\n' + WT_ENTRY + '\n'
+
+
 def persona_meta(pid):
     """일반인용 SP 파일에서 SP 번호·HT 줄을 읽는다(없으면 데이터의 값을 쓴다)."""
     cat = json.load(open(os.path.join(ROOT, 'prompts/sp-catalog.json'), encoding='utf-8'))
@@ -425,15 +469,25 @@ def build(pid):
     if not d['code'] or not d['ht_line']: raise SystemExit('%s: code/ht_line 을 데이터에 적어야 합니다' % pid)
     text = fix_josa(fill(TEMPLATE, d))
     fname = 'SP_%s-assistant_v1_0.md' % pid
-    path = os.path.join(ROOT, 'prompts', fname)
-    old = open(path, encoding='utf-8', newline='').read() if os.path.exists(path) else None
+    outs = [(fname, text)]
+    wt = write_track_params(pid)
+    fname_reg = fname
+    if wt:
+        fname_reg = 'SP_%s-assistant_v1_1.md' % pid
+        outs.append((fname_reg, apply_step_w(text, d['prof'], d['name'], wt)))
+    changed = False
+    for fn, tx in outs:
+        path = os.path.join(ROOT, 'prompts', fn)
+        old = open(path, encoding='utf-8', newline='').read() if os.path.exists(path) else None
+        if CHECK:
+            if old != tx: print('%s: %s 가 데이터와 다릅니다' % (pid, fn)); sys.exit(1)
+            continue
+        if old != tx:
+            open(path, 'w', encoding='utf-8', newline='').write(tx); changed = True
     if CHECK:
-        if old != text: print('%s: %s 가 데이터와 다릅니다' % (pid, fname)); sys.exit(1)
         print('%s: 일치' % pid); return
-    if old != text:
-        open(path, 'w', encoding='utf-8', newline='').write(text)
-    register(pid, d['name'], fname)
-    print('%s: %s (%d줄)%s' % (pid, fname, text.count('\n') + 1, '' if old != text else ' — 변경 없음'))
+    register(pid, d['name'], fname_reg)
+    print('%s: %s (%d줄)%s' % (pid, fname_reg, outs[-1][1].count('\n') + 1, ' — 변경 없음' if not changed else ''))
 
 
 if __name__ == '__main__':
@@ -441,6 +495,6 @@ if __name__ == '__main__':
     if args and args[0] == '--check':
         CHECK = True; args = args[1:]
     if args == ['--all']:
-        args = sorted(os.path.basename(f)[:-5] for f in glob.glob(os.path.join(ROOT, 'data/assistant-sp/*.json')))
+        args = sorted(os.path.basename(f)[:-5] for f in glob.glob(os.path.join(ROOT, 'data/assistant-sp/*.json')) if os.path.basename(f) != 'write-track.json')
     if not args: raise SystemExit(__doc__)
     for a in args: build(a)

@@ -79,6 +79,7 @@ export const ASSISTANT_SP_CODES = {
   "SP-LAW-01A-6": "lawyer-traffic",
   "SP-LAW-11": "loss-adjuster",
   "SP-ENG-06A": "marine-engineer",
+  "SP-ENG-03A": "marine-pilot",
   "SP-HEALTH-09A": "medical-lab-technologist",
   "SP-HEALTH-21A": "midwife",
   "SP-ENG-04A": "naval-architect",

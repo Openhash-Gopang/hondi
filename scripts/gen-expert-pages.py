@@ -31,6 +31,7 @@ WRITE_TRACK = {
     'navigation-officer': '항해사',  # 2026-10-21 계열 C(기록형)
     'marine-engineer': '기관사(선박)',  # 2026-10-21 계열 C(기록형)
     'weather-forecaster': '기상예보사',  # 2026-10-21 계열 C(기록형)
+    'marine-pilot': '도선사',  # 2026-10-21 해사 도선사(기록형)
     'security-engineer': '정보보안전문가',  # 2026-10-21 계열 D(기록형)
     'translator-interpreter': '통역사·번역사',  # 2026-10-21 계열 D(기록형)
     'tour-guide': '관광통역안내사',  # 2026-10-21 계열 D(기록형)
@@ -45,6 +46,7 @@ WRITE_JUDGE = {'financial-planner': '재무 진단·상품 선택·투자 판단
     'navigation-officer': '항해·운항 판단',
     'marine-engineer': '기관 상태·운전 판단',
     'weather-forecaster': '기상 현상 판단·예보',
+    'marine-pilot': '도선·조타·접안 판단',
     'security-engineer': '보안 위험 판단·취약점 평가',
     'translator-interpreter': '번역의 정확성·적합성 판단',
     'tour-guide': '관광 안내 내용 판단',
