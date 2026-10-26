@@ -15,7 +15,7 @@ window.PAGE_HEADER = {
   active: 'expert-personas',
   sharedForms: false,
   badge: "K-Law · 후보 LLM 검증",
-  h1: "K-Law LLM으로 성장할<br>LLM 후보들의 기본적인<br>성능을 평가합니다",
+  h1: "K-Law LLM으로 성장할 LLM 후보들의<br>기본적인 성능을 평가합니다",
   sub: "동일한 사건 개요를 각각의 후보 LLM에 입력해 얻은 가상 판결문들을 실제 대법원 판결문과 견주어 보는 테스트 300건의 예시입니다.",
   disclaimer: "이 페이지는 후보 LLM 검증 기록이며 법률 자문이 아니다. 가상 판결문은 참고용이며 실제 판결이 아니다.",
   disclaimerDismissKey: "klaw-llm-verdict-validation",
@@ -53,6 +53,8 @@ body { margin: 0; background: #eef1f6; color: #0f172a; font-size: 14px; line-hei
 .vv-methodnav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; width: 100%; }
 .vv-navrow { display: contents; }
 .vv-methodnav a { justify-content: center; text-align: center; white-space: nowrap; padding: 0 6px; }
+/* 헤더 제목은 두 줄 고정. 좁은 화면에서는 글자 크기를 줄여 줄바꿈이 늘지 않게 한다 */
+@media (max-width: 560px) { .ph-hero h1 { font-size: clamp(15px, 4.9vw, 21px); } }
 @media (min-width: 900px) { .ph-hero-inner { position: relative; } .vv-methodnav { position: absolute; top: 0; right: 24px; margin-top: 0; width: 432px; grid-template-columns: repeat(3, 140px); } .vv-methodnav a { padding: 0 12px; } }
 .vv-table.g16 td:first-child { min-width: 190px; }
 .vv-table.g16 td:last-child { min-width: 240px; }
