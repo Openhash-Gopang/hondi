@@ -83,6 +83,16 @@
     <!-- 대시보드 본문 -->
     <div id="admin-body" style="display:none;padding:22px 26px">
 
+      <!-- 직역 AI 법인 지분 매수 제안서 (2026-10-27 — 주피터 지시: 사업 계획 목록 안에서 꺼내 문서 상단의 독립 섹션으로 이동)
+           문서는 정적 파일이 아니라 L1 admin_proposals 에 있고 관리자 토큰으로만 받는다(_propList/_propOpen). id 는 그대로 둔다. -->
+      <details id="admin-proposals-menu" open style="border:1px solid var(--ad-line,#3c3f46);border-radius:0;margin-bottom:16px">
+        <summary style="cursor:pointer;padding:12px 18px;font-size:14px;font-weight:600;list-style:none">직역 AI 법인 지분 매수 제안서 (비공개 · 관리자 DB 보관)</summary>
+        <div style="padding:4px 18px 14px;border-top:1px solid var(--ad-line,#3c3f46)">
+          <p style="margin:10px 0 0;font-size:14px"><a href="#" id="admin-proposals-load" onclick="_propList(event)">목록 불러오기</a></p>
+          <ul id="admin-proposals-list" style="margin:6px 0 0;padding-left:20px;font-size:14px;line-height:2"></ul>
+        </div>
+      </details>
+
       <!-- ⓪ 사업 계획 메뉴 (2026-10-12 신설 — 주피터 지시: 관리자 대시보드에 사업 계획 메뉴와 K-Law 사업계획서 추가)
            문서가 늘면 아래 목록에 항목만 추가한다. -->
       <details id="admin-bizplan-menu" style="border:1px solid var(--ad-line,#3c3f46);border-radius:0;margin-bottom:16px">
@@ -117,7 +127,6 @@
               <li>나비 신설 법인 공통 설립 원칙 (초안, 2026-10-17) — <a href="./docs/business-plan/founding-proposals/nabi-common-principles.md" target="_blank" rel="noopener">MD ↗</a></li>
               <li>나비 신설 법인 전문가 검토 요청서 (초안, 2026-10-17) — <a href="./docs/business-plan/founding-proposals/nabi-expert-review-request.md" target="_blank" rel="noopener">MD ↗</a></li>
               <li>나비로 사업 계획서 (법무사 AI) — <a href="./docs/business-plan/founding-proposals/nabiro-business-plan.md" target="_blank" rel="noopener">MD ↗</a></li>
-              <li><strong>직역 AI 법인 지분 매수 제안서 (비공개 · 관리자 DB 보관)</strong> — <a href="#" id="admin-proposals-load" onclick="_propList(event)">목록 불러오기</a><ul id="admin-proposals-list" style="margin:6px 0 0 0"></ul></li>
               <li>1. 나비로 공동 설립 참여 제안서 (법무사, 초안) — <a href="./docs/business-plan/founding-proposals/nabiro-proposal.md" target="_blank" rel="noopener">MD ↗</a></li>
               <li>2. 나비 행정 공동 설립 참여 제안서 (행정사, 초안) — <a href="./docs/business-plan/founding-proposals/nabi-haengjeong-proposal.md" target="_blank" rel="noopener">MD ↗</a></li>
               <li>3. 나비 변호사 공동 설립 참여 제안서 (개업 변호사, 초안) — <a href="./docs/business-plan/founding-proposals/nabi-byunhosa-proposal.md" target="_blank" rel="noopener">MD ↗</a></li>
