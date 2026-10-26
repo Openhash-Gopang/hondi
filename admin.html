@@ -83,13 +83,16 @@
     <!-- 대시보드 본문 -->
     <div id="admin-body" style="display:none;padding:22px 26px">
 
-      <!-- 직역 AI 법인 지분 매수 제안서 (2026-10-27 — 주피터 지시: 사업 계획 목록 안에서 꺼내 문서 상단의 독립 섹션으로 이동)
+      <!-- 직역 AI 법인 지분 매수 제안서 (2026-10-27 — 주피터 지시: 사업 계획 목록 안에서 꺼내 문서 상단의 독립 섹션으로 이동. 같은 날 부산·울산·경남 나비 숫자 코드 테스트 제안서도 이 섹션으로 옮김)
            문서는 정적 파일이 아니라 L1 admin_proposals 에 있고 관리자 토큰으로만 받는다(_propList/_propOpen). id 는 그대로 둔다. -->
       <details id="admin-proposals-menu" open style="border:1px solid var(--ad-line,#3c3f46);border-radius:0;margin-bottom:16px">
-        <summary style="cursor:pointer;padding:12px 18px;font-size:14px;font-weight:600;list-style:none">직역 AI 법인 지분 매수 제안서 (비공개 · 관리자 DB 보관)</summary>
+        <summary style="cursor:pointer;padding:12px 18px;font-size:14px;font-weight:600;list-style:none">제안서 (비공개 · 관리자 전용)</summary>
         <div style="padding:4px 18px 14px;border-top:1px solid var(--ad-line,#3c3f46)">
-          <p style="margin:10px 0 0;font-size:14px"><a href="#" id="admin-proposals-load" onclick="_propList(event)">목록 불러오기</a></p>
+          <p style="margin:10px 0 0;font-size:14px"><strong>직역 AI 법인 지분 매수 제안서 (관리자 DB 보관)</strong> — <a href="#" id="admin-proposals-load" onclick="_propList(event)">목록 불러오기</a></p>
           <ul id="admin-proposals-list" style="margin:6px 0 0;padding-left:20px;font-size:14px;line-height:2"></ul>
+          <ul id="admin-test-proposals" style="margin:6px 0 0;padding-left:20px;font-size:14px;line-height:2">
+            <li><a href="./admin/busan-ulsan-gyeongnam-nabi-code-plan.html" target="_blank" rel="noopener">부산·울산·경남 나비 숫자 코드 테스트 제안서 (초안, 예시 코드 13종·예산 가정 포함, 2026-10-27) ↗</a></li>
+          </ul>
         </div>
       </details>
 
@@ -144,7 +147,6 @@
             <li><a href="./docs/business-plan/hondi-jeju-corp.html" target="_blank" rel="noopener">혼디제주(가칭) 법인 설립 사업계획 초안 (자본금·지분구조, 조직 구성, 사업부문별 수익모델, 5개년 추정 재무제표, 2026-09-16) ↗</a></li>
             <li><a href="./admin/klaw-business-plan.html" target="_blank" rel="noopener">K-Law 사업계획서 (마케팅 방안 포함, 2026-10-12) ↗</a></li>
             <li><a href="./admin/jeju-nabi-code-plan.html" target="_blank" rel="noopener">제주도 나비 코드 보급 계획 (코드 샘플·예산·경제 효용 추정 포함, 2026-10-13) ↗</a></li>
-            <li><a href="./admin/busan-ulsan-gyeongnam-nabi-code-plan.html" target="_blank" rel="noopener">부산·울산·경남 나비 숫자 코드 테스트 제안서 (초안, 예시 코드 13종·예산 가정 포함, 2026-10-27) ↗</a></li>
             <li><a href="./admin/naviweb-public-purpose-plan.pdf" target="_blank" rel="noopener">나비웹의 공적 목적 PDF (초안, 2026-10-18) ↗</a></li>
             <li><a href="./admin/naviweb-public-purpose-plan.html" target="_blank" rel="noopener">나비웹의 공적 목적 (수익의 공적 집행·경영권 이양·복수 수탁자, 2026-10-18) ↗</a></li>
             <li><a href="./admin/naviweb-group-formation-plan-final.pdf" target="_blank" rel="noopener">나비웹 자회사 설립과 이사진 구성 PDF (초안, 2026-10-18) ↗</a></li>
