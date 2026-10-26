@@ -7,6 +7,10 @@
 (function () {
   'use strict';
   var PERSONAS = {
+    'marine-pilot': {
+      role: '도선사', tool: '도선사 보조 AI', back: '/pages/marine-pilot.html', judge: '도선·조타·접안 판단',
+      docHint: '예: 도선계획서', toHint: '예: 선장'
+    },
     'security-engineer': {
       role: '정보보안전문가', tool: '정보보안전문가 보조 AI', back: '/pages/security-engineer.html', judge: '보안 위험 판단·취약점 평가',
       docHint: '예: 보안 점검 결과 보고서', toHint: '예: 의뢰 기관'

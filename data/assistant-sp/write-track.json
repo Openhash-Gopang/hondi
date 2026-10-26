@@ -1,0 +1,105 @@
+{
+ "advanced-practice-nurse": {
+  "act": "직접 간호를 수행한 대상"
+ },
+ "chef": {
+  "act": "직접 조리·위생 관리를 수행한 건"
+ },
+ "dental-hygienist": {
+  "act": "직접 처치한 환자"
+ },
+ "dental-technician": {
+  "act": "의뢰를 받아 직접 제작한 기공물"
+ },
+ "dentist": {
+  "act": "직접 진찰한 환자"
+ },
+ "dietitian": {
+  "act": "직접 관리·상담한 대상"
+ },
+ "financial-planner": {
+  "act": "직접 상담·설계한 고객 건",
+  "extra": " 수익 보장·특정 금융상품의 추천·권유는 하지 않는다(§LEGAL-LIMIT 3)."
+ },
+ "hairdresser": {
+  "act": "직접 시술한 건"
+ },
+ "health-educator": {
+  "act": "직접 기획·실시한 교육"
+ },
+ "marine-engineer": {
+  "act": "직접 기관 당직·정비를 수행한 건",
+  "ph": "기관사",
+  "role": "기관사(선박)"
+ },
+ "medical-lab-technologist": {
+  "act": "직접 검사를 수행한 건"
+ },
+ "midwife": {
+  "act": "직접 관여한 산전·분만·산후 건",
+  "extra": ""
+ },
+ "naval-architect": {
+  "act": "직접 설계·검토한 건",
+  "ph": "조선기술사",
+  "role": "조선사"
+ },
+ "navigation-officer": {
+  "act": "직접 항해·당직을 수행한 건"
+ },
+ "nurse": {
+  "act": "직접 간호를 수행한 대상"
+ },
+ "occupational-therapist": {
+  "act": "직접 평가·중재한 대상"
+ },
+ "optician": {
+  "act": "직접 상담·조제한 건"
+ },
+ "paramedic": {
+  "act": "직접 출동·처치한 건"
+ },
+ "pharmacist": {
+  "act": "직접 조제·복약지도한 건"
+ },
+ "physical-therapist": {
+  "act": "직접 평가·치료한 대상"
+ },
+ "professional-engineer": {
+  "act": "직접 검토·수행한 건"
+ },
+ "radiologic-technologist": {
+  "act": "직접 촬영·검사를 수행한 건"
+ },
+ "sanitarian": {
+  "act": "직접 점검·관리한 시설"
+ },
+ "security-engineer": {
+  "act": "직접 점검·분석·구축한 건"
+ },
+ "speech-language-pathologist": {
+  "act": "직접 평가·치료한 대상"
+ },
+ "sports-instructor": {
+  "act": "직접 지도한 건",
+  "ph": "지도사"
+ },
+ "tour-guide": {
+  "act": "직접 안내한 건"
+ },
+ "traditional-medicine-doctor": {
+  "act": "직접 진찰한 환자"
+ },
+ "translator-interpreter": {
+  "act": "직접 통역·번역한 건"
+ },
+ "veterinarian": {
+  "act": "직접 진료한 동물"
+ },
+ "weather-forecaster": {
+  "act": "직접 관측·분석한 건"
+ },
+ "marine-pilot": {
+  "act": "직접 도선한 건"
+ }
+}
