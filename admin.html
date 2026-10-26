@@ -83,13 +83,20 @@
     <!-- 대시보드 본문 -->
     <div id="admin-body" style="display:none;padding:22px 26px">
 
-      <!-- 직역 AI 법인 지분 매수 제안서 (2026-10-27 — 주피터 지시: 사업 계획 목록 안에서 꺼내 문서 상단의 독립 섹션으로 이동. 같은 날 부산·울산·경남 나비 숫자 코드 테스트 제안서도 이 섹션으로 옮김)
-           문서는 정적 파일이 아니라 L1 admin_proposals 에 있고 관리자 토큰으로만 받는다(_propList/_propOpen). id 는 그대로 둔다. -->
+      <!-- 직역 AI 법인 지분 매수 제안서 (2026-10-27 — 주피터 지시: 사업 계획 목록 안에서 꺼내 문서 상단의 독립 섹션으로 이동. 같은 날 부산·울산·경남 나비 숫자 코드 테스트 제안서도 이 섹션으로 옮김. 제안서 6종은 L1 DB 대신 admin/ 정적 파일로 두고 여기서 링크한다 — 투자자 공개 모집이 아니라 직역 단체 협의용이며 noindex)
+           (이전 L1 admin_proposals 보관 방식의 _propList/_propOpen 함수는 남겨 두었으나 지금 화면은 admin/ 정적 파일 링크를 쓴다.) -->
       <details id="admin-proposals-menu" open style="border:1px solid var(--ad-line,#3c3f46);border-radius:0;margin-bottom:16px">
-        <summary style="cursor:pointer;padding:12px 18px;font-size:14px;font-weight:600;list-style:none">제안서 (비공개 · 관리자 전용)</summary>
+        <summary style="cursor:pointer;padding:12px 18px;font-size:14px;font-weight:600;list-style:none">제안서</summary>
         <div style="padding:4px 18px 14px;border-top:1px solid var(--ad-line,#3c3f46)">
-          <p style="margin:10px 0 0;font-size:14px"><strong>직역 AI 법인 지분 매수 제안서 (관리자 DB 보관)</strong> — <a href="#" id="admin-proposals-load" onclick="_propList(event)">목록 불러오기</a></p>
-          <ul id="admin-proposals-list" style="margin:6px 0 0;padding-left:20px;font-size:14px;line-height:2"></ul>
+          <p style="margin:10px 0 0;font-size:14px"><strong>직역 AI 법인 지분 매수 제안서 (초안, 1%, 최저 입찰가 방식)</strong></p>
+          <ul id="admin-proposals-list" style="margin:6px 0 0;padding-left:20px;font-size:14px;line-height:2">
+            <li><a href="./admin/equity-proposal-1pct-paralegal.html" target="_blank" rel="noopener">법무사 보조 AI 법인 지분 매수 제안서 (초안) ↗</a></li>
+            <li><a href="./admin/equity-proposal-1pct-public-service.html" target="_blank" rel="noopener">행정사 보조 AI 법인 지분 매수 제안서 (초안) ↗</a></li>
+            <li><a href="./admin/equity-proposal-1pct-law.html" target="_blank" rel="noopener">변호사 보조 AI 법인 지분 매수 제안서 (초안) ↗</a></li>
+            <li><a href="./admin/equity-proposal-1pct-tax-accounting.html" target="_blank" rel="noopener">세무·회계 보조 AI 법인 지분 매수 제안서 (초안) ↗</a></li>
+            <li><a href="./admin/equity-proposal-1pct-ip.html" target="_blank" rel="noopener">변리사 보조 AI 법인 지분 매수 제안서 (초안) ↗</a></li>
+            <li><a href="./admin/equity-proposal-1pct-valuation.html" target="_blank" rel="noopener">감정평가사 보조 AI 법인 지분 매수 제안서 (초안) ↗</a></li>
+          </ul>
           <ul id="admin-test-proposals" style="margin:6px 0 0;padding-left:20px;font-size:14px;line-height:2">
             <li><a href="./admin/busan-ulsan-gyeongnam-nabi-code-plan.html" target="_blank" rel="noopener">부산·울산·경남 나비 숫자 코드 테스트 제안서 (초안, 예시 코드 13종·예산 가정 포함, 2026-10-27) ↗</a></li>
           </ul>
