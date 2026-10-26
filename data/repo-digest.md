@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-27 06:30 KST · 기준 커밋 22014d9a
+- 갱신: 2026-10-27 06:39 KST · 기준 커밋 343fc2e9
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-27 feat(admin): move the proposals store out of the business-plan list into its own top section
 - 2026-10-27 Merge pull request #781 from Openhash-Gopang/feat/admin-busan-ulsan-gyeongnam-nabi-code-plan
 - 2026-10-27 admin: add Busan-Ulsan-Gyeongnam nabi digit code test proposal
 - 2026-10-27 feat(lawyer): extend 서류 작성하기 (STEP W) to the 46 lawyer sub-fields
@@ -43,7 +44,6 @@
 - 2026-10-24 Merge pull request #760 from Openhash-Gopang/feat/klaw-llm-verdict-validation-actual-judgment-tab-20261024
 - 2026-10-24 pages: klaw-llm-verdict-validation 대법원·고등법원 판결문 탭을 '실제 판결문' 탭으로 통합 (심급 4탭)
 - 2026-10-24 Merge pull request #759 from Openhash-Gopang/feat/klaw-llm-verdict-validation-test-method-tab-20261024
-- 2026-10-24 pages: klaw-llm-verdict-validation '사건의 개요' 탭을 '테스트 방법' 탭으로 개편
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
