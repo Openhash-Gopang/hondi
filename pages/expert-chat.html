@@ -329,7 +329,7 @@ async function composeExpertPrompt() {
     }
   }
 
-  // 2026-10-21: 법무사·행정사 서류 작성하기(임베드)는 전문가용(-assistant) SP 를 쓴다 — 서류 작성 도구(STEP C·W)는 거기에만 있다.
+  // 2026-10-21: 법무사·행정사(2026-10-27 변호사 추가) 서류 작성하기(임베드)는 전문가용(-assistant) SP 를 쓴다 — 서류 작성 도구(STEP C·W)는 거기에만 있다.
   const _spKey = (_embedOn() && _PRO_WRITE_PERSONAS.has(PERSONA)) ? def.key + '-assistant' : def.key;
   window.__PRO_ASSISTANT_SP = _spKey !== def.key;
   parts.push(await _loadSpRawByKey(_spKey, def.label)
@@ -424,6 +424,8 @@ async function _pumpSSE(response, onJson) {
 }
 
 const _PRO_WRITE_PERSONAS = new Set(['judicial-scrivener', 'administrative-scrivener',
+  // 2026-10-27 변호사 — 제출형은 pages/scrivener-write.html?persona=lawyer (전문가용 SP_lawyer-assistant v1.1 STEP W)
+  'lawyer',
   // 2026-10-21 해사 도선사 — 기록형은 pages/expert-write.html (보조 AI SP 신설)
   'marine-pilot',
   // 2026-10-21 계열 D(보안·통번역·관광·스포츠·미용·조리) 6개 직역 — 기록형은 pages/expert-write.html

@@ -1,5 +1,5 @@
-/* 서류 작성하기 — 법무사·행정사 공통 단계 화면 (2026-10-21)
- * pages/scrivener-write.html?persona=judicial-scrivener | administrative-scrivener | loss-adjuster | labor-attorney | customs-broker
+/* 서류 작성하기 — 법무사·행정사 공통 단계 화면 (2026-10-21, 2026-10-27 변호사 추가)
+ * pages/scrivener-write.html?persona=judicial-scrivener | administrative-scrivener | lawyer | loss-adjuster | labor-attorney | customs-broker
  * 대화는 /pages/expert-chat.html?embed=1 (iframe) 이 맡고, 이 파일은 진행 표시·단계별 버튼·제출 결과 기록을 맡는다.
  * 규약: 부모→자식 {type:'expert-embed-send', text}, 자식→부모 {type:'expert-embed-reply', text} / {type:'expert-embed-ready'}.
  * 상태 줄: [법무사 보조 AI | 서류 작성 트랙 | 현재: W-n | 서류: … | 서식: … | 게이트: …]  (SP STEP W-0 7)
@@ -38,6 +38,10 @@
     'judicial-scrivener': {
       role: '법무사', tool: '법무사 보조 AI', back: '/pages/judicial-scrivener.html',
       docHint: '예: 소유권이전등기신청서', toHint: '예: 관할 등기소, 지방법원'
+    },
+    'lawyer': {
+      role: '변호사', tool: '변호사 보조 AI', back: '/pages/lawyer.html', proOnly: true,
+      docHint: '예: 소장, 답변서, 준비서면', toHint: '예: ○○지방법원 제○민사부'
     },
     'administrative-scrivener': {
       role: '행정사', tool: '행정사 보조 AI', back: '/pages/administrative-scrivener.html',
@@ -217,6 +221,8 @@
     $('h1').textContent = P.role + ' 서류 작성하기 9단계';
     $('sub').textContent = '서식 결정 → 서식 승인 → 서식 DB → 추가 자료 → 작성 → 검증·승인 → 제출 준비 → 수수료 → 결과 기록 순서로 진행합니다.';
     $('fDoc').placeholder = P.docHint; $('fTo').placeholder = P.toHint; $('optPro').textContent = P.role;
+    // 변호사 보조 AI 는 인증된 변호사·동일 직역 종사자 전용 — 일반 이용자(본인 사안) 선택지를 두지 않는다(SP_lawyer-assistant §0-3, STEP W-0 4).
+    if (P.proOnly) { var selfOpt = $('fRole').options[2]; if (selfOpt) selfOpt.remove(); }
     frame = $('chatFrame');
     frame.src = '/pages/expert-chat.html?persona=' + encodeURIComponent(PID) + '&embed=1';
     $('btnStart').onclick = startMsg;
