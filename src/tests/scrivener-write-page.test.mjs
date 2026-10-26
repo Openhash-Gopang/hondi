@@ -6,7 +6,7 @@
  */
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -87,6 +87,41 @@ describe('변호사 서류 작성하기 — 변호사 전용·전문 판단 규�
   it('헤더가 셋째 버튼을 그린다', () => {
     const ph = read('assets/ph-header.js');
     assert.ok(ph.includes('heroButton3') && ph.includes('ph-hero-cta-3'));
+  });
+});
+
+describe('변호사 세부 분야 서류 작성하기 (2026-10-27)', () => {
+  const ids = readdirSync(join(ROOT, 'data/assistant-child-sp')).filter((f) => /^lawyer-.+\.json$/.test(f)).map((f) => f.replace(/\.json$/, ''));
+  it('세부 분야가 46개이고 데이터에 write(서식 후보·기한)가 있다', () => {
+    assert.equal(ids.length, 46);
+    for (const id of ids) {
+      const d = JSON.parse(read('data/assistant-child-sp/' + id + '.json'));
+      assert.ok(d.write && d.write.forms.length >= 5, id + ': forms');
+      assert.ok(d.write.deadlines.length >= 1, id + ': deadlines');
+      assert.ok(d.write.forms.every((r) => r.length === 3) && d.write.deadlines.every((r) => r.length === 2), id + ': 행 모양');
+    }
+  });
+  it('각 분야 페이지에 서류 작성하기 버튼이 있고, 화면·대화 화면이 그 분야를 안다', () => {
+    const js2 = read('assets/scrivener-write.js');
+    const chat2 = read('pages/expert-chat.html');
+    for (const id of ids) {
+      const page = read('pages/' + id + '.html');
+      assert.ok(page.includes('heroButton3: { label: "서류 작성하기", href: "/pages/scrivener-write.html?persona=' + id + '"'), id + ': 버튼');
+      assert.ok(js2.includes("'" + id + "':"), id + ': 화면 persona');
+      assert.ok(chat2.includes("'" + id.slice('lawyer-'.length) + "'"), id + ': 대화 화면');
+    }
+  });
+  it('각 분야 전문가용 SP 가 부모 STEP W 를 담고 부록 A 끝에 보강 절이 있으며 고지 문구를 되풀이하지 않는다', () => {
+    for (const id of ids) {
+      const f = catalog['SP_' + id + '-assistant'];
+      assert.ok(/_v1_1\.md$/.test(f), id + ': v1_1');
+      const sp = read('prompts/' + f);
+      assert.equal((sp.match(/^## STEP W — 서류 작성 트랙/gm) || []).length, 1, id + ': STEP W');
+      assert.ok(/^### A-\d+\. .+ 서류 작성하기 보강/m.test(sp), id + ': 보강 절');
+      const sec = sp.slice(sp.search(/^### A-\d+\. .+ 서류 작성하기 보강/m), sp.search(/^## 부록 B/m));
+      assert.ok(!/법률 자문 아님|법적 효력/.test(sec), id + ': 고지 반복');
+      assert.ok(sp.indexOf('## STEP W') < sp.indexOf('## 부록 A'), id + ': 순서');
+    }
   });
 });
 

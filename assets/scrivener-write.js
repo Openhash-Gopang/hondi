@@ -1,5 +1,5 @@
 /* 서류 작성하기 — 법무사·행정사 공통 단계 화면 (2026-10-21, 2026-10-27 변호사 추가)
- * pages/scrivener-write.html?persona=judicial-scrivener | administrative-scrivener | lawyer | loss-adjuster | labor-attorney | customs-broker
+ * pages/scrivener-write.html?persona=judicial-scrivener | administrative-scrivener | lawyer | lawyer-<세부분야> | loss-adjuster | labor-attorney | customs-broker
  * 대화는 /pages/expert-chat.html?embed=1 (iframe) 이 맡고, 이 파일은 진행 표시·단계별 버튼·제출 결과 기록을 맡는다.
  * 규약: 부모→자식 {type:'expert-embed-send', text}, 자식→부모 {type:'expert-embed-reply', text} / {type:'expert-embed-ready'}.
  * 상태 줄: [법무사 보조 AI | 서류 작성 트랙 | 현재: W-n | 서류: … | 서식: … | 게이트: …]  (SP STEP W-0 7)
@@ -88,6 +88,62 @@
     { k: 'W-9', t: '제출 결과 기록', s: '접수번호·일시·납부·결과를 이용자가 알려 준 대로 기록합니다.',
       l: ['이용자 보고 기준으로만 기록', '모르는 칸은 미확인', '보정·반려 시 W-5로 되돌아감'], record: true }
   ];
+
+  // 2026-10-27 변호사 세부 분야(46) — 모두 변호사 전용. 서류·기한 후보는 각 분야 SP(SP_lawyer-<분야>-assistant) 부록 A 끝 절이 정한다.
+  var LAWYER_SUBS = {
+    'lawyer-administrative': '행정법',
+    'lawyer-antitrust': '공정거래',
+    'lawyer-arbitration': '중재',
+    'lawyer-auction': '경매',
+    'lawyer-broadcasting': '방송통신',
+    'lawyer-civil': '민사법',
+    'lawyer-collection': '채권추심',
+    'lawyer-commercial': '상법',
+    'lawyer-constitutional': '헌법',
+    'lawyer-construction': '건설',
+    'lawyer-corporate': '기업법무',
+    'lawyer-criminal': '형사법',
+    'lawyer-damages': '손해배상',
+    'lawyer-energy': '에너지',
+    'lawyer-entertainment': '엔터테인먼트',
+    'lawyer-environmental': '환경법',
+    'lawyer-execution': '강제집행',
+    'lawyer-expropriation': '수용·보상',
+    'lawyer-family': '가사법',
+    'lawyer-finance': '금융법',
+    'lawyer-foodpharma': '식품·의약',
+    'lawyer-government-contract': '정부계약',
+    'lawyer-guardianship': '성년후견',
+    'lawyer-immigration': '이민·비자',
+    'lawyer-inheritance': '상속법',
+    'lawyer-insolvency': '도산·회생',
+    'lawyer-insurance': '보험법',
+    'lawyer-international-arbitration': '국제중재',
+    'lawyer-international-relations': '국제관계법',
+    'lawyer-international-transactions': '국제거래',
+    'lawyer-it': 'IT',
+    'lawyer-juvenile': '소년법',
+    'lawyer-legislation': '입법',
+    'lawyer-maritime': '해상',
+    'lawyer-military': '군사법',
+    'lawyer-overseas-investment': '해외투자',
+    'lawyer-realestate': '부동산법',
+    'lawyer-redevelopment': '재개발·재건축',
+    'lawyer-religious': '종교',
+    'lawyer-school-violence': '학교폭력',
+    'lawyer-securities': '증권법',
+    'lawyer-shipbuilding': '조선·해양플랜트',
+    'lawyer-sports': '스포츠',
+    'lawyer-startup': '스타트업',
+    'lawyer-trade': '통상',
+    'lawyer-traffic': '교통사고'
+  };
+  Object.keys(LAWYER_SUBS).forEach(function (id) {
+    PERSONAS[id] = {
+      role: '변호사(' + LAWYER_SUBS[id] + ')', tool: '변호사 보조 AI — ' + LAWYER_SUBS[id], back: '/pages/' + id + '.html', proOnly: true,
+      docHint: PERSONAS['lawyer'].docHint, toHint: PERSONAS['lawyer'].toHint
+    };
+  });
 
   var qs = new URLSearchParams(location.search);
   var PID = qs.get('persona') || '';
