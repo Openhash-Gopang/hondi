@@ -91,3 +91,9 @@ test('확인 요약용 설명: 이름이 있으면 "이름 <주소>", 없으면 
   const d = describeSender('swift-heron-482@hondi.kr', ''); assert.match(d, /^swift-heron-482@hondi\.kr \(이름 없음/); assert.match(d, /"swift-heron-482"가 보낸 사람 이름으로 보일 수 있습니다/);
   assert.match(describeSender('x@hondi.kr', '나비 K-Mail'), /이름 없음/, '옛 기본값은 이름 없음');
 });
+
+test('worker.js: 직접 발송 응답에 받는 사람 화면 모양(from_display)이 들어 있다(보냄 확인 카드용)', () => {
+  const w = fs.readFileSync(new URL('../worker.js', import.meta.url), 'utf8');
+  assert.match(w, /return \{ fromAddr, fromName, quota \};/);
+  assert.match(w, /from_display: _kmailFormatSender\(result\.fromAddr, result\.fromName\)/);
+});
