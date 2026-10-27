@@ -35537,7 +35537,8 @@ async function handleKmailContactsDecide(request, env, corsHeaders) {
 }
 
 // POST /kmail/contacts/update — body: { guid, pubkey, signature, ts, contact_id,
-//   name?, org?, dept?, occupation?, relationship?, add_tags?, remove_tags? }
+//   name?, org?, dept?, occupation?, relationship?, phone?, address?, website?, notes?, add_tags?, remove_tags? }
+// (2026-10-28: phone·address·website·notes 추가 — 주소록 화면의 '수정'이 쓴다. 빈 문자열은 비우기. email 은 바꾸지 않는다.)
 // decide와 별개로, 이미 confirmed된(=주소록에 있는) 연락처의 분류를
 // 나중에 고치기 위한 엔드포인트 — "이 사람 이제 회사 옮겼어" 같은
 // 갱신을 위해 status 변경 없이 필드만 바꾼다. status 자체는 여기서
@@ -35548,7 +35549,7 @@ async function handleKmailContactsDecide(request, env, corsHeaders) {
 async function handleKmailContactsUpdate(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
-  const { contact_id, name, org, dept, occupation, relationship, add_tags, remove_tags } = body;
+  const { contact_id, name, org, dept, occupation, relationship, phone, address, website, notes, add_tags, remove_tags } = body;
   if (!contact_id) return _err(400, 'MISSING_FIELD', 'contact_id 필수', corsHeaders);
 
   // 2026-09-03 — 공용 인증 게이트로 위임(src/worker/k-service-auth.js)
@@ -35567,8 +35568,13 @@ async function handleKmailContactsUpdate(request, env, corsHeaders) {
   }
 
   const patch = {};
-  for (const [k, v] of Object.entries({ name, org, dept, occupation, relationship })) {
-    if (typeof v === 'string') patch[k] = v;
+  const KMAIL_CONTACT_EDIT_LIMITS = { name: 100, org: 200, dept: 200, occupation: 100, relationship: 100, phone: 50, address: 300, website: 300, notes: 2000 };
+  for (const [k, v] of Object.entries({ name, org, dept, occupation, relationship, phone, address, website, notes })) {
+    if (typeof v !== 'string') continue;
+    const s = v.trim();
+    if (s.length > KMAIL_CONTACT_EDIT_LIMITS[k]) return _err(400, 'FIELD_TOO_LONG', `${k} 은(는) ${KMAIL_CONTACT_EDIT_LIMITS[k]}자까지 입력할 수 있습니다`, corsHeaders);
+    if (k === 'website' && s && !/^https?:\/\/\S+$/i.test(s)) return _err(400, 'INVALID_WEBSITE', '웹사이트는 http:// 또는 https:// 로 시작하는 주소여야 합니다', corsHeaders);
+    patch[k] = s;
   }
   if (Array.isArray(add_tags) || Array.isArray(remove_tags)) {
     const current = new Set(contact.tags || []);
