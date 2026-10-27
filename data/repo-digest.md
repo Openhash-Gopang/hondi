@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-27 13:43 KST · 기준 커밋 467c3666
+- 갱신: 2026-10-27 13:50 KST · 기준 커밋 ee338de3
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-27 admin: add regional equity-purchase proposals (Busan, Ulsan, Gyeongnam, Jeju)
 - 2026-10-27 admin: add regional equity-purchase proposals (Busan, Ulsan, Gyeongnam, Jeju)
 - 2026-10-27 Merge pull request #794 from Openhash-Gopang/fix/remove-ceo-signature-variants
 - 2026-10-27 docs: remove developer name/contact signatures and footers (keep FAQ/SP/narrative/citation uses)
@@ -43,7 +44,6 @@
 - 2026-10-24 Merge pull request #770 from Openhash-Gopang/feat/navi-guide-start-chat-20261024
 - 2026-10-24 feat(navi-guide): 소개 페이지 5곳에 나비 안내 시작 영역(대화창) 추가
 - 2026-10-24 Merge pull request #769 from Openhash-Gopang/feat/citizen-consent-start-chat-20261024
-- 2026-10-24 feat(citizen-report,consent-sale): 시작 영역(대화창) 추가 — 신고 정리(k-watch)·합의매각 안내(SP-24_kestate)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
