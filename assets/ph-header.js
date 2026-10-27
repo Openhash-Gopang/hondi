@@ -68,7 +68,7 @@
     var internal = b.href.charAt(0) === '/' && b.href.charAt(1) !== '/';
     var external = b.href.indexOf('https://klaw.hondi.net/') === 0;
     if (!internal && !external) return '';
-    return '<a class="' + cls + '" href="' + escapeHtml(b.href).replace(/"/g, '&quot;') + '"' + ((external || newTab) ? ' target="_blank" rel="noopener"' : '') + (b.title ? ' title="' + escapeHtml(b.title).replace(/"/g, '&quot;') + '"' : '') + '>' + escapeHtml(b.label) + '</a>';
+    return '<a class="' + cls + '" href="' + escapeHtml(b.href).replace(/"/g, '&quot;') + '"' + ((external || newTab || b.newTab) ? ' target="_blank" rel="noopener"' : '') + (b.title ? ' title="' + escapeHtml(b.title).replace(/"/g, '&quot;') + '"' : '') + '>' + escapeHtml(b.label) + '</a>';
   }
   // 2026-10-23(주피터 지시) — 둘째 버튼 PAGE_HEADER.heroButton2 = { label, href, title }. 첫째 버튼 오른쪽에 나란히 놓는다(첫째 버튼이 있을 때만).
   // 2026-10-27(주피터 지시) — 「기술 소개」 버튼: 직역 전문가 페이지(법무사·행정사·변호사·세무사·회계사·변리사·감정평가사와
@@ -100,7 +100,9 @@
     var intro = heroCtaLink(introButtonFor(config), 'ph-hero-cta ph-hero-cta-2 ph-hero-cta-intro', true);
     if (!first && !intro) return '';
     var count = (first ? 1 : 0) + (second ? 1 : 0) + (third ? 1 : 0) + (intro ? 1 : 0);
-    return '<div class="ph-hero-cta-row' + (count >= 4 ? ' ph-hero-cta-row-wide' : '') + '">' + first + second + third + intro + '</div>';
+    // 2026-10-27 — PAGE_HEADER.introFirst === true 면 「기술 소개」를 맨 앞(왼쪽)에 두고 나머지 버튼을 그 오른쪽에 놓는다.
+    var order = (config && config.introFirst) ? (intro + first + second + third) : (first + second + third + intro);
+    return '<div class="ph-hero-cta-row' + (count >= 4 ? ' ph-hero-cta-row-wide' : '') + '">' + order + '</div>';
   }
   // 2026-10-24: 「K-Law」 버튼 — 인프라(K-서비스)·전문가 페르소나·K-정부(기관 페이지 포함) 문서의 오른쪽 상단.
   // PAGE_HEADER.klaw === false 로 끄고, true 로 강제로 켤 수 있다.
