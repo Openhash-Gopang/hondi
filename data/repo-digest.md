@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-27 18:16 KST · 기준 커밋 3491faba
+- 갱신: 2026-10-27 18:20 KST · 기준 커밋 a645eca6
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-27 feat: 법무 시뮬레이션 페이지 추가, 법무사 페이지 히어로에 버튼 추가
 - 2026-10-27 Merge pull request #808 from Openhash-Gopang/feat/ktax-sim-hero-doc-button
 - 2026-10-27 fix: 절세 시뮬레이션 히어로 — 나비 아이콘 삭제, K-Tax 방법론 버튼을 오른쪽 빈 공간으로 이동
 - 2026-10-27 Merge pull request #807 from Openhash-Gopang/feat/tax-hero-buttons-order
@@ -43,7 +44,6 @@
 - 2026-10-27 feat(admin): move the Busan/Ulsan/Gyeongnam nabi-code test proposal into the top proposals section
 - 2026-10-27 feat(admin): move the proposals store out of the business-plan list into its own top section
 - 2026-10-27 Merge pull request #781 from Openhash-Gopang/feat/admin-busan-ulsan-gyeongnam-nabi-code-plan
-- 2026-10-27 admin: add Busan-Ulsan-Gyeongnam nabi digit code test proposal
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
@@ -72,6 +72,7 @@
 - /pages/intro-patent-attorney.html — 변리사 보조 AI 소개서
 - /pages/intro-tax-accounting.html — 세무·회계 보조 AI 소개서
 - /pages/jeju-gov-automation-draft.html — 제주 AI 행정 — 기관·실국과·읍면동 실행 지도
+- /pages/judicial-simulation.html — 법무 시뮬레이션 — 법무사 보조 AI
 - /pages/k-evaluation.html — K-Evaluation — 감정평가사 보조 AI 성능 시험
 - /pages/klaw-llm-verdict-validation.html — K-Law 후보 LLM 가상 판결문 검증
 - /pages/klaw-research.html — 법원 중심에서 당사자 합의 중심으로 축의 이동
