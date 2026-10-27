@@ -18,7 +18,7 @@ import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
 import { profilePhoneFilter, last8Filter, pickGuidByLast8 } from './src/worker/phone-lookup.js';
 import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
-import { checkSenderName as _kmailCheckSenderName, effectiveSenderName as _kmailEffectiveSenderName, formatSender as _kmailFormatSender, SENDER_NAME_MAX as _KMAIL_SENDER_NAME_MAX } from './src/worker/kmail-sender.js';
+import { checkSenderName as _kmailCheckSenderName, effectiveSenderName as _kmailEffectiveSenderName, formatSender as _kmailFormatSender, describeSender as _kmailDescribeSender, SENDER_NAME_MAX as _KMAIL_SENDER_NAME_MAX } from './src/worker/kmail-sender.js';
 import { evaluateSendGuard as _kmailEvaluateSendGuard } from './src/worker/kmail-confirm.js';
 import { senderLocalPart as _kmailSenderLocalPart, classifyInboundLocalPart as _kmailClassifyLocalPart } from './src/worker/kmail-address.js';
 import { buildSendStatus as _kmailBuildSendStatus, instantSendMax as _kmailInstantSendMax, isImmediate as _kmailIsImmediate } from './src/worker/kmail-send-status.js';
@@ -36071,11 +36071,14 @@ async function handleKmailMailIdStatus(request, url, env, corsHeaders) {
   const auth = await _kAuth.resolveGuid(env, qp, { sigMsg: `kmail-mail-id-status:${qp.guid}:${qp.ts}` });
   if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
   const guid = auth.guid;
-  const mailId = (await _kmailGetUserSettings(env, guid)).mail_id || '';
+  const userSettings = await _kmailGetUserSettings(env, guid);
+  const mailId = userSettings.mail_id || '';
   const st = await _mailIdReadState(env.AI_SETUP_SEALS_KV, guid);
   const ev = _mailIdEvaluate(st, Date.now(), _mailIdPolicy(env), { hasCurrent: !!mailId });
   return new Response(JSON.stringify({
     ok: true, mail_id: mailId, address: mailId ? `${mailId}@hondi.kr` : '',
+    sender_display_name: userSettings.sender_display_name || '', sender_name_max: _KMAIL_SENDER_NAME_MAX,
+    sender_preview: mailId ? _kmailFormatSender(`${mailId}@hondi.kr`, userSettings.sender_display_name) : '',
     needs_choice: st.confirmed === null, confirmed: st.confirmed,
     can_change: ev.allowed, first_free: ev.exempt, changes_left: ev.exempt ? ev.limit : ev.left, limit: ev.limit, window_days: ev.windowDays, next_change_at: ev.nextChangeAt,
   }), { status: 200, headers: corsHeaders });
@@ -38502,7 +38505,10 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   // 그대로 들어가고, SP가 그 경우를 분기해 설정을 권유하도록 되어있다.
   const kmailSettingsForChat = await _kmailGetUserSettings(env, guid).catch(() => ({ mail_id: '' }));
   const systemPrompt = sp.replace(/\{\{NOW\}\}/g, nowKST).replace(/\{\{GUID\}\}/g, guid)
-    .replace(/\{\{MAIL_ID\}\}/g, kmailSettingsForChat.mail_id || '');
+    .replace(/\{\{MAIL_ID\}\}/g, kmailSettingsForChat.mail_id || '')
+    // 2026-10-27: 보내는 사람(받는 사람 화면에 보이는 모양)과 이름 설정 여부 — 발송 전 확인 목록에 "보내는 사람" 줄을 넣게 한다(SP §2-2).
+    .replace(/\{\{SENDER_DISPLAY\}\}/g, _kmailDescribeSender(`${_kmailSenderLocalPart(guid, kmailSettingsForChat.mail_id)}@hondi.kr`, kmailSettingsForChat.sender_display_name))
+    .replace(/\{\{SENDER_NAME\}\}/g, kmailSettingsForChat.sender_display_name || '');
 
   // UNIVERSAL-INTEGRITY·UNIVERSAL-common·CONTROL-TOWER-PRINCIPLE 서버측
   // 강제 주입(2026-09-02 추가) — /kmail/chat은 handleLLMRelay를 거치지
@@ -39580,7 +39586,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     }
     // 2026-10-27 확인 단계 방어: 바로 앞 비서 메시지가 "이대로 보낼까요?" 같은 확인 질문이 아니면 연락처 저장·캠페인 생성·발송을
     // 모두 하지 않고, 서버가 태그 내용으로 만든 확인 요약을 대신 보여 준다(사용자가 동의하면 비서가 같은 내용으로 다시 낸다).
-    const sendGuard = _kmailEvaluateSendGuard(cleanMessages, parsed);
+    const sendGuard = _kmailEvaluateSendGuard(cleanMessages, parsed, Date.now(), { address: `${_kmailSenderLocalPart(guid, kmailSettingsForChat.mail_id)}@hondi.kr`, name: kmailSettingsForChat.sender_display_name });
     if (!sendGuard.allow) {
       return new Response(JSON.stringify({ ok: true, reply: sendGuard.reply, action: sendGuard.action }), { status: 200, headers: corsHeaders });
     }
