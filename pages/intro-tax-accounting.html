@@ -4,44 +4,37 @@
 <link rel="icon" href="data:,">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<link rel="stylesheet" href="/assets/pro-doc-page.css">
-<title>세무·회계 보조 AI 소개서</title>
 <style>
-/* 세무사 보조 AI 페이지(tax-accountant.html)와 같은 헤더·색상·카드 체계 — 소개서 전용 보강 */
-.ug-doc { max-width: 1040px; }
-.intro-meta { font-size: 12.5px; color: var(--text4); margin-bottom: 14px; }
-.intro-meta b { color: var(--text3); font-weight: 600; }
-.kpi-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 4px 0 18px; }
-.kpi-card { background: var(--surface); border-radius: var(--radius-lg); padding: 16px 18px; box-shadow: 0 2px 10px rgba(15,23,42,0.08), 0 1px 3px rgba(15,23,42,0.06); border-top: 3px solid var(--brand); min-width: 0; }
-.kpi-card .n { font-size: 17px; font-weight: 700; color: var(--navy); line-height: 1.35; }
-.kpi-card .l { font-size: 12.5px; color: var(--text4); margin-top: 2px; }
-.doc-intro-box .svc-callout p { margin: 0 0 8px; }
-.doc-intro-box .svc-callout p:last-child { margin-bottom: 0; }
-.doc-intro-box .svc-callout ul { margin: 6px 0 10px 20px; }
-.doc-intro-box .svc-callout li { margin: 2px 0; }
-.doc-intro-box .svc-callout a { color: var(--brand-dk); font-weight: 600; }
-.toc-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 22px; }
-.toc-chips a { background: var(--surface); border-radius: 10px; padding: 9px 16px; font-size: 13px; font-weight: 600; color: var(--text3); text-decoration: none; box-shadow: 0 1px 4px rgba(15,23,42,0.08); transition: .15s; }
-.toc-chips a:hover, .toc-chips a:focus-visible { background: var(--brand); color: #fff; outline: none; box-shadow: 0 6px 16px rgba(12,108,195,0.3); }
-.svc-content { margin-bottom: 18px; min-height: 0; padding: 32px 36px; }
-.svc-content h2 { font-size: 20px; font-weight: 700; color: var(--navy); margin: 0 0 16px; padding-bottom: 10px; border-bottom: 2px solid var(--border); scroll-margin-top: 70px; }
-.svc-content ul { margin: 0 0 4px 20px; }
-.svc-content li { font-size: 13.5px; color: var(--text3); line-height: 1.9; }
-.svc-content p { font-size: 13.5px; color: var(--text3); line-height: 1.8; margin: 12px 0 0; }
-.svc-content code { background: #f1f5f9; color: var(--navy); padding: 1px 6px; border-radius: 4px; font-size: .9em; }
-.svc-content a { color: var(--brand-dk); font-weight: 600; }
-.tbl-wrap { overflow-x: auto; margin: 0 0 8px; border-radius: 8px; box-shadow: 0 1px 4px rgba(15,23,42,0.08); }
-.tbl-wrap table.svc-table { box-shadow: none; min-width: 560px; }
-table.svc-table td:first-child { font-weight: 600; color: var(--navy); }
-.svc-content table.svc-table td { color: var(--text3); font-size: 13px; line-height: 1.7; }
-.svc-content table.svc-table td:first-child { color: var(--navy); }
-@media (max-width: 900px) { .kpi-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 560px) { .ug-doc { padding: 24px 14px 60px; } .svc-content { padding: 22px 18px; } .kpi-row { grid-template-columns: minmax(0, 1fr); } }
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:#1f2937;font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif;font-size:15.5px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.doc-simple{max-width:820px;margin:0 auto;padding:44px 24px 90px}
+.doc-simple p{margin:.7em 0}
+.doc-simple a{color:#0c5aa6}
+.doc-simple .lead{font-size:17px;line-height:1.85;color:#111827;margin:0 0 6px}
+.doc-simple .links{font-size:14px;color:#4b5563;margin:14px 0 0}
+.doc-simple .notice{font-size:13.5px;color:#4b5563;border-left:3px solid #cbd5e1;padding:2px 0 2px 14px;margin:22px 0 0}
+.doc-simple h2{font-size:20px;font-weight:700;color:#0e1c3f;margin:52px 0 14px;padding-bottom:9px;border-bottom:1px solid #cbd5e1}
+.doc-simple h3{font-size:15.5px;font-weight:700;color:#0e1c3f;margin:30px 0 6px}
+.doc-simple ul{margin:.5em 0 1em;padding-left:1.3em}
+.doc-simple li{margin:.3em 0}
+.doc-simple .toc{margin:26px 0 0;padding:14px 0;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;font-size:14px}
+.doc-simple .toc a{display:inline-block;margin:2px 18px 2px 0;color:#0e1c3f;text-decoration:none}
+.doc-simple .toc a:hover{text-decoration:underline}
+.doc-simple .tw{overflow-x:auto;margin:14px 0}
+.doc-simple table{width:100%;border-collapse:collapse;font-size:14px}
+.doc-simple th{text-align:left;font-weight:700;color:#0e1c3f;padding:9px 12px 9px 0;border-bottom:2px solid #0e1c3f;white-space:nowrap}
+.doc-simple td{padding:10px 12px 10px 0;border-bottom:1px solid #e5e7eb;vertical-align:top}
+.doc-simple td:first-child{width:28%;color:#374151;font-weight:600}
+.doc-simple code{background:#f3f4f6;padding:1px 5px;border-radius:3px;font-size:.9em}
+.doc-simple .foot{margin-top:70px;padding-top:16px;border-top:1px solid #e5e7eb;font-size:12.5px;color:#6b7280}
+@media(max-width:640px){.doc-simple{padding:28px 16px 60px}.doc-simple td:first-child{width:auto}}
+@media print{.ph-hero,.ph-disclaimer,.doc-simple .toc{display:none}}
 </style>
+<title>세무·회계 보조 AI 소개서</title>
 </head>
 <body>
-
 <script>
 window.PAGE_HEADER = {
   active: 'expert-personas',
@@ -49,36 +42,27 @@ window.PAGE_HEADER = {
   h1: '세무·회계 보조 AI 소개서',
   sub: '세무법인·회계법인·세무사사무소·회계사사무소를 위한 세무사 보조 AI와 회계사 보조 AI의 기능, 설계 원칙, 현재 상태와 한계를 소개합니다.',
   disclaimer: '이 서비스는 해당 직역의 자격을 갖지 않으며, 모든 산출물은 자격자가 검토·확정해야 하는 초안이다. 성능·정확도는 제3자 검증 전이며 테스트 단계이다.',
-  disclaimerDismissKey: 'intro-tax-accounting',
-  introButton: false
+    introButton: false,
+  heroButton: { label: '세무사 보조 AI', href: '/pages/tax-accountant.html', title: '세무사 보조 AI 서비스 화면으로 이동합니다' },
+  heroButton2: { label: '절세 시뮬레이션', href: '/pages/ktax-simulation.html', title: '재무제표를 올리면 K-Tax 방법론으로 절세 방안을 시뮬레이션합니다 (참고용)' }
 };
 </script>
 <link rel="stylesheet" href="/assets/ph-header.css">
 <script src="/assets/ph-header.js"></script>
-
-<div class="ug-doc">
-  <p class="intro-meta">2026-10-27 · 나비웹(hondi.net) · <b>대상</b> 세무법인·회계법인·세무사사무소·회계사사무소 (세무사 보조 AI와 회계사 보조 AI)</p>
-  <div class="kpi-row">
-<div class="kpi-card"><div class="n">세무 20영역·239종</div><div class="l">세무사 보조 AI 카탈로그</div></div>
-<div class="kpi-card"><div class="n">회계 18영역·143종</div><div class="l">회계사 보조 AI 카탈로그</div></div>
-<div class="kpi-card"><div class="n">STEP L</div><div class="l">사업자 연동·기한 관리</div></div>
-<div class="kpi-card"><div class="n">독립성 게이트</div><div class="l">회계사 보조 AI</div></div>
-</div>
-  <div class="doc-intro-box">
-<div class="svc-callout"><p><strong>세무사 보조 AI(SP-FIN-09)</strong>와 <strong>회계사 보조 AI(SP-FIN-10)</strong>는 사업자와 사무소를 연동해 장부 초안과 신고 준비를 돕는 도구입니다. 신고·감사의견·기명날인은 자격자의 전속 업무이며, 현재 버전은 자동으로 신고하지 않습니다(제출·납부 대행은 dpaper 승인과 법령 검토 후 사람의 최종 승인을 전제로 추진). 세무사와 회계사는 별개의 직역이므로 두 서비스의 인원은 합산됩니다.</p></div>
-<div class="svc-callout"><p><strong>모든 직역 AI의 공통 설계</strong></p><ul><li><strong>모델</strong>: 오픈소스 중소형 LLM(예: Gemma 4 31B)을 해당 직역 전문가의 업무 보조에 특화해 조정합니다. 해외 거대 LLM에 호출하지 않습니다.</li><li><strong>운영</strong>: 국내 서버에 설치해 서비스를 제공하며, 업무 자료가 해외로 나가지 않습니다.</li><li><strong>dpaper API 승인 후의 계획</strong>: 승인되면 서류 작성, 제출, 수수료 납부까지 AI가 대행하고, 사람(자격자)은 <strong>최종 검토와 승인</strong>을 맡습니다.</li></ul><p>현재는 dpaper 승인 전이므로 제출·납부는 연동되지 않았고 사람이 직접 합니다. 제출·납부 대행은 관련 법령(직역별 업무 범위, 무자격 대리 금지 등)의 검토와 승인 절차를 거친 뒤에 시작하며, 그 전에는 이 문서의 대행 기능을 제공하지 않습니다.</p></div>
-<div class="svc-callout"><p><strong>상세 보기(hondi.net)</strong>: <a href="https://hondi.net/pages/tax-accountant.html" target="_blank" rel="noopener">세무사 보조 AI</a> · <a href="https://hondi.net/pages/tax-optimizer.html" target="_blank" rel="noopener">세무 최적화</a> · <a href="https://hondi.net/pages/accountant.html" target="_blank" rel="noopener">회계사 보조 AI</a> · <a href="https://hondi.net/" target="_blank" rel="noopener">나비웹 홈</a>. 해당 페이지는 테스트 단계의 화면입니다.</p></div>
-<div class="svc-callout important"><p><strong>안내</strong> 이 문서는 서비스 소개서이며 투자 권유나 입찰 공고가 아닙니다. 지분 매수에 관한 사항은 별도의 지분 매수 제안서(초안)를 따릅니다. 아래 '차별점'은 <strong>설계와 운영 규칙상의 차이</strong>를 설명한 것이며, 다른 서비스보다 성능이 우수하다는 것을 실측으로 입증한 내용이 아닙니다. 성능·정확도는 제3자 검증 전이며, 각 서비스는 테스트 단계입니다. 이 서비스는 해당 직역의 자격을 갖지 않으며, 모든 산출물은 자격자가 검토·확정해야 하는 초안입니다.</p></div>
-</div>
-  <nav class="toc-chips" aria-label="목차"><a href="#s1">1. 한눈에 보기</a><a href="#s2">2. 이 서비스가 하는 일</a><a href="#s3">3. 범용 AI와 다른 점</a><a href="#s4">4. 다른 직역 AI와 다른 점</a><a href="#s5">5. 작업 흐름</a><a href="#s6">6. 현재 상태와 한계</a></nav>
-<section class="svc-content" id="s1_"><h2 id="s1">1. 한눈에 보기</h2><div class="tbl-wrap"><table class="svc-table"><thead><tr><th></th><th>세무사 보조 AI</th><th>회계사 보조 AI</th></tr></thead><tbody><tr><td>서류 카탈로그</td><td>20영역 239종</td><td>18영역 143종</td></tr><tr><td>전속 책임</td><td>성실신고 확인, 세무조정 최종 판단, 신고서 기명날인(세무사법 제9조)</td><td>감사·검토·증명 의견 표명과 서명, 장부·재무제표 확정</td></tr><tr><td>특수 트랙</td><td>STEP L(연동·기한·공제감면), STEP T</td><td>STEP L(연동·기한·독립성 게이트)</td></tr><tr><td>제외</td><td>세무대리 신고·청구 대리</td><td>분식·독립성 훼손 요청 가담</td></tr></tbody></table></div></section>
-<section class="svc-content" id="s2_"><h2 id="s2">2. 이 서비스가 하는 일</h2><ul><li>거래가 생길 때 증빙 종류·계정과목·부가가치세 공제 여부를 제안하고 확신도(🟢/🟡/🔴)를 붙여 잠정 분개와 잠정 재무제표를 갱신</li><li>신고·납부 캘린더를 사업자 유형과 결산월로 만들고 D-30 자료 요청부터 D-day 세무사 전자신고까지 단계별로 준비</li><li>세법이 허용하는 공제·감면 후보를 요건 충족/확인 필요/불충족으로 표시하고 순효과·사후관리 위험·신청 기한과 함께 제시</li><li>중복 결제, 증빙 불일치, 가지급금 발생, 현금 지급 과다 같은 이상 거래를 "확인이 필요합니다" 형태로 알림</li></ul></section>
-<section class="svc-content" id="s3_"><h2 id="s3">3. 범용 AI와 다른 점</h2><div class="tbl-wrap"><table class="svc-table"><thead><tr><th>범용 AI 챗봇에서 흔한 방식</th><th>세무·회계 보조 AI의 설계</th></tr></thead><tbody><tr><td>"절세 방법"을 단정적으로 권함</td><td>"절세 전문", "무조건 환급" 같은 표현을 쓰지 않고 <strong>"세법상 공제·감면 검토 후보"</strong>로만 표시. 채택은 세무사가 판단</td></tr><tr><td>기한이 되면 대신 신고해 주는 구조를 제안</td><td><strong>현재 버전은 AI가 자동 신고하지 않는 구조</strong>(납세자 대신 신고를 주도하면 무자격 세무대리에 해당할 수 있다는 판례 인용 취지). 기한은 알리되 신고는 세무사가 기명날인 후 전자신고</td></tr><tr><td>세법·기한·율을 기억으로 답함</td><td>신고 때마다 현행 기한·공휴일 보정·직권 연장 공고를 조회해 조회일(<code>law_checked</code>)을 기록. 국회 확정 전 세제개편안은 "예정"으로만 표시하고 적용하지 않음</td></tr><tr><td>모든 분개를 즉시 확정</td><td>승인되지 않은 분개는 확정 장부와 신고서 초안에 넣지 않음. 🔴 분개는 사업자 확인 전 잠정 장부에도 반영하지 않음</td></tr><tr><td>허위·가공 거래 요청도 처리</td><td>가공 거래, 허위 세금계산서, 사적 지출의 경비 처리 요청은 처리하지 않고 세무사에 즉시 보고, 사업자에게는 합법적 대안만 안내</td></tr><tr><td>연동 범위가 불분명</td><td>위임 관계와 사업자 동의(범위·기간·철회 방법)가 확인된 경우에만 연동. 연동 데이터는 해외 LLM 등 외부로 이전하지 않는 플랫폼 원칙</td></tr></tbody></table></div></section>
-<section class="svc-content" id="s4_"><h2 id="s4">4. 다른 직역 AI와 다른 점</h2><ul><li><strong>사업자 연동(STEP L)</strong>: 법률 직역 AI가 서류 중심인 데 비해, 세무·회계는 거래 단위의 상시 기장 초안과 기한 관리가 핵심</li><li>회계사 보조 AI는 <strong>독립성 게이트</strong>를 가짐: 외부감사 대상 회사에 기장·재무제표 작성 연동을 시작하지 않으며, 연동 데이터를 감사증거로 제시하지 않음</li><li>세무사 보조 AI는 가업상속·증여 시기·양도세 등 세목별 기한과 사후관리(추징 위험)를 함께 표시</li><li>세무대리업무 등록이 필요한 영역(회계사의 세무 검토)은 등록 회계사에 한정</li></ul></section>
-<section class="svc-content" id="s5_"><h2 id="s5">5. 작업 흐름</h2><div class="tbl-wrap"><table class="svc-table"><thead><tr><th>단계</th><th>내용</th></tr></thead><tbody><tr><td>수집</td><td>세금계산서·카드·계좌·현금영수증·급여 등 동의 범위 안의 이벤트</td></tr><tr><td>분류 제안</td><td>증빙·계정과목·부가세 공제 여부 + 확신도</td></tr><tr><td>확인 질문</td><td>한 번에 3개 이내</td></tr><tr><td>잠정 반영</td><td>분개 → 잠정 시산표 → 잠정 재무제표(세무사 확정 전 표시)</td></tr><tr><td>승인</td><td>세무사가 건별 또는 승인한 규칙·배치 단위로 승인</td></tr><tr><td>신고 준비</td><td>D-30~D-1 점검</td></tr><tr><td>신고</td><td>세무사가 확정·기명날인·전자신고</td></tr></tbody></table></div></section>
-<section class="svc-content" id="s6_"><h2 id="s6">6. 현재 상태와 한계</h2><ul><li>테스트 단계. 연동 소스는 실제로 연결된 것만 사용하며 응답마다 연동 소스를 표시</li><li>카탈로그 수치는 서류 종류의 규모이며 각 서류의 정확도는 제3자 검증 전</li><li>회계사 보조 AI의 공인회계사법 현행 조번호·독립성·외부감사법은 서비스 내부에서 확인 범위가 제한적이라 "확인 필요"로 표시</li><li>세무사·회계사 각각의 인원은 중복 없이 합산(별개 직역)</li></ul><p>자격자 보조 도구의 공통 규칙(§LEGAL-LIMIT)은 이 서비스의 모든 응답과 서류에 적용됩니다.</p></section>
-<section class="svc-content" id="sx_"><h2 id="sx">문의</h2><p><a href="mailto:ceo@hondi.net">ceo@hondi.net</a></p></section>
-  <div class="ug-footer">세무사 보조 AI · 회계사 보조 AI 기술 소개 · 이 문서는 서비스 소개서이며 투자 권유나 입찰 공고가 아닙니다.</div>
-</div>
+<main class="doc-simple">
+<p class="lead"><strong>세무사 보조 AI(SP-FIN-09)</strong>와 <strong>회계사 보조 AI(SP-FIN-10)</strong>는 사업자와 사무소를 연동해 장부 초안과 신고 준비를 돕는 도구입니다. 신고·감사의견·기명날인은 자격자의 전속 업무이며, 현재 버전은 자동으로 신고하지 않습니다(제출·납부 대행은 dpaper 승인과 법령 검토 후 사람의 최종 승인을 전제로 추진). 세무사와 회계사는 별개의 직역이므로 두 서비스의 인원은 합산됩니다.</p>
+<h3>모든 직역 AI의 공통 설계</h3>
+<ul><li><strong>모델</strong>: 오픈소스 중소형 LLM(예: Gemma 4 31B)을 해당 직역 전문가의 업무 보조에 특화해 조정합니다. 해외 거대 LLM에 호출하지 않습니다.</li><li><strong>운영</strong>: 국내 서버에 설치해 서비스를 제공하며, 업무 자료가 해외로 나가지 않습니다.</li><li><strong>dpaper API 승인 후의 계획</strong>: 승인되면 서류 작성, 제출, 수수료 납부까지 AI가 대행하고, 사람(자격자)은 <strong>최종 검토와 승인</strong>을 맡습니다.</li></ul><p>현재는 dpaper 승인 전이므로 제출·납부는 연동되지 않았고 사람이 직접 합니다. 제출·납부 대행은 관련 법령(직역별 업무 범위, 무자격 대리 금지 등)의 검토와 승인 절차를 거친 뒤에 시작하며, 그 전에는 이 문서의 대행 기능을 제공하지 않습니다.</p>
+<p class="links"><strong>상세 보기(hondi.net)</strong>: <a href="https://hondi.net/pages/tax-accountant.html" target="_blank" rel="noopener">세무사 보조 AI</a> · <a href="https://hondi.net/pages/tax-optimizer.html" target="_blank" rel="noopener">세무 최적화</a> · <a href="https://hondi.net/pages/accountant.html" target="_blank" rel="noopener">회계사 보조 AI</a> · <a href="https://hondi.net/" target="_blank" rel="noopener">나비웹 홈</a>. 해당 페이지는 테스트 단계의 화면입니다.<br>2026-10-27 · 나비웹(hondi.net) · 대상 세무법인·회계법인·세무사사무소·회계사사무소 (세무사 보조 AI와 회계사 보조 AI)<br>핵심 수치: 세무 20영역·239종(세무사 보조 AI 카탈로그) · 회계 18영역·143종(회계사 보조 AI 카탈로그) · STEP L(사업자 연동·기한 관리) · 독립성 게이트(회계사 보조 AI)</p>
+<p class="notice"><strong>안내</strong> 이 문서는 서비스 소개서이며 투자 권유나 입찰 공고가 아닙니다. 지분 매수에 관한 사항은 별도의 지분 매수 제안서(초안)를 따릅니다. 아래 '차별점'은 <strong>설계와 운영 규칙상의 차이</strong>를 설명한 것이며, 다른 서비스보다 성능이 우수하다는 것을 실측으로 입증한 내용이 아닙니다. 성능·정확도는 제3자 검증 전이며, 각 서비스는 테스트 단계입니다. 이 서비스는 해당 직역의 자격을 갖지 않으며, 모든 산출물은 자격자가 검토·확정해야 하는 초안입니다.</p>
+<nav class="toc"><a href="#s1">1. 한눈에 보기</a><a href="#s2">2. 이 서비스가 하는 일</a><a href="#s3">3. 범용 AI와 다른 점</a><a href="#s4">4. 다른 직역 AI와 다른 점</a><a href="#s5">5. 작업 흐름</a><a href="#s6">6. 현재 상태와 한계</a></nav>
+<section id="s1"><h2>1. 한눈에 보기</h2><div class="tw"><table><thead><tr><th></th><th>세무사 보조 AI</th><th>회계사 보조 AI</th></tr></thead><tbody><tr><td>서류 카탈로그</td><td>20영역 239종</td><td>18영역 143종</td></tr><tr><td>전속 책임</td><td>성실신고 확인, 세무조정 최종 판단, 신고서 기명날인(세무사법 제9조)</td><td>감사·검토·증명 의견 표명과 서명, 장부·재무제표 확정</td></tr><tr><td>특수 트랙</td><td>STEP L(연동·기한·공제감면), STEP T</td><td>STEP L(연동·기한·독립성 게이트)</td></tr><tr><td>제외</td><td>세무대리 신고·청구 대리</td><td>분식·독립성 훼손 요청 가담</td></tr></tbody></table></div></section>
+<section id="s2"><h2>2. 이 서비스가 하는 일</h2><ul><li>거래가 생길 때 증빙 종류·계정과목·부가가치세 공제 여부를 제안하고 확신도(🟢/🟡/🔴)를 붙여 잠정 분개와 잠정 재무제표를 갱신</li><li>신고·납부 캘린더를 사업자 유형과 결산월로 만들고 D-30 자료 요청부터 D-day 세무사 전자신고까지 단계별로 준비</li><li>세법이 허용하는 공제·감면 후보를 요건 충족/확인 필요/불충족으로 표시하고 순효과·사후관리 위험·신청 기한과 함께 제시</li><li>중복 결제, 증빙 불일치, 가지급금 발생, 현금 지급 과다 같은 이상 거래를 "확인이 필요합니다" 형태로 알림</li></ul></section>
+<section id="s3"><h2>3. 범용 AI와 다른 점</h2><div class="tw"><table><thead><tr><th>범용 AI 챗봇에서 흔한 방식</th><th>세무·회계 보조 AI의 설계</th></tr></thead><tbody><tr><td>"절세 방법"을 단정적으로 권함</td><td>"절세 전문", "무조건 환급" 같은 표현을 쓰지 않고 <strong>"세법상 공제·감면 검토 후보"</strong>로만 표시. 채택은 세무사가 판단</td></tr><tr><td>기한이 되면 대신 신고해 주는 구조를 제안</td><td><strong>현재 버전은 AI가 자동 신고하지 않는 구조</strong>(납세자 대신 신고를 주도하면 무자격 세무대리에 해당할 수 있다는 판례 인용 취지). 기한은 알리되 신고는 세무사가 기명날인 후 전자신고</td></tr><tr><td>세법·기한·율을 기억으로 답함</td><td>신고 때마다 현행 기한·공휴일 보정·직권 연장 공고를 조회해 조회일(<code>law_checked</code>)을 기록. 국회 확정 전 세제개편안은 "예정"으로만 표시하고 적용하지 않음</td></tr><tr><td>모든 분개를 즉시 확정</td><td>승인되지 않은 분개는 확정 장부와 신고서 초안에 넣지 않음. 🔴 분개는 사업자 확인 전 잠정 장부에도 반영하지 않음</td></tr><tr><td>허위·가공 거래 요청도 처리</td><td>가공 거래, 허위 세금계산서, 사적 지출의 경비 처리 요청은 처리하지 않고 세무사에 즉시 보고, 사업자에게는 합법적 대안만 안내</td></tr><tr><td>연동 범위가 불분명</td><td>위임 관계와 사업자 동의(범위·기간·철회 방법)가 확인된 경우에만 연동. 연동 데이터는 해외 LLM 등 외부로 이전하지 않는 플랫폼 원칙</td></tr></tbody></table></div></section>
+<section id="s4"><h2>4. 다른 직역 AI와 다른 점</h2><ul><li><strong>사업자 연동(STEP L)</strong>: 법률 직역 AI가 서류 중심인 데 비해, 세무·회계는 거래 단위의 상시 기장 초안과 기한 관리가 핵심</li><li>회계사 보조 AI는 <strong>독립성 게이트</strong>를 가짐: 외부감사 대상 회사에 기장·재무제표 작성 연동을 시작하지 않으며, 연동 데이터를 감사증거로 제시하지 않음</li><li>세무사 보조 AI는 가업상속·증여 시기·양도세 등 세목별 기한과 사후관리(추징 위험)를 함께 표시</li><li>세무대리업무 등록이 필요한 영역(회계사의 세무 검토)은 등록 회계사에 한정</li></ul></section>
+<section id="s5"><h2>5. 작업 흐름</h2><div class="tw"><table><thead><tr><th>단계</th><th>내용</th></tr></thead><tbody><tr><td>수집</td><td>세금계산서·카드·계좌·현금영수증·급여 등 동의 범위 안의 이벤트</td></tr><tr><td>분류 제안</td><td>증빙·계정과목·부가세 공제 여부 + 확신도</td></tr><tr><td>확인 질문</td><td>한 번에 3개 이내</td></tr><tr><td>잠정 반영</td><td>분개 → 잠정 시산표 → 잠정 재무제표(세무사 확정 전 표시)</td></tr><tr><td>승인</td><td>세무사가 건별 또는 승인한 규칙·배치 단위로 승인</td></tr><tr><td>신고 준비</td><td>D-30~D-1 점검</td></tr><tr><td>신고</td><td>세무사가 확정·기명날인·전자신고</td></tr></tbody></table></div></section>
+<section id="s6"><h2>6. 현재 상태와 한계</h2><ul><li>테스트 단계. 연동 소스는 실제로 연결된 것만 사용하며 응답마다 연동 소스를 표시</li><li>카탈로그 수치는 서류 종류의 규모이며 각 서류의 정확도는 제3자 검증 전</li><li>회계사 보조 AI의 공인회계사법 현행 조번호·독립성·외부감사법은 서비스 내부에서 확인 범위가 제한적이라 "확인 필요"로 표시</li><li>세무사·회계사 각각의 인원은 중복 없이 합산(별개 직역)</li></ul><p>자격자 보조 도구의 공통 규칙(§LEGAL-LIMIT)은 이 서비스의 모든 응답과 서류에 적용됩니다.</p></section>
+<div class="foot">세무사 보조 AI · 회계사 보조 AI 기술 소개 · 이 문서는 서비스 소개서이며 투자 권유나 입찰 공고가 아닙니다. 문의 <a href="mailto:ceo@hondi.net">ceo@hondi.net</a></div>
+</main>
 </body>
 </html>
