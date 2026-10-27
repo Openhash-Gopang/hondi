@@ -23,7 +23,7 @@ export function defaultMailIdFromHash(hex) {
 }
 
 // ── 형식·예약어 ─────────────────────────────────────────────────────────────
-export const MAIL_ID_PATTERN = /^[a-z0-9](?:[a-z0-9_-]{1,28}[a-z0-9])?$/;      // 3~30자, 영숫자로 시작·끝
+export const MAIL_ID_PATTERN = /^[a-z0-9][a-z0-9_-]{1,28}[a-z0-9]$/;          // 3~30자, 영숫자로 시작·끝 (2026-10-27: 1글자가 통과하던 결함 수정 — 끝 묶음을 선택으로 둬서 'a'가 맞았다)
 // 사칭·시스템 주소로 오해될 이름. 끝의 숫자·-·_ 를 떼고도 비교한다(admin01, support-2 …).
 export const RESERVED_EXACT = new Set([
   'admin', 'administrator', 'root', 'postmaster', 'webmaster', 'hostmaster', 'abuse', 'security', 'support', 'help', 'info', 'contact',

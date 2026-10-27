@@ -41,6 +41,9 @@ test('형식·예약어: 숫자만 금지, 사칭 방지, 대소문자 정규화
     ['admin', 'reserved'], ['Admin01', 'reserved'], ['support-2', 'reserved'], ['postmaster', 'reserved'], ['hondi', 'reserved'], ['hondi-fan', 'reserved'], ['kmailer', 'reserved'], ['no-reply', 'reserved'], ['police', 'reserved'], ['gopang1', 'reserved']]) {
     const r = ok(bad); assert.equal(r.ok, false, bad); assert.equal(r.reason, why, bad + ' → ' + r.reason); assert.ok(r.message.length > 10);
   }
+  for (const tooShort of ['a', 'a1', 'z', '9']) assert.equal(ok(tooShort).ok, false, tooShort + ' — 3자 미만은 안 된다(1글자가 통과하던 결함의 회귀 방지)');
+  for (const edge of ['abc', 'a'.repeat(30)]) assert.equal(ok(edge).ok, true, edge.length + '자 경계');
+  assert.equal(ok('a'.repeat(31)).ok, false);
   assert.equal(ok('administrator-kim').ok, true, '예약어로 시작해도 뒤에 다른 말이 붙으면 쓸 수 있다(관리자·브랜드 접두어는 제외)');
   assert.equal(ok('bankim').ok, true, '우연히 단어가 포함된 이름까지 막지는 않는다');
 });
