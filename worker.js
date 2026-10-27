@@ -18,6 +18,7 @@ import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
 import { profilePhoneFilter, last8Filter, pickGuidByLast8 } from './src/worker/phone-lookup.js';
 import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
+import { buildSendStatus as _kmailBuildSendStatus, instantSendMax as _kmailInstantSendMax, isImmediate as _kmailIsImmediate } from './src/worker/kmail-send-status.js';
 import { checkMailId as _checkMailId, defaultMailIdFromHash as _defaultMailIdFromHash, normalizeMailId as _normMailId, changePolicyConfig as _mailIdPolicy, evaluateChange as _mailIdEvaluate, recordChange as _mailIdRecordChange, recordConfirm as _mailIdRecordConfirm, limitMessage as _mailIdLimitMessage, readState as _mailIdReadState, writeState as _mailIdWriteState } from './src/worker/mail-id.js';
 import { makeDigitClaimHandler } from './src/worker/digit-claim-handler.js';
 import { makePocketBaseDigitStore } from './src/worker/digit-claim-store.js';
@@ -36698,7 +36699,7 @@ async function handleKmailCampaignDraftState(request, url, env, corsHeaders) {
 // 전원에게 _kmailSendOneEmail로 보낸다. 발송 도중 소유권/상태가 바뀐
 // 연락처(예: 그 사이 거부로 바뀜)는 건너뛴다 — 캠페인 생성 시점엔
 // confirmed였어도 발송 시점엔 아닐 수 있으므로 재검증한다.
-async function _kmailSendCampaign(env, campaign) {
+async function _kmailSendCampaign(env, campaign, opts = {}) {
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
   const settings = await _kmailGetUserSettings(env, campaign.owner_user_guid).catch(() => ({ signature: '', sender_display_name: '나비 K-Mail' }));
@@ -36724,6 +36725,9 @@ async function _kmailSendCampaign(env, campaign) {
   let successCount = 0, failCount = 0;
   for (const cid of contactIds) {
     const recipRow = recipByContact.get(cid);
+    // 2026-10-27: 이미 'sent'로 기록된 수신자는 다시 보내지 않는다 — 발송 도중 워커가 끊겨 캠페인이 'scheduled'로 남았다가
+    // 다음 스케줄러 실행에서 재시도될 때 앞서 받은 사람에게 같은 메일이 두 번 가는 것을 막는다.
+    if (recipRow && recipRow.delivery_status === 'sent') { successCount++; continue; }
     try {
       const cRes = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records/${cid}`, { headers: { Authorization: headers.Authorization } });
       if (!cRes.ok) { failCount++; continue; }
@@ -36768,14 +36772,43 @@ async function _kmailSendCampaign(env, campaign) {
   // (pb_migrations/..._created_kmail_campaigns.js 참고). 부분성공
   // 상세(성공/실패 수)는 아래 로그로만 남긴다.
   const newStatus = successCount > 0 ? 'sent' : 'failed';
+  const finalPatch = { status: newStatus };
+  if (opts.restoreSendAt) finalPatch.send_at = opts.restoreSendAt;       // 즉시 발송 때 선점용으로 미뤄 둔 send_at을 원래 값으로 되돌린다
   await fetch(`${L1_DEFAULT}/api/collections/kmail_campaigns/records/${campaign.id}`, {
-    method: 'PATCH', headers, body: JSON.stringify({ status: newStatus }),
+    method: 'PATCH', headers, body: JSON.stringify(finalPatch),
   }).catch(e => console.error('[K-Mail Campaign] 상태 갱신 실패:', campaign.id, e.message));
 
   console.log(JSON.stringify({
     tag: 'KMAIL_CAMPAIGN_SENT', campaign_id: campaign.id, owner: campaign.owner_user_guid,
     success: successCount, fail: failCount, ts: new Date().toISOString(),
   }));
+  return { success: successCount, fail: failCount, status: newStatus };
+}
+
+// 2026-10-27 신설 — 대화에서 "지금 바로 보내세요"를 확정한 캠페인을 10분 주기 스케줄러를 기다리지 않고 지금 보낸다.
+// 문구가 사실이 되게 하려는 것이다: 보냈으면 "발송 완료", 못 보냈으면 "발송 접수"라고 정직하게 말할 수 있어야 한다.
+//  ① 선점: 같은 캠페인을 스케줄러가 동시에 집어 두 번 보내지 않도록 send_at을 15분 뒤로 밀어 둔다(status='scheduled && send_at<=now' 조건에서 빠진다).
+//  ② 발송: _kmailSendCampaign — 끝나면 상태(sent/failed)와 원래 send_at을 함께 기록한다.
+//  ③ 도중에 예외가 나면 send_at을 원래대로 되돌려 다음 스케줄러 실행이 이어서 보내게 한다(이미 보낸 사람은 위에서 건너뜀).
+// 반환: { dispatched:false } — 선점 실패 등으로 시도하지 못함(스케줄러에 맡김) | { dispatched:true, success, fail }
+async function _kmailDispatchCampaignNow(env, campaign) {
+  if (!env.EMAIL || !campaign || !campaign.id) return { dispatched: false };
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  const url = `${L1_DEFAULT}/api/collections/kmail_campaigns/records/${campaign.id}`;
+  const originalSendAt = campaign.send_at;
+  let claimed = false;
+  try {
+    const claim = await fetch(url, { method: 'PATCH', headers, body: JSON.stringify({ send_at: new Date(Date.now() + 15 * 60 * 1000).toISOString() }) });
+    if (!claim.ok) return { dispatched: false };
+    claimed = true;
+    const r = await _kmailSendCampaign(env, campaign, { restoreSendAt: originalSendAt });
+    return { dispatched: true, success: r.success, fail: r.fail };
+  } catch (e) {
+    console.error('[K-Mail Campaign] 즉시 발송 실패 — 스케줄러에 맡김:', campaign.id, e.message);
+    if (claimed) await fetch(url, { method: 'PATCH', headers, body: JSON.stringify({ send_at: originalSendAt }) }).catch(() => {});
+    return { dispatched: false };
+  }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -37908,7 +37941,7 @@ async function _kmailChatCreateCampaign(env, guid, parsed) {
     }).catch(e => console.warn('[K-Mail Campaign] 수신자 추적행 생성 실패(계속 진행):', r.email, e.message));
   }));
 
-  return { campaignId: campaign.id, recipientCount: contactIds.length, sendAt: record.send_at, newContactCount };
+  return { campaignId: campaign.id, recipientCount: contactIds.length, sendAt: record.send_at, newContactCount, campaign };
 }
 
 // 2026-09-10 신설 — 캠페인 대화 전문 기록(주피터 지시). campaign_id가
@@ -39446,10 +39479,14 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     }
     try {
       const result = await _kmailChatCreateCampaign(env, guid, parsed);
-      const addressBookNote = result.newContactCount > 0
-        ? ` (신규 ${result.newContactCount}명은 주소록에도 등록했습니다)`
-        : '';
-      const replyText = `${cleanReplyText}\n\n✅ 예약 완료 — 수신자 ${result.recipientCount}명, 발송 예정: ${result.sendAt}${addressBookNote}`;
+      // 2026-10-27: "지금 바로"인 소량 캠페인은 여기서 실제로 보내고 결과를 말한다. 아니면 정직하게 "접수"/"예약"이라고 말한다.
+      const nowMs = Date.now(), sendAtMs = Date.parse(result.sendAt);
+      let outcome = null;
+      if (_kmailIsImmediate(sendAtMs, nowMs) && result.recipientCount <= _kmailInstantSendMax(env)) {
+        outcome = await _kmailDispatchCampaignNow(env, result.campaign).catch(() => ({ dispatched: false }));
+      }
+      const sendStatus = _kmailBuildSendStatus({ nowMs, sendAtMs, recipientCount: result.recipientCount, newContactCount: result.newContactCount, outcome });
+      const replyText = `${cleanReplyText}\n\n${sendStatus.line}`;
       // campaign_id를 클라이언트가 이번 요청에 실어 보내지 않았다면(=
       // 사전에 KMAIL_CAMPAIGN_START 없이 바로 확정한 단발성 캠페인)
       // 위 공용 로깅(pre-dispatch)이 이 턴을 못 잡았으므로 여기서 남긴다.
@@ -39465,11 +39502,11 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
       return new Response(JSON.stringify({
         ok: true,
         reply: replyText,
-        action: { type: 'campaign_created', campaign_id: result.campaignId },
+        action: { type: 'campaign_created', campaign_id: result.campaignId, state: sendStatus.state },
       }), { status: 200, headers: corsHeaders });
     } catch (e) {
       return new Response(JSON.stringify({
-        ok: true, reply: `${cleanReplyText}\n\n(발송 예약 처리 중 오류: ${e.message})`, action: null,
+        ok: true, reply: `${cleanReplyText}\n\n(발송 접수 중 오류: ${e.message}) 아직 발송되지 않았습니다. 다시 시도해 주세요.`, action: null,
       }), { status: 200, headers: corsHeaders });
     }
   }
