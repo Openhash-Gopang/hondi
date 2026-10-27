@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<link rel="icon" href="data:,">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>절세 시뮬레이션 — K-Tax</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+</head>
+<body>
+<script>
+window.PAGE_HERO = {
+  badge: 'K-Tax · 참고용 시뮬레이션',
+  l1: '재무제표를 올리면',
+  l2: '최적의 절세 방안을 시뮬레이션합니다',
+  sub: 'K-Tax 방법론 v0.1(STEP 0→A→B→C→D)에 따라 과소·과다 양방향으로 점검하고, 적법한 전략 안에서 세부담이 가장 낮은 경로를 찾습니다. 세무사·공인회계사의 확인 전에는 확정할 수 없는 참고 자료입니다.',
+  actions: [{ label: 'K-Tax 방법론 v0.1', href: '/docs/ktax-methodology-v0.1.html', style: 'outline' }]
+};
+</script>
+<link rel="stylesheet" href="/assets/site-header.css">
+<script src="/assets/site-header.js"></script>
+<div id="site-hero-mount"></div>
+
+<script>
+  window.K_AUTH_CONFIG = { serviceLabel: "K-Tax 절세 시뮬레이션" };
+  window.HONDI_CHAT_WIDGET_CONFIG = {
+    sp: "SP_tax-accountant-assistant",   // 기본값. 페이지가 열리면 K-Tax 시뮬레이션 SP로 바꾼다(setMode).
+    panelMode: "inline",
+    inlineMount: "#resultMount",
+    mic: false,
+    camera: "touch",
+    maxTokens: 6000,
+    panelTitle: "K-Tax 절세 시뮬레이션",
+    label: "조건을 바꿔 다시 물어보세요",
+    serviceLabel: "K-Tax 절세 시뮬레이션",
+    greeting: "K-Tax 절세 시뮬레이션입니다. 왼쪽에 납세자 정보와 재무제표를 넣고 「시뮬레이션 실행」을 누르면 결과가 여기에 나옵니다. 결과가 나온 뒤에는 이 입력창에서 조건을 바꿔 다시 물어볼 수 있습니다.",
+    onReply: function (reply) { try { window.KtaxSim && window.KtaxSim.parse(reply); } catch (e) { console.error(e); } }
+  };
+</script>
+<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
+<script src="/assets/chat-widget.js"></script>
+
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+:root {
+  --kt-bg:#f8f9fa; --kt-surface:#fff; --kt-border:#e5e7eb; --kt-border2:#d1d5db;
+  --kt-brand:#3ecf8e; --kt-brand-dk:#1a9e6a; --kt-brand-bg:#f0fdf8; --kt-brand-bd:#a7f3d0;
+  --kt-amber:#f59e0b; --kt-amber-bg:#fffbeb; --kt-amber-ink:#92400e;
+  --kt-red:#dc2626; --kt-red-bg:#fef2f2;
+  --kt-text:#0f172a; --kt-text2:#374151; --kt-text3:#6b7280;
+}
+body { background: var(--kt-bg); color: var(--kt-text); font-family: 'Pretendard', -apple-system, sans-serif; font-size: 14px; line-height: 1.7; }
+.kt-wrap { max-width: 1180px; margin: 0 auto; padding: 24px 16px 80px; }
+.kt-notice { background: var(--kt-amber-bg); border: 1px solid #fde68a; color: var(--kt-amber-ink); border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; }
+.kt-notice b { font-weight: 700; }
+.kt-steps { display: flex; gap: 6px; margin: 0 0 18px; flex-wrap: wrap; }
+.kt-step { flex: 1; min-width: 120px; background: var(--kt-surface); border: 1px solid var(--kt-border); border-radius: 10px; padding: 8px 12px; font-size: 12px; color: var(--kt-text3); line-height: 1.45; }
+.kt-step b { display: block; font-size: 12.5px; color: var(--kt-text2); }
+.kt-step.done { background: var(--kt-brand-bg); border-color: var(--kt-brand-bd); }
+.kt-step.done b { color: var(--kt-brand-dk); }
+.kt-step.cur { border-color: var(--kt-brand); box-shadow: 0 0 0 2px var(--kt-brand-bd); }
+.kt-grid { display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.kt-card { background: var(--kt-surface); border: 1px solid var(--kt-border); border-radius: 14px; padding: 18px; }
+.kt-card h2 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.kt-card .sub { color: var(--kt-text3); font-size: 12.5px; margin-bottom: 14px; }
+.kt-field { margin-bottom: 12px; min-width: 0; }
+.kt-field label, .kt-field .lab { display: block; font-size: 12px; color: var(--kt-text3); margin-bottom: 4px; font-weight: 500; }
+.kt-field select, .kt-field input[type=text], .kt-field input[type=date], .kt-field textarea {
+  display: block; width: 100%; padding: 9px 11px; border: 1px solid var(--kt-border2); border-radius: 8px; font: inherit; color: var(--kt-text); background: #fff; }
+.kt-field textarea { min-height: 150px; resize: vertical; line-height: 1.6; }
+.kt-field select:focus, .kt-field input:focus, .kt-field textarea:focus { outline: 2px solid var(--kt-brand); outline-offset: 0; border-color: var(--kt-brand); }
+.kt-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.kt-drop { border: 1.5px dashed var(--kt-border2); border-radius: 10px; padding: 16px 12px; text-align: center; background: #fafafa; cursor: pointer; color: var(--kt-text3); font-size: 13px; transition: .15s; }
+.kt-drop:hover, .kt-drop.over, .kt-drop:focus-visible { border-color: var(--kt-brand); background: var(--kt-brand-bg); outline: none; }
+.kt-drop.has { border-style: solid; border-color: var(--kt-brand-bd); background: var(--kt-brand-bg); color: var(--kt-text); }
+.kt-drop .nm { font-weight: 600; word-break: break-all; }
+.kt-drop .meta { font-size: 12px; color: var(--kt-text3); margin-top: 2px; }
+.kt-drop .x { margin-top: 6px; font-size: 12px; color: var(--kt-red); background: none; border: 0; cursor: pointer; text-decoration: underline; font-family: inherit; }
+.kt-hint { font-size: 12px; color: var(--kt-text3); margin-top: 5px; }
+.kt-hint.warn { color: var(--kt-amber-ink); }
+.kt-hint.err { color: var(--kt-red); }
+.kt-opts { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--kt-text2); }
+.kt-opts label { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: var(--kt-text2); margin: 0; }
+.kt-opts input { margin-top: 5px; }
+.kt-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.kt-btn { padding: 10px 18px; border: 0; border-radius: 8px; background: var(--kt-brand-dk); color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+.kt-btn:hover { background: #15805a; }
+.kt-btn:disabled { opacity: .55; cursor: not-allowed; }
+.kt-btn.sec { background: #fff; color: var(--kt-text2); border: 1px solid var(--kt-border2); font-weight: 500; }
+.kt-btn.sec:hover { background: #f3f4f6; }
+.kt-btn:focus-visible { outline: 2px solid var(--kt-text); outline-offset: 2px; }
+.kt-left { position: sticky; top: 12px; }
+#resultMount { min-height: 300px; }
+#resultMount:empty::before { content: '결과가 여기에 표시됩니다.'; display: block; padding: 60px 20px; text-align: center; color: var(--kt-text3); border: 1px dashed var(--kt-border2); border-radius: 14px; background: #fff; }
+#hcw-panel.hcw-inline { max-width: none !important; --hcw-inline-h: min(680px, 72vh) !important; }
+.kt-method { margin-top: 22px; }
+.kt-method details { background: var(--kt-surface); border: 1px solid var(--kt-border); border-radius: 12px; padding: 12px 16px; margin-bottom: 8px; }
+.kt-method summary { cursor: pointer; font-weight: 600; font-size: 13.5px; }
+.kt-method p, .kt-method li { font-size: 13px; color: var(--kt-text2); margin-top: 6px; }
+.kt-method ul { margin-left: 18px; }
+.kt-toast { position: fixed; right: 18px; bottom: 18px; background: #111827; color: #fff; padding: 10px 14px; border-radius: 10px; font-size: 13px; opacity: 0; transform: translateY(8px); transition: .25s; pointer-events: none; z-index: 99; max-width: calc(100vw - 36px); }
+.kt-toast.on { opacity: 1; transform: none; }
+@media (max-width: 900px) { .kt-grid { grid-template-columns: minmax(0, 1fr); } .kt-left { position: static; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="kt-wrap">
+  <div class="kt-notice" role="note"><b>참고용 시뮬레이션입니다.</b> 이 화면의 세액·절감액은 모두 추정이며 확정 세액이 아닙니다. AI는 신고·서명·제출을 하지 않으며, 신고 전에 세무사 또는 공인회계사의 확인이 필요합니다(방법론 R8). 사실에 맞지 않는 거래나 증빙 없는 비용을 만드는 방안은 제시하지 않습니다.</div>
+
+  <div class="kt-steps" id="ktSteps" aria-label="진행 단계">
+    <div class="kt-step" data-s="0"><b>STEP 0</b>사실·범위 확정</div>
+    <div class="kt-step" data-s="A"><b>STEP A</b>과세요건·역방향 추론</div>
+    <div class="kt-step" data-s="B"><b>STEP B</b>세액 산출·전략 비교</div>
+    <div class="kt-step" data-s="C"><b>STEP C</b>검증·확신도</div>
+    <div class="kt-step" data-s="D"><b>STEP D</b>집행 계획</div>
+  </div>
+
+  <div class="kt-grid">
+    <div class="kt-left">
+      <div class="kt-card">
+        <h2>입력</h2>
+        <p class="sub">재무제표를 첨부하고 상황을 적어 주세요. 입력하지 않은 사실은 가정으로 표시되고, 핵심 사실이 비면 먼저 질문합니다.</p>
+
+        <div class="kt-two">
+          <div class="kt-field">
+            <label for="fType">납세자 유형</label>
+            <select id="fType">
+              <option>법인(중소기업)</option>
+              <option>법인(중견·일반)</option>
+              <option>개인사업자</option>
+              <option>근로소득자·종합소득 개인</option>
+              <option>비영리법인</option>
+              <option>기타(설명란에 기재)</option>
+            </select>
+          </div>
+          <div class="kt-field">
+            <label for="fYear">과세기간</label>
+            <input type="text" id="fYear" placeholder="예: 2026 사업연도" autocomplete="off">
+          </div>
+        </div>
+        <div class="kt-field">
+          <label for="fDate">기준일 (법령 기준일)</label>
+          <input type="date" id="fDate">
+        </div>
+
+        <div class="kt-field">
+          <span class="lab" id="fileLab">재무제표 첨부</span>
+          <div class="kt-drop" id="drop" tabindex="0" role="button" aria-labelledby="fileLab">
+            <div id="dropIdle">파일을 끌어다 놓거나 눌러서 선택<br><span style="font-size:12px">엑셀(.xlsx·.xls), PDF, 워드(.docx), 한글(.hwpx), CSV·텍스트, 사진·스캔</span></div>
+            <div id="dropHas" hidden><div class="nm" id="dropName"></div><div class="meta" id="dropMeta"></div><button type="button" class="x" id="dropX">첨부 취소</button></div>
+          </div>
+          <input type="file" id="file" hidden accept="image/*,.pdf,.docx,.hwpx,.txt,.md,.csv,.xlsx,.xls">
+          <div class="kt-hint" id="fileHint">재무상태표와 손익계산서를 한 파일에 담아 주세요. 파일은 하나만 전달됩니다. 글자로 읽은 내용은 앞 2만 자까지 전달됩니다.</div>
+        </div>
+
+        <div class="kt-field">
+          <label for="fNote">상황·목표·계획</label>
+          <textarea id="fNote" placeholder="예) 올해 영업이익이 크게 늘었습니다. 내년 초 설비 교체와 직원 3명 채용을 계획 중이고, 대표이사 가지급금이 있습니다. 이월결손금과 투자세액공제 활용 여부를 알고 싶습니다."></textarea>
+          <div class="kt-hint">들어갈수록 정확해지는 정보: 특수관계 거래, 가지급금·가수금, 이월결손금, 고용·투자 계획, 이미 신고한 내용, 대표자 보수 수준.</div>
+        </div>
+
+        <div class="kt-field">
+          <span class="lab">출력 범위</span>
+          <div class="kt-opts">
+            <label><input type="checkbox" id="oFull" checked> STEP 0~D 전 과정 (역방향 추론·검증 포함)</label>
+            <label><input type="checkbox" id="oSum"> 결론과 결과표를 먼저, 상세는 뒤에</label>
+          </div>
+        </div>
+
+        <div class="kt-btns">
+          <button type="button" class="kt-btn" id="btnRun">시뮬레이션 실행</button>
+          <button type="button" class="kt-btn sec" id="btnSample">예시 채우기</button>
+          <button type="button" class="kt-btn sec" id="btnReset">초기화</button>
+        </div>
+        <div class="kt-hint" id="runHint"></div>
+      </div>
+    </div>
+
+    <div>
+      <div id="resultMount"></div>
+    </div>
+  </div>
+
+  <div class="kt-method">
+    <details>
+      <summary>적용되는 K-Tax 방법론</summary>
+      <ul>
+        <li><b>목표:</b> 적법한 전략 집합 안에서 세부담이 가장 낮은 경로(T*)를 찾고, 과소·과다 납부를 모두 오류로 봅니다.</li>
+        <li><b>역방향 추론(R3):</b> 결론 전에 과세관청이 부인할 가장 강한 논거와 놓친 공제·감면을 모두 점검합니다.</li>
+        <li><b>적법성 게이트(R4):</b> 가장행위, 부당행위계산 부인 대상, 조세회피 목적만 있는 거래는 후보에서 제외합니다.</li>
+        <li><b>계산 공개(R2):</b> 산식을 단계별로 보여 주고 두 경로로 검산합니다. 세율·한도를 확인하지 못하면 「확인 필요」로 표시합니다.</li>
+        <li><b>자격자 확인(R8):</b> 집행 전 세무사·공인회계사가 확인할 항목을 쟁점별로 제시합니다.</li>
+      </ul>
+      <p>전체 내용은 <a href="/docs/ktax-methodology-v0.1.html" target="_blank" rel="noopener">K-Tax 방법론 v0.1</a>을 보세요.</p>
+    </details>
+    <details>
+      <summary>한계</summary>
+      <ul>
+        <li>이 시뮬레이션의 성능은 아직 검증되지 않았습니다. 평가 방법은 방법론 제8장에 제안되어 있습니다.</li>
+        <li>실시간 법령 조회 기능이 없어, 최신 개정이 반영되지 않았을 수 있습니다. 기준일과 확인 필요 항목을 반드시 대조하세요.</li>
+        <li>첨부 파일은 글자로 읽을 수 있는 범위에서만 반영됩니다. 스캔 품질이 낮으면 숫자를 잘못 읽을 수 있으니 합계를 대조하세요.</li>
+      </ul>
+    </details>
+  </div>
+</div>
+<div class="kt-toast" id="ktToast" role="status"></div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var SP_URL = '/prompts/SP-ktax-simulation_v0_1.md';
+  var KEY = 'ktax-sim-form-v1';
+  var attached = null;          // { file, label }
+  var modeReady = false, spText = null;
+
+  function toast(m) { var t = $('ktToast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(function () { t.classList.remove('on'); }, 3200); }
+  function hint(el, msg, cls) { el.textContent = msg || ''; el.className = 'kt-hint' + (cls ? ' ' + cls : ''); }
+
+  // ── 입력 저장(파일 제외) ──
+  function save() { try { localStorage.setItem(KEY, JSON.stringify({ t: $('fType').selectedIndex, y: $('fYear').value, d: $('fDate').value, n: $('fNote').value, f: $('oFull').checked, s: $('oSum').checked })); } catch (e) {} }
+  function load() {
+    var v = null; try { v = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+    if (v) { $('fType').selectedIndex = v.t || 0; $('fYear').value = v.y || ''; $('fDate').value = v.d || ''; $('fNote').value = v.n || ''; $('oFull').checked = v.f !== false; $('oSum').checked = !!v.s; }
+    if (!$('fDate').value) { var d = new Date(Date.now() + 9 * 3600e3); $('fDate').value = d.toISOString().slice(0, 10); }
+  }
+  ['fType', 'fYear', 'fDate', 'fNote', 'oFull', 'oSum'].forEach(function (id) { $(id).addEventListener('input', save); $(id).addEventListener('change', save); });
+
+  // ── 진행 표시 ──
+  var ORDER = ['0', 'A', 'B', 'C', 'D'];
+  function setStep(s) {
+    var i = ORDER.indexOf(s); if (i < 0) return;
+    Array.prototype.forEach.call(document.querySelectorAll('.kt-step'), function (el) {
+      var j = ORDER.indexOf(el.getAttribute('data-s'));
+      el.classList.toggle('done', j <= i); el.classList.toggle('cur', j === i);
+    });
+  }
+  function parse(reply) {
+    var m = /\[K-Tax 시뮬레이션\s*\|\s*현재:\s*STEP\s*([0ABCD])/i.exec(reply || '');
+    if (m) setStep(m[1].toUpperCase());
+  }
+  window.KtaxSim = { parse: parse };
+
+  // ── SP 적용 ──
+  function whenWidget(cb, tries) {
+    if (window.HondiChatWidget && window.HondiChatWidget.setMode) return cb();
+    if ((tries || 0) > 100) return cb(new Error('widget'));
+    setTimeout(function () { whenWidget(cb, (tries || 0) + 1); }, 100);
+  }
+  function applyMode() {
+    return fetch(SP_URL, { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw new Error('SP ' + r.status); return r.text(); }).then(function (t) {
+      spText = t;
+      return new Promise(function (ok, no) {
+        whenWidget(function (err) {
+          if (err) return no(err);
+          var done = window.HondiChatWidget.setMode({
+            system: spText,
+            context: '사용자는 K-Tax 절세 시뮬레이션 화면에 있다. 왼쪽 입력란에서 보낸 재무제표와 설명으로 STEP 0~D 시뮬레이션을 진행한다. 이 화면의 결과는 참고용이며 확정 세액이 아니다.',
+            greeting: '결과가 여기에 표시됩니다. 왼쪽에 입력하고 「시뮬레이션 실행」을 눌러 주세요. 결과가 나온 뒤에는 이 입력창에서 조건을 바꿔 다시 물어볼 수 있습니다.',
+            maxTokens: 6000
+          });
+          if (done === false) return no(new Error('busy'));
+          modeReady = true; ok();
+        });
+      });
+    });
+  }
+  applyMode().catch(function (e) { console.warn('[ktax-sim] SP 적용 지연', e); });
+
+  // ── 파일 ──
+  function fmtSize(n) { return n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB'; }
+  var xlsxP = null;
+  function loadXlsx() {
+    if (window.XLSX) return Promise.resolve();
+    if (!xlsxP) xlsxP = new Promise(function (ok, no) {
+      var s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'; s.onload = ok; s.onerror = function () { xlsxP = null; no(new Error('xlsx load')); }; document.head.appendChild(s);
+    });
+    return xlsxP;
+  }
+  function xlsxToCsvFile(file) {
+    return loadXlsx().then(function () { return file.arrayBuffer(); }).then(function (buf) {
+      var wb = window.XLSX.read(buf, { type: 'array' });
+      var out = [];
+      wb.SheetNames.forEach(function (n) {
+        var csv = window.XLSX.utils.sheet_to_csv(wb.Sheets[n], { blankrows: false }).trim();
+        if (csv) out.push('## 시트: ' + n + '\n' + csv);
+      });
+      var text = out.join('\n\n');
+      return { file: new File([text], file.name.replace(/\.(xlsx|xls)$/i, '') + '.csv', { type: 'text/csv' }), chars: text.length, sheets: wb.SheetNames.length };
+    });
+  }
+  function showAttached(label, meta) {
+    $('dropIdle').hidden = true; $('dropHas').hidden = false; $('drop').classList.add('has');
+    $('dropName').textContent = '📎 ' + label; $('dropMeta').textContent = meta || '';
+  }
+  function clearAttached() {
+    attached = null; $('file').value = ''; $('dropIdle').hidden = false; $('dropHas').hidden = true; $('drop').classList.remove('has');
+    hint($('fileHint'), '재무상태표와 손익계산서를 한 파일에 담아 주세요. 파일은 하나만 전달됩니다. 글자로 읽은 내용은 앞 2만 자까지 전달됩니다.');
+  }
+  function pick(file) {
+    if (!file) return;
+    if (file.size > 25 * 1048576) { hint($('fileHint'), '파일이 너무 큽니다(25MB 이하).', 'err'); return; }
+    if (/\.(xlsx|xls)$/i.test(file.name)) {
+      showAttached(file.name, '엑셀을 읽는 중…');
+      xlsxToCsvFile(file).then(function (r) {
+        attached = { file: r.file, label: file.name };
+        showAttached(file.name, fmtSize(file.size) + ' · 시트 ' + r.sheets + '개 · 글자 ' + r.chars.toLocaleString() + '자');
+        if (r.chars > 20000) hint($('fileHint'), '내용이 2만 자를 넘어 앞부분만 전달됩니다. 재무상태표와 손익계산서만 남긴 파일을 쓰는 것이 좋습니다.', 'warn');
+        else hint($('fileHint'), '엑셀의 모든 시트를 글자로 바꿔 전달합니다.');
+      }).catch(function () { clearAttached(); hint($('fileHint'), '엑셀을 읽지 못했습니다. CSV나 PDF로 저장해 올려 주세요.', 'err'); });
+      return;
+    }
+    attached = { file: file, label: file.name };
+    showAttached(file.name, fmtSize(file.size));
+    hint($('fileHint'), /^image\//.test(file.type) ? '사진·스캔은 이미지로 전달됩니다. 숫자가 흐리면 합계를 대조해 주세요.' : '실행하면 글자를 읽어 전달합니다.');
+  }
+  $('drop').addEventListener('click', function (e) { if (e.target.id !== 'dropX') $('file').click(); });
+  $('drop').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('file').click(); } });
+  $('file').addEventListener('change', function () { pick($('file').files && $('file').files[0]); });
+  $('dropX').addEventListener('click', function (e) { e.stopPropagation(); clearAttached(); });
+  ['dragenter', 'dragover'].forEach(function (ev) { $('drop').addEventListener(ev, function (e) { e.preventDefault(); $('drop').classList.add('over'); }); });
+  ['dragleave', 'drop'].forEach(function (ev) { $('drop').addEventListener(ev, function (e) { e.preventDefault(); $('drop').classList.remove('over'); }); });
+  $('drop').addEventListener('drop', function (e) { var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) pick(f); });
+
+  // 위젯의 첨부 입력에 파일을 넣어, 위젯이 쓰는 글자 추출·이미지 변환 경로를 그대로 쓴다.
+  function pushToWidget(file) {
+    return new Promise(function (ok, no) {
+      var inp = document.getElementById('hcw-file'), nm = document.getElementById('hcw-attach-name');
+      if (!inp || !nm) return no(new Error('입력창이 아직 준비되지 않았습니다.'));
+      var dt = new DataTransfer(); dt.items.add(file); inp.files = dt.files;
+      inp.dispatchEvent(new Event('change', { bubbles: true }));
+      var n = 0;
+      (function wait() {
+        var t = nm.textContent || '';
+        if (t && t.indexOf('읽는 중') < 0) return (t.indexOf('읽지 못함') >= 0) ? no(new Error('첨부 파일을 읽지 못했습니다. PDF나 사진으로 다시 올려 보세요.')) : ok();
+        if (++n > 150) return no(new Error('첨부 파일 읽기가 오래 걸립니다.'));
+        setTimeout(wait, 200);
+      })();
+    });
+  }
+
+  // ── 실행 ──
+  function compose() {
+    var lines = [];
+    lines.push('K-Tax 방법론 v0.1에 따라 절세 시뮬레이션을 진행해 주세요.');
+    lines.push('- 납세자 유형: ' + $('fType').value);
+    lines.push('- 과세기간: ' + ($('fYear').value.trim() || '(미입력 — 첨부에서 확인하고, 불명확하면 질문)'));
+    lines.push('- 기준일(법령 기준): ' + ($('fDate').value || '(미입력)'));
+    lines.push('- 첨부 재무제표: ' + (attached ? attached.label : '없음 (설명만으로 진행 가능한 범위를 정하고 필요한 자료를 요청)'));
+    var note = $('fNote').value.trim();
+    lines.push('- 상황·목표·계획: ' + (note || '(없음)'));
+    lines.push('- 출력 범위: ' + ($('oSum').checked ? '결론과 결과표를 먼저 쓰고 상세는 뒤에' : '기본 구성') + (($('oFull').checked) ? ', STEP 0~D 전 과정(역방향 추론·검증 포함)' : ', 핵심 단계 위주로 간략히'));
+    lines.push('첨부와 위 정보만을 입력값으로 쓰고, 없는 사실은 가정으로 표시해 주세요.');
+    return lines.join('\n');
+  }
+  var running = false;
+  $('btnRun').addEventListener('click', function () {
+    if (running) return;
+    var note = $('fNote').value.trim();
+    if (!attached && !note) { hint($('runHint'), '재무제표를 첨부하거나 상황을 입력해 주세요.', 'err'); return; }
+    hint($('runHint'), '');
+    running = true; $('btnRun').disabled = true; $('btnRun').textContent = '실행 중…';
+    var prev = Promise.resolve();
+    if (!modeReady) prev = applyMode();
+    prev.then(function () {
+      var w = window.HondiChatWidget;
+      if (w.isBusy && w.isBusy()) throw new Error('이전 응답을 기다리는 중입니다. 잠시 뒤 다시 눌러 주세요.');
+      // 새 실행은 새 대화로 시작한다(앞선 결과가 섞이지 않게).
+      var again = w.setMode({ system: spText, context: '사용자는 K-Tax 절세 시뮬레이션 화면에 있다. 왼쪽 입력란에서 보낸 재무제표와 설명으로 STEP 0~D 시뮬레이션을 진행한다. 이 화면의 결과는 참고용이며 확정 세액이 아니다.', greeting: '시뮬레이션을 시작합니다.', maxTokens: 6000 });
+      if (again === false) throw new Error('이전 응답을 기다리는 중입니다.');
+      setStep('__none__');
+      Array.prototype.forEach.call(document.querySelectorAll('.kt-step'), function (el) { el.classList.remove('done', 'cur'); });
+      return w.open();
+    }).then(function () {
+      return attached ? pushToWidget(attached.file) : null;
+    }).then(function () {
+      return window.HondiChatWidget.send(compose());
+    }).then(function () {
+      var m = $('resultMount'); try { m.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+    }).catch(function (e) {
+      hint($('runHint'), (e && e.message) || '실행하지 못했습니다. 잠시 뒤 다시 시도해 주세요.', 'err');
+    }).then(function () { running = false; $('btnRun').disabled = false; $('btnRun').textContent = '시뮬레이션 실행'; });
+  });
+
+  $('btnSample').addEventListener('click', function () {
+    $('fType').selectedIndex = 0; $('fYear').value = '2026 사업연도';
+    $('fNote').value = '제조업 중소기업(직원 24명)입니다. 올해 영업이익이 전년보다 크게 늘었고, 대표이사 가지급금이 있습니다. 내년 1분기에 생산설비 교체와 신규 채용 3명을 계획 중입니다. 이월결손금이 남아 있는지, 투자·고용 관련 세액공제를 쓸 수 있는지, 지금 결산 전에 할 수 있는 적법한 조정이 있는지 알고 싶습니다. (예시 입력입니다. 실제 사정으로 바꿔 주세요.)';
+    save(); toast('예시를 채웠습니다. 재무제표를 첨부해 실행해 보세요.');
+  });
+  $('btnReset').addEventListener('click', function () {
+    $('fYear').value = ''; $('fNote').value = ''; $('fType').selectedIndex = 0; $('oFull').checked = true; $('oSum').checked = false;
+    clearAttached(); save(); hint($('runHint'), '');
+    Array.prototype.forEach.call(document.querySelectorAll('.kt-step'), function (el) { el.classList.remove('done', 'cur'); });
+    toast('입력을 초기화했습니다. 대화 내용은 결과 창에서 새 실행 시 비워집니다.');
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>
