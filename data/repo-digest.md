@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-27 17:21 KST · 기준 커밋 8cf42b60
+- 갱신: 2026-10-27 17:50 KST · 기준 커밋 97e235b5
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-27 Merge pull request #802 from Openhash-Gopang/feat/ktax-simulation-page
+- 2026-10-27 feat: K-Tax 절세 시뮬레이션 페이지와 SP 추가, 세무사 보조 AI 페이지에 버튼 연결
 - 2026-10-27 docs: state the K-Evaluation methodology goal at the top of the related documents
 - 2026-10-27 Merge pull request #800 from Openhash-Gopang/feat/ktax-methodology-v0-1-button
 - 2026-10-27 feat: 세무사 보조 AI 페이지에 K-Tax 방법론 v0.1 버튼과 문서 추가
@@ -42,8 +44,6 @@
 - 2026-10-27 fix(klaw): 검증 페이지 헤더 제목을 두 줄로 표시
 - 2026-10-27 Merge pull request #774 from Openhash-Gopang/feat/klaw-deduction-tab-v2-20261027
 - 2026-10-27 feat(klaw): 연역적 방법론 탭 추가, 버튼 3x2 격자 정렬, 안내 박스 중립 스타일
-- 2026-10-27 Merge pull request #773 from Openhash-Gopang/feat/klaw-embed-tabs-20261026
-- 2026-10-26 feat(klaw): 비교 실험·갱신 계획을 페이지 내 탭으로 표시
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
@@ -76,6 +76,7 @@
 - /pages/klaw-llm-verdict-validation.html — K-Law 후보 LLM 가상 판결문 검증
 - /pages/klaw-research.html — 법원 중심에서 당사자 합의 중심으로 축의 이동
 - /pages/klaw-simulation-record.html — 가상 판결문 생성 테스트 기록
+- /pages/ktax-simulation.html — 절세 시뮬레이션 — K-Tax
 - /pages/legislative-research.html — 입법 — DAWN과 선례의 순환
 - /pages/naviwb.html — naviwb
 - /pages/openhash.html — OpenHash
