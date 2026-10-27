@@ -99,7 +99,7 @@
     var third = second ? heroCtaLink(config && config.heroButton3, 'ph-hero-cta ph-hero-cta-2 ph-hero-cta-3') : '';
     var intro = heroCtaLink(introButtonFor(config), 'ph-hero-cta ph-hero-cta-2 ph-hero-cta-intro', true);
     // 2026-10-27 — PAGE_HEADER.heroButtonLast = { label, href, title }: 「기술 소개」 오른쪽 맨 끝에 놓는 버튼(법무사 페이지의 「법무 시뮬레이션」).
-    var last = intro ? heroCtaLink(config && config.heroButtonLast, 'ph-hero-cta ph-hero-cta-2 ph-hero-cta-3') : '';
+    var last = (intro || first) ? heroCtaLink(config && config.heroButtonLast, 'ph-hero-cta ph-hero-cta-2 ph-hero-cta-3') : '';
     if (!first && !intro) return '';
     var count = (first ? 1 : 0) + (second ? 1 : 0) + (third ? 1 : 0) + (intro ? 1 : 0) + (last ? 1 : 0);
     // 2026-10-27 — PAGE_HEADER.introFirst === true 면 「기술 소개」를 맨 앞(왼쪽)에 두고 나머지 버튼을 그 오른쪽에 놓는다.
