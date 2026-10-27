@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-27 17:05 KST · 기준 커밋 6432b88d
+- 갱신: 2026-10-27 17:08 KST · 기준 커밋 2a0d0788
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-27 feat(auth): 메일 아이디를 혼디 아이디로 — 배지에 아이디 표시, 읽기 쉬운 기본값, 가입 직후 선택 화면(건너뛰기), 아이디 바꾸기(30일 3번)
 - 2026-10-27 pages: add auction-price-prediction validation section to appraiser intro (intro-appraiser)
 - 2026-10-27 admin: add confidentiality notice to all proposals; finalize regional equity proposals (print style, legal wording)
 - 2026-10-27 admin: add regional equity-purchase proposals (Busan, Ulsan, Gyeongnam, Jeju)
@@ -43,7 +44,6 @@
 - 2026-10-26 Merge pull request #772 from Openhash-Gopang/feat/klaw-nav-buttons-20261026
 - 2026-10-26 feat(klaw): LLM 검증 페이지에 K-Law 비교 실험·갱신 계획 버튼 추가, 설계 문서 2건 게재
 - 2026-10-26 feat(admin): admin-only document store (admin_proposals) served by the Worker behind the admin Bearer token
-- 2026-10-24 Merge pull request #770 from Openhash-Gopang/feat/navi-guide-start-chat-20261024
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
