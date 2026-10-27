@@ -1,9 +1,12 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-27 10:30 KST · 기준 커밋 9eb7d4b2
+- 갱신: 2026-10-27 10:35 KST · 기준 커밋 c73e35c7
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-27 docs: add auction-price-prediction validation method to appraiser proposal (new 2-4)
+- 2026-10-27 Merge pull request #789 from Openhash-Gopang/feat/sido-proposal-button-daegu-incheon-daejeon-sejong-gwangju
+- 2026-10-27 gov-agency: add 사업 제안 proposals for Daegu, Incheon, Daejeon, Sejong, Gwangju
 - 2026-10-27 Merge pull request #788 from Openhash-Gopang/feat/sido-proposal-button-jeju-busan-ulsan-gyeongnam
 - 2026-10-27 gov-agency: add 사업 제안 proposals for Jeju, Busan, Ulsan, Gyeongnam
 - 2026-10-27 feat: 직역 전문가 페이지 헤더에 기술 소개 버튼(새 탭) + 소개서 5종
@@ -41,9 +44,6 @@
 - 2026-10-24 Merge pull request #766 from Openhash-Gopang/feat/k-services-start-chat-20261024
 - 2026-10-24 feat(k-services): 서비스 탭마다 제공자 쪽 SP로 바뀌는 시작 영역(대화창) 추가
 - 2026-10-24 Merge pull request #765 from Openhash-Gopang/feat/sp-infra-provider-5-20261024
-- 2026-10-24 feat(sp): 인프라 SP 5종 신설 — 세무(국세청)·교육(학교·대학)·금융(은행·보험·증권사)·투자(거래소)·거래(이커머스) 서비스 제공자 쪽
-- 2026-10-24 Merge pull request #764 from Openhash-Gopang/feat/sp-klaw-v2-20261024
-- 2026-10-24 feat(sp): K-Law 인프라 SP(SP-01_klaw v2.0) 신설 — 서비스 제공자 쪽 사건담당관
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
