@@ -4712,9 +4712,11 @@ onRecordBeforeCreateRequest((e) => {
 // 지정이 언제 이뤄져야 하는지" 논의 끝에, 가입 시점에 항상 기본값이
 // 있게 만들기로 결정) ──────────────────────────────────────────
 //
-// worker.js _kmailGenerateMailIdCandidate와 완전히 동일한 알고리즘
-// (HMAC-SHA256(MAIL_ID_SECRET, "mail-id-seed:"+guid+":"+counter)의 앞
-// 8자리 hex)을 여기서도 그대로 재현한다 — 두 곳이 달라지면 나중에
+// worker.js _kmailGenerateMailIdCandidate와 완전히 동일한 알고리즘을 여기서도 그대로 재현한다.
+// 2026-10-27 변경 — 8자리 hex 대신 읽기 쉬운 <형용사>-<명사>-<세 자리 숫자>(예: swift-heron-482):
+// h = HMAC-SHA256(MAIL_ID_SECRET, "mail-id-seed:"+guid+":"+counter) 16진수에서 앞 4자리→형용사, 다음 4자리→명사,
+// 그다음 4자리→100~999. 단어 목록·계산식은 src/worker/mail-id.js와 같아야 하며 tests/mail-id.test.mjs가 일치를 확인한다.
+// (이 파일의 전역 선언은 핸들러 안에서 보이지 않으므로 목록을 콜백 안에 둔다.) — 두 곳이 달라지면 나중에
 // 사용자가 "내 메일 ID" 화면에서 "자동으로 만들기"를 다시 눌렀을 때
 // 이미 배정된 값과 다른 값이 나올 수 있어 혼란을 준다.
 //
@@ -4747,10 +4749,12 @@ onRecordAfterCreateRequest((e) => {
       return;
     }
 
+    const ADJ = ["swift","calm","bright","brave","clever","gentle","happy","kind","lucky","merry","noble","proud","quick","quiet","rapid","sharp","shiny","silent","smart","solid","steady","sunny","tidy","vivid","warm","wise","witty","young","bold","crisp","eager","fair","fresh","grand","honest","jolly","keen","lively","mighty","neat","polite","ready","sincere","snug","sound","stable","sturdy","super","true","upbeat","vast","zesty","amber","azure","coral","golden","ivory","jade","olive","pearl","ruby","silver","teal"];
+    const NOUN = ["heron","falcon","maple","river","cedar","harbor","meadow","pebble","lantern","compass","anchor","beacon","bridge","canyon","comet","dolphin","ember","forest","glacier","island","jasmine","kestrel","lagoon","lotus","marble","nebula","orchid","otter","panda","pine","quartz","raven","sparrow","summit","tulip","valley","willow","zephyr","aster","birch","breeze","clover","dune","eagle","fern","garden","hazel","iris","juniper","koala","lily","mango","nectar","oasis","plum","quail","reef","sage","thistle","tiger","violet","whale","yarrow"];
     const MAX_TRIES = 10;
     for (let counter = 0; counter < MAX_TRIES; counter++) {
       const hash = $security.hs256(`mail-id-seed:${guid}:${counter}`, secret);
-      const candidate = hash.substring(0, 8);
+      const candidate = ADJ[parseInt(hash.substring(0, 4), 16) % ADJ.length] + "-" + NOUN[parseInt(hash.substring(4, 8), 16) % NOUN.length] + "-" + String((parseInt(hash.substring(8, 12), 16) % 900) + 100);
 
       const existing = $app.dao().findRecordsByFilter(
         "kmail_user_settings",
