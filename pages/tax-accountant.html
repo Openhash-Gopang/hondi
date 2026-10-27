@@ -17,7 +17,8 @@ window.PAGE_HEADER = {
   h1: '세무사 업무 서류를<br>대화로 작성해 웹 표준 서식으로 제출합니다',
   sub: '작성할 서류를 목록에서 고르거나 아래 입력창으로 요청하면, 필요한 정보를 물어 서류 초안을 작성합니다.',
   disclaimer: '관계 법령에 따라, 모든 보조 AI는 인간 전문가의 업무를 보조하며, 단독으로 기능하지 않는다. 작성된 초안은 세무사의 검토·확정 전에는 사용할 수 없다.',
-  disclaimerDismissKey: 'tax-accountant'
+  disclaimerDismissKey: 'tax-accountant',
+  heroButton: { label: '절세 시뮬레이션', href: '/pages/ktax-simulation.html', title: '재무제표를 올리면 K-Tax 방법론으로 절세 방안을 시뮬레이션합니다 (참고용)' }
 };
 </script>
 <link rel="stylesheet" href="/assets/ph-header.css">
@@ -120,14 +121,6 @@ window.PRO_DOC_PAGE = {"catalog":[{"id":"A-1","tab":"부가가치세","title":"�
     a.title = 'K-Tax 방법론 v0.1 (초안) — 절세 전략 수립·집행 방법과 성능 평가 제안';
     a.textContent = 'K-Tax 방법론';
     nr.insertBefore(a, nr.firstChild);
-    if (!document.getElementById('ktaxSimBtn')) {
-      var s = document.createElement('a');
-      s.id = 'ktaxSimBtn'; s.className = 'lr-nav-btn'; s.href = '/pages/ktax-simulation.html';
-      s.style.textDecoration = 'none';
-      s.title = '재무제표를 올리면 K-Tax 방법론으로 절세 방안을 시뮬레이션합니다 (참고용)';
-      s.textContent = '절세 시뮬레이션';
-      nr.insertBefore(s, nr.firstChild);
-    }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(add, 0); });
   else setTimeout(add, 0);
