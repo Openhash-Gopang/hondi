@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-28 07:20 KST · 기준 커밋 09babbba
+- 갱신: 2026-10-28 07:43 KST · 기준 커밋 9d446001
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-28 feat(kmail): 발송 직후 '보낸 메일 내용' 표시 + 답장 주소(reply-to)를 보내는 사람 자신으로
 - 2026-10-28 feat(kmail): 연락처 수정 API 에 전화번호·주소·웹사이트·메모 추가
 - 2026-10-28 feat(kmail): 이름만 말해도 주소록 조회 후 '받는 사람 이름<이메일>'로 확인
 - 2026-10-28 feat(ui): 공용 아이디 배지 — 아이디만 표시, 보내는 이름 인라인 편집, 세로 점 세 개(⋮) 설정 링크
@@ -43,7 +44,6 @@
 - 2026-10-27 docs: state the K-Evaluation methodology goal at the top of the related documents
 - 2026-10-27 Merge pull request #800 from Openhash-Gopang/feat/ktax-methodology-v0-1-button
 - 2026-10-27 feat: 세무사 보조 AI 페이지에 K-Tax 방법론 v0.1 버튼과 문서 추가
-- 2026-10-27 feat(auth): 메일 아이디를 혼디 아이디로 — 배지에 아이디 표시, 읽기 쉬운 기본값, 가입 직후 선택 화면(건너뛰기), 아이디 바꾸기(30일 3번)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
