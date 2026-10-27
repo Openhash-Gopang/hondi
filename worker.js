@@ -18,6 +18,7 @@ import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
 import { profilePhoneFilter, last8Filter, pickGuidByLast8 } from './src/worker/phone-lookup.js';
 import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
+import { checkMailId as _checkMailId, defaultMailIdFromHash as _defaultMailIdFromHash, normalizeMailId as _normMailId, changePolicyConfig as _mailIdPolicy, evaluateChange as _mailIdEvaluate, recordChange as _mailIdRecordChange, recordConfirm as _mailIdRecordConfirm, limitMessage as _mailIdLimitMessage, readState as _mailIdReadState, writeState as _mailIdWriteState } from './src/worker/mail-id.js';
 import { makeDigitClaimHandler } from './src/worker/digit-claim-handler.js';
 import { makePocketBaseDigitStore } from './src/worker/digit-claim-store.js';
 import { makeOrgSiteHandler } from './src/worker/org-site-handler.js';
@@ -13673,6 +13674,10 @@ export default {
     // 을 쓴다 — 관리자 전용 별도 시크릿을 새로 요구하지 않기 위함.
     if (pathname === '/kmail/fetch-content-check' && request.method === 'GET') return handleKmailFetchContentCheck(request, url, env, corsHeaders, ctx);
     if (pathname === '/kmail/mail-id/auto' && request.method === 'POST') return handleKmailMailIdAuto(request, env, corsHeaders);
+    // 2026-10-27 신설 — 메일 아이디 선택 화면·배지용(상태 조회, 추천, 선택 확정/건너뛰기)
+    if (pathname === '/kmail/mail-id/status' && request.method === 'GET') return handleKmailMailIdStatus(request, url, env, corsHeaders);
+    if (pathname === '/kmail/mail-id/suggest' && request.method === 'GET') return handleKmailMailIdSuggest(request, url, env, corsHeaders);
+    if (pathname === '/kmail/mail-id/confirm' && request.method === 'POST') return handleKmailMailIdConfirm(request, env, corsHeaders);
     if (pathname === '/kmail/attachments/upload' && request.method === 'POST') return handleKmailAttachmentUpload(request, env, corsHeaders);
     if (pathname.startsWith('/kmail/attachments/') && request.method === 'GET') return handleKmailAttachmentGet(request, url, env, corsHeaders);
     if (pathname.startsWith('/r/') && request.method === 'GET') return handleKmailTrackingRedirect(request, url, env, corsHeaders, ctx);
@@ -34502,31 +34507,22 @@ async function _kmailLinkAttachmentsToMessage(env, attachmentIds, messageId) {
 //      실사용성을 위해 8자리로 시작한다.
 //   4. 자동생성/수동입력 모두 같은 검증·가용성 확인 경로를 통과한다.
 // ═══════════════════════════════════════════════════════════
-const KMAIL_MAIL_ID_PATTERN = /^[a-z0-9](?:[a-z0-9_-]{1,28}[a-z0-9])?$/; // 3~30자, 영숫자로 시작/끝
-const KMAIL_MAIL_ID_RESERVED = new Set([
-  'admin', 'root', 'postmaster', 'support', 'help', 'info', 'contact',
-  'no-reply', 'noreply', 'kmail', 'k-mail', 'hondi', 'system', 'security',
-  'abuse', 'webmaster', 'mail', 'test',
-]);
-
+// 형식·예약어·읽기 쉬운 기본값 알고리즘은 src/worker/mail-id.js로 옮겼다(2026-10-27) — 가입 훅(pb_hooks/main.pb.js)과 같은 목록·알고리즘.
 function _kmailNormalizeMailId(raw) {
-  return String(raw || '').trim().toLowerCase();
+  return _normMailId(raw);
 }
 
 function _kmailValidateMailId(normalized) {
-  if (!KMAIL_MAIL_ID_PATTERN.test(normalized)) return false;
-  if (KMAIL_MAIL_ID_RESERVED.has(normalized)) return false;
-  return true;
+  return _checkMailId(normalized).ok;
 }
 
-// HMAC(MAIL_ID_SECRET, "mail-id-seed:<guid>:<counter>")의 앞 8자리(hex).
-// counter는 충돌 시 재시도용 — 같은 guid라도 counter가 다르면 완전히
-// 다른 후보가 나온다(카운터를 늘려도 길이는 항상 8자리로 고정 — UX상
-// "먼저 가입한 사람일수록 ID가 짧다" 같은 인상을 주지 않기 위함).
+// HMAC(MAIL_ID_SECRET, "mail-id-seed:<guid>:<counter>") → 읽기 쉬운 아이디(<형용사>-<명사>-<숫자 세 자리>).
+// counter는 충돌·다음 추천용 — 같은 guid라도 counter가 다르면 완전히 다른 후보가 나온다.
+//   0~9: 가입 때 기본값(훅과 동일) · (자동 재생성 n회째) n*10+0~9 · 선택 화면의 "다른 추천" 1000+n*10+0~9
 async function _kmailGenerateMailIdCandidate(env, guid, counter) {
   const secret = env.MAIL_ID_SECRET || 'hondi-dev-mail-id-2026'; // 운영 전환 시 wrangler secret put MAIL_ID_SECRET 필수
   const hash = await _hmacSha256Hex(secret, `mail-id-seed:${guid}:${counter}`);
-  return hash.slice(0, 8);
+  return _defaultMailIdFromHash(hash);
 }
 
 // mail_id를 쓰고 있는 owner_user_guid를 반환(없으면 null). 대소문자는
@@ -35936,19 +35932,32 @@ async function handleKmailSettingsSet(request, env, corsHeaders) {
   // mail_id(수동 지정) — 자동생성은 별도 엔드포인트(POST /kmail/mail-id/auto)를
   // 쓰지만, 검증·가용성 확인 경로는 완전히 동일하게 통과시킨다(대화 기록
   // §설계원칙 4 참고 — 자동/수동을 다른 경로로 만들면 한쪽만 고치는 사고가 남).
+  // 2026-10-27: 아이디 변경은 횟수 정책(30일 3번, 가입 직후 첫 선택은 제외)·숫자만 금지·예약어 확대를 거친다.
+  let mailIdChange = null, mailIdSame = false;
   if (typeof mail_id === 'string' && mail_id.length > 0) {
-    const normalized = _kmailNormalizeMailId(mail_id);
-    if (!_kmailValidateMailId(normalized)) {
-      return _err(400, 'INVALID_MAIL_ID', '메일 ID는 3~30자의 영문 소문자·숫자·-·_ 조합이어야 하고 영숫자로 시작·끝나야 합니다', corsHeaders);
+    const chk = _checkMailId(mail_id);
+    if (!chk.ok) return _err(400, 'INVALID_MAIL_ID', chk.message, corsHeaders);
+    const normalized = chk.normalized;
+    const current = (await _kmailGetUserSettings(env, guid)).mail_id || '';
+    if (normalized === current) {
+      mailIdSame = true;                                    // 같은 아이디를 다시 저장 — 바뀐 것이 없으니 횟수에 세지 않는다
+    } else {
+      const owner = await _kmailFindMailIdOwner(env, normalized);
+      if (owner && owner !== guid) {
+        return _err(409, 'MAIL_ID_TAKEN', '이미 사용 중인 메일 ID입니다', corsHeaders);
+      }
+      const st = await _mailIdReadState(env.AI_SETUP_SEALS_KV, guid);
+      const ev = _mailIdEvaluate(st, Date.now(), _mailIdPolicy(env), { hasCurrent: !!current });
+      if (!ev.allowed) return _mailIdLimitResponse(ev, corsHeaders);
+      patch.mail_id = normalized;
+      mailIdChange = { st, ev };
     }
-    const owner = await _kmailFindMailIdOwner(env, normalized);
-    if (owner && owner !== guid) {
-      return _err(409, 'MAIL_ID_TAKEN', '이미 사용 중인 메일 ID입니다', corsHeaders);
-    }
-    patch.mail_id = normalized;
   }
 
-  if (Object.keys(patch).length === 0) return _err(400, 'NOTHING_TO_UPDATE', '수정할 필드가 하나도 없습니다', corsHeaders);
+  if (Object.keys(patch).length === 0) {
+    if (mailIdSame) return new Response(JSON.stringify({ ok: true, updated: [], unchanged: true }), { status: 200, headers: corsHeaders });
+    return _err(400, 'NOTHING_TO_UPDATE', '수정할 필드가 하나도 없습니다', corsHeaders);
+  }
 
   try {
     await _kmailUpsertUserSettings(env, guid, patch);
@@ -35962,7 +35971,79 @@ async function handleKmailSettingsSet(request, env, corsHeaders) {
     return _err(502, 'UPDATE_FAILED', e.message || '설정 갱신 실패', corsHeaders);
   }
 
+  if (mailIdChange) await _mailIdWriteState(env.AI_SETUP_SEALS_KV, guid, _mailIdRecordChange(mailIdChange.st, Date.now(), { exempt: mailIdChange.ev.exempt }));
   return new Response(JSON.stringify({ ok: true, updated: Object.keys(patch) }), { status: 200, headers: corsHeaders });
+}
+
+// 아이디 변경 횟수 초과 응답(429) — 화면이 다음 변경 가능 시각을 보여 줄 수 있게 필드를 함께 준다
+function _mailIdLimitResponse(ev, corsHeaders) {
+  return new Response(JSON.stringify({ ok: false, error: 'MAIL_ID_CHANGE_LIMIT', message: _mailIdLimitMessage(ev), next_change_at: ev.nextChangeAt, limit: ev.limit, window_days: ev.windowDays }), { status: 429, headers: corsHeaders });
+}
+
+// 기본 아이디(가입 훅과 같은 후보)를 배정한다 — 아직 아이디가 없는 사용자용. 이미 있으면 그대로 돌려준다.
+async function _kmailAssignDefaultMailId(env, guid) {
+  const current = (await _kmailGetUserSettings(env, guid)).mail_id || '';
+  if (current) return current;
+  for (let counter = 0; counter < 10; counter++) {
+    const candidate = await _kmailGenerateMailIdCandidate(env, guid, counter);
+    const owner = await _kmailFindMailIdOwner(env, candidate);
+    if (owner && owner !== guid) continue;
+    try { await _kmailUpsertUserSettings(env, guid, { mail_id: candidate }); return candidate; }
+    catch (e) { if (/unique|mail_id/i.test(e.message || '')) continue; throw e; }
+  }
+  return '';
+}
+
+// GET /kmail/mail-id/status?phone_verify_token=… — 내 아이디와 선택·변경 상태(배지·선택 화면용)
+async function handleKmailMailIdStatus(request, url, env, corsHeaders) {
+  const qp = Object.fromEntries(url.searchParams.entries());
+  const auth = await _kAuth.resolveGuid(env, qp, { sigMsg: `kmail-mail-id-status:${qp.guid}:${qp.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
+  const mailId = (await _kmailGetUserSettings(env, guid)).mail_id || '';
+  const st = await _mailIdReadState(env.AI_SETUP_SEALS_KV, guid);
+  const ev = _mailIdEvaluate(st, Date.now(), _mailIdPolicy(env), { hasCurrent: !!mailId });
+  return new Response(JSON.stringify({
+    ok: true, mail_id: mailId, address: mailId ? `${mailId}@hondi.kr` : '',
+    needs_choice: st.confirmed === null, confirmed: st.confirmed,
+    can_change: ev.allowed, first_free: ev.exempt, changes_left: ev.exempt ? ev.limit : ev.left, limit: ev.limit, window_days: ev.windowDays, next_change_at: ev.nextChangeAt,
+  }), { status: 200, headers: corsHeaders });
+}
+
+// GET /kmail/mail-id/suggest?n=0.. — 저장하지 않고 추천 후보만 준다(선택 화면의 "다른 추천 보기").
+// 아직 아이디가 없고 n=0이면 가입 때 기본값과 같은 후보다.
+async function handleKmailMailIdSuggest(request, url, env, corsHeaders) {
+  const qp = Object.fromEntries(url.searchParams.entries());
+  const auth = await _kAuth.resolveGuid(env, qp, { sigMsg: `kmail-mail-id-suggest:${qp.guid}:${qp.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
+  const n = Math.max(0, Math.min(50, Math.floor(Number(qp.n) || 0)));
+  const current = (await _kmailGetUserSettings(env, guid)).mail_id || '';
+  const base = (!current && n === 0) ? 0 : 1000 + n * 10;
+  for (let t = 0; t < 10; t++) {
+    const candidate = await _kmailGenerateMailIdCandidate(env, guid, base + t);
+    if (candidate === current) continue;
+    const owner = await _kmailFindMailIdOwner(env, candidate);
+    if (owner && owner !== guid) continue;
+    return new Response(JSON.stringify({ ok: true, candidate, n }), { status: 200, headers: corsHeaders });
+  }
+  return _err(500, 'MAIL_ID_GEN_EXHAUSTED', '추천할 아이디를 찾지 못했습니다. 직접 입력해 주세요', corsHeaders);
+}
+
+// POST /kmail/mail-id/confirm — body: { phone_verify_token, action: 'accept'|'skip' }
+// 선택 화면에서 "이 아이디 사용" 또는 "나중에 하기(건너뛰기)". 둘 다 아이디를 바꾸지 않으며, 아직 아이디가 없으면 기본값을 준다.
+async function handleKmailMailIdConfirm(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
+  if (body.action !== 'accept' && body.action !== 'skip') return _err(400, 'INVALID_ACTION', 'action은 accept 또는 skip이어야 합니다', corsHeaders);
+  const auth = await _kAuth.resolveGuid(env, body, { sigMsg: `kmail-mail-id-confirm:${body.guid}:${body.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
+  const mailId = await _kmailAssignDefaultMailId(env, guid);
+  if (!mailId) return _err(500, 'MAIL_ID_GEN_EXHAUSTED', '기본 아이디를 만들지 못했습니다. 직접 입력해 주세요', corsHeaders);
+  const st = await _mailIdReadState(env.AI_SETUP_SEALS_KV, guid);
+  await _mailIdWriteState(env.AI_SETUP_SEALS_KV, guid, _mailIdRecordConfirm(st, body.action));
+  return new Response(JSON.stringify({ ok: true, mail_id: mailId, address: `${mailId}@hondi.kr`, confirmed: body.action === 'accept' ? 'accepted' : 'skipped' }), { status: 200, headers: corsHeaders });
 }
 
 // GET /kmail/mail-id/check?candidate=...&guid=...&pubkey=...&signature=...&ts=...
@@ -35977,9 +36058,10 @@ async function handleKmailMailIdCheck(request, url, env, corsHeaders) {
   if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
   const guid = auth.guid;
 
-  const normalized = _kmailNormalizeMailId(candidate);
-  if (!_kmailValidateMailId(normalized)) {
-    return new Response(JSON.stringify({ ok: true, normalized, valid: false, available: false }), { status: 200, headers: corsHeaders });
+  const chk = _checkMailId(candidate);
+  const normalized = chk.normalized;
+  if (!chk.ok) {
+    return new Response(JSON.stringify({ ok: true, normalized, valid: false, available: false, reason: chk.reason, message: chk.message }), { status: 200, headers: corsHeaders });
   }
   const owner = await _kmailFindMailIdOwner(env, normalized);
   const available = !owner || owner === guid;
@@ -36015,17 +36097,28 @@ async function handleKmailMailIdAuto(request, env, corsHeaders) {
   if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
   const guid = auth.guid;
 
+  // 2026-10-27: 이미 아이디가 있으면 "다른 아이디로 바꾸기"이므로 변경 횟수 정책을 거치고, 누를 때마다 다른 후보를 준다.
+  const current = (await _kmailGetUserSettings(env, guid)).mail_id || '';
+  const st = await _mailIdReadState(env.AI_SETUP_SEALS_KV, guid);
+  const ev = _mailIdEvaluate(st, Date.now(), _mailIdPolicy(env), { hasCurrent: !!current });
+  if (!ev.allowed) return _mailIdLimitResponse(ev, corsHeaders);
+  const autoN = current ? st.autoN + 1 : 0;           // 아이디가 없을 때는 가입 훅과 같은 기본 후보(0~9)
+  const base = autoN * 10;
+
   const MAX_TRIES = 10;
-  for (let counter = 0; counter < MAX_TRIES; counter++) {
-    const candidate = await _kmailGenerateMailIdCandidate(env, guid, counter);
+  for (let t = 0; t < MAX_TRIES; t++) {
+    const candidate = await _kmailGenerateMailIdCandidate(env, guid, base + t);
+    if (candidate === current) continue;
     const owner = await _kmailFindMailIdOwner(env, candidate);
-    if (owner && owner !== guid) continue; // 충돌 — 다음 counter로 재시도
+    if (owner && owner !== guid) continue; // 충돌 — 다음 후보로 재시도
 
     try {
       await _kmailUpsertUserSettings(env, guid, { mail_id: candidate });
-      return new Response(JSON.stringify({ ok: true, mail_id: candidate, tries: counter + 1 }), { status: 200, headers: corsHeaders });
+      const next = _mailIdRecordChange({ ...st, autoN }, Date.now(), { exempt: ev.exempt });
+      await _mailIdWriteState(env.AI_SETUP_SEALS_KV, guid, { ...next, autoN });
+      return new Response(JSON.stringify({ ok: true, mail_id: candidate, tries: t + 1 }), { status: 200, headers: corsHeaders });
     } catch (e) {
-      if (/unique|mail_id/i.test(e.message || '')) continue; // race condition — 다음 counter로 재시도
+      if (/unique|mail_id/i.test(e.message || '')) continue; // race condition — 다음 후보로 재시도
       return _err(502, 'CREATE_FAILED', e.message || '메일 ID 생성 실패', corsHeaders);
     }
   }

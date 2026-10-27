@@ -26,6 +26,13 @@
        정식 아이디로 로그인되면 같은 쿠키를 보고 테스트 데이터를 정식 아이디로 옮긴다(서버 /auth/test-migrate).
      · "정식 아이디 만들기" — 위 쿠키를 남기고 hondi.net 가입 화면으로 이동. 가입·로그인 뒤 어느 사이트에서든 이동이 이어진다.
 
+   ■ 아이디 = 메일 아이디(2026-10-27)
+     · 정식 로그인 사용자의 아이디는 전화번호가 아니라 메일 아이디(<아이디>@hondi.kr의 앞부분)를 보여 준다.
+       서버 GET /kmail/mail-id/status 로 가져오며, 불러오는 동안·실패했을 때는 "로그인됨"만 보인다(전화번호는 어디에도 쓰지 않는다).
+     · 가입 직후 첫 로그인에서 한 번 "메일 아이디를 정해 주세요" 선택 화면을 띄운다 — 기본 아이디가 채워져 있고,
+       그대로 쓰거나 직접 정하거나 "나중에 하기"(건너뛰기, 기본 아이디 유지)를 고를 수 있다.
+     · 메뉴의 "아이디 바꾸기"로 언제든 다시 열 수 있다(30일에 3번까지 — 서버 정책).
+
    ■ 기능 제한(선언형) — 로그인 필요 기능에 속성만 붙이면 됩니다.
        <button data-requires-login="메일 보내기">보내기</button>
        <form data-requires-login="정보 공개 청구"> … </form>
@@ -75,8 +82,7 @@
       var u = JSON.parse(raw);
       var h = String((u && u.handle) || '');
       if (!u || !(u.ipv6 || u.guid) || u.isGuest || u.isTemp || u.test_account || h.indexOf('tid-') === 0) return null;
-      var digits = h.replace(/\D/g, '');
-      return { loggedIn: true, kind: 'user', source: 'spa', label: digits.length >= 4 ? '●●●● ' + digits.slice(-4) : '로그인됨' };
+      return { loggedIn: true, kind: 'user', source: 'spa', label: '로그인됨' };   // 메인 앱의 handle은 전화번호 뒷자리라 보여 주지 않는다
     } catch (e) { return null; }
   }
   function identity() {
@@ -87,9 +93,7 @@
       var id = i > 4 ? t.slice(4, i) : t.slice(4);
       return { loggedIn: true, kind: 'test', source: 'cookie', label: id };
     }
-    var head = String(t.split(':')[0] || '');          // 실사용자 토큰의 첫 칸은 전화번호 → 뒤 4자리만
-    var digits = head.replace(/\D/g, '');
-    return { loggedIn: true, kind: 'user', source: 'cookie', label: digits.length >= 4 ? '●●●● ' + digits.slice(-4) : '로그인됨' };
+    return { loggedIn: true, kind: 'user', source: 'cookie', label: (mailInfo && mailInfo.mail_id) || cachedMailId() || '로그인됨' };   // 전화번호는 아이디로 쓰지 않는다
   }
   function testIdSaved() {
     try { return global.localStorage.getItem('hondi_test_id') || ''; } catch (e) { return ''; }
@@ -217,7 +221,7 @@
       }
       return loop(0, 0);
     }).catch(function () { toast('테스트 데이터 이동 중 연결이 끊겼습니다. 잠시 뒤 다시 시도합니다.', 8000); })
-      .then(function () { migrating = false; });
+      .then(function () { migrating = false; mailInfo = null; fetchMailId(true); });   // 이동이 끝나면 새 정식 계정의 아이디 선택 화면을 이어서 띄운다
   }
   function showBlockedModal() {
     if (doc.getElementById('hondi-blocked-modal')) return;
@@ -254,6 +258,150 @@
     menu.appendChild(el('p', 'hub-note', '로그인하면 테스트 데이터를 정식 아이디로 옮겨 드립니다.'));
   }
 
+  // ── 메일 아이디(= 혼디 아이디) ───────────────────────────────
+  var mailInfo = null, mailInfoAt = 0, mailInfoBusy = false, mailInfoTriedAt = 0, mailPrompted = false;
+  var MID_CACHE = 'hondi_mail_id', MID_PROMPTED = 'hondi_mid_prompted';
+  function cachedMailId() {
+    try { var v = JSON.parse(global.sessionStorage.getItem(MID_CACHE) || 'null'); return (v && v.id && Date.now() - v.t < 600000) ? v.id : ''; } catch (e) { return ''; }
+  }
+  function cacheMailId(id) {
+    try { if (id) global.sessionStorage.setItem(MID_CACHE, JSON.stringify({ id: id, t: Date.now() })); else global.sessionStorage.removeItem(MID_CACHE); } catch (e) {}
+  }
+  function getJson(path) {
+    if (typeof global.fetch !== 'function') return Promise.reject(new Error('fetch를 쓸 수 없는 브라우저입니다'));
+    return global.fetch(PROXY + path).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { status: r.status, d: d || {} }; }); });
+  }
+  function isCookieUser() { var i = identity(); return i.kind === 'user' && i.source === 'cookie'; }
+  function fetchMailId(force) {
+    if (!isCookieUser()) { mailInfo = null; return Promise.resolve(null); }
+    if (mailInfoBusy) return Promise.resolve(mailInfo);
+    if (!force && mailInfo && Date.now() - mailInfoAt < 300000) return Promise.resolve(mailInfo);
+    if (!force && !mailInfo && Date.now() - mailInfoTriedAt < 15000) return Promise.resolve(mailInfo);   // 실패해도 15초에 한 번만
+    mailInfoBusy = true; mailInfoTriedAt = Date.now();
+    return getJson('/kmail/mail-id/status?phone_verify_token=' + encodeURIComponent(readCookie(C_TOKEN))).then(function (x) {
+      mailInfoBusy = false;
+      if (x.d && x.d.ok) { mailInfo = x.d; mailInfoAt = Date.now(); cacheMailId(x.d.mail_id); render(true); maybePromptMailId(); }
+      return mailInfo;
+    }, function () { mailInfoBusy = false; return mailInfo; });
+  }
+  // 가입 직후 첫 로그인 — 선택을 아직 안 했으면 한 번만(탭 세션당) 선택 화면을 띄운다. 데이터 이동이 끝난 뒤에 띄운다.
+  function maybePromptMailId() {
+    if (!mailInfo || !mailInfo.needs_choice || mailPrompted || migrating || !isCookieUser()) return;
+    var seen = null; try { seen = global.sessionStorage.getItem(MID_PROMPTED); } catch (e) {}
+    if (seen) return;
+    mailPrompted = true; try { global.sessionStorage.setItem(MID_PROMPTED, '1'); } catch (e) {}
+    openMailIdChooser({ first: true });
+  }
+  function openMailIdChooser(opts) {
+    opts = opts || {};
+    var first = !!opts.first, tok = readCookie(C_TOKEN);
+    if (!tok || doc.getElementById('hondi-mailid-modal')) return;
+    var info = mailInfo || {}, current = info.mail_id || '', n = 0, timer = null, seq = 0;
+    var st = { ok: false, same: false };
+    var enc = encodeURIComponent;
+
+    var back = el('div'); back.id = 'hondi-mailid-modal';
+    var box = el('div', 'hub-modal'); box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-labelledby', 'hondi-mid-title');
+    var h = el('h2', '', first ? '메일 아이디를 정해 주세요' : '메일 아이디 바꾸기'); h.id = 'hondi-mid-title';
+    box.appendChild(h);
+    box.appendChild(el('p', '', first ? '혼디 아이디이자 메일 주소(아이디@hondi.kr)가 됩니다. 기본 아이디를 드렸어요 — 마음에 들면 그대로 쓰시고, 바꾸고 싶으면 아래에서 고르세요.' : '바꾸면 새 아이디가 내 메일 주소가 됩니다.'));
+    var row = el('div', 'hub-mid-row');
+    var input = el('input', 'hub-mid-input'); input.type = 'text'; input.id = 'hondi-mid-input'; input.maxLength = 40; input.autocomplete = 'off'; input.spellcheck = false; input.setAttribute('autocapitalize', 'none'); input.setAttribute('aria-label', '메일 아이디');
+    row.appendChild(input); row.appendChild(el('span', 'hub-mid-suffix', '@hondi.kr'));
+    box.appendChild(row);
+    var status = el('div', 'hub-mid-status'); status.setAttribute('aria-live', 'polite'); status.id = 'hondi-mid-status';
+    box.appendChild(status);
+    var suggest = el('button', 'hub-btn hub-mid-suggest', '다른 아이디 추천 보기'); suggest.type = 'button';
+    box.appendChild(suggest);
+    box.appendChild(el('p', 'hub-note', '3~30자 · 영문 소문자, 숫자, 하이픈(-), 밑줄(_) · 숫자만으로는 만들 수 없어요.'));
+    var limitNote = el('p', 'hub-note'); box.appendChild(limitNote);
+    var primary = el('button', 'hub-btn hub-primary', first ? '이 아이디 사용' : '이 아이디로 저장'); primary.type = 'button';
+    var secondary = el('button', 'hub-btn', first ? '나중에 하기 (기본 아이디 유지)' : '닫기'); secondary.type = 'button';
+    box.appendChild(primary); box.appendChild(secondary);
+    back.appendChild(box); doc.body.appendChild(back);
+
+    function setStatus(msg, kind) { status.textContent = msg || ''; status.className = 'hub-mid-status' + (kind ? ' hub-mid-' + kind : ''); }
+    function paintLimit() {
+      var left = info.changes_left, lim = info.limit, win = info.window_days;
+      if (info.can_change === false) { limitNote.textContent = (info.limit_message || ('변경 횟수를 모두 사용했습니다.')); limitNote.className = 'hub-note hub-warn'; }
+      else if (first || info.first_free) { limitNote.textContent = '처음 한 번은 변경 횟수에 포함되지 않아요. 이후에는 ' + (win || 30) + '일에 ' + (lim || 3) + '번까지 바꿀 수 있어요.'; limitNote.className = 'hub-note'; }
+      else if (left != null) { limitNote.textContent = '남은 변경 횟수 ' + left + '/' + lim + ' (' + win + '일 기준)'; limitNote.className = 'hub-note'; }
+      else limitNote.textContent = '';
+    }
+    function paintButtons() {
+      var changeBlocked = info.can_change === false;
+      if (st.same) { primary.textContent = first ? '이 아이디 사용' : '이 아이디로 저장'; primary.disabled = !first; }
+      else { primary.textContent = '이 아이디로 저장'; primary.disabled = !st.ok || changeBlocked; }
+    }
+    function close() { clearTimeout(timer); if (back.parentNode) back.parentNode.removeChild(back); doc.removeEventListener('keydown', onKey, true); }
+    function onKey(ev) { if (ev.key === 'Escape' && !first) close(); }
+    doc.addEventListener('keydown', onKey, true);
+
+    function runCheck() {
+      var v = input.value.trim().toLowerCase();
+      var mine = ++seq;
+      if (!v) { st = { ok: false, same: false }; setStatus('', ''); paintButtons(); return; }
+      if (v === current) { st = { ok: true, same: true }; setStatus('지금 쓰는 아이디입니다.', 'ok'); paintButtons(); return; }
+      if (v.length < 3) { st = { ok: false, same: false }; setStatus('3자 이상 입력해 주세요.', 'bad'); paintButtons(); return; }
+      setStatus('확인하는 중…', ''); st = { ok: false, same: false }; paintButtons();
+      getJson('/kmail/mail-id/check?candidate=' + enc(v) + '&phone_verify_token=' + enc(tok)).then(function (x) {
+        if (mine !== seq) return;                           // 그 사이 입력이 바뀌었으면 버린다
+        if (x.status === 200 && x.d.ok) {
+          if (!x.d.valid) { setStatus(x.d.message || '사용할 수 없는 아이디입니다.', 'bad'); st = { ok: false, same: false }; }
+          else if (!x.d.available) { setStatus('이미 사용 중인 아이디예요.', 'bad'); st = { ok: false, same: false }; }
+          else { setStatus('사용할 수 있어요 ✓', 'ok'); st = { ok: true, same: false }; }
+        } else { setStatus((x.d && x.d.message) || '확인하지 못했습니다. 잠시 뒤 다시 시도해 주세요.', 'bad'); st = { ok: false, same: false }; }
+        paintButtons();
+      }, function () { if (mine === seq) { setStatus('확인하지 못했습니다. 잠시 뒤 다시 시도해 주세요.', 'bad'); paintButtons(); } });
+    }
+    input.addEventListener('input', function () { clearTimeout(timer); st = { ok: false, same: false }; paintButtons(); timer = setTimeout(runCheck, 350); });
+    input.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' && !ev.isComposing && !primary.disabled) { ev.preventDefault(); primary.click(); } });
+
+    suggest.addEventListener('click', function () {
+      n += 1; suggest.disabled = true;
+      getJson('/kmail/mail-id/suggest?n=' + n + '&phone_verify_token=' + enc(tok)).then(function (x) {
+        suggest.disabled = false;
+        if (x.d && x.d.ok && x.d.candidate) { input.value = x.d.candidate; runCheck(); input.focus(); }
+        else setStatus((x.d && x.d.message) || '추천을 가져오지 못했습니다.', 'bad');
+      }, function () { suggest.disabled = false; setStatus('추천을 가져오지 못했습니다.', 'bad'); });
+    });
+
+    function refreshAndClose(msg) {
+      toast(msg, 7000); mailInfo = null; render(true); close(); fetchMailId(true);
+    }
+    primary.addEventListener('click', function () {
+      var v = input.value.trim().toLowerCase();
+      primary.disabled = true;
+      if (st.same) {                                         // 기본 아이디를 그대로 쓰겠다
+        postJson('/kmail/mail-id/confirm', { phone_verify_token: tok, action: 'accept' }).then(function (x) {
+          if (x.d && x.d.ok) refreshAndClose('메일 아이디 ' + x.d.mail_id + '(으)로 정해졌습니다. 아이디를 눌러 언제든 바꿀 수 있어요.');
+          else { setStatus((x.d && x.d.message) || '저장하지 못했습니다.', 'bad'); paintButtons(); }
+        }, function () { setStatus('저장하지 못했습니다. 잠시 뒤 다시 시도해 주세요.', 'bad'); paintButtons(); });
+        return;
+      }
+      postJson('/kmail/settings', { phone_verify_token: tok, mail_id: v }).then(function (x) {
+        if (x.status === 200 && x.d.ok) { cacheMailId(v); refreshAndClose('메일 아이디가 ' + v + '(으)로 바뀌었습니다. 새 주소: ' + v + '@hondi.kr'); return; }
+        if (x.status === 429) { info.can_change = false; info.limit_message = x.d.message; paintLimit(); }
+        setStatus((x.d && x.d.message) || '저장하지 못했습니다.', 'bad'); st = { ok: false, same: false }; paintButtons();
+      }, function () { setStatus('저장하지 못했습니다. 잠시 뒤 다시 시도해 주세요.', 'bad'); paintButtons(); });
+    });
+    secondary.addEventListener('click', function () {
+      if (!first) { close(); return; }
+      secondary.disabled = true;
+      postJson('/kmail/mail-id/confirm', { phone_verify_token: tok, action: 'skip' }).then(function (x) {
+        if (x.d && x.d.ok) refreshAndClose('기본 아이디 ' + x.d.mail_id + '(을)를 그대로 쓰겠습니다. 아이디를 눌러 언제든 바꿀 수 있어요.');
+        else { secondary.disabled = false; setStatus((x.d && x.d.message) || '저장하지 못했습니다.', 'bad'); }
+      }, function () { secondary.disabled = false; setStatus('저장하지 못했습니다. 잠시 뒤 다시 시도해 주세요.', 'bad'); });
+    });
+
+    paintLimit();
+    if (current) { input.value = current; runCheck(); }
+    else {                                                   // 아직 아이디가 없으면(드문 경우) 기본 추천을 채운다
+      getJson('/kmail/mail-id/suggest?n=0&phone_verify_token=' + enc(tok)).then(function (x) { if (x.d && x.d.candidate) { input.value = x.d.candidate; runCheck(); } }, function () {});
+    }
+    input.focus();
+  }
+
   // ── 로그인 창(K-서비스 공용 모듈) ────────────────────────────
   var kauthPromise = null;
   function ensureKAuth() {
@@ -275,6 +423,7 @@
     });
   }
   function logout() {
+    mailInfo = null; mailPrompted = false; cacheMailId('');
     var id = identity();
     // 테스트 기간 아이디는 접속하면 자동 입장되므로, 로그아웃이 유지되도록 자동 입장을 끈다.
     if (id.kind === 'test') { try { global.localStorage.setItem('hondi_test_optout', '1'); } catch (e) {} }
@@ -320,9 +469,26 @@
     '#hondi-blocked-modal .hub-btn{display:block;width:100%;margin-top:10px;padding:11px 12px;border-radius:10px;border:1px solid #cbd5e1;background:#f8fafc;color:#0f172a;font:inherit;font-size:16px;cursor:pointer}' +
     '#hondi-blocked-modal .hub-btn.hub-primary{background:#1d4ed8;border-color:#1d4ed8;color:#fff}' +
     '@media (prefers-color-scheme:dark){#hondi-user-badge .hub-bar{background:#475569}#hondi-user-badge .hub-warn{color:#fca5a5}#hondi-blocked-modal .hub-modal{background:#1e293b;color:#f1f5f9}#hondi-blocked-modal .hub-btn{background:#334155;border-color:#475569;color:#f1f5f9}#hondi-blocked-modal .hub-btn.hub-primary{background:#2563eb;border-color:#2563eb;color:#fff}}' +
+    '#hondi-mailid-modal{position:fixed;inset:0;z-index:2147482400;background:rgba(15,23,42,.62);display:flex;align-items:center;justify-content:center;padding:16px}' +
+    '#hondi-mailid-modal .hub-modal{width:min(460px,100%);max-height:calc(100vh - 32px);overflow:auto;box-sizing:border-box;background:#fff;color:#0f172a;border-radius:16px;padding:22px 22px 18px;font:500 16px/1.6 Pretendard,system-ui,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.35)}' +
+    '#hondi-mailid-modal h2{margin:0 0 8px;font-size:21px}' +
+    '#hondi-mailid-modal p{margin:0 0 8px}' +
+    '#hondi-mailid-modal .hub-note{font-size:14px;color:#475569;line-height:1.55}' +
+    '#hondi-mailid-modal .hub-warn{color:#b91c1c;font-weight:600}' +
+    '#hondi-mailid-modal .hub-btn{display:block;width:100%;margin-top:10px;padding:11px 12px;border-radius:10px;border:1px solid #cbd5e1;background:#f8fafc;color:#0f172a;font:inherit;font-size:16px;cursor:pointer}' +
+    '#hondi-mailid-modal .hub-btn:disabled{opacity:.5;cursor:not-allowed}' +
+    '#hondi-mailid-modal .hub-btn.hub-primary{background:#1d4ed8;border-color:#1d4ed8;color:#fff}' +
+    '#hondi-mailid-modal .hub-mid-suggest{margin-top:2px;padding:8px 12px;font-size:14.5px}' +
+    '.hub-mid-row{display:flex;align-items:center;gap:6px;margin:10px 0 4px}' +
+    '.hub-mid-input{flex:1 1 auto;min-width:0;box-sizing:border-box;padding:11px 12px;border:2px solid #cbd5e1;border-radius:10px;font:600 18px/1.3 Pretendard,system-ui,sans-serif;color:#0f172a;background:#fff}' +
+    '.hub-mid-input:focus{outline:none;border-color:#1d4ed8}' +
+    '.hub-mid-suffix{flex:none;font-weight:700;color:#475569}' +
+    '.hub-mid-status{min-height:1.5em;margin:2px 0 8px;font-size:15px;font-weight:600;color:#475569}' +
+    '.hub-mid-status.hub-mid-ok{color:#15803d}.hub-mid-status.hub-mid-bad{color:#b91c1c}' +
+    '@media (prefers-color-scheme:dark){#hondi-mailid-modal .hub-modal{background:#1e293b;color:#f1f5f9}#hondi-mailid-modal .hub-note{color:#cbd5e1}#hondi-mailid-modal .hub-btn{background:#334155;border-color:#475569;color:#f1f5f9}#hondi-mailid-modal .hub-btn.hub-primary{background:#2563eb;border-color:#2563eb;color:#fff}.hub-mid-input{background:#0f172a;border-color:#475569;color:#f1f5f9}.hub-mid-suffix{color:#cbd5e1}.hub-mid-status.hub-mid-ok{color:#86efac}.hub-mid-status.hub-mid-bad{color:#fca5a5}}' +
     'html.hondi-anon [data-requires-login]{opacity:.55;cursor:not-allowed}' +
     '#hondi-user-toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);transform:translateX(-50%);z-index:2147482100;max-width:88vw;padding:11px 18px;border-radius:12px;background:#0f172a;color:#fff;font:600 15px/1.4 Pretendard,system-ui,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.3)}' +
-    '@media print{#hondi-user-badge,#hondi-user-toast,#hondi-blocked-modal{display:none!important}}';
+    '@media print{#hondi-user-badge,#hondi-user-toast,#hondi-blocked-modal,#hondi-mailid-modal{display:none!important}}';
 
   var badge = null, menuOpen = false, lastSig = null, toastTimer = null;
 
@@ -398,6 +564,12 @@
       if (id.source === 'spa') {
         menu.appendChild(el('p', 'hub-note', '이 기기에 등록된 계정입니다. 계정 정보는 메인 앱의 설정에서 관리합니다.'));
       } else {
+        if (id.kind === 'user') {
+          if (mailInfo && mailInfo.address) menu.appendChild(el('p', 'hub-note', '내 메일 주소: ' + mailInfo.address));
+          var chg = el('button', 'hub-btn', (mailInfo && mailInfo.needs_choice) ? '아이디 정하기' : '아이디 바꾸기'); chg.type = 'button';
+          chg.addEventListener('click', function () { setMenu(false); fetchMailId(true).then(function () { openMailIdChooser({ first: !!(mailInfo && mailInfo.needs_choice) }); }); });
+          menu.appendChild(chg);
+        }
         var out = el('button', 'hub-btn', '로그아웃'); out.type = 'button';
         out.addEventListener('click', function () { setMenu(false); logout(); });
         menu.appendChild(out);
@@ -423,6 +595,7 @@
     if (id.kind === 'user' && id.source === 'cookie' && readCookie(C_MIG)) maybeMigrate();
     if (id.kind !== 'test') quota = null;
     else if (!quota) fetchQuota(false);          // 로그인 직후 사용량을 바로 가져온다(1분을 기다리지 않는다)
+    if (id.kind === 'user' && id.source === 'cookie' && !mailInfo) fetchMailId(false);   // 메일 아이디(표시용·선택 화면용)
   }
 
   // ── 기능 제한: data-requires-login ───────────────────────────
@@ -462,6 +635,8 @@
     logout: logout,
     startFormalLogin: startFormalLogin,
     getQuota: function () { return quota; },
+    getMailId: function () { return mailInfo && mailInfo.mail_id || ''; },
+    openMailIdChooser: function (o) { return fetchMailId(true).then(function () { openMailIdChooser(o || {}); }); },
     refresh: function () { render(true); },
   };
 
