@@ -108,5 +108,22 @@ window.PRO_DOC_PAGE = {"catalog":[{"id":"A-1","tab":"부가가치세","title":"�
 <script src="/assets/pro-doc-page.js"></script>
 <script src="/assets/start-field.js"></script>
 <script src="/assets/biz-link-demo.js"></script>
+<script>
+// 2026-10-27: 상단 메뉴에 「K-Tax 방법론」 버튼 — 방법론 v0.1 문서를 새 탭으로 연다.
+(function () {
+  function add() {
+    var nr = document.querySelector('.topnav-right');
+    if (!nr || document.getElementById('ktaxMethodBtn')) return;
+    var a = document.createElement('a');
+    a.id = 'ktaxMethodBtn'; a.className = 'lr-nav-btn'; a.href = '/docs/ktax-methodology-v0.1.html';
+    a.target = '_blank'; a.rel = 'noopener'; a.style.textDecoration = 'none';
+    a.title = 'K-Tax 방법론 v0.1 (초안) — 절세 전략 수립·집행 방법과 성능 평가 제안';
+    a.textContent = 'K-Tax 방법론';
+    nr.insertBefore(a, nr.firstChild);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(add, 0); });
+  else setTimeout(add, 0);
+})();
+</script>
 </body>
 </html>
