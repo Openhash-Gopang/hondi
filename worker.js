@@ -18,6 +18,7 @@ import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
 import { profilePhoneFilter, last8Filter, pickGuidByLast8 } from './src/worker/phone-lookup.js';
 import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
+import { checkSenderName as _kmailCheckSenderName, effectiveSenderName as _kmailEffectiveSenderName, formatSender as _kmailFormatSender, SENDER_NAME_MAX as _KMAIL_SENDER_NAME_MAX } from './src/worker/kmail-sender.js';
 import { evaluateSendGuard as _kmailEvaluateSendGuard } from './src/worker/kmail-confirm.js';
 import { senderLocalPart as _kmailSenderLocalPart, classifyInboundLocalPart as _kmailClassifyLocalPart } from './src/worker/kmail-address.js';
 import { buildSendStatus as _kmailBuildSendStatus, instantSendMax as _kmailInstantSendMax, isImmediate as _kmailIsImmediate } from './src/worker/kmail-send-status.js';
@@ -34610,7 +34611,7 @@ async function _kmailGetUserSettings(env, guid) {
   const row = data.items && data.items[0];
   return {
     signature: row?.signature || '',
-    sender_display_name: row?.sender_display_name || '나비 K-Mail',
+    sender_display_name: _kmailEffectiveSenderName(row?.sender_display_name),   // 2026-10-27: 이름을 안 정했으면 빈 값(주소만 표시). 옛 기본값 '나비 K-Mail'도 빈 값으로 본다
     auto_reply_enabled: row?.auto_reply_enabled || false,
     auto_reply_text: row?.auto_reply_text || '',
     auto_reply_until: row?.auto_reply_until || null,
@@ -34629,7 +34630,7 @@ async function _kmailGetUserSettings(env, guid) {
 // 자연히 <guid>@hondi.kr(발신 주소 그대로)로 온다).
 // signature/senderName: 호출부가 _kmailGetUserSettings로 한 번만
 // 불러서 넘긴다(위 주석 참고) — 생략하면 서명 없이, 이름은
-// '나비 K-Mail'로 발송된다.
+// 이름 없이(주소만) 발송된다.
 // ═══════════════════════════════════════════════════════════
 // guid ↔ 이메일 로컬파트 안전 변환 (2026-09-12 긴급 수정, 주피터 지시)
 //
@@ -34677,7 +34678,8 @@ async function _kmailSendOneEmail(env, { guid, to, subject, text, sessionId, rep
   const resolvedMailId = mailId !== undefined ? mailId : await _kmailMailIdCached(env, guid);
   const fromAddr = `${_kmailSenderLocalPart(guid, resolvedMailId)}@hondi.kr`;
   const finalText = signature ? `${text}\n\n${signature}` : text;
-  const sendParams = { to, from: { email: fromAddr, name: senderName || '나비 K-Mail' }, subject, text: finalText };
+  const fromName = _kmailEffectiveSenderName(senderName);                       // 이름이 없으면 주소만("ceo@hondi.kr"), 있으면 "도 영민 <ceo@hondi.kr>"
+  const sendParams = { to, from: fromName ? { email: fromAddr, name: fromName } : fromAddr, subject, text: finalText };
   if (replyTo) sendParams.replyTo = replyTo;
 
   // preResolvedAttachments가 주어지면(캠페인 발송처럼 수신자 N명에게
@@ -34746,7 +34748,7 @@ async function handleUserMailSend(request, env, corsHeaders) {
       'send_email 바인딩이 설정되지 않았습니다 — wrangler.toml 확인 및 재배포 필요', corsHeaders);
   }
 
-  const settings = await _kmailGetUserSettings(env, guid).catch(() => ({ signature: '', sender_display_name: '나비 K-Mail' }));
+  const settings = await _kmailGetUserSettings(env, guid).catch(() => ({ signature: '', sender_display_name: '' }));
 
   let result;
   try {
@@ -35952,6 +35954,8 @@ async function handleKmailSettingsGet(request, url, env, corsHeaders) {
     kmail_address: `${_kmailSenderLocalPart(guid, settings.mail_id)}@hondi.kr`,   // 내 메일 주소(보내는 주소 = 받는 주소)
     kmail_address_fixed: `${_guidToEmailLocalPart(guid)}@hondi.kr`,                // 변하지 않는 내부 주소(여전히 도착함)
     daily_quota_reference: unlimited ? null : KMAIL_QUOTA_5D_AVG_LIMIT, daily_quota_unlimited: unlimited,
+    sender_preview: _kmailFormatSender(`${_kmailSenderLocalPart(guid, settings.mail_id)}@hondi.kr`, settings.sender_display_name),   // 받는 사람 화면에 보이는 모양
+    sender_name_max: _KMAIL_SENDER_NAME_MAX,
   }), { status: 200, headers: corsHeaders });
 }
 
@@ -35972,7 +35976,11 @@ async function handleKmailSettingsSet(request, env, corsHeaders) {
 
   const patch = {};
   if (typeof signature_text === 'string') patch.signature = signature_text.slice(0, 1000);
-  if (typeof sender_display_name === 'string') patch.sender_display_name = sender_display_name.slice(0, 100);
+  if (sender_display_name !== undefined && sender_display_name !== null) {
+    const sn = await _kmailValidateSenderName(env, guid, sender_display_name);
+    if (!sn.ok) return _err(400, 'INVALID_SENDER_NAME', sn.message, corsHeaders);
+    patch.sender_display_name = sn.value;                     // 빈 문자열이면 "이름 없이 주소만"
+  }
   if (typeof auto_reply_enabled === 'boolean') patch.auto_reply_enabled = auto_reply_enabled;
   if (typeof auto_reply_text === 'string') patch.auto_reply_text = auto_reply_text.slice(0, 2000);
   if (typeof auto_reply_until === 'string' || auto_reply_until === null) {
@@ -35983,25 +35991,12 @@ async function handleKmailSettingsSet(request, env, corsHeaders) {
   // 쓰지만, 검증·가용성 확인 경로는 완전히 동일하게 통과시킨다(대화 기록
   // §설계원칙 4 참고 — 자동/수동을 다른 경로로 만들면 한쪽만 고치는 사고가 남).
   // 2026-10-27: 아이디 변경은 횟수 정책(30일 3번, 가입 직후 첫 선택은 제외)·숫자만 금지·예약어 확대를 거친다.
-  let mailIdChange = null, mailIdSame = false;
+  let mailIdPlan = null, mailIdSame = false;
   if (typeof mail_id === 'string' && mail_id.length > 0) {
-    const chk = _checkMailId(mail_id);
-    if (!chk.ok) return _err(400, 'INVALID_MAIL_ID', chk.message, corsHeaders);
-    const normalized = chk.normalized;
-    const current = (await _kmailGetUserSettings(env, guid)).mail_id || '';
-    if (normalized === current) {
-      mailIdSame = true;                                    // 같은 아이디를 다시 저장 — 바뀐 것이 없으니 횟수에 세지 않는다
-    } else {
-      const owner = await _kmailFindMailIdOwner(env, normalized);
-      if (owner && owner !== guid) {
-        return _err(409, 'MAIL_ID_TAKEN', '이미 사용 중인 메일 ID입니다', corsHeaders);
-      }
-      const st = await _mailIdReadState(env.AI_SETUP_SEALS_KV, guid);
-      const ev = _mailIdEvaluate(st, Date.now(), _mailIdPolicy(env), { hasCurrent: !!current });
-      if (!ev.allowed) return _mailIdLimitResponse(ev, corsHeaders);
-      patch.mail_id = normalized;
-      mailIdChange = { st, ev };
-    }
+    const plan = await _kmailPlanMailIdChange(env, guid, mail_id);
+    if (plan.error) return plan.error.status === 429 ? _mailIdLimitResponse(plan.error.ev, corsHeaders) : _err(plan.error.status, plan.error.code, plan.error.message, corsHeaders);
+    if (plan.same) mailIdSame = true;                         // 같은 아이디를 다시 저장 — 바뀐 것이 없으니 횟수에 세지 않는다
+    else { patch.mail_id = plan.mailId; mailIdPlan = plan; }
   }
 
   if (Object.keys(patch).length === 0) {
@@ -36021,8 +36016,34 @@ async function handleKmailSettingsSet(request, env, corsHeaders) {
     return _err(502, 'UPDATE_FAILED', e.message || '설정 갱신 실패', corsHeaders);
   }
 
-  if (mailIdChange) { _kmailMailIdForget(guid); await _mailIdWriteState(env.AI_SETUP_SEALS_KV, guid, _mailIdRecordChange(mailIdChange.st, Date.now(), { exempt: mailIdChange.ev.exempt })); }
+  if (mailIdPlan) await _kmailCommitMailIdChange(env, guid, mailIdPlan);
   return new Response(JSON.stringify({ ok: true, updated: Object.keys(patch) }), { status: 200, headers: corsHeaders });
+}
+
+// 보내는 사람 이름 검사(REST·채팅 공용) — 예약어(혼디·관리자 등) 검사는 관리자에게는 적용하지 않는다.
+async function _kmailValidateSenderName(env, guid, raw) {
+  let r = _kmailCheckSenderName(raw, { isAdmin: false });
+  if (!r.ok && r.reason === 'reserved') r = _kmailCheckSenderName(raw, { isAdmin: await _kmailIsQuotaExempt(env, guid) });
+  return r;
+}
+
+// 메일 아이디 변경 — REST(/kmail/settings)와 채팅(KMAIL_SET_SETTINGS)이 같은 규칙(형식·숫자만 금지·예약어·중복·변경 횟수)을 쓰게 한다.
+// 계획만 세우고(저장 전), 저장이 성공한 뒤 _kmailCommitMailIdChange로 횟수·메모를 갱신한다.
+async function _kmailPlanMailIdChange(env, guid, rawMailId) {
+  const chk = _checkMailId(rawMailId);
+  if (!chk.ok) return { error: { status: 400, code: 'INVALID_MAIL_ID', message: chk.message } };
+  const current = (await _kmailGetUserSettings(env, guid)).mail_id || '';
+  if (chk.normalized === current) return { same: true, mailId: current };
+  const owner = await _kmailFindMailIdOwner(env, chk.normalized);
+  if (owner && owner !== guid) return { error: { status: 409, code: 'MAIL_ID_TAKEN', message: '이미 사용 중인 메일 ID입니다' } };
+  const st = await _mailIdReadState(env.AI_SETUP_SEALS_KV, guid);
+  const ev = _mailIdEvaluate(st, Date.now(), _mailIdPolicy(env), { hasCurrent: !!current });
+  if (!ev.allowed) return { error: { status: 429, code: 'MAIL_ID_CHANGE_LIMIT', message: _mailIdLimitMessage(ev), ev } };
+  return { mailId: chk.normalized, st, ev };
+}
+async function _kmailCommitMailIdChange(env, guid, plan) {
+  _kmailMailIdForget(guid);
+  await _mailIdWriteState(env.AI_SETUP_SEALS_KV, guid, _mailIdRecordChange(plan.st, Date.now(), { exempt: plan.ev.exempt }));
 }
 
 // 아이디 변경 횟수 초과 응답(429) — 화면이 다음 변경 가능 시각을 보여 줄 수 있게 필드를 함께 준다
@@ -36752,7 +36773,7 @@ async function handleKmailCampaignDraftState(request, url, env, corsHeaders) {
 async function _kmailSendCampaign(env, campaign, opts = {}) {
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
-  const settings = await _kmailGetUserSettings(env, campaign.owner_user_guid).catch(() => ({ signature: '', sender_display_name: '나비 K-Mail' }));
+  const settings = await _kmailGetUserSettings(env, campaign.owner_user_guid).catch(() => ({ signature: '', sender_display_name: '' }));
   // 수신자 수만큼 같은 첨부를 반복 조회하지 않도록 한 번만 해석한다.
   const preResolvedAttachments = await _kmailResolveAttachmentsForSend(env, campaign.owner_user_guid, campaign.attachment_ids).catch(e => {
     console.warn('[K-Mail Campaign] 첨부 변환 실패(첨부 없이 발송 계속):', e.message);
@@ -37564,7 +37585,7 @@ async function _handleKmailInboundEmail(message, env, ctx) {
       // 발송 자체는 승인/거절 판단이 아니라 "확인 중" 안내일 뿐이라
       // 위임 승인과 달리 사람 에스컬레이션(아래)을 대체하지 않는다.
       try {
-        const settings = await _kmailGetUserSettings(env, ownerGuid).catch(() => ({ signature: '', sender_display_name: '나비 K-Mail' }));
+        const settings = await _kmailGetUserSettings(env, ownerGuid).catch(() => ({ signature: '', sender_display_name: '' }));
         const emailMatch = fromAddr.match(/[^\s<>]+@[^\s<>]+/);
         const replyToEmail = emailMatch ? emailMatch[0] : fromAddr;
         await _kmailSendOneEmail(env, {
@@ -37595,7 +37616,7 @@ async function _handleKmailInboundEmail(message, env, ctx) {
     // 태그는 "이건 특히 봐주세요"라는 덧표시다.
     if (!isBlocked && !matchedDelete && delegation.decision === 'approve') {
       try {
-        const settings = await _kmailGetUserSettings(env, ownerGuid).catch(() => ({ signature: '', sender_display_name: '나비 K-Mail' }));
+        const settings = await _kmailGetUserSettings(env, ownerGuid).catch(() => ({ signature: '', sender_display_name: '' }));
         const emailMatch = fromAddr.match(/[^\s<>]+@[^\s<>]+/);
         const replyToEmail = emailMatch ? emailMatch[0] : fromAddr;
         const replyBody = await deepseekChatText({
@@ -37708,7 +37729,8 @@ async function _handleKmailInboundEmail(message, env, ctx) {
 async function _kmailSendAutoReply(env, guid, toEmail, replyText, sessionId, senderDisplayName, mailId) {
   if (!env.EMAIL) return;
   const fromAddr = `${_kmailSenderLocalPart(guid, mailId !== undefined ? mailId : await _kmailMailIdCached(env, guid))}@hondi.kr`;
-  await env.EMAIL.send({ to: toEmail, from: { email: fromAddr, name: senderDisplayName || '나비 K-Mail' }, subject: '자동 응답: 부재중 안내', text: replyText });
+  const fromName = _kmailEffectiveSenderName(senderDisplayName);
+  await env.EMAIL.send({ to: toEmail, from: fromName ? { email: fromAddr, name: fromName } : fromAddr, subject: '자동 응답: 부재중 안내', text: replyText });
   await _writeAiMessage(env, {
     session_id: sessionId,
     sender_guid: guid,
@@ -38667,7 +38689,13 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
 
     const patch = {};
     if (typeof parsed.signature_text === 'string') patch.signature = parsed.signature_text.slice(0, 1000);
-    if (typeof parsed.sender_display_name === 'string') patch.sender_display_name = parsed.sender_display_name.slice(0, 100);
+    if (parsed.sender_display_name !== undefined && parsed.sender_display_name !== null) {
+      const sn = await _kmailValidateSenderName(env, guid, parsed.sender_display_name);
+      if (!sn.ok) {
+        return new Response(JSON.stringify({ ok: true, reply: `${cleanReplyText}\n\n죄송합니다, ${sn.message} 다른 이름으로 다시 말씀해 주세요.`, action: null }), { status: 200, headers: corsHeaders });
+      }
+      patch.sender_display_name = sn.value;                    // 빈 문자열이면 "이름 없이 주소만"
+    }
     if (typeof parsed.auto_reply_enabled === 'boolean') patch.auto_reply_enabled = parsed.auto_reply_enabled;
     if (typeof parsed.auto_reply_text === 'string') patch.auto_reply_text = parsed.auto_reply_text.slice(0, 2000);
     if ('auto_reply_until' in parsed) patch.auto_reply_until = parsed.auto_reply_until ? new Date(parsed.auto_reply_until).toISOString() : null;
@@ -38678,24 +38706,15 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     // _kmailFindMailIdOwner)를 그대로 재사용한다 — 두 경로가 따로
     // 놀면 한쪽만 검증하는 사고가 나기 쉽다(§공용 헬퍼 원칙, 파일 상단
     // _kmailSendOneEmail 주석과 동일한 이유).
+    // 2026-10-27: REST와 같은 공용 헬퍼를 쓴다 — 예전에는 이 경로가 변경 횟수 정책을 거치지 않고 바로 저장했다.
+    let chatMailIdPlan = null;
     if (typeof parsed.mail_id === 'string' && parsed.mail_id.length > 0) {
-      const normalized = _kmailNormalizeMailId(parsed.mail_id);
-      if (!_kmailValidateMailId(normalized)) {
-        return new Response(JSON.stringify({
-          ok: true,
-          reply: `${cleanReplyText}\n\n죄송합니다, 메일 ID는 3~30자의 영문 소문자·숫자·-·_ 조합이어야 하고 영숫자로 시작·끝나야 합니다. 다른 ID로 다시 말씀해 주세요.`,
-          action: null,
-        }), { status: 200, headers: corsHeaders });
+      const plan = await _kmailPlanMailIdChange(env, guid, parsed.mail_id);
+      if (plan.error) {
+        const tail = plan.error.status === 429 ? '' : ' 다른 ID로 다시 말씀해 주세요.';
+        return new Response(JSON.stringify({ ok: true, reply: `${cleanReplyText}\n\n죄송합니다, ${plan.error.message}${tail}`, action: null }), { status: 200, headers: corsHeaders });
       }
-      const owner = await _kmailFindMailIdOwner(env, normalized);
-      if (owner && owner !== guid) {
-        return new Response(JSON.stringify({
-          ok: true,
-          reply: `${cleanReplyText}\n\n"${normalized}"는 이미 다른 분이 쓰고 있는 메일 ID입니다. 다른 ID로 다시 말씀해 주세요.`,
-          action: null,
-        }), { status: 200, headers: corsHeaders });
-      }
-      patch.mail_id = normalized;
+      if (!plan.same) { patch.mail_id = plan.mailId; chatMailIdPlan = plan; }
     }
 
     if (Object.keys(patch).length === 0) {
@@ -38707,6 +38726,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     try {
       await _kmailUpsertUserSettings(env, guid, patch);
       ok2 = true;
+      if (chatMailIdPlan) await _kmailCommitMailIdChange(env, guid, chatMailIdPlan);
     } catch (e) {
       if (patch.mail_id && /unique|mail_id/i.test(e.message || '')) {
         conflictMsg = `\n\n"${patch.mail_id}"는 방금 사이에 다른 분이 먼저 선점했습니다(동시 요청). 다른 ID로 다시 말씀해 주세요.`;
