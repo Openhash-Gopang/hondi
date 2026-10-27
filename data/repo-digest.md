@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-27 13:24 KST · 기준 커밋 2d4f90b3
+- 갱신: 2026-10-27 13:27 KST · 기준 커밋 9066164f
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-27 Merge pull request #793 from Openhash-Gopang/fix/remove-ceo-contact-phrase
+- 2026-10-27 docs: remove 나비 개발자 대표 도영민(ceo@hondi.net) contact phrase from proposals and intro pages
 - 2026-10-27 feat(auth): 테스트 계정 한도(500 GDC)·24시간 유예·차단, 정식 아이디 전환과 데이터 이동
 - 2026-10-27 feat: add K-Evaluation v0.1 methodology and batch test page (appraiser auction price prediction)
 - 2026-10-27 docs: add auction-price-prediction validation method to appraiser proposal (new 2-4)
@@ -42,8 +44,6 @@
 - 2026-10-24 Merge pull request #768 from Openhash-Gopang/feat/jeju-start-chat-20261024
 - 2026-10-24 feat(jeju-gov-automation): 시작 영역(대화창) 추가 — 제주 행정 안내(SP-10_kpublic)
 - 2026-10-24 Merge pull request #767 from Openhash-Gopang/feat/gov-klaw-start-chat-20261024
-- 2026-10-24 feat(k-government,klaw): 시작 영역(대화창) 추가 — K-정부는 입법·사법·행정 탭별 SP, K-Law는 사건담당관 SP
-- 2026-10-24 Merge pull request #766 from Openhash-Gopang/feat/k-services-start-chat-20261024
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
