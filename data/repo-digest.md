@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-27 19:37 KST · 기준 커밋 b619b2d7
+- 갱신: 2026-10-27 19:51 KST · 기준 커밋 0c22f970
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-27 Merge pull request #819 from Openhash-Gopang/feat/kpatent-me-sim
+- 2026-10-27 feat: 변리사 기계·전기전자 방법론 v0.1·출원 시뮬레이션·헤더 버튼
 - 2026-10-27 feat(kmail): 보내는 사람 표시 — 기본은 주소만, 사용자가 이름을 붙여 '도 영민 <ceo@hondi.kr>'로 바꿀 수 있음 + 채팅 경로의 아이디 변경 횟수 우회 수정
 - 2026-10-27 feat(kmail): 발송 전 확인 단계를 서버가 강제 — 확인 없이 낸 발송 태그는 막고 확인 요약을 대신 보여 줌
 - 2026-10-27 feat(kmail): 보내는 주소를 메일 아이디로, 관리자 일일 발신 한도 해제, 없는 아이디로 온 메일 반송
@@ -42,8 +44,6 @@
 - 2026-10-27 feat(auth): 테스트 계정 한도(500 GDC)·24시간 유예·차단, 정식 아이디 전환과 데이터 이동
 - 2026-10-27 feat: add K-Evaluation v0.1 methodology and batch test page (appraiser auction price prediction)
 - 2026-10-27 docs: add auction-price-prediction validation method to appraiser proposal (new 2-4)
-- 2026-10-27 Merge pull request #789 from Openhash-Gopang/feat/sido-proposal-button-daegu-incheon-daejeon-sejong-gwangju
-- 2026-10-27 gov-agency: add 사업 제안 proposals for Daegu, Incheon, Daejeon, Sejong, Gwangju
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
@@ -85,6 +85,7 @@
 - /pages/org-admin.html — 나비 AI 사이트 관리
 - /pages/org-ai.html — 나비 AI
 - /pages/overview.html — 개요
+- /pages/patent-attorney-mechanical-electrical-simulation.html — 기계·전기전자 출원 시뮬레이션 — 변리사 보조 AI
 - /pages/plan-architecture.html — K-Plan 아키텍처 — 나비 (Navi)
 - /pages/presentations.html — 나비 프레젠테이션
 - /pages/professor.html — 학습 트랙 — K-Professor
