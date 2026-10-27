@@ -33,7 +33,7 @@ test('확인 요약: 받는 사람·제목·시각·본문을 서버가 직접 �
 test('확인 요약: 이름이 있으면 함께, 많으면 10명까지만 나열하고 "외 N명", 미래 시각은 한국 시간', () => {
   const many = { ...parsedOne, recipients: Array.from({ length: 13 }, (_, i) => ({ name: i === 0 ? '홍길동' : '', email: `u${i}@x.com` })), send_at: '2026-10-28T00:00:00Z' };
   const t = buildConfirmationSummary(many, NOW);
-  assert.match(t, /홍길동\(u0@x\.com\), u1@x\.com/); assert.match(t, / 외 3명 \(총 13명\)/); assert.ok(!t.includes('u10@x.com')); assert.match(t, /\*\*발송 시각\*\*: 10월 28일 09:00/);
+  assert.match(t, /홍길동<u0@x\.com>, u1@x\.com/); assert.match(t, / 외 3명 \(총 13명\)/); assert.ok(!t.includes('u10@x.com')); assert.match(t, /\*\*발송 시각\*\*: 10월 28일 09:00/);
 });
 
 test('확인 요약: 필드가 비어도 깨지지 않는다(제목 없음·시각 미정·받는 사람 없음)', () => {
@@ -86,4 +86,13 @@ test('worker.js: 확인 가드에 보내는 사람 정보를 넘기고, 프롬�
   assert.match(w, /\\\{\\\{SENDER_DISPLAY\\\}\\\}/); assert.match(w, /\\\{\\\{SENDER_NAME\\\}\\\}/);
   const sp = fs.readFileSync(new URL('../prompts/SP-25_kmail_v1_30.txt', import.meta.url), 'utf8');
   for (const k of ['{{SENDER_DISPLAY}}', '{{SENDER_NAME}}', '보내는 이름을 정해', '2026-10-27 보정(v1.30, 다섯 번째)']) assert.ok(sp.includes(k), k);
+});
+
+// 2026-10-28 — 이름만 말한 수신자: SP에 조회 우선 규칙과 이름<이메일> 확인 형식이 들어 있어야 한다
+import { readFileSync as __readSp } from 'node:fs';
+test('SP-25: 이름만 말한 수신자는 주소록 조회 후 이름<이메일>로 확인', () => {
+  const sp = __readSp(new URL('../prompts/SP-25_kmail_v1_30.txt', import.meta.url), 'utf8');
+  assert.match(sp, /여섯 번째/);
+  assert.match(sp, /사람 이름·별칭만/);
+  assert.match(sp, /받는 사람 이름<이메일>/);
 });
