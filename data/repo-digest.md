@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-27 17:50 KST · 기준 커밋 97e235b5
+- 갱신: 2026-10-27 17:50 KST · 기준 커밋 3c05af8c
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-27 pages: restyle appraiser intro to match appraiser.html (pro-doc-page.css, shared header)
 - 2026-10-27 Merge pull request #802 from Openhash-Gopang/feat/ktax-simulation-page
 - 2026-10-27 feat: K-Tax 절세 시뮬레이션 페이지와 SP 추가, 세무사 보조 AI 페이지에 버튼 연결
 - 2026-10-27 docs: state the K-Evaluation methodology goal at the top of the related documents
@@ -43,7 +44,6 @@
 - 2026-10-27 Merge pull request #775 from Openhash-Gopang/feat/klaw-header-two-lines-20261027
 - 2026-10-27 fix(klaw): 검증 페이지 헤더 제목을 두 줄로 표시
 - 2026-10-27 Merge pull request #774 from Openhash-Gopang/feat/klaw-deduction-tab-v2-20261027
-- 2026-10-27 feat(klaw): 연역적 방법론 탭 추가, 버튼 3x2 격자 정렬, 안내 박스 중립 스타일
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
