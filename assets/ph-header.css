@@ -57,17 +57,21 @@
 /* 히어로 오른쪽 빈 공간 세로 중앙의 행동 버튼(PAGE_HEADER.heroButton, 2026-10-18) — 글자는 넉넉하게.
    폭이 좁아 글과 겹칠 수 있으면(1080px 이하) 히어로 맨 아래 가운데로 내려온다. */
 .ph-hero-inner.has-cta { position: relative; }
-.ph-hero-cta-row { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+.ph-hero-cta-row { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 9px; margin-top: 24px; }
 @media (min-width: 1081px) {
   .ph-hero-inner.has-cta .ph-hero-cta-row { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); margin-top: 0; }
 }
-.ph-hero-cta { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 18px; border-radius: 6px; background: #f0b429; color: #14181f; font-size: 14px; white-space: nowrap; font-weight: 800; letter-spacing: -.1px; text-decoration: none; text-align: center; }
+.ph-hero-cta { display: inline-flex; align-items: center; justify-content: center; min-height: 36px; padding: 0 16px; border-radius: 6px; background: #f0b429; color: #14181f; font-size: 12.6px; white-space: nowrap; font-weight: 800; letter-spacing: -.1px; text-decoration: none; text-align: center; }
 .ph-hero-cta:hover { background: #ffc94d; }
 /* 2026-10-23 — 둘째 버튼(LLM 성능 평가 등): 첫째 버튼과 구별되는 외곽선형 */
 .ph-hero-cta-2 { background: transparent; color: #f0b429; border: 1px solid #f0b429; }
 .ph-hero-cta-2:hover { background: rgba(240,180,41,.16); }
-.ph-hero-cta-row-wide { max-width: 360px; }
-@media (min-width: 1081px) { .ph-hero-cta-row-wide { justify-content: flex-end; } }
+/* 2026-10-28(주피터 지시) — 버튼 크기 10% 축소(ph-hero-cta 10%), 데스크톱에서는 한 줄로 나란히. 좁은 화면은 줄바꿈 허용. */
+@media (min-width: 1081px) {
+  .ph-hero-cta-row-wide { max-width: none; justify-content: flex-end; flex-wrap: nowrap; }
+  .ph-hero-inner.has-cta:has(.ph-hero-cta-row-wide) h1,
+  .ph-hero-inner.has-cta:has(.ph-hero-cta-row-wide) p { max-width: min(760px, calc(100% - 620px)); }
+}
 .ph-hero-cta:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 .ph-hero p { font-size: 12.5px; color: rgba(255,255,255,.60); line-height: 1.65; max-width: 700px; }
 
