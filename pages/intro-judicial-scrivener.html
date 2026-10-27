@@ -6,20 +6,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<link rel="stylesheet" href="/assets/pro-doc-page.css">
 <style>
-.ug-doc .svc-callout{margin:0 0 14px}.ug-doc .svc-callout p{margin:.5em 0}.ug-doc .svc-callout ul{margin:.4em 0 .6em;padding-left:20px}.ug-doc .svc-callout li{line-height:1.8}
-.intro-toc{background:var(--surface);border-radius:var(--radius-lg);box-shadow:0 2px 10px rgba(15,23,42,.08),0 1px 3px rgba(15,23,42,.06);padding:14px 20px;margin:18px 0 24px;font-size:13px}
-.intro-toc b{display:block;margin-bottom:6px;color:var(--navy)}
-.intro-toc a{display:inline-block;margin:2px 14px 2px 0;color:var(--brand-dk);text-decoration:none;font-weight:600}
-.intro-toc a:hover{text-decoration:underline}
-.ug-doc .svc-content{min-height:0;padding:32px 40px;scroll-margin-top:12px}
-.ug-doc .svc-detail h2{display:block;border-bottom:2px solid var(--brand);padding-bottom:8px;margin-bottom:16px}
-.ug-doc .svc-note{margin:.5em 0 .9em}
-.ug-doc .svc-list{margin:.3em 0 .8em}
-.ug-doc code{background:#eef2f7;padding:1px 5px;border-radius:4px;font-size:.9em}
-@media(max-width:640px){.ug-doc{padding:24px 12px 60px}.ug-doc .svc-content{padding:22px 18px}}
-@media print{.ph-hero,.ph-disclaimer,.intro-toc{display:none}body{background:#fff}.svc-content{box-shadow:none;break-inside:avoid}}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:#1f2937;font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Malgun Gothic',sans-serif;font-size:15.5px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.doc-simple{max-width:820px;margin:0 auto;padding:44px 24px 90px}
+.doc-simple p{margin:.7em 0}
+.doc-simple a{color:#0c5aa6}
+.doc-simple .lead{font-size:17px;line-height:1.85;color:#111827;margin:0 0 6px}
+.doc-simple .links{font-size:14px;color:#4b5563;margin:14px 0 0}
+.doc-simple .notice{font-size:13.5px;color:#4b5563;border-left:3px solid #cbd5e1;padding:2px 0 2px 14px;margin:22px 0 0}
+.doc-simple h2{font-size:20px;font-weight:700;color:#0e1c3f;margin:52px 0 14px;padding-bottom:9px;border-bottom:1px solid #cbd5e1}
+.doc-simple h3{font-size:15.5px;font-weight:700;color:#0e1c3f;margin:30px 0 6px}
+.doc-simple ul{margin:.5em 0 1em;padding-left:1.3em}
+.doc-simple li{margin:.3em 0}
+.doc-simple .toc{margin:26px 0 0;padding:14px 0;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;font-size:14px}
+.doc-simple .toc a{display:inline-block;margin:2px 18px 2px 0;color:#0e1c3f;text-decoration:none}
+.doc-simple .toc a:hover{text-decoration:underline}
+.doc-simple .tw{overflow-x:auto;margin:14px 0}
+.doc-simple table{width:100%;border-collapse:collapse;font-size:14px}
+.doc-simple th{text-align:left;font-weight:700;color:#0e1c3f;padding:9px 12px 9px 0;border-bottom:2px solid #0e1c3f;white-space:nowrap}
+.doc-simple td{padding:10px 12px 10px 0;border-bottom:1px solid #e5e7eb;vertical-align:top}
+.doc-simple td:first-child{width:28%;color:#374151;font-weight:600}
+.doc-simple code{background:#f3f4f6;padding:1px 5px;border-radius:3px;font-size:.9em}
+.doc-simple .foot{margin-top:70px;padding-top:16px;border-top:1px solid #e5e7eb;font-size:12.5px;color:#6b7280}
+@media(max-width:640px){.doc-simple{padding:28px 16px 60px}.doc-simple td:first-child{width:auto}}
+@media print{.ph-hero,.ph-disclaimer,.doc-simple .toc{display:none}}
 </style>
 <title>법무사 보조 AI 소개서</title>
 </head>
@@ -38,20 +49,21 @@ window.PAGE_HEADER = {
 </script>
 <link rel="stylesheet" href="/assets/ph-header.css">
 <script src="/assets/ph-header.js"></script>
-<div class="ug-doc">
-<div class="svc-callout"><p><strong>법무사 보조 AI</strong>는 등기·공탁·법원 제출 서류 등 법무사 업무의 초안을 만들고 검토 포인트를 정리해 주는 도구입니다. 현재 버전은 서류를 제출·서명·대리하지 않으며(dpaper 승인 후 사람의 최종 승인을 전제로 제출·납부 대행으로 확장할 계획), 법무사의 최종 검토와 승인 아래에서만 쓰입니다.</p></div>
-<div class="svc-callout"><p><strong>모든 직역 AI의 공통 설계</strong></p><ul><li><strong>모델</strong>: 오픈소스 중소형 LLM(예: Gemma 4 31B)을 해당 직역 전문가의 업무 보조에 특화해 조정합니다. 해외 거대 LLM에 호출하지 않습니다.</li><li><strong>운영</strong>: 국내 서버에 설치해 서비스를 제공하며, 업무 자료가 해외로 나가지 않습니다.</li><li><strong>dpaper API 승인 후의 계획</strong>: 승인되면 서류 작성, 제출, 수수료 납부까지 AI가 대행하고, 사람(자격자)은 <strong>최종 검토와 승인</strong>을 맡습니다.</li></ul><p>현재는 dpaper 승인 전이므로 제출·납부는 연동되지 않았고 사람이 직접 합니다. 제출·납부 대행은 관련 법령(직역별 업무 범위, 무자격 대리 금지 등)의 검토와 승인 절차를 거친 뒤에 시작하며, 그 전에는 이 문서의 대행 기능을 제공하지 않습니다.</p></div>
-<div class="svc-callout"><p><strong>상세 보기(hondi.net)</strong>: <a href="https://hondi.net/pages/judicial-scrivener.html" target="_blank" rel="noopener">법무사 보조 AI</a> · <a href="https://hondi.net/pages/scrivener-write.html" target="_blank" rel="noopener">서류 작성하기</a> · <a href="https://hondi.net/" target="_blank" rel="noopener">나비웹 홈</a>. 해당 페이지는 테스트 단계의 화면입니다.</p></div>
-<div class="svc-callout important"><p><strong>안내</strong> 이 문서는 서비스 소개서이며 투자 권유나 입찰 공고가 아닙니다. 지분 매수에 관한 사항은 별도의 지분 매수 제안서(초안)를 따릅니다. 아래 '차별점'은 <strong>설계와 운영 규칙상의 차이</strong>를 설명한 것이며, 다른 서비스보다 성능이 우수하다는 것을 실측으로 입증한 내용이 아닙니다. 성능·정확도는 제3자 검증 전이며, 각 서비스는 테스트 단계입니다. 이 서비스는 해당 직역의 자격을 갖지 않으며, 모든 산출물은 자격자가 검토·확정해야 하는 초안입니다.</p></div>
-<nav class="intro-toc"><b>목차</b><a href="#s1">1. 한눈에 보기</a><a href="#s2">2. 이 서비스가 하는 일</a><a href="#s3">3. 범용 AI와 다른 점</a><a href="#s4">4. 다른 직역 AI와 다른 점</a><a href="#s5">5. 작업 흐름</a><a href="#s6">6. 현재 상태와 한계</a></nav>
-<div class="svc-content" id="s1"><div class="svc-detail"><h2>1. 한눈에 보기</h2><div class="svc-table-wrap"><table class="svc-table"><thead><tr><th>항목</th><th>내용</th></tr></thead><tbody><tr><td>서비스 코드</td><td>SP-LAW-02</td></tr><tr><td>작성 단계 수</td><td>9단계 (STEP W)</td></tr><tr><td>판단 구조 이식 훅</td><td>K-Law v15.1 (STEP B+)</td></tr><tr><td>dpaper 연동</td><td>현재 미연동</td></tr><tr><td>정체</td><td>법무사 업무 보조 도구. 법무사 자격이 없으며 위임을 받지 않고, 기명날인·제출·납부를 하지 않음</td></tr><tr><td>주 사용자</td><td>플랫폼 인증을 거친 인간 법무사(L3), 같은 직역 종사자(L2). 일반 이용자(L0·L1)는 본인 사건의 일반 정보와 서류 초안에 한함</td></tr><tr><td>산출물의 지위</td><td>모든 서류는 DRAFT. 법무사가 검토·확정한 이후에만 제출</td></tr><tr><td>서류 작성 트랙</td><td>STEP W: 서식 결정 → 서식 승인 → 서식 DB → 추가 자료 → 작성 → 검증·승인 → 제출 준비 → 수수료 → 결과 기록</td></tr><tr><td>판단 구조</td><td>STEP B+ : K-Law v15.1 이식 훅(규범 3축 등)을 법무사 업무 내용으로 채움</td></tr></tbody></table></div></div></div>
-<div class="svc-content" id="s2"><div class="svc-detail"><h2>2. 이 서비스가 하는 일</h2><ul class="svc-list"><li>서류 목적과 제출처를 묻고 부록 A 서류 목록에서 후보 1~3개를 근거와 함께 제시</li><li>서식 DB에서 기관 서식을 조회하고, 없으면 이용자가 승인한 항목으로 새 서식을 구성(법정 서식이 아님을 표시)</li><li>누락 항목을 표로 정리하고 빠진 것만 한 번에 3개 이내로 질문</li><li>주민등록번호·계좌번호는 본문에 쓰지 않고 <code>[법무사 직접 기재]</code> 자리표시자로 남김</li><li>제출 패키지(제출처·접수 방식·첨부·제출 전 점검)와 수수료 항목을 조회 확인분만 정리</li><li>제출 결과(접수번호·일시·납부액)를 이용자가 알려 준 만큼만 기록</li></ul></div></div>
-<div class="svc-content" id="s3"><div class="svc-detail"><h2>3. 범용 AI와 다른 점</h2><div class="svc-table-wrap"><table class="svc-table"><thead><tr><th>범용 AI 챗봇에서 흔한 방식</th><th>법무사 보조 AI의 설계</th></tr></thead><tbody><tr><td>서류 한 장을 바로 써 줌</td><td>서식을 정하고 <strong>이용자 승인(W-2)</strong>을 받은 뒤에만 본문 작성. 승인은 명시적 발화로만 통과하며 AI가 대신 승인하지 않음</td></tr><tr><td>법령·서식 번호·수수료를 기억에 의존해 단정</td><td>법정 서식 여부·서식 번호·수수료·기한은 웹 조회로 확인한 것만 확정처럼 쓰고, 나머지는 <code>[확인 필요]</code>로 표시</td></tr><tr><td>빠진 정보를 그럴듯하게 채움</td><td>접수번호·납부액·결과는 이용자 제공 자료에서만 옮겨 적고 모르는 칸은 <code>[미확인]</code></td></tr><tr><td>출처가 섞임</td><td>이용자 진술(F) / 조회 확인(V, 출처·조회일) / 도구의 추론(I)을 구분</td></tr><tr><td>제출까지 대행하는 듯한 표현</td><td>현재는 제출·납부·서명·날인을 사람이 하도록 고정. dpaper 승인 후에는 AI가 제출·납부를 실행하고 사람이 최종 승인하는 구조로 확장 계획(법령 검토 후)</td></tr><tr><td>새 서식이 대화마다 사라짐</td><td>개인·사안 값을 모두 지운 <strong>빈 서식만</strong> 저장 제안. 이용자가 동의해야 저장</td></tr></tbody></table></div></div></div>
-<div class="svc-content" id="s4"><div class="svc-detail"><h2>4. 다른 직역 AI와 다른 점</h2><ul class="svc-list"><li>등기·공탁·법원 제출 서류 중심의 서류 목록(부록 A)과 제출처·관할 확인 흐름이 법무사 업무에 맞춰져 있음</li><li>변호사 보조 AI는 소송 전략·법률 쟁점, 행정사 보조 AI는 인허가·민원 서류, 이 서비스는 <strong>법무사 업무 범위의 서류 작성과 제출 준비</strong>에 초점</li><li>범위 밖 요청은 부록 B에서 해당 직역으로 안내(<code>[REFER_LAWYER]</code> 사용 기준 별도)</li></ul></div></div>
-<div class="svc-content" id="s5"><div class="svc-detail"><h2>5. 작업 흐름</h2><div class="svc-table-wrap"><table class="svc-table"><thead><tr><th>단계</th><th>내용</th><th>게이트</th></tr></thead><tbody><tr><td>W-1</td><td>서식 결정(목적·제출처·후보 1~3개)</td><td>이용자 확인</td></tr><tr><td>W-2</td><td>서식 한 장 요약 후 승인</td><td><strong>이용자 승인</strong></td></tr><tr><td>W-3</td><td>서식 DB 조회 / 첨부 / 신규 구성, 빈 서식 저장 제안</td><td>—</td></tr><tr><td>W-4</td><td>추가 자료 획득(누락 항목 표)</td><td>—</td></tr><tr><td>W-5</td><td>서류 초안 작성, 기명날인란은 비워 둠</td><td>—</td></tr><tr><td>W-6</td><td>검증 체크리스트, 수정 반영</td><td><strong>이용자 승인</strong></td></tr><tr><td>W-7</td><td>제출 패키지 정리(dpaper 미연동)</td><td>제출은 사람</td></tr><tr><td>W-8</td><td>수수료 항목 조회·정리</td><td>납부는 사람</td></tr><tr><td>W-9</td><td>제출 결과 기록</td><td>이용자 보고</td></tr></tbody></table></div></div></div>
-<div class="svc-content" id="s6"><div class="svc-detail"><h2>6. 현재 상태와 한계</h2><ul class="svc-list"><li>테스트 단계. dpaper API는 아직 승인·개통되지 않아 전자 제출은 연동되지 않음</li><li>판단 구조는 K-Law v15.1 기준이며, 제3자 검증 전 단계</li><li>조문·수치·기한은 인용 시 확인 필요 표시를 동반하며, 최종 확인은 법무사가 함</li><li>법무사법 등 현행 법령의 확인 범위는 서비스 내부 조회 기준</li></ul><p class="svc-note">자격자 보조 도구의 공통 규칙(§LEGAL-LIMIT)은 이 서비스의 모든 응답과 서류에 적용됩니다.</p>
-<h2 id="sx">문의</h2><p class="svc-note"><a href="mailto:ceo@hondi.net">ceo@hondi.net</a></p></div></div>
-<div class="ug-footer">감정평가사 보조 AI 소개서 · 이 문서는 서비스 소개서이며 투자 권유나 입찰 공고가 아닙니다. 문의 <a href="mailto:ceo@hondi.net">ceo@hondi.net</a></div>
-</div>
+<main class="doc-simple">
+<p class="lead"><strong>법무사 보조 AI</strong>는 등기·공탁·법원 제출 서류 등 법무사 업무의 초안을 만들고 검토 포인트를 정리해 주는 도구입니다. 현재 버전은 서류를 제출·서명·대리하지 않으며(dpaper 승인 후 사람의 최종 승인을 전제로 제출·납부 대행으로 확장할 계획), 법무사의 최종 검토와 승인 아래에서만 쓰입니다.</p>
+<h3>모든 직역 AI의 공통 설계</h3>
+<ul><li><strong>모델</strong>: 오픈소스 중소형 LLM(예: Gemma 4 31B)을 해당 직역 전문가의 업무 보조에 특화해 조정합니다. 해외 거대 LLM에 호출하지 않습니다.</li><li><strong>운영</strong>: 국내 서버에 설치해 서비스를 제공하며, 업무 자료가 해외로 나가지 않습니다.</li><li><strong>dpaper API 승인 후의 계획</strong>: 승인되면 서류 작성, 제출, 수수료 납부까지 AI가 대행하고, 사람(자격자)은 <strong>최종 검토와 승인</strong>을 맡습니다.</li></ul><p>현재는 dpaper 승인 전이므로 제출·납부는 연동되지 않았고 사람이 직접 합니다. 제출·납부 대행은 관련 법령(직역별 업무 범위, 무자격 대리 금지 등)의 검토와 승인 절차를 거친 뒤에 시작하며, 그 전에는 이 문서의 대행 기능을 제공하지 않습니다.</p>
+<p class="links"><strong>상세 보기(hondi.net)</strong>: <a href="https://hondi.net/pages/judicial-scrivener.html" target="_blank" rel="noopener">법무사 보조 AI</a> · <a href="https://hondi.net/pages/scrivener-write.html" target="_blank" rel="noopener">서류 작성하기</a> · <a href="https://hondi.net/" target="_blank" rel="noopener">나비웹 홈</a>. 해당 페이지는 테스트 단계의 화면입니다.</p>
+<p class="notice"><strong>안내</strong> 이 문서는 서비스 소개서이며 투자 권유나 입찰 공고가 아닙니다. 지분 매수에 관한 사항은 별도의 지분 매수 제안서(초안)를 따릅니다. 아래 '차별점'은 <strong>설계와 운영 규칙상의 차이</strong>를 설명한 것이며, 다른 서비스보다 성능이 우수하다는 것을 실측으로 입증한 내용이 아닙니다. 성능·정확도는 제3자 검증 전이며, 각 서비스는 테스트 단계입니다. 이 서비스는 해당 직역의 자격을 갖지 않으며, 모든 산출물은 자격자가 검토·확정해야 하는 초안입니다.</p>
+<nav class="toc"><a href="#s1">1. 한눈에 보기</a><a href="#s2">2. 이 서비스가 하는 일</a><a href="#s3">3. 범용 AI와 다른 점</a><a href="#s4">4. 다른 직역 AI와 다른 점</a><a href="#s5">5. 작업 흐름</a><a href="#s6">6. 현재 상태와 한계</a></nav>
+<section id="s1"><h2>1. 한눈에 보기</h2><div class="tw"><table><thead><tr><th>항목</th><th>내용</th></tr></thead><tbody><tr><td>서비스 코드</td><td>SP-LAW-02</td></tr><tr><td>작성 단계 수</td><td>9단계 (STEP W)</td></tr><tr><td>판단 구조 이식 훅</td><td>K-Law v15.1 (STEP B+)</td></tr><tr><td>dpaper 연동</td><td>현재 미연동</td></tr><tr><td>정체</td><td>법무사 업무 보조 도구. 법무사 자격이 없으며 위임을 받지 않고, 기명날인·제출·납부를 하지 않음</td></tr><tr><td>주 사용자</td><td>플랫폼 인증을 거친 인간 법무사(L3), 같은 직역 종사자(L2). 일반 이용자(L0·L1)는 본인 사건의 일반 정보와 서류 초안에 한함</td></tr><tr><td>산출물의 지위</td><td>모든 서류는 DRAFT. 법무사가 검토·확정한 이후에만 제출</td></tr><tr><td>서류 작성 트랙</td><td>STEP W: 서식 결정 → 서식 승인 → 서식 DB → 추가 자료 → 작성 → 검증·승인 → 제출 준비 → 수수료 → 결과 기록</td></tr><tr><td>판단 구조</td><td>STEP B+ : K-Law v15.1 이식 훅(규범 3축 등)을 법무사 업무 내용으로 채움</td></tr></tbody></table></div></section>
+<section id="s2"><h2>2. 이 서비스가 하는 일</h2><ul><li>서류 목적과 제출처를 묻고 부록 A 서류 목록에서 후보 1~3개를 근거와 함께 제시</li><li>서식 DB에서 기관 서식을 조회하고, 없으면 이용자가 승인한 항목으로 새 서식을 구성(법정 서식이 아님을 표시)</li><li>누락 항목을 표로 정리하고 빠진 것만 한 번에 3개 이내로 질문</li><li>주민등록번호·계좌번호는 본문에 쓰지 않고 <code>[법무사 직접 기재]</code> 자리표시자로 남김</li><li>제출 패키지(제출처·접수 방식·첨부·제출 전 점검)와 수수료 항목을 조회 확인분만 정리</li><li>제출 결과(접수번호·일시·납부액)를 이용자가 알려 준 만큼만 기록</li></ul></section>
+<section id="s3"><h2>3. 범용 AI와 다른 점</h2><div class="tw"><table><thead><tr><th>범용 AI 챗봇에서 흔한 방식</th><th>법무사 보조 AI의 설계</th></tr></thead><tbody><tr><td>서류 한 장을 바로 써 줌</td><td>서식을 정하고 <strong>이용자 승인(W-2)</strong>을 받은 뒤에만 본문 작성. 승인은 명시적 발화로만 통과하며 AI가 대신 승인하지 않음</td></tr><tr><td>법령·서식 번호·수수료를 기억에 의존해 단정</td><td>법정 서식 여부·서식 번호·수수료·기한은 웹 조회로 확인한 것만 확정처럼 쓰고, 나머지는 <code>[확인 필요]</code>로 표시</td></tr><tr><td>빠진 정보를 그럴듯하게 채움</td><td>접수번호·납부액·결과는 이용자 제공 자료에서만 옮겨 적고 모르는 칸은 <code>[미확인]</code></td></tr><tr><td>출처가 섞임</td><td>이용자 진술(F) / 조회 확인(V, 출처·조회일) / 도구의 추론(I)을 구분</td></tr><tr><td>제출까지 대행하는 듯한 표현</td><td>현재는 제출·납부·서명·날인을 사람이 하도록 고정. dpaper 승인 후에는 AI가 제출·납부를 실행하고 사람이 최종 승인하는 구조로 확장 계획(법령 검토 후)</td></tr><tr><td>새 서식이 대화마다 사라짐</td><td>개인·사안 값을 모두 지운 <strong>빈 서식만</strong> 저장 제안. 이용자가 동의해야 저장</td></tr></tbody></table></div></section>
+<section id="s4"><h2>4. 다른 직역 AI와 다른 점</h2><ul><li>등기·공탁·법원 제출 서류 중심의 서류 목록(부록 A)과 제출처·관할 확인 흐름이 법무사 업무에 맞춰져 있음</li><li>변호사 보조 AI는 소송 전략·법률 쟁점, 행정사 보조 AI는 인허가·민원 서류, 이 서비스는 <strong>법무사 업무 범위의 서류 작성과 제출 준비</strong>에 초점</li><li>범위 밖 요청은 부록 B에서 해당 직역으로 안내(<code>[REFER_LAWYER]</code> 사용 기준 별도)</li></ul></section>
+<section id="s5"><h2>5. 작업 흐름</h2><div class="tw"><table><thead><tr><th>단계</th><th>내용</th><th>게이트</th></tr></thead><tbody><tr><td>W-1</td><td>서식 결정(목적·제출처·후보 1~3개)</td><td>이용자 확인</td></tr><tr><td>W-2</td><td>서식 한 장 요약 후 승인</td><td><strong>이용자 승인</strong></td></tr><tr><td>W-3</td><td>서식 DB 조회 / 첨부 / 신규 구성, 빈 서식 저장 제안</td><td>—</td></tr><tr><td>W-4</td><td>추가 자료 획득(누락 항목 표)</td><td>—</td></tr><tr><td>W-5</td><td>서류 초안 작성, 기명날인란은 비워 둠</td><td>—</td></tr><tr><td>W-6</td><td>검증 체크리스트, 수정 반영</td><td><strong>이용자 승인</strong></td></tr><tr><td>W-7</td><td>제출 패키지 정리(dpaper 미연동)</td><td>제출은 사람</td></tr><tr><td>W-8</td><td>수수료 항목 조회·정리</td><td>납부는 사람</td></tr><tr><td>W-9</td><td>제출 결과 기록</td><td>이용자 보고</td></tr></tbody></table></div></section>
+<section id="s6"><h2>6. 현재 상태와 한계</h2><ul><li>테스트 단계. dpaper API는 아직 승인·개통되지 않아 전자 제출은 연동되지 않음</li><li>판단 구조는 K-Law v15.1 기준이며, 제3자 검증 전 단계</li><li>조문·수치·기한은 인용 시 확인 필요 표시를 동반하며, 최종 확인은 법무사가 함</li><li>법무사법 등 현행 법령의 확인 범위는 서비스 내부 조회 기준</li></ul><p>자격자 보조 도구의 공통 규칙(§LEGAL-LIMIT)은 이 서비스의 모든 응답과 서류에 적용됩니다.</p>
+<h2 id="sx">문의</h2><p><a href="mailto:ceo@hondi.net">ceo@hondi.net</a></p></section>
+<div class="foot">감정평가사 보조 AI 소개서 · 이 문서는 서비스 소개서이며 투자 권유나 입찰 공고가 아닙니다. 문의 <a href="mailto:ceo@hondi.net">ceo@hondi.net</a></div>
+</main>
 </body>
 </html>
