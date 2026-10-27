@@ -14,7 +14,6 @@ window.PAGE_HERO = {
   badge: 'K-Tax · 참고용 시뮬레이션',
   l1: '재무제표를 올리면',
   l2: '최적의 절세 방안을 시뮬레이션합니다',
-  sub: 'K-Tax 방법론 v0.1(STEP 0→A→B→C→D)에 따라 과소·과다 양방향으로 점검하고, 적법한 전략 안에서 세부담이 가장 낮은 경로를 찾습니다. 세무사·공인회계사의 확인 전에는 확정할 수 없는 참고 자료입니다.',
   actions: []   // 방법론 버튼은 아래 스크립트가 히어로 오른쪽 빈 공간에 놓는다.
 };
 </script>
@@ -57,6 +56,7 @@ window.PAGE_HERO = {
 }
 body { background: var(--kt-bg); color: var(--kt-text); font-family: 'Pretendard', -apple-system, sans-serif; font-size: 14px; line-height: 1.7; }
 .kt-wrap { max-width: 1180px; margin: 0 auto; padding: 24px 16px 80px; }
+.kt-lead { font-size: 15px; line-height: 1.75; color: var(--kt-text2); max-width: 760px; margin: 4px 0 16px; }
 .kt-notice { background: var(--kt-amber-bg); border: 1px solid #fde68a; color: var(--kt-amber-ink); border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; }
 .kt-notice b { font-weight: 700; }
 .kt-steps { display: flex; gap: 6px; margin: 0 0 18px; flex-wrap: wrap; }
@@ -111,6 +111,7 @@ body { background: var(--kt-bg); color: var(--kt-text); font-family: 'Pretendard
 </style>
 
 <div class="kt-wrap">
+  <p class="kt-lead">K-Tax 방법론 v0.1(STEP 0→A→B→C→D)에 따라 과소·과다 양방향으로 점검하고, 적법한 전략 안에서 세부담이 가장 낮은 경로를 찾습니다. 세무사·공인회계사의 확인 전에는 확정할 수 없는 참고 자료입니다.</p>
   <div class="kt-notice" role="note"><b>참고용 시뮬레이션입니다.</b> 이 화면의 세액·절감액은 모두 추정이며 확정 세액이 아닙니다. AI는 신고·서명·제출을 하지 않으며, 신고 전에 세무사 또는 공인회계사의 확인이 필요합니다(방법론 R8). 사실에 맞지 않는 거래나 증빙 없는 비용을 만드는 방안은 제시하지 않습니다.</div>
 
   <div class="kt-steps" id="ktSteps" aria-label="진행 단계">
