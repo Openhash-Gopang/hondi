@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-28 04:28 KST · 기준 커밋 19a632a0
+- 갱신: 2026-10-28 04:38 KST · 기준 커밋 740412c8
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-28 ph-header: 전문가 페르소나 히어로 버튼 크기 10% 축소, 데스크톱에서 한 줄 배치
 - 2026-10-28 Merge pull request #820 from Openhash-Gopang/feat/kpatent-subpages-sim
 - 2026-10-28 feat: 변리사 9개 하위 페이지 방법론 v0.1·시뮬레이션·헤더 버튼
 - 2026-10-27 Merge pull request #819 from Openhash-Gopang/feat/kpatent-me-sim
@@ -43,7 +44,6 @@
 - 2026-10-27 docs: remove developer name/contact signatures and footers (keep FAQ/SP/narrative/citation uses)
 - 2026-10-27 Merge pull request #793 from Openhash-Gopang/fix/remove-ceo-contact-phrase
 - 2026-10-27 docs: remove 나비 개발자 대표 도영민(ceo@hondi.net) contact phrase from proposals and intro pages
-- 2026-10-27 feat(auth): 테스트 계정 한도(500 GDC)·24시간 유예·차단, 정식 아이디 전환과 데이터 이동
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
