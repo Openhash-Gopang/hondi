@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-27 18:34 KST · 기준 커밋 6c5055d2
+- 갱신: 2026-10-27 18:35 KST · 기준 커밋 e3c250a5
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-27 site-header: 히어로 오른쪽 나비 로고 삭제, 설명 문단을 본문 상단으로, 버튼을 히어로 오른쪽으로 이동
 - 2026-10-27 Merge pull request #812 from Openhash-Gopang/docs/kpatent-methodology-v0-1
 - 2026-10-27 docs: K-Patent 방법론 v0.1 초안 추가
 - 2026-10-27 pages: 행정사·변리사·세무회계·감정평가사 소개서를 간결한 단일 칼럼 문서 스타일로 통일, 법무사 소개서 꼬리말 오기 수정
@@ -43,7 +44,6 @@
 - 2026-10-27 feat: 직역 전문가 페이지 헤더에 기술 소개 버튼(새 탭) + 소개서 5종
 - 2026-10-27 Merge pull request #786 from Openhash-Gopang/feat/sido-proposal-button
 - 2026-10-27 gov-agency: add 사업 제안 header button showing per-province nabi digit code proposal
-- 2026-10-27 Merge pull request #785 from Openhash-Gopang/feat/admin-eight-sido-nabi-code-plan
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
