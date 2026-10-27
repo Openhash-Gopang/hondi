@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<link rel="icon" href="data:,">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>감정 시뮬레이션 — 감정평가사 보조 AI</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+</head>
+<body>
+<script>
+window.PAGE_HERO = {
+  badge: '감정평가사 보조 AI · 참고용 시뮬레이션',
+  l1: '평가 의뢰 하나를 받으면',
+  l2: '자료 정리부터 시산·평가서 초안·수수료까지 모의로 진행합니다',
+  sub: '감정평가사 보조 AI의 가치평가 흐름(의뢰 접수 → 자료·현장조사 정리 → 방법별 시산 → 검증 → 평가서 초안 → 수수료·결과 기록)을 한 건의 의뢰로 끝까지 보여 줍니다. 평가액은 정하지 않으며, 감정평가사의 확인·확정 전에는 사용할 수 없는 참고 자료입니다.',
+  actions: [{ label: '감정평가사 서비스 화면', href: '/pages/appraiser.html', style: 'outline' }, { label: 'K-Evaluation', href: '/pages/k-evaluation.html', style: 'outline', target: '_blank' }, { label: '기술 소개', href: '/pages/intro-appraiser.html', style: 'outline', target: '_blank' }]
+};
+</script>
+<link rel="stylesheet" href="/assets/site-header.css">
+<script src="/assets/site-header.js"></script>
+<div id="site-hero-mount"></div>
+
+<script>
+  window.K_AUTH_CONFIG = { serviceLabel: "감정 시뮬레이션" };
+  window.HONDI_CHAT_WIDGET_CONFIG = {
+    sp: "SP_appraiser-assistant",   // 기본값. 페이지가 열리면 감정 시뮬레이션 SP로 바꾼다(setMode).
+    panelMode: "inline",
+    inlineMount: "#resultMount",
+    mic: false,
+    camera: "touch",
+    maxTokens: 6000,
+    panelTitle: "감정 시뮬레이션",
+    label: "조건을 바꿔 다시 물어보세요",
+    serviceLabel: "감정 시뮬레이션",
+    greeting: "감정 시뮬레이션입니다. 왼쪽에서 평가 의뢰를 고르거나 적고 「시뮬레이션 실행」을 누르면 결과가 여기에 나옵니다. 결과가 나온 뒤에는 이 입력창에서 조건을 바꿔 다시 물어볼 수 있습니다.",
+    onReply: function (reply) { try { window.AprSim && window.AprSim.parse(reply); } catch (e) { console.error(e); } }
+  };
+</script>
+<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
+<script src="/assets/chat-widget.js"></script>
+
+<style>
+/* 히어로: 오른쪽 위 나비 아이콘 삭제, 그 자리 아래 빈 공간에 방법론 버튼 */
+.site-hero-corner-logo { display: none !important; }
+.js-hero-doc { position: absolute; right: 40px; top: 50%; transform: translateY(-50%); display: inline-flex; align-items: center; background: #1a2e5c; border: 1px solid rgba(255,255,255,.45); color: #fff; font-size: 14px; font-weight: 600; padding: 9px 22px; border-radius: 20px; white-space: nowrap; text-decoration: none; font-family: 'Pretendard', sans-serif; box-shadow: 0 2px 6px rgba(0,0,0,.25); transition: background .15s, box-shadow .15s; }
+.js-hero-doc:hover, .js-hero-doc:focus-visible { background: #24356b; box-shadow: 0 3px 10px rgba(0,0,0,.3); outline: none; }
+@media (max-width: 900px) { .js-hero-doc { position: static; transform: none; margin-top: 22px; display: inline-flex; } }
+*, *::before, *::after { box-sizing: border-box; }
+:root {
+  --js-bg:#f8f9fa; --js-surface:#fff; --js-border:#e5e7eb; --js-border2:#d1d5db;
+  --js-brand:#3ecf8e; --js-brand-dk:#1a9e6a; --js-brand-bg:#f0fdf8; --js-brand-bd:#a7f3d0;
+  --js-amber:#f59e0b; --js-amber-bg:#fffbeb; --js-amber-ink:#92400e;
+  --js-red:#dc2626; --js-red-bg:#fef2f2;
+  --js-text:#0f172a; --js-text2:#374151; --js-text3:#6b7280;
+}
+body { background: var(--js-bg); color: var(--js-text); font-family: 'Pretendard', -apple-system, sans-serif; font-size: 14px; line-height: 1.7; }
+.js-wrap { max-width: 1180px; margin: 0 auto; padding: 24px 16px 80px; }
+.js-lead { font-size: 15px; line-height: 1.75; color: var(--js-text2); max-width: 760px; margin: 4px 0 16px; }
+.js-notice { background: var(--js-amber-bg); border: 1px solid #fde68a; color: var(--js-amber-ink); border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; }
+.js-notice b { font-weight: 700; }
+.js-steps { display: flex; gap: 6px; margin: 0 0 18px; flex-wrap: wrap; }
+.js-step { flex: 1; min-width: 120px; background: var(--js-surface); border: 1px solid var(--js-border); border-radius: 10px; padding: 8px 12px; font-size: 12px; color: var(--js-text3); line-height: 1.45; }
+.js-step b { display: block; font-size: 12.5px; color: var(--js-text2); }
+.js-step.done { background: var(--js-brand-bg); border-color: var(--js-brand-bd); }
+.js-step.done b { color: var(--js-brand-dk); }
+.js-step.cur { border-color: var(--js-brand); box-shadow: 0 0 0 2px var(--js-brand-bd); }
+.js-grid { display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.js-card { background: var(--js-surface); border: 1px solid var(--js-border); border-radius: 14px; padding: 18px; }
+.js-card h2 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.js-card .sub { color: var(--js-text3); font-size: 12.5px; margin-bottom: 14px; }
+.js-field { margin-bottom: 12px; min-width: 0; }
+.js-field label, .js-field .lab { display: block; font-size: 12px; color: var(--js-text3); margin-bottom: 4px; font-weight: 500; }
+.js-field select, .js-field input[type=text], .js-field input[type=date], .js-field textarea {
+  display: block; width: 100%; padding: 9px 11px; border: 1px solid var(--js-border2); border-radius: 8px; font: inherit; color: var(--js-text); background: #fff; }
+.js-field textarea { min-height: 150px; resize: vertical; line-height: 1.6; }
+.js-field select:focus, .js-field input:focus, .js-field textarea:focus { outline: 2px solid var(--js-brand); outline-offset: 0; border-color: var(--js-brand); }
+.js-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.js-drop { border: 1.5px dashed var(--js-border2); border-radius: 10px; padding: 16px 12px; text-align: center; background: #fafafa; cursor: pointer; color: var(--js-text3); font-size: 13px; transition: .15s; }
+.js-drop:hover, .js-drop.over, .js-drop:focus-visible { border-color: var(--js-brand); background: var(--js-brand-bg); outline: none; }
+.js-drop.has { border-style: solid; border-color: var(--js-brand-bd); background: var(--js-brand-bg); color: var(--js-text); }
+.js-drop .nm { font-weight: 600; word-break: break-all; }
+.js-drop .meta { font-size: 12px; color: var(--js-text3); margin-top: 2px; }
+.js-drop .x { margin-top: 6px; font-size: 12px; color: var(--js-red); background: none; border: 0; cursor: pointer; text-decoration: underline; font-family: inherit; }
+.js-hint { font-size: 12px; color: var(--js-text3); margin-top: 5px; }
+.js-hint.warn { color: var(--js-amber-ink); }
+.js-hint.err { color: var(--js-red); }
+.js-opts { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--js-text2); }
+.js-opts label { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: var(--js-text2); margin: 0; }
+.js-opts input { margin-top: 5px; }
+.js-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.js-btn { padding: 10px 18px; border: 0; border-radius: 8px; background: var(--js-brand-dk); color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+.js-btn:hover { background: #15805a; }
+.js-btn:disabled { opacity: .55; cursor: not-allowed; }
+.js-btn.sec { background: #fff; color: var(--js-text2); border: 1px solid var(--js-border2); font-weight: 500; }
+.js-btn.sec:hover { background: #f3f4f6; }
+.js-btn:focus-visible { outline: 2px solid var(--js-text); outline-offset: 2px; }
+.js-left { position: sticky; top: 12px; }
+#resultMount { min-height: 300px; }
+#resultMount:empty::before { content: '모의 진행 결과가 여기에 표시됩니다.'; display: block; padding: 60px 20px; text-align: center; color: var(--js-text3); border: 1px dashed var(--js-border2); border-radius: 14px; background: #fff; }
+#hcw-panel.hcw-inline { max-width: none !important; --hcw-inline-h: min(680px, 72vh) !important; }
+.js-method { margin-top: 22px; }
+.js-method details { background: var(--js-surface); border: 1px solid var(--js-border); border-radius: 12px; padding: 12px 16px; margin-bottom: 8px; }
+.js-method summary { cursor: pointer; font-weight: 600; font-size: 13.5px; }
+.js-method p, .js-method li { font-size: 13px; color: var(--js-text2); margin-top: 6px; }
+.js-method ul { margin-left: 18px; }
+.js-toast { position: fixed; right: 18px; bottom: 18px; background: #111827; color: #fff; padding: 10px 14px; border-radius: 10px; font-size: 13px; opacity: 0; transform: translateY(8px); transition: .25s; pointer-events: none; z-index: 99; max-width: calc(100vw - 36px); }
+.js-toast.on { opacity: 1; transform: none; }
+@media (max-width: 900px) { .js-grid { grid-template-columns: minmax(0, 1fr); } .js-left { position: static; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+.js-step .n { display:block; font-size:11px; color:var(--js-text3); }
+.js-case { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+.js-case button { text-align:left; background:#fff; border:1px solid var(--js-border2); border-radius:8px; padding:8px 10px; font:inherit; font-size:12.5px; color:var(--js-text2); cursor:pointer; line-height:1.4; }
+.js-case button:hover { border-color:var(--js-brand); background:var(--js-brand-bg); }
+.js-case button b { display:block; color:var(--js-text); font-size:13px; }
+@media (max-width: 560px) { .js-case { grid-template-columns: 1fr; } }
+</style>
+
+<div class="js-wrap">
+  <div class="js-notice" role="note"><b>참고용 모의 절차입니다.</b> 이 화면의 수치는 감정평가가 아닌 참고 시산이며, 평가액은 항상 「감정평가사 확정」으로 비워 둡니다. 서류는 모두 초안(DRAFT)이고 발급·제출·서명날인은 감정평가사가 합니다. 특정 가액을 정해 달라는 요청에는 응하지 않습니다.</div>
+
+  <div class="js-steps" id="jsSteps" aria-label="진행 단계">
+    <div class="js-step" data-s="1"><b>1 의뢰 접수</b>목적·기준시점·대상 특정</div>
+    <div class="js-step" data-s="2"><b>2 자료·현장조사</b>부족 자료, 현장 확인 항목</div>
+    <div class="js-step" data-s="3"><b>3 방법별 시산</b>참고 범위, 가정</div>
+    <div class="js-step" data-s="4"><b>4 검증·승인</b>시산 간 비교, 확인</div>
+    <div class="js-step" data-s="5"><b>5 평가서 초안</b>발급은 감정평가사</div>
+    <div class="js-step" data-s="6"><b>6 수수료·결과 기록</b>항목별 금액, 기록</div>
+  </div>
+
+  <div class="js-grid">
+    <div class="js-left">
+      <div class="js-card">
+        <h2>의뢰 입력</h2>
+        <p class="sub">평가 의뢰를 고르거나 직접 적어 주세요. 적지 않은 사실은 가정으로 표시되거나 빈칸으로 남습니다.</p>
+
+        <div class="js-field">
+          <span class="lab">자주 있는 평가 의뢰 (눌러서 채우기)</span>
+          <div class="js-case" id="cases"><button type="button" data-i="0"><b>아파트 담보대출용 감정평가</b></button><button type="button" data-i="1"><b>토지 보상 평가 검토</b></button><button type="button" data-i="2"><b>상가 건물 임대료 평가</b></button><button type="button" data-i="3"><b>비상장 기업 지분 평가</b></button><button type="button" data-i="4"><b>경매 부동산 시가 검토</b></button><button type="button" data-i="5"><b>기계·설비 감정평가</b></button><button type="button" data-i="6"><b>특허권 가치 검토</b></button><button type="button" data-i="7"><b>감정평가서 이의 대응</b></button></div>
+        </div>
+
+        <div class="js-two">
+          <div class="js-field">
+            <label for="fType">평가 대상 유형</label>
+            <select id="fType">
+              <option>부동산(토지·건물)</option>
+              <option>기업·지분</option>
+              <option>동산·기계·설비</option>
+              <option>무형자산(특허·상표 등)</option>
+              <option>임대료·기타</option>
+              <option>기타(설명란에 기재)</option>
+            </select>
+          </div>
+          <div class="js-field">
+            <label for="fSubmit">평가 목적</label>
+            <select id="fSubmit">
+              <option>담보·대출</option>
+              <option>보상·수용</option>
+              <option>경매·소송</option>
+              <option>매매·투자</option>
+              <option>재무보고·기타</option>
+            </select>
+          </div>
+        </div>
+        <div class="js-field">
+          <label for="fDate">기준시점(가격조사 기준일)</label>
+          <input type="date" id="fDate">
+        </div>
+
+        <div class="js-field">
+          <label for="fNote">평가 의뢰 내용</label>
+          <textarea id="fNote" placeholder="예) 은행 담보대출을 위해 서울 소재 아파트(전용 84㎡)의 감정평가가 필요합니다. 기준시점은 이번 달 말입니다."></textarea>
+          <div class="js-hint">들어갈수록 정확해지는 정보: 소재지·지번, 면적·용도, 권리관계, 임대차 현황, 최근 거래 자료, 기업은 재무제표(최근 3개 사업연도). 희망 가액은 쓰지 마세요(응하지 않습니다).</div>
+        </div>
+
+        <div class="js-field">
+          <span class="lab" id="fileLab">자료 첨부 (선택)</span>
+          <div class="js-drop" id="drop" tabindex="0" role="button" aria-labelledby="fileLab">
+            <div id="dropIdle">파일을 끌어다 놓거나 눌러서 선택<br><span style="font-size:12px">PDF, 워드(.docx), 한글(.hwpx), 텍스트, 사진·스캔</span></div>
+            <div id="dropHas" hidden><div class="nm" id="dropName"></div><div class="meta" id="dropMeta"></div><button type="button" class="x" id="dropX">첨부 취소</button></div>
+          </div>
+          <input type="file" id="file" hidden accept="image/*,.pdf,.docx,.hwpx,.txt,.md,.csv">
+          <div class="js-hint warn" id="fileHint">실제 개인정보·비밀 자료가 든 서류는 올리지 마세요. 모의 시뮬레이션입니다.</div>
+        </div>
+
+        <div class="js-field">
+          <span class="lab">진행 범위</span>
+          <div class="js-opts">
+            <label><input type="checkbox" id="oAll" checked> 1~6단계 끝까지 한 번에 진행</label>
+            <label><input type="checkbox" id="oSum"> 참고 시산 범위와 한계를 먼저, 상세는 뒤에</label>
+          </div>
+        </div>
+
+        <div class="js-btns">
+          <button type="button" class="js-btn" id="btnRun">시뮬레이션 실행</button>
+          <button type="button" class="js-btn sec" id="btnReset">초기화</button>
+        </div>
+        <div class="js-hint" id="runHint"></div>
+      </div>
+    </div>
+
+    <div>
+      <div id="resultMount"></div>
+    </div>
+  </div>
+
+  <div class="js-method">
+    <details>
+      <summary>이 시뮬레이션이 따르는 흐름</summary>
+      <ul>
+        <li><b>의뢰 접수:</b> 대상물 유형, 평가 목적, 가치 기준, 기준시점, 대상 특정, 권리관계를 확인하고 빠진 항목만 묻습니다(V-1).</li>
+        <li><b>자료·현장조사:</b> 필요한 자료 목록과 현장 확인이 필요한 항목을 정리합니다. AI는 현장을 확인하지 못합니다.</li>
+        <li><b>방법별 시산:</b> 비교·원가·수익 방식 가운데 맞는 방법으로 참고 범위를 내고, 시산 간 차이를 검토합니다(V-2, V-3). 평가액은 「감정평가사 확정」으로 비워 둡니다.</li>
+        <li><b>검증·평가서 초안:</b> 가정과 미확인 사항을 표시하고, 감정평가서 초안은 감정평가사가 검토·확정합니다.</li>
+        <li><b>수수료·결과 기록:</b> 수수료 항목은 조회한 근거가 있는 것만 쓰고, 기록은 이용자가 알려 준 만큼만 남깁니다.</li>
+      </ul>
+      <p>평가 성능 시험은 <a href="/pages/k-evaluation.html" target="_blank" rel="noopener">K-Evaluation</a>, 실제 작성 화면은 <a href="/pages/appraiser.html">감정평가사 서비스 화면</a>에서 볼 수 있습니다.</p>
+    </details>
+    <details>
+      <summary>한계</summary>
+      <ul>
+        <li>이 시뮬레이션의 수치는 참고 시산이며 감정평가가 아닙니다. 감정평가서의 발급·제출과 서명날인은 감정평가사가 하며, 이 화면은 이를 대신하지 않습니다.</li>
+        <li>시장 자료·금리·요율은 바뀔 수 있고 조회하지 못한 값은 「미확인」으로 남습니다. 현장조사를 하지 않았으므로 기준시점과 한계 항목을 반드시 대조하세요.</li>
+        <li>이 시뮬레이션의 성능은 아직 검증되지 않았습니다.</li>
+      </ul>
+    </details>
+  </div>
+</div>
+<div class="js-toast" id="jsToast" role="status"></div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var SP_URL = '/prompts/SP-appraiser-simulation_v0_1.md';
+  var KEY = 'apr-sim-form-v1';
+  var CASES = [{"t": "아파트 담보대출용 감정평가", "n": "은행 담보대출을 위해 아파트 감정평가가 필요합니다. 서울 소재 전용 84㎡, 준공 15년차, 기준시점은 이번 달 말(가정). 평가 목적은 담보 제공입니다."}, {"t": "토지 보상 평가 검토", "n": "공익사업으로 우리 땅의 일부가 수용된다는 통지를 받았습니다. 지목은 전, 면적 1,200㎡(가정). 보상 평가 자료를 정리하고 싶습니다."}, {"t": "상가 건물 임대료 평가", "n": "상가 건물의 적정 임대료 수준을 알고 싶습니다. 1층 점포 40㎡, 현재 월세와 보증금 자료는 있습니다(가정)."}, {"t": "비상장 기업 지분 평가", "n": "비상장 중소기업의 지분 30%를 매각하려 합니다. 최근 3개 사업연도 재무제표가 있고 업종은 제조업입니다(가정)."}, {"t": "경매 부동산 시가 검토", "n": "경매에 나온 단독주택의 시가를 검토하고 싶습니다. 감정가와 최근 인근 거래 자료를 비교해 보려 합니다(가정)."}, {"t": "기계·설비 감정평가", "n": "공장 설비(프레스 3대, 연식 8년)의 가치를 알고 싶습니다. 설비 목록과 취득 가격 자료가 있습니다(가정)."}, {"t": "특허권 가치 검토", "n": "보유한 특허권의 가치 검토를 의뢰하려 합니다. 남은 존속 기간 7년, 라이선스 계약 1건이 있습니다(가정)."}, {"t": "감정평가서 이의 대응", "n": "받은 감정평가서의 금액이 시세와 차이가 크다고 생각합니다. 이의 신청에 가져갈 자료를 정리하고 싶습니다."}];
+  var attached = null, modeReady = false, spText = null;
+  var CTX = '사용자는 감정 시뮬레이션 화면에 있다. 왼쪽 입력란의 의뢰 내용으로 1~6단계 모의 절차를 진행한다. 수치는 참고 시산이며 평가액은 감정평가사 확정으로 비워 둔다. 발급·제출·납부는 하지 않는 모의 절차이다.';
+
+  function toast(m) { var t = $('jsToast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(function () { t.classList.remove('on'); }, 3200); }
+  function hint(el, msg, cls) { el.textContent = msg || ''; el.className = 'js-hint' + (cls ? ' ' + cls : ''); }
+
+  function save() { try { localStorage.setItem(KEY, JSON.stringify({ t: $('fType').selectedIndex, s: $('fSubmit').selectedIndex, d: $('fDate').value, n: $('fNote').value, a: $('oAll').checked, m: $('oSum').checked })); } catch (e) {} }
+  function load() {
+    var v = null; try { v = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+    if (v) { $('fType').selectedIndex = v.t || 0; $('fSubmit').selectedIndex = v.s || 0; $('fDate').value = v.d || ''; $('fNote').value = v.n || ''; $('oAll').checked = v.a !== false; $('oSum').checked = !!v.m; }
+    if (!$('fDate').value) { var d = new Date(Date.now() + 9 * 3600e3); $('fDate').value = d.toISOString().slice(0, 10); }
+  }
+  ['fType', 'fSubmit', 'fDate', 'fNote', 'oAll', 'oSum'].forEach(function (id) { $(id).addEventListener('input', save); $(id).addEventListener('change', save); });
+
+  function setStep(n) {
+    n = parseInt(n, 10); if (!(n >= 1 && n <= 6)) return;
+    Array.prototype.forEach.call(document.querySelectorAll('.js-step'), function (el) {
+      var j = parseInt(el.getAttribute('data-s'), 10);
+      el.classList.toggle('done', j <= n); el.classList.toggle('cur', j === n);
+    });
+  }
+  function clearSteps() { Array.prototype.forEach.call(document.querySelectorAll('.js-step'), function (el) { el.classList.remove('done', 'cur'); }); }
+  function parse(reply) {
+    var re = /\[감정 시뮬레이션\s*\|\s*현재:\s*단계\s*([1-6])/g, m, last = null;
+    while ((m = re.exec(reply || ''))) last = m[1];
+    if (last) setStep(last);
+  }
+  window.AprSim = { parse: parse };
+
+  $('cases').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-i]'); if (!b) return;
+    var c = CASES[+b.getAttribute('data-i')];
+    $('fNote').value = c.n; save(); toast('「' + c.t + '」 예시를 채웠습니다. 실제 사정으로 바꿔 실행하세요.');
+  });
+
+  function whenWidget(cb, tries) {
+    if (window.HondiChatWidget && window.HondiChatWidget.setMode) return cb();
+    if ((tries || 0) > 100) return cb(new Error('widget'));
+    setTimeout(function () { whenWidget(cb, (tries || 0) + 1); }, 100);
+  }
+  function applyMode() {
+    return fetch(SP_URL, { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw new Error('SP ' + r.status); return r.text(); }).then(function (t) {
+      spText = t;
+      return new Promise(function (ok, no) {
+        whenWidget(function (err) {
+          if (err) return no(err);
+          var done = window.HondiChatWidget.setMode({ system: spText, context: CTX, greeting: '결과가 여기에 표시됩니다. 왼쪽에 입력하고 「시뮬레이션 실행」을 눌러 주세요.', maxTokens: 6000 });
+          if (done === false) return no(new Error('busy'));
+          modeReady = true; ok();
+        });
+      });
+    });
+  }
+  applyMode().catch(function (e) { console.warn('[apr-sim] SP 적용 지연', e); });
+
+  function fmtSize(n) { return n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB'; }
+  function showAttached(label, meta) { $('dropIdle').hidden = true; $('dropHas').hidden = false; $('drop').classList.add('has'); $('dropName').textContent = '📎 ' + label; $('dropMeta').textContent = meta || ''; }
+  function clearAttached() { attached = null; $('file').value = ''; $('dropIdle').hidden = false; $('dropHas').hidden = true; $('drop').classList.remove('has'); hint($('fileHint'), '실제 개인정보·비밀 자료가 든 서류는 올리지 마세요. 모의 시뮬레이션입니다.', 'warn'); }
+  function pick(file) {
+    if (!file) return;
+    if (file.size > 25 * 1048576) { hint($('fileHint'), '파일이 너무 큽니다(25MB 이하).', 'err'); return; }
+    attached = { file: file, label: file.name };
+    showAttached(file.name, fmtSize(file.size));
+    hint($('fileHint'), '실행하면 글자를 읽어 전달합니다. 실제 개인정보가 든 서류는 올리지 마세요.', 'warn');
+  }
+  $('drop').addEventListener('click', function (e) { if (e.target.id !== 'dropX') $('file').click(); });
+  $('drop').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('file').click(); } });
+  $('file').addEventListener('change', function () { pick($('file').files && $('file').files[0]); });
+  $('dropX').addEventListener('click', function (e) { e.stopPropagation(); clearAttached(); });
+  ['dragenter', 'dragover'].forEach(function (ev) { $('drop').addEventListener(ev, function (e) { e.preventDefault(); $('drop').classList.add('over'); }); });
+  ['dragleave', 'drop'].forEach(function (ev) { $('drop').addEventListener(ev, function (e) { e.preventDefault(); $('drop').classList.remove('over'); }); });
+  $('drop').addEventListener('drop', function (e) { var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) pick(f); });
+
+  function pushToWidget(file) {
+    return new Promise(function (ok, no) {
+      var inp = document.getElementById('hcw-file'), nm = document.getElementById('hcw-attach-name');
+      if (!inp || !nm) return no(new Error('입력창이 아직 준비되지 않았습니다.'));
+      var dt = new DataTransfer(); dt.items.add(file); inp.files = dt.files;
+      inp.dispatchEvent(new Event('change', { bubbles: true }));
+      var n = 0;
+      (function wait() {
+        var t = nm.textContent || '';
+        if (t && t.indexOf('읽는 중') < 0) return (t.indexOf('읽지 못함') >= 0) ? no(new Error('첨부 파일을 읽지 못했습니다. PDF나 사진으로 다시 올려 보세요.')) : ok();
+        if (++n > 150) return no(new Error('첨부 파일 읽기가 오래 걸립니다.'));
+        setTimeout(wait, 200);
+      })();
+    });
+  }
+
+  function compose() {
+    var L = [];
+    L.push('감정 시뮬레이션을 진행해 주세요. 평가액은 정하지 않고 참고 시산 범위만 내며, 발급·제출·수수료 납부는 모의로 진행합니다.');
+    L.push('- 평가 대상 유형: ' + $('fType').value);
+    L.push('- 평가 목적: ' + $('fSubmit').value);
+    L.push('- 기준시점: ' + ($('fDate').value || '(미입력)'));
+    L.push('- 첨부 자료: ' + (attached ? attached.label : '없음'));
+    L.push('- 평가 의뢰 내용: ' + ($('fNote').value.trim() || '(없음)'));
+    L.push('- 진행 범위: ' + ($('oAll').checked ? '1~6단계를 끝까지 한 번에' : '1~3단계까지만 먼저') + ($('oSum').checked ? ', 참고 시산 범위와 한계를 먼저 쓰고 상세는 뒤에' : ''));
+    L.push('위 정보만을 입력값으로 쓰고, 없는 사실은 지어내지 말고 빈칸 표시나 가정으로 처리해 주세요.');
+    return L.join('\n');
+  }
+  var running = false;
+  $('btnRun').addEventListener('click', function () {
+    if (running) return;
+    if (!$('fNote').value.trim() && !attached) { hint($('runHint'), '평가 의뢰를 고르거나 적어 주세요.', 'err'); return; }
+    hint($('runHint'), '');
+    running = true; $('btnRun').disabled = true; $('btnRun').textContent = '실행 중…';
+    var prev = Promise.resolve();
+    if (!modeReady) prev = applyMode();
+    prev.then(function () {
+      var w = window.HondiChatWidget;
+      if (w.isBusy && w.isBusy()) throw new Error('이전 응답을 기다리는 중입니다. 잠시 뒤 다시 눌러 주세요.');
+      var again = w.setMode({ system: spText, context: CTX, greeting: '시뮬레이션을 시작합니다.', maxTokens: 6000 });
+      if (again === false) throw new Error('이전 응답을 기다리는 중입니다.');
+      clearSteps();
+      return w.open();
+    }).then(function () { return attached ? pushToWidget(attached.file) : null; })
+      .then(function () { return window.HondiChatWidget.send(compose()); })
+      .then(function () { var m = $('resultMount'); try { m.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} })
+      .catch(function (e) { hint($('runHint'), (e && e.message) || '실행하지 못했습니다. 잠시 뒤 다시 시도해 주세요.', 'err'); })
+      .then(function () { running = false; $('btnRun').disabled = false; $('btnRun').textContent = '시뮬레이션 실행'; });
+  });
+
+  $('btnReset').addEventListener('click', function () {
+    $('fNote').value = ''; $('fType').selectedIndex = 0; $('fSubmit').selectedIndex = 0; $('oAll').checked = true; $('oSum').checked = false;
+    clearAttached(); save(); hint($('runHint'), ''); clearSteps();
+    toast('입력을 초기화했습니다.');
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>

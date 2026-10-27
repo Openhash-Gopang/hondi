@@ -99,7 +99,7 @@
     var third = second ? heroCtaLink(config && config.heroButton3, 'ph-hero-cta ph-hero-cta-2 ph-hero-cta-3') : '';
     var intro = heroCtaLink(introButtonFor(config), 'ph-hero-cta ph-hero-cta-2 ph-hero-cta-intro', true);
     // 2026-10-27 — PAGE_HEADER.heroButtonLast = { label, href, title }: 「기술 소개」 오른쪽 맨 끝에 놓는 버튼(법무사 페이지의 「법무 시뮬레이션」).
-    var last = intro ? heroCtaLink(config && config.heroButtonLast, 'ph-hero-cta ph-hero-cta-2 ph-hero-cta-3') : '';
+    var last = (intro || first) ? heroCtaLink(config && config.heroButtonLast, 'ph-hero-cta ph-hero-cta-2 ph-hero-cta-3') : '';
     // 2026-10-27 — PAGE_HEADER.heroButtonLast2: 「heroButtonLast」 오른쪽에 놓는 버튼(변리사 세부 분야의 「방법론」 「시뮬레이션」 두 버튼). heroButtonLast가 있을 때만 그린다.
     var last2 = last ? heroCtaLink(config && config.heroButtonLast2, 'ph-hero-cta ph-hero-cta-2 ph-hero-cta-3') : '';
     if (!first && !intro) return '';
