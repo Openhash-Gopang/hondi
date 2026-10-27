@@ -33,7 +33,9 @@
        그대로 쓰거나 직접 정하거나 "나중에 하기"(건너뛰기, 기본 아이디 유지)를 고를 수 있다.
      · 같은 화면에서 "보내는 이름(선택)"도 받는다 — 받는 사람의 메일 프로그램(Gmail 등)이 보낸 사람으로 보여 주는 이름이다.
        비워 두면 주소만 나가고, 받는 사람의 프로그램에 따라 @ 앞부분(아이디)이 이름처럼 보일 수 있다. 미리보기를 함께 보여 준다.
-     · 메뉴의 "아이디 바꾸기"로 언제든 다시 열 수 있다(30일에 3번까지 — 서버 정책).
+     · 아이디 바꾸기는 K-Mail 설정 페이지(https://mail.hondi.net/desktop.html#settings)의 "계정"에서 한다(30일에 3번까지 — 서버 정책).
+       배지 오른쪽의 세로 점 세 개(⋮) 아이콘이 그 설정 페이지로 연결된다. (2026-10-28)
+     · 메뉴의 "보내는 이름"은 눌러서 바로 고칠 수 있다(저장하면 서버 POST /kmail/settings, 같은 페이지에 "hondi-mail-info-change" 이벤트를 보낸다).
 
    ■ 기능 제한(선언형) — 로그인 필요 기능에 속성만 붙이면 됩니다.
        <button data-requires-login="메일 보내기">보내기</button>
@@ -65,6 +67,7 @@
   var KAUTH_SRC = 'https://hondi.net/auth/k-service-auth-client.js';
   var C_TOKEN = 'hondi_pvt', C_EXP = 'hondi_pvt_exp';
   var COOKIE_DOMAIN = '.hondi.net';
+  var SETTINGS_URL = 'https://mail.hondi.net/desktop.html#settings';   // K-Mail 설정 페이지(아이디 바꾸기·보내는 이름·서명·자동응답)
 
   // ── 로그인 상태 읽기 ─────────────────────────────────────────
   function readCookie(name) {
@@ -294,6 +297,17 @@
     mailPrompted = true; try { global.sessionStorage.setItem(MID_PROMPTED, '1'); } catch (e) {}
     openMailIdChooser({ first: true });
   }
+  // 서버(kmail-sender.js)와 같은 규칙 — 최종 판정은 서버가 하고, 여기서는 미리 알려 준다
+  function checkSenderName(raw, nameMax) {
+    nameMax = nameMax || 40;
+    var r = String(raw == null ? '' : raw);
+    if (/[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u2028\u2029\u202A-\u202E\u2060-\u206F\uFEFF]/.test(r)) return { ok: false, value: '', msg: '줄바꿈이나 보이지 않는 문자는 쓸 수 없습니다.' };
+    var v = r.replace(/\s+/g, ' ').trim();
+    if (Array.from(v).length > nameMax) return { ok: false, value: v, msg: '이름은 ' + nameMax + '자까지 쓸 수 있습니다.' };
+    if (/[<>"@\\;:,]/.test(v)) return { ok: false, value: v, msg: '이름에는 < > " @ \\ ; : , 문자를 쓸 수 없습니다.' };
+    if (/[\u2713\u2714\u2611\u2705\uD83D\uDD12\uD83D\uDD10\uD83D\uDD0F\uD83D\uDEE1]/.test(v)) return { ok: false, value: v, msg: '인증·보증된 것처럼 보이는 기호(✓ ✔ ✅ 🔒 등)는 이름에 쓸 수 없습니다.' };
+    return { ok: true, value: v };
+  }
   function openMailIdChooser(opts) {
     opts = opts || {};
     var first = !!opts.first, tok = readCookie(C_TOKEN);
@@ -304,16 +318,7 @@
     var curName = String(info.sender_display_name || '');
     var nameServerMsg = '';                                         // 서버가 이름을 거절했을 때의 이유 — 이름을 다시 고칠 때까지 보여 준다
     var nameMax = info.sender_name_max || 40;
-    // 서버(kmail-sender.js)와 같은 규칙 — 최종 판정은 서버가 하고, 여기서는 미리 알려 준다
-    function checkName(raw) {
-      var r = String(raw == null ? '' : raw);
-      if (/[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u2028\u2029\u202A-\u202E\u2060-\u206F\uFEFF]/.test(r)) return { ok: false, value: '', msg: '줄바꿈이나 보이지 않는 문자는 쓸 수 없습니다.' };
-      var v = r.replace(/\s+/g, ' ').trim();
-      if (Array.from(v).length > nameMax) return { ok: false, value: v, msg: '이름은 ' + nameMax + '자까지 쓸 수 있습니다.' };
-      if (/[<>"@\\;:,]/.test(v)) return { ok: false, value: v, msg: '이름에는 < > " @ \\ ; : , 문자를 쓸 수 없습니다.' };
-      if (/[\u2713\u2714\u2611\u2705\uD83D\uDD12\uD83D\uDD10\uD83D\uDD0F\uD83D\uDEE1]/.test(v)) return { ok: false, value: v, msg: '인증·보증된 것처럼 보이는 기호(✓ ✔ ✅ 🔒 등)는 이름에 쓸 수 없습니다.' };
-      return { ok: true, value: v };
-    }
+    function checkName(raw) { return checkSenderName(raw, nameMax); }
 
     var back = el('div'); back.id = 'hondi-mailid-modal';
     var box = el('div', 'hub-modal'); box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-labelledby', 'hondi-mid-title');
@@ -512,6 +517,26 @@
     '#hondi-user-badge .hub-bar-fill{height:100%;background:#22c55e}' +
     '#hondi-user-badge .hub-bar-fill.hub-over{background:#dc2626}' +
     '#hondi-user-badge .hub-warn{color:#b91c1c;font-weight:600}' +
+    '#hondi-user-badge .hub-row{display:inline-flex;align-items:center;gap:4px;max-width:100%}' +
+    '#hondi-user-badge .hub-more{flex:none;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;text-decoration:none;cursor:pointer;border:1px solid transparent;background:transparent;color:#334155}' +
+    '#hondi-user-badge .hub-more:hover{background:rgba(15,23,42,.1)}' +
+    '#hondi-user-badge .hub-more:focus-visible{outline:2px solid #2563eb;outline-offset:2px}' +
+    '#hondi-user-badge .hub-more svg{width:20px;height:20px;fill:currentColor}' +
+    '[data-hondi-user-slot="dark"] #hondi-user-badge .hub-more{color:#fff}' +
+    '[data-hondi-user-slot="dark"] #hondi-user-badge .hub-more:hover{background:rgba(255,255,255,.18)}' +
+    '#hondi-user-badge .hub-name{margin:8px 0 0;font-size:13.5px;color:#475569;line-height:1.6}' +
+    '#hondi-user-badge .hub-name-val{display:inline-flex;align-items:center;gap:5px;max-width:100%;padding:2px 7px;margin-left:3px;border:1px dashed #94a3b8;border-radius:7px;background:transparent;color:#0f172a;font:inherit;font-size:13.5px;font-weight:700;cursor:text;text-align:left;word-break:break-all}' +
+    '#hondi-user-badge .hub-name-val:hover{background:#f1f5f9;border-color:#64748b}' +
+    '#hondi-user-badge .hub-name-val:focus-visible{outline:2px solid #2563eb;outline-offset:2px}' +
+    '#hondi-user-badge .hub-name-val.hub-empty{font-weight:500;color:#64748b}' +
+    '#hondi-user-badge .hub-name-val svg{width:13px;height:13px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}' +
+    '#hondi-user-badge .hub-name-edit{display:flex;gap:6px;margin-top:6px}' +
+    '#hondi-user-badge .hub-name-input{flex:1 1 auto;min-width:0;box-sizing:border-box;padding:7px 9px;border:2px solid #cbd5e1;border-radius:8px;font:600 14.5px/1.3 Pretendard,system-ui,sans-serif;color:#0f172a;background:#fff}' +
+    '#hondi-user-badge .hub-name-input:focus{outline:none;border-color:#1d4ed8}' +
+    '#hondi-user-badge .hub-name-edit .hub-btn{display:inline-block;width:auto;margin-top:0;padding:7px 11px;font-size:13.5px;flex:none}' +
+    '#hondi-user-badge .hub-name-edit .hub-btn:disabled{opacity:.5;cursor:not-allowed}' +
+    '#hondi-user-badge .hub-name-msg{min-height:1.2em;margin:4px 0 0;font-size:12.5px;color:#b91c1c;font-weight:600}' +
+    '@media (prefers-color-scheme:dark){#hondi-user-badge .hub-more{color:#e2e8f0}#hondi-user-badge .hub-more:hover{background:rgba(255,255,255,.14)}#hondi-user-badge .hub-name-val{color:#f1f5f9;border-color:#64748b}#hondi-user-badge .hub-name-val:hover{background:#334155}#hondi-user-badge .hub-name-val.hub-empty{color:#cbd5e1}#hondi-user-badge .hub-name-input{background:#0f172a;border-color:#475569;color:#f1f5f9}#hondi-user-badge .hub-name-msg{color:#fca5a5}}' +
     '#hondi-blocked-modal{position:fixed;inset:0;z-index:2147482500;background:rgba(15,23,42,.62);display:flex;align-items:center;justify-content:center;padding:16px}' +
     '#hondi-blocked-modal .hub-modal{width:min(440px,100%);box-sizing:border-box;background:#fff;color:#0f172a;border-radius:16px;padding:22px 22px 18px;font:500 16px/1.6 Pretendard,system-ui,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.35)}' +
     '#hondi-blocked-modal h2{margin:0 0 8px;font-size:21px}' +
@@ -543,7 +568,7 @@
     '#hondi-user-toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);transform:translateX(-50%);z-index:2147482100;max-width:88vw;padding:11px 18px;border-radius:12px;background:#0f172a;color:#fff;font:600 15px/1.4 Pretendard,system-ui,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.3)}' +
     '@media print{#hondi-user-badge,#hondi-user-toast,#hondi-blocked-modal,#hondi-mailid-modal{display:none!important}}';
 
-  var badge = null, menuOpen = false, lastSig = null, toastTimer = null;
+  var badge = null, menuOpen = false, lastSig = null, toastTimer = null, nameEdit = null;   // nameEdit: 보내는 이름을 고치는 중이면 { draft, msg, busy }
 
   function addStyle() {
     if (doc.getElementById('hondi-user-badge-style')) return;
@@ -584,13 +609,116 @@
     if (c) c.setAttribute('aria-expanded', menuOpen ? 'true' : 'false');
   }
 
-  function render(force) {
+  // ── 아이콘(SVG는 createElementNS로 만든다) ────────────────────
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+  function svgEl(tag, attrs) {
+    var n = doc.createElementNS(SVG_NS, tag);
+    for (var k in attrs) if (Object.prototype.hasOwnProperty.call(attrs, k)) n.setAttribute(k, attrs[k]);
+    return n;
+  }
+  function dotsIcon() {                                      // 세로 점 세 개(⋮)
+    var s = svgEl('svg', { viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false' });
+    [5, 12, 19].forEach(function (cy) { s.appendChild(svgEl('circle', { cx: '12', cy: String(cy), r: '2' })); });
+    return s;
+  }
+  function pencilIcon() {
+    var s = svgEl('svg', { viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false' });
+    s.appendChild(svgEl('path', { d: 'M12 20h9' }));
+    s.appendChild(svgEl('path', { d: 'M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z' }));
+    return s;
+  }
+  // 아이디 칩 오른쪽의 ⋮ — K-Mail 설정 페이지로 간다. K-Mail 화면 안이면 새로 읽지 않고 바로 연다.
+  function settingsLink() {
+    var a = el('a', 'hub-more');
+    a.href = SETTINGS_URL; a.title = '설정'; a.setAttribute('aria-label', '설정');
+    a.appendChild(dotsIcon());
+    a.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      if (typeof global.kmailOpenSettings === 'function') { ev.preventDefault(); setMenu(false); global.kmailOpenSettings(); }
+    });
+    return a;
+  }
+
+  // ── 보내는 이름: 메뉴에서 눌러서 바로 고친다 ───────────────────
+  function senderNameNow() { return String((mailInfo && mailInfo.sender_display_name) || ''); }
+  function announceMailInfo() {                              // 같은 페이지의 설정 화면 등이 값을 맞추도록 알린다
+    try { global.dispatchEvent(new CustomEvent('hondi-mail-info-change', { detail: { mail_id: (mailInfo && mailInfo.mail_id) || '', sender_display_name: senderNameNow() } })); } catch (e) {}
+  }
+  function saveSenderName(value) {
+    var tok = readCookie(C_TOKEN);
+    if (!tok || !nameEdit || nameEdit.busy) return;
+    nameEdit.busy = true;
+    postJson('/kmail/settings', { phone_verify_token: tok, sender_display_name: value }).then(function (x) {
+      if (x.status === 200 && x.d && x.d.ok) {
+        if (mailInfo) mailInfo.sender_display_name = value;
+        nameEdit = null;
+        toast(value ? '보내는 이름을 ' + value + '(으)로 바꿨습니다.' : '보내는 이름을 비웠습니다. 주소만 나갑니다.');
+        render(true, true);
+        announceMailInfo();
+        return;
+      }
+      if (nameEdit) { nameEdit.busy = false; nameEdit.msg = (x.d && x.d.message) || '저장하지 못했습니다. 잠시 뒤 다시 시도해 주세요.'; }
+      render(true, true);
+    }, function () {
+      if (nameEdit) { nameEdit.busy = false; nameEdit.msg = '저장하지 못했습니다. 연결을 확인하고 다시 시도해 주세요.'; }
+      render(true, true);
+    });
+  }
+  function buildNameRow() {
+    var row = el('div', 'hub-name');
+    row.addEventListener('click', function (ev) { ev.stopPropagation(); });   // 이 줄 안의 클릭은 메뉴를 닫지 않는다
+    row.appendChild(doc.createTextNode('보내는 이름'));
+    if (!nameEdit) {
+      var cur = senderNameNow();
+      var b = el('button', 'hub-name-val' + (cur ? '' : ' hub-empty')); b.type = 'button';
+      b.title = '눌러서 고치기';
+      b.appendChild(el('span', '', cur || '(없음 — 주소만 나감)'));
+      b.appendChild(pencilIcon());
+      b.addEventListener('click', function (ev) { ev.stopPropagation(); nameEdit = { draft: cur, msg: '', busy: false }; render(true, true); });
+      row.appendChild(b);
+      return row;
+    }
+    var max = (mailInfo && mailInfo.sender_name_max) || 40;
+    var wrap = el('div', 'hub-name-edit');
+    var inp = el('input', 'hub-name-input'); inp.type = 'text'; inp.maxLength = max; inp.autocomplete = 'off'; inp.spellcheck = false;
+    inp.placeholder = '예: 도 영민'; inp.setAttribute('aria-label', '보내는 이름'); inp.value = nameEdit.draft;
+    var save = el('button', 'hub-btn hub-primary', '저장'); save.type = 'button';
+    var cancel = el('button', 'hub-btn', '취소'); cancel.type = 'button';
+    var msg = el('p', 'hub-name-msg', nameEdit.msg || ''); msg.setAttribute('aria-live', 'polite');
+    function paint() {
+      var r = checkSenderName(inp.value, max);
+      if (!nameEdit.busy) msg.textContent = r.ok ? (nameEdit.msg || '') : r.msg;
+      save.disabled = nameEdit.busy || !r.ok;
+      cancel.disabled = nameEdit.busy; inp.disabled = nameEdit.busy;
+    }
+    function submit() {
+      var r = checkSenderName(inp.value, max);
+      if (!r.ok || nameEdit.busy) return;
+      if (r.value === senderNameNow()) { nameEdit = null; render(true, true); return; }   // 바뀐 것이 없으면 그냥 닫는다
+      nameEdit.draft = r.value; paint(); saveSenderName(r.value);
+    }
+    inp.addEventListener('input', function () { nameEdit.draft = inp.value; nameEdit.msg = ''; paint(); });
+    inp.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Enter' && !ev.isComposing) { ev.preventDefault(); submit(); }
+      else if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); if (!nameEdit.busy) { nameEdit = null; render(true, true); } }
+    });
+    save.addEventListener('click', function (ev) { ev.stopPropagation(); submit(); });
+    cancel.addEventListener('click', function (ev) { ev.stopPropagation(); nameEdit = null; render(true, true); });
+    wrap.appendChild(inp); wrap.appendChild(save); wrap.appendChild(cancel);
+    row.appendChild(wrap); row.appendChild(msg);
+    paint();
+    return row;
+  }
+
+  function render(force, hard) {
     if (!doc.body) return;
     var id = identity();
     var sig = (id.loggedIn ? '1' : '0') + '|' + id.kind + '|' + id.label;
+    if (!(id.loggedIn && id.kind === 'user' && id.source === 'cookie')) nameEdit = null;   // 로그아웃·계정 전환이면 고치던 이름은 버린다
     doc.documentElement.classList.toggle('hondi-anon', !id.loggedIn);
     doc.documentElement.setAttribute('data-hondi-auth', id.loggedIn ? 'in' : 'out');
     if (!force && sig === lastSig && badge && badge.isConnected) return;
+    if (nameEdit && !hard && sig === lastSig && badge && badge.isConnected) return;   // 이름을 고치는 중에는 백그라운드 갱신이 입력칸을 지우지 않게 한다
     lastSig = sig;
     addStyle();
     mount();
@@ -601,7 +729,7 @@
     chip.type = 'button';
     chip.setAttribute('aria-haspopup', 'true');
     chip.setAttribute('aria-expanded', 'false');
-    chip.title = id.loggedIn ? '로그인됨 · 아이디 ' + id.label : '로그인하지 않았습니다';
+    chip.title = id.loggedIn ? id.label : '로그인하지 않았습니다';
     chip.appendChild(el('span', 'hub-dot'));
     chip.appendChild(el('span', 'hub-label', id.loggedIn ? id.label : '로그인 필요'));
     if (id.kind === 'test') chip.appendChild(el('span', 'hub-tag', testTagText()));
@@ -611,7 +739,7 @@
     menu.hidden = true;
     menu.setAttribute('role', 'menu');
     if (id.loggedIn) {
-      var p = el('div'); p.appendChild(doc.createTextNode('로그인됨 · 아이디 ')); p.appendChild(el('b', '', id.label));
+      var p = el('div'); p.appendChild(el('b', '', id.label));              // 아이디만 보여 준다 — 메뉴가 열리면 로그인된 상태임을 알 수 있다
       menu.appendChild(p);
       if (id.kind === 'test') appendTestSection(menu);
       if (id.source === 'spa') {
@@ -619,10 +747,14 @@
       } else {
         if (id.kind === 'user') {
           if (mailInfo && mailInfo.address) menu.appendChild(el('p', 'hub-note', '내 메일 주소: ' + mailInfo.address));
-          if (mailInfo && mailInfo.address) menu.appendChild(el('p', 'hub-note', '보내는 이름: ' + (mailInfo.sender_display_name || '(없음 — 주소만 나감)')));
-          var chg = el('button', 'hub-btn', (mailInfo && mailInfo.needs_choice) ? '아이디 정하기' : '아이디 바꾸기'); chg.type = 'button';
-          chg.addEventListener('click', function () { setMenu(false); fetchMailId(true).then(function () { openMailIdChooser({ first: !!(mailInfo && mailInfo.needs_choice) }); }); });
-          menu.appendChild(chg);
+          if (mailInfo && mailInfo.address) menu.appendChild(buildNameRow());   // 보내는 이름 — 눌러서 바로 고친다
+          if (mailInfo && mailInfo.needs_choice) {                              // 아이디를 아직 안 정한 사람에게만 — 바꾸기는 설정 페이지(⋮)로 옮겼다
+            var chg = el('button', 'hub-btn', '아이디 정하기'); chg.type = 'button';
+            chg.addEventListener('click', function () { setMenu(false); fetchMailId(true).then(function () { openMailIdChooser({ first: true }); }); });
+            menu.appendChild(chg);
+          } else if (mailInfo && mailInfo.address) {
+            menu.appendChild(el('p', 'hub-note', '아이디 바꾸기는 오른쪽 ⋮ 설정에서 할 수 있어요.'));
+          }
         }
         var out = el('button', 'hub-btn', '로그아웃'); out.type = 'button';
         out.addEventListener('click', function () { setMenu(false); logout(); });
@@ -643,9 +775,16 @@
         menu.appendChild(back);
       }
     }
-    badge.appendChild(chip);
+    var rowBox = el('div', 'hub-row');
+    rowBox.appendChild(chip);
+    if (id.loggedIn && id.kind === 'user' && id.source === 'cookie') rowBox.appendChild(settingsLink());   // 아이디 오른쪽 ⋮ → 설정 페이지
+    badge.appendChild(rowBox);
     badge.appendChild(menu);
     setMenu(menuOpen);                                // 사용량을 새로 받아 다시 그려도 열어 둔 메뉴는 닫지 않는다
+    if (nameEdit && menuOpen) {                       // 이름을 고치는 중이면 입력칸에 커서를 돌려 준다
+      var ni = badge.querySelector('.hub-name-input');
+      if (ni && !ni.disabled) { ni.focus(); try { ni.setSelectionRange(ni.value.length, ni.value.length); } catch (e) {} }
+    }
     if (id.kind === 'user' && id.source === 'cookie' && readCookie(C_MIG)) maybeMigrate();
     if (id.kind !== 'test') quota = null;
     else if (!quota) fetchQuota(false);          // 로그인 직후 사용량을 바로 가져온다(1분을 기다리지 않는다)
@@ -676,7 +815,7 @@
 
   // ── 공개 API ─────────────────────────────────────────────────
   global.HondiAuth = {
-    version: '1.0',
+    version: '1.1',
     isLoggedIn: function () { return identity().loggedIn; },
     getUserLabel: function () { return identity().label; },
     getKind: function () { return identity().kind; },
@@ -690,6 +829,7 @@
     startFormalLogin: startFormalLogin,
     getQuota: function () { return quota; },
     getMailId: function () { return mailInfo && mailInfo.mail_id || ''; },
+    reloadMailInfo: function () { return fetchMailId(true); },   // 설정 화면에서 아이디·이름을 바꾼 뒤 배지를 새로 맞춘다
     openMailIdChooser: function (o) { return fetchMailId(true).then(function () { openMailIdChooser(o || {}); }); },
     refresh: function () { render(true); },
   };
