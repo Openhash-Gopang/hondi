@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-28 04:52 KST · 기준 커밋 a0b941e8
+- 갱신: 2026-10-28 04:56 KST · 기준 커밋 6d3849b0
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-28 feat: 감정 시뮬레이션 페이지 추가, 감정평가사 페이지 히어로에 K-Evaluation·시뮬레이션 버튼 배치, 헤더 맨 끝 버튼 조건 복원
 - 2026-10-28 feat(auth): 아이디를 정하는 화면에서 보내는 이름도 받음(선택·권장) + 발송 전 확인 목록에 보내는 사람 줄
 - 2026-10-28 ph-header: 전문가 페르소나 히어로 버튼 크기 10% 축소, 데스크톱에서 한 줄 배치
 - 2026-10-28 Merge pull request #820 from Openhash-Gopang/feat/kpatent-subpages-sim
@@ -43,7 +44,6 @@
 - 2026-10-27 admin: add regional equity-purchase proposals (Busan, Ulsan, Gyeongnam, Jeju)
 - 2026-10-27 Merge pull request #794 from Openhash-Gopang/fix/remove-ceo-signature-variants
 - 2026-10-27 docs: remove developer name/contact signatures and footers (keep FAQ/SP/narrative/citation uses)
-- 2026-10-27 Merge pull request #793 from Openhash-Gopang/fix/remove-ceo-contact-phrase
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
@@ -52,6 +52,7 @@
 - /pages/agents.html — 에이전트
 - /pages/ai-engine.html — AI 엔진
 - /pages/ai-types.html — ai-types.html
+- /pages/appraiser-simulation.html — 감정 시뮬레이션 — 감정평가사 보조 AI
 - /pages/appraiser-valuation.html — 가치평가 — 감정평가사 보조 AI
 - /pages/core-prompts.html — 핵심 프롬프트
 - /pages/dashboard.html — 대시보드
@@ -115,7 +116,6 @@
 - /pages/sp-evaluation-methodology.html — SP 평가 방법론
 - /pages/sp-hierarchy.html — SP의 계층 구조
 - /pages/sp-writing-methodology.html — SP 작성 방법론
-- /pages/suggest.html — 제안 및 질문
 
 ## 전문가 페르소나 전용 페이지 id
 accountant-audit, accountant-due-diligence, accountant-forensic, accountant-ifrs, accountant-internal-control, accountant-ipo, accountant-nonprofit-public, accountant-restructuring, accountant-valuation, accountant, administrative-scrivener, advanced-practice-nurse, advisor, ai-assistant, appraiser, architect, chef, consent-sale, customs-broker, dental-hygienist, dental-technician, dentist, dietitian, electrical-safety-engineer, financial-planner, fire-safety-manager, gas-safety-engineer, gov-agency, hairdresser, health-educator, hondi-market, indtransform-01, indtransform-10, indtransform-56, industrial-safety-consultant, jeju-gov-automation, judicial-scrivener, k-government, k-services, klaw, labor-attorney, landscape-engineer, lawyer-administrative, lawyer-antitrust, lawyer-arbitration, lawyer-auction, lawyer-broadcasting, lawyer-civil, lawyer-collection, lawyer-commercial, lawyer-constitutional, lawyer-construction, lawyer-corporate, lawyer-criminal, lawyer-damages, lawyer-energy, lawyer-entertainment, lawyer-environmental, lawyer-execution, lawyer-expropriation, lawyer-family, lawyer-finance, lawyer-foodpharma, lawyer-government-contract, lawyer-guardianship, lawyer-immigration, lawyer-inheritance, lawyer-insolvency, lawyer-insurance, lawyer-international-arbitration, lawyer-international-relations, lawyer-international-transactions, lawyer-it, lawyer-juvenile, lawyer-legislation, lawyer-maritime, lawyer-military, lawyer-overseas-investment, lawyer-realestate, lawyer-redevelopment, lawyer-religious, lawyer-school-violence, lawyer-securities, lawyer-shipbuilding, lawyer-sports, lawyer-startup, lawyer-trade, lawyer-traffic, lawyer, loss-adjuster, marine-engineer, marine-pilot, medical-lab-technologist, midwife, naval-architect, navigation-officer, nurse, occupational-therapist, optician, paramedic, patent-attorney-bio-pharma, patent-attorney-chemistry-materials, patent-attorney-design, patent-attorney-ip-strategy, patent-attorney-it-software, patent-attorney-licensing, patent-attorney-mechanical-electrical, patent-attorney-pct-international, patent-attorney-trademark, patent-attorney-trial-litigation, patent-attorney, pharmacist, physical-therapist, physician-anesthesiology, physician-cardiothoracic, physician-dermatology, physician-emergency, physician-ent, physician-internal-medicine, physician-lab-medicine, physician-neurology, physician-nuclear-medicine, physician-obgyn, physician-occupational, physician-ophthalmology, physician-orthopedics, physician-pathology, physician-pediatrics, physician-plastic, physician-preventive, physician-psychiatry, physician-radiation-oncology, physician-radiology, physician-rehabilitation, physician-surgery, physician-urology, physician, professional-ai, professional-engineer, professor-persona, radiologic-technologist, real-estate-agent, sanitarian, security-engineer, speech-language-pathologist, sports-instructor, surveying-engineer, tax-accountant, tour-guide, traditional-medicine-doctor, translator-interpreter, usage-guide, veterinarian, weather-forecaster
