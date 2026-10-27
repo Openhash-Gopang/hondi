@@ -1,0 +1,71 @@
+/**
+ * tests/kmail-confirm.test.mjs — 발송 전 확인 단계 방어 장치. 네트워크 없음.
+ * 실행: node --test tests/kmail-confirm.test.mjs
+ */
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { hasConfirmationAsk, previousAssistantAsked, buildConfirmationSummary, evaluateSendGuard } from '../src/worker/kmail-confirm.js';
+
+const NOW = Date.parse('2026-10-27T07:58:16.000Z');
+const parsedOne = { recipients: [{ name: '', email: 'tensor.city@gmail.com' }], subject: '테스트 메일', body: '안녕하세요, K-Mail 테스트 발송입니다.', send_at: '2026-10-27T16:58:16+09:00' };
+
+test('확인 질문은 질문형만 인정한다', () => {
+  for (const ok of ['이대로 보낼까요?', '제목이나 본문을 바꾸고 싶으시면 말씀해 주세요. 이대로 보낼까요?', '이 내용으로 발송할까요?', '이대로 발송해도 될까요?', '이대로 보내도 괜찮을까요?', '이대로 진행할까요?', '전송할까요', '예약할까요?', '이대로 괜찮으신가요?']) assert.equal(hasConfirmationAsk(ok), true, ok);
+  for (const no of ['확인했습니다. 지금 바로 발송하겠습니다.', '이대로 보냅니다.', '보내드렸습니다.', '발송 완료되었습니다.', '', null, undefined, '수신자는 tensor.city@gmail.com 입니다']) assert.equal(hasConfirmationAsk(no), false, String(no));
+});
+
+test('바로 앞 비서 메시지가 확인 질문이어야 한다 — 비서 메시지가 없으면 안 됨, 오래된 확인은 무효', () => {
+  assert.equal(previousAssistantAsked([{ role: 'user', content: 'tensor.city@gmail.com에 테스트 메일 발송' }]), false, '보고된 실제 사례(첫 요청 한 번에 발송)');
+  assert.equal(previousAssistantAsked([{ role: 'user', content: '보내줘' }, { role: 'assistant', content: '받는 사람: a@b.com … 이대로 보낼까요?' }, { role: 'user', content: '네' }]), true);
+  assert.equal(previousAssistantAsked([{ role: 'user', content: 'x' }, { role: 'assistant', content: '이대로 보낼까요?' }, { role: 'user', content: '제목을 바꿔줘' }, { role: 'assistant', content: '제목을 바꿨습니다.' }, { role: 'user', content: '보내세요' }]), false, '확인 뒤 수정이 있었고 다시 묻지 않았다면 새로 확인받아야 한다');
+  assert.equal(previousAssistantAsked([]), false); assert.equal(previousAssistantAsked(null), false);
+  assert.equal(previousAssistantAsked([{ role: 'assistant', content: '이대로 보낼까요?' }]), true);
+});
+
+test('확인 요약: 받는 사람·제목·시각·본문을 서버가 직접 정리하고 "아직 발송하지 않았습니다"를 먼저 말한다', () => {
+  const t = buildConfirmationSummary(parsedOne, NOW);
+  assert.match(t, /^⚠️ 아직 발송하지 않았습니다/); assert.match(t, /\*\*받는 사람\*\*: tensor\.city@gmail\.com \(총 1명\)/); assert.match(t, /\*\*제목\*\*: 테스트 메일/); assert.match(t, /\*\*발송 시각\*\*: 지금 즉시/);
+  assert.match(t, /안녕하세요, K-Mail 테스트 발송입니다\./); assert.match(t, /이대로 보낼까요\?/);
+  assert.equal(hasConfirmationAsk(t), true, '서버가 만든 요약 자체가 다음 턴의 확인 질문으로 인정돼야 한다');
+});
+
+test('확인 요약: 이름이 있으면 함께, 많으면 10명까지만 나열하고 "외 N명", 미래 시각은 한국 시간', () => {
+  const many = { ...parsedOne, recipients: Array.from({ length: 13 }, (_, i) => ({ name: i === 0 ? '홍길동' : '', email: `u${i}@x.com` })), send_at: '2026-10-28T00:00:00Z' };
+  const t = buildConfirmationSummary(many, NOW);
+  assert.match(t, /홍길동\(u0@x\.com\), u1@x\.com/); assert.match(t, / 외 3명 \(총 13명\)/); assert.ok(!t.includes('u10@x.com')); assert.match(t, /\*\*발송 시각\*\*: 10월 28일 09:00/);
+});
+
+test('확인 요약: 필드가 비어도 깨지지 않는다(제목 없음·시각 미정·받는 사람 없음)', () => {
+  const t = buildConfirmationSummary({}, NOW); assert.match(t, /\(없음\)/); assert.match(t, /\(제목 없음\)/); assert.match(t, /시각 미정/); assert.match(t, /\(본문 없음\)/);
+  assert.doesNotThrow(() => buildConfirmationSummary(null, NOW)); assert.doesNotThrow(() => buildConfirmationSummary({ recipients: [null, {}, { email: 'a@b.com' }] }, NOW));
+});
+
+test('본문이 너무 길면 요약에 일부만 담지 않는다 — 잘린 본문이 그대로 나가는 사고 방지', () => {
+  const long = '가'.repeat(5000);
+  const t = buildConfirmationSummary({ ...parsedOne, body: long }, NOW);
+  assert.ok(t.length < 1200); assert.ok(!t.includes('가가가가가가')); assert.match(t, /5000자라 여기서는 생략/); assert.match(t, /발송할 내용 전체를 보여줘/);
+  assert.equal(hasConfirmationAsk(t), false, '이 경우는 확인 질문이 아니라 먼저 전체를 보라는 안내 — 다음 턴에 바로 통과하지 않는다');
+});
+
+test('발송 판정: 확인 없이 낸 태그는 막고 요약+action을, 확인된 태그는 통과', () => {
+  const blocked = evaluateSendGuard([{ role: 'user', content: '테스트 메일 발송' }], parsedOne, NOW);
+  assert.equal(blocked.allow, false); assert.equal(blocked.action.type, 'send_confirmation_required'); assert.match(blocked.reply, /아직 발송하지 않았습니다/);
+  const afterSummary = evaluateSendGuard([{ role: 'user', content: '테스트 메일 발송' }, { role: 'assistant', content: blocked.reply }, { role: 'user', content: '네' }], parsedOne, NOW);
+  assert.equal(afterSummary.allow, true, '서버 요약 뒤 사용자가 동의하면 같은 내용으로 통과');
+});
+
+test('worker.js: 확인 판정이 연락처 저장·캠페인 생성보다 먼저 일어나고, 막히면 거기서 응답한다', () => {
+  const w = fs.readFileSync(new URL('../worker.js', import.meta.url), 'utf8');
+  const guard = w.indexOf('_kmailEvaluateSendGuard(cleanMessages, parsed)');
+  const create = w.indexOf('await _kmailChatCreateCampaign(env, guid, parsed)');
+  assert.ok(guard > 0 && create > 0 && guard < create, '판정이 생성보다 앞서야 한다');
+  const between = w.slice(guard, create);
+  assert.match(between, /if \(!sendGuard\.allow\)/); assert.match(between, /return new Response/);
+  assert.equal((w.match(/await _kmailChatCreateCampaign\(/g) || []).length, 1, '대화에서 캠페인을 만드는 호출이 하나뿐이어야 우회가 없다');
+});
+
+test('시스템 프롬프트: 확인 질문 형태와 서버 요약 뒤 재발송 규칙', () => {
+  const sp = fs.readFileSync(new URL('../prompts/SP-25_kmail_v1_30.txt', import.meta.url), 'utf8');
+  for (const w of ['확인 질문은 서버가 검사합니다', '이대로 보낼까요?', '서버가 위 요약을 보여 준 뒤', '지어내지 마세요', '2026-10-27 보정(v1.30, 세 번째)']) assert.ok(sp.includes(w), w);
+});

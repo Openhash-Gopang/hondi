@@ -18,6 +18,7 @@ import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
 import { profilePhoneFilter, last8Filter, pickGuidByLast8 } from './src/worker/phone-lookup.js';
 import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
+import { evaluateSendGuard as _kmailEvaluateSendGuard } from './src/worker/kmail-confirm.js';
 import { senderLocalPart as _kmailSenderLocalPart, classifyInboundLocalPart as _kmailClassifyLocalPart } from './src/worker/kmail-address.js';
 import { buildSendStatus as _kmailBuildSendStatus, instantSendMax as _kmailInstantSendMax, isImmediate as _kmailIsImmediate } from './src/worker/kmail-send-status.js';
 import { checkMailId as _checkMailId, defaultMailIdFromHash as _defaultMailIdFromHash, normalizeMailId as _normMailId, changePolicyConfig as _mailIdPolicy, evaluateChange as _mailIdEvaluate, recordChange as _mailIdRecordChange, recordConfirm as _mailIdRecordConfirm, limitMessage as _mailIdLimitMessage, readState as _mailIdReadState, writeState as _mailIdWriteState } from './src/worker/mail-id.js';
@@ -39556,6 +39557,12 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
       return new Response(JSON.stringify({
         ok: true, reply: cleanReplyText || '발송 정보를 정확히 파악하지 못했습니다. 다시 말씀해 주시겠어요?', action: null,
       }), { status: 200, headers: corsHeaders });
+    }
+    // 2026-10-27 확인 단계 방어: 바로 앞 비서 메시지가 "이대로 보낼까요?" 같은 확인 질문이 아니면 연락처 저장·캠페인 생성·발송을
+    // 모두 하지 않고, 서버가 태그 내용으로 만든 확인 요약을 대신 보여 준다(사용자가 동의하면 비서가 같은 내용으로 다시 낸다).
+    const sendGuard = _kmailEvaluateSendGuard(cleanMessages, parsed);
+    if (!sendGuard.allow) {
+      return new Response(JSON.stringify({ ok: true, reply: sendGuard.reply, action: sendGuard.action }), { status: 200, headers: corsHeaders });
     }
     try {
       const result = await _kmailChatCreateCampaign(env, guid, parsed);
