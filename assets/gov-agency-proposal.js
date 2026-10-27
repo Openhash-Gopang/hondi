@@ -6,10 +6,10 @@
    새 시·도를 추가하려면 PROPOSALS 에 slug 를 적고 assets/proposals/<slug>.html 을 만든다. */
 (function () {
   'use strict';
-  var PROPOSALS = { jeju: '제주특별자치도', busan: '부산광역시', ulsan: '울산광역시', gyeongnam: '경상남도', jeonnam: '전라남도', jeonbuk: '전북특별자치도', gyeonggi: '경기도', seoul: '서울특별시', chungnam: '충청남도', chungbuk: '충청북도', gangwon: '강원특별자치도', gyeongbuk: '경상북도' };
+  var PROPOSALS = { daegu: '대구광역시', incheon: '인천광역시', daejeon: '대전광역시', sejong: '세종특별자치시', gwangju: '광주광역시', jeju: '제주특별자치도', busan: '부산광역시', ulsan: '울산광역시', gyeongnam: '경상남도', jeonnam: '전라남도', jeonbuk: '전북특별자치도', gyeonggi: '경기도', seoul: '서울특별시', chungnam: '충청남도', chungbuk: '충청북도', gangwon: '강원특별자치도', gyeongbuk: '경상북도' };
   var SLUG_ALIAS = { 'jeonnam-gwangju': 'jeonnam', jejusi: 'jeju', seogwipo: 'jeju' };
   var NOTES = { jeju: '제주도 나비 코드 보급 계획 · 초안(2026-10-12), 수치는 모두 가정' };
-  var GROUP_SLUG = { '제주': 'jeju', '부산': 'busan', '울산': 'ulsan', '경남': 'gyeongnam', '서울': 'seoul', '경기': 'gyeonggi', '전북': 'jeonbuk', '전남광주': 'jeonnam', '전남': 'jeonnam', '충남': 'chungnam', '충북': 'chungbuk', '강원': 'gangwon', '경북': 'gyeongbuk' };
+  var GROUP_SLUG = { '대구': 'daegu', '인천': 'incheon', '대전': 'daejeon', '세종': 'sejong', '제주': 'jeju', '부산': 'busan', '울산': 'ulsan', '경남': 'gyeongnam', '서울': 'seoul', '경기': 'gyeonggi', '전북': 'jeonbuk', '전남광주': 'jeonnam', '전남': 'jeonnam', '충남': 'chungnam', '충북': 'chungbuk', '강원': 'gangwon', '경북': 'gyeongbuk' };
 
   var code = (new URLSearchParams(location.search).get('gov_code') || '').trim();
   var rec = (window.GOV_AGENCIES || {})[code] || null;
@@ -22,6 +22,8 @@
     return GROUP_SLUG[first] || null;
   }
   var slug = sidoSlug();
+  // 전남광주통합특별시 소속 기관 중 이름에 「광주」가 있고 「전남·전라남도」가 없으면 광주 제안서, 나머지는 전남 제안서
+  if (slug === 'jeonnam' && rec && /광주/.test(rec[0]) && !/전남|전라남도/.test(rec[0])) slug = 'gwangju';
   if (!slug) return;
 
   function init() {
