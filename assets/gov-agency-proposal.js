@@ -6,9 +6,10 @@
    새 시·도를 추가하려면 PROPOSALS 에 slug 를 적고 assets/proposals/<slug>.html 을 만든다. */
 (function () {
   'use strict';
-  var PROPOSALS = { jeonnam: '전라남도', jeonbuk: '전북특별자치도', gyeonggi: '경기도', seoul: '서울특별시', chungnam: '충청남도', chungbuk: '충청북도', gangwon: '강원특별자치도', gyeongbuk: '경상북도' };
-  var SLUG_ALIAS = { 'jeonnam-gwangju': 'jeonnam' };
-  var GROUP_SLUG = { '서울': 'seoul', '경기': 'gyeonggi', '전북': 'jeonbuk', '전남광주': 'jeonnam', '전남': 'jeonnam', '충남': 'chungnam', '충북': 'chungbuk', '강원': 'gangwon', '경북': 'gyeongbuk' };
+  var PROPOSALS = { jeju: '제주특별자치도', busan: '부산광역시', ulsan: '울산광역시', gyeongnam: '경상남도', jeonnam: '전라남도', jeonbuk: '전북특별자치도', gyeonggi: '경기도', seoul: '서울특별시', chungnam: '충청남도', chungbuk: '충청북도', gangwon: '강원특별자치도', gyeongbuk: '경상북도' };
+  var SLUG_ALIAS = { 'jeonnam-gwangju': 'jeonnam', jejusi: 'jeju', seogwipo: 'jeju' };
+  var NOTES = { jeju: '제주도 나비 코드 보급 계획 · 초안(2026-10-12), 수치는 모두 가정' };
+  var GROUP_SLUG = { '제주': 'jeju', '부산': 'busan', '울산': 'ulsan', '경남': 'gyeongnam', '서울': 'seoul', '경기': 'gyeonggi', '전북': 'jeonbuk', '전남광주': 'jeonnam', '전남': 'jeonnam', '충남': 'chungnam', '충북': 'chungbuk', '강원': 'gangwon', '경북': 'gyeongbuk' };
 
   var code = (new URLSearchParams(location.search).get('gov_code') || '').trim();
   var rec = (window.GOV_AGENCIES || {})[code] || null;
@@ -33,12 +34,12 @@
     var css = document.createElement('link'); css.rel = 'stylesheet'; css.href = '/assets/proposals/proposal.css'; document.head.appendChild(css);
     var view = document.createElement('div');
     view.id = 'proposalView'; view.hidden = true;
-    view.innerHTML = '<div class="pv-bar"><button type="button" class="pv-back">← 기관 페이지로</button><span class="pv-note">' + PROPOSALS[slug] + ' 나비 숫자 코드 테스트 제안서 · 초안, 수치는 모두 가정</span></div><div id="proposalBody">불러오는 중…</div>';
+    view.innerHTML = '<div class="pv-bar"><button type="button" class="pv-back">← 기관 페이지로</button><span class="pv-note">' + (NOTES[slug] || (PROPOSALS[slug] + ' 나비 숫자 코드 테스트 제안서 · 초안, 수치는 모두 가정')) + '</span></div><div id="proposalBody">불러오는 중…</div>';
     doc.parentNode.insertBefore(view, doc.nextSibling);
 
     var btn = document.createElement('button');
     btn.type = 'button'; btn.id = 'proposalNavBtn'; btn.className = 'lr-nav-btn';
-    btn.title = PROPOSALS[slug] + ' 나비 숫자 코드 테스트 제안서를 이 페이지에서 봅니다';
+    btn.title = PROPOSALS[slug] + ' 사업 제안서를 이 페이지에서 봅니다';
     btn.textContent = '사업 제안';
     navRight.insertBefore(btn, navRight.firstChild);
 
