@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>K-Evaluation — 감정평가사 보조 AI 성능 시험</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{--bg:#f8f9fa;--sur:#fff;--bdr:#e5e7eb;--bdr2:#d1d5db;--txt:#111827;--txt2:#374151;--txt3:#6b7280;--txt4:#9ca3af;
+--pri:#3ecf8e;--pri-dk:#2baa74;--pri-bg:#f0fdf9;--pri-bd:#bbf7d0;--red:#ef4444;--red-bg:#fef2f2;--org:#f59e0b;--org-bg:#fffbeb;--blue:#3b82f6;--blue-bg:#eff6ff;
+--font:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;--r:10px;--r-lg:16px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:14px;line-height:1.6}
+.topbar{position:sticky;top:0;z-index:20;height:48px;background:var(--sur);border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:14px;padding:0 20px}
+.topbar b{color:var(--pri-dk)}
+.topbar .sp{flex:1}
+.ver{font-weight:700;color:var(--pri-dk)}
+.notice{padding:8px 20px;font-size:12.5px;background:var(--org-bg);border-bottom:1px solid #fde68a;color:#92400e}
+.notice.b{background:var(--blue-bg);border-color:#bfdbfe;color:#1e40af}
+.main{max-width:1100px;margin:0 auto;padding:20px 20px 80px}
+h1{font-size:22px}
+.sub{color:var(--txt3);margin:4px 0 16px}
+.card{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:14px}
+.card h3{font-size:14px;margin-bottom:8px}
+.goal{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.bar{flex:1;min-width:220px;height:10px;background:#eef0f3;border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--pri)}
+.stat{font-size:12.5px;color:var(--txt3)}
+.stat b{color:var(--txt);font-size:15px}
+.stepper{display:flex;gap:6px;margin:6px 0 16px;flex-wrap:wrap}
+.st{flex:1;min-width:130px;padding:8px 10px;border:1px solid var(--bdr);border-radius:var(--r);background:var(--sur);font-size:12px;color:var(--txt3)}
+.st b{display:block;color:var(--txt2);font-size:12.5px}
+.st.done{background:var(--pri-bg);border-color:var(--pri-bd)}.st.done b{color:var(--pri-dk)}
+.st.cur{border-color:var(--pri);box-shadow:0 0 0 2px var(--pri-bd)}
+.panel{display:none}.panel.on{display:block}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(max-width:820px){.grid{grid-template-columns:1fr}}
+.case{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r-lg);padding:12px 14px}
+.case h4{font-size:13px;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px}
+.case h4 span{font-weight:400;color:var(--txt3);font-size:12px}
+.f{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.f label{font-size:11.5px;color:var(--txt3);display:block;margin-bottom:2px}
+.f .w{grid-column:1/-1}
+input,select,textarea{width:100%;padding:6px 8px;border:1px solid var(--bdr2);border-radius:8px;font:inherit;font-size:13px;background:#fff;color:var(--txt)}
+textarea{resize:vertical;min-height:46px}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--pri-bd);border-color:var(--pri)}
+.bad{border-color:var(--red)!important;background:var(--red-bg)}
+.btn{display:inline-block;padding:8px 16px;border:0;border-radius:var(--r);background:var(--pri-dk);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+.btn.sec{background:#fff;color:var(--txt2);border:1px solid var(--bdr2)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.msg{font-size:12.5px;color:var(--txt3)}
+.msg.err{color:#b91c1c}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--bdr);text-align:right;vertical-align:top}
+th:first-child,td:first-child,td.l,th.l{text-align:left}
+th{background:#f3f4f6;font-weight:600;color:var(--txt2)}
+.tag{display:inline-block;padding:1px 8px;border-radius:99px;font-size:11.5px;border:1px solid var(--bdr2);color:var(--txt3)}
+.tag.ok{background:var(--pri-bg);border-color:var(--pri-bd);color:var(--pri-dk)}
+.tag.warn{background:var(--org-bg);border-color:#fde68a;color:#92400e}
+.tag.no{background:var(--red-bg);border-color:#fecaca;color:#b91c1c}
+details{margin-top:6px}
+summary{cursor:pointer;color:var(--txt3);font-size:12px}
+pre{white-space:pre-wrap;word-break:break-word;font-family:inherit;font-size:12.5px;background:#f9fafb;border:1px solid var(--bdr);border-radius:8px;padding:8px 10px;margin-top:6px;max-height:340px;overflow:auto}
+.big{font-size:28px;font-weight:700}
+.ok-t{color:var(--pri-dk)}.no-t{color:#b91c1c}
+</style>
+</head>
+<body>
+<div class="topbar"><b>K-Evaluation</b><span class="msg">감정평가사 보조 AI 성능 시험</span><span class="sp"></span><span>현재 방법론 <span class="ver" id="verTop">v0.1</span></span></div>
+<div class="notice">방법론 갱신용 성능 시험 페이지입니다. 여기서 나오는 낙찰가 예상은 시험용 추정이며 감정평가액이 아니고, 이용자에게 제시하는 값도 아닙니다. 평가 의견은 감정평가사의 전속 판단입니다.</div>
+<div class="notice b">입력에는 사건번호, 소재지 상세(지번·건물명), 당사자명 등 사건을 특정할 수 있는 정보를 넣지 마십시오. 그런 정보가 있으면 입력이 차단됩니다.</div>
+
+<div class="main">
+<h1>K-Evaluation <span class="ver" id="verH1">v0.1</span></h1>
+<p class="sub">경매 물건 10건의 개요로 낙찰 가격을 예상하고, 실제 낙찰 가격과 견주어 방법론을 갱신합니다. 배치(10건)마다 버전이 0.1씩 오르며, v10.0에서 일치도 90%가 목표입니다.</p>
+
+<div class="card">
+  <div class="goal">
+    <div class="stat">현재 버전<br><b id="gVer">v0.1</b></div>
+    <div class="stat">진행 배치<br><b id="gBatch">1</b></div>
+    <div class="stat">최근 배치 일치도<br><b id="gLast">—</b></div>
+    <div class="stat">목표<br><b>v10.0 · 90%</b></div>
+    <div style="flex:1;min-width:240px">
+      <div class="bar"><i id="gBar" style="width:1%"></i></div>
+      <div class="msg" id="gBarTxt">v0.1 / v10.0</div>
+    </div>
+  </div>
+  <details><summary>배치별 일치도 이력</summary><div id="histBox"></div></details>
+  <div class="row">
+    <button class="btn sec" id="btnExportState">진행 상태 내보내기(JSON)</button>
+    <button class="btn sec" id="btnImportState">진행 상태 가져오기</button>
+    <button class="btn sec" id="btnExportMethod">현재 방법론 내려받기(.md)</button>
+    <button class="btn sec" id="btnViewMethod">방법론 보기</button>
+    <input type="file" id="fileImport" accept="application/json" style="display:none">
+  </div>
+  <div class="msg" style="margin-top:6px">진행 상태는 이 기기의 브라우저에만 저장됩니다. 기기를 바꾸거나 브라우저 데이터를 지우기 전에 내보내 두십시오.</div>
+  <pre id="methodBox" style="display:none"></pre>
+</div>
+
+<div class="stepper" id="stepper"></div>
+
+<!-- ① 입력 -->
+<div class="panel" id="p1">
+  <div class="card"><h3>① 물건 개요 입력 (10건)</h3>
+    <div class="msg">사건을 특정할 수 없도록 익명화한 개요만 입력합니다. 실제 낙찰 가격은 이 단계에서 입력하지 않습니다(③에서 입력).</div>
+  </div>
+  <div class="grid" id="caseGrid"></div>
+  <div class="row"><button class="btn" id="btnConfirmInput">입력 확정 → ② 낙찰액 예상</button><span class="msg" id="inputMsg"></span></div>
+</div>
+
+<!-- ② 예상 -->
+<div class="panel" id="p2">
+  <div class="card"><h3>② 낙찰액 예상 프로세스</h3>
+    <div class="msg">현재 방법론 버전으로 10건을 차례로 예상합니다(STEP 0 → A → B → C → D). 예상을 확정(잠금)하면 수정할 수 없고, 그 뒤에 실제 낙찰 가격을 입력합니다.</div>
+    <div class="row"><button class="btn" id="btnRun">예상 시작</button><button class="btn sec" id="btnRetry" style="display:none">실패 건 다시 실행</button><button class="btn" id="btnLock" disabled>예상 확정(잠금) → ③</button><span class="msg" id="runMsg"></span></div>
+  </div>
+  <div id="predList"></div>
+</div>
+
+<!-- ③ 일치도 -->
+<div class="panel" id="p3">
+  <div class="card"><h3>③ 일치도 평가</h3>
+    <div class="msg">실제 낙찰 가격(원)을 입력하면 건별 일치도와 배치 일치도가 계산됩니다. 일치도 = 1 − |예상 − 실제| ÷ 실제 (최소 0).</div>
+  </div>
+  <div class="card"><table id="evalTbl"></table></div>
+  <div class="card" id="evalSum"></div>
+  <div class="row"><button class="btn" id="btnConfirmEval" disabled>일치도 확정 → ④ 미비점 보완</button><span class="msg" id="evalMsg"></span></div>
+</div>
+
+<!-- ④ 보완 -->
+<div class="panel" id="p4">
+  <div class="card"><h3>④ 미비점 보완</h3>
+    <div class="msg">AI가 오차의 원인을 원리 수준으로 분석해 방법론 보완안을 제안합니다. 내용을 검토·수정한 뒤 확정하면 보완안이 방법론(부록 E)에 누적되고 버전이 0.1 오릅니다. 보완 항목은 최대 5개이며 개별 물건의 식별 정보와 금액은 적지 않습니다.</div>
+    <div class="row"><button class="btn" id="btnAnalyze">미비점 분석 실행</button><span class="msg" id="anaMsg"></span></div>
+  </div>
+  <div class="card"><div id="trigBox" class="msg"></div></div>
+  <div class="card"><label class="msg">보완안 (수정 가능)</label><textarea id="patchText" style="min-height:260px" placeholder="분석을 실행하면 보완안이 여기에 채워집니다. 직접 작성해도 됩니다."></textarea>
+    <div class="row"><button class="btn" id="btnConfirmPatch">보완 확정 → 버전 올리기</button><span class="msg" id="patchMsg"></span></div></div>
+</div>
+
+<!-- ⑤ 다음 -->
+<div class="panel" id="p5">
+  <div class="card"><h3>⑤ 새로운 10건 입력</h3><div id="doneSum"></div>
+    <div class="row"><button class="btn" id="btnNext">새로운 10건 입력 시작</button></div>
+    <div class="msg" style="margin-top:6px">이미 쓴 물건은 다시 쓰지 않습니다. 다음 배치는 갱신된 방법론으로 새 물건을 예상합니다.</div>
+  </div>
+</div>
+</div>
+
+<script>window.K_AUTH_CONFIG = { serviceLabel: "K-Evaluation" };</script>
+<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
+<script>
+(function () {
+'use strict';
+var WORKER_URL = 'https://hondi-proxy.tensor-city.workers.dev';
+var METHOD_URL = '/prompts/SP_k-evaluation_v0_1.md';
+var KEY = 'kEval_state_v1';
+var TYPES = ['아파트','연립·다세대','단독·다가구','오피스텔','토지','상가·사무실','공장·창고','기타'];
+var REGIONS = ['서울','부산','대구','인천','광주','대전','울산','세종','경기','강원','충북','충남','전북','전남','경북','경남','제주','미상'];
+var STAGES = ['① 물건 개요 입력','② 낙찰액 예상','③ 일치도 평가','④ 미비점 보완','⑤ 새로운 10건'];
+var N = 10;
+var methodBase = '';
+var S = load();
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function ver(t){ return 'v' + (t / 10).toFixed(1); }
+function won(n){ return (n == null || isNaN(n)) ? '—' : Math.round(n).toLocaleString('ko-KR') + '원'; }
+function num(s){ var v = String(s == null ? '' : s).replace(/[^0-9.]/g, ''); return v === '' ? NaN : parseFloat(v); }
+function emptyCase(i){ return { id: i + 1, type: '', region: '', area: '', year: '', appraisal: '', minPrice: '', fails: '', rights: '', note: '', pred: null, actual: '' }; }
+function newCur(){ var c = []; for (var i = 0; i < N; i++) c.push(emptyCase(i)); return { stage: 1, cases: c, locked: false, evalDone: false, patchText: '', analysisDone: false }; }
+function load(){
+  try { var raw = localStorage.getItem(KEY); if (raw) { var s = JSON.parse(raw); if (s && s.cur) return s; } } catch (e) {}
+  return { versionTenths: 1, batchNo: 1, patches: [], history: [], cur: newCur() };
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+
+/* ── 식별 정보 검사 ── */
+var ID_PATTERNS = [
+  [/\d{2,4}\s*(타경|타기|본|가단|가합)\s*\d+/, '사건번호'],
+  [/[가-힣]+(시|군|구)\s*[가-힣0-9]+(동|읍|면|리|로|길)\s*\d+(-\d+)?/, '소재지 상세(지번·도로명)'],
+  [/\d+\s*번지/, '지번'],
+  [/(아파트|빌라|타워|캐슬|푸르지오|자이|힐스테이트|래미안|e편한세상|롯데캐슬)\s*\d*\s*(동|차|단지)?/, '건물·단지명으로 보이는 표현']
+];
+function findIdent(c){
+  var hit = [];
+  var txt = [c.rights, c.note].join(' \n ');
+  ID_PATTERNS.forEach(function(p){ if (p[0].test(txt)) hit.push(p[1]); });
+  return hit;
+}
+
+/* ── 렌더 ── */
+function render(){
+  var c = S.cur;
+  $('verTop').textContent = $('verH1').textContent = $('gVer').textContent = ver(S.versionTenths);
+  $('gBatch').textContent = S.batchNo;
+  var last = S.history.length ? S.history[S.history.length - 1] : null;
+  $('gLast').textContent = last ? last.agreement.toFixed(1) + '%' : '—';
+  $('gBar').style.width = Math.min(100, S.versionTenths) + '%';
+  $('gBarTxt').textContent = ver(S.versionTenths) + ' / v10.0';
+  renderHist();
+  var st = $('stepper'); st.innerHTML = '';
+  STAGES.forEach(function(name, i){
+    var d = document.createElement('div');
+    d.className = 'st' + (i + 1 < c.stage ? ' done' : '') + (i + 1 === c.stage ? ' cur' : '');
+    d.innerHTML = '<b>' + esc(name) + '</b>' + (i + 1 < c.stage ? '완료' : (i + 1 === c.stage ? '진행 중' : '대기'));
+    st.appendChild(d);
+  });
+  for (var i = 1; i <= 5; i++) $('p' + i).classList.toggle('on', i === c.stage);
+  if (c.stage === 1) renderInput();
+  if (c.stage === 2) renderPred();
+  if (c.stage === 3) renderEval();
+  if (c.stage === 4) renderPatch();
+  if (c.stage === 5) renderDone();
+}
+function renderHist(){
+  var h = S.history, box = $('histBox');
+  if (!h.length) { box.innerHTML = '<div class="msg">아직 완료한 배치가 없습니다.</div>'; return; }
+  var rows = h.map(function(x){ return '<tr><td>' + x.batch + '</td><td>' + esc(ver(x.versionUsed)) + '</td><td>' + x.agreement.toFixed(1) + '%</td><td>' + x.within10 + '/10</td><td>' + (x.bias >= 0 ? '+' : '') + x.bias.toFixed(1) + '%</td></tr>'; }).join('');
+  var W = 520, H = 120, pts = h.map(function(x, i){ return [20 + (h.length === 1 ? 0 : i * (W - 40) / (h.length - 1)), H - 10 - (x.agreement / 100) * (H - 20)]; });
+  var y90 = H - 10 - 0.9 * (H - 20);
+  var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="max-width:' + W + 'px"><line x1="0" x2="' + W + '" y1="' + y90 + '" y2="' + y90 + '" stroke="#f59e0b" stroke-dasharray="4 3"/><text x="4" y="' + (y90 - 3) + '" font-size="10" fill="#92400e">목표 90%</text><polyline fill="none" stroke="#2baa74" stroke-width="2" points="' + pts.map(function(p){ return p.join(','); }).join(' ') + '"/>' + pts.map(function(p){ return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="3" fill="#2baa74"/>'; }).join('') + '</svg>';
+  box.innerHTML = svg + '<table><tr><th>배치</th><th>사용 버전</th><th>일치도</th><th>±10% 이내</th><th>평균 오차(부호)</th></tr>' + rows + '</table>';
+}
+
+/* ── ① 입력 ── */
+function opt(list, v){ return '<option value="">선택</option>' + list.map(function(x){ return '<option' + (x === v ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join(''); }
+function renderInput(){
+  var g = $('caseGrid'); g.innerHTML = '';
+  S.cur.cases.forEach(function(c, i){
+    var d = document.createElement('div'); d.className = 'case';
+    d.innerHTML = '<h4>물건 ' + c.id + '<span id="idw' + i + '"></span></h4><div class="f">' +
+      '<div><label>물건 유형 *</label><select data-i="' + i + '" data-k="type">' + opt(TYPES, c.type) + '</select></div>' +
+      '<div><label>지역(광역 단위만)</label><select data-i="' + i + '" data-k="region">' + opt(REGIONS, c.region) + '</select></div>' +
+      '<div><label>면적(㎡)</label><input inputmode="decimal" data-i="' + i + '" data-k="area" value="' + esc(c.area) + '"></div>' +
+      '<div><label>건축 연도(해당 시)</label><input inputmode="numeric" data-i="' + i + '" data-k="year" value="' + esc(c.year) + '"></div>' +
+      '<div><label>감정가(원) *</label><input inputmode="numeric" data-i="' + i + '" data-k="appraisal" value="' + esc(c.appraisal) + '"></div>' +
+      '<div><label>최저매각가격(원) *</label><input inputmode="numeric" data-i="' + i + '" data-k="minPrice" value="' + esc(c.minPrice) + '"></div>' +
+      '<div><label>유찰 횟수</label><input inputmode="numeric" data-i="' + i + '" data-k="fails" value="' + esc(c.fails) + '"></div>' +
+      '<div></div>' +
+      '<div class="w"><label>권리·점유 개요 (예: 선순위 임차인 유무, 인수 권리, 점유 상태)</label><textarea data-i="' + i + '" data-k="rights">' + esc(c.rights) + '</textarea></div>' +
+      '<div class="w"><label>특이사항</label><textarea data-i="' + i + '" data-k="note">' + esc(c.note) + '</textarea></div></div>';
+    g.appendChild(d);
+  });
+  g.oninput = g.onchange = function(e){
+    var t = e.target; if (!t.dataset || t.dataset.i == null) return;
+    var c = S.cur.cases[+t.dataset.i]; c[t.dataset.k] = t.value; t.classList.remove('bad'); save();
+    var h = findIdent(c), w = $('idw' + t.dataset.i); if (w) w.textContent = h.length ? '⚠ ' + h.join(', ') : '';
+  };
+}
+$('btnConfirmInput').onclick = function(){
+  var m = $('inputMsg'), bad = [], ident = [];
+  S.cur.cases.forEach(function(c, i){
+    var miss = !c.type || isNaN(num(c.appraisal)) || isNaN(num(c.minPrice));
+    if (miss) bad.push(c.id);
+    var h = findIdent(c); if (h.length) ident.push('물건 ' + c.id + '(' + h.join(', ') + ')');
+    if (!isNaN(num(c.appraisal)) && !isNaN(num(c.minPrice)) && num(c.minPrice) > num(c.appraisal)) bad.push(c.id);
+  });
+  if (ident.length) { m.className = 'msg err'; m.textContent = '식별 정보로 보이는 내용이 있어 차단했습니다: ' + ident.join(' / ') + '. 삭제한 뒤 다시 확정하십시오.'; return; }
+  if (bad.length) { m.className = 'msg err'; m.textContent = '유형·감정가·최저매각가격을 확인하십시오(최저매각가격은 감정가 이하). 해당: 물건 ' + bad.filter(function(v, i, a){ return a.indexOf(v) === i; }).join(', '); return; }
+  m.textContent = ''; S.cur.stage = 2; save(); render();
+};
+
+/* ── LLM 호출 ── */
+function post(url, body){
+  var opts = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
+  return (window.KAuth && window.KAuth.fetchWithAuth) ? window.KAuth.fetchWithAuth(url, opts) : fetch(url, opts);
+}
+function chat(system, user, maxTokens){
+  return post(WORKER_URL + '/ai/chat', { provider: 'deepseek', model: 'deepseek-v4-flash', system: system, messages: [{ role: 'user', content: user }], max_tokens: maxTokens || 3500 })
+    .then(function(r){ if (!r.ok) throw new Error('서버 응답 ' + r.status); return r.json(); })
+    .then(function(d){ if (!d || !d.content) throw new Error('빈 응답'); return d.content; });
+}
+function loadMethod(){
+  if (methodBase) return Promise.resolve(methodBase);
+  return fetch(METHOD_URL, { cache: 'no-cache' }).then(function(r){ if (!r.ok) throw new Error('방법론 파일 ' + r.status); return r.text(); }).then(function(t){ methodBase = t; return t; });
+}
+function patchesText(){
+  if (!S.patches.length) return '';
+  return '\n\n---\n## 부록 E 누적 보완 사항 (현재 버전 ' + ver(S.versionTenths) + ' 적용)\n' + S.patches.map(function(p){ return '[' + ver(p.from) + ' → ' + ver(p.to) + ' | 일치도 ' + p.agreement.toFixed(1) + '%]\n' + p.text; }).join('\n\n');
+}
+function currentSystem(){ return loadMethod().then(function(m){ return m + patchesText() + '\n\n---\n[적용 버전] K-Evaluation ' + ver(S.versionTenths); }); }
+function caseText(c){
+  return '물건 ' + c.id + '\n유형: ' + c.type + '\n지역(광역): ' + (c.region || '불명') + '\n면적(㎡): ' + (c.area || '불명') + '\n건축 연도: ' + (c.year || '불명') +
+    '\n감정가: ' + won(num(c.appraisal)) + '\n최저매각가격: ' + won(num(c.minPrice)) + '\n유찰 횟수: ' + (c.fails === '' ? '불명' : c.fails) +
+    '\n권리·점유 개요: ' + (c.rights || '불명') + '\n특이사항: ' + (c.note || '없음');
+}
+function parseResult(txt){
+  var m = txt.match(/\[K-EVAL-RESULT\]\s*(\{[\s\S]*?\})\s*$/m) || txt.match(/\[K-EVAL-RESULT\]\s*(\{[\s\S]*\})/);
+  if (!m) return null;
+  try { var o = JSON.parse(m[1]); if (!(o.predicted_price > 0)) return null; return o; } catch (e) { return null; }
+}
+
+/* ── ② 예상 ── */
+var running = false;
+function renderPred(){
+  var list = $('predList'); list.innerHTML = '';
+  S.cur.cases.forEach(function(c){
+    var p = c.pred, d = document.createElement('div'); d.className = 'card';
+    var head = '<b>물건 ' + c.id + '</b> · ' + esc(c.type) + ' · 감정가 ' + won(num(c.appraisal)) + ' · 최저 ' + won(num(c.minPrice));
+    if (!p) d.innerHTML = head + ' <span class="tag">대기</span>';
+    else if (p.error) d.innerHTML = head + ' <span class="tag no">실패</span><div class="msg err">' + esc(p.error) + '</div>';
+    else d.innerHTML = head + ' <span class="tag ok">예상 완료</span>' + (p.lowerBreach ? ' <span class="tag no">하한 위반(강제규칙 4)</span>' : '') +
+      '<div style="margin-top:6px">예상 낙찰가 <b>' + won(p.price) + '</b> (범위 ' + won(p.low) + ' ~ ' + won(p.high) + ' · 확신도 ' + esc(p.conf) + '/10)</div><details><summary>예상 과정 보기</summary><pre>' + esc(p.text) + '</pre></details>';
+    list.appendChild(d);
+  });
+  var done = S.cur.cases.filter(function(c){ return c.pred && !c.pred.error; }).length;
+  var failed = S.cur.cases.filter(function(c){ return c.pred && c.pred.error; }).length;
+  $('btnLock').disabled = (done !== N) || running;
+  $('btnRun').disabled = running || done === N;
+  $('btnRetry').style.display = failed ? '' : 'none'; $('btnRetry').disabled = running;
+  $('runMsg').className = 'msg'; if (!running) $('runMsg').textContent = done + '/' + N + ' 완료' + (failed ? ' · 실패 ' + failed : '');
+}
+function runAll(){
+  if (running) return; running = true; renderPred();
+  var todo = S.cur.cases.filter(function(c){ return !c.pred || c.pred.error; });
+  currentSystem().then(function(sys){
+    return todo.reduce(function(p, c){
+      return p.then(function(){
+        $('runMsg').textContent = '물건 ' + c.id + ' 예상 중… (' + (N - todo.length + todo.indexOf(c) + 1) + '/' + N + ')';
+        return chat(sys, '다음 물건의 낙찰 가격을 방법론 K-Evaluation ' + ver(S.versionTenths) + '에 따라 예상하십시오. 응답의 마지막 줄은 [A-4] 결과 줄이어야 합니다.\n\n' + caseText(c), 3500)
+          .then(function(txt){
+            var r = parseResult(txt);
+            if (!r) { c.pred = { error: '결과 줄([K-EVAL-RESULT])을 읽지 못했습니다.', text: txt }; return; }
+            var mp = num(c.minPrice);
+            c.pred = { price: Math.round(r.predicted_price), low: Math.round(r.low || r.predicted_price), high: Math.round(r.high || r.predicted_price), conf: r.confidence, rate: r.rate, text: txt, lowerBreach: !isNaN(mp) && r.predicted_price < mp };
+          })
+          .catch(function(e){ c.pred = { error: String(e && e.message || e) }; })
+          .then(function(){ save(); renderPred(); });
+      });
+    }, Promise.resolve());
+  }).catch(function(e){ $('runMsg').className = 'msg err'; $('runMsg').textContent = '방법론을 불러오지 못했습니다: ' + (e && e.message || e); })
+    .then(function(){ running = false; renderPred(); });
+}
+$('btnRun').onclick = runAll; $('btnRetry').onclick = runAll;
+$('btnLock').onclick = function(){ S.cur.locked = true; S.cur.stage = 3; save(); render(); };
+
+/* ── ③ 일치도 ── */
+function agree(c){ var a = num(c.actual), p = c.pred && c.pred.price; if (isNaN(a) || a <= 0 || !p) return null; return Math.max(0, 1 - Math.abs(p - a) / a) * 100; }
+function errPct(c){ var a = num(c.actual), p = c.pred && c.pred.price; if (isNaN(a) || a <= 0 || !p) return null; return (p - a) / a * 100; }
+function metrics(cases){
+  var rows = cases.map(function(c){ return { c: c, a: agree(c), e: errPct(c) }; });
+  var ok = rows.filter(function(r){ return r.a != null; });
+  var m = { n: ok.length };
+  m.agreement = ok.length ? ok.reduce(function(s, r){ return s + r.a; }, 0) / ok.length : 0;
+  m.within10 = ok.filter(function(r){ return Math.abs(r.e) <= 10; }).length;
+  m.bias = ok.length ? ok.reduce(function(s, r){ return s + r.e; }, 0) / ok.length : 0;
+  m.over = ok.filter(function(r){ return r.e > 0; }).length; m.under = ok.filter(function(r){ return r.e < 0; }).length;
+  m.outOfRange = ok.filter(function(r){ var a = num(r.c.actual); return a < r.c.pred.low || a > r.c.pred.high; }).length;
+  m.lowerBreach = cases.filter(function(c){ return c.pred && c.pred.lowerBreach; }).length;
+  var hc = ok.filter(function(r){ return +r.c.pred.conf >= 8; });
+  m.highConfAvg = hc.length ? hc.reduce(function(s, r){ return s + r.a; }, 0) / hc.length : null;
+  var bt = {}; ok.forEach(function(r){ var t = r.c.type; bt[t] = bt[t] || { n: 0, sum: 0, big: 0 }; bt[t].n++; bt[t].sum += r.a; if (Math.abs(r.e) > 20) bt[t].big++; });
+  m.byType = bt; m.typeBad = Object.keys(bt).filter(function(t){ return bt[t].big >= 2; });
+  return m;
+}
+function renderEval(){
+  var cs = S.cur.cases;
+  var h = '<tr><th class="l">물건</th><th class="l">유형</th><th>예상 낙찰가</th><th>예상 범위</th><th>실제 낙찰가(원) *</th><th>오차율</th><th>일치도</th></tr>';
+  cs.forEach(function(c, i){
+    h += '<tr><td class="l">' + c.id + '</td><td class="l">' + esc(c.type) + '</td><td>' + won(c.pred.price) + '</td><td>' + won(c.pred.low) + ' ~ ' + won(c.pred.high) + '</td>' +
+      '<td><input inputmode="numeric" data-i="' + i + '" value="' + esc(c.actual) + '" style="text-align:right;min-width:130px"></td><td id="er' + i + '"></td><td id="ag' + i + '"></td></tr>';
+  });
+  $('evalTbl').innerHTML = h;
+  $('evalTbl').oninput = function(e){ var t = e.target; if (t.dataset.i == null) return; cs[+t.dataset.i].actual = t.value; save(); updEval(); };
+  updEval();
+}
+function updEval(){
+  var cs = S.cur.cases, m = metrics(cs);
+  cs.forEach(function(c, i){
+    var a = agree(c), e = errPct(c);
+    $('er' + i).textContent = e == null ? '—' : (e >= 0 ? '+' : '') + e.toFixed(1) + '%';
+    $('ag' + i).textContent = a == null ? '—' : a.toFixed(1) + '%';
+  });
+  var pass = m.agreement >= 90;
+  $('evalSum').innerHTML = '<div class="goal"><div><div class="stat">배치 일치도 (' + m.n + '/' + N + '건 입력)</div><div class="big ' + (m.n === N ? (pass ? 'ok-t' : 'no-t') : '') + '">' + (m.n ? m.agreement.toFixed(1) + '%' : '—') + '</div></div>' +
+    '<div class="stat">±10% 이내<br><b>' + m.within10 + '/' + N + '</b></div><div class="stat">평균 오차(부호)<br><b>' + (m.n ? (m.bias >= 0 ? '+' : '') + m.bias.toFixed(1) + '%' : '—') + '</b></div>' +
+    '<div class="stat">과대 / 과소<br><b>' + m.over + ' / ' + m.under + '</b></div><div class="stat">예상 범위 밖<br><b>' + m.outOfRange + '</b></div><div class="stat">하한 위반<br><b>' + m.lowerBreach + '</b></div></div>' +
+    '<div class="msg" style="margin-top:6px">목표 90%는 v10.0에서의 목표입니다. 현재 ' + ver(S.versionTenths) + ' 기준 참고 표시: ' + (m.n === N ? (pass ? '90% 이상' : '90% 미만') : '입력 중') + '</div>';
+  $('btnConfirmEval').disabled = m.n !== N;
+}
+$('btnConfirmEval').onclick = function(){
+  var m = metrics(S.cur.cases);
+  S.cur.metrics = m; S.cur.evalDone = true; S.cur.stage = 4; save(); render();
+};
+
+/* ── ④ 보완 ── */
+function triggers(m){
+  var t = [], h = S.history, prev = h.length ? h[h.length - 1] : null;
+  if (m.agreement < 70) t.push('(a) 배치 일치도 70% 미만 — 즉시 패치 검토');
+  if (m.over >= 7) t.push('(b) 과대 예상 ' + m.over + '건 — 한 방향 편향(공리 A + STEP C)');
+  if (m.under >= 7) t.push('(b) 과소 예상 ' + m.under + '건 — 한 방향 편향(공리 A + STEP C)');
+  if (m.lowerBreach >= 1) t.push('(f) 하한 위반 ' + m.lowerBreach + '건 — 강제규칙 4 + STEP D');
+  if (m.outOfRange > 5 && prev && prev.outOfRange > 5) t.push('(g) 예상 범위 밖이 연속 2개 배치에서 5건 초과 — STEP C 범위 산정');
+  if (m.highConfAvg != null && m.highConfAvg < 80 && prev && prev.highConfAvg != null && prev.highConfAvg < 80) t.push('(h) 확신도 8 이상 건의 평균 일치도 80% 미만이 연속 2개 배치 — 확신도 보정');
+  if (prev) m.typeBad.forEach(function(ty){ if ((prev.typeBad || []).indexOf(ty) >= 0) t.push('(c) 유형 [' + ty + '] 오차율 20% 초과 2건 이상이 연속 2개 배치 — 부록 B 유형별 원리 + 공리 F'); });
+  if (h.length >= 2) { var a = [h[h.length - 2].agreement, h[h.length - 1].agreement, m.agreement]; if (Math.max.apply(null, a) - Math.min.apply(null, a) <= 2 && m.agreement < 90) t.push('(i) 일치도 변화 ±2%p 이내가 연속 3개 배치이고 목표 미달 — 공리·절차 구조 검토'); }
+  return t;
+}
+function renderPatch(){
+  var m = S.cur.metrics || metrics(S.cur.cases), tr = triggers(m);
+  S.cur.trig = tr;
+  $('trigBox').innerHTML = '<b>자동 감지된 트리거</b>: ' + (tr.length ? '<ul style="margin:4px 0 0 18px">' + tr.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '없음') + '<div style="margin-top:4px">(d)(e) 트리거는 분석 단계에서 AI가 판단합니다.</div>';
+  $('patchText').value = S.cur.patchText || '';
+  $('btnConfirmPatch').disabled = !$('patchText').value.trim();
+}
+$('patchText').oninput = function(){ S.cur.patchText = this.value; $('btnConfirmPatch').disabled = !this.value.trim(); save(); };
+var ANALYZE_INSTRUCTION = '당신은 K-Evaluation 방법론의 갱신 분석가입니다. 아래 배치의 예상과 실제 낙찰가의 차이를 보고, 방법론의 미비점을 원리 수준으로 분석하고 보완안을 제안하십시오. 개별 물건을 특정하는 정보나 개별 금액을 보완안에 적지 마십시오(공리 D). 보완 항목은 최대 5개이며, 각 항목에 수정 대상(부록 B / STEP / 공리)을 밝히십시오.';
+$('btnAnalyze').onclick = function(){
+  var btn = this, msg = $('anaMsg'), m = S.cur.metrics || metrics(S.cur.cases);
+  btn.disabled = true; msg.className = 'msg'; msg.textContent = '분석 중…';
+  var rows = S.cur.cases.map(function(c){
+    return caseText(c) + '\n예상: ' + won(c.pred.price) + ' (범위 ' + won(c.pred.low) + '~' + won(c.pred.high) + ', 확신도 ' + c.pred.conf + ')\n실제 낙찰가: ' + won(num(c.actual)) + ' → 오차율 ' + (errPct(c) >= 0 ? '+' : '') + errPct(c).toFixed(1) + '%, 일치도 ' + agree(c).toFixed(1) + '%\n예상 과정 요약: ' + (c.pred.text || '').slice(0, 700);
+  }).join('\n\n---\n');
+  var user = '배치 ' + S.batchNo + ' (사용 버전 ' + ver(S.versionTenths) + ') 결과\n배치 일치도 ' + m.agreement.toFixed(1) + '%, ±10% 이내 ' + m.within10 + '건, 평균 오차 ' + m.bias.toFixed(1) + '%, 과대 ' + m.over + '/과소 ' + m.under + ', 범위 밖 ' + m.outOfRange + '건.\n자동 감지 트리거: ' + ((S.cur.trig || []).join('; ') || '없음') +
+    '\n\n' + rows + '\n\n다음 형식으로 답하십시오.\n## 미비점 (원리 수준)\n## 보완안 (최대 5개: 수정 대상 — 내용)\n## 발동 트리거 판단 ((d)(e) 포함)\n## 갱신 유형 (부록/절차/공리)';
+  loadMethod().then(function(meth){ return chat(ANALYZE_INSTRUCTION + '\n\n' + meth + patchesText(), user, 3500); })
+    .then(function(txt){ S.cur.patchText = txt; $('patchText').value = txt; $('btnConfirmPatch').disabled = false; S.cur.analysisDone = true; save(); msg.textContent = '분석 완료 — 내용을 검토·수정하십시오.'; })
+    .catch(function(e){ msg.className = 'msg err'; msg.textContent = '분석 실패: ' + (e && e.message || e); })
+    .then(function(){ btn.disabled = false; });
+};
+$('btnConfirmPatch').onclick = function(){
+  var text = $('patchText').value.trim(); if (!text) return;
+  var m = S.cur.metrics || metrics(S.cur.cases), from = S.versionTenths, to = from + 1;
+  S.history.push({ batch: S.batchNo, versionUsed: from, agreement: m.agreement, within10: m.within10, bias: m.bias, over: m.over, under: m.under, outOfRange: m.outOfRange, highConfAvg: m.highConfAvg, typeBad: m.typeBad, ts: Date.now() });
+  S.patches.push({ from: from, to: to, agreement: m.agreement, text: text, ts: Date.now() });
+  S.versionTenths = to; S.cur.stage = 5; S.cur.final = { versionUsed: from, versionNew: to, agreement: m.agreement }; save(); render();
+};
+
+/* ── ⑤ 다음 ── */
+function renderDone(){
+  var f = S.cur.final || {}, last = S.history[S.history.length - 1] || {};
+  var reached = S.versionTenths >= 100;
+  $('doneSum').innerHTML = '<div>배치 ' + (S.batchNo) + ' 일치도 <b>' + (f.agreement != null ? f.agreement.toFixed(1) : '—') + '%</b> · 방법론 ' + esc(ver(f.versionUsed || S.versionTenths - 1)) + ' → <b>' + esc(ver(S.versionTenths)) + '</b></div>' +
+    (reached ? '<div class="msg" style="margin-top:6px"><b>v10.0에 도달했습니다.</b> 최근 배치 일치도 ' + (last.agreement != null ? last.agreement.toFixed(1) : '—') + '% — 목표 90% ' + (last.agreement >= 90 ? '이상입니다.' : '미만입니다.') + ' 목표 달성 판정 방식(최근 1개 배치 또는 연속 복수 배치)은 방법론에 미확정으로 적혀 있습니다.</div>' : '');
+}
+$('btnNext').onclick = function(){ S.batchNo += 1; S.cur = newCur(); save(); render(); window.scrollTo(0, 0); };
+
+/* ── 방법론 보기·내보내기 ── */
+function download(name, text, type){ var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: type || 'text/plain;charset=utf-8' })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500); }
+$('btnViewMethod').onclick = function(){ var b = $('methodBox'); if (b.style.display === 'none') { currentSystem().then(function(t){ b.textContent = t; b.style.display = 'block'; }).catch(function(e){ b.textContent = '불러오지 못했습니다: ' + e.message; b.style.display = 'block'; }); } else b.style.display = 'none'; };
+$('btnExportMethod').onclick = function(){ currentSystem().then(function(t){ download('K-Evaluation_' + ver(S.versionTenths) + '.md', t); }).catch(function(e){ alert('내려받지 못했습니다: ' + e.message); }); };
+$('btnExportState').onclick = function(){ download('k-evaluation-state_' + ver(S.versionTenths) + '_batch' + S.batchNo + '.json', JSON.stringify(S, null, 1), 'application/json'); };
+$('btnImportState').onclick = function(){ $('fileImport').click(); };
+$('fileImport').onchange = function(){
+  var f = this.files[0]; if (!f) return; var r = new FileReader();
+  r.onload = function(){ try { var s = JSON.parse(r.result); if (!s || !s.cur || typeof s.versionTenths !== 'number') throw new Error('형식이 맞지 않습니다'); if (!confirm('현재 진행 상태를 가져온 상태로 바꿉니다. 계속할까요?')) return; S = s; save(); render(); } catch (e) { alert('가져오지 못했습니다: ' + e.message); } };
+  r.readAsText(f); this.value = '';
+};
+
+render();
+})();
+</script>
+</body>
+</html>
