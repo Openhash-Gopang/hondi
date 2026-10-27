@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K-Paralegal 방법론 v0.1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;900&display=swap">
+<style>
+/* Layout: 좌측 목차 + 본문 단일 컬럼 문서. 표와 수식은 가로 스크롤 컨테이너. */
+:root{
+  --bg:#f2f5f3; --surface:#ffffff; --soft:#e4ece8; --fg:#14211d; --muted:#51625c;
+  --line:#c9d5cf; --accent:#0d5a4a; --accent-ink:#ffffff; --mark:#8a5a00; --mark-bg:#f6e7c1;
+  --warn:#9b2c1c; --warn-bg:#f6dcd6; --ok:#17603a; --ok-bg:#d6eddf;
+  --f-display:"Noto Serif KR","Nanum Myeongjo",serif;
+  --f-body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1614; --surface:#15201d; --soft:#1c2b27; --fg:#e3ece8; --muted:#92a49d;
+    --line:#2c3d38; --accent:#62c5aa; --accent-ink:#06150f; --mark:#e6b955; --mark-bg:#3a2e12;
+    --warn:#ef9a8a; --warn-bg:#3b1d17; --ok:#7bd3a0; --ok-bg:#15301f; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1614; --surface:#15201d; --soft:#1c2b27; --fg:#e3ece8; --muted:#92a49d;
+  --line:#2c3d38; --accent:#62c5aa; --accent-ink:#06150f; --mark:#e6b955; --mark-bg:#3a2e12;
+  --warn:#ef9a8a; --warn-bg:#3b1d17; --ok:#7bd3a0; --ok-bg:#15301f; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.75;
+  padding-block:32px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));word-break:keep-all;overflow-wrap:break-word}
+.wrap{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:200px minmax(0,1fr);gap:48px}
+nav.toc{position:sticky;top:24px;align-self:start;font-size:13px;line-height:1.5;max-height:calc(100vh - 48px);overflow:auto}
+nav.toc b{display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;color:var(--muted);margin-bottom:10px;font-weight:500}
+nav.toc a{display:block;padding:5px 0 5px 10px;border-left:2px solid var(--line);color:var(--muted);text-decoration:none}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--accent);border-left-color:var(--accent);outline:none}
+main{min-width:0}
+header.top{border-bottom:2px solid var(--fg);padding-bottom:24px;margin-bottom:36px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+h1{font-family:var(--f-display);font-weight:900;font-size:clamp(30px,5vw,46px);line-height:1.2;margin:10px 0 12px;text-wrap:balance}
+h1 em{font-style:normal;color:var(--accent)}
+.lede{font-size:17px;color:var(--fg);max-width:46em}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.chip{font-family:var(--f-mono);font-size:12px;padding:3px 10px;border:1px solid var(--line);background:var(--surface);border-radius:3px;color:var(--muted)}
+.chip.draft{background:var(--mark-bg);color:var(--mark);border-color:transparent}
+section{margin-bottom:56px;scroll-margin-top:24px}
+h2{font-family:var(--f-display);font-weight:600;font-size:25px;line-height:1.35;margin:0 0 6px;text-wrap:balance;padding-top:6px;border-top:1px solid var(--line)}
+h2 .sec{font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.1em;color:var(--accent);display:block;margin-bottom:2px;padding-top:14px}
+h3{font-size:16.5px;margin:30px 0 8px;font-weight:700}
+h4{font-size:14px;margin:18px 0 4px;font-weight:700;color:var(--muted);letter-spacing:.02em}
+p{margin:0 0 12px;max-width:44em}
+ul,ol{margin:0 0 14px;padding-left:1.3em;max-width:44em}
+li{margin-bottom:5px}
+code,.mono{font-family:var(--f-mono);font-size:.9em}
+code{background:var(--soft);padding:1px 5px;border-radius:3px}
+.scroll{overflow-x:auto;margin:12px 0 20px;border:1px solid var(--line);background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:13.5px;line-height:1.6}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--line)}
+th{background:var(--soft);font-weight:700;font-size:12.5px;letter-spacing:.03em;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:500}
+.formula{font-family:var(--f-mono);font-size:13.5px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);padding:14px 16px;margin:14px 0 18px;overflow-x:auto;white-space:pre;line-height:1.8}
+.note,.warn,.ok{padding:12px 16px;margin:16px 0 20px;max-width:46em;font-size:14px;border-left:4px solid}
+.note{background:var(--mark-bg);border-color:var(--mark)}
+.warn{background:var(--warn-bg);border-color:var(--warn)}
+.ok{background:var(--ok-bg);border-color:var(--ok)}
+.note b,.warn b,.ok b{display:block;font-size:12px;letter-spacing:.08em;margin-bottom:2px}
+.tag{display:inline-block;font-family:var(--f-mono);font-size:12px;padding:0 7px;border-radius:3px;font-weight:500;white-space:nowrap}
+.t-must{background:var(--warn-bg);color:var(--warn)}
+.t-imp{background:var(--mark-bg);color:var(--mark)}
+.t-rec{background:var(--soft);color:var(--muted)}
+.t-keep{background:var(--ok-bg);color:var(--ok)}
+.t-chg{background:var(--mark-bg);color:var(--mark)}
+.t-new{background:var(--accent);color:var(--accent-ink)}
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;margin:18px 0 24px;border:1px solid var(--line);background:var(--surface)}
+.flow>div{padding:12px 14px;border-right:1px solid var(--line);font-size:13px;line-height:1.55;min-width:0}
+.flow>div:last-child{border-right:0;background:var(--soft)}
+.flow b{display:block;font-family:var(--f-mono);font-size:12px;color:var(--accent);margin-bottom:3px}
+.flow span{color:var(--muted)}
+.layers{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:16px 0 22px}
+.layer{border:1px solid var(--line);background:var(--surface);padding:14px 16px;min-width:0}
+.layer h4{margin:0 0 6px;color:var(--fg);font-size:14.5px}
+.layer .k{font-family:var(--f-mono);font-size:12px;color:var(--accent);letter-spacing:.06em}
+.layer p{font-size:13.5px;margin:0 0 6px;line-height:1.65}
+.layer .lim{color:var(--muted);font-size:12.5px}
+footer{border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:13px}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:860px){
+  .wrap{grid-template-columns:minmax(0,1fr);gap:0}
+  nav.toc{position:static;max-height:none;margin-bottom:28px;display:flex;flex-wrap:wrap;gap:4px 14px}
+  nav.toc b{width:100%;margin-bottom:2px}
+  nav.toc a{border-left:0;padding:2px 0}
+  .flow{grid-template-columns:minmax(0,1fr)}
+  .flow>div{border-right:0;border-bottom:1px solid var(--line)}
+  .flow>div:last-child{border-bottom:0}
+}
+.flow.f3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.flow.f3>div{border-bottom:1px solid var(--line)}
+.flow.f3>div:nth-child(3n){border-right:0}
+.flow.f3>div:nth-last-child(-n+3){border-bottom:0}
+@media (max-width:860px){.flow.f3{grid-template-columns:minmax(0,1fr)}.flow.f3>div{border-right:0}.flow.f3>div:nth-last-child(-n+3){border-bottom:1px solid var(--line)}.flow.f3>div:last-child{border-bottom:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="toc" aria-label="목차">
+  <b>CONTENTS</b>
+  <a href="#s0">0 요약</a>
+  <a href="#s1">1 위치와 범위</a>
+  <a href="#s2">2 목표와 오차 정의</a>
+  <a href="#s3">3 공리 계층</a>
+  <a href="#s4">4 강제규칙</a>
+  <a href="#s5">5 절차 STEP W-1~W-9</a>
+  <a href="#s6">6 확신도와 난이도</a>
+  <a href="#s7">7 현재 SP 대비 변경</a>
+  <a href="#s8">8 성능 평가 제안</a>
+  <a href="#s9">9 열린 질문</a>
+</nav>
+
+<main>
+<header class="top">
+  <div class="eyebrow">K-Paralegal · 법무사 업무 서류 방법론</div>
+  <h1>K-Paralegal 방법론 <em>v0.1</em></h1>
+  <p class="lede">법무사 보조 AI가 의뢰 접수부터 서류 작성, 제출 준비, 수수료 납부 준비, 결과 기록까지 한 건의 사건을 다루는 방법을 K-Law v15.1의 공리 계층과 강제규칙 구조에 맞춰 정리한 초안입니다. 목표는 보정·반려 없이 접수되는 서류를 정해진 기한 안에 준비하는 것입니다.</p>
+  <div class="meta">
+    <span class="chip draft">초안 DRAFT</span>
+    <span class="chip">2026-10-27</span>
+    <span class="chip">기반: K-Law v15.1 · SP-LAW-02A</span>
+    <span class="chip">검토 대상: 법무사</span>
+  </div>
+</header>
+
+<section id="s0">
+  <h2><span class="sec">SECTION 0</span>요약</h2>
+  <ul>
+    <li><b>목표.</b> 사건 유형에 맞는 서식을 고르고, 사실과 증빙에 맞게 빠짐없이 채워, 기한 안에 보정·반려 없이 접수될 수 있는 서류 한 벌(본문, 첨부, 수수료 항목)을 법무사에게 넘깁니다.</li>
+    <li><b>K-Law에서 가져온 것.</b> 4계층 공리, 강제규칙표(★▲○), STEP 0/A/B/C 구조, 역방향 점검, 법리·사실 이원 확신도, 판단난이도, 자기갱신 트리거.</li>
+    <li><b>바뀐 것.</b> 판결문이 아니라 서류 한 벌이 산출물입니다. 역방향 점검의 상대는 접수 기관(등기관·법원·공탁관)이며, “이 서류를 기관이 보정하거나 반려할 이유가 있는가”를 먼저 찾습니다.</li>
+    <li><b>지키는 선.</b> AI는 법무사가 아닙니다. 승인, 서명·기명날인, 제출, 납부는 법무사(또는 본인 사건의 본인)가 합니다. 모르는 값은 지어내지 않고 자리표시자로 남깁니다.</li>
+    <li><b>성능 평가.</b> 단일 정답이 없으므로 서식 구조 대조, 보정·반려 사례 재현, 법무사 패널 블라인드 검토, 모의 제출 시나리오, 감독 아래 병행 시범의 5개 층으로 나누어 재는 방법을 제8장에서 제안합니다. 이 문서는 성능을 주장하지 않습니다.</li>
+  </ul>
+  <div class="note"><b>읽는 법</b>제2장 목표 정의와 제8장 평가 제안이 v0.1의 핵심입니다. 제3~6장은 현재 운영 중인 법무사 보조 AI 프롬프트(SP-LAW-02A)의 규칙을 K-Law 구조에 맞춰 다시 정리한 설계이며, 규칙 번호의 1:1 이식과 감점표는 v0.2에서 다룹니다. 화면에서 직접 돌려 볼 수 있는 모의 절차는 <a href="/pages/judicial-simulation.html">법무 시뮬레이션</a>입니다.</div>
+</section>
+
+<section id="s1">
+  <h2><span class="sec">SECTION 1</span>위치와 범위</h2>
+  <p>저장소에는 이미 법무사 보조 AI 시스템 프롬프트(SP-LAW-02A)와 서류 작성 트랙(STEP W)이 있습니다. 이 방법론은 그 규칙을 대체하지 않고, 목표와 평가 방법을 정해 주는 상위 설계입니다.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>구분</th><th>K-Law v15.1</th><th>SP-LAW-02A v1.0</th><th>K-Paralegal 방법론 v0.1</th></tr></thead>
+    <tbody>
+      <tr><td>관점</td><td>법원, 중립</td><td>인증된 법무사의 업무 보조</td><td>법무사의 서류 업무 보조</td></tr>
+      <tr><td>목표</td><td>법리에 맞는 판결</td><td>쟁점 정리와 서류 초안</td><td>보정·반려 없는 서류 한 벌과 기한 준수</td></tr>
+      <tr><td>산출물</td><td>판결문</td><td>서류 초안, 체크리스트</td><td>서류 한 벌(본문·첨부·수수료 항목)과 제출 결과 기록</td></tr>
+      <tr><td>기준 정답</td><td>실제 판결(사후 확정)</td><td>법령·서식</td><td>유형별로 다름(제8장)</td></tr>
+      <tr><td>책임 주체</td><td>AI 출력의 평가 대상</td><td>법무사</td><td>승인·날인·제출·납부는 법무사</td></tr>
+    </tbody>
+  </table></div>
+  <h3>v0.1 대상 업무 (제안)</h3>
+  <p>SP-LAW-02A 부록 A의 문서 카탈로그 가운데 부동산등기, 상업·법인·담보등기, 공탁, 민사 독촉·보전 서류, 개인회생·파산 서류로 시작합니다. 경매·공매, 가사·비송, 형사 관련 서류는 제출처와 관련성 확인이 더 필요하므로 v0.2 이후에 넣습니다.</p>
+  <h3>업무 경계</h3>
+  <p>소송 대리, 법률 분쟁의 상담·교섭, 쟁송 전략 판단은 법무사의 업무 범위 밖이며 변호사에게 안내합니다(<code>[REFER_LAWYER]</code>). 경매·공매 현장 출석과 서류의 제출·접수·날인은 법무사 본인의 일입니다. 구체적인 조문 표현은 법령 스냅샷을 확정할 때 법무사 검토로 확정합니다.</p>
+</section>
+
+<section id="s2">
+  <h2><span class="sec">SECTION 2</span>목표와 오차 정의</h2>
+  <p>“빠짐없이, 사실대로, 기한 안에”를 검증 가능한 형태로 바꿉니다.</p>
+  <div class="formula">D(s)   서류 한 벌 s에서 접수 기관이 보정·반려할 수 있는 결함의 수
+        (필수 기재 누락, 서식 불일치, 첨부 누락, 표시 불일치, 수수료·세액 오류, 기한 도과)
+F(s)   지어낸 값의 수 (사용자가 제공하지 않았거나 조회로 확인되지 않은 사실·번호·금액을 채운 곳)
+E(s)   업무 범위 이탈 수 (대리·자문·타인 사건 대행·제출 완료 표시 등 금지 행위)
+목표   D(s) = 0 , F(s) = 0 , E(s) = 0
+       단, 알 수 없는 값은 결함이 아니라 자리표시자([법무사 직접 기재], [확인 필요], [미확인])로 남긴다</div>
+  <h3>세 가지 실패</h3>
+  <ul>
+    <li><b>결함(D&gt;0).</b> 보정 명령, 반려, 기한 도과로 이어집니다. 기한이 정해진 절차에서는 되돌리기 어렵습니다.</li>
+    <li><b>지어낸 값(F&gt;0).</b> 한 건이라도 있으면 실패로 봅니다. 허위 기재는 서류 전체의 신뢰를 무너뜨리고, 법무사가 놓치면 책임 문제가 생깁니다.</li>
+    <li><b>범위 이탈(E&gt;0).</b> 한 건이라도 있으면 실패로 봅니다. 정확도와 무관하게 먼저 통과해야 하는 문턱입니다.</li>
+  </ul>
+  <div class="warn"><b>약속의 범위</b>D=0은 사건의 사실이 모두 주어지고, 서식이 법정 서식으로 확인되고, 기관의 실무 취급이 다르지 않을 때만 약속할 수 있습니다. 기관별 실무 차이와 개정 직후의 서식은 확인 필요 항목으로 표시하며, 최종 판단은 법무사가 합니다. 이 도구는 접수를 보장하지 않습니다.</div>
+</section>
+
+<section id="s3">
+  <h2><span class="sec">SECTION 3</span>공리 계층</h2>
+  <p>K-Law의 4계층 구조를 유지하고 내용을 법무사 서류 업무에 맞게 교체했습니다. 조문 번호는 초안 작성 시점 기준이며, 법령 스냅샷을 확정할 때 다시 대조합니다.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>계층</th><th>K-Paralegal 공리</th><th>내용</th><th>K-Law 대응</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="7">제1계층<br>원칙공리</td><td>P1 업무범위 법정주의</td><td>법무사가 할 수 있는 일은 법무사법이 정한 범위입니다. 범위 밖 요청은 작성하지 않고 해당 자격자로 안내합니다.</td><td><span class="tag t-keep">유지</span> 제재규범 엄격해석</td></tr>
+      <tr><td>P2 서식·형식요건 엄격</td><td>법정 서식과 필수 기재사항은 기관이 정한 대로 채웁니다. 서식에 없는 항목을 임의로 넣거나 빼지 않습니다.</td><td><span class="tag t-keep">유지</span> 형식 요건</td></tr>
+      <tr><td>P3 동일성·일관성</td><td>당사자, 부동산·법인 표시, 금액, 날짜는 서류 전체와 첨부 사이에서 서로 일치해야 합니다.</td><td><span class="tag t-new">신설</span></td></tr>
+      <tr><td>P4 근거·증빙 우선</td><td>모든 사실 값은 이용자 진술·첨부(F), 조회 확인(V), 도구의 추론(I) 중 하나로 출처를 구분합니다. 근거 없는 값은 쓰지 않습니다.</td><td><span class="tag t-keep">유지</span> 증명책임</td></tr>
+      <tr><td>P5 기한 우선</td><td>기한이 있는 절차는 기한 확인이 가장 먼저입니다. 도과하면 다른 모든 정확성이 의미를 잃습니다.</td><td><span class="tag t-keep">유지</span> 소멸시효·제척</td></tr>
+      <tr><td>P6 최소 개인정보</td><td>주민등록번호, 계좌번호, 인증 정보는 대화와 서식 저장소에 남기지 않고 자리표시자로 둡니다.</td><td><span class="tag t-new">신설</span></td></tr>
+      <tr><td>P7 자격자 게이트</td><td>승인, 서명·기명날인, 제출, 납부는 사람이 합니다. AI는 하지 않은 일을 한 것처럼 표시하지 않습니다.</td><td><span class="tag t-chg">변경</span> 사람 확인 게이트</td></tr>
+      <tr><td>제1.5계층<br>의미해석공리 S</td><td>S 일상어-법률개념 매핑</td><td>이용자의 설명을 등기 원인, 신청 취지, 당사자 지위 같은 법률 개념으로 옮깁니다. “집 샀어요”는 매매, 증여, 상속 중 무엇인지부터 묻습니다.</td><td><span class="tag t-keep">유지</span></td></tr>
+      <tr><td rowspan="3">제2계층<br>해석공리</td><td>H1 해석 우선순위</td><td>법령 문언, 시행령·규칙, 대법원 예규·등기예규·선례, 기관 실무 순입니다. 실무 취급은 근거로 삼되 법령과 충돌하면 법무사 확인 항목으로 올립니다.</td><td><span class="tag t-chg">변경</span></td></tr>
+      <tr><td>H2 특별규정 우선</td><td>특별법과 일반법, 기관별 신청 방식(전자·방문)의 차이를 먼저 가려 서식과 절차를 정합니다.</td><td><span class="tag t-keep">유지</span> 특별법·일반법</td></tr>
+      <tr><td>H3 시간 필터</td><td>법령·서식 개정 시점, 신청 기한, 보정 기한, 등기 의무 기간을 먼저 거릅니다.</td><td><span class="tag t-keep">유지</span> 시제</td></tr>
+      <tr><td>제3계층<br>집행규칙</td><td>M 제출·납부 규칙</td><td>접수 방식, 첨부 목록, 수수료 항목(등록면허세·교육세·인지·송달료·증명서 발급비 등 서류별로 다름), 납부 방법.</td><td><span class="tag t-chg">변경</span> 집행규칙 확장</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="s4">
+  <h2><span class="sec">SECTION 4</span>강제규칙</h2>
+  <p>K-Law의 강제규칙표(<span class="tag t-must">★ 필수</span> <span class="tag t-imp">▲ 중요</span> <span class="tag t-rec">○ 권고</span>)를 법무사 서류용으로 다시 작성했습니다.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>번호</th><th>등급</th><th>규칙</th></tr></thead>
+    <tbody>
+      <tr><td>R1</td><td><span class="tag t-must">★</span></td><td>업무 범위 판정이 먼저입니다. 범위 밖이면 서류를 작성하지 않고 이유와 안내 대상을 밝힙니다.</td></tr>
+      <tr><td>R2</td><td><span class="tag t-must">★</span></td><td>사용자가 승인한 서식으로만 작성합니다. 서식 승인(W-2) 전에는 본문을 쓰지 않습니다.</td></tr>
+      <tr><td>R3</td><td><span class="tag t-must">★</span></td><td>모르는 값은 지어내지 않고 <code>[법무사 직접 기재]</code>, <code>[확인 필요]</code>, <code>[미확인]</code>으로 남깁니다. 수치·번호·금액도 같습니다.</td></tr>
+      <tr><td>R4</td><td><span class="tag t-must">★</span></td><td>기한이 있는 절차는 기한을 맨 앞에 적고 기준일을 함께 씁니다.</td></tr>
+      <tr><td>R5</td><td><span class="tag t-must">★</span></td><td>접수 기관의 관점에서 역방향 점검을 합니다. 이 서류를 보정하거나 반려할 이유를 먼저 찾고, 찾은 것은 검증 결과에 표시합니다.</td></tr>
+      <tr><td>R6</td><td><span class="tag t-must">★</span></td><td>제출, 납부, 날인은 하지 않습니다. 제출·납부 화면의 값은 이용자가 알려 준 만큼만 “이용자 보고”로 기록합니다.</td></tr>
+      <tr><td>R7</td><td><span class="tag t-imp">▲</span></td><td>수수료 금액과 산식은 조회한 것만 확정처럼 쓰고 조회일과 출처를 표시합니다. 확인하지 못하면 숫자를 쓰지 않습니다.</td></tr>
+      <tr><td>R8</td><td><span class="tag t-imp">▲</span></td><td>특정 법무사사무소나 변호사를 소개·추천·연결하지 않습니다.</td></tr>
+      <tr><td>R9</td><td><span class="tag t-imp">▲</span></td><td>초안은 모두 DRAFT 상태이며, 검토 체크리스트는 법무사가 직접 체크합니다. AI가 “검토 완료”로 표시하지 않습니다.</td></tr>
+      <tr><td>R10</td><td><span class="tag t-rec">○</span></td><td>쉬운 말로 설명하고, 법률 용어는 처음 나올 때 풀어 씁니다. 사람의 경험을 자기 것으로 서술하지 않습니다.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="s5">
+  <h2><span class="sec">SECTION 5</span>절차: STEP W-1 → W-9</h2>
+  <p>현재 서류 작성 트랙(STEP W)의 9단계를 그대로 쓰고, 단계마다 통과 조건과 점검 대상을 붙였습니다. 앞 단계의 완료 조건을 채우지 못하면 다음 단계로 넘어가지 않습니다.</p>
+  <div class="flow f3">
+    <div><b>W-1 서식 결정</b><span>목적·제출처 확인, 후보 서식 1~3개. 업무 범위 판정(R1).</span></div>
+    <div><b>W-2 서식 승인</b><span>한 장 요약을 보이고 이용자가 승인. 게이트(R2).</span></div>
+    <div><b>W-3 서식 DB</b><span>기존 서식 조회, 없으면 신규 구성. 빈 서식만 저장 제안.</span></div>
+    <div><b>W-4 추가 자료</b><span>누락 항목 표, 3개 이내로 질문. 첨부 안내(P6).</span></div>
+    <div><b>W-5 서류 작성</b><span>승인된 서식대로 초안. 모르는 값은 자리표시자(R3).</span></div>
+    <div><b>W-6 검증·승인</b><span>역방향 점검(R5), 법무사 체크리스트. 게이트.</span></div>
+    <div><b>W-7 제출 준비</b><span>제출처·접수 방식·첨부·기한 패키지. 제출은 사람(R6).</span></div>
+    <div><b>W-8 수수료</b><span>항목별 금액과 산식은 조회한 것만(R7). 납부는 사람.</span></div>
+    <div><b>W-9 결과 기록</b><span>접수번호·일시·결과는 이용자 보고 기준. 모르면 [미확인].</span></div>
+  </div>
+  <h3>단계별 점검 질문</h3>
+  <div class="scroll"><table>
+    <thead><tr><th>단계</th><th>통과 전에 확인할 것</th><th>실패 신호</th></tr></thead>
+    <tbody>
+      <tr><td>W-1</td><td>서류명, 제출처, 법정 서식인지 관행 서류인지, 업무 범위 안인지</td><td>범위 밖 서류를 후보로 올림</td></tr>
+      <tr><td>W-2</td><td>항목·첨부·기한이 한 장에 정리되고 명시적 승인이 있었는지</td><td>모호한 말을 승인으로 처리</td></tr>
+      <tr><td>W-4</td><td>비어 있는 항목이 모두 표에 올랐는지</td><td>이미 말한 내용을 다시 묻거나 빈칸을 추정으로 채움</td></tr>
+      <tr><td>W-5</td><td>당사자·부동산 표시·금액이 본문과 첨부에서 일치하는지</td><td>불일치, 승인되지 않은 항목 추가</td></tr>
+      <tr><td>W-6</td><td>기관이 보정할 만한 결함을 찾아 표시했는지</td><td>“검토 완료”로 자체 표시</td></tr>
+      <tr><td>W-7</td><td>dpaper 미연동 상태를 먼저 알렸는지, 기한이 맨 앞에 있는지</td><td>제출했다고 표시</td></tr>
+      <tr><td>W-8</td><td>수수료 항목마다 근거(조회일·출처)가 있는지</td><td>근거 없는 금액, 대신 납부했다는 표시</td></tr>
+      <tr><td>W-9</td><td>기록의 모든 값에 이용자 보고 또는 영수증 근거가 있는지</td><td>접수번호를 지어냄</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><b>dpaper 연동</b>전자 제출·납부 시스템(dpaper) API는 아직 연결되지 않았습니다. 연결 전에는 제출 패키지 정리까지만 하고, 연결된 뒤에도 법률 검토와 법무사의 최종 승인 뒤에만 AI가 제출·납부를 수행하는 것을 전제로 합니다.</div>
+</section>
+
+<section id="s6">
+  <h2><span class="sec">SECTION 6</span>확신도와 판단난이도</h2>
+  <p>K-Law의 이원 확신도를 서류 업무에 맞게 바꿉니다. 법리 확신도는 서식·절차 선택의 확실성을, 사실 확신도는 이용자가 준 값과 첨부의 신뢰도를 나타냅니다.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>수준</th><th>서식·절차 확신도(법리)</th><th>사실 확신도</th></tr></thead>
+    <tbody>
+      <tr><td>높음</td><td>법정 서식이 확인되고 기관 실무와 어긋나지 않음</td><td>등기부·계약서 등 첨부로 뒷받침됨</td></tr>
+      <tr><td>보통</td><td>관행 서류이거나 서식 개정 여부가 확인 중임</td><td>이용자 진술만 있고 첨부가 없음</td></tr>
+      <tr><td>낮음</td><td>기관별 실무 차이가 크거나 근거가 서로 충돌함</td><td>핵심 값이 비어 있거나 서로 모순됨</td></tr>
+    </tbody>
+  </table></div>
+  <h3>판단난이도 (제안)</h3>
+  <ul>
+    <li><b>1~2.</b> 서식이 정형화된 단일 당사자 서류(예: 단순 소유권이전등기).</li>
+    <li><b>3.</b> 당사자나 목적물이 여럿이거나 첨부가 많은 서류(예: 상속 등기, 법인 설립).</li>
+    <li><b>4~5.</b> 절차가 여러 단계이거나 경계 영역에 걸린 서류(예: 개인회생 신청, 범위 판정이 필요한 서류). 난이도가 높을수록 법무사 확인 항목을 늘립니다.</li>
+  </ul>
+</section>
+
+<section id="s7">
+  <h2><span class="sec">SECTION 7</span>현재 SP 대비 변경 요약</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>항목</th><th>현재(SP-LAW-02A v1.0)</th><th>K-Paralegal v0.1 제안</th></tr></thead>
+    <tbody>
+      <tr><td>목표</td><td>초안 작성과 점검</td><td>D=0, F=0, E=0이라는 측정 가능한 목표(제2장)</td></tr>
+      <tr><td>규칙 구조</td><td>절별 지시문</td><td>4계층 공리와 강제규칙표(★▲○)로 재정리</td></tr>
+      <tr><td>역방향 점검</td><td>전송 전 검증(C-3)</td><td>접수 기관 관점의 보정·반려 사유 탐색을 필수 규칙으로 격상(R5)</td></tr>
+      <tr><td>평가</td><td>정해진 방법 없음</td><td>5개 층 평가 설계(제8장)</td></tr>
+      <tr><td>산출물 표기</td><td>상태 줄과 태그</td><td>변경 없음. 규칙은 그대로 따릅니다.</td></tr>
+    </tbody>
+  </table></div>
+  <p>이 방법론이 확정되어도 SP-LAW-02A의 §LEGAL-LIMIT는 변경하지 않으며, 충돌 시 §LEGAL-LIMIT를 따릅니다.</p>
+</section>
+
+<section id="s8">
+  <h2><span class="sec">SECTION 8</span>성능 평가 제안</h2>
+  <p>이 장은 평가를 어떻게 설계할지에 대한 제안이며, 아직 수행하지 않았습니다. 결과가 나오기 전까지 성능을 주장하는 문구는 소개 문서에 넣지 않습니다.</p>
+  <h3>8.1 평가 지표</h3>
+  <div class="scroll"><table>
+    <thead><tr><th>지표</th><th>정의</th><th>방향</th></tr></thead>
+    <tbody>
+      <tr><td>필수 기재 충족률</td><td>서식의 필수 항목 가운데 값 또는 적정한 자리표시자로 채워진 비율</td><td>높을수록 좋음 (목표 100%)</td></tr>
+      <tr><td>지어낸 값 건수 F</td><td>이용자가 주지 않았고 조회로 확인되지 않은 값의 수</td><td>0건</td></tr>
+      <tr><td>범위 판정 정확도</td><td>범위 밖 요청을 거절하고 올바른 자격자로 안내한 비율, 범위 안 요청을 불필요하게 거절하지 않은 비율</td><td>양쪽 모두 높을수록 좋음</td></tr>
+      <tr><td>결함 재현율</td><td>사전에 심어 둔 결함(표시 불일치, 첨부 누락 등) 가운데 검증 단계에서 찾아낸 비율</td><td>높을수록 좋음</td></tr>
+      <tr><td>수수료·기한 정확도</td><td>조회 근거와 일치하는 금액·산식·기한의 비율. 근거 없는 숫자는 오답으로 셈</td><td>높을수록 좋음</td></tr>
+      <tr><td>금지 행위 건수 E</td><td>대리·자문·소개·제출 완료 표시 등 §LEGAL-LIMIT 위반 수</td><td>0건</td></tr>
+    </tbody>
+  </table></div>
+  <h3>8.2 평가 층</h3>
+  <div class="scroll"><table>
+    <thead><tr><th>층</th><th>방법</th><th>자료</th></tr></thead>
+    <tbody>
+      <tr><td>L1 서식 구조 대조</td><td>생성한 서류의 항목을 법정 서식과 항목 단위로 대조</td><td>법정 서식, 서식 DB</td></tr>
+      <tr><td>L2 보정·반려 사례 재현</td><td>공개된 예규·선례에서 보정·반려 사유가 된 사례를 입력으로 주고 같은 결함을 찾는지 확인</td><td>공개 예규·선례(공개 범위 확인 필요)</td></tr>
+      <tr><td>L3 법무사 패널 블라인드 검토</td><td>법무사 3인 이상이 AI 초안과 사람 초안을 구분 없이 채점</td><td>합성 사건(개인정보 없음)</td></tr>
+      <tr><td>L4 모의 제출 시나리오</td><td>의뢰 접수부터 결과 기록까지 W-1~W-9 전 과정을 모의로 진행하고 단계별 통과 조건을 확인</td><td><a href="/pages/judicial-simulation.html">법무 시뮬레이션</a> 시나리오</td></tr>
+      <tr><td>L5 감독 아래 병행 시범</td><td>법무사가 실제 업무와 병행해 AI 초안과 최종 서류의 차이를 기록</td><td>법무사 동의를 받은 실제 사건</td></tr>
+    </tbody>
+  </table></div>
+  <h3>8.3 통과 기준 (초기 제안값)</h3>
+  <ul>
+    <li>F와 E는 어느 층에서도 0건이어야 합니다.</li>
+    <li>필수 기재 충족률과 범위 판정 정확도는 L1·L3에서 협의한 기준(예: 95% 이상)을 넘어야 합니다.</li>
+    <li>L5 병행 시범은 법무사 감독 아래에서만 하며, 접수 결과는 보정 요구가 있었는지만 기록하고 서류의 최종 판단은 법무사가 합니다.</li>
+  </ul>
+  <p>위 수치는 협의를 위한 출발점이며 1회차 결과를 보고 조정합니다.</p>
+  <h3>8.4 평가 설계의 원칙</h3>
+  <ul>
+    <li><b>합성 사건 사용.</b> 실제 개인정보가 든 서류로 평가하지 않습니다.</li>
+    <li><b>보류 세트.</b> 평가 사건의 일부는 개발에 쓰지 않고 최종 판정에만 씁니다.</li>
+    <li><b>평가 모드와 운영 모드 분리.</b> 평가에서는 법령·서식 스냅샷을 입력으로 주고, 운영에서는 최신 조회를 허용합니다.</li>
+    <li><b>블라인드 채점.</b> 채점자는 답안이 AI의 것인지 사람의 것인지 알지 못합니다.</li>
+  </ul>
+  <h3>8.5 한계</h3>
+  <div class="warn"><b>이 평가가 보장하지 못하는 것</b>
+    <ul style="margin:6px 0 0">
+      <li>기관별 실무 취급과 담당자 재량은 평가 자료로 포착하기 어렵습니다.</li>
+      <li>공개된 보정·반려 사례는 분쟁이 있던 사건에 치우쳐 일반 업무의 정확도를 과소 또는 과대 추정할 수 있습니다.</li>
+      <li>법령과 서식이 개정되면 평가 세트가 낡습니다. 개정 때마다 갱신해야 합니다.</li>
+      <li>제3자 검증은 아직 없습니다.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="s9">
+  <h2><span class="sec">SECTION 9</span>열린 질문과 다음 단계</h2>
+  <ol>
+    <li><b>대상 업무 범위.</b> 제1장의 5개 업무 영역으로 시작해도 되는지 확인이 필요합니다.</li>
+    <li><b>업무 경계 문구.</b> 법무사법상 업무 범위와 제출 대행 관련 표현을 법무사 검토로 확정합니다.</li>
+    <li><b>평가 자료.</b> 등기 예규·선례와 보정 사례의 공개 범위, 법정 서식의 이용 조건을 확인합니다.</li>
+    <li><b>dpaper 연동.</b> 연동 승인 시점과 연동 뒤 AI가 수행할 수 있는 범위를 법률 검토로 정합니다.</li>
+    <li><b>v0.2 작업.</b> K-Law 규칙 번호와의 1:1 대응표, 감점표, 판단난이도 가중치, 일치도 공식.</li>
+  </ol>
+  <p>이 방법론이 확정되면 법무사 보조 AI의 기술 소개 문서는 제2장의 목표 정의와 제8장의 평가 설계를 근거로 갱신합니다.</p>
+</section>
+
+<footer>K-Paralegal 방법론 v0.1 초안 · 2026-10-27 · K-Law v15.1, SP-LAW-02A v1.0 기반 · 조문 번호와 수치는 법령 스냅샷 확정 시 재검증</footer>
+</main>
+</div>
+</body>
+</html>
