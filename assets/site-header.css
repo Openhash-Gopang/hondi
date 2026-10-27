@@ -227,3 +227,19 @@
 
 /* 2026-10-27 — 우측 상단 로그인 상태·아이디(/auth/user-badge.js)가 들어가는 자리 */
 .site-nav-user { margin-left: auto; flex-shrink: 0; display: flex; align-items: center; padding-left: 10px; }
+
+/* ── 2026-10-27(주피터 지시) 공통 히어로 개편: 로고 삭제, 설명 문단은 본문 상단, 버튼은 히어로 오른쪽(옛 로고 자리) ── */
+.site-hero-page { padding-bottom: 40px; }
+.site-hero-page .site-hero-actions {
+  position: absolute; top: 40px; right: 40px; margin-top: 0;
+  max-width: 460px; justify-content: flex-end;
+}
+.site-lead { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 22px 40px; }
+.site-lead p {
+  max-width: 1040px; margin: 0 auto; color: #1f2937; font-size: 15.5px; line-height: 1.8;
+  font-family: 'Pretendard', -apple-system, sans-serif;
+}
+@media (max-width: 860px) {
+  .site-hero-page .site-hero-actions { position: static; margin-top: 20px; max-width: none; justify-content: flex-start; }
+}
+@media (max-width: 640px) { .site-lead { padding: 18px 20px; } }

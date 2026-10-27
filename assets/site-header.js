@@ -87,22 +87,17 @@
 
   function renderHero(config) {
     if (!config) return '';
-    var html = '<section class="site-hero" id="top">';
+    var html = '<section class="site-hero site-hero-page" id="top">';
     if (config.badge) {
       html += '<span class="site-hero-badge"><span class="dot"></span>' + escapeHtml(config.badge) + '</span>';
     }
-    html += '<a class="site-hero-corner-logo" href="/desktop.html" onclick="return __hondiBack(event);" title="나비">' +
-              '<img src="/icons/navi-hero-badge.png" alt="나비 로고">' +
-            '</a>';
+    // 2026-10-27(주피터 지시) — 히어로 오른쪽 위 나비 로고 삭제(왼쪽 위 메뉴에 이미 있음).
     if (config.l1 || config.l2) {
       html += '<h1>';
       if (config.l1) html += '<span class="l1">' + escapeHtml(config.l1) + '</span>';
       if (config.l1 && config.l2) html += '<br>';
       if (config.l2) html += '<span class="l2">' + escapeHtml(config.l2) + '</span>';
       html += '</h1>';
-    }
-    if (config.sub) {
-      html += '<p class="site-hero-sub">' + config.sub + '</p>';
     }
     if (config.actions && config.actions.length) {
       html += '<div class="site-hero-actions">';
@@ -114,6 +109,10 @@
       html += '</div>';
     }
     html += '</section>';
+    // 2026-10-27(주피터 지시) — 히어로의 설명 문단은 본문 맨 위(히어로 바로 아래)에 둔다.
+    if (config.sub) {
+      html += '<div class="site-lead"><p>' + config.sub + '</p></div>';
+    }
     return html;
   }
 
