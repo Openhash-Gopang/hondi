@@ -56,6 +56,21 @@ WRITE_JUDGE = {'financial-planner': '재무 진단·상품 선택·투자 판단
 }
 
 # 2026-10-21 — 서류 작성이 아니라 단계별 자문 화면이 있는 직역(구매자문 K-Advisor). 서류 목록 없는 일반 페이지(page())가 헤더 버튼을 만든다(화면: pages/advisor-steps.html).
+# 2026-10-27(주피터 지시) — 변리사 세부 분야 페이지: 「기술 소개」 오른쪽에 「방법론」 「시뮬레이션」 버튼을 놓는다(분야별로 하나씩 추가).
+DOC_SIM_TRACK = {
+    'patent-attorney-mechanical-electrical': ('mechanical-electrical', '기계·전기전자'),
+}
+def doc_sim_hero(pid):
+    d = DOC_SIM_TRACK.get(pid)
+    if not d: return ''
+    slug, lab = d
+    return (",\n  heroButtonLast: { label: '방법론', href: %s, newTab: true, title: %s }"
+            ",\n  heroButtonLast2: { label: '시뮬레이션', href: %s, title: %s }" % (
+        json.dumps('/docs/kpatent-%s-methodology-v0.1.html' % slug),
+        json.dumps('%s 변리사 보조 AI의 방법론(K-Patent v0.1, K-Law v15.1 기반)을 새 탭으로 엽니다' % lab, ensure_ascii=False),
+        json.dumps('/pages/%s-simulation.html' % pid),
+        json.dumps('의뢰인과의 대화로 명세서·도면·청구범위·출원서를 쓰고 제출·수수료 납부까지 모의로 진행합니다', ensure_ascii=False)))
+
 STEP_TRACK = {'advisor': ('/pages/advisor-steps.html', '구매자문(K-Advisor)을 사기 징후·이해관계 확인부터 정리본까지 7단계로 진행합니다')}
 
 # ── 서류 목록(SP 부록 A) 파서 — SP 가 서류 목록의 정본이고, 페이지의 PRO_DOC_PAGE 데이터는 여기서 만든다 (2026-10-17)
@@ -331,6 +346,7 @@ def catalog_page(pid, label, cat, spk, parent, catalog, children=None):
         hero_js = ",\n  heroButton: { label: '서류 작성하기', href: %s, title: %s }" % (json.dumps(href), json.dumps(wt + ' 기록·서류를 서식 결정부터 처리 결과 기록까지 9단계로 작성합니다', ensure_ascii=False))
         wt_callout = ('\n    <div class="svc-callout"><b>서류 작성하기</b> 기록 유형 결정 → 서식 승인 → 서식 DB 확인·저장 → 지시 내용 입력 → 기록 작성 → 검증·승인 → 저장·교부·신고 준비 → 청구·비용 → 결과 기록 9단계로 한 건을 끝까지 진행하는 화면이 있습니다. '
                       '%s 같은 전문 판단과 승인·서명·교부·신고·청구는 자격자가 직접 하며, dpaper 연동은 아직 되지 않았습니다. <a href="%s">서류 작성하기 화면으로 이동</a></div>' % (WRITE_JUDGE.get(pid, '진단·평가·처치·처방'), href))
+    hero_js += doc_sim_hero(pid)
     kids_html = ''
     if children:  # 세부 분야가 있는 직역: 서류 목록 아래에 세부 분야 링크 표를 둔다
         rows = ''.join('<tr><td class="doc-title"><a href="/pages/%s.html">%s</a></td></tr>' % (c['id'], e(c['label'])) for c in children)
