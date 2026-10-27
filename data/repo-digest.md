@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-28 05:00 KST · 기준 커밋 27dafbd1
+- 갱신: 2026-10-28 05:10 KST · 기준 커밋 842819a6
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-28 feat(kmail): 직접 발송 응답에 받는 사람 화면 모양(from_display) 추가 — 보냄 확인 카드가 이름과 주소를 보여 줌
 - 2026-10-28 fix(kmail): 받은 메일의 깨진 제목·본문 수정 — RFC 2047 제목, base64/quoted-printable 본문, 문자 집합, 중첩 multipart, HTML 전용 처리
 - 2026-10-28 feat: 감정 시뮬레이션 페이지 추가, 감정평가사 페이지 히어로에 K-Evaluation·시뮬레이션 버튼 배치, 헤더 맨 끝 버튼 조건 복원
 - 2026-10-28 feat(auth): 아이디를 정하는 화면에서 보내는 이름도 받음(선택·권장) + 발송 전 확인 목록에 보내는 사람 줄
@@ -43,7 +44,6 @@
 - 2026-10-27 admin: add confidentiality notice to all proposals; finalize regional equity proposals (print style, legal wording)
 - 2026-10-27 admin: add regional equity-purchase proposals (Busan, Ulsan, Gyeongnam, Jeju)
 - 2026-10-27 admin: add regional equity-purchase proposals (Busan, Ulsan, Gyeongnam, Jeju)
-- 2026-10-27 Merge pull request #794 from Openhash-Gopang/fix/remove-ceo-signature-variants
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
