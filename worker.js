@@ -19,8 +19,8 @@ import { profilePhoneFilter, last8Filter, pickGuidByLast8 } from './src/worker/p
 import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
 import { parseMessage as _kmailParseMime, decodeMimeWords as _kmailDecodeMimeWords, repairStoredText as _kmailRepairStoredText } from './src/worker/mime-text.js';
-import { checkSenderName as _kmailCheckSenderName, effectiveSenderName as _kmailEffectiveSenderName, formatSender as _kmailFormatSender, describeSender as _kmailDescribeSender, SENDER_NAME_MAX as _KMAIL_SENDER_NAME_MAX } from './src/worker/kmail-sender.js';
-import { evaluateSendGuard as _kmailEvaluateSendGuard } from './src/worker/kmail-confirm.js';
+import { checkSenderName as _kmailCheckSenderName, effectiveSenderName as _kmailEffectiveSenderName, campaignReplyTo as _kmailCampaignReplyTo, replyToWithName as _kmailReplyToWithName, REPLY_TO_SELF as _KMAIL_REPLY_TO_SELF, formatSender as _kmailFormatSender, describeSender as _kmailDescribeSender, SENDER_NAME_MAX as _KMAIL_SENDER_NAME_MAX } from './src/worker/kmail-sender.js';
+import { evaluateSendGuard as _kmailEvaluateSendGuard, buildSentMailPreview as _kmailBuildSentMailPreview } from './src/worker/kmail-confirm.js';
 import { senderLocalPart as _kmailSenderLocalPart, classifyInboundLocalPart as _kmailClassifyLocalPart } from './src/worker/kmail-address.js';
 import { buildSendStatus as _kmailBuildSendStatus, instantSendMax as _kmailInstantSendMax, isImmediate as _kmailIsImmediate } from './src/worker/kmail-send-status.js';
 import { checkMailId as _checkMailId, defaultMailIdFromHash as _defaultMailIdFromHash, normalizeMailId as _normMailId, changePolicyConfig as _mailIdPolicy, evaluateChange as _mailIdEvaluate, recordChange as _mailIdRecordChange, recordConfirm as _mailIdRecordConfirm, limitMessage as _mailIdLimitMessage, readState as _mailIdReadState, writeState as _mailIdWriteState } from './src/worker/mail-id.js';
@@ -34682,7 +34682,7 @@ async function _kmailSendOneEmail(env, { guid, to, subject, text, sessionId, rep
   const finalText = signature ? `${text}\n\n${signature}` : text;
   const fromName = _kmailEffectiveSenderName(senderName);                       // 이름이 없으면 주소만("ceo@hondi.kr"), 있으면 "도 영민 <ceo@hondi.kr>"
   const sendParams = { to, from: fromName ? { email: fromAddr, name: fromName } : fromAddr, subject, text: finalText };
-  if (replyTo) sendParams.replyTo = replyTo;
+  if (replyTo) sendParams.replyTo = _kmailReplyToWithName(replyTo === _KMAIL_REPLY_TO_SELF ? fromAddr : replyTo, senderName);   // 2026-10-28: 회신 주소에도 보내는 이름(1명 메일은 보내는 사람 자신)
 
   // preResolvedAttachments가 주어지면(캠페인 발송처럼 수신자 N명에게
   // 같은 첨부를 반복해서 보내는 경우) R2 재조회 없이 그대로 쓴다 —
@@ -36830,7 +36830,7 @@ async function _kmailSendCampaign(env, campaign, opts = {}) {
         guid: campaign.owner_user_guid, to: contact.email,
         subject: campaign.subject, text: sendText,
         sessionId: `kmail:${campaign.id}`,
-        replyTo: `kmail-${campaign.id}@hondi.kr`,
+        replyTo: _kmailCampaignReplyTo(`kmail-${campaign.id}@hondi.kr`, contactIds.length),   // 2026-10-28: 1명이면 보내는 사람 자신
         signature: settings.signature, senderName: settings.sender_display_name, mailId: settings.mail_id,
         preResolvedAttachments,
       });
@@ -39611,7 +39611,8 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
         outcome = await _kmailDispatchCampaignNow(env, result.campaign).catch(() => ({ dispatched: false }));
       }
       const sendStatus = _kmailBuildSendStatus({ nowMs, sendAtMs, recipientCount: result.recipientCount, newContactCount: result.newContactCount, outcome });
-      const replyText = `${cleanReplyText}\n\n${sendStatus.line}`;
+      const _sentPreview = _kmailBuildSentMailPreview(parsed, { address: `${_kmailSenderLocalPart(guid, kmailSettingsForChat.mail_id)}@hondi.kr`, name: kmailSettingsForChat.sender_display_name }, sendStatus.state, sendAtMs, nowMs);
+      const replyText = `${cleanReplyText}\n\n${sendStatus.line}${_sentPreview ? '\n\n' + _sentPreview : ''}`;   // 2026-10-28: 발송 직후 보낸 메일 내용을 보여 준다
       // campaign_id를 클라이언트가 이번 요청에 실어 보내지 않았다면(=
       // 사전에 KMAIL_CAMPAIGN_START 없이 바로 확정한 단발성 캠페인)
       // 위 공용 로깅(pre-dispatch)이 이 턴을 못 잡았으므로 여기서 남긴다.

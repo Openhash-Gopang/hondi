@@ -9,7 +9,7 @@
 // 사용자가 동의하면 비서가 그 요약대로 태그를 다시 내고, 이번에는 앞 메시지가 확인 질문이므로 통과한다.
 // 순수 함수만 담는다 — worker.js 밖에서 단위 시험이 가능하다.
 import { formatKst, isImmediate } from './kmail-send-status.js';
-import { describeSender } from './kmail-sender.js';
+import { describeSender, effectiveSenderName } from './kmail-sender.js';
 
 // 확인을 구하는 문장(질문형). "지금 바로 발송하겠습니다"·"이대로 보냅니다"처럼 선언하는 문장은 해당하지 않는다.
 const ASK_RE = /(보낼까요|보내드릴까요|보내도\s*(될까요|괜찮을까요|되겠습니까|괜찮겠습니까)|발송할까요|발송해\s*드릴까요|발송해도\s*(될까요|괜찮을까요|되겠습니까|괜찮겠습니까)|전송할까요|진행할까요|진행해도\s*(될까요|괜찮을까요|되겠습니까)|확정할까요|예약할까요|이대로[^?\n]{0,25}\?)/;
@@ -69,4 +69,33 @@ export function buildConfirmationSummary(parsed, nowMs = Date.now(), sender = nu
 export function evaluateSendGuard(messages, parsed, nowMs = Date.now(), sender = null) {
   if (previousAssistantAsked(messages)) return { allow: true };
   return { allow: false, reply: buildConfirmationSummary(parsed, nowMs, sender), action: { type: 'send_confirmation_required' } };
+}
+
+// 2026-10-28 — 발송 직후 대화에 붙이는 "보낸 메일 내용". parsed 는 실제로 캠페인을 만든 KMAIL_SEND_CAMPAIGN JSON(서버가 확인·발송한 그 값).
+// state: 'sent'|'partial'(실제로 나감) | 'queued'|'scheduled'(아직 안 나감 → '발송할 메일 내용') | 'failed'(붙이지 않음 → 빈 문자열)
+const MAX_PREVIEW_BODY = 3000;
+export function buildSentMailPreview(parsed, sender, state, sendAtMs, nowMs = Date.now()) {
+  if (state === 'failed') return '';
+  const p = parsed && typeof parsed === 'object' ? parsed : {};
+  const recips = (Array.isArray(p.recipients) ? p.recipients : []).filter(r => r && r.email);
+  const listed = recips.slice(0, MAX_LISTED).map(recipientLabel).join(', ');
+  const more = recips.length > MAX_LISTED ? ` 외 ${recips.length - MAX_LISTED}명` : '';
+  const subject = String(p.subject || '').trim() || '(제목 없음)';
+  let body = String(p.body || '').trim() || '(본문 없음)';
+  if (body.length > MAX_PREVIEW_BODY) body = body.slice(0, MAX_PREVIEW_BODY) + `\n… (이하 ${String(p.body).trim().length - MAX_PREVIEW_BODY}자 생략 — 전체는 "내 캠페인"에서 확인하세요)`;
+  const sent = state === 'sent' || state === 'partial';
+  const timeLine = sent
+    ? `- **발송 시각**: ${formatKst(nowMs, nowMs)}`
+    : (Number.isFinite(sendAtMs) && !isImmediate(sendAtMs, nowMs) ? `- **발송 예정**: ${formatKst(sendAtMs, nowMs)}` : '- **발송 예정**: 곧(보통 10분 이내)');
+  return [
+    sent ? '📨 **보낸 메일 내용**' : '📝 **발송할 메일 내용**',
+    '',
+    ...(sender && sender.address ? [`- **보내는 사람**: ${effectiveSenderName(sender.name) ? effectiveSenderName(sender.name) + '<' + sender.address + '>' : sender.address}`] : []),
+    `- **받는 사람**: ${listed || '(없음)'}${more}${recips.length ? ` (총 ${recips.length}명)` : ''}`,
+    `- **제목**: ${subject}`,
+    timeLine,
+    '- **본문**:',
+    '',
+    ...body.split('\n').map(l => '> ' + l),
+  ].join('\n');
 }

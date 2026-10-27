@@ -64,3 +64,17 @@ export function describeSender(address, name) {
   const local = String(address).split('@')[0];
   return `${address} (이름 없음 — 받는 사람의 메일 프로그램에 따라 "${local}"가 보낸 사람 이름으로 보일 수 있습니다)`;
 }
+
+// 2026-10-28 — 회신 주소. 캠페인 메일의 Reply-To(kmail-<캠페인ID>@hondi.kr)는 회신을 캠페인별로 모으기 위한 내부 주소다.
+// 받는 사람이 1명이면 모을 것이 없으므로 Reply-To 를 보내는 사람 자신으로 둔다(REPLY_TO_SELF → 발송 직전에 보내는 주소로 바뀐다. 이름이 있으면 "주피터<ceo@hondi.kr>").
+// 2명 이상이면 캠페인 주소를 유지한다.
+export const REPLY_TO_SELF = '__reply_to_self__';
+export function campaignReplyTo(trackingAddress, recipientCount) {
+  return Number(recipientCount) === 1 ? REPLY_TO_SELF : trackingAddress;
+}
+// Reply-To 에도 보내는 이름을 붙인다 → { email, name }. 이름이 없거나 Reply-To 가 없으면 그대로.
+export function replyToWithName(replyTo, name) {
+  if (!replyTo || typeof replyTo !== 'string') return replyTo;
+  const n = effectiveSenderName(name);
+  return n ? { email: replyTo, name: n } : replyTo;
+}

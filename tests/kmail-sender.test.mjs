@@ -5,7 +5,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { checkSenderName, effectiveSenderName, formatSender, describeSender, LEGACY_DEFAULT_NAME, SENDER_NAME_MAX } from '../src/worker/kmail-sender.js';
+import { checkSenderName, effectiveSenderName, formatSender, describeSender, LEGACY_DEFAULT_NAME, SENDER_NAME_MAX, campaignReplyTo, replyToWithName, REPLY_TO_SELF } from '../src/worker/kmail-sender.js';
 
 test('기본은 이름 없음 → 주소만, 이름이 있으면 "이름 <주소>"', () => {
   assert.equal(formatSender('ceo@hondi.kr', ''), 'ceo@hondi.kr');
@@ -96,4 +96,21 @@ test('worker.js: 직접 발송 응답에 받는 사람 화면 모양(from_displa
   const w = fs.readFileSync(new URL('../worker.js', import.meta.url), 'utf8');
   assert.match(w, /return \{ fromAddr, fromName, quota \};/);
   assert.match(w, /from_display: _kmailFormatSender\(result\.fromAddr, result\.fromName\)/);
+});
+
+// 2026-10-28 — 회신 주소
+test('회신 주소: 받는 사람 1명이면 Reply-To 를 보내는 사람 자신으로 두고, 2명 이상이면 캠페인 주소를 유지한다', () => {
+  assert.equal(campaignReplyTo('kmail-abc@hondi.kr', 1), REPLY_TO_SELF);
+  assert.equal(campaignReplyTo('kmail-abc@hondi.kr', 2), 'kmail-abc@hondi.kr');
+  assert.equal(campaignReplyTo('kmail-abc@hondi.kr', 57), 'kmail-abc@hondi.kr');
+});
+test('회신 주소: 보내는 이름이 있으면 Reply-To 에도 이름을 붙인다', () => {
+  assert.deepEqual(replyToWithName('kmail-abc@hondi.kr', '주피터'), { email: 'kmail-abc@hondi.kr', name: '주피터' });
+  assert.equal(replyToWithName('kmail-abc@hondi.kr', ''), 'kmail-abc@hondi.kr');
+  assert.equal(replyToWithName(undefined, '주피터'), undefined);
+});
+test('worker.js: 캠페인 발송이 회신 주소 규칙을 쓴다', () => {
+  const w = fs.readFileSync(new URL('../worker.js', import.meta.url), 'utf8');
+  assert.match(w, /replyTo: _kmailCampaignReplyTo\(`kmail-\$\{campaign\.id\}@hondi\.kr`, contactIds\.length\)/);
+  assert.match(w, /_kmailReplyToWithName\(replyTo === _KMAIL_REPLY_TO_SELF \? fromAddr : replyTo, senderName\)/);
 });
