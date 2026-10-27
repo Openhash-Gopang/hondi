@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-27 19:51 KST · 기준 커밋 0c22f970
+- 갱신: 2026-10-28 04:28 KST · 기준 커밋 19a632a0
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-28 Merge pull request #820 from Openhash-Gopang/feat/kpatent-subpages-sim
+- 2026-10-28 feat: 변리사 9개 하위 페이지 방법론 v0.1·시뮬레이션·헤더 버튼
 - 2026-10-27 Merge pull request #819 from Openhash-Gopang/feat/kpatent-me-sim
 - 2026-10-27 feat: 변리사 기계·전기전자 방법론 v0.1·출원 시뮬레이션·헤더 버튼
 - 2026-10-27 feat(kmail): 보내는 사람 표시 — 기본은 주소만, 사용자가 이름을 붙여 '도 영민 <ceo@hondi.kr>'로 바꿀 수 있음 + 채팅 경로의 아이디 변경 횟수 우회 수정
@@ -42,8 +44,6 @@
 - 2026-10-27 Merge pull request #793 from Openhash-Gopang/fix/remove-ceo-contact-phrase
 - 2026-10-27 docs: remove 나비 개발자 대표 도영민(ceo@hondi.net) contact phrase from proposals and intro pages
 - 2026-10-27 feat(auth): 테스트 계정 한도(500 GDC)·24시간 유예·차단, 정식 아이디 전환과 데이터 이동
-- 2026-10-27 feat: add K-Evaluation v0.1 methodology and batch test page (appraiser auction price prediction)
-- 2026-10-27 docs: add auction-price-prediction validation method to appraiser proposal (new 2-4)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
@@ -85,7 +85,16 @@
 - /pages/org-admin.html — 나비 AI 사이트 관리
 - /pages/org-ai.html — 나비 AI
 - /pages/overview.html — 개요
+- /pages/patent-attorney-bio-pharma-simulation.html — 바이오·제약 출원 시뮬레이션 — 변리사 보조 AI
+- /pages/patent-attorney-chemistry-materials-simulation.html — 화학·소재 출원 시뮬레이션 — 변리사 보조 AI
+- /pages/patent-attorney-design-simulation.html — 디자인 출원 시뮬레이션 — 변리사 보조 AI
+- /pages/patent-attorney-ip-strategy-simulation.html — IP전략·특허맵 분석 시뮬레이션 — 변리사 보조 AI
+- /pages/patent-attorney-it-software-simulation.html — IT·소프트웨어 출원 시뮬레이션 — 변리사 보조 AI
+- /pages/patent-attorney-licensing-simulation.html — 라이선싱·기술이전계약 계약 시뮬레이션 — 변리사 보조 AI
 - /pages/patent-attorney-mechanical-electrical-simulation.html — 기계·전기전자 출원 시뮬레이션 — 변리사 보조 AI
+- /pages/patent-attorney-pct-international-simulation.html — PCT·해외출원 해외출원 시뮬레이션 — 변리사 보조 AI
+- /pages/patent-attorney-trademark-simulation.html — 상표 출원 시뮬레이션 — 변리사 보조 AI
+- /pages/patent-attorney-trial-litigation-simulation.html — 심판·심결취소소송 심판청구 시뮬레이션 — 변리사 보조 AI
 - /pages/plan-architecture.html — K-Plan 아키텍처 — 나비 (Navi)
 - /pages/presentations.html — 나비 프레젠테이션
 - /pages/professor.html — 학습 트랙 — K-Professor
@@ -107,9 +116,6 @@
 - /pages/sp-hierarchy.html — SP의 계층 구조
 - /pages/sp-writing-methodology.html — SP 작성 방법론
 - /pages/suggest.html — 제안 및 질문
-- /pages/tax-optimizer.html — 절세 최적화 — 세무사 보조 AI
-- /pages/teasers.html — teasers.html
-- /pages/watch-architecture.html — K-Watch 아키텍처 — 나비 (Navi)
 
 ## 전문가 페르소나 전용 페이지 id
 accountant-audit, accountant-due-diligence, accountant-forensic, accountant-ifrs, accountant-internal-control, accountant-ipo, accountant-nonprofit-public, accountant-restructuring, accountant-valuation, accountant, administrative-scrivener, advanced-practice-nurse, advisor, ai-assistant, appraiser, architect, chef, consent-sale, customs-broker, dental-hygienist, dental-technician, dentist, dietitian, electrical-safety-engineer, financial-planner, fire-safety-manager, gas-safety-engineer, gov-agency, hairdresser, health-educator, hondi-market, indtransform-01, indtransform-10, indtransform-56, industrial-safety-consultant, jeju-gov-automation, judicial-scrivener, k-government, k-services, klaw, labor-attorney, landscape-engineer, lawyer-administrative, lawyer-antitrust, lawyer-arbitration, lawyer-auction, lawyer-broadcasting, lawyer-civil, lawyer-collection, lawyer-commercial, lawyer-constitutional, lawyer-construction, lawyer-corporate, lawyer-criminal, lawyer-damages, lawyer-energy, lawyer-entertainment, lawyer-environmental, lawyer-execution, lawyer-expropriation, lawyer-family, lawyer-finance, lawyer-foodpharma, lawyer-government-contract, lawyer-guardianship, lawyer-immigration, lawyer-inheritance, lawyer-insolvency, lawyer-insurance, lawyer-international-arbitration, lawyer-international-relations, lawyer-international-transactions, lawyer-it, lawyer-juvenile, lawyer-legislation, lawyer-maritime, lawyer-military, lawyer-overseas-investment, lawyer-realestate, lawyer-redevelopment, lawyer-religious, lawyer-school-violence, lawyer-securities, lawyer-shipbuilding, lawyer-sports, lawyer-startup, lawyer-trade, lawyer-traffic, lawyer, loss-adjuster, marine-engineer, marine-pilot, medical-lab-technologist, midwife, naval-architect, navigation-officer, nurse, occupational-therapist, optician, paramedic, patent-attorney-bio-pharma, patent-attorney-chemistry-materials, patent-attorney-design, patent-attorney-ip-strategy, patent-attorney-it-software, patent-attorney-licensing, patent-attorney-mechanical-electrical, patent-attorney-pct-international, patent-attorney-trademark, patent-attorney-trial-litigation, patent-attorney, pharmacist, physical-therapist, physician-anesthesiology, physician-cardiothoracic, physician-dermatology, physician-emergency, physician-ent, physician-internal-medicine, physician-lab-medicine, physician-neurology, physician-nuclear-medicine, physician-obgyn, physician-occupational, physician-ophthalmology, physician-orthopedics, physician-pathology, physician-pediatrics, physician-plastic, physician-preventive, physician-psychiatry, physician-radiation-oncology, physician-radiology, physician-rehabilitation, physician-surgery, physician-urology, physician, professional-ai, professional-engineer, professor-persona, radiologic-technologist, real-estate-agent, sanitarian, security-engineer, speech-language-pathologist, sports-instructor, surveying-engineer, tax-accountant, tour-guide, traditional-medicine-doctor, translator-interpreter, usage-guide, veterinarian, weather-forecaster
