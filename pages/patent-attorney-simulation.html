@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<link rel="icon" href="data:,">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>출원 시뮬레이션 — 변리사 보조 AI</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+</head>
+<body>
+<script>
+window.PAGE_HERO = {
+  badge: '변리사 보조 AI · 참고용 시뮬레이션',
+  l1: '발명·상표 의뢰 하나를 받으면',
+  l2: '인터뷰부터 명세서·출원서·수수료까지 모의로 진행합니다',
+  sub: '변리사 보조 AI의 출원 업무 흐름(의뢰 접수 → 선행기술·차별화 → 명세서·청구범위 초안 → 검증 → 제출 준비 → 수수료·결과 기록)을 한 건의 의뢰로 끝까지 보여 줍니다. 특허성·권리범위는 확정하지 않으며, 제출·서명·납부도 하지 않습니다. 변리사의 확인 전에는 사용할 수 없는 참고 자료입니다. 분야별 시뮬레이션은 세부 분야 페이지에서 볼 수 있습니다.',
+  actions: [{ label: '변리사 서비스 화면', href: '/pages/patent-attorney.html', style: 'outline' }, { label: 'K-Patent 방법론', href: '/docs/kpatent-methodology-v0.1.html', style: 'outline', target: '_blank' }, { label: '기술 소개', href: '/pages/intro-patent-attorney.html', style: 'outline', target: '_blank' }]
+};
+</script>
+<link rel="stylesheet" href="/assets/site-header.css">
+<script src="/assets/site-header.js"></script>
+<div id="site-hero-mount"></div>
+
+<script>
+  window.K_AUTH_CONFIG = { serviceLabel: "출원 시뮬레이션" };
+  window.HONDI_CHAT_WIDGET_CONFIG = {
+    sp: "SP_patent-attorney-assistant",   // 기본값. 페이지가 열리면 시뮬레이션 SP로 바꾼다(setMode).
+    panelMode: "inline",
+    inlineMount: "#resultMount",
+    mic: false,
+    camera: "touch",
+    maxTokens: 6000,
+    panelTitle: "출원 시뮬레이션",
+    label: "조건을 바꿔 다시 물어보세요",
+    serviceLabel: "출원 시뮬레이션",
+    greeting: "출원 시뮬레이션입니다. 왼쪽에서 출원 의뢰을 고르거나 적고 「시뮬레이션 실행」을 누르면 결과가 여기에 나옵니다. 결과가 나온 뒤에는 이 입력창에서 조건을 바꿔 다시 물어볼 수 있습니다.",
+    onReply: function (reply) { try { window.PatSim && window.PatSim.parse(reply); } catch (e) { console.error(e); } }
+  };
+</script>
+<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
+<script src="/assets/chat-widget.js"></script>
+
+<style>
+/* 히어로: 오른쪽 위 나비 아이콘 삭제, 그 자리 아래 빈 공간에 방법론 버튼 */
+.site-hero-corner-logo { display: none !important; }
+.js-hero-doc { position: absolute; right: 40px; top: 50%; transform: translateY(-50%); display: inline-flex; align-items: center; background: #1a2e5c; border: 1px solid rgba(255,255,255,.45); color: #fff; font-size: 14px; font-weight: 600; padding: 9px 22px; border-radius: 20px; white-space: nowrap; text-decoration: none; font-family: 'Pretendard', sans-serif; box-shadow: 0 2px 6px rgba(0,0,0,.25); transition: background .15s, box-shadow .15s; }
+.js-hero-doc:hover, .js-hero-doc:focus-visible { background: #24356b; box-shadow: 0 3px 10px rgba(0,0,0,.3); outline: none; }
+@media (max-width: 900px) { .js-hero-doc { position: static; transform: none; margin-top: 22px; display: inline-flex; } }
+*, *::before, *::after { box-sizing: border-box; }
+:root {
+  --js-bg:#f8f9fa; --js-surface:#fff; --js-border:#e5e7eb; --js-border2:#d1d5db;
+  --js-brand:#3ecf8e; --js-brand-dk:#1a9e6a; --js-brand-bg:#f0fdf8; --js-brand-bd:#a7f3d0;
+  --js-amber:#f59e0b; --js-amber-bg:#fffbeb; --js-amber-ink:#92400e;
+  --js-red:#dc2626; --js-red-bg:#fef2f2;
+  --js-text:#0f172a; --js-text2:#374151; --js-text3:#6b7280;
+}
+body { background: var(--js-bg); color: var(--js-text); font-family: 'Pretendard', -apple-system, sans-serif; font-size: 14px; line-height: 1.7; }
+.js-wrap { max-width: 1180px; margin: 0 auto; padding: 24px 16px 80px; }
+.js-lead { font-size: 15px; line-height: 1.75; color: var(--js-text2); max-width: 760px; margin: 4px 0 16px; }
+.js-notice { background: var(--js-amber-bg); border: 1px solid #fde68a; color: var(--js-amber-ink); border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; }
+.js-notice b { font-weight: 700; }
+.js-steps { display: flex; gap: 6px; margin: 0 0 18px; flex-wrap: wrap; }
+.js-step { flex: 1; min-width: 120px; background: var(--js-surface); border: 1px solid var(--js-border); border-radius: 10px; padding: 8px 12px; font-size: 12px; color: var(--js-text3); line-height: 1.45; }
+.js-step b { display: block; font-size: 12.5px; color: var(--js-text2); }
+.js-step.done { background: var(--js-brand-bg); border-color: var(--js-brand-bd); }
+.js-step.done b { color: var(--js-brand-dk); }
+.js-step.cur { border-color: var(--js-brand); box-shadow: 0 0 0 2px var(--js-brand-bd); }
+.js-grid { display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.js-card { background: var(--js-surface); border: 1px solid var(--js-border); border-radius: 14px; padding: 18px; }
+.js-card h2 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.js-card .sub { color: var(--js-text3); font-size: 12.5px; margin-bottom: 14px; }
+.js-field { margin-bottom: 12px; min-width: 0; }
+.js-field label, .js-field .lab { display: block; font-size: 12px; color: var(--js-text3); margin-bottom: 4px; font-weight: 500; }
+.js-field select, .js-field input[type=text], .js-field input[type=date], .js-field textarea {
+  display: block; width: 100%; padding: 9px 11px; border: 1px solid var(--js-border2); border-radius: 8px; font: inherit; color: var(--js-text); background: #fff; }
+.js-field textarea { min-height: 150px; resize: vertical; line-height: 1.6; }
+.js-field select:focus, .js-field input:focus, .js-field textarea:focus { outline: 2px solid var(--js-brand); outline-offset: 0; border-color: var(--js-brand); }
+.js-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.js-drop { border: 1.5px dashed var(--js-border2); border-radius: 10px; padding: 16px 12px; text-align: center; background: #fafafa; cursor: pointer; color: var(--js-text3); font-size: 13px; transition: .15s; }
+.js-drop:hover, .js-drop.over, .js-drop:focus-visible { border-color: var(--js-brand); background: var(--js-brand-bg); outline: none; }
+.js-drop.has { border-style: solid; border-color: var(--js-brand-bd); background: var(--js-brand-bg); color: var(--js-text); }
+.js-drop .nm { font-weight: 600; word-break: break-all; }
+.js-drop .meta { font-size: 12px; color: var(--js-text3); margin-top: 2px; }
+.js-drop .x { margin-top: 6px; font-size: 12px; color: var(--js-red); background: none; border: 0; cursor: pointer; text-decoration: underline; font-family: inherit; }
+.js-hint { font-size: 12px; color: var(--js-text3); margin-top: 5px; }
+.js-hint.warn { color: var(--js-amber-ink); }
+.js-hint.err { color: var(--js-red); }
+.js-opts { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--js-text2); }
+.js-opts label { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: var(--js-text2); margin: 0; }
+.js-opts input { margin-top: 5px; }
+.js-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.js-btn { padding: 10px 18px; border: 0; border-radius: 8px; background: var(--js-brand-dk); color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+.js-btn:hover { background: #15805a; }
+.js-btn:disabled { opacity: .55; cursor: not-allowed; }
+.js-btn.sec { background: #fff; color: var(--js-text2); border: 1px solid var(--js-border2); font-weight: 500; }
+.js-btn.sec:hover { background: #f3f4f6; }
+.js-btn:focus-visible { outline: 2px solid var(--js-text); outline-offset: 2px; }
+.js-left { position: sticky; top: 12px; }
+#resultMount { min-height: 300px; }
+#resultMount:empty::before { content: '모의 진행 결과가 여기에 표시됩니다.'; display: block; padding: 60px 20px; text-align: center; color: var(--js-text3); border: 1px dashed var(--js-border2); border-radius: 14px; background: #fff; }
+#hcw-panel.hcw-inline { max-width: none !important; --hcw-inline-h: min(680px, 72vh) !important; }
+.js-method { margin-top: 22px; }
+.js-method details { background: var(--js-surface); border: 1px solid var(--js-border); border-radius: 12px; padding: 12px 16px; margin-bottom: 8px; }
+.js-method summary { cursor: pointer; font-weight: 600; font-size: 13.5px; }
+.js-method p, .js-method li { font-size: 13px; color: var(--js-text2); margin-top: 6px; }
+.js-method ul { margin-left: 18px; }
+.js-toast { position: fixed; right: 18px; bottom: 18px; background: #111827; color: #fff; padding: 10px 14px; border-radius: 10px; font-size: 13px; opacity: 0; transform: translateY(8px); transition: .25s; pointer-events: none; z-index: 99; max-width: calc(100vw - 36px); }
+.js-toast.on { opacity: 1; transform: none; }
+@media (max-width: 900px) { .js-grid { grid-template-columns: minmax(0, 1fr); } .js-left { position: static; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+.js-step .n { display:block; font-size:11px; color:var(--js-text3); }
+.js-case { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+.js-case button { text-align:left; background:#fff; border:1px solid var(--js-border2); border-radius:8px; padding:8px 10px; font:inherit; font-size:12.5px; color:var(--js-text2); cursor:pointer; line-height:1.4; }
+.js-case button:hover { border-color:var(--js-brand); background:var(--js-brand-bg); }
+.js-case button b { display:block; color:var(--js-text); font-size:13px; }
+@media (max-width: 560px) { .js-case { grid-template-columns: 1fr; } }
+</style>
+
+<div class="js-wrap">
+  <div class="js-notice" role="note"><b>참고용 모의 절차입니다.</b> 이 화면의 서류는 모두 초안(DRAFT)입니다. 신규성·진보성, 상표 유사, 침해·무효 여부와 권리범위는 확정하지 않으며, 제출·서명·납부는 하지 않고 변리사(사람)가 합니다. 수수료는 추정이며 확정 금액이 아닙니다.</div>
+
+  <div class="js-steps" id="jsSteps" aria-label="진행 단계">
+    <div class="js-step" data-s="1"><b>1 의뢰 접수</b>발명·표장 인터뷰, 기한</div>
+    <div class="js-step" data-s="2"><b>2 선행기술·차별화</b>조사 범위, 차이점</div>
+    <div class="js-step" data-s="3"><b>3 명세서·청구범위</b>서류 초안</div>
+    <div class="js-step" data-s="4"><b>4 검증·승인</b>점검, 변리사 확인</div>
+    <div class="js-step" data-s="5"><b>5 제출 준비</b>출원서, 첨부, 방법</div>
+    <div class="js-step" data-s="6"><b>6 수수료·결과 기록</b>항목별 금액, 기록</div>
+  </div>
+
+  <div class="js-grid">
+    <div class="js-left">
+      <div class="js-card">
+        <h2>의뢰 입력</h2>
+        <p class="sub">출원 의뢰을 고르거나 직접 적어 주세요. 적지 않은 사실은 가정으로 표시되거나 빈칸으로 남습니다.</p>
+
+        <div class="js-field">
+          <span class="lab">자주 있는 출원 의뢰 (눌러서 채우기)</span>
+          <div class="js-case" id="cases"><button type="button" data-i="0"><b>IT·소프트웨어 발명 출원</b></button><button type="button" data-i="1"><b>바이오·제약 발명 출원</b></button><button type="button" data-i="2"><b>화학·소재 발명 출원</b></button><button type="button" data-i="3"><b>기계·전기전자 발명 출원</b></button><button type="button" data-i="4"><b>디자인 출원</b></button><button type="button" data-i="5"><b>상표 출원</b></button><button type="button" data-i="6"><b>거절이유통지 대응</b></button><button type="button" data-i="7"><b>PCT 국제출원 준비</b></button></div>
+        </div>
+
+        <div class="js-two">
+          <div class="js-field">
+            <label for="fType">출원 분야</label>
+            <select id="fType">
+              <option>특허(IT·소프트웨어)</option>
+              <option>특허(바이오·제약)</option>
+              <option>특허(화학·소재)</option>
+              <option>특허(기계·전기전자)</option>
+              <option>디자인</option>
+              <option>상표</option>
+              <option>기타(설명란에 기재)</option>
+            </select>
+          </div>
+          <div class="js-field">
+            <label for="fSubmit">진행 구분</label>
+            <select id="fSubmit">
+              <option>신규 출원</option>
+              <option>거절이유통지 대응(의견서·보정서)</option>
+              <option>심사청구</option>
+              <option>PCT·해외 출원</option>
+              <option>심판·소송 준비</option>
+              <option>변리사가 정함</option>
+            </select>
+          </div>
+        </div>
+        <div class="js-field">
+          <label for="fDate">기준일 (법령·수수료 기준일)</label>
+          <input type="date" id="fDate">
+        </div>
+
+        <div class="js-field">
+          <label for="fNote">의뢰 내용</label>
+          <textarea id="fNote" placeholder="예) 스마트폰 카메라로 식물 병해를 판별하는 앱을 개발했습니다. 특허 출원을 준비하려 합니다. 핵심 아이디어는 잎 사진에서 병반 영역을 분리해 분류하는 방식입니다."></textarea>
+          <div class="js-hint">들어갈수록 정확해지는 정보: 발명의 목적·구성·효과, 이미 공개한 날짜(논문·판매·시연), 출원인(이름만), 상표는 표장과 지정상품, 기한.</div>
+        </div>
+
+        <div class="js-field">
+          <span class="lab" id="fileLab">자료 첨부 (선택)</span>
+          <div class="js-drop" id="drop" tabindex="0" role="button" aria-labelledby="fileLab">
+            <div id="dropIdle">파일을 끌어다 놓거나 눌러서 선택<br><span style="font-size:12px">PDF, 워드(.docx), 한글(.hwpx), 텍스트, 사진·스캔</span></div>
+            <div id="dropHas" hidden><div class="nm" id="dropName"></div><div class="meta" id="dropMeta"></div><button type="button" class="x" id="dropX">첨부 취소</button></div>
+          </div>
+          <input type="file" id="file" hidden accept="image/*,.pdf,.docx,.hwpx,.txt,.md,.csv">
+          <div class="js-hint warn" id="fileHint">공개 전 발명 내용과 개인정보가 든 실제 자료는 올리지 마세요. 모의 시뮬레이션입니다.</div>
+        </div>
+
+        <div class="js-field">
+          <span class="lab">진행 범위</span>
+          <div class="js-opts">
+            <label><input type="checkbox" id="oAll" checked> 1~6단계 끝까지 한 번에 진행</label>
+            <label><input type="checkbox" id="oSum"> 결론과 수수료 합계를 먼저, 상세는 뒤에</label>
+          </div>
+        </div>
+
+        <div class="js-btns">
+          <button type="button" class="js-btn" id="btnRun">시뮬레이션 실행</button>
+          <button type="button" class="js-btn sec" id="btnReset">초기화</button>
+        </div>
+        <div class="js-hint" id="runHint"></div>
+      </div>
+    </div>
+
+    <div>
+      <div id="resultMount"></div>
+    </div>
+  </div>
+
+  <div class="js-method">
+    <details>
+      <summary>이 시뮬레이션이 따르는 흐름</summary>
+      <ul>
+        <li><b>의뢰 접수 → 공개 여부 확인:</b> 발명의 공개 시점과 출원 기한을 먼저 확인합니다.</li>
+        <li><b>선행기술·차별화:</b> 조사 범위와 검색 기록을 남기고 차이점을 정리합니다. 특허성은 확정하지 않습니다.</li>
+        <li><b>명세서·청구범위 초안 → 검증:</b> 승인된 구성대로 초안을 쓰고, 청구항 간 인용 관계와 용어 일관성을 점검합니다.</li>
+        <li><b>제출 준비 → 수수료·결과 기록:</b> 출원서와 첨부 목록, 수수료 항목표를 만들고 결과는 이용자 보고 기준으로 기록합니다.</li>
+      </ul>
+      <p>방법론 문서: <a href="/docs/kpatent-methodology-v0.1.html" target="_blank" rel="noopener">K-Patent 방법론 v0.1</a>. 분야별 시뮬레이션: <a href="/pages/patent-attorney-it-software-simulation.html">IT·소프트웨어</a> · <a href="/pages/patent-attorney-bio-pharma-simulation.html">바이오·제약</a> · <a href="/pages/patent-attorney-chemistry-materials-simulation.html">화학·소재</a> · <a href="/pages/patent-attorney-mechanical-electrical-simulation.html">기계·전기전자</a> · <a href="/pages/patent-attorney-design-simulation.html">디자인</a> · <a href="/pages/patent-attorney-trademark-simulation.html">상표</a> · <a href="/pages/patent-attorney-pct-international-simulation.html">PCT·해외출원</a> · <a href="/pages/patent-attorney-trial-litigation-simulation.html">심판·소송</a> · <a href="/pages/patent-attorney-ip-strategy-simulation.html">IP전략</a> · <a href="/pages/patent-attorney-licensing-simulation.html">라이선싱</a></p>
+    </details>
+    <details>
+      <summary>한계</summary>
+      <ul>
+        <li>제출과 수수료 납부는 모의입니다. 특허청 전자출원 시스템과는 연결되어 있지 않으며, 실제로는 변리사가 합니다. 이 도구는 대리 제출을 하지 않습니다.</li>
+        <li>수수료·기한 산식은 개정될 수 있어 추정치에 오차가 있습니다. 기준일과 「확인 필요」 항목을 반드시 대조하세요. 선행기술 조사는 조회한 범위에 한정됩니다.</li>
+        <li>이 시뮬레이션의 성능은 아직 검증되지 않았습니다.</li>
+      </ul>
+    </details>
+  </div>
+</div>
+<div class="js-toast" id="jsToast" role="status"></div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var SP_URL = '/prompts/SP-kpatent-simulation_v0_1.md';
+  var KEY = 'pat-sim-form-v1';
+  var CASES = [{"t": "IT·소프트웨어 발명 출원", "n": "스마트폰 카메라로 식물 병해를 판별하는 앱을 개발했습니다. 잎 사진에서 병반 영역을 분리해 분류하는 방식입니다(가정). 특허 출원을 준비하려 합니다."}, {"t": "바이오·제약 발명 출원", "n": "특정 유산균 균주의 장 건강 개선 용도를 발견했습니다. 시험 데이터가 있습니다(가정). 출원 준비를 하고 싶습니다."}, {"t": "화학·소재 발명 출원", "n": "내열성이 높은 고분자 복합 소재를 개발했습니다. 조성비와 물성 시험 결과가 있습니다(가정)."}, {"t": "기계·전기전자 발명 출원", "n": "배터리 냉각 구조를 개선한 장치를 개발했습니다. 도면 초안이 있습니다(가정)."}, {"t": "디자인 출원", "n": "새로 디자인한 휴대용 충전기의 디자인 등록을 하려 합니다. 렌더링 이미지가 있습니다(가정)."}, {"t": "상표 출원", "n": "카페 브랜드 이름과 로고를 상표로 출원하려 합니다. 커피·음료 판매업을 지정하려 합니다(가정)."}, {"t": "거절이유통지 대응", "n": "특허 출원에 거절이유통지를 받았습니다. 진보성 부족 이유이며 응답 기한이 얼마 남지 않았습니다(가정). 의견서·보정서를 준비하고 싶습니다."}, {"t": "PCT 국제출원 준비", "n": "국내 출원 후 해외 진출을 위해 PCT 출원을 준비하려 합니다. 우선권 주장 기한을 점검하고 싶습니다(가정)."}];
+  var attached = null, modeReady = false, spText = null;
+  var CTX = '사용자는 출원 시뮬레이션 화면에 있다. 왼쪽 입력란의 의뢰 내용으로 1~6단계 모의 절차를 진행한다. 특허성·권리범위는 확정하지 않고, 제출과 수수료 납부는 실제로 하지 않는 모의 절차이며, 결과는 참고용 초안이다.';
+
+  function toast(m) { var t = $('jsToast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(function () { t.classList.remove('on'); }, 3200); }
+  function hint(el, msg, cls) { el.textContent = msg || ''; el.className = 'js-hint' + (cls ? ' ' + cls : ''); }
+
+  function save() { try { localStorage.setItem(KEY, JSON.stringify({ t: $('fType').selectedIndex, s: $('fSubmit').selectedIndex, d: $('fDate').value, n: $('fNote').value, a: $('oAll').checked, m: $('oSum').checked })); } catch (e) {} }
+  function load() {
+    var v = null; try { v = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+    if (v) { $('fType').selectedIndex = v.t || 0; $('fSubmit').selectedIndex = v.s || 0; $('fDate').value = v.d || ''; $('fNote').value = v.n || ''; $('oAll').checked = v.a !== false; $('oSum').checked = !!v.m; }
+    if (!$('fDate').value) { var d = new Date(Date.now() + 9 * 3600e3); $('fDate').value = d.toISOString().slice(0, 10); }
+  }
+  ['fType', 'fSubmit', 'fDate', 'fNote', 'oAll', 'oSum'].forEach(function (id) { $(id).addEventListener('input', save); $(id).addEventListener('change', save); });
+
+  function setStep(n) {
+    n = parseInt(n, 10); if (!(n >= 1 && n <= 6)) return;
+    Array.prototype.forEach.call(document.querySelectorAll('.js-step'), function (el) {
+      var j = parseInt(el.getAttribute('data-s'), 10);
+      el.classList.toggle('done', j <= n); el.classList.toggle('cur', j === n);
+    });
+  }
+  function clearSteps() { Array.prototype.forEach.call(document.querySelectorAll('.js-step'), function (el) { el.classList.remove('done', 'cur'); }); }
+  function parse(reply) {
+    var re = /\[출원 시뮬레이션\s*\|\s*현재:\s*단계\s*([1-6])/g, m, last = null;
+    while ((m = re.exec(reply || ''))) last = m[1];
+    if (last) setStep(last);
+  }
+  window.PatSim = { parse: parse };
+
+  $('cases').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-i]'); if (!b) return;
+    var c = CASES[+b.getAttribute('data-i')];
+    $('fNote').value = c.n; save(); toast('「' + c.t + '」 예시를 채웠습니다. 실제 사정으로 바꿔 실행하세요.');
+  });
+
+  function whenWidget(cb, tries) {
+    if (window.HondiChatWidget && window.HondiChatWidget.setMode) return cb();
+    if ((tries || 0) > 100) return cb(new Error('widget'));
+    setTimeout(function () { whenWidget(cb, (tries || 0) + 1); }, 100);
+  }
+  function applyMode() {
+    return fetch(SP_URL, { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw new Error('SP ' + r.status); return r.text(); }).then(function (t) {
+      spText = t;
+      return new Promise(function (ok, no) {
+        whenWidget(function (err) {
+          if (err) return no(err);
+          var done = window.HondiChatWidget.setMode({ system: spText, context: CTX, greeting: '결과가 여기에 표시됩니다. 왼쪽에 입력하고 「시뮬레이션 실행」을 눌러 주세요.', maxTokens: 6000 });
+          if (done === false) return no(new Error('busy'));
+          modeReady = true; ok();
+        });
+      });
+    });
+  }
+  applyMode().catch(function (e) { console.warn('[pat-sim-form-v1] SP 적용 지연', e); });
+
+  function fmtSize(n) { return n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB'; }
+  function showAttached(label, meta) { $('dropIdle').hidden = true; $('dropHas').hidden = false; $('drop').classList.add('has'); $('dropName').textContent = '📎 ' + label; $('dropMeta').textContent = meta || ''; }
+  function clearAttached() { attached = null; $('file').value = ''; $('dropIdle').hidden = false; $('dropHas').hidden = true; $('drop').classList.remove('has'); hint($('fileHint'), '공개 전 발명 내용과 개인정보가 든 실제 자료는 올리지 마세요. 모의 시뮬레이션입니다.', 'warn'); }
+  function pick(file) {
+    if (!file) return;
+    if (file.size > 25 * 1048576) { hint($('fileHint'), '파일이 너무 큽니다(25MB 이하).', 'err'); return; }
+    attached = { file: file, label: file.name };
+    showAttached(file.name, fmtSize(file.size));
+    hint($('fileHint'), '실행하면 글자를 읽어 전달합니다. 실제 개인정보가 든 서류는 올리지 마세요.', 'warn');
+  }
+  $('drop').addEventListener('click', function (e) { if (e.target.id !== 'dropX') $('file').click(); });
+  $('drop').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('file').click(); } });
+  $('file').addEventListener('change', function () { pick($('file').files && $('file').files[0]); });
+  $('dropX').addEventListener('click', function (e) { e.stopPropagation(); clearAttached(); });
+  ['dragenter', 'dragover'].forEach(function (ev) { $('drop').addEventListener(ev, function (e) { e.preventDefault(); $('drop').classList.add('over'); }); });
+  ['dragleave', 'drop'].forEach(function (ev) { $('drop').addEventListener(ev, function (e) { e.preventDefault(); $('drop').classList.remove('over'); }); });
+  $('drop').addEventListener('drop', function (e) { var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) pick(f); });
+
+  function pushToWidget(file) {
+    return new Promise(function (ok, no) {
+      var inp = document.getElementById('hcw-file'), nm = document.getElementById('hcw-attach-name');
+      if (!inp || !nm) return no(new Error('입력창이 아직 준비되지 않았습니다.'));
+      var dt = new DataTransfer(); dt.items.add(file); inp.files = dt.files;
+      inp.dispatchEvent(new Event('change', { bubbles: true }));
+      var n = 0;
+      (function wait() {
+        var t = nm.textContent || '';
+        if (t && t.indexOf('읽는 중') < 0) return (t.indexOf('읽지 못함') >= 0) ? no(new Error('첨부 파일을 읽지 못했습니다. PDF나 사진으로 다시 올려 보세요.')) : ok();
+        if (++n > 150) return no(new Error('첨부 파일 읽기가 오래 걸립니다.'));
+        setTimeout(wait, 200);
+      })();
+    });
+  }
+
+  function compose() {
+    var L = [];
+    L.push('출원 시뮬레이션을 진행해 주세요. 특허성과 권리범위는 확정하지 않고, 제출과 수수료 납부는 모의로 진행합니다.');
+    L.push('- 출원 분야: ' + $('fType').value);
+    L.push('- 진행 구분: ' + $('fSubmit').value);
+    L.push('- 기준일(법령·수수료): ' + ($('fDate').value || '(미입력)'));
+    L.push('- 첨부 자료: ' + (attached ? attached.label : '없음'));
+    L.push('- 의뢰 내용: ' + ($('fNote').value.trim() || '(없음)'));
+    L.push('- 진행 범위: ' + ($('oAll').checked ? '1~6단계를 끝까지 한 번에' : '1~3단계까지만 먼저') + ($('oSum').checked ? ', 결론과 수수료 합계를 먼저 쓰고 상세는 뒤에' : ''));
+    L.push('위 정보만을 입력값으로 쓰고, 없는 사실은 지어내지 말고 빈칸 표시나 가정으로 처리해 주세요.');
+    return L.join('\n');
+  }
+  var running = false;
+  $('btnRun').addEventListener('click', function () {
+    if (running) return;
+    if (!$('fNote').value.trim() && !attached) { hint($('runHint'), '출원 의뢰을 고르거나 적어 주세요.', 'err'); return; }
+    hint($('runHint'), '');
+    running = true; $('btnRun').disabled = true; $('btnRun').textContent = '실행 중…';
+    var prev = Promise.resolve();
+    if (!modeReady) prev = applyMode();
+    prev.then(function () {
+      var w = window.HondiChatWidget;
+      if (w.isBusy && w.isBusy()) throw new Error('이전 응답을 기다리는 중입니다. 잠시 뒤 다시 눌러 주세요.');
+      var again = w.setMode({ system: spText, context: CTX, greeting: '시뮬레이션을 시작합니다.', maxTokens: 6000 });
+      if (again === false) throw new Error('이전 응답을 기다리는 중입니다.');
+      clearSteps();
+      return w.open();
+    }).then(function () { return attached ? pushToWidget(attached.file) : null; })
+      .then(function () { return window.HondiChatWidget.send(compose()); })
+      .then(function () { var m = $('resultMount'); try { m.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} })
+      .catch(function (e) { hint($('runHint'), (e && e.message) || '실행하지 못했습니다. 잠시 뒤 다시 시도해 주세요.', 'err'); })
+      .then(function () { running = false; $('btnRun').disabled = false; $('btnRun').textContent = '시뮬레이션 실행'; });
+  });
+
+  $('btnReset').addEventListener('click', function () {
+    $('fNote').value = ''; $('fType').selectedIndex = 0; $('fSubmit').selectedIndex = 0; $('oAll').checked = true; $('oSum').checked = false;
+    clearAttached(); save(); hint($('runHint'), ''); clearSteps();
+    toast('입력을 초기화했습니다.');
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>
