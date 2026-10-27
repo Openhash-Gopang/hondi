@@ -5,7 +5,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { hasConfirmationAsk, previousAssistantAsked, buildConfirmationSummary, evaluateSendGuard } from '../src/worker/kmail-confirm.js';
+import { hasConfirmationAsk, previousAssistantAsked, buildConfirmationSummary, evaluateSendGuard, buildSentMailPreview } from '../src/worker/kmail-confirm.js';
 
 const NOW = Date.parse('2026-10-27T07:58:16.000Z');
 const parsedOne = { recipients: [{ name: '', email: 'tensor.city@gmail.com' }], subject: '테스트 메일', body: '안녕하세요, K-Mail 테스트 발송입니다.', send_at: '2026-10-27T16:58:16+09:00' };
@@ -95,4 +95,25 @@ test('SP-25: 이름만 말한 수신자는 주소록 조회 후 이름<이메일
   assert.match(sp, /여섯 번째/);
   assert.match(sp, /사람 이름·별칭만/);
   assert.match(sp, /받는 사람 이름<이메일>/);
+});
+
+// 2026-10-28 — 발송 후 '보낸 메일 내용'
+test('보낸 메일 내용: 발송 완료는 받는 사람·제목·본문·시각을 모두 보여 준다', () => {
+  const now = Date.parse('2026-10-27T22:31:00Z');   // KST 10월 28일 07:31
+  const t = buildSentMailPreview({ recipients: [{ name: '주피터', email: 'tensor.city@gmail.com' }], subject: '테스트 메일', body: '테스트 메일입니다.\n두 번째 줄', send_at: '2026-10-27T22:31:00Z' },
+    { address: 'ceo@hondi.kr', name: '' }, 'sent', Date.parse('2026-10-27T22:31:00Z'), now);
+  assert.match(t, /보낸 메일 내용/); assert.match(t, /\*\*보내는 사람\*\*: ceo@hondi\.kr/);
+  assert.match(t, /주피터<tensor\.city@gmail\.com> \(총 1명\)/); assert.match(t, /\*\*제목\*\*: 테스트 메일/);
+  assert.match(t, /발송 시각\*\*: 10월 28일 07:31/); assert.match(t, /> 테스트 메일입니다\.\n> 두 번째 줄/);
+});
+test('보낸 메일 내용: 예약·접수는 "발송할 메일 내용", 실패는 붙이지 않는다', () => {
+  const now = Date.parse('2026-10-27T22:31:00Z');
+  const p = { recipients: [{ email: 'a@x.com' }], subject: 's', body: 'b' };
+  assert.match(buildSentMailPreview(p, null, 'scheduled', Date.parse('2026-10-29T00:00:00Z'), now), /발송할 메일 내용[\s\S]*발송 예정\*\*: 10월 29일 09:00/);
+  assert.match(buildSentMailPreview(p, null, 'queued', now, now), /발송 예정\*\*: 곧/);
+  assert.equal(buildSentMailPreview(p, null, 'failed', now, now), '');
+});
+test('보낸 메일 내용: 아주 긴 본문은 잘라 보여 주고 안내한다', () => {
+  const t = buildSentMailPreview({ recipients: [{ email: 'a@x.com' }], subject: 's', body: '가'.repeat(5000) }, null, 'sent', 0, 0);
+  assert.match(t, /이하 2000자 생략/); assert.ok(t.length < 3400);
 });
