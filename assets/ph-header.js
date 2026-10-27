@@ -98,10 +98,12 @@
     // 2026-10-27 — 셋째 버튼 PAGE_HEADER.heroButton3 (변호사 페이지의 「서류 작성하기」). 둘째 버튼이 있을 때만 그 오른쪽에 놓는다.
     var third = second ? heroCtaLink(config && config.heroButton3, 'ph-hero-cta ph-hero-cta-2 ph-hero-cta-3') : '';
     var intro = heroCtaLink(introButtonFor(config), 'ph-hero-cta ph-hero-cta-2 ph-hero-cta-intro', true);
+    // 2026-10-27 — PAGE_HEADER.heroButtonLast = { label, href, title }: 「기술 소개」 오른쪽 맨 끝에 놓는 버튼(법무사 페이지의 「법무 시뮬레이션」).
+    var last = intro ? heroCtaLink(config && config.heroButtonLast, 'ph-hero-cta ph-hero-cta-2 ph-hero-cta-3') : '';
     if (!first && !intro) return '';
-    var count = (first ? 1 : 0) + (second ? 1 : 0) + (third ? 1 : 0) + (intro ? 1 : 0);
+    var count = (first ? 1 : 0) + (second ? 1 : 0) + (third ? 1 : 0) + (intro ? 1 : 0) + (last ? 1 : 0);
     // 2026-10-27 — PAGE_HEADER.introFirst === true 면 「기술 소개」를 맨 앞(왼쪽)에 두고 나머지 버튼을 그 오른쪽에 놓는다.
-    var order = (config && config.introFirst) ? (intro + first + second + third) : (first + second + third + intro);
+    var order = (config && config.introFirst) ? (intro + first + second + third) : (first + second + third + intro + last);
     return '<div class="ph-hero-cta-row' + (count >= 4 ? ' ph-hero-cta-row-wide' : '') + '">' + order + '</div>';
   }
   // 2026-10-24: 「K-Law」 버튼 — 인프라(K-서비스)·전문가 페르소나·K-정부(기관 페이지 포함) 문서의 오른쪽 상단.
