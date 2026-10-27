@@ -4767,7 +4767,7 @@ onRecordAfterCreateRequest((e) => {
       const rec = new Record(collection);
       rec.set("owner_user_guid", guid);
       rec.set("mail_id", candidate);
-      rec.set("sender_display_name", "나비 K-Mail");
+      // 2026-10-27: 보내는 사람 이름은 기본으로 비워 둔다(받는 사람 화면에는 주소만 보임). 사용자가 원하면 "내 메일 ID" 화면에서 정한다.
       $app.dao().saveRecord(rec);
       console.log(`[MAIL-ID-DEFAULT] guid=${guid} → mail_id=${candidate} 자동배정 완료(${counter + 1}회 시도)`);
       return;
