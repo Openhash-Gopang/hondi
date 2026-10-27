@@ -34,7 +34,7 @@ const MAX_SUMMARY_CHARS = 3600;                   // 대화 기록은 메시지�
 function recipientLabel(r) {
   const email = String((r && r.email) || '').trim();
   const name = String((r && r.name) || '').trim();
-  return name ? `${name}(${email})` : email;
+  return name ? `${name}<${email}>` : email;   // 2026-10-28: 이름<이메일> 표기(사용자가 말한 확인 문구 형식)
 }
 
 // parsed: 비서가 낸 KMAIL_SEND_CAMPAIGN JSON. 확인 요약 문장을 서버가 직접 만든다(모델의 서술을 거치지 않아 정확하다).
