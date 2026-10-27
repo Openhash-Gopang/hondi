@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-27 18:00 KST · 기준 커밋 3052ae53
+- 갱신: 2026-10-27 18:16 KST · 기준 커밋 3491faba
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-27 Merge pull request #808 from Openhash-Gopang/feat/ktax-sim-hero-doc-button
+- 2026-10-27 fix: 절세 시뮬레이션 히어로 — 나비 아이콘 삭제, K-Tax 방법론 버튼을 오른쪽 빈 공간으로 이동
 - 2026-10-27 Merge pull request #807 from Openhash-Gopang/feat/tax-hero-buttons-order
 - 2026-10-27 feat: 세무사 보조 AI 히어로 버튼 순서 변경 — 기술 소개 오른쪽에 절세 시뮬레이션·K-Tax 방법론
 - 2026-10-27 pages: simplify judicial scrivener intro layout (single-column document style)
@@ -42,8 +44,6 @@
 - 2026-10-27 feat(admin): move the proposals store out of the business-plan list into its own top section
 - 2026-10-27 Merge pull request #781 from Openhash-Gopang/feat/admin-busan-ulsan-gyeongnam-nabi-code-plan
 - 2026-10-27 admin: add Busan-Ulsan-Gyeongnam nabi digit code test proposal
-- 2026-10-27 feat(lawyer): extend 서류 작성하기 (STEP W) to the 46 lawyer sub-fields
-- 2026-10-27 feat(lawyer): add 서류 작성하기 (STEP W 9-step court filing track) for lawyer
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
