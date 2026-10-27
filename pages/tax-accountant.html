@@ -18,7 +18,9 @@ window.PAGE_HEADER = {
   sub: '작성할 서류를 목록에서 고르거나 아래 입력창으로 요청하면, 필요한 정보를 물어 서류 초안을 작성합니다.',
   disclaimer: '관계 법령에 따라, 모든 보조 AI는 인간 전문가의 업무를 보조하며, 단독으로 기능하지 않는다. 작성된 초안은 세무사의 검토·확정 전에는 사용할 수 없다.',
   disclaimerDismissKey: 'tax-accountant',
-  heroButton: { label: '절세 시뮬레이션', href: '/pages/ktax-simulation.html', title: '재무제표를 올리면 K-Tax 방법론으로 절세 방안을 시뮬레이션합니다 (참고용)' }
+  heroButton: { label: '절세 시뮬레이션', href: '/pages/ktax-simulation.html', title: '재무제표를 올리면 K-Tax 방법론으로 절세 방안을 시뮬레이션합니다 (참고용)' },
+  heroButton2: { label: 'K-Tax 방법론', href: '/docs/ktax-methodology-v0.1.html', newTab: true, title: 'K-Tax 방법론 v0.1 (초안) — 절세 전략 수립·집행 방법과 성능 평가 제안 (새 탭)' },
+  introFirst: true
 };
 </script>
 <link rel="stylesheet" href="/assets/ph-header.css">
@@ -109,22 +111,5 @@ window.PRO_DOC_PAGE = {"catalog":[{"id":"A-1","tab":"부가가치세","title":"�
 <script src="/assets/pro-doc-page.js"></script>
 <script src="/assets/start-field.js"></script>
 <script src="/assets/biz-link-demo.js"></script>
-<script>
-// 2026-10-27: 상단 메뉴에 「K-Tax 방법론」 버튼 — 방법론 v0.1 문서를 새 탭으로 연다.
-(function () {
-  function add() {
-    var nr = document.querySelector('.topnav-right');
-    if (!nr || document.getElementById('ktaxMethodBtn')) return;
-    var a = document.createElement('a');
-    a.id = 'ktaxMethodBtn'; a.className = 'lr-nav-btn'; a.href = '/docs/ktax-methodology-v0.1.html';
-    a.target = '_blank'; a.rel = 'noopener'; a.style.textDecoration = 'none';
-    a.title = 'K-Tax 방법론 v0.1 (초안) — 절세 전략 수립·집행 방법과 성능 평가 제안';
-    a.textContent = 'K-Tax 방법론';
-    nr.insertBefore(a, nr.firstChild);
-  }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(add, 0); });
-  else setTimeout(add, 0);
-})();
-</script>
 </body>
 </html>
