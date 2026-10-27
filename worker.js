@@ -18,6 +18,7 @@ import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
 import { profilePhoneFilter, last8Filter, pickGuidByLast8 } from './src/worker/phone-lookup.js';
 import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
+import { parseMessage as _kmailParseMime, decodeMimeWords as _kmailDecodeMimeWords, repairStoredText as _kmailRepairStoredText } from './src/worker/mime-text.js';
 import { checkSenderName as _kmailCheckSenderName, effectiveSenderName as _kmailEffectiveSenderName, formatSender as _kmailFormatSender, describeSender as _kmailDescribeSender, SENDER_NAME_MAX as _KMAIL_SENDER_NAME_MAX } from './src/worker/kmail-sender.js';
 import { evaluateSendGuard as _kmailEvaluateSendGuard } from './src/worker/kmail-confirm.js';
 import { senderLocalPart as _kmailSenderLocalPart, classifyInboundLocalPart as _kmailClassifyLocalPart } from './src/worker/kmail-address.js';
@@ -13423,12 +13424,13 @@ export default {
     }
     const letterId = m[1];
 
-    let rawText = '';
-    try { rawText = await new Response(message.raw).text(); }
+    let rawBuf, rawText = '';
+    try { rawBuf = await new Response(message.raw).arrayBuffer(); rawText = new TextDecoder().decode(rawBuf); }
     catch (e) { console.error('[email] raw 읽기 실패:', e.message); return; }
 
-    const subject = message.headers?.get?.('subject') || '(제목 없음)';
-    const bodyText = _extractPlainTextBody(rawText);
+    const parsedMail = _kmailParseMime(rawBuf);                       // 2026-10-28: 제목·본문 인코딩 해석(K-Mail 수신과 같은 해석기)
+    const subject = parsedMail.subject || _kmailDecodeMimeWords(message.headers?.get?.('subject') || '') || '(제목 없음)';
+    const bodyText = parsedMail.bodyText || _extractPlainTextBody(rawText);
     const fromAddr = message.from || 'unknown@unknown';
 
     ctx.waitUntil((async () => {
@@ -33943,12 +33945,12 @@ async function handleAdminLettersSet(request, env, corsHeaders) {
 // 공문 메일 발송/수신 공용 헬퍼 (2026-08-31 신설)
 // ═══════════════════════════════════════════════════════════
 
-// 매우 단순한 MIME 본문 추출기 — text/plain 단일 파트, 또는
-// multipart/alternative 안의 첫 text/plain 파트만 정확히 처리한다.
-// base64/quoted-printable 디코딩은 하지 않는다(위 email() 핸들러
-// 주석의 "정직한 한계 표시" 참고) — 인코딩된 본문은 그 형태 그대로
-// 반환되므로, AI 요약 품질이 떨어질 수 있다는 걸 알고 쓸 것.
+// MIME 본문 추출기 — 2026-10-28부터 src/worker/mime-text.js(base64·quoted-printable·문자 집합·중첩 multipart·HTML 전용 처리)에
+// 위임한다. (예전에는 인코딩을 풀지 않아 한글 메일이 "64u17J6l…" 같은 글자로 저장됐다.)
 function _extractPlainTextBody(rawMime) {
+  // 2026-10-28: base64·quoted-printable·문자 집합·중첩 multipart·HTML 전용을 모두 처리하는 해석기(src/worker/mime-text.js)에 맡긴다.
+  // 아래 옛 방식은 해석기가 아무것도 못 뽑았을 때만 쓰는 최후 수단이다.
+  try { const t = _kmailParseMime(rawMime).bodyText; if (t) return t; } catch (e) { /* 아래로 */ }
   const headerEnd = rawMime.search(/\r?\n\r?\n/);
   if (headerEnd < 0) return rawMime.trim();
   const headerBlock = rawMime.slice(0, headerEnd);
@@ -35389,8 +35391,9 @@ async function handleKmailContactsList(request, url, env, corsHeaders) {
 // 파싱하지 않도록 여기서 한 번에 subject/body로 갈라서 내려준다.
 function _kmailSplitSubjectBody(contentOriginal) {
   const m = String(contentOriginal || '').match(/^\[제목\] (.*?)\n\n([\s\S]*)$/);
-  if (m) return { subject: m[1], body: m[2] };
-  return { subject: '(제목 없음)', body: contentOriginal || '' };
+  // 2026-10-28: 예전 파서가 인코딩을 풀지 않고 저장한 글(제목 =?UTF-8?B?…?=, 본문 base64)은 읽을 때 고친다. 정상 글은 그대로(멱등).
+  if (m) return _kmailRepairStoredText(m[1], m[2]);
+  return _kmailRepairStoredText('(제목 없음)', contentOriginal || '');
 }
 
 // GET /kmail/mailbox?box=inbox|sent|thread&guid=...&pubkey=...&signature=...&ts=...
@@ -37434,12 +37437,14 @@ async function _handleKmailInboundEmail(message, env, ctx) {
   if (await _kmailRejectUnknownRecipient(env, message, localPart)) return;
   const campaignMatch = localPart.match(/^kmail-([a-z0-9_-]+)$/i);
 
-  let rawText = '';
-  try { rawText = await new Response(message.raw).text(); }
+  // 2026-10-28: 원본을 바이트로 읽어 제목(RFC 2047)·본문(base64/quoted-printable, 문자 집합)을 제대로 푼다. 첨부 추출은 예전처럼 UTF-8 글을 쓴다.
+  let rawBuf, rawText = '';
+  try { rawBuf = await new Response(message.raw).arrayBuffer(); rawText = new TextDecoder().decode(rawBuf); }
   catch (e) { console.error('[K-Mail email] raw 읽기 실패:', e.message); return; }
 
-  const subject = message.headers?.get?.('subject') || '(제목 없음)';
-  const bodyText = _extractPlainTextBody(rawText);
+  const parsedMail = _kmailParseMime(rawBuf);
+  const subject = parsedMail.subject || _kmailDecodeMimeWords(message.headers?.get?.('subject') || '') || '(제목 없음)';
+  const bodyText = parsedMail.bodyText || '(본문을 읽을 수 없는 메일 형식입니다 — 이미지나 첨부만 들어 있을 수 있습니다)';
   const fromAddr = message.from || 'unknown@unknown';
 
   ctx.waitUntil((async () => {
