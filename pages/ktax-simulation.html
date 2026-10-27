@@ -15,7 +15,7 @@ window.PAGE_HERO = {
   l1: '재무제표를 올리면',
   l2: '최적의 절세 방안을 시뮬레이션합니다',
   sub: 'K-Tax 방법론 v0.1(STEP 0→A→B→C→D)에 따라 과소·과다 양방향으로 점검하고, 적법한 전략 안에서 세부담이 가장 낮은 경로를 찾습니다. 세무사·공인회계사의 확인 전에는 확정할 수 없는 참고 자료입니다.',
-  actions: [{ label: 'K-Tax 방법론 v0.1', href: '/docs/ktax-methodology-v0.1.html', style: 'outline' }]
+  actions: []   // 방법론 버튼은 아래 스크립트가 히어로 오른쪽 빈 공간에 놓는다.
 };
 </script>
 <link rel="stylesheet" href="/assets/site-header.css">
@@ -42,6 +42,11 @@ window.PAGE_HERO = {
 <script src="/assets/chat-widget.js"></script>
 
 <style>
+/* 히어로: 오른쪽 위 나비 아이콘 삭제, 그 자리 아래 빈 공간에 방법론 버튼 */
+.site-hero-corner-logo { display: none !important; }
+.kt-hero-doc { position: absolute; right: 40px; top: 50%; transform: translateY(-50%); display: inline-flex; align-items: center; background: #1a2e5c; border: 1px solid rgba(255,255,255,.45); color: #fff; font-size: 14px; font-weight: 600; padding: 9px 22px; border-radius: 20px; white-space: nowrap; text-decoration: none; font-family: 'Pretendard', sans-serif; box-shadow: 0 2px 6px rgba(0,0,0,.25); transition: background .15s, box-shadow .15s; }
+.kt-hero-doc:hover, .kt-hero-doc:focus-visible { background: #24356b; box-shadow: 0 3px 10px rgba(0,0,0,.3); outline: none; }
+@media (max-width: 900px) { .kt-hero-doc { position: static; transform: none; margin-top: 22px; display: inline-flex; } }
 *, *::before, *::after { box-sizing: border-box; }
 :root {
   --kt-bg:#f8f9fa; --kt-surface:#fff; --kt-border:#e5e7eb; --kt-border2:#d1d5db;
@@ -206,6 +211,21 @@ body { background: var(--kt-bg); color: var(--kt-text); font-family: 'Pretendard
 </div>
 <div class="kt-toast" id="ktToast" role="status"></div>
 
+<script>
+// 히어로 오른쪽 빈 공간에 「K-Tax 방법론 v0.1」 버튼을 놓는다(공용 헤더 스크립트가 히어로를 그린 뒤).
+(function () {
+  function put() {
+    var h = document.querySelector('.site-hero');
+    if (!h) return false;
+    if (document.getElementById('ktHeroDoc')) return true;
+    var a = document.createElement('a');
+    a.id = 'ktHeroDoc'; a.className = 'kt-hero-doc'; a.href = '/docs/ktax-methodology-v0.1.html';
+    a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'K-Tax 방법론 v0.1';
+    h.appendChild(a); return true;
+  }
+  var n = 0; (function w() { if (put() || ++n > 50) return; setTimeout(w, 100); })();
+})();
+</script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
