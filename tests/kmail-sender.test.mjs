@@ -5,7 +5,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { checkSenderName, effectiveSenderName, formatSender, LEGACY_DEFAULT_NAME, SENDER_NAME_MAX } from '../src/worker/kmail-sender.js';
+import { checkSenderName, effectiveSenderName, formatSender, describeSender, LEGACY_DEFAULT_NAME, SENDER_NAME_MAX } from '../src/worker/kmail-sender.js';
 
 test('기본은 이름 없음 → 주소만, 이름이 있으면 "이름 <주소>"', () => {
   assert.equal(formatSender('ceo@hondi.kr', ''), 'ceo@hondi.kr');
@@ -72,4 +72,22 @@ test('worker.js: 채팅 설정 태그도 REST와 같은 공용 헬퍼를 거친�
 test('시스템 프롬프트: 기본은 주소만, 이름 지우기는 빈 문자열, 사칭 거절 안내', () => {
   const sp = fs.readFileSync(new URL('../prompts/SP-25_kmail_v1_30.txt', import.meta.url), 'utf8');
   for (const w of ['보내는 사람 표시(sender_display_name)', '{"sender_display_name": ""}', '도 영민 <ceo@hondi.kr>', '"나비 K-Mail"을 기본 이름으로 붙이지 않습니다', '2026-10-27 보정(v1.30, 네 번째)']) assert.ok(sp.includes(w), w);
+});
+
+test('인증된 것처럼 보이는 기호는 거절한다(Google 발신자 지침) — 관리자도 예외 없음', () => {
+  for (const bad of ['도 영민 ✅', '✓ 도 영민', '도영민✔', '도 영민 ☑', '도 영민 🔒', '🛡 도 영민', '도영민 ✔️', '도 영민 🔐']) {
+    assert.equal(checkSenderName(bad).reason, 'symbol', bad); assert.equal(checkSenderName(bad, { isAdmin: true }).reason, 'symbol', bad + ' (관리자)');
+  }
+  assert.equal(checkSenderName('도 영민 😀').ok, true, '일반 이모지는 허용');
+  for (const w of ['Verified 도영민', '인증됨 도영민', '인증 완료']) assert.equal(checkSenderName(w).reason, 'reserved', w);
+  assert.equal(checkSenderName('Verified 도영민', { isAdmin: true }).ok, true, '단어는 관리자 예외(기호만 전원 금지)');
+});
+test('보낼 때: 예전에 저장된 이름의 인증 기호만 조용히 지운다(나머지 이름은 유지)', () => {
+  assert.equal(effectiveSenderName('도 영민 ✅'), '도 영민'); assert.equal(effectiveSenderName('✔️ 도 영민 🔒'), '도 영민'); assert.equal(effectiveSenderName('✅'), '');
+  assert.equal(formatSender('ceo@hondi.kr', '도 영민 ✅'), '도 영민 <ceo@hondi.kr>');
+});
+test('확인 요약용 설명: 이름이 있으면 "이름 <주소>", 없으면 받는 쪽 표시 가능성을 알린다', () => {
+  assert.equal(describeSender('ceo@hondi.kr', '도 영민'), '도 영민 <ceo@hondi.kr>');
+  const d = describeSender('swift-heron-482@hondi.kr', ''); assert.match(d, /^swift-heron-482@hondi\.kr \(이름 없음/); assert.match(d, /"swift-heron-482"가 보낸 사람 이름으로 보일 수 있습니다/);
+  assert.match(describeSender('x@hondi.kr', '나비 K-Mail'), /이름 없음/, '옛 기본값은 이름 없음');
 });

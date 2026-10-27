@@ -57,7 +57,7 @@ test('발송 판정: 확인 없이 낸 태그는 막고 요약+action을, 확인
 
 test('worker.js: 확인 판정이 연락처 저장·캠페인 생성보다 먼저 일어나고, 막히면 거기서 응답한다', () => {
   const w = fs.readFileSync(new URL('../worker.js', import.meta.url), 'utf8');
-  const guard = w.indexOf('_kmailEvaluateSendGuard(cleanMessages, parsed)');
+  const guard = w.indexOf('_kmailEvaluateSendGuard(cleanMessages, parsed');
   const create = w.indexOf('await _kmailChatCreateCampaign(env, guid, parsed)');
   assert.ok(guard > 0 && create > 0 && guard < create, '판정이 생성보다 앞서야 한다');
   const between = w.slice(guard, create);
@@ -68,4 +68,22 @@ test('worker.js: 확인 판정이 연락처 저장·캠페인 생성보다 먼�
 test('시스템 프롬프트: 확인 질문 형태와 서버 요약 뒤 재발송 규칙', () => {
   const sp = fs.readFileSync(new URL('../prompts/SP-25_kmail_v1_30.txt', import.meta.url), 'utf8');
   for (const w of ['확인 질문은 서버가 검사합니다', '이대로 보낼까요?', '서버가 위 요약을 보여 준 뒤', '지어내지 마세요', '2026-10-27 보정(v1.30, 세 번째)']) assert.ok(sp.includes(w), w);
+});
+
+test('확인 요약: 보내는 사람 줄(이름 있음/없음)', () => {
+  const withName = buildConfirmationSummary(parsedOne, NOW, { address: 'ceo@hondi.kr', name: '도 영민' });
+  assert.match(withName, /- \*\*보내는 사람\*\*: 도 영민 <ceo@hondi\.kr>/);
+  assert.ok(withName.indexOf('보내는 사람') < withName.indexOf('받는 사람'), '보내는 사람 줄이 먼저');
+  const noName = buildConfirmationSummary(parsedOne, NOW, { address: 'swift-heron-482@hondi.kr', name: '' });
+  assert.match(noName, /\*\*보내는 사람\*\*: swift-heron-482@hondi\.kr \(이름 없음/);
+  assert.ok(!buildConfirmationSummary(parsedOne, NOW).includes('보내는 사람'), 'sender를 안 주면 줄을 넣지 않는다(기존 동작)');
+  assert.equal(evaluateSendGuard([{ role: 'user', content: 'x' }], parsedOne, NOW, { address: 'a@hondi.kr', name: '' }).reply.includes('보내는 사람'), true);
+  assert.equal(hasConfirmationAsk(noName), true);
+});
+test('worker.js: 확인 가드에 보내는 사람 정보를 넘기고, 프롬프트 변수 {{SENDER_DISPLAY}}·{{SENDER_NAME}}을 채운다', () => {
+  const w = fs.readFileSync(new URL('../worker.js', import.meta.url), 'utf8');
+  assert.match(w, /_kmailEvaluateSendGuard\(cleanMessages, parsed, Date\.now\(\), \{ address:/);
+  assert.match(w, /\\\{\\\{SENDER_DISPLAY\\\}\\\}/); assert.match(w, /\\\{\\\{SENDER_NAME\\\}\\\}/);
+  const sp = fs.readFileSync(new URL('../prompts/SP-25_kmail_v1_30.txt', import.meta.url), 'utf8');
+  for (const k of ['{{SENDER_DISPLAY}}', '{{SENDER_NAME}}', '보내는 이름을 정해', '2026-10-27 보정(v1.30, 다섯 번째)']) assert.ok(sp.includes(k), k);
 });

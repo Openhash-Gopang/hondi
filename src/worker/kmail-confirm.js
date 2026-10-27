@@ -9,6 +9,7 @@
 // 사용자가 동의하면 비서가 그 요약대로 태그를 다시 내고, 이번에는 앞 메시지가 확인 질문이므로 통과한다.
 // 순수 함수만 담는다 — worker.js 밖에서 단위 시험이 가능하다.
 import { formatKst, isImmediate } from './kmail-send-status.js';
+import { describeSender } from './kmail-sender.js';
 
 // 확인을 구하는 문장(질문형). "지금 바로 발송하겠습니다"·"이대로 보냅니다"처럼 선언하는 문장은 해당하지 않는다.
 const ASK_RE = /(보낼까요|보내드릴까요|보내도\s*(될까요|괜찮을까요|되겠습니까|괜찮겠습니까)|발송할까요|발송해\s*드릴까요|발송해도\s*(될까요|괜찮을까요|되겠습니까|괜찮겠습니까)|전송할까요|진행할까요|진행해도\s*(될까요|괜찮을까요|되겠습니까)|확정할까요|예약할까요|이대로[^?\n]{0,25}\?)/;
@@ -37,7 +38,8 @@ function recipientLabel(r) {
 }
 
 // parsed: 비서가 낸 KMAIL_SEND_CAMPAIGN JSON. 확인 요약 문장을 서버가 직접 만든다(모델의 서술을 거치지 않아 정확하다).
-export function buildConfirmationSummary(parsed, nowMs = Date.now()) {
+// sender: { address, name } — 있으면 "보내는 사람" 줄을 넣는다(이름이 없으면 그 사실과 받는 쪽 표시 가능성을 알림).
+export function buildConfirmationSummary(parsed, nowMs = Date.now(), sender = null) {
   const p = parsed && typeof parsed === 'object' ? parsed : {};
   const recips = (Array.isArray(p.recipients) ? p.recipients : []).filter(r => r && r.email);
   const listed = recips.slice(0, MAX_LISTED).map(recipientLabel).join(', ');
@@ -50,6 +52,7 @@ export function buildConfirmationSummary(parsed, nowMs = Date.now()) {
   const head = [
     '⚠️ 아직 발송하지 않았습니다. 보내기 전에 아래 내용을 확인해 주세요.',
     '',
+    ...(sender && sender.address ? [`- **보내는 사람**: ${describeSender(sender.address, sender.name)}`] : []),
     `- **받는 사람**: ${listed || '(없음)'}${more}${recips.length ? ` (총 ${recips.length}명)` : ''}`,
     `- **제목**: ${subject}`,
     `- **발송 시각**: ${when}`,
@@ -63,7 +66,7 @@ export function buildConfirmationSummary(parsed, nowMs = Date.now()) {
 }
 
 // 발송 태그를 받아 줄지 판정한다. → { allow: true } | { allow: false, reply, action }
-export function evaluateSendGuard(messages, parsed, nowMs = Date.now()) {
+export function evaluateSendGuard(messages, parsed, nowMs = Date.now(), sender = null) {
   if (previousAssistantAsked(messages)) return { allow: true };
-  return { allow: false, reply: buildConfirmationSummary(parsed, nowMs), action: { type: 'send_confirmation_required' } };
+  return { allow: false, reply: buildConfirmationSummary(parsed, nowMs, sender), action: { type: 'send_confirmation_required' } };
 }

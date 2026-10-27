@@ -8,7 +8,9 @@ export const SENDER_NAME_MAX = 40;
 
 const CONTROL_RE = /[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u2028\u2029\u202A-\u202E\u2060-\u206F\uFEFF]/;   // 줄바꿈·보이지 않는 문자·글자 방향 바꾸기(속임수에 쓰임)
 const FORBIDDEN_RE = /[<>"@\\;:,]/;                                                                            // 주소·헤더를 흉내 내거나 깨뜨릴 수 있는 문자
-const RESERVED_WORDS = ['hondi', '혼디', 'admin', '관리자', '운영자', '운영팀', '고객센터', '공식', 'official', 'support', 'postmaster', 'security', '보안', 'noreply', 'no-reply'];
+// Google 발신자 지침: 이름 옆에 이모지·이미지를 붙여 인증된 것처럼 보이게 하면 안 된다 — ✓ ✔ ☑ ✅ 🔒 🔐 🔏 🛡 (이모지 선택자 포함)
+const VERIFY_SYMBOL_RE = /[\u2713\u2714\u2611\u2705\u{1F512}\u{1F510}\u{1F50F}\u{1F6E1}]\uFE0F?/gu;
+const RESERVED_WORDS = ['hondi', '혼디', 'admin', '관리자', '운영자', '운영팀', '고객센터', '공식', 'official', 'support', 'postmaster', 'security', '보안', 'noreply', 'no-reply', 'verified', '인증됨', '인증완료', '인증 완료'];
 
 export const SENDER_NAME_MESSAGES = {
   type: '이름은 글자로 입력해 주세요.',
@@ -16,6 +18,7 @@ export const SENDER_NAME_MESSAGES = {
   length: `이름은 ${SENDER_NAME_MAX}자까지 쓸 수 있습니다.`,
   chars: '이름에는 < > " @ \\ ; : , 문자를 쓸 수 없습니다.',
   reserved: '서비스나 기관을 사칭할 수 있는 말(혼디, 관리자, 공식, 고객센터 등)은 이름에 쓸 수 없습니다.',
+  symbol: '인증·보증된 것처럼 보이는 기호(✓ ✔ ✅ 🔒 등)는 이름에 쓸 수 없습니다.',
 };
 
 const codePoints = (s) => Array.from(s).length;
@@ -29,6 +32,7 @@ export function checkSenderName(raw, { isAdmin = false } = {}) {
   const v = nfc.replace(/\s+/g, ' ').trim();
   if (!v) return { ok: true, value: '' };
   if (codePoints(v) > SENDER_NAME_MAX) return { ok: false, value: v, reason: 'length', message: SENDER_NAME_MESSAGES.length };
+  if (new RegExp(VERIFY_SYMBOL_RE.source, 'u').test(v)) return { ok: false, value: v, reason: 'symbol', message: SENDER_NAME_MESSAGES.symbol };   // 관리자도 예외 없음
   if (FORBIDDEN_RE.test(v)) return { ok: false, value: v, reason: 'chars', message: SENDER_NAME_MESSAGES.chars };
   if (!isAdmin) {
     const lower = v.toLowerCase();
@@ -39,7 +43,8 @@ export function checkSenderName(raw, { isAdmin = false } = {}) {
 
 // 보낼 때 실제로 쓸 이름. 저장된 값이 비었거나 옛 기본값이거나, 예전에 검사 없이 저장돼 위험한 글자가 들어 있으면 "이름 없음"으로 본다(주소만 나감).
 export function effectiveSenderName(stored) {
-  const v = String(stored == null ? '' : stored).replace(/\s+/g, ' ').trim();
+  // 예전에 검사 없이 저장된 이름에 인증 기호가 들어 있으면 기호만 조용히 지우고 나머지 이름은 그대로 쓴다
+  const v = String(stored == null ? '' : stored).replace(VERIFY_SYMBOL_RE, '').replace(/\s+/g, ' ').trim();
   if (!v || v === LEGACY_DEFAULT_NAME) return '';
   if (CONTROL_RE.test(v) || FORBIDDEN_RE.test(v) || codePoints(v) > SENDER_NAME_MAX * 2) return '';
   return v;
@@ -49,4 +54,13 @@ export function effectiveSenderName(stored) {
 export function formatSender(address, name) {
   const n = effectiveSenderName(name);
   return n ? `${n} <${address}>` : String(address);
+}
+
+// 발송 전 확인 요약에 쓰는 "보내는 사람" 설명 — 이름이 없을 때는 받는 사람 화면에서 아이디가 이름처럼 보일 수 있음을 알린다.
+// (Gmail이 이름 없는 주소를 어떻게 보이는지는 Google이 문서로 밝히지 않았고, 사용자 보고로는 @ 앞부분이 보낸 사람 이름으로 보인다.)
+export function describeSender(address, name) {
+  const n = effectiveSenderName(name);
+  if (n) return `${n} <${address}>`;
+  const local = String(address).split('@')[0];
+  return `${address} (이름 없음 — 받는 사람의 메일 프로그램에 따라 "${local}"가 보낸 사람 이름으로 보일 수 있습니다)`;
 }
