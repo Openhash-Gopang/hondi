@@ -47,6 +47,8 @@ export function mapPhoneAuthError(authResult) {
     : authResult.code === 'SECRET_NOT_SET' ? 500
     : authResult.code === 'L1_ERROR' ? 502
     : (authResult.code === 'MISSING_FIELD' || authResult.code === 'TOKEN_MALFORMED') ? 400
+    : authResult.code === 'TEST_QUOTA_BLOCKED' ? 402      // 테스트 한도 초과·유예 종료(2026-10-27)
+    : authResult.code === 'TEST_ACCOUNT_MIGRATED' ? 403   // 정식 계정으로 이동을 마친 테스트 계정
     : 401; // TOKEN_EXPIRED, TOKEN_INVALID
   const code = authResult.code === 'MISSING_FIELD' ? 'LOGIN_REQUIRED' : authResult.code;
   const message = authResult.code === 'MISSING_FIELD' ? '전화번호 로그인이 필요합니다.' : authResult.message;

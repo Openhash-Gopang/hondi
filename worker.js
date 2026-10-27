@@ -16,6 +16,8 @@ import { prepareDoctorRequest, doctorRateLimits } from './src/worker/kdoctor-gua
 import { handleOrderQueue } from './src/worker/order-queue-handler.js';
 import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
 import { profilePhoneFilter, last8Filter, pickGuidByLast8 } from './src/worker/phone-lookup.js';
+import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
+import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
 import { makeDigitClaimHandler } from './src/worker/digit-claim-handler.js';
 import { makePocketBaseDigitStore } from './src/worker/digit-claim-store.js';
 import { makeOrgSiteHandler } from './src/worker/org-site-handler.js';
@@ -646,7 +648,7 @@ async function handleAuthRefreshToken(request, env, corsHeaders) {
 // 않고 그대로 둔다 — 이 함수는 K-Law 쪽 신규 호출부에서만 쓴다(중복
 // ~15줄은 감수. 두 곳이 갈라질 위험보다 기존 동작 검증된 코드를
 // 안 건드리는 쪽을 우선함 — 후속 정리 여지로 남겨둠).
-async function _resolveGuidFromPhoneVerifyToken(env, phoneVerifyToken) {
+async function _resolveGuidFromPhoneVerifyToken(env, phoneVerifyToken, opts = {}) {
   if (!phoneVerifyToken) return { ok: false, code: 'MISSING_FIELD', message: 'phone_verify_token 필수' };
   if (!env.PHONE_VERIFY_SECRET) return { ok: false, code: 'SECRET_NOT_SET', message: 'PHONE_VERIFY_SECRET이 설정되지 않았습니다' };
 
@@ -670,6 +672,8 @@ async function _resolveGuidFromPhoneVerifyToken(env, phoneVerifyToken) {
     try {
       const prof = await _l1FindProfileByHandle(env, e164);
       if (!prof) return { ok: false, code: 'PROFILE_NOT_FOUND', message: '이 아이디로 등록된 프로필이 없습니다' };
+      const _gateErr = await _testAccountGate(env, prof, opts); // 2026-10-27: 이동 완료·한도 초과(유예 종료) 계정은 여기서 막는다
+      if (_gateErr) return _gateErr;
       return { ok: true, guid: prof.guid, e164 };
     } catch (e) {
       return { ok: false, code: 'L1_ERROR', message: '아이디 조회 실패: ' + e.message };
@@ -697,6 +701,19 @@ async function _resolveGuidFromPhoneVerifyToken(env, phoneVerifyToken) {
   } catch (e) {
     return { ok: false, code: 'L1_ERROR', message: '전화번호 인증 조회 실패: ' + e.message };
   }
+}
+
+// 테스트 계정 접근 판정(2026-10-27). opts.allowBlockedTest: 한도 초과 차단 중에도 통과(한도 조회·데이터 이동용),
+// opts.allowMigrated: 이미 정식 계정으로 이동을 마친 계정도 통과(이동 결과 재확인용).
+async function _testAccountGate(env, prof, opts = {}) {
+  if (prof?.extra?.migrated_to && !opts.allowMigrated) {
+    return { ok: false, code: 'TEST_ACCOUNT_MIGRATED', message: '이 테스트 아이디의 데이터는 정식 아이디로 이동했습니다. 정식 아이디로 로그인해 주세요.' };
+  }
+  if (!opts.allowBlockedTest && _gdcFreeTestOn(env) && env.AI_SETUP_SEALS_KV) {
+    const ev = await _testQuotaGetStatus(env.AI_SETUP_SEALS_KV, prof.guid, Date.now(), _testQuotaConfig(env));
+    if (ev.status === 'blocked') return { ok: false, code: 'TEST_QUOTA_BLOCKED', message: _testQuotaBlockedMessage(ev) };
+  }
+  return null;
 }
 
 // K-서비스 공용 인증 게이트 인스턴스 — _verifyClaimsRequester는 이
@@ -1903,8 +1920,69 @@ async function _l1GetBalanceKRW(guid) {
 // ═══════════════════════════════════════════════════════════
 function _gdcFreeTestOn(env) { return !!env && env.GDC_FREE_TEST === '1'; }
 
+// ═══════════════════════════════════════════════════════════
+// 🧪 테스트 계정 한도·유예·차단 + 정식 계정 전환 — 2026-10-27 (주피터 지시)
+//   · 테스트 계정(handle이 'tid-'로 시작)은 청구액 합계가 TEST_QUOTA_KRW(기본 500 GDC)가 될 때까지 무료.
+//   · 한도를 넘기면 TEST_GRACE_HOURS(기본 24)시간 유예 후 차단 — _gdcFreeQuotaGate·K-서비스 공용 토큰 게이트가 막는다.
+//   · 차단돼도 /auth/test-quota 조회와 /auth/test-migrate(정식 계정으로 데이터 이동)는 계속 허용한다.
+//   · 판정 로직은 src/worker/test-quota.js, 데이터 이동은 src/worker/test-migrate.js (단위 시험: tests/test-quota-migrate.test.mjs).
+//   · GDC_FREE_TEST_SCOPE='test-only'로 설정하면 무료 테스트 모드가 테스트 계정에만 적용된다(정식 계정은 GDC 충전·차감).
+//     설정하지 않으면 지금처럼 모든 계정이 무료다 — 정식 계정 과금 시작은 이 변수를 켜는 시점에 정한다.
+// ═══════════════════════════════════════════════════════════
+// 계정 종류(테스트/정식)는 거의 바뀌지 않으므로 같은 워커 인스턴스 안에서는 60초간 메모리에 둔다 —
+// 요청 하나가 KV를 여러 번 읽지 않게 해, 무료 플랜의 요청당 하위 요청 한도(50)를 아낀다.
+const _acctKindMem = new Map();
+function _acctKindMemReset() { _acctKindMem.clear(); }
+async function _isTestGuid(env, guid) {
+  if (!guid) return false;
+  const _m = _acctKindMem.get(guid);
+  if (_m && Date.now() - _m.t < 60000) return _m.v;
+  const _v = await _isTestGuidUncached(env, guid);
+  if (_acctKindMem.size > 2000) _acctKindMem.clear();
+  _acctKindMem.set(guid, { v: _v, t: Date.now() });
+  return _v;
+}
+async function _isTestGuidUncached(env, guid) {
+  const kv = env.AI_SETUP_SEALS_KV;
+  const kvKey = `hondi:acct_kind:${guid}`;
+  if (kv) {
+    try { const v = await kv.get(kvKey); if (v === 't') return true; if (v === 'f') return false; } catch (e) { /* 캐시 실패는 조회로 대체 */ }
+  }
+  let isTest = false;
+  try {
+    const prof = await _l1FindProfileByGuid(env, guid);
+    isTest = String(prof?.handle || '').startsWith('tid-');
+  } catch (e) { return false; } // 모르면 정식 계정으로 본다 — 차단하는 쪽으로 틀리지 않는다
+  if (kv) { try { await kv.put(kvKey, isTest ? 't' : 'f', isTest ? undefined : { expirationTtl: 21600 }); } catch (e) { /* 무시 */ } }
+  return isTest;
+}
+// 이 계정의 사용분을 GDC에서 차감하지 않고 무료로 처리해야 하는가
+async function _gdcFreeFor(env, guid) {
+  if (!_gdcFreeTestOn(env)) return false;
+  if (env.GDC_FREE_TEST_SCOPE !== 'test-only') return true;
+  return await _isTestGuid(env, guid);
+}
+// 무료로 처리한 사용분을 테스트 계정 한도에 누적한다(정식 계정이면 아무 일도 하지 않는다)
+async function _testQuotaAdd(env, guid, krw, dedupKey = null) {
+  if (!(Number(krw) > 0) || !_gdcFreeTestOn(env)) return;
+  if (!(await _isTestGuid(env, guid))) return;
+  // 같은 정산 키(settlementKey)는 한 번만 센다 — 백그라운드 작업이 취소돼 10분 스윕이 같은 건을 다시 정산해도 중복 누적되지 않는다
+  await _testQuotaAddSpend(env.AI_SETUP_SEALS_KV, guid, krw, Date.now(), _testQuotaConfig(env), dedupKey);
+}
+// 유예가 끝난 테스트 계정이면 402 응답을, 아니면 null
+async function _testQuotaBlockedResponse(env, guid, corsHeaders) {
+  if (!_gdcFreeTestOn(env) || !env.AI_SETUP_SEALS_KV) return null;
+  if (!(await _isTestGuid(env, guid))) return null;
+  const ev = await _testQuotaGetStatus(env.AI_SETUP_SEALS_KV, guid, Date.now(), _testQuotaConfig(env));
+  if (ev.status !== 'blocked') return null;
+  console.warn(JSON.stringify({ tag: 'TEST_QUOTA_BLOCKED', guid, spent_krw: ev.spent_krw, ts: new Date().toISOString() }));
+  return new Response(JSON.stringify({ error: 'TEST_QUOTA_BLOCKED', message: _testQuotaBlockedMessage(ev), ...ev }), { status: 402, headers: corsHeaders });
+}
+
 async function _gdcFreeQuotaGate(env, guid, corsHeaders, meta) {
-  if (_gdcFreeTestOn(env)) return null; // 🧪 GDC 무료 테스트 모드
+  const _tqBlock = await _testQuotaBlockedResponse(env, guid, corsHeaders); // 🧪 유예가 끝난 테스트 계정은 여기서 막는다
+  if (_tqBlock) return _tqBlock;
+  if (await _gdcFreeFor(env, guid)) return null; // 🧪 GDC 무료 테스트 모드
   if (!guid || !FREE_QUOTA_ENFORCEMENT_ENABLED) return null;
   const kv = env.AI_SETUP_SEALS_KV;
   if (!kv) return null;
@@ -1958,7 +2036,8 @@ async function _chargeGdcForAiUsage(env, {
 }) {
   if (!guid || !(krwAmount > 0)) return null;
   // 🧪 GDC 무료 테스트 모드 — 실제 차감 없이 성공으로 돌려준다(관리자 수동 차감 제외).
-  if (_gdcFreeTestOn(env) && serviceId !== 'admin-correction') {
+  if (serviceId !== 'admin-correction' && await _gdcFreeFor(env, guid)) {
+    await _testQuotaAdd(env, guid, krwAmount, settlementKey); // 테스트 계정 한도에 누적
     console.log(JSON.stringify({ tag: 'GDC_FREE_TEST_SKIP_CHARGE', guid, krwAmount, serviceId: serviceId || 'hondi-chat', ts: new Date().toISOString() }));
     return { ok: true, test_free: true, charged_gdc: 0 };
   }
@@ -2004,7 +2083,10 @@ async function _chargeGdcForAiUsage(env, {
 // 평생 100원 무료"라는 약속이 요청 경계와 무관하게 정확히 지켜진다.
 async function _settleAiUsage(env, guid, bill, meta = {}, ctx = null, settlementKey = null) {
   if (!guid || !bill) return;
-  if (_gdcFreeTestOn(env)) return; // 🧪 GDC 무료 테스트 모드 — 차감·무료한도 소진 모두 생략
+  if (await _gdcFreeFor(env, guid)) { // 🧪 GDC 무료 테스트 모드 — 차감·무료한도 소진 모두 생략
+    await _testQuotaAdd(env, guid, bill.billedKRW, settlementKey); // 단, 테스트 계정 한도에는 누적한다
+    return;
+  }
   const kv = env.AI_SETUP_SEALS_KV;
   let spentBefore = 0;
   if (kv) {
@@ -13424,6 +13506,8 @@ export default {
     // 🧪 테스트 전용 ID 입장(2026-10-09) — env.SIMPLE_AUTH_TEST==='1'일 때만 동작. 기본 꺼짐.
     if (pathname === '/auth/test-mode')          return handleTestAuthMode(request, env, corsHeaders);
     if (pathname === '/auth/test-enter')         return handleTestAuthEnter(request, env, corsHeaders);
+    if (pathname === '/auth/test-quota')         return handleTestQuota(request, env, corsHeaders);
+    if (pathname === '/auth/test-migrate')       return handleTestMigrate(request, env, corsHeaders);
     if (pathname === '/auth/confirm-backup')      return handleConfirmBackup(request, env, corsHeaders);
     if (pathname === '/auth/verify')             return handleVerify(request, env, corsHeaders);
     if (pathname === '/auth/refresh')            return handleRefresh(request, env, corsHeaders);
@@ -20465,7 +20549,7 @@ const TEST_ID_PREFIX = 'tid-';
 function _testAuthOn(env) { return env && env.SIMPLE_AUTH_TEST === '1'; }
 
 async function handleTestAuthMode(request, env, corsHeaders) {
-  return new Response(JSON.stringify({ ok: true, enabled: _testAuthOn(env), gdc_free: _gdcFreeTestOn(env) }), { status: 200, headers: corsHeaders });
+  { const _qc = _testQuotaConfig(env); return new Response(JSON.stringify({ ok: true, enabled: _testAuthOn(env), gdc_free: _gdcFreeTestOn(env), quota_krw: _qc.limitKrw, grace_hours: _qc.graceHours, free_scope: env.GDC_FREE_TEST_SCOPE === 'test-only' ? 'test-only' : 'all' }), { status: 200, headers: corsHeaders }); }
 }
 
 // ── 쉬운 한국어 단어 아이디 자동 생성 (2026-10-09) ─────────────────────
@@ -20497,6 +20581,67 @@ async function _mintTestPhoneToken(env, id) {
   const payload = `${TEST_ID_PREFIX}${id}:${exp}`;
   const sig = await _hmacSha256Hex(env.PHONE_VERIFY_SECRET, payload);
   return { token: payload + '.' + sig, exp };
+}
+
+// POST /auth/test-quota { phone_verify_token } — 테스트 계정의 사용 한도·유예·차단 상태(2026-10-27).
+// 테스트 토큰이 아니면 { ok:true, test:false }. 한도 초과로 차단된 계정도 조회할 수 있다.
+async function handleTestQuota(request, env, corsHeaders) {
+  if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+  const body = await request.json().catch(() => ({})) || {};
+  const r = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, { allowBlockedTest: true, allowMigrated: true });
+  if (!r.ok) { const m = mapPhoneAuthError(r); return _err(m.status, m.code, m.message, corsHeaders); }
+  if (!String(r.e164 || '').startsWith(TEST_ID_PREFIX)) {
+    return new Response(JSON.stringify({ ok: true, test: false }), { status: 200, headers: corsHeaders });
+  }
+  const ev = await _testQuotaGetStatus(env.AI_SETUP_SEALS_KV, r.guid, Date.now(), _testQuotaConfig(env));
+  return new Response(JSON.stringify({ ok: true, test: true, id: String(r.e164).slice(TEST_ID_PREFIX.length), free_test_on: _gdcFreeTestOn(env), ...ev }), { status: 200, headers: corsHeaders });
+}
+
+// POST /auth/test-migrate { test_phone_verify_token, phone_verify_token, dry_run? } — 테스트 계정 데이터를 정식 계정으로 이동(2026-10-27).
+//  · 두 토큰이 모두 유효해야 한다: 테스트 토큰(tid-…)과 전화 인증으로 로그인한 정식 토큰.
+//  · dry_run=true면 옮길 건수만 센다. 한 번에 처리할 수 있는 하위 요청 수가 한정돼 있어(MIGRATE_MAX_REQUESTS, 기본 22 — 무료 플랜 기준)
+//    done=false가 오면 응답의 next_index를 cursor로, 지금까지의 실패 수를 failed_before로 실어 다시 호출한다.
+//  · 전부 옮기고 실패가 없으면 테스트 프로필에 migrated_to를 기록해 더는 로그인되지 않게 한다.
+async function handleTestMigrate(request, env, corsHeaders) {
+  if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  if (!(await _checkRateLimitN(env, ip, 'test-migrate', 120, 3600))) return _err(429, 'RATE_LIMITED', '잠시 후 다시 시도해 주세요', corsHeaders);
+  const body = await request.json().catch(() => ({})) || {};
+  const t = await _resolveGuidFromPhoneVerifyToken(env, body.test_phone_verify_token, { allowBlockedTest: true, allowMigrated: true });
+  if (!t.ok) { const m = mapPhoneAuthError(t); return _err(m.status, m.code, '테스트 계정 확인 실패: ' + m.message, corsHeaders); }
+  if (!String(t.e164 || '').startsWith(TEST_ID_PREFIX)) return _err(400, 'NOT_TEST_ACCOUNT', '테스트 아이디 토큰이 아닙니다', corsHeaders);
+  const f = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token);
+  if (!f.ok) { const m = mapPhoneAuthError(f); return _err(m.status, m.code, '정식 계정 확인 실패: ' + m.message, corsHeaders); }
+  if (String(f.e164 || '').startsWith(TEST_ID_PREFIX)) return _err(400, 'TARGET_IS_TEST', '정식 아이디로 로그인한 뒤에 옮길 수 있습니다', corsHeaders);
+  if (t.guid === f.guid) return _err(400, 'SAME_ACCOUNT', '같은 계정입니다', corsHeaders);
+
+  const prof = await _l1FindProfileByGuid(env, t.guid).catch(() => null);
+  if (!prof) return _err(404, 'PROFILE_NOT_FOUND', '테스트 계정을 찾을 수 없습니다', corsHeaders);
+  if (prof.extra?.migrated_to) {
+    if (prof.extra.migrated_to === f.guid) return new Response(JSON.stringify({ ok: true, done: true, clean: true, migrated: true, already: true, totals: { found: 0, moved: 0, failed: 0 }, results: [] }), { status: 200, headers: corsHeaders });
+    return _err(409, 'ALREADY_MIGRATED_ELSEWHERE', '이 테스트 아이디는 이미 다른 정식 아이디로 이동했습니다', corsHeaders);
+  }
+
+  const dry = !!body.dry_run;
+  const cursor = Math.max(0, Math.floor(Number(body.cursor) || 0));
+  const failedBefore = Math.max(0, Math.floor(Number(body.failed_before) || 0));
+  // 하위 요청 예산: 무료 플랜은 요청 1건당 50개까지이고, 이 호출은 로그인 확인·속도 제한·마무리 등으로 따로 15~20개를 쓴다.
+  // 기본 22. 유료 플랜이면 MIGRATE_MAX_REQUESTS=800 등으로 올리면 호출 횟수가 줄어든다(커서 방식이라 어느 값이든 끝까지 간다).
+  const budget = Math.max(6, Math.min(2000, Number(env.MIGRATE_MAX_REQUESTS) > 0 ? Number(env.MIGRATE_MAX_REQUESTS) : 22));
+  const l1Token = await _l1AdminToken(env);
+  const l1 = (path, init = {}) => fetch(`${L1_DEFAULT}${path}`, { ...init, headers: { 'Authorization': `Bearer ${l1Token}`, 'Content-Type': 'application/json', ...(init.headers || {}) } });
+  const out = await _migrateTestData({ l1, fromGuid: t.guid, toGuid: f.guid, dryRun: dry, maxRequests: budget, startIndex: cursor });
+
+  let settings = null, migrated = false;
+  if (!dry && out.done) {
+    settings = await _mergeKmailSettings({ l1, fromGuid: t.guid, toGuid: f.guid }).catch(e => ({ merged: false, error: e.message }));
+    if (out.clean && failedBefore === 0) { // 앞선 호출에서 실패가 있었다면(failed_before) 이동 완료로 표시하지 않는다
+      await _l1PatchProfile(env, prof.id, { extra: { ...(prof.extra || {}), migrated_to: f.guid, migrated_at: new Date().toISOString() } });
+      migrated = true;
+    }
+  }
+  console.log(JSON.stringify({ tag: 'TEST_MIGRATE', dry, from: t.guid, to: f.guid, cursor, next_index: out.next_index, totals: out.totals, done: out.done, clean: out.clean, requests_used: out.requests_used, migrated, ts: new Date().toISOString() }));
+  return new Response(JSON.stringify({ ok: true, ...out, migrated, settings }), { status: 200, headers: corsHeaders });
 }
 
 // POST /auth/test-enter { id? } — id가 없으면 새 한국어 단어 아이디를 자동 생성,
@@ -20551,6 +20696,10 @@ async function handleTestAuthEnter(request, env, corsHeaders) {
   if (!String(profile.handle || '').startsWith(TEST_ID_PREFIX)) {
     return _err(403, 'NOT_TEST_ACCOUNT', '테스트 계정이 아닙니다', corsHeaders);
   }
+  if (profile.extra && profile.extra.migrated_to) {
+    return _err(403, 'TEST_ACCOUNT_MIGRATED', '이 테스트 아이디의 데이터는 정식 아이디로 이동했습니다. 정식 아이디로 로그인해 주세요.', corsHeaders);
+  }
+  if (env.AI_SETUP_SEALS_KV) { try { await env.AI_SETUP_SEALS_KV.put(`hondi:acct_kind:${profile.guid}`, 't'); } catch (e) { /* 캐시 실패 무시 */ } }
   const shownId = String(profile.handle).slice(TEST_ID_PREFIX.length);
 
   const pv = await _mintTestPhoneToken(env, shownId);
@@ -21284,7 +21433,7 @@ async function handleKlawRelay(bodyText, env, corsHeaders, meta = null, ctx = nu
   const _klawBetaActive = _klawBetaUsageBillingActive();
   const _klawFlatFee = (!_klawBetaActive && step_cycle) ? _klawFlatFeeForClaimAmount(claim_amount_krw) : null;
   const _klawIsCaseFlow = !_klawBetaActive && !!case_id;
-  if (!_gdcFreeTestOn(env) && !_klawFreeTier && step_cycle && _klawFlatFee) { // 🧪 무료 테스트 모드면 사전 잔액 확인 생략
+  if (!(await _gdcFreeFor(env, guid)) && !_klawFreeTier && step_cycle && _klawFlatFee) { // 🧪 무료 테스트 모드면 사전 잔액 확인 생략
     let _klawWillChargeNow = true; // 기본: 이번 호출에서 실제로 청구 시도됨
     if (_klawIsCaseFlow) {
       // 사건단위 흐름 — 이미 결제된 사건이면(재생성) 이번엔 청구가 없다.
