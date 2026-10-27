@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K-Patent 라이선싱·기술이전계약 방법론 v0.1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;900&display=swap">
+<style>
+/* Layout: 좌측 목차 + 본문 단일 컬럼 문서. 표와 수식은 가로 스크롤 컨테이너. */
+:root{
+  --bg:#f2f5f3; --surface:#ffffff; --soft:#e4ece8; --fg:#14211d; --muted:#51625c;
+  --line:#c9d5cf; --accent:#0d5a4a; --accent-ink:#ffffff; --mark:#8a5a00; --mark-bg:#f6e7c1;
+  --warn:#9b2c1c; --warn-bg:#f6dcd6; --ok:#17603a; --ok-bg:#d6eddf;
+  --f-display:"Noto Serif KR","Nanum Myeongjo",serif;
+  --f-body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1614; --surface:#15201d; --soft:#1c2b27; --fg:#e3ece8; --muted:#92a49d;
+    --line:#2c3d38; --accent:#62c5aa; --accent-ink:#06150f; --mark:#e6b955; --mark-bg:#3a2e12;
+    --warn:#ef9a8a; --warn-bg:#3b1d17; --ok:#7bd3a0; --ok-bg:#15301f; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1614; --surface:#15201d; --soft:#1c2b27; --fg:#e3ece8; --muted:#92a49d;
+  --line:#2c3d38; --accent:#62c5aa; --accent-ink:#06150f; --mark:#e6b955; --mark-bg:#3a2e12;
+  --warn:#ef9a8a; --warn-bg:#3b1d17; --ok:#7bd3a0; --ok-bg:#15301f; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.75;
+  padding-block:32px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));word-break:keep-all;overflow-wrap:break-word}
+.wrap{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:200px minmax(0,1fr);gap:48px}
+nav.toc{position:sticky;top:24px;align-self:start;font-size:13px;line-height:1.5;max-height:calc(100vh - 48px);overflow:auto}
+nav.toc b{display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;color:var(--muted);margin-bottom:10px;font-weight:500}
+nav.toc a{display:block;padding:5px 0 5px 10px;border-left:2px solid var(--line);color:var(--muted);text-decoration:none}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--accent);border-left-color:var(--accent);outline:none}
+main{min-width:0}
+header.top{border-bottom:2px solid var(--fg);padding-bottom:24px;margin-bottom:36px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+h1{font-family:var(--f-display);font-weight:900;font-size:clamp(30px,5vw,46px);line-height:1.2;margin:10px 0 12px;text-wrap:balance}
+h1 em{font-style:normal;color:var(--accent)}
+.lede{font-size:17px;color:var(--fg);max-width:46em}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.chip{font-family:var(--f-mono);font-size:12px;padding:3px 10px;border:1px solid var(--line);background:var(--surface);border-radius:3px;color:var(--muted)}
+.chip.draft{background:var(--mark-bg);color:var(--mark);border-color:transparent}
+section{margin-bottom:56px;scroll-margin-top:24px}
+h2{font-family:var(--f-display);font-weight:600;font-size:25px;line-height:1.35;margin:0 0 6px;text-wrap:balance;padding-top:6px;border-top:1px solid var(--line)}
+h2 .sec{font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.1em;color:var(--accent);display:block;margin-bottom:2px;padding-top:14px}
+h3{font-size:16.5px;margin:30px 0 8px;font-weight:700}
+h4{font-size:14px;margin:18px 0 4px;font-weight:700;color:var(--muted);letter-spacing:.02em}
+p{margin:0 0 12px;max-width:44em}
+ul,ol{margin:0 0 14px;padding-left:1.3em;max-width:44em}
+li{margin-bottom:5px}
+code,.mono{font-family:var(--f-mono);font-size:.9em}
+code{background:var(--soft);padding:1px 5px;border-radius:3px}
+.scroll{overflow-x:auto;margin:12px 0 20px;border:1px solid var(--line);background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:13.5px;line-height:1.6}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--line)}
+th{background:var(--soft);font-weight:700;font-size:12.5px;letter-spacing:.03em;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:500}
+.formula{font-family:var(--f-mono);font-size:13.5px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);padding:14px 16px;margin:14px 0 18px;overflow-x:auto;white-space:pre;line-height:1.8}
+.note,.warn,.ok{padding:12px 16px;margin:16px 0 20px;max-width:46em;font-size:14px;border-left:4px solid}
+.note{background:var(--mark-bg);border-color:var(--mark)}
+.warn{background:var(--warn-bg);border-color:var(--warn)}
+.ok{background:var(--ok-bg);border-color:var(--ok)}
+.note b,.warn b,.ok b{display:block;font-size:12px;letter-spacing:.08em;margin-bottom:2px}
+.tag{display:inline-block;font-family:var(--f-mono);font-size:12px;padding:0 7px;border-radius:3px;font-weight:500;white-space:nowrap}
+.t-must{background:var(--warn-bg);color:var(--warn)}
+.t-imp{background:var(--mark-bg);color:var(--mark)}
+.t-rec{background:var(--soft);color:var(--muted)}
+.t-keep{background:var(--ok-bg);color:var(--ok)}
+.t-chg{background:var(--mark-bg);color:var(--mark)}
+.t-new{background:var(--accent);color:var(--accent-ink)}
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;margin:18px 0 24px;border:1px solid var(--line);background:var(--surface)}
+.flow>div{padding:12px 14px;border-right:1px solid var(--line);font-size:13px;line-height:1.55;min-width:0}
+.flow>div:last-child{border-right:0;background:var(--soft)}
+.flow b{display:block;font-family:var(--f-mono);font-size:12px;color:var(--accent);margin-bottom:3px}
+.flow span{color:var(--muted)}
+.layers{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:16px 0 22px}
+.layer{border:1px solid var(--line);background:var(--surface);padding:14px 16px;min-width:0}
+.layer h4{margin:0 0 6px;color:var(--fg);font-size:14.5px}
+.layer .k{font-family:var(--f-mono);font-size:12px;color:var(--accent);letter-spacing:.06em}
+.layer p{font-size:13.5px;margin:0 0 6px;line-height:1.65}
+.layer .lim{color:var(--muted);font-size:12.5px}
+footer{border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:13px}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:860px){
+  .wrap{grid-template-columns:minmax(0,1fr);gap:0}
+  nav.toc{position:static;max-height:none;margin-bottom:28px;display:flex;flex-wrap:wrap;gap:4px 14px}
+  nav.toc b{width:100%;margin-bottom:2px}
+  nav.toc a{border-left:0;padding:2px 0}
+  .flow{grid-template-columns:minmax(0,1fr)}
+  .flow>div{border-right:0;border-bottom:1px solid var(--line)}
+  .flow>div:last-child{border-bottom:0}
+}
+  .flow.f6{grid-template-columns:repeat(6,minmax(0,1fr))}
+  @media (max-width:860px){ .flow.f6{grid-template-columns:minmax(0,1fr)} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="toc" aria-label="목차">
+  <b>CONTENTS</b>
+  <a href="#s0">0 요약</a>
+  <a href="#s1">1 위치와 범위</a>
+  <a href="#s2">2 목표와 불가역 조건</a>
+  <a href="#s3">3 공리와 명제</a>
+  <a href="#s4">4 강제규칙</a>
+  <a href="#s5">5 절차 STEP 0~E</a>
+  <a href="#s6">6 서류 세트 설계</a>
+  <a href="#s7">7 수수료 납부 모의</a>
+  <a href="#s8">8 확신도·평가 제안</a>
+  <a href="#s9">9 열린 질문</a>
+  <a href="#s10">부록 출력 서식</a>
+</nav>
+<main>
+<header class="top">
+  <div class="eyebrow">K-Patent · 라이선싱·기술이전계약 변리사 보조 방법론</div>
+  <h1>K-Patent 라이선싱·기술이전계약 <em>v0.1</em></h1>
+  <p class="lede">K-Patent 방법론 v0.1을 라이선싱·기술이전 실무에 맞게 구체화한 초안입니다. 대상 지식재산과 계약 목적을 의뢰인과의 대화로 정리해 대상 지식재산 목록, 실시권 조건표, 대가 구조 비교표, 계약서 목차와 초안을 만들고, 수수료·비용 처리 절차까지 연습할 수 있게 설계했습니다. 실시권 범위·대가 구조의 확정, 법률 검토(계약 효력·분쟁), 세무·회계 판단, 기명날인, 제출, 납부는 인간 변리사가 하며 법률·세무 부분은 변호사·회계사 영역입니다.</p>
+  <div class="meta">
+    <span class="chip draft">초안 DRAFT</span>
+    <span class="chip">2026-10-27</span>
+    <span class="chip">기반: K-Law v15.1</span>
+    <span class="chip">상위: K-Patent v0.1</span>
+    <span class="chip">검토 대상: 변리사</span>
+  </div>
+</header>
+
+<section id="s0">
+  <h2><span class="sec">SECTION 0</span>요약</h2>
+  <ul>
+    <li><b>무엇인가.</b> <a href="/docs/kpatent-methodology-v0.1.html">K-Patent 방법론 v0.1</a>(공리 P1–P9, 강제규칙 R1–R25, STEP 0→D, 승인 게이트)을 그대로 상속하고, 라이선스·기술이전 계약 조건 정리와 계약서 초안에 필요한 공리 LA1–LA6, 강제규칙 LR1–LR10, 서류 세트 설계를 더한 하위 방법론입니다.</li>
+    <li><b>K-Law v15.1에서 가져온 것.</b> 4계층 공리와 강제규칙표(★▲○), STEP 0/A/B/C 구조, 역방향 추론 우선, 판단불가 페일세이프, 허위 식별자 생성 금지, 완료 태그와 자기검증.</li>
+    <li><b>이 분야에서 더한 것.</b> 계약 목적 중심의 인터뷰, 대상 목록과 계약서 일치 점검, 조건표와 조항 일치 점검, 대가 구조 비교, 개량기술·해지 조항 점검, 법률·세무 판단의 이관.</li>
+    <li><b>시뮬레이션과의 연결.</b> 이 방법론은 <a href="/pages/patent-attorney-licensing-simulation.html">라이선싱·기술이전계약 시뮬레이션</a>의 근거입니다. 의뢰인과의 대화로 대상 지식재산 목록, 실시권 조건표, 대가 구조 비교표, 계약서 초안를 쓰고, 제출과 수수료 납부를 <b>모의로</b> 진행하며, 인간 변리사 역할은 승인 게이트(HG-0, HG-1, HG-2, HG-P)에서 이용자가 맡습니다.</li>
+    <li><b>인간 변리사의 몫.</b> 실시권 범위·대가 구조(권리범위) 확정, 서류 검토, 기명날인, 지식재산처 제출, 수수료 납부, 대리는 어느 단계에서도 AI가 대신하지 않습니다. AI의 모든 산출물은 변리사가 확정하기 전까지 DRAFT입니다.</li>
+  </ul>
+  <div class="note"><b>읽는 법</b>상위 문서와 겹치는 규칙은 번호만 인용하고 다시 쓰지 않습니다. 이 문서의 새 내용은 제3~7장에 있습니다. 조문 번호, 기한, 수수료 수치는 법령 스냅샷 확정 시 대조하며, 확인하지 못한 값은 <code>확인 필요</code>로 둡니다.</div>
+</section>
+
+<section id="s1">
+  <h2><span class="sec">SECTION 1</span>위치와 범위</h2>
+  <h3>상속 관계</h3>
+  <div class="scroll"><table>
+<thead><tr><th>항목</th><th>내용</th></tr></thead>
+<tbody><tr><td>상위 방법론</td><td>K-Patent v0.1 (공리 P1–P9, 규칙 R1–R25, STEP 0→D, 게이트 HG-0~HG-4, 3축 확신도, 5층 평가). 충돌하면 상위 문서와 SP의 §LEGAL-LIMIT이 우선합니다.</td></tr><tr><td>기반 SP</td><td>SP-LAW-13-10 변리사 보조 AI — 라이선싱·기술이전계약 v1.0 (SP_patent-attorney-licensing-assistant), 부록 A 서류 카탈로그</td></tr><tr><td>시뮬레이션 SP</td><td>SP-KPATENT-SIM-LICENSING v0.1 (prompts/SP-kpatent-licensing-simulation_v0_1.md)</td></tr><tr><td>대상 업무</td><td>라이선스·기술이전 계약 조건 정리와 계약서 초안</td></tr><tr><td>이 방법론이 하지 않는 것</td><td>특허성·권리범위·침해·무효 확정, 선행기술 조회 결과의 단정, 기명날인·제출·납부·대리</td></tr></tbody>
+</table></div>
+  <h3>인접 분야와의 경계</h3>
+  <div class="scroll"><table>
+<thead><tr><th>인접 분야</th><th>처리</th></tr></thead>
+<tbody><tr><td>변호사</td><td>계약의 법적 효력, 분쟁 해결, 책임 조항의 법률 검토는 변호사 영역이다.</td></tr><tr><td>회계사·세무</td><td>대가의 세무 처리·가치평가·회계 판단은 회계사·세무사 영역이다.</td></tr><tr><td>IP전략</td><td>대상 특허의 가치·침해 분석은 IP전략 분야와 변리사가 맡는다.</td></tr><tr><td>심판·소송</td><td>계약 분쟁에서 심판·소송으로 이어지면 해당 분야와 변호사에게 이관한다.</td></tr></tbody>
+</table></div>
+</section>
+
+<section id="s2">
+  <h2><span class="sec">SECTION 2</span>목표와 불가역 조건</h2>
+  <p>목표는 상위 문서와 같습니다. 출원인이 법이 허용하는 범위에서 가장 넓고 단단한 권리를 기한 안에 놓치지 않고 확보하도록, 변리사가 바로 검토할 수 있는 초안과 근거를 만드는 것입니다.</p>
+  <h3>불가역 조건 (상위 C1~C4 상속)</h3>
+  <div class="scroll"><table>
+<thead><tr><th>조건</th><th>내용</th><th>라이선싱·기술이전계약 분야에서의 의미</th></tr></thead>
+<tbody><tr><td>C1 기한 무결</td><td>우선권·청구·통지 응답 등 기한을 놓치지 않는다</td><td>체결 목표일 임박 발언이 나오면 서류 작성보다 일정 확인을 먼저 변리사에게 맡김(R10)</td></tr><tr><td>C2 선행 사실 보전</td><td>공개 이력 등 되돌릴 수 없는 사실을 가장 먼저 확인한다</td><td>권리자·공유 여부를 첫 질문으로 둠(P4)</td></tr><tr><td>C3 보정·보완 가능성 보전</td><td>나중에 보충할 수 없는 자료를 처음에 확보한다</td><td>가치 평가·금액 생성 요구는 거절하고 의뢰인 입력만 사용(R11)</td></tr><tr><td>C4 정직</td><td>허위·은폐·무단 행위를 하지 않는다</td><td>법적 효력·세무 보장 요구는 변호사·회계사 이관(P6)</td></tr></tbody>
+</table></div>
+  <h3>두 방향의 실패 (P7)</h3>
+  <div class="scroll"><table>
+<thead><tr><th>방향</th><th>라이선싱·기술이전계약 예시</th><th>점검</th></tr></thead>
+<tbody><tr><td>과소보호</td><td>개량기술·해지 조항 누락, 범위가 너무 넓은 허락</td><td>필수 조항 점검표, 범위 재검토</td></tr><tr><td>과대주장</td><td>보유하지 않은 권리의 허락, 근거 없는 대가 주장</td><td>권리자 확인, 수치 근거 대조</td></tr></tbody>
+</table></div>
+</section>
+
+<section id="s3">
+  <h2><span class="sec">SECTION 3</span>공리와 명제</h2>
+  <p>상위 공리 P1–P9를 그대로 두고, 이 분야의 도메인 공리를 제1계층에 더합니다. 공리는 컨텍스트에 명시된 전제로 유지합니다.</p>
+  <div class="scroll"><table>
+  <thead><tr><th>공리</th><th>내용</th></tr></thead>
+  <tbody><tr><td>LA1 대상의 특정</td><td>라이선스는 “무엇을, 누가, 어떤 범위로”가 특정되어야 한다. 하나라도 비면 판단 유보한다.</td></tr><tr><td>LA2 보유한 권리만</td><td>의뢰인이 보유하지 않은 권리나 공유자 동의 없는 권리를 허락하는 조항을 쓰지 않는다.</td></tr><tr><td>LA3 조건표가 곧 조항</td><td>조건표와 계약서 조항이 일치해야 한다. 어긋나면 고치지 않고 표시한다.</td></tr><tr><td>LA4 수치는 입력만</td><td>대가·기간·지역 등 수치는 의뢰인이 준 것만 쓴다. 가치 평가는 하지 않는다.</td></tr><tr><td>LA5 법률·세무는 전문가</td><td>계약의 효력·분쟁·책임 조항 검토는 변호사, 세무·가치평가는 회계사·세무사에게 이관한다.</td></tr><tr><td>LA6 양방향 점검</td><td>허락자 위험과 상대방 논거를 함께 살펴 한쪽에 치우친 초안을 피한다.</td></tr></tbody>
+  </table></div>
+  <h3>명제의 3층위</h3>
+  <div class="scroll"><table>
+<thead><tr><th>층위</th><th>내용</th></tr></thead>
+<tbody><tr><td>제1층위: 기한·절차</td><td>체결 목표일, 권리의 존속 기간, 기술 이전 시점, 등록 이전 절차 시점</td></tr><tr><td>제2층위: 권리유형·성격</td><td>계약 유형, 대상 지식재산, 권리자·공유 여부, 지역·분야·기간</td></tr><tr><td>제3층위: 실체 요건</td><td>조건표와 조항의 대응, 대가 구조, 개량기술·보증·해지 조항</td></tr></tbody>
+</table></div>
+</section>
+
+<section id="s4">
+  <h2><span class="sec">SECTION 4</span>강제규칙</h2>
+  <p>상위 규칙 R1–R25는 모두 적용됩니다(특히 R4 인간 변리사 게이트, R5 식별자 생성 금지, R8 사실 날조 금지, R10 공개 이력, R13 명칭, R16 부호 대응, R20 수수료). 아래는 이 분야에서 더하는 규칙이며, 충돌하면 더 엄격한 쪽을 따릅니다. <span class="tag t-must">★ 필수</span> <span class="tag t-imp">▲ 중요</span> <span class="tag t-rec">○ 권고</span></p>
+  <div class="scroll"><table>
+    <thead><tr><th>번호</th><th>등급</th><th>규칙</th></tr></thead>
+    <tbody><tr><td>LR1</td><td><span class="tag t-must">★</span></td><td>대상 지식재산 목록과 계약서의 번호·명칭이 어긋나면 고치지 않고 <code>[기록 점검]</code>으로 표시한다.</td></tr><tr><td>LR2</td><td><span class="tag t-must">★</span></td><td>조건표와 계약서 조항이 다르면 <code>[기록 점검]</code>으로 표시한다.</td></tr><tr><td>LR3</td><td><span class="tag t-must">★</span></td><td>대가·금액·로열티율을 만들지 않는다. 의뢰인이 준 수치만 쓰고 나머지는 <code>확인 필요</code>로 둔다. 가치 평가를 하지 않는다.</td></tr><tr><td>LR4</td><td><span class="tag t-must">★</span></td><td>계약의 법적 효력, 책임 한도, 세무 처리를 단정하지 않는다. 변호사·회계사 이관으로 표시한다.</td></tr><tr><td>LR5</td><td><span class="tag t-imp">▲</span></td><td>공유 특허·정부 과제 결과물 등 제약이 있으면 변리사에게 이관한다.</td></tr><tr><td>LR6</td><td><span class="tag t-imp">▲</span></td><td>개량기술·재실시·해지 조항 누락을 점검표로 표시한다.</td></tr><tr><td>LR7</td><td><span class="tag t-imp">▲</span></td><td>대상 특허 번호는 의뢰인이 준 것만 쓰고 만들지 않는다(<code>조회 필요</code>).</td></tr><tr><td>LR8</td><td><span class="tag t-rec">○</span></td><td>분쟁 대비 조항이 필요하면 변호사 검토 필요로 표시한다.</td></tr><tr><td>LR9</td><td><span class="tag t-must">★</span></td><td>기한 임박 우선: 불변기간·납부기한·응답 기한 도과가 임박했다는 말이 나오면 서류 작성보다 먼저 기한 확인을 변리사에게 맡기도록 안내한다.</td></tr><tr><td>LR10</td><td><span class="tag t-rec">○</span></td><td>수수료 항목 표시: 금액에 영향을 주는 변수(분량, 항 수, 국가 수 등)를 구분해 표시하되 금액은 조회 전 <code>확인 필요</code>로 둔다.</td></tr></tbody>
+  </table></div>
+</section>
+
+<section id="s5">
+  <h2><span class="sec">SECTION 5</span>절차: STEP 0 → A → B → C → D → E</h2>
+  <p>상위 STEP 0/A/B/C/D를 유지하고, 시뮬레이션에서는 STEP D(인계·제출)와 별도로 <b>STEP E(수수료 납부 모의·결과 기록)</b>를 둡니다. 상위 문서에서는 납부를 변리사의 전속 행위(HG-2)로 두므로, 납부 단계를 승인 게이트 <b>HG-P</b>로 분리해 연습합니다. 응답의 첫 줄은 <code>[K-Patent 라이선싱·기술이전계약 시뮬레이션 | 단계: STEP X | 게이트: G | 서류: S]</code> 형식입니다.</p>
+  <div class="flow f6">
+    <div><b>STEP 0</b>접수<br><span>권리자, 목적, 범위</span></div><div><b>STEP A</b>요건<br><span>목적·대상·조건 인터뷰</span></div><div><b>STEP B</b>초안<br><span>목록, 조건표, 계약서</span></div><div><b>STEP C</b>검증<br><span>목록–조항 대응, 결함 목록</span></div><div><b>STEP D</b>인계·제출<br><span>인계, 제출 모의</span></div><div><b>STEP E</b>납부·기록 <span class="tag t-new">시뮬레이션</span><br><span>비용 모의 납부</span></div>
+  </div>
+  <h3>단계별 내용</h3>
+  <div class="scroll"><table>
+<thead><tr><th>단계</th><th>내용</th><th>게이트</th></tr></thead>
+<tbody><tr><td>STEP 0 접수</td><td>의뢰인·계약 유형 확인, <b>권리자와 공유 여부 최우선</b>, 첫 직관 격리, 3층위 명제. 법률·세무 이관 안내</td><td>HG-0 대기</td></tr><tr><td>STEP A 목적·대상</td><td>계약 인터뷰(제6장 표), 핵심 표기 확정, 역방향 추론(상대 협상 논거), 권리 현황 조사 상태 표시(미조사), 대가 희망 질문</td><td>—</td></tr><tr><td>STEP B 초안</td><td>조건·대가 설계 2~3안, 양방향 점검, 대상 목록·조건표·계약서 초안(한 응답에 한 서류)</td><td>HG-1 대기 (실시권 범위·대가 구조 확정)</td></tr><tr><td>STEP C 검증</td><td>목록–조항 대응표, 대가 수치 근거 점검, 결함 목록, 3축 확신도(조사 상한 3), 변리사 검토 체크리스트</td><td>HG-2 대기 (최종 승인)</td></tr><tr><td>STEP D 인계·제출</td><td>인계 패키지, 제출 서류 목록, 제출 순서 모의, <b>SIM- 모의 제출 확인서</b>(“실제로 체결·제출되지 않았습니다”)</td><td>HG-P 대기 (납부 승인)</td></tr><tr><td>STEP E 납부·기록</td><td>비용 항목표(금액 확인 필요), 모의 납부 영수증(SIM-PAY-…), 후속 일정표, 의뢰인 안내문, 결과 기록</td><td>HG-P 통과</td></tr></tbody>
+</table></div>
+  <h3>인간 변리사 승인 게이트 (시뮬레이션)</h3>
+  <div class="scroll"><table>
+<thead><tr><th>게이트</th><th>시점</th><th>변리사 역이 하는 일</th><th>AI가 하는 일</th></tr></thead>
+<tbody><tr><td>HG-0</td><td>STEP 0</td><td>권리유형·출원 여부 방침 확인</td><td>비교표와 위험 고지</td></tr><tr><td>HG-1</td><td>STEP B</td><td>실시권 범위·대가 구조(권리범위) 확정</td><td>실시권 조건안, 대가 구조 비교안, 최강 반론(상대 협상 논거)</td></tr><tr><td>HG-2</td><td>STEP C</td><td>서류 일체 검토·최종 승인(실제 업무에서는 기명날인과 제출)</td><td>체크리스트, 인계 패키지</td></tr><tr><td>HG-P</td><td>STEP D</td><td>수수료 금액 확정·납부 승인(실제 업무에서는 변리사가 직접 납부)</td><td>항목표, 모의 영수증</td></tr></tbody>
+</table></div>
+  <div class="ok"><b>승인의 기록</b>승인은 이용자가 변리사 역으로 직접 보낸 메시지(버튼 또는 입력)만 인정합니다. AI는 스스로 승인하거나 승인된 것으로 간주하지 않습니다. 서류 상태는 DRAFT → 변리사 검토 중 → 변리사 확정(시뮬레이션) 순서로만 바뀝니다.</div>
+</section>
+
+<section id="s6">
+  <h2><span class="sec">SECTION 6</span>서류 세트 설계</h2>
+  <h3>계약 인터뷰 (STEP A)</h3>
+  <div class="scroll"><table>
+<thead><tr><th>항목</th><th>질문 요지</th><th>쓰임</th></tr></thead>
+<tbody><tr><td>계약 목적</td><td>라이선스·양도·공동개발·크로스 중 무엇인가</td><td>계약 유형 확정 (판단은 변리사)</td></tr><tr><td>대상 지식재산</td><td>무엇을 허락·이전하나, 권리자, 공유 여부</td><td>대상 지식재산 목록 (번호는 만들지 않음)</td></tr><tr><td>당사자</td><td>허락자·상대방, 관계, 계열 여부</td><td>당사자 표시</td></tr><tr><td>실시권 조건</td><td>독점/비독점, 지역, 기간, 분야, 재실시 허용</td><td>실시권 조건표</td></tr><tr><td>대가 희망</td><td>일시금, 경상 로열티, 마일스톤, 희망 수준</td><td>대가 구조 비교표 (수치는 의뢰인 입력만)</td></tr><tr><td>개량기술·후속</td><td>개량기술 귀속, 개선 공유</td><td>개량기술 조항 후보</td></tr><tr><td>보증·책임·해지</td><td>권리 보증, 침해 대응, 해지·종료 조건</td><td>조항 후보 (법률 검토는 변호사)</td></tr><tr><td>일정·제약</td><td>체결 목표일, 정부 과제·공유 제약, 비밀 유지</td><td>일정표, 제약 표시</td></tr></tbody>
+</table></div>
+  <h3>조건·대가 설계 (STEP B)</h3>
+  <div class="scroll"><table>
+<thead><tr><th>설계 항목</th><th>쓰임</th><th>위험</th></tr></thead>
+<tbody><tr><td>독점 실시권</td><td>한 상대에게만 실시 허락</td><td>허락자 자신의 실시 가능 여부 명시 필요</td></tr><tr><td>비독점 실시권</td><td>여러 상대에게 허락 가능</td><td>대가 수준과 관리 부담 비교</td></tr><tr><td>양도</td><td>권리 자체를 이전</td><td>되돌리기 어려움, 조건 점검 필수</td></tr><tr><td>일시금 대가</td><td>계약 시 일괄 지급</td><td>장기 가치를 반영하기 어려움</td></tr><tr><td>경상 로열티</td><td>매출 연동 지급</td><td>매출 정의·검증 방법 필요(수치는 의뢰인 입력만)</td></tr><tr><td>개량기술 조항</td><td>개량 결과의 귀속·공유</td><td>누락 시 분쟁 가능, 조항은 변리사·변호사 검토</td></tr></tbody>
+</table></div>
+  <h3>별첨 구성 (STEP B)</h3>
+  <p>AI는 지식재산의 가치를 평가하거나 법적 효력을 판단하지 않습니다. 의뢰인이 준 계약 목적·조건을 기준으로 대상 목록, 조건표, 별첨 구성을 만들고, 대상 지식재산 목록과 계약서의 번호·명칭이 어긋나거나 조건표와 계약서 조항이 다르면 고치지 않고 [기록 점검]으로 표시합니다.</p>
+  <div class="scroll"><table>
+<thead><tr><th>자료</th><th>용도</th><th>작성 규칙</th></tr></thead>
+<tbody><tr><td>대상 지식재산 목록</td><td>번호, 명칭, 권리자, 상태</td><td>번호·상태는 근거 있는 것만</td></tr><tr><td>실시권 조건표</td><td>종류, 지역, 기간, 분야</td><td>계약서 조항과 일치 점검</td></tr><tr><td>대가 구조 비교표</td><td>일시금/경상/혼합</td><td>수치는 의뢰인 입력만</td></tr><tr><td>계약서 목차</td><td>조항 구성</td><td>조항 효력 판단은 변호사</td></tr><tr><td>개량기술·해지 조항 후보</td><td>조항 후보</td><td>법률 검토는 변호사</td></tr><tr><td>일정표</td><td>체결 목표, 이행 시기</td><td>날짜는 의뢰인 진술</td></tr></tbody>
+</table></div>
+  <h3>계약서 구성 (STEP B)</h3>
+  <div class="scroll"><table>
+<thead><tr><th>항목</th><th>작성 원칙</th></tr></thead>
+<tbody><tr><td>당사자</td><td>허락자·상대방 명칭</td></tr><tr><td>정의</td><td>대상 기술·용어</td></tr><tr><td>실시권의 허락</td><td>종류·지역·기간·분야</td></tr><tr><td>대가</td><td>구조와 지급 조건, 수치는 <code>[변리사 기재: …]</code></td></tr><tr><td>개량기술</td><td>귀속·공유</td></tr><tr><td>보증·책임</td><td><code>[변호사 검토]</code></td></tr><tr><td>해지·종료</td><td>조건 후보</td></tr><tr><td>확인·기명날인</td><td><code>[변리사 직접 기재]</code></td></tr></tbody>
+</table></div>
+  <h3>검증에서 찾는 결함 유형 (STEP C)</h3>
+  <div class="scroll"><table>
+<thead><tr><th>유형</th><th>내용</th></tr></thead>
+<tbody><tr><td>대상 목록 불일치</td><td>목록과 계약서의 번호·명칭이 다름</td></tr><tr><td>조건표–조항 불일치</td><td>조건표와 조항이 다름</td></tr><tr><td>대가 수치 근거 없음</td><td>입력되지 않은 금액·율 기재</td></tr><tr><td>법률·세무 단정</td><td>효력·세무 처리를 단정</td></tr><tr><td>필수 조항 누락</td><td>개량기술·해지 조항 누락</td></tr><tr><td>과소보호·과대주장</td><td>조항 누락 / 보유하지 않은 권리 허락</td></tr><tr><td>근거 없는 사실</td><td>의뢰인이 주지 않은 당사자 정보</td></tr><tr><td>제약 확인 누락</td><td>공유·정부 과제 제약 미확인</td></tr></tbody>
+</table></div>
+</section>
+
+<section id="s7">
+  <h2><span class="sec">SECTION 7</span>수수료 납부 모의</h2>
+  <p>시뮬레이션은 수수료 납부 절차를 연습하지만, <b>금액을 기억에서 말하지 않고(R20), 실제 결제를 하지 않습니다.</b> 항목별 산식의 종류와 납부 주체만 보이고, 금액은 현행 징수규칙을 조회한 값으로 변리사가 확정합니다. 모의 영수증은 <code>SIM-PAY-날짜-일련번호</code> 형식이며 공식 영수증처럼 보이지 않게 합니다.</p>
+  <div class="scroll"><table>
+<thead><tr><th>항목</th><th>산식 종류·시기</th><th>금액</th></tr></thead>
+<tbody><tr><td>계약서 작성 비용</td><td>계약 복잡도에 따라 달라짐(사무소 협의)</td><td>확인 필요</td></tr><tr><td>등록 이전·실시권 등록 비용</td><td>필요한 경우만(요건은 변리사 판단)</td><td>확인 필요</td></tr><tr><td>권리 현황 확인 비용</td><td>대상 특허 상태 확인</td><td>확인 필요</td></tr><tr><td>법률 검토 비용</td><td>변호사 영역, 별도</td><td>확인 필요</td></tr><tr><td>세무·가치평가 비용</td><td>회계사·세무사 영역, 별도</td><td>확인 필요</td></tr><tr><td>변리사 보수</td><td>사무소와 의뢰인 사이의 계약. 이 도구는 금액을 정하거나 추천하지 않음</td><td>변리사 확정</td></tr></tbody>
+</table></div>
+  <div class="warn"><b>한계</b>전자납부·가상계좌 등 실제 결제 시스템과는 연결되어 있지 않습니다. 연결되더라도 법률 검토와 변리사의 승인(HG-P) 뒤에만 수행해야 합니다. 이 화면의 납부는 순서를 익히기 위한 연습입니다.</div>
+</section>
+
+<section id="s8">
+  <h2><span class="sec">SECTION 8</span>확신도와 평가 제안</h2>
+  <h3>확신도</h3>
+  <p>상위 문서의 3축(법리·사실·조사)을 쓰고 종합은 가장 낮은 값입니다. 시뮬레이션에서는 선행기술을 조회하지 못하므로 조사 축의 상한은 3이고, 종합 4 미만은 “판단 유보”로 표시합니다. 이 값은 참고 지표이며 등록 확률이 아닙니다.</p>
+  <h3>평가 제안 (상위 5층 구조를 따름)</h3>
+  <div class="scroll"><table>
+<thead><tr><th>데이터셋</th><th>구성</th></tr></thead>
+<tbody><tr><td>라이선스 계약 10건</td><td>독점/비독점. 평가 초점: 대상 목록–조항 일치, 수치 생성 방지</td></tr><tr><td>기술이전·공동개발 10건</td><td>대가 구조. 평가 초점: 개량기술 조항, 조건표–조항 일치</td></tr><tr><td>경계 사례 5건</td><td>법률 검토, 세무, 분쟁. 평가 초점: 변호사·회계사 이관</td></tr><tr><td>함정 사례 5건</td><td>가치 평가 요구, 보유하지 않은 권리 허락, 효력 보장 요구. 평가 초점: 거절·유보</td></tr></tbody>
+</table></div>
+  <div class="scroll"><table>
+<thead><tr><th>지표</th><th>정의</th><th>방향</th></tr></thead>
+<tbody><tr><td>목록–조항 불일치 검출률</td><td>삽입한 불일치를 잡은 비율</td><td>높을수록 좋음</td></tr><tr><td>수치 생성률</td><td>입력 없이 금액·율을 만든 비율</td><td>0이어야 함</td></tr><tr><td>법률·세무 단정 억제율</td><td>효력·세무를 단정하지 않은 비율</td><td>100% 목표</td></tr><tr><td>근거 없는 사실 생성률</td><td>의뢰인이 주지 않은 수치·사실·번호를 쓴 비율</td><td>0에 가까울수록 좋음</td></tr><tr><td>공개 이력 선확인률</td><td>공개 이력(또는 해당 분야의 선행 사실) 질문이 서류 작성보다 먼저 나온 비율</td><td>100% 목표</td></tr><tr><td>게이트 준수율</td><td>변리사 승인 메시지 없이 다음 단계로 간 횟수</td><td>0이어야 함</td></tr><tr><td>모의 식별자 오염률</td><td><code>SIM-</code>·<code>SIM-PAY-</code> 외의 접수번호·영수증 번호 형태 문자열을 만든 횟수</td><td>0이어야 함</td></tr></tbody>
+</table></div>
+  <p>표본이 작아 오차가 큽니다(예: 30건에서 한 건의 차이는 3%p 이상). 학습·프롬프트 개발에 쓴 사례와 평가 사례를 분리하고(홀드아웃 30%), 변리사 패널은 AI 산출물임을 모른 채 블라인드로 채점합니다. 통과 기준은 v0.2에서 확정합니다. <b>이 시뮬레이션의 성능은 아직 검증되지 않았습니다.</b></p>
+</section>
+
+<section id="s9">
+  <h2><span class="sec">SECTION 9</span>열린 질문</h2>
+  <ul>
+    <li><b>STEP E와 HG-P.</b> 상위 문서는 납부를 HG-2의 전속 행위로 두고 STEP D까지만 정의합니다. 시뮬레이션 전용의 STEP E와 HG-P를 상위 방법론에 반영할지 정합니다.</li>
+    <li><b>법률 검토 연계.</b> 변호사 검토 시점과 인계 형식을 정합니다.</li><li><b>대가 구조 표준.</b> 대가 구조 비교표의 표준 항목을 변리사와 정합니다.</li><li><b>권리 현황 확인.</b> 권리자·공유 여부 확인 방식을 정합니다.</li>
+    <li><b>수수료 데이터.</b> 현행 징수규칙을 법령 스냅샷에서 가져오는 방법과 갱신 주기를 정합니다.</li>
+    <li><b>명칭.</b> 상위 문서와 같이 “변리사 자문가”, “AI 변리사” 등 표현을 쓰지 않고 “라이선싱·기술이전계약 변리사 보조 AI”로 칭합니다. 최종 노출 명칭은 법률 검토 사항입니다.</li>
+  </ul>
+</section>
+
+<section id="s10">
+  <h2><span class="sec">APPENDIX</span>출력 서식</h2>
+  <div class="scroll"><table>
+<thead><tr><th>번호</th><th>서식</th><th>구성</th></tr></thead>
+<tbody><tr><td>A-1</td><td>대상 지식재산 목록</td><td>번호 / 명칭 / 권리자 / 상태 / 출처(F), 번호는 근거 있는 것만</td></tr><tr><td>A-2</td><td>실시권 조건표</td><td>종류 / 지역 / 기간 / 분야 / 재실시</td></tr><tr><td>A-3</td><td>대가 구조 비교표</td><td>일시금 / 경상 / 혼합 / 수치는 의뢰인 입력만</td></tr><tr><td>A-4</td><td>개량기술·해지 조항 후보</td><td>조항 후보 / 법률 검토는 변호사</td></tr><tr><td>A-5</td><td>초안 서류</td><td>제목 / 사안 개요(내부용) / 본문(제출용) / 첨부 목록 / 변리사 검토 체크리스트 / 확인·기명날인 <code>[변리사 직접 기재]</code> / [초안 검토 고지]</td></tr><tr><td>A-6</td><td>결함 목록</td><td>ID / 위치 / 유형 / 심각도 / 조치</td></tr><tr><td>A-7</td><td>수수료 항목표·모의 영수증</td><td>항목 / 산식 종류 / 금액(확인 필요) / 납부 주체 / SIM-PAY 번호</td></tr><tr><td>A-8</td><td>인계 패키지</td><td>사안 요약 / 서류 목록과 상태 / 대비표와 최강 반론 / 결함 목록 / 기한표 / 확인 필요 목록 / 승인 체크리스트</td></tr></tbody>
+</table></div>
+  <h3>완료 태그</h3>
+  <p><code>[STEP-0-COMPLETE]</code> <code>[STEP-A-COMPLETE]</code> <code>[STEP-B-COMPLETE]</code> <code>[STEP-C-COMPLETE]</code> <code>[STEP-D-HANDOFF]</code> <code>[STEP-E-COMPLETE]</code></p>
+</section>
+
+<footer>K-Patent 라이선싱·기술이전계약 v0.1 초안 · 2026-10-27 · K-Law v15.1과 K-Patent v0.1 기반, SP_patent-attorney-licensing-assistant v1.0 참조 · 조문·수치는 법령 스냅샷 확정 시 재검증 · 자체 설계 초안이며 제3자 검증을 거치지 않았습니다. 법률 자문이나 성능 보증이 아닙니다. <a href="/docs/kpatent-methodology-v0.1.html">상위 문서: K-Patent 방법론 v0.1</a> · <a href="/pages/patent-attorney-licensing.html">라이선싱·기술이전계약 서비스 화면</a></footer>
+</main>
+</div>
+
+</body>
+</html>
