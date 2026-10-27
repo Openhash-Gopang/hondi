@@ -34720,7 +34720,7 @@ async function _kmailSendOneEmail(env, { guid, to, subject, text, sessionId, rep
   // 쿼터 판정·과금은 발송이 이미 끝난 뒤 실행 — 실패해도 이미 보낸
   // 메일을 취소할 수 없으므로 호출부 응답 자체는 막지 않는다.
   const quota = await _kmailCheckAndChargeQuota(env, guid);
-  return { fromAddr, quota };
+  return { fromAddr, fromName, quota };
 }
 
 // POST /mail/send — K-Mail 사용자 발신(관리자 gov-mail과 별개 경로).
@@ -34765,6 +34765,7 @@ async function handleUserMailSend(request, env, corsHeaders) {
 
   return new Response(JSON.stringify({
     ok: true, from: result.fromAddr, sent_at: new Date().toISOString(),
+    from_display: _kmailFormatSender(result.fromAddr, result.fromName),     // 받는 사람 화면에 보이는 모양("도 영민 <ceo@hondi.kr>" 또는 주소만) — 보냄 확인 카드가 표시
     quota: { charged_gdc: result.quota.charged ? result.quota.chargedGdc : 0, projected_5d_avg: result.quota.projectedAvg ?? null },
   }), { status: 200, headers: corsHeaders });
 }
