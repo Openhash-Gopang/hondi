@@ -62,3 +62,13 @@ describe('서류 작성 시작 문구 — 법무사·변호사는 초안 우선'
     assert.ok(js.includes("'부족한 항목은 3개 이내로 먼저 물어봐 주세요.'"));
   });
 });
+
+describe('GWP — 나비로 Navi Law 등록(PDV 자동 기입 경로)', () => {
+  it('registry 에 tab 서비스로 등록되고 PDV·서명 출처 허용 목록에 law.hondi.net 이 있다', () => {
+    const reg = read('gwp-registry.js'), k = reg.indexOf("id: 'navilaw'");
+    assert.ok(k > 0);
+    const block = reg.slice(k, reg.indexOf('},', k));
+    assert.match(block, /type: 'tab'/); assert.match(block, /url: 'https:\/\/law\.hondi\.net\/'/); assert.match(block, /status: 'active'/);
+    assert.ok(read('src/gopang/gwp/allowed-origins.js').includes("'https://law.hondi.net'"));
+  });
+});
