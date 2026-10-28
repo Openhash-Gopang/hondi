@@ -377,9 +377,21 @@ async function _handleNoAnswer(targetUser, callId) {
 }
 
 // ── P2P 수신측 처리 ──────────────────────────────────────
+// 2026-10-28 신설 — 걸려 온 대화의 "누구인지"는 상대가 신호에 적어 보낸 from_handle 을 믿지 않고,
+// guid 로 서버(L1)의 프로필에서 읽은 아이디(handle)로 표시한다. 남의 아이디를 적어 보내 사칭하는 것을 막는다.
+// 프로필을 못 찾으면 "확인되지 않은 사용자"로 표시한다(적힌 이름을 대신 쓰지 않는다).
+async function _verifiedCallerHandle(fromGuid) {
+  try {
+    const filter = encodeURIComponent(`guid='${String(fromGuid).replace(/[\\']/g, '')}'`);
+    const res = await fetch(`${L1_URL}?filter=${filter}&perPage=1`);
+    if (res.ok) { const raw = await res.json(); const u = raw.items?.[0]; if (u?.handle) return String(u.handle).replace(/^tid-/, ''); }
+  } catch { /* 아래에서 미확인 처리 */ }
+  return null;
+}
+
 export async function handleIncomingOffer(signal) {
-  const fromHandle  = signal.payload?.from_handle || signal.from_guid;
   const fromGuid    = signal.from_guid;
+  const fromHandle  = (await _verifiedCallerHandle(fromGuid)) || '확인되지 않은 사용자';
 
   // payload 방어적 파싱 (webrtc.js/p2p-chat.js 양쪽 호환) — callId 추출용으로 먼저 파싱
   const _offerPayload = typeof signal.payload === 'string'

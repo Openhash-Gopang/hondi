@@ -48,7 +48,7 @@ export function openSearch(prefillQuery) {
         <div style="display:flex;align-items:center;
                     border:1px solid #e5e7eb;border-radius:12px;
                     background:#f9fafb;overflow:hidden" id="_sq-field">
-          <input id="_sq-input" type="text" placeholder="아이디 또는 전화번호 (닉네임도 가능)"
+          <input id="_sq-input" type="text" placeholder="혼디 아이디(@8자리) 또는 전화번호 (닉네임도 가능)"
             style="flex:1;padding:0 14px;height:48px;border:none;background:transparent;
                    font-size:15px;font-family:inherit;outline:none;color:#111827;min-width:0"
             autocomplete="off"/>
@@ -153,7 +153,7 @@ async function _doSearch(q, country, region, resultsEl) {
   // 카카오톡 방식(2026-10-28): 전화번호는 정확일치(상대가 허용한 경우만), 아이디는 검색용 아이디 정확일치.
   const cq = classifyQuery(q);
   let exact = null, exactMsg = '';
-  if (cq.kind === 'phone' || cq.kind === 'id') {
+  if (cq.kind === 'phone' || cq.kind === 'handle' || cq.kind === 'id') {
     const fr = await findFriend(q);
     if (fr.ok && fr.found && fr.user) exact = fr.user;
     else if (fr.ok && fr.self) exactMsg = '검색하신 상대는 본인 계정입니다.';
