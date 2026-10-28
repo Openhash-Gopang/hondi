@@ -15,20 +15,18 @@ import { appendBubble } from './bubble.js';
 // 재사용한다). webrtc.js→p2p-chat.js는 동적 import(순환 없음)이므로 반대
 // 방향(정적 import)은 안전하다.
 import { _clearPeer } from '../p2p/webrtc.js';
+import { signalPost } from '../p2p/signal-auth.js';
 
 // ── 탈중앙화 이관 ③: 시그널링 전송/수신/삭제를 L1 직접으로 ──────────────
 // Worker가 이미 L1 webrtc_signals 컬렉션을 직접 쓰는 구조이므로,
 // 단말도 같은 경로로 직접 접근. Worker 경유 불필요.
 const _L1_SIGNAL = L1_SIGNAL_BASE;
 
+// 2026-10-28: 신호 쓰기는 서버(/signal/send)를 거친다 — 서버가 로그인 증명을 확인해 from_guid 를 그 계정으로 강제하므로
+// 남의 guid 로 offer/answer/ice 를 위조할 수 없다. (읽기·구독은 예전처럼 L1 직접)
 async function _signalSendDirect(from_guid, to_guid, type, payload) {
-  const expires_at = new Date(Date.now() + 60_000).toISOString();
-  const res = await fetch(_L1_SIGNAL, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({ from_guid, to_guid, type, payload, expires_at }),
-  });
-  if (!res.ok) throw new Error(`L1 signal send ${res.status}`);
+  const r = await signalPost('/signal/send', from_guid, { from_guid, to_guid, type, payload });
+  if (!r.ok) throw new Error(`signal send ${r.status}${r.code ? ' ' + r.code : ''}`);
 }
 
 async function _signalPollDirect(guid) {
@@ -48,7 +46,7 @@ async function _signalPollDirect(guid) {
 
 async function _signalDeleteDirect(id) {
   if (!id) return;
-  await fetch(`${_L1_SIGNAL}/${id}`, { method: 'DELETE' }).catch(() => {});
+  await signalPost('/signal/delete', _USER?.ipv6, { id }).catch(() => {});
 }
 
 // ── L1 PocketBase 자체 Realtime(SSE) 구독 — Supabase WS 대체 ──────────
