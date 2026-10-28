@@ -20,6 +20,7 @@ import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, addS
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
 import { parseMessage as _kmailParseMime, decodeMimeWords as _kmailDecodeMimeWords, repairStoredText as _kmailRepairStoredText } from './src/worker/mime-text.js';
 import { checkSenderName as _kmailCheckSenderName, effectiveSenderName as _kmailEffectiveSenderName, campaignReplyTo as _kmailCampaignReplyTo, replyToWithName as _kmailReplyToWithName, REPLY_TO_SELF as _KMAIL_REPLY_TO_SELF, formatSender as _kmailFormatSender, describeSender as _kmailDescribeSender, SENDER_NAME_MAX as _KMAIL_SENDER_NAME_MAX } from './src/worker/kmail-sender.js';
+import { LETTER_MODE_NOTE as _KMAIL_LETTER_MODE_NOTE, letterMax as _kmailLetterMax, evaluateLetter as _kmailEvaluateLetter, buildLetterStatus as _kmailBuildLetterStatus } from './src/worker/kmail-letter.js';
 import { rescueDanglingLookup as _kmailRescueDanglingLookup, evaluateSendGuard as _kmailEvaluateSendGuard, buildSentMailPreview as _kmailBuildSentMailPreview } from './src/worker/kmail-confirm.js';
 import { senderLocalPart as _kmailSenderLocalPart, classifyInboundLocalPart as _kmailClassifyLocalPart } from './src/worker/kmail-address.js';
 import { buildSendStatus as _kmailBuildSendStatus, instantSendMax as _kmailInstantSendMax, isImmediate as _kmailIsImmediate } from './src/worker/kmail-send-status.js';
@@ -38455,6 +38456,7 @@ async function _kmailDecideDelegation(env, ownerGuid, campaign, { subject, bodyT
 async function handleKmailChat(request, env, corsHeaders, ctx) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
+  const letterMode = body.mode === 'letter';   // 2026-10-28: '편지 작성(AI)' — 캠페인이 아니라 개인 편지로 바로 보내 보낸메일함에만 기록
   const { messages } = body;
   if (!Array.isArray(messages) || messages.length === 0) {
     return _err(400, 'MISSING_FIELD', 'messages 배열(1개 이상) 필수', corsHeaders);
@@ -38563,6 +38565,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     ...(kmailUniversalInjected ? [{ role: 'system', content: kmailUniversalInjected }] : []),
     { role: 'system', content: systemPrompt },
     ...(kplanBriefNote ? [{ role: 'system', content: kplanBriefNote }] : []),
+    ...(letterMode ? [{ role: 'system', content: _KMAIL_LETTER_MODE_NOTE }] : []),
   ];
 
   let reply;
@@ -38606,6 +38609,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     return _err(502, 'AI_CALL_FAILED', 'AI 호출 실패: ' + e.message, corsHeaders);
   }
   if (!reply) return _err(502, 'AI_EMPTY_REPLY', 'AI 응답이 비어있습니다', corsHeaders);
+  if (letterMode) reply = reply.replace(/KMAIL_CAMPAIGN_START\s*(\{[\s\S]*\})?\s*$/, '').trim() || reply;   // 편지 모드에서는 캠페인을 시작하지 않는다
   reply = _kmailRescueDanglingLookup(reply);   // 2026-10-28: "찾아볼게요"만 말하고 태그를 안 낸 응답은 서버가 조회 태그를 이어 붙인다
 
   const searchMatch = reply.match(/[\[\(]?KMAIL_SEARCH_CONTACTS\s*(\{[\s\S]*\})\s*[\]\)]?\s*$/);
@@ -39602,6 +39606,36 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     const sendGuard = _kmailEvaluateSendGuard(cleanMessages, parsed, Date.now(), { address: `${_kmailSenderLocalPart(guid, kmailSettingsForChat.mail_id)}@hondi.kr`, name: kmailSettingsForChat.sender_display_name });
     if (!sendGuard.allow) {
       return new Response(JSON.stringify({ ok: true, reply: sendGuard.reply, action: sendGuard.action }), { status: 200, headers: corsHeaders });
+    }
+    if (letterMode) {
+      // 2026-10-28 — 편지 작성(AI): 캠페인을 만들지 않고 받는 사람에게 바로 보낸다. ai_messages(kmail_outbound)에 남아 보낸메일함에 보인다.
+      const letter = _kmailEvaluateLetter(parsed, { nowMs: Date.now(), max: _kmailLetterMax(_kmailInstantSendMax(env)) });
+      if (!letter.ok) {
+        return new Response(JSON.stringify({ ok: true, reply: `${cleanReplyText}\n\n${letter.message}`, action: null }), { status: 200, headers: corsHeaders });
+      }
+      if (!env.EMAIL) {
+        return new Response(JSON.stringify({ ok: true, reply: `${cleanReplyText}\n\n메일 발송 설정이 아직 준비되지 않아 보내지 못했습니다.`, action: null }), { status: 200, headers: corsHeaders });
+      }
+      let success = 0, fail = 0;
+      for (const r of letter.recipients) {
+        try {
+          await _kmailSendOneEmail(env, {
+            guid, to: r.email, subject: letter.subject, text: letter.body, sessionId: `kmail:letter:${guid}`,
+            replyTo: _KMAIL_REPLY_TO_SELF,
+            signature: kmailSettingsForChat.signature, senderName: kmailSettingsForChat.sender_display_name, mailId: kmailSettingsForChat.mail_id,
+          });
+          success++;
+        } catch (e) { console.warn('[K-Mail 편지] 발송 실패:', r.email, e.message); fail++; }
+      }
+      const nowMsL = Date.now();
+      const st = _kmailBuildLetterStatus({ success, fail, nowMs: nowMsL });
+      const letterPreview = _kmailBuildSentMailPreview({ ...parsed, recipients: letter.recipients, subject: letter.subject, body: letter.body },
+        { address: `${_kmailSenderLocalPart(guid, kmailSettingsForChat.mail_id)}@hondi.kr`, name: kmailSettingsForChat.sender_display_name }, st.state, nowMsL, nowMsL);
+      return new Response(JSON.stringify({
+        ok: true,
+        reply: `${cleanReplyText}\n\n${st.line}${letterPreview ? '\n\n' + letterPreview : ''}`,
+        action: { type: 'letter_sent', state: st.state },
+      }), { status: 200, headers: corsHeaders });
     }
     try {
       const result = await _kmailChatCreateCampaign(env, guid, parsed);
