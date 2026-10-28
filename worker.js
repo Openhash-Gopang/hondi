@@ -22,6 +22,7 @@ import { parseMessage as _kmailParseMime, decodeMimeWords as _kmailDecodeMimeWor
 import { checkSenderName as _kmailCheckSenderName, effectiveSenderName as _kmailEffectiveSenderName, campaignReplyTo as _kmailCampaignReplyTo, replyToWithName as _kmailReplyToWithName, REPLY_TO_SELF as _KMAIL_REPLY_TO_SELF, formatSender as _kmailFormatSender, describeSender as _kmailDescribeSender, SENDER_NAME_MAX as _KMAIL_SENDER_NAME_MAX } from './src/worker/kmail-sender.js';
 import { LETTER_MODE_NOTE as _KMAIL_LETTER_MODE_NOTE, letterMax as _kmailLetterMax, evaluateLetter as _kmailEvaluateLetter, buildLetterStatus as _kmailBuildLetterStatus } from './src/worker/kmail-letter.js';
 import { rescueDanglingLookup as _kmailRescueDanglingLookup, evaluateSendGuard as _kmailEvaluateSendGuard, buildSentMailPreview as _kmailBuildSentMailPreview } from './src/worker/kmail-confirm.js';
+import { validateMailRecipients as _kmailValidateRecipients } from './src/worker/kmail-recipients.js';
 import { senderLocalPart as _kmailSenderLocalPart, classifyInboundLocalPart as _kmailClassifyLocalPart } from './src/worker/kmail-address.js';
 import { buildSendStatus as _kmailBuildSendStatus, instantSendMax as _kmailInstantSendMax, isImmediate as _kmailIsImmediate } from './src/worker/kmail-send-status.js';
 import { checkMailId as _checkMailId, defaultMailIdFromHash as _defaultMailIdFromHash, normalizeMailId as _normMailId, changePolicyConfig as _mailIdPolicy, evaluateChange as _mailIdEvaluate, recordChange as _mailIdRecordChange, recordConfirm as _mailIdRecordConfirm, limitMessage as _mailIdLimitMessage, readState as _mailIdReadState, writeState as _mailIdWriteState } from './src/worker/mail-id.js';
@@ -34677,12 +34678,14 @@ async function _kmailMailIdCached(env, guid) {
   _kmailMailIdMemo.set(guid, { v, t: Date.now() });
   return v;
 }
-async function _kmailSendOneEmail(env, { guid, to, subject, text, sessionId, replyTo, signature, senderName, attachmentIds, preResolvedAttachments, mailId }) {
+async function _kmailSendOneEmail(env, { guid, to, cc, bcc, subject, text, sessionId, replyTo, signature, senderName, attachmentIds, preResolvedAttachments, mailId }) {
   const resolvedMailId = mailId !== undefined ? mailId : await _kmailMailIdCached(env, guid);
   const fromAddr = `${_kmailSenderLocalPart(guid, resolvedMailId)}@hondi.kr`;
   const finalText = signature ? `${text}\n\n${signature}` : text;
   const fromName = _kmailEffectiveSenderName(senderName);                       // 이름이 없으면 주소만("ceo@hondi.kr"), 있으면 "도 영민 <ceo@hondi.kr>"
   const sendParams = { to, from: fromName ? { email: fromAddr, name: fromName } : fromAddr, subject, text: finalText };
+  if (Array.isArray(cc) && cc.length) sendParams.cc = cc;                       // 2026-10-28: 참조
+  if (Array.isArray(bcc) && bcc.length) sendParams.bcc = bcc;                   // 숨은참조(받는 사람 화면에 보이지 않음)
   if (replyTo) sendParams.replyTo = _kmailReplyToWithName(replyTo === _KMAIL_REPLY_TO_SELF ? fromAddr : replyTo, senderName);   // 2026-10-28: 회신 주소에도 보내는 이름(1명 메일은 보내는 사람 자신)
 
   // preResolvedAttachments가 주어지면(캠페인 발송처럼 수신자 N명에게
@@ -34702,8 +34705,8 @@ async function _kmailSendOneEmail(env, { guid, to, subject, text, sessionId, rep
   const written = await _writeAiMessage(env, {
     session_id: sessionId,
     sender_guid: guid,
-    receiver_guid: `ext:${_slugifyEmailAddr(to)}`,
-    content_original: `[제목] ${subject}\n\n${finalText}`,
+    receiver_guid: `ext:${_slugifyEmailAddr(Array.isArray(to) ? to[0] : to)}`,
+    content_original: `[제목] ${subject}\n\n${finalText}` + (Array.isArray(to) && to.length > 1 ? `\n\n[받는 사람] ${to.join(', ')}` : '') + (cc && cc.length ? `\n[참조] ${cc.join(', ')}` : '') + (bcc && bcc.length ? `\n[숨은참조] ${bcc.join(', ')}` : ''),
     content_type: 'kmail_outbound',
   }).catch(e => { console.error('[K-Mail] ai_messages 기록 실패:', e.message); return null; });
 
@@ -34746,6 +34749,10 @@ async function handleUserMailSend(request, env, corsHeaders) {
   if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
   const guid = auth.guid;
 
+  // 2026-10-28: 받는 사람 여러 명 + 참조(cc)·숨은참조(bcc)
+  const rcpt = _kmailValidateRecipients({ to, cc: body.cc, bcc: body.bcc });
+  if (!rcpt.ok) return _err(400, 'INVALID_RECIPIENTS', rcpt.message, corsHeaders);
+
   if (!env.EMAIL) {
     return _err(500, 'EMAIL_BINDING_MISSING',
       'send_email 바인딩이 설정되지 않았습니다 — wrangler.toml 확인 및 재배포 필요', corsHeaders);
@@ -34756,7 +34763,7 @@ async function handleUserMailSend(request, env, corsHeaders) {
   let result;
   try {
     result = await _kmailSendOneEmail(env, {
-      guid, to, subject, text, sessionId: `kmail:direct:${guid}`,
+      guid, to: rcpt.to.length === 1 ? rcpt.to[0] : rcpt.to, cc: rcpt.cc, bcc: rcpt.bcc, subject, text, sessionId: `kmail:direct:${guid}`,
       signature: settings.signature, senderName: settings.sender_display_name, mailId: settings.mail_id,
       attachmentIds: Array.isArray(attachment_ids) ? attachment_ids : [],
     });
@@ -34766,6 +34773,7 @@ async function handleUserMailSend(request, env, corsHeaders) {
 
   return new Response(JSON.stringify({
     ok: true, from: result.fromAddr, sent_at: new Date().toISOString(),
+    recipients: { to: rcpt.to, cc: rcpt.cc, bcc: rcpt.bcc },
     from_display: _kmailFormatSender(result.fromAddr, result.fromName),     // 받는 사람 화면에 보이는 모양("도 영민 <ceo@hondi.kr>" 또는 주소만) — 보냄 확인 카드가 표시
     quota: { charged_gdc: result.quota.charged ? result.quota.chargedGdc : 0, projected_5d_avg: result.quota.projectedAvg ?? null },
   }), { status: 200, headers: corsHeaders });
