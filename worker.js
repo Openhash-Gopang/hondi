@@ -24,6 +24,8 @@ import { LETTER_MODE_NOTE as _KMAIL_LETTER_MODE_NOTE, letterMax as _kmailLetterM
 import { rescueDanglingLookup as _kmailRescueDanglingLookup, evaluateSendGuard as _kmailEvaluateSendGuard, buildSentMailPreview as _kmailBuildSentMailPreview } from './src/worker/kmail-confirm.js';
 import { validateMailRecipients as _kmailValidateRecipients } from './src/worker/kmail-recipients.js';
 import { buildContactsNote as _kmailBuildContactsNote, sumRegisteredInMessages as _kmailSumRegistered, summarizeContacts as _kmailSummarizeContacts, buildSummaryContext as _kmailBuildSummaryContext, describeLookupScope as _kmailDescribeLookupScope } from './src/worker/kmail-contacts-summary.js';
+import { trimTrailingAfterTag as _kmailTrimTrailingAfterTag } from './src/worker/kmail-tagfix.js';
+import { parseCampaignDeleteRequest as _kmailParseCampaignDeleteRequest, ownedCampaignFilter as _kmailOwnedCampaignFilter } from './src/worker/kmail-campaign-delete.js';
 import { senderLocalPart as _kmailSenderLocalPart, classifyInboundLocalPart as _kmailClassifyLocalPart } from './src/worker/kmail-address.js';
 import { buildSendStatus as _kmailBuildSendStatus, instantSendMax as _kmailInstantSendMax, isImmediate as _kmailIsImmediate } from './src/worker/kmail-send-status.js';
 import { checkMailId as _checkMailId, defaultMailIdFromHash as _defaultMailIdFromHash, normalizeMailId as _normMailId, changePolicyConfig as _mailIdPolicy, evaluateChange as _mailIdEvaluate, recordChange as _mailIdRecordChange, recordConfirm as _mailIdRecordConfirm, limitMessage as _mailIdLimitMessage, readState as _mailIdReadState, writeState as _mailIdWriteState } from './src/worker/mail-id.js';
@@ -13696,6 +13698,7 @@ export default {
     // 없었다(handleKmailContactsList의 캠페인판이 빠져있던 것 — 작업
     // 지시서 §3-4 구현 중 발견).
     if (pathname === '/kmail/campaigns/list' && request.method === 'GET') return handleKmailCampaignsList(request, url, env, corsHeaders);
+    if (pathname === '/kmail/campaigns/delete' && request.method === 'POST') return handleKmailCampaignsDelete(request, env, corsHeaders);
     // 2026-09-10 신설 — 캠페인 대화 전문(일자·시간별) 조회. "내 캠페인"
     // 탭에서 특정 캠페인을 열었을 때 그 캠페인이 어떻게 논의됐는지
     // 전체 히스토리를 보여주기 위함.
@@ -36729,6 +36732,56 @@ async function handleKmailCampaignCreate(request, env, corsHeaders) {
 // 전용 — 회신 수까지는 포함하지 않는다(kmail_campaign_recipients가
 // 아직 없어 별도 지시서(HANDOFF_2026-09-03_kmail-campaign-recipients-taskbrief.md)
 // 대상, 이 응답은 캠페인 레코드 자체의 status/digest_status만 보여준다).
+// POST /kmail/campaigns/delete — body: { campaign_ids:[...] } 또는 { all:true } (2026-10-28 신설)
+async function handleKmailCampaignsDelete(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
+  const auth = await _kAuth.resolveGuid(env, body, { sigMsg: `kmail-campaigns-delete:${body.guid}:${body.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
+  const req = _kmailParseCampaignDeleteRequest(body);
+  if (!req.ok) return _err(400, 'INVALID_REQUEST', req.message, corsHeaders);
+
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}` };
+  const base = `${L1_DEFAULT}/api/collections`;
+  const esc = s => String(s).replace(/'/g, "\\'");
+
+  // 본인 소유 캠페인 id 수집(전체 삭제는 페이지를 넘겨 가며 모두)
+  const owned = [];
+  const filter = encodeURIComponent(_kmailOwnedCampaignFilter(guid, req.all ? [] : req.ids));
+  for (let page = 1; page <= 50; page++) {
+    const r = await fetch(`${base}/kmail_campaigns/records?filter=${filter}&fields=id&perPage=200&page=${page}`, { headers });
+    const d = await r.json().catch(() => ({ items: [] }));
+    (d.items || []).forEach(x => owned.push(x.id));
+    if (!d.items || d.items.length < 200) break;
+  }
+
+  const delOne = async (col, id) => { const r = await fetch(`${base}/${col}/records/${id}`, { method: 'DELETE', headers }); return r.ok || r.status === 404; };
+  const delChildren = async (col, campaignId) => {
+    const f = encodeURIComponent(`campaign_id='${esc(campaignId)}'`);
+    for (let i = 0; i < 20; i++) {                                    // 항상 1쪽을 다시 읽는다(지운 만큼 줄어든다)
+      const r = await fetch(`${base}/${col}/records?filter=${f}&fields=id&perPage=200`, { headers });
+      const d = await r.json().catch(() => ({ items: [] }));
+      if (!d.items || !d.items.length) break;
+      await Promise.all(d.items.map(x => delOne(col, x.id).catch(() => false)));
+      if (d.items.length < 200) break;
+    }
+  };
+
+  let deleted = 0, failed = 0;
+  for (let i = 0; i < owned.length; i += 5) {
+    await Promise.all(owned.slice(i, i + 5).map(async id => {
+      try {
+        await delChildren('kmail_campaign_messages', id);
+        await delChildren('kmail_campaign_recipients', id);
+        if (await delOne('kmail_campaigns', id)) deleted++; else failed++;
+      } catch (e) { failed++; }
+    }));
+  }
+  return new Response(JSON.stringify({ ok: true, deleted, failed, requested: req.all ? owned.length : req.ids.length }), { status: 200, headers: corsHeaders });
+}
+
 async function handleKmailCampaignsList(request, url, env, corsHeaders) {
   const qp = Object.fromEntries(url.searchParams.entries());
   const auth = await _kAuth.resolveGuid(env, qp, { sigMsg: `kmail-campaigns-list:${qp.guid}:${qp.ts}` });
@@ -38655,6 +38708,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   }
   if (!reply) return _err(502, 'AI_EMPTY_REPLY', 'AI 응답이 비어있습니다', corsHeaders);
   if (letterMode) reply = reply.replace(/KMAIL_CAMPAIGN_START\s*(\{[\s\S]*\})?\s*$/, '').trim() || reply;   // 편지 모드에서는 캠페인을 시작하지 않는다
+  reply = _kmailTrimTrailingAfterTag(reply);   // 2026-10-28: 태그 JSON 뒤 군더더기 제거(끝 앵커 실패로 '깨진 태그' 오류가 나던 것 방지)
   reply = _kmailRescueDanglingLookup(reply);   // 2026-10-28: "찾아볼게요"만 말하고 태그를 안 낸 응답은 서버가 조회 태그를 이어 붙인다
 
   const searchMatch = reply.match(/[\[\(]?KMAIL_SEARCH_CONTACTS\s*(\{[\s\S]*\})\s*[\]\)]?\s*$/);
@@ -38705,6 +38759,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     ruleMatch || lookupMatch || contactsSummaryMatch || campaignLookupMatch || campaignReportMatch || lookupThreadMatch || filterRepliesMatch || tagMatch ||
     mergeMatch || threadStateMatch || statsMatch || settingsMatch || mailIdPromptMatch;
   if (!_kmailAnyTagMatch && /KMAIL_[A-Z_]+\s*\{/.test(reply)) {
+    console.warn('[K-Mail] AI_MALFORMED_TAG 응답 끝부분:', String(reply).slice(-400));
     return _err(502, 'AI_MALFORMED_TAG',
       '응답이 중간에 잘렸거나 태그 형식이 깨졌습니다 — 아무것도 저장/실행되지 않았습니다. 다시 시도해 주세요(요청 범위를 좀 더 잘게 나누면 도움이 됩니다).',
       corsHeaders);
