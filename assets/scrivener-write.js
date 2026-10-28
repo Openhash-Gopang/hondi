@@ -264,7 +264,7 @@
     var doc = val('fDoc'), to = val('fTo'), cs = val('fCase');
     var sel = $('fRole'), who = sel.options[sel.selectedIndex].text;
     st.started = true; st.cur = 0; if (doc) st.doc = doc; save(); render();
-    send('서류 작성 트랙(STEP W)을 시작합니다. 이용자: ' + who + ' / 작성할 서류: ' + (doc || '(미정)') + ' / 제출처: ' + (to || '(미정)') + ' / 사안 요약: ' + (cs || '(미입력)') + '. W-1부터 진행해 주시고, 부족한 항목은 3개 이내로 먼저 물어봐 주세요.');
+    send('서류 작성 트랙(STEP W)을 시작합니다. 이용자: ' + who + ' / 작성할 서류: ' + (doc || '(미정)') + ' / 제출처: ' + (to || '(미정)') + ' / 사안 요약: ' + (cs || '(미입력)') + '. W-1부터 진행해 주시고, ' + (/^(judicial-scrivener|lawyer)/.test(PID) ? '모르는 항목은 묻지 말고 빈 칸으로 남긴 뒤 초안 아래 빈 칸 표로 알려 주세요.' : '부족한 항목은 3개 이내로 먼저 물어봐 주세요.'));
   }
 
   function init() {

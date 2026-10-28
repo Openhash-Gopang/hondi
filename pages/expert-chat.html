@@ -1661,19 +1661,26 @@ updateSendBtn();
 // 이 페이지 → 부모: {type:'expert-embed-reply', text} (AI 답변 전문 — 부모가 상태 줄을 읽어 진행 표시를 갱신).
 // ?embed=1 이고 같은 오리진·부모 창에서 온 메시지만 받는다. 일반 접속에는 영향이 없다.
 function _embedOn() { return _qs.get('embed') === '1' && window.parent !== window; }
+// 2026-10-28: 나비로 Navi Law(law.hondi.net)가 이 화면을 iframe 으로 끼운다 — 부모 오리진은 같은 오리진 또는 아래 목록만 허용한다.
+const _EMBED_PARENT_ORIGINS = [location.origin, 'https://law.hondi.net'];
+function _embedParentOrigin() {
+  try { const a = window.location.ancestorOrigins && window.location.ancestorOrigins[0]; if (a && _EMBED_PARENT_ORIGINS.includes(a)) return a; } catch (e) { /* 무시 */ }
+  try { const o = new URL(document.referrer).origin; if (_EMBED_PARENT_ORIGINS.includes(o)) return o; } catch (e) { /* 무시 */ }
+  return location.origin;
+}
 function _embedReply(text) {
   if (!_embedOn()) return;
-  try { window.parent.postMessage({ type: 'expert-embed-reply', text: String(text || '') }, location.origin); } catch (e) { /* 부모가 없으면 무시 */ }
+  try { window.parent.postMessage({ type: 'expert-embed-reply', text: String(text || '') }, _embedParentOrigin()); } catch (e) { /* 부모가 없으면 무시 */ }
 }
 if (_embedOn()) {
   window.addEventListener('message', (e) => {
-    if (e.origin !== location.origin || e.source !== window.parent || !e.data) return;
+    if (!_EMBED_PARENT_ORIGINS.includes(e.origin) || e.source !== window.parent || !e.data) return;
     if (e.data.type === 'expert-embed-send' && typeof e.data.text === 'string' && e.data.text.trim()) {
       input.value = e.data.text.slice(0, 4000);
       doSend();
     }
   });
-  try { window.parent.postMessage({ type: 'expert-embed-ready' }, location.origin); } catch (e) { /* 무시 */ }
+  try { window.parent.postMessage({ type: 'expert-embed-ready' }, _embedParentOrigin()); } catch (e) { /* 무시 */ }
 }
 
 // ── 단계별 구매 자문 진입 링크 (2026-10-21 신설) — 구매자문(K-Advisor)은 pages/advisor-steps.html 로 이어진다. 구매자 본인용 SP 라 전문가 인증 목록에 넣지 않는다.
@@ -1725,9 +1732,10 @@ let _idleTimer = null;
 function _resetIdle() {
   if (_idleTimer) clearTimeout(_idleTimer);
   _idleTimer = setTimeout(() => {
-    appendBubble('ai', '10분간 응답이 없어 대화를 종료합니다. 나비 화면으로 돌아갑니다…');
+    // 2026-10-28: 끼운 화면(embed)에서는 부모 사이트를 떠나지 않는다 — 안내만 하고 이동하지 않는다.
+    appendBubble('ai', _embedOn() ? '10분간 응답이 없어 대화를 멈췄습니다. 이어서 쓰려면 페이지를 새로 고침해 주세요.' : '10분간 응답이 없어 대화를 종료합니다. 나비 화면으로 돌아갑니다…');
     _recordExpertOwnerPDV('timeout'); // §7 기관측 PDV (2026-07-20) — await 없이 발사(페이지 곧 이동)
-    setTimeout(() => { location.href = RETURN; }, 1500);
+    if (!_embedOn()) setTimeout(() => { location.href = RETURN; }, 1500);
   }, 10 * 60 * 1000);
 }
 document.addEventListener('click', _resetIdle);
