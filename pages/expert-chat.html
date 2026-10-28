@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
 <title>전문가 업무 보조 AI</title>
+<script>try{if(new URLSearchParams(location.search).get('embed')==='1'&&window.parent!==window)document.documentElement.classList.add('embed')}catch(e){}</script>
 <meta name="description" content="자격직 전문가와 소속 직원의 서류 작성을 대화로 보조하는 AI 페르소나 — GWP 방식 새 탭.">
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
@@ -28,6 +29,10 @@
 #tb-suggest{margin-left:auto;flex-shrink:0;border:1px solid #D9A441;background:rgba(217,164,65,.16);color:#FFE6B0;font:600 12px var(--font);padding:6px 11px;border-radius:999px;white-space:nowrap;text-decoration:none}
 #tb-suggest:hover{background:#D9A441;color:#2B1D00}
 #tb-suggest + #tb-review{margin-left:8px}
+/* 끼운 화면(?embed=1, 나비로 Navi Law) — 좁은 iframe 에서 설명 문구가 글자 한 칸 폭으로 줄어 상단바가 세로로 늘어나 대화를 가리므로, 문구·아이콘·"나비로" 버튼은 숨기고 한 줄 얇은 막대로 둔다 */
+html.embed #tb-icon, html.embed #tb-sub, html.embed #tb-back{display:none}
+html.embed #top-bar{padding:6px 10px;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+html.embed #tb-suggest, html.embed #tb-review{margin-left:0}
 #lr-banner{display:flex;align-items:flex-start;gap:10px;padding:9px 14px;background:#FFF6DD;color:#5A4300;
   border-bottom:1px solid #F0DFA8;font-size:12.5px;line-height:1.5}
 #lr-banner[hidden]{display:none}
@@ -201,6 +206,7 @@ document.title = def.label + ' 업무 보조 AI';
 
 const _lrBtn = document.getElementById('tb-review');
 document.getElementById('tb-suggest').href = '/pages/suggest.html?from=' + encodeURIComponent(PERSONA);
+if (_qs.get('embed') === '1' && window.parent !== window) { const _sg = document.getElementById('tb-suggest'); _sg.target = '_blank'; _sg.rel = 'noopener'; }   // 끼운 화면에서는 대화창이 제안 화면으로 바뀌지 않도록 새 탭으로 연다
 const _lrBanner = document.getElementById('lr-banner');
 function _refreshReviewChrome() {
   _lrBtn.classList.toggle('on', REVIEW_MODE);
