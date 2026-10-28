@@ -114,7 +114,8 @@ describe('변호사 세부 분야 서류 작성하기 (2026-10-27)', () => {
   it('각 분야 전문가용 SP 가 부모 STEP W 를 담고 부록 A 끝에 보강 절이 있으며 고지 문구를 되풀이하지 않는다', () => {
     for (const id of ids) {
       const f = catalog['SP_' + id + '-assistant'];
-      assert.ok(/_v1_1\.md$/.test(f), id + ': v1_1');
+      assert.ok(/_v1_[12]\.md$/.test(f), id + ': v1_1 또는 v1_2 (부모 변호사 보조 AI 버전을 따른다)');
+      assert.equal(f.match(/_v(1_\d)\.md$/)[1], catalog['SP_lawyer-assistant'].match(/_v(1_\d)\.md$/)[1], id + ': 부모 SP 버전과 같다');
       const sp = read('prompts/' + f);
       assert.equal((sp.match(/^## STEP W — 서류 작성 트랙/gm) || []).length, 1, id + ': STEP W');
       assert.ok(/^### A-\d+\. .+ 서류 작성하기 보강/m.test(sp), id + ': 보강 절');
