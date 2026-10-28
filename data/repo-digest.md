@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-28 10:04 KST · 기준 커밋 89b0fd8e
+- 갱신: 2026-10-28 10:20 KST · 기준 커밋 065c858e
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-28 fix(kmail): 깨진 태그 오류 완화 + 내 캠페인 삭제 API
 - 2026-10-28 fix(kmail): K-Mail 이 주소록 현황(전체·소속별 건수)을 파악하도록 — 요약 태그·현황 주입·조회 범위 명시
 - 2026-10-28 feat(kmail): 메일 발송에 받는 사람 여러 명 + 참조(cc)·숨은참조(bcc)
 - 2026-10-28 feat(kmail): 편지 작성(AI) 모드 — 캠페인 없이 보낸메일함에만 기록하는 즉시 발송
@@ -43,7 +44,6 @@
 - 2026-10-27 feat: 세무·회계 보조 AI 소개서를 세무사 보조 AI 페이지 레이아웃으로 갱신, 히어로에 절세 시뮬레이션 버튼
 - 2026-10-27 pages: restyle judicial scrivener intro to match the service page (pro-doc-page.css, shared header)
 - 2026-10-27 pages: restyle appraiser intro to match appraiser.html (pro-doc-page.css, shared header)
-- 2026-10-27 Merge pull request #802 from Openhash-Gopang/feat/ktax-simulation-page
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
