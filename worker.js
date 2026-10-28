@@ -16,6 +16,7 @@ import { prepareDoctorRequest, doctorRateLimits } from './src/worker/kdoctor-gua
 import { handleOrderQueue } from './src/worker/order-queue-handler.js';
 import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
 import { profilePhoneFilter, last8Filter, pickGuidByLast8 } from './src/worker/phone-lookup.js';
+import { validateSignalInput as _sigValidate, canDeleteSignal as _sigCanDelete, sendRateOk as _sigRateOk } from './src/worker/signal-auth.js';
 import { classifyQuery as _ffClassify, publicCard as _ffPublicCard, rateLimitOk as _ffRateOk } from './src/worker/friend-find.js';
 import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
@@ -14246,6 +14247,7 @@ export default {
 
     // ── WebRTC 시그널링 (P2P 채팅 — OpenHash 철학) ──────────
     // 메시지는 서버에 저장하지 않음 — 시그널(SDP/ICE)만 임시 경유
+    // 2026-10-28: 세 경로 모두 로그인 증명을 요구한다(대화 신호 위조 방지) — 보내는 쪽 guid 는 증명의 계정으로 강제.
     if (pathname === '/signal/send')   return handleSignalSend(request, env, corsHeaders);
     if (pathname === '/signal/poll')   return handleSignalPoll(request, env, corsHeaders);
     if (pathname === '/signal/delete') return handleSignalDelete(request, env, corsHeaders);
@@ -28866,56 +28868,73 @@ async function handleAiSetupGet(request, env, corsHeaders, guid) {
 
 const L1_SIGNAL_URL = `${L1_DEFAULT}/api/collections/webrtc_signals/records`;
 
-// ── L1 시그널 저장 헬퍼 ──────────────────────────────────────
-async function _l1SignalSend(from_guid, to_guid, type, payload, expires_at) {
+// ── L1 시그널 저장·조회·삭제 헬퍼 ────────────────────────────
+// 2026-10-28: webrtc_signals 쓰기는 서버(관리자 토큰)만 한다 — 단말이 L1 에 직접 쓰면 from_guid 를 아무 값이나 적을 수 있다.
+// (읽기는 단말이 L1 SSE/조회로 직접 하므로 열려 있다. 쓰기 규칙을 닫는 마이그레이션은 이 코드를 배포한 뒤에 따로 적용한다.)
+async function _l1SignalHeaders(env) {
+  const h = { 'Content-Type': 'application/json' };
+  try { h['Authorization'] = 'Bearer ' + await _l1AdminToken(env); } catch (e) { /* 관리자 토큰이 없으면 예전 방식(규칙이 열려 있을 때만 동작) */ }
+  return h;
+}
+async function _l1SignalSend(env, from_guid, to_guid, type, payload, expires_at) {
   const res = await fetch(L1_SIGNAL_URL, {
     method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: await _l1SignalHeaders(env),
     body:    JSON.stringify({ from_guid, to_guid, type, payload, expires_at }),
   });
   if (!res.ok) throw new Error(`L1 signal send ${res.status}: ${await res.text().catch(()=>'')}`);
   return res;
 }
 
-// ── L1 시그널 조회 헬퍼 ──────────────────────────────────────
-async function _l1SignalPoll(guid) {
-  const now    = new Date().toISOString();
-  const filter = encodeURIComponent(`to_guid='${guid}'`);
-  // 캐시 완전 무력화: cache:'no-store' + 매번 달라지는 cache-buster 쿼리.
-  // Cloudflare Worker의 fetch()는 기본적으로 GET을 엣지에서 캐싱할 수 있어서,
-  // 같은 URL 패턴이 반복되는 폴링 요청이 옛(비어있던) 응답을 계속 재사용하는
-  // 문제가 있었다. PocketBase에 직접 조회하면 최신 데이터가 보이는데
-  // 워커를 거치면 비어있던 게 정확히 이 캐시 문제였다.
+async function _l1SignalPoll(env, guid) {
+  // 캐시 완전 무력화: cache:'no-store' + 매번 달라지는 cache-buster 쿼리(Cloudflare 가 같은 URL 의 GET 을 캐싱하는 문제).
+  const filter = encodeURIComponent(`to_guid='${String(guid).replace(/[\\']/g, '')}'`);
   const res    = await fetch(
     `${L1_SIGNAL_URL}?filter=${filter}&sort=-created&perPage=40&_ts=${Date.now()}`,
-    { headers: { 'Content-Type': 'application/json' }, cache: 'no-store' }
+    { headers: await _l1SignalHeaders(env), cache: 'no-store' }
   );
   if (!res.ok) throw new Error(`L1 signal poll ${res.status}`);
   const data = await res.json().catch(() => ({ items: [] }));
-  // PocketBase 응답: { items: [...] } → Supabase 형식 배열로 정규화
-  const items = (data.items || []).filter(r => {
-    // expires_at 필터 (L1은 필터 표현식으로 처리 안 되므로 클라이언트 필터)
-    if (!r.expires_at) return true;
-    return new Date(r.expires_at) > new Date();
-  });
-  return items;
+  return (data.items || []).filter(r => !r.expires_at || new Date(r.expires_at) > new Date());
 }
 
-// ── L1 시그널 삭제 헬퍼 ──────────────────────────────────────
-async function _l1SignalDelete(field, value) {
-  // PocketBase: 필터로 목록 조회 후 id별 삭제 (REST v1)
-  // 캐시 완전 무력화 (이유는 _l1SignalPoll 주석 참고)
-  const filter = encodeURIComponent(`${field}='${value}'`);
-  const listRes = await fetch(
-    `${L1_SIGNAL_URL}?filter=${filter}&perPage=50&_ts=${Date.now()}`,
-    { headers: { 'Content-Type': 'application/json' }, cache: 'no-store' }
-  );
+async function _l1SignalGet(env, id) {
+  const res = await fetch(`${L1_SIGNAL_URL}/${encodeURIComponent(id)}`, { headers: await _l1SignalHeaders(env), cache: 'no-store' });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`L1 signal get ${res.status}`);
+  return res.json().catch(() => null);
+}
+
+async function _l1SignalDeleteById(env, id) {
+  await fetch(`${L1_SIGNAL_URL}/${encodeURIComponent(id)}`, { method: 'DELETE', headers: await _l1SignalHeaders(env) }).catch(() => {});
+}
+
+// 내가 보낸 신호 전부 지우기(통화 종료 정리용) — 증명된 본인 guid 만
+async function _l1SignalDeleteMine(env, guid) {
+  const filter = encodeURIComponent(`from_guid='${String(guid).replace(/[\\']/g, '')}'`);
+  const listRes = await fetch(`${L1_SIGNAL_URL}?filter=${filter}&perPage=50&_ts=${Date.now()}`, { headers: await _l1SignalHeaders(env), cache: 'no-store' });
   if (!listRes.ok) throw new Error(`L1 signal list ${listRes.status}`);
-  const data  = await listRes.json().catch(() => ({ items: [] }));
-  const items = data.items || [];
-  await Promise.all(items.map(r =>
-    fetch(`${L1_SIGNAL_URL}/${r.id}`, { method: 'DELETE' }).catch(() => {})
-  ));
+  const data = await listRes.json().catch(() => ({ items: [] }));
+  await Promise.all((data.items || []).map(r => _l1SignalDeleteById(env, r.id)));
+}
+
+// 로그인 증명 → 계정 guid. phone_verify_token(전화 인증·테스트 아이디 토큰) 또는 gopang_token(지갑 서명으로 발급, svc=p2p-signal).
+// gopang_token 은 /auth/issue 가 "공개키가 아직 고정되지 않은 계정"이면 아무 키로나 발급해 주므로, 여기서는 공개키가 고정된
+// 계정(pubkey_ed25519 있음)의 토큰만 받아 그 허점을 피한다.
+async function _signalCaller(env, body) {
+  if (body && body.phone_verify_token) {
+    const r = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token);
+    return r.ok ? { ok: true, guid: r.guid } : { ok: false, status: 401, code: r.code || 'TOKEN_INVALID', message: r.message || '인증 실패' };
+  }
+  if (body && body.gopang_token) {
+    const p = await parseToken(env, body.gopang_token);
+    if (!p || p.svc !== 'p2p-signal' || !p.ipv6) return { ok: false, status: 401, code: 'TOKEN_INVALID', message: '토큰이 유효하지 않습니다' };
+    let prof = null;
+    try { prof = await _l1FindProfileByGuid(env, p.ipv6); } catch (e) { return { ok: false, status: 502, code: 'L1_UNREACHABLE', message: e.message }; }
+    if (!prof || !prof.pubkey_ed25519) return { ok: false, status: 403, code: 'KEY_NOT_PINNED', message: '공개키가 등록되지 않은 계정입니다' };
+    return { ok: true, guid: p.ipv6 };
+  }
+  return { ok: false, status: 401, code: 'AUTH_REQUIRED', message: '로그인 증명이 필요합니다' };
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -28982,20 +29001,26 @@ async function handleTurnCredential(request, env, corsHeaders) {
 async function handleSignalSend(request, env, corsHeaders) {
   if (request.method !== 'POST') return _err(405, 'METHOD_NOT_ALLOWED', '', corsHeaders);
   const body = await request.json().catch(() => null);
-  if (!body) return _err(400, 'INVALID_JSON', '', corsHeaders);
-  const { from_guid, to_guid, type, payload } = body;
-  if (!from_guid || !to_guid || !type || !payload)
-    return _err(400, 'MISSING_FIELDS', 'from_guid, to_guid, type, payload 필수', corsHeaders);
-  if (!['offer','answer','ice'].includes(type))
-    return _err(400, 'INVALID_TYPE', 'offer|answer|ice 만 허용', corsHeaders);
+  const v = _sigValidate(body);
+  if (!v.ok) return _err(v.status, v.code, v.message, corsHeaders);
+  const who = await _signalCaller(env, body);
+  if (!who.ok) return _err(who.status, who.code, who.message, corsHeaders);
+  if (who.guid !== v.from) return _err(403, 'FROM_MISMATCH', '보내는 계정이 로그인한 계정과 다릅니다', corsHeaders);
+  const { from, to: to_guid, type, payload } = v;
+  const from_guid = from;
+
+  if (env.AI_SETUP_SEALS_KV) {          // 남용 방지 — 계정당 분당 한도
+    const key = `sigsend:${who.guid}:${Math.floor(Date.now() / 60000)}`;
+    try {
+      const n = Number(await env.AI_SETUP_SEALS_KV.get(key)) || 0;
+      if (!_sigRateOk(n)) return _err(429, 'RATE_LIMITED', '신호를 너무 많이 보냈습니다. 잠시 후 다시 시도해 주세요', corsHeaders);
+      await env.AI_SETUP_SEALS_KV.put(key, String(n + 1), { expirationTtl: 120 });
+    } catch (e) { /* 한도 기록 실패는 신호를 막지 않는다 */ }
+  }
 
   const expires_at = new Date(Date.now() + 60_000).toISOString();
-
-  // (2026-07-14: Supabase 폴백 제거 — L1이 실패하면 그대로 실패 처리한다.
-  //  webrtc_signals는 초 단위로 재시도되는 폴링성 데이터라 클라이언트가
-  //  다음 폴링에서 다시 시도하면 되므로, 서버가 대신 폴백해줄 필요가 없다.)
   try {
-    await _l1SignalSend(from_guid, to_guid, type, payload, expires_at);
+    await _l1SignalSend(env, from_guid, to_guid, type, payload, expires_at);
   } catch (l1Err) {
     console.warn('[Signal] L1 저장 실패:', l1Err.message);
     return _err(502, 'L1_UNREACHABLE', 'L1 연결 실패: ' + l1Err.message, corsHeaders);
@@ -29014,14 +29039,14 @@ async function handleSignalSend(request, env, corsHeaders) {
   return new Response(JSON.stringify({ ok: true, source: 'l1' }), { status: 200, headers: corsHeaders });
 }
 
+// POST { phone_verify_token | gopang_token, guid } — 본인 것만 조회(예전 GET ?guid= 는 누구나 남의 신호를 읽게 해서 닫았다)
 async function handleSignalPoll(request, env, corsHeaders) {
-  if (request.method !== 'GET') return _err(405, 'METHOD_NOT_ALLOWED', '', corsHeaders);
-  const url  = new URL(request.url);
-  const guid = url.searchParams.get('guid');
-  if (!guid) return _err(400, 'GUID_REQUIRED', '', corsHeaders);
-
+  if (request.method !== 'POST') return _err(405, 'METHOD_NOT_ALLOWED', 'POST + 로그인 증명 필요', corsHeaders);
+  const body = await request.json().catch(() => null);
+  const who = await _signalCaller(env, body);
+  if (!who.ok) return _err(who.status, who.code, who.message, corsHeaders);
   try {
-    const signals = await _l1SignalPoll(guid);
+    const signals = await _l1SignalPoll(env, who.guid);
     return new Response(JSON.stringify({ ok: true, signals, source: 'l1' }), { status: 200, headers: corsHeaders });
   } catch (l1Err) {
     console.warn('[Signal] L1 poll 실패:', l1Err.message);
@@ -29029,22 +29054,26 @@ async function handleSignalPoll(request, env, corsHeaders) {
   }
 }
 
+// POST { phone_verify_token | gopang_token, id? , mine? } — 받는 사람·보낸 사람 본인의 신호만 지운다
 async function handleSignalDelete(request, env, corsHeaders) {
   if (request.method !== 'POST') return _err(405, 'METHOD_NOT_ALLOWED', '', corsHeaders);
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', '', corsHeaders);
-
+  const who = await _signalCaller(env, body);
+  if (!who.ok) return _err(who.status, who.code, who.message, corsHeaders);
   try {
-    if (body.id)        await _l1SignalDelete('id',        body.id);
-    if (body.from_guid) await _l1SignalDelete('from_guid', body.from_guid);
+    if (body.id) {
+      const rec = await _l1SignalGet(env, String(body.id));
+      if (rec && !_sigCanDelete(rec, who.guid)) return _err(403, 'NOT_YOUR_SIGNAL', '내 신호가 아닙니다', corsHeaders);
+      if (rec) await _l1SignalDeleteById(env, rec.id);
+    }
+    if (body.mine) await _l1SignalDeleteMine(env, who.guid);
     return new Response(JSON.stringify({ ok: true, source: 'l1' }), { status: 200, headers: corsHeaders });
   } catch (l1Err) {
     console.warn('[Signal] L1 delete 실패:', l1Err.message);
     return _err(502, 'L1_UNREACHABLE', 'L1 연결 실패: ' + l1Err.message, corsHeaders);
   }
 }
-
-
 
 // ═══════════════════════════════════════════════════════════
 // GDUDA Phase 1 — /p2p/search

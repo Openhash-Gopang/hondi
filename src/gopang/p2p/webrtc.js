@@ -7,6 +7,7 @@ import {
   PROXY, RTC_CONFIG, USER_GUID, fetchRtcConfig,
 } from '../core/state.js';
 import { _isRegistered } from '../core/auth.js';
+import { signalPost } from './signal-auth.js';
 import { appendBubble } from '../ui/bubble.js';
 import { _showRegisterFlowThenPeer } from '../ui/register-flow.js';
 
@@ -195,11 +196,8 @@ async function _sendSignal(type, payload, toGuid = null) {
   const to = toGuid || _peer?.guid;
   if (!to || !USER_GUID) return;
   try {
-    await fetch(`${PROXY}/signal/send`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from_guid: USER_GUID, to_guid: to, type, payload: JSON.stringify(payload) }),
-    });
+    const r = await signalPost('/signal/send', USER_GUID, { from_guid: USER_GUID, to_guid: to, type, payload: JSON.stringify(payload) });
+    if (!r.ok) console.warn('[Signal] 전송 거부:', r.status, r.code);
   } catch(e) { console.warn('[Signal] 전송 실패:', e.message); }
 }
 
@@ -211,8 +209,8 @@ export function _startSignalPoll() {
   const id = setInterval(async () => {
     if (!USER_GUID) return;
     try {
-      const res  = await fetch(`${PROXY}/signal/poll?guid=${encodeURIComponent(USER_GUID)}`);
-      const data = await res.json();
+      const pr   = await signalPost('/signal/poll', USER_GUID, {});
+      const data = pr.data || {};
       if (!data.ok || !data.signals?.length) return;
       for (const sig of data.signals) await _handleSignal(sig);
     } catch {}
@@ -254,10 +252,10 @@ async function _handleSignal(sig) {
 }
 
 async function _deleteSignal(id) {
-  try { await fetch(`${PROXY}/signal/delete`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id }) }); } catch {}
+  try { await signalPost('/signal/delete', USER_GUID, { id }); } catch {}
 }
 async function _deleteMySignals() {
-  try { await fetch(`${PROXY}/signal/delete`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ from_guid: USER_GUID }) }); } catch {}
+  try { await signalPost('/signal/delete', USER_GUID, { mine: true }); } catch {}
 }
 
 // ── PDV 채팅 저장 (IndexedDB) ────────────────────────────
