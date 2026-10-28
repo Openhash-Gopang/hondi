@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-28 21:17 KST · 기준 커밋 ae6319a1
+- 갱신: 2026-10-28 21:44 KST · 기준 커밋 474e65e2
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-28 Merge pull request #846 from Openhash-Gopang/feat/navi-law-gwp
+- 2026-10-28 GWP: 나비로 Navi Law(law.hondi.net)를 tab 서비스로 등록
 - 2026-10-28 Merge pull request #845 from Openhash-Gopang/fix/embed-topbar
 - 2026-10-28 expert-chat 끼운 화면: 상단바를 한 줄로 줄여 대화를 가리지 않게 함
 - 2026-10-28 나비로 Navi Law 연동: 대화창 임베드 허용, 서비스 메뉴 링크, 초안 우선 시작 문구
@@ -42,8 +44,6 @@
 - 2026-10-27 site-header: 히어로 오른쪽 나비 로고 삭제, 설명 문단을 본문 상단으로, 버튼을 히어로 오른쪽으로 이동
 - 2026-10-27 Merge pull request #812 from Openhash-Gopang/docs/kpatent-methodology-v0-1
 - 2026-10-27 docs: K-Patent 방법론 v0.1 초안 추가
-- 2026-10-27 pages: 행정사·변리사·세무회계·감정평가사 소개서를 간결한 단일 칼럼 문서 스타일로 통일, 법무사 소개서 꼬리말 오기 수정
-- 2026-10-27 Merge pull request #810 from Openhash-Gopang/feat/ktax-sim-intro-text-body
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
