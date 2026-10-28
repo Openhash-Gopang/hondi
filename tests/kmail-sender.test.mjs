@@ -5,7 +5,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { checkSenderName, effectiveSenderName, formatSender, describeSender, LEGACY_DEFAULT_NAME, SENDER_NAME_MAX, campaignReplyTo, replyToWithName, REPLY_TO_SELF } from '../src/worker/kmail-sender.js';
+import { renderSignature, checkSenderName, effectiveSenderName, formatSender, describeSender, LEGACY_DEFAULT_NAME, SENDER_NAME_MAX, campaignReplyTo, replyToWithName, REPLY_TO_SELF } from '../src/worker/kmail-sender.js';
 
 test('기본은 이름 없음 → 주소만, 이름이 있으면 "이름 <주소>"', () => {
   assert.equal(formatSender('ceo@hondi.kr', ''), 'ceo@hondi.kr');
@@ -113,4 +113,15 @@ test('worker.js: 캠페인 발송이 회신 주소 규칙을 쓴다', () => {
   const w = fs.readFileSync(new URL('../worker.js', import.meta.url), 'utf8');
   assert.match(w, /replyTo: _kmailCampaignReplyTo\(`kmail-\$\{campaign\.id\}@hondi\.kr`, contactIds\.length\)/);
   assert.match(w, /_kmailReplyToWithName\(replyTo === _KMAIL_REPLY_TO_SELF \? fromAddr : replyTo, senderName\)/);
+});
+
+test('서명: 비어 있으면 "Signed by 이름"(이름 없으면 메일 아이디), {이름} 치환, "-" 이면 없음', () => {
+  assert.equal(renderSignature('', '주피터', 'ceo'), 'Signed by 주피터');
+  assert.equal(renderSignature(undefined, '', 'ceo'), 'Signed by ceo');
+  assert.equal(renderSignature('   ', '나비 K-Mail', 'ceo'), 'Signed by ceo', '옛 기본 이름은 이름 없음으로 본다');
+  assert.equal(renderSignature('Signed by {이름}', '주피터', 'ceo'), 'Signed by 주피터');
+  assert.equal(renderSignature('{name} 드림 / {NAME}', '주피터', 'ceo'), '주피터 드림 / 주피터');
+  assert.equal(renderSignature('혼디 도영민 드림', '주피터', 'ceo'), '혼디 도영민 드림');
+  assert.equal(renderSignature('-', '주피터', 'ceo'), '');
+  assert.equal(renderSignature('', '', ''), '');
 });
