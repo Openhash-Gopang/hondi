@@ -16,6 +16,7 @@ import { prepareDoctorRequest, doctorRateLimits } from './src/worker/kdoctor-gua
 import { handleOrderQueue } from './src/worker/order-queue-handler.js';
 import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
 import { profilePhoneFilter, last8Filter, pickGuidByLast8 } from './src/worker/phone-lookup.js';
+import { classifyQuery as _ffClassify, validateSearchId as _ffValidateId, publicCard as _ffPublicCard, rateLimitOk as _ffRateOk } from './src/worker/friend-find.js';
 import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
 import { parseMessage as _kmailParseMime, decodeMimeWords as _kmailDecodeMimeWords, repairStoredText as _kmailRepairStoredText } from './src/worker/mime-text.js';
@@ -14100,6 +14101,13 @@ export default {
     // phone_verify_token(전화번호 소유 증명)을 요구한다.
     if (pathname === '/user/gdc-balance' && request.method === 'POST')
       return handleUserGdcBalance(request, env, corsHeaders);
+
+    // POST /friends/find · /friends/settings — 카카오톡 방식 대화 상대 찾기(2026-10-28).
+    // 번호(상대가 허용한 경우만)·검색용 아이디 정확일치로만 찾는다. phone_verify_token 필요.
+    if (pathname === '/friends/find' && request.method === 'POST')
+      return handleFriendFind(request, env, corsHeaders);
+    if (pathname === '/friends/settings' && request.method === 'POST')
+      return handleFriendSettings(request, env, corsHeaders);
 
     // GET /user/gdc-history — 일반 사용자용 충전·이용료 내역 (2026-09-01
     // 신설). /balance-status·/subscription/status와 동일 관례(guid만으로
@@ -28248,6 +28256,100 @@ async function handleAdminUserHistory(request, env, corsHeaders) {
 // ═══════════════════════════════════════════════════════════
 // 2026-07-27 신설 — guid에 해당하는 profiles 레코드가 실제로 존재하는지
 // 확인한다. _l1FindProfileByHandle과 같은 패턴(guid 필드로 필터링).
+// ── 대화 상대 찾기 (2026-10-28, 주피터 지시: 카카오톡 방식) ──────────────────────────
+// 정확일치만: 번호는 상대가 phone_findable 을 켠 경우에만, 아이디는 search_id(또는 K-Mail/테스트 아이디) 일치일 때만.
+// 못 찾은 이유(없음/허용 안 함)는 구분해 알려 주지 않는다 — 번호 가입 여부를 캐내는 데 쓰이지 않게.
+const _FF_ID_CHARS = /^[A-Za-z0-9가-힣._-]{1,40}$/;
+async function handleFriendFind(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token);
+  if (!who.ok) return _err(401, who.code, who.message, corsHeaders);
+  const c = _ffClassify(body.q);
+  if (c.kind === 'empty') return _err(400, 'MISSING_FIELD', '찾을 전화번호나 아이디를 입력하세요', corsHeaders);
+
+  if (env.AI_SETUP_SEALS_KV) {            // 둘러보기 방지 — 시간당 조회 한도
+    const key = `ffind:${who.guid}:${Math.floor(Date.now() / 3600000)}`;
+    try {
+      const n = Number(await env.AI_SETUP_SEALS_KV.get(key)) || 0;
+      if (!_ffRateOk(n)) return _err(429, 'RATE_LIMITED', '조회가 너무 많습니다. 잠시 후 다시 시도해 주세요', corsHeaders);
+      await env.AI_SETUP_SEALS_KV.put(key, String(n + 1), { expirationTtl: 3700 });
+    } catch (e) { /* 한도 기록 실패는 조회를 막지 않는다 */ }
+  }
+
+  let prof = null;
+  try {
+    const l1 = await _l1AdminToken(env);
+    const find = async (filter) => {
+      const r = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${encodeURIComponent(filter)}&perPage=1`, {
+        headers: { 'Authorization': `Bearer ${l1}` }, signal: AbortSignal.timeout(8000),
+      });
+      if (!r.ok) throw new Error(`L1 조회 실패 (HTTP ${r.status})`);
+      const d = await r.json().catch(() => ({ items: [] }));
+      return d.items?.[0] || null;
+    };
+    if (c.kind === 'phone') {
+      prof = await find(`(${await profilePhoneFilter(env, c.e164)}) && phone_findable=true`);
+    } else if (_FF_ID_CHARS.test(c.id)) {
+      prof = await find(`search_id='${c.id}'`);
+      if (!prof && _testAuthOn(env)) {      // K-Mail·테스트 아이디(ceo 등)는 따로 설정 없이도 아이디로 찾힌다
+        const raw = String(body.q || '').trim().replace(/^@/, '');
+        prof = await _l1FindProfileByHandle(env, TEST_ID_PREFIX + c.id)
+          || (raw && raw !== c.id && _FF_ID_CHARS.test(raw) ? await _l1FindProfileByHandle(env, TEST_ID_PREFIX + raw) : null);
+      }
+    }
+  } catch (e) {
+    return _err(502, 'L1_ERROR', '상대 찾기 실패: ' + e.message, corsHeaders);
+  }
+  if (prof && (prof.extra?.migrated_to)) prof = null;
+  if (prof && prof.guid === who.guid) return new Response(JSON.stringify({ ok: true, found: false, self: true }), { status: 200, headers: corsHeaders });
+  if (!prof) return new Response(JSON.stringify({ ok: true, found: false }), { status: 200, headers: corsHeaders });
+  return new Response(JSON.stringify({ ok: true, found: true, user: _ffPublicCard(prof) }), { status: 200, headers: corsHeaders });
+}
+
+// body: { phone_verify_token, action: 'get' | 'set', search_id?, phone_findable? }
+async function handleFriendSettings(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token);
+  if (!who.ok) return _err(401, who.code, who.message, corsHeaders);
+  let me;
+  try { me = await _l1FindProfileByGuid(env, who.guid); } catch (e) { return _err(502, 'L1_ERROR', e.message, corsHeaders); }
+  if (!me) return _err(404, 'PROFILE_NOT_FOUND', '프로필을 찾을 수 없습니다', corsHeaders);
+  const isTest = String(me.handle || '').startsWith(TEST_ID_PREFIX);
+  const view = () => ({ ok: true, search_id: me.search_id || '', phone_findable: me.phone_findable === true,
+    test_account: isTest, effective_id: me.search_id || (isTest ? String(me.handle).slice(TEST_ID_PREFIX.length) : '') });
+  if (body.action !== 'set') return new Response(JSON.stringify(view()), { status: 200, headers: corsHeaders });
+
+  const patch = {};
+  if (typeof body.phone_findable === 'boolean') patch.phone_findable = body.phone_findable;
+  if (body.search_id !== undefined) {
+    const raw = String(body.search_id || '').trim();
+    if (raw === '') patch.search_id = '';
+    else {
+      const v = _ffValidateId(raw);
+      if (!v.ok) return _err(400, 'INVALID_SEARCH_ID', v.reason, corsHeaders);
+      try {
+        const l1 = await _l1AdminToken(env);
+        const r = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${encodeURIComponent(`search_id='${v.id}' && guid!='${String(me.guid).replace(/'/g, "\\'")}'`)}&perPage=1`, {
+          headers: { 'Authorization': `Bearer ${l1}` }, signal: AbortSignal.timeout(8000),
+        });
+        if (!r.ok) throw new Error(`L1 조회 실패 (HTTP ${r.status})`);
+        const d = await r.json().catch(() => ({ items: [] }));
+        let taken = !!d.items?.[0];
+        if (!taken && _testAuthOn(env)) { const t = await _l1FindProfileByHandle(env, TEST_ID_PREFIX + v.id); taken = !!(t && t.guid !== me.guid); }
+        if (taken) return _err(409, 'SEARCH_ID_TAKEN', '이미 사용 중인 아이디입니다', corsHeaders);
+      } catch (e) { return _err(502, 'L1_ERROR', '아이디 확인 실패: ' + e.message, corsHeaders); }
+      patch.search_id = v.id;
+    }
+  }
+  if (!Object.keys(patch).length) return _err(400, 'MISSING_FIELD', '바꿀 값이 없습니다', corsHeaders);
+  try { me = await _l1PatchProfile(env, me.id, patch); } catch (e) {
+    return _err(/unique|validation/i.test(e.message) ? 409 : 502, 'L1_ERROR', '저장 실패: ' + e.message, corsHeaders);
+  }
+  return new Response(JSON.stringify(view()), { status: 200, headers: corsHeaders });
+}
+
 async function _l1FindProfileByGuid(env, guid) {
   const token = await _l1AdminToken(env);
   const esc = guid.replace(/'/g, "\\'");
