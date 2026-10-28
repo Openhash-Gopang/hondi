@@ -4,6 +4,8 @@
  * - CF Worker /p2p/search 경유
  */
 import { PROXY, L1_URL, _USER } from '../core/state.js';
+import { classifyQuery } from '../../worker/friend-find.js';
+import { findFriend } from './friend-find-client.js';
 
 let _searchOverlay = null;
 let _searchTimer   = null;
@@ -46,7 +48,7 @@ export function openSearch(prefillQuery) {
         <div style="display:flex;align-items:center;
                     border:1px solid #e5e7eb;border-radius:12px;
                     background:#f9fafb;overflow:hidden" id="_sq-field">
-          <input id="_sq-input" type="text" placeholder="닉네임 또는 @handle"
+          <input id="_sq-input" type="text" placeholder="아이디 또는 전화번호 (닉네임도 가능)"
             style="flex:1;padding:0 14px;height:48px;border:none;background:transparent;
                    font-size:15px;font-family:inherit;outline:none;color:#111827;min-width:0"
             autocomplete="off"/>
@@ -148,6 +150,24 @@ async function _doSearch(q, country, region, resultsEl) {
       검색 중...
     </div>`;
 
+  // 카카오톡 방식(2026-10-28): 전화번호는 정확일치(상대가 허용한 경우만), 아이디는 검색용 아이디 정확일치.
+  const cq = classifyQuery(q);
+  let exact = null, exactMsg = '';
+  if (cq.kind === 'phone' || cq.kind === 'id') {
+    const fr = await findFriend(q);
+    if (fr.ok && fr.found && fr.user) exact = fr.user;
+    else if (fr.ok && fr.self) exactMsg = '검색하신 상대는 본인 계정입니다.';
+    else if (!fr.ok && fr.error === 'LOGIN_REQUIRED' && cq.kind === 'phone') exactMsg = '전화번호로 찾으려면 먼저 로그인해 주세요.';
+    else if (!fr.ok && cq.kind === 'phone') exactMsg = fr.message || '검색에 실패했습니다.';
+  }
+  if (cq.kind === 'phone') {
+    resultsEl.innerHTML = exact
+      ? _renderUserCard(exact)
+      : `<div style="text-align:center;padding:24px 16px;color:#9ca3af;font-size:13px;line-height:1.6">${exactMsg || '이 전화번호로 찾을 수 있는 사용자가 없습니다.<br>상대가 혼디에 가입했고 “번호로 찾기”를 허용했는지 확인해 주세요.'}</div>`;
+    resultsEl.querySelectorAll('[data-connect]').forEach(btn => { btn.onclick = () => _sendConnectRequest(JSON.parse(btn.dataset.connect)); });
+    return;
+  }
+
   try {
     // ── 탈중앙화 이관 ⑨: p2p/search → L1 직접 (2026-06-23) ─────────────
     // 이전: PROXY /p2p/search → Worker → L1 profiles 검색
@@ -181,6 +201,8 @@ async function _doSearch(q, country, region, resultsEl) {
       count:  raw.totalItems || 0,
       source: 'l1-direct',
     };
+
+    if (exact && !data.users.some(u => u.guid === exact.guid)) data.users.unshift(exact);   // 아이디 정확일치 결과를 맨 위에
 
     if (!data.ok || !data.users?.length) {
       resultsEl.innerHTML = `
@@ -245,7 +267,7 @@ async function _doSearch(q, country, region, resultsEl) {
 // ── 사용자 카드 렌더 ──────────────────────────────────────
 function _renderUserCard(u) {
   const flag    = _countryFlag(u.country_code);
-  const handle  = u.handle || '';
+  const handle  = String(u.handle || '').replace(/^tid-/, '');   // 테스트 아이디는 접두어 없이 보여 준다
   const region  = u.region  ? `<span style="color:#9ca3af">·</span> ${u.region}` : '';
   const country = u.country_code || '';
   const data    = JSON.stringify(u).replace(/"/g, '&quot;');

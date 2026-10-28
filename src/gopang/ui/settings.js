@@ -132,6 +132,7 @@ export function openSettings() {
 
   _updateSecuritySection();
   _syncSkinSwatchSelection();
+  if (registered) import('./friend-find-client.js').then(m => m.mountFriendFindCard()).catch(() => {});   // 2026-10-28 대화 상대 찾기 설정
   document.getElementById('settings-overlay')?.classList.add('open');
 }
 
