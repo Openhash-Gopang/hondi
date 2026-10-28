@@ -1168,6 +1168,40 @@ function _showDeviceMismatchNotice(found, resolve) {
 }
 
 
+// ── 공유 로그인 이어받기 (2026-10-28, 주피터 지시: K-Mail 대화 패널이 K-Mail 사용자로 보이게) ──
+// .hondi.net 공유 쿠키 hondi_pvt 에 전화 인증 토큰이 살아 있으면 서버에 "이 토큰이 누구인가"를 물어
+// 그 계정으로 이 앱을 연다(K-Mail 사용자 = 같은 guid). 이 기기에 저장된 계정이 없거나 테스트·임시 계정일 때만
+// 바꾼다 — 이미 다른 정식 계정으로 로그인해 있으면 건드리지 않는다. 어떤 실패든 기존 흐름으로 넘어간다.
+async function _adoptRealSharedLogin() {
+  try {
+    if (!_hasRealSharedLogin()) return null;
+    const stored = _loadStored();
+    if (stored?.ipv6 && !stored.test_account && !stored.isGuest && !stored.isTemp) return null;
+    const r = await fetch(`${PROXY_URL}/auth/session-profile`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone_verify_token: _readCookie('hondi_pvt') }),
+      signal: AbortSignal.timeout(6000),
+    });
+    const d = await r.json().catch(() => null);
+    if (!r.ok || !d || !d.ok || !d.guid) return null;
+    if (stored?.ipv6 === d.guid) return null;
+    const user = {
+      ipv6: d.guid, handle: d.handle, e164: '', country_code: d.country_code || DEFAULT_COUNTRY,
+      nickname: d.nickname || '', region: d.region || '', name: d.nickname || d.handle,
+      isGuest: false, isTemp: false, shared_login: true, test_account: !!d.test_account,
+      registeredAt: d.created || new Date().toISOString(),
+    };
+    localStorage.setItem(STORE_KEY, JSON.stringify(user));
+    try { localStorage.removeItem('hondi_test_optout'); } catch {}
+    setUser(user);
+    console.info('[Auth] 공유 로그인 이어받기 ✅', d.guid);
+    return user;
+  } catch (e) {
+    console.warn('[Auth] 공유 로그인 이어받기 실패 — 기존 흐름으로:', e.message);
+    return null;
+  }
+}
+
 // ── 저장소 읽기 ──────────────────────────────────────────
 function _loadStored() {
   try {
@@ -1179,6 +1213,8 @@ function _loadStored() {
 // ── 사용자 초기화 (앱 시작 시 1회) ──────────────────────
 export async function initAuth() {
   await _handleTestIdParam(); // 🧪 ?testid=… (없으면 즉시 반환)
+  const adopted = await _adoptRealSharedLogin(); // K-Mail 등 다른 서비스의 전화 인증 로그인을 이어받는다(2026-10-28)
+  if (adopted) return adopted;
   const stored = _loadStored();
   if (stored?.ipv6) {
     console.info('[Auth] 자동 로그인 ✅', stored.ipv6);
