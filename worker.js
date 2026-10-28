@@ -14104,6 +14104,10 @@ export default {
 
     // POST /friends/find · /friends/settings — 카카오톡 방식 대화 상대 찾기(2026-10-28).
     // 번호(상대가 허용한 경우만)·검색용 아이디 정확일치로만 찾는다. phone_verify_token 필요.
+    // POST /auth/session-profile — 공유 로그인 토큰(hondi_pvt)으로 "지금 누구인가"를 알려 준다(2026-10-28).
+    // K-Mail 등 다른 서비스에서 로그인한 사용자를 혼디 앱이 그대로 이어받을 때 쓴다. 최소 정보만 돌려준다.
+    if (pathname === '/auth/session-profile' && request.method === 'POST')
+      return handleAuthSessionProfile(request, env, corsHeaders);
     if (pathname === '/friends/find' && request.method === 'POST')
       return handleFriendFind(request, env, corsHeaders);
     if (pathname === '/friends/settings' && request.method === 'POST')
@@ -28256,6 +28260,21 @@ async function handleAdminUserHistory(request, env, corsHeaders) {
 // ═══════════════════════════════════════════════════════════
 // 2026-07-27 신설 — guid에 해당하는 profiles 레코드가 실제로 존재하는지
 // 확인한다. _l1FindProfileByHandle과 같은 패턴(guid 필드로 필터링).
+async function handleAuthSessionProfile(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, { allowBlockedTest: true });
+  if (!who.ok) return _err(401, who.code, who.message, corsHeaders);
+  let p;
+  try { p = await _l1FindProfileByGuid(env, who.guid); } catch (e) { return _err(502, 'L1_ERROR', e.message, corsHeaders); }
+  if (!p) return _err(404, 'PROFILE_NOT_FOUND', '프로필을 찾을 수 없습니다', corsHeaders);
+  return new Response(JSON.stringify({
+    ok: true, guid: p.guid, handle: p.handle || '', nickname: p.nickname || '',
+    region: p.region || '', country_code: p.country_code || 'KR', created: p.created || '',
+    test_account: String(p.handle || '').startsWith(TEST_ID_PREFIX),
+  }), { status: 200, headers: corsHeaders });
+}
+
 // ── 대화 상대 찾기 (2026-10-28, 주피터 지시: 카카오톡 방식) ──────────────────────────
 // 정확일치만: 번호는 상대가 phone_findable 을 켠 경우에만, 아이디는 search_id(또는 K-Mail/테스트 아이디) 일치일 때만.
 // 못 찾은 이유(없음/허용 안 함)는 구분해 알려 주지 않는다 — 번호 가입 여부를 캐내는 데 쓰이지 않게.

@@ -51,4 +51,7 @@ r=await call('/friends/settings',{phone_verify_token:U,action:'set',search_id:'a
 r=await call('/friends/settings',{phone_verify_token:U,action:'set',search_id:'Jupiter'}); ok(r.s===200&&r.j.search_id==='jupiter','아이디 저장(소문자)');
 r=await call('/friends/settings',{phone_verify_token:U,action:'set',phone_findable:true}); ok(r.j.phone_findable===true,'번호 허용 저장');
 r=await call('/friends/find',{phone_verify_token:tok('tid-ceo'),q:'jupiter'}); ok(r.j.self===true,'새 아이디도 본인 판정');
+r=await call('/auth/session-profile',{phone_verify_token:tok('tid-ceo')}); ok(r.s===200&&r.j.guid==='g-ceo'&&r.j.nickname==='주피터'&&r.j.test_account===true,'세션 프로필: 토큰 → 계정');
+ok(!('e164' in r.j)&&!('e164_hash' in r.j),'세션 프로필에 번호 필드 없음');
+r=await call('/auth/session-profile',{phone_verify_token:'bad.sig'}); ok(r.s===401||r.s===400,'세션 프로필: 무효 토큰 거부');
 process.exit(bad?1:0);
