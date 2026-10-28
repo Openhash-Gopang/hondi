@@ -905,6 +905,21 @@ const GWP_REGISTRY = [
     ],
   },
 
+
+  // ── 나비로 Navi Law (JUS) — tab, 2026-10-28 신설 ───────────────────
+  // law.hondi.net(법무사·변호사 서류 초안 작성, 서식 안의 빈 칸 입력). 사이트가 비서(AC)가 연 탭이면 GWP_PDV_REQUEST 로
+  // 의뢰인 본인의 이름·연락처·주소만 사용자 승인 하에 받아 서식 칸에 채운다(주민등록번호 등은 요청하지 않는다).
+  // sp_key 없음 — AI는 사이트 안의 expert-chat(embed)이 맡는다. triggers 는 K-Law·khealth 와 겹치지 않게 서비스명·작업명만 둔다.
+  {
+    id: 'navilaw', name: '나비로 Navi Law', category: 'JUS',
+    type: 'tab',
+    url: 'https://law.hondi.net/',
+    sp_key: null,
+    status: 'active', priority: 8, threshold: 0.80,
+    description: '법무사·변호사 서류(소장·신청서·계약서 등) 초안 작성과 서식 빈 칸 입력. 의뢰인 인적사항은 PDV에서 승인 하에 가져온다. 법률 상담·판결 예측은 담당하지 않음(→ K-Law).',
+    triggers: ['나비로','Navi Law','서류 초안 작성','서식 빈 칸'],
+  },
+
 ];
 
 // ── L1 pending_agents 동적 로드 (앱 시작 시 1회) ───────────────
