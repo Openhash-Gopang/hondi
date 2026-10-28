@@ -25,6 +25,22 @@ describe('expert-chat 임베드 — law.hondi.net 허용', () => {
   });
 });
 
+describe('expert-chat 임베드 — 상단바가 대화를 가리지 않는다', () => {
+  const chat = read('pages/expert-chat.html');
+  it('embed=1 이고 iframe 안일 때만 html 에 embed 클래스를 붙인다(화면이 그려지기 전, head 에서)', () => {
+    const head = chat.slice(0, chat.indexOf('</head>'));
+    assert.ok(head.includes("get('embed')==='1'&&window.parent!==window)document.documentElement.classList.add('embed')"));
+  });
+  it('끼운 화면에서는 설명 문구·아이콘·나비로 버튼을 숨기고 상단바를 한 줄 얇게 줄인다', () => {
+    assert.ok(chat.includes('html.embed #tb-icon, html.embed #tb-sub, html.embed #tb-back{display:none}'));
+    assert.ok(/html\.embed #top-bar\{padding:6px 10px;/.test(chat));
+    assert.ok(!/^#top-bar\{[^}]*display:none/m.test(chat), '일반 접속의 상단바는 그대로');
+  });
+  it('끼운 화면의 제안 및 질문은 새 탭으로 열려 대화창이 바뀌지 않는다', () => {
+    assert.ok(chat.includes("_sg.target = '_blank'; _sg.rel = 'noopener';"));
+  });
+});
+
 describe('hondi.net 서비스 메뉴 — 나비로 Navi Law', () => {
   it('K-Mail 다음에 law.hondi.net 링크가 있다', () => {
     const s = read('desktop.html'), pre = 'var MEGA_MENU_SECTIONS = ', i = s.indexOf(pre), j = s.indexOf(';\n', i);
