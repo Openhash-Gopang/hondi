@@ -23,6 +23,7 @@ import { checkSenderName as _kmailCheckSenderName, effectiveSenderName as _kmail
 import { LETTER_MODE_NOTE as _KMAIL_LETTER_MODE_NOTE, letterMax as _kmailLetterMax, evaluateLetter as _kmailEvaluateLetter, buildLetterStatus as _kmailBuildLetterStatus } from './src/worker/kmail-letter.js';
 import { rescueDanglingLookup as _kmailRescueDanglingLookup, evaluateSendGuard as _kmailEvaluateSendGuard, buildSentMailPreview as _kmailBuildSentMailPreview } from './src/worker/kmail-confirm.js';
 import { validateMailRecipients as _kmailValidateRecipients } from './src/worker/kmail-recipients.js';
+import { buildContactsNote as _kmailBuildContactsNote, sumRegisteredInMessages as _kmailSumRegistered, summarizeContacts as _kmailSummarizeContacts, buildSummaryContext as _kmailBuildSummaryContext, describeLookupScope as _kmailDescribeLookupScope } from './src/worker/kmail-contacts-summary.js';
 import { senderLocalPart as _kmailSenderLocalPart, classifyInboundLocalPart as _kmailClassifyLocalPart } from './src/worker/kmail-address.js';
 import { buildSendStatus as _kmailBuildSendStatus, instantSendMax as _kmailInstantSendMax, isImmediate as _kmailIsImmediate } from './src/worker/kmail-send-status.js';
 import { checkMailId as _checkMailId, defaultMailIdFromHash as _defaultMailIdFromHash, normalizeMailId as _normMailId, changePolicyConfig as _mailIdPolicy, evaluateChange as _mailIdEvaluate, recordChange as _mailIdRecordChange, recordConfirm as _mailIdRecordConfirm, limitMessage as _mailIdLimitMessage, readState as _mailIdReadState, writeState as _mailIdWriteState } from './src/worker/mail-id.js';
@@ -35160,6 +35161,33 @@ async function _kmailCountContacts(env, guid, opts = {}) {
 // 201번째부터는 어떤 방법으로도 가져올 수 없었다). 정렬은 (org, name) 뒤에 id를 붙여 동률에서도 페이지
 // 경계가 흔들리지 않게 한다. _kmailQueryContacts는 시그니처·반환(items 배열)이 그대로라 기존 호출부
 // (목록 핸들러, 채팅 조회 2곳)는 영향이 없다.
+// 2026-10-28 신설 — 주소록 현황 집계(K-Mail 대화용). 건수는 perPage=1 의 totalItems, 소속·카테고리는 앞쪽 최대 5,000건을 훑어 집계.
+async function _kmailContactsTotals(env, guid) {
+  const [total, confirmed, pending] = await Promise.all([
+    _kmailCountContacts(env, guid, { status: 'all' }),
+    _kmailCountContacts(env, guid, { status: 'confirmed' }),
+    _kmailCountContacts(env, guid, { status: 'pending_review' }),
+  ]);
+  return { total, confirmed, pending };
+}
+async function _kmailContactsSummary(env, guid) {
+  const totals = await _kmailContactsTotals(env, guid);
+  const rejected = await _kmailCountContacts(env, guid, { status: 'rejected' }).catch(() => 0);
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}` };
+  const filter = encodeURIComponent(_kmailContactsFilterString(guid, { status: 'all' }));
+  const rows = [];
+  let truncated = false;
+  for (let page = 1; page <= 10; page++) {
+    const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_contacts/records?filter=${filter}&fields=org,category,status,created&perPage=500&page=${page}`, { headers });
+    const d = await res.json().catch(() => ({ items: [] }));
+    (d.items || []).forEach(x => rows.push(x));
+    if (!d.items || d.items.length < 500) break;
+    if (page === 10) truncated = true;
+  }
+  return { ...totals, rejected, ..._kmailSummarizeContacts(rows), scanned: rows.length, truncated };
+}
+
 async function _kmailQueryContactsPage(env, guid, { status = 'confirmed', q = '', relationship = '', occupation = '', org = '', tag = '', category = '', org_path = '' } = {}, page = 1) {
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}` };
@@ -38569,9 +38597,18 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     }
   }
 
+  // 2026-10-28: 주소록 현황 + 도구 안내 + (대화가 길어 잘려 나간 앞부분 안내)
+  let contactsNote = '';
+  try {
+    const _validAll = messages.filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string');
+    const _omitted = _validAll.slice(0, Math.max(0, _validAll.length - 30));
+    const _totals = await _kmailContactsTotals(env, guid).catch(() => ({}));
+    contactsNote = _kmailBuildContactsNote({ ..._totals, omittedCount: _omitted.length, omittedRegistered: _kmailSumRegistered(_omitted) });
+  } catch (e) { /* 안내 없이 계속 */ }
   const systemMessages = [
     ...(kmailUniversalInjected ? [{ role: 'system', content: kmailUniversalInjected }] : []),
     { role: 'system', content: systemPrompt },
+    ...(contactsNote ? [{ role: 'system', content: contactsNote }] : []),
     ...(kplanBriefNote ? [{ role: 'system', content: kplanBriefNote }] : []),
     ...(letterMode ? [{ role: 'system', content: _KMAIL_LETTER_MODE_NOTE }] : []),
   ];
@@ -38638,6 +38675,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   const updateCampaignDraftMatch = reply.match(/KMAIL_UPDATE_CAMPAIGN_DRAFT\s*(\{[\s\S]*\})\s*$/);
   const ruleMatch = reply.match(/KMAIL_CREATE_RULE\s*(\{[\s\S]*\})\s*$/);
   const lookupMatch = reply.match(/KMAIL_LOOKUP_CONTACTS\s*(\{[\s\S]*\})\s*$/);
+  const contactsSummaryMatch = reply.match(/KMAIL_CONTACTS_SUMMARY\s*(\{[\s\S]*\})?\s*$/);
   const campaignLookupMatch = reply.match(/KMAIL_LOOKUP_CAMPAIGNS\s*(\{[\s\S]*\})?\s*$/);
   const campaignReportMatch = reply.match(/KMAIL_CAMPAIGN_REPORT\s*(\{[\s\S]*\})?\s*$/);
   // 2026-09-11 신설 — Mail SP ↔ 주소록 SP 협업 설계에서 나온 두 요청
@@ -38664,7 +38702,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   // 그대로 흘려보내지 않고 명확한 오류로 처리한다 — 조용히 실패하고
   // "된 것처럼" 보이는 것보다, 실패를 실패로 보여주는 게 훨씬 안전.
   const _kmailAnyTagMatch = searchMatch || fetchPageMatch || fetchContentMatch || sendMatch || campaignStartMatch || saveContactsMatch || capabilityGapMatch || saveDraftMatch || lookupDraftsMatch || updateCampaignDraftMatch ||
-    ruleMatch || lookupMatch || campaignLookupMatch || campaignReportMatch || lookupThreadMatch || filterRepliesMatch || tagMatch ||
+    ruleMatch || lookupMatch || contactsSummaryMatch || campaignLookupMatch || campaignReportMatch || lookupThreadMatch || filterRepliesMatch || tagMatch ||
     mergeMatch || threadStateMatch || statsMatch || settingsMatch || mailIdPromptMatch;
   if (!_kmailAnyTagMatch && /KMAIL_[A-Z_]+\s*\{/.test(reply)) {
     return _err(502, 'AI_MALFORMED_TAG',
@@ -38944,6 +38982,30 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   }
 
   // ── ⓪ 저장된 주소록 조회 태그 ─────────────────────────────────
+  // ── 주소록 현황 요약 태그 (2026-10-28 신설) ─────────────────────────
+  if (contactsSummaryMatch) {
+    const cleanReplyText = reply.slice(0, contactsSummaryMatch.index).trim();
+    const summary = await _kmailContactsSummary(env, guid).catch(e => { console.warn('[K-Mail] 주소록 요약 실패:', e.message); return null; });
+    const summaryContext = summary ? _kmailBuildSummaryContext(summary) : '[주소록 요약 실패] 집계에 실패했습니다. 건수를 지어내지 말고 실패했다고 밝히세요.';
+    let followUpReply;
+    try {
+      followUpReply = await deepseekChatText({
+        env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
+        messages: [
+          { role: 'system', content: systemPrompt }, ...cleanMessages,
+          { role: 'assistant', content: cleanReplyText || '주소록 현황을 집계하고 있습니다...' },
+          { role: 'user', content: summaryContext },
+        ],
+        max_tokens: 1500, temperature: 0.2, timeoutMs: 20000,
+        fallbackText: '주소록 집계는 완료됐지만 결과 정리에 실패했습니다. 다시 시도해 주세요.',
+      });
+    } catch (e) {
+      followUpReply = '주소록 요약 중 오류가 발생했습니다: ' + e.message;
+    }
+    return new Response(JSON.stringify({ ok: true, reply: followUpReply, action: { type: 'contacts_summary', total: summary ? summary.total : null } }),
+      { status: 200, headers: corsHeaders });
+  }
+
   if (lookupMatch) {
     let parsed = null;
     try { parsed = JSON.parse(lookupMatch[1]); } catch (e) { /* 아래에서 빈 조건으로 처리 */ }
@@ -38969,7 +39031,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     const cappedNote = items.length >= 200 && totalCount !== null && totalCount > items.length
       ? ` 아래 목록은 그중 처음 ${items.length}건 샘플입니다 — 이 샘플 크기를 총 건수로 말하지 마세요.`
       : '';
-    const lookupContext = `[주소록 조회 결과] ${totalNote}${cappedNote}\n\n샘플 ${items.length}건:\n${JSON.stringify(items.map(c => ({ name: c.name, email: c.email, org: c.org, occupation: c.occupation, relationship: c.relationship, tags: c.tags })))}\n\n위 정보를 사용자에게 자연스럽게 정리해서 보여주세요. "총 건수"를 말할 땐 반드시 위 정확한 총 건수를 쓰세요. 결과가 없으면 없다고 솔직히 말하세요. (이 메시지 자체는 사용자에게 보이지 않습니다.)`;
+    const lookupContext = `[주소록 조회 결과 — ${_kmailDescribeLookupScope(lookupOpts)}] ${totalNote}${cappedNote}\n\n샘플 ${items.length}건:\n${JSON.stringify(items.map(c => ({ name: c.name, email: c.email, org: c.org, occupation: c.occupation, relationship: c.relationship, tags: c.tags })))}\n\n위 정보를 사용자에게 자연스럽게 정리해서 보여주세요. "총 건수"를 말할 땐 반드시 위 정확한 총 건수를 쓰세요. 결과가 없으면 없다고 솔직히 말하세요. (이 메시지 자체는 사용자에게 보이지 않습니다.)`;
     let followUpReply;
     try {
       followUpReply = await deepseekChatText({
