@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-28 15:58 KST · 기준 커밋 29d60023
+- 갱신: 2026-10-28 18:26 KST · 기준 커밋 fa479d97
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-28 법무사·변호사 보조 AI SP: 초안 우선(§DRAFT-FIRST)으로 갱신, 나비로 Navi Law 반영
 - 2026-10-28 fix(chat): 직접 정하는 검색용 아이디 폐기 - 서버가 정한 혼디 아이디로만 찾고, 걸려 온 대화의 상대 표시 사칭 차단
 - 2026-10-28 fix(auth): 다른 서비스(K-Mail)의 전화 인증 공유 로그인을 혼디 앱이 이어받는다
 - 2026-10-28 feat(chat): 카카오톡 방식 대화 상대 찾기 - 전화번호(허용한 사람만)·검색용 아이디 정확일치
@@ -43,7 +44,6 @@
 - 2026-10-27 Merge pull request #808 from Openhash-Gopang/feat/ktax-sim-hero-doc-button
 - 2026-10-27 fix: 절세 시뮬레이션 히어로 — 나비 아이콘 삭제, K-Tax 방법론 버튼을 오른쪽 빈 공간으로 이동
 - 2026-10-27 Merge pull request #807 from Openhash-Gopang/feat/tax-hero-buttons-order
-- 2026-10-27 feat: 세무사 보조 AI 히어로 버튼 순서 변경 — 기술 소개 오른쪽에 절세 시뮬레이션·K-Tax 방법론
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
