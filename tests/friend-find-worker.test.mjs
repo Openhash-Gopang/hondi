@@ -7,8 +7,8 @@ const tok=(id)=>{const p=`${id}:${Date.now()+3600000}`;return p+'.'+sign(p);};
 // 모의 L1
 const profiles=[
  {id:'r1',guid:'g-ceo',handle:'tid-ceo',nickname:'주피터',e164:'',search_id:'',phone_findable:false},
- {id:'r2',guid:'g-hong',handle:'honggd',nickname:'홍길동',e164:'',e164_hash:'H-hong',search_id:'gildong',phone_findable:true},
- {id:'r3',guid:'g-kim',handle:'kimcs',nickname:'김철수',e164:'',e164_hash:'H-kim',search_id:'',phone_findable:false},
+ {id:'r2',guid:'g-hong',handle:'@11112222',nickname:'홍길동',e164:'',e164_hash:'H-hong',search_id:'gildong',phone_findable:true},
+ {id:'r3',guid:'g-kim',handle:'@33334444',nickname:'김철수',e164:'',e164_hash:'H-kim',search_id:'',phone_findable:false},
 ];
 const patches=[];
 globalThis.fetch=async(url,opts={})=>{
@@ -20,8 +20,6 @@ globalThis.fetch=async(url,opts={})=>{
     let m;
     if((m=f.match(/^handle='([^']+)'$/))) return p.handle===m[1];
     if((m=f.match(/^guid='([^']+)'$/))) return p.guid===m[1];
-    if((m=f.match(/^search_id='([^']+)' && guid!='([^']+)'$/))) return p.search_id===m[1]&&p.guid!==m[2];
-    if((m=f.match(/^search_id='([^']+)'$/))) return p.search_id===m[1];
     if(f.includes('phone_findable=true')){ const hm=f.match(/e164_hash='([^']+)'/); return p.phone_findable&&hm&&p.e164_hash===hm[1]; }
     return false;});
   return new Response(JSON.stringify({items}),{status:200});
@@ -31,11 +29,12 @@ const env={PHONE_VERIFY_SECRET:SECRET,SIMPLE_AUTH_TEST:'1',L1_ADMIN_EMAIL:'a',L1
 const call=async(path,body)=>{const r=await w.fetch(new Request('https://x.test'+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}),env,{waitUntil(){}});return {s:r.status,j:await r.json().catch(()=>null)};};
 let bad=0; const ok=(c,m)=>{console.log((c?'PASS ':'FAIL ')+m); if(!c)bad++;};
 const T=tok('tid-ceo');
-let r=await call('/friends/find',{phone_verify_token:T,q:'gildong'}); ok(r.s===200&&r.j.found&&r.j.user.guid==='g-hong','검색용 아이디로 찾기');
+let r=await call('/friends/find',{phone_verify_token:T,q:'@11112222'}); ok(r.s===200&&r.j.found&&r.j.user.guid==='g-hong','혼디 아이디(@8자리)로 찾기');
 ok(!('e164' in r.j.user)&&!('e164_hash' in r.j.user),'결과에 번호 필드 없음');
-r=await call('/friends/find',{phone_verify_token:T,q:'@Gildong'}); ok(r.j.found,'@·대소문자 무시');
-r=await call('/friends/find',{phone_verify_token:T,q:'nobody'}); ok(r.s===200&&r.j.found===false,'없는 아이디');
-r=await call('/friends/find',{phone_verify_token:T,q:'ceo'}); ok(r.j.self===true,'본인은 self');
+r=await call('/friends/find',{phone_verify_token:T,q:'11112222'}); ok(r.j.found,'@ 없이도');
+r=await call('/friends/find',{phone_verify_token:T,q:'99999999'}); ok(r.s===200&&r.j.found===false,'없는 아이디');
+r=await call('/friends/find',{phone_verify_token:T,q:'gildong'}); ok(r.j.found===false,'직접 정한 문자열 아이디는 더 이상 검색 대상이 아님');
+r=await call('/friends/find',{phone_verify_token:T,q:'ceo'}); ok(r.j.self===true,'테스트 아이디(ceo): 본인은 self');
 r=await call('/friends/find',{phone_verify_token:'bad.sig',q:'x'}); ok(r.s===401||r.s===400,'토큰 무효 거부 '+r.s);
 r=await call('/friends/find',{phone_verify_token:T,q:'  '}); ok(r.s===400,'빈 입력 400');
 // 번호: 해시는 모의에서 직접 계산해 맞춘다
@@ -45,12 +44,9 @@ r=await call('/friends/find',{phone_verify_token:T,q:'010-1111-2222'}); ok(r.j.f
 r=await call('/friends/find',{phone_verify_token:T,q:'010-3333-4444'}); ok(r.j.found===false,'번호(허용 안 함)는 못 찾음');
 // 설정
 const U=tok('tid-ceo');
-r=await call('/friends/settings',{phone_verify_token:U,action:'get'}); ok(r.j.ok&&r.j.effective_id==='ceo'&&r.j.test_account,'설정 조회: 유효 아이디 ceo');
-r=await call('/friends/settings',{phone_verify_token:U,action:'set',search_id:'gildong'}); ok(r.s===409,'중복 아이디 409');
-r=await call('/friends/settings',{phone_verify_token:U,action:'set',search_id:'ab'}); ok(r.s===400,'짧은 아이디 400');
-r=await call('/friends/settings',{phone_verify_token:U,action:'set',search_id:'Jupiter'}); ok(r.s===200&&r.j.search_id==='jupiter','아이디 저장(소문자)');
-r=await call('/friends/settings',{phone_verify_token:U,action:'set',phone_findable:true}); ok(r.j.phone_findable===true,'번호 허용 저장');
-r=await call('/friends/find',{phone_verify_token:tok('tid-ceo'),q:'jupiter'}); ok(r.j.self===true,'새 아이디도 본인 판정');
+r=await call('/friends/settings',{phone_verify_token:U,action:'get'}); ok(r.j.ok&&r.j.handle==='tid-ceo'&&r.j.test_account,'설정 조회: 혼디 아이디는 서버 값');
+r=await call('/friends/settings',{phone_verify_token:U,action:'set',search_id:'gildong'}); ok(r.s===400,'아이디를 직접 정하는 요청은 거부');
+r=await call('/friends/settings',{phone_verify_token:U,action:'set',phone_findable:true}); ok(r.j.phone_findable===true&&r.j.handle==='tid-ceo','번호 허용만 저장, 아이디 불변');
 r=await call('/auth/session-profile',{phone_verify_token:tok('tid-ceo')}); ok(r.s===200&&r.j.guid==='g-ceo'&&r.j.nickname==='주피터'&&r.j.test_account===true,'세션 프로필: 토큰 → 계정');
 ok(!('e164' in r.j)&&!('e164_hash' in r.j),'세션 프로필에 번호 필드 없음');
 r=await call('/auth/session-profile',{phone_verify_token:'bad.sig'}); ok(r.s===401||r.s===400,'세션 프로필: 무효 토큰 거부');
