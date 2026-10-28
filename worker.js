@@ -20,7 +20,7 @@ import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, addS
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
 import { parseMessage as _kmailParseMime, decodeMimeWords as _kmailDecodeMimeWords, repairStoredText as _kmailRepairStoredText } from './src/worker/mime-text.js';
 import { checkSenderName as _kmailCheckSenderName, effectiveSenderName as _kmailEffectiveSenderName, campaignReplyTo as _kmailCampaignReplyTo, replyToWithName as _kmailReplyToWithName, REPLY_TO_SELF as _KMAIL_REPLY_TO_SELF, formatSender as _kmailFormatSender, describeSender as _kmailDescribeSender, SENDER_NAME_MAX as _KMAIL_SENDER_NAME_MAX } from './src/worker/kmail-sender.js';
-import { evaluateSendGuard as _kmailEvaluateSendGuard, buildSentMailPreview as _kmailBuildSentMailPreview } from './src/worker/kmail-confirm.js';
+import { rescueDanglingLookup as _kmailRescueDanglingLookup, evaluateSendGuard as _kmailEvaluateSendGuard, buildSentMailPreview as _kmailBuildSentMailPreview } from './src/worker/kmail-confirm.js';
 import { senderLocalPart as _kmailSenderLocalPart, classifyInboundLocalPart as _kmailClassifyLocalPart } from './src/worker/kmail-address.js';
 import { buildSendStatus as _kmailBuildSendStatus, instantSendMax as _kmailInstantSendMax, isImmediate as _kmailIsImmediate } from './src/worker/kmail-send-status.js';
 import { checkMailId as _checkMailId, defaultMailIdFromHash as _defaultMailIdFromHash, normalizeMailId as _normMailId, changePolicyConfig as _mailIdPolicy, evaluateChange as _mailIdEvaluate, recordChange as _mailIdRecordChange, recordConfirm as _mailIdRecordConfirm, limitMessage as _mailIdLimitMessage, readState as _mailIdReadState, writeState as _mailIdWriteState } from './src/worker/mail-id.js';
@@ -38606,6 +38606,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     return _err(502, 'AI_CALL_FAILED', 'AI 호출 실패: ' + e.message, corsHeaders);
   }
   if (!reply) return _err(502, 'AI_EMPTY_REPLY', 'AI 응답이 비어있습니다', corsHeaders);
+  reply = _kmailRescueDanglingLookup(reply);   // 2026-10-28: "찾아볼게요"만 말하고 태그를 안 낸 응답은 서버가 조회 태그를 이어 붙인다
 
   const searchMatch = reply.match(/[\[\(]?KMAIL_SEARCH_CONTACTS\s*(\{[\s\S]*\})\s*[\]\)]?\s*$/);
   const fetchPageMatch = reply.match(/[\[\(]?KMAIL_FETCH_PAGE\s*(\{[\s\S]*\})\s*[\]\)]?\s*$/);
