@@ -78,3 +78,17 @@ export function replyToWithName(replyTo, name) {
   const n = effectiveSenderName(name);
   return n ? { email: replyTo, name: n } : replyTo;
 }
+
+/**
+ * 보내는 메일 끝에 붙는 서명 문구 (2026-10-28).
+ *  - 설정에 서명이 있으면 그대로(안의 {이름}·{name} 은 보내는 사람 이름으로 바꿈)
+ *  - 비어 있으면 기본 "Signed by 이름" — 이름은 보내는 이름, 없으면 메일 아이디
+ *  - 정확히 "-" 이면 서명을 붙이지 않음
+ */
+export function renderSignature(signature, senderName, mailIdFallback) {
+  const name = effectiveSenderName(senderName) || String(mailIdFallback || '').trim();
+  const raw = String(signature == null ? '' : signature).trim();
+  if (raw === '-') return '';
+  if (!raw) return name ? `Signed by ${name}` : '';
+  return raw.replace(/\{(?:이름|name)\}/gi, name);
+}

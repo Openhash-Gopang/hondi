@@ -19,7 +19,7 @@ import { profilePhoneFilter, last8Filter, pickGuidByLast8 } from './src/worker/p
 import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
 import { parseMessage as _kmailParseMime, decodeMimeWords as _kmailDecodeMimeWords, repairStoredText as _kmailRepairStoredText } from './src/worker/mime-text.js';
-import { checkSenderName as _kmailCheckSenderName, effectiveSenderName as _kmailEffectiveSenderName, campaignReplyTo as _kmailCampaignReplyTo, replyToWithName as _kmailReplyToWithName, REPLY_TO_SELF as _KMAIL_REPLY_TO_SELF, formatSender as _kmailFormatSender, describeSender as _kmailDescribeSender, SENDER_NAME_MAX as _KMAIL_SENDER_NAME_MAX } from './src/worker/kmail-sender.js';
+import { checkSenderName as _kmailCheckSenderName, effectiveSenderName as _kmailEffectiveSenderName, renderSignature as _kmailRenderSignature, campaignReplyTo as _kmailCampaignReplyTo, replyToWithName as _kmailReplyToWithName, REPLY_TO_SELF as _KMAIL_REPLY_TO_SELF, formatSender as _kmailFormatSender, describeSender as _kmailDescribeSender, SENDER_NAME_MAX as _KMAIL_SENDER_NAME_MAX } from './src/worker/kmail-sender.js';
 import { LETTER_MODE_NOTE as _KMAIL_LETTER_MODE_NOTE, letterMax as _kmailLetterMax, evaluateLetter as _kmailEvaluateLetter, buildLetterStatus as _kmailBuildLetterStatus } from './src/worker/kmail-letter.js';
 import { rescueDanglingLookup as _kmailRescueDanglingLookup, evaluateSendGuard as _kmailEvaluateSendGuard, buildSentMailPreview as _kmailBuildSentMailPreview } from './src/worker/kmail-confirm.js';
 import { validateMailRecipients as _kmailValidateRecipients } from './src/worker/kmail-recipients.js';
@@ -34685,7 +34685,8 @@ async function _kmailMailIdCached(env, guid) {
 async function _kmailSendOneEmail(env, { guid, to, cc, bcc, subject, text, sessionId, replyTo, signature, senderName, attachmentIds, preResolvedAttachments, mailId }) {
   const resolvedMailId = mailId !== undefined ? mailId : await _kmailMailIdCached(env, guid);
   const fromAddr = `${_kmailSenderLocalPart(guid, resolvedMailId)}@hondi.kr`;
-  const finalText = signature ? `${text}\n\n${signature}` : text;
+  const _sigText = _kmailRenderSignature(signature, senderName, _kmailSenderLocalPart(guid, resolvedMailId));   // 2026-10-28: 비어 있으면 'Signed by 이름', {이름} 치환, '-' 이면 없음
+  const finalText = _sigText ? `${text}\n\n${_sigText}` : text;
   const fromName = _kmailEffectiveSenderName(senderName);                       // 이름이 없으면 주소만("ceo@hondi.kr"), 있으면 "도 영민 <ceo@hondi.kr>"
   const sendParams = { to, from: fromName ? { email: fromAddr, name: fromName } : fromAddr, subject, text: finalText };
   if (Array.isArray(cc) && cc.length) sendParams.cc = cc;                       // 2026-10-28: 참조
