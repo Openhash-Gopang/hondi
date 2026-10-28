@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>혼디 전용 검색 엔진 구현 계획서 · 나비 관리자</title>
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  --bg: #f6f7f5;
+  --surface: #ffffff;
+  --surface-2: #eaf1f0;
+  --text: #1b2a2e;
+  --muted: #4f6166;
+  --line: #cfdad8;
+  --brand: #0e5560;
+  --accent: #c8650a;
+  --accent-bg: #fdf0e1;
+  --warn-bg: #fff4d6;
+  --warn-line: #e0b84a;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111b1e; --surface: #182428; --surface-2: #1f3036; --text: #e6eeee; --muted: #a3b6ba;
+    --line: #2f444a; --brand: #5cc3cf; --accent: #f0a04b; --accent-bg: #2c2216; --warn-bg: #2d2813; --warn-line: #8a7425;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111b1e; --surface: #182428; --surface-2: #1f3036; --text: #e6eeee; --muted: #a3b6ba;
+  --line: #2f444a; --brand: #5cc3cf; --accent: #f0a04b; --accent-bg: #2c2216; --warn-bg: #2d2813; --warn-line: #8a7425;
+  color-scheme: dark;
+}
+html { scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 16px); }
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font-family: "Pretendard", "Pretendard Variable", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  font-size: 19px; line-height: 1.8; word-break: keep-all; overflow-wrap: break-word; }
+.layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 48px; max-width: 1180px; margin: 0 auto; padding: 32px 24px 96px; }
+nav.toc { position: sticky; top: 24px; align-self: start; max-height: calc(100vh - 48px); overflow-y: auto; font-size: 16.5px; line-height: 1.5; border-right: 1px solid var(--line); padding-right: 20px; }
+nav.toc strong { display: block; margin-bottom: 12px; font-size: 17px; }
+nav.toc a { display: block; padding: 7px 0; color: var(--muted); text-decoration: none; }
+nav.toc a:hover, nav.toc a:focus-visible { color: var(--brand); text-decoration: underline; }
+main { max-width: 800px; min-width: 0; }
+header.doc { padding: 8px 0 28px; border-bottom: 3px solid var(--brand); margin-bottom: 8px; }
+header.doc h1 { font-size: 36px; line-height: 1.35; margin: 0 0 14px; letter-spacing: -0.01em; }
+header.doc p { margin: 0; color: var(--muted); font-size: 18px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 18px; font-size: 17px; color: var(--muted); }
+.meta b { color: var(--text); }
+h2 { font-size: 28px; line-height: 1.4; margin: 56px 0 14px; padding-top: 8px; border-top: 1px solid var(--line); }
+h3 { font-size: 22px; line-height: 1.45; margin: 32px 0 8px; color: var(--brand); }
+p { margin: 0 0 14px; }
+ul, ol { margin: 0 0 16px; padding-left: 26px; }
+li { margin-bottom: 6px; }
+code { font-family: ui-monospace, "SF Mono", Consolas, "D2Coding", monospace; font-size: 0.88em; background: var(--surface-2); padding: 2px 7px; border-radius: 5px; word-break: break-all; }
+.callout { background: var(--surface-2); border-left: 5px solid var(--brand); padding: 16px 20px; margin: 18px 0; border-radius: 0 8px 8px 0; }
+.callout.warn { background: var(--warn-bg); border-left-color: var(--warn-line); }
+.callout p:last-child, .callout ul:last-child { margin-bottom: 0; }
+.tablewrap { overflow-x: auto; margin: 16px 0 22px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 17px; line-height: 1.6; }
+th, td { text-align: left; vertical-align: top; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+th { background: var(--surface-2); font-weight: 700; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+.flow { display: flex; flex-wrap: wrap; gap: 10px; align-items: stretch; margin: 18px 0 24px; }
+.flow .step { flex: 1 1 150px; background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--brand); border-radius: 8px; padding: 12px 14px; font-size: 16.5px; line-height: 1.55; }
+.flow .step b { display: block; font-size: 17.5px; margin-bottom: 4px; }
+.flow .step.hl { border-top-color: var(--accent); background: var(--accent-bg); }
+.kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin: 16px 0 22px; }
+.kpi div { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; font-size: 17px; line-height: 1.55; }
+.kpi b { display: block; font-size: 24px; color: var(--accent); line-height: 1.3; }
+.decide li { margin-bottom: 10px; }
+footer { margin-top: 64px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 16.5px; }
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 20px 16px 72px; }
+  nav.toc { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--line); padding: 0 0 12px; margin-bottom: 8px; }
+  header.doc h1 { font-size: 29px; }
+  h2 { font-size: 25px; }
+  body { font-size: 18.5px; }
+}
+@media print { nav.toc { display: none; } .layout { display: block; } }
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc" aria-label="목차">
+  <a href="../admin.html" style="font-weight:700;color:var(--brand)">← 관리자 대시보드</a>
+  <strong style="margin-top:14px">목차</strong>
+  <a href="#s1">1. 요약</a>
+  <a href="#s2">2. 목표와 범위</a>
+  <a href="#s3">3. 사용 장면</a>
+  <a href="#s4">4. 데이터 수집</a>
+  <a href="#s5">5. 데이터 모델</a>
+  <a href="#s6">6. 처리 파이프라인</a>
+  <a href="#s7">7. 검색 구조</a>
+  <a href="#s8">8. 혼디 연동</a>
+  <a href="#s9">9. 화면 구성</a>
+  <a href="#s10">10. 인프라·운영</a>
+  <a href="#s11">11. 개인정보·저작권·법</a>
+  <a href="#s12">12. 품질 기준</a>
+  <a href="#s13">13. 일정</a>
+  <a href="#s14">14. 위험과 대응</a>
+  <a href="#s15">15. 결정이 필요한 사항</a>
+  <a href="#s16">16. 확장 로드맵</a>
+  <a href="#sa">부록. 인증키 신청 체크리스트</a>
+</nav>
+
+<main>
+<header class="doc">
+  <h1>혼디 전용 검색 엔진 구현 계획서<br>한국 논문 중심 파일럿 (개정 4판)</h1>
+  <p>어느 대학의 어느 교수가 언제 어떤 논문을 발표했는지 찾고, 그 내용을 요약으로 확인하고, 원문까지 바로 이어 주는 논문 검색 엔진. 데이터는 한국 학술·연구 기관의 공개 API를 중심으로 모은다.</p>
+  <div class="meta">
+    <span><b>작성일</b> 2026-10-28</span>
+    <span><b>준비</b> 10/29부터 인증키 신청</span>
+    <span><b>파일럿 기간</b> 2026-11-02 ~ 12-27 (8주)</span>
+  </div>
+</header>
+
+<h2 id="s1">1. 요약</h2>
+<p>이 엔진의 중심은 <b>논문</b>이다. 교수 검색은 논문의 저자·소속에서 만들어지는 “저자 보기”로 둔다. 데이터는 크롤링보다 <b>학술 기관의 공개 API</b>로 먼저 가져오고, 크롤러와 검색 서비스는 API가 채우지 못하는 부분(교수 직위·연락처 확인, 원문 링크 보강)에만 쓴다.</p>
+<div class="callout">
+  <p><b>3판에서 달라진 점</b></p>
+  <ul>
+    <li><b>수집 방향이 반대가 되었다.</b> 이전에는 교수 목록에서 시작해 논문을 붙였다. 이제는 논문 메타데이터(제목·저자·소속·초록·키워드·DOI)에서 시작해 교수와 대학을 구성한다.</li>
+    <li><b>요약과 원문 연결이 핵심 기능이 되었다.</b> 논문마다 초록 기반 한국어 요약을 만들고, DOI와 원문 링크를 확인해 보여 준다.</li>
+    <li><b>인증키 신청이 일정의 병목이다.</b> 승인에 걸리는 시간을 모르므로 0주차(10/29~)에 바로 신청하고, 키가 도착하기 전에는 키가 필요 없는 오픈 데이터로 먼저 진행한다.</li>
+    <li><b>수집 서버에는 고정 공인 IP가 필요하다.</b> ScienceON이 호출 서버의 공인 IP를 등록하게 하므로, API 수집은 Cloudflare Workers가 아니라 고정 IP 서버에서 실행한다.</li>
+  </ul>
+</div>
+<div class="kpi">
+  <div><b>논문 우선</b>제목·초록·키워드·저자·소속·발행연도·원문 링크</div>
+  <div><b>API 우선</b>KCI·ScienceON·NTIS·OpenAlex를 기본 원천으로 사용</div>
+  <div><b>초록 기반 요약</b>근거 없는 문장은 폐기, “AI 요약” 표시</div>
+  <div><b>8주 + 준비</b>11월 2일 착수, 12월 27일 완료</div>
+</div>
+
+<h2 id="s2">2. 목표와 범위</h2>
+<h3>2.1 파일럿 목표</h3>
+<ol>
+  <li>제목·키워드·주제 문장·저자명·대학 중 무엇으로 물어도 해당 논문을 찾는다.</li>
+  <li>논문마다 저자(교수), 소속 대학·학과, 발행연도·학술지, 요약, 원문 링크를 한 화면에서 보여 준다.</li>
+  <li>교수 한 사람의 논문 목록을 연도순으로 볼 수 있다.</li>
+  <li>수집 → 병합 → 요약 → 색인 → 서비스가 자동으로 돌고, 새 데이터 영역(코퍼스)은 설정 추가로 늘릴 수 있다.</li>
+</ol>
+<h3>2.2 범위에 넣는 것</h3>
+<ul>
+  <li>파일럿 5개 대학 소속 저자의 국내 학술지 논문(KCI 중심)과 해외 저널 논문(OpenAlex 등 보완)</li>
+  <li>저자·소속 해석, 동명이인 구분, 학문 분류와 K-EDU 소분류 매핑</li>
+  <li>초록 기반 한국어 요약, DOI·원문 링크 확인</li>
+  <li>교수 프로필 보강(직위·전공·대학이 공개한 연락처). 논문 기능이 안정된 뒤 붙인다(5.1의 규칙 적용).</li>
+</ul>
+<h3>2.3 범위에서 뺀 것</h3>
+<ul>
+  <li><b>교수·논문의 평가·순위·우수 추천.</b> 인용 수는 사실값으로만 표시하고 정렬 기본값으로 쓰지 않는다.</li>
+  <li><b>논문 전문(PDF) 저장·재배포와 전문 기반 요약.</b> 오픈액세스 이용 허락이 확인된 논문만 2단계에서 검토한다.</li>
+  <li>비공개 개인정보, 개인 휴대전화 번호</li>
+  <li>학위논문·보고서·특허(2단계 이후)</li>
+</ul>
+
+<h2 id="s3">3. 사용 장면</h2>
+<div class="tablewrap"><table>
+  <thead><tr><th>유형</th><th>예시 질의</th><th>엔진이 해야 할 일</th></tr></thead>
+  <tbody>
+    <tr><td>주제 탐색</td><td>“2024년 이후 미세플라스틱이 해양 생물에 미치는 영향 논문”</td><td>의미 검색 + 발행연도 필터, 논문 카드와 요약 제시</td></tr>
+    <tr><td>대학·학과 한정</td><td>“제주대 해양과학 분야 최근 3년 논문”</td><td>소속 필터와 학문 분류 필터로 좁힘</td></tr>
+    <tr><td>저자 중심</td><td>“김OO 교수가 최근 낸 논문” (동아대 경영학)</td><td>동명이인을 소속으로 구분하고 논문을 연도순으로 나열</td></tr>
+    <tr><td>제목 확인</td><td>정확한 논문 제목 일부</td><td>제목 일치 후 저자·소속·요약·원문 링크</td></tr>
+    <tr><td>원문 찾기</td><td>“이 논문 원문 어디서 봐?”</td><td>DOI → KCI → 학술지 페이지 순으로 연결, 오픈액세스 여부 표시</td></tr>
+    <tr><td>협업 탐색</td><td>“우리 문제와 가까운 연구를 한 교수 찾기”</td><td>질의 해석 후 후보 논문과 저자를 근거와 함께 제시</td></tr>
+  </tbody>
+</table></div>
+<p>착수 첫 주에 이 유형별 질의 200개와 정답 표본을 만들어 평가 기준으로 쓴다.</p>
+
+<h2 id="s4">4. 데이터 수집</h2>
+<h3>4.1 원천과 역할</h3>
+<p>구조가 정리된 데이터는 API로, 그렇지 않은 부분은 크롤링으로 가져온다. API 안내는 모두 기관의 공개 안내와 개발자 문서를 바탕으로 정리했으며, 호출 한도와 재배포 조건은 신청 과정에서 확인해 4.5의 조건표에 기록한다.</p>
+<div class="tablewrap"><table>
+  <thead><tr><th>원천</th><th>역할</th><th>가져올 정보</th><th>접근 방식·유의</th></tr></thead>
+  <tbody>
+    <tr><td>KCI(한국연구재단)</td><td>국내 학술지 논문의 뼈대</td><td>제목, 저자, 소속, 초록, 키워드, DOI, 인용 수, 학술지, 발행연도</td><td>KCI Open API(XML 응답). 인증키 신청 필요, 신청 방식(공문 요구 여부)은 신청 시 확인</td></tr>
+    <tr><td>ScienceON(KISTI)</td><td>KCI 보완(논문·보고서), 연구자·기관 조회</td><td>서지 메타데이터, 연구자·기관 정보</td><td>인증키 + Client ID 발급, MAC 주소와 호출 서버 공인 IP 등록 필요(고정 IP 서버 필요). KISTI 약관·트래픽 정책 준수</td></tr>
+    <tr><td>NTIS(KISTI)</td><td>국가 R&amp;D 과제와 성과 논문 연결(2단계 후보)</td><td>과제, 참여 연구자, 성과 논문</td><td>API별 활용신청과 승인이 필요</td></tr>
+    <tr><td>OpenAlex</td><td>해외 저널 논문 보완, DOI·주제 분류</td><td>논문, 저자, 기관, 초록(일부)</td><td>공개 데이터. 키 없이 먼저 시작 가능. 한국 저자 식별은 불완전할 수 있음</td></tr>
+    <tr><td>Crossref</td><td>DOI 검증과 서지 보정</td><td>DOI 기준 메타데이터</td><td>공개 API</td></tr>
+    <tr><td>공공데이터포털(출연연 등)</td><td>롱테일 보완</td><td>기관별 논문 메타(제목·저자·초록·키워드)</td><td>데이터별 활용신청, 심의 유형·비용 여부를 데이터마다 확인</td></tr>
+    <tr><td>RISS(KERIS)</td><td>학위논문·문헌복사 링크(2단계)</td><td>링크 연결 위주</td><td>공개 논문 검색 API가 있는지 확인하지 못함. 확인될 때까지 링크 방식</td></tr>
+    <tr><td>대학 홈페이지(크롤러)</td><td>교수 직위·전공·연락처 확인</td><td>공개 프로필 페이지</td><td>4.3의 크롤링 규칙 적용</td></tr>
+  </tbody>
+</table></div>
+
+<h3>4.2 API 수집 방식</h3>
+<ul>
+  <li><b>고정 공인 IP 서버에서 실행한다.</b> 한림 노드 등 고정 IP가 있는 서버에서 수집기를 돌리고, 그 IP를 ScienceON에 등록한다. Cloudflare Workers는 검색 중계에만 쓴다.</li>
+  <li><b>초기 적재 후 증분 갱신.</b> 파일럿 대상의 논문을 먼저 적재하고, 이후 주 1회 신규·수정분만 가져온다.</li>
+  <li><b>한도 존중.</b> 일 호출 한도의 70% 이하로 스케줄하고, 오류 시 지수 백오프로 재시도한다. 원본 응답(XML·JSON)은 가공하지 않은 채 별도 보관한다.</li>
+  <li><b>키 관리.</b> 인증키는 서버 비밀 값으로만 저장하고 저장소에 올리지 않는다.</li>
+  <li><b>원천별 약관 요약</b>을 <code>sources</code>에 기록하고, 재배포가 제한된 항목은 화면에 링크로만 표시한다.</li>
+</ul>
+
+<h3>4.3 크롤러(구글식 구조): 보조 수집</h3>
+<p>API가 채우지 못하는 교수 프로필·연락처 확인과 원문 링크 보강에 쓴다. 구글의 수집 구조(시드, 방문 대기열, 예절, 페처, 렌더링, 추출, 정규화, 링크 그래프, 재방문)를 차용하되 범위를 학술·대학 도메인으로 제한한다.</p>
+<ul>
+  <li><b>허용 목록 방식.</b> 승인한 대학·연구기관 도메인 안에서만 링크를 따라가고, 목록 밖 링크는 기록만 한다.</li>
+  <li><b>예절.</b> robots.txt와 noindex를 지키고, 호스트별 요청 간격 제한, 조건부 요청(ETag·Last-Modified), 식별 가능한 User-Agent를 쓴다. 약관이 자동 수집을 금지한 사이트는 링크 연결만 한다. 중단 요청은 즉시 반영한다.</li>
+  <li><b>렌더링과 추출.</b> 정적 HTML을 우선하고 필요한 곳만 헤드리스 브라우저를 쓴다. 구조화 데이터(JSON-LD·메타 태그) → 대학별 규칙 → 보조 추출(LLM) 순서이며, 추출값은 형식·기존 값 일치 검증을 통과해야 저장한다.</li>
+  <li><b>링크 그래프와 재방문.</b> 학과 → 교수 → 연구실 → 논문 링크를 저장해 우선순위와 교차 확인에 쓰되, 순위에는 반영하지 않는다. 변경이 잦은 페이지는 짧게, 드문 페이지는 길게 재방문한다.</li>
+  <li><b>로그인·개인정보 페이지는 수집하지 않는다.</b> 수집 원문은 근거 보관용이며 재배포하지 않는다.</li>
+</ul>
+<div class="callout warn">
+  <p><b>법적 위험은 구글과 같지 않다.</b> 국내에서는 타인의 데이터베이스를 무단으로 대량 수집·이용한 행위가 부정경쟁방지법이나 저작권법(데이터베이스제작자 권리) 문제로 다투어진 사례가 있다. 수집 범위·빈도·재이용 방식은 착수 전에 법률 검토를 받는다. 이 계획서는 법률 자문이 아니다.</p>
+</div>
+
+<h3>4.4 검색 서비스를 쓰는 보조 발견</h3>
+<p>크롤러가 교수 프로필 페이지를 찾지 못한 경우에만 “대학 이름 학과 교수” 질의로 후보 URL을 찾는다. 후보는 허용 도메인에 속한 것만 크롤러에 넘기고, 값은 대학 페이지에서 직접 읽어 출처와 함께 저장한다. 검색 서비스의 요약문·순위는 저장하지 않는다.</p>
+<ul>
+  <li>구글 Custom Search JSON API는 신규 가입이 닫혀 있고 2027-01-01에 종료되므로 쓰지 않는다. 구글 결과를 긁어 오는 서드파티 서비스도 약관 충돌 소지가 있어 제외한다.</li>
+  <li>후보: Vertex AI Search(5개교 도메인으로 제한), Brave Search API, 네이버 검색 오픈 API. 1주차에 약관·단가·한국어 품질을 비교해 정하거나, 보조 발견 없이 크롤러만으로 시작한다(15장).</li>
+</ul>
+
+<h3>4.5 원천 조건표(1주차 산출물)</h3>
+<p>원천마다 다음 항목을 확인해 표로 만들고, 팀이 승인한 원천만 본 수집에 쓴다: 일 호출 한도, 응답 형식, 재배포·저장 가능 범위, 출처 표기 의무, 상업 이용 가능 여부, 초록 표시 가능 여부, 약관 변경 통지 방식. 조건이 맞지 않는 원천은 “검색에만 쓰고 원문은 링크로 연결”하는 방식으로 낮춘다.</p>
+
+<h2 id="s5">5. 데이터 모델</h2>
+<p>PocketBase에 정규화된 엔티티를 저장하고, 검색 엔진에는 검색용으로 펼친 문서를 색인한다. 모든 레코드에 원천 식별자와 수집 시각을 남긴다.</p>
+<div class="tablewrap"><table>
+  <thead><tr><th>컬렉션</th><th>주요 필드</th><th>비고</th></tr></thead>
+  <tbody>
+    <tr><td><code>papers</code></td><td>제목(국문·영문), 초록(국문·영문), 키워드, 학술지, 발행연도·권호, DOI, 언어, 분야, 인용 수, 원천 ID 목록</td><td>여러 원천의 같은 논문을 하나로 병합한 대표 레코드</td></tr>
+    <tr><td><code>paper_summaries</code></td><td>논문 ID, 요약문, 입력 근거(초록 구간), 모델·버전, 생성 시각, 검증 결과</td><td>검증 실패 요약은 저장하지 않음(6.3)</td></tr>
+    <tr><td><code>paper_links</code></td><td>논문 ID, 링크 종류(DOI·KCI·학술지·오픈액세스), URL, 마지막 확인 시각, 상태</td><td>원문 파일은 저장하지 않음(6.4)</td></tr>
+    <tr><td><code>authorships</code></td><td>논문 ID, 교수 ID, 저자 순서, 교신 여부, 당시 소속 문자열, 정규화 소속, 매칭 신뢰도</td><td>동일인 식별 결과와 근거를 보관</td></tr>
+    <tr><td><code>professors</code></td><td>이름(국문·영문), 소속 ID, 직위, 전공, 연구 키워드, 외부 ID(ORCID 등), 상태, 최종 확인일</td><td>논문 저자에서 구성하고 대학 페이지로 보강</td></tr>
+    <tr><td><code>institutions</code></td><td>대학, 단과대, 학과, 공식 영문명, 별칭</td><td>“제주대”, “Jeju National Univ.” 같은 표기 통합</td></tr>
+    <tr><td><code>contacts</code></td><td>교수 ID, 종류, 값, 출처 URL, 수집 시각, 검증 상태, 표시 정책, 숨김 여부</td><td>5.1 규칙. 휴대전화 번호는 저장하지 않음</td></tr>
+    <tr><td><code>fields</code></td><td>학문 분류 계층, K-EDU 소분류 매핑, 동의어</td><td>필터와 페르소나 연결의 기준</td></tr>
+    <tr><td><code>sources</code></td><td>원천별 수집 이력, 약관 요약, 한도, 마지막 성공 시각</td><td>출처 표기와 갱신 관리</td></tr>
+    <tr><td><code>corrections</code></td><td>대상, 요청자, 내용, 근거, 처리 상태</td><td>정정·삭제·숨김 요청</td></tr>
+  </tbody>
+</table></div>
+<p>검색 색인은 논문 문서(제목·초록·키워드·요약·저자·소속)가 기본이고, 교수 문서(이름·소속·전공·대표 논문)는 저자 보기용 보조 색인이다.</p>
+<h3>5.1 연락처 처리 규칙</h3>
+<ul>
+  <li><b>출처 필수.</b> 값마다 출처 URL, 수집 시각, 검증 상태를 저장하고 화면에 출처 링크와 최종 확인일을 함께 표시한다. 확인 후 90일(시작값)이 지난 값은 “확인 필요”로 표시한다.</li>
+  <li><b>이메일.</b> 도메인이 소속 대학 공식 도메인과 일치하면 검증 통과. 다르면 검수 큐로 보내고 기본 표시하지 않는다.</li>
+  <li><b>전화.</b> 대학·학과·연구실 전화만 저장하고 휴대전화(010 등)는 수집 단계에서 걸러 저장하지 않는다.</li>
+  <li><b>표시와 악용 방지.</b> 이메일은 로그인한 사용자에게만 보이고 전체 목록을 내려받는 API는 만들지 않으며, 계정별 호출 한도를 둔다. 연락처는 검색 색인에서 제외한다.</li>
+  <li><b>숨김·정정.</b> 교수 본인의 요청은 즉시 반영하고, 재수집으로 되살아나지 않도록 차단 목록에 기록한다.</li>
+</ul>
+
+<h2 id="s6">6. 처리 파이프라인</h2>
+<div class="flow">
+  <div class="step"><b>API 수집</b>KCI·ScienceON·OpenAlex 등에서 원본 보관</div>
+  <div class="step hl"><b>논문 병합</b>원천 간 중복 논문을 하나로</div>
+  <div class="step hl"><b>저자·소속 해석</b>동명이인 구분, 대학 정규화</div>
+  <div class="step"><b>교수 구성·분류</b>저자에서 교수 엔티티와 분야 부여</div>
+  <div class="step hl"><b>요약 생성·검증</b>초록 기반, 근거 없는 문장 폐기</div>
+  <div class="step"><b>원문 링크 확인</b>DOI·KCI·학술지 경로 점검</div>
+  <div class="step"><b>벡터화·색인</b>검색 엔진 반영, 신선도 점검</div>
+</div>
+<h3>6.1 논문 병합</h3>
+<p>같은 논문이 KCI·ScienceON·OpenAlex에 중복해서 들어온다. DOI가 같으면 같은 논문으로 본다. DOI가 없으면 정규화한 제목, 발행연도, 첫 저자, 학술지를 조합한 키와 제목 유사도로 후보를 묶고, 확신이 낮으면 병합하지 않고 검수 큐로 보낸다. 서로 다른 논문을 합치는 오류가 가장 해로우므로 병합 정밀도를 우선한다.</p>
+<h3>6.2 저자·소속 해석(가장 어려운 단계)</h3>
+<ol>
+  <li><b>소속 정규화.</b> “동아대”, “Dong-A Univ.”, 학과명만 있는 표기를 기관 사전으로 통합한다. 사전은 공공데이터의 대학·학과 코드에서 시작해 실제 표기를 보며 늘린다.</li>
+  <li><b>후보 묶기와 점수.</b> 이름(국문·영문 변형)과 정규화 소속으로 후보를 묶고, ORCID 일치, 공저자 겹침, 키워드·초록 벡터 유사도, 소속 이동의 연속성을 합산한다.</li>
+  <li><b>확신도 분기.</b> 높으면 자동 연결, 중간이면 검수 큐, 낮으면 연결하지 않는다.</li>
+  <li><b>정정 반영.</b> 검수와 정정 요청 결과를 정답 데이터로 쌓아 가중치를 조정한다.</li>
+</ol>
+<h3>6.3 논문 요약</h3>
+<ul>
+  <li><b>입력은 초록·제목·키워드.</b> 논문 전문은 입력으로 쓰지 않는다(오픈액세스 허락이 확인된 논문만 2단계에서 검토).</li>
+  <li><b>출력은 3문장 이내의 한국어 요약</b>(연구 목적, 방법, 주요 결과). 영문 초록만 있으면 한국어로 요약하고 영문 초록 링크를 함께 제공한다.</li>
+  <li><b>자동 검증.</b> 요약에 나온 수치·고유명사·결론이 초록에 있는지 대조해, 근거가 없는 문장이 있으면 그 요약을 저장하지 않고 재생성하거나 비워 둔다.</li>
+  <li><b>표시.</b> “AI 요약 · 초록 기반 · 원문 확인 필요”를 붙이고, 사용한 모델과 버전을 저장한다. 초록이 없는 논문은 요약을 만들지 않고 제목·키워드·원문 링크만 보여 준다.</li>
+  <li><b>초록 원문 노출</b> 여부는 원천 약관에 따른다. 허용되지 않으면 요약만 보여 준다.</li>
+</ul>
+<h3>6.4 원문 링크</h3>
+<ul>
+  <li>연결 순서는 DOI(<code>doi.org</code>) → KCI 상세·원문 링크 → 학술지·학회 페이지. 오픈액세스로 확인된 경우 표시한다.</li>
+  <li>링크는 주 1회 점검(응답 상태 확인)하고, 깨진 링크는 다음 경로로 대체한다.</li>
+  <li>원문 파일은 저장하거나 재배포하지 않고 링크로만 연결한다.</li>
+</ul>
+<h3>6.5 분야 분류와 갱신 주기</h3>
+<ul>
+  <li>한국연구재단 학문 분류를 기준 축으로, OpenAlex 주제 분류와 K-EDU 교수 페르소나 소분류를 매핑 테이블로 연결한다. 매핑이 안 되는 항목은 “미분류”로 남기고 주간 점검 목록에 올린다.</li>
+  <li>논문 증분 수집은 주 1회, 교수 소속·직위 확인은 월 1회, 분류 매핑·동의어 사전은 월 1회 점검한다.</li>
+</ul>
+
+<h2 id="s7">7. 검색 구조</h2>
+<h3>7.1 논문 중심 하이브리드 검색</h3>
+<ol>
+  <li><b>키워드 검색(BM25).</b> 한국어 형태소 분석을 적용한다. 필드 가중치는 제목 &gt; 키워드 &gt; 저자·소속 &gt; 초록 &gt; 요약 순으로 시작해 평가 결과로 조정한다.</li>
+  <li><b>의미 검색(벡터).</b> 다국어 임베딩 모델(예: BGE-M3 계열 오픈 모델)을 자체 서버에서 돌려 한국어 질의와 영문 초록이 서로 매칭되게 한다. 질의가 외부 임베딩 서비스로 나가지 않는다.</li>
+  <li><b>결합과 재순위.</b> 두 결과를 합친 뒤 상위 후보에만 재순위 모델을 적용한다. 기본 정렬은 관련도, 선택지로 최신순을 둔다.</li>
+  <li><b>필터.</b> 대학, 학과, 저자, 발행연도, 학술지, 분야, 언어, 원문 링크 유무.</li>
+  <li><b>저자 보기.</b> 논문 점수를 저자별로 모을 때는 상위 N편만 반영하고, 근거 논문을 함께 보여 준다.</li>
+</ol>
+<h3>7.2 검색 엔진 선택</h3>
+<div class="tablewrap"><table>
+  <thead><tr><th>안</th><th>구성</th><th>장점</th><th>단점</th></tr></thead>
+  <tbody>
+    <tr><td>A안</td><td>OpenSearch 단일 노드(Nori 한국어 분석기 + k-NN 벡터)</td><td>키워드·벡터·필터·집계를 한 엔진에서 처리, 한국어 분석기가 검증됨</td><td>메모리 사용량이 큼, 운영 지식 필요</td></tr>
+    <tr><td>B안</td><td>Meilisearch(키워드·하이브리드) + Qdrant(벡터)</td><td>가볍고 설치가 쉬움, 개발 속도가 빠름</td><td>한국어 형태소 품질과 집계 기능에서 약할 수 있음, 구성 요소 2개</td></tr>
+  </tbody>
+</table></div>
+<p>2주차에 같은 평가 질의로 벤치마크해 정하되, 결과가 비슷하면 구성 요소가 적은 A안을 택한다. 엔진은 검색 서비스 뒤에 숨겨 두어 나중에 바꿔도 API와 화면은 그대로 둔다.</p>
+<h3>7.3 질의 해석</h3>
+<p>사용자 문장을 LLM으로 필터(대학·학과·연도·저자), 검색어(국문·영문 동의어 포함), 의도(주제 탐색·저자 중심·제목 확인·원문 찾기·협업 탐색)로 바꾼다. 실패하면 원문 그대로 하이브리드 검색을 실행한다. 모델 호출부를 한 곳에 모아 필드 테스트 단계의 모델에서 앱 상용화 단계의 나비 LLM으로 바꿀 수 있게 하고, 질의에는 사용자 개인정보를 넣지 않는다.</p>
+<h3>7.4 답변 생성 규칙</h3>
+<ul>
+  <li>결과 카드의 저자·소속·학술지·연도·링크는 DB 값만 표시한다(생성 금지).</li>
+  <li>“왜 이 논문이 나왔는가”를 한두 문장으로 말할 때는 근거(제목·초록 구절의 요지)가 있어야 하고, 없으면 만들지 않는다.</li>
+  <li>결과가 없을 때는 이유와 다른 검색 방법(철자, 연도·소속 범위 넓히기)을 안내한다.</li>
+</ul>
+<h3>7.5 검색 API</h3>
+<div class="tablewrap"><table>
+  <thead><tr><th>엔드포인트</th><th>용도</th></tr></thead>
+  <tbody>
+    <tr><td><code>GET /search?corpus=paper&amp;q=…</code></td><td>자연어·키워드 통합 논문 검색(필터 파라미터 포함)</td></tr>
+    <tr><td><code>GET /paper/{id}</code></td><td>논문 상세: 저자·소속, 초록(허용 시), 요약, 원문 링크, 출처, 최종 확인일</td></tr>
+    <tr><td><code>GET /professor/{id}</code></td><td>저자 보기: 소속, 전공, 논문 목록(연도순), 출처(연락처는 로그인 사용자에게만)</td></tr>
+    <tr><td><code>GET /facets</code></td><td>대학·학과·분야·연도 필터 목록과 건수</td></tr>
+    <tr><td><code>POST /corrections</code></td><td>정정·삭제·숨김 요청 접수</td></tr>
+  </tbody>
+</table></div>
+<p>API는 Cloudflare Workers의 검색 중계 계층에서 받아 인증·호출 한도·캐시를 처리한 뒤 검색 서버로 넘긴다.</p>
+
+<h2 id="s8">8. 혼디 연동</h2>
+<ul>
+  <li><b>혼디 검색(상단 검색창).</b> 사용자 안내/개발자 문서 2단 토글과 “전체 없음” 결정을 유지한다. 질의가 논문·교수 의도로 판단될 때만 전용 검색 화면으로 넘기는 방식을 제안한다(15장).</li>
+  <li><b>K-EDU 교수 페르소나.</b> 논문의 분야를 페르소나 소분류와 매핑해 “이 분야 교수 AI에게 물어보기”를 제공한다. 실존 교수와 페르소나는 별개이며 페르소나는 해당 교수 본인이 아님을 화면에 적는다.</li>
+  <li><b>로그인.</b> 모든 화면 우측 상단에 로그인 상태와 아이디를 표시한다. 필드 테스트 기간에는 아이디만으로 로그인하고 과금하지 않는다. 비로그인 사용자는 검색은 가능하되 결과 건수·페이지 수·연락처 등 일부를 제한한다(15장).</li>
+  <li><b>행동 연결.</b> 논문 카드에서 “이 논문 인용 형식 복사”, “저자에게 문의 메일 초안”(K-Mail, 발송은 사용자 확인 후)을 제공한다. 서비스별 정액 과금 체계에 맞춰 호출 단위 로그를 남긴다.</li>
+</ul>
+
+<h2 id="s9">9. 화면 구성</h2>
+<ul>
+  <li><b>검색 첫 화면.</b> 검색창, 예시 질의 5개, 대학·연도·분야 필터.</li>
+  <li><b>결과 목록(논문 카드).</b> 제목, 저자와 소속 대학·학과, 학술지와 발행연도, AI 요약(라벨 포함), 원문 링크 버튼과 오픈액세스 표시, 출처와 최종 확인일.</li>
+  <li><b>논문 상세.</b> 초록(허용 시), 요약, 키워드, 저자(교수 연결), 원문·DOI 링크, 비슷한 논문.</li>
+  <li><b>저자 보기.</b> 소속·전공, 연도순 논문 목록, 분야별 보기, “정보가 틀렸나요?” 정정 버튼.</li>
+  <li><b>공통 규칙.</b> 폰트는 Pretendard, 모든 글자를 읽기 편한 크기(본문 18px 이상)로 하고, 사이트 공통 헤더(로그인 상태)를 쓴다.</li>
+</ul>
+
+<h2 id="s10">10. 인프라·운영</h2>
+<div class="tablewrap"><table>
+  <thead><tr><th>계층</th><th>구성</th><th>비고</th></tr></thead>
+  <tbody>
+    <tr><td>화면</td><td>Cloudflare 배포 정적 페이지</td><td>사이트 공통 헤더·로그인 모듈 재사용</td></tr>
+    <tr><td>검색 중계</td><td>Cloudflare Workers</td><td>인증, 호출 한도, 캐시, 질의 해석 호출</td></tr>
+    <tr><td>API 수집기</td><td>고정 공인 IP 서버(한림 노드 등)의 예약 작업</td><td>ScienceON 등 IP 등록이 필요한 API 호출. 서비스 서버와 분리</td></tr>
+    <tr><td>크롤러</td><td>프런티어 큐 + 워커, 서비스 서버와 분리</td><td>수집 부하가 서비스 응답에 영향을 주지 않게 함</td></tr>
+    <tr><td>엔티티 DB</td><td>PocketBase(한림 노드의 인스턴스)</td><td>기존 서비스 DB와 분리 권고</td></tr>
+    <tr><td>검색 엔진·벡터</td><td>자체 서버 1대(7.2의 A안 또는 B안)</td><td>자원 실측 후 확정</td></tr>
+    <tr><td>요약 생성</td><td>배치 작업(논문별 1회, 캐시)</td><td>필드 테스트 단계의 모델 사용, 나비 LLM으로 전환 가능한 구조</td></tr>
+  </tbody>
+</table></div>
+<ul>
+  <li><b>자원 어림치.</b> 1,024차원 벡터를 32비트로 저장하면 문서 100만 건당 약 4GB다. 대상 논문 수는 5개교 실제 수집 결과로 추정하고, 서버 메모리·디스크·임베딩 처리 시간은 1주차에 실측해 엔진과 범위를 확정한다.</li>
+  <li><b>개발 규칙.</b> 별도 저장소로 시작하고 GPL v3.0을 따른다. 변경은 기능 브랜치에서 작업해 PR로 병합하고, 푸시 전에 항상 최신 원격 상태를 먼저 가져온다. 마이그레이션은 자동 배포 파이프라인을 필수 경로로 쓴다.</li>
+  <li><b>모니터링.</b> 수집 실패, 호출 한도 임박, 신선도 지연, 링크 깨짐 비율, 요약 검증 실패율을 주간 리포트로 자동 집계한다.</li>
+</ul>
+
+<h2 id="s11">11. 개인정보·저작권·법</h2>
+<ul>
+  <li><b>API 약관 준수.</b> 원천별 이용 약관(저장 기간, 재배포, 출처 표기, 상업 이용)을 조건표로 정리하고, 허용되지 않는 사용은 링크 방식으로 낮춘다. 데이터의 이용 조건은 코드의 GPL과 별개로 관리한다.</li>
+  <li><b>초록·요약의 저작권.</b> 초록은 저자·학술지의 저작물이다. 초록을 그대로 보여 줄지는 약관에 따르고, AI 요약은 초록을 근거로만 만들어 “AI 요약”으로 표시하며 원문 확인을 안내한다. 이 처리가 저작권법상 문제가 없는지는 상용화 전에 검토한다.</li>
+  <li><b>수집 최소화.</b> 공개된 직위·소속·연구 업적과 대학이 공개한 이메일·학과 전화만 다룬다. 개인 휴대전화 번호는 수집하지 않는다.</li>
+  <li><b>연락처 악용 방지.</b> 5.1의 규칙(로그인 후 표시, 대량 내려받기 금지, 호출 한도, 숨김 요청 즉시 반영)을 따른다.</li>
+  <li><b>평가성 표현 금지.</b> 순위·등급·“추천 교수” 표현을 쓰지 않는다. 인용 수는 사실값으로만 둔다.</li>
+  <li><b>정정·삭제 통로.</b> 모든 논문·저자 화면에 정정 요청 버튼을 두고, 처리 기한과 담당자를 정해 이력을 남긴다.</li>
+  <li><b>사용자 데이터 국내 처리.</b> 질의와 임베딩은 해외 서비스로 이전하지 않는 것을 기본으로 한다. 필드 테스트 중 외부 LLM API를 쓰는 부분은 질의 해석·요약에 한정하고, 개인정보를 제거한 문장만 보낸다.</li>
+</ul>
+<div class="callout warn">
+  <p><b>법률 검토 필요.</b> 대학 홈페이지 정보의 수집·가공 허용 범위, 이름과 연락처를 묶은 데이터베이스의 구축 목적·범위·보관 기간, 초록 이용과 AI 요약의 저작권 문제는 상용화 전에 전문가 검토를 받는다. 이 계획서는 법률 자문이 아니다.</p>
+</div>
+
+<h2 id="s12">12. 품질 기준</h2>
+<div class="tablewrap"><table>
+  <thead><tr><th>지표</th><th>파일럿 목표</th><th>측정 방법</th></tr></thead>
+  <tbody>
+    <tr><td>제목·저자 질의 정확도</td><td>상위 3건 안에 정답 포함률 95% 이상</td><td>질의 100개</td></tr>
+    <tr><td>주제 질의 재현율</td><td>Recall@10 80% 이상</td><td>질의 100개, 전문가 정답 라벨</td></tr>
+    <tr><td>논문 병합 정밀도</td><td>98% 이상(서로 다른 논문을 합치지 않음)</td><td>병합 표본 300쌍 검토</td></tr>
+    <tr><td>저자·소속 연결 정밀도</td><td>95% 이상(재현율 85% 이상)</td><td>교수 300명 수작업 정답 표본</td></tr>
+    <tr><td>요약 충실성</td><td>표본 200건에서 초록에 근거 없는 문장 2% 이하</td><td>사람 검토 + 자동 대조</td></tr>
+    <tr><td>원문 링크 유효율</td><td>95% 이상</td><td>주간 자동 점검</td></tr>
+    <tr><td>응답 속도</td><td>p95 800ms 이하(질의 해석·요약 제외)</td><td>부하 시험</td></tr>
+    <tr><td>근거 표시율</td><td>결과 카드 100%에 출처 링크</td><td>자동 검사</td></tr>
+    <tr><td>연락처 정확도</td><td>표본 일치율 95% 이상</td><td>표본 300건을 대학 원본 페이지와 대조</td></tr>
+  </tbody>
+</table></div>
+<p>목표 수치는 시작점이다. 1주차에 만든 정답 데이터로 현재 수준을 먼저 재고, 달성 가능한 값으로 조정한다. 평가는 매주 같은 질의 세트로 반복한다.</p>
+
+<h2 id="s13">13. 일정</h2>
+<div class="tablewrap"><table>
+  <thead><tr><th>주차</th><th>기간</th><th>작업</th><th>산출물</th></tr></thead>
+  <tbody>
+    <tr><td>0주</td><td>10/29 ~ 11/1</td><td>인증키 신청(KCI, ScienceON, NTIS, 공공데이터포털), 신청 명의 확정, 고정 IP 서버 확인</td><td>신청 완료 목록</td></tr>
+    <tr><td>1주</td><td>11/2 ~ 11/8</td><td>원천 조건표 작성, 키가 필요 없는 OpenAlex·Crossref 수집 PoC, 평가 질의·정답 표본 설계, 서버 자원 실측</td><td>원천 조건표, 평가 세트 v0, 환경 보고</td></tr>
+    <tr><td>2주</td><td>11/9 ~ 11/15</td><td>KCI·ScienceON 커넥터(키 도착 시), 논문 병합 v1, 엔진 A/B 벤치마크</td><td>수집 PoC, 엔진 선택 결과</td></tr>
+    <tr><td>3주</td><td>11/16 ~ 11/22</td><td>5개교 논문 적재, 소속 정규화 사전, 분야 분류 매핑, 대학 교수 목록 크롤 시험</td><td>논문 DB 1차</td></tr>
+    <tr><td>4주</td><td>11/23 ~ 11/29</td><td>저자·소속 해석 v1, 교수 엔티티 구성, 검수 큐, 임베딩 생성</td><td>식별 정밀도 보고, 벡터 색인</td></tr>
+    <tr><td>5주</td><td>11/30 ~ 12/6</td><td>요약 생성·검증, 하이브리드 검색·재순위, 검색 API, 호출 한도·캐시</td><td>검색 API 베타, 요약 품질 보고</td></tr>
+    <tr><td>6주</td><td>12/7 ~ 12/13</td><td>논문 카드·상세·저자 보기 화면, 원문 링크 점검기, 질의 해석, 정정 요청, 로그인 표시</td><td>화면 베타</td></tr>
+    <tr><td>7주</td><td>12/14 ~ 12/20</td><td>혼디 검색·K-EDU 연결, 연락처 크롤·검증, 내부 사용자 시험, 지표 측정</td><td>통합 베타, 지표 보고</td></tr>
+    <tr><td>8주</td><td>12/21 ~ 12/27</td><td>결함 수정, 운영 자동화 점검, 파일럿 결과 정리</td><td>파일럿 결과 보고서, 확장 제안</td></tr>
+  </tbody>
+</table></div>
+<p><b>인증키 승인이 늦어질 경우.</b> 11/15까지 KCI 키가 오지 않으면 OpenAlex·Crossref 데이터로 파이프라인과 검색을 먼저 완성하고, 키가 도착하는 대로 국내 논문을 채운다. 지연 시 기능을 줄이는 순서는 ① 협업 탐색 ② 재순위 ③ 연락처 크롤 ④ 비슷한 논문이다.</p>
+
+<h2 id="s14">14. 위험과 대응</h2>
+<div class="tablewrap"><table>
+  <thead><tr><th>위험</th><th>영향</th><th>대응</th></tr></thead>
+  <tbody>
+    <tr><td>인증키 승인 지연·거절</td><td>국내 논문 수집 시작 지연</td><td>0주차 신청, 법인 명의 신청서 준비, 승인 전에는 오픈 데이터로 진행, 담당 기관에 진행 상황 문의</td></tr>
+    <tr><td>고정 IP 요건</td><td>호출 거부</td><td>수집기를 고정 IP 서버에서 실행, IP 변경 시 재등록 절차를 운영 문서에 기록</td></tr>
+    <tr><td>API 약관·한도 제약</td><td>수집·표시 범위 축소</td><td>조건표로 사전 확인, 링크 방식으로 전환, 대체 원천 확보</td></tr>
+    <tr><td>소속 표기 불일치</td><td>대학별 논문 누락·오귀속</td><td>기관 사전, 확신도 분기, 검수 큐</td></tr>
+    <tr><td>동명이인 오연결</td><td>다른 사람의 논문이 붙음</td><td>점수화, 낮은 점수는 비연결, 정정 통로</td></tr>
+    <tr><td>초록 없음·초록 품질 낮음</td><td>요약 불가·부정확</td><td>요약 생략 처리, 제목·키워드·링크만 표시, 비율 실측</td></tr>
+    <tr><td>요약 오류(환각)</td><td>없는 내용이 논문 요약으로 표시</td><td>초록 대조 검증, 근거 없는 문장 폐기, “AI 요약” 표시, 표본 검토</td></tr>
+    <tr><td>원문 링크 깨짐</td><td>원문 접근 실패</td><td>주간 점검, 대체 경로(DOI → KCI → 학술지)</td></tr>
+    <tr><td>크롤링 차단·약관 위반 지적</td><td>수집 중단, 법적 분쟁</td><td>허용 목록 방식, 약관 사전 확인, 중단 요청 즉시 반영, API 우선 사용</td></tr>
+    <tr><td>연락처 오류·대량 수집 악용</td><td>잘못된 노출, 스팸·피싱</td><td>도메인 검증, 로그인 후 표시, 내려받기 차단, 숨김 요청 즉시 반영</td></tr>
+    <tr><td>한국어 검색 품질 부족</td><td>제목·전공어 검색 실패</td><td>동의어·사용자 사전, 엔진 교체 가능 구조</td></tr>
+    <tr><td>서버 자원 부족</td><td>색인·응답 지연</td><td>벡터 양자화, 대상 범위 축소, 임베딩 배치 처리</td></tr>
+    <tr><td>평가·명예 문제 제기</td><td>법적·평판 위험</td><td>평가성 표현 금지, 삭제 요청 신속 처리, 법률 검토</td></tr>
+  </tbody>
+</table></div>
+
+<h2 id="s15">15. 결정이 필요한 사항</h2>
+<ol class="decide">
+  <li><b>인증키 신청 명의.</b> 법인(AI City Inc.) 명의로 신청할지 개인 명의로 할지. 공문이 필요한 경우 법인 명의가 유리하며, 일부 서비스는 기관 사용자만 신청할 수 있도록 바뀌는 추세다.</li>
+  <li><b>고정 IP 서버.</b> 수집기를 돌릴 서버와 그 공인 IP를 확정할 것.</li>
+  <li><b>파일럿 대학 5곳.</b> 제주 지역 대학을 포함하고 규모·분야가 다른 대학을 섞는 구성을 권한다.</li>
+  <li><b>저장소와 도메인.</b> 별도 저장소(예: <code>search</code>)와 하위 도메인으로 시작할지, 기존 hondi 저장소 안에서 시작할지.</li>
+  <li><b>혼디 검색과의 연결 방식.</b> 8장의 “질의 의도로 넘기기” 방식으로 갈지, 별도 페이지 진입만 둘지.</li>
+  <li><b>검색 엔진.</b> 7.2의 A안·B안은 2주차 벤치마크 후 결정(권고: 결과가 비슷하면 A안).</li>
+  <li><b>비로그인 이용 범위.</b> 검색 가능 횟수, 결과 페이지 수, 정정 요청 가능 여부.</li>
+  <li><b>정정·삭제 요청 처리 주체.</b> 담당자와 기한(예: 접수 후 7일 이내).</li>
+  <li><b>크롤러 운영 방식.</b> 봇 이름·소개 페이지·연락처를 정하고, 약관이 수집을 금지한 대학은 링크 연결만 할지, 대학 측에 사전 협조를 요청할지.</li>
+  <li><b>보조 발견용 검색 서비스.</b> 4.4의 후보를 1주차에 비교해 정하거나, 보조 발견 없이 크롤러만으로 시작할지.</li>
+  <li><b>연락처 표시 범위.</b> 이메일을 로그인 사용자에게만 보여 줄지, 학과 전화까지 같은 기준으로 묶을지, 상용화 이후에도 유지할지.</li>
+  <li><b>초록 노출 방식.</b> 약관이 허용하면 초록 전체를 보여 줄지, 요약만 보여 줄지.</li>
+</ol>
+
+<h2 id="s16">16. 확장 로드맵</h2>
+<ul>
+  <li><b>2단계(파일럿 직후).</b> 전국 대학 확대, 학위논문·보고서·특허 추가, NTIS 과제와 성과 논문 연결, 공동연구 네트워크 보기, 오픈액세스 논문의 전문 요약</li>
+  <li><b>3단계.</b> 출연연·병원 등 다른 기관의 연구 업적 코퍼스. 직종별 법적 표시 의무와 광고 규제를 먼저 검토</li>
+  <li><b>4단계.</b> 대학·행정기관·법령 코퍼스로 K-정부 페이지 검색을 같은 엔진으로 통합</li>
+  <li><b>5단계.</b> 나비웹 앱에서 나비 LLM이 질의 해석과 요약을 맡도록 전환, 서비스별 과금 체계 연동</li>
+</ul>
+<p>파일럿 결과 보고서에는 수집 비용, 서버 자원, 정확도 지표, 정정 요청 건수를 포함해 이후 클라우드 구축 비용 산출의 근거 수치로 쓸 수 있게 한다.</p>
+
+<h2 id="sa">부록. 인증키 신청 체크리스트</h2>
+<div class="tablewrap"><table>
+  <thead><tr><th>순서</th><th>대상</th><th>핵심 절차</th><th>준비물·확인</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>KCI Open API</td><td>KCI 포털 회원가입 → Open API 인증키 신청서 작성 → 승인 확인</td><td>신청 방식(공문 필요 여부)을 포털 안내에서 확인, 법인 명의 신청서</td></tr>
+    <tr><td>2</td><td>ScienceON</td><td>회원가입·로그인 → API Gateway → 인증키 발급 신청 → 승인 후 인증키·Client ID 확인 → MAC 주소 등록 → 호출 서버 공인 IP 등록</td><td>고정 IP 서버, MAC 주소</td></tr>
+    <tr><td>3</td><td>NTIS(KISTI OpenAPI)</td><td>안내 페이지에서 필요한 API 선택 → API별 활용신청 → 승인 후 키 확인</td><td>2단계 후보이므로 과제·성과 검색 API 위주로 신청</td></tr>
+    <tr><td>4</td><td>공공데이터포털</td><td>회원가입 → 원하는 데이터 검색 → 활용신청 → 심의 유형 확인 → 승인 후 서비스 키 확인</td><td>데이터마다 심의·승인이 다름</td></tr>
+  </tbody>
+</table></div>
+<p>화면 이름과 절차는 기관의 사정에 따라 바뀔 수 있으므로, 신청 중 화면에 나오는 안내를 우선한다. 신청 목적 문구에는 “학술 논문 검색 서비스 구축, 서지 메타데이터 조회, 원문은 저장·재배포하지 않고 링크로만 연결, 출처 표기”를 명시한다.</p>
+
+<footer>혼디 전용 검색 엔진 구현 계획서 · 개정 4판(논문 중심, 학술 API 우선) · 2026-10-28</footer>
+</main>
+</div>
+</body>
+</html>
