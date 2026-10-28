@@ -99,3 +99,14 @@ export function buildSentMailPreview(parsed, sender, state, sendAtMs, nowMs = Da
     ...body.split('\n').map(l => '> ' + l),
   ].join('\n');
 }
+
+// 2026-10-28 — 비서가 "<이름>님을 주소록에서 찾아볼게요."라고만 말하고 조회 태그를 안 낸 응답을 구제한다(대화가 그 자리에서 멈추던 문제).
+// K-Mail 태그가 하나도 없고, 끝 문장이 "주소록에서 찾아/조회/확인해 볼게요"류이면 그 앞의 이름으로 KMAIL_LOOKUP_CONTACTS 태그를 붙여 돌려준다.
+const DANGLING_LOOKUP_RE = /(?:^|[\s,.:;!?'"(\[])([가-힣A-Za-z0-9_·\-]{1,20}?)\s*(?:님|씨)?(?:을|를)?\s*주소록(?:에서|을|에)\s*(?:찾아\s*(?:볼게요|보겠습니다)|조회\s*(?:해\s*볼게요|하겠습니다)|확인\s*(?:해\s*볼게요|하겠습니다))[.!?\s]*$/;
+export function rescueDanglingLookup(reply) {
+  const text = String(reply == null ? '' : reply);
+  if (/KMAIL_[A-Z_]+/.test(text)) return text;
+  const m = text.slice(-160).match(DANGLING_LOOKUP_RE);
+  if (!m || !m[1] || /^(주소록|이름|연락처)$/.test(m[1])) return text;
+  return text.trimEnd() + '\nKMAIL_LOOKUP_CONTACTS ' + JSON.stringify({ q: m[1], relationship: '', occupation: '', org: '', tag: '', category: '' });
+}

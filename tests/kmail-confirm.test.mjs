@@ -5,7 +5,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { hasConfirmationAsk, previousAssistantAsked, buildConfirmationSummary, evaluateSendGuard, buildSentMailPreview } from '../src/worker/kmail-confirm.js';
+import { rescueDanglingLookup, hasConfirmationAsk, previousAssistantAsked, buildConfirmationSummary, evaluateSendGuard, buildSentMailPreview } from '../src/worker/kmail-confirm.js';
 
 const NOW = Date.parse('2026-10-27T07:58:16.000Z');
 const parsedOne = { recipients: [{ name: '', email: 'tensor.city@gmail.com' }], subject: '테스트 메일', body: '안녕하세요, K-Mail 테스트 발송입니다.', send_at: '2026-10-27T16:58:16+09:00' };
@@ -116,4 +116,23 @@ test('보낸 메일 내용: 예약·접수는 "발송할 메일 내용", 실패�
 test('보낸 메일 내용: 아주 긴 본문은 잘라 보여 주고 안내한다', () => {
   const t = buildSentMailPreview({ recipients: [{ email: 'a@x.com' }], subject: 's', body: '가'.repeat(5000) }, null, 'sent', 0, 0);
   assert.match(t, /이하 2000자 생략/); assert.ok(t.length < 3400);
+});
+
+// 2026-10-28 — "찾아볼게요"만 말하고 멈춘 응답 구제
+test('rescueDanglingLookup: "주피터님을 주소록에서 찾아볼게요."에 조회 태그를 붙인다', () => {
+  const r = rescueDanglingLookup('주피터님을 주소록에서 찾아볼게요.');
+  assert.match(r, /\nKMAIL_LOOKUP_CONTACTS \{"q":"주피터"/);
+  assert.match(rescueDanglingLookup('네, 김철수 씨를 주소록에서 조회해 볼게요!'), /"q":"김철수"/);
+  assert.match(rescueDanglingLookup('홍길동을 주소록에서 확인하겠습니다'), /"q":"홍길동"/);
+});
+test('rescueDanglingLookup: 이미 태그가 있거나 해당 문장이 아니면 그대로 둔다', () => {
+  const tagged = '찾아볼게요.\nKMAIL_LOOKUP_CONTACTS {"q":"주피터"}';
+  assert.equal(rescueDanglingLookup(tagged), tagged);
+  assert.equal(rescueDanglingLookup('주소록에서 찾았습니다. 보낼까요?'), '주소록에서 찾았습니다. 보낼까요?');
+  assert.equal(rescueDanglingLookup('주피터님을 주소록에서 찾아볼게요. 잠시만요 기다려 주세요'), '주피터님을 주소록에서 찾아볼게요. 잠시만요 기다려 주세요');
+  assert.equal(rescueDanglingLookup(''), '');
+});
+test('worker.js: 응답 태그 판정 전에 rescueDanglingLookup 을 거친다', () => {
+  const w = fs.readFileSync(new URL('../worker.js', import.meta.url), 'utf8');
+  assert.match(w, /reply = _kmailRescueDanglingLookup\(reply\);[^\n]*\n\n  const searchMatch = reply\.match/);
 });
