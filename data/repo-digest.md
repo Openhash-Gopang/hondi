@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-28 15:01 KST · 기준 커밋 ee1d737e
+- 갱신: 2026-10-28 15:23 KST · 기준 커밋 f2fbf3d3
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 875건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-28 feat(chat): 카카오톡 방식 대화 상대 찾기 - 전화번호(허용한 사람만)·검색용 아이디 정확일치
 - 2026-10-28 feat(kmail): 서명이 비어 있으면 Signed by 이름 기본 서명, {이름} 치환, 하이픈은 서명 없음
 - 2026-10-28 feat(admin): 검색 엔진 구현 계획 섹션 추가 (논문 중심 파일럿 개정 4판)
 - 2026-10-28 fix(kmail): 깨진 태그 오류 완화 + 내 캠페인 삭제 API
@@ -43,7 +44,6 @@
 - 2026-10-27 feat: 세무사 보조 AI 히어로 버튼 순서 변경 — 기술 소개 오른쪽에 절세 시뮬레이션·K-Tax 방법론
 - 2026-10-27 pages: simplify judicial scrivener intro layout (single-column document style)
 - 2026-10-27 Merge pull request #805 from Openhash-Gopang/feat/intro-tax-restyle-sim-button
-- 2026-10-27 feat: 세무·회계 보조 AI 소개서를 세무사 보조 AI 페이지 레이아웃으로 갱신, 히어로에 절세 시뮬레이션 버튼
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
