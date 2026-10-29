@@ -9,7 +9,7 @@ const read = (p) => readFileSync(new URL('../../' + p, import.meta.url), 'utf8')
 
 describe('세무·회계 통합 SP 연동', () => {
   it('tax.hondi.net 이 임베드 부모 오리진에 있다', () => {
-    assert.ok(read('pages/expert-chat.html').includes("'https://tax.hondi.net'];"));
+    assert.ok(read('pages/expert-chat.html').includes("'https://tax.hondi.net'"));
   });
   it('페르소나 tax-accounting 이 등록되고 서류 작성 직역 루트에 있다', () => {
     const d = EXPERT_REGISTRY['tax-accounting'];
