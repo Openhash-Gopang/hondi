@@ -1,7 +1,7 @@
 // 나비로 Navi Law(law.hondi.net) 연동 — 대화 화면 임베드 허용, 서비스 메뉴 링크, 초안 우선 시작 문구
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -11,7 +11,7 @@ const read = (p) => readFileSync(join(ROOT, p), 'utf8');
 describe('expert-chat 임베드 — law.hondi.net 허용', () => {
   const chat = read('pages/expert-chat.html');
   it('부모 오리진은 같은 오리진과 law.hondi.net·tax.hondi.net 만 허용한다', () => {
-    assert.ok(chat.includes("const _EMBED_PARENT_ORIGINS = [location.origin, 'https://law.hondi.net', 'https://tax.hondi.net'];"));
+    assert.ok(chat.includes("const _EMBED_PARENT_ORIGINS = [location.origin, 'https://law.hondi.net', 'https://tax.hondi.net', 'https://patent.hondi.net'];"));
     assert.ok(chat.includes('!_EMBED_PARENT_ORIGINS.includes(e.origin) || e.source !== window.parent'));
     assert.ok(!/e\.origin !== location\.origin \|\| e\.source !== window\.parent/.test(chat), '예전 같은 오리진 전용 검사가 남아 있다');
   });
@@ -56,7 +56,7 @@ describe('hondi.net 서비스 메뉴 — 나비로 Navi Law', () => {
 describe('서류 작성 시작 문구 — 법무사·변호사는 초안 우선', () => {
   const js = read('assets/scrivener-write.js');
   it('법무사·변호사 보조 AI 는 묻지 말고 빈 칸으로 남기라고 시작한다', () => {
-    assert.ok(js.includes("/^(judicial-scrivener|lawyer)/.test(PID) ? '모르는 항목은 묻지 말고 빈 칸으로 남긴 뒤 초안 아래 빈 칸 표로 알려 주세요.'"));
+    assert.ok(js.includes("/^(judicial-scrivener|lawyer|patent-attorney)/.test(PID) ? '모르는 항목은 묻지 말고 빈 칸으로 남긴 뒤 초안 아래 빈 칸 표로 알려 주세요.'"));
   });
   it('다른 직역은 기존 문구(3개 이내로 되묻기)를 그대로 쓴다', () => {
     assert.ok(js.includes("'부족한 항목은 3개 이내로 먼저 물어봐 주세요.'"));
@@ -70,5 +70,30 @@ describe('GWP — 나비로 Navi Law 등록(PDV 자동 기입 경로)', () => {
     const block = reg.slice(k, reg.indexOf('},', k));
     assert.match(block, /type: 'tab'/); assert.match(block, /url: 'https:\/\/law\.hondi\.net\/'/); assert.match(block, /status: 'active'/);
     assert.ok(read('src/gopang/gwp/allowed-origins.js').includes("'https://law.hondi.net'"));
+  });
+});
+
+describe('나비 특허 Navi Patent(patent.hondi.net) 연동', () => {
+  it('registry 에 tab 서비스로 등록되고 PDV·서명 출처 허용 목록에 patent.hondi.net 이 있다', () => {
+    const reg = read('gwp-registry.js'), k = reg.indexOf("id: 'navipatent'");
+    assert.ok(k > 0);
+    const block = reg.slice(k, reg.indexOf('},', k));
+    assert.match(block, /type: 'tab'/); assert.match(block, /url: 'https:\/\/patent\.hondi\.net\/'/); assert.match(block, /status: 'active'/);
+    assert.ok(read('src/gopang/gwp/allowed-origins.js').includes("'https://patent.hondi.net'"));
+  });
+  it('서비스 메뉴에 patent.hondi.net 링크가 있다', () => {
+    const s = read('desktop.html'), pre = 'var MEGA_MENU_SECTIONS = ', i = s.indexOf(pre), j = s.indexOf(';\n', i);
+    const arr = JSON.parse(s.slice(i + pre.length, j));
+    const it = arr.flatMap((x) => x.items).find((x) => x.href === 'https://patent.hondi.net');
+    assert.ok(it && it.target === '_blank');
+  });
+  it('끼운 서류 작성은 변리사(+세부 분야 10개) 전문가용 SP 를 쓴다', () => {
+    const chat = read('pages/expert-chat.html');
+    assert.ok(chat.includes("  'patent-attorney',"));
+    assert.ok(chat.includes("_PRO_WRITE_PERSONAS.add('patent-attorney-' + s)"));
+    for (const f of ['mechanical-electrical', 'chemistry-materials', 'bio-pharma', 'it-software', 'trademark', 'design', 'trial-litigation', 'pct-international', 'ip-strategy', 'licensing']) {
+      assert.ok(chat.includes("'" + f + "'"), f);
+      assert.ok(existsSync(join(ROOT, 'prompts/SP_patent-attorney-' + f + '-assistant_v1_0.md')), f + ' 보조 SP');
+    }
   });
 });

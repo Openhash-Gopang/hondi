@@ -432,6 +432,8 @@ async function _pumpSSE(response, onJson) {
 const _PRO_WRITE_PERSONAS = new Set(['judicial-scrivener', 'administrative-scrivener',
   // 2026-10-27 변호사 — 제출형은 pages/scrivener-write.html?persona=lawyer (전문가용 SP_lawyer-assistant v1.1 STEP W)
   'lawyer',
+  // 2026-10-29 변리사 — 나비 특허 임베드의 서류 작성은 전문가용 SP_patent-attorney-assistant 를 쓴다(세부 분야 10개 포함, 아래)
+  'patent-attorney',
   // 2026-10-21 해사 도선사 — 기록형은 pages/expert-write.html (보조 AI SP 신설)
   'marine-pilot',
   // 2026-10-21 계열 D(보안·통번역·관광·스포츠·미용·조리) 6개 직역 — 기록형은 pages/expert-write.html
@@ -446,6 +448,8 @@ const _PRO_WRITE_PERSONAS = new Set(['judicial-scrivener', 'administrative-scriv
   'tax-accounting']);
 // 2026-10-27 변호사 세부 분야 — 서류 작성하기에서 각 분야 전문가용 SP(SP_lawyer-<분야>-assistant)를 연다.
 ['administrative', 'antitrust', 'arbitration', 'auction', 'broadcasting', 'civil', 'collection', 'commercial', 'constitutional', 'construction', 'corporate', 'criminal', 'damages', 'energy', 'entertainment', 'environmental', 'execution', 'expropriation', 'family', 'finance', 'foodpharma', 'government-contract', 'guardianship', 'immigration', 'inheritance', 'insolvency', 'insurance', 'international-arbitration', 'international-relations', 'international-transactions', 'it', 'juvenile', 'legislation', 'maritime', 'military', 'overseas-investment', 'realestate', 'redevelopment', 'religious', 'school-violence', 'securities', 'shipbuilding', 'sports', 'startup', 'trade', 'traffic'].forEach(function (s) { _PRO_WRITE_PERSONAS.add('lawyer-' + s); });
+// 2026-10-29 변리사 세부 분야 — 서류 작성(embed)에서 각 분야 전문가용 SP(SP_patent-attorney-<분야>-assistant)를 연다.
+['mechanical-electrical', 'chemistry-materials', 'bio-pharma', 'it-software', 'trademark', 'design', 'trial-litigation', 'pct-international', 'ip-strategy', 'licensing'].forEach(function (s) { _PRO_WRITE_PERSONAS.add('patent-attorney-' + s); });
 let _proClientP = null;
 function _loadProClient() {
   if (window.HondiPro) return Promise.resolve();
@@ -1670,7 +1674,7 @@ updateSendBtn();
 // ?embed=1 이고 같은 오리진·부모 창에서 온 메시지만 받는다. 일반 접속에는 영향이 없다.
 function _embedOn() { return _qs.get('embed') === '1' && window.parent !== window; }
 // 2026-10-28: 나비로 Navi Law(law.hondi.net)가 이 화면을 iframe 으로 끼운다 — 부모 오리진은 같은 오리진 또는 아래 목록만 허용한다.
-const _EMBED_PARENT_ORIGINS = [location.origin, 'https://law.hondi.net', 'https://tax.hondi.net'];
+const _EMBED_PARENT_ORIGINS = [location.origin, 'https://law.hondi.net', 'https://tax.hondi.net', 'https://patent.hondi.net'];
 function _embedParentOrigin() {
   try { const a = window.location.ancestorOrigins && window.location.ancestorOrigins[0]; if (a && _EMBED_PARENT_ORIGINS.includes(a)) return a; } catch (e) { /* 무시 */ }
   try { const o = new URL(document.referrer).origin; if (_EMBED_PARENT_ORIGINS.includes(o)) return o; } catch (e) { /* 무시 */ }
