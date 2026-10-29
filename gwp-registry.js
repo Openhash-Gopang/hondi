@@ -921,13 +921,13 @@ const GWP_REGISTRY = [
   },
 
   // ── 나비 특허 Navi Patent (JUS) — tab, 2026-10-29 신설 ─────────────
-  // patent.hondi.net(변리사 서류 초안 작성, 서식 안의 빈 칸 입력). 나비로 Navi Law 와 같은 구조 — 비서(AC)가 연 탭이면
+  // ip.hondi.net(변리사 서류 초안 작성, 서식 안의 빈 칸 입력). 나비로 Navi Law 와 같은 구조 — 비서(AC)가 연 탭이면
   // GWP_PDV_REQUEST 로 의뢰인(출원인) 본인의 이름·연락처·주소만 사용자 승인 하에 받아 서식 칸에 채운다.
   // sp_key 없음 — AI는 사이트 안의 expert-chat(embed, persona=patent-attorney*)이 맡는다.
   {
     id: 'navipatent', name: '나비 특허 Navi Patent', category: 'JUS',
     type: 'tab',
-    url: 'https://patent.hondi.net/',
+    url: 'https://ip.hondi.net/',
     sp_key: null,
     status: 'active', priority: 8, threshold: 0.80,
     description: '변리사 서류(특허출원서·의견서·보정서·상표등록출원서 등) 초안 작성과 서식 빈 칸 입력. 출원인 인적사항은 PDV에서 승인 하에 가져온다. 법률 상담·판결 예측은 담당하지 않음.',

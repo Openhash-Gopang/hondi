@@ -11,7 +11,7 @@ const read = (p) => readFileSync(join(ROOT, p), 'utf8');
 describe('expert-chat 임베드 — law.hondi.net 허용', () => {
   const chat = read('pages/expert-chat.html');
   it('부모 오리진은 같은 오리진과 law.hondi.net·tax.hondi.net 만 허용한다', () => {
-    assert.ok(chat.includes("const _EMBED_PARENT_ORIGINS = [location.origin, 'https://law.hondi.net', 'https://tax.hondi.net', 'https://patent.hondi.net'];"));
+    assert.ok(chat.includes("const _EMBED_PARENT_ORIGINS = [location.origin, 'https://law.hondi.net', 'https://tax.hondi.net', 'https://ip.hondi.net'];"));
     assert.ok(chat.includes('!_EMBED_PARENT_ORIGINS.includes(e.origin) || e.source !== window.parent'));
     assert.ok(!/e\.origin !== location\.origin \|\| e\.source !== window\.parent/.test(chat), '예전 같은 오리진 전용 검사가 남아 있다');
   });
@@ -73,18 +73,18 @@ describe('GWP — 나비로 Navi Law 등록(PDV 자동 기입 경로)', () => {
   });
 });
 
-describe('나비 특허 Navi Patent(patent.hondi.net) 연동', () => {
-  it('registry 에 tab 서비스로 등록되고 PDV·서명 출처 허용 목록에 patent.hondi.net 이 있다', () => {
+describe('나비 특허 Navi Patent(ip.hondi.net) 연동', () => {
+  it('registry 에 tab 서비스로 등록되고 PDV·서명 출처 허용 목록에 ip.hondi.net 이 있다', () => {
     const reg = read('gwp-registry.js'), k = reg.indexOf("id: 'navipatent'");
     assert.ok(k > 0);
     const block = reg.slice(k, reg.indexOf('},', k));
-    assert.match(block, /type: 'tab'/); assert.match(block, /url: 'https:\/\/patent\.hondi\.net\/'/); assert.match(block, /status: 'active'/);
-    assert.ok(read('src/gopang/gwp/allowed-origins.js').includes("'https://patent.hondi.net'"));
+    assert.match(block, /type: 'tab'/); assert.match(block, /url: 'https:\/\/ip\.hondi\.net\/'/); assert.match(block, /status: 'active'/);
+    assert.ok(read('src/gopang/gwp/allowed-origins.js').includes("'https://ip.hondi.net'"));
   });
-  it('서비스 메뉴에 patent.hondi.net 링크가 있다', () => {
+  it('서비스 메뉴에 ip.hondi.net 링크가 있다', () => {
     const s = read('desktop.html'), pre = 'var MEGA_MENU_SECTIONS = ', i = s.indexOf(pre), j = s.indexOf(';\n', i);
     const arr = JSON.parse(s.slice(i + pre.length, j));
-    const it = arr.flatMap((x) => x.items).find((x) => x.href === 'https://patent.hondi.net');
+    const it = arr.flatMap((x) => x.items).find((x) => x.href === 'https://ip.hondi.net');
     assert.ok(it && it.target === '_blank');
   });
   it('끼운 서류 작성은 변리사(+세부 분야 10개) 전문가용 SP 를 쓴다', () => {

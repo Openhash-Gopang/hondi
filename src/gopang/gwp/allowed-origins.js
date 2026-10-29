@@ -26,7 +26,7 @@ export const GWP_ALLOWED_ORIGINS = [
   'https://jeju.hondi.net',
   'https://klaw.hondi.net',
   'https://law.hondi.net',
-  'https://patent.hondi.net',
+  'https://ip.hondi.net',
   'https://logistics.hondi.net',
   'https://market.hondi.net',
   'https://police.hondi.net',
