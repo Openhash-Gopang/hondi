@@ -74,7 +74,7 @@ export const EXPERT_BASE_KEY           = 'SP_EXPERT_BASE'; // 2026-08-07 신설(
 export const DOC_FORM_KEY = 'SP_DOC_FORM';
 export const DOC_FORM_ROOT_KEYS = [
   'SP_lawyer', 'SP_judicial-scrivener', 'SP_administrative-scrivener',
-  'SP_tax-accountant', 'SP_accountant', 'SP_tax-accounting', 'SP_hospital', 'SP_appraiser', 'SP_architect',
+  'SP_tax-accountant', 'SP_accountant', 'SP_tax-accounting', 'SP_school-docs', 'SP_hospital', 'SP_appraiser', 'SP_architect',
   'SP_customs-broker', 'SP_electrical-safety-engineer', 'SP_fire-safety-manager',
   'SP_gas-safety-engineer', 'SP_industrial-safety-consultant', 'SP_labor-attorney',
   'SP_landscape-engineer', 'SP_loss-adjuster', 'SP_patent-attorney',

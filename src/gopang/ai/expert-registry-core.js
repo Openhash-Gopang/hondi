@@ -52,6 +52,13 @@ export const CORE_REGISTRY = {
     key: 'SP_tax-accounting', needsMedicalSafety: false,
     triggers: ['세무 회계 통합 상담'],
   },
+  // 2026-10-29 신설(주피터 지시) — school.hondi.net 「나비 스쿨」(초중고·대학 학교 서류 작성)용. 면허 직역이 아니라 학생·보호자·교직원이 쓰는
+  // 서류 작성 도우미다. SP 는 제목에 "보조 AI"를 쓰지 않아 전문가용(-assistant) 서버 게이트에 걸리지 않는다. 라우팅 트리거는 이 사이트 전용 문구만 둔다.
+  'school-docs': {
+    label: '학교 서류', icon: '🏫', category: 'EDU', ownerAgency: 'kedu',
+    key: 'SP_school-docs', needsMedicalSafety: false,
+    triggers: ['학교 서류 작성 도우미'],
+  },
   // 2026-07-06 신설 — 세무사와 다른 자격(회계감사·재무제표 중심). 사고실험
   // #40에서 세무사로 오매핑될 위험이 확인된 항목.
   accountant: {

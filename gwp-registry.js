@@ -934,6 +934,21 @@ const GWP_REGISTRY = [
     triggers: ['나비 특허','Navi Patent','특허 서류 초안','특허출원서 작성'],
   },
 
+  // ── 나비 스쿨 Navi School (EDU) — tab, 2026-10-29 신설 ─────────────
+  // school.hondi.net(초중고·대학 학교 서류 초안 작성, 서식 안의 빈 칸 입력). 나비로·나비 특허와 같은 구조 — 비서(AC)가 연 탭이면
+  // GWP_PDV_REQUEST 로 작성자(학생·보호자·교직원) 본인의 이름·연락처·주소만 사용자 승인 하에 받아 서식 칸에 채운다.
+  // 같은 도메인의 K-School(kedu, /webapp.html·/desktop.html)과는 별개 서비스다 — kedu 는 공공 교육정책 데이터 시스템으로 그대로 둔다.
+  // sp_key 없음 — AI는 사이트 안의 expert-chat(embed, persona=school-docs)이 맡는다.
+  {
+    id: 'navischool', name: '나비 스쿨 Navi School', category: 'EDU',
+    type: 'tab',
+    url: 'https://school.hondi.net/',
+    sp_key: null,
+    status: 'active', priority: 8, threshold: 0.80,
+    description: '학교 서류(결석계·체험학습 신청서·휴학원·장학금 신청서·이의신청서 등) 초안 작성과 서식 빈 칸 입력. 작성자 인적사항은 PDV에서 승인 하에 가져온다. 과제·논문·자기소개서 대필, 증명서 발급, 제출 대행은 하지 않음.',
+    triggers: ['나비 스쿨','Navi School','학교 서류 초안','결석계 작성','학교 서류 작성'],
+  },
+
   // ── 병원 & 의원 (MED) — tab, 2026-10-29 신설 ────────────────────────
   // doctor.hondi.net(의사·간호사·원무 서류 초안 작성, 서식 안의 빈 칸 입력). 나비로 Navi Law 와 같은 구조 — 비서(AC)가 연 탭이면
   // GWP_PDV_REQUEST 로 환자 본인의 이름·연락처·주소만 사용자 승인 하에 받아 서식 칸에 채운다(주민등록번호 등은 요청하지 않는다).
