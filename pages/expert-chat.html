@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
 <title>전문가 업무 보조 AI</title>
-<script>try{if(new URLSearchParams(location.search).get('embed')==='1'&&window.parent!==window)document.documentElement.classList.add('embed')}catch(e){}</script>
+<script>try{if(new URLSearchParams(location.search).get('embed')==='1'&&window.parent!==window)document.documentElement.classList.add('embed');if(new URLSearchParams(location.search).get('glass')==='1'&&window.parent!==window)document.documentElement.classList.add('glass')}catch(e){}</script>
 <meta name="description" content="자격직 전문가와 소속 직원의 서류 작성을 대화로 보조하는 AI 페르소나 — GWP 방식 새 탭.">
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
@@ -33,6 +33,10 @@
 html.embed #tb-icon, html.embed #tb-sub, html.embed #tb-back{display:none}
 html.embed #top-bar{padding:6px 10px;gap:8px;justify-content:flex-end;flex-wrap:wrap}
 html.embed #tb-suggest, html.embed #tb-review{margin-left:0}
+/* 2026-10-29 ?embed=1&glass=1 — 나비 스쿨: 부모 사이트의 반투명 회색 유리 바탕이 비치도록 안쪽 바탕을 투명하게 */
+html.embed.glass, html.embed.glass body, html.embed.glass #chat-thread{background:transparent}
+html.embed.glass #bottom-dock{background:rgba(255,255,255,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+html.embed.glass .bubble-ai{background:rgba(255,255,255,.82)}
 #lr-banner{display:flex;align-items:flex-start;gap:10px;padding:9px 14px;background:#FFF6DD;color:#5A4300;
   border-bottom:1px solid #F0DFA8;font-size:12.5px;line-height:1.5}
 #lr-banner[hidden]{display:none}
