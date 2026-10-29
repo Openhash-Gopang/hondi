@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-29 19:36 KST · 기준 커밋 5cb680ab
-- 전문가 페르소나 전용 페이지 154개 · 등록된 SP 877건
+- 갱신: 2026-10-29 20:36 KST · 기준 커밋 b2269833
+- 전문가 페르소나 전용 페이지 154개 · 등록된 SP 879건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-29 Merge pull request #852 from Openhash-Gopang/feat/doctor-hospital-sp-20261029-2036
+- 2026-10-29 feat: 병원·의원 보조 AI(의사·간호사·원무) 통합 SP와 doctor.hondi.net 임베드 등록
 - 2026-10-29 Merge pull request #851 from Openhash-Gopang/feat/patent-site-integration-20261029-1935
 - 2026-10-29 feat: 나비 특허 Navi Patent(ip.hondi.net) 연동 — GWP 등록·출처 허용·임베드 허용·서비스 메뉴·전문가용 SP, 보조 AI 자기소개 문구
 - 2026-10-29 Merge pull request #850 from Openhash-Gopang/feat/patent-site-integration-20261029
@@ -42,8 +44,6 @@
 - 2026-10-28 ph-header: 전문가 페르소나 히어로 버튼 크기 10% 축소, 데스크톱에서 한 줄 배치
 - 2026-10-28 Merge pull request #820 from Openhash-Gopang/feat/kpatent-subpages-sim
 - 2026-10-28 feat: 변리사 9개 하위 페이지 방법론 v0.1·시뮬레이션·헤더 버튼
-- 2026-10-27 Merge pull request #819 from Openhash-Gopang/feat/kpatent-me-sim
-- 2026-10-27 feat: 변리사 기계·전기전자 방법론 v0.1·출원 시뮬레이션·헤더 버튼
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
