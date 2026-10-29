@@ -134,6 +134,7 @@ export const ASSISTANT_SP_CODES = {
   "SP-SPORTS-01A": "sports-instructor",
   "SP-ENG-17": "surveying-engineer",
   "SP-FIN-09": "tax-accountant",
+  "SP-FIN-11": "tax-accounting",
   "SP-TOUR-01A": "tour-guide",
   "SP-HEALTH-18A": "traditional-medicine-doctor",
   "SP-LANG-01A": "translator-interpreter",

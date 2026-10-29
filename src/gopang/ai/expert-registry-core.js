@@ -44,6 +44,14 @@ export const CORE_REGISTRY = {
       // 트리거 어디와도 문자열이 안 겹쳐 ktax로 샌 게 확인됨.
       '절세 방법을 상담', '세금 신고를 도와줄 사람'],
   },
+  // 2026-10-29 신설(주피터 지시) — tax.hondi.net 「세무 & 회계」 통합 페이지용. 세무사(SP-FIN-09)와 회계사(SP-FIN-10)
+  // 보조 SP를 합친 SP_tax-accounting(-assistant)을 연다. 라우팅 트리거는 기존 tax-accountant/accountant와 겹치지 않게
+  // 통합 페이지 전용 문구만 둔다.
+  'tax-accounting': {
+    label: '세무·회계', icon: '🧾', category: 'FIN', ownerAgency: 'ktax',
+    key: 'SP_tax-accounting', needsMedicalSafety: false,
+    triggers: ['세무 회계 통합 상담'],
+  },
   // 2026-07-06 신설 — 세무사와 다른 자격(회계감사·재무제표 중심). 사고실험
   // #40에서 세무사로 오매핑될 위험이 확인된 항목.
   accountant: {
