@@ -254,6 +254,14 @@ export const CORE_REGISTRY = {
   // 2026-07-06 신설(SP-HEALTH-16~19) — 의사·치과의사·한의사·약사. 다른 10개
   // 의료직이 전부 "확진·처방은 의사 영역"이라고 선을 긋는 구조라, 그 반대편을
   // 정의하는 이 4개는 특히 신중한 검토가 필요함(SP 본문 상단 주석 참조).
+  // 2026-10-29 신설(주피터 지시) — doctor.hondi.net 「병원 & 의원」 통합 페이지용. 의사(SP-HEALTH-16A)·간호사(SP-HEALTH-07A) 보조 SP를 합치고
+  // 원무(접수·수납·청구·진료기록 발급) 서류를 더한 SP_hospital(-assistant)을 연다. 라우팅 트리거는 기존 physician·nurse와 겹치지 않게
+  // 통합 페이지 전용 문구만 둔다.
+  hospital: {
+    label: '병원·의원', icon: '🏥', category: 'HEALTH', ownerAgency: 'khealth',
+    key: 'SP_hospital', needsMedicalSafety: true,
+    triggers: ['병원 의원 통합 서류 작성'],
+  },
   dentist: {
     label: '치과의사', icon: '🦷', category: 'HEALTH', ownerAgency: 'khealth',
     key: 'SP_dentist', needsMedicalSafety: true,

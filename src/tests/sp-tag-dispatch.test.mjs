@@ -276,7 +276,7 @@ describe('SD — GWP_REGISTRY 구조적 위생 점검', () => {
     // ★ 2026-10-01 갱신 — 이 점검은 이미 노후화돼 있었다(기대값 33, 실제 35). kdoctor(SP-29, type:'tab') 신설로 36.
     // pending이라 실사용자에게 라우팅되지 않는다. 35 → 36 외의 차이 2건은 이번 변경과 무관한 선행 누락 갱신이다.
     // 2026-10-28 — 나비로 Navi Law(navilaw, type:'tab') 신설로 37, 2026-10-29 나비 특허(navipatent) 신설로 38.
-    assert.equal(GWP_REGISTRY.length, 38, `엔트리 수 변경 감지(현재 ${GWP_REGISTRY.length}) — 이 숫자가 바뀌면 다른 곳(문서 등)도 갱신 필요할 수 있음, 실패 아니라 확인 신호로만 취급해도 됨`);
+    assert.equal(GWP_REGISTRY.length, 39, `엔트리 수 변경 감지(현재 ${GWP_REGISTRY.length}) — 이 숫자가 바뀌면 다른 곳(문서 등)도 갱신 필요할 수 있음, 실패 아니라 확인 신호로만 취급해도 됨`);
     for (const e of GWP_REGISTRY) {
       assert.ok(Array.isArray(e.triggers) && e.triggers.length > 0, `${e.id}: triggers 비어있음`);
     }

@@ -26,6 +26,7 @@ export const ASSISTANT_SP_CODES = {
   "SP-ENG-19": "gas-safety-engineer",
   "SP-BEAUTY-01A": "hairdresser",
   "SP-HEALTH-25A": "health-educator",
+  "SP-HEALTH-26A": "hospital",
   "SP-ENG-15": "industrial-safety-consultant",
   "SP-LAW-02A": "judicial-scrivener",
   "SP-LAW-10": "labor-attorney",

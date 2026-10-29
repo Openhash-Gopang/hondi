@@ -185,7 +185,7 @@ const GWP_REGISTRY = [
   {
     id: 'kdoctor', name: 'K-Doctor', category: 'MED',
     type: 'tab',
-    url: 'https://doctor.hondi.net/',
+    url: 'https://doctor.hondi.net/kdoctor.html', // 2026-10-29 K-Doctor 소개 첫 화면을 kdoctor.html 로 옮김(doctor.hondi.net/ 는 병원·의원 서류 페이지)
     sp_key: 'SP-29_kdoctor',
     status: 'active', priority: 3, threshold: 0.70,
     description: '진료과목별 AI가 참여하는 진단 참고·처방/처치 제안(의료인 대상 임상 의사결정 지원). 진단서·처방전을 발급하지 않는다.',
@@ -932,6 +932,20 @@ const GWP_REGISTRY = [
     status: 'active', priority: 8, threshold: 0.80,
     description: '변리사 서류(특허출원서·의견서·보정서·상표등록출원서 등) 초안 작성과 서식 빈 칸 입력. 출원인 인적사항은 PDV에서 승인 하에 가져온다. 법률 상담·판결 예측은 담당하지 않음.',
     triggers: ['나비 특허','Navi Patent','특허 서류 초안','특허출원서 작성'],
+  },
+
+  // ── 병원 & 의원 (MED) — tab, 2026-10-29 신설 ────────────────────────
+  // doctor.hondi.net(의사·간호사·원무 서류 초안 작성, 서식 안의 빈 칸 입력). 나비로 Navi Law 와 같은 구조 — 비서(AC)가 연 탭이면
+  // GWP_PDV_REQUEST 로 환자 본인의 이름·연락처·주소만 사용자 승인 하에 받아 서식 칸에 채운다(주민등록번호 등은 요청하지 않는다).
+  // sp_key 없음 — AI는 사이트 안의 expert-chat(embed, persona=hospital)이 맡는다. K-Doctor(진단 참고)는 doctor.hondi.net/kdoctor.html 로 옮겨졌다.
+  {
+    id: 'navidoctor', name: '병원 & 의원 서류 (나비웹)', category: 'MED',
+    type: 'tab',
+    url: 'https://doctor.hondi.net/',
+    sp_key: null,
+    status: 'active', priority: 8, threshold: 0.80,
+    description: '의사·간호사·병원 원무 서류(진단서·소견서·간호기록·동의서·진료비·진료기록 발급 등) 초안 작성과 서식 빈 칸 입력. 환자 인적사항은 PDV에서 승인 하에 가져온다. 진단·처방 판단과 증상 상담은 담당하지 않음(→ K-Doctor·K-Health).',
+    triggers: ['병원 의원 서류','진단서 초안 작성','간호기록 초안 작성','진료기록 사본 신청서'],
   },
 
 ];
