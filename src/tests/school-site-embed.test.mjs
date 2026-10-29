@@ -23,13 +23,13 @@ describe('나비 스쿨(school.hondi.net) 연동', () => {
   });
   it('sp-catalog 두 키가 같은 SP 파일을 가리키고 파일이 있다', () => {
     const c = JSON.parse(read('prompts/sp-catalog.json'));
-    assert.equal(c['SP_school-docs-assistant'], 'SP_school-docs_v1_0.md');
-    assert.equal(c['SP_school-docs'], 'SP_school-docs_v1_0.md');
-    assert.ok(existsSync(new URL('../../prompts/SP_school-docs_v1_0.md', import.meta.url)));
+    assert.equal(c['SP_school-docs-assistant'], 'SP_school-docs_v1_1.md');
+    assert.equal(c['SP_school-docs'], 'SP_school-docs_v1_1.md');
+    assert.ok(existsSync(new URL('../../prompts/SP_school-docs_v1_1.md', import.meta.url)));
   });
   it('SP 는 자기소개 문구와 금지 규칙을 담고, 면허 직역용(전문가 게이트) SP 로 오인되지 않는다', () => {
-    const sp = read('prompts/SP_school-docs_v1_0.md');
-    for (const k of ['저는 학교 서류 작성을 보조하는 AI입니다.', '## §LIMIT', '## §MINOR', '## §DRAFT-FIRST', '## STEP W', '[학교 서류 보조 AI | 서류 작성 트랙', '대필', '서명·날인']) assert.ok(sp.includes(k), k);
+    const sp = read('prompts/SP_school-docs_v1_1.md');
+    for (const k of ['저는 학교 서류 작성을 보조하는 AI입니다.', '## §LIMIT', '## §AUDIENCE', '## 부록 B. 교사·학교 행정 서류 안내', '교사가 쓰는 학교생활기록부', '## §MINOR', '## §DRAFT-FIRST', '## STEP W', '[학교 서류 보조 AI | 서류 작성 트랙', '대필', '서명·날인']) assert.ok(sp.includes(k), k);
     assert.ok(!/\[CONNECT_HUMAN_EXPERT\]\s*$/m.test(sp.split('\n').filter((l) => !/쓰지 않는다|태그/.test(l)).join('\n')));
     const r = detectAssistantSp({ system: sp });
     assert.equal(r.assistant, false, '학생·보호자도 쓰는 SP 라 전문가 면허 게이트 대상이 아니어야 한다');
