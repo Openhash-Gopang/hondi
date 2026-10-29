@@ -10,8 +10,8 @@ const read = (p) => readFileSync(join(ROOT, p), 'utf8');
 
 describe('expert-chat 임베드 — law.hondi.net 허용', () => {
   const chat = read('pages/expert-chat.html');
-  it('부모 오리진은 같은 오리진과 law.hondi.net 만 허용한다', () => {
-    assert.ok(chat.includes("const _EMBED_PARENT_ORIGINS = [location.origin, 'https://law.hondi.net'];"));
+  it('부모 오리진은 같은 오리진과 law.hondi.net·tax.hondi.net 만 허용한다', () => {
+    assert.ok(chat.includes("const _EMBED_PARENT_ORIGINS = [location.origin, 'https://law.hondi.net', 'https://tax.hondi.net'];"));
     assert.ok(chat.includes('!_EMBED_PARENT_ORIGINS.includes(e.origin) || e.source !== window.parent'));
     assert.ok(!/e\.origin !== location\.origin \|\| e\.source !== window\.parent/.test(chat), '예전 같은 오리진 전용 검사가 남아 있다');
   });
