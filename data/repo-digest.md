@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-29 20:56 KST · 기준 커밋 d0e6be0d
+- 갱신: 2026-10-29 21:24 KST · 기준 커밋 1f82e916
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 881건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-29 Merge pull request #854 from Openhash-Gopang/feat/school-docs-sp-v1-1-20261029-2123
+- 2026-10-29 feat: 학교 서류 작성 도우미 SP v1.1 — 교사·학교 행정 서류 안내 보강
 - 2026-10-29 Merge pull request #853 from Openhash-Gopang/feat/school-site-integration-20261029-2055
 - 2026-10-29 feat: 나비 스쿨 Navi School(school.hondi.net) 연동 — 학교 서류 작성 도우미 SP(school-docs)·GWP 탭 등록·임베드 허용·서비스 메뉴
 - 2026-10-29 Merge pull request #852 from Openhash-Gopang/feat/doctor-hospital-sp-20261029-2036
@@ -42,8 +44,6 @@
 - 2026-10-28 feat(kmail): 직접 발송 응답에 받는 사람 화면 모양(from_display) 추가 — 보냄 확인 카드가 이름과 주소를 보여 줌
 - 2026-10-28 fix(kmail): 받은 메일의 깨진 제목·본문 수정 — RFC 2047 제목, base64/quoted-printable 본문, 문자 집합, 중첩 multipart, HTML 전용 처리
 - 2026-10-28 feat: 감정 시뮬레이션 페이지 추가, 감정평가사 페이지 히어로에 K-Evaluation·시뮬레이션 버튼 배치, 헤더 맨 끝 버튼 조건 복원
-- 2026-10-28 feat(auth): 아이디를 정하는 화면에서 보내는 이름도 받음(선택·권장) + 발송 전 확인 목록에 보내는 사람 줄
-- 2026-10-28 ph-header: 전문가 페르소나 히어로 버튼 크기 10% 축소, 데스크톱에서 한 줄 배치
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
