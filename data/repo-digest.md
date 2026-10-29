@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-29 20:36 KST · 기준 커밋 b2269833
-- 전문가 페르소나 전용 페이지 154개 · 등록된 SP 879건
+- 갱신: 2026-10-29 20:56 KST · 기준 커밋 d0e6be0d
+- 전문가 페르소나 전용 페이지 154개 · 등록된 SP 881건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-29 Merge pull request #853 from Openhash-Gopang/feat/school-site-integration-20261029-2055
+- 2026-10-29 feat: 나비 스쿨 Navi School(school.hondi.net) 연동 — 학교 서류 작성 도우미 SP(school-docs)·GWP 탭 등록·임베드 허용·서비스 메뉴
 - 2026-10-29 Merge pull request #852 from Openhash-Gopang/feat/doctor-hospital-sp-20261029-2036
 - 2026-10-29 feat: 병원·의원 보조 AI(의사·간호사·원무) 통합 SP와 doctor.hondi.net 임베드 등록
 - 2026-10-29 Merge pull request #851 from Openhash-Gopang/feat/patent-site-integration-20261029-1935
@@ -42,8 +44,6 @@
 - 2026-10-28 feat: 감정 시뮬레이션 페이지 추가, 감정평가사 페이지 히어로에 K-Evaluation·시뮬레이션 버튼 배치, 헤더 맨 끝 버튼 조건 복원
 - 2026-10-28 feat(auth): 아이디를 정하는 화면에서 보내는 이름도 받음(선택·권장) + 발송 전 확인 목록에 보내는 사람 줄
 - 2026-10-28 ph-header: 전문가 페르소나 히어로 버튼 크기 10% 축소, 데스크톱에서 한 줄 배치
-- 2026-10-28 Merge pull request #820 from Openhash-Gopang/feat/kpatent-subpages-sim
-- 2026-10-28 feat: 변리사 9개 하위 페이지 방법론 v0.1·시뮬레이션·헤더 버튼
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
