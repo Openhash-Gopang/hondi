@@ -920,6 +920,20 @@ const GWP_REGISTRY = [
     triggers: ['나비로','Navi Law','서류 초안 작성','서식 빈 칸'],
   },
 
+  // ── 나비감정 Navi Appraisal (감정평가사 서류 초안) — tab, 2026-10-29 신설 ───────
+  // appraiser.hondi.net(감정평가서·의뢰·계약·수수료·심사 대응 서류 초안 작성, 서식 안의 빈 칸 입력). 나비로(navilaw)와 같은 구조 —
+  // 사이트가 비서(AC)가 연 탭이면 GWP_PDV_REQUEST 로 의뢰인 본인의 이름·연락처·주소만 사용자 승인 하에 받는다(주민등록번호 등은 요청하지 않는다).
+  // sp_key 없음 — AI는 사이트 안의 expert-chat(embed, persona=appraiser → SP_appraiser-assistant)이 맡는다. triggers 는 서비스명·작업명만.
+  {
+    id: 'naviappraiser', name: '나비감정 Navi Appraisal', category: 'ECO',
+    type: 'tab',
+    url: 'https://appraiser.hondi.net/',
+    sp_key: null,
+    status: 'active', priority: 8, threshold: 0.80,
+    description: '감정평가서·의뢰·계약·수수료·심사 대응 서류 초안 작성과 서식 빈 칸 입력. 의뢰인 인적사항은 PDV에서 승인 하에 가져온다. 가치평가·담보 평가 수치 산출은 담당하지 않음(→ K-Estate).',
+    triggers: ['나비감정','Navi Appraisal','감정평가서 초안 작성'],
+  },
+
 ];
 
 // ── L1 pending_agents 동적 로드 (앱 시작 시 1회) ───────────────
