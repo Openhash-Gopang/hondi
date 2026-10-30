@@ -29,6 +29,7 @@ import { buildContactsNote as _kmailBuildContactsNote, sumRegisteredInMessages a
 import { trimTrailingAfterTag as _kmailTrimTrailingAfterTag } from './src/worker/kmail-tagfix.js';
 import { parseCampaignDeleteRequest as _kmailParseCampaignDeleteRequest, ownedCampaignFilter as _kmailOwnedCampaignFilter } from './src/worker/kmail-campaign-delete.js';
 import { senderLocalPart as _kmailSenderLocalPart, classifyInboundLocalPart as _kmailClassifyLocalPart } from './src/worker/kmail-address.js';
+import { normalizeQuery as _kpsNormalize, buildFilter as _kpsFilter, publicRow as _kpsRow, MAX_RESULTS as _KPS_MAX, RATE_LIMIT as _KPS_LIMIT, RATE_TTL as _KPS_TTL } from './src/worker/kmail-people-search.js';
 import { buildSendStatus as _kmailBuildSendStatus, instantSendMax as _kmailInstantSendMax, isImmediate as _kmailIsImmediate } from './src/worker/kmail-send-status.js';
 import { checkMailId as _checkMailId, defaultMailIdFromHash as _defaultMailIdFromHash, normalizeMailId as _normMailId, changePolicyConfig as _mailIdPolicy, evaluateChange as _mailIdEvaluate, recordChange as _mailIdRecordChange, recordConfirm as _mailIdRecordConfirm, limitMessage as _mailIdLimitMessage, readState as _mailIdReadState, writeState as _mailIdWriteState } from './src/worker/mail-id.js';
 import { makeDigitClaimHandler } from './src/worker/digit-claim-handler.js';
@@ -13678,6 +13679,8 @@ export default {
     if (pathname === '/kmail/stats' && request.method === 'GET') return handleKmailStats(request, url, env, corsHeaders);
     if (pathname === '/kmail/settings' && request.method === 'GET') return handleKmailSettingsGet(request, url, env, corsHeaders);
     if (pathname === '/kmail/settings' && request.method === 'POST') return handleKmailSettingsSet(request, env, corsHeaders);
+    // 2026-10-31 신설 — 가입자 검색(검색을 허용한 가입자만). 빠른 발송의 받는 사람 검색용.
+    if (pathname === '/kmail/people/search' && request.method === 'GET') return handleKmailPeopleSearch(request, url, env, corsHeaders);
     // 2026-09-12 신설 — K-Mail ID(mail_id, hondi.kr 로컬파트 별칭). 실제
     // 발신 주소(<guid>@hondi.kr)는 그대로 두고 그 위에 얹는 조회용 별칭.
     if (pathname === '/kmail/mail-id/check' && request.method === 'GET') return handleKmailMailIdCheck(request, url, env, corsHeaders);
@@ -34753,6 +34756,7 @@ async function _kmailGetUserSettings(env, guid) {
     auto_reply_text: row?.auto_reply_text || '',
     auto_reply_until: row?.auto_reply_until || null,
     mail_id: row?.mail_id || '',
+    discoverable: row?.discoverable === true,   // 2026-10-31: 다른 가입자가 K-Mail 에서 나를 찾도록 허용(기본 꺼짐)
   };
 }
 
@@ -36115,6 +36119,26 @@ async function handleKmailStats(request, url, env, corsHeaders) {
   return new Response(JSON.stringify({ ok: true, ...stats }), { status: 200, headers: corsHeaders });
 }
 
+// GET /kmail/people/search?q=...&phone_verify_token=...
+// 검색을 허용(discoverable)한 가입자 중 메일 아이디·보내는 이름이 q 와 부분 일치하는 사람을 최대 8명 돌려준다.
+// 돌려주는 값은 이름·메일 아이디·메일 주소뿐이다(guid·전화번호·개인 이메일 없음). 2자 미만 검색어는 거절하고 목록 둘러보기는 없다.
+async function handleKmailPeopleSearch(request, url, env, corsHeaders) {
+  const qp = Object.fromEntries(url.searchParams.entries());
+  const auth = await _kAuth.resolveGuid(env, qp, { sigMsg: `kmail-people-search:${qp.guid}:${qp.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const guid = auth.guid;
+  const q = _kpsNormalize(qp.q);
+  if (!q) return new Response(JSON.stringify({ ok: true, items: [], hint: '두 글자 이상 입력해 주세요.' }), { status: 200, headers: corsHeaders });
+  if (!(await _checkRateLimitN(env, guid, 'kmail-people-search', _KPS_LIMIT, _KPS_TTL))) return _err(429, 'RATE_LIMITED', '검색을 너무 자주 했습니다. 잠시 후 다시 시도해 주세요', corsHeaders);
+  const token = await _l1AdminToken(env);
+  const filter = encodeURIComponent(_kpsFilter(q, guid));
+  const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_user_settings/records?filter=${filter}&perPage=${_KPS_MAX}&sort=mail_id`, { headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) return _err(502, 'SEARCH_FAILED', '가입자 검색에 실패했습니다', corsHeaders);
+  const data = await res.json().catch(() => ({ items: [] }));
+  const items = (data.items || []).map(r => _kpsRow(r, _kmailSenderLocalPart, _kmailEffectiveSenderName)).filter(Boolean);
+  return new Response(JSON.stringify({ ok: true, items }), { status: 200, headers: corsHeaders });
+}
+
 // GET /kmail/settings?phone_verify_token=... (또는 하위호환 guid/pubkey/signature/ts)
 // 2026-09-12 수정 — mail.hondi.net 웹앱은 지갑 SSO를 쓰지 않고
 // phone_verify_token만 보내는데, 이 엔드포인트는 여태 _verifyClaimsRequester
@@ -36146,7 +36170,7 @@ async function handleKmailSettingsGet(request, url, env, corsHeaders) {
 async function handleKmailSettingsSet(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
-  const { signature_text, sender_display_name, auto_reply_enabled, auto_reply_text, auto_reply_until, mail_id } = body;
+  const { signature_text, sender_display_name, auto_reply_enabled, auto_reply_text, auto_reply_until, mail_id, discoverable } = body;
 
   // 2026-09-12 수정 — handleKmailSettingsGet과 동일한 이유로
   // _kAuth.resolveGuid(phone_verify_token/지갑 서명 겸용)로 교체.
@@ -36163,6 +36187,11 @@ async function handleKmailSettingsSet(request, env, corsHeaders) {
   }
   if (typeof auto_reply_enabled === 'boolean') patch.auto_reply_enabled = auto_reply_enabled;
   if (typeof auto_reply_text === 'string') patch.auto_reply_text = auto_reply_text.slice(0, 2000);
+  if (typeof discoverable === 'boolean') {
+    patch.discoverable = discoverable;
+    // 찾을 수 있으려면 메일 아이디가 있어야 한다 — 아직 없으면 기본 아이디를 배정한다
+    if (discoverable) { try { await _kmailAssignDefaultMailId(env, guid); } catch (e) { /* 배정 실패는 아래 저장 결과로 드러난다 */ } }
+  }
   if (typeof auto_reply_until === 'string' || auto_reply_until === null) {
     patch.auto_reply_until = auto_reply_until ? new Date(auto_reply_until).toISOString() : null;
   }
