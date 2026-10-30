@@ -22,7 +22,14 @@ export function senderLocalPart(guid, mailId) {
   const id = String(mailId || '').trim().toLowerCase();
   return id && MAIL_ID_PATTERN.test(id) ? id : guidToLocalPart(guid);
 }
-export const senderAddress = (guid, mailId) => `${senderLocalPart(guid, mailId)}@hondi.kr`;
+// 2026-10-31 결정(주피터): 보내는 주소 도메인을 hondi.kr → naviweb.kr 로 옮긴다. 받을 때는 옛 hondi.kr 도 계속 K-Mail 로 처리한다(이미 나간 메일의 답장).
+export const KMAIL_DOMAIN = 'naviweb.kr';
+export const KMAIL_RECEIVE_DOMAINS = ['naviweb.kr', 'hondi.kr'];
+export const isKmailAddress = (addr) => {
+  const a = String(addr || '').trim().toLowerCase();
+  return KMAIL_RECEIVE_DOMAINS.some((d) => a.endsWith('@' + d));
+};
+export const senderAddress = (guid, mailId) => `${senderLocalPart(guid, mailId)}@${KMAIL_DOMAIN}`;
 
 // → { kind: 'campaign', campaignId } | { kind: 'guid', guid } | { kind: 'mail_id', mailId } | { kind: 'unknown' }
 export function classifyInboundLocalPart(localPart) {
