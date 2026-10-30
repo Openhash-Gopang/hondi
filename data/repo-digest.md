@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-31 06:12 KST · 기준 커밋 9c3fc0aa
+- 갱신: 2026-10-31 07:38 KST · 기준 커밋 f8d07cae
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 881건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-31 Merge pull request #860 from Openhash-Gopang/feat/kmail-people-search-20261031-0738
+- 2026-10-31 feat: K-Mail 가입자 검색(검색을 허용한 가입자만)
 - 2026-10-31 Merge pull request #859 from Openhash-Gopang/fix/embed-pro-origin-20261031-0612
 - 2026-10-31 feat: 서류 화면 삽입 허용 주소에 pro.hondi.net 추가
 - 2026-10-31 Merge pull request #858 from Openhash-Gopang/fix/embed-max-tokens-20261031-0443
@@ -42,8 +44,6 @@
 - 2026-10-28 feat(kmail): 서명이 비어 있으면 Signed by 이름 기본 서명, {이름} 치환, 하이픈은 서명 없음
 - 2026-10-28 feat(admin): 검색 엔진 구현 계획 섹션 추가 (논문 중심 파일럿 개정 4판)
 - 2026-10-28 fix(kmail): 깨진 태그 오류 완화 + 내 캠페인 삭제 API
-- 2026-10-28 fix(kmail): K-Mail 이 주소록 현황(전체·소속별 건수)을 파악하도록 — 요약 태그·현황 주입·조회 범위 명시
-- 2026-10-28 feat(kmail): 메일 발송에 받는 사람 여러 명 + 참조(cc)·숨은참조(bcc)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
