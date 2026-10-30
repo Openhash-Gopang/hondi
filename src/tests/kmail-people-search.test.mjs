@@ -20,7 +20,7 @@ test('필터: 허용한 사람만, 자기 자신 제외', () => {
 test('공개 카드: 이름·메일 아이디·주소만, 허용하지 않았으면 null', () => {
   const row = { owner_user_guid: 'aaaa:bbbb:cccc:dddd:eeee:ffff:0000:1111', mail_id: 'jupiter', sender_display_name: '주피터', discoverable: true, signature: 'x', auto_reply_text: 'y' };
   const c = publicRow(row, senderLocalPart, (n) => n);
-  assert.deepEqual(c, { name: '주피터', mail_id: 'jupiter', email: 'jupiter@naviweb.kr' });
+  assert.deepEqual(c, { name: '주피터', mail_id: 'jupiter', email: 'jupiter@hondi.kr' });
   assert.equal(publicRow({ ...row, discoverable: false }, senderLocalPart), null);
   assert.equal(publicRow({ ...row, mail_id: '' }, senderLocalPart), null);
   assert.deepEqual(Object.keys(c).sort(), ['email', 'mail_id', 'name']);
