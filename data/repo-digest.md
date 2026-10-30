@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-29 21:38 KST · 기준 커밋 2049c500
+- 갱신: 2026-10-31 03:12 KST · 기준 커밋 c4319b03
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 881건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-31 Merge pull request #856 from Openhash-Gopang/fix/llm-relay-thinking-off-20261031-0312
+- 2026-10-31 fix: /llm/relay — DeepSeek flash thinking 기본 끄기 (reasoning 이 max_tokens 를 소진해 content 가 빈 채 끝나는 문제)
 - 2026-10-29 Merge pull request #855 from Openhash-Gopang/feat/expert-chat-glass-embed-20261029-2138
 - 2026-10-29 feat: expert-chat ?embed=1&glass=1 — 끼운 화면 바탕 투명(나비 스쿨 반투명 대화창)
 - 2026-10-29 Merge pull request #854 from Openhash-Gopang/feat/school-docs-sp-v1-1-20261029-2123
@@ -42,8 +44,6 @@
 - 2026-10-28 feat(kmail): 연락처 수정 API 에 전화번호·주소·웹사이트·메모 추가
 - 2026-10-28 feat(kmail): 이름만 말해도 주소록 조회 후 '받는 사람 이름<이메일>'로 확인
 - 2026-10-28 feat(ui): 공용 아이디 배지 — 아이디만 표시, 보내는 이름 인라인 편집, 세로 점 세 개(⋮) 설정 링크
-- 2026-10-28 feat: 행정사·변호사·변리사 시뮬레이션 페이지와 K-Admin 방법론 v0.1 추가, 헤더 버튼 배치
-- 2026-10-28 feat(kmail): 직접 발송 응답에 받는 사람 화면 모양(from_display) 추가 — 보냄 확인 카드가 이름과 주소를 보여 줌
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
