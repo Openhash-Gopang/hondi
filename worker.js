@@ -21175,6 +21175,11 @@ async function handleLLMRelay(bodyText, env, corsHeaders, meta = null) {
   const payload = { model, messages: relayMessages, stream: isStream };
   if (max_tokens  != null) payload.max_tokens  = max_tokens;
   if (temperature != null) payload.temperature = temperature;
+  // LLM_RELAY_THINKING_DEFAULT (2026-10-31) — DeepSeek flash 계열은 thinking 이 기본 켜져, reasoning_content 가 max_tokens 를 모두 쓰고
+  // content 가 빈 채 finish_reason=length 로 끝난다(전문가 임베드 초안 실패: completion 1200 = reasoning 1200). 다른 relay 핸들러와 같은 원칙으로,
+  // 클라이언트가 thinking 을 명시하지 않았으면 flash 는 끈다. 명시했으면 그대로 전달한다.
+  if (body.thinking !== undefined) payload.thinking = body.thinking;
+  else if (/(^|\.)deepseek\.com$/.test(targetHost) && /flash/i.test(String(model))) payload.thinking = { type: 'disabled' };
 
   _dlog(env, JSON.stringify({ tag: 'LLM_RELAY_CALL', provider: provider || targetHost, model, stream: isStream, ts: new Date().toISOString(), ...meta }));
 
