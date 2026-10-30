@@ -28,7 +28,7 @@ import { validateMailRecipients as _kmailValidateRecipients } from './src/worker
 import { buildContactsNote as _kmailBuildContactsNote, sumRegisteredInMessages as _kmailSumRegistered, summarizeContacts as _kmailSummarizeContacts, buildSummaryContext as _kmailBuildSummaryContext, describeLookupScope as _kmailDescribeLookupScope } from './src/worker/kmail-contacts-summary.js';
 import { trimTrailingAfterTag as _kmailTrimTrailingAfterTag } from './src/worker/kmail-tagfix.js';
 import { parseCampaignDeleteRequest as _kmailParseCampaignDeleteRequest, ownedCampaignFilter as _kmailOwnedCampaignFilter } from './src/worker/kmail-campaign-delete.js';
-import { senderLocalPart as _kmailSenderLocalPart, classifyInboundLocalPart as _kmailClassifyLocalPart } from './src/worker/kmail-address.js';
+import { senderLocalPart as _kmailSenderLocalPart, classifyInboundLocalPart as _kmailClassifyLocalPart, KMAIL_DOMAIN as _KMAIL_DOMAIN, isKmailAddress as _isKmailAddress } from './src/worker/kmail-address.js';
 import { normalizeQuery as _kpsNormalize, buildFilter as _kpsFilter, publicRow as _kpsRow, MAX_RESULTS as _KPS_MAX, RATE_LIMIT as _KPS_LIMIT, RATE_TTL as _KPS_TTL } from './src/worker/kmail-people-search.js';
 import { buildSendStatus as _kmailBuildSendStatus, instantSendMax as _kmailInstantSendMax, isImmediate as _kmailIsImmediate } from './src/worker/kmail-send-status.js';
 import { checkMailId as _checkMailId, defaultMailIdFromHash as _defaultMailIdFromHash, normalizeMailId as _normMailId, changePolicyConfig as _mailIdPolicy, evaluateChange as _mailIdEvaluate, recordChange as _mailIdRecordChange, recordConfirm as _mailIdRecordConfirm, limitMessage as _mailIdLimitMessage, readState as _mailIdReadState, writeState as _mailIdWriteState } from './src/worker/mail-id.js';
@@ -13421,7 +13421,7 @@ export default {
     // Cloudflare Email Routing catch-all이 hondi.org/hondi.kr 둘 다
     // 이 같은 Worker(hondi-proxy)로 보내므로, 이 분기가 없으면 K-Mail
     // 회신이 전부 아래 "Unrecognized recipient"로 거부된다.
-    if (toAddr.endsWith('@hondi.kr')) {
+    if (_isKmailAddress(toAddr)) {
       return _handleKmailInboundEmail(message, env, ctx);
     }
 
@@ -34779,7 +34779,7 @@ async function _kmailGetUserSettings(env, guid) {
 // "2601:db80:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx"(콜론으로 이어진 8그룹)
 // 형식으로 생성한다 — 예외 없이 전 사용자가 이 형식이다. 그런데
 // 콜론(:)은 이메일 로컬파트에서 따옴표(") 없이는 쓸 수 없는 문자라,
-// `${guid}@hondi.kr`을 그대로 env.EMAIL.send()의 from/replyTo에
+// `${guid}@${_KMAIL_DOMAIN}`을 그대로 env.EMAIL.send()의 from/replyTo에
 // 넘기면 Cloudflare가 "Invalid email address: Invalid input"으로
 // 매번 거부한다 — 즉시발송·캠페인 발송·부재중 자동응답까지 K-Mail의
 // 모든 실제 발송 경로가 이 때문에 처음부터 한 번도 성공한 적이
@@ -34817,7 +34817,7 @@ async function _kmailMailIdCached(env, guid) {
 }
 async function _kmailSendOneEmail(env, { guid, to, cc, bcc, subject, text, sessionId, replyTo, signature, senderName, attachmentIds, preResolvedAttachments, mailId }) {
   const resolvedMailId = mailId !== undefined ? mailId : await _kmailMailIdCached(env, guid);
-  const fromAddr = `${_kmailSenderLocalPart(guid, resolvedMailId)}@hondi.kr`;
+  const fromAddr = `${_kmailSenderLocalPart(guid, resolvedMailId)}@${_KMAIL_DOMAIN}`;
   const _sigText = _kmailRenderSignature(signature, senderName, _kmailSenderLocalPart(guid, resolvedMailId));   // 2026-10-28: 비어 있으면 'Signed by 이름', {이름} 치환, '-' 이면 없음
   const finalText = _sigText ? `${text}\n\n${_sigText}` : text;
   const fromName = _kmailEffectiveSenderName(senderName);                       // 이름이 없으면 주소만("ceo@hondi.kr"), 있으면 "도 영민 <ceo@hondi.kr>"
@@ -36155,10 +36155,10 @@ async function handleKmailSettingsGet(request, url, env, corsHeaders) {
   const unlimited = await _kmailIsQuotaExempt(env, guid);
   return new Response(JSON.stringify({
     ok: true, ...settings,
-    kmail_address: `${_kmailSenderLocalPart(guid, settings.mail_id)}@hondi.kr`,   // 내 메일 주소(보내는 주소 = 받는 주소)
-    kmail_address_fixed: `${_guidToEmailLocalPart(guid)}@hondi.kr`,                // 변하지 않는 내부 주소(여전히 도착함)
+    kmail_address: `${_kmailSenderLocalPart(guid, settings.mail_id)}@${_KMAIL_DOMAIN}`,   // 내 메일 주소(보내는 주소 = 받는 주소)
+    kmail_address_fixed: `${_guidToEmailLocalPart(guid)}@${_KMAIL_DOMAIN}`,                // 변하지 않는 내부 주소(여전히 도착함)
     daily_quota_reference: unlimited ? null : KMAIL_QUOTA_5D_AVG_LIMIT, daily_quota_unlimited: unlimited,
-    sender_preview: _kmailFormatSender(`${_kmailSenderLocalPart(guid, settings.mail_id)}@hondi.kr`, settings.sender_display_name),   // 받는 사람 화면에 보이는 모양
+    sender_preview: _kmailFormatSender(`${_kmailSenderLocalPart(guid, settings.mail_id)}@${_KMAIL_DOMAIN}`, settings.sender_display_name),   // 받는 사람 화면에 보이는 모양
     sender_name_max: _KMAIL_SENDER_NAME_MAX,
   }), { status: 200, headers: corsHeaders });
 }
@@ -36285,9 +36285,9 @@ async function handleKmailMailIdStatus(request, url, env, corsHeaders) {
   const st = await _mailIdReadState(env.AI_SETUP_SEALS_KV, guid);
   const ev = _mailIdEvaluate(st, Date.now(), _mailIdPolicy(env), { hasCurrent: !!mailId });
   return new Response(JSON.stringify({
-    ok: true, mail_id: mailId, address: mailId ? `${mailId}@hondi.kr` : '',
+    ok: true, mail_id: mailId, address: mailId ? `${mailId}@${_KMAIL_DOMAIN}` : '',
     sender_display_name: userSettings.sender_display_name || '', sender_name_max: _KMAIL_SENDER_NAME_MAX,
-    sender_preview: mailId ? _kmailFormatSender(`${mailId}@hondi.kr`, userSettings.sender_display_name) : '',
+    sender_preview: mailId ? _kmailFormatSender(`${mailId}@${_KMAIL_DOMAIN}`, userSettings.sender_display_name) : '',
     needs_choice: st.confirmed === null, confirmed: st.confirmed,
     can_change: ev.allowed, first_free: ev.exempt, changes_left: ev.exempt ? ev.limit : ev.left, limit: ev.limit, window_days: ev.windowDays, next_change_at: ev.nextChangeAt,
   }), { status: 200, headers: corsHeaders });
@@ -36326,7 +36326,7 @@ async function handleKmailMailIdConfirm(request, env, corsHeaders) {
   if (!mailId) return _err(500, 'MAIL_ID_GEN_EXHAUSTED', '기본 아이디를 만들지 못했습니다. 직접 입력해 주세요', corsHeaders);
   const st = await _mailIdReadState(env.AI_SETUP_SEALS_KV, guid);
   await _mailIdWriteState(env.AI_SETUP_SEALS_KV, guid, _mailIdRecordConfirm(st, body.action));
-  return new Response(JSON.stringify({ ok: true, mail_id: mailId, address: `${mailId}@hondi.kr`, confirmed: body.action === 'accept' ? 'accepted' : 'skipped' }), { status: 200, headers: corsHeaders });
+  return new Response(JSON.stringify({ ok: true, mail_id: mailId, address: `${mailId}@${_KMAIL_DOMAIN}`, confirmed: body.action === 'accept' ? 'accepted' : 'skipped' }), { status: 200, headers: corsHeaders });
 }
 
 // GET /kmail/mail-id/check?candidate=...&guid=...&pubkey=...&signature=...&ts=...
@@ -37079,7 +37079,7 @@ async function _kmailSendCampaign(env, campaign, opts = {}) {
         guid: campaign.owner_user_guid, to: contact.email,
         subject: campaign.subject, text: sendText,
         sessionId: `kmail:${campaign.id}`,
-        replyTo: _kmailCampaignReplyTo(`kmail-${campaign.id}@hondi.kr`, contactIds.length),   // 2026-10-28: 1명이면 보내는 사람 자신
+        replyTo: _kmailCampaignReplyTo(`kmail-${campaign.id}@${_KMAIL_DOMAIN}`, contactIds.length),   // 2026-10-28: 1명이면 보내는 사람 자신
         signature: settings.signature, senderName: settings.sender_display_name, mailId: settings.mail_id,
         preResolvedAttachments,
       });
@@ -37854,7 +37854,7 @@ async function _handleKmailInboundEmail(message, env, ctx) {
         const replyToEmail = emailMatch ? emailMatch[0] : fromAddr;
         await _kmailSendOneEmail(env, {
           guid: ownerGuid, to: replyToEmail, subject: `Re: ${subject}`, text: delegation.holdMessage,
-          sessionId, replyTo: campaignObj ? `kmail-${campaignObj.id}@hondi.kr` : `${_kmailSenderLocalPart(ownerGuid, settings.mail_id)}@hondi.kr`,
+          sessionId, replyTo: campaignObj ? `kmail-${campaignObj.id}@${_KMAIL_DOMAIN}` : `${_kmailSenderLocalPart(ownerGuid, settings.mail_id)}@${_KMAIL_DOMAIN}`,
           signature: settings.signature, senderName: settings.sender_display_name, mailId: settings.mail_id,
         });
       } catch (e) {
@@ -37892,7 +37892,7 @@ async function _handleKmailInboundEmail(message, env, ctx) {
         });
         await _kmailSendOneEmail(env, {
           guid: ownerGuid, to: replyToEmail, subject: `Re: ${subject}`, text: replyBody,
-          sessionId, replyTo: campaignObj ? `kmail-${campaignObj.id}@hondi.kr` : `${_kmailSenderLocalPart(ownerGuid, settings.mail_id)}@hondi.kr`,
+          sessionId, replyTo: campaignObj ? `kmail-${campaignObj.id}@${_KMAIL_DOMAIN}` : `${_kmailSenderLocalPart(ownerGuid, settings.mail_id)}@${_KMAIL_DOMAIN}`,
           signature: settings.signature, senderName: settings.sender_display_name, mailId: settings.mail_id,
         });
         await _writeAiMessage(env, {
@@ -37959,7 +37959,7 @@ async function _handleKmailInboundEmail(message, env, ctx) {
     if (!isBlocked && !matchedDelete) try {
       const emailMatch2 = fromAddr.match(/[^\s<>]+@[^\s<>]+/);
       const fromEmail = emailMatch2 ? emailMatch2[0] : fromAddr;
-      if (!fromEmail.toLowerCase().endsWith('@hondi.kr')) {
+      if (!_isKmailAddress(fromEmail)) {
         const settings = await _kmailGetUserSettings(env, ownerGuid);
         const autoReplyActive = settings.auto_reply_enabled &&
           (!settings.auto_reply_until || settings.auto_reply_until > new Date().toISOString());
@@ -37992,7 +37992,7 @@ async function _handleKmailInboundEmail(message, env, ctx) {
 // 일반 발송과 구분되고, 위 24시간 스팸 방지 체크도 이 태그를 본다.
 async function _kmailSendAutoReply(env, guid, toEmail, replyText, sessionId, senderDisplayName, mailId) {
   if (!env.EMAIL) return;
-  const fromAddr = `${_kmailSenderLocalPart(guid, mailId !== undefined ? mailId : await _kmailMailIdCached(env, guid))}@hondi.kr`;
+  const fromAddr = `${_kmailSenderLocalPart(guid, mailId !== undefined ? mailId : await _kmailMailIdCached(env, guid))}@${_KMAIL_DOMAIN}`;
   const fromName = _kmailEffectiveSenderName(senderDisplayName);
   await env.EMAIL.send({ to: toEmail, from: fromName ? { email: fromAddr, name: fromName } : fromAddr, subject: '자동 응답: 부재중 안내', text: replyText });
   await _writeAiMessage(env, {
@@ -38769,7 +38769,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
   const systemPrompt = sp.replace(/\{\{NOW\}\}/g, nowKST).replace(/\{\{GUID\}\}/g, guid)
     .replace(/\{\{MAIL_ID\}\}/g, kmailSettingsForChat.mail_id || '')
     // 2026-10-27: 보내는 사람(받는 사람 화면에 보이는 모양)과 이름 설정 여부 — 발송 전 확인 목록에 "보내는 사람" 줄을 넣게 한다(SP §2-2).
-    .replace(/\{\{SENDER_DISPLAY\}\}/g, _kmailDescribeSender(`${_kmailSenderLocalPart(guid, kmailSettingsForChat.mail_id)}@hondi.kr`, kmailSettingsForChat.sender_display_name))
+    .replace(/\{\{SENDER_DISPLAY\}\}/g, _kmailDescribeSender(`${_kmailSenderLocalPart(guid, kmailSettingsForChat.mail_id)}@${_KMAIL_DOMAIN}`, kmailSettingsForChat.sender_display_name))
     .replace(/\{\{SENDER_NAME\}\}/g, kmailSettingsForChat.sender_display_name || '');
 
   // UNIVERSAL-INTEGRITY·UNIVERSAL-common·CONTROL-TOWER-PRINCIPLE 서버측
@@ -39887,7 +39887,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
     }
     // 2026-10-27 확인 단계 방어: 바로 앞 비서 메시지가 "이대로 보낼까요?" 같은 확인 질문이 아니면 연락처 저장·캠페인 생성·발송을
     // 모두 하지 않고, 서버가 태그 내용으로 만든 확인 요약을 대신 보여 준다(사용자가 동의하면 비서가 같은 내용으로 다시 낸다).
-    const sendGuard = _kmailEvaluateSendGuard(cleanMessages, parsed, Date.now(), { address: `${_kmailSenderLocalPart(guid, kmailSettingsForChat.mail_id)}@hondi.kr`, name: kmailSettingsForChat.sender_display_name });
+    const sendGuard = _kmailEvaluateSendGuard(cleanMessages, parsed, Date.now(), { address: `${_kmailSenderLocalPart(guid, kmailSettingsForChat.mail_id)}@${_KMAIL_DOMAIN}`, name: kmailSettingsForChat.sender_display_name });
     if (!sendGuard.allow) {
       return new Response(JSON.stringify({ ok: true, reply: sendGuard.reply, action: sendGuard.action }), { status: 200, headers: corsHeaders });
     }
@@ -39914,7 +39914,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
       const nowMsL = Date.now();
       const st = _kmailBuildLetterStatus({ success, fail, nowMs: nowMsL });
       const letterPreview = _kmailBuildSentMailPreview({ ...parsed, recipients: letter.recipients, subject: letter.subject, body: letter.body },
-        { address: `${_kmailSenderLocalPart(guid, kmailSettingsForChat.mail_id)}@hondi.kr`, name: kmailSettingsForChat.sender_display_name }, st.state, nowMsL, nowMsL);
+        { address: `${_kmailSenderLocalPart(guid, kmailSettingsForChat.mail_id)}@${_KMAIL_DOMAIN}`, name: kmailSettingsForChat.sender_display_name }, st.state, nowMsL, nowMsL);
       return new Response(JSON.stringify({
         ok: true,
         reply: `${cleanReplyText}\n\n${st.line}${letterPreview ? '\n\n' + letterPreview : ''}`,
@@ -39930,7 +39930,7 @@ async function handleKmailChat(request, env, corsHeaders, ctx) {
         outcome = await _kmailDispatchCampaignNow(env, result.campaign).catch(() => ({ dispatched: false }));
       }
       const sendStatus = _kmailBuildSendStatus({ nowMs, sendAtMs, recipientCount: result.recipientCount, newContactCount: result.newContactCount, outcome });
-      const _sentPreview = _kmailBuildSentMailPreview(parsed, { address: `${_kmailSenderLocalPart(guid, kmailSettingsForChat.mail_id)}@hondi.kr`, name: kmailSettingsForChat.sender_display_name }, sendStatus.state, sendAtMs, nowMs);
+      const _sentPreview = _kmailBuildSentMailPreview(parsed, { address: `${_kmailSenderLocalPart(guid, kmailSettingsForChat.mail_id)}@${_KMAIL_DOMAIN}`, name: kmailSettingsForChat.sender_display_name }, sendStatus.state, sendAtMs, nowMs);
       const replyText = `${cleanReplyText}\n\n${sendStatus.line}${_sentPreview ? '\n\n' + _sentPreview : ''}`;   // 2026-10-28: 발송 직후 보낸 메일 내용을 보여 준다
       // campaign_id를 클라이언트가 이번 요청에 실어 보내지 않았다면(=
       // 사전에 KMAIL_CAMPAIGN_START 없이 바로 확정한 단발성 캠페인)
