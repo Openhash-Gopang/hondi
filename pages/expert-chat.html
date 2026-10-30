@@ -1680,7 +1680,7 @@ updateSendBtn();
 // ?embed=1 이고 같은 오리진·부모 창에서 온 메시지만 받는다. 일반 접속에는 영향이 없다.
 function _embedOn() { return _qs.get('embed') === '1' && window.parent !== window; }
 // 2026-10-28: 나비로 Navi Law(law.hondi.net)가 이 화면을 iframe 으로 끼운다 — 부모 오리진은 같은 오리진 또는 아래 목록만 허용한다.
-const _EMBED_PARENT_ORIGINS = [location.origin, 'https://law.hondi.net', 'https://school.hondi.net', 'https://tax.hondi.net', 'https://ip.hondi.net', 'https://doctor.hondi.net'];
+const _EMBED_PARENT_ORIGINS = [location.origin, 'https://law.hondi.net', 'https://school.hondi.net', 'https://tax.hondi.net', 'https://ip.hondi.net', 'https://doctor.hondi.net', 'https://pro.hondi.net'];
 function _embedParentOrigin() {
   try { const a = window.location.ancestorOrigins && window.location.ancestorOrigins[0]; if (a && _EMBED_PARENT_ORIGINS.includes(a)) return a; } catch (e) { /* 무시 */ }
   try { const o = new URL(document.referrer).origin; if (_EMBED_PARENT_ORIGINS.includes(o)) return o; } catch (e) { /* 무시 */ }
