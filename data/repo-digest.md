@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-31 03:12 KST · 기준 커밋 c4319b03
+- 갱신: 2026-10-31 03:43 KST · 기준 커밋 e66adefc
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 881건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-31 Merge pull request #857 from Openhash-Gopang/feat/navi-logo-butterfly-20261031-0343
+- 2026-10-31 feat: 나비 로고를 새 나비 이미지로 교체 (아이콘 6종 + 파비콘)
 - 2026-10-31 Merge pull request #856 from Openhash-Gopang/fix/llm-relay-thinking-off-20261031-0312
 - 2026-10-31 fix: /llm/relay — DeepSeek flash thinking 기본 끄기 (reasoning 이 max_tokens 를 소진해 content 가 빈 채 끝나는 문제)
 - 2026-10-29 Merge pull request #855 from Openhash-Gopang/feat/expert-chat-glass-embed-20261029-2138
@@ -42,8 +44,6 @@
 - 2026-10-28 fix(kmail): "찾아볼게요"만 말하고 멈추는 응답에 주소록 조회를 이어 붙임
 - 2026-10-28 feat(kmail): 발송 직후 '보낸 메일 내용' 표시 + 답장 주소(reply-to)를 보내는 사람 자신으로
 - 2026-10-28 feat(kmail): 연락처 수정 API 에 전화번호·주소·웹사이트·메모 추가
-- 2026-10-28 feat(kmail): 이름만 말해도 주소록 조회 후 '받는 사람 이름<이메일>'로 확인
-- 2026-10-28 feat(ui): 공용 아이디 배지 — 아이디만 표시, 보내는 이름 인라인 편집, 세로 점 세 개(⋮) 설정 링크
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
