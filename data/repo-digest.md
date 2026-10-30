@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-31 07:38 KST · 기준 커밋 f8d07cae
+- 갱신: 2026-10-31 07:55 KST · 기준 커밋 f0a4c788
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 881건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-31 Merge pull request #861 from Openhash-Gopang/feat/kmail-domain-naviweb-20261031-0755
+- 2026-10-31 feat: K-Mail 보내는 주소를 naviweb.kr 로(hondi.kr 도 계속 수신)
 - 2026-10-31 Merge pull request #860 from Openhash-Gopang/feat/kmail-people-search-20261031-0738
 - 2026-10-31 feat: K-Mail 가입자 검색(검색을 허용한 가입자만)
 - 2026-10-31 Merge pull request #859 from Openhash-Gopang/fix/embed-pro-origin-20261031-0612
@@ -42,8 +44,6 @@
 - 2026-10-28 fix(auth): 다른 서비스(K-Mail)의 전화 인증 공유 로그인을 혼디 앱이 이어받는다
 - 2026-10-28 feat(chat): 카카오톡 방식 대화 상대 찾기 - 전화번호(허용한 사람만)·검색용 아이디 정확일치
 - 2026-10-28 feat(kmail): 서명이 비어 있으면 Signed by 이름 기본 서명, {이름} 치환, 하이픈은 서명 없음
-- 2026-10-28 feat(admin): 검색 엔진 구현 계획 섹션 추가 (논문 중심 파일럿 개정 4판)
-- 2026-10-28 fix(kmail): 깨진 태그 오류 완화 + 내 캠페인 삭제 API
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
