@@ -473,7 +473,7 @@ async function callExpertAI(messages, onChunk) {
   let lastErr = null;
   for (const c of candidates) {
     try {
-      const reqBody = { model: c.model, messages, max_tokens: 1200, temperature: 0.4, stream: true };
+      const reqBody = { model: c.model, messages, max_tokens: _embedOn() ? 3200 : 1200, temperature: 0.4, stream: true };   // 2026-10-31 서류 작성(embed)은 서식 틀 + 완성 초안을 차례로 내므로 상한을 넓힌다(일반 대화는 그대로)
       const resp = c.provider === 'legacy'
         ? await fetch(`${c.baseUrl}/chat/completions`, {
             method: 'POST',
