@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-01 07:37 KST · 기준 커밋 d925fe80
+- 갱신: 2026-11-01 07:47 KST · 기준 커밋 0240e5e9
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 882건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-01 Merge pull request #883 from Openhash-Gopang/feat/case-invite-link
+- 2026-11-01 feat(case): 초대 링크 주소를 앱이 지정할 수 있게(signup_base, https만)
 - 2026-11-01 Merge pull request #882 from Openhash-Gopang/feat/case-invitee-flow
 - 2026-11-01 feat(case): 초대받은 쪽 흐름 — claimInvite·sendProposal·poll(onProposal), 제안 case_id 해시 검증
 - 2026-11-01 Merge pull request #881 from Openhash-Gopang/feat/assistant-finish
@@ -42,8 +44,6 @@
 - 2026-10-31 Merge pull request #864 from Openhash-Gopang/fix/pwa-white-20261031-0948
 - 2026-10-31 fix: 설치 앱 시작 화면·하단 바를 흰색으로
 - 2026-10-31 Merge pull request #863 from Openhash-Gopang/feat/sp-route-20261031-0916
-- 2026-10-31 feat: 메인 화면 SP 라우팅(/kmail/assist)
-- 2026-10-31 Merge pull request #862 from Openhash-Gopang/feat/kmail-people-search-20261031-0812
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
