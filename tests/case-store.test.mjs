@@ -108,3 +108,24 @@ test('저장 후 변조는 verify 가 잡는다(저장소를 직접 수정)', as
   const e = await ad.get('history', 's1/000001'); e.payload = { a: 999 }; await ad.put('history', 's1/000001', e);
   assert.equal((await s.verify('s1')).ok, false);
 });
+
+test('patchCase: 보조 필드만 갱신, state/mode/case_id 는 못 바꿈', async () => {
+  const s = mkStore();
+  await s.createCase({ mode: 'solo', case_id: 's1', title: 't' });
+  const r = await s.patchCase('s1', { invitation: { x: 1 }, state: 'closed', mode: 'engaged', case_id: 'zz' });
+  assert.equal(r.ok, true);
+  const c = await s.getCase('s1');
+  assert.deepEqual(c.invitation, { x: 1 });
+  assert.equal(c.state, 'active');
+  assert.equal(c.mode, 'solo');
+  assert.equal(c.case_id, 's1');
+  assert.equal((await s.patchCase('none', {})).ok, false);
+});
+
+test('상태 전이 기록: 결과(outcome)가 from/to 와 함께 payload 에 남는다', async () => {
+  const s = mkStore();
+  await s.createCase({ mode: 'solo', case_id: 's1', title: 't' });
+  await s.applyTransition('s1', 'close_self', { side: 'self', outcome: '완치' }, { payload: { outcome: '완치' } });
+  const [e] = await s.history('s1');
+  assert.deepEqual(e.payload, { from: 'active', to: 'closed', outcome: '완치' });
+});
