@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-31 18:21 KST · 기준 커밋 3a742860
+- 갱신: 2026-10-31 20:28 KST · 기준 커밋 4bf421f8
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 881건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-31 Merge pull request #868 from Openhash-Gopang/feat/embed-attach-form-20261031
+- 2026-10-31 feat: expert-chat 임베드에 서식 이미지·PDF 첨부(expert-embed-attach)와 서식 DB 조회 결과 회신 추가
 - 2026-10-31 Merge pull request #867 from Openhash-Gopang/feat/pdv-draft-extras-20261031
 - 2026-10-31 feat: PDV 초안 보관에 서류 첨부서류(extras) 추가
 - 2026-10-31 Merge pull request #866 from Openhash-Gopang/feat/pdv-draft-bridge-20261031
@@ -42,8 +44,6 @@
 - 2026-10-29 feat: 나비 특허 Navi Patent(patent.hondi.net) 연동 — GWP 등록·출처 허용·임베드 허용·서비스 메뉴·전문가용 SP
 - 2026-10-29 Merge pull request #848 from Openhash-Gopang/feat/tax-accounting-sp-20261029
 - 2026-10-29 feat: 세무·회계 통합 보조 AI SP(SP-FIN-11) 신설 및 tax.hondi.net 임베드 허용
-- 2026-10-29 Merge pull request #847 from Openhash-Gopang/feat/sp-legal-review-v11-20261029
-- 2026-10-29 법적 검토 SP v1.0 신설 및 v1.1(기준일·첨부·법적 근거 제시 의무)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
