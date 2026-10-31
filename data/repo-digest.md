@@ -1,10 +1,13 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-01 07:47 KST · 기준 커밋 0240e5e9
+- 갱신: 2026-11-01 07:48 KST · 기준 커밋 03704911
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 882건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-01 Merge pull request #884 from Openhash-Gopang/feat/assistant-host
 - 2026-11-01 Merge pull request #883 from Openhash-Gopang/feat/case-invite-link
+- 2026-11-01 fix(assistant): 기본 규칙팩 effective_from 을 앞당김(배포 직후·시계 오차에서 팩이 거부되던 문제)
+- 2026-11-01 feat(assistant): 비서 호스트(기본 규칙팩·점검·알림 패널용 findings) + /kmail/assist 점검 신호 첨부 + gate 미평가 버그 수정
 - 2026-11-01 feat(case): 초대 링크 주소를 앱이 지정할 수 있게(signup_base, https만)
 - 2026-11-01 Merge pull request #882 from Openhash-Gopang/feat/case-invitee-flow
 - 2026-11-01 feat(case): 초대받은 쪽 흐름 — claimInvite·sendProposal·poll(onProposal), 제안 case_id 해시 검증
@@ -41,9 +44,6 @@
 - 2026-10-31 feat: PDV 초안 보관 중계 페이지(pdv-draft-bridge.html)
 - 2026-10-31 Merge pull request #865 from Openhash-Gopang/feat/ac-route-mail-doc-20261031
 - 2026-10-31 feat(kmail-assist): 메일(편지/캠페인)·서류 라우팅 보강 + 되묻기 2회 상한
-- 2026-10-31 Merge pull request #864 from Openhash-Gopang/fix/pwa-white-20261031-0948
-- 2026-10-31 fix: 설치 앱 시작 화면·하단 바를 흰색으로
-- 2026-10-31 Merge pull request #863 from Openhash-Gopang/feat/sp-route-20261031-0916
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
