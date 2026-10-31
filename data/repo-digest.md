@@ -1,10 +1,19 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-01 05:01 KST · 기준 커밋 f2acfcc6
+- 갱신: 2026-11-01 05:09 KST · 기준 커밋 687c6bd4
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 881건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-01 Merge pull request #878 from Openhash-Gopang/feat/case-handover
+- 2026-11-01 Merge pull request #877 from Openhash-Gopang/feat/case-net
+- 2026-11-01 feat(case): 기기 쪽 접착 모듈 case-net — 키 등록·TOFU·봉인 전송·수신 반영 (S5 전반)
+- 2026-11-01 feat(case): 나 홀로→맡기기 인계·선택 공개·기기 간 기록 분기 탐지 (S4, G8·G7 일부)
+- 2026-11-01 feat(case): 초대 취소와 관계 차단/해제 (S3, G9)
+- 2026-11-01 feat(case): 우편함 종단 암호화(X25519+AES-GCM)와 공개키 등록부·가입 시 키 교환 (S2, G2)
+- 2026-11-01 Merge pull request #872 from Openhash-Gopang/test/case-scenarios
 - 2026-11-01 Merge pull request #871 from Openhash-Gopang/feat/case-core-rest
+- 2026-11-01 feat(case): 서명된 이벤트(S1) — 합의·종료·청구서·소통 응답 위조 방지, 투영 해시 검증, 상태 전이 전달 (G1·G3·G4·G5·G6)
+- 2026-11-01 test(case): 사고 실험 — 맡은 일·맡긴 일·나 홀로를 두 기기+서버로 끝까지 시뮬레이션, 한계 G1~G12 고정
 - 2026-11-01 fix(case): case-store patchCase 추가, 상태 전이 기록에 outcome 을 from/to 와 합쳐 저장
 - 2026-11-01 feat(case): M1 case-store — PDV(IndexedDB, domain work) 저장소 + 해시 앵커 아웃박스
 - 2026-11-01 feat(case): M2 초대권·가입 알림·chat room 개설 계약, M3 봉인 우편함 봉투 계약
@@ -35,15 +44,6 @@
 - 2026-10-31 feat: 서류 화면 삽입 허용 주소에 pro.hondi.net 추가
 - 2026-10-31 Merge pull request #858 from Openhash-Gopang/fix/embed-max-tokens-20261031-0443
 - 2026-10-31 fix: 서류 작성(embed) 응답 상한 3200 — 서식 틀 + 초안을 차례로 내다 1200 에서 잘림
-- 2026-10-31 Merge pull request #857 from Openhash-Gopang/feat/navi-logo-butterfly-20261031-0343
-- 2026-10-31 feat: 나비 로고를 새 나비 이미지로 교체 (아이콘 6종 + 파비콘)
-- 2026-10-31 Merge pull request #856 from Openhash-Gopang/fix/llm-relay-thinking-off-20261031-0312
-- 2026-10-31 fix: /llm/relay — DeepSeek flash thinking 기본 끄기 (reasoning 이 max_tokens 를 소진해 content 가 빈 채 끝나는 문제)
-- 2026-10-29 Merge pull request #855 from Openhash-Gopang/feat/expert-chat-glass-embed-20261029-2138
-- 2026-10-29 feat: expert-chat ?embed=1&glass=1 — 끼운 화면 바탕 투명(나비 스쿨 반투명 대화창)
-- 2026-10-29 Merge pull request #854 from Openhash-Gopang/feat/school-docs-sp-v1-1-20261029-2123
-- 2026-10-29 feat: 학교 서류 작성 도우미 SP v1.1 — 교사·학교 행정 서류 안내 보강
-- 2026-10-29 Merge pull request #853 from Openhash-Gopang/feat/school-site-integration-20261029-2055
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
