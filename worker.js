@@ -1517,7 +1517,7 @@ async function handlePdvRelayPush(request, env, corsHeaders) {
 }
 
 // ── Case(일) 서버 측 — 로직은 src/worker/case-server.js, 여기는 연결만 ──
-// POST /case/invite/register | /case/invite/claim | /case/mailbox/push | /case/mailbox/pull | /case/mailbox/ack
+// POST /case/invite/register | /case/invite/claim | /case/mailbox/push | /case/mailbox/pull | /case/mailbox/ack | /case/key/register | /case/key/get
 // 인증은 K 서비스 공용 게이트(phone_verify_token 또는 지갑 서명, sigMsg = `<route>:<guid>:<ts>`).
 async function handleCaseApi(request, env, corsHeaders, op) {
   if (!env.QR_SESSIONS_KV) return _err(500, 'KV_NOT_BOUND', '저장소가 설정되지 않았습니다', corsHeaders);
@@ -14168,6 +14168,8 @@ export default {
     if (pathname === '/case/mailbox/push' && request.method === 'POST') return handleCaseApi(request, env, corsHeaders, 'mailboxPush');
     if (pathname === '/case/mailbox/pull' && request.method === 'POST') return handleCaseApi(request, env, corsHeaders, 'mailboxPull');
     if (pathname === '/case/mailbox/ack' && request.method === 'POST') return handleCaseApi(request, env, corsHeaders, 'mailboxAck');
+    if (pathname === '/case/key/register' && request.method === 'POST') return handleCaseApi(request, env, corsHeaders, 'keyRegister');
+    if (pathname === '/case/key/get' && request.method === 'POST') return handleCaseApi(request, env, corsHeaders, 'keyGet');
     if (pathname === '/account/step-up-threshold' && request.method === 'GET')  return handleStepUpThresholdGet(request, env, corsHeaders);
     if (pathname === '/account/step-up-threshold' && request.method === 'POST') return handleStepUpThresholdSet(request, env, corsHeaders);
     if (pathname === '/auth/webauthn/register-key' && request.method === 'POST') return handleWebAuthnRegisterKey(request, env, corsHeaders);
