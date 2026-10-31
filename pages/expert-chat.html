@@ -1094,9 +1094,11 @@ async function _maybeHandleFormTags(fullReply, aiBubble, depth = 0) {
   try {
     const form = await findForm(WORKER, lookup); foundForm = form;
     note.innerHTML = `<i>"${escHtml(lookup.name)}" ${form ? '서식 DB에서 찾음' : '서식 DB에 없음'}</i>`;
+    _embedPost({ type: 'expert-embed-form', status: form ? 'found' : 'missing', name: String(lookup.name || '').slice(0, 100) });
     resultText = lookupResultText(form, lookup);
   } catch (e) {
     note.innerHTML = `<i>서식 DB에 닿지 못했습니다</i>`;
+    _embedPost({ type: 'expert-embed-form', status: 'error', name: String(lookup.name || '').slice(0, 100) });
     resultText = `[서식 DB 조회 실패] ${e.message}. 이용자에게 이 사실을 알리고 SP_DOC_FORM §3-1의 다음 순서(첨부 요청 → 임의 구성)로 진행하세요.`;
   }
   messages.push({ role: 'user', content: resultText });
@@ -1693,12 +1695,27 @@ function _embedReply(text) {
   if (!_embedOn()) return;
   try { window.parent.postMessage({ type: 'expert-embed-reply', text: String(text || '') }, _embedParentOrigin()); } catch (e) { /* 부모가 없으면 무시 */ }
 }
+// 부모 → 이 페이지: {type:'expert-embed-attach', name, mime, data(ArrayBuffer), text} — 서식 이미지·PDF(8MB 이하)를 첨부해 text 와 함께 보낸다(2026-10-31).
+// 이 페이지 → 부모: {type:'expert-embed-form', status:'found'|'missing'|'error', name} — 서식 DB 조회 결과(부모가 "기존 서식을 불러옴/새 서식" 안내에 쓴다),
+//                  {type:'expert-embed-error', msg} — 첨부를 읽지 못했을 때.
+function _embedPost(msg) {
+  if (!_embedOn()) return;
+  try { window.parent.postMessage(msg, _embedParentOrigin()); } catch (e) { /* 부모가 없으면 무시 */ }
+}
 if (_embedOn()) {
   window.addEventListener('message', (e) => {
     if (!_EMBED_PARENT_ORIGINS.includes(e.origin) || e.source !== window.parent || !e.data) return;
     if (e.data.type === 'expert-embed-send' && typeof e.data.text === 'string' && e.data.text.trim()) {
       input.value = e.data.text.slice(0, 4000);
       doSend();
+    } else if (e.data.type === 'expert-embed-attach' && e.data.data instanceof ArrayBuffer && e.data.data.byteLength > 0 && e.data.data.byteLength <= 8 * 1024 * 1024
+        && /^(image\/|application\/pdf$)/.test(String(e.data.mime || '')) && typeof e.data.text === 'string' && e.data.text.trim()) {
+      const f = new File([e.data.data], String(e.data.name || '서식').slice(0, 120), { type: String(e.data.mime) });
+      handleFileSelect(f).then(() => {
+        if (!_attachedFile || (_attachedFile.isImage === false && !_attachedFile.text)) { clearAttach(); _embedPost({ type: 'expert-embed-error', msg: '첨부한 파일을 읽지 못했습니다. 더 선명한 이미지나 텍스트가 있는 PDF로 다시 올려 주세요.' }); return; }
+        input.value = e.data.text.slice(0, 4000);
+        doSend();
+      });
     }
   });
   try { window.parent.postMessage({ type: 'expert-embed-ready' }, _embedParentOrigin()); } catch (e) { /* 무시 */ }
