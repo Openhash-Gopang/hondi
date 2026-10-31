@@ -23,6 +23,7 @@ import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailS
 import { parseMessage as _kmailParseMime, decodeMimeWords as _kmailDecodeMimeWords, repairStoredText as _kmailRepairStoredText } from './src/worker/mime-text.js';
 import { checkSenderName as _kmailCheckSenderName, effectiveSenderName as _kmailEffectiveSenderName, renderSignature as _kmailRenderSignature, campaignReplyTo as _kmailCampaignReplyTo, replyToWithName as _kmailReplyToWithName, REPLY_TO_SELF as _KMAIL_REPLY_TO_SELF, formatSender as _kmailFormatSender, describeSender as _kmailDescribeSender, SENDER_NAME_MAX as _KMAIL_SENDER_NAME_MAX } from './src/worker/kmail-sender.js';
 import { LETTER_MODE_NOTE as _KMAIL_LETTER_MODE_NOTE, letterMax as _kmailLetterMax, evaluateLetter as _kmailEvaluateLetter, buildLetterStatus as _kmailBuildLetterStatus } from './src/worker/kmail-letter.js';
+import { routeFromReply as _assistRoute, stripTags as _assistStrip, quickRoute as _assistQuick } from './src/worker/kmail-assist.js';
 import { rescueDanglingLookup as _kmailRescueDanglingLookup, evaluateSendGuard as _kmailEvaluateSendGuard, buildSentMailPreview as _kmailBuildSentMailPreview } from './src/worker/kmail-confirm.js';
 import { validateMailRecipients as _kmailValidateRecipients } from './src/worker/kmail-recipients.js';
 import { buildContactsNote as _kmailBuildContactsNote, sumRegisteredInMessages as _kmailSumRegistered, summarizeContacts as _kmailSummarizeContacts, buildSummaryContext as _kmailBuildSummaryContext, describeLookupScope as _kmailDescribeLookupScope } from './src/worker/kmail-contacts-summary.js';
@@ -13716,6 +13717,7 @@ export default {
     if (pathname === '/kmail/rules' && request.method === 'GET') return handleKmailRuleList(request, url, env, corsHeaders);
     if (pathname === '/kmail/rules/toggle' && request.method === 'POST') return handleKmailRuleToggle(request, env, corsHeaders);
     if (pathname === '/kmail/chat' && request.method === 'POST') return handleKmailChat(request, env, corsHeaders, ctx);
+    if (pathname === '/kmail/assist' && request.method === 'POST') return handleKmailAssist(request, env, corsHeaders, ctx);   // 2026-10-31 메인 화면 SP 라우팅
     // 2026-09-11 신설 — K-Address(SP-26) 대화형 주소록 관리, K-Mail과
     // 완전히 격리된 별도 엔드포인트.
     if (pathname === '/kaddress/chat' && request.method === 'POST') return handleKaddressChat(request, env, corsHeaders, ctx);
@@ -38701,6 +38703,58 @@ async function _kmailDecideDelegation(env, ownerGuid, campaign, { subject, bodyT
 // 한 요청 = 대화 한 턴. 대화 이력 전체를 클라이언트가 들고 있다가 매번
 // 함께 보낸다(서버는 세션 상태를 갖지 않음 — 무상태 유지가 단순하고,
 // 대화 길이도 40턴으로 제한해 무한정 커지지 않게 막는다).
+/* kmail-assist — 2026-10-31: 나비 메인 화면의 기본 SP("혼디 나만의 AI 비서", AC-PRO-CORE)와 SP 라우팅.
+ * 입력 → (빠른 규칙 | AC-PRO-CORE 태그) → { route:{type:kmail|expert|doc|assistant,...}, reply }.
+ * K-Mail 본 대화는 기존 /kmail/chat 이 맡고, 전문가는 화면이 expert-chat 을 끼워 연다. 여기서는 판별과 기본 답변만 한다. */
+let _assistAcCache = null, _assistAcAt = 0;
+async function _assistLoadAc(env) {
+  const now = Date.now();
+  if (_assistAcCache && now - _assistAcAt < 10 * 60 * 1000) return _assistAcCache;
+  try { _assistAcCache = await _fetchByManifestKeyFromGithub('AC-PRO-CORE'); _assistAcAt = now; }
+  catch (e) { if (!_assistAcCache) throw e; }
+  return _assistAcCache;
+}
+const _ASSIST_NOTE = '[나비 메인 화면] 사용자는 naviweb.kr 의 첫 화면 입력창에 쓰고 있습니다. 메일 보내기·확인·주소록·캠페인은 [GWP: kmail], 전문 분야 상담·서류는 해당 [EXPERT: personaId] 또는 [GWP: id] 태그로 연결하세요. 연결할 때는 한 문장 안내와 태그 하나만 내고, 그 밖의 일반 대화는 간결하게 직접 답하세요.';
+async function handleKmailAssist(request, env, corsHeaders, ctx) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
+  const { messages } = body;
+  if (!Array.isArray(messages) || messages.length === 0) return _err(400, 'MISSING_FIELD', 'messages 배열(1개 이상) 필수', corsHeaders);
+  const auth = await _kAuth.resolveGuid(env, body, { sigMsg: `kmail-assist:${body.guid}:${body.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const clean = messages.filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+    .slice(-12).map(m => ({ role: m.role, content: m.content.slice(0, 4000) }));
+  if (!clean.length || clean[clean.length - 1].role !== 'user') return _err(400, 'MISSING_FIELD', '마지막은 사용자 메시지여야 합니다', corsHeaders);
+  const last = clean[clean.length - 1].content;
+
+  // 1) 명확한 발화는 규칙으로 즉시 — LLM 호출 없음
+  const quick = body.noQuick ? null : _assistQuick(last);
+  if (quick) return new Response(JSON.stringify({ ok: true, reply: '', route: quick, via: 'rule' }), { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
+
+  // 2) 나머지는 AC-PRO-CORE 가 판단
+  if (!env.DEEPSEEK_API_KEY) return _err(500, 'DEEPSEEK_KEY_MISSING', 'DEEPSEEK_API_KEY secret 미설정', corsHeaders);
+  let sp;
+  try { sp = await _assistLoadAc(env); } catch (e) { return _err(502, 'SP_LOAD_FAILED', 'AC SP 로드 실패: ' + e.message, corsHeaders); }
+  const nowKST = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
+  const universal = await _fetchUniversalLayers();
+  let reply;
+  try {
+    reply = await deepseekChatText({
+      env, apiKey: env.DEEPSEEK_API_KEY, model: resolveDeepseekModel('deepseek-v4-flash'),
+      messages: [
+        ...(universal ? [{ role: 'system', content: universal }] : []),
+        { role: 'system', content: sp },
+        { role: 'system', content: _ASSIST_NOTE + ' 현재 시각(KST): ' + nowKST },
+        ...clean,
+      ],
+      max_tokens: 1500, temperature: 0.3, timeoutMs: 45000, fallbackText: '',
+    });
+  } catch (e) { return _err(502, 'AI_CALL_FAILED', 'AI 호출 실패: ' + e.message, corsHeaders); }
+  if (!reply) return _err(502, 'AI_EMPTY_REPLY', 'AI 응답이 비어있습니다', corsHeaders);
+  const route = _assistRoute(reply);
+  return new Response(JSON.stringify({ ok: true, reply: _assistStrip(reply), route, via: 'ac' }), { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
+}
+
 async function handleKmailChat(request, env, corsHeaders, ctx) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);

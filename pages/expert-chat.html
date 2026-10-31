@@ -31,6 +31,8 @@
 #tb-suggest + #tb-review{margin-left:8px}
 /* 끼운 화면(?embed=1, 나비로 Navi Law) — 좁은 iframe 에서 설명 문구가 글자 한 칸 폭으로 줄어 상단바가 세로로 늘어나 대화를 가리므로, 문구·아이콘·"나비로" 버튼은 숨기고 한 줄 얇은 막대로 둔다 */
 html.embed #tb-icon, html.embed #tb-sub, html.embed #tb-back{display:none}
+/* host-input — 나비 메인 화면이 입력창을 맡는다(?hostinput=1): 이 화면의 입력 독을 감춘다 */
+html.hostinput #bottom-dock{display:none}
 html.embed #top-bar{padding:6px 10px;gap:8px;justify-content:flex-end;flex-wrap:wrap}
 html.embed #tb-suggest, html.embed #tb-review{margin-left:0}
 /* 2026-10-29 ?embed=1&glass=1 — 나비 스쿨: 부모 사이트의 반투명 회색 유리 바탕이 비치도록 안쪽 바탕을 투명하게 */
@@ -1679,8 +1681,9 @@ updateSendBtn();
 // 이 페이지 → 부모: {type:'expert-embed-reply', text} (AI 답변 전문 — 부모가 상태 줄을 읽어 진행 표시를 갱신).
 // ?embed=1 이고 같은 오리진·부모 창에서 온 메시지만 받는다. 일반 접속에는 영향이 없다.
 function _embedOn() { return _qs.get('embed') === '1' && window.parent !== window; }
+if (_embedOn() && _qs.get('hostinput') === '1') document.documentElement.classList.add('hostinput');
 // 2026-10-28: 나비로 Navi Law(law.hondi.net)가 이 화면을 iframe 으로 끼운다 — 부모 오리진은 같은 오리진 또는 아래 목록만 허용한다.
-const _EMBED_PARENT_ORIGINS = [location.origin, 'https://law.hondi.net', 'https://school.hondi.net', 'https://tax.hondi.net', 'https://ip.hondi.net', 'https://doctor.hondi.net', 'https://pro.hondi.net'];
+const _EMBED_PARENT_ORIGINS = [location.origin, 'https://mail.hondi.net', 'https://naviweb.kr', 'https://www.naviweb.kr', 'https://law.hondi.net', 'https://school.hondi.net', 'https://tax.hondi.net', 'https://ip.hondi.net', 'https://doctor.hondi.net', 'https://pro.hondi.net'];
 function _embedParentOrigin() {
   try { const a = window.location.ancestorOrigins && window.location.ancestorOrigins[0]; if (a && _EMBED_PARENT_ORIGINS.includes(a)) return a; } catch (e) { /* 무시 */ }
   try { const o = new URL(document.referrer).origin; if (_EMBED_PARENT_ORIGINS.includes(o)) return o; } catch (e) { /* 무시 */ }
