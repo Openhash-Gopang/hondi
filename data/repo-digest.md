@@ -1,9 +1,13 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-01 04:43 KST · 기준 커밋 2052c242
+- 갱신: 2026-11-01 05:01 KST · 기준 커밋 f2acfcc6
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 881건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-01 Merge pull request #871 from Openhash-Gopang/feat/case-core-rest
+- 2026-11-01 fix(case): case-store patchCase 추가, 상태 전이 기록에 outcome 을 from/to 와 합쳐 저장
+- 2026-11-01 feat(case): M1 case-store — PDV(IndexedDB, domain work) 저장소 + 해시 앵커 아웃박스
+- 2026-11-01 feat(case): M2 초대권·가입 알림·chat room 개설 계약, M3 봉인 우편함 봉투 계약
 - 2026-11-01 Merge pull request #870 from Openhash-Gopang/feat/case-server-m3
 - 2026-11-01 feat(case): 서버 — case 서비스 등록, 초대 등록·가입 확인, 봉인 우편함(push/pull/ack)
 - 2026-11-01 Merge pull request #869 from Openhash-Gopang/feat/case-core-m0
@@ -40,10 +44,6 @@
 - 2026-10-29 Merge pull request #854 from Openhash-Gopang/feat/school-docs-sp-v1-1-20261029-2123
 - 2026-10-29 feat: 학교 서류 작성 도우미 SP v1.1 — 교사·학교 행정 서류 안내 보강
 - 2026-10-29 Merge pull request #853 from Openhash-Gopang/feat/school-site-integration-20261029-2055
-- 2026-10-29 feat: 나비 스쿨 Navi School(school.hondi.net) 연동 — 학교 서류 작성 도우미 SP(school-docs)·GWP 탭 등록·임베드 허용·서비스 메뉴
-- 2026-10-29 Merge pull request #852 from Openhash-Gopang/feat/doctor-hospital-sp-20261029-2036
-- 2026-10-29 feat: 병원·의원 보조 AI(의사·간호사·원무) 통합 SP와 doctor.hondi.net 임베드 등록
-- 2026-10-29 Merge pull request #851 from Openhash-Gopang/feat/patent-site-integration-20261029-1935
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
