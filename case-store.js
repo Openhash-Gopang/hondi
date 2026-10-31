@@ -108,7 +108,9 @@
     // ── 서명·동기화(S1) — case-sync.js 필요. 나 홀로 일은 서명이 필요 없다(상대가 없음). ─────────────
     var Y = function () { return root.CaseSync; };
     var oppo = function (side) { return side === 'provider' ? 'consumer' : side === 'consumer' ? 'provider' : null; };
-    var SIGNED_ON_TRANSITION = ['accept', 'request_close', 'close_agree', 'close_dispute', 'close_hold'];
+    // 맡은 일/맡긴 일의 모든 상태 전이는 서명해서 상대에게 보낸다(보내지 않으면 두 기기의 상태가 어긋나 이후 서명 전이가 STATE_MISMATCH 로 막힌다).
+    // expire 는 각자 시계로 판단하는 시스템 전이라 제외, confirm 은 상태가 안 바뀌고 agreement_confirm 항목으로 따로 서명한다.
+    var SIGNED_ON_TRANSITION = ['accept', 'decline', 'activate', 'hold', 'resume', 'request_close', 'close_agree', 'close_dispute', 'close_hold', 'archive'];
     var NEED_KEYS = ['accept', 'close_agree', 'close_dispute', 'close_hold'];
 
     // 두 사람의 공개키를 일에 기록한다. 내 키는 내 identity 와 같아야 한다.
@@ -222,6 +224,7 @@
         if (SIGNED_ON_TRANSITION.indexOf(td.event) < 0) return { ok: false, code: 'BAD_TYPE', error: '허용되지 않은 전이' };
         var probe2 = { case_id: case_id, type: 'state_' + td.event, actor_side: peer, payload: pl };
         if (!(await Y().verifyEntryProof(probe2, cs.keys[peer]))) return { ok: false, code: 'BAD_PROOF', error: '전이 서명 검증 실패' };
+        if (pl.from !== cs.state && cs.state === pl.to) return { ok: true, duplicate: true, converged: true };   // 양쪽이 동시에 같은 전이를 한 경우(이미 같은 상태) — 충돌이 아니라 수렴
         if (pl.from !== cs.state) return { ok: false, code: 'STATE_MISMATCH', error: '내 상태(' + cs.state + ')와 상대가 본 상태(' + pl.from + ')가 다름' };
         var dd = await _derive(cs, td.event);
         if (!dd.ok) return dd;
