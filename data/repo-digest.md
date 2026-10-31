@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-01 05:25 KST · 기준 커밋 5c299013
+- 갱신: 2026-11-01 06:15 KST · 기준 커밋 1ca42219
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 881건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-01 Merge pull request #880 from Openhash-Gopang/fix/case-sign-all-transitions
+- 2026-11-01 fix(case): 모든 상태 전이를 서명 이벤트로 전달(두 기기 상태 어긋남 방지) + 동시 전이 수렴 + 가입 알림에 token_hash
 - 2026-11-01 Merge pull request #879 from Openhash-Gopang/feat/assistant-core
 - 2026-11-01 docs(sp): AC-PRO-CORE v1.16 초안 — §ASSIST 점검 신호 소비(비활성, sp-catalog 미변경)
 - 2026-11-01 feat(assistant): 나만의 AI 비서 코어 A1·A2 — 동의 범위·마스킹·원장, 규칙팩·Gate·Attestation·인간 전문가 권유
@@ -42,8 +44,6 @@
 - 2026-10-31 Merge pull request #861 from Openhash-Gopang/feat/kmail-domain-naviweb-20261031-0755
 - 2026-10-31 feat: K-Mail 보내는 주소를 naviweb.kr 로(hondi.kr 도 계속 수신)
 - 2026-10-31 Merge pull request #860 from Openhash-Gopang/feat/kmail-people-search-20261031-0738
-- 2026-10-31 feat: K-Mail 가입자 검색(검색을 허용한 가입자만)
-- 2026-10-31 Merge pull request #859 from Openhash-Gopang/fix/embed-pro-origin-20261031-0612
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
