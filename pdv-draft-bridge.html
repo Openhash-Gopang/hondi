@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>PDV 초안 보관 중계</title>
+<meta name="robots" content="noindex">
+<!--
+  pdv-draft-bridge.html — mail.hondi.net(·naviweb.kr)에서 작성 중이던 서류·편지·캠페인 초안을 이 기기의 PDV에 보관하는 중계 페이지. (2026-10-31 신설)
+
+  왜 필요한가
+  - PDV(pdv-store.js)는 hondi.net 출처의 브라우저 IndexedDB 라서, mail.hondi.net 화면이 직접 읽고 쓸 수 없다.
+    mail.hondi.net 은 이 페이지를 숨은 iframe 으로 열어 postMessage 로 부탁한다(같은 사이트 hondi.net 이라 저장소가 공유된다).
+
+  PDV 규칙과의 관계 (docs/gopang_pdv_rules.md)
+  - 초안 원문(입력문·서류 파일·대화)은 "서비스 쪽 원본"에 해당하므로 PDV 6하원칙 기록에 넣지 않는다.
+    이 기기의 별도 보관소(gopang_pdv_drafts)에만 두고, 서버로는 나가지 않는다("서버는 해시만" 원칙).
+  - PDV 타임라인에는 "초안 저장/작성 완료" 사실과 제목만 6하원칙 요약으로 남긴다(처음 저장할 때·완료할 때 1회씩, 자동 저장마다 쌓지 않는다).
+  - 기기 간(폰↔PC) 동기화는 아직 없다 — 별도 설계 예정.
+
+  프로토콜 (요청 → 응답, 모두 postMessage)
+    { type:'pdv-draft', reqId, op:'put',    item }            → { ok, id }      item.id 가 없으면 새로 만든다
+    { type:'pdv-draft', reqId, op:'list',   kind?, status? }  → { ok, items }   (파일·대화 본문 제외한 요약 목록)
+    { type:'pdv-draft', reqId, op:'get',    id }              → { ok, item }    (전체)
+    { type:'pdv-draft', reqId, op:'delete', id }              → { ok }
+    { type:'pdv-draft', reqId, op:'done',   id }              → { ok }          status='done'(작성한 서류)
+  응답: { type:'pdv-draft-result', reqId, ok, ...data }.  준비되면 부모에게 { type:'pdv-draft-ready' } 를 보낸다.
+-->
+<script src="/pdv-store.js"></script>
+</head>
+<body>
+<script>
+(function () {
+  'use strict';
+  var ALLOW = ['https://mail.hondi.net', 'https://naviweb.kr', 'https://www.naviweb.kr'];
+  var DB_NAME = 'gopang_pdv_drafts', STORE = 'items';
+  var KINDS = ['doc', 'letter', 'campaign'];
+  var MAX_FILE = 8 * 1024 * 1024;   // 서류 파일 한 건 상한
+  var MAX_ITEMS = 300;
+
+  function openDB() {
+    return new Promise(function (resolve, reject) {
+      var req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = function () {
+        var db = req.result;
+        if (!db.objectStoreNames.contains(STORE)) {
+          var os = db.createObjectStore(STORE, { keyPath: 'id' });
+          os.createIndex('kind', 'kind', { unique: false });
+          os.createIndex('status', 'status', { unique: false });
+          os.createIndex('updated', 'updated', { unique: false });
+        }
+      };
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror = function () { reject(req.error); };
+    });
+  }
+  function tx(mode, fn) {
+    return openDB().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var t = db.transaction(STORE, mode), os = t.objectStore(STORE), out;
+        out = fn(os);
+        t.oncomplete = function () { resolve(out && typeof out === 'object' && 'result' in out ? out.result : out); };
+        t.onerror = function () { reject(t.error); };
+        t.onabort = function () { reject(t.error || new Error('aborted')); };
+      });
+    });
+  }
+  function getOne(id) { return tx('readonly', function (os) { return os.get(id); }); }
+  function getAll() { return tx('readonly', function (os) { return os.getAll(); }); }
+
+  function newId() { return 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+  function str(v, n) { return typeof v === 'string' ? v.slice(0, n) : ''; }
+
+  // 일부 필드만 보낸 갱신(예: 파일만 추가)은 보내지 않은 필드를 이전 값 그대로 둔다
+  function pick(item, prev, k, dflt) { return item[k] !== undefined ? item[k] : (prev && prev[k] !== undefined ? prev[k] : dflt); }
+  function clean(item, prev) {
+    var now = Date.now();
+    var kind = KINDS.indexOf(item.kind) >= 0 ? item.kind : (prev && prev.kind) || 'doc';
+    var msgs = pick(item, prev, 'messages', []);
+    var newFile = item.fileData && item.fileData.byteLength && item.fileData.byteLength <= MAX_FILE;
+    var keepFile = !newFile && !item.dropFile && prev && prev.fileData;
+    return {
+      id: item.id || (prev && prev.id) || newId(),
+      kind: kind,
+      status: (prev && prev.status === 'done' && item.status !== 'draft') ? 'done' : (item.status === 'done' ? 'done' : 'draft'),
+      title: str(item.title, 120) || (prev && prev.title) || '(제목 없음)',
+      site: str(pick(item, prev, 'site', ''), 20),
+      text: str(pick(item, prev, 'text', ''), 20000),                 // 서류: 요청문 / 편지: 마지막 입력
+      subject: str(pick(item, prev, 'subject', ''), 300),             // 편지·캠페인: 마지막으로 정리된 제목·본문
+      body: str(pick(item, prev, 'body', ''), 50000),
+      campaignId: str(pick(item, prev, 'campaignId', ''), 80),
+      messages: Array.isArray(msgs) ? msgs.slice(-60).map(function (m) { return { role: m.role === 'assistant' ? 'assistant' : 'user', content: str(m.content, 8000) }; }) : [],
+      fileName: newFile ? str(item.fileName, 160) : (keepFile ? prev.fileName : ''),
+      fileMime: newFile ? str(item.fileMime, 120) : (keepFile ? prev.fileMime : ''),
+      fileData: newFile ? item.fileData : (keepFile ? prev.fileData : null),
+      created: (prev && prev.created) || now,
+      updated: now
+    };
+  }
+
+  // PDV 타임라인(공용 gopang_pdv_store)에 6하원칙 요약 1건 — 제목만, 원문·파일 없음
+  function pdvNote(item, what) {
+    try {
+      var label = item.kind === 'doc' ? '서류' : item.kind === 'letter' ? '편지' : '캠페인';
+      window.dispatchEvent(new CustomEvent('gopang:pdv-recorded', { detail: {
+        type: 'draft', serviceId: 'navi-drafts', svc: 'navi-drafts', source: 'mail.hondi.net', ts: new Date().toISOString(),
+        who: '본인', when: new Date().toISOString(), where: 'mail.hondi.net',
+        what: label + ' ' + what + ': ' + item.title, how: '자동 저장(이 기기 PDV)', why: '작성 중단 시 이어서 쓰기'
+      } }));
+    } catch (e) {}
+  }
+
+  function summary(it) {
+    return { id: it.id, kind: it.kind, status: it.status, title: it.title, site: it.site,
+      text: (it.text || '').slice(0, 200), subject: it.subject, fileName: it.fileName, hasFile: !!it.fileData,
+      msgCount: it.messages ? it.messages.length : 0, campaignId: it.campaignId, created: it.created, updated: it.updated };
+  }
+
+  var OPS = {
+    put: function (m) {
+      var item = m.item || {};
+      var p = item.id ? getOne(item.id) : Promise.resolve(null);
+      return p.then(function (prev) {
+        var out = clean(item, prev || null);
+        return tx('readwrite', function (os) { return os.put(out); }).then(function () {
+          if (!prev) pdvNote(out, '초안 저장');
+          return getAll().then(function (all) {
+            if (all.length > MAX_ITEMS) {   // 오래된 초안부터 정리(작성한 서류는 지우지 않는다)
+              var drafts = all.filter(function (x) { return x.status === 'draft'; }).sort(function (a, b) { return a.updated - b.updated; });
+              var over = all.length - MAX_ITEMS;
+              return tx('readwrite', function (os) { drafts.slice(0, over).forEach(function (x) { os.delete(x.id); }); });
+            }
+          }).then(function () { return { id: out.id }; });
+        });
+      });
+    },
+    list: function (m) {
+      return getAll().then(function (all) {
+        var items = all.filter(function (x) { return (!m.kind || x.kind === m.kind) && (!m.status || x.status === m.status); })
+          .sort(function (a, b) { return b.updated - a.updated; }).map(summary);
+        return { items: items };
+      });
+    },
+    get: function (m) { return getOne(m.id).then(function (it) { if (!it) throw new Error('NOT_FOUND'); return { item: it }; }); },
+    delete: function (m) { return tx('readwrite', function (os) { return os.delete(m.id); }).then(function () { return {}; }); },
+    done: function (m) {
+      return getOne(m.id).then(function (it) {
+        if (!it) throw new Error('NOT_FOUND');
+        var first = it.status !== 'done';
+        it.status = 'done'; it.updated = Date.now();
+        return tx('readwrite', function (os) { return os.put(it); }).then(function () { if (first) pdvNote(it, '작성 완료'); return {}; });
+      });
+    }
+  };
+
+  window.addEventListener('message', function (e) {
+    if (ALLOW.indexOf(e.origin) < 0 || !e.data || e.data.type !== 'pdv-draft') return;
+    var m = e.data, reply = function (obj) { try { e.source.postMessage(Object.assign({ type: 'pdv-draft-result', reqId: m.reqId }, obj), e.origin); } catch (x) {} };
+    var fn = OPS[m.op];
+    if (!fn) { reply({ ok: false, error: 'BAD_OP' }); return; }
+    Promise.resolve().then(function () { return fn(m); }).then(function (r) { reply(Object.assign({ ok: true }, r || {})); })
+      .catch(function (err) { reply({ ok: false, error: String((err && err.message) || err) }); });
+  });
+
+  // 저장소가 열리는지 확인한 뒤에 "준비됨"을 알린다
+  openDB().then(function (db) { db.close(); if (window.parent !== window) window.parent.postMessage({ type: 'pdv-draft-ready' }, '*'); })
+    .catch(function () { if (window.parent !== window) window.parent.postMessage({ type: 'pdv-draft-ready', ok: false }, '*'); });
+})();
+</script>
+</body>
+</html>
