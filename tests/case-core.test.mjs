@@ -149,3 +149,37 @@ test('소통 이력 확인: 상대만, 1회만, 자동 기록은 대상 아님',
   const a = C.buildCommunication(comm({ how: 'auto', channel: 'mail' }), NOW).value;
   assert.equal(C.respondCommunication(a, 'consumer', 'confirmed').ok, false);
 });
+
+test('나 홀로: 합의 없이 active 로 생성, 단독 종료(결과 필수)', () => {
+  const c = C.createSolo({ case_id: 's1', title: '내 소송', kind: 'case' });
+  assert.equal(c.value.state, 'active');
+  assert.equal(c.value.mode, 'solo');
+  assert.equal(C.createSolo({ title: 'x' }).ok, false);
+  const ctx = { mode: 'solo', side: 'self' };
+  assert.equal(C.transition('active', 'close_self', ctx).ok, false);
+  assert.equal(C.transition('active', 'close_self', { ...ctx, outcome: '완치' }).to, 'closed');
+  assert.equal(C.transition('on_hold', 'close_self', { ...ctx, outcome: '취하' }).to, 'closed');
+  assert.equal(C.transition('closed', 'archive', ctx).to, 'archived');
+  assert.equal(C.transition('active', 'hold', ctx).to, 'on_hold');
+});
+
+test('나 홀로: 합의·상대 응답 절차는 없고 side/mode 혼용 금지', () => {
+  const ctx = { mode: 'solo', side: 'self', outcome: 'x' };
+  for (const ev of ['accept', 'request_close', 'close_agree', 'close_dispute']) assert.equal(C.transition('active', ev, ctx).ok, false, ev);
+  assert.equal(C.transition('active', 'hold', { mode: 'solo', side: 'provider' }).ok, false);
+  assert.equal(C.transition('active', 'hold', { side: 'self' }).ok, false);
+  assert.equal(C.transition('active', 'close_self', { side: 'provider', outcome: 'x' }).ok, false);
+});
+
+test('나 홀로: History 는 self 로 기록되고 체인 검증·앵커 동일', async () => {
+  const h = await chain(3, () => ({ actor_side: 'self' }));
+  assert.equal((await C.verifyChain(h)).ok, true);
+  assert.equal(h[0].actor_side, 'self');
+});
+
+test('나 홀로 소통 이력: 제3자와의 소통은 본인 기록(self), 확인 절차 없음, 대면은 장소 필수', () => {
+  const m = C.buildCommunication(comm({ recorder_side: 'self', who: '나', with: '○○지방법원 접수계', channel: 'in_person', place: '법원 민원실' }), NOW);
+  assert.equal(m.value.confirm_status, 'self');
+  assert.equal(C.respondCommunication(m.value, 'consumer', 'confirmed').ok, false);
+  assert.equal(C.buildCommunication(comm({ recorder_side: 'self', channel: 'in_person' }), NOW).ok, false);
+});

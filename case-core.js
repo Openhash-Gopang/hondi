@@ -47,14 +47,15 @@
   // ── 2) Case 상태기계 ───────────────────────────────────────
   var STATES = ['proposed', 'agreed', 'active', 'on_hold', 'closing', 'closed', 'archived', 'declined', 'expired'];
   var KINDS = ['transaction', 'case', 'event'];
-  var SIDES = ['provider', 'consumer'];
+  var SIDES = ['provider', 'consumer', 'self'];   // self = 나 홀로(한 사람이 공급자이자 소비자)
+  var MODES = ['engaged', 'solo'];                // engaged = 맡은 일/맡긴 일(양측), solo = 나 홀로
 
   // from → { event: to }
   var TRANSITIONS = {
     proposed: { confirm: 'proposed', accept: 'agreed', decline: 'declined', expire: 'expired' },
     agreed:   { activate: 'active' },
-    active:   { hold: 'on_hold', request_close: 'closing' },
-    on_hold:  { resume: 'active', request_close: 'closing' },
+    active:   { hold: 'on_hold', request_close: 'closing', close_self: 'closed' },
+    on_hold:  { resume: 'active', request_close: 'closing', close_self: 'closed' },
     closing:  { close_agree: 'closed', close_dispute: 'active', close_hold: 'on_hold' },
     closed:   { archive: 'archived' },
     archived: {}, declined: {}, expired: {},
@@ -67,6 +68,12 @@
     var row = TRANSITIONS[state];
     if (!row) return { ok: false, error: '알 수 없는 상태: ' + state };
     if (!Object.prototype.hasOwnProperty.call(row, event)) return { ok: false, error: state + ' 상태에서 ' + event + ' 불가' };
+    var solo = ctx.mode === 'solo';
+    if (solo && ['confirm', 'accept', 'decline', 'expire', 'request_close', 'close_agree', 'close_dispute', 'close_hold'].indexOf(event) >= 0)
+      return { ok: false, error: '나 홀로 일에는 합의·상대 응답 절차가 없음(' + event + ')' };
+    if (!solo && event === 'close_self') return { ok: false, error: 'close_self는 나 홀로 일에서만 가능' };
+    if (solo && ctx.side !== 'self') return { ok: false, error: '나 홀로 일은 side=self 만 가능' };
+    if (!solo && ctx.side === 'self') return { ok: false, error: 'self 는 나 홀로 일에서만 가능' };
     if (SIDES.indexOf(ctx.side) < 0 && event !== 'expire') return { ok: false, error: 'side(provider|consumer) 필요' };
 
     if (event === 'confirm') {
@@ -77,7 +84,7 @@
       var cf = ctx.confirmations || {};
       if (!(cf.provider && cf.consumer)) return { ok: false, error: '양측 확인이 모두 기록되어야 합의 완료' };
     }
-    if (event === 'request_close') {
+    if (event === 'request_close' || event === 'close_self') {
       if (!ctx.outcome) return { ok: false, error: '종료 요청에는 결과(outcome) 기록이 필요' };
     }
     if (event === 'close_agree') {
@@ -89,6 +96,14 @@
       if (ctx.side === ctx.closeRequestedBy) return { ok: false, error: '요청한 쪽은 자기 종료 요청에 이의/보류 불가' };
     }
     return { ok: true, to: row[event] };
+  }
+
+  // 나 홀로 일은 합의 없이 곧바로 active 로 시작한다(제3자 기관·병원 등과의 소통은 소통 이력에 기록).
+  function createSolo(input) {
+    var i = input || {};
+    if (!i.case_id || !i.title) return { ok: false, error: 'case_id, title 필수' };
+    if (KINDS.indexOf(i.kind || 'case') < 0) return { ok: false, error: 'kind 오류' };
+    return { ok: true, value: { case_id: i.case_id, title: i.title, kind: i.kind || 'case', mode: 'solo', state: 'active', owner: i.owner || null } };
   }
 
   // ── 3) History: 해시체인 ───────────────────────────────────
@@ -186,7 +201,7 @@
   var CHANNELS = ['mail', 'chat', 'phone', 'video', 'in_person', 'document', 'other'];
   var HOW = ['auto', 'manual', 'ai_assisted'];
   var PURPOSES = ['info', 'request', 'report', 'consult', 'agreement', 'payment', 'other'];
-  var CONFIRM = ['auto', 'unconfirmed', 'confirmed', 'disputed'];
+  var CONFIRM = ['auto', 'self', 'unconfirmed', 'confirmed', 'disputed'];
 
   // 입력: { recorder_side, who, with, occurred_at, channel, place?, how, summary, purpose, link?:{request_id|task_id},
   //        attachments?:[hash], visibility? }
@@ -207,7 +222,8 @@
     if (VISIBILITY.indexOf(visibility) < 0) errs.push('visibility 오류');
     if (errs.length) return { ok: false, errors: errs };
     // 자동 수집(메일·앱 채팅)은 시스템이 본 사실이므로 auto, 수기 입력은 상대 확인 전까지 unconfirmed.
-    var confirm_status = i.how === 'auto' ? 'auto' : 'unconfirmed';
+    // 나 홀로(self)의 상대는 법원·병원 등 제3자라 확인 절차가 없다 → 본인 기록('self').
+    var confirm_status = i.how === 'auto' ? 'auto' : (i.recorder_side === 'self' ? 'self' : 'unconfirmed');
     return {
       ok: true,
       value: {
@@ -223,6 +239,7 @@
 
   // 수기 소통의 확정 상태 전이: 상대(with 측)만 confirmed/disputed 가능, 기록 원본은 바꾸지 않고 새 History 항목으로 남긴다.
   function respondCommunication(comm, responderSide, answer) {
+    if (comm.confirm_status === 'self') return { ok: false, error: '나 홀로 기록은 확인 대상 아님' };
     if (comm.confirm_status === 'auto') return { ok: false, error: '자동 수집 기록은 확인 대상 아님' };
     if (comm.confirm_status !== 'unconfirmed') return { ok: false, error: '이미 ' + comm.confirm_status };
     if (answer !== 'confirmed' && answer !== 'disputed') return { ok: false, error: 'answer 오류' };
@@ -232,7 +249,7 @@
 
   var API = {
     canonical: canonical, sha256Hex: sha256Hex,
-    STATES: STATES, KINDS: KINDS, SIDES: SIDES, TRANSITIONS: TRANSITIONS, transition: transition,
+    STATES: STATES, KINDS: KINDS, SIDES: SIDES, MODES: MODES, createSolo: createSolo, TRANSITIONS: TRANSITIONS, transition: transition,
     GENESIS: GENESIS, appendEntry: appendEntry, verifyChain: verifyChain,
     anchorPayloadFor: anchorPayloadFor,
     projectForConsumer: projectForConsumer, verifyProjection: verifyProjection,
