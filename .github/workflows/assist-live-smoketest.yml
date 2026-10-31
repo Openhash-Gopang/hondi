@@ -2,7 +2,7 @@ name: Assist Live Smoketest (AC-PRO-CORE v1.15 vs v1.16)
 on:
   push:
     branches: [test/assistant-live]
-    paths: [tests/live_smoketest/assist_live_smoketest.py, .github/workflows/assist-live-smoketest.yml, prompts/AC-PRO-CORE_v1_16.txt]
+    paths: [tests/live_smoketest/assist_live_smoketest.py, .github/workflows/assist-live-smoketest.yml, prompts/AC-PRO-ASSIST_v1_0.txt]
   workflow_dispatch:
 permissions:
   contents: write

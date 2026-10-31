@@ -2,7 +2,7 @@ name: Assist Routing Regression (300 scenarios, v1.15 vs v1.16)
 on:
   push:
     branches: [test/assistant-live]
-    paths: [.github/workflows/assist-regression.yml, prompts/AC-PRO-CORE_v1_16.txt]
+    paths: [.github/workflows/assist-regression.yml]
 permissions:
   contents: write
 jobs:

@@ -8,7 +8,8 @@ import json, os, re, sys, time, requests
 
 URL = "https://api.deepseek.com/v1/chat/completions"
 KEY = os.environ.get("DEEPSEEK_API_KEY")
-PROMPTS = {"v1_15": "prompts/AC-PRO-CORE_v1_15.txt", "v1_16": "prompts/AC-PRO-CORE_v1_16.txt"}
+PROMPTS = {"v1_15": ("prompts/AC-PRO-CORE_v1_15.txt", False), "v1_16": ("prompts/AC-PRO-CORE_v1_15.txt", True)}   # v1_16 = 기본 SP 그대로 + 신호가 있는 턴에만 AC-PRO-ASSIST 지침을 사용자 메시지 앞에 첨부
+GUIDE = open("prompts/AC-PRO-ASSIST_v1_0.txt", encoding="utf-8").read()
 
 def ctx(lines, text):
     return ("[ctx]\n" + "\n".join(lines) + "\n\n" if lines else "") + text
@@ -70,11 +71,11 @@ def grade(s, text):
 def main():
     if not KEY: sys.exit("DEEPSEEK_API_KEY 없음")
     res = {}
-    for name, path in PROMPTS.items():
+    for name, (path, inject) in PROMPTS.items():
         system = open(path, encoding="utf-8").read()
         res[name] = []
         for s in S:
-            t = call(system, ctx(s["ctx"], s["say"])); ok, why = grade(s, t)
+            t = call(system, (GUIDE + "\n" if (inject and s["ctx"]) else "") + ctx(s["ctx"], s["say"])); ok, why = grade(s, t)
             res[name].append(dict(id=s["id"], ok=ok, why=why, text=t))
     os.makedirs("results", exist_ok=True)
     json.dump(res, open("results/assist_live.json", "w"), ensure_ascii=False, indent=1)
