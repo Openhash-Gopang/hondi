@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-31 08:12 KST · 기준 커밋 9eb09fd0
+- 갱신: 2026-10-31 09:17 KST · 기준 커밋 4173b86c
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 881건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-31 Merge pull request #863 from Openhash-Gopang/feat/sp-route-20261031-0916
+- 2026-10-31 feat: 메인 화면 SP 라우팅(/kmail/assist)
 - 2026-10-31 Merge pull request #862 from Openhash-Gopang/feat/kmail-people-search-20261031-0812
 - 2026-10-31 feat: K-Mail 가입자 검색(검색을 허용한 가입자만)
 - 2026-10-31 Merge pull request #861 from Openhash-Gopang/feat/kmail-domain-naviweb-20261031-0755
@@ -42,8 +44,6 @@
 - 2026-10-28 chore(pb): webrtc_signals 의 직접 쓰기(create/update/delete) 규칙을 닫는다 - 대화 신호 위조 방지 2단계
 - 2026-10-28 fix(chat): 대화 신호 위조 방지 - 서버가 로그인 증명을 확인하고 보낸 사람 guid 를 강제
 - 2026-10-28 법무사·변호사 보조 AI SP: 초안 우선(§DRAFT-FIRST)으로 갱신, 나비로 Navi Law 반영
-- 2026-10-28 fix(chat): 직접 정하는 검색용 아이디 폐기 - 서버가 정한 혼디 아이디로만 찾고, 걸려 온 대화의 상대 표시 사칭 차단
-- 2026-10-28 fix(auth): 다른 서비스(K-Mail)의 전화 인증 공유 로그인을 혼디 앱이 이어받는다
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
