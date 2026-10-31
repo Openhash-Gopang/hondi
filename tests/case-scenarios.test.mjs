@@ -7,11 +7,10 @@
  *  [동작] 지금 코드로 실제로 되는 것을 검증한다.
  *  [해결] 사고 실험에서 드러난 빈틈이 고쳐졌음을 확인한다(S1: G1·G3·G4·G5·G6).
  *  [한계] 아직 남은 빈틈을 "현재 동작 그대로" 고정해 둔다 — 고치면 이 테스트가 깨지므로 그때 기대값을 바꾼다. (G 번호는 보고서와 같다)
- * 봉투 암호화는 아직 연결되지 않아 sealed()는 base64 로 흉내만 낸다(서버가 읽을 수 있는 상태 — G2).
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-await import('../case-core.js'); await import('../case-sync.js'); await import('../case-invite.js'); await import('../case-mailbox.js'); await import('../case-store.js');
+await import('../case-core.js'); await import('../case-sync.js'); await import('../case-seal.js'); await import('../case-invite.js'); await import('../case-mailbox.js'); await import('../case-store.js');
 import { makeCaseServer } from '../src/worker/case-server.js';
 const C = globalThis.CaseCore, Y = globalThis.CaseSync, I = globalThis.CaseInvite, { CaseStore, MemoryAdapter } = globalThis.CaseStore;
 
@@ -242,13 +241,18 @@ test('[해결 G1] 기록에 서명이 필요하다: 변호사가 의뢰인의 �
   // 호출자가 side/confirmations 를 속여도 소용없다
   assert.equal((await lawyer.store.applyTransition('c', 'accept', { side: 'consumer', confirmations: { provider: true, consumer: true } })).ok, false);
 });
-test('[한계 G2] 우편함 봉투가 아직 암호화되지 않았다: 서버(KV)에서 내용이 읽힌다', async () => {
+test('[해결 G2] 우편함 봉투가 종단 암호화된다: 서버(KV)에서 내용이 읽히지 않고 수신자만 연다', async () => {
+  const S = globalThis.CaseSeal;
   const w = world(), a = w.device('a'), b = w.device('b');
   const inv = await I.createInvitation({ case_id: 'c', inviter_id: 'a', inviter_side: 'provider', invitee_email: 'x@y.co' }, w.now());
   await a.call('inviteRegister', { token_hash: inv.server_record.token_hash }); await b.call('inviteClaim', { token: inv.token, mail_id: 'b' });
-  await a.call('mailboxPush', { envelope: env('a', 'b', 'chat', { text: '기밀 내용' }) });
-  const stored = [...w.m.entries()].filter(([k]) => k.startsWith('casemb:b:')).map(([, v]) => unb64(JSON.parse(v).envelope.ciphertext));
-  assert.equal(stored[0].text, '기밀 내용');   // 실제 X25519 봉인 연결 전 — 연결되면 이 줄은 실패해야 정상
+  const box = await S.generateBoxKey();
+  const e = await S.seal({ from: 'a', to: 'b', kind: 'chat', case_id_hash: await sha('c') }, { text: '기밀 내용' }, box.pub, w.now());
+  assert.equal((await a.call('mailboxPush', { envelope: e })).status, 200);
+  const stored = [...w.m.entries()].filter(([k]) => k.startsWith('casemb:b:')).map(([, v]) => v).join('');
+  assert.ok(!stored.includes('기밀') && !Buffer.from(JSON.parse(stored).envelope.ciphertext, 'base64').toString('latin1').includes('기밀'));
+  const item = (await b.call('mailboxPull', {})).json.items[0];
+  assert.deepEqual((await S.open(item.envelope, box)).value, { text: '기밀 내용' });
 });
 
 test('[해결 G3] 소비자는 받은 항목의 해시를 직접 검증하고, 변조·다른 일 항목은 거부한다', async () => {
