@@ -1,0 +1,33 @@
+name: Assist Routing Regression (300 scenarios, v1.15 vs v1.16)
+on:
+  push:
+    branches: [test/assistant-live]
+    paths: [.github/workflows/assist-regression.yml]
+permissions:
+  contents: write
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        v: ["1_15", "1_16"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install requests
+      - name: Run 300 routing scenarios
+        working-directory: tests/live_smoketest
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: python3 live_smoketest.py --scenarios scenarios.json --system-prompt ../../prompts/AC-PRO-CORE_v${{ matrix.v }}.txt --out ../../results/v${{ matrix.v }}
+      - name: Publish
+        run: |
+          git config user.name hondi-live-smoketest-bot
+          git config user.email actions@users.noreply.github.com
+          git checkout -B results/assist-reg-v${{ matrix.v }}
+          git add -f results/
+          git commit -q -m "chore: assist regression results v${{ matrix.v }}"
+          git push --force origin HEAD:results/assist-reg-v${{ matrix.v }}
