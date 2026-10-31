@@ -10,7 +10,7 @@ function world() {
   const kv = { get: async k => (m.has(k) ? m.get(k) : null), put: async (k, v) => { m.set(k, v); }, delete: async k => { m.delete(k); },
     list: async ({ prefix }) => ({ keys: [...m.keys()].filter(k => k.startsWith(prefix)).map(name => ({ name })) }) };
   const server = makeCaseServer({ kv, env: {}, now: () => t, resolveGuid: async (e, b) => (b && b.guid ? { ok: true, guid: b.guid } : { ok: false, status: 403 }) });
-  const ops = { '/case/key/register': 'keyRegister', '/case/key/get': 'keyGet', '/case/mailbox/push': 'mailboxPush', '/case/mailbox/pull': 'mailboxPull', '/case/mailbox/ack': 'mailboxAck' };
+  const ops = { '/case/key/register': 'keyRegister', '/case/key/get': 'keyGet', '/case/mailbox/push': 'mailboxPush', '/case/mailbox/pull': 'mailboxPull', '/case/mailbox/ack': 'mailboxAck', '/case/invite/register': 'inviteRegister', '/case/invite/claim': 'inviteClaim' };
   return { m, server, now: () => new Date(t).toISOString(), callFor: guid => (route, body) => server[ops[route]](Object.assign({ guid, ts: t }, body)) };
 }
 async function dev(w, guid) {
@@ -70,4 +70,42 @@ test('TOFU: 저장된 상대 서명키와 다른 키가 나타나면 KEY_CHANGED
   assert.equal(r.errors[0].code, 'DECRYPT_FAILED');
   assert.equal((await w.server.mailboxPull({ guid: 'b', ts: 1 })).json.items.length, 0);
   assert.equal(a.net.fingerprint(a.identity.pub).split(' ').length, 3);
+});
+
+test('초대받은 쪽: 가입 확인(claim) → 가입 알림에 token_hash → 제안 봉인 전송 → 받는 기기가 일을 만든다', async () => {
+  const w = world(), a = await dev(w, 'a'), b = await dev(w, 'b');
+  await a.net.registerKeys();
+  const inv = await I.createInvitation({ case_id: 'c9', inviter_id: 'a', inviter_side: 'provider', invitee_email: 'x@y.co' }, w.now());
+  assert.equal((await w.callFor('a')('/case/invite/register', { token_hash: inv.invitation.token_hash })).status, 200);
+  await a.store.createCase({ case_id: 'c9', title: '비밀 사건명', kind: 'case', my_side: 'provider' });
+  const cl = await b.net.claimInvite(inv.token, 'bmail');
+  assert.equal(cl.ok, true); assert.equal(cl.inviter, 'a'); assert.equal(cl.inviter_keys.sign_pub, a.identity.pub);
+  // 초청자: 알림에서 token_hash 로 일을 찾고, 상대 키를 받아 제안을 보낸다
+  const ra = await a.net.poll(), n = ra.notices.find(x => x.type === 'invite_signed_up');
+  assert.equal(n.token_hash, inv.invitation.token_hash); assert.equal(n.invitee_user_id, 'b');
+  assert.equal((await a.net.sendProposal('c9', 'b', { case_id: 'c9', title: '비밀 사건명', kind: 'case', inviter_side: 'provider' })).ok, true);
+  assert.ok(![...w.m.values()].join('').includes('비밀 사건명'));                       // 서버는 제목을 못 본다
+  // 초대받은 기기: 모르는 일의 제안이 오면 핸들러가 일을 만든다. 핸들러가 없으면 우편함에 남는다.
+  assert.equal((await b.net.poll()).errors[0].code, 'NO_HANDLER');
+  let seen = null;
+  const rb = await b.net.poll({ onProposal: async (pv, env) => { seen = pv; await b.store.createCase({ case_id: pv.case_id, title: pv.title, kind: pv.kind, my_side: pv.inviter_side === 'provider' ? 'consumer' : 'provider' }); return { ok: true }; } });
+  assert.equal(rb.proposals, 1); assert.equal(seen.title, '비밀 사건명');
+  assert.equal((await b.store.getCase('c9')).my_side, 'consumer');
+  assert.equal((await b.net.poll()).errors.length, 0);                                    // ack 되어 다시 오지 않음
+});
+
+test('제안의 case_id 가 봉투의 case_id_hash 와 다르면 BAD_PROPOSAL 로 버린다(일을 만들지 않는다)', async () => {
+  const w = world(), a = await dev(w, 'a'), b = await dev(w, 'b');
+  await a.net.registerKeys();
+  const inv = await I.createInvitation({ case_id: 'cX', inviter_id: 'a', inviter_side: 'provider', invitee_email: 'x@y.co' }, w.now());
+  await w.callFor('a')('/case/invite/register', { token_hash: inv.invitation.token_hash });
+  await a.store.createCase({ case_id: 'cX', title: 't', kind: 'case', my_side: 'provider' });
+  await b.net.claimInvite(inv.token, 'bmail');
+  await a.net.poll();
+  const pk = await a.net.peerKeys('cX', 'b');
+  const env = await S.seal({ from: 'a', to: 'b', kind: 'agreement', case_id_hash: await C.sha256Hex('case:cX') }, { type: 'proposal', proposal: { case_id: 'cOTHER', title: 't', kind: 'case', inviter_side: 'provider' } }, pk.record.box_pub);
+  await w.callFor('a')('/case/mailbox/push', { envelope: env });
+  let called = false;
+  const r = await b.net.poll({ onProposal: async () => { called = true; return { ok: true }; } });
+  assert.equal(called, false); assert.equal(r.errors[0].code, 'BAD_PROPOSAL');
 });
