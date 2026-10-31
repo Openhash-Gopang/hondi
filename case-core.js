@@ -159,6 +159,16 @@
     return { ok: true, head: history.length ? prevHash : GENESIS, length: history.length };
   }
 
+  // 두 기기의 기록 비교(S4, G7 일부): same / ahead(a 가 더 앞섬) / behind / forked(어느 시점부터 갈라짐)
+  async function compareChains(a, b) {
+    var n = Math.min(a.length, b.length), i = 0;
+    while (i < n && a[i].hash === b[i].hash) i++;
+    if (i === a.length && i === b.length) return { relation: 'same', common: i };
+    if (i === a.length) return { relation: 'behind', common: i };
+    if (i === b.length) return { relation: 'ahead', common: i };
+    return { relation: 'forked', common: i, forkSeq: a[i].seq };
+  }
+
   // 네트워크에 올리는 것은 이것뿐 — 본문 없이 해시와 식별 메타만(/pdv/report용 입력).
   function anchorPayload(entry) {
     return { type: 'case_' + entry.type, content_hash: entry.hash, case_id_hash: null, seq: entry.seq, at: entry.at };
@@ -263,7 +273,7 @@
   var API = {
     canonical: canonical, sha256Hex: sha256Hex,
     STATES: STATES, KINDS: KINDS, SIDES: SIDES, MODES: MODES, createSolo: createSolo, TRANSITIONS: TRANSITIONS, transition: transition,
-    GENESIS: GENESIS, appendEntry: appendEntry, verifyChain: verifyChain,
+    GENESIS: GENESIS, appendEntry: appendEntry, verifyChain: verifyChain, compareChains: compareChains,
     anchorPayloadFor: anchorPayloadFor,
     projectForConsumer: projectForConsumer, verifyProjection: verifyProjection, entryHash: entryHash, verifyEntryHash: verifyEntryHash,
     CHANNELS: CHANNELS, PURPOSES: PURPOSES, CONFIRM: CONFIRM,

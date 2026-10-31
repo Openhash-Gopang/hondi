@@ -333,25 +333,60 @@ test('[해결 G6] 수기 소통의 확인/이의가 서명된 응답으로 유�
   assert.equal(await Y.effectiveConfirmStatus(await l.store.history('c'), 1, keys), 'disputed');
   assert.equal((await l.store.getCase('c')).state, 'proposed');
 });
-test('[한계 G7] 여러 기기에서 같은 일에 기록하면 체인이 갈라지고 합칠 방법이 없다', async () => {
+test('[부분 해결 G7] 기기 간 기록: 연장이면 이어 붙이고, 갈라졌으면 거부(자동 합치기는 하지 않음)', async () => {
   const w = world(), pc = w.device('u'), phone = w.device('u');
   await pc.store.createCase({ case_id: 'c', title: 't', kind: 'case', my_side: 'provider' });
-  await pc.store.append('c', { type: 'note', actor_side: 'provider', payload: { text: '공통' } });
-  // 폰이 PC 기록을 복사해 간 뒤 서로 따로 기록
   await phone.store.createCase({ case_id: 'c', title: 't', kind: 'case', my_side: 'provider' });
-  for (const e of await pc.store.history('c')) await phone.store.append('c', { type: e.type, actor_side: e.actor_side, payload: e.payload, at: e.at });
-  await pc.store.append('c', { type: 'note', actor_side: 'provider', payload: { text: 'PC 에서' } });
+  await pc.store.append('c', { type: 'note', actor_side: 'provider', payload: { text: '공통' } });
+  // 폰은 PC 기록을 그대로 가져와 이어 쓴다
+  assert.equal((await phone.store.importHistory('c', await pc.store.history('c'))).added, 1);
+  assert.equal((await phone.store.importHistory('c', await pc.store.history('c'))).added, 0);          // 중복 가져오기는 무해
   await phone.store.append('c', { type: 'note', actor_side: 'provider', payload: { text: '폰에서' } });
-  const merged = [...(await pc.store.history('c')), ...(await phone.store.history('c'))];
-  assert.equal((await C.verifyChain(merged)).ok, false);
-  assert.equal(typeof pc.store.mergeFrom, 'undefined');
+  assert.equal((await pc.store.importHistory('c', await phone.store.history('c'))).added, 1);          // PC 가 따라잡음
+  // 양쪽이 동시에 다른 내용을 쓰면 갈라진다 → 가져오기 거부, 두 기록 모두 보존
+  await pc.store.append('c', { type: 'note', actor_side: 'provider', payload: { text: 'PC 에서' } });
+  await phone.store.append('c', { type: 'note', actor_side: 'provider', payload: { text: '폰 또' } });
+  const r = await pc.store.importHistory('c', await phone.store.history('c'));
+  assert.deepEqual([r.ok, r.code, r.forkSeq], [false, 'FORKED', 3]);
+  assert.equal((await pc.store.verify('c')).ok, true);
+  // 변조된 기록은 가져오지 못한다
+  const bad = JSON.parse(JSON.stringify(await phone.store.history('c'))); bad[1].payload = { text: '변조' };
+  assert.equal((await pc.store.importHistory('c', bad)).code, 'BAD_CHAIN');
 });
 
-test('[한계 G8] 나 홀로 → 맡기기(전문가에게 넘기기) 전환이 없다', async () => {
-  const w = world(), me = w.device('me');
-  await me.store.createCase({ mode: 'solo', case_id: 's', title: 't' });
-  assert.equal(typeof me.store.handover, 'undefined');
-  assert.equal(typeof me.store.continueAsSolo, 'undefined');
+test('[해결 G8] 나 홀로 → 맡기기(인계): 기록은 보존·내부 유지, 선택 공개, 합의 전엔 되돌리기 가능', async () => {
+  const w = world(), me = await w.signedDevice('me'), pro = await w.signedDevice('pro');
+  await me.store.createCase({ mode: 'solo', case_id: 's', title: '내 소송', kind: 'case' });
+  await me.store.append('s', { type: 'note', actor_side: 'self', visibility: 'internal', payload: { text: '혼자 쓴 메모' } });
+  await me.store.append('s', { type: 'note', actor_side: 'self', visibility: 'internal', payload: { text: '공개할 자료' } });
+  const h = await me.store.handover('s');
+  assert.equal(h.ok, true);
+  const cs = await me.store.getCase('s');
+  assert.deepEqual([cs.mode, cs.my_side, cs.state], ['engaged', 'consumer', 'proposed']);
+  assert.equal((await me.store.verify('s')).ok, true);                                                 // 체인은 이어진다
+  assert.equal((await me.store.handover('s')).ok, false);                                              // 이중 인계 불가
+  // 합의 전: 되돌리면 다시 나 홀로(진행 중)
+  const back = await me.store.continueAsSolo('s');
+  assert.deepEqual([back.value.mode, back.value.state], ['solo', 'active']);
+  assert.equal((await me.store.verify('s')).ok, true);
+  // 다시 인계 → 합의 → 이후엔 되돌릴 수 없고, 내부 기록은 상대에게 새지 않으며 선택 공개만 가능
+  await me.store.handover('s');
+  await pro.store.createCase({ case_id: 's', title: '내 소송', kind: 'case', my_side: 'provider' });
+  const keys = { provider: pro.identity.pub, consumer: me.identity.pub };
+  await me.store.setKeys('s', keys); await pro.store.setKeys('s', keys);
+  const pr = { t: 1 }, x = await pro.store.confirmAgreement('s', pr), y = await me.store.confirmAgreement('s', pr);
+  await me.store.ingestEvent('s', x.event); await pro.store.ingestEvent('s', y.event);
+  for (const d of [me, pro]) { await d.store.applyTransition('s', 'accept', {}); await d.store.applyTransition('s', 'activate', {}); }
+  assert.equal((await me.store.continueAsSolo('s')).ok, false);
+  const d = await me.store.discloseEntry('s', 2);
+  assert.equal(d.ok, true);
+  const { events } = await me.store.buildShareEvents('s', 0);
+  for (const ev of events) assert.equal((await pro.store.ingestEvent('s', ev)).ok, true);
+  const got = JSON.stringify(await pro.store.peerEntries('s'));
+  assert.ok(got.includes('공개할 자료'));
+  assert.ok(!got.includes('혼자 쓴 메모'));                                                       // 고른 것만 공개
+  const pe = (await pro.store.peerEntries('s')).find(e => e.type === 'disclosure');
+  assert.equal(await C.verifyEntryHash(pe.payload.entry), true);                                       // 원본 항목의 해시를 상대가 검증
 });
 
 test('[해결 G9] 초대 취소, 관계 차단/해제: 차단하면 양방향 전달 중단·쌓인 봉투 삭제, 해제는 차단한 본인만', async () => {
