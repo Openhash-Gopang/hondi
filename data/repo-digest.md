@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-10-31 17:43 KST · 기준 커밋 5e28c52f
+- 갱신: 2026-10-31 18:07 KST · 기준 커밋 3d91b410
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 881건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-10-31 Merge pull request #866 from Openhash-Gopang/feat/pdv-draft-bridge-20261031
+- 2026-10-31 feat: PDV 초안 보관 중계 페이지(pdv-draft-bridge.html)
 - 2026-10-31 Merge pull request #865 from Openhash-Gopang/feat/ac-route-mail-doc-20261031
 - 2026-10-31 feat(kmail-assist): 메일(편지/캠페인)·서류 라우팅 보강 + 되묻기 2회 상한
 - 2026-10-31 Merge pull request #864 from Openhash-Gopang/fix/pwa-white-20261031-0948
@@ -42,8 +44,6 @@
 - 2026-10-29 법적 검토 SP v1.0 신설 및 v1.1(기준일·첨부·법적 근거 제시 의무)
 - 2026-10-28 Merge pull request #846 from Openhash-Gopang/feat/navi-law-gwp
 - 2026-10-28 GWP: 나비로 Navi Law(law.hondi.net)를 tab 서비스로 등록
-- 2026-10-28 Merge pull request #845 from Openhash-Gopang/fix/embed-topbar
-- 2026-10-28 expert-chat 끼운 화면: 상단바를 한 줄로 줄여 대화를 가리지 않게 함
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
