@@ -35,6 +35,7 @@ import { getExpertDef, resolveExpertId, EXPERT_REGISTRY } from './expert-registr
 import { buildHondiFaqContext } from './hondi-faq-router.js';
 import { buildGoalPathContext } from './goal-path-router.js';
 import { buildRoutingHintPart } from './routing-hint.js';
+import { buildAssistHintParts } from './assist-hint.js';
 import { findFreshCredential } from '../idv/idv-store.js';
 
 // ═══════════════════════════════════════════════════════════
@@ -3930,6 +3931,15 @@ async function _buildEnhancedUserContent(userContent) {
     if (routingHint) parts.push(routingHint);
   } catch (e) {
     console.warn('[RoutingHint] 통합 지점에서 실패(무시):', e.message);
+  }
+
+  // 나만의 AI 비서 점검 신호(2026-11-01 신설, assist-hint.js) — 기한·점검 결과·확인요청을 코드가 계산해 줄로 얹는다.
+  // AC-PRO-CORE §ASSIST(v1.16)가 소비한다. window.AssistantHost 가 없으면 아무것도 안 붙는다(안전 폴백).
+  try {
+    const assistLines = await buildAssistHintParts(plainText);
+    assistLines.forEach(l => parts.push(l));
+  } catch (e) {
+    console.warn('[AssistHint] 통합 지점에서 실패(무시):', e.message);
   }
 
   if (!parts.length && !firstContact && !faqBlock && !goalPathBlock && !integrityBlock && !shareBlock && !pdvReviewBlock && !jobKscoReviewBlock && !paHandoffBlock) return userContent;
