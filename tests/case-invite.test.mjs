@@ -106,3 +106,13 @@ test('우편함 봉투: 정상은 30일 만료, 평문 필드·크기 초과·�
   assert.equal(M.isExpired('2026-12-01T00:00:00.000Z', '2026-12-02T00:00:00.000Z'), true);
   assert.equal(M.isExpired('2026-12-01T00:00:00.000Z', NOW), false);
 });
+
+test('signup_base 로 링크 주소를 바꿀 수 있다(? 가 있으면 & 로 이음), https 가 아니면 거부', async () => {
+  const base = { case_id: 'c', inviter_id: 'u1', inviter_side: 'provider', invitee_email: 'a@b.co' };
+  const r1 = await globalThis.CaseInvite.createInvitation(Object.assign({ signup_base: 'https://mail.hondi.net/desktop.html?case=1' }, base));
+  assert.ok(r1.ok && r1.link.startsWith('https://mail.hondi.net/desktop.html?case=1&inv='));
+  const r2 = await globalThis.CaseInvite.createInvitation(Object.assign({ signup_base: 'https://naviweb.kr/signup' }, base));
+  assert.ok(r2.link.startsWith('https://naviweb.kr/signup?inv='));
+  const r3 = await globalThis.CaseInvite.createInvitation(Object.assign({ signup_base: 'javascript:alert(1)' }, base));
+  assert.equal(r3.ok, false);
+});
