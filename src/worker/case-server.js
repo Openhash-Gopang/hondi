@@ -100,7 +100,7 @@ export function makeCaseServer(deps) {
     // 가입자가 키 기록을 같이 보냈으면 등록하고, 초청자 키를 돌려준다(키 교환 — 이후 TOFU, 지문은 화면에서 대조)
     let invitee_keys = null;
     if (body.key_record) { const kr = await storeKey(a.guid, body.key_record); if (kr.status === 200) invitee_keys = body.key_record; }
-    const notice = { type: 'invite_signed_up', invitee_keys, signed_up: true, invitee_user_id: a.guid,
+    const notice = { type: 'invite_signed_up', token_hash: key.slice('caseinv:'.length), invitee_keys, signed_up: true, invitee_user_id: a.guid,
       invitee_mail_id: `${String(body.mail_id).replace(/@.*$/, '')}@naviweb.kr`, signed_up_at: new Date(now()).toISOString() };
     await deliver(inv.inviter, { id: undefined, server_notice: notice, from: 'server', kind: 'invite_notice' });
     const ik = await getJson('casekey:' + inv.inviter);
