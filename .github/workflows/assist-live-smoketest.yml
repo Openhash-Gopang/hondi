@@ -5,7 +5,7 @@ on:
     paths: [tests/live_smoketest/assist_live_smoketest.py, .github/workflows/assist-live-smoketest.yml, prompts/AC-PRO-CORE_v1_16.txt]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -16,6 +16,15 @@ jobs:
         with: { python-version: "3.12" }
       - run: pip install requests
       - name: Run A/B
+        shell: bash
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-        run: python3 tests/live_smoketest/assist_live_smoketest.py
+        run: mkdir -p results && python3 tests/live_smoketest/assist_live_smoketest.py | tee results/summary.txt
+      - name: Publish results branch
+        run: |
+          git config user.name hondi-live-smoketest-bot
+          git config user.email actions@users.noreply.github.com
+          git checkout -B results/assist-live
+          git add -f results/
+          git commit -q -m "chore: assist live smoketest results"
+          git push --force origin HEAD:results/assist-live
