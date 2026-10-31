@@ -79,6 +79,15 @@
       return c;
     }
 
+    // 보조 필드(초대장 등) 갱신. 상태(state)는 여기서 못 바꾼다 — 반드시 applyTransition 으로.
+    async function patchCase(id, patch) {
+      var c = await adapter.get('cases', id);
+      if (!c) return { ok: false, error: '없는 Case' };
+      var p = Object.assign({}, patch); delete p.state; delete p.case_id; delete p.mode; delete p.domain;
+      await saveCase(Object.assign(c, p));
+      return { ok: true, value: c };
+    }
+
     async function getCase(id) { return adapter.get('cases', id); }
     async function listCases() { return adapter.list('cases', ''); }
     async function history(id) { return adapter.list('history', id + '/'); }
@@ -102,7 +111,9 @@
       if (!cs) return { ok: false, error: '없는 Case' };
       var t = C().transition(cs.state, event, Object.assign({ mode: cs.mode }, ctx));
       if (!t.ok) return t;
-      var r = await append(case_id, Object.assign({ type: 'state_' + event, actor_side: ctx.side, visibility: 'shared', payload: { from: cs.state, to: t.to } }, entry || {}));
+      entry = entry || {};
+      var r = await append(case_id, Object.assign({ type: 'state_' + event, actor_side: ctx.side, visibility: 'shared' }, entry,
+        { payload: Object.assign({ from: cs.state, to: t.to }, entry.payload || {}) }));   // outcome 등은 from/to 와 합친다
       cs.state = t.to; await saveCase(cs);
       return Object.assign({}, r, { state: t.to });
     }
@@ -131,7 +142,7 @@
       return { sent: sent, failed: failed, pending: (await adapter.list('outbox', '')).filter(function (x) { return x.state === 'pending'; }).length };
     }
 
-    return { createCase: createCase, getCase: getCase, listCases: listCases, history: history, append: append,
+    return { createCase: createCase, patchCase: patchCase, getCase: getCase, listCases: listCases, history: history, append: append,
       applyTransition: applyTransition, verify: verify, flushAnchors: flushAnchors };
   }
 
