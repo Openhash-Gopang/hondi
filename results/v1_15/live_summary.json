@@ -1,0 +1,10 @@
+{
+  "total": 300,
+  "counts": {
+    "LIVE-PASS": 138,
+    "LIVE-FAIL": 65,
+    "LIVE-CLARIFY": 94,
+    "LIVE-NEEDS-REVIEW": 3
+  },
+  "runtime_seconds": 120
+}
