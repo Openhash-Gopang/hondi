@@ -242,6 +242,60 @@
       return (await history(case_id)).filter(function (e) { return e.type === 'peer_entry'; }).map(function (e) { return e.payload.entry; });
     }
 
+    // ── 인계(S4, G8): 나 홀로 → 전문가에게 맡기기 ─────────────────────
+    // 나 홀로 때의 기록은 그대로(내부) 남고, 인계 시점의 체인 머리 해시를 기록해 이후 "그때까지의 기록"을 증명할 수 있다.
+    // 상대(맡은 쪽)에게는 사용자가 고른 항목만 discloseEntry 로 공개한다.
+    async function handover(case_id) {
+      var cs = await getCase(case_id);
+      if (!cs) return { ok: false, error: '없는 Case' };
+      if (cs.mode !== 'solo') return { ok: false, error: '나 홀로 일만 인계할 수 있습니다' };
+      if (['active', 'on_hold'].indexOf(cs.state) < 0) return { ok: false, error: '진행 중이거나 보류 중인 일만 인계할 수 있습니다' };
+      var v = await verify(case_id);
+      if (!v.ok) return { ok: false, error: '기록 체인이 손상되어 인계할 수 없습니다' };
+      var r = await append(case_id, { type: 'handover', actor_side: 'self', visibility: 'internal', payload: { solo_head: v.head, solo_length: v.length, prior_state: cs.state } });
+      Object.assign(cs, { mode: 'engaged', my_side: 'consumer', state: 'proposed', keys: null, handover: { prior_state: cs.state, at: now(), solo_head: v.head, seq: r.entry.seq } });
+      await saveCase(cs);
+      return { ok: true, value: cs, entry: r.entry };
+    }
+    // 합의 전(제안·거절·만료)이면 나 홀로로 되돌린다. 합의 후에는 되돌릴 수 없다(맡은 쪽이 이미 책임을 졌다).
+    async function continueAsSolo(case_id) {
+      var cs = await getCase(case_id);
+      if (!cs || !cs.handover) return { ok: false, error: '인계한 적 없는 일입니다' };
+      if (['proposed', 'declined', 'expired'].indexOf(cs.state) < 0) return { ok: false, error: '합의 후에는 나 홀로로 되돌릴 수 없습니다' };
+      var r = await append(case_id, { type: 'handover_cancelled', actor_side: 'consumer', visibility: 'internal', payload: { restored_state: cs.handover.prior_state } });
+      var prior = cs.handover.prior_state;
+      delete cs.my_side; delete cs.keys; delete cs.handover;
+      Object.assign(cs, { mode: 'solo', state: prior });
+      await saveCase(cs);
+      return { ok: true, value: cs, entry: r.entry };
+    }
+    // 과거의 내부 기록을 상대에게 보여 주기로 한 경우: 원본 항목을 그대로 담은 공개 항목을 새로 남긴다(원본은 불변).
+    async function discloseEntry(case_id, seq) {
+      var h = await history(case_id), orig = h.filter(function (e) { return e.seq === seq; })[0];
+      if (!orig) return { ok: false, error: '없는 항목' };
+      if (orig.visibility === 'shared') return { ok: false, error: '이미 공개된 항목입니다' };
+      var cs = await getCase(case_id);
+      return append(case_id, { type: 'disclosure', actor_side: cs.my_side || 'self', visibility: 'shared', payload: { entry: orig } });
+    }
+
+    // 다른 기기의 기록 가져오기: 내 기록의 연장일 때만 이어 붙이고, 갈라졌으면(FORKED) 거부한다(합치기는 하지 않음).
+    async function importHistory(case_id, entries) {
+      var cs = await getCase(case_id);
+      if (!cs) return { ok: false, code: 'NO_CASE' };
+      var v = await C().verifyChain(entries);
+      if (!v.ok) return { ok: false, code: 'BAD_CHAIN', reason: v.reason };
+      if (entries.length && entries[0].case_id !== case_id) return { ok: false, code: 'WRONG_CASE' };
+      var mine = await history(case_id), cmp = await C().compareChains(mine, entries);
+      if (cmp.relation === 'forked') return { ok: false, code: 'FORKED', forkSeq: cmp.forkSeq };
+      if (cmp.relation !== 'behind') return { ok: true, added: 0, relation: cmp.relation };
+      for (var i = mine.length; i < entries.length; i++) {
+        var e = entries[i], key = case_id + '/' + pad(e.seq);
+        await adapter.put('history', key, e);
+        await adapter.put('outbox', key, { _key: key, payload: await C().anchorPayloadFor(e), state: 'pending', tries: 0 });
+      }
+      return { ok: true, added: entries.length - mine.length, relation: 'behind' };
+    }
+
     async function verify(case_id) { return C().verifyChain(await history(case_id)); }
 
     // 아웃박스 발송. 실패해도 예외 없이 pending 유지(오프라인 허용). 반환: { sent, failed, pending }
@@ -268,7 +322,8 @@
 
     return { createCase: createCase, patchCase: patchCase, getCase: getCase, listCases: listCases, history: history, append: append,
       applyTransition: applyTransition, verify: verify, flushAnchors: flushAnchors,
-      setKeys: setKeys, signedAppend: signedAppend, confirmAgreement: confirmAgreement, buildShareEvents: buildShareEvents, ingestEvent: ingestEvent, peerEntries: peerEntries };
+      setKeys: setKeys, signedAppend: signedAppend, confirmAgreement: confirmAgreement, buildShareEvents: buildShareEvents, ingestEvent: ingestEvent, peerEntries: peerEntries,
+      handover: handover, continueAsSolo: continueAsSolo, discloseEntry: discloseEntry, importHistory: importHistory };
   }
 
   root.CaseStore = { CaseStore: CaseStore, MemoryAdapter: MemoryAdapter, IdbAdapter: IdbAdapter };
