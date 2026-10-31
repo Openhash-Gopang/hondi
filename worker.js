@@ -23,7 +23,7 @@ import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailS
 import { parseMessage as _kmailParseMime, decodeMimeWords as _kmailDecodeMimeWords, repairStoredText as _kmailRepairStoredText } from './src/worker/mime-text.js';
 import { checkSenderName as _kmailCheckSenderName, effectiveSenderName as _kmailEffectiveSenderName, renderSignature as _kmailRenderSignature, campaignReplyTo as _kmailCampaignReplyTo, replyToWithName as _kmailReplyToWithName, REPLY_TO_SELF as _KMAIL_REPLY_TO_SELF, formatSender as _kmailFormatSender, describeSender as _kmailDescribeSender, SENDER_NAME_MAX as _KMAIL_SENDER_NAME_MAX } from './src/worker/kmail-sender.js';
 import { LETTER_MODE_NOTE as _KMAIL_LETTER_MODE_NOTE, letterMax as _kmailLetterMax, evaluateLetter as _kmailEvaluateLetter, buildLetterStatus as _kmailBuildLetterStatus } from './src/worker/kmail-letter.js';
-import { routeFromReply as _assistRoute, stripTags as _assistStrip, quickRoute as _assistQuick } from './src/worker/kmail-assist.js';
+import { routeFromReply as _assistRoute, stripTags as _assistStrip, quickRoute as _assistQuick, finalizeRoute as _assistFinalize, assistNote as _assistNote } from './src/worker/kmail-assist.js';
 import { rescueDanglingLookup as _kmailRescueDanglingLookup, evaluateSendGuard as _kmailEvaluateSendGuard, buildSentMailPreview as _kmailBuildSentMailPreview } from './src/worker/kmail-confirm.js';
 import { validateMailRecipients as _kmailValidateRecipients } from './src/worker/kmail-recipients.js';
 import { buildContactsNote as _kmailBuildContactsNote, sumRegisteredInMessages as _kmailSumRegistered, summarizeContacts as _kmailSummarizeContacts, buildSummaryContext as _kmailBuildSummaryContext, describeLookupScope as _kmailDescribeLookupScope } from './src/worker/kmail-contacts-summary.js';
@@ -38714,7 +38714,7 @@ async function _assistLoadAc(env) {
   catch (e) { if (!_assistAcCache) throw e; }
   return _assistAcCache;
 }
-const _ASSIST_NOTE = '[나비 메인 화면] 사용자는 naviweb.kr 의 첫 화면 입력창에 쓰고 있습니다. 메일 보내기·확인·주소록·캠페인은 [GWP: kmail], 전문 분야 상담·서류는 해당 [EXPERT: personaId] 또는 [GWP: id] 태그로 연결하세요. 연결할 때는 한 문장 안내와 태그 하나만 내고, 그 밖의 일반 대화는 간결하게 직접 답하세요.';
+// _ASSIST_NOTE 는 src/worker/kmail-assist.js 의 assistNote(asked) — 질의 횟수에 따라 달라진다
 async function handleKmailAssist(request, env, corsHeaders, ctx) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
@@ -38728,7 +38728,8 @@ async function handleKmailAssist(request, env, corsHeaders, ctx) {
   const last = clean[clean.length - 1].content;
 
   // 1) 명확한 발화는 규칙으로 즉시 — LLM 호출 없음
-  const quick = body.noQuick ? null : _assistQuick(last);
+  const asked = Math.max(0, Math.min(9, parseInt(body.asked, 10) || 0));   // 클라이언트가 센 되묻기 횟수 — 상한(2)은 여기서 강제
+  const quick = body.noQuick ? null : _assistQuick(last, { asked });
   if (quick) return new Response(JSON.stringify({ ok: true, reply: '', route: quick, via: 'rule' }), { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
 
   // 2) 나머지는 AC-PRO-CORE 가 판단
@@ -38744,15 +38745,15 @@ async function handleKmailAssist(request, env, corsHeaders, ctx) {
       messages: [
         ...(universal ? [{ role: 'system', content: universal }] : []),
         { role: 'system', content: sp },
-        { role: 'system', content: _ASSIST_NOTE + ' 현재 시각(KST): ' + nowKST },
+        { role: 'system', content: _assistNote(asked) + ' 현재 시각(KST): ' + nowKST },
         ...clean,
       ],
       max_tokens: 1500, temperature: 0.3, timeoutMs: 45000, fallbackText: '',
     });
   } catch (e) { return _err(502, 'AI_CALL_FAILED', 'AI 호출 실패: ' + e.message, corsHeaders); }
   if (!reply) return _err(502, 'AI_EMPTY_REPLY', 'AI 응답이 비어있습니다', corsHeaders);
-  const route = _assistRoute(reply);
-  return new Response(JSON.stringify({ ok: true, reply: _assistStrip(reply), route, via: 'ac' }), { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
+  const route = _assistFinalize(_assistRoute(reply), last, { asked });
+  return new Response(JSON.stringify({ ok: true, reply: route.type === 'ask' ? '' : _assistStrip(reply), route, via: 'ac' }), { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
 }
 
 async function handleKmailChat(request, env, corsHeaders, ctx) {
