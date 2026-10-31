@@ -42,6 +42,13 @@ async function sha256Hex(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
 }
+function b64ToBytes(str) { const b = String(str).replace(/-/g, '+').replace(/_/g, '/'); const bin = atob(b + '='.repeat((4 - b.length % 4) % 4)); const o = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) o[i] = bin.charCodeAt(i); return o; }
+async function verifyBinding(r) {
+  try {
+    const key = await crypto.subtle.importKey('raw', b64ToBytes(r.sign_pub), { name: 'Ed25519' }, false, ['verify']);
+    return await crypto.subtle.verify({ name: 'Ed25519' }, key, b64ToBytes(r.sig), new TextEncoder().encode('hondi-case/v1:boxkey:' + r.box_pub));
+  } catch (_) { return false; }
+}
 const pairKey = (a, b) => 'caserel:' + [a, b].sort().join('|');
 const out = (status, json) => ({ status, json });
 const bad = (status, code, message) => out(status, { ok: false, code, message });
@@ -82,6 +89,7 @@ export function makeCaseServer(deps) {
     const key = 'caseinv:' + await sha256Hex('inv:' + body.token);
     const inv = await getJson(key);
     if (!inv) return bad(404, 'INVITE_NOT_FOUND', '초대를 찾을 수 없습니다(만료되었거나 잘못된 링크)');
+    if (inv.state === 'revoked') return bad(410, 'INVITE_REVOKED', '초청자가 취소한 초대입니다');
     if (inv.state !== 'issued') return bad(409, 'INVITE_USED', '이미 사용된 초대입니다');
     if (now() >= inv.expires_at) return bad(410, 'INVITE_EXPIRED', '만료된 초대입니다');
     if (inv.inviter === a.guid) return bad(400, 'SELF_INVITE', '자기 자신은 초대할 수 없습니다');
@@ -89,10 +97,14 @@ export function makeCaseServer(deps) {
     await putJson(key, inv, CASE_POLICY.INVITE_TTL_DAYS * DAY);
     await putJson(pairKey(inv.inviter, a.guid), { at: now() });       // 이 쌍 사이에서만 우편함 허용(만료 없음)
     // 가입 사실·아이디·메일 아이디를 초청자에게 전달(서버가 아는 계정 메타정보이며 Case 내용은 아님)
-    const notice = { type: 'invite_signed_up', signed_up: true, invitee_user_id: a.guid,
+    // 가입자가 키 기록을 같이 보냈으면 등록하고, 초청자 키를 돌려준다(키 교환 — 이후 TOFU, 지문은 화면에서 대조)
+    let invitee_keys = null;
+    if (body.key_record) { const kr = await storeKey(a.guid, body.key_record); if (kr.status === 200) invitee_keys = body.key_record; }
+    const notice = { type: 'invite_signed_up', invitee_keys, signed_up: true, invitee_user_id: a.guid,
       invitee_mail_id: `${String(body.mail_id).replace(/@.*$/, '')}@naviweb.kr`, signed_up_at: new Date(now()).toISOString() };
     await deliver(inv.inviter, { id: undefined, server_notice: notice, from: 'server', kind: 'invite_notice' });
-    return out(200, { ok: true, inviter_user_id: inv.inviter, room_peer: inv.inviter });
+    const ik = await getJson('casekey:' + inv.inviter);
+    return out(200, { ok: true, inviter_user_id: inv.inviter, room_peer: inv.inviter, inviter_keys: ik ? { sign_pub: ik.sign_pub, box_pub: ik.box_pub, sig: ik.sig } : null });
   }
 
   async function deliver(to, item) {
@@ -114,7 +126,9 @@ export function makeCaseServer(deps) {
     if (errs.length) return bad(400, 'BAD_ENVELOPE', errs.join(' · '));
     if (e.from !== a.guid) return bad(403, 'FROM_MISMATCH', 'from 은 로그인한 본인이어야 합니다');
     if (e.to === a.guid) return bad(400, 'SELF_SEND', '본인에게 보낼 수 없습니다');
-    if (!(await getJson(pairKey(a.guid, e.to)))) return bad(403, 'NO_RELATION', '초대·가입으로 연결된 상대에게만 보낼 수 있습니다');
+    const rel = await getJson(pairKey(a.guid, e.to));
+    if (!rel) return bad(403, 'NO_RELATION', '초대·가입으로 연결된 상대에게만 보낼 수 있습니다');
+    if ((rel.blocked_by || []).length) return bad(403, 'BLOCKED', '차단된 관계입니다');
     if ((await listBox(e.to)).length >= CASE_POLICY.MAX_PENDING_PER_RECIPIENT) return bad(429, 'MAILBOX_FULL', '상대의 우편함이 가득 찼습니다');
     const id = await deliver(e.to, { envelope: e });
     return out(200, { ok: true, id, expires_in: CASE_POLICY.MAILBOX_TTL_DAYS * DAY });
@@ -142,5 +156,68 @@ export function makeCaseServer(deps) {
     return out(200, { ok: true, deleted });
   }
 
-  return { inviteRegister, inviteClaim, mailboxPush, mailboxPull, mailboxAck };
+  // ── 공개키 등록부(S2): 서명 키(Ed25519)와 봉인 키(X25519 — 서명 키로 서명한 묶음)를 서버가 "전달"만 한다.
+  // 서명 키는 한 번 정하면 바꿀 수 없다(바꾸려면 새 계정/관계). 봉인 키는 같은 서명 키로 서명하면 교체 가능.
+  async function storeKey(guid, r) {
+    r = r || {};
+    const B64 = /^[A-Za-z0-9+/_-]{32,128}=*$/;
+    if (!B64.test(r.sign_pub || '') || !B64.test(r.box_pub || '') || !B64.test(r.sig || '')) return bad(400, 'BAD_KEY_RECORD', 'sign_pub, box_pub, sig 필수');
+    if (!(await verifyBinding(r))) return bad(400, 'BAD_KEY_SIGNATURE', '봉인키가 서명키로 서명되지 않았습니다');
+    const cur = await getJson('casekey:' + guid);
+    if (cur && cur.sign_pub !== r.sign_pub) return bad(409, 'SIGN_KEY_LOCKED', '서명 키는 변경할 수 없습니다');
+    await putJson('casekey:' + guid, { sign_pub: r.sign_pub, box_pub: r.box_pub, sig: r.sig, at: now() });
+    return out(200, { ok: true });
+  }
+  async function keyRegister(body) {
+    const a = await auth(body, 'case-key-register'); if (!a.ok) return a.res;
+    return storeKey(a.guid, body.record);
+  }
+  // 관계가 있는 상대의 공개키만 조회(관계 없는 사람의 키 목록 수집 방지)
+  async function keyGet(body) {
+    const a = await auth(body, 'case-key-get'); if (!a.ok) return a.res;
+    if (!body.peer) return bad(400, 'MISSING_FIELD', 'peer 필수');
+    const rel = await getJson(pairKey(a.guid, body.peer));
+    if (!rel) return bad(403, 'NO_RELATION', '연결된 상대의 키만 조회할 수 있습니다');
+    if ((rel.blocked_by || []).length) return bad(403, 'BLOCKED', '차단된 관계입니다');
+    const k = await getJson('casekey:' + body.peer);
+    if (!k) return bad(404, 'KEY_NOT_FOUND', '상대가 아직 키를 등록하지 않았습니다');
+    return out(200, { ok: true, record: { sign_pub: k.sign_pub, box_pub: k.box_pub, sig: k.sig } });
+  }
+
+  // ── 관계 관리(S3, G9): 초대 취소, 차단/해제 ──────────────────────
+  // 가입 전의 초대는 초청자가 취소할 수 있다(가입이 끝난 초대는 차단으로 끊는다).
+  async function inviteRevoke(body) {
+    const a = await auth(body, 'case-invite-revoke'); if (!a.ok) return a.res;
+    if (!HEX64.test(body.token_hash || '')) return bad(400, 'BAD_TOKEN_HASH', 'token_hash(sha256 hex) 필수');
+    const key = 'caseinv:' + body.token_hash, inv = await getJson(key);
+    if (!inv || inv.inviter !== a.guid) return bad(404, 'INVITE_NOT_FOUND', '초대를 찾을 수 없습니다');
+    if (inv.state !== 'issued') return bad(409, 'INVITE_NOT_REVOCABLE', '이미 사용되었거나 취소된 초대입니다(가입한 상대는 차단으로 끊으세요)');
+    inv.state = 'revoked';
+    await putJson(key, inv, 2 * DAY);
+    return out(200, { ok: true });
+  }
+  // 차단: 어느 쪽이든 가능. 차단하면 양쪽 모두 이 쌍으로 보내기·키 조회 불가, 차단한 사람의 우편함에 쌓인 상대의 봉투는 지운다.
+  async function relationBlock(body) {
+    const a = await auth(body, 'case-relation-block'); if (!a.ok) return a.res;
+    if (!body.peer) return bad(400, 'MISSING_FIELD', 'peer 필수');
+    const k = pairKey(a.guid, body.peer), rel = await getJson(k);
+    if (!rel) return bad(404, 'NO_RELATION', '연결된 관계가 없습니다');
+    const by = new Set(rel.blocked_by || []); by.add(a.guid);
+    await putJson(k, Object.assign({}, rel, { blocked_by: [...by] }));
+    let purged = 0;
+    for (const n of await listBox(a.guid)) { const v = await getJson(n); if (v && v.envelope && v.envelope.from === body.peer) { await kv.delete(n); purged++; } }
+    return out(200, { ok: true, purged });
+  }
+  // 해제는 차단한 본인만 자기 차단을 푼다(상대가 차단한 것은 풀 수 없다).
+  async function relationUnblock(body) {
+    const a = await auth(body, 'case-relation-unblock'); if (!a.ok) return a.res;
+    if (!body.peer) return bad(400, 'MISSING_FIELD', 'peer 필수');
+    const k = pairKey(a.guid, body.peer), rel = await getJson(k);
+    if (!rel) return bad(404, 'NO_RELATION', '연결된 관계가 없습니다');
+    const by = (rel.blocked_by || []).filter(g => g !== a.guid);
+    await putJson(k, Object.assign({}, rel, { blocked_by: by }));
+    return out(200, { ok: true, still_blocked: by.length > 0 });
+  }
+
+  return { inviteRegister, inviteClaim, inviteRevoke, mailboxPush, mailboxPull, mailboxAck, keyRegister, keyGet, relationBlock, relationUnblock };
 }
