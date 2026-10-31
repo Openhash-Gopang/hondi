@@ -1,9 +1,12 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-01 05:09 KST · 기준 커밋 687c6bd4
+- 갱신: 2026-11-01 05:25 KST · 기준 커밋 5c299013
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 881건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-01 Merge pull request #879 from Openhash-Gopang/feat/assistant-core
+- 2026-11-01 docs(sp): AC-PRO-CORE v1.16 초안 — §ASSIST 점검 신호 소비(비활성, sp-catalog 미변경)
+- 2026-11-01 feat(assistant): 나만의 AI 비서 코어 A1·A2 — 동의 범위·마스킹·원장, 규칙팩·Gate·Attestation·인간 전문가 권유
 - 2026-11-01 Merge pull request #878 from Openhash-Gopang/feat/case-handover
 - 2026-11-01 Merge pull request #877 from Openhash-Gopang/feat/case-net
 - 2026-11-01 feat(case): 기기 쪽 접착 모듈 case-net — 키 등록·TOFU·봉인 전송·수신 반영 (S5 전반)
@@ -41,9 +44,6 @@
 - 2026-10-31 Merge pull request #860 from Openhash-Gopang/feat/kmail-people-search-20261031-0738
 - 2026-10-31 feat: K-Mail 가입자 검색(검색을 허용한 가입자만)
 - 2026-10-31 Merge pull request #859 from Openhash-Gopang/fix/embed-pro-origin-20261031-0612
-- 2026-10-31 feat: 서류 화면 삽입 허용 주소에 pro.hondi.net 추가
-- 2026-10-31 Merge pull request #858 from Openhash-Gopang/fix/embed-max-tokens-20261031-0443
-- 2026-10-31 fix: 서류 작성(embed) 응답 상한 3200 — 서식 틀 + 초안을 차례로 내다 1200 에서 잘림
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
