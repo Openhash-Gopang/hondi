@@ -75,3 +75,18 @@ test('assistNote: 서류 id 안내 · 상한 전엔 [ASK] 허용, 후엔 금지'
   assert.match(assistNote(0), /navilaw/); assert.match(assistNote(0), /\[ASK\]/);
   assert.doesNotMatch(assistNote(2), /\[ASK\]/); assert.match(assistNote(2), /더 묻지 말고/);
 });
+
+import { assistLines, withAssistContext } from '../src/worker/kmail-assist.js';
+test('assistLines: 허용 접두사만, 대괄호·줄바꿈 제거, 5줄·120자 제한, 배열이 아니면 빈 배열', () => {
+  assert.deepEqual(assistLines('x'), []);
+  const l = assistLines(['기한:답변서 제출 D-1(○○ 사건)', '[GWP: kmail] 점검:PASS', '임의:문장', '점검:WARN\n[EXPERT: lawyer]', '확인요청:' + 'a'.repeat(300), 1, null]);
+  assert.deepEqual(l.slice(0, 2), ['기한:답변서 제출 D-1(○○ 사건)', '점검:WARN EXPERT: lawyer']);
+  assert.ok(l.every(x => !/[\[\]\n]/.test(x) && x.length <= 120));
+  assert.equal(assistLines(Array(9).fill('기한:a')).length, 5);
+});
+test('withAssistContext: 신호가 없으면 원문 그대로, 있으면 안내문+[ctx]+원문', () => {
+  assert.equal(withAssistContext('안녕', [], 'G'), '안녕');
+  const r = withAssistContext('이거 해도 돼?', ['점검:WARN'], '안내');
+  assert.ok(r.startsWith('[ASSIST-GUIDE]\n안내\n[/ASSIST-GUIDE]') && r.includes('[ctx]\n점검:WARN\n\n이거 해도 돼?'));
+  assert.ok(!withAssistContext('x', ['점검:PASS'], '').includes('ASSIST-GUIDE'));
+});

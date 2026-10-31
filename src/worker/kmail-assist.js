@@ -139,3 +139,23 @@ export function assistNote(asked = 0) {
     : '메일·서류·그냥 대화 중 무엇인지 정말 알 수 없을 때에만 짧은 확인 질문 한 문장을 쓰고 끝에 [ASK] 를 붙이세요(태그는 이것 하나만). 대화 맥락으로 판단되면 묻지 마세요.';
   return base + ask;
 }
+
+// ── 나만의 AI 비서 점검 신호(2026-11-01) ─────────────────────────────────
+// 클라이언트(case 화면의 비서 호스트)가 코드로 계산한 신호 줄을 body.assist_lines 로 보낸다. 서버는 형식만 다시 걸러(접두사 4종, 대괄호·줄바꿈 제거, 길이·개수 제한)
+// 마지막 사용자 메시지 앞 [ctx] 로 얹고, 줄이 있을 때만 AC-PRO-ASSIST 안내문을 함께 붙인다. system(AC-PRO-CORE)은 바뀌지 않는다.
+const ASSIST_PREFIX = /^(점검|점검사유|기한|제안|확인요청):/;
+export function assistLines(raw) {
+  if (!Array.isArray(raw)) return [];
+  const out = [];
+  for (const s of raw) {
+    const t = String(s == null ? '' : s).replace(/[\[\]<>{}\u0000-\u001f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
+    if (ASSIST_PREFIX.test(t)) out.push(t);
+    if (out.length >= 5) break;
+  }
+  return out;
+}
+export function withAssistContext(content, lines, guide) {
+  if (!lines || !lines.length) return content;
+  const g = guide ? `[ASSIST-GUIDE]\n${guide}\n[/ASSIST-GUIDE]\n\n` : '';
+  return `${g}[ctx]\n${lines.join('\n')}\n\n${content}`;
+}

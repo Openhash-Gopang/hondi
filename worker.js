@@ -23,7 +23,7 @@ import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailS
 import { parseMessage as _kmailParseMime, decodeMimeWords as _kmailDecodeMimeWords, repairStoredText as _kmailRepairStoredText } from './src/worker/mime-text.js';
 import { checkSenderName as _kmailCheckSenderName, effectiveSenderName as _kmailEffectiveSenderName, renderSignature as _kmailRenderSignature, campaignReplyTo as _kmailCampaignReplyTo, replyToWithName as _kmailReplyToWithName, REPLY_TO_SELF as _KMAIL_REPLY_TO_SELF, formatSender as _kmailFormatSender, describeSender as _kmailDescribeSender, SENDER_NAME_MAX as _KMAIL_SENDER_NAME_MAX } from './src/worker/kmail-sender.js';
 import { LETTER_MODE_NOTE as _KMAIL_LETTER_MODE_NOTE, letterMax as _kmailLetterMax, evaluateLetter as _kmailEvaluateLetter, buildLetterStatus as _kmailBuildLetterStatus } from './src/worker/kmail-letter.js';
-import { routeFromReply as _assistRoute, stripTags as _assistStrip, quickRoute as _assistQuick, finalizeRoute as _assistFinalize, assistNote as _assistNote } from './src/worker/kmail-assist.js';
+import { routeFromReply as _assistRoute, stripTags as _assistStrip, quickRoute as _assistQuick, finalizeRoute as _assistFinalize, assistNote as _assistNote, assistLines as _assistLines, withAssistContext as _assistWithCtx } from './src/worker/kmail-assist.js';
 import { rescueDanglingLookup as _kmailRescueDanglingLookup, evaluateSendGuard as _kmailEvaluateSendGuard, buildSentMailPreview as _kmailBuildSentMailPreview } from './src/worker/kmail-confirm.js';
 import { validateMailRecipients as _kmailValidateRecipients } from './src/worker/kmail-recipients.js';
 import { buildContactsNote as _kmailBuildContactsNote, sumRegisteredInMessages as _kmailSumRegistered, summarizeContacts as _kmailSummarizeContacts, buildSummaryContext as _kmailBuildSummaryContext, describeLookupScope as _kmailDescribeLookupScope } from './src/worker/kmail-contacts-summary.js';
@@ -38747,6 +38747,15 @@ async function _assistLoadAc(env) {
   catch (e) { if (!_assistAcCache) throw e; }
   return _assistAcCache;
 }
+// AC-PRO-ASSIST(점검 신호 안내) — 신호 줄이 있는 턴에만 쓴다. 실패하면 ''(신호 줄만 전달).
+let _assistGuideCache = null, _assistGuideAt = 0;
+async function _assistLoadGuide() {
+  const now = Date.now();
+  if (_assistGuideCache !== null && now - _assistGuideAt < 10 * 60 * 1000) return _assistGuideCache;
+  try { _assistGuideCache = await _fetchByManifestKeyFromGithub('AC-PRO-ASSIST'); } catch (e) { if (_assistGuideCache === null) _assistGuideCache = ''; }
+  _assistGuideAt = now;
+  return _assistGuideCache;
+}
 // _ASSIST_NOTE 는 src/worker/kmail-assist.js 의 assistNote(asked) — 질의 횟수에 따라 달라진다
 async function handleKmailAssist(request, env, corsHeaders, ctx) {
   const body = await request.json().catch(() => null);
@@ -38759,6 +38768,7 @@ async function handleKmailAssist(request, env, corsHeaders, ctx) {
     .slice(-12).map(m => ({ role: m.role, content: m.content.slice(0, 4000) }));
   if (!clean.length || clean[clean.length - 1].role !== 'user') return _err(400, 'MISSING_FIELD', '마지막은 사용자 메시지여야 합니다', corsHeaders);
   const last = clean[clean.length - 1].content;
+  const assistSignals = _assistLines(body.assist_lines);   // 나만의 AI 비서 점검 신호(코드가 계산, 형식만 재검증)
 
   // 1) 명확한 발화는 규칙으로 즉시 — LLM 호출 없음
   const asked = Math.max(0, Math.min(9, parseInt(body.asked, 10) || 0));   // 클라이언트가 센 되묻기 횟수 — 상한(2)은 여기서 강제
@@ -38779,7 +38789,7 @@ async function handleKmailAssist(request, env, corsHeaders, ctx) {
         ...(universal ? [{ role: 'system', content: universal }] : []),
         { role: 'system', content: sp },
         { role: 'system', content: _assistNote(asked) + ' 현재 시각(KST): ' + nowKST },
-        ...clean,
+        ...(assistSignals.length ? [...clean.slice(0, -1), { role: 'user', content: _assistWithCtx(last, assistSignals, await _assistLoadGuide()) }] : clean),
       ],
       max_tokens: 1500, temperature: 0.3, timeoutMs: 45000, fallbackText: '',
     });

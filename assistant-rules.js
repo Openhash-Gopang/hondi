@@ -96,7 +96,7 @@
     if (violations.some(function (v) { return v.blocking; })) result = 'BLOCK';
     else if (risk === 'high' && (unevaluated.length || (!evaluated.length && !unevaluated.length))) result = 'ADVISE_HUMAN';
     else if (violations.length) result = 'WARN';
-    else if (!evaluated.length) result = 'PASS_UNCHECKED';
+    else if (!evaluated.length && !unevaluated.length) result = 'PASS_UNCHECKED';   // 적용되는 규칙이 아예 없을 때만. 규칙은 있는데 값을 몰라 평가 못 한 것은 아래 WARN(미확인)
     else if (unevaluated.length) result = 'WARN';           // 낮은 위험: 미평가 규칙이 있으면 알린다
     else result = 'PASS';
     // 위반도 있고 위험도 커서 ADVISE_HUMAN 인 경우, 더 센 신호를 잃지 않게 위반 목록은 그대로 둔다.
