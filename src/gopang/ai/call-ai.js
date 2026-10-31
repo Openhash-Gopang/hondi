@@ -143,6 +143,20 @@ export async function _loadFlashExecutorSP() {
   }
 }
 
+// AC-PRO-ASSIST (2026-11-01 신설) — 점검 신호 줄이 있는 턴에만 첨부하는 안내문. 세션당 1회 캐시, 실패 시 ''(신호 줄만 전달).
+let _assistGuideCache = null;
+async function _loadAssistGuide() {
+  if (_assistGuideCache !== null) return _assistGuideCache;
+  try {
+    const t = await _loadSpByKey('AC-PRO-ASSIST', 'AC-PRO-ASSIST');
+    _assistGuideCache = t ? `[ASSIST-GUIDE]\n${t}\n[/ASSIST-GUIDE]\n\n` : '';
+  } catch (e) {
+    console.warn('[SP] AC-PRO-ASSIST 로드 실패(무시):', e.message);
+    _assistGuideCache = '';
+  }
+  return _assistGuideCache;
+}
+
 // UNIVERSAL-job-assist (2026-07-15 신설) — AGENT-COMMON과 달리 CFG.system_base에
 // 넣지 않는다. 위 AGENT-COMMON 로드 지점 주석에 "system 메시지는 세션 내 절대
 // 변경하지 않는다(DeepSeek 캐시 prefix 보존)"는 명시적 원칙이 있는데, 이 모듈은
@@ -3933,18 +3947,22 @@ async function _buildEnhancedUserContent(userContent) {
     console.warn('[RoutingHint] 통합 지점에서 실패(무시):', e.message);
   }
 
+  let assistGuideBlock = '';
   // 나만의 AI 비서 점검 신호(2026-11-01 신설, assist-hint.js) — 기한·점검 결과·확인요청을 코드가 계산해 줄로 얹는다.
   // AC-PRO-CORE §ASSIST(v1.16)가 소비한다. window.AssistantHost 가 없으면 아무것도 안 붙는다(안전 폴백).
   try {
     const assistLines = await buildAssistHintParts(plainText);
     assistLines.forEach(l => parts.push(l));
+    // 안내문(AC-PRO-ASSIST)은 신호 줄이 있는 턴에만 user 메시지 앞에 붙인다. system(AC-PRO-CORE)은 건드리지 않아
+    // 라우팅·캐시가 그대로다(본문 수정 시 라이브 300건 회귀 -9~-30 → 별도 SP 첨부로 결정).
+    if (assistLines.length) assistGuideBlock = await _loadAssistGuide();
   } catch (e) {
     console.warn('[AssistHint] 통합 지점에서 실패(무시):', e.message);
   }
 
   if (!parts.length && !firstContact && !faqBlock && !goalPathBlock && !integrityBlock && !shareBlock && !pdvReviewBlock && !jobKscoReviewBlock && !paHandoffBlock) return userContent;
 
-  const ctxBlock = integrityBlock + shareBlock + pdvReviewBlock + jobKscoReviewBlock + paHandoffBlock + firstContact + faqBlock + goalPathBlock + (parts.length ? `[ctx]\n${parts.join('\n')}\n\n` : '');
+  const ctxBlock = assistGuideBlock + integrityBlock + shareBlock + pdvReviewBlock + jobKscoReviewBlock + paHandoffBlock + firstContact + faqBlock + goalPathBlock + (parts.length ? `[ctx]\n${parts.join('\n')}\n\n` : '');
 
   // multipart(이미지 포함) 메시지 처리
   if (Array.isArray(userContent)) {

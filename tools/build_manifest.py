@@ -96,6 +96,11 @@ _scan_single(r'^AGENT-COMMON_v', '.txt', 'AGENT-COMMON')
 #      동일한 명명 규칙(단일 키, vX_Y, .txt)이라 스캔 패턴도 동일 형태.
 _scan_single(r'^AC-PRO-CORE_v', '.txt', 'AC-PRO-CORE')
 
+# 1-a-1) AC-PRO-ASSIST — prompts/AC-PRO-ASSIST_vX_Y.txt (2026-11-01 신설)
+#      AC-PRO-CORE 를 보완하는 "점검 신호 안내". 본문(system)에 넣으면 §CORE 라우팅이 되묻기 쪽으로 기울어(라이브 300건 회귀 -9~-30)
+#      call-ai.js 가 이번 턴 [ctx]에 점검 신호 줄이 있을 때만 사용자 메시지 앞에 첨부한다(UNIVERSAL-INTEGRITY 와 같은 패턴).
+_scan_single(r'^AC-PRO-ASSIST_v', '.txt', 'AC-PRO-ASSIST')
+
 # 1-b) AC-FLASH-EXECUTOR — prompts/AC-FLASH-EXECUTOR_vX_Y.txt (2026-07-29 신설)
 #      AC-PRO-CORE와 같은 재설계에서 함께 도입된 짝. 같은 원인으로 함께
 #      누락돼 있었다.
