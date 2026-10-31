@@ -354,14 +354,28 @@ test('[한계 G8] 나 홀로 → 맡기기(전문가에게 넘기기) 전환이 
   assert.equal(typeof me.store.continueAsSolo, 'undefined');
 });
 
-test('[한계 G9] 한번 연결된 관계는 해제할 수 없고, 초대는 서버에서 취소할 수 없다', async () => {
-  const w = world(), a = w.device('a'), b = w.device('b');
-  const inv = await I.createInvitation({ case_id: 'c', inviter_id: 'a', inviter_side: 'provider', invitee_email: 'x@y.co' }, w.now());
-  await a.call('inviteRegister', { token_hash: inv.server_record.token_hash }); await b.call('inviteClaim', { token: inv.token, mail_id: 'b' });
-  assert.equal(typeof w.server.inviteRevoke, 'undefined');
-  assert.equal(typeof w.server.relationBlock, 'undefined');
-  w.tick(365 * 86400e3);                                                                                  // 1년 뒤에도
-  assert.equal((await a.call('mailboxPush', { envelope: env('a', 'b', 'chat', {}) })).status, 200);       // 관계는 영구
+test('[해결 G9] 초대 취소, 관계 차단/해제: 차단하면 양방향 전달 중단·쌓인 봉투 삭제, 해제는 차단한 본인만', async () => {
+  const w = world(), a = w.device('a'), b = w.device('b'), c = w.device('c');
+  // 가입 전 초대 취소 → 가입 불가, 남의 초대는 취소 불가
+  const i1 = await I.createInvitation({ case_id: 'c', inviter_id: 'a', inviter_side: 'provider', invitee_email: 'x@y.co' }, w.now());
+  await a.call('inviteRegister', { token_hash: i1.server_record.token_hash });
+  assert.equal((await c.call('inviteRevoke', { token_hash: i1.server_record.token_hash })).status, 404);
+  assert.equal((await a.call('inviteRevoke', { token_hash: i1.server_record.token_hash })).status, 200);
+  assert.equal((await b.call('inviteClaim', { token: i1.token, mail_id: 'b' })).json.code, 'INVITE_REVOKED');
+  // 연결 후 차단
+  const i2 = await I.createInvitation({ case_id: 'c', inviter_id: 'a', inviter_side: 'provider', invitee_email: 'x@y.co' }, w.now());
+  await a.call('inviteRegister', { token_hash: i2.server_record.token_hash }); await b.call('inviteClaim', { token: i2.token, mail_id: 'b' });
+  assert.equal((await a.call('inviteRevoke', { token_hash: i2.server_record.token_hash })).status, 409);       // 가입 후엔 차단으로
+  await a.call('mailboxPush', { envelope: env('a', 'b', 'chat', { t: 1 }) });
+  assert.equal((await b.call('relationBlock', { peer: 'a' })).json.purged, 1);                                 // b 의 우편함에서 a 의 봉투 삭제
+  assert.equal((await a.call('mailboxPush', { envelope: env('a', 'b', 'chat', {}) })).json.code, 'BLOCKED');
+  assert.equal((await b.call('mailboxPush', { envelope: env('b', 'a', 'chat', {}) })).json.code, 'BLOCKED');
+  assert.equal((await a.call('keyGet', { peer: 'b' })).json.code, 'BLOCKED');
+  assert.equal((await a.call('relationUnblock', { peer: 'b' })).json.still_blocked, true);                     // 차단자가 아니면 못 푼다
+  assert.equal((await a.call('mailboxPush', { envelope: env('a', 'b', 'chat', {}) })).json.code, 'BLOCKED');
+  assert.equal((await b.call('relationUnblock', { peer: 'a' })).json.still_blocked, false);
+  assert.equal((await a.call('mailboxPush', { envelope: env('a', 'b', 'chat', {}) })).status, 200);
+  assert.equal((await c.call('relationBlock', { peer: 'a' })).status, 404);
 });
 
 test('[한계 G10] 해시 앵커의 사용자 식별자(who.ipv6)를 어디서 얻는지 정해지지 않았다 — 설정이 없으면 전송하지 않고 대기만', async () => {
