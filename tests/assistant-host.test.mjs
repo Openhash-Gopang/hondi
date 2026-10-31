@@ -67,3 +67,9 @@ test('기한 알림: findings 는 열린 일 전체를 한국어 한 줄로, lin
   const l1 = await host.lines(); assert.ok(l1.some(x => x.startsWith('기한:답변서 제출')));
   const l2 = await host.lines(); assert.equal(l2.filter(x => x.startsWith('기한:')).length, 0);   // 같은 날 두 번째 호출은 같은 알림을 다시 내지 않는다
 });
+
+test('기본 규칙팩은 시각이 이르거나 늦어도(시계 오차·배포 직후) 로드된다 — 2026-11-01 이전 시각에도 유효', async () => {
+  const { identity, store } = await mk();
+  const early = H.create({ store, identity, now: () => '2026-10-31T21:00:00.000Z' });
+  assert.equal((await early.init()).packs.length, 1);
+});

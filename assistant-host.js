@@ -13,7 +13,7 @@
 
   // 일 처리 규칙(domain:'common') — 어떤 분야의 일에도 적용되는, 제품 자체의 규칙만 담는다.
   var BUILTIN = [{
-    id: 'hondi-case-process', version: '1.0.0', domain: 'common', jurisdiction: 'KR', effective_from: '2026-11-01T00:00:00.000Z',
+    id: 'hondi-case-process', version: '1.0.0', domain: 'common', jurisdiction: 'KR', effective_from: '2026-01-01T00:00:00.000Z',
     publisher: { id: 'device', pub: '' },
     rules: [
       { id: 'process.peer_key_unverified', actions: ['case.agree'], severity: 2,
