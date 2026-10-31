@@ -94,6 +94,7 @@ import { createLawApiClient } from './src/gopang/gov/regulation-pipeline/law-api
 import { passesRegexFilter, classifyRegulation, extractChecklistItems } from './src/gopang/gov/regulation-pipeline/regulation-classifier-extractor.js';
 import { enqueueForReview } from './src/gopang/gov/regulation-pipeline/review-gate-and-drift.js';
 import { handleHondiSearch } from './src/routes/hondi-search-worker.js';
+import { makeCaseServer as _makeCaseServer } from './src/worker/case-server.js';   // 2026-11-01 Case 초대·봉인 우편함
 
 const ALLOWED_ORIGINS = [
   'https://hondi.net',
@@ -1513,6 +1514,28 @@ async function handlePdvRelayPush(request, env, corsHeaders) {
 
   return new Response(JSON.stringify({ ok: true, queued: queue.length, expires_in: PDV_RELAY_TTL_SECONDS }),
     { status: 200, headers: corsHeaders });
+}
+
+// ── Case(일) 서버 측 — 로직은 src/worker/case-server.js, 여기는 연결만 ──
+// POST /case/invite/register | /case/invite/claim | /case/mailbox/push | /case/mailbox/pull | /case/mailbox/ack
+// 인증은 K 서비스 공용 게이트(phone_verify_token 또는 지갑 서명, sigMsg = `<route>:<guid>:<ts>`).
+async function handleCaseApi(request, env, corsHeaders, op) {
+  if (!env.QR_SESSIONS_KV) return _err(500, 'KV_NOT_BOUND', '저장소가 설정되지 않았습니다', corsHeaders);
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+  const srv = _makeCaseServer({
+    env, kv: env.QR_SESSIONS_KV,
+    resolveGuid: (e, b, o) => _kAuth.resolveGuid(e, b, o),
+    notify: async (guid) => {   // 웹푸시 — 실패해도 전달은 유지(case-server 가 예외를 삼킨다)
+      if (!(env.VAPID_PRIVATE_KEY && env.VAPID_PUBLIC_KEY && env.VAPID_SUBJECT)) return;
+      const profile = await _l1FindProfileByGuid(env, guid).catch(() => null);
+      const devices = _parseDeviceSubscriptions(profile?.push_subscription);
+      const payload = JSON.stringify({ title: '일(Case) 새 소식', body: '새 소식이 도착했습니다. 열어서 확인하세요.', url: '/desktop.html?case=1', tag: `case-${guid}` });
+      await Promise.allSettled(devices.map(d => _sendWebPush(env, d.subscription, payload)));
+    },
+  });
+  const r = await srv[op](body);
+  return new Response(JSON.stringify(r.json), { status: r.status, headers: corsHeaders });
 }
 
 // GET /pdv/relay/pull?guid=...
@@ -14140,6 +14163,11 @@ export default {
     if (pathname === '/auth/refresh-token'        && request.method === 'POST') return handleAuthRefreshToken(request, env, corsHeaders);
     if (pathname === '/pdv/relay/push'            && request.method === 'POST') return handlePdvRelayPush(request, env, corsHeaders);
     if (pathname === '/pdv/relay/pull'            && request.method === 'GET')  return handlePdvRelayPull(request, env, corsHeaders);
+    if (pathname === '/case/invite/register' && request.method === 'POST') return handleCaseApi(request, env, corsHeaders, 'inviteRegister');
+    if (pathname === '/case/invite/claim' && request.method === 'POST') return handleCaseApi(request, env, corsHeaders, 'inviteClaim');
+    if (pathname === '/case/mailbox/push' && request.method === 'POST') return handleCaseApi(request, env, corsHeaders, 'mailboxPush');
+    if (pathname === '/case/mailbox/pull' && request.method === 'POST') return handleCaseApi(request, env, corsHeaders, 'mailboxPull');
+    if (pathname === '/case/mailbox/ack' && request.method === 'POST') return handleCaseApi(request, env, corsHeaders, 'mailboxAck');
     if (pathname === '/account/step-up-threshold' && request.method === 'GET')  return handleStepUpThresholdGet(request, env, corsHeaders);
     if (pathname === '/account/step-up-threshold' && request.method === 'POST') return handleStepUpThresholdSet(request, env, corsHeaders);
     if (pathname === '/auth/webauthn/register-key' && request.method === 'POST') return handleWebAuthnRegisterKey(request, env, corsHeaders);
@@ -20815,7 +20843,7 @@ async function _verifyChallengeToken(env,chalB64,exp,sig){if(exp<Math.floor(Date
 //  s.webauthn?.credentialId 값을 "여러 인증 신호 중 하나"로 읽기만
 //  할 뿐, 그 값을 채워 넣을 호출부 자체가 없어 항상 undefined였다.
 //  Supabase webauthn_credentials 의존이라 정리 대상.)
-const REGISTERED_SERVICES={'gopang':{level:3,domain:'hondi.net',minAuth:'L0',pdv:true},'klaw':{level:3,domain:'klaw.hondi.net',minAuth:'L0',pdv:true},'market':{level:3,domain:'market.hondi.net',minAuth:'L0',pdv:true},'school':{level:3,domain:'school.hondi.net',minAuth:'L0',pdv:true},'security':{level:3,domain:'security.hondi.net',minAuth:'L1',pdv:true},'health':{level:3,domain:'health.hondi.net',minAuth:'L1',pdv:true},'tax':{level:3,domain:'tax.hondi.net',minAuth:'L0',pdv:true},'gdc':{level:3,domain:'gdc.hondi.net',minAuth:'L1',pdv:true},'public':{level:3,domain:'public.hondi.net',minAuth:'L0',pdv:true},'democracy':{level:3,domain:'democracy.hondi.net',minAuth:'L1',pdv:true},'911':{level:3,domain:'911.hondi.net',minAuth:'L0',pdv:true},'police':{level:3,domain:'police.hondi.net',minAuth:'L1',pdv:true},'insurance':{level:3,domain:'insurance.hondi.net',minAuth:'L1',pdv:true},'stock':{level:3,domain:'stock.hondi.net',minAuth:'L1',pdv:true},'traffic':{level:3,domain:'traffic.hondi.net',minAuth:'L0',pdv:true},'logistics':{level:3,domain:'logistics.hondi.net',minAuth:'L0',pdv:true},'fiil':{level:2,domain:'clean.hondi.net',minAuth:'L0',pdv:true},'klaw-ext':{level:2,domain:'klaw.openhash.kr',minAuth:'L0',pdv:false},'users':{level:3,domain:'users.hondi.net',minAuth:'L0',pdv:false},'qna':{level:3,domain:'qna.hondi.net',minAuth:'L0',pdv:true}};
+const REGISTERED_SERVICES={'gopang':{level:3,domain:'hondi.net',minAuth:'L0',pdv:true},'case':{level:2,domain:'mail.hondi.net',minAuth:'L0',pdv:true},'klaw':{level:3,domain:'klaw.hondi.net',minAuth:'L0',pdv:true},'market':{level:3,domain:'market.hondi.net',minAuth:'L0',pdv:true},'school':{level:3,domain:'school.hondi.net',minAuth:'L0',pdv:true},'security':{level:3,domain:'security.hondi.net',minAuth:'L1',pdv:true},'health':{level:3,domain:'health.hondi.net',minAuth:'L1',pdv:true},'tax':{level:3,domain:'tax.hondi.net',minAuth:'L0',pdv:true},'gdc':{level:3,domain:'gdc.hondi.net',minAuth:'L1',pdv:true},'public':{level:3,domain:'public.hondi.net',minAuth:'L0',pdv:true},'democracy':{level:3,domain:'democracy.hondi.net',minAuth:'L1',pdv:true},'911':{level:3,domain:'911.hondi.net',minAuth:'L0',pdv:true},'police':{level:3,domain:'police.hondi.net',minAuth:'L1',pdv:true},'insurance':{level:3,domain:'insurance.hondi.net',minAuth:'L1',pdv:true},'stock':{level:3,domain:'stock.hondi.net',minAuth:'L1',pdv:true},'traffic':{level:3,domain:'traffic.hondi.net',minAuth:'L0',pdv:true},'logistics':{level:3,domain:'logistics.hondi.net',minAuth:'L0',pdv:true},'fiil':{level:2,domain:'clean.hondi.net',minAuth:'L0',pdv:true},'klaw-ext':{level:2,domain:'klaw.openhash.kr',minAuth:'L0',pdv:false},'users':{level:3,domain:'users.hondi.net',minAuth:'L0',pdv:false},'qna':{level:3,domain:'qna.hondi.net',minAuth:'L0',pdv:true}};
 function _getSvcRegistration(origin,svcId){const resolvedId=_resolveSvcId(svcId);const svc=REGISTERED_SERVICES[resolvedId];if(svc&&origin.includes(svc.domain))return{...svc,svcId:resolvedId,originalId:svcId};if(/^https:\/\/[a-z0-9-]+\.gopang\.net$/.test(origin))return{level:1,domain:origin,minAuth:'L0',pdv:false,svcId:resolvedId,originalId:svcId};return null;}
 async function handleSvcRegister(request,env,corsHeaders){
   if(request.method!=='POST')return new Response('Method Not Allowed',{status:405});
