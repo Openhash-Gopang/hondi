@@ -13,6 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         v: ["1_15", "1_16"]
+        rep: ["b"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -22,12 +23,12 @@ jobs:
         working-directory: tests/live_smoketest
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-        run: python3 live_smoketest.py --scenarios scenarios.json --system-prompt ../../prompts/AC-PRO-CORE_v${{ matrix.v }}.txt --out ../../results/v${{ matrix.v }}
+        run: python3 live_smoketest.py --scenarios scenarios.json --system-prompt ../../prompts/AC-PRO-CORE_v${{ matrix.v }}.txt --out ../../results/v${{ matrix.v }}_${{ matrix.rep }}
       - name: Publish
         run: |
           git config user.name hondi-live-smoketest-bot
           git config user.email actions@users.noreply.github.com
-          git checkout -B results/assist-reg-v${{ matrix.v }}
+          git checkout -B results/assist-reg-v${{ matrix.v }}-${{ matrix.rep }}
           git add -f results/
-          git commit -q -m "chore: assist regression results v${{ matrix.v }}"
-          git push --force origin HEAD:results/assist-reg-v${{ matrix.v }}
+          git commit -q -m "chore: assist regression results v${{ matrix.v }} ${{ matrix.rep }}"
+          git push --force origin HEAD:results/assist-reg-v${{ matrix.v }}-${{ matrix.rep }}
