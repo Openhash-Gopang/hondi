@@ -99,7 +99,8 @@
     // gate: 사용자가 지금 하려는 행위의 Gate 결과(있으면). 그 외에는 이번 tick 에서 새로 보여 줄 Finding.
     function ctxLines(tickResult, gate, action) {
       var lines = [], PROF = { law: '변호사', tax: '세무사·회계사', health: '의사·약사', contract: '변호사', ip: '변리사', labor: '공인노무사', real_estate: '공인중개사·법무사' };
-      if (gate) {
+      // 낮은 위험 행위의 PASS/PASS_UNCHECKED 는 이용자에게 말할 가치가 없다 — 줄 자체를 만들지 않는다(소음·내부 표기 노출 방지).
+      if (gate && !(gate.risk === 'low' && (gate.result === 'PASS' || gate.result === 'PASS_UNCHECKED'))) {
         var dom = gate.domain || (action && action.domain);
         lines.push('점검:' + gate.result + (gate.result === 'ADVISE_HUMAN' ? '(분야=' + clean(PROF[dom] || '해당 분야 전문가', 12) + ')' : ''));
         if (gate.result === 'BLOCK' || gate.result === 'WARN') gate.violations.slice(0, 2).forEach(function (v) { lines.push('점검사유:' + clean(v.message, 50)); });

@@ -59,6 +59,10 @@ test('[사고실험 B: 나 홀로] 기한 임박 → 전문가에게 맡기기 �
   const g = await R.gate({ type: 'court_submit', effect: 'external', domain: 'law', affects_life_property: true }, {}, [], T0);
   const gl = m.rt.ctxLines(null, g, { domain: 'law' });
   assert.deepEqual(gl, ['점검:ADVISE_HUMAN(분야=변호사)']);
+  // 낮은 위험 행위의 통과/미점검은 신호 줄을 만들지 않고, 높은 위험의 통과는 만든다
+  const low = await R.gate({ type: 'note_save', effect: 'internal', domain: 'law' }, {}, [], T0);
+  assert.deepEqual(m.rt.ctxLines(null, low, { domain: 'law' }), []);
+  assert.deepEqual(m.rt.ctxLines(null, { ...low, risk: 'high' }, { domain: 'law' }), ['점검:PASS_UNCHECKED']);
   await m.store.handover('s1');                                                            // 인계(맡기기) → engaged
   assert.equal((await m.rt.scan(plus(0))).some(f => f.sub === 'handover'), false);
 });
