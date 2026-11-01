@@ -10,6 +10,14 @@
   ],
   "items": [
     {
+      "id": "navi-naviweb-guide-202611", "order": 4, "series": "intro", "status": "draft",
+      "title": "나비와 나비웹 안내서 (2026년 11월 개정)",
+      "summary": "10월 안내서 2종을 하나로 합친 개정본입니다. Case(맡은 일·맡긴 일·나 홀로), 초대권, 서류를 말로 고치기, 나만의 AI 비서의 점검 등 새 기능과 데이터 금고, 안전 약속을 안내합니다. 시험 운영 기능과 개편 중인 요금은 그대로 표시했습니다.",
+      "audience": "일반", "date": "2026-11-02",
+      "tags": ["안내서", "나비웹", "HTML"],
+      "url": "https://hondi.net/assets/presentations/navi-naviweb-guide-20261102.html"
+    },
+    {
       "id": "navi-naviweb-guide", "order": 5, "series": "intro", "status": "ready",
       "title": "나비와 나비웹 안내서",
       "summary": "나비는 나만의 AI 비서, 나비웹은 그 나비들이 모이는 메신저입니다. 나비로 할 수 있는 일, 내 정보를 내 데이터 금고에만 두는 방식, 구독 요금, 안전하게 쓰기 위한 약속을 쉬운 말로 설명합니다.",
