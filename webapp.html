@@ -161,6 +161,7 @@ function _updateLogoutBtn() {
   }
 }
 </script>
+<script src="/embed-delegate.js?v=20261101"></script>
 <script src="/gwp-registry.js?v=20261015"></script>
 <!-- pdv-store.js는 GWP_REGISTRY(위 스크립트) 로드 이후여야 classify()가 서비스 분류를
      제대로 찾는다. record.js의 _recordPDV()가 발행하는 'gopang:pdv-recorded' 이벤트를
@@ -5022,9 +5023,26 @@ window.closePDV = closePDV;
     panelChatInput?.setGenerating(on);
   }
 
+  // 2026-11-01 — 나비웹 화면 안에 떠 있을 때(embed-delegate.js) 이 패널의 AI 입력은 그 화면의 기본 SP 로 넘긴다. 첨부가 있으면 예전대로 여기서 처리한다.
+  const _embedDel = (window.EmbedDelegate && window.parent !== window)
+    ? window.EmbedDelegate.create({ parent: window.parent, post: (m, o) => window.parent.postMessage(m, o) }) : null;
+  if (_embedDel) {
+    window.addEventListener('message', (e) => { _embedDel.onMessage(e); });
+    _embedDel.onNote((t) => { if (t) _appendPanelMsg('ai', t); });
+  }
+
   async function _sendToAI(text, files) {
     const attachedList = files || [];
     if (!text && !attachedList.length) return;
+    if (_embedDel && _embedDel.active() && text && !attachedList.length) {
+      _appendPanelMsg('user', text);
+      const bub = _appendPanelMsg('ai', '나비 화면에서 처리하고 있습니다…'); bub.classList.add('streaming');
+      _setPanelGenerating(true);
+      const r = await _embedDel.send(text);
+      bub.classList.remove('streaming'); _setPanelGenerating(false);
+      bub.textContent = r == null ? '화면의 나비가 응답하지 않았습니다. 잠시 뒤 다시 시도해 주세요.' : (r || '처리했습니다.');
+      return;
+    }
     _setPanelGenerating(true);
     const attachLabel = attachedList.length
       ? (attachedList.length === 1
