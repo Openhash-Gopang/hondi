@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-01 07:48 KST · 기준 커밋 03704911
+- 갱신: 2026-11-01 14:44 KST · 기준 커밋 a404d1a6
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 882건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-01 Merge pull request #885 from Openhash-Gopang/feat/doc-edit-route
+- 2026-11-01 feat(assist): /kmail/assist 열린 서류 수정 경로(doc_edit)
 - 2026-11-01 Merge pull request #884 from Openhash-Gopang/feat/assistant-host
 - 2026-11-01 Merge pull request #883 from Openhash-Gopang/feat/case-invite-link
 - 2026-11-01 fix(assistant): 기본 규칙팩 effective_from 을 앞당김(배포 직후·시계 오차에서 팩이 거부되던 문제)
@@ -42,8 +44,6 @@
 - 2026-10-31 feat: PDV 초안 보관에 서류 첨부서류(extras) 추가
 - 2026-10-31 Merge pull request #866 from Openhash-Gopang/feat/pdv-draft-bridge-20261031
 - 2026-10-31 feat: PDV 초안 보관 중계 페이지(pdv-draft-bridge.html)
-- 2026-10-31 Merge pull request #865 from Openhash-Gopang/feat/ac-route-mail-doc-20261031
-- 2026-10-31 feat(kmail-assist): 메일(편지/캠페인)·서류 라우팅 보강 + 되묻기 2회 상한
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
