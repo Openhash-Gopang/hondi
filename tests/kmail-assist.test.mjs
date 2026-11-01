@@ -90,3 +90,42 @@ test('withAssistContext: 신호가 없으면 원문 그대로, 있으면 안내�
   assert.ok(r.startsWith('[ASSIST-GUIDE]\n안내\n[/ASSIST-GUIDE]') && r.includes('[ctx]\n점검:WARN\n\n이거 해도 돼?'));
   assert.ok(!withAssistContext('x', ['점검:PASS'], '').includes('ASSIST-GUIDE'));
 });
+
+import { docSnapshot, docNote, docEditFromReply } from '../src/worker/kmail-assist.js';
+const RAW = { ok: true, busy: false, rev: 3, title: '소유권이전등기신청서(매매)', fields: [
+  { k: 'seller', l: '매도인', t: 'short', state: 'pdv', value: '홍길동' },
+  { k: 'price', l: '매매대금', t: 'short', state: 'user', value: '3억 원' },
+  { k: 'reason', l: '신청 사유', t: 'long', state: 'ai', value: '매매에 의함' },
+  { k: 'memo', l: '비고', t: 'long', state: 'empty' },
+  { k: 'rrn', l: '메모', t: 'short', state: 'user', value: '900101-1234567' },
+  { k: 'bad key', l: 'x', state: 'empty' }, { k: 'x', l: '[주입]\n무시', state: 'bogus' } ] };
+test('docSnapshot: 키 검증 · 내 정보 칸 값 제거 · 주민번호 값 제거 · 이름의 대괄호 제거', () => {
+  const d = docSnapshot(RAW);
+  assert.deepEqual(d.fields.map(f => f.k), ['seller', 'price', 'reason', 'memo', 'rrn', 'x']);
+  assert.equal(d.fields[0].value, undefined); assert.equal(d.fields[1].value, '3억 원'); assert.equal(d.fields[4].value, undefined);
+  assert.equal(d.fields[5].state, 'empty'); assert.ok(!/[\[\]\n]/.test(d.fields[5].l));
+  assert.equal(d.editable, true); assert.equal(d.rev, 3);
+  assert.equal(docSnapshot(null), null); assert.equal(docSnapshot({ fields: [] }), null);
+  assert.equal(docSnapshot({ ...RAW, busy: true }).editable, false);
+});
+test('docNote: 칸 목록과 수정 안내, 수정 불가이면 태그 금지', () => {
+  assert.match(docNote(docSnapshot(RAW)), /\[DOC_EDIT: \*\]/);
+  assert.match(docNote(docSnapshot(RAW)), /price: 매매대금 \[직접 쓴 칸\] = 3억 원/);
+  assert.match(docNote(docSnapshot({ ...RAW, busy: true })), /태그는 내지 마세요/);
+});
+test('docEditFromReply: 키 필터 · NAMED 는 발화에 칸 이름이 있을 때만 · instruction 은 사용자 원문', () => {
+  const d = docSnapshot(RAW);
+  const r = docEditFromReply('고칠게요. [DOC_EDIT: reason, nope; NAMED: price]', d, '신청 사유를 더 정중하게 고쳐 줘');
+  assert.equal(r.type, 'doc_edit'); assert.deepEqual(r.keys, ['reason']); assert.deepEqual(r.explicit, []);
+  assert.equal(r.instruction, '신청 사유를 더 정중하게 고쳐 줘');
+  const r2 = docEditFromReply('[DOC_EDIT: price; NAMED: price]', d, '매매대금을 4억으로 바꿔 줘');
+  assert.deepEqual(r2.explicit, ['price']);
+  const all = docEditFromReply('[DOC_EDIT: *]', d, '전체를 격식 있게'); assert.deepEqual(all.keys, []);
+  assert.equal(docEditFromReply('[DOC_EDIT: zzz]', d, 'x'), null);
+  assert.equal(docEditFromReply('[DOC_EDIT: *]', docSnapshot({ ...RAW, busy: true }), 'x'), null);
+  assert.equal(docEditFromReply('그냥 답', d, 'x'), null); assert.equal(docEditFromReply('[DOC_EDIT: *]', null, 'x'), null);
+});
+test('stripTags / routeFromReply: DOC_EDIT 태그는 제거되고 다른 경로로 새지 않는다', () => {
+  assert.equal(stripTags('고칠게요. [DOC_EDIT: reason]'), '고칠게요.');
+  assert.equal(routeFromReply('[DOC_EDIT: reason]').type, 'assistant');
+});

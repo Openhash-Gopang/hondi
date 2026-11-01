@@ -23,7 +23,7 @@ import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailS
 import { parseMessage as _kmailParseMime, decodeMimeWords as _kmailDecodeMimeWords, repairStoredText as _kmailRepairStoredText } from './src/worker/mime-text.js';
 import { checkSenderName as _kmailCheckSenderName, effectiveSenderName as _kmailEffectiveSenderName, renderSignature as _kmailRenderSignature, campaignReplyTo as _kmailCampaignReplyTo, replyToWithName as _kmailReplyToWithName, REPLY_TO_SELF as _KMAIL_REPLY_TO_SELF, formatSender as _kmailFormatSender, describeSender as _kmailDescribeSender, SENDER_NAME_MAX as _KMAIL_SENDER_NAME_MAX } from './src/worker/kmail-sender.js';
 import { LETTER_MODE_NOTE as _KMAIL_LETTER_MODE_NOTE, letterMax as _kmailLetterMax, evaluateLetter as _kmailEvaluateLetter, buildLetterStatus as _kmailBuildLetterStatus } from './src/worker/kmail-letter.js';
-import { routeFromReply as _assistRoute, stripTags as _assistStrip, quickRoute as _assistQuick, finalizeRoute as _assistFinalize, assistNote as _assistNote, assistLines as _assistLines, withAssistContext as _assistWithCtx } from './src/worker/kmail-assist.js';
+import { routeFromReply as _assistRoute, stripTags as _assistStrip, quickRoute as _assistQuick, finalizeRoute as _assistFinalize, assistNote as _assistNote, assistLines as _assistLines, withAssistContext as _assistWithCtx, docSnapshot as _assistDocSnap, docNote as _assistDocNote, docEditFromReply as _assistDocEdit } from './src/worker/kmail-assist.js';
 import { rescueDanglingLookup as _kmailRescueDanglingLookup, evaluateSendGuard as _kmailEvaluateSendGuard, buildSentMailPreview as _kmailBuildSentMailPreview } from './src/worker/kmail-confirm.js';
 import { validateMailRecipients as _kmailValidateRecipients } from './src/worker/kmail-recipients.js';
 import { buildContactsNote as _kmailBuildContactsNote, sumRegisteredInMessages as _kmailSumRegistered, summarizeContacts as _kmailSummarizeContacts, buildSummaryContext as _kmailBuildSummaryContext, describeLookupScope as _kmailDescribeLookupScope } from './src/worker/kmail-contacts-summary.js';
@@ -38772,7 +38772,8 @@ async function handleKmailAssist(request, env, corsHeaders, ctx) {
 
   // 1) 명확한 발화는 규칙으로 즉시 — LLM 호출 없음
   const asked = Math.max(0, Math.min(9, parseInt(body.asked, 10) || 0));   // 클라이언트가 센 되묻기 횟수 — 상한(2)은 여기서 강제
-  const quick = body.noQuick ? null : _assistQuick(last, { asked });
+  const docSnap = _assistDocSnap(body.doc);   // 열린 서류의 칸 스냅샷(서버가 다시 걸러 민감 값 제외)
+  const quick = (body.noQuick || docSnap) ? null : _assistQuick(last, { asked });   // 서류가 열려 있으면 발화는 먼저 AC 가 본다
   if (quick) return new Response(JSON.stringify({ ok: true, reply: '', route: quick, via: 'rule' }), { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
 
   // 2) 나머지는 AC-PRO-CORE 가 판단
@@ -38789,13 +38790,15 @@ async function handleKmailAssist(request, env, corsHeaders, ctx) {
         ...(universal ? [{ role: 'system', content: universal }] : []),
         { role: 'system', content: sp },
         { role: 'system', content: _assistNote(asked) + ' 현재 시각(KST): ' + nowKST },
+        ...(docSnap ? [{ role: 'system', content: _assistDocNote(docSnap) }] : []),
         ...(assistSignals.length ? [...clean.slice(0, -1), { role: 'user', content: _assistWithCtx(last, assistSignals, await _assistLoadGuide()) }] : clean),
       ],
       max_tokens: 1500, temperature: 0.3, timeoutMs: 45000, fallbackText: '',
     });
   } catch (e) { return _err(502, 'AI_CALL_FAILED', 'AI 호출 실패: ' + e.message, corsHeaders); }
   if (!reply) return _err(502, 'AI_EMPTY_REPLY', 'AI 응답이 비어있습니다', corsHeaders);
-  const route = _assistFinalize(_assistRoute(reply), last, { asked });
+  const editRoute = docSnap ? _assistDocEdit(reply, docSnap, last) : null;
+  const route = editRoute || _assistFinalize(_assistRoute(reply), last, { asked });
   return new Response(JSON.stringify({ ok: true, reply: route.type === 'ask' ? '' : _assistStrip(reply), route, via: 'ac' }), { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
 }
 
