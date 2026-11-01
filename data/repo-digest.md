@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-02 08:27 KST · 기준 커밋 d9dcd5af
+- 갱신: 2026-11-02 08:39 KST · 기준 커밋 5d40ab90
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 882건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-02 Merge pull request #889 from Openhash-Gopang/docs/naviweb-guide-fix-20261102
+- 2026-11-02 docs: 개정 안내서 시작하기 문구를 사용 설명서와 일치시킴
 - 2026-11-02 Merge pull request #888 from Openhash-Gopang/docs/naviweb-guide-20261102
 - 2026-11-02 docs: 나비와 나비웹 안내서 2026년 11월 개정본(HTML) 추가
 - 2026-11-02 Merge pull request #887 from Openhash-Gopang/feat/admin-docs-sp-edit
@@ -42,8 +44,6 @@
 - 2026-11-01 Merge pull request #870 from Openhash-Gopang/feat/case-server-m3
 - 2026-11-01 feat(case): 서버 — case 서비스 등록, 초대 등록·가입 확인, 봉인 우편함(push/pull/ack)
 - 2026-11-01 Merge pull request #869 from Openhash-Gopang/feat/case-core-m0
-- 2026-11-01 feat(case): 나 홀로(solo) 모드 — 합의 없이 시작, 단독 종료, 본인 소통 기록
-- 2026-11-01 feat(case): M0 case-core — 상태기계·해시체인 History·소비자 투영·소통 이력(6하)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
