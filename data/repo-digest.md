@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-01 14:52 KST · 기준 커밋 8c439a89
+- 갱신: 2026-11-02 08:07 KST · 기준 커밋 6ce8d7c4
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 882건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-02 Merge pull request #887 from Openhash-Gopang/feat/admin-docs-sp-edit
+- 2026-11-02 docs(admin): SP 서류 수정 설계서와 AI 입력 전수 조사서를 관리자 페이지에 보관
 - 2026-11-01 Merge pull request #886 from Openhash-Gopang/feat/embed-delegate
 - 2026-11-01 feat(webapp): 나비웹 화면 안에서는 AI 입력을 호스트 SP로 위임 (embed-delegate)
 - 2026-11-01 Merge pull request #885 from Openhash-Gopang/feat/doc-edit-route
@@ -42,8 +44,6 @@
 - 2026-11-01 feat(case): M0 case-core — 상태기계·해시체인 History·소비자 투영·소통 이력(6하)
 - 2026-10-31 Merge pull request #868 from Openhash-Gopang/feat/embed-attach-form-20261031
 - 2026-10-31 feat: expert-chat 임베드에 서식 이미지·PDF 첨부(expert-embed-attach)와 서식 DB 조회 결과 회신 추가
-- 2026-10-31 Merge pull request #867 from Openhash-Gopang/feat/pdv-draft-extras-20261031
-- 2026-10-31 feat: PDV 초안 보관에 서류 첨부서류(extras) 추가
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
