@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>hondi.net AI 입력 전수 조사</title>
+<link rel="icon" href="data:,">
+<style>
+:root{--bg:#f7f8f6;--fg:#1b2420;--mut:#5d6a63;--card:#fff;--bd:#d9dfda;--acc:#0f6b5c;--accbg:#e2f1ed;--warn:#8a5a00;--warnbg:#fbf0d9;--no:#8b2d2d;--nobg:#f6e1e1}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121815;--fg:#e6ece8;--mut:#9aa8a0;--card:#1a221e;--bd:#2d3832;--acc:#5fc3ae;--accbg:#1c3530;--warn:#e3b660;--warnbg:#3a2f14;--no:#e69a9a;--nobg:#3d2222;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121815;--fg:#e6ece8;--mut:#9aa8a0;--card:#1a221e;--bd:#2d3832;--acc:#5fc3ae;--accbg:#1c3530;--warn:#e3b660;--warnbg:#3a2f14;--no:#e69a9a;--nobg:#3d2222;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:15px/1.65 "Pretendard","Noto Sans KR",system-ui,sans-serif;padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block:28px 56px}
+main{max-width:860px;margin:0 auto}
+h1{font-size:24px;margin:0 0 6px;text-wrap:balance}h2{font-size:17px;margin:30px 0 10px}
+.sub{color:var(--mut);margin:0 0 18px}
+.rule{background:var(--accbg);border-left:4px solid var(--acc);padding:10px 14px;border-radius:6px;margin:14px 0}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;margin:10px 0;min-width:0}
+.card h3{margin:0 0 4px;font-size:15px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tag{font-size:12px;padding:1px 9px;border-radius:999px;font-weight:700}
+.t-ok{background:var(--accbg);color:var(--acc)}.t-do{background:var(--warnbg);color:var(--warn)}.t-no{background:var(--nobg);color:var(--no)}
+.card p{margin:4px 0;color:var(--mut)}.card b{color:var(--fg)}
+code{font-size:12.5px;background:var(--bg);padding:1px 5px;border-radius:4px;word-break:break-all}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13.5px}td,th{border-bottom:1px solid var(--bd);padding:6px 8px;text-align:left;vertical-align:top}th{color:var(--mut);font-weight:600}
+</style>
+</head>
+<body>
+<main>
+<h1>hondi.net AI 입력 전수 조사</h1>
+<p class="sub">원칙: 데스크탑 입력 필드와 hondi.net 페이지가 한 화면에 함께 있으면, 그 페이지의 SP는 입력 필드의 SP다. 저장소 hondi 기준, 루트 HTML 42쪽 + pages 231쪽을 훑었습니다.</p>
+<div class="rule"><b>결론</b> 입력창을 가진 곳은 <b>공용 부품 몇 개</b>로 모입니다. 한 화면에 함께 뜨는 경로는 지금 <b>두 곳(혼디 대화 패널, 전문가 연결)뿐</b>이고 둘 다 처리돼 있습니다. 나머지는 "같이 뜨는 경로가 없는 곳"이라, 원칙을 적용한다기보다 <b>어떻게 같이 뜨게 할지</b>를 정해야 합니다. 직역별 SP를 가진 175쪽은 호스트 SP로 통째로 바꾸면 안 됩니다.</div>
+
+<h2>분류</h2>
+<div class="card"><h3>혼디 대화 패널 <code>webapp.html</code> <span class="tag t-ok">적용 완료</span></h3><p>AI 입력을 호스트 SP로 위임(hondi #886, mail #104). P2P 대화는 그대로.</p></div>
+<div class="card"><h3>전문가 연결 <code>pages/expert-chat.html</code> <span class="tag t-ok">이미 적용</span></h3><p>호스트 입력창이 대화를 이끄는 <code>hostinput</code> 방식(이전 작업). 직역별 SP를 유지한 채 입력창만 호스트 것을 씁니다.</p></div>
+<div class="card"><h3>서류 사이트 4곳 (law·tax·doctor·pro) <span class="tag t-ok">적용 완료</span></h3><p>별도 저장소(navi-pro). 호스트 입력창 + 칸 수정(navi-doc-* v3, navi-pro #28 / hondi #885).</p></div>
+
+<div class="card"><h3>공용 대화 위젯 <code>assets/chat-widget.js</code> — 175쪽 <span class="tag t-no">그대로 두기 권장</span></h3>
+<p>lawyer 48 · physician 24 · patent 22 · accountant 10 · 기타 71. 각 쪽이 <code>SP_lawyer-assistant</code> 같은 직역 SP를 고정해 <code>/ai/chat</code>을 호출합니다.</p>
+<p><b>위임하면 안 되는 이유</b> 호스트 SP(AC-PRO-CORE)로 바꾸면 직역 보조 SP가 사라집니다. 이 쪽은 "SP를 통일"이 아니라 <b>입력창만 호스트 것을 쓰는 방식</b>(expert-chat의 <code>hostinput</code>)이 맞습니다. 다만 이 페이지들이 데스크탑 화면 안에 함께 뜨는 경로는 현재 없습니다(독립 페이지).</p></div>
+
+<div class="card"><h3>expert-chat을 품은 페이지 4쪽 <span class="tag t-do">경로가 생길 때 적용</span></h3>
+<p><code>scrivener-write</code> · <code>advisor-steps</code> · <code>expert-counsel</code> · <code>expert-write</code>. 안에 <code>expert-chat.html?embed=1</code>을 넣는 구조라, 이 페이지를 호스트가 iframe으로 띄우게 되면 <code>hostinput</code>을 한 단계 전달하면 됩니다.</p></div>
+
+<div class="card"><h3>시뮬레이션 17쪽 <span class="tag t-no">해당 없음</span></h3><p>입력창 하나에 사건을 적고 한 번 실행하는 생성형 화면입니다. 대화가 아니므로 SP 통일 대상이 아닙니다.</p></div>
+
+<div class="card"><h3>독립 AI 화면 <span class="tag t-do">개별 결정</span></h3>
+<div class="tw"><table><tr><th>페이지</th><th>AI 호출</th><th>판단</th></tr>
+<tr><td><code>profile-assistant</code></td><td><code>/llm/relay</code> + chat-shell</td><td>내 프로필을 돕는 비서. 호스트 SP와 겹쳐 통일 후보 1순위</td></tr>
+<tr><td><code>regional-gov</code></td><td><code>call-ai</code>, 임베드 모드 있음</td><td>이미 iframe 용 모드가 있어 위임을 붙이기 쉬움</td></tr>
+<tr><td><code>ai-assistant</code> · <code>professional-ai</code> · <code>tax-optimizer</code> · <code>k-government</code></td><td>chat-widget</td><td>위 175쪽과 같은 취급</td></tr>
+<tr><td><code>consent-sale</code> · <code>hondi-market</code> · <code>profile</code> · <code>register-profile</code></td><td>전용 엔드포인트(<code>hondi-consent-sale</code>, 디지트 코드 등)</td><td>기능 전용 호출. 통일 대상 아님</td></tr></table></div></div>
+
+<div class="card"><h3>개발·관리 도구 <span class="tag t-no">제외</span></h3><p><code>admin</code> · <code>sp-editor</code> · <code>scenario-test</code> · <code>k-evaluation</code> · <code>core-prompts</code> · 아키텍처 설명 페이지들. 사용자 대화가 아닙니다.</p></div>
+<div class="card"><h3>쓰이지 않는 위젯 <span class="tag t-no">정리 후보</span></h3><p><code>kdoctor-chat-widget</code> · <code>estate-register-widget</code> · <code>estate-search-widget</code>은 어느 페이지도 불러오지 않습니다.</p></div>
+
+<h2>정해 주실 것</h2>
+<div class="card"><p><b>1.</b> 직역 SP 페이지(175쪽 + 4쪽)는 "SP 통일" 대신 <b>입력창만 호스트 것을 쓰는 방식</b>으로 가는 것이 맞는지.</p>
+<p><b>2.</b> 이 페이지들을 나비 화면 안에서 어떻게 보이게 할지(전문가 연결처럼 대화 아래 iframe으로 열기, 또는 혼디 대화 패널 안에서 열기). 경로가 정해져야 위임을 붙일 수 있습니다.</p>
+<p><b>3.</b> 다음 후보로 <code>profile-assistant</code>와 <code>regional-gov</code>를 먼저 할지.</p></div>
+</main>
+
+</body>
+</html>
