@@ -3139,9 +3139,17 @@ const SVC_ALIAS = {
 
 function _resolveSvcId(svcId) { return SVC_ALIAS[svcId] || svcId; }
 
+// 2026-11-02 — startsWith 접두어 비교를 정확 일치로 교체. 이전에는 'https://hondi.net.evil.com' 같은
+// 출처도 'https://hondi.net' 으로 시작한다는 이유로 통과했고, 응답에 Allow-Credentials:true 가 붙어
+// 임의 사이트가 허용 출처로 인정될 수 있었다. 로컬 개발(localhost·127.0.0.1)만 포트를 임의로 허용한다.
+const _LOCAL_DEV_ORIGIN_RE = /^http:\/\/(localhost|127\.0\.0\.1)(:\d{1,5})?$/;
+function _isAllowedOrigin(origin) {
+  return ALLOWED_ORIGINS.includes(origin) || _LOCAL_DEV_ORIGIN_RE.test(origin);
+}
+
 function getCorsOrigin(request) {
   const origin = request.headers.get('Origin') || '';
-  if (ALLOWED_ORIGINS.some(o => origin.startsWith(o))) return origin;
+  if (_isAllowedOrigin(origin)) return origin;
   if (origin === '') return '';
   return null;
 }
