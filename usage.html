@@ -611,6 +611,8 @@ window._retryPushSubscription = async function () {
 };
 
 loadUsage();
+// 유료 전환 안내창에서 넘어온 경우(?charge=1) 충전(계좌 이체) 안내를 바로 연다.
+if (new URLSearchParams(location.search).get('charge') === '1') { setTimeout(openChargeModal, 300); }
 loadChargeHistory();
 _checkPushRequired();
 </script>

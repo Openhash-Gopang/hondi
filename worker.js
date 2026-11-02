@@ -2081,7 +2081,7 @@ async function _chargeGdcForAiUsage(env, {
   if (!guid || !(krwAmount > 0)) return null;
   // 🧪 GDC 무료 테스트 모드 — 실제 차감 없이 성공으로 돌려준다(관리자 수동 차감 제외).
   if (serviceId !== 'admin-correction' && await _gdcFreeFor(env, guid)) {
-    await _testQuotaAdd(env, guid, krwAmount, settlementKey); // 테스트 계정 한도에 누적
+    await _testQuotaAdd(env, guid, (costKRW > 0 ? costKRW : krwAmount), settlementKey); // 테스트 계정 한도에 누적(DeepSeek API 실비 기준 — 실비가 없으면 청구액)
     console.log(JSON.stringify({ tag: 'GDC_FREE_TEST_SKIP_CHARGE', guid, krwAmount, serviceId: serviceId || 'hondi-chat', ts: new Date().toISOString() }));
     return { ok: true, test_free: true, charged_gdc: 0 };
   }
@@ -2128,7 +2128,7 @@ async function _chargeGdcForAiUsage(env, {
 async function _settleAiUsage(env, guid, bill, meta = {}, ctx = null, settlementKey = null) {
   if (!guid || !bill) return;
   if (await _gdcFreeFor(env, guid)) { // 🧪 GDC 무료 테스트 모드 — 차감·무료한도 소진 모두 생략
-    await _testQuotaAdd(env, guid, bill.billedKRW, settlementKey); // 단, 테스트 계정 한도에는 누적한다
+    await _testQuotaAdd(env, guid, (bill.apiCostKRW > 0 ? bill.apiCostKRW : bill.billedKRW), settlementKey); // 단, 테스트 계정 한도에는 DeepSeek API 실비 기준으로 누적한다
     return;
   }
   const kv = env.AI_SETUP_SEALS_KV;
