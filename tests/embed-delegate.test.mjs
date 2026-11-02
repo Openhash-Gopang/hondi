@@ -56,3 +56,12 @@ test('hondi-embed-sp: role=expert 이면 사용자를 해당 분야 인간 전�
   assert.match(h, /expert: d\.role === 'expert'/);
   assert.match(h, /\[대화 상대 — 나비웹 전문가 AI\]/);
 });
+
+test('지역별 정부 기관: gov-tree 경로 SP 전환(검증)·지역 컨텍스트 주입, 브릿지 region 응답', async () => {
+  const { readFileSync } = await import('node:fs');
+  const h = readFileSync(new URL('../webapp.html', import.meta.url), 'utf8');
+  assert.match(h, /prompts\\\/gov-tree\\\/\[A-Za-z0-9_\\-\\\/\.\]\+\\\.md/);
+  assert.match(h, /\[사용자 지역 정보 — 나비웹\]/);
+  const b = readFileSync(new URL('../pdv-draft-bridge.html', import.meta.url), 'utf8');
+  assert.match(b, /region: function \(\)/);
+});
