@@ -112,6 +112,22 @@ body{font-family:'Pretendard',-apple-system,'Helvetica Neue',sans-serif;
 .chq-row{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;
   border-top:1px solid #f5f5f5;font-size:13px}
 .chq-row:first-child{border-top:none}
+
+/* ── 사용량 그래프(2026-11-02) ── */
+.u-filters{display:flex;gap:8px;align-items:center;margin:4px 0 12px;flex-wrap:wrap}
+.u-chip{border:1px solid #e5e7eb;background:#fff;border-radius:20px;padding:6px 14px;font:inherit;font-size:12.5px;color:#374151;cursor:pointer}
+.u-chip.on{background:#111;color:#fff;border-color:#111}
+.u-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+@media (max-width:520px){.u-stats{grid-template-columns:1fr}}
+.u-chart{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.u-chart h3{font-size:13px;font-weight:600;color:#111;margin-bottom:2px;display:flex;justify-content:space-between;gap:8px}
+.u-chart h3 span{font-weight:500;color:#6b7280}
+.u-chart svg{display:block;width:100%;height:auto;margin-top:6px}
+.u-model{font-size:13px;font-weight:600;color:#111;margin:14px 2px 8px}
+.u-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:640px){.u-grid2{grid-template-columns:1fr}}
+body.embed .topbar,body.embed #push-required-banner,body.embed .notice{display:none!important}
+body.embed .scroll-body{max-width:960px;padding-top:12px}
 </style>
 </head>
 <body>
@@ -194,6 +210,18 @@ body{font-family:'Pretendard',-apple-system,'Helvetica Neue',sans-serif;
       <div class="quota-text" id="quota-text"></div>
       <div class="quota-est" id="quota-est"></div>
     </div>
+
+    <div class="u-filters" id="u-filters">
+      <button type="button" class="u-chip on" data-r="today">오늘</button>
+      <button type="button" class="u-chip" data-r="7">최근 7일</button>
+      <button type="button" class="u-chip" data-r="30">최근 30일</button>
+    </div>
+    <div class="u-stats">
+      <div class="summary-card"><div class="summary-label">청구액</div><div class="summary-value" id="u-krw">—<span class="unit">원</span></div></div>
+      <div class="summary-card"><div class="summary-label">API 요청</div><div class="summary-value" id="u-req">—</div></div>
+      <div class="summary-card"><div class="summary-label">토큰</div><div class="summary-value" id="u-tok">—</div></div>
+    </div>
+    <div id="u-charts"></div>
 
     <div class="detail-section">
       <div class="detail-header">
@@ -349,6 +377,7 @@ async function loadUsage() {
     // ── 모델별 상세 내역 ──
     const usageLogData = usageLogRes.status === 'fulfilled' ? usageLogRes.value : null;
     renderDetailTable(usageLogData);
+    _useSeries = usageLogData && usageLogData.ok && usageLogData.series ? usageLogData.series : null; _renderUse();
 
     loadingEl.style.display = 'none';
     contentEl.style.display = 'block';
@@ -358,6 +387,46 @@ async function loadUsage() {
     document.getElementById('state-error-detail').textContent = e.message || String(e);
   }
 }
+
+
+// ── 사용량 그래프(막대, 인라인 SVG). 데이터: /usage-log 의 series(KST) ──
+let _useSeries = null, _useRange = 'today';
+function _short(n) { n = Math.round(n); if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + 'M'; if (n >= 1e3) return (n / 1e3).toFixed(n >= 1e4 ? 0 : 1) + 'K'; return String(n); }
+function _niceMax(v) { if (v <= 0) return 1; const p = Math.pow(10, Math.floor(Math.log10(v))), f = v / p; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * p; }
+function _barChart(vals, labels, color, fmtY, minMax) {
+  const W = 560, H = 190, L = 44, R = 8, T = 10, B = 24, max = Math.max(_niceMax(Math.max.apply(null, vals.concat([0]))), minMax || 0), iw = W - L - R, ih = H - T - B, n = vals.length, bw = Math.max(2, iw / n * .62);
+  let g = '';
+  for (let i = 0; i <= 2; i++) { const y = T + ih - ih * i / 2; g += `<line x1="${L}" x2="${W - R}" y1="${y}" y2="${y}" stroke="#e5e7eb"/><text x="${L - 6}" y="${y + 4}" text-anchor="end" font-size="10.5" fill="#9ca3af">${fmtY(max * i / 2)}</text>`; }
+  vals.forEach((v, i) => { const h = ih * v / max, x = L + iw * (i + .5) / n - bw / 2; if (v > 0) g += `<rect x="${x.toFixed(1)}" y="${(T + ih - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(h, 1).toFixed(1)}" rx="2" fill="${color}"><title>${escapeHtml(labels[i])}: ${fmtY(v)}</title></rect>`; });
+  const step = Math.ceil(n / 6);
+  labels.forEach((l, i) => { if (i % step === 0 || i === n - 1 && n < 8) g += `<text x="${(L + iw * (i + .5) / n).toFixed(1)}" y="${H - 6}" text-anchor="middle" font-size="10.5" fill="#9ca3af">${escapeHtml(l)}</text>`; });
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="막대 그래프">${g}</svg>`;
+}
+function _renderUse() {
+  const sr = _useSeries, el = document.getElementById('u-charts');
+  if (!sr) { el.innerHTML = ''; return; }
+  const rows = _useRange === 'today' ? sr.hourly : sr.daily.slice(-Number(_useRange));
+  const lab = rows.map(r => _useRange === 'today' ? String(r.h).padStart(2, '0') + ':00' : r.d.slice(5));
+  const sum = (k) => rows.reduce((a, r) => a + (r[k] || 0), 0);
+  document.getElementById('u-krw').innerHTML = fmt(sum('krw')) + '<span class="unit">원</span>';
+  document.getElementById('u-req').textContent = fmt(sum('req'));
+  document.getElementById('u-tok').textContent = fmt(sum('tok'));
+  if (!sum('req')) { el.innerHTML = '<div class="detail-empty"><div class="detail-empty-icon">&#128202;</div>이 기간의 사용 내역이 없어요.</div>'; return; }
+  const num = (v) => v >= 100 ? fmt(v) : (Math.round(v * 100) / 100).toString();
+  let h = `<div class="u-chart"><h3>청구액(원) <span>${fmt(sum('krw'))}원</span></h3>${_barChart(rows.map(r => r.krw), lab, '#1A73E8', num)}</div>`;
+  const models = {}; rows.forEach(r => Object.keys(r.models || {}).forEach(m => { models[m] = 1; }));
+  Object.keys(models).forEach(m => {
+    if (!rows.some(r => ((r.models[m] || {}).req || 0) > 0)) return;
+    const rq = rows.map(r => (r.models[m] || {}).req || 0), tk = rows.map(r => (r.models[m] || {}).tok || 0);
+    h += `<div class="u-model">${escapeHtml(m)}</div><div class="u-grid2"><div class="u-chart"><h3>API 요청 <span>${fmt(rq.reduce((a, b) => a + b, 0))}</span></h3>${_barChart(rq, lab, '#60a5fa', _short, 2)}</div><div class="u-chart"><h3>토큰 <span>${fmt(tk.reduce((a, b) => a + b, 0))}</span></h3>${_barChart(tk, lab, '#93c5fd', _short)}</div></div>`;
+  });
+  el.innerHTML = h;
+}
+document.addEventListener('click', (e) => {
+  const b = e.target.closest && e.target.closest('#u-filters .u-chip'); if (!b) return;
+  _useRange = b.getAttribute('data-r'); document.querySelectorAll('#u-filters .u-chip').forEach(c => c.classList.toggle('on', c === b)); _renderUse();
+});
+if (/[?&]embed=mail/.test(location.search)) document.body.classList.add('embed');
 
 function renderDetailTable(data) {
   const body = document.getElementById('detail-body');
