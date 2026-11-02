@@ -238,6 +238,7 @@
     var price = el('div', 'hub-price');
     price.appendChild(el('div', '', '정식 요금: 월 100,000원 · 연 1,200,000원'));
     price.appendChild(el('div', 'hub-price-em', '필드 테스트 가입자(2026년 12월 말까지) 90% 할인: 월 10,000원 · 연 100,000원'));
+    price.appendChild(el('div', '', '결제 시 GDC 지급: 월 10,000원 → 100,000 GDC, 연 100,000원 → 120,000 GDC'));
     box.appendChild(price);
     box.appendChild(el('p', 'hub-note', '전환 순서: ① 정식 아이디로 로그인하거나 만들면 테스트 데이터가 옮겨집니다. ② 사용량 화면의 충전하기에서 계좌 이체로 결제합니다. 자동결제는 없습니다.'));
     var b1 = el('button', 'hub-btn hub-primary', '정식 아이디로 로그인'); b1.type = 'button';

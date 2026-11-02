@@ -18,6 +18,7 @@ import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
 import { profilePhoneFilter, last8Filter, pickGuidByLast8 } from './src/worker/phone-lookup.js';
 import { validateSignalInput as _sigValidate, canDeleteSignal as _sigCanDelete, sendRateOk as _sigRateOk } from './src/worker/signal-auth.js';
 import { classifyQuery as _ffClassify, publicCard as _ffPublicCard, rateLimitOk as _ffRateOk } from './src/worker/friend-find.js';
+import { fieldTestPlanGdc as _fieldTestPlanGdc } from './src/worker/charge-plans.js';
 import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
 import { parseMessage as _kmailParseMime, decodeMimeWords as _kmailDecodeMimeWords, repairStoredText as _kmailRepairStoredText } from './src/worker/mime-text.js';
@@ -291,8 +292,12 @@ function _chargeBankAccountInfo(env) {
 // 구조적으로 합산이 불가능하다). 만료·기간 제한 없음(A안 채택,
 // 2026-09-12) — 지급된 GDC는 일반 잔액과 동일하게 소진될 때까지
 // 유지되며 K-Law·전문가 페르소나·모든 K-서비스에 공용으로 쓰인다.
-function _computeChargeBonusGdc(confirmedKrw) {
+// ※ 2026-11-02(주피터 지시) — 필드 테스트 기간(2026년 12월 말까지)에는 정확히 10,000원 → 100,000 GDC,
+//    100,000원 → 120,000 GDC를 지급한다(src/worker/charge-plans.js). 그 밖의 금액은 아래 구간 배율 그대로다.
+function _computeChargeBonusGdc(confirmedKrw, now = Date.now()) {
   const krw = Number(confirmedKrw) || 0;
+  const planGdc = _fieldTestPlanGdc(krw, now);
+  if (planGdc !== null) return planGdc;
   if (krw >= 100000) return Math.round(krw * 2.0);
   if (krw >= 50000)  return Math.round(krw * 1.8);
   if (krw >= 10000)  return Math.round(krw * 1.6);
