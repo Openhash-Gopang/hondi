@@ -66,7 +66,8 @@
 
   var KAUTH_SRC = 'https://hondi.net/auth/k-service-auth-client.js';
   var C_TOKEN = 'hondi_pvt', C_EXP = 'hondi_pvt_exp';
-  var COOKIE_DOMAIN = '.hondi.net';
+  // hondi.net 계열은 서브도메인 공유 쿠키(.hondi.net), 그 밖의 주소(naviweb.kr 등)는 그 주소 자신의 쿠키를 쓴다(브라우저가 남의 도메인 쿠키를 거부함)
+  var COOKIE_DOMAIN = /(^|\.)hondi\.net$/.test(location.hostname) ? '.hondi.net' : location.hostname;
   var SETTINGS_URL = 'https://mail.hondi.net/desktop.html#settings';   // K-Mail 설정 페이지(아이디 바꾸기·보내는 이름·서명·자동응답)
 
   // ── 로그인 상태 읽기 ─────────────────────────────────────────

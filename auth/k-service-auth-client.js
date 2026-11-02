@@ -51,7 +51,7 @@
   if (global.KAuth) return; // 중복 로드 방지
 
   var PROXY         = 'https://hondi-proxy.tensor-city.workers.dev';
-  var COOKIE_DOMAIN = (global.K_AUTH_CONFIG && global.K_AUTH_CONFIG.cookieDomain) || '.hondi.net';
+  var COOKIE_DOMAIN = (global.K_AUTH_CONFIG && global.K_AUTH_CONFIG.cookieDomain) || (/(^|\.)hondi\.net$/.test(location.hostname) ? '.hondi.net' : location.hostname);
   var COOKIE_TOKEN  = 'hondi_pvt';
   var COOKIE_EXP    = 'hondi_pvt_exp';
   // 2026-09-12 신설 — 슬라이딩 세션 갱신 임계값(주피터 지시: Gmail처럼
