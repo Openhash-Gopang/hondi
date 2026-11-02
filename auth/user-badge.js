@@ -20,8 +20,8 @@
          뒤 4자리만 보여 준다(예: ●●●● 5678).
 
    ■ 테스트 아이디 한도(2026-10-27)
-     · 테스트 아이디는 청구액 기준 정해진 한도(기본 500 GDC)까지 무료이고, 넘기면 24시간 유예 뒤 사용이 중단된다.
-     · 메뉴에 사용량·유예 마감 시각을 보여 주고, 중단되면 안내창을 띄운다(서버 /auth/test-quota).
+     · 테스트 아이디는 DeepSeek API 실비 기준 정해진 한도(기본 500원)까지 무료이고, 한도가 차면 곧바로 사용이 중단되며 유료 회원 전환 안내창이 뜬다.
+     · 메뉴에 사용량을 보여 주고, 한도가 차면 안내창을 띄운다(서버 /auth/test-quota). 유예(grace)는 서버 설정(TEST_GRACE_HOURS)을 켠 경우에만 있다.
      · "정식 아이디로 로그인" — 테스트 아이디의 로그인 정보를 쿠키(hondi_mig_pvt, 7일)에 잠시 보관한 뒤 전화 인증 로그인을 연다.
        정식 아이디로 로그인되면 같은 쿠키를 보고 테스트 데이터를 정식 아이디로 옮긴다(서버 /auth/test-migrate).
      · "정식 아이디 만들기" — 위 쿠키를 남기고 hondi.net 가입 화면으로 이동. 가입·로그인 뒤 어느 사이트에서든 이동이 이어진다.
@@ -108,6 +108,7 @@
   var PROXY = 'https://hondi-proxy.tensor-city.workers.dev';
   var C_MIG = 'hondi_mig_pvt';                              // 테스트 로그인 정보를 잠시 보관(전환용)
   var SIGNUP_URL = 'https://hondi.net/desktop.html';        // 정식 아이디 가입 화면(메인 앱)
+  var PAY_URL = 'https://hondi.net/usage.html?charge=1';     // 결제(계좌 이체) 화면 — 정식 아이디로 로그인한 뒤 열린다
   function writeCookie(name, value, maxAgeSec) {
     doc.cookie = name + '=' + encodeURIComponent(value) + '; domain=' + COOKIE_DOMAIN + '; path=/; max-age=' + maxAgeSec + '; secure; samesite=lax';
   }
@@ -232,25 +233,33 @@
     if (doc.getElementById('hondi-blocked-modal')) return;
     var back = el('div'); back.id = 'hondi-blocked-modal';
     var box = el('div', 'hub-modal'); box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true');
-    box.appendChild(el('h2', '', '테스트 사용이 중단되었습니다'));
-    box.appendChild(el('p', '', '테스트 한도 ' + fmtNum(quota.limit_krw) + ' GDC를 모두 사용했고 ' + quota.grace_hours + '시간의 유예 기간도 끝났습니다. 정식 아이디로 로그인하거나 새로 만들면 테스트 데이터를 옮겨 계속 이용할 수 있습니다.'));
+    box.appendChild(el('h2', '', '무료 한도를 모두 사용했습니다'));
+    box.appendChild(el('p', '', '테스트 아이디의 무료 한도(AI 사용 비용 ' + fmtNum(quota.limit_krw) + '원)를 다 썼습니다. 계속 쓰려면 유료 회원으로 전환해 주세요.'));
+    var price = el('div', 'hub-price');
+    price.appendChild(el('div', '', '정식 요금: 월 100,000원 · 연 1,200,000원'));
+    price.appendChild(el('div', 'hub-price-em', '필드 테스트 가입자(2026년 12월 말까지) 90% 할인: 월 10,000원 · 연 100,000원'));
+    price.appendChild(el('div', '', '결제 시 GDC 지급: 월 10,000원 → 100,000 GDC, 연 100,000원 → 120,000 GDC'));
+    box.appendChild(price);
+    box.appendChild(el('p', 'hub-note', '전환 순서: ① 정식 아이디로 로그인하거나 만들면 테스트 데이터가 옮겨집니다. ② 사용량 화면의 충전하기에서 계좌 이체로 결제합니다. 자동결제는 없습니다.'));
     var b1 = el('button', 'hub-btn hub-primary', '정식 아이디로 로그인'); b1.type = 'button';
     b1.addEventListener('click', function () { back.remove(); startFormalLogin(); });
     var b2 = el('button', 'hub-btn', '정식 아이디 만들기'); b2.type = 'button';
     b2.addEventListener('click', startSignup);
+    var b4 = el('button', 'hub-btn', '이미 정식 아이디가 있다면 결제 화면 열기'); b4.type = 'button';
+    b4.addEventListener('click', function () { global.location.href = PAY_URL; });
     var b3 = el('button', 'hub-btn', '닫기'); b3.type = 'button';
     b3.addEventListener('click', function () { back.remove(); });
-    box.appendChild(b1); box.appendChild(b2); box.appendChild(b3);
+    box.appendChild(b1); box.appendChild(b2); box.appendChild(b4); box.appendChild(b3);
     back.appendChild(box); doc.body.appendChild(back);
   }
   function appendTestSection(menu) {
     if (quota) {
       var pct = Math.min(100, Math.round((quota.spent_krw / quota.limit_krw) * 100));
       var q = el('div', 'hub-quota');
-      q.appendChild(el('div', '', '테스트 사용량 ' + fmtNum(quota.spent_krw) + ' / ' + fmtNum(quota.limit_krw) + ' GDC'));
+      q.appendChild(el('div', '', '무료 사용량 ' + fmtNum(quota.spent_krw) + ' / ' + fmtNum(quota.limit_krw) + '원'));
       var bar = el('div', 'hub-bar'); var fill = el('div', 'hub-bar-fill' + (quota.status === 'active' ? '' : ' hub-over')); fill.style.width = pct + '%'; bar.appendChild(fill); q.appendChild(bar);
       if (quota.status === 'grace') q.appendChild(el('p', 'hub-note hub-warn', '한도를 모두 사용했습니다. ' + fmtTime(quota.grace_ends_at) + '까지 정식 아이디로 전환해 주세요. 이후에는 사용이 중단됩니다.'));
-      else if (quota.status === 'blocked') q.appendChild(el('p', 'hub-note hub-warn', '사용이 중단되었습니다. 정식 아이디로 전환하면 이어서 쓸 수 있습니다.'));
+      else if (quota.status === 'blocked') q.appendChild(el('p', 'hub-note hub-warn', '무료 한도를 모두 사용해 사용이 중단되었습니다. 유료 회원으로 전환하면 이어서 쓸 수 있습니다.'));
       menu.appendChild(q);
     } else {
       menu.appendChild(el('p', 'hub-note', '테스트 기간에 자동으로 만들어진 임시 아이디입니다.'));
@@ -540,6 +549,10 @@
     '#hondi-blocked-modal{position:fixed;inset:0;z-index:2147482500;background:rgba(15,23,42,.62);display:flex;align-items:center;justify-content:center;padding:16px}' +
     '#hondi-blocked-modal .hub-modal{width:min(440px,100%);box-sizing:border-box;background:#fff;color:#0f172a;border-radius:16px;padding:22px 22px 18px;font:500 16px/1.6 Pretendard,system-ui,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.35)}' +
     '#hondi-blocked-modal h2{margin:0 0 8px;font-size:21px}' +
+    '#hondi-blocked-modal .hub-price{margin:8px 0;padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#f1f5f9;font-size:15px;line-height:1.55}' +
+    '#hondi-blocked-modal .hub-price-em{margin-top:4px;font-weight:700;color:#1d4ed8}' +
+    '#hondi-blocked-modal .hub-note{font-size:14px;color:#475569;line-height:1.55}' +
+    '@media (prefers-color-scheme:dark){#hondi-blocked-modal .hub-price{background:#0f172a;border-color:#475569}#hondi-blocked-modal .hub-price-em{color:#93c5fd}#hondi-blocked-modal .hub-note{color:#cbd5e1}}' +
     '#hondi-blocked-modal p{margin:0 0 6px}' +
     '#hondi-blocked-modal .hub-btn{display:block;width:100%;margin-top:10px;padding:11px 12px;border-radius:10px;border:1px solid #cbd5e1;background:#f8fafc;color:#0f172a;font:inherit;font-size:16px;cursor:pointer}' +
     '#hondi-blocked-modal .hub-btn.hub-primary{background:#1d4ed8;border-color:#1d4ed8;color:#fff}' +

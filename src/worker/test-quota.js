@@ -1,9 +1,11 @@
-// src/worker/test-quota.js — 테스트 계정 사용 한도(청구액 기준 GDC) · 24시간 유예 · 차단 판정
+// src/worker/test-quota.js — 테스트 계정 사용 한도(DeepSeek API 실비 기준 원) · 차단 판정
 //
-// 정책(2026-10-27, 주피터 지시):
-//   · 테스트 계정은 청구액 합계가 TEST_QUOTA_KRW(기본 500, GDC=KRW 1:1)가 될 때까지 무료로 쓴다.
-//   · 한도를 넘기면 그 순간부터 TEST_GRACE_HOURS(기본 24)시간 동안은 계속 쓸 수 있다(유예).
-//   · 유예가 끝나면 차단한다 — 정식 아이디로 전환(데이터 이동)하거나 사용을 중단해야 한다.
+// 정책(2026-11-02, 주피터 지시 — 2026-10-27 정책을 바꿈):
+//   · 테스트 계정은 DeepSeek API 실비(apiCostKRW) 합계가 TEST_QUOTA_KRW(기본 500원)가 될 때까지 무료로 쓴다.
+//     (예전에는 실비에 배수를 곱한 청구액 기준이었다. 호출하는 쪽에서 실비를 넘겨 준다.)
+//   · 한도가 차면 곧바로 차단하고 화면에서 유료 회원 전환 안내창을 띄운다. 유예 기간은 기본 0시간이다.
+//     (TEST_GRACE_HOURS 환경 변수에 0보다 큰 값을 주면 예전처럼 그 시간 동안 유예할 수 있다.)
+//   · 차단돼도 정식 아이디로 전환(데이터 이동)과 한도 조회는 계속 허용한다.
 //
 // KV만 주입받는 순수 모듈이다(worker.js 밖에서도 단위 시험 가능).
 //   키: hondi:test_quota:<guid> → { spent_krw, exceeded_at(ms|null) }
@@ -11,7 +13,7 @@
 //     늦게 걸리는 쪽으로만 틀린다), 같은 키에 초당 1회를 넘는 쓰기는 거부될 수 있어 쓰기 실패는 무시한다.
 
 export const TEST_QUOTA_DEFAULT_KRW = 500;
-export const TEST_GRACE_DEFAULT_HOURS = 24;
+export const TEST_GRACE_DEFAULT_HOURS = 0;
 
 const keyOf = (guid) => `hondi:test_quota:${guid}`;
 
@@ -87,6 +89,7 @@ export async function addSpend(kv, guid, krw, now, cfg, dedupKey = null) {
 }
 
 export function blockedMessage(ev) {
-  return `테스트 한도(${ev.limit_krw} GDC)를 모두 사용했고 ${ev.grace_hours}시간의 유예 기간도 끝났습니다. ` +
-    `정식 아이디로 로그인하거나 새로 만든 뒤, 테스트 데이터를 옮겨 계속 이용해 주세요.`;
+  const grace = Number(ev && ev.grace_hours) > 0 ? ` ${ev.grace_hours}시간의 유예 기간도 끝났습니다.` : '';
+  return `무료 한도(AI 사용 비용 ${ev.limit_krw}원)를 모두 사용했습니다.${grace} ` +
+    `유료 회원으로 전환하려면 먼저 정식 아이디로 로그인하거나 새로 만든 뒤, 테스트 데이터를 옮겨 계속 이용해 주세요.`;
 }
