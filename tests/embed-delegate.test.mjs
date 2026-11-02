@@ -42,3 +42,10 @@ test('webapp.html: 나비웹의 "각종 기관" 선택 — hondi-embed-sp 로 �
   const s = readFileSync(new URL('../webapp.html', import.meta.url), 'utf8');
   for (const k of ["d.type === 'hondi-embed-sp'", "d.type === 'hondi-embed-sp-ask'", "type: 'hondi-embed-sp-ready'", "type: 'hondi-embed-sp-reply'", "window.__hondiEmbedSp && window.__hondiEmbedSp.text", "/prompts/sp-catalog.json", 'window.EmbedDelegate.HOSTS.indexOf(e.origin) >= 0']) assert.ok(s.includes(k), k);
 });
+
+test('hondi-embed-sp: 답은 짧게·마크다운, 면책 문구 제외 규칙을 붙이고 마크다운 원문을 돌려준다', async () => {
+  const { readFileSync } = await import('node:fs');
+  const h = readFileSync(new URL('../webapp.html', import.meta.url), 'utf8');
+  assert.match(h, /\[화면 표시 규칙 — 나비웹 대화창\]/);
+  assert.match(h, /_lastA/);
+});

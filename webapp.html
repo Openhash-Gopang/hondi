@@ -4286,7 +4286,8 @@ window.closePDV = closePDV;
     // length가 0이 아니라서 system이 영영 주입되지 않는 문제가 있었다.
     // "system 메시지가 있는지"로 직접 판단하고, unshift로 맨 앞에 둔다.
     if (!_panelHistory.some(m => m.role === 'system')) {
-      let effectiveSystem = (window.__hondiEmbedSp && window.__hondiEmbedSp.text) || cfg.system || '';   // 2026-11-02: 나비웹 '각종 기관' 선택 중이면 그 기관의 SP
+      let effectiveSystem = (window.__hondiEmbedSp && window.__hondiEmbedSp.text) || cfg.system || '';
+      if (window.__hondiEmbedSp && window.__hondiEmbedSp.text) effectiveSystem += '\n\n[화면 표시 규칙 — 나비웹 대화창]\n- 답은 핵심만 짧게(6~8줄 이내) 마크다운으로 쓴다: 필요하면 **굵은 글씨**, 짧은 글머리표(- ), 번호 목록만 쓰고 큰 제목(#)·구분선(---)은 쓰지 않는다. 줄바꿈은 반드시 실제 줄바꿈으로 한다.\n- 면책·고지·권고 문구(\"저는 AI이며 …가 아닙니다\", \"인간 전문가와 상담하세요\", [1차 통로 고지], [위험 고지] 등)는 화면 첫머리에 한 번 게시되므로 답변에는 넣지 않는다.\n- 더 필요한 정보가 있으면 마지막에 짧은 질문 한 가지만 한다.';   // 2026-11-02: 나비웹 '각종 기관' 선택 중이면 그 기관의 SP
       if (!effectiveSystem) {
         try {
           effectiveSystem = await _loadAgentCommonSP();
@@ -5072,7 +5073,8 @@ window.closePDV = closePDV;
         const bub = _appendPanelMsg('ai', '…'); bub.classList.add('streaming'); _setPanelGenerating(true);
         try { await _callPanelAI(text, bub, [], null, 'hondi-flash'); } catch (err) { bub.textContent = 'AI 오류: ' + (err && err.message || err); }
         bub.classList.remove('streaming'); _setPanelGenerating(false);
-        _spPost(e, { type: 'hondi-embed-sp-reply', id, text: String(bub.textContent || '').slice(0, 4000) });
+        const _lastA = [..._panelHistory].reverse().find(m => m && m.role === 'assistant');
+        _spPost(e, { type: 'hondi-embed-sp-reply', id, text: String((_lastA && _lastA.content) || bub.textContent || '').slice(0, 4000) });   // 마크다운 원문을 돌려준다
       }
     });
   }
