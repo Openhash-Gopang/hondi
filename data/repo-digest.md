@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-03 06:07 KST · 기준 커밋 4aecfdd0
+- 갱신: 2026-11-03 07:37 KST · 기준 커밋 94b3de0c
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 882건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-03 Merge pull request #908 from Openhash-Gopang/feat/pdv-bridge-guide-kind
+- 2026-11-03 PDV 중계: 나비 길잡이 과제 계획서('guide' 종류)와 caps 확인 명령 추가
 - 2026-11-03 feat: 로그인 쿠키 도메인을 접속 주소에 맞춤(naviweb.kr 전환 준비)
 - 2026-11-03 style: 제안 게시판을 나비웹 청록 기반의 심플한 레이아웃·큰 글자로 갱신
 - 2026-11-03 PDV 페이지: 나비웹 설정에 끼워 쓰는 embed=mail 모드
@@ -42,8 +44,6 @@
 - 2026-11-01 feat(assistant): 비서 호스트(기본 규칙팩·점검·알림 패널용 findings) + /kmail/assist 점검 신호 첨부 + gate 미평가 버그 수정
 - 2026-11-01 feat(case): 초대 링크 주소를 앱이 지정할 수 있게(signup_base, https만)
 - 2026-11-01 Merge pull request #882 from Openhash-Gopang/feat/case-invitee-flow
-- 2026-11-01 feat(case): 초대받은 쪽 흐름 — claimInvite·sendProposal·poll(onProposal), 제안 case_id 해시 검증
-- 2026-11-01 Merge pull request #881 from Openhash-Gopang/feat/assistant-finish
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
