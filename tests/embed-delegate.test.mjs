@@ -49,3 +49,10 @@ test('hondi-embed-sp: 답은 짧게·마크다운, 면책 문구 제외 규칙�
   assert.match(h, /\[화면 표시 규칙 — 나비웹 대화창\]/);
   assert.match(h, /_lastA/);
 });
+
+test('hondi-embed-sp: role=expert 이면 사용자를 해당 분야 인간 전문가로 상정하는 규칙을 붙인다', async () => {
+  const { readFileSync } = await import('node:fs');
+  const h = readFileSync(new URL('../webapp.html', import.meta.url), 'utf8');
+  assert.match(h, /expert: d\.role === 'expert'/);
+  assert.match(h, /\[대화 상대 — 나비웹 전문가 AI\]/);
+});
