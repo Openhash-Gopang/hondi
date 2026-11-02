@@ -5055,15 +5055,17 @@ window.closePDV = closePDV;
         try {
           // 정부 AI(지역별 기관): spPath = prompts/gov-tree/ 아래 .md 만 허용(그 밖의 경로·.. 거부). 아니면 sp-catalog 의 키.
           const gpath = /^prompts\/gov-tree\/[A-Za-z0-9_\-\/.]+\.md$/.test(key) && key.indexOf('..') < 0 ? key : '';
-          let url;
-          if (gpath) url = '/' + gpath;
+          let url, inlineTxt = '';
+          if (key.indexOf('inline:') === 0 && typeof d.spText === 'string' && d.spText.length > 50) inlineTxt = d.spText.slice(0, 8000);   // 호스트(허용된 mail)가 직접 준 안내용 SP — 메일 화면의 '제출 안내' 등
+          if (inlineTxt) url = '';
+          else if (gpath) url = '/' + gpath;
           else {
             const cat = await fetch('/prompts/sp-catalog.json', { cache: 'no-cache' }); if (!cat.ok) throw new Error('catalog ' + cat.status);
             const name = (await cat.json())[key]; if (!name) throw new Error('catalog key ' + key);
             url = '/prompts/' + name;
           }
-          const res = await fetch(url, { cache: 'no-cache' }); if (!res.ok) throw new Error('sp ' + res.status);
-          const txt = await res.text(); if (!txt || txt.length < 50) throw new Error('sp 내용이 비정상적으로 짧음');
+          let txt;
+          if (inlineTxt) txt = inlineTxt; else { const res = await fetch(url, { cache: 'no-cache' }); if (!res.ok) throw new Error('sp ' + res.status); txt = await res.text(); } if (!txt || txt.length < 50) throw new Error('sp 내용이 비정상적으로 짧음');
           window.__hondiEmbedSp = { key, label, text: txt, expert: d.role === 'expert', context: String(d.context || '').slice(0, 400) };
           _panelHistory.length = 0; msgList.innerHTML = '';
           _appendPanelMsg('ai', String(d.greeting || ('안녕하세요! 나비 ' + label + ' 서비스입니다. 원하시는 것을 말씀해 주세요.')).slice(0, 300));

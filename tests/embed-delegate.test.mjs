@@ -65,3 +65,9 @@ test('지역별 정부 기관: gov-tree 경로 SP 전환(검증)·지역 컨텍�
   const b = readFileSync(new URL('../pdv-draft-bridge.html', import.meta.url), 'utf8');
   assert.match(b, /region: function \(\)/);
 });
+
+test('hondi-embed-sp: inline: 키 + spText 로 호스트가 직접 준 안내용 SP 를 쓴다', async () => {
+  const { readFileSync } = await import('node:fs');
+  const h = readFileSync(new URL('../webapp.html', import.meta.url), 'utf8');
+  assert.match(h, /key\.indexOf\('inline:'\) === 0 && typeof d\.spText === 'string'/);
+});
