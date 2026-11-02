@@ -4287,6 +4287,7 @@ window.closePDV = closePDV;
     // "system 메시지가 있는지"로 직접 판단하고, unshift로 맨 앞에 둔다.
     if (!_panelHistory.some(m => m.role === 'system')) {
       let effectiveSystem = (window.__hondiEmbedSp && window.__hondiEmbedSp.text) || cfg.system || '';
+      if (window.__hondiEmbedSp && window.__hondiEmbedSp.text && window.__hondiEmbedSp.context) effectiveSystem += '\n\n[사용자 지역 정보 — 나비웹]\n' + window.__hondiEmbedSp.context + '\n이 지역을 관할하는 기관의 입장에서 답한다.';
       if (window.__hondiEmbedSp && window.__hondiEmbedSp.text && window.__hondiEmbedSp.expert) effectiveSystem += '\n\n[대화 상대 — 나비웹 전문가 AI]\n- 지금 대화하는 사용자는 이 분야의 자격을 갖춘 인간 전문가(' + (window.__hondiEmbedSp.label || '') + ')다. 일반인에게 하듯 쉽게 풀어 설명하거나 \"전문가와 상담하세요\"라고 권하지 않는다.\n- 당신은 그 전문가의 업무를 보조한다: 법률이면 법리·쟁점·판례·조문 검토, 의료면 감별진단·검사·치료 옵션 검토처럼 해당 직역의 전문 용어와 수준으로 답한다. 최종 판단과 책임은 사용자인 전문가에게 있다.';
       if (window.__hondiEmbedSp && window.__hondiEmbedSp.text) effectiveSystem += '\n\n[화면 표시 규칙 — 나비웹 대화창]\n- 답은 핵심만 짧게(6~8줄 이내) 마크다운으로 쓴다: 필요하면 **굵은 글씨**, 짧은 글머리표(- ), 번호 목록만 쓰고 큰 제목(#)·구분선(---)은 쓰지 않는다. 줄바꿈은 반드시 실제 줄바꿈으로 한다.\n- 면책·고지·권고 문구(\"저는 AI이며 …가 아닙니다\", \"인간 전문가와 상담하세요\", [1차 통로 고지], [위험 고지] 등)는 화면 첫머리에 한 번 게시되므로 답변에는 넣지 않는다.\n- 더 필요한 정보가 있으면 마지막에 짧은 질문 한 가지만 한다.';   // 2026-11-02: 나비웹 '각종 기관' 선택 중이면 그 기관의 SP
       if (!effectiveSystem) {
@@ -5050,13 +5051,20 @@ window.closePDV = closePDV;
           if (was) { _panelHistory.length = 0; msgList.innerHTML = ''; _appendPanelMsg('ai', '원래의 나비로 돌아왔습니다. 무엇을 도와드릴까요?'); }
           _spPost(e, { type: 'hondi-embed-sp-ready', sp: '', ok: true }); return;
         }
-        if (window.__hondiEmbedSp && window.__hondiEmbedSp.key === key) { _spPost(e, { type: 'hondi-embed-sp-ready', sp: key, ok: true }); return; }
+        if (window.__hondiEmbedSp && window.__hondiEmbedSp.key === key && String(d.context || '').slice(0, 400) === (window.__hondiEmbedSp.context || '')) { _spPost(e, { type: 'hondi-embed-sp-ready', sp: key, ok: true }); return; }
         try {
-          const cat = await fetch('/prompts/sp-catalog.json', { cache: 'no-cache' }); if (!cat.ok) throw new Error('catalog ' + cat.status);
-          const name = (await cat.json())[key]; if (!name) throw new Error('catalog key ' + key);
-          const res = await fetch('/prompts/' + name, { cache: 'no-cache' }); if (!res.ok) throw new Error('sp ' + res.status);
+          // 정부 AI(지역별 기관): spPath = prompts/gov-tree/ 아래 .md 만 허용(그 밖의 경로·.. 거부). 아니면 sp-catalog 의 키.
+          const gpath = /^prompts\/gov-tree\/[A-Za-z0-9_\-\/.]+\.md$/.test(key) && key.indexOf('..') < 0 ? key : '';
+          let url;
+          if (gpath) url = '/' + gpath;
+          else {
+            const cat = await fetch('/prompts/sp-catalog.json', { cache: 'no-cache' }); if (!cat.ok) throw new Error('catalog ' + cat.status);
+            const name = (await cat.json())[key]; if (!name) throw new Error('catalog key ' + key);
+            url = '/prompts/' + name;
+          }
+          const res = await fetch(url, { cache: 'no-cache' }); if (!res.ok) throw new Error('sp ' + res.status);
           const txt = await res.text(); if (!txt || txt.length < 50) throw new Error('sp 내용이 비정상적으로 짧음');
-          window.__hondiEmbedSp = { key, label, text: txt, expert: d.role === 'expert' };
+          window.__hondiEmbedSp = { key, label, text: txt, expert: d.role === 'expert', context: String(d.context || '').slice(0, 400) };
           _panelHistory.length = 0; msgList.innerHTML = '';
           _appendPanelMsg('ai', String(d.greeting || ('안녕하세요! 나비 ' + label + ' 서비스입니다. 원하시는 것을 말씀해 주세요.')).slice(0, 300));
           _spPost(e, { type: 'hondi-embed-sp-ready', sp: key, ok: true });
