@@ -1,9 +1,14 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-02 11:11 KST · 기준 커밋 b909adeb
+- 갱신: 2026-11-02 11:29 KST · 기준 커밋 d9773260
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 882건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-02 Merge pull request #892 from Openhash-Gopang/feat/free-limit-paid-popup-20261102
+- 2026-11-02 feat: 충전 구간별 보너스 배율(x1.6/x1.8/x2.0)을 없앰
+- 2026-11-02 feat: 필드 테스트 기간 정액 입금 GDC 지급(월 1만원→10만 GDC, 연 10만원→12만 GDC)
+- 2026-11-02 feat: 테스트 무료 한도를 DeepSeek API 실비 500원 기준으로 바꾸고 유예를 없앰
+- 2026-11-02 fix(cors): getCorsOrigin 접두어 비교를 정확 일치로 교체 (hondi.net.evil.com 류 우회 차단)
 - 2026-11-02 feat: naviweb.kr 판결 시뮬레이션용 CORS 허용 + klaw 공유 엔진
 - 2026-11-02 Merge pull request #889 from Openhash-Gopang/docs/naviweb-guide-fix-20261102
 - 2026-11-02 docs: 개정 안내서 시작하기 문구를 사용 설명서와 일치시킴
@@ -39,11 +44,6 @@
 - 2026-11-01 Merge pull request #871 from Openhash-Gopang/feat/case-core-rest
 - 2026-11-01 feat(case): 서명된 이벤트(S1) — 합의·종료·청구서·소통 응답 위조 방지, 투영 해시 검증, 상태 전이 전달 (G1·G3·G4·G5·G6)
 - 2026-11-01 test(case): 사고 실험 — 맡은 일·맡긴 일·나 홀로를 두 기기+서버로 끝까지 시뮬레이션, 한계 G1~G12 고정
-- 2026-11-01 fix(case): case-store patchCase 추가, 상태 전이 기록에 outcome 을 from/to 와 합쳐 저장
-- 2026-11-01 feat(case): M1 case-store — PDV(IndexedDB, domain work) 저장소 + 해시 앵커 아웃박스
-- 2026-11-01 feat(case): M2 초대권·가입 알림·chat room 개설 계약, M3 봉인 우편함 봉투 계약
-- 2026-11-01 Merge pull request #870 from Openhash-Gopang/feat/case-server-m3
-- 2026-11-01 feat(case): 서버 — case 서비스 등록, 초대 등록·가입 확인, 봉인 우편함(push/pull/ack)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
