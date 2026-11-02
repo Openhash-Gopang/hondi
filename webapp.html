@@ -5070,6 +5070,12 @@ window.closePDV = closePDV;
           _panelHistory.length = 0; msgList.innerHTML = '';
           _appendPanelMsg('ai', String(d.greeting || ('안녕하세요! 나비 ' + label + ' 서비스입니다. 원하시는 것을 말씀해 주세요.')).slice(0, 300));
           _spPost(e, { type: 'hondi-embed-sp-ready', sp: key, ok: true });
+          // autoAsk: 호스트가 정한 첫 요청을 사용자 말풍선 없이 곧바로 SP 에 넣는다(예: 작성한 서류 검토). 인사말 다음에 답이 이어진다.
+          if (typeof d.autoAsk === 'string' && d.autoAsk.trim() && !_panelGenerating) {
+            const bub0 = _appendPanelMsg('ai', '…'); bub0.classList.add('streaming'); _setPanelGenerating(true);
+            try { await _callPanelAI(String(d.autoAsk).slice(0, 1500), bub0, [], null, 'hondi-flash'); } catch (er) { bub0.textContent = 'AI 오류: ' + (er && er.message || er); }
+            bub0.classList.remove('streaming'); _setPanelGenerating(false);
+          }
         } catch (err) {
           console.error('[Panel] SP 전환 실패', err);
           _spPost(e, { type: 'hondi-embed-sp-ready', sp: key, ok: false, msg: String(err && err.message || err).slice(0, 120) });

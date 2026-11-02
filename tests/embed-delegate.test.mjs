@@ -71,3 +71,9 @@ test('hondi-embed-sp: inline: 키 + spText 로 호스트가 직접 준 안내용
   const h = readFileSync(new URL('../webapp.html', import.meta.url), 'utf8');
   assert.match(h, /key\.indexOf\('inline:'\) === 0 && typeof d\.spText === 'string'/);
 });
+
+test('hondi-embed-sp: autoAsk 로 첫 요청을 사용자 말풍선 없이 SP 에 넣는다', async () => {
+  const { readFileSync } = await import('node:fs');
+  const h = readFileSync(new URL('../webapp.html', import.meta.url), 'utf8');
+  assert.match(h, /typeof d\.autoAsk === 'string'/);
+});
