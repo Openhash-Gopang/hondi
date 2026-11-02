@@ -6,42 +6,49 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>제안 게시판 — 나비</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
 
 :root {
-  /* ── Material Design 3 토큰 ── */
-  --bg:        #f6f6fb;
+  --bg:        #ffffff;
   --surface:   #ffffff;
-  --surface-variant: #f0eff6;
-  --border:    #e2e1ec;
-  --outline-variant: #e2e1ec;
+  --surface-variant: #f4f7f6;
+  --border:    #e3e9e6;
+  --outline-variant: #dbe3e0;
 
-  --brand:     #4f46e5;   /* primary */
-  --brand-dk:  #3730a3;   /* primary, darker (hover/active) */
+  --brand:     #14594A;   /* 나비웹 상단 바와 같은 청록 */
+  --brand-dk:  #0e4639;
   --on-brand:  #ffffff;
-  --brand-container:    #e4e1ff;
-  --on-brand-container: #150066;
+  --brand-container:    #e6f3ef;
+  --on-brand-container: #0e4639;
 
-  --text:      #1c1b1f;   /* on-surface */
-  --text-sub:  #49454f;   /* on-surface-variant */
-  --text-mute: #79747e;   /* outline */
+  --text:      #14213d;
+  --text-sub:  #4b5675;
+  --text-mute: #7b86a6;
 
   --error:     #b3261e;
   --error-container: #f9dedc;
 
-  --font:      'Roboto','Noto Sans KR',sans-serif;
-  --mono:      'Roboto Mono',monospace;
-  --radius:    12px;
+  --font:      'Pretendard','Noto Sans KR','Roboto',sans-serif;
+  --mono:      'Pretendard','Noto Sans KR',sans-serif;
+  --radius:    14px;
 
-  --el-1: 0px 1px 2px rgba(0,0,0,.30), 0px 1px 3px 1px rgba(0,0,0,.15);
-  --el-2: 0px 1px 2px rgba(0,0,0,.30), 0px 2px 6px 2px rgba(0,0,0,.15);
-  --el-3: 0px 1px 3px rgba(0,0,0,.30), 0px 4px 8px 3px rgba(0,0,0,.15);
+  --el-1: none;
+  --el-2: 0 2px 8px rgba(20,89,74,.12);
+  --el-3: 0 8px 28px rgba(0,0,0,.18);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#0f172a; --surface:#16203a; --surface-variant:#1c2848; --border:#2b3555; --outline-variant:#35416a;
+    --brand:#5fd0b2; --brand-dk:#8be0c8; --on-brand:#06261f; --brand-container:#12332c; --on-brand-container:#bdf1e1;
+    --text:#eef1fa; --text-sub:#c3cae0; --text-mute:#9aa4c4; --error:#ffb4ab; --error-container:#5c1a15;
+  }
 }
 
-body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; font-size: 16px; word-break: keep-all; }
 
 /* ── Header (MD3 Top App Bar) ── */
 .header {
@@ -55,15 +62,15 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); min-
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: var(--el-1);
+  box-shadow: none;
 }
 .header-left { display: flex; align-items: center; gap: 14px; }
-.header-logo { font-size: 16px; font-weight: 700; color: var(--brand); text-decoration: none; letter-spacing: .1px; }
+.header-logo { font-size: 18px; font-weight: 700; color: var(--brand); text-decoration: none; letter-spacing: .1px; }
 .header-divider { width: 1px; height: 18px; background: var(--border); }
-.header-title { font-size: 14px; font-weight: 500; color: var(--text-sub); }
+.header-title { font-size: 16px; font-weight: 500; color: var(--text-sub); }
 .back-btn {
   display: flex; align-items: center; gap: 6px;
-  font-size: 13px; font-weight: 500; color: var(--brand);
+  font-size: 15px; font-weight: 600; color: var(--brand);
   text-decoration: none; padding: 8px 16px;
   border: 1px solid var(--outline-variant); border-radius: 20px;
   background: var(--surface);
@@ -77,12 +84,12 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); min-
 /* ── Stats (MD3 Elevated Card) ── */
 .stats { display: flex; gap: 12px; margin-bottom: 28px; flex-wrap: wrap; }
 .stat-card {
-  background: var(--surface); border: none; box-shadow: var(--el-1);
-  border-radius: var(--radius); padding: 18px 20px;
+  background: var(--surface-variant); border: 1px solid var(--border); box-shadow: none;
+  border-radius: var(--radius); padding: 18px 22px;
   flex: 1; min-width: 120px;
 }
-.stat-num { font-size: 26px; font-weight: 700; color: var(--brand); font-family: var(--mono); }
-.stat-label { font-size: 12px; font-weight: 500; color: var(--text-sub); margin-top: 4px; }
+.stat-num { font-size: 30px; font-weight: 800; color: var(--brand); line-height: 1.2; }
+.stat-label { font-size: 15px; font-weight: 600; color: var(--text-sub); margin-top: 2px; }
 
 /* ── Filter row ── */
 .filter-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
@@ -90,8 +97,8 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); min-
 /* write-btn = MD3 Filled Button */
 .write-btn {
   display: flex; align-items: center; gap: 8px;
-  padding: 10px 20px; border-radius: 20px; border: none;
-  background: var(--brand); color: var(--on-brand); font-size: 14px; font-weight: 500;
+  padding: 11px 22px; border-radius: 999px; border: none;
+  background: var(--brand); color: var(--on-brand); font-size: 16px; font-weight: 700;
   cursor: pointer; font-family: var(--font); white-space: nowrap;
   box-shadow: var(--el-1); transition: box-shadow .15s, background-color .15s;
 }
@@ -100,31 +107,30 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); min-
 /* filter-btn = MD3 Filter Chip */
 .filter-bar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
 .filter-btn {
-  padding: 7px 16px; border-radius: 8px; border: 1px solid var(--outline-variant);
-  background: var(--surface); font-size: 13px; font-weight: 500; color: var(--text-sub);
+  padding: 8px 18px; border-radius: 999px; border: 1px solid var(--outline-variant);
+  background: var(--surface); font-size: 15px; font-weight: 600; color: var(--text-sub);
   cursor: pointer; font-family: var(--font); transition: all .15s;
 }
 .filter-btn:hover { background: var(--surface-variant); }
 .filter-btn.active {
   background: var(--brand-container); color: var(--on-brand-container);
-  border-color: var(--brand-container); font-weight: 700;
+  border-color: var(--brand-container); font-weight: 800;
 }
 
 /* ── Table (MD3 Elevated Card) ── */
-.table-wrap { background: var(--surface); border: none; box-shadow: var(--el-1); border-radius: var(--radius); overflow: hidden; }
+.table-wrap { background: var(--surface); border: 1px solid var(--border); box-shadow: none; border-radius: var(--radius); overflow: hidden; }
 .table-header {
   display: grid;
-  grid-template-columns: 56px 80px 1fr 90px 100px 90px;
-  gap: 0; padding: 14px 20px;
+  grid-template-columns: 64px 110px 1fr 90px 80px 100px;
+  gap: 0 8px; padding: 14px 20px;
   background: var(--surface-variant);
   border-bottom: 1px solid var(--border);
-  font-size: 11px; font-weight: 700; color: var(--text-sub);
-  text-transform: uppercase; letter-spacing: .5px;
+  font-size: 15px; font-weight: 700; color: var(--text-sub);
 }
 .feedback-row {
   display: grid;
-  grid-template-columns: 56px 80px 1fr 90px 100px 90px;
-  gap: 0; padding: 16px 20px;
+  grid-template-columns: 64px 110px 1fr 90px 80px 100px;
+  gap: 0 8px; padding: 18px 20px;
   border-bottom: 1px solid var(--border);
   align-items: start;
   transition: background-color .1s;
@@ -132,41 +138,41 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); min-
 .feedback-row:last-child { border-bottom: none; }
 .feedback-row:hover { background: var(--surface-variant); }
 
-.cell-handle { font-size: 12px; color: var(--text-sub); font-family: var(--mono); }
-.cell-content { font-size: 13.5px; color: var(--text); line-height: 1.55; }
-.cell-content .admin-note { font-size: 11.5px; color: var(--text-sub); margin-top: 4px; }
-.cell-category { font-size: 12px; }
-.cell-date { font-size: 11px; color: var(--text-mute); font-family: var(--mono); }
+.cell-handle { font-size: 14px; color: var(--text-sub); overflow-wrap: anywhere; }
+.cell-content { font-size: 16px; color: var(--text); line-height: 1.6; }
+.cell-content .admin-note { font-size: 14px; color: var(--text-sub); margin-top: 4px; }
+.cell-category { font-size: 14px; }
+.cell-date { font-size: 14px; color: var(--text-mute); }
 .cell-status { }
 
 /* ── Category badge (MD3 Assist Chip, tonal) ── */
 .cat-badge {
   display: inline-flex; align-items: center; gap: 4px;
-  font-size: 11px; padding: 4px 10px; border-radius: 8px;
+  font-size: 14px; padding: 4px 12px; border-radius: 999px;
   font-weight: 600;
 }
-.cat-bug     { background: #f9dedc; color: #8c1d18; }
-.cat-feature { background: #dde3ff; color: #1a237e; }
-.cat-ui      { background: #ecdcfb; color: #4a148c; }
+.cat-bug     { background: #fbe4e1; color: #8c1d18; }
+.cat-feature { background: var(--brand-container); color: var(--brand); }
+.cat-ui      { background: #e3eefb; color: #1d4a7a; }
 .cat-etc     { background: var(--surface-variant); color: var(--text-sub); }
 .cat-pending { background: var(--surface-variant); color: var(--text-mute); }
 
 /* ── Status badge (MD3 tonal chip) ── */
 .status-badge {
   display: inline-flex; align-items: center; gap: 4px;
-  font-size: 11px; padding: 4px 10px; border-radius: 8px;
+  font-size: 14px; padding: 4px 12px; border-radius: 999px;
   font-weight: 600; cursor: default;
 }
 .status-pending   { background: #fff3cd; color: #7a5900; }
-.status-reviewing { background: #dde3ff; color: #1a237e; }
-.status-accepted  { background: #d7f3df; color: #0f5e2c; }
+.status-reviewing { background: #e3eefb; color: #1d4a7a; }
+.status-accepted  { background: var(--brand-container); color: var(--brand); }
 .status-rejected  { background: var(--surface-variant); color: var(--text-mute); }
 
 /* ── Admin controls (MD3 Outlined Button, small) ── */
 .admin-controls { display: none; margin-top: 10px; }
 .admin-controls.visible { display: flex; gap: 6px; flex-wrap: wrap; }
 .admin-btn {
-  font-size: 11px; font-weight: 500; padding: 5px 12px; border-radius: 8px;
+  font-size: 14px; font-weight: 600; padding: 6px 14px; border-radius: 999px;
   border: 1px solid var(--brand); background: var(--surface);
   cursor: pointer; font-family: var(--font); color: var(--brand);
   transition: all .15s;
@@ -181,25 +187,25 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); min-
 .cell-vote { display: flex; flex-direction: column; align-items: center; gap: 3px; }
 .vote-btn {
   display: flex; align-items: center; justify-content: center;
-  width: 32px; height: 28px; border-radius: 8px;
+  width: 36px; height: 32px; border-radius: 10px;
   border: 1px solid var(--outline-variant); background: var(--surface);
   color: var(--text-sub); cursor: pointer; transition: all .15s;
 }
 .vote-btn:hover:not(:disabled) { background: var(--brand-container); border-color: var(--brand-container); color: var(--on-brand-container); }
 .vote-btn.voted { background: var(--brand); border-color: var(--brand); color: var(--on-brand); }
 .vote-btn:disabled { cursor: default; opacity: .55; }
-.vote-count { font-size: 12px; font-weight: 700; color: var(--text-sub); font-family: var(--mono); }
+.vote-count { font-size: 15px; font-weight: 700; color: var(--text-sub); }
 
 /* ── 비공개 배지 ── */
 .vis-badge {
   display: inline-flex; align-items: center; gap: 3px;
-  font-size: 10.5px; padding: 3px 8px; border-radius: 8px;
+  font-size: 13px; padding: 3px 10px; border-radius: 999px;
   background: var(--surface-variant); color: var(--text-sub); font-weight: 600; margin-left: 6px;
 }
 
 /* ── 글쓰기 모달 (MD3 Dialog) ── */
 .modal-backdrop {
-  position: fixed; inset: 0; background: rgba(28,27,31,.4);
+  position: fixed; inset: 0; background: rgba(10,20,18,.45);
   display: none; align-items: center; justify-content: center;
   z-index: 2000; padding: 20px;
 }
@@ -209,10 +215,10 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); min-
   width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto;
   box-shadow: var(--el-3);
 }
-.modal-title { font-size: 17px; font-weight: 700; margin-bottom: 18px; color: var(--text); }
+.modal-title { font-size: 20px; font-weight: 700; margin-bottom: 18px; color: var(--text); }
 .modal-box textarea {
   width: 100%; min-height: 120px; padding: 14px; border: 1px solid var(--outline-variant);
-  border-radius: 12px; font-family: var(--font); font-size: 13.5px; resize: vertical;
+  border-radius: 12px; font-family: var(--font); font-size: 16px; resize: vertical;
   box-sizing: border-box; background: var(--surface-variant);
 }
 .modal-box textarea:focus { outline: 2px solid var(--brand); outline-offset: -1px; background: var(--surface); }
@@ -220,7 +226,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); min-
 .vis-choice label {
   flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
   padding: 11px; border: 1px solid var(--outline-variant); border-radius: 12px;
-  font-size: 13px; color: var(--text-sub); cursor: pointer; transition: all .15s;
+  font-size: 15px; color: var(--text-sub); cursor: pointer; transition: all .15s;
 }
 .vis-choice input { accent-color: var(--brand); }
 .vis-choice label:has(input:checked) { border-color: var(--brand); background: var(--brand-container); color: var(--on-brand-container); font-weight: 700; }
@@ -228,7 +234,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); min-
 
 /* modal-btn.cancel = MD3 Text Button / modal-btn.submit = MD3 Filled Button */
 .modal-btn {
-  padding: 10px 20px; border-radius: 20px; font-size: 13.5px; font-weight: 500;
+  padding: 10px 22px; border-radius: 999px; font-size: 16px; font-weight: 700;
   cursor: pointer; font-family: var(--font); border: none;
 }
 .modal-btn.cancel { background: transparent; color: var(--brand); }
@@ -236,10 +242,10 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); min-
 .modal-btn.submit { background: var(--brand); color: var(--on-brand); box-shadow: var(--el-1); }
 .modal-btn.submit:hover { background: var(--brand-dk); box-shadow: var(--el-2); }
 .modal-btn.submit:disabled { opacity: .5; cursor: default; box-shadow: none; }
-.modal-error { font-size: 12px; font-weight: 500; color: var(--error); margin-top: 10px; display: none; }
+.modal-error { font-size: 14px; font-weight: 500; color: var(--error); margin-top: 10px; display: none; }
 
 /* ── Loading ── */
-.loading { text-align: center; padding: 40px; color: var(--text-mute); font-size: 13px; }
+.loading { text-align: center; padding: 40px; color: var(--text-mute); font-size: 15px; }
 
 @media (max-width: 600px) {
   .table-header, .feedback-row {
