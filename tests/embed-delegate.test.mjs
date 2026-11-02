@@ -77,3 +77,9 @@ test('hondi-embed-sp: autoAsk 로 첫 요청을 사용자 말풍선 없이 SP �
   const h = readFileSync(new URL('../webapp.html', import.meta.url), 'utf8');
   assert.match(h, /typeof d\.autoAsk === 'string'/);
 });
+
+test('hondi-embed-say: 호스트가 대화창에 AI 말풍선을 보여 준다', async () => {
+  const { readFileSync } = await import('node:fs');
+  const h = readFileSync(new URL('../webapp.html', import.meta.url), 'utf8');
+  assert.match(h, /d\.type === 'hondi-embed-say'/);
+});

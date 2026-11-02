@@ -5044,6 +5044,9 @@ window.closePDV = closePDV;
     window.addEventListener('message', async (e) => {
       const d = e.data;
       if (!d || typeof d !== 'object' || !_spHostOk(e)) return;
+      if (d.type === 'hondi-embed-say') {   // 호스트가 대화창에 AI 말풍선 한 줄을 보여 준다(모델 호출 없음) — 예: 서류 제출 안내의 첫 문구
+        const t = String(d.text || '').trim().slice(0, 600); if (t) _appendPanelMsg('ai', t); return;
+      }
       if (d.type === 'hondi-embed-sp') {
         const key = d.sp ? String(d.sp).slice(0, 80) : '', label = String(d.label || '').slice(0, 40);
         if (!key) {
