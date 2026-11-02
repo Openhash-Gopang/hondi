@@ -18,7 +18,7 @@ import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
 import { profilePhoneFilter, last8Filter, pickGuidByLast8 } from './src/worker/phone-lookup.js';
 import { validateSignalInput as _sigValidate, canDeleteSignal as _sigCanDelete, sendRateOk as _sigRateOk } from './src/worker/signal-auth.js';
 import { classifyQuery as _ffClassify, publicCard as _ffPublicCard, rateLimitOk as _ffRateOk } from './src/worker/friend-find.js';
-import { fieldTestPlanGdc as _fieldTestPlanGdc } from './src/worker/charge-plans.js';
+import { computeChargeGdc as _computeChargeGdc } from './src/worker/charge-plans.js';
 import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
 import { parseMessage as _kmailParseMime, decodeMimeWords as _kmailDecodeMimeWords, repairStoredText as _kmailRepairStoredText } from './src/worker/mime-text.js';
@@ -275,33 +275,14 @@ function _chargeBankAccountInfo(env) {
   };
 }
 
-// (2026-09-12 신설, 주피터 지시) — 1회 입금액에 따라 지급 GDC에 보너스
-// 배율을 적용한다. "카드 자동결제 없이 계좌이체만"이라는 원칙(위 §)은
-// 그대로 유지하면서, 큰 금액을 한 번에 넣을수록 유리하게 한다.
-// ⚠️ "월간/연간 요금제"가 아니다 — 만료·기간 개념 자체가 없다(A안,
-// 2026-09-12 확정). 실체는 오직 "1회 입금액 구간별 보너스 배율"뿐이며,
-// 사용량에 따라 그냥 차감되는 단일 GDC 잔액에 합산된다. 화면(usage.html)
-// 에도 "요금제"라는 이름 없이 금액 구간과 배율만 노출한다 — 이름이
-// 아직 붙어 있으면 나중에 "진짜 기간제 상품이 있나?"라는 오해를 부른다.
-//   - 10,000원 미만: 기본료, ×1.0 (보너스 없음)
-//   - 10,000원 ~ 49,999원: 구간2 보너스, ×1.6
-//   - 50,000원 ~ 99,999원: 구간3 보너스, ×1.8
-//   - 100,000원 이상: 구간4 보너스, ×2.0
-// 분할 입금은 합산되지 않는다 — 5,000원을 두 번 나눠 넣어도 각 건은
-// 여전히 ×1.0으로 계산된다(이 함수가 건별 확정 금액만 입력받으므로
-// 구조적으로 합산이 불가능하다). 만료·기간 제한 없음(A안 채택,
-// 2026-09-12) — 지급된 GDC는 일반 잔액과 동일하게 소진될 때까지
-// 유지되며 K-Law·전문가 페르소나·모든 K-서비스에 공용으로 쓰인다.
-// ※ 2026-11-02(주피터 지시) — 필드 테스트 기간(2026년 12월 말까지)에는 정확히 10,000원 → 100,000 GDC,
-//    100,000원 → 120,000 GDC를 지급한다(src/worker/charge-plans.js). 그 밖의 금액은 아래 구간 배율 그대로다.
+// 입금액 → 지급 GDC. 2026-11-02(주피터 지시)로 구간별 보너스 배율(×1.6/×1.8/×2.0)을 없앴다.
+//   · 기본은 1원 = 1 GDC(×1.0)이다. 분할 입금은 합산하지 않고 건별 확정 금액만 입력받는다.
+//   · 필드 테스트 기간(2026년 12월 말까지)에만 정액 예외가 있다 — 정확히 10,000원 → 100,000 GDC,
+//     100,000원 → 120,000 GDC (src/worker/charge-plans.js, 단위 시험 tests/charge-plans.test.mjs).
+//   · "월/연"은 화면에 붙이는 이름일 뿐 만료·기간 제한은 없다(A안, 2026-09-12 확정) — 지급된 GDC는 일반 잔액과
+//     동일하게 소진될 때까지 유지되며 K-Law·전문가 페르소나·모든 K-서비스에 공용으로 쓰인다.
 function _computeChargeBonusGdc(confirmedKrw, now = Date.now()) {
-  const krw = Number(confirmedKrw) || 0;
-  const planGdc = _fieldTestPlanGdc(krw, now);
-  if (planGdc !== null) return planGdc;
-  if (krw >= 100000) return Math.round(krw * 2.0);
-  if (krw >= 50000)  return Math.round(krw * 1.8);
-  if (krw >= 10000)  return Math.round(krw * 1.6);
-  return krw;
+  return _computeChargeGdc(confirmedKrw, now);
 }
 
 // (2026-07-14: 관리자 전용 액션 — /biz/charge-list, /biz/charge-confirm
