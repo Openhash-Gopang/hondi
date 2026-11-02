@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-02 08:39 KST · 기준 커밋 5d40ab90
+- 갱신: 2026-11-02 11:11 KST · 기준 커밋 b909adeb
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 882건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-02 feat: naviweb.kr 판결 시뮬레이션용 CORS 허용 + klaw 공유 엔진
 - 2026-11-02 Merge pull request #889 from Openhash-Gopang/docs/naviweb-guide-fix-20261102
 - 2026-11-02 docs: 개정 안내서 시작하기 문구를 사용 설명서와 일치시킴
 - 2026-11-02 Merge pull request #888 from Openhash-Gopang/docs/naviweb-guide-20261102
@@ -43,7 +44,6 @@
 - 2026-11-01 feat(case): M2 초대권·가입 알림·chat room 개설 계약, M3 봉인 우편함 봉투 계약
 - 2026-11-01 Merge pull request #870 from Openhash-Gopang/feat/case-server-m3
 - 2026-11-01 feat(case): 서버 — case 서비스 등록, 초대 등록·가입 확인, 봉인 우편함(push/pull/ack)
-- 2026-11-01 Merge pull request #869 from Openhash-Gopang/feat/case-core-m0
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
