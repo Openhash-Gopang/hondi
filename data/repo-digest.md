@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-02 15:14 KST · 기준 커밋 a6546a53
+- 갱신: 2026-11-02 15:23 KST · 기준 커밋 e96df27d
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 882건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-02 혼디 대화창: 위임 중 첨부 파일을 호스트(서류 SP)로 함께 넘긴다
+- 2026-11-02 대화 패널: hondi-embed-say(호스트가 AI 말풍선 표시)
 - 2026-11-02 대화 패널: autoAsk(첫 요청을 사용자 말풍선 없이 SP에 입력)
 - 2026-11-02 대화 패널: 호스트가 준 안내용 SP(inline:, spText)로 전환
 - 2026-11-02 정부 AI 지역 호출: gov-tree SP 경로 전환·지역 컨텍스트, PDV 브릿지 region(거주지) 응답
@@ -42,8 +44,6 @@
 - 2026-11-01 feat(assistant): A3·A4 런타임·[ctx] 신호 배선 + AC-PRO-ASSIST 안내 SP (#879 병합 때 빠진 후속분)
 - 2026-11-01 fix(case): 모든 상태 전이를 서명 이벤트로 전달(두 기기 상태 어긋남 방지) + 동시 전이 수렴 + 가입 알림에 token_hash
 - 2026-11-01 Merge pull request #879 from Openhash-Gopang/feat/assistant-core
-- 2026-11-01 docs(sp): AC-PRO-CORE v1.16 초안 — §ASSIST 점검 신호 소비(비활성, sp-catalog 미변경)
-- 2026-11-01 feat(assistant): 나만의 AI 비서 코어 A1·A2 — 동의 범위·마스킹·원장, 규칙팩·Gate·Attestation·인간 전문가 권유
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
