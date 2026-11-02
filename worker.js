@@ -2636,10 +2636,31 @@ async function handleUsageLog(request, env, corsHeaders) {
     totalTokens    += (Number(it.hit_tokens) || 0) + (Number(it.miss_tokens) || 0) + (Number(it.out_tokens) || 0);
   }
 
+  // ── 시계열(2026-11-02, mail.hondi.net 'GDC' 화면의 그래프용) ──
+  // 한국시간(KST) 기준. hourly = 오늘 0~23시, daily = 최근 N일(오래된 날 → 오늘). 모델별 요청·토큰도 함께 담는다.
+  const KST = 9 * 3600000;
+  const kstOf = (created) => new Date(new Date(String(created || '').replace(' ', 'T')).getTime() + KST);   // 'YYYY-MM-DD HH:MM:SS.mmmZ' 도 파싱된다
+  const ymd = (d) => d.toISOString().slice(0, 10);
+  const todayKst = ymd(new Date(Date.now() + KST));
+  const hourly = Array.from({ length: 24 }, (_, h) => ({ h, req: 0, tok: 0, krw: 0, models: {} }));
+  const dailyMap = {};
+  for (let i = days - 1; i >= 0; i--) dailyMap[ymd(new Date(Date.now() + KST - i * 86400000))] = { d: null, req: 0, tok: 0, krw: 0, models: {} };
+  for (const it of items) {
+    const k = kstOf(it.created); if (isNaN(k)) continue;
+    const day = ymd(k), tok = (Number(it.hit_tokens) || 0) + (Number(it.miss_tokens) || 0) + (Number(it.out_tokens) || 0);
+    const krw = Number(it.billed_krw) || 0, model = it.model || '(unknown)';
+    const add = (b) => { b.req += 1; b.tok += tok; b.krw += krw; const m = b.models[model] || (b.models[model] = { req: 0, tok: 0 }); m.req += 1; m.tok += tok; };
+    if (day === todayKst) add(hourly[k.getUTCHours()]);
+    if (dailyMap[day]) add(dailyMap[day]);
+  }
+  const daily = Object.keys(dailyMap).map(d => ({ ...dailyMap[d], d, krw: Math.round(dailyMap[d].krw * 100) / 100 }));
+  hourly.forEach(b => { b.krw = Math.round(b.krw * 100) / 100; });
+
   return new Response(JSON.stringify({
     ok: true,
     guid,
     days,
+    series: { today: todayKst, hourly, daily },
     total_cost_krw: Math.round(totalCostKRW * 100) / 100,
     total_billed_krw: Math.round(totalBilledKRW * 100) / 100,
     total_requests: totalRequests,
