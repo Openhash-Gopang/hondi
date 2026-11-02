@@ -4286,7 +4286,7 @@ window.closePDV = closePDV;
     // length가 0이 아니라서 system이 영영 주입되지 않는 문제가 있었다.
     // "system 메시지가 있는지"로 직접 판단하고, unshift로 맨 앞에 둔다.
     if (!_panelHistory.some(m => m.role === 'system')) {
-      let effectiveSystem = cfg.system || '';
+      let effectiveSystem = (window.__hondiEmbedSp && window.__hondiEmbedSp.text) || cfg.system || '';   // 2026-11-02: 나비웹 '각종 기관' 선택 중이면 그 기관의 SP
       if (!effectiveSystem) {
         try {
           effectiveSystem = await _loadAgentCommonSP();
@@ -5029,6 +5029,52 @@ window.closePDV = closePDV;
   if (_embedDel) {
     window.addEventListener('message', (e) => { _embedDel.onMessage(e); });
     _embedDel.onNote((t) => { if (t) _appendPanelMsg('ai', t); });
+  }
+
+  /* 2026-11-02 — 나비웹(mail.hondi.net) 화면의 '각종 기관' 선택: 이 패널의 SP 를 그 기관의 SP 로 바꾸고(host→page hondi-embed-sp),
+   * 그 화면 입력창의 말(hondi-embed-sp-ask)도 이 패널이 그 SP 로 답해 돌려준다(page→host hondi-embed-sp-reply). 기관 선택을 풀면 sp:null 로 원래대로.
+   *  host→page { type:'hondi-embed-sp', sp:'SP-02_k119'|null, label, greeting }   page→host { type:'hondi-embed-sp-ready', sp, ok, msg }
+   *  host→page { type:'hondi-embed-sp-ask', id, text }                              page→host { type:'hondi-embed-sp-reply', id, text }  */
+  if (window.parent !== window && window.EmbedDelegate) {
+    const _spHostOk = (e) => e.source === window.parent && window.EmbedDelegate.HOSTS.indexOf(e.origin) >= 0;
+    const _spPost = (e, m) => { try { window.parent.postMessage(m, e.origin); } catch (x) {} };
+    window.addEventListener('message', async (e) => {
+      const d = e.data;
+      if (!d || typeof d !== 'object' || !_spHostOk(e)) return;
+      if (d.type === 'hondi-embed-sp') {
+        const key = d.sp ? String(d.sp).slice(0, 80) : '', label = String(d.label || '').slice(0, 40);
+        if (!key) {
+          const was = !!window.__hondiEmbedSp; window.__hondiEmbedSp = null;
+          if (was) { _panelHistory.length = 0; msgList.innerHTML = ''; _appendPanelMsg('ai', '원래의 나비로 돌아왔습니다. 무엇을 도와드릴까요?'); }
+          _spPost(e, { type: 'hondi-embed-sp-ready', sp: '', ok: true }); return;
+        }
+        if (window.__hondiEmbedSp && window.__hondiEmbedSp.key === key) { _spPost(e, { type: 'hondi-embed-sp-ready', sp: key, ok: true }); return; }
+        try {
+          const cat = await fetch('/prompts/sp-catalog.json', { cache: 'no-cache' }); if (!cat.ok) throw new Error('catalog ' + cat.status);
+          const name = (await cat.json())[key]; if (!name) throw new Error('catalog key ' + key);
+          const res = await fetch('/prompts/' + name, { cache: 'no-cache' }); if (!res.ok) throw new Error('sp ' + res.status);
+          const txt = await res.text(); if (!txt || txt.length < 50) throw new Error('sp 내용이 비정상적으로 짧음');
+          window.__hondiEmbedSp = { key, label, text: txt };
+          _panelHistory.length = 0; msgList.innerHTML = '';
+          _appendPanelMsg('ai', String(d.greeting || ('안녕하세요! 나비 ' + label + ' 서비스입니다. 원하시는 것을 말씀해 주세요.')).slice(0, 300));
+          _spPost(e, { type: 'hondi-embed-sp-ready', sp: key, ok: true });
+        } catch (err) {
+          console.error('[Panel] SP 전환 실패', err);
+          _spPost(e, { type: 'hondi-embed-sp-ready', sp: key, ok: false, msg: String(err && err.message || err).slice(0, 120) });
+        }
+      } else if (d.type === 'hondi-embed-sp-ask') {
+        const id = String(d.id || '').slice(0, 40), text = String(d.text || '').trim().slice(0, 2000);
+        if (!id || !text) return;
+        const fail = (m) => _spPost(e, { type: 'hondi-embed-sp-reply', id, text: m });
+        if (!window.__hondiEmbedSp) { fail('이 기관의 상담은 준비 중입니다.'); return; }
+        if (_panelGenerating) { fail('앞의 요청을 처리하는 중입니다. 잠시 뒤 다시 보내 주세요.'); return; }
+        _appendPanelMsg('user', text);
+        const bub = _appendPanelMsg('ai', '…'); bub.classList.add('streaming'); _setPanelGenerating(true);
+        try { await _callPanelAI(text, bub, [], null, 'hondi-flash'); } catch (err) { bub.textContent = 'AI 오류: ' + (err && err.message || err); }
+        bub.classList.remove('streaming'); _setPanelGenerating(false);
+        _spPost(e, { type: 'hondi-embed-sp-reply', id, text: String(bub.textContent || '').slice(0, 4000) });
+      }
+    });
   }
 
   async function _sendToAI(text, files) {

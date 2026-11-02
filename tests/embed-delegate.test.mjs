@@ -36,3 +36,9 @@ test('note 는 콜백으로 전달된다', () => {
   const { d } = mk(); let got = ''; d.onNote(t => { got = t; });
   d.onMessage(ev({ type: 'hondi-embed-ai-note', text: '되돌렸습니다' })); assert.equal(got, '되돌렸습니다');
 });
+
+test('webapp.html: 나비웹의 "각종 기관" 선택 — hondi-embed-sp 로 패널 SP 전환, hondi-embed-sp-ask 로 입력창 말을 그 SP 로 답한다', async () => {
+  const { readFileSync } = await import('node:fs');
+  const s = readFileSync(new URL('../webapp.html', import.meta.url), 'utf8');
+  for (const k of ["d.type === 'hondi-embed-sp'", "d.type === 'hondi-embed-sp-ask'", "type: 'hondi-embed-sp-ready'", "type: 'hondi-embed-sp-reply'", "window.__hondiEmbedSp && window.__hondiEmbedSp.text", "/prompts/sp-catalog.json", 'window.EmbedDelegate.HOSTS.indexOf(e.origin) >= 0']) assert.ok(s.includes(k), k);
+});
