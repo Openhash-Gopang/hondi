@@ -56,9 +56,13 @@ body{font-family:var(--font);color:#111;background:#fff;-webkit-font-smoothing:a
 .field-value{font-size:14.5px;line-height:1.6;color:#111}
 .field-value.muted{color:var(--txt3)}
 .sensitive-note{margin-top:16px;padding:12px 14px;border-radius:10px;background:#FAEEDA;color:#633806;font-size:12.5px;line-height:1.6;display:flex;gap:8px;align-items:flex-start}
+/* 나비웹(mail.hondi.net) 설정 안에 끼워 쓸 때(?embed=mail): 자체 상단 바(뒤로가기·제목)를 숨기고 안에서 목록·상세를 그대로 보여 준다. */
+body.embed > .header{display:none}
+body.embed .detail{position:absolute}
 </style>
 </head>
 <body>
+<script>if (/[?&]embed=mail/.test(location.search)) document.body.classList.add('embed');</script>
 
 <div class="header">
   <button class="icon-btn" onclick="parent.closePDV && parent.closePDV()" aria-label="닫기"><i class="ti ti-arrow-left"></i></button>
