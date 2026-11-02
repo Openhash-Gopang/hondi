@@ -137,6 +137,12 @@ const ALLOWED_ORIGINS = [
   // 로그인·과금 게이트 없음, 별도 rate-limit 없음)이다. 의료인 면허 검증 전 초안 단계이므로
   // 남용·오용이 관측되면 게이트를 추가할 것.
   'https://doctor.hondi.net',
+  // 2026-11-02 신설 — naviweb.kr(나비웹) 메인의 '판결 시뮬레이션' 모드가 K-Law 공유 엔진
+  // (hondi.net/lib/klaw-engine.js)으로 /klaw/relay·/klaw/sessions 와 전화번호 OTP 로그인
+  // (/biz/phone-otp-*)을 직접 호출한다. 이 배열에 없으면 전역 가드가 403 을 돌려 "Failed to fetch" 가 된다.
+  // 인증은 요청 본문의 phone_verify_token(디스패치 "현관문" 게이트)이므로 Origin 허용만으로 비로그인 호출이 열리지는 않는다.
+  'https://naviweb.kr',
+  'https://www.naviweb.kr',
 
   'https://users.hondi.net',
   'https://l1-hanlim.hondi.net',
