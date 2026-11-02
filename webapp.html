@@ -5102,11 +5102,14 @@ window.closePDV = closePDV;
   async function _sendToAI(text, files) {
     const attachedList = files || [];
     if (!text && !attachedList.length) return;
-    if (_embedDel && _embedDel.active() && text && !attachedList.length) {
-      _appendPanelMsg('user', text);
+    if (_embedDel && _embedDel.active() && (text || attachedList.length)) {
+      if (attachedList.length) {   // 본문 추출·해시가 끝난 뒤 호스트(서류 SP)로 넘긴다
+        await Promise.all(attachedList.map(f => Promise.all([f._hashPromise ? f._hashPromise.catch(() => null) : null, f._extractPromise ? f._extractPromise.catch(() => null) : null])));
+      }
+      _appendPanelMsg('user', text || (attachedList.length === 1 ? `(파일 첨부: ${attachedList[0].name})` : `(파일 ${attachedList.length}개 첨부)`));
       const bub = _appendPanelMsg('ai', '나비 화면에서 처리하고 있습니다…'); bub.classList.add('streaming');
       _setPanelGenerating(true);
-      const r = await _embedDel.send(text);
+      const r = await _embedDel.send(text, attachedList);
       bub.classList.remove('streaming'); _setPanelGenerating(false);
       bub.textContent = r == null ? '화면의 나비가 응답하지 않았습니다. 잠시 뒤 다시 시도해 주세요.' : (r || '처리했습니다.');
       return;
