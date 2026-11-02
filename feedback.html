@@ -254,9 +254,15 @@ body { background: var(--bg); color: var(--text); font-family: var(--font); min-
   .stats { gap: 8px; }
   .stat-card { min-width: 80px; padding: 14px; }
 }
+
+/* 나비웹(mail.hondi.net) 화면 안에 iframe 으로 들어갈 때(?embed=mail): 자체 상단 바를 숨기고 바깥 화면의 바탕에 어울리게 한다. */
+body.embed { background: transparent; min-height: 0; }
+body.embed .header { display: none; }
+body.embed .main { padding-top: 8px; max-width: 960px; }
 </style>
 </head>
 <body>
+<script>if (/[?&]embed=mail/.test(location.search)) document.body.classList.add('embed');</script>
 
 <!-- Header -->
 <header class="header">
@@ -355,6 +361,7 @@ let allItems   = [];
 let curFilter  = '';
 let isAdmin    = false;
 let adminGuid  = null;
+if (/[?&]embed=mail/.test(location.search)) document.body.classList.add('embed');
 let myGuid     = null;
 let myHandle   = null;
 const votedIds = new Set(); // 이번 세션에서 투표한 항목(중복 클릭 방지용 — 서버가 최종 판정)
@@ -424,7 +431,7 @@ function render() {
   list.innerHTML = items.map(item => {
     const cat    = CAT_MAP[item.category]    || CAT_MAP.etc;
     const status = STATUS_MAP[item.status]   || STATUS_MAP.pending;
-    const date   = new Date(item.created_at).toLocaleDateString('ko-KR', { month:'2-digit', day:'2-digit' });
+    const date   = new Date(String(item.created || item.created_at || '').replace(' ', 'T')).toLocaleDateString('ko-KR', { month:'2-digit', day:'2-digit' });
     const adminCtrl = isAdmin ? `
       <div class="admin-controls visible" id="ctrl-${item.id}">
         ${['reviewing','accepted','rejected'].map(s =>
