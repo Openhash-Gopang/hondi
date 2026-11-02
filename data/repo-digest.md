@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-02 14:51 KST · 기준 커밋 dd472eef
+- 갱신: 2026-11-02 14:53 KST · 기준 커밋 9b0c1494
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 882건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-02 정부 AI 지역 호출: gov-tree SP 경로 전환·지역 컨텍스트, PDV 브릿지 region(거주지) 응답
 - 2026-11-02 usage: '충전 신청 내역'→'충전 내역', 처음엔 닫힌 slide 패널(화살표·클릭으로 펼침/접힘)
 - 2026-11-02 GDC 사용량: /usage-log 시계열(KST 시간별·일별)과 usage.html 그래프·임베드 모드
 - 2026-11-02 전문가 AI 대화: 사용자를 해당 분야 인간 전문가로 상정(role=expert)
@@ -43,7 +44,6 @@
 - 2026-11-01 feat(assistant): 나만의 AI 비서 코어 A1·A2 — 동의 범위·마스킹·원장, 규칙팩·Gate·Attestation·인간 전문가 권유
 - 2026-11-01 Merge pull request #878 from Openhash-Gopang/feat/case-handover
 - 2026-11-01 Merge pull request #877 from Openhash-Gopang/feat/case-net
-- 2026-11-01 feat(case): 기기 쪽 접착 모듈 case-net — 키 등록·TOFU·봉인 전송·수신 반영 (S5 전반)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
