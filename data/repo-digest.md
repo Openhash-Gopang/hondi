@@ -1,9 +1,12 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-02 11:29 KST · 기준 커밋 d9773260
+- 갱신: 2026-11-02 13:43 KST · 기준 커밋 41442401
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 882건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-02 대화 패널: 나비웹 '각종 기관' 선택 시 패널 SP 전환(hondi-embed-sp)·입력창 말에 그 SP로 답(hondi-embed-sp-ask)
+- 2026-11-02 Merge pull request #893 from Openhash-Gopang/fix/monthly-gdc-1x-20261102
+- 2026-11-02 fix: 월 10,000원 입금은 10,000T — 정액 예외에서 월 플랜 제거
 - 2026-11-02 Merge pull request #892 from Openhash-Gopang/feat/free-limit-paid-popup-20261102
 - 2026-11-02 feat: 충전 구간별 보너스 배율(x1.6/x1.8/x2.0)을 없앰
 - 2026-11-02 feat: 필드 테스트 기간 정액 입금 GDC 지급(월 1만원→10만 GDC, 연 10만원→12만 GDC)
@@ -41,9 +44,6 @@
 - 2026-11-01 feat(case): 초대 취소와 관계 차단/해제 (S3, G9)
 - 2026-11-01 feat(case): 우편함 종단 암호화(X25519+AES-GCM)와 공개키 등록부·가입 시 키 교환 (S2, G2)
 - 2026-11-01 Merge pull request #872 from Openhash-Gopang/test/case-scenarios
-- 2026-11-01 Merge pull request #871 from Openhash-Gopang/feat/case-core-rest
-- 2026-11-01 feat(case): 서명된 이벤트(S1) — 합의·종료·청구서·소통 응답 위조 방지, 투영 해시 검증, 상태 전이 전달 (G1·G3·G4·G5·G6)
-- 2026-11-01 test(case): 사고 실험 — 맡은 일·맡긴 일·나 홀로를 두 기기+서버로 끝까지 시뮬레이션, 한계 G1~G12 고정
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
