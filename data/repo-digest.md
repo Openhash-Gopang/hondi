@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-03 00:18 KST · 기준 커밋 e1ffe7ff
+- 갱신: 2026-11-03 01:23 KST · 기준 커밋 3b8dc7bc
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 882건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-03 style: 제안 게시판을 나비웹 청록 기반의 심플한 레이아웃·큰 글자로 갱신
 - 2026-11-03 PDV 페이지: 나비웹 설정에 끼워 쓰는 embed=mail 모드
 - 2026-11-03 제안 게시판: 나비웹 화면에 끼워 쓰는 embed=mail 모드, 날짜 표시 수정(created)
 - 2026-11-02 혼디 대화창: 위임 중 첨부 파일을 호스트(서류 SP)로 함께 넘긴다
@@ -43,7 +44,6 @@
 - 2026-11-01 feat(case): 초대받은 쪽 흐름 — claimInvite·sendProposal·poll(onProposal), 제안 case_id 해시 검증
 - 2026-11-01 Merge pull request #881 from Openhash-Gopang/feat/assistant-finish
 - 2026-11-01 Merge pull request #880 from Openhash-Gopang/fix/case-sign-all-transitions
-- 2026-11-01 feat(assistant): A3·A4 런타임·[ctx] 신호 배선 + AC-PRO-ASSIST 안내 SP (#879 병합 때 빠진 후속분)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
