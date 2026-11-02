@@ -277,8 +277,8 @@ function _chargeBankAccountInfo(env) {
 
 // 입금액 → 지급 GDC. 2026-11-02(주피터 지시)로 구간별 보너스 배율(×1.6/×1.8/×2.0)을 없앴다.
 //   · 기본은 1원 = 1 GDC(×1.0)이다. 분할 입금은 합산하지 않고 건별 확정 금액만 입력받는다.
-//   · 필드 테스트 기간(2026년 12월 말까지)에만 정액 예외가 있다 — 정확히 10,000원 → 100,000 GDC,
-//     100,000원 → 120,000 GDC (src/worker/charge-plans.js, 단위 시험 tests/charge-plans.test.mjs).
+//   · 필드 테스트 기간(2026년 12월 말까지)에만 정액 예외가 있다 — 정확히 100,000원(연) → 120,000 GDC.
+//     월 10,000원은 예외가 아니라 10,000T(1원 = 1T)다 (src/worker/charge-plans.js, 단위 시험 tests/charge-plans.test.mjs).
 //   · "월/연"은 화면에 붙이는 이름일 뿐 만료·기간 제한은 없다(A안, 2026-09-12 확정) — 지급된 GDC는 일반 잔액과
 //     동일하게 소진될 때까지 유지되며 K-Law·전문가 페르소나·모든 K-서비스에 공용으로 쓰인다.
 function _computeChargeBonusGdc(confirmedKrw, now = Date.now()) {
