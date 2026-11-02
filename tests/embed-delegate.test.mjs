@@ -83,3 +83,18 @@ test('hondi-embed-say: 호스트가 대화창에 AI 말풍선을 보여 준다',
   const h = readFileSync(new URL('../webapp.html', import.meta.url), 'utf8');
   assert.match(h, /d\.type === 'hondi-embed-say'/);
 });
+
+test('첨부 파일을 호스트로 함께 넘긴다(텍스트·사진/PDF 원본, 개수·크기 상한)', async () => {
+  const { d, sent } = mk(); d.onMessage(ev({ type: 'hondi-embed-host', ai: 'delegate' }));
+  const big = 'data:image/png;base64,' + 'A'.repeat(9 * 1024 * 1024);
+  const files = [
+    { name: '계약서.pdf', mimeType: 'application/pdf', extractedText: '본문'.repeat(20000), dataUrl: 'data:application/pdf;base64,AAAA' },
+    { name: '사진.png', isImage: true, mimeType: 'image/png', dataUrl: 'data:image/png;base64,AAAA' },
+    { name: '큰사진.png', isImage: true, mimeType: 'image/png', dataUrl: big },
+    { name: 'a.txt', mimeType: 'text/plain', extractedText: '글' }, { name: 'b.txt', extractedText: '글' }, { name: 'c.txt', extractedText: '글' },
+  ];
+  const p = d.send('', files); assert.ok(p);
+  const m = sent[0][0]; assert.equal(m.files.length, 4); assert.equal(m.files[0].text.length, 20000); assert.equal(m.files[1].dataUrl.startsWith('data:image'), true);
+  assert.equal(m.files.some(f => f.name === '큰사진.png'), false);
+  assert.equal(d.send('', []), undefined);
+});
