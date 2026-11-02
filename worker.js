@@ -13409,6 +13409,8 @@ export default {
     // 2026-09-01 신설 — K-Mail 다이제스트 생성 스윕. digest_at이 지났고
     // 아직 pending인 캠페인의 회신을 취합해 정리(_kmailSweepDueDigests).
     ctx.waitUntil(_kmailSweepDueDigests(env).catch(e => console.error('[K-Mail Digest] 스윕 전체 실패:', e.message)));
+    // 2026-11-03 신설 — 나비 길잡이 아침 알림 푸시(_guideRemindersSweep). 한국 시각 09~21시에만 KV 를 훑는다.
+    ctx.waitUntil(_guideRemindersSweep(env).catch(e => console.error('[GuideReminders] 스윕 전체 실패:', e.message)));
     // 2026-09-01 신설 — K-Mail 저장 용량 월정기 과금 스윕(1MB 무료
     // 초과분, 10MB당 GDC 3). 매 10분마다 도는 크론이지만 실제 청구
     // 대상은 storage_next_billing_at<=지금인 행뿐이라 대부분의 실행은
@@ -13690,6 +13692,8 @@ export default {
     // gov-mail(hondi.org, 관리자 전용)과 도메인·인증 방식 모두 별개 —
     // 나비 사용자 본인 지갑 서명으로 <guid>@hondi.kr에서 발송한다.
     if (pathname === '/mail/send' && request.method === 'POST') return handleUserMailSend(request, env, corsHeaders);
+    // 나비 길잡이 서버 알림(2026-11-03) — 클라이언트가 앞으로 며칠치 알림 문구를 맡겨 두면 매일 아침 푸시로 보낸다.
+    if (pathname === '/guide/reminders' && request.method === 'POST') return handleGuideRemindersPut(request, env, corsHeaders);
     // K-Mail 수신자 확정 파이프라인(2026-09-01) — propose(리서치 후보 스테이징)
     // → list(사용자 확인) → decide(승인/거부). confirmed만 캠페인 발송 대상.
     if (pathname === '/kmail/contacts/propose' && request.method === 'POST') return handleKmailContactsPropose(request, env, corsHeaders);
@@ -34921,6 +34925,80 @@ async function _kmailSendOneEmail(env, { guid, to, cc, bcc, subject, text, sessi
   return { fromAddr, fromName, quota };
 }
 
+// ═══════════════════════════════════════════════════════════
+// 푸시 알림 (2026-11-03 신설) — 새 메일 · 서류 처리 결과 회신 · 나비 길잡이 아침 알림
+// 기존 VAPID 웹푸시 채널(_sendPushToGuid)을 그대로 쓴다. 푸시는 사용자가 혼디 앱(hondi.net PWA)에서 구독한 기기에만 간다.
+// ═══════════════════════════════════════════════════════════
+const NAVIWEB_APP_URL = 'https://naviweb.kr/desktop.html';
+
+// 서류를 제출한 뒤 오는 회신(접수·처리 결과·반려·보완 요청 등)으로 보이는가.
+// 앱은 서류 제출 자체를 추적하지 않는다(제출은 사용자가 외부 사이트에서 한다) — 그래서 회신 메일의 발신 도메인(.go.kr)과 제목의 낱말로 짐작한다. 틀릴 수 있다.
+function _kmailLooksLikeDocResult(fromAddr, subject) {
+  const email = ((String(fromAddr || '').match(/[^\s<>]+@[^\s<>]+/) || [''])[0]).toLowerCase();
+  const dom = email.split('@')[1] || '';
+  return /\.go\.kr$/.test(dom) || /(접수|처리\s*결과|결과\s*(통보|통지|안내)|결정\s*통지|통지서|반려|보완\s*요청|심사\s*결과|승인|허가|정보\s*공개)/.test(String(subject || ''));
+}
+async function _kmailNotifyInboundPush(env, guid, fromAddr, subject) {
+  if (!guid) return;
+  const doc = _kmailLooksLikeDocResult(fromAddr, subject);
+  const nameMatch = String(fromAddr || '').match(/^\s*"?([^"<]+?)"?\s*</);
+  const who = (nameMatch ? nameMatch[1].trim() : String(fromAddr || '').replace(/[<>]/g, '').trim()).slice(0, 40);
+  await _sendPushToGuid(env, guid, {
+    title: doc ? '서류 처리 결과로 보이는 메일이 왔어요' : '새 메일이 왔어요',
+    body: `${who ? who + ' · ' : ''}${String(subject || '(제목 없음)').slice(0, 80)}`,
+    tag: 'kmail-inbound-' + String(guid).slice(-8),   // 같은 사람에게 연달아 와도 알림 한 개로 합쳐진다
+    url: NAVIWEB_APP_URL + (doc ? '#docs' : '#mail'),
+  });
+}
+
+// POST /guide/reminders — 나비 길잡이가 앞으로 며칠치 알림 문구를 서버에 맡긴다(사용자가 켠 경우만).
+// body: { phone_verify_token, enabled, days: { 'YYYY-MM-DD': ['문구', ...] } }. enabled=false 이면 지운다.
+// 서버는 문구만 가진다(계획서 본문은 가지지 않는다). 45일 뒤 저절로 사라진다.
+const GUIDE_REM_PREFIX = 'guide:rem:';
+async function handleGuideRemindersPut(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
+  const auth = await _kAuth.resolveGuid(env, body, { sigMsg: `guide-reminders:${body.guid}:${body.ts}` });
+  if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
+  const kv = env.AI_SETUP_SEALS_KV;
+  if (!kv) return _err(500, 'CONFIG_ERROR', 'AI_SETUP_SEALS_KV 바인딩 미설정', corsHeaders);
+  const key = GUIDE_REM_PREFIX + auth.guid;
+  if (body.enabled === false) { await kv.delete(key).catch(() => {}); return new Response(JSON.stringify({ ok: true, enabled: false }), { status: 200, headers: corsHeaders }); }
+  const days = {};
+  Object.keys(body.days && typeof body.days === 'object' ? body.days : {}).slice(0, 40).forEach(d => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || !Array.isArray(body.days[d])) return;
+    const msgs = body.days[d].map(m => String(m || '').replace(/\s+/g, ' ').trim().slice(0, 140)).filter(Boolean).slice(0, 8);
+    if (msgs.length) days[d] = msgs;
+  });
+  let prev = null; try { prev = await kv.get(key, 'json'); } catch (e) {}
+  await kv.put(key, JSON.stringify({ guid: auth.guid, days, sent: prev && prev.sent || '', updated: new Date().toISOString() }), { expirationTtl: 45 * 86400 });
+  return new Response(JSON.stringify({ ok: true, enabled: true, days: Object.keys(days).length }), { status: 200, headers: corsHeaders });
+}
+// 10분 크론에서 부른다. 한국 시각 09~21시에, 오늘 알림 문구가 있고 아직 안 보낸 사용자에게 하루 한 번 푸시한다.
+async function _guideRemindersSweep(env) {
+  const kv = env.AI_SETUP_SEALS_KV; if (!kv) return;
+  const kst = new Date(Date.now() + 9 * 3600e3), hour = kst.getUTCHours(), today = kst.toISOString().slice(0, 10);
+  if (hour < 9 || hour >= 21) return;
+  let cursor;
+  do {
+    const page = await kv.list({ prefix: GUIDE_REM_PREFIX, cursor, limit: 200 });
+    for (const k of page.keys) {
+      try {
+        const rec = await kv.get(k.name, 'json'); if (!rec || rec.sent === today) continue;
+        const msgs = rec.days && rec.days[today]; if (!msgs || !msgs.length) continue;
+        await _sendPushToGuid(env, rec.guid, {
+          title: '나비 길잡이 · 오늘 챙길 일',
+          body: msgs[0] + (msgs.length > 1 ? ` 외 ${msgs.length - 1}건` : ''),
+          tag: 'guide-reminder', url: NAVIWEB_APP_URL + '#guide-prog',
+        });
+        rec.sent = today;
+        await kv.put(k.name, JSON.stringify(rec), { expirationTtl: 45 * 86400 });
+      } catch (e) { console.warn('[GuideReminders] 건너뜀:', k.name, e.message); }
+    }
+    cursor = page.list_complete ? undefined : page.cursor;
+  } while (cursor);
+}
+
 // POST /mail/send — K-Mail 사용자 발신(관리자 gov-mail과 별개 경로).
 // body: { phone_verify_token, to, subject, text } 또는 하위호환으로
 // { guid, pubkey, signature, ts, to, subject, text }
@@ -37925,6 +38003,9 @@ async function _handleKmailInboundEmail(message, env, ctx) {
       content_original: `[제목] ${subject}\n\n${bodyText}`,
       content_type: isBlocked ? 'kmail_inbound_blocked' : (matchedDelete ? 'kmail_inbound_deleted' : 'kmail_inbound'),
     }).catch(e => { console.error('[K-Mail email] ai_messages 기록 실패:', e.message); return null; });
+
+    // 2026-11-03 신설 — 새 메일 푸시. 차단·자동삭제된 메일은 알리지 않는다. 푸시를 받을 기기(PWA 구독)가 없으면 _sendPushToGuid 가 조용히 건너뛴다.
+    if (writtenMsg && !isBlocked && !matchedDelete) _kmailNotifyInboundPush(env, ownerGuid, fromAddr, subject).catch(e => console.warn('[K-Mail email] 새 메일 푸시 실패(무시):', e.message));
 
     // §3 "2단계: 위임 범위 내 실행" — 사람 확인 없이 즉시 회신하고,
     // 처리 결과를 kmail_delegated_reply로 남긴다(K-Plan/사람이 나중에
