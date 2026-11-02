@@ -4031,7 +4031,15 @@ window.closePDV = closePDV;
   //  순서대로 다 두드리느라 응답이 10초 이상 걸리는 문제가 있었음 — 2026-06-24 수정)
   // ── AI 비서 이름 — 로컬에서 읽어 표시 ─────────────────────────────
   (function _initAIName() {
-    const stored = localStorage.getItem('hondi_assistant_name') || '나비';
+    let stored = localStorage.getItem('hondi_assistant_name') || '나비';
+    // 옛 기본 표시 이름 "혼디"가 저장돼 있으면 한 번만 "나비"로 되돌린다(2026-11-03).
+    // 표시 이름 "혼디"를 사용자가 이후에 직접 짓는 것은 막지 않는다(한 번만 실행하는 표식 hondi_assistant_name_v2).
+    try {
+      if (localStorage.getItem('hondi_assistant_name_v2') !== '1') {
+        if (stored === '혼디') { stored = '나비'; localStorage.removeItem('hondi_assistant_name'); }
+        localStorage.setItem('hondi_assistant_name_v2', '1');
+      }
+    } catch {}
     document.getElementById('ai-panel-name').textContent = stored;
   })();
 
@@ -5688,6 +5696,65 @@ window.hsSendAsAttachment = function () {
       preventScrollFocus();
     });
     observer.observe(document.body, { childList: true, subtree: false });
+  });
+})();
+</script>
+
+<!-- 2026-11-03 — 음성 입력 창: 입력창의 마이크를 누르면(mic-active) 가운데 카드와 하단 안내를 보여 준다.
+     공용 chat-input.js 는 수정하지 않는다. 창 바깥을 누르면 마이크 버튼을 한 번 더 눌러 듣기를 멈춘다. -->
+<style>
+#navi-voice-overlay{position:fixed;inset:0;z-index:10020;display:none;background:rgba(0,0,0,.46);
+  font-family:'Pretendard',-apple-system,'Apple SD Gothic Neo',sans-serif;-webkit-tap-highlight-color:transparent}
+#navi-voice-overlay.nv-on{display:block}
+#navi-voice-overlay .nv-card{position:absolute;left:16px;right:16px;top:50%;transform:translateY(-52%);
+  max-width:420px;margin:0 auto;background:#fff;border-radius:8px;padding:22px 16px 18px;text-align:center;
+  box-shadow:0 8px 28px rgba(0,0,0,.28)}
+#navi-voice-overlay .nv-brand{font-size:26px;font-weight:800;letter-spacing:-.02em;color:#1A73E8;line-height:1.2}
+#navi-voice-overlay .nv-mic{position:relative;width:76px;height:76px;border-radius:50%;margin:26px auto 22px;
+  background:#1A73E8;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 0 7px rgba(26,115,232,.16)}
+#navi-voice-overlay .nv-mic::after{content:"";position:absolute;inset:-7px;border-radius:50%;
+  border:2px solid rgba(26,115,232,.35);animation:nv-ripple 1.6s ease-out infinite}
+#navi-voice-overlay .nv-mic svg{width:34px;height:34px;color:#fff}
+#navi-voice-overlay .nv-say{font-size:17px;color:#202124;margin:0 0 30px}
+#navi-voice-overlay .nv-lang{font-size:11.5px;color:#5f6368}
+#navi-voice-overlay .nv-note{position:absolute;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));
+  margin:0 auto;width:min(300px,calc(100% - 64px));background:#fff;color:#202124;border-radius:24px;
+  padding:14px 20px;font-size:13.5px;line-height:1.5;text-align:left;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+@keyframes nv-ripple{0%{transform:scale(.9);opacity:1}100%{transform:scale(1.35);opacity:0}}
+@media (prefers-reduced-motion:reduce){#navi-voice-overlay .nv-mic::after{animation:none}}
+</style>
+<div id="navi-voice-overlay" role="dialog" aria-modal="true" aria-label="음성 입력" aria-live="polite">
+  <div class="nv-card">
+    <div class="nv-brand">나비웹</div>
+    <div class="nv-mic" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2.5" width="6" height="12" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="21.5"/></svg>
+    </div>
+    <p class="nv-say">아무 말이나 해 보세요.</p>
+    <div class="nv-lang">한국어 (대한민국)</div>
+  </div>
+  <div class="nv-note">음성은 이 기기의 음성 인식 서비스가 텍스트로 변환하고, 변환된 텍스트만 나비웹과 공유합니다.</div>
+</div>
+<script>
+(function () {
+  var ov = document.getElementById('navi-voice-overlay');
+  var slot = document.getElementById('ai-panel-input-slot');
+  if (!ov || !slot) return;
+  function micBtn() { return slot.querySelector('.ci-mic-btn'); }
+  function sync() {
+    var b = micBtn();
+    var on = !!(b && b.classList.contains('mic-active'));
+    ov.classList.toggle('nv-on', on);
+  }
+  // chat-input.js 가 마운트되면서 버튼이 생기고, 듣는 동안 mic-active 클래스가 붙었다 떨어진다.
+  new MutationObserver(sync).observe(slot, { subtree: true, attributes: true, attributeFilter: ['class'], childList: true });
+  // 창을 누르면 마이크를 한 번 더 눌러 듣기를 멈춘다(창은 mic-active 가 꺼지면 닫힌다).
+  ov.addEventListener('click', function () {
+    var b = micBtn();
+    if (b && b.classList.contains('mic-active')) b.click(); else ov.classList.remove('nv-on');
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && ov.classList.contains('nv-on')) ov.click();
   });
 })();
 </script>
