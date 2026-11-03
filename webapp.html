@@ -4293,6 +4293,7 @@ window.closePDV = closePDV;
     // 히스토리(system 메시지는 저장하지 않으므로 항상 빠져 있음)가 있으면
     // length가 0이 아니라서 system이 영영 주입되지 않는 문제가 있었다.
     // "system 메시지가 있는지"로 직접 판단하고, unshift로 맨 앞에 둔다.
+    await _embedFreshScreen();
     if (!_panelHistory.some(m => m.role === 'system')) {
       let effectiveSystem = (window.__hondiEmbedSp && window.__hondiEmbedSp.text) || cfg.system || '';
       if (window.__hondiEmbedSp && window.__hondiEmbedSp.text && window.__hondiEmbedSp.context) effectiveSystem += '\n\n[사용자 지역 정보 — 나비웹]\n' + window.__hondiEmbedSp.context + '\n이 지역을 관할하는 기관의 입장에서 답한다.';
@@ -4368,7 +4369,35 @@ window.closePDV = closePDV;
     } catch (e) { console.warn('[Panel] 위치 확보 실패(무시):', e.message); }
     // _panelHistory는 그대로 두고(위치 없는 원문 유지), 실제 API 호출에만
     // 마지막 user 메시지에 위치를 얹은 사본을 쓴다.
-    function _messagesWithLocation(historyArr) {
+    /* 2026-11-04 — 화면 동기화(나비웹 서류 작성): 서류 안내 SP('inline:doc:…') 는 호스트(나비웹)가 알려 주는 "지금 화면"(서류 제목·항목) 없이는 답하지 않는다.
+ * 화면 상태는 SP 본문에 박지 않고 요청마다 사용자 말 앞에 붙인다(기록에는 남지 않음). 전송 직전에 호스트에 새로 물어(hondi-embed-ctx-request) 오래된 상태가 들어가지 않게 한다.
+ * host→page { type:'hondi-embed-ctx', ok, rev, text }   page→host { type:'hondi-embed-ctx-request' } */
+function _isScreenSp() { return !!(window.__hondiEmbedSp && String(window.__hondiEmbedSp.key || '').indexOf('inline:doc:') === 0); }
+function _embedFreshScreen() {
+  const ho = window.__hondiHostOrigin;
+  if (!_isScreenSp() || window.parent === window || !ho) return Promise.resolve();
+  return new Promise(function (resolve) {
+    let done = false, tm = 0;
+    const fin = function () { if (done) return; done = true; window.__ctxWait = null; clearTimeout(tm); resolve(); };
+    tm = setTimeout(fin, 1800); window.__ctxWait = fin;
+    try { window.parent.postMessage({ type: 'hondi-embed-ctx-request' }, ho); } catch (x) { fin(); }
+  });
+}
+function _screenCtxNote() {
+  if (!_isScreenSp()) return '';
+  const s = window.__hondiEmbedScreen;
+  if (!s || !s.ok || !s.text || Date.now() - s.at > 20000) {
+    return '[현재 화면 — 연결 확인 중]\n화면의 서류 정보를 받지 못했다. 서류 제목·내용을 추측하거나 지어내지 말고 "화면을 확인하고 있습니다. 잠시 후 다시 말씀해 주세요."라고만 답한다.';
+  }
+  return '[현재 화면 — 나비웹 서류 작성 (rev ' + s.rev + ')]\n' + s.text + '\n(위는 사용자 화면의 지금 상태다. 대화 기록과 어긋나면 화면을 기준으로 답한다.)';
+}
+function _withScreenCtx(h) {
+  const note = _screenCtxNote(); if (!note) return h;
+  const last = h[h.length - 1]; if (!last || last.role !== 'user' || typeof last.content !== 'string') return h;
+  const c = h.slice(); c[c.length - 1] = { ...last, content: note + '\n\n' + last.content }; return c;
+}
+function _messagesWithLocation(historyArr) {
+  historyArr = _withScreenCtx(historyArr);
       if (!_panelLocNote) return historyArr;
       const last = historyArr[historyArr.length - 1];
       if (!last || last.role !== 'user' || typeof last.content !== 'string') return historyArr;
@@ -5052,6 +5081,12 @@ window.closePDV = closePDV;
     window.addEventListener('message', async (e) => {
       const d = e.data;
       if (!d || typeof d !== 'object' || !_spHostOk(e)) return;
+      window.__hondiHostOrigin = e.origin;
+      if (d.type === 'hondi-embed-ctx') {   // 호스트가 알려 준 현재 화면 — 대화 기록은 건드리지 않고 상태만 갱신
+        window.__hondiEmbedScreen = { ok: d.ok !== false, rev: d.rev | 0, text: String(d.text || '').slice(0, 6000), at: Date.now() };
+        if (window.__ctxWait) window.__ctxWait();
+        return;
+      }
       if (d.type === 'hondi-embed-say') {   // 호스트가 대화창에 AI 말풍선 한 줄을 보여 준다(모델 호출 없음) — 예: 서류 제출 안내의 첫 문구
         const t = String(d.text || '').trim().slice(0, 600); if (t) _appendPanelMsg('ai', t); return;
       }
