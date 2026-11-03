@@ -4921,6 +4921,12 @@ export async function _handleDelegateToFlashTag(fullReply, bubble, sendFn = call
 //            실행 함수에 배선만 추가).
 // 아직 미처리(Phase 2~5 예정): PDV_STORE, HANDSHAKE, VERIFY_OWNER, TRADE.
 // (ESCALATE는 2026-07-11 _handleSPAuthorTags()로 처리됨 — 이 목록에서 제외)
+// ★ 2026-11-03 신설 — 새 탭으로 위임할 때 나비(AC)가 방금 쓴 문장을 말풍선에 남기지도, 새 탭의 ctx 에 섞지도 않는 서비스.
+//   배경: 아래 [GWP: id] 분기는 모델이 태그 앞에 쓴 문장(cleanedReply)을 ① 말풍선에 그대로 남기고 ② "[사용자 요청]" 앞에 붙여 ctx 로 보낸다.
+//   기관 안내(kgov 등)에는 그 문장이 기관명을 담고 있어 쓸모가 있지만(2026-07-23), K-Market 처럼 새 탭의 AI 가 사용자 질문을 직접 받아 답하는 서비스에서는
+//   (1) 나비가 먼저 답을 내 버려 위임이 무의미해지고 (2) 나비의 문장이 사용자 말처럼 새 탭 입력창에 들어간다.
+//   → 이런 서비스는 말풍선엔 연결 안내 한 줄만, ctx 에는 사용자 원문만 싣는다(위치는 facts 로 따로 간다).
+const _GWP_USER_TEXT_ONLY = new Set(['kcommerce']);
 export function _parseAgentTags(fullReply, bubble, userText, _preTab) {
   // [GWP: serviceId] — 하위 시스템 새 탭 오픈 (SP-00 v10.0, 기존 로직 그대로 이전)
   try {
@@ -5112,7 +5118,8 @@ export function _parseAgentTags(fullReply, bubble, userText, _preTab) {
       } else if (svcDef) {
         console.info('[GWP] LLM 판단 → 새 탭:', svcId);
         const cleanedReply = fullReply.replace(/\[GWP:\s*[\w-]+\]\s*/, '').trim();
-        if (bubble) _updateStreamBubble(bubble, cleanedReply);
+        const _userTextOnly = _GWP_USER_TEXT_ONLY.has(svcDef.id);
+        if (bubble) _updateStreamBubble(bubble, _userTextOnly ? `🔗 ${svcDef.name}(으)로 연결하고 있습니다…` : cleanedReply);
         // ★ 2026-09-14 신설(결함 B 조치) — svcDef.requireConfirm(현재
         // kgdc만 해당, gwp-registry.js 참고)이면 실제로 탭을 열기 전에
         // 한 번 더 확인을 구한다. _parseAgentTags는 동기 함수라 별도
@@ -5141,7 +5148,7 @@ export function _parseAgentTags(fullReply, bubble, userText, _preTab) {
           // AI가 방금 스스로 판단해 말한 내용을 그냥 버리고 있었을 뿐이다.
           // cleanedReply를 같이 실어 보내, 새 탭의 assembleGovSystemPrompt
           // 키워드 매칭이 그 기관명을 그대로 잡을 수 있게 한다.
-          const gwpCtx = cleanedReply ? `${cleanedReply}\n\n[사용자 요청] ${userText}` : userText;
+          const gwpCtx = (cleanedReply && !_userTextOnly) ? `${cleanedReply}\n\n[사용자 요청] ${userText}` : userText;
           _gwpLaunch(svcDef, gwpCtx, _preTab, _buildRoutingFacts());
         }
       } else {

@@ -39,9 +39,10 @@ globalThis.fetch = async () => { throw new Error('테스트 환경: 네트워크
 //    호출됐는지"만 관찰한다. call-ai.js와 expert-session.js 둘 다 같은
 //    모듈(gwp/engine.js)에서 import하므로 한 번의 mock으로 양쪽 다 커버된다 ──
 let _launched = null;
+let _launchedCtx = null;   // _gwpLaunch 가 새 탭에 실어 보낸 ctx(2026-11-03 — 위임 시 나비의 문장 처리 검증용)
 mock.module(new URL('../gopang/gwp/engine.js', import.meta.url), {
   namedExports: {
-    _gwpLaunch: (svc, ctx, _preTab, _facts) => { _launched = svc; },
+    _gwpLaunch: (svc, ctx, _preTab, _facts) => { _launched = svc; _launchedCtx = ctx; },
   },
 });
 
@@ -51,7 +52,7 @@ const { _parseAgentTags, _estimateGovImportance, _selectGovVerificationMode, _is
 const { handleExpertTag } = await import(new URL('../gopang/ai/expert-session.js', import.meta.url));
 const { getService, GWP_REGISTRY } = globalThis;
 
-function resetLaunch() { _launched = null; }
+function resetLaunch() { _launched = null; _launchedCtx = null; }
 
 // 앞 테스트가 태운 자동복구(fire-and-forget callAI)가 끝나 재진입 가드가 풀릴 때까지 기다린다.
 // 예전에는 고정 sleep(100~250ms)이었는데, 복구가 끝나는 시간이 환경마다 달라(느린 환경에서 SD-05b/c가 "재진입"으로 오판)
@@ -309,5 +310,38 @@ describe('SD — GWP_REGISTRY 구조적 위생 점검', () => {
     }
     // 정보성 — 실패시키지 않음. 다만 최소한 배열 형태는 보장한다.
     assert.ok(Array.isArray(dupes));
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
+// 2026-11-03 — 위임 시 나비(AC)의 문장 처리. 사고: "근처에 맛집 있어" → AC 가 자기 답을 쓰고 [GWP: kcommerce] 를 붙여,
+// ① 나비 말풍선에 AC 의 답이 그대로 남고 ② 그 답이 "[사용자 요청]" 앞에 붙어 K-Market 입력창에 사용자 말처럼 들어갔다.
+describe('SD-CTX — 위임할 때 나비의 문장을 남기지·싣지 않는 서비스(K-Market)', () => {
+  test('SD-CTX-01: kcommerce — ctx 는 사용자 원문뿐, 말풍선은 연결 안내 한 줄', () => {
+    resetLaunch();
+    const bubble = { innerHTML: '' };
+    _parseAgentTags('부산 동구 중앙대로 357 근처 맛집을 찾아드릴게요. 어떤 종류가 좋으세요?\n[GWP: kcommerce]', bubble, '근처에 맛집 있어', null);
+    assert.equal(_launched?.id, 'kcommerce');
+    assert.equal(_launchedCtx, '근처에 맛집 있어', 'ctx 에 나비의 문장이 섞이면 안 된다');
+    assert.match(bubble.innerHTML, /K-Market/);
+    assert.doesNotMatch(bubble.innerHTML, /찾아드릴게요|어떤 종류/, '나비가 위임하면서 직접 답한 문장이 화면에 남으면 안 된다');
+  });
+
+  test('SD-CTX-02: 태그만 내도 동일하게 사용자 원문만 전달', () => {
+    resetLaunch();
+    const bubble = { innerHTML: '' };
+    _parseAgentTags('[GWP: kcommerce]', bubble, '치킨 시켜줘', null);
+    assert.equal(_launched?.id, 'kcommerce');
+    assert.equal(_launchedCtx, '치킨 시켜줘');
+  });
+
+  test('SD-CTX-03: 목록에 없는 서비스(klaw)는 기존대로 나비 문장 + [사용자 요청] (회귀 방지)', () => {
+    resetLaunch();
+    const bubble = { innerHTML: '' };
+    _parseAgentTags('이혼 소송 준비를 도와드리겠습니다.\n[GWP: klaw]', bubble, '이혼 소송 준비하려는데', null);
+    assert.equal(_launched?.id, 'klaw');
+    assert.match(_launchedCtx, /이혼 소송 준비를 도와드리겠습니다\./);
+    assert.match(_launchedCtx, /\[사용자 요청\] 이혼 소송 준비하려는데/);
+    assert.match(bubble.innerHTML, /도와드리겠습니다/);
   });
 });
