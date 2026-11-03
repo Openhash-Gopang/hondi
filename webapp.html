@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+<script>try{if(window.parent!==window)document.documentElement.classList.add('is-embedded')}catch(e){}</script>
 <meta charset="UTF-8">
 <script>
 // ── PC 접속 차단 가드 ────────────────────────────────────
@@ -1020,6 +1021,8 @@ select.setting-field{appearance:none;-webkit-appearance:none;
 /* v6.1: 가입/로그인 완료(body.gopang-authed) 전에는 설치 배너를 절대 노출하지 않음.
    gopang-pwa.js가 인증 상태를 확인하지 않고 .show를 붙이는 경우에 대한 안전장치. */
 body:not(.gopang-authed) .install-banner.show{display:none!important}
+/* 2026-11-04 나비웹 등 호스트 화면 안의 대화창에서는 앱 설치 안내를 보이지 않는다 */
+html.is-embedded .install-banner{display:none!important}
 .install-banner-icon img{width:36px;height:36px;border-radius:8px}
 .install-banner-text{flex:1}
 .install-banner-title{font-size:13px;font-weight:700;color:#111;margin-bottom:2px}
