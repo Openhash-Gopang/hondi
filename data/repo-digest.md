@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-03 08:31 KST · 기준 커밋 4226918d
+- 갱신: 2026-11-03 13:40 KST · 기준 커밋 cfe395b5
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 882건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-03 fix(gwp): K-Market 위임 시 나비 문장 제외, ctx는 사용자 원문만
 - 2026-11-03 feat(webapp): 비서 이름 "혼디"→"나비" 정리 + 마이크 나비웹 음성 입력 창
 - 2026-11-03 Merge pull request #909 from Openhash-Gopang/feat/guide-mail-push
 - 2026-11-03 워커: 새 메일·서류 처리 결과 회신 푸시, 나비 길잡이 아침 알림 푸시
@@ -43,7 +44,6 @@
 - 2026-11-01 feat(assist): /kmail/assist 열린 서류 수정 경로(doc_edit)
 - 2026-11-01 Merge pull request #884 from Openhash-Gopang/feat/assistant-host
 - 2026-11-01 Merge pull request #883 from Openhash-Gopang/feat/case-invite-link
-- 2026-11-01 fix(assistant): 기본 규칙팩 effective_from 을 앞당김(배포 직후·시계 오차에서 팩이 거부되던 문제)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
