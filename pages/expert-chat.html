@@ -6,6 +6,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
 <title>전문가 업무 보조 AI</title>
 <script>try{if(new URLSearchParams(location.search).get('embed')==='1'&&window.parent!==window)document.documentElement.classList.add('embed');if(new URLSearchParams(location.search).get('glass')==='1'&&window.parent!==window)document.documentElement.classList.add('glass')}catch(e){}</script>
+<!-- modulepreload:begin (scripts/gen-expert-chat-preload.mjs) -->
+<link rel="modulepreload" href="/src/gopang/ai/attach-memory.js">
+<link rel="modulepreload" href="/src/gopang/ai/doc-form-client.js">
+<link rel="modulepreload" href="/src/gopang/ai/expert-registry-core.js">
+<link rel="modulepreload" href="/src/gopang/ai/expert-registry-lawyer.js">
+<link rel="modulepreload" href="/src/gopang/ai/expert-registry-physician.js">
+<link rel="modulepreload" href="/src/gopang/ai/expert-registry-professor.js">
+<link rel="modulepreload" href="/src/gopang/ai/expert-registry.js">
+<link rel="modulepreload" href="/src/gopang/ai/expert-session.js">
+<link rel="modulepreload" href="/src/gopang/ai/file-extract.js">
+<link rel="modulepreload" href="/src/gopang/ai/form-shots-handoff.js">
+<link rel="modulepreload" href="/src/gopang/ai/hondi-digit-claim.js">
+<link rel="modulepreload" href="/src/gopang/ai/hondi-digit-core.js">
+<link rel="modulepreload" href="/src/gopang/ai/legal-review.js">
+<link rel="modulepreload" href="/src/gopang/ai/manifest-loader.js">
+<link rel="modulepreload" href="/src/gopang/ai/report-utils.js">
+<link rel="modulepreload" href="/src/gopang/ai/subject-gate.js">
+<link rel="modulepreload" href="/src/gopang/core/config.js">
+<link rel="modulepreload" href="/src/gopang/core/state.js">
+<link rel="modulepreload" href="/src/gopang/core/token-policy.js">
+<link rel="modulepreload" href="/src/gopang/gwp/allowed-origins.js">
+<link rel="modulepreload" href="/src/gopang/gwp/engine.js">
+<link rel="modulepreload" href="/src/gopang/gwp/gwp-report-client.js">
+<link rel="modulepreload" href="/src/gopang/gwp/pdv-health-handler.js">
+<link rel="modulepreload" href="/src/gopang/gwp/sign.js">
+<link rel="modulepreload" href="/src/gopang/pdv/health-profile.js">
+<link rel="modulepreload" href="/src/gopang/pdv/record.js">
+<link rel="modulepreload" href="/src/gopang/services/klaw.js">
+<link rel="modulepreload" href="/src/gopang/services/location.js">
+<link rel="modulepreload" href="/src/gopang/ui/bubble.js">
+<link rel="modulepreload" href="/src/gopang/ui/chat-shell.js">
+<link rel="modulepreload" href="/src/gopang/ui/legal-review-ui.js">
+<link rel="modulepreload" href="/src/worker/doc-form-handler.js">
+<link rel="modulepreload" href="/src/worker/doc-form-reward.js">
+<!-- modulepreload:end -->
 <meta name="description" content="자격직 전문가와 소속 직원의 서류 작성을 대화로 보조하는 AI 페르소나 — GWP 방식 새 탭.">
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
@@ -103,7 +138,7 @@ html.embed.glass .bubble-ai{background:rgba(255,255,255,.82)}
   </div>
 </div>
 </div>
-<script src="/gopang-wallet.js"></script>
+<script src="/gopang-wallet.js" defer></script>
 <script type="module">
 import { EXPERT_REGISTRY, UNIVERSAL_INTEGRITY_KEY, COMMON_GUARDRAILS_KEY,
          COMMON_MEDICAL_SAFETY_KEY, EXPERT_BASE_KEY, isConsultableChild, resolveExpertId }
