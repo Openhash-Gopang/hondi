@@ -89,12 +89,12 @@ th{font-size:12.5px;color:var(--muted);font-weight:500;background:var(--code-bg)
   <div class="tw"><table>
     <thead><tr><th>파일</th><th>용도</th></tr></thead>
     <tbody>
-      <tr><td><code>C:\Users\주피터\.ssh\oracle\gopang-l1.key</code></td><td>l1-hanlim(168.110.123.175) 접속에 사용해 확인됨. l1-hanlim-new(152.67.196.86)도 이 키로 점검함(처음 점검 때 사용한 키가 이것인지 다음 접속 때 확인)</td></tr>
+      <tr><td><code>C:\Users\주피터\.ssh\oracle\gopang-l1.key</code></td><td><span class="pill no">분실 가능성</span> l1-hanlim 접속에 쓰인 키. 2026-11-04 정리 때 Downloads에 없어 이동하지 못했고, 같은 명령에서 바탕화면 2026_10_27 폴더의 *.key와 임시 사본을 삭제했음. 다른 사본이 있는지 확인 중이며, 없으면 새 키 쌍을 만들어 서버 authorized_keys에 등록해야 함(6절)</td></tr>
       <tr><td><code>C:\Users\주피터\.ssh\oracle\ssh-key-2026-05-08.key</code></td><td>오라클 콘솔에서 받은 키. 144.24.90.233에서는 거부됨(서버에 등록되지 않은 키)</td></tr>
       <tr><td><code>C:\Users\주피터\.ssh\oracle\README.txt</code></td><td>이 문서의 주소(hondi.net/admin/oracle-cloud-cost-20261104.html)와 접속 명령 기록</td></tr>
     </tbody>
   </table></div>
-  <p>다음 PowerShell을 한 번 실행하면 흩어진 사본이 이 위치로 모이고 권한이 본인 계정으로 제한됩니다. 원본 위치는 Downloads, 바탕화면 <code>2026_10_27</code> 폴더입니다.</p>
+  <p>아래 명령으로 사본을 이 위치로 모으고 권한을 본인 계정으로 제한했습니다(<code>ssh-key-2026-05-08.key</code>만 이동 성공). <strong>삭제 명령은 이동이 모두 성공한 뒤에 실행해야 합니다.</strong></p>
 <pre><code>$d = "$HOME\.ssh\oracle"
 New-Item -ItemType Directory -Force $d | Out-Null
 # 원본을 찾아 이동 (경로가 다르면 수정)
@@ -128,7 +128,7 @@ Remove-Item "$HOME\Desktop\2026_10_27\*.key" -Force -ErrorAction SilentlyContinu
     <li>인스턴스 목록에서 144.24.90.233이 무엇인지 확인하고, 비용 분석(Cost Analysis)에서 서비스별 요금을 확인.</li>
     <li>선택지 결정(3절). A1 이전이면 이전 계획서를 따로 작성한 뒤 진행: A1 인스턴스 생성 → 데이터 복사(PocketBase 31개) → 읽기 전용 검증 → DNS 전환 → 기존 서버 중지 → 일정 기간 뒤 삭제.</li>
     <li>DNS가 <code>l1-hanlim</code>(무료 마이크로)을 아직 가리키는지 확인하고, 남은 서버라면 정리를 검토.</li>
-    <li>SSH 키 교체(4절).</li>
+    <li>SSH 키 교체(4절). <code>gopang-l1.key</code>를 찾지 못했다면 콘솔에서 새 키 쌍을 만들고, 인스턴스의 콘솔 연결 또는 기존에 접속 가능한 키로 <code>authorized_keys</code>에 새 공개키를 추가합니다.</li>
   </ol>
 </section>
 </main>
