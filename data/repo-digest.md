@@ -1,9 +1,14 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-04 19:11 KST · 기준 커밋 f1557351
+- 갱신: 2026-11-04 20:13 KST · 기준 커밋 3a625c05
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 882건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-04 Merge pull request #916 from Openhash-Gopang/docs/oracle-cost-20261104-b
+- 2026-11-04 docs(admin): 오라클 문서 갱신 - 서버 조회 결과, 144.24.90.233은 테넌시 밖, 접속 복구 경로 정정
+- 2026-11-04 Merge pull request #915 from Openhash-Gopang/docs/oracle-cost-20261104
+- 2026-11-04 docs(admin): 오라클 문서 gopang-l1.key 분실 확정 반영
+- 2026-11-04 docs(admin): 오라클 문서 키 보관 상태 정정 (gopang-l1.key 이동 실패)
 - 2026-11-04 Merge pull request #914 from Openhash-Gopang/docs/oracle-cost-20261104
 - 2026-11-04 docs(admin): 오라클 클라우드 비용 정리 문서와 관리자 메뉴 추가
 - 2026-11-04 fix(webapp): 호스트 화면 안 대화창에서는 나비 앱 설치 배너를 숨김
@@ -39,11 +44,6 @@
 - 2026-11-02 Merge pull request #889 from Openhash-Gopang/docs/naviweb-guide-fix-20261102
 - 2026-11-02 docs: 개정 안내서 시작하기 문구를 사용 설명서와 일치시킴
 - 2026-11-02 Merge pull request #888 from Openhash-Gopang/docs/naviweb-guide-20261102
-- 2026-11-02 docs: 나비와 나비웹 안내서 2026년 11월 개정본(HTML) 추가
-- 2026-11-02 Merge pull request #887 from Openhash-Gopang/feat/admin-docs-sp-edit
-- 2026-11-02 docs(admin): SP 서류 수정 설계서와 AI 입력 전수 조사서를 관리자 페이지에 보관
-- 2026-11-01 Merge pull request #886 from Openhash-Gopang/feat/embed-delegate
-- 2026-11-01 feat(webapp): 나비웹 화면 안에서는 AI 입력을 호스트 SP로 위임 (embed-delegate)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
