@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-04 21:54 KST · 기준 커밋 b53859fa
+- 갱신: 2026-11-04 22:52 KST · 기준 커밋 69cb8c57
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 882건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-04 feat: doc form feedback API (anonymous add-field signals, candidates by distinct users)
+- 2026-11-04 perf: load SP layers in parallel for expert-chat, share manifest request
 - 2026-11-04 서류 작성 엔진(expert-chat) 로딩 단축: 모듈 사전 로드 + 지갑 스크립트 defer
 - 2026-11-04 서류 작성 도우미 태그 채널 + SP_lawyer v5.7
 - 2026-11-04 Merge pull request #916 from Openhash-Gopang/docs/oracle-cost-20261104-b
@@ -42,8 +44,6 @@
 - 2026-11-02 feat: 필드 테스트 기간 정액 입금 GDC 지급(월 1만원→10만 GDC, 연 10만원→12만 GDC)
 - 2026-11-02 feat: 테스트 무료 한도를 DeepSeek API 실비 500원 기준으로 바꾸고 유예를 없앰
 - 2026-11-02 fix(cors): getCorsOrigin 접두어 비교를 정확 일치로 교체 (hondi.net.evil.com 류 우회 차단)
-- 2026-11-02 feat: naviweb.kr 판결 시뮬레이션용 CORS 허용 + klaw 공유 엔진
-- 2026-11-02 Merge pull request #889 from Openhash-Gopang/docs/naviweb-guide-fix-20261102
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
