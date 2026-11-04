@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-04 08:09 KST · 기준 커밋 34bc2487
+- 갱신: 2026-11-04 19:11 KST · 기준 커밋 f1557351
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 882건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-04 Merge pull request #914 from Openhash-Gopang/docs/oracle-cost-20261104
+- 2026-11-04 docs(admin): 오라클 클라우드 비용 정리 문서와 관리자 메뉴 추가
 - 2026-11-04 fix(webapp): 호스트 화면 안 대화창에서는 나비 앱 설치 배너를 숨김
 - 2026-11-04 feat: 서류 작성 안내 SP는 화면 스냅샷 없이는 답하지 않음 — 전송 때마다 호스트에 현재 화면을 물어 붙임
 - 2026-11-03 fix(gwp): K-Market 위임 시 나비 문장 제외, ctx는 사용자 원문만
@@ -42,8 +44,6 @@
 - 2026-11-02 docs(admin): SP 서류 수정 설계서와 AI 입력 전수 조사서를 관리자 페이지에 보관
 - 2026-11-01 Merge pull request #886 from Openhash-Gopang/feat/embed-delegate
 - 2026-11-01 feat(webapp): 나비웹 화면 안에서는 AI 입력을 호스트 SP로 위임 (embed-delegate)
-- 2026-11-01 Merge pull request #885 from Openhash-Gopang/feat/doc-edit-route
-- 2026-11-01 feat(assist): /kmail/assist 열린 서류 수정 경로(doc_edit)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
