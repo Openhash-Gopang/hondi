@@ -1480,6 +1480,8 @@ async function startGreeting() {
     return;
   }
   if (REVIEW_MODE) { appendBubble('ai', escHtml(_reviewGreeting()).replace(/\n/g, '<br>')); return; }
+  // 2026-11-04: ?quiet=1(서류 작성이 숨겨 둔 엔진)은 인사 턴을 만들지 않는다 — 인사에 AI 호출 한 번(약 10초)이 들고, 첫 초안이 그만큼 늦어졌다. 대화 화면으로 보이는 임베드(메일의 전문가 상담 등)에는 quiet 를 주지 않아 인사가 그대로 나온다.
+  if (_embedOn() && _qs.get('quiet') === '1') return;
   // 2026-09-04 신설 — 카탈로그에서 곧바로 들어온 경우(ctx 없음)도
   // "안녕하세요, OO AI입니다" 같은 정적 한 줄 대신, 페르소나 자신의 SP
   // 정체성(Q1 등)에 따라 스스로 소개하도록 내부 지시를 첫 턴으로 조용히
