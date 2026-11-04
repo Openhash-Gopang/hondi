@@ -25,6 +25,7 @@
     { type:'pdv-draft', reqId, op:'delete', id }              → { ok }
     { type:'pdv-draft', reqId, op:'done',   id }              → { ok }          status='done'(작성한 서류)
     { type:'pdv-draft', reqId, op:'caps' }                    → { ok, kinds }   받는 항목 종류(옛 중계는 BAD_OP)
+  kind='form' (내 서류함, 2026-11-05): box='fav'|'mine'|'upload', title=양식 이름, site=서류 사이트, body='mine' 이면 서식 JSON(50000자까지), fileData='upload' 이면 올린 양식 원본(8MB까지), uses·lastUsed=사용 횟수·마지막 사용(ms). 초안 정리에서 제외, 서류·편지 목록(kind 지정)에는 나타나지 않는다.
   kind='guide' (나비 길잡이 과제 계획서, 2026-11-03): id 는 'guide-<계획서 id>', title=과제명, body=계획서 본문(50000자까지), subject=마지막 수정 시각(ms).
     초안 정리(MAX_ITEMS)에서 제외하고, 서류·편지 목록(kind 지정)에는 나타나지 않는다. 타임라인에는 처음 저장할 때 '과제 계획서 초안 저장: 제목' 1건만 남긴다.
   응답: { type:'pdv-draft-result', reqId, ok, ...data }.  준비되면 부모에게 { type:'pdv-draft-ready' } 를 보낸다.
@@ -37,7 +38,7 @@
   'use strict';
   var ALLOW = ['https://mail.hondi.net', 'https://naviweb.kr', 'https://www.naviweb.kr'];
   var DB_NAME = 'gopang_pdv_drafts', STORE = 'items';
-  var KINDS = ['doc', 'letter', 'campaign', 'guide'];   // guide: 나비 길잡이 과제 계획서(2026-11-03) — body 에 계획서 본문, subject 에 마지막 수정 시각(ms)
+  var KINDS = ['doc', 'letter', 'campaign', 'guide', 'form'];   // form: 내 서류함(2026-11-05) — box 'fav'(자주 쓰는 양식)·'mine'(내가 만든 양식, body=서식 JSON)·'upload'(업로드한 양식, fileData=원본)   // guide: 나비 길잡이 과제 계획서(2026-11-03) — body 에 계획서 본문, subject 에 마지막 수정 시각(ms)
   var MAX_FILE = 8 * 1024 * 1024;   // 서류 파일 한 건 상한
   var MAX_ITEMS = 300;
   var MAX_EXTRAS = 12, MAX_EXTRA_TOTAL = 25 * 1024 * 1024;   // 서류 첨부서류(항목별로 올린 파일)
@@ -107,6 +108,9 @@
       fileMime: newFile ? str(item.fileMime, 120) : (keepFile ? prev.fileMime : ''),
       fileData: newFile ? item.fileData : (keepFile ? prev.fileData : null),
       extras: extras,
+      box: ['fav', 'mine', 'upload'].indexOf(item.box) >= 0 ? item.box : ((prev && prev.box) || ''),   // 내 서류함 종류(kind='form')
+      uses: item.uses !== undefined ? Math.max(0, Math.min(9999, item.uses | 0)) : ((prev && prev.uses) || 0),
+      lastUsed: item.lastUsed !== undefined ? (+item.lastUsed || 0) : ((prev && prev.lastUsed) || 0),
       created: (prev && prev.created) || now,
       updated: now
     };
@@ -115,7 +119,7 @@
   // PDV 타임라인(공용 gopang_pdv_store)에 6하원칙 요약 1건 — 제목만, 원문·파일 없음
   function pdvNote(item, what) {
     try {
-      var label = item.kind === 'doc' ? '서류' : item.kind === 'letter' ? '편지' : item.kind === 'guide' ? '과제 계획서' : '캠페인';
+      var label = item.kind === 'doc' ? '서류' : item.kind === 'letter' ? '편지' : item.kind === 'guide' ? '과제 계획서' : item.kind === 'form' ? '내 서류함 양식' : '캠페인';
       window.dispatchEvent(new CustomEvent('gopang:pdv-recorded', { detail: {
         type: 'draft', serviceId: 'navi-drafts', svc: 'navi-drafts', source: 'mail.hondi.net', ts: new Date().toISOString(),
         who: '본인', when: new Date().toISOString(), where: 'mail.hondi.net',
@@ -127,7 +131,7 @@
   function summary(it) {
     return { id: it.id, kind: it.kind, status: it.status, title: it.title, site: it.site,
       text: (it.text || '').slice(0, 200), subject: it.subject, fileName: it.fileName, hasFile: !!it.fileData, extraCount: it.extras ? it.extras.length : 0,
-      msgCount: it.messages ? it.messages.length : 0, campaignId: it.campaignId, created: it.created, updated: it.updated };
+      msgCount: it.messages ? it.messages.length : 0, campaignId: it.campaignId, box: it.box || '', uses: it.uses || 0, lastUsed: it.lastUsed || 0, created: it.created, updated: it.updated };
   }
 
   var OPS = {
@@ -140,7 +144,7 @@
           if (!prev) pdvNote(out, '초안 저장');
           return getAll().then(function (all) {
             if (all.length > MAX_ITEMS) {   // 오래된 초안부터 정리(작성한 서류·과제 계획서는 지우지 않는다)
-              var drafts = all.filter(function (x) { return x.status === 'draft' && x.kind !== 'guide'; }).sort(function (a, b) { return a.updated - b.updated; });
+              var drafts = all.filter(function (x) { return x.status === 'draft' && x.kind !== 'guide' && x.kind !== 'form'; }).sort(function (a, b) { return a.updated - b.updated; });
               var over = all.length - MAX_ITEMS;
               return tx('readwrite', function (os) { drafts.slice(0, over).forEach(function (x) { os.delete(x.id); }); });
             }

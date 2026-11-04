@@ -145,3 +145,12 @@ test('webapp.html: 서류 SP(inline:doc:)일 때만 태그를 호스트로 올�
   const c = readFileSync(new URL('../src/gopang/ai/call-ai.js', import.meta.url), 'utf8');
   assert.match(c, /\\\[AGENT_TASK:\[\^\\\]\]\*\\\]/); assert.match(c, /\\\[DOC_HANDBACK:\[\^\\\]\]\*\\\]/);
 });
+
+test('PDV 중계: 내 서류함(kind=form) — box·uses·lastUsed 를 저장하고 초안 정리에서 제외', async () => {
+  const { readFileSync } = await import('node:fs');
+  const b = readFileSync(new URL('../pdv-draft-bridge.html', import.meta.url), 'utf8');
+  assert.match(b, /var KINDS = \['doc', 'letter', 'campaign', 'guide', 'form'\]/);
+  assert.match(b, /box: \['fav', 'mine', 'upload'\]\.indexOf\(item\.box\) >= 0/);
+  assert.match(b, /x\.kind !== 'guide' && x\.kind !== 'form'/);
+  assert.match(b, /box: it\.box \|\| '', uses: it\.uses \|\| 0, lastUsed: it\.lastUsed \|\| 0/);
+});
