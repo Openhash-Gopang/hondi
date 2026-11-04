@@ -20,12 +20,19 @@ const _SP_BASE = '/prompts/';
 let _manifestCache = null;
 let _universalIntegrityCache = null;
 
+let _manifestInflight = null;
 export async function _loadManifest() {
   if (_manifestCache) return _manifestCache;
-  const res = await fetch(_SP_BASE + 'sp-catalog.json', { cache: 'no-cache' });
-  if (!res.ok) throw new Error('manifest fetch 실패: ' + res.status);
-  _manifestCache = await res.json();
-  return _manifestCache;
+  // 2026-11-04: SP 계층을 동시에 받아도 목록은 한 번만 요청한다(진행 중인 요청을 공유). 실패하면 다음 호출이 다시 시도한다.
+  if (!_manifestInflight) {
+    _manifestInflight = (async () => {
+      const res = await fetch(_SP_BASE + 'sp-catalog.json', { cache: 'no-cache' });
+      if (!res.ok) throw new Error('manifest fetch 실패: ' + res.status);
+      _manifestCache = await res.json();
+      return _manifestCache;
+    })().finally(() => { _manifestInflight = null; });
+  }
+  return _manifestInflight;
 }
 
 // ★ 2026-07-12 신설 — UNIVERSAL-INTEGRITY 자동 상속.
