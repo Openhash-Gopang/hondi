@@ -42,6 +42,8 @@ import { makeDocFormHandler } from './src/worker/doc-form-handler.js';
 import { makeAdminProposalsHandler } from './src/worker/admin-proposals-handler.js';
 import { makePocketBaseDocFormStore } from './src/worker/doc-form-store.js';
 import { makeDocFormRewardHandler } from './src/worker/doc-form-reward.js';
+import { makeDocFormFeedbackHandler } from './src/worker/doc-form-feedback.js';
+import { makePocketBaseFeedbackStore } from './src/worker/doc-form-feedback-store.js';
 import { makePocketBaseRatingStore, makePocketBaseRewardStore } from './src/worker/doc-form-reward-store.js';
 import { makeProVerifyHandler } from './src/worker/pro-verify-handler.js';
 import { makePocketBaseProVerifyStore } from './src/worker/pro-verify-store.js';
@@ -5694,6 +5696,10 @@ async function handleDocFormRoutes(request, url, env, corsHeaders) {
     },
     mint: (e, a) => _mintFormReward(e, a),
   });
+  // 서식 피드백(2026-11-04 신설) — /doc-form/feedback, /doc-form/feedback/candidates. 해당 경로가 아니면 null.
+  const feedback = makeDocFormFeedbackHandler({ store: makePocketBaseFeedbackStore(cfg) });
+  const fb = await feedback.handle(request, url, env, corsHeaders);
+  if (fb) return fb;
   const handled = await rewards.handle(request, url, env, corsHeaders);
   if (handled) return handled;
   const handler = makeDocFormHandler({ store: formStore, getPinnedPubKey });
