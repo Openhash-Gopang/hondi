@@ -307,22 +307,22 @@ function appendTyping() {
 // 호출마다 자동으로 앞에 붙이므로, 상위 공유 계층은 _loadSpRawByKey로
 // 원문만 받아 정확히 한 번만 조립한다).
 async function composeExpertPrompt() {
-  const parts = [];
+  const jobs = []; // 2026-11-04: SP 계층을 동시에 받는다(순차 10.1초 → 병렬 약 2초). 조립 순서와 하드 실패 원칙은 그대로.
 
-  parts.push(await _loadSpByKey(UNIVERSAL_INTEGRITY_KEY, 'UNIVERSAL-INTEGRITY')
+  jobs.push(_loadSpByKey(UNIVERSAL_INTEGRITY_KEY, 'UNIVERSAL-INTEGRITY')
     .catch(e => { throw new Error('UNIVERSAL-INTEGRITY 로드 실패: ' + e.message); }));
 
-  parts.push(await _loadSpRawByKey('UNIVERSAL-common', 'UNIVERSAL-common')
+  jobs.push(_loadSpRawByKey('UNIVERSAL-common', 'UNIVERSAL-common')
     .catch(e => { throw new Error('UNIVERSAL-common 로드 실패: ' + e.message); }));
 
-  parts.push(await _loadSpRawByKey('PROFESSIONAL-common', 'PROFESSIONAL-common')
+  jobs.push(_loadSpRawByKey('PROFESSIONAL-common', 'PROFESSIONAL-common')
     .catch(e => { throw new Error('PROFESSIONAL-common 로드 실패: ' + e.message); }));
 
-  parts.push(await _loadSpRawByKey(COMMON_GUARDRAILS_KEY, '공통 가드레일')
+  jobs.push(_loadSpRawByKey(COMMON_GUARDRAILS_KEY, '공통 가드레일')
     .catch(e => { throw new Error('공통 가드레일 로드 실패: ' + e.message); }));
 
   if (def.needsMedicalSafety) {
-    parts.push(await _loadSpRawByKey(COMMON_MEDICAL_SAFETY_KEY, '의료 안전모듈')
+    jobs.push(_loadSpRawByKey(COMMON_MEDICAL_SAFETY_KEY, '의료 안전모듈')
       .catch(e => { throw new Error('의료 안전모듈 로드 실패: ' + e.message); }));
   }
 
@@ -336,15 +336,14 @@ async function composeExpertPrompt() {
   // 패턴(_composeExpertPrompt()의 "실패해도 console.warn만 남기고 계속
   // 진행" 패턴과 의도적으로 다름 — 위 2026-08-06 주석이 그 이유를 이미
   // 설명하고 있다)은 그대로 유지한다.
-  parts.push(await _loadSpRawByKey(EXPERT_BASE_KEY, 'EXPERT_BASE')
+  jobs.push(_loadSpRawByKey(EXPERT_BASE_KEY, 'EXPERT_BASE')
     .catch(e => { throw new Error('EXPERT_BASE 로드 실패: ' + e.message); }));
 
   // 2026-10-14 신설 — 서류를 작성하는 직역에만 서식 SP(SP_DOC_FORM)를 EXPERT_BASE 다음에 한 번 결합한다.
   // expert-session.js의 _composeExpertPrompt()에는 이미 있었지만 이 페이지는 독립 구현이라 빠져 있었다.
   // 서식 SP가 없어도 상담은 가능하므로 실패해도 경고만 남기고 진행한다(다른 계층과 달리 throw 하지 않음).
   if (_needsDocForm(def)) {
-    try { parts.push(await _loadSpRawByKey(DOC_FORM_KEY, 'DOC_FORM')); }
-    catch (e) { console.warn('[Expert] DOC_FORM 로드 실패:', e.message); }
+    jobs.push(_loadSpRawByKey(DOC_FORM_KEY, 'DOC_FORM').catch(e => { console.warn('[Expert] DOC_FORM 로드 실패:', e.message); return null; }));
   }
 
   if (def.parentKey) {
@@ -371,7 +370,7 @@ async function composeExpertPrompt() {
       cursorKey = ancestorDef.parentKey;
     }
     for (const ancestorDef of ancestors) {
-      parts.push(await _loadSpRawByKey(ancestorDef.key, `${ancestorDef.label}(상위 SP)`)
+      jobs.push(_loadSpRawByKey(ancestorDef.key, `${ancestorDef.label}(상위 SP)`)
         .catch(e => { throw new Error(`상위 SP(${ancestorDef.label}) 로드 실패: ` + e.message); }));
     }
   }
@@ -379,10 +378,10 @@ async function composeExpertPrompt() {
   // 2026-10-21: 법무사·행정사(2026-10-27 변호사 추가) 서류 작성하기(임베드)는 전문가용(-assistant) SP 를 쓴다 — 서류 작성 도구(STEP C·W)는 거기에만 있다.
   const _spKey = (_embedOn() && _PRO_WRITE_PERSONAS.has(PERSONA)) ? def.key + '-assistant' : def.key;
   window.__PRO_ASSISTANT_SP = _spKey !== def.key;
-  parts.push(await _loadSpRawByKey(_spKey, def.label)
+  jobs.push(_loadSpRawByKey(_spKey, def.label)
     .catch(e => { throw new Error(`${def.label} SP 로드 실패: ` + e.message); }));
 
-  return parts.join('\n\n---\n\n');
+  return (await Promise.all(jobs)).filter(x => x != null).join('\n\n---\n\n');
 }
 
 // 2026-08-07 신설(내부 자문 호출 기능) — 부모 SP가 대화 중 자식(세부분야)
