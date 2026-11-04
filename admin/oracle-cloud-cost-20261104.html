@@ -59,7 +59,7 @@ th{font-size:12.5px;color:var(--muted);font-weight:500;background:var(--code-bg)
       <tr><td>합계</td><td>38.04</td><td>10월 744시간, 1 OCPU + 8GB 한 대분과 일치</td></tr>
     </tbody>
   </table></div>
-  <p class="meta">환율은 청구 금액에서 역산한 값입니다. 청구서 메일의 계정 번호는 A8QYK9이고, 연락처는 collections_sg@oracle.com 입니다.</p>
+  <p class="meta">유료 인스턴스는 OCI CLI 조회(2026-11-04)로 <code>l1-hanlim-new</code> 한 대뿐임을 확인했습니다. 환율은 청구 금액에서 역산한 값입니다. 청구서 메일의 계정 번호는 A8QYK9이고, 연락처는 collections_sg@oracle.com 입니다.</p>
 </section>
 
 <section>
@@ -69,7 +69,8 @@ th{font-size:12.5px;color:var(--muted);font-weight:500;background:var(--code-bg)
     <tbody>
       <tr><td><code>l1-hanlim-new</code></td><td>152.67.196.86</td><td>E4.Flex 1 OCPU / 8GB, 2026-08-20 생성</td><td><span class="pill wn">청구 대상</span> 부하 0.00, 메모리 3.7/7.8GB, 서비스 31개, 포트 80·443·9000</td></tr>
       <tr><td><code>l1-hanlim</code></td><td>168.110.123.175</td><td>E2.1.Micro 1GB(무료)</td><td><span class="pill no">과부하</span> 부하 약 95, 스왑 4.9GB 사용, PocketBase가 몇 분마다 재시작. 비용은 없음</td></tr>
-      <tr><td>미확인</td><td>144.24.90.233</td><td>모름</td><td><span class="pill wn">확인 필요</span> 두 키 모두 거부됨. 청구서에 E4가 한 대분뿐이라 유료 E4는 아닌 것으로 보임</td></tr>
+      <tr><td><code>seogwipo-l1-nodes</code></td><td>158.180.84.57</td><td>E2.1.Micro 1GB(무료), 2026-07-08 생성</td><td><span class="pill ok">무료</span> 실행 중. 아직 내부를 점검하지 않음</td></tr>
+      <tr><td>(테넌시 밖)</td><td>144.24.90.233</td><td>모름</td><td><span class="pill wn">이 계정 아님</span> 2026-11-04 OCI CLI 조회로 이 테넌시의 어떤 인스턴스·예약 IP도 아님을 확인(구획은 루트뿐). 다른 계정 서버로 보이며 이번 청구와 무관</td></tr>
     </tbody>
   </table></div>
   <div class="tw"><table>
@@ -89,7 +90,7 @@ th{font-size:12.5px;color:var(--muted);font-weight:500;background:var(--code-bg)
   <div class="tw"><table>
     <thead><tr><th>파일</th><th>용도</th></tr></thead>
     <tbody>
-      <tr><td><code>C:\Users\주피터\.ssh\oracle\gopang-l1.key</code></td><td><span class="pill no">분실</span> l1-hanlim 접속에 쓰인 키. 2026-11-04 정리 때 Downloads에 없어 이동하지 못했고, 같은 명령에서 바탕화면 2026_10_27 폴더의 *.key와 임시 사본을 삭제했음. PC를 검색해 .ssh의 gopang-key·id_rsa·oci_key·gopang-dev-key.pem과 ssh-key-2026-05-08을 세 서버에 시험했으나 모두 거부됨. 새 키 쌍을 만들어 서버 authorized_keys에 등록해야 함(6절). 서비스와 GitHub Actions 배포(별도 배포 키 사용)에는 영향 없음</td></tr>
+      <tr><td><code>C:\Users\주피터\.ssh\oracle\gopang-l1.key</code></td><td><span class="pill no">분실</span> l1-hanlim 접속에 쓰인 키. 2026-11-04 정리 때 Downloads에 없어 이동하지 못했고, 같은 명령에서 바탕화면 2026_10_27 폴더의 *.key와 임시 사본을 삭제했음. PC를 검색해 .ssh의 gopang-key·id_rsa·oci_key·gopang-dev-key.pem과 ssh-key-2026-05-08을 세 서버에 시험했으나 모두 거부됨. 서버 접속을 되살리려면 서버의 authorized_keys에 새 공개키를 넣어야 하며 방법은 6절. 서비스와 GitHub Actions 배포(별도 배포 키 사용)에는 영향 없음</td></tr>
       <tr><td><code>C:\Users\주피터\.ssh\oracle\ssh-key-2026-05-08.key</code></td><td>오라클 콘솔에서 받은 키. 144.24.90.233에서는 거부됨(서버에 등록되지 않은 키)</td></tr>
       <tr><td><code>C:\Users\주피터\.ssh\oracle\README.txt</code></td><td>이 문서의 주소(hondi.net/admin/oracle-cloud-cost-20261104.html)와 접속 명령 기록</td></tr>
     </tbody>
@@ -109,12 +110,13 @@ Remove-Item "$HOME\.ssh\oci_key" -Force -ErrorAction SilentlyContinue
 Remove-Item "$HOME\Desktop\2026_10_27\*.key" -Force -ErrorAction SilentlyContinue</code></pre>
   <p>접속 명령은 다음과 같습니다.</p>
 <pre><code>ssh -o IdentitiesOnly=yes -i "$HOME\.ssh\oracle\gopang-l1.key" ubuntu@152.67.196.86</code></pre>
-  <div class="box warn"><p style="margin:0">개인키 내용이 대화에 노출된 적이 있습니다. 조정 작업을 재개할 때 오라클 콘솔에서 새 키 쌍을 만들어 서버의 <code>authorized_keys</code>를 교체하고, 이전 키는 지우는 것을 권합니다. 교체 후에는 이 절의 파일명만 갱신합니다.</p></div>
+  <div class="box warn"><p style="margin:0">개인키 내용이 대화에 노출된 적이 있습니다. 접속을 복구하면 새 키 쌍(이 PC에서 <code>ssh-keygen</code>)의 공개키를 서버에 넣고 이전 키는 제거합니다. 그 뒤 이 절의 파일명만 갱신합니다.</p></div>
 </section>
 
 <section>
   <h2>5. 계정 접근 상태</h2>
   <ul>
+    <li><strong>OCI CLI(2026-11-04 확인):</strong> <code>oci</code> 3.90.3, 프로필 <code>hondi</code>(키 <code>C:\Users\주피터\.oci\hondi_api_key.pem</code>, 8월 20일 발급)는 유효해서 콘솔 로그인·MFA 없이 조회와 관리가 가능합니다. 프로필 <code>DEFAULT</code>(5월 키)는 401로 무효입니다. 이 키는 SSH 키가 아니라 API 서명 키입니다.</li>
     <li>오라클 로그인 정보: 테넌시 <code>tensorcity</code>, Default 신원 도메인, 사용자 tensor.city@gmail.com.</li>
     <li>모바일 인증 앱을 재설치하면서 오라클 항목이 사라졌고, 우회 코드와 모바일 통지도 쓸 수 없어 <strong>MFA 초기화를 오라클 지원에 요청해야 합니다</strong>(Contact Us 또는 청구서 메일의 연락처). 요청은 직접 보내야 하며 아직 보냈다는 확인이 없습니다.</li>
     <li>Cloudflare는 정상 로그인 상태입니다. 보안 키 "oracle"과 이메일 2단계 인증이 있고, 앱 인증(TOTP)은 사라진 항목이 남아 있으니 백업 코드를 발급해 두는 것을 권합니다.</li>
@@ -128,7 +130,14 @@ Remove-Item "$HOME\Desktop\2026_10_27\*.key" -Force -ErrorAction SilentlyContinu
     <li>인스턴스 목록에서 144.24.90.233이 무엇인지 확인하고, 비용 분석(Cost Analysis)에서 서비스별 요금을 확인.</li>
     <li>선택지 결정(3절). A1 이전이면 이전 계획서를 따로 작성한 뒤 진행: A1 인스턴스 생성 → 데이터 복사(PocketBase 31개) → 읽기 전용 검증 → DNS 전환 → 기존 서버 중지 → 일정 기간 뒤 삭제.</li>
     <li>DNS가 <code>l1-hanlim</code>(무료 마이크로)을 아직 가리키는지 확인하고, 남은 서버라면 정리를 검토.</li>
-    <li>SSH 키 교체(4절). <code>gopang-l1.key</code>를 찾지 못했다면 콘솔에서 새 키 쌍을 만들고, 인스턴스의 콘솔 연결 또는 기존에 접속 가능한 키로 <code>authorized_keys</code>에 새 공개키를 추가합니다.</li>
+    <li>SSH 접속 복구(4절). 콘솔에서 키를 새로 만들어도 이미 만든 인스턴스의 <code>authorized_keys</code>는 바뀌지 않습니다(키는 생성 시점에만 주입됨). 가능한 경로는 다음과 같습니다.
+      <ul>
+        <li>Cloud Agent의 Run Command 플러그인: 2026-11-04 조회에서 <code>l1-hanlim-new</code>의 플러그인 목록에 없어 불가.</li>
+        <li>Bastion 플러그인(현재 STOPPED)을 켜고 Bastion 관리형 SSH 세션으로 임시 키 주입: 인스턴스 에이전트 설정 변경과 Bastion 구성이 필요. 서버 재부팅 없음.</li>
+        <li>콘솔 연결(시리얼) + 복구 모드 재부팅 후 키 추가: 운영 서버 다운타임 발생.</li>
+        <li>부팅 볼륨을 다른 인스턴스에 붙여 파일 수정: 다운타임 발생. 운영 서버에는 비권장.</li>
+      </ul>
+      어느 경로든 서버를 바꾸는 작업이므로 실행 전에 확인을 받고 진행합니다.</li>
   </ol>
 </section>
 </main>
