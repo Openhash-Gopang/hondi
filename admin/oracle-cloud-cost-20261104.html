@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>오라클 클라우드 비용 정리</title>
+<link rel="icon" href="data:,">
+<style>
+:root{--bg:#f5f8f7;--surface:#fff;--fg:#17211f;--muted:#5a6b67;--line:#d7e1de;--accent:#0d6b58;--accent-bg:#e1f2ed;--warn:#8a5a00;--warn-bg:#fbf0d9;--bad:#a3302a;--bad-bg:#f9e4e2;--code-bg:#eef3f1;
+--font-body:system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;--font-mono:ui-monospace,Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1715;--surface:#16211e;--fg:#e4ede9;--muted:#9db0aa;--line:#2b3b37;--accent:#58c4a8;--accent-bg:#17332c;--warn:#e6b85c;--warn-bg:#2f2610;--bad:#f08a82;--bad-bg:#341a18;--code-bg:#1b2a26;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);line-height:1.65;font-size:16px;padding:32px max(16px,env(safe-area-inset-left,0px)) 72px}
+main{max-width:820px;margin:0 auto;display:flex;flex-direction:column;gap:36px}
+h1{font-size:clamp(26px,5vw,34px);line-height:1.25;margin:0 0 8px}
+h2{font-size:22px;margin:0 0 14px}
+p{margin:0 0 12px}.meta{color:var(--muted);font-size:14px}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px}
+.box.warn{border-color:var(--warn);background:var(--warn-bg)}.box.accent{border-color:var(--accent);background:var(--accent-bg)}
+ul,ol{margin:0 0 12px;padding-left:22px}li{margin:4px 0}
+code{font-family:var(--font-mono);font-size:.88em;background:var(--code-bg);padding:1px 6px;border-radius:4px;word-break:break-word}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13.5px;line-height:1.55;margin:0 0 14px}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:0 0 14px}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:560px}
+th,td{text-align:left;vertical-align:top;padding:10px 14px;border-bottom:1px solid var(--line)}
+th{font-size:12.5px;color:var(--muted);font-weight:500;background:var(--code-bg)}tr:last-child td{border-bottom:none}
+.pill{display:inline-block;font-size:12.5px;font-weight:700;padding:1px 9px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.pill.ok{color:var(--accent);border-color:var(--accent);background:var(--accent-bg)}.pill.wn{color:var(--warn);border-color:var(--warn);background:var(--warn-bg)}.pill.no{color:var(--bad);border-color:var(--bad);background:var(--bad-bg)}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>오라클 클라우드 비용 정리</h1>
+  <p class="meta">2026-11-04 · 2026년 10월분 청구서 950199016 (SGD 38.04) 조사 결과 · 조정 작업은 보류 중(재개 예정)</p>
+  <div class="box warn"><p style="margin:0"><strong>이 문서에는 개인키 본문, 비밀번호, 우회 코드, 인증 코드를 적지 않습니다.</strong> 공개 저장소의 정적 파일(noindex)이므로 키는 아래 4절의 PC 위치에만 두고, 여기에는 위치만 기록합니다.</p></div>
+</header>
+
+<section>
+  <h2>1. 결론</h2>
+  <div class="box accent">
+    <ul style="margin:0">
+      <li>청구 SGD 38.04의 거의 전부는 <code>l1-hanlim-new</code> 서버 한 대의 유료 사양(E4 Flex 1 OCPU·8GB, 744시간) 요금입니다.</li>
+      <li>이 서버는 PocketBase 31개를 돌리는 <strong>운영 서버</strong>입니다. "이용하지 않는 항목"이라는 판단과 달라서 이의 제기는 근거가 약합니다.</li>
+      <li>비용을 줄이려면 서버를 없애는 것이 아니라 <strong>Ampere A1 무료 한도로 이전</strong>하거나 메모리를 줄이는 방법이 있습니다(3절).</li>
+      <li>현재 서비스는 정상이어서 지금은 변경하지 않았습니다. 오라클 계정·서버 설정은 하나도 바꾸지 않았습니다.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>2. 청구 근거</h2>
+  <div class="tw"><table>
+    <thead><tr><th>항목</th><th>금액(SGD)</th><th>산출</th></tr></thead>
+    <tbody>
+      <tr><td>B93113 E4 OCPU</td><td>25.67</td><td>1 OCPU × 744시간 × 목록가 USD 0.025 × 환율 약 1.38</td></tr>
+      <tr><td>B93114 E4 메모리</td><td>12.32</td><td>8GB × 744시간 × USD 0.0015 × 환율 약 1.38</td></tr>
+      <tr><td>합계</td><td>38.04</td><td>10월 744시간, 1 OCPU + 8GB 한 대분과 일치</td></tr>
+    </tbody>
+  </table></div>
+  <p class="meta">환율은 청구 금액에서 역산한 값입니다. 청구서 메일의 계정 번호는 A8QYK9이고, 연락처는 collections_sg@oracle.com 입니다.</p>
+</section>
+
+<section>
+  <h2>3. 서버 현황과 비용 절감 선택지</h2>
+  <div class="tw"><table>
+    <thead><tr><th>서버</th><th>IP</th><th>사양</th><th>상태</th></tr></thead>
+    <tbody>
+      <tr><td><code>l1-hanlim-new</code></td><td>152.67.196.86</td><td>E4.Flex 1 OCPU / 8GB, 2026-08-20 생성</td><td><span class="pill wn">청구 대상</span> 부하 0.00, 메모리 3.7/7.8GB, 서비스 31개, 포트 80·443·9000</td></tr>
+      <tr><td><code>l1-hanlim</code></td><td>168.110.123.175</td><td>E2.1.Micro 1GB(무료)</td><td><span class="pill no">과부하</span> 부하 약 95, 스왑 4.9GB 사용, PocketBase가 몇 분마다 재시작. 비용은 없음</td></tr>
+      <tr><td>미확인</td><td>144.24.90.233</td><td>모름</td><td><span class="pill wn">확인 필요</span> 두 키 모두 거부됨. 청구서에 E4가 한 대분뿐이라 유료 E4는 아닌 것으로 보임</td></tr>
+    </tbody>
+  </table></div>
+  <div class="tw"><table>
+    <thead><tr><th>선택지</th><th>월 절감(약)</th><th>작업·위험</th></tr></thead>
+    <tbody>
+      <tr><td>현재 유지</td><td>0</td><td>없음</td></tr>
+      <tr><td>메모리 8GB → 6GB</td><td>SGD 3</td><td>재부팅 몇 분. 사용량 3.7GB라 6GB는 여유가 있으나 4GB는 빠듯함. OCPU는 최소 1이라 더 못 줄임</td></tr>
+      <tr><td>Ampere A1(Arm) 무료 한도로 이전</td><td>SGD 38 전부</td><td>새 인스턴스를 만들어 데이터 이전 + DNS 전환. 무료 한도는 월 3,000 OCPU시간·18,000 GB시간(약 4 OCPU/24GB). Arm용 PocketBase·Node 빌드 확인 필요. 춘천 리전에 A1 여유가 없을 수 있음. x86→Arm은 제자리 변경 불가</td></tr>
+    </tbody>
+  </table></div>
+  <p>무료 E2.1.Micro(1GB)로는 불가능합니다. <code>l1-hanlim</code>이 같은 사양에서 이미 허덕이고 있습니다.</p>
+</section>
+
+<section>
+  <h2>4. SSH 키 보관 위치(이 PC)</h2>
+  <p>키는 아래 한 곳에만 둡니다. 서버 접속 계정은 <code>ubuntu</code>입니다.</p>
+  <div class="tw"><table>
+    <thead><tr><th>파일</th><th>용도</th></tr></thead>
+    <tbody>
+      <tr><td><code>C:\Users\주피터\.ssh\oracle\gopang-l1.key</code></td><td>l1-hanlim(168.110.123.175) 접속에 사용해 확인됨. l1-hanlim-new(152.67.196.86)도 이 키로 점검함(처음 점검 때 사용한 키가 이것인지 다음 접속 때 확인)</td></tr>
+      <tr><td><code>C:\Users\주피터\.ssh\oracle\ssh-key-2026-05-08.key</code></td><td>오라클 콘솔에서 받은 키. 144.24.90.233에서는 거부됨(서버에 등록되지 않은 키)</td></tr>
+      <tr><td><code>C:\Users\주피터\.ssh\oracle\README.txt</code></td><td>이 문서의 주소(hondi.net/admin/oracle-cloud-cost-20261104.html)와 접속 명령 기록</td></tr>
+    </tbody>
+  </table></div>
+  <p>다음 PowerShell을 한 번 실행하면 흩어진 사본이 이 위치로 모이고 권한이 본인 계정으로 제한됩니다. 원본 위치는 Downloads, 바탕화면 <code>2026_10_27</code> 폴더입니다.</p>
+<pre><code>$d = "$HOME\.ssh\oracle"
+New-Item -ItemType Directory -Force $d | Out-Null
+# 원본을 찾아 이동 (경로가 다르면 수정)
+Move-Item -Force "$HOME\Downloads\gopang-l1.key" "$d\gopang-l1.key"
+Move-Item -Force "$HOME\Downloads\ssh-key-2026-05-08 (1).key" "$d\ssh-key-2026-05-08.key"
+# 본인만 읽을 수 있게 제한
+icacls $d /inheritance:r /grant:r "$($env:USERNAME):(OI)(CI)F"
+icacls "$d\*" /inheritance:r /grant:r "$($env:USERNAME):F"
+# 임시 사본 삭제
+Remove-Item C:\sshtmp -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item "$HOME\.ssh\oci_key" -Force -ErrorAction SilentlyContinue
+Remove-Item "$HOME\Desktop\2026_10_27\*.key" -Force -ErrorAction SilentlyContinue</code></pre>
+  <p>접속 명령은 다음과 같습니다.</p>
+<pre><code>ssh -o IdentitiesOnly=yes -i "$HOME\.ssh\oracle\gopang-l1.key" ubuntu@152.67.196.86</code></pre>
+  <div class="box warn"><p style="margin:0">개인키 내용이 대화에 노출된 적이 있습니다. 조정 작업을 재개할 때 오라클 콘솔에서 새 키 쌍을 만들어 서버의 <code>authorized_keys</code>를 교체하고, 이전 키는 지우는 것을 권합니다. 교체 후에는 이 절의 파일명만 갱신합니다.</p></div>
+</section>
+
+<section>
+  <h2>5. 계정 접근 상태</h2>
+  <ul>
+    <li>오라클 로그인 정보: 테넌시 <code>tensorcity</code>, Default 신원 도메인, 사용자 tensor.city@gmail.com.</li>
+    <li>모바일 인증 앱을 재설치하면서 오라클 항목이 사라졌고, 우회 코드와 모바일 통지도 쓸 수 없어 <strong>MFA 초기화를 오라클 지원에 요청해야 합니다</strong>(Contact Us 또는 청구서 메일의 연락처). 요청은 직접 보내야 하며 아직 보냈다는 확인이 없습니다.</li>
+    <li>Cloudflare는 정상 로그인 상태입니다. 보안 키 "oracle"과 이메일 2단계 인증이 있고, 앱 인증(TOTP)은 사라진 항목이 남아 있으니 백업 코드를 발급해 두는 것을 권합니다.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>6. 재개할 때 순서</h2>
+  <ol>
+    <li>오라클에 MFA 초기화 요청 → 콘솔 로그인.</li>
+    <li>인스턴스 목록에서 144.24.90.233이 무엇인지 확인하고, 비용 분석(Cost Analysis)에서 서비스별 요금을 확인.</li>
+    <li>선택지 결정(3절). A1 이전이면 이전 계획서를 따로 작성한 뒤 진행: A1 인스턴스 생성 → 데이터 복사(PocketBase 31개) → 읽기 전용 검증 → DNS 전환 → 기존 서버 중지 → 일정 기간 뒤 삭제.</li>
+    <li>DNS가 <code>l1-hanlim</code>(무료 마이크로)을 아직 가리키는지 확인하고, 남은 서버라면 정리를 검토.</li>
+    <li>SSH 키 교체(4절).</li>
+  </ol>
+</section>
+</main>
+</body>
+</html>
