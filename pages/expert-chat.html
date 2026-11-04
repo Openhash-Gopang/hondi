@@ -1742,6 +1742,13 @@ if (_embedOn()) {
     if (e.data.type === 'expert-embed-send' && typeof e.data.text === 'string' && e.data.text.trim()) {
       input.value = e.data.text.slice(0, 4000);
       doSend();
+    } else if (e.data.type === 'expert-embed-feedback') {
+      // 2026-11-04: 서류 서식을 쓰는 화면(나비로 등)이 "이 서식에 항목을 추가했다"는 익명 신호를 서버로 전한다(law.hondi.net 은 서버 CORS 허용 밖이라 이 화면이 대신 보낸다).
+      const d = e.data;
+      if (typeof d.form_id === 'string' && Number.isInteger(d.v) && typeof d.cid === 'string' && Array.isArray(d.adds)) {
+        fetch(`${WORKER}/doc-form/feedback`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ persona: String(d.persona || '').slice(0, 60), form_id: d.form_id.slice(0, 60), v: d.v, cid: d.cid.slice(0, 64), adds: d.adds.slice(0, 5).map(x => String(x).slice(0, 60)) }) }).catch(() => {});
+      }
     } else if (e.data.type === 'expert-embed-attach' && e.data.data instanceof ArrayBuffer && e.data.data.byteLength > 0 && e.data.data.byteLength <= 8 * 1024 * 1024
         && /^(image\/|application\/pdf$)/.test(String(e.data.mime || '')) && typeof e.data.text === 'string' && e.data.text.trim()) {
       const f = new File([e.data.data], String(e.data.name || '서식').slice(0, 120), { type: String(e.data.mime) });
