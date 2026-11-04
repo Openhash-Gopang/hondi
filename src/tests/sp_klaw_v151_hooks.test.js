@@ -22,7 +22,8 @@ const JOBS = [
   ['SP_customs-broker', 'SP_customs-broker_v1_8.md', 'SP_customs-broker_v1_7.md', 'v1.8'],
   ['SP_marine-pilot', 'SP_marine-pilot_v3_6.md', 'SP_marine-pilot_v3_5.md', 'v3.6'],
   ['SP_patent-attorney', 'SP_patent-attorney_v1_9.md', 'SP_patent-attorney_v1_8.md', 'v1.9'],
-  ['SP_lawyer', 'SP_lawyer_v5_6.md', 'SP_lawyer_v5_5.md', 'v5.6'],
+  // v5.7(2026-11-04, 서류 작성 도우미 인계)은 STEP R §③ 한 줄을 의도적으로 대체했다 — 6번째 값이 '직전 버전에서 사라져도 되는 줄'이다.
+  ['SP_lawyer', 'SP_lawyer_v5_7.md', 'SP_lawyer_v5_6.md', 'v5.7', 'v5.6', ['(C5 신규항목 — 본인인증 벽) — 사용자 본인이 마지막 단계를 수행하도록 안내한다.']],
   ['SP_tax-accountant', 'SP_tax-accountant_v2_5.md', 'SP_tax-accountant_v2_4.md', 'v2.5'],
   ['SP_physician', 'SP_physician_v2_6.md', 'SP_physician_v2_5.md', 'v2.6'],
   ['SP_accountant', 'SP_accountant_v1_11.md', 'SP_accountant_v1_10.md', 'v1.11'],
@@ -53,7 +54,7 @@ describe('SP_EXPERT_BASE v1.3 §3-B', () => {
 });
 
 // 5번째 값(histVer)은 K-Law v15.1 이식 개정이 기록된 버전 — 이후 개정(서류 작성 트랙 등)으로 파일 버전이 올라가도 그 이력 항목은 남는다.
-for (const [key, file, prev, ver, histVer = ver] of JOBS) {
+for (const [key, file, prev, ver, histVer = ver, superseded = []] of JOBS) {
   describe(`${key} ${ver}`, () => {
     const t = read('prompts/' + file);
     it('카탈로그가 새 파일을 가리키고 직전 파일이 남아 있다', () => {
@@ -88,9 +89,9 @@ for (const [key, file, prev, ver, histVer = ver] of JOBS) {
     it('변경 이력에 이번 개정이 기록된다', () => {
       assert.match(t, new RegExp('- (\\*\\*)?' + histVer.replace('.', '\\.') + ' \\(2026-10-17'));
     });
-    it('직전 버전과 비교해 삭제된 줄은 1행(버전 표기)뿐이다 — 기존 절을 건드리지 않는다', () => {
+    it('직전 버전과 비교해 삭제된 줄은 1행(버전 표기)과 명시한 대체 줄뿐이다 — 기존 절을 건드리지 않는다', () => {
       const a = read('prompts/' + prev).split('\n'), b = new Set(t.split('\n'));
-      const missing = a.filter((l, i) => i > 0 && !b.has(l));
+      const missing = a.filter((l, i) => i > 0 && !b.has(l) && !superseded.includes(l));
       assert.equal(missing.length, 0, '사라진 줄: ' + missing.slice(0, 2).join(' / '));
     });
   });
@@ -106,5 +107,24 @@ describe('참조 일관성', () => {
   });
   it('카탈로그의 모든 값이 실제 파일을 가리킨다(이번에 바꾼 11건 포함)', () => {
     for (const k of ['SP_EXPERT_BASE', ...JOBS.map((j) => j[0])]) assert.ok(existsSync(join(ROOT, 'prompts/' + catalog[k])), k);
+  });
+});
+
+describe('SP_lawyer v5.7 — 서류 작성 도우미 인계 (2026-11-04)', () => {
+  const t = read('prompts/SP_lawyer_v5_7.md');
+  it('이력에 v5.7 이 기록되고 v5.6 이력도 남는다', () => {
+    assert.match(t, /> \*\*v5\.7 \(2026-11-04/);
+    assert.match(t, /> \*\*v5\.6 \(2026-10-17/);
+  });
+  it('R-5 자동화 지점: 도우미가 연결된 화면에서는 도우미가 수행하고, 사용자에게 발급을 시키지 않는다', () => {
+    const sec = t.slice(t.search(/^\*\*③ R-5 자동화 지점/m), t.search(/^\*\*\(L2·L3 전용\)/m));
+    assert.ok(sec.includes('나비웹 도우미(Chrome 확장)가 연결돼 있으면'));
+    assert.ok(sec.includes('인증(로그인·공동인증서)과 결제는 사용자 본인이 수행한다'));
+    assert.ok(sec.includes('"발급받아 오세요"류로 사용자에게 시키지 않고'));
+    assert.ok(!sec.includes('사용자 본인이 마지막 단계를 수행하도록 안내한다.'), '대체된 옛 문장이 남아 있음');
+  });
+  it('본인인증 벽(C5)과 인증 대행 금지는 완화하지 않는다', () => {
+    assert.ok(t.includes('(C5 신규항목 — 본인인증 벽)'));
+    assert.ok(t.includes('그 기관의 처분·발급 기능 자체를 이 페르소나가 수행하지 않는다') || t.includes('기관의 처분·발급 기능 자체를 이 페르소나가 수행하지 않는다'));
   });
 });

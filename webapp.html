@@ -4376,6 +4376,16 @@ window.closePDV = closePDV;
  * 화면 상태는 SP 본문에 박지 않고 요청마다 사용자 말 앞에 붙인다(기록에는 남지 않음). 전송 직전에 호스트에 새로 물어(hondi-embed-ctx-request) 오래된 상태가 들어가지 않게 한다.
  * host→page { type:'hondi-embed-ctx', ok, rev, text }   page→host { type:'hondi-embed-ctx-request' } */
 function _isScreenSp() { return !!(window.__hondiEmbedSp && String(window.__hondiEmbedSp.key || '').indexOf('inline:doc:') === 0); }
+/* 2026-11-04 — 서류 작성 도우미 인계: 서류 SP 가 답변 끝에 낸 [AGENT_TASK: …](첨부서류 발급을 도우미에게 맡김)·[DOC_HANDBACK: …](대화 주도권 반납)를
+ * 읽어 호스트(나비웹)로 올리고 화면에서는 지운다. 실행 여부(확장 연결·저장 여부 확인)는 호스트가 정한다. 서류 SP 가 아니면 아무 일도 하지 않는다. */
+function _embedDocTags(full) {
+  const ho = window.__hondiHostOrigin;
+  if (!_isScreenSp() || window.parent === window || !ho || !window.EmbedDelegate || typeof window.EmbedDelegate.parseDocTags !== 'function') return full;
+  const r = window.EmbedDelegate.parseDocTags(full);
+  r.tasks.forEach(function (t) { try { window.parent.postMessage({ type: 'hondi-embed-agent-task', slot: t.slot, goal: t.goal }, ho); } catch (x) {} });
+  if (r.handback) { try { window.parent.postMessage({ type: 'hondi-embed-doc-handback', reason: r.handback }, ho); } catch (x) {} }
+  return r.clean;
+}
 function _embedFreshScreen() {
   const ho = window.__hondiHostOrigin;
   if (!_isScreenSp() || window.parent === window || !ho) return Promise.resolve();
@@ -4700,7 +4710,7 @@ function _messagesWithLocation(historyArr) {
         // 9c3aaa2/5fcf79b1) 제거했다 — full 값 자체를 화면에 노출하던
         // console.warn('[RAW-DEBUG][Panel] ...')와 노란 점선 박스 렌더링
         // 코드 전체를 되돌렸다.
-        const _clean = _stripInternalTags(full);
+        const _clean = _stripInternalTags(_embedDocTags(full));
         bubbleEl.innerHTML = _clean
           .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
           .replace(/\n/g,'<br>')

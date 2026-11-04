@@ -741,6 +741,8 @@ export const _stripInternalTags = (text) => _stripBracketTag(
   .replace(/\[SHARE_DOC_CONFIRMED:[^\]]+\]/g, '')  // 공유문서 확인 완료 태그
   .replace(/\[SHARE_DOC_REJECTED\]/g, '')          // 공유문서 거부 태그
   .replace(/\[PANEL_ACTION:close\]/g, '')      // AI 패널 닫기 지시 태그 (2026-07-02 신설)
+  .replace(/\[AGENT_TASK:[^\]]*\]/g, '')       // 나비웹 서류 도우미 인계 태그 (2026-11-04 신설 — 정상 경로는 webapp.html _embedDocTags 가 호스트로 올리고 지움; 대화 기록 복원 때 화면에 새지 않게)
+  .replace(/\[DOC_HANDBACK:[^\]]*\]/g, '')     // 서류 도우미 → AC 주도권 반납 태그 (2026-11-04 신설, 위와 같은 이유)
   .replace(/\[PDV_DOMAIN_SET:[^\]]*\]/g, '')    // PDV 일상/업무 전환 태그 (2026-07-13 신설)
   .replace(/\[KCOMPOSE_AWAIT_USER:[^\]]*\]/g, '')  // 2026-09-12 신설 — K-Compose 정상 대기 신호(§ K-Compose 프로토콜 가드 참고), 사용자에겐 안 보여야 함
   .replace(/\[TEMPLATE_LOOKUP:[^\]]*\]/g, '')   // 정체성 템플릿 참조 조회 태그 (2026-07-17 신설, 방어적 — 정상 경로는 _handleProfileTags가 먼저 소비)
