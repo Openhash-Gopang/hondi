@@ -969,6 +969,8 @@ async function sendTurn(text, attachment) {
     typing.remove();
     aiBubble.remove();
     appendBubble('ai', `⚠️ 응답 중 오류가 발생했습니다: ${escHtml(e.message)}. 잠시 후 다시 시도해 주세요.`);
+    // 2026-11-04: 임베드(서류 작성)에서는 실패 사유를 부모에게 즉시 알린다. 예전엔 알리지 않아 부모가 90초를 기다린 뒤 이유 없이 "불러오지 못했습니다"만 보였다.
+    _embedPost({ type: 'expert-embed-error', msg: '응답 중 오류: ' + String((e && e.message) || e).slice(0, 160) });
   }
 }
 
