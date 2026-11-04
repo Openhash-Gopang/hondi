@@ -98,3 +98,50 @@ test('첨부 파일을 호스트로 함께 넘긴다(텍스트·사진/PDF 원�
   assert.equal(m.files.some(f => f.name === '큰사진.png'), false);
   assert.equal(d.send('', []), undefined);
 });
+
+// ── 서류 작성 도우미 인계(2026-11-04): 서류 SP 의 [AGENT_TASK]·[DOC_HANDBACK] 태그 ──────────────────────────────
+test('parseDocTags: [AGENT_TASK] 를 slot/goal 로 뽑고 본문에서 지운다', () => {
+  const r = E.parseDocTags('도우미에 맡겼습니다.\n[AGENT_TASK: slot=집행권원 사본 1부; goal=대법원 전자소송에서 판결문 정본을 발급 신청 화면까지 열어 주세요]');
+  assert.deepEqual(r.tasks, [{ slot: '집행권원 사본 1부', goal: '대법원 전자소송에서 판결문 정본을 발급 신청 화면까지 열어 주세요' }]);
+  assert.equal(r.handback, null);
+  assert.equal(r.clean, '도우미에 맡겼습니다.');
+});
+test('parseDocTags: 한 답변 2건까지, 3번째부터는 버린다(태그는 모두 지운다)', () => {
+  const t = (n) => `[AGENT_TASK: slot=서류${n}; goal=일${n}]`;
+  const r = E.parseDocTags(`맡깁니다 ${t(1)} ${t(2)} ${t(3)}`);
+  assert.equal(r.tasks.length, 2); assert.deepEqual(r.tasks.map(x => x.slot), ['서류1', '서류2']);
+  assert.equal(r.clean.includes('AGENT_TASK'), false);
+});
+test('parseDocTags: 형식이 틀린 태그(slot·goal 누락)는 실행하지 않고 화면에서만 지운다', () => {
+  for (const bad of ['[AGENT_TASK: slot=서류]', '[AGENT_TASK: goal=일만]', '[AGENT_TASK: ]', '[AGENT_TASK: slot=; goal=일]', '[AGENT_TASK: slot=서류; goal=]']) {
+    const r = E.parseDocTags('앞 ' + bad + ' 뒤'); assert.equal(r.tasks.length, 0, bad); assert.equal(r.clean.replace(/\s+/g, ' '), '앞 뒤', bad); assert.equal(r.clean.includes('AGENT_TASK'), false, bad);
+  }
+});
+test('parseDocTags: 길이 상한(slot 80·goal 300)과 제어문자·줄바꿈 제거', () => {
+  const r = E.parseDocTags(`[AGENT_TASK: slot=${'가'.repeat(200)}; goal=첫 줄\n둘째\u0007줄 ${'나'.repeat(500)}]`);
+  assert.equal(r.tasks[0].slot.length, 80); assert.equal(r.tasks[0].goal.length, 300);
+  assert.equal(/[\u0000-\u001f]/.test(r.tasks[0].goal), false);
+  assert.ok(r.tasks[0].goal.startsWith('첫 줄 둘째 줄'));
+});
+test('parseDocTags: [DOC_HANDBACK] 는 cancel·complete 만 인정하고 마지막 것을 쓴다', () => {
+  assert.equal(E.parseDocTags('끝 [DOC_HANDBACK: reason=complete]').handback, 'complete');
+  assert.equal(E.parseDocTags('[DOC_HANDBACK: reason=cancel] x [DOC_HANDBACK: reason=complete]').handback, 'complete');
+  assert.equal(E.parseDocTags('[DOC_HANDBACK: reason=offtopic]').handback, null);
+  assert.equal(E.parseDocTags('[DOC_HANDBACK: reason=offtopic]').clean, '');
+  assert.equal(E.parseDocTags('[DOC_HANDBACK: complete]').handback, null);
+});
+test('parseDocTags: 태그가 없으면 본문 그대로, 비문자열도 안전', () => {
+  assert.deepEqual(E.parseDocTags('안녕하세요'), { tasks: [], handback: null, clean: '안녕하세요' });
+  assert.deepEqual(E.parseDocTags(null), { tasks: [], handback: null, clean: '' });
+});
+test('webapp.html: 서류 SP(inline:doc:)일 때만 태그를 호스트로 올리고, 표시 전에 지운다', async () => {
+  const { readFileSync } = await import('node:fs');
+  const h = readFileSync(new URL('../webapp.html', import.meta.url), 'utf8');
+  assert.match(h, /function _embedDocTags\(full\)/);
+  assert.match(h, /if \(!_isScreenSp\(\) \|\| window\.parent === window \|\| !ho/);
+  assert.match(h, /type: 'hondi-embed-agent-task', slot: t\.slot, goal: t\.goal/);
+  assert.match(h, /type: 'hondi-embed-doc-handback', reason: r\.handback/);
+  assert.match(h, /const _clean = _stripInternalTags\(_embedDocTags\(full\)\)/);
+  const c = readFileSync(new URL('../src/gopang/ai/call-ai.js', import.meta.url), 'utf8');
+  assert.match(c, /\\\[AGENT_TASK:\[\^\\\]\]\*\\\]/); assert.match(c, /\\\[DOC_HANDBACK:\[\^\\\]\]\*\\\]/);
+});

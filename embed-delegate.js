@@ -8,6 +8,11 @@
  *  호스트 → 페이지  { type:'hondi-embed-ai-reply', id, text }                        호스트가 처리한 결과 요약(말풍선에 표시)
  *  호스트 → 페이지  { type:'hondi-embed-ai-note', text }                             뒤늦게 끝난 일(서류 수정 결과 등)
  * 호스트가 위임을 알리지 않으면(일반 접속·폰) 아무것도 바뀌지 않는다. 메시지는 부모 창에서 온 것이고 출처가 허용 목록에 있을 때만 받는다.
+ *
+ * 서류 작성 도우미 인계(2026-11-04): 서류 화면이 떠 있어 대화창 SP 가 '서류 작성 도우미'(inline:doc:…)일 때, 그 SP 가 답변 끝에 내는 태그를 호스트로 올린다.
+ *  [AGENT_TASK: slot=<첨부서류 항목>; goal=<도우미가 할 일 한 문장>]   → 페이지 → 호스트  { type:'hondi-embed-agent-task', slot, goal }
+ *  [DOC_HANDBACK: reason=cancel|complete]                              → 페이지 → 호스트  { type:'hondi-embed-doc-handback', reason }
+ * 태그는 화면에 보이지 않게 지운다. 호스트가 실제로 실행할지(확장 연결·저장 여부)는 호스트가 정한다 — 이 파일은 읽어서 올리기만 한다.
  */
 (function (root) {
   'use strict';
@@ -56,6 +61,31 @@
     }
     return { onMessage: onMessage, send: send, active: function () { return !!origin; }, onNote: function (fn) { noteFn = fn; } };
   }
-  var API = { HOSTS: HOSTS, isHost: isHost, create: create, packFiles: packFiles };
+  /**
+   * 순수 함수 — 서류 SP 의 답변에서 [AGENT_TASK: …]·[DOC_HANDBACK: …] 를 뽑고 지운 본문을 돌려준다.
+   * tasks: 한 답변에 최대 2건, slot ≤ 80자 · goal ≤ 300자, 제어문자 제거. 형식이 틀린 태그는 버리되 화면에서는 지운다.
+   * handback: 'cancel' | 'complete' | null (여러 번 나오면 마지막 것).
+   */
+  var TASK_MAX = 2, SLOT_MAX = 80, GOAL_MAX = 300;
+  function oneLine(s, n) { return String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, n); }
+  function parseDocTags(text) {
+    var tasks = [], handback = null;
+    var clean = String(text == null ? '' : text)
+      .replace(/\[AGENT_TASK:\s*([^\]]*)\]/g, function (m, body) {
+        var mm = /slot\s*=\s*([^;]*?)\s*;\s*goal\s*=\s*([\s\S]+)$/.exec(body);
+        if (!mm) return '';
+        var slot = oneLine(mm[1], SLOT_MAX), goal = oneLine(mm[2], GOAL_MAX);
+        if (slot && goal && tasks.length < TASK_MAX) tasks.push({ slot: slot, goal: goal });
+        return '';
+      })
+      .replace(/\[DOC_HANDBACK:\s*([^\]]*)\]/g, function (m, body) {
+        var mm = /reason\s*=\s*(cancel|complete)\b/i.exec(body);
+        if (mm) handback = mm[1].toLowerCase();
+        return '';
+      });
+    return { tasks: tasks, handback: handback, clean: clean.replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim() };
+  }
+
+  var API = { HOSTS: HOSTS, isHost: isHost, create: create, packFiles: packFiles, parseDocTags: parseDocTags };
   root.EmbedDelegate = API;
 })(typeof window !== 'undefined' ? window : globalThis);
