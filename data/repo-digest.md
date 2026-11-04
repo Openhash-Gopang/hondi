@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-04 22:59 KST · 기준 커밋 4ff7d7ec
+- 갱신: 2026-11-05 05:41 KST · 기준 커밋 d9190a5f
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 882건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-05 feat: 직역 사이트 *.naviweb.kr 출처를 엔진 임베드·서명 릴레이 허용 목록에 추가
 - 2026-11-04 perf: skip greeting turn for quiet=1 embed (document-writing engine)
 - 2026-11-04 feat: doc form feedback API (anonymous add-field signals, candidates by distinct users)
 - 2026-11-04 perf: load SP layers in parallel for expert-chat, share manifest request
@@ -43,7 +44,6 @@
 - 2026-11-02 Merge pull request #892 from Openhash-Gopang/feat/free-limit-paid-popup-20261102
 - 2026-11-02 feat: 충전 구간별 보너스 배율(x1.6/x1.8/x2.0)을 없앰
 - 2026-11-02 feat: 필드 테스트 기간 정액 입금 GDC 지급(월 1만원→10만 GDC, 연 10만원→12만 GDC)
-- 2026-11-02 feat: 테스트 무료 한도를 DeepSeek API 실비 500원 기준으로 바꾸고 유예를 없앰
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
