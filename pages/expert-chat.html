@@ -1721,7 +1721,7 @@ updateSendBtn();
 function _embedOn() { return _qs.get('embed') === '1' && window.parent !== window; }
 if (_embedOn() && _qs.get('hostinput') === '1') document.documentElement.classList.add('hostinput');
 // 2026-10-28: 나비로 Navi Law(law.hondi.net)가 이 화면을 iframe 으로 끼운다 — 부모 오리진은 같은 오리진 또는 아래 목록만 허용한다.
-const _EMBED_PARENT_ORIGINS = [location.origin, 'https://mail.hondi.net', 'https://naviweb.kr', 'https://www.naviweb.kr', 'https://law.hondi.net', 'https://school.hondi.net', 'https://tax.hondi.net', 'https://ip.hondi.net', 'https://doctor.hondi.net', 'https://pro.hondi.net'];
+const _EMBED_PARENT_ORIGINS = [location.origin, 'https://mail.hondi.net', 'https://naviweb.kr', 'https://www.naviweb.kr', 'https://law.hondi.net', 'https://school.hondi.net', 'https://tax.hondi.net', 'https://ip.hondi.net', 'https://doctor.hondi.net', 'https://pro.hondi.net', 'https://law.naviweb.kr', 'https://tax.naviweb.kr', 'https://doctor.naviweb.kr', 'https://pro.naviweb.kr', 'https://jeju.naviweb.kr', 'https://ip.naviweb.kr', 'https://appraiser.naviweb.kr', 'https://school.naviweb.kr', 'https://taxcpa.naviweb.kr'];   // 2026-11-05: 직역 사이트를 *.naviweb.kr 로 옮기는 동안 두 주소를 함께 허용
 function _embedParentOrigin() {
   try { const a = window.location.ancestorOrigins && window.location.ancestorOrigins[0]; if (a && _EMBED_PARENT_ORIGINS.includes(a)) return a; } catch (e) { /* 무시 */ }
   try { const o = new URL(document.referrer).origin; if (_EMBED_PARENT_ORIGINS.includes(o)) return o; } catch (e) { /* 무시 */ }
