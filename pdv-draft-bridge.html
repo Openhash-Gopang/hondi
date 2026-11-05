@@ -25,7 +25,12 @@
     { type:'pdv-draft', reqId, op:'delete', id }              → { ok }
     { type:'pdv-draft', reqId, op:'done',   id }              → { ok }          status='done'(작성한 서류)
     { type:'pdv-draft', reqId, op:'caps' }                    → { ok, kinds }   받는 항목 종류(옛 중계는 BAD_OP)
+    { type:'pdv-draft', reqId, op:'purge', now? }             → { ok, removed }  kind='attach' 중 유효 기간(expires)이 지난 보관 서류를 지운다(2026-11-06)
   kind='form' (내 서류함, 2026-11-05): box='fav'|'mine'|'upload', title=양식 이름, site=서류 사이트, body='mine' 이면 서식 JSON(50000자까지), fileData='upload' 이면 올린 양식 원본(8MB까지), uses·lastUsed=사용 횟수·마지막 사용(ms). 초안 정리에서 제외, 서류·편지 목록(kind 지정)에는 나타나지 않는다.
+  kind='attach' (재활용 첨부서류, 2026-11-06): 서류를 쓰며 첨부한 파일(주민등록등본·등기사항증명서 등)을 다음 서류에 다시 쓰도록 이 기기에 보관한다.
+    title=보관 당시 항목 이름, key=서류 종류 키(나비 서류 화면이 정함: 'resident-reg' 등), fileName/fileMime/fileData=파일(8MB까지), issued=발급 시각(ms), expires=유효 기간 끝(ms, 필수),
+    basis='law'|'practice'|'default'. 최대 60건(넘으면 오래된 것부터 지움). expires 가 지나면 purge 에서 지워진다. 초안 정리(MAX_ITEMS)에서 제외하고 서류·편지 목록(kind 지정)에는 나타나지 않는다.
+    타임라인에는 처음 보관할 때 '첨부서류 보관: 항목 이름' 1건만 남기고 파일·내용은 넣지 않는다.
   kind='guide' (나비 길잡이 과제 계획서, 2026-11-03): id 는 'guide-<계획서 id>', title=과제명, body=계획서 본문(50000자까지), subject=마지막 수정 시각(ms).
     초안 정리(MAX_ITEMS)에서 제외하고, 서류·편지 목록(kind 지정)에는 나타나지 않는다. 타임라인에는 처음 저장할 때 '과제 계획서 초안 저장: 제목' 1건만 남긴다.
   응답: { type:'pdv-draft-result', reqId, ok, ...data }.  준비되면 부모에게 { type:'pdv-draft-ready' } 를 보낸다.
@@ -38,9 +43,10 @@
   'use strict';
   var ALLOW = ['https://mail.hondi.net', 'https://naviweb.kr', 'https://www.naviweb.kr'];
   var DB_NAME = 'gopang_pdv_drafts', STORE = 'items';
-  var KINDS = ['doc', 'letter', 'campaign', 'guide', 'form'];   // form: 내 서류함(2026-11-05) — box 'fav'(자주 쓰는 양식)·'mine'(내가 만든 양식, body=서식 JSON)·'upload'(업로드한 양식, fileData=원본)   // guide: 나비 길잡이 과제 계획서(2026-11-03) — body 에 계획서 본문, subject 에 마지막 수정 시각(ms)
+  var KINDS = ['doc', 'letter', 'campaign', 'guide', 'form', 'attach'];   // form: 내 서류함(2026-11-05) — box 'fav'(자주 쓰는 양식)·'mine'(내가 만든 양식, body=서식 JSON)·'upload'(업로드한 양식, fileData=원본)   // guide: 나비 길잡이 과제 계획서(2026-11-03) — body 에 계획서 본문, subject 에 마지막 수정 시각(ms)
   var MAX_FILE = 8 * 1024 * 1024;   // 서류 파일 한 건 상한
   var MAX_ITEMS = 300;
+  var MAX_ATTACH = 60, ATTACH_MAX_MS = 400 * 86400000;   // 재활용 첨부서류: 보관 건수 상한, 유효 기간 상한(400일)
   var MAX_EXTRAS = 12, MAX_EXTRA_TOTAL = 25 * 1024 * 1024;   // 서류 첨부서류(항목별로 올린 파일)
 
   function openDB() {
@@ -108,6 +114,10 @@
       fileMime: newFile ? str(item.fileMime, 120) : (keepFile ? prev.fileMime : ''),
       fileData: newFile ? item.fileData : (keepFile ? prev.fileData : null),
       extras: extras,
+      key: str(pick(item, prev, 'key', ''), 40),                      // kind='attach': 서류 종류 키
+      issued: kind === 'attach' ? Math.min(now, Math.max(0, +pick(item, prev, 'issued', now) || now)) : 0,
+      expires: kind === 'attach' ? Math.min(now + ATTACH_MAX_MS, Math.max(0, +pick(item, prev, 'expires', 0) || 0)) : 0,
+      basis: ['law', 'practice', 'default'].indexOf(pick(item, prev, 'basis', '')) >= 0 ? pick(item, prev, 'basis', '') : '',
       box: ['fav', 'mine', 'upload'].indexOf(item.box) >= 0 ? item.box : ((prev && prev.box) || ''),   // 내 서류함 종류(kind='form')
       uses: item.uses !== undefined ? Math.max(0, Math.min(9999, item.uses | 0)) : ((prev && prev.uses) || 0),
       lastUsed: item.lastUsed !== undefined ? (+item.lastUsed || 0) : ((prev && prev.lastUsed) || 0),
@@ -119,7 +129,7 @@
   // PDV 타임라인(공용 gopang_pdv_store)에 6하원칙 요약 1건 — 제목만, 원문·파일 없음
   function pdvNote(item, what) {
     try {
-      var label = item.kind === 'doc' ? '서류' : item.kind === 'letter' ? '편지' : item.kind === 'guide' ? '과제 계획서' : item.kind === 'form' ? '내 서류함 양식' : '캠페인';
+      var label = item.kind === 'attach' ? '첨부서류' : item.kind === 'doc' ? '서류' : item.kind === 'letter' ? '편지' : item.kind === 'guide' ? '과제 계획서' : item.kind === 'form' ? '내 서류함 양식' : '캠페인';
       window.dispatchEvent(new CustomEvent('gopang:pdv-recorded', { detail: {
         type: 'draft', serviceId: 'navi-drafts', svc: 'navi-drafts', source: 'mail.hondi.net', ts: new Date().toISOString(),
         who: '본인', when: new Date().toISOString(), where: 'mail.hondi.net',
@@ -131,7 +141,7 @@
   function summary(it) {
     return { id: it.id, kind: it.kind, status: it.status, title: it.title, site: it.site,
       text: (it.text || '').slice(0, 200), subject: it.subject, fileName: it.fileName, hasFile: !!it.fileData, extraCount: it.extras ? it.extras.length : 0,
-      msgCount: it.messages ? it.messages.length : 0, campaignId: it.campaignId, box: it.box || '', uses: it.uses || 0, lastUsed: it.lastUsed || 0, created: it.created, updated: it.updated };
+      msgCount: it.messages ? it.messages.length : 0, campaignId: it.campaignId, key: it.key || '', issued: it.issued || 0, expires: it.expires || 0, basis: it.basis || '', box: it.box || '', uses: it.uses || 0, lastUsed: it.lastUsed || 0, created: it.created, updated: it.updated };
   }
 
   var OPS = {
@@ -140,11 +150,24 @@
       var p = item.id ? getOne(item.id) : Promise.resolve(null);
       return p.then(function (prev) {
         var out = clean(item, prev || null);
+        if (out.kind === 'attach') {
+          if (!out.fileData) throw new Error('NO_FILE');
+          if (!out.key) throw new Error('NO_KEY');
+          if (!(out.expires > Date.now())) throw new Error('EXPIRED');   // 이미 유효 기간이 지난 서류는 보관하지 않는다
+        }
         return tx('readwrite', function (os) { return os.put(out); }).then(function () {
-          if (!prev) pdvNote(out, '초안 저장');
+          if (!prev) pdvNote(out, out.kind === 'attach' ? '보관' : '초안 저장');
+          if (out.kind === 'attach') {   // 보관 건수 상한: 오래된 것부터 지운다
+            return getAll().then(function (all2) {
+              var atts = all2.filter(function (x) { return x.kind === 'attach'; }).sort(function (a, b) { return a.updated - b.updated; });
+              if (atts.length <= MAX_ATTACH) return { id: out.id, key: out.key, issued: out.issued, expires: out.expires };
+              return tx('readwrite', function (os) { atts.slice(0, atts.length - MAX_ATTACH).forEach(function (x) { if (x.id !== out.id) os.delete(x.id); }); })
+                .then(function () { return { id: out.id, key: out.key, issued: out.issued, expires: out.expires }; });
+            });
+          }
           return getAll().then(function (all) {
             if (all.length > MAX_ITEMS) {   // 오래된 초안부터 정리(작성한 서류·과제 계획서는 지우지 않는다)
-              var drafts = all.filter(function (x) { return x.status === 'draft' && x.kind !== 'guide' && x.kind !== 'form'; }).sort(function (a, b) { return a.updated - b.updated; });
+              var drafts = all.filter(function (x) { return x.status === 'draft' && x.kind !== 'guide' && x.kind !== 'form' && x.kind !== 'attach'; }).sort(function (a, b) { return a.updated - b.updated; });
               var over = all.length - MAX_ITEMS;
               return tx('readwrite', function (os) { drafts.slice(0, over).forEach(function (x) { os.delete(x.id); }); });
             }
@@ -169,7 +192,16 @@
       return { region: pick(reg.region) || pick(part.region), address: pick(part.address) || pick(part.addr) || pick(reg.address) };
     },
     // 2026-11-03: 이 중계가 받는 항목 종류를 알려 준다 — 옛 중계는 이 op 를 몰라 BAD_OP 로 답하므로, 부른 쪽이 새 종류(guide) 지원 여부를 알 수 있다
-    caps: function () { return { kinds: KINDS.slice() }; },
+    caps: function () { return { kinds: KINDS.slice(), ops: ['purge'] }; },
+    // 2026-11-06: 유효 기간이 지난 재활용 첨부서류를 지운다(서류 화면이 열릴 때마다 부른다)
+    purge: function (m) {
+      var now = Date.now();
+      return getAll().then(function (all) {
+        var dead = all.filter(function (x) { return x.kind === 'attach' && x.expires > 0 && x.expires <= now; });
+        if (!dead.length) return { removed: 0 };
+        return tx('readwrite', function (os) { dead.forEach(function (x) { os.delete(x.id); }); }).then(function () { return { removed: dead.length }; });
+      });
+    },
     delete: function (m) { return tx('readwrite', function (os) { return os.delete(m.id); }).then(function () { return {}; }); },
     done: function (m) {
       return getOne(m.id).then(function (it) {
