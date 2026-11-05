@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-05 14:08 KST · 기준 커밋 6608cd18
+- 갱신: 2026-11-05 14:14 KST · 기준 커밋 ec396607
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 882건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-05 Merge pull request #925 from Openhash-Gopang/feat/naviweb-feedback-sp-txt-20261105
+- 2026-11-05 feat(prompts): 나비웹 기능 개선 SP v0.1 텍스트판 추가
 - 2026-11-05 Merge pull request #924 from Openhash-Gopang/feat/naviweb-feedback-sp-20261105
 - 2026-11-05 docs(prompts): 나비웹 기능 개선 SP 초안 v0.1 추가
 - 2026-11-05 feat: PDV 중계에 내 서류함(kind=form: box·uses·lastUsed) 추가
@@ -42,8 +44,6 @@
 - 2026-11-02 전문가 AI 대화: 사용자를 해당 분야 인간 전문가로 상정(role=expert)
 - 2026-11-02 대화 패널 SP 답변: 짧게·마크다운, 면책 문구 제외 규칙 + 마크다운 원문 회신
 - 2026-11-02 대화 패널: 나비웹 '각종 기관' 선택 시 패널 SP 전환(hondi-embed-sp)·입력창 말에 그 SP로 답(hondi-embed-sp-ask)
-- 2026-11-02 Merge pull request #893 from Openhash-Gopang/fix/monthly-gdc-1x-20261102
-- 2026-11-02 fix: 월 10,000원 입금은 10,000T — 정액 예외에서 월 플랜 제거
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
