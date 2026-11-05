@@ -1,9 +1,12 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-05 14:20 KST · 기준 커밋 d1842687
+- 갱신: 2026-11-06 08:00 KST · 기준 커밋 67a08f0d
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-06 pdv: 재활용 첨부서류(kind=attach) 보관과 만료 삭제(purge) 추가
+- 2026-11-05 Merge pull request #927 from Openhash-Gopang/feat/naviweb-feedback-sp-v02-20261105
+- 2026-11-05 feat(prompts): 나비웹 기능 개선 SP v0.2 추가 (승인 체계, 개인정보 규칙, 사고 실험 보완)
 - 2026-11-05 feat: 양식 작성 SP(form-builder) 신설 — 자연어 초안 + 대화로 항목 추가·삭제·이동·크기 변경
 - 2026-11-05 Merge pull request #925 from Openhash-Gopang/feat/naviweb-feedback-sp-txt-20261105
 - 2026-11-05 feat(prompts): 나비웹 기능 개선 SP v0.1 텍스트판 추가
@@ -41,9 +44,6 @@
 - 2026-11-02 대화 패널: 호스트가 준 안내용 SP(inline:, spText)로 전환
 - 2026-11-02 정부 AI 지역 호출: gov-tree SP 경로 전환·지역 컨텍스트, PDV 브릿지 region(거주지) 응답
 - 2026-11-02 usage: '충전 신청 내역'→'충전 내역', 처음엔 닫힌 slide 패널(화살표·클릭으로 펼침/접힘)
-- 2026-11-02 GDC 사용량: /usage-log 시계열(KST 시간별·일별)과 usage.html 그래프·임베드 모드
-- 2026-11-02 전문가 AI 대화: 사용자를 해당 분야 인간 전문가로 상정(role=expert)
-- 2026-11-02 대화 패널 SP 답변: 짧게·마크다운, 면책 문구 제외 규칙 + 마크다운 원문 회신
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
