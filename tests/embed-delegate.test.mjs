@@ -154,3 +154,10 @@ test('PDV 중계: 내 서류함(kind=form) — box·uses·lastUsed 를 저장하
   assert.match(b, /x\.kind !== 'guide' && x\.kind !== 'form'/);
   assert.match(b, /box: it\.box \|\| '', uses: it\.uses \|\| 0, lastUsed: it\.lastUsed \|\| 0/);
 });
+
+test('webapp.html: 나비웹 화면 안에서는 "…"·빈 AI 말풍선을 숨긴다(진행 표시는 호스트 막대)', async () => {
+  const { readFileSync } = await import('node:fs');
+  const h = readFileSync(new URL('../webapp.html', import.meta.url), 'utf8');
+  assert.match(h, /if \(window\.parent !== window\) \{\s*\n\s*const _isPh = /);
+  assert.match(h, /t === '…'/); assert.match(h, /new MutationObserver\(_syncPh\)\.observe\(msgList/);
+});

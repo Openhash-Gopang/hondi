@@ -3746,6 +3746,14 @@ window.closePDV = closePDV;
     return b;
   }
 
+  // 2026-11-06 — 나비웹 화면 안(iframe)에서는 "…"·빈 AI 말풍선(답이 오기 전 자리표시, 태그만 있어 지워진 답)을 보이지 않게 한다.
+  // 기다리는 동안의 표시는 호스트(나비웹)의 "잠시 기다려 주십시오" 진행 막대가 맡는다. 글자가 생기면 그 말풍선이 나타난다.
+  if (window.parent !== window) {
+    const _isPh = (b) => { const t = String(b.textContent || '').replace(/\s+/g, ''); return !t || t === '…' || t === '...' || t === '나비화면에서처리하고있습니다…'; };
+    const _syncPh = () => { msgList.querySelectorAll('.bubble-ai').forEach((b) => { const r = b.parentNode; if (r && r.classList && r.classList.contains('msg-row')) r.style.display = _isPh(b) ? 'none' : ''; }); };
+    new MutationObserver(_syncPh).observe(msgList, { childList: true, subtree: true, characterData: true });
+  }
+
   // ── 즉시 표시용 인사말 풀 (2026-08-06 신설) ──────────────
   // hondi-pro는 thinking 모드로 reasoning에 먼저 시간을 쓰기 때문에,
   // 패널을 열었을 때 실제 AI 응답(대화 이력 복기 포함)이 오기까지
