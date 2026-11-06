@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-06 19:33 KST · 기준 커밋 a1e23b5b
+- 갱신: 2026-11-07 07:24 KST · 기준 커밋 b2047547
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-07 Merge pull request #940 from Openhash-Gopang/perf/embed-force-flash-short-ask
+- 2026-11-07 perf(embed): 서류 작성 화면은 사고 모드(pro)로 올리지 않고, 질문 답변 상한을 낮춘다
 - 2026-11-06 feat(admin): 무료 이용 현황 조회와 다시 시작(/admin/quota-reset)
 - 2026-11-06 Merge pull request #938 from Openhash-Gopang/fix/free-limit-popup-5h-text
 - 2026-11-06 fix(badge): 무료 한도 소진 팝업 문구 — 100원/24시간 문구 삭제, 5시간 후 재시작 안내
@@ -42,8 +44,6 @@
 - 2026-11-04 docs(admin): 오라클 클라우드 비용 정리 문서와 관리자 메뉴 추가
 - 2026-11-04 fix(webapp): 호스트 화면 안 대화창에서는 나비 앱 설치 배너를 숨김
 - 2026-11-04 feat: 서류 작성 안내 SP는 화면 스냅샷 없이는 답하지 않음 — 전송 때마다 호스트에 현재 화면을 물어 붙임
-- 2026-11-03 fix(gwp): K-Market 위임 시 나비 문장 제외, ctx는 사용자 원문만
-- 2026-11-03 feat(webapp): 비서 이름 "혼디"→"나비" 정리 + 마이크 나비웹 음성 입력 창
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
