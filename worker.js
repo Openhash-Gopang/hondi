@@ -19,6 +19,7 @@ import { profilePhoneFilter, last8Filter, pickGuidByLast8 } from './src/worker/p
 import { validateSignalInput as _sigValidate, canDeleteSignal as _sigCanDelete, sendRateOk as _sigRateOk } from './src/worker/signal-auth.js';
 import { classifyQuery as _ffClassify, publicCard as _ffPublicCard, rateLimitOk as _ffRateOk } from './src/worker/friend-find.js';
 import { computeChargeGdc as _computeChargeGdc } from './src/worker/charge-plans.js';
+import { makePlanRequest as _planMakeRequest, judgeDeposit as _planJudgeDeposit, nextPaidUntil as _planNextPaidUntil, validTier as _planValidTier, DEFAULT_KRW_PER_USD as _PLAN_DEFAULT_RATE } from './src/worker/plan-pay.js';
 import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, startFree as _testQuotaStartFree, setPlan as _testQuotaSetPlan, setPaid as _testQuotaSetPaid, setExtra as _testQuotaSetExtra, addExtraSpend as _testQuotaAddExtra, exhaustedMessage as _planExhaustedMessage, waitMessage as _freePlanWaitMessage, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
 import { parseMessage as _kmailParseMime, decodeMimeWords as _kmailDecodeMimeWords, repairStoredText as _kmailRepairStoredText } from './src/worker/mime-text.js';
@@ -13607,6 +13608,8 @@ export default {
     if (pathname === '/auth/free-plan')          return handleFreePlan(request, env, corsHeaders);
     if (pathname === '/auth/extra-usage')        return handleExtraUsage(request, env, corsHeaders);
     if (pathname === '/admin/plan-set')          return handleAdminPlanSet(request, env, corsHeaders);
+    if (pathname === '/admin/plan-deposits')     return handleAdminPlanDeposits(request, env, corsHeaders);
+    if (pathname === '/biz/plan-request')        return handlePlanRequest(request, env, corsHeaders);
     if (pathname === '/auth/test-migrate')       return handleTestMigrate(request, env, corsHeaders);
     if (pathname === '/auth/confirm-backup')      return handleConfirmBackup(request, env, corsHeaders);
     if (pathname === '/auth/verify')             return handleVerify(request, env, corsHeaders);
@@ -17995,6 +17998,78 @@ function _extractKrwAmountFromText(text) {
   return (n > 0) ? n : null;
 }
 
+// ── 유료 플랜 입금 확인(2026-11-06, B안: 플랜 요금은 GDC로 충전하지 않는다) ──────────────────────────
+//  흐름·정책은 src/worker/plan-pay.js 머리말 참고. KV 키: hondi:plan_req:<매칭키>(48시간), hondi:plan_done:<알림키>, hondi:plan_events(최근 50건).
+async function _planKrwPerUsd(env) {
+  const kv = env.AI_SETUP_SEALS_KV, key = 'hondi:plan_rate';
+  if (kv) { try { const c = JSON.parse(await kv.get(key) || 'null'); if (c && Number(c.rate) > 0 && Date.now() - c.t < 3600 * 1000) return Number(c.rate); } catch (e) { /* 캐시 실패는 조회로 대체 */ } }
+  let rate = 0;
+  try {
+    const res = await fetch('https://open.er-api.com/v6/latest/USD', { signal: AbortSignal.timeout(5000) });
+    const j = await res.json();
+    if (j && j.result === 'success' && j.rates && Number(j.rates.KRW) > 0) rate = Number(j.rates.KRW);
+  } catch (e) { /* 환율 조회 실패 — 아래 대체값 */ }
+  if (!(rate > 0)) return Number(env.PLAN_KRW_PER_USD) > 0 ? Number(env.PLAN_KRW_PER_USD) : _PLAN_DEFAULT_RATE;
+  if (kv) { try { await kv.put(key, JSON.stringify({ rate, t: Date.now() })); } catch (e) { /* 무시 */ } }
+  return rate;
+}
+async function _planEvent(env, ev) {
+  const kv = env.AI_SETUP_SEALS_KV; if (!kv) return;
+  try {
+    const list = JSON.parse(await kv.get('hondi:plan_events') || '[]');
+    list.unshift({ ...ev, at: new Date().toISOString() });
+    await kv.put('hondi:plan_events', JSON.stringify(list.slice(0, 50)));
+  } catch (e) { /* 기록 실패는 무시 */ }
+}
+async function _planDepositTry(env, code, amount, notificationKey) {
+  const kv = env.AI_SETUP_SEALS_KV; if (!kv || !/^\d{8}$/.test(String(code || ''))) return null;
+  const doneKey = 'hondi:plan_done:' + notificationKey;
+  // 같은 알림이 다시 오면(안드로이드가 알림을 갱신하며 다시 알리는 경우) 요청이 이미 지워졌어도 플랜 입금으로 인정하고 끝낸다 —
+  // 그렇지 않으면 아래 일반 충전 흐름이 같은 입금을 GDC 충전으로 한 번 더 처리할 수 있다.
+  if (notificationKey && await kv.get(doneKey)) return { matched: true, already: true };
+  const req = JSON.parse(await kv.get('hondi:plan_req:' + code) || 'null');
+  if (!req) return null;
+  const verdict = _planJudgeDeposit(req, amount, Date.now());
+  if (!verdict.ok) {
+    await _planEvent(env, { kind: 'mismatch', reason: verdict.reason, code, guid: req.guid, tier: req.tier, expected_krw: req.krw, amount_krw: Number(amount) });
+    return { matched: false, reason: verdict.reason };
+  }
+  const cfg = _testQuotaConfig(env), now = Date.now();
+  const cur = await _testQuotaGetStatus(kv, req.guid, now, cfg);
+  const until = _planNextPaidUntil(cur && cur.tier ? { tier: cur.tier, paid_until: Date.parse(cur.paid_until) } : null, req.grant, now);
+  await _testQuotaSetPaid(kv, req.guid, req.grant, until, now);
+  _freeTrialMem.delete(req.guid);
+  if (notificationKey) await kv.put(doneKey, '1', { expirationTtl: 30 * 86400 });
+  await kv.delete('hondi:plan_req:' + code);
+  await _planEvent(env, { kind: 'applied', code, guid: req.guid, tier: req.grant, requested_tier: req.tier, amount_krw: Number(amount), paid_until: new Date(until).toISOString() });
+  console.info(JSON.stringify({ tag: 'PLAN_DEPOSIT_APPLIED', guid: req.guid, tier: req.grant, amount: Number(amount), ts: new Date().toISOString() }));
+  return { matched: true, tier: req.grant, paid_until: new Date(until).toISOString() };
+}
+
+// POST /biz/plan-request { phone_verify_token, tier } — 플랜 입금 요청을 만든다(정확한 입금액·입금자명 매칭키 안내). 같은 번호의 이전 요청은 덮어쓴다.
+async function handlePlanRequest(request, env, corsHeaders) {
+  if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+  const body = await request.json().catch(() => ({})) || {};
+  const r = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token);
+  if (!r.ok) { const m = mapPhoneAuthError(r); return _err(m.status, m.code, m.message, corsHeaders); }
+  if (String(r.e164 || '').startsWith(TEST_ID_PREFIX)) return _err(400, 'TEST_ACCOUNT_NO_PLAN', '테스트 아이디는 유료 플랜을 쓸 수 없습니다. 정식 아이디로 로그인해 주세요.', corsHeaders);
+  if (!env.AI_SETUP_SEALS_KV) return _err(503, 'KV_NOT_BOUND', '잠시 후 다시 시도해 주세요', corsHeaders);
+  if (!_planValidTier(body.tier)) return _err(400, 'BAD_TIER', 'tier는 p10, p100, p200 중 하나여야 합니다', corsHeaders);
+  const rate = await _planKrwPerUsd(env);
+  const req = _planMakeRequest({ guid: r.guid, e164: r.e164, tier: body.tier, krwPerUsd: rate, now: Date.now() });
+  if (!req) return _err(400, 'NO_MATCH_KEY', '전화번호 정보를 확인하지 못했습니다', corsHeaders);
+  await env.AI_SETUP_SEALS_KV.put('hondi:plan_req:' + req.code, JSON.stringify(req), { expirationTtl: 48 * 3600 });
+  return new Response(JSON.stringify({ ok: true, tier: req.tier, grant: req.grant, usd: req.usd, krw: req.krw, rate: req.rate, match_code: req.code, expires_at: new Date(req.expires).toISOString() }), { status: 200, headers: corsHeaders });
+}
+
+// GET /admin/plan-deposits — 최근 플랜 입금 처리 결과(자동 지정·금액 불일치 등) 50건. 관리자 Bearer 필요.
+async function handleAdminPlanDeposits(request, env, corsHeaders) {
+  if (!(await _requireAdmin(request, env))) return _err(401, 'UNAUTHORIZED', '관리자 인증 필요', corsHeaders);
+  let events = [];
+  try { events = JSON.parse(await env.AI_SETUP_SEALS_KV.get('hondi:plan_events') || '[]'); } catch (e) { /* 비어 있음 */ }
+  return new Response(JSON.stringify({ ok: true, events }), { status: 200, headers: corsHeaders });
+}
+
 // POST /biz/charge-confirm-notification — 관리자 전용(알림 리스너 앱이 호출).
 // body: { secret, raw_text, notification_key, source: 'app_push'|'sms',
 //         app_package, krw_amount(선택 — 없으면 raw_text에서 자동 추출),
@@ -18129,6 +18204,12 @@ async function handleChargeConfirmNotification(request, env, corsHeaders, ctx) {
     return new Response(JSON.stringify({ ok: true, matched: false, reason: 'NO_AMOUNT_FOUND', match_code: code }), { status: 200, headers: corsHeaders });
   }
 
+  // 유료 플랜 입금(2026-11-06): 이 매칭키로 48시간 안에 만든 플랜 입금 요청이 있고 금액이 정확히 같으면 플랜을 지정한다(GDC는 충전하지 않는다).
+  // 금액이 다르면 기록만 남기고 아래 기존 GDC 충전 흐름으로 넘어간다(일반 충전을 막지 않기 위함).
+  try {
+    const _pl = await _planDepositTry(env, code, amount, notification_key);
+    if (_pl && _pl.matched) return new Response(JSON.stringify({ ok: true, matched: true, plan: true, ..._pl }), { status: 200, headers: corsHeaders });
+  } catch (e) { console.warn('[PlanDeposit] 처리 중 오류(기존 충전 흐름으로 진행):', e.message); }
   try {
     const token = await _l1AdminToken(env);
     const headers = { 'Authorization': `Bearer ${token}` };
