@@ -89,6 +89,8 @@ test('제보 내보내기: 토큰이 없거나 틀리면 401, 맞으면 [naviweb
   assert.equal(await h.handle(new Request('https://x/other'), new URL('https://x/other'), {}), null);
   const bad = await get("?since=2026-11-01'%20||%20true", 'SECRET'); assert.equal(bad.status, 200);
   assert.ok(!/true/.test(decodeURIComponent(calls[1][0])), 'since 는 날짜 모양만 받는다');
+  const hb = makeUserFeedbackExportHandler({ base: 'https://l1', getToken: async () => 'ADMIN', fetchImpl });
+  assert.equal((await hb.handle(new Request('https://x/user-feedback/export', { headers: { Authorization: 'Bearer SECRET' } }), new URL('https://x/user-feedback/export'), { USER_FEEDBACK_EXPORT_TOKEN: '\uFEFFSECRET\r\n' })).status, 200, 'Worker 비밀값 앞의 BOM·줄바꿈은 무시');
   const nokTok = makeUserFeedbackExportHandler({ base: 'https://l1', getToken: async () => 't', fetchImpl });
   assert.equal((await nokTok.handle(new Request('https://x/user-feedback/export'), new URL('https://x/user-feedback/export'), {})).status, 401, '토큰 미설정이면 거부');
 });
