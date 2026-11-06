@@ -20,7 +20,7 @@ import { validateSignalInput as _sigValidate, canDeleteSignal as _sigCanDelete, 
 import { classifyQuery as _ffClassify, publicCard as _ffPublicCard, rateLimitOk as _ffRateOk } from './src/worker/friend-find.js';
 import { computeChargeGdc as _computeChargeGdc } from './src/worker/charge-plans.js';
 import { makePlanRequest as _planMakeRequest, judgeDeposit as _planJudgeDeposit, nextPaidUntil as _planNextPaidUntil, validTier as _planValidTier, DEFAULT_KRW_PER_USD as _PLAN_DEFAULT_RATE } from './src/worker/plan-pay.js';
-import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, startFree as _testQuotaStartFree, setPlan as _testQuotaSetPlan, setPaid as _testQuotaSetPaid, setExtra as _testQuotaSetExtra, addExtraSpend as _testQuotaAddExtra, exhaustedMessage as _planExhaustedMessage, waitMessage as _freePlanWaitMessage, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
+import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, startFree as _testQuotaStartFree, resetFree as _testQuotaResetFree, setPlan as _testQuotaSetPlan, setPaid as _testQuotaSetPaid, setExtra as _testQuotaSetExtra, addExtraSpend as _testQuotaAddExtra, exhaustedMessage as _planExhaustedMessage, waitMessage as _freePlanWaitMessage, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
 import { parseMessage as _kmailParseMime, decodeMimeWords as _kmailDecodeMimeWords, repairStoredText as _kmailRepairStoredText } from './src/worker/mime-text.js';
 import { checkSenderName as _kmailCheckSenderName, effectiveSenderName as _kmailEffectiveSenderName, renderSignature as _kmailRenderSignature, campaignReplyTo as _kmailCampaignReplyTo, replyToWithName as _kmailReplyToWithName, REPLY_TO_SELF as _KMAIL_REPLY_TO_SELF, formatSender as _kmailFormatSender, describeSender as _kmailDescribeSender, SENDER_NAME_MAX as _KMAIL_SENDER_NAME_MAX } from './src/worker/kmail-sender.js';
@@ -13607,6 +13607,7 @@ export default {
     if (pathname === '/auth/test-quota')         return handleTestQuota(request, env, corsHeaders);
     if (pathname === '/auth/free-plan')          return handleFreePlan(request, env, corsHeaders);
     if (pathname === '/auth/extra-usage')        return handleExtraUsage(request, env, corsHeaders);
+    if (pathname === '/admin/quota-reset')       return handleAdminQuotaReset(request, env, corsHeaders);
     if (pathname === '/admin/plan-set')          return handleAdminPlanSet(request, env, corsHeaders);
     if (pathname === '/admin/plan-deposits')     return handleAdminPlanDeposits(request, env, corsHeaders);
     if (pathname === '/biz/plan-request')        return handlePlanRequest(request, env, corsHeaders);
@@ -20873,6 +20874,20 @@ async function handleAdminPlanSet(request, env, corsHeaders) {
   _freeTrialMem.delete(guid);
   const ev = await _testQuotaGetStatus(env.AI_SETUP_SEALS_KV, guid, now, _testQuotaConfig(env));
   return new Response(JSON.stringify({ ok: true, guid, ...ev }), { status: 200, headers: corsHeaders });
+}
+
+// POST /admin/quota-reset { guid, reset? } — 무료 이용 현황 조회, reset=true면 지금부터 100원·24시간을 새로 시작한다(2026-11-06).
+async function handleAdminQuotaReset(request, env, corsHeaders) {
+  if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+  if (!(await _requireAdmin(request, env))) return _err(401, 'UNAUTHORIZED', '관리자 인증 필요', corsHeaders);
+  const body = await request.json().catch(() => null);
+  const guid = String(body?.guid || '').trim();
+  if (!guid) return _err(400, 'MISSING_FIELD', 'guid 필수', corsHeaders);
+  if (!env.AI_SETUP_SEALS_KV) return _err(503, 'KV_NOT_BOUND', 'KV 없음', corsHeaders);
+  const now = Date.now();
+  if (body?.reset === true) { await _testQuotaResetFree(env.AI_SETUP_SEALS_KV, guid, now); _freeTrialMem.delete(guid); }
+  const ev = await _testQuotaGetStatus(env.AI_SETUP_SEALS_KV, guid, now, _testQuotaConfig(env));
+  return new Response(JSON.stringify({ ok: true, guid, reset: body?.reset === true, at: new Date(now).toISOString(), ...ev }), { status: 200, headers: corsHeaders });
 }
 
 // POST /auth/test-migrate { test_phone_verify_token, phone_verify_token, dry_run? } — 테스트 계정 데이터를 정식 계정으로 이동(2026-10-27).

@@ -124,6 +124,14 @@ export async function startFree(kv, guid, now) {
   return next;
 }
 
+// 무료 이용 기간 다시 시작(관리자): 사용액·플랜·유료·추가 사용량 기록을 지우고 지금부터 새로 센다.
+export async function resetFree(kv, guid, now) {
+  if (!kv || !guid) return null;
+  const next = { spent_krw: 0, exceeded_at: null, started_at: now };
+  await writeRaw(kv, guid, next);
+  return next;
+}
+
 // 플랜 선택('free'|null). 선택 시점에 시작 기록이 없으면 함께 기록한다.
 export async function setPlan(kv, guid, plan, now) {
   if (!kv || !guid) return null;

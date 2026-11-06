@@ -106,6 +106,8 @@
             <select id="pl-tier" style="font-family:inherit;font-size:12.5px"><option value="p200" selected>프로($200) — 베타 기본</option><option value="p100">서류($100)</option><option value="p10">기본($10)</option><option value="none">해제(무료로)</option></select>
             <label>기간 <input id="pl-days" type="number" value="30" min="1" max="400" style="font-family:inherit;font-size:12.5px;width:56px"> 일</label>
             <button onclick="_planSet()" id="pl-set" style="padding:4px 10px;font-family:inherit;font-size:12.5px;cursor:pointer">지정·해제</button>
+            <button onclick="_quotaView(false)" style="padding:4px 10px;font-family:inherit;font-size:12.5px;cursor:pointer">무료 한도 현황</button>
+            <button onclick="_quotaView(true)" style="padding:4px 10px;font-family:inherit;font-size:12.5px;cursor:pointer">무료 한도 다시 시작</button>
             <button onclick="_loadPlanEvents()" style="padding:4px 10px;font-family:inherit;font-size:12.5px;cursor:pointer">새로고침</button>
             <span id="pl-note" style="color:var(--ad-faint)"></span>
           </div>
@@ -925,6 +927,18 @@ async function _loadPlanEvents() {
       return `<tr style="border-top:1px solid var(--ad-line,#3c3f46)"><td>${_fbiEsc(new Date(e.at).toLocaleString('ko-KR'))}</td><td style="color:${ok ? 'inherit' : 'var(--ad-crit)'}">${ok ? '자동 지정' : '확인 필요'}</td><td><code>${_fbiEsc(e.guid)}</code></td><td>${_fbiEsc(_PL_TIER[e.tier] || e.tier)}</td><td>${amt}</td><td>${why}</td></tr>`;
     }).join('') + '</table>' : '아직 처리된 플랜 입금이 없습니다.';
   } catch (e) { body.innerHTML = '<span style="color:var(--ad-crit)">' + _fbiEsc(e.message) + '</span>'; }
+}
+async function _quotaView(reset) {
+  const guid = document.getElementById('pl-guid').value.trim(), note = document.getElementById('pl-note');
+  if (!guid) { note.textContent = '회원 guid를 입력하세요.'; return; }
+  if (reset && !confirm(guid + ' 회원의 무료 이용을 지금부터 다시 시작합니다. 사용액·플랜 기록이 지워집니다.')) return;
+  note.textContent = '처리 중…';
+  try {
+    const res = await fetch(`${WORKER_URL}/admin/quota-reset`, { method: 'POST', signal: AbortSignal.timeout(15000), headers: { ..._adminAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ guid, reset: !!reset }) });
+    const j = await res.json().catch(() => null);
+    if (!res.ok || !j || !j.ok) throw new Error((j && (j.message || j.error)) || 'HTTP ' + res.status);
+    note.textContent = (reset ? '다시 시작함 · ' : '') + '상태 ' + j.status + '/' + j.phase + ' · 사용 ' + (j.spent_krw ?? j.used_krw ?? '?') + '/' + (j.limit_krw ?? '?') + '원' + (j.started_at ? ' · 시작 ' + new Date(j.started_at).toLocaleString('ko-KR') : '') + (j.free_ends_at ? ' · 종료 ' + new Date(j.free_ends_at).toLocaleString('ko-KR') : '');
+  } catch (e) { note.textContent = '실패: ' + e.message; }
 }
 async function _planSet() {
   const guid = document.getElementById('pl-guid').value.trim(), tier = document.getElementById('pl-tier').value, days = Number(document.getElementById('pl-days').value) || 30;
