@@ -19,7 +19,7 @@ import { profilePhoneFilter, last8Filter, pickGuidByLast8 } from './src/worker/p
 import { validateSignalInput as _sigValidate, canDeleteSignal as _sigCanDelete, sendRateOk as _sigRateOk } from './src/worker/signal-auth.js';
 import { classifyQuery as _ffClassify, publicCard as _ffPublicCard, rateLimitOk as _ffRateOk } from './src/worker/friend-find.js';
 import { computeChargeGdc as _computeChargeGdc } from './src/worker/charge-plans.js';
-import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, startFree as _testQuotaStartFree, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
+import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, startFree as _testQuotaStartFree, setPlan as _testQuotaSetPlan, setPaid as _testQuotaSetPaid, setExtra as _testQuotaSetExtra, addExtraSpend as _testQuotaAddExtra, exhaustedMessage as _planExhaustedMessage, waitMessage as _freePlanWaitMessage, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
 import { parseMessage as _kmailParseMime, decodeMimeWords as _kmailDecodeMimeWords, repairStoredText as _kmailRepairStoredText } from './src/worker/mime-text.js';
 import { checkSenderName as _kmailCheckSenderName, effectiveSenderName as _kmailEffectiveSenderName, renderSignature as _kmailRenderSignature, campaignReplyTo as _kmailCampaignReplyTo, replyToWithName as _kmailReplyToWithName, REPLY_TO_SELF as _KMAIL_REPLY_TO_SELF, formatSender as _kmailFormatSender, describeSender as _kmailDescribeSender, SENDER_NAME_MAX as _KMAIL_SENDER_NAME_MAX } from './src/worker/kmail-sender.js';
@@ -1994,15 +1994,19 @@ async function _isTestGuidUncached(env, guid) {
 //   무료 테스트 모드가 켜져 있으면 모든 계정(유료·무료 불문)이 전화 인증 뒤 "100원 소진 또는 24시간 중 먼저"까지 무료다.
 //   무료 기간이 끝나면 false — 정식 계정은 GDC 잔액으로 이어 쓰고, 테스트 계정은 _testQuotaBlockedResponse가 막는다.
 const _freeTrialMem = new Map();
-async function _freeTrialActive(env, guid) {
-  if (!guid || !env.AI_SETUP_SEALS_KV) return true;   // 상태를 알 수 없으면 막지 않는다(과금하지 않는 쪽으로 실패)
+async function _freeTrialStatus(env, guid) {   // 무료 이용 상태(15초 메모리 캐시). 알 수 없으면 null — 막지 않는 쪽으로 실패
+  if (!guid || !env.AI_SETUP_SEALS_KV) return null;
   const m = _freeTrialMem.get(guid);
   if (m && Date.now() - m.t < 15000) return m.v;
-  let v = true;
-  try { v = (await _testQuotaGetStatus(env.AI_SETUP_SEALS_KV, guid, Date.now(), _testQuotaConfig(env))).status === 'active'; } catch (e) { v = true; }
+  let v = null;
+  try { v = await _testQuotaGetStatus(env.AI_SETUP_SEALS_KV, guid, Date.now(), _testQuotaConfig(env)); } catch (e) { v = null; }
   if (_freeTrialMem.size > 2000) _freeTrialMem.clear();
   _freeTrialMem.set(guid, { v, t: Date.now() });
   return v;
+}
+async function _freeTrialActive(env, guid) {
+  const ev = await _freeTrialStatus(env, guid);
+  return !ev || (ev.status === 'active' && ev.phase !== 'extra');   // 추가 사용량 단계('extra')는 GDC를 실제로 차감한다
 }
 async function _gdcFreeFor(env, guid) {
   if (!_gdcFreeTestOn(env)) return false;
@@ -2018,9 +2022,16 @@ async function _testQuotaAdd(env, guid, krw, dedupKey = null) {
 // 유예가 끝난 테스트 계정이면 402 응답을, 아니면 null
 async function _testQuotaBlockedResponse(env, guid, corsHeaders) {
   if (!_gdcFreeTestOn(env) || !env.AI_SETUP_SEALS_KV) return null;
-  if (!(await _isTestGuid(env, guid))) return null;
-  const ev = await _testQuotaGetStatus(env.AI_SETUP_SEALS_KV, guid, Date.now(), _testQuotaConfig(env));
+  const ev = await _freeTrialStatus(env, guid);
+  if (!ev) return null;
+  if (ev.status === 'waiting') {   // 무료 플랜의 쉬는 시간 — 금액은 알리지 않는다
+    return new Response(JSON.stringify({ error: 'FREE_PLAN_WAIT', message: _freePlanWaitMessage(ev), wait_until: ev.wait_until, plan: 'free' }), { status: 402, headers: corsHeaders });
+  }
+  if (ev.status === 'exhausted') {   // 유료 플랜의 이번 기간 사용량 소진(추가 사용량 꺼짐/한도 도달)
+    return new Response(JSON.stringify({ error: 'PLAN_USAGE_EXHAUSTED', message: _planExhaustedMessage(ev), period_ends_at: ev.period_ends_at, extra_on: ev.extra_on, plan: ev.tier }), { status: 402, headers: corsHeaders });
+  }
   if (ev.status !== 'blocked') return null;
+  if (!(await _isTestGuid(env, guid))) return null;   // 정식 계정은 무료 기간이 끝나면 GDC 결제로 이어진다
   console.warn(JSON.stringify({ tag: 'TEST_QUOTA_BLOCKED', guid, spent_krw: ev.spent_krw, ts: new Date().toISOString() }));
   return new Response(JSON.stringify({ error: 'TEST_QUOTA_BLOCKED', message: _testQuotaBlockedMessage(ev), ...ev }), { status: 402, headers: corsHeaders });
 }
@@ -2114,6 +2125,10 @@ async function _chargeGdcForAiUsage(env, {
       tag: 'AI_CHARGE_OK', guid, krwAmount, chargedGdc: data.charged_gdc, balanceAfter: data.balance_after,
       ts: new Date().toISOString(),
     }));
+    try {   // 유료 플랜의 추가 사용량 단계였다면 이번 차감액을 월 한도에 누적한다
+      const _ev = await _freeTrialStatus(env, guid);
+      if (_ev && _ev.phase === 'extra') { await _testQuotaAddExtra(env.AI_SETUP_SEALS_KV, guid, Number(data.charged_gdc) > 0 ? Number(data.charged_gdc) : krwAmount, Date.now(), _testQuotaConfig(env)); _freeTrialMem.delete(guid); }
+    } catch (e) { /* 누적 실패는 무시 — 한도가 약간 늦게 걸리는 쪽으로만 틀린다 */ }
     return data;
   } catch (e) {
     console.warn('[AiCharge] L1 호출 실패:', e.message);
@@ -13589,6 +13604,9 @@ export default {
     if (pathname === '/auth/test-mode')          return handleTestAuthMode(request, env, corsHeaders);
     if (pathname === '/auth/test-enter')         return handleTestAuthEnter(request, env, corsHeaders);
     if (pathname === '/auth/test-quota')         return handleTestQuota(request, env, corsHeaders);
+    if (pathname === '/auth/free-plan')          return handleFreePlan(request, env, corsHeaders);
+    if (pathname === '/auth/extra-usage')        return handleExtraUsage(request, env, corsHeaders);
+    if (pathname === '/admin/plan-set')          return handleAdminPlanSet(request, env, corsHeaders);
     if (pathname === '/auth/test-migrate')       return handleTestMigrate(request, env, corsHeaders);
     if (pathname === '/auth/confirm-backup')      return handleConfirmBackup(request, env, corsHeaders);
     if (pathname === '/auth/verify')             return handleVerify(request, env, corsHeaders);
@@ -20714,6 +20732,66 @@ async function handleTestQuota(request, env, corsHeaders) {
     return new Response(JSON.stringify({ ok: true, test: false, free_test_on: _gdcFreeTestOn(env), ...ev }), { status: 200, headers: corsHeaders });
   }
   return new Response(JSON.stringify({ ok: true, test: true, id: String(r.e164).slice(TEST_ID_PREFIX.length), free_test_on: _gdcFreeTestOn(env), ...ev }), { status: 200, headers: corsHeaders });
+}
+
+// POST /auth/free-plan { phone_verify_token, plan: 'free' | 'none' } — 무료 플랜 선택·해제(2026-11-06).
+//  · 무료 기간(100원/24시간)이 끝난 뒤 무료 플랜이면 내부적으로 10원 소진마다 5시간 쉬었다가 10원이 다시 채워진다(숫자는 응답에 싣지 않는다).
+//  · 테스트 계정은 선택할 수 없다(정식 아이디로 전환해야 한다).
+async function handleFreePlan(request, env, corsHeaders) {
+  if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+  const body = await request.json().catch(() => ({})) || {};
+  const r = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token);
+  if (!r.ok) { const m = mapPhoneAuthError(r); return _err(m.status, m.code, m.message, corsHeaders); }
+  if (String(r.e164 || '').startsWith(TEST_ID_PREFIX)) return _err(400, 'TEST_ACCOUNT_NO_PLAN', '테스트 아이디는 플랜을 고를 수 없습니다. 정식 아이디로 로그인해 주세요.', corsHeaders);
+  if (!env.AI_SETUP_SEALS_KV) return _err(503, 'KV_NOT_BOUND', '잠시 후 다시 시도해 주세요', corsHeaders);
+  const plan = body.plan === 'free' ? 'free' : (body.plan === 'none' ? null : undefined);
+  if (plan === undefined) return _err(400, 'BAD_PLAN', "plan은 'free' 또는 'none'이어야 합니다", corsHeaders);
+  await _testQuotaSetPlan(env.AI_SETUP_SEALS_KV, r.guid, plan, Date.now());
+  _freeTrialMem.delete(r.guid);
+  const ev = await _testQuotaGetStatus(env.AI_SETUP_SEALS_KV, r.guid, Date.now(), _testQuotaConfig(env));
+  return new Response(JSON.stringify({ ok: true, plan: ev.plan || null, status: ev.status, phase: ev.phase || 'paid', free_ends_at: ev.free_ends_at, wait_until: ev.wait_until || null }), { status: 200, headers: corsHeaders });
+}
+
+// POST /auth/extra-usage { phone_verify_token, enabled, limit_krw? } — 추가 사용량(종량제) 켜기/끄기와 월 한도(원)(2026-11-06).
+//  · 유료 플랜의 포함 사용량을 다 쓴 뒤, 켜 둔 경우에만 직접 정한 월 한도까지 GDC 잔액에서 사용분만큼 차감해 이어 쓴다.
+//  · 응답은 현재 상태(포함 사용량·사용분·추가 사용분 포함).
+async function handleExtraUsage(request, env, corsHeaders) {
+  if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+  const body = await request.json().catch(() => ({})) || {};
+  const r = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token);
+  if (!r.ok) { const m = mapPhoneAuthError(r); return _err(m.status, m.code, m.message, corsHeaders); }
+  if (String(r.e164 || '').startsWith(TEST_ID_PREFIX)) return _err(400, 'TEST_ACCOUNT_NO_PLAN', '테스트 아이디는 유료 플랜을 쓸 수 없습니다. 정식 아이디로 로그인해 주세요.', corsHeaders);
+  if (!env.AI_SETUP_SEALS_KV) return _err(503, 'KV_NOT_BOUND', '잠시 후 다시 시도해 주세요', corsHeaders);
+  const cur = await _testQuotaGetStatus(env.AI_SETUP_SEALS_KV, r.guid, Date.now(), _testQuotaConfig(env));
+  if (!cur.tier) return _err(400, 'NO_PAID_PLAN', '유료 플랜을 이용 중일 때만 추가 사용량을 설정할 수 있습니다.', corsHeaders);
+  const on = body.enabled === true || body.enabled === 'true';
+  const lim = body.limit_krw === undefined ? undefined : Number(body.limit_krw);
+  if (lim !== undefined && !(lim >= 0)) return _err(400, 'BAD_LIMIT', 'limit_krw는 0 이상의 숫자여야 합니다', corsHeaders);
+  if (on && lim === undefined && !(cur.extra_limit_krw > 0)) return _err(400, 'LIMIT_REQUIRED', '추가 사용량을 켜려면 월 한도를 정해 주세요', corsHeaders);
+  await _testQuotaSetExtra(env.AI_SETUP_SEALS_KV, r.guid, on, lim, Date.now());
+  _freeTrialMem.delete(r.guid);
+  const ev = await _testQuotaGetStatus(env.AI_SETUP_SEALS_KV, r.guid, Date.now(), _testQuotaConfig(env));
+  return new Response(JSON.stringify({ ok: true, ...ev }), { status: 200, headers: corsHeaders });
+}
+
+// POST /admin/plan-set { guid, tier: 'p10'|'p100'|'p200'|'none', days? } — 입금 확인 뒤 유료 플랜 지정·해제(관리자 Bearer 필요).
+//  · 베타 테스트 기간(2026-12-말까지)에는 입금한 모든 회원에게 'p200'을 지정한다($200 플랜을 90% 할인한 $20 일괄).
+//  · days 기본 30. 같은 등급을 다시 지정하면 기간 시작은 유지되고 만료일만 늘어난다(이번 기간 사용량은 유지).
+async function handleAdminPlanSet(request, env, corsHeaders) {
+  if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+  if (!(await _requireAdmin(request, env))) return _err(401, 'UNAUTHORIZED', '관리자 인증 필요', corsHeaders);
+  const body = await request.json().catch(() => null);
+  const guid = String(body?.guid || '').trim();
+  const tier = body?.tier === 'none' ? null : String(body?.tier || '');
+  if (!guid) return _err(400, 'MISSING_FIELD', 'guid 필수', corsHeaders);
+  if (tier !== null && !['p10', 'p100', 'p200'].includes(tier)) return _err(400, 'BAD_TIER', "tier는 p10, p100, p200, none 중 하나여야 합니다", corsHeaders);
+  if (!env.AI_SETUP_SEALS_KV) return _err(503, 'KV_NOT_BOUND', 'KV 없음', corsHeaders);
+  const days = Math.max(1, Math.min(400, Math.floor(Number(body?.days) || 30)));
+  const now = Date.now();
+  await _testQuotaSetPaid(env.AI_SETUP_SEALS_KV, guid, tier, now + days * 86400000, now);
+  _freeTrialMem.delete(guid);
+  const ev = await _testQuotaGetStatus(env.AI_SETUP_SEALS_KV, guid, now, _testQuotaConfig(env));
+  return new Response(JSON.stringify({ ok: true, guid, ...ev }), { status: 200, headers: corsHeaders });
 }
 
 // POST /auth/test-migrate { test_phone_verify_token, phone_verify_token, dry_run? } — 테스트 계정 데이터를 정식 계정으로 이동(2026-10-27).

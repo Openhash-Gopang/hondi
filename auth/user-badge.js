@@ -109,7 +109,7 @@
   var PROXY = 'https://hondi-proxy.tensor-city.workers.dev';
   var C_MIG = 'hondi_mig_pvt';                              // 테스트 로그인 정보를 잠시 보관(전환용)
   var SIGNUP_URL = 'https://hondi.net/desktop.html';        // 정식 아이디 가입 화면(메인 앱)
-  var PAY_URL = 'https://hondi.net/usage.html?charge=1';     // 결제(계좌 이체) 화면 — 정식 아이디로 로그인한 뒤 열린다
+  var PAY_URL = 'https://naviweb.kr/desktop.html#pricing';   // 플랜 업그레이드 화면(요금·플랜·입금 안내)
   function writeCookie(name, value, maxAgeSec) {
     doc.cookie = name + '=' + encodeURIComponent(value) + '; domain=' + COOKIE_DOMAIN + '; path=/; max-age=' + maxAgeSec + '; secure; samesite=lax';
   }
@@ -236,17 +236,12 @@
     var box = el('div', 'hub-modal'); box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true');
     box.appendChild(el('h2', '', '무료 한도를 모두 사용했습니다'));
     box.appendChild(el('p', '', '테스트 아이디의 무료 이용 기간(AI 사용 비용 ' + fmtNum(quota.limit_krw) + '원 또는 ' + (quota.free_hours || 24) + '시간 중 먼저 오는 쪽)이 끝났습니다. 계속 쓰려면 유료 회원으로 전환해 주세요.'));
-    var price = el('div', 'hub-price');
-    price.appendChild(el('div', '', '정식 요금: 월 100,000원 · 연 1,200,000원'));
-    price.appendChild(el('div', 'hub-price-em', '필드 테스트 가입자(2026년 12월 말까지) 90% 할인: 월 10,000원 · 연 100,000원'));
-    price.appendChild(el('div', '', '결제 시 GDC(T) 충전: 월 10,000원 → 10,000T, 연 100,000원 → 120,000T'));
-    box.appendChild(price);
-    box.appendChild(el('p', 'hub-note', '전환 순서: ① 정식 아이디로 로그인하거나 만들면 테스트 데이터가 옮겨집니다. ② 사용량 화면의 충전하기에서 계좌 이체로 결제합니다. 자동결제는 없습니다.'));
+    box.appendChild(el('p', 'hub-note', '요금과 플랜 안내는 "플랜 업그레이드" 화면에서 확인하실 수 있습니다. 정식 아이디로 로그인하거나 만들면 테스트 데이터가 옮겨집니다.'));
     var b1 = el('button', 'hub-btn hub-primary', '정식 아이디로 로그인'); b1.type = 'button';
     b1.addEventListener('click', function () { back.remove(); startFormalLogin(); });
     var b2 = el('button', 'hub-btn', '정식 아이디 만들기'); b2.type = 'button';
     b2.addEventListener('click', startSignup);
-    var b4 = el('button', 'hub-btn', '이미 정식 아이디가 있다면 결제 화면 열기'); b4.type = 'button';
+    var b4 = el('button', 'hub-btn', '플랜 업그레이드 보기'); b4.type = 'button';
     b4.addEventListener('click', function () { global.location.href = PAY_URL; });
     var b3 = el('button', 'hub-btn', '닫기'); b3.type = 'button';
     b3.addEventListener('click', function () { back.remove(); });

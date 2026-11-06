@@ -4,7 +4,7 @@
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { quotaConfig, evaluate, getStatus, startFree, addSpend, blockedMessage } from '../src/worker/test-quota.js';
+import { quotaConfig, evaluate, getStatus, startFree, setPlan, addSpend, blockedMessage, waitMessage, setPaid, setExtra, addExtraSpend, exhaustedMessage } from '../src/worker/test-quota.js';
 import { migrateTestData, mergeKmailSettings, MIGRATION_TARGETS } from '../src/worker/test-migrate.js';
 
 const H = 3600 * 1000;
@@ -87,6 +87,79 @@ test('blockedMessage: 끝난 이유(비용/시간)에 맞는 문구와 유료 �
   const m = blockedMessage({ limit_krw: 100, free_hours: 24, ended_reason: 'spent' });
   assert.match(m, /100원/); assert.match(m, /유료 회원/); assert.match(m, /정식 아이디/);
   assert.match(blockedMessage({ limit_krw: 100, free_hours: 24, ended_reason: 'time' }), /24시간/);
+});
+
+test('무료 플랜: 무료 기간(100원/24시간)이 끝난 뒤 10원을 쓰면 5시간 쉬고 10원이 다시 채워진다', async () => {
+  const kv = fakeKv(); const t0 = 1_700_000_000_000;
+  assert.equal(CFG.refillKrw, 10); assert.equal(CFG.refillMs, 5 * H);
+  await startFree(kv, 'p1', t0); await setPlan(kv, 'p1', 'free', t0);
+  assert.equal((await getStatus(kv, 'p1', t0 + H, CFG)).phase, 'trial');           // 무료 기간 동안은 100원 규칙
+  const t1 = t0 + 25 * H;                                                          // 24시간 뒤: 무료 플랜 단계
+  let ev = await getStatus(kv, 'p1', t1, CFG);
+  assert.equal(ev.status, 'active'); assert.equal(ev.phase, 'free');
+  await addSpend(kv, 'p1', 4, t1, CFG);
+  assert.equal((await getStatus(kv, 'p1', t1, CFG)).status, 'active');
+  ev = await addSpend(kv, 'p1', 6.5, t1 + 1000, CFG);                              // 10원을 넘김 → 쉬는 시간
+  assert.equal(ev.status, 'waiting'); assert.equal(ev.wait_until, new Date(t1 + 1000 + 5 * H).toISOString());
+  assert.equal((await getStatus(kv, 'p1', t1 + 4 * H, CFG)).status, 'waiting');
+  assert.equal((await getStatus(kv, 'p1', t1 + 1000 + 5 * H, CFG)).status, 'active');   // 5시간 뒤 다시 사용 가능
+  ev = await addSpend(kv, 'p1', 3, t1 + 6 * H, CFG);                                // 재충전 뒤에는 새 10원 통부터 쌓인다
+  assert.equal(ev.status, 'active'); assert.equal(JSON.parse(kv.m.get('hondi:test_quota:p1')).fp_spent, 3);
+  assert.equal((await addSpend(kv, 'p1', 8, t1 + 7 * H, CFG)).status, 'waiting');
+});
+
+test('무료 플랜: 플랜을 고르지 않은 정식 계정은 무료 기간이 끝나면 blocked(GDC 결제 단계), 해제하면 되돌아간다', async () => {
+  const kv = fakeKv(); const t0 = 1_700_000_000_000;
+  await startFree(kv, 'p2', t0);
+  assert.equal((await getStatus(kv, 'p2', t0 + 25 * H, CFG)).status, 'blocked');
+  await setPlan(kv, 'p2', 'free', t0 + 25 * H);
+  assert.equal((await getStatus(kv, 'p2', t0 + 25 * H, CFG)).status, 'active');
+  await setPlan(kv, 'p2', null, t0 + 26 * H);
+  assert.equal((await getStatus(kv, 'p2', t0 + 26 * H, CFG)).status, 'blocked');
+  await setPlan(null, 'p2', 'free', 1);                                              // KV 없음은 조용히 넘어간다
+});
+
+test('waitMessage: 시각은 알리되 금액(10원)은 문구에 넣지 않는다', () => {
+  const m = waitMessage({ wait_until: new Date(1_700_000_000_000).toISOString() });
+  assert.match(m, /다시 이용/); assert.match(m, /업그레이드/); assert.doesNotMatch(m, /\d+원/);
+});
+
+test('유료 플랜: 포함 사용량 → 추가 사용량(켠 경우, 월 한도까지) → 소진, 기간이 지나면 다시 채워진다', async () => {
+  const kv = fakeKv(); const t0 = 1_700_000_000_000; const D = 24 * H;
+  assert.equal(CFG.included.p10, 5000); assert.equal(CFG.included.p100, 50000); assert.equal(CFG.included.p200, 100000);
+  await setPaid(kv, 'u1', 'p10', t0 + 30 * D, t0);
+  let ev = await getStatus(kv, 'u1', t0 + H, CFG);
+  assert.equal(ev.status, 'active'); assert.equal(ev.phase, 'paid'); assert.equal(ev.included_krw, 5000);
+  ev = await addSpend(kv, 'u1', 4990, t0 + 2 * H, CFG); assert.equal(ev.phase, 'paid');
+  ev = await addSpend(kv, 'u1', 20, t0 + 3 * H, CFG);                                   // 포함 사용량을 넘김
+  assert.equal(ev.status, 'exhausted');                                                 // 추가 사용량이 꺼져 있으면 멈춘다
+  assert.match(exhaustedMessage(ev), /추가 사용량/);
+  await setExtra(kv, 'u1', true, 3000, t0 + 4 * H);
+  ev = await getStatus(kv, 'u1', t0 + 4 * H, CFG); assert.equal(ev.status, 'active'); assert.equal(ev.phase, 'extra');
+  ev = await addExtraSpend(kv, 'u1', 2000, t0 + 5 * H, CFG); assert.equal(ev.phase, 'extra'); assert.equal(ev.extra_used_krw, 2000);
+  ev = await addExtraSpend(kv, 'u1', 1000, t0 + 6 * H, CFG); assert.equal(ev.status, 'exhausted'); assert.equal(ev.extra_limit_krw, 3000);   // 월 한도 도달
+  await setExtra(kv, 'u1', false, undefined, t0 + 7 * H);
+  assert.equal(JSON.parse(kv.m.get('hondi:test_quota:u1')).extra_limit_krw, 3000);      // 끄기만 해도 한도값은 남는다
+  ev = await getStatus(kv, 'u1', t0 + 31 * D, CFG);                                      // 만료(30일)가 지나면 유료 상태가 아니다
+  assert.equal(ev.tier, undefined);
+  await setPaid(kv, 'u1', 'p10', t0 + 90 * D, t0 + 31 * D);                              // 같은 등급 갱신: 기간 시작은 유지(이미 31일 지나 새 기간으로 굴러감)
+  ev = await getStatus(kv, 'u1', t0 + 31 * D, CFG);
+  assert.equal(ev.used_krw, 0, '새 기간에는 사용분이 0');
+});
+
+test('유료 플랜: 같은 등급 갱신은 이번 기간 사용분을 유지하고, 등급이 바뀌면 새로 시작한다', async () => {
+  const kv = fakeKv(); const t0 = 1_700_000_000_000; const D = 24 * H;
+  await setPaid(kv, 'u2', 'p100', t0 + 30 * D, t0); await addSpend(kv, 'u2', 1234, t0 + H, CFG);
+  await setPaid(kv, 'u2', 'p100', t0 + 60 * D, t0 + 2 * H);
+  assert.equal((await getStatus(kv, 'u2', t0 + 3 * H, CFG)).used_krw, 1234);
+  await setPaid(kv, 'u2', 'p200', t0 + 60 * D, t0 + 4 * H);
+  const ev = await getStatus(kv, 'u2', t0 + 5 * H, CFG);
+  assert.equal(ev.used_krw, 0); assert.equal(ev.included_krw, 100000);
+  await setPaid(kv, 'u2', null, 0, t0 + 6 * H);
+  assert.notEqual((await getStatus(kv, 'u2', t0 + 7 * H, CFG)).phase, 'paid');
+  assert.equal(await addExtraSpend(kv, 'nobody', 5, t0, CFG), null);                    // 유료가 아니면 아무 일도 하지 않는다
+  assert.equal(quotaConfig({ PLAN_INCLUDED_KRW: '{"p10":7000}' }).included.p10, 7000);
+  assert.equal(quotaConfig({ PLAN_INCLUDED_KRW: 'oops' }).included.p10, 5000);
 });
 
 // ── 데이터 이동 ────────────────────────────────────────────
