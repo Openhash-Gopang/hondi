@@ -509,7 +509,11 @@ async function callExpertAI(messages, onChunk) {
   let lastErr = null;
   for (const c of candidates) {
     try {
-      const reqBody = { model: c.model, messages, max_tokens: _embedOn() ? 3200 : 1200, temperature: 0.4, stream: true };   // 2026-10-31 서류 작성(embed)은 서식 틀 + 완성 초안을 차례로 내므로 상한을 넓힌다(일반 대화는 그대로)
+      // 2026-11-07 — 서류 화면 질문("서류 작성 화면에서 온 질문")은 1~2문장 답이라 상한을 낮춰 길게 늘어지는 응답·중간 끊김을 막는다.
+      const _lastUser = [...messages].reverse().find(m => m.role === 'user');
+      const _lastText = typeof _lastUser?.content === 'string' ? _lastUser.content : '';
+      const _quickAsk = _embedOn() && _lastText.slice(0, 40).includes('서류 작성 화면에서 온 질문');
+      const reqBody = { model: c.model, messages, max_tokens: _quickAsk ? 600 : (_embedOn() ? 3200 : 1200), temperature: 0.4, stream: true };   // 2026-10-31 서류 작성(embed)은 서식 틀 + 완성 초안을 차례로 내므로 상한을 넓힌다(일반 대화는 그대로)
       const resp = c.provider === 'legacy'
         ? await fetch(`${c.baseUrl}/chat/completions`, {
             method: 'POST',
@@ -520,7 +524,7 @@ async function callExpertAI(messages, onChunk) {
         ? await fetch(`${c.baseUrl}/deepseek`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...reqBody, guid: user?.ipv6 || null, pro_session: proSession || undefined }),
+            body: JSON.stringify({ ...reqBody, guid: user?.ipv6 || null, pro_session: proSession || undefined, force_flash: _embedOn() ? true : undefined }),   // 2026-11-07 서류 작성 화면은 사고 모드(pro)로 올리지 않는다
           })
         : await fetch(`${RELAY_ENDPOINT}/llm/relay`, {
             method: 'POST',
