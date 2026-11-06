@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-06 18:36 KST · 기준 커밋 bada8bcb
+- 갱신: 2026-11-06 19:12 KST · 기준 커밋 383b7288
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-06 feat(plan): 은행 입금 알림으로 유료 플랜 자동 지정 (입금자·금액 대조), 관리자 입금 확인 화면
 - 2026-11-06 feat: free plan with internal refill + free trial 100 KRW or 24h (all accounts)
 - 2026-11-06 Merge pull request #935 from Openhash-Gopang/fix/badge-anon-person-icon
 - 2026-11-06 feat(badge): 익명(테스트 아이디)은 이니셜 대신 사람 아이콘
@@ -43,7 +44,6 @@
 - 2026-11-03 Merge pull request #909 from Openhash-Gopang/feat/guide-mail-push
 - 2026-11-03 워커: 새 메일·서류 처리 결과 회신 푸시, 나비 길잡이 아침 알림 푸시
 - 2026-11-03 Merge pull request #908 from Openhash-Gopang/feat/pdv-bridge-guide-kind
-- 2026-11-03 PDV 중계: 나비 길잡이 과제 계획서('guide' 종류)와 caps 확인 명령 추가
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
