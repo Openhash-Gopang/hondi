@@ -40,6 +40,7 @@ import { makeOrgSiteHandler } from './src/worker/org-site-handler.js';
 import { makePocketBaseOrgSiteStore } from './src/worker/org-site-store.js';
 import { makeDocFormHandler } from './src/worker/doc-form-handler.js';
 import { makeAdminProposalsHandler } from './src/worker/admin-proposals-handler.js';
+import { makeAdminFeedbackHandler } from './src/worker/admin-feedback-handler.js';
 import { makePocketBaseDocFormStore } from './src/worker/doc-form-store.js';
 import { makeDocFormRewardHandler } from './src/worker/doc-form-reward.js';
 import { makeDocFormFeedbackHandler } from './src/worker/doc-form-feedback.js';
@@ -14423,6 +14424,10 @@ export default {
     // 관리자 전용 문서 보관소(2026-10-25) — 관리자 Bearer 토큰 확인 후 L1 admin_proposals 컬렉션만 사용
     if (pathname === '/admin/proposals' || pathname.startsWith('/admin/proposals/'))
       return handleAdminProposalsRoutes(request, url, env, corsHeaders);
+
+    // 관리자 대시보드의 사용자 제보·기능 개선 제안 조회(2026-11-06) — 관리자 Bearer 토큰 필요, 읽기 전용
+    if (pathname === '/admin/feedback-inbox')
+      return (await makeAdminFeedbackHandler({ requireAdmin: _requireAdmin, base: L1_DEFAULT, getToken: () => _l1AdminToken(env) }).handle(request, url, env, corsHeaders)) || _err(404, 'NOT_FOUND', '없는 경로입니다', corsHeaders);
 
     if (pathname === '/admin/login' && request.method === 'POST')
       return handleAdminLogin(request, env, corsHeaders);
