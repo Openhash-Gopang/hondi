@@ -71,3 +71,33 @@ test('aggregateCandidates: 같은 이용자가 여러 번 내도 1명, 대표 �
   assert.equal(r.length, 1);
   assert.deepEqual([r[0].label, r[0].users, r[0].version], ['채권번호', 3, 1]);
 });
+
+// ── 사용자 제보 내보내기 · [FEEDBACK] 태그 (2026-11-06) ──
+import { makeUserFeedbackExportHandler } from '../src/worker/user-feedback-export.js';
+await import('../embed-delegate.js');
+test('제보 내보내기: 토큰이 없거나 틀리면 401, 맞으면 [naviweb:] 제보만 L1 에서 가져온다', async () => {
+  const calls = [];
+  const fetchImpl = async (u, o) => { calls.push([u, o]); return new Response(JSON.stringify({ items: [{ id: 'a', raw_text: '[naviweb:bug] 내용=x' }], totalPages: 1 }), { status: 200 }); };
+  const h = makeUserFeedbackExportHandler({ base: 'https://l1', getToken: async () => 'ADMIN', fetchImpl });
+  const get = (qs, tok) => h.handle(new Request('https://x/user-feedback/export' + qs, { headers: tok ? { Authorization: 'Bearer ' + tok } : {} }), new URL('https://x/user-feedback/export' + qs), { USER_FEEDBACK_EXPORT_TOKEN: 'SECRET' });
+  assert.equal((await get('', null)).status, 401);
+  assert.equal((await get('', 'wrong')).status, 401);
+  assert.equal(calls.length, 0, '인증 전에는 L1 을 부르지 않는다');
+  const r = await get('?since=2026-11-01&limit=10', 'SECRET'); const j = await r.json();
+  assert.equal(r.status, 200); assert.equal(j.count, 1);
+  assert.match(decodeURIComponent(calls[0][0]), /raw_text~'\[naviweb:' && created>='2026-11-01'/); assert.equal(calls[0][1].headers.Authorization, 'Bearer ADMIN');
+  assert.equal(await h.handle(new Request('https://x/other'), new URL('https://x/other'), {}), null);
+  const bad = await get("?since=2026-11-01'%20||%20true", 'SECRET'); assert.equal(bad.status, 200);
+  assert.ok(!/true/.test(decodeURIComponent(calls[1][0])), 'since 는 날짜 모양만 받는다');
+  const nokTok = makeUserFeedbackExportHandler({ base: 'https://l1', getToken: async () => 't', fetchImpl });
+  assert.equal((await nokTok.handle(new Request('https://x/user-feedback/export'), new URL('https://x/user-feedback/export'), {})).status, 401, '토큰 미설정이면 거부');
+});
+test('[FEEDBACK] 태그: 오류·기관·서류 요청을 뽑고 화면에서는 지운다', () => {
+  const E = globalThis.EmbedDelegate;
+  const r = E.parseDocTags('죄송합니다. 알려 드리겠습니다.\n[FEEDBACK: kind=attach; label=가족관계증명서; problem=agency; right=대법원; text=정부24에서는 안 나와요]');
+  assert.deepEqual(r.feedback, { kind: 'attach', label: '가족관계증명서', problem: 'agency', right: '대법원', text: '정부24에서는 안 나와요' });
+  assert.equal(r.clean, '죄송합니다. 알려 드리겠습니다.');
+  assert.equal(E.parseDocTags('[FEEDBACK: kind=hack; text=x]').feedback, null);
+  assert.equal(E.parseDocTags('[FEEDBACK: kind=bug; problem=zzz; text=멈춰요]').feedback.problem, '');
+  assert.equal(E.parseDocTags('[AGENT_TASK: slot=a; goal=b]').feedback, null);
+});

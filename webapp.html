@@ -4392,6 +4392,7 @@ function _embedDocTags(full) {
   const r = window.EmbedDelegate.parseDocTags(full);
   r.tasks.forEach(function (t) { try { window.parent.postMessage({ type: 'hondi-embed-agent-task', slot: t.slot, goal: t.goal }, ho); } catch (x) {} });
   if (r.handback) { try { window.parent.postMessage({ type: 'hondi-embed-doc-handback', reason: r.handback }, ho); } catch (x) {} }
+  if (r.feedback) { try { window.parent.postMessage({ type: 'hondi-embed-feedback', kind: r.feedback.kind, label: r.feedback.label, problem: r.feedback.problem, right: r.feedback.right, text: r.feedback.text }, ho); } catch (x) {} }
   return r.clean;
 }
 function _embedFreshScreen() {
