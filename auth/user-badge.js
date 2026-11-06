@@ -651,8 +651,8 @@
   }
   function avatarEl(id) {                                    // 프로필 사진 → 없거나 못 불러오면 이니셜 → 로그인 전이면 사람 아이콘
     var a = el('span', 'hub-av');
-    var letter = id.loggedIn ? String(id.label || '').replace(/^[^A-Za-z0-9\uAC00-\uD7A3]+/, '').charAt(0) : '';
-    if (id.loggedIn && !letter) letter = '?';
+    var letter = (id.loggedIn && id.kind !== 'test') ? String(id.label || '').replace(/^[^A-Za-z0-9\uAC00-\uD7A3]+/, '').charAt(0) : '';
+    if (id.loggedIn && id.kind !== 'test' && !letter) letter = '?';   // 테스트(익명) 아이디는 이니셜 대신 사람 아이콘
     var url = /^https:\/\//.test(id.avatar || '') ? id.avatar : '';
     if (letter) a.textContent = letter; else a.appendChild(personIcon());
     if (url) {
