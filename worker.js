@@ -21219,14 +21219,21 @@ async function callDeepSeek(bodyText,env,corsHeaders,fallbackFrom=null,meta=null
   const requestedModel = parsedBody?.model || '';
   const isKnownTierName = !!HONDI_TIER_MODELS[requestedModel];
   const hasMessages = Array.isArray(parsedBody?.messages) && parsedBody.messages.length > 0;
-  const tierKey = (isKnownTierName && hasMessages)
-    ? _resolveServerTier(null, parsedBody.messages)   // 서버가 재계산해서 덮어씀
-    : (isKnownTierName ? requestedModel : null);       // messages가 없는 예외적 호출은 클라이언트 값 존중(안전 폴백)
+  // 2026-11-07 — force_flash: 서류 작성(embed) 화면의 질문·초안은 사고 모드(pro)로 올리지 않는다.
+  // 서류 칸 목록이 길고 "합계·비율·계산" 같은 낱말이 많아 복잡도 점수가 임계값(3)을 넘으면 매번 pro(사고 모드)로 올라가
+  // 답이 수 초~십수 초 늦어졌다. 클라이언트(expert-chat embed)가 force_flash:true 를 보내면 flash 로 고정한다(flash 는 더 싸므로 과금 측면 위험 없음).
+  const _forceFlash = parsedBody?.force_flash === true && isKnownTierName;
+  const tierKey = _forceFlash
+    ? 'hondi-flash'
+    : (isKnownTierName && hasMessages)
+      ? _resolveServerTier(null, parsedBody.messages)   // 서버가 재계산해서 덮어씀
+      : (isKnownTierName ? requestedModel : null);       // messages가 없는 예외적 호출은 클라이언트 값 존중(안전 폴백)
   const backendModel = tierKey ? HONDI_TIER_MODELS[tierKey].backendModel : resolveDeepseekModel(requestedModel);
 
   // guid가 실려 있으면(=call-ai.js의 deepseek-default 경로) 1,000원 누적 한도 체크.
   let outboundBody = parsedBody ? { ...parsedBody, model: backendModel } : null;
   if (outboundBody) delete outboundBody.guid; // 벤더 API는 guid 필드를 모름
+  if (outboundBody) delete outboundBody.force_flash; // 벤더 API는 force_flash 필드를 모름
   // 2026-0X-XX 신설 — deepseek-v4-flash/-pro를 model로 직접 호출하면 thinking이
   // 기본값 enabled(공식 문서 확인)라, 이 파라미터 없이는 "나비 Flash"=비사고라는
   // 원 설계 의도(위 HONDI_TIER_MODELS 윗쪽 주석 참조)와 달리 매 호출이 조용히
