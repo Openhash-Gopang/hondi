@@ -69,7 +69,7 @@
   var TASK_MAX = 2, SLOT_MAX = 80, GOAL_MAX = 300;
   function oneLine(s, n) { return String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, n); }
   function parseDocTags(text) {
-    var tasks = [], handback = null;
+    var tasks = [], handback = null, feedback = null;
     var clean = String(text == null ? '' : text)
       .replace(/\[AGENT_TASK:\s*([^\]]*)\]/g, function (m, body) {
         var mm = /slot\s*=\s*([^;]*?)\s*;\s*goal\s*=\s*([\s\S]+)$/.exec(body);
@@ -78,12 +78,18 @@
         if (slot && goal && tasks.length < TASK_MAX) tasks.push({ slot: slot, goal: goal });
         return '';
       })
+      .replace(/\[FEEDBACK:\s*([^\]]*)\]/g, function (m, body) {   // 사용자가 알려 준 오류·잘못된 기관·없는 서류 → 호스트가 제보 창을 미리 채워 연다(전송은 사용자가 확인한 뒤)
+        var f = {}; body.split(';').forEach(function (p) { var i = p.indexOf('='); if (i > 0) f[p.slice(0, i).trim()] = oneLine(p.slice(i + 1), 300); });
+        var kind = /^(attach|newdoc|bug)$/.test(f.kind) ? f.kind : '';
+        if (kind && !feedback) feedback = { kind: kind, label: (f.label || '').slice(0, 80), problem: /^(agency|fail|own|missing|other)$/.test(f.problem) ? f.problem : '', right: (f.right || '').slice(0, 80), text: f.text || '' };
+        return '';
+      })
       .replace(/\[DOC_HANDBACK:\s*([^\]]*)\]/g, function (m, body) {
         var mm = /reason\s*=\s*(cancel|complete)\b/i.exec(body);
         if (mm) handback = mm[1].toLowerCase();
         return '';
       });
-    return { tasks: tasks, handback: handback, clean: clean.replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim() };
+    return { tasks: tasks, handback: handback, feedback: feedback, clean: clean.replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim() };
   }
 
   var API = { HOSTS: HOSTS, isHost: isHost, create: create, packFiles: packFiles, parseDocTags: parseDocTags };

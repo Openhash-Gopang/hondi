@@ -44,6 +44,7 @@ import { makePocketBaseDocFormStore } from './src/worker/doc-form-store.js';
 import { makeDocFormRewardHandler } from './src/worker/doc-form-reward.js';
 import { makeDocFormFeedbackHandler } from './src/worker/doc-form-feedback.js';
 import { makePocketBaseFeedbackStore } from './src/worker/doc-form-feedback-store.js';
+import { makeUserFeedbackExportHandler } from './src/worker/user-feedback-export.js';
 import { makePocketBaseRatingStore, makePocketBaseRewardStore } from './src/worker/doc-form-reward-store.js';
 import { makeProVerifyHandler } from './src/worker/pro-verify-handler.js';
 import { makePocketBaseProVerifyStore } from './src/worker/pro-verify-store.js';
@@ -13606,6 +13607,7 @@ export default {
     if (pathname === '/sp-updates/propose')      return handleSpUpdatePropose(request, env, corsHeaders);
     if (pathname === '/sp-updates/draft-patch')  return handleSpUpdatesDraftPatch(request, env, corsHeaders);
     if (pathname === '/user-feedback/submit')    return handleUserFeedbackSubmit(request, env, corsHeaders);
+    if (pathname === '/user-feedback/export')    return makeUserFeedbackExportHandler({ base: L1_DEFAULT, getToken: () => _l1AdminToken(env) }).handle(request, new URL(request.url), env, corsHeaders);   // 운영자·자동 집계 전용(Bearer)
     if (pathname === '/profile/field-event')     return handleProfileFieldEvent(request, env, corsHeaders);
     if (pathname === '/template-candidate/submit') return handleTemplateCandidateSubmit(request, env, corsHeaders);
     if (pathname === '/embed-text')              return handleEmbedText(request, env, corsHeaders);

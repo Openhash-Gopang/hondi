@@ -131,8 +131,8 @@ test('parseDocTags: [DOC_HANDBACK] 는 cancel·complete 만 인정하고 마지�
   assert.equal(E.parseDocTags('[DOC_HANDBACK: complete]').handback, null);
 });
 test('parseDocTags: 태그가 없으면 본문 그대로, 비문자열도 안전', () => {
-  assert.deepEqual(E.parseDocTags('안녕하세요'), { tasks: [], handback: null, clean: '안녕하세요' });
-  assert.deepEqual(E.parseDocTags(null), { tasks: [], handback: null, clean: '' });
+  assert.deepEqual(E.parseDocTags('안녕하세요'), { tasks: [], handback: null, feedback: null, clean: '안녕하세요' });
+  assert.deepEqual(E.parseDocTags(null), { tasks: [], handback: null, feedback: null, clean: '' });
 });
 test('webapp.html: 서류 SP(inline:doc:)일 때만 태그를 호스트로 올리고, 표시 전에 지운다', async () => {
   const { readFileSync } = await import('node:fs');
