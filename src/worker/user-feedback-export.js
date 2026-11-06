@@ -16,8 +16,9 @@ export function makeUserFeedbackExportHandler({ base, getToken, fetchImpl = fetc
   async function handle(request, url, env, cors = {}) {
     if (url.pathname !== '/user-feedback/export') return null;
     if (request.method !== 'GET') return json({ ok: false, code: 'METHOD' }, 405, cors);
-    const token = env?.USER_FEEDBACK_EXPORT_TOKEN;
-    const given = (request.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
+    const strip = (v) => String(v || '').replace(/[\uFEFF\s]+/g, '');   // PowerShell 파이프로 넣은 비밀값 앞의 BOM·줄바꿈 허용
+    const token = strip(env?.USER_FEEDBACK_EXPORT_TOKEN);
+    const given = strip((request.headers.get('Authorization') || '').replace(/^Bearer\s+/i, ''));
     if (!token || !given || !safeEqual(given, token)) return json({ ok: false, code: 'UNAUTHORIZED', message: '권한이 없습니다.' }, 401, cors);
     const sinceRaw = url.searchParams.get('since') || '';
     const since = /^\d{4}-\d{2}-\d{2}([T ][\d:.]+Z?)?$/.test(sinceRaw) ? sinceRaw.replace('T', ' ').replace(/Z$/, '') : '';
