@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-06 17:09 KST · 기준 커밋 ba0b7320
+- 갱신: 2026-11-06 18:04 KST · 기준 커밋 c4c941ef
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-06 feat: 무료 이용 = 전화 인증 후 100원 소진 또는 24시간 중 먼저(모든 계정)
 - 2026-11-06 Merge pull request #933 from Openhash-Gopang/feat/user-badge-avatar-material
 - 2026-11-06 feat(badge): 우측 상단 아이디를 프로필 사진 아바타로, 팝업을 Material 스타일(폭 272px)로 개편
 - 2026-11-06 feat(admin): user reports and feature suggestions inbox in the admin dashboard
@@ -43,7 +44,6 @@
 - 2026-11-03 feat: 로그인 쿠키 도메인을 접속 주소에 맞춤(naviweb.kr 전환 준비)
 - 2026-11-03 style: 제안 게시판을 나비웹 청록 기반의 심플한 레이아웃·큰 글자로 갱신
 - 2026-11-03 PDV 페이지: 나비웹 설정에 끼워 쓰는 embed=mail 모드
-- 2026-11-03 제안 게시판: 나비웹 화면에 끼워 쓰는 embed=mail 모드, 날짜 표시 수정(created)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
