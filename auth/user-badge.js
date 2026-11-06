@@ -19,9 +19,9 @@
      · 전화 인증 실사용자 → 토큰 안의 전화번호는 화면에 절대 풀어 쓰지 않고
          뒤 4자리만 보여 준다(예: ●●●● 5678).
 
-   ■ 테스트 아이디 한도(2026-10-27)
-     · 테스트 아이디는 DeepSeek API 실비 기준 정해진 한도(기본 500원)까지 무료이고, 한도가 차면 곧바로 사용이 중단되며 유료 회원 전환 안내창이 뜬다.
-     · 메뉴에 사용량을 보여 주고, 한도가 차면 안내창을 띄운다(서버 /auth/test-quota). 유예(grace)는 서버 설정(TEST_GRACE_HOURS)을 켠 경우에만 있다.
+   ■ 무료 이용 기간(2026-11-06)
+     · 모든 사용자는 전화번호 본인 인증 후 AI 사용 비용 100원을 다 쓰거나 24시간이 지날 때까지(먼저 오는 쪽) 무료이다. 테스트 아이디는 그 뒤 곧바로 사용이 중단되며 유료 회원 전환 안내창이 뜬다.
+     · 메뉴에 사용량을 보여 주고, 한도가 차면 안내창을 띄운다(서버 /auth/test-quota). 유예 기간은 없다.
      · "정식 아이디로 로그인" — 테스트 아이디의 로그인 정보를 쿠키(hondi_mig_pvt, 7일)에 잠시 보관한 뒤 전화 인증 로그인을 연다.
        정식 아이디로 로그인되면 같은 쿠키를 보고 테스트 데이터를 정식 아이디로 옮긴다(서버 /auth/test-migrate).
      · "정식 아이디 만들기" — 위 쿠키를 남기고 hondi.net 가입 화면으로 이동. 가입·로그인 뒤 어느 사이트에서든 이동이 이어진다.
@@ -235,7 +235,7 @@
     var back = el('div'); back.id = 'hondi-blocked-modal';
     var box = el('div', 'hub-modal'); box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true');
     box.appendChild(el('h2', '', '무료 한도를 모두 사용했습니다'));
-    box.appendChild(el('p', '', '테스트 아이디의 무료 한도(AI 사용 비용 ' + fmtNum(quota.limit_krw) + '원)를 다 썼습니다. 계속 쓰려면 유료 회원으로 전환해 주세요.'));
+    box.appendChild(el('p', '', '테스트 아이디의 무료 이용 기간(AI 사용 비용 ' + fmtNum(quota.limit_krw) + '원 또는 ' + (quota.free_hours || 24) + '시간 중 먼저 오는 쪽)이 끝났습니다. 계속 쓰려면 유료 회원으로 전환해 주세요.'));
     var price = el('div', 'hub-price');
     price.appendChild(el('div', '', '정식 요금: 월 100,000원 · 연 1,200,000원'));
     price.appendChild(el('div', 'hub-price-em', '필드 테스트 가입자(2026년 12월 말까지) 90% 할인: 월 10,000원 · 연 100,000원'));
@@ -257,10 +257,10 @@
     if (quota) {
       var pct = Math.min(100, Math.round((quota.spent_krw / quota.limit_krw) * 100));
       var q = el('div', 'hub-quota');
-      q.appendChild(el('div', '', '무료 사용량 ' + fmtNum(quota.spent_krw) + ' / ' + fmtNum(quota.limit_krw) + '원'));
+      q.appendChild(el('div', '', '무료 사용량 ' + fmtNum(quota.spent_krw) + ' / ' + fmtNum(quota.limit_krw) + '원 · ' + fmtTime(quota.free_ends_at) + '까지'));
       var bar = el('div', 'hub-bar'); var fill = el('div', 'hub-bar-fill' + (quota.status === 'active' ? '' : ' hub-over')); fill.style.width = pct + '%'; bar.appendChild(fill); q.appendChild(bar);
       if (quota.status === 'grace') q.appendChild(el('p', 'hub-note hub-warn', '한도를 모두 사용했습니다. ' + fmtTime(quota.grace_ends_at) + '까지 정식 아이디로 전환해 주세요. 이후에는 사용이 중단됩니다.'));
-      else if (quota.status === 'blocked') q.appendChild(el('p', 'hub-note hub-warn', '무료 한도를 모두 사용해 사용이 중단되었습니다. 유료 회원으로 전환하면 이어서 쓸 수 있습니다.'));
+      else if (quota.status === 'blocked') q.appendChild(el('p', 'hub-note hub-warn', '무료 이용 기간(AI 사용 비용 ' + fmtNum(quota.limit_krw) + '원 또는 ' + (quota.free_hours || 24) + '시간 중 먼저 오는 쪽)이 끝나 사용이 중단되었습니다. 유료 회원으로 전환하면 이어서 쓸 수 있습니다.'));
       menu.appendChild(q);
     } else {
       menu.appendChild(el('p', 'hub-note', '테스트 기간에 자동으로 만들어진 임시 아이디입니다.'));
