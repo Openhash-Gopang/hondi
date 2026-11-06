@@ -83,6 +83,20 @@
     <!-- 대시보드 본문 -->
     <div id="admin-body" style="display:none;padding:22px 26px">
 
+      <!-- 사용자 제보·기능 개선 제안 (2026-11-06) — 나비웹 제보([naviweb:] 말머리)와 기능 개선 제안 게시판을 한곳에서 본다. 읽기 전용: /admin/feedback-inbox -->
+      <details id="admin-feedback-menu" open style="border:1px solid var(--ad-line,#3c3f46);border-radius:0;margin-bottom:16px">
+        <summary style="cursor:pointer;padding:12px 18px;font-size:14px;font-weight:600;list-style:none">사용자 제보 · 기능 개선 제안 <span id="fbi-badge" style="font-weight:400;color:var(--ad-faint);font-size:12px;margin-left:6px"></span></summary>
+        <div style="padding:10px 18px 16px;border-top:1px solid var(--ad-line,#3c3f46)">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;font-size:12.5px">
+            <label>기간 <select id="fbi-days" onchange="_loadFeedbackInbox()" style="font-family:inherit;font-size:12.5px"><option value="7">최근 7일</option><option value="30" selected>최근 30일</option><option value="90">최근 90일</option></select></label>
+            <label>조치 기준 <select id="fbi-min" onchange="_renderFeedbackInbox()" style="font-family:inherit;font-size:12.5px"><option value="1">1명 이상</option><option value="2">2명 이상</option><option value="3" selected>3명 이상</option></select></label>
+            <button onclick="_loadFeedbackInbox()" id="fbi-reload" style="padding:4px 10px;font-family:inherit;font-size:12.5px;cursor:pointer">새로고침</button>
+            <span id="fbi-note" style="color:var(--ad-faint)"></span>
+          </div>
+          <div id="fbi-body" style="font-size:13px">불러오는 중...</div>
+        </div>
+      </details>
+
       <!-- 직역 AI 법인 지분 매수 제안서 (2026-10-27 — 주피터 지시: 사업 계획 목록 안에서 꺼내 문서 상단의 독립 섹션으로 이동. 같은 날 부산·울산·경남 나비 숫자 코드 테스트 제안서도 이 섹션으로 옮김. 제안서 6종은 L1 DB 대신 admin/ 정적 파일로 두고 여기서 링크한다 — 투자자 공개 모집이 아니라 직역 단체 협의용이며 noindex)
            (이전 L1 admin_proposals 보관 방식의 _propList/_propOpen 함수는 남겨 두었으나 지금 화면은 admin/ 정적 파일 링크를 쓴다.) -->
       <details id="admin-proposals-menu" open style="border:1px solid var(--ad-line,#3c3f46);border-radius:0;margin-bottom:16px">
@@ -872,6 +886,71 @@ function _showAdminBody() {
   _renderSubdomainList();
   _loadAutoRefreshStatus();
   _loadLetters();
+  _loadFeedbackInbox();
+}
+
+
+// ── 사용자 제보 · 기능 개선 제안 (2026-11-06) ────────────────
+let _fbiData = null;
+const _fbiEsc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const _FBI_PROBLEM = { agency: '기관이 달라요', fail: '가져오지 못해요', own: '직접 준비 서류예요', missing: '버튼이 없어요', other: '그 밖의 문제' };
+const _FBI_STATUS = { pending: '검토 대기', reviewing: '검토중', accepted: '반영 확정', rejected: '보류' };
+const _FBI_CAT = { bug: '오류', feature: '기능', ui: '화면', etc: '기타' };
+const _fbiNorm = (s) => String(s || '').normalize('NFKC').toLowerCase().replace(/[\s·.,:;!?()\[\]{}<>\-_/\\'"~]/g, '');
+async function _loadFeedbackInbox() {
+  const body = document.getElementById('fbi-body'), note = document.getElementById('fbi-note'), btn = document.getElementById('fbi-reload');
+  if (!body) return;
+  if (btn) btn.disabled = true; note.textContent = '불러오는 중…';
+  try {
+    const days = document.getElementById('fbi-days').value;
+    const res = await fetch(`${WORKER_URL}/admin/feedback-inbox?days=${encodeURIComponent(days)}`, { signal: AbortSignal.timeout(15000), headers: _adminAuthHeaders() });
+    if (res.status === 401) throw new Error('로그인이 만료되었습니다. 다시 로그인하십시오.');
+    const j = await res.json().catch(() => null);
+    if (!res.ok || !j || !j.ok) throw new Error('조회하지 못했습니다 (HTTP ' + res.status + ')');
+    _fbiData = j; note.textContent = '갱신 ' + new Date().toLocaleTimeString('ko-KR');
+    _renderFeedbackInbox();
+  } catch (e) {
+    body.innerHTML = '<span style="color:var(--ad-crit)">' + _fbiEsc(e.message) + '</span>'; note.textContent = '';
+  } finally { if (btn) btn.disabled = false; }
+}
+function _renderFeedbackInbox() {
+  const body = document.getElementById('fbi-body'); if (!body || !_fbiData) return;
+  const min = Number(document.getElementById('fbi-min').value) || 3;
+  const groups = new Map(), bugs = [];
+  for (const r of _fbiData.reports) {
+    if (r.kind === 'bug') { bugs.push(r); continue; }
+    if (!r.doc) continue;
+    const key = [r.kind, _fbiNorm(r.doc), r.problem].join('\n');
+    const g = groups.get(key) || { kind: r.kind, doc: r.doc, problem: r.problem, users: new Set(), rights: new Map(), notes: [], last: '' };
+    g.users.add(r.dev || r.id);
+    if (r.right) g.rights.set(r.right, (g.rights.get(r.right) || 0) + 1);
+    if (r.text && g.notes.length < 3 && !g.notes.includes(r.text)) g.notes.push(r.text);
+    if (r.created > g.last) g.last = r.created;
+    groups.set(key, g);
+  }
+  const rows = [...groups.values()].sort((a, b) => b.users.size - a.users.size || b.last.localeCompare(a.last));
+  const att = rows.filter(g => g.kind === 'attach'), nd = rows.filter(g => g.kind === 'newdoc');
+  const sug = _fbiData.suggestions;
+  const open = sug.filter(x => x.status === 'pending' || x.status === 'reviewing').length;
+  document.getElementById('fbi-badge').textContent = `제보 ${_fbiData.reports.length}건 · 제안 ${sug.length}건(처리 전 ${open}건)`;
+  const th = 'text-align:left;padding:4px 8px;border-bottom:1px solid var(--ad-line);color:var(--ad-faint);font-weight:500;white-space:nowrap';
+  const td = 'padding:5px 8px;border-bottom:1px solid var(--ad-line);vertical-align:top';
+  const flag = (n) => n >= min ? '<strong style="color:var(--ad-crit)">조치 </strong>' : '';
+  const ymd = (s) => String(s || '').slice(0, 10);
+  const h = [];
+  h.push('<h4 style="margin:4px 0 6px;font-size:13px">① 첨부서류 문제 — 카탈로그 규칙 수정 후보</h4>');
+  h.push(att.length ? '<table style="width:100%;border-collapse:collapse"><tr><th style="' + th + '">서류</th><th style="' + th + '">문제</th><th style="' + th + '">제보자</th><th style="' + th + '">올바른 기관(제안)</th><th style="' + th + '">메모</th><th style="' + th + '">최근</th></tr>' +
+    att.map(g => { const best = [...g.rights.entries()].sort((a, b) => b[1] - a[1])[0]; return '<tr><td style="' + td + '">' + flag(g.users.size) + _fbiEsc(g.doc) + '</td><td style="' + td + '">' + _fbiEsc(_FBI_PROBLEM[g.problem] || g.problem) + '</td><td style="' + td + ';font-family:var(--ad-mono)">' + g.users.size + '명</td><td style="' + td + '">' + _fbiEsc(best ? best[0] : '') + '</td><td style="' + td + '">' + _fbiEsc(g.notes.join(' / ')) + '</td><td style="' + td + ';white-space:nowrap">' + ymd(g.last) + '</td></tr>'; }).join('') + '</table>' : '<div style="color:var(--ad-faint)">(없음)</div>');
+  h.push('<h4 style="margin:14px 0 6px;font-size:13px">② 찾는 서류가 없어요 — 새 서류 양식 후보</h4>');
+  h.push(nd.length ? '<table style="width:100%;border-collapse:collapse"><tr><th style="' + th + '">서류</th><th style="' + th + '">요청</th><th style="' + th + '">메모</th><th style="' + th + '">최근</th></tr>' +
+    nd.map(g => '<tr><td style="' + td + '">' + flag(g.users.size) + _fbiEsc(g.doc) + '</td><td style="' + td + ';font-family:var(--ad-mono)">' + g.users.size + '명</td><td style="' + td + '">' + _fbiEsc(g.notes.join(' / ')) + '</td><td style="' + td + ';white-space:nowrap">' + ymd(g.last) + '</td></tr>').join('') + '</table>' : '<div style="color:var(--ad-faint)">(없음)</div>');
+  h.push('<h4 style="margin:14px 0 6px;font-size:13px">③ 오류·불편 신고</h4>');
+  h.push(bugs.length ? '<ul style="margin:0;padding-left:18px">' + bugs.map(b => '<li style="margin-bottom:4px">' + _fbiEsc(b.text) + ' <span style="color:var(--ad-faint);font-size:11.5px">' + ymd(b.created) + (b.ctx ? ' · ' + _fbiEsc(b.ctx.replace(/;?\s*dev=[^;]+/, '')) : '') + '</span></li>').join('') + '</ul>' : '<div style="color:var(--ad-faint)">(없음)</div>');
+  h.push('<h4 style="margin:14px 0 6px;font-size:13px">④ 기능 개선 제안 (찬성 많은 순) <a href="./feedback.html" target="_blank" rel="noopener" style="font-weight:400;font-size:12px;margin-left:6px">게시판 ↗</a></h4>');
+  h.push(sug.length ? '<table style="width:100%;border-collapse:collapse"><tr><th style="' + th + '">찬성</th><th style="' + th + '">내용</th><th style="' + th + '">분류</th><th style="' + th + '">상태</th><th style="' + th + '">공개</th><th style="' + th + '">등록</th></tr>' +
+    sug.map(x => '<tr><td style="' + td + ';font-family:var(--ad-mono)">' + x.vote_count + '</td><td style="' + td + ';white-space:pre-wrap">' + _fbiEsc(x.content) + (x.admin_note ? '<div style="color:var(--ad-faint);font-size:11.5px">메모: ' + _fbiEsc(x.admin_note) + '</div>' : '') + '</td><td style="' + td + '">' + _fbiEsc(_FBI_CAT[x.category] || x.category) + '</td><td style="' + td + '">' + _fbiEsc(_FBI_STATUS[x.status] || x.status) + '</td><td style="' + td + '">' + (x.visibility === 'private' ? '비공개' : '공개') + '</td><td style="' + td + ';white-space:nowrap">' + ymd(x.created) + '</td></tr>').join('') + '</table>' : '<div style="color:var(--ad-faint)">(없음)</div>');
+  h.push('<div style="margin-top:12px;color:var(--ad-faint);font-size:11.5px">제보는 매주 월요일 GitHub 이슈로도 집계됩니다. 규칙 수정은 docs/user-feedback.md 참조.</div>');
+  body.innerHTML = h.join('');
 }
 
 // ── 통계 ─────────────────────────────────────────────────────
