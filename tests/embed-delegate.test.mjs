@@ -161,3 +161,10 @@ test('webapp.html: 나비웹 화면 안에서는 "…"·빈 AI 말풍선을 숨�
   assert.match(h, /if \(window\.parent !== window\) \{\s*\n\s*const _isPh = /);
   assert.match(h, /t === '…'/); assert.match(h, /new MutationObserver\(_syncPh\)\.observe\(msgList/);
 });
+
+test('webapp.html: 자리표시 말풍선이 있는 동안 호스트에 hondi-embed-busy 를 알린다(ai:self 모드의 진행 막대)', async () => {
+  const { readFileSync } = await import('node:fs');
+  const h = readFileSync(new URL('../webapp.html', import.meta.url), 'utf8');
+  assert.match(h, /type: 'hondi-embed-busy', on: !!on/);
+  assert.match(h, /if \(anyPh !== _phBusy\) \{ _phBusy = anyPh; _tellBusy\(anyPh\); \}/);
+});
