@@ -88,7 +88,7 @@
       var u = JSON.parse(raw);
       var h = String((u && u.handle) || '');
       if (!u || !(u.ipv6 || u.guid) || u.isGuest || u.isTemp || u.test_account || h.indexOf('tid-') === 0) return null;
-      return { loggedIn: true, kind: 'user', source: 'spa', label: '로그인됨' };   // 메인 앱의 handle은 전화번호 뒷자리라 보여 주지 않는다
+      return { loggedIn: true, kind: 'user', source: 'spa', label: '로그인됨', avatar: u.avatar_url || u.avatarUrl || '' };   // 메인 앱의 handle은 전화번호 뒷자리라 보여 주지 않는다
     } catch (e) { return null; }
   }
   function identity() {
@@ -99,7 +99,7 @@
       var id = i > 4 ? t.slice(4, i) : t.slice(4);
       return { loggedIn: true, kind: 'test', source: 'cookie', label: id };
     }
-    return { loggedIn: true, kind: 'user', source: 'cookie', label: (mailInfo && mailInfo.mail_id) || cachedMailId() || '로그인됨' };   // 전화번호는 아이디로 쓰지 않는다
+    return { loggedIn: true, kind: 'user', source: 'cookie', label: (mailInfo && mailInfo.mail_id) || cachedMailId() || '로그인됨', avatar: (mailInfo && mailInfo.avatar_url) || '' };   // 전화번호는 아이디로 쓰지 않는다
   }
   function testIdSaved() {
     try { return global.localStorage.getItem('hondi_test_id') || ''; } catch (e) { return ''; }
@@ -501,52 +501,66 @@
   var CSS =
     '#hondi-user-badge{font:600 14px/1.25 Pretendard,system-ui,-apple-system,"Segoe UI","Malgun Gothic",sans-serif;position:relative;display:inline-block;vertical-align:middle;text-align:left}' +
     '#hondi-user-badge.hub-fixed{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);right:12px;z-index:2147482000}' +
-    '#hondi-user-badge .hub-chip{display:inline-flex;align-items:center;gap:8px;max-width:56vw;padding:7px 13px;border-radius:999px;border:1px solid rgba(15,23,42,.2);background:rgba(255,255,255,.95);color:#0f172a;cursor:pointer;font:inherit;box-shadow:0 1px 4px rgba(0,0,0,.14)}' +
-    '#hondi-user-badge .hub-chip:focus-visible{outline:2px solid #2563eb;outline-offset:2px}' +
-    '#hondi-user-badge .hub-dot{width:9px;height:9px;border-radius:50%;background:#94a3b8;flex:none}' +
-    '#hondi-user-badge.hub-in .hub-dot{background:#22c55e}' +
-    '#hondi-user-badge .hub-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
-    '#hondi-user-badge .hub-tag{flex:none;font-size:11.5px;font-weight:700;padding:1px 6px;border-radius:6px;background:#fef3c7;color:#92400e}' +
-    '#hondi-user-badge .hub-menu{position:absolute;right:0;top:calc(100% + 6px);width:max-content;min-width:250px;max-width:min(340px,88vw);box-sizing:border-box;background:#fff;color:#0f172a;border:1px solid rgba(15,23,42,.16);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.2);padding:14px;font-size:15px;font-weight:500;line-height:1.5;z-index:1}' +
+    '#hondi-user-badge{--hub-pri:#1a56db;--hub-on-pri:#fff;--hub-surf:#fff;--hub-on:#1f2937;--hub-var:#5f6b7a;--hub-line:rgba(15,23,42,.12);--hub-tonal:#e8eefc;--hub-tonal-on:#1a3a8a;--hub-track:#e5e7eb;--hub-ok:#1e9e5a;--hub-err:#c62828;--hub-warn-bg:#fff4e0;--hub-warn-on:#8a5200}' +
+    '#hondi-user-badge .hub-chip{position:relative;display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;padding:0;border-radius:50%;border:2px solid #fff;background:#e8eefc;color:#1a3a8a;cursor:pointer;font:inherit;box-shadow:0 1px 3px rgba(0,0,0,.28);overflow:visible;transition:box-shadow .15s}' +
+    '#hondi-user-badge .hub-chip:hover{box-shadow:0 2px 8px rgba(0,0,0,.32)}' +
+    '#hondi-user-badge .hub-chip:focus-visible{outline:2px solid var(--hub-pri);outline-offset:2px}' +
+    '#hondi-user-badge .hub-av{display:inline-flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:50%;overflow:hidden;background:var(--hub-av-bg,#dbe4fb);color:var(--hub-av-fg,#1a3a8a);font-weight:700;font-size:16px;line-height:1;text-transform:uppercase;flex:none}' +
+    '#hondi-user-badge .hub-av{position:relative}#hondi-user-badge .hub-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:var(--hub-av-bg,#dbe4fb)}' +
+    '#hondi-user-badge .hub-av svg{width:60%;height:60%;fill:currentColor}' +
+    '#hondi-user-badge .hub-dot{position:absolute;right:-1px;bottom:-1px;width:11px;height:11px;border-radius:50%;background:#9aa4b2;border:2px solid #fff;box-sizing:border-box}' +
+    '#hondi-user-badge.hub-in .hub-dot{background:var(--hub-ok)}' +
+    '#hondi-user-badge.hub-in.hub-test .hub-dot{background:#f59e0b}' +
+    '#hondi-user-badge .hub-tag{display:inline-block;font-size:11.5px;font-weight:600;letter-spacing:.01em;padding:2px 8px;border-radius:999px;background:var(--hub-warn-bg);color:var(--hub-warn-on)}' +
+    '#hondi-user-badge .hub-menu{position:absolute;right:0;top:calc(100% + 8px);width:272px;max-width:min(272px,calc(100vw - 24px));box-sizing:border-box;background:var(--hub-surf);color:var(--hub-on);border:0;border-radius:16px;box-shadow:0 1px 2px rgba(0,0,0,.14),0 6px 16px rgba(0,0,0,.18),0 12px 32px rgba(0,0,0,.12);padding:16px;font-size:14px;font-weight:400;line-height:1.45;z-index:1;transform-origin:top right;animation:hubPop .14s ease-out}' +
+    '@keyframes hubPop{from{opacity:0;transform:scale(.96) translateY(-4px)}to{opacity:1;transform:none}}' +
+    '@media (prefers-reduced-motion:reduce){#hondi-user-badge .hub-menu{animation:none}}' +
     '#hondi-user-badge .hub-menu[hidden]{display:none}' +
-    '#hondi-user-badge .hub-menu b{font-weight:800;word-break:break-all}' +
-    '#hondi-user-badge .hub-note{margin:6px 0 0;font-size:13.5px;color:#475569}' +
-    '#hondi-user-badge .hub-btn{display:block;width:100%;margin-top:10px;padding:9px 12px;border-radius:9px;border:1px solid #cbd5e1;background:#f8fafc;color:#0f172a;font:inherit;font-size:14.5px;cursor:pointer}' +
-    '#hondi-user-badge .hub-btn.hub-primary{background:#1d4ed8;border-color:#1d4ed8;color:#fff}' +
-    '[data-hondi-user-slot="dark"] #hondi-user-badge .hub-chip{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.4);color:#fff;box-shadow:none}' +
-    '[data-hondi-user-slot="dark"] #hondi-user-badge .hub-tag{background:rgba(251,191,36,.25);color:#fde68a}' +
+    '#hondi-user-badge .hub-head{display:flex;align-items:center;gap:12px;padding-bottom:12px;margin-bottom:4px;border-bottom:1px solid var(--hub-line)}' +
+    '#hondi-user-badge .hub-head .hub-av{width:44px;height:44px;font-size:18px}' +
+    '#hondi-user-badge .hub-head-txt{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:3px}' +
+    '#hondi-user-badge .hub-menu b{font-weight:600;font-size:15px;line-height:1.25;word-break:break-all;color:var(--hub-on)}' +
+    '#hondi-user-badge .hub-note{margin:8px 0 0;font-size:12.5px;line-height:1.45;color:var(--hub-var)}' +
+    '#hondi-user-badge .hub-btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:40px;margin-top:10px;padding:0 16px;border-radius:20px;border:0;background:var(--hub-tonal);color:var(--hub-tonal-on);font:inherit;font-size:14px;font-weight:600;letter-spacing:.01em;cursor:pointer;transition:filter .12s,box-shadow .12s}' +
+    '#hondi-user-badge .hub-btn:hover{filter:brightness(.96)}' +
+    '#hondi-user-badge .hub-btn:focus-visible{outline:2px solid var(--hub-pri);outline-offset:2px}' +
+    '#hondi-user-badge .hub-btn.hub-primary{background:var(--hub-pri);color:var(--hub-on-pri)}' +
+    '#hondi-user-badge .hub-btn.hub-primary:hover{filter:brightness(1.08);box-shadow:0 1px 3px rgba(0,0,0,.3)}' +
+    '#hondi-user-badge .hub-btn.hub-text{background:transparent;color:var(--hub-pri);margin-top:6px}' +
+    '#hondi-user-badge .hub-btn.hub-text:hover{background:var(--hub-tonal);filter:none}' +
+    '[data-hondi-user-slot="dark"] #hondi-user-badge .hub-chip{border-color:rgba(255,255,255,.55);box-shadow:none}' +
+    '[data-hondi-user-slot="dark"] #hondi-user-badge .hub-dot{border-color:#1f2937}' +
     '@media (prefers-color-scheme:dark){' +
-      '#hondi-user-badge.hub-fixed .hub-chip{background:rgba(30,41,59,.95);border-color:rgba(255,255,255,.25);color:#f1f5f9}' +
-      '#hondi-user-badge .hub-menu{background:#1e293b;color:#f1f5f9;border-color:rgba(255,255,255,.2)}' +
-      '#hondi-user-badge .hub-note{color:#cbd5e1}' +
-      '#hondi-user-badge .hub-btn{background:#334155;border-color:#475569;color:#f1f5f9}' +
-      '#hondi-user-badge .hub-btn.hub-primary{background:#2563eb;border-color:#2563eb;color:#fff}' +
+      '#hondi-user-badge{--hub-pri:#8ab4f8;--hub-on-pri:#0b1b3b;--hub-surf:#2b2f36;--hub-on:#e8eaed;--hub-var:#a8b0bc;--hub-line:rgba(255,255,255,.12);--hub-tonal:#3b4660;--hub-tonal-on:#d6e3ff;--hub-track:#4a505a;--hub-ok:#5dd28a;--hub-err:#ff8a80;--hub-warn-bg:#4a3a1a;--hub-warn-on:#ffd68a}' +
+      '#hondi-user-badge.hub-fixed .hub-chip{border-color:#2b2f36}' +
+      '#hondi-user-badge .hub-dot{border-color:#2b2f36}' +
+      '#hondi-user-badge .hub-av{--hub-av-bg:#3b4660;--hub-av-fg:#d6e3ff}' +
     '}' +
-    '#hondi-user-badge .hub-quota{margin-top:8px}' +
-    '#hondi-user-badge .hub-bar{height:8px;border-radius:999px;background:#e2e8f0;margin-top:6px;overflow:hidden}' +
-    '#hondi-user-badge .hub-bar-fill{height:100%;background:#22c55e}' +
-    '#hondi-user-badge .hub-bar-fill.hub-over{background:#dc2626}' +
-    '#hondi-user-badge .hub-warn{color:#b91c1c;font-weight:600}' +
+    '#hondi-user-badge .hub-quota{margin-top:12px;font-size:13px;color:var(--hub-on)}' +
+    '#hondi-user-badge .hub-bar{height:4px;border-radius:2px;background:var(--hub-track);margin-top:8px;overflow:hidden}' +
+    '#hondi-user-badge .hub-bar-fill{height:100%;background:var(--hub-ok);border-radius:2px}' +
+    '#hondi-user-badge .hub-bar-fill.hub-over{background:var(--hub-err)}' +
+    '#hondi-user-badge .hub-warn{color:var(--hub-err);font-weight:600}' +
     '#hondi-user-badge .hub-row{display:inline-flex;align-items:center;gap:4px;max-width:100%}' +
-    '#hondi-user-badge .hub-more{flex:none;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;text-decoration:none;cursor:pointer;border:1px solid transparent;background:transparent;color:#334155}' +
+    '#hondi-user-badge .hub-more{flex:none;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;text-decoration:none;cursor:pointer;border:1px solid transparent;background:transparent;color:var(--hub-var)}' +
     '#hondi-user-badge .hub-more:hover{background:rgba(15,23,42,.1)}' +
     '#hondi-user-badge .hub-more:focus-visible{outline:2px solid #2563eb;outline-offset:2px}' +
     '#hondi-user-badge .hub-more svg{width:20px;height:20px;fill:currentColor}' +
     '[data-hondi-user-slot="dark"] #hondi-user-badge .hub-more{color:#fff}' +
     '[data-hondi-user-slot="dark"] #hondi-user-badge .hub-more:hover{background:rgba(255,255,255,.18)}' +
-    '#hondi-user-badge .hub-name{margin:8px 0 0;font-size:13.5px;color:#475569;line-height:1.6}' +
-    '#hondi-user-badge .hub-name-val{display:inline-flex;align-items:center;gap:5px;max-width:100%;padding:2px 7px;margin-left:3px;border:1px dashed #94a3b8;border-radius:7px;background:transparent;color:#0f172a;font:inherit;font-size:13.5px;font-weight:700;cursor:text;text-align:left;word-break:break-all}' +
-    '#hondi-user-badge .hub-name-val:hover{background:#f1f5f9;border-color:#64748b}' +
+    '#hondi-user-badge .hub-name{margin:10px 0 0;font-size:12.5px;color:var(--hub-var);line-height:1.6}' +
+    '#hondi-user-badge .hub-name-val{display:inline-flex;align-items:center;gap:5px;max-width:100%;padding:2px 7px;margin-left:3px;border:1px dashed var(--hub-var);border-radius:8px;background:transparent;color:var(--hub-on);font:inherit;font-size:13px;font-weight:600;cursor:text;text-align:left;word-break:break-all}' +
+    '#hondi-user-badge .hub-name-val:hover{background:var(--hub-tonal)}' +
     '#hondi-user-badge .hub-name-val:focus-visible{outline:2px solid #2563eb;outline-offset:2px}' +
-    '#hondi-user-badge .hub-name-val.hub-empty{font-weight:500;color:#64748b}' +
+    '#hondi-user-badge .hub-name-val.hub-empty{font-weight:400;color:var(--hub-var)}' +
     '#hondi-user-badge .hub-name-val svg{width:13px;height:13px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}' +
     '#hondi-user-badge .hub-name-edit{display:flex;gap:6px;margin-top:6px}' +
-    '#hondi-user-badge .hub-name-input{flex:1 1 auto;min-width:0;box-sizing:border-box;padding:7px 9px;border:2px solid #cbd5e1;border-radius:8px;font:600 14.5px/1.3 Pretendard,system-ui,sans-serif;color:#0f172a;background:#fff}' +
-    '#hondi-user-badge .hub-name-input:focus{outline:none;border-color:#1d4ed8}' +
-    '#hondi-user-badge .hub-name-edit .hub-btn{display:inline-block;width:auto;margin-top:0;padding:7px 11px;font-size:13.5px;flex:none}' +
+    '#hondi-user-badge .hub-name-input{flex:1 1 auto;min-width:0;box-sizing:border-box;padding:7px 9px;border:1px solid var(--hub-line);border-radius:8px;font:500 14px/1.3 Pretendard,system-ui,sans-serif;color:var(--hub-on);background:var(--hub-surf)}' +
+    '#hondi-user-badge .hub-name-input:focus{outline:none;border-color:var(--hub-pri);box-shadow:0 0 0 1px var(--hub-pri)}' +
+    '#hondi-user-badge .hub-name-edit .hub-btn{display:inline-flex;width:auto;margin-top:0;min-height:34px;padding:0 12px;border-radius:17px;font-size:13px;flex:none}' +
     '#hondi-user-badge .hub-name-edit .hub-btn:disabled{opacity:.5;cursor:not-allowed}' +
-    '#hondi-user-badge .hub-name-msg{min-height:1.2em;margin:4px 0 0;font-size:12.5px;color:#b91c1c;font-weight:600}' +
-    '@media (prefers-color-scheme:dark){#hondi-user-badge .hub-more{color:#e2e8f0}#hondi-user-badge .hub-more:hover{background:rgba(255,255,255,.14)}#hondi-user-badge .hub-name-val{color:#f1f5f9;border-color:#64748b}#hondi-user-badge .hub-name-val:hover{background:#334155}#hondi-user-badge .hub-name-val.hub-empty{color:#cbd5e1}#hondi-user-badge .hub-name-input{background:#0f172a;border-color:#475569;color:#f1f5f9}#hondi-user-badge .hub-name-msg{color:#fca5a5}}' +
+    '#hondi-user-badge .hub-name-msg{min-height:1.2em;margin:4px 0 0;font-size:12px;color:var(--hub-err);font-weight:500}' +
+    '@media (prefers-color-scheme:dark){#hondi-user-badge .hub-more:hover{background:rgba(255,255,255,.14)}}' +
     '#hondi-blocked-modal{position:fixed;inset:0;z-index:2147482500;background:rgba(15,23,42,.62);display:flex;align-items:center;justify-content:center;padding:16px}' +
     '#hondi-blocked-modal .hub-modal{width:min(440px,100%);box-sizing:border-box;background:#fff;color:#0f172a;border-radius:16px;padding:22px 22px 18px;font:500 16px/1.6 Pretendard,system-ui,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.35)}' +
     '#hondi-blocked-modal h2{margin:0 0 8px;font-size:21px}' +
@@ -557,7 +571,7 @@
     '#hondi-blocked-modal p{margin:0 0 6px}' +
     '#hondi-blocked-modal .hub-btn{display:block;width:100%;margin-top:10px;padding:11px 12px;border-radius:10px;border:1px solid #cbd5e1;background:#f8fafc;color:#0f172a;font:inherit;font-size:16px;cursor:pointer}' +
     '#hondi-blocked-modal .hub-btn.hub-primary{background:#1d4ed8;border-color:#1d4ed8;color:#fff}' +
-    '@media (prefers-color-scheme:dark){#hondi-user-badge .hub-bar{background:#475569}#hondi-user-badge .hub-warn{color:#fca5a5}#hondi-blocked-modal .hub-modal{background:#1e293b;color:#f1f5f9}#hondi-blocked-modal .hub-btn{background:#334155;border-color:#475569;color:#f1f5f9}#hondi-blocked-modal .hub-btn.hub-primary{background:#2563eb;border-color:#2563eb;color:#fff}}' +
+    '@media (prefers-color-scheme:dark){#hondi-blocked-modal .hub-modal{background:#1e293b;color:#f1f5f9}#hondi-blocked-modal .hub-btn{background:#334155;border-color:#475569;color:#f1f5f9}#hondi-blocked-modal .hub-btn.hub-primary{background:#2563eb;border-color:#2563eb;color:#fff}}' +
     '#hondi-mailid-modal{position:fixed;inset:0;z-index:2147482400;background:rgba(15,23,42,.62);display:flex;align-items:center;justify-content:center;padding:16px}' +
     '#hondi-mailid-modal .hub-modal{width:min(460px,100%);max-height:calc(100vh - 32px);overflow:auto;box-sizing:border-box;background:#fff;color:#0f172a;border-radius:16px;padding:22px 22px 18px;font:500 16px/1.6 Pretendard,system-ui,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.35)}' +
     '#hondi-mailid-modal h2{margin:0 0 8px;font-size:21px}' +
@@ -629,6 +643,24 @@
     var n = doc.createElementNS(SVG_NS, tag);
     for (var k in attrs) if (Object.prototype.hasOwnProperty.call(attrs, k)) n.setAttribute(k, attrs[k]);
     return n;
+  }
+  function personIcon() {
+    var s = svgEl('svg', { viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false' });
+    s.appendChild(svgEl('path', { d: 'M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9zm0 2.25c-3.2 0-9 1.6-9 4.8V21h18v-1.95c0-3.2-5.8-4.8-9-4.8z' }));
+    return s;
+  }
+  function avatarEl(id) {                                    // 프로필 사진 → 없거나 못 불러오면 이니셜 → 로그인 전이면 사람 아이콘
+    var a = el('span', 'hub-av');
+    var letter = id.loggedIn ? String(id.label || '').replace(/^[^A-Za-z0-9\uAC00-\uD7A3]+/, '').charAt(0) : '';
+    if (id.loggedIn && !letter) letter = '?';
+    var url = /^https:\/\//.test(id.avatar || '') ? id.avatar : '';
+    if (letter) a.textContent = letter; else a.appendChild(personIcon());
+    if (url) {
+      var im = doc.createElement('img'); im.alt = ''; im.decoding = 'async'; im.referrerPolicy = 'no-referrer'; im.draggable = false;
+      im.onerror = function () { if (im.parentNode) im.parentNode.removeChild(im); };
+      im.src = url; a.appendChild(im);
+    }
+    return a;
   }
   function dotsIcon() {                                      // 세로 점 세 개(⋮)
     var s = svgEl('svg', { viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false' });
@@ -727,7 +759,7 @@
   function render(force, hard) {
     if (!doc.body) return;
     var id = identity();
-    var sig = (id.loggedIn ? '1' : '0') + '|' + id.kind + '|' + id.label;
+    var sig = (id.loggedIn ? '1' : '0') + '|' + id.kind + '|' + id.label + '|' + (id.avatar || '');
     if (!(id.loggedIn && id.kind === 'user' && id.source === 'cookie')) nameEdit = null;   // 로그아웃·계정 전환이면 고치던 이름은 버린다
     doc.documentElement.classList.toggle('hondi-anon', !id.loggedIn);
     doc.documentElement.setAttribute('data-hondi-auth', id.loggedIn ? 'in' : 'out');
@@ -736,25 +768,27 @@
     lastSig = sig;
     addStyle();
     mount();
-    badge.className = (badge.className.indexOf('hub-fixed') >= 0 ? 'hub-fixed ' : '') + (id.loggedIn ? 'hub-in' : 'hub-out');
+    badge.className = (badge.className.indexOf('hub-fixed') >= 0 ? 'hub-fixed ' : '') + (id.loggedIn ? 'hub-in' : 'hub-out') + (id.kind === 'test' ? ' hub-test' : '');
     while (badge.firstChild) badge.removeChild(badge.firstChild);
 
     var chip = el('button', 'hub-chip');
     chip.type = 'button';
     chip.setAttribute('aria-haspopup', 'true');
     chip.setAttribute('aria-expanded', 'false');
-    chip.title = id.loggedIn ? id.label : '로그인하지 않았습니다';
+    chip.title = id.loggedIn ? id.label + (id.kind === 'test' ? ' (' + testTagText() + ')' : '') : '로그인하지 않았습니다';
+    chip.setAttribute('aria-label', chip.title);
+    chip.appendChild(avatarEl(id));
     chip.appendChild(el('span', 'hub-dot'));
-    chip.appendChild(el('span', 'hub-label', id.loggedIn ? id.label : '로그인 필요'));
-    if (id.kind === 'test') chip.appendChild(el('span', 'hub-tag', testTagText()));
     chip.addEventListener('click', function (ev) { ev.stopPropagation(); setMenu(!menuOpen); if (menuOpen && id.kind === 'test') fetchQuota(true); });
 
     var menu = el('div', 'hub-menu');
     menu.hidden = true;
     menu.setAttribute('role', 'menu');
     if (id.loggedIn) {
-      var p = el('div'); p.appendChild(el('b', '', id.label));              // 아이디만 보여 준다 — 메뉴가 열리면 로그인된 상태임을 알 수 있다
-      menu.appendChild(p);
+      var head = el('div', 'hub-head'); head.appendChild(avatarEl(id));
+      var htxt = el('div', 'hub-head-txt'); htxt.appendChild(el('b', '', id.label));   // 사진 옆에 아이디(+ 테스트면 표시)
+      if (id.kind === 'test') htxt.appendChild(el('span', 'hub-tag', testTagText()));
+      head.appendChild(htxt); menu.appendChild(head);
       if (id.kind === 'test') appendTestSection(menu);
       if (id.source === 'spa') {
         menu.appendChild(el('p', 'hub-note', '이 기기에 등록된 계정입니다. 계정 정보는 메인 앱의 설정에서 관리합니다.'));
@@ -770,12 +804,12 @@
             menu.appendChild(el('p', 'hub-note', '아이디 바꾸기는 오른쪽 ⋮ 설정에서 할 수 있어요.'));
           }
         }
-        var out = el('button', 'hub-btn', '로그아웃'); out.type = 'button';
+        var out = el('button', 'hub-btn hub-text', '로그아웃'); out.type = 'button';
         out.addEventListener('click', function () { setMenu(false); logout(); });
         menu.appendChild(out);
       }
     } else {
-      menu.appendChild(el('div', '', '로그인하지 않았습니다.'));
+      menu.appendChild(el('div', '', '로그인하지 않았습니다.'));   // 사진 자리는 비워 둔다
       menu.appendChild(el('p', 'hub-note', '메일 보내기 등 일부 기능은 로그인 후에 쓸 수 있습니다.'));
       var inn = el('button', 'hub-btn hub-primary', '로그인'); inn.type = 'button';
       inn.addEventListener('click', function () { setMenu(false); login(); });

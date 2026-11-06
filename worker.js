@@ -36431,8 +36431,15 @@ async function handleKmailMailIdStatus(request, url, env, corsHeaders) {
   const mailId = userSettings.mail_id || '';
   const st = await _mailIdReadState(env.AI_SETUP_SEALS_KV, guid);
   const ev = _mailIdEvaluate(st, Date.now(), _mailIdPolicy(env), { hasCurrent: !!mailId });
+  // 우측 상단 배지의 프로필 사진 — 본인 프로필의 공개 사진(없거나 조회 실패면 빈 값, 배지는 이니셜로 대신한다)
+  let avatarUrl = '';
+  try {
+    const prof = await _l1FindProfileByGuid(env, guid);
+    const u = prof && prof.extra && prof.extra.public && prof.extra.public.avatar_url;
+    if (typeof u === 'string' && /^https:\/\//.test(u)) avatarUrl = u;
+  } catch (_) { /* 사진이 없어도 배지는 그대로 동작 */ }
   return new Response(JSON.stringify({
-    ok: true, mail_id: mailId, address: mailId ? `${mailId}@${_KMAIL_DOMAIN}` : '',
+    ok: true, mail_id: mailId, address: mailId ? `${mailId}@${_KMAIL_DOMAIN}` : '', avatar_url: avatarUrl,
     sender_display_name: userSettings.sender_display_name || '', sender_name_max: _KMAIL_SENDER_NAME_MAX,
     sender_preview: mailId ? _kmailFormatSender(`${mailId}@${_KMAIL_DOMAIN}`, userSettings.sender_display_name) : '',
     needs_choice: st.confirmed === null, confirmed: st.confirmed,
