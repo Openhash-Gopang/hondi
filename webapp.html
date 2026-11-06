@@ -3750,7 +3750,15 @@ window.closePDV = closePDV;
   // 기다리는 동안의 표시는 호스트(나비웹)의 "잠시 기다려 주십시오" 진행 막대가 맡는다. 글자가 생기면 그 말풍선이 나타난다.
   if (window.parent !== window) {
     const _isPh = (b) => { const t = String(b.textContent || '').replace(/\s+/g, ''); return !t || t === '…' || t === '...' || t === '나비화면에서처리하고있습니다…'; };
-    const _syncPh = () => { msgList.querySelectorAll('.bubble-ai').forEach((b) => { const r = b.parentNode; if (r && r.classList && r.classList.contains('msg-row')) r.style.display = _isPh(b) ? 'none' : ''; }); };
+    // 2026-11-07 — 호스트가 이 페이지에 AI 를 위임하지 않고(서류 SP 등 ai:'self') 이 페이지가 직접 답하는 동안에도 진행 막대가 보이게 한다.
+    // 자리표시 말풍선이 있는 동안 호스트에 hondi-embed-busy {on:true} 를, 사라지면 {on:false} 를 보낸다(위임 모드는 호스트가 이미 막대를 켠다 — 켜짐·꺼짐은 겹쳐도 무해).
+    let _phBusy = false;
+    const _tellBusy = (on) => { try { const o = (window.location.ancestorOrigins && window.location.ancestorOrigins[0]) || '*'; window.parent.postMessage({ type: 'hondi-embed-busy', on: !!on }, o); } catch (e) {} };
+    const _syncPh = () => {
+      let anyPh = false;
+      msgList.querySelectorAll('.bubble-ai').forEach((b) => { const r = b.parentNode; if (r && r.classList && r.classList.contains('msg-row')) { const ph = _isPh(b); r.style.display = ph ? 'none' : ''; if (ph) anyPh = true; } });
+      if (anyPh !== _phBusy) { _phBusy = anyPh; _tellBusy(anyPh); }
+    };
     new MutationObserver(_syncPh).observe(msgList, { childList: true, subtree: true, characterData: true });
   }
 
