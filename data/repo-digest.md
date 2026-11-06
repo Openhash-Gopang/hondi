@@ -1,9 +1,12 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-06 11:41 KST · 기준 커밋 a074ef00
+- 갱신: 2026-11-06 17:09 KST · 기준 커밋 ba0b7320
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-06 Merge pull request #933 from Openhash-Gopang/feat/user-badge-avatar-material
+- 2026-11-06 feat(badge): 우측 상단 아이디를 프로필 사진 아바타로, 팝업을 Material 스타일(폭 272px)로 개편
+- 2026-11-06 feat(admin): user reports and feature suggestions inbox in the admin dashboard
 - 2026-11-06 fix(feedback): ignore BOM/whitespace in export token secret
 - 2026-11-06 feat(feedback): /user-feedback/export (operator-only) and [FEEDBACK] tag from the document helper SP
 - 2026-11-06 fix(embed): hide empty/placeholder AI bubbles inside the naviweb frame; host progress bar shows waiting
@@ -41,9 +44,6 @@
 - 2026-11-03 style: 제안 게시판을 나비웹 청록 기반의 심플한 레이아웃·큰 글자로 갱신
 - 2026-11-03 PDV 페이지: 나비웹 설정에 끼워 쓰는 embed=mail 모드
 - 2026-11-03 제안 게시판: 나비웹 화면에 끼워 쓰는 embed=mail 모드, 날짜 표시 수정(created)
-- 2026-11-02 혼디 대화창: 위임 중 첨부 파일을 호스트(서류 SP)로 함께 넘긴다
-- 2026-11-02 대화 패널: hondi-embed-say(호스트가 AI 말풍선 표시)
-- 2026-11-02 대화 패널: autoAsk(첫 요청을 사용자 말풍선 없이 SP에 입력)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
