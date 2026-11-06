@@ -1,55 +1,59 @@
 /**
- * tests/test-quota-migrate.test.mjs — 테스트 계정 한도(DeepSeek API 실비 500원)·차단(유예 기본 0시간), 정식 계정으로 데이터 이동 단위 시험(네트워크 없음).
+ * tests/test-quota-migrate.test.mjs — 테스트 계정 한도(무료 이용 100원 또는 24시간 중 먼저)·차단, 정식 계정으로 데이터 이동 단위 시험(네트워크 없음).
  * 실행: node --test tests/test-quota-migrate.test.mjs
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { quotaConfig, evaluate, getStatus, addSpend, blockedMessage } from '../src/worker/test-quota.js';
+import { quotaConfig, evaluate, getStatus, startFree, addSpend, blockedMessage } from '../src/worker/test-quota.js';
 import { migrateTestData, mergeKmailSettings, MIGRATION_TARGETS } from '../src/worker/test-migrate.js';
 
 const H = 3600 * 1000;
 const fakeKv = () => { const m = new Map(); return { m, get: async k => m.get(k) ?? null, put: async (k, v) => { m.set(k, v); } }; };
-const CFG = quotaConfig({});                                  // 기본값: 500원, 유예 없음
-const CFG_GRACE = quotaConfig({ TEST_GRACE_HOURS: '24' });    // 유예를 켠 경우(선택 기능)
+const CFG = quotaConfig({});                                  // 기본값: 100원 또는 24시간 중 먼저
 
-test('quotaConfig: 기본값 500원·유예 없음, 환경 변수로 바꿀 수 있다', () => {
-  assert.equal(CFG.limitKrw, 500); assert.equal(CFG.graceHours, 0); assert.equal(CFG.graceMs, 0);
-  assert.equal(CFG_GRACE.graceHours, 24); assert.equal(CFG_GRACE.graceMs, 24 * H);
-  const c = quotaConfig({ TEST_QUOTA_KRW: '300', TEST_GRACE_HOURS: '0' });
-  assert.equal(c.limitKrw, 300); assert.equal(c.graceMs, 0);
-  assert.equal(quotaConfig({ TEST_QUOTA_KRW: 'abc', TEST_GRACE_HOURS: '' }).limitKrw, 500);
+test('quotaConfig: 기본값 100원·24시간, 환경 변수로 바꿀 수 있고 옛 변수는 무시한다', () => {
+  assert.equal(CFG.limitKrw, 100); assert.equal(CFG.freeHours, 24); assert.equal(CFG.freeMs, 24 * H); assert.equal(CFG.graceMs, 0);
+  const c = quotaConfig({ FREE_TRIAL_KRW: '300', FREE_TRIAL_HOURS: '12' });
+  assert.equal(c.limitKrw, 300); assert.equal(c.freeMs, 12 * H);
+  assert.equal(quotaConfig({ FREE_TRIAL_KRW: 'abc', FREE_TRIAL_HOURS: '' }).limitKrw, 100);
+  assert.equal(quotaConfig({ TEST_QUOTA_KRW: '500', TEST_GRACE_HOURS: '24' }).limitKrw, 100);   // 옛 변수(500원)가 남아 있어도 무시
 });
 
-test('evaluate: 한도 전 active → 한도가 차는 즉시 blocked(유예 없음)', () => {
+test('evaluate: 100원 미만·24시간 미만이면 active, 둘 중 먼저 오는 쪽에서 blocked', () => {
   const t0 = 1_700_000_000_000;
-  assert.equal(evaluate({ spent_krw: 499.99 }, t0, CFG).status, 'active');
-  assert.equal(evaluate({ spent_krw: 500, exceeded_at: t0 }, t0, CFG).status, 'blocked');
-  assert.equal(evaluate({ spent_krw: 500 }, t0, CFG).status, 'blocked');             // 시작 시각이 없어도 지금부터 차단
-  assert.equal(evaluate({ spent_krw: 900, exceeded_at: t0 }, t0 + 99 * H, CFG).status, 'blocked');
+  assert.equal(evaluate({ spent_krw: 99.99, started_at: t0 }, t0 + 23 * H, CFG).status, 'active');
+  const bySpend = evaluate({ spent_krw: 100, started_at: t0, exceeded_at: t0 + H }, t0 + 2 * H, CFG);
+  assert.equal(bySpend.status, 'blocked'); assert.equal(bySpend.ended_reason, 'spent');
+  const byTime = evaluate({ spent_krw: 10, started_at: t0 }, t0 + 24 * H, CFG);
+  assert.equal(byTime.status, 'blocked'); assert.equal(byTime.ended_reason, 'time');
+  assert.equal(byTime.free_ends_at, new Date(t0 + 24 * H).toISOString()); assert.equal(byTime.started_at, new Date(t0).toISOString());
+  // 둘 다 지났으면 먼저 온 쪽: 20시간째에 100원을 넘겼다면 spent, 30시간째에 넘겼다면 time
+  assert.equal(evaluate({ spent_krw: 150, started_at: t0, exceeded_at: t0 + 20 * H }, t0 + 40 * H, CFG).ended_reason, 'spent');
+  assert.equal(evaluate({ spent_krw: 150, started_at: t0, exceeded_at: t0 + 30 * H }, t0 + 40 * H, CFG).ended_reason, 'time');
+  assert.equal(evaluate({ spent_krw: 0 }, 5, CFG).status, 'active');                  // 시작 시각이 없으면 지금부터
 });
 
-test('evaluate: 유예를 켠 경우 한도 도달 시 grace → 24시간 뒤 blocked', () => {
-  const t0 = 1_700_000_000_000;
-  assert.equal(evaluate({ spent_krw: 499.99 }, t0, CFG_GRACE).status, 'active');
-  const g = evaluate({ spent_krw: 500, exceeded_at: t0 }, t0 + 23 * H, CFG_GRACE);
-  assert.equal(g.status, 'grace'); assert.equal(g.remaining_krw, 0);
-  assert.equal(g.grace_ends_at, new Date(t0 + 24 * H).toISOString());
-  assert.equal(evaluate({ spent_krw: 500, exceeded_at: t0 }, t0 + 24 * H, CFG_GRACE).status, 'blocked');
-  assert.equal(evaluate({ spent_krw: 900, exceeded_at: t0 }, t0 + 99 * H, CFG_GRACE).status, 'blocked');
-});
-
-test('addSpend: 누적하다가 넘는 순간에만 exceeded_at을 한 번 기록한다', async () => {
+test('startFree: 처음 한 번만 시작 시각을 기록하고 다시 인증해도 24시간이 새로 시작되지 않는다', async () => {
   const kv = fakeKv(); const t0 = 1_700_000_000_000;
-  assert.equal((await addSpend(kv, 'g1', 200, t0, CFG)).status, 'active');
-  assert.equal((await addSpend(kv, 'g1', 299.5, t0 + 1000, CFG)).status, 'active');
+  await startFree(kv, 's1', t0); await startFree(kv, 's1', t0 + 10 * H);
+  assert.equal(JSON.parse(kv.m.get('hondi:test_quota:s1')).started_at, t0);
+  assert.equal((await getStatus(kv, 's1', t0 + 23 * H, CFG)).status, 'active');
+  assert.equal((await getStatus(kv, 's1', t0 + 24 * H, CFG)).status, 'blocked');
+  await addSpend(kv, 's1', 5, t0 + 1, CFG);                                           // 사용분을 쌓아도 시작 시각은 그대로
+  assert.equal(JSON.parse(kv.m.get('hondi:test_quota:s1')).started_at, t0);
+  await startFree(null, 's1', t0);                                                    // KV 없음은 조용히 넘어간다
+});
+
+test('addSpend: 100원이 되는 순간 blocked, exceeded_at은 한 번만 기록', async () => {
+  const kv = fakeKv(); const t0 = 1_700_000_000_000;
+  assert.equal((await addSpend(kv, 'g1', 40, t0, CFG)).status, 'active');
+  assert.equal((await addSpend(kv, 'g1', 59.5, t0 + 1000, CFG)).status, 'active');
   const over = await addSpend(kv, 'g1', 1, t0 + 5000, CFG);
-  assert.equal(over.status, 'blocked');                                // 유예가 없으니 넘는 순간 바로 차단
+  assert.equal(over.status, 'blocked'); assert.equal(over.ended_reason, 'spent');
   const first = JSON.parse(kv.m.get('hondi:test_quota:g1')).exceeded_at;
   assert.equal(first, t0 + 5000);
-  await addSpend(kv, 'g1', 50, t0 + 9000, CFG);                       // 이후 사용은 시작 시각을 바꾸지 않는다
+  await addSpend(kv, 'g1', 50, t0 + 9000, CFG);
   assert.equal(JSON.parse(kv.m.get('hondi:test_quota:g1')).exceeded_at, first);
-  assert.equal((await getStatus(kv, 'g1', t0 + 5000 + 24 * H, CFG)).status, 'blocked');
-  assert.equal((await getStatus(kv, 'g1', t0 + 5000 + 24 * H, CFG_GRACE)).status, 'blocked');
 });
 
 test('addSpend: 0원·음수·KV 없음은 아무 일도 하지 않는다(차단 쪽으로 실패하지 않는다)', async () => {
@@ -61,31 +65,28 @@ test('addSpend: 0원·음수·KV 없음은 아무 일도 하지 않는다(차단
   assert.equal((await getStatus(null, 'g2', 1, CFG)).status, 'active');
 });
 
-test('getStatus: 한도를 나중에 낮춰 이미 넘은 계정은 바로 차단되고, 유예를 켰다면 지금부터 유예가 시작된다', async () => {
+test('getStatus: 시작 기록이 없던 계정은 처음 조회한 시점부터 24시간, 이미 100원을 넘었다면 바로 blocked', async () => {
   const kv = fakeKv(); const t0 = 1_700_000_000_000;
-  await addSpend(kv, 'g3', 400, t0, CFG);
-  const low = quotaConfig({ TEST_QUOTA_KRW: '300' });
-  assert.equal((await getStatus(kv, 'g3', t0 + H, low)).status, 'blocked');
-  const kv2 = fakeKv(); await addSpend(kv2, 'g3', 400, t0, CFG);
-  const lowGrace = quotaConfig({ TEST_QUOTA_KRW: '300', TEST_GRACE_HOURS: '24' });
-  assert.equal((await getStatus(kv2, 'g3', t0 + H, lowGrace)).status, 'grace');
-  assert.equal((await getStatus(kv2, 'g3', t0 + H + 24 * H, lowGrace)).status, 'blocked');
+  assert.equal((await getStatus(kv, 'g3', t0, CFG)).status, 'active');
+  assert.equal(JSON.parse(kv.m.get('hondi:test_quota:g3')).started_at, t0);
+  kv.m.set('hondi:test_quota:g4', JSON.stringify({ spent_krw: 400, exceeded_at: null }));   // 옛 형식(시작 기록 없음)
+  assert.equal((await getStatus(kv, 'g4', t0, CFG)).status, 'blocked');
 });
 
 test('addSpend: 같은 정산 키는 한 번만 센다(같은 KV 항목에 최근 키 30개 보관), 키가 없으면 매번 센다', async () => {
   const kv = fakeKv(); const t0 = 1_700_000_000_000; let writes = 0; const put = kv.put; kv.put = async (k, v) => { writes++; return put(k, v); };
-  await addSpend(kv, 'gd', 100, t0, CFG, 'k1'); await addSpend(kv, 'gd', 100, t0, CFG, 'k1'); await addSpend(kv, 'gd', 100, t0, CFG, 'k1');
-  assert.equal(JSON.parse(kv.m.get('hondi:test_quota:gd')).spent_krw, 100); assert.equal(writes, 1);   // 중복 호출은 쓰기도 하지 않는다
-  await addSpend(kv, 'gd', 50, t0, CFG, 'k2'); assert.equal(JSON.parse(kv.m.get('hondi:test_quota:gd')).spent_krw, 150);
-  await addSpend(kv, 'gd', 10, t0, CFG); await addSpend(kv, 'gd', 10, t0, CFG); assert.equal(JSON.parse(kv.m.get('hondi:test_quota:gd')).spent_krw, 170);
-  for (let i = 0; i < 40; i++) await addSpend(kv, 'gd', 1, t0, CFG, 'x' + i);
-  assert.ok(JSON.parse(kv.m.get('hondi:test_quota:gd')).recent.length <= 30);                         // 기록이 무한히 늘지 않는다
+  await addSpend(kv, 'gd', 10, t0, CFG, 'k1'); await addSpend(kv, 'gd', 10, t0, CFG, 'k1'); await addSpend(kv, 'gd', 10, t0, CFG, 'k1');
+  assert.equal(JSON.parse(kv.m.get('hondi:test_quota:gd')).spent_krw, 10); assert.equal(writes, 1);
+  await addSpend(kv, 'gd', 5, t0, CFG, 'k2'); assert.equal(JSON.parse(kv.m.get('hondi:test_quota:gd')).spent_krw, 15);
+  await addSpend(kv, 'gd', 1, t0, CFG); await addSpend(kv, 'gd', 1, t0, CFG); assert.equal(JSON.parse(kv.m.get('hondi:test_quota:gd')).spent_krw, 17);
+  for (let i = 0; i < 40; i++) await addSpend(kv, 'gd', 0.1, t0, CFG, 'x' + i);
+  assert.ok(JSON.parse(kv.m.get('hondi:test_quota:gd')).recent.length <= 30);
 });
 
-test('blockedMessage: 한도(원)를 넣고, 유예가 없으면 유예 문구를 빼며, 유료 회원 전환을 안내한다', () => {
-  const m = blockedMessage({ limit_krw: 500, grace_hours: 0 });
-  assert.match(m, /500원/); assert.doesNotMatch(m, /유예/); assert.match(m, /유료 회원/); assert.match(m, /정식 아이디/);
-  assert.match(blockedMessage({ limit_krw: 500, grace_hours: 24 }), /24시간/);
+test('blockedMessage: 끝난 이유(비용/시간)에 맞는 문구와 유료 회원 전환 안내', () => {
+  const m = blockedMessage({ limit_krw: 100, free_hours: 24, ended_reason: 'spent' });
+  assert.match(m, /100원/); assert.match(m, /유료 회원/); assert.match(m, /정식 아이디/);
+  assert.match(blockedMessage({ limit_krw: 100, free_hours: 24, ended_reason: 'time' }), /24시간/);
 });
 
 // ── 데이터 이동 ────────────────────────────────────────────

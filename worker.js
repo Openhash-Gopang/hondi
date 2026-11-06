@@ -19,7 +19,7 @@ import { profilePhoneFilter, last8Filter, pickGuidByLast8 } from './src/worker/p
 import { validateSignalInput as _sigValidate, canDeleteSignal as _sigCanDelete, sendRateOk as _sigRateOk } from './src/worker/signal-auth.js';
 import { classifyQuery as _ffClassify, publicCard as _ffPublicCard, rateLimitOk as _ffRateOk } from './src/worker/friend-find.js';
 import { computeChargeGdc as _computeChargeGdc } from './src/worker/charge-plans.js';
-import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
+import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, startFree as _testQuotaStartFree, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
 import { parseMessage as _kmailParseMime, decodeMimeWords as _kmailDecodeMimeWords, repairStoredText as _kmailRepairStoredText } from './src/worker/mime-text.js';
 import { checkSenderName as _kmailCheckSenderName, effectiveSenderName as _kmailEffectiveSenderName, renderSignature as _kmailRenderSignature, campaignReplyTo as _kmailCampaignReplyTo, replyToWithName as _kmailReplyToWithName, REPLY_TO_SELF as _KMAIL_REPLY_TO_SELF, formatSender as _kmailFormatSender, describeSender as _kmailDescribeSender, SENDER_NAME_MAX as _KMAIL_SENDER_NAME_MAX } from './src/worker/kmail-sender.js';
@@ -646,6 +646,7 @@ async function handleAuthRefreshToken(request, env, corsHeaders) {
   const newPayload = `${resolved.e164}:${exp}`;
   const signature = await _hmacSha256Hex(env.PHONE_VERIFY_SECRET, newPayload);
   const newToken = newPayload + '.' + signature;
+  if (resolved.guid && env.AI_SETUP_SEALS_KV) { try { await _testQuotaStartFree(env.AI_SETUP_SEALS_KV, resolved.guid, Date.now()); } catch (e) { /* 시작 기록 실패는 무시 — 첫 사용 때 다시 기록된다 */ } }  // 무료 이용 시작(전화 인증 후)
 
   return new Response(JSON.stringify({
     ok: true, phone_verify_token: newToken, expires_at: new Date(exp).toISOString(),
@@ -1956,12 +1957,11 @@ function _gdcFreeTestOn(env) { return !!env && env.GDC_FREE_TEST === '1'; }
 
 // ═══════════════════════════════════════════════════════════
 // 🧪 테스트 계정 한도·유예·차단 + 정식 계정 전환 — 2026-10-27 (주피터 지시)
-//   · 테스트 계정(handle이 'tid-'로 시작)은 청구액 합계가 TEST_QUOTA_KRW(기본 500 GDC)가 될 때까지 무료.
-//   · 한도를 넘기면 TEST_GRACE_HOURS(기본 24)시간 유예 후 차단 — _gdcFreeQuotaGate·K-서비스 공용 토큰 게이트가 막는다.
+//   · [2026-11-06 개정] 모든 계정이 전화 인증 후 AI 사용 비용 FREE_TRIAL_KRW(기본 100원) 또는 FREE_TRIAL_HOURS(기본 24시간) 중 먼저 오는 때까지 무료.
+//     끝나면 정식 계정은 GDC 결제로 이어지고, 테스트 계정(handle이 'tid-'로 시작)은 유예 없이 차단 — _gdcFreeQuotaGate·K-서비스 공용 토큰 게이트가 막는다.
 //   · 차단돼도 /auth/test-quota 조회와 /auth/test-migrate(정식 계정으로 데이터 이동)는 계속 허용한다.
 //   · 판정 로직은 src/worker/test-quota.js, 데이터 이동은 src/worker/test-migrate.js (단위 시험: tests/test-quota-migrate.test.mjs).
-//   · GDC_FREE_TEST_SCOPE='test-only'로 설정하면 무료 테스트 모드가 테스트 계정에만 적용된다(정식 계정은 GDC 충전·차감).
-//     설정하지 않으면 지금처럼 모든 계정이 무료다 — 정식 계정 과금 시작은 이 변수를 켜는 시점에 정한다.
+//   · GDC_FREE_TEST_SCOPE는 더 이상 쓰지 않는다 — 무료 테스트 모드(GDC_FREE_TEST=1)가 켜져 있으면 무료 이용 기간 규칙이 모든 계정에 적용된다.
 // ═══════════════════════════════════════════════════════════
 // 계정 종류(테스트/정식)는 거의 바뀌지 않으므로 같은 워커 인스턴스 안에서는 60초간 메모리에 둔다 —
 // 요청 하나가 KV를 여러 번 읽지 않게 해, 무료 플랜의 요청당 하위 요청 한도(50)를 아낀다.
@@ -1990,18 +1990,30 @@ async function _isTestGuidUncached(env, guid) {
   if (kv) { try { await kv.put(kvKey, isTest ? 't' : 'f', isTest ? undefined : { expirationTtl: 21600 }); } catch (e) { /* 무시 */ } }
   return isTest;
 }
-// 이 계정의 사용분을 GDC에서 차감하지 않고 무료로 처리해야 하는가
+// 이 계정의 사용분을 GDC에서 차감하지 않고 무료로 처리해야 하는가(2026-11-06 개정).
+//   무료 테스트 모드가 켜져 있으면 모든 계정(유료·무료 불문)이 전화 인증 뒤 "100원 소진 또는 24시간 중 먼저"까지 무료다.
+//   무료 기간이 끝나면 false — 정식 계정은 GDC 잔액으로 이어 쓰고, 테스트 계정은 _testQuotaBlockedResponse가 막는다.
+const _freeTrialMem = new Map();
+async function _freeTrialActive(env, guid) {
+  if (!guid || !env.AI_SETUP_SEALS_KV) return true;   // 상태를 알 수 없으면 막지 않는다(과금하지 않는 쪽으로 실패)
+  const m = _freeTrialMem.get(guid);
+  if (m && Date.now() - m.t < 15000) return m.v;
+  let v = true;
+  try { v = (await _testQuotaGetStatus(env.AI_SETUP_SEALS_KV, guid, Date.now(), _testQuotaConfig(env))).status === 'active'; } catch (e) { v = true; }
+  if (_freeTrialMem.size > 2000) _freeTrialMem.clear();
+  _freeTrialMem.set(guid, { v, t: Date.now() });
+  return v;
+}
 async function _gdcFreeFor(env, guid) {
   if (!_gdcFreeTestOn(env)) return false;
-  if (env.GDC_FREE_TEST_SCOPE !== 'test-only') return true;
-  return await _isTestGuid(env, guid);
+  return await _freeTrialActive(env, guid);
 }
-// 무료로 처리한 사용분을 테스트 계정 한도에 누적한다(정식 계정이면 아무 일도 하지 않는다)
+// 무료로 처리한 사용분을 무료 이용 한도에 누적한다(모든 계정)
 async function _testQuotaAdd(env, guid, krw, dedupKey = null) {
   if (!(Number(krw) > 0) || !_gdcFreeTestOn(env)) return;
-  if (!(await _isTestGuid(env, guid))) return;
   // 같은 정산 키(settlementKey)는 한 번만 센다 — 백그라운드 작업이 취소돼 10분 스윕이 같은 건을 다시 정산해도 중복 누적되지 않는다
   await _testQuotaAddSpend(env.AI_SETUP_SEALS_KV, guid, krw, Date.now(), _testQuotaConfig(env), dedupKey);
+  _freeTrialMem.delete(guid);
 }
 // 유예가 끝난 테스트 계정이면 402 응답을, 아니면 null
 async function _testQuotaBlockedResponse(env, guid, corsHeaders) {
@@ -20656,7 +20668,7 @@ const TEST_ID_PREFIX = 'tid-';
 function _testAuthOn(env) { return env && env.SIMPLE_AUTH_TEST === '1'; }
 
 async function handleTestAuthMode(request, env, corsHeaders) {
-  { const _qc = _testQuotaConfig(env); return new Response(JSON.stringify({ ok: true, enabled: _testAuthOn(env), gdc_free: _gdcFreeTestOn(env), quota_krw: _qc.limitKrw, grace_hours: _qc.graceHours, free_scope: env.GDC_FREE_TEST_SCOPE === 'test-only' ? 'test-only' : 'all' }), { status: 200, headers: corsHeaders }); }
+  { const _qc = _testQuotaConfig(env); return new Response(JSON.stringify({ ok: true, enabled: _testAuthOn(env), gdc_free: _gdcFreeTestOn(env), quota_krw: _qc.limitKrw, free_hours: _qc.freeHours, grace_hours: 0, free_scope: 'all' }), { status: 200, headers: corsHeaders }); }
 }
 
 // ── 쉬운 한국어 단어 아이디 자동 생성 (2026-10-09) ─────────────────────
@@ -20697,10 +20709,10 @@ async function handleTestQuota(request, env, corsHeaders) {
   const body = await request.json().catch(() => ({})) || {};
   const r = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, { allowBlockedTest: true, allowMigrated: true });
   if (!r.ok) { const m = mapPhoneAuthError(r); return _err(m.status, m.code, m.message, corsHeaders); }
-  if (!String(r.e164 || '').startsWith(TEST_ID_PREFIX)) {
-    return new Response(JSON.stringify({ ok: true, test: false }), { status: 200, headers: corsHeaders });
-  }
   const ev = await _testQuotaGetStatus(env.AI_SETUP_SEALS_KV, r.guid, Date.now(), _testQuotaConfig(env));
+  if (!String(r.e164 || '').startsWith(TEST_ID_PREFIX)) {   // 정식 계정도 무료 이용 기간 상태를 돌려준다(차단 대신 GDC 결제로 이어진다)
+    return new Response(JSON.stringify({ ok: true, test: false, free_test_on: _gdcFreeTestOn(env), ...ev }), { status: 200, headers: corsHeaders });
+  }
   return new Response(JSON.stringify({ ok: true, test: true, id: String(r.e164).slice(TEST_ID_PREFIX.length), free_test_on: _gdcFreeTestOn(env), ...ev }), { status: 200, headers: corsHeaders });
 }
 
@@ -20810,6 +20822,7 @@ async function handleTestAuthEnter(request, env, corsHeaders) {
   const shownId = String(profile.handle).slice(TEST_ID_PREFIX.length);
 
   const pv = await _mintTestPhoneToken(env, shownId);
+  if (env.AI_SETUP_SEALS_KV) { try { await _testQuotaStartFree(env.AI_SETUP_SEALS_KV, profile.guid, Date.now()); } catch (e) { /* 무시 */ } }  // 무료 이용 시작
   const token = await buildToken(env, profile.guid, 'L0', 'gopang');
   return new Response(JSON.stringify({
     ok: true, created, id: shownId, guid: profile.guid, handle: profile.handle,
