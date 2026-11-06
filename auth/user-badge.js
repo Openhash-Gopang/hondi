@@ -235,7 +235,7 @@
     var back = el('div'); back.id = 'hondi-blocked-modal';
     var box = el('div', 'hub-modal'); box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true');
     box.appendChild(el('h2', '', '무료 한도를 모두 사용했습니다'));
-    box.appendChild(el('p', '', '테스트 아이디의 무료 이용 기간(AI 사용 비용 ' + fmtNum(quota.limit_krw) + '원 또는 ' + (quota.free_hours || 24) + '시간 중 먼저 오는 쪽)이 끝났습니다. 계속 쓰려면 유료 회원으로 전환해 주세요.'));
+    box.appendChild(el('p', '', '무료 사용 한도를 모두 사용했습니다. 5시간 후에 다시 시작됩니다. 지금 바로 계속 쓰려면 유료 회원으로 전환해 주세요.'));
     box.appendChild(el('p', 'hub-note', '요금과 플랜 안내는 "플랜 업그레이드" 화면에서 확인하실 수 있습니다. 정식 아이디로 로그인하거나 만들면 테스트 데이터가 옮겨집니다.'));
     var b1 = el('button', 'hub-btn hub-primary', '정식 아이디로 로그인'); b1.type = 'button';
     b1.addEventListener('click', function () { back.remove(); startFormalLogin(); });
@@ -255,7 +255,7 @@
       q.appendChild(el('div', '', '무료 사용량 ' + fmtNum(quota.spent_krw) + ' / ' + fmtNum(quota.limit_krw) + '원 · ' + fmtTime(quota.free_ends_at) + '까지'));
       var bar = el('div', 'hub-bar'); var fill = el('div', 'hub-bar-fill' + (quota.status === 'active' ? '' : ' hub-over')); fill.style.width = pct + '%'; bar.appendChild(fill); q.appendChild(bar);
       if (quota.status === 'grace') q.appendChild(el('p', 'hub-note hub-warn', '한도를 모두 사용했습니다. ' + fmtTime(quota.grace_ends_at) + '까지 정식 아이디로 전환해 주세요. 이후에는 사용이 중단됩니다.'));
-      else if (quota.status === 'blocked') q.appendChild(el('p', 'hub-note hub-warn', '무료 이용 기간(AI 사용 비용 ' + fmtNum(quota.limit_krw) + '원 또는 ' + (quota.free_hours || 24) + '시간 중 먼저 오는 쪽)이 끝나 사용이 중단되었습니다. 유료 회원으로 전환하면 이어서 쓸 수 있습니다.'));
+      else if (quota.status === 'blocked') q.appendChild(el('p', 'hub-note hub-warn', '무료 사용 한도를 모두 사용해 사용이 중단되었습니다. 5시간 후에 다시 시작되며, 유료 회원으로 전환하면 바로 이어서 쓸 수 있습니다.'));
       menu.appendChild(q);
     } else {
       menu.appendChild(el('p', 'hub-note', '테스트 기간에 자동으로 만들어진 임시 아이디입니다.'));
