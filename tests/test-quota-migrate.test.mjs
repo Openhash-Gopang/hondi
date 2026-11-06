@@ -4,7 +4,7 @@
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { quotaConfig, evaluate, getStatus, startFree, addSpend, blockedMessage } from '../src/worker/test-quota.js';
+import { quotaConfig, evaluate, getStatus, startFree, setPlan, addSpend, blockedMessage, waitMessage } from '../src/worker/test-quota.js';
 import { migrateTestData, mergeKmailSettings, MIGRATION_TARGETS } from '../src/worker/test-migrate.js';
 
 const H = 3600 * 1000;
@@ -87,6 +87,41 @@ test('blockedMessage: 끝난 이유(비용/시간)에 맞는 문구와 유료 �
   const m = blockedMessage({ limit_krw: 100, free_hours: 24, ended_reason: 'spent' });
   assert.match(m, /100원/); assert.match(m, /유료 회원/); assert.match(m, /정식 아이디/);
   assert.match(blockedMessage({ limit_krw: 100, free_hours: 24, ended_reason: 'time' }), /24시간/);
+});
+
+test('무료 플랜: 무료 기간(100원/24시간)이 끝난 뒤 10원을 쓰면 5시간 쉬고 10원이 다시 채워진다', async () => {
+  const kv = fakeKv(); const t0 = 1_700_000_000_000;
+  assert.equal(CFG.refillKrw, 10); assert.equal(CFG.refillMs, 5 * H);
+  await startFree(kv, 'p1', t0); await setPlan(kv, 'p1', 'free', t0);
+  assert.equal((await getStatus(kv, 'p1', t0 + H, CFG)).phase, 'trial');           // 무료 기간 동안은 100원 규칙
+  const t1 = t0 + 25 * H;                                                          // 24시간 뒤: 무료 플랜 단계
+  let ev = await getStatus(kv, 'p1', t1, CFG);
+  assert.equal(ev.status, 'active'); assert.equal(ev.phase, 'free');
+  await addSpend(kv, 'p1', 4, t1, CFG);
+  assert.equal((await getStatus(kv, 'p1', t1, CFG)).status, 'active');
+  ev = await addSpend(kv, 'p1', 6.5, t1 + 1000, CFG);                              // 10원을 넘김 → 쉬는 시간
+  assert.equal(ev.status, 'waiting'); assert.equal(ev.wait_until, new Date(t1 + 1000 + 5 * H).toISOString());
+  assert.equal((await getStatus(kv, 'p1', t1 + 4 * H, CFG)).status, 'waiting');
+  assert.equal((await getStatus(kv, 'p1', t1 + 1000 + 5 * H, CFG)).status, 'active');   // 5시간 뒤 다시 사용 가능
+  ev = await addSpend(kv, 'p1', 3, t1 + 6 * H, CFG);                                // 재충전 뒤에는 새 10원 통부터 쌓인다
+  assert.equal(ev.status, 'active'); assert.equal(JSON.parse(kv.m.get('hondi:test_quota:p1')).fp_spent, 3);
+  assert.equal((await addSpend(kv, 'p1', 8, t1 + 7 * H, CFG)).status, 'waiting');
+});
+
+test('무료 플랜: 플랜을 고르지 않은 정식 계정은 무료 기간이 끝나면 blocked(GDC 결제 단계), 해제하면 되돌아간다', async () => {
+  const kv = fakeKv(); const t0 = 1_700_000_000_000;
+  await startFree(kv, 'p2', t0);
+  assert.equal((await getStatus(kv, 'p2', t0 + 25 * H, CFG)).status, 'blocked');
+  await setPlan(kv, 'p2', 'free', t0 + 25 * H);
+  assert.equal((await getStatus(kv, 'p2', t0 + 25 * H, CFG)).status, 'active');
+  await setPlan(kv, 'p2', null, t0 + 26 * H);
+  assert.equal((await getStatus(kv, 'p2', t0 + 26 * H, CFG)).status, 'blocked');
+  await setPlan(null, 'p2', 'free', 1);                                              // KV 없음은 조용히 넘어간다
+});
+
+test('waitMessage: 시각은 알리되 금액(10원)은 문구에 넣지 않는다', () => {
+  const m = waitMessage({ wait_until: new Date(1_700_000_000_000).toISOString() });
+  assert.match(m, /다시 이용/); assert.match(m, /업그레이드/); assert.doesNotMatch(m, /\d+원/);
 });
 
 // ── 데이터 이동 ────────────────────────────────────────────
