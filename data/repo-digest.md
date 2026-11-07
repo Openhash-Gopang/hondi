@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-07 07:48 KST · 기준 커밋 10759f06
+- 갱신: 2026-11-07 09:19 KST · 기준 커밋 94bdaacf
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-07 Merge pull request #942 from Openhash-Gopang/fix/ksa-popup-cancel
+- 2026-11-07 로그인 팝업: 문구(010 제외), 단순 화살표 아이콘, 취소 버튼·Esc 닫기
 - 2026-11-07 Merge pull request #941 from Openhash-Gopang/fix/embed-busy-bar-self-mode
 - 2026-11-07 fix(embed): ai:self 모드(서류 SP 등)에서도 호스트 진행 막대가 켜지도록 hondi-embed-busy 를 알린다
 - 2026-11-07 Merge pull request #940 from Openhash-Gopang/perf/embed-force-flash-short-ask
@@ -42,8 +44,6 @@
 - 2026-11-04 Merge pull request #915 from Openhash-Gopang/docs/oracle-cost-20261104
 - 2026-11-04 docs(admin): 오라클 문서 gopang-l1.key 분실 확정 반영
 - 2026-11-04 docs(admin): 오라클 문서 키 보관 상태 정정 (gopang-l1.key 이동 실패)
-- 2026-11-04 Merge pull request #914 from Openhash-Gopang/docs/oracle-cost-20261104
-- 2026-11-04 docs(admin): 오라클 클라우드 비용 정리 문서와 관리자 메뉴 추가
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
