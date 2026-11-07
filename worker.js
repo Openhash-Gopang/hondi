@@ -40,6 +40,7 @@ import { makePocketBaseDigitStore } from './src/worker/digit-claim-store.js';
 import { makeOrgSiteHandler } from './src/worker/org-site-handler.js';
 import { makePocketBaseOrgSiteStore } from './src/worker/org-site-store.js';
 import { makeDocFormHandler } from './src/worker/doc-form-handler.js';
+import { makePdvBackupServer, makePocketBasePdvBackupStore } from './src/worker/pdv-backup-handler.js';
 import { makeAdminProposalsHandler } from './src/worker/admin-proposals-handler.js';
 import { makeAdminFeedbackHandler } from './src/worker/admin-feedback-handler.js';
 import { makePocketBaseDocFormStore } from './src/worker/doc-form-store.js';
@@ -1581,6 +1582,19 @@ async function handleCaseApi(request, env, corsHeaders, op) {
     },
   });
   const r = await srv[op](body);
+  return new Response(JSON.stringify(r.json), { status: r.status, headers: corsHeaders });
+}
+
+// POST /pdv/backup/{put|get|list|remove} — PDV 암호화 백업(L1 pdv_backups). 서버는 암호문만 본다. 본인 인증 필수.
+async function handlePdvBackup(request, env, corsHeaders, op) {
+  const body = await request.json().catch(() => null);
+  const srv = makePdvBackupServer({
+    auth: (b) => _kAuth.resolveGuid(env, b, { sigMsg: `pdv-backup-${op}:${b.guid}:${b.ts}` }),
+    store: makePocketBasePdvBackupStore({ base: L1_DEFAULT, getToken: () => _l1AdminToken(env) }),
+  });
+  let r;
+  try { r = await srv[op](body); }
+  catch (e) { r = { status: 502, json: { ok: false, code: 'L1_ERROR', message: String(e.message || e).slice(0, 200) } }; }
   return new Response(JSON.stringify(r.json), { status: r.status, headers: corsHeaders });
 }
 
@@ -14281,6 +14295,8 @@ export default {
     if (pathname === '/auth/refresh-token'        && request.method === 'POST') return handleAuthRefreshToken(request, env, corsHeaders);
     if (pathname === '/pdv/relay/push'            && request.method === 'POST') return handlePdvRelayPush(request, env, corsHeaders);
     if (pathname === '/pdv/relay/pull'            && request.method === 'GET')  return handlePdvRelayPull(request, env, corsHeaders);
+    // PDV 클라우드 백업(방식 C, 기본 저장소 L1 PocketBase) — 암호문만 보관 (2026-11-08)
+    if (/^\/pdv\/backup\/(put|get|list|remove)$/.test(pathname) && request.method === 'POST') return handlePdvBackup(request, env, corsHeaders, pathname.split('/').pop());
     if (pathname === '/case/invite/register' && request.method === 'POST') return handleCaseApi(request, env, corsHeaders, 'inviteRegister');
     if (pathname === '/case/invite/claim' && request.method === 'POST') return handleCaseApi(request, env, corsHeaders, 'inviteClaim');
     if (pathname === '/case/mailbox/push' && request.method === 'POST') return handleCaseApi(request, env, corsHeaders, 'mailboxPush');
