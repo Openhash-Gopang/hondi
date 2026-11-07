@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-07 10:15 KST · 기준 커밋 30908768
+- 갱신: 2026-11-07 10:20 KST · 기준 커밋 df90118d
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-07 Merge pull request #946 from Openhash-Gopang/docs/pdv-storage-survey-20261107
+- 2026-11-07 docs: PDV 저장 구조 조사(2026-11-07)
 - 2026-11-07 Merge pull request #945 from Openhash-Gopang/feat/auth-simplify-phone-only
 - 2026-11-07 인증 단순화: 가입 테스트 스위치 종료, 서버 테스트 입장 차단, QR 로그인 파일 삭제, 로그인 팝업 문자로 받기 버튼, 구독 점검 1시간
 - 2026-11-07 Merge pull request #944 from Openhash-Gopang/docs/auth-current-state-20261107
@@ -42,8 +44,6 @@
 - 2026-11-05 feat: 직역 사이트 *.naviweb.kr 출처를 엔진 임베드·서명 릴레이 허용 목록에 추가
 - 2026-11-04 perf: skip greeting turn for quiet=1 embed (document-writing engine)
 - 2026-11-04 feat: doc form feedback API (anonymous add-field signals, candidates by distinct users)
-- 2026-11-04 perf: load SP layers in parallel for expert-chat, share manifest request
-- 2026-11-04 서류 작성 엔진(expert-chat) 로딩 단축: 모듈 사전 로드 + 지갑 스크립트 defer
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
