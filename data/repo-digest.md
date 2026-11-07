@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-07 09:44 KST · 기준 커밋 c4367335
+- 갱신: 2026-11-07 10:02 KST · 기준 커밋 25f48560
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-07 Merge pull request #944 from Openhash-Gopang/docs/auth-current-state-20261107
+- 2026-11-07 docs: 가입·로그인 현황 조사(2026-11-07)
 - 2026-11-07 Merge pull request #943 from Openhash-Gopang/fix/push-sound-keep-devicetype
 - 2026-11-07 알림음 변경 시 deviceType 유지: 폰이 unknown 으로 덮어써져 승인 알림을 못 받는 문제 방지
 - 2026-11-07 Merge pull request #942 from Openhash-Gopang/fix/ksa-popup-cancel
@@ -42,8 +44,6 @@
 - 2026-11-04 서류 작성 엔진(expert-chat) 로딩 단축: 모듈 사전 로드 + 지갑 스크립트 defer
 - 2026-11-04 서류 작성 도우미 태그 채널 + SP_lawyer v5.7
 - 2026-11-04 Merge pull request #916 from Openhash-Gopang/docs/oracle-cost-20261104-b
-- 2026-11-04 docs(admin): 오라클 문서 갱신 - 서버 조회 결과, 144.24.90.233은 테넌시 밖, 접속 복구 경로 정정
-- 2026-11-04 Merge pull request #915 from Openhash-Gopang/docs/oracle-cost-20261104
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
