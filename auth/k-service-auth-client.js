@@ -164,7 +164,9 @@
       '.ksa-resend{text-align:center;margin-top:10px;font-size:12px;color:#718096;cursor:pointer;text-decoration:underline}' +
       '.ksa-msg{font-size:12px;margin-top:10px;text-align:center;min-height:16px}' +
       '.ksa-msg.err{color:#c01c28}' +
-      '.ksa-msg.ok{color:#1b6b3a}';
+      '.ksa-msg.ok{color:#1b6b3a}' +
+      '.ksa-cancel{display:block;margin:12px auto 0;border:1px solid #dfe2ed;background:#fff;color:#4A5568;border-radius:8px;padding:7px 22px;font-size:13px;font-family:inherit;cursor:pointer}' +
+      '.ksa-cancel:hover{background:#f4f5fa}';
     document.head.appendChild(style);
   }
 
@@ -176,11 +178,11 @@
     wrap.innerHTML =
       '<div class="ksa-box">' +
         '<div class="ksa-icon-row"><span class="ksa-icon">' + cfg.icon + '</span>' +
-          '<div class="ksa-desc" id="ksa-desc">휴대폰 번호 뒷자리 8자를 입력하십시오.</div></div>' +
+          '<div class="ksa-desc" id="ksa-desc">010을 제외한 폰 번호 뒷자리 8자를 입력하십시오.</div></div>' +
         '<div id="ksa-step-phone">' +
           '<div class="ksa-input-wrap">' +
             '<input type="tel" id="ksa-phone" placeholder="전화번호 뒷 8자리" inputmode="numeric" maxlength="8" autocomplete="tel">' +
-            '<button type="button" class="ksa-input-icon-btn" id="ksa-devlink-btn" aria-label="폰으로 승인받기" title="폰으로 승인받기">📱</button>' +
+            '<button type="button" class="ksa-input-icon-btn" id="ksa-devlink-btn" aria-label="폰으로 승인받기" title="폰으로 승인받기"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>' +
           '</div>' +
         '</div>' +
         '<div id="ksa-step-devlink" style="display:none">' +
@@ -192,6 +194,7 @@
           '<div class="ksa-resend" id="ksa-resend-phone">번호를 다시 입력할게요</div>' +
         '</div>' +
         '<div class="ksa-msg" id="ksa-msg"></div>' +
+        '<button type="button" class="ksa-cancel" id="ksa-cancel">취소</button>' +
       '</div>';
     document.body.appendChild(wrap);
     els.overlay      = wrap;
@@ -205,7 +208,8 @@
     els.devlinkTimer = wrap.querySelector('#ksa-devlink-timer');
     els.resendPhone  = wrap.querySelector('#ksa-resend-phone');
 
-    els.desc.textContent = (cfg.serviceLabel ? cfg.serviceLabel + ' — ' : '') + '휴대폰 번호 뒷자리 8자를 입력하십시오.';
+    els.desc.textContent = (cfg.serviceLabel ? cfg.serviceLabel + ' — ' : '') + '010을 제외한 폰 번호 뒷자리 8자를 입력하십시오.';
+    wrap.querySelector('#ksa-cancel').onclick = cancelOverlay;
     els.devlinkBtn.onclick = startDeviceLink;
     els.resendPhone.onclick = resetToPhoneStep;
     els.phone.addEventListener('keydown', function (e) { if (e.key === 'Enter') startDeviceLink(); });
@@ -222,6 +226,9 @@
     setMsg('', '');
   }
   function showOverlay() { ensureOverlay(); els.overlay.classList.add('show'); }
+  // 취소·Esc: 진행 중인 승인 대기를 멈추고 팝업을 닫는다. 기다리던 호출에는 지금 토큰(없으면 빈 값)을 돌려준다.
+  function cancelOverlay() { stopDevlinkPolling(); resetToPhoneStep(); hideOverlay(); resolveWaiters(); }
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && els.overlay && els.overlay.classList.contains('show')) { e.preventDefault(); cancelOverlay(); } });
   function hideOverlay() { if (els.overlay) els.overlay.classList.remove('show'); }
 
   function resolveWaiters() {
