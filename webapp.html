@@ -2498,7 +2498,9 @@ function _savePushSound(val) {
     reg.pushManager.getSubscription().then(sub => {
       if (!sub) return;
       import('/src/gopang/services/push.js').then(({ getOrCreateDeviceId, postPushSubscribe }) => {
-        postPushSubscribe({ guid: user.ipv6, subscription: sub.toJSON(), sound: val, deviceId: getOrCreateDeviceId() });
+        postPushSubscribe({ guid: user.ipv6, subscription: sub.toJSON(), sound: val, deviceId: getOrCreateDeviceId(),
+          // 알림음만 바꿔도 deviceType 을 같이 보낸다 — 빠뜨리면 서버가 'unknown' 으로 덮어써 폰이 mobile 로 인식되지 않는다.
+          deviceType: /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '') ? 'mobile' : 'desktop' });
       });
     })
   );
