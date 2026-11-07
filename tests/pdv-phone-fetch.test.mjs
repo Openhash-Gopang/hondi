@@ -80,5 +80,17 @@ test('폰 승인 화면·PDV 저장소: pdv_fetch 분기와 exportAll', () => {
   assert.match(a, /sessionData\.purpose === 'pdv_fetch'[\s\S]*?phoneRespond\(\{[\s\S]*?GopangWallet\.sealForRecipient\(sessionData\.pcPubKeyB64u/);
   assert.match(a, /<script src="\/pdv-store\.js"><\/script>/);
   assert.match(s, /async function exportAll\(\)[\s\S]*?delete o\._id/);
-  assert.match(s, /global\.GopangPDV = \{\s*\n\s*exportAll,/);
+  assert.match(s, /global\.GopangPDV = \{\s*\n\s*importRecords,\s*\n\s*exportAll,/);
+});
+
+test('PDV 화면: 원본 보관 선택(폰 기본·클라우드 준비 중)과 PC 의 "폰에서 불러오기"', () => {
+  const h = read('pdv.html'), s = read('pdv-store.js');
+  assert.match(h, /name="pdv-mode" value="phone" checked/);
+  assert.match(h, /name="pdv-mode" value="cloud" disabled/);
+  assert.match(h, /id="btn-phone-fetch">폰에서 불러오기/);
+  assert.match(h, /010을 제외한 폰 번호 뒷자리 8자를 입력하십시오/);
+  assert.match(h, /requestFromPhone\(\{[\s\S]*?importRecords\(data\.records\)/);
+  assert.match(h, /<script src="\/gopang-wallet\.js"><\/script>/);
+  assert.match(s, /async function importRecords\(records\)/);
+  assert.match(s, /global\.GopangPDV = \{\s*\n\s*importRecords,/);
 });

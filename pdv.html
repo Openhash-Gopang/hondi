@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <script src="/pdv-store.js"></script>
+<script src="/gopang-wallet.js"></script>
 <style>
 :root{
   --blue:#1A73E8;--blue-lt:#EEF4FF;--blue-dk:#1557B0;
@@ -59,6 +60,12 @@ body{font-family:var(--font);color:#111;background:#fff;-webkit-font-smoothing:a
 /* 나비웹(mail.hondi.net) 설정 안에 끼워 쓸 때(?embed=mail): 자체 상단 바(뒤로가기·제목)를 숨기고 안에서 목록·상세를 그대로 보여 준다. */
 body.embed > .header{display:none}
 body.embed .detail{position:absolute}
+.srcbar{padding:10px 14px;border-bottom:1px solid var(--border);background:#f8fafc;font-size:12.5px;color:var(--txt2);line-height:1.7}
+.srcbar b{color:#111}.srcbar .row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.srcbar label{display:inline-flex;align-items:center;gap:5px;cursor:pointer}.srcbar label.off{opacity:.5;cursor:not-allowed}
+.srcbar button{border:1px solid var(--blue);background:#fff;color:var(--blue-dk);border-radius:8px;padding:6px 12px;font:600 12.5px inherit;cursor:pointer}
+.srcbar button:disabled{opacity:.5;cursor:default}.srcbar input{border:1px solid var(--border);border-radius:8px;padding:6px 8px;width:130px;font:inherit}
+.srcbar .st{color:var(--txt3)}.srcbar .st.err{color:#b91c1c}.srcbar .st.ok{color:#15803d}
 </style>
 </head>
 <body>
@@ -70,6 +77,20 @@ body.embed .detail{position:absolute}
   <button class="icon-btn" aria-label="검색"><i class="ti ti-search"></i></button>
 </div>
 
+<div class="srcbar" id="srcbar">
+  <div class="row">
+    <span>PDV 원본 보관</span>
+    <label><input type="radio" name="pdv-mode" value="phone" checked> <b>폰</b> (기본)</label>
+    <label class="off" title="Oracle 춘천 등 클라우드 백업은 준비 중입니다"><input type="radio" name="pdv-mode" value="cloud" disabled> 클라우드 백업 <span class="st">(준비 중)</span></label>
+  </div>
+  <div class="row" id="src-pc" hidden>
+    <span>이 기기는 폰의 사본을 보관합니다.</span>
+    <input id="src-phone" inputmode="numeric" maxlength="8" placeholder="폰 번호 뒷자리 8자" hidden aria-label="010을 제외한 폰 번호 뒷자리 8자">
+    <button type="button" id="btn-phone-fetch">폰에서 불러오기</button>
+    <span class="st" id="src-state"></span>
+  </div>
+  <div class="row" id="src-phone-note" hidden><span class="st">이 폰이 PDV 원본을 보관합니다. PC에서 불러오기를 요청하면 이 폰에 승인 알림이 옵니다.</span></div>
+</div>
 <div class="tabbar" id="tabbar">
   <button class="tab active" data-cat="all">전체 (시간순)</button>
   <button class="tab" data-cat="person">사람</button>
@@ -213,6 +234,41 @@ async function boot() {
   renderList();
 }
 boot();
+
+// ── PDV 원본 보관: 폰(기본) — PC 는 폰의 승인을 받아 불러온다(2026-11-07) ──
+(function () {
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
+  const $ = (id) => document.getElementById(id);
+  const WORKER = (window.GOPANG_WORKER || 'https://hondi-proxy.tensor-city.workers.dev').replace(/\/$/, '');
+  $(isMobile ? 'src-phone-note' : 'src-pc').hidden = false;
+  if (isMobile) return;
+  const user = (() => { try { return JSON.parse(localStorage.getItem('gopang_user_v4') || 'null'); } catch (e) { return null; } })();
+  let e164 = user && user.e164 ? String(user.e164) : '';
+  if (!e164) $('src-phone').hidden = false;
+  const st = (m, c) => { const el = $('src-state'); el.textContent = m || ''; el.className = 'st' + (c ? ' ' + c : ''); };
+  $('btn-phone-fetch').addEventListener('click', async () => {
+    const btn = $('btn-phone-fetch'); btn.disabled = true; st('');
+    try {
+      if (!e164) {
+        const d = ($('src-phone').value || '').replace(/\D/g, '');
+        if (d.length !== 8) throw new Error('010을 제외한 폰 번호 뒷자리 8자를 입력하십시오.');
+        e164 = '+8210' + d;
+      }
+      const { requestFromPhone } = await import('/src/gopang/pdv/phone-fetch.js');
+      const keyPair = await GopangWallet.generateX25519KeyPair();
+      const label = (/Windows/.test(navigator.userAgent) ? 'Windows PC' : /Mac/.test(navigator.userAgent) ? 'Mac' : '이 PC') + ' (' + location.hostname + ')';
+      const data = await requestFromPhone({
+        worker: WORKER, e164, keyPair, pcLabel: label,
+        openWithKey: (sealed, priv) => GopangWallet.openSealedWithKey(priv, sealed),
+        onState: (s) => st(s === 'pushed' ? '폰으로 승인 요청을 보냈습니다. 폰에서 확인해 주세요…' : s === 'no-push' ? '폰에 알림을 보내지 못했습니다. 폰에서 푸시 알림을 켜 주세요.' : s === 'receiving' ? '폰에서 받는 중…' : '폰의 승인을 기다리는 중…'),
+      });
+      const r = await window.GopangPDV.importRecords(data.records);
+      st('불러왔습니다: ' + r.added + '건 추가' + (r.skipped ? ' (' + r.skipped + '건은 이미 있음)' : ''), 'ok');
+      RECORDS = await window.GopangPDV.list(); renderList();
+    } catch (e) { st(e.message || '불러오지 못했습니다.', 'err'); e164 = user && user.e164 ? String(user.e164) : ''; }
+    finally { btn.disabled = false; }
+  });
+})();
 </script>
 
 </body>
