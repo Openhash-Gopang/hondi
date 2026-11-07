@@ -161,6 +161,8 @@
       '.ksa-devlink-wait{padding:6px 0}' +
       '.ksa-spinner{width:22px;height:22px;border:3px solid #e5e7eb;border-top-color:#4338CA;border-radius:50%;margin:0 auto 12px;animation:ksa-spin .8s linear infinite}' +
       '@keyframes ksa-spin{to{transform:rotate(360deg)}}' +
+      '.ksa-sms{display:block;margin:10px auto 0;border:1px solid #4338CA;background:#fff;color:#4338CA;border-radius:8px;padding:7px 18px;font-size:13px;font-family:inherit;cursor:pointer}' +
+      '.ksa-sms:disabled{opacity:.5;cursor:not-allowed}' +
       '.ksa-resend{text-align:center;margin-top:10px;font-size:12px;color:#718096;cursor:pointer;text-decoration:underline}' +
       '.ksa-msg{font-size:12px;margin-top:10px;text-align:center;min-height:16px}' +
       '.ksa-msg.err{color:#c01c28}' +
@@ -191,6 +193,7 @@
             '<div id="ksa-devlink-status" style="font-size:12.5px;color:#4A5568;text-align:center">스마트폰 알림을 확인해 주세요…</div>' +
             '<div id="ksa-devlink-timer" style="font-size:11px;color:#718096;text-align:center;margin-top:4px"></div>' +
           '</div>' +
+          '<button type="button" class="ksa-sms" id="ksa-sms-btn" style="display:none">문자로 받기</button>' +
           '<div class="ksa-resend" id="ksa-resend-phone">번호를 다시 입력할게요</div>' +
         '</div>' +
         '<div class="ksa-msg" id="ksa-msg"></div>' +
@@ -207,6 +210,8 @@
     els.devlinkStatus= wrap.querySelector('#ksa-devlink-status');
     els.devlinkTimer = wrap.querySelector('#ksa-devlink-timer');
     els.resendPhone  = wrap.querySelector('#ksa-resend-phone');
+    els.smsBtn       = wrap.querySelector('#ksa-sms-btn');
+    els.smsBtn.onclick = sendSmsLink;
 
     els.desc.textContent = (cfg.serviceLabel ? cfg.serviceLabel + ' — ' : '') + '010을 제외한 폰 번호 뒷자리 8자를 입력하십시오.';
     wrap.querySelector('#ksa-cancel').onclick = cancelOverlay;
@@ -215,6 +220,27 @@
     els.phone.addEventListener('keydown', function (e) { if (e.key === 'Enter') startDeviceLink(); });
   }
 
+  // 문자로 승인 링크 받기 — 폰 구독이 없을 때만 보인다. 문자는 비용이 들어 자동 발송하지 않고 사용자가 누를 때 한 번 보낸다(서버가 횟수·시간당 제한).
+  function showSmsButton(on) {
+    if (!els.smsBtn) return;
+    els.smsBtn.style.display = on ? '' : 'none';
+    if (on) { els.smsBtn.disabled = false; els.smsBtn.textContent = '문자로 받기'; }
+  }
+  async function sendSmsLink() {
+    var sid = devlinkSessionIds[devlinkSessionIds.length - 1];
+    if (!sid || els.smsBtn.disabled) return;
+    els.smsBtn.disabled = true; els.smsBtn.textContent = '문자 발송 중…';
+    try {
+      var res = await fetch(PROXY + '/auth/device-link/resend-sms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sid }) });
+      var data = await res.json().catch(function () { return {}; });
+      if (!res.ok || !data.ok) throw new Error(data.detail || data.message || '문자 발송에 실패했습니다.');
+      els.smsBtn.textContent = '문자를 보냈습니다';
+      els.devlinkStatus.textContent = '문자로 받은 링크를 폰에서 열어 승인해 주세요.';
+    } catch (e) {
+      els.smsBtn.disabled = false; els.smsBtn.textContent = '문자로 받기';
+      els.devlinkStatus.textContent = e.message || '문자 발송에 실패했습니다.';
+    }
+  }
   function setMsg(text, kind) {
     els.msg.textContent = text || '';
     els.msg.className = 'ksa-msg' + (kind ? ' ' + kind : '');
@@ -223,6 +249,7 @@
     stopDevlinkPolling();
     els.stepDevlink.style.display = 'none';
     els.stepPhone.style.display = '';
+    showSmsButton(false);
     setMsg('', '');
   }
   function showOverlay() { ensureOverlay(); els.overlay.classList.add('show'); }
@@ -317,8 +344,9 @@
       els.stepPhone.style.display = 'none';
       els.stepDevlink.style.display = '';
       els.devlinkStatus.textContent = data.hasMobileDevice === false
-        ? '이 번호로 연결된 스마트폰이 없습니다 — 문자로 안내해 드립니다.'
-        : '스마트폰 알림을 확인해 주세요…';
+        ? '이 번호로 알림을 받을 폰이 등록되어 있지 않습니다. 아래 "문자로 받기"를 누르면 승인 링크를 문자로 보내 드립니다. 폰에서 나비웹을 열어 설정 → 푸시 알림 재구독을 하면 다음부터 알림으로 받을 수 있습니다.'
+        : '폰에 알림을 보냈습니다. 폰에서 알림을 눌러 승인해 주세요.';
+      showSmsButton(data.hasMobileDevice === false);
 
       startDevlinkCountdown(data.expires_in || 90);
       document.addEventListener('visibilitychange', onVisibilityPoll);
@@ -357,8 +385,9 @@
       // 타이머·카운트다운은 이미 돌고 있으므로 다시 만들지 않는다.
       devlinkSessionIds.push(data.sessionId);
       els.devlinkStatus.textContent = data.hasMobileDevice === false
-        ? '이 번호로 연결된 스마트폰이 없습니다 — 문자로 안내해 드립니다.'
+        ? '이 번호로 알림을 받을 폰이 등록되어 있지 않습니다. 아래 "문자로 받기"를 눌러 주세요.'
         : '알림을 다시 보냈습니다 — 스마트폰을 확인해 주세요… (이전 알림도 계속 유효합니다)';
+      showSmsButton(data.hasMobileDevice === false);
       scheduleDevlinkAutoResend();
     } catch (e) {
       scheduleDevlinkAutoResend();
