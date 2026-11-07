@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PDV 저장 구조 조사 (2026-11-07)</title>
+<style>
+:root{--bg:#fff;--fg:#1a202c;--mut:#5a6578;--line:#dfe2ed;--acc:#4338CA;--warn:#b45309;--bad:#c01c28;--ok:#1b6b3a;--chip:#f4f5fa}
+@media (prefers-color-scheme:dark){:root{--bg:#14161f;--fg:#e8eaf2;--mut:#9aa3b8;--line:#2b3042;--acc:#8b85ff;--warn:#e0a24a;--bad:#ff7b84;--ok:#6fd19a;--chip:#1d2030}}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.65 system-ui,-apple-system,"Noto Sans KR",sans-serif}
+main{max-width:880px;margin:0 auto;padding:28px 16px 60px}
+h1{font-size:22px;margin:0 0 4px}h2{font-size:17px;margin:30px 0 8px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.mut{color:var(--mut);font-size:13px}table{border-collapse:collapse;width:100%;font-size:13.5px;margin:8px 0}
+th,td{border:1px solid var(--line);padding:7px 9px;vertical-align:top;text-align:left}th{background:var(--chip)}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}code{background:var(--chip);padding:1px 5px;border-radius:4px;font-size:12.5px}
+.box{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:10px 0;background:var(--chip)}
+@media(max-width:600px){table{font-size:12.5px}}
+</style></head><body><main>
+<h1>PDV 저장 구조 조사</h1>
+<p class="mut">2026-11-07 · 기준: Openhash-Gopang/hondi main, Openhash-Gopang/mail main · 코드 읽기 기반(운영 서버·DB는 직접 확인하지 못함)</p>
+
+<h2>1. 핵심 결론</h2>
+<div class="box"><b>PDV 원문은 지금 "그 기기의 브라우저 IndexedDB"에만 있습니다.</b> 서버(L1 PocketBase)에는 해시와 메타데이터만 올라갑니다(PR #461 "해시전용 재설계"). 기기 간 동기화와 클라우드 보관본이 없습니다. 그래서 PC로 로그인해도 폰의 PDV는 보이지 않고, PC에서 만든 서류 초안은 PC에만 남습니다.</div>
+
+<h2>2. 지금 어디에 무엇이 저장되는가</h2>
+<table><tr><th>저장소</th><th>내용</th><th>위치·범위</th><th>근거</th></tr>
+<tr><td>PDV 기록 (4분류 6하원칙 로그)</td><td>나비 AI 서브시스템과의 상호작용 기록. 사람·사물 분류는 아직 기록 호출부가 없어 비어 있음</td><td>IndexedDB <code>gopang_pdv_store</code> — <b>출처(origin)와 기기 단위</b>. 옛 localStorage 로그(<code>gopang_pdv_log</code>, 최대 1,000건)에서 1회 이전</td><td><code>pdv-store.js</code>, <code>src/gopang/pdv/record.js</code></td></tr>
+<tr><td>서류 초안·첨부 보관</td><td>K-Mail 서류 작성 초안, 첨부서류 보관본(<code>kind='attach'</code>, 유효 기간 후 삭제), 길잡이 기록. 최대 60건</td><td><code>hondi.net</code> 출처 IndexedDB. <code>mail.hondi.net</code>은 직접 못 읽어 <code>pdv-draft-bridge.html</code>(iframe)에 <code>postMessage</code>로 요청</td><td><code>pdv-draft-bridge.html</code>, mail <code>_drCall</code></td></tr>
+<tr><td>서버 PDV 기록 (L1)</td><td>해시(<code>content_hash</code>, <code>what_hash</code>)·블록 해시·위험도·분류. 평문 조회 엔드포인트(<code>/pdv/query</code>, <code>/owner-pdv/self-history</code>)는 410으로 폐기</td><td>PocketBase <code>pdv_records</code>, <code>pdv_consent_requests</code>, <code>pdv_query_audit_log</code> (Oracle 춘천)</td><td><code>worker.js</code>, <code>Verify-PdvHashOnly.ps1</code></td></tr>
+<tr><td>ID 볼트 (IDV)</td><td>서명된 자격증명 원본. PDV와 별개 저장소로 서로 참조하지 않음</td><td>IndexedDB <code>gopang_idv_vault</code> (기기 단위)</td><td><code>src/gopang/idv/idv-store.js</code></td></tr>
+<tr><td>지갑 개인키</td><td>Ed25519 서명키. 서버에는 공개키만</td><td>폰 IndexedDB. PC는 <code>key_transfer</code>로 받은 경우에만 보유</td><td><code>gopang-wallet.js</code>, 인증 백서</td></tr>
+<tr><td>K-서비스 소유 PDV</td><td>상담 기록 등. 사용자 식별자는 서비스별 salt 가명화 해시</td><td>서비스 측(설계 결정 2026-07-20)</td><td>메모리 결정 사항, <code>pdv_records</code></td></tr></table>
+
+<h2>3. 이 구조에서 생기는 일</h2>
+<ol>
+<li><b>PC 로그인은 PDV 접근이 아닙니다.</b> KAuth 로그인은 토큰(30일)만 주고, 기기마다 IndexedDB가 따로이므로 PC의 PDV는 비어 있습니다. <code>key_transfer</code>로 개인키를 옮겨도 PDV 데이터는 따라오지 않습니다.</li>
+<li><b>초안·첨부가 기기에 묶입니다.</b> PC에서 쓰던 서류 초안을 폰에서 이어 쓸 수 없습니다(그 반대도 같음).</li>
+<li><b>브라우저 데이터 삭제 = PDV 소실.</b> 서버에는 해시뿐이라 복구할 원문이 없습니다. IndexedDB는 브라우저가 저장 공간 부족 시 정리할 수도 있습니다(영구 저장 요청 여부는 확인하지 못함).</li>
+<li><b>"사용자마다 PDV 저장 공간을 할당하고 LLM 이용 이력을 이후 지시·질의에 참조"(2026-10-26 요구)는 현재 구조로 불가.</b> 서버가 평문을 못 읽는 원칙과 충돌하므로, 서버 보관은 <b>클라이언트에서 암호화한 사본</b>이어야 합니다.</li>
+<li><b>폰 분실 시 PDV도 함께 사라집니다.</b> 지갑 백업 키가 선택 저장(2026-11-06)으로 바뀐 만큼, 키와 PDV의 복구 경로를 같이 설계해야 합니다.</li></ol>
+
+<h2>4. 설계 선택지</h2>
+<table><tr><th></th><th>A. 폰 원본 + PC는 폰에서 가져오기</th><th>B. 클라우드 암호화 사본(E2E)</th><th>C. 하이브리드 (권장 검토)</th></tr>
+<tr><td>구조</td><td>원본은 폰. PC가 필요할 때 폰에 요청(승인 시 전달)</td><td>모든 기기가 암호화한 PDV 사본을 서버에 올리고 내려받음. 서버는 암호문만 보관</td><td>폰이 원본. 클라우드엔 암호화 백업 사본. PC는 폰 승인 후 사본을 내려받아 <b>세션 동안만</b> 복호화해 사용</td></tr>
+<tr><td>키</td><td>필요 없음(전달 시 일회용 키)</td><td>지갑 개인키에서 PDV 암호화 키를 유도(HKDF). 키를 잃으면 사본도 못 엽니다</td><td>B와 같음 + PC에는 키를 영구 보관하지 않음</td></tr>
+<tr><td>장점</td><td>서버에 PDV 사본 없음. 구현 단순</td><td>PC 단독 사용, 분실·초기화 복구, LLM 이력 참조에 적합</td><td>PC 로그인=폰 승인 원칙과 일치. 분실 복구와 기기 간 이어쓰기 가능</td></tr>
+<tr><td>단점</td><td>폰이 꺼져 있으면 PC가 못 씀. 분실 시 복구 불가. 대용량(첨부) 전송 부담</td><td>키 관리 부담이 큼(키 분실=영구 소실). 암호문도 보관·삭제 정책·비용이 생김</td><td>구현량이 가장 큼. 동기화 충돌 처리 필요</td></tr></table>
+
+<h2>5. 정해야 할 것</h2>
+<ol>
+<li><b>PC가 PDV 원문을 볼 수 있어야 하는가</b> — 예: 서류 초안 이어쓰기, 길잡이 기록. 아니오면 A(또는 현 구조 유지).</li>
+<li><b>서버에 암호화 사본을 둘 것인가</b> — 분실 복구와 LLM 이력 참조를 원하면 필요. "서버는 평문을 못 읽는다" 원칙은 유지됩니다(클라이언트 암호화).</li>
+<li><b>PC에 개인키를 영구 보관할지(<code>key_transfer</code>)</b> — 아니오(세션만)로 하면 PC 로그인 단순화와 맞고, PDV 복호화도 세션 단위가 됩니다.</li>
+<li><b>저장 대상 범위</b> — 상호작용 로그, 서류 초안·첨부, IDV 자격증명 중 무엇을 동기화할지. IDV는 민감도가 높아 별도 결정 권장.</li>
+<li><b>복구 방식</b> — 키 분실 시 PDV는 어떻게 할지(백업 키 선택 저장 연계).</li></ol>
+
+<p class="mut">확인하지 못한 것: PocketBase <code>pdv_records</code> 실제 스키마·용량, 브라우저의 영구 저장(<code>navigator.storage.persist</code>) 요청 여부, 서버에 암호문 저장 컬렉션 존재 여부(코드 검색에서는 발견되지 않음).</p>
+</main></body></html>
