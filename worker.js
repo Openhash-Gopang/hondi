@@ -915,6 +915,9 @@ async function handleUserGdcHistory(request, url, env, corsHeaders) {
 // ═══════════════════════════════════════════════════════════
 const DEVICE_LINK_TTL_SECONDS = 90;      // 코드 유효기간 — SMS(5분)보다 훨씬 짧게(사용자 지시)
 const DEVICE_LINK_MAX_ATTEMPTS = 5;
+const DEVICE_LINK_PDV_MAX_PARTS = 200;          // PDV 불러오기: 조각 수 상한(조각당 ≈90KB 평문)
+const DEVICE_LINK_PDV_PART_MAX_CHARS = 400000;  // 봉투 조각 1개의 JSON 길이 상한
+const DEVICE_LINK_PDV_PART_TTL = 180;           // 조각이 KV 에 머무는 시간(초) — PC 가 가져가면 즉시 삭제
 
 // ── 2026-07-20 신설: 웹푸시 실패 시 SMS 폴백(1안 웹푸시·2안 SMS) ──
 // 사고실험(주피터 지시)에서 발견한 위험 6가지를 반영:
@@ -962,6 +965,7 @@ function _generateDeviceLinkCode() {
 // 다음 단계에서 조용히 원상복구돼 버린다. 재기록 시엔 항상 이 함수로
 // "SMS를 이미 썼는지"를 보고 TTL을 정한다.
 function _deviceLinkTtl(record) {
+  if (record.purpose === 'pdv_fetch') return 180;   // 폰이 조각을 여러 번 올릴 시간
   return (record.smsResendCount || 0) > 0 ? DEVICE_LINK_SMS_TTL_SECONDS : DEVICE_LINK_TTL_SECONDS;
 }
 
@@ -993,7 +997,7 @@ async function handleDeviceLinkInit(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
   const { pcPubKeyB64u, pcLabel, sigMsg } = body;
-  const purpose = body.purpose === 'sign_request' ? 'sign_request' : 'key_transfer'; // 미지정/그외 값은 안전하게 기존 동작으로
+  const purpose = body.purpose === 'sign_request' ? 'sign_request' : body.purpose === 'pdv_fetch' ? 'pdv_fetch' : 'key_transfer'; // 미지정/그외 값은 안전하게 기존 동작으로(pdv_fetch: 2026-11-07 PC 가 폰의 PDV 원본을 승인 후 불러온다)
   // 2026-09-19 신설(주피터 지적) — "삭제하려는 기기 자신에게 그 삭제
   // 승인 요청이 함께 간다"는 문제(잘못 mobile로 등록된 기기가 자기 자신을
   // 지우는 요청의 push 대상에도 포함되는 경우). 호출부가 "이 기기ID로는
@@ -1007,7 +1011,7 @@ async function handleDeviceLinkInit(request, env, corsHeaders) {
     return _err(400, 'INVALID_PHONE', '올바른 국내 전화번호 형식이 아닙니다', corsHeaders);
   }
 
-  if (purpose === 'key_transfer') {
+  if (purpose === 'key_transfer' || purpose === 'pdv_fetch') {
     if (!pcPubKeyB64u) return _err(400, 'MISSING_FIELD', 'pcPubKeyB64u 필수', corsHeaders);
     // ★ 2026-07-20 신설 — 실사로 발견: 이 값이 32바이트(X25519 raw 공개키
     // 크기)가 아닌 채로 저장되면, 폰이 나중에 sealForRecipient()에서
@@ -1089,7 +1093,7 @@ async function handleDeviceLinkInit(request, env, corsHeaders) {
   const _geo = await resolveDeviceGeo(env, request, body);       // 카카오 주소(요청 기기 위치) — 실패해도 세션 생성은 계속
   const record = {
     guid: profile.guid, e164, purpose,
-    pcPubKeyB64u: purpose === 'key_transfer' ? pcPubKeyB64u : null,
+    pcPubKeyB64u: (purpose === 'key_transfer' || purpose === 'pdv_fetch') ? pcPubKeyB64u : null,
     sigMsg: purpose === 'sign_request' ? sigMsg : null,
     pcLabel: pcLabel || '알 수 없는 기기',
     code, attempts: 0, state: 'pending', smsResendCount: 0,
@@ -1150,10 +1154,12 @@ async function handleDeviceLinkInit(request, env, corsHeaders) {
       hasMobileDevice = mobileDevices.length > 0;
       if (mobileDevices.length) {
         const payload = JSON.stringify({
-          title: purpose === 'sign_request' ? '서명 요청' : '새 기기에서 로그인 요청',
+          title: purpose === 'sign_request' ? '서명 요청' : purpose === 'pdv_fetch' ? 'PDV 불러오기 요청' : '새 기기에서 로그인 요청',
           body:  purpose === 'sign_request'
             ? `${record.pcLabel}에서 서명을 요청했습니다. 확인하려면 누르세요.`
-            : `${record.pcLabel}에서 로그인을 시도했습니다. 확인하려면 누르세요.`,
+            : purpose === 'pdv_fetch'
+              ? `${record.pcLabel}에서 내 PDV 를 불러오려 합니다. 확인하려면 누르세요.`
+              : `${record.pcLabel}에서 로그인을 시도했습니다. 확인하려면 누르세요.`,
           sound: mobileDevices[0].sound || profile.push_sound || 'ping',
           url:   `/auth/device-link-approve.html?sessionId=${encodeURIComponent(sessionId)}`,
           tag:   `gopang-device-link-${sessionId}`,
@@ -1350,6 +1356,12 @@ async function handleDeviceLinkDeliver(request, env, corsHeaders) {
     }
     record.signature = signature;
     record.publicKeyB64u = publicKeyB64u;
+  } else if (purpose === 'pdv_fetch') {
+    // 조각은 /deliver-part 로 이미 KV 에 올라가 있다 — 여기서는 조각 수만 확정한다.
+    const n = Number(body.partCount);
+    if (!Number.isInteger(n) || n < 1 || n > DEVICE_LINK_PDV_MAX_PARTS) return _err(400, 'INVALID_PART_COUNT', 'partCount 는 1~' + DEVICE_LINK_PDV_MAX_PARTS, corsHeaders);
+    if (!(await env.QR_SESSIONS_KV.get(`dlpart:${sessionId}:${n - 1}`))) return _err(409, 'PARTS_MISSING', '마지막 조각이 아직 도착하지 않았습니다', corsHeaders);
+    record.partCount = n;
   } else {
     if (!sealed) return _err(400, 'MISSING_FIELD', 'sealed 필수(key_transfer)', corsHeaders);
     record.sealed = sealed;
@@ -1364,6 +1376,40 @@ async function handleDeviceLinkDeliver(request, env, corsHeaders) {
   // 짧게 더 준다"는 원래 의도는 그대로 유지한다.
   await _dlPut(env, sessionId, record, 60);
   return new Response(JSON.stringify({ ok: true }), { status: 200, headers: corsHeaders });
+}
+
+// POST /auth/device-link/deliver-part { sessionId, guid, index, sealed }   (purpose=pdv_fetch)
+// 폰이 호출 — 승인된 세션에만, 자기 guid 가 소유자와 일치할 때만 암호화된 조각을 KV 에 올린다.
+async function handleDeviceLinkDeliverPart(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+  const { sessionId, guid, sealed } = body, index = Number(body.index);
+  if (!sessionId || !guid || !sealed) return _err(400, 'MISSING_FIELD', 'sessionId, guid, sealed 필수', corsHeaders);
+  if (!Number.isInteger(index) || index < 0 || index >= DEVICE_LINK_PDV_MAX_PARTS) return _err(400, 'INVALID_INDEX', 'index 범위 오류', corsHeaders);
+  if (!env.DEVICE_LINK_SESSIONS || !env.QR_SESSIONS_KV) return _err(500, 'DO_NOT_BOUND', 'device-link 저장소가 설정되지 않았습니다', corsHeaders);
+  const record = await _dlGet(env, sessionId);
+  if (!record) return _err(404, 'SESSION_EXPIRED', '세션이 만료됐거나 존재하지 않습니다', corsHeaders);
+  if (record.guid !== guid) return _err(403, 'GUID_MISMATCH', '이 세션의 소유자가 아닙니다', corsHeaders);
+  if (record.purpose !== 'pdv_fetch') return _err(409, 'WRONG_PURPOSE', 'PDV 불러오기 세션이 아닙니다', corsHeaders);
+  if (record.state !== 'approved') return _err(409, 'NOT_APPROVED', '승인된 세션이 아닙니다', corsHeaders);
+  const raw = JSON.stringify(sealed);
+  if (raw.length > DEVICE_LINK_PDV_PART_MAX_CHARS) return _err(413, 'PART_TOO_LARGE', '조각이 너무 큽니다', corsHeaders);
+  await env.QR_SESSIONS_KV.put(`dlpart:${sessionId}:${index}`, raw, { expirationTtl: DEVICE_LINK_PDV_PART_TTL });
+  return new Response(JSON.stringify({ ok: true }), { status: 200, headers: corsHeaders });
+}
+
+// GET /auth/device-link/part?sessionId=...&i=N   (purpose=pdv_fetch)
+// PC 가 호출 — 가져가면 즉시 삭제(한 번만 소비). 조각은 PC 의 1회용 공개키로 암호화돼 있어 서버는 내용을 모른다.
+async function handleDeviceLinkPart(request, env, corsHeaders) {
+  const url = new URL(request.url);
+  const sessionId = url.searchParams.get('sessionId'), i = Number(url.searchParams.get('i'));
+  if (!sessionId || !Number.isInteger(i) || i < 0 || i >= DEVICE_LINK_PDV_MAX_PARTS) return _err(400, 'MISSING_FIELD', 'sessionId, i 필요', corsHeaders);
+  if (!env.QR_SESSIONS_KV) return _err(500, 'KV_NOT_BOUND', '세션 저장소가 설정되지 않았습니다', corsHeaders);
+  const key = `dlpart:${sessionId}:${i}`;
+  const raw = await env.QR_SESSIONS_KV.get(key);
+  if (!raw) return _err(404, 'PART_NOT_FOUND', '조각이 없거나 이미 가져갔습니다', corsHeaders);
+  await env.QR_SESSIONS_KV.delete(key);
+  return new Response(JSON.stringify({ ok: true, sealed: JSON.parse(raw) }), { status: 200, headers: corsHeaders });
 }
 
 // GET /auth/device-link/poll?sessionId=...
@@ -1431,6 +1477,8 @@ async function handleDeviceLinkPoll(request, env, corsHeaders) {
         // 불가능하다(재사용 방지 자체는 유지).
         payload.state = 'verification_failed';
       }
+    } else if (purpose === 'pdv_fetch') {
+      payload.partCount = record.partCount;   // 조각 자체는 /part 로 가져간다
     } else {
       payload.sealed = record.sealed;
     }
@@ -14225,6 +14273,8 @@ export default {
     if (pathname === '/auth/device-link/resend-sms' && request.method === 'POST') return handleDeviceLinkResendSms(request, env, corsHeaders);
     if (pathname === '/auth/device-link/deliver'  && request.method === 'POST') return handleDeviceLinkDeliver(request, env, corsHeaders);
     if (pathname === '/auth/device-link/poll'     && request.method === 'GET')  return handleDeviceLinkPoll(request, env, corsHeaders);
+    if (pathname === '/auth/device-link/deliver-part' && request.method === 'POST') return handleDeviceLinkDeliverPart(request, env, corsHeaders);
+    if (pathname === '/auth/device-link/part'     && request.method === 'GET')  return handleDeviceLinkPart(request, env, corsHeaders);
     // 2026-09-12 신설 — 슬라이딩 세션 갱신(주피터 지시: Gmail처럼 활동
     // 중엔 재인증 없이 유지). k-service-auth-client.js가 만료 임박 시
     // 조용히 이 엔드포인트를 호출해 30일 창을 새로 연다.

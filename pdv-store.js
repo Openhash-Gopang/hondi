@@ -232,7 +232,14 @@
     };
   }
 
+  // 2026-11-07: PDV 방식 P — PC 가 승인 뒤 불러갈 원본 전체(보기용 파생 없이 저장된 그대로)
+  async function exportAll() {
+    await migrateFromLocalStorageOnce();
+    return (await getAllRecords()).map(function (r) { const o = Object.assign({}, r); delete o._id; return o; });
+  }
+
   global.GopangPDV = {
+    exportAll,
     list,
     listByCategory,
     summarizeForRelay,
