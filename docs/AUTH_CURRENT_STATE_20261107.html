@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>가입·로그인 현황 조사 (2026-11-07)</title>
+<style>
+:root{--bg:#fff;--fg:#1a202c;--mut:#5a6578;--line:#dfe2ed;--acc:#4338CA;--warn:#b45309;--bad:#c01c28;--ok:#1b6b3a;--chip:#f4f5fa}
+@media (prefers-color-scheme:dark){:root{--bg:#14161f;--fg:#e8eaf2;--mut:#9aa3b8;--line:#2b3042;--acc:#8b85ff;--warn:#e0a24a;--bad:#ff7b84;--ok:#6fd19a;--chip:#1d2030}}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.65 system-ui,-apple-system,"Noto Sans KR",sans-serif}
+main{max-width:860px;margin:0 auto;padding:28px 16px 60px}
+h1{font-size:22px;margin:0 0 4px}h2{font-size:17px;margin:30px 0 8px;border-bottom:1px solid var(--line);padding-bottom:6px}
+p,li{color:var(--fg)}.mut{color:var(--mut);font-size:13px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:8px 0}th,td{border:1px solid var(--line);padding:7px 9px;vertical-align:top;text-align:left}th{background:var(--chip)}
+.t{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;background:var(--chip)}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}code{background:var(--chip);padding:1px 5px;border-radius:4px;font-size:12.5px}
+.box{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:10px 0;background:var(--chip)}
+@media(max-width:600px){table{font-size:12.5px}}
+</style></head><body><main>
+<h1>가입·로그인 현황 조사</h1>
+<p class="mut">2026-11-07 · 기준: Openhash-Gopang/hondi main · 근거 문서: <code>docs/AUTH_LOGIN_WHITEPAPER_v1_0_20260829.html</code>(설계 의도), 이번 조사(현재 코드)</p>
+
+<h2>1. 한눈에 보기</h2>
+<div class="box">
+설계 원칙은 백서와 같습니다. <b>가입은 폰에서만</b>, <b>PC 로그인은 반드시 폰 승인</b>입니다. 다만 현재 코드에는 이 원칙과 어긋나는 <b>임시 테스트 스위치(SIMPLE_SIGNUP_TEST)</b>가 켜져 있고, PC 로그인 화면이 <b>두 종류</b>(KAuth 팝업, device-link.html)로 나뉘어 있으며, 폐기된 QR 로그인 파일이 남아 있습니다.
+</div>
+
+<h2>2. 가입 (현재)</h2>
+<table><tr><th>단계</th><th>구현</th><th>상태</th></tr>
+<tr><td>약관 동의 → PC 가입 차단</td><td><code>src/gopang/core/auth.js</code> <code>_isMobileDevice()</code>, <code>_showPcRegisterBlockedNotice()</code></td><td class="bad">SIMPLE_SIGNUP_TEST=true 라서 <b>건너뜀</b>(2026-10-09 잠정). PC에서도 가입 가능</td></tr>
+<tr><td>전화번호 문자 인증(OTP)</td><td><code>_requestAndVerifyPhoneOtp</code> → <code>/auth/issue</code>·<code>/auth/verify</code></td><td class="ok">유지</td></tr>
+<tr><td>계정 ID(GUID) 계산</td><td><code>_e164ToIPv6</code> (전화번호 해시, 결정론적)</td><td class="ok">정상</td></tr>
+<tr><td>지갑(Ed25519) 생성·공개키 등록(TOFU)</td><td><code>gopang-wallet.js</code>, <code>_completeRegistration</code></td><td class="ok">정상</td></tr>
+<tr><td>푸시 알림 구독 (폰 = mobile 등록)</td><td><code>src/gopang/services/push.js</code> → <code>/push/subscribe</code></td><td class="warn">가입 직후 자동 등록. 구독 만료 시 조용히 삭제됨(아래 4절)</td></tr>
+<tr><td>생체인증 기본 등록</td><td><code>enrollStepUpBiometric</code></td><td class="bad">SIMPLE_SIGNUP_TEST=true 라서 <b>건너뜀</b></td></tr>
+<tr><td>테스트 2단계(서버 <code>SIMPLE_AUTH_TEST=1</code>)</td><td><code>/auth/test-enter</code>, <code>/auth/test-mode</code>, KAuth <code>autoTestEnter</code></td><td class="warn">문자 인증 없이 아이디만으로 입장. <b>서버 스위치 상태는 이번 조사에서 확인하지 못함</b>(Worker 환경변수)</td></tr></table>
+
+<h2>3. PC 로그인 (현재)</h2>
+<table><tr><th>경로</th><th>파일</th><th>방식</th><th>쓰이는 곳</th><th>판정</th></tr>
+<tr><td>A. KAuth 팝업</td><td><code>auth/k-service-auth-client.js</code></td><td>번호 입력 → <code>device-link/init</code>(<code>sign_request</code>) → 폰 푸시 승인 → <code>phone_verify_token</code> 30일(쿠키 <code>.hondi.net</code>, 활동 중 자동 갱신)</td><td>mail·klaw·plan·desktop 등 참조 192곳</td><td class="ok">현역(주 경로)</td></tr>
+<tr><td>B. device-link 화면</td><td><code>auth/device-link.html</code> + <code>device-link-approve.html</code>(폰)</td><td><code>key_transfer</code>: 폰이 <b>개인키를 PC로 암호화 전달</b>, 또는 <code>sign_request</code></td><td><code>webapp.html</code>, <code>auth.js</code>, <code>settings.js</code> 등 11곳</td><td class="warn">현역, 단 A와 중복·방식 다름</td></tr>
+<tr><td>문자 폴백</td><td><code>/auth/device-link/resend-sms</code></td><td>폰 구독이 없으면 승인 링크를 문자로 발송(횟수·시간당 제한)</td><td>A·B 공통</td><td class="ok">현역</td></tr>
+<tr><td>숫자 코드 스캔</td><td><code>auth/link-scan.html</code></td><td>번호 타이핑 생략용 입력 보조(인증 아님)</td><td>webapp·settings</td><td class="ok">현역</td></tr>
+<tr><td>백업 키 직접 입력</td><td>device-link 화면의 "백업 키를 직접 갖고 있어요"</td><td>개인키 문자열로 복구(최후 수단)</td><td>—</td><td class="ok">현역</td></tr>
+<tr><td>QR 로그인</td><td><code>auth/qr-login.html</code>, <code>qr-scan.html</code></td><td>2026-07-19 폐기. <code>/auth/qr/create</code> 서버 엔드포인트 없음</td><td>settings·docs·테스트 시나리오 참조</td><td class="bad">폐기·정리 대상</td></tr>
+<tr><td>SSO·서브시스템·조용한 서명</td><td><code>gopang-sso.js</code>, <code>subsystem-auth.js</code>, <code>silent-auth/sign/pref.html</code></td><td>하위 시스템 인증·GWP 서명 위임</td><td>gwp, sw.js, pdv-store.js 등</td><td class="warn">별도 용도 — 이번 단순화 범위 밖으로 두고 용도만 문서화 필요</td></tr>
+<tr><td>진단 화면</td><td><code>auth/push-diagnose.html</code></td><td>푸시 구독 상태 점검</td><td>device-link</td><td class="ok">현역(운영 도구)</td></tr></table>
+
+<h2>4. 오늘(11/07) 드러난 문제</h2>
+<ol>
+<li><b>안내가 모호</b> — "스마트폰이 없습니다 — 문자로 안내"만 나오고, 무엇을 해야 하는지가 없음.</li>
+<li><b>폰 구독이 조용히 삭제</b> — 푸시 서비스가 구독 만료(410)를 알리면 서버가 기기를 지움. 사용자에게 알림이 없고, 복구 메뉴("푸시 알림 재구독")는 설정 맨 아래에 숨어 있음.</li>
+<li><b>기기 판정이 UA 한 줄</b> — 알림음 변경 경로가 <code>deviceType</code>을 빠뜨려 <code>unknown</code>으로 덮어쓰던 결함은 PR #943에서 수정.</li>
+<li><b>폰 분실·교체 복구 경로 없음</b> — 개인키가 폰에만 있으면 새 폰은 스스로 로그인 불가(백업 키가 있을 때만 복구).</li>
+<li><b>로그인 UI 이원화</b> — A(토큰만)와 B(개인키 이전)가 서로 다른 보안 모델.</li>
+<li><b>원칙과 코드의 불일치</b> — "PC 가입 불가" 원칙이 임시 스위치로 꺼져 있음.</li></ol>
+
+<h2>5. 단순화 안 (목표 상태)</h2>
+<table><tr><th></th><th>목표</th></tr>
+<tr><td>가입</td><td>폰 전용. 번호 입력 → 문자 OTP → 지갑 생성 → 푸시 구독(mobile) 등록 → 생체인증 등록 → 복구 방법 안내</td></tr>
+<tr><td>PC 로그인</td><td>하나의 화면(KAuth 팝업). 번호 입력 → 폰 푸시 승인 → 토큰. 폰 구독이 없으면 문자 승인 링크로 대체하고 화면이 상태별로 분명히 안내</td></tr>
+<tr><td>자가 치유</td><td>폰이 앱을 열 때마다 구독 점검·재등록. 서버가 구독을 지우면 "알림 만료" 표시를 남겨 로그인 팝업이 정확히 안내</td></tr>
+<tr><td>정리</td><td>QR 로그인 파일 삭제, B(device-link 화면)는 A로 통합 또는 용도 명시, SSO 계열은 용도 문서화</td></tr></table>
+
+<h2>6. 결정이 필요한 것</h2>
+<ol>
+<li><b>SIMPLE_SIGNUP_TEST 종료 시점</b> — 끄면 PC 가입 차단·생체인증 등록이 복원되고, 서버 <code>SIMPLE_AUTH_TEST</code>도 지워야 테스트 계정 입장이 사라집니다. 테스트 사용자 영향이 있어 시점 결정 필요.</li>
+<li><b>PC에 개인키를 둘지(key_transfer)</b> — A만 쓰면 PC에는 키가 없고 매번 폰 승인(토큰 30일 유지). B를 유지하면 PC가 키를 보관합니다. 이는 <b>PDV를 폰·PC·클라우드에 어떻게 저장할지</b>와 직결되므로 그 논의와 함께 정하는 것이 좋습니다.</li>
+<li><b>분실·교체 복구 방식</b> — 복구 코드(가입 시 1회 표시), 지문(WebAuthn)으로 새 기기 승인, 본인 확인 후 초기화 중 선택.</li></ol>
+<p class="mut">한계: Cloudflare Worker 환경변수(<code>SIMPLE_AUTH_TEST</code> 등)와 운영 서버 응답은 이번 환경에서 접근하지 못해 확인하지 않았습니다.</p>
+</main></body></html>
