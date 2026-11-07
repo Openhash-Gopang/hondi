@@ -65,7 +65,7 @@ body.embed .detail{position:absolute}
 .srcbar label{display:inline-flex;align-items:center;gap:5px;cursor:pointer}.srcbar label.off{opacity:.5;cursor:not-allowed}
 .srcbar button{border:1px solid var(--blue);background:#fff;color:var(--blue-dk);border-radius:8px;padding:6px 12px;font:600 12.5px inherit;cursor:pointer}
 .srcbar button:disabled{opacity:.5;cursor:default}.srcbar input{border:1px solid var(--border);border-radius:8px;padding:6px 8px;width:130px;font:inherit}
-.srcbar .st{color:var(--txt3)}.srcbar .st.err{color:#b91c1c}.srcbar .st.ok{color:#15803d}
+.srcbar input[type=radio]{width:auto;padding:0}.srcbar .st{color:var(--txt3)}.srcbar .st.err{color:#b91c1c}.srcbar .st.ok{color:#15803d}
 </style>
 </head>
 <body>
@@ -80,16 +80,26 @@ body.embed .detail{position:absolute}
 <div class="srcbar" id="srcbar">
   <div class="row">
     <span>PDV 원본 보관</span>
-    <label><input type="radio" name="pdv-mode" value="phone" checked> <b>폰</b> (기본)</label>
-    <label class="off" title="Oracle 춘천 등 클라우드 백업은 준비 중입니다"><input type="radio" name="pdv-mode" value="cloud" disabled> 클라우드 백업 <span class="st">(준비 중)</span></label>
+    <label><input type="radio" name="pdv-mode" value="phone" checked disabled> <b>폰</b> (원본)</label>
+    <span class="st">· 백업 저장소</span>
+    <label><input type="radio" name="pdv-cloud" value="l1" checked> <b>나비 L1</b> (기본)</label>
+    <label><input type="radio" name="pdv-cloud" value="par"> 직접 지정</label>
+    <input id="cl-url" type="url" style="width:min(340px,90%)" placeholder="Oracle PAR URL 등 (https://…/o/)" hidden aria-label="백업 저장소 주소">
   </div>
+  <div class="row">
+    <input id="cl-phrase" type="password" autocomplete="off" style="width:190px" placeholder="복구 문구 (12자 이상)" aria-label="복구 문구">
+    <input id="cl-phrase2" type="password" autocomplete="off" style="width:190px" placeholder="복구 문구 확인" aria-label="복구 문구 확인" hidden>
+    <button type="button" id="btn-cl-restore" hidden>클라우드에서 불러오기</button>
+    <button type="button" id="btn-cl-backup" hidden>지금 백업</button>
+    <span class="st" id="cl-state"></span>
+  </div>
+  <div class="row"><span class="st">백업은 폰에서 암호화되어 저장소에 올라가며, 복구 문구는 서버로 전송·저장되지 않습니다. 문구를 잃으면 복구할 수 없습니다.</span></div>
   <div class="row" id="src-pc" hidden>
-    <span>이 기기는 폰의 사본을 보관합니다.</span>
+    <span class="st">대안(불안정할 수 있음): 폰과 직접 연결</span>
     <input id="src-phone" inputmode="numeric" maxlength="8" placeholder="폰 번호 뒷자리 8자" hidden aria-label="010을 제외한 폰 번호 뒷자리 8자">
     <button type="button" id="btn-phone-fetch">폰에서 불러오기</button>
     <span class="st" id="src-state"></span>
   </div>
-  <div class="row" id="src-phone-note" hidden><span class="st">이 폰이 PDV 원본을 보관합니다. PC에서 불러오기를 요청하면 이 폰에 승인 알림이 옵니다.</span></div>
 </div>
 <div class="tabbar" id="tabbar">
   <button class="tab active" data-cat="all">전체 (시간순)</button>
@@ -240,7 +250,6 @@ boot();
   const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
   const $ = (id) => document.getElementById(id);
   const WORKER = (window.GOPANG_WORKER || 'https://hondi-proxy.tensor-city.workers.dev').replace(/\/$/, '');
-  $(isMobile ? 'src-phone-note' : 'src-pc').hidden = false;
   if (isMobile) return;
   const user = (() => { try { return JSON.parse(localStorage.getItem('gopang_user_v4') || 'null'); } catch (e) { return null; } })();
   let e164 = user && user.e164 ? String(user.e164) : '';
@@ -268,6 +277,67 @@ boot();
     } catch (e) { st(e.message || '불러오지 못했습니다.', 'err'); e164 = user && user.e164 ? String(user.e164) : ''; }
     finally { btn.disabled = false; }
   });
+})();
+
+// ── PDV 클라우드 백업(방식 C): 기본 나비 L1 PocketBase, 사용자 지정 가능. PC 는 클라우드에서 불러온다(2026-11-08) ──
+(function () {
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
+  const $ = (id) => document.getElementById(id);
+  const WORKER = (window.GOPANG_WORKER || 'https://hondi-proxy.tensor-city.workers.dev').replace(/\/$/, '');
+  const KEY = 'gopang_pdv_cloud';
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || 'null') || { kind: 'l1', url: '' }; } catch (e) { return { kind: 'l1', url: '' }; } };
+  const cfg = load();
+  const radios = document.querySelectorAll('input[name="pdv-cloud"]');
+  radios.forEach((r) => { r.checked = r.value === cfg.kind; });
+  $('cl-url').value = cfg.url || ''; $('cl-url').hidden = cfg.kind !== 'par';
+  radios.forEach((r) => r.addEventListener('change', () => {
+    cfg.kind = r.value; $('cl-url').hidden = cfg.kind !== 'par';
+    try { localStorage.setItem(KEY, JSON.stringify(cfg)); } catch (e) { /* 저장 불가여도 이번 세션은 동작 */ }
+  }));
+  $('cl-url').addEventListener('change', () => { cfg.url = $('cl-url').value.trim(); try { localStorage.setItem(KEY, JSON.stringify(cfg)); } catch (e) {} });
+  $('btn-cl-restore').hidden = isMobile; $('btn-cl-backup').hidden = !isMobile; $('cl-phrase2').hidden = !isMobile;
+  const st = (m, c) => { const el = $('cl-state'); el.textContent = m || ''; el.className = 'st' + (c ? ' ' + c : ''); };
+  async function adapter(B) {
+    if (cfg.kind === 'par') {
+      const u = $('cl-url').value.trim();
+      if (!/^https:\/\//.test(u)) throw new Error('저장소 주소(https://…)를 입력하십시오.');
+      return new B.ParUrlAdapter(u);
+    }
+    const wallet = await GopangWallet.load();
+    return new B.HondiL1Adapter({ worker: WORKER, wallet });
+  }
+  async function run(btn, fn) {
+    btn.disabled = true; st('');
+    try { await fn(await import('/src/gopang/pdv/backup.js')); }
+    catch (e) { st(e.message || '실패했습니다.', 'err'); }
+    finally { btn.disabled = false; }
+  }
+  $('btn-cl-backup').addEventListener('click', () => run($('btn-cl-backup'), async (B) => {
+    const phrase = $('cl-phrase').value, c = B.checkPhrase(phrase);
+    if (!c.ok) throw new Error(c.reason);
+    const ad = await adapter(B);
+    let header = null;
+    try { header = JSON.parse(new TextDecoder().decode(await ad.get(B.HEADER_KEY))); } catch (e) { header = null; }
+    let dek;
+    if (header) dek = (await B.unlockDek(header, phrase)).dek;
+    else {
+      if (phrase !== $('cl-phrase2').value) throw new Error('복구 문구 확인이 일치하지 않습니다.');
+      st('복구 문구로 키를 만드는 중…'); dek = (await B.initBackup(ad, phrase)).dek;
+    }
+    st('암호화해 올리는 중…');
+    const r = await B.backupSnapshot(ad, dek, await window.GopangPDV.exportAll());
+    st('백업했습니다: ' + r.count + '건', 'ok');
+  }));
+  $('btn-cl-restore').addEventListener('click', () => run($('btn-cl-restore'), async (B) => {
+    const phrase = $('cl-phrase').value;
+    if (!phrase) throw new Error('복구 문구를 입력하십시오.');
+    st('클라우드에서 받는 중…');
+    const r = await B.restoreLatest(await adapter(B), phrase);
+    const m = await window.GopangPDV.importRecords(r.records, 'cloud');
+    st('불러왔습니다: ' + m.added + '건 추가' + (m.skipped ? ' (' + m.skipped + '건은 이미 있음)' : '') + ' · 백업 시각 ' + new Date(r.ts).toLocaleString(), 'ok');
+    RECORDS = await window.GopangPDV.list(); renderList();
+  }));
+  if (!isMobile) $('src-pc').hidden = false;
 })();
 </script>
 

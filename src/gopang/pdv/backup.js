@@ -6,7 +6,8 @@
  *  - 데이터 키(DEK)는 무작위. 사용자가 정한 복구 문구(12자 이상)에서 PBKDF2 로 만든 키로 DEK 를
  *    감싸 "헤더"에 둔다. 문구를 바꿔도 본문을 다시 올릴 필요가 없다.
  *  - 복구 문구는 서버로 보내지도, 저장하지도 않는다.
- *  - 저장소는 어댑터 인터페이스 {put,get,list,remove}. 기본 대상은 Oracle 춘천(PAR URL 어댑터).
+ *  - 저장소는 어댑터 인터페이스 {put,get,list,remove}. 기본 대상은 나비 L1 PocketBase(HondiL1Adapter, 2026-11-08 변경),
+ *    사용자는 Oracle PAR URL 등 임의 저장소(ParUrlAdapter)로 바꿀 수 있다.
  * 순수 Web Crypto — 브라우저/Node 모두 동작.
  */
 
@@ -128,9 +129,9 @@ export class MemoryAdapter {
  * (list/remove 는 PAR 권한이 있을 때만 동작 — 없으면 인덱스 객체로 대체)
  */
 export class ParUrlAdapter {
-  constructor(baseUrl, fetchImpl = globalThis.fetch) {
+  constructor(baseUrl, fetchImpl) {
     this.base = baseUrl.endsWith('/') ? baseUrl : baseUrl + '/';
-    this.f = fetchImpl;
+    this.f = fetchImpl || ((...a) => globalThis.fetch(...a)); // 메서드로 호출하면 Illegal invocation — 감싸 둔다
   }
   _u(k) { return this.base + k.split('/').map(encodeURIComponent).join('/'); }
   async put(k, bytes) {
@@ -151,6 +152,33 @@ export class ParUrlAdapter {
     const r = await this.f(this._u(k), { method: 'DELETE' });
     if (!r.ok && r.status !== 404) throw new Error(`저장소 삭제 실패 (${r.status})`);
   }
+}
+
+/**
+ * 기본 저장소: 나비 L1 PocketBase(pdv_backups) — Worker 경유, 본인 지갑 서명으로 인증(2026-11-08).
+ * 서버는 암호문만 본다. wallet = GopangWallet.load() 인스턴스 (guid, publicKeyB64u, signPayload).
+ */
+export class HondiL1Adapter {
+  constructor({ worker, wallet, fetchImpl }) {
+    if (!worker || !wallet?.guid || !wallet?.publicKeyB64u) throw new Error('로그인(지갑)이 필요합니다.');
+    this.worker = worker.replace(/\/$/, ''); this.w = wallet;
+    this.f = fetchImpl || ((...a) => globalThis.fetch(...a)); // 메서드로 호출하면 Illegal invocation — 감싸 둔다
+  }
+  async _call(op, fields) {
+    const ts = String(Date.now());
+    const signature = await this.w.signPayload(`pdv-backup-${op}:${this.w.guid}:${ts}`);
+    const r = await this.f(`${this.worker}/pdv/backup/${op}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ guid: this.w.guid, pubkey: this.w.publicKeyB64u, signature, ts, ...fields }),
+    });
+    const j = await r.json().catch(() => null);
+    if (!r.ok || !j?.ok) throw new Error(j?.message || `저장소 오류 (${r.status})`);
+    return j;
+  }
+  async put(k, bytes) { await this._call('put', { name: k, data: b64(bytes) }); }
+  async get(k) { return unb64((await this._call('get', { name: k })).data); }
+  async list(prefix = '') { return (await this._call('list', { prefix })).names; }
+  async remove(k) { await this._call('remove', { name: k }); }
 }
 
 async function addToIndex(adapter, key) {

@@ -239,7 +239,7 @@
   }
 
   // 2026-11-07: 폰에서 불러온 원본을 이 기기 사본에 합친다. 레코드에 안정적 id 가 없어 (ts·서비스·유형·본문 해시)로 중복을 거른다.
-  async function importRecords(records) {
+  async function importRecords(records, via) {
     if (!Array.isArray(records)) return { added: 0, skipped: 0 };
     const sig = function (r) { return [r.ts, r.serviceId || r.svc || '', r.type || '', JSON.stringify(r.what || r.summary || r.w || '').slice(0, 200)].join('|'); };
     const have = new Set((await getAllRecords()).map(sig));
@@ -249,7 +249,7 @@
       const k = sig(r);
       if (have.has(k)) { skipped++; continue; }
       have.add(k);
-      const o = Object.assign({}, r); delete o._id; o._via = 'phone';
+      const o = Object.assign({}, r); delete o._id; o._via = via || 'phone';
       await putRecord(o); added++;
     }
     return { added, skipped };
