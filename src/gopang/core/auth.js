@@ -30,7 +30,8 @@ const DEV_MODE = false;
 //     서버 스위치가 꺼져 있으면 자동으로 기존(문자 인증) 흐름으로 돌아간다.
 //   테스트가 끝나면 이 값을 false로 되돌리고 서버 변수 SIMPLE_AUTH_TEST를 지운다.
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const SIMPLE_SIGNUP_TEST = true;
+// 2026-11-07: 테스트 종료(주피터 지시) — 가입은 폰에서만, 문자 인증 필수, 가입 직후 생체인증 등록 복원.
+const SIMPLE_SIGNUP_TEST = false;
 
 // DEV_MODE: _issueSession 서명 검증 우회 → 항상 ok
 // DEV_MODE: initAuth / initAuthWithPhone → handle만 있으면 즉시 로그인

@@ -20765,7 +20765,8 @@ async function parseToken(env,token){
 //   3) 테스트 계정에는 지갑 키가 없어 서명이 필요한 기능(GDC 결제 등)은 동작하지 않는다.
 // ═══════════════════════════════════════════════════════════
 const TEST_ID_PREFIX = 'tid-';
-function _testAuthOn(env) { return env && env.SIMPLE_AUTH_TEST === '1'; }
+// 2026-11-07: 테스트 종료(주피터 지시) — env.SIMPLE_AUTH_TEST 값과 무관하게 항상 꺼짐. 문자 인증 없는 입장 경로를 닫는다.
+function _testAuthOn(env) { return false; }
 
 async function handleTestAuthMode(request, env, corsHeaders) {
   { const _qc = _testQuotaConfig(env); return new Response(JSON.stringify({ ok: true, enabled: _testAuthOn(env), gdc_free: _gdcFreeTestOn(env), quota_krw: _qc.limitKrw, free_hours: _qc.freeHours, grace_hours: 0, free_scope: 'all' }), { status: 200, headers: corsHeaders }); }

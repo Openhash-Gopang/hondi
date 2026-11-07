@@ -152,7 +152,8 @@ try {
     // 없는 상황을 가정해 결과를 화면에도 말풍선으로 보여준다.
     const _forceRetry = new URLSearchParams(location.search).get('resetpush') === '1';
 
-    const PUSH_RETRY_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+    // 2026-11-07: 24시간 → 1시간. 서버가 만료 구독(410)을 지우면 폰이 mobile 목록에서 빠져 로그인이 막히므로, 앱을 열 때 더 자주 다시 등록한다(이미 구독된 기기는 즉시 재확인만 하고 끝난다).
+    const PUSH_RETRY_COOLDOWN_MS = 60 * 60 * 1000;
     const lastTry = parseInt(localStorage.getItem('gopang_push_last_try') || '0', 10);
     if (!_forceRetry && Date.now() - lastTry < PUSH_RETRY_COOLDOWN_MS) return;
 
