@@ -1,83 +1,726 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
 <link rel="icon" href="data:,">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <script src="/pdv-store.js"></script>
 <script src="/gopang-wallet.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>내 데이터 금고(PDV) — 레이아웃 시안 v12</title>
 <style>
 :root{
-  --blue:#1A73E8;--blue-lt:#EEF4FF;--blue-dk:#1557B0;
-  --border:#DADCE0;--txt2:#5F6368;--txt3:#9AA0A6;
-  --font:'Pretendard',-apple-system,'Helvetica Neue',sans-serif;
-  --safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px);
-  --person:#712B13;--person-bg:#FAECE7;
-  --thing:#085041;--thing-bg:#E1F5EE;
-  --org:#633806;--org-bg:#FAEEDA;
-  --ai:#3C3489;--ai-bg:#EEEDFE;
+  /* 첨부 이미지(MatAble 계열) 색: 짙은 청록 면 · 연한 하늘색 면 · 회청색 막대 · 연녹색 성공 칩 */
+  --teal:#17627d; --teal-d:#0f4d64; --teal-l:#2b86a3; --sky:#bfe6fb; --sky-l:#dff1fb;
+  --bar:#dbe7ed; --bar-line:rgba(255,255,255,.45);
+  --ink:#10242e; --mut:#6b8290; --faint:#a3b4bf; --line:#e3ecf0; --bg:#f5f9fb; --card:#ffffff; --soft:#f1f6f8;
+  --ok-bg:#d8f5d3; --ok-fg:#2b7a35; --wait-bg:#e8edf0; --wait-fg:#5b6f7a;
+  --r:22px;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--font);color:#111;background:#fff;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-.header{display:flex;align-items:center;gap:10px;padding:calc(var(--safe-t) + 14px) 16px 14px;border-bottom:1px solid var(--border)}
-.icon-btn{width:32px;height:32px;border-radius:50%;border:none;background:none;color:var(--txt2);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
-.header h1{flex:1;font-size:16px;font-weight:700}
-.tabbar{display:flex;gap:6px;overflow-x:auto;padding:10px 12px;border-bottom:1px solid var(--border);-ms-overflow-style:none;scrollbar-width:none}
-.tabbar::-webkit-scrollbar{display:none}
-.tab{flex-shrink:0;padding:7px 13px;border-radius:16px;font-size:12.5px;border:1px solid var(--border);color:var(--txt2);background:#fff;white-space:nowrap}
-.tab.active{background:var(--blue-lt);color:var(--blue-dk);border-color:var(--blue)}
-.list{padding-bottom:calc(var(--safe-b) + 12px)}
-.card{display:block;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid var(--border);padding:13px 16px;font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.card:active{background:#f9fafb}
-.card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;gap:8px}
-.card-who{display:flex;align-items:center;gap:6px;min-width:0}
-.badge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:600;flex-shrink:0}
-.badge.person{background:var(--person-bg);color:var(--person)}
-.badge.thing{background:var(--thing-bg);color:var(--thing)}
-.badge.org{background:var(--org-bg);color:var(--org)}
-.badge.ai{background:var(--ai-bg);color:var(--ai)}
-.badge.uncategorized{background:#f3f4f6;color:var(--txt3)}
-.name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.date{font-size:11px;color:var(--txt3);flex-shrink:0}
-.what{font-size:13px;color:#333;line-height:1.5}
-.why{font-size:11.5px;color:var(--txt3);margin-top:2px}
-.locked{opacity:.7}
-.locked .what{color:var(--txt3)}
-.empty{padding:40px 24px;text-align:center;color:var(--txt3);font-size:13px;line-height:1.7}
-.empty-tab-note{padding:16px 20px;background:#f9fafb;border-radius:10px;margin:12px 16px;font-size:12px;color:var(--txt3);line-height:1.7}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --teal:#2b86a3; --teal-d:#1b6f8e; --teal-l:#5fb3cf; --sky:#245d70; --sky-l:#183f4e;
+  --bar:#22404d; --bar-line:rgba(0,0,0,.18); --ink:#e6f3f8; --mut:#93aebb; --faint:#5f7b89; --line:#24404c; --bg:#0c1a21; --card:#112530; --soft:#0f202a;
+  --ok-bg:#1d4a26; --ok-fg:#b7ecb3; --wait-bg:#22343d; --wait-fg:#9db4c0;}}
+:root[data-theme="dark"]{--teal:#2b86a3; --teal-d:#1b6f8e; --teal-l:#5fb3cf; --sky:#245d70; --sky-l:#183f4e;
+  --bar:#22404d; --bar-line:rgba(0,0,0,.18); --ink:#e6f3f8; --mut:#93aebb; --faint:#5f7b89; --line:#24404c; --bg:#0c1a21; --card:#112530; --soft:#0f202a;
+  --ok-bg:#1d4a26; --ok-fg:#b7ecb3; --wait-bg:#22343d; --wait-fg:#9db4c0;}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 Pretendard,"Pretendard Variable",-apple-system,"Segoe UI","Noto Sans KR",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 16px 64px}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:ui-monospace,"D2Coding","Cascadia Mono",Consolas,monospace;font-size:12px}
+svg{display:block}
+.ic{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.sp{flex:1}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 
-.detail{position:fixed;inset:0;background:#fff;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;z-index:5}
-.detail.open{transform:translateX(0)}
-.detail-body{padding:18px 16px;overflow-y:auto}
-.detail-name{font-size:19px;font-weight:700;margin:2px 0 4px}
-.detail-field{border-top:1px solid var(--border);padding:13px 0}
-.detail-field:first-of-type{border-top:none;margin-top:8px}
-.field-label{font-size:11.5px;color:var(--txt3);margin-bottom:4px;display:flex;align-items:center;gap:6px}
-.field-value{font-size:14.5px;line-height:1.6;color:#111}
-.field-value.muted{color:var(--txt3)}
-.sensitive-note{margin-top:16px;padding:12px 14px;border-radius:10px;background:#FAEEDA;color:#633806;font-size:12.5px;line-height:1.6;display:flex;gap:8px;align-items:flex-start}
-/* 나비웹(mail.hondi.net) 설정 안에 끼워 쓸 때(?embed=mail): 자체 상단 바(뒤로가기·제목)를 숨기고 안에서 목록·상세를 그대로 보여 준다. */
-body.embed > .header{display:none}
-body.embed .detail{position:absolute}
-.srcbar{padding:10px 14px;border-bottom:1px solid var(--border);background:#f8fafc;font-size:12.5px;color:var(--txt2);line-height:1.7}
-.srcbar b{color:#111}.srcbar .row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
-.srcbar label{display:inline-flex;align-items:center;gap:5px;cursor:pointer}.srcbar label.off{opacity:.5;cursor:not-allowed}
-.srcbar button{border:1px solid var(--blue);background:#fff;color:var(--blue-dk);border-radius:8px;padding:6px 12px;font:600 12.5px inherit;cursor:pointer}
-.srcbar button:disabled{opacity:.5;cursor:default}.srcbar input{border:1px solid var(--border);border-radius:8px;padding:6px 8px;width:130px;font:inherit}
-.srcbar input[type=radio]{width:auto;padding:0}.srcbar .st{color:var(--txt3)}.srcbar .st.err{color:#b91c1c}.srcbar .st.ok{color:#15803d}
+/* 머리줄 */
+.head{display:flex;flex-wrap:wrap;align-items:center;gap:12px 14px;margin-bottom:18px}
+.head h1{font-size:20px;margin:0;font-weight:700;letter-spacing:-.01em}
+.head .sub{color:var(--mut);font-size:12.5px;margin-top:2px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--card)}
+.seg button{border:0;background:none;color:var(--ink);font:inherit;font-size:13px;font-weight:500;height:38px;padding:0 18px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed=true]{background:var(--sky);color:var(--teal-d);font-weight:600}
+.search{display:flex;align-items:center;gap:8px;background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:0 16px;height:38px;min-width:230px;color:var(--mut)}
+.search input{border:0;outline:0;background:none;font:inherit;font-size:13px;color:var(--ink);width:100%}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);color:var(--teal-d);border-radius:999px;height:38px;padding:0 18px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--soft)}
+.btn.pri{background:var(--teal);border-color:var(--teal);color:#fff}
+.btn.pri:hover{background:var(--teal-d)}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:500;color:var(--ink)}
+.pill svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2.4}
+
+/* 카드 공통 */
+.grid{display:grid;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.card-h{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.card h2{font-size:13px;margin:0;font-weight:600}
+.cap{color:var(--mut);font-size:12px}
+
+/* 1열 — 청록 게이지 · 작은 지표 3 · 선 그래프 */
+.g1{grid-template-columns:1fr .95fr 1.45fr}
+.feat{background:var(--teal);border-color:var(--teal);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;padding:22px 20px}
+.feat .ring{width:150px;height:150px;position:relative;margin-bottom:8px}
+.feat .ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:24px;font-weight:600}
+.feat .t{font-size:13px;opacity:.9}
+.feat .v{font-size:22px;font-weight:600;letter-spacing:-.01em}
+.stack{display:grid;gap:12px;grid-template-rows:repeat(3,1fr)}
+.mini{display:flex;align-items:center;gap:14px;background:var(--soft);border:1px solid var(--line);border-radius:18px;padding:12px 16px}
+.mini .tile{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;flex:none;background:var(--sky);color:var(--teal-d)}
+.mini .tile.g{background:var(--ok-bg);color:var(--ok-fg)}
+.mini .tile svg{width:20px;height:20px}
+.mini .l{font-size:12.5px;color:var(--mut)}
+.mini .v{font-size:19px;font-weight:600;line-height:1.2;letter-spacing:-.01em}
+.line .legend{margin-left:auto;display:flex;gap:14px;font-size:11.5px;color:var(--mut)}
+.line .legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+.line svg{width:100%;height:auto}
+.line text{font-family:inherit}
+
+/* 2열 — 막대 · 도넛 */
+.g2{grid-template-columns:1.75fr 1fr;margin-top:16px}
+.strip{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 18px;margin:4px 0 6px;box-shadow:0 2px 10px rgba(16,36,46,.05)}
+.strip div{font-size:11.5px;color:var(--faint)}
+.strip b{display:block;font-size:14px;color:var(--mut);font-weight:600}
+.strip i{display:block;height:3px;border-radius:3px;background:var(--bar);margin-top:6px}
+.strip .on{color:var(--ink)} .strip .on b{color:var(--ink);font-weight:700} .strip .on i{height:4px;background:var(--teal);margin-top:5px}
+.bars{display:flex;align-items:flex-end;gap:12px;height:230px;padding:6px 6px 0}
+.bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;height:100%}
+.bar span{font-size:11.5px;color:var(--faint);white-space:nowrap}
+.bar i{display:block;width:100%;max-width:52px;border-radius:26px 26px 6px 6px;background:var(--bar) repeating-linear-gradient(90deg,var(--bar-line) 0 2px,transparent 2px 6px)}
+.bar.on span{color:var(--ink);font-weight:600}
+.bar.on i{background:var(--teal) repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 2px,transparent 2px 6px)}
+.donutwrap{display:flex;flex-direction:column;align-items:center;gap:10px}
+.donut{width:170px;height:170px;position:relative}
+.donut b{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-size:19px;font-weight:600;line-height:1.2}
+.donut small{display:block;font-size:11.5px;font-weight:400;color:var(--mut)}
+.lg{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;font-size:11.5px;color:var(--mut)}
+.lg i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+.col2{display:grid;gap:16px;grid-template-rows:1fr auto}
+.tileblue{background:var(--sky);border-color:var(--sky);display:flex;align-items:center;gap:14px;padding:16px 18px}
+.tileblue .w{width:56px;height:56px;border-radius:16px;background:var(--card);color:var(--teal);display:grid;place-items:center;flex:none}
+.tileblue .w svg{width:26px;height:26px}
+.tileblue .l{font-size:12.5px;color:var(--teal-d);opacity:.85}
+.tileblue .v{font-size:18px;font-weight:700;color:var(--teal-d)}
+
+/* 기록 표 */
+.tcard{margin-top:16px;padding:0;overflow:hidden}
+.t-h{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:18px 20px 12px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--mut);font:inherit;font-size:12.5px;font-weight:500;border-radius:999px;padding:5px 14px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--sky);color:var(--teal-d);border-color:var(--sky);font-weight:600}
+.cols,.row{display:grid;grid-template-columns:96px 1.1fr 1fr 2.2fr 1.5fr 110px;gap:12px;align-items:center;padding:13px 20px}
+.cols{color:var(--mut);font-size:12px;font-weight:600;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--soft)}
+.cols span{display:inline-flex;align-items:center;gap:4px}
+.cols svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.row{border:0;border-bottom:1px solid var(--line);background:none;width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.row:hover,.row[aria-selected=true]{background:var(--soft)}
+.row .what{font-weight:500}
+.row .why{color:var(--mut);font-size:12.5px}
+.sub2{color:var(--mut);font-size:12px}
+.chipst{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 12px;font-size:12px;font-weight:600}
+.chipst.ok{background:var(--ok-bg);color:var(--ok-fg)}
+.chipst.wait{background:var(--wait-bg);color:var(--wait-fg)}
+.chipst svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
+.t-f{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-top:1px solid var(--line);color:var(--mut);font-size:12.5px}
+
+/* 상세 */
+.drawer{margin-top:16px;grid-template-columns:1fr 1fr}
+.w6 div{display:grid;grid-template-columns:70px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.w6 div:last-child{border-bottom:0}
+.w6 dt{color:var(--teal);font-weight:600;margin:0;font-size:13px}
+.w6 dd{margin:0}
+.proof{background:var(--soft);border:1px solid var(--line);border-radius:16px;padding:10px 14px;display:grid;gap:7px}
+.proof div{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--mut)}
+.proof .mono{color:var(--ink)}
+.verify{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+.keep{margin-top:16px;display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center}
+.keep .it{display:flex;align-items:center;gap:12px}
+.keep .tile{width:40px;height:40px;border-radius:13px;background:var(--sky);color:var(--teal-d);display:grid;place-items:center}
+.keep b{display:block;font-size:13px;font-weight:600}.keep small{color:var(--mut);font-size:12px}
+.note{margin:22px 0 0;color:var(--mut);font-size:12.5px}
+
+@media (max-width:1000px){
+  .g1{grid-template-columns:1fr 1fr}.g1 .line{grid-column:1/-1}
+  .g2,.drawer{grid-template-columns:1fr}
+}
+@media (max-width:560px){.g1{grid-template-columns:1fr}.search{min-width:0;flex:1}.bars{gap:5px}.bar span{font-size:10px}.strip{gap:8px;padding:10px}}
+
+/* 탭 (Material 3 primary tabs) */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:0 0 18px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{border:0;background:none;font:inherit;font-size:14px;font-weight:500;color:var(--mut);padding:12px 18px;position:relative;cursor:pointer;white-space:nowrap;border-radius:12px 12px 0 0}
+.tab:hover{background:var(--soft)}
+.tab[aria-selected=true]{color:var(--teal);font-weight:600}
+.tab[aria-selected=true]::after{content:"";position:absolute;left:14px;right:14px;bottom:-1px;height:3px;border-radius:3px 3px 0 0;background:var(--teal)}
+.tab small{display:block;font-size:10.5px;font-weight:400;color:var(--faint);margin-top:-1px}
+[role=tabpanel][hidden]{display:none}
+.panel-in{animation:fadeup .28s cubic-bezier(.2,0,0,1)}
+@keyframes fadeup{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* 재무제표 표 */
+.fscard{padding:0;overflow:hidden;margin-bottom:16px}
+.fs-h{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:18px 20px 14px}
+.fs-h h2{font-size:15px;font-weight:600}
+.fs-f{padding:12px 20px 16px;border-top:1px solid var(--line);color:var(--mut);font-size:12px}
+table.fs{width:100%;border-collapse:collapse;font-size:13.5px}
+table.fs thead th{background:var(--soft);color:var(--mut);font-size:12px;font-weight:600;text-align:left;padding:10px 16px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+table.fs th[scope=row]{font-weight:400;text-align:left;padding:9px 16px}
+table.fs td{padding:9px 16px}
+table.fs .n{text-align:right;white-space:nowrap;width:150px}
+table.fs .nt{text-align:center;width:64px;color:var(--faint);font-size:12px}
+table.fs .pv{color:var(--mut)}
+table.fs tr.r{border-bottom:1px solid var(--line)}
+table.fs tr.r:last-child{border-bottom:0}
+table.fs tr.h th{background:var(--sky-l);color:var(--teal-d);font-weight:600;font-size:13px;padding:8px 16px}
+table.fs tr.sub th{color:var(--teal);font-weight:600;font-size:12.5px;padding-top:12px}
+table.fs tr.s th,table.fs tr.s td{font-weight:600}
+table.fs tr.s{background:var(--soft)}
+table.fs tr.t th,table.fs tr.t td{font-weight:700;color:var(--ink)}
+table.fs tr.t{background:var(--sky-l);border-top:1.5px solid var(--teal-l)}
+table.fs.ra th[scope=row]{padding:10px 16px}
+table.fs.ra .n{width:110px}
+.sub2{color:var(--mut);font-size:12px}
+.kps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.kp{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px}
+.kp .l{color:var(--mut);font-size:12.5px}.kp .v{font-size:20px;font-weight:600;margin:2px 0 6px;letter-spacing:-.01em}
+.fa-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:0}
+.fa-side{border-left:1px solid var(--line);padding:16px;display:grid;gap:14px;align-content:start}
+.box{background:var(--soft);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.box h3{margin:0 0 10px;font-size:13px;font-weight:600}
+.dupont{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dupont div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px;min-width:84px}
+.dupont .res{background:var(--teal);border-color:var(--teal);color:#fff}
+.dupont span{display:block;font-size:11px;opacity:.8}.dupont b{font-size:15px;font-weight:600}.dupont i{font-style:normal;color:var(--faint)}
+.growth{display:grid;gap:8px}.growth div{display:flex;justify-content:space-between;font-size:13px}.growth span{color:var(--mut)}.growth b{font-weight:600}
+.sum{margin:0;padding-left:18px;font-size:13px;display:grid;gap:6px}
+.notes{padding:18px 20px}.notes h2{margin-bottom:8px}.notes ol{margin:0;padding-left:22px;color:var(--mut);font-size:12.5px;display:grid;gap:4px}
+
+/* 기록 행 — 6하원칙 패널이 아래로 펼쳐지고(slide out) 접힌다(slide in) */
+.row{position:relative}
+.row .chev{width:16px;height:16px;stroke:var(--faint);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s cubic-bezier(.2,0,0,1)}
+.row[aria-expanded=true]{background:var(--soft)}
+.row[aria-expanded=true] .chev{transform:rotate(180deg);stroke:var(--teal)}
+.row .stc{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.rp{display:grid;grid-template-rows:0fr;transition:grid-template-rows .34s cubic-bezier(.2,0,0,1);background:var(--soft);border-bottom:1px solid transparent}
+.rp.open{grid-template-rows:1fr;border-bottom-color:var(--line)}
+.rp-in{overflow:hidden;min-height:0}
+.rp-body{display:grid;grid-template-columns:1.2fr 1fr;gap:20px;padding:6px 20px 20px;opacity:0;transform:translateY(-10px);transition:opacity .22s ease,transform .34s cubic-bezier(.2,0,0,1)}
+.rp.open .rp-body{opacity:1;transform:none;transition-delay:.06s}
+.rp h3{margin:0 0 6px;font-size:12.5px;font-weight:600;color:var(--teal-d)}
+.w6{margin:0}
+.w6 div{display:grid;grid-template-columns:62px 1fr;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.w6 div:last-child{border-bottom:0}
+.w6 dt{color:var(--teal);font-weight:600;margin:0}.w6 dd{margin:0}
+.rp .proof{background:var(--card)}
+.rp .verify{margin-top:12px}
+@media (prefers-reduced-motion:reduce){.rp,.rp-body,.row .chev,.panel-in{transition:none!important;animation:none!important}}
+@media (max-width:1000px){.kps{grid-template-columns:1fr 1fr}.fa-grid{grid-template-columns:1fr}.fa-side{border-left:0;border-top:1px solid var(--line)}.rp-body{grid-template-columns:1fr}table.fs .nt{display:none}table.fs .n{width:96px}table.fs th[scope=row],table.fs td,table.fs thead th{padding-left:10px;padding-right:10px}}
+@media (max-width:560px){.kps{grid-template-columns:1fr 1fr}}
+
+/* 일기·메모 */
+.diary{padding:0;overflow:hidden;margin-bottom:16px}
+.dy-h{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:18px 20px 12px}
+.dy-h h2{font-size:15px;font-weight:600;margin:0}
+.dy-h .sp{flex:1}
+.dy-search{position:relative;min-width:220px}
+.dy-search input{width:100%;height:38px;border:1px solid var(--line);border-radius:999px;background:var(--soft);padding:0 14px 0 38px;font:inherit;font-size:13px;color:var(--ink)}
+.dy-search svg{position:absolute;left:13px;top:10px;width:17px;height:17px;stroke:var(--faint);fill:none;stroke-width:2;stroke-linecap:round}
+.dy-comp{margin:0 20px 14px;border:1px solid var(--line);border-radius:18px;background:var(--soft);padding:12px 14px;transition:border-color .2s,background .2s}
+.dy-comp:focus-within{border-color:var(--teal);background:var(--card)}
+.dy-comp textarea{width:100%;border:0;background:none;resize:none;font:inherit;font-size:14px;color:var(--ink);min-height:44px;outline:none}
+.dy-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:6px}
+.dy-bar .cap{margin-left:auto;font-size:11.5px;color:var(--faint)}
+.dy-tags{display:flex;gap:6px;flex-wrap:wrap;padding:0 20px 10px}
+.dy-list{border-top:1px solid var(--line)}
+.dy-item{display:grid;grid-template-columns:86px 1fr auto;gap:14px;padding:13px 20px;border-bottom:1px solid var(--line);font-size:13.5px;align-items:start}
+.dy-item:last-child{border-bottom:0}
+.dy-item time{color:var(--mut);font-size:12px;line-height:1.5}
+.dy-item p{margin:0 0 4px;white-space:pre-wrap}
+.dy-item mark{background:var(--sky);color:var(--teal-d);border-radius:4px;padding:0 2px}
+.dy-item .tg{color:var(--teal);font-size:12px;margin-right:8px}
+.dy-item .hs{font-size:11px;color:var(--faint);white-space:nowrap}
+.dy-empty{padding:26px 20px;text-align:center;color:var(--mut);font-size:13px}
+.dy-item.new{animation:fadeup .3s cubic-bezier(.2,0,0,1)}
+@media (max-width:560px){.dy-item{grid-template-columns:1fr}.dy-item .hs{display:inline-flex}.dy-search{min-width:100%;order:3}}
+
+/* 트랜잭션 */
+.txcard{padding:0;overflow:hidden;margin-bottom:16px}
+.tx-h{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:18px 20px 14px}
+.tx-h h2{font-size:15px;font-weight:600;margin:0}.tx-h .sp{flex:1}
+.tx-cols,.txrow{display:grid;grid-template-columns:96px 1.1fr 2fr 1fr 120px 24px;gap:12px;align-items:center;padding:13px 20px}
+.tx-cols{background:var(--soft);color:var(--mut);font-size:12px;font-weight:600;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.tx-cols .r,.txrow .amt{text-align:right}
+.txrow{border:0;border-bottom:1px solid var(--line);background:none;width:100%;text-align:left;font:inherit;font-size:13.5px;color:inherit;cursor:pointer}
+.txrow:hover,.txrow[aria-expanded=true]{background:var(--soft)}
+.txrow .sub{display:block;color:var(--mut);font-size:12px}
+.txrow .amt{font-weight:600}.txrow .amt.in{color:var(--ok-fg)}
+.txrow mark,.txd mark{background:var(--sky);color:var(--teal-d);border-radius:4px;padding:0 2px}
+.txrow .chev{width:16px;height:16px;stroke:var(--faint);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s cubic-bezier(.2,0,0,1)}
+.txrow[aria-expanded=true] .chev{transform:rotate(180deg);stroke:var(--teal)}
+.jn{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px}
+.jn th{color:var(--mut);font-weight:600;text-align:left;padding:4px 0}.jn td{padding:5px 0;border-top:1px solid var(--line)}.jn .n{text-align:right}
+
+
+/* ===== 앱 셸 (MatAble 참고: 둥근 흰 사이드바 · 알약형 활성 메뉴 · 상단 바) ===== */
+body{background:var(--bg)}
+.app{display:grid;grid-template-columns:268px minmax(0,1fr);gap:20px;padding:16px;max-width:1640px;margin:0 auto;align-items:start}
+.side{position:sticky;top:16px;height:calc(100vh - 32px);background:var(--card);border:1px solid var(--line);border-radius:28px;padding:18px 14px;display:flex;flex-direction:column;overflow:auto;box-shadow:0 1px 2px rgba(16,36,46,.04),0 12px 32px -18px rgba(16,36,46,.18)}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 10px 18px;font-weight:700;font-size:16px;color:var(--ink);letter-spacing:-.01em}
+.brand .lg{width:30px;height:30px;border-radius:10px;background:var(--teal);display:grid;place-items:center;color:#fff}
+.brand .lg svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.brand .sp{flex:1}
+.nv-cap{font-size:11.5px;color:var(--faint);font-weight:500;padding:14px 14px 6px}
+.nv{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;font:inherit;font-size:14px;font-weight:500;color:var(--ink);padding:11px 14px;border-radius:16px;cursor:pointer;text-align:left}
+.nv:hover{background:var(--soft)}
+.nv .ic{color:var(--mut)}
+.nv .cv{margin-left:auto;width:14px;height:14px;stroke:var(--faint);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .25s}
+.nv.on{background:var(--sky);color:var(--teal-d);font-weight:600}
+.nv.on .ic{color:var(--teal-d)}
+.nv.on .cv{stroke:var(--teal-d);transform:rotate(180deg)}
+.sm{margin:6px 0 6px 26px;padding-left:12px;border-left:1.5px solid var(--line);display:grid;gap:1px}
+.sm button{border:0;background:none;font:inherit;font-size:13.5px;color:var(--mut);text-align:left;padding:8px 12px;border-radius:12px;cursor:pointer}
+.sm button:hover{background:var(--soft);color:var(--ink)}
+.sm button[aria-current=true]{color:var(--teal);font-weight:600;background:var(--sky-l)}
+.side .grow{flex:1}
+.me{display:flex;align-items:center;gap:10px;border-top:1px solid var(--line);margin:10px 4px 0;padding:14px 8px 2px}
+.av{width:36px;height:36px;border-radius:50%;background:var(--sky);color:var(--teal-d);display:grid;place-items:center;font-weight:700;font-size:14px;flex:none}
+.me b{display:block;font-size:13px}.me small{color:var(--mut);font-size:11.5px}
+.mainc{min-width:0}
+.topbar{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:8px 12px 8px 14px;margin-bottom:18px;box-shadow:0 1px 2px rgba(16,36,46,.04)}
+.topbar .search{flex:1;max-width:420px;background:var(--soft);border-color:transparent}
+.ib{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--mut);display:grid;place-items:center;cursor:pointer;position:relative}
+.ib:hover{background:var(--soft);color:var(--teal)}
+.ib .dot{position:absolute;top:9px;right:10px;width:8px;height:8px;border-radius:50%;background:#e57373;border:2px solid var(--card)}
+.menu-btn{display:none}
+.wrap{max-width:none;margin:0;padding:0 0 48px}
+.scrim{display:none}
+/* 표: 레퍼런스 'Order List' 스타일 — 헤더에 면 없이 연한 글자, 넉넉한 행 높이, 알약 상태 */
+.cols,.tx-cols{background:none;border-top:1px solid var(--line);border-bottom:1px solid var(--line);color:var(--faint);font-weight:500;padding-top:12px;padding-bottom:12px}
+table.fs thead th{background:none;color:var(--faint);font-weight:500}
+.row,.txrow{padding-top:16px;padding-bottom:16px}
+.row:hover,.txrow:hover{background:var(--soft)}
+.tcard,.txcard,.fscard,.diary{border-radius:26px;box-shadow:0 1px 2px rgba(16,36,46,.03)}
+.chipst{padding:4px 14px}
+.head{margin-bottom:12px}
+@media (max-width:1100px){
+  .app{grid-template-columns:1fr;padding:12px}
+  .side{position:fixed;z-index:50;left:12px;top:12px;bottom:12px;width:268px;height:auto;transform:translateX(-120%);transition:transform .3s cubic-bezier(.2,0,0,1)}
+  body.nav-open .side{transform:none}
+  body.nav-open .scrim{display:block;position:fixed;inset:0;background:rgba(10,25,32,.4);z-index:40}
+  .menu-btn{display:grid}
+}
+@media (prefers-reduced-motion:reduce){.side{transition:none}}
+
+/* 목록 카드 너비에 따라 바뀌는 간결 배치 (사이드바 때문에 뷰포트 폭이 아니라 카드 폭 기준) */
+.tcard,.txcard{container-type:inline-size}
+@container (max-width:820px){
+  .cols,.tx-cols{display:none}
+  .txrow{grid-template-columns:minmax(0,1fr) auto 20px;grid-template-areas:"who amt chev" "what what chev" "date date chev";gap:2px 12px;padding:14px 16px}
+  .txrow>:nth-child(1){grid-area:date;color:var(--mut);font-size:12px}
+  .txrow>:nth-child(2){grid-area:who;font-weight:600}
+  .txrow>:nth-child(3){grid-area:what}
+  .txrow>:nth-child(4){display:none}
+  .txrow>:nth-child(5){grid-area:amt;align-self:start}
+  .txrow>:nth-child(6){grid-area:chev;align-self:center}
+  .txrow .sub{display:inline;margin-left:6px}
+  .row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"what st" "date st";gap:2px 12px;padding:14px 16px}
+  .row>:nth-child(1){grid-area:date;color:var(--mut);font-size:12px}
+  .row>:nth-child(4){grid-area:what}
+  .row>:nth-child(6){grid-area:st;align-self:center}
+  .row>:nth-child(2),.row>:nth-child(3),.row>:nth-child(5){display:none}
+}
+
+/* Material 3 상태 레이어: 호버 8% · 포커스 12%, 포커스 링 대신 면 색 변화 / 탭은 48dp 한 줄 라벨 + 3dp 인디케이터 */
+:root{--sl:color-mix(in srgb,var(--teal) 8%,transparent);--sl2:color-mix(in srgb,var(--teal) 12%,transparent)}
+.tab{height:48px;padding:0 20px;display:inline-flex;align-items:center;border-radius:0;font-size:14px;letter-spacing:.1px}
+.tab:hover{background:var(--sl)}
+.tab:focus-visible{outline:0;background:var(--sl2)}
+.tab[aria-selected=true]::after{left:20px;right:20px;height:3px}
+.tabs{margin-bottom:20px}
+.nv:focus-visible,.sm button:focus-visible,.row:focus-visible,.txrow:focus-visible,.ib:focus-visible{outline:0;background:var(--sl2)}
+.nv:not(.on):hover,.sm button:hover,.row:hover,.txrow:hover,.ib:hover{background:var(--sl)}
+.chip:hover{background:var(--sl)}.chip:focus-visible,.btn:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.btn:not(.pri):hover{background:var(--sl)}
+.btn.pri:hover,.btn.pri:focus-visible{background:var(--teal-d)}
+.tab,.nv,.sm button,.row,.txrow,.chip,.btn,.ib,.seg button{-webkit-tap-highlight-color:transparent}
+
+/* 요약 지표 + 썸네일 그래프 */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+.st{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:10px 14px}
+.st .tile{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:var(--sky);color:var(--teal-d);flex:none}
+.st .tile.g{background:var(--ok-bg);color:var(--ok-fg)}
+.st .tile .ic{width:17px;height:17px}
+.st .l{font-size:11.5px;color:var(--mut)}.st .v{font-size:14px;font-weight:600}
+.thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+.thumb{display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;font:inherit;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:12px 14px;cursor:pointer;transition:border-color .2s,background .2s,box-shadow .2s}
+.thumb:hover{background:var(--sl)}
+.thumb:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.thumb[aria-expanded=true]{border-color:var(--teal);background:var(--sky-l)}
+.thumb .tl{display:grid;gap:1px;min-width:0}
+.thumb .l{font-size:12px;color:var(--mut)}.thumb b{font-size:17px;font-weight:600;line-height:1.25}.thumb .cap{font-size:11.5px;white-space:nowrap}
+.thumb .tv{width:40px;height:40px;flex:none}.thumb .tv.wide{width:64px;height:32px}
+.cdwrap{margin-bottom:12px}
+.cdp{display:grid;grid-template-rows:0fr;transition:grid-template-rows .34s cubic-bezier(.2,0,0,1)}
+.cdp.open{grid-template-rows:1fr}
+.cdi{overflow:hidden;min-height:0}
+.cdb{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px 20px;margin-top:0;opacity:0;transform:translateY(-8px);transition:opacity .22s,transform .34s cubic-bezier(.2,0,0,1);max-width:760px}
+.cdp.open .cdb{opacity:1;transform:none;margin-top:0}
+.cdp:not(.open) .cdb{border-color:transparent}
+.cdb h2{font-size:14px;margin:0 0 10px;font-weight:600}
+.cdb .card-h h2{margin:0}
+.cdb.line svg{max-width:560px}
+.cdb .bars{height:170px}
+.cdb .donutwrap{flex-direction:row;gap:24px;justify-content:flex-start;flex-wrap:wrap}
+.cdb .donut{width:130px;height:130px}.cdb .donut b{font-size:16px}
+.ringrow{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.ringrow .ring{position:relative;width:110px;height:110px;color:var(--ink)}
+.ringrow .ring svg{width:100%;height:100%}
+.ringrow .ring circle:first-child{stroke:var(--bar)}.ringrow .ring circle:nth-child(2){stroke:var(--teal)}
+.ringrow .ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:22px;font-weight:600}
+.ringrow .t{color:var(--ink)!important}.ringrow .v{font-size:20px;font-weight:600;color:var(--ink)}
+@media (max-width:1100px){.stats,.thumbs{grid-template-columns:1fr 1fr}}
+@media (prefers-reduced-motion:reduce){.cdp,.cdb{transition:none!important}}
+
+/* ===== Material 3 컴포넌트 통일 (버튼 · 칩 · 분할 버튼 · 탭 · 아이콘 버튼 · 라벨) ===== */
+:root{--lbl:500 14px/20px Pretendard,"Pretendard Variable",-apple-system,"Segoe UI","Noto Sans KR",sans-serif;--lbl-s:500 12px/16px Pretendard,"Pretendard Variable",-apple-system,"Segoe UI","Noto Sans KR",sans-serif;--outline:color-mix(in srgb,var(--ink) 22%,var(--card))}
+/* 버튼: 높이 40 · 완전 둥근 모서리 · 라벨 14/500 */
+.btn{height:40px;padding:0 24px;gap:8px;border:1px solid var(--outline);border-radius:20px;background:transparent;color:var(--teal);font:var(--lbl);letter-spacing:.1px;position:relative;overflow:hidden;transition:background .2s,box-shadow .2s}
+.btn .ic{width:18px;height:18px}
+.btn:has(.ic){padding-left:16px}
+.btn:hover{background:var(--sl)}
+.btn.pri{background:var(--teal);color:#fff;border-color:transparent}
+.btn.pri:hover{background:var(--teal-d);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.btn.tonal{background:var(--sky);color:var(--teal-d);border-color:transparent}
+.btn.text{border-color:transparent;padding:0 12px}
+/* 칩(필터·태그): 높이 32 · 모서리 8 · 선택 시 보조 컨테이너 색 */
+.chip{height:32px;padding:0 14px;border:1px solid var(--outline);border-radius:8px;background:transparent;color:var(--ink);font:var(--lbl);font-size:13px;display:inline-flex;align-items:center;gap:6px;position:relative;overflow:hidden;transition:background .2s}
+.chip:hover{background:var(--sl)}
+.chip[aria-pressed=true]{background:var(--sky);border-color:transparent;color:var(--teal-d);font-weight:500}
+.chip .cap{font-size:12px;color:inherit;opacity:.7;margin:0}
+/* 분할 버튼(개인/조직) */
+.seg{height:40px;border:1px solid var(--outline);border-radius:20px;background:transparent}
+.seg button{height:38px;padding:0 20px;font:var(--lbl);color:var(--ink);position:relative;overflow:hidden}
+.seg button+button{border-left:1px solid var(--outline)}
+.seg button:hover{background:var(--sl)}
+.seg button[aria-pressed=true]{background:var(--sky);color:var(--teal-d);font-weight:500}
+/* 아이콘 버튼: 40 · 테두리 없음 */
+.ib{width:40px;height:40px;border:0;background:transparent;color:var(--mut);position:relative;overflow:hidden}
+.ib:hover{background:var(--sl);color:var(--teal)}
+/* 라벨(알약 안내): 높이 24 · 모서리 8 · 면색 */
+.pill{height:24px;padding:0 10px;border:0;border-radius:8px;background:var(--soft);color:var(--mut);font:var(--lbl-s)}
+/* 상태 칩 */
+.chipst{height:24px;padding:0 12px;font:var(--lbl-s);border-radius:8px}
+/* 탭: 48 · 라벨 14/500 · 인디케이터 3 */
+.tabs{border-bottom:1px solid var(--line)}
+.tab{height:48px;padding:0 20px;font:var(--lbl);color:var(--mut);margin-bottom:-1px;position:relative;overflow:hidden;border-radius:0}
+.tab[aria-selected=true]{color:var(--teal);font-weight:600}
+.tab[aria-selected=true]::after{bottom:0;left:20px;right:20px}
+/* 사이드 메뉴도 같은 라벨 규격 */
+.nv,.sm button{font:var(--lbl);position:relative;overflow:hidden}
+.nv.on{font-weight:600}
+.sm button[aria-current=true]{font-weight:600}
+.thumb,.row,.txrow{position:relative;overflow:hidden}
+/* 물결(ripple) */
+.rip{position:absolute;border-radius:50%;background:currentColor;opacity:.16;transform:scale(0);animation:rip .5s ease-out forwards;pointer-events:none}
+@keyframes rip{to{transform:scale(1);opacity:0}}
+@media (prefers-reduced-motion:reduce){.rip{display:none}}
+
+/* 일기·메모 행: 상세가 있으면 눌러서 slide out, 없으면 화살표 없는 일반 행 */
+.dy-item{width:100%;text-align:left;font:inherit;color:inherit;background:none;border:0;border-bottom:1px solid var(--line);grid-template-columns:96px 1fr auto;position:relative;overflow:hidden}
+button.dy-item{cursor:pointer}
+button.dy-item:hover,button.dy-item[aria-expanded=true]{background:var(--soft)}
+.dy-item.plain{cursor:default}
+.dy-item .hs{display:inline-flex;align-items:center;gap:8px;font-size:11.5px;color:var(--faint)}
+.dy-item .chev,.dy-item .chev-sp{width:16px;height:16px;flex:none}
+.dy-item .chev{stroke:var(--faint);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s cubic-bezier(.2,0,0,1)}
+button.dy-item[aria-expanded=true] .chev{transform:rotate(180deg);stroke:var(--teal)}
+.dyw:last-child .dy-item{border-bottom:0}
+.dyw .rp .full{margin:0;white-space:pre-wrap;font-size:13.5px;line-height:1.7}
+.dyw .rp{border-bottom:1px solid transparent}.dyw .rp.open{border-bottom-color:var(--line)}
+@media (max-width:560px){.dy-item .hs>span{display:none}}
+
+/* 개인 / 조직 보기 전환 */
+body[data-mode=person] .mo[data-m=org],body:not([data-mode=person]) .mo[data-m=person]{display:none}
+
+/* ===== 첨부 이미지 버튼 양식으로 통일: 알약 · 아이콘+라벨 · ①그림자 ②윤곽선 ③채움 ===== */
+:root{--bd:color-mix(in srgb,var(--teal) 32%,var(--card));--sh:0 1px 5px rgba(16,36,46,.14),0 0 0 .5px rgba(16,36,46,.04)}
+.btn,.chip,.tab,.seg button{
+  height:38px;padding:0 18px;border-radius:999px;border:1px solid var(--bd);background:var(--card);color:var(--teal);
+  font:var(--lbl);letter-spacing:.1px;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;
+  box-shadow:var(--sh);position:relative;overflow:hidden;transition:background .2s,box-shadow .2s,color .2s}
+.btn .ic,.tab .ic,.seg button .ic{width:18px;height:18px;stroke:currentColor}
+.btn:hover,.chip:hover,.tab:hover,.seg button:hover{background:color-mix(in srgb,var(--teal) 7%,var(--card));box-shadow:0 2px 8px rgba(16,36,46,.18)}
+.btn:focus-visible,.chip:focus-visible,.tab:focus-visible,.seg button:focus-visible{outline:2px solid var(--teal);outline-offset:2px;background:color-mix(in srgb,var(--teal) 10%,var(--card))}
+/* ③ 채움: 주 동작 · 선택된 탭/분할/칩 */
+.btn.pri,.chip[aria-pressed=true],.tab[aria-selected=true],.seg button[aria-pressed=true]{background:var(--teal);border-color:var(--teal);color:#fff;box-shadow:none;font-weight:500}
+.btn.pri:hover,.chip[aria-pressed=true]:hover,.tab[aria-selected=true]:hover,.seg button[aria-pressed=true]:hover{background:var(--teal-d);border-color:var(--teal-d);box-shadow:0 2px 6px rgba(15,77,100,.35)}
+/* ① 그림자만: 선택되지 않은 탭 */
+.tab:not([aria-selected=true]){border-color:transparent}
+.tab[aria-selected=true]::after{display:none}
+.tab{margin:0;border-radius:999px}
+.tabs{border-bottom:0;gap:10px;padding:4px 4px 14px;margin:0 -4px 6px}
+.seg{display:inline-flex;gap:8px;height:auto;border:0;background:none;border-radius:0;overflow:visible}
+.seg button+button{border-left:1px solid var(--bd)}
+.seg button[aria-pressed=true]+button,.seg button[aria-pressed=false]+button{border-left:1px solid var(--bd)}
+.seg button[aria-pressed=true]{border-color:var(--teal)}.seg button[aria-pressed=true]+button{border-left-color:var(--bd)}
+.chip{height:34px;padding:0 16px;font-size:13px}
+.chip .cap{color:inherit;opacity:.7}
+.btn:has(.ic){padding-left:16px}
+.ib{border-radius:50%;box-shadow:var(--sh);background:var(--card);color:var(--teal);border:0}
+.ib:hover{box-shadow:0 2px 8px rgba(16,36,46,.18);background:color-mix(in srgb,var(--teal) 7%,var(--card))}
+.verify .btn,.btn.pri{color:inherit}
+.btn.pri{color:#fff}
+
+/* ===== 바탕색 ↔ 버튼색 맞바꿈: 바탕 #f5f9fb → #ffffff / 선택 안 된 버튼 #ffffff → #f5f9fb ===== */
+@media (prefers-color-scheme:light){
+  :root:root:root{--bg:#ffffff;--btn-rest:#f5f9fb}
+  body{background:#ffffff}
+  .btn:not(.pri),.chip:not([aria-pressed=true]),.tab:not([aria-selected=true]),.seg button:not([aria-pressed=true]),.ib{background:var(--btn-rest)}
+  .btn:not(.pri):hover,.chip:not([aria-pressed=true]):hover,.tab:not([aria-selected=true]):hover,.seg button:not([aria-pressed=true]):hover{background:color-mix(in srgb,var(--teal) 9%,var(--btn-rest))}
+}
+
+/* 보고서 드롭다운(M3 메뉴) */
+.dd{position:relative}
+.dd .dd-cv{width:16px;height:16px;transition:transform .2s;margin-left:-2px}
+.dd [aria-expanded=true] .dd-cv{transform:rotate(180deg)}
+.menu{position:absolute;right:0;top:calc(100% + 8px);z-index:30;min-width:290px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:8px;box-shadow:0 12px 32px -8px rgba(16,36,46,.28),0 2px 6px rgba(16,36,46,.08);transform-origin:top right;animation:menuin .16s cubic-bezier(.2,0,0,1)}
+@keyframes menuin{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+.menu[hidden]{display:none}
+.mi{display:flex;align-items:center;gap:14px;width:100%;border:0;background:none;font:inherit;text-align:left;color:var(--ink);padding:9px 12px;border-radius:12px;cursor:pointer;position:relative;overflow:hidden}
+.mi:hover,.mi:focus-visible{outline:0;background:var(--sl2)}
+.mi .ic{color:var(--teal)}
+.mi b{display:block;font-size:14px;font-weight:500}.mi small{display:block;color:var(--mut);font-size:12px}
+.mi .tag{margin-left:auto;font-size:11px;color:var(--faint)}
+.menu .dv{height:1px;background:var(--line);margin:6px 4px}
+/* 보고서 화면 */
+.rep-h{padding:18px 20px;margin-bottom:12px}
+.rep-top{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+.rep-top h2{font-size:18px;margin:2px 0 0;font-weight:700;letter-spacing:-.01em}
+.rep-sw{display:flex;gap:8px;flex-wrap:wrap}
+.rep-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.rep-c{padding:18px 20px}.rep-c h2{font-size:14px;font-weight:600;margin:0 0 12px}
+.mixrow{display:grid;grid-template-columns:110px 1fr 104px;gap:10px;align-items:center;font-size:13px;padding:6px 0}
+.mixrow i{display:block;height:8px;border-radius:8px;background:var(--bar);position:relative;overflow:hidden}
+.mixrow i::after{content:"";position:absolute;inset:0;width:var(--w);background:var(--teal);border-radius:8px}
+.mixrow span:last-child{text-align:right;color:var(--mut);white-space:nowrap}
+.actrow{display:grid;grid-template-columns:78px 1fr;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.actrow:last-child{border-bottom:0}.actrow time{color:var(--mut);font-size:12px}.actrow small{display:block;color:var(--mut);font-size:12px}
+.finrow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.finrow:last-child{border-bottom:0}.finrow b{font-weight:600}.finrow .d{color:var(--mut);font-size:12px;margin-left:8px;font-weight:400}
+.rep-auto{margin-bottom:16px}
+.rep-ah{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin-bottom:8px}.rep-ah h2{margin:0}
+.sch{display:grid}
+.schr{display:grid;grid-template-columns:96px 1fr 1fr 1fr 56px;gap:12px;align-items:center;padding:11px 0;border-top:1px solid var(--line);font-size:13px}
+.schr .k{font-weight:600}.schr small{display:block;color:var(--mut);font-size:11.5px}
+/* M3 스위치 */
+.sw{width:52px;height:32px;border-radius:16px;border:2px solid var(--outline);background:var(--soft);position:relative;cursor:pointer;padding:0;transition:background .2s,border-color .2s}
+.sw::after{content:"";position:absolute;top:6px;left:6px;width:16px;height:16px;border-radius:50%;background:var(--outline);transition:all .2s cubic-bezier(.2,0,0,1)}
+.sw[aria-checked=true]{background:var(--teal);border-color:var(--teal)}
+.sw[aria-checked=true]::after{left:24px;top:4px;width:24px;height:24px;background:#fff}
+.sw:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+@media (max-width:1100px){.rep-grid{grid-template-columns:1fr}.schr{grid-template-columns:80px 1fr 56px}.schr>:nth-child(3),.schr>:nth-child(4){display:none}}
+@media (max-width:560px){.menu{min-width:260px}}
+.tab{flex:none}
+@media (max-width:560px){.topbar .sp{display:none}.topbar .search{min-width:0;flex:1;max-width:none}}
+@media (max-width:560px){.menu{left:0;right:auto;transform-origin:top left;max-width:calc(100vw - 24px)}}
+
+/* 나만의 AI 비서: 우측 하단 아이콘 + 대화창 */
+.fab{position:fixed;right:22px;bottom:22px;z-index:60;width:60px;height:60px;border-radius:50%;border:0;background:var(--teal);color:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:0 8px 22px -6px rgba(15,77,100,.55),0 2px 6px rgba(0,0,0,.18);transition:transform .2s,box-shadow .2s}
+.fab:hover{transform:translateY(-2px);box-shadow:0 12px 26px -6px rgba(15,77,100,.6)}
+.fab:focus-visible{outline:3px solid var(--sky);outline-offset:3px}
+.fab-ic{width:28px;height:28px;stroke:#fff}
+.fab-dot{position:absolute;top:4px;right:4px;width:14px;height:14px;border-radius:50%;background:#3ccf6e;border:2px solid var(--card);display:none}
+.fab.ready .fab-dot{display:block}
+.fab-spin{position:absolute;inset:-5px;border-radius:50%;border:3px solid transparent;border-top-color:var(--teal-l);animation:spin .9s linear infinite}
+.fab.ready .fab-spin{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fab-tip{position:absolute;right:70px;white-space:nowrap;background:var(--ink);color:var(--card);font-size:12px;padding:6px 10px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s}
+.fab:hover .fab-tip{opacity:1}
+.bot{position:fixed;right:22px;bottom:96px;z-index:60;width:390px;max-width:calc(100vw - 24px);height:min(640px,calc(100vh - 120px));display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:26px;box-shadow:0 24px 60px -12px rgba(16,36,46,.35),0 4px 12px rgba(16,36,46,.1);transform-origin:bottom right;animation:botin .26s cubic-bezier(.2,0,0,1);overflow:hidden}
+.bot[hidden]{display:none}
+@keyframes botin{from{opacity:0;transform:scale(.9) translateY(12px)}to{opacity:1;transform:none}}
+.bot-h{display:flex;align-items:center;gap:12px;padding:14px 14px 12px 18px;border-bottom:1px solid var(--line)}
+.bot-av{width:38px;height:38px;border-radius:50%;background:var(--teal);display:grid;place-items:center;color:#fff}
+.bot-av .ic{stroke:#fff}
+.bot-h b{display:block;font-size:15px}.bot-h small{color:var(--mut);font-size:12px}
+.bot-b{flex:1;overflow:auto;padding:16px 16px 8px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+.msg{max-width:86%;padding:10px 14px;border-radius:18px;font-size:13.5px;line-height:1.55;animation:fadeup .25s cubic-bezier(.2,0,0,1);white-space:pre-wrap}
+.msg.bot{position:static;width:auto;height:auto;display:block;box-shadow:none;border:0;animation:fadeup .25s cubic-bezier(.2,0,0,1);background:var(--soft);border-bottom-left-radius:6px;align-self:flex-start;border-radius:18px 18px 18px 6px;overflow:visible}
+.msg.me{background:var(--teal);color:#fff;align-self:flex-end;border-radius:18px 18px 6px 18px}
+.msg.sys{align-self:stretch;max-width:none;background:var(--sky-l);border:1px solid var(--line);border-radius:16px;font-size:12.5px;color:var(--ink)}
+.msg.sys b{display:block;margin-bottom:4px;font-size:13px;color:var(--teal-d)}
+.msg .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.msg .acts .chip{height:30px;padding:0 12px;font-size:12.5px}
+.msg .hit{display:block;padding:7px 0;border-top:1px solid var(--line);font-size:12.5px}.msg .hit small{color:var(--mut);display:block}
+.typing{display:inline-flex;gap:4px;padding:4px 0}.typing i{width:7px;height:7px;border-radius:50%;background:var(--faint);animation:bl 1s infinite}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes bl{0%,60%,100%{opacity:.3;transform:none}30%{opacity:1;transform:translateY(-3px)}}
+.bot-sg{display:flex;gap:6px;overflow-x:auto;padding:4px 14px 8px;scrollbar-width:none}.bot-sg::-webkit-scrollbar{display:none}
+.bot-sg .chip{flex:none;height:32px;font-size:12.5px}
+.bot-f{display:flex;gap:8px;padding:10px 12px 14px;border-top:1px solid var(--line)}
+.bot-f input{flex:1;min-width:0;height:42px;border:1px solid var(--line);border-radius:999px;background:var(--soft);padding:0 16px;font:inherit;font-size:14px;color:var(--ink)}
+.bot-f input:focus{outline:2px solid var(--teal);outline-offset:0;background:var(--card)}
+.bot-f .btn{width:42px;padding:0;height:42px}
+@media (max-width:560px){.fab{right:14px;bottom:14px}.bot{right:8px;left:8px;width:auto;bottom:84px;max-width:none;height:min(600px,calc(100vh - 100px))}}
+@media (prefers-reduced-motion:reduce){.fab-spin{animation:none}.bot,.msg{animation:none}}
+
+/* 입력줄: 홈 화면과 같은 배치 — 클립 · 입력 · 카메라 · 마이크 · 보내기(↑) */
+.ibar{display:flex;align-items:flex-end;gap:4px;background:var(--card);border:1.5px solid var(--outline);border-radius:24px;padding:7px 9px 7px 13px;transition:border-color .12s,box-shadow .12s}
+.ibar:focus-within{border-color:var(--teal);box-shadow:0 0 0 3px color-mix(in srgb,var(--teal) 14%,transparent)}
+.ibar textarea,.ibar input[type=text]{flex:1;min-width:0;border:0;outline:0;resize:none;background:transparent;font:inherit;font-size:15px;line-height:1.5;color:var(--ink);padding:8px 4px;max-height:200px;overflow-y:hidden;height:auto}
+.ibar input[type=text]{height:38px;padding:0 4px;align-self:center}
+.ib-btn{flex:none;width:32px;height:32px;margin-bottom:2px;border-radius:50%;border:0;background:transparent;color:var(--faint);display:grid;place-items:center;cursor:pointer;position:relative;overflow:hidden;transition:background .12s,color .12s}
+.ib-btn:hover{background:var(--sky-l);color:var(--teal)}
+.ib-btn.rec{color:#d93025;background:#fde8e6;animation:micp 1.1s ease-in-out infinite}
+@keyframes micp{50%{box-shadow:0 0 0 6px rgba(217,48,37,.16)}}
+.ib-send{flex:none;width:36px;height:36px;border-radius:50%;border:0;background:var(--teal);color:#fff;display:grid;place-items:center;cursor:pointer;transition:opacity .12s,transform .08s}
+.ib-send:disabled{opacity:.35;cursor:not-allowed}.ib-send:not(:disabled):hover{transform:scale(1.06)}
+.ibar-att{display:flex;flex-wrap:wrap;gap:6px;padding:0 4px 8px}.ibar-att[hidden]{display:none}
+.att-chip{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 6px 4px 12px;font-size:13px;color:var(--mut)}
+.att-chip button{border:0;background:transparent;color:var(--faint);cursor:pointer;font-size:16px;line-height:1;padding:0 4px}
+.att-chip button:hover{color:#d93025}
+.dy-comp{background:none;border:0;padding:0;margin:0 20px 14px}
+.dy-comp:focus-within{background:none;border:0}
+.dy-note{font-size:11.5px;color:var(--faint);padding:6px 14px 0}
+.bot-f{display:block;padding:8px 12px 14px}
+.bot-f .ibar{padding:5px 7px 5px 11px}.bot-f .ibar-att{padding-bottom:6px}
+
+.fab{right:20px;bottom:20px;width:56px;height:56px;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.fab:hover{transform:none;filter:brightness(1.08);box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.fab-ic{width:28px;height:28px}
+.fab.ready .fab-dot{display:none}
+.fab-dot{background:#e5484d;border-color:#fff;top:6px;right:6px}
+.bot{right:20px;bottom:88px}
+@media (max-width:560px){.fab{right:14px;bottom:14px}.bot{bottom:80px}}
+.dy-item time{white-space:nowrap}
+@media (max-width:560px){.dy-item{grid-template-columns:1fr auto;row-gap:2px}.dy-item time{grid-column:1/-1}}
+.topbar .tb-search{width:40px;height:40px;padding:0;border-radius:50%;border:1px solid transparent;background:var(--soft);color:var(--mut);display:inline-grid;place-items:center;cursor:pointer;flex:none}.topbar .tb-search svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}.topbar .tb-search:hover{color:var(--teal)}
+
+/* 나비웹 안에 끼워 쓰는 페이지: 사이드바·상단 바 없이 본문만 */
+.app{display:block;padding:0;max-width:none}.mainc{padding:16px 20px 96px}
+.srcpanel{margin-top:14px;display:grid;gap:10px;font-size:12.5px;color:var(--mut)}
+.srcpanel[hidden]{display:none}
+.srcpanel .row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;cursor:default;border:0;background:none;min-height:0;padding:0;box-shadow:none;border-radius:0;height:auto}
+.srcpanel label{display:inline-flex;align-items:center;gap:5px}
+.srcpanel input:not([type=radio]){height:38px;border:1px solid var(--line);border-radius:999px;background:var(--soft);padding:0 14px;font:inherit;font-size:13px;color:var(--ink)}
+.srcpanel button{height:38px;padding:0 18px;border-radius:999px;border:1px solid var(--bd);background:var(--card);color:var(--teal);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.srcpanel button:disabled{opacity:.5;cursor:default}
+.srcpanel .st{color:var(--mut)}.srcpanel .st.err{color:#b91c1c}.srcpanel .st.ok{color:#15803d}
 </style>
 </head>
 <body>
-<script>if (/[?&]embed=mail/.test(location.search)) document.body.classList.add('embed');</script>
+<script>if(/[?&]embed=/.test(location.search))document.documentElement.classList.add("embed")</script>
+<div class="app">
+<div class="mainc">
+<div class="wrap">
 
-<div class="header">
-  <button class="icon-btn" onclick="parent.closePDV && parent.closePDV()" aria-label="닫기"><i class="ti ti-arrow-left"></i></button>
-  <h1>PDV · 대화 이력</h1>
-  <button class="icon-btn" aria-label="검색"><i class="ti ti-search"></i></button>
-</div>
+  <div class="head">
+    <div>
+      <h1>내 데이터 금고</h1>
+      <div class="sub">일상과 업무를 6하원칙으로 기록하고, 그 증명을 OpenHash 네트워크에 남깁니다.</div>
+    </div>
+    <div class="sp"></div>
+    <div class="seg" role="group" aria-label="보기 대상">
+      <button type="button" aria-pressed="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c1-4 4-6 8-6s7 2 8 6"/></svg>개인</button>
+      <button type="button" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M9 8h2M13 8h2M9 12h2M13 12h2M10 21v-4h4v4"/></svg>조직</button>
+    </div>
+    <div class="dd" id="rp-dd"><button type="button" class="btn" id="rp-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="rp-menu"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/></svg>보고서<svg class="ic dd-cv" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+      <div class="menu" id="rp-menu" role="menu" aria-labelledby="rp-btn" hidden></div></div>
+  </div>
 
-<div class="srcbar" id="srcbar">
+  <div class="tabs" role="tablist" aria-label="금고 보기">
+    <button class="tab" role="tab" id="t-vault" aria-selected="true" aria-controls="p-vault" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>기록 금고</button>
+    <button class="tab" role="tab" id="t-tx" title="금전 거래 기록" aria-selected="false" aria-controls="p-tx" type="button" tabindex="-1"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h12m0 0-3-3m3 3-3 3M17 17H5m0 0 3-3m-3 3 3 3"/></svg>트랜잭션</button>
+    <button class="tab" role="tab" id="t-is" title="포괄손익계산서 (K-IFRS 1001)" aria-selected="false" aria-controls="p-is" type="button" tabindex="-1"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16 5-5 4 4 7-8"/><path d="M15 7h5v5"/></svg>손익계산서</button>
+    <button class="tab" role="tab" id="t-bs" title="재무상태표 (K-IFRS 1001)" aria-selected="false" aria-controls="p-bs" type="button" tabindex="-1"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M12 4.5v15M7 9h2.5M7 12.5h2.5M14.5 9H17M14.5 12.5H17"/></svg>대차대조표</button>
+    <button class="tab" role="tab" id="t-cf" title="현금흐름표 (K-IFRS 1007)" aria-selected="false" aria-controls="p-cf" type="button" tabindex="-1"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4 7l11-3v3M16 14h2"/></svg>현금흐름표</button>
+    <button class="tab" role="tab" id="t-fa" title="재무분석 보고서" aria-selected="false" aria-controls="p-fa" type="button" tabindex="-1"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>재무분석 보고서</button>
+  </div>
+  <div id="p-vault" role="tabpanel" aria-labelledby="t-vault">
+  <!-- 일기·메모 -->
+  <section class="card diary" aria-label="일기와 메모">
+    <div class="dy-h"><h2>일기 · 메모</h2><span class="pill">검색 가능</span><span class="sp"></span>
+      <label class="dy-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="dy-q" type="search" placeholder="메모 검색 (내용·날짜)" aria-label="메모 검색"></label></div>
+    <form class="dy-comp" id="dy-form"><div class="ibar-att" hidden></div>
+      <div class="ibar"><input type="file" class="ib-file" multiple hidden><input type="file" class="ib-cam" accept="image/*" capture="environment" hidden>
+        <button type="button" class="ib-btn" data-k="clip" aria-label="파일 첨부" title="파일 첨부"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
+        <textarea id="dy-text" rows="1" placeholder="오늘 있었던 일, 떠오른 생각을 바로 적어 두세요" aria-label="새 메모"></textarea>
+        <button type="button" class="ib-btn" data-k="cam" aria-label="카메라" title="사진 촬영"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></button>
+        <button type="button" class="ib-btn" data-k="mic" aria-label="음성 입력" title="음성 입력"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
+        <button type="submit" class="ib-send" aria-label="입력" title="입력" disabled><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button></div>
+      <div class="dy-note">Enter 입력 · Shift+Enter 줄바꿈 · 입력하면 변조 방지 기록이 남습니다(원문은 이 기기에만)</div></form>
+    <div class="dy-list" id="dy-list" aria-live="polite"></div>
+  </section>
+  <!-- 요약: 작은 지표 + 썸네일 그래프(눌러서 펼침) -->
+
+  <section class="thumbs" role="group" aria-label="그래프 (눌러서 크게 보기)">
+    <button class="thumb" type="button" aria-expanded="false" aria-controls="cd-ring"><div class="tl"><span class="l">기록 완료율</span><b class="num">82%</b><span class="cap">1,284 / 1,566건</span></div>
+      <svg class="tv" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="17" fill="none" stroke="var(--bar)" stroke-width="6"/><circle cx="22" cy="22" r="17" fill="none" stroke="var(--teal)" stroke-width="6" stroke-linecap="round" stroke-dasharray="106.8" stroke-dashoffset="19.2" transform="rotate(-90 22 22)"/></svg></button>
+    <button class="thumb" type="button" aria-expanded="false" aria-controls="cd-line"><div class="tl"><span class="l">월별 기록</span><b class="num">412건</b><span class="cap">10월</span></div>
+      <svg class="tv wide" viewBox="0 0 80 36" aria-hidden="true"><path d="M2 26 C14 22 20 8 32 14 S44 24 54 12 S70 6 78 4" fill="none" stroke="var(--teal)" stroke-width="2.4" stroke-linecap="round"/><path d="M2 30 C16 28 24 22 36 24 S56 20 78 17" fill="none" stroke="var(--sky)" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+    <button class="thumb" type="button" aria-expanded="false" aria-controls="cd-bars"><div class="tl"><span class="l">일별 기록</span><b class="num">1,566건</b><span class="cap">최근 7일</span></div>
+      <svg class="tv wide" viewBox="0 0 80 36" aria-hidden="true"><g fill="var(--bar)"><rect x="2" y="18" width="8" height="18" rx="3"/><rect x="13" y="13" width="8" height="23" rx="3"/><rect x="24" y="6" width="8" height="30" rx="3"/><rect x="35" y="16" width="8" height="20" rx="3"/><rect x="46" y="20" width="8" height="16" rx="3"/><rect x="57" y="15" width="8" height="21" rx="3"/></g><rect x="68" y="10" width="9" height="26" rx="3" fill="var(--teal)"/></svg></button>
+    <button class="thumb" type="button" aria-expanded="false" aria-controls="cd-donut"><div class="tl"><span class="l">분류별 기록</span><b class="num">58%</b><span class="cap">공용 AI 전문가</span></div>
+      <svg class="tv" viewBox="0 0 44 44" aria-hidden="true"><g fill="none" stroke-width="7" transform="rotate(-90 22 22)"><circle cx="22" cy="22" r="16" stroke="var(--bar)"/><circle cx="22" cy="22" r="16" stroke="var(--sky)" stroke-dasharray="20.1 100.5" stroke-dashoffset="-58.3"/><circle cx="22" cy="22" r="16" stroke="var(--teal)" stroke-dasharray="58.3 100.5"/></g></svg></button>
+  </section>
+
+  <div class="cdwrap">
+    <div class="cdp" id="cd-ring"><div class="cdi"><div class="cdb"><h2>기록 완료율</h2><div class="ringrow"><div class="ring" aria-hidden="true">
+        <svg viewBox="0 0 150 150"><circle cx="75" cy="75" r="60" fill="none" stroke="rgba(0,0,0,.2)" stroke-width="16"/><circle cx="75" cy="75" r="60" fill="none" stroke="#bfe6fb" stroke-width="16" stroke-linecap="round" stroke-dasharray="377" stroke-dashoffset="68" transform="rotate(-90 75 75)"/></svg>
+        <b class="num">82%</b>
+      </div>
+      <div class="t">OpenHash 기록 완료</div>
+      <div class="v num">1,284건</div>
+      <div class="t" style="opacity:.75;font-size:12px">전체 1,566건 · 대기 282건</div>
+    </div></div></div></div>
+    <div class="cdp" id="cd-line"><div class="cdi"><div class="cdb line"><div class="card-h"><h2>월별 기록</h2><div class="legend"><span><i style="background:var(--teal)"></i>이번 기간</span><span><i style="background:var(--sky)"></i>이전 기간</span></div></div><svg id="lc" viewBox="0 0 460 210" role="img" aria-label="최근 6개월 월별 기록 수 선 그래프"></svg></div></div></div>
+    <div class="cdp" id="cd-bars"><div class="cdi"><div class="cdb"><div class="card-h"><h2>일별 기록</h2></div><div class="strip">
+        <div><b class="num">1,284</b>기록 완료<i></i></div>
+        <div class="on"><b class="num">1,566</b>전체 기록<i></i></div>
+        <div><b class="num">52</b>일평균<i></i></div>
+      </div>
+      <div class="bars" role="img" aria-label="최근 7일 기록 수 막대 그래프">
+        <div class="bar"><span>11/2</span><i style="height:46%"></i></div>
+        <div class="bar"><span>11/3</span><i style="height:64%"></i></div>
+        <div class="bar"><span>11/4</span><i style="height:84%"></i></div>
+        <div class="bar"><span>11/5</span><i style="height:52%"></i></div>
+        <div class="bar"><span>11/6</span><i style="height:40%"></i></div>
+        <div class="bar"><span>11/7</span><i style="height:58%"></i></div>
+        <div class="bar on"><span>오늘</span><i style="height:72%"></i></div>
+      </div></div></div></div>
+    <div class="cdp" id="cd-donut"><div class="cdi"><div class="cdb"><div class="card-h"><h2>분류별 기록</h2></div><div class="donutwrap">
+          <div class="donut">
+            <svg viewBox="0 0 170 170"><g fill="none" stroke-width="20" transform="rotate(-90 85 85)">
+              <circle cx="85" cy="85" r="68" stroke="var(--bar)"/>
+              <circle cx="85" cy="85" r="68" stroke="var(--sky)" stroke-dasharray="85.4 341.8" stroke-dashoffset="-247.8"/>
+              <circle cx="85" cy="85" r="68" stroke="var(--teal)" stroke-dasharray="247.8 341.8"/>
+            </g></svg>
+            <b class="num"><span>1,566건<small>전체 기록</small></span></b>
+          </div>
+          <div class="lg"><span><i style="background:var(--teal)"></i>공용 AI 전문가 58%</span><span><i style="background:var(--sky)"></i>사람 20%</span><span><i style="background:var(--bar)"></i>사물·기관 22%</span></div>
+        </div></div></div></div>
+  </div>
+
+  <!-- 3열 — 기록 목록 -->
+  <section class="card tcard" aria-label="기록 목록">
+    <div class="t-h">
+      <h2>기록 목록</h2>
+    </div>
+    <div class="cols" role="row">
+      <span>언제 <svg viewBox="0 0 12 12"><path d="M6 2v8M3 7l3 3 3-3"/></svg></span><span>누가</span><span>어디서</span><span>무엇을</span><span>왜 · 어떻게</span><span></span>
+    </div>
+    <div id="rec-list" aria-live="polite"></div>
+    <div class="t-f"><span class="num" id="rec-count"></span><span>행을 누르면 아래로 6하원칙과 기록 정보가 펼쳐집니다</span></div>
+  </section>
+
+  <section class="card keep" aria-label="보관 위치">
+    <div class="it"><span class="tile"><svg class="ic" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></span><div><b>원본: 폰</b><small>PC에서는 클라우드 백업으로 불러옵니다</small></div></div>
+    <div class="it"><span class="tile"><svg class="ic" viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1-.6-7.96A6 6 0 0 1 18 9a4.5 4.5 0 0 1 0 9z"/></svg></span><div><b>백업: 나비 L1 (기본)</b><small>직접 지정도 가능 · 복구 문구 12자</small></div></div>
+    <div class="sp"></div>
+    <button class="btn" type="button" id="btn-src" aria-expanded="false" aria-controls="srcbar"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13 7 4 4"/></svg>저장소 변경</button>
+  </section>
+
+  <section class="card srcpanel" id="srcbar" aria-label="저장소 변경" hidden>
   <div class="row">
     <span>PDV 원본 보관</span>
     <label><input type="radio" name="pdv-mode" value="phone" checked disabled> <b>폰</b> (원본)</label>
@@ -100,151 +743,145 @@ body.embed .detail{position:absolute}
     <button type="button" id="btn-phone-fetch">폰에서 불러오기</button>
     <span class="st" id="src-state"></span>
   </div>
-</div>
-<div class="tabbar" id="tabbar">
-  <button class="tab active" data-cat="all">전체 (시간순)</button>
-  <button class="tab" data-cat="person">사람</button>
-  <button class="tab" data-cat="thing">사물</button>
-  <button class="tab" data-cat="org">기관</button>
-  <button class="tab" data-cat="ai">공용 AI 전문가</button>
-</div>
+</section>
 
-<div class="list" id="list"></div>
 
-<div class="detail" id="detail">
-  <div class="header">
-    <button class="icon-btn" onclick="closeDetail()" aria-label="목록으로"><i class="ti ti-arrow-left"></i></button>
-    <h1 id="detail-title">대화 상세</h1>
   </div>
-  <div class="detail-body" id="detail-body"></div>
+  <div id="p-tx" role="tabpanel" aria-labelledby="t-tx" hidden>
+    <div class="kps" id="tx-kp"></div>
+    <section class="card txcard" aria-label="트랜잭션 목록">
+      <div class="tx-h"><h2>트랜잭션</h2><span class="pill">예시 데이터</span><span class="sp"></span>
+        <label class="dy-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="tx-q" type="search" placeholder="거래처·내용·계정·결제수단 검색" aria-label="트랜잭션 검색"></label></div>
+      <div class="dy-tags" id="tx-f" role="group" aria-label="구분"><button class="chip" type="button" data-f="" aria-pressed="true">전체</button><button class="chip" type="button" data-f="수입" aria-pressed="false">수입</button><button class="chip" type="button" data-f="지출" aria-pressed="false">지출</button><button class="chip" type="button" data-f="이체" aria-pressed="false">이체</button></div>
+      <div class="tx-cols"><span>언제</span><span>누가(상대)</span><span>무엇을</span><span>계정</span><span class="r">금액(원)</span><span></span></div>
+      <div id="tx-list" aria-live="polite"></div>
+    </section></div>
+  <div id="p-is" role="tabpanel" aria-labelledby="t-is" hidden><div class="mo" data-m="org"><section class="card fscard" aria-label="포괄손익계산서">
+      <div class="fs-h"><div><h2>포괄손익계산서</h2><div class="cap">제 N기 2026.01.01 ~ 2026.12.31 · 비교: 제 N-1기 2025.01.01 ~ 2025.12.31 · 비용의 기능별 분류</div></div><div class="sp"></div><span class="pill">예시 데이터</span><span class="pill">단위: 천원</span><button class="btn" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>내보내기</button></div>
+      <table class="fs"><thead><tr><th scope="col">과목</th><th scope="col" class="nt">주석</th><th scope="col" class="n">당기</th><th scope="col" class="n">전기</th></tr></thead><tbody><tr class="r"><th scope="row" style="padding-left:16px">수익(매출액)</th><td class="nt">5</td><td class="n num">1,250,000</td><td class="n num pv">1,000,000</td></tr><tr class="r"><th scope="row" style="padding-left:16px">매출원가</th><td class="nt">6</td><td class="n num">(700,000)</td><td class="n num pv">(580,000)</td></tr><tr class="r s"><th scope="row" style="padding-left:16px">매출총이익</th><td class="nt"></td><td class="n num">550,000</td><td class="n num pv">420,000</td></tr><tr class="r"><th scope="row" style="padding-left:16px">판매비와관리비</th><td class="nt">7</td><td class="n num">(290,000)</td><td class="n num pv">(250,000)</td></tr><tr class="r s"><th scope="row" style="padding-left:16px">영업이익</th><td class="nt"></td><td class="n num">260,000</td><td class="n num pv">170,000</td></tr><tr class="r"><th scope="row" style="padding-left:16px">기타수익</th><td class="nt">8</td><td class="n num">6,000</td><td class="n num pv">4,000</td></tr><tr class="r"><th scope="row" style="padding-left:16px">기타비용</th><td class="nt">8</td><td class="n num">(4,000)</td><td class="n num pv">(2,000)</td></tr><tr class="r"><th scope="row" style="padding-left:16px">금융수익</th><td class="nt">9</td><td class="n num">12,000</td><td class="n num pv">8,000</td></tr><tr class="r"><th scope="row" style="padding-left:16px">금융원가</th><td class="nt">9</td><td class="n num">(22,000)</td><td class="n num pv">(20,000)</td></tr><tr class="r s"><th scope="row" style="padding-left:16px">법인세비용차감전순이익</th><td class="nt"></td><td class="n num">252,000</td><td class="n num pv">160,000</td></tr><tr class="r"><th scope="row" style="padding-left:16px">법인세비용</th><td class="nt">10</td><td class="n num">(55,000)</td><td class="n num pv">(35,000)</td></tr><tr class="r t"><th scope="row" style="padding-left:16px">당기순이익</th><td class="nt"></td><td class="n num">197,000</td><td class="n num pv">125,000</td></tr><tr class="r h"><th scope="row" colspan="4">기타포괄손익 (세후)</th></tr><tr class="r sub"><th scope="row" colspan="4" style="padding-left:16px">후속적으로 당기손익으로 재분류되지 않는 항목</th></tr><tr class="r"><th scope="row" style="padding-left:34px">기타포괄손익-공정가치 측정 지분상품 평가손익</th><td class="nt">11</td><td class="n num">3,000</td><td class="n num pv">(1,000)</td></tr><tr class="r sub"><th scope="row" colspan="4" style="padding-left:16px">후속적으로 당기손익으로 재분류될 수 있는 항목</th></tr><tr class="r"><th scope="row" style="padding-left:34px">해외사업장환산외환차이</th><td class="nt">11</td><td class="n num">3,000</td><td class="n num pv">1,000</td></tr><tr class="r s"><th scope="row" style="padding-left:16px">기타포괄손익 합계</th><td class="nt"></td><td class="n num">6,000</td><td class="n num pv">0</td></tr><tr class="r t"><th scope="row" style="padding-left:16px">총포괄이익</th><td class="nt"></td><td class="n num">203,000</td><td class="n num pv">125,000</td></tr><tr class="r h"><th scope="row" colspan="4">주당이익 (단위: 원)</th></tr><tr class="r"><th scope="row" style="padding-left:16px">기본주당이익</th><td class="nt">12</td><td class="n num">1,970</td><td class="n num pv">1,250</td></tr></tbody></table><div class="fs-f">K-IFRS 제1001호(재무제표 표시) 양식의 예시입니다. 기본주당이익은 가중평균 유통주식수 100,000주 기준입니다. 주석 번호는 이 화면 안의 설명 항목을 가리킵니다.</div></section><section class="card notes" aria-label="주석"><h2>주석</h2><ol>
+<li value="4">현금및현금성자산: 요구불예금과 취득 당시 만기 3개월 이내인 단기금융상품.</li>
+<li value="5">수익: 고객과의 계약에서 생기는 수익(K-IFRS 제1115호)을 이행의무 충족 시점에 인식.</li>
+<li value="6">매출원가·7 판매비와관리비: 비용을 기능별로 분류. 성격별 분류는 별도 공시.</li>
+<li value="8">기타수익·기타비용: 영업활동 외 일반 수익·비용. 9 금융수익·금융원가: 이자수익·이자비용 등.</li>
+<li value="10">법인세비용: 당기법인세와 이연법인세의 합. 당기법인세부채는 재무상태표 유동부채에 표시.</li>
+<li value="11">기타포괄손익은 법인세 차감 후 금액이며 재분류 여부에 따라 구분 표시. 누계액은 자본의 기타자본구성요소.</li>
+<li value="12">기본주당이익 = 보통주 당기순이익 ÷ 가중평균 유통보통주식수(100,000주).</li>
+<li value="13">매출채권·14 재고자산·15 유형자산·16 무형자산·17 차입금·18 퇴직급여부채·19 자본금: 계정별 변동 내역은 PDV의 거래 기록에서 집계.</li></ol></section></div><div class="mo" data-m="person"><section class="card fscard" aria-label="소득·지출 계산서 (개인 손익계산서)">
+      <div class="fs-h"><div><h2>소득·지출 계산서 (개인 손익계산서)</h2><div class="cap">2026.01.01 ~ 2026.12.31 · 비교: 2025.01.01 ~ 2025.12.31 · 현금주의 · 법인세·주당이익 항목 없음</div></div><div class="sp"></div><span class="pill">예시 데이터</span><span class="pill">개인 · 단위: 천원</span><button class="btn" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>내보내기</button></div>
+      <table class="fs"><thead><tr><th scope="col">과목</th><th scope="col" class="nt"></th><th scope="col" class="n">당기</th><th scope="col" class="n">전기</th></tr></thead><tbody><tr class="r h"><th scope="row" colspan="4">수입</th></tr><tr class="r"><th scope="row" style="padding-left:34px">근로·사업소득 (자문료 등)</th><td class="nt"></td><td class="n num">42,000</td><td class="n num pv">40,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">기타 사업소득</th><td class="nt"></td><td class="n num">6,000</td><td class="n num pv">4,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">이자·배당소득</th><td class="nt"></td><td class="n num">1,200</td><td class="n num pv">1,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">기타 수입</th><td class="nt"></td><td class="n num">800</td><td class="n num pv">1,000</td></tr><tr class="r s"><th scope="row" style="padding-left:16px">총수입</th><td class="nt"></td><td class="n num">50,000</td><td class="n num pv">46,000</td></tr><tr class="r h"><th scope="row" colspan="4">지출</th></tr><tr class="r sub"><th scope="row" colspan="4" style="padding-left:16px">생활비·업무 경비</th></tr><tr class="r"><th scope="row" style="padding-left:34px">주거(월세·관리비)</th><td class="nt"></td><td class="n num">7,200</td><td class="n num pv">6,800</td></tr><tr class="r"><th scope="row" style="padding-left:34px">식비</th><td class="nt"></td><td class="n num">6,000</td><td class="n num pv">5,600</td></tr><tr class="r"><th scope="row" style="padding-left:34px">교통</th><td class="nt"></td><td class="n num">2,400</td><td class="n num pv">2,300</td></tr><tr class="r"><th scope="row" style="padding-left:34px">통신·구독</th><td class="nt"></td><td class="n num">1,800</td><td class="n num pv">1,700</td></tr><tr class="r"><th scope="row" style="padding-left:34px">의료·건강</th><td class="nt"></td><td class="n num">1,200</td><td class="n num pv">1,100</td></tr><tr class="r"><th scope="row" style="padding-left:34px">업무 경비</th><td class="nt"></td><td class="n num">3,000</td><td class="n num pv">2,600</td></tr><tr class="r"><th scope="row" style="padding-left:34px">여가·문화</th><td class="nt"></td><td class="n num">2,400</td><td class="n num pv">2,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">기타</th><td class="nt"></td><td class="n num">1,400</td><td class="n num pv">1,300</td></tr><tr class="r s"><th scope="row" style="padding-left:16px">생활비·업무 경비 소계</th><td class="nt"></td><td class="n num">25,400</td><td class="n num pv">23,400</td></tr><tr class="r sub"><th scope="row" colspan="4" style="padding-left:16px">세금·사회보험</th></tr><tr class="r"><th scope="row" style="padding-left:34px">소득세·지방소득세</th><td class="nt"></td><td class="n num">4,800</td><td class="n num pv">4,300</td></tr><tr class="r"><th scope="row" style="padding-left:34px">건강보험·국민연금</th><td class="nt"></td><td class="n num">5,200</td><td class="n num pv">4,900</td></tr><tr class="r s"><th scope="row" style="padding-left:16px">세금·사회보험 소계</th><td class="nt"></td><td class="n num">10,000</td><td class="n num pv">9,200</td></tr><tr class="r"><th scope="row" style="padding-left:16px">이자비용</th><td class="nt"></td><td class="n num">1,000</td><td class="n num pv">1,200</td></tr><tr class="r s"><th scope="row" style="padding-left:16px">총지출</th><td class="nt"></td><td class="n num">36,400</td><td class="n num pv">33,800</td></tr><tr class="r t"><th scope="row" style="padding-left:16px">순저축 (총수입 − 총지출)</th><td class="nt"></td><td class="n num">13,600</td><td class="n num pv">12,200</td></tr><tr class="r h"><th scope="row" colspan="4">미실현 평가손익 (순자산에 반영)</th></tr><tr class="r"><th scope="row" style="padding-left:34px">주식·펀드 평가손익</th><td class="nt"></td><td class="n num">2,000</td><td class="n num pv"></td></tr><tr class="r"><th scope="row" style="padding-left:34px">연금·보험 평가손익</th><td class="nt"></td><td class="n num">1,500</td><td class="n num pv"></td></tr><tr class="r"><th scope="row" style="padding-left:34px">주택 평가손익</th><td class="nt"></td><td class="n num">3,000</td><td class="n num pv"></td></tr><tr class="r"><th scope="row" style="padding-left:34px">차량 감가</th><td class="nt"></td><td class="n num">(1,500)</td><td class="n num pv"></td></tr><tr class="r s"><th scope="row" style="padding-left:16px">평가손익 합계</th><td class="nt"></td><td class="n num">5,000</td><td class="n num pv"></td></tr><tr class="r t"><th scope="row" style="padding-left:16px">순자산 증가 (순저축 + 평가손익)</th><td class="nt"></td><td class="n num">18,600</td><td class="n num pv"></td></tr></tbody></table><div class="fs-f">개인에는 이익잉여금·배당·주당이익이 없어 <b>순저축</b>과 <b>순자산 증가</b>로 성과를 봅니다. 소득세는 비용이 아니라 지출(세금)로 표시합니다. 저축률 27.2%(전기 26.5%).</div></section></div></div>
+  <div id="p-bs" role="tabpanel" aria-labelledby="t-bs" hidden><div class="mo" data-m="org"><section class="card fscard" aria-label="재무상태표 (대차대조표)">
+      <div class="fs-h"><div><h2>재무상태표 (대차대조표)</h2><div class="cap">2026.12.31 현재 · 비교: 2025.12.31 · 유동/비유동 구분 표시</div></div><div class="sp"></div><span class="pill">예시 데이터</span><span class="pill">단위: 천원</span><button class="btn" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>내보내기</button></div>
+      <table class="fs"><thead><tr><th scope="col">과목</th><th scope="col" class="nt">주석</th><th scope="col" class="n">당기말</th><th scope="col" class="n">전기말</th></tr></thead><tbody><tr class="r h"><th scope="row" colspan="4">자산</th></tr><tr class="r h"><th scope="row" colspan="4">유동자산</th></tr><tr class="r"><th scope="row" style="padding-left:34px">현금및현금성자산</th><td class="nt">4</td><td class="n num">204,000</td><td class="n num pv">150,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">매출채권</th><td class="nt">13</td><td class="n num">220,000</td><td class="n num pv">180,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">재고자산</th><td class="nt">14</td><td class="n num">135,000</td><td class="n num pv">120,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">기타유동자산</th><td class="nt"></td><td class="n num">35,000</td><td class="n num pv">30,000</td></tr><tr class="r s"><th scope="row" style="padding-left:16px">유동자산 합계</th><td class="nt"></td><td class="n num">594,000</td><td class="n num pv">480,000</td></tr><tr class="r h"><th scope="row" colspan="4">비유동자산</th></tr><tr class="r"><th scope="row" style="padding-left:34px">유형자산</th><td class="nt">15</td><td class="n num">560,000</td><td class="n num pv">520,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">무형자산</th><td class="nt">16</td><td class="n num">62,000</td><td class="n num pv">60,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">기타비유동자산</th><td class="nt"></td><td class="n num">45,000</td><td class="n num pv">40,000</td></tr><tr class="r s"><th scope="row" style="padding-left:16px">비유동자산 합계</th><td class="nt"></td><td class="n num">667,000</td><td class="n num pv">620,000</td></tr><tr class="r t"><th scope="row" style="padding-left:16px">자산 총계</th><td class="nt"></td><td class="n num">1,261,000</td><td class="n num pv">1,100,000</td></tr><tr class="r h"><th scope="row" colspan="4">부채</th></tr><tr class="r h"><th scope="row" colspan="4">유동부채</th></tr><tr class="r"><th scope="row" style="padding-left:34px">매입채무</th><td class="nt"></td><td class="n num">130,000</td><td class="n num pv">110,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">단기차입금</th><td class="nt">17</td><td class="n num">80,000</td><td class="n num pv">90,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">당기법인세부채</th><td class="nt">10</td><td class="n num">28,000</td><td class="n num pv">20,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">기타유동부채</th><td class="nt"></td><td class="n num">42,000</td><td class="n num pv">40,000</td></tr><tr class="r s"><th scope="row" style="padding-left:16px">유동부채 합계</th><td class="nt"></td><td class="n num">280,000</td><td class="n num pv">260,000</td></tr><tr class="r h"><th scope="row" colspan="4">비유동부채</th></tr><tr class="r"><th scope="row" style="padding-left:34px">장기차입금</th><td class="nt">17</td><td class="n num">170,000</td><td class="n num pv">200,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">퇴직급여부채</th><td class="nt">18</td><td class="n num">48,000</td><td class="n num pv">40,000</td></tr><tr class="r s"><th scope="row" style="padding-left:16px">비유동부채 합계</th><td class="nt"></td><td class="n num">218,000</td><td class="n num pv">240,000</td></tr><tr class="r t"><th scope="row" style="padding-left:16px">부채 총계</th><td class="nt"></td><td class="n num">498,000</td><td class="n num pv">500,000</td></tr><tr class="r h"><th scope="row" colspan="4">자본</th></tr><tr class="r"><th scope="row" style="padding-left:34px">자본금</th><td class="nt">19</td><td class="n num">300,000</td><td class="n num pv">300,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">이익잉여금</th><td class="nt"></td><td class="n num">452,000</td><td class="n num pv">295,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">기타자본구성요소</th><td class="nt">11</td><td class="n num">11,000</td><td class="n num pv">5,000</td></tr><tr class="r t"><th scope="row" style="padding-left:16px">자본 총계</th><td class="nt"></td><td class="n num">763,000</td><td class="n num pv">600,000</td></tr><tr class="r t"><th scope="row" style="padding-left:16px">부채와 자본 총계</th><td class="nt"></td><td class="n num">1,261,000</td><td class="n num pv">1,100,000</td></tr></tbody></table><div class="fs-f">자산 총계와 부채·자본 총계가 같은지 화면이 열릴 때마다 검산합니다. 이 예시는 두 해 모두 일치합니다.</div></section></div><div class="mo" data-m="person"><section class="card fscard" aria-label="재무상태표 (개인 대차대조표)">
+      <div class="fs-h"><div><h2>재무상태표 (개인 대차대조표)</h2><div class="cap">2026.12.31 현재 · 비교: 2025.12.31 · 유동성 순서 · 자본금·이익잉여금 대신 순자산</div></div><div class="sp"></div><span class="pill">예시 데이터</span><span class="pill">개인 · 단위: 천원</span><button class="btn" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>내보내기</button></div>
+      <table class="fs"><thead><tr><th scope="col">과목</th><th scope="col" class="nt"></th><th scope="col" class="n">당기말</th><th scope="col" class="n">전기말</th></tr></thead><tbody><tr class="r h"><th scope="row" colspan="4">자산</th></tr><tr class="r sub"><th scope="row" colspan="4" style="padding-left:16px">유동자산 (1년 이내 현금화)</th></tr><tr class="r"><th scope="row" style="padding-left:34px">현금및예금</th><td class="nt"></td><td class="n num">45,000</td><td class="n num pv">38,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">단기금융상품·적금</th><td class="nt"></td><td class="n num">12,000</td><td class="n num pv">11,000</td></tr><tr class="r s"><th scope="row" style="padding-left:16px">유동자산 합계</th><td class="nt"></td><td class="n num">57,000</td><td class="n num pv">49,000</td></tr><tr class="r sub"><th scope="row" colspan="4" style="padding-left:16px">금융·투자자산</th></tr><tr class="r"><th scope="row" style="padding-left:34px">주식·펀드</th><td class="nt"></td><td class="n num">28,000</td><td class="n num pv">25,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">연금·보험(적립금)</th><td class="nt"></td><td class="n num">36,000</td><td class="n num pv">33,500</td></tr><tr class="r s"><th scope="row" style="padding-left:16px">금융·투자자산 합계</th><td class="nt"></td><td class="n num">64,000</td><td class="n num pv">58,500</td></tr><tr class="r sub"><th scope="row" colspan="4" style="padding-left:16px">실물자산</th></tr><tr class="r"><th scope="row" style="padding-left:34px">주택(시가)</th><td class="nt"></td><td class="n num">320,000</td><td class="n num pv">317,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">차량</th><td class="nt"></td><td class="n num">12,000</td><td class="n num pv">13,500</td></tr><tr class="r"><th scope="row" style="padding-left:34px">기타 자산</th><td class="nt"></td><td class="n num">3,000</td><td class="n num pv">3,000</td></tr><tr class="r s"><th scope="row" style="padding-left:16px">실물자산 합계</th><td class="nt"></td><td class="n num">335,000</td><td class="n num pv">333,500</td></tr><tr class="r t"><th scope="row" style="padding-left:16px">자산 총계</th><td class="nt"></td><td class="n num">456,000</td><td class="n num pv">441,000</td></tr><tr class="r h"><th scope="row" colspan="4">부채</th></tr><tr class="r sub"><th scope="row" colspan="4" style="padding-left:16px">유동부채</th></tr><tr class="r"><th scope="row" style="padding-left:34px">카드 미결제액</th><td class="nt"></td><td class="n num">1,800</td><td class="n num pv">1,800</td></tr><tr class="r"><th scope="row" style="padding-left:34px">단기차입금</th><td class="nt"></td><td class="n num">2,000</td><td class="n num pv">2,600</td></tr><tr class="r s"><th scope="row" style="padding-left:16px">유동부채 합계</th><td class="nt"></td><td class="n num">3,800</td><td class="n num pv">4,400</td></tr><tr class="r sub"><th scope="row" colspan="4" style="padding-left:16px">장기부채</th></tr><tr class="r"><th scope="row" style="padding-left:34px">주택담보대출</th><td class="nt"></td><td class="n num">150,000</td><td class="n num pv">153,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">신용대출</th><td class="nt"></td><td class="n num">8,000</td><td class="n num pv">8,000</td></tr><tr class="r s"><th scope="row" style="padding-left:16px">장기부채 합계</th><td class="nt"></td><td class="n num">158,000</td><td class="n num pv">161,000</td></tr><tr class="r t"><th scope="row" style="padding-left:16px">부채 총계</th><td class="nt"></td><td class="n num">161,800</td><td class="n num pv">165,400</td></tr><tr class="r h"><th scope="row" colspan="4">순자산</th></tr><tr class="r t"><th scope="row" style="padding-left:16px">순자산 (자산 − 부채)</th><td class="nt"></td><td class="n num">294,200</td><td class="n num pv">275,600</td></tr><tr class="r t"><th scope="row" style="padding-left:16px">부채와 순자산 총계</th><td class="nt"></td><td class="n num">456,000</td><td class="n num pv">441,000</td></tr></tbody></table><div class="fs-f">개인의 자본은 <b>순자산</b>(자산 − 부채)입니다. 주택·차량은 시가 추정액이며 평가 방식은 사용자가 정합니다.</div></section></div></div>
+  <div id="p-cf" role="tabpanel" aria-labelledby="t-cf" hidden><div class="mo" data-m="org"><section class="card fscard" aria-label="현금흐름표">
+      <div class="fs-h"><div><h2>현금흐름표</h2><div class="cap">2026.01.01 ~ 2026.12.31 · 비교: 2025.01.01 ~ 2025.12.31 · 간접법</div></div><div class="sp"></div><span class="pill">예시 데이터</span><span class="pill">단위: 천원</span><button class="btn" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>내보내기</button></div>
+      <table class="fs"><thead><tr><th scope="col">과목</th><th scope="col" class="nt">주석</th><th scope="col" class="n">당기</th><th scope="col" class="n">전기</th></tr></thead><tbody><tr class="r h"><th scope="row" colspan="4">영업활동현금흐름</th></tr><tr class="r"><th scope="row" style="padding-left:34px">당기순이익</th><td class="nt"></td><td class="n num">197,000</td><td class="n num pv">125,000</td></tr><tr class="r sub"><th scope="row" colspan="4" style="padding-left:16px">조정</th></tr><tr class="r"><th scope="row" style="padding-left:34px">감가상각비</th><td class="nt">15</td><td class="n num">56,000</td><td class="n num pv">49,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">무형자산상각비</th><td class="nt">16</td><td class="n num">6,000</td><td class="n num pv">6,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">법인세비용</th><td class="nt">10</td><td class="n num">55,000</td><td class="n num pv">35,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">이자비용</th><td class="nt">9</td><td class="n num">22,000</td><td class="n num pv">20,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">이자수익</th><td class="nt">9</td><td class="n num">(12,000)</td><td class="n num pv">(8,000)</td></tr><tr class="r"><th scope="row" style="padding-left:34px">퇴직급여</th><td class="nt">18</td><td class="n num">8,000</td><td class="n num pv">7,000</td></tr><tr class="r sub"><th scope="row" colspan="4" style="padding-left:16px">영업활동 자산·부채의 변동</th></tr><tr class="r"><th scope="row" style="padding-left:34px">매출채권의 증가</th><td class="nt"></td><td class="n num">(40,000)</td><td class="n num pv">(30,000)</td></tr><tr class="r"><th scope="row" style="padding-left:34px">재고자산의 증가</th><td class="nt"></td><td class="n num">(15,000)</td><td class="n num pv">(10,000)</td></tr><tr class="r"><th scope="row" style="padding-left:34px">기타유동자산의 증가</th><td class="nt"></td><td class="n num">(5,000)</td><td class="n num pv">(3,000)</td></tr><tr class="r"><th scope="row" style="padding-left:34px">매입채무의 증가</th><td class="nt"></td><td class="n num">20,000</td><td class="n num pv">12,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">기타유동부채의 증가</th><td class="nt"></td><td class="n num">2,000</td><td class="n num pv">1,000</td></tr><tr class="r s"><th scope="row" style="padding-left:16px">영업에서 창출된 현금</th><td class="nt"></td><td class="n num">294,000</td><td class="n num pv">204,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">이자의 수취</th><td class="nt"></td><td class="n num">12,000</td><td class="n num pv">8,000</td></tr><tr class="r"><th scope="row" style="padding-left:34px">이자의 지급</th><td class="nt"></td><td class="n num">(22,000)</td><td class="n num pv">(20,000)</td></tr><tr class="r"><th scope="row" style="padding-left:34px">법인세의 납부</th><td class="nt"></td><td class="n num">(47,000)</td><td class="n num pv">(30,000)</td></tr><tr class="r t"><th scope="row" style="padding-left:16px">영업활동순현금흐름</th><td class="nt"></td><td class="n num">237,000</td><td class="n num pv">162,000</td></tr><tr class="r h"><th scope="row" colspan="4">투자활동현금흐름</th></tr><tr class="r"><th scope="row" style="padding-left:34px">유형자산의 취득</th><td class="nt">15</td><td class="n num">(96,000)</td><td class="n num pv">(70,000)</td></tr><tr class="r"><th scope="row" style="padding-left:34px">무형자산의 취득</th><td class="nt">16</td><td class="n num">(8,000)</td><td class="n num pv">(6,000)</td></tr><tr class="r"><th scope="row" style="padding-left:34px">지분상품의 취득</th><td class="nt"></td><td class="n num">(2,000)</td><td class="n num pv">(3,000)</td></tr><tr class="r t"><th scope="row" style="padding-left:16px">투자활동순현금흐름</th><td class="nt"></td><td class="n num">(106,000)</td><td class="n num pv">(79,000)</td></tr><tr class="r h"><th scope="row" colspan="4">재무활동현금흐름</th></tr><tr class="r"><th scope="row" style="padding-left:34px">단기차입금의 상환</th><td class="nt">17</td><td class="n num">(10,000)</td><td class="n num pv">(10,000)</td></tr><tr class="r"><th scope="row" style="padding-left:34px">장기차입금의 상환</th><td class="nt">17</td><td class="n num">(30,000)</td><td class="n num pv">(25,000)</td></tr><tr class="r"><th scope="row" style="padding-left:34px">배당금의 지급</th><td class="nt"></td><td class="n num">(40,000)</td><td class="n num pv">(25,000)</td></tr><tr class="r t"><th scope="row" style="padding-left:16px">재무활동순현금흐름</th><td class="nt"></td><td class="n num">(80,000)</td><td class="n num pv">(60,000)</td></tr><tr class="r s"><th scope="row" style="padding-left:16px">현금및현금성자산의 순증가</th><td class="nt"></td><td class="n num">51,000</td><td class="n num pv">23,000</td></tr><tr class="r"><th scope="row" style="padding-left:16px">기초 현금및현금성자산</th><td class="nt"></td><td class="n num">150,000</td><td class="n num pv">126,000</td></tr><tr class="r"><th scope="row" style="padding-left:16px">외화로 표시된 현금의 환율변동효과</th><td class="nt"></td><td class="n num">3,000</td><td class="n num pv">1,000</td></tr><tr class="r t"><th scope="row" style="padding-left:16px">기말 현금및현금성자산</th><td class="nt">4</td><td class="n num">204,000</td><td class="n num pv">150,000</td></tr></tbody></table><div class="fs-f">K-IFRS 제1007호(현금흐름표) 양식의 예시입니다. 이자·배당 분류는 영업(이자)·재무(배당)로 정했고 매 기간 같게 적용합니다. 기말 현금은 재무상태표의 현금및현금성자산과 같습니다.</div></section></div><div class="mo" data-m="person"><section class="card fscard" aria-label="현금흐름표 (개인)">
+      <div class="fs-h"><div><h2>현금흐름표 (개인)</h2><div class="cap">2026.01.01 ~ 2026.12.31 · 소득·지출 / 저축·투자 / 부채 활동으로 구분 · 기말 현금은 재무상태표와 일치</div></div><div class="sp"></div><span class="pill">예시 데이터</span><span class="pill">개인 · 단위: 천원</span><button class="btn" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>내보내기</button></div>
+      <table class="fs"><thead><tr><th scope="col">과목</th><th scope="col" class="nt"></th><th scope="col" class="n">당기</th><th scope="col" class="n"></th></tr></thead><tbody><tr class="r h"><th scope="row" colspan="4">소득·지출 활동</th></tr><tr class="r"><th scope="row" style="padding-left:34px">총수입 수취</th><td class="nt"></td><td class="n num">50,000</td><td class="n num pv"></td></tr><tr class="r"><th scope="row" style="padding-left:34px">생활비·업무 경비 지급</th><td class="nt"></td><td class="n num">(25,400)</td><td class="n num pv"></td></tr><tr class="r"><th scope="row" style="padding-left:34px">세금·사회보험 납부</th><td class="nt"></td><td class="n num">(10,000)</td><td class="n num pv"></td></tr><tr class="r"><th scope="row" style="padding-left:34px">이자 지급</th><td class="nt"></td><td class="n num">(1,000)</td><td class="n num pv"></td></tr><tr class="r s"><th scope="row" style="padding-left:16px">소득·지출 활동 현금흐름</th><td class="nt"></td><td class="n num">13,600</td><td class="n num pv"></td></tr><tr class="r h"><th scope="row" colspan="4">저축·투자 활동</th></tr><tr class="r"><th scope="row" style="padding-left:34px">적금·단기금융 순예치</th><td class="nt"></td><td class="n num">(1,000)</td><td class="n num pv"></td></tr><tr class="r"><th scope="row" style="padding-left:34px">주식·펀드 순매수</th><td class="nt"></td><td class="n num">(1,000)</td><td class="n num pv"></td></tr><tr class="r"><th scope="row" style="padding-left:34px">연금·보험 납입</th><td class="nt"></td><td class="n num">(1,000)</td><td class="n num pv"></td></tr><tr class="r s"><th scope="row" style="padding-left:16px">저축·투자 활동 현금흐름</th><td class="nt"></td><td class="n num">(3,000)</td><td class="n num pv"></td></tr><tr class="r h"><th scope="row" colspan="4">부채 활동</th></tr><tr class="r"><th scope="row" style="padding-left:34px">주택담보대출 원금 상환</th><td class="nt"></td><td class="n num">(3,000)</td><td class="n num pv"></td></tr><tr class="r"><th scope="row" style="padding-left:34px">단기차입금 상환</th><td class="nt"></td><td class="n num">(600)</td><td class="n num pv"></td></tr><tr class="r s"><th scope="row" style="padding-left:16px">부채 활동 현금흐름</th><td class="nt"></td><td class="n num">(3,600)</td><td class="n num pv"></td></tr><tr class="r s"><th scope="row" style="padding-left:16px">현금및예금 순증가</th><td class="nt"></td><td class="n num">7,000</td><td class="n num pv"></td></tr><tr class="r"><th scope="row" style="padding-left:16px">기초 현금및예금</th><td class="nt"></td><td class="n num">38,000</td><td class="n num pv"></td></tr><tr class="r t"><th scope="row" style="padding-left:16px">기말 현금및예금</th><td class="nt"></td><td class="n num">45,000</td><td class="n num pv"></td></tr></tbody></table><div class="fs-f">기말 현금및예금 45,000천원이 재무상태표 현금과 일치합니다.</div></section></div></div>
+  <div id="p-fa" role="tabpanel" aria-labelledby="t-fa" hidden><div class="mo" data-m="org"><div class="kps"><div class="kp"><div class="l">유동비율</div><div class="v num">212.1%</div><span class="chipst ok">▲ 27.5%p</span></div><div class="kp"><div class="l">부채비율</div><div class="v num">65.3%</div><span class="chipst ok">▼ 18.1%p</span></div><div class="kp"><div class="l">영업이익률</div><div class="v num">20.8%</div><span class="chipst ok">▲ 3.8%p</span></div><div class="kp"><div class="l">ROE</div><div class="v num">25.8%</div><span class="chipst ok">▲ 5.0%p</span></div></div>
+    <section class="card fscard" aria-label="재무분석 보고서">
+      <div class="fs-h"><div><h2>재무분석 보고서</h2><div class="cap">2026 사업연도 · 앞의 세 재무제표에서 계산 · 비율은 기말 잔액 기준</div></div><div class="sp"></div><button class="btn" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>내보내기</button></div>
+      <div class="fa-grid">
+        <div><table class="fs ra"><thead><tr><th scope="col">지표</th><th scope="col" class="n">당기</th><th scope="col" class="n">전기</th><th scope="col" class="n">변화</th></tr></thead><tbody><tr class="r h"><th scope="row" colspan="4">유동성</th></tr><tr class="r"><th scope="row">유동비율<div class="sub2">유동자산 ÷ 유동부채</div></th><td class="n num">212.1%</td><td class="n num pv">184.6%</td><td class="n"><span class="chipst ok">▲ 27.5%</span></td></tr><tr class="r"><th scope="row">당좌비율<div class="sub2">(유동자산 − 재고자산) ÷ 유동부채</div></th><td class="n num">163.9%</td><td class="n num pv">138.5%</td><td class="n"><span class="chipst ok">▲ 25.5%</span></td></tr><tr class="r h"><th scope="row" colspan="4">안정성</th></tr><tr class="r"><th scope="row">부채비율<div class="sub2">부채 총계 ÷ 자본 총계</div></th><td class="n num">65.3%</td><td class="n num pv">83.3%</td><td class="n"><span class="chipst ok">▼ 18.1%</span></td></tr><tr class="r"><th scope="row">차입금의존도<div class="sub2">(단기+장기차입금) ÷ 자산 총계</div></th><td class="n num">19.8%</td><td class="n num pv">26.4%</td><td class="n"><span class="chipst ok">▼ 6.5%</span></td></tr><tr class="r"><th scope="row">이자보상배율<div class="sub2">영업이익 ÷ 금융원가</div></th><td class="n num">11.8배</td><td class="n num pv">8.5배</td><td class="n"><span class="chipst ok">▲ 3.3배</span></td></tr><tr class="r h"><th scope="row" colspan="4">수익성</th></tr><tr class="r"><th scope="row">매출총이익률<div class="sub2">매출총이익 ÷ 매출액</div></th><td class="n num">44.0%</td><td class="n num pv">42.0%</td><td class="n"><span class="chipst ok">▲ 2.0%</span></td></tr><tr class="r"><th scope="row">영업이익률<div class="sub2">영업이익 ÷ 매출액</div></th><td class="n num">20.8%</td><td class="n num pv">17.0%</td><td class="n"><span class="chipst ok">▲ 3.8%</span></td></tr><tr class="r"><th scope="row">순이익률<div class="sub2">당기순이익 ÷ 매출액</div></th><td class="n num">15.8%</td><td class="n num pv">12.5%</td><td class="n"><span class="chipst ok">▲ 3.3%</span></td></tr><tr class="r"><th scope="row">자기자본이익률(ROE)<div class="sub2">당기순이익 ÷ 기말 자본</div></th><td class="n num">25.8%</td><td class="n num pv">20.8%</td><td class="n"><span class="chipst ok">▲ 5.0%</span></td></tr><tr class="r"><th scope="row">총자산이익률(ROA)<div class="sub2">당기순이익 ÷ 기말 자산</div></th><td class="n num">15.6%</td><td class="n num pv">11.4%</td><td class="n"><span class="chipst ok">▲ 4.3%</span></td></tr><tr class="r h"><th scope="row" colspan="4">활동성</th></tr><tr class="r"><th scope="row">매출채권회전율<div class="sub2">매출액 ÷ 기말 매출채권</div></th><td class="n num">5.7회</td><td class="n num pv">5.6회</td><td class="n"><span class="chipst ok">▲ 0.1회</span></td></tr><tr class="r"><th scope="row">재고자산회전율<div class="sub2">매출원가 ÷ 기말 재고자산</div></th><td class="n num">5.2회</td><td class="n num pv">4.8회</td><td class="n"><span class="chipst ok">▲ 0.4회</span></td></tr><tr class="r"><th scope="row">총자산회전율<div class="sub2">매출액 ÷ 기말 자산</div></th><td class="n num">1.0회</td><td class="n num pv">0.9회</td><td class="n"><span class="chipst ok">▲ 0.1회</span></td></tr><tr class="r h"><th scope="row" colspan="4">현금흐름</th></tr><tr class="r"><th scope="row">영업현금흐름 ÷ 순이익<div class="sub2">이익의 현금 뒷받침</div></th><td class="n num">1.20배</td><td class="n num pv">1.30배</td><td class="n"><span class="chipst wait">▼ 0.09배</span></td></tr><tr class="r"><th scope="row">잉여현금흐름(천원)<div class="sub2">영업CF − 유·무형자산 취득</div></th><td class="n num">133,000</td><td class="n num pv">86,000</td><td class="n"><span class="chipst ok">▲ 47,000</span></td></tr></tbody></table></div>
+        <div class="fa-side">
+          <div class="box"><h3>ROE 듀퐁 분해</h3><div class="dupont" role="group" aria-label="듀퐁 분해"><div><span>순이익률</span><b class="num">15.8%</b></div><i>×</i><div><span>총자산회전율</span><b class="num">1.0회</b></div><i>×</i><div><span>재무레버리지</span><b class="num">1.65배</b></div><i>=</i><div class="res"><span>ROE</span><b class="num">25.8%</b></div></div><p class="cap" style="margin:8px 0 0">수익성(순이익률)이 가장 크게 올랐고, 차입금을 갚아 재무레버리지는 낮아졌습니다.</p></div>
+          <div class="box"><h3>성장성 (전기 대비)</h3><div class="growth"><div><span>매출 증가율</span><b class="num">+25.0%</b></div><div><span>영업이익 증가율</span><b class="num">+52.9%</b></div><div><span>순이익 증가율</span><b class="num">+57.6%</b></div></div></div>
+          <div class="box"><h3>요약</h3><ul class="sum">
+            <li><b>유동성</b> 유동비율 212.1%로 단기 지급능력이 넉넉합니다.</li>
+            <li><b>안정성</b> 부채비율이 83.3%에서 65.3%로 낮아졌습니다. 이자보상배율은 11.8배입니다.</li>
+            <li><b>수익성</b> 영업이익률 20.8%, 순이익률 15.8%로 모두 개선되었습니다.</li>
+            <li><b>현금</b> 영업현금흐름이 순이익의 1.20배이고, 잉여현금흐름은 133,000천원입니다.</li></ul>
+            <p class="cap" style="margin:8px 0 0">기계적으로 계산한 요약 초안입니다. 회계사·세무사의 검토를 거쳐 사용하십시오.</p></div>
+        </div>
+      </div>
+    </section></div><div class="mo" data-m="person"><div class="kps"><div class="kp"><div class="l">저축률</div><div class="v num">27.2%</div><span class="chipst ok">▲ 0.7%p</span></div><div class="kp"><div class="l">비상자금</div><div class="v num">14.8개월</div><span class="chipst ok">▲ 1.3개월</span></div><div class="kp"><div class="l">부채/자산</div><div class="v num">35.5%</div><span class="chipst ok">▼ 2.0%p</span></div><div class="kp"><div class="l">순자산 증가율</div><div class="v num">6.7%</div><span class="chipst ok">+18,600천원</span></div></div>
+    <section class="card fscard" aria-label="개인 재무분석 보고서">
+      <div class="fs-h"><div><h2>재무분석 보고서 (개인)</h2><div class="cap">2026 · 개인 재무설계에서 쓰는 지표 · ROE·주당이익 같은 기업 지표는 쓰지 않습니다</div></div><div class="sp"></div><button class="btn" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>내보내기</button></div>
+      <div class="fa-grid"><div><table class="fs ra"><thead><tr><th scope="col">지표</th><th scope="col" class="n">당기</th><th scope="col" class="n">전기</th><th scope="col" class="n">변화</th></tr></thead><tbody><tr class="r h"><th scope="row" colspan="4">저축·소득</th></tr><tr class="r"><th scope="row">저축률<div class="sub2">순저축 ÷ 총수입</div></th><td class="n num">27.2%</td><td class="n num pv">26.5%</td><td class="n"><span class="chipst ok">▲ 0.7%</span></td></tr><tr class="r"><th scope="row">주거비 비율<div class="sub2">주거비 ÷ 총수입</div></th><td class="n num">14.4%</td><td class="n num pv">14.8%</td><td class="n"><span class="chipst ok">▼ 0.4%</span></td></tr><tr class="r h"><th scope="row" colspan="4">유동성</th></tr><tr class="r"><th scope="row">비상자금<div class="sub2">현금및예금 ÷ 월평균 지출</div></th><td class="n num">14.8개월</td><td class="n num pv">13.5개월</td><td class="n"><span class="chipst ok">▲ 1.3개월</span></td></tr><tr class="r"><th scope="row">유동비율<div class="sub2">유동자산 ÷ 유동부채</div></th><td class="n num">15.0배</td><td class="n num pv">11.1배</td><td class="n"><span class="chipst ok">▲ 3.9배</span></td></tr><tr class="r h"><th scope="row" colspan="4">부채 안정성</th></tr><tr class="r"><th scope="row">부채/자산<div class="sub2">부채 총계 ÷ 자산 총계</div></th><td class="n num">35.5%</td><td class="n num pv">37.5%</td><td class="n"><span class="chipst ok">▼ 2.0%</span></td></tr><tr class="r"><th scope="row">부채상환비율(DSR)<div class="sub2">(원금 상환 + 이자) ÷ 총수입</div></th><td class="n num">9.2%</td><td class="n num pv">11.3%</td><td class="n"><span class="chipst ok">▼ 2.1%</span></td></tr><tr class="r h"><th scope="row" colspan="4">자산 구성</th></tr><tr class="r"><th scope="row">금융자산 비중<div class="sub2">(유동+금융·투자자산) ÷ 자산 총계</div></th><td class="n num">26.5%</td><td class="n num pv">24.4%</td><td class="n"><span class="chipst ok">▲ 2.2%</span></td></tr></tbody></table></div><div class="fa-side">
+        <div class="box"><h3>순자산은 어떻게 늘었나</h3><div class="dupont" role="group" aria-label="순자산 증가 분해"><div><span>순저축</span><b class="num">+13,600</b></div><i>+</i><div><span>평가손익</span><b class="num">+5,000</b></div><i>=</i><div class="res"><span>순자산 증가</span><b class="num">+18,600</b></div></div><p class="cap" style="margin:8px 0 0">저축으로 늘어난 몫이 평가손익보다 큽니다. 직접 통제할 수 있는 부분입니다.</p></div>
+        <div class="box"><h3>성장 (전기 대비)</h3><div class="growth"><div><span>총수입 증가율</span><b class="num">+8.7%</b></div><div><span>총지출 증가율</span><b class="num">+7.7%</b></div><div><span>순저축 증가율</span><b class="num">+11.5%</b></div></div></div>
+        <div class="box"><h3>요약</h3><ul class="sum">
+          <li><b>저축</b> 수입의 27.2%를 저축했고 전기보다 높아졌습니다.</li>
+          <li><b>비상자금</b> 월 지출의 14.8개월치가 현금으로 있어 권장 3~6개월을 넘습니다.</li>
+          <li><b>부채</b> 자산 대비 부채 35.5%로 낮아졌고 DSR은 9.2%입니다.</li></ul>
+          <p class="cap" style="margin:8px 0 0">기계적으로 계산한 요약 초안이며 투자·세무 조언이 아닙니다.</p></div></div></div></section></div></div>
+<div id="p-rep" role="region" aria-label="보고서" hidden>
+    <section class="card rep-h">
+      <div class="rep-top"><div><div class="cap" id="rp-kind">주간 보고서</div><h2 id="rp-title">2026.10.26 ~ 2026.11.01</h2></div><div class="sp"></div><span class="pill" id="rp-auto">자동 작성</span><button class="btn" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>내보내기</button></div>
+      <div class="chips rep-sw" id="rp-sw" role="group" aria-label="보고서 종류"></div>
+    </section>
+    <div class="kps" id="rp-kp"></div>
+    <div class="rep-grid">
+      <section class="card rep-c"><h2>한눈에 보기</h2><ul class="sum" id="rp-sum"></ul></section>
+      <section class="card rep-c"><h2>누가 활동했나</h2><div id="rp-mix"></div></section>
+      <section class="card rep-c"><h2>주요 활동</h2><div id="rp-act"></div></section>
+      <section class="card rep-c"><h2>돈의 흐름</h2><div id="rp-fin"></div></section>
+    </div>
+    <section class="card rep-c rep-auto"><div class="rep-ah"><h2>자동 작성</h2><span class="cap">보고서는 이 기기에서 정해진 시각에 자동으로 만들어집니다. 원문은 밖으로 나가지 않습니다.</span></div>
+      <div id="rp-sch" class="sch"></div></section>
+  </div>
+  <p class="note">기록 목록은 이 기기에 저장된 실제 기록입니다. 차트와 트랜잭션·재무제표·보고서의 숫자는 아직 예시 데이터이며, 실제 거래 기록과 연결되면 자동으로 채워집니다.</p>
 </div>
+</div></div>
+
+<!-- 나만의 AI 비서 (우측 하단) -->
+<button class="fab" id="bot-fab" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="bot" aria-label="나만의 AI 비서 열기">
+  <svg class="fab-ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M4 3h16a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-5 4v-4H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><circle cx="8" cy="10.5" r="1.3" fill="var(--teal)"/><circle cx="12" cy="10.5" r="1.3" fill="var(--teal)"/><circle cx="16" cy="10.5" r="1.3" fill="var(--teal)"/></svg><span class="fab-spin" aria-hidden="true"></span><i class="fab-dot" aria-hidden="true"></i><span class="fab-tip">나만의 AI 비서</span></button>
+<section class="bot" id="bot" role="dialog" aria-label="나만의 AI 비서" hidden>
+  <header class="bot-h"><span class="bot-av"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12c-2-5-6-7-8-5s0 7 5 7c-3 1-3 5-1 6s4-2 4-5"/><path d="M12 12c2-5 6-7 8-5s0 7-5 7c3 1 3 5 1 6s-4-2-4-5"/><path d="M12 8v10"/></svg></span><div><b>나비</b><small id="bot-st">나만의 AI 비서 · 불러오는 중…</small></div><span class="sp"></span><button class="ib" type="button" id="bot-x" aria-label="닫기"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
+  <div class="bot-b" id="bot-msgs" aria-live="polite"></div>
+  <div class="bot-sg" id="bot-sg"></div>
+  <form class="bot-f" id="bot-form"><div class="ibar-att" hidden></div>
+      <div class="ibar"><input type="file" class="ib-file" multiple hidden><input type="file" class="ib-cam" accept="image/*" capture="environment" hidden>
+        <button type="button" class="ib-btn" data-k="clip" aria-label="파일 첨부" title="파일 첨부"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
+        <input id="bot-in" type="text" autocomplete="off" placeholder="나비에게 지시하거나 검색하세요" aria-label="나비에게 메시지">
+        <button type="button" class="ib-btn" data-k="cam" aria-label="카메라" title="사진 촬영"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></button>
+        <button type="button" class="ib-btn" data-k="mic" aria-label="음성 입력" title="음성 입력"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
+        <button type="submit" class="ib-send" aria-label="입력" title="입력" disabled><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button></div></form>
+</section>
 
 <script>
-// 이번 카테고리 분류가 어떤 근거로 나오는지, 데이터가 왜 비어있는지는
-// pdv-store.js 파일 상단 주석(2026-07-01 저장소 실사 결과)이 최신 진실이다.
-const EMPTY_TAB_NOTE = {
-  person: '1:1 대화 상대의 PDV 기록 기능은 아직 구현되어 있지 않습니다. 지금은 나비 자체 AI 서브시스템과의 상호작용만 기록됩니다.',
-  thing: '사물(기기) 상대방의 PDV 기록 기능은 아직 구현되어 있지 않습니다.',
-  org: '실제 사업자 식별 정보 없이, K-Market 등 거래형 서비스 이용 기록을 근사치로 표시합니다. 어느 사업자였는지는 확인할 수 없습니다.',
-  ai: '',
-  all: '',
-};
-
-const CAT_CLASS = { person:'person', thing:'thing', org:'org', ai:'ai', uncategorized:'uncategorized' };
-
-let RECORDS = [];
-let activeCat = 'all';
-
-function fmtDate(iso) {
-  const d = new Date(iso);
-  if (isNaN(d)) return '';
-  return (d.getMonth()+1).toString().padStart(2,'0') + '.' + d.getDate().toString().padStart(2,'0');
-}
-
-// L2 이상만 risk_level:'high' 레코드 상세를 볼 수 있음 — 백엔드 인증 미구현이라
-// 현재는 항상 L0으로 취급(fail-safe). window.GopangAuth가 생기면 자동 반영됨.
-function canViewHighRisk() {
-  const tier = (parent.GopangAuth && parent.GopangAuth.tier) || 'L0';
-  return tier === 'L2' || tier === 'L3';
-}
-
-function renderList() {
-  const listEl = document.getElementById('list');
-  const note = EMPTY_TAB_NOTE[activeCat];
-  const noteHtml = note ? `<div class="empty-tab-note">${note}</div>` : '';
-
-  const filtered = RECORDS.filter(r => activeCat === 'all' || r.category === activeCat);
-
-  if (!filtered.length) {
-    listEl.innerHTML = noteHtml + `<div class="empty">표시할 기록이 없습니다.</div>`;
-    return;
-  }
-
-  listEl.innerHTML = noteHtml + filtered.map(r => {
-    const cls = CAT_CLASS[r.category] || 'uncategorized';
-    const locked = r.risk_level === 'high' && !canViewHighRisk();
-    const w = r.summary_6w_view || {};
-    const name = r.service || r.serviceId || w.who || '기록';
-    const what = locked ? '민감도 높음 — 인증 후 열람 가능' : (w.what || r.summary || '(요약 없음)');
-    const why  = locked ? '' : (w.why ? `<div class="why">왜: ${w.why}</div>` : '');
-    return `
-      <button class="card ${locked ? 'locked' : ''}" data-id="${r._id}">
-        <div class="card-top">
-          <div class="card-who"><span class="badge ${cls}">${r.category_label}</span><span class="name">${name}</span></div>
-          <span class="date">${fmtDate(r.ts || r.when)}</span>
-        </div>
-        <div class="what">${locked ? '<i class="ti ti-lock" style="font-size:12px;margin-right:4px"></i>' : ''}${what}</div>
-        ${why}
-      </button>`;
-  }).join('');
-
-  listEl.querySelectorAll('.card').forEach(card => {
-    card.addEventListener('click', () => openDetail(Number(card.getAttribute('data-id'))));
-  });
-}
-
-function openDetail(id) {
-  const r = RECORDS.find(x => x._id === id);
-  if (!r) return;
-  const locked = r.risk_level === 'high' && !canViewHighRisk();
-  const w = r.summary_6w_view || {};
-
-  document.getElementById('detail-title').textContent = r.service || r.serviceId || '대화 상세';
-
-  if (locked) {
-    document.getElementById('detail-body').innerHTML = `
-      <div class="detail-name">${r.service || r.serviceId || '기록'}</div>
-      <div class="sensitive-note"><i class="ti ti-lock"></i>이 기록은 위험도(risk_level)가 높음으로 분류되어 있습니다. 인증 등급이 올라간 뒤(L2 이상) 열람할 수 있습니다.</div>`;
-  } else {
-    const rows = [
-      ['ti-calendar','언제', w.when || fmtDate(r.ts) || '확인불가'],
-      ['ti-map-pin','어디서', w.where || '확인불가'],
-      ['ti-user','누가', w.who || '확인불가'],
-      ['ti-message','무엇을', w.what || r.summary || '확인불가'],
-      ['ti-route','어떻게', w.how || '확인불가'],
-      ['ti-help-circle','왜', w.why || '확인불가'],
-    ];
-    document.getElementById('detail-body').innerHTML = `
-      <div class="detail-name">${r.service || r.serviceId || '기록'}</div>
-      ${rows.map(([icon,label,val]) => `
-        <div class="detail-field">
-          <div class="field-label"><i class="ti ${icon}"></i>${label}</div>
-          <div class="field-value ${val==='확인불가' ? 'muted' : ''}">${val}</div>
-        </div>`).join('')}
-      ${r.risk_level ? `<div class="sensitive-note"><i class="ti ti-alert-triangle"></i>위험도: ${r.risk_level}</div>` : ''}
-      <div class="detail-field">
-        <div class="field-label"><i class="ti ${r.category === 'org' ? 'ti-info-circle' : 'ti-tag'}"></i>분류 근거</div>
-        <div class="field-value muted">${r.category === 'org'
-          ? '실거래(MKT) 서비스 이용으로 근사 분류됨 — 실제 사업자 식별자 아님'
-          : `svc/serviceId "${r.serviceId || r.svc || '-'}"를 GWP_REGISTRY와 대조해 분류됨`}</div>
-      </div>`;
-  }
-
-  document.getElementById('detail').classList.add('open');
-}
-function closeDetail() {
-  document.getElementById('detail').classList.remove('open');
-}
-
-document.getElementById('tabbar').addEventListener('click', (e) => {
-  const btn = e.target.closest('.tab');
-  if (!btn) return;
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  activeCat = btn.getAttribute('data-cat');
-  renderList();
-});
-
-async function boot() {
-  if (!window.GopangPDV) {
-    document.getElementById('list').innerHTML = '<div class="empty">PDV 저장소 모듈(pdv-store.js)을 불러오지 못했습니다.</div>';
-    return;
-  }
-  RECORDS = await window.GopangPDV.list();
-  renderList();
-}
-boot();
-
+(function(){
+  var $=function(id){return document.getElementById(id)};
+  var esc=function(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+  var CHEV='<svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="m2 4 4 4 4-4"/></svg>';
+  var R=[], list=$('rec-list');
+  function P2(n){return String(n).padStart(2,'0')}
+  function when(iso){var d=new Date(iso); if(isNaN(d))return '';var n=new Date(),y=new Date(n);y.setDate(n.getDate()-1);
+    var k=function(x){return x.getFullYear()+'-'+x.getMonth()+'-'+x.getDate()},hm=P2(d.getHours())+':'+P2(d.getMinutes());
+    return k(d)===k(n)?'오늘 '+hm:k(d)===k(y)?'어제 '+hm:P2(d.getMonth()+1)+'.'+P2(d.getDate())+' '+hm}
+  function full(iso){var d=new Date(iso);return isNaN(d)?'확인불가':d.getFullYear()+'-'+P2(d.getMonth()+1)+'-'+P2(d.getDate())+' '+P2(d.getHours())+':'+P2(d.getMinutes())+' KST'}
+  function high(r){var t=(parent&&parent.GopangAuth&&parent.GopangAuth.tier)||'L0';return r.risk_level==='high'&&!(t==='L2'||t==='L3')}
+  window.renderList=function(){
+    $('rec-count').textContent=R.length.toLocaleString('ko-KR')+'건';
+    if(!R.length){list.innerHTML='<div class="dy-empty">아직 기록이 없습니다. 나비와 나눈 대화와 서비스 이용 내역이 자동으로 쌓입니다.</div>';return;}
+    list.innerHTML=R.map(function(r,i){
+      var w=r.summary_6w_view||{},lk=high(r),svc=r.service||r.serviceId||'기록',ts=r.ts||r.when;
+      var what=lk?'민감도 높은 기록 — 인증 후 열람':(w.what||r.summary||'(요약 없음)');
+      var row='<button class="row" type="button" aria-expanded="false" aria-controls="rp-r'+i+'"><span class="num">'+esc(when(ts))+'</span>'+
+        '<span>'+esc(lk?'—':(w.who||'나'))+'<div class="sub2">'+esc(r.category_label||'')+'</div></span><span>'+esc(lk?'—':(w.where||svc))+'</span>'+
+        '<span class="what">'+esc(what)+'</span><span><span class="why">'+esc(lk?'':(w.why||''))+'</span><div class="sub2">'+esc(lk?'':(w.how||''))+'</div></span>'+
+        '<span class="stc">'+CHEV+'</span></button>';
+      var rows=[['누가',w.who||'나'],['언제',w.when||full(ts)],['어디서',w.where||svc],['무엇을',w.what||r.summary||'확인불가'],['어떻게',w.how||'확인불가'],['왜',w.why||'확인불가']];
+      var body=lk?'<div><h3>열람 제한</h3><p class="full">위험도가 높은 기록입니다. 인증 등급이 올라간 뒤(L2 이상) 열람할 수 있습니다.</p></div>':
+        '<div><h3>6하원칙</h3><dl class="w6">'+rows.map(function(x){return '<div><dt>'+x[0]+'</dt><dd>'+esc(x[1])+'</dd></div>'}).join('')+'</dl></div>'+
+        '<div><h3>기록 정보</h3><div class="proof"><div><span>기록 시각</span><span>'+esc(full(ts))+'</span></div><div><span>원본 위치</span><span>이 기기</span></div></div></div>';
+      return row+'<div class="rp" id="rp-r'+i+'" role="region" aria-label="'+esc(what)+' — 6하원칙과 기록 정보"><div class="rp-in"><div class="rp-body">'+body+'</div></div></div>';
+    }).join('');
+  };
+  list.addEventListener('click',function(e){var b=e.target.closest('button.row'); if(!b)return; var open=b.getAttribute('aria-expanded')==='true';
+    [].forEach.call(list.querySelectorAll('button.row'),function(o){o.setAttribute('aria-expanded','false');$(o.getAttribute('aria-controls')).classList.remove('open')});
+    if(!open){b.setAttribute('aria-expanded','true');$(b.getAttribute('aria-controls')).classList.add('open')}});
+  $('btn-src').addEventListener('click',function(){var p=$('srcbar'),o=p.hidden;p.hidden=!o;this.setAttribute('aria-expanded',o)});
+  window.__setRecords=function(a){R=a||[];window.renderList()};
+  (async function(){
+    if(!window.GopangPDV){list.innerHTML='<div class="dy-empty">PDV 저장소 모듈(pdv-store.js)을 불러오지 못했습니다.</div>';return;}
+    try{window.__setRecords(await window.GopangPDV.list())}catch(e){list.innerHTML='<div class="dy-empty">기록을 불러오지 못했습니다.</div>'}
+  })();
+})();
+</script>
+<script>
 // ── PDV 원본 보관: 폰(기본) — PC 는 폰의 승인을 받아 불러온다(2026-11-07) ──
 (function () {
   const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
@@ -273,7 +910,7 @@ boot();
       });
       const r = await window.GopangPDV.importRecords(data.records);
       st('불러왔습니다: ' + r.added + '건 추가' + (r.skipped ? ' (' + r.skipped + '건은 이미 있음)' : ''), 'ok');
-      RECORDS = await window.GopangPDV.list(); renderList();
+      window.__setRecords(await window.GopangPDV.list());
     } catch (e) { st(e.message || '불러오지 못했습니다.', 'err'); e164 = user && user.e164 ? String(user.e164) : ''; }
     finally { btn.disabled = false; }
   });
@@ -335,11 +972,306 @@ boot();
     const r = await B.restoreLatest(await adapter(B), phrase);
     const m = await window.GopangPDV.importRecords(r.records, 'cloud');
     st('불러왔습니다: ' + m.added + '건 추가' + (m.skipped ? ' (' + m.skipped + '건은 이미 있음)' : '') + ' · 백업 시각 ' + new Date(r.ts).toLocaleString(), 'ok');
-    RECORDS = await window.GopangPDV.list(); renderList();
+    window.__setRecords(await window.GopangPDV.list());
   }));
   if (!isMobile) $('src-pc').hidden = false;
 })();
 </script>
+<script>
+// 월별 기록 선 그래프 — 시안용 그리기 (실제 화면에서는 기록 수 집계를 넣는다)
+(function(){
+  var svg=document.getElementById('lc'), NS='http://www.w3.org/2000/svg', W=460,H=210, L=34,R=14,T=26,B=28;
+  var months=['5월','6월','7월','8월','9월','10월'], cur=[150,210,170,300,360,412], prev=[110,140,130,190,230,250], max=500, sel=5;
+  var x=function(i){return L+i*(W-L-R)/(months.length-1)}, y=function(v){return T+(H-T-B)*(1-v/max)};
+  function el(n,a,t){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);if(t!=null)e.textContent=t;svg.appendChild(e);return e}
+  function path(vs){var p=vs.map(function(v,i){return [x(i),y(v)]}),d='M'+p[0][0]+' '+p[0][1];
+    for(var i=0;i<p.length-1;i++){var p0=p[i-1]||p[i],p1=p[i],p2=p[i+1],p3=p[i+2]||p2,t=.18;
+      d+=' C'+(p1[0]+(p2[0]-p0[0])*t)+' '+(p1[1]+(p2[1]-p0[1])*t)+' '+(p2[0]-(p3[0]-p1[0])*t)+' '+(p2[1]-(p3[1]-p1[1])*t)+' '+p2[0]+' '+p2[1];}
+    return d}
+  [0,200,400].forEach(function(v){ el('line',{x1:L,x2:W-R,y1:y(v),y2:y(v),stroke:'var(--line)','stroke-dasharray':'4 5'}); el('text',{x:L-8,y:y(v)+4,'text-anchor':'end','font-size':11,fill:'var(--faint)'},v); });
+  months.forEach(function(m,i){ el('text',{x:x(i),y:H-8,'text-anchor':'middle','font-size':11,fill:i===sel?'var(--teal)':'var(--faint)','font-weight':i===sel?700:400},m); });
+  el('path',{d:path(prev),fill:'none',stroke:'var(--sky)','stroke-width':2.5,'stroke-linecap':'round'});
+  el('path',{d:path(cur),fill:'none',stroke:'var(--teal)','stroke-width':3,'stroke-linecap':'round'});
+  var cx=x(sel), cy=y(cur[sel]);
+  el('rect',{x:cx-34,y:cy-46,width:68,height:34,rx:10,fill:'var(--sky)'});
+  el('text',{x:cx,y:cy-31,'text-anchor':'middle','font-size':11,fill:'var(--teal-d)','font-weight':700},cur[sel]+'건');
+  el('text',{x:cx,y:cy-18,'text-anchor':'middle','font-size':10.5,fill:'var(--teal-d)'},months[sel]);
+  el('circle',{cx:cx,cy:cy,r:5.5,fill:'var(--card)',stroke:'var(--teal)','stroke-width':3});
+})();
 
+// 탭 전환 + 기록 행 펼침(아코디언: 한 번에 하나, 같은 행을 다시 누르면 접힘)
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.tab'));
+  function show(t){ tabs.forEach(function(b){var on=b===t; b.setAttribute('aria-selected',on); b.tabIndex=on?0:-1; var p=document.getElementById(b.getAttribute('aria-controls')); if(on){p.hidden=false; p.classList.remove('panel-in'); void p.offsetWidth; p.classList.add('panel-in');} else p.hidden=true;}); }
+  tabs.forEach(function(b,i){ b.addEventListener('click',function(){show(b)}); b.addEventListener('keydown',function(e){ var j=e.key==='ArrowRight'?i+1:e.key==='ArrowLeft'?i-1:-1; if(j<0) return; j=(j+tabs.length)%tabs.length; tabs[j].focus(); show(tabs[j]); e.preventDefault(); }); });
+  var rows=[].slice.call(document.querySelectorAll('.row'));
+  rows.forEach(function(r){ r.addEventListener('click',function(){
+    var open=r.getAttribute('aria-expanded')==='true';
+    rows.forEach(function(o){ o.setAttribute('aria-expanded','false'); document.getElementById(o.getAttribute('aria-controls')).classList.remove('open'); });   // 이전 패널은 접히고
+    if(!open){ r.setAttribute('aria-expanded','true'); document.getElementById(r.getAttribute('aria-controls')).classList.add('open'); }   // 새 패널이 펼쳐진다
+  }); });
+})();
+
+// 일기·메모: 즉시 추가 + 실시간 검색 + 상세가 있는 메모만 행 아래 패널(slide out) 제공
+(function(){
+  var M=[];try{M=JSON.parse(localStorage.getItem('pdv_diary_v1')||'[]')||[]}catch(e){M=[]}
+  function saveM(){try{localStorage.setItem('pdv_diary_v1',JSON.stringify(M.map(function(m){return {d:m.d,t:m.t,att:m.att}})))}catch(e){}}
+  var id=0,q=document.getElementById('dy-q'),L=document.getElementById('dy-list'),T=document.getElementById('dy-text'),F=document.getElementById('dy-form'),TG=null;
+  var chips=[].slice.call(F.querySelectorAll('.chip'));
+  M.forEach(function(m){m.id=++id});
+  function esc(x){return x.replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})}
+  function hl(x,ws){x=esc(x); ws.forEach(function(w){ if(!w) return; var r=new RegExp('('+w.replace(/[.*+?^${}()|[\\]\\\\]/g,'\\\\$&')+')','gi'); x=x.replace(r,'<mark>$1</mark>'); }); return x;}
+  var WD=['일','월','화','수','목','금','토'];
+  function P2(n){return String(n).padStart(2,'0')}
+  function dt(d){var a=d.split(/[- :]/);return new Date(+a[0],+a[1]-1,+a[2],+a[3],+a[4],0)}
+  function ymd(x){return x.getFullYear()+'-'+P2(x.getMonth()+1)+'-'+P2(x.getDate())}
+  function brief(d){var x=dt(d),n=new Date(),y=new Date(n);y.setDate(n.getDate()-1),hm=d.slice(11,16);
+    if(ymd(x)===ymd(n))return '오늘 '+hm; if(ymd(x)===ymd(y))return '어제 '+hm; return (x.getFullYear()===n.getFullYear()?'':x.getFullYear()+'.')+P2(x.getMonth()+1)+'.'+P2(x.getDate())+' '+hm}
+  function full(m){var x=dt(m.d),sec=m.sec||'00';return x.getFullYear()+'년 '+(x.getMonth()+1)+'월 '+x.getDate()+'일 ('+WD[x.getDay()]+') '+m.d.slice(11,16)+':'+sec+' KST'}
+  function rec(m){var s=+(m.sec||0)+1,x=dt(m.d);return m.d.slice(11,16)+':'+P2(s)+' · 변조 방지 기록 완료 (입력 1초 뒤)'}
+  var CH='<svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="m2 4 4 4 4-4"/></svg>';
+  function render(newFirst){
+    var ws=q.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    var r=M.filter(function(m){var hay=(m.d+' '+m.t+' '+(m.det?m.det.full+' '+m.det.where+' '+m.det.how+' '+m.det.why:'')).toLowerCase(); return ws.every(function(w){return hay.indexOf(w)>-1})});
+    if(!r.length){L.innerHTML='<div class="dy-empty">일치하는 메모가 없습니다</div>';return;}
+    L.innerHTML=r.map(function(m,i){ var tags=(m.t.match(/#[^\s#]+/g)||[]); var body=m.t.replace(/\s*#[^\s#]+/g,'').trim();
+      var attH=(m.att&&m.att.length)?'<span class="tg">첨부 '+m.att.map(esc).join(', ')+'</span>':'';var inner='<time title="'+m.d+'">'+brief(m.d)+'</time><div><p>'+hl(body,ws)+'</p>'+tags.map(function(t){return '<span class="tg">'+hl(t,ws)+'</span>'}).join('')+attH+'</div><span class="hs">'+(m.det?CH:'<i class="chev-sp"></i>')+'</span>';
+      var cls='dy-item'+(newFirst&&i===0?' new':'');
+      if(!m.det) return '<div class="dyw"><div class="'+cls+' plain">'+inner+'</div></div>';
+      var d=m.det;
+      return '<div class="dyw"><button type="button" class="'+cls+'" aria-expanded="false" aria-controls="dyp-'+m.id+'">'+inner+'</button>'+
+       '<div class="rp" id="dyp-'+m.id+'" role="region" aria-label="메모 상세"><div class="rp-in"><div class="rp-body"><div><h3>전체 내용</h3><p class="full">'+hl(d.full,ws)+'</p></div>'+
+       '<div><h3>6하원칙</h3><dl class="w6"><div><dt>누가</dt><dd>나</dd></div><div><dt>입력</dt><dd class="num">'+full(m)+'</dd></div><div><dt>기록</dt><dd class="num">'+rec(m)+'</dd></div><div><dt>어디서</dt><dd>'+esc(d.where)+'</dd></div><div><dt>무엇을</dt><dd>'+esc(body)+'</dd></div><div><dt>어떻게</dt><dd>'+esc(d.how)+'</dd></div><div><dt>왜</dt><dd>'+esc(d.why)+'</dd></div></dl>'+(d.rel?'<div class="verify"><span class="pill">연결된 기록</span><span class="cap">'+esc(d.rel)+'</span></div>':'')+'</div></div></div></div></div>';
+    }).join('');
+  }
+  function tagbar(){ if(!TG) return; var all={}; M.forEach(function(m){(m.t.match(/#[^\s#]+/g)||[]).forEach(function(t){all[t]=(all[t]||0)+1})});
+    TG.innerHTML=Object.keys(all).map(function(t){return '<button class="chip" type="button" data-q="'+t+'">'+t+' <span class="cap">'+all[t]+'</span></button>'}).join(''); }
+  
+  L.addEventListener('click',function(e){var b=e.target.closest('button.dy-item'); if(!b) return; var open=b.getAttribute('aria-expanded')==='true';
+    [].forEach.call(L.querySelectorAll('button.dy-item'),function(o){o.setAttribute('aria-expanded','false');document.getElementById(o.getAttribute('aria-controls')).classList.remove('open')});
+    if(!open){b.setAttribute('aria-expanded','true');document.getElementById(b.getAttribute('aria-controls')).classList.add('open')}});
+  q.addEventListener('input',function(){render()});
+  chips.forEach(function(c){c.addEventListener('click',function(){var on=c.getAttribute('aria-pressed')!=='true'; c.setAttribute('aria-pressed',on);})});
+  F.addEventListener('submit',function(e){e.preventDefault(); var v=T.value.trim(); if(!v&&!(F._att&&F._att.length)) return; if(!v) v='(첨부)';
+    chips.forEach(function(c){ if(c.getAttribute('aria-pressed')==='true'&&v.indexOf(c.dataset.t)<0) v+=' '+c.dataset.t; c.setAttribute('aria-pressed','false'); });
+    var d=new Date(),p=function(n){return String(n).padStart(2,'0')};
+    M.unshift({att:(F._att||[]).slice(),id:++id,d:d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes()),t:v});
+    saveM(); T.value=''; q.value=''; F._att=[];F._sync&&F._sync(); tagbar(); render(true); });
+  
+  window.PDV=window.PDV||{};
+  window.PDV.memo={all:function(){return M},search:function(ws){return M.filter(function(m){var h=(m.d+' '+m.t).toLowerCase();return ws.some(function(w){return h.indexOf(w)>-1})})},
+    add:function(text){T.value=text;F.requestSubmit()},show:function(k){q.value=k||'';render()}};
+  tagbar(); render();
+})();
+
+// 트랜잭션: 목록 + 검색 + 구분 필터 + 행 아래 6하원칙 패널(slide out/in, 한 번에 하나)
+(function(){
+  var X=[
+   {id:1,d:'2026-11-08 12:40',k:'지출',who:'나 → 정부24 수수료',amt:-400,ac:'수수료비용',what:'주민등록등본 발급 수수료',where:'naviweb.kr · 이 기기(Windows PC)',how:'카드 결제(간편결제 ****1203)',why:'소유권보존등기 첨부서류',h:'b41c07de…20af',blk:'#48,211',dr:['수수료비용',400],cr:['현금및현금성자산',400]},
+   {id:2,d:'2026-11-07 18:10',k:'지출',who:'나 → 서울중앙지방법원',amt:-12000,ac:'수수료비용',what:'소장 인지대·송달료 납부',where:'전자소송 포털 · 이 기기',how:'계좌이체',why:'소송 제기',h:'91a2f6c0…77be',blk:'#48,125',dr:['수수료비용',12000],cr:['현금및현금성자산',12000]},
+   {id:3,d:'2026-11-06 10:05',k:'수입',who:'㈜한림건설 → 나',amt:3500000,ac:'매출',what:'11월 자문료 입금',where:'농협 입출금 계좌',how:'계좌이체 수취',why:'월 자문 계약 대가',h:'0d83e1a5…c9f1',blk:'#48,044',dr:['현금및현금성자산',3500000],cr:['매출',3500000]},
+   {id:4,d:'2026-11-05 13:22',k:'지출',who:'나 → 한림 식자재마트',amt:-86400,ac:'복리후생비',what:'사무실 간식·음료 구입',where:'한림 식자재마트 · 오프라인',how:'신용카드',why:'사무실 운영',h:'e7054b19…3a60',blk:'#47,990',dr:['복리후생비',86400],cr:['미지급금',86400]},
+   {id:5,d:'2026-11-03 09:00',k:'이체',who:'나 → 나(적금 계좌)',amt:-500000,ac:'기타금융자산',what:'월 정기적금 납입',where:'제주은행 앱 · 폰',how:'자동이체',why:'저축',h:'6f1b9d02…58c4',blk:'#47,850',dr:['기타금융자산',500000],cr:['현금및현금성자산',500000]},
+   {id:6,d:'2026-11-01 00:05',k:'지출',who:'나 → 클라우드 서비스',amt:-59000,ac:'지급수수료',what:'11월 서버·도메인 이용료',where:'온라인 · 자동결제',how:'신용카드 정기결제',why:'서비스 운영',h:'a38e5c71…d012',blk:'#47,760',dr:['지급수수료',59000],cr:['미지급금',59000]}];
+  var Q=document.getElementById('tx-q'),L=document.getElementById('tx-list'),F=document.getElementById('tx-f'),K=document.getElementById('tx-kp'),flt='';
+  var won=function(n){return (n<0?'−':'+')+Math.abs(n).toLocaleString('ko-KR')};
+  var W=function(n){return n.toLocaleString('ko-KR')};
+  function esc(x){return String(x).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})}
+  function hl(x,ws){x=esc(x);ws.forEach(function(w){if(!w)return;var r=new RegExp('('+w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');x=x.replace(r,'<mark>$1</mark>')});return x}
+  function render(){
+    var ws=Q.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    var r=X.filter(function(t){if(flt&&t.k!==flt)return false;var hay=[t.d,t.k,t.who,t.ac,t.what,t.where,t.how,t.why].join(' ').toLowerCase();return ws.every(function(w){return hay.indexOf(w)>-1})});
+    var inn=0,out=0;r.forEach(function(t){t.amt>0?inn+=t.amt:out+=t.amt});
+    K.innerHTML=[['수입 합계','+'+W(inn)+'원'],['지출 합계','−'+W(-out)+'원'],['순현금 증감',(inn+out<0?'−':'+')+W(Math.abs(inn+out))+'원'],['거래 건수',r.length+'건']].map(function(a){return '<div class="kp"><div class="l">'+a[0]+'</div><div class="v num">'+a[1]+'</div></div>'}).join('');
+    if(!r.length){L.innerHTML='<div class="dy-empty">일치하는 거래가 없습니다</div>';return}
+    L.innerHTML=r.map(function(t){return '<div class="txd"><button class="txrow" type="button" aria-expanded="false" aria-controls="txp-'+t.id+'"><span class="num">'+hl(t.d.slice(5,10)+' '+t.d.slice(11),ws)+'</span><span>'+hl(t.who.split(' → ')[t.amt>0?0:1],ws)+'<span class="sub">'+t.k+'</span></span><span>'+hl(t.what,ws)+'<span class="sub">'+hl(t.how,ws)+'</span></span><span>'+hl(t.ac,ws)+'</span><span class="amt num '+(t.amt>0?'in':'')+'">'+won(t.amt)+'</span><svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="m2 4 4 4 4-4"/></svg></button>'+
+     '<div class="rp" id="txp-'+t.id+'" role="region" aria-label="'+esc(t.what)+' — 6하원칙"><div class="rp-in"><div class="rp-body"><div><h3>6하원칙</h3><dl class="w6"><div><dt>누가</dt><dd>'+esc(t.who)+'</dd></div><div><dt>언제</dt><dd class="num">'+t.d+' KST</dd></div><div><dt>어디서</dt><dd>'+esc(t.where)+'</dd></div><div><dt>무엇을</dt><dd>'+esc(t.what)+' · '+won(t.amt)+'원</dd></div><div><dt>어떻게</dt><dd>'+esc(t.how)+'</dd></div><div><dt>왜</dt><dd>'+esc(t.why)+'</dd></div></dl></div>'+
+     '<div><h3>기록 정보 · 분개</h3><div class="proof"><div><span>원본 위치</span><span>이 기기(폰)</span></div></div><table class="jn"><tr><th>구분</th><th>계정</th><th class="n">금액</th></tr><tr><td>차변</td><td>'+t.dr[0]+'</td><td class="n num">'+W(t.dr[1])+'</td></tr><tr><td>대변</td><td>'+t.cr[0]+'</td><td class="n num">'+W(t.cr[1])+'</td></tr></table><div class="verify"><button class="btn pri" type="button">원본과 대조</button><span class="cap">분개는 재무제표 계정에 자동 반영됩니다</span></div></div></div></div></div></div>'}).join('');
+  }
+  Q.addEventListener('input',render);
+  window.PDV=window.PDV||{};
+  window.PDV.tx={search:function(ws){return X.filter(function(t){var h=[t.d,t.k,t.who,t.ac,t.what,t.how,t.why].join(' ').toLowerCase();return ws.some(function(w){return h.indexOf(w)>-1})})},
+    show:function(k){Q.value=k||'';render()},all:function(){return X}};
+  F.addEventListener('click',function(e){var b=e.target.closest('[data-f]');if(!b)return;flt=b.dataset.f;[].forEach.call(F.children,function(c){c.setAttribute('aria-pressed',c===b)});render()});
+  L.addEventListener('click',function(e){var b=e.target.closest('.txrow');if(!b)return;var open=b.getAttribute('aria-expanded')==='true';
+    [].forEach.call(L.querySelectorAll('.txrow'),function(o){o.setAttribute('aria-expanded','false');document.getElementById(o.getAttribute('aria-controls')).classList.remove('open')});
+    if(!open){b.setAttribute('aria-expanded','true');document.getElementById(b.getAttribute('aria-controls')).classList.add('open')}});
+  render();
+})();
+
+// 썸네일 그래프: 눌러서 펼치기(한 번에 하나, 다시 누르면 접힘)
+(function(){
+  var th=[].slice.call(document.querySelectorAll('.thumb'));
+  th.forEach(function(t){t.addEventListener('click',function(){var open=t.getAttribute('aria-expanded')==='true';
+    th.forEach(function(o){o.setAttribute('aria-expanded','false');document.getElementById(o.getAttribute('aria-controls')).classList.remove('open')});
+    if(!open){t.setAttribute('aria-expanded','true');document.getElementById(t.getAttribute('aria-controls')).classList.add('open')}})});
+})();
+
+// 물결 효과(ripple) — 버튼·칩·탭·메뉴·행 공통
+(function(){
+  document.addEventListener('pointerdown',function(e){
+    var t=e.target.closest('.btn,.chip,.tab,.seg button,.ib,.nv,.sm button,.thumb,.row,.txrow'); if(!t) return;
+    var r=t.getBoundingClientRect(),d=Math.max(r.width,r.height)*2,x=document.createElement('span');
+    x.className='rip';x.style.cssText='width:'+d+'px;height:'+d+'px;left:'+(e.clientX-r.left-d/2)+'px;top:'+(e.clientY-r.top-d/2)+'px';
+    t.appendChild(x);setTimeout(function(){x.remove()},520);
+  });
+})();
+
+// 개인/조직 전환: 재무제표 양식이 바뀐다
+(function(){
+  var seg=document.querySelector('.seg'),bs=[].slice.call(seg.querySelectorAll('button'));
+  function set(m){document.body.setAttribute('data-mode',m);bs.forEach(function(b){b.setAttribute('aria-pressed',b.dataset.m===m)})}
+  bs[0].dataset.m='person';bs[1].dataset.m='org';
+  bs.forEach(function(b){b.addEventListener('click',function(){set(b.dataset.m)})});
+  set('person');
+})();
+
+// 보고서: 일일·주간·월간·분기·반기·연간 — 기간 활동을 자동으로 요약 (시안: 가상 데이터)
+(function(){
+  var R={
+   day:{n:'일일',rng:'2026.11.07 (토)',when:'매일 06:00',last:'오늘 06:00',next:'내일 06:00',rec:46,anc:46,mix:[27,9,4,6],inn:0,out:12000,memo:1,tx:1,pv:{rec:-4,inn:0,out:0},
+     sum:['소송 제기 관련 활동이 하루의 중심이었습니다. 소장 접수 메일을 보내고 인지대·송달료를 납부했습니다.','기록 46건이 모두 변조 방지 기록까지 끝났습니다.','메모 1건: 답변서 제출 기한을 달력에 적어 둘 것.'],
+     act:[['17:45','소장 접수 메일 발송','나 → 서울중앙지방법원'],['18:10','소장 인지대·송달료 납부','−12,000원 · 계좌이체'],['22:40','메모 작성','답변서 기한 일정 관리']]},
+   week:{n:'주간',rng:'2026.10.26 ~ 2026.11.01',when:'매주 월요일 06:00',last:'11.02(월) 06:00',next:'11.09(월) 06:00',rec:291,anc:291,mix:[168,58,26,39],inn:1200000,out:187400,memo:3,tx:9,pv:{rec:12,inn:1200000,out:-23000},
+     sum:['기록이 지난주보다 12건 늘었습니다. 공용 AI 전문가와의 작업이 58%를 차지했습니다.','수입은 외주 수금 1건(1,200,000원), 지출은 187,400원입니다.','소장 초안 작성과 증거자료 정리가 가장 많이 반복된 활동입니다.'],
+     act:[['10.27','소장 초안 작성 시작','나 → 공용 AI 전문가 · K-Law'],['10.29','증거자료 14건 정리','이 기기(PC)'],['10.31','외주 수금 입금 확인','+1,200,000원'],['11.01','소장 초안 최종 확인','나비 길잡이 체크리스트']]},
+   month:{n:'월간',rng:'2026년 10월',when:'매월 1일 06:00',last:'11.01 06:00',next:'12.01 06:00',rec:412,anc:412,mix:[239,83,36,54],inn:4100000,out:2980000,memo:11,tx:34,pv:{rec:62,inn:200000,out:-140000},
+     sum:['10월 기록은 412건으로 최근 6개월 중 가장 많았습니다.','수입 4,100,000원, 지출 2,980,000원으로 순저축은 1,120,000원(저축률 27.3%)입니다.','지출에서 가장 큰 항목은 주거비였고, 지난달보다 140,000원 줄었습니다.'],
+     act:[['10.04','월 자문 계약 갱신','나 ↔ ㈜한림건설'],['10.15','소송 사건 접수 준비 시작','K-Law'],['10.22','세무 신고자료 정리','K-Tax'],['10.30','월 정기적금 납입','−500,000원']]},
+   qtr:{n:'분기',rng:'2026년 3분기 (7~9월)',when:'분기 첫날 06:00',last:'10.01 06:00',next:'2027.01.01 06:00',rec:806,anc:806,mix:[466,160,72,108],inn:12300000,out:9020000,memo:27,tx:96,pv:{rec:120,inn:600000,out:-210000},
+     sum:['3분기 기록은 806건으로 2분기보다 120건 늘었습니다.','수입 12,300,000원, 지출 9,020,000원, 순저축 3,280,000원(저축률 26.7%)입니다.','월별로는 9월(약 350건)이 가장 활발했습니다.'],
+     act:[['7월','사무실 이전 계약','나 ↔ 임대인'],['8월','K-Law 사건 3건 수임','공용 AI 전문가'],['9월','분기 부가가치세 신고','K-Tax']]},
+   half:{n:'반기',rng:'2026년 상반기 (1~6월)',when:'1월 1일 · 7월 1일 06:00',last:'07.01 06:00',next:'2027.01.01 06:00',rec:1018,anc:1018,mix:[560,214,98,146],inn:24000000,out:17500000,memo:41,tx:188,pv:{rec:210,inn:1800000,out:-300000},
+     sum:['상반기 기록은 1,018건이고 하반기로 갈수록 늘고 있습니다.','수입 24,000,000원, 지출 17,500,000원, 순저축 6,500,000원(저축률 27.1%)입니다.','메모는 41건, 가장 많이 쓴 태그는 #업무입니다.'],
+     act:[['2월','법인 설립 준비 시작','나비웹 컨소시엄'],['4월','K-Law 시범 운영','공용 AI 전문가'],['6월','상반기 결산 자료 정리','K-Tax']]},
+   year:{n:'연간',rng:'2025년',when:'1월 1일 06:00',last:'2026.01.01 06:00',next:'2027.01.01 06:00',rec:1302,anc:1302,mix:[690,310,120,182],inn:46000000,out:33800000,memo:58,tx:240,pv:{rec:0,inn:0,out:0},
+     sum:['2025년 기록은 1,302건입니다. 하반기부터 활동이 크게 늘었습니다.','수입 46,000,000원, 지출 33,800,000원, 순저축 12,200,000원(저축률 26.5%)입니다.','전년과 비교할 기록이 없어 증감은 표시하지 않습니다.'],
+     act:[['7월','나비웹 서비스 개발 시작','나 · 팀 주피터'],['10월','특허 출원 준비','나비 숫자 코드'],['12월','연말 정산 자료 정리','K-Tax']]}};
+  var ORDER=['day','week','month','qtr','half','year'];
+  var IC={day:'<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/>',week:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M8 14h2M12 14h2M16 14h2"/>',month:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/>',qtr:'<path d="M12 12V4a8 8 0 1 1-8 8z"/>',half:'<path d="M12 4a8 8 0 1 0 0 16z"/>',year:'<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>'};
+  var W=function(n){return n.toLocaleString('ko-KR')};
+  var dd=document.getElementById('rp-dd'),btn=document.getElementById('rp-btn'),menu=document.getElementById('rp-menu'),panel=document.getElementById('p-rep');
+  menu.innerHTML=ORDER.map(function(k){var r=R[k];return '<button type="button" class="mi" role="menuitem" data-k="'+k+'"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true">'+IC[k]+'</svg><span><b>'+r.n+' 보고서</b><small>'+r.rng+'</small></span></button>'}).join('')+'<div class="dv"></div><button type="button" class="mi" role="menuitem" data-k="auto"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg><span><b>자동 작성 설정</b><small>종류별 켜기·끄기</small></span></button>';
+  function open(o){menu.hidden=!o;btn.setAttribute('aria-expanded',o);if(o)menu.querySelector('.mi').focus()}
+  btn.addEventListener('click',function(e){e.stopPropagation();open(menu.hidden)});
+  document.addEventListener('click',function(e){if(!dd.contains(e.target))open(false)});
+  dd.addEventListener('keydown',function(e){var it=[].slice.call(menu.querySelectorAll('.mi')),i=it.indexOf(document.activeElement);
+    if(e.key==='Escape'){open(false);btn.focus()}else if(e.key==='ArrowDown'&&!menu.hidden){it[(i+1)%it.length].focus();e.preventDefault()}else if(e.key==='ArrowUp'&&!menu.hidden){it[(i-1+it.length)%it.length].focus();e.preventDefault()}});
+  var cur='week',on={day:1,week:1,month:1,qtr:1,half:1,year:1};
+  function delta(v,unit){return v===0?'':(v>0?'▲ ':'▼ ')+W(Math.abs(v))+unit}
+  function render(k){
+    var r=R[k];cur=k;
+    document.getElementById('rp-kind').textContent=r.n+' 보고서';document.getElementById('rp-title').textContent=r.rng;
+    document.getElementById('rp-auto').textContent='자동 작성 · '+r.when+' · 마지막 '+r.last;
+    document.getElementById('rp-sw').innerHTML=ORDER.map(function(x){return '<button class="chip" type="button" data-k="'+x+'" aria-pressed="'+(x===k)+'">'+R[x].n+'</button>'}).join('');
+    var net=r.inn-r.out,sr=r.inn?(net/r.inn*100).toFixed(1)+'%':'–';
+    var kp=function(l,v,d,ok){return '<div class="kp"><div class="l">'+l+'</div><div class="v num">'+v+'</div>'+(d?'<span class="chipst '+(ok?'ok':'wait')+'">'+d+'</span>':'')+'</div>'};
+    document.getElementById('rp-kp').innerHTML=kp('기록',W(r.rec)+'건',delta(r.pv.rec,'건'),r.pv.rec>0)+kp('거래',r.tx+'건',r.memo?'메모 '+r.memo+'건':'',true)+kp('수입','+'+W(r.inn)+'원','지출 −'+W(r.out)+'원',false)+kp('순저축',(net<0?'−':'+')+W(Math.abs(net))+'원','저축률 '+sr,net>=0);
+    document.getElementById('rp-sum').innerHTML=r.sum.map(function(t){return '<li>'+t+'</li>'}).join('');
+    var nm=['공용 AI 전문가','사람','사물','기관'];
+    document.getElementById('rp-mix').innerHTML=r.mix.map(function(v,i){var p=Math.round(v/r.rec*100);return '<div class="mixrow"><span>'+nm[i]+'</span><i style="--w:'+p+'%"></i><span class="num">'+W(v)+'건 · '+p+'%</span></div>'}).join('')+'<p class="cap" style="margin:8px 0 0">기록 '+W(r.anc)+'건 모두 변조 방지 기록 완료 · 변조 감지 0건</p>';
+    document.getElementById('rp-act').innerHTML=r.act.map(function(a){return '<div class="actrow"><time>'+a[0]+'</time><div>'+a[1]+'<small>'+a[2]+'</small></div></div>'}).join('');
+    document.getElementById('rp-fin').innerHTML='<div class="finrow"><span>수입</span><b class="num">+'+W(r.inn)+'원'+(r.pv.inn?'<span class="d">'+delta(r.pv.inn,'원')+'</span>':'')+'</b></div><div class="finrow"><span>지출</span><b class="num">−'+W(r.out)+'원'+(r.pv.out?'<span class="d">'+delta(r.pv.out,'원')+'</span>':'')+'</b></div><div class="finrow"><span>순저축</span><b class="num">'+(net<0?'−':'+')+W(Math.abs(net))+'원</b></div><p class="cap" style="margin:8px 0 0">자세한 내역은 트랜잭션·재무제표 탭에서 볼 수 있습니다.</p>';
+  }
+  function sched(){document.getElementById('rp-sch').innerHTML=ORDER.map(function(k){var r=R[k];return '<div class="schr"><span class="k">'+r.n+'</span><span>'+r.when+'<small>작성 시각</small></span><span>'+r.last+'<small>마지막 작성</small></span><span>'+(on[k]?r.next:'꺼짐')+'<small>다음 작성</small></span><button type="button" class="sw" role="switch" aria-checked="'+(!!on[k])+'" aria-label="'+r.n+' 보고서 자동 작성" data-k="'+k+'"></button></div>'}).join('')}
+  function showRep(k){
+    document.querySelectorAll('[role=tabpanel]').forEach(function(p){p.hidden=true});
+    document.querySelectorAll('.tab').forEach(function(t){t.setAttribute('aria-selected','false');t.tabIndex=-1});
+    document.querySelectorAll('#sm [data-go]').forEach(function(b){b.setAttribute('aria-current','false')});
+    panel.hidden=false;panel.classList.remove('panel-in');void panel.offsetWidth;panel.classList.add('panel-in');
+    if(k!=='auto')render(k);sched();
+    if(k==='auto')document.getElementById('rp-sch').scrollIntoView({behavior:'smooth',block:'center'});else window.scrollTo({top:0,behavior:'smooth'});
+  }
+  menu.addEventListener('click',function(e){var b=e.target.closest('.mi');if(!b)return;open(false);showRep(b.dataset.k)});
+  window.PDV=window.PDV||{};window.PDV.openReport=function(k){showRep(k)};
+  window.PDV.openTab=function(id){document.getElementById(id).click()};
+  panel.addEventListener('click',function(e){var c=e.target.closest('#rp-sw [data-k]');if(c){render(c.dataset.k);return}
+    var w=e.target.closest('.sw');if(w){on[w.dataset.k]=!on[w.dataset.k];sched()}});
+  // 탭을 누르면 보고서 화면은 닫힌다
+  document.querySelectorAll('.tab').forEach(function(t){t.addEventListener('click',function(){panel.hidden=true})});
+  render('week');sched();
+})();
+
+// 나만의 AI 비서(나비): PDV 갱신·관리 담당. 시안에서는 가상 응답으로 지시·검색 흐름을 보여준다.
+(function(){
+  var fab=document.getElementById('bot-fab'),bot=document.getElementById('bot'),box=document.getElementById('bot-msgs'),st=document.getElementById('bot-st'),
+      sg=document.getElementById('bot-sg'),form=document.getElementById('bot-form'),inp=document.getElementById('bot-in'),ready=false,greeted=false;
+  // 페이지가 열리면 비서를 미리 불러온다(로딩 표시 → 준비됨)
+  setTimeout(function(){ready=true;fab.classList.add('ready');st.textContent='나만의 AI 비서 · PDV 관리 중'},1400);
+  function add(cls,html){var d=document.createElement('div');d.className='msg '+cls;d.innerHTML=html;box.appendChild(d);box.scrollTop=box.scrollHeight;return d}
+  function esc(x){return String(x).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]})}
+  function say(html,acts,delay){var t=add('bot','<span class="typing"><i></i><i></i><i></i></span>');
+    setTimeout(function(){t.innerHTML=html+(acts?'<div class="acts">'+acts.map(function(a,i){return '<button type="button" class="chip" data-a="'+i+'">'+a[0]+'</button>'}).join('')+'</div>':'');
+      if(acts)t._acts=acts;box.scrollTop=box.scrollHeight},delay||600);return t}
+  box.addEventListener('click',function(e){var b=e.target.closest('[data-a]');if(!b)return;var m=b.closest('.msg');m._acts[b.dataset.a][1]()});
+  function suggestions(){var S=['이번 주 보고서 만들어 줘','소장 관련 기록 찾아줘','이번 달 지출 얼마야?','메모: 내일 등기소 방문','오늘 PDV에서 뭘 정리했어?'];
+    sg.innerHTML=S.map(function(t){return '<button type="button" class="chip">'+t+'</button>'}).join('')}
+  sg.addEventListener('click',function(e){var b=e.target.closest('.chip');if(b)send(b.textContent)});
+  function open(o){bot.hidden=!o;fab.setAttribute('aria-expanded',o);if(!o)return;
+    if(!greeted){greeted=true;suggestions();
+      var l=add('bot','<span class="typing"><i></i><i></i><i></i></span>');
+      setTimeout(function(){l.remove();
+        add('sys','<b>나비가 PDV를 관리하고 있어요</b>오늘 기록 12건을 정리했고, 06:00에 일일 보고서를 작성했습니다. 변조 감지 0건 · 마지막 백업 어제 23:40');
+        say('안녕하세요, 주피터 님. 저는 나만의 AI 비서 나비입니다. 내 데이터 금고의 기록·메모·보고서를 갱신하고 관리합니다. 기록 검색, 메모 남기기, 보고서 만들기를 말로 시키세요.',null,500)},ready?500:1100)}
+    setTimeout(function(){inp.focus()},50)}
+  fab.addEventListener('click',function(){open(bot.hidden)});
+  document.getElementById('bot-x').addEventListener('click',function(){open(false);fab.focus()});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!bot.hidden)open(false)});
+  // 사이드바 "나만의 비서(나비)"도 같은 대화창을 연다
+  [].forEach.call([],function(b){if(b.textContent.indexOf('나만의 비서')>-1)b.addEventListener('click',function(){open(true)})});
+  var STOP=/(검색|검색해|찾아줘|찾아|찾아봐|보여줘|보여|알려줘|알려|해줘|해 줘|줘|관련|기록|에서|에 대해|대해|좀|전부|모두|내|나의|이번|지난|얼마야|얼마|뭐야|\?)/g;
+  function kws(t){return t.replace(STOP,' ').split(/\s+/).map(function(x){return x.replace(/[을를은는이가의로]$/,'')}).filter(function(x){return x.length>1})}
+  function toTab(id,fn){return function(){PDV.openTab(id);if(fn)fn();window.scrollTo({top:0,behavior:'smooth'})}}
+  function send(text){text=text.trim();if(!text)return;add('me',esc(text));inp.value='';
+    var t=text.replace(/\s+/g,' ');
+    var per={'일일':'day','오늘':'day','주간':'week','이번 주':'week','월간':'month','이번 달 보고':'month','분기':'qtr','반기':'half','연간':'year'};
+    if(/보고서/.test(t)){var k='week',nm='주간';Object.keys(per).forEach(function(x){if(t.indexOf(x)>-1){k=per[x];nm=x}});if(/이번 주|주간/.test(t)){k='week';nm='주간'}
+      var tm=say('좋아요. '+nm.replace('오늘','일일').replace('이번 주','주간')+' 보고서를 열었습니다. 해당 기간의 기록과 거래를 모아 요약했어요. 매번 자동으로 작성되고 있으니 설정은 "자동 작성"에서 바꿀 수 있습니다.',null,700);setTimeout(function(){PDV.openReport(k)},900);return}
+    if(/^(메모|일기)\s*[:：]?/.test(t)||/(메모해|적어 ?줘|기록해 ?줘)/.test(t)){var body=t.replace(/^(메모|일기)\s*[:：]?\s*/,'').replace(/(메모해|적어 ?줘|기록해 ?줘).*/,'').trim()||t;
+      PDV.memo.add(body);say('메모를 저장했고 변조 방지 기록도 남겼습니다.\n“'+esc(body)+'”',[['메모 보기',toTab('t-vault',function(){PDV.memo.show('')})]],600);return}
+    if(/(손익|대차|현금흐름|재무)/.test(t)){var map=[['손익','t-is','손익계산서'],['대차','t-bs','대차대조표'],['현금흐름','t-cf','현금흐름표'],['재무분석','t-fa','재무분석 보고서']],hit=map.filter(function(m){return t.indexOf(m[0])>-1})[0]||map[3];
+      say(hit[2]+'를 열어 드릴게요.',null,500);setTimeout(toTab(hit[1]),700);return}
+    if(/(뭘 정리|뭐 했|무슨 일|오늘 PDV|정리했)/.test(t)){say('오늘 한 일입니다.\n· 새 기록 12건을 6하원칙으로 정리\n· 소장 관련 기록 3건을 한 건으로 묶음\n· 06:00 일일 보고서 작성\n· 변조 감지 0건',[['일일 보고서 보기',function(){PDV.openReport('day')}]],700);return}
+    var ws=kws(t),isMoney=/(지출|수입|얼마|거래|결제|입금|돈)/.test(t);
+    var ws2=ws.filter(function(x){return !/^(지출|수입|거래|결제|입금|돈|달|월|이번달)$/.test(x)});
+    if(isMoney&&!ws2.length){var all=PDV.tx.all(),inn=0,out=0;all.forEach(function(x){x.amt>0?inn+=x.amt:out+=x.amt});
+      say('이번 달 거래 '+all.length+'건입니다.\n수입 +'+inn.toLocaleString('ko-KR')+'원 · 지출 −'+(-out).toLocaleString('ko-KR')+'원 · 순 '+(inn+out>=0?'+':'−')+Math.abs(inn+out).toLocaleString('ko-KR')+'원',[['트랜잭션 보기',toTab('t-tx',function(){PDV.tx.show('')})]],700);return}
+    if(ws.length){var mm=PDV.memo.search(ws),tt=PDV.tx.search(ws),h='';
+      mm.slice(0,3).forEach(function(m){h+='<span class="hit">'+esc(m.t.replace(/\s*#\S+/g,''))+'<small>메모 · '+m.d.slice(0,10)+'</small></span>'});
+      tt.slice(0,3).forEach(function(x){h+='<span class="hit">'+esc(x.what)+' · '+(x.amt>0?'+':'−')+Math.abs(x.amt).toLocaleString('ko-KR')+'원<small>거래 · '+x.d.slice(0,10)+' · '+esc(x.who)+'</small></span>'});
+      var acts=[];if(mm.length)acts.push(['메모에서 보기',toTab('t-vault',function(){PDV.memo.show(ws[0])})]);if(tt.length)acts.push(['트랜잭션에서 보기',toTab('t-tx',function(){PDV.tx.show(ws[0])})]);
+      say(mm.length+tt.length?'“'+esc(ws.join(' '))+'” 관련해서 메모 '+mm.length+'건, 거래 '+tt.length+'건을 찾았어요.'+h:'“'+esc(ws.join(' '))+'”와 일치하는 기록을 찾지 못했어요. 다른 단어로 다시 말씀해 주세요.',acts.length?acts:null,800);return}
+    say('이런 일을 도와드릴 수 있어요.\n· “소장 관련 기록 찾아줘” 검색\n· “메모: 내일 등기소 방문” 메모 남기기\n· “월간 보고서 만들어 줘” 보고서 열기\n· “이번 달 지출 얼마야?” 돈의 흐름 확인',null,500)}
+  form.addEventListener('submit',function(e){e.preventDefault();var a=(form._att||[]).slice();form._att=[];form._sync&&form._sync();if(a.length)add('me','첨부: '+esc(a.join(', ')));if(inp.value.trim())send(inp.value);else if(a.length)say('첨부하신 파일 '+a.length+'건을 받았어요. 어떻게 정리할까요? “이 파일을 소장 사건에 연결해 줘”처럼 말씀해 주세요.',null,600)});
+})();
+
+// 입력줄 공통: 파일 첨부 · 카메라 · 음성 입력 · 보내기 활성화 · Enter 전송
+(function(){
+  [].forEach.call(document.querySelectorAll('form:has(.ibar)'),function(F){
+    var bar=F.querySelector('.ibar'),att=F.querySelector('.ibar-att'),ctl=bar.querySelector('textarea,input[type=text]'),send=bar.querySelector('.ib-send'),
+        file=bar.querySelector('.ib-file'),cam=bar.querySelector('.ib-cam'),micb=bar.querySelector('[data-k=mic]'),rec=null;
+    F._att=[];
+    function sync(){send.disabled=!(ctl.value.trim()||F._att.length);
+      att.hidden=!F._att.length;att.innerHTML=F._att.map(function(n,i){return '<span class="att-chip">'+n.replace(/[&<>]/g,'')+'<button type="button" data-i="'+i+'" aria-label="첨부 제거">×</button></span>'}).join('')}
+    F._sync=sync;
+    function grow(){if(ctl.tagName==='TEXTAREA'){ctl.style.height='auto';ctl.style.height=Math.min(ctl.scrollHeight,200)+'px'}}
+    ctl.addEventListener('input',function(){grow();sync()});
+    ctl.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();if(!send.disabled)F.requestSubmit()}});
+    F.addEventListener('submit',function(){setTimeout(function(){grow();sync()},0)},true);
+    bar.querySelector('[data-k=clip]').addEventListener('click',function(){file.click()});
+    bar.querySelector('[data-k=cam]').addEventListener('click',function(){cam.click()});
+    [file,cam].forEach(function(inp){inp.addEventListener('change',function(){[].forEach.call(inp.files,function(f){F._att.push(f.name)});inp.value='';sync()})});
+    att.addEventListener('click',function(e){var b=e.target.closest('[data-i]');if(!b)return;F._att.splice(+b.dataset.i,1);sync()});
+    micb.addEventListener('click',function(){
+      var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+      if(rec){rec.stop();return}
+      if(!SR){micb.classList.toggle('rec');return}
+      rec=new SR();rec.lang='ko-KR';rec.interimResults=false;micb.classList.add('rec');
+      rec.onresult=function(e){ctl.value=(ctl.value+' '+e.results[0][0].transcript).trim();grow();sync()};
+      rec.onend=function(){rec=null;micb.classList.remove('rec')};rec.start()});
+    sync();
+  });
+})();
+</script>
 </body>
 </html>
