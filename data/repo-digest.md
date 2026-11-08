@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-08 07:27 KST · 기준 커밋 93b6cb0e
+- 갱신: 2026-11-08 09:36 KST · 기준 커밋 d5536b84
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-08 Merge pull request #951 from Openhash-Gopang/feat/pdv-vault-page
+- 2026-11-08 feat(pdv): 내 데이터 금고 화면을 새 디자인으로 교체 (기록 목록은 실제 PDV 데이터, 백업·복구 유지)
 - 2026-11-08 Merge pull request #950 from Openhash-Gopang/feat/pdv-cloud-backup
 - 2026-11-08 feat(pdv): PC 는 클라우드 백업(기본 L1 PocketBase)에서 PDV 를 불러온다
 - 2026-11-08 Merge pull request #949 from Openhash-Gopang/feat/pdv-settings-ui
@@ -42,8 +44,6 @@
 - 2026-11-06 fix(embed): hide empty/placeholder AI bubbles inside the naviweb frame; host progress bar shows waiting
 - 2026-11-06 pdv: 재활용 첨부서류(kind=attach) 보관과 만료 삭제(purge) 추가
 - 2026-11-05 Merge pull request #927 from Openhash-Gopang/feat/naviweb-feedback-sp-v02-20261105
-- 2026-11-05 feat(prompts): 나비웹 기능 개선 SP v0.2 추가 (승인 체계, 개인정보 규칙, 사고 실험 보완)
-- 2026-11-05 feat: 양식 작성 SP(form-builder) 신설 — 자연어 초안 + 대화로 항목 추가·삭제·이동·크기 변경
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
