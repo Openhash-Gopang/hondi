@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-08 09:59 KST · 기준 커밋 c0f1a913
+- 갱신: 2026-11-08 15:36 KST · 기준 커밋 0cec5f14
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-08 Merge pull request #953 from Openhash-Gopang/follow/vault-safe-icon-hondi
+- 2026-11-08 feat(vault): 금고 아이콘을 단순화한 금고 모양으로 교체
 - 2026-11-08 Merge pull request #952 from Openhash-Gopang/follow/vault-bot-icon-hondi
 - 2026-11-08 feat(vault): 금고 아이콘을 자물쇠로 교체
 - 2026-11-08 feat(pdv): 자체 대화창 아이콘 제거, 부모 아이콘으로 나비 열기, iframe 높이 자동 조절
@@ -42,8 +44,6 @@
 - 2026-11-06 Merge pull request #933 from Openhash-Gopang/feat/user-badge-avatar-material
 - 2026-11-06 feat(badge): 우측 상단 아이디를 프로필 사진 아바타로, 팝업을 Material 스타일(폭 272px)로 개편
 - 2026-11-06 feat(admin): user reports and feature suggestions inbox in the admin dashboard
-- 2026-11-06 fix(feedback): ignore BOM/whitespace in export token secret
-- 2026-11-06 feat(feedback): /user-feedback/export (operator-only) and [FEEDBACK] tag from the document helper SP
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
