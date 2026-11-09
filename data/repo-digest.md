@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-09 14:41 KST · 기준 커밋 e12c216e
+- 갱신: 2026-11-09 18:26 KST · 기준 커밋 1975f36f
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-09 Merge pull request #957 from Openhash-Gopang/feat/pdv-kept-docs
+- 2026-11-09 feat(pdv): 내 데이터 금고에 '보관 서류' 탭 — 발급·보관한 첨부서류와 유효 기간, 내려받기·삭제
 - 2026-11-09 Merge pull request #956 from Openhash-Gopang/feat/pdv-profile-bridge
 - 2026-11-09 feat(pdv): 도우미용 개인 정보 profile_get/profile_set 중계 추가
 - 2026-11-09 Merge pull request #955 from Openhash-Gopang/feat/embed-host-login
@@ -42,8 +44,6 @@
 - 2026-11-06 feat(admin): 무료 이용 현황 조회와 다시 시작(/admin/quota-reset)
 - 2026-11-06 Merge pull request #938 from Openhash-Gopang/fix/free-limit-popup-5h-text
 - 2026-11-06 fix(badge): 무료 한도 소진 팝업 문구 — 100원/24시간 문구 삭제, 5시간 후 재시작 안내
-- 2026-11-06 feat(plan): 은행 입금 알림으로 유료 플랜 자동 지정 (입금자·금액 대조), 관리자 입금 확인 화면
-- 2026-11-06 feat: free plan with internal refill + free trial 100 KRW or 24h (all accounts)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
