@@ -1173,14 +1173,16 @@ function _showDeviceMismatchNotice(found, resolve) {
 // .hondi.net 공유 쿠키 hondi_pvt 에 전화 인증 토큰이 살아 있으면 서버에 "이 토큰이 누구인가"를 물어
 // 그 계정으로 이 앱을 연다(K-Mail 사용자 = 같은 guid). 이 기기에 저장된 계정이 없거나 테스트·임시 계정일 때만
 // 바꾼다 — 이미 다른 정식 계정으로 로그인해 있으면 건드리지 않는다. 어떤 실패든 기존 흐름으로 넘어간다.
-async function _adoptRealSharedLogin() {
+async function _adoptRealSharedLogin(hostToken) {
   try {
-    if (!_hasRealSharedLogin()) return null;
+    // hostToken: 나비웹(naviweb.kr) 같은 다른 사이트 화면 안에 iframe 으로 떠 있을 때 그 화면이 postMessage 로 넘겨 준 전화 인증 토큰 — 쿠키는 사이트가 달라 읽을 수 없다(2026-11-09)
+    const _tok = hostToken || (_hasRealSharedLogin() ? _readCookie('hondi_pvt') : null);
+    if (!_tok) return null;
     const stored = _loadStored();
     if (stored?.ipv6 && !stored.test_account && !stored.isGuest && !stored.isTemp) return null;
     const r = await fetch(`${PROXY_URL}/auth/session-profile`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone_verify_token: _readCookie('hondi_pvt') }),
+      body: JSON.stringify({ phone_verify_token: _tok }),
       signal: AbortSignal.timeout(6000),
     });
     const d = await r.json().catch(() => null);
@@ -1203,6 +1205,38 @@ async function _adoptRealSharedLogin() {
   }
 }
 
+// ── 다른 사이트 화면 안에서 열렸을 때: 그 화면의 로그인 이어받기 (2026-11-09) ──
+// 나비웹(naviweb.kr)의 대화창은 이 앱(hondi.net)을 iframe 으로 띄운다. 두 사이트는 쿠키를 나누지 못해(.hondi.net 공유 쿠키는 naviweb.kr 에서 안 보임)
+// 전화 인증으로 로그인해 있어도 이 앱은 임시 계정으로 열렸다. 그래서 호스트가 {type:'hondi-embed-auth', token, exp} 를 이 창에만 보내 주면
+// 같은 방식(서버 /auth/session-profile)으로 그 계정을 이어받는다. 토큰은 주소(URL)에 싣지 않고, 이 탭의 sessionStorage 에만 둔다.
+const _HOST_ORIGINS = ['https://naviweb.kr', 'https://www.naviweb.kr', 'https://mail.hondi.net'];
+const _HOST_PVT_KEY = 'hondi_host_pvt';
+function _isEmbedded() { try { return window.parent !== window; } catch { return true; } }
+function _readHostPvt() {
+  try {
+    const o = JSON.parse(sessionStorage.getItem(_HOST_PVT_KEY) || 'null');
+    if (o && o.token && !String(o.token).startsWith('tid-') && Number(o.exp) - 30000 > Date.now()) return o;
+  } catch {}
+  return null;
+}
+if (typeof window !== 'undefined' && _isEmbedded()) {
+  window.addEventListener('message', async (e) => {
+    const d = e && e.data;
+    if (!d || d.type !== 'hondi-embed-auth' || e.source !== window.parent || !_HOST_ORIGINS.includes(e.origin)) return;
+    const tok = String(d.token || ''), exp = Number(d.exp || 0);
+    if (!tok || tok.startsWith('tid-') || !exp || exp - 30000 < Date.now()) return;   // 테스트 토큰은 ?testid= 로 이미 처리된다
+    try { sessionStorage.setItem(_HOST_PVT_KEY, JSON.stringify({ token: tok, exp })); } catch {}
+    const before = _loadStored()?.ipv6 || '';
+    const u = await _adoptRealSharedLogin(tok);   // 이미 정식 계정이 저장돼 있으면 null(건드리지 않는다)
+    if (u && u.ipv6 !== before) {
+      // 이미 떠 있는 화면은 옛 계정으로 그려졌으므로 한 번만 다시 불러온다(같은 계정으로 또 불러오지 않게 계정 값을 적어 둔다)
+      try { if (sessionStorage.getItem('hondi_host_reload') === u.ipv6) return; sessionStorage.setItem('hondi_host_reload', u.ipv6); } catch {}
+      location.reload();
+    }
+  });
+  try { window.parent.postMessage({ type: 'hondi-embed-auth-request' }, '*'); } catch {}   // 요청만 보낸다(비밀값 없음) — 호스트가 이 창의 출처를 확인한 뒤에만 토큰을 답한다
+}
+
 // ── 저장소 읽기 ──────────────────────────────────────────
 function _loadStored() {
   try {
@@ -1214,7 +1248,7 @@ function _loadStored() {
 // ── 사용자 초기화 (앱 시작 시 1회) ──────────────────────
 export async function initAuth() {
   await _handleTestIdParam(); // 🧪 ?testid=… (없으면 즉시 반환)
-  const adopted = await _adoptRealSharedLogin(); // K-Mail 등 다른 서비스의 전화 인증 로그인을 이어받는다(2026-10-28)
+  const adopted = await _adoptRealSharedLogin(_readHostPvt()?.token); // K-Mail 등 다른 서비스의 전화 인증 로그인을 이어받는다(2026-10-28)
   if (adopted) return adopted;
   const stored = _loadStored();
   if (stored?.ipv6) {
