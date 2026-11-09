@@ -638,6 +638,7 @@ html.embed .bot{position:absolute;bottom:auto;right:20px}
     <button class="tab" role="tab" id="t-bs" title="재무상태표 (K-IFRS 1001)" aria-selected="false" aria-controls="p-bs" type="button" tabindex="-1"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M12 4.5v15M7 9h2.5M7 12.5h2.5M14.5 9H17M14.5 12.5H17"/></svg>대차대조표</button>
     <button class="tab" role="tab" id="t-cf" title="현금흐름표 (K-IFRS 1007)" aria-selected="false" aria-controls="p-cf" type="button" tabindex="-1"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4 7l11-3v3M16 14h2"/></svg>현금흐름표</button>
     <button class="tab" role="tab" id="t-fa" title="재무분석 보고서" aria-selected="false" aria-controls="p-fa" type="button" tabindex="-1"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>재무분석 보고서</button>
+    <button class="tab" role="tab" id="t-docs" title="발급받아 보관한 서류와 유효 기간" aria-selected="false" aria-controls="p-docs" type="button" tabindex="-1"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 13h5M10 17h5"/></svg>보관 서류</button>
   </div>
   <div id="p-vault" role="tabpanel" aria-labelledby="t-vault">
   <!-- 일기·메모 -->
@@ -714,6 +715,13 @@ html.embed .bot{position:absolute;bottom:auto;right:20px}
   <div id="p-bs" role="tabpanel" aria-labelledby="t-bs" hidden><div class="mo" data-m="org"><section class="card fscard" aria-label="재무상태표"><div class="fs-h"><div><h2>재무상태표</h2></div></div><div class="dy-empty">아직 기록된 거래가 없습니다. 거래가 기록되면 자동으로 작성됩니다.</div></section></div><div class="mo" data-m="person"><section class="card fscard" aria-label="순자산 대차대조표"><div class="fs-h"><div><h2>순자산 대차대조표</h2></div></div><div class="dy-empty">아직 기록된 거래가 없습니다. 거래가 기록되면 자동으로 작성됩니다.</div></section></div>
   </div>
   <div id="p-cf" role="tabpanel" aria-labelledby="t-cf" hidden><div class="mo" data-m="org"><section class="card fscard" aria-label="현금흐름표"><div class="fs-h"><div><h2>현금흐름표</h2></div></div><div class="dy-empty">아직 기록된 거래가 없습니다. 거래가 기록되면 자동으로 작성됩니다.</div></section></div><div class="mo" data-m="person"><section class="card fscard" aria-label="현금흐름표 (개인)"><div class="fs-h"><div><h2>현금흐름표 (개인)</h2></div></div><div class="dy-empty">아직 기록된 거래가 없습니다. 거래가 기록되면 자동으로 작성됩니다.</div></section></div>
+  </div>
+  <div id="p-docs" role="tabpanel" aria-labelledby="t-docs" hidden>
+    <section class="card" aria-label="보관 서류">
+      <div class="t-h"><h2>보관 서류</h2><span class="pill">이 기기에만 보관</span><span class="sp"></span></div>
+      <p class="mut" style="margin:4px 0 12px;font-size:13px">나비웹 도우미가 발급받았거나 서류에 첨부해 보관한 파일입니다. 유효 기간이 지나면 자동으로 지워지며, 언제든 직접 내려받거나 삭제할 수 있습니다.</p>
+      <div id="kd-list" aria-live="polite"><div class="mut">불러오는 중…</div></div>
+    </section>
   </div>
   <div id="p-fa" role="tabpanel" aria-labelledby="t-fa" hidden><div class="mo" data-m="org"><section class="card fscard" aria-label="재무분석 보고서"><div class="fs-h"><div><h2>재무분석 보고서</h2></div></div><div class="dy-empty">아직 기록된 거래가 없습니다. 거래가 기록되면 자동으로 작성됩니다.</div></section></div><div class="mo" data-m="person"><section class="card fscard" aria-label="재무분석 보고서 (개인)"><div class="fs-h"><div><h2>재무분석 보고서 (개인)</h2></div></div><div class="dy-empty">아직 기록된 거래가 없습니다. 거래가 기록되면 자동으로 작성됩니다.</div></section></div>
   </div>
@@ -907,6 +915,37 @@ html.embed .bot{position:absolute;bottom:auto;right:20px}
   el('text',{x:cx,y:cy-31,'text-anchor':'middle','font-size':11,fill:'var(--teal-d)','font-weight':700},cur[sel]+'건');
   el('text',{x:cx,y:cy-18,'text-anchor':'middle','font-size':10.5,fill:'var(--teal-d)'},months[sel]);
   el('circle',{cx:cx,cy:cy,r:5.5,fill:'var(--card)',stroke:'var(--teal)','stroke-width':3});
+})();
+
+// 보관 서류: 서류 작성 중 PDV 에 보관된 첨부서류(kind=attach)를 보여 준다. 같은 hondi.net 의 draft 중계(pdv-draft-bridge.html)를 숨은 iframe 으로 열어 읽는다.
+(function(){
+  var fr=null,seq=0,pend={},ready=false,q=[];
+  function open(){ if(fr) return; fr=document.createElement('iframe'); fr.src='pdv-draft-bridge.html'; fr.hidden=true; fr.title='PDV 중계';
+    fr.addEventListener('load',function(){ ready=true; q.splice(0).forEach(function(f){f()}); }); document.body.appendChild(fr); }
+  window.addEventListener('message',function(e){ var d=e.data; if(e.origin!==location.origin||!d||d.type!=='pdv-draft-result'||!pend[d.reqId]) return; var f=pend[d.reqId]; delete pend[d.reqId]; f(d); });
+  function call(op,p){ return new Promise(function(res,rej){ open(); var id=++seq, t=setTimeout(function(){delete pend[id];rej(new Error('TIMEOUT'))},15000);
+    pend[id]=function(r){clearTimeout(t); r.ok?res(r):rej(new Error(r.error||'FAILED'))};
+    var send=function(){ fr.contentWindow.postMessage(Object.assign({type:'pdv-draft',reqId:id,op:op},p||{}),location.origin) }; ready?send():q.push(send); }); }
+  var L=document.getElementById('kd-list');
+  function esc(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function dt(ms){ if(!ms) return '-'; var d=new Date(ms); return d.getFullYear()+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+('0'+d.getDate()).slice(-2); }
+  function render(items){
+    var now=Date.now();
+    items=items.filter(function(x){return x.kind==='attach'}).sort(function(a,b){return (b.issued||0)-(a.issued||0)});
+    if(!items.length){ L.innerHTML='<div class="mut">보관된 서류가 없습니다. 도우미가 발급받은 서류는 여기에 자동으로 보관됩니다.</div>'; return; }
+    L.innerHTML=items.map(function(it){
+      var left=it.expires?Math.ceil((it.expires-now)/86400000):null, st=left==null?'':left<=0?'<span class="pill" style="background:#fde8e8;color:#b3261e">만료됨</span>':left<=7?'<span class="pill" style="background:#fff3d6;color:#8a5a00">'+left+'일 남음</span>':'<span class="pill">'+left+'일 남음</span>';
+      return '<div class="row" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 4px;border-top:1px solid var(--line,#e3e8ec)"><div style="flex:1;min-width:200px"><b>'+esc(it.title||it.fileName||'서류')+'</b><div class="mut" style="font-size:12.5px">'+esc(it.fileName||'')+' · 발급 '+dt(it.issued)+' · <b>'+dt(it.expires)+'까지 유효</b> '+st+'</div></div>'
+        +'<button type="button" class="btn" data-kd="dl" data-id="'+esc(it.id)+'">내려받기</button><button type="button" class="btn" data-kd="del" data-id="'+esc(it.id)+'">삭제</button></div>';
+    }).join('');
+  }
+  function load(){ L.innerHTML='<div class="mut">불러오는 중…</div>'; call('purge').catch(function(){}).then(function(){ return call('list',{kind:'attach'}); }).then(function(r){ render(r.items||[]); }).catch(function(){ L.innerHTML='<div class="mut">보관 서류를 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.</div>'; }); }
+  document.getElementById('t-docs').addEventListener('click',load);
+  L.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('[data-kd]'); if(!b) return; var id=b.getAttribute('data-id');
+    if(b.getAttribute('data-kd')==='del'){ if(!confirm('이 보관 서류를 삭제할까요? 되돌릴 수 없습니다.')) return; call('delete',{id:id}).then(load).catch(function(){ alert('삭제하지 못했습니다.'); }); return; }
+    call('get',{id:id}).then(function(r){ var it=r.item; if(!it||!it.fileData) throw new Error('NO_FILE'); var u=URL.createObjectURL(new Blob([it.fileData],{type:it.fileMime||'application/octet-stream'})); var a=document.createElement('a'); a.href=u; a.download=it.fileName||'서류'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(u)},4000); }).catch(function(){ alert('내려받지 못했습니다.'); });
+  });
 })();
 
 // 탭 전환 + 기록 행 펼침(아코디언: 한 번에 하나, 같은 행을 다시 누르면 접힘)

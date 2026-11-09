@@ -43,7 +43,7 @@
 <script>
 (function () {
   'use strict';
-  var ALLOW = ['https://mail.hondi.net', 'https://naviweb.kr', 'https://www.naviweb.kr'];
+  var ALLOW = ['https://mail.hondi.net', 'https://naviweb.kr', 'https://www.naviweb.kr', 'https://hondi.net'];   // hondi.net: 내 데이터 금고(pdv.html)의 '보관 서류' 탭
   var DB_NAME = 'gopang_pdv_drafts', STORE = 'items';
   var KINDS = ['doc', 'letter', 'campaign', 'guide', 'form', 'attach'];   // form: 내 서류함(2026-11-05) — box 'fav'(자주 쓰는 양식)·'mine'(내가 만든 양식, body=서식 JSON)·'upload'(업로드한 양식, fileData=원본)   // guide: 나비 길잡이 과제 계획서(2026-11-03) — body 에 계획서 본문, subject 에 마지막 수정 시각(ms)
   var PROFILE_KEY = 'hondi_pdv_profile_v1', PROFILE_FIELDS = ['name', 'sido', 'address', 'phone', 'email'];   // 도우미가 쓰는 개인 정보 항목(2026-11-09)
