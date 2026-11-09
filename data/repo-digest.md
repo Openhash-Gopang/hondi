@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-08 19:40 KST · 기준 커밋 d93475e9
+- 갱신: 2026-11-09 12:36 KST · 기준 커밋 9eddfb66
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-09 Merge pull request #955 from Openhash-Gopang/feat/embed-host-login
+- 2026-11-09 feat(auth): 다른 사이트(나비웹) 화면 안 iframe 으로 열릴 때 호스트가 postMessage 로 넘긴 전화 인증 토큰으로 로그인 이어받기
 - 2026-11-08 Merge pull request #954 from Openhash-Gopang/feat/pdv-empty-state
 - 2026-11-08 feat(pdv): 안내 문구 2건 삭제, 가짜 데이터 전부 제거하고 미사용 초기 상태로 전환
 - 2026-11-08 Merge pull request #953 from Openhash-Gopang/follow/vault-safe-icon-hondi
@@ -42,8 +44,6 @@
 - 2026-11-06 feat: free plan with internal refill + free trial 100 KRW or 24h (all accounts)
 - 2026-11-06 Merge pull request #935 from Openhash-Gopang/fix/badge-anon-person-icon
 - 2026-11-06 feat(badge): 익명(테스트 아이디)은 이니셜 대신 사람 아이콘
-- 2026-11-06 feat: 무료 이용 = 전화 인증 후 100원 소진 또는 24시간 중 먼저(모든 계정)
-- 2026-11-06 Merge pull request #933 from Openhash-Gopang/feat/user-badge-avatar-material
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
