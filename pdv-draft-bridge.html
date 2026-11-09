@@ -25,6 +25,8 @@
     { type:'pdv-draft', reqId, op:'delete', id }              → { ok }
     { type:'pdv-draft', reqId, op:'done',   id }              → { ok }          status='done'(작성한 서류)
     { type:'pdv-draft', reqId, op:'caps' }                    → { ok, kinds }   받는 항목 종류(옛 중계는 BAD_OP)
+    { type:'pdv-draft', reqId, op:'profile_get', keys? }      → { ok, values }  도우미용 개인 정보(name·sido·address·phone·email) 조회 (2026-11-09)
+    { type:'pdv-draft', reqId, op:'profile_set', values }     → { ok, saved }   위 항목 보관(주민등록번호 꼴은 거부)
     { type:'pdv-draft', reqId, op:'purge', now? }             → { ok, removed }  kind='attach' 중 유효 기간(expires)이 지난 보관 서류를 지운다(2026-11-06)
   kind='form' (내 서류함, 2026-11-05): box='fav'|'mine'|'upload', title=양식 이름, site=서류 사이트, body='mine' 이면 서식 JSON(50000자까지), fileData='upload' 이면 올린 양식 원본(8MB까지), uses·lastUsed=사용 횟수·마지막 사용(ms). 초안 정리에서 제외, 서류·편지 목록(kind 지정)에는 나타나지 않는다.
   kind='attach' (재활용 첨부서류, 2026-11-06): 서류를 쓰며 첨부한 파일(주민등록등본·등기사항증명서 등)을 다음 서류에 다시 쓰도록 이 기기에 보관한다.
@@ -44,6 +46,7 @@
   var ALLOW = ['https://mail.hondi.net', 'https://naviweb.kr', 'https://www.naviweb.kr'];
   var DB_NAME = 'gopang_pdv_drafts', STORE = 'items';
   var KINDS = ['doc', 'letter', 'campaign', 'guide', 'form', 'attach'];   // form: 내 서류함(2026-11-05) — box 'fav'(자주 쓰는 양식)·'mine'(내가 만든 양식, body=서식 JSON)·'upload'(업로드한 양식, fileData=원본)   // guide: 나비 길잡이 과제 계획서(2026-11-03) — body 에 계획서 본문, subject 에 마지막 수정 시각(ms)
+  var PROFILE_KEY = 'hondi_pdv_profile_v1', PROFILE_FIELDS = ['name', 'sido', 'address', 'phone', 'email'];   // 도우미가 쓰는 개인 정보 항목(2026-11-09)
   var MAX_FILE = 8 * 1024 * 1024;   // 서류 파일 한 건 상한
   var MAX_ITEMS = 300;
   var MAX_ATTACH = 60, ATTACH_MAX_MS = 400 * 86400000;   // 재활용 첨부서류: 보관 건수 상한, 유효 기간 상한(400일)
@@ -191,8 +194,28 @@
       var pick = function (v) { return typeof v === 'string' ? v.slice(0, 120) : ''; };
       return { region: pick(reg.region) || pick(part.region), address: pick(part.address) || pick(part.addr) || pick(reg.address) };
     },
+    // 2026-11-09: 나비웹 도우미 — 서류를 발급받으며 쓰는 개인 정보(성명·시도·주소·전화번호·이메일)를 이 기기 PDV 에 보관·조회한다.
+    // 허용 항목만 받고(주민등록번호·비밀번호·카드 등은 받지 않는다), 서버로 나가지 않는다.
+    profile_get: function (m) {
+      var all = {}; try { all = JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}') || {}; } catch (x) {}
+      var keys = Array.isArray(m.keys) && m.keys.length ? m.keys : PROFILE_FIELDS, out = {};
+      keys.forEach(function (k) { if (PROFILE_FIELDS.indexOf(k) >= 0 && typeof all[k] === 'string' && all[k]) out[k] = all[k]; });
+      return { values: out };
+    },
+    profile_set: function (m) {
+      var all = {}; try { all = JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}') || {}; } catch (x) {}
+      var saved = [], v = m.values || {};
+      Object.keys(v).forEach(function (k) {
+        if (PROFILE_FIELDS.indexOf(k) < 0 || typeof v[k] !== 'string') return;
+        var val = v[k].trim().slice(0, 200);
+        if (!val || /\d{6}\s*-?\s*[1-8]\d{6}/.test(val)) return;   // 빈 값·주민등록번호 꼴은 보관하지 않는다
+        all[k] = val; saved.push(k);
+      });
+      try { localStorage.setItem(PROFILE_KEY, JSON.stringify(all)); } catch (x) { throw new Error('STORAGE_FULL'); }
+      return { saved: saved };
+    },
     // 2026-11-03: 이 중계가 받는 항목 종류를 알려 준다 — 옛 중계는 이 op 를 몰라 BAD_OP 로 답하므로, 부른 쪽이 새 종류(guide) 지원 여부를 알 수 있다
-    caps: function () { return { kinds: KINDS.slice(), ops: ['purge'] }; },
+    caps: function () { return { kinds: KINDS.slice(), ops: ['purge', 'profile_get', 'profile_set'] }; },
     // 2026-11-06: 유효 기간이 지난 재활용 첨부서류를 지운다(서류 화면이 열릴 때마다 부른다)
     purge: function (m) {
       var now = Date.now();
