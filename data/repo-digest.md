@@ -1,9 +1,13 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-10 20:23 KST · 기준 커밋 e03bdf4b
+- 갱신: 2026-11-10 20:48 KST · 기준 커밋 0c043cbb
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-10 Merge pull request #965 from Openhash-Gopang/feat/device-link-number-match
+- 2026-11-10 feat: PC 로그인 숫자 대조 — 폰에서 PC 화면의 숫자를 골라야 승인
+- 2026-11-10 Merge pull request #964 from Openhash-Gopang/feat/klaw-remove-step-limit
+- 2026-11-10 feat: K-Law 1인 1일 판결 생성 횟수 제한(3회) 해제
 - 2026-11-10 Merge pull request #963 from Openhash-Gopang/feat/klaw-remove-user-daily-krw-cap
 - 2026-11-10 feat: K-Law 1인 1일 금액 한도(300원) 해제
 - 2026-11-10 Merge pull request #962 from Openhash-Gopang/feat/klaw-verdict-min-balance
@@ -40,10 +44,6 @@
 - 2026-11-07 Merge pull request #947 from Openhash-Gopang/feat/pdv-backup-core
 - 2026-11-07 PDV 방식 C 백업 코어: 복구 문구 키 래핑·AES-GCM·저장소 어댑터(PAR/메모리)
 - 2026-11-07 Merge pull request #946 from Openhash-Gopang/docs/pdv-storage-survey-20261107
-- 2026-11-07 docs: PDV 저장 구조 조사(2026-11-07)
-- 2026-11-07 Merge pull request #945 from Openhash-Gopang/feat/auth-simplify-phone-only
-- 2026-11-07 인증 단순화: 가입 테스트 스위치 종료, 서버 테스트 입장 차단, QR 로그인 파일 삭제, 로그인 팝업 문자로 받기 버튼, 구독 점검 1시간
-- 2026-11-07 Merge pull request #944 from Openhash-Gopang/docs/auth-current-state-20261107
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
