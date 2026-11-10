@@ -21670,6 +21670,7 @@ function _klawFlatFeeForClaimAmount(claimAmountKrw) {
 // handleKlawRelay 안에서 _klawFlatFee/_klawIsCaseFlow를 계산할 때 이
 // 플래그로 감싸는 방식으로 구현(아래 참고).
 const KLAW_BETA_USAGE_BILLING_UNTIL = '2026-12-31T23:59:59+09:00';
+const KLAW_VERDICT_MIN_BALANCE_KRW = 10000; // 판결 생성 시작 최소 GDC 잔액(원) — 2026-11-10
 const KLAW_BETA_MULTIPLIER = { 'klaw-flash': 10, 'klaw-pro': 5 };
 function _klawBetaUsageBillingActive() {
   return Date.now() <= new Date(KLAW_BETA_USAGE_BILLING_UNTIL).getTime();
@@ -21896,6 +21897,24 @@ async function handleKlawRelay(bodyText, env, corsHeaders, meta = null, ctx = nu
           required_krw: _klawFlatFee.fee, balance_krw: Math.round(_klawBalanceKRW),
         }), { status: 402, headers: corsHeaders });
       }
+    }
+  }
+
+  // ── 판결 생성 시작 최소 잔액 (2026-11-10 신설 — 주피터 지시) ──
+  // 판결 생성(STEP 0, step_cycle===true)은 GDC 잔액이 KLAW_VERDICT_MIN_BALANCE_KRW(1만원) 이상일 때만 시작한다.
+  // 일반 게이트(_gdcFreeQuotaGate)의 문턱 3원으로는 판결 한 건을 끝까지 돌리기에 모자랄 수 있기 때문이다.
+  // STEP A/B/C(step_cycle=false)에는 적용하지 않아 이미 시작한 판결이 중간에 끊기지 않는다.
+  // 무료 테스트 모드·관리자 면제 계정(_gdcFreeFor)은 건너뛴다.
+  if (step_cycle && !_klawFreeTier && !(await _gdcFreeFor(env, guid))) {
+    const _vBal = await _l1GetBalanceKRW(guid);
+    if (_vBal === null) return _err(502, 'GDC_BALANCE_CHECK_FAILED', '잔액 확인에 실패했습니다. 잠시 후 다시 시도해 주세요.', corsHeaders);
+    if (_vBal < KLAW_VERDICT_MIN_BALANCE_KRW) {
+      _dlog(env, JSON.stringify({ tag: 'KLAW_VERDICT_MIN_BALANCE_BLOCKED', guid, requiredKrw: KLAW_VERDICT_MIN_BALANCE_KRW, balanceKrw: _vBal, ts: new Date().toISOString() }));
+      return new Response(JSON.stringify({
+        error: 'GDC_INSUFFICIENT_BALANCE',
+        message: `가상 판결문 생성은 GDC 잔액이 ${KLAW_VERDICT_MIN_BALANCE_KRW.toLocaleString('ko-KR')}원 이상일 때 시작할 수 있습니다. 현재 잔액은 ${Math.round(_vBal).toLocaleString('ko-KR')}원입니다. 충전 후 다시 이용해 주세요.`,
+        required_krw: KLAW_VERDICT_MIN_BALANCE_KRW, balance_krw: Math.round(_vBal),
+      }), { status: 402, headers: corsHeaders });
     }
   }
 
