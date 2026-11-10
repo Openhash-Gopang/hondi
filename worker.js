@@ -2018,13 +2018,22 @@ async function _l1GetBalanceKRW(guid) {
 // ═══════════════════════════════════════════════════════════
 function _gdcFreeTestOn(env) { return !!env && env.GDC_FREE_TEST === '1'; }
 
-// 👑 관리자 면제 — 2026-11-10 (주피터 지시): env.OWNER_UNLIMITED_GUIDS(쉼표 구분 guid 목록)에 든 계정은
+// 👑 관리자 면제 — 2026-11-10 (주피터 지시): KV 키 hondi:owner_unlimited:{guid}가 있는 계정은
 //   무료 한도·GDC 잔액 게이트와 GDC 차감을 모두 건너뛴다(사용량 기록 _recordAiUsage는 그대로 남아 원가 집계 가능).
-//   예외: 관리자 수동 차감 'admin-correction'은 그대로 차감. 끄는 법: Cloudflare 변수 OWNER_UNLIMITED_GUIDS 삭제.
-//   wrangler.toml에는 넣지 않는다(secret/변수로만 등록).
-function _ownerUnlimited(env, guid) {
-  if (!guid || !env || !env.OWNER_UNLIMITED_GUIDS) return false;
-  return String(env.OWNER_UNLIMITED_GUIDS).split(',').map(x => x.trim()).filter(Boolean).includes(String(guid));
+//   예외: 관리자 수동 차감 'admin-correction'은 그대로 차감.
+//   켜고 끄기: POST /admin/owner-unlimited { handle 또는 guid, enabled } (관리자 인증) — 재배포·환경변수 불필요.
+//   요청마다 KV를 읽지 않도록 같은 워커 인스턴스 안에서 15초 메모리 캐시를 둔다(변경 반영까지 최대 15초).
+const _ownerUnlimitedMem = new Map();
+const OWNER_UNLIMITED_KV_PREFIX = 'hondi:owner_unlimited:';
+async function _ownerUnlimited(env, guid) {
+  if (!guid || !env || !env.AI_SETUP_SEALS_KV) return false;
+  const m = _ownerUnlimitedMem.get(guid);
+  if (m && Date.now() - m.t < 15000) return m.v;
+  let v = false;
+  try { v = !!(await env.AI_SETUP_SEALS_KV.get(OWNER_UNLIMITED_KV_PREFIX + guid)); } catch (e) { v = false; } // 모르면 면제하지 않는다
+  if (_ownerUnlimitedMem.size > 2000) _ownerUnlimitedMem.clear();
+  _ownerUnlimitedMem.set(guid, { v, t: Date.now() });
+  return v;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -2081,13 +2090,13 @@ async function _freeTrialActive(env, guid) {
   return !ev || (ev.status === 'active' && ev.phase !== 'extra');   // 추가 사용량 단계('extra')는 GDC를 실제로 차감한다
 }
 async function _gdcFreeFor(env, guid) {
-  if (_ownerUnlimited(env, guid)) return true; // 👑 관리자 면제
+  if (await _ownerUnlimited(env, guid)) return true; // 👑 관리자 면제
   if (!_gdcFreeTestOn(env)) return false;
   return await _freeTrialActive(env, guid);
 }
 // 무료로 처리한 사용분을 무료 이용 한도에 누적한다(모든 계정)
 async function _testQuotaAdd(env, guid, krw, dedupKey = null) {
-  if (_ownerUnlimited(env, guid)) return; // 👑 관리자 면제 — 무료 이용 한도에 누적하지 않는다
+  if (await _ownerUnlimited(env, guid)) return; // 👑 관리자 면제 — 무료 이용 한도에 누적하지 않는다
   if (!(Number(krw) > 0) || !_gdcFreeTestOn(env)) return;
   // 같은 정산 키(settlementKey)는 한 번만 센다 — 백그라운드 작업이 취소돼 10분 스윕이 같은 건을 다시 정산해도 중복 누적되지 않는다
   await _testQuotaAddSpend(env.AI_SETUP_SEALS_KV, guid, krw, Date.now(), _testQuotaConfig(env), dedupKey);
@@ -2111,7 +2120,7 @@ async function _testQuotaBlockedResponse(env, guid, corsHeaders) {
 }
 
 async function _gdcFreeQuotaGate(env, guid, corsHeaders, meta) {
-  if (_ownerUnlimited(env, guid)) return null; // 👑 관리자 면제
+  if (await _ownerUnlimited(env, guid)) return null; // 👑 관리자 면제
   const _tqBlock = await _testQuotaBlockedResponse(env, guid, corsHeaders); // 🧪 유예가 끝난 테스트 계정은 여기서 막는다
   if (_tqBlock) return _tqBlock;
   if (await _gdcFreeFor(env, guid)) return null; // 🧪 GDC 무료 테스트 모드
@@ -13682,6 +13691,7 @@ export default {
     if (pathname === '/auth/free-plan')          return handleFreePlan(request, env, corsHeaders);
     if (pathname === '/auth/extra-usage')        return handleExtraUsage(request, env, corsHeaders);
     if (pathname === '/admin/quota-reset')       return handleAdminQuotaReset(request, env, corsHeaders);
+    if (pathname === '/admin/owner-unlimited')   return handleAdminOwnerUnlimited(request, env, corsHeaders);
     if (pathname === '/admin/plan-set')          return handleAdminPlanSet(request, env, corsHeaders);
     if (pathname === '/admin/plan-deposits')     return handleAdminPlanDeposits(request, env, corsHeaders);
     if (pathname === '/biz/plan-request')        return handlePlanRequest(request, env, corsHeaders);
@@ -20967,6 +20977,44 @@ async function handleAdminQuotaReset(request, env, corsHeaders) {
   if (body?.reset === true) { await _testQuotaResetFree(env.AI_SETUP_SEALS_KV, guid, now); _freeTrialMem.delete(guid); }
   const ev = await _testQuotaGetStatus(env.AI_SETUP_SEALS_KV, guid, now, _testQuotaConfig(env));
   return new Response(JSON.stringify({ ok: true, guid, reset: body?.reset === true, at: new Date(now).toISOString(), ...ev }), { status: 200, headers: corsHeaders });
+}
+
+// GET/POST /admin/owner-unlimited — 관리자 면제 계정 관리(2026-11-10). 관리자 인증 필요.
+//  GET  → { ok, items:[{guid}] } 면제 중인 guid 목록
+//  POST { handle 또는 guid, enabled } → 아이디(handle, 정확히 일치)를 guid로 바꿔 KV 플래그를 켜거나(enabled:true) 끈다(false).
+async function handleAdminOwnerUnlimited(request, env, corsHeaders) {
+  if (!(await _requireAdmin(request, env))) return _err(401, 'UNAUTHORIZED', '관리자 인증 필요', corsHeaders);
+  const kv = env.AI_SETUP_SEALS_KV;
+  if (!kv) return _err(503, 'KV_NOT_BOUND', 'KV 없음', corsHeaders);
+  if (request.method === 'GET') {
+    const l = await kv.list({ prefix: OWNER_UNLIMITED_KV_PREFIX, limit: 200 });
+    return new Response(JSON.stringify({ ok: true, items: (l.keys || []).map(k => ({ guid: k.name.slice(OWNER_UNLIMITED_KV_PREFIX.length) })) }), { status: 200, headers: corsHeaders });
+  }
+  if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+  const body = await request.json().catch(() => null);
+  if (!body || typeof body.enabled !== 'boolean') return _err(400, 'MISSING_FIELD', 'enabled(true/false) 필수', corsHeaders);
+  let guid = String(body.guid || '').trim();
+  const handle = String(body.handle || '').trim();
+  let prof = null;
+  try {
+    if (guid) prof = await _l1FindProfileByGuid(env, guid);
+    else if (handle) {
+      const token = await _l1AdminToken(env);
+      const filter = encodeURIComponent(`handle='${handle.replace(/'/g, "\\'")}'`);
+      const res = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${filter}&perPage=2`, { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) return _err(502, 'L1_ERROR', `L1 조회 실패 (HTTP ${res.status})`, corsHeaders);
+      const items = (await res.json().catch(() => ({ items: [] }))).items || [];
+      if (items.length > 1) return _err(409, 'AMBIGUOUS_HANDLE', '같은 아이디가 둘 이상입니다. guid로 지정해 주세요', corsHeaders);
+      prof = items[0] || null;
+    } else return _err(400, 'MISSING_FIELD', 'handle 또는 guid 필수', corsHeaders);
+  } catch (e) { return _err(502, 'L1_ERROR', 'L1 조회 실패: ' + e.message, corsHeaders); }
+  if (!prof || !prof.guid) return _err(404, 'NOT_FOUND', '해당 계정을 찾지 못했습니다', corsHeaders);
+  guid = prof.guid;
+  if (body.enabled) await kv.put(OWNER_UNLIMITED_KV_PREFIX + guid, new Date().toISOString());
+  else await kv.delete(OWNER_UNLIMITED_KV_PREFIX + guid);
+  _ownerUnlimitedMem.delete(guid);
+  console.log(JSON.stringify({ tag: 'OWNER_UNLIMITED_SET', guid, handle: prof.handle || '', enabled: body.enabled, ts: new Date().toISOString() }));
+  return new Response(JSON.stringify({ ok: true, guid, handle: prof.handle || '', enabled: body.enabled }), { status: 200, headers: corsHeaders });
 }
 
 // POST /auth/test-migrate { test_phone_verify_token, phone_verify_token, dry_run? } — 테스트 계정 데이터를 정식 계정으로 이동(2026-10-27).
