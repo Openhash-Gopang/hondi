@@ -610,6 +610,67 @@ async function handlePhoneOtpVerify(request, env, corsHeaders) {
   }), { status: 200, headers: corsHeaders });
 }
 
+// ── 휴대폰 분실 복구(2026-11-10 신설) ─────────────────────────────────────
+//  새 휴대폰(같은 번호로 재발급한 USIM)에서 문자 인증번호 + 확인 문구로 로그인하면
+//   ① 그 시각 이전에 발급된 모든 로그인 토큰(분실한 폰·다른 PC 포함)을 무효화하고
+//   ② 24시간 동안 이 계정의 GDC 송금과 탈퇴·환급 접수를 막는다(분실한 폰을 쥔 사람의 출금 방지).
+//  토큰은 서명만 있는 무상태 구조라, 무효화 기준 시각을 KV에 두고 토큰 해석 때 비교한다.
+const LOST_PHONE_PHRASE = '휴대폰을 분실하여 문자 인증으로 로그인합니다';
+const LOST_PHONE_LOCK_MS = 24 * 60 * 60 * 1000;
+const _revokedMem = new Map();
+async function _sessionRevokedBefore(env, e164) {
+  if (!env.AI_SETUP_SEALS_KV) return 0;
+  const hit = _revokedMem.get(e164);
+  if (hit && Date.now() - hit.at < 15000) return hit.v;
+  let v = 0;
+  try { v = Number(await env.AI_SETUP_SEALS_KV.get('hondi:sess_revoked_before:' + e164)) || 0; } catch (e) { /* 조회 실패 시 기존 동작 유지 */ }
+  _revokedMem.set(e164, { v, at: Date.now() });
+  return v;
+}
+async function _lostPhoneLockUntil(env, guid) {
+  if (!env.AI_SETUP_SEALS_KV || !guid) return 0;
+  try { const u = Number(await env.AI_SETUP_SEALS_KV.get('hondi:lost_lock:' + guid)) || 0; return u > Date.now() ? u : 0; } catch (e) { return 0; }
+}
+// POST /auth/lost-phone/recover { e164, code, phrase } — 먼저 /biz/phone-otp-request 로 문자 인증번호를 받아 둔다.
+async function handleLostPhoneRecover(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+  const e164 = _normalizePhoneE164(body.e164);
+  if (!e164) return _err(400, 'INVALID_PHONE', '올바른 국내 전화번호 형식이 아닙니다', corsHeaders);
+  if (String(body.phrase || '').replace(/\s+/g, '') !== LOST_PHONE_PHRASE.replace(/\s+/g, ''))
+    return _err(400, 'PHRASE_MISMATCH', '확인 문구가 다릅니다. 화면의 문구를 그대로 입력해 주세요', corsHeaders);
+  if (!body.code) return _err(400, 'MISSING_FIELD', 'code 필수', corsHeaders);
+  if (!env.QR_SESSIONS_KV || !env.AI_SETUP_SEALS_KV) return _err(500, 'KV_NOT_BOUND', '저장소가 설정되지 않았습니다', corsHeaders);
+  if (!env.PHONE_VERIFY_SECRET) return _err(500, 'SECRET_NOT_SET', 'PHONE_VERIFY_SECRET이 설정되지 않았습니다', corsHeaders);
+
+  const otpKey = `otp:${e164}`;
+  const raw = await env.QR_SESSIONS_KV.get(otpKey);
+  if (!raw) return _err(400, 'OTP_EXPIRED', '인증번호가 만료됐거나 요청 이력이 없습니다', corsHeaders);
+  const rec = JSON.parse(raw);
+  if (rec.attempts >= OTP_MAX_ATTEMPTS) { await env.QR_SESSIONS_KV.delete(otpKey); return _err(429, 'OTP_TOO_MANY_ATTEMPTS', '시도 횟수를 초과했습니다. 다시 요청해 주세요', corsHeaders); }
+  if (String(body.code).trim() !== rec.code) {
+    rec.attempts += 1;
+    await env.QR_SESSIONS_KV.put(otpKey, JSON.stringify(rec), { expirationTtl: OTP_TTL_SECONDS });
+    return _err(400, 'OTP_MISMATCH', `인증번호가 일치하지 않습니다(남은 시도 ${OTP_MAX_ATTEMPTS - rec.attempts}회)`, corsHeaders);
+  }
+  await env.QR_SESSIONS_KV.delete(otpKey);
+
+  let prof = null;
+  try { prof = await _l1FindProfileByE164(env, e164); } catch (e) { return _err(502, 'L1_UNREACHABLE', '계정 조회 실패: ' + e.message, corsHeaders); }
+  if (!prof || !prof.guid) return _err(404, 'PROFILE_NOT_FOUND', '이 번호로 가입된 계정이 없습니다. 새로 가입해 주세요', corsHeaders);
+
+  const now = Date.now(), until = now + LOST_PHONE_LOCK_MS;
+  await env.AI_SETUP_SEALS_KV.put('hondi:sess_revoked_before:' + e164, String(now));
+  await env.AI_SETUP_SEALS_KV.put('hondi:lost_lock:' + prof.guid, String(until), { expirationTtl: Math.ceil(LOST_PHONE_LOCK_MS / 1000) + 3600 });
+  _revokedMem.set(e164, { v: now, at: Date.now() });
+
+  const exp = Date.now() + PHONE_VERIFY_TOKEN_TTL_MS;
+  const payload = `${e164}:${exp}`;
+  const token = payload + '.' + await _hmacSha256Hex(env.PHONE_VERIFY_SECRET, payload);
+  console.info('[LostPhone] 분실 복구 | guid:', String(prof.guid).slice(0, 16));
+  return new Response(JSON.stringify({ ok: true, phone_verify_token: token, expires_at: new Date(exp).toISOString(), lock_until: new Date(until).toISOString() }), { status: 200, headers: corsHeaders });
+}
+
 // POST /auth/refresh-token — body: { phone_verify_token }
 // 2026-09-12 신설(주피터 지시) — "K-Law에서 인증하면 K-Mail도 같이
 // 로그인되고, 브라우저를 껐다 켜도 Gmail처럼 계속 로그인 상태"를 위한
@@ -680,6 +741,12 @@ async function _resolveGuidFromPhoneVerifyToken(env, phoneVerifyToken, opts = {}
   if (Date.now() > exp) return { ok: false, code: 'TOKEN_EXPIRED', message: '전화번호 인증 토큰이 만료됐습니다' };
   const expectedSig = await _hmacSha256Hex(env.PHONE_VERIFY_SECRET, payload);
   if (expectedSig !== sig) return { ok: false, code: 'TOKEN_INVALID', message: '전화번호 인증 토큰 서명이 유효하지 않습니다' };
+
+  // 분실 신고(2026-11-10): 신고 시각 이전에 발급된 토큰(발급 시각 = 만료 − 유효기간)은 모두 무효
+  if (!e164.startsWith(TEST_ID_PREFIX)) {
+    const _rb = await _sessionRevokedBefore(env, e164);
+    if (_rb && exp - PHONE_VERIFY_TOKEN_TTL_MS < _rb) return { ok: false, code: 'TOKEN_EXPIRED', message: '분실 신고로 이전 로그인이 해제되었습니다. 다시 로그인해 주세요' };
+  }
 
   // 🧪 테스트 아이디 토큰(2026-10-09): e164 자리가 'tid-<아이디>'. 서버 스위치가 꺼지면 즉시 무효.
   if (e164.startsWith(TEST_ID_PREFIX)) {
@@ -14337,6 +14404,7 @@ export default {
     // 중엔 재인증 없이 유지). k-service-auth-client.js가 만료 임박 시
     // 조용히 이 엔드포인트를 호출해 30일 창을 새로 연다.
     if (pathname === '/auth/refresh-token'        && request.method === 'POST') return handleAuthRefreshToken(request, env, corsHeaders);
+    if (pathname === '/auth/lost-phone/recover'   && request.method === 'POST') return handleLostPhoneRecover(request, env, corsHeaders);
     if (pathname === '/pdv/relay/push'            && request.method === 'POST') return handlePdvRelayPush(request, env, corsHeaders);
     if (pathname === '/pdv/relay/pull'            && request.method === 'GET')  return handlePdvRelayPull(request, env, corsHeaders);
     // PDV 클라우드 백업(방식 C, 기본 저장소 L1 PocketBase) — 암호문만 보관 (2026-11-08)
@@ -15724,6 +15792,8 @@ async function handleGdcTransfer(request, env, corsHeaders, ctx) {
   if (!from_guid)          return _err(400, 'MISSING_FIELD', 'from_guid 필수', corsHeaders);
   if (!to_guid)            return _err(400, 'MISSING_FIELD', 'to_guid 필수', corsHeaders);
   if (!(amount > 0))       return _err(400, 'MISSING_FIELD', 'amount 필수(양수)', corsHeaders);
+  { const _lk = await _lostPhoneLockUntil(env, from_guid);   // 분실 신고 후 24시간 송금 정지
+    if (_lk) return _err(423, 'LOST_PHONE_LOCK', '휴대폰 분실 신고로 ' + new Date(_lk).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }) + '까지 송금이 정지됩니다', corsHeaders); }
 
   // ── Phase 1: 거래목적 분류 (설계문서 §4, 법적 리스크 직결) ──────────
   if (purpose !== 'transfer' && purpose !== 'purchase') {
@@ -28416,6 +28486,8 @@ async function handleAccountDeleteProfile(request, env, corsHeaders) {
   }
   let refundId = null;
   if (balRounded >= 1) {
+    const _lk = await _lostPhoneLockUntil(env, guid);   // 분실 신고 후 24시간은 잔액 환급·탈퇴 접수 정지
+    if (_lk) return new Response(JSON.stringify({ ok: false, code: 'LOST_PHONE_LOCK', message: '휴대폰 분실 신고 후에는 ' + new Date(_lk).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }) + '까지 잔액 환급·탈퇴를 접수할 수 없습니다', lock_until: new Date(_lk).toISOString() }), { status: 423, headers: corsHeaders });
     const ra = body.refund_account || {};
     const bank = String(ra.bank || '').trim().slice(0, 30);
     const number = String(ra.number || '').replace(/[^0-9-]/g, '').slice(0, 30);

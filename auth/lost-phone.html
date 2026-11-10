@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<link rel="icon" href="data:,">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나비 — 휴대폰을 분실했어요</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',-apple-system,sans-serif; background:#f8f9fa; display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px; }
+  #card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:30px 26px; width:100%; max-width:400px; box-shadow:0 4px 16px rgba(0,0,0,.08); }
+  h1 { font-size:18px; color:#111827; margin-bottom:6px; }
+  p.desc { font-size:13px; color:#6b7280; margin-bottom:16px; line-height:1.65; }
+  label { display:block; font-size:12px; color:#374151; margin:12px 0 6px; font-weight:600; }
+  input { width:100%; padding:12px 14px; border:1px solid #d1d5db; border-radius:8px; font-size:15px; font-family:inherit; }
+  input:focus { outline:none; border-color:#0057A8; }
+  button { width:100%; padding:13px; border:0; border-radius:8px; background:#0057A8; color:#fff; font-size:15px; font-weight:600; margin-top:14px; cursor:pointer; font-family:inherit; }
+  button:disabled { background:#9db9d6; cursor:not-allowed; }
+  .phrase { background:#fffbeb; border:1px solid #fcd34d; color:#92400e; border-radius:8px; padding:10px 12px; font-size:14px; font-weight:700; line-height:1.5; margin-bottom:6px; user-select:all; }
+  .notice { font-size:12px; color:#6b7280; line-height:1.65; margin-top:14px; }
+  #msg { font-size:13px; margin-top:12px; min-height:18px; line-height:1.5; }
+  #msg.err { color:#dc2626; } #msg.ok { color:#15803d; }
+</style>
+</head>
+<body>
+<div id="card">
+  <h1>휴대폰을 분실하셨나요?</h1>
+  <p class="desc">같은 번호로 재발급한 USIM의 새 휴대폰에서 문자 인증번호를 받아 다시 로그인합니다. 이전 휴대폰과 다른 PC의 로그인은 모두 해제되고, 안전을 위해 <b>24시간 동안 GDC 송금과 잔액 환급·탈퇴 접수가 정지</b>됩니다.</p>
+
+  <label for="phone">전화번호</label>
+  <input id="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="01012345678">
+
+  <label>아래 문구를 그대로 입력하세요</label>
+  <div class="phrase" id="phrase-text">휴대폰을 분실하여 문자 인증으로 로그인합니다</div>
+  <input id="phrase" type="text" autocomplete="off" spellcheck="false" placeholder="위 문구 입력">
+
+  <button id="btn-send" type="button">인증번호 받기</button>
+
+  <div id="step2" style="display:none">
+    <label for="code">문자로 받은 인증번호 6자리</label>
+    <input id="code" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000">
+    <button id="btn-go" type="button">분실 신고하고 로그인</button>
+  </div>
+  <div id="msg" role="status"></div>
+  <p class="notice">본인이 시도하지 않았는데 이 문자를 받으셨다면 입력하지 마세요. 이 기기의 대화·기록과 지갑 키는 새 휴대폰으로 옮겨지지 않으므로, 미리 저장해 둔 백업 키가 없으면 기존 기록은 복구되지 않습니다.</p>
+</div>
+<script>
+(function () {
+  var WORKER = 'https://hondi-proxy.tensor-city.workers.dev';
+  var PHRASE = '휴대폰을 분실하여 문자 인증으로 로그인합니다';
+  var $ = function (id) { return document.getElementById(id); };
+  var DOMAIN = /(^|\.)hondi\.net$/.test(location.hostname) ? '.hondi.net' : location.hostname;
+  function setMsg(t, cls) { var m = $('msg'); m.textContent = t || ''; m.className = cls || ''; }
+  function norm(s) { return String(s || '').replace(/\s+/g, ''); }
+  function phoneOk() { return /^0?1[0-9]{8,9}$/.test($('phone').value.replace(/\D/g, '').replace(/^82/, '0')) || /^01[0-9]{8,9}$/.test($('phone').value.replace(/\D/g, '')); }
+  function writeCookie(n, v, sec) { document.cookie = n + '=' + encodeURIComponent(v) + '; domain=' + DOMAIN + '; path=/; max-age=' + sec + '; secure; samesite=lax'; }
+  async function post(path, body) {
+    var r = await fetch(WORKER + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    var d = await r.json().catch(function () { return {}; });
+    return { ok: r.ok && d.ok !== false, d: d };
+  }
+  $('btn-send').addEventListener('click', async function () {
+    if (!phoneOk()) return setMsg('전화번호를 확인해 주세요.', 'err');
+    if (norm($('phrase').value) !== norm(PHRASE)) return setMsg('확인 문구를 그대로 입력해 주세요.', 'err');
+    var b = $('btn-send'); b.disabled = true; setMsg('인증번호를 보내는 중...');
+    try {
+      var x = await post('/biz/phone-otp-request', { e164: $('phone').value.replace(/\s/g, '') });
+      if (!x.ok) { setMsg('발송 실패: ' + (x.d.message || x.d.detail || x.d.error || '잠시 후 다시 시도해 주세요'), 'err'); b.disabled = false; return; }
+      $('step2').style.display = 'block'; $('code').focus();
+      setMsg('문자로 받은 인증번호를 입력해 주세요.', 'ok');
+      setTimeout(function () { b.disabled = false; b.textContent = '인증번호 다시 받기'; }, 30000);
+    } catch (e) { setMsg('네트워크 오류: ' + e.message, 'err'); b.disabled = false; }
+  });
+  $('btn-go').addEventListener('click', async function () {
+    var code = $('code').value.replace(/\D/g, '');
+    if (code.length !== 6) return setMsg('인증번호 6자리를 입력해 주세요.', 'err');
+    var b = $('btn-go'); b.disabled = true; setMsg('확인하는 중...');
+    try {
+      var x = await post('/auth/lost-phone/recover', { e164: $('phone').value.replace(/\s/g, ''), code: code, phrase: $('phrase').value });
+      if (!x.ok) { setMsg(x.d.message || '확인에 실패했습니다.', 'err'); b.disabled = false; return; }
+      var exp = new Date(x.d.expires_at).getTime(), sec = Math.max(1, Math.floor((exp - Date.now()) / 1000));
+      writeCookie('hondi_pvt', x.d.phone_verify_token, sec); writeCookie('hondi_pvt_exp', String(exp), sec);
+      var until = new Date(x.d.lock_until).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
+      setMsg('로그인되었습니다. 이전 로그인은 모두 해제되었고, ' + until + '까지 송금·환급이 정지됩니다. 잠시 후 이동합니다.', 'ok');
+      setTimeout(function () { location.href = 'https://naviweb.kr/'; }, 3500);
+    } catch (e) { setMsg('네트워크 오류: ' + e.message, 'err'); b.disabled = false; }
+  });
+})();
+</script>
+</body>
+</html>
