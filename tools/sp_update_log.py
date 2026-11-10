@@ -36,21 +36,37 @@ DATE_RE = re.compile(r'(?:legal_basis_last_verified|last_verified)\**:?\**\s*\**
 TAG_RE = re.compile(r'^(법령|기관|분야):.+')
 
 
+def rel(p):
+    return p.relative_to(ROOT).as_posix()
+
+
 def today():
     return datetime.now(timezone(timedelta(hours=9))).date()
 
 
+def _is_sp(p):
+    n = p.name
+    return n.startswith('SP-') or bool(re.search(r'-SP_v[\d.]+\.md$', n)) or rel(p) in GOV_EXTRA
+
+
+def _ver(p):
+    m = re.search(r'_v([\d.]+?)(?:\.[a-z]+)?$', p.name)
+    return tuple(int(x) for x in m.group(1).split('.') if x.isdigit()) if m else ()
+
+
 def gov_files():
-    out = []
+    """갱신 규칙의 대상 = 실제로 로드되는 정부 AI SP(최신 버전만). 문서·스키마·로그·구버전은 제외."""
+    cand = []
     for g in GOV_GLOBS:
-        out += [Path(p) for p in glob.glob(str(ROOT / g), recursive=True)]
-    out += [ROOT / p for p in GOV_EXTRA]
-    return sorted(p for p in out if p.exists() and '/archive/' not in p.as_posix()
-                  and p.relative_to(ROOT).as_posix() not in EXEMPT)
-
-
-def rel(p):
-    return p.relative_to(ROOT).as_posix()
+        cand += [Path(p) for p in glob.glob(str(ROOT / g), recursive=True)]
+    cand += [ROOT / p for p in GOV_EXTRA]
+    cand = [p for p in cand if p.exists() and '/archive/' not in p.as_posix() and _is_sp(p)
+            and rel(p) not in EXEMPT]
+    best = {}
+    for p in cand:
+        key = (p.parent, p.name.split('_v')[0])
+        if key not in best or _ver(p) > _ver(best[key]): best[key] = p
+    return sorted(best.values())
 
 
 def read_log():
@@ -215,13 +231,56 @@ def cmd_due(a):
     return 0
 
 
+RULE_VERSION = 'v1.0'
+RULE_HEAD = '## §UPDATE-RULE.'
+RULE_BLOCK = f'''## §UPDATE-RULE. 이 SP의 갱신 규칙 ({RULE_VERSION} · 2026-11-11 — 모든 정부 AI SP 공통, 정본: K-Public_common P15 · docs/GOV-SP-UPDATE-SHARING_v1_0.md)
+
+- **갱신 의무**: 이 SP에 대한 미반영 사용자 피드백이 10건 이상 쌓이거나 마지막 갱신 후 90일이 지나면 이 SP는 갱신되어야 한다.
+- **갱신 방법**: 웹 검색 등으로 최신 정보를 확인해 반영하고, 다른 SP의 갱신 기록(GOV-UPDATE-DIGEST·원장 data/sp-update-log/log.jsonl)을 참고하며, 언제·어떻게·왜 갱신했는지 원장에 기록한다. 기록은 모든 SP와 공유된다.
+- **호출 시 행동**: ① 상위로 주어진 GOV-UPDATE-DIGEST에서 내 소관과 같은 법령·기관·분야의 더 새로운 기록이 있으면 SP 본문보다 그것을 따른다(검증수준이 `partial`·`unverified`면 확정 사실처럼 말하지 않는다). ② 이 SP의 마지막 확인일이 90일을 넘겼으면 안내가 오래된 정보일 수 있음을 사용자에게 알리고 공식 출처 확인을 권한다. ③ 사용자가 정정·불만·누락을 말하면 `[USER_FEEDBACK]`, 웹 검색으로 SP와 다른 공식 최신 정보를 발견하면 `[SP_UPDATE_SIGNAL]`을 낸다(형식: K-Public_common P14·P15). ④ 갱신이 되었다고 약속하지 않는다.
+'''
+
+
+def _apply_rule(text):
+    """규칙 블록 삽입(없으면 §3 앞, §3이 없으면 파일 끝) 또는 갱신(있으면 그 자리 교체). 멱등."""
+    if RULE_HEAD in text:
+        i = text.index(RULE_HEAD); m = re.search(r'\n## ', text[i + 5:])
+        j = i + 5 + m.start() + 1 if m else len(text)
+        return text[:i] + RULE_BLOCK + ('\n' if j < len(text) else '') + text[j:]
+    m = re.search(r'^## §[3-9]', text, re.M)
+    if m: return text[:m.start()] + RULE_BLOCK + '\n' + text[m.start():]
+    return text.rstrip('\n') + '\n\n' + RULE_BLOCK
+
+
+def rule_targets():
+    # K-Public_common(P15)·SP-10(§UPDATE-SHARING)은 규칙의 정본을 본문에 갖고 있어 블록을 따로 두지 않는다
+    return [p for p in gov_files() if rel(p) not in GOV_EXTRA]
+
+
+def cmd_rule(a):
+    """rule-apply: 모든 정부 SP에 규칙 블록 반영 / rule-check: 모든 SP가 현행 규칙 블록을 갖는지 검사(CI)."""
+    check = a and a[0] == 'check'
+    bad = []; n = 0
+    for p in rule_targets():
+        t = p.read_text(encoding='utf-8')
+        new = _apply_rule(t)
+        if new != t:
+            if check: bad.append(rel(p))
+            else: p.write_text(new, encoding='utf-8'); n += 1
+    if check:
+        if bad:
+            print(f'✗ 갱신 규칙(§UPDATE-RULE {RULE_VERSION})이 없거나 현행과 다른 정부 SP {len(bad)}개 — `python3 tools/sp_update_log.py rule-apply`'); [print('  -', b) for b in bad[:15]]; return 1
+        print(f'✓ 정부 SP {len(rule_targets())}개 모두 현행 갱신 규칙 보유(정본 2개 제외)'); return 0
+    print(f'✓ 규칙 블록 반영 {n}개 (대상 {len(rule_targets())}개)'); return 0
+
+
 def cmd_check_pr(a):
     base = a[a.index('--base') + 1]
     names = subprocess.run(['git', 'diff', '--name-only', f'{base}...HEAD'], cwd=ROOT, capture_output=True, text=True, check=True).stdout.split()
     gov = {rel(p) for p in gov_files()}
     changed = [n for n in names if n in gov]
     if not changed:
-        print('✓ 정부 SP 변경 없음'); return 0
+        print('✓ 정부 SP 변경 없음'); return cmd_rule(['check'])
     diff = subprocess.run(['git', 'diff', f'{base}...HEAD', '--', 'data/sp-update-log/log.jsonl'], cwd=ROOT, capture_output=True, text=True).stdout
     added = [json.loads(l[1:]) for l in diff.splitlines() if l.startswith('+') and not l.startswith('+++') and l[1:].strip()]
     bad = []
@@ -234,10 +293,11 @@ def cmd_check_pr(a):
     if miss:
         print(f'✗ 갱신 기록 없이 바뀐 정부 SP {len(miss)}개 — 언제·어떻게·왜를 data/sp-update-log/log.jsonl 에 추가하고 digest 를 갱신하세요'); [print('  -', m) for m in miss[:15]]; return 1
     if cmd_digest(['--check']): return 1
+    if cmd_rule(['check']): return 1
     print(f'✓ 정부 SP {len(changed)}개 변경 모두 갱신 기록 있음'); return 0
 
 
 if __name__ == '__main__':
     a = sys.argv[1:]
-    cmds = {'add': cmd_add, 'digest': cmd_digest, 'due': cmd_due, 'check-pr': cmd_check_pr}
+    cmds = {'rule-apply': lambda x: cmd_rule(['apply']), 'rule-check': lambda x: cmd_rule(['check']), 'add': cmd_add, 'digest': cmd_digest, 'due': cmd_due, 'check-pr': cmd_check_pr}
     sys.exit(cmds[a[0]](a[1:]) if a and a[0] in cmds else (print(__doc__) or 2))
