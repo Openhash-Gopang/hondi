@@ -20981,7 +20981,7 @@ async function handleAdminQuotaReset(request, env, corsHeaders) {
 
 // GET/POST /admin/owner-unlimited — 관리자 면제 계정 관리(2026-11-10). 관리자 인증 필요.
 //  GET  → { ok, items:[{guid}] } 면제 중인 guid 목록
-//  POST { handle 또는 guid, enabled } → 아이디(handle, 정확히 일치)를 guid로 바꿔 KV 플래그를 켜거나(enabled:true) 끈다(false).
+//  POST { handle 또는 mail_id(ceo 또는 ceo@naviweb.kr) 또는 guid, enabled } → 아이디(handle, 정확히 일치)를 guid로 바꿔 KV 플래그를 켜거나(enabled:true) 끈다(false).
 async function handleAdminOwnerUnlimited(request, env, corsHeaders) {
   if (!(await _requireAdmin(request, env))) return _err(401, 'UNAUTHORIZED', '관리자 인증 필요', corsHeaders);
   const kv = env.AI_SETUP_SEALS_KV;
@@ -20995,8 +20995,13 @@ async function handleAdminOwnerUnlimited(request, env, corsHeaders) {
   if (!body || typeof body.enabled !== 'boolean') return _err(400, 'MISSING_FIELD', 'enabled(true/false) 필수', corsHeaders);
   let guid = String(body.guid || '').trim();
   const handle = String(body.handle || '').trim();
+  const mailId = String(body.mail_id || '').trim().toLowerCase().replace(/@(naviweb\.kr|hondi\.kr)$/, '');
   let prof = null;
   try {
+    if (!guid && mailId) {   // K-Mail 아이디(메일 주소 앞부분, 예: ceo@naviweb.kr의 ceo)로 지정
+      guid = (await _kmailFindMailIdOwner(env, mailId)) || '';
+      if (!guid) return _err(404, 'NOT_FOUND', 'K-Mail 아이디를 쓰는 계정을 찾지 못했습니다', corsHeaders);
+    }
     if (guid) prof = await _l1FindProfileByGuid(env, guid);
     else if (handle) {
       const token = await _l1AdminToken(env);
@@ -21006,7 +21011,7 @@ async function handleAdminOwnerUnlimited(request, env, corsHeaders) {
       const items = (await res.json().catch(() => ({ items: [] }))).items || [];
       if (items.length > 1) return _err(409, 'AMBIGUOUS_HANDLE', '같은 아이디가 둘 이상입니다. guid로 지정해 주세요', corsHeaders);
       prof = items[0] || null;
-    } else return _err(400, 'MISSING_FIELD', 'handle 또는 guid 필수', corsHeaders);
+    } else return _err(400, 'MISSING_FIELD', 'handle, mail_id 또는 guid 필수', corsHeaders);
   } catch (e) { return _err(502, 'L1_ERROR', 'L1 조회 실패: ' + e.message, corsHeaders); }
   if (!prof || !prof.guid) return _err(404, 'NOT_FOUND', '해당 계정을 찾지 못했습니다', corsHeaders);
   guid = prof.guid;
