@@ -1683,6 +1683,12 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
                border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;
                font-family:inherit;outline:none;background:#f9fafb;color:#111"
         oninput="_checkAccountDeleteInput()">
+      <div id="ad-refund" style="display:none;margin:6px 0 4px;padding:10px 12px;border-radius:10px;background:#fffbeb;border:1px solid #fcd34d">
+        <div id="ad-refund-msg" style="font-size:12.5px;color:#92400e;line-height:1.6;margin-bottom:8px"></div>
+        <input type="text" id="ad-ref-bank" placeholder="은행(예: 국민은행)" autocomplete="off" style="width:100%;box-sizing:border-box;padding:10px 12px;margin-bottom:6px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit">
+        <input type="text" id="ad-ref-number" placeholder="계좌번호(숫자)" inputmode="numeric" autocomplete="off" style="width:100%;box-sizing:border-box;padding:10px 12px;margin-bottom:6px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit">
+        <input type="text" id="ad-ref-holder" placeholder="예금주(본인 명의)" autocomplete="off" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit">
+      </div>
       <div id="ad-error" style="display:none;font-size:12px;color:#dc2626;margin:4px 4px 8px"></div>
       <button id="btn-account-delete-confirm" onclick="_confirmAccountDelete()" disabled
         style="width:100%;padding:14px;border:none;border-radius:10px;margin-top:6px;
@@ -2268,6 +2274,8 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
         if (idInput)    idInput.value = '';
         if (phoneInput) phoneInput.value = '';
         if (errEl)      errEl.style.display = 'none';
+        const _rf = document.getElementById('ad-refund'); if (_rf) _rf.style.display = 'none';
+        window.__adRefundNeeded = false;
         _checkAccountDeleteInput();
         document.getElementById('account-delete-overlay')?.classList.add('open');
       }
@@ -2313,10 +2321,33 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
 
         try {
           const stored = JSON.parse(localStorage.getItem('gopang_user_v4') || sessionStorage.getItem('gopang_user_v4') || '{}');
-          const ok = await window._deleteMyProfile(stored.e164 || '');
+          // 1) 남은 잔액 확인 — 있으면 환급 계좌를 받은 뒤에만 삭제한다
+          let refund = null;
+          const chk = await window._checkDeleteBalance(stored.e164 || '');
+          if (!chk) {
+            if (errEl) { errEl.textContent = '잔액을 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.'; errEl.style.display = 'block'; }
+            btn.disabled = false; btn.textContent = originalLabel; _checkAccountDeleteInput(); return;
+          }
+          if (chk.refund_required) {
+            const box = document.getElementById('ad-refund'), msg = document.getElementById('ad-refund-msg');
+            const bank = (document.getElementById('ad-ref-bank')?.value || '').trim();
+            const number = (document.getElementById('ad-ref-number')?.value || '').trim();
+            const holder = (document.getElementById('ad-ref-holder')?.value || '').trim();
+            if (msg) msg.textContent = '남은 GDC 잔액이 ' + Number(chk.balance_krw).toLocaleString('ko-KR') + '원입니다. 환급받을 계좌를 입력한 뒤 다시 "계정 삭제"를 눌러 주세요. 환급은 접수 후 별도로 처리됩니다.';
+            if (box) box.style.display = 'block';
+            if (!bank || number.replace(/\D/g, '').length < 8 || !holder) {
+              if (errEl) { errEl.textContent = '은행·계좌번호·예금주를 모두 입력해 주세요.'; errEl.style.display = 'block'; }
+              btn.disabled = false; btn.textContent = originalLabel; _checkAccountDeleteInput(); return;
+            }
+            refund = { bank, number, holder };
+            if (!confirm('남은 잔액 ' + Number(chk.balance_krw).toLocaleString('ko-KR') + '원의 환급을 ' + bank + ' ' + number + '(' + holder + ') 계좌로 요청하고 계정을 삭제합니다.\n계좌 정보가 맞나요?')) {
+              btn.disabled = false; btn.textContent = originalLabel; _checkAccountDeleteInput(); return;
+            }
+          }
+          const ok = await window._deleteMyProfile(stored.e164 || '', refund);
           if (ok) {
             closeAccountDelete();
-            alert('계정이 삭제됐어요.\n\n이 기기의 기록은 남아있으니, 언제든 같은 번호로 다시 가입하시면 이어서 쓰실 수 있어요.');
+            alert('계정이 삭제됐어요.' + (refund ? '\n\n남은 잔액 환급은 입력하신 계좌로 요청이 접수되었습니다.' : '') + '\n\n이 기기의 기록은 남아있으니, 언제든 같은 번호로 다시 가입하시면 이어서 쓰실 수 있어요.');
             location.reload();
             return;
           }

@@ -13713,6 +13713,7 @@ export default {
     if (pathname === '/auth/extra-usage')        return handleExtraUsage(request, env, corsHeaders);
     if (pathname === '/admin/quota-reset')       return handleAdminQuotaReset(request, env, corsHeaders);
     if (pathname === '/admin/owner-unlimited')   return handleAdminOwnerUnlimited(request, env, corsHeaders);
+    if (pathname === '/admin/refund-requests')   return handleAdminRefundRequests(request, env, corsHeaders);
     if (pathname === '/admin/plan-set')          return handleAdminPlanSet(request, env, corsHeaders);
     if (pathname === '/admin/plan-deposits')     return handleAdminPlanDeposits(request, env, corsHeaders);
     if (pathname === '/biz/plan-request')        return handlePlanRequest(request, env, corsHeaders);
@@ -28403,6 +28404,32 @@ async function handleAccountDeleteProfile(request, env, corsHeaders) {
     return _err(403, 'PHONE_MISMATCH', '입력한 전화번호가 계정과 일치하지 않습니다', corsHeaders);
   }
 
+  // ── 잔액 확인·환급 계좌 접수 (2026-11-10 신설) ──────────────────────
+  //  · 잔액이 1원 이상이면 환급 계좌(은행·계좌번호·예금주) 없이는 탈퇴되지 않는다(409 REFUND_ACCOUNT_REQUIRED).
+  //  · check_only:true 이면 삭제하지 않고 잔액·환급 필요 여부만 돌려준다(본인 확인은 위에서 이미 끝났다).
+  //  · 환급 요청은 KV에 접수만 한다. 수수료·기한 등 환급 정책은 별도 확정 뒤 처리한다.
+  const balKrw = await _l1GetBalanceKRW(guid);
+  if (balKrw === null) return _err(502, 'BALANCE_CHECK_FAILED', '잔액을 확인하지 못했습니다. 잠시 후 다시 시도해 주세요(잔액이 있는 계정은 확인 없이 삭제하지 않습니다).', corsHeaders);
+  const balRounded = Math.floor(balKrw);
+  if (body.check_only) {
+    return new Response(JSON.stringify({ ok: true, check_only: true, balance_krw: balRounded, refund_required: balRounded >= 1 }), { status: 200, headers: corsHeaders });
+  }
+  let refundId = null;
+  if (balRounded >= 1) {
+    const ra = body.refund_account || {};
+    const bank = String(ra.bank || '').trim().slice(0, 30);
+    const number = String(ra.number || '').replace(/[^0-9-]/g, '').slice(0, 30);
+    const holder = String(ra.holder || '').trim().slice(0, 30);
+    if (!bank || number.replace(/-/g, '').length < 8 || !holder)
+      return new Response(JSON.stringify({ ok: false, code: 'REFUND_ACCOUNT_REQUIRED', message: `남은 잔액 ${balRounded.toLocaleString('ko-KR')}원을 돌려받을 은행·계좌번호·예금주를 입력해 주세요.`, balance_krw: balRounded }), { status: 409, headers: corsHeaders });
+    if (!env.AI_SETUP_SEALS_KV) return _err(503, 'KV_NOT_BOUND', '잠시 후 다시 시도해 주세요', corsHeaders);
+    refundId = Date.now() + '-' + String(guid).slice(0, 12);
+    await env.AI_SETUP_SEALS_KV.put('hondi:refund_req:' + refundId, JSON.stringify({
+      id: refundId, guid, phone: l1Record.phone || phone || '', balance_krw: balRounded,
+      account: { bank, number, holder }, status: 'pending', requested_at: new Date().toISOString(),
+    }));
+  }
+
   try {
     const token = await _l1AdminToken(env);
     const r = await fetch(
@@ -28416,8 +28443,30 @@ async function handleAccountDeleteProfile(request, env, corsHeaders) {
     return _err(502, 'L1_DELETE_FAILED', 'L1 삭제 실패: ' + e.message, corsHeaders);
   }
 
-  console.info('[DeleteProfile] 삭제 완료 | guid:', guid.slice(0, 16));
-  return new Response(JSON.stringify({ ok: true, deleted: true }), { status: 200, headers: corsHeaders });
+  console.info('[DeleteProfile] 삭제 완료 | guid:', guid.slice(0, 16), refundId ? '| 환급요청 ' + refundId : '');
+  return new Response(JSON.stringify({ ok: true, deleted: true, refund_requested: !!refundId, refund_krw: refundId ? balRounded : 0 }), { status: 200, headers: corsHeaders });
+}
+
+// GET /admin/refund-requests → 접수된 환급 요청 목록 / POST { id, status: 'paid'|'rejected'|'pending', note? } → 처리 상태 기록(관리자 Bearer 필요)
+async function handleAdminRefundRequests(request, env, corsHeaders) {
+  if (!(await _requireAdmin(request, env))) return _err(401, 'UNAUTHORIZED', '관리자 인증 필요', corsHeaders);
+  if (!env.AI_SETUP_SEALS_KV) return _err(503, 'KV_NOT_BOUND', 'KV 없음', corsHeaders);
+  const kv = env.AI_SETUP_SEALS_KV;
+  if (request.method === 'POST') {
+    const b = await request.json().catch(() => null) || {};
+    const key = 'hondi:refund_req:' + String(b.id || '');
+    const cur = b.id ? await kv.get(key, 'json') : null;
+    if (!cur) return _err(404, 'NOT_FOUND', '해당 환급 요청이 없습니다', corsHeaders);
+    if (!['paid', 'rejected', 'pending'].includes(b.status)) return _err(400, 'BAD_STATUS', "status는 'paid'|'rejected'|'pending'", corsHeaders);
+    cur.status = b.status; cur.note = String(b.note || '').slice(0, 200); cur.handled_at = new Date().toISOString();
+    await kv.put(key, JSON.stringify(cur));
+    return new Response(JSON.stringify({ ok: true, request: cur }), { status: 200, headers: corsHeaders });
+  }
+  const list = await kv.list({ prefix: 'hondi:refund_req:', limit: 200 });
+  const items = [];
+  for (const k of list.keys) { const v = await kv.get(k.name, 'json'); if (v) items.push(v); }
+  items.sort((a, b) => String(b.requested_at).localeCompare(String(a.requested_at)));
+  return new Response(JSON.stringify({ ok: true, count: items.length, items }), { status: 200, headers: corsHeaders });
 }
 
 // POST /account/full-reset — 계정 완전 삭제 시 Supabase user_profiles row 삭제
