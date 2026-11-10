@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-11 04:30 KST · 기준 커밋 f88ef254
+- 갱신: 2026-11-11 04:32 KST · 기준 커밋 26bee0bb
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-11 Merge pull request #979 from Openhash-Gopang/feat/gov-dept-maps-2
+- 2026-11-11 feat(prompts): 도청·시청 나머지 부서 템플릿에 소관 전체 업무 지도 추가(민원·청렴, 기획조정, 공보, 자치분권, 혁신, 기획·세정, 수산, 문화, 체육)
 - 2026-11-11 feat
 - 2026-11-11 Merge pull request #977 from Openhash-Gopang/feat/gov-ai-broad-task-map
 - 2026-11-11 feat(prompts): 도청·시청 부서 템플릿(보건·주택·기후환경·농업·가족·경제)에 소관 전체 업무 지도 추가
@@ -42,8 +44,6 @@
 - 2026-11-10 feat: 관리자 면제를 KV 플래그 방식으로 변경 + /admin/owner-unlimited
 - 2026-11-10 Merge pull request #958 from Openhash-Gopang/feat/owner-unlimited
 - 2026-11-10 feat: 관리자 면제(OWNER_UNLIMITED_GUIDS) — 지정 계정은 무료 한도·GDC 차감을 건너뜀
-- 2026-11-09 Merge pull request #957 from Openhash-Gopang/feat/pdv-kept-docs
-- 2026-11-09 feat(pdv): 내 데이터 금고에 '보관 서류' 탭 — 발급·보관한 첨부서류와 유효 기간, 내려받기·삭제
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
