@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-11 05:30 KST · 기준 커밋 aa0c926d
+- 갱신: 2026-11-11 05:37 KST · 기준 커밋 613e45eb
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-11 feat: K-Law 도우미용 사건번호 판결문 조회(/klaw/case-judgments)와 KAuth.adopt 추가
 - 2026-11-11 Merge pull request #988 from Openhash-Gopang/feat/gov-sp-update-rule
 - 2026-11-11 chore(gov-sp): 2026-11 장부 기준선 재계산(대상 = 로드되는 최신 SP 파일)
 - 2026-11-11 feat(gov-sp): 모든 정부 SP에 §UPDATE-RULE(갱신 규칙) 삽입 + rule-check CI
@@ -43,7 +44,6 @@
 - 2026-11-11 Merge pull request #971 from Openhash-Gopang/feat/gov-ai-identity-p1-yongmu
 - 2026-11-11 feat(prompts): 국세청·법원 SP에 업무 지도 추가(종합소득세 신고, 지급명령·소액사건)
 - 2026-11-11 Merge pull request #970 from Openhash-Gopang/feat/gov-ai-identity-p1-yongmu
-- 2026-11-11 feat(prompts): 정부 AI 정체성을 '기관 대신'에서 '기관 업무에 정통해 용무를 돕는 AI'로, P12 기관 업무 지도 응답 원칙 신설
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
