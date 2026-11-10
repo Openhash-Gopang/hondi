@@ -4827,6 +4827,7 @@ async function handleKlawSessionsDetail(request, url, env, corsHeaders) {
       confidence: rec.confidence, match_rate: rec.match_rate, match_items: rec.match_items || '',
       is_public: !!rec.is_public,
       case_input: rec.case_input || '',
+      match_report: rec.match_report || '', match_basis: rec.match_basis || '',
       verdict_full: rec.verdict_full || '', created: rec.created,
     }), { headers: corsHeaders });
   } catch (e) {
@@ -4938,6 +4939,10 @@ async function handleKlawSessionsVisibility(request, env, corsHeaders) {
     if (typeof body.is_public === 'boolean') patchBody.is_public = body.is_public;
     if (typeof body.match_items === 'string') patchBody.match_items = body.match_items.slice(0, 2000);
     if (typeof body.title === 'string') patchBody.title = body.title.slice(0, 100);
+    // 2026-11-11 — 일치도 평가 보고서 전문(+비교에 쓴 통합 판결문)과 평가 기준 정보를
+    // 이력에 남긴다. 공개 게시판 상세(handleKlawSessionsBoardDetail)에는 노출하지 않는다.
+    if (typeof body.match_report === 'string') patchBody.match_report = _klawTruncateWithNotice(body.match_report, 200000);
+    if (typeof body.match_basis === 'string') patchBody.match_basis = body.match_basis.slice(0, 500);
     if (Object.keys(patchBody).length === 0) return _err(400, 'NOTHING_TO_UPDATE', '변경할 값이 없습니다', corsHeaders);
 
     const patchRes = await fetch(
