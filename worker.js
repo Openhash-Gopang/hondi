@@ -6376,6 +6376,26 @@ async function handleSpAnswerReport(bodyText, env, corsHeaders) {
   return new Response(JSON.stringify({ ok: true, id: saved.id || null }), { status: 200, headers: corsHeaders });
 }
 
+// ── 최상위 SP(UNIVERSAL-INTEGRITY U8) 신고 태그의 중앙 수집 (2026-11-11) ──────────
+// 신고 수신 규칙은 최상위 SP 한 곳(U8)에만 있고, 이 래퍼가 모든 채팅 릴레이의 JSON 응답에서
+// [USER_FEEDBACK]/[SP_UPDATE_SIGNAL] 태그를 읽어 저장·제거한다(/gov/relay 는 자체 인터셉트도 거치며 멱등).
+// 스트리밍·비JSON·태그 없는 응답은 그대로 통과한다. 실패해도 응답은 그대로 돌려준다.
+async function _withSpFeedback(resPromise, bodyText, env, ctx) {
+  const res = await resPromise;
+  try {
+    if (!res || res.status !== 200) return res;
+    const ct = res.headers.get('content-type') || '';
+    if (!ct.includes('application/json')) return res;
+    const txt = await res.clone().text();
+    if (!txt.includes('USER_FEEDBACK') && !txt.includes('SP_UPDATE_SIGNAL')) return res;
+    const data = JSON.parse(txt);
+    let guid = null; try { guid = JSON.parse(bodyText)?.guid || null; } catch {}
+    await _interceptSpFeedback(env, data, guid, ctx);
+    const h = new Headers(res.headers); h.delete('content-length');
+    return new Response(JSON.stringify(data), { status: res.status, headers: h });
+  } catch (e) { console.warn('[SpFeedback] 래퍼 실패(응답 그대로):', e.message); return res; }
+}
+
 // ── AGY_VAULT_STORE 인터셉트 헬퍼 (2026-08-10 신설) ──────────────────
 // handleGovRelay가 반환하는 모든 "최종 응답" data 객체는 반환 직전에
 // 반드시 이걸 거쳐야 한다 — 원래 첫 LLM 응답 한 곳에만 인라인으로
@@ -12881,7 +12901,7 @@ async function _sweepBridgeOutbox(env) {
 
 // 2026-07-18 신설 — 테스트 목적 named export. 런타임 동작에는 영향 없음
 // (default export의 fetch 핸들러는 그대로 pathname 매칭으로 호출).
-export { _gdcEvaluateCreditServer, handleBizOrder, handleGdcTransfer, _gdcCheckTransferLimits, _gdcKstDayStartMs, handleGdcTestLoanApply, _gdcCheckLoanLimits, handleGdcDepositClose, handleGdcDaoProposalCreate, handleGdcDaoVote, handleGdcDaoProposalsList, handleFeeRate, handleInsClaimCreate, handleInsClaimsList, handleVerifyAdmin, _natAgencyExtractName, _parseInstanceEnrichTag, _parseSpFeedbackTags, _interceptSpFeedback, handleSpAnswerReport };
+export { _gdcEvaluateCreditServer, handleBizOrder, handleGdcTransfer, _gdcCheckTransferLimits, _gdcKstDayStartMs, handleGdcTestLoanApply, _gdcCheckLoanLimits, handleGdcDepositClose, handleGdcDaoProposalCreate, handleGdcDaoVote, handleGdcDaoProposalsList, handleFeeRate, handleInsClaimCreate, handleInsClaimsList, handleVerifyAdmin, _natAgencyExtractName, _parseInstanceEnrichTag, _parseSpFeedbackTags, _interceptSpFeedback, _withSpFeedback, handleSpAnswerReport };
 
 // ═══════════════════════════════════════════════════════════
 // K-TRAFFIC / K-LOGISTICS 실매칭 백엔드 (2026-07-26 신설)
@@ -14952,10 +14972,10 @@ export default {
     }
 
     if (pathname === '/user-feedback/sp-report')  return handleSpAnswerReport(bodyText, env, corsHeaders);   // 인증 게이트 통과 후(guid 검증됨)
-    if (pathname === '/chat/completions')        return callDeepSeek(bodyText, env, corsHeaders, null, _meta, ctx);
-    if (pathname.startsWith('/deepseek'))        return callDeepSeek(bodyText, env, corsHeaders, null, _meta, ctx);
-    if (pathname === '/llm/relay')               return handleLLMRelay(bodyText, env, corsHeaders, _meta);
-    if (pathname === '/klaw/relay')               return handleKlawRelay(bodyText, env, corsHeaders, _meta, ctx);
+    if (pathname === '/chat/completions')        return _withSpFeedback(callDeepSeek(bodyText, env, corsHeaders, null, _meta, ctx), bodyText, env, ctx);
+    if (pathname.startsWith('/deepseek'))        return _withSpFeedback(callDeepSeek(bodyText, env, corsHeaders, null, _meta, ctx), bodyText, env, ctx);
+    if (pathname === '/llm/relay')               return _withSpFeedback(handleLLMRelay(bodyText, env, corsHeaders, _meta), bodyText, env, ctx);
+    if (pathname === '/klaw/relay')               return _withSpFeedback(handleKlawRelay(bodyText, env, corsHeaders, _meta, ctx), bodyText, env, ctx);
     if (pathname === '/kplan/relay')              return handleKPlanRelay(bodyText, env, corsHeaders, _meta, ctx);
     if (pathname === '/kjit/relay')                return handleKjitRelay(bodyText, env, corsHeaders, _meta, ctx);
     if (pathname === '/kcity/relay')               return handleKcityRelay(bodyText, env, corsHeaders, _meta, ctx);
@@ -14978,9 +14998,9 @@ export default {
     if (pathname === '/gov/task/schema/lookup')   return handleGovTaskSchemaLookup(bodyText, env, corsHeaders);
     if (pathname === '/gov/task/registry/match')  return handleGovTaskRegistryMatch(bodyText, env, corsHeaders);
     if (pathname === '/admin/gov-task-drafts/review') return handleGovTaskDraftReview(request, bodyText, env, corsHeaders);
-    if (pathname === '/business/relay')           return handleBusinessRelay(bodyText, env, corsHeaders, _meta, ctx);
+    if (pathname === '/business/relay')           return _withSpFeedback(handleBusinessRelay(bodyText, env, corsHeaders, _meta, ctx), bodyText, env, ctx);
     if (pathname.startsWith('/gemini/'))         return callOpenAIFromGeminiBody(bodyText, env, corsHeaders, _meta);
-    if (pathname === '/ai/chat')                 return handleAIChat(bodyText, env, corsHeaders, _meta);
+    if (pathname === '/ai/chat')                 return _withSpFeedback(handleAIChat(bodyText, env, corsHeaders, _meta), bodyText, env, ctx);
 
     return new Response(JSON.stringify({ error: 'Not Found', path: pathname }), { status: 404, headers: corsHeaders });
   },

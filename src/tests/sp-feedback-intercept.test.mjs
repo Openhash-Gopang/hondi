@@ -1,7 +1,7 @@
 // SP 피드백·갱신 신호 서버측 수집 — 태그 파싱·마스킹·저장·스트립
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { _parseSpFeedbackTags, _interceptSpFeedback } from '../../worker.js';
+import { _parseSpFeedbackTags, _interceptSpFeedback, _withSpFeedback } from '../../worker.js';
 
 test('파싱: USER_FEEDBACK / SP_UPDATE_SIGNAL, 따옴표 안의 쉼표·대괄호 허용', () => {
   const t = _parseSpFeedbackTags('답변입니다.\n[USER_FEEDBACK: sp="SP-DO-AGRI", kind="bug", raw="접수 창구가 틀려요, [번호] 다름"]\n[SP_UPDATE_SIGNAL: sp="SP-DO-AGRI", what="창구 이관", source="https://x.go.kr/a", published="2026-11-01"]');
@@ -39,4 +39,24 @@ test('인터셉트: 태그가 없으면 아무것도 하지 않는다', async ()
   const data = { choices: [{ message: { content: '그냥 답변' } }] };
   await _interceptSpFeedback({}, data, 'g', null);
   assert.equal(data.choices[0].message.content, '그냥 답변');
+});
+
+test('중앙 래퍼: 어떤 릴레이의 JSON 응답이든 태그를 저장·제거, 태그 없으면 그대로, 비JSON은 통과', async () => {
+  const calls = [];
+  const orig = globalThis.fetch;
+  globalThis.fetch = async (url, init) => { calls.push(JSON.parse(init.body)); return new Response('{}', { status: 200 }); };
+  const mk = (o, ct = 'application/json') => new Response(typeof o === 'string' ? o : JSON.stringify(o), { status: 200, headers: { 'content-type': ct } });
+  try {
+    const r = await _withSpFeedback(Promise.resolve(mk({ choices: [{ message: { content: '본문\n[USER_FEEDBACK: sp="K-Tax", kind="bug", raw="세율이 틀렸어요"]' } }] })), JSON.stringify({ guid: 'g1' }), {}, null);
+    const j = await r.json();
+    await new Promise(r2 => setTimeout(r2, 10));
+    assert.equal(j.choices[0].message.content, '본문');
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].context_sp, 'K-Tax');
+    const plain = mk({ choices: [{ message: { content: '태그 없음' } }] });
+    assert.equal(await _withSpFeedback(Promise.resolve(plain), '{}', {}, null), plain);
+    const sse = mk('data: [USER_FEEDBACK: sp="X"]', 'text/event-stream');
+    assert.equal(await _withSpFeedback(Promise.resolve(sse), '{}', {}, null), sse);
+    assert.equal(calls.length, 1);
+  } finally { globalThis.fetch = orig; }
 });
