@@ -79,6 +79,9 @@
   }
   .dl-simple #btn-approve { color: #0b57d0; margin-top: 24px; }
   .dl-simple #btn-deny { color: #b3261e; margin-top: 64px; }
+  /* 숫자 선택형: 숫자 자체가 승인, 아래에는 "본인 아님"만 남긴다 */
+  .dl-match .warn { display: none; }
+  .dl-match #btn-deny { margin-top: 28px; }
   .dl-simple #btn-approve:disabled, .dl-simple #btn-deny:disabled { background: #f3f4f6; color: #9ca3af; }
 </style>
 </head>
@@ -101,7 +104,6 @@
     <div id="match-box" class="hide" style="margin:14px 0 4px;text-align:center">
       <p style="font-size:14px;color:#111827;margin:0 0 10px"><strong>로그인하려는 PC 화면에 보이는 숫자</strong>를 선택하세요</p>
       <div id="match-choices" style="display:flex;gap:10px;justify-content:center"></div>
-      <p style="font-size:11.5px;color:#6b7280;margin:8px 0 0">PC 화면을 보고 있지 않거나 숫자가 없다면 선택하지 말고 <strong>거부</strong>를 누르세요.</p>
     </div>
     <button id="btn-approve">본인이 맞습니다 — 로그인 허용</button>
     <button id="btn-deny" class="secondary">본인 아님 — 거부</button>
@@ -217,21 +219,32 @@
     // 숫자 대조 — 서버가 후보 숫자를 내려준 세션이면, 하나를 고르기 전까지 승인 버튼을 잠근다
     window.__picked = null;
     if (Array.isArray(data.matchChoices) && data.matchChoices.length) {
-      $('btn-approve').disabled = true;
+      // 숫자를 누르면 그 자체가 본인 확인 — 별도 "본인이 맞습니다" 버튼 없이 바로 승인 흐름을 시작한다.
+      $('content').classList.add('dl-match');
+      $('btn-approve').style.display = 'none';
       const box = $('match-choices'); box.innerHTML = '';
       data.matchChoices.forEach(function (n) {
         const b = document.createElement('button');
         b.type = 'button'; b.textContent = n;
         b.style.cssText = 'width:84px;padding:14px 0;font-size:24px;font-weight:700;border:2px solid #cbd5e1;border-radius:12px;background:#fff;color:#111827;cursor:pointer';
         b.addEventListener('click', function () {
+          if ($('btn-approve').disabled) return; // 승인 진행 중 중복 탭 방지
           window.__picked = n;
           Array.prototype.forEach.call(box.children, function (c) { c.style.borderColor = '#cbd5e1'; c.style.background = '#fff'; });
           b.style.borderColor = '#0057A8'; b.style.background = '#eaf3fc';
-          $('btn-approve').disabled = false;
+          Array.prototype.forEach.call(box.children, function (c) { c.disabled = true; });
+          $('btn-approve').click();
         });
         box.appendChild(b);
       });
       $('match-box').classList.remove('hide');
+      // 실패(숫자 불일치·네트워크 등)로 승인 버튼이 다시 활성화되면 숫자도 다시 고를 수 있게 풀어 준다.
+      new MutationObserver(function () {
+        if (!$('btn-approve').disabled) {
+          Array.prototype.forEach.call(box.children, function (c) { c.disabled = false; c.style.borderColor = '#cbd5e1'; c.style.background = '#fff'; });
+          window.__picked = null;
+        }
+      }).observe($('btn-approve'), { attributes: true, attributeFilter: ['disabled'] });
     }
     // 2026-07-23 신설 — purpose별로 승인 화면 문구를 다르게 보여준다.
     // key_transfer는 원래부터 있던 "계정 전체 권한 이전" 경고 그대로
