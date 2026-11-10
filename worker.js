@@ -12459,6 +12459,90 @@ async function handleLawPrecedent(request, env, corsHeaders, ctx) {
   return new Response(JSON.stringify(result), { headers: corsHeaders });
 }
 
+// ── K-Law 도우미: 사건번호로 대법원·2심·1심 판결문 가져오기 (2026-11-11 신설) ──
+// open.law.go.kr 판례 API(lawSearch/lawService, OC=env.LAW_GO_KR_OC)를 서버에서 호출한다.
+// 대법원 사건번호 → 판결문 본문 → 본문의 "원심판결"·"제1심판결" 표시에서 하급심 사건번호를 읽어 같은 방식으로 이어서 가져온다.
+// 본인 확인은 phone_verify_token. 판결문 글자는 이 응답으로만 돌려주고 저장하지 않는다.
+// ※ 상세 조회 JSON 필드는 실측 전이라 문자열 필드를 모두 모아 쓴다(필드명이 달라도 본문이 비지 않게).
+function _klawCaseNoOk(no) { return /^\d{2,4}[가-힣]{1,4}\d{1,7}$/.test(no); }
+function _klawPrecStripHtml(t) {
+  return String(t == null ? '' : t).replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n').replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/&quot;/g, '"')
+    .replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+// 본문에서 하급심 사건번호를 찾는다 — "【원심판결】 인천지방법원 2024. 6. 12. 선고 2023노5007 판결", "【제1심판결】 …" 형식.
+function _klawFindLowerCase(text, selfNo) {
+  const t = String(text || '');
+  const re = /([가-힣]{2,12}(?:지방|고등|가정|행정|특허)?법원(?:\s*[가-힣]{1,8}지원)?)\s*(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})\.\s*선고\s*(\d{4}[가-힣]{1,4}\d{1,7})\s*판결/g;
+  const mark = t.search(/【\s*(?:원심판결|제\s*1\s*심\s*판결|원심|제1심)\s*】/);
+  const scope = mark >= 0 ? t.slice(mark, mark + 1500) : t.slice(0, 6000);
+  let m;
+  while ((m = re.exec(scope)) !== null) { if (m[5] !== selfNo) return { court: m[1].replace(/\s+/g, ' '), caseNo: m[5], date: `${m[2]}-${String(m[3]).padStart(2, '0')}-${String(m[4]).padStart(2, '0')}` }; }
+  return null;
+}
+function _klawPrecLevel(courtName, caseNo) {
+  if (/대법원/.test(courtName || '')) return 'supreme';
+  if (/^\d+(?:재)?(노|나|누|라|초)/.test(caseNo || '')) return 'appeal';
+  return 'first';
+}
+function _klawPrecCollectText(detail) {
+  const o = detail && (detail.PrecService || detail) || {};
+  const pick = (k) => _klawPrecStripHtml(o[k]);
+  const body = pick('판례내용');
+  const head = ['판시사항', '판결요지', '참조조문', '참조판례'].map((k) => { const v = pick(k); return v ? `【${k}】\n${v}` : ''; }).filter(Boolean).join('\n\n');
+  if (body) return { body, text: [head, `【판례내용】\n${body}`].filter(Boolean).join('\n\n') };
+  // 필드명이 예상과 다르면 문자열 필드를 모두 모은다
+  const all = Object.keys(o).filter((k) => typeof o[k] === 'string' && o[k].length > 30).map((k) => `【${k}】\n${_klawPrecStripHtml(o[k])}`).join('\n\n');
+  return { body: all, text: all };
+}
+async function _klawFetchPrecByCaseNo(env, caseNo, courtHint) {
+  const call = async (base, params) => {
+    const u = new URL(`http://www.law.go.kr/DRF/${base}`);
+    for (const [k, v] of Object.entries(params)) u.searchParams.set(k, String(v));
+    u.searchParams.set('OC', env.LAW_GO_KR_OC); u.searchParams.set('type', 'JSON');
+    const r = await fetch(u.toString(), { signal: AbortSignal.timeout(9000) });
+    if (!r.ok) throw new Error(`law.go.kr HTTP ${r.status}`);
+    return r.json().catch(() => { throw new Error('law.go.kr 응답을 JSON으로 읽지 못했습니다'); });
+  };
+  const rowsOf = (j) => { const x = j && (j.PrecSearch || j); const p = x && x.prec; return Array.isArray(p) ? p : (p ? [p] : []); };
+  let rows = rowsOf(await call('lawSearch.do', { target: 'prec', nb: caseNo, display: 20 })).filter((p) => String(p['사건번호'] || '').replace(/\s+/g, '') === caseNo);
+  if (!rows.length) rows = rowsOf(await call('lawSearch.do', { target: 'prec', query: caseNo, search: 2, display: 20 })).filter((p) => String(p['사건번호'] || '').replace(/\s+/g, '') === caseNo);
+  if (!rows.length) return null;
+  const hint = String(courtHint || '').replace(/\s+/g, '');
+  const row = (hint && rows.find((p) => hint.includes(String(p['법원명'] || '').replace(/\s+/g, '')) || String(p['법원명'] || '').replace(/\s+/g, '').includes(hint))) || rows[0];
+  const id = row['판례일련번호'];
+  if (!id) return null;
+  const det = _klawPrecCollectText(await call('lawService.do', { target: 'prec', ID: id }));
+  if (!det.body || det.body.length < 200) return { meta: row, empty: true };
+  return { meta: row, text: det.text, body: det.body };
+}
+async function handleKlawCaseJudgments(request, env, corsHeaders) {
+  let body = null; try { body = await request.json(); } catch (e) { /* 아래에서 거절 */ }
+  if (!body) return _err(400, 'BAD_JSON', '요청 본문이 올바르지 않습니다', corsHeaders);
+  const auth = await _resolveGuidFromPhoneVerifyToken(env, String(body.phone_verify_token || '').trim());
+  if (!auth.ok) { const { status, code, message } = mapPhoneAuthError(auth); return _err(status, code, message, corsHeaders); }
+  if (!env.LAW_GO_KR_OC) return _err(503, 'LAW_OC_NOT_CONFIGURED', 'LAW_GO_KR_OC가 설정되지 않았습니다', corsHeaders);
+  const caseNo = String(body.case_no || '').replace(/\s+/g, '');
+  if (!_klawCaseNoOk(caseNo)) return _err(400, 'BAD_CASE_NO', '사건번호 형식이 올바르지 않습니다. 예: 2024도7082', corsHeaders);
+  const levels = [], notes = [];
+  let next = { caseNo, court: '' };
+  try {
+    for (let i = 0; i < 3 && next; i++) {
+      const r = await _klawFetchPrecByCaseNo(env, next.caseNo, next.court);
+      if (!r) { notes.push(`${next.caseNo}: 판례 데이터베이스에 없습니다(비공개이거나 아직 수록되지 않았을 수 있습니다).`); break; }
+      if (r.empty) { notes.push(`${next.caseNo}: 판결문 본문을 받지 못했습니다.`); break; }
+      const court = String(r.meta['법원명'] || next.court || '');
+      levels.push({ level: _klawPrecLevel(court, next.caseNo), court, case_no: next.caseNo, date: String(r.meta['선고일자'] || ''), title: String(r.meta['사건명'] || ''), text: r.text.slice(0, 200000), body: r.body.slice(0, 200000) });
+      next = _klawFindLowerCase(r.body, next.caseNo);
+    }
+  } catch (e) {
+    if (!levels.length) return _err(502, 'LAW_GO_KR_ERROR', `판결문을 가져오지 못했습니다: ${e.message}`, corsHeaders);
+    notes.push('하급심을 가져오는 중 오류: ' + e.message);
+  }
+  if (!levels.length) return _err(404, 'NOT_FOUND', notes[0] || '판결문을 찾지 못했습니다', corsHeaders);
+  return new Response(JSON.stringify({ ok: true, case_no: caseNo, levels, notes, source: 'open.law.go.kr (국가법령정보 공동활용, 법제처)' }), { headers: corsHeaders });
+}
+
 // ── ATOM_PATTERN 실행 엔진 (2026-07-09 신설) ────────────────────────
 // 3~4차 라운드(개인파산·창업 준비 사고실험)에서 확정한 5개 실행 패턴을
 // 실제로 구현한다. 지금 시점에 실제로 자동화된 automation_sp는 거의
@@ -13899,6 +13983,7 @@ export default {
     // klaw_sessions
     if (pathname === '/klaw/sessions/history' && request.method === 'GET') return handleKlawSessionsHistory(request, url, env, corsHeaders);
     if (pathname === '/klaw/sessions/detail' && request.method === 'GET') return handleKlawSessionsDetail(request, url, env, corsHeaders);
+    if (pathname === '/klaw/case-judgments' && request.method === 'POST') return handleKlawCaseJudgments(request, env, corsHeaders);
     if (pathname === '/klaw/sessions/visibility' && request.method === 'POST') return handleKlawSessionsVisibility(request, env, corsHeaders);
     if (pathname === '/klaw/sessions/board' && request.method === 'GET') return handleKlawSessionsBoard(request, url, env, corsHeaders);
     if (pathname === '/klaw/sessions/board-detail' && request.method === 'GET') return handleKlawSessionsBoardDetail(request, url, env, corsHeaders);
