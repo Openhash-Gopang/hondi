@@ -1,9 +1,12 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-11 04:54 KST · 기준 커밋 ab67422c
+- 갱신: 2026-11-11 05:00 KST · 기준 커밋 d98e9969
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-11 Merge pull request #983 from Openhash-Gopang/feat/gov-instance-check
+- 2026-11-11 feat(gov-sp): 읍면동 팀 템플릿 5개·합의제기관 SP-COMM 3개에 §2-MAP 반영
+- 2026-11-11 feat(gov-sp): 03-do-agency SP-AGY-* 25개에 §2-MAP(업무 지도) 반영
 - 2026-11-11 Merge pull request #982 from Openhash-Gopang/feat/gov-instance-check
 - 2026-11-11 feat(gov-sp): Jeju 도 부서 SP-DO-* 21개에 §2-MAP(업무 지도) 반영 — 템플릿 편집이 정적 인스턴스에 닿지 않던 문제 해소
 - 2026-11-11 Merge pull request #981 from Openhash-Gopang/feat/gov-policy-maps
@@ -41,9 +44,6 @@
 - 2026-11-10 Merge pull request #963 from Openhash-Gopang/feat/klaw-remove-user-daily-krw-cap
 - 2026-11-10 feat: K-Law 1인 1일 금액 한도(300원) 해제
 - 2026-11-10 Merge pull request #962 from Openhash-Gopang/feat/klaw-verdict-min-balance
-- 2026-11-10 feat: K-Law·Agon 판결 생성 시작은 GDC 잔액 1만원 이상일 때만
-- 2026-11-10 Merge pull request #961 from Openhash-Gopang/fix/owner-unlimited-mailid
-- 2026-11-10 fix: /admin/owner-unlimited가 K-Mail 아이디(mail_id)로도 계정을 지정하도록
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
