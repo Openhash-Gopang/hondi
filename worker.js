@@ -6290,6 +6290,62 @@ function _parseAgyVaultStoreTag(raw) {
   } catch (e) { return null; }
 }
 
+// ── SP 피드백·갱신 신호 서버측 수집 (2026-11-11 신설) ─────────────────
+// 정부 AI SP가 응답 끝에 내는 [USER_FEEDBACK: sp="SP-ID", kind="...", raw="..."] 와
+// [SP_UPDATE_SIGNAL: sp="SP-ID", what="...", source="URL", published="..."] 를 서버가
+// 읽어 user_feedback 컬렉션에 저장하고 사용자 화면에서는 지운다(클라이언트가 태그를
+// 처리하는 경로와 무관하게 수집 — handleGovRelay의 모든 최종 응답이 거친다).
+// 개수 집계·갱신 결정은 tools/sp_update_log.py (docs/GOV-SP-UPDATE-SHARING_v1_0.md §피드백).
+// 기존 user_feedback 필드만 쓴다(스키마 변경 없음): guid=사용자 해시, context_sp=SP ID,
+// context_summary="kind=..;src=..;dk=.." (중복 판정 키), status='new'(→ reflected/rejected/deferred).
+const _SP_ID_RE = /^[A-Za-z0-9][A-Za-z0-9_.-]{2,80}$/;
+const _SP_FEEDBACK_CATEGORY = { bug: 'bug', correction: 'bug', suggestion: 'feature_request', improvement: 'feature_request', complaint: 'complaint' };
+function _parseSpFeedbackTags(text) {
+  const out = [];
+  if (typeof text !== 'string') return out;
+  const tagRe = /\[(USER_FEEDBACK|SP_UPDATE_SIGNAL):((?:[^\]"]|"(?:[^"\\]|\\.)*")*)\]/g;
+  let m;
+  while ((m = tagRe.exec(text)) !== null) {
+    const fields = {};
+    const kvRe = /(\w+)=("(?:[^"\\]|\\.)*"|[^,\]]*)/g;
+    let kv;
+    while ((kv = kvRe.exec(m[2])) !== null) fields[kv[1]] = kv[2].trim().replace(/^"|"$/g, '');
+    out.push({ type: m[1] === 'SP_UPDATE_SIGNAL' ? 'signal' : 'feedback', fields, raw: m[0] });
+  }
+  return out;
+}
+function _maskSpFeedbackText(t) {
+  return String(t || '').replace(/[\w.+-]+@[\w-]+\.[\w.]+/g, '[이메일]').replace(/\d[\d\s-]{6,}\d/g, '[숫자]').slice(0, 500);
+}
+async function _interceptSpFeedback(env, dataObj, guid, ctx) {
+  const content = dataObj?.choices?.[0]?.message?.content;
+  const tags = _parseSpFeedbackTags(content);
+  if (!tags.length) return;
+  // 사용자 화면에서는 태그를 지운다(저장 실패해도 노출하지 않는다)
+  let stripped = content;
+  for (const t of tags) stripped = stripped.split(t.raw).join('');
+  dataObj.choices[0].message.content = stripped.trim();
+  const userKey = guid ? 'h:' + (await _sha256Hex(String(guid))).slice(0, 16) : null;
+  for (const t of tags.slice(0, 3)) {                       // 응답당 최대 3건(남용 방지)
+    const f = t.fields;
+    const sp = f.sp || f.context_sp || '';
+    const isSignal = t.type === 'signal';
+    const rawText = _maskSpFeedbackText(isSignal ? (f.what || '') : (f.raw || ''));
+    if (!rawText) continue;
+    const kind = isSignal ? 'update_signal' : (_SP_FEEDBACK_CATEGORY[f.kind] ? f.kind : 'suggestion');
+    const spId = _SP_ID_RE.test(sp) ? sp : 'unspecified';
+    const dk = (await _sha256Hex(spId + '|' + rawText.toLowerCase().replace(/\s+/g, ' '))).slice(0, 12);
+    const meta = `kind=${kind};src=${isSignal ? 'sp_signal' : 'sp_tag'};dk=${dk}` +
+      (isSignal ? `;source=${String(f.source || '').slice(0, 200)};published=${String(f.published || '').slice(0, 20)}` : '');
+    const task = fetch(`${L1_DEFAULT}/api/collections/user_feedback/records`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ guid: userKey, raw_text: rawText, context_sp: spId, context_summary: meta,
+        category: isSignal ? 'update_signal' : _SP_FEEDBACK_CATEGORY[kind], status: 'new' }),
+    }).catch(e => console.warn('[SpFeedback] 저장 실패(응답 흐름은 계속):', e.message));
+    if (ctx?.waitUntil) ctx.waitUntil(task); else task.catch(() => {});
+  }
+}
+
 // ── AGY_VAULT_STORE 인터셉트 헬퍼 (2026-08-10 신설) ──────────────────
 // handleGovRelay가 반환하는 모든 "최종 응답" data 객체는 반환 직전에
 // 반드시 이걸 거쳐야 한다 — 원래 첫 LLM 응답 한 곳에만 인라인으로
@@ -6308,6 +6364,7 @@ function _parseAgyVaultStoreTag(raw) {
 // 런타임 에러가 난다. 호출은 `await _interceptAgyVaultStore(env, data,
 // guid, ctx);`처럼 반환값을 버려도 무방한 statement로 쓴다.
 async function _interceptAgyVaultStore(env, dataObj, guid, ctx) {
+  await _interceptSpFeedback(env, dataObj, guid, ctx); // 2026-11-11 — SP 피드백·갱신 신호 수집(모든 최종 응답이 이 인터셉트를 거친다)
   const content = dataObj?.choices?.[0]?.message?.content;
   const match = typeof content === 'string'
     ? content.match(/\[AGY_VAULT_STORE:([\s\S]*?)\]/)
@@ -12878,7 +12935,7 @@ async function _sweepBridgeOutbox(env) {
 
 // 2026-07-18 신설 — 테스트 목적 named export. 런타임 동작에는 영향 없음
 // (default export의 fetch 핸들러는 그대로 pathname 매칭으로 호출).
-export { _gdcEvaluateCreditServer, handleBizOrder, handleGdcTransfer, _gdcCheckTransferLimits, _gdcKstDayStartMs, handleGdcTestLoanApply, _gdcCheckLoanLimits, handleGdcDepositClose, handleGdcDaoProposalCreate, handleGdcDaoVote, handleGdcDaoProposalsList, handleFeeRate, handleInsClaimCreate, handleInsClaimsList, handleVerifyAdmin, _natAgencyExtractName, _parseInstanceEnrichTag };
+export { _gdcEvaluateCreditServer, handleBizOrder, handleGdcTransfer, _gdcCheckTransferLimits, _gdcKstDayStartMs, handleGdcTestLoanApply, _gdcCheckLoanLimits, handleGdcDepositClose, handleGdcDaoProposalCreate, handleGdcDaoVote, handleGdcDaoProposalsList, handleFeeRate, handleInsClaimCreate, handleInsClaimsList, handleVerifyAdmin, _natAgencyExtractName, _parseInstanceEnrichTag, _parseSpFeedbackTags, _interceptSpFeedback };
 
 // ═══════════════════════════════════════════════════════════
 // K-TRAFFIC / K-LOGISTICS 실매칭 백엔드 (2026-07-26 신설)
