@@ -669,7 +669,62 @@
   }
 
   // ── 초기화 ───────────────────────────────────────────────────
+  // ── PC 비활동 자동 로그아웃 (2026-11-10 신설, 주피터 지시) ─────────────────────
+  // 공용·남의 PC에서 로그인한 채 자리를 뜨는 경우를 막는다. 폰(앱)은 본인 기기이므로 적용하지 않는다.
+  //   · 마지막 사용(마우스·키보드·터치·스크롤) 시각을 쿠키 hondi_act(.hondi.net 공유)에 남겨, 같은 계정으로 열린 모든 서브도메인 탭이 함께 판단한다.
+  //   · 기본 30분(K_AUTH_CONFIG.idleLogoutMinutes로 바꿈, 0이면 끔) 동안 아무 입력이 없으면 로그아웃한다.
+  //     AI 요청이 진행 중이면(fetchWithAuth) 사용 중으로 본다 — 긴 판결 생성이 중간에 끊기지 않게.
+  //   · 탭·브라우저를 닫았다가 30분이 지나서 다시 열어도 같은 규칙으로 로그아웃된다(탭을 닫는 순간의 로그아웃은 브라우저가 신뢰성 있게 알려 주지 않아 시간으로 대신한다).
+  //   · 테스트 아이디(tid-) 자동 입장에는 적용하지 않는다.
+  var COOKIE_ACT = 'hondi_act';
+  var IDLE_MS = (function () {
+    var m = global.K_AUTH_CONFIG && global.K_AUTH_CONFIG.idleLogoutMinutes;
+    m = (m === undefined || m === null) ? 30 : Number(m);
+    return m > 0 ? m * 60000 : 0;
+  })();
+  var IS_MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
+  var inflight = 0, lastTouchWrite = 0;
+  function touchActivity(force) {
+    var now = Date.now();
+    if (!force && now - lastTouchWrite < 20000) return;   // 쿠키 쓰기는 20초에 한 번만
+    lastTouchWrite = now;
+    try { writeCookie(COOKIE_ACT, String(now), 86400); } catch (e) {}
+  }
+  function idleLogoutApplies() {
+    return IDLE_MS > 0 && !IS_MOBILE && hasValidLogin() && !isTestToken(token);
+  }
+  function checkIdle() {
+    if (!idleLogoutApplies() || inflight > 0) return;
+    var last = Number(readCookie(COOKIE_ACT) || 0);
+    if (!last) { touchActivity(true); return; }
+    if (Date.now() - last > IDLE_MS) {
+      clear();
+      try { global.dispatchEvent(new CustomEvent('hondi-idle-logout')); } catch (e) {}
+      showIdleNotice();
+    }
+  }
+  function showIdleNotice() {
+    try {
+      if (!document.body) return;
+      var d = document.createElement('div');
+      d.setAttribute('role', 'status');
+      d.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1e293b;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;z-index:2147483000;max-width:90vw;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.3)';
+      d.textContent = '오래 사용하지 않아 안전을 위해 로그아웃되었습니다. 다시 사용하시려면 로그인해 주세요.';
+      document.body.appendChild(d);
+      setTimeout(function () { if (d.parentNode) d.parentNode.removeChild(d); }, 15000);
+    } catch (e) {}
+  }
+  if (IDLE_MS > 0 && !IS_MOBILE) {
+    ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'wheel'].forEach(function (ev) {
+      global.addEventListener(ev, function () { touchActivity(false); }, { passive: true, capture: true });
+    });
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) { checkIdle(); } });
+    setInterval(checkIdle, 30000);
+  }
+
   loadFromCookie();
+  if (IDLE_MS > 0 && !IS_MOBILE) checkIdle();   // 닫았다가 오래 뒤에 다시 연 경우: 로그인 상태를 읽자마자 판단
+  if (idleLogoutApplies()) touchActivity(true);
   // 🧪 테스트 기간: 접속하면 자동으로 아이디 생성/입장(스위치가 꺼져 있으면 아무 일도 없음)
   var _bootTest = function () { autoTestEnter(); };
   if (document.body) _bootTest(); else document.addEventListener('DOMContentLoaded', _bootTest);
@@ -679,6 +734,12 @@
     getToken: getToken,
     hasValidLogin: hasValidLogin,
     logout: logout,
-    fetchWithAuth: fetchWithAuth,
+    fetchWithAuth: function () {   // 진행 중인 요청이 있는 동안은 비활동으로 보지 않는다
+      inflight++;
+      var p = fetchWithAuth.apply(null, arguments);
+      var done = function () { inflight = Math.max(0, inflight - 1); touchActivity(true); };
+      p.then(done, done);
+      return p;
+    },
   };
 })(window);
