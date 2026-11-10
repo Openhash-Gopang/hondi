@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-11 05:05 KST · 기준 커밋 f13cf22f
+- 갱신: 2026-11-11 05:09 KST · 기준 커밋 c4c166cb
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-11 Merge pull request #986 from Openhash-Gopang/feat/gov-sp-monthly-review
+- 2026-11-11 feat(gov-sp): 월간 검토(최신성 갱신 + 사용자 피드백 반영) 장부·CI 게이트·P14/§FEEDBACK 신설
 - 2026-11-11 Merge pull request #985 from Openhash-Gopang/feat/gov-instance-check
 - 2026-11-11 feat(gov-sp): 출자출연 팀 SP-ORGDIV 86·ORG 템플릿 16·도 루트 템플릿에 §2-MAP 반영
 - 2026-11-11 Merge pull request #984 from Openhash-Gopang/feat/gov-instance-check
@@ -42,8 +44,6 @@
 - 2026-11-10 feat(auth): 무료 한도 첫 안내 및 소진 임박 충전 알림 (user-badge)
 - 2026-11-10 Merge pull request #966 from Openhash-Gopang/feat/pc-idle-logout
 - 2026-11-10 feat: PC 비활동 30분 자동 로그아웃 (K 서비스 공용 로그인)
-- 2026-11-10 Merge pull request #965 from Openhash-Gopang/feat/device-link-number-match
-- 2026-11-10 feat: PC 로그인 숫자 대조 — 폰에서 PC 화면의 숫자를 골라야 승인
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
