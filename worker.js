@@ -23228,6 +23228,11 @@ async function _fetchKPublicCommon() {
   if (_kPublicCommonFailedAt && (now - _kPublicCommonFailedAt) < _MANIFEST_FAIL_RETRY_MS) return _kPublicCommonCache || '';
   try {
     _kPublicCommonCache = await _fetchByManifestKeyFromGithub('K-Public_common');
+    // 갱신 공유 다이제스트(모든 정부 AI 공유 — docs/GOV-SP-UPDATE-SHARING_v1_0.md). 실패해도 본문은 쓴다.
+    try {
+      const _digest = await _fetchByManifestKeyFromGithub('GOV-UPDATE-DIGEST');
+      if (_digest) _kPublicCommonCache = _kPublicCommonCache + '\n\n---\n\n' + _digest;
+    } catch (_e) { /* 다이제스트 없이 진행 */ }
     _kPublicCommonCacheAt = now;
     _kPublicCommonFailedAt = 0;
   } catch (e) {

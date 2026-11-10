@@ -16,6 +16,8 @@ on:
       - 'prompts/SP-10_kpublic_*.txt'
       - 'data/gov-sp-review/**'
       - 'tools/gov_sp_monthly_review.py'
+      - 'tools/sp_update_log.py'
+      - 'data/sp-update-log/**'
   workflow_dispatch:
     inputs:
       action:
@@ -47,6 +49,9 @@ jobs:
           HONDI_WORKER_URL: https://hondi-proxy.tensor-city.workers.dev
         run: python3 tools/triage_feedback.py
       # 2) 월간 장부 개설
+      # 2-1) 공유 다이제스트 재생성(최근 90일 창이 매월 이동)
+      - name: Regenerate shared update digest
+        run: python3 tools/sp_update_log.py digest
       - name: Open ledger
         env:
           POCKETBASE_URL: ${{ secrets.POCKETBASE_URL }}
@@ -61,7 +66,7 @@ jobs:
           M=$(TZ=Asia/Seoul date +%Y-%m)
           git config user.name "github-actions[bot]"; git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b "gov-sp-review/$M"
-          git add "data/gov-sp-review/$M.json"
+          git add "data/gov-sp-review/$M.json" prompts/gov-tree/00-common/GOV-UPDATE-DIGEST.md
           git diff --staged --quiet && { echo "장부 변경 없음(이미 개설됨)"; exit 0; }
           git commit -m "chore(gov-sp): $M 월간 검토 장부 개설"
           git push -u origin "gov-sp-review/$M"
@@ -73,9 +78,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      # 정부 SP를 바꾼 PR은 갱신 기록(언제·어떻게·왜)을 함께 추가해야 하고 공유 다이제스트가 원장과 맞아야 한다
+      - name: Require update-log entry for changed gov SPs
+        if: github.event_name == 'pull_request'
+        run: python3 tools/sp_update_log.py check-pr --base origin/${{ github.base_ref }}
       - name: Check monthly review ledger
         id: chk
         run: python3 tools/gov_sp_monthly_review.py check --pr-gate | tee /tmp/chk.txt; exit ${PIPESTATUS[0]}

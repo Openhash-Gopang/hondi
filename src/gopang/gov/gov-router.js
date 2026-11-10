@@ -350,7 +350,31 @@ function _renderGovCommonOverlay(template, rec) {
     .replaceAll('{관할예시_문구}', rec.관할예시_문구 || '');
 }
 
+// ── 갱신 공유 다이제스트(GOV-UPDATE-DIGEST) — 모든 정부 AI가 공유하는 SP 갱신 기록 ──
+// 원장 data/sp-update-log/log.jsonl → tools/sp_update_log.py digest 가 생성. 절차:
+// docs/GOV-SP-UPDATE-SHARING_v1_0.md. 도별 캐시(_govCommonByProvince)와 별개로 1시간
+// TTL로 가져와 붙인다(갱신 기록은 SP 본문보다 자주 바뀜). 실패해도 응답을 막지 않는다.
+let _govUpdateDigest = '';
+let _govUpdateDigestAt = 0;
+async function _loadGovUpdateDigest() {
+  const now = Date.now();
+  if (_govUpdateDigestAt && now - _govUpdateDigestAt < 3600000) return _govUpdateDigest;
+  try {
+    _govUpdateDigest = await _fetchByManifestKey('GOV-UPDATE-DIGEST');
+  } catch (e) {
+    console.warn('[gov-router] GOV-UPDATE-DIGEST 로드 실패(없이 진행):', e.message);
+  }
+  _govUpdateDigestAt = now;
+  return _govUpdateDigest;
+}
+
 async function _loadGovCommon() {
+  const base = await _loadGovCommonBase();
+  const digest = await _loadGovUpdateDigest();
+  return digest ? base + '\n\n---\n\n' + digest : base;
+}
+
+async function _loadGovCommonBase() {
   // 2026-07-05: GOV-COMMON-CORE(자체 발명한 "전국 공통 원칙") 폐기.
   // kgov(전국 공통, 실사용 중인 K-Public SP) + OVERLAY(도별 사실) +
   // JEJU-TREE-PROTOCOL(도 트리 전용 기술 프로토콜)로 대체 — 캐시 변수
