@@ -228,6 +228,21 @@ def sp_stems():
     return out
 
 
+def normalize_sp_id(raw, stems):
+    """화면 신고(라우팅 trace 유래)·태그의 SP ID → 파일 stem. 못 찾으면 'unattributed'.
+    예: SP-EMD-한림읍 → SP-EMD-TEMPLATE, SP-CITYDEPT-JEJU-WELFARE → SP-CITYDEPT-WELFARE-TEMPLATE, SP-POLICY-LAZY(BMTC) → SP-NAT-POLICY-BMTC"""
+    key = re.sub(r'_v[\d.]+(\.[a-z]+)?$', '', (raw or '').strip()).lower()
+    if key in stems: return stems[key]
+    if key.replace('-template', '') in stems: return stems[key.replace('-template', '')]
+    m = re.match(r'^sp-(?:policy|nat)-lazy\(([^)]+)\)$', key)
+    if m and f'sp-nat-policy-{m.group(1)}' in stems: return stems[f'sp-nat-policy-{m.group(1)}']
+    m = re.match(r'^sp-citydept-[a-z0-9]+-([a-z0-9]+)$', key)
+    if m and f'sp-citydept-{m.group(1)}-template' in stems: return stems[f'sp-citydept-{m.group(1)}-template']
+    if key.startswith('sp-emd-') and 'sp-emd-template' in stems: return stems['sp-emd-template']
+    if key.startswith('sp-city-') and 'sp-city-template' in stems: return stems['sp-city-template']
+    return 'unattributed'
+
+
 def tally_feedback(items):
     """미반영(new) 피드백을 SP별로 집계한다.
     규칙: 세는 분류만(COUNTED_CATEGORIES) · 같은 사용자의 같은 내용(dk 또는 원문)은 1건 · 한 사용자는 SP당 PER_USER_CAP건까지.
@@ -236,8 +251,7 @@ def tally_feedback(items):
     for it in sorted(items, key=lambda x: x.get('created', '')):
         if (it.get('category') or '') not in COUNTED_CATEGORIES: continue
         raw_sp = (it.get('context_sp') or '').strip()
-        key = re.sub(r'_v[\d.]+(\.[a-z]+)?$', '', raw_sp).lower()
-        sp = stems.get(key) or stems.get(key.replace('-template', '')) or 'unattributed'
+        sp = normalize_sp_id(raw_sp, stems)
         user = it.get('guid') or f"anon:{it.get('id')}"
         dk = _meta(it).get('dk') or re.sub(r'\s+', ' ', (it.get('raw_text') or '').lower())[:80]
         if (sp, user, dk) in seen: continue

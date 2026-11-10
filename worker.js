@@ -6346,6 +6346,36 @@ async function _interceptSpFeedback(env, dataObj, guid, ctx) {
   }
 }
 
+// ── 정부 AI 답변 "문제 신고" (2026-11-11 신설) ─────────────────────────
+// 화면의 신고 버튼(src/gopang/ui/answer-report.js)이 보내는 결정적 수집 경로 — 모델이 태그를 내지
+// 않아도 사용자 제안·버그 신고·개선 요청이 SP별로 쌓인다. 인증 게이트(MANDATORY_AUTH_PATHS)를 거쳐
+// body.guid 는 검증된 값이며, 사용자는 태그 경로와 같은 방식으로 해시해 저장한다(중복·집계 일관).
+const _SP_REPORT_KINDS = { wrong_info: 'bug', outdated: 'bug', missing: 'feature_request', wrong_agency: 'bug', suggestion: 'feature_request', other: 'complaint' };
+const _SP_REPORT_LABEL = { wrong_info: '틀린 정보', outdated: '오래된 정보', missing: '빠진 안내', wrong_agency: '소관(기관) 안내 오류', suggestion: '개선 제안', other: '기타' };
+const _SP_REPORT_ID_RE = /^[\w가-힣().,/:-]{3,120}$/;
+async function handleSpAnswerReport(bodyText, env, corsHeaders) {
+  let body;
+  try { body = JSON.parse(bodyText); } catch { return _err(400, 'INVALID_JSON', '', corsHeaders); }
+  if (!body?.guid) return _err(401, 'AUTH_REQUIRED', '로그인이 필요합니다', corsHeaders);
+  const kind = _SP_REPORT_KINDS[body.kind] ? body.kind : null;
+  if (!kind) return _err(400, 'SCHEMA_ERROR', 'kind 는 ' + Object.keys(_SP_REPORT_KINDS).join('|'), corsHeaders);
+  const spId = _SP_REPORT_ID_RE.test(String(body.sp_id || '')) ? String(body.sp_id) : 'unspecified';
+  const comment = _maskSpFeedbackText(body.comment || '');
+  const rawText = comment || `(${_SP_REPORT_LABEL[kind]} — 설명 없음)`;
+  const userKey = 'h:' + (await _sha256Hex(String(body.guid))).slice(0, 16);
+  const dk = (await _sha256Hex(spId + '|' + kind + '|' + rawText.toLowerCase().replace(/\s+/g, ' '))).slice(0, 12);
+  const trace = Array.isArray(body.trace) ? body.trace.slice(-6).map(x => String(x).slice(0, 60)).join('>') : '';
+  const res = await fetch(`${L1_DEFAULT}/api/collections/user_feedback/records`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ guid: userKey, raw_text: rawText, context_sp: spId,
+      context_summary: `kind=${kind};src=ui;dk=${dk};trace=${trace}`.slice(0, 480),
+      category: _SP_REPORT_KINDS[kind], status: 'new' }),
+  }).catch(() => null);
+  if (!res || !res.ok) return _err(503, 'SP_REPORT_SAVE_FAILED', '저장하지 못했습니다', corsHeaders);
+  const saved = await res.json().catch(() => ({}));
+  return new Response(JSON.stringify({ ok: true, id: saved.id || null }), { status: 200, headers: corsHeaders });
+}
+
 // ── AGY_VAULT_STORE 인터셉트 헬퍼 (2026-08-10 신설) ──────────────────
 // handleGovRelay가 반환하는 모든 "최종 응답" data 객체는 반환 직전에
 // 반드시 이걸 거쳐야 한다 — 원래 첫 LLM 응답 한 곳에만 인라인으로
@@ -12935,7 +12965,7 @@ async function _sweepBridgeOutbox(env) {
 
 // 2026-07-18 신설 — 테스트 목적 named export. 런타임 동작에는 영향 없음
 // (default export의 fetch 핸들러는 그대로 pathname 매칭으로 호출).
-export { _gdcEvaluateCreditServer, handleBizOrder, handleGdcTransfer, _gdcCheckTransferLimits, _gdcKstDayStartMs, handleGdcTestLoanApply, _gdcCheckLoanLimits, handleGdcDepositClose, handleGdcDaoProposalCreate, handleGdcDaoVote, handleGdcDaoProposalsList, handleFeeRate, handleInsClaimCreate, handleInsClaimsList, handleVerifyAdmin, _natAgencyExtractName, _parseInstanceEnrichTag, _parseSpFeedbackTags, _interceptSpFeedback };
+export { _gdcEvaluateCreditServer, handleBizOrder, handleGdcTransfer, _gdcCheckTransferLimits, _gdcKstDayStartMs, handleGdcTestLoanApply, _gdcCheckLoanLimits, handleGdcDepositClose, handleGdcDaoProposalCreate, handleGdcDaoVote, handleGdcDaoProposalsList, handleFeeRate, handleInsClaimCreate, handleInsClaimsList, handleVerifyAdmin, _natAgencyExtractName, _parseInstanceEnrichTag, _parseSpFeedbackTags, _interceptSpFeedback, handleSpAnswerReport };
 
 // ═══════════════════════════════════════════════════════════
 // K-TRAFFIC / K-LOGISTICS 실매칭 백엔드 (2026-07-26 신설)
@@ -14979,7 +15009,7 @@ export default {
     // 이미 있던 별개의 지갑 기반 세션 시스템(auth.js의 _issueSession, Ed25519
     // 서명)과 충돌 — 두 인증 오버레이가 동시에 뜨는 등 불안정을 일으켜 원상
     // 복귀한다. 메인 채팅 인증은 계속 그 기존 지갑 세션에 맡긴다.
-    const MANDATORY_AUTH_PATHS = ['/klaw/relay', '/kplan/relay', '/kjit/relay', '/kcity/relay', '/gov/relay'];
+    const MANDATORY_AUTH_PATHS = ['/klaw/relay', '/kplan/relay', '/kjit/relay', '/kcity/relay', '/gov/relay', '/user-feedback/sp-report'];
     if (MANDATORY_AUTH_PATHS.some(p => pathname === p || pathname.startsWith(p))) {
       let _gateBody;
       try { _gateBody = JSON.parse(bodyText); } catch {
@@ -15006,6 +15036,7 @@ export default {
       bodyText = _pg.bodyText;
     }
 
+    if (pathname === '/user-feedback/sp-report')  return handleSpAnswerReport(bodyText, env, corsHeaders);   // 인증 게이트 통과 후(guid 검증됨)
     if (pathname === '/chat/completions')        return callDeepSeek(bodyText, env, corsHeaders, null, _meta, ctx);
     if (pathname.startsWith('/deepseek'))        return callDeepSeek(bodyText, env, corsHeaders, null, _meta, ctx);
     if (pathname === '/llm/relay')               return handleLLMRelay(bodyText, env, corsHeaders, _meta);
