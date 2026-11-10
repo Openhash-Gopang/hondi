@@ -515,7 +515,7 @@
     '#hondi-user-badge .hub-head .hub-av{width:44px;height:44px;font-size:18px}' +
     '#hondi-user-badge .hub-head-txt{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:3px}' +
     '#hondi-user-badge .hub-menu b{font-weight:600;font-size:15px;line-height:1.25;word-break:break-all;color:var(--hub-on)}' +
-    '#hondi-user-badge .hub-note{margin:8px 0 0;font-size:12.5px;line-height:1.45;color:var(--hub-var)}' +
+    '#hondi-user-badge .hub-note{margin:8px 0 0;font-size:14px;line-height:1.45;color:var(--hub-var)}' +
     '#hondi-user-badge .hub-btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:40px;margin-top:10px;padding:0 16px;border-radius:20px;border:0;background:var(--hub-tonal);color:var(--hub-tonal-on);font:inherit;font-size:14px;font-weight:600;letter-spacing:.01em;cursor:pointer;transition:filter .12s,box-shadow .12s}' +
     '#hondi-user-badge .hub-btn:hover{filter:brightness(.96)}' +
     '#hondi-user-badge .hub-btn:focus-visible{outline:2px solid var(--hub-pri);outline-offset:2px}' +
@@ -531,7 +531,7 @@
       '#hondi-user-badge .hub-dot{border-color:#2b2f36}' +
       '#hondi-user-badge .hub-av{--hub-av-bg:#3b4660;--hub-av-fg:#d6e3ff}' +
     '}' +
-    '#hondi-user-badge .hub-quota{margin-top:12px;font-size:13px;color:var(--hub-on)}' +
+    '#hondi-user-badge .hub-quota{margin-top:12px;font-size:14px;color:var(--hub-on)}' +
     '#hondi-user-badge .hub-bar{height:4px;border-radius:2px;background:var(--hub-track);margin-top:8px;overflow:hidden}' +
     '#hondi-user-badge .hub-bar-fill{height:100%;background:var(--hub-ok);border-radius:2px}' +
     '#hondi-user-badge .hub-bar-fill.hub-over{background:var(--hub-err)}' +
@@ -543,8 +543,8 @@
     '#hondi-user-badge .hub-more svg{width:20px;height:20px;fill:currentColor}' +
     '[data-hondi-user-slot="dark"] #hondi-user-badge .hub-more{color:#fff}' +
     '[data-hondi-user-slot="dark"] #hondi-user-badge .hub-more:hover{background:rgba(255,255,255,.18)}' +
-    '#hondi-user-badge .hub-name{margin:10px 0 0;font-size:12.5px;color:var(--hub-var);line-height:1.6}' +
-    '#hondi-user-badge .hub-name-val{display:inline-flex;align-items:center;gap:5px;max-width:100%;padding:2px 7px;margin-left:3px;border:1px dashed var(--hub-var);border-radius:8px;background:transparent;color:var(--hub-on);font:inherit;font-size:13px;font-weight:600;cursor:text;text-align:left;word-break:break-all}' +
+    '#hondi-user-badge .hub-name{margin:10px 0 0;font-size:14px;color:var(--hub-var);line-height:1.6}' +
+    '#hondi-user-badge .hub-name-val{display:inline-flex;align-items:center;gap:5px;max-width:100%;padding:2px 7px;margin-left:3px;border:1px dashed var(--hub-var);border-radius:8px;background:transparent;color:var(--hub-on);font:inherit;font-size:14px;font-weight:600;cursor:text;text-align:left;word-break:break-all}' +
     '#hondi-user-badge .hub-name-val:hover{background:var(--hub-tonal)}' +
     '#hondi-user-badge .hub-name-val:focus-visible{outline:2px solid #2563eb;outline-offset:2px}' +
     '#hondi-user-badge .hub-name-val.hub-empty{font-weight:400;color:var(--hub-var)}' +
@@ -552,9 +552,9 @@
     '#hondi-user-badge .hub-name-edit{display:flex;gap:6px;margin-top:6px}' +
     '#hondi-user-badge .hub-name-input{flex:1 1 auto;min-width:0;box-sizing:border-box;padding:7px 9px;border:1px solid var(--hub-line);border-radius:8px;font:500 14px/1.3 Pretendard,system-ui,sans-serif;color:var(--hub-on);background:var(--hub-surf)}' +
     '#hondi-user-badge .hub-name-input:focus{outline:none;border-color:var(--hub-pri);box-shadow:0 0 0 1px var(--hub-pri)}' +
-    '#hondi-user-badge .hub-name-edit .hub-btn{display:inline-flex;width:auto;margin-top:0;min-height:34px;padding:0 12px;border-radius:17px;font-size:13px;flex:none}' +
+    '#hondi-user-badge .hub-name-edit .hub-btn{display:inline-flex;width:auto;margin-top:0;min-height:34px;padding:0 12px;border-radius:17px;font-size:14px;flex:none}' +
     '#hondi-user-badge .hub-name-edit .hub-btn:disabled{opacity:.5;cursor:not-allowed}' +
-    '#hondi-user-badge .hub-name-msg{min-height:1.2em;margin:4px 0 0;font-size:12px;color:var(--hub-err);font-weight:500}' +
+    '#hondi-user-badge .hub-name-msg{min-height:1.2em;margin:4px 0 0;font-size:14px;color:var(--hub-err);font-weight:500}' +
     '@media (prefers-color-scheme:dark){#hondi-user-badge .hub-more:hover{background:rgba(255,255,255,.14)}}' +
     '#hondi-blocked-modal{position:fixed;inset:0;z-index:2147482500;background:rgba(15,23,42,.62);display:flex;align-items:center;justify-content:center;padding:16px}' +
     '#hondi-blocked-modal .hub-modal{width:min(440px,100%);box-sizing:border-box;background:#fff;color:#0f172a;border-radius:16px;padding:22px 22px 18px;font:500 16px/1.6 Pretendard,system-ui,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.35)}' +
