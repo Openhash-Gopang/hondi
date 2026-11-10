@@ -2018,6 +2018,15 @@ async function _l1GetBalanceKRW(guid) {
 // ═══════════════════════════════════════════════════════════
 function _gdcFreeTestOn(env) { return !!env && env.GDC_FREE_TEST === '1'; }
 
+// 👑 관리자 면제 — 2026-11-10 (주피터 지시): env.OWNER_UNLIMITED_GUIDS(쉼표 구분 guid 목록)에 든 계정은
+//   무료 한도·GDC 잔액 게이트와 GDC 차감을 모두 건너뛴다(사용량 기록 _recordAiUsage는 그대로 남아 원가 집계 가능).
+//   예외: 관리자 수동 차감 'admin-correction'은 그대로 차감. 끄는 법: Cloudflare 변수 OWNER_UNLIMITED_GUIDS 삭제.
+//   wrangler.toml에는 넣지 않는다(secret/변수로만 등록).
+function _ownerUnlimited(env, guid) {
+  if (!guid || !env || !env.OWNER_UNLIMITED_GUIDS) return false;
+  return String(env.OWNER_UNLIMITED_GUIDS).split(',').map(x => x.trim()).filter(Boolean).includes(String(guid));
+}
+
 // ═══════════════════════════════════════════════════════════
 // 🧪 테스트 계정 한도·유예·차단 + 정식 계정 전환 — 2026-10-27 (주피터 지시)
 //   · [2026-11-06 개정] 모든 계정이 전화 인증 후 AI 사용 비용 FREE_TRIAL_KRW(기본 100원) 또는 FREE_TRIAL_HOURS(기본 24시간) 중 먼저 오는 때까지 무료.
@@ -2072,11 +2081,13 @@ async function _freeTrialActive(env, guid) {
   return !ev || (ev.status === 'active' && ev.phase !== 'extra');   // 추가 사용량 단계('extra')는 GDC를 실제로 차감한다
 }
 async function _gdcFreeFor(env, guid) {
+  if (_ownerUnlimited(env, guid)) return true; // 👑 관리자 면제
   if (!_gdcFreeTestOn(env)) return false;
   return await _freeTrialActive(env, guid);
 }
 // 무료로 처리한 사용분을 무료 이용 한도에 누적한다(모든 계정)
 async function _testQuotaAdd(env, guid, krw, dedupKey = null) {
+  if (_ownerUnlimited(env, guid)) return; // 👑 관리자 면제 — 무료 이용 한도에 누적하지 않는다
   if (!(Number(krw) > 0) || !_gdcFreeTestOn(env)) return;
   // 같은 정산 키(settlementKey)는 한 번만 센다 — 백그라운드 작업이 취소돼 10분 스윕이 같은 건을 다시 정산해도 중복 누적되지 않는다
   await _testQuotaAddSpend(env.AI_SETUP_SEALS_KV, guid, krw, Date.now(), _testQuotaConfig(env), dedupKey);
@@ -2100,6 +2111,7 @@ async function _testQuotaBlockedResponse(env, guid, corsHeaders) {
 }
 
 async function _gdcFreeQuotaGate(env, guid, corsHeaders, meta) {
+  if (_ownerUnlimited(env, guid)) return null; // 👑 관리자 면제
   const _tqBlock = await _testQuotaBlockedResponse(env, guid, corsHeaders); // 🧪 유예가 끝난 테스트 계정은 여기서 막는다
   if (_tqBlock) return _tqBlock;
   if (await _gdcFreeFor(env, guid)) return null; // 🧪 GDC 무료 테스트 모드
