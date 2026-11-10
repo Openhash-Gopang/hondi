@@ -21620,7 +21620,7 @@ const KLAW_TIER_MODELS = {
   'klaw-flash': { backendModel: 'deepseek-v4-flash', price: { cacheHit: 0.0028, cacheMiss: 0.14,  output: 0.28 } }, // 인터뷰·분석 — 경량
   'klaw-pro':   { backendModel: 'deepseek-v4-pro',   price: { cacheHit: 0.0145, cacheMiss: 0.435, output: 0.87 } }, // STEP 0~C 판결 생성 — 추론
 };
-const KLAW_USER_DAILY_KRW_LIMIT   = 300;    // 1인 1일 한도(원)
+const KLAW_USER_DAILY_KRW_LIMIT   = Infinity; // 1인 1일 금액 한도 — 2026-11-10 해제(주피터 지시, 기존 300원). 사용액 기록은 그대로 남는다. 전체 이용자 합계 상한(아래)과 1인 1일 판결 횟수 한도는 유지
 const KLAW_GLOBAL_DAILY_KRW_LIMIT = 30000;  // 계정 전체 1일 예산 상한(원) — 공유 계정 보호
 const KLAW_USER_DAILY_STEP_LIMIT  = 3;      // 1인 1일 "판결 생성"(STEP 0~C) 횟수 한도
 
