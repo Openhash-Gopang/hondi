@@ -128,6 +128,8 @@ import { assembleGovSystemPrompt, resolveGovAgency, resolveProvinceCode, resolve
 import { escHtml, appendBubble, appendTyping }
   from '/src/gopang/ui/chat-shell.js';
 import { mountChatInput, THEME_LINE_GREEN } from '/src/gopang/ui/chat-input.js';
+// 2026-11-11 — 답변마다 "문제 신고": 사용자 피드백을 SP별로 확실히 수집(docs/GOV-SP-UPDATE-SHARING_v1_0.md)
+import { attachAnswerReport } from '/src/gopang/ui/answer-report.js';
 // ★ 2026-08-13 신설 — GOV_TASK_SCHEMA_LOOKUP/DRAFT_REQUEST/SUBMIT_REQUEST
 // 태그 처리(사고실험으로 발견: 이 페이지엔 지금까지 이 처리가 전혀 없어
 // kgov가 이 태그들을 내도 화면에 브라켓 원문이 그대로 노출되거나 무시된
@@ -429,7 +431,14 @@ const ci = mountChatInput(document.getElementById('chat-input-slot'), {
       typing.remove();
       let shown = reply, blocks = [];
       if (_live) { const p = parseBlockTags(reply, _live.config.blocks); shown = p.text; blocks = p.blocks; }
-      if (shown) appendBubble('ai', escHtml(shown).replace(/\n/g, '<br>'));
+      if (shown) {
+        const _aiBubble = appendBubble('ai', escHtml(shown).replace(/\n/g, '<br>'));
+        try {
+          attachAnswerReport(_aiBubble, { trace: _lastGovTrace, proxy: PROXY,
+            getToken: () => (window.KAuth && KAuth.hasValidLogin()) ? KAuth.getToken() : null,
+            getGuid: () => _loadUser()?.ipv6 || null });
+        } catch (e) { console.warn('[RegionalGov] 문제 신고 UI 부착 실패(무시):', e.message); }
+      }
       _postParent({ type: 'gov-embed-reply', text: shown || '' });   // 부모 페이지가 「작성된 문서」 카드를 채우는 데 쓴다
       for (const b of blocks) {
         const node = renderBlock(b, _live.config, { onAsk: (t) => { ci.setText(t); ci.el.sendBtn.click(); } });
@@ -638,6 +647,7 @@ const _applyLiveName = () => { if (_live && _live.config.name) document.title = 
 const _govDirectCode = _site ? _site.govCode : (_qs.get('gov_code') || null);
 let _govDirectCodeUsed = false;
 
+let _lastGovTrace = [];   // 가장 최근 답변의 라우팅 경로 — 문제 신고에 SP ID를 붙이는 데 쓴다
 async function _callAI(latestUserText, typingEl) {
   let sp = '이 지역 정부기관 안내를 도와드립니다.', trace = [], agency = 'gov_do', provinceCode = null;
   try {
@@ -673,6 +683,7 @@ async function _callAI(latestUserText, typingEl) {
     }
     sp = r.systemPrompt;
     trace = r.trace || [];
+    _lastGovTrace = trace;
     agency = resolveGovAgency(trace) || 'gov_do';
     provinceCode = resolveProvinceCode();
     _lastAgency = agency;

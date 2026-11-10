@@ -23,9 +23,9 @@ SP마다 "피드백이 몇 건 쌓였나"를 세고 갱신 여부를 정하는 �
 
 | 단계 | 방법 | 어디서 |
 |---|---|---|
-| **1. 수집** | SP가 사용자의 제안·버그 신고·개선 요청·불만·정정을 감지하면 응답 끝에 `[USER_FEEDBACK: sp="SP-ID", kind="bug|suggestion|improvement|correction|complaint", raw="발화"]` 를 낸다. 웹 검색으로 다른 최신 사실을 발견하면 `[SP_UPDATE_SIGNAL: sp=…, what=…, source=…, published=…]`. | 각 SP 본문 §UPDATE-RULE(SP ID 포함) |
-| **2. 저장** | 서버(`/gov/relay`의 모든 최종 응답)가 태그를 읽어 `user_feedback`에 저장하고 **사용자 화면에서는 지운다**. 개인정보는 마스킹(전화·이메일)하고, 사용자는 해시(`h:…`)로만 남긴다. SP ID 형식이 틀리면 `unspecified`. 응답당 3건까지. | `worker.js` `_interceptSpFeedback` (스키마 변경 없음) |
-| **3. 집계** | SP ID별 **미반영(status=new)** 건수. 세는 것: bug·feature_request·complaint·update_signal. 안 세는 것: 칭찬·단순 질문. **같은 사용자의 같은 내용은 1건, 한 사용자는 SP당 3건까지**(몰아넣기 방지). 버전 접미사·`-TEMPLATE`는 같은 SP로 합친다. | `tools/sp_update_log.py feedback-status` |
+| **1. 수집** | **(a) 화면 신고(결정적)**: 정부 AI 답변마다 "이 답변에 문제가 있나요? 신고·제안" 링크가 붙고, 틀린 정보·오래된 정보·빠진 안내·소관 안내 오류·개선 제안·기타 중 하나와 선택 설명을 보낸다. 이 답변을 처리한 SP ID는 라우팅 trace에서 자동으로 붙는다(로그인한 사용자만, `/user-feedback/sp-report`). **(b) SP 태그(보조)**: SP가 사용자의 제안·버그 신고·개선 요청·불만·정정을 감지하면 응답 끝에 `[USER_FEEDBACK: sp="SP-ID", kind="bug|suggestion|improvement|correction|complaint", raw="발화"]` 를 낸다. 웹 검색으로 다른 최신 사실을 발견하면 `[SP_UPDATE_SIGNAL: sp=…, what=…, source=…, published=…]`. | 각 SP 본문 §UPDATE-RULE(SP ID 포함) |
+| **2. 저장** | 서버가 신고와 태그(`/gov/relay`의 모든 최종 응답)를 읽어 `user_feedback`에 저장하고 **사용자 화면에서는 지운다**. 개인정보는 마스킹(전화·이메일)하고, 사용자는 해시(`h:…`)로만 남긴다. SP ID 형식이 틀리면 `unspecified`. 응답당 3건까지. | `worker.js` `handleSpAnswerReport`·`_interceptSpFeedback`, `src/gopang/ui/answer-report.js` (스키마 변경 없음) |
+| **3. 집계** | SP ID별 **미반영(status=new)** 건수. 세는 것: bug·feature_request·complaint·update_signal. 안 세는 것: 칭찬·단순 질문. **같은 사용자의 같은 내용은 1건, 한 사용자는 SP당 3건까지**(몰아넣기 방지). 버전 접미사·`-TEMPLATE`는 같은 SP로 합치고, 화면 신고의 trace 유래 ID는 파일로 정규화한다(`SP-EMD-한림읍`→`SP-EMD-TEMPLATE`, `SP-CITYDEPT-JEJU-WELFARE`→`SP-CITYDEPT-WELFARE-TEMPLATE`, `SP-POLICY-LAZY(BMTC)`→`SP-NAT-POLICY-BMTC`). | `tools/sp_update_log.py feedback-status` |
 | **4. 결정** | **집계 ≥ 10 → 갱신 필요**(기계적 판정). 매일 점검이 SP별 GitHub 이슈를 한 건 열고(이미 있으면 생략), `due`·월간 장부가 같은 기준을 쓴다. 10건 미만은 "대기 n/10"이며 월간 검토에서 사람이 `rejected`/`deferred`로 정리하거나 조기 갱신을 선택할 수 있다. SP를 특정 못 한 건(`unspecified`)은 월간 검토에서 사람이 SP를 배정한다. | `feedback-decide --open-issues` (`gov-sp-monthly-review.yml` 매일) |
 | **5. 갱신·종결** | 갱신 후 `add --resolve-feedback`로 원장에 기록하면 반영된 피드백이 `reflected`로 닫혀 **집계가 0으로 돌아간다**. 반영하지 않기로 한 건은 `feedback-resolve --status rejected|deferred --note 사유`. | `add` / `feedback-resolve` |
 
@@ -77,7 +77,8 @@ SP마다 "피드백이 몇 건 쌓였나"를 세고 갱신 여부를 정하는 �
 ## 한계(정직하게)
 
 - SP는 스스로 파일을 고치지 못한다. "스스로 갱신"은 위 갱신 작업이 대신 수행하며, 런타임에서는 다이제스트 참조와 신호 발행까지가 SP의 몫이다.
-- 태그 수집은 `/gov/relay`(정부 AI 중계) 응답에만 연결됐다. 다른 경로(직접 호출 등)는 기존 클라이언트 처리(`call-ai.js`)가 `sp` 값을 `context_sp`로 저장한다. 모델이 태그를 내지 않으면 수집되지 않는다 — 화면의 "이 답변 문제 신고" 버튼 같은 결정적 수집 경로는 아직 없다(다음 단계).
+- 화면 신고 버튼은 지방행정 AI 페이지(`pages/regional-gov.html`)에만 붙였다. 다른 정부 AI 화면(국가기관·전문가 등)에는 같은 모듈(`attachAnswerReport`)을 붙이면 된다. 태그 수집은 `/gov/relay` 응답에만 연결됐고, 다른 경로는 기존 클라이언트 처리(`call-ai.js`)가 `sp` 값을 `context_sp`로 저장한다. 모델이 태그를 내지 않아도 화면 신고로는 수집된다.
+- 신고는 로그인한 사용자만 보낼 수 있다(전화번호 인증 토큰). 가짜 사용자 대량 생성으로 건수를 부풀리는 것을 막는 장치는 사용자 해시·같은 내용 1건·사용자당 SP별 3건 상한뿐이며, 서로 다른 인증 계정을 많이 만드는 공격은 막지 못한다(월간 검토에서 이상 패턴 확인).
 - `sp` 값은 모델이 SP 본문에서 읽어 쓰는 값이라 틀릴 수 있다(형식이 틀리면 `unspecified`로 분류, 알려진 SP 이름과 맞지 않으면 `unattributed`).
 - 다이제스트는 길이 상한(9KB)이 있어 오래된/많은 기록은 원장 참조로 줄어든다. 기록이 많은 일괄 갱신은 묶음(`sp_ids` 글로브)으로 한 줄에 기록한다.
 - 최초 기록 4건은 모두 `unverified`다(사용자 지시에 따른 구조 변경이며 법령·번호는 담당자 검증 필요).
