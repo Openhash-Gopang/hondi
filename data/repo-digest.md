@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-11 06:24 KST · 기준 커밋 f4fb92c1
+- 갱신: 2026-11-11 06:25 KST · 기준 커밋 48107b3a
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-11 fix: 폰 본인 확인 — 숫자를 누르면 바로 승인, '본인이 맞습니다' 버튼·불필요한 문구 삭제
 - 2026-11-11 Merge pull request #991 from Openhash-Gopang/feat/gov-answer-report
 - 2026-11-11 feat(gov-sp): 정부 AI 답변마다 '문제 신고' — SP별 피드백의 결정적 수집 경로
 - 2026-11-11 Merge pull request #990 from Openhash-Gopang/feat/gov-sp-feedback-collect
@@ -43,7 +44,6 @@
 - 2026-11-11 feat(prompts): 모든 정부 AI에 기능·역할 최신성 갱신 원칙 신설(호출 시 확인, 월 1회 이상 웹 검색 갱신)
 - 2026-11-11 Merge pull request #973 from Openhash-Gopang/feat/gov-ai-broad-task-map
 - 2026-11-11 feat(prompts): 경찰·건강보험·국민연금·출입국 SP에 소관 전체 업무 지도(§2-MAP) 추가
-- 2026-11-11 Merge pull request #972 from Openhash-Gopang/feat/gov-ai-broad-task-map
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
