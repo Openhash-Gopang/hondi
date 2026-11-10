@@ -2845,10 +2845,43 @@ async function _initGdcWalletAndFs(guid) {
 // 않으므로, 나중에 같은 번호로 다시 가입하면 로컬에 남아있던 PDV 기록·지갑과
 // 함께 자연스럽게 이전 상태로 돌아갈 수 있다 — 서버가 곧 원본인 기존 SNS와
 // 근본적으로 다른 지점이다.
-export async function _deleteMyProfile(phoneE164) {
+// 탈퇴 전 잔액 확인(삭제하지 않음) → { ok, balance_krw, refund_required } 또는 null
+export async function _checkDeleteBalance(phoneE164) {
+  const r = await _postDelete(phoneE164, { check_only: true });
+  return r && r.data && r.data.ok ? r.data : null;
+}
+
+async function _postDelete(phoneE164, extra) {
+  const stored = _loadStored();
+  const guid = stored?.ipv6;
+  if (!guid) { alert('로그인 정보가 없습니다.'); return null; }
+  let body = { guid, phone: phoneE164 || stored.e164 || '', ...(extra || {}) };
+  try {
+    if (typeof window.GopangWallet !== 'undefined') {
+      const wallet = await window.GopangWallet.load().catch(() => null);
+      if (wallet?.publicKeyB64u && typeof wallet.signPayload === 'function') {
+        const ts  = Date.now();
+        const sig = await wallet.signPayload(`delete-profile:${guid}:${ts}`);
+        body = { ...body, ed25519_pubkey: wallet.publicKeyB64u, signature: sig, ts };
+      }
+    }
+  } catch (e) { console.warn('[DeleteProfile] 서명 생성 실패(서명 없이 진행):', e.message); }
+  try {
+    const res = await fetch(`${PROXY_URL}/account/delete-profile`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    return { status: res.status, data: await res.json().catch(() => ({})) };
+  } catch (e) { return { status: 0, data: { ok: false, message: e.message } }; }
+}
+
+export async function _deleteMyProfile(phoneE164, refundAccount) {
   const stored = _loadStored();
   const guid = stored?.ipv6;
   if (!guid) { alert('로그인 정보가 없습니다.'); return false; }
+  if (refundAccount) {
+    const r = await _postDelete(phoneE164, { refund_account: refundAccount });
+    if (!r || !r.data || !r.data.ok) { alert('계정 삭제에 실패했습니다: ' + (r?.data?.message || `HTTP ${r?.status}`)); return false; }
+    try { localStorage.removeItem(STORE_KEY); sessionStorage.removeItem(STORE_KEY); } catch {}
+    return true;
+  }
 
   let body = { guid, phone: phoneE164 || stored.e164 || '' };
   try {
