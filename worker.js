@@ -1091,6 +1091,18 @@ async function handleDeviceLinkInit(request, env, corsHeaders) {
 
   const sessionId = crypto.randomUUID();
   const code = _generateDeviceLinkCode();
+  // 2026-11-10 신설(주피터 지시) — 숫자 대조(승인 피로 공격 방지). PC(로그인 요청자)가 두 자리 숫자를 만들어 pcMatch로 보내면,
+  // 폰 승인 화면에는 그 숫자와 무작위 숫자 2개가 섞여 보이고, 사용자가 PC 화면의 숫자를 골라야만 승인이 진행된다.
+  // 알림이 뜨면 습관적으로 승인하거나, 남이 내 번호로 시작한 로그인을 눌러도 PC 화면을 보고 있지 않으면 맞는 숫자를 알 수 없다.
+  // pcMatch를 보내지 않는 옛 클라이언트는 기존 동작 그대로다(점진 적용).
+  let _pcMatch = null, _matchChoices = null;
+  if ((purpose === 'key_transfer' || purpose === 'sign_request') && /^[1-9][0-9]$/.test(String(body.pcMatch || ''))) {
+    _pcMatch = String(body.pcMatch);
+    const _ds = new Set();
+    while (_ds.size < 2) { const n = 10 + (crypto.getRandomValues(new Uint32Array(1))[0] % 90); if (String(n) !== _pcMatch) _ds.add(String(n)); }
+    _matchChoices = [_pcMatch, ..._ds];
+    for (let i = _matchChoices.length - 1; i > 0; i--) { const j = crypto.getRandomValues(new Uint32Array(1))[0] % (i + 1); [_matchChoices[i], _matchChoices[j]] = [_matchChoices[j], _matchChoices[i]]; }
+  }
   const _geo = await resolveDeviceGeo(env, request, body);       // 카카오 주소(요청 기기 위치) — 실패해도 세션 생성은 계속
   const record = {
     guid: profile.guid, e164, purpose,
@@ -1098,6 +1110,7 @@ async function handleDeviceLinkInit(request, env, corsHeaders) {
     sigMsg: purpose === 'sign_request' ? sigMsg : null,
     pcLabel: pcLabel || '알 수 없는 기기',
     code, attempts: 0, state: 'pending', smsResendCount: 0,
+    pcMatch: _pcMatch, matchChoices: _matchChoices,   // 숫자 대조(정답은 폰에 내려주지 않는다 — matchChoices만 내려간다)
     pcGeo: _geo.address, pcGeoSrc: _geo.src, createdAt: Date.now(),      // 승인 화면 표시용(2026-09-25, 좌표는 저장하지 않음)
   };
   await _dlPut(env, sessionId, record, DEVICE_LINK_TTL_SECONDS);
@@ -1286,6 +1299,7 @@ async function handleDeviceLinkSession(request, env, corsHeaders) {
     purpose: record.purpose || 'key_transfer', // 2026-07-23 신설 — 이전 세션 레코드엔 없을 수 있어 기본값 보정
     sigMsg: record.sigMsg || null,
     pcGeo: record.pcGeo || null, pcGeoSrc: record.pcGeoSrc || null, createdAt: record.createdAt || null,
+    matchChoices: record.matchChoices || null,   // 숫자 대조 후보(섞여 있음). 정답(pcMatch)은 절대 내려주지 않는다
   }), { status: 200, headers: corsHeaders });
 }
 
@@ -1318,6 +1332,12 @@ async function handleDeviceLinkVerify(request, env, corsHeaders) {
     record.attempts += 1;
     await _dlPut(env, sessionId, record, _deviceLinkTtl(record));
     return _err(400, 'CODE_MISMATCH', `코드가 일치하지 않습니다(남은 시도 ${DEVICE_LINK_MAX_ATTEMPTS - record.attempts}회)`, corsHeaders);
+  }
+
+  // 숫자 대조 — 틀리면 이 세션을 바로 폐기한다(찍어서 맞추기 방지, PC에서 처음부터 다시 시작해야 함)
+  if (record.pcMatch && String(body.picked || '') !== record.pcMatch) {
+    await _dlDelete(env, sessionId);
+    return _err(403, 'MATCH_MISMATCH', 'PC 화면의 숫자와 다릅니다. 보안을 위해 이 요청을 취소했습니다. 본인이 시도한 로그인이라면 PC에서 처음부터 다시 시작해 주세요', corsHeaders);
   }
 
   const stepUpCheck = await _verifyStepUpToken(env, step_up_token, record.guid, `device-link:${sessionId}`);

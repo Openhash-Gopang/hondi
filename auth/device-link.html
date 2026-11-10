@@ -90,6 +90,10 @@
   <!-- STEP 2: 승인 대기 (2026-07-20 UX 개선 — 구글 방식, PC에 입력할 코드 없음) -->
   <div class="step" id="step-code">
     <div class="spinner" id="code-spinner"></div>
+    <div id="match-wrap" style="display:none;text-align:center;margin:6px 0 12px">
+      <div style="font-size:13px;color:#374151">폰에 세 개의 숫자가 보이면 아래 숫자를 선택하세요</div>
+      <div id="match-num" style="font-size:44px;font-weight:800;letter-spacing:2px;color:#0057A8;margin-top:4px"></div>
+    </div>
     <p style="text-align:center;font-size:14px;color:#374151;margin-bottom:6px">
       스마트폰 알림을 열어 <strong>"본인이 맞습니다"</strong>를 눌러주세요
     </p>
@@ -148,6 +152,7 @@ import { _buildKrE164, KR_AREA_CODES, krNeededDigitsFor, _restoreFromBackupKey }
   let sessionId = null;
   let pcKeyPair = null;   // { publicKey, privateKey (CryptoKey), publicKeyB64u }
   let e164Used = null;    // sign_request 완료 시 sessionStorage에 캐시하기 위해 기억
+  let pcMatchNum = null; // 숫자 대조용 두 자리 숫자
   let pollTimer = null;
   let countdownTimer = null;
 
@@ -313,6 +318,9 @@ import { _buildKrE164, KR_AREA_CODES, krNeededDigitsFor, _restoreFromBackupKey }
       })();
 
       const initBody = { e164, pcLabel, purpose: PURPOSE };
+      // 숫자 대조(2026-11-10) — 폰에서 이 숫자를 골라야 승인된다
+      pcMatchNum = String(10 + (crypto.getRandomValues(new Uint32Array(1))[0] % 90));
+      initBody.pcMatch = pcMatchNum;
       if (PURPOSE === 'sign_request') {
         if (!SIG_MSG) throw new Error('서명 대상이 없습니다(sigMsg 누락) — 잘못된 요청입니다.');
         initBody.sigMsg = SIG_MSG;
@@ -334,6 +342,8 @@ import { _buildKrE164, KR_AREA_CODES, krNeededDigitsFor, _restoreFromBackupKey }
       sessionId = data.sessionId;
       stepPhone.classList.remove('active');
       stepCode.classList.add('active');
+      $('match-num').textContent = pcMatchNum;
+      $('match-wrap').style.display = '';
       // 2026-07-28 — pushSent(누군가 하나라도 받음) 대신 pushSentToMobile
       // (폰이 실제로 받음)을 기준으로 안내한다. "PC 자신이 예전 구독으로
       // 남아있어서 pushSent:true인데 정작 폰은 못 받는" 사고를 이 화면

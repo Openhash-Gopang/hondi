@@ -190,6 +190,7 @@
         '<div id="ksa-step-devlink" style="display:none">' +
           '<div class="ksa-devlink-wait">' +
             '<div class="ksa-spinner"></div>' +
+            '<div id="ksa-match" style="display:none;text-align:center;margin:0 0 10px"><div style="font-size:12.5px;color:#374151">폰에 세 개의 숫자가 보이면 아래 숫자를 선택하세요</div><div id="ksa-match-num" style="font-size:40px;font-weight:800;letter-spacing:2px;color:#4338CA;margin-top:2px"></div></div>' +
             '<div id="ksa-devlink-status" style="font-size:12.5px;color:#4A5568;text-align:center">스마트폰 알림을 확인해 주세요…</div>' +
             '<div id="ksa-devlink-timer" style="font-size:11px;color:#718096;text-align:center;margin-top:4px"></div>' +
           '</div>' +
@@ -208,6 +209,8 @@
     els.msg          = wrap.querySelector('#ksa-msg');
     els.devlinkBtn   = wrap.querySelector('#ksa-devlink-btn');
     els.devlinkStatus= wrap.querySelector('#ksa-devlink-status');
+    els.matchBox     = wrap.querySelector('#ksa-match');
+    els.matchNum     = wrap.querySelector('#ksa-match-num');
     els.devlinkTimer = wrap.querySelector('#ksa-devlink-timer');
     els.resendPhone  = wrap.querySelector('#ksa-resend-phone');
     els.smsBtn       = wrap.querySelector('#ksa-sms-btn');
@@ -333,12 +336,13 @@
     try {
       var res = await fetch(PROXY + '/auth/device-link/init', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ e164: phone, pcLabel: cfg.serviceLabel, purpose: 'sign_request', sigMsg: sigMsg }),
+        body: JSON.stringify({ e164: phone, pcLabel: cfg.serviceLabel, purpose: 'sign_request', sigMsg: sigMsg, pcMatch: (devlinkMatch = String(10 + (crypto.getRandomValues(new Uint32Array(1))[0] % 90))) }),
       });
       var data = await res.json().catch(function () { return {}; });
       if (!res.ok || !data.ok) throw new Error(data.message || data.detail || '요청에 실패했습니다.');
 
       pendingE164 = phone;
+      var _mEl = wrapMatchEl(); if (_mEl) { _mEl.num.textContent = devlinkMatch; _mEl.box.style.display = ''; }
       devlinkSessionIds = [data.sessionId];
       devlinkAutoResendCount = 0;
       els.stepPhone.style.display = 'none';
@@ -359,6 +363,10 @@
     }
   }
 
+  // 숫자 대조(2026-11-10) — 이번 로그인 시도에서 PC가 보여 주는 두 자리 숫자(자동 재전송 세션도 같은 숫자)
+  var devlinkMatch = null;
+  function wrapMatchEl() { return (els.matchBox && els.matchNum) ? { box: els.matchBox, num: els.matchNum } : null; }
+
   function scheduleDevlinkAutoResend() {
     if (devlinkAutoResendTimer) clearTimeout(devlinkAutoResendTimer);
     if (devlinkAutoResendCount >= DEVLINK_AUTORESEND_MAX) return;
@@ -377,7 +385,7 @@
     try {
       var res = await fetch(PROXY + '/auth/device-link/init', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ e164: pendingE164, pcLabel: cfg.serviceLabel, purpose: 'sign_request', sigMsg: sigMsg }),
+        body: JSON.stringify({ e164: pendingE164, pcLabel: cfg.serviceLabel, purpose: 'sign_request', sigMsg: sigMsg, pcMatch: devlinkMatch }), // 자동 재전송 세션도 같은 숫자를 쓴다
       });
       var data = await res.json().catch(function () { return {}; });
       if (!res.ok || !data.ok) { scheduleDevlinkAutoResend(); return; }

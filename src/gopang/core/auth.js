@@ -926,6 +926,7 @@ function _showDeviceMismatchNotice(found, resolve) {
   function renderWaiting() {
     render(`
       <div style="width:24px;height:24px;border:2.5px solid #e5e7eb;border-top-color:#0057A8;border-radius:50%;animation:_dlSpin 0.8s linear infinite;margin:20px auto"></div>
+      <div id="_dl-match" style="display:none;margin-bottom:10px"><div style="font-size:12.5px;color:#374151">폰에 세 개의 숫자가 보이면 아래 숫자를 선택하세요</div><div id="_dl-match-num" style="font-size:40px;font-weight:800;letter-spacing:2px;color:#0057A8;margin-top:2px"></div></div>
       <p style="font-size:14px;color:#374151;margin-bottom:6px">스마트폰 알림을 열어 <strong>"본인이 맞습니다"</strong>를 눌러주세요</p>
       <p style="font-size:12px;color:#9ca3af;margin-bottom:10px">알림이 도착하기까지 보통 몇 초에서 20초 정도 걸릴 수 있어요. 잠시만 기다려 주세요.</p>
       <div id="_dl-timer" style="font-size:12px;color:#9ca3af;margin-bottom:14px"></div>
@@ -1133,6 +1134,7 @@ function _showDeviceMismatchNotice(found, resolve) {
     setStatus('스마트폰에 요청을 보내는 중...');
     try {
       pcKeyPair = await GopangWallet.generateX25519KeyPair();
+      const _pcMatchNum = String(10 + (crypto.getRandomValues(new Uint32Array(1))[0] % 90));
       const pcLabel = (() => {
         const ua = navigator.userAgent;
         const browser = /Chrome/.test(ua) ? 'Chrome' : /Firefox/.test(ua) ? 'Firefox' : /Safari/.test(ua) ? 'Safari' : '브라우저';
@@ -1145,12 +1147,14 @@ function _showDeviceMismatchNotice(found, resolve) {
         body: JSON.stringify({
           e164: found.e164, pcLabel, purpose: 'key_transfer',
           pcPubKeyB64u: pcKeyPair.publicKeyB64u,
+          pcMatch: _pcMatchNum,   // 숫자 대조(2026-11-10) — 폰에서 이 숫자를 골라야 승인된다
         }),
       });
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.detail || data.error || '요청 실패');
 
       sessionId = data.sessionId;
+      { const _mb = $$('#_dl-match'), _mn = $$('#_dl-match-num'); if (_mb && _mn) { _mn.textContent = _pcMatchNum; _mb.style.display = ''; } }
       if (data.hasMobileDevice === false) {
         setStatus('이 계정에 등록된 스마트폰이 없습니다. 아래 "문자로 받기"를 이용해 주세요.', true);
       } else {
