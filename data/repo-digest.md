@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-11 04:13 KST · 기준 커밋 be2278c2
+- 갱신: 2026-11-11 04:17 KST · 기준 커밋 79d8a48a
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-11 Merge pull request #974 from Openhash-Gopang/feat/gov-ai-broad-task-map
+- 2026-11-11 feat(prompts): 모든 정부 AI에 기능·역할 최신성 갱신 원칙 신설(호출 시 확인, 월 1회 이상 웹 검색 갱신)
 - 2026-11-11 Merge pull request #973 from Openhash-Gopang/feat/gov-ai-broad-task-map
 - 2026-11-11 feat(prompts): 경찰·건강보험·국민연금·출입국 SP에 소관 전체 업무 지도(§2-MAP) 추가
 - 2026-11-11 Merge pull request #972 from Openhash-Gopang/feat/gov-ai-broad-task-map
@@ -42,8 +44,6 @@
 - 2026-11-08 Merge pull request #954 from Openhash-Gopang/feat/pdv-empty-state
 - 2026-11-08 feat(pdv): 안내 문구 2건 삭제, 가짜 데이터 전부 제거하고 미사용 초기 상태로 전환
 - 2026-11-08 Merge pull request #953 from Openhash-Gopang/follow/vault-safe-icon-hondi
-- 2026-11-08 feat(vault): 금고 아이콘을 단순화한 금고 모양으로 교체
-- 2026-11-08 Merge pull request #952 from Openhash-Gopang/follow/vault-bot-icon-hondi
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
