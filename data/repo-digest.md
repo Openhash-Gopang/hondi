@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-10 19:41 KST · 기준 커밋 4e25db59
+- 갱신: 2026-11-10 19:58 KST · 기준 커밋 1e2c0d21
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-10 Merge pull request #961 from Openhash-Gopang/fix/owner-unlimited-mailid
+- 2026-11-10 fix: /admin/owner-unlimited가 K-Mail 아이디(mail_id)로도 계정을 지정하도록
 - 2026-11-10 Merge pull request #960 from Openhash-Gopang/fix/user-badge-menu-font-14px
 - 2026-11-10 fix(user-badge): 프로필 메뉴 작은 글자를 로그아웃과 같은 14px로 통일
 - 2026-11-10 Merge pull request #959 from Openhash-Gopang/feat/owner-unlimited-kv
@@ -42,8 +44,6 @@
 - 2026-11-07 Merge pull request #943 from Openhash-Gopang/fix/push-sound-keep-devicetype
 - 2026-11-07 알림음 변경 시 deviceType 유지: 폰이 unknown 으로 덮어써져 승인 알림을 못 받는 문제 방지
 - 2026-11-07 Merge pull request #942 from Openhash-Gopang/fix/ksa-popup-cancel
-- 2026-11-07 로그인 팝업: 문구(010 제외), 단순 화살표 아이콘, 취소 버튼·Esc 닫기
-- 2026-11-07 Merge pull request #941 from Openhash-Gopang/fix/embed-busy-bar-self-mode
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
