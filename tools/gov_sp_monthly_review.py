@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parent.parent
 DIR = ROOT / 'data' / 'gov-sp-review'
 GOV_GLOBS = ['prompts/gov-tree/**/*.md']
 GOV_EXTRA = ['prompts/K-Public_common_v1_4.md', 'prompts/SP-10_kpublic_v3.25.txt']
-STALE_DAYS = 30        # K-Public_common P13 / SP-10 §REFRESH 와 동일
+# 갱신 의무 기준(90일·피드백 10건)은 tools/sp_update_log.py 에 둔다(런타임 확인 주기 30일은 P13).
 DEADLINE_DAY = 15      # 매월 15일까지 종결
 DATE_RE = re.compile(r'(?:legal_basis_last_verified|last_verified)\**:?\**\s*\**(\d{4}-\d{2}-\d{2})')
 GOV_SP_RE = re.compile(r'(SP-(DO|AGY|COMM|CITY|CITYDIV|CITYDEPT|DEPT|EMD|TEAM|NAT|ORG|ORGDIV|PROVINCE)|K-Public|SP-10|gov)', re.I)
@@ -42,15 +42,11 @@ def gov_files():
     return sorted(p for p in out if p.exists() and '/archive/' not in p.as_posix())
 
 
-def stale_list(ref):
-    res = []
-    for p in gov_files():
-        m = DATE_RE.search(p.read_text(encoding='utf-8', errors='ignore'))
-        lv = date.fromisoformat(m.group(1)) if m else None
-        days = (ref - lv).days if lv else None
-        if lv is None or days > STALE_DAYS:
-            res.append({'path': p.relative_to(ROOT).as_posix(), 'last_verified': lv.isoformat() if lv else None})
-    return res
+def stale_list(ref, fb_counts=None):
+    """갱신 의무 SP — 마지막 갱신 후 90일 경과 또는 미반영 피드백 10건↑ (tools/sp_update_log.py due_list 와 동일 기준)."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import sp_update_log
+    return [{'path': d['path'], 'last_update': d['last_update'], 'reasons': d['reasons']} for d in sp_update_log.due_list(ref, fb_counts)]
 
 
 def prev_month(m):
@@ -132,7 +128,12 @@ def problems(m, ref, require_closed):
     if fb['source'] == 'unavailable' and not fb.get('attested_none') and not fb['items']:
         errs.append('피드백 원천 조회 불가 — 사람이 직접 취합해 items를 채우거나 attested_none=true 로 확인해야 함')
     rf = led['refresh']
-    actual = len(stale_list(ref))
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent)); import sp_update_log
+        fbc = sp_update_log.pb_new_feedback_counts()
+    except Exception:
+        fbc = None
+    actual = len(stale_list(ref, fbc))
     if rf.get('remaining_stale') is None:
         errs.append('refresh.remaining_stale 미기록')
     else:
