@@ -11,6 +11,10 @@ tools/sp_update_log.py
   digest   [--check]                            공유 다이제스트 prompts/gov-tree/00-common/GOV-UPDATE-DIGEST.md 생성/동기 검사
   due      [--json]                             지금 갱신해야 하는 SP 목록(트리거별)
   check-pr --base REF                           CI: 바뀐 정부 SP 파일은 기록이 함께 추가돼야 함
+  feedback-status [--items f.json]              SP별 미반영 피드백 집계(10건 기준 대비)
+  feedback-decide [--open-issues]               갱신 필요 SP 결정(≥10건) + GitHub 이슈
+  feedback-resolve --ids .. --status ..         피드백 처분 기록(reflected/rejected/deferred) — 집계에서 빠짐
+  rule-apply | rule-check                       각 SP 본문의 §UPDATE-RULE 블록 반영/검사
 
 기록 원장: data/sp-update-log/log.jsonl (append-only, 한 줄 = 한 갱신). 지우거나 고치지 않고 정정 기록을 추가한다.
 """
@@ -146,6 +150,8 @@ def cmd_add(a):
     with LOG.open('a', encoding='utf-8') as f:
         f.write(json.dumps(e, ensure_ascii=False) + '\n')
     print(f"✓ {e['id']} 기록 — 참고 점검 후보 SP {len(e['peer_impact'])}개. 다음: python3 tools/sp_update_log.py digest")
+    if '--resolve-feedback' in a and e['how'].get('feedback_ids'):
+        return cmd_feedback_resolve(['--ids', ','.join(e['how']['feedback_ids']), '--status', 'reflected', '--ref', e['id']])
     return 0
 
 
@@ -182,25 +188,129 @@ def cmd_digest(a):
     DIGEST.write_text(new, encoding='utf-8'); print(f'✓ {rel(DIGEST)} ({len(new.encode())}B)'); return 0
 
 
-def pb_new_feedback_counts():
+COUNTED_CATEGORIES = {'bug', 'feature_request', 'complaint', 'update_signal'}   # 제안·버그·개선 요청·불만·최신 정보 신호 (칭찬·단순 질문은 세지 않음)
+PER_USER_CAP = 3          # 한 사용자가 한 SP에 낼 수 있는 집계 건수 상한(몰아넣기 방지)
+FEEDBACK_STATUSES = {'reflected', 'rejected', 'deferred'}
+
+
+def _pb():
     base, em, pw = (os.environ.get(k, '').rstrip('/') for k in ('POCKETBASE_URL', 'POCKETBASE_ADMIN_EMAIL', 'POCKETBASE_ADMIN_PASSWORD'))
     if not (base and em and pw):
         return None
-    def call(url, body=None, tok=None):
-        req = urllib.request.Request(url, data=json.dumps(body).encode() if body else None,
+
+    def call(path, body=None, method=None, tok=None):
+        req = urllib.request.Request(base + path, data=json.dumps(body).encode() if body is not None else None, method=method,
                                      headers={'Content-Type': 'application/json', **({'Authorization': f'Bearer {tok}'} if tok else {})})
-        return json.loads(urllib.request.urlopen(req, timeout=30).read())
-    tok = call(f'{base}/api/collections/_superusers/auth-with-password', {'identity': em, 'password': pw})['token']
-    counts, page = {}, 1
+        return json.loads(urllib.request.urlopen(req, timeout=30).read() or b'{}')
+    tok = call('/api/collections/_superusers/auth-with-password', {'identity': em, 'password': pw})['token']
+    return lambda path, body=None, method=None: call(path, body, method, tok)
+
+
+def fetch_new_feedback(pb):
+    items, page = [], 1
     while True:
         qs = urllib.parse.urlencode({'filter': "status = 'new'", 'perPage': 200, 'page': page})
-        r = call(f'{base}/api/collections/user_feedback/records?{qs}', tok=tok)
-        for it in r.get('items', []):
-            c = it.get('context_sp') or ''
-            if c: counts[c] = counts.get(c, 0) + 1
+        r = pb(f'/api/collections/user_feedback/records?{qs}')
+        items += r.get('items', [])
         if page >= r.get('totalPages', 1): break
         page += 1
-    return counts
+    return items
+
+
+def _meta(it):
+    return dict(kv.split('=', 1) for kv in (it.get('context_summary') or '').split(';') if '=' in kv)
+
+
+def sp_stems():
+    out = {}
+    for p in gov_files():
+        out[p.name.split('_v')[0].lower()] = p.name.split('_v')[0]
+    return out
+
+
+def tally_feedback(items):
+    """미반영(new) 피드백을 SP별로 집계한다.
+    규칙: 세는 분류만(COUNTED_CATEGORIES) · 같은 사용자의 같은 내용(dk 또는 원문)은 1건 · 한 사용자는 SP당 PER_USER_CAP건까지.
+    SP를 특정하지 못한 항목(context_sp 가 SP ID 가 아님)은 'unattributed' 로 모아 월간 검토에서 사람이 배정한다."""
+    stems = sp_stems(); per = {}; seen = set(); user_n = {}
+    for it in sorted(items, key=lambda x: x.get('created', '')):
+        if (it.get('category') or '') not in COUNTED_CATEGORIES: continue
+        raw_sp = (it.get('context_sp') or '').strip()
+        key = re.sub(r'_v[\d.]+(\.[a-z]+)?$', '', raw_sp).lower()
+        sp = stems.get(key) or stems.get(key.replace('-template', '')) or 'unattributed'
+        user = it.get('guid') or f"anon:{it.get('id')}"
+        dk = _meta(it).get('dk') or re.sub(r'\s+', ' ', (it.get('raw_text') or '').lower())[:80]
+        if (sp, user, dk) in seen: continue
+        seen.add((sp, user, dk))
+        if sp != 'unattributed':
+            user_n[(sp, user)] = user_n.get((sp, user), 0) + 1
+            if user_n[(sp, user)] > PER_USER_CAP: continue
+        d = per.setdefault(sp, {'count': 0, 'users': set(), 'ids': [], 'samples': []})
+        d['count'] += 1; d['users'].add(user); d['ids'].append(it.get('id'))
+        if len(d['samples']) < 3: d['samples'].append((it.get('raw_text') or '')[:100])
+    return per
+
+
+def pb_new_feedback_counts():
+    pb = _pb()
+    if pb is None: return None
+    return {sp: d['count'] for sp, d in tally_feedback(fetch_new_feedback(pb)).items() if sp != 'unattributed'}
+
+
+def _load_items(a):
+    if '--items' in a:
+        return json.loads(Path(a[a.index('--items') + 1]).read_text(encoding='utf-8')), 'file'
+    pb = _pb()
+    return (fetch_new_feedback(pb), 'pocketbase') if pb else (None, 'unavailable')
+
+
+def cmd_feedback_status(a):
+    items, src = _load_items(a)
+    if items is None:
+        print('피드백 원천 조회 불가(POCKETBASE_* 없음) — 집계 불가'); return 1
+    per = tally_feedback(items)
+    print(f'미반영 피드백 {len(items)}건(원천: {src}) · 집계 대상 SP {len([k for k in per if k != "unattributed"])}개 · 기준 {DUE_FEEDBACK}건')
+    for sp, d in sorted(per.items(), key=lambda kv: -kv[1]['count']):
+        flag = '' if sp == 'unattributed' else ('갱신 필요' if d['count'] >= DUE_FEEDBACK else f"대기 {d['count']}/{DUE_FEEDBACK}")
+        print(f"  {sp}: {d['count']}건 · 사용자 {len(d['users'])}명 · {flag}" + (' (SP 미특정 — 월간 검토에서 배정)' if sp == 'unattributed' else ''))
+    return 0
+
+
+def cmd_feedback_decide(a):
+    """갱신 여부 결정: 집계 ≥ 10 이면 '갱신 필요'. --open-issues 면 SP마다 GitHub 이슈 1건(이미 열린 이슈 있으면 생략)."""
+    items, src = _load_items(a)
+    if items is None:
+        print('피드백 원천 조회 불가 — 결정 보류'); return 1
+    per = tally_feedback(items); need = {sp: d for sp, d in per.items() if sp != 'unattributed' and d['count'] >= DUE_FEEDBACK}
+    print(f'갱신 필요(피드백 {DUE_FEEDBACK}건↑) SP {len(need)}개')
+    for sp, d in sorted(need.items(), key=lambda kv: -kv[1]['count']):
+        print(f"  {sp}: {d['count']}건 · 사용자 {len(d['users'])}명 · 예: {d['samples'][0]}")
+        if '--open-issues' in a:
+            title = f'[SP 갱신 필요] {sp} — 피드백 {d["count"]}건'
+            q = subprocess.run(['gh', 'issue', 'list', '--state', 'open', '--search', f'"[SP 갱신 필요] {sp}" in:title', '--json', 'number'], capture_output=True, text=True)
+            if q.returncode == 0 and json.loads(q.stdout or '[]'):
+                print('    (열린 이슈 있음 — 생략)'); continue
+            body = (f'규칙: 미반영 피드백 {DUE_FEEDBACK}건 이상 → 갱신 의무 (docs/GOV-SP-UPDATE-SHARING_v1_0.md)\n\n'
+                    f'- 집계 {d["count"]}건 / 사용자 {len(d["users"])}명\n- 피드백 id: {", ".join(i for i in d["ids"][:30] if i)}\n- 예시:\n' +
+                    ''.join(f'  - {x}\n' for x in d['samples']) +
+                    '\n갱신 후: `python3 tools/sp_update_log.py add --json ... --resolve-feedback` 로 기록하면 이 피드백이 reflected 로 닫히고 집계가 0으로 돌아간다.')
+            subprocess.run(['gh', 'issue', 'create', '--title', title, '--body', body])
+    return 0
+
+
+def cmd_feedback_resolve(a):
+    """피드백 처분 기록: --ids id1,id2 --status reflected|rejected|deferred --ref U-... [--note 사유(rejected/deferred 필수)]."""
+    ids = a[a.index('--ids') + 1].split(',') if '--ids' in a else []
+    st = a[a.index('--status') + 1] if '--status' in a else ''
+    ref = a[a.index('--ref') + 1] if '--ref' in a else ''
+    note = a[a.index('--note') + 1] if '--note' in a else ''
+    if not ids or st not in FEEDBACK_STATUSES or (st == 'reflected' and not ref) or (st != 'reflected' and not note):
+        print('사용법: feedback-resolve --ids a,b --status reflected|rejected|deferred [--ref U-id (reflected 필수)] [--note 사유 (그 외 필수)]'); return 2
+    pb = _pb()
+    if pb is None: print('POCKETBASE_* 필요'); return 1
+    for i in ids:
+        pb(f'/api/collections/user_feedback/records/{i}', {'status': st, 'admin_note': (ref or note)[:200]}, 'PATCH')
+    print(f'✓ {len(ids)}건 → {st}'); return 0
 
 
 def due_list(ref=None, fb_counts=None):
@@ -231,25 +341,34 @@ def cmd_due(a):
     return 0
 
 
-RULE_VERSION = 'v1.0'
+RULE_VERSION = 'v1.1'
 RULE_HEAD = '## §UPDATE-RULE.'
-RULE_BLOCK = f'''## §UPDATE-RULE. 이 SP의 갱신 규칙 ({RULE_VERSION} · 2026-11-11 — 모든 정부 AI SP 공통, 정본: K-Public_common P15 · docs/GOV-SP-UPDATE-SHARING_v1_0.md)
 
-- **갱신 의무**: 이 SP에 대한 미반영 사용자 피드백이 10건 이상 쌓이거나 마지막 갱신 후 90일이 지나면 이 SP는 갱신되어야 한다.
+
+def sp_id_of(p):
+    return p.name.split('_v')[0] if '_v' in p.name else p.stem
+
+
+def rule_block(sp_id):
+    return f'''## §UPDATE-RULE. 이 SP의 갱신 규칙 ({RULE_VERSION} · 2026-11-11 — 모든 정부 AI SP 공통, 정본: K-Public_common P14·P15 · docs/GOV-SP-UPDATE-SHARING_v1_0.md)
+
+- **SP ID**: `{sp_id}` — 피드백·신호 태그의 `sp` 값. 여러 SP가 함께 로드되어 있으면 이번 답변을 실제로 처리한 가장 구체적인 SP의 ID를 쓴다.
+- **갱신 의무**: 이 SP에 대한 미반영 사용자 피드백(제안·버그 신고·개선 요청·불만·정정)이 10건 이상 쌓이거나 마지막 갱신 후 90일이 지나면 이 SP는 갱신되어야 한다. 건수는 서버가 SP ID별로 집계한다.
 - **갱신 방법**: 웹 검색 등으로 최신 정보를 확인해 반영하고, 다른 SP의 갱신 기록(GOV-UPDATE-DIGEST·원장 data/sp-update-log/log.jsonl)을 참고하며, 언제·어떻게·왜 갱신했는지 원장에 기록한다. 기록은 모든 SP와 공유된다.
-- **호출 시 행동**: ① 상위로 주어진 GOV-UPDATE-DIGEST에서 내 소관과 같은 법령·기관·분야의 더 새로운 기록이 있으면 SP 본문보다 그것을 따른다(검증수준이 `partial`·`unverified`면 확정 사실처럼 말하지 않는다). ② 이 SP의 마지막 확인일이 90일을 넘겼으면 안내가 오래된 정보일 수 있음을 사용자에게 알리고 공식 출처 확인을 권한다. ③ 사용자가 정정·불만·누락을 말하면 `[USER_FEEDBACK]`, 웹 검색으로 SP와 다른 공식 최신 정보를 발견하면 `[SP_UPDATE_SIGNAL]`을 낸다(형식: K-Public_common P14·P15). ④ 갱신이 되었다고 약속하지 않는다.
+- **피드백 수집**: 사용자가 제안·버그 신고·개선 요청·불만·정정을 말하면 처리를 막지 않고 응답 끝에 `[USER_FEEDBACK: sp="{sp_id}", kind="bug|suggestion|improvement|correction|complaint", raw="사용자 발화 그대로"]` 를 낸다(서버가 수집하고 화면에서 지운다). 개인정보는 넣지 않는다. 웹 검색으로 SP와 다른 공식 최신 정보를 발견하면 응답에 반영한 뒤 `[SP_UPDATE_SIGNAL: sp="{sp_id}", what="무엇이 다른가", source="공식 URL", published="게시일"]` 을 낸다.
+- **호출 시 행동**: ① 상위로 주어진 GOV-UPDATE-DIGEST에서 내 소관과 같은 법령·기관·분야의 더 새로운 기록이 있으면 SP 본문보다 그것을 따른다(검증수준이 `partial`·`unverified`면 확정 사실처럼 말하지 않는다). ② 이 SP의 마지막 확인일이 90일을 넘겼으면 안내가 오래된 정보일 수 있음을 사용자에게 알리고 공식 출처 확인을 권한다. ③ 정정 내용은 공식 출처로 확인해 이번 응답에서 바로잡고, 확인하지 못했으면 그렇게 말한다. ④ 갱신이 되었다고 약속하지 않는다.
 '''
 
 
-def _apply_rule(text):
+def _apply_rule(text, sp_id):
     """규칙 블록 삽입(없으면 §3 앞, §3이 없으면 파일 끝) 또는 갱신(있으면 그 자리 교체). 멱등."""
     if RULE_HEAD in text:
         i = text.index(RULE_HEAD); m = re.search(r'\n## ', text[i + 5:])
         j = i + 5 + m.start() + 1 if m else len(text)
-        return text[:i] + RULE_BLOCK + ('\n' if j < len(text) else '') + text[j:]
+        return text[:i] + rule_block(sp_id) + ('\n' if j < len(text) else '') + text[j:]
     m = re.search(r'^## §[3-9]', text, re.M)
-    if m: return text[:m.start()] + RULE_BLOCK + '\n' + text[m.start():]
-    return text.rstrip('\n') + '\n\n' + RULE_BLOCK
+    if m: return text[:m.start()] + rule_block(sp_id) + '\n' + text[m.start():]
+    return text.rstrip('\n') + '\n\n' + rule_block(sp_id)
 
 
 def rule_targets():
@@ -263,7 +382,7 @@ def cmd_rule(a):
     bad = []; n = 0
     for p in rule_targets():
         t = p.read_text(encoding='utf-8')
-        new = _apply_rule(t)
+        new = _apply_rule(t, sp_id_of(p))
         if new != t:
             if check: bad.append(rel(p))
             else: p.write_text(new, encoding='utf-8'); n += 1
@@ -299,5 +418,5 @@ def cmd_check_pr(a):
 
 if __name__ == '__main__':
     a = sys.argv[1:]
-    cmds = {'rule-apply': lambda x: cmd_rule(['apply']), 'rule-check': lambda x: cmd_rule(['check']), 'add': cmd_add, 'digest': cmd_digest, 'due': cmd_due, 'check-pr': cmd_check_pr}
+    cmds = {'feedback-status': cmd_feedback_status, 'feedback-decide': cmd_feedback_decide, 'feedback-resolve': cmd_feedback_resolve, 'rule-apply': lambda x: cmd_rule(['apply']), 'rule-check': lambda x: cmd_rule(['check']), 'add': cmd_add, 'digest': cmd_digest, 'due': cmd_due, 'check-pr': cmd_check_pr}
     sys.exit(cmds[a[0]](a[1:]) if a and a[0] in cmds else (print(__doc__) or 2))

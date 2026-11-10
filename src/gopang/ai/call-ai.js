@@ -1779,7 +1779,7 @@ export async function _handleOrchestrationTags(fullReply, bubble, sendFn = callA
       };
       await _submitUserFeedback({
         raw_text: pick('raw') || userText || '',
-        context_sp: pick('context_sp') || CFG.system?.slice(0, 60) || null,
+        context_sp: pick('sp') || pick('context_sp') || CFG.system?.slice(0, 60) || null,
         context_summary: pick('context_summary') || '',
         category: pick('category') || 'question',
       });

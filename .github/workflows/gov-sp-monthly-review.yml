@@ -90,6 +90,16 @@ jobs:
       - name: Check monthly review ledger
         id: chk
         run: python3 tools/gov_sp_monthly_review.py check --pr-gate | tee /tmp/chk.txt; exit ${PIPESTATUS[0]}
+      # 피드백 집계 → 갱신 여부 결정(SP별 미반영 10건↑ → 갱신 필요 이슈). 원천 조회 실패해도 다른 점검은 막지 않는다.
+      - name: Decide SP updates from feedback counts
+        if: github.event_name == 'schedule'
+        continue-on-error: true
+        env:
+          POCKETBASE_URL: ${{ secrets.POCKETBASE_URL }}
+          POCKETBASE_ADMIN_EMAIL: ${{ secrets.POCKETBASE_ADMIN_EMAIL }}
+          POCKETBASE_ADMIN_PASSWORD: ${{ secrets.POCKETBASE_ADMIN_PASSWORD }}
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tools/sp_update_log.py feedback-decide --open-issues
       - name: Re-alert overdue
         if: failure() && github.event_name == 'schedule'
         env:
