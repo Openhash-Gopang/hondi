@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-11 04:40 KST · 기준 커밋 ef7208f6
+- 갱신: 2026-11-11 04:49 KST · 기준 커밋 c04edf31
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-11 Merge pull request #981 from Openhash-Gopang/feat/gov-policy-maps
+- 2026-11-11 feat(prompts): 정책기관 SP 69종에 소관 전체 업무 지도(§2-MAP) 추가
 - 2026-11-11 Merge pull request #980 from Openhash-Gopang/feat/gov-nat-maps
 - 2026-11-11 feat(prompts): 국가기관 템플릿 28종에 소관 전체 업무 지도(§2-MAP) 추가
 - 2026-11-11 Merge pull request #979 from Openhash-Gopang/feat/gov-dept-maps-2
@@ -42,8 +44,6 @@
 - 2026-11-10 fix: /admin/owner-unlimited가 K-Mail 아이디(mail_id)로도 계정을 지정하도록
 - 2026-11-10 Merge pull request #960 from Openhash-Gopang/fix/user-badge-menu-font-14px
 - 2026-11-10 fix(user-badge): 프로필 메뉴 작은 글자를 로그아웃과 같은 14px로 통일
-- 2026-11-10 Merge pull request #959 from Openhash-Gopang/feat/owner-unlimited-kv
-- 2026-11-10 feat: 관리자 면제를 KV 플래그 방식으로 변경 + /admin/owner-unlimited
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
