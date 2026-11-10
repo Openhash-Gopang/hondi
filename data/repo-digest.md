@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-11 04:21 KST · 기준 커밋 03ccacd7
+- 갱신: 2026-11-11 04:23 KST · 기준 커밋 749a9c9c
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-11 Merge pull request #976 from Openhash-Gopang/feat/gov-ai-broad-task-map
+- 2026-11-11 feat(prompts): 도청·시청 부서 템플릿(복지·교통·안전·관광)에 소관 전체 업무 지도 추가
 - 2026-11-11 Merge pull request #975 from Openhash-Gopang/feat/gov-ai-broad-task-map
 - 2026-11-11 feat(prompts): 지방정부(도청·시청·읍면동) SP에 업무 지도 원칙과 소관 업무 지도 적용
 - 2026-11-11 Merge pull request #974 from Openhash-Gopang/feat/gov-ai-broad-task-map
@@ -42,8 +44,6 @@
 - 2026-11-09 Merge pull request #956 from Openhash-Gopang/feat/pdv-profile-bridge
 - 2026-11-09 feat(pdv): 도우미용 개인 정보 profile_get/profile_set 중계 추가
 - 2026-11-09 Merge pull request #955 from Openhash-Gopang/feat/embed-host-login
-- 2026-11-09 feat(auth): 다른 사이트(나비웹) 화면 안 iframe 으로 열릴 때 호스트가 postMessage 로 넘긴 전화 인증 토큰으로 로그인 이어받기
-- 2026-11-08 Merge pull request #954 from Openhash-Gopang/feat/pdv-empty-state
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
