@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-10 20:51 KST · 기준 커밋 765b0066
+- 갱신: 2026-11-10 20:54 KST · 기준 커밋 61a1506c
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-10 feat(auth): 무료 한도 첫 안내 및 소진 임박 충전 알림 (user-badge)
 - 2026-11-10 Merge pull request #966 from Openhash-Gopang/feat/pc-idle-logout
 - 2026-11-10 feat: PC 비활동 30분 자동 로그아웃 (K 서비스 공용 로그인)
 - 2026-11-10 Merge pull request #965 from Openhash-Gopang/feat/device-link-number-match
@@ -43,7 +44,6 @@
 - 2026-11-08 feat(pdv): PC "폰에서 불러오기" 및 원본 보관 위치 선택 UI
 - 2026-11-08 Merge pull request #948 from Openhash-Gopang/feat/pdv-phone-fetch
 - 2026-11-07 PDV 방식 P: PC 가 폰의 승인을 받아 PDV 원본을 불러오는 경로(device-link pdv_fetch, 조각 전달)
-- 2026-11-07 Merge pull request #947 from Openhash-Gopang/feat/pdv-backup-core
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
