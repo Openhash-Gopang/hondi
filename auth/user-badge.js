@@ -127,18 +127,22 @@
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { status: r.status, d: d || {} }; }); });
   }
   var quotaTriedAt = 0;
+  var freeInfo = null;   // 안내용 무료·플랜 사용 상태(테스트 아이디·정식 아이디 모두). 메뉴의 사용량 막대(quota)는 테스트 아이디 전용이라 따로 둔다
   function fetchQuota(force) {
-    if (identity().kind !== 'test') { quota = null; return Promise.resolve(null); }
+    var _kind = identity().kind;
+    if (_kind !== 'test' && _kind !== 'user') { quota = null; freeInfo = null; return Promise.resolve(null); }
+    if (_kind === 'user') quota = null;   // 정식 아이디는 메뉴 막대를 그리지 않는다(사용량 안내 알림만 받는다)
     if (!force && quota && Date.now() - quotaAt < 55000) return Promise.resolve(quota);
     if (!force && !quota && Date.now() - quotaTriedAt < 15000) return Promise.resolve(quota);   // 조회가 계속 실패해도 15초에 한 번만 다시 시도
     if (quotaBusy) return Promise.resolve(quota);
     quotaBusy = true; quotaTriedAt = Date.now();
     return postJson('/auth/test-quota', { phone_verify_token: readCookie(C_TOKEN) }).then(function (x) {
       quotaBusy = false;
-      if (x.d.ok && x.d.test) { quota = x.d; quotaAt = Date.now(); }
-      else if (x.d.ok && !x.d.test) { quota = null; }
+      if (x.d.ok && x.d.test) { quota = x.d; quotaAt = Date.now(); freeInfo = x.d; }
+      else if (x.d.ok && !x.d.test) { quota = null; freeInfo = x.d; }
       render(true);
       onQuotaState();
+      usageNotices();
       return quota;
     }, function () { quotaBusy = false; return quota; });
   }
@@ -152,6 +156,63 @@
       }
     } else if (quota.status === 'blocked') {
       showBlockedModal();
+    }
+  }
+  // ── 무료 한도 안내·소진 임박 알림 (2026-11-10 신설, 주피터 지시) ─────────────────────────────
+  //   · 처음 한 번(기기당): 가입·첫 입장 직후 "무료로 얼마까지 쓸 수 있는지"를 알려 준다.
+  //   · 한도 소진 전: 무료 사용량 80% 이상 사용 또는 무료 시간이 3시간 이내로 남으면, 유료 플랜 포함 사용량 80% 이상 사용하면
+  //     한 번씩 "미리 충전·플랜 선택" 안내를 띄운다. 막힌 뒤에야 알리지 않는다.
+  function seenFlag(key) { try { return !!global.localStorage.getItem(key); } catch (e) { return false; } }
+  function setFlag(key) { try { global.localStorage.setItem(key, String(Date.now())); } catch (e) {} }
+  function otherModalOpen() { return !!(doc.getElementById('hondi-blocked-modal') || doc.getElementById('hondi-free-intro') || doc.querySelector('.hub-modal')); }
+  function showFreeIntro(q) {
+    if (otherModalOpen()) return;                       // 다른 안내창(메일 아이디 선택 등)이 떠 있으면 다음 조회 때 다시 시도
+    setFlag('hondi_free_intro_seen');
+    var back = el('div'); back.id = 'hondi-free-intro';
+    var box = el('div', 'hub-modal'); box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true');
+    box.appendChild(el('h2', '', '무료로 시작해 보세요'));
+    box.appendChild(el('p', '', '지금부터 AI 사용 ' + fmtNum(q.limit_krw) + '원어치 또는 ' + fmtNum(q.free_hours) + '시간 중 먼저 오는 때까지 무료로 쓰실 수 있습니다.'));
+    box.appendChild(el('p', 'hub-note', '남은 사용량은 오른쪽 위 메뉴에서 언제든 볼 수 있고, 거의 다 쓰기 전에 미리 알려 드립니다. 계속 쓰려면 플랜을 고르거나 GDC를 충전하시면 됩니다.'));
+    var ok = el('button', 'hub-btn hub-primary', '확인'); ok.type = 'button';
+    ok.addEventListener('click', function () { back.remove(); });
+    var pay = el('button', 'hub-btn', '요금·충전 안내 보기'); pay.type = 'button';
+    pay.addEventListener('click', function () { global.location.href = PAY_URL; });
+    box.appendChild(ok); box.appendChild(pay);
+    back.appendChild(box); doc.body.appendChild(back);
+  }
+  function showLowBanner(msg) {
+    if (doc.getElementById('hondi-low-banner')) return;
+    var b = el('div'); b.id = 'hondi-low-banner'; b.setAttribute('role', 'alert');
+    b.style.cssText = 'position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:2147483000;max-width:min(560px,92vw);background:#92400e;color:#fff;padding:12px 14px;border-radius:12px;font-size:13.5px;line-height:1.5;box-shadow:0 6px 24px rgba(0,0,0,.3);display:flex;gap:10px;align-items:center';
+    var t = el('span', '', msg); t.style.flex = '1';
+    var go = el('button', '', '충전·플랜 보기'); go.type = 'button';
+    go.style.cssText = 'border:0;background:#fff;color:#92400e;font-weight:700;border-radius:8px;padding:7px 10px;cursor:pointer;white-space:nowrap';
+    go.addEventListener('click', function () { global.location.href = PAY_URL; });
+    var x = el('button', '', '✕'); x.type = 'button'; x.setAttribute('aria-label', '닫기');
+    x.style.cssText = 'border:0;background:none;color:#fff;font-size:16px;cursor:pointer';
+    x.addEventListener('click', function () { b.remove(); });
+    b.appendChild(t); b.appendChild(go); b.appendChild(x); doc.body.appendChild(b);
+  }
+  function usageNotices() {
+    var q = freeInfo;
+    if (!q || q.status !== 'active') return;
+    if (q.phase === 'trial') {
+      if (!seenFlag('hondi_free_intro_seen')) { setTimeout(function () { if (freeInfo && !seenFlag('hondi_free_intro_seen')) showFreeIntro(freeInfo); }, 1500); return; }
+      var ratio = q.limit_krw > 0 ? q.spent_krw / q.limit_krw : 0;
+      var hoursLeft = (new Date(q.free_ends_at).getTime() - Date.now()) / 3600000;
+      if (ratio >= 0.8 && !seenFlag('hondi_warn_trial_80')) {
+        setFlag('hondi_warn_trial_80');
+        showLowBanner('무료 사용량을 80% 이상 사용했습니다(남은 약 ' + fmtNum(Math.max(0, q.remaining_krw)) + '원어치). 끊기지 않게 미리 플랜을 고르거나 GDC를 충전해 주세요.');
+      } else if (hoursLeft > 0 && hoursLeft <= 3 && !seenFlag('hondi_warn_trial_time')) {
+        setFlag('hondi_warn_trial_time');
+        showLowBanner('무료 이용 시간이 약 ' + Math.max(1, Math.ceil(hoursLeft)) + '시간 남았습니다. 끊기지 않게 미리 플랜을 고르거나 GDC를 충전해 주세요.');
+      }
+    } else if (q.phase === 'paid' && q.included_krw > 0) {
+      var pr = q.used_krw / q.included_krw, pkey = 'hondi_warn_paid_' + (q.period_ends_at || '');
+      if (pr >= 0.8 && !seenFlag(pkey)) {
+        setFlag(pkey);
+        showLowBanner('이번 기간 플랜 포함 사용량의 80% 이상을 사용했습니다. 부족해지기 전에 추가 사용량을 켜거나 GDC를 충전해 주세요.');
+      }
     }
   }
   function testTagText() {
