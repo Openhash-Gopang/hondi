@@ -4769,7 +4769,7 @@ async function handleKlawSessionsHistory(request, url, env, corsHeaders) {
     // 않는다 — 목록 조회 1번에 항목 최대 50개×전문(수만 자)을 전부
     // 실어보내면 불필요하게 무거워진다(상세 조회는 별도 엔드포인트).
     const res = await fetch(
-      `${L1_DEFAULT}/api/collections/${KLAW_SESSIONS_COLLECTION}/records?filter=${filter}&sort=-created&perPage=100&fields=id,title,klaw_version,llm_model,case_type,case_summary,match_rate,match_items,is_public,created`,
+      `${L1_DEFAULT}/api/collections/${KLAW_SESSIONS_COLLECTION}/records?filter=${filter}&sort=-created&perPage=100&fields=id,title,case_no,klaw_version,llm_model,case_type,case_summary,match_rate,match_items,is_public,created`,
       { headers: { 'Authorization': `Bearer ${token}` } }
     );
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -4794,6 +4794,18 @@ function _klawTruncateWithNotice(text, maxLen) {
   if (text.length <= maxLen) return text;
   const notice = '\n\n[⚠ 저장 용량 한도로 이 이후 내용이 잘렸습니다]';
   return text.slice(0, maxLen - notice.length) + notice;
+}
+
+// 2026-11-11 — 사건번호 정리(예: 2024도7082). 형식에 맞지 않으면 빈 문자열.
+function _klawCleanCaseNo(v) {
+  const t = String(v || '').replace(/\s+/g, '');
+  return /^\d{2,4}[가-힣]{1,4}\d{1,7}$/.test(t) ? t : '';
+}
+// JSON 문자열은 중간을 자르면 깨지므로, 상한을 넘으면 저장하지 않고 빈 값으로 둔다(무음 절단 방지).
+function _klawTruncateJson(text, maxLen) {
+  const t = String(text || '');
+  if (t.length > maxLen) return '';
+  try { JSON.parse(t); return t; } catch (e) { return ''; }
 }
 
 async function handleKlawSessionsDetail(request, url, env, corsHeaders) {
@@ -4828,6 +4840,8 @@ async function handleKlawSessionsDetail(request, url, env, corsHeaders) {
       is_public: !!rec.is_public,
       case_input: rec.case_input || '',
       match_report: rec.match_report || '', match_basis: rec.match_basis || '',
+      // 2026-11-11 — 이력 패널용: 사건번호, 확보한 대법원·원심 판결문, 통합 판결문, 방법론 갱신 제안(JSON 문자열).
+      case_no: rec.case_no || '', case_docs: rec.case_docs || '',
       verdict_full: rec.verdict_full || '', created: rec.created,
     }), { headers: corsHeaders });
   } catch (e) {
@@ -4884,6 +4898,8 @@ async function handleKlawSessionsSave(request, env, corsHeaders) {
       title:        (body.title || '').slice(0, 100),
       match_items:  (body.match_items || '').slice(0, 2000),
       is_public:    body.is_public === true,
+      // 2026-11-11 — 제목에 표시할 사건번호(도우미가 사건번호로 판결문을 가져온 경우).
+      case_no:      _klawCleanCaseNo(body.case_no),
     };
     const res = await fetch(`${L1_DEFAULT}/api/collections/${KLAW_SESSIONS_COLLECTION}/records`, {
       method: 'POST',
@@ -4943,6 +4959,9 @@ async function handleKlawSessionsVisibility(request, env, corsHeaders) {
     // 이력에 남긴다. 공개 게시판 상세(handleKlawSessionsBoardDetail)에는 노출하지 않는다.
     if (typeof body.match_report === 'string') patchBody.match_report = _klawTruncateWithNotice(body.match_report, 200000);
     if (typeof body.match_basis === 'string') patchBody.match_basis = body.match_basis.slice(0, 500);
+    // 2026-11-11 — 이력 패널의 문서들(JSON 문자열). 본인 이력에만 보이며 공개 게시판에는 나가지 않는다.
+    if (typeof body.case_no === 'string') patchBody.case_no = _klawCleanCaseNo(body.case_no);
+    if (typeof body.case_docs === 'string') patchBody.case_docs = _klawTruncateJson(body.case_docs, 900000);
     if (Object.keys(patchBody).length === 0) return _err(400, 'NOTHING_TO_UPDATE', '변경할 값이 없습니다', corsHeaders);
 
     const patchRes = await fetch(
