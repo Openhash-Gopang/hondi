@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-10 19:58 KST · 기준 커밋 1e2c0d21
+- 갱신: 2026-11-10 20:21 KST · 기준 커밋 d5469bc1
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-10 Merge pull request #962 from Openhash-Gopang/feat/klaw-verdict-min-balance
+- 2026-11-10 feat: K-Law·Agon 판결 생성 시작은 GDC 잔액 1만원 이상일 때만
 - 2026-11-10 Merge pull request #961 from Openhash-Gopang/fix/owner-unlimited-mailid
 - 2026-11-10 fix: /admin/owner-unlimited가 K-Mail 아이디(mail_id)로도 계정을 지정하도록
 - 2026-11-10 Merge pull request #960 from Openhash-Gopang/fix/user-badge-menu-font-14px
@@ -42,8 +44,6 @@
 - 2026-11-07 Merge pull request #944 from Openhash-Gopang/docs/auth-current-state-20261107
 - 2026-11-07 docs: 가입·로그인 현황 조사(2026-11-07)
 - 2026-11-07 Merge pull request #943 from Openhash-Gopang/fix/push-sound-keep-devicetype
-- 2026-11-07 알림음 변경 시 deviceType 유지: 폰이 unknown 으로 덮어써져 승인 알림을 못 받는 문제 방지
-- 2026-11-07 Merge pull request #942 from Openhash-Gopang/fix/ksa-popup-cancel
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
