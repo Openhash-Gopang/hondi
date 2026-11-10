@@ -4987,14 +4987,14 @@ async function handleKlawSessionsBoard(request, url, env, corsHeaders) {
     const token = await _l1AdminToken(env);
     const filter = encodeURIComponent(`is_public=true`);
     const res = await fetch(
-      `${L1_DEFAULT}/api/collections/${KLAW_SESSIONS_COLLECTION}/records?filter=${filter}&sort=-created&perPage=100` +
-      `&fields=id,title,klaw_version,llm_model,case_type,case_summary,match_rate,match_items,user_id,created`,
+      `${L1_DEFAULT}/api/collections/${KLAW_SESSIONS_COLLECTION}/records?filter=${filter}&sort=-created&perPage=500` +
+      `&fields=id,title,case_no,klaw_version,llm_model,case_type,case_summary,match_rate,match_items,user_id,created`,
       { headers: { 'Authorization': `Bearer ${token}` } }
     );
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json().catch(() => ({ items: [] }));
     const items = (data.items || []).map(r => ({
-      id: r.id, title: r.title, klaw_version: r.klaw_version, llm_model: r.llm_model,
+      id: r.id, title: r.title, case_no: r.case_no || '', klaw_version: r.klaw_version, llm_model: r.llm_model,
       case_type: r.case_type, case_summary: r.case_summary,
       match_rate: r.match_rate, match_items: r.match_items,
       // 익명 작성자 표시 — 원본 guid는 절대 내보내지 않는다.
@@ -5004,6 +5004,44 @@ async function handleKlawSessionsBoard(request, url, env, corsHeaders) {
     return new Response(JSON.stringify({ ok: true, items }), { headers: corsHeaders });
   } catch (e) {
     return _err(502, 'KLAW_SESSIONS_BOARD_FAILED', e.message, corsHeaders);
+  }
+}
+
+// 2026-11-11 신설(주피터 지시 — "K-Law 이용자 모두의 일치도를 그래프로 취합") — 모든 이용자의 일치도 평가를
+// (일자 × 사건 종류)로 합산한 값만 돌려준다. 사건 내용·작성자·기록 id는 내보내지 않으므로 비공개 이력의 점수도
+// 개별 식별이 불가능한 통계로만 반영된다. 인증 불필요, 5분 캐시.
+async function handleKlawSessionsTrend(request, url, env, corsHeaders) {
+  try {
+    const token = await _l1AdminToken(env);
+    const filter = encodeURIComponent(`match_rate!=''`);
+    const agg = new Map();
+    let total = 0;
+    for (let page = 1; page <= 20; page++) {
+      const res = await fetch(
+        `${L1_DEFAULT}/api/collections/${KLAW_SESSIONS_COLLECTION}/records?filter=${filter}&sort=created&perPage=500&page=${page}&fields=case_type,match_rate,created&skipTotal=1`,
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json().catch(() => ({ items: [] }));
+      const items = data.items || [];
+      for (const r of items) {
+        const v = parseFloat(String(r.match_rate || '').replace('%', ''));
+        const t = Date.parse(String(r.created || '').replace(' ', 'T'));
+        if (!isFinite(v) || v < 0 || v > 100 || isNaN(t)) continue;
+        const d = new Date(t + 9 * 3600 * 1000).toISOString().slice(0, 10);   // 한국 날짜
+        const ty = String(r.case_type || '기타').slice(0, 20);
+        const k = d + '|' + ty;
+        const e = agg.get(k) || { d, t: ty, s: 0, n: 0 };
+        e.s += v; e.n++; total++;
+        agg.set(k, e);
+      }
+      if (items.length < 500) break;
+    }
+    return new Response(JSON.stringify({ ok: true, total, days: Array.from(agg.values()) }), {
+      headers: { ...corsHeaders, 'Cache-Control': 'public, max-age=300' },
+    });
+  } catch (e) {
+    return _err(502, 'KLAW_SESSIONS_TREND_FAILED', e.message, corsHeaders);
   }
 }
 
@@ -5026,7 +5064,7 @@ async function handleKlawSessionsBoardDetail(request, url, env, corsHeaders) {
     if (!rec.is_public) return _err(404, 'NOT_FOUND', '게시물을 찾을 수 없습니다', corsHeaders);
     return new Response(JSON.stringify({
       ok: true,
-      title: rec.title || '', klaw_version: rec.klaw_version, llm_model: rec.llm_model,
+      title: rec.title || '', case_no: rec.case_no || '', klaw_version: rec.klaw_version, llm_model: rec.llm_model,
       case_type: rec.case_type, case_level: rec.case_level,
       case_summary: rec.case_summary, verdict: rec.verdict,
       confidence: rec.confidence, match_rate: rec.match_rate, match_items: rec.match_items || '',
@@ -14091,6 +14129,7 @@ export default {
     if (pathname === '/klaw/sessions/detail' && request.method === 'GET') return handleKlawSessionsDetail(request, url, env, corsHeaders);
     if (pathname === '/klaw/case-judgments' && request.method === 'POST') return handleKlawCaseJudgments(request, env, corsHeaders);
     if (pathname === '/klaw/sessions/visibility' && request.method === 'POST') return handleKlawSessionsVisibility(request, env, corsHeaders);
+    if (pathname === '/klaw/sessions/trend' && request.method === 'GET') return handleKlawSessionsTrend(request, url, env, corsHeaders);
     if (pathname === '/klaw/sessions/board' && request.method === 'GET') return handleKlawSessionsBoard(request, url, env, corsHeaders);
     if (pathname === '/klaw/sessions/board-detail' && request.method === 'GET') return handleKlawSessionsBoardDetail(request, url, env, corsHeaders);
     if (pathname === '/klaw/sessions' && request.method === 'POST') return handleKlawSessionsSave(request, env, corsHeaders);
