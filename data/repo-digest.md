@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-10 22:01 KST · 기준 커밋 6f3c4610
+- 갱신: 2026-11-10 22:14 KST · 기준 커밋 64099766
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-10 feat(auth): 휴대폰 분실 복구(문자 인증+확인 문구), 이전 로그인 일괄 해제, 24시간 송금·환급 정지
 - 2026-11-10 feat(account): 탈퇴 시 잔액 확인 및 환급 계좌 접수
 - 2026-11-10 feat(auth): 무료 한도 첫 안내 및 소진 임박 충전 알림 (user-badge)
 - 2026-11-10 Merge pull request #966 from Openhash-Gopang/feat/pc-idle-logout
@@ -43,7 +44,6 @@
 - 2026-11-08 feat(pdv): PC 는 클라우드 백업(기본 L1 PocketBase)에서 PDV 를 불러온다
 - 2026-11-08 Merge pull request #949 from Openhash-Gopang/feat/pdv-settings-ui
 - 2026-11-08 feat(pdv): PC "폰에서 불러오기" 및 원본 보관 위치 선택 UI
-- 2026-11-08 Merge pull request #948 from Openhash-Gopang/feat/pdv-phone-fetch
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
