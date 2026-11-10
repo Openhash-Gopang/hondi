@@ -734,6 +734,14 @@
     getToken: getToken,
     hasValidLogin: hasValidLogin,
     logout: logout,
+    // 2026-11-11 — 나비웹 도우미가 K-Law 창을 열 때, 이미 로그인한 나비웹에서 넘겨 준 토큰으로 재인증 없이 들어온다.
+    // 호출하는 쪽(klaw-assist.js)이 부모 창 출처를 직접 확인한 뒤에만 부른다. 형식이 맞지 않거나 이미 만료된 값은 받지 않는다.
+    adopt: function (t, exp) {
+      exp = Number(exp);
+      if (typeof t !== 'string' || t.length < 20 || t.length > 4000 || !(exp > Date.now() + 60000)) return false;
+      persist(t, exp);
+      return true;
+    },
     fetchWithAuth: function () {   // 진행 중인 요청이 있는 동안은 비활동으로 보지 않는다
       inflight++;
       var p = fetchWithAuth.apply(null, arguments);
