@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-11 05:09 KST · 기준 커밋 c4c166cb
-- 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
+- 갱신: 2026-11-11 05:23 KST · 기준 커밋 cdec2477
+- 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-11 Merge pull request #987 from Openhash-Gopang/feat/gov-sp-update-sharing
+- 2026-11-11 feat(gov-sp): SP 갱신 기록 원장·공유 다이제스트·런타임 로딩·CI 게이트 (10건 피드백/90일 갱신 의무)
 - 2026-11-11 Merge pull request #986 from Openhash-Gopang/feat/gov-sp-monthly-review
 - 2026-11-11 feat(gov-sp): 월간 검토(최신성 갱신 + 사용자 피드백 반영) 장부·CI 게이트·P14/§FEEDBACK 신설
 - 2026-11-11 Merge pull request #985 from Openhash-Gopang/feat/gov-instance-check
@@ -42,8 +44,6 @@
 - 2026-11-10 feat(auth): 휴대폰 분실 복구(문자 인증+확인 문구), 이전 로그인 일괄 해제, 24시간 송금·환급 정지
 - 2026-11-10 feat(account): 탈퇴 시 잔액 확인 및 환급 계좌 접수
 - 2026-11-10 feat(auth): 무료 한도 첫 안내 및 소진 임박 충전 알림 (user-badge)
-- 2026-11-10 Merge pull request #966 from Openhash-Gopang/feat/pc-idle-logout
-- 2026-11-10 feat: PC 비활동 30분 자동 로그아웃 (K 서비스 공용 로그인)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
