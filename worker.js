@@ -4955,6 +4955,7 @@ async function handleKlawQuota(request, url, env, corsHeaders) {
     const stepKey = `klaw:steps:${guid}:${day}`;
     const used = await _klawSpendGet(env, stepKey);
     const limit = KLAW_USER_DAILY_STEP_LIMIT;
+    if (!Number.isFinite(limit)) return new Response(JSON.stringify({ ok: true, used, limit: null, remaining: null, unlimited: true }), { headers: corsHeaders }); // JSON은 Infinity를 null로 바꿔 버리므로 명시한다
     const remaining = Math.max(0, limit - used);
     return new Response(JSON.stringify({ ok: true, used, limit, remaining }), { headers: corsHeaders });
   } catch (e) {
@@ -21622,7 +21623,7 @@ const KLAW_TIER_MODELS = {
 };
 const KLAW_USER_DAILY_KRW_LIMIT   = Infinity; // 1인 1일 금액 한도 — 2026-11-10 해제(주피터 지시, 기존 300원). 사용액 기록은 그대로 남는다. 전체 이용자 합계 상한(아래)과 1인 1일 판결 횟수 한도는 유지
 const KLAW_GLOBAL_DAILY_KRW_LIMIT = 30000;  // 계정 전체 1일 예산 상한(원) — 공유 계정 보호
-const KLAW_USER_DAILY_STEP_LIMIT  = 3;      // 1인 1일 "판결 생성"(STEP 0~C) 횟수 한도
+const KLAW_USER_DAILY_STEP_LIMIT  = Infinity; // 1인 1일 "판결 생성" 횟수 한도 — 2026-11-10 해제(주피터 지시, 기존 3회). 횟수 기록은 그대로 남고, 잔액 문턱(KLAW_VERDICT_MIN_BALANCE_KRW)만 적용된다
 
 // ═══════════════════════════════════════════════════════════
 // K-Law 건당 정가 과금 — 2026-08-11 신설(주피터 지시)
