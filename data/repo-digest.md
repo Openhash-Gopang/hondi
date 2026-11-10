@@ -1,9 +1,13 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-11 03:52 KST · 기준 커밋 90b639da
+- 갱신: 2026-11-11 04:10 KST · 기준 커밋 896bcf70
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 883건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-11 Merge pull request #972 from Openhash-Gopang/feat/gov-ai-broad-task-map
+- 2026-11-11 feat(prompts): 정부 AI 업무 지도를 사례 중심에서 기관 소관 전체 지도로 개편(P12-6 범용성)
+- 2026-11-11 Merge pull request #971 from Openhash-Gopang/feat/gov-ai-identity-p1-yongmu
+- 2026-11-11 feat(prompts): 국세청·법원 SP에 업무 지도 추가(종합소득세 신고, 지급명령·소액사건)
 - 2026-11-11 Merge pull request #970 from Openhash-Gopang/feat/gov-ai-identity-p1-yongmu
 - 2026-11-11 feat(prompts): 정부 AI 정체성을 '기관 대신'에서 '기관 업무에 정통해 용무를 돕는 AI'로, P12 기관 업무 지도 응답 원칙 신설
 - 2026-11-10 feat(auth): 휴대폰 분실 복구(문자 인증+확인 문구), 이전 로그인 일괄 해제, 24시간 송금·환급 정지
@@ -40,10 +44,6 @@
 - 2026-11-08 Merge pull request #952 from Openhash-Gopang/follow/vault-bot-icon-hondi
 - 2026-11-08 feat(vault): 금고 아이콘을 자물쇠로 교체
 - 2026-11-08 feat(pdv): 자체 대화창 아이콘 제거, 부모 아이콘으로 나비 열기, iframe 높이 자동 조절
-- 2026-11-08 Merge pull request #951 from Openhash-Gopang/feat/pdv-vault-page
-- 2026-11-08 feat(pdv): 내 데이터 금고 화면을 새 디자인으로 교체 (기록 목록은 실제 PDV 데이터, 백업·복구 유지)
-- 2026-11-08 Merge pull request #950 from Openhash-Gopang/feat/pdv-cloud-backup
-- 2026-11-08 feat(pdv): PC 는 클라우드 백업(기본 L1 PocketBase)에서 PDV 를 불러온다
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
