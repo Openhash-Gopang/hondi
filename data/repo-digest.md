@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-12 20:18 KST · 기준 커밋 da7b93a8
+- 갱신: 2026-11-13 05:42 KST · 기준 커밋 9a460cc5
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-13 Merge pull request #1016 from Openhash-Gopang/fix/search-verb-hoching
+- 2026-11-12 fix(search): '@아이디 호출해줘'·'번호 연락' 등 호출·연락·통화 동사도 즉시 검색으로 처리
 - 2026-11-12 Merge pull request #1015 from Openhash-Gopang/feat/llm-guard
 - 2026-11-12 feat(guard): LLM 거짓 실행·나중에 알림 약속 답변 검문 + 모델 진단 표시(?llm=1) + SP 가능 목록 규칙
 - 2026-11-12 Merge pull request #1014 from Openhash-Gopang/fix/search-name-verb
@@ -42,8 +44,6 @@
 - 2026-11-12 feat: 로그인 팝오버에 회원 가입 메뉴 추가
 - 2026-11-12 feat: KAuth.openSignup - 팝오버에서 가입 화면 바로 열기
 - 2026-11-12 Merge pull request #999 from Openhash-Gopang/feat/pc-signup-link
-- 2026-11-12 test: PC 회원 가입 세션 로직 시험
-- 2026-11-12 feat: PC 로그인 창에 회원 가입(QR·문자 선택, 무료 플랜 시작)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
