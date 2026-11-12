@@ -1,9 +1,12 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-11 07:11 KST · 기준 커밋 393d0e1d
+- 갱신: 2026-11-12 16:32 KST · 기준 커밋 35c0b434
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-12 Merge pull request #997 from Openhash-Gopang/fix/device-link-approve-direct
+- 2026-11-12 feat: 폰 승인 숫자 화면 단순화 — 요약 한 줄·숫자·안내 한 줄만, 위치는 시·군·구까지
+- 2026-11-12 fix: 폰 승인 화면 — 지갑 잠금 해제 화면 제거, 숫자 선택 화면 즉시 표시, 숫자 터치 안에서 지갑 열기
 - 2026-11-11 feat: 공개 게시판용 전체 이용자 일치도 합산(/klaw/sessions/trend)과 게시판 목록 확장(500건·사건번호)
 - 2026-11-11 feat: 판결 이력에 사건번호·판결문·갱신 제안 저장 항목 추가(case_no, case_docs)
 - 2026-11-11 fix: 폰 본인 확인 — 숫자를 누르면 바로 승인, '본인이 맞습니다' 버튼·불필요한 문구 삭제
@@ -41,9 +44,6 @@
 - 2026-11-11 Merge pull request #976 from Openhash-Gopang/feat/gov-ai-broad-task-map
 - 2026-11-11 feat(prompts): 도청·시청 부서 템플릿(복지·교통·안전·관광)에 소관 전체 업무 지도 추가
 - 2026-11-11 Merge pull request #975 from Openhash-Gopang/feat/gov-ai-broad-task-map
-- 2026-11-11 feat(prompts): 지방정부(도청·시청·읍면동) SP에 업무 지도 원칙과 소관 업무 지도 적용
-- 2026-11-11 Merge pull request #974 from Openhash-Gopang/feat/gov-ai-broad-task-map
-- 2026-11-11 feat(prompts): 모든 정부 AI에 기능·역할 최신성 갱신 원칙 신설(호출 시 확인, 월 1회 이상 웹 검색 갱신)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
