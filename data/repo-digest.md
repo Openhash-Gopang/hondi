@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-12 17:41 KST · 기준 커밋 66cedccc
+- 갱신: 2026-11-12 18:31 KST · 기준 커밋 a850623a
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-12 Merge pull request #1001 from Openhash-Gopang/fix/friend-search-exact-only
+- 2026-11-12 fix(search): 사용자 검색을 전화번호·아이디 정확 일치로만 제한 (닉네임 부분 검색 제거)
 - 2026-11-12 Merge pull request #1000 from Openhash-Gopang/feat/pc-signup-link
 - 2026-11-12 feat: 로그인 팝오버에 회원 가입 메뉴 추가
 - 2026-11-12 feat: KAuth.openSignup - 팝오버에서 가입 화면 바로 열기
@@ -42,8 +44,6 @@
 - 2026-11-11 feat(gov-sp): 출자·출연기관 SP-ORG-* 271개에 §2-MAP 반영
 - 2026-11-11 feat(gov-sp): 제주시·서귀포시 과 단위 SP-CITYDIV-* 88개에 §2-MAP 반영
 - 2026-11-11 Merge pull request #983 from Openhash-Gopang/feat/gov-instance-check
-- 2026-11-11 feat(gov-sp): 읍면동 팀 템플릿 5개·합의제기관 SP-COMM 3개에 §2-MAP 반영
-- 2026-11-11 feat(gov-sp): 03-do-agency SP-AGY-* 25개에 §2-MAP(업무 지도) 반영
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
