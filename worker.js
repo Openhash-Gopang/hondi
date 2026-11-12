@@ -751,7 +751,7 @@ async function _resolveGuidFromPhoneVerifyToken(env, phoneVerifyToken, opts = {}
 
   // 🧪 테스트 아이디 토큰(2026-10-09): e164 자리가 'tid-<아이디>'. 서버 스위치가 꺼지면 즉시 무효.
   if (e164.startsWith(TEST_ID_PREFIX)) {
-    if (!_testAuthOn(env)) return { ok: false, code: 'TOKEN_INVALID', message: '테스트 기간이 종료되어 인증 토큰이 만료되었습니다' };
+    if (!_testAuthOn(env) && !opts.allowTestOff) return { ok: false, code: 'TOKEN_INVALID', message: '테스트 기간이 종료되어 인증 토큰이 만료되었습니다' };   // opts.allowTestOff: 이용자 검색처럼 테스트 기간과 무관하게 허용하는 경로(2026-11-12)
     try {
       const prof = await _l1FindProfileByHandle(env, e164);
       if (!prof) return { ok: false, code: 'PROFILE_NOT_FOUND', message: '이 아이디로 등록된 프로필이 없습니다' };
@@ -29122,7 +29122,7 @@ const _FF_ID_CHARS = /^[A-Za-z0-9가-힣._-]{1,40}$/;
 async function handleFriendFind(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
-  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token);
+  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, { allowTestOff: true, allowBlockedTest: true });   // 이용자 검색은 테스트 기간·무료 한도와 무관하게 항상 허용(2026-11-12)
   if (!who.ok) return _err(401, who.code, who.message, corsHeaders);
   const c = _ffClassify(body.q);
   if (c.kind === 'empty') return _err(400, 'MISSING_FIELD', '찾을 전화번호나 아이디를 입력하세요', corsHeaders);
@@ -29169,7 +29169,7 @@ async function handleFriendFind(request, env, corsHeaders) {
 async function handleFriendSettings(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
-  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token);
+  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, { allowTestOff: true, allowBlockedTest: true });   // 이용자 검색은 테스트 기간·무료 한도와 무관하게 항상 허용(2026-11-12)
   if (!who.ok) return _err(401, who.code, who.message, corsHeaders);
   let me;
   try { me = await _l1FindProfileByGuid(env, who.guid); } catch (e) { return _err(502, 'L1_ERROR', e.message, corsHeaders); }
