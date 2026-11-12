@@ -81,7 +81,11 @@
   .dl-simple #btn-deny { color: #b3261e; margin-top: 64px; }
   /* 숫자 선택형: 숫자 자체가 승인, 아래에는 "본인 아님"만 남긴다 */
   .dl-match .warn { display: none; }
-  .dl-match #btn-deny { margin-top: 28px; }
+  /* 2026-11-12 단순화(주피터 지시): 숫자 선택 화면에는 '무엇에 로그인하는지·대략 위치' 한 줄과 숫자, 안내 한 줄만 둔다 */
+  .dl-match #btn-deny, .dl-match #pc-label, .dl-match #dl-rows { display: none; }
+  .dl-match.dl-hide-title h1 { display: none; }
+  #dl-summary { font-size: 17px; font-weight: 700; color: #111827; line-height: 1.5; margin: 4px 0 18px; word-break: keep-all; }
+  #match-hint { font-size: 12px; color: #6b7280; margin: 14px 0 0; line-height: 1.5; }
   .dl-simple #btn-approve:disabled, .dl-simple #btn-deny:disabled { background: #f3f4f6; color: #9ca3af; }
 </style>
 </head>
@@ -101,9 +105,11 @@
       사용할 수 있는 권한</strong>이 그 기기에 전달됩니다.
     </div>
     <!-- 2026-11-10 신설 — 숫자 대조: PC 화면에 보이는 숫자를 골라야 승인 버튼이 켜진다 -->
+    <div id="dl-summary" class="hide"></div>
     <div id="match-box" class="hide" style="margin:14px 0 4px;text-align:center">
       <p style="font-size:14px;color:#111827;margin:0 0 10px"><strong>로그인하려는 PC 화면에 보이는 숫자</strong>를 선택하세요</p>
       <div id="match-choices" style="display:flex;gap:10px;justify-content:center"></div>
+      <p id="match-hint">PC 화면을 보고 있지 않거나 숫자가 없다면 선택하지 마세요.</p>
     </div>
     <button id="btn-approve">본인이 맞습니다 — 로그인 허용</button>
     <button id="btn-deny" class="secondary">본인 아님 — 거부</button>
@@ -112,15 +118,6 @@
          암호화까지 끝난 봉투를 그대로 재전송할 수 있는 버튼. 실사로
          "Failed to fetch"가 여러 번 반복되는 사례가 확인됨. -->
     <button id="btn-retry-deliver" class="secondary hide">전달 다시 시도</button>
-  </div>
-
-  <div id="unlock" class="hide">
-    <h1>지갑 잠금 해제가 필요합니다</h1>
-    <div class="warn">
-      브라우저 보안 정책상, 지문/얼굴 인식은 화면을 직접 눌러야만 뜹니다.
-      아래 버튼을 눌러 인증을 진행해 주세요.
-    </div>
-    <button id="btn-unlock">지갑 잠금 해제</button>
   </div>
 
   <div id="error" class="hide">
@@ -138,7 +135,7 @@
   const sessionId = new URLSearchParams(location.search).get('sessionId');
 
   const $ = (id) => document.getElementById(id);
-  const show = (id) => { ['loading','content','error','unlock'].forEach(x => $(x).classList.add('hide')); $(id).classList.remove('hide'); };
+  const show = (id) => { ['loading','content','error'].forEach(x => $(x).classList.add('hide')); $(id).classList.remove('hide'); };
   const setStatus = (msg, kind) => { $('status').textContent = msg || ''; $('status').className = kind || ''; if (kind === 'error') $('card').classList.add('has-error'); };
 
   // 2026-07-20 신설 — USB 원격 디버깅이 반복적으로 불안정해, 화면에
@@ -202,15 +199,28 @@
     return wallet;
   }
 
-  async function proceedWithWallet(wallet) {
-    if (!wallet.guid) {
+  // 2026-11-12 개편(주피터 지시): 지갑을 열기 전에 숫자 선택 화면부터 보여 준다.
+  // 세션 조회에는 계정 guid 만 필요하고, 폰의 localStorage(gopang_user_v4.ipv6)에 이미 있다.
+  // 지갑(지문·얼굴 인증)은 사용자가 숫자를 누르는 순간 — 진짜 터치 안에서 — 연다.
+  let sessionGuid = null;
+  let _biometricSetting = null;   // 보호 설정은 화면이 뜰 때 미리 조회해 둔다(터치 직후 네트워크 대기를 없애려고)
+  function _storedGuid() {
+    try { return (JSON.parse(localStorage.getItem('gopang_user_v4') || 'null') || {}).ipv6 || null; }
+    catch { return null; }
+  }
+  async function showRequest(guid) {
+    if (!guid) {
       show('error');
       $('error-title').textContent = '먼저 로그인해 주세요';
       $('error-msg').textContent = '나비 앱에 먼저 로그인한 뒤 다시 시도해 주세요.';
       return;
     }
+    sessionGuid = guid;
+    _biometricSetting = fetch(`${WORKER}/account/protective-setting?guid=${encodeURIComponent(guid)}&key=device_link_biometric_required`)
+      .then(r => r.json().then(d => (r.ok && d.ok && d.value === false) ? false : true))
+      .catch(() => true);   // 조회 실패는 안전한 쪽(지문 필수)으로
 
-    const res = await fetch(`${WORKER}/auth/device-link/session?sessionId=${encodeURIComponent(sessionId)}&guid=${encodeURIComponent(wallet.guid)}`);
+    const res = await fetch(`${WORKER}/auth/device-link/session?sessionId=${encodeURIComponent(sessionId)}&guid=${encodeURIComponent(guid)}`);
     const data = await res.json();
     if (!res.ok || !data.ok) throw new Error(data.detail || data.error || '요청을 확인할 수 없습니다.');
 
@@ -255,6 +265,7 @@
     // sigMsg를 반드시 화면에 보여준다.
     if (data.purpose === 'sign_request') renderSignRequestSimple(data);
     else if (data.purpose === 'pdv_fetch') renderPdvFetch(data);
+    if (Array.isArray(data.matchChoices) && data.matchChoices.length) applyMatchLayout(data);
     show('content');
   }
 
@@ -298,6 +309,18 @@
     $('btn-deny').textContent = '✕ 아니요, 허용하지 않습니다';
   }
 
+  // 숫자 선택 화면의 요약 한 줄 — '어디에 로그인하는지'(맹목적 승인 방지) + 요청한 PC 의 대략적인 위치(서버가 접속 IP 로 추정한 값).
+  // 로그인이 아닌 서명 요청(번호 등록·양도·폐기 등)은 무엇에 서명하는지가 핵심이라 제목을 그대로 둔다.
+  function applyMatchLayout(data) {
+    const info = data.purpose === 'sign_request' ? parseSigMsg(data.sigMsg) : null;
+    const isLogin = data.purpose === 'key_transfer' || (info && String(data.sigMsg || '').startsWith('kauth-login:'));
+    const geo = data.pcGeo ? ' · ' + data.pcGeo + ' 부근(대략)' : '';
+    const el = $('dl-summary');
+    el.textContent = (data.pcLabel || '알 수 없는 기기') + (isLogin ? ' 로그인' : ' 요청') + geo;
+    el.classList.remove('hide');
+    $('content').classList.toggle('dl-hide-title', !!isLogin);
+  }
+
   function renderSignRequestSimple(data) {
     const info = parseSigMsg(data.sigMsg);
     const c = $('content');
@@ -327,31 +350,16 @@
       return;
     }
     try {
-      const wallet = await waitForWallet();
-      if (!wallet) {
-        // 조용히 실패 — WebAuthn이 사용자 제스처 없이 막혔을 가능성이 가장
-        // 크므로, 에러로 끝내지 않고 탭-투-언락 버튼으로 넘긴다.
-        show('unlock');
-        return;
-      }
-      await proceedWithWallet(wallet);
+      // 지갑을 기다리지 않는다 — 폰에 저장된 계정 guid 로 바로 숫자 선택 화면을 띄운다.
+      // (저장된 guid 가 없을 때만, 지갑이 자동으로 열려 guid 를 알려 주기를 잠깐 기다린다.)
+      let guid = _storedGuid();
+      if (!guid) { const w = await waitForWallet(); guid = (w && w.guid) || null; }
+      await showRequest(guid);
     } catch (e) {
       show('error');
       $('error-msg').textContent = e.message || '요청을 확인할 수 없습니다. 만료됐을 수 있습니다.';
     }
   }
-
-  $('btn-unlock').addEventListener('click', async () => {
-    $('btn-unlock').disabled = true;
-    $('btn-unlock').textContent = '확인 중...';
-    try {
-      const wallet = await unlockWalletDirectly(); // 진짜 탭 안에서 호출 — 생체인증 프롬프트 정상 표시돼야 함
-      await proceedWithWallet(wallet);
-    } catch (e) {
-      show('error');
-      $('error-msg').textContent = e.message || '지갑을 열지 못했습니다.';
-    }
-  });
 
   $('btn-deny').addEventListener('click', () => {
     show('error');
@@ -403,8 +411,11 @@
     dlog('승인 시작');
 
     try {
-      let wallet = await waitForWallet();
-      if (!wallet) wallet = await unlockWalletDirectly(); // 방어적 폴백 — 이 시점엔 보통 이미 준비돼 있음
+      // 사용자가 숫자를 누른 바로 이 터치 안에서 지갑을 연다(생체 인증 창은 터치 직후에만 뜬다) —
+      // 이보다 앞에 네트워크·타이머 대기를 두지 않는다.
+      let wallet = (window.gopangWallet && !window.gopangWallet._isSessionProxy) ? window.gopangWallet : await unlockWalletDirectly();   // 개인키 없는 세션 대리 객체는 쓰지 않는다
+      if (!wallet.guid && sessionGuid) wallet.setIdentity({ guid: sessionGuid, handle: null });
+      if (sessionGuid && wallet.guid !== sessionGuid) throw new Error('이 폰의 지갑 계정이 요청한 계정과 다릅니다. 나비 앱에 같은 계정으로 로그인했는지 확인해 주세요.');
       dlog('지갑 준비 완료 · guid=' + wallet.guid, 'ok');
 
       // ── 2026-09-07 신설(사용자 지시) — 코드 확인만으로 승인이 완료되던
@@ -423,16 +434,7 @@
       // 최종 판단을 하므로(handleDeviceLinkVerify) 여기서 꺼져 있다고
       // 잘못 판단해도 안전하게 막히지만, 꺼진 사용자에게 불필요한 지문
       // 프롬프트를 안 띄우기 위해 여기서도 먼저 확인한다.
-      let biometricRequired = true;
-      try {
-        const settingRes = await fetch(
-          `${WORKER}/account/protective-setting?guid=${encodeURIComponent(wallet.guid)}&key=device_link_biometric_required`
-        );
-        const settingData = await settingRes.json();
-        if (settingRes.ok && settingData.ok && settingData.value === false) biometricRequired = false;
-      } catch (e) {
-        dlog('보호 설정 조회 실패(안전한 쪽으로 진행): ' + e.message);
-      }
+      const biometricRequired = _biometricSetting ? await _biometricSetting : true;   // 화면이 뜰 때 미리 조회해 둔 값
 
       let stepUp = { ok: true, step_up_token: null };
       if (biometricRequired) {
