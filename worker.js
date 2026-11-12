@@ -1777,6 +1777,136 @@ const HONDI_TIER_MODELS = {
     price: { cacheHit: 0.0145, cacheMiss: 0.435, output: 0.87 },
   },
 };
+// ═══════════════════════════════════════════════════════════
+// 2026-11-12 — 나비 대화 LLM: DeepSeek → Claude Haiku 5.5 (주피터 지시)
+// 켜짐 조건: env.ANTHROPIC_API_KEY 가 있고 env.NAVI_LLM !== 'deepseek'.
+// 즉 키를 등록하면 전환되고, NAVI_LLM=deepseek 로 두면 즉시 되돌린다.
+// 가격: Anthropic 공식 페이지(anthropic.com/claude/haiku) 기준 프롬프트 100K 토큰 이하
+// 입력 $0.10 · 출력 $0.50 / 1M. 캐시 읽기 단가는 공식 페이지에 숫자가 없어 입력 단가와
+// 같게 두었다(상한 추정). 캐시 쓰기 토큰도 일반 입력으로 센다.
+// 100K 초과 프롬프트는 단가가 5배(입력 $0.50·출력 $2.50)이므로 HAIKU_LONG_*로 따로 계산한다.
+// ═══════════════════════════════════════════════════════════
+const HAIKU_MODEL = 'claude-haiku-5-5';
+HONDI_TIER_MODELS['hondi-haiku'] = {
+  backendModel: HAIKU_MODEL,
+  price: { cacheHit: 0.10, cacheMiss: 0.10, output: 0.50 },
+  longPrice: { cacheHit: 0.50, cacheMiss: 0.50, output: 2.50 },
+  longThresholdTokens: 100000,
+};
+const HAIKU_MAX_OUTPUT_TOKENS = 8192;
+
+function _haikuEnabled(env) {
+  return !!env?.ANTHROPIC_API_KEY && env.NAVI_LLM !== 'deepseek';
+}
+
+function _haikuUsage(u) {
+  // Anthropic usage → DeepSeek형 필드(기존 정산 코드가 읽는 이름)
+  const read = u?.cache_read_input_tokens || 0;
+  const miss = (u?.input_tokens || 0) + (u?.cache_creation_input_tokens || 0);
+  const out = u?.output_tokens || 0;
+  return {
+    prompt_tokens: read + miss, prompt_cache_hit_tokens: read, prompt_cache_miss_tokens: miss,
+    completion_tokens: out, total_tokens: read + miss + out,
+  };
+}
+
+function _haikuContentBlocks(content) {
+  if (typeof content === 'string') return content;
+  if (!Array.isArray(content)) return String(content ?? '');
+  const out = [];
+  for (const part of content) {
+    if (!part) continue;
+    if (part.type === 'text' && typeof part.text === 'string') { out.push({ type: 'text', text: part.text }); continue; }
+    const url = part.type === 'image_url' ? (part.image_url?.url || part.image_url) : null;
+    if (typeof url === 'string') {
+      const m = /^data:([^;]+);base64,(.+)$/s.exec(url);
+      if (m) out.push({ type: 'image', source: { type: 'base64', media_type: m[1], data: m[2] } });
+      else if (/^https:\/\//.test(url)) out.push({ type: 'image', source: { type: 'url', url } });
+    }
+  }
+  return out.length ? out : '';
+}
+
+// OpenAI형 요청 본문 → Anthropic Messages 요청 본문
+function _openAIToAnthropicBody(ob) {
+  const sys = [];
+  const msgs = [];
+  for (const m of (ob.messages || [])) {
+    if (!m) continue;
+    if (m.role === 'system') {
+      const t = typeof m.content === 'string' ? m.content : (_haikuContentBlocks(m.content) || []).map?.(b => b.text || '').join('\n');
+      if (t) sys.push(t);
+      continue;
+    }
+    const role = m.role === 'assistant' ? 'assistant' : 'user';
+    const content = _haikuContentBlocks(m.content);
+    if (content === '' || (Array.isArray(content) && !content.length)) continue;
+    const last = msgs[msgs.length - 1];
+    if (last && last.role === role) {
+      // Anthropic은 같은 역할 연속을 허용하지 않는다 — 합친다
+      const a = typeof last.content === 'string' ? [{ type: 'text', text: last.content }] : last.content;
+      const b = typeof content === 'string' ? [{ type: 'text', text: content }] : content;
+      last.content = a.concat(b);
+    } else msgs.push({ role, content });
+  }
+  if (!msgs.length || msgs[0].role !== 'user') msgs.unshift({ role: 'user', content: '(대화 시작)' });
+  const maxTok = Math.min(Number(ob.max_tokens || ob.max_completion_tokens) || 1024, HAIKU_MAX_OUTPUT_TOKENS);
+  const body = { model: HAIKU_MODEL, max_tokens: maxTok, messages: msgs, stream: !!ob.stream };
+  if (sys.length) body.system = [{ type: 'text', text: sys.join('\n\n---\n\n'), cache_control: { type: 'ephemeral' } }];
+  if (ob.stop) body.stop_sequences = [].concat(ob.stop).filter(x => typeof x === 'string').slice(0, 4);
+  return body;
+}
+
+function _haikuFinish(r) {
+  return r === 'max_tokens' ? 'length' : (r === 'end_turn' || r === 'stop_sequence' || !r) ? 'stop' : r;
+}
+
+// Anthropic 응답(JSON 또는 SSE)을 OpenAI형으로 바꾼 Response 를 돌려준다.
+async function _fetchHaikuAsOpenAI(env, outboundBody) {
+  const body = _openAIToAnthropicBody(outboundBody);
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) return res;
+  if (!body.stream) {
+    const d = await res.json();
+    const text = (d.content || []).filter(c => c.type === 'text').map(c => c.text).join('');
+    return new Response(JSON.stringify({
+      id: d.id, object: 'chat.completion', model: d.model || HAIKU_MODEL,
+      choices: [{ index: 0, message: { role: 'assistant', content: text }, finish_reason: _haikuFinish(d.stop_reason) }],
+      usage: _haikuUsage(d.usage),
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  }
+  const enc = new TextEncoder(), dec = new TextDecoder();
+  let buf = '', usage = {}, finish = null;
+  const send = (c, o) => c.enqueue(enc.encode('data: ' + JSON.stringify(o) + '\n\n'));
+  const tr = new TransformStream({
+    transform(chunk, ctl) {
+      buf += dec.decode(chunk, { stream: true });
+      const lines = buf.split('\n'); buf = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data:')) continue;
+        let ev; try { ev = JSON.parse(line.slice(5).trim()); } catch { continue; }
+        if (ev.type === 'message_start') Object.assign(usage, ev.message?.usage || {});
+        else if (ev.type === 'content_block_delta' && ev.delta?.type === 'text_delta' && ev.delta.text) {
+          send(ctl, { object: 'chat.completion.chunk', model: HAIKU_MODEL, choices: [{ index: 0, delta: { content: ev.delta.text }, finish_reason: null }] });
+        } else if (ev.type === 'message_delta') {
+          if (ev.usage) Object.assign(usage, ev.usage);
+          if (ev.delta?.stop_reason) finish = ev.delta.stop_reason;
+        } else if (ev.type === 'error') {
+          send(ctl, { object: 'chat.completion.chunk', model: HAIKU_MODEL, choices: [{ index: 0, delta: {}, finish_reason: 'error' }], error: ev.error });
+        }
+      }
+    },
+    flush(ctl) {
+      send(ctl, { object: 'chat.completion.chunk', model: HAIKU_MODEL, choices: [{ index: 0, delta: {}, finish_reason: _haikuFinish(finish) }], usage: _haikuUsage(usage) });
+      ctl.enqueue(enc.encode('data: [DONE]\n\n'));
+    },
+  });
+  return new Response(res.body.pipeThrough(tr), { status: 200, headers: { 'Content-Type': 'text/event-stream' } });
+}
 
 // ═══════════════════════════════════════════════════════════
 // 복잡도 기반 flash/pro 판단 — 서버측 단일 소스(2026-08-14 신설, 주피터
@@ -1908,7 +2038,9 @@ const FREE_QUOTA_ENFORCEMENT_ENABLED = true;
 
 function _deepseekUsageToKRW(usage, tierKey) {
   if (!usage) return 0;
-  const price = HONDI_TIER_MODELS[tierKey]?.price || HONDI_TIER_MODELS['hondi-flash'].price;
+  const _tm = HONDI_TIER_MODELS[tierKey] || HONDI_TIER_MODELS['hondi-flash'];
+  const _promptTok = (usage.prompt_cache_hit_tokens ?? 0) + (usage.prompt_cache_miss_tokens ?? usage.prompt_tokens ?? 0);
+  const price = (_tm.longPrice && _promptTok > _tm.longThresholdTokens) ? _tm.longPrice : _tm.price;
   // DeepSeek 응답의 usage 필드명: prompt_cache_hit_tokens / prompt_cache_miss_tokens
   // (없으면 prompt_tokens 전체를 캐시 미스로 간주 — 보수적 상한 추정)
   const hit  = usage.prompt_cache_hit_tokens ?? 0;
@@ -21771,10 +21903,30 @@ async function callDeepSeek(bodyText,env,corsHeaders,fallbackFrom=null,meta=null
   const _url = _useSelfHost ? env.HONDI_SELFHOST_URL : (_useOR ? OR_URL : DEEPSEEK_URL);
   const _key = _useSelfHost ? env.HONDI_SELFHOST_API_KEY : (_useOR ? env.OPENROUTER_API_KEY : env.DEEPSEEK_API_KEY);
   _dlog(env, JSON.stringify({tag:'AI_PROXY_CALL',fn:'callDeepSeek',ts:new Date().toISOString(),target:_useSelfHost?'hondi-selfhost':(_useOR?'openrouter':'deepseek'),tier:tierKey,model:backendModel,guid,fallbackFrom,...meta}));
-  const res=await fetch(_url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${_key}`,...(_useOR?{'HTTP-Referer':'https://hondi.net','X-Title':'Navi'}:{})},body:outboundBodyText});
+  // 2026-11-12 — 알려진 티어(hondi-flash/pro) 요청은 Haiku 로 보낸다(_haikuEnabled). Haiku 가 인증·한도·서버 오류로
+  // 실패하면 DeepSeek 키가 있을 때 기존 경로로 폴백한다(400 계열 요청 오류는 그대로 돌려준다).
+  let res = null, _haikuUsed = false;
+  if (_haikuEnabled(env) && isKnownTierName && outboundBody && Array.isArray(outboundBody.messages)) {
+    try {
+      const hr = await _fetchHaikuAsOpenAI(env, outboundBody);
+      if (hr.ok) { res = hr; _haikuUsed = true; }
+      else {
+        const _st = hr.status;
+        console.warn(JSON.stringify({ tag: 'HAIKU_CALL_FAILED', status: _st, ts: new Date().toISOString(), ...meta }));
+        if (!([401, 403, 429].includes(_st) || _st >= 500) || !(_useSelfHost || _useOR || env.DEEPSEEK_API_KEY)) {
+          const t = await hr.text(); let m; try { m = JSON.parse(t)?.error?.message; } catch {}
+          return new Response(JSON.stringify({ error: m || `HTTP ${_st}` }), { status: _st, headers: corsHeaders });
+        }
+      }
+    } catch (e) { console.warn(JSON.stringify({ tag: 'HAIKU_CALL_ERROR', message: String(e?.message || e), ts: new Date().toISOString(), ...meta })); }
+  }
+  if (!res) {
+    res=await fetch(_url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${_key}`,...(_useOR?{'HTTP-Referer':'https://hondi.net','X-Title':'Navi'}:{})},body:outboundBodyText});
+  }
   if(!res.ok){const errText=await res.text();let errMsg;try{errMsg=JSON.parse(errText)?.error?.message;}catch{}return new Response(JSON.stringify({error:errMsg||`HTTP ${res.status}`}),{status:res.status,headers:corsHeaders});}
 
-  const spendTier = tierKey || 'hondi-flash'; // 레거시 호출은 flash 단가로 보수적 계산
+  const spendTier = _haikuUsed ? 'hondi-haiku' : (tierKey || 'hondi-flash'); // 레거시 호출은 flash 단가로 보수적 계산
+  const _billModel = _haikuUsed ? HAIKU_MODEL : backendModel;
   if(isStream){
     if (guid && env.AI_SETUP_SEALS_KV) {
       const [forClient, forUsage] = res.body.tee();
@@ -21787,13 +21939,13 @@ async function callDeepSeek(bodyText,env,corsHeaders,fallbackFrom=null,meta=null
       // 우연히 두 번 실행되는 경우(네트워크 재시도 등)의 이중 차감은
       // 막는다.
       const _settlementKey = 'aicharge-' + (crypto.randomUUID?.() || (Date.now() + '-' + Math.random().toString(36).slice(2)));
-      const usageTask = _parseUsageFromStream(forUsage, { env, meta: { tier: spendTier, model: backendModel, guid, ...meta } }).then(usage => _recordAiUsage(env, ctx, {
-        guid, serviceId: 'hondi-chat', tier: spendTier, priceTier: spendTier, model: backendModel, usage,
+      const usageTask = _parseUsageFromStream(forUsage, { env, meta: { tier: spendTier, model: _billModel, guid, ...meta } }).then(usage => _recordAiUsage(env, ctx, {
+        guid, serviceId: 'hondi-chat', tier: spendTier, priceTier: spendTier, model: _billModel, usage,
         logTag: 'HONDI_CHAT_COST', extraLogFields: meta,
         // (2026-07-14: 무료 한도 100원을 넘는 사용량은 이제 GDC 잔액에서
         //  실제로 차감된다 — _settleAiUsage가 무료/유료 경계를 나눠 처리)
         onAfterRecord: bill => _settleAiUsage(env, guid, bill, {
-          serviceId: 'hondi-chat', model: backendModel,
+          serviceId: 'hondi-chat', model: _billModel,
           hitTokens: usage?.prompt_cache_hit_tokens, missTokens: usage?.prompt_cache_miss_tokens,
           outTokens: usage?.completion_tokens,
         }, ctx, _settlementKey),
@@ -21815,16 +21967,16 @@ async function callDeepSeek(bodyText,env,corsHeaders,fallbackFrom=null,meta=null
     const _settlementKey = 'aicharge-' + (crypto.randomUUID?.() || (Date.now() + '-' + Math.random().toString(36).slice(2)));
     const _bill = computeBilledKRW(env, data.usage, spendTier);
     await _l1CreateSettlementOutbox(env, {
-      guid, settlementKey: _settlementKey, serviceId: 'hondi-chat', tier: spendTier, model: backendModel,
+      guid, settlementKey: _settlementKey, serviceId: 'hondi-chat', tier: spendTier, model: _billModel,
       hitTokens: data.usage?.prompt_cache_hit_tokens, missTokens: data.usage?.prompt_cache_miss_tokens,
       outTokens: data.usage?.completion_tokens, costKRW: _bill.apiCostKRW, billedKRW: _bill.billedKRW,
       extra: meta || {},
     });
     _recordAiUsage(env, ctx, {
-      guid, serviceId: 'hondi-chat', tier: spendTier, priceTier: spendTier, model: backendModel, usage: data.usage,
+      guid, serviceId: 'hondi-chat', tier: spendTier, priceTier: spendTier, model: _billModel, usage: data.usage,
       logTag: 'HONDI_CHAT_COST', extraLogFields: meta, settlementKey: _settlementKey,
       onAfterRecord: bill => _settleAiUsage(env, guid, bill, {
-        serviceId: 'hondi-chat', model: backendModel,
+        serviceId: 'hondi-chat', model: _billModel,
         hitTokens: data.usage?.prompt_cache_hit_tokens, missTokens: data.usage?.prompt_cache_miss_tokens,
         outTokens: data.usage?.completion_tokens,
       }, ctx, _settlementKey),
