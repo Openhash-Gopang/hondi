@@ -58,6 +58,7 @@ import { makeConsentSaleHandler } from './src/worker/consent-sale-handler.js';
 import { makeConsentSaleStore } from './src/worker/consent-sale-store.js';
 import { verifyPhoneAndStepUp } from './src/worker/phone-token.js';
 import { resolveDeviceGeo } from './src/worker/device-geo.js';
+import { createSignupLinkApi } from './src/worker/signup-link.js';
 import { handleDeptTaskCreate, handleDeptTaskUpdate, createDeptTaskCore, DEPT_TASK_TAXONOMY, _authoritativeCheck, _verifyAccessCert } from './src/worker/dept-task-handler.js';
 // 2026-09-20: K-FOI(SP-28_kfoi) — 정보 공개 청구 비서·청구 건 추적·공유 아카이브. 구현은 이 모듈에 있고
 // worker.js에는 import·팩토리(_kfoiHandlers)·라우트만 둔다(4만 줄 공유 파일의 병합 충돌을 줄이려는 분리).
@@ -1048,6 +1049,29 @@ async function _l1FindProfileByE164(env, e164) {
   if (!res.ok) throw new Error(`L1 조회 실패 (HTTP ${res.status})`);
   const data = await res.json().catch(() => ({ items: [] }));
   return data.items?.[0] || null;
+}
+
+// ── PC 회원 가입(폰으로 이어 가기) — 2026-11-12 신설(주피터 지시) ─────────────────────────────
+// PC 가입 창이 /auth/signup-link/init 으로 가입 세션을 만들고(QR 또는 문자 링크), 폰이 숫자 대조 뒤 기존 가입 절차로 가입을 끝낸다.
+// 로직은 src/worker/signup-link.js(시험 가능). 여기서는 의존(KV·토큰 확인·프로필 조회·SMS)만 연결한다.
+async function handleSignupLink(action, request, env, corsHeaders) {
+  if (!env.QR_SESSIONS_KV) return _err(500, 'KV_NOT_BOUND', '세션 저장소가 설정되지 않았습니다', corsHeaders);
+  const api = createSignupLinkApi({
+    kv: env.QR_SESSIONS_KV,
+    resolveToken: (t) => _resolveGuidFromPhoneVerifyToken(env, t),
+    findProfileByE164: (e164) => _l1FindProfileByE164(env, e164),
+    sendSms: (e164, text) => _sendSolapiSms(env, e164, text),
+  });
+  const url = new URL(request.url);
+  const body = request.method === 'POST' ? await request.json().catch(() => ({})) : null;
+  let r;
+  if (action === 'init') r = await api.init(body, request.headers.get('CF-Connecting-IP') || '');
+  else if (action === 'session') r = await api.session(url.searchParams.get('sessionId'));
+  else if (action === 'verify') r = await api.verify(body);
+  else if (action === 'complete') r = await api.complete(body);
+  else if (action === 'poll') r = await api.poll(url.searchParams.get('sessionId'));
+  else return _err(404, 'NOT_FOUND', '알 수 없는 요청', corsHeaders);
+  return new Response(JSON.stringify(r.body), { status: r.status, headers: corsHeaders });
 }
 
 // POST /auth/device-link/init { e164, pcPubKeyB64u?, pcLabel?, purpose?, sigMsg? }
@@ -14628,6 +14652,11 @@ export default {
     // 입력받아 페어링한 뒤, X25519 봉투 암호화로 개인키 자체를 옮긴다.
     // 서버는 암호화된 봉투만 중계하며 평문 개인키를 절대 보지 않는다.)
     if (pathname === '/auth/device-link/init'    && request.method === 'POST') return handleDeviceLinkInit(request, env, corsHeaders);
+    if (pathname === '/auth/signup-link/init'     && request.method === 'POST') return handleSignupLink('init', request, env, corsHeaders);
+    if (pathname === '/auth/signup-link/session'  && request.method === 'GET')  return handleSignupLink('session', request, env, corsHeaders);
+    if (pathname === '/auth/signup-link/verify'   && request.method === 'POST') return handleSignupLink('verify', request, env, corsHeaders);
+    if (pathname === '/auth/signup-link/complete' && request.method === 'POST') return handleSignupLink('complete', request, env, corsHeaders);
+    if (pathname === '/auth/signup-link/poll'     && request.method === 'GET')  return handleSignupLink('poll', request, env, corsHeaders);
     if (pathname === '/auth/device-link/session'  && request.method === 'GET')  return handleDeviceLinkSession(request, env, corsHeaders);
     if (pathname === '/auth/device-link/verify'   && request.method === 'POST') return handleDeviceLinkVerify(request, env, corsHeaders);
     if (pathname === '/auth/device-link/resend-sms' && request.method === 'POST') return handleDeviceLinkResendSms(request, env, corsHeaders);

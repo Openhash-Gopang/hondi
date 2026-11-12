@@ -2413,6 +2413,18 @@ function _showPhonePopupLegacy(resolve) {
     }
     console.info('[Auth] 신규 등록:', handle, nickname);
 
+    // PC 회원 가입 연결(2026-11-12, 주피터 지시): PC 가입 창이 만든 가입 세션을 폰에서 이어 받아 가입한 경우(auth/signup-approve.html 이
+    // sessionStorage 에 세션 번호를 남긴다), 가입이 끝났음을 서버에 알려 PC 가 일반 로그인으로 이어 가게 한다. 실패해도 가입 자체에는 영향 없다.
+    try {
+      const _slSession = sessionStorage.getItem('signup_link_session');
+      if (_slSession && phoneVerifyToken) {
+        fetch(`${PROXY_URL}/auth/signup-link/complete`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: _slSession, phone_verify_token: phoneVerifyToken }),
+        }).then(r => { if (r.ok) sessionStorage.removeItem('signup_link_session'); }).catch(e => console.warn('[가입][PC연결] 알림 실패(무시):', e.message));
+      }
+    } catch (e) { /* sessionStorage 접근 불가 */ }
+
     if (hondiDigitCodeImage) {
       try { localStorage.setItem('hondi_digit_code_image_v1', hondiDigitCodeImage); } catch {}
     }
