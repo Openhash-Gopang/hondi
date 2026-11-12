@@ -69,7 +69,7 @@ function _matchUsageDashboardIntent(text) {
 // LLM을 거치지 않고(약 100KB SP를 매번 싣는 호출을 생략) 즉시 검색창을 연다. 기다림 없이 바로 응답하는 것이 목적.
 // 보수적으로 매칭: 25자 이하이고 '사용자/이용자/대화 상대/친구' + '검색/찾기' 조합일 때만.
 const _USER_SEARCH_NOUN   = /(사용자|이용자|대화\s*상대|상대방?|친구|채팅|대화)/;
-const _USER_SEARCH_ACTION = /(검색|찾기|찾아|찾고|찾을|연결|불러)/;
+const _USER_SEARCH_ACTION = /(검색|찾기|찾아|찾고|찾을|연결|불러|호출|연락|통화)/;
 const _USER_SEARCH_EXCLUDE = /(방법|어떻게|왜\s|뭐|무엇|알려|기록|내용|요약|번역|설명)/;   // 질문·다른 용무로 보이면 LLM 으로
 function _matchUserSearchIntent(text) {
   if (!text || typeof text !== 'string') return null;
