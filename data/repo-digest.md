@@ -1,9 +1,13 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-12 18:31 KST · 기준 커밋 a850623a
+- 갱신: 2026-11-12 19:13 KST · 기준 커밋 c3cb2371
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-12 Merge pull request #1006 from Openhash-Gopang/fix/smoketest-sp-v2
+- 2026-11-12 ci: live-smoketest가 SP v2.0을 쓰도록 참조 갱신
+- 2026-11-12 Merge pull request #1005 from Openhash-Gopang/feat/sp-v2-haiku
+- 2026-11-12 feat: 나비 대화 LLM을 Claude Haiku 5.5로 전환하고 SP v2.0 적용
 - 2026-11-12 Merge pull request #1001 from Openhash-Gopang/fix/friend-search-exact-only
 - 2026-11-12 fix(search): 사용자 검색을 전화번호·아이디 정확 일치로만 제한 (닉네임 부분 검색 제거)
 - 2026-11-12 Merge pull request #1000 from Openhash-Gopang/feat/pc-signup-link
@@ -40,10 +44,6 @@
 - 2026-11-11 feat(gov-sp): 월간 검토(최신성 갱신 + 사용자 피드백 반영) 장부·CI 게이트·P14/§FEEDBACK 신설
 - 2026-11-11 Merge pull request #985 from Openhash-Gopang/feat/gov-instance-check
 - 2026-11-11 feat(gov-sp): 출자출연 팀 SP-ORGDIV 86·ORG 템플릿 16·도 루트 템플릿에 §2-MAP 반영
-- 2026-11-11 Merge pull request #984 from Openhash-Gopang/feat/gov-instance-check
-- 2026-11-11 feat(gov-sp): 출자·출연기관 SP-ORG-* 271개에 §2-MAP 반영
-- 2026-11-11 feat(gov-sp): 제주시·서귀포시 과 단위 SP-CITYDIV-* 88개에 §2-MAP 반영
-- 2026-11-11 Merge pull request #983 from Openhash-Gopang/feat/gov-instance-check
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
