@@ -87,6 +87,7 @@ function _matchUserSearchIntent(text) {
   return { query: num ? num[0] : '' };
 }
 import { loadFrequent, matchFrequent } from '../ui/frequent-users.js';
+import { guardReply } from './reply-guard.js';
 import { setPdvDomain, getPdvDomain, _buildPDVNote, _saveProjectState, _loadOpenProjectStates, _proposeSpUpdate, _submitUserFeedback } from '../pdv/record.js';
 // ★ 2026-07-11 추가: _callGeminiGeneral 등 5개 함수가 vision.js에 정의는
 // 돼 있는데 여기서 import가 빠져 있었다 — 이미지 첨부 후 Gemini 분석
@@ -5698,6 +5699,7 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
     }
 
     console.log(`[AI] 응답 시작 — status:${res.status}, streaming...`);
+    try { window.__hondiLLM = res.headers.get('X-Navi-LLM') || ''; } catch {}
 
     // ── SSE 스트림 수신 + 실시간 렌더링 ─────────────────────
     // ★ 2026-07-30 버그 수정 — 기존엔 여기서 hideTyping()을 바로
@@ -5843,6 +5845,25 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
     // ── 스트리밍 호출 이후 공통 처리 ────────────────────────
     if (!fullReply) fullReply = '(응답 없음)';
     console.log(`[AI] 응답 완료 — ${fullReply.length}자`);
+    // 하지 않은 일을 했다고 말하거나 '나중에 알려 드리겠다'고 약속하는 답변은 화면·대화 기록에서 모두 고정 안내문으로 바꾼다(reply-guard.js).
+    if (!(CFG.systemStack?.length > 0)) {
+      const _g = guardReply(fullReply);
+      if (_g.blocked) {
+        console.warn('[Guard] 거짓 실행/약속 답변 차단:', fullReply.slice(0, 80));
+        fullReply = _g.text;
+        if (bubble) _updateStreamBubble(bubble, fullReply);
+      }
+    }
+    try {
+      // 진단: ?llm=1 로 접속하면(이후 기억) 답변 아래에 응답한 모델 이름을 작게 표시한다.
+      if (new URLSearchParams(location.search).get('llm') === '1') localStorage.setItem('hondi_show_llm', '1');
+      if (bubble && localStorage.getItem('hondi_show_llm') === '1') {
+        const tag = document.createElement('div');
+        tag.style.cssText = 'font-size:10px;opacity:.55;margin-top:4px';
+        tag.textContent = '모델: ' + (window.__hondiLLM || usedCandidate?.model || '?');
+        bubble.appendChild(tag);
+      }
+    } catch {}
     if (CFG._modelOverride) { CFG.model = CFG._modelOverride; CFG._modelOverride = null; }
     history.push({ role: 'assistant', content: fullReply });
     if (bubble) bubble.classList.remove('streaming');
