@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-12 19:49 KST · 기준 커밋 42a900cc
+- 갱신: 2026-11-12 19:55 KST · 기준 커밋 9f217665
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-12 Merge pull request #1009 from Openhash-Gopang/feat/font-size-scale
+- 2026-11-12 feat: 폰 글자 크기 — 설정에서 4단계 선택(기본 크게 110%), 핀치 확대 허용, 폰·크롬 글꼴 크기(rem) 반영
 - 2026-11-12 Merge pull request #1008 from Openhash-Gopang/fix/instant-id-and-name-connect
 - 2026-11-12 feat: 이름만 말한 '찾아서 채팅 연결' 요청도 LLM 없이 즉시 안내
 - 2026-11-12 fix: 번호·@아이디만 입력해도 LLM 없이 바로 검색(검색 결과를 약속만 하고 멈추던 문제)
@@ -42,8 +44,6 @@
 - 2026-11-12 Merge pull request #997 from Openhash-Gopang/fix/device-link-approve-direct
 - 2026-11-12 feat: 폰 승인 숫자 화면 단순화 — 요약 한 줄·숫자·안내 한 줄만, 위치는 시·군·구까지
 - 2026-11-12 fix: 폰 승인 화면 — 지갑 잠금 해제 화면 제거, 숫자 선택 화면 즉시 표시, 숫자 터치 안에서 지갑 열기
-- 2026-11-11 feat: 공개 게시판용 전체 이용자 일치도 합산(/klaw/sessions/trend)과 게시판 목록 확장(500건·사건번호)
-- 2026-11-11 feat: 판결 이력에 사건번호·판결문·갱신 제안 저장 항목 추가(case_no, case_docs)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
