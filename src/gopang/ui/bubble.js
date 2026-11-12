@@ -60,20 +60,37 @@ export function appendBubble(role, text, isHTML = false, senderName = null) {
 // ── 타이핑 인디케이터 ────────────────────────────────────
 let typingEl = null;
 
+// 2026-11-12 — 응답 준비 중 진행 상태 표시(주피터 지시): 점 3개와 함께 "단계 문구… N초"를 1초마다 갱신하고,
+// 8초가 넘으면 늦어지고 있다고 알린다. 단계는 setWaitStage()로 바꾼다.
+let _typingTimer = null, _typingT0 = 0, _typingStage = '요청을 확인하는 중';
+function _renderTypingStatus() {
+  const el = document.getElementById('typing-status');
+  if (!el) return;
+  const sec = Math.floor((Date.now() - _typingT0) / 1000);
+  el.textContent = `${_typingStage}… ${sec}초` + (sec >= 8 ? ' · 평소보다 늦어지고 있습니다. 잠시만 기다려 주세요.' : '');
+}
+export function setWaitStage(label) { _typingStage = label; _renderTypingStatus(); }
 export function showTyping() {
   const list = document.getElementById(_activeContainerId);
   if (!list) return;
+  document.getElementById('typing-row')?.remove();
+  clearInterval(_typingTimer);
+  _typingT0 = Date.now();
+  _typingStage = '요청을 확인하는 중';
   typingEl = document.createElement('div');
   typingEl.className = 'msg-row ai';
   typingEl.id = 'typing-row';
   typingEl.innerHTML = `<div class="typing-indicator">
     <span></span><span></span><span></span>
-  </div>`;
+  </div><div id="typing-status" style="font-size:12px;color:#6b7280;margin:4px 0 0 4px" aria-live="polite"></div>`;
   list.appendChild(typingEl);
   list.scrollTop = list.scrollHeight;
+  _renderTypingStatus();
+  _typingTimer = setInterval(_renderTypingStatus, 1000);
 }
 
 export function hideTyping() {
+  clearInterval(_typingTimer);
   document.getElementById('typing-row')?.remove();
   typingEl = null;
 }
