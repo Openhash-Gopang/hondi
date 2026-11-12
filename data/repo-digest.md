@@ -1,9 +1,13 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-13 05:56 KST · 기준 커밋 193cf651
+- 갱신: 2026-11-13 07:32 KST · 기준 커밋 848b48f2
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-13 Merge pull request #1020 from Openhash-Gopang/domain-naviweb-origins-20261113
+- 2026-11-13 feat(worker): CORS 허용 출처에 naviweb.kr 서비스 하위 도메인 추가 (hondi.net 병행)
+- 2026-11-13 fix(gwp): 파일 맨 앞 BOM 복원 (추가만 하는 변경으로 되돌림)
+- 2026-11-13 feat(gwp): GWP 허용 출처에 naviweb.kr 주소 추가 (hondi.net 병행)
 - 2026-11-13 Merge pull request #1019 from Openhash-Gopang/fix/phone-signup-wording
 - 2026-11-13 fix(auth): 폰에서 가입·로그인 중 '스마트폰 알림을 열어 확인' 안내가 자기 자신을 가리키던 문구를 기기별로 분기
 - 2026-11-13 Merge pull request #1017 from Openhash-Gopang/feat/search-intents-latency
@@ -40,10 +44,6 @@
 - 2026-11-12 Merge pull request #1006 from Openhash-Gopang/fix/smoketest-sp-v2
 - 2026-11-12 ci: live-smoketest가 SP v2.0을 쓰도록 참조 갱신
 - 2026-11-12 Merge pull request #1005 from Openhash-Gopang/feat/sp-v2-haiku
-- 2026-11-12 feat: 나비 대화 LLM을 Claude Haiku 5.5로 전환하고 SP v2.0 적용
-- 2026-11-12 perf(chat): 사용자 검색 명령은 LLM 없이 즉시 검색창을 열고, 첫 응답 지연을 측정해 기록
-- 2026-11-12 fix(friends): 이용자 검색·설정은 테스트 기간과 무관하게 항상 허용
-- 2026-11-12 feat(auth): 가입 입력 칸을 밑줄·라벨 스타일로 바꾸고 전화번호 칸을 하나로 합침
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
