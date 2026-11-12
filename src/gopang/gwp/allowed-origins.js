@@ -1,4 +1,4 @@
-/**
+﻿/**
  * gwp/allowed-origins.js — GWP 서명 릴레이 공통 origin 화이트리스트
  *
  * 2026-07-05 실사: 이전에는 engine.js 안에 인라인으로 ALLOWED_ORIGINS가
