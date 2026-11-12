@@ -168,7 +168,15 @@
       '.ksa-msg.err{color:#c01c28}' +
       '.ksa-msg.ok{color:#1b6b3a}' +
       '.ksa-cancel{display:block;margin:12px auto 0;border:1px solid #dfe2ed;background:#fff;color:#4A5568;border-radius:8px;padding:7px 22px;font-size:13px;font-family:inherit;cursor:pointer}' +
-      '.ksa-cancel:hover{background:#f4f5fa}';
+      '.ksa-cancel:hover{background:#f4f5fa}' +
+      '.ksa-su-row{text-align:center;margin-top:12px;font-size:12.5px;color:#718096}' +
+      '.ksa-su-row a{color:#4338CA;font-weight:600;text-decoration:underline;cursor:pointer}' +
+      '.ksa-su-title{font-size:14px;font-weight:700;color:#1a202c;text-align:center;margin-bottom:4px}' +
+      '.ksa-su-sub{font-size:12px;color:#718096;text-align:center;margin-bottom:12px}' +
+      '.ksa-su-tabs{display:flex;gap:6px;margin-bottom:12px}' +
+      '.ksa-su-tabs button{flex:1;padding:8px 4px;border:1px solid #dfe2ed;background:#fff;color:#4A5568;border-radius:8px;font-size:12.5px;font-family:inherit;cursor:pointer}' +
+      '.ksa-su-tabs button.on{background:#EEF2FF;border-color:#4338CA;color:#4338CA;font-weight:700}' +
+      '#ksa-su-qrbox{display:flex;justify-content:center;margin:4px 0 8px}#ksa-su-qrbox svg{width:168px;height:168px}';
     document.head.appendChild(style);
   }
 
@@ -186,6 +194,24 @@
             '<input type="tel" id="ksa-phone" placeholder="전화번호 뒷 8자리" inputmode="numeric" maxlength="8" autocomplete="tel">' +
             '<button type="button" class="ksa-input-icon-btn" id="ksa-devlink-btn" aria-label="폰으로 승인받기" title="폰으로 승인받기"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>' +
           '</div>' +
+          '<div class="ksa-su-row">처음이세요? <a id="ksa-signup-link" role="button" tabindex="0">회원 가입</a></div>' +
+        '</div>' +
+        '<div id="ksa-step-signup" style="display:none">' +
+          '<div class="ksa-su-title">회원 가입</div>' +
+          '<div class="ksa-su-sub">무료 플랜으로 시작합니다. 가입은 스마트폰에서 이어집니다.</div>' +
+          '<div class="ksa-su-tabs"><button type="button" id="ksa-su-qr-tab" class="on">QR로 가입</button><button type="button" id="ksa-su-sms-tab">문자로 링크 받기</button></div>' +
+          '<div id="ksa-su-sms" style="display:none;margin-bottom:10px"><div class="ksa-input-wrap">' +
+            '<input type="tel" id="ksa-su-phone" placeholder="전화번호 뒷 8자리" inputmode="numeric" maxlength="8" autocomplete="tel">' +
+            '<button type="button" class="ksa-input-icon-btn" id="ksa-su-send" aria-label="가입 링크 문자 받기" title="가입 링크 문자 받기"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>' +
+          '</div></div>' +
+          '<div id="ksa-su-wait" style="display:none;text-align:center">' +
+            '<div id="ksa-su-qrbox"></div>' +
+            '<div style="font-size:12.5px;color:#374151">폰에 세 개의 숫자가 보이면 아래 숫자를 선택하세요</div>' +
+            '<div id="ksa-su-num" style="font-size:40px;font-weight:800;letter-spacing:2px;color:#4338CA;margin-top:2px"></div>' +
+            '<div id="ksa-su-status" style="font-size:12.5px;color:#4A5568;margin-top:4px"></div>' +
+            '<div id="ksa-su-timer" style="font-size:11px;color:#718096;margin-top:4px"></div>' +
+          '</div>' +
+          '<div class="ksa-resend" id="ksa-su-back">로그인으로 돌아가기</div>' +
         '</div>' +
         '<div id="ksa-step-devlink" style="display:none">' +
           '<div class="ksa-devlink-wait">' +
@@ -215,6 +241,14 @@
     els.resendPhone  = wrap.querySelector('#ksa-resend-phone');
     els.smsBtn       = wrap.querySelector('#ksa-sms-btn');
     els.smsBtn.onclick = sendSmsLink;
+    els.stepSignup = wrap.querySelector('#ksa-step-signup');
+    wrap.querySelector('#ksa-signup-link').onclick = openSignup;
+    wrap.querySelector('#ksa-signup-link').onkeydown = function (e) { if (e.key === 'Enter') openSignup(); };
+    wrap.querySelector('#ksa-su-qr-tab').onclick = function () { signupTab('qr'); };
+    wrap.querySelector('#ksa-su-sms-tab').onclick = function () { signupTab('sms'); };
+    wrap.querySelector('#ksa-su-send').onclick = function () { startSignup('sms'); };
+    wrap.querySelector('#ksa-su-phone').addEventListener('keydown', function (e) { if (e.key === 'Enter') startSignup('sms'); });
+    wrap.querySelector('#ksa-su-back').onclick = closeSignup;
 
     els.desc.textContent = (cfg.serviceLabel ? cfg.serviceLabel + ' — ' : '') + '010을 제외한 폰 번호 뒷자리 8자를 입력하십시오.';
     wrap.querySelector('#ksa-cancel').onclick = cancelOverlay;
@@ -250,6 +284,7 @@
   }
   function resetToPhoneStep() {
     stopDevlinkPolling();
+    if (els.stepSignup) els.stepSignup.style.display = 'none';
     els.stepDevlink.style.display = 'none';
     els.stepPhone.style.display = '';
     showSmsButton(false);
@@ -257,7 +292,7 @@
   }
   function showOverlay() { ensureOverlay(); els.overlay.classList.add('show'); }
   // 취소·Esc: 진행 중인 승인 대기를 멈추고 팝업을 닫는다. 기다리던 호출에는 지금 토큰(없으면 빈 값)을 돌려준다.
-  function cancelOverlay() { stopDevlinkPolling(); resetToPhoneStep(); hideOverlay(); resolveWaiters(); }
+  function cancelOverlay() { stopSignupPolling(); stopDevlinkPolling(); resetToPhoneStep(); hideOverlay(); resolveWaiters(); }
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && els.overlay && els.overlay.classList.contains('show')) { e.preventDefault(); cancelOverlay(); } });
   function hideOverlay() { if (els.overlay) els.overlay.classList.remove('show'); }
 
@@ -307,6 +342,118 @@
     };
     tick();
     devlinkCountdownTimer = setInterval(tick, 1000);
+  }
+
+  // ── PC 회원 가입(2026-11-12, 주피터 지시) ────────────────────────────────
+  // 신규 사용자는 폰에 계정이 없어 알림 승인을 쓸 수 없고, 암호키(GDC Wallet)는 폰에서만 만든다. 그래서 PC 는 "가입 세션"만 만들고
+  // (QR 또는 문자 링크) 폰이 숫자 대조 뒤 기존 가입 절차를 진행한다. 가입이 끝나면 일반 로그인(폰 승인)으로 이어 가고,
+  // 모든 가입은 무료 플랜으로 시작한다(유료 서비스가 필요해질 때 그 지점에서 전환을 요청한다).
+  var QR_LIB_URL = 'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js';
+  var QR_LIB_SRI = 'sha384-8FWZA6BGMXhsfO+BLtrJK0We6gg5o1JyO8xQm6peWDEUs17ACA5ziE/NIAkl9z2k';
+  var signupSessionId = null, signupPollTimer = null, signupTimer = null, signupFreePlan = false, signupMethod = 'qr';
+  function sq(id) { return els.overlay.querySelector('#' + id); }
+  function stopSignupPolling() {
+    if (signupPollTimer) { clearInterval(signupPollTimer); signupPollTimer = null; }
+    if (signupTimer) { clearInterval(signupTimer); signupTimer = null; }
+    signupSessionId = null;
+  }
+  function loadQrLib() {
+    if (global.qrcode) return Promise.resolve(global.qrcode);
+    return new Promise(function (resolve, reject) {
+      var sc = document.createElement('script');
+      sc.src = QR_LIB_URL; sc.integrity = QR_LIB_SRI; sc.crossOrigin = 'anonymous';
+      sc.onload = function () { global.qrcode ? resolve(global.qrcode) : reject(new Error('qr')); };
+      sc.onerror = function () { reject(new Error('qr')); };
+      document.head.appendChild(sc);
+    });
+  }
+  function openSignup() {
+    stopDevlinkPolling();
+    els.stepPhone.style.display = 'none';
+    els.stepDevlink.style.display = 'none';
+    els.stepSignup.style.display = '';
+    setMsg('', '');
+    signupTab('qr');
+  }
+  function closeSignup() {
+    stopSignupPolling();
+    els.stepSignup.style.display = 'none';
+    els.stepPhone.style.display = '';
+    setMsg('', '');
+  }
+  function signupTab(method) {
+    stopSignupPolling();
+    signupMethod = method;
+    sq('ksa-su-qr-tab').className = method === 'qr' ? 'on' : '';
+    sq('ksa-su-sms-tab').className = method === 'sms' ? 'on' : '';
+    sq('ksa-su-sms').style.display = method === 'sms' ? '' : 'none';
+    sq('ksa-su-wait').style.display = 'none';
+    setMsg('', '');
+    if (method === 'qr') startSignup('qr');
+  }
+  async function startSignup(method) {
+    stopSignupPolling();
+    var body = { pcLabel: cfg.serviceLabel || 'PC', method: method };
+    var match = String(10 + (crypto.getRandomValues(new Uint32Array(1))[0] % 90));
+    body.pcMatch = match;
+    if (method === 'sms') {
+      var raw = sq('ksa-su-phone').value.replace(/\D/g, '');
+      if (raw.length !== 8) { setMsg('전화번호 뒷 8자리를 입력해 주세요.', 'err'); return; }
+      body.e164 = '+8210' + raw;
+    }
+    setMsg('', '');
+    try {
+      var res = await fetch(PROXY + '/auth/signup-link/init', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      var data = await res.json().catch(function () { return {}; });
+      if (!res.ok || !data.ok) {
+        if (data.error === 'ALREADY_REGISTERED') { setMsg('이미 가입된 번호입니다. 로그인해 주세요.', 'err'); return; }
+        throw new Error(data.message || '요청에 실패했습니다.');
+      }
+      signupSessionId = data.sessionId;
+      sq('ksa-su-num').textContent = match;
+      sq('ksa-su-wait').style.display = '';
+      var qrBox = sq('ksa-su-qrbox'); qrBox.innerHTML = '';
+      if (method === 'qr') {
+        sq('ksa-su-status').textContent = '스마트폰 카메라로 QR을 비추어 주세요.';
+        try {
+          var qrcodeFn = await loadQrLib();
+          var qr = qrcodeFn(0, 'M'); qr.addData(data.approveUrl); qr.make();
+          qrBox.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2, scalable: true });
+        } catch (e) {
+          sq('ksa-su-status').textContent = '폰의 브라우저에서 이 주소를 열어 주세요: ' + data.approveUrl;
+        }
+      } else {
+        sq('ksa-su-status').textContent = '문자로 보낸 링크를 폰에서 열어 주세요.';
+      }
+      var remain = data.expires_in || 600;
+      var tick = function () { sq('ksa-su-timer').textContent = remain > 0 ? (Math.floor(remain / 60) + '분 ' + (remain % 60) + '초 후 만료') : '만료됨'; remain -= 1; };
+      tick(); signupTimer = setInterval(tick, 1000);
+      var sid = signupSessionId;
+      signupPollTimer = setInterval(function () { signupPollOnce(sid); }, 2000);
+    } catch (e) {
+      setMsg(e.message || '요청에 실패했습니다.', 'err');
+    }
+  }
+  async function signupPollOnce(sid) {
+    if (sid !== signupSessionId) return;
+    try {
+      var res = await fetch(PROXY + '/auth/signup-link/poll?sessionId=' + encodeURIComponent(sid));
+      var d = await res.json().catch(function () { return {}; });
+      if (sid !== signupSessionId || !d.ok) return;
+      if (d.state === 'verified') sq('ksa-su-status').textContent = '확인되었습니다. 폰에서 가입을 마쳐 주세요.';
+      if (d.state === 'denied') { stopSignupPolling(); sq('ksa-su-wait').style.display = 'none'; setMsg('폰에서 숫자를 여러 번 잘못 골라 취소됐습니다. 다시 시작해 주세요.', 'err'); return; }
+      if (d.state === 'expired') { stopSignupPolling(); sq('ksa-su-wait').style.display = 'none'; setMsg('요청이 만료됐습니다. 다시 시작해 주세요.', 'err'); return; }
+      if (d.state === 'registered' && d.e164) {
+        stopSignupPolling();
+        // 가입이 끝났다 — 이어서 일반 로그인(폰 승인)으로 넘어간다. 로그인에 성공하면 무료 플랜을 명시해 둔다.
+        signupFreePlan = true;
+        els.phone.value = String(d.e164).slice(-8);
+        els.stepSignup.style.display = 'none';
+        els.stepPhone.style.display = '';
+        setMsg('가입이 완료되었습니다. 이어서 폰으로 로그인합니다.', 'ok');
+        startDeviceLink();
+      }
+    } catch (e) { /* 일시적 오류 무시, 다음 polling에서 재시도 */ }
   }
 
   async function startDeviceLink() {
@@ -433,6 +580,10 @@
         if (data.state === 'delivered' && data.verified && data.phone_verify_token) {
           stopDevlinkPolling();
           persist(data.phone_verify_token, new Date(data.expires_at).getTime());
+          if (signupFreePlan) {   // 방금 가입한 사용자 — 무료 플랜으로 시작한다(실패해도 로그인에는 영향 없음)
+            signupFreePlan = false;
+            try { fetch(PROXY + '/auth/free-plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone_verify_token: data.phone_verify_token, plan: 'free' }) }).catch(function () {}); } catch (e) { /* 무시 */ }
+          }
           hideOverlay();
           setMsg('', '');
           resolveWaiters();
