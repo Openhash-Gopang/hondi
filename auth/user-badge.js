@@ -870,6 +870,15 @@
       var inn = el('button', 'hub-btn hub-primary', '로그인'); inn.type = 'button';
       inn.addEventListener('click', function () { setMenu(false); login(); });
       menu.appendChild(inn);
+      var su = el('button', 'hub-btn hub-text', '처음이세요? 회원 가입'); su.type = 'button';   // 2026-11-12 — 가입도 로그인처럼 폰으로 본인 확인(QR·문자 선택), 모두 무료 플랜으로 시작
+      su.addEventListener('click', function () {
+        setMenu(false);
+        ensureKAuth().then(function (K) {
+          if (!K || !K.openSignup) { toast('가입 모듈을 불러오지 못했습니다. 잠시 뒤 다시 시도해 주세요.'); return; }
+          K.openSignup().then(function () { render(); }, function () {});
+        });
+      });
+      menu.appendChild(su);
       var saved = testIdSaved();
       if (saved) {                                   // 이 기기에서 쓰던 테스트 아이디로 되돌아가기(?testid= 는 공용 모듈이 처리)
         var back = el('button', 'hub-btn', '테스트 아이디 ' + saved + '(으)로 입장'); back.type = 'button';
