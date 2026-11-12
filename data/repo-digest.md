@@ -1,15 +1,22 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-12 19:43 KST · 기준 커밋 25742b5b
+- 갱신: 2026-11-12 19:45 KST · 기준 커밋 c1f8493c
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-12 Merge pull request #1007 from Openhash-Gopang/feat/frequent-users
+- 2026-11-12 Merge remote-tracking branch 'origin/main' into feat/frequent-users
+- 2026-11-12 Merge pull request #1004 from Openhash-Gopang/perf/instant-user-search
 - 2026-11-12 Merge pull request #1003 from Openhash-Gopang/fix/friend-find-test-off
 - 2026-11-12 Merge pull request #1002 from Openhash-Gopang/feat/simplify-signup-start
+- 2026-11-12 feat: 응답 대기 진행 상태 표시, SP 간결 규칙, 사용자 연결 명령 즉시 처리, 응답 헤더로 사용 모델 표시
+- 2026-11-12 feat: 자주 찾는 사용자 저장·이름/아이디로 즉시 채팅 연결, SP v2.1(지어낸 검색 태그 방지)
+- 2026-11-12 merge main
 - 2026-11-12 Merge pull request #1006 from Openhash-Gopang/fix/smoketest-sp-v2
 - 2026-11-12 ci: live-smoketest가 SP v2.0을 쓰도록 참조 갱신
 - 2026-11-12 Merge pull request #1005 from Openhash-Gopang/feat/sp-v2-haiku
 - 2026-11-12 feat: 나비 대화 LLM을 Claude Haiku 5.5로 전환하고 SP v2.0 적용
+- 2026-11-12 perf(chat): 사용자 검색 명령은 LLM 없이 즉시 검색창을 열고, 첫 응답 지연을 측정해 기록
 - 2026-11-12 fix(friends): 이용자 검색·설정은 테스트 기간과 무관하게 항상 허용
 - 2026-11-12 feat(auth): 가입 입력 칸을 밑줄·라벨 스타일로 바꾸고 전화번호 칸을 하나로 합침
 - 2026-11-12 feat(auth): 폰 가입 첫 화면 문구 단순화 (초안, 승인 대기)
@@ -37,13 +44,6 @@
 - 2026-11-11 fix: 폰 본인 확인 — 숫자를 누르면 바로 승인, '본인이 맞습니다' 버튼·불필요한 문구 삭제
 - 2026-11-11 Merge pull request #991 from Openhash-Gopang/feat/gov-answer-report
 - 2026-11-11 feat(gov-sp): 정부 AI 답변마다 '문제 신고' — SP별 피드백의 결정적 수집 경로
-- 2026-11-11 Merge pull request #990 from Openhash-Gopang/feat/gov-sp-feedback-collect
-- 2026-11-11 feat: K-Law 도우미용 사건번호 판결문 조회(/klaw/case-judgments)와 KAuth.adopt 추가
-- 2026-11-11 feat(gov-sp): SP별 사용자 피드백 서버 수집·집계·갱신 결정(10건) + 규칙 v1.1(SP ID·태그 형식)
-- 2026-11-11 Merge pull request #988 from Openhash-Gopang/feat/gov-sp-update-rule
-- 2026-11-11 chore(gov-sp): 2026-11 장부 기준선 재계산(대상 = 로드되는 최신 SP 파일)
-- 2026-11-11 feat(gov-sp): 모든 정부 SP에 §UPDATE-RULE(갱신 규칙) 삽입 + rule-check CI
-- 2026-11-11 Merge pull request #987 from Openhash-Gopang/feat/gov-sp-update-sharing
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
