@@ -68,8 +68,9 @@ function _matchUsageDashboardIntent(text) {
 // 2026-11-12 신설 — "사용자 검색", "나비 웹 사용자 검색", "친구 찾기" 같은 짧고 분명한 명령은
 // LLM을 거치지 않고(약 100KB SP를 매번 싣는 호출을 생략) 즉시 검색창을 연다. 기다림 없이 바로 응답하는 것이 목적.
 // 보수적으로 매칭: 25자 이하이고 '사용자/이용자/대화 상대/친구' + '검색/찾기' 조합일 때만.
-const _USER_SEARCH_NOUN   = /(사용자|이용자|대화\s*상대|상대방?|친구)/;
-const _USER_SEARCH_ACTION = /(검색|찾기|찾아|찾고|찾을|연결|불러|채팅|대화)/;
+const _USER_SEARCH_NOUN   = /(사용자|이용자|대화\s*상대|상대방?|친구|채팅|대화)/;
+const _USER_SEARCH_ACTION = /(검색|찾기|찾아|찾고|찾을|연결|불러)/;
+const _USER_SEARCH_EXCLUDE = /(방법|어떻게|왜\s|뭐|무엇|알려|기록|내용|요약|번역|설명)/;   // 질문·다른 용무로 보이면 LLM 으로
 function _matchUserSearchIntent(text) {
   if (!text || typeof text !== 'string') return null;
   const t = text.trim();
@@ -77,7 +78,7 @@ function _matchUserSearchIntent(text) {
   // 번호나 @아이디만 입력한 경우(예: '@98807170', '010-9880-7170')는 말없이 바로 검색한다.
   const _bare = t.replace(/[\s.]+$/, '');
   if (/^@[A-Za-z0-9._-]{3,}$/.test(_bare) || /^\+?[0-9][0-9\s-]{7,16}[0-9]$/.test(_bare)) return { query: _bare };
-  if (!_USER_SEARCH_NOUN.test(t) || !_USER_SEARCH_ACTION.test(t)) return null;
+  if (!_USER_SEARCH_NOUN.test(t) || !_USER_SEARCH_ACTION.test(t) || _USER_SEARCH_EXCLUDE.test(t)) return null;
   const num = t.match(/@?[0-9]{8,13}|@[A-Za-z0-9._-]{3,}/);   // 번호·아이디가 함께 있으면 그대로 채워 연다
   return { query: num ? num[0] : '' };
 }
