@@ -1,9 +1,9 @@
 /**
  * ui/search.js — 사용자 검색 UI (GDUDA Phase 1)
- * - 닉네임 검색 → 상세 필터 → 연결 요청
- * - CF Worker /p2p/search 경유
+ * - 전화번호·아이디 정확 일치 검색 → 연결 요청 (카카오톡 방식: 닉네임·부분 일치 둘러보기 없음)
+ * - Worker /friends/find 경유 (friend-find-client.js)
  */
-import { PROXY, L1_URL, _USER } from '../core/state.js';
+import { PROXY, _USER } from '../core/state.js';
 import { classifyQuery } from '../../worker/friend-find.js';
 import { findFriend } from './friend-find-client.js';
 
@@ -48,7 +48,7 @@ export function openSearch(prefillQuery) {
         <div style="display:flex;align-items:center;
                     border:1px solid #e5e7eb;border-radius:12px;
                     background:#f9fafb;overflow:hidden" id="_sq-field">
-          <input id="_sq-input" type="text" placeholder="혼디 아이디(@8자리) 또는 전화번호 (닉네임도 가능)"
+          <input id="_sq-input" type="text" placeholder="혼디 아이디(@8자리) 또는 전화번호를 정확히 입력"
             style="flex:1;padding:0 14px;height:48px;border:none;background:transparent;
                    font-size:15px;font-family:inherit;outline:none;color:#111827;min-width:0"
             autocomplete="off"/>
@@ -57,26 +57,6 @@ export function openSearch(prefillQuery) {
                    cursor:pointer;color:#1A73E8;font-size:14px;font-weight:600">
             검색
           </button>
-        </div>
-      </div>
-
-      <!-- 상세 필터 (접힘) -->
-      <div style="padding:0 20px 8px">
-        <button id="_sq-filter-toggle"
-          style="font-size:12px;color:#6b7280;background:none;border:none;
-                 cursor:pointer;padding:4px 0">
-          ▶ 상세 필터
-        </button>
-        <div id="_sq-filters" style="display:none;margin-top:8px;
-             display:none;gap:8px;flex-direction:column">
-          <input id="_sq-country" type="text" placeholder="국가코드 (예: US, KR, JP)"
-            style="padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;
-                   font-size:13px;font-family:inherit;outline:none;width:100%;
-                   box-sizing:border-box"/>
-          <input id="_sq-region" type="text" placeholder="지역 (예: New York, 서울)"
-            style="padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;
-                   font-size:13px;font-family:inherit;outline:none;width:100%;
-                   box-sizing:border-box;margin-top:6px"/>
         </div>
       </div>
 
@@ -91,45 +71,30 @@ export function openSearch(prefillQuery) {
 
   const input       = document.getElementById('_sq-input');
   const field       = document.getElementById('_sq-field');
-  const filterBtn   = document.getElementById('_sq-filter-toggle');
-  const filtersEl   = document.getElementById('_sq-filters');
-  const countryEl   = document.getElementById('_sq-country');
-  const regionEl    = document.getElementById('_sq-region');
   const resultsEl   = document.getElementById('_sq-results');
 
   // 닫기
   document.getElementById('_search-close').onclick = _closeSearch;
   overlay.addEventListener('click', e => { if (e.target === overlay) _closeSearch(); });
 
-  // 상세 필터 토글
-  let filterOpen = false;
-  filterBtn.onclick = () => {
-    filterOpen = !filterOpen;
-    filtersEl.style.display = filterOpen ? 'flex' : 'none';
-    filterBtn.textContent   = (filterOpen ? '▼' : '▶') + ' 상세 필터';
-  };
-
   // 포커스
   input.addEventListener('focus', () => field.style.borderColor = '#1A73E8');
   input.addEventListener('blur',  () => field.style.borderColor = '#e5e7eb');
 
-  // 실시간 검색 (300ms debounce)
+  // 입력 중 자동 검색은 하지 않는다 — 정확 일치 조회는 시간당 한도가 있어, 검색 버튼·Enter 때만 조회한다.
   input.addEventListener('input', () => {
-    clearTimeout(_searchTimer);
-    const q = input.value.trim();
-    if (!q) { resultsEl.innerHTML = ''; return; }
-    _searchTimer = setTimeout(() => _doSearch(q, countryEl.value.trim(), regionEl.value.trim(), resultsEl), 300);
+    if (!input.value.trim()) resultsEl.innerHTML = '';
   });
 
   document.getElementById('_sq-btn').onclick = () => {
     const q = input.value.trim();
-    if (q) _doSearch(q, countryEl.value.trim(), regionEl.value.trim(), resultsEl);
+    if (q) _doSearch(q, '', '', resultsEl);
   };
 
   input.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       const q = input.value.trim();
-      if (q) _doSearch(q, countryEl.value.trim(), regionEl.value.trim(), resultsEl);
+      if (q) _doSearch(q, '', '', resultsEl);
     }
     if (e.key === 'Escape') _closeSearch();
   });
@@ -150,117 +115,29 @@ async function _doSearch(q, country, region, resultsEl) {
       검색 중...
     </div>`;
 
-  // 카카오톡 방식(2026-10-28): 전화번호는 정확일치(상대가 허용한 경우만), 아이디는 검색용 아이디 정확일치.
+  // 카카오톡 방식: 전화번호(상대가 허용한 경우만)·아이디 정확 일치로만 찾는다. 닉네임·부분 일치 둘러보기는 없다.
   const cq = classifyQuery(q);
-  let exact = null, exactMsg = '';
-  if (cq.kind === 'phone' || cq.kind === 'handle' || cq.kind === 'id') {
-    const fr = await findFriend(q);
-    if (fr.ok && fr.found && fr.user) exact = fr.user;
-    else if (fr.ok && fr.self) exactMsg = '검색하신 상대는 본인 계정입니다.';
-    else if (!fr.ok && fr.error === 'LOGIN_REQUIRED' && cq.kind === 'phone') exactMsg = '전화번호로 찾으려면 먼저 로그인해 주세요.';
-    else if (!fr.ok && cq.kind === 'phone') exactMsg = fr.message || '검색에 실패했습니다.';
-  }
-  if (cq.kind === 'phone') {
-    resultsEl.innerHTML = exact
-      ? _renderUserCard(exact)
-      : `<div style="text-align:center;padding:24px 16px;color:#9ca3af;font-size:13px;line-height:1.6">${exactMsg || '이 전화번호로 찾을 수 있는 사용자가 없습니다.<br>상대가 혼디에 가입했고 “번호로 찾기”를 허용했는지 확인해 주세요.'}</div>`;
-    resultsEl.querySelectorAll('[data-connect]').forEach(btn => { btn.onclick = () => _sendConnectRequest(JSON.parse(btn.dataset.connect)); });
-    return;
-  }
-
+  const msg = (t) => `<div style="text-align:center;padding:24px 16px;color:#9ca3af;font-size:13px;line-height:1.6">${t}</div>`;
   try {
-    // ── 탈중앙화 이관 ⑨: p2p/search → L1 직접 (2026-06-23) ─────────────
-    // 이전: PROXY /p2p/search → Worker → L1 profiles 검색
-    // 이후: L1 profiles 직접 검색 (Worker 경유 없음)
-    const L1_PROFILES_BASE = L1_URL.replace('/api/collections/profiles/records', '') + '/api/collections/profiles/records';
-    const isHandle = q.startsWith('@');
-    let filter;
-    if (isHandle) {
-      const handleClean = q.replace(/^@/, '');
-      filter = `handle='${handleClean}'`;
+    const fr = await findFriend(q);
+    if (fr.ok && fr.found && fr.user) {
+      resultsEl.innerHTML = _renderUserCard(fr.user);
+      resultsEl.querySelectorAll('[data-connect]').forEach(btn => { btn.onclick = () => _sendConnectRequest(JSON.parse(btn.dataset.connect)); });
+      return;
+    }
+    if (fr.ok && fr.self) {
+      resultsEl.innerHTML = msg('검색하신 상대는 본인 계정입니다.<br>같은 계정을 다른 기기에서 쓰려면 <b>기기 연결</b>을 이용해 주세요.');
+    } else if (!fr.ok && fr.error === 'LOGIN_REQUIRED') {
+      resultsEl.innerHTML = msg('상대를 찾으려면 먼저 로그인해 주세요.');
+    } else if (!fr.ok) {
+      resultsEl.innerHTML = msg(fr.message || '검색에 실패했습니다.');
+    } else if (cq.kind === 'phone') {
+      resultsEl.innerHTML = msg('이 전화번호로 찾을 수 있는 사용자가 없습니다.<br>상대가 혼디에 가입했고 “번호로 찾기”를 허용했는지 확인해 주세요.');
     } else {
-      // 닉네임 또는 handle에서 검색 (PocketBase like 필터)
-      filter = `nickname~'${q}' || handle~'${q}'`;
-      if (country) filter += ` && country_code='${country}'`;
-      if (region)  filter += ` && region~'${region}'`;
+      resultsEl.innerHTML = msg('일치하는 사용자가 없습니다.<br>혼디 아이디(@8자리) 또는 전화번호를 정확히 입력해 주세요. 닉네임으로는 찾을 수 없습니다.');
     }
-    const l1Url = `${L1_PROFILES_BASE}?filter=${encodeURIComponent(filter)}&perPage=20&sort=handle`;
-    const res  = await fetch(l1Url);
-    const raw  = await res.json();
-    // L1 응답 → Worker 응답 형식으로 정규화
-    const data = {
-      ok:    res.ok,
-      users: (raw.items || []).map(u => ({
-        guid:      u.guid,
-        handle:    u.handle,
-        nickname:  u.nickname,
-        region:    u.region,
-        country_code: u.country_code,
-        current_l1:   u.current_l1,
-      })),
-      count:  raw.totalItems || 0,
-      source: 'l1-direct',
-    };
-
-    if (exact && !data.users.some(u => u.guid === exact.guid)) data.users.unshift(exact);   // 아이디 정확일치 결과를 맨 위에
-
-    if (!data.ok || !data.users?.length) {
-      resultsEl.innerHTML = `
-        <div style="text-align:center;padding:24px;color:#9ca3af;font-size:13px">
-          검색 결과가 없습니다.
-        </div>`;
-      return;
-    }
-
-    // 본인 제외
-    const myHandle  = _USER?.handle;
-    const wasSelfOnly = myHandle && data.users.length > 0
-      && data.users.every(u => u.handle === myHandle);
-    const users = data.users.filter(u => u.handle !== myHandle);
-
-    if (!users.length) {
-      // 2026-07-31 신설 — 유일한 매치가 본인 계정이었던 경우, 그냥 조용히
-      // "결과 없음"만 보여주면 마치 검색이 고장난 것처럼 보인다(실사로
-      // 확인된 혼란 사례: PC에 이미 로그인된 계정을 폰에서 검색해 "호출"
-      // 하려던 시도). 이 검색·연결 기능은 애초에 "나 아닌 다른 사람"을
-      // 찾는 용도이고, 자신의 다른 기기에 같은 계정을 여는 방법은 따로
-      // (device-link) 있음을 여기서 바로 안내한다.
-      if (wasSelfOnly) {
-        resultsEl.innerHTML = `
-          <div style="text-align:center;padding:20px 16px;color:#6b7280;font-size:13px;line-height:1.6">
-            검색하신 상대는 본인 계정입니다 — 자기 자신에게는 연결 요청을 보낼 수 없습니다.<br>
-            같은 계정을 다른 기기(폰·PC)에서도 쓰고 싶으신 거라면, 검색이 아니라
-            <b>기기 연결</b> 기능을 이용해주세요.
-          </div>
-          <div style="padding:0 16px 16px">
-            <button onclick="if (window.openDeviceLinkQR) { window.openDeviceLinkQR(); }
-                             else { location.href = '/auth/device-link.html?return=' + encodeURIComponent('/webapp.html'); }"
-              style="width:100%;padding:11px;border-radius:10px;background:#1A73E8;color:#fff;
-                     border:none;font-size:13.5px;font-weight:600;cursor:pointer;font-family:inherit">
-              다른 기기 연결
-            </button>
-          </div>`;
-      } else {
-        resultsEl.innerHTML = `
-          <div style="text-align:center;padding:24px;color:#9ca3af;font-size:13px">
-            검색 결과가 없습니다.
-          </div>`;
-      }
-      return;
-    }
-
-    resultsEl.innerHTML = users.map(u => _renderUserCard(u)).join('');
-
-    // 연결 요청 버튼 이벤트
-    resultsEl.querySelectorAll('[data-connect]').forEach(btn => {
-      btn.onclick = () => _sendConnectRequest(JSON.parse(btn.dataset.connect));
-    });
-
-  } catch(e) {
-    resultsEl.innerHTML = `
-      <div style="text-align:center;padding:24px;color:#dc2626;font-size:13px">
-        네트워크 오류: ${e.message}
-      </div>`;
+  } catch (e) {
+    resultsEl.innerHTML = `<div style="text-align:center;padding:24px;color:#dc2626;font-size:13px">네트워크 오류: ${e.message}</div>`;
   }
 }
 
