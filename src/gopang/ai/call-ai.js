@@ -78,8 +78,10 @@ function _matchUserSearchIntent(text) {
   // 번호나 @아이디만 입력한 경우(예: '@98807170', '010-9880-7170')는 말없이 바로 검색한다.
   const _bare = t.replace(/[\s.]+$/, '');
   if (/^@[A-Za-z0-9._-]{3,}$/.test(_bare) || /^\+?[0-9][0-9\s-]{7,16}[0-9]$/.test(_bare)) return { query: _bare };
+  const num = t.match(/@?[0-9][0-9-]{6,14}[0-9]|@[A-Za-z0-9._-]{3,}/);   // 번호·아이디가 함께 있으면 그대로 채워 연다
+  // '@98807170을 연결해줘'처럼 아이디·번호와 연결/찾기 동사가 함께 있으면 '사용자' 같은 명사가 없어도 바로 검색한다.
+  if (num && _USER_SEARCH_ACTION.test(t) && !_USER_SEARCH_EXCLUDE.test(t)) return { query: num[0] };
   if (!_USER_SEARCH_NOUN.test(t) || !_USER_SEARCH_ACTION.test(t) || _USER_SEARCH_EXCLUDE.test(t)) return null;
-  const num = t.match(/@?[0-9]{8,13}|@[A-Za-z0-9._-]{3,}/);   // 번호·아이디가 함께 있으면 그대로 채워 연다
   return { query: num ? num[0] : '' };
 }
 import { loadFrequent, matchFrequent } from '../ui/frequent-users.js';
