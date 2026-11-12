@@ -69,8 +69,11 @@ function _matchUsageDashboardIntent(text) {
 // LLM을 거치지 않고(약 100KB SP를 매번 싣는 호출을 생략) 즉시 검색창을 연다. 기다림 없이 바로 응답하는 것이 목적.
 // 보수적으로 매칭: 25자 이하이고 '사용자/이용자/대화 상대/친구' + '검색/찾기' 조합일 때만.
 const _USER_SEARCH_NOUN   = /(사용자|이용자|대화\s*상대|상대방?|친구|채팅|대화)/;
-const _USER_SEARCH_ACTION = /(검색|찾기|찾아|찾고|찾을|연결|불러|호출|연락|통화)/;
-const _USER_SEARCH_EXCLUDE = /(방법|어떻게|왜\s|뭐|무엇|알려|기록|내용|요약|번역|설명)/;   // 질문·다른 용무로 보이면 LLM 으로
+const _SEARCH_VERBS = '검색|찾아|찾기|찾고|찾을|찾는|연결|불러|부르|호출|연락|통화|전화|대화|채팅|말\\s*걸|메시지|메세지|문자|톡|초대|만나|접속|콜';
+const _USER_SEARCH_ACTION = new RegExp('(' + _SEARCH_VERBS + ')');
+const _NOT_A_NAME = /^(오늘|내일|모레|어제|지금|나중|아까|이따|병원|의원|은행|식당|회사|학교|시청|구청|도청|경찰|소방|택시|배달|고객센터|관공서|우체국|약국|호텔|공항|누구|아무|다시|바로|계속)/;
+const _USER_NAME_VERB = new RegExp('^[가-힣]{2,5}\\s*(님|씨)?\\s*(을|를|께|과|와|랑|하고|한테|에게|이랑)?\\s*(' + _SEARCH_VERBS + ')');
+const _USER_SEARCH_EXCLUDE = /(방법|어떻게|왜\s|뭐|무엇|알려|기록|내용|요약|번역|설명|내\s*(번호|전화|아이디)|저장|등록|가입|삭제)/;   // 질문·다른 용무로 보이면 LLM 으로
 function _matchUserSearchIntent(text) {
   if (!text || typeof text !== 'string') return null;
   const t = text.trim();
@@ -82,7 +85,7 @@ function _matchUserSearchIntent(text) {
   // '@98807170을 연결해줘'처럼 아이디·번호와 연결/찾기 동사가 함께 있으면 '사용자' 같은 명사가 없어도 바로 검색한다.
   if (num && _USER_SEARCH_ACTION.test(t) && !_USER_SEARCH_EXCLUDE.test(t)) return { query: num[0] };
   // '김동 님 호출', '김동 연결해줘'처럼 이름 + 연결 동사만 있는 경우(저장된 자주 찾는 사용자가 아닐 때): LLM 이 한 일처럼 꾸며 답하지 못하게 바로 안내하고 검색창을 연다.
-  if (/^[가-힣]{2,5}\s*(님|씨)?\s*(을|를|께|과|와)?\s*(호출|연결|연락|통화)/.test(t) && !_USER_SEARCH_EXCLUDE.test(t)) return { query: '' };
+  if (_USER_NAME_VERB.test(t) && !_USER_SEARCH_EXCLUDE.test(t) && !/번호|예약|상담|신청|민원/.test(t) && !_NOT_A_NAME.test(t)) return { query: '' };
   if (!_USER_SEARCH_NOUN.test(t) || !_USER_SEARCH_ACTION.test(t) || _USER_SEARCH_EXCLUDE.test(t)) return null;
   return { query: num ? num[0] : '' };
 }
@@ -3798,7 +3801,7 @@ async function _buildEnhancedUserContent(userContent) {
   // (사용자 리포트: "나비가 내 위치를 모른다고 함"). 최대 4초까지만
   // 대기하므로(services/location.js), 위치 권한을 거부한 사용자도 무한정
   // 멈추지 않는다.
-  await _waitForLocationReady();
+  await _waitForLocationReady(1500);
   const locNote = _buildLocNote();
   if (locNote) parts.push(locNote.trim());
 
@@ -5432,7 +5435,7 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
   // ── 위치 준비 대기 (최대 6초, race condition 방지) ──────
   if (_locationPending) {
     await new Promise(resolve => {
-      const deadline = Date.now() + 6000;
+      const deadline = Date.now() + 1500;   // 위치 대기는 짧게(응답 지연 방지) — 위치는 다음 턴부터 반영
       const poll = () => {
         if (_locationReady || Date.now() >= deadline) resolve();
         else setTimeout(poll, 200);
@@ -5865,12 +5868,14 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
       }
     }
     try {
-      // 진단: ?llm=1 로 접속하면(이후 기억) 답변 아래에 응답한 모델 이름을 작게 표시한다.
-      if (new URLSearchParams(location.search).get('llm') === '1') localStorage.setItem('hondi_show_llm', '1');
-      if (bubble && localStorage.getItem('hondi_show_llm') === '1') {
+      // 진단: 답변 아래에 응답한 모델과 첫 응답까지 걸린 시간을 작게 표시한다(?llm=0 으로 끄고 ?llm=1 로 다시 켠다).
+      const _q = new URLSearchParams(location.search).get('llm');
+      if (_q === '0') localStorage.setItem('hondi_hide_llm', '1'); else if (_q === '1') localStorage.removeItem('hondi_hide_llm');
+      if (bubble && localStorage.getItem('hondi_hide_llm') !== '1') {
+        const _lat = (window.__hondiLatency || []).slice(-1)[0];
         const tag = document.createElement('div');
         tag.style.cssText = 'font-size:10px;opacity:.55;margin-top:4px';
-        tag.textContent = '모델: ' + (window.__hondiLLM || usedCandidate?.model || '?');
+        tag.textContent = '모델: ' + (window.__hondiLLM || usedCandidate?.model || '?') + (_lat ? ` · 첫 응답 ${(_lat.firstChunkMs / 1000).toFixed(1)}초` : '');
         bubble.appendChild(tag);
       }
     } catch {}

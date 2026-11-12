@@ -59,8 +59,12 @@ function buildSystemPrompt() {
  *   "판단했고 해당 도메인 없음"이고 null은 "판단 자체에 실패").
  */
 export async function classifyDomain(userText) {
+  // 메인 답변 앞에서 직렬로 도는 추가 LLM 호출이라 오래 걸리면 응답 전체가 늦어진다 — 1.5초 안에 못 끝내면 포기하고(null) 힌트 없이 진행한다.
+  const _ac = new AbortController();
+  const _to = setTimeout(() => _ac.abort(), 1500);
   try {
     const res = await fetch(CFG.endpoint + '/chat/completions', {
+      signal: _ac.signal,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -87,8 +91,10 @@ export async function classifyDomain(userText) {
 
     const validIds = new Set(getClassifiableDomains().map(d => d.id));
     const filtered = chosen.filter(id => validIds.has(id)).slice(0, 2);
+    clearTimeout(_to);
     return filtered;
   } catch (e) {
+    clearTimeout(_to);
     console.warn('[DomainClassifier] 도메인 분류 실패(무시 — 전체 후보로 진행):', e.message);
     return null;
   }
