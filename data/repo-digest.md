@@ -1,9 +1,18 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-12 17:10 KST · 기준 커밋 54d15c0e
+- 갱신: 2026-11-12 17:34 KST · 기준 커밋 72ab2fc5
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-12 Merge pull request #999 from Openhash-Gopang/feat/pc-signup-link
+- 2026-11-12 test: PC 회원 가입 세션 로직 시험
+- 2026-11-12 feat: PC 로그인 창에 회원 가입(QR·문자 선택, 무료 플랜 시작)
+- 2026-11-12 feat: 폰 가입 완료 시 PC 가입 세션에 알림(auth.js)
+- 2026-11-12 afeat: worker - /auth/signup-link/* 연결 (LF)
+- 2026-11-12 Delete worker.js
+- 2026-11-12 afeat: worker — /auth/signup-link/* 연결
+- 2026-11-12 feat: 폰 회원 가입 확인 화면(signup-approve.html)
+- 2026-11-12 feat: PC 회원 가입(폰으로 이어 가기) 세션 로직
 - 2026-11-12 Merge pull request #998 from Openhash-Gopang/fix/device-link-single-push
 - 2026-11-12 fix: 폰 로그인 알림 1회만 전송 — 자동 재전송은 첫 발송 실패 시 1회로 제한
 - 2026-11-12 Merge pull request #997 from Openhash-Gopang/fix/device-link-approve-direct
@@ -35,15 +44,6 @@
 - 2026-11-11 Merge pull request #982 from Openhash-Gopang/feat/gov-instance-check
 - 2026-11-11 feat(gov-sp): Jeju 도 부서 SP-DO-* 21개에 §2-MAP(업무 지도) 반영 — 템플릿 편집이 정적 인스턴스에 닿지 않던 문제 해소
 - 2026-11-11 Merge pull request #981 from Openhash-Gopang/feat/gov-policy-maps
-- 2026-11-11 feat(prompts): 정책기관 SP 69종에 소관 전체 업무 지도(§2-MAP) 추가
-- 2026-11-11 Merge pull request #980 from Openhash-Gopang/feat/gov-nat-maps
-- 2026-11-11 feat(prompts): 국가기관 템플릿 28종에 소관 전체 업무 지도(§2-MAP) 추가
-- 2026-11-11 Merge pull request #979 from Openhash-Gopang/feat/gov-dept-maps-2
-- 2026-11-11 feat(prompts): 도청·시청 나머지 부서 템플릿에 소관 전체 업무 지도 추가(민원·청렴, 기획조정, 공보, 자치분권, 혁신, 기획·세정, 수산, 문화, 체육)
-- 2026-11-11 feat
-- 2026-11-11 Merge pull request #977 from Openhash-Gopang/feat/gov-ai-broad-task-map
-- 2026-11-11 feat(prompts): 도청·시청 부서 템플릿(보건·주택·기후환경·농업·가족·경제)에 소관 전체 업무 지도 추가
-- 2026-11-11 Merge pull request #976 from Openhash-Gopang/feat/gov-ai-broad-task-map
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
