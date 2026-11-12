@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-12 20:11 KST · 기준 커밋 b4700465
+- 갱신: 2026-11-12 20:12 KST · 기준 커밋 93aadf30
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-12 Merge pull request #1013 from Openhash-Gopang/fix/search-intent-with-id
+- 2026-11-12 fix(search): '@아이디를 연결해줘'·'010-… 찾아줘'처럼 명사 없이 아이디/번호+동사만 있어도 사용자 검색을 바로 연다
 - 2026-11-12 Merge pull request #1012 from Openhash-Gopang/feat/sw-instant-shell
 - 2026-11-12 perf(sw): 앱 셸을 캐시 먼저·뒤에서 갱신(stale-while-revalidate)으로 바꿔 첫 화면 즉시 표시
 - 2026-11-12 Merge pull request #1011 from Openhash-Gopang/fix/invite-push
@@ -42,8 +44,6 @@
 - 2026-11-12 afeat: worker - /auth/signup-link/* 연결 (LF)
 - 2026-11-12 Delete worker.js
 - 2026-11-12 afeat: worker — /auth/signup-link/* 연결
-- 2026-11-12 feat: 폰 회원 가입 확인 화면(signup-approve.html)
-- 2026-11-12 feat: PC 회원 가입(폰으로 이어 가기) 세션 로직
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
