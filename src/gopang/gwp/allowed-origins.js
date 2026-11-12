@@ -1,4 +1,4 @@
-﻿/**
+/**
  * gwp/allowed-origins.js — GWP 서명 릴레이 공통 origin 화이트리스트
  *
  * 2026-07-05 실사: 이전에는 engine.js 안에 인라인으로 ALLOWED_ORIGINS가
@@ -47,5 +47,21 @@ export const GWP_ALLOWED_ORIGINS = [
   'https://traffic.hondi.net',
   'https://clean.hondi.net',
   'https://openhash-gopang.github.io',
+  // 2026-11-13 hondi.net 종료 대비 — naviweb.kr 주소를 병행 허용한다(기존 hondi.net 항목은 이전 완료 후 제거)
+  'https://naviweb.kr',
+  'https://911.naviweb.kr',
+  'https://democracy.naviweb.kr',
+  'https://gdc.naviweb.kr',
+  'https://health.naviweb.kr',
+  'https://insurance.naviweb.kr',
+  'https://klaw.naviweb.kr',
+  'https://logistics.naviweb.kr',
+  'https://market.naviweb.kr',
+  'https://police.naviweb.kr',
+  'https://public.naviweb.kr',
+  'https://security.naviweb.kr',
+  'https://stock.naviweb.kr',
+  'https://traffic.naviweb.kr',
+  'https://clean.naviweb.kr',
   location.origin,  // 개발 환경 (localhost 등)
 ];
