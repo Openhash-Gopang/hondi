@@ -1716,8 +1716,7 @@ function _showPhonePopupLegacy(resolve) {
                 width:100%;max-width:340px;box-sizing:border-box;">
 
       <div style="margin-bottom:20px">
-        <div style="font-size:16px;font-weight:600;color:#111827;margin-bottom:4px">나비 시작하기</div>
-        <div style="font-size:13px;color:#6b7280">전화번호와 닉네임만 있으면 바로 시작할 수 있어요</div>
+        <div style="font-size:16px;font-weight:600;color:#111827">나비 시작하기</div>
       </div>
 
       <!-- 2026-07-21 신설 — 아래 전체를 컨테이너로 감싸, 인증번호 단계로
@@ -1791,9 +1790,7 @@ function _showPhonePopupLegacy(resolve) {
       </div>
       <div id="_phone-error" style="display:none;font-size:12px;color:#dc2626;
            padding:0 4px;margin-bottom:4px"></div>
-      <div id="_phone-hint" style="font-size:12px;color:#9ca3af;padding:0 4px;margin-bottom:14px">
-        기존 회원이면 닉네임만 입력해도 로그인돼요. 처음이면 둘 다 입력해 주세요.
-      </div>
+      <div style="height:8px"></div>
 
       <!-- 닉네임 입력 -->
       <div style="display:flex;align-items:center;
@@ -1801,21 +1798,12 @@ function _showPhonePopupLegacy(resolve) {
                   background:#f9fafb;overflow:hidden;margin-bottom:10px"
            id="_nick-field">
         <input id="_nick-input" type="text" maxlength="20"
-          placeholder="닉네임 (예: 홍길동, James)"
+          placeholder="닉네임 (처음 가입할 때만)"
           style="flex:1;padding:0 14px;height:52px;border:none;background:transparent;
                  font-size:15px;font-family:inherit;outline:none;color:#111827;min-width:0"
           autocomplete="off"/>
       </div>
       <div id="_nick-error" style="display:none;font-size:12px;color:#dc2626;padding:0 4px;margin-bottom:8px"></div>
-
-      <!-- 이용 약정서 동의 -->
-      <label style="display:flex;align-items:flex-start;gap:8px;padding:10px 4px;margin-bottom:6px;cursor:pointer">
-        <input type="checkbox" id="_terms-agree-chk" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;accent-color:#1A73E8">
-        <span style="font-size:12.5px;color:#374151;line-height:1.6">
-          <span onclick="event.preventDefault();window.openTermsOfUse&&window.openTermsOfUse()" style="color:#1A73E8;font-weight:600;text-decoration:underline">이용 약정서</span>(베타 서비스 면책조항 포함)를 읽었으며 동의합니다. <span style="color:#9ca3af">(처음 가입할 때만 필요해요)</span>
-        </span>
-      </label>
-      <div id="_terms-error" style="display:none;font-size:12px;color:#dc2626;padding:0 4px;margin-bottom:8px">이용 약정서에 동의해야 가입을 완료할 수 있습니다.</div>
 
       <button id="_auth-btn"
         style="width:100%;height:52px;background:#1A73E8;color:#fff;
@@ -1823,9 +1811,10 @@ function _showPhonePopupLegacy(resolve) {
                cursor:pointer;font-family:inherit">
         시작하기
       </button>
-      <div style="font-size:12px;color:#9ca3af;text-align:center;margin-top:10px">
-        handle: <span id="_handle-preview" style="color:#1A73E8">@ · · · · · · · ·</span>
+      <div style="font-size:12px;color:#9ca3af;text-align:center;margin-top:12px">
+        시작하면 <span onclick="window.openTermsOfUse&&window.openTermsOfUse()" style="color:#6b7280;text-decoration:underline;cursor:pointer">이용 약정서</span>에 동의한 것으로 봅니다.
       </div>
+      <span id="_handle-preview" style="display:none"></span>
 
       </div>
 
@@ -2576,15 +2565,7 @@ function _showPhonePopupLegacy(resolve) {
         btn.style.opacity = '1'; btn.style.pointerEvents = '';
         return;
       }
-      const termsChk = document.getElementById('_terms-agree-chk');
-      const termsErr = document.getElementById('_terms-error');
-      if (!termsChk?.checked) {
-        termsErr.style.display = 'block';
-        termsChk?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        btn.style.opacity = '1'; btn.style.pointerEvents = '';
-        return;
-      }
-      termsErr.style.display = 'none';
+      // 이용 약정서 동의: 별도 체크 없이 "시작하면 동의한 것으로 봅니다" 안내로 대체 (2026-11-12 화면 단순화)
 
       if (!SIMPLE_SIGNUP_TEST && !_isMobileDevice()) {
         btn.style.opacity = '1'; btn.style.pointerEvents = '';
