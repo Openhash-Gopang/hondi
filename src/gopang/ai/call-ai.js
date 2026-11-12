@@ -65,6 +65,19 @@ function _matchUsageDashboardIntent(text) {
   if (text.trim().startsWith('[')) return false; // 클라이언트 내부 신호 제외 (hondi-faq-router.js와 동일 원칙)
   return _USAGE_DASHBOARD_NOUN.test(text) && _USAGE_DASHBOARD_ACTION.test(text);
 }
+// 2026-11-12 신설 — "사용자 검색", "나비 웹 사용자 검색", "친구 찾기" 같은 짧고 분명한 명령은
+// LLM을 거치지 않고(약 100KB SP를 매번 싣는 호출을 생략) 즉시 검색창을 연다. 기다림 없이 바로 응답하는 것이 목적.
+// 보수적으로 매칭: 25자 이하이고 '사용자/이용자/대화 상대/친구' + '검색/찾기' 조합일 때만.
+const _USER_SEARCH_NOUN   = /(사용자|이용자|대화\s*상대|상대방?|친구)/;
+const _USER_SEARCH_ACTION = /(검색|찾기|찾아|찾고|찾을)/;
+function _matchUserSearchIntent(text) {
+  if (!text || typeof text !== 'string') return null;
+  const t = text.trim();
+  if (!t || t.length > 25 || t.startsWith('[')) return null;
+  if (!_USER_SEARCH_NOUN.test(t) || !_USER_SEARCH_ACTION.test(t)) return null;
+  const num = t.match(/@?[0-9]{8,13}|@[A-Za-z0-9._-]{3,}/);   // 번호·아이디가 함께 있으면 그대로 채워 연다
+  return { query: num ? num[0] : '' };
+}
 import { setPdvDomain, getPdvDomain, _buildPDVNote, _saveProjectState, _loadOpenProjectStates, _proposeSpUpdate, _submitUserFeedback } from '../pdv/record.js';
 // ★ 2026-07-11 추가: _callGeminiGeneral 등 5개 함수가 vision.js에 정의는
 // 돼 있는데 여기서 import가 빠져 있었다 — 이미지 첨부 후 Gemini 분석
@@ -5278,6 +5291,20 @@ export function _parseAgentTags(fullReply, bubble, userText, _preTab) {
 
 
 async function _callAIInner(userText, imageFile = null, _preTab = null, modelTier = null, onFailure = null) {
+  // 지연 측정 시작점(2026-11-12) — 아래 첫 스트림 청크 도착 시 경과를 콘솔·window.__hondiLatency 에 남긴다.
+  const _t0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+  try { window.__hondiLatencyStart = _t0; } catch {}
+  if (!imageFile && !(CFG.systemStack?.length > 0)) {
+    const _us = _matchUserSearchIntent(userText);
+    if (_us) {
+      history.push({ role: 'user', content: userText });
+      const _msg = '🔎 사용자 검색 창을 열었습니다. 전화번호 또는 혼디 아이디(@8자리)를 정확히 입력해 주세요.';
+      appendBubble('ai', _msg);
+      history.push({ role: 'assistant', content: _msg });
+      try { openSearch(_us.query || undefined); } catch (e) { console.warn('[Search] 검색창 열기 실패:', e.message); }
+      return;
+    }
+  }
   // 2026-08-10 신설 — "내 사용량 보여줘" 등은 LLM 호출 없이 즉시 처리.
   // 사용자 말풍선은 호출부(send-message.js의 sendMessage())가 callAI 진입
   // 전에 이미 찍어뒀으므로 여기서 다시 찍지 않는다(중복 방지). 이미지
@@ -5666,10 +5693,20 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
     // 이 문구를 덮어써야 하므로.
     const _stopWaitTicker = _startWaitTicker(bubble, '생각하는 중입니다');
 
+    let _firstChunkLogged = false;
     try {
       while (true) {
         const { done, value } = await reader.read();
         idle.reset(); // 청크(또는 종료)를 받을 때마다 유휴 타이머 리셋
+        if (!_firstChunkLogged && value) {
+          _firstChunkLogged = true;
+          try {
+            const _ms = Math.round(((typeof performance !== 'undefined') ? performance.now() : Date.now()) - _t0);
+            console.info(`[Latency] 전송부터 첫 응답 조각까지 ${_ms}ms (model=${usedCandidate?.model || '?'})`);
+            (window.__hondiLatency = window.__hondiLatency || []).push({ at: Date.now(), firstChunkMs: _ms, model: usedCandidate?.model || '' });
+            if (window.__hondiLatency.length > 20) window.__hondiLatency.shift();
+          } catch {}
+        }
         if (done) break;
 
         buf += decoder.decode(value, { stream: true });
