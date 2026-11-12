@@ -34,6 +34,18 @@ if ('serviceWorker' in navigator) {
       navigator.serviceWorker.addEventListener('message', (event) => {
         if (event.data?.type === 'CHECK_FOR_UPDATE') reg.update().catch(() => {});
       });
+      // 2026-11-12 — 대기 중인 새 서비스워커를 앱이 열릴 때 바로 활성화한다. (페이지는 새로고침하지 않는다 — 다음 접속부터 새 화면.)
+      // 지금까지는 앱을 '완전히 닫았다' 열어야 적용돼, 탭이 열려 있는 폰에서는 옛 화면이 계속 떴다.
+      // 로그인 오버레이(#ksa-overlay)가 떠 있을 때는 건드리지 않는다.
+      const _activateWaiting = (w) => {
+        if (!w || document.getElementById('ksa-overlay')) return;
+        try { w.postMessage({ type: 'SKIP_WAITING' }); } catch (e) { /* 무시 */ }
+      };
+      _activateWaiting(reg.waiting);
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        if (nw) nw.addEventListener('statechange', () => { if (nw.state === 'installed' && navigator.serviceWorker.controller) _activateWaiting(nw); });
+      });
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') reg.update().catch(() => {});
       });

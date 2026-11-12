@@ -5851,6 +5851,16 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
       if (_g.blocked) {
         console.warn('[Guard] 거짓 실행/약속 답변 차단:', fullReply.slice(0, 80));
         fullReply = _g.text;
+        // 사람을 찾거나 부르는 말이었다면 답변만 바꾸지 말고 검색 창을 직접 열어 대화가 멈추지 않게 한다.
+        try {
+          const _ut = typeof userText === 'string' ? userText : '';
+          const _num = _ut.match(/@?[0-9][0-9-]{6,14}[0-9]|@[A-Za-z0-9._-]{3,}/);
+          if (_num) { fullReply = '🔎 사용자 검색 창을 열고 바로 검색합니다.'; openSearch(_num[0]); }
+          else if (_USER_SEARCH_ACTION.test(_ut) && !_USER_SEARCH_EXCLUDE.test(_ut)) {
+            fullReply = '🔎 사용자 검색 창을 열었습니다. 이름으로는 찾을 수 없어요. 상대의 전화번호 또는 혼디 아이디(@8자리)를 입력해 주세요.';
+            openSearch();
+          }
+        } catch (e) { console.warn('[Guard] 검색 창 열기 실패:', e.message); }
         if (bubble) _updateStreamBubble(bubble, fullReply);
       }
     }
