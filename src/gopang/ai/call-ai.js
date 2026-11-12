@@ -78,6 +78,7 @@ function _matchUserSearchIntent(text) {
   const num = t.match(/@?[0-9]{8,13}|@[A-Za-z0-9._-]{3,}/);   // 번호·아이디가 함께 있으면 그대로 채워 연다
   return { query: num ? num[0] : '' };
 }
+import { loadFrequent, matchFrequent } from '../ui/frequent-users.js';
 import { setPdvDomain, getPdvDomain, _buildPDVNote, _saveProjectState, _loadOpenProjectStates, _proposeSpUpdate, _submitUserFeedback } from '../pdv/record.js';
 // ★ 2026-07-11 추가: _callGeminiGeneral 등 5개 함수가 vision.js에 정의는
 // 돼 있는데 여기서 import가 빠져 있었다 — 이미지 첨부 후 Gemini 분석
@@ -756,6 +757,7 @@ export const _stripInternalTags = (text) => _stripBracketTag(
   .replace(/\[PANEL_ACTION:close\]/g, '')      // AI 패널 닫기 지시 태그 (2026-07-02 신설)
   .replace(/\[AGENT_TASK:[^\]]*\]/g, '')       // 나비웹 서류 도우미 인계 태그 (2026-11-04 신설 — 정상 경로는 webapp.html _embedDocTags 가 호스트로 올리고 지움; 대화 기록 복원 때 화면에 새지 않게)
   .replace(/\[DOC_HANDBACK:[^\]]*\]/g, '')     // 서류 도우미 → AC 주도권 반납 태그 (2026-11-04 신설, 위와 같은 이유)
+  .replace(/\[K_SEARCH_REQUEST[^\]]*\]/gi, '')   // 2026-11-12 — 모델이 지어낸 검색 태그(전화번호·지역 노출 방지). 정상 태그는 [SEARCH: ...]뿐이다.
   .replace(/\[PDV_DOMAIN_SET:[^\]]*\]/g, '')    // PDV 일상/업무 전환 태그 (2026-07-13 신설)
   .replace(/\[KCOMPOSE_AWAIT_USER:[^\]]*\]/g, '')  // 2026-09-12 신설 — K-Compose 정상 대기 신호(§ K-Compose 프로토콜 가드 참고), 사용자에겐 안 보여야 함
   .replace(/\[TEMPLATE_LOOKUP:[^\]]*\]/g, '')   // 정체성 템플릿 참조 조회 태그 (2026-07-17 신설, 방어적 — 정상 경로는 _handleProfileTags가 먼저 소비)
@@ -5294,6 +5296,27 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
   // 지연 측정 시작점(2026-11-12) — 아래 첫 스트림 청크 도착 시 경과를 콘솔·window.__hondiLatency 에 남긴다.
   const _t0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
   try { window.__hondiLatencyStart = _t0; } catch {}
+  // 2026-11-12 — 자주 찾는 사용자: 이름·아이디만 말해도 LLM·검색 없이 곧바로 채팅으로 연결한다.
+  if (!imageFile && !(CFG.systemStack?.length > 0)) {
+    let _fm = null;
+    try { _fm = matchFrequent(userText, loadFrequent(localStorage, _USER?.guid || _USER?.ipv6)); } catch {}
+    if (_fm) {
+      history.push({ role: 'user', content: userText });
+      let _msg;
+      if (_fm.user) {
+        const _u = _fm.user, _nm = _u.nickname || _u.handle;
+        _msg = `💬 ${_nm}님과 채팅 연결을 시작합니다.`;
+        appendBubble('ai', _msg);
+        try { const { startP2PCall } = await import('../ui/p2p-chat.js'); await startP2PCall(_u); }
+        catch (e) { appendBubble('ai', '연결을 시작하지 못했습니다: ' + e.message + ' — 검색 창에서 다시 시도해 주세요.'); openSearch(_u.handle); }
+      } else {
+        _msg = `같은 이름의 사용자가 ${_fm.many.length}명입니다. 아이디로 말씀해 주세요: ` + _fm.many.map(u => '@' + String(u.handle).replace(/^@|^tid-/g, '')).join(', ');
+        appendBubble('ai', _msg);
+      }
+      history.push({ role: 'assistant', content: _msg });
+      return;
+    }
+  }
   if (!imageFile && !(CFG.systemStack?.length > 0)) {
     const _us = _matchUserSearchIntent(userText);
     if (_us) {
