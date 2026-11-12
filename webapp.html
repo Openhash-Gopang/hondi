@@ -30,14 +30,14 @@
     'box-sizing:border-box;font-family:\'Pretendard\',-apple-system,' +
     'BlinkMacSystemFont,sans-serif">' +
       '<div style="max-width:380px;text-align:center">' +
-        '<p style="font-weight:700;font-size:18px;margin:0 0 14px;color:#111827">' +
+        '<p style="font-weight:700;font-size:calc(1.125rem*var(--hondi-fs,1));margin:0 0 14px;color:#111827">' +
           '스마트폰 전용 서비스입니다' +
         '</p>' +
-        '<p style="font-size:14px;color:#374151;line-height:1.7;margin:0 0 8px">' +
+        '<p style="font-size:calc(0.875rem*var(--hondi-fs,1));color:#374151;line-height:1.7;margin:0 0 8px">' +
           '나비는 개인정보 보호를 위해 스마트폰에서만 사용할 수 있습니다.<br>' +
           'PC에서는 대화·기록이 다른 사람에게 노출될 위험이 있어 접속을 제한합니다.' +
         '</p>' +
-        '<p style="font-size:13px;color:#6b7280;line-height:1.6;margin:0">' +
+        '<p style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#6b7280;line-height:1.6;margin:0">' +
           'AI 비서는 가입 즉시 무료로 자동 제공되며, 별도의 PC 설정이 필요 없습니다.' +
         '</p>' +
       '</div>' +
@@ -47,7 +47,8 @@
   throw new Error('[Gopang] PC 접속 차단 — webapp.html은 스마트폰 전용입니다.');
 })();
 </script>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<script src="/assets/hondi-fontscale.js"></script>
 
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -106,15 +107,15 @@ function _showWalletLockedBanner() {
   bar.id = '_wallet-locked-banner';
   bar.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:99999;'
     + 'background:#fef2f2;border-top:1px solid #fecaca;color:#7f1d1d;'
-    + 'padding:12px 16px;font-size:13px;line-height:1.5;'
+    + 'padding:12px 16px;font-size:calc(0.8125rem*var(--hondi-fs,1));line-height:1.5;'
     + 'box-shadow:0 -2px 10px rgba(0,0,0,0.08);';
   bar.innerHTML = `
     🔒 이 기기에 저장된 지갑을 열 수 없습니다 (인증 정보 불일치).
     새 지갑을 임의로 만들지 않고 멈췄습니다 — 아래 중 하나를 선택해 주세요.<br>
-    <button id="_wl-devicelink-btn" style="margin-top:8px;padding:8px 14px;border:none;border-radius:8px;background:#7f1d1d;color:#fff;font-size:12.5px;font-weight:600;cursor:pointer">다른 기기에서 이 지갑 가져오기</button>
-    <button id="_wl-restore-btn" style="margin-top:8px;margin-left:6px;padding:8px 14px;border:none;border-radius:8px;background:transparent;color:#7f1d1d;border:1px solid #fca5a5;font-size:12.5px;cursor:pointer">백업 키로 복구</button>
-    <button id="_wl-reset-btn" style="margin-top:8px;margin-left:6px;padding:8px 14px;border:none;border-radius:8px;background:transparent;color:#7f1d1d;border:1px solid #fca5a5;font-size:12.5px;cursor:pointer">이 기기에서 새로 시작</button>
-    <button id="_wl-dismiss-btn" style="margin-top:8px;margin-left:6px;padding:8px 14px;border:none;border-radius:8px;background:transparent;color:#7f1d1d;font-size:12.5px;cursor:pointer">나중에</button>
+    <button id="_wl-devicelink-btn" style="margin-top:8px;padding:8px 14px;border:none;border-radius:8px;background:#7f1d1d;color:#fff;font-size:calc(0.7812rem*var(--hondi-fs,1));font-weight:600;cursor:pointer">다른 기기에서 이 지갑 가져오기</button>
+    <button id="_wl-restore-btn" style="margin-top:8px;margin-left:6px;padding:8px 14px;border:none;border-radius:8px;background:transparent;color:#7f1d1d;border:1px solid #fca5a5;font-size:calc(0.7812rem*var(--hondi-fs,1));cursor:pointer">백업 키로 복구</button>
+    <button id="_wl-reset-btn" style="margin-top:8px;margin-left:6px;padding:8px 14px;border:none;border-radius:8px;background:transparent;color:#7f1d1d;border:1px solid #fca5a5;font-size:calc(0.7812rem*var(--hondi-fs,1));cursor:pointer">이 기기에서 새로 시작</button>
+    <button id="_wl-dismiss-btn" style="margin-top:8px;margin-left:6px;padding:8px 14px;border:none;border-radius:8px;background:transparent;color:#7f1d1d;font-size:calc(0.7812rem*var(--hondi-fs,1));cursor:pointer">나중에</button>
   `;
   document.body.appendChild(bar);
 
@@ -173,7 +174,7 @@ function _updateLogoutBtn() {
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;height:100dvh;overflow:hidden;
   font-family:'Pretendard',-apple-system,'Helvetica Neue',sans-serif;
-  font-size:15px;background:#fff;color:#111;-webkit-font-smoothing:antialiased;
+  font-size:calc(0.9375rem*var(--hondi-fs,1));background:#fff;color:#111;-webkit-font-smoothing:antialiased;
   /* 안드로이드 Chrome의 엣지 스와이프 "뒤로가기/앞으로가기" 제스처 차단.
      이게 없으면 왼쪽 가장자리 스와이프가 페이지 자체를 이탈시켜
      구글/안드로이드 화면으로 빠져나가 버린다. */
@@ -274,7 +275,7 @@ body.gopang-authed #gopang-auth-gate{display:none}
   border:1.2px solid transparent;
   background:var(--ai-btn-bg, #c9daf8);
   color:var(--ai-btn-fg, #000);
-  font-size:9.5px;font-weight:700;letter-spacing:.04em;
+  font-size:calc(0.5938rem*var(--hondi-fs,1));font-weight:700;letter-spacing:.04em;
   font-family:inherit;
   cursor:pointer;padding:0 5px;
   transition:background .4s ease, color .4s ease;
@@ -356,11 +357,11 @@ body.gopang-authed #gopang-auth-gate{display:none}
 }
 #ai-panel-name-line{display:flex;align-items:baseline;min-width:0;overflow:hidden}
 #ai-panel-name{
-  font-size:15px;font-weight:700;color:#fff;letter-spacing:.01em;
+  font-size:calc(0.9375rem*var(--hondi-fs,1));font-weight:700;color:#fff;letter-spacing:.01em;
   flex-shrink:0;white-space:nowrap;
 }
 #ai-panel-name-tagline{
-  font-size:14px;font-weight:400;color:rgba(255,255,255,.85);
+  font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:400;color:rgba(255,255,255,.85);
   margin-left:2px;overflow:hidden;text-overflow:ellipsis;
   white-space:nowrap;min-width:0;
 }
@@ -399,7 +400,7 @@ body.gopang-authed #gopang-auth-gate{display:none}
 #ai-panel-name-input{
   display:none;
   background:transparent;border:none;border-bottom:1.5px solid rgba(255,255,255,.6);
-  border-radius:0;padding:0 2px;font-size:15px;font-weight:700;color:#fff;
+  border-radius:0;padding:0 2px;font-size:calc(0.9375rem*var(--hondi-fs,1));font-weight:700;color:#fff;
   font-family:inherit;outline:none;width:90px;text-align:left;
 }
 #ai-panel-name-input::placeholder{color:rgba(255,255,255,.6)}
@@ -441,7 +442,7 @@ body.gopang-authed #gopang-auth-gate{display:none}
 
 /* ── 라우터 뱃지 ── */
 #router-badge{
-  display:none;font-size:10px;font-weight:600;
+  display:none;font-size:calc(0.625rem*var(--hondi-fs,1));font-weight:600;
   color:var(--green-dk);background:var(--green-lt);
   border:1px solid var(--green-bd);
   border-radius:6px;padding:3px 10px;
@@ -464,14 +465,14 @@ body.gopang-authed #gopang-auth-gate{display:none}
   max-width:88%;align-self:flex-start;
   background:#f9fafb;border:1px solid var(--border);
   border-radius:4px 16px 16px 16px;
-  padding:10px 14px;font-size:14px;line-height:1.75;color:#111;
+  padding:10px 14px;font-size:calc(0.875rem*var(--hondi-fs,1));line-height:1.75;color:#111;
   box-shadow:0 1px 2px rgba(0,0,0,.04);
 }
 .msg-bubble-user,.b-user{
   max-width:88%;align-self:flex-end;
   background:var(--green);color:#fff;
   border-radius:16px 16px 4px 16px;
-  padding:10px 14px;font-size:14px;line-height:1.75;
+  padding:10px 14px;font-size:calc(0.875rem*var(--hondi-fs,1));line-height:1.75;
 }
 /* ── 메시지 행 레이아웃 ── */
 .msg-row{display:flex;flex-direction:column;}
@@ -484,7 +485,7 @@ body.gopang-authed #gopang-auth-gate{display:none}
   max-width:88%;align-self:flex-start;
   background:#f9fafb;border:1px solid var(--border);
   border-radius:4px 16px 16px 16px;
-  padding:10px 14px;font-size:14px;line-height:1.75;color:#111;
+  padding:10px 14px;font-size:calc(0.875rem*var(--hondi-fs,1));line-height:1.75;color:#111;
   box-shadow:0 1px 2px rgba(0,0,0,.04);
 }
 /* 사용자 버블 */
@@ -492,10 +493,10 @@ body.gopang-authed #gopang-auth-gate{display:none}
   max-width:88%;align-self:flex-end;
   background:var(--green);color:#fff;
   border-radius:16px 16px 4px 16px;
-  padding:10px 14px;font-size:14px;line-height:1.75;
+  padding:10px 14px;font-size:calc(0.875rem*var(--hondi-fs,1));line-height:1.75;
 }
 .bubble-ai b,.msg-bubble-ai b,.b-ai b{font-weight:700}
-.bubble-ai code,.msg-bubble-ai code,.b-ai code{background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:13px}
+.bubble-ai code,.msg-bubble-ai code,.b-ai code{background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:calc(0.8125rem*var(--hondi-fs,1))}
 .msg-ai-wrap,.b-ai-wrap{display:flex;flex-direction:column;align-self:flex-start;max-width:88%}
 .msg-user-wrap,.b-user-wrap{display:flex;flex-direction:column;align-items:flex-end;max-width:88%;align-self:flex-end}
 
@@ -504,14 +505,14 @@ body.gopang-authed #gopang-auth-gate{display:none}
   max-width:88%;align-self:flex-start;
   background:#eef2ff;border:1px solid #c7d2fe;
   border-radius:4px 16px 16px 16px;
-  padding:10px 14px;font-size:14px;line-height:1.75;color:#1e1b4b;
+  padding:10px 14px;font-size:calc(0.875rem*var(--hondi-fs,1));line-height:1.75;color:#1e1b4b;
   box-shadow:0 1px 2px rgba(0,0,0,.04);
 }
 /* 시스템 메시지 */
 .bubble-system{
   align-self:center;
   background:transparent;
-  font-size:11px;color:var(--txt3);
+  font-size:calc(0.6875rem*var(--hondi-fs,1));color:var(--txt3);
   text-align:center;padding:2px 8px;
 }
 
@@ -535,13 +536,13 @@ body.gopang-authed #gopang-auth-gate{display:none}
 }
 .intro-icon svg{width:30px;height:30px;stroke:#fff;stroke-width:1.8;fill:none;
   stroke-linecap:round;stroke-linejoin:round}
-.intro-title{font-size:19px;font-weight:800;color:#111;letter-spacing:-.4px}
-.intro-sub{font-size:13px;color:var(--txt2);line-height:1.65}
+.intro-title{font-size:calc(1.1875rem*var(--hondi-fs,1));font-weight:800;color:#111;letter-spacing:-.4px}
+.intro-sub{font-size:calc(0.8125rem*var(--hondi-fs,1));color:var(--txt2);line-height:1.65}
 .chip-row{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;padding:0 8px}
 .chip{
   display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:20px;
   background:#fff;border:1.5px solid var(--chip-border);
-  font-size:12px;font-weight:600;color:#374151;cursor:pointer;
+  font-size:calc(0.75rem*var(--hondi-fs,1));font-weight:600;color:#374151;cursor:pointer;
   transition:border-color .12s,background .12s,color .12s;white-space:nowrap;
 }
 .chip svg{width:12px;height:12px;stroke:currentColor;stroke-width:2;fill:none;flex-shrink:0}
@@ -562,12 +563,12 @@ body.gopang-authed #gopang-auth-gate{display:none}
   display:flex;align-items:center;gap:8px;
   padding:6px 14px;margin-bottom:6px;
   background:var(--chip-bg);
-  font-size:13px;color:var(--txt2);
+  font-size:calc(0.8125rem*var(--hondi-fs,1));color:var(--txt2);
   border-bottom:1px solid var(--border);
 }
 .remove-attach{
   margin-left:auto;background:none;border:none;cursor:pointer;
-  color:var(--txt3);font-size:14px;line-height:1;padding:2px 4px;
+  color:var(--txt3);font-size:calc(0.875rem*var(--hondi-fs,1));line-height:1;padding:2px 4px;
 }
 
 /* 입력 행 전체 */
@@ -597,7 +598,7 @@ body.gopang-authed #gopang-auth-gate{display:none}
 .ia-btn.active{color:var(--green)}
 /* 코드 스캔 버튼 — 프레임+카메라 아이콘 + "스캔" 글자. 한 번 쓴 뒤에는 글자를 없앤다(2026-10-09) */
 .ia-btn.ia-scan{width:auto;padding:0 11px 0 8px;gap:3px;border-radius:18px}
-.ia-btn.ia-scan .ia-scan-label{font-size:13px;font-weight:700;color:var(--green);letter-spacing:-.2px}
+.ia-btn.ia-scan .ia-scan-label{font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:700;color:var(--green);letter-spacing:-.2px}
 .ia-btn.ia-scan.used{width:35.91px;padding:0;gap:0}
 .ia-btn.ia-scan.used .ia-scan-label{display:none}
 .ia-btn.mic-recording{color:#3b82f6;animation:mic-pulse .9s ease-in-out infinite}
@@ -613,7 +614,7 @@ body.gopang-authed #gopang-auth-gate{display:none}
 /* Navi 버전 뱃지 — 2026-07-08: 상단 바 삭제로 로고·베타뱃지가 사라지면서
    입력창 마이크 왼쪽으로 이전. 텍스트만 있는 정적 표시(클릭 동작 없음). */
 #hondi-version-badge{
-  font-size:10px;font-weight:700;color:var(--green-dk);white-space:nowrap;
+  font-size:calc(0.625rem*var(--hondi-fs,1));font-weight:700;color:var(--green-dk);white-space:nowrap;
   flex-shrink:0;user-select:none;padding:0 6px;letter-spacing:.2px;
 }
 
@@ -631,7 +632,7 @@ body.gopang-authed #gopang-auth-gate{display:none}
 /* 텍스트 영역 */
 #msg-input{
   flex:1;background:transparent;border:none;
-  font-family:'Pretendard',sans-serif;font-size:14px;
+  font-family:'Pretendard',sans-serif;font-size:calc(0.875rem*var(--hondi-fs,1));
   resize:none;outline:none;
   min-height:17.87px;max-height:160px;
   line-height:1.55;color:#111;
@@ -670,13 +671,13 @@ body.gopang-authed #gopang-auth-gate{display:none}
 /* 상태 스트립 */
 .status-strip{
   display:flex;align-items:center;gap:6px;
-  font-size:10px;color:var(--txt3);
+  font-size:calc(0.625rem*var(--hondi-fs,1));color:var(--txt3);
   padding:0 14px 6px;
 }
 .status-dot{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0}
 .version-select{
   background:none;border:none;outline:none;
-  font-family:inherit;font-size:11px;color:var(--txt3);cursor:pointer;
+  font-family:inherit;font-size:calc(0.6875rem*var(--hondi-fs,1));color:var(--txt3);cursor:pointer;
 }
 
 /* ── 좌우 엣지 손잡이 ── 화면 가장자리 중간에 작은 grip을 항상 띄워
@@ -858,9 +859,9 @@ body.gopang-authed #gopang-auth-gate{display:none}
   display:flex;align-items:center;justify-content:space-between;
   padding:calc(var(--safe-t)+20px) 20px 16px;
   background:#fff;flex-shrink:0;
-  font-size:17px;font-weight:700;color:#000;letter-spacing:-0.4px;
+  font-size:calc(1.0625rem*var(--hondi-fs,1));font-weight:700;color:#000;letter-spacing:-0.4px;
 }
-.sheet-title{padding:20px 20px 16px;font-size:17px;font-weight:700;color:#000;background:#fff}
+.sheet-title{padding:20px 20px 16px;font-size:calc(1.0625rem*var(--hondi-fs,1));font-weight:700;color:#000;background:#fff}
 .sheet-handle{width:36px;height:4px;background:#c7c7cc;border-radius:4px;margin:10px auto 0}
 
 /* 닫기 버튼 */
@@ -874,7 +875,7 @@ body.gopang-authed #gopang-auth-gate{display:none}
 .settings-body{flex:1;overflow-y:auto;padding:0 0 48px}
 .settings-section,.setting-group{padding:6px 16px 6px}
 .settings-section-title,.setting-label{
-  font-size:12px;font-weight:400;color:#6b6b6b;
+  font-size:calc(0.75rem*var(--hondi-fs,1));font-weight:400;color:#6b6b6b;
   letter-spacing:.2px;margin:16px 4px 8px;display:block;
 }
 
@@ -885,15 +886,15 @@ body.gopang-authed #gopang-auth-gate{display:none}
 .settings-block:first-child{border-top:none}
 .settings-block-label{
   display:flex;align-items:center;gap:6px;margin:0;padding:14px 16px 8px;
-  font-size:13px;font-weight:600;color:var(--accent-teal);letter-spacing:.2px;
+  font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:600;color:var(--accent-teal);letter-spacing:.2px;
 }
 .settings-block-label.danger{color:#b91c1c}
-.settings-block-label i{font-size:14px}
+.settings-block-label i{font-size:calc(0.875rem*var(--hondi-fs,1))}
 .settings-block-caption{
   display:flex;align-items:flex-start;gap:6px;
-  font-size:11px;color:#6b6b6b;line-height:1.6;padding:8px 16px 0;
+  font-size:calc(0.6875rem*var(--hondi-fs,1));color:#6b6b6b;line-height:1.6;padding:8px 16px 0;
 }
-.settings-block-caption i{font-size:13px;margin-top:1px;flex-shrink:0}
+.settings-block-caption i{font-size:calc(0.8125rem*var(--hondi-fs,1));margin-top:1px;flex-shrink:0}
 
 /* 퀵 액션 (원형 아이콘 행 — Profile 페이지와 동일한 패턴) */
 .settings-quick-actions{display:flex;justify-content:space-around;padding:4px 10px 18px;gap:2px}
@@ -903,7 +904,7 @@ body.gopang-authed #gopang-auth-gate{display:none}
   justify-content:center;background:var(--accent-teal-lt);color:var(--accent-teal);flex-shrink:0;transition:transform .12s}
 .sqa-item:active .sqa-circle{transform:scale(.92)}
 .sqa-circle.primary{background:var(--accent-teal);color:#fff}
-.sqa-label{font-size:11px;color:#374151;text-align:center;line-height:1.3;
+.sqa-label{font-size:calc(0.6875rem*var(--hondi-fs,1));color:#374151;text-align:center;line-height:1.3;
   max-width:62px;font-weight:500}
 
 /* 카드 그룹 — 박스 배경 제거, 플랫 리스트로 (구분은 .settings-block 사이의 구분선만) */
@@ -914,16 +915,20 @@ body.gopang-authed #gopang-auth-gate{display:none}
 .settings-card-row{
   display:flex;align-items:center;justify-content:space-between;
   padding:12px 16px;border-bottom:none;
-  font-size:15px;color:#000;cursor:pointer;
+  font-size:calc(0.9375rem*var(--hondi-fs,1));color:#000;cursor:pointer;
 }
 .settings-card-row:last-child{border-bottom:none}
-.settings-card-row-label{font-size:15px;font-weight:400;color:#000}
-.settings-card-row-value{font-size:15px;color:#8e8e93}
+.settings-card-row-label{font-size:calc(0.9375rem*var(--hondi-fs,1));font-weight:400;color:#000}
+.settings-card-row-value{font-size:calc(0.9375rem*var(--hondi-fs,1));color:#8e8e93}
 
 /* 스킨 색상 스와치 */
 .skin-swatch{width:30px;height:30px;border-radius:50%;border:2px solid transparent;
   padding:0;cursor:pointer}
 .skin-swatch.is-selected{border-color:#000;box-shadow:0 0 0 2px #fff inset}
+/* 글자 크기 선택 */
+.fs-row{display:flex;gap:8px;flex-wrap:wrap}
+.fs-btn{padding:8px 14px;border-radius:10px;border:1.5px solid #d1d5db;background:#fff;color:#111827;font-weight:600;font-size:calc(0.875rem*var(--hondi-fs,1));cursor:pointer}
+.fs-btn.is-selected{border-color:var(--accent-teal,#0d9488);background:var(--accent-teal-lt,#ccfbf1);color:var(--accent-teal,#0d9488)}
 
 /* 아이템 */
 .settings-item{
@@ -934,20 +939,20 @@ body.gopang-authed #gopang-auth-gate{display:none}
 .settings-item:last-child{border-bottom:none}
 .settings-item svg{width:18px;height:18px;stroke:#374151;stroke-width:1.8;fill:none;
   stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-.settings-item-label{font-size:15px;font-weight:400;color:#000}
-.settings-item-sub{font-size:13px;color:#8e8e93;margin-top:1px}
+.settings-item-label{font-size:calc(0.9375rem*var(--hondi-fs,1));font-weight:400;color:#000}
+.settings-item-sub{font-size:calc(0.8125rem*var(--hondi-fs,1));color:#8e8e93;margin-top:1px}
 .settings-sep{height:1px;background:#e5e5ea;margin:0 16px}
 
 /* 폼 요소 */
 .setting-field{
   width:100%;padding:11px 14px;border-radius:10px;
   border:none;background:#fff;
-  font-family:inherit;font-size:15px;color:#000;outline:none;
+  font-family:inherit;font-size:calc(0.9375rem*var(--hondi-fs,1));color:#000;outline:none;
   box-shadow:0 0 0 1px #e5e5ea;
   transition:box-shadow .15s;box-sizing:border-box;
 }
 .setting-field:focus{box-shadow:0 0 0 2px rgba(26,115,232,.45)}
-.setting-field-mono{font-family:'Pretendard',sans-serif;font-size:13px}
+.setting-field-mono{font-family:'Pretendard',sans-serif;font-size:calc(0.8125rem*var(--hondi-fs,1))}
 select.setting-field{appearance:none;-webkit-appearance:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
@@ -956,7 +961,7 @@ select.setting-field{appearance:none;-webkit-appearance:none;
 .sheet-save{
   display:block;width:calc(100% - 32px);margin:16px 16px 8px;
   padding:14px;border-radius:12px;background:#1A73E8;
-  color:#fff;font-size:16px;font-weight:600;border:none;cursor:pointer;
+  color:#fff;font-size:calc(1rem*var(--hondi-fs,1));font-weight:600;border:none;cursor:pointer;
   font-family:inherit;letter-spacing:-0.2px;
   transition:opacity .15s;
 }
@@ -997,18 +1002,18 @@ select.setting-field{appearance:none;-webkit-appearance:none;
   display:flex;align-items:center;justify-content:space-between;
   padding:16px 16px 12px;border-bottom:1px solid var(--border);flex-shrink:0;
 }
-.history-sheet-title{font-size:15px;font-weight:800;color:#111}
+.history-sheet-title{font-size:calc(0.9375rem*var(--hondi-fs,1));font-weight:800;color:#111}
 .history-sheet-close{background:none;border:none;cursor:pointer;padding:4px;
   border-radius:6px;display:flex;align-items:center;justify-content:center}
 .history-sheet-close:hover{background:var(--chip-bg)}
 .history-sheet-close svg{width:18px;height:18px;stroke:#6b7280;stroke-width:2;fill:none;
   stroke-linecap:round;stroke-linejoin:round}
 .history-body{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:8px}
-.history-empty{text-align:center;color:var(--txt3);font-size:14px;padding:32px 0}
-.history-item{border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.6}
+.history-empty{text-align:center;color:var(--txt3);font-size:calc(0.875rem*var(--hondi-fs,1));padding:32px 0}
+.history-item{border-radius:10px;padding:10px 12px;font-size:calc(0.8125rem*var(--hondi-fs,1));line-height:1.6}
 .history-item.user{background:#EEF4FF;color:#1557B0;align-self:flex-end;max-width:88%;text-align:right}
 .history-item.ai{background:var(--chip-bg);color:#374151;align-self:flex-start;max-width:88%}
-.history-item-role{font-size:10px;font-weight:700;margin-bottom:3px;opacity:.7}
+.history-item-role{font-size:calc(0.625rem*var(--hondi-fs,1));font-weight:700;margin-bottom:3px;opacity:.7}
 
 /* ── PWA 설치 배너 ── */
 .install-banner{
@@ -1025,10 +1030,10 @@ body:not(.gopang-authed) .install-banner.show{display:none!important}
 html.is-embedded .install-banner{display:none!important}
 .install-banner-icon img{width:36px;height:36px;border-radius:8px}
 .install-banner-text{flex:1}
-.install-banner-title{font-size:13px;font-weight:700;color:#111;margin-bottom:2px}
-.install-banner-sub{font-size:11px;color:var(--txt2);line-height:1.5}
+.install-banner-title{font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:700;color:#111;margin-bottom:2px}
+.install-banner-sub{font-size:calc(0.6875rem*var(--hondi-fs,1));color:var(--txt2);line-height:1.5}
 .install-banner-actions{display:flex;gap:6px;flex-shrink:0}
-.install-btn{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;
+.install-btn{padding:6px 12px;border-radius:8px;font-size:calc(0.75rem*var(--hondi-fs,1));font-weight:600;
   border:none;cursor:pointer;white-space:nowrap}
 .install-btn-primary{background:var(--green);color:#fff}
 .install-btn-dismiss{background:var(--chip-bg);color:var(--txt2);border:1px solid var(--border)}
@@ -1043,12 +1048,12 @@ html.is-embedded .install-banner{display:none!important}
 .backup-warn-banner.show{display:flex}
 .backup-warn-banner.below-install{top:calc(var(--safe-t)+72px)}
 .backup-warn-icon{width:36px;height:36px;border-radius:8px;background:#fef3c7;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px}
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:calc(1.125rem*var(--hondi-fs,1))}
 .backup-warn-text{flex:1}
-.backup-warn-title{font-size:13px;font-weight:700;color:#92400e;margin-bottom:2px}
-.backup-warn-sub{font-size:11px;color:#92400e;line-height:1.5;opacity:.85}
+.backup-warn-title{font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:700;color:#92400e;margin-bottom:2px}
+.backup-warn-sub{font-size:calc(0.6875rem*var(--hondi-fs,1));color:#92400e;line-height:1.5;opacity:.85}
 .backup-warn-actions{display:flex;gap:6px;flex-shrink:0}
-.backup-warn-btn{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;
+.backup-warn-btn{padding:6px 12px;border-radius:8px;font-size:calc(0.75rem*var(--hondi-fs,1));font-weight:600;
   border:none;cursor:pointer;white-space:nowrap}
 .backup-warn-btn-primary{background:#f59e0b;color:#fff}
 .backup-warn-btn-dismiss{background:#fff;color:#92400e;border:1px solid #fde68a}
@@ -1067,12 +1072,12 @@ html.is-embedded .install-banner{display:none!important}
   border-radius:24px 24px 0 0;padding:28px 24px calc(24px + var(--safe-b));
   text-align:center;
 }
-.ai-card-icon{font-size:40px;margin-bottom:10px}
-.ai-card-title{font-size:18px;font-weight:800;color:#111;margin-bottom:6px}
-.ai-card-sub{font-size:13px;color:var(--txt2);line-height:1.65;margin-bottom:20px}
+.ai-card-icon{font-size:calc(2.5rem*var(--hondi-fs,1));margin-bottom:10px}
+.ai-card-title{font-size:calc(1.125rem*var(--hondi-fs,1));font-weight:800;color:#111;margin-bottom:6px}
+.ai-card-sub{font-size:calc(0.8125rem*var(--hondi-fs,1));color:var(--txt2);line-height:1.65;margin-bottom:20px}
 .ai-card-btn{
   display:block;width:100%;padding:13px;border-radius:12px;
-  font-size:14px;font-weight:700;border:none;cursor:pointer;margin-bottom:8px;
+  font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:700;border:none;cursor:pointer;margin-bottom:8px;
   transition:opacity .12s;
 }
 .ai-card-btn-primary{background:var(--green);color:#fff}
@@ -1085,7 +1090,7 @@ html.is-embedded .install-banner{display:none!important}
   position:fixed;bottom:calc(80px + var(--safe-b));left:50%;
   transform:translateX(-50%) translateY(10px);
   background:#111;color:#fff;border-radius:10px;
-  padding:10px 18px;font-size:13px;font-weight:500;
+  padding:10px 18px;font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:500;
   z-index:9999;opacity:0;transition:all .25s;white-space:nowrap;pointer-events:none;
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -1199,27 +1204,27 @@ html.is-embedded .install-banner{display:none!important}
   border-radius:var(--r-md);background:var(--bg-input);margin-bottom:6px;
   cursor:pointer;transition:background .15s}
 .search-item:active{background:var(--tint-dim)}
-.search-avatar{font-size:20px;flex-shrink:0;width:28px;text-align:center}
+.search-avatar{font-size:calc(1.25rem*var(--hondi-fs,1));flex-shrink:0;width:28px;text-align:center}
 .search-item-body{flex:1;min-width:0}
-.search-item-name{display:block;font-size:14px;font-weight:500;
+.search-item-name{display:block;font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:500;
   color:var(--label);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.search-item-sub{display:block;font-size:11px;color:var(--label-3);
+.search-item-sub{display:block;font-size:calc(0.6875rem*var(--hondi-fs,1));color:var(--label-3);
   margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.search-item-badge{flex-shrink:0;font-size:10px;font-weight:600;
+.search-item-badge{flex-shrink:0;font-size:calc(0.625rem*var(--hondi-fs,1));font-weight:600;
   padding:2px 7px;border-radius:10px;background:var(--tint-dim);
   color:var(--tint)}
 /* ── 보편 설명 툴팁 (두 번 탭 → 설명, 어린이·고령자 친화 크기) ── */
 .hondi-explain-tip{
   position:fixed;z-index:5000;max-width:min(86vw,320px);
   background:#1A2B4C;color:#fff;border-radius:14px;
-  padding:14px 16px;font-size:16px;line-height:1.55;font-family:'Pretendard',-apple-system,sans-serif;
+  padding:14px 16px;font-size:calc(1rem*var(--hondi-fs,1));line-height:1.55;font-family:'Pretendard',-apple-system,sans-serif;
   box-shadow:0 8px 28px rgba(0,0,0,.28);
   opacity:0;transform:translateY(6px);
   transition:opacity .18s,transform .18s;pointer-events:none;
 }
 .hondi-explain-tip.show{opacity:1;transform:translateY(0);pointer-events:auto}
 .hondi-explain-tip .tip-close{
-  display:block;margin-top:10px;text-align:right;font-size:14px;
+  display:block;margin-top:10px;text-align:right;font-size:calc(0.875rem*var(--hondi-fs,1));
   color:#9FC2FF;font-weight:600;cursor:pointer;
 }
 </style>
@@ -1299,16 +1304,16 @@ html.is-embedded .install-banner{display:none!important}
   <!-- ── P2P 대화 상대 바 ── -->
   <div id="peer-bar" style="display:none;align-items:center;gap:10px;padding:8px 14px;
        border-bottom:1px solid var(--border);background:var(--chip-bg);flex-shrink:0">
-    <span id="peer-avatar" style="font-size:20px">🙂</span>
+    <span id="peer-avatar" style="font-size:calc(1.25rem*var(--hondi-fs,1))">🙂</span>
     <div style="flex:1;min-width:0">
-      <div id="peer-name" style="font-size:14px;font-weight:600;color:#111;
+      <div id="peer-name" style="font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:600;color:#111;
            white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
-      <div id="peer-handle" style="font-size:11px;color:var(--txt3);
+      <div id="peer-handle" style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:var(--txt3);
            white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
     </div>
     <button onclick="_closeP2P()"
       style="flex-shrink:0;background:none;border:1px solid var(--border);border-radius:8px;
-             padding:5px 10px;font-size:12px;color:var(--txt2);cursor:pointer">
+             padding:5px 10px;font-size:calc(0.75rem*var(--hondi-fs,1));color:var(--txt2);cursor:pointer">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> 종료
     </button>
   </div>
@@ -1389,7 +1394,7 @@ html.is-embedded .install-banner{display:none!important}
       <div class="status-dot" id="status-dot"></div>
       <span id="status-text">PDV 암호화</span>
       <span>·</span>
-      <span>OpenHash <code id="hash-ref" style="font-size:10px;background:var(--chip-bg);padding:1px 4px;border-radius:3px">대기중</code></span>
+      <span>OpenHash <code id="hash-ref" style="font-size:calc(0.625rem*var(--hondi-fs,1));background:var(--chip-bg);padding:1px 4px;border-radius:3px">대기중</code></span>
       <span id="layer-lbl">L1</span>
       <span style="margin-left:auto">
         <select class="version-select" id="version-select" title="나비 버전">
@@ -1515,21 +1520,21 @@ html.is-embedded .install-banner{display:none!important}
   #gdc-dash-sheet{
     width:100%;max-width:480px;max-height:88vh;background:var(--gd-bg);color:var(--gd-text);
     border-radius:14px 14px 0 0;overflow:hidden;display:flex;flex-direction:column;
-    font-family:'Pretendard','Noto Sans KR',sans-serif;font-size:13px;
+    font-family:'Pretendard','Noto Sans KR',sans-serif;font-size:calc(0.8125rem*var(--hondi-fs,1));
   }
   #gdc-dash-head{display:flex;align-items:center;justify-content:space-between;
     padding:14px 18px;border-bottom:1px solid var(--gd-line);flex-shrink:0;}
-  #gdc-dash-head span{font-size:14px;font-weight:500;}
-  #gdc-dash-close{color:var(--gd-dim);font-size:20px;cursor:pointer;background:none;border:none;padding:2px 6px;}
+  #gdc-dash-head span{font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:500;}
+  #gdc-dash-close{color:var(--gd-dim);font-size:calc(1.25rem*var(--hondi-fs,1));cursor:pointer;background:none;border:none;padding:2px 6px;}
   #gdc-dash-body{overflow-y:auto;padding:16px 18px 28px;}
   .gd-balance{border:1px solid var(--gd-line);border-radius:4px;padding:14px 16px;
     display:flex;justify-content:space-between;align-items:baseline;}
-  .gd-balance .l{font-size:11px;color:var(--gd-faint);}
-  .gd-balance .v{font-family:var(--gd-mono);font-size:22px;}
-  .gd-sub{font-size:11px;color:var(--gd-faint);padding:0 16px 12px;
+  .gd-balance .l{font-size:calc(0.6875rem*var(--hondi-fs,1));color:var(--gd-faint);}
+  .gd-balance .v{font-family:var(--gd-mono);font-size:calc(1.375rem*var(--hondi-fs,1));}
+  .gd-sub{font-size:calc(0.6875rem*var(--hondi-fs,1));color:var(--gd-faint);padding:0 16px 12px;
     border:1px solid var(--gd-line);border-top:none;border-radius:0 0 4px 4px;margin-bottom:16px;}
   .gd-tabs{display:flex;border-bottom:1px solid var(--gd-line);margin-bottom:14px;gap:2px;overflow-x:auto;}
-  .gd-tab{flex-shrink:0;padding:9px 12px;font-size:12px;color:var(--gd-faint);cursor:pointer;
+  .gd-tab{flex-shrink:0;padding:9px 12px;font-size:calc(0.75rem*var(--hondi-fs,1));color:var(--gd-faint);cursor:pointer;
     border-bottom:2px solid transparent;white-space:nowrap;}
   .gd-tab.active{color:var(--gd-text);border-bottom-color:var(--gd-dim);}
   .gd-pane{display:none;}
@@ -1539,10 +1544,10 @@ html.is-embedded .install-banner{display:none!important}
     padding:10px 12px;border-bottom:1px solid var(--gd-line);background:var(--gd-panel);}
   .gd-txn:last-child{border-bottom:none;}
   .gd-dot{width:6px;height:6px;border-radius:50%;background:var(--gd-dim);}
-  .gd-title{color:var(--gd-text);font-size:12.5px;}
-  .gd-meta{color:var(--gd-faint);font-size:11px;margin-top:2px;}
-  .gd-amt{font-family:var(--gd-mono);font-size:12.5px;text-align:right;white-space:nowrap;}
-  .gd-empty{text-align:center;padding:26px 16px;color:var(--gd-faint);font-size:11.5px;line-height:1.7;}
+  .gd-title{color:var(--gd-text);font-size:calc(0.7812rem*var(--hondi-fs,1));}
+  .gd-meta{color:var(--gd-faint);font-size:calc(0.6875rem*var(--hondi-fs,1));margin-top:2px;}
+  .gd-amt{font-family:var(--gd-mono);font-size:calc(0.7812rem*var(--hondi-fs,1));text-align:right;white-space:nowrap;}
+  .gd-empty{text-align:center;padding:26px 16px;color:var(--gd-faint);font-size:calc(0.7188rem*var(--hondi-fs,1));line-height:1.7;}
 </style>
 <div id="gdc-dash-overlay" onclick="if(event.target===this) closeGdcDashboard()">
   <div id="gdc-dash-sheet">
@@ -1664,7 +1669,7 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
   <div class="account-delete-backdrop" onclick="closeAccountDelete()"></div>
   <div class="account-delete-drawer">
     <div class="sheet-title" style="color:#ef4444;padding:0 16px">계정 삭제</div>
-    <div style="padding:8px 16px 4px;font-size:12px;color:#888;line-height:1.7">
+    <div style="padding:8px 16px 4px;font-size:calc(0.75rem*var(--hondi-fs,1));color:#888;line-height:1.7">
       서버에는 전화번호·아이디처럼 사용자를 서로 연결하는 정보만 있고,
       대화·기록은 이 기기에만 저장돼 있어요. 계정을 삭제해도 이 기기의
       기록은 지워지지 않으니, 같은 번호로 다시 가입하면 지금 상태로
@@ -1674,31 +1679,31 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
       <input type="text" id="ad-input-id" placeholder="아이디(닉네임) 입력"
         autocomplete="off" autocapitalize="off" spellcheck="false"
         style="width:100%;box-sizing:border-box;padding:12px 14px;margin-bottom:8px;
-               border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;
+               border:1.5px solid #e5e7eb;border-radius:10px;font-size:calc(0.875rem*var(--hondi-fs,1));
                font-family:inherit;outline:none;background:#f9fafb;color:#111"
         oninput="_checkAccountDeleteInput()">
       <input type="tel" id="ad-input-phone" placeholder="전화번호(예: 01012345678)"
         autocomplete="off" inputmode="numeric" spellcheck="false"
         style="width:100%;box-sizing:border-box;padding:12px 14px;margin-bottom:6px;
-               border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;
+               border:1.5px solid #e5e7eb;border-radius:10px;font-size:calc(0.875rem*var(--hondi-fs,1));
                font-family:inherit;outline:none;background:#f9fafb;color:#111"
         oninput="_checkAccountDeleteInput()">
       <div id="ad-refund" style="display:none;margin:6px 0 4px;padding:10px 12px;border-radius:10px;background:#fffbeb;border:1px solid #fcd34d">
-        <div id="ad-refund-msg" style="font-size:12.5px;color:#92400e;line-height:1.6;margin-bottom:8px"></div>
-        <input type="text" id="ad-ref-bank" placeholder="은행(예: 국민은행)" autocomplete="off" style="width:100%;box-sizing:border-box;padding:10px 12px;margin-bottom:6px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit">
-        <input type="text" id="ad-ref-number" placeholder="계좌번호(숫자)" inputmode="numeric" autocomplete="off" style="width:100%;box-sizing:border-box;padding:10px 12px;margin-bottom:6px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit">
-        <input type="text" id="ad-ref-holder" placeholder="예금주(본인 명의)" autocomplete="off" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit">
+        <div id="ad-refund-msg" style="font-size:calc(0.7812rem*var(--hondi-fs,1));color:#92400e;line-height:1.6;margin-bottom:8px"></div>
+        <input type="text" id="ad-ref-bank" placeholder="은행(예: 국민은행)" autocomplete="off" style="width:100%;box-sizing:border-box;padding:10px 12px;margin-bottom:6px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:calc(0.875rem*var(--hondi-fs,1));font-family:inherit">
+        <input type="text" id="ad-ref-number" placeholder="계좌번호(숫자)" inputmode="numeric" autocomplete="off" style="width:100%;box-sizing:border-box;padding:10px 12px;margin-bottom:6px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:calc(0.875rem*var(--hondi-fs,1));font-family:inherit">
+        <input type="text" id="ad-ref-holder" placeholder="예금주(본인 명의)" autocomplete="off" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:calc(0.875rem*var(--hondi-fs,1));font-family:inherit">
       </div>
-      <div id="ad-error" style="display:none;font-size:12px;color:#dc2626;margin:4px 4px 8px"></div>
+      <div id="ad-error" style="display:none;font-size:calc(0.75rem*var(--hondi-fs,1));color:#dc2626;margin:4px 4px 8px"></div>
       <button id="btn-account-delete-confirm" onclick="_confirmAccountDelete()" disabled
         style="width:100%;padding:14px;border:none;border-radius:10px;margin-top:6px;
-               background:#fca5a5;color:#fff;font-size:14px;font-weight:600;
+               background:#fca5a5;color:#fff;font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:600;
                cursor:not-allowed;font-family:inherit;transition:background .15s">
         계정 삭제
       </button>
       <button onclick="closeAccountDelete()"
         style="width:100%;padding:12px;margin:8px 0 4px;border:none;background:transparent;
-               color:#888;font-size:13px;font-family:inherit;cursor:pointer">
+               color:#888;font-size:calc(0.8125rem*var(--hondi-fs,1));font-family:inherit;cursor:pointer">
         취소
       </button>
     </div>
@@ -1801,8 +1806,8 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
           <div class="settings-card">
             <div class="settings-card-row" style="align-items:center;gap:10px">
               <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
-                <div id="gopang-id-status" style="font-size:15px;color:#000">로딩 중…</div>
-                <div id="gopang-id-display" style="font-size:12px;color:#8e8e93;font-family:'Pretendard',sans-serif;word-break:break-all"></div>
+                <div id="gopang-id-status" style="font-size:calc(0.9375rem*var(--hondi-fs,1));color:#000">로딩 중…</div>
+                <div id="gopang-id-display" style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#8e8e93;font-family:'Pretendard',sans-serif;word-break:break-all"></div>
               </div>
               <img id="hondi-code-thumb"
                    src="" alt="나비 코드"
@@ -1832,11 +1837,11 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
                 <img id="hondi-code-modal-img" src="" alt="나비 코드"
                      style="width:100%;max-width:280px;border-radius:8px;
                             border:1px solid #e5e5ea;background:#fff">
-                <p style="margin:12px 0 4px;font-size:13px;color:#6b6b6b">내 나비 코드</p>
+                <p style="margin:12px 0 4px;font-size:calc(0.8125rem*var(--hondi-fs,1));color:#6b6b6b">내 나비 코드</p>
                 <button onclick="_downloadHondiCode()"
                         style="margin-top:8px;padding:10px 24px;border-radius:10px;
                                background:var(--accent-teal);color:#fff;border:none;
-                               font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">
+                               font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:600;cursor:pointer;font-family:inherit">
                   이미지로 저장
                 </button>
               </div>
@@ -1859,14 +1864,14 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
                     <line x1="6" y1="6" x2="18" y2="18"/>
                   </svg>
                 </button>
-                <p style="margin:0 0 14px;font-size:15px;font-weight:700;color:#111827">다른 기기에서 내 계정 열기</p>
+                <p style="margin:0 0 14px;font-size:calc(0.9375rem*var(--hondi-fs,1));font-weight:700;color:#111827">다른 기기에서 내 계정 열기</p>
                 <img id="device-link-qr-img" src="" alt="기기 연결용 나비 숫자 코드"
                      style="display:none;width:100%;max-width:260px;border-radius:8px;
                             border:1px solid #e5e5ea;background:#fff;margin:0 auto">
-                <p id="device-link-qr-error" style="display:none;font-size:13px;color:#dc2626;padding:20px 4px">
+                <p id="device-link-qr-error" style="display:none;font-size:calc(0.8125rem*var(--hondi-fs,1));color:#dc2626;padding:20px 4px">
                   전화번호 인증이 완료된 계정만 연결할 수 있습니다.
                 </p>
-                <p style="margin:12px 0 4px;font-size:12.5px;color:#6b6b6b;line-height:1.55">
+                <p style="margin:12px 0 4px;font-size:calc(0.7812rem*var(--hondi-fs,1));color:#6b6b6b;line-height:1.55">
                   새 기기에서 <b>hondi.net/auth/link-scan.html</b>을 열어 카메라로 이 코드를 비추면,
                   전화번호 입력 없이 곧바로 연결 요청이 전송됩니다.
                   이 기기(또는 알림을 받는 기기)에서 승인해주세요.<br>
@@ -1876,7 +1881,7 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
                   <button id="device-link-qr-copy-btn" onclick="_copyDeviceLinkQRUrl()"
                           style="width:100%;padding:10px 16px;border-radius:10px;
                                  background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;
-                                 font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">
+                                 font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:600;cursor:pointer;font-family:inherit">
                     링크 복사 (카메라를 못 쓸 때)
                   </button>
                 </div>
@@ -1890,7 +1895,7 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
                 onblur="setTimeout(()=>this.setAttribute('readonly',''),100)">
               <button id="gopang-id-register-btn" onclick="_settingsRegisterHandle()"
                 style="width:100%;padding:13px;border-radius:10px;background:var(--accent-teal);
-                       color:#fff;border:none;font-size:15px;font-weight:600;
+                       color:#fff;border:none;font-size:calc(0.9375rem*var(--hondi-fs,1));font-weight:600;
                        cursor:pointer;font-family:inherit;letter-spacing:-0.2px">
                 아이디 등록
               </button>
@@ -1950,8 +1955,8 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
         <div id="gdc-wallet-section" style="display:none;padding:0 16px">
           <div class="settings-card">
             <div class="settings-card-row" style="flex-direction:column;align-items:flex-start;gap:4px">
-              <div id="gdc-balance-display" style="font-size:24px;font-weight:600;color:#000;letter-spacing:-0.5px">— GDC</div>
-              <div style="font-size:13px;color:#8e8e93">사용 가능한 잔액</div>
+              <div id="gdc-balance-display" style="font-size:calc(1.5rem*var(--hondi-fs,1));font-weight:600;color:#000;letter-spacing:-0.5px">— GDC</div>
+              <div style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#8e8e93">사용 가능한 잔액</div>
             </div>
             <div class="settings-card-row" onclick="_openGDCWallet()" style="cursor:pointer">
               <span class="settings-card-row-label">Wallet 관리</span>
@@ -1971,26 +1976,26 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
           <div class="settings-block-label" style="padding:10px 0 8px"><i class="ti ti-history" aria-hidden="true"></i><span id="setting-label-history">내 기록</span></div>
           <div class="settings-card">
             <div class="settings-card-row" onclick="openChatHistory()" style="cursor:pointer">
-              <span class="settings-card-row-label"><i class="ti ti-message-circle" aria-hidden="true" style="font-size:17px;color:var(--accent-teal);width:20px;text-align:center"></i id="label-chat-history"> 이전 대화 기록</span>
+              <span class="settings-card-row-label"><i class="ti ti-message-circle" aria-hidden="true" style="font-size:calc(1.0625rem*var(--hondi-fs,1));color:var(--accent-teal);width:20px;text-align:center"></i id="label-chat-history"> 이전 대화 기록</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c7c7cc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </div>
             <div class="settings-card-row" onclick="openHashChain()" style="cursor:pointer">
-              <span class="settings-card-row-label"><i class="ti ti-link" aria-hidden="true" style="font-size:17px;color:var(--accent-teal);width:20px;text-align:center"></i id="label-hash-chain"> 나의 기록 금고 (PDV)</span>
+              <span class="settings-card-row-label"><i class="ti ti-link" aria-hidden="true" style="font-size:calc(1.0625rem*var(--hondi-fs,1));color:var(--accent-teal);width:20px;text-align:center"></i id="label-hash-chain"> 나의 기록 금고 (PDV)</span>
               <div style="display:flex;align-items:center;gap:6px">
-                <span style="font-size:11px;background:#eafcff;color:var(--accent-teal);padding:2px 6px;border-radius:4px">통합</span>
+                <span style="font-size:calc(0.6875rem*var(--hondi-fs,1));background:#eafcff;color:var(--accent-teal);padding:2px 6px;border-radius:4px">통합</span>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c7c7cc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
               </div>
             </div>
             <div class="settings-card-row" onclick="openGopangWallet()" style="cursor:pointer">
-              <span class="settings-card-row-label"><i class="ti ti-wallet" aria-hidden="true" style="font-size:17px;color:var(--accent-teal);width:20px;text-align:center"></i id="label-gopang-wallet"> Navi Wallet</span>
+              <span class="settings-card-row-label"><i class="ti ti-wallet" aria-hidden="true" style="font-size:calc(1.0625rem*var(--hondi-fs,1));color:var(--accent-teal);width:20px;text-align:center"></i id="label-gopang-wallet"> Navi Wallet</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c7c7cc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </div>
             <div class="settings-card-row" onclick="openBackupKey()" style="cursor:pointer">
-              <span class="settings-card-row-label"><i class="ti ti-key" aria-hidden="true" style="font-size:17px;color:var(--accent-teal);width:20px;text-align:center"></i> 백업 키</span>
+              <span class="settings-card-row-label"><i class="ti ti-key" aria-hidden="true" style="font-size:calc(1.0625rem*var(--hondi-fs,1));color:var(--accent-teal);width:20px;text-align:center"></i> 백업 키</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c7c7cc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </div>
             <div class="settings-card-row" onclick="openFinancialStatement()" style="cursor:pointer">
-              <span class="settings-card-row-label"><i class="ti ti-report-analytics" aria-hidden="true" style="font-size:17px;color:var(--accent-teal);width:20px;text-align:center"></i id="label-financial"> 재무제표</span>
+              <span class="settings-card-row-label"><i class="ti ti-report-analytics" aria-hidden="true" style="font-size:calc(1.0625rem*var(--hondi-fs,1));color:var(--accent-teal);width:20px;text-align:center"></i id="label-financial"> 재무제표</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c7c7cc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </div>
           </div>
@@ -2002,6 +2007,16 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
         <div class="settings-block-label"><i class="ti ti-palette" aria-hidden="true"></i><span id="setting-label-screen">화면</span></div>
         <div style="padding:0 16px">
           <div class="settings-card">
+            <div class="settings-card-row" style="cursor:default;flex-direction:column;align-items:flex-start;gap:10px">
+              <span class="settings-card-row-label">글자 크기</span>
+              <div class="fs-row" role="group" aria-label="글자 크기">
+                <button type="button" class="fs-btn" data-fs="100" onclick="setHondiFontScale(100)">보통</button>
+                <button type="button" class="fs-btn" data-fs="110" onclick="setHondiFontScale(110)">크게</button>
+                <button type="button" class="fs-btn" data-fs="125" onclick="setHondiFontScale(125)">더 크게</button>
+                <button type="button" class="fs-btn" data-fs="145" onclick="setHondiFontScale(145)">아주 크게</button>
+              </div>
+              <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#6b7280">미리보기: 가나다라 ABC 123 — 화면을 두 손가락으로 벌려 확대할 수도 있습니다.</span>
+            </div>
             <div class="settings-card-row" style="cursor:default;flex-direction:column;align-items:flex-start;gap:10px">
               <span class="settings-card-row-label">스킨 선택</span>
               <div style="display:flex;gap:14px">
@@ -2027,29 +2042,29 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
               <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
                 <span class="settings-card-row-label" id="label-sound">메시지 알림 소리</span>
                 <button id="btn-push-test" onclick="_testPushSound()"
-                  style="font-size:12px;color:var(--accent-teal);background:none;border:none;cursor:pointer;font-family:inherit">
+                  style="font-size:calc(0.75rem*var(--hondi-fs,1));color:var(--accent-teal);background:none;border:none;cursor:pointer;font-family:inherit">
                   <span id="label-preview">미리듣기</span>
                 </button>
               </div>
               <div style="display:flex;gap:8px;flex-wrap:wrap">
-                <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer">
+                <label style="display:flex;align-items:center;gap:4px;font-size:calc(0.8125rem*var(--hondi-fs,1));cursor:pointer">
                   <input type="radio" name="push-sound" value="ping"  onchange="_savePushSound(this.value)" style="accent-color:var(--accent-teal)"> <span id="snd-label-ping">기본</span>
                 </label>
-                <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer">
+                <label style="display:flex;align-items:center;gap:4px;font-size:calc(0.8125rem*var(--hondi-fs,1));cursor:pointer">
                   <input type="radio" name="push-sound" value="bell"  onchange="_savePushSound(this.value)" style="accent-color:var(--accent-teal)"> <span id="snd-label-bell">벨</span>
                 </label>
-                <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer">
+                <label style="display:flex;align-items:center;gap:4px;font-size:calc(0.8125rem*var(--hondi-fs,1));cursor:pointer">
                   <input type="radio" name="push-sound" value="drop"  onchange="_savePushSound(this.value)" style="accent-color:var(--accent-teal)"> <span id="snd-label-drop">물방울</span>
                 </label>
-                <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer">
+                <label style="display:flex;align-items:center;gap:4px;font-size:calc(0.8125rem*var(--hondi-fs,1));cursor:pointer">
                   <input type="radio" name="push-sound" value="chime" onchange="_savePushSound(this.value)" style="accent-color:var(--accent-teal)"> <span id="snd-label-chime">차임</span>
                 </label>
-                <label style="display:flex;align-items:center;gap:4px;font-size:13px;cursor:pointer">
+                <label style="display:flex;align-items:center;gap:4px;font-size:calc(0.8125rem*var(--hondi-fs,1));cursor:pointer">
                   <input type="radio" name="push-sound" value="none"  onchange="_savePushSound(this.value)" style="accent-color:var(--accent-teal)"> <span id="snd-label-none">없음</span>
                 </label>
               </div>
               <div style="display:flex;align-items:center;justify-content:space-between;width:100%;padding:4px 0">
-                <span style="font-size:13px;color:#333" id="label-notif-toggle">알림 끄기/켜기</span>
+                <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#333" id="label-notif-toggle">알림 끄기/켜기</span>
                 <label style="position:relative;display:inline-block;width:48px;height:28px;cursor:pointer">
                   <input type="checkbox" id="push-toggle" onchange="_togglePush(this.checked)"
                     style="opacity:0;width:0;height:0;position:absolute">
@@ -2065,7 +2080,7 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
                   "></span>
                 </label>
               </div>
-              <div id="push-status" style="font-size:11px;color:#9ca3af;width:100%"></div>
+              <div id="push-status" style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:#9ca3af;width:100%"></div>
             </div>
           </div>
         </div>
@@ -2077,54 +2092,54 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
         <div class="settings-card">
           <div style="padding:14px 16px">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-              <span style="font-size:13px;color:#333">생체인증(지문·얼굴)</span>
+              <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#333">생체인증(지문·얼굴)</span>
               <button id="btn-biometric-toggle" onclick="_toggleBiometric()"
-                style="padding:6px 14px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">
+                style="padding:6px 14px;border-radius:8px;border:none;font-size:calc(0.75rem*var(--hondi-fs,1));font-weight:700;cursor:pointer;font-family:inherit">
                 확인 중...
               </button>
             </div>
-            <div id="biometric-status" style="font-size:11px;color:#9ca3af;margin-bottom:14px"></div>
+            <div id="biometric-status" style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:#9ca3af;margin-bottom:14px"></div>
 
-            <div style="font-size:13px;color:#333;margin-bottom:6px">
+            <div style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#333;margin-bottom:6px">
               이 금액(₮) 이상 송금 시 생체인증 재확인
             </div>
             <div style="display:flex;gap:8px">
               <input id="step-up-threshold-input" type="number" min="0" step="1000"
                 placeholder="예: 100000"
-                style="flex:1;padding:9px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit">
+                style="flex:1;padding:9px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:calc(0.8125rem*var(--hondi-fs,1));font-family:inherit">
               <button onclick="_saveStepUpThreshold()"
-                style="padding:9px 16px;border-radius:8px;border:none;background:#0057A8;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
+                style="padding:9px 16px;border-radius:8px;border:none;background:#0057A8;color:#fff;font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:700;cursor:pointer;font-family:inherit">
                 저장
               </button>
             </div>
-            <div id="step-up-status" style="font-size:11px;color:#9ca3af;margin-top:6px"></div>
+            <div id="step-up-status" style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:#9ca3af;margin-top:6px"></div>
 
             <!-- 2026-09-07 신설 — K-서비스 결제 문턱값 -->
-            <div style="font-size:13px;color:#333;margin:18px 0 6px">
+            <div style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#333;margin:18px 0 6px">
               이 금액(₩) 이상 K-서비스 결제 시 생체인증 재확인
               <span style="color:#9ca3af;font-weight:400"> (1만원 미만은 매번 요구하지 않음)</span>
             </div>
             <div style="display:flex;gap:8px">
               <input id="biz-step-up-threshold-input" type="number" min="0" step="1000"
                 placeholder="예: 10000"
-                style="flex:1;padding:9px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit">
+                style="flex:1;padding:9px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:calc(0.8125rem*var(--hondi-fs,1));font-family:inherit">
               <button onclick="_saveProtectiveSetting('biz_step_up_threshold', 'number')"
-                style="padding:9px 16px;border-radius:8px;border:none;background:#0057A8;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">
+                style="padding:9px 16px;border-radius:8px;border:none;background:#0057A8;color:#fff;font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:700;cursor:pointer;font-family:inherit">
                 저장
               </button>
             </div>
-            <div id="biz-step-up-status" style="font-size:11px;color:#9ca3af;margin-top:6px"></div>
+            <div id="biz-step-up-status" style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:#9ca3af;margin-top:6px"></div>
 
             <!-- 2026-09-07 신설 — device-link 지문 필수 여부 -->
             <div style="display:flex;align-items:center;justify-content:space-between;margin:18px 0 4px">
-              <span style="font-size:13px;color:#333">다른 기기 로그인 승인 시 지문 필수</span>
+              <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#333">다른 기기 로그인 승인 시 지문 필수</span>
               <button id="btn-devicelink-biometric-toggle" onclick="_toggleDeviceLinkBiometric()"
-                style="padding:6px 14px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">
+                style="padding:6px 14px;border-radius:8px;border:none;font-size:calc(0.75rem*var(--hondi-fs,1));font-weight:700;cursor:pointer;font-family:inherit">
                 확인 중...
               </button>
             </div>
-            <div id="devicelink-biometric-status" style="font-size:11px;color:#9ca3af"></div>
-            <div id="pending-changes-banner" style="display:none;margin-top:10px;padding:10px 12px;border-radius:8px;background:#fff7ed;border:1px solid #fed7aa;font-size:12px;color:#9a3412"></div>
+            <div id="devicelink-biometric-status" style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:#9ca3af"></div>
+            <div id="pending-changes-banner" style="display:none;margin-top:10px;padding:10px 12px;border-radius:8px;background:#fff7ed;border:1px solid #fed7aa;font-size:calc(0.75rem*var(--hondi-fs,1));color:#9a3412"></div>
           </div>
         </div>
       </div>
@@ -2136,24 +2151,24 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
           <div class="settings-card" style="display:flex;flex-direction:row">
             <details style="flex:1;border-right:1px solid #f2f2f7">
               <summary style="cursor:pointer;outline:none;list-style:none;
-                              padding:13px 14px;font-size:14px;color:#000;
+                              padding:13px 14px;font-size:calc(0.875rem*var(--hondi-fs,1));color:#000;
                               display:flex;align-items:center;justify-content:space-between">
                 Android
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c7c7cc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
               </summary>
-              <div style="padding:4px 14px 12px;font-size:12px;color:#6b6b6b;line-height:1.6">
+              <div style="padding:4px 14px 12px;font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b6b6b;line-height:1.6">
                 크롬 ⋮ → 사이트 설정<br>
                 <b style="color:#000">위치·카메라·마이크</b> 허용
               </div>
             </details>
             <details style="flex:1">
               <summary style="cursor:pointer;outline:none;list-style:none;
-                              padding:13px 14px;font-size:14px;color:#000;
+                              padding:13px 14px;font-size:calc(0.875rem*var(--hondi-fs,1));color:#000;
                               display:flex;align-items:center;justify-content:space-between">
                 iPhone
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c7c7cc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
               </summary>
-              <div style="padding:4px 14px 12px;font-size:12px;color:#6b6b6b;line-height:1.6">
+              <div style="padding:4px 14px 12px;font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b6b6b;line-height:1.6">
                 AA → 웹사이트 설정<br>
                 <b style="color:#000">위치·마이크</b> 허용
               </div>
@@ -2169,12 +2184,12 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
           <div class="settings-card">
             <div class="settings-card-row" id="btn-create-shortcut" onclick="installPWAWithPermission()" style="cursor:pointer">
               <span class="settings-card-row-label" style="display:flex;align-items:center;gap:8px">
-                <i class="ti ti-device-mobile-down" aria-hidden="true" style="font-size:17px;color:#1050DC;width:20px;text-align:center"></i>
+                <i class="ti ti-device-mobile-down" aria-hidden="true" style="font-size:calc(1.0625rem*var(--hondi-fs,1));color:#1050DC;width:20px;text-align:center"></i>
                 <span id="label-pwa-install">앱으로 설치 (PWA)</span>
               </span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c7c7cc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </div>
-            <div style="padding:0 4px 8px;font-size:11px;color:var(--txt3);line-height:1.6">
+            <div style="padding:0 4px 8px;font-size:calc(0.6875rem*var(--hondi-fs,1));color:var(--txt3);line-height:1.6">
               설치하면 카메라·마이크·위치가 자동 허용되고 주소창 없이 앱처럼 실행됩니다
             </div>
             <div class="settings-card-row" id="btn-force-update" onclick="forceUpdateApp(this)" style="cursor:pointer">
@@ -2190,32 +2205,32 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
             <!-- 실제 배포 버전 표시 — /version.json(배포마다 CI가 자동 갱신)을
                  읽어 채운다. "최신 버전으로 갱신"을 누르지 않아도 지금 이
                  화면이 몇 번째 배포인지 언제든 직접 확인할 수 있게 한다. -->
-            <div style="padding:0 4px 8px;font-size:11px;color:var(--txt3)" id="current-version-line">현재 버전 확인 중…</div>
+            <div style="padding:0 4px 8px;font-size:calc(0.6875rem*var(--hondi-fs,1));color:var(--txt3)" id="current-version-line">현재 버전 확인 중…</div>
             <div class="settings-card-row" onclick="clearSWCache()" style="cursor:pointer">
               <span class="settings-card-row-label">
-                <i class="ti ti-refresh" aria-hidden="true" style="font-size:17px;color:var(--accent-teal);width:20px;text-align:center"></i>
+                <i class="ti ti-refresh" aria-hidden="true" style="font-size:calc(1.0625rem*var(--hondi-fs,1));color:var(--accent-teal);width:20px;text-align:center"></i>
                 <span id="label-cache-clear">앱 캐시 초기화</span>
               </span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c7c7cc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </div>
             <div class="settings-card-row" onclick="_deviceLocalReset()" style="cursor:pointer">
               <span class="settings-card-row-label">
-                <i class="ti ti-device-mobile-x" aria-hidden="true" style="font-size:17px;color:#f59e0b;width:20px;text-align:center"></i>
+                <i class="ti ti-device-mobile-x" aria-hidden="true" style="font-size:calc(1.0625rem*var(--hondi-fs,1));color:#f59e0b;width:20px;text-align:center"></i>
                 기기 초기화
               </span>
-              <span style="font-size:11px;background:#fffbeb;color:#b45309;padding:2px 6px;border-radius:4px" id="label-local-reset">재접속 시 복원 가능</span>
+              <span style="font-size:calc(0.6875rem*var(--hondi-fs,1));background:#fffbeb;color:#b45309;padding:2px 6px;border-radius:4px" id="label-local-reset">재접속 시 복원 가능</span>
             </div>
             <!-- 2026-07-22 신설 — device-link 웹푸시가 안 올 때 수동 재구독.
                  자주 쓰는 기능이 아니라 이 섹션 맨 아래(눈에 덜 띄는 자리)에 배치. -->
             <div class="settings-card-row" id="btn-resubscribe-push" onclick="_resubscribePush()" style="cursor:pointer">
               <span class="settings-card-row-label" style="display:flex;align-items:center;gap:8px">
-                <i class="ti ti-bell" aria-hidden="true" style="font-size:17px;color:var(--accent-teal);width:20px;text-align:center"></i>
+                <i class="ti ti-bell" aria-hidden="true" style="font-size:calc(1.0625rem*var(--hondi-fs,1));color:var(--accent-teal);width:20px;text-align:center"></i>
                 <span id="label-resubscribe-push">푸시 알림 재구독</span>
               </span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c7c7cc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </div>
           </div>
-          <div style="font-size:11px;color:var(--txt3);padding:8px 4px 0;line-height:1.6" id="label-local-reset-sub">이 기기의 데이터만 삭제 — 계정은 유지됩니다</div>
+          <div style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:var(--txt3);padding:8px 4px 0;line-height:1.6" id="label-local-reset-sub">이 기기의 데이터만 삭제 — 계정은 유지됩니다</div>
         </div>
       </div>
 
@@ -2226,7 +2241,7 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
           <div class="settings-card" style="display:none" id="card-account-delete">
             <div class="settings-card-row" onclick="openAccountDelete()" style="cursor:pointer">
               <span class="settings-card-row-label" style="color:#ef4444">
-                <i class="ti ti-trash" aria-hidden="true" style="font-size:17px;width:20px;text-align:center"></i>
+                <i class="ti ti-trash" aria-hidden="true" style="font-size:calc(1.0625rem*var(--hondi-fs,1));width:20px;text-align:center"></i>
                 <span id="label-account-delete">계정 삭제</span>
               </span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c7c7cc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -2237,7 +2252,7 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
                "계정 삭제"는 서버 연결 정보만 지우고 이 기기 기록은 남기지만,
                기기를 팔거나 남에게 줄 때는 반대로 이 기기 기록까지 함께
                지워야 하므로 별도 기능으로 남겨둔다. -->
-          <div style="padding:10px 4px 2px;font-size:11.5px;color:var(--txt3);line-height:1.6">
+          <div style="padding:10px 4px 2px;font-size:calc(0.7188rem*var(--hondi-fs,1));color:var(--txt3);line-height:1.6">
             기기를 팔거나 남에게 넘기실 예정인가요?
             <a href="javascript:void(0)" onclick="_deviceFullReset()" style="color:#ef4444;text-decoration:underline">계정 + 이 기기 기록 함께 삭제</a>
           </div>
@@ -2378,7 +2393,7 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
     <div class="sheet-handle"></div>
     <div class="sheet-title">
       <button onclick="closeAISettings()"
-        style="background:none;border:none;color:var(--accent-teal);font-size:15px;
+        style="background:none;border:none;color:var(--accent-teal);font-size:calc(0.9375rem*var(--hondi-fs,1));
                font-weight:400;cursor:pointer;padding:0;font-family:inherit">
         ← 뒤로
       </button>
@@ -2396,11 +2411,11 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
       <div style="padding:0 16px">
         <div class="setting-label">시스템 프롬프트</div>
         <div class="settings-card" style="padding:14px 16px">
-          <div style="font-size:12px;color:#8e8e93;margin-bottom:10px;line-height:1.5">
+          <div style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#8e8e93;margin-bottom:10px;line-height:1.5">
             PC에서 설정합니다. 여기서는 확인만 가능합니다.
           </div>
           <textarea class="setting-field" id="setting-system" rows="5" readonly
-            style="resize:none;font-size:14px;line-height:1.6;border-radius:10px;
+            style="resize:none;font-size:calc(0.875rem*var(--hondi-fs,1));line-height:1.6;border-radius:10px;
                    min-height:100px;color:#6b7280;background:#f9fafb"
             placeholder="PC에서 등록한 시스템 프롬프트가 여기에 표시됩니다."></textarea>
         </div>
@@ -2414,7 +2429,7 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
       <div style="padding:0 16px">
         <div class="setting-label">AI 종합 위법 가능성 판단 (Phase 7)</div>
         <div class="settings-card" style="padding:14px 16px">
-          <div style="font-size:12px;color:#8e8e93;margin-bottom:10px;line-height:1.5">
+          <div style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#8e8e93;margin-bottom:10px;line-height:1.5">
             대화 중 정규식으로 못 잡는 완곡어법·암시적 위협(스토킹·가정폭력
             등)까지 AI가 맥락을 읽어 추가로 검토합니다. <b>호출당 비용이
             발생하며 본인 무료 한도/GDC 잔액에서 차감됩니다.</b> 위법
@@ -2424,16 +2439,16 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
           </div>
           <label style="display:flex;align-items:center;justify-content:space-between;
                  padding:8px 0;cursor:pointer">
-            <span style="font-size:14px;color:#111827">사용</span>
+            <span style="font-size:calc(0.875rem*var(--hondi-fs,1));color:#111827">사용</span>
             <input type="checkbox" id="setting-phase7-enabled"
                    onchange="document.getElementById('setting-phase7-tier-row').style.display=this.checked?'flex':'none'"
                    style="width:20px;height:20px;accent-color:var(--accent-teal)">
           </label>
           <div id="setting-phase7-tier-row" style="display:none;align-items:center;
                justify-content:space-between;padding:8px 0;border-top:1px solid #f2f2f7">
-            <span style="font-size:14px;color:#111827">모델 등급</span>
+            <span style="font-size:calc(0.875rem*var(--hondi-fs,1));color:#111827">모델 등급</span>
             <select id="setting-phase7-tier" class="setting-field"
-                    style="width:auto;padding:6px 10px;font-size:13px;border-radius:8px">
+                    style="width:auto;padding:6px 10px;font-size:calc(0.8125rem*var(--hondi-fs,1));border-radius:8px">
               <option value="flash">경량(flash) — 저비용</option>
               <option value="pro">정밀(pro) — 고비용</option>
             </select>
@@ -2861,7 +2876,7 @@ async function _refreshPendingChangesBanner() {
   banner.innerHTML = pendings.map(p => {
     const when = new Date(p.effective_at).toLocaleString('ko-KR');
     return `⏳ 보안 설정 완화가 ${when}에 적용 예정입니다. ` +
-      `<button onclick="_cancelPendingChange('${p.key}')" style="margin-left:6px;padding:3px 9px;border-radius:6px;border:none;background:#9a3412;color:#fff;font-size:11px;font-weight:700;cursor:pointer">지금 취소</button>`;
+      `<button onclick="_cancelPendingChange('${p.key}')" style="margin-left:6px;padding:3px 9px;border-radius:6px;border:none;background:#9a3412;color:#fff;font-size:calc(0.6875rem*var(--hondi-fs,1));font-weight:700;cursor:pointer">지금 취소</button>`;
   }).join('<br>');
 }
 
@@ -5418,16 +5433,16 @@ function _messagesWithLocation(historyArr) {
   <!-- 헤더 -->
   <div style="width:100%;display:flex;align-items:center;justify-content:space-between;
               padding:12px 16px;background:rgba(0,0,0,.85);flex-shrink:0">
-    <span style="color:#fff;font-size:16px;font-weight:600">나비 코드 스캔</span>
+    <span style="color:#fff;font-size:calc(1rem*var(--hondi-fs,1));font-weight:600">나비 코드 스캔</span>
     <div style="display:flex;gap:12px;align-items:center">
       <!-- 사진 촬영 버튼 (보조) -->
       <button id="hs-shutter" onclick="hsTakePhoto()" title="사진으로 인식"
         style="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.4);
-               border-radius:8px;color:#fff;font-size:12px;padding:5px 10px;cursor:pointer">
+               border-radius:8px;color:#fff;font-size:calc(0.75rem*var(--hondi-fs,1));padding:5px 10px;cursor:pointer">
         📷 사진
       </button>
       <button onclick="closeHondiScanner()"
-        style="background:none;border:none;color:#fff;font-size:24px;cursor:pointer;
+        style="background:none;border:none;color:#fff;font-size:calc(1.5rem*var(--hondi-fs,1));cursor:pointer;
                line-height:1">✕</button>
     </div>
   </div>
@@ -5447,7 +5462,7 @@ function _messagesWithLocation(historyArr) {
     <!-- 중앙 가이드 텍스트 -->
     <div style="position:absolute;bottom:16px;left:0;right:0;text-align:center;
                 pointer-events:none">
-      <span style="background:rgba(0,0,0,.55);color:#ddd;font-size:12px;
+      <span style="background:rgba(0,0,0,.55);color:#ddd;font-size:calc(0.75rem*var(--hondi-fs,1));
                    padding:4px 14px;border-radius:20px">
         나비 로고와 숫자를 화면에 맞춰주세요
       </span>
@@ -5465,7 +5480,7 @@ function _messagesWithLocation(historyArr) {
   <!-- 상태 바 -->
   <div id="hs-status"
     style="width:100%;padding:10px 20px;background:rgba(0,0,0,.85);
-           color:#bbb;font-size:13px;text-align:center;min-height:42px;flex-shrink:0">
+           color:#bbb;font-size:calc(0.8125rem*var(--hondi-fs,1));text-align:center;min-height:42px;flex-shrink:0">
     카메라를 시작하는 중...
   </div>
 
@@ -5474,7 +5489,7 @@ function _messagesWithLocation(historyArr) {
   <button id="hs-send-photo-btn" onclick="hsSendAsAttachment()" style="display:none;
     width:calc(100% - 32px);margin:0 16px 12px;padding:11px;border-radius:12px;
     background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);
-    color:#ddd;font-size:13px;cursor:pointer;flex-shrink:0">
+    color:#ddd;font-size:calc(0.8125rem*var(--hondi-fs,1));cursor:pointer;flex-shrink:0">
     이 사진 그냥 첨부해서 보내기
   </button>
 
@@ -5482,18 +5497,18 @@ function _messagesWithLocation(historyArr) {
   <div id="hs-result"
     style="display:none;position:absolute;inset:0;background:rgba(0,0,0,.93);
            flex-direction:column;align-items:center;justify-content:center;gap:16px">
-    <div style="font-size:52px">✅</div>
-    <div style="color:#fff;font-size:19px;font-weight:700" id="hs-result-name"></div>
-    <div style="color:#aaa;font-size:13px" id="hs-result-handle"></div>
-    <div style="color:#00ff88;font-size:11px;margin-top:-8px" id="hs-result-version"></div>
+    <div style="font-size:calc(3.25rem*var(--hondi-fs,1))">✅</div>
+    <div style="color:#fff;font-size:calc(1.1875rem*var(--hondi-fs,1));font-weight:700" id="hs-result-name"></div>
+    <div style="color:#aaa;font-size:calc(0.8125rem*var(--hondi-fs,1))" id="hs-result-handle"></div>
+    <div style="color:#00ff88;font-size:calc(0.6875rem*var(--hondi-fs,1));margin-top:-8px" id="hs-result-version"></div>
     <button onclick="hsGoProfile()"
       style="margin-top:10px;padding:13px 36px;border-radius:14px;background:#00ff88;
-             color:#000;font-size:16px;font-weight:700;border:none;cursor:pointer">
+             color:#000;font-size:calc(1rem*var(--hondi-fs,1));font-weight:700;border:none;cursor:pointer">
       프로필 열기
     </button>
     <button onclick="hsRescan()"
       style="padding:8px 26px;border-radius:10px;background:rgba(255,255,255,.12);
-             color:#ddd;font-size:13px;border:none;cursor:pointer">
+             color:#ddd;font-size:calc(0.8125rem*var(--hondi-fs,1));border:none;cursor:pointer">
       다시 스캔
     </button>
   </div>
@@ -5807,18 +5822,18 @@ window.hsSendAsAttachment = function () {
 #navi-voice-overlay .nv-card{position:absolute;left:16px;right:16px;top:50%;transform:translateY(-52%);
   max-width:420px;margin:0 auto;background:#fff;border-radius:8px;padding:22px 16px 18px;text-align:center;
   box-shadow:0 8px 28px rgba(0,0,0,.28)}
-#navi-voice-overlay .nv-brand{font-size:26px;font-weight:800;letter-spacing:-.02em;color:#1A73E8;line-height:1.2}
+#navi-voice-overlay .nv-brand{font-size:calc(1.625rem*var(--hondi-fs,1));font-weight:800;letter-spacing:-.02em;color:#1A73E8;line-height:1.2}
 #navi-voice-overlay .nv-mic{position:relative;width:76px;height:76px;border-radius:50%;margin:26px auto 22px;
   background:#1A73E8;display:flex;align-items:center;justify-content:center;
   box-shadow:0 0 0 7px rgba(26,115,232,.16)}
 #navi-voice-overlay .nv-mic::after{content:"";position:absolute;inset:-7px;border-radius:50%;
   border:2px solid rgba(26,115,232,.35);animation:nv-ripple 1.6s ease-out infinite}
 #navi-voice-overlay .nv-mic svg{width:34px;height:34px;color:#fff}
-#navi-voice-overlay .nv-say{font-size:17px;color:#202124;margin:0 0 30px}
-#navi-voice-overlay .nv-lang{font-size:11.5px;color:#5f6368}
+#navi-voice-overlay .nv-say{font-size:calc(1.0625rem*var(--hondi-fs,1));color:#202124;margin:0 0 30px}
+#navi-voice-overlay .nv-lang{font-size:calc(0.7188rem*var(--hondi-fs,1));color:#5f6368}
 #navi-voice-overlay .nv-note{position:absolute;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));
   margin:0 auto;width:min(300px,calc(100% - 64px));background:#fff;color:#202124;border-radius:24px;
-  padding:14px 20px;font-size:13.5px;line-height:1.5;text-align:left;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+  padding:14px 20px;font-size:calc(0.8438rem*var(--hondi-fs,1));line-height:1.5;text-align:left;box-shadow:0 4px 16px rgba(0,0,0,.3)}
 @keyframes nv-ripple{0%{transform:scale(.9);opacity:1}100%{transform:scale(1.35);opacity:0}}
 @media (prefers-reduced-motion:reduce){#navi-voice-overlay .nv-mic::after{animation:none}}
 </style>

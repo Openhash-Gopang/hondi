@@ -94,7 +94,7 @@ function _ensureMicButton() {
   btn.style.cssText = [
     'position:fixed', 'right:16px', 'bottom:90px', 'z-index:150',
     'width:48px', 'height:48px', 'border-radius:50%', 'border:none',
-    'background:#1A73E8', 'color:#fff', 'font-size:20px', 'cursor:pointer',
+    'background:#1A73E8', 'color:#fff', 'font-size:calc(1.25rem*var(--hondi-fs,1))', 'cursor:pointer',
     'box-shadow:0 4px 12px rgba(0,0,0,.25)', 'transition:opacity .15s, background .15s'
   ].join(';');
   document.body.appendChild(btn);

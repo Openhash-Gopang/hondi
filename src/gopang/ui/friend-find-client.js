@@ -38,11 +38,11 @@ export async function mountFriendFindCard() {
     card = document.createElement('div');
     card.id = 'friend-find-card'; card.className = 'settings-card'; card.style.cssText = 'margin-top:10px;padding:12px 14px';
     card.innerHTML =
-      '<div style="font-size:14px;font-weight:600;color:#000;margin-bottom:6px">대화 상대 찾기</div>' +
-      '<div style="font-size:12px;color:#8e8e93;line-height:1.5">상대가 내 <b>혼디 아이디</b>를 입력하면 나를 찾을 수 있습니다. 혼디 아이디는 가입할 때 전화번호로 정해지며 바꿀 수 없습니다.</div>' +
-      '<div id="ff-handle" style="font-size:15px;font-weight:600;margin:8px 0;color:#1A73E8"></div>' +
-      '<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#111827"><input id="ff-phone" type="checkbox"> 내 전화번호로 나를 찾을 수 있게 허용</label>' +
-      '<div id="ff-msg" style="font-size:12px;margin-top:6px;min-height:16px;color:#6b7280"></div>';
+      '<div style="font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:600;color:#000;margin-bottom:6px">대화 상대 찾기</div>' +
+      '<div style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#8e8e93;line-height:1.5">상대가 내 <b>혼디 아이디</b>를 입력하면 나를 찾을 수 있습니다. 혼디 아이디는 가입할 때 전화번호로 정해지며 바꿀 수 없습니다.</div>' +
+      '<div id="ff-handle" style="font-size:calc(0.9375rem*var(--hondi-fs,1));font-weight:600;margin:8px 0;color:#1A73E8"></div>' +
+      '<label style="display:flex;align-items:center;gap:8px;font-size:calc(0.8125rem*var(--hondi-fs,1));color:#111827"><input id="ff-phone" type="checkbox"> 내 전화번호로 나를 찾을 수 있게 허용</label>' +
+      '<div id="ff-msg" style="font-size:calc(0.75rem*var(--hondi-fs,1));margin-top:6px;min-height:16px;color:#6b7280"></div>';
     host.appendChild(card);
   }
   const msg = (t, bad) => { const m = card.querySelector('#ff-msg'); m.textContent = t || ''; m.style.color = bad ? '#dc2626' : '#0f7b4f'; };

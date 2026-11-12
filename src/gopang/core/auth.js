@@ -93,23 +93,23 @@ function _confirmMobileRegistration() {
     overlay.innerHTML = `
       <div style="background:#fff;border-radius:20px;padding:28px 22px;
                   width:100%;max-width:360px;box-sizing:border-box;">
-        <p style="font-weight:700;font-size:16px;margin:0 0 10px;color:#111827">
+        <p style="font-weight:700;font-size:calc(1rem*var(--hondi-fs,1));margin:0 0 10px;color:#111827">
           첫 방문이시군요
         </p>
-        <p style="font-size:13px;color:#374151;line-height:1.6;margin:0 0 20px">
+        <p style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#374151;line-height:1.6;margin:0 0 20px">
           나비의 암호키(GDC Wallet)는 보안을 위해 <b>오직 스마트폰에서만</b> 생성할 수 있습니다.<br><br>
           지금 접속하신 기기가 <b>스마트폰</b>인가요?
         </p>
         <div style="display:flex;gap:8px">
           <button id="_mc_no"
             style="flex:1;padding:13px;border:1px solid #e5e7eb;border-radius:10px;
-                   background:none;cursor:pointer;font-size:14px;font-family:inherit">
+                   background:none;cursor:pointer;font-size:calc(0.875rem*var(--hondi-fs,1));font-family:inherit">
             아니요, PC입니다
           </button>
           <button id="_mc_yes"
             style="flex:1;padding:13px;border:none;border-radius:10px;
                    background:#16a34a;color:#fff;cursor:pointer;
-                   font-size:14px;font-weight:700;font-family:inherit">
+                   font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:700;font-family:inherit">
             예, 스마트폰입니다
           </button>
         </div>
@@ -138,10 +138,10 @@ function _showPcRegisterBlockedNotice() {
   overlay.innerHTML = `
     <div style="background:#fff;border-radius:20px;padding:28px 22px;
                 width:100%;max-width:360px;box-sizing:border-box;text-align:center">
-      <p style="font-weight:700;font-size:16px;margin:0 0 10px;color:#111827">
+      <p style="font-weight:700;font-size:calc(1rem*var(--hondi-fs,1));margin:0 0 10px;color:#111827">
         스마트폰으로 등록해 주세요
       </p>
-      <p style="font-size:13px;color:#374151;line-height:1.6;margin:0 0 20px">
+      <p style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#374151;line-height:1.6;margin:0 0 20px">
         사용자 등록(암호키 생성)은 스마트폰에서만 가능합니다.<br>
         스마트폰으로 <b>hondi.net</b>에 접속해 등록해 주세요.<br><br>
         등록을 마친 후에는 PC에서도 로그인할 수 있습니다.
@@ -149,7 +149,7 @@ function _showPcRegisterBlockedNotice() {
       <button id="_pc_blocked_close"
         style="width:100%;padding:13px;border:none;border-radius:10px;
                background:#16a34a;color:#fff;cursor:pointer;
-               font-size:14px;font-weight:700;font-family:inherit">
+               font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:700;font-family:inherit">
         확인
       </button>
     </div>`;
@@ -188,22 +188,22 @@ function _showAccountExistsCheck() {
     overlay.innerHTML = `
       <div style="background:#fff;border-radius:20px;padding:28px 22px;
                   width:100%;max-width:360px;box-sizing:border-box;">
-        <p style="font-weight:700;font-size:16px;margin:0 0 10px;color:#111827">
+        <p style="font-weight:700;font-size:calc(1rem*var(--hondi-fs,1));margin:0 0 10px;color:#111827">
           이미 나비 계정이 있으신가요?
         </p>
-        <p style="font-size:13px;color:#374151;line-height:1.6;margin:0 0 20px">
+        <p style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#374151;line-height:1.6;margin:0 0 20px">
           스마트폰에서 이미 가입하셨다면, 그 계정을 이 PC에서도 이용할 수 있습니다.
         </p>
         <div style="display:flex;gap:8px">
           <button id="_ae_no"
             style="flex:1;padding:13px;border:1px solid #e5e7eb;border-radius:10px;
-                   background:none;cursor:pointer;font-size:14px;font-family:inherit">
+                   background:none;cursor:pointer;font-size:calc(0.875rem*var(--hondi-fs,1));font-family:inherit">
             아니요, 처음이에요
           </button>
           <button id="_ae_yes"
             style="flex:1;padding:13px;border:none;border-radius:10px;
                    background:#16a34a;color:#fff;cursor:pointer;
-                   font-size:14px;font-weight:700;font-family:inherit">
+                   font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:700;font-family:inherit">
             네, 있어요
           </button>
         </div>
@@ -231,22 +231,22 @@ function _showDedicatedOrSharedChoice() {
     overlay.innerHTML = `
       <div style="background:#fff;border-radius:20px;padding:28px 22px;
                   width:100%;max-width:360px;box-sizing:border-box">
-        <p style="font-weight:700;font-size:16px;margin:0 0 10px;color:#111827">
+        <p style="font-weight:700;font-size:calc(1rem*var(--hondi-fs,1));margin:0 0 10px;color:#111827">
           이 PC는 어떤 PC인가요?
         </p>
-        <p style="font-size:13px;color:#374151;line-height:1.6;margin:0 0 20px">
+        <p style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#374151;line-height:1.6;margin:0 0 20px">
           전용 PC를 선택하면 다음부터 폰 없이 바로 로그인됩니다.<br>
           공용 PC를 선택하면 이 PC엔 아무 정보도 남지 않습니다.
         </p>
         <button id="_pm_dedicated"
           style="width:100%;padding:13px;border:none;border-radius:10px;
                  background:#16a34a;color:#fff;cursor:pointer;
-                 font-size:14px;font-weight:700;font-family:inherit;margin-bottom:8px">
+                 font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:700;font-family:inherit;margin-bottom:8px">
           저만 쓰는 전용 PC예요
         </button>
         <button id="_pm_shared"
           style="width:100%;padding:13px;border:1px solid #e5e7eb;border-radius:10px;
-                 background:none;cursor:pointer;font-size:14px;font-family:inherit">
+                 background:none;cursor:pointer;font-size:calc(0.875rem*var(--hondi-fs,1));font-family:inherit">
           여러 사람이 쓰는 공용 PC예요
         </button>
       </div>`;
@@ -747,34 +747,34 @@ function _showMandatoryBackupStep(key, handle) {
     overlay.innerHTML = `
       <div style="background:#fff;border-radius:20px;padding:28px 22px;
                   width:100%;max-width:380px;box-sizing:border-box">
-        <p style="font-weight:700;font-size:17px;margin:0 0 8px;color:#111827;text-align:center">
+        <p style="font-weight:700;font-size:calc(1.0625rem*var(--hondi-fs,1));margin:0 0 8px;color:#111827;text-align:center">
           백업 키를 저장하세요
         </p>
-        <p style="font-size:13px;color:#374151;line-height:1.6;margin:0 0 16px;text-align:center">
+        <p style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#374151;line-height:1.6;margin:0 0 16px;text-align:center">
           이 키는 이 기기에만 있고, 나비 서버에는 사본이 없습니다.<br>
           <b>지금 저장하지 않으면, 이 기기를 잃었을 때 계정을 되찾을 방법이 없습니다.</b>
         </p>
         <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;
-             padding:12px;font-family:monospace;font-size:12px;word-break:break-all;
+             padding:12px;font-family:monospace;font-size:calc(0.75rem*var(--hondi-fs,1));word-break:break-all;
              color:#111827;margin-bottom:12px">${key}</div>
         <div style="display:flex;gap:8px;margin-bottom:16px">
           <button id="_bm_copy" style="flex:1;padding:11px;border:1px solid #e5e7eb;border-radius:8px;
-                  background:none;color:#16a34a;font-weight:600;cursor:pointer;font-size:13px">
+                  background:none;color:#16a34a;font-weight:600;cursor:pointer;font-size:calc(0.8125rem*var(--hondi-fs,1))">
             복사
           </button>
           <button id="_bm_mail" style="flex:1;padding:11px;border:1px solid #e5e7eb;border-radius:8px;
-                  background:none;color:#16a34a;font-weight:600;cursor:pointer;font-size:13px">
+                  background:none;color:#16a34a;font-weight:600;cursor:pointer;font-size:calc(0.8125rem*var(--hondi-fs,1))">
             이메일로 보내기
           </button>
         </div>
         <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;margin-bottom:16px">
           <input type="checkbox" id="_bm_chk" style="width:16px;height:16px;margin-top:1px;accent-color:#16a34a;flex-shrink:0">
-          <span style="font-size:13px;color:#374151;line-height:1.5">이 키를 안전한 곳에 저장했습니다. 분실 시 계정을 복구할 수 없다는 점을 이해했습니다.</span>
+          <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#374151;line-height:1.5">이 키를 안전한 곳에 저장했습니다. 분실 시 계정을 복구할 수 없다는 점을 이해했습니다.</span>
         </label>
         <button id="_bm_continue" disabled
           style="width:100%;padding:13px;border:none;border-radius:10px;
                  background:#d1d5db;color:#fff;cursor:not-allowed;
-                 font-size:14px;font-weight:700;font-family:inherit;transition:background .15s">
+                 font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:700;font-family:inherit;transition:background .15s">
           계속하기
         </button>
       </div>`;
@@ -926,14 +926,14 @@ function _showDeviceMismatchNotice(found, resolve) {
   function renderWaiting() {
     render(`
       <div style="width:24px;height:24px;border:2.5px solid #e5e7eb;border-top-color:#0057A8;border-radius:50%;animation:_dlSpin 0.8s linear infinite;margin:20px auto"></div>
-      <div id="_dl-match" style="display:none;margin-bottom:10px"><div style="font-size:12.5px;color:#374151">폰에 세 개의 숫자가 보이면 아래 숫자를 선택하세요</div><div id="_dl-match-num" style="font-size:40px;font-weight:800;letter-spacing:2px;color:#0057A8;margin-top:2px"></div></div>
-      <p style="font-size:14px;color:#374151;margin-bottom:6px">스마트폰 알림을 열어 <strong>"본인이 맞습니다"</strong>를 눌러주세요</p>
-      <p style="font-size:12px;color:#9ca3af;margin-bottom:10px">알림이 도착하기까지 보통 몇 초에서 20초 정도 걸릴 수 있어요. 잠시만 기다려 주세요.</p>
-      <div id="_dl-timer" style="font-size:12px;color:#9ca3af;margin-bottom:14px"></div>
-      <button id="_dl-sms" style="width:100%;padding:11px;border:none;border-radius:10px;background:#f3f4f6;color:#374151;cursor:pointer;font-size:12.5px;opacity:0.5;margin-bottom:8px;font-family:inherit">알림이 안 왔나요? 문자로 받기</button>
-      <button id="_dl-backup" style="width:100%;padding:11px;border:1px solid #e5e7eb;border-radius:10px;background:none;color:#374151;cursor:pointer;font-size:12.5px;margin-bottom:8px;font-family:inherit">백업 키를 직접 갖고 있어요(수동 입력)</button>
-      <button id="_dl-close" style="width:100%;padding:11px;border:none;background:none;color:#9ca3af;cursor:pointer;font-size:12.5px;font-family:inherit">나중에</button>
-      <div id="_dl-status" style="font-size:12px;margin-top:10px;min-height:16px"></div>
+      <div id="_dl-match" style="display:none;margin-bottom:10px"><div style="font-size:calc(0.7812rem*var(--hondi-fs,1));color:#374151">폰에 세 개의 숫자가 보이면 아래 숫자를 선택하세요</div><div id="_dl-match-num" style="font-size:calc(2.5rem*var(--hondi-fs,1));font-weight:800;letter-spacing:2px;color:#0057A8;margin-top:2px"></div></div>
+      <p style="font-size:calc(0.875rem*var(--hondi-fs,1));color:#374151;margin-bottom:6px">스마트폰 알림을 열어 <strong>"본인이 맞습니다"</strong>를 눌러주세요</p>
+      <p style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;margin-bottom:10px">알림이 도착하기까지 보통 몇 초에서 20초 정도 걸릴 수 있어요. 잠시만 기다려 주세요.</p>
+      <div id="_dl-timer" style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;margin-bottom:14px"></div>
+      <button id="_dl-sms" style="width:100%;padding:11px;border:none;border-radius:10px;background:#f3f4f6;color:#374151;cursor:pointer;font-size:calc(0.7812rem*var(--hondi-fs,1));opacity:0.5;margin-bottom:8px;font-family:inherit">알림이 안 왔나요? 문자로 받기</button>
+      <button id="_dl-backup" style="width:100%;padding:11px;border:1px solid #e5e7eb;border-radius:10px;background:none;color:#374151;cursor:pointer;font-size:calc(0.7812rem*var(--hondi-fs,1));margin-bottom:8px;font-family:inherit">백업 키를 직접 갖고 있어요(수동 입력)</button>
+      <button id="_dl-close" style="width:100%;padding:11px;border:none;background:none;color:#9ca3af;cursor:pointer;font-size:calc(0.7812rem*var(--hondi-fs,1));font-family:inherit">나중에</button>
+      <div id="_dl-status" style="font-size:calc(0.75rem*var(--hondi-fs,1));margin-top:10px;min-height:16px"></div>
     `);
     $$('#_dl-sms').onclick = _resendSms;
     $$('#_dl-backup').onclick = _showBackupForm;
@@ -1002,13 +1002,13 @@ function _showDeviceMismatchNotice(found, resolve) {
 
   function _showBackupForm() {
     render(`
-      <p style="font-weight:700;font-size:16px;margin:0 0 10px;color:#111827">백업 키 입력</p>
-      <p style="font-size:13px;color:#374151;line-height:1.6;margin:0 0 16px">가입 시 또는 설정 → 백업 키에서 내보낸<br>키 문자열을 붙여넣어 주세요.</p>
+      <p style="font-weight:700;font-size:calc(1rem*var(--hondi-fs,1));margin:0 0 10px;color:#111827">백업 키 입력</p>
+      <p style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#374151;line-height:1.6;margin:0 0 16px">가입 시 또는 설정 → 백업 키에서 내보낸<br>키 문자열을 붙여넣어 주세요.</p>
       <textarea id="_dl-key-input" rows="3" placeholder="백업 키 붙여넣기"
-        style="width:100%;border:1px solid #e5e7eb;border-radius:10px;padding:12px;font-size:13px;font-family:monospace;resize:none;box-sizing:border-box;margin-bottom:8px" autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
-      <div id="_dl-key-err" style="display:none;font-size:12px;color:#dc2626;margin-bottom:8px"></div>
-      <button id="_dl-key-submit" style="width:100%;padding:13px;border:none;border-radius:10px;background:#16a34a;color:#fff;cursor:pointer;margin-bottom:8px;font-size:14px;font-weight:700;font-family:inherit">복구</button>
-      <button id="_dl-key-back" style="width:100%;padding:13px;border:1px solid #e5e7eb;border-radius:10px;background:none;color:#6b7280;cursor:pointer;font-size:14px;font-family:inherit">뒤로</button>
+        style="width:100%;border:1px solid #e5e7eb;border-radius:10px;padding:12px;font-size:calc(0.8125rem*var(--hondi-fs,1));font-family:monospace;resize:none;box-sizing:border-box;margin-bottom:8px" autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
+      <div id="_dl-key-err" style="display:none;font-size:calc(0.75rem*var(--hondi-fs,1));color:#dc2626;margin-bottom:8px"></div>
+      <button id="_dl-key-submit" style="width:100%;padding:13px;border:none;border-radius:10px;background:#16a34a;color:#fff;cursor:pointer;margin-bottom:8px;font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:700;font-family:inherit">복구</button>
+      <button id="_dl-key-back" style="width:100%;padding:13px;border:1px solid #e5e7eb;border-radius:10px;background:none;color:#6b7280;cursor:pointer;font-size:calc(0.875rem*var(--hondi-fs,1));font-family:inherit">뒤로</button>
     `);
     const input = $$('#_dl-key-input');
     const errEl = $$('#_dl-key-err');
@@ -1049,16 +1049,16 @@ function _showDeviceMismatchNotice(found, resolve) {
 
   function _showExpiredGuidance() {
     render(`
-      <p style="font-size:13px;color:#dc2626;line-height:1.6;margin-bottom:16px;text-align:left">
+      <p style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#dc2626;line-height:1.6;margin-bottom:16px;text-align:left">
         응답이 없어 만료됐습니다. 이 방식은 개인키를 가진 다른 기기가
         실제로 존재해야만 작동합니다 — 그 기기가 확실히 있다면 다시
         시도해 주세요. 만약 이 계정을 쓰던 기기가 이것뿐이었고 데이터를
         지운 적이 있다면, 가입 시 저장해둔 백업 키(4단어 시드)가 있으면
         복구하고, 없다면 이 계정은 되살릴 수 없으니 새로 가입해 주세요.
       </p>
-      <button id="_dl-retry" style="width:100%;padding:13px;border:none;border-radius:10px;background:#0057A8;color:#fff;cursor:pointer;margin-bottom:8px;font-size:14px;font-weight:700;font-family:inherit">다시 시도</button>
-      <button id="_dl-backup2" style="width:100%;padding:13px;border:1px solid #e5e7eb;border-radius:10px;background:none;color:#374151;cursor:pointer;margin-bottom:8px;font-size:13px;font-family:inherit">백업 키를 직접 갖고 있어요</button>
-      <button id="_dl-close2" style="width:100%;padding:13px;border:none;background:none;color:#9ca3af;cursor:pointer;font-size:13px;font-family:inherit">닫기</button>
+      <button id="_dl-retry" style="width:100%;padding:13px;border:none;border-radius:10px;background:#0057A8;color:#fff;cursor:pointer;margin-bottom:8px;font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:700;font-family:inherit">다시 시도</button>
+      <button id="_dl-backup2" style="width:100%;padding:13px;border:1px solid #e5e7eb;border-radius:10px;background:none;color:#374151;cursor:pointer;margin-bottom:8px;font-size:calc(0.8125rem*var(--hondi-fs,1));font-family:inherit">백업 키를 직접 갖고 있어요</button>
+      <button id="_dl-close2" style="width:100%;padding:13px;border:none;background:none;color:#9ca3af;cursor:pointer;font-size:calc(0.8125rem*var(--hondi-fs,1));font-family:inherit">닫기</button>
     `);
     $$('#_dl-retry').onclick = () => _startRequest();
     $$('#_dl-backup2').onclick = _showBackupForm;
@@ -1083,7 +1083,7 @@ function _showDeviceMismatchNotice(found, resolve) {
   }
 
   async function _finishImport(sealed) {
-    render(`<p style="font-size:14px;color:#374151">가져오는 중...</p>`);
+    render(`<p style="font-size:calc(0.875rem*var(--hondi-fs,1));color:#374151">가져오는 중...</p>`);
     try {
       const plaintext = await GopangWallet.openSealedWithKey(pcKeyPair.privateKey, sealed);
       const { privKeyB64u, userRecord, onboardingFlags } = JSON.parse(plaintext);
@@ -1124,7 +1124,7 @@ function _showDeviceMismatchNotice(found, resolve) {
 
       closeOverlay(user);
     } catch (e) {
-      render(`<p style="font-size:13px;color:#dc2626;margin-bottom:16px">지갑 가져오기에 실패했습니다: ${e.message}</p>`);
+      render(`<p style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#dc2626;margin-bottom:16px">지갑 가져오기에 실패했습니다: ${e.message}</p>`);
       setTimeout(() => _showExpiredGuidance(), 1200);
     }
   }
@@ -1480,7 +1480,7 @@ function _showTestNoticeBanner(id) {
     bar = document.createElement('div');
     bar.id = '_test-notice-banner';
     bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:2147483000;background:#b45309;color:#fff;' +
-      'font-size:13px;line-height:1.55;padding:8px 12px;text-align:center;font-family:inherit';
+      'font-size:calc(0.8125rem*var(--hondi-fs,1));line-height:1.55;padding:8px 12px;text-align:center;font-family:inherit';
     document.body.appendChild(bar);
     document.body.style.paddingTop = '40px';
   }
@@ -1493,7 +1493,7 @@ function _showTestNoticeBanner(id) {
     const mk = (label, fn) => {
       const x = document.createElement('button');
       x.textContent = label;
-      x.style.cssText = 'margin:2px 0 0 8px;padding:2px 8px;border:1px solid #fff;background:transparent;color:#fff;border-radius:6px;cursor:pointer;font-size:12.5px';
+      x.style.cssText = 'margin:2px 0 0 8px;padding:2px 8px;border:1px solid #fff;background:transparent;color:#fff;border-radius:6px;cursor:pointer;font-size:calc(0.7812rem*var(--hondi-fs,1))';
       x.onclick = fn; bar.appendChild(x); return x;
     };
     mk('다른 아이디로 입장', () => _showTestIdPopup((u) => { if (u) location.reload(); }));
@@ -1577,17 +1577,17 @@ function _showTestIdPopup(resolve) {
     'align-items:center;justify-content:center;padding:24px;box-sizing:border-box';
   overlay.innerHTML = `
     <div style="background:#fff;border-radius:20px;padding:28px 22px;width:100%;max-width:360px;box-sizing:border-box">
-      <div style="font-size:18px;font-weight:700;margin-bottom:6px;color:#111">아이디로 입장</div>
-      <p style="font-size:13px;color:#6b7280;line-height:1.6;margin:0 0 14px">
+      <div style="font-size:calc(1.125rem*var(--hondi-fs,1));font-weight:700;margin-bottom:6px;color:#111">아이디로 입장</div>
+      <p style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#6b7280;line-height:1.6;margin:0 0 14px">
         다른 기기에서 쓰던 아이디(예: 푸른바다)를 입력하면 같은 계정으로 들어와요.
         없는 아이디면 그 이름으로 새로 만들어요.
       </p>
       <input id="_tid-input" type="text" maxlength="20" autocomplete="off" autocapitalize="off" placeholder="아이디 (2~20자)"
-        style="width:100%;box-sizing:border-box;padding:13px;border:1px solid #e5e7eb;border-radius:10px;font-size:15px;margin-bottom:6px;font-family:inherit">
-      <div id="_tid-err" style="display:none;font-size:12px;color:#dc2626;margin-bottom:8px"></div>
-      <button id="_tid-btn" style="width:100%;padding:13px;border:none;border-radius:10px;background:#16a34a;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px">입장</button>
-      <button id="_tid-legacy" style="width:100%;padding:11px;border:1px solid #e5e7eb;border-radius:10px;background:none;color:#374151;cursor:pointer;font-size:13px;font-family:inherit;margin-bottom:8px">전화번호로 만든 기존 계정으로 로그인</button>
-      <button id="_tid-cancel" style="width:100%;padding:11px;border:none;background:none;color:#9ca3af;cursor:pointer;font-size:13px;font-family:inherit">닫기</button>
+        style="width:100%;box-sizing:border-box;padding:13px;border:1px solid #e5e7eb;border-radius:10px;font-size:calc(0.9375rem*var(--hondi-fs,1));margin-bottom:6px;font-family:inherit">
+      <div id="_tid-err" style="display:none;font-size:calc(0.75rem*var(--hondi-fs,1));color:#dc2626;margin-bottom:8px"></div>
+      <button id="_tid-btn" style="width:100%;padding:13px;border:none;border-radius:10px;background:#16a34a;color:#fff;font-size:calc(0.9375rem*var(--hondi-fs,1));font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px">입장</button>
+      <button id="_tid-legacy" style="width:100%;padding:11px;border:1px solid #e5e7eb;border-radius:10px;background:none;color:#374151;cursor:pointer;font-size:calc(0.8125rem*var(--hondi-fs,1));font-family:inherit;margin-bottom:8px">전화번호로 만든 기존 계정으로 로그인</button>
+      <button id="_tid-cancel" style="width:100%;padding:11px;border:none;background:none;color:#9ca3af;cursor:pointer;font-size:calc(0.8125rem*var(--hondi-fs,1));font-family:inherit">닫기</button>
     </div>`;
   document.body.appendChild(overlay);
   const input = overlay.querySelector('#_tid-input');
@@ -1730,7 +1730,7 @@ function _showPhonePopupLegacy(resolve) {
         <div style="padding:10px 12px;border-bottom:1px solid #f0f0f0">
           <input id="_country-search" type="text" placeholder="국가 검색..."
             style="width:100%;border:1px solid #e5e7eb;border-radius:8px;
-                   padding:8px 12px;font-size:14px;outline:none;
+                   padding:8px 12px;font-size:calc(0.875rem*var(--hondi-fs,1));outline:none;
                    box-sizing:border-box;font-family:inherit"
             autocomplete="off"/>
         </div>
@@ -1746,7 +1746,7 @@ function _showPhonePopupLegacy(resolve) {
         <div style="padding:10px 12px;border-bottom:1px solid #f0f0f0">
           <input id="_kr-areatype-search" type="text" placeholder="예: 06 (지역번호 검색)..."
             style="width:100%;border:1px solid #e5e7eb;border-radius:8px;
-                   padding:8px 12px;font-size:14px;outline:none;
+                   padding:8px 12px;font-size:calc(0.875rem*var(--hondi-fs,1));outline:none;
                    box-sizing:border-box;font-family:inherit"
             autocomplete="off"/>
         </div>
@@ -1758,61 +1758,61 @@ function _showPhonePopupLegacy(resolve) {
       <div id="_phone-field"
            style="display:flex;align-items:flex-end;gap:12px;padding:2px 0 6px;
                   border:0;border-bottom:1.5px solid #e5e7eb;margin-bottom:14px">
-        <span style="width:22px;text-align:center;color:#6b7280;font-size:17px;line-height:34px;flex-shrink:0">&#9742;</span>
+        <span style="width:22px;text-align:center;color:#6b7280;font-size:calc(1.0625rem*var(--hondi-fs,1));line-height:34px;flex-shrink:0">&#9742;</span>
         <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
-          <span style="font-size:11px;color:#6b7280">전화번호</span>
+          <span style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:#6b7280">전화번호</span>
           <div style="display:flex;align-items:center;gap:8px;min-width:0">
             <button id="_country-btn" type="button"
               style="padding:0;height:34px;border:none;background:transparent;cursor:pointer;
                      flex-shrink:0;display:flex;align-items:center;gap:4px;font-family:inherit">
-              <span id="_flag-icon" style="font-size:20px">🇰🇷</span>
-              <span id="_dial-code" style="font-size:14px;color:#111827">+82</span>
-              <span style="font-size:9px;color:#9ca3af">▼</span>
+              <span id="_flag-icon" style="font-size:calc(1.25rem*var(--hondi-fs,1))">🇰🇷</span>
+              <span id="_dial-code" style="font-size:calc(0.875rem*var(--hondi-fs,1));color:#111827">+82</span>
+              <span style="font-size:calc(0.5625rem*var(--hondi-fs,1));color:#9ca3af">▼</span>
             </button>
             <div id="_kr-areatype-row" style="display:none;flex-shrink:0">
               <button id="_kr-areatype-btn" type="button"
                 style="height:34px;padding:0 0 0 8px;border:none;border-left:1px solid #e5e7eb;
-                       background:transparent;cursor:pointer;font-family:inherit;font-size:14px;
+                       background:transparent;cursor:pointer;font-family:inherit;font-size:calc(0.875rem*var(--hondi-fs,1));
                        color:#111827;display:flex;align-items:center;gap:4px">
                 <span id="_kr-areatype-label">010</span>
-                <span style="font-size:9px;color:#9ca3af">▼</span>
+                <span style="font-size:calc(0.5625rem*var(--hondi-fs,1));color:#9ca3af">▼</span>
               </button>
             </div>
             <input id="_phone-input" type="tel" maxlength="8"
               placeholder="뒷 8자리"
               style="flex:1;padding:0 0 0 4px;height:34px;border:none;background:transparent;
-                     font-size:16px;font-family:inherit;outline:none;color:#111827;
+                     font-size:calc(1rem*var(--hondi-fs,1));font-family:inherit;outline:none;color:#111827;
                      min-width:0;letter-spacing:2px"
               autocomplete="off" inputmode="numeric"/>
           </div>
         </div>
       </div>
-      <div id="_phone-error" style="display:none;font-size:12px;color:#dc2626;
+      <div id="_phone-error" style="display:none;font-size:calc(0.75rem*var(--hondi-fs,1));color:#dc2626;
            padding:0 4px;margin:-8px 0 10px"></div>
 
       <!-- 닉네임 -->
       <div id="_nick-field"
            style="display:flex;align-items:flex-end;gap:12px;padding:2px 0 6px;
                   border:0;border-bottom:1.5px solid #e5e7eb;margin-bottom:10px">
-        <span style="width:22px;text-align:center;color:#6b7280;font-size:17px;line-height:34px;flex-shrink:0">&#9786;</span>
+        <span style="width:22px;text-align:center;color:#6b7280;font-size:calc(1.0625rem*var(--hondi-fs,1));line-height:34px;flex-shrink:0">&#9786;</span>
         <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
-          <span style="font-size:11px;color:#6b7280">닉네임</span>
+          <span style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:#6b7280">닉네임</span>
           <input id="_nick-input" type="text" maxlength="20"
             placeholder="처음 가입할 때만"
             style="width:100%;padding:0;height:34px;border:none;background:transparent;
-                   font-size:15px;font-family:inherit;outline:none;color:#111827;min-width:0"
+                   font-size:calc(0.9375rem*var(--hondi-fs,1));font-family:inherit;outline:none;color:#111827;min-width:0"
             autocomplete="off"/>
         </div>
       </div>
-      <div id="_nick-error" style="display:none;font-size:12px;color:#dc2626;padding:0 4px;margin-bottom:8px"></div>
+      <div id="_nick-error" style="display:none;font-size:calc(0.75rem*var(--hondi-fs,1));color:#dc2626;padding:0 4px;margin-bottom:8px"></div>
 
       <button id="_auth-btn"
         style="width:100%;height:52px;background:#1A73E8;color:#fff;
-               border:none;border-radius:12px;font-size:16px;font-weight:600;
+               border:none;border-radius:12px;font-size:calc(1rem*var(--hondi-fs,1));font-weight:600;
                cursor:pointer;font-family:inherit">
         시작하기
       </button>
-      <div style="font-size:12px;color:#9ca3af;text-align:center;margin-top:12px">
+      <div style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;text-align:center;margin-top:12px">
         시작하면 <span onclick="window.openTermsOfUse&&window.openTermsOfUse()" style="color:#6b7280;text-decoration:underline;cursor:pointer">이용 약정서</span>에 동의한 것으로 봅니다.
       </div>
       <span id="_handle-preview" style="display:none"></span>
@@ -1822,30 +1822,30 @@ function _showPhonePopupLegacy(resolve) {
       <!-- 인증번호 입력 단계 (2026-07-21 신설, prompt() 대체) — 화면에
            계속 남아있어서 문자 앱을 확인하고 돌아와도 사라지지 않는다. -->
       <div id="_otp-step" style="display:none">
-        <div style="font-size:15px;font-weight:600;color:#111827;margin-bottom:4px">인증번호 입력</div>
-        <div id="_otp-desc" style="font-size:13px;color:#6b7280;margin-bottom:16px"></div>
+        <div style="font-size:calc(0.9375rem*var(--hondi-fs,1));font-weight:600;color:#111827;margin-bottom:4px">인증번호 입력</div>
+        <div id="_otp-desc" style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#6b7280;margin-bottom:16px"></div>
         <input id="_otp-input" type="text" maxlength="6" placeholder="6자리 숫자"
           style="width:100%;height:52px;border:1px solid #e5e7eb;border-radius:12px;
-                 background:#f9fafb;padding:0 14px;font-size:20px;letter-spacing:6px;
+                 background:#f9fafb;padding:0 14px;font-size:calc(1.25rem*var(--hondi-fs,1));letter-spacing:6px;
                  text-align:center;font-family:inherit;outline:none;color:#111827;
                  box-sizing:border-box;margin-bottom:8px"
           autocomplete="one-time-code" inputmode="numeric"/>
-        <div id="_otp-error" style="display:none;font-size:12px;color:#dc2626;padding:0 4px;margin-bottom:8px"></div>
+        <div id="_otp-error" style="display:none;font-size:calc(0.75rem*var(--hondi-fs,1));color:#dc2626;padding:0 4px;margin-bottom:8px"></div>
         <button id="_otp-verify-btn"
           style="width:100%;height:52px;background:#1A73E8;color:#fff;
-                 border:none;border-radius:12px;font-size:16px;font-weight:600;
+                 border:none;border-radius:12px;font-size:calc(1rem*var(--hondi-fs,1));font-weight:600;
                  cursor:pointer;font-family:inherit;margin-bottom:8px">
           확인
         </button>
         <div style="display:flex;gap:8px">
           <button id="_otp-resend-btn" type="button"
             style="flex:1;height:44px;background:#f3f4f6;color:#374151;border:none;
-                   border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit">
+                   border-radius:10px;font-size:calc(0.8125rem*var(--hondi-fs,1));cursor:pointer;font-family:inherit">
             재전송
           </button>
           <button id="_otp-back-btn" type="button"
             style="flex:1;height:44px;background:none;color:#9ca3af;border:1px solid #e5e7eb;
-                   border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit">
+                   border-radius:10px;font-size:calc(0.8125rem*var(--hondi-fs,1));cursor:pointer;font-family:inherit">
             전화번호 다시 입력
           </button>
         </div>
@@ -1895,7 +1895,7 @@ function _showPhonePopupLegacy(resolve) {
            style="padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;
                   border-bottom:1px solid #f9f9f9;
                   ${(it.code === areaCode && phoneType==='landline') || (it.code===null && phoneType==='mobile') ? 'background:#f0fdf4;' : ''}">
-        <span style="flex:1;color:#111827;font-size:14px">${it.label}</span>
+        <span style="flex:1;color:#111827;font-size:calc(0.875rem*var(--hondi-fs,1))">${it.label}</span>
       </div>`).join('');
 
     krListEl.querySelectorAll('[data-code]').forEach(el => {
@@ -1963,10 +1963,10 @@ function _showPhonePopupLegacy(resolve) {
                   display:flex;align-items:center;gap:10px;
                   border-bottom:1px solid #f9f9f9;
                   ${key === selectedCountry ? 'background:#f0fdf4;' : ''}">
-        <span style="font-size:20px;flex-shrink:0;width:28px;text-align:center">${c.flag}</span>
-        <span style="flex:1;color:#111827;font-size:14px">${c.name}</span>
-        <span style="color:#6b7280;font-size:12px;margin-right:4px">${key}</span>
-        <span style="color:#9ca3af;font-size:14px">${c.code}</span>
+        <span style="font-size:calc(1.25rem*var(--hondi-fs,1));flex-shrink:0;width:28px;text-align:center">${c.flag}</span>
+        <span style="flex:1;color:#111827;font-size:calc(0.875rem*var(--hondi-fs,1))">${c.name}</span>
+        <span style="color:#6b7280;font-size:calc(0.75rem*var(--hondi-fs,1));margin-right:4px">${key}</span>
+        <span style="color:#9ca3af;font-size:calc(0.875rem*var(--hondi-fs,1))">${c.code}</span>
       </div>`).join('');
 
     listEl.querySelectorAll('[data-country]').forEach(el => {
@@ -2076,7 +2076,7 @@ function _showPhonePopupLegacy(resolve) {
     if (!nickHintEl) {
       nickHintEl = document.createElement('div');
       nickHintEl.id = '_nick-hint';
-      nickHintEl.style.cssText = 'font-size:12px;color:#9ca3af;padding:0 4px;margin-bottom:6px;line-height:1.6;min-height:18px';
+      nickHintEl.style.cssText = 'font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;padding:0 4px;margin-bottom:6px;line-height:1.6;min-height:18px';
       nickErr.insertAdjacentElement('afterend', nickHintEl);
     }
     if (nick.length < 2) { nickHintEl.innerHTML = ''; return; }
@@ -3087,12 +3087,12 @@ export function _injectAuthConfirmButton(level) {
     <div style="display:flex;gap:10px;flex-wrap:wrap;padding:4px 0;">
       <button onclick="window._executeAuthAndProceed('${level}')"
         style="background:var(--tint);color:#fff;border:none;border-radius:8px;
-               padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;">
+               padding:10px 20px;font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:600;cursor:pointer;">
         🔐 ${labels[level]||'추가 인증'} 후 진행
       </button>
       <button onclick="window._cancelAuthRequest()"
         style="background:var(--bg-subtle);color:var(--label-2);border:1px solid var(--sep);
-               border-radius:8px;padding:10px 16px;font-size:13px;cursor:pointer;">취소</button>
+               border-radius:8px;padding:10px 16px;font-size:calc(0.8125rem*var(--hondi-fs,1));cursor:pointer;">취소</button>
     </div>`;
   list.appendChild(row);
   list.scrollTop = list.scrollHeight;

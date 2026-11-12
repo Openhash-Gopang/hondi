@@ -157,13 +157,13 @@
     .install-banner-icon img { width: 100%; height: 100%; object-fit: cover; }
     .install-banner-text { flex: 1; }
     .install-banner-title {
-      font-size: 15px;
+      font-size: calc(0.9375rem*var(--hondi-fs,1));
       font-weight: 600;
       color: var(--label);
       margin-bottom: 2px;
     }
     .install-banner-sub {
-      font-size: 12px;
+      font-size: calc(0.75rem*var(--hondi-fs,1));
       color: var(--label-2);
       line-height: 1.4;
     }
@@ -178,7 +178,7 @@
       border-radius: 20px;
       border: none;
       font-family: var(--font);
-      font-size: 13px;
+      font-size: calc(0.8125rem*var(--hondi-fs,1));
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
@@ -190,7 +190,7 @@
       background: transparent;
       color: var(--label-3);
       font-weight: 400;
-      font-size: 12px;
+      font-size: calc(0.75rem*var(--hondi-fs,1));
       text-align: center;
     }
 
@@ -203,7 +203,7 @@
       color: var(--label-3);
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      font-size: 15px;
+      font-size: calc(0.9375rem*var(--hondi-fs,1));
       transition: background 0.15s, color 0.15s, transform 0.12s var(--ease-spring);
       -webkit-tap-highlight-color: transparent;
     }
@@ -214,7 +214,7 @@
       width: auto;
       padding: 0 12px;
       border-radius: var(--r-md);
-      font-size: 12px;
+      font-size: calc(0.75rem*var(--hondi-fs,1));
       font-weight: 600;
       letter-spacing: 0.03em;
       color: var(--label-3);
@@ -277,7 +277,7 @@
       max-width: 72%;
       padding: 10px 14px;
       border-radius: var(--r-lg);
-      font-size: 15px;
+      font-size: calc(0.9375rem*var(--hondi-fs,1));
       line-height: 1.45;
       white-space: pre-wrap;
       word-break: break-word;
@@ -313,7 +313,7 @@
       margin-top: 4px;
       padding: 3px 10px;
       border-radius: 20px;
-      font-size: 11px;
+      font-size: calc(0.6875rem*var(--hondi-fs,1));
       font-weight: 600;
       letter-spacing: 0.02em;
     }
@@ -385,7 +385,7 @@
       color: #718096;
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
+      font-size: calc(1rem*var(--hondi-fs,1));
       transition: color 0.12s, background 0.12s;
       -webkit-tap-highlight-color: transparent;
     }
@@ -401,7 +401,7 @@
       background: transparent;
       border: none;
       color: var(--label-2);
-      font-size: 12px;
+      font-size: calc(0.75rem*var(--hondi-fs,1));
       font-family: var(--font);
       cursor: pointer;
       padding: 4px 2px;
@@ -420,7 +420,7 @@
       outline: none;
       color: var(--label);
       font-family: var(--font);
-      font-size: 16px;
+      font-size: calc(1rem*var(--hondi-fs,1));
       line-height: 1.4;
       resize: none;
       max-height: 140px;
@@ -442,7 +442,7 @@
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
-      font-size: 15px;
+      font-size: calc(0.9375rem*var(--hondi-fs,1));
       transition: background 0.15s, transform 0.1s var(--ease-spring), opacity 0.15s;
       align-self: flex-end;
     }
@@ -456,7 +456,7 @@
       padding: 12px 14px;
     }
     .gemini-progress-label {
-      font-size: 13px;
+      font-size: calc(0.8125rem*var(--hondi-fs,1));
       color: var(--label-2);
       margin-bottom: 8px;
       display: flex;
@@ -531,7 +531,7 @@
     }
     .sheet-title {
       font-family: var(--font-display);
-      font-size: 17px;
+      font-size: calc(1.0625rem*var(--hondi-fs,1));
       font-weight: 600;
       color: #1A202C;
       margin-bottom: 20px;
@@ -546,7 +546,7 @@
     #perm-guide details > summary::-webkit-details-marker { display: none; }
     #perm-guide details[open] > summary { margin-bottom: 2px; }
     .setting-label {
-      font-size: 12px;
+      font-size: calc(0.75rem*var(--hondi-fs,1));
       font-weight: 500;
       color: var(--label-2);
       letter-spacing: 0.04em;
@@ -560,7 +560,7 @@
       border-radius: var(--r-md);
       color: #1A202C;
       font-family: var(--font);
-      font-size: 14px;
+      font-size: calc(0.875rem*var(--hondi-fs,1));
       padding: 10px 12px;
       outline: none;
       transition: border-color 0.15s, box-shadow 0.15s;
@@ -572,7 +572,7 @@
 
     .setting-field-mono {
       font-family: 'SF Mono', 'Menlo', monospace;
-      font-size: 13px;
+      font-size: calc(0.8125rem*var(--hondi-fs,1));
       letter-spacing: 0.01em;
     }
     .setting-field::placeholder { color: var(--label-3); }
@@ -585,7 +585,7 @@
       border-radius: var(--r-md);
       color: #fff;
       font-family: var(--font);
-      font-size: 16px;
+      font-size: calc(1rem*var(--hondi-fs,1));
       font-weight: 600;
       cursor: pointer;
       margin-top: 4px;
@@ -631,19 +631,19 @@
       border-radius: 14px;
       background: linear-gradient(135deg, #0057A8, #5E5CE6);
       display: flex; align-items: center; justify-content: center;
-      font-size: 22px;
+      font-size: calc(1.375rem*var(--hondi-fs,1));
       margin-bottom: 14px;
     }
     .ai-card-title {
       font-family: var(--font-display);
-      font-size: 19px;
+      font-size: calc(1.1875rem*var(--hondi-fs,1));
       font-weight: 700;
       letter-spacing: -0.02em;
       margin-bottom: 4px;
       color: #1A202C;
     }
     .ai-card-sub {
-      font-size: 13px;
+      font-size: calc(0.8125rem*var(--hondi-fs,1));
       color: #4A5568;
       margin-bottom: 18px;
       line-height: 1.4;
@@ -654,7 +654,7 @@
       border-radius: var(--r-md);
       border: none;
       font-family: var(--font);
-      font-size: 15px;
+      font-size: calc(0.9375rem*var(--hondi-fs,1));
       font-weight: 600;
       cursor: pointer;
       margin-bottom: 8px;
@@ -677,7 +677,7 @@
       background: rgba(255,255,255,0.15);
       border-radius: var(--r-md);
       margin-bottom: 8px;
-      font-size: 13px;
+      font-size: calc(0.8125rem*var(--hondi-fs,1));
       color: rgba(255,255,255,0.80);
     }
     .attach-preview .remove-attach {
@@ -686,7 +686,7 @@
       border: none;
       color: var(--label-3);
       cursor: pointer;
-      font-size: 16px;
+      font-size: calc(1rem*var(--hondi-fs,1));
       padding: 0;
       width: auto; height: auto;
       border-radius: 0;
