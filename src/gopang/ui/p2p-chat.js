@@ -4,6 +4,7 @@
  * - 메시지 본문은 서버 저장 없음 — 순수 P2P
  * - from/to 모두 handle 기준 (전세계 유일)
  */
+import { notifyInvite } from './friend-find-client.js';
 import {
   PROXY, L1_SIGNAL_BASE, L1_PDV_URL, L1_ANCHOR_URL, L1_URL, L1_P2P_INVITES_URL, RTC_CONFIG, _USER,
   setRtcConn, setRtcChannel, setSignalPoll, setPeerState,
@@ -1038,6 +1039,8 @@ async function _leaveInviteForPeerAI(targetUser) {
     }),
   });
   if (!res.ok) throw new Error(`invite 저장 실패: HTTP ${res.status}`);
+  // 상대가 앱을 닫아 둔 경우를 위해 웹푸시로 즉시 알린다(실패해도 초대 저장은 유효).
+  notifyInvite(targetUser.guid).catch(() => {});
 }
 
 // ── 받은 초대 확인 (앱 시작 시 1회) ──────────────────────
