@@ -284,7 +284,9 @@
   var devlinkAutoResendTimer = null, devlinkAutoResendCount = 0;
   var devlinkSessionIds = []; // 동시에 유효할 수 있는 모든 pending 세션
   var pendingE164 = '';
-  var DEVLINK_AUTORESEND_DELAY_MS = 10000, DEVLINK_AUTORESEND_MAX = 3;
+  // 폰 알림은 1회만 보낸다(2026-11-12, 주피터 지시). 예전에는 전달 여부와 상관없이 10초마다 최대 3번 더 보내 폰에 같은 알림이 4건까지 쌓였다.
+  // 이제는 첫 발송이 실패했을 때(푸시 서비스가 받지 않음)에만 1회 다시 보낸다. 전달됐는데 폰에서 안 보이면 "문자로 받기"를 쓴다.
+  var DEVLINK_AUTORESEND_DELAY_MS = 3000, DEVLINK_AUTORESEND_MAX = 1;
 
   function stopDevlinkPolling() {
     if (devlinkPollTimer) { clearInterval(devlinkPollTimer); devlinkPollTimer = null; }
@@ -355,7 +357,8 @@
       startDevlinkCountdown(data.expires_in || 90);
       document.addEventListener('visibilitychange', onVisibilityPoll);
       devlinkPollTimer = setInterval(devlinkPollOnce, 2000);
-      scheduleDevlinkAutoResend();
+      // 첫 발송이 성공했으면 다시 보내지 않는다. 폰이 등록돼 있는데 발송이 실패했을 때만 1회 재시도한다.
+      if (data.pushSentToMobile === false && data.hasMobileDevice !== false) scheduleDevlinkAutoResend();
     } catch (e) {
       setMsg(e.message || '요청에 실패했습니다.', 'err');
     } finally {
@@ -388,18 +391,15 @@
         body: JSON.stringify({ e164: pendingE164, pcLabel: cfg.serviceLabel, purpose: 'sign_request', sigMsg: sigMsg, pcMatch: devlinkMatch }), // 자동 재전송 세션도 같은 숫자를 쓴다
       });
       var data = await res.json().catch(function () { return {}; });
-      if (!res.ok || !data.ok) { scheduleDevlinkAutoResend(); return; }
+      if (!res.ok || !data.ok) return;   // 재시도는 1회뿐이다(문자로 받기가 남아 있다)
       // 옛 세션(들) 폴링은 그대로 두고 새 세션을 추가만 한다 — 폴링
       // 타이머·카운트다운은 이미 돌고 있으므로 다시 만들지 않는다.
       devlinkSessionIds.push(data.sessionId);
       els.devlinkStatus.textContent = data.hasMobileDevice === false
         ? '이 번호로 알림을 받을 폰이 등록되어 있지 않습니다. 아래 "문자로 받기"를 눌러 주세요.'
-        : '알림을 다시 보냈습니다 — 스마트폰을 확인해 주세요… (이전 알림도 계속 유효합니다)';
+        : '알림을 다시 보냈습니다 — 스마트폰을 확인해 주세요.';
       showSmsButton(data.hasMobileDevice === false);
-      scheduleDevlinkAutoResend();
-    } catch (e) {
-      scheduleDevlinkAutoResend();
-    }
+    } catch (e) { /* 재시도는 1회뿐이다 */ }
   }
 
   async function devlinkPollOnce() {
