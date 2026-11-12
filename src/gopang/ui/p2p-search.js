@@ -38,9 +38,9 @@ export function openSearch(prefillQuery) {
       <!-- 헤더 -->
       <div style="display:flex;align-items:center;padding:16px 20px;
                   border-bottom:1px solid #f0f0f0">
-        <span style="font-size:15px;font-weight:600;color:#111827;flex:1">사용자 검색</span>
+        <span style="font-size:calc(0.9375rem*var(--hondi-fs,1));font-weight:600;color:#111827;flex:1">사용자 검색</span>
         <button id="_search-close"
-          style="border:none;background:none;font-size:20px;cursor:pointer;
+          style="border:none;background:none;font-size:calc(1.25rem*var(--hondi-fs,1));cursor:pointer;
                  color:#9ca3af;padding:0 4px">✕</button>
       </div>
 
@@ -51,11 +51,11 @@ export function openSearch(prefillQuery) {
                     background:#f9fafb;overflow:hidden" id="_sq-field">
           <input id="_sq-input" type="text" placeholder="혼디 아이디(@8자리) 또는 전화번호를 정확히 입력"
             style="flex:1;padding:0 14px;height:48px;border:none;background:transparent;
-                   font-size:15px;font-family:inherit;outline:none;color:#111827;min-width:0"
+                   font-size:calc(0.9375rem*var(--hondi-fs,1));font-family:inherit;outline:none;color:#111827;min-width:0"
             autocomplete="off"/>
           <button id="_sq-btn"
             style="padding:0 16px;height:48px;border:none;background:transparent;
-                   cursor:pointer;color:#1A73E8;font-size:14px;font-weight:600">
+                   cursor:pointer;color:#1A73E8;font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:600">
             검색
           </button>
         </div>
@@ -112,13 +112,13 @@ export function openSearch(prefillQuery) {
 // ── 검색 실행 ─────────────────────────────────────────────
 async function _doSearch(q, country, region, resultsEl) {
   resultsEl.innerHTML = `
-    <div style="text-align:center;padding:24px;color:#9ca3af;font-size:13px">
+    <div style="text-align:center;padding:24px;color:#9ca3af;font-size:calc(0.8125rem*var(--hondi-fs,1))">
       검색 중...
     </div>`;
 
   // 카카오톡 방식: 전화번호(상대가 허용한 경우만)·아이디 정확 일치로만 찾는다. 닉네임·부분 일치 둘러보기는 없다.
   const cq = classifyQuery(q);
-  const msg = (t) => `<div style="text-align:center;padding:24px 16px;color:#9ca3af;font-size:13px;line-height:1.6">${t}</div>`;
+  const msg = (t) => `<div style="text-align:center;padding:24px 16px;color:#9ca3af;font-size:calc(0.8125rem*var(--hondi-fs,1));line-height:1.6">${t}</div>`;
   try {
     const fr = await findFriend(q);
     if (fr.ok && fr.found && fr.user) {
@@ -139,7 +139,7 @@ async function _doSearch(q, country, region, resultsEl) {
       resultsEl.innerHTML = msg('일치하는 사용자가 없습니다.<br>혼디 아이디(@8자리) 또는 전화번호를 정확히 입력해 주세요. 닉네임으로는 찾을 수 없습니다.');
     }
   } catch (e) {
-    resultsEl.innerHTML = `<div style="text-align:center;padding:24px;color:#dc2626;font-size:13px">네트워크 오류: ${e.message}</div>`;
+    resultsEl.innerHTML = `<div style="text-align:center;padding:24px;color:#dc2626;font-size:calc(0.8125rem*var(--hondi-fs,1))">네트워크 오류: ${e.message}</div>`;
   }
 }
 
@@ -154,19 +154,19 @@ function _renderUserCard(u) {
   return `
     <div style="display:flex;align-items:center;gap:12px;
                 padding:12px 20px;border-bottom:1px solid #f9f9f9">
-      <div style="font-size:28px;flex-shrink:0">${flag}</div>
+      <div style="font-size:calc(1.75rem*var(--hondi-fs,1));flex-shrink:0">${flag}</div>
       <div style="flex:1;min-width:0">
-        <div style="font-size:14px;font-weight:600;color:#111827">
+        <div style="font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:600;color:#111827">
           ${u.nickname || handle}
         </div>
-        <div style="font-size:12px;color:#6b7280;margin-top:2px">
+        <div style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b7280;margin-top:2px">
           ${handle}
           ${region ? `<span style="margin-left:6px">${region}</span>` : ''}
         </div>
       </div>
       <button data-connect="${data}"
         style="padding:6px 14px;background:#1A73E8;color:#fff;
-               border:none;border-radius:8px;font-size:13px;
+               border:none;border-radius:8px;font-size:calc(0.8125rem*var(--hondi-fs,1));
                font-weight:600;cursor:pointer;flex-shrink:0">
         연결
       </button>

@@ -100,7 +100,7 @@ export function _renderProgressSteps() {
 
   // 위치 표시
   if (_progressJob.location) {
-    html += `<div style="font-size:12px;color:var(--label-3);
+    html += `<div style="font-size:calc(0.75rem*var(--hondi-fs,1));color:var(--label-3);
                           margin-bottom:16px;padding:8px 12px;
                           background:var(--bg-subtle);border-radius:10px;">
                📍 ${_progressJob.location}
@@ -132,24 +132,24 @@ export function _renderProgressSteps() {
         <div style="width:34px;height:34px;border-radius:50%;
                     background:${dotColor};flex-shrink:0;
                     display:flex;align-items:center;justify-content:center;
-                    font-size:16px;z-index:1;
+                    font-size:calc(1rem*var(--hondi-fs,1));z-index:1;
                     ${current ? 'box-shadow:0 0 0 4px rgba(255,214,10,0.2);' : ''}">
           ${done ? '✓' : step.icon}
         </div>
         <!-- 텍스트 -->
         <div>
-          <div style="font-size:15px;font-weight:${fontWeight};
+          <div style="font-size:calc(0.9375rem*var(--hondi-fs,1));font-weight:${fontWeight};
                       color:${labelColor};">${step.label}</div>
-          ${current ? `<div style="font-size:12px;color:var(--yellow);
+          ${current ? `<div style="font-size:calc(0.75rem*var(--hondi-fs,1));color:var(--yellow);
                                     margin-top:2px;">진행 중…</div>` : ''}
-          ${done    ? `<div style="font-size:12px;color:var(--green);
+          ${done    ? `<div style="font-size:calc(0.75rem*var(--hondi-fs,1));color:var(--green);
                                     margin-top:2px;">완료</div>` : ''}
         </div>
       </div>`;
   });
 
   // 신고 ID
-  html += `<div style="font-size:11px;color:var(--label-3);
+  html += `<div style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:var(--label-3);
                         margin-top:16px;text-align:right;">
              ${_progressJob.id}
            </div>`;

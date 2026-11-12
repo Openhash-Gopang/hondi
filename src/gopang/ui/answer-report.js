@@ -26,7 +26,7 @@ export function attachAnswerReport(bubble, opts) {
   if (!bubble || typeof document === 'undefined') return;
   const spId = deriveSpIdFromTrace(opts.trace);
   const bar = document.createElement('div');
-  bar.style.cssText = 'margin-top:6px;font-size:12px;opacity:.7';
+  bar.style.cssText = 'margin-top:6px;font-size:calc(0.75rem*var(--hondi-fs,1));opacity:.7';
   const link = document.createElement('a');
   link.href = '#'; link.textContent = '이 답변에 문제가 있나요? 신고·제안';
   link.style.cssText = 'color:inherit;text-decoration:underline;cursor:pointer';
@@ -34,7 +34,7 @@ export function attachAnswerReport(bubble, opts) {
   link.addEventListener('click', (ev) => {
     ev.preventDefault();
     const form = document.createElement('div');
-    form.style.cssText = 'margin-top:6px;display:flex;flex-direction:column;gap:6px;font-size:13px';
+    form.style.cssText = 'margin-top:6px;display:flex;flex-direction:column;gap:6px;font-size:calc(0.8125rem*var(--hondi-fs,1))';
     const sel = document.createElement('select');
     sel.innerHTML = REPORT_KINDS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
     const txt = document.createElement('textarea');

@@ -3,7 +3,8 @@
 <head>
 <link rel="icon" href="data:,">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="/assets/hondi-fontscale.js"></script>
 <title>나비 — 권한 설정</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
@@ -11,26 +12,26 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,'Pretendard',sans-serif;background:#fff;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:0}
-.logo{font-size:28px;font-weight:900;color:#1050DC;letter-spacing:-1px;margin-bottom:8px}
-.sub{font-size:14px;color:#6B7280;margin-bottom:36px;text-align:center;line-height:1.6}
+.logo{font-size:calc(1.75rem*var(--hondi-fs,1));font-weight:900;color:#1050DC;letter-spacing:-1px;margin-bottom:8px}
+.sub{font-size:calc(0.875rem*var(--hondi-fs,1));color:#6B7280;margin-bottom:36px;text-align:center;line-height:1.6}
 .perm-list{width:100%;max-width:340px;display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
 .perm-row{display:flex;align-items:center;gap:14px;background:#F7F7F5;border-radius:14px;padding:14px 16px}
-.perm-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.perm-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:calc(1.25rem*var(--hondi-fs,1));flex-shrink:0}
 .perm-icon.cam{background:#EEF3FF}
 .perm-icon.mic{background:#FFF3E0}
 .perm-icon.geo{background:#E8F5E9}
 .perm-info{flex:1}
-.perm-name{font-size:14px;font-weight:600;color:#1A1A18}
-.perm-desc{font-size:12px;color:#9A9A96;margin-top:2px}
-.perm-status{font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;flex-shrink:0}
+.perm-name{font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:600;color:#1A1A18}
+.perm-desc{font-size:calc(0.75rem*var(--hondi-fs,1));color:#9A9A96;margin-top:2px}
+.perm-status{font-size:calc(0.75rem*var(--hondi-fs,1));font-weight:600;padding:4px 10px;border-radius:20px;flex-shrink:0}
 .status-idle{background:#F0F0EE;color:#9A9A96}
 .status-granted{background:#E8F5E9;color:#1B7F3A}
 .status-denied{background:#FEECEC;color:#C0392B}
 .status-asking{background:#EEF3FF;color:#1050DC}
-.btn-main{width:100%;max-width:340px;padding:16px;background:#1050DC;color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn-main{width:100%;max-width:340px;padding:16px;background:#1050DC;color:#fff;border:none;border-radius:14px;font-size:calc(1rem*var(--hondi-fs,1));font-weight:700;cursor:pointer;font-family:inherit}
 .btn-main:disabled{background:#C0C8E8;cursor:not-allowed}
-.btn-skip{margin-top:12px;background:none;border:none;color:#9A9A96;font-size:13px;cursor:pointer;font-family:inherit;padding:8px}
-.notice{font-size:12px;color:#9A9A96;text-align:center;margin-top:20px;line-height:1.6;max-width:300px}
+.btn-skip{margin-top:12px;background:none;border:none;color:#9A9A96;font-size:calc(0.8125rem*var(--hondi-fs,1));cursor:pointer;font-family:inherit;padding:8px}
+.notice{font-size:calc(0.75rem*var(--hondi-fs,1));color:#9A9A96;text-align:center;margin-top:20px;line-height:1.6;max-width:300px}
 </style>
 </head>
 <body>

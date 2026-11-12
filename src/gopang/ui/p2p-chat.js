@@ -642,21 +642,21 @@ function _showIncomingCallModal(fromHandle) {
       <div style="background:#fff;border-radius:16px;padding:24px;
                   width:min(320px,85vw);text-align:center;
                   box-shadow:0 10px 30px rgba(0,0,0,0.2)">
-        <div style="font-size:32px;margin-bottom:8px">📞</div>
-        <div style="font-size:16px;font-weight:600;color:#111827;margin-bottom:4px">
+        <div style="font-size:calc(2rem*var(--hondi-fs,1));margin-bottom:8px">📞</div>
+        <div style="font-size:calc(1rem*var(--hondi-fs,1));font-weight:600;color:#111827;margin-bottom:4px">
           ${fromHandle}님의 연결 요청
         </div>
-        <div style="font-size:13px;color:#6b7280;margin-bottom:20px">
+        <div style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#6b7280;margin-bottom:20px">
           수락하시겠습니까?
         </div>
         <div style="display:flex;gap:8px">
           <button id="_p2p-decline"
             style="flex:1;padding:11px;border:none;border-radius:10px;
-                   background:#f3f4f6;color:#374151;font-size:14px;
+                   background:#f3f4f6;color:#374151;font-size:calc(0.875rem*var(--hondi-fs,1));
                    font-weight:600;cursor:pointer;font-family:inherit">거절</button>
           <button id="_p2p-accept"
             style="flex:1;padding:11px;border:none;border-radius:10px;
-                   background:#1A73E8;color:#fff;font-size:14px;
+                   background:#1A73E8;color:#fff;font-size:calc(0.875rem*var(--hondi-fs,1));
                    font-weight:600;cursor:pointer;font-family:inherit">수락</button>
         </div>
       </div>`;

@@ -149,7 +149,7 @@ export async function sendMessage() {
       // 미등록(Guest) → 등록 유도
       appendBubble('ai',
         '<b>나비 아이디를 등록</b>하면 AI 비서와 대화할 수 있습니다.<br>' +
-        '<span style="font-size:12px;color:var(--txt3)">상단 <b>AI</b> 버튼을 탭하여 등록하세요.</span>',
+        '<span style="font-size:calc(0.75rem*var(--hondi-fs,1));color:var(--txt3)">상단 <b>AI</b> 버튼을 탭하여 등록하세요.</span>',
         true
       );
     }
@@ -300,12 +300,12 @@ function _injectReportSuggestion(text, result, source) {
     <div style="display:flex;gap:10px;flex-wrap:wrap;padding:4px 0;">
       <button onclick="window._launchPoliceReport()"
         style="background:#dc2626;color:#fff;border:none;border-radius:8px;
-               padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;">
+               padding:10px 20px;font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:600;cursor:pointer;">
         🚨 K-Police에 신고
       </button>
       <button onclick="window._dismissReportSuggestion()"
         style="background:var(--bg-subtle);color:var(--label-2);border:1px solid var(--sep);
-               border-radius:8px;padding:10px 16px;font-size:13px;cursor:pointer;">닫기</button>
+               border-radius:8px;padding:10px 16px;font-size:calc(0.8125rem*var(--hondi-fs,1));cursor:pointer;">닫기</button>
     </div>`;
   list.appendChild(row);
   list.scrollTop = list.scrollHeight;

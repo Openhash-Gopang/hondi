@@ -41,7 +41,7 @@ export function appendBubble(role, text, isHTML = false, senderName = null) {
   // peer 메시지 발신자 이름
   if (senderName && role === 'peer') {
     const nameEl = document.createElement('div');
-    nameEl.style.cssText = 'font-size:11px;font-weight:600;color:var(--txt3);margin-bottom:2px;padding-left:2px';
+    nameEl.style.cssText = 'font-size:calc(0.6875rem*var(--hondi-fs,1));font-weight:600;color:var(--txt3);margin-bottom:2px;padding-left:2px';
     nameEl.textContent = senderName;
     row.appendChild(nameEl);
   }
@@ -82,7 +82,7 @@ export function showTyping() {
   typingEl.id = 'typing-row';
   typingEl.innerHTML = `<div class="typing-indicator">
     <span></span><span></span><span></span>
-  </div><div id="typing-status" style="font-size:12px;color:#6b7280;margin:4px 0 0 4px" aria-live="polite"></div>`;
+  </div><div id="typing-status" style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b7280;margin:4px 0 0 4px" aria-live="polite"></div>`;
   list.appendChild(typingEl);
   list.scrollTop = list.scrollHeight;
   _renderTypingStatus();

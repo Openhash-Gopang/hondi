@@ -35,7 +35,7 @@ export function handleFileSelect(e) {
     // 일반 파일 — 아이콘만 표시
     const ext = file.name.split('.').pop().toUpperCase();
     nameEl.innerHTML =
-      `<span style="font-size:11px;font-weight:600;color:var(--label-2);
+      `<span style="font-size:calc(0.6875rem*var(--hondi-fs,1));font-weight:600;color:var(--label-2);
                     background:var(--bg-subtle);border-radius:6px;
                     padding:3px 7px;">${ext}</span>`;
   }
