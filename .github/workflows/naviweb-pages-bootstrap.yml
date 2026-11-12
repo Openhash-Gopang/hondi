@@ -1,0 +1,40 @@
+name: naviweb Pages bootstrap
+
+# 2026-11-13 — hondi.net 종료 대비. 서비스별 Cloudflare Pages 프로젝트와
+# <name>.naviweb.kr 도메인을 일괄 생성한다. 수동 실행 전용.
+# 먼저 apply=false(기본)로 돌려 토큰 권한·대상 상태를 점검한 뒤 apply=true로 실행한다.
+# 토큰에 필요한 권한: Account · Cloudflare Pages · Edit, Zone · DNS · Edit(naviweb.kr), Zone · Zone · Read
+
+"on":
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: '실제로 생성(false면 점검만)'
+        type: boolean
+        default: false
+      only:
+        description: '일부만 처리(공백/쉼표 구분, 비우면 전체)'
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ops/domain-migration
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          GITHUB_TOKEN: ${{ github.token }}
+          APPLY: ${{ inputs.apply }}
+          ONLY: ${{ inputs.only }}
+        run: node ops/domain-migration/pages-bootstrap.mjs
