@@ -3526,6 +3526,7 @@ function buildCorsHeaders(corsOrigin, extra = {}) {
     'Access-Control-Allow-Credentials': 'true',
     'Access-Control-Allow-Methods':     'GET, POST, PATCH, DELETE, OPTIONS',
     'Access-Control-Allow-Headers':     'Content-Type, Authorization',
+    'Access-Control-Expose-Headers':    'X-Navi-LLM',
     ...extra,
   };
 }
