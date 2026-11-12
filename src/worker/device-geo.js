@@ -8,11 +8,11 @@
 //   모두 실패하면 { address: null, src: null } — 승인 화면은 "확인할 수 없음"으로 표시한다.
 //
 // 개인정보: 좌표는 이 함수 안에서 주소로 바꾸는 데만 쓰고 저장·로그·응답에 남기지 않는다. 남는 것은 주소 문자열뿐이다.
-// 표시 정밀도: 기본은 시·도 시·군·구 읍·면·동(ADDR_DEPTH=3). 도로명·지번까지 보이게 하려면 depth를 4로 올린다.
+// 표시 정밀도: 시·도 시·군·구(ADDR_DEPTH=2). 접속 IP 추정은 동 단위 정확도가 없어 읍·면·동까지 보이면 오히려 잘못된 확신을 준다(2026-11-12).
 // 카카오 키는 Worker 비밀값 KAKAO_REST_KEY (이미 등록되어 있음). 없으면 카카오 단계를 건너뛴다.
 // ═════════════════════════════════════════════════
 
-export const ADDR_DEPTH = 3;
+export const ADDR_DEPTH = 2;
 const KAKAO_COORD2ADDR = 'https://dapi.kakao.com/v2/local/geo/coord2address.json';
 
 const KR_REGION = { 'Seoul': '서울특별시', 'Busan': '부산광역시', 'Incheon': '인천광역시', 'Daegu': '대구광역시', 'Daejeon': '대전광역시', 'Gwangju': '광주광역시', 'Ulsan': '울산광역시', 'Sejong': '세종특별자치시', 'Gyeonggi-do': '경기도', 'Gangwon-do': '강원특별자치도', 'North Chungcheong': '충청북도', 'South Chungcheong': '충청남도', 'North Jeolla': '전북특별자치도', 'South Jeolla': '전라남도', 'North Gyeongsang': '경상북도', 'South Gyeongsang': '경상남도', 'Jeju': '제주특별자치도' };

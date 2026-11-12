@@ -17,10 +17,10 @@ test('좌표 검증: 국내 범위만 통과', () => {
   assert.ok(!validKoreaCoord(NaN, 127)); assert.ok(!validKoreaCoord('33', '126'));
 });
 
-test('GPS 좌표 → 카카오 주소(읍·면·동까지), 키는 KakaoAK 헤더, x=경도 y=위도', async () => {
+test('GPS 좌표 → 카카오 주소(시·군·구까지(2026-11-12: 기본 깊이 2)), 키는 KakaoAK 헤더, x=경도 y=위도', async () => {
   kakaoOk.calls.length = 0;
   const r = await resolveDeviceGeo(env, req({}), { geo: { lat: 33.4137, lng: 126.2650 } }, { fetchImpl: kakaoOk('제주특별자치도', '제주시', '한림읍', '1234', '5') });
-  assert.deepEqual(r, { address: '제주특별자치도 제주시 한림읍', src: 'gps' });
+  assert.deepEqual(r, { address: '제주특별자치도 제주시', src: 'gps' });
   assert.equal(kakaoOk.calls[0].auth, 'KakaoAK test-key');
   assert.match(kakaoOk.calls[0].url, /x=126\.265&y=33\.4137/);
 });
@@ -32,7 +32,7 @@ test('depth=4면 지번까지', async () => {
 
 test('좌표가 없으면 Cloudflare IP 좌표로 카카오 → src=ip', async () => {
   const r = await resolveDeviceGeo(env, req({ latitude: '33.4996', longitude: '126.5312', country: 'KR' }), {}, { fetchImpl: kakaoOk('제주특별자치도', '제주시', '이도이동') });
-  assert.deepEqual(r, { address: '제주특별자치도 제주시 이도이동', src: 'ip' });
+  assert.deepEqual(r, { address: '제주특별자치도 제주시', src: 'ip' });
 });
 
 test('카카오 실패(HTTP 오류·타임아웃) → Cloudflare 지역명(한글)으로 대체', async () => {

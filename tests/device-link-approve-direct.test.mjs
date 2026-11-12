@@ -29,3 +29,14 @@ test('보호 설정은 화면이 뜰 때 미리 조회하고 승인 때는 결�
 test('지갑 계정이 요청 계정과 다르면 거절한다', () => {
   assert.match(a, /wallet\.guid !== sessionGuid\) throw new Error/);
 });
+
+test('숫자 선택 화면 단순화: 요약 한 줄 + 숫자 + 안내 한 줄, 거부·세부 정보는 숨김', () => {
+  assert.match(a, /\.dl-match #btn-deny, \.dl-match #pc-label, \.dl-match #dl-rows \{ display: none; \}/);
+  assert.match(a, /id="match-hint">PC 화면을 보고 있지 않거나 숫자가 없다면 선택하지 마세요\./);
+  assert.match(a, /function applyMatchLayout\(data\)[\s\S]*?kauth-login:[\s\S]*?부근\(대략\)/);
+  assert.match(a, /matchChoices\.length\) applyMatchLayout\(data\);\s*\n\s*show\('content'\)/);
+});
+test('서버 위치는 시·군·구까지만(IP 추정은 동 단위 정확도가 없다)', () => {
+  const g = readFileSync(new URL('../src/worker/device-geo.js', import.meta.url), 'utf8');
+  assert.match(g, /export const ADDR_DEPTH = 2;/);
+});
