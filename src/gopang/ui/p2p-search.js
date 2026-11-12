@@ -4,6 +4,7 @@
  * - Worker /friends/find 경유 (friend-find-client.js)
  */
 import { PROXY, _USER } from '../core/state.js';
+import { rememberUser } from './frequent-users.js';
 import { classifyQuery } from '../../worker/friend-find.js';
 import { findFriend } from './friend-find-client.js';
 
@@ -121,6 +122,7 @@ async function _doSearch(q, country, region, resultsEl) {
   try {
     const fr = await findFriend(q);
     if (fr.ok && fr.found && fr.user) {
+      try { rememberUser(localStorage, _USER?.guid || _USER?.ipv6, fr.user); } catch {}   // 찾은 사용자는 자주 찾는 사용자로 저장
       resultsEl.innerHTML = _renderUserCard(fr.user);
       resultsEl.querySelectorAll('[data-connect]').forEach(btn => { btn.onclick = () => _sendConnectRequest(JSON.parse(btn.dataset.connect)); });
       return;
@@ -205,6 +207,7 @@ async function _sendConnectRequest(targetUser) {
         window.opener.location.origin
       );
       window.opener.focus();
+      try { rememberUser(localStorage, _USER?.guid || _USER?.ipv6, targetUser, Date.now(), true); } catch {}
       alert(`메인 창에서 ${targetUser.nickname || targetUser.handle}님과 연결을 시작합니다.`);
       _closeSearch();
     } catch (e) {
@@ -217,6 +220,7 @@ async function _sendConnectRequest(targetUser) {
     // WebRTC offer 생성
     const { startP2PCall } = await import('./p2p-chat.js');
     await startP2PCall(targetUser);
+    try { rememberUser(localStorage, _USER?.guid || _USER?.ipv6, targetUser, Date.now(), true); } catch {}
     _closeSearch();
   } catch(e) {
     alert('연결 요청 실패: ' + e.message);

@@ -21,7 +21,7 @@ import { aiActive, history, _userLocation,
          _USER, USER_GUID, _locationPending, _locationReady,
          _gwpLiveProgress, _paHandoffPending, setPaHandoffPending } from '../core/state.js';
 import { appendBubble, showTyping, hideTyping,
-         _createStreamBubble, _updateStreamBubble, setBubbleTarget, _startWaitTicker } from '../ui/bubble.js';
+         _createStreamBubble, _updateStreamBubble, setBubbleTarget, _startWaitTicker, setWaitStage } from '../ui/bubble.js';
 import { _buildLocNote, _buildRoutingFacts, _waitForLocationReady } from '../services/location.js';
 import { _injectAuthConfirmButton } from '../core/auth.js';
 import { _klawReview } from '../services/klaw.js';
@@ -69,15 +69,16 @@ function _matchUsageDashboardIntent(text) {
 // LLM을 거치지 않고(약 100KB SP를 매번 싣는 호출을 생략) 즉시 검색창을 연다. 기다림 없이 바로 응답하는 것이 목적.
 // 보수적으로 매칭: 25자 이하이고 '사용자/이용자/대화 상대/친구' + '검색/찾기' 조합일 때만.
 const _USER_SEARCH_NOUN   = /(사용자|이용자|대화\s*상대|상대방?|친구)/;
-const _USER_SEARCH_ACTION = /(검색|찾기|찾아|찾고|찾을)/;
+const _USER_SEARCH_ACTION = /(검색|찾기|찾아|찾고|찾을|연결|불러|채팅|대화)/;
 function _matchUserSearchIntent(text) {
   if (!text || typeof text !== 'string') return null;
   const t = text.trim();
-  if (!t || t.length > 25 || t.startsWith('[')) return null;
+  if (!t || t.length > 40 || t.startsWith('[')) return null;
   if (!_USER_SEARCH_NOUN.test(t) || !_USER_SEARCH_ACTION.test(t)) return null;
   const num = t.match(/@?[0-9]{8,13}|@[A-Za-z0-9._-]{3,}/);   // 번호·아이디가 함께 있으면 그대로 채워 연다
   return { query: num ? num[0] : '' };
 }
+import { loadFrequent, matchFrequent } from '../ui/frequent-users.js';
 import { setPdvDomain, getPdvDomain, _buildPDVNote, _saveProjectState, _loadOpenProjectStates, _proposeSpUpdate, _submitUserFeedback } from '../pdv/record.js';
 // ★ 2026-07-11 추가: _callGeminiGeneral 등 5개 함수가 vision.js에 정의는
 // 돼 있는데 여기서 import가 빠져 있었다 — 이미지 첨부 후 Gemini 분석
@@ -756,6 +757,7 @@ export const _stripInternalTags = (text) => _stripBracketTag(
   .replace(/\[PANEL_ACTION:close\]/g, '')      // AI 패널 닫기 지시 태그 (2026-07-02 신설)
   .replace(/\[AGENT_TASK:[^\]]*\]/g, '')       // 나비웹 서류 도우미 인계 태그 (2026-11-04 신설 — 정상 경로는 webapp.html _embedDocTags 가 호스트로 올리고 지움; 대화 기록 복원 때 화면에 새지 않게)
   .replace(/\[DOC_HANDBACK:[^\]]*\]/g, '')     // 서류 도우미 → AC 주도권 반납 태그 (2026-11-04 신설, 위와 같은 이유)
+  .replace(/\[K_SEARCH_REQUEST[^\]]*\]/gi, '')   // 2026-11-12 — 모델이 지어낸 검색 태그(전화번호·지역 노출 방지). 정상 태그는 [SEARCH: ...]뿐이다.
   .replace(/\[PDV_DOMAIN_SET:[^\]]*\]/g, '')    // PDV 일상/업무 전환 태그 (2026-07-13 신설)
   .replace(/\[KCOMPOSE_AWAIT_USER:[^\]]*\]/g, '')  // 2026-09-12 신설 — K-Compose 정상 대기 신호(§ K-Compose 프로토콜 가드 참고), 사용자에겐 안 보여야 함
   .replace(/\[TEMPLATE_LOOKUP:[^\]]*\]/g, '')   // 정체성 템플릿 참조 조회 태그 (2026-07-17 신설, 방어적 — 정상 경로는 _handleProfileTags가 먼저 소비)
@@ -5294,11 +5296,34 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
   // 지연 측정 시작점(2026-11-12) — 아래 첫 스트림 청크 도착 시 경과를 콘솔·window.__hondiLatency 에 남긴다.
   const _t0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
   try { window.__hondiLatencyStart = _t0; } catch {}
+  // 2026-11-12 — 자주 찾는 사용자: 이름·아이디만 말해도 LLM·검색 없이 곧바로 채팅으로 연결한다.
+  if (!imageFile && !(CFG.systemStack?.length > 0)) {
+    let _fm = null;
+    try { _fm = matchFrequent(userText, loadFrequent(localStorage, _USER?.guid || _USER?.ipv6)); } catch {}
+    if (_fm) {
+      history.push({ role: 'user', content: userText });
+      let _msg;
+      if (_fm.user) {
+        const _u = _fm.user, _nm = _u.nickname || _u.handle;
+        _msg = `💬 ${_nm}님과 채팅 연결을 시작합니다.`;
+        appendBubble('ai', _msg);
+        try { const { startP2PCall } = await import('../ui/p2p-chat.js'); await startP2PCall(_u); }
+        catch (e) { appendBubble('ai', '연결을 시작하지 못했습니다: ' + e.message + ' — 검색 창에서 다시 시도해 주세요.'); openSearch(_u.handle); }
+      } else {
+        _msg = `같은 이름의 사용자가 ${_fm.many.length}명입니다. 아이디로 말씀해 주세요: ` + _fm.many.map(u => '@' + String(u.handle).replace(/^@|^tid-/g, '')).join(', ');
+        appendBubble('ai', _msg);
+      }
+      history.push({ role: 'assistant', content: _msg });
+      return;
+    }
+  }
   if (!imageFile && !(CFG.systemStack?.length > 0)) {
     const _us = _matchUserSearchIntent(userText);
     if (_us) {
       history.push({ role: 'user', content: userText });
-      const _msg = '🔎 사용자 검색 창을 열었습니다. 전화번호 또는 혼디 아이디(@8자리)를 정확히 입력해 주세요.';
+      const _msg = _us.query
+        ? '🔎 사용자 검색 창을 열고 바로 검색합니다.'
+        : '🔎 사용자 검색 창을 열었습니다. 이름으로는 찾을 수 없어요. 상대의 전화번호 또는 혼디 아이디(@8자리)를 입력해 주세요. 한 번 연결한 사용자는 다음부터 이름만 말해도 바로 연결됩니다.';
       appendBubble('ai', _msg);
       history.push({ role: 'assistant', content: _msg });
       try { openSearch(_us.query || undefined); } catch (e) { console.warn('[Search] 검색창 열기 실패:', e.message); }
@@ -5608,6 +5633,7 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
         // 아니므로 중계 허용목록에 없다 — 이 경로만 예외적으로 직접 호출한다.
         // 'deepseek-default'는 나비 제공 무료 기본 키(hondi-flash/hondi-pro) —
         // apiKey 없이 /deepseek(서버가 자체 키·티어별 모델 매핑 처리)로 직행한다.
+        try { setWaitStage('나비에게 묻는 중'); } catch {}
         const attempt = c.provider === 'legacy'
           ? await fetch(`${c.baseUrl}/chat/completions`, {
               method: 'POST',
@@ -5691,6 +5717,7 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
     // 인디케이터만 반복 재생 — 몇 초짜리인지 사용자가 가늠 못 함).
     // 첫 델타가 오면(=_typingHidden true) 바로 멈춘다 — 실제 콘텐츠가
     // 이 문구를 덮어써야 하므로.
+    try { setWaitStage('답변을 받는 중'); } catch {}
     const _stopWaitTicker = _startWaitTicker(bubble, '생각하는 중입니다');
 
     let _firstChunkLogged = false;

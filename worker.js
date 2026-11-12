@@ -21951,9 +21951,9 @@ async function callDeepSeek(bodyText,env,corsHeaders,fallbackFrom=null,meta=null
         }, ctx, _settlementKey),
       }));
       if (ctx?.waitUntil) ctx.waitUntil(usageTask); else usageTask.catch(() => {});
-      return new Response(forClient,{status:200,headers:{...corsHeaders,'Content-Type':'text/event-stream','Cache-Control':'no-cache','X-Accel-Buffering':'no'}});
+      return new Response(forClient,{status:200,headers:{...corsHeaders,'Content-Type':'text/event-stream','Cache-Control':'no-cache','X-Accel-Buffering':'no','X-Navi-LLM':_billModel}});
     }
-    return new Response(res.body,{status:200,headers:{...corsHeaders,'Content-Type':'text/event-stream','Cache-Control':'no-cache','X-Accel-Buffering':'no'}});
+    return new Response(res.body,{status:200,headers:{...corsHeaders,'Content-Type':'text/event-stream','Cache-Control':'no-cache','X-Accel-Buffering':'no','X-Navi-LLM':_billModel}});
   }
   const data=await res.json();
   if (guid && env.AI_SETUP_SEALS_KV && data?.usage) {
@@ -21983,7 +21983,7 @@ async function callDeepSeek(bodyText,env,corsHeaders,fallbackFrom=null,meta=null
     });
   }
   if(fallbackFrom){const text=data.choices?.[0]?.message?.content||'{}';return new Response(JSON.stringify({candidates:[{content:{parts:[{text}],role:'model'},finishReason:'STOP'}],_provider:'deepseek-fallback',_fallback_from:fallbackFrom}),{headers:corsHeaders});}
-  return new Response(JSON.stringify(data),{headers:corsHeaders});
+  return new Response(JSON.stringify(data),{headers:{...corsHeaders,'X-Navi-LLM':_billModel}});
 }catch(e){return _err(502,'DEEPSEEK_ERROR',e.message,corsHeaders);}}
 
 
