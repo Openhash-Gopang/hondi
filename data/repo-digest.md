@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-12 20:09 KST · 기준 커밋 a673d8c2
+- 갱신: 2026-11-12 20:11 KST · 기준 커밋 b4700465
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-12 Merge pull request #1012 from Openhash-Gopang/feat/sw-instant-shell
+- 2026-11-12 perf(sw): 앱 셸을 캐시 먼저·뒤에서 갱신(stale-while-revalidate)으로 바꿔 첫 화면 즉시 표시
 - 2026-11-12 Merge pull request #1011 from Openhash-Gopang/fix/invite-push
 - 2026-11-12 fix(p2p): 무응답 초대 저장 후 상대에게 웹푸시 발송 (/friends/invite-notify)
 - 2026-11-12 feat: 폰 설정 단순화 1단계 — 상단 칩 줄 제거, 자주 쓰는 항목만 기본 표시, 나머지는 '더 보기', PC에서 이어서 하기 행 추가
@@ -42,8 +44,6 @@
 - 2026-11-12 afeat: worker — /auth/signup-link/* 연결
 - 2026-11-12 feat: 폰 회원 가입 확인 화면(signup-approve.html)
 - 2026-11-12 feat: PC 회원 가입(폰으로 이어 가기) 세션 로직
-- 2026-11-12 Merge pull request #998 from Openhash-Gopang/fix/device-link-single-push
-- 2026-11-12 fix: 폰 로그인 알림 1회만 전송 — 자동 재전송은 첫 발송 실패 시 1회로 제한
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
