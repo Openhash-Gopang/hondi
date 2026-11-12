@@ -109,6 +109,11 @@ self.addEventListener('activate', (event) => {
 });
 
 // ── Fetch 전략: Network First + Cache Fallback ─────────────
+function _isShellPath(p) {
+  if (p === '/sw.js' || p.startsWith('/prompts/') || p.startsWith('/api/') || p.startsWith('/signal/')) return false;
+  return p === '/' || /\.(html|js|css|png|jpe?g|svg|webp|ico|woff2?|ttf)$/i.test(p);
+}
+
 self.addEventListener('fetch', (event) => {
   // ★ http/https 이외 스킴 제외 (chrome-extension://, data: 등)
   // Cache API는 http/https 스킴만 허용하므로 그 외는 즉시 반환
@@ -145,6 +150,33 @@ self.addEventListener('fetch', (event) => {
 
   // ── 나비 자체 리소스: Network First ─────────────────────
   if (event.request.method !== 'GET') return;
+
+  // ── 앱 셸(화면·스크립트·스타일·이미지): 캐시 먼저, 뒤에서 갱신(2026-11-12) ──
+  // Network First 는 파일마다 네트워크를 기다려(naviweb.kr 은 LA 경유 파일당 0.4초+) 첫 화면이 늦었다.
+  // 캐시가 있으면 즉시 보여 주고, 같은 요청을 뒤에서 새로 받아 다음 실행에 반영한다.
+  // 캐시가 없으면(첫 방문) 기존처럼 네트워크를 기다린다. 프롬프트·sw.js·API 는 제외(항상 최신).
+  if (url.origin === self.location.origin && _isShellPath(url.pathname)) {
+    event.respondWith((async () => {
+      const cached = await caches.match(event.request);
+      if (cached) {
+        event.waitUntil((async () => {
+          try {
+            const fresh = await fetch(event.request.clone(), { cache: 'no-store' });
+            if (fresh.ok) (await caches.open(CACHE_NAME)).put(event.request, fresh);
+          } catch (e) { /* 오프라인이면 캐시 그대로 */ }
+        })());
+        return cached;
+      }
+      try {
+        const res = await fetch(event.request.clone(), { cache: 'no-store' });
+        if (res.ok) (await caches.open(CACHE_NAME)).put(event.request, res.clone());
+        return res;
+      } catch (e) {
+        return new Response('오프라인 상태입니다.', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+      }
+    })());
+    return;
+  }
 
   event.respondWith(
     (async () => {
