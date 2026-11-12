@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<link rel="icon" href="data:,">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나비 — PC 회원 가입 확인</title>
+<!--
+  2026-11-12 신설(주피터 지시) — PC에서 시작한 회원 가입을 폰에서 이어 가는 확인 화면.
+  PC 가입 창이 QR 또는 문자 링크로 이 페이지(?sessionId=...)를 열게 한다. 순서:
+    1) 폰에 이미 계정이 있으면 가입이 아니라 로그인 안내만 보인다.
+    2) PC 화면에 보이는 두 자리 숫자를 세 개 중에서 고른다(본인이 PC 앞에 있다는 확인). 정답은 서버만 안다.
+    3) 맞으면 이 탭의 sessionStorage 에 가입 세션을 적어 두고 webapp.html 로 넘어가 기존 가입 절차(번호 인증·암호키 생성·닉네임)를 그대로 진행한다.
+    4) 가입이 끝나면 auth.js(_completeRegistration)가 /auth/signup-link/complete 를 불러 PC 에 알린다.
+  암호키(GDC Wallet)는 이 폰에서만 만들어진다 — PC 는 가입 세션만 만들고 키를 만들지 않는다.
+-->
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans KR',-apple-system,sans-serif; background:#f8f9fa; display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px; }
+  #card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:28px 24px; width:100%; max-width:380px; box-shadow:0 4px 16px rgba(0,0,0,.08); text-align:center; }
+  h1 { font-size:17px; color:#111827; margin-bottom:10px; }
+  p { font-size:13.5px; color:#374151; line-height:1.6; }
+  .pc { background:#f3f4f6; border-radius:10px; padding:10px; margin:12px 0 16px; font-size:14px; color:#374151; }
+  .choices { display:flex; gap:10px; margin:6px 0 4px; }
+  .choices button { flex:1; padding:16px 0; border:1.5px solid #c7d2fe; background:#eef2ff; color:#3730a3; border-radius:12px; font-size:26px; font-weight:800; font-family:inherit; cursor:pointer; }
+  .choices button:disabled { opacity:.5; cursor:default; }
+  .hint { font-size:12px; color:#6b7280; margin-top:10px; }
+  #status { font-size:13px; margin-top:14px; min-height:18px; color:#6b7280; }
+  #status.error { color:#dc2626; }
+  #status.success { color:#059669; }
+  .hide { display:none; }
+</style>
+</head>
+<body>
+<div id="card">
+  <h1 id="title">PC에서 회원 가입을 요청했습니다</h1>
+  <div id="body-msg"><p>확인 중입니다…</p></div>
+  <div id="pick" class="hide">
+    <div class="pc" id="pc-label"></div>
+    <p>PC 화면에 보이는 숫자를 고르세요.</p>
+    <div class="choices" id="choices"></div>
+    <div class="hint" id="phone-hint"></div>
+  </div>
+  <div id="status"></div>
+</div>
+<script>
+(function () {
+  var PROXY = 'https://hondi-proxy.tensor-city.workers.dev';
+  var $ = function (id) { return document.getElementById(id); };
+  var sessionId = new URLSearchParams(location.search).get('sessionId') || '';
+  function say(t, kind) { var s = $('status'); s.textContent = t || ''; s.className = kind || ''; }
+  function stop(title, msg) { $('title').textContent = title; $('body-msg').innerHTML = '<p></p>'; $('body-msg').firstChild.textContent = msg; $('pick').classList.add('hide'); }
+
+  function hasLocalAccount() {
+    try { var s = JSON.parse(localStorage.getItem('gopang_user_v4') || 'null'); return !!(s && s.handle && s.ipv6); } catch (e) { return false; }
+  }
+  async function api(path, opt) {
+    var res = await fetch(PROXY + path, opt);
+    var data = await res.json().catch(function () { return {}; });
+    return { status: res.status, data: data };
+  }
+
+  async function pick(n, buttons) {
+    buttons.forEach(function (b) { b.disabled = true; });
+    say('확인 중…');
+    var r = await api('/auth/signup-link/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sessionId, picked: n }) });
+    if (r.data && r.data.ok) {
+      try { sessionStorage.setItem('signup_link_session', sessionId); } catch (e) {}
+      say('확인되었습니다. 이어서 가입을 진행합니다.', 'success');
+      setTimeout(function () { location.href = '/webapp.html'; }, 700);
+      return;
+    }
+    if (r.data && r.data.error === 'DENIED') { stop('요청이 취소되었습니다', '숫자를 여러 번 잘못 골라 요청이 취소됐습니다. PC에서 처음부터 다시 시도해 주세요.'); say(''); return; }
+    say((r.data && r.data.message) || '숫자가 다릅니다. PC 화면을 다시 확인해 주세요.', 'error');
+    buttons.forEach(function (b) { b.disabled = false; });
+  }
+
+  async function init() {
+    if (!sessionId) { stop('잘못된 링크입니다', 'PC의 가입 창에서 QR을 다시 만들어 주세요.'); return; }
+    if (hasLocalAccount()) {
+      stop('이 폰에는 이미 계정이 있습니다', '회원 가입이 필요하지 않습니다. PC 화면에서 “로그인”을 눌러 폰으로 승인해 주세요.');
+      return;
+    }
+    var r = await api('/auth/signup-link/session?sessionId=' + encodeURIComponent(sessionId));
+    if (!r.data || !r.data.ok) { stop('요청이 만료되었습니다', 'PC의 가입 창에서 QR을 다시 만들어 주세요.'); return; }
+    if (r.data.state !== 'pending' || !r.data.matchChoices) { stop('이미 진행된 요청입니다', 'PC 화면을 확인해 주세요.'); return; }
+    $('body-msg').classList.add('hide');
+    $('pc-label').textContent = (r.data.pcLabel || 'PC') + ' 에서 요청';
+    if (r.data.phoneHint) $('phone-hint').textContent = '문자를 받은 번호(끝 8자리 ' + r.data.phoneHint + ')로 가입해 주세요.';
+    var box = $('choices'), buttons = [];
+    r.data.matchChoices.forEach(function (n) {
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = n;
+      b.onclick = function () { pick(n, buttons); };
+      buttons.push(b); box.appendChild(b);
+    });
+    $('pick').classList.remove('hide');
+  }
+  init().catch(function () { stop('연결하지 못했습니다', '네트워크를 확인하고 다시 열어 주세요.'); });
+})();
+</script>
+</body>
+</html>
