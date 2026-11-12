@@ -885,6 +885,10 @@
     getToken: getToken,
     hasValidLogin: hasValidLogin,
     logout: logout,
+    // 2026-11-12 — 로그인 팝오버의 "회원 가입": 로그인 창을 가입 화면으로 바로 연다. 가입·로그인이 끝나면 기다리던 호출에 토큰을 돌려준다.
+    openSignup: function () {
+      return new Promise(function (resolve) { waiters.push(resolve); showOverlay(); openSignup(); });
+    },
     // 2026-11-11 — 나비웹 도우미가 K-Law 창을 열 때, 이미 로그인한 나비웹에서 넘겨 준 토큰으로 재인증 없이 들어온다.
     // 호출하는 쪽(klaw-assist.js)이 부모 창 출처를 직접 확인한 뒤에만 부른다. 형식이 맞지 않거나 이미 만료된 값은 받지 않는다.
     adopt: function (t, exp) {
