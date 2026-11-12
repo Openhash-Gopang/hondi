@@ -868,6 +868,8 @@ export async function _restoreFromBackupKey(privKeyB64u, guid = null, svc = 'gop
 // 팝업(device-link.html)을 쓴다 — 그건 원래도 페이지 이동 문제가 없고
 // (전용 팝업), opener에 postMessage로 결과를 돌려주는 구조가 그대로
 // 적합하다.
+// 지금 보는 기기가 스마트폰이면 '스마트폰 알림을 열라'는 안내가 자기 자신을 가리키는 꼴이 된다(폰에서 가입 중인데 폰에서 확인하라는 문구).
+const _THIS_IS_PHONE = /Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent || '');
 function _showDeviceMismatchNotice(found, resolve) {
   document.getElementById('_dl-inline-overlay')?.remove();
   if (!document.getElementById('_dl-inline-style')) {
@@ -927,7 +929,9 @@ function _showDeviceMismatchNotice(found, resolve) {
     render(`
       <div style="width:24px;height:24px;border:2.5px solid #e5e7eb;border-top-color:#0057A8;border-radius:50%;animation:_dlSpin 0.8s linear infinite;margin:20px auto"></div>
       <div id="_dl-match" style="display:none;margin-bottom:10px"><div style="font-size:calc(0.7812rem*var(--hondi-fs,1));color:#374151">폰에 세 개의 숫자가 보이면 아래 숫자를 선택하세요</div><div id="_dl-match-num" style="font-size:calc(2.5rem*var(--hondi-fs,1));font-weight:800;letter-spacing:2px;color:#0057A8;margin-top:2px"></div></div>
-      <p style="font-size:calc(0.875rem*var(--hondi-fs,1));color:#374151;margin-bottom:6px">스마트폰 알림을 열어 <strong>"본인이 맞습니다"</strong>를 눌러주세요</p>
+      <p style="font-size:calc(0.875rem*var(--hondi-fs,1));color:#374151;margin-bottom:6px">${_THIS_IS_PHONE
+        ? '이 번호는 이미 다른 기기에 가입되어 있습니다.<br>예전에 쓰던 <strong>다른 스마트폰</strong>의 알림에서 <strong>"본인이 맞습니다"</strong>를 눌러주세요'
+        : '스마트폰 알림을 열어 <strong>"본인이 맞습니다"</strong>를 눌러주세요'}</p>
       <p style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;margin-bottom:10px">알림이 도착하기까지 보통 몇 초에서 20초 정도 걸릴 수 있어요. 잠시만 기다려 주세요.</p>
       <div id="_dl-timer" style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;margin-bottom:14px"></div>
       <button id="_dl-sms" style="width:100%;padding:11px;border:none;border-radius:10px;background:#f3f4f6;color:#374151;cursor:pointer;font-size:calc(0.7812rem*var(--hondi-fs,1));opacity:0.5;margin-bottom:8px;font-family:inherit">알림이 안 왔나요? 문자로 받기</button>
@@ -1131,7 +1135,7 @@ function _showDeviceMismatchNotice(found, resolve) {
 
   async function _startRequest() {
     renderWaiting();
-    setStatus('스마트폰에 요청을 보내는 중...');
+    setStatus(_THIS_IS_PHONE ? '기존 기기에 요청을 보내는 중...' : '스마트폰에 요청을 보내는 중...');
     try {
       pcKeyPair = await GopangWallet.generateX25519KeyPair();
       const _pcMatchNum = String(10 + (crypto.getRandomValues(new Uint32Array(1))[0] % 90));
