@@ -14771,6 +14771,8 @@ export default {
       return handleAuthSessionProfile(request, env, corsHeaders);
     if (pathname === '/friends/find' && request.method === 'POST')
       return handleFriendFind(request, env, corsHeaders);
+    if (pathname === '/friends/invite-notify' && request.method === 'POST')
+      return handleFriendInviteNotify(request, env, corsHeaders);
     if (pathname === '/friends/settings' && request.method === 'POST')
       return handleFriendSettings(request, env, corsHeaders);
 
@@ -29315,6 +29317,33 @@ async function handleFriendFind(request, env, corsHeaders) {
   if (prof && prof.guid === who.guid) return new Response(JSON.stringify({ ok: true, found: false, self: true }), { status: 200, headers: corsHeaders });
   if (!prof) return new Response(JSON.stringify({ ok: true, found: false }), { status: 200, headers: corsHeaders });
   return new Response(JSON.stringify({ ok: true, found: true, user: _ffPublicCard(prof) }), { status: 200, headers: corsHeaders });
+}
+
+// POST /friends/invite-notify — 무응답 초대를 남긴 뒤 상대에게 웹푸시를 보낸다(2026-11-12).
+// 초대 레코드만으로는 상대가 앱을 다시 열 때까지 아무것도 보이지 않았다.
+// body: { phone_verify_token, to_guid } — 보낸 사람 이름은 서버가 프로필에서 읽는다(위조 방지).
+async function handleFriendInviteNotify(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, { allowTestOff: true, allowBlockedTest: true });
+  if (!who.ok) return _err(401, who.code, who.message, corsHeaders);
+  const to = String(body.to_guid || '');
+  if (!to || to === who.guid) return _err(400, 'MISSING_FIELD', 'to_guid 필요', corsHeaders);
+  if (env.AI_SETUP_SEALS_KV) {            // 시간당 20회 — 푸시 남용 방지
+    const key = `finv:${who.guid}:${Math.floor(Date.now() / 3600000)}`;
+    try {
+      const n = Number(await env.AI_SETUP_SEALS_KV.get(key)) || 0;
+      if (n >= 20) return _err(429, 'RATE_LIMITED', '알림이 너무 많습니다', corsHeaders);
+      await env.AI_SETUP_SEALS_KV.put(key, String(n + 1), { expirationTtl: 3700 });
+    } catch (e) { /* 기록 실패는 발송을 막지 않는다 */ }
+  }
+  let me = null;
+  try { me = await _l1FindProfileByGuid(env, who.guid); } catch (e) { /* 이름 없이 발송 */ }
+  const name = (me && (me.nickname || me.handle)) || '누군가';
+  try {
+    await _sendPushToGuid(env, to, { title: '나비웹 대화 요청', body: `${name}님이 대화를 시도했습니다.`, tag: `p2p-invite-${who.guid}`, url: 'https://hondi.net/webapp.html' });
+  } catch (e) { return new Response(JSON.stringify({ ok: true, pushed: false }), { status: 200, headers: corsHeaders }); }
+  return new Response(JSON.stringify({ ok: true, pushed: true }), { status: 200, headers: corsHeaders });
 }
 
 // body: { phone_verify_token, action: 'get' | 'set', phone_findable? } — 혼디 아이디(handle)는 서버가 정한 값이라 바꿀 수 없고, 번호로 찾기 허용만 바꾼다.

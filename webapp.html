@@ -925,6 +925,12 @@ body.gopang-authed #gopang-auth-gate{display:none}
 .skin-swatch{width:30px;height:30px;border-radius:50%;border:2px solid transparent;
   padding:0;cursor:pointer}
 .skin-swatch.is-selected{border-color:#000;box-shadow:0 0 0 2px #fff inset}
+/* 설정 단순화(2026-11-12): 기본은 자주 쓰는 항목만 보이고, '더 보기'를 누르면 나머지가 펼쳐진다. 상단 칩 줄은 아래 목록과 중복이라 숨긴다. */
+.settings-quick-actions{display:none !important}
+.settings-body:not(.show-more) .settings-more{display:none !important}
+.settings-more-btn{display:flex;align-items:center;justify-content:space-between;width:calc(100% - 32px);margin:6px 16px 0;padding:14px 16px;border:0;border-radius:12px;background:#f3f4f6;color:#111827;font:inherit;font-weight:600;font-size:calc(0.9375rem*var(--hondi-fs,1));cursor:pointer}
+.settings-body.show-more .settings-more-btn .chev{transform:rotate(180deg)}
+.settings-pc-row{background:#e8effc;color:#1d4ed8}
 /* 글자 크기 선택 */
 .fs-row{display:flex;gap:8px;flex-wrap:wrap}
 .fs-btn{padding:8px 14px;border-radius:10px;border:1.5px solid #d1d5db;background:#fff;color:#111827;font-weight:600;font-size:calc(0.875rem*var(--hondi-fs,1));cursor:pointer}
@@ -1904,7 +1910,7 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
         </div>
 
         <!-- 프로필 (등록 사용자만) -->
-        <div style="padding:10px 16px 0;display:none" id="_profile-card">
+        <div class="settings-more" style="padding:10px 16px 0;display:none" id="_profile-card">
           <div class="settings-card">
             <div class="settings-card-row" onclick="location.href='/register-profile.html'" style="cursor:pointer">
               <span class="settings-card-row-label">
@@ -1926,10 +1932,17 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
             </div>
           </div>
         </div>
+        <div style="padding:10px 16px 0">
+          <div class="settings-card">
+            <div class="settings-card-row" onclick="openMyProfile()" style="cursor:pointer">
+              <span class="settings-card-row-label">내 프로필</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- ② AI 비서 -->
-      <div class="settings-block">
+      <div class="settings-block settings-more">
         <div class="settings-block-label"><i class="ti ti-robot" aria-hidden="true"></i>AI 비서</div>
 
         <div style="padding:0 16px">
@@ -1948,7 +1961,7 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
       </div>
 
       <!-- ③ 지갑 & 기록 -->
-      <div class="settings-block">
+      <div class="settings-block settings-more">
         <div class="settings-block-label"><i class="ti ti-wallet" aria-hidden="true"></i><span id="setting-label-wallet">GDC Wallet</span></div>
 
         <!-- GDC Wallet (GDC 사용자만) -->
@@ -2087,7 +2100,7 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
       </div>
 
       <!-- ⑤-1 보안 — 고액 거래 생체 재인증 (2026-07-20 신설) -->
-      <div class="settings-section">
+      <div class="settings-section settings-more">
         <div class="settings-section-title">보안 — 고액 거래 재인증</div>
         <div class="settings-card">
           <div style="padding:14px 16px">
@@ -2177,8 +2190,16 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
         </div>
       </div>
 
+      <!-- 설정 단순화(2026-11-12): PC에서 이어서 하기 + 더 보기 -->
+      <button type="button" class="settings-more-btn settings-pc-row" onclick="openDeviceLinkQR()">
+        <span>PC에서 이어서 하기</span><span aria-hidden="true">›</span>
+      </button>
+      <button type="button" class="settings-more-btn" onclick="var b=this.closest('.settings-body');b.classList.toggle('show-more');this.querySelector('.lbl').textContent=b.classList.contains('show-more')?'접기':'더 보기 (AI·지갑·기록·앱 관리 등)'" aria-expanded="false">
+        <span class="lbl">더 보기 (AI·지갑·기록·앱 관리 등)</span><span class="chev" aria-hidden="true">⌄</span>
+      </button>
+
       <!-- ⑦ 앱 관리 -->
-      <div class="settings-block" id="setting-section-cache">
+      <div class="settings-block settings-more" id="setting-section-cache">
         <div class="settings-block-label"><i class="ti ti-apps" aria-hidden="true"></i><span id="setting-label-cache">앱 관리</span></div>
         <div style="padding:0 16px">
           <div class="settings-card">
@@ -2235,7 +2256,7 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
       </div>
 
       <!-- ⑧ 위험 구역 (계정 삭제, 등록 사용자만) -->
-      <div class="settings-block" id="btn-device-reset">
+      <div class="settings-block settings-more" id="btn-device-reset">
         <div class="settings-block-label danger"><i class="ti ti-alert-triangle" aria-hidden="true"></i><span id="setting-label-danger">위험 구역</span></div>
         <div style="padding:0 16px">
           <div class="settings-card" style="display:none" id="card-account-delete">

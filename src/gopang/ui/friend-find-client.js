@@ -25,6 +25,8 @@ async function post(path, body) {
 
 /** @returns {Promise<{ok:boolean, found?:boolean, self?:boolean, user?:object, message?:string}>} */
 export function findFriend(q) { return post('/friends/find', { q }); }
+/** 무응답 초대를 남긴 뒤 상대에게 푸시 알림을 보낸다(실패해도 무시). */
+export function notifyInvite(toGuid) { return post('/friends/invite-notify', { to_guid: toGuid }); }
 export function getFriendSettings() { return post('/friends/settings', { action: 'get' }); }
 export function saveFriendSettings(patch) { return post('/friends/settings', { action: 'set', ...patch }); }
 
