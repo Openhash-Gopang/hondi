@@ -1,10 +1,15 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-13 05:42 KST · 기준 커밋 9a460cc5
+- 갱신: 2026-11-13 05:43 KST · 기준 커밋 52022b7f
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-13 Merge pull request #1017 from Openhash-Gopang/feat/search-intents-latency
+- 2026-11-13 Merge origin/main into feat/search-intents-latency (call-ai.js 검색 동사 충돌 해결: 확대된 목록 유지)
+- 2026-11-13 Merge pull request #1018 from Openhash-Gopang/fix/sw-activate-guard-action
 - 2026-11-13 Merge pull request #1016 from Openhash-Gopang/fix/search-verb-hoching
+- 2026-11-12 fix: 검문에 걸린 답변이 사람 찾기/호출이면 검색 창을 직접 열어 대화가 멈추지 않게, 대기 중인 새 서비스워커를 앱 열 때 바로 활성화
+- 2026-11-12 perf/fix: 상대 검색·호출 표현 전면 확대(즉시 검색), 응답 지연 요인(도메인 분류 1.5초 상한·위치 대기 단축) 제거, 모델·첫 응답 시간 상시 표시
 - 2026-11-12 fix(search): '@아이디 호출해줘'·'번호 연락' 등 호출·연락·통화 동사도 즉시 검색으로 처리
 - 2026-11-12 Merge pull request #1015 from Openhash-Gopang/feat/llm-guard
 - 2026-11-12 feat(guard): LLM 거짓 실행·나중에 알림 약속 답변 검문 + 모델 진단 표시(?llm=1) + SP 가능 목록 규칙
@@ -39,11 +44,6 @@
 - 2026-11-12 feat(auth): 가입 입력 칸을 밑줄·라벨 스타일로 바꾸고 전화번호 칸을 하나로 합침
 - 2026-11-12 feat(auth): 폰 가입 첫 화면 문구 단순화 (초안, 승인 대기)
 - 2026-11-12 Merge pull request #1001 from Openhash-Gopang/fix/friend-search-exact-only
-- 2026-11-12 fix(search): 사용자 검색을 전화번호·아이디 정확 일치로만 제한 (닉네임 부분 검색 제거)
-- 2026-11-12 Merge pull request #1000 from Openhash-Gopang/feat/pc-signup-link
-- 2026-11-12 feat: 로그인 팝오버에 회원 가입 메뉴 추가
-- 2026-11-12 feat: KAuth.openSignup - 팝오버에서 가입 화면 바로 열기
-- 2026-11-12 Merge pull request #999 from Openhash-Gopang/feat/pc-signup-link
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
