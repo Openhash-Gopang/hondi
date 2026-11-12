@@ -81,6 +81,8 @@ function _matchUserSearchIntent(text) {
   const num = t.match(/@?[0-9][0-9-]{6,14}[0-9]|@[A-Za-z0-9._-]{3,}/);   // 번호·아이디가 함께 있으면 그대로 채워 연다
   // '@98807170을 연결해줘'처럼 아이디·번호와 연결/찾기 동사가 함께 있으면 '사용자' 같은 명사가 없어도 바로 검색한다.
   if (num && _USER_SEARCH_ACTION.test(t) && !_USER_SEARCH_EXCLUDE.test(t)) return { query: num[0] };
+  // '김동 님 호출', '김동 연결해줘'처럼 이름 + 연결 동사만 있는 경우(저장된 자주 찾는 사용자가 아닐 때): LLM 이 한 일처럼 꾸며 답하지 못하게 바로 안내하고 검색창을 연다.
+  if (/^[가-힣]{2,5}\s*(님|씨)?\s*(을|를|께|과|와)?\s*(호출|연결|연락|통화)/.test(t) && !_USER_SEARCH_EXCLUDE.test(t)) return { query: '' };
   if (!_USER_SEARCH_NOUN.test(t) || !_USER_SEARCH_ACTION.test(t) || _USER_SEARCH_EXCLUDE.test(t)) return null;
   return { query: num ? num[0] : '' };
 }
