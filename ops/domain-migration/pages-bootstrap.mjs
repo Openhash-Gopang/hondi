@@ -40,7 +40,7 @@ async function main() {
     const ac0 = await cf('GET', '/accounts');
     if (ac0.ok && ac0.j.result.length === 1) { A = ac0.j.result[0].id; log('- 시크릿의 계정 ID 형식이 올바르지 않아 토큰의 유일한 계정을 사용'); }
   }
-  const pl = await cf('GET', `/accounts/${A}/pages/projects?per_page=100`);
+  const pl = await cf('GET', `/accounts/${A}/pages/projects`);
   if (!pl.ok) {
     const ac = await cf('GET', '/accounts');
     log(`- 계정 ID 형식 ${/^[0-9a-f]{32}$/.test(A) ? '정상' : '비정상(길이 ' + A.length + ')'}, 토큰이 접근 가능한 계정 수: ${ac.ok ? ac.j.result.length : '조회 실패 ' + ac.err}`);
