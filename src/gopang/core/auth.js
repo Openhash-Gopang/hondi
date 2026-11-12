@@ -1715,10 +1715,6 @@ function _showPhonePopupLegacy(resolve) {
     <div style="background:#fff;border-radius:20px;padding:28px 20px;
                 width:100%;max-width:340px;box-sizing:border-box;">
 
-      <div style="margin-bottom:20px">
-        <div style="font-size:16px;font-weight:600;color:#111827">나비 시작하기</div>
-      </div>
-
       <!-- 2026-07-21 신설 — 아래 전체를 컨테이너로 감싸, 인증번호 단계로
            전환할 때 이 블록은 숨기고 _otp-step을 보여주는 방식으로 바꾼다
            (기존엔 네이티브 prompt()를 썼는데, 모바일에서 사용자가 문자
@@ -1758,50 +1754,55 @@ function _showPhonePopupLegacy(resolve) {
           style="max-height:220px;overflow-y:auto;overscroll-behavior:contain">
         </div>
       </div>
-      <div id="_kr-areatype-row" style="display:none;margin-bottom:10px">
-        <button id="_kr-areatype-btn" type="button"
-          style="width:100%;text-align:left;padding:12px 14px;border:1.5px solid #e5e7eb;
-                 border-radius:10px;background:#f9fafb;cursor:pointer;font-family:inherit;
-                 font-size:14px;color:#111827;display:flex;align-items:center;gap:8px">
-          <span id="_kr-areatype-label">📱 휴대폰 (010)</span>
-          <span style="margin-left:auto;font-size:9px;color:#9ca3af">▼</span>
-        </button>
-      </div>
-
-      <!-- 전화번호 입력 행 -->
-      <div style="display:flex;align-items:center;
-                  border:1px solid #e5e7eb;border-radius:12px;
-                  background:#f9fafb;overflow:hidden;margin-bottom:6px"
-           id="_phone-field">
-        <button id="_country-btn"
-          style="padding:0 10px;height:52px;border:none;background:transparent;
-                 cursor:pointer;border-right:1px solid #e5e7eb;
-                 flex-shrink:0;display:flex;align-items:center;gap:3px">
-          <span id="_flag-icon" style="font-size:20px">🇰🇷</span>
-          <span id="_dial-code" style="font-size:11px;color:#6b7280">+82</span>
-          <span style="font-size:9px;color:#9ca3af">▼</span>
-        </button>
-        <input id="_phone-input" type="tel" maxlength="8"
-          placeholder="전화번호 뒷 8자리"
-          style="flex:1;padding:0 12px;height:52px;border:none;background:transparent;
-                 font-size:16px;font-family:inherit;outline:none;color:#111827;
-                 min-width:0;letter-spacing:2px"
-          autocomplete="off" inputmode="numeric"/>
+      <!-- 전화번호: 국가 · 휴대폰/지역번호 · 번호를 한 칸에 (2026-11-12 화면 단순화) -->
+      <div id="_phone-field"
+           style="display:flex;align-items:flex-end;gap:12px;padding:2px 0 6px;
+                  border:0;border-bottom:1.5px solid #e5e7eb;margin-bottom:14px">
+        <span style="width:22px;text-align:center;color:#6b7280;font-size:17px;line-height:34px;flex-shrink:0">&#9742;</span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+          <span style="font-size:11px;color:#6b7280">전화번호</span>
+          <div style="display:flex;align-items:center;gap:8px;min-width:0">
+            <button id="_country-btn" type="button"
+              style="padding:0;height:34px;border:none;background:transparent;cursor:pointer;
+                     flex-shrink:0;display:flex;align-items:center;gap:4px;font-family:inherit">
+              <span id="_flag-icon" style="font-size:20px">🇰🇷</span>
+              <span id="_dial-code" style="font-size:14px;color:#111827">+82</span>
+              <span style="font-size:9px;color:#9ca3af">▼</span>
+            </button>
+            <div id="_kr-areatype-row" style="display:none;flex-shrink:0">
+              <button id="_kr-areatype-btn" type="button"
+                style="height:34px;padding:0 0 0 8px;border:none;border-left:1px solid #e5e7eb;
+                       background:transparent;cursor:pointer;font-family:inherit;font-size:14px;
+                       color:#111827;display:flex;align-items:center;gap:4px">
+                <span id="_kr-areatype-label">010</span>
+                <span style="font-size:9px;color:#9ca3af">▼</span>
+              </button>
+            </div>
+            <input id="_phone-input" type="tel" maxlength="8"
+              placeholder="뒷 8자리"
+              style="flex:1;padding:0 0 0 4px;height:34px;border:none;background:transparent;
+                     font-size:16px;font-family:inherit;outline:none;color:#111827;
+                     min-width:0;letter-spacing:2px"
+              autocomplete="off" inputmode="numeric"/>
+          </div>
+        </div>
       </div>
       <div id="_phone-error" style="display:none;font-size:12px;color:#dc2626;
-           padding:0 4px;margin-bottom:4px"></div>
-      <div style="height:8px"></div>
+           padding:0 4px;margin:-8px 0 10px"></div>
 
-      <!-- 닉네임 입력 -->
-      <div style="display:flex;align-items:center;
-                  border:1px solid #e5e7eb;border-radius:12px;
-                  background:#f9fafb;overflow:hidden;margin-bottom:10px"
-           id="_nick-field">
-        <input id="_nick-input" type="text" maxlength="20"
-          placeholder="닉네임 (처음 가입할 때만)"
-          style="flex:1;padding:0 14px;height:52px;border:none;background:transparent;
-                 font-size:15px;font-family:inherit;outline:none;color:#111827;min-width:0"
-          autocomplete="off"/>
+      <!-- 닉네임 -->
+      <div id="_nick-field"
+           style="display:flex;align-items:flex-end;gap:12px;padding:2px 0 6px;
+                  border:0;border-bottom:1.5px solid #e5e7eb;margin-bottom:10px">
+        <span style="width:22px;text-align:center;color:#6b7280;font-size:17px;line-height:34px;flex-shrink:0">&#9786;</span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+          <span style="font-size:11px;color:#6b7280">닉네임</span>
+          <input id="_nick-input" type="text" maxlength="20"
+            placeholder="처음 가입할 때만"
+            style="width:100%;padding:0;height:34px;border:none;background:transparent;
+                   font-size:15px;font-family:inherit;outline:none;color:#111827;min-width:0"
+            autocomplete="off"/>
+        </div>
       </div>
       <div id="_nick-error" style="display:none;font-size:12px;color:#dc2626;padding:0 4px;margin-bottom:8px"></div>
 
@@ -1907,18 +1908,18 @@ function _showPhonePopupLegacy(resolve) {
   function _selectKrAreaType(code) {
     if (code === null || code === '') {
       phoneType = 'mobile'; areaCode = null;
-      krLabel.textContent = '📱 휴대폰 (010)';
+      krLabel.textContent = '010';
     } else {
       phoneType = 'landline'; areaCode = code;
       const found = KR_AREA_CODES.find(a => a.code === code);
-      krLabel.textContent = `☎️ ${found ? found.name : ''} (0${code})`;
+      krLabel.textContent = `0${code}`;
     }
     krPanel.style.display = 'none';
     krSearchEl.value = '';
     const need = _krNeededDigits();
     phoneInput.maxLength = need;
     phoneInput.value = '';
-    phoneInput.placeholder = phoneType === 'mobile' ? '전화번호 뒷 8자리' : `가입자번호 ${need}자리`;
+    phoneInput.placeholder = phoneType === 'mobile' ? '뒷 8자리' : `가입자번호 ${need}자리`;
     _updateHandlePreview();
     phoneInput.focus();
   }
@@ -1999,13 +2000,13 @@ function _showPhonePopupLegacy(resolve) {
 
     // 국가를 바꾸면 한국 전용 휴대폰/지역번호 선택 상태를 초기화한다.
     phoneType = 'mobile'; areaCode = null;
-    krLabel.textContent = '📱 휴대폰 (010)';
+    krLabel.textContent = '010';
     krRow.style.display = key === 'KR' ? 'block' : 'none';
 
     const need = key === 'KR' ? _krNeededDigits() : c.digits;
     phoneInput.maxLength = need;
     phoneInput.value = '';
-    phoneInput.placeholder = key === DEFAULT_COUNTRY ? '전화번호 뒷 8자리' : `전화번호 (${c.digits}자리)`;
+    phoneInput.placeholder = key === DEFAULT_COUNTRY ? '뒷 8자리' : `전화번호 (${c.digits}자리)`;
     _updateHandlePreview();
     phoneInput.focus();
   }
@@ -2043,7 +2044,7 @@ function _showPhonePopupLegacy(resolve) {
   });
 
   phoneInput.focus();
-  phoneInput.addEventListener('focus', () => phoneField.style.borderColor = '#16a34a');
+  phoneInput.addEventListener('focus', () => phoneField.style.borderColor = '#1A73E8');
   phoneInput.addEventListener('blur',  () => phoneField.style.borderColor = '#e5e7eb');
   phoneInput.addEventListener('input', () => {
     const need = selectedCountry === 'KR' ? _krNeededDigits() : COUNTRIES[selectedCountry].digits;
@@ -2061,7 +2062,7 @@ function _showPhonePopupLegacy(resolve) {
   });
 
   nickInput.focus === undefined; // no-op (스타일 정리용)
-  nickInput.addEventListener('focus', () => nickField.style.borderColor = '#16a34a');
+  nickInput.addEventListener('focus', () => nickField.style.borderColor = '#1A73E8');
   nickInput.addEventListener('blur',  () => nickField.style.borderColor = '#e5e7eb');
 
   // ── 닉네임 실시간 동명이인 안내 (신규 가입 예정자에게만 의미 있음) ──
