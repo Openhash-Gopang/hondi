@@ -1,7 +1,7 @@
 // 2026-11-13 hondi.net 종료 대비 — 서비스별 Cloudflare Pages 프로젝트와
 // <name>.naviweb.kr 도메인(CNAME 포함)을 일괄 생성한다. 멱등: 이미 있으면 건너뛴다.
 // APPLY!=true 이면 쓰기 없이 점검만 한다(토큰 권한·대상 상태 보고).
-const A = (process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
+let A = (process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
 const T = (process.env.CLOUDFLARE_API_TOKEN || '').trim();
 const APPLY = process.env.APPLY === 'true';
 const OWNER = process.env.REPO_OWNER || 'Openhash-Gopang';
@@ -35,6 +35,11 @@ async function main() {
   const v = await cf('GET', '/user/tokens/verify');
   log(`- 토큰 상태: ${v.ok ? v.j.result?.status : '확인 실패 ' + v.err}`);
 
+  // 시크릿 CLOUDFLARE_ACCOUNT_ID가 계정 ID 형식(32자 16진수)이 아니면, 토큰이 접근하는 계정이 하나일 때 그것을 쓴다
+  if (!/^[0-9a-f]{32}$/.test(A)) {
+    const ac0 = await cf('GET', '/accounts');
+    if (ac0.ok && ac0.j.result.length === 1) { A = ac0.j.result[0].id; log('- 시크릿의 계정 ID 형식이 올바르지 않아 토큰의 유일한 계정을 사용'); }
+  }
   const pl = await cf('GET', `/accounts/${A}/pages/projects?per_page=100`);
   if (!pl.ok) {
     const ac = await cf('GET', '/accounts');
