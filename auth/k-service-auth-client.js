@@ -195,7 +195,6 @@
             '<button type="button" class="ksa-input-icon-btn" id="ksa-devlink-btn" aria-label="폰으로 승인받기" title="폰으로 승인받기"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>' +
           '</div>' +
           '<div class="ksa-su-row">처음이세요? <a id="ksa-signup-link" role="button" tabindex="0">회원 가입</a></div>' +
-          '<div class="ksa-su-row">이 폰이 처음이면 <a href="/webapp.html">폰에서 로그인</a></div>' +
         '</div>' +
         '<div id="ksa-step-signup" style="display:none">' +
           '<div class="ksa-su-title">회원 가입</div>' +
@@ -253,9 +252,9 @@
 
     els.desc.textContent = (cfg.serviceLabel ? cfg.serviceLabel + ' — ' : '') + '폰 번호 뒷 8자리';
     wrap.querySelector('#ksa-cancel').onclick = cancelOverlay;
-    els.devlinkBtn.onclick = startDeviceLink;
+    els.devlinkBtn.onclick = startLogin;
     els.resendPhone.onclick = resetToPhoneStep;
-    els.phone.addEventListener('keydown', function (e) { if (e.key === 'Enter') startDeviceLink(); });
+    els.phone.addEventListener('keydown', function (e) { if (e.key === 'Enter') startLogin(); });
   }
 
   // 문자로 승인 링크 받기 — 폰 구독이 없을 때만 보인다. 문자는 비용이 들어 자동 발송하지 않고 사용자가 누를 때 한 번 보낸다(서버가 횟수·시간당 제한).
@@ -289,6 +288,8 @@
   }
   function resetToPhoneStep() {
     stopDevlinkPolling();
+    if (smsAbort) { try { smsAbort.abort(); } catch (e) {} smsAbort = null; }
+    { var _b = els.overlay && els.overlay.querySelector('#ksa-sms-code'); if (_b) _b.style.display = 'none'; }
     setDescWait(false);
     if (els.stepSignup) els.stepSignup.style.display = 'none';
     els.stepDevlink.style.display = 'none';
@@ -463,6 +464,70 @@
     } catch (e) { /* 일시적 오류 무시, 다음 polling에서 재시도 */ }
   }
 
+  // ── 폰에서 로그인: 입력한 번호로 인증번호(문자)를 보내고, 폰이 자동으로 읽어 입력한다 (2026-11-13, 주피터 지시) ──
+  // 사용자는 번호를 넣고 "로그인"만 누르면 된다. 안드로이드 Chrome 은 문자 끝의 "@도메인 #코드"를 보고 코드를 자동으로 넘겨 준다(WebOTP).
+  // 자동 입력이 안 되는 폰(iOS 등)은 키보드 위 제안이나 직접 입력 칸을 쓴다. PC 는 문자를 받을 수 없으므로 기존 폰 승인 방식을 그대로 쓴다.
+  // 이 로그인으로는 전화번호 인증 토큰만 얻는다 — 지갑 개인키는 기기에 있어 문자로 옮겨지지 않으므로 서명·송금에는 쓸 수 없다.
+  var IS_PHONE = /Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent || '');
+  function startLogin() { return IS_PHONE ? startSmsLogin() : startDeviceLink(); }
+  var smsAbort = null;
+  async function startSmsLogin() {
+    var rawPhone = els.phone.value.trim();
+    if (!rawPhone) { setMsg('전화번호를 입력해 주세요.', 'err'); return; }
+    var phone = rawPhone;
+    try {
+      var authMod = await import('https://app.naviweb.kr/src/gopang/core/auth.js');
+      phone = authMod.buildE164(rawPhone, 'KR');
+    } catch (e) { console.warn('[KAuth] buildE164 공유 모듈 로드 실패, 원본 입력값 사용:', e.message); }
+    setMsg('', '');
+    els.devlinkBtn.disabled = true;
+    try {
+      var res = await fetch(PROXY + '/biz/phone-otp-request', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ e164: phone }) });
+      var d = await res.json().catch(function () { return {}; });
+      if (!res.ok || !d.ok) throw new Error(d.detail || d.message || '인증번호를 보내지 못했습니다.');
+    } catch (e) { els.devlinkBtn.disabled = false; setMsg(e.message, 'err'); return; }
+    els.devlinkBtn.disabled = false;
+
+    pendingE164 = phone;
+    els.stepPhone.style.display = 'none';
+    els.stepDevlink.style.display = '';
+    els.desc.textContent = '문자 인증번호';
+    els.devlinkStatus.textContent = '인증번호 확인 중…';
+    els.devlinkTimer.textContent = '';
+    var matchBox = els.overlay.querySelector('#ksa-match'); if (matchBox) matchBox.style.display = 'none';
+    showSmsButton(false);
+
+    var done = false;
+    var verify = async function (code) {
+      if (done) return;
+      try {
+        var r = await fetch(PROXY + '/biz/phone-otp-verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ e164: phone, code: String(code).trim() }) });
+        var v = await r.json().catch(function () { return {}; });
+        if (!r.ok || !v.ok) throw new Error(v.detail || v.message || '인증번호가 맞지 않습니다.');
+        done = true;
+        if (smsAbort) { try { smsAbort.abort(); } catch (e) {} smsAbort = null; }
+        persist(v.phone_verify_token, new Date(v.expires_at).getTime());
+        hideOverlay(); setMsg('', ''); resetToPhoneStep(); resolveWaiters();
+      } catch (e) { els.devlinkStatus.textContent = e.message; }
+    };
+    // 자동 입력(WebOTP) — 안드로이드 Chrome
+    if ('OTPCredential' in window && navigator.credentials && navigator.credentials.get) {
+      smsAbort = new AbortController();
+      navigator.credentials.get({ otp: { transport: ['sms'] }, signal: smsAbort.signal })
+        .then(function (c) { if (c && c.code) verify(c.code); })
+        .catch(function () { /* 취소·미지원 — 아래 직접 입력 칸이 남아 있다 */ });
+    }
+    // 자동 입력이 안 될 때를 위한 직접 입력 칸(키보드 위 문자 제안도 여기에 들어간다)
+    var box = els.overlay.querySelector('#ksa-sms-code');
+    if (!box) {
+      box = document.createElement('input');
+      box.id = 'ksa-sms-code'; box.type = 'tel'; box.inputMode = 'numeric'; box.maxLength = 6; box.autocomplete = 'one-time-code'; box.placeholder = '인증번호 6자리';
+      box.style.cssText = 'display:block;width:100%;box-sizing:border-box;margin:10px 0 0;padding:10px;border:1px solid #d1d5db;border-radius:8px;text-align:center;font-size:16px;letter-spacing:4px;font-family:inherit';
+      els.devlinkStatus.parentNode.appendChild(box);
+      box.addEventListener('input', function () { if (/^\d{6}$/.test(box.value)) verify(box.value); });
+    }
+    box.value = ''; box.style.display = '';
+  }
   async function startDeviceLink() {
     var rawPhone = els.phone.value.trim();
     if (!rawPhone) { setMsg('전화번호를 입력해 주세요.', 'err'); return; }
