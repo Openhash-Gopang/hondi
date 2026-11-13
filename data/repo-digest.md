@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-13 23:34 KST · 기준 커밋 5cc27cd6
+- 갱신: 2026-11-14 00:04 KST · 기준 커밋 b7ab1664
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-14 Merge pull request #1038 from Openhash-Gopang/login-popup-simplify-20261114
+- 2026-11-14 feat(login-popup): simplify popup text, title 'naviweb 로그인'
 - 2026-11-13 Merge pull request #1037 from Openhash-Gopang/webapp-sms-login
 - 2026-11-13 webapp 폰 로그인: 번호 입력 → 인증번호 문자 → 자동 입력으로 로그인(PC는 폰 승인 유지)
 - 2026-11-13 Merge pull request #1036 from Openhash-Gopang/sms-login
@@ -42,8 +44,6 @@
 - 2026-11-13 Merge pull request #1021 from Openhash-Gopang/naviweb-pages-bootstrap-20261113
 - 2026-11-13 ci: naviweb.kr Pages 일괄 생성 워크플로 추가 (점검/적용 모드)
 - 2026-11-13 Merge pull request #1020 from Openhash-Gopang/domain-naviweb-origins-20261113
-- 2026-11-13 feat(worker): CORS 허용 출처에 naviweb.kr 서비스 하위 도메인 추가 (hondi.net 병행)
-- 2026-11-13 fix(gwp): 파일 맨 앞 BOM 복원 (추가만 하는 변경으로 되돌림)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
