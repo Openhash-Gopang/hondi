@@ -188,10 +188,10 @@
     wrap.innerHTML =
       '<div class="ksa-box">' +
         '<div class="ksa-icon-row"><span class="ksa-icon">' + cfg.icon + '</span>' +
-          '<div class="ksa-desc" id="ksa-desc">폰 번호 뒷 8자리</div></div>' +
+          '<div class="ksa-desc" id="ksa-desc">naviweb 로그인</div></div>' +
         '<div id="ksa-step-phone">' +
           '<div class="ksa-input-wrap">' +
-            '<input type="tel" id="ksa-phone" placeholder="전화번호 뒷 8자리" inputmode="numeric" maxlength="8" autocomplete="tel">' +
+            '<input type="tel" id="ksa-phone" placeholder="폰 번호 뒷 8자리" inputmode="numeric" maxlength="8" autocomplete="tel">' +
             '<button type="button" class="ksa-input-icon-btn" id="ksa-devlink-btn" aria-label="폰으로 승인받기" title="폰으로 승인받기"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>' +
           '</div>' +
           '<div class="ksa-su-row">처음이세요? <a id="ksa-signup-link" role="button" tabindex="0">회원 가입</a></div>' +
@@ -216,7 +216,7 @@
         '<div id="ksa-step-devlink" style="display:none">' +
           '<div class="ksa-devlink-wait">' +
             '<div class="ksa-spinner"></div>' +
-            '<div id="ksa-match" style="display:none;text-align:center;margin:0 0 10px"><div style="font-size:12.5px;color:#374151">폰에서 이 숫자 선택</div><div id="ksa-match-num" style="font-size:40px;font-weight:800;letter-spacing:2px;color:#4338CA;margin-top:2px"></div></div>' +
+            '<div id="ksa-match" style="display:none;text-align:center;margin:0 0 10px"><div style="font-size:12.5px;color:#374151">이 숫자를 선택</div><div id="ksa-match-num" style="font-size:40px;font-weight:800;letter-spacing:2px;color:#4338CA;margin-top:2px"></div></div>' +
             '<div id="ksa-devlink-status" style="font-size:12.5px;color:#4A5568;text-align:center"></div>' +
             '<div id="ksa-devlink-timer" style="font-size:11px;color:#718096;text-align:center;margin-top:4px"></div>' +
           '</div>' +
@@ -250,7 +250,7 @@
     wrap.querySelector('#ksa-su-phone').addEventListener('keydown', function (e) { if (e.key === 'Enter') startSignup('sms'); });
     wrap.querySelector('#ksa-su-back').onclick = closeSignup;
 
-    els.desc.textContent = (cfg.serviceLabel ? cfg.serviceLabel + ' — ' : '') + '폰 번호 뒷 8자리';
+    els.desc.textContent = PHONE_TITLE();
     wrap.querySelector('#ksa-cancel').onclick = cancelOverlay;
     els.devlinkBtn.onclick = startLogin;
     els.resendPhone.onclick = resetToPhoneStep;
@@ -278,13 +278,14 @@
       els.devlinkStatus.textContent = e.message || '문자 발송에 실패했습니다.';
     }
   }
+  function PHONE_TITLE() { return (cfg.serviceLabel && cfg.serviceLabel !== 'K-Mail' ? cfg.serviceLabel : 'naviweb') + ' 로그인'; }
   function setMsg(text, kind) {
     els.msg.textContent = text || '';
     els.msg.className = 'ksa-msg' + (kind ? ' ' + kind : '');
   }
   // 승인 대기 화면에서는 제목을 "폰에서 승인하세요" 한 줄로 바꾼다(번호 입력 안내가 남아 있으면 불필요하고 중복된다).
   function setDescWait(on) {
-    els.desc.textContent = on ? '폰에서 승인하세요' : ((cfg.serviceLabel ? cfg.serviceLabel + ' — ' : '') + '폰 번호 뒷 8자리');
+    els.desc.textContent = on ? '폰에서 승인하세요' : PHONE_TITLE();
   }
   function resetToPhoneStep() {
     stopDevlinkPolling();
