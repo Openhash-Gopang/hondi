@@ -75,19 +75,20 @@ body{font-family:'Pretendard',-apple-system,'Helvetica Neue',sans-serif;
   color:#fff;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
 
 /* ── 충전 모달 ── */
-.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;
   align-items:flex-end;justify-content:center;z-index:100}
 .modal-backdrop.open{display:flex}
-.modal-sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;
+.modal-sheet{background:#fff;border-radius:4px 4px 0 0;width:100%;max-width:480px;
   padding:20px 20px calc(env(safe-area-inset-bottom,0px)+20px);max-height:88vh;overflow-y:auto}
 .modal-title{font-size:16px;font-weight:700;margin-bottom:14px;display:flex;
   align-items:center;justify-content:space-between}
 .modal-close{background:none;border:none;font-size:20px;color:#9ca3af;cursor:pointer;padding:4px}
+.modal-input:focus{outline:none;border-bottom:2px solid #00796B;padding-bottom:11px}
 .modal-label{font-size:12.5px;color:#6b7280;margin:14px 0 6px}
-.modal-input{width:100%;padding:12px 14px;border:1px solid #e5e7eb;border-radius:10px;
+.modal-input{width:100%;padding:12px 2px;border:0;border-bottom:1px solid #9e9e9e;border-radius:0;
   font-size:15px;font-family:inherit}
-.modal-primary-btn{width:100%;margin-top:18px;padding:13px;border:none;border-radius:12px;
-  background:#1A73E8;color:#fff;font-size:14.5px;font-weight:700;cursor:pointer;font-family:inherit}
+.modal-primary-btn{width:100%;margin-top:18px;padding:13px;border:none;border-radius:4px;min-height:44px;
+  background:#00796B;color:#fff;font-size:14.5px;font-weight:600;letter-spacing:.04em;cursor:pointer;font-family:inherit}
 .modal-primary-btn:disabled{background:#c7ddfd;cursor:not-allowed}
 .charge-result-box{background:#F7F8FA;border-radius:12px;padding:14px;margin-top:14px;
   font-size:13px;line-height:1.7;color:#111}
