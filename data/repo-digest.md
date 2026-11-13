@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-14 01:03 KST · 기준 커밋 f2b094b3
+- 갱신: 2026-11-14 01:36 KST · 기준 커밋 28ddff04
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-14 Merge pull request #1042 from Openhash-Gopang/popup-material-20261114
+- 2026-11-14 ui: PC 로그인 팝업 글자 크기 확대(힌트·상태·타이머·버튼 14~17px)
 - 2026-11-14 Merge pull request #1048 from Openhash-Gopang/ci-pages-retry-20261114
 - 2026-11-14 ci: Cloudflare Pages 배포 요청에 재시도 추가 (503 일시 오류로 배포가 누락됨)
 - 2026-11-14 Merge pull request #1047 from Openhash-Gopang/material-dialogs-d2-20261114
@@ -16,11 +18,14 @@
 - 2026-11-14 ui: 설정 시트·프로필 패널·바텀시트 Material Design 갱신 (B 묶음)
 - 2026-11-14 Merge pull request #1043 from Openhash-Gopang/material-popups-a-20261114
 - 2026-11-14 ui: 공용 Material 팝업 모듈 + 로그인 대기창·배지 팝업 Material Design 갱신
+- 2026-11-14 feat(login-popup): Material Design style (approved mockup)
 - 2026-11-14 Merge pull request #1041 from Openhash-Gopang/ratelimit-fix-20261114
 - 2026-11-14 fix(worker): same fixed-window counter for SMS resend limiter
 - 2026-11-14 fix(worker): device-link rate limit uses fixed window (TTL no longer slides)
 - 2026-11-14 Merge pull request #1039 from Openhash-Gopang/sw-redirect-cache-20261114
 - 2026-11-14 fix(sw): return non-redirected response from cache (ERR_FAILED on /webapp.html)
+- 2026-11-14 Revert "feat(login-popup): PC login also uses SMS code (push approval slow/needs wallet)"
+- 2026-11-14 feat(login-popup): PC login also uses SMS code (push approval slow/needs wallet)
 - 2026-11-14 Merge pull request #1038 from Openhash-Gopang/login-popup-simplify-20261114
 - 2026-11-14 feat(login-popup): simplify popup text, title 'naviweb 로그인'
 - 2026-11-13 Merge pull request #1037 from Openhash-Gopang/webapp-sms-login
@@ -39,11 +44,6 @@
 - 2026-11-13 로그인 승인 대기 팝업 문구 단순화 — 중복 안내 삭제
 - 2026-11-13 Merge pull request #1030 from Openhash-Gopang/fix-approve-host
 - 2026-11-13 Merge pull request #1029 from Openhash-Gopang/login-ui
-- 2026-11-13 폰 알림이 hondi.net 으로 열려 지문 인증이 실패하던 문제 — app.naviweb.kr 로 연결
-- 2026-11-13 로그인 승인 팝업 문구 간략화
-- 2026-11-13 Merge pull request #1028 from Openhash-Gopang/fix-app-origin
-- 2026-11-13 CORS: app.naviweb.kr 허용 — 앱 로그인 Failed to fetch 수정
-- 2026-11-13 Merge pull request #1027 from Openhash-Gopang/mailid-signup
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
