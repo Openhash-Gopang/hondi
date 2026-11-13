@@ -1025,7 +1025,7 @@ async function handleUserGdcHistory(request, url, env, corsHeaders) {
 // 저장소는 phone-otp와 동일한 env.QR_SESSIONS_KV를 그대로 쓴다(짧은
 // TTL의 임시 레코드라는 성격이 완전히 동일 — 별도 KV 바인딩 불필요).
 // ═══════════════════════════════════════════════════════════
-const DEVICE_LINK_TTL_SECONDS = 90;      // 코드 유효기간 — SMS(5분)보다 훨씬 짧게(사용자 지시)
+const DEVICE_LINK_TTL_SECONDS = 300;     // 코드 유효기간 — 2026-11-14: 90초로는 알림 도착(문자 수십 초~1분 이상)+생체인증 뒤 숫자 선택 때 SESSION_EXPIRED가 나서 5분으로 연장
 const DEVICE_LINK_MAX_ATTEMPTS = 5;
 const DEVICE_LINK_PDV_MAX_PARTS = 200;          // PDV 불러오기: 조각 수 상한(조각당 ≈90KB 평문)
 const DEVICE_LINK_PDV_PART_MAX_CHARS = 400000;  // 봉투 조각 1개의 JSON 길이 상한
