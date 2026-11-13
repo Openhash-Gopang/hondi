@@ -66,6 +66,14 @@ async function main() {
       }
       let proj = projects.get(n);
       const state = [proj ? '프로젝트 있음' : '프로젝트 없음', rec ? '레코드 있음' : '레코드 없음'];
+      if (!APPLY && proj) {
+        const d = await cf('GET', `/accounts/${A}/pages/projects/${n}`);
+        const pr = d.ok ? d.j.result : {};
+        const ld = pr.latest_deployment;
+        const dm = await cf('GET', `/accounts/${A}/pages/projects/${n}/domains`);
+        const ds = dm.ok ? dm.j.result.map(x => `${x.name}=${x.status}`).join(',') : dm.err;
+        log(`| ${host} | ${n} | ${rec ? rec.content : '-'} | 배포 ${ld ? (ld.latest_stage?.name + ':' + ld.latest_stage?.status) : '없음'}, 도메인 ${ds} |`); continue;
+      }
       if (!APPLY) { log(`| ${host} | ${n} | ${rec ? rec.content : '-'} | ${state.join(', ')} → 생성 예정 |`); continue; }
 
       if (!proj) {
