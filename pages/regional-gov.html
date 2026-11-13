@@ -78,6 +78,7 @@
 <!-- ★ 2026-10-19 신설 — 임베드 모드(?embed=1, 같은 오리진 iframe 안에서만). pages/gov-agency.html(행정기관 공통 페이지)의
      「민원 작성」 탭이 이 대화창을 그대로 끼워 쓴다 — 라우팅·GOV_TASK·직원 검토 게이트·PDV 기록 같은 엔진은 한 줄도 바꾸지 않고,
      화면만 "입력창이 위, 대화가 아래로 늘어나는" 페르소나 페이지 형태로 바꾼다. embed가 아니면 아래 규칙은 전혀 적용되지 않는다. -->
+<script src="/assets/material-dialog.js"></script>
 <script>
 if (new URLSearchParams(location.search).get('embed') === '1' && window.parent !== window) document.documentElement.classList.add('embed');
 </script>

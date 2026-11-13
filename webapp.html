@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+<script src="/assets/material-dialog.js"></script>
 <script>try{if(window.parent!==window)document.documentElement.classList.add('is-embedded')}catch(e){}</script>
 <meta charset="UTF-8">
 <script>
@@ -132,7 +133,7 @@ function _showWalletLockedBanner() {
     if (!backupKey) return;
     try {
       await window.GopangWallet.restoreFromPrivateKey(backupKey.trim());
-      alert('복구되었습니다. 페이지를 새로고침합니다.');
+      (window.nativeAlert||alert)('복구되었습니다. 페이지를 새로고침합니다.');
       location.reload();
     } catch (e) {
       alert('복구 실패: ' + e.message);
@@ -2383,7 +2384,7 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
           const ok = await window._deleteMyProfile(stored.e164 || '', refund);
           if (ok) {
             closeAccountDelete();
-            alert('계정이 삭제됐어요.' + (refund ? '\n\n남은 잔액 환급은 입력하신 계좌로 요청이 접수되었습니다.' : '') + '\n\n이 기기의 기록은 남아있으니, 언제든 같은 번호로 다시 가입하시면 이어서 쓰실 수 있어요.');
+            (window.nativeAlert||alert)('계정이 삭제됐어요.' + (refund ? '\n\n남은 잔액 환급은 입력하신 계좌로 요청이 접수되었습니다.' : '') + '\n\n이 기기의 기록은 남아있으니, 언제든 같은 번호로 다시 가입하시면 이어서 쓰실 수 있어요.');
             location.reload();
             return;
           }

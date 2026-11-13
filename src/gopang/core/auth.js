@@ -1434,7 +1434,7 @@ export async function _verifyStoredAccountStillExists(stored) {
     // 조용히 새로고침해 initAuth()가 처음부터 다시 시작하게 한다 — 어중간한
     // 화면 상태(존재하지 않는 계정으로 로그인된 것처럼 보이는 UI)로 남겨두지
     // 않는다.
-    alert('이 기기에 저장된 계정이 서버에서 삭제되어 로그아웃됩니다. 다시 가입해 주세요.');
+    (window.nativeAlert||alert)('이 기기에 저장된 계정이 서버에서 삭제되어 로그아웃됩니다. 다시 가입해 주세요.');
     location.reload();
   } catch (e) {
     // 네트워크 오류 등 — 판단 보류, 조용히 무시
