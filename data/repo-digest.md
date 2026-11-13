@@ -1,9 +1,12 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-14 01:36 KST · 기준 커밋 28ddff04
+- 갱신: 2026-11-14 01:38 KST · 기준 커밋 2adc50d5
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-14 Merge pull request #1049 from Openhash-Gopang/devlink-ttl-20261114
+- 2026-11-14 fix(worker): PC 로그인 승인 세션 유효시간 90초→300초 (폰 알림 지연으로 SESSION_EXPIRED)
+- 2026-11-14 Merge pull request #1040 from Openhash-Gopang/first-greeting-20261114
 - 2026-11-14 Merge pull request #1042 from Openhash-Gopang/popup-material-20261114
 - 2026-11-14 ui: PC 로그인 팝업 글자 크기 확대(힌트·상태·타이머·버튼 14~17px)
 - 2026-11-14 Merge pull request #1048 from Openhash-Gopang/ci-pages-retry-20261114
@@ -22,6 +25,7 @@
 - 2026-11-14 Merge pull request #1041 from Openhash-Gopang/ratelimit-fix-20261114
 - 2026-11-14 fix(worker): same fixed-window counter for SMS resend limiter
 - 2026-11-14 fix(worker): device-link rate limit uses fixed window (TTL no longer slides)
+- 2026-11-14 feat(ai): first greeting is one line (no long self-intro / profile questions)
 - 2026-11-14 Merge pull request #1039 from Openhash-Gopang/sw-redirect-cache-20261114
 - 2026-11-14 fix(sw): return non-redirected response from cache (ERR_FAILED on /webapp.html)
 - 2026-11-14 Revert "feat(login-popup): PC login also uses SMS code (push approval slow/needs wallet)"
@@ -40,10 +44,6 @@
 - 2026-11-13 병합 뒤 Cloudflare Pages 배포가 [skip ci] 때문에 건너뛰어지는 문제 — 버전 커밋 직후 배포 직접 요청
 - 2026-11-13 Merge pull request #1032 from Openhash-Gopang/login-sms-option
 - 2026-11-13 webapp 시작 팝업에 로그인|가입 구분 추가, 로그인 팝업에 '폰에서 로그인' 안내
-- 2026-11-13 Merge pull request #1031 from Openhash-Gopang/simplify-login-popup
-- 2026-11-13 로그인 승인 대기 팝업 문구 단순화 — 중복 안내 삭제
-- 2026-11-13 Merge pull request #1030 from Openhash-Gopang/fix-approve-host
-- 2026-11-13 Merge pull request #1029 from Openhash-Gopang/login-ui
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
