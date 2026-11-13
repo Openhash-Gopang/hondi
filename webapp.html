@@ -58,7 +58,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="description" content="나비(Navi) AI 메신저 플랫폼">
-<link rel="manifest" href="/manifest.json?v=20261031">
+<link rel="manifest" href="/manifest.json?v=20261114">
 <link rel="apple-touch-icon" href="/icons/navi-icon-192.png?v=20261015">
 <link rel="apple-touch-icon" sizes="180x180" href="/icons/navi-icon-180.png?v=20261015">
 <link rel="icon" type="image/png" href="/icons/navi-icon-192.png?v=20261015">
@@ -1262,19 +1262,7 @@ html.is-embedded .install-banner{display:none!important}
 </head>
 <body>
 
-<!-- ── PWA 설치 배너 ── -->
-<div class="install-banner" id="install-banner">
-  <div class="install-banner-icon"><img src="/icons/navi-icon-192.png" alt="나비"></div>
-  <div class="install-banner-text">
-    <div class="install-banner-title">📲 나비 앱으로 설치</div>
-    <div class="install-banner-sub">설치하면 카메라·위치가 자동 허용되고<br>주소창 없이 앱처럼 실행됩니다</div>
-  </div>
-  <div class="install-banner-actions">
-    <button class="install-btn install-btn-primary" onclick="installPWAWithPermission()">설치</button>
-    <button class="install-btn install-btn-dismiss" onclick="dismissInstall()">나중에</button>
-  </div>
-</div>
-
+<!-- ── PWA 설치 배너 ── (2026-11-14: Android 자동 배너 삭제 — 설치는 설정 > 앱 관리에서 브라우저 설치 창으로) -->
 <div class="install-banner" id="ios-install-banner">
   <div class="install-banner-icon"><img src="/icons/navi-icon-192.png" alt="나비"></div>
   <div class="install-banner-text">
@@ -1286,18 +1274,6 @@ html.is-embedded .install-banner{display:none!important}
   </div>
   <div class="install-banner-actions">
     <button class="install-btn install-btn-dismiss" onclick="dismissIOSInstall()">확인</button>
-  </div>
-</div>
-
-<!-- ── Android 수동 설치 안내 (beforeinstallprompt 미지원 브라우저) ── -->
-<div class="install-banner" id="manual-install-banner" style="display:none">
-  <div class="install-banner-icon"><img src="/icons/navi-icon-192.png" alt="나비"></div>
-  <div class="install-banner-text">
-    <div class="install-banner-title">📲 나비 앱으로 설치</div>
-    <div class="install-banner-sub">브라우저 메뉴 → <strong style="color:var(--green)">홈 화면에 추가</strong></div>
-  </div>
-  <div class="install-banner-actions">
-    <button class="install-btn install-btn-dismiss" onclick="dismissInstall()">확인</button>
   </div>
 </div>
 
@@ -2223,7 +2199,7 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c7c7cc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </div>
             <div style="padding:0 4px 8px;font-size:calc(0.6875rem*var(--hondi-fs,1));color:var(--txt3);line-height:1.6">
-              설치하면 카메라·마이크·위치가 자동 허용되고 주소창 없이 앱처럼 실행됩니다
+              폰 바탕화면에 나비웹 열기 아이콘 추가
             </div>
             <div class="settings-card-row" id="btn-force-update" onclick="forceUpdateApp(this)" style="cursor:pointer">
               <span class="settings-card-row-label" style="display:flex;align-items:center;gap:8px">
@@ -2540,7 +2516,7 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
 </script>
 
 <!-- 나비 모듈 -->
-<script src="/src/pwa/gopang-pwa.js?v=20261015"></script>
+<script src="/src/pwa/gopang-pwa.js?v=20261114"></script>
 <!-- BUG FIX: /src/auth/gopang-auth.js는 src/gopang/core/auth.js의 오래된 죽은 복사본이며
      import 구문을 쓰는데 type="module" 없이 로드되어 매 페이지 로드마다
      "Cannot use import statement outside a module" 에러를 던지고 있었음.

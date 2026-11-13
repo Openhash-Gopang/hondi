@@ -187,11 +187,9 @@ window.addEventListener('beforeinstallprompt', (e) => {
   const installBtn = document.getElementById('btn-install');
   if (installBtn) installBtn.style.display = 'flex';
 
-  // 이미 설치됐거나 사용자가 7일 이내 거절한 경우 표시 안 함
-  if (_shouldShowInstallBanner()) {
-    // 첫 방문 또는 재방문 시 2초 후 배너 표시
-    setTimeout(() => _showInstallBanner('android'), 2000);
-  }
+  // 2026-11-14(주피터 지시) — Android 상단 자동 설치 배너(📲 나비 앱으로 설치)를 없앴다.
+  // 설치 안내는 설정 > 앱 관리 > "앱으로 설치(PWA)"를 눌렀을 때 브라우저의 설치 창
+  // 하나만 남긴다. (iOS는 이 이벤트가 없어 기존 안내 배너를 그대로 쓴다.)
 });
 
 // ── 앱이 이미 설치된 상태로 실행 시 ────────────────────────
@@ -244,7 +242,7 @@ function _hideInstallBanner() {
 
 // ── 설치 버튼 클릭 ────────────────────────────────────────
 async function installPWA() {
-  if (!_deferredInstallPrompt) return;
+  if (!_deferredInstallPrompt) return null;
   _hideInstallBanner();
   _deferredInstallPrompt.prompt();
   const { outcome } = await _deferredInstallPrompt.userChoice;
@@ -254,19 +252,37 @@ async function installPWA() {
   }
   _deferredInstallPrompt = null;
   window.dispatchEvent(new CustomEvent('gopang:pwa-install-done'));
+  return outcome;
+}
+
+// 2026-11-14(주피터 지시) — 알림 문구를 잠깐 보여 주는 하단 토스트.
+function _pwaToast(text, ms) {
+  return new Promise(resolve => {
+    const t = document.createElement('div');
+    t.textContent = text;
+    t.style.cssText = 'position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:100000;'
+      + 'max-width:calc(100vw - 32px);padding:12px 20px;border-radius:4px;background:#323232;color:#fff;'
+      + 'font-size:15px;line-height:1.5;text-align:center;box-shadow:0 3px 5px -1px rgba(0,0,0,.2),0 6px 10px 0 rgba(0,0,0,.14),0 1px 18px 0 rgba(0,0,0,.12);';
+    document.body.appendChild(t);
+    setTimeout(() => { t.remove(); resolve(); }, ms);
+  });
 }
 
 // 설치 + 권한 요청 통합
 async function installPWAWithPermission() {
   // 1. PWA 설치
   if (_deferredInstallPrompt) {
-    await installPWA();
-  } else {
-    // beforeinstallprompt 없음 → 수동 안내
-    _hideInstallBanner();
-    const manual = document.getElementById('manual-install-banner');
-    if (manual) manual.style.display = 'flex';
+    const outcome = await installPWA();
+    if (outcome === 'accepted') {
+      // 추가했다는 안내를 1초간 보여 준 뒤, 곧바로 첫 화면(메인 대화 화면)으로 전환한다.
+      await _pwaToast('바탕화면에 나비웹 바로가기 아이콘을 추가하였습니다.', 1000);
+      try { window.closeSettings && window.closeSettings(); } catch (e) {}
+      try { window.scrollTo(0, 0); } catch (e) {}
+    }
+  } else if (!_isInStandaloneMode()) {
+    // 브라우저가 설치 창을 지금 띄울 수 없는 경우(이미 추가했거나 지원하지 않음) — 수동 안내만.
     localStorage.setItem(_INSTALL_DISMISSED_KEY, Date.now());
+    await _pwaToast('브라우저 메뉴 → 홈 화면에 추가를 눌러 주세요.', 3000);
   }
   // 2. 권한 요청
   await _requestPWAPermissions().catch(() => {});
@@ -314,15 +330,8 @@ window.addEventListener('DOMContentLoaded', () => {
   if (_isInStandaloneMode() || localStorage.getItem(_INSTALL_DONE_KEY)) {
     const btn = document.getElementById('btn-install');
     if (btn) btn.style.display = 'none';
-  } else if (!_isIOS() && _shouldShowInstallBanner()) {
-    // Android — beforeinstallprompt 없으면 2초 후 수동 배너 표시
-    setTimeout(() => {
-      if (!_deferredInstallPrompt && !_isInStandaloneMode()) {
-        const manual = document.getElementById('manual-install-banner');
-        if (manual) manual.style.display = 'flex';
-      }
-    }, 2000);
   }
+  // (2026-11-14) Android 수동 설치 안내 배너 자동 표시도 제거 — 위 주석 참고.
 
   // URL 파라미터 ?ai=1 — AI 비서 자동 활성화 (manifest shortcuts)
   if (new URLSearchParams(location.search).get('ai') === '1') {
