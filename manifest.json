@@ -2,7 +2,7 @@
   "name": "나비 (Navi)",
   "id": "/webapp.html?pwa=1",
   "short_name": "나비",
-  "description": "나비 AI 시민 플랫폼 — 카메라로 나비 코드를 스캔하고 AI 비서와 대화하세요.",
+  "description": "폰 바탕화면에 나비웹 열기 아이콘 추가",
   "start_url": "/webapp.html?pwa=1",
   "scope": "/",
   "display": "standalone",
