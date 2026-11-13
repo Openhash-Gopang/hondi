@@ -1810,6 +1810,26 @@ function _showPhonePopupLegacy(resolve) {
       </div>
       <div id="_nick-error" style="display:none;font-size:calc(0.75rem*var(--hondi-fs,1));color:#dc2626;padding:0 4px;margin-bottom:8px"></div>
 
+      <!-- 이메일 ID(메일 아이디) — 가입할 때 정한다. 내 메일 주소는 <이메일 ID>@naviweb.kr (2026-11-13, 주피터 지시) -->
+      <div id="_mid-field"
+           style="display:flex;align-items:flex-end;gap:12px;padding:2px 0 6px;
+                  border:0;border-bottom:1.5px solid #e5e7eb;margin-bottom:10px">
+        <span style="width:22px;text-align:center;color:#6b7280;font-size:calc(1.0625rem*var(--hondi-fs,1));line-height:34px;flex-shrink:0">&#9993;</span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+          <span style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:#6b7280">이메일 ID</span>
+          <div style="display:flex;align-items:center;gap:4px">
+            <input id="_mid-input" type="text" maxlength="30" inputmode="latin" autocapitalize="off" spellcheck="false"
+              placeholder="처음 가입할 때만 (영문 소문자·숫자)"
+              style="flex:1;padding:0;height:34px;border:none;background:transparent;
+                     font-size:calc(0.9375rem*var(--hondi-fs,1));font-family:inherit;outline:none;color:#111827;min-width:0"
+              autocomplete="off"/>
+            <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#6b7280;flex-shrink:0">@naviweb.kr</span>
+          </div>
+        </div>
+      </div>
+      <div id="_mid-error" style="display:none;font-size:calc(0.75rem*var(--hondi-fs,1));color:#dc2626;padding:0 4px;margin-bottom:8px"></div>
+      <div id="_mid-hint" style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;padding:0 4px;margin-bottom:6px;line-height:1.6;min-height:18px"></div>
+
       <button id="_auth-btn"
         style="width:100%;height:52px;background:#1A73E8;color:#fff;
                border:none;border-radius:12px;font-size:calc(1rem*var(--hondi-fs,1));font-weight:600;
@@ -2069,6 +2089,41 @@ function _showPhonePopupLegacy(resolve) {
   nickInput.addEventListener('focus', () => nickField.style.borderColor = '#1A73E8');
   nickInput.addEventListener('blur',  () => nickField.style.borderColor = '#e5e7eb');
 
+  // ── 이메일 ID(메일 아이디) — 형식·예약어·중복을 서버(공개 조회)에 물어 실시간으로 안내 ──
+  const midInput = document.getElementById('_mid-input');
+  const midErr   = document.getElementById('_mid-error');
+  const midHint  = document.getElementById('_mid-hint');
+  const midField = document.getElementById('_mid-field');
+  midInput.addEventListener('focus', () => midField.style.borderColor = '#1A73E8');
+  midInput.addEventListener('blur',  () => midField.style.borderColor = '#e5e7eb');
+  // → { ok:true, id } | { ok:false, message } | { ok:null }(조회 실패 — 가입 직후 서버가 다시 검사한다)
+  async function _checkMailIdAvailable(raw) {
+    const id = String(raw || '').trim().toLowerCase();
+    try {
+      const r = await fetch(`${PROXY}/kmail/mail-id/available?candidate=${encodeURIComponent(id)}`);
+      const d = await r.json();
+      if (!r.ok || !d || d.ok !== true) return { ok: null };
+      if (!d.valid) return { ok: false, message: d.message || '쓸 수 없는 이메일 ID입니다.' };
+      if (!d.available) return { ok: false, message: '이미 다른 분이 쓰고 있는 이메일 ID입니다. 다른 이름을 입력해 주세요.' };
+      return { ok: true, id: d.normalized || id };
+    } catch { return { ok: null }; }
+  }
+  let _midTimer = null;
+  midInput.addEventListener('input', () => {
+    midErr.style.display = 'none';
+    clearTimeout(_midTimer);
+    const v = midInput.value.trim().toLowerCase();
+    if (v.length < 3) { midHint.innerHTML = v ? '<span style="color:#9ca3af">3자 이상 입력해 주세요.</span>' : ''; return; }
+    midHint.innerHTML = '<span style="color:#9ca3af">확인 중…</span>';
+    _midTimer = setTimeout(async () => {
+      const c = await _checkMailIdAvailable(v);
+      if (midInput.value.trim().toLowerCase() !== v) return;   // 그 사이 입력이 바뀌었으면 옛 결과는 버린다
+      if (c.ok === true) midHint.innerHTML = `<span style="color:#16a34a">✓ 쓸 수 있습니다. 내 메일 주소: ${v}@naviweb.kr</span>`;
+      else if (c.ok === false) midHint.innerHTML = `<span style="color:#dc2626">${c.message}</span>`;
+      else midHint.innerHTML = '';
+    }, 400);
+  });
+
   // ── 닉네임 실시간 동명이인 안내 (신규 가입 예정자에게만 의미 있음) ──
   let _nickTimer = null;
   nickInput.addEventListener('input', () => {
@@ -2319,7 +2374,7 @@ function _showPhonePopupLegacy(resolve) {
   }
 
   // ── 실제 신규 가입 처리 (기존 _register 로직 그대로, 지역 필드는 제거) ──
-  async function _completeRegistration({ ipv6, handle, e164, nickname, digits, phoneVerifyToken, stepUpToken }) {
+  async function _completeRegistration({ ipv6, handle, e164, nickname, digits, mailId, phoneVerifyToken, stepUpToken }) {
     const nickname_hash = await _sha256('phone:' + e164);
     const region = '';
 
@@ -2406,6 +2461,18 @@ function _showPhonePopupLegacy(resolve) {
       throw new Error(`L1 프로필 등록 실패(status: ${_l1Res?.status ?? '네트워크 오류'}) — 서버에 프로필이 생성되지 않았습니다`);
     }
     console.info('[Auth] 신규 등록:', handle, nickname);
+
+    // 이메일 ID 저장(2026-11-13, 주피터 지시) — 가입 입력 창에서 정한 아이디를 K-Mail 설정에 기록한다. 가입 직후 첫 선택이므로 변경 횟수에 세지 않는다.
+    // 실패해도(그 사이 다른 분이 먼저 가져간 경우 등) 가입은 그대로 끝나고, 서버가 읽기 쉬운 기본 아이디를 주며 선택 화면이 한 번 뜬다.
+    if (mailId && phoneVerifyToken) {
+      try {
+        const r = await fetch(`${PROXY}/kmail/settings`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone_verify_token: phoneVerifyToken, mail_id: mailId }),
+        });
+        if (!r.ok) console.warn('[가입][이메일 ID] 저장 실패(status:', r.status, ') — 가입 직후 선택 화면으로 대신합니다');
+      } catch (e) { console.warn('[가입][이메일 ID] 저장 실패(무시):', e.message); }
+    }
 
     // PC 회원 가입 연결(2026-11-12, 주피터 지시): PC 가입 창이 만든 가입 세션을 폰에서 이어 받아 가입한 경우(auth/signup-approve.html 이
     // sessionStorage 에 세션 번호를 남긴다), 가입이 끝났음을 서버에 알려 PC 가 일반 로그인으로 이어 가게 한다. 실패해도 가입 자체에는 영향 없다.
@@ -2570,6 +2637,23 @@ function _showPhonePopupLegacy(resolve) {
         btn.style.opacity = '1'; btn.style.pointerEvents = '';
         return;
       }
+      // 이메일 ID — 가입할 때 정한다(2026-11-13). 인증번호를 받기 전에 형식·중복을 먼저 확인해, 문자 인증을 다시 하는 일이 없게 한다.
+      const mailIdRaw = midInput.value.trim().toLowerCase();
+      if (!mailIdRaw) {
+        midErr.textContent = '이메일 ID를 입력해 주세요. 내 메일 주소는 이메일ID@naviweb.kr 가 됩니다.';
+        midErr.style.display = 'block';
+        midInput.focus();
+        btn.style.opacity = '1'; btn.style.pointerEvents = '';
+        return;
+      }
+      const midCheck = await _checkMailIdAvailable(mailIdRaw);
+      if (midCheck.ok === false) {
+        midErr.textContent = midCheck.message;
+        midErr.style.display = 'block';
+        midInput.focus();
+        btn.style.opacity = '1'; btn.style.pointerEvents = '';
+        return;
+      }
       // 이용 약정서 동의: 별도 체크 없이 "시작하면 동의한 것으로 봅니다" 안내로 대체 (2026-11-12 화면 단순화)
 
       if (!SIMPLE_SIGNUP_TEST && !_isMobileDevice()) {
@@ -2597,7 +2681,7 @@ function _showPhonePopupLegacy(resolve) {
       btn.textContent = '등록 중...';
       const ipv6 = await _e164ToIPv6(e164);
       await _completeRegistration({
-        ipv6, handle, e164, nickname, digits,
+        ipv6, handle, e164, nickname, digits, mailId: mailIdRaw,
         phoneVerifyToken: otpResult.phoneVerifyToken, stepUpToken: otpResult.stepUpToken,
       });
 
