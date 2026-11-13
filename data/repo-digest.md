@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-14 00:51 KST · 기준 커밋 6f87e500
+- 갱신: 2026-11-14 00:53 KST · 기준 커밋 37ce9674
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-14 Merge pull request #1046 from Openhash-Gopang/material-dialogs-d-20261114
+- 2026-11-14 ui: 공용 Material 대화상자(mpAlert/mpConfirm/mpPrompt) 추가, alert 대체 (D-1)
 - 2026-11-14 Merge pull request #1045 from Openhash-Gopang/material-popups-c-20261114
 - 2026-11-14 ui: 페이지 모달(나비코드 확대, GDC 보내기, 충전, AI 분류 로딩) Material Design 갱신 (C-1)
 - 2026-11-14 Merge pull request #1044 from Openhash-Gopang/material-popups-b-20261114
@@ -42,8 +44,6 @@
 - 2026-11-13 Merge pull request #1026 from Openhash-Gopang/naviweb-code-switch2-20261113
 - 2026-11-13 feat: hondi.net → naviweb.kr 코드 전환 2차 (AI 프롬프트·사이트 목록 주소)
 - 2026-11-13 Merge pull request #1025 from Openhash-Gopang/naviweb-code-switch-20261113
-- 2026-11-13 feat: hondi.net → naviweb.kr 코드 전환 1차 (인증·링크·화면 주소)
-- 2026-11-13 Merge pull request #1024 from Openhash-Gopang/naviweb-pages-alias-20261113
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
