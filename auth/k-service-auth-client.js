@@ -147,35 +147,47 @@
     var style = document.createElement('style');
     style.id = 'ksa-style';
     style.textContent =
-      '#ksa-overlay{position:fixed;inset:0;z-index:99999;background:rgba(15,15,25,.45);display:none;align-items:center;justify-content:center;padding:24px;font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Malgun Gothic",sans-serif}' +
+      // Material Design 스타일(2026-11-14, 주피터 승인 시안): 밑줄 입력칸 · 전체 폭 버튼 · 문자(텍스트) 버튼 · 고도 그림자. 강조색은 --ksa-accent 한 곳에서 바꾼다.
+      '#ksa-overlay{--ksa-accent:#00796B;--ksa-err:#D32F2F;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:24px;font-family:"Noto Sans KR",Roboto,Pretendard,-apple-system,BlinkMacSystemFont,"Malgun Gothic",sans-serif}' +
       '#ksa-overlay.show{display:flex}' +
-      '.ksa-box{background:#fff;border-radius:14px;padding:26px 24px;width:100%;max-width:340px;box-shadow:0 12px 32px rgba(0,0,0,.22)}' +
-      '.ksa-icon-row{display:flex;align-items:center;gap:9px;margin-bottom:16px}' +
-      '.ksa-icon{font-size:20px}' +
-      '.ksa-desc{font-size:13px;color:#1a202c;line-height:1.5}' +
-      '.ksa-input-wrap{display:flex;gap:6px}' +
-      '.ksa-input-wrap input{flex:1;padding:10px 12px;border:1px solid #dfe2ed;border-radius:8px;font-size:14px;font-family:inherit}' +
-      '.ksa-input-icon-btn{border:none;background:#4338CA;color:#fff;border-radius:8px;width:42px;height:42px;flex-shrink:0;font-size:17px;cursor:pointer;transition:opacity .12s,transform .08s}' +
+      '.ksa-box{background:#fff;border-radius:4px;padding:32px 32px 12px;width:100%;max-width:360px;box-sizing:border-box;box-shadow:0 11px 15px -7px rgba(0,0,0,.2),0 24px 38px 3px rgba(0,0,0,.14),0 9px 46px 8px rgba(0,0,0,.12)}' +
+      '.ksa-icon-row{display:block;margin-bottom:24px}' +
+      '.ksa-icon{display:none}' +
+      '.ksa-desc{font-size:20px;font-weight:500;color:#212121;line-height:1.3}' +
+      '.ksa-field{margin-bottom:0}' +
+      '.ksa-field label{display:block;font-size:12px;font-weight:500;color:var(--ksa-accent)}' +
+      '.ksa-field input{display:block;width:100%;box-sizing:border-box;border:0;border-bottom:2px solid var(--ksa-accent);border-radius:0;padding:6px 0 8px;background:transparent;outline:none;font-size:20px;letter-spacing:2px;color:#212121;font-family:inherit}' +
+      '.ksa-field input.ksa-invalid{border-bottom-color:var(--ksa-err)}' +
+      '.ksa-field:has(.ksa-invalid) label{color:var(--ksa-err)}' +
+      '.ksa-hint{margin-top:6px;font-size:12px;color:#616161}' +
+      '.ksa-cta{display:block;width:100%;height:44px;margin-top:24px;border:0;border-radius:4px;background:var(--ksa-accent);color:#fff;font-size:15px;font-weight:500;letter-spacing:.5px;font-family:inherit;cursor:pointer;box-shadow:0 2px 2px 0 rgba(0,0,0,.14),0 3px 1px -2px rgba(0,0,0,.12),0 1px 5px 0 rgba(0,0,0,.2);transition:box-shadow .15s}' +
+      '.ksa-cta:disabled{opacity:.5;cursor:not-allowed}' +
+      '.ksa-cta:not(:disabled):hover{box-shadow:0 4px 5px 0 rgba(0,0,0,.14),0 1px 10px 0 rgba(0,0,0,.12),0 2px 4px -1px rgba(0,0,0,.2)}' +
+      '.ksa-input-wrap{display:flex;gap:8px;align-items:flex-end}' +
+      '.ksa-input-wrap input{flex:1;min-width:0;border:0;border-bottom:2px solid var(--ksa-accent);border-radius:0;padding:6px 0 8px;background:transparent;outline:none;font-size:18px;letter-spacing:1px;font-family:inherit}' +
+      '.ksa-input-icon-btn{border:none;background:var(--ksa-accent);color:#fff;border-radius:4px;width:44px;height:44px;flex-shrink:0;font-size:17px;cursor:pointer}' +
       '.ksa-input-icon-btn:disabled{opacity:.5;cursor:not-allowed}' +
-      '.ksa-input-icon-btn:not(:disabled):hover{transform:scale(1.05)}' +
-      '.ksa-devlink-wait{padding:6px 0}' +
-      '.ksa-spinner{width:22px;height:22px;border:3px solid #e5e7eb;border-top-color:#4338CA;border-radius:50%;margin:0 auto 12px;animation:ksa-spin .8s linear infinite}' +
-      '@keyframes ksa-spin{to{transform:rotate(360deg)}}' +
-      '.ksa-sms{display:block;margin:10px auto 0;border:1px solid #4338CA;background:#fff;color:#4338CA;border-radius:8px;padding:7px 18px;font-size:13px;font-family:inherit;cursor:pointer}' +
+      '.ksa-devlink-wait{padding:0;text-align:center}' +
+      '.ksa-spinner{position:relative;height:4px;margin:0 -32px 24px;background:#B2DFDB;overflow:hidden}' +
+      '.ksa-spinner::before{content:"";position:absolute;top:0;bottom:0;width:40%;background:var(--ksa-accent);animation:ksa-ind 1.6s linear infinite}' +
+      '@keyframes ksa-ind{0%{left:-40%}100%{left:100%}}' +
+      '.ksa-match-sub{font-size:14px;color:#424242}' +
+      '.ksa-match-num{display:inline-flex;align-items:center;justify-content:center;min-width:128px;height:88px;margin-top:14px;border-radius:12px;background:#E0F2F1;color:var(--ksa-accent);font-size:56px;font-weight:700;letter-spacing:2px;font-family:Roboto,inherit}' +
+      '.ksa-sms{display:block;margin:12px auto 0;border:0;background:transparent;color:var(--ksa-accent);border-radius:4px;height:44px;padding:0 12px;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer}' +
       '.ksa-sms:disabled{opacity:.5;cursor:not-allowed}' +
-      '.ksa-resend{text-align:center;margin-top:10px;font-size:12px;color:#718096;cursor:pointer;text-decoration:underline}' +
-      '.ksa-msg{font-size:12px;margin-top:10px;text-align:center;min-height:16px}' +
-      '.ksa-msg.err{color:#c01c28}' +
+      '.ksa-resend{display:inline-block;margin-top:8px;padding:12px;font-size:14px;font-weight:500;color:var(--ksa-accent);cursor:pointer}' +
+      '.ksa-msg{font-size:12px;margin-top:8px;text-align:left;min-height:16px}' +
+      '.ksa-msg.err{color:var(--ksa-err)}' +
       '.ksa-msg.ok{color:#1b6b3a}' +
-      '.ksa-cancel{display:block;margin:12px auto 0;border:1px solid #dfe2ed;background:#fff;color:#4A5568;border-radius:8px;padding:7px 22px;font-size:13px;font-family:inherit;cursor:pointer}' +
-      '.ksa-cancel:hover{background:#f4f5fa}' +
-      '.ksa-su-row{text-align:center;margin-top:12px;font-size:12.5px;color:#718096}' +
-      '.ksa-su-row a{color:#4338CA;font-weight:600;text-decoration:underline;cursor:pointer}' +
-      '.ksa-su-title{font-size:14px;font-weight:700;color:#1a202c;text-align:center;margin-bottom:4px}' +
-      '.ksa-su-sub{font-size:12px;color:#718096;text-align:center;margin-bottom:12px}' +
-      '.ksa-su-tabs{display:flex;gap:6px;margin-bottom:12px}' +
-      '.ksa-su-tabs button{flex:1;padding:8px 4px;border:1px solid #dfe2ed;background:#fff;color:#4A5568;border-radius:8px;font-size:12.5px;font-family:inherit;cursor:pointer}' +
-      '.ksa-su-tabs button.on{background:#EEF2FF;border-color:#4338CA;color:#4338CA;font-weight:700}' +
+      '.ksa-cancel{display:block;margin:4px -8px 0 auto;border:0;background:transparent;color:#616161;border-radius:4px;height:44px;padding:0 12px;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer}' +
+      '.ksa-cancel:hover{background:rgba(0,0,0,.05)}' +
+      '.ksa-su-row{margin-top:8px;font-size:13px;color:#616161}' +
+      '.ksa-su-row a{color:var(--ksa-accent);font-weight:500;cursor:pointer;padding:8px 4px}' +
+      '.ksa-su-title{font-size:16px;font-weight:500;color:#212121;margin-bottom:4px}' +
+      '.ksa-su-sub{font-size:12px;color:#616161;margin-bottom:12px}' +
+      '.ksa-su-tabs{display:flex;gap:0;margin-bottom:12px;border-bottom:1px solid #E0E0E0}' +
+      '.ksa-su-tabs button{flex:1;height:44px;border:0;border-bottom:2px solid transparent;background:transparent;color:#616161;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer}' +
+      '.ksa-su-tabs button.on{border-bottom-color:var(--ksa-accent);color:var(--ksa-accent)}' +
       '#ksa-su-qrbox{display:flex;justify-content:center;margin:4px 0 8px}#ksa-su-qrbox svg{width:168px;height:168px}';
     document.head.appendChild(style);
   }
@@ -190,10 +202,10 @@
         '<div class="ksa-icon-row"><span class="ksa-icon">' + cfg.icon + '</span>' +
           '<div class="ksa-desc" id="ksa-desc">naviweb 로그인</div></div>' +
         '<div id="ksa-step-phone">' +
-          '<div class="ksa-input-wrap">' +
-            '<input type="tel" id="ksa-phone" placeholder="폰 번호 뒷 8자리" inputmode="numeric" maxlength="8" autocomplete="tel">' +
-            '<button type="button" class="ksa-input-icon-btn" id="ksa-devlink-btn" aria-label="폰으로 승인받기" title="폰으로 승인받기"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>' +
-          '</div>' +
+          '<div class="ksa-field"><label for="ksa-phone">폰 번호 뒷 8자리</label>' +
+            '<input type="tel" id="ksa-phone" inputmode="numeric" maxlength="8" autocomplete="tel" aria-describedby="ksa-phone-hint">' +
+            '<div class="ksa-hint" id="ksa-phone-hint">010을 제외한 8자리</div></div>' +
+          '<button type="button" class="ksa-cta" id="ksa-devlink-btn">로그인</button>' +
           '<div class="ksa-su-row">처음이세요? <a id="ksa-signup-link" role="button" tabindex="0">회원 가입</a></div>' +
         '</div>' +
         '<div id="ksa-step-signup" style="display:none">' +
@@ -216,7 +228,7 @@
         '<div id="ksa-step-devlink" style="display:none">' +
           '<div class="ksa-devlink-wait">' +
             '<div class="ksa-spinner"></div>' +
-            '<div id="ksa-match" style="display:none;text-align:center;margin:0 0 10px"><div style="font-size:12.5px;color:#374151">이 숫자를 선택</div><div id="ksa-match-num" style="font-size:40px;font-weight:800;letter-spacing:2px;color:#4338CA;margin-top:2px"></div></div>' +
+                        '<div id="ksa-match" style="display:none"><div class="ksa-match-sub">폰에서 이 숫자를 선택하세요</div><div id="ksa-match-num" class="ksa-match-num"></div></div>' +
             '<div id="ksa-devlink-status" style="font-size:12.5px;color:#4A5568;text-align:center"></div>' +
             '<div id="ksa-devlink-timer" style="font-size:11px;color:#718096;text-align:center;margin-top:4px"></div>' +
           '</div>' +
@@ -280,8 +292,10 @@
   }
   function PHONE_TITLE() { return (cfg.serviceLabel && cfg.serviceLabel !== 'K-Mail' ? cfg.serviceLabel : 'naviweb') + ' 로그인'; }
   function setMsg(text, kind) {
+    if (els.phone) els.phone.classList.toggle('ksa-invalid', kind === 'err');
     els.msg.textContent = text || '';
     els.msg.className = 'ksa-msg' + (kind ? ' ' + kind : '');
+    els.msg.setAttribute('role', 'alert');
   }
   // 승인 대기 화면에서는 제목을 "폰에서 승인하세요" 한 줄로 바꾼다(번호 입력 안내가 남아 있으면 불필요하고 중복된다).
   function setDescWait(on) {
@@ -344,7 +358,7 @@
   function startDevlinkCountdown(seconds) {
     var remain = seconds;
     var tick = function () {
-      els.devlinkTimer.textContent = remain > 0 ? (remain + '초') : '만료됨';
+      els.devlinkTimer.textContent = remain > 0 ? (remain + '초 남음') : '만료됨';
       if (remain <= 0 && devlinkCountdownTimer) { clearInterval(devlinkCountdownTimer); devlinkCountdownTimer = null; }
       remain -= 1;
     };
