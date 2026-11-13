@@ -47,7 +47,7 @@ export function _updateHandleChip(h) {
   if (h) {
     const nickname = _USER?.nickname || _USER?.name || '';
     const nickPrefix = nickname ? `${nickname} ` : '';
-    if (s) s.innerHTML = `${nickPrefix}<b style="color:#007b8b">${h}</b>`;
+    if (s) s.innerHTML = `${nickPrefix}<b style="color:#00796B">${h}</b>`;
     if (b) b.style.display = 'none';
   } else {
     if (s) s.textContent = '등록되지 않았습니다.';
@@ -72,7 +72,7 @@ export function openSettings() {
     if (registered) {
       const s = JSON.parse(localStorage.getItem('gopang_user_v4') || sessionStorage.getItem('gopang_user_v4') || '{}');
       const nickPrefix = s.nickname ? `${s.nickname} ` : '';
-      idStatus.innerHTML = `${nickPrefix}<b style="color:#007b8b">${s.handle}</b>`;
+      idStatus.innerHTML = `${nickPrefix}<b style="color:#00796B">${s.handle}</b>`;
     } else {
       idStatus.textContent = '등록되지 않았습니다.';
     }
@@ -94,7 +94,7 @@ export function openSettings() {
       if (!document.getElementById('_id-section-guide')) {
         const g = document.createElement('p');
         g.id = '_id-section-guide';
-        g.style.cssText = 'font-size:calc(0.75rem*var(--hondi-fs,1));color:#007b8b;font-weight:600;margin-bottom:8px;' +
+        g.style.cssText = 'font-size:calc(0.75rem*var(--hondi-fs,1));color:#00796B;font-weight:600;margin-bottom:8px;' +
                           'background:#d3f7ff;border-radius:8px;padding:8px 10px;line-height:1.5';
         g.innerHTML = '아이디를 등록하면 AI 비서와 P2P 채팅을 사용할 수 있습니다.';
         idSec.insertBefore(g, idSec.firstChild);
@@ -342,7 +342,7 @@ function _renderPcSyncBanner(parsed, guid) {
   banner.style.color = '#166534';
   banner.innerHTML = `
     🔒 PC에서 <b>${_displayLabel}</b> 설정이 암호화되어 도착했습니다.${parsed.systemPrompt ? '<br>시스템 프롬프트도 함께 도착했습니다.' : ''}<br>
-    <button id="_pc-sync-accept" style="margin-top:8px;padding:8px 14px;border:none;border-radius:8px;background:#007b8b;color:#fff;font-size:calc(0.7812rem*var(--hondi-fs,1));font-weight:600;cursor:pointer">이 설정으로 등록하기</button>
+    <button id="_pc-sync-accept" style="margin-top:8px;padding:8px 14px;border:none;border-radius:8px;background:#00796B;color:#fff;font-size:calc(0.7812rem*var(--hondi-fs,1));font-weight:600;cursor:pointer">이 설정으로 등록하기</button>
     <button id="_pc-sync-dismiss" style="margin-top:8px;margin-left:6px;padding:8px 14px;border:none;border-radius:8px;background:transparent;color:#166534;font-size:calc(0.7812rem*var(--hondi-fs,1));cursor:pointer">무시</button>
   `;
 
@@ -531,7 +531,7 @@ export function _updateSecuritySection() {
   }
 
   if (levelEl) levelEl.innerHTML =
-    `<span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#007b8b">${stored.handle || stored.ipv6}</span>`;
+    `<span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#00796B">${stored.handle || stored.ipv6}</span>`;
   if (idEl) idEl.textContent = '';
 }
 
@@ -683,13 +683,13 @@ window._openChatDetail = async function(idx) {
   const html = `
     <div style="padding:0">
       <div style="padding:12px 16px;border-bottom:1px solid #f2f2f7;display:flex;align-items:center;gap:10px">
-        <button onclick="openChatHistory()" style="border:none;background:none;color:#007b8b;font-size:calc(0.9375rem*var(--hondi-fs,1));cursor:pointer;padding:0">← 목록</button>
+        <button onclick="openChatHistory()" style="border:none;background:none;color:#00796B;font-size:calc(0.9375rem*var(--hondi-fs,1));cursor:pointer;padding:0">← 목록</button>
         <span style="font-size:calc(0.9375rem*var(--hondi-fs,1));font-weight:600">${session.peerHandle || '대화'}</span>
       </div>
       <div style="padding:16px;display:flex;flex-direction:column;gap:8px">
         ${messages.map(m => m.role === 'me' || m.role === 'user'
           ? `<div style="display:flex;justify-content:flex-end">
-               <div style="background:#007b8b;color:#fff;padding:8px 12px;border-radius:16px 16px 4px 16px;max-width:70%;font-size:calc(0.875rem*var(--hondi-fs,1))">${m.content}</div>
+               <div style="background:#00796B;color:#fff;padding:8px 12px;border-radius:16px 16px 4px 16px;max-width:70%;font-size:calc(0.875rem*var(--hondi-fs,1))">${m.content}</div>
              </div>`
           : `<div style="display:flex;justify-content:flex-start">
                <div style="background:#f3f4f6;color:#111827;padding:8px 12px;border-radius:16px 16px 16px 4px;max-width:70%;font-size:calc(0.875rem*var(--hondi-fs,1))">${m.content}</div>
@@ -735,7 +735,7 @@ export function openHashChain() {
     : chains.map((c, i) => `
       <div style="padding:12px 16px;border-bottom:1px solid #f2f2f7">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-          <span style="font-size:calc(0.6875rem*var(--hondi-fs,1));background:#eafcff;color:#007b8b;padding:2px 6px;border-radius:4px;font-weight:600">
+          <span style="font-size:calc(0.6875rem*var(--hondi-fs,1));background:#eafcff;color:#00796B;padding:2px 6px;border-radius:4px;font-weight:600">
             ${i === chains.length - 1 ? 'Genesis' : 'L' + (i + 1)}
           </span>
           <span style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:#9ca3af">${new Date(c.ts).toLocaleString('ko-KR')}</span>
@@ -963,22 +963,22 @@ export async function openGopangWallet() {
           <div style="font-size:calc(0.6875rem*var(--hondi-fs,1));font-weight:600;letter-spacing:.05em;color:#8a94a6;text-transform:uppercase;margin-bottom:8px">입금 계좌</div>
           <div style="display:flex;align-items:center;gap:8px">
             <div style="flex:1;font-size:calc(1rem*var(--hondi-fs,1));font-weight:600;color:#111827;letter-spacing:-.1px">기업은행 315-092028-04-011</div>
-            <button id="_gdc-account-copy-btn" onclick="_copyGdcAccountNumber()" style="flex-shrink:0;padding:7px 14px;border:1px solid #007b8b;border-radius:6px;background:#fff;color:#007b8b;font-size:calc(0.7812rem*var(--hondi-fs,1));font-weight:600;cursor:pointer;letter-spacing:.02em">복사</button>
+            <button id="_gdc-account-copy-btn" onclick="_copyGdcAccountNumber()" style="flex-shrink:0;padding:7px 14px;border:1px solid #00796B;border-radius:6px;background:#fff;color:#00796B;font-size:calc(0.7812rem*var(--hondi-fs,1));font-weight:600;cursor:pointer;letter-spacing:.02em">복사</button>
           </div>
           <div style="font-size:calc(0.7812rem*var(--hondi-fs,1));color:#6b7280;margin-top:10px;line-height:1.55">위 계좌로 입금하면, 입금액에 상응하는 GDC가 충전됩니다(GDC:KRW = 1:1). 아래 두 방법 중 하나를 선택해 입금해 주세요.</div>
 
-          <div style="margin-top:14px;padding:12px;border:1.5px solid #007b8b;border-radius:8px">
+          <div style="margin-top:14px;padding:12px;border:1.5px solid #00796B;border-radius:8px">
             <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-              <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:700;color:#007b8b">방법 1</span>
-              <span style="font-size:calc(0.6875rem*var(--hondi-fs,1));font-weight:600;color:#007b8b;background:#e6f4f6;padding:2px 7px;border-radius:4px">추천</span>
+              <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:700;color:#00796B">방법 1</span>
+              <span style="font-size:calc(0.6875rem*var(--hondi-fs,1));font-weight:600;color:#00796B;background:#e6f4f6;padding:2px 7px;border-radius:4px">추천</span>
             </div>
             <div style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b7280;margin-bottom:8px;line-height:1.5">입금하실 금액을 먼저 등록하고, 그 금액 그대로 입금해 주세요. 보낸이는 본인 이름 그대로여도 됩니다. 폰 번호가 아니라 이름으로 이미 입금하셨어도, 여기에 입금 금액을 적어 주세요.</div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
-              ${[100, 1000, 5000, 10000].map(v => `<button type="button" onclick="_setChargeAmount(${v})" style="padding:6px 12px;border:1px solid #007b8b;border-radius:999px;background:#fff;color:#007b8b;font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:600;cursor:pointer">${v.toLocaleString()}원</button>`).join('')}
+              ${[100, 1000, 5000, 10000].map(v => `<button type="button" onclick="_setChargeAmount(${v})" style="padding:6px 12px;border:1px solid #00796B;border-radius:999px;background:#fff;color:#00796B;font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:600;cursor:pointer">${v.toLocaleString()}원</button>`).join('')}
             </div>
             <div style="display:flex;gap:8px">
               <input id="_charge-self-report-amount" type="number" inputmode="numeric" min="100" step="1" value="1000" placeholder="입금하실 금액(원) · 최소 100원" style="flex:1;min-width:0;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:calc(0.8125rem*var(--hondi-fs,1))" />
-              <button onclick="_submitChargeSelfReport()" style="flex-shrink:0;padding:8px 14px;border:none;border-radius:6px;background:#007b8b;color:#fff;font-size:calc(0.7812rem*var(--hondi-fs,1));font-weight:600;cursor:pointer">등록</button>
+              <button onclick="_submitChargeSelfReport()" style="flex-shrink:0;padding:8px 14px;border:none;border-radius:6px;background:#00796B;color:#fff;font-size:calc(0.7812rem*var(--hondi-fs,1));font-weight:600;cursor:pointer">등록</button>
             </div>
             <div id="_charge-self-report-status" style="font-size:calc(0.75rem*var(--hondi-fs,1));margin-top:8px"></div>
           </div>
@@ -1191,7 +1191,7 @@ window._openTxDetail = function(idx) {
 
   body.innerHTML = `
     <div style="padding:0 16px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f2f2f7;padding-bottom:14px">
-      <button onclick="closeChargeDetail()" style="border:none;background:none;color:#007b8b;font-size:calc(0.9375rem*var(--hondi-fs,1));cursor:pointer;padding:0">← 뒤로</button>
+      <button onclick="closeChargeDetail()" style="border:none;background:none;color:#00796B;font-size:calc(0.9375rem*var(--hondi-fs,1));cursor:pointer;padding:0">← 뒤로</button>
       <span style="font-size:calc(0.9375rem*var(--hondi-fs,1));font-weight:600">거래 상세</span>
     </div>
     <div style="padding:16px;display:flex;flex-direction:column;gap:14px">
@@ -1226,7 +1226,7 @@ window._openWalletTxDetail = async function() {
   const html = `
     <div style="padding:0">
       <div style="padding:12px 16px;border-bottom:1px solid #f2f2f7;display:flex;align-items:center;gap:10px">
-        <button onclick="openGopangWallet()" style="border:none;background:none;color:#007b8b;font-size:calc(0.9375rem*var(--hondi-fs,1));cursor:pointer;padding:0">← 뒤로</button>
+        <button onclick="openGopangWallet()" style="border:none;background:none;color:#00796B;font-size:calc(0.9375rem*var(--hondi-fs,1));cursor:pointer;padding:0">← 뒤로</button>
         <span style="font-size:calc(0.9375rem*var(--hondi-fs,1));font-weight:600">거래 상세</span>
       </div>
       <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
@@ -1279,13 +1279,13 @@ export async function openFinancialStatement() {
     const _row = (label, val, cls='', bold=false) => `
       <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid #f2f2f7">
         <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:${bold?'#111827':'#6b7280'};font-weight:${bold?'600':'400'}">${label}</span>
-        <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:${bold?'700':'500'};color:${cls==='green'?'#007b8b':cls==='red'?'#dc2626':'#111827'}">${val}</span>
+        <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:${bold?'700':'500'};color:${cls==='green'?'#00796B':cls==='red'?'#dc2626':'#111827'}">${val}</span>
       </div>`;
 
     const _card = (rows) =>
       `<div style="background:#f9fafb;border-radius:10px;padding:4px 12px;margin-bottom:14px">${rows}</div>`;
 
-    const _title = (text, color='#007b8b') =>
+    const _title = (text, color='#00796B') =>
       `<div style="font-size:calc(0.75rem*var(--hondi-fs,1));font-weight:600;color:#374151;margin:12px 0 6px;
                    padding-bottom:4px;border-bottom:2px solid ${color}">${text}</div>`;
 
@@ -1294,7 +1294,7 @@ export async function openFinancialStatement() {
     // ── 탭별 콘텐츠 ──────────────────────────────────────────
     const tabs = {
       bs: `
-        ${_title('대차대조표 (Balance Sheet)', '#007b8b')}
+        ${_title('대차대조표 (Balance Sheet)', '#00796B')}
         ${_card(
           _row('자산 · 현금 (bs-cash)', '₮' + bsCash.toLocaleString()) +
           _row('자산 합계', '₮' + bsCash.toLocaleString(), 'green', true)
@@ -1341,8 +1341,8 @@ export async function openFinancialStatement() {
         ${_title('재무분석 (Financial Analysis)', '#f59e0b')}
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
           ${[
-            ['수익률', plRevenue > 0 ? ((netIncome/plRevenue)*100).toFixed(1)+'%' : '0%', netIncome >= 0 ? '#007b8b' : '#dc2626'],
-            ['유동비율', '100%', '#007b8b'],
+            ['수익률', plRevenue > 0 ? ((netIncome/plRevenue)*100).toFixed(1)+'%' : '0%', netIncome >= 0 ? '#00796B' : '#dc2626'],
+            ['유동비율', '100%', '#00796B'],
             ['부채비율', '0%', '#111827'],
             ['총거래 횟수', (fs['last_tx_id'] ? '1건+' : '0건'), '#111827'],
           ].map(([label, val, color]) => `
@@ -1367,8 +1367,8 @@ export async function openFinancialStatement() {
           ${[['bs','대차대조표'],['pl','손익계산서'],['cf','현금흐름표'],['fa','재무분석']].map(([id,label],i) => `
             <button onclick="_fsSwitchTab('${id}')" id="_fs-tab-${id}"
               style="flex:1;padding:10px 2px;font-size:calc(0.6875rem*var(--hondi-fs,1));font-weight:${i===0?'600':'400'};
-                     color:${i===0?'#007b8b':'#9ca3af'};background:${i===0?'#fff':'transparent'};
-                     border:none;border-bottom:${i===0?'2px solid #007b8b':'2px solid transparent'};
+                     color:${i===0?'#00796B':'#9ca3af'};background:${i===0?'#fff':'transparent'};
+                     border:none;border-bottom:${i===0?'2px solid #00796B':'2px solid transparent'};
                      cursor:pointer;font-family:inherit;transition:all .15s">
               ${label}
             </button>`).join('')}
@@ -1387,10 +1387,10 @@ export async function openFinancialStatement() {
         const el = document.getElementById('_fs-tab-' + t);
         if (!el) return;
         const active = t === id;
-        el.style.color      = active ? '#007b8b' : '#9ca3af';
+        el.style.color      = active ? '#00796B' : '#9ca3af';
         el.style.fontWeight = active ? '600' : '400';
         el.style.background = active ? '#fff' : 'transparent';
-        el.style.borderBottom = active ? '2px solid #007b8b' : '2px solid transparent';
+        el.style.borderBottom = active ? '2px solid #00796B' : '2px solid transparent';
       });
       const body = document.getElementById('_fs-body');
       if (body) body.innerHTML = tabData[id];
@@ -1422,12 +1422,12 @@ function _openSheet(title, html, rightLabel = '') {
     // 비어 있으면(기존 시트 대부분) min-width:36px만 유지돼 "닫기"
     // 버튼과 균형을 맞추는 기존 동작 그대로다.
     sheet.innerHTML = `
-      <div style="display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid #f2f2f7;flex-shrink:0">
+      <div style="display:flex;align-items:center;min-height:56px;padding:0 16px;box-shadow:0 1px 3px rgba(0,0,0,.2);flex-shrink:0">
         <button id="_gopang-sheet-close"
-          style="border:none;background:none;font-size:calc(0.9375rem*var(--hondi-fs,1));color:#007b8b;cursor:pointer;padding:0;font-family:inherit">
+          style="border:none;background:none;font-size:calc(0.9375rem*var(--hondi-fs,1));font-weight:600;letter-spacing:.04em;color:#00796B;cursor:pointer;padding:8px 0;font-family:inherit">
           닫기
         </button>
-        <div id="_gopang-sheet-title" style="flex:1;text-align:center;font-size:calc(1rem*var(--hondi-fs,1));font-weight:600"></div>
+        <div id="_gopang-sheet-title" style="flex:1;text-align:center;font-size:calc(1.125rem*var(--hondi-fs,1));font-weight:500;color:#212121"></div>
         <div id="_gopang-sheet-right" style="min-width:36px;text-align:right;font-size:calc(0.7812rem*var(--hondi-fs,1));font-weight:500;color:#6b7280;white-space:nowrap"></div>
       </div>
       <div id="_gopang-sheet-body" style="flex:1;overflow-y:auto"></div>`;
@@ -1493,7 +1493,7 @@ export function openProfileComposer() {
   ].join(';');
 
   ov.innerHTML = `
-    <div style="background:#4B7BE5;padding:calc(env(safe-area-inset-top,0px)+12px) 16px 0;
+    <div style="background:#00796B;padding:calc(env(safe-area-inset-top,0px)+12px) 16px 0;
       display:flex;align-items:center;gap:10px;flex-shrink:0">
       <button id="_pc-back" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.15);
           border:none;cursor:pointer;color:#fff;font-size:calc(1.25rem*var(--hondi-fs,1));display:flex;
@@ -1643,7 +1643,7 @@ export function _openProfilePanel(handle) {
 
   // 상단 바
   ov.innerHTML = `
-    <div style="background:#4B7BE5;padding:calc(env(safe-area-inset-top,0px)+12px) 16px 0;
+    <div style="background:#00796B;padding:calc(env(safe-area-inset-top,0px)+12px) 16px 0;
       display:flex;align-items:center;gap:10px;flex-shrink:0">
       <button onclick="document.getElementById('_profile-panel-overlay').style.transform='translateX(100%)';
         setTimeout(()=>document.getElementById('_profile-panel-overlay')?.remove(),300)"
@@ -1691,11 +1691,11 @@ export async function openBackupKey() {
            border-radius:8px;padding:12px;font-family:monospace;font-size:calc(0.75rem*var(--hondi-fs,1));
            word-break:break-all;color:#111827;margin-bottom:8px"></div>
       <button id="_bk-show-btn" style="width:100%;padding:13px;border:1px solid #e5e7eb;border-radius:10px;
-              background:none;color:#007b8b;font-weight:600;cursor:pointer;font-size:calc(0.875rem*var(--hondi-fs,1));margin-bottom:8px">
+              background:none;color:#00796B;font-weight:600;cursor:pointer;font-size:calc(0.875rem*var(--hondi-fs,1));margin-bottom:8px">
         키 표시
       </button>
       <button id="_bk-copy-btn" style="display:none;width:100%;padding:13px;border:none;border-radius:10px;
-              background:#007b8b;color:#fff;font-weight:600;cursor:pointer;font-size:calc(0.875rem*var(--hondi-fs,1));margin-bottom:28px">
+              background:#00796B;color:#fff;font-weight:600;cursor:pointer;font-size:calc(0.875rem*var(--hondi-fs,1));margin-bottom:28px">
         복사
       </button>
 
@@ -1710,7 +1710,7 @@ export async function openBackupKey() {
                font-size:calc(0.8125rem*var(--hondi-fs,1));font-family:monospace;resize:none;box-sizing:border-box;
                margin-bottom:8px" autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
       <div id="_bk-restore-err" style="display:none;font-size:calc(0.75rem*var(--hondi-fs,1));color:#dc2626;margin-bottom:8px"></div>
-      <div id="_bk-restore-ok" style="display:none;font-size:calc(0.75rem*var(--hondi-fs,1));color:#007b8b;margin-bottom:8px"></div>
+      <div id="_bk-restore-ok" style="display:none;font-size:calc(0.75rem*var(--hondi-fs,1));color:#00796B;margin-bottom:8px"></div>
       <button id="_bk-restore-btn" style="width:100%;padding:13px;border:none;border-radius:10px;
               background:#111827;color:#fff;font-weight:600;cursor:pointer;font-size:calc(0.875rem*var(--hondi-fs,1))">
         이 기기에 적용
