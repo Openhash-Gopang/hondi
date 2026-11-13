@@ -392,11 +392,13 @@ body.gopang-authed #gopang-auth-gate{display:none}
 #ai-panel-close{
   display:flex;
   width:32px;height:32px;border-radius:50%;
-  background:rgba(255,255,255,.18);
+  background:none; /* 2026-11-14(주피터 지시): 톱니바퀴 아이콘을 이미지로 교체 — 반투명 원형 배경 제거 */
   align-items:center;justify-content:center;
   flex-shrink:0;cursor:pointer;border:none;color:var(--panel-header-txt);
 }
 #ai-panel-close svg{pointer-events:none;stroke:currentColor}
+#ai-panel-close img{width:28px;height:28px;display:block;pointer-events:none}
+#ai-panel-close:active{opacity:.75}
 
 /* 숫자 코드 버튼 — 우측, 설정 버튼 바로 왼쪽 (2026-09-24, 주피터 지시).
    나비 숫자 코드 만들기·인식 페이지(/pages/digit-code.html, 정식 반영 2026-09-26)로 연결한다.
@@ -1388,12 +1390,8 @@ html.is-embedded .install-banner{display:none!important}
            기능은 항상 설정 패널을 열었는데, 아이콘 모양이 종(bell) 모양이라
            "알림 버튼"처럼 보이는 시각적 불일치가 있었다. 실제 기능에 맞게
            톱니바퀴 아이콘 + "설정" 라벨로 교체(기능 변경 없음, 표시만 수정). -->
-      <button id="ai-panel-close" title="설정" onclick="openSettings()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-        </svg>
+      <button id="ai-panel-close" title="설정" aria-label="설정" onclick="openSettings()">
+        <img src="/assets/settings-icon.webp?v=20261114" width="28" height="28" alt="" decoding="async">
       </button>
     </div>
     <div id="ai-panel-title">내 AI 비서</div>
