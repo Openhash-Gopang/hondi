@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-13 23:00 KST · 기준 커밋 47c2d659
+- 갱신: 2026-11-13 23:04 KST · 기준 커밋 7e2446bb
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-13 Merge pull request #1034 from Openhash-Gopang/login-phone-notify
+- 2026-11-13 로그인 승인 팝업 단순화, 입력한 번호로 알림 요청 보내기
 - 2026-11-13 Merge pull request #1033 from Openhash-Gopang/fix-pages-skip-ci
 - 2026-11-13 병합 뒤 Cloudflare Pages 배포가 [skip ci] 때문에 건너뛰어지는 문제 — 버전 커밋 직후 배포 직접 요청
 - 2026-11-13 Merge pull request #1032 from Openhash-Gopang/login-sms-option
@@ -42,8 +44,6 @@
 - 2026-11-13 Merge pull request #1017 from Openhash-Gopang/feat/search-intents-latency
 - 2026-11-13 Merge origin/main into feat/search-intents-latency (call-ai.js 검색 동사 충돌 해결: 확대된 목록 유지)
 - 2026-11-13 Merge pull request #1018 from Openhash-Gopang/fix/sw-activate-guard-action
-- 2026-11-13 Merge pull request #1016 from Openhash-Gopang/fix/search-verb-hoching
-- 2026-11-12 fix: 검문에 걸린 답변이 사람 찾기/호출이면 검색 창을 직접 열어 대화가 멈추지 않게, 대기 중인 새 서비스워커를 앱 열 때 바로 활성화
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
