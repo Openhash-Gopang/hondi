@@ -2790,7 +2790,7 @@ document.addEventListener('keydown', function (e) {
     --ud-mono:'SFMono-Regular','Consolas',monospace;
     --ud-pri:#4338CA; --ud-pri-bg:#EEF2FF;
   }
-  #user-dash-overlay .ud-card{background:var(--ud-bg);border-radius:14px;width:100%;max-width:560px;
+  #user-dash-overlay .ud-card{background:var(--ud-bg);border-radius:4px;width:100%;max-width:560px;
     box-shadow:0 12px 32px rgba(0,0,0,.18);overflow:hidden;margin:auto;color:var(--ud-text);
     font-family:'Pretendard','Noto Sans KR',sans-serif;border:1px solid var(--ud-line);}
   #user-dash-overlay .ud-head{display:flex;align-items:center;justify-content:space-between;
@@ -2831,7 +2831,7 @@ document.addEventListener('keydown', function (e) {
 </style>
 <div id="user-dash-overlay"
      style="display:none;position:fixed;inset:0;z-index:10000;
-            background:rgba(0,0,0,.55);backdrop-filter:blur(4px);
+            background:rgba(0,0,0,.5);
             align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px 16px">
   <div class="ud-card">
 
@@ -3038,18 +3038,18 @@ const WORKER_URL  = 'https://hondi-proxy.tensor-city.workers.dev';
 <!-- ── 나비 코드 확대 팝업 ── -->
 <div id="hondi-zoom-overlay" onclick="closeHondiZoom()" style="
   display:none; position:fixed; inset:0; z-index:99999;
-  background:rgba(0,0,0,0.85);
+  background:rgba(0,0,0,0.5);
   align-items:center; justify-content:center; flex-direction:column; gap:20px;">
   <div onclick="event.stopPropagation()" style="
-    background:#fff; border-radius:16px; padding:28px 32px;
+    background:#fff; border-radius:4px; padding:24px 24px 16px;
     display:flex; flex-direction:column; align-items:center; gap:16px;
-    box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+    box-shadow:0 11px 15px -7px rgba(0,0,0,.2),0 24px 38px 3px rgba(0,0,0,.14),0 9px 46px 8px rgba(0,0,0,.12);">
     <div style="font-size:14px; color:#888; letter-spacing:0.05em;">나비 코드 — 스마트폰으로 스캔하세요</div>
     <canvas id="hondi-zoom-canvas" style="border-radius:8px; max-width:90vw; max-height:70vh;"></canvas>
     <button onclick="closeHondiZoom()" style="
-      padding:10px 32px; border-radius:10px; border:none;
-      background:#111; color:#fff; font-size:14px; font-weight:500;
-      cursor:pointer; letter-spacing:0.03em;">✕ 닫기</button>
+      min-height:44px; padding:0 24px; border-radius:4px; border:none;
+      background:transparent; color:#00796B; font-size:15px; font-weight:600;
+      cursor:pointer; letter-spacing:0.04em;">닫기</button>
   </div>
 </div>
 
