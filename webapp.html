@@ -404,14 +404,16 @@ body.gopang-authed #gopang-auth-gate{display:none}
 #ai-panel-digit{
   display:flex;
   width:32px;height:32px;border-radius:50%;
-  background:rgba(255,255,255,.18);
+  background:none;
   align-items:center;justify-content:center;
   flex-shrink:0;cursor:pointer;border:none;margin-right:8px;
   color:var(--panel-header-txt);text-decoration:none;
   -webkit-tap-highlight-color:transparent;
 }
 #ai-panel-digit svg{pointer-events:none;stroke:currentColor}
-#ai-panel-digit:active{background:rgba(255,255,255,.3)}
+/* 2026-11-14(주피터 지시): QR 아이콘 → 카메라 아이콘 이미지로 교체. 이미지 자체가 둥근 타일이라 원형 반투명 배경은 뺀다. */
+#ai-panel-digit img{width:30px;height:30px;display:block;pointer-events:none;border-radius:8px}
+#ai-panel-digit:active{opacity:.75}
 
 /* 이름 편집 인풋 (inline) — 2026-07-27: 배지형 박스에서 밑줄형 인라인
    입력으로 단순화, 이름 폰트(15px/700)와 시각적으로 이어지도록 맞춤 */
@@ -1379,13 +1381,7 @@ html.is-embedded .install-banner{display:none!important}
            프레임 모양이 겹쳐 헷갈린다는 지적. 기능(숫자 코드 페이지 새 탭 열기)은 그대로. -->
       <a id="ai-panel-digit" href="https://app.naviweb.kr/pages/digit-code.html" target="_blank" rel="noopener"
          title="내 코드 (숫자 코드)" aria-label="내 코드 (숫자 코드)">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3.5" y="3.5" width="7" height="7" rx="1.2"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.2"/>
-          <rect x="3.5" y="13.5" width="7" height="7" rx="1.2"/>
-          <path d="M6.5 6.5h1M16.5 6.5h1M6.5 16.5h1"/>
-          <path d="M14 14h2.5v2.5M20.5 14v.01M14 20.5h.01M17 18.5v2h3.5M20.5 17v.01"/>
-        </svg>
+        <img src="/assets/camera-icon-glossy.webp?v=20261114" width="30" height="30" alt="" decoding="async">
       </a>
       <!-- 설정 버튼 (우) — 기존 "닫기" 버튼 자리 재사용.
            2026-08-28 수정(주피터 지시) — onclick은 원래부터 openSettings()라
