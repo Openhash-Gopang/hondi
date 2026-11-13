@@ -903,7 +903,7 @@ manifest 등록  : prompts/sp-catalog.json에 "SP-18_ksearch":
   {
     id: 'ksearch', name: 'K-Search', category: 'UTL',
     type: 'inline',
-    url: 'https://search.hondi.net/webapp.html',  // 서브도메인 미배포 시 gopang 자체 경유
+    url: 'https://search.naviweb.kr/webapp.html',  // 서브도메인 미배포 시 gopang 자체 경유
     sp_key: 'SP-18_ksearch',
     status: 'pending',  // RULE-03 후반부·재주입 배선 완료 전까지 pending 유지 권장
     priority: 9, threshold: 0.70,

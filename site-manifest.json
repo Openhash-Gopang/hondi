@@ -13,7 +13,7 @@
       "AC",
       "라우팅"
     ],
-    "pc_url": "https://hondi.net/docs/AC-ROUTING-ARCHITECTURE_v1_0_2026-09-14.md",
+    "pc_url": "https://app.naviweb.kr/docs/AC-ROUTING-ARCHITECTURE_v1_0_2026-09-14.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-14"
@@ -30,7 +30,7 @@
       "3대",
       "시나리오"
     ],
-    "pc_url": "https://hondi.net/docs/AC_SP_COMMUNICATION_ARCHITECTURE_MANUAL_v1_0.md",
+    "pc_url": "https://app.naviweb.kr/docs/AC_SP_COMMUNICATION_ARCHITECTURE_MANUAL_v1_0.md",
     "audience": "dev",
     "source": "menu"
   },
@@ -48,7 +48,7 @@
       "3주",
       "무발생"
     ],
-    "pc_url": "https://hondi.net/docs/AI_CHARGE_SECRET_DRIFT_INCIDENT_2026_09_03.md",
+    "pc_url": "https://app.naviweb.kr/docs/AI_CHARGE_SECRET_DRIFT_INCIDENT_2026_09_03.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-03"
@@ -63,7 +63,7 @@
       "API",
       "레퍼런스"
     ],
-    "pc_url": "https://hondi.net/docs/API_REFERENCE_worker_v1_0.md",
+    "pc_url": "https://app.naviweb.kr/docs/API_REFERENCE_worker_v1_0.md",
     "audience": "dev",
     "source": "menu"
   },
@@ -83,7 +83,7 @@
       "로그인",
       "백서"
     ],
-    "pc_url": "https://hondi.net/docs/AUTH_LOGIN_WHITEPAPER_v1_0_20260829.html",
+    "pc_url": "https://app.naviweb.kr/docs/AUTH_LOGIN_WHITEPAPER_v1_0_20260829.html",
     "audience": "dev",
     "source": "menu",
     "date": "2026-08-29"
@@ -102,7 +102,7 @@
       "미등록태그",
       "피드백취합"
     ],
-    "pc_url": "https://hondi.net/docs/AUTO_REFRESH_MANUAL_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/AUTO_REFRESH_MANUAL_v1_0.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -120,7 +120,7 @@
       "입력창을",
       "각자"
     ],
-    "pc_url": "https://hondi.net/docs/CHAT_SHELL_UNIFICATION_2026_07_22.md",
+    "pc_url": "https://app.naviweb.kr/docs/CHAT_SHELL_UNIFICATION_2026_07_22.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-07-22"
@@ -139,7 +139,7 @@
       "to",
       "fetch"
     ],
-    "pc_url": "https://hondi.net/docs/DEVICELINK_KV_TTL_MINIMUM_2026_07_22.md",
+    "pc_url": "https://app.naviweb.kr/docs/DEVICELINK_KV_TTL_MINIMUM_2026_07_22.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-07-22"
@@ -158,7 +158,7 @@
       "device",
       "전체"
     ],
-    "pc_url": "https://hondi.net/docs/DEVICE_LINK_FULL_CHAIN_INCIDENT_2026_07_28.md",
+    "pc_url": "https://app.naviweb.kr/docs/DEVICE_LINK_FULL_CHAIN_INCIDENT_2026_07_28.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-07-28"
@@ -176,7 +176,7 @@
       "PC",
       "로그인"
     ],
-    "pc_url": "https://hondi.net/docs/DEVICE_LINK_MANUAL_v1_0.md",
+    "pc_url": "https://app.naviweb.kr/docs/DEVICE_LINK_MANUAL_v1_0.md",
     "audience": "dev",
     "source": "menu"
   },
@@ -194,7 +194,7 @@
       "숫자",
       "코드"
     ],
-    "pc_url": "https://hondi.net/docs/DIGIT_CODE_PHONE_AUTH_SEQ_ZERO_INCIDENT_2026_09_25.md",
+    "pc_url": "https://app.naviweb.kr/docs/DIGIT_CODE_PHONE_AUTH_SEQ_ZERO_INCIDENT_2026_09_25.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-25"
@@ -213,7 +213,7 @@
       "오픈뱅킹",
       "PG"
     ],
-    "pc_url": "https://hondi.net/docs/GDC_AUTO_CHARGE_INTEGRATION_CHECKLIST_20260810_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/GDC_AUTO_CHARGE_INTEGRATION_CHECKLIST_20260810_v1_0.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -231,7 +231,7 @@
       "사용료",
       "개발자"
     ],
-    "pc_url": "https://hondi.net/docs/GDC_BILLING_DEVELOPER_MANUAL_v1_0_20260903.md",
+    "pc_url": "https://app.naviweb.kr/docs/GDC_BILLING_DEVELOPER_MANUAL_v1_0_20260903.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-03"
@@ -249,7 +249,7 @@
       "알림",
       "매뉴얼"
     ],
-    "pc_url": "https://hondi.net/docs/GDC_CHARGE_MANUAL_v1_0.md",
+    "pc_url": "https://app.naviweb.kr/docs/GDC_CHARGE_MANUAL_v1_0.md",
     "audience": "dev",
     "source": "menu"
   },
@@ -267,7 +267,7 @@
       "폴더",
       "전체"
     ],
-    "pc_url": "https://hondi.net/docs/GDC_GIT_EXPOSURE_INCIDENT_2026_07_23.md",
+    "pc_url": "https://app.naviweb.kr/docs/GDC_GIT_EXPOSURE_INCIDENT_2026_07_23.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-07-23"
@@ -286,7 +286,7 @@
       "백서",
       "v2.0"
     ],
-    "pc_url": "https://hondi.net/docs/GDC_WHITEPAPER_v2_0_20260828.html",
+    "pc_url": "https://app.naviweb.kr/docs/GDC_WHITEPAPER_v2_0_20260828.html",
     "audience": "dev",
     "source": "menu",
     "date": "2026-08-28"
@@ -305,7 +305,7 @@
       "교훈",
       "매뉴얼"
     ],
-    "pc_url": "https://hondi.net/docs/GOVTREE_NATIONWIDE_EXPANSION_LESSONS_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/GOVTREE_NATIONWIDE_EXPANSION_LESSONS_v1_0.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -323,7 +323,7 @@
       "시청",
       "읍면동"
     ],
-    "pc_url": "https://hondi.net/docs/GOV_REGIONAL_AC_MANUAL_v1_0.md",
+    "pc_url": "https://app.naviweb.kr/docs/GOV_REGIONAL_AC_MANUAL_v1_0.md",
     "audience": "dev",
     "source": "menu"
   },
@@ -341,7 +341,7 @@
       "Market 미등록 메뉴 폴백 근거 확장",
       "대시보드 폼 편집기 신설 사진"
     ],
-    "pc_url": "https://hondi.net/docs/HANDOFF_2026-09-14_profile-dashboard-vision.md",
+    "pc_url": "https://app.naviweb.kr/docs/HANDOFF_2026-09-14_profile-dashboard-vision.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-14"
@@ -360,7 +360,7 @@
       "AC",
       "라우팅"
     ],
-    "pc_url": "https://hondi.net/docs/HANDOFF_2026-09-14_routing-precision-testing.md",
+    "pc_url": "https://app.naviweb.kr/docs/HANDOFF_2026-09-14_routing-precision-testing.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-14"
@@ -379,7 +379,7 @@
       "CLARIFY",
       "runnerUp"
     ],
-    "pc_url": "https://hondi.net/docs/HANDOFF_2026-09-18_gov-clarify-runnerup-a1-a5-verification.md",
+    "pc_url": "https://app.naviweb.kr/docs/HANDOFF_2026-09-18_gov-clarify-runnerup-a1-a5-verification.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-18"
@@ -398,7 +398,7 @@
       "SP",
       "개별"
     ],
-    "pc_url": "https://hondi.net/docs/HANDOFF_2026-09-19_jeju-sp-quality-evaluation.md",
+    "pc_url": "https://app.naviweb.kr/docs/HANDOFF_2026-09-19_jeju-sp-quality-evaluation.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-19"
@@ -417,7 +417,7 @@
       "Recompose",
       "파이프라인"
     ],
-    "pc_url": "https://hondi.net/docs/HANDOFF_20260902.md",
+    "pc_url": "https://app.naviweb.kr/docs/HANDOFF_20260902.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-02"
@@ -436,7 +436,7 @@
       "다음 세션 네트워크탭+wrangler tail부터",
       "chat.html"
     ],
-    "pc_url": "https://hondi.net/docs/HANDOFF_EXPERT_CHAT_FAILED_TO_FETCH_20260909_v1_0.md",
+    "pc_url": "https://app.naviweb.kr/docs/HANDOFF_EXPERT_CHAT_FAILED_TO_FETCH_20260909_v1_0.md",
     "audience": "dev",
     "source": "menu"
   },
@@ -456,7 +456,7 @@
       "나비",
       "검색이"
     ],
-    "pc_url": "https://hondi.net/docs/HANDOFF_HONDI_SEARCH_RELAY_MIGRATION_20260909_v1_0.md",
+    "pc_url": "https://app.naviweb.kr/docs/HANDOFF_HONDI_SEARCH_RELAY_MIGRATION_20260909_v1_0.md",
     "audience": "dev",
     "source": "menu"
   },
@@ -474,7 +474,7 @@
       "city Route 미등록 search",
       "biz"
     ],
-    "pc_url": "https://hondi.net/docs/HANDOFF_INFRA_AUDIT_SUBDOMAINS_20260909_v1_0.md",
+    "pc_url": "https://app.naviweb.kr/docs/HANDOFF_INFRA_AUDIT_SUBDOMAINS_20260909_v1_0.md",
     "audience": "dev",
     "source": "menu"
   },
@@ -492,7 +492,7 @@
       "전역",
       "API가"
     ],
-    "pc_url": "https://hondi.net/docs/HANDOFF_SITEWIDE_1042_CORS_BLOCK_20260909_v1_0.md",
+    "pc_url": "https://app.naviweb.kr/docs/HANDOFF_SITEWIDE_1042_CORS_BLOCK_20260909_v1_0.md",
     "audience": "dev",
     "source": "menu"
   },
@@ -512,7 +512,7 @@
       "원칙",
       "v1.0"
     ],
-    "pc_url": "https://hondi.net/docs/HONDI_PAGE_DESIGN_PRINCIPLES_v1_0.md",
+    "pc_url": "https://app.naviweb.kr/docs/HONDI_PAGE_DESIGN_PRINCIPLES_v1_0.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-23"
@@ -533,7 +533,7 @@
       "상세",
       "케이스"
     ],
-    "pc_url": "https://hondi.net/docs/HONDI_TEST_PLAN_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/HONDI_TEST_PLAN_v1_0.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -551,7 +551,7 @@
       "변경과",
       "노후화"
     ],
-    "pc_url": "https://hondi.net/docs/HONDI_TEST_STALENESS_PREVENTION_MANUAL_v1_0.md",
+    "pc_url": "https://app.naviweb.kr/docs/HONDI_TEST_STALENESS_PREVENTION_MANUAL_v1_0.md",
     "audience": "dev",
     "source": "menu"
   },
@@ -569,7 +569,7 @@
       "서버",
       "PocketBase"
     ],
-    "pc_url": "https://hondi.net/docs/INCIDENT_2026-09-18_l1-hanlim-pocketbase-crashloop-recovery.md",
+    "pc_url": "https://app.naviweb.kr/docs/INCIDENT_2026-09-18_l1-hanlim-pocketbase-crashloop-recovery.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-18"
@@ -588,7 +588,7 @@
       "오리진",
       "이전"
     ],
-    "pc_url": "https://hondi.net/docs/JEJU_SVC_ID_ALIAS_REGRESSION_2026_07_22.md",
+    "pc_url": "https://app.naviweb.kr/docs/JEJU_SVC_ID_ALIAS_REGRESSION_2026_07_22.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-07-22"
@@ -607,7 +607,7 @@
       "테스트",
       "사고"
     ],
-    "pc_url": "https://hondi.net/docs/KMAIL_KPLAN_PIPELINE_LIVE_TEST_INCIDENT_2026_09_02.md",
+    "pc_url": "https://app.naviweb.kr/docs/KMAIL_KPLAN_PIPELINE_LIVE_TEST_INCIDENT_2026_09_02.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-02"
@@ -626,7 +626,7 @@
       "Recompose",
       "파이프라인"
     ],
-    "pc_url": "https://hondi.net/docs/KPLAN_KMAIL_INTEGRATION_ARCHITECTURE_v1_0_20260902.md",
+    "pc_url": "https://app.naviweb.kr/docs/KPLAN_KMAIL_INTEGRATION_ARCHITECTURE_v1_0_20260902.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-02"
@@ -644,7 +644,7 @@
       "유료화",
       "가격정책"
     ],
-    "pc_url": "https://hondi.net/docs/K_SERVICE_MONETIZATION_v1_0.md",
+    "pc_url": "https://app.naviweb.kr/docs/K_SERVICE_MONETIZATION_v1_0.md",
     "audience": "dev",
     "source": "menu"
   },
@@ -662,7 +662,7 @@
       "put",
       "파이프"
     ],
-    "pc_url": "https://hondi.net/docs/L1_ADMIN_AUTH_INCIDENT_2026_07_21.md",
+    "pc_url": "https://app.naviweb.kr/docs/L1_ADMIN_AUTH_INCIDENT_2026_07_21.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-07-21"
@@ -681,7 +681,7 @@
       "이름 혼동 주의",
       "+ 기기 push"
     ],
-    "pc_url": "https://hondi.net/docs/L1_INSTANCE_TOPOLOGY_AND_DEVICE_MANAGEMENT_REFERENCE_2026_09_19.md",
+    "pc_url": "https://app.naviweb.kr/docs/L1_INSTANCE_TOPOLOGY_AND_DEVICE_MANAGEMENT_REFERENCE_2026_09_19.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-19"
@@ -696,7 +696,7 @@
       "PocketBase",
       "매뉴얼"
     ],
-    "pc_url": "https://hondi.net/docs/L1_POCKETBASE_MANUAL_v1_0.md",
+    "pc_url": "https://app.naviweb.kr/docs/L1_POCKETBASE_MANUAL_v1_0.md",
     "audience": "dev",
     "source": "menu"
   },
@@ -714,7 +714,7 @@
       "네트워크",
       "오류"
     ],
-    "pc_url": "https://hondi.net/docs/LEGACY_L1_DOMAIN_CORS_INCIDENT_2026_07_22.md",
+    "pc_url": "https://app.naviweb.kr/docs/LEGACY_L1_DOMAIN_CORS_INCIDENT_2026_07_22.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-07-22"
@@ -730,7 +730,7 @@
       "전체",
       "지도"
     ],
-    "pc_url": "https://hondi.net/docs/MANUAL_INDEX.html",
+    "pc_url": "https://app.naviweb.kr/docs/MANUAL_INDEX.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -748,7 +748,7 @@
       "권한",
       "프롬프트가"
     ],
-    "pc_url": "https://hondi.net/docs/MOBILE_GWP_POPUP_GEO_RACE_2026_07_22.md",
+    "pc_url": "https://app.naviweb.kr/docs/MOBILE_GWP_POPUP_GEO_RACE_2026_07_22.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-07-22"
@@ -765,7 +765,7 @@
       "거버넌스",
       "owner_pdv"
     ],
-    "pc_url": "https://hondi.net/docs/OWNER_PDV_GOVERNANCE_MANUAL_v1_0.md",
+    "pc_url": "https://app.naviweb.kr/docs/OWNER_PDV_GOVERNANCE_MANUAL_v1_0.md",
     "audience": "dev",
     "source": "menu"
   },
@@ -783,7 +783,7 @@
       "deepseek",
       "인증"
     ],
-    "pc_url": "https://hondi.net/docs/PHONE_VERIFY_TOKEN_KAUTH_WALLET_CONFLICT_INCIDENT_2026_09_18.md",
+    "pc_url": "https://app.naviweb.kr/docs/PHONE_VERIFY_TOKEN_KAUTH_WALLET_CONFLICT_INCIDENT_2026_09_18.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-18"
@@ -802,7 +802,7 @@
       "+신청용",
       "API"
     ],
-    "pc_url": "https://hondi.net/docs/PLAN_DPAPER_WALLET-ELIGIBILITY_ISMS-P-MOIS-RECOGNITION_20260828_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/PLAN_DPAPER_WALLET-ELIGIBILITY_ISMS-P-MOIS-RECOGNITION_20260828_v1_0.html",
     "audience": "dev",
     "source": "menu",
     "date": "2026-08-28"
@@ -821,7 +821,7 @@
       "충전",
       "시스템"
     ],
-    "pc_url": "https://hondi.net/docs/POCKETBASE_INFRA_GDC_STATUS_20260810_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/POCKETBASE_INFRA_GDC_STATUS_20260810_v1_0.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -839,7 +839,7 @@
       "곧바로",
       "410"
     ],
-    "pc_url": "https://hondi.net/docs/PUSH_SUBSCRIBE_RACE_CONDITION_2026_07_22.md",
+    "pc_url": "https://app.naviweb.kr/docs/PUSH_SUBSCRIBE_RACE_CONDITION_2026_07_22.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-07-22"
@@ -858,7 +858,7 @@
       "지갑",
       "없는"
     ],
-    "pc_url": "https://hondi.net/docs/PUSH_SUBSCRIPTION_HIJACK_2026_07_21.md",
+    "pc_url": "https://app.naviweb.kr/docs/PUSH_SUBSCRIPTION_HIJACK_2026_07_21.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-07-21"
@@ -877,7 +877,7 @@
       "가는",
       "문제"
     ],
-    "pc_url": "https://hondi.net/docs/PUSH_SUBSCRIPTION_MULTIDEVICE_2026_07_23.md",
+    "pc_url": "https://app.naviweb.kr/docs/PUSH_SUBSCRIPTION_MULTIDEVICE_2026_07_23.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-07-23"
@@ -896,7 +896,7 @@
       "배포 파이프라인 재발견 및 사고 5건 실전 교훈 0907",
       "지문"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_BIOMETRIC_E164_DEPLOYMENT_20260907_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_LESSONS_BIOMETRIC_E164_DEPLOYMENT_20260907_v1_0.html",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-07"
@@ -915,7 +915,7 @@
       "실전",
       "교훈"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_CONTROL_TOWER_LIVE_VERIFY_20260809_v2_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_LESSONS_CONTROL_TOWER_LIVE_VERIFY_20260809_v2_0.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -933,7 +933,7 @@
       "실전",
       "교훈"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_EXPERT_PERSONA_KLAW_UPGRADE_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_LESSONS_EXPERT_PERSONA_KLAW_UPGRADE_v1_0.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -951,7 +951,7 @@
       "대칭",
       "기록"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_FS_SYMMETRIC_OPENHASH_ANCHORING_20260907_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_LESSONS_FS_SYMMETRIC_OPENHASH_ANCHORING_20260907_v1_0.html",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-07"
@@ -970,7 +970,7 @@
       "성공",
       "Goja"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_GDC_TRANSFER_GOJA_SCOPE_20260906_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_LESSONS_GDC_TRANSFER_GOJA_SCOPE_20260906_v1_0.html",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-06"
@@ -989,7 +989,7 @@
       "실전",
       "교훈"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_GOVTREE_LAZY_INSTANCING_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_LESSONS_GOVTREE_LAZY_INSTANCING_v1_0.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -1009,7 +1009,7 @@
       "나비",
       "검색"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_HONDI_SEARCH_MANIFEST_SCOPE_20260913_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_LESSONS_HONDI_SEARCH_MANIFEST_SCOPE_20260913_v1_0.html",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-13"
@@ -1029,7 +1029,7 @@
       "Windows Application Data 배포 함정",
       "curl 한글 인코딩 재발"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_HONDI_SEARCH_RELAY_1042_ISOLATION_20260909_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_LESSONS_HONDI_SEARCH_RELAY_1042_ISOLATION_20260909_v1_0.html",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-09"
@@ -1049,7 +1049,7 @@
       "PR 제목",
       "내용 불일치 재발까지 0909"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_HONDI_SEARCH_ROUTING_DNS_20260909_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_LESSONS_HONDI_SEARCH_ROUTING_DNS_20260909_v1_0.html",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-09"
@@ -1068,7 +1068,7 @@
       "위임 재설계 실전 교훈 0909",
       "City"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_KCITY_SUBMODULES_REPO_RECOVERY_20260909_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_LESSONS_KCITY_SUBMODULES_REPO_RECOVERY_20260909_v1_0.html",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-09"
@@ -1086,7 +1086,7 @@
       "교훈",
       "매뉴얼"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_LIVE_SMOKETEST_LATENCY_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_LESSONS_LIVE_SMOKETEST_LATENCY_v1_0.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -1104,7 +1104,7 @@
       "전체",
       "기록"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_PANEL_MAINCHAT_UNIFICATION_20260914_v1_0.md",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_LESSONS_PANEL_MAINCHAT_UNIFICATION_20260914_v1_0.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-14"
@@ -1123,7 +1123,7 @@
       "테스트",
       "버전\""
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_PANEL_VS_MAIN_CHAT_AUDIT_20260914_v1_0.md",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_LESSONS_PANEL_VS_MAIN_CHAT_AUDIT_20260914_v1_0.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-14"
@@ -1142,7 +1142,7 @@
       "재무제표",
       "검증"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_PDV_BIDIRECTIONAL_FS_LIVE_TEST_20260908_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_LESSONS_PDV_BIDIRECTIONAL_FS_LIVE_TEST_20260908_v1_0.html",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-08"
@@ -1161,7 +1161,7 @@
       "매뉴얼",
       "R1"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_ROUTING_ARCHITECTURE_20260806_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_LESSONS_ROUTING_ARCHITECTURE_20260806_v1_0.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -1179,7 +1179,7 @@
       "교훈",
       "매뉴얼"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_ROUTING_FIXES_20260807_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_LESSONS_ROUTING_FIXES_20260807_v1_0.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -1199,7 +1199,7 @@
       "라우팅",
       "지침서"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_ROUTING_STRUCTURAL_NORMALIZATION_20260823_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_LESSONS_ROUTING_STRUCTURAL_NORMALIZATION_20260823_v1_0.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -1217,7 +1217,7 @@
       "실전",
       "교훈"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_SUBJECT_GATE_MAX_TOKENS_20260809_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_LESSONS_SUBJECT_GATE_MAX_TOKENS_20260809_v1_0.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -1235,7 +1235,7 @@
       "실전",
       "교훈"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_UNIVERSAL_AUDIT_ROUTING_20260808_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_LESSONS_UNIVERSAL_AUDIT_ROUTING_20260808_v1_0.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -1253,7 +1253,7 @@
       "교훈",
       "매뉴얼"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_LESSONS_VECTORIZE_GOVTREE_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_LESSONS_VECTORIZE_GOVTREE_v1_0.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -1271,7 +1271,7 @@
       "세션",
       "기록"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_CONTROL_TOWER_LIVE_SMOKETEST_20260919_v1_0.md",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_SUMMARY_CONTROL_TOWER_LIVE_SMOKETEST_20260919_v1_0.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-19"
@@ -1290,7 +1290,7 @@
       "보조",
       "AI"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_EXPERT_ASSISTANT_SP_SPLIT_20261017_v1_0.md",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_SUMMARY_EXPERT_ASSISTANT_SP_SPLIT_20261017_v1_0.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-10-17"
@@ -1309,7 +1309,7 @@
       "신용평가",
       "라이브"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_GDC_LOAN_CREDIT_LIVE_TEST_20260906_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_SUMMARY_GDC_LOAN_CREDIT_LIVE_TEST_20260906_v1_0.html",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-06"
@@ -1328,7 +1328,7 @@
       "세션",
       "기록"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_GOVTREE_AGENCY_COLLEGIAL_EXPANSION_20260925_v1_0.md",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_SUMMARY_GOVTREE_AGENCY_COLLEGIAL_EXPANSION_20260925_v1_0.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-25"
@@ -1349,7 +1349,7 @@
       "근본적",
       "정상화"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_GOV_ROUTER_STRUCTURAL_NORMALIZATION_20260823_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_SUMMARY_GOV_ROUTER_STRUCTURAL_NORMALIZATION_20260823_v1_0.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -1367,7 +1367,7 @@
       "PRINCIPLE 매니페스트 버그 핵심 서비스 9~10개 영향",
       "콘텐츠품질 NEEDS"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_JEJU_SP_QUALITY_AND_KSERVICES_REDESIGN_20260920_v1_0.md",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_SUMMARY_JEJU_SP_QUALITY_AND_KSERVICES_REDESIGN_20260920_v1_0.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-20"
@@ -1386,7 +1386,7 @@
       "추적",
       "실결함"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_JEJU_UNIVERSITY_SCENARIO_GAP_20260820_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_SUMMARY_JEJU_UNIVERSITY_SCENARIO_GAP_20260820_v1_0.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -1404,18 +1404,18 @@
       "대량",
       "등록"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_KADDRESS_KMAIL_MAILTAB_20260911_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_SUMMARY_KADDRESS_KMAIL_MAILTAB_20260911_v1_0.html",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-11"
   },
   {
     "path": "/docs/SESSION_SUMMARY_KCLEAN_MIGRATION_TOKEN_ROTATION_20260922_v1_0.md",
-    "title": "세션 기록 — clean.hondi.net(구 fiil.kr) 실사 소스 이식·Supabase 완전 제거→hondi-proxy/L1 PocketBase 전환·R2 사진업로드 신설·Cloudflare 배포 토큰 인증오류 근본원인 규명·서비스명 K-Cleaner→K-Clean 전면 정정 (2026-09-22) ↗",
-    "description": "세션 기록 — clean.hondi.net(구 fiil.kr) 실사 소스 이식·Supabase 완전 제거→hondi-proxy/L1 PocketBase 전환·R2 사진업로드 신설·Cloudflare 배포 토큰 인증오류 근본원인 규명·서비스명 K-Cleaner→K-Clean 전면 정정 (2026-09-22) ↗",
+    "title": "세션 기록 — clean.naviweb.kr(구 fiil.kr) 실사 소스 이식·Supabase 완전 제거→hondi-proxy/L1 PocketBase 전환·R2 사진업로드 신설·Cloudflare 배포 토큰 인증오류 근본원인 규명·서비스명 K-Cleaner→K-Clean 전면 정정 (2026-09-22) ↗",
+    "description": "세션 기록 — clean.naviweb.kr(구 fiil.kr) 실사 소스 이식·Supabase 완전 제거→hondi-proxy/L1 PocketBase 전환·R2 사진업로드 신설·Cloudflare 배포 토큰 인증오류 근본원인 규명·서비스명 K-Cleaner→K-Clean 전면 정정 (2026-09-22) ↗",
     "keywords": [
       "세션 기록",
-      "clean.hondi.net 구 fiil.kr",
+      "clean.naviweb.kr 구 fiil.kr",
       "실사 소스 이식 Supabase 완전 제거→hondi",
       "proxy",
       "L1 PocketBase 전환 R2 사진업로드 신설 Cloudflare 배포 토큰 인증오류 근본원인 규명 서비스명 K",
@@ -1423,7 +1423,7 @@
       "Clean 전면 정정",
       "세션"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_KCLEAN_MIGRATION_TOKEN_ROTATION_20260922_v1_0.md",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_SUMMARY_KCLEAN_MIGRATION_TOKEN_ROTATION_20260922_v1_0.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-22"
@@ -1442,7 +1442,7 @@
       "재설계",
       "0814"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_KGOV_IDV_BILLING_PRICING_20260814_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_SUMMARY_KGOV_IDV_BILLING_PRICING_20260814_v1_0.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -1460,7 +1460,7 @@
       "라이브",
       "검증"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_KLAW_GDC_BILLING_20260813_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_SUMMARY_KLAW_GDC_BILLING_20260813_v1_0.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -1478,7 +1478,7 @@
       "Mail",
       "ID"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_KMAIL_MAILID_COLONFIX_HANDOFF_FETCHCONTENT_20260912_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_SUMMARY_KMAIL_MAILID_COLONFIX_HANDOFF_FETCHCONTENT_20260912_v1_0.html",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-12"
@@ -1497,7 +1497,7 @@
       "서비스",
       "로그인"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_K_SERVICE_SSO_INTEGRATION_20260906_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_SUMMARY_K_SERVICE_SSO_INTEGRATION_20260906_v1_0.html",
     "audience": "dev",
     "source": "menu",
     "date": "2026-09-06"
@@ -1516,7 +1516,7 @@
       "마이그레이션",
       "온디맨드"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_L1_SERVER_MIGRATION_ONDEMAND_20260820_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_SUMMARY_L1_SERVER_MIGRATION_ONDEMAND_20260820_v1_0.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -1534,7 +1534,7 @@
       "검증",
       "0813"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_PATHFINDER_GOVTASK_LIVE_VERIFY_20260813_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_SUMMARY_PATHFINDER_GOVTASK_LIVE_VERIFY_20260813_v1_0.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -1552,7 +1552,7 @@
       "기록",
       "원칙"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_PROFESSOR_EXPANSION_PDV_20260810.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_SUMMARY_PROFESSOR_EXPANSION_PDV_20260810.html",
     "audience": "dev",
     "source": "menu",
     "date": "2026-08-10"
@@ -1571,7 +1571,7 @@
       "인프라",
       "구현"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_TRUST_SCORE_SMOKE_TEST_20260820_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_SUMMARY_TRUST_SCORE_SMOKE_TEST_20260820_v1_0.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -1588,7 +1588,7 @@
       "상속",
       "CI가드"
     ],
-    "pc_url": "https://hondi.net/docs/SP_TREE_GOVERNANCE_MANUAL_v1_0.md",
+    "pc_url": "https://app.naviweb.kr/docs/SP_TREE_GOVERNANCE_MANUAL_v1_0.md",
     "audience": "dev",
     "source": "menu"
   },
@@ -1606,7 +1606,7 @@
       "VAPID",
       "구독"
     ],
-    "pc_url": "https://hondi.net/docs/STALE_VAPID_PUSH_SUBSCRIPTION_2026_07_22.md",
+    "pc_url": "https://app.naviweb.kr/docs/STALE_VAPID_PUSH_SUBSCRIPTION_2026_07_22.md",
     "audience": "dev",
     "source": "menu",
     "date": "2026-07-22"
@@ -1625,7 +1625,7 @@
       "입장",
       "한국어"
     ],
-    "pc_url": "https://hondi.net/docs/TEST_PERIOD_SIMPLE_ENTRY_MANUAL_v1_0_20261009.html",
+    "pc_url": "https://app.naviweb.kr/docs/TEST_PERIOD_SIMPLE_ENTRY_MANUAL_v1_0_20261009.html",
     "audience": "dev",
     "source": "menu",
     "date": "2026-10-09"
@@ -1646,7 +1646,7 @@
       "절감",
       "사고실험"
     ],
-    "pc_url": "https://hondi.net/docs/THOUGHT_EXPERIMENT_kakaotalk-to-hondi-2030-cost-estimate.html",
+    "pc_url": "https://app.naviweb.kr/docs/THOUGHT_EXPERIMENT_kakaotalk-to-hondi-2030-cost-estimate.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -1660,7 +1660,7 @@
       "작업",
       "이력"
     ],
-    "pc_url": "https://hondi.net/docs/WORKLOG_INDEX.md",
+    "pc_url": "https://app.naviweb.kr/docs/WORKLOG_INDEX.md",
     "audience": "dev",
     "source": "menu"
   },
@@ -1673,7 +1673,7 @@
       "사업화",
       "보관"
     ],
-    "pc_url": "https://hondi.net/docs/archive/bizplan.html",
+    "pc_url": "https://app.naviweb.kr/docs/archive/bizplan.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -1689,7 +1689,7 @@
       "수익",
       "모델"
     ],
-    "pc_url": "https://hondi.net/docs/business-plan/BUSINESS-PLAN.md",
+    "pc_url": "https://app.naviweb.kr/docs/business-plan/BUSINESS-PLAN.md",
     "audience": "dev",
     "source": "menu"
   },
@@ -1704,7 +1704,7 @@
       "마케팅",
       "플랜"
     ],
-    "pc_url": "https://hondi.net/docs/business-plan/PRICING_TIER_MARKETING_PLAN_v1_0_2026-07-25.md",
+    "pc_url": "https://app.naviweb.kr/docs/business-plan/PRICING_TIER_MARKETING_PLAN_v1_0_2026-07-25.md",
     "audience": "dev",
     "source": "menu"
   },
@@ -1718,7 +1718,7 @@
       "인증",
       "안내"
     ],
-    "pc_url": "https://hondi.net/docs/gopang-id-auth-guide.md",
+    "pc_url": "https://app.naviweb.kr/docs/gopang-id-auth-guide.md",
     "audience": "dev",
     "source": "menu"
   },
@@ -1731,7 +1731,7 @@
       "기술",
       "백서"
     ],
-    "pc_url": "https://hondi.net/docs/gopang_whitepaper.html",
+    "pc_url": "https://app.naviweb.kr/docs/gopang_whitepaper.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -1744,7 +1744,7 @@
       "OFP",
       "표준"
     ],
-    "pc_url": "https://hondi.net/docs/ofp_standard.html",
+    "pc_url": "https://app.naviweb.kr/docs/ofp_standard.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -1757,7 +1757,7 @@
       "OpenHash",
       "백서"
     ],
-    "pc_url": "https://hondi.net/docs/openhash_whitepaper.html",
+    "pc_url": "https://app.naviweb.kr/docs/openhash_whitepaper.html",
     "audience": "dev",
     "source": "menu"
   },
@@ -1780,7 +1780,7 @@
       "about",
       "hondi"
     ],
-    "pc_url": "https://hondi.net/desktop.html#about-hondi",
+    "pc_url": "https://app.naviweb.kr/desktop.html#about-hondi",
     "audience": "user",
     "source": "standalone"
   },
@@ -1791,7 +1791,7 @@
     "keywords": [
       "에이전트"
     ],
-    "pc_url": "https://hondi.net/desktop.html#agents",
+    "pc_url": "https://app.naviweb.kr/desktop.html#agents",
     "audience": "user",
     "source": "menu"
   },
@@ -1803,7 +1803,7 @@
       "ai",
       "assistant"
     ],
-    "pc_url": "https://hondi.net/desktop.html#ai-assistant",
+    "pc_url": "https://app.naviweb.kr/desktop.html#ai-assistant",
     "audience": "user",
     "source": "standalone"
   },
@@ -1815,7 +1815,7 @@
       "ai",
       "engine"
     ],
-    "pc_url": "https://hondi.net/desktop.html#ai-engine",
+    "pc_url": "https://app.naviweb.kr/desktop.html#ai-engine",
     "audience": "user",
     "source": "standalone"
   },
@@ -1829,7 +1829,7 @@
       "AI",
       "비서"
     ],
-    "pc_url": "https://hondi.net/desktop.html#ai-types",
+    "pc_url": "https://app.naviweb.kr/desktop.html#ai-types",
     "audience": "user",
     "source": "menu"
   },
@@ -1847,7 +1847,7 @@
       "검색",
       "배선"
     ],
-    "pc_url": "https://hondi.net/docs/SESSION_SUMMARY_GOV_FEE_SCHEDULE_20260815_v1_0.html",
+    "pc_url": "https://app.naviweb.kr/docs/SESSION_SUMMARY_GOV_FEE_SCHEDULE_20260815_v1_0.html",
     "audience": "user",
     "source": "menu"
   },
@@ -1861,7 +1861,7 @@
       "실험",
       "방법론"
     ],
-    "pc_url": "https://hondi.net/docs/empirical_methodology_2026_07_31.html",
+    "pc_url": "https://app.naviweb.kr/docs/empirical_methodology_2026_07_31.html",
     "audience": "user",
     "source": "menu"
   },
@@ -1872,7 +1872,7 @@
     "keywords": [
       "한림읍"
     ],
-    "pc_url": "https://hondi.net/docs/hallim_masterplan.html",
+    "pc_url": "https://app.naviweb.kr/docs/hallim_masterplan.html",
     "audience": "user",
     "source": "menu"
   },
@@ -1886,7 +1886,7 @@
       "대학생",
       "가이드"
     ],
-    "pc_url": "https://hondi.net/docs/hondi_college_guide_day1.html",
+    "pc_url": "https://app.naviweb.kr/docs/hondi_college_guide_day1.html",
     "audience": "user",
     "source": "menu"
   },
@@ -1903,7 +1903,7 @@
       "SP",
       "작성"
     ],
-    "pc_url": "https://hondi.net/docs/hondi_college_guide_day2.html",
+    "pc_url": "https://app.naviweb.kr/docs/hondi_college_guide_day2.html",
     "audience": "user",
     "source": "menu"
   },
@@ -1914,7 +1914,7 @@
     "keywords": [
       "용어집"
     ],
-    "pc_url": "https://hondi.net/docs/hondi_glossary.html",
+    "pc_url": "https://app.naviweb.kr/docs/hondi_glossary.html",
     "audience": "user",
     "source": "menu"
   },
@@ -1928,7 +1928,7 @@
       "고등학생",
       "가이드"
     ],
-    "pc_url": "https://hondi.net/docs/hondi_highschool_guide_day1.html",
+    "pc_url": "https://app.naviweb.kr/docs/hondi_highschool_guide_day1.html",
     "audience": "user",
     "source": "menu"
   },
@@ -1945,7 +1945,7 @@
       "SP",
       "작성"
     ],
-    "pc_url": "https://hondi.net/docs/hondi_highschool_guide_day2.html",
+    "pc_url": "https://app.naviweb.kr/docs/hondi_highschool_guide_day2.html",
     "audience": "user",
     "source": "menu"
   },
@@ -1960,7 +1960,7 @@
       "나비",
       "사용법"
     ],
-    "pc_url": "https://hondi.net/docs/hondi_interactive_manual.html",
+    "pc_url": "https://app.naviweb.kr/docs/hondi_interactive_manual.html",
     "audience": "user",
     "source": "loose_anchor"
   },
@@ -1973,7 +1973,7 @@
       "초등학생",
       "가이드"
     ],
-    "pc_url": "https://hondi.net/docs/hondi_kids_guide.html",
+    "pc_url": "https://app.naviweb.kr/docs/hondi_kids_guide.html",
     "audience": "user",
     "source": "menu"
   },
@@ -1986,7 +1986,7 @@
       "중학생",
       "가이드"
     ],
-    "pc_url": "https://hondi.net/docs/hondi_teens_guide.html",
+    "pc_url": "https://app.naviweb.kr/docs/hondi_teens_guide.html",
     "audience": "user",
     "source": "menu"
   },
@@ -1999,7 +1999,7 @@
       "사용자",
       "매뉴얼"
     ],
-    "pc_url": "https://hondi.net/docs/hondi_user_manual.html",
+    "pc_url": "https://app.naviweb.kr/docs/hondi_user_manual.html",
     "audience": "user",
     "source": "menu"
   },
@@ -2015,7 +2015,7 @@
       "시스템",
       "개요"
     ],
-    "pc_url": "https://hondi.net/docs/legacy_overview_20260821.html",
+    "pc_url": "https://app.naviweb.kr/docs/legacy_overview_20260821.html",
     "audience": "user",
     "source": "pinned"
   },
@@ -2026,7 +2026,7 @@
     "keywords": [
       "시작하기"
     ],
-    "pc_url": "https://hondi.net/docs/user-guide.html",
+    "pc_url": "https://app.naviweb.kr/docs/user-guide.html",
     "audience": "user",
     "source": "menu"
   },
@@ -2038,7 +2038,7 @@
       "expert",
       "personas"
     ],
-    "pc_url": "https://hondi.net/desktop.html#expert-personas",
+    "pc_url": "https://app.naviweb.kr/desktop.html#expert-personas",
     "audience": "user",
     "source": "standalone"
   },
@@ -2051,7 +2051,7 @@
       "제안",
       "현황"
     ],
-    "pc_url": "https://hondi.net/feedback.html",
+    "pc_url": "https://app.naviweb.kr/feedback.html",
     "audience": "user",
     "source": "menu"
   },
@@ -2063,7 +2063,7 @@
       "혼디장",
       "나비장"
     ],
-    "pc_url": "https://hondi.net/desktop.html#hondi-market",
+    "pc_url": "https://app.naviweb.kr/desktop.html#hondi-market",
     "audience": "user",
     "source": "menu"
   },
@@ -2074,7 +2074,7 @@
     "keywords": [
       "government"
     ],
-    "pc_url": "https://hondi.net/desktop.html#k-government",
+    "pc_url": "https://app.naviweb.kr/desktop.html#k-government",
     "audience": "user",
     "source": "standalone"
   },
@@ -2085,7 +2085,7 @@
     "keywords": [
       "services"
     ],
-    "pc_url": "https://hondi.net/desktop.html#k-services",
+    "pc_url": "https://app.naviweb.kr/desktop.html#k-services",
     "audience": "user",
     "source": "standalone"
   },
@@ -2096,7 +2096,7 @@
     "keywords": [
       "klaw"
     ],
-    "pc_url": "https://hondi.net/desktop.html#klaw",
+    "pc_url": "https://app.naviweb.kr/desktop.html#klaw",
     "audience": "user",
     "source": "standalone"
   },
@@ -2107,7 +2107,7 @@
     "keywords": [
       "OpenHash"
     ],
-    "pc_url": "https://hondi.net/desktop.html#openhash",
+    "pc_url": "https://app.naviweb.kr/desktop.html#openhash",
     "audience": "user",
     "source": "menu"
   },
@@ -2120,7 +2120,7 @@
       "simulation",
       "record"
     ],
-    "pc_url": "https://hondi.net/pages/klaw-simulation-record.html",
+    "pc_url": "https://app.naviweb.kr/pages/klaw-simulation-record.html",
     "audience": "user",
     "source": "loose_anchor"
   },
@@ -2137,7 +2137,7 @@
       "지원하는",
       "방법"
     ],
-    "pc_url": "https://hondi.net/pages/project-support.html",
+    "pc_url": "https://app.naviweb.kr/pages/project-support.html",
     "audience": "user",
     "source": "loose_anchor"
   },
@@ -2151,7 +2151,7 @@
       "분야",
       "AI"
     ],
-    "pc_url": "https://hondi.net/desktop.html#professional-ai",
+    "pc_url": "https://app.naviweb.kr/desktop.html#professional-ai",
     "audience": "user",
     "source": "menu"
   },
@@ -2164,7 +2164,7 @@
       "of",
       "law"
     ],
-    "pc_url": "https://hondi.net/desktop.html#rule-of-law",
+    "pc_url": "https://app.naviweb.kr/desktop.html#rule-of-law",
     "audience": "user",
     "source": "standalone"
   },
@@ -2177,7 +2177,7 @@
       "시나리오",
       "테스트"
     ],
-    "pc_url": "https://hondi.net/desktop.html#scenario-test",
+    "pc_url": "https://app.naviweb.kr/desktop.html#scenario-test",
     "audience": "user",
     "source": "menu"
   },
@@ -2193,7 +2193,7 @@
       "숫자",
       "코드"
     ],
-    "pc_url": "https://hondi.net/desktop.html#scenarios",
+    "pc_url": "https://app.naviweb.kr/desktop.html#scenarios",
     "audience": "user",
     "source": "menu"
   },
@@ -2204,7 +2204,7 @@
     "keywords": [
       "teasers"
     ],
-    "pc_url": "https://hondi.net/desktop.html#teasers",
+    "pc_url": "https://app.naviweb.kr/desktop.html#teasers",
     "audience": "user",
     "source": "standalone"
   },
@@ -2216,7 +2216,7 @@
       "usage",
       "guide"
     ],
-    "pc_url": "https://hondi.net/desktop.html#usage-guide",
+    "pc_url": "https://app.naviweb.kr/desktop.html#usage-guide",
     "audience": "user",
     "source": "standalone"
   },
@@ -2229,12 +2229,12 @@
       "GDC",
       "대시보드"
     ],
-    "pc_url": "https://hondi.net/desktop.html",
+    "pc_url": "https://app.naviweb.kr/desktop.html",
     "audience": "user",
     "source": "menu_special"
   },
   {
-    "path": "https://biz.hondi.net",
+    "path": "https://biz.naviweb.kr",
     "title": "K-Biz 체험하기 ↗",
     "description": "K-Biz 체험하기 ↗",
     "keywords": [
@@ -2242,12 +2242,12 @@
       "Biz",
       "체험하기"
     ],
-    "pc_url": "https://biz.hondi.net",
+    "pc_url": "https://biz.naviweb.kr",
     "audience": "user",
     "source": "menu"
   },
   {
-    "path": "https://city.hondi.net",
+    "path": "https://city.naviweb.kr",
     "title": "K-City 체험하기 ↗",
     "description": "K-City 체험하기 ↗",
     "keywords": [
@@ -2255,23 +2255,23 @@
       "City",
       "체험하기"
     ],
-    "pc_url": "https://city.hondi.net",
+    "pc_url": "https://city.naviweb.kr",
     "audience": "user",
     "source": "menu"
   },
   {
-    "path": "https://democracy.hondi.net/desktop.html",
+    "path": "https://democracy.naviweb.kr/desktop.html",
     "title": "K-Democracy ↗",
     "description": "K-Democracy ↗",
     "keywords": [
       "Democracy"
     ],
-    "pc_url": "https://democracy.hondi.net/desktop.html",
+    "pc_url": "https://democracy.naviweb.kr/desktop.html",
     "audience": "user",
     "source": "menu"
   },
   {
-    "path": "https://job.hondi.net",
+    "path": "https://job.naviweb.kr",
     "title": "K-Job 체험하기 ↗",
     "description": "K-Job 체험하기 ↗",
     "keywords": [
@@ -2279,12 +2279,12 @@
       "Job",
       "체험하기"
     ],
-    "pc_url": "https://job.hondi.net",
+    "pc_url": "https://job.naviweb.kr",
     "audience": "user",
     "source": "menu"
   },
   {
-    "path": "https://klaw.hondi.net",
+    "path": "https://klaw.naviweb.kr",
     "title": "K-Law 체험하기 ↗",
     "description": "K-Law 체험하기 ↗",
     "keywords": [
@@ -2292,12 +2292,12 @@
       "Law",
       "체험하기"
     ],
-    "pc_url": "https://klaw.hondi.net",
+    "pc_url": "https://klaw.naviweb.kr",
     "audience": "user",
     "source": "menu"
   },
   {
-    "path": "https://mail.hondi.net",
+    "path": "https://mail.naviweb.kr",
     "title": "K-Mail 체험하기 ↗",
     "description": "K-Mail 체험하기 ↗",
     "keywords": [
@@ -2305,12 +2305,12 @@
       "Mail",
       "체험하기"
     ],
-    "pc_url": "https://mail.hondi.net",
+    "pc_url": "https://mail.naviweb.kr",
     "audience": "user",
     "source": "menu"
   },
   {
-    "path": "https://plan.hondi.net",
+    "path": "https://plan.naviweb.kr",
     "title": "K-Plan 체험하기 ↗",
     "description": "K-Plan 체험하기 ↗",
     "keywords": [
@@ -2318,12 +2318,12 @@
       "Plan",
       "체험하기"
     ],
-    "pc_url": "https://plan.hondi.net",
+    "pc_url": "https://plan.naviweb.kr",
     "audience": "user",
     "source": "menu"
   },
   {
-    "path": "https://search.hondi.net",
+    "path": "https://search.naviweb.kr",
     "title": "K-Search 체험하기 ↗",
     "description": "K-Search 체험하기 ↗",
     "keywords": [
@@ -2331,12 +2331,12 @@
       "Search",
       "체험하기"
     ],
-    "pc_url": "https://search.hondi.net",
+    "pc_url": "https://search.naviweb.kr",
     "audience": "user",
     "source": "menu"
   },
   {
-    "path": "https://telecom.hondi.net",
+    "path": "https://telecom.naviweb.kr",
     "title": "K-Telecom 체험하기 ↗",
     "description": "K-Telecom 체험하기 ↗",
     "keywords": [
@@ -2344,12 +2344,12 @@
       "Telecom",
       "체험하기"
     ],
-    "pc_url": "https://telecom.hondi.net",
+    "pc_url": "https://telecom.naviweb.kr",
     "audience": "user",
     "source": "menu"
   },
   {
-    "path": "https://watch.hondi.net",
+    "path": "https://watch.naviweb.kr",
     "title": "K-Watch 체험하기 ↗",
     "description": "K-Watch 체험하기 ↗",
     "keywords": [
@@ -2357,7 +2357,7 @@
       "Watch",
       "체험하기"
     ],
-    "pc_url": "https://watch.hondi.net",
+    "pc_url": "https://watch.naviweb.kr",
     "audience": "user",
     "source": "menu"
   }

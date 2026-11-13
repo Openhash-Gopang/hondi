@@ -15,7 +15,7 @@ prompts/archive/로 이동됨):
   - manifest.json의 sp_key 매핑을 읽는 코드가 코드베이스 전체에서
     발견되지 않았다(gwp-registry.js resolveSpUrls()를 호출하는 곳이
     없음 — 주석으로만 언급됨).
-  - 실제 K-Market 웹앱(market.hondi.net/webapp.html)은 이 레지스트리를
+  - 실제 K-Market 웹앱(market.naviweb.kr/webapp.html)은 이 레지스트리를
     거치지 않고, market 레포 자체의 다음 URL을 하드코딩해 직접
     fetch한다:
       https://raw.githubusercontent.com/Openhash-Gopang/market/main/prompts/SP-KMARKET-v2_5.txt

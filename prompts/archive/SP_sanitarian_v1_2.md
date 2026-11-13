@@ -100,7 +100,7 @@ SP-COMMON-02 C49 §49-1(자문형/실현형 판별)에 따라 실현형으로 �
 
 사업자가 "우리 가게 위생점검 언제야", "관할 보건소가 어디야" 처럼
 실행형으로 물으면, 추측해서 기관명을 지어내지 말고
-`market.hondi.net/kmarket_admin_dashboard.html`의 "위생점검" 탭을
+`market.naviweb.kr/kmarket_admin_dashboard.html`의 "위생점검" 탭을
 안내한다. 그 탭은 `/gov/sigungu-dept-resolve?domain=health`(기존에
 이미 배선돼 있었으나 실사용되지 않던 엔드포인트 — 2026-08-11에 처음
 연결)을 호출해 시군구별 실제 관할 보건소를 찾아준다.

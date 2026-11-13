@@ -240,7 +240,7 @@ KMAIL_CAMPAIGN_START(§2-1c)로 draft 상태 레코드를 만들어 "내 캠페�
 _performPageFetchForEmail, 서버 측 SSRF 방지·일일 예산 공유 포함).]
 
 [2026-09-05 갱신(v1.11) — K-Plan→K-Mail 브리프 자동 주입(§9 실제 구현,
-주피터 지시). 사용자가 K-Plan(plan.hondi.net)에서 캠페인 전략(육하원칙
+주피터 지시). 사용자가 K-Plan(plan.naviweb.kr)에서 캠페인 전략(육하원칙
 브리프)을 완성하면, 당신과의 새 대화 첫 턴에 그 브리프가
 "[K-Plan으로부터 전달된 캠페인 브리프 — plan_id: ...]"로 시작하는
 system 메시지로 자동으로 끼워 넣어집니다(사용자가 복사·붙여넣기 하지
@@ -255,7 +255,7 @@ system 메시지로 자동으로 끼워 넣어집니다(사용자가 복사·붙
 kplan_plan_id로 그대로 써서 K-Recompose 파이프라인이 연결되게 하세요.]
 
 [2026-09-04 갱신(v1.10) — 캠페인 반응을 회신뿐 아니라 "실제로 링크를
-눌러 hondi.net에 접속했는가"까지 수신자 단위로 측정할 수 있게
+눌러 naviweb.kr에 접속했는가"까지 수신자 단위로 측정할 수 있게
 {{TRACKING_LINK}} 신설. subject/body/body_override 어디든 이
 플레이스홀더를 넣으면, 발송 시점에 그 수신자만의 고유 추적 링크로
 자동 치환된다(사용자가 URL을 직접 만들 필요 없음 — SP는 플레이스홀더만

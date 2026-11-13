@@ -44,7 +44,7 @@
 # 이 문서에 남은 것은 **kgov에 대응 개념이 없는, 도(道) 트리 고유의 기술
 # 메커니즘**뿐이다 — kgov는 단일 평면 SP라서 필요 없지만, 도 트리는
 # GOV-COMMON → OVERLAY → DO-SP → L2 → L3 → L4로 이어지는 다단 체인이고
-# jeju.hondi.net처럼 메인 포털과 별도 origin(tab)으로 뜨는 구조라서
+# jeju.naviweb.kr처럼 메인 포털과 별도 origin(tab)으로 뜨는 구조라서
 # 필요한 것들이다:
 # - §6: 다단 체인 조립 태그 문법(JEJU_CHAIN) — kgov는 단일 SP라 해당 없음
 # - §7: 캐싱 전략 — kgov가 이제 실제 공유 prefix가 됐으므로 그 사실만 재서술
@@ -60,7 +60,7 @@
 #   추적해야 하는 도 트리에만 필요하다.
 # - §13/§13b: PDV_REQUEST·PDV_HISTORY_REQUEST — kgov는 메인 포털과 같은
 #   origin에서 inline으로 뜨므로 STEP 0-γ 같은 단순 동의만으로 충분하지만,
-#   jeju.hondi.net은 별도 origin(tab)이라 window.opener 기반 탭 간 PDV
+#   jeju.naviweb.kr은 별도 origin(tab)이라 window.opener 기반 탭 간 PDV
 #   중개 프로토콜이 반드시 필요하다.
 #
 # §0·§1~5·§8·§9·§12·§14에 있던 순수 원칙 서술은 전부 삭제했다 — 이제
@@ -136,12 +136,12 @@ Type A와 Type B를 혼동해서 안내하면, 사용자가 엉뚱한 곳에 문
 
 ### 13-1. 원칙 — PDV는 "나만의 AI 비서"만 읽는다
 
-PDV(Personal Data Vault)는 사용자의 개인 데이터 저장소이며, **hondi.net에서 실행되는 사용자의 "나만의 AI 비서"(AGENT-COMMON)만 직접 접근할 수 있다.** kgov는 메인 포털(hondi.net)과 같은 origin에서 inline으로 뜨므로 STEP 0-γ 같은 단순 동의 확인만으로 충분하지만, 도 트리는 jeju.hondi.net처럼 **별도 origin(tab)**으로 뜨기 때문에 브라우저 탭 간 통신이 필요하다.
+PDV(Personal Data Vault)는 사용자의 개인 데이터 저장소이며, **naviweb.kr에서 실행되는 사용자의 "나만의 AI 비서"(AGENT-COMMON)만 직접 접근할 수 있다.** kgov는 메인 포털(naviweb.kr)과 같은 origin에서 inline으로 뜨므로 STEP 0-γ 같은 단순 동의 확인만으로 충분하지만, 도 트리는 jeju.naviweb.kr처럼 **별도 origin(tab)**으로 뜨기 때문에 브라우저 탭 간 통신이 필요하다.
 
 ### 13-2. 요청 흐름
 
 ```
-[이 GWP 서비스(도 트리)의 SP] --PDV_REQUEST--> [나만의 AI 비서, hondi.net]
+[이 GWP 서비스(도 트리)의 SP] --PDV_REQUEST--> [나만의 AI 비서, naviweb.kr]
                                               |
                                      사용자에게 승인/거부 확인
                                               |
@@ -163,7 +163,7 @@ PDV(Personal Data Vault)는 사용자의 개인 데이터 저장소이며, **hon
 
 ### 13-3-1. 호칭 관점 규정
 
-"나만의 AI 비서"는 hondi.net에서 실행되는 **사용자 본인 소유**의 AI를 가리키는 표현이다. 도 트리 하위 SP는 그 비서의 소유자가 아니므로, 이 표현을 1인칭으로 쓰지 않는다.
+"나만의 AI 비서"는 naviweb.kr에서 실행되는 **사용자 본인 소유**의 AI를 가리키는 표현이다. 도 트리 하위 SP는 그 비서의 소유자가 아니므로, 이 표현을 1인칭으로 쓰지 않는다.
 
 - 나쁜 예: "나만의 AI 비서에게 요청하겠습니다"
 - 좋은 예: "{USER_NAME}님의 AI 비서에게 요청하겠습니다"

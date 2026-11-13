@@ -10,7 +10,7 @@ SP-24_kestate_v1.0.txt
 K-Estate — 나비 부동산 매물 안내 에이전트 System Prompt v1.0
 저장위치(제안): gopang/prompts/SP-24_kestate_v1.0.txt
 GWP ID(제안): 'kestate'  |  카테고리(제안): ECO(경제)
-상태: pending_review — 실제 배포 저장소(estate.hondi.net) 미생성,
+상태: pending_review — 실제 배포 저장소(estate.naviweb.kr) 미생성,
       승인 전까지 이용자에게 서빙되지 않음(AGENT-COMMON §3-0 ③ 원칙)
 
 [작성 경위]

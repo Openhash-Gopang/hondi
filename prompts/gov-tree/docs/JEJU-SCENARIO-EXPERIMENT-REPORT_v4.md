@@ -7,7 +7,7 @@
 > (Version ID `5b6927cc-8b25-481f-8a83-f1019e7979c5`, `hondi-proxy.tensor-city.workers.dev`).
 > 이 과정에서 실제 운영 중이던 Cloudflare Worker를 대조한 결과, 리포의
 > `worker.js`에만 있던 `/gov/relay`·`/klaw/relay`·`ALLOWED_ORIGINS`의
-> `jeju.hondi.net` 항목이 **운영본에는 배포된 적이 없었다는 것**이 확인됐다
+> `jeju.naviweb.kr` 항목이 **운영본에는 배포된 적이 없었다는 것**이 확인됐다
 > — 즉 아래 45건은 이번 배포 전까지 코드는 존재하되 실제로는 전부 FAIL
 > 상태였다. 이제 45건을 **PASS(배포 완료)**로 갱신한다. 상세는
 > `scenarios_300_v5.json` 참조. (K-Law 및 배선 불명 5개 서비스는 이번
