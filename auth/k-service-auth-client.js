@@ -195,6 +195,7 @@
             '<button type="button" class="ksa-input-icon-btn" id="ksa-devlink-btn" aria-label="폰으로 승인받기" title="폰으로 승인받기"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>' +
           '</div>' +
           '<div class="ksa-su-row">처음이세요? <a id="ksa-signup-link" role="button" tabindex="0">회원 가입</a></div>' +
+          '<div class="ksa-su-row">이 폰이 처음이면 <a href="/webapp.html">폰에서 로그인</a></div>' +
         '</div>' +
         '<div id="ksa-step-signup" style="display:none">' +
           '<div class="ksa-su-title">회원 가입</div>' +
