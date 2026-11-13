@@ -232,6 +232,7 @@
             '<div id="ksa-devlink-status" style="font-size:17px;color:#4A5568;text-align:center"></div>' +
             '<div id="ksa-devlink-timer" style="font-size:15px;color:#718096;text-align:center;margin-top:4px"></div>' +
           '</div>' +
+          '<button type="button" class="ksa-sms" id="ksa-push-btn" style="display:none">알림 다시 보내기</button>' +
           '<button type="button" class="ksa-sms" id="ksa-sms-btn" style="display:none">문자로 받기</button>' +
           '<div class="ksa-resend" id="ksa-resend-phone">다시 입력</div>' +
         '</div>' +
@@ -253,6 +254,8 @@
     els.resendPhone  = wrap.querySelector('#ksa-resend-phone');
     els.smsBtn       = wrap.querySelector('#ksa-sms-btn');
     els.smsBtn.onclick = sendSmsLink;
+    els.pushBtn      = wrap.querySelector('#ksa-push-btn');
+    els.pushBtn.onclick = function () { pushAgain(false); };
     els.stepSignup = wrap.querySelector('#ksa-step-signup');
     wrap.querySelector('#ksa-signup-link').onclick = openSignup;
     wrap.querySelector('#ksa-signup-link').onkeydown = function (e) { if (e.key === 'Enter') openSignup(); };
@@ -283,7 +286,6 @@
       var res = await fetch(PROXY + '/auth/device-link/resend-sms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: sid }) });
       var data = await res.json().catch(function () { return {}; });
       if (!res.ok || !data.ok) throw new Error(data.detail || data.message || '문자 발송에 실패했습니다.');
-      devlinkSmsSent = true;
       els.smsBtn.textContent = '문자를 보냈습니다';
       els.devlinkStatus.textContent = '문자로 받은 링크를 폰에서 열어 승인해 주세요.';
     } catch (e) {
@@ -346,15 +348,15 @@
   // 이제는 첫 발송이 실패했을 때(푸시 서비스가 받지 않음)에만 1회 다시 보낸다. 전달됐는데 폰에서 안 보이면 "문자로 받기"를 쓴다.
   var DEVLINK_AUTORESEND_DELAY_MS = 3000, DEVLINK_AUTORESEND_MAX = 1;
   // 2026-11-14 — 푸시는 푸시 서비스(FCM)가 받아도(201) 폰이 절전·Doze·죽은 구독 때문에 알림을 못 띄우는 경우가 있다(서버는 그 사실을 알 수 없다).
-  // 예전에는 이때 PC 화면에 아무 대안이 없었다("문자로 받기"는 폰 구독이 아예 없을 때만 보였다). 이제 알림이 안 오면 6초 뒤 버튼을 보이고, 12초 뒤에도 승인이 없으면 문자를 자동으로 한 번 보낸다.
-  var DEVLINK_SMS_BUTTON_DELAY_MS = 6000, DEVLINK_AUTO_SMS_DELAY_MS = 12000;
-  var devlinkSmsBtnTimer = null, devlinkAutoSmsTimer = null, devlinkSmsSent = false;
+  // 문자(SMS)가 아니라 같은 푸시 경로로 다시 보낸다(주피터 지시: 와이파이 전송). 6초 뒤에도 승인이 없으면 자동으로 1회 다시 보내고 "알림 다시 보내기" 버튼을 보인다. 다시 보낸 알림은 같은 tag라 폰에 한 건으로 합쳐진다.
+  var DEVLINK_PUSH_AGAIN_DELAY_MS = 6000, DEVLINK_PUSH_AGAIN_MAX = 5;
+  var devlinkPushAgainTimer = null, devlinkPushAgainCount = 0;
 
   function stopDevlinkPolling() {
     if (devlinkPollTimer) { clearInterval(devlinkPollTimer); devlinkPollTimer = null; }
     if (devlinkCountdownTimer) { clearInterval(devlinkCountdownTimer); devlinkCountdownTimer = null; }
-    if (devlinkSmsBtnTimer) { clearTimeout(devlinkSmsBtnTimer); devlinkSmsBtnTimer = null; }
-    if (devlinkAutoSmsTimer) { clearTimeout(devlinkAutoSmsTimer); devlinkAutoSmsTimer = null; }
+    if (devlinkPushAgainTimer) { clearTimeout(devlinkPushAgainTimer); devlinkPushAgainTimer = null; }
+    if (els.pushBtn) els.pushBtn.style.display = 'none';
     if (devlinkAutoResendTimer) { clearTimeout(devlinkAutoResendTimer); devlinkAutoResendTimer = null; }
     devlinkAutoResendCount = 0;
     devlinkSessionIds = [];
@@ -601,12 +603,9 @@
       devlinkPollTimer = setInterval(devlinkPollOnce, 2000);
       // 첫 발송이 성공했으면 다시 보내지 않는다. 폰이 등록돼 있는데 발송이 실패했을 때만 1회 재시도한다.
       // 2026-11-14 — 알림 받을 폰(푸시 구독)이 없으면 사용자가 "문자로 받기"를 누를 때까지 기다리지 않고 바로 문자를 보낸다(도착이 30초 이상 늦던 원인). 서버가 횟수·시간당 제한을 한다.
-      devlinkSmsSent = false;
+      devlinkPushAgainCount = 0;
       if (data.hasMobileDevice === false) sendSmsLink();
-      else {
-        devlinkSmsBtnTimer = setTimeout(function () { if (devlinkSessionIds.length) { showSmsButton(true); els.devlinkStatus.textContent = '알림이 안 오나요? 아래 "문자로 받기"를 눌러 주세요.'; } }, DEVLINK_SMS_BUTTON_DELAY_MS);
-        devlinkAutoSmsTimer = setTimeout(function () { if (devlinkSessionIds.length && !devlinkSmsSent) sendSmsLink(); }, DEVLINK_AUTO_SMS_DELAY_MS);
-      }
+      else devlinkPushAgainTimer = setTimeout(function () { pushAgain(true); }, DEVLINK_PUSH_AGAIN_DELAY_MS);
       if (data.pushSentToMobile === false && data.hasMobileDevice !== false) scheduleDevlinkAutoResend();
     } catch (e) {
       setMsg(e.message || '요청에 실패했습니다.', 'err');
@@ -618,6 +617,36 @@
   // 숫자 대조(2026-11-10) — 이번 로그인 시도에서 PC가 보여 주는 두 자리 숫자(자동 재전송 세션도 같은 숫자)
   var devlinkMatch = null;
   function wrapMatchEl() { return (els.matchBox && els.matchNum) ? { box: els.matchBox, num: els.matchNum } : null; }
+
+  // 폰 알림이 안 보일 때 같은 푸시 경로로 다시 보낸다(문자 아님). 새 세션을 추가하고 기존 세션 폴링은 유지 — 먼저 승인되는 쪽을 채택한다.
+  async function pushAgain(auto) {
+    devlinkPushAgainTimer = null;
+    if (!devlinkSessionIds.length || !pendingE164 || devlinkPushAgainCount >= DEVLINK_PUSH_AGAIN_MAX) return;
+    if (els.pushBtn.disabled) return;
+    devlinkPushAgainCount += 1;
+    els.pushBtn.style.display = ''; els.pushBtn.disabled = true; els.pushBtn.textContent = '알림 보내는 중…';
+    var firstSid = devlinkSessionIds[0];
+    var sigMsg = 'kauth-login:' + (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)) + ':' + Date.now();
+    try {
+      var res = await fetch(PROXY + '/auth/device-link/init', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ e164: pendingE164, pcLabel: cfg.serviceLabel, purpose: 'sign_request', sigMsg: sigMsg, pcMatch: devlinkMatch, retryOf: firstSid }),
+      });
+      var data = await res.json().catch(function () { return {}; });
+      if (res.ok && data.ok) {
+        devlinkSessionIds.push(data.sessionId);
+        els.devlinkStatus.textContent = '알림을 다시 보냈습니다. 폰 화면을 켜 주세요.';
+      } else {
+        els.devlinkStatus.textContent = data.message || '알림을 다시 보내지 못했습니다.';
+      }
+    } catch (e) {
+      els.devlinkStatus.textContent = '알림을 다시 보내지 못했습니다.';
+    }
+    if (devlinkSessionIds.length) {
+      els.pushBtn.textContent = '알림 다시 보내기';
+      setTimeout(function () { if (els.pushBtn) els.pushBtn.disabled = false; }, 4000);
+    }
+  }
 
   function scheduleDevlinkAutoResend() {
     if (devlinkAutoResendTimer) clearTimeout(devlinkAutoResendTimer);

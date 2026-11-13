@@ -1329,7 +1329,8 @@ async function handleDeviceLinkInit(request, env, corsHeaders) {
               : `${record.pcLabel}에서 로그인을 시도했습니다. 확인하려면 누르세요.`,
           sound: mobileDevices[0].sound || profile.push_sound || 'ping',
           url:   `/auth/device-link-approve.html?sessionId=${encodeURIComponent(sessionId)}`,
-          tag:   `gopang-device-link-${sessionId}`,
+          // 같은 로그인 시도에서 다시 보낸 알림(retryOf=첫 세션)은 같은 tag로 보내 폰에 한 건으로 합친다.
+          tag:   `gopang-device-link-${(typeof body.retryOf === 'string' && /^[0-9a-f-]{36}$/i.test(body.retryOf)) ? body.retryOf : sessionId}`,
         });
         // 2026-07-28 근본 수정 — Urgency 헤더가 아예 없어서 FCM 기본값
         // (normal)으로 처리되고 있었다. device-link 승인 요청은 "지금
