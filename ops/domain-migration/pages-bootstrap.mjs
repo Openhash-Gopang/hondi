@@ -13,7 +13,8 @@ const ALL = ['market','gdc','health','security','insurance','traffic','logistics
 const SKIP = new Set(['klaw','hondi','appraiser','doctor','ip','jeju','law','pro','school','taxcpa','tax',
   'l1-hanlim','l1-ido1','l2-jeju-city','l3-jeju','l4-kr','l5-global']);
 const only = (process.env.ONLY || '').split(/[\s,]+/).filter(Boolean);
-const targets = (only.length ? only : ALL).filter(n => !SKIP.has(n));
+// ONLY 에는 '하위이름=프로젝트' 형식도 쓸 수 있다(예: app=hondi → app.naviweb.kr 을 hondi 프로젝트에 연결)
+const targets = (only.length ? only : ALL).filter(t => t.includes('=') || !SKIP.has(t));
 
 const out = [];
 const log = (s) => { console.log(s); out.push(s); };
@@ -66,8 +67,9 @@ async function main() {
   const recs = new Map(rl.j.result.map(r => [r.name, r]));
   log(`- ${ZONE} DNS 레코드 ${recs.size}개 확인\n\n| 이름 | 프로젝트 | 레코드 | 결과 |\n|---|---|---|---|`);
 
-  for (const n of targets) {
-    const host = `${n}.${ZONE}`;
+  for (const t of targets) {
+    const [sub, n] = t.includes('=') ? t.split('=') : [t, t];
+    const host = `${sub}.${ZONE}`;
     const notes = [];
     try {
       const rec = recs.get(host);
@@ -107,7 +109,7 @@ async function main() {
       else if (/already|exist/i.test(dom.err)) notes.push('도메인 이미 있음');
       else throw new Error(`도메인 추가 실패 ${dom.status} ${dom.err}`);
       if (!rec) {
-        const r = await cf('POST', `/zones/${zoneId}/dns_records`, { type: 'CNAME', name: n, content: `${proj.subdomain || n + '.pages.dev'}`, proxied: true, ttl: 1 });
+        const r = await cf('POST', `/zones/${zoneId}/dns_records`, { type: 'CNAME', name: sub, content: `${proj.subdomain || n + '.pages.dev'}`, proxied: true, ttl: 1 });
         if (!r.ok) throw new Error(`CNAME 생성 실패 ${r.status} ${r.err}${r.status === 403 ? ' → ' + need('Zone · DNS · Edit') : ''}`);
         notes.push('CNAME 생성');
       }
