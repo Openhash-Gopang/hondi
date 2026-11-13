@@ -1,9 +1,12 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-13 18:10 KST · 기준 커밋 037ec222
+- 갱신: 2026-11-13 18:15 KST · 기준 커밋 5bffcf01
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-13 Merge pull request #1023 from Openhash-Gopang/naviweb-pages-status-20261113
+- 2026-11-13 ci: pages-bootstrap Pages 프로젝트 목록 페이지 순회
+- 2026-11-13 ci: pages-bootstrap 점검 모드에서 배포·도메인 상태 표시
 - 2026-11-13 Merge pull request #1022 from Openhash-Gopang/naviweb-pages-bootstrap-fix-20261113
 - 2026-11-13 ci: pages-bootstrap Pages 목록 조회의 per_page 제거
 - 2026-11-13 ci: pages-bootstrap 계정 ID 시크릿이 잘못된 경우 토큰의 유일한 계정으로 대체
@@ -41,9 +44,6 @@
 - 2026-11-12 fix: 번호·@아이디만 입력해도 LLM 없이 바로 검색(검색 결과를 약속만 하고 멈추던 문제)
 - 2026-11-12 Merge pull request #1007 from Openhash-Gopang/feat/frequent-users
 - 2026-11-12 Merge remote-tracking branch 'origin/main' into feat/frequent-users
-- 2026-11-12 Merge pull request #1004 from Openhash-Gopang/perf/instant-user-search
-- 2026-11-12 Merge pull request #1003 from Openhash-Gopang/fix/friend-find-test-off
-- 2026-11-12 Merge pull request #1002 from Openhash-Gopang/feat/simplify-signup-start
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
