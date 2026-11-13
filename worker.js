@@ -181,6 +181,7 @@ const ALLOWED_ORIGINS = [
   'https://watch.naviweb.kr',
   'https://job.naviweb.kr',
   'https://mail.naviweb.kr',
+  'https://app.naviweb.kr',   // 2026-11-13: 앱 본체(hondi Pages) 주소 — 빠져 있어 app.naviweb.kr/desktop 로그인이 'Failed to fetch'(CORS 403)였다
   'https://estate.naviweb.kr',
   'https://doctor.naviweb.kr',
   'https://users.naviweb.kr',
