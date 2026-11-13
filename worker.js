@@ -14383,6 +14383,7 @@ export default {
     // 2026-09-12 신설 — K-Mail ID(mail_id, hondi.kr 로컬파트 별칭). 실제
     // 발신 주소(<guid>@hondi.kr)는 그대로 두고 그 위에 얹는 조회용 별칭.
     if (pathname === '/kmail/mail-id/check' && request.method === 'GET') return handleKmailMailIdCheck(request, url, env, corsHeaders);
+    if (pathname === '/kmail/mail-id/available' && request.method === 'GET') return handleKmailMailIdAvailable(request, url, env, corsHeaders);   // 2026-11-13: 가입 입력 창용 — 로그인 전이라 인증 없이 형식·예약어·중복만 알려 준다
     // 2026-09-12 신설 — KMAIL_FETCH_CONTENT의 실제 조회 메커니즘(GitHub
     // API 우회 포함)을 LLM 판단과 분리해서 직접 검증하기 위한 테스트용
     // 엔드포인트. 다른 kmail 엔드포인트와 동일한 인증(phone_verify_token)
@@ -37468,6 +37469,16 @@ async function handleKmailMailIdConfirm(request, env, corsHeaders) {
 // GET /kmail/mail-id/check?candidate=...&guid=...&pubkey=...&signature=...&ts=...
 // 화면에서 사용자가 입력하는 동안 실시간 중복확인용(로그인 필요 —
 // 비로그인으로 전체 네임스페이스를 긁어보는 걸 막기 위해 인증을 그대로 건다).
+// GET /kmail/mail-id/available?candidate= — 가입 입력 창(로그인 전)이 이메일 ID를 정하기 전에 묻는 공개 조회.
+// 형식·예약어·중복만 알려 준다(누구의 아이디인지는 알려 주지 않는다). 가입 창에서만 쓰이므로 후보 길이를 제한한다.
+async function handleKmailMailIdAvailable(request, url, env, corsHeaders) {
+  const candidate = String(url.searchParams.get('candidate') || '').slice(0, 64);
+  if (!candidate) return _err(400, 'MISSING_FIELD', 'candidate 필수', corsHeaders);
+  const chk = _checkMailId(candidate);
+  if (!chk.ok) return new Response(JSON.stringify({ ok: true, normalized: chk.normalized, valid: false, available: false, reason: chk.reason, message: chk.message }), { status: 200, headers: corsHeaders });
+  const owner = await _kmailFindMailIdOwner(env, chk.normalized);
+  return new Response(JSON.stringify({ ok: true, normalized: chk.normalized, valid: true, available: !owner }), { status: 200, headers: corsHeaders });
+}
 async function handleKmailMailIdCheck(request, url, env, corsHeaders) {
   const candidate = url.searchParams.get('candidate');
   if (!candidate) return _err(400, 'MISSING_FIELD', 'candidate 필수', corsHeaders);
