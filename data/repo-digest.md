@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-14 07:33 KST · 기준 커밋 c397c209
+- 갱신: 2026-11-14 07:44 KST · 기준 커밋 a14f0ae1
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-14 Merge pull request #1057 from Openhash-Gopang/icons-phone-20261114
+- 2026-11-14 ui(webapp): 폰 화면 스캔 버튼·왼쪽 메뉴 설정 아이콘을 더 읽기 쉬운 모양으로 교체
 - 2026-11-14 Merge pull request #1056 from Openhash-Gopang/manual-screens2
 - 2026-11-14 docs(manual): 안내서 JSON 따옴표 오류 수정 + 설치 창·바탕화면 아이콘·무료 소진 안내 화면 추가
 - 2026-11-14 Merge pull request #1055 from Openhash-Gopang/install-banner
@@ -42,8 +44,6 @@
 - 2026-11-14 feat(ai): first greeting is one line (no long self-intro / profile questions)
 - 2026-11-14 Merge pull request #1039 from Openhash-Gopang/sw-redirect-cache-20261114
 - 2026-11-14 fix(sw): return non-redirected response from cache (ERR_FAILED on /webapp.html)
-- 2026-11-14 Revert "feat(login-popup): PC login also uses SMS code (push approval slow/needs wallet)"
-- 2026-11-14 feat(login-popup): PC login also uses SMS code (push approval slow/needs wallet)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
