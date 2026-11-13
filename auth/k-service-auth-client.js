@@ -470,7 +470,8 @@
   // 자동 입력이 안 되는 폰(iOS 등)은 키보드 위 제안이나 직접 입력 칸을 쓴다. PC 는 문자를 받을 수 없으므로 기존 폰 승인 방식을 그대로 쓴다.
   // 이 로그인으로는 전화번호 인증 토큰만 얻는다 — 지갑 개인키는 기기에 있어 문자로 옮겨지지 않으므로 서명·송금에는 쓸 수 없다.
   var IS_PHONE = /Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent || '');
-  function startLogin() { return IS_PHONE ? startSmsLogin() : startDeviceLink(); }
+  // PC 도 같은 문자 인증을 쓴다(2026-11-14): 폰 승인 알림은 도착이 늦고, 지갑이 없는 새 폰은 승인 자체가 불가능하다.
+  function startLogin() { return startSmsLogin(); }
   var smsAbort = null;
   async function startSmsLogin() {
     var rawPhone = els.phone.value.trim();
@@ -493,7 +494,7 @@
     els.stepPhone.style.display = 'none';
     els.stepDevlink.style.display = '';
     els.desc.textContent = '문자 인증번호';
-    els.devlinkStatus.textContent = '인증번호 확인 중…';
+    els.devlinkStatus.textContent = IS_PHONE ? '인증번호 확인 중…' : '폰으로 받은 6자리를 입력하세요';
     els.devlinkTimer.textContent = '';
     var matchBox = els.overlay.querySelector('#ksa-match'); if (matchBox) matchBox.style.display = 'none';
     showSmsButton(false);
