@@ -1,0 +1,28 @@
+/* 나비웹 공용 팝업 스타일 — Material Design (2026-11-14, 주피터 승인 시안)
+ * 강조색은 --mp-accent 한 곳에서 바꾼다. 글자 크기는 앱의 글자 크기 설정(--hondi-fs)을 따른다.
+ * 사용: 팝업의 바깥 상자에 .mp-dialog, 제목 .mp-title, 설명 .mp-text, 오류 .mp-error,
+ *       버튼 .mp-btn + (.mp-btn-primary | .mp-btn-text | .mp-btn-quiet), 입력칸 .mp-input, 진행 막대 .mp-progress.
+ */
+:root{--mp-accent:#00796B;--mp-accent-weak:#E0F2F1;--mp-accent-track:#B2DFDB;--mp-err:#D32F2F;--mp-text:#212121;--mp-text-2:#424242;--mp-text-3:#616161}
+.mp-dialog{background:#fff;border-radius:4px;padding:32px 32px 12px;width:100%;max-width:360px;box-sizing:border-box;text-align:left;font-family:"Noto Sans KR",Roboto,Pretendard,-apple-system,BlinkMacSystemFont,"Malgun Gothic",sans-serif;box-shadow:0 11px 15px -7px rgba(0,0,0,.2),0 24px 38px 3px rgba(0,0,0,.14),0 9px 46px 8px rgba(0,0,0,.12);max-height:calc(100vh - 48px);overflow-y:auto}
+.mp-title{font-size:calc(1.25rem*var(--hondi-fs,1));font-weight:500;color:var(--mp-text);line-height:1.3;margin:0 0 16px}
+.mp-text{font-size:calc(.875rem*var(--hondi-fs,1));color:var(--mp-text-2);line-height:1.6;margin:0 0 20px}
+.mp-text-muted{color:var(--mp-text-3)}
+.mp-error{font-size:calc(.75rem*var(--hondi-fs,1));color:var(--mp-err);line-height:1.5;margin:0 0 8px}
+.mp-btn{display:block;width:100%;height:44px;margin:0 0 8px;padding:0 12px;border:0;border-radius:4px;font-family:inherit;font-size:calc(.9375rem*var(--hondi-fs,1));font-weight:500;letter-spacing:.3px;cursor:pointer;background:transparent;color:var(--mp-accent)}
+.mp-btn:hover{background:rgba(0,0,0,.05)}
+.mp-btn:disabled{opacity:.5;cursor:not-allowed}
+.mp-btn-primary{background:var(--mp-accent);color:#fff;letter-spacing:.5px;box-shadow:0 2px 2px 0 rgba(0,0,0,.14),0 3px 1px -2px rgba(0,0,0,.12),0 1px 5px 0 rgba(0,0,0,.2)}
+.mp-btn-primary:hover{background:var(--mp-accent);box-shadow:0 4px 5px 0 rgba(0,0,0,.14),0 1px 10px 0 rgba(0,0,0,.12),0 2px 4px -1px rgba(0,0,0,.2)}
+.mp-btn-text{color:var(--mp-accent)}
+.mp-btn-quiet{color:var(--mp-text-3)}
+.mp-grow{flex:1;width:auto}
+.mp-actions{display:flex;gap:8px;margin:0 0 8px}
+.mp-actions .mp-btn{margin:0}
+.mp-input{display:block;width:100%;box-sizing:border-box;margin:0 0 8px;padding:6px 0 8px;border:0;border-bottom:2px solid var(--mp-accent);border-radius:0;background:transparent;outline:none;text-align:left;font-family:inherit;font-size:calc(1.125rem*var(--hondi-fs,1));letter-spacing:2px;color:var(--mp-text)}
+.mp-input.mp-invalid{border-bottom-color:var(--mp-err)}
+.mp-progress{position:relative;height:4px;margin:-32px -32px 24px;background:var(--mp-accent-track);overflow:hidden}
+.mp-progress::before{content:"";position:absolute;top:0;bottom:0;width:40%;background:var(--mp-accent);animation:mp-ind 1.6s linear infinite}
+@keyframes mp-ind{0%{left:-40%}100%{left:100%}}
+.mp-num{display:inline-flex;align-items:center;justify-content:center;min-width:128px;height:88px;border-radius:12px;background:var(--mp-accent-weak);color:var(--mp-accent);font-size:calc(3.5rem*var(--hondi-fs,1));font-weight:700;letter-spacing:2px;font-family:Roboto,inherit}
+.mp-center{text-align:center}
