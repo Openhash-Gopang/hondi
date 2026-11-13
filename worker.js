@@ -1412,7 +1412,8 @@ async function handleDeviceLinkResendSms(request, env, corsHeaders) {
   // 유발하는 걸 막는다(웹푸시와 달리 SMS는 회사에 실제 비용이 나간다).
   const rlKey = `devlink_sms_rl:${record.e164}`;
   const rlRaw = await env.QR_SESSIONS_KV.get(rlKey);
-  const rlCount = rlRaw ? parseInt(rlRaw, 10) || 0 : 0;
+  const smsRl = _rlParse(rlRaw, DEVICE_LINK_SMS_RATE_WINDOW_SECONDS);
+  const rlCount = smsRl.count;
   if (rlCount >= DEVICE_LINK_SMS_RATE_LIMIT_PER_HOUR) {
     return _err(429, 'PHONE_RATE_LIMITED', '이 번호로 문자를 너무 많이 요청했습니다. 잠시 후 다시 시도해 주세요', corsHeaders);
   }
@@ -1428,7 +1429,7 @@ async function handleDeviceLinkResendSms(request, env, corsHeaders) {
 
   record.smsResendCount = (record.smsResendCount || 0) + 1;
   await _dlPut(env, sessionId, record, DEVICE_LINK_SMS_TTL_SECONDS);
-  await env.QR_SESSIONS_KV.put(rlKey, String(rlCount + 1), { expirationTtl: DEVICE_LINK_SMS_RATE_WINDOW_SECONDS });
+  await _rlPut(env.QR_SESSIONS_KV, rlKey, smsRl, DEVICE_LINK_SMS_RATE_WINDOW_SECONDS);
 
   return new Response(JSON.stringify({ ok: true, expires_in: DEVICE_LINK_SMS_TTL_SECONDS }), { status: 200, headers: corsHeaders });
 }
