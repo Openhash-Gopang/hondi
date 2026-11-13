@@ -216,12 +216,12 @@
         '<div id="ksa-step-devlink" style="display:none">' +
           '<div class="ksa-devlink-wait">' +
             '<div class="ksa-spinner"></div>' +
-            '<div id="ksa-match" style="display:none;text-align:center;margin:0 0 10px"><div style="font-size:12.5px;color:#374151">폰에서 이 숫자를 고르세요</div><div id="ksa-match-num" style="font-size:40px;font-weight:800;letter-spacing:2px;color:#4338CA;margin-top:2px"></div></div>' +
-            '<div id="ksa-devlink-status" style="font-size:12.5px;color:#4A5568;text-align:center">폰 알림을 확인하세요.</div>' +
+            '<div id="ksa-match" style="display:none;text-align:center;margin:0 0 10px"><div style="font-size:12.5px;color:#374151">폰에서 이 숫자 선택</div><div id="ksa-match-num" style="font-size:40px;font-weight:800;letter-spacing:2px;color:#4338CA;margin-top:2px"></div></div>' +
+            '<div id="ksa-devlink-status" style="font-size:12.5px;color:#4A5568;text-align:center"></div>' +
             '<div id="ksa-devlink-timer" style="font-size:11px;color:#718096;text-align:center;margin-top:4px"></div>' +
           '</div>' +
           '<button type="button" class="ksa-sms" id="ksa-sms-btn" style="display:none">문자로 받기</button>' +
-          '<div class="ksa-resend" id="ksa-resend-phone">번호 다시 입력</div>' +
+          '<div class="ksa-resend" id="ksa-resend-phone">다시 입력</div>' +
         '</div>' +
         '<div class="ksa-msg" id="ksa-msg"></div>' +
         '<button type="button" class="ksa-cancel" id="ksa-cancel">취소</button>' +
@@ -282,8 +282,13 @@
     els.msg.textContent = text || '';
     els.msg.className = 'ksa-msg' + (kind ? ' ' + kind : '');
   }
+  // 승인 대기 화면에서는 제목을 "폰에서 승인하세요" 한 줄로 바꾼다(번호 입력 안내가 남아 있으면 불필요하고 중복된다).
+  function setDescWait(on) {
+    els.desc.textContent = on ? '폰에서 승인하세요' : ((cfg.serviceLabel ? cfg.serviceLabel + ' — ' : '') + '폰 번호 뒷 8자리');
+  }
   function resetToPhoneStep() {
     stopDevlinkPolling();
+    setDescWait(false);
     if (els.stepSignup) els.stepSignup.style.display = 'none';
     els.stepDevlink.style.display = 'none';
     els.stepPhone.style.display = '';
@@ -336,7 +341,7 @@
   function startDevlinkCountdown(seconds) {
     var remain = seconds;
     var tick = function () {
-      els.devlinkTimer.textContent = remain > 0 ? (remain + '초 후 만료') : '만료됨';
+      els.devlinkTimer.textContent = remain > 0 ? (remain + '초') : '만료됨';
       if (remain <= 0 && devlinkCountdownTimer) { clearInterval(devlinkCountdownTimer); devlinkCountdownTimer = null; }
       remain -= 1;
     };
@@ -369,6 +374,7 @@
   }
   function openSignup() {
     stopDevlinkPolling();
+    setDescWait(false);
     els.stepPhone.style.display = 'none';
     els.stepDevlink.style.display = 'none';
     els.stepSignup.style.display = '';
@@ -496,9 +502,10 @@
       devlinkAutoResendCount = 0;
       els.stepPhone.style.display = 'none';
       els.stepDevlink.style.display = '';
+      setDescWait(true);
       els.devlinkStatus.textContent = data.hasMobileDevice === false
         ? '알림 받을 폰이 없습니다. "문자로 받기"를 눌러 주세요.'
-        : '폰 알림을 눌러 승인하세요.';
+        : '';
       showSmsButton(data.hasMobileDevice === false);
 
       startDevlinkCountdown(data.expires_in || 90);
@@ -544,7 +551,7 @@
       devlinkSessionIds.push(data.sessionId);
       els.devlinkStatus.textContent = data.hasMobileDevice === false
         ? '알림 받을 폰이 없습니다. "문자로 받기"를 눌러 주세요.'
-        : '알림을 다시 보냈습니다 — 스마트폰을 확인해 주세요.';
+        : '';
       showSmsButton(data.hasMobileDevice === false);
     } catch (e) { /* 재시도는 1회뿐이다 */ }
   }
