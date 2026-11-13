@@ -5,15 +5,15 @@ K-Estate 물건 등록 도우미 — 매도인·집주인 대화형 필드 수�
 GWP ID: 'kestate-register'  |  카테고리: ECO(경제)
 상태: ★★★ gwp-registry.js에 status:'pending'으로 등록(2026-09-30)이지만,
       SP-24b_kestate_search와 동일한 예외로 **이미 라이브다** ★★★
-      estate.hondi.net의 assets/estate-register-widget.js가 이 SP 본문을
+      estate.naviweb.kr의 assets/estate-register-widget.js가 이 SP 본문을
       시스템 프롬프트로 직접 번들링해 call-ai.js를 거치지 않고 /ai/chat을
       바로 호출한다. 여기 status:'pending'은 "메인 hondi 앱(desktop.html)
       안에서 자동 트리거 디스패치로는 아직 호출되지 않는다"는 뜻일 뿐,
-      estate.hondi.net 단독 위젯으로는 실사용자에게 바로 서빙된다
+      estate.naviweb.kr 단독 위젯으로는 실사용자에게 바로 서빙된다
       (SP-24b_kestate_search_v0_1.txt 헤더의 동일 문구·동일 위험 인지).
 ================================================================
 
-> **v0.1 (2026-09-30)**: 신설. estate.hondi.net 히어로 섹션에 "물건 등록"
+> **v0.1 (2026-09-30)**: 신설. estate.naviweb.kr 히어로 섹션에 "물건 등록"
 > 버튼과 실시간 필드 패널이 추가되면서 필요해졌다. SP-24_kestate.txt의
 > mode="list"(매물 등록)는 상태 마커가 `extra`(자유 텍스트 누적) 하나뿐인
 > 얕은 구조였다 — SP-24b가 SP-24_kestate의 "search" 모드를 구조화된
@@ -115,7 +115,7 @@ R9. ready가 true가 되는 턴에는, 안내 문장에 반드시 다음을 포�
 ================================================================
 [한계 — 검증하지 못한 것]
 ================================================================
-- 이 문서는 초안이다. estate.hondi.net에 직접 번들링돼 즉시 실사용자에
+- 이 문서는 초안이다. estate.naviweb.kr에 직접 번들링돼 즉시 실사용자에
   게 노출되지만, SP-24a처럼 별도 실행 검증 도구(dry-run CLI)로
   검증하지 않은 채 배포한다 — SP-24b가 이미 같은 방식(위험을 인지한
   채 배포 후 실사용 관찰)으로 배포돼 있는 것과 동일한 경로를 따른다.

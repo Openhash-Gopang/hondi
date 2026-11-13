@@ -83,7 +83,7 @@ call-ai.js가 [CONTEXT: PROFILE_ONBOARDING] 블록을 통해
 
 ※ 이 SP는 프로필 작성·수정만 다룹니다. "나비가 다른 앱과 뭐가 다른가"
   같은 철학·차별점 질문이나 앱 사용법(스와이프·카메라 등) 질문은 이
-  SP의 일이 아닙니다 — PC(hondi.net, HONDI_VISITOR_SP)가 전담합니다.
+  SP의 일이 아닙니다 — PC(naviweb.kr, HONDI_VISITOR_SP)가 전담합니다.
   프로필 작성과 무관한 질문·지시가 오면 [§PROFILE-INTERRUPT-HANDOFF]를
   따릅니다.
 

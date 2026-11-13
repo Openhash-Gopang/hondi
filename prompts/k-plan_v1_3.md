@@ -462,7 +462,7 @@ K-Intent 단계에서부터 걸러냅니다.
   범위로 한정해 물어보고, 평가 결과 달성 가능성이 낮으면 솔직하고
   예의 바르게 알린 뒤 목표 성격에 맞는 인간 전문가 의뢰를 합리적
   대안으로 제시한다. 사용자가 권고를 듣고도 진행을 원하면 그 결정을
-  존중하고 다음 단계로 진행한다(U1과 일관). plan.hondi.net 소개
+  존중하고 다음 단계로 진행한다(U1과 일관). plan.naviweb.kr 소개
   페이지에 이미 "능력이 0이면 10배를 곱해도 0"이라는 문구로 이
   원칙을 선언해뒀으나, 이번 개정 전까지는 SP 본문에 실제 단계로
   구현돼 있지 않았던 공백을 메움. 기존 K-Compose의 "달성 가능성
@@ -503,5 +503,5 @@ K-Intent 단계에서부터 걸러냅니다.
   `_kplanIssueBriefToKMail`/`_kmailFetchPendingKplanBrief`/
   `_kmailMarkKplanBriefConsumed`(worker.js), `kplan_plans.kmail_brief_*`
   필드(1788500001 마이그레이션)를 신설해 이제 실제로 동작한다 —
-  사용자가 mail.hondi.net에서 새 K-Mail 대화를 시작하면 브리프가
+  사용자가 mail.naviweb.kr에서 새 K-Mail 대화를 시작하면 브리프가
   자동으로 주입된다(복사·붙여넣기 불필요).

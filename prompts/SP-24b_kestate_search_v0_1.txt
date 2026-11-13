@@ -1,10 +1,10 @@
 ================================================================
 SP-24b_kestate_search_v0_1.txt
-K-Estate 매물 검색 도우미 — estate.hondi.net 상단 채팅창 전용 System Prompt v0.1
+K-Estate 매물 검색 도우미 — estate.naviweb.kr 상단 채팅창 전용 System Prompt v0.1
 저장위치: gopang/prompts/SP-24b_kestate_search_v0_1.txt
 GWP ID: 'kestate-search'  |  카테고리: ECO(경제)
 상태: gwp-registry.js에 status:'pending'으로 등록(2026-09-28)했지만,
-      실제로는 estate.hondi.net의 assets/estate-search-widget.js가 이 문서의
+      실제로는 estate.naviweb.kr의 assets/estate-search-widget.js가 이 문서의
       본문을 시스템 프롬프트로 직접 번들링해 /ai/chat을 호출하는 방식으로
       "이미 라이브"다 — call-ai.js의 SWITCH_SP_LOADERS·candidate-prefilter
       디스패치 경로를 거치지 않기 때문에, 메인 hondi 앱(desktop.html) 안에서
@@ -20,7 +20,7 @@ consent_sale 네 모드를 다 다루는 종합 부동산 안내 에이전트다
 등기부·지수 증거를 수집해 코드가 3단계로 가치를 "계산"하는 별도 엔진이다.
 
 이 SP-24b는 그 둘의 부분집합이다 — SP-24_kestate의 "search" 모드 하나만
-떼어내, 로그인·K-서비스 생태계 전체 맥락 없이 estate.hondi.net이라는
+떼어내, 로그인·K-서비스 생태계 전체 맥락 없이 estate.naviweb.kr이라는
 별도 정적 사이트 위 채팅창 하나에서 단독으로 동작하도록 다시 쓴 것이다.
 list(매물 등록)·manage(계약 관리)·consent_sale(합의매각)·klaw/ktax/kgov
 연계는 이 SP의 범위가 아니다 — 이 위젯은 "매물을 찾아준다" 이상을
@@ -109,7 +109,7 @@ list(매물 등록)·manage(계약 관리)·consent_sale(합의매각)·klaw/kta
 [배포 형태]
 ================================================================
 이 SP는 hondi 저장소의 다른 SP들과 달리 call-ai.js의 SWITCH_SP_LOADERS·
-[CALL_...] 정규식 배선을 거치지 않는다. estate.hondi.net(별도 정적
+[CALL_...] 정규식 배선을 거치지 않는다. estate.naviweb.kr(별도 정적
 사이트, GitHub Pages)에 있는 assets/estate-search-widget.js가 이 문서의
 본문(위 STEP들)을 자바스크립트 문자열 상수로 그대로 담아, 사용자가
 채팅창에 입력할 때마다 { system: <이 문서 내용>, messages: [...] }를
@@ -123,12 +123,12 @@ https://hondi-proxy.tensor-city.workers.dev/ai/chat 에 직접 POST한다
 상태이며, 자동 동기화 장치는 아직 없다(향후 과제: 위젯이 이 파일을
 빌드 타임에 인라인하도록 바꾸는 것).
 
-worker.js의 ALLOWED_ORIGINS에 'https://estate.hondi.net'을 추가해야
+worker.js의 ALLOWED_ORIGINS에 'https://estate.naviweb.kr'을 추가해야
 CORS를 통과한다(2026-09-28 패치 포함). 이 경로(/ai/chat)는 로그인
 (phone_verify_token)도, GDC 과금 게이트도 요구하지 않는 기존 그대로의
 동작이다 — Origin 헤더 검사만 받는다(AI_PROXY_PATHS에 이미 포함돼
 있음). 즉 이 위젯의 호출 비용은 기존에 이미 CORS 허용된 다른 30여 개
-hondi.net 서브도메인과 동일한 수준의 노출이며, 이 SP가 새로 만든
+naviweb.kr 서브도메인과 동일한 수준의 노출이며, 이 SP가 새로 만든
 위험이 아니라 플랫폼이 이미 감수하고 있던 것과 같은 종류의 위험이다.
 
 ================================================================

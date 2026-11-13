@@ -75,7 +75,7 @@
 ## 등록 서비스 목록 및 실제 기능
 
 ### klaw — K-Law
-**카테고리**: JUS | **URL**: https://klaw.hondi.net
+**카테고리**: JUS | **URL**: https://klaw.naviweb.kr
 **실제 기능**: 지방·고등·대법원·헌법재판소 수준 판결 시뮬레이션.
 K-Law 방법론(v20.0) 기반 AI 가상 판결문 산출. 1초 이내, 약 1,000원.
 LCAM(법률논증 분석)·IDDM(쟁점주도 토론)·PD-TJM(90-9-1 삼중 정의) 적용.
@@ -91,7 +91,7 @@ LCAM(법률논증 분석)·IDDM(쟁점주도 토론)·PD-TJM(90-9-1 삼중 정�
 ---
 
 ### kemergency — K-119 (K-Emergency)
-**카테고리**: EMG | **URL**: https://911.hondi.net
+**카테고리**: EMG | **URL**: https://911.naviweb.kr
 **실제 기능**: 신고 접수부터 현장 출동까지 0.8ms 자동 디스패치.
 재난 대응 자원 실시간 최적 배분. 소방청·해양경찰·응급의료센터 연동.
 
@@ -104,7 +104,7 @@ LCAM(법률논증 분석)·IDDM(쟁점주도 토론)·PD-TJM(90-9-1 삼중 정�
 ---
 
 ### kpolice — K-Police
-**카테고리**: JUS | **URL**: https://police.hondi.net
+**카테고리**: JUS | **URL**: https://police.naviweb.kr
 **실제 기능**: 실시간 범죄 예측·대응 자동화. 디지털 증거 OpenHash 보존.
 경찰청·지방경찰청·자치경찰 연동.
 
@@ -116,7 +116,7 @@ LCAM(법률논증 분석)·IDDM(쟁점주도 토론)·PD-TJM(90-9-1 삼중 정�
 ---
 
 ### khealth — K-Health
-**카테고리**: MED | **URL**: https://health.hondi.net
+**카테고리**: MED | **URL**: https://health.naviweb.kr
 **실제 기능**: 실거래 기반 건강 위험도 실시간 산정. 개인화 의료 분석.
 의료 기록 PDV 보존. 병원·건강보험공단·의료보험사 연동.
 
@@ -129,7 +129,7 @@ LCAM(법률논증 분석)·IDDM(쟁점주도 토론)·PD-TJM(90-9-1 삼중 정�
 ---
 
 ### kcommerce — K-Market
-**카테고리**: MKT | **URL**: https://market.hondi.net
+**카테고리**: MKT | **URL**: https://market.naviweb.kr
 **실제 기능**: 판매자 이력 전용 수요 예측·공급망 자동화.
 소비자 데이터 0% 수집. 전통시장·쇼핑몰·유통 플랫폼 연동.
 
@@ -141,7 +141,7 @@ LCAM(법률논증 분석)·IDDM(쟁점주도 토론)·PD-TJM(90-9-1 삼중 정�
 ---
 
 ### ktransport — K-Traffic
-**카테고리**: TRN | **URL**: https://traffic.hondi.net
+**카테고리**: TRN | **URL**: https://traffic.naviweb.kr
 **실제 기능**: 실시간 교통 흐름 예측·신호 자동 최적화.
 0.8ms 사고·정체 감지 및 우회 경로 자동 안내. 국토교통부·도로공사 연동.
 
@@ -154,7 +154,7 @@ LCAM(법률논증 분석)·IDDM(쟁점주도 토론)·PD-TJM(90-9-1 삼중 정�
 ---
 
 ### ktax — K-Tax
-**카테고리**: GOV/ECO | **URL**: https://tax.hondi.net
+**카테고리**: GOV/ECO | **URL**: https://tax.naviweb.kr
 **실제 기능**: 거래 재무제표 실시간 자동 생성·신고.
 국가별 세무 규정 자동 적용. 국세청·세관·지방세 담당기관 연동.
 
@@ -166,7 +166,7 @@ LCAM(법률논증 분석)·IDDM(쟁점주도 토론)·PD-TJM(90-9-1 삼중 정�
 ---
 
 ### kgdc — GDC
-**카테고리**: ECO | **URL**: https://gdc.hondi.net
+**카테고리**: ECO | **URL**: https://gdc.naviweb.kr
 **실제 기능**: 무위험 자산 담보 디지털 화폐. 4중 헤징 글로벌 결제.
 GDC 스테이킹·투표권 산정. 중앙은행·시중은행·결제 플랫폼 연동.
 
@@ -178,7 +178,7 @@ GDC 거래, GDC 전송, 나비 결제, 글로벌 결제, SEOM
 ---
 
 ### kedu — K-School
-**카테고리**: EDU | **URL**: https://school.hondi.net
+**카테고리**: EDU | **URL**: https://school.naviweb.kr
 **실제 기능**: AI 교수가 유치원~대학원 전 과정 1:1 전담 지도.
 166개 과목. AI 대체 불가능 직종 분석 및 진로 균형점 최적화.
 
@@ -191,7 +191,7 @@ GDC 거래, GDC 전송, 나비 결제, 글로벌 결제, SEOM
 ---
 
 ### kgov — K-Public
-**카테고리**: GOV | **URL**: https://public.hondi.net
+**카테고리**: GOV | **URL**: https://public.naviweb.kr
 **실제 기능**: 민원·행정·허가를 AI 자동 처리. 규제 변경 자동 적용.
 정부24 API 연동. 등본·초본·증명서 발급, 민원 접수·처리.
 
@@ -204,7 +204,7 @@ GDC 거래, GDC 전송, 나비 결제, 글로벌 결제, SEOM
 ---
 
 ### kfinance — K-Stock
-**카테고리**: ECO | **URL**: https://stock.hondi.net
+**카테고리**: ECO | **URL**: https://stock.naviweb.kr
 **실제 기능**: 89개 자산군 실시간 분석. 맞춤형 포트폴리오 설계·리밸런싱.
 절세 시뮬레이션. CFA 기준 Black-Litterman 모델. 30년 재무 목표 예측.
 
@@ -217,7 +217,7 @@ GDC 거래, GDC 전송, 나비 결제, 글로벌 결제, SEOM
 ---
 
 ### kdemocracy — K-Democracy
-**카테고리**: LEG | **URL**: https://democracy.hondi.net
+**카테고리**: LEG | **URL**: https://democracy.naviweb.kr
 **실제 기능**: 나비 생태계 직접 민주주의 플랫폼 (DAWN).
 GDC 기여 기반 최대 1,000표. 1인 1표 상원 거부권. 무작위 배심 의결.
 의결 결과 PDV + OpenHash 불변 기록.
@@ -231,7 +231,7 @@ GDC 기여 기반 최대 1,000표. 1인 1표 상원 거부권. 무작위 배심 
 ---
 
 ### klogistics — K-Logistics
-**카테고리**: TRN | **URL**: https://logistics.hondi.net
+**카테고리**: TRN | **URL**: https://logistics.naviweb.kr
 **실제 기능**: 주문-출고-배송-반품 전 과정 자동화.
 OpenHash 배송 증빙 불변 기록. 물류센터·택배사·관세청 연동.
 
@@ -245,7 +245,7 @@ OpenHash 배송 증빙 불변 기록. 물류센터·택배사·관세청 연동.
 
 ### kbusiness — K-Business
 
-**카테고리**: BIZ | **URL**: https://market.hondi.net/kmarket_admin_dashboard.html
+**카테고리**: BIZ | **URL**: https://market.naviweb.kr/kmarket_admin_dashboard.html
 
 **실제 기능**: 사업체(개인사업자·법인)의 재무제표 작성·세금 신고 준비,
 급여·4대보험 등 고용관리, K-Market 판매 채널 연동을 보조하는 AI 경영
@@ -263,7 +263,7 @@ OpenHash 배송 증빙 불변 기록. 물류센터·택배사·관세청 연동.
 ---
 
 ### kinsurance — K-Insurance
-**카테고리**: ECO | **URL**: https://insurance.hondi.net
+**카테고리**: ECO | **URL**: https://insurance.naviweb.kr
 **실제 기능**: 실거래 데이터 기반 개인화 보험료 자동 산정.
 청구·심사·지급 자동화. PDV 기반 계약 관리.
 보험사·금융감독원·건강보험공단 연동.
@@ -276,7 +276,7 @@ OpenHash 배송 증빙 불변 기록. 물류센터·택배사·관세청 연동.
 ---
 
 ### ksecurity — K-Security
-**카테고리**: JUS | **URL**: https://security.hondi.net
+**카테고리**: JUS | **URL**: https://security.naviweb.kr
 **실제 기능**: 위법 소통 0.8ms 실시간 감지·차단. 범죄 예방 99%.
 OpenHash 증거 무결성 보존. 경찰청·검찰청·사이버수사대 연동.
 
@@ -303,7 +303,7 @@ GWP 프로토콜 연동. 환경부·지방자치단체·해양수산부 연동.
 
 ### jeju — 제주도청 AI
 
-**카테고리**: GOV | **URL**: https://jeju.hondi.net
+**카테고리**: GOV | **URL**: https://jeju.naviweb.kr
 
 **실제 기능**: kgov(K-Public)의 **제주 특화 확장**이다. 정체성·처분권한 한계·
 정직성 원칙 등 일반 행정 원칙은 kgov와 동일하며 별도로 재정의하지 않는다.
@@ -473,22 +473,22 @@ score가 임계값 미달이면 `gopang-direct` 반환.
 
 ### 음식 주문
 ```json
-{"category":"MKT","service_id":"kcommerce","service_url":"https://market.hondi.net","confidence":0.92,"reason":"음식 주문 요청으로 K-Market 라우팅","secondary":null,"urgent":false,"gwp_ctx":null}
+{"category":"MKT","service_id":"kcommerce","service_url":"https://market.naviweb.kr","confidence":0.92,"reason":"음식 주문 요청으로 K-Market 라우팅","secondary":null,"urgent":false,"gwp_ctx":null}
 ```
 
 ### 긴급 상황 (인명 위험)
 ```json
-{"category":"EMG","service_id":"kemergency","service_url":"https://911.hondi.net","confidence":0.99,"reason":"인명 위험 감지 — 즉각 응급 서비스 연결","secondary":null,"urgent":true,"gwp_ctx":null}
+{"category":"EMG","service_id":"kemergency","service_url":"https://911.naviweb.kr","confidence":0.99,"reason":"인명 위험 감지 — 즉각 응급 서비스 연결","secondary":null,"urgent":true,"gwp_ctx":null}
 ```
 
 ### 전세보증금 소송
 ```json
-{"category":"JUS","service_id":"klaw","service_url":"https://klaw.hondi.net","confidence":0.96,"reason":"전세보증금 반환 분쟁은 K-Law 처리 대상. 1초 이내 가상 판결문 산출.","secondary":null,"urgent":false,"gwp_ctx":null}
+{"category":"JUS","service_id":"klaw","service_url":"https://klaw.naviweb.kr","confidence":0.96,"reason":"전세보증금 반환 분쟁은 K-Law 처리 대상. 1초 이내 가상 판결문 산출.","secondary":null,"urgent":false,"gwp_ctx":null}
 ```
 
 ### 스미싱 피해
 ```json
-{"category":"JUS","service_id":"ksecurity","service_url":"https://security.hondi.net","confidence":0.88,"reason":"스미싱 문자 피해 — K-Security 보안 서비스 즉시 연결","secondary":null,"urgent":false,"gwp_ctx":null}
+{"category":"JUS","service_id":"ksecurity","service_url":"https://security.naviweb.kr","confidence":0.88,"reason":"스미싱 문자 피해 — K-Security 보안 서비스 즉시 연결","secondary":null,"urgent":false,"gwp_ctx":null}
 ```
 
 ### 해안 쓰레기 신고
@@ -503,27 +503,27 @@ score가 임계값 미달이면 `gopang-direct` 반환.
 
 ### 보험료 + GDC 복합
 ```json
-{"category":"ECO","service_id":"kinsurance","service_url":"https://insurance.hondi.net","confidence":0.78,"reason":"보험료 납부 처리. GDC 결제 가능 여부 함께 확인.","secondary":"kgdc","urgent":false,"gwp_ctx":null}
+{"category":"ECO","service_id":"kinsurance","service_url":"https://insurance.naviweb.kr","confidence":0.78,"reason":"보험료 납부 처리. GDC 결제 가능 여부 함께 확인.","secondary":"kgdc","urgent":false,"gwp_ctx":null}
 ```
 
 ### 주식 투자
 ```json
-{"category":"ECO","service_id":"kfinance","service_url":"https://stock.hondi.net","confidence":0.95,"reason":"주식 투자 상담 및 포트폴리오 분석 — K-Stock 89개 자산군 분석 제공","secondary":null,"urgent":false,"gwp_ctx":null}
+{"category":"ECO","service_id":"kfinance","service_url":"https://stock.naviweb.kr","confidence":0.95,"reason":"주식 투자 상담 및 포트폴리오 분석 — K-Stock 89개 자산군 분석 제공","secondary":null,"urgent":false,"gwp_ctx":null}
 ```
 
 ### 일반 행정 민원 (전국 공통 — kgov)
 ```json
-{"category":"GOV","service_id":"kgov","service_url":"https://public.hondi.net","confidence":0.93,"reason":"주민등록등본 발급은 전국 공통 절차로 K-Public 처리 대상. 제주 언급이 없으므로 jeju가 아닌 kgov로 라우팅.","secondary":null,"urgent":false,"gwp_ctx":null}
+{"category":"GOV","service_id":"kgov","service_url":"https://public.naviweb.kr","confidence":0.93,"reason":"주민등록등본 발급은 전국 공통 절차로 K-Public 처리 대상. 제주 언급이 없으므로 jeju가 아닌 kgov로 라우팅.","secondary":null,"urgent":false,"gwp_ctx":null}
 ```
 
 ### 제주 특화 행정 민원 (구체적 지역 고유명사 — jeju)
 ```json
-{"category":"GOV","service_id":"jeju","service_url":"https://jeju.hondi.net","confidence":0.91,"reason":"한림읍사무소라는 구체적 제주 읍면동 고유명사가 있어 kgov가 아닌 jeju(제주 특화 확장)로 라우팅.","secondary":null,"urgent":false,"gwp_ctx":null}
+{"category":"GOV","service_id":"jeju","service_url":"https://jeju.naviweb.kr","confidence":0.91,"reason":"한림읍사무소라는 구체적 제주 읍면동 고유명사가 있어 kgov가 아닌 jeju(제주 특화 확장)로 라우팅.","secondary":null,"urgent":false,"gwp_ctx":null}
 ```
 
 ### GWP 직접 라우팅 (svc=stock)
 ```json
-{"category":"ECO","service_id":"kfinance","service_url":"https://stock.hondi.net","confidence":0.99,"reason":"GWP svc 파라미터 직접 라우팅","secondary":null,"urgent":false,"gwp_ctx":"삼성전자 분석해줘"}
+{"category":"ECO","service_id":"kfinance","service_url":"https://stock.naviweb.kr","confidence":0.99,"reason":"GWP svc 파라미터 직접 라우팅","secondary":null,"urgent":false,"gwp_ctx":"삼성전자 분석해줘"}
 ```
 
 ### 나비 직접 처리

@@ -3,7 +3,7 @@ SP-18_ksearch_v1_2.txt
 K-Search — 나비 통합 검색 실행 에이전트 System Prompt v1.2
 저장위치(제안): gopang/prompts/SP-18_ksearch_v1_2.txt
 GWP ID(제안): 'ksearch'  |  카테고리(제안): UTL(플랫폼 유틸리티)
-대상 서비스(제안): search.hondi.net/webapp.html
+대상 서비스(제안): search.naviweb.kr/webapp.html
         (신규 서브도메인 배포 전까지는 gopang 자체 webapp.html 안에서
         call-ai.js의 system 전환 방식으로 우선 구동 가능 — RULE-09 참조)
 
@@ -983,7 +983,7 @@ manifest 등록  : prompts/sp-catalog.json에 "SP-18_ksearch":
   {
     id: 'ksearch', name: 'K-Search', category: 'UTL',
     type: 'inline',
-    url: 'https://search.hondi.net/webapp.html',  // 서브도메인 미배포 시 gopang 자체 경유
+    url: 'https://search.naviweb.kr/webapp.html',  // 서브도메인 미배포 시 gopang 자체 경유
     sp_key: 'SP-18_ksearch',
     status: 'pending',  // RULE-03 후반부·재주입 배선 완료 전까지 pending 유지 권장
     priority: 9, threshold: 0.70,

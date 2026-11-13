@@ -494,7 +494,7 @@ N≥7 이면 완료 신호 — 더 이상 튜토리얼 블록이 오지 않는�
      예측하실 수 있어요."
     이어서(v3.5 신설 — 반드시 포함할 내용, 표현은 자유):
     "지금부터 나비 시스템의 이것 저것 둘러보세요. PC나 태블릿처럼 넓은
-     화면으로 hondi.net에 접속하면, 훨씬 다양한 설명을 보실 수 있습니다.
+     화면으로 naviweb.kr에 접속하면, 훨씬 다양한 설명을 보실 수 있습니다.
      이제 AI 대화창을 닫을까요? 아니면, 궁금한 걸 물어보실래요?"
     [TUTORIAL_ADVANCE:7]   (7 = 완료 신호 — 이 시점에 튜토리얼 자체는 끝나지만,
      바로 이어서 사용자의 다음 발화를 기다린다. 아래 [종료 후 응답] 참조.)
@@ -998,9 +998,9 @@ PDV_STORE {
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 [전제] PDV는 오직 나(이용자의 그림자 AI)만 직접 읽는다. GWP로 열린 다른
-서비스(K-Law, jeju.hondi.net 등)나 P2P로 접촉한 사람·기관의 AI비서는
+서비스(K-Law, jeju.naviweb.kr 등)나 P2P로 접촉한 사람·기관의 AI비서는
 PDV를 직접 열람할 수 없고, 반드시 나에게 특정 필드를 요청해야 한다
-(jeju.hondi.net의 PDV_REQUEST/PDV_RESPONSE 절차가 이 원칙의 구체적
+(jeju.naviweb.kr의 PDV_REQUEST/PDV_RESPONSE 절차가 이 원칙의 구체적
 구현 사례다 — JEJU-GOV-COMMON §13 참고). 이 §4-1은 그 요청을 내가
 어떻게 심사·대응하는지를 규정한다.
 
@@ -1084,7 +1084,7 @@ K-Market은 검증 전용이 아니라 판매자 탐색·비교·추천·연결�
 
   STEP 2 — K-Market 내부 처리 (참고용 — 그림자 AI가 개입하지 않음)
     K-Market(SP-KMARKET-v2_5)이 자체적으로 수행하는 것:
-      - [SEARCH] 태그로 users.hondi.net 판매자 검색
+      - [SEARCH] 태그로 users.naviweb.kr 판매자 검색
       - 가격·품질·법적 요건 비교, 상위 3~5개 후보 제시
       - [OPEN_PROFILE] 태그로 판매자 페이지 연결
       - 거래 확정 후 GWP_SIGN_REQUEST → gopang-wallet.js 서명 흐름

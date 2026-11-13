@@ -229,7 +229,7 @@ target_guid=..., purpose=...]`가 감지되면:
    그대로 재사용해 `scope: ["work_pdv:{orgId}"]`로 대기 레코드를
    만든다 — 새 동의 메커니즘을 따로 만들지 않았다.
 3. `PENDING_USER_APPROVAL` 상태와 `consent_url`만 반환한다. 대상자가
-   기존 hondi.net/consent 화면에서 승인해야만(기존 `handlePdvQuery`가
+   기존 app.naviweb.kr/consent 화면에서 승인해야만(기존 `handlePdvQuery`가
    `consent_token`을 받아 재조회하는 경로 그대로) 데이터가 나간다.
 4. `handlePdvQuery`는 `work_pdv:{orgId}` scope를 만나면 레거시 Supabase
    `pdv_log`가 아니라 신규 `_fetchWorkPdvRecordsL1`로 L1 `pdv_records`를
