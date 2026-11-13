@@ -297,7 +297,7 @@ self.addEventListener('push', (event) => {
         badge: '/icons/navi-icon-192.png',
         tag,
         data:  { url, sound },
-        vibrate: [200, 100, 200],
+        vibrate: tag.startsWith('gopang-device-link-') ? [600, 200, 600, 200, 900] : [200, 100, 200], // 로그인 승인 알림은 길게(안드로이드 8 이상에서는 채널 설정이 우선해 효과가 없을 수 있음)
         // 로그인 승인 요청은 눈에 띄게: 소리·진동으로 다시 알리고, 사용자가 누르거나 닫을 때까지 남긴다.
         renotify: tag.startsWith('gopang-device-link-'),
         requireInteraction: tag.startsWith('gopang-device-link-'),
