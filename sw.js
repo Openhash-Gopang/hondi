@@ -319,7 +319,9 @@ self.addEventListener('push', (event) => {
 // 기존 postMessage 방식 그대로 둔다.
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const url   = event.notification.data?.url   || '/webapp.html';
+  let url   = event.notification.data?.url   || '/webapp.html';
+  // 2026-11-13: 이 서비스 워커가 옛 주소(hondi.net)에 등록돼 있으면 알림이 hondi.net 으로 열린다 → 새 주소로 연다(지문 키 rpId 가 naviweb.kr 기준)
+  try { if (/(^|\.)hondi\.net$/.test(self.location.hostname) && url.startsWith('/')) url = 'https://app.naviweb.kr' + url; } catch (_) {}
   const sound = event.notification.data?.sound || 'ping';
   const tag   = event.notification.tag || '';
 
