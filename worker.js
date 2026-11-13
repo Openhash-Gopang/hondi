@@ -1242,22 +1242,31 @@ async function handleDeviceLinkInit(request, env, corsHeaders) {
   const profile = profileResult.profile;
   if (!profile) return _err(404, 'PHONE_NOT_REGISTERED', '이 번호로 등록된 계정이 없습니다', corsHeaders);
 
-  const sessionId = crypto.randomUUID();
-  const code = _generateDeviceLinkCode();
+  // 2026-11-14 — 알림 재전송(retryOf): 같은 로그인 시도에서 PC가 알림을 다시 요청하면 새 세션을 만들지 않고 기존 세션을 재사용한다.
+  // 숫자 후보(matchChoices)만 새로 섞어 덮어쓰고(정답 pcMatch는 그대로), 알림은 새로 한 건 더 보낸다(tag가 달라 폰에 쌓인다).
+  // 폰이 예전 알림을 열어도 같은 세션이라 항상 최신 숫자를 본다.
+  let _reuse = null;
+  if (typeof body.retryOf === 'string' && /^[0-9a-f-]{36}$/i.test(body.retryOf)) {
+    const _ex = await _dlGet(env, body.retryOf);
+    if (_ex && _ex.guid === profile.guid && _ex.state === 'pending' && _ex.purpose === purpose && _ex.pcMatch) _reuse = _ex;
+  }
+  const sessionId = _reuse ? body.retryOf : crypto.randomUUID();
+  const code = _reuse ? _reuse.code : _generateDeviceLinkCode();
   // 2026-11-10 신설(주피터 지시) — 숫자 대조(승인 피로 공격 방지). PC(로그인 요청자)가 두 자리 숫자를 만들어 pcMatch로 보내면,
   // 폰 승인 화면에는 그 숫자와 무작위 숫자 2개가 섞여 보이고, 사용자가 PC 화면의 숫자를 골라야만 승인이 진행된다.
   // 알림이 뜨면 습관적으로 승인하거나, 남이 내 번호로 시작한 로그인을 눌러도 PC 화면을 보고 있지 않으면 맞는 숫자를 알 수 없다.
   // pcMatch를 보내지 않는 옛 클라이언트는 기존 동작 그대로다(점진 적용).
   let _pcMatch = null, _matchChoices = null;
-  if ((purpose === 'key_transfer' || purpose === 'sign_request') && /^[1-9][0-9]$/.test(String(body.pcMatch || ''))) {
-    _pcMatch = String(body.pcMatch);
+  const _pmSrc = _reuse ? _reuse.pcMatch : body.pcMatch;
+  if ((purpose === 'key_transfer' || purpose === 'sign_request') && /^[1-9][0-9]$/.test(String(_pmSrc || ''))) {
+    _pcMatch = String(_pmSrc);
     const _ds = new Set();
     while (_ds.size < 2) { const n = 10 + (crypto.getRandomValues(new Uint32Array(1))[0] % 90); if (String(n) !== _pcMatch) _ds.add(String(n)); }
     _matchChoices = [_pcMatch, ..._ds];
     for (let i = _matchChoices.length - 1; i > 0; i--) { const j = crypto.getRandomValues(new Uint32Array(1))[0] % (i + 1); [_matchChoices[i], _matchChoices[j]] = [_matchChoices[j], _matchChoices[i]]; }
   }
-  const _geo = await resolveDeviceGeo(env, request, body);       // 카카오 주소(요청 기기 위치) — 실패해도 세션 생성은 계속
-  const record = {
+  const _geo = _reuse ? { address: _reuse.pcGeo, src: _reuse.pcGeoSrc } : await resolveDeviceGeo(env, request, body);       // 카카오 주소(요청 기기 위치) — 실패해도 세션 생성은 계속
+  const record = _reuse ? { ..._reuse, matchChoices: _matchChoices, pushSeq: (_reuse.pushSeq || 0) + 1 } : {
     guid: profile.guid, e164, purpose,
     pcPubKeyB64u: (purpose === 'key_transfer' || purpose === 'pdv_fetch') ? pcPubKeyB64u : null,
     sigMsg: purpose === 'sign_request' ? sigMsg : null,
@@ -1266,7 +1275,7 @@ async function handleDeviceLinkInit(request, env, corsHeaders) {
     pcMatch: _pcMatch, matchChoices: _matchChoices,   // 숫자 대조(정답은 폰에 내려주지 않는다 — matchChoices만 내려간다)
     pcGeo: _geo.address, pcGeoSrc: _geo.src, createdAt: Date.now(),      // 승인 화면 표시용(2026-09-25, 좌표는 저장하지 않음)
   };
-  await _dlPut(env, sessionId, record, DEVICE_LINK_TTL_SECONDS);
+  await _dlPut(env, sessionId, record, _reuse ? Math.max(15, DEVICE_LINK_TTL_SECONDS - Math.floor((Date.now() - (record.createdAt || Date.now())) / 1000)) : DEVICE_LINK_TTL_SECONDS); // 재사용 시 만료 시각은 늘리지 않는다
 
   // 웹푸시로 폰을 깨운다(SMS 아님 — 비용 없음). 코드 자체는 푸시 payload에
   // 담지 않는다 — 알림을 열어 앱(자기 guid)으로 조회해야만 코드가 보이게
@@ -1329,7 +1338,8 @@ async function handleDeviceLinkInit(request, env, corsHeaders) {
               : `${record.pcLabel}에서 로그인을 시도했습니다. 확인하려면 누르세요.`,
           sound: mobileDevices[0].sound || profile.push_sound || 'ping',
           url:   `/auth/device-link-approve.html?sessionId=${encodeURIComponent(sessionId)}`,
-          tag:   `gopang-device-link-${sessionId}`,
+          // 재전송 알림도 폰에 따로 쌓이도록 푸시마다 tag를 다르게 한다(pushSeq). 승인 화면은 sessionId 하나라 어느 알림을 눌러도 최신 숫자가 보인다.
+          tag:   `gopang-device-link-${sessionId}-${record.pushSeq || 0}`,
         });
         // 2026-07-28 근본 수정 — Urgency 헤더가 아예 없어서 FCM 기본값
         // (normal)으로 처리되고 있었다. device-link 승인 요청은 "지금
@@ -1351,7 +1361,10 @@ async function handleDeviceLinkInit(request, env, corsHeaders) {
             pushSent = true;
             pushSentToMobile = true;
           }
-          if (r.status === 'fulfilled' && r.value?.status === 410) {
+          // 410(Gone)뿐 아니라 404(구독 없음)도 FCM이 "등록 해제된 구독"을 알릴 때 쓰는 값이다 — 같이 정리해 죽은 구독이 계속 쌓이지 않게 한다.
+          const _st = r.status === 'fulfilled' ? r.value?.status : 'rejected';
+          console.info('[DeviceLink] 푸시 결과:', d.deviceId, _st, (d.subscription?.endpoint || '').slice(0, 48));
+          if (r.status === 'fulfilled' && (r.value?.status === 410 || r.value?.status === 404)) {
             deadDeviceIds.push(d.deviceId);
           }
         });

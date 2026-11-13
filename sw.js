@@ -298,6 +298,9 @@ self.addEventListener('push', (event) => {
         tag,
         data:  { url, sound },
         vibrate: [200, 100, 200],
+        // 로그인 승인 요청은 눈에 띄게: 소리·진동으로 다시 알리고, 사용자가 누르거나 닫을 때까지 남긴다.
+        renotify: tag.startsWith('gopang-device-link-'),
+        requireInteraction: tag.startsWith('gopang-device-link-'),
       }),
       _broadcastSound,
       _reportConsentReceipt(tag, 'delivered'),
