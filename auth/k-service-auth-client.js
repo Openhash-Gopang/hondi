@@ -155,12 +155,12 @@
       '.ksa-icon{display:none}' +
       '.ksa-desc{font-size:20px;font-weight:500;color:#212121;line-height:1.3}' +
       '.ksa-field{margin-bottom:0}' +
-      '.ksa-field label{display:block;font-size:12px;font-weight:500;color:var(--ksa-accent)}' +
+      '.ksa-field label{display:block;font-size:14px;font-weight:500;color:var(--ksa-accent)}' +
       '.ksa-field input{display:block;width:100%;box-sizing:border-box;border:0;border-bottom:2px solid var(--ksa-accent);border-radius:0;padding:6px 0 8px;background:transparent;outline:none;font-size:20px;letter-spacing:2px;color:#212121;font-family:inherit}' +
       '.ksa-field input.ksa-invalid{border-bottom-color:var(--ksa-err)}' +
       '.ksa-field:has(.ksa-invalid) label{color:var(--ksa-err)}' +
-      '.ksa-hint{margin-top:6px;font-size:12px;color:#616161}' +
-      '.ksa-cta{display:block;width:100%;height:44px;margin-top:24px;border:0;border-radius:4px;background:var(--ksa-accent);color:#fff;font-size:15px;font-weight:500;letter-spacing:.5px;font-family:inherit;cursor:pointer;box-shadow:0 2px 2px 0 rgba(0,0,0,.14),0 3px 1px -2px rgba(0,0,0,.12),0 1px 5px 0 rgba(0,0,0,.2);transition:box-shadow .15s}' +
+      '.ksa-hint{margin-top:6px;font-size:14px;color:#616161}' +
+      '.ksa-cta{display:block;width:100%;height:48px;margin-top:24px;border:0;border-radius:4px;background:var(--ksa-accent);color:#fff;font-size:17px;font-weight:500;letter-spacing:.5px;font-family:inherit;cursor:pointer;box-shadow:0 2px 2px 0 rgba(0,0,0,.14),0 3px 1px -2px rgba(0,0,0,.12),0 1px 5px 0 rgba(0,0,0,.2);transition:box-shadow .15s}' +
       '.ksa-cta:disabled{opacity:.5;cursor:not-allowed}' +
       '.ksa-cta:not(:disabled):hover{box-shadow:0 4px 5px 0 rgba(0,0,0,.14),0 1px 10px 0 rgba(0,0,0,.12),0 2px 4px -1px rgba(0,0,0,.2)}' +
       '.ksa-input-wrap{display:flex;gap:8px;align-items:flex-end}' +
@@ -171,22 +171,22 @@
       '.ksa-spinner{position:relative;height:4px;margin:0 -32px 24px;background:#B2DFDB;overflow:hidden}' +
       '.ksa-spinner::before{content:"";position:absolute;top:0;bottom:0;width:40%;background:var(--ksa-accent);animation:ksa-ind 1.6s linear infinite}' +
       '@keyframes ksa-ind{0%{left:-40%}100%{left:100%}}' +
-      '.ksa-match-sub{font-size:14px;color:#424242}' +
+      '.ksa-match-sub{font-size:17px;color:#424242}' +
       '.ksa-match-num{display:inline-flex;align-items:center;justify-content:center;min-width:128px;height:88px;margin-top:14px;border-radius:12px;background:#E0F2F1;color:var(--ksa-accent);font-size:56px;font-weight:700;letter-spacing:2px;font-family:Roboto,inherit}' +
-      '.ksa-sms{display:block;margin:12px auto 0;border:0;background:transparent;color:var(--ksa-accent);border-radius:4px;height:44px;padding:0 12px;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer}' +
+      '.ksa-sms{display:block;margin:12px auto 0;border:0;background:transparent;color:var(--ksa-accent);border-radius:4px;height:48px;padding:0 12px;font-size:16px;font-weight:500;font-family:inherit;cursor:pointer}' +
       '.ksa-sms:disabled{opacity:.5;cursor:not-allowed}' +
-      '.ksa-resend{display:inline-block;margin-top:8px;padding:12px;font-size:14px;font-weight:500;color:var(--ksa-accent);cursor:pointer}' +
-      '.ksa-msg{font-size:12px;margin-top:8px;text-align:left;min-height:16px}' +
+      '.ksa-resend{display:inline-block;margin-top:8px;padding:12px;font-size:16px;font-weight:500;color:var(--ksa-accent);cursor:pointer}' +
+      '.ksa-msg{font-size:15px;margin-top:8px;text-align:left;min-height:16px}' +
       '.ksa-msg.err{color:var(--ksa-err)}' +
       '.ksa-msg.ok{color:#1b6b3a}' +
-      '.ksa-cancel{display:block;margin:4px -8px 0 auto;border:0;background:transparent;color:#616161;border-radius:4px;height:44px;padding:0 12px;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer}' +
+      '.ksa-cancel{display:block;margin:4px -8px 0 auto;border:0;background:transparent;color:#616161;border-radius:4px;height:48px;padding:0 12px;font-size:16px;font-weight:500;font-family:inherit;cursor:pointer}' +
       '.ksa-cancel:hover{background:rgba(0,0,0,.05)}' +
-      '.ksa-su-row{margin-top:8px;font-size:13px;color:#616161}' +
+      '.ksa-su-row{margin-top:8px;font-size:16px;color:#616161}' +
       '.ksa-su-row a{color:var(--ksa-accent);font-weight:500;cursor:pointer;padding:8px 4px}' +
-      '.ksa-su-title{font-size:16px;font-weight:500;color:#212121;margin-bottom:4px}' +
-      '.ksa-su-sub{font-size:12px;color:#616161;margin-bottom:12px}' +
+      '.ksa-su-title{font-size:19px;font-weight:500;color:#212121;margin-bottom:4px}' +
+      '.ksa-su-sub{font-size:15px;color:#616161;margin-bottom:12px}' +
       '.ksa-su-tabs{display:flex;gap:0;margin-bottom:12px;border-bottom:1px solid #E0E0E0}' +
-      '.ksa-su-tabs button{flex:1;height:44px;border:0;border-bottom:2px solid transparent;background:transparent;color:#616161;font-size:14px;font-weight:500;font-family:inherit;cursor:pointer}' +
+      '.ksa-su-tabs button{flex:1;height:48px;border:0;border-bottom:2px solid transparent;background:transparent;color:#616161;font-size:16px;font-weight:500;font-family:inherit;cursor:pointer}' +
       '.ksa-su-tabs button.on{border-bottom-color:var(--ksa-accent);color:var(--ksa-accent)}' +
       '#ksa-su-qrbox{display:flex;justify-content:center;margin:4px 0 8px}#ksa-su-qrbox svg{width:168px;height:168px}';
     document.head.appendChild(style);
@@ -220,8 +220,8 @@
             '<div id="ksa-su-qrbox"></div>' +
             '<div style="font-size:12.5px;color:#374151">폰에서 이 숫자를 고르세요</div>' +
             '<div id="ksa-su-num" style="font-size:40px;font-weight:800;letter-spacing:2px;color:#4338CA;margin-top:2px"></div>' +
-            '<div id="ksa-su-status" style="font-size:12.5px;color:#4A5568;margin-top:4px"></div>' +
-            '<div id="ksa-su-timer" style="font-size:11px;color:#718096;margin-top:4px"></div>' +
+            '<div id="ksa-su-status" style="font-size:16px;color:#4A5568;margin-top:4px"></div>' +
+            '<div id="ksa-su-timer" style="font-size:14px;color:#718096;margin-top:4px"></div>' +
           '</div>' +
           '<div class="ksa-resend" id="ksa-su-back">로그인으로 돌아가기</div>' +
         '</div>' +
@@ -229,8 +229,8 @@
           '<div class="ksa-devlink-wait">' +
             '<div class="ksa-spinner"></div>' +
                         '<div id="ksa-match" style="display:none"><div class="ksa-match-sub">폰에서 이 숫자를 선택하세요</div><div id="ksa-match-num" class="ksa-match-num"></div></div>' +
-            '<div id="ksa-devlink-status" style="font-size:12.5px;color:#4A5568;text-align:center"></div>' +
-            '<div id="ksa-devlink-timer" style="font-size:11px;color:#718096;text-align:center;margin-top:4px"></div>' +
+            '<div id="ksa-devlink-status" style="font-size:17px;color:#4A5568;text-align:center"></div>' +
+            '<div id="ksa-devlink-timer" style="font-size:15px;color:#718096;text-align:center;margin-top:4px"></div>' +
           '</div>' +
           '<button type="button" class="ksa-sms" id="ksa-sms-btn" style="display:none">문자로 받기</button>' +
           '<div class="ksa-resend" id="ksa-resend-phone">다시 입력</div>' +
