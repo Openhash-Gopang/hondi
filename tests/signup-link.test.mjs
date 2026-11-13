@@ -89,7 +89,7 @@ test('PC 화면·폰 화면·worker 연결이 모두 있다(문자열 확인)', 
   const w = fs.readFileSync(new URL('../worker.js', import.meta.url), 'utf8');
   for (const a of ['init', 'session', 'verify', 'complete', 'poll']) assert.ok(w.includes(`/auth/signup-link/${a}'`), a);
   const k = fs.readFileSync(new URL('../auth/k-service-auth-client.js', import.meta.url), 'utf8');
-  assert.ok(k.includes('/auth/signup-link/init') && k.includes('/auth/free-plan') && k.includes("plan: 'free'"));
+  assert.ok(k.includes('/auth/signup-link/init') && !k.includes("plan: 'free'"));
   const au = fs.readFileSync(new URL('../src/gopang/core/auth.js', import.meta.url), 'utf8');
   assert.ok(au.includes('/auth/signup-link/complete'));
 });

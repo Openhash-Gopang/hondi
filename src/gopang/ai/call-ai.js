@@ -6103,7 +6103,7 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
     }
     const existingBubble = document.querySelector('.bubble-ai.streaming');
     let userMsg = `⚠️ API 오류: ${err.message}`;
-    // (2026-07-14: SP-GDC-BILLING-v2_0 파이프라인 연결 — 무료 한도(100원)
+    // (2026-07-14: SP-GDC-BILLING-v2_0 파이프라인 연결 — 무료 한도(500원)
     //  소진과 "GDC 잔액도 부족해 최종 차단"을 구분해서 안내한다. 전자는
     //  본인 AI 키 등록으로 우회 가능하지만, 후자는 GDC 충전이 필요하다는
     //  점이 달라 안내 문구/버튼도 다르게 준다.)
@@ -6112,7 +6112,7 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
       err.message.includes('FREE_QUOTA_EXCEEDED'));
     if (_isBalanceMsg) {
       userMsg =
-        '💳 무료로 제공되는 100원어치 AI 사용량을 모두 사용했고, GDC 잔액도 부족해요.<br>' +
+        '💳 무료로 제공되는 500원어치 AI 사용량을 모두 사용했고, GDC 잔액도 부족해요.<br>' +
         'GDC를 충전한 뒤 다시 이용해 주세요.<br>' +
         '<button onclick="window.location.href=\'usage.html\'" ' +
         'style="margin-top:8px;padding:8px 14px;border:none;border-radius:8px;' +
@@ -6125,7 +6125,7 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
       // 건 "무료 한도까지 다 썼다"는 뜻이다. 페이지 이동 없이 대화창 안에서
       // 안내하고, 설정으로 가는 버튼만 제공한다.
       userMsg =
-        '🔑 무료로 제공되는 100원어치 AI 사용량을 모두 사용했어요.<br>' +
+        '🔑 무료로 제공되는 500원어치 AI 사용량을 모두 사용했어요.<br>' +
         '설정에서 본인의 AI 키를 등록하시면 제한 없이 계속 쓰실 수 있어요.<br>' +
         '<button onclick="window.openAISettings && window.openAISettings()" ' +
         'style="margin-top:8px;padding:8px 14px;border:none;border-radius:8px;' +

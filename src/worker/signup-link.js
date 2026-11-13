@@ -14,7 +14,7 @@ const INIT_PER_IP_PER_HOUR = 20;
 const KEY = (id) => `signup_link:${id}`;
 
 const KR_MOBILE_E164 = /^\+8210\d{8}$/;
-// 가입은 모두 무료 플랜으로 시작한다(2026-11-12 주피터 지시). 유료 서비스가 필요한 순간(예: K-Law)에 그 지점에서 유료 전환을 요청한다.
+// 가입 직후에는 무료 이용 기간(AI 사용 500원어치 또는 24시간)이 시작된다. (2026-11-14 요금제에서 "무료 플랜"은 없앴다.) 유료 서비스가 필요한 순간(예: K-Law)에 그 지점에서 유료 전환을 요청한다.
 
 function json(status, body) { return { status, body }; }
 const err = (status, code, message) => json(status, { ok: false, error: code, message });
