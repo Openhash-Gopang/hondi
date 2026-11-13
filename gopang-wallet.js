@@ -38,7 +38,7 @@
   // 2026-07-28 신설 — _deviceEntropy()가 navigator.userAgent 대신 쓰는
   // 영구 랜덤 비밀값의 저장 키. 자세한 사유는 _deviceEntropy() 주석 참고.
   const LS_DEVICE_SECRET = 'gopang_wallet_device_secret_v2';
-  const WEBAUTHN_RP_ID   = 'hondi.net';  // 전체 hondi.net 서브도메인에서 credential 공유
+  const WEBAUTHN_RP_ID   = 'naviweb.kr';  // 전체 hondi.net 서브도메인에서 credential 공유
   // PRF는 결정론적 — 동일 salt + 동일 authenticator = 항상 동일 32바이트.
   // 서버에 아무것도 저장할 필요 없음.
   const WEBAUTHN_PRF_SALT = new TextEncoder().encode('gopang-wallet-v1-prf-salt');
@@ -2137,7 +2137,7 @@
       //
       // ★ 2026-07-21 같은 날 재설계 — BroadcastChannel만으로는 실사에서
       // 실패가 재현됐다. 최신 Chrome은 BroadcastChannel도 최상위 사이트
-      // (top-level site)별로 격리한다(스토리지 파티셔닝) — klaw.hondi.net
+      // (top-level site)별로 격리한다(스토리지 파티셔닝) — klaw.naviweb.kr
       // 안의 숨은 iframe이 여는 채널과 이 탭(webapp.html, 최상위 사이트가
       // hondi.net)이 여는 같은 이름의 채널은 최상위 사이트가 달라 서로
       // 완전히 격리된다. postMessage는 스토리지가 아니라 "실제로 쥐고
@@ -2165,7 +2165,7 @@
       //  - GOPANG_SIGN_REQUEST: hondi.net 자신의 iframe(silent-auth.html)이
       //    보내는 "이 챌린지에 서명만 해달라" 요청 — 보낸 쪽이 hondi.net
       //    오리진 그 자체이므로 정확히 그 오리진만 신뢰한다.
-      //  - GOPANG_ISSUE_TOKEN_REQUEST (2026-07-21 신설) — klaw.hondi.net
+      //  - GOPANG_ISSUE_TOKEN_REQUEST (2026-07-21 신설) — klaw.naviweb.kr
       //    등 하위 서비스의 최상위 창이 iframe도 안 거치고 window.opener로
       //    직접 보내는 "나 대신 /auth/issue까지 전부 해서 완성된 토큰을
       //    달라" 요청이다. 이 경우 보낸 쪽은 hondi.net이 아니라
@@ -2179,7 +2179,7 @@
         if (!msg) return;
 
         if (msg.type === 'GOPANG_SIGN_REQUEST') {
-          if (ev.origin !== 'https://hondi.net') return; // hondi.net 오리진 프레임만 신뢰
+          if (ev.origin !== 'https://app.naviweb.kr') return; // hondi.net 오리진 프레임만 신뢰
           const result = await _handleSignRequest(msg);
           if (!result) return; // 실패 시 응답 안 함 — 요청 측은 자체 타임아웃으로 로컬 폴백
           ev.source?.postMessage(

@@ -1,13 +1,13 @@
 /* ══════════════════════════════════════════════════════════════════
    user-badge.js — 혼디넷 공용 로그인 상태·아이디 표시 (v1.0, 2026-10-27)
 
-   배포 위치: https://hondi.net/auth/user-badge.js
+   배포 위치: https://app.naviweb.kr/auth/user-badge.js
 
    모든 페이지의 우측 상단에 "로그인 상태 + 아이디"를 보여 주고,
    로그인하지 않은 사용자에게는 data-requires-login 이 붙은 기능을 막습니다.
 
    ■ 설치 — 페이지에 한 줄(</body> 앞 또는 <head>)
-       <script src="https://hondi.net/auth/user-badge.js" defer></script>
+       <script src="https://app.naviweb.kr/auth/user-badge.js" defer></script>
 
    ■ 표시 위치
      · 페이지에 [data-hondi-user-slot] 요소가 있으면 그 안에 넣는다(헤더 오른쪽 등).
@@ -33,7 +33,7 @@
        그대로 쓰거나 직접 정하거나 "나중에 하기"(건너뛰기, 기본 아이디 유지)를 고를 수 있다.
      · 같은 화면에서 "보내는 이름(선택)"도 받는다 — 받는 사람의 메일 프로그램(Gmail 등)이 보낸 사람으로 보여 주는 이름이다.
        비워 두면 주소만 나가고, 받는 사람의 프로그램에 따라 @ 앞부분(아이디)이 이름처럼 보일 수 있다. 미리보기를 함께 보여 준다.
-     · 아이디 바꾸기는 K-Mail 설정 페이지(https://mail.hondi.net/desktop.html#settings)의 "계정"에서 한다(30일에 3번까지 — 서버 정책).
+     · 아이디 바꾸기는 K-Mail 설정 페이지(https://mail.naviweb.kr/desktop.html#settings)의 "계정"에서 한다(30일에 3번까지 — 서버 정책).
        배지 오른쪽의 세로 점 세 개(⋮) 아이콘이 그 설정 페이지로 연결된다. (2026-10-28)
      · 메뉴의 "보내는 이름"은 눌러서 바로 고칠 수 있다(저장하면 서버 POST /kmail/settings, 같은 페이지에 "hondi-mail-info-change" 이벤트를 보낸다).
 
@@ -55,7 +55,7 @@
        refresh()         표시 다시 그리기
 
    ■ 의존성: 없음. 로그인 창이 필요하면 K-서비스 공용 모듈
-     (https://hondi.net/auth/k-service-auth-client.js)을 필요할 때 스스로 불러온다.
+     (https://app.naviweb.kr/auth/k-service-auth-client.js)을 필요할 때 스스로 불러온다.
    ══════════════════════════════════════════════════════════════════ */
 (function (global) {
   'use strict';
@@ -64,11 +64,11 @@
   if (!doc) return;
   try { if (global.self !== global.top) return; } catch (e) { return; } // iframe 안에서는 표시하지 않는다
 
-  var KAUTH_SRC = 'https://hondi.net/auth/k-service-auth-client.js';
+  var KAUTH_SRC = 'https://app.naviweb.kr/auth/k-service-auth-client.js';
   var C_TOKEN = 'hondi_pvt', C_EXP = 'hondi_pvt_exp';
   // hondi.net 계열은 서브도메인 공유 쿠키(.hondi.net), 그 밖의 주소(naviweb.kr 등)는 그 주소 자신의 쿠키를 쓴다(브라우저가 남의 도메인 쿠키를 거부함)
-  var COOKIE_DOMAIN = /(^|\.)hondi\.net$/.test(location.hostname) ? '.hondi.net' : location.hostname;
-  var SETTINGS_URL = 'https://mail.hondi.net/desktop.html#settings';   // K-Mail 설정 페이지(아이디 바꾸기·보내는 이름·서명·자동응답)
+  var COOKIE_DOMAIN = /(^|\.)naviweb\.kr$/.test(location.hostname) ? '.naviweb.kr' : location.hostname;
+  var SETTINGS_URL = 'https://mail.naviweb.kr/desktop.html#settings';   // K-Mail 설정 페이지(아이디 바꾸기·보내는 이름·서명·자동응답)
 
   // ── 로그인 상태 읽기 ─────────────────────────────────────────
   function readCookie(name) {
@@ -108,7 +108,7 @@
   // ── 한도 조회·정식 아이디 전환·데이터 이동 ───────────────────
   var PROXY = 'https://hondi-proxy.tensor-city.workers.dev';
   var C_MIG = 'hondi_mig_pvt';                              // 테스트 로그인 정보를 잠시 보관(전환용)
-  var SIGNUP_URL = 'https://hondi.net/desktop.html';        // 정식 아이디 가입 화면(메인 앱)
+  var SIGNUP_URL = 'https://app.naviweb.kr/desktop.html';        // 정식 아이디 가입 화면(메인 앱)
   var PAY_URL = 'https://naviweb.kr/desktop.html#pricing';   // 플랜 업그레이드 화면(요금·플랜·입금 안내)
   function writeCookie(name, value, maxAgeSec) {
     doc.cookie = name + '=' + encodeURIComponent(value) + '; domain=' + COOKIE_DOMAIN + '; path=/; max-age=' + maxAgeSec + '; secure; samesite=lax';

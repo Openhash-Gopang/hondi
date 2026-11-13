@@ -49,7 +49,7 @@
   var WORKER = 'https://hondi-proxy.tensor-city.workers.dev';
   var PHRASE = '휴대폰을 분실하여 문자 인증으로 로그인합니다';
   var $ = function (id) { return document.getElementById(id); };
-  var DOMAIN = /(^|\.)hondi\.net$/.test(location.hostname) ? '.hondi.net' : location.hostname;
+  var DOMAIN = /(^|\.)naviweb\.kr$/.test(location.hostname) ? '.naviweb.kr' : location.hostname;
   function setMsg(t, cls) { var m = $('msg'); m.textContent = t || ''; m.className = cls || ''; }
   function norm(s) { return String(s || '').replace(/\s+/g, ''); }
   function phoneOk() { return /^0?1[0-9]{8,9}$/.test($('phone').value.replace(/\D/g, '').replace(/^82/, '0')) || /^01[0-9]{8,9}$/.test($('phone').value.replace(/\D/g, '')); }

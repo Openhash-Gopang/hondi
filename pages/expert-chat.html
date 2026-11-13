@@ -195,7 +195,7 @@ if (/^professor/.test(_qs.get('persona') || '') && !_qs.get('classic') && !_qs.g
 }
 const PERSONA   = resolveExpertId(_qs.get('persona') || '');
 const GWP_TOKEN = _qs.get('token')  || '';
-const RETURN    = _qs.get('return') || 'https://hondi.net';
+const RETURN    = _qs.get('return') || 'https://app.naviweb.kr';
 let   GWP_CTX   = '';
 if (_qs.get('ctx')) {
   try {
@@ -484,9 +484,9 @@ const _PRO_WRITE_PERSONAS = new Set(['judicial-scrivener', 'administrative-scriv
   'dentist', 'traditional-medicine-doctor', 'pharmacist', 'veterinarian', 'nurse', 'physical-therapist', 'medical-lab-technologist', 'radiologic-technologist', 'dental-hygienist', 'occupational-therapist', 'dental-technician', 'advanced-practice-nurse', 'dietitian', 'paramedic', 'midwife', 'speech-language-pathologist', 'optician', 'sanitarian', 'health-educator',
   // 2026-10-21 계열 A(법률·금융) 4개 직역 — 노무사·손해사정사·관세사는 pages/scrivener-write.html, 재무설계사는 pages/expert-write.html
   'financial-planner', 'loss-adjuster', 'labor-attorney', 'customs-broker',
-  // 2026-10-29 세무·회계 — tax.hondi.net 임베드는 통합 전문가용 SP_tax-accounting-assistant(세무사 v1.3 + 회계사 v1.1)를 연다
+  // 2026-10-29 세무·회계 — tax.naviweb.kr 임베드는 통합 전문가용 SP_tax-accounting-assistant(세무사 v1.3 + 회계사 v1.1)를 연다
   'tax-accounting',
-  // 2026-10-29 병원·의원 — doctor.hondi.net 임베드는 통합 전문가용 SP_hospital-assistant(의사 v1.0 + 간호사 v1.1 + 원무)를 연다
+  // 2026-10-29 병원·의원 — doctor.naviweb.kr 임베드는 통합 전문가용 SP_hospital-assistant(의사 v1.0 + 간호사 v1.1 + 원무)를 연다
   'school-docs', 'hospital']);
 // 2026-10-27 변호사 세부 분야 — 서류 작성하기에서 각 분야 전문가용 SP(SP_lawyer-<분야>-assistant)를 연다.
 ['administrative', 'antitrust', 'arbitration', 'auction', 'broadcasting', 'civil', 'collection', 'commercial', 'constitutional', 'construction', 'corporate', 'criminal', 'damages', 'energy', 'entertainment', 'environmental', 'execution', 'expropriation', 'family', 'finance', 'foodpharma', 'government-contract', 'guardianship', 'immigration', 'inheritance', 'insolvency', 'insurance', 'international-arbitration', 'international-relations', 'international-transactions', 'it', 'juvenile', 'legislation', 'maritime', 'military', 'overseas-investment', 'realestate', 'redevelopment', 'religious', 'school-violence', 'securities', 'shipbuilding', 'sports', 'startup', 'trade', 'traffic'].forEach(function (s) { _PRO_WRITE_PERSONAS.add('lawyer-' + s); });
@@ -581,15 +581,15 @@ const _NEXT_STEP_RETRY_MAX = 2;
 // 정합성 검사(check-service-table-sync.yml류)에 이 표도 편입하는 게
 // 이상적이나 이번 패스 범위 밖으로 남긴다.)
 const _REDIRECT_GWP_TABLE = {
-  klaw:      { name: 'K-Law',     url: 'https://klaw.hondi.net/webapp.html' },
-  khealth:   { name: 'K-Health',  url: 'https://health.hondi.net/webapp.html' },
-  kedu:      { name: 'K-School',  url: 'https://school.hondi.net/webapp.html' },
-  kfinance:  { name: 'K-Stock',   url: 'https://stock.hondi.net/webapp.html' },
-  ktax:      { name: 'K-Tax',     url: 'https://tax.hondi.net/webapp.html' },
-  kestate:   { name: 'K-Estate',  url: 'https://market.hondi.net/desktop.html#seller' },
-  ksecurity: { name: 'K-Security', url: 'https://security.hondi.net/webapp.html' },
-  kcommerce: { name: 'K-Market',  url: 'https://market.hondi.net/webapp.html' },
-  kgdc:      { name: 'GDC',       url: 'https://gdc.hondi.net/webapp.html' },
+  klaw:      { name: 'K-Law',     url: 'https://klaw.naviweb.kr/webapp.html' },
+  khealth:   { name: 'K-Health',  url: 'https://health.naviweb.kr/webapp.html' },
+  kedu:      { name: 'K-School',  url: 'https://school.naviweb.kr/webapp.html' },
+  kfinance:  { name: 'K-Stock',   url: 'https://stock.naviweb.kr/webapp.html' },
+  ktax:      { name: 'K-Tax',     url: 'https://tax.naviweb.kr/webapp.html' },
+  kestate:   { name: 'K-Estate',  url: 'https://market.naviweb.kr/desktop.html#seller' },
+  ksecurity: { name: 'K-Security', url: 'https://security.naviweb.kr/webapp.html' },
+  kcommerce: { name: 'K-Market',  url: 'https://market.naviweb.kr/webapp.html' },
+  kgdc:      { name: 'GDC',       url: 'https://gdc.naviweb.kr/webapp.html' },
 };
 
 // 응답에서 태그를 찾아 화면에서 제거하고, 제안 배너를 렌더링한다.
@@ -1724,8 +1724,8 @@ updateSendBtn();
 // ?embed=1 이고 같은 오리진·부모 창에서 온 메시지만 받는다. 일반 접속에는 영향이 없다.
 function _embedOn() { return _qs.get('embed') === '1' && window.parent !== window; }
 if (_embedOn() && _qs.get('hostinput') === '1') document.documentElement.classList.add('hostinput');
-// 2026-10-28: 나비로 Navi Law(law.hondi.net)가 이 화면을 iframe 으로 끼운다 — 부모 오리진은 같은 오리진 또는 아래 목록만 허용한다.
-const _EMBED_PARENT_ORIGINS = [location.origin, 'https://mail.hondi.net', 'https://naviweb.kr', 'https://www.naviweb.kr', 'https://law.hondi.net', 'https://school.hondi.net', 'https://tax.hondi.net', 'https://ip.hondi.net', 'https://doctor.hondi.net', 'https://pro.hondi.net', 'https://law.naviweb.kr', 'https://tax.naviweb.kr', 'https://doctor.naviweb.kr', 'https://pro.naviweb.kr', 'https://jeju.naviweb.kr', 'https://ip.naviweb.kr', 'https://appraiser.naviweb.kr', 'https://school.naviweb.kr', 'https://taxcpa.naviweb.kr'];   // 2026-11-05: 직역 사이트를 *.naviweb.kr 로 옮기는 동안 두 주소를 함께 허용
+// 2026-10-28: 나비로 Navi Law(law.naviweb.kr)가 이 화면을 iframe 으로 끼운다 — 부모 오리진은 같은 오리진 또는 아래 목록만 허용한다.
+const _EMBED_PARENT_ORIGINS = [location.origin, 'https://mail.naviweb.kr', 'https://naviweb.kr', 'https://www.naviweb.kr', 'https://law.naviweb.kr', 'https://school.naviweb.kr', 'https://tax.naviweb.kr', 'https://ip.naviweb.kr', 'https://doctor.naviweb.kr', 'https://pro.naviweb.kr', 'https://law.naviweb.kr', 'https://tax.naviweb.kr', 'https://doctor.naviweb.kr', 'https://pro.naviweb.kr', 'https://jeju.naviweb.kr', 'https://ip.naviweb.kr', 'https://appraiser.naviweb.kr', 'https://school.naviweb.kr', 'https://taxcpa.naviweb.kr'];   // 2026-11-05: 직역 사이트를 *.naviweb.kr 로 옮기는 동안 두 주소를 함께 허용
 function _embedParentOrigin() {
   try { const a = window.location.ancestorOrigins && window.location.ancestorOrigins[0]; if (a && _EMBED_PARENT_ORIGINS.includes(a)) return a; } catch (e) { /* 무시 */ }
   try { const o = new URL(document.referrer).origin; if (_EMBED_PARENT_ORIGINS.includes(o)) return o; } catch (e) { /* 무시 */ }
@@ -1749,7 +1749,7 @@ if (_embedOn()) {
       input.value = e.data.text.slice(0, 4000);
       doSend();
     } else if (e.data.type === 'expert-embed-feedback') {
-      // 2026-11-04: 서류 서식을 쓰는 화면(나비로 등)이 "이 서식에 항목을 추가했다"는 익명 신호를 서버로 전한다(law.hondi.net 은 서버 CORS 허용 밖이라 이 화면이 대신 보낸다).
+      // 2026-11-04: 서류 서식을 쓰는 화면(나비로 등)이 "이 서식에 항목을 추가했다"는 익명 신호를 서버로 전한다(law.naviweb.kr 은 서버 CORS 허용 밖이라 이 화면이 대신 보낸다).
       const d = e.data;
       if (typeof d.form_id === 'string' && Number.isInteger(d.v) && typeof d.cid === 'string' && Array.isArray(d.adds)) {
         fetch(`${WORKER}/doc-form/feedback`, { method: 'POST', headers: { 'Content-Type': 'application/json' },

@@ -1359,7 +1359,7 @@ html.is-embedded .install-banner{display:none!important}
            아이콘. 누르면 숫자 코드 만들기·카메라 인식 테스트 페이지가 새 탭으로 열린다(앱 상태 유지). -->
       <!-- 2026-10-15(주피터 지시): 아이콘을 스캔 프레임+"8"에서 QR 모양(내 코드)으로 교체. 하단 "스캔" 카메라 버튼과
            프레임 모양이 겹쳐 헷갈린다는 지적. 기능(숫자 코드 페이지 새 탭 열기)은 그대로. -->
-      <a id="ai-panel-digit" href="https://hondi.net/pages/digit-code.html" target="_blank" rel="noopener"
+      <a id="ai-panel-digit" href="https://app.naviweb.kr/pages/digit-code.html" target="_blank" rel="noopener"
          title="내 코드 (숫자 코드)" aria-label="내 코드 (숫자 코드)">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -5170,7 +5170,7 @@ function _messagesWithLocation(historyArr) {
     _embedDel.onNote((t) => { if (t) _appendPanelMsg('ai', t); });
   }
 
-  /* 2026-11-02 — 나비웹(mail.hondi.net) 화면의 '각종 기관' 선택: 이 패널의 SP 를 그 기관의 SP 로 바꾸고(host→page hondi-embed-sp),
+  /* 2026-11-02 — 나비웹(mail.naviweb.kr) 화면의 '각종 기관' 선택: 이 패널의 SP 를 그 기관의 SP 로 바꾸고(host→page hondi-embed-sp),
    * 그 화면 입력창의 말(hondi-embed-sp-ask)도 이 패널이 그 SP 로 답해 돌려준다(page→host hondi-embed-sp-reply). 기관 선택을 풀면 sp:null 로 원래대로.
    *  host→page { type:'hondi-embed-sp', sp:'SP-02_k119'|null, label, greeting }   page→host { type:'hondi-embed-sp-ready', sp, ok, msg }
    *  host→page { type:'hondi-embed-sp-ask', id, text }                              page→host { type:'hondi-embed-sp-reply', id, text }  */
@@ -5545,7 +5545,7 @@ function _messagesWithLocation(historyArr) {
 
 <script type="module">
 // 2026-10-09: 스캐너를 v2(로고 기준, 1~10자리)로 교체. 인식 기준점은 글자가 아니라 로고 그림이다.
-// 2026-10-13: 새 배치(노란 바탕 나비 로고 칸 + 숫자열 한 줄)를 읽도록 확장 — 예전 "hondi.net" 로고 코드도 계속 읽힌다(hondi-digit-scanner-v2.js).
+// 2026-10-13: 새 배치(노란 바탕 나비 로고 칸 + 숫자열 한 줄)를 읽도록 확장 — 예전 "naviweb.kr" 로고 코드도 계속 읽힌다(hondi-digit-scanner-v2.js).
 import { startScanner, stopScanner, analyzePhoto, lookupSerial }
   from './src/gopang/ai/hondi-digit-scanner-v2.js';
 import { ORG_SITES, findSiteByDigitCode } from './src/gopang/gov/org-sites.js';

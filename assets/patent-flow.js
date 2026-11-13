@@ -1,6 +1,6 @@
 /* patent-flow.js — 신규 발명의 특허 출원 준비 단계형 화면 (변리사 보조 AI, 2026-10-21 신설)
 
-   참고: klaw.hondi.net/verdict-generate.html (입력 필드·첨부 아이콘·진행 표시·결과 패널 구성).
+   참고: klaw.naviweb.kr/verdict-generate.html (입력 필드·첨부 아이콘·진행 표시·결과 패널 구성).
    기반 SP: prompts/SP_patent-attorney-assistant (STEP T 발명 출원 트랙) — SP는 이 파일에 복제하지 않고 매 호출마다 매니페스트로 받는다.
 
    ■ 이 화면이 하지 않는 일 (SP §LEGAL-LIMIT): 지식재산처에 제출하지 않고, 수수료를 납부하지 않고, 서명·날인하지 않는다.

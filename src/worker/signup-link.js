@@ -38,7 +38,7 @@ export function createSignupLinkApi(deps) {
   const now = deps.now || (() => Date.now());
   const uuid = deps.uuid || (() => crypto.randomUUID());
   const randInt = deps.randInt || ((n) => crypto.getRandomValues(new Uint32Array(1))[0] % n);
-  const origin = deps.origin || 'https://hondi.net';
+  const origin = deps.origin || 'https://app.naviweb.kr';
 
   async function load(sessionId) {
     if (!sessionId || !/^[0-9a-f-]{36}$/i.test(String(sessionId))) return null;

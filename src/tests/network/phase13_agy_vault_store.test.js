@@ -24,7 +24,7 @@ const ORIGIN = 'https://worker.example';
 function req(payload) {
   return new Request(`${ORIGIN}/gov/relay`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Origin': 'https://public.hondi.net' },
+    headers: { 'Content-Type': 'application/json', 'Origin': 'https://public.naviweb.kr' },
     body: JSON.stringify(payload),
   });
 }

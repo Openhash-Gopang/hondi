@@ -80,9 +80,9 @@ describe('감정평가사 보조 AI — 시작 영역(감정 평가·방법론 +
   it('A-08: MD 변환기는 글자를 이스케이프하고 실제 SP(표·인용·코드·목록)를 온전히 바꾼다', () => {
     const win = {}; new Function('window', read('assets/md-view.js'))(win);
     const R = win.HondiMd.render;
-    const evil = R('# 제목 <script>alert(1)</script>\n\n[x](javascript:alert(1)) [ok](https://hondi.net) **굵게** `a<b`');
+    const evil = R('# 제목 <script>alert(1)</script>\n\n[x](javascript:alert(1)) [ok](https://app.naviweb.kr) **굵게** `a<b`');
     assert.ok(!/<script/i.test(evil) && !evil.includes('href="javascript'), '이스케이프/링크 제한 실패: ' + evil);
-    assert.ok(evil.includes('<strong>굵게</strong>') && evil.includes('<code>a&lt;b</code>') && evil.includes('href="https://hondi.net"'), '기본 서식 변환 실패');
+    assert.ok(evil.includes('<strong>굵게</strong>') && evil.includes('<code>a&lt;b</code>') && evil.includes('href="https://app.naviweb.kr"'), '기본 서식 변환 실패');
     const t = R('| A | B |\n|---|---|\n| 1 | 2 |');
     assert.ok(t.includes('<th>A</th>') && t.includes('<td>2</td>') && !t.includes('|---'), '표 변환 실패');
     const nest = R('- 가\n  - 나\n- 다');

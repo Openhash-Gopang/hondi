@@ -269,7 +269,7 @@ export function resolveExpertId(personaId) {
 // 일관성이 없다. 이제 모든 전문가 페르소나를 하나의 공용 페이지
 // (pages/expert-chat.html)에서 persona 쿼리 파라미터로 SP만 갈아끼워
 // 서빙하고, GWP와 동일하게 _gwpLaunch()로 새 탭을 연다.
-const EXPERT_CHAT_BASE_URL = 'https://hondi.net/pages/expert-chat.html';
+const EXPERT_CHAT_BASE_URL = 'https://app.naviweb.kr/pages/expert-chat.html';
 
 export function getExpertGwpDef(personaId) {
   const def = EXPERT_REGISTRY[personaId];

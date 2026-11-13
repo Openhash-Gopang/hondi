@@ -1217,7 +1217,7 @@ async function _adoptRealSharedLogin(hostToken) {
 // 나비웹(naviweb.kr)의 대화창은 이 앱(hondi.net)을 iframe 으로 띄운다. 두 사이트는 쿠키를 나누지 못해(.hondi.net 공유 쿠키는 naviweb.kr 에서 안 보임)
 // 전화 인증으로 로그인해 있어도 이 앱은 임시 계정으로 열렸다. 그래서 호스트가 {type:'hondi-embed-auth', token, exp} 를 이 창에만 보내 주면
 // 같은 방식(서버 /auth/session-profile)으로 그 계정을 이어받는다. 토큰은 주소(URL)에 싣지 않고, 이 탭의 sessionStorage 에만 둔다.
-const _HOST_ORIGINS = ['https://naviweb.kr', 'https://www.naviweb.kr', 'https://mail.hondi.net'];
+const _HOST_ORIGINS = ['https://naviweb.kr', 'https://www.naviweb.kr', 'https://mail.naviweb.kr'];
 const _HOST_PVT_KEY = 'hondi_host_pvt';
 function _isEmbedded() { try { return window.parent !== window; } catch { return true; } }
 function _readHostPvt() {
@@ -1432,14 +1432,14 @@ export async function initAuthWithPhone(digits, countryKey = 'KR', phoneType = '
 function _writeSharedPvtCookie(token, expMs) {
   try {
     const maxAge = Math.max(1, Math.floor((expMs - Date.now()) / 1000));
-    const base = '; domain=.hondi.net; path=/; max-age=' + maxAge + '; secure; samesite=lax';
+    const base = '; domain=.naviweb.kr; path=/; max-age=' + maxAge + '; secure; samesite=lax';
     document.cookie = 'hondi_pvt=' + encodeURIComponent(token) + base;
     document.cookie = 'hondi_pvt_exp=' + encodeURIComponent(String(expMs)) + base;
   } catch {}
 }
 function _clearSharedPvtCookie() {
   try {
-    const base = '; domain=.hondi.net; path=/; max-age=0; secure; samesite=lax';
+    const base = '; domain=.naviweb.kr; path=/; max-age=0; secure; samesite=lax';
     document.cookie = 'hondi_pvt=' + base; document.cookie = 'hondi_pvt_exp=' + base;
   } catch {}
 }
@@ -1462,7 +1462,7 @@ function _readCookie(name) {
 const TEST_NOTICE_MS = 10000;
 function _writeNoticeUntil(until) {
   try { localStorage.setItem('hondi_test_notice_until', String(until)); } catch {}
-  try { document.cookie = 'hondi_tn=' + until + '; domain=.hondi.net; path=/; max-age=31536000; secure; samesite=lax'; } catch {}
+  try { document.cookie = 'hondi_tn=' + until + '; domain=.naviweb.kr; path=/; max-age=31536000; secure; samesite=lax'; } catch {}
 }
 function _noticeRemainingMs() {
   const c = Number(_readCookie('hondi_tn') || 0);
@@ -2167,7 +2167,7 @@ function _showPhonePopupLegacy(resolve) {
         // ── WebOTP API (2026-07-21 신설) ──────────────────────────
         // 지원 브라우저(안드로이드 Chrome)에서는 문자를 아예 확인하러
         // 나갈 필요 없이, 브라우저가 SMS 도착을 감지해 입력창에 자동으로
-        // 채워준다 — worker.js가 문자 맨 끝에 "@hondi.net #코드" 태그를
+        // 채워준다 — worker.js가 문자 맨 끝에 "@naviweb.kr #코드" 태그를
         // 붙여 보내야 이 기능이 동작한다(같은 커밋에서 함께 수정).
         // 이 단계(otp-step)를 벗어나면(수동 확인·재전송·뒤로가기 등)
         // abort()로 반드시 정리한다 — 안 그러면 다음 단계에서도 계속
@@ -2231,7 +2231,7 @@ function _showPhonePopupLegacy(resolve) {
                 const assertion = await navigator.credentials.get({
                   publicKey: {
                     challenge: _b64uToBuf(existingAccountChallenge.challengeB64u),
-                    rpId: existingAccountChallenge.rpId || 'hondi.net',
+                    rpId: existingAccountChallenge.rpId || 'naviweb.kr',
                     allowCredentials: (existingAccountChallenge.credentialIds || []).map(id => ({
                       id: _b64uToBuf(id), type: 'public-key',
                     })),
@@ -2825,7 +2825,7 @@ async function _initGdcWalletAndFs(guid) {
           type: 'fs_genesis',
           who:  { ipv6: guid, role: 'user', level: 'L0', recipients: ['gopang-pdv'] },
           when: { period_start: new Date().toISOString(), period_end: new Date().toISOString() },
-          where:{ svc_url: 'https://hondi.net' },
+          where:{ svc_url: 'https://app.naviweb.kr' },
           what: { summary: 'GDC 지갑·재무제표 초기화(자산 0 / 비용 0 / 수익 0)' },
           how:  { method: 'signup_auto_init' },
           why:  { goal: 'IASB 기준 재무제표 최초 생성' },
@@ -3306,7 +3306,7 @@ async function _recordRegisterPdv({ ipv6, handle, nickname, e164, selectedCountr
     block_hash:   entryHash,
     who:  { ipv6, handle },
     when: now,
-    where: 'https://hondi.net',
+    where: 'https://app.naviweb.kr',
     what: `신규 사용자 가입: ${nickname} (${handle})`,
     how:  '전화번호 입력 → 즉시 등록 (테스트 모드, 상용화 시 SMS 2FA)',
     why:  '나비 서비스 최초 가입',

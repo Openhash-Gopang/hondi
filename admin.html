@@ -1966,7 +1966,7 @@ function _addSubdomainRow() {
   if(!cred.apiKey||!cred.email||!cred.zoneId){
     alert('먼저 Cloudflare 자격증명을 입력하고 저장하세요.\n\nAPI Key, Email, Zone ID 모두 입력 후\n"자격증명 저장" 버튼을 클릭하세요.');return;
   }
-  const name=prompt('추가할 서브도메인 이름 입력\n(예: klaw → klaw.hondi.net)\n\n여러 개: 쉼표로 구분 (예: qna,openhash,l1-ido1)');
+  const name=prompt('추가할 서브도메인 이름 입력\n(예: klaw → klaw.naviweb.kr)\n\n여러 개: 쉼표로 구분 (예: qna,openhash,l1-ido1)');
   if(!name||!name.trim()) return;
   const names=name.split(',').map(n=>n.trim().toLowerCase().replace(/[^a-z0-9-]/g,'')).filter(Boolean);
   if(!names.length){alert('유효하지 않은 이름입니다.');return;}

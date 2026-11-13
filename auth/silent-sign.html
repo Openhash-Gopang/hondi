@@ -119,13 +119,13 @@
 // 고정 문자열이다(JSON.stringify 방식이 아님 — §6.2 문서는 구버전 설명).
 //
 // 호출 측(예: market/desktop.html) 계약:
-//   1) <iframe src="https://hondi.net/auth/silent-sign.html?svc=market"> 를
+//   1) <iframe src="https://app.naviweb.kr/auth/silent-sign.html?svc=market"> 를
 //      화면에 보이는 위치(모달 오버레이 등)에 삽입한다 — 사용자가 확인
 //      UI를 봐야 하므로 display:none 금지.
 //   2) iframe load 이후 postMessage({
 //        type: 'GWP_PROFILE_SIGN_REQUEST',
 //        session_id, payload            // payload: 서명할 필드들 (guid/pubkey/ts는 이 페이지가 채움)
-//      }, 'https://hondi.net') 를 전송한다.
+//      }, 'https://app.naviweb.kr') 를 전송한다.
 //   3) 응답 postMessage({
 //        type: 'GWP_PROFILE_SIGN_RESPONSE', session_id,
 //        ok, guid, pubkey, ts, signature,   // ok===true일 때

@@ -2,16 +2,16 @@
  * subsystem-auth.js  v1.2
  * 나비 하위 시스템 공용 인증 모듈
  *
- * 배포 위치: https://hondi.net/auth/subsystem-auth.js
+ * 배포 위치: https://app.naviweb.kr/auth/subsystem-auth.js
  *
  * 사용법 (각 하위 시스템 HTML에 단 한 줄):
  *   <script type="module"
- *     src="https://hondi.net/auth/subsystem-auth.js">
+ *     src="https://app.naviweb.kr/auth/subsystem-auth.js">
  *   </script>
  *
  * 또는 함수를 직접 import할 때:
  *   import { initAuth, requireLevel }
- *     from 'https://hondi.net/auth/subsystem-auth.js';
+ *     from 'https://app.naviweb.kr/auth/subsystem-auth.js';
  *
  * 백서 §12: 하위 서비스 독자 인증 구현 금지
  *
@@ -78,8 +78,8 @@ export async function initAuth() {
 function _detectServiceId() {
   const host = location.hostname;
   if (host === 'localhost' || host === '127.0.0.1') return 'dev';
-  if (host === 'hondi.net') return 'gopang';
-  const sub = host.replace(/\.hondi\.net$/, '');
+  if (host === 'naviweb.kr') return 'gopang';
+  const sub = host.replace(/\.naviweb\.kr$/, '');
   return sub !== host ? sub : 'unknown';
 }
 
@@ -102,7 +102,7 @@ function _loadSecurityAgent() {
 
   const agent     = document.createElement('script');
   agent.id        = 'ksec-agent';
-  agent.src       = 'https://security.hondi.net/security-agent.js';
+  agent.src       = 'https://security.naviweb.kr/security-agent.js';
   agent.dataset.svc = svcId;
   agent.dataset.url = svcUrl;
   // 인증된 사용자 정보를 에이전트에 전달 (진단 정확도 향상)
@@ -166,8 +166,8 @@ export function showAuthPanel() {
   const content = document.getElementById('auth-modal-content');
   if (!modal || !content) return;
 
-  // 서비스명: hostname에서 자동 추출 (police.hondi.net → K-Police)
-  const sub = location.hostname.replace(/\.hondi\.net$/, '');
+  // 서비스명: hostname에서 자동 추출 (police.naviweb.kr → K-Police)
+  const sub = location.hostname.replace(/\.naviweb\.kr$/, '');
   const svcLabel = sub !== location.hostname
     ? 'K-' + sub.charAt(0).toUpperCase() + sub.slice(1)
     : '나비 서비스';
@@ -185,7 +185,7 @@ export function showAuthPanel() {
           ${(_user?.ipv6 || '').slice(0, 24)}…
         </code>
       </div>
-      <a href="https://hondi.net" target="_blank"
+      <a href="https://app.naviweb.kr" target="_blank"
         style="display:flex;align-items:center;justify-content:center;
                width:100%;padding:12px;border-radius:8px;
                background:#3ecf8e;color:#fff;
@@ -209,9 +209,9 @@ export function showLoginPrompt(level) {
   const content = document.getElementById('auth-modal-content');
   if (!modal || !content) {
     // 모달 없는 환경 → silent-auth.html 리다이렉트
-    const svc = location.hostname.replace(/\.hondi\.net$/, '') || 'dev';
+    const svc = location.hostname.replace(/\.naviweb\.kr$/, '') || 'dev';
     location.replace(
-      `https://hondi.net/auth/silent-auth.html`
+      `https://app.naviweb.kr/auth/silent-auth.html`
       + `?return=${encodeURIComponent(location.href)}&svc=${svc}&level=${level || 'L0'}`
     );
     return;
@@ -225,7 +225,7 @@ export function showLoginPrompt(level) {
         모든 하위 서비스를 이용할 수 있습니다.
         ${level ? `<br><strong>${level}</strong> 인증이 필요합니다.` : ''}
       </div>
-      <a href="https://hondi.net" target="_blank"
+      <a href="https://app.naviweb.kr" target="_blank"
         style="display:flex;align-items:center;justify-content:center;
                width:100%;padding:12px;border-radius:8px;
                background:#3ecf8e;color:#fff;

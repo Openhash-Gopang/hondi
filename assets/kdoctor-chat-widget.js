@@ -1,9 +1,9 @@
 /* ══════════════════════════════════════════════════════════════════
-   kdoctor-chat-widget.js — doctor.hondi.net 상단 진료 상담 창 (v0.1, 2026-09-30)
+   kdoctor-chat-widget.js — doctor.naviweb.kr 상단 진료 상담 창 (v0.1, 2026-09-30)
 
    ES 모듈로 로드한다:
      <div id="kdoctor-chat"></div>
-     <script type="module" src="https://hondi.net/assets/kdoctor-chat-widget.js"></script>
+     <script type="module" src="https://app.naviweb.kr/assets/kdoctor-chat-widget.js"></script>
 
    구조(estate 위젯과 다른 점):
      - SP 본문을 이 파일에 복사해 두지 않고 hondi.net의 정본을 실행 시점에 fetch한다
@@ -14,7 +14,7 @@
      - [DIAGNOSIS_REPORT]는 src/gopang/ai/hondi-doctor-verdict.js로 재계산·제한한 뒤 카드로만 보여 준다.
        검증 실패는 1회 재생성 후 페일세이프(대면 진료 + 119·109 안내).
    호출 경로: POST https://hondi-proxy.tensor-city.workers.dev/ai/chat (Origin 화이트리스트만, 로그인 없음 —
-   worker.js ALLOWED_ORIGINS에 https://doctor.hondi.net 등록 필요). rate-limit은 워커(doctor 경로, IP·시간·전체)에서 건다.
+   worker.js ALLOWED_ORIGINS에 https://doctor.naviweb.kr 등록 필요). rate-limit은 워커(doctor 경로, IP·시간·전체)에서 건다.
 
    첨부("+", 2026-10-01): 증상 사진 → SP-29-IMG 비전 관찰 JSON, 서류 → 브라우저 글자 추출(txt·PDF·docx) 또는 SP-29-DOC 전사(스캔·사진)
      → 개인식별번호 가림·제어 태그 무력화 후 [ATTACHED_*] 블록으로 총괄 SP에 전달. 사진 원본은 총괄 SP에 보내지 않는다.
@@ -36,7 +36,7 @@ import { validateDiagnosis, audienceView } from '../src/gopang/ai/hondi-doctor-v
   if (!container || container.dataset.kdInit) return;
   container.dataset.kdInit = '1';
 
-  var BASE = new URL('..', import.meta.url).href.replace(/\/$/, ''); // https://hondi.net
+  var BASE = new URL('..', import.meta.url).href.replace(/\/$/, ''); // https://app.naviweb.kr
   var WORKER_URL = 'https://hondi-proxy.tensor-city.workers.dev';
 
   var style = document.createElement('style');
@@ -363,7 +363,7 @@ import { validateDiagnosis, audienceView } from '../src/gopang/ai/hondi-doctor-v
   }
 
   // ─────────────── PDV(건강 기록) — "나만의 AI 비서"가 연 탭에서만 ───────────────
-  var AC_ORIGINS = (Array.isArray(window.KDOCTOR_AC_ORIGINS) && window.KDOCTOR_AC_ORIGINS.length) ? window.KDOCTOR_AC_ORIGINS : ['https://hondi.net', 'https://www.hondi.net'];
+  var AC_ORIGINS = (Array.isArray(window.KDOCTOR_AC_ORIGINS) && window.KDOCTOR_AC_ORIGINS.length) ? window.KDOCTOR_AC_ORIGINS : ['https://app.naviweb.kr', 'https://www.hondi.net'];
   var qs = new URLSearchParams(location.search);
   var acOrigin = null;
   if (qs.get('gwp') === '1' && window.opener && !window.opener.closed) {

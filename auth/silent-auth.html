@@ -247,7 +247,7 @@ const ORIGIN    = params.get('origin') || '*';
 const RETURN    = params.get('return') || null;
 const IS_SILENT = (window.parent !== window);   // iframe 여부
 const WORKER    = 'https://hondi-proxy.tensor-city.workers.dev';
-const _GOPANG_ORIGIN = 'https://hondi.net'; // 2026-07-21 — postMessage 타겟/검증용
+const _GOPANG_ORIGIN = 'https://app.naviweb.kr'; // 2026-07-21 — postMessage 타겟/검증용
 
 window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('svc-label').textContent = SERVICE;
@@ -267,7 +267,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 //
 // ★ 1차 시도(BroadcastChannel)는 실사에서 실패가 재현됐다 — 최신
 // Chrome은 BroadcastChannel도 최상위 사이트(top-level site)별로 격리
-// 한다(스토리지 파티셔닝). klaw.hondi.net 안의 이 iframe이 여는 채널과
+// 한다(스토리지 파티셔닝). klaw.naviweb.kr 안의 이 iframe이 여는 채널과
 // webapp.html 탭이 여는 같은 이름의 채널은 최상위 사이트가 서로 달라
 // 완전히 격리된 별개 채널이 되어 서로 절대 못 본다 — 처음에 iframe이
 // localStorage를 못 읽던 문제와 근본적으로 같은 원인이다.
@@ -421,7 +421,7 @@ async function _runRedirectMode() {
       returnUrl.searchParams.set('gopang_token', token);
       location.href = returnUrl.toString();
     } else {
-      location.href = 'https://hondi.net';
+      location.href = 'https://app.naviweb.kr';
     }
     return;
   }
@@ -445,7 +445,7 @@ async function _runRedirectMode() {
 
 window.goRegister = function() {
   const returnParam = RETURN ? `&return=${encodeURIComponent(RETURN)}` : '';
-  location.href = `https://hondi.net?register=1&svc=${SERVICE}${returnParam}`;
+  location.href = `https://app.naviweb.kr?register=1&svc=${SERVICE}${returnParam}`;
 };
 
 // ── 유틸 ─────────────────────────────────────────────────

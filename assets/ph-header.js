@@ -7,7 +7,7 @@
      - pages/k-government.html
      - pages/prompts.html
 
-   전문가 페르소나 페이지가 2026-09-04에 plan.hondi.net 스타일로
+   전문가 페르소나 페이지가 2026-09-04에 plan.naviweb.kr 스타일로
    하드코딩했던 topnav+hero 마크업을 그 원형으로 삼아, 이 4개 페이지가
    공유하는 단일 모듈로 추출했다(2026-09-06, 주피터님 지시).
    ※ /assets/site-header.js(다른 19개 페이지가 쓰는 기존 공용 모듈)와는
@@ -61,12 +61,12 @@
   }
 
   // 2026-10-18(주피터 지시) — 히어로 오른쪽 빈 공간 세로 중앙에 놓는 행동 버튼(선택). PAGE_HEADER.heroButton = { label, href, title }.
-  // href는 사이트 안 경로('/'로 시작)와 https://klaw.hondi.net/ 주소만 허용한다. 문구는 escapeHtml을 거친다.
+  // href는 사이트 안 경로('/'로 시작)와 https://klaw.naviweb.kr/ 주소만 허용한다. 문구는 escapeHtml을 거친다.
   function heroCtaLink(b, cls, newTab) {
     if (!b || !b.label || typeof b.href !== 'string') return '';
-    // 2026-10-22(주피터 지시) — 사이트 안 경로 외에, 아래 허용 목록의 K-Law 주소(https://klaw.hondi.net/...)만 새 창 링크로 허용한다.
+    // 2026-10-22(주피터 지시) — 사이트 안 경로 외에, 아래 허용 목록의 K-Law 주소(https://klaw.naviweb.kr/...)만 새 창 링크로 허용한다.
     var internal = b.href.charAt(0) === '/' && b.href.charAt(1) !== '/';
-    var external = b.href.indexOf('https://klaw.hondi.net/') === 0;
+    var external = b.href.indexOf('https://klaw.naviweb.kr/') === 0;
     if (!internal && !external) return '';
     return '<a class="' + cls + '" href="' + escapeHtml(b.href).replace(/"/g, '&quot;') + '"' + ((external || newTab || b.newTab) ? ' target="_blank" rel="noopener"' : '') + (b.title ? ' title="' + escapeHtml(b.title).replace(/"/g, '&quot;') + '"' : '') + '>' + escapeHtml(b.label) + '</a>';
   }
@@ -75,7 +75,7 @@
   // 그 세부 분야)의 히어로 오른쪽 버튼 줄 맨 끝에 놓고, 직역별 소개서를 새 탭으로 연다.
   // PAGE_HEADER.introButton === false 로 끄고, { label, href, title } 로 바꿀 수 있다.
   var INTRO_MAP = [
-    [/^lawyer(-|$)/, 'https://klaw.hondi.net/klaw_intro.html'],
+    [/^lawyer(-|$)/, 'https://klaw.naviweb.kr/klaw_intro.html'],
     [/^judicial-scrivener(-|$)/, '/pages/intro-judicial-scrivener.html'],
     [/^administrative-scrivener(-|$)/, '/pages/intro-administrative-scrivener.html'],
     [/^(tax-accountant|tax-optimizer|accountant)(-|$)/, '/pages/intro-tax-accounting.html'],
@@ -110,7 +110,7 @@
   }
   // 2026-10-24: 「K-Law」 버튼 — 인프라(K-서비스)·전문가 페르소나·K-정부(기관 페이지 포함) 문서의 오른쪽 상단.
   // PAGE_HEADER.klaw === false 로 끄고, true 로 강제로 켤 수 있다.
-  var KLAW_URL = 'https://hondi.net/pages/klaw-llm-verdict-validation.html#case-overview';
+  var KLAW_URL = 'https://app.naviweb.kr/pages/klaw-llm-verdict-validation.html#case-overview';
   var KLAW_KEYS = { 'k-services': 1, 'expert-personas': 1, 'k-government': 1 };
   function wantsKlaw(config, activeKey) {
     if (config && config.klaw === false) return false;

@@ -93,13 +93,13 @@
 // hondi.net origin에서 로컬로 계산한 요약을 받아가야 한다.
 //
 // 호출 측 계약 (silent-sign.html과 동일한 형태):
-//   1) <iframe src="https://hondi.net/auth/silent-pref.html?svc=market">
+//   1) <iframe src="https://app.naviweb.kr/auth/silent-pref.html?svc=market">
 //      화면에 보이는 위치에 삽입 (동의 UI가 뜰 수 있으므로 display:none 금지)
 //   2) iframe load 후 postMessage({
 //        type: 'GWP_PREF_REQUEST', session_id,
 //        category,   // 'org'|'ai'|'person'|'thing'|'all' — 생략 시 'all'
 //        keywords    // string[], 생략 가능
-//      }, 'https://hondi.net')
+//      }, 'https://app.naviweb.kr')
 //   3) 응답 postMessage({
 //        type: 'GWP_PREF_RESPONSE', session_id,
 //        ok, count, summary_text,   // ok===true. summary_text는 null일 수 있음(신호 없음)

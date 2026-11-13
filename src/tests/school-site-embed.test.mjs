@@ -10,7 +10,7 @@ const read = (p) => readFileSync(new URL('../../' + p, import.meta.url), 'utf8')
 
 describe('나비 스쿨(school.hondi.net) 연동', () => {
   it('school.hondi.net 이 임베드 부모 오리진과 PDV·서명 허용 출처에 있다', () => {
-    assert.ok(read('pages/expert-chat.html').includes("'https://law.hondi.net', 'https://school.hondi.net'"));
+    assert.ok(read('pages/expert-chat.html').includes("'https://law.naviweb.kr', 'https://school.naviweb.kr'"));
     assert.ok(read('src/gopang/gwp/allowed-origins.js').includes("'https://school.hondi.net'"));
   });
   it('페르소나 school-docs 가 등록되고 서류 작성 직역 루트에 있다', () => {
@@ -38,14 +38,14 @@ describe('나비 스쿨(school.hondi.net) 연동', () => {
     const reg = read('gwp-registry.js'), k = reg.indexOf("id: 'navischool'");
     assert.ok(k > 0);
     const block = reg.slice(k, reg.indexOf('},', k));
-    assert.match(block, /type: 'tab'/); assert.ok(block.includes("url: 'https://school.hondi.net/'")); assert.match(block, /status: 'active'/);
+    assert.match(block, /type: 'tab'/); assert.ok(block.includes("url: 'https://school.naviweb.kr/'")); assert.match(block, /status: 'active'/);
     assert.ok(reg.includes("id: 'kedu', name: 'K-School'"));
-    assert.ok(reg.includes("url: 'https://school.hondi.net/webapp.html'"));
+    assert.ok(reg.includes("url: 'https://school.naviweb.kr/webapp.html'"));
   });
   it('서비스 메뉴에 school.hondi.net 링크가 있다', () => {
     const s = read('desktop.html'), pre = 'var MEGA_MENU_SECTIONS = ', i = s.indexOf(pre), j = s.indexOf(';\n', i);
     const arr = JSON.parse(s.slice(i + pre.length, j));
-    const it2 = arr.flatMap((x) => x.items).find((x) => x.href === 'https://school.hondi.net');
+    const it2 = arr.flatMap((x) => x.items).find((x) => x.href === 'https://school.naviweb.kr');
     assert.ok(it2 && it2.target === '_blank');
   });
 });

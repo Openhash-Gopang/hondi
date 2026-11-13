@@ -19,7 +19,7 @@
 (function (root) {
   'use strict';
 
-  var MANUAL_URL = 'https://hondi.net/assets/presentations/navi-user-manual-20261016.pdf';
+  var MANUAL_URL = 'https://app.naviweb.kr/assets/presentations/navi-user-manual-20261016.pdf';
   var STORE_KEY = 'hondi_manual_banner_hidden_v1';
   var STYLE_ID = 'nmb-style';
   var TEXT = '나비를 처음 쓰시나요? 나비 매뉴얼에서 사용 방법을 확인하세요.';

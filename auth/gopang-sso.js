@@ -2,8 +2,8 @@
  * gopang-sso.js  v1.0
  * 나비 중앙 인증 라이브러리 — 하위 서비스 전용
  *
- * 배포 위치 : https://hondi.net/auth/gopang-sso.js
- * 하위 서비스: import { gopangAuth } from 'https://hondi.net/auth/gopang-sso.js'
+ * 배포 위치 : https://app.naviweb.kr/auth/gopang-sso.js
+ * 하위 서비스: import { gopangAuth } from 'https://app.naviweb.kr/auth/gopang-sso.js'
  *
  * 백서 §12 준수
  * ─ 하위 서비스는 독자 인증 구현 금지
@@ -11,7 +11,7 @@
  * ─ 4가지 경로 자동 처리: GWP토큰 → sessionStorage → Silent iframe → 리다이렉트
  */
 
-const _GOPANG_ORIGIN  = 'https://hondi.net';
+const _GOPANG_ORIGIN  = 'https://app.naviweb.kr';
 const _WORKER         = 'https://hondi-proxy.tensor-city.workers.dev';
 const _STORE_KEY      = 'gopang_user_v4';       // gopang_v2와 공유
 const _SSO_SESSION    = 'gopang_sso_token';     // sessionStorage 키
@@ -48,7 +48,7 @@ export async function issueToken(user, svcId) {
     ver:   '1.0',
     ipv6:  user.ipv6,
     level: user.authLevel || user.level || 'L0',
-    svc:   svcId || (location.hostname.replace(/\.hondi\.net$/, '') || 'dev'),
+    svc:   svcId || (location.hostname.replace(/\.naviweb\.kr$/, '') || 'dev'),
     iat:   Math.floor(Date.now() / 1000),
     exp:   Math.floor(Date.now() / 1000) + 3600,
   };
@@ -58,14 +58,14 @@ export async function issueToken(user, svcId) {
 }
 // ── 서비스 ID 추출 (hostname에서 자동) ──────────────────
 function _detectServiceId() {
-  // security.hondi.net → 'security'
-  // klaw.hondi.net     → 'klaw'
+  // security.naviweb.kr → 'security'
+  // klaw.naviweb.kr     → 'klaw'
   // hondi.net (루트)    → 'gopang'
   // localhost           → 'dev'
   const host = location.hostname;
   if (host === 'localhost' || host === '127.0.0.1') return 'dev';
-  if (host === 'hondi.net') return 'gopang';
-  const sub = host.replace(/\.hondi\.net$/, '');
+  if (host === 'naviweb.kr') return 'gopang';
+  const sub = host.replace(/\.naviweb\.kr$/, '');
   return sub !== host ? sub : 'unknown';
 }
 
@@ -326,8 +326,8 @@ export const gopangAuth = {
     user = await _tryOpenerAuth(level);
     if (user) return _checkLevel(user, level);
 
-    // opener가 없는 경우(klaw.hondi.net 북마크 직접 방문 등) — 2026-07-21
-    // 사용자 지시로 Silent iframe 시도 자체를 없앴다. klaw.hondi.net 등
+    // opener가 없는 경우(klaw.naviweb.kr 북마크 직접 방문 등) — 2026-07-21
+    // 사용자 지시로 Silent iframe 시도 자체를 없앴다. klaw.naviweb.kr 등
     // 하위 서비스 저장소가 이미 자체적으로 hondi.net 로그인 안내 화면을
     // 직접 제공하고 있어("hondi.net에서 로그인" 버튼 → 실제 페이지 이동),
     // 성공률이 낮았던 iframe 시도(WebAuthn 무제스처·스토리지 파티셔닝
