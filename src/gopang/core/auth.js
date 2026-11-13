@@ -1239,7 +1239,54 @@ function _showDeviceMismatchNotice(found, resolve) {
     }
   }
 
-  _startRequest();
+  // 폰에서 로그인(2026-11-13, 주피터 지시): 입력한 번호로 인증번호 문자를 보내고, 폰이 자동으로 읽어 입력한다 — 사용자는 "로그인"만 누르면 된다.
+  // 얻는 것은 전화번호 인증 토큰(계정 접속)이다. 지갑 개인키는 문자로 옮겨지지 않으므로, 서명·송금이 필요하면 "백업 키로 복구"를 쓴다.
+  // PC 는 문자를 받을 수 없어 기존 폰 승인 방식을 쓴다.
+  let smsAbort = null;
+  async function _startSmsLogin() {
+    const phone = _lastLoginE164 || found.e164;
+    render(`
+      <div style="width:24px;height:24px;border:2.5px solid #e5e7eb;border-top-color:#0057A8;border-radius:50%;animation:_dlSpin 0.8s linear infinite;margin:20px auto"></div>
+      <p style="font-size:calc(0.875rem*var(--hondi-fs,1));color:#374151;margin-bottom:10px">인증번호를 보냈습니다</p>
+      <input id="_dl-sms-code" type="tel" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="인증번호 6자리"
+        style="width:100%;box-sizing:border-box;margin-bottom:10px;padding:11px;border:1px solid #d1d5db;border-radius:10px;text-align:center;font-size:16px;letter-spacing:4px;font-family:inherit">
+      <button id="_dl-backup" style="width:100%;padding:11px;border:1px solid #e5e7eb;border-radius:10px;background:none;color:#374151;cursor:pointer;font-size:calc(0.7812rem*var(--hondi-fs,1));margin-bottom:8px;font-family:inherit">백업 키로 복구</button>
+      <button id="_dl-close" style="width:100%;padding:11px;border:none;background:none;color:#9ca3af;cursor:pointer;font-size:calc(0.7812rem*var(--hondi-fs,1));font-family:inherit">취소</button>
+      <div id="_dl-status" style="font-size:calc(0.75rem*var(--hondi-fs,1));margin-top:10px;min-height:16px"></div>
+    `);
+    $$('#_dl-backup').onclick = () => { if (smsAbort) smsAbort.abort(); _showBackupForm(); };
+    $$('#_dl-close').onclick = () => { if (smsAbort) smsAbort.abort(); closeOverlay(null); };
+    try {
+      const rq = await fetch(`${PROXY_URL}/biz/phone-otp-request`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ e164: phone }) });
+      const rd = await rq.json().catch(() => ({}));
+      if (!rq.ok || !rd.ok) throw new Error(rd.detail || rd.message || '인증번호를 보내지 못했습니다.');
+    } catch (e) { setStatus(e.message, true); return; }
+
+    let finished = false;
+    const verify = async (code) => {
+      if (finished) return;
+      try {
+        const r = await fetch(`${PROXY_URL}/biz/phone-otp-verify`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ e164: phone, code: String(code).trim() }) });
+        const v = await r.json().catch(() => ({}));
+        if (!r.ok || !v.ok) throw new Error(v.detail || v.message || '인증번호가 맞지 않습니다.');
+        finished = true;
+        if (smsAbort) { try { smsAbort.abort(); } catch {} }
+        _writeSharedPvtCookie(v.phone_verify_token, new Date(v.expires_at).getTime());
+        const u = await _adoptRealSharedLogin(v.phone_verify_token);
+        if (!u) throw new Error('로그인 처리에 실패했습니다. 다시 시도해 주세요.');
+        closeOverlay(u);
+      } catch (e) { finished = false; setStatus(e.message, true); }
+    };
+    if ('OTPCredential' in window && navigator.credentials && navigator.credentials.get) {
+      smsAbort = new AbortController();
+      navigator.credentials.get({ otp: { transport: ['sms'] }, signal: smsAbort.signal })
+        .then((c) => { if (c && c.code) verify(c.code); }).catch(() => {});
+    }
+    const box = $$('#_dl-sms-code');
+    box.addEventListener('input', () => { if (/^\d{6}$/.test(box.value)) verify(box.value); });
+  }
+
+  if (_THIS_IS_PHONE && (_lastLoginE164 || found.e164)) _startSmsLogin(); else _startRequest();
 }
 
 
