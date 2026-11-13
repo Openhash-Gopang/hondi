@@ -204,13 +204,13 @@ self.addEventListener('fetch', (event) => {
         const cached = await caches.match(event.request);
         if (cached) {
           console.log('[SW] 캐시 폴백:', url.pathname);
-          return cached;
+          return await _plainResponse(cached);
         }
 
         // 캐시도 없으면 오프라인 페이지
         if (event.request.mode === 'navigate') {
           const offlineCache = await caches.match('/index.html');
-          if (offlineCache) return offlineCache;
+          if (offlineCache) return await _plainResponse(offlineCache);
         }
 
         return new Response('오프라인 상태입니다.', {
@@ -221,6 +221,17 @@ self.addEventListener('fetch', (event) => {
     })()
   );
 });
+
+// 2026-11-14 — Cloudflare Pages 가 /webapp.html 을 /webapp 으로 이동(308)시켜서, 사전 캐시에 들어간 응답이 redirected 표시를 달고 있다.
+// 브라우저는 이런 응답을 페이지 이동(navigate)에 그대로 돌려주면 ERR_FAILED("사이트에 연결할 수 없음")로 막는다.
+// 캐시에서 꺼낸 응답은 본문·헤더만 옮겨 담아 redirected 표시가 없는 새 응답으로 돌려준다.
+async function _plainResponse(res) {
+  try {
+    if (!res || !res.redirected) return res;
+    const body = await res.clone().blob();
+    return new Response(body, { status: res.status, statusText: res.statusText, headers: res.headers });
+  } catch (_) { return res; }
+}
 
 // ── 메시지 수신 (skipWaiting 명령) ────────────────────────
 self.addEventListener('message', (event) => {
