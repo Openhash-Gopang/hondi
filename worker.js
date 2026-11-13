@@ -532,7 +532,7 @@ async function handlePhoneOtpRequest(request, env, corsHeaders) {
   if (!env.QR_SESSIONS_KV) return _err(500, 'KV_NOT_BOUND', 'OTP 저장소가 설정되지 않았습니다', corsHeaders);
 
   const cooldownKey = `otp_cd:${e164}`;
-  if (await env.QR_SESSIONS_KV.get(cooldownKey)) {
+  if (!DEV_DISABLE_LOGIN_RATE_LIMIT && await env.QR_SESSIONS_KV.get(cooldownKey)) {
     return _err(429, 'OTP_COOLDOWN', `잠시 후(${OTP_RESEND_COOLDOWN_SECONDS}초) 다시 시도해 주세요`, corsHeaders);
   }
 
@@ -1083,6 +1083,10 @@ function _rlPut(kv, key, cur, windowSec) {
   return kv.put(key, `${cur.count + 1}|${start}`, { expirationTtl: remain });
 }
 
+// ★ 2026-11-14(주피터 지시) — 개발 기간 동안 로그인 "요청 횟수" 제한을 잠정 중단한다(반복 테스트가 자기 제한에 계속 걸리는 문제).
+// 출시(실사용자 개시) 전에 반드시 false 로 되돌릴 것. 인증번호 "틀린 입력" 횟수(5회)와 숫자 대조 오답 횟수는 무차별 대입 방어라 그대로 둔다.
+const DEV_DISABLE_LOGIN_RATE_LIMIT = true;
+
 function _generateDeviceLinkCode() {
   const buf = new Uint32Array(1);
   crypto.getRandomValues(buf);
@@ -1219,12 +1223,12 @@ async function handleDeviceLinkInit(request, env, corsHeaders) {
 
   const pushRl = _rlParse(pushRlRaw, DEVICE_LINK_PUSH_RATE_WINDOW_SECONDS);
   const pushRlCount = pushRl.count;
-  if (pushRlCount >= DEVICE_LINK_PUSH_RATE_LIMIT_PER_HOUR) {
+  if (!DEV_DISABLE_LOGIN_RATE_LIMIT && pushRlCount >= DEVICE_LINK_PUSH_RATE_LIMIT_PER_HOUR) {
     return _err(429, 'PHONE_RATE_LIMITED', '이 번호로 요청이 너무 많습니다. 잠시 후 다시 시도해 주세요', corsHeaders);
   }
   const ipRl = _rlParse(ipRlRaw, DEVICE_LINK_IP_RATE_WINDOW_SECONDS);
   const ipRlCount = ipRl.count;
-  if (ipRlCount >= DEVICE_LINK_IP_RATE_LIMIT_PER_HOUR) {
+  if (!DEV_DISABLE_LOGIN_RATE_LIMIT && ipRlCount >= DEVICE_LINK_IP_RATE_LIMIT_PER_HOUR) {
     return _err(429, 'IP_RATE_LIMITED', '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요', corsHeaders);
   }
 
@@ -1404,7 +1408,7 @@ async function handleDeviceLinkResendSms(request, env, corsHeaders) {
   if (record.state !== 'pending') {
     return _err(409, 'ALREADY_PROGRESSED', '이미 진행된 세션입니다', corsHeaders);
   }
-  if ((record.smsResendCount || 0) >= DEVICE_LINK_SMS_MAX_RESEND) {
+  if (!DEV_DISABLE_LOGIN_RATE_LIMIT && (record.smsResendCount || 0) >= DEVICE_LINK_SMS_MAX_RESEND) {
     return _err(429, 'TOO_MANY_RESENDS', '문자 재발송 횟수를 초과했습니다. 처음부터 다시 시도해 주세요', corsHeaders);
   }
 
@@ -1414,7 +1418,7 @@ async function handleDeviceLinkResendSms(request, env, corsHeaders) {
   const rlRaw = await env.QR_SESSIONS_KV.get(rlKey);
   const smsRl = _rlParse(rlRaw, DEVICE_LINK_SMS_RATE_WINDOW_SECONDS);
   const rlCount = smsRl.count;
-  if (rlCount >= DEVICE_LINK_SMS_RATE_LIMIT_PER_HOUR) {
+  if (!DEV_DISABLE_LOGIN_RATE_LIMIT && rlCount >= DEVICE_LINK_SMS_RATE_LIMIT_PER_HOUR) {
     return _err(429, 'PHONE_RATE_LIMITED', '이 번호로 문자를 너무 많이 요청했습니다. 잠시 후 다시 시도해 주세요', corsHeaders);
   }
 
