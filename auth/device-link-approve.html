@@ -213,6 +213,37 @@ if (/(^|\.)hondi\.net$/.test(location.hostname)) location.replace('https://app.n
     try { return (JSON.parse(localStorage.getItem('gopang_user_v4') || 'null') || {}).ipv6 || null; }
     catch { return null; }
   }
+  // 숫자 후보 버튼을 만든다(처음 한 번, 그리고 PC가 알림을 다시 보내 숫자가 바뀌었을 때 덮어쓰기).
+  function buildChoices(box, choices) {
+    box.innerHTML = '';
+    window.__choicesKey = JSON.stringify(choices);
+    choices.forEach(function (n) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.textContent = n;
+      b.style.cssText = 'width:84px;padding:14px 0;font-size:24px;font-weight:700;border:2px solid #cbd5e1;border-radius:12px;background:#fff;color:#111827;cursor:pointer';
+      b.addEventListener('click', function () {
+        if ($('btn-approve').disabled) return; // 승인 진행 중 중복 탭 방지
+        window.__picked = n;
+        Array.prototype.forEach.call(box.children, function (c) { c.style.borderColor = '#cbd5e1'; c.style.background = '#fff'; });
+        b.style.borderColor = '#0057A8'; b.style.background = '#eaf3fc';
+        Array.prototype.forEach.call(box.children, function (c) { c.disabled = true; });
+        $('btn-approve').click();
+      });
+      box.appendChild(b);
+    });
+  }
+  // 알림이 쌓였을 때 예전 알림을 열어도 최신 숫자를 보도록, 대기 중에는 주기적으로 세션을 다시 읽어 숫자가 바뀌었으면 덮어쓴다.
+  async function refreshChoices() {
+    if (!sessionGuid || document.hidden || $('btn-approve').disabled || window.__picked) return;
+    try {
+      const r = await fetch(`${WORKER}/auth/device-link/session?sessionId=${encodeURIComponent(sessionId)}&guid=${encodeURIComponent(sessionGuid)}`);
+      const d = await r.json();
+      if (r.ok && d.ok && Array.isArray(d.matchChoices) && JSON.stringify(d.matchChoices) !== window.__choicesKey) buildChoices($('match-choices'), d.matchChoices);
+    } catch (_) {}
+  }
+  setInterval(refreshChoices, 3000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) refreshChoices(); });
+
   async function showRequest(guid) {
     if (!guid) {
       show('error');
@@ -237,21 +268,7 @@ if (/(^|\.)hondi\.net$/.test(location.hostname)) location.replace('https://app.n
       // 숫자를 누르면 그 자체가 본인 확인 — 별도 "본인이 맞습니다" 버튼 없이 바로 승인 흐름을 시작한다.
       $('content').classList.add('dl-match');
       $('btn-approve').style.display = 'none';
-      const box = $('match-choices'); box.innerHTML = '';
-      data.matchChoices.forEach(function (n) {
-        const b = document.createElement('button');
-        b.type = 'button'; b.textContent = n;
-        b.style.cssText = 'width:84px;padding:14px 0;font-size:24px;font-weight:700;border:2px solid #cbd5e1;border-radius:12px;background:#fff;color:#111827;cursor:pointer';
-        b.addEventListener('click', function () {
-          if ($('btn-approve').disabled) return; // 승인 진행 중 중복 탭 방지
-          window.__picked = n;
-          Array.prototype.forEach.call(box.children, function (c) { c.style.borderColor = '#cbd5e1'; c.style.background = '#fff'; });
-          b.style.borderColor = '#0057A8'; b.style.background = '#eaf3fc';
-          Array.prototype.forEach.call(box.children, function (c) { c.disabled = true; });
-          $('btn-approve').click();
-        });
-        box.appendChild(b);
-      });
+      const box = $('match-choices'); buildChoices(box, data.matchChoices);
       $('match-box').classList.remove('hide');
       // 실패(숫자 불일치·네트워크 등)로 승인 버튼이 다시 활성화되면 숫자도 다시 고를 수 있게 풀어 준다.
       new MutationObserver(function () {

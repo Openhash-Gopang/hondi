@@ -348,7 +348,7 @@
   // 이제는 첫 발송이 실패했을 때(푸시 서비스가 받지 않음)에만 1회 다시 보낸다. 전달됐는데 폰에서 안 보이면 "문자로 받기"를 쓴다.
   var DEVLINK_AUTORESEND_DELAY_MS = 3000, DEVLINK_AUTORESEND_MAX = 1;
   // 2026-11-14 — 푸시는 푸시 서비스(FCM)가 받아도(201) 폰이 절전·Doze·죽은 구독 때문에 알림을 못 띄우는 경우가 있다(서버는 그 사실을 알 수 없다).
-  // 문자(SMS)가 아니라 같은 푸시 경로로 다시 보낸다(주피터 지시: 와이파이 전송). 6초 뒤에도 승인이 없으면 자동으로 1회 다시 보내고 "알림 다시 보내기" 버튼을 보인다. 다시 보낸 알림은 같은 tag라 폰에 한 건으로 합쳐진다.
+  // 문자(SMS)가 아니라 같은 푸시 경로로 다시 보낸다(주피터 지시: 와이파이 전송). 6초 뒤에도 승인이 없으면 자동으로 1회 다시 보내고 "알림 다시 보내기" 버튼을 보인다. 다시 보낸 알림은 폰에 새로 쌓이고, 승인 화면의 숫자는 최신으로 바뀐다.
   var DEVLINK_PUSH_AGAIN_DELAY_MS = 6000, DEVLINK_PUSH_AGAIN_MAX = 5;
   var devlinkPushAgainTimer = null, devlinkPushAgainCount = 0;
 
@@ -634,7 +634,7 @@
       });
       var data = await res.json().catch(function () { return {}; });
       if (res.ok && data.ok) {
-        devlinkSessionIds.push(data.sessionId);
+        if (devlinkSessionIds.indexOf(data.sessionId) === -1) devlinkSessionIds.push(data.sessionId); // 같은 세션이면 그대로(서버가 숫자만 새로 섞는다)
         els.devlinkStatus.textContent = '알림을 다시 보냈습니다. 폰 화면을 켜 주세요.';
       } else {
         els.devlinkStatus.textContent = data.message || '알림을 다시 보내지 못했습니다.';
