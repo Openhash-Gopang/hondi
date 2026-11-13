@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-13 18:19 KST · 기준 커밋 46d64515
+- 갱신: 2026-11-13 18:27 KST · 기준 커밋 e64dede2
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-13 Merge pull request #1025 from Openhash-Gopang/naviweb-code-switch-20261113
+- 2026-11-13 feat: hondi.net → naviweb.kr 코드 전환 1차 (인증·링크·화면 주소)
 - 2026-11-13 Merge pull request #1024 from Openhash-Gopang/naviweb-pages-alias-20261113
 - 2026-11-13 ci: pages-bootstrap 하위이름=프로젝트 별칭 지원
 - 2026-11-13 Merge pull request #1023 from Openhash-Gopang/naviweb-pages-status-20261113
@@ -42,8 +44,6 @@
 - 2026-11-12 Merge pull request #1009 from Openhash-Gopang/feat/font-size-scale
 - 2026-11-12 feat: 폰 글자 크기 — 설정에서 4단계 선택(기본 크게 110%), 핀치 확대 허용, 폰·크롬 글꼴 크기(rem) 반영
 - 2026-11-12 Merge pull request #1008 from Openhash-Gopang/fix/instant-id-and-name-connect
-- 2026-11-12 feat: 이름만 말한 '찾아서 채팅 연결' 요청도 LLM 없이 즉시 안내
-- 2026-11-12 fix: 번호·@아이디만 입력해도 LLM 없이 바로 검색(검색 결과를 약속만 하고 멈추던 문제)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
