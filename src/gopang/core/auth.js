@@ -807,6 +807,73 @@ function _showMandatoryBackupStep(key, handle) {
   });
 }
 
+// ── 가입 직후: 백업 키를 사용자의 기존 이메일로 보낸다 (2026-11-13, 주피터 지시) ──
+// 순서: 인증번호를 그 주소로 보내 본인 주소임을 확인 → 맞으면 백업 키 메일 발송 → "제목·주소·시각"을 화면에 알려 준다.
+// 발송 기록(제목·받는 주소·시각)은 서버에 남고(키는 남기지 않음), 나중에 사용자가 물으면 그대로 알려 줄 수 있다.
+function _emailBackupKeyStep({ email, phoneVerifyToken, handle, ipv6 }) {
+  return new Promise((resolve) => {
+    const ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;z-index:10004;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box';
+    const box = (html) => { ov.innerHTML = `<div style="background:#fff;border-radius:20px;padding:26px 22px;width:100%;max-width:360px;box-sizing:border-box;text-align:center;font-family:inherit">${html}</div>`; };
+    document.body.appendChild(ov);
+    const done = () => { ov.remove(); resolve(); };
+    const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const post = async (path, body) => {
+      const r = await fetch(`${PROXY}${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone_verify_token: phoneVerifyToken, ...body }) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok || d.ok === false) throw new Error(d.detail || d.message || '요청에 실패했습니다.');
+      return d;
+    };
+    const showCode = async (first) => {
+      box(`<div style="font-weight:700;margin-bottom:8px;color:#111827">백업 키를 이메일로 보냅니다</div>
+        <div id="_bk_msg" style="font-size:13px;color:#374151;line-height:1.6;margin-bottom:12px">${esc(email)} 로<br>인증번호를 보내는 중…</div>
+        <input id="_bk_code" inputmode="numeric" maxlength="6" placeholder="인증번호 6자리" autocomplete="one-time-code"
+          style="width:100%;box-sizing:border-box;border:1px solid #e5e7eb;border-radius:10px;padding:12px;font-size:16px;text-align:center;letter-spacing:4px;margin-bottom:8px">
+        <div id="_bk_err" style="display:none;font-size:12px;color:#dc2626;margin-bottom:8px"></div>
+        <button id="_bk_ok" style="width:100%;padding:13px;border:none;border-radius:10px;background:#16a34a;color:#fff;font-weight:700;cursor:pointer;margin-bottom:8px;font-family:inherit">확인</button>
+        <button id="_bk_again" style="width:100%;padding:11px;border:1px solid #e5e7eb;border-radius:10px;background:none;color:#374151;cursor:pointer;margin-bottom:6px;font-family:inherit">인증번호 다시 받기</button>
+        <button id="_bk_skip" style="width:100%;padding:10px;border:none;background:none;color:#9ca3af;cursor:pointer;font-family:inherit">나중에</button>`);
+      const q = (id) => ov.querySelector(id);
+      const err = (m) => { q('#_bk_err').textContent = m; q('#_bk_err').style.display = m ? 'block' : 'none'; };
+      const request = async () => {
+        err('');
+        try { await post('/account/backup-email/request', { email }); q('#_bk_msg').innerHTML = `${esc(email)} 로<br>인증번호를 보냈습니다. 메일함을 확인해 주세요.`; }
+        catch (e) { q('#_bk_msg').innerHTML = esc(email); err(e.message); }
+      };
+      q('#_bk_skip').onclick = done;
+      q('#_bk_again').onclick = request;
+      q('#_bk_ok').onclick = async () => {
+        const code = q('#_bk_code').value.trim();
+        if (!/^\d{6}$/.test(code)) { err('인증번호 6자리를 입력해 주세요.'); return; }
+        q('#_bk_ok').disabled = true; q('#_bk_ok').textContent = '보내는 중…'; err('');
+        try {
+          const key = await _exportBackupKey();
+          if (!key) throw new Error('이 기기에서 키를 꺼내지 못했습니다. 설정 → 백업 키에서 다시 시도해 주세요.');
+          const r = await post('/account/backup-email/send', { email, code, key, handle });
+          try { localStorage.setItem(BACKUP_CONFIRMED_KEY, '1'); } catch {}
+          _confirmBackupOnServer(ipv6).catch(() => {});
+          const when = new Date(r.sent_at).toLocaleString('ko-KR', { dateStyle: 'medium', timeStyle: 'short' });
+          box(`<div style="font-weight:700;margin-bottom:10px;color:#111827">백업 키를 보냈습니다</div>
+            <div style="font-size:13px;color:#374151;line-height:1.7;margin-bottom:16px;text-align:left">제목: ${esc(r.subject)}<br>받는 주소: ${esc(r.to)}<br>보낸 시각: ${esc(when)}</div>
+            <button id="_bk_done" style="width:100%;padding:13px;border:none;border-radius:10px;background:#16a34a;color:#fff;font-weight:700;cursor:pointer;font-family:inherit">확인</button>`);
+          ov.querySelector('#_bk_done').onclick = done;
+        } catch (e) {
+          q('#_bk_ok').disabled = false; q('#_bk_ok').textContent = '확인'; err(e.message);
+        }
+      };
+      if (first) request();
+    };
+    showCode(true);
+  });
+}
+
+// 백업 키 발송 기록(제목·받는 주소·시각) — 나중에 "내 백업 키를 어디로 보냈나요?"에 답할 때 쓴다.
+export async function _getBackupKeyMailLog(phoneVerifyToken) {
+  const r = await fetch(`${PROXY}/account/backup-email/log`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone_verify_token: phoneVerifyToken }) });
+  const d = await r.json().catch(() => ({}));
+  return r.ok && d.ok ? d.records : [];
+}
+
 // ── 백업 키 내보내기 (설정 화면에서 사용) ────────────────
 export async function _exportBackupKey() {
   const wallet = await _waitForWallet();
@@ -1834,6 +1901,22 @@ function _showPhonePopupLegacy(resolve) {
       <div id="_mid-error" style="display:none;font-size:calc(0.75rem*var(--hondi-fs,1));color:#dc2626;padding:0 4px;margin-bottom:8px"></div>
       <div id="_mid-hint" style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;padding:0 4px;margin-bottom:6px;line-height:1.6;min-height:18px"></div>
 
+      <!-- 백업 키를 받을 이메일 — 가입 전부터 쓰던 주소(나비웹 주소 아님). 2026-11-13, 주피터 지시 -->
+      <div id="_bke-field"
+           style="display:flex;align-items:flex-end;gap:12px;padding:2px 0 6px;
+                  border:0;border-bottom:1.5px solid #e5e7eb;margin-bottom:10px">
+        <span style="width:22px;text-align:center;color:#6b7280;font-size:calc(1.0625rem*var(--hondi-fs,1));line-height:34px;flex-shrink:0">&#128273;</span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+          <span style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:#6b7280">백업 키 받을 내 이메일</span>
+          <input id="_bke-input" type="email" maxlength="254" inputmode="email" autocapitalize="off" spellcheck="false"
+            placeholder="가입 전부터 쓰던 이메일"
+            style="width:100%;padding:0;height:34px;border:none;background:transparent;
+                   font-size:calc(0.9375rem*var(--hondi-fs,1));font-family:inherit;outline:none;color:#111827;min-width:0"
+            autocomplete="email"/>
+        </div>
+      </div>
+      <div id="_bke-error" style="display:none;font-size:calc(0.75rem*var(--hondi-fs,1));color:#dc2626;padding:0 4px;margin-bottom:8px"></div>
+
       <button id="_auth-btn"
         style="width:100%;height:52px;background:#1A73E8;color:#fff;
                border:none;border-radius:12px;font-size:calc(1rem*var(--hondi-fs,1));font-weight:600;
@@ -2171,6 +2254,7 @@ function _showPhonePopupLegacy(resolve) {
     nickField.style.display = _signupMode ? '' : 'none';
     midField.style.display  = _signupMode ? '' : 'none';
     midHint.style.display   = _signupMode ? '' : 'none';
+    { const f = document.getElementById('_bke-field'); if (f) f.style.display = _signupMode ? '' : 'none'; const e = document.getElementById('_bke-error'); if (e) e.style.display = 'none'; }
     nickErr.style.display = 'none'; midErr.style.display = 'none';
     btn.textContent = _signupMode ? '가입하기' : '로그인';
     const on = 'background:#fff;color:#111827;box-shadow:0 1px 3px rgba(0,0,0,.12)';
@@ -2397,7 +2481,7 @@ function _showPhonePopupLegacy(resolve) {
   }
 
   // ── 실제 신규 가입 처리 (기존 _register 로직 그대로, 지역 필드는 제거) ──
-  async function _completeRegistration({ ipv6, handle, e164, nickname, digits, mailId, phoneVerifyToken, stepUpToken }) {
+  async function _completeRegistration({ ipv6, handle, e164, nickname, digits, mailId, backupEmail, phoneVerifyToken, stepUpToken }) {
     const nickname_hash = await _sha256('phone:' + e164);
     const region = '';
 
@@ -2548,8 +2632,12 @@ function _showPhonePopupLegacy(resolve) {
       console.info('[가입][X25519] 키 등록 완료:', syncResult.publicKeyB64u?.slice(0, 16) + '...');
     }
 
-    console.info('[가입] 백업 단계 스킵(v2.0 간소화)');
+    console.info('[가입] 백업 키는 입력한 이메일로 발송(2026-11-13)');
     localStorage.setItem('hondi_new_registration', '1');
+    if (backupEmail && phoneVerifyToken) {
+      try { await _emailBackupKeyStep({ email: backupEmail, phoneVerifyToken, handle, ipv6 }); }
+      catch (e) { console.warn('[가입][백업 키 메일] 실패(무시):', e.message); }
+    }
 
     resolve(user);
 
@@ -2687,6 +2775,17 @@ function _showPhonePopupLegacy(resolve) {
         btn.style.opacity = '1'; btn.style.pointerEvents = '';
         return;
       }
+      // 백업 키 받을 이메일 — 가입 전부터 쓰던 주소여야 한다(나비웹·혼디 주소는 계정을 잃으면 같이 잃으므로 안 된다)
+      const _bkeInput = document.getElementById('_bke-input');
+      const _bkeErr = document.getElementById('_bke-error');
+      const backupEmail = (_bkeInput?.value || '').trim().toLowerCase();
+      const _bkeProblem = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(backupEmail) ? '백업 키를 받을 이메일을 입력해 주세요.'
+        : /(^|\.)(naviweb\.kr|hondi\.net|hondi\.kr|hondi\.org)$/i.test(backupEmail.split('@')[1] || '') ? '나비웹 주소가 아니라, 가입 전부터 쓰던 이메일을 입력해 주세요.' : '';
+      if (_bkeProblem) {
+        _bkeErr.textContent = _bkeProblem; _bkeErr.style.display = 'block'; _bkeInput?.focus();
+        btn.style.opacity = '1'; btn.style.pointerEvents = '';
+        return;
+      }
       // 이용 약정서 동의: 별도 체크 없이 "시작하면 동의한 것으로 봅니다" 안내로 대체 (2026-11-12 화면 단순화)
 
       if (!SIMPLE_SIGNUP_TEST && !_isMobileDevice()) {
@@ -2714,7 +2813,7 @@ function _showPhonePopupLegacy(resolve) {
       btn.textContent = '등록 중...';
       const ipv6 = await _e164ToIPv6(e164);
       await _completeRegistration({
-        ipv6, handle, e164, nickname, digits, mailId: mailIdRaw,
+        ipv6, handle, e164, nickname, digits, mailId: mailIdRaw, backupEmail,
         phoneVerifyToken: otpResult.phoneVerifyToken, stepUpToken: otpResult.stepUpToken,
       });
 
