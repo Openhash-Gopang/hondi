@@ -1,9 +1,13 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-13 07:42 KST · 기준 커밋 6ffa282e
+- 갱신: 2026-11-13 18:10 KST · 기준 커밋 037ec222
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-13 Merge pull request #1022 from Openhash-Gopang/naviweb-pages-bootstrap-fix-20261113
+- 2026-11-13 ci: pages-bootstrap Pages 목록 조회의 per_page 제거
+- 2026-11-13 ci: pages-bootstrap 계정 ID 시크릿이 잘못된 경우 토큰의 유일한 계정으로 대체
+- 2026-11-13 ci: pages-bootstrap 실패 시 계정 ID 진단 추가, 시크릿 공백 제거
 - 2026-11-13 Merge pull request #1021 from Openhash-Gopang/naviweb-pages-bootstrap-20261113
 - 2026-11-13 ci: naviweb.kr Pages 일괄 생성 워크플로 추가 (점검/적용 모드)
 - 2026-11-13 Merge pull request #1020 from Openhash-Gopang/domain-naviweb-origins-20261113
@@ -40,10 +44,6 @@
 - 2026-11-12 Merge pull request #1004 from Openhash-Gopang/perf/instant-user-search
 - 2026-11-12 Merge pull request #1003 from Openhash-Gopang/fix/friend-find-test-off
 - 2026-11-12 Merge pull request #1002 from Openhash-Gopang/feat/simplify-signup-start
-- 2026-11-12 feat: 응답 대기 진행 상태 표시, SP 간결 규칙, 사용자 연결 명령 즉시 처리, 응답 헤더로 사용 모델 표시
-- 2026-11-12 feat: 자주 찾는 사용자 저장·이름/아이디로 즉시 채팅 연결, SP v2.1(지어낸 검색 태그 방지)
-- 2026-11-12 merge main
-- 2026-11-12 Merge pull request #1006 from Openhash-Gopang/fix/smoketest-sp-v2
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
