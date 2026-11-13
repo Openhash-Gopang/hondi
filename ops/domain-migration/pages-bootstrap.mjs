@@ -57,6 +57,23 @@ async function main() {
     log(`- 계정 ID 형식 ${/^[0-9a-f]{32}$/.test(A) ? '정상' : '비정상(길이 ' + A.length + ')'}, 토큰이 접근 가능한 계정 수: ${ac.ok ? ac.j.result.length : '조회 실패 ' + ac.err}`);
     if (ac.ok) log(`- 접근 가능 계정 ID 앞 8자리: ${ac.j.result.map(x => x.id.slice(0, 8) + '(' + A.slice(0, 8) + '와 ' + (x.id === A ? '일치' : '불일치') + ')').join(', ')}`); log(`- Pages 목록: 실패 (${pl.status}) ${pl.err} → ${need('Account · Cloudflare Pages · Edit')}`); process.exit(1); }
   const projects = new Map(pl.j.result.map(p => [p.name, p]));
+
+  // 배포 점검·재배포(2026-11-13) — DEPLOYS=<프로젝트> 이면 최근 배포 8개(커밋·상태)를 보여 주고, REDEPLOY=true 이면 main 으로 새 배포를 만든다.
+  // 커밋 메시지에 [skip ci] 등이 있으면 Pages 가 빌드를 건너뛰므로, 최신 반영이 늦어졌을 때 쓴다.
+  const DEP = (process.env.DEPLOYS || '').trim();
+  if (DEP) {
+    const dl = await cf('GET', `/accounts/${A}/pages/projects/${DEP}/deployments?per_page=8`);
+    if (!dl.ok) { log(`- ${DEP} 배포 목록 실패: ${dl.err}`); process.exit(1); }
+    for (const d of dl.j.result.slice(0, 8)) {
+      log(`- ${d.created_on} | ${d.environment} | ${d.deployment_trigger?.metadata?.branch} | ${(d.deployment_trigger?.metadata?.commit_hash || '').slice(0, 7)} | ${d.latest_stage?.name}:${d.latest_stage?.status} | ${(d.deployment_trigger?.metadata?.commit_message || '').split('\n')[0].slice(0, 60)}`);
+    }
+    if (process.env.REDEPLOY === 'true') {
+      const fd = new FormData(); fd.append('branch', 'main');
+      const nd = await cf('POST', `/accounts/${A}/pages/projects/${DEP}/deployments`, fd);
+      log(nd.ok ? `- 새 배포 생성: ${nd.j.result?.id} (${nd.j.result?.url})` : `- 새 배포 실패: ${nd.status} ${nd.err}`);
+    }
+    process.exit(0);
+  }
   log(`- Pages 프로젝트 ${projects.size}개 확인`);
 
   const z = await cf('GET', `/zones?name=${ZONE}`);

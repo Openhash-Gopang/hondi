@@ -16,6 +16,14 @@ name: naviweb Pages bootstrap
         description: '일부만 처리(공백/쉼표 구분, 비우면 전체)'
         type: string
         default: ''
+      deploys:
+        description: '배포 점검할 Pages 프로젝트 이름(예: hondi) — 비우면 사용 안 함'
+        type: string
+        default: ''
+      redeploy:
+        description: 'deploys 와 함께: main 으로 새 배포 만들기'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -37,4 +45,6 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           APPLY: ${{ inputs.apply }}
           ONLY: ${{ inputs.only }}
+          DEPLOYS: ${{ inputs.deploys }}
+          REDEPLOY: ${{ inputs.redeploy }}
         run: node ops/domain-migration/pages-bootstrap.mjs
