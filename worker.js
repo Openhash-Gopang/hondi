@@ -1351,7 +1351,10 @@ async function handleDeviceLinkInit(request, env, corsHeaders) {
             pushSent = true;
             pushSentToMobile = true;
           }
-          if (r.status === 'fulfilled' && r.value?.status === 410) {
+          // 410(Gone)뿐 아니라 404(구독 없음)도 FCM이 "등록 해제된 구독"을 알릴 때 쓰는 값이다 — 같이 정리해 죽은 구독이 계속 쌓이지 않게 한다.
+          const _st = r.status === 'fulfilled' ? r.value?.status : 'rejected';
+          console.info('[DeviceLink] 푸시 결과:', d.deviceId, _st, (d.subscription?.endpoint || '').slice(0, 48));
+          if (r.status === 'fulfilled' && (r.value?.status === 410 || r.value?.status === 404)) {
             deadDeviceIds.push(d.deviceId);
           }
         });
