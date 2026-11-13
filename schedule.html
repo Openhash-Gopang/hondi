@@ -156,7 +156,7 @@ async function markDone(id) {
 }
 
 async function deleteItem(id) {
-  if (!confirm('이 일정을 삭제할까요?')) return;
+  if (!await (window.mpConfirm||confirm)('이 일정을 삭제할까요?')) return;
   try {
     const res = await fetch(`${WORKER_URL}/schedule/delete`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },

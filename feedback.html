@@ -560,7 +560,7 @@ async function voteFeedback(id) {
 async function changeStatus(id, status) {
   if (!isAdmin) return;
   const note = status === 'rejected'
-    ? prompt('보류 사유를 입력하세요 (선택사항):') || null
+    ? await (window.mpPrompt||prompt)('보류 사유를 입력하세요 (선택사항):') || null
     : null;
 
   try {

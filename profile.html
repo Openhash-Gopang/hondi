@@ -1267,7 +1267,7 @@ async function _enrollWalletWebAuthn() {
 }
 
 async function _disableWalletWebAuthn() {
-  if (!confirm('지문/얼굴 인식 보호를 끌까요?\n다음부터는 생체인증 없이 지갑을 사용합니다.')) return;
+  if (!await (window.mpConfirm||confirm)('지문/얼굴 인식 보호를 끌까요?\n다음부터는 생체인증 없이 지갑을 사용합니다.')) return;
   const status = document.getElementById('wallet-security-status');
   try {
     const result = await GopangWallet.disableWebAuthn();
@@ -1320,11 +1320,11 @@ async function _editPayoutAccount() {
   const wallet = window.gopangWallet;
   if (!wallet?.signPayload) { alert('지갑이 준비되지 않았습니다.'); return; }
   const current = _profile?.extra?.public?.finance?.payout_account || {};
-  const bankName = prompt('은행명을 입력하세요', current.bank_name || '');
+  const bankName = await (window.mpPrompt||prompt)('은행명을 입력하세요', current.bank_name || '');
   if (bankName === null) return;
-  const accountNumber = prompt('계좌번호를 입력하세요(하이픈 없이 숫자만)', current.account_number || '');
+  const accountNumber = await (window.mpPrompt||prompt)('계좌번호를 입력하세요(하이픈 없이 숫자만)', current.account_number || '');
   if (accountNumber === null) return;
-  const holderName = prompt('예금주명을 입력하세요', current.holder_name || '');
+  const holderName = await (window.mpPrompt||prompt)('예금주명을 입력하세요', current.holder_name || '');
   if (holderName === null) return;
 
   try {
@@ -1441,7 +1441,7 @@ async function _confirmSendGdc() {
   const confirmMsg = purpose === 'purchase'
     ? `${recipientLabel}에게 "${memo}" 대금으로 ₮${amount.toLocaleString()}을 보내시겠습니까?\n되돌릴 수 없습니다.`
     : `${recipientLabel}에게 ₮${amount.toLocaleString()}을 보내시겠습니까?\n되돌릴 수 없습니다.`;
-  if (!confirm(confirmMsg)) return;
+  if (!await (window.mpConfirm||confirm)(confirmMsg)) return;
 
   btn.disabled = true;
   statusEl.style.color = '';
@@ -1929,7 +1929,7 @@ async function _startClaimFlow() {
   // 그래서 서명 청구와 별개로 전화번호 인증 청구 옵션을 항상 제공한다 —
   // 새 지갑을 만들지 않고 기존 wallet.publicKeyB64u를 그대로 pin하되,
   // "서명"이 아니라 "전화번호 소유 증명"을 근거로 삼는다.
-  const usePhone = confirm(
+  const usePhone = await (window.mpConfirm||confirm)(
     `"${_profile.name || '이 업체'}"를 본인 소유로 인증합니다.\n\n` +
     `전화번호 인증으로 진행하시겠습니까?\n` +
     `(확인: 전화번호 인증 / 취소: 지갑 서명으로 바로 인증)`
@@ -1939,7 +1939,7 @@ async function _startClaimFlow() {
     return _claimViaPhone(wallet);
   }
 
-  if (!confirm(`"${_profile.name || '이 업체'}"를 지갑 서명으로 인증하시겠습니까?`)) return;
+  if (!await (window.mpConfirm||confirm)(`"${_profile.name || '이 업체'}"를 지갑 서명으로 인증하시겠습니까?`)) return;
 
   const pubkey = wallet.publicKeyB64u || wallet.publicKeyB64 || '';
   const ts = Date.now().toString();
@@ -1967,7 +1967,7 @@ async function _startClaimFlow() {
 // 참조). AC(그림자 AI SP) 초기화는 서버 handleProfileClaim이 claim 방식과
 // 무관하게 이미 자동으로 수행한다 — 클라이언트가 별도로 할 일 없음.
 async function _claimViaPhone(wallet) {
-  const phoneRaw = prompt('본인 명의 휴대폰 번호를 입력해주세요 (하이픈 없이, 예: 01012345678)');
+  const phoneRaw = await (window.mpPrompt||prompt)('본인 명의 휴대폰 번호를 입력해주세요 (하이픈 없이, 예: 01012345678)');
   if (!phoneRaw) return;
   const digits = phoneRaw.replace(/\D/g, '');
   if (!/^0\d{9,10}$/.test(digits)) {
@@ -1984,7 +1984,7 @@ async function _claimViaPhone(wallet) {
     const reqData = await reqRes.json().catch(() => ({}));
     if (!reqRes.ok || !reqData.ok) throw new Error(reqData.detail || reqData.error || '인증번호 발송 실패');
 
-    const code = prompt('문자로 받은 인증번호 6자리를 입력해주세요.');
+    const code = await (window.mpPrompt||prompt)('문자로 받은 인증번호 6자리를 입력해주세요.');
     if (!code) return;
 
     const verifyRes = await fetch(`${PROXY}/biz/phone-otp-verify`, {
@@ -2179,8 +2179,8 @@ async function _editReservationSettings() {
     return;
   }
   const currentRc = _profile?.extra?.public?.industry_fields?.reservation_config || {};
-  const wantsAuto = confirm('예약을 자동으로 확정할까요?\n(취소를 누르면 사업자 승인이 필요한 방식으로 설정됩니다)');
-  const thresholdStr = prompt('보증금을 요구할 신뢰도 온도 기준을 입력하세요(기본 36.5)', String(currentRc.deposit_temp_threshold ?? 36.5));
+  const wantsAuto = await (window.mpConfirm||confirm)('예약을 자동으로 확정할까요?\n(취소를 누르면 사업자 승인이 필요한 방식으로 설정됩니다)');
+  const thresholdStr = await (window.mpPrompt||prompt)('보증금을 요구할 신뢰도 온도 기준을 입력하세요(기본 36.5)', String(currentRc.deposit_temp_threshold ?? 36.5));
   if (thresholdStr === null) return; // 사용자 취소
   const newThreshold = parseFloat(thresholdStr);
   if (isNaN(newThreshold)) { alert('숫자를 입력해 주세요.'); return; }

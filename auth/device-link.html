@@ -375,7 +375,7 @@ import { _buildKrE164, KR_AREA_CODES, krNeededDigitsFor, _restoreFromBackupKey }
   // RETURN_URL로 돌아간 뒤 그 페이지의 통상적인 세션 검증 단계에서
   // PUBKEY_MISMATCH 등은 그대로 걸러진다.
   $('btn-backup-key').addEventListener('click', async () => {
-    const key = prompt('백업 키(개인키, Base64URL)를 입력하세요:');
+    const key = await (window.mpPrompt||prompt)('백업 키(개인키, Base64URL)를 입력하세요:');
     if (!key) return;
     const result = await _restoreFromBackupKey(key.trim());
     if (!result.ok) {

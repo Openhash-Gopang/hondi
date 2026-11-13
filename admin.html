@@ -932,7 +932,7 @@ async function _loadPlanEvents() {
 async function _quotaView(reset) {
   const guid = document.getElementById('pl-guid').value.trim(), note = document.getElementById('pl-note');
   if (!guid) { note.textContent = '회원 guid를 입력하세요.'; return; }
-  if (reset && !confirm(guid + ' 회원의 무료 이용을 지금부터 다시 시작합니다. 사용액·플랜 기록이 지워집니다.')) return;
+  if (reset && !await (window.mpConfirm||confirm)(guid + ' 회원의 무료 이용을 지금부터 다시 시작합니다. 사용액·플랜 기록이 지워집니다.')) return;
   note.textContent = '처리 중…';
   try {
     const res = await fetch(`${WORKER_URL}/admin/quota-reset`, { method: 'POST', signal: AbortSignal.timeout(15000), headers: { ..._adminAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ guid, reset: !!reset }) });
@@ -945,7 +945,7 @@ async function _planSet() {
   const guid = document.getElementById('pl-guid').value.trim(), tier = document.getElementById('pl-tier').value, days = Number(document.getElementById('pl-days').value) || 30;
   const note = document.getElementById('pl-note'), btn = document.getElementById('pl-set');
   if (!guid) { note.textContent = '회원 guid를 입력하세요.'; return; }
-  if (!confirm(tier === 'none' ? guid + ' 회원의 유료 플랜을 해제합니다.' : guid + ' 회원에게 ' + (_PL_TIER[tier] || tier) + ' 플랜을 ' + days + '일 지정합니다.')) return;
+  if (!await (window.mpConfirm||confirm)(tier === 'none' ? guid + ' 회원의 유료 플랜을 해제합니다.' : guid + ' 회원에게 ' + (_PL_TIER[tier] || tier) + ' 플랜을 ' + days + '일 지정합니다.')) return;
   btn.disabled = true; note.textContent = '처리 중…';
   try {
     const res = await fetch(`${WORKER_URL}/admin/plan-set`, { method: 'POST', signal: AbortSignal.timeout(15000), headers: { ..._adminAuthHeaders(), 'Content-Type': 'application/json' }, body: JSON.stringify({ guid, tier, days }) });
@@ -1146,8 +1146,8 @@ async function _pvView(id) {
 }
 async function _pvDecide(id, decision) {
   let note = '';
-  if (decision === 'reject') { note = prompt('반려 사유를 입력하세요 (신청자에게 보입니다)'); if (!note) return; }
-  else if (!confirm('면허증 사본을 확인했고 승인합니다. 승인하면 사본이 즉시 삭제됩니다.')) return;
+  if (decision === 'reject') { note = await (window.mpPrompt||prompt)('반려 사유를 입력하세요 (신청자에게 보입니다)'); if (!note) return; }
+  else if (!await (window.mpConfirm||confirm)('면허증 사본을 확인했고 승인합니다. 승인하면 사본이 즉시 삭제됩니다.')) return;
   try {
     const res = await _pvCall('/pro-verify/decide', { id, decision, note });
     const j = await res.json().catch(() => ({}));
@@ -1191,7 +1191,7 @@ async function _psGrant() {
   const g = id => document.getElementById(id).value.trim();
   const body = { target_guid: g('ps-guid'), kind: g('ps-kind'), pay_ref: g('ps-ref'), amount: Number(g('ps-amount')), months: Number(g('ps-months')) };
   if (!body.target_guid || body.pay_ref.length < 2) { alert('대상 계정 ID와 입금 참조(2자 이상)를 입력하세요.'); return; }
-  if (!confirm('입금을 확인했습니다. ' + body.kind + ' 구독 ' + body.months + '개월(' + body.amount.toLocaleString('ko-KR') + '원)을 부여합니다.')) return;
+  if (!await (window.mpConfirm||confirm)('입금을 확인했습니다. ' + body.kind + ' 구독 ' + body.months + '개월(' + body.amount.toLocaleString('ko-KR') + '원)을 부여합니다.')) return;
   try {
     const res = await _psCall('/pro-sub/grant', body);
     const j = await res.json().catch(() => ({}));
@@ -1205,10 +1205,10 @@ async function _psRefund(id) {
     const q = await (await _psCall('/pro-sub/quote', { id })).json();
     if (!q.ok) { alert(q.message || '제안액을 가져오지 못했습니다.'); return; }
     const k = q.quote;
-    const amt = prompt('환불액(원). 제안: ' + k.suggested_amount.toLocaleString('ko-KR') + '원 (결제 ' + k.paid.toLocaleString('ko-KR') + '원, 잔여 ' + k.days_left + '일' + (k.within_7d ? ', 결제 7일 이내' : '') + ') — 초안 정책이며 최종 금액은 운영자가 정합니다.', String(k.suggested_amount));
+    const amt = await (window.mpPrompt||prompt)('환불액(원). 제안: ' + k.suggested_amount.toLocaleString('ko-KR') + '원 (결제 ' + k.paid.toLocaleString('ko-KR') + '원, 잔여 ' + k.days_left + '일' + (k.within_7d ? ', 결제 7일 이내' : '') + ') — 초안 정책이며 최종 금액은 운영자가 정합니다.', String(k.suggested_amount));
     if (amt === null) return;
-    const note = prompt('환불 사유 (필수)'); if (!note) return;
-    if (!confirm('환불 처리하면 해당 구독이 즉시 종료됩니다. 실제 송금은 따로 하셔야 합니다.')) return;
+    const note = await (window.mpPrompt||prompt)('환불 사유 (필수)'); if (!note) return;
+    if (!await (window.mpConfirm||confirm)('환불 처리하면 해당 구독이 즉시 종료됩니다. 실제 송금은 따로 하셔야 합니다.')) return;
     const res = await _psCall('/pro-sub/refund', { id, amount: Number(amt), note });
     const j = await res.json().catch(() => ({}));
     if (!res.ok || !j.ok) { alert(j.message || ('처리하지 못했습니다 (' + res.status + ')')); return; }
@@ -1641,7 +1641,7 @@ async function _runBulkDelete() {
     return;
   }
 
-  const sure = confirm(
+  const sure = await (window.mpConfirm||confirm)(
     `${identifiers.length}명의 계정을 완전히 삭제합니다.\n` +
     `L1 PocketBase + Supabase 9개 테이블 + KV에서 모두 제거되며 되돌릴 수 없습니다.\n\n` +
     `계속하시겠습니까?`
@@ -1874,9 +1874,9 @@ async function _sendLetterEmail(i) {
     alert('먼저 "전체 저장"을 눌러 저장한 뒤, 수신 이메일 주소를 채워주세요.');
     return;
   }
-  const subject = prompt('제목을 입력하세요:', l.title || '');
+  const subject = await (window.mpPrompt||prompt)('제목을 입력하세요:', l.title || '');
   if (subject === null) return;
-  const text = prompt('본문을 입력하세요 (공문 초안 내용을 붙여넣으세요):', '');
+  const text = await (window.mpPrompt||prompt)('본문을 입력하세요 (공문 초안 내용을 붙여넣으세요):', '');
   if (text === null) return;
   if (!subject.trim() || !text.trim()) {
     alert('제목과 본문을 모두 입력해야 합니다.');
@@ -1962,12 +1962,12 @@ function _renderSubdomainList() {
   });
 }
 
-function _addSubdomainRow() {
+async function _addSubdomainRow() {
   const cred=_getCFCred();
   if(!cred.apiKey||!cred.email||!cred.zoneId){
     alert('먼저 Cloudflare 자격증명을 입력하고 저장하세요.\n\nAPI Key, Email, Zone ID 모두 입력 후\n"자격증명 저장" 버튼을 클릭하세요.');return;
   }
-  const name=prompt('추가할 서브도메인 이름 입력\n(예: klaw → klaw.naviweb.kr)\n\n여러 개: 쉼표로 구분 (예: qna,openhash,l1-ido1)');
+  const name=await (window.mpPrompt||prompt)('추가할 서브도메인 이름 입력\n(예: klaw → klaw.naviweb.kr)\n\n여러 개: 쉼표로 구분 (예: qna,openhash,l1-ido1)');
   if(!name||!name.trim()) return;
   const names=name.split(',').map(n=>n.trim().toLowerCase().replace(/[^a-z0-9-]/g,'')).filter(Boolean);
   if(!names.length){alert('유효하지 않은 이름입니다.');return;}
@@ -2012,7 +2012,7 @@ async function _createCFRecord(sub) {
 
 async function _deleteSubdomain(i) {
   const subs=_getSubdomains(); const sub=subs[i];
-  if(!sub||!confirm(`${sub.name}.hondi.net을 삭제할까요?`)) return;
+  if(!sub||!await (window.mpConfirm||confirm)(`${sub.name}.hondi.net을 삭제할까요?`)) return;
   const cred=_getCFCred();
   const status=document.getElementById('subdomain-list-status');
   if(cred.apiKey&&cred.email&&cred.zoneId&&sub.recordId){

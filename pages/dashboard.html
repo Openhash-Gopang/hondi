@@ -1289,7 +1289,7 @@ import { L1_URL, setUser } from '/src/gopang/core/state.js';
   });
 
   backupKeyBtn.addEventListener('click', async () => {
-    const key = prompt('백업 키(개인키, Base64URL)를 입력하세요:');
+    const key = await (window.mpPrompt||prompt)('백업 키(개인키, Base64URL)를 입력하세요:');
     if (!key) return;
 
     // ★ 2026-09-01 수정 — 기존엔 이 자리에서 guid 없이
@@ -2291,7 +2291,7 @@ document.getElementById('hometaxQueryBtn')?.addEventListener('click', async () =
   const wallet = await _getTaxWallet();
   const statusEl = document.getElementById('hometaxStatus');
   if (!wallet?.guid) { statusEl.textContent = '로그인 후 조회할 수 있습니다.'; return; }
-  const bizNo = prompt('사업자등록번호를 입력하세요 (예: 123-45-67890) — 개인 소득만 있다면 취소해도 됩니다.');
+  const bizNo = await (window.mpPrompt||prompt)('사업자등록번호를 입력하세요 (예: 123-45-67890) — 개인 소득만 있다면 취소해도 됩니다.');
   statusEl.textContent = '조회 중…';
   try {
     const r = await queryHometax(wallet, bizNo || '');

@@ -3173,13 +3173,13 @@ export async function _deleteMyProfile(phoneE164, refundAccount) {
 // ── 기기 완전 초기화 ─────────────────────────────────────
 // ── 로컬 데이터만 초기화 (L1 레코드 유지 → 재접속 시 복원 가능) ──
 export async function _deviceLocalReset() {
-  if (!confirm('이 기기의 나비 데이터를 초기화합니다.\n\n계정 정보는 서버에 유지되므로\n같은 번호로 재접속하면 복원됩니다.')) return;
+  if (!await (window.mpConfirm||confirm)('이 기기의 나비 데이터를 초기화합니다.\n\n계정 정보는 서버에 유지되므로\n같은 번호로 재접속하면 복원됩니다.')) return;
   await _clearLocalData();
 }
 
 // ── 계정 완전 삭제 (L1 레코드 + 로컬 모두 삭제, 판매·양도용) ──
 export async function _deviceFullReset() {
-  if (!confirm(
+  if (!await (window.mpConfirm||confirm)(
     '계정을 완전히 삭제합니다.\n' +
     '\n' +
     '⚠️ L1 서버, Supabase, 이 기기의 모든 기록이 삭제됩니다.\n' +

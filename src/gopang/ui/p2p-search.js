@@ -188,7 +188,7 @@ async function _sendConnectRequest(targetUser) {
     return;
   }
 
-  const confirmed = confirm(
+  const confirmed = await (window.mpConfirm||confirm)(
     `${targetUser.nickname || targetUser.handle}님에게 연결 요청을 보내시겠습니까?`
   );
   if (!confirmed) return;
