@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-14 00:56 KST · 기준 커밋 aafe306e
+- 갱신: 2026-11-14 01:03 KST · 기준 커밋 f2b094b3
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-14 Merge pull request #1048 from Openhash-Gopang/ci-pages-retry-20261114
+- 2026-11-14 ci: Cloudflare Pages 배포 요청에 재시도 추가 (503 일시 오류로 배포가 누락됨)
 - 2026-11-14 Merge pull request #1047 from Openhash-Gopang/material-dialogs-d2-20261114
 - 2026-11-14 ui: confirm/prompt를 Material 대화상자(await mpConfirm/mpPrompt)로 전환 (D-2)
 - 2026-11-14 Merge pull request #1046 from Openhash-Gopang/material-dialogs-d-20261114
@@ -42,8 +44,6 @@
 - 2026-11-13 Merge pull request #1028 from Openhash-Gopang/fix-app-origin
 - 2026-11-13 CORS: app.naviweb.kr 허용 — 앱 로그인 Failed to fetch 수정
 - 2026-11-13 Merge pull request #1027 from Openhash-Gopang/mailid-signup
-- 2026-11-13 가입 입력 창에 이메일 ID 필드 추가 — 가입할 때 메일 아이디를 정한다
-- 2026-11-13 Merge pull request #1026 from Openhash-Gopang/naviweb-code-switch2-20261113
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
