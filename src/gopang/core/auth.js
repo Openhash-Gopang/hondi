@@ -1758,6 +1758,11 @@ function _showPhonePopupLegacy(resolve) {
           style="max-height:220px;overflow-y:auto;overscroll-behavior:contain">
         </div>
       </div>
+      <!-- 로그인 | 가입 구분 (2026-11-13, 주피터 지시: 로그인 입구가 없다) -->
+      <div id="_mode-tabs" style="display:flex;gap:6px;margin-bottom:14px;background:#f3f4f6;border-radius:10px;padding:3px">
+        <button id="_mode-login" type="button" style="flex:1;height:34px;border:none;border-radius:8px;font-family:inherit;font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:600;cursor:pointer">로그인</button>
+        <button id="_mode-signup" type="button" style="flex:1;height:34px;border:none;border-radius:8px;font-family:inherit;font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:600;cursor:pointer">가입</button>
+      </div>
       <!-- 전화번호: 국가 · 휴대폰/지역번호 · 번호를 한 칸에 (2026-11-12 화면 단순화) -->
       <div id="_phone-field"
            style="display:flex;align-items:flex-end;gap:12px;padding:2px 0 6px;
@@ -2158,6 +2163,25 @@ function _showPhonePopupLegacy(resolve) {
   });
 
   const btn = document.getElementById('_auth-btn');
+  // 로그인 | 가입 — 로그인은 번호만, 가입은 닉네임·이메일 ID까지. 기본은 로그인.
+  let _signupMode = false;
+  const _tabLogin = document.getElementById('_mode-login');
+  const _tabSignup = document.getElementById('_mode-signup');
+  const _setMode = (signup) => {
+    _signupMode = !!signup;
+    nickField.style.display = _signupMode ? '' : 'none';
+    midField.style.display  = _signupMode ? '' : 'none';
+    midHint.style.display   = _signupMode ? '' : 'none';
+    nickErr.style.display = 'none'; midErr.style.display = 'none';
+    btn.textContent = _signupMode ? '가입하기' : '로그인';
+    const on = 'background:#fff;color:#111827;box-shadow:0 1px 3px rgba(0,0,0,.12)';
+    const off = 'background:transparent;color:#6b7280;box-shadow:none';
+    _tabLogin.style.cssText  += ';' + (_signupMode ? off : on);
+    _tabSignup.style.cssText += ';' + (_signupMode ? on : off);
+  };
+  _tabLogin.onclick  = () => _setMode(false);
+  _tabSignup.onclick = () => _setMode(true);
+  _setMode(false);
 
   // ── 전화번호 OTP 발송/확인 (2026-07-15 신설, 2026-07-21 UI 전면 교체) ──
   // 성공 시 L1 훅이 검증할 phone_verify_token을 반환. 사용자가 뒤로가기를
@@ -2630,6 +2654,15 @@ function _showPhonePopupLegacy(resolve) {
       }
 
       // ── 케이스 C: 신규 번호 — 닉네임·약관 필요 ──────────────
+      if (!_signupMode) {
+        // 로그인 화면인데 가입되지 않은 번호 — 가입 화면으로 넘겨 이어서 입력하게 한다.
+        _setMode(true);
+        phoneErr.textContent = '가입되지 않은 번호입니다. 닉네임과 이메일 ID를 입력해 가입해 주세요.';
+        phoneErr.style.display = 'block';
+        nickInput.focus();
+        btn.style.opacity = '1'; btn.style.pointerEvents = '';
+        return;
+      }
       if (!nickname) {
         nickErr.textContent = '처음 오셨네요! 닉네임도 함께 입력해 주세요.';
         nickErr.style.display = 'block';
@@ -2674,7 +2707,7 @@ function _showPhonePopupLegacy(resolve) {
         phoneErr.textContent = '전화번호 인증이 완료되지 않아 가입을 진행할 수 없습니다.';
         phoneErr.style.display = 'block';
         btn.style.opacity = '1'; btn.style.pointerEvents = '';
-        btn.textContent = '시작하기';
+        btn.textContent = _signupMode ? '가입하기' : '로그인';
         return;
       }
 
@@ -2690,7 +2723,7 @@ function _showPhonePopupLegacy(resolve) {
       phoneErr.style.display = 'block';
       btn.style.opacity = '1';
       btn.style.pointerEvents = '';
-      btn.textContent = '시작하기';
+      btn.textContent = _signupMode ? '가입하기' : '로그인';
     }
   };
 
