@@ -585,7 +585,7 @@
       els.stepDevlink.style.display = '';
       setDescWait(true);
       els.devlinkStatus.textContent = data.hasMobileDevice === false
-        ? '알림 받을 폰이 없습니다. "문자로 받기"를 눌러 주세요.'
+        ? '알림 받을 폰이 없어 문자로 보냅니다.'
         : '';
       showSmsButton(data.hasMobileDevice === false);
 
@@ -593,6 +593,8 @@
       document.addEventListener('visibilitychange', onVisibilityPoll);
       devlinkPollTimer = setInterval(devlinkPollOnce, 2000);
       // 첫 발송이 성공했으면 다시 보내지 않는다. 폰이 등록돼 있는데 발송이 실패했을 때만 1회 재시도한다.
+      // 2026-11-14 — 알림 받을 폰(푸시 구독)이 없으면 사용자가 "문자로 받기"를 누를 때까지 기다리지 않고 바로 문자를 보낸다(도착이 30초 이상 늦던 원인). 서버가 횟수·시간당 제한을 한다.
+      if (data.hasMobileDevice === false) sendSmsLink();
       if (data.pushSentToMobile === false && data.hasMobileDevice !== false) scheduleDevlinkAutoResend();
     } catch (e) {
       setMsg(e.message || '요청에 실패했습니다.', 'err');
@@ -631,7 +633,7 @@
       // 타이머·카운트다운은 이미 돌고 있으므로 다시 만들지 않는다.
       devlinkSessionIds.push(data.sessionId);
       els.devlinkStatus.textContent = data.hasMobileDevice === false
-        ? '알림 받을 폰이 없습니다. "문자로 받기"를 눌러 주세요.'
+        ? '알림 받을 폰이 없어 문자로 보냅니다.'
         : '';
       showSmsButton(data.hasMobileDevice === false);
     } catch (e) { /* 재시도는 1회뿐이다 */ }
