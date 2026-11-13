@@ -1,9 +1,13 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-14 07:58 KST · 기준 커밋 1c609a55
+- 갱신: 2026-11-14 08:24 KST · 기준 커밋 fce3baf3
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-14 Merge pull request #1060 from Openhash-Gopang/push-reliability
+- 2026-11-14 fix(auth): 재전송 알림은 쌓이고 승인 화면 숫자는 최신으로 덮어쓴다
+- 2026-11-14 fix(auth): 폰 알림 미도착 시 문자 대신 같은 푸시로 재전송
+- 2026-11-14 fix(auth): PC 로그인 폰 알림이 안 올 때 문자 대안을 보이고 자동 발송
 - 2026-11-14 Merge pull request #1058 from Openhash-Gopang/free-quota-500
 - 2026-11-14 feat(billing): 무료 한도 500원 통일 + 요금제의 무료 플랜 삭제
 - 2026-11-14 Merge pull request #1057 from Openhash-Gopang/icons-phone-20261114
@@ -40,10 +44,6 @@
 - 2026-11-14 Merge pull request #1043 from Openhash-Gopang/material-popups-a-20261114
 - 2026-11-14 ui: 공용 Material 팝업 모듈 + 로그인 대기창·배지 팝업 Material Design 갱신
 - 2026-11-14 feat(login-popup): Material Design style (approved mockup)
-- 2026-11-14 Merge pull request #1041 from Openhash-Gopang/ratelimit-fix-20261114
-- 2026-11-14 fix(worker): same fixed-window counter for SMS resend limiter
-- 2026-11-14 fix(worker): device-link rate limit uses fixed window (TTL no longer slides)
-- 2026-11-14 feat(ai): first greeting is one line (no long self-intro / profile questions)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
