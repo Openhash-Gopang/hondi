@@ -349,8 +349,8 @@ function updateStats() {
   document.getElementById('progress-fill').style.width = pct + '%';
 }
 
-document.getElementById('btn-reset-all').onclick = () => {
-  if (!confirm('모든 입력과 체크 상태를 초기화할까요?')) return;
+document.getElementById('btn-reset-all').onclick = async () => {
+  if (!await (window.mpConfirm||confirm)('모든 입력과 체크 상태를 초기화할까요?')) return;
   state = {};
   saveState(state);
   render();

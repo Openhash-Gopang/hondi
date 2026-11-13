@@ -448,7 +448,7 @@ $('btnExportState').onclick = function(){ download('k-evaluation-state_' + ver(S
 $('btnImportState').onclick = function(){ $('fileImport').click(); };
 $('fileImport').onchange = function(){
   var f = this.files[0]; if (!f) return; var r = new FileReader();
-  r.onload = function(){ try { var s = JSON.parse(r.result); if (!s || !s.cur || typeof s.versionTenths !== 'number') throw new Error('형식이 맞지 않습니다'); if (!confirm('현재 진행 상태를 가져온 상태로 바꿉니다. 계속할까요?')) return; S = s; save(); render(); } catch (e) { alert('가져오지 못했습니다: ' + e.message); } };
+  r.onload = async function(){ try { var s = JSON.parse(r.result); if (!s || !s.cur || typeof s.versionTenths !== 'number') throw new Error('형식이 맞지 않습니다'); if (!await (window.mpConfirm||confirm)('현재 진행 상태를 가져온 상태로 바꿉니다. 계속할까요?')) return; S = s; save(); render(); } catch (e) { alert('가져오지 못했습니다: ' + e.message); } };
   r.readAsText(f); this.value = '';
 };
 

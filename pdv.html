@@ -944,7 +944,7 @@ html.embed .bot{position:absolute;bottom:auto;right:20px}
   document.getElementById('t-docs').addEventListener('click',load);
   L.addEventListener('click',function(e){
     var b=e.target.closest&&e.target.closest('[data-kd]'); if(!b) return; var id=b.getAttribute('data-id');
-    if(b.getAttribute('data-kd')==='del'){ if(!confirm('이 보관 서류를 삭제할까요? 되돌릴 수 없습니다.')) return; call('delete',{id:id}).then(load).catch(function(){ alert('삭제하지 못했습니다.'); }); return; }
+    if(b.getAttribute('data-kd')==='del'){ (window.mpConfirm||function(m){return Promise.resolve(confirm(m));})('이 보관 서류를 삭제할까요? 되돌릴 수 없습니다.').then(function(ok){ if(!ok) return; call('delete',{id:id}).then(load).catch(function(){ alert('삭제하지 못했습니다.'); }); }); return; }
     call('get',{id:id}).then(function(r){ var it=r.item; if(!it||!it.fileData) throw new Error('NO_FILE'); var u=URL.createObjectURL(new Blob([it.fileData],{type:it.fileMime||'application/octet-stream'})); var a=document.createElement('a'); a.href=u; a.download=it.fileName||'서류'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(u)},4000); }).catch(function(){ alert('내려받지 못했습니다.'); });
   });
 })();

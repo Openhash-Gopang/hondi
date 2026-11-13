@@ -1954,6 +1954,6 @@ export async function _copyDeviceLinkQRUrl() {
       setTimeout(() => { btn.textContent = orig; }, 1500);
     }
   } catch {
-    prompt('아래 링크를 복사하세요:', url);
+    (window.mpPrompt||prompt)('아래 링크를 복사하세요:', url);
   }
 }

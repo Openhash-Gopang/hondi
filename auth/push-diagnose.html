@@ -250,7 +250,7 @@
   }
 
   async function removeDevice(guid, e164, deviceId, btn) {
-    if (!confirm(`이 기기(${deviceId.slice(0, 8)}...)를 삭제할까요?\n폰에 승인 요청이 갑니다.`)) return;
+    if (!await (window.mpConfirm||confirm)(`이 기기(${deviceId.slice(0, 8)}...)를 삭제할까요?\n폰에 승인 요청이 갑니다.`)) return;
     btn.disabled = true;
     btn.textContent = '폰 승인 대기 중...';
     const resultEl = $('result');
