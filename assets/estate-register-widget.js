@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════════
-   estate-register-widget.js — estate.hondi.net "물건 등록" 채팅창 + 실시간
+   estate-register-widget.js — estate.naviweb.kr "물건 등록" 채팅창 + 실시간
    필드 패널 (v0.1, 2026-09-30)
 
    estate-search-widget.js(SP-24b)와 같은 발상·같은 제약을 그대로 따른다:
@@ -32,7 +32,7 @@
    뒤에 포함:
      <div id="estate-register-chat"></div>
      <div id="estate-register-fields"></div>
-     <script src="https://hondi.net/assets/estate-register-widget.js"></script>
+     <script src="https://app.naviweb.kr/assets/estate-register-widget.js"></script>
    ══════════════════════════════════════════════════════════════════ */
 
 (function () {

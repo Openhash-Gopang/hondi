@@ -15,7 +15,7 @@
       "summary": "10월 안내서 2종을 하나로 합친 개정본입니다. Case(맡은 일·맡긴 일·나 홀로), 초대권, 서류를 말로 고치기, 나만의 AI 비서의 점검 등 새 기능과 데이터 금고, 안전 약속을 안내합니다. 시험 운영 기능과 개편 중인 요금은 그대로 표시했습니다.",
       "audience": "일반", "date": "2026-11-02",
       "tags": ["안내서", "나비웹", "HTML"],
-      "url": "https://hondi.net/assets/presentations/navi-naviweb-guide-20261102.html"
+      "url": "https://app.naviweb.kr/assets/presentations/navi-naviweb-guide-20261102.html"
     },
     {
       "id": "navi-naviweb-guide", "order": 5, "series": "intro", "status": "ready",
@@ -23,7 +23,7 @@
       "summary": "나비는 나만의 AI 비서, 나비웹은 그 나비들이 모이는 메신저입니다. 나비로 할 수 있는 일, 내 정보를 내 데이터 금고에만 두는 방식, 구독 요금, 안전하게 쓰기 위한 약속을 쉬운 말로 설명합니다.",
       "audience": "일반", "date": "2026-10-18",
       "tags": ["안내서", "나비웹", "PDF"],
-      "url": "https://hondi.net/assets/presentations/navi-naviweb-guide-20261018.pdf"
+      "url": "https://app.naviweb.kr/assets/presentations/navi-naviweb-guide-20261018.pdf"
     },
     {
       "id": "k-services-guide", "order": 10, "series": "kservice", "status": "ready",
@@ -31,7 +31,7 @@
       "summary": "응급·법률·금융·물류·구직·메일·도시 설계 등 K-서비스가 어떤 일을 대신 해 주는지 서비스별로 소개합니다. 지금 쓸 수 있는 서비스와 준비 중인 서비스를 구분해 안내합니다.",
       "audience": "일반", "date": "2026-10-18",
       "tags": ["K-서비스", "PDF"],
-      "url": "https://hondi.net/assets/presentations/k-services-guide-20261018.pdf"
+      "url": "https://app.naviweb.kr/assets/presentations/k-services-guide-20261018.pdf"
     },
     {
       "id": "klaw-guide", "order": 20, "series": "kservice", "status": "ready",
@@ -39,7 +39,7 @@
       "summary": "사건 개요를 입력하면 대법원까지 간다고 가정한 참고용 가상 판결문과 쉬운 설명을 써 주는 K-Law를 소개합니다. 이용 방법, 결과 읽는 법, 개인정보 주의사항, 얼마나 믿을 수 있는지와 한계까지 알려 드립니다.",
       "audience": "일반", "date": "2026-10-18",
       "tags": ["K-Law", "가상 판결", "PDF"],
-      "url": "https://hondi.net/assets/presentations/klaw-guide-20261018.pdf"
+      "url": "https://app.naviweb.kr/assets/presentations/klaw-guide-20261018.pdf"
     },
     {
       "id": "klaw-purpose", "order": 30, "series": "kservice", "status": "ready",
@@ -47,7 +47,7 @@
       "summary": "K-Law를 만든 까닭은 판결 예측이 아니라 공공기관과 전문직이 법과 규정에 따라 일하는 과정의 법적 검토입니다. 대법원 판결문을 견주어 본 시험이 어떤 의미인지, 결과와 한계는 무엇인지 설명합니다.",
       "audience": "일반", "date": "2026-10-18",
       "tags": ["K-Law", "법적 검토", "PDF"],
-      "url": "https://hondi.net/assets/presentations/klaw-purpose-guide-20261018.pdf"
+      "url": "https://app.naviweb.kr/assets/presentations/klaw-purpose-guide-20261018.pdf"
     },
     {
       "id": "persona-guide", "order": 5, "series": "persona", "status": "ready",
@@ -55,7 +55,7 @@
       "summary": "변호사·세무사·의사 등 직종 63개의 전문가 AI가 서류 작업을 돕는 방식과 [법률 검토], 사람 전문가의 검토·승인 원칙, 직종 목록을 소개합니다.",
       "audience": "일반", "date": "2026-10-18",
       "tags": ["전문가 페르소나", "PDF"],
-      "url": "https://hondi.net/assets/presentations/expert-personas-guide-20261018.pdf"
+      "url": "https://app.naviweb.kr/assets/presentations/expert-personas-guide-20261018.pdf"
     },
     {
       "id": "naviwb", "order": 10, "no": 0, "series": "web", "status": "ready",
@@ -71,7 +71,7 @@
       "summary": "나비웹이 무엇이고 기존 웹과 무엇이 다른지, 업종마다 하나의 AI 법인이 대표하는 구조, 모든 공공기관 나비의 안전장치인 법률 검토, 행정기관 나비 페이지의 현황과 이용 시 유의사항, hondi.net 주요 페이지 링크를 쉬운 말로 안내합니다.",
       "audience": "일반", "date": "2026-10-19",
       "tags": ["나비웹", "안내문", "PDF"],
-      "url": "https://hondi.net/assets/presentations/navi-naviweb-announcement-20261019.pdf"
+      "url": "https://app.naviweb.kr/assets/presentations/navi-naviweb-announcement-20261019.pdf"
     },
     {
       "id": "field-test", "order": 10, "series": "intro", "status": "ready",
@@ -103,7 +103,7 @@
       "summary": "기존 웹사이트를 나비 AI 사이트로 전환하고, 모든 나비 사이트가 같은 인터페이스로 열리는 나비웹을 소개합니다. 전국 광역자치단체로 확산하는 사업계획과 광역별 기대 효과를 인구 비례로 추정하고, 제주 데이터를 예시로 보입니다.",
       "audience": "지자체 · 파트너 기관", "date": "2026-10-15",
       "tags": ["사업계획", "전국 확산", "PDF"],
-      "url": "https://hondi.net/assets/presentations/nabiweb-intro-business-plan-20261015-r2.pdf"
+      "url": "https://app.naviweb.kr/assets/presentations/nabiweb-intro-business-plan-20261015-r2.pdf"
     },
     {
       "id": "user-manual", "order": 30, "series": "intro", "status": "ready",
@@ -111,7 +111,7 @@
       "summary": "처음 쓰는 사람도 따라 할 수 있게 접속, 말로 전문가 부르기, 메뉴·설정, 앱 설치, 나비 숫자 코드, GDC 지갑, 나의 기록 금고(PDV), OpenHash를 화면 18장과 함께 설명합니다.",
       "audience": "일반 · 처음 쓰는 사용자", "date": "2026-10-16",
       "tags": ["매뉴얼", "PDF", "사용법"],
-      "url": "https://hondi.net/assets/presentations/navi-user-manual-20261016.pdf"
+      "url": "https://app.naviweb.kr/assets/presentations/navi-user-manual-20261016.pdf"
     },
     {
       "id": "domestic-ai-engine", "order": 40, "series": "intro", "status": "ready",
@@ -119,7 +119,7 @@
       "summary": "왜 외국이 만든 AI를 국회·법원·행정기관의 핵심 업무에 그대로 쓰기 어려운지 열 가지 이유로 설명하고, 나비의 AI 엔진을 어디까지 직접 운영하고 있는지, 반대 의견은 무엇인지까지 함께 밝힙니다.",
       "audience": "일반", "date": "2026-10-18",
       "tags": ["AI 엔진", "국내 개발", "PDF"],
-      "url": "https://hondi.net/assets/presentations/navi-ai-engine-domestic-development-20261018.pdf"
+      "url": "https://app.naviweb.kr/assets/presentations/navi-ai-engine-domestic-development-20261018.pdf"
     },
     {
       "id": "navi-llm-genealogy", "order": 50, "series": "intro", "status": "ready",
@@ -127,7 +127,7 @@
       "summary": "분야마다 따로 훈련한 작은 AI 중 알맞은 하나만 불러 쓰는 나비의 방식과, 웹앱 단계와 상용화 단계에서 쓰는 AI의 차이를 설명합니다. 나비 LLM의 뿌리를 A.X 4.0, Qwen, LLaMA, Transformer를 거쳐 캐나다 토론토 대학의 연구까지 거슬러 올라가 보여 줍니다.",
       "audience": "일반", "date": "2026-10-18",
       "tags": ["나비 LLM", "족보", "PDF"],
-      "url": "https://hondi.net/assets/presentations/navi-llm-genealogy-guide-20261018.pdf"
+      "url": "https://app.naviweb.kr/assets/presentations/navi-llm-genealogy-guide-20261018.pdf"
     },
     {
       "id": "legal-review-purpose", "order": 8, "series": "persona", "status": "ready",
@@ -135,7 +135,7 @@
       "summary": "직업군과 세부 분야별 업무 보조 AI 페이지마다 있는 [법률 검토]가 무엇을 해 주고 무엇을 하지 않는지, 왜 K-Law의 본래 목적인지, 중앙정부와 지자체 부서의 업무 보조 AI에는 어떻게 넣고 있는지 설명합니다.",
       "audience": "일반", "date": "2026-10-18",
       "tags": ["법률 검토", "K-Law", "PDF"],
-      "url": "https://hondi.net/assets/presentations/legal-review-purpose-guide-20261018.pdf"
+      "url": "https://app.naviweb.kr/assets/presentations/legal-review-purpose-guide-20261018.pdf"
     },
     {
       "id": "persona-scrivener", "order": 10, "series": "persona", "status": "ready",
@@ -143,7 +143,7 @@
       "summary": "법무사와 사무소 직원의 업무를 돕는 법무사 AI를 소개합니다. 은행 예금 압류·가압류 절차를 예시로, 관제탑 원칙에 따라 한 번에 하나씩 지시하는 현재 방식과 법원 dpaper API 공개 후의 일괄 처리를 설명합니다.",
       "audience": "법무사 · 법무사 사무소", "date": "2026-10-16",
       "tags": ["전문가 페르소나", "법무사", "PDF"],
-      "url": "https://hondi.net/assets/presentations/expert-persona-judicial-scrivener-20261016.pdf"
+      "url": "https://app.naviweb.kr/assets/presentations/expert-persona-judicial-scrivener-20261016.pdf"
     },
     {
       "id": "tp-seminar", "order": 10, "series": "seminar", "status": "draft",

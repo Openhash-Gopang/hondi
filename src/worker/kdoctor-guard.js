@@ -1,5 +1,5 @@
 /**
- * kdoctor-guard.js — doctor.hondi.net 요청의 서버측 제한 (2026-10-01)
+ * kdoctor-guard.js — doctor.naviweb.kr 요청의 서버측 제한 (2026-10-01)
  *
  * worker.js handleAIChat의 doctor 분기(전용 키 DEEPSEEK_DOCTOR_KEY)에서만 쓴다.
  * 전용 키로 과금되는 경로이므로 클라이언트가 고를 수 있는 것을 좁힌다:

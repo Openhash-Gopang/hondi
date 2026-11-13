@@ -5,7 +5,7 @@
 // 해석 실패 시의 상태코드 매핑(PROFILE_NOT_FOUND→404, TOKEN_EXPIRED→401
 // 등)을 각자 손으로 복붙해뒀고, K-Mail의 8개 엔드포인트(chat, 캠페인
 // 생성, 주소록 6종)는 그 매핑조차 없이 지갑 서명(_verifyClaimsRequester)
-// 만 지원해 K-Plan과 로그인 경험이 갈라져 있었다(mail.hondi.net/webapp.html
+// 만 지원해 K-Plan과 로그인 경험이 갈라져 있었다(mail.naviweb.kr/webapp.html
 // 작업 지시서 §2에서 발견). 24개 K-서비스가 매번 이 인증 판정을
 // 새로 구현하는 건 지속 불가능하므로, "어떻게 guid를 확정하는가"의
 // 공통 판정 로직만 이 모듈로 뺐다(주피터 지시, 2026-09-03).

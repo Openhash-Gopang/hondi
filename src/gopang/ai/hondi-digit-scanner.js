@@ -339,7 +339,7 @@ export async function lookupDigitProfile(shortId) {
       name: p.name || p.nickname || p.handle,
       url: p.digit_code_id
         ? `/profiles/${p.digit_code_id}.html`
-        : `https://hondi.net/profile?id=${p.id}`,
+        : `https://app.naviweb.kr/profile?id=${p.id}`,
     };
   } catch (e) {
     throw new Error(`프로필 조회 실패: ${e.message}`);

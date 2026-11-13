@@ -169,8 +169,8 @@ export function setKlawLastCheck(v) { _klawLastCheck = v; }
 // 컬렉션으로 확정하고, Worker PATCH /kcleaner/report/:report_code
 // 경유로 전환 완료 — _updateFiilReport 참고) — 전부 마이그레이션
 // 완료되어 이 파일에서 상수 자체를 제거한다. 남은 위험: nounweb/fiil
-// (clean.hondi.net 이관 전 원본)의 webapp.html에 같은 anon key가 아직
-// 하드코딩돼 있었음 — clean.hondi.net 이관 시 함께 제거 대상.
+// (clean.naviweb.kr 이관 전 원본)의 webapp.html에 같은 anon key가 아직
+// 하드코딩돼 있었음 — clean.naviweb.kr 이관 시 함께 제거 대상.
 export const _SUPABASE_URL = undefined; // deprecated — no longer used anywhere; kept only so a stray import doesn't crash at load time
 export const _SUPABASE_KEY = undefined; // deprecated — see _SUPABASE_URL
 

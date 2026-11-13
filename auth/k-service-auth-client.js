@@ -1,7 +1,7 @@
 /* ══════════════════════════════════════════════════════════════════
    k-service-auth-client.js — K-서비스 공용 전화번호 인증 모듈 (v2.0)
 
-   배포 위치: https://hondi.net/auth/k-service-auth-client.js
+   배포 위치: https://app.naviweb.kr/auth/k-service-auth-client.js
 
    v2.0(2026-09-06 저녁, 주피터 지시로 긴급 수정): v1.0은 SMS 인증번호를
    직접 입력받는 UI(받기→인증번호 입력→확인)를 기본/대체 경로로
@@ -17,8 +17,8 @@
    채널로 처리한다 — 클라이언트는 그저 폴링만 한다). v1.0의 SMS 입력
    UI는 완전히 제거했다.
 
-   대상: plan.hondi.net(webapp.html) · klaw.hondi.net(webapp.html) ·
-   mail.hondi.net(webapp.html) · hondi.net(desktop.html GDC 대시보드).
+   대상: plan.naviweb.kr(webapp.html) · klaw.naviweb.kr(webapp.html) ·
+   mail.naviweb.kr(webapp.html) · hondi.net(desktop.html GDC 대시보드).
    ※ /assets/site-header.js(다른 19개 페이지가 쓰는 기존 공용 모듈)와는
      별개의 모듈이다.
 
@@ -29,7 +29,7 @@
          serviceLabel: 'K-Law',   // 로그인 UI에 표시될 서비스명(선택)
        };
      </script>
-     <script src="https://hondi.net/auth/k-service-auth-client.js"></script>
+     <script src="https://app.naviweb.kr/auth/k-service-auth-client.js"></script>
 
    공개 API (window.KAuth):
      await KAuth.ensureLogin()        — 로그인 안 돼 있으면 오버레이를 띄우고 완료까지 대기, 토큰 문자열 반환
@@ -51,7 +51,7 @@
   if (global.KAuth) return; // 중복 로드 방지
 
   var PROXY         = 'https://hondi-proxy.tensor-city.workers.dev';
-  var COOKIE_DOMAIN = (global.K_AUTH_CONFIG && global.K_AUTH_CONFIG.cookieDomain) || (/(^|\.)hondi\.net$/.test(location.hostname) ? '.hondi.net' : location.hostname);
+  var COOKIE_DOMAIN = (global.K_AUTH_CONFIG && global.K_AUTH_CONFIG.cookieDomain) || (/(^|\.)naviweb\.kr$/.test(location.hostname) ? '.naviweb.kr' : location.hostname);
   var COOKIE_TOKEN  = 'hondi_pvt';
   var COOKIE_EXP    = 'hondi_pvt_exp';
   // 2026-09-12 신설 — 슬라이딩 세션 갱신 임계값(주피터 지시: Gmail처럼
@@ -468,11 +468,11 @@
     // 실사로 보여줬으므로, 원칙대로 클라이언트도 "물리적으로 하나뿐인"
     // 정규화 함수(core/auth.js의 buildE164)를 직접 써서 보낸다. klaw
     // 저장소 webapp.html이 이미 같은 방식(동적 cross-origin import)으로
-    // https://hondi.net/src/gopang/gwp/gwp-report-client.js를 성공적으로
+    // https://app.naviweb.kr/src/gopang/gwp/gwp-report-client.js를 성공적으로
     // 쓰고 있어 이 패턴 자체는 검증된 것이다.
     var phone = rawPhone;
     try {
-      var authMod = await import('https://hondi.net/src/gopang/core/auth.js');
+      var authMod = await import('https://app.naviweb.kr/src/gopang/core/auth.js');
       phone = authMod.buildE164(rawPhone, 'KR');
     } catch (e) {
       // 공유 모듈 로드 실패 시(네트워크 문제 등) 원본 입력값으로 그대로

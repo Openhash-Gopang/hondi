@@ -10,12 +10,12 @@
  * "각자 복사" 구조에서는 로직을 한 곳만 고치면 나머지는 안 고쳐지는 사고가
  * 반복된다(SP_lawyer 버전 고정, call-ai.js manifest 로더 중복과 동일 패턴).
  * 이 파일은 그 복사본들을 단일 소스로 통합한다 — auth/subsystem-auth.js가
- * 이미 쓰고 있는 크로스오리진 <script type="module" src="https://hondi.net/..."> 관행을
+ * 이미 쓰고 있는 크로스오리진 <script type="module" src="https://app.naviweb.kr/..."> 관행을
  * 그대로 따른다.
  *
  * 사용법 (각 K-서비스 webapp.html):
  *   <script type="module">
- *     import { reportGwpSessionEnd } from 'https://hondi.net/src/gopang/gwp/gwp-report-client.js';
+ *     import { reportGwpSessionEnd } from 'https://app.naviweb.kr/src/gopang/gwp/gwp-report-client.js';
  *     window._reportSessionEnd = (resultText, summaryLine) => reportGwpSessionEnd({
  *       agencyId: AGENCY_ID, guid: _govGuid(), messages: conversationState.messages,
  *       resultText, summaryLine, gwpMode: GWP_MODE, gwpOrigin: GWP_ORIGIN,
@@ -26,7 +26,7 @@
  * 그대로 둔다 — 함수 시그니처(resultText, summaryLine)를 그대로 유지했다.
  *
  * 사용법 (전문가 페르소나 세션, expert-session.js — 2026-07-20 신설):
- *   import { recordOwnerPDV } from 'https://hondi.net/src/gopang/gwp/gwp-report-client.js';
+ *   import { recordOwnerPDV } from 'https://app.naviweb.kr/src/gopang/gwp/gwp-report-client.js';
  *   await recordOwnerPDV({
  *     ownerAgency: EXPERT_REGISTRY[personaKey].ownerAgency,
  *     recordType: 'consultation', guid: userGuid,
@@ -42,7 +42,7 @@ const DEFAULT_PROXY = 'https://hondi-proxy.tensor-city.workers.dev';
 // 이 파일의 세 기록 함수(reportGwpSessionEnd/recordOwnerPDV/
 // recordUserPdvForExpert) 모두, 네트워크로 나가기 직전 콘텐츠를 이
 // 함수로 해시화한다 — pdv/record.js에도 동일한 헬퍼가 있으나 이 파일은
-// 독립 모듈(별도 오리진에서 <script type="module" src="https://hondi.net/...">
+// 독립 모듈(별도 오리진에서 <script type="module" src="https://app.naviweb.kr/...">
 // 로 로드됨)이라 import로 공유하지 않고 각자 유지한다(기존 관례).
 async function _sha256Hex(str) {
   const buf = new TextEncoder().encode(str ?? '');

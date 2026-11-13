@@ -55,7 +55,7 @@
    자동 감지하므로 순서만 지키면 별도 설정 불필요):
 
      <script>window.K_AUTH_CONFIG = { serviceLabel: 'K-정부' };</script>
-     <script src="https://hondi.net/auth/k-service-auth-client.js"></script>
+     <script src="https://app.naviweb.kr/auth/k-service-auth-client.js"></script>
    ══════════════════════════════════════════════════════════════════ */
 
 (function () {

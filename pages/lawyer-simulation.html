@@ -15,7 +15,7 @@ window.PAGE_HERO = {
   l1: '사건 의뢰 하나를 받으면',
   l2: '쟁점 정리부터 서류 초안·제출 준비·비용까지 모의로 진행합니다',
   sub: '변호사 보조 AI의 업무 흐름(사건 접수 → 쟁점·자료 정리 → 서류 초안 → 검증 → 제출 준비 → 비용·결과 기록)을 한 건의 사건으로 끝까지 보여 줍니다. 법적 판단과 승소 가능성은 정하지 않으며, 제출·서명·납부도 하지 않습니다. 변호사의 확인 전에는 사용할 수 없는 참고 자료입니다.',
-  actions: [{ label: '변호사 서비스 화면', href: '/pages/lawyer.html', style: 'outline' }, { label: 'LLM 성능 평가', href: '/pages/klaw-llm-verdict-validation.html#llm-compare', style: 'outline' }, { label: '기술 소개', href: 'https://klaw.hondi.net/klaw_intro.html', style: 'outline', target: '_blank' }]
+  actions: [{ label: '변호사 서비스 화면', href: '/pages/lawyer.html', style: 'outline' }, { label: 'LLM 성능 평가', href: '/pages/klaw-llm-verdict-validation.html#llm-compare', style: 'outline' }, { label: '기술 소개', href: 'https://klaw.naviweb.kr/klaw_intro.html', style: 'outline', target: '_blank' }]
 };
 </script>
 <link rel="stylesheet" href="/assets/site-header.css">
@@ -38,7 +38,7 @@ window.PAGE_HERO = {
     onReply: function (reply) { try { window.LawSim && window.LawSim.parse(reply); } catch (e) { console.error(e); } }
   };
 </script>
-<script src="https://hondi.net/auth/k-service-auth-client.js"></script>
+<script src="https://app.naviweb.kr/auth/k-service-auth-client.js"></script>
 <script src="/assets/chat-widget.js"></script>
 
 <style>

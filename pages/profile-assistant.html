@@ -97,7 +97,7 @@ import { _loadSpByKey } from '/src/gopang/ai/manifest-loader.js';
 import { handleProfileSubmit } from '/src/gopang/ui/welcome.js';
 import { escHtml, appendBubble, appendTyping, wireBackButton, wireInputBar,
          wireMic, wireAttachAndCamera } from '/src/gopang/ui/chat-shell.js';
-import { reportGwpSessionEnd } from 'https://hondi.net/src/gopang/gwp/gwp-report-client.js';
+import { reportGwpSessionEnd } from 'https://app.naviweb.kr/src/gopang/gwp/gwp-report-client.js';
 // 2026-0X-XX 신설(#186 리뷰) — max_tokens 판단 기준을 token-policy.js
 // 한 곳으로 모은다. 이 파일이 예전에 갖고 있던 인라인 삼항연산자
 // (tierOverride === 'hondi-pro' ? 6000 : 1200)를 대체한다.
@@ -105,7 +105,7 @@ import { resolveChatBudget } from '/src/gopang/core/token-policy.js';
 
 const RELAY_ENDPOINT = 'https://hondi-proxy.tensor-city.workers.dev';
 const _qs    = new URLSearchParams(location.search);
-const RETURN = _qs.get('return') || 'https://hondi.net';
+const RETURN = _qs.get('return') || 'https://app.naviweb.kr';
 
 // 2026-07-27 신설 — AC가 _gwpLaunch()로 넘기는 ctx 파라미터를 지금까지
 // 이 파일이 전혀 읽지 않고 있었다(다른 GWP 서비스는 이미 쓰는 일반

@@ -108,7 +108,7 @@ export async function handleProfileSubmit(aiResponseText, extraFields = {}) {
 
   // 판매자 AI 비서 endpoint 설정 (사업자일 때)
   if (profile.entity_type === 'business' && profile.handle) {
-    const ep = `https://market.hondi.net/webapp.html?seller=${profile.handle}`;
+    const ep = `https://market.naviweb.kr/webapp.html?seller=${profile.handle}`;
     const aiCfg = profile.extra?.public?.ai_assistant;
     if (aiCfg) {
       aiCfg.seller_ai_endpoint = ep;

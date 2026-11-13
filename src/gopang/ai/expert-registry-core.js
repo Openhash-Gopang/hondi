@@ -44,7 +44,7 @@ export const CORE_REGISTRY = {
       // 트리거 어디와도 문자열이 안 겹쳐 ktax로 샌 게 확인됨.
       '절세 방법을 상담', '세금 신고를 도와줄 사람'],
   },
-  // 2026-10-29 신설(주피터 지시) — tax.hondi.net 「세무 & 회계」 통합 페이지용. 세무사(SP-FIN-09)와 회계사(SP-FIN-10)
+  // 2026-10-29 신설(주피터 지시) — tax.naviweb.kr 「세무 & 회계」 통합 페이지용. 세무사(SP-FIN-09)와 회계사(SP-FIN-10)
   // 보조 SP를 합친 SP_tax-accounting(-assistant)을 연다. 라우팅 트리거는 기존 tax-accountant/accountant와 겹치지 않게
   // 통합 페이지 전용 문구만 둔다.
   'tax-accounting': {
@@ -52,7 +52,7 @@ export const CORE_REGISTRY = {
     key: 'SP_tax-accounting', needsMedicalSafety: false,
     triggers: ['세무 회계 통합 상담'],
   },
-  // 2026-10-29 신설(주피터 지시) — school.hondi.net 「나비 스쿨」(초중고·대학 학교 서류 작성)용. 면허 직역이 아니라 학생·보호자·교직원이 쓰는
+  // 2026-10-29 신설(주피터 지시) — school.naviweb.kr 「나비 스쿨」(초중고·대학 학교 서류 작성)용. 면허 직역이 아니라 학생·보호자·교직원이 쓰는
   // 서류 작성 도우미다. SP 는 제목에 "보조 AI"를 쓰지 않아 전문가용(-assistant) 서버 게이트에 걸리지 않는다. 라우팅 트리거는 이 사이트 전용 문구만 둔다.
   'school-docs': {
     label: '학교 서류', icon: '🏫', category: 'EDU', ownerAgency: 'kedu',
@@ -261,7 +261,7 @@ export const CORE_REGISTRY = {
   // 2026-07-06 신설(SP-HEALTH-16~19) — 의사·치과의사·한의사·약사. 다른 10개
   // 의료직이 전부 "확진·처방은 의사 영역"이라고 선을 긋는 구조라, 그 반대편을
   // 정의하는 이 4개는 특히 신중한 검토가 필요함(SP 본문 상단 주석 참조).
-  // 2026-10-29 신설(주피터 지시) — doctor.hondi.net 「병원 & 의원」 통합 페이지용. 의사(SP-HEALTH-16A)·간호사(SP-HEALTH-07A) 보조 SP를 합치고
+  // 2026-10-29 신설(주피터 지시) — doctor.naviweb.kr 「병원 & 의원」 통합 페이지용. 의사(SP-HEALTH-16A)·간호사(SP-HEALTH-07A) 보조 SP를 합치고
   // 원무(접수·수납·청구·진료기록 발급) 서류를 더한 SP_hospital(-assistant)을 연다. 라우팅 트리거는 기존 physician·nurse와 겹치지 않게
   // 통합 페이지 전용 문구만 둔다.
   hospital: {

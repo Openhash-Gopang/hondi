@@ -15,7 +15,7 @@ import { JOB_SERIES_REGISTRY_DATA } from './job-series-registry.js';
 //
 // ★★ 2026-07-12 재설계 — 처음 버전은 이 파일을 call-ai.js(gopang 저장소
 // 시민용 채팅 클라이언트)가 호출하는 걸 전제로 짰는데, jeju_do/
-// jeju_national SP는 실제로 jeju.hondi.net(별도 저장소 Openhash-Gopang/
+// jeju_national SP는 실제로 jeju.naviweb.kr(별도 저장소 Openhash-Gopang/
 // jeju)에서 서빙되고, 그 클라이언트는 call-ai.js를 전혀 쓰지 않는다
 // (webapp.html의 _govRelayCompletion이 /gov/relay를 직접 호출하고, U9
 // sp_call만 서버가 처리 — DEPT_TASK_REQUEST 처리 로직은 클라이언트

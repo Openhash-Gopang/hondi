@@ -24,7 +24,7 @@ class El {
 const fakeDoc = { createElement: tag => new El(tag) };
 
 test('매뉴얼 주소와 문구', () => {
-  assert.equal(mb.MANUAL_URL, 'https://hondi.net/assets/presentations/navi-user-manual-20261016.pdf');
+  assert.equal(mb.MANUAL_URL, 'https://app.naviweb.kr/assets/presentations/navi-user-manual-20261016.pdf');
   assert.ok(mb.CLOSE_LABEL.includes('다시 보지 않기 (X)'));
   assert.ok(mb.LINK_LABEL.includes('나비 매뉴얼'));
 });

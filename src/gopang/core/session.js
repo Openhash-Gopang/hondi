@@ -173,7 +173,7 @@ async function _saveSessionOnce() {
         block_hash:   result.entryHash,
         who:   { ipv6: USER_GUID },
         when:  { period_start: sessionData.startedAt, period_end: now },
-        where: { svc_url: 'https://hondi.net' },
+        where: { svc_url: 'https://app.naviweb.kr' },
         what:  { summary: `세션 종료 — ${primaryDomain} 영역, ${sessionMessages.length}턴` },
         how:   { method: '앱 종료(visibilitychange / pagehide)' },
         why:   { goal: '세션 데이터 PDV 기록' },

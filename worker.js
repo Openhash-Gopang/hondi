@@ -81,7 +81,7 @@ import { resolveDeepseekModel, deepseekChatText, deepseekChat } from './src/gopa
 // 2026-09-03 신설 — K-서비스 공용 인증 게이트. "phone_verify_token 또는
 // 지갑 서명으로 guid를 확정한다"는 판정 로직이 K-Plan/K-Law/K-Gov/
 // K-Business relay 4곳 + K-Mail 8개 엔드포인트에 각자 손으로 반복
-// 구현돼 있던 것을 하나로 모음(주피터 지시, mail.hondi.net/webapp.html
+// 구현돼 있던 것을 하나로 모음(주피터 지시, mail.naviweb.kr/webapp.html
 // 작업 중 발견 — 상세 배경은 src/worker/k-service-auth.js 헤더 참고).
 // _kAuth 인스턴스는 이 파일 하단에서 _resolveGuidFromPhoneVerifyToken·
 // _verifyClaimsRequester가 정의된 뒤(둘 다 function 선언이라 호이스팅
@@ -135,12 +135,12 @@ const ALLOWED_ORIGINS = [
   'https://watch.hondi.net',
   'https://job.hondi.net',
   'https://mail.hondi.net',
-  // 2026-09-28 신설 — estate.hondi.net(별도 GitHub Pages 저장소, K-Estate
+  // 2026-09-28 신설 — estate.naviweb.kr(별도 GitHub Pages 저장소, K-Estate
   // 소개+매물 검색 채팅창)이 /ai/chat을 직접 호출한다(SP-24b_kestate_search,
   // assets/estate-search-widget.js). 다른 서브도메인과 동일한 수준(Origin
   // 검사만, 로그인·과금 게이트 없음)의 노출이며 별도 rate-limit은 없다.
   'https://estate.hondi.net',
-  // 2026-09-30 신설 — doctor.hondi.net(별도 GitHub Pages 저장소, K-Doctor 소개+진료 상담 창)이
+  // 2026-09-30 신설 — doctor.naviweb.kr(별도 GitHub Pages 저장소, K-Doctor 소개+진료 상담 창)이
   // /ai/chat을 직접 호출한다(assets/kdoctor-chat-widget.js). estate와 같은 수준(Origin 검사만,
   // 로그인·과금 게이트 없음, 별도 rate-limit 없음)이다. 의료인 면허 검증 전 초안 단계이므로
   // 남용·오용이 관측되면 게이트를 추가할 것.
@@ -551,7 +551,7 @@ async function handlePhoneOtpRequest(request, env, corsHeaders) {
     // 반드시 메시지 맨 끝 줄이어야 하고, 그 뒤에 다른 텍스트가 있으면
     // 안 된다(WebOTP 표준 요구사항).
     await _sendSolapiSms(env, e164,
-      `[나비] 인증번호는 ${code}입니다. ${Math.floor(OTP_TTL_SECONDS / 60)}분 이내에 입력해 주세요.\n\n@hondi.net #${code}`);
+      `[나비] 인증번호는 ${code}입니다. ${Math.floor(OTP_TTL_SECONDS / 60)}분 이내에 입력해 주세요.\n\n@naviweb.kr #${code}`);
   } catch (e) {
     console.warn('[PhoneOTP] SOLAPI 발송 실패:', e.message);
     return _err(502, 'SMS_SEND_FAILED', '인증번호 발송에 실패했습니다: ' + e.message, corsHeaders);
@@ -1397,7 +1397,7 @@ async function handleDeviceLinkResendSms(request, env, corsHeaders) {
     return _err(429, 'PHONE_RATE_LIMITED', '이 번호로 문자를 너무 많이 요청했습니다. 잠시 후 다시 시도해 주세요', corsHeaders);
   }
 
-  const approveUrl = `https://hondi.net/auth/device-link-approve.html?sessionId=${encodeURIComponent(sessionId)}`;
+  const approveUrl = `https://app.naviweb.kr/auth/device-link-approve.html?sessionId=${encodeURIComponent(sessionId)}`;
   try {
     await _sendSolapiSms(env, record.e164,
       `[나비] PC 로그인 확인: ${approveUrl} (${Math.floor(DEVICE_LINK_SMS_TTL_SECONDS / 60)}분 이내)`);
@@ -2878,7 +2878,7 @@ async function _checkLowBalanceAndNotify(env, guid, balanceGdc) {
     title: 'GDC 잔액이 얼마 남지 않았어요',
     body:  `현재 잔액 약 ${balanceKrw.toLocaleString('ko-KR')}원 상당(${balanceGdc.toFixed(4)} GDC). 서비스 이용이 끊기지 않도록 GDC를 충전해 주세요.`,
     tag:   'gdc-low-balance',
-    url:   'https://gdc.hondi.net/charge.html', // 충전 신청 페이지(gdc repo 신설, 2026-07-23)
+    url:   'https://gdc.naviweb.kr/charge.html', // 충전 신청 페이지(gdc repo 신설, 2026-07-23)
   });
 
   if (kv) {
@@ -3036,7 +3036,7 @@ async function handleUsageLog(request, env, corsHeaders) {
     totalTokens    += (Number(it.hit_tokens) || 0) + (Number(it.miss_tokens) || 0) + (Number(it.out_tokens) || 0);
   }
 
-  // ── 시계열(2026-11-02, mail.hondi.net 'GDC' 화면의 그래프용) ──
+  // ── 시계열(2026-11-02, mail.naviweb.kr 'GDC' 화면의 그래프용) ──
   // 한국시간(KST) 기준. hourly = 오늘 0~23시, daily = 최근 N일(오래된 날 → 오늘). 모델별 요청·토큰도 함께 담는다.
   const KST = 9 * 3600000;
   const kstOf = (created) => new Date(new Date(String(created || '').replace(' ', 'T')).getTime() + KST);   // 'YYYY-MM-DD HH:MM:SS.mmmZ' 도 파싱된다
@@ -3528,12 +3528,12 @@ const SVC_ALIAS = {
   // 정상 동작했으나 이 별칭이 없어 _getSvcRegistration()이 REGISTERED_SERVICES를
   // 못 찾고 *.gopang.net 폴백(level:1)으로 떨어져 PDV 신뢰 등급이 의도보다
   // 낮게 처리되고 있었다. 매핑 근거는 각 서비스의 실제 url(gwp-registry.js):
-  'kcommerce_seller':'market',  // url market.hondi.net/desktop.html#seller — kcommerce와 동일 도메인
-  'kbusiness':'market',         // url market.hondi.net/kmarket_admin_dashboard.html
+  'kcommerce_seller':'market',  // url market.naviweb.kr/desktop.html#seller — kcommerce와 동일 도메인
+  'kbusiness':'market',         // url market.naviweb.kr/kmarket_admin_dashboard.html
   'kregionalgov':'gopang',      // 2026-07-22 hondi.net 자체로 이전(전용 서브도메인 폐지)
   'profile-assistant':'gopang', // url이 /pages/... 상대경로 — hondi.net 내부
-  'kusers':'users',             // url users.hondi.net — REGISTERED_SERVICES엔 이미 있었으나 별칭만 없었음
-  'kqna':'qna',                 // url qna.hondi.net — REGISTERED_SERVICES 자체가 없어 위에서 신규 등록(level:3, minAuth:'L0')
+  'kusers':'users',             // url users.naviweb.kr — REGISTERED_SERVICES엔 이미 있었으나 별칭만 없었음
+  'kqna':'qna',                 // url qna.naviweb.kr — REGISTERED_SERVICES 자체가 없어 위에서 신규 등록(level:3, minAuth:'L0')
   // ── 백업 별칭(2026-07-03) — GOV_AGENCIES/AGENCY_ID를 REGISTERED_SERVICES
   // 키와 통일했지만, 혹시 남은 캐시된 클라이언트나 실수로 하이픈형을 보내는
   // 경우에도 /pdv/report가 조용히 실패하지 않도록 하는 안전망. GOV_AGENCIES
@@ -3547,7 +3547,7 @@ const SVC_ALIAS = {
 function _resolveSvcId(svcId) { return SVC_ALIAS[svcId] || svcId; }
 
 // 2026-11-02 — startsWith 접두어 비교를 정확 일치로 교체. 이전에는 'https://hondi.net.evil.com' 같은
-// 출처도 'https://hondi.net' 으로 시작한다는 이유로 통과했고, 응답에 Allow-Credentials:true 가 붙어
+// 출처도 'https://app.naviweb.kr' 으로 시작한다는 이유로 통과했고, 응답에 Allow-Credentials:true 가 붙어
 // 임의 사이트가 허용 출처로 인정될 수 있었다. 로컬 개발(localhost·127.0.0.1)만 포트를 임의로 허용한다.
 const _LOCAL_DEV_ORIGIN_RE = /^http:\/\/(localhost|127\.0\.0\.1)(:\d{1,5})?$/;
 function _isAllowedOrigin(origin) {
@@ -5634,7 +5634,7 @@ async function handleCitizenReportList(request, url, env, corsHeaders) {
 
 
 // ═══════════════════════════════════════════════════════════
-// K-Clean(clean.hondi.net, 구 fiil.kr) 신고 저장 — L1 PocketBase
+// K-Clean(clean.naviweb.kr, 구 fiil.kr) 신고 저장 — L1 PocketBase
 // (2026-09-22 신설)
 //
 // 이전에는 fiil.kr이 독자 Supabase 프로젝트에 anon key를 클라이언트에
@@ -8274,7 +8274,7 @@ async function requestWorkDomainPdvCore(env, { orgId, targetGuid, purpose = '' }
     period: { start: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10), end: new Date().toISOString().slice(0, 10) },
   }, expiresAt);
 
-  const consentUrl = 'https://hondi.net/consent' +
+  const consentUrl = 'https://app.naviweb.kr/consent' +
     `?req=${encodeURIComponent(reqId)}&svc=${encodeURIComponent(orgId)}` +
     `&scope=work_pdv&purpose=${encodeURIComponent(purpose || '')}`;
 
@@ -12177,7 +12177,7 @@ async function _performPageFetchForEmail(env, ctx, url) {
     res = await fetch(parsed.toString(), {
       redirect: 'follow',
       signal: controller.signal,
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; HondiKMailBot/1.0; +https://hondi.net)' },
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; HondiKMailBot/1.0; +https://app.naviweb.kr)' },
     });
     clearTimeout(timeout);
   } catch (e) {
@@ -12270,7 +12270,7 @@ async function _performUrlFetchForSummary(env, ctx, url) {
     res = await fetch(parsed.toString(), {
       redirect: 'follow',
       signal: controller.signal,
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; HondiKMailBot/1.0; +https://hondi.net)' },
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; HondiKMailBot/1.0; +https://app.naviweb.kr)' },
     });
     clearTimeout(timeout);
   } catch (e) {
@@ -14397,7 +14397,7 @@ export default {
     if (pathname.startsWith('/kmail/attachments/') && request.method === 'GET') return handleKmailAttachmentGet(request, url, env, corsHeaders);
     if (pathname.startsWith('/r/') && request.method === 'GET') return handleKmailTrackingRedirect(request, url, env, corsHeaders, ctx);
     if (pathname === '/kmail/campaigns/create' && request.method === 'POST') return handleKmailCampaignCreate(request, env, corsHeaders);
-    // 2026-09-03 신설 — mail.hondi.net/webapp.html "캠페인 목록/상태" 화면
+    // 2026-09-03 신설 — mail.naviweb.kr/webapp.html "캠페인 목록/상태" 화면
     // 요구사항 대응. 지금까지 캠페인 생성(create) API만 있고 조회 API가
     // 없었다(handleKmailContactsList의 캠페인판이 빠져있던 것 — 작업
     // 지시서 §3-4 구현 중 발견).
@@ -14448,7 +14448,7 @@ export default {
     // ── 시민 신고(안전신문고식) — 시민 티어 신규 항목 (2026-08-11 신설) ──
     if (pathname === '/citizen/reports/submit' && request.method === 'POST') return handleCitizenReportSubmit(request, env, corsHeaders);
     if (pathname === '/citizen/reports/list' && request.method === 'GET') return handleCitizenReportList(request, url, env, corsHeaders);
-    // ── K-Clean(clean.hondi.net) 신고 저장 — L1 PocketBase (2026-09-22 신설) ──
+    // ── K-Clean(clean.naviweb.kr) 신고 저장 — L1 PocketBase (2026-09-22 신설) ──
     if (pathname === '/kcleaner/report' && request.method === 'POST')   return handleKCleanerReportSubmit(request, env, corsHeaders);
     if (pathname === '/kcleaner/reports' && request.method === 'GET')   return handleKCleanerReportList(url, env, corsHeaders);
     if (pathname.startsWith('/kcleaner/report/') && request.method === 'PATCH') return handleKCleanerReportUpdate(request, url, env, corsHeaders);
@@ -15094,7 +15094,7 @@ export default {
     if (pathname === '/admin/stats' && request.method === 'GET')
       return handleAdminStats(request, env, corsHeaders);
 
-    // (2026-07-15 신설) GET /admin/tx-recent — gdc.hondi.net 관리자
+    // (2026-07-15 신설) GET /admin/tx-recent — gdc.naviweb.kr 관리자
     // 대시보드용 전체 최근 거래(admin/stats와 동일 토큰 인증 관례)
     if (pathname === '/admin/tx-recent' && request.method === 'GET')
       return handleAdminTxRecent(request, env, corsHeaders);
@@ -16114,7 +16114,7 @@ async function _issueStepUpChallenge(env, guid, tx_hash) {
   const challengeB64u = _b64uEncode(String.fromCharCode(...challengeBytes));
   const sessionId = crypto.randomUUID();
   await env.QR_SESSIONS_KV.put(`stepup:${sessionId}`, JSON.stringify({ guid, tx_hash, challengeB64u, used: false }), { expirationTtl: STEP_UP_CHALLENGE_TTL_SECONDS });
-  return { sessionId, challengeB64u, rpId: 'hondi.net', expires_in: STEP_UP_CHALLENGE_TTL_SECONDS };
+  return { sessionId, challengeB64u, rpId: 'naviweb.kr', expires_in: STEP_UP_CHALLENGE_TTL_SECONDS };
 }
 
 async function handleStepUpChallenge(request, env, corsHeaders) {
@@ -16147,11 +16147,12 @@ async function handleStepUpVerify(request, env, corsHeaders) {
   catch (e) { return _err(400, 'CLIENTDATA_PARSE_ERROR', 'clientDataJSON 파싱 실패', corsHeaders); }
   if (clientData.type !== 'webauthn.get') return _err(400, 'WRONG_CEREMONY_TYPE', `type이 webauthn.get이 아닙니다: ${clientData.type}`, corsHeaders);
   if (clientData.challenge !== session.challengeB64u) return _err(403, 'CHALLENGE_MISMATCH', '이 세션에서 발급한 챌린지와 일치하지 않습니다', corsHeaders);
-  const expectedOrigin = 'https://hondi.net';
-  if (clientData.origin !== expectedOrigin) return _err(403, 'ORIGIN_MISMATCH', `예상 origin(${expectedOrigin})과 다릅니다: ${clientData.origin}`, corsHeaders);
+  // 패스키는 RP ID naviweb.kr 아래 어느 화면(naviweb.kr, app./mail. 등 하위 도메인)에서든 만들어질 수 있다. 정확한 호스트 형식만 허용한다.
+  const expectedOrigin = 'https://naviweb.kr';
+  if (!/^https:\/\/([a-z0-9-]+\.)?naviweb\.kr$/.test(String(clientData.origin || ''))) return _err(403, 'ORIGIN_MISMATCH', `예상 origin(${expectedOrigin} 또는 그 하위 도메인)과 다릅니다: ${clientData.origin}`, corsHeaders);
   const authData = _b64uToBytes(authenticatorDataB64u);
   if (authData.length < 37) return _err(400, 'AUTHDATA_TOO_SHORT', 'authenticatorData 형식 오류', corsHeaders);
-  const rpIdHashExpected = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode('hondi.net')));
+  const rpIdHashExpected = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode('naviweb.kr')));
   const rpIdHashActual = authData.slice(0, 32);
   if (!rpIdHashExpected.every((b, i) => b === rpIdHashActual[i])) return _err(403, 'RPID_HASH_MISMATCH', 'RP ID 해시가 일치하지 않습니다', corsHeaders);
   const flags = authData[32];
@@ -17565,7 +17566,7 @@ async function handleGdcDaoProposalsList(request, env, corsHeaders) {
 }
 
 // GET /admin/tx-recent?token=&limit= — 관리자 전용 전체 최근 거래 목록.
-// (2026-07-15 신설 — gdc.hondi.net dashboard.html의 Supabase fs_ledger
+// (2026-07-15 신설 — gdc.naviweb.kr dashboard.html의 Supabase fs_ledger
 //  전체조회를 대체. handleTxHistory와 달리 guid 필터 없이 최근 blocks를
 //  그대로 가져온다 — 관리자가 "전체 흐름"을 보는 용도라 개인정보
 //  노출 범위가 넓으므로 admin token 필수.)
@@ -18349,7 +18350,7 @@ async function _mintAndRecordCharge(env, {
       ? `${finalKrw.toLocaleString('ko-KR')}원 입금 확인 — 보너스가 적용되어 GDC ${bonusGdcAmount.toLocaleString('ko-KR')}T가 충전됐어요.`
       : `${finalKrw.toLocaleString('ko-KR')}원 입금이 확인되어 GDC가 충전됐어요.`,
     tag:   'gdc-charge-confirmed',
-    url:   'https://hondi.net/usage.html',
+    url:   'https://app.naviweb.kr/usage.html',
   }).catch(e => console.warn('[ChargeConfirm] 푸시 발송 실패(무시):', e.message));
   if (ctx?.waitUntil) ctx.waitUntil(pushPromise); else await pushPromise;
 
@@ -19133,7 +19134,7 @@ async function _recordOrderPdv(env, {
 
   const sharedFields = {
     when:  now,
-    where: 'https://market.hondi.net',
+    where: 'https://market.naviweb.kr',
     how:   'Ed25519 서명 + L1 4단계 검증',
     raw_hash:             tx_hash,
     openhash_block_id:    block_id,
@@ -20152,7 +20153,7 @@ async function handleOwnerPdvReport(request, env, corsHeaders) {
   // 건다 — (1) hondi.net 계열 오리진만 허용, (2) 접속 IP당 요청 빈도
   // 제한. 세션 서명 토큰 인증은 별도 작업으로 남긴다(알려진 한계).
   const origin = request.headers.get('Origin') || '';
-  if (!/^https:\/\/([a-z0-9-]+\.)*hondi\.net$/.test(origin)) {
+  if (!/^https:\/\/([a-z0-9-]+\.)*(naviweb\.kr|hondi\.net)$/.test(origin)) {   // 2026-11-13 naviweb.kr 병행(hondi.net 은 이전 완료 후 제거)
     return _err(403, 'ORIGIN_NOT_ALLOWED', `${origin || '(오리진 없음)'}은 허용되지 않은 출처입니다`, corsHeaders);
   }
   const clientIp = request.headers.get('cf-connecting-ip') || 'unknown';
@@ -20852,7 +20853,7 @@ async function handlePdvQuery(request,env,corsHeaders){
       const reqId=`CNSREQ-${query.ipv6.replace(/:/g,'').slice(0,8)}-${Date.now()}`;
       const expiresAt=Math.floor(Date.now()/1000)+300;
       await _storeConsentRequest(env,reqId,query,expiresAt);
-      const consentUrl='https://hondi.net/consent'+`?req=${encodeURIComponent(reqId)}&svc=${encodeURIComponent(query.svc)}`+`&scope=${encodeURIComponent(query.scope.join(','))}`+`&purpose=${encodeURIComponent(query.purpose||'')}`+`&ipv6_hash=${encodeURIComponent(await _sha256Hex(query.ipv6))}`+`&return_to=${encodeURIComponent(origin)}`;
+      const consentUrl='https://app.naviweb.kr/consent'+`?req=${encodeURIComponent(reqId)}&svc=${encodeURIComponent(query.svc)}`+`&scope=${encodeURIComponent(query.scope.join(','))}`+`&purpose=${encodeURIComponent(query.purpose||'')}`+`&ipv6_hash=${encodeURIComponent(await _sha256Hex(query.ipv6))}`+`&return_to=${encodeURIComponent(origin)}`;
       return new Response(JSON.stringify({ok:false,status:'CONSENT_REQUIRED',consent:{request_id:reqId,expires_at:expiresAt,consent_url:consentUrl,message:'사용자가 나비 앱에서 PDV 조회에 동의해야 합니다.'}}),{status:202,headers:corsHeaders});
     }
     const consentOk=await _verifyConsentToken(env,query.consent_token,query.request_id,query.ipv6);
@@ -21068,7 +21069,7 @@ async function handlePersonalAcCall(request, env, corsHeaders) {
   const query = { svc: verifiedOrgId, ipv6: target_guid, scope, purpose, period };
   await _storeConsentRequest(env, reqId, query, expiresAt);
 
-  const consentUrl = 'https://hondi.net/consent' +
+  const consentUrl = 'https://app.naviweb.kr/consent' +
     `?req=${encodeURIComponent(reqId)}&svc=${encodeURIComponent(verifiedOrgId)}` +
     `&scope=${encodeURIComponent(scope.join(','))}&purpose=${encodeURIComponent(purpose)}`;
 
@@ -21343,7 +21344,7 @@ async function _incrAuditFailureCounter(env,reason){
   }catch{/* 카운터 자체 실패는 무시 — 원래 조회를 막지 않는다는 원칙과 동일 */}
 }
 async function _sha256Hex(text){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');}
-function buildCookie(token){return[`gopang_token=${token}`,'Path=/','Domain=.hondi.net','Max-Age=3600','SameSite=None','Secure','HttpOnly'].join('; ');}
+function buildCookie(token){return[`gopang_token=${token}`,'Path=/','Domain=.naviweb.kr','Max-Age=3600','SameSite=None','Secure','HttpOnly'].join('; ');}
 function parseCookie(header,name){const match=header.match(new RegExp(`(?:^|;)\\s*${name}=([^;]+)`));return match?decodeURIComponent(match[1]):null;}
 // ═══════════════════════════════════════════════════════════
 // v6.0 — 세션 토큰: HMAC-SHA256 서명 (env.GOPANG_MASTER_KEY, _verifyConsentHmac/
@@ -21739,7 +21740,7 @@ async function _verifyChallengeToken(env,chalB64,exp,sig){if(exp<Math.floor(Date
 //  s.webauthn?.credentialId 값을 "여러 인증 신호 중 하나"로 읽기만
 //  할 뿐, 그 값을 채워 넣을 호출부 자체가 없어 항상 undefined였다.
 //  Supabase webauthn_credentials 의존이라 정리 대상.)
-const REGISTERED_SERVICES={'gopang':{level:3,domain:'hondi.net',minAuth:'L0',pdv:true},'case':{level:2,domain:'mail.hondi.net',minAuth:'L0',pdv:true},'klaw':{level:3,domain:'klaw.hondi.net',minAuth:'L0',pdv:true},'market':{level:3,domain:'market.hondi.net',minAuth:'L0',pdv:true},'school':{level:3,domain:'school.hondi.net',minAuth:'L0',pdv:true},'security':{level:3,domain:'security.hondi.net',minAuth:'L1',pdv:true},'health':{level:3,domain:'health.hondi.net',minAuth:'L1',pdv:true},'tax':{level:3,domain:'tax.hondi.net',minAuth:'L0',pdv:true},'gdc':{level:3,domain:'gdc.hondi.net',minAuth:'L1',pdv:true},'public':{level:3,domain:'public.hondi.net',minAuth:'L0',pdv:true},'democracy':{level:3,domain:'democracy.hondi.net',minAuth:'L1',pdv:true},'911':{level:3,domain:'911.hondi.net',minAuth:'L0',pdv:true},'police':{level:3,domain:'police.hondi.net',minAuth:'L1',pdv:true},'insurance':{level:3,domain:'insurance.hondi.net',minAuth:'L1',pdv:true},'stock':{level:3,domain:'stock.hondi.net',minAuth:'L1',pdv:true},'traffic':{level:3,domain:'traffic.hondi.net',minAuth:'L0',pdv:true},'logistics':{level:3,domain:'logistics.hondi.net',minAuth:'L0',pdv:true},'fiil':{level:2,domain:'clean.hondi.net',minAuth:'L0',pdv:true},'klaw-ext':{level:2,domain:'klaw.openhash.kr',minAuth:'L0',pdv:false},'users':{level:3,domain:'users.hondi.net',minAuth:'L0',pdv:false},'qna':{level:3,domain:'qna.hondi.net',minAuth:'L0',pdv:true}};
+const REGISTERED_SERVICES={'gopang':{level:3,domain:'naviweb.kr',minAuth:'L0',pdv:true},'case':{level:2,domain:'mail.naviweb.kr',minAuth:'L0',pdv:true},'klaw':{level:3,domain:'klaw.naviweb.kr',minAuth:'L0',pdv:true},'market':{level:3,domain:'market.naviweb.kr',minAuth:'L0',pdv:true},'school':{level:3,domain:'school.naviweb.kr',minAuth:'L0',pdv:true},'security':{level:3,domain:'security.naviweb.kr',minAuth:'L1',pdv:true},'health':{level:3,domain:'health.naviweb.kr',minAuth:'L1',pdv:true},'tax':{level:3,domain:'tax.naviweb.kr',minAuth:'L0',pdv:true},'gdc':{level:3,domain:'gdc.naviweb.kr',minAuth:'L1',pdv:true},'public':{level:3,domain:'public.naviweb.kr',minAuth:'L0',pdv:true},'democracy':{level:3,domain:'democracy.naviweb.kr',minAuth:'L1',pdv:true},'911':{level:3,domain:'911.naviweb.kr',minAuth:'L0',pdv:true},'police':{level:3,domain:'police.naviweb.kr',minAuth:'L1',pdv:true},'insurance':{level:3,domain:'insurance.naviweb.kr',minAuth:'L1',pdv:true},'stock':{level:3,domain:'stock.naviweb.kr',minAuth:'L1',pdv:true},'traffic':{level:3,domain:'traffic.naviweb.kr',minAuth:'L0',pdv:true},'logistics':{level:3,domain:'logistics.naviweb.kr',minAuth:'L0',pdv:true},'fiil':{level:2,domain:'clean.naviweb.kr',minAuth:'L0',pdv:true},'klaw-ext':{level:2,domain:'klaw.openhash.kr',minAuth:'L0',pdv:false},'users':{level:3,domain:'users.naviweb.kr',minAuth:'L0',pdv:false},'qna':{level:3,domain:'qna.naviweb.kr',minAuth:'L0',pdv:true}};
 function _getSvcRegistration(origin,svcId){const resolvedId=_resolveSvcId(svcId);const svc=REGISTERED_SERVICES[resolvedId];if(svc&&origin.includes(svc.domain))return{...svc,svcId:resolvedId,originalId:svcId};if(/^https:\/\/[a-z0-9-]+\.gopang\.net$/.test(origin))return{level:1,domain:origin,minAuth:'L0',pdv:false,svcId:resolvedId,originalId:svcId};return null;}
 async function handleSvcRegister(request,env,corsHeaders){
   if(request.method!=='POST')return new Response('Method Not Allowed',{status:405});
@@ -21824,11 +21825,11 @@ builtMessages=_insertSystemNote(builtMessages,_buildLocationNote(currentLocation
 builtMessages=_insertSystemNote(builtMessages,_buildDateNote());
 _dlog(env, JSON.stringify({tag:'AI_PROXY_CALL',fn:'handleAIChat',ts:new Date().toISOString(),provider,model,...meta}));
 try{if(provider!=='anthropic'){
-  // ★ 2026-09-30 신설 — doctor.hondi.net(K-Doctor 상담 창) 요청은 전용 키 DEEPSEEK_DOCTOR_KEY로 DeepSeek를 직접
+  // ★ 2026-09-30 신설 — doctor.naviweb.kr(K-Doctor 상담 창) 요청은 전용 키 DEEPSEEK_DOCTOR_KEY로 DeepSeek를 직접
   // 호출한다(OpenRouter·공용 DEEPSEEK_API_KEY를 거치지 않음 — 비용을 서비스별로 분리). 전용 키가 없으면 공용 키로
   // 조용히 폴백하지 않고 오류를 낸다(과금 분리가 깨지는 것을 막기 위함). Origin은 브라우저가 보내는 헤더이며 비브라우저
   // 호출은 위조할 수 있으나, 위조해도 얻는 것은 "doctor 키로 과금되는 호출"뿐이다.
-  const _isDoctor=meta?.origin==='https://doctor.hondi.net';
+  const _isDoctor=meta?.origin==='https://doctor.naviweb.kr';
   if(_isDoctor&&!env.DEEPSEEK_DOCTOR_KEY)return _err(500,'DEEPSEEK_DOCTOR_KEY_MISSING','DEEPSEEK_DOCTOR_KEY secret 미설정',corsHeaders);
   // ★ 2026-10-01 — doctor 요청의 모델·이미지·토큰 상한은 서버가 정한다(src/worker/kdoctor-guard.js). 첨부 이미지는 user 메시지의 data URL만 허용, 이미지가 있으면 비전 모델로 전환.
   let _dReq=null;if(_isDoctor){_dReq=prepareDoctorRequest({messages,model,max_tokens},env);if(!_dReq.ok)return _err(_dReq.status,_dReq.code,_dReq.message,corsHeaders);
@@ -21844,7 +21845,7 @@ try{if(provider!=='anthropic'){
   const _orKey=_isDoctor?((_checkCall===true&&env.DEEPSEEK_CHECK_KEY)||env.DEEPSEEK_DOCTOR_KEY):(env.OPENROUTER_API_KEY||env.DEEPSEEK_API_KEY);
   const _orUrl=_useOR?OR_URL:DEEPSEEK_URL;
   const _orMdl=_isDoctor?_dReq.model:(model||(_useOR?OR_MODEL_FAST:DEEPSEEK_MODEL));
-  const _orHdr={'Content-Type':'application/json','Authorization':`Bearer ${_orKey}`,...(_useOR?{'HTTP-Referer':'https://hondi.net','X-Title':'Navi'}:{})};
+  const _orHdr={'Content-Type':'application/json','Authorization':`Bearer ${_orKey}`,...(_useOR?{'HTTP-Referer':'https://app.naviweb.kr','X-Title':'Navi'}:{})};
   const res=await fetch(_orUrl,{method:'POST',headers:_orHdr,body:JSON.stringify({model:_orMdl,max_tokens:_isDoctor?_dReq.max_tokens:max_tokens,messages:builtMessages,...(_isDoctor?{thinking:_dReq.thinking}:{})})});
   const data=await res.json();const content=data.choices?.[0]?.message?.content;
   if(!content)throw new Error('AI 응답 없음: '+JSON.stringify(data));
@@ -21966,7 +21967,7 @@ async function callDeepSeek(bodyText,env,corsHeaders,fallbackFrom=null,meta=null
     } catch (e) { console.warn(JSON.stringify({ tag: 'HAIKU_CALL_ERROR', message: String(e?.message || e), ts: new Date().toISOString(), ...meta })); }
   }
   if (!res) {
-    res=await fetch(_url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${_key}`,...(_useOR?{'HTTP-Referer':'https://hondi.net','X-Title':'Navi'}:{})},body:outboundBodyText});
+    res=await fetch(_url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${_key}`,...(_useOR?{'HTTP-Referer':'https://app.naviweb.kr','X-Title':'Navi'}:{})},body:outboundBodyText});
   }
   if(!res.ok){const errText=await res.text();let errMsg;try{errMsg=JSON.parse(errText)?.error?.message;}catch{}return new Response(JSON.stringify({error:errMsg||`HTTP ${res.status}`}),{status:res.status,headers:corsHeaders});}
 
@@ -22126,7 +22127,7 @@ async function handleLLMRelay(bodyText, env, corsHeaders, meta = null) {
   const isStream  = !!stream;
 
   const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` };
-  if (provider === 'openrouter') { headers['HTTP-Referer'] = 'https://hondi.net'; headers['X-Title'] = 'Navi'; }
+  if (provider === 'openrouter') { headers['HTTP-Referer'] = 'https://app.naviweb.kr'; headers['X-Title'] = 'Navi'; }
 
   const payload = { model, messages: relayMessages, stream: isStream };
   if (max_tokens  != null) payload.max_tokens  = max_tokens;
@@ -22950,7 +22951,7 @@ async function handleKPlanRelay(bodyText, env, corsHeaders, meta = null, ctx = n
   if (isStream) {
     // 2026-09-03 — 웹검색(KPLAN_WEB_SEARCH_TAG) 왕복은 스트리밍과 함께
     // 구현하지 않는다(SSE 스트림 중간에 별도 검색 호출을 끼워 넣는 건
-    // 클라이언트 파싱 계약을 깨뜨림). plan.hondi.net/webapp.html은 이미
+    // 클라이언트 파싱 계약을 깨뜨림). plan.naviweb.kr/webapp.html은 이미
     // stream:false만 쓰므로 실사용에 지장 없음 — 스트리밍 호출부가 검색이
     // 필요해지면 그때 별도로 설계.
     let res;
@@ -23082,7 +23083,7 @@ async function handleKPlanRelay(bodyText, env, corsHeaders, meta = null, ctx = n
       if (briefText && plan_id) {
         try {
           await _kplanIssueBriefToKMail(env, { guid, planId: plan_id, briefText });
-          finalMsg.content = cleanContent + '\n\n---\n✅ 위 브리프를 K-Mail로 전달했습니다. [mail.hondi.net](https://mail.hondi.net)에서 새 대화를 시작하시면 K-Mail이 이어받아 구체적인 실행(대상 검색·발송 회차·문구·보고)을 설계합니다.';
+          finalMsg.content = cleanContent + '\n\n---\n✅ 위 브리프를 K-Mail로 전달했습니다. [mail.naviweb.kr](https://mail.naviweb.kr)에서 새 대화를 시작하시면 K-Mail이 이어받아 구체적인 실행(대상 검색·발송 회차·문구·보고)을 설계합니다.';
         } catch (e) {
           _dlog(env, JSON.stringify({ tag: 'KPLAN_ISSUE_BRIEF_TO_KMAIL_FAILED', guid, planId: plan_id, error: e.message }));
           finalMsg.content = cleanContent + '\n\n(K-Mail로 브리프 전달에 실패했습니다 — 잠시 후 다시 시도해 주세요.)';
@@ -24158,7 +24159,7 @@ let _spDelegationCache = new Map();
 const _SP_DELEGATION_TTL_MS = 10 * 60 * 1000;
 
 // ★ 2026-07-09 신설 — kgov(SP-10_kpublic) + <PROVINCE>-GOV-COMMON-OVERLAY +
-// GOV-TREE-PROTOCOL을 조립한다. jeju.hondi.net(독립 jeju 저장소)의
+// GOV-TREE-PROTOCOL을 조립한다. jeju.naviweb.kr(독립 jeju 저장소)의
 // jeju-router.js `_loadGovCommon()`과 정확히 같은 로직을 worker.js
 // 서버사이드에도 이식했다 — 지금까지 /gov/relay의 gov_do/gov_national
 // (당시 jeju_do/jeju_national) 위임 경로만 이 상위 체인 없이
@@ -29384,7 +29385,7 @@ async function handleFriendInviteNotify(request, env, corsHeaders) {
   try { me = await _l1FindProfileByGuid(env, who.guid); } catch (e) { /* 이름 없이 발송 */ }
   const name = (me && (me.nickname || me.handle)) || '누군가';
   try {
-    await _sendPushToGuid(env, to, { title: '나비웹 대화 요청', body: `${name}님이 대화를 시도했습니다.`, tag: `p2p-invite-${who.guid}`, url: 'https://hondi.net/webapp.html' });
+    await _sendPushToGuid(env, to, { title: '나비웹 대화 요청', body: `${name}님이 대화를 시도했습니다.`, tag: `p2p-invite-${who.guid}`, url: 'https://app.naviweb.kr/webapp.html' });
   } catch (e) { return new Response(JSON.stringify({ ok: true, pushed: false }), { status: 200, headers: corsHeaders }); }
   return new Response(JSON.stringify({ ok: true, pushed: true }), { status: 200, headers: corsHeaders });
 }
@@ -34598,7 +34599,7 @@ async function handleFeedbackPost(request, env, corsHeaders) {
     const aiRes = await fetch(_fbUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${_fbKey}`,
-                 ...(env.OPENROUTER_API_KEY ? {'HTTP-Referer':'https://hondi.net','X-Title':'Navi'} : {}) },
+                 ...(env.OPENROUTER_API_KEY ? {'HTTP-Referer':'https://app.naviweb.kr','X-Title':'Navi'} : {}) },
       body: JSON.stringify({
         model: env.OPENROUTER_API_KEY ? OR_MODEL_FAST : 'deepseek/deepseek-r1:free',
         max_tokens: 10,
@@ -34807,7 +34808,7 @@ async function handleFeedbackPatch(request, env, corsHeaders) {
 //   성공 시 Worker가 자체 admin 세션 토큰(HMAC-SHA256, ADMIN_MASTER_KEY로 서명)을
 //   발급한다. 이 토큰은 쿠키가 아니라 Authorization: Bearer 헤더로 주고받는다 —
 //   이 Worker는 커스텀 도메인(hondi.net) 라우트가 없는 *.workers.dev 인스턴스라
-//   기존 buildCookie()처럼 Domain=.hondi.net 쿠키를 발급해도 브라우저가 도메인
+//   기존 buildCookie()처럼 Domain=.naviweb.kr 쿠키를 발급해도 브라우저가 도메인
 //   불일치로 폐기한다. prompt-editor.html은 새 탭에서 열리는 독립 단일 페이지라
 //   세션을 메모리에만 들고 있으면 충분하다(새로고침 시 재로그인 — 의도된 동작).
 //
@@ -35490,7 +35491,7 @@ async function handleKmailAttachmentUpload(request, env, corsHeaders) {
   const { file_base64, filename, content_type } = body;
   if (!file_base64 || !filename) return _err(400, 'MISSING_FIELD', 'file_base64, filename 필수', corsHeaders);
 
-  // 2026-09-10 — mail.hondi.net/webapp.html은 지갑 SSO를 쓰지 않고
+  // 2026-09-10 — mail.naviweb.kr/webapp.html은 지갑 SSO를 쓰지 않고
   // phone_verify_token만 보내는데, 이 핸들러는 그동안 지갑 서명
   // (guid/pubkey/signature/ts)만 받아 캠페인 작성 중 첨부가 항상
   // 400(MISSING_FIELD)으로 실패했다. handleKmailChat과 동일한 공용
@@ -35568,7 +35569,7 @@ async function handleKmailAttachmentUpload(request, env, corsHeaders) {
 // 프로필 사진과 달리 인증 필요 — 개인 문서일 수 있는 첨부를 공개로
 // 열어두면 안 된다.
 // GET /r/<token> — 2026-09-04 신설. 캠페인 본문의 {{TRACKING_LINK}}가
-// 발송 시점에 이 URL(https://hondi.net/r/<token>)로 치환된다(아래
+// 발송 시점에 이 URL(https://app.naviweb.kr/r/<token>)로 치환된다(아래
 // _kmailSendCampaign 참고). 이 엔드포인트는 인증이 필요 없다 — 수신자
 // (외부인)가 클릭하는 링크라 로그인 상태를 요구할 수 없다. 토큰 자체가
 // 추측 불가능한 무작위 문자열이라 그 자체로 접근 통제 역할을 한다.
@@ -35576,8 +35577,8 @@ async function handleKmailAttachmentUpload(request, env, corsHeaders) {
 // kmail_campaign_recipients 갱신은 응답을 막지 않도록 fire-and-forget.
 async function handleKmailTrackingRedirect(request, url, env, corsHeaders, ctx) {
   const token = url.pathname.replace(/^\/r\//, '').trim();
-  const PC_DEST = 'https://hondi.net/';
-  const MOBILE_DEST = 'https://hondi.net/desktop.html#k-services';
+  const PC_DEST = 'https://app.naviweb.kr/';
+  const MOBILE_DEST = 'https://app.naviweb.kr/desktop.html#k-services';
   if (!token || !/^[a-zA-Z0-9_-]{8,64}$/.test(token)) {
     return Response.redirect(PC_DEST, 302);
   }
@@ -36009,7 +36010,7 @@ async function handleUserMailSend(request, env, corsHeaders) {
   }
 
   // 2026-09-10 — handleKmailAttachmentUpload와 같은 이유로 동일하게
-  // 교체: mail.hondi.net/webapp.html(빠른 발송 탭)은 phone_verify_token만
+  // 교체: mail.naviweb.kr/webapp.html(빠른 발송 탭)은 phone_verify_token만
   // 보내므로, handleKmailChat과 같은 공용 인증 게이트로 맞춘다.
   const auth = await _kAuth.resolveGuid(env, body, { sigMsg: `kmail-send:${body.guid}:${to}:${body.ts}` });
   if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
@@ -36721,7 +36722,7 @@ async function handleKmailMailboxList(request, url, env, corsHeaders) {
     return _err(400, 'MISSING_FIELD', "box=thread일 때는 with(상대방 이메일)가 필수입니다", corsHeaders);
   }
 
-  // 2026-09-11 — mail.hondi.net 웹앱(지갑 SSO 미사용, "메일" 탭 신설)이
+  // 2026-09-11 — mail.naviweb.kr 웹앱(지갑 SSO 미사용, "메일" 탭 신설)이
   // phone_verify_token만 보내므로 handleUserMailSend와 같은 공용
   // 인증 게이트로 맞춘다. GET이라 body가 없어 쿼리스트링을 plain
   // object로 바꿔서 넘긴다.
@@ -37268,7 +37269,7 @@ async function handleKmailPeopleSearch(request, url, env, corsHeaders) {
 }
 
 // GET /kmail/settings?phone_verify_token=... (또는 하위호환 guid/pubkey/signature/ts)
-// 2026-09-12 수정 — mail.hondi.net 웹앱은 지갑 SSO를 쓰지 않고
+// 2026-09-12 수정 — mail.naviweb.kr 웹앱은 지갑 SSO를 쓰지 않고
 // phone_verify_token만 보내는데, 이 엔드포인트는 여태 _verifyClaimsRequester
 // (지갑 서명 전용)만 받고 있어 실제로는 화면에서 호출이 불가능한
 // 상태였다(내 메일 ID 화면을 만들며 발견). handleUserMailSend와 동일한
@@ -37826,7 +37827,7 @@ async function handleKmailDraftSave(request, env, corsHeaders) {
   if (!reqBody) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
   const { draft_id, recipients, subject, body: mailBody } = reqBody;
 
-  // 2026-09-11 — mail.hondi.net "메일" 탭(지갑 SSO 미사용)에서 쓸 수
+  // 2026-09-11 — mail.naviweb.kr "메일" 탭(지갑 SSO 미사용)에서 쓸 수
   // 있도록 공용 인증 게이트로 이관.
   const auth = await _kAuth.resolveGuid(env, reqBody, { sigMsg: `kmail-draft-save:${reqBody.guid}:${draft_id || 'new'}:${reqBody.ts}` });
   if (!auth.ok) return _err(auth.status, auth.code, auth.message, corsHeaders);
@@ -38022,7 +38023,7 @@ async function handleKmailCampaignCreate(request, env, corsHeaders) {
 
 // GET /kmail/campaigns/list?phone_verify_token=... (또는 지갑 서명)
 // 2026-09-03 신설 — 본인 소유(owner_user_guid=guid) 캠페인 전체를 최신순
-// 으로 돌려준다. mail.hondi.net/webapp.html "캠페인 목록/상태" 화면
+// 으로 돌려준다. mail.naviweb.kr/webapp.html "캠페인 목록/상태" 화면
 // 전용 — 회신 수까지는 포함하지 않는다(kmail_campaign_recipients가
 // 아직 없어 별도 지시서(HANDOFF_2026-09-03_kmail-campaign-recipients-taskbrief.md)
 // 대상, 이 응답은 캠페인 레코드 자체의 status/digest_status만 보여준다).
@@ -38208,7 +38209,7 @@ async function _kmailSendCampaign(env, campaign, opts = {}) {
       // 눈에 띄게 원문 그대로 두어 문제를 바로 알아챌 수 있게 한다.
       let sendText = (recipRow?.body_override || '').trim() || campaign.body;
       if (recipRow?.tracking_token) {
-        sendText = sendText.replace(/\{\{TRACKING_LINK\}\}/g, `https://hondi.net/r/${recipRow.tracking_token}`);
+        sendText = sendText.replace(/\{\{TRACKING_LINK\}\}/g, `https://app.naviweb.kr/r/${recipRow.tracking_token}`);
       }
       await _kmailSendOneEmail(env, {
         guid: campaign.owner_user_guid, to: contact.email,

@@ -570,6 +570,6 @@ export async function lookupProfile(shortId, version) {
     if(!data.items?.length) throw new Error(`등록되지 않은 코드 (${sid})`);
     const p=data.items[0];
     return{guid:p.ipv6||p.id,handle:p.handle,name:p.name||p.nickname||p.handle,
-           url:p.hondi_code_id?`/profiles/${p.hondi_code_id}.html`:`https://hondi.net/profile?id=${p.id}`};
+           url:p.hondi_code_id?`/profiles/${p.hondi_code_id}.html`:`https://app.naviweb.kr/profile?id=${p.id}`};
   }catch(e){throw new Error(`프로필 조회 실패: ${e.message}`);}
 }

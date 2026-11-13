@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════════
-   estate-search-widget.js — estate.hondi.net 상단 매물 검색 채팅창 (v1.0, 2026-09-28)
+   estate-search-widget.js — estate.naviweb.kr 상단 매물 검색 채팅창 (v1.0, 2026-09-28)
 
    assets/chat-widget.js(단독 페이지용 채팅 FAB)와 같은 발상이지만 세 가지가
    다르다:
@@ -16,7 +16,7 @@
 
    호출 경로: POST https://hondi-proxy.tensor-city.workers.dev/ai/chat
    이 경로는 CORS(Origin 헤더 화이트리스트, worker.js ALLOWED_ORIGINS에
-   'https://estate.hondi.net' 등록 필요)만 검사하고 로그인·과금 게이트가
+   'https://estate.naviweb.kr' 등록 필요)만 검사하고 로그인·과금 게이트가
    없는 기존 그대로의 엔드포인트다 — 이 위젯이 새로 만든 노출이 아니라
    기존 30여 개 hondi.net 서브도메인과 같은 수준의 노출이다. 별도
    rate-limit은 없으니, 남용이 관측되면 worker.js 쪽에 추가 게이트를
@@ -24,7 +24,7 @@
 
    사용법 — estate 페이지 <body> 안에 컨테이너를 두고 이 스크립트를 뒤에 포함:
      <div id="estate-search-chat"></div>
-     <script src="https://hondi.net/assets/estate-search-widget.js"></script>
+     <script src="https://app.naviweb.kr/assets/estate-search-widget.js"></script>
    ══════════════════════════════════════════════════════════════════ */
 
 (function () {

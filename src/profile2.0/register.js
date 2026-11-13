@@ -98,7 +98,7 @@ function generateQRSVG(url, label) {
   <text x="150" y="312" font-family="sans-serif" font-size="13"
         fill="#ffffff" text-anchor="middle" font-weight="bold">${label}</text>
   <text x="150" y="330" font-family="sans-serif" font-size="11"
-        fill="#9FE1CB" text-anchor="middle">users.hondi.net</text>
+        fill="#9FE1CB" text-anchor="middle">users.naviweb.kr</text>
 </svg>`;
 }
 
@@ -304,7 +304,7 @@ async function handleQrCode(request, env, corsHeaders) {
   }
 
   // 프로필 URL
-  const profileUrl = `https://users.hondi.net/profile.html?handle=${encodeURIComponent(handle)}`;
+  const profileUrl = `https://users.naviweb.kr/profile.html?handle=${encodeURIComponent(handle)}`;
   const svg = generateQRSVG(profileUrl, handle);
 
   return new Response(svg, {

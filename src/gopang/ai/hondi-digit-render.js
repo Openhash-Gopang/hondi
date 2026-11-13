@@ -2,7 +2,7 @@
  * hondi-digit-render.js — 숫자 코드 v2 이미지 생성 (가변 자릿수 1~10, 브라우저용)
  * 레이아웃은 hondi-digit-core.js가 전부 정한다(테스트가 쓰는 것과 동일).
  *   · 'navi'(기본, 2026-10~): 왼쪽 노란 바탕 "나비" 로고 칸 + 오른쪽 숫자열(최대 10칸, 짧은 코드는 뒤쪽 칸을 비워 둠) — layoutDigitCodeV3()
- *   · 'hondi'(옛 배치): 위 "hondi.net" 로고 + 아래 왼쪽 정렬 숫자열 — layoutDigitCode(). 이미 발급·인쇄된 코드를 다시 그릴 때만 쓴다.
+ *   · 'hondi'(옛 배치): 위 "naviweb.kr" 로고 + 아래 왼쪽 정렬 숫자열 — layoutDigitCode(). 이미 발급·인쇄된 코드를 다시 그릴 때만 쓴다.
  * 스캐너(hondi-digit-scanner-v2.js)는 두 배치를 모두 읽는다.
  */
 import { layoutDigitCode, layoutDigitCodeV3, BOX_W, LOGO, V3 } from './hondi-digit-core.js';

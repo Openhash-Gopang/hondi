@@ -44,7 +44,7 @@ export const SOURCES = Object.freeze(['user_stated', 'ac_conversation', 'documen
 
 /** 건강 기록을 요청할 수 있는 서비스(기본 거부). 서비스 id는 gwp-registry.js의 id, origin은 그 서비스의 오리진이다. */
 export const HEALTH_DATA_REQUESTERS = Object.freeze({
-  kdoctor: Object.freeze({ origin: 'https://doctor.hondi.net', purposes: Object.freeze(['diagnosis_support']) }),
+  kdoctor: Object.freeze({ origin: 'https://doctor.naviweb.kr', purposes: Object.freeze(['diagnosis_support']) }),
 });
 
 const LIST_MAX_ITEMS = 50;

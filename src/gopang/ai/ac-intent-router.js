@@ -188,7 +188,7 @@ function classifyIntent(userText, registry, scope) {
       type: ROUTE_TYPES.QNA,
       target: registry.other_targets.QNA.domain,
       confidence: "low", // 오늘 실측 결과 QNA 버킷의 63%가 qna 자체 도메인 라우터에도 안 걸렸으므로 과신 금지
-      reason: "플랫폼 전략/아키텍처 키워드 매칭 — 단, qna.hondi.net 자체 도메인 라우팅 커버리지가 낮으니 확인 필요",
+      reason: "플랫폼 전략/아키텍처 키워드 매칭 — 단, qna.naviweb.kr 자체 도메인 라우팅 커버리지가 낮으니 확인 필요",
     };
   }
 

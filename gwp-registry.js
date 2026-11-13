@@ -68,7 +68,7 @@ const GWP_REGISTRY = [
     // 여닫기 전 확인창을 넣는 건 되레 해롭다(불필요한 지연). 오탐(false
     // positive) 라우팅 자체를 줄이는 게 맞는 방향이고, 그건 이 게이트의
     // 범위 밖이다.
-    url: 'https://911.hondi.net/webapp.html',
+    url: 'https://911.naviweb.kr/webapp.html',
     sp_key: 'SP-02_k119',
     status: 'active', priority: 0, threshold: 0.60,
     description: '긴급 구조·재난 대응. 119·112 연계.',
@@ -93,7 +93,7 @@ const GWP_REGISTRY = [
   {
     id: 'klaw', name: 'K-Law', category: 'JUS',
     type: 'inline',
-    url: 'https://klaw.hondi.net/webapp.html',
+    url: 'https://klaw.naviweb.kr/webapp.html',
     sp_key: 'SP-01_klaw',
     status: 'active', priority: 1, threshold: 0.70,
     // 2026-09-30 명확화(주피터 확정) — klaw와 EXPERT lawyer의 경계를
@@ -119,7 +119,7 @@ const GWP_REGISTRY = [
   {
     id: 'kpolice', name: 'K-Police', category: 'JUS',
     type: 'inline',
-    url: 'https://police.hondi.net/webapp.html',
+    url: 'https://police.naviweb.kr/webapp.html',
     sp_key: 'SP-03_kpolice',
     status: 'active', priority: 1, threshold: 0.65,
     description: '실시간 범죄 예측·대응. 경찰청 연동.',
@@ -137,7 +137,7 @@ const GWP_REGISTRY = [
   {
     id: 'ksecurity', name: 'K-Security', category: 'JUS',
     type: 'inline',
-    url: 'https://security.hondi.net/webapp.html',
+    url: 'https://security.naviweb.kr/webapp.html',
     sp_key: 'SP-15_ksecurity',
     // ★ 2026-07-12 정정 — status가 특별한 이유 없이 'pending'으로 방치돼
     // 있었다(관련 커밋 이력 없음). security.hondi.net에 실제로 배포된
@@ -159,7 +159,7 @@ const GWP_REGISTRY = [
   {
     id: 'khealth', name: 'K-Health', category: 'MED',
     type: 'inline',
-    url: 'https://health.hondi.net/webapp.html',
+    url: 'https://health.naviweb.kr/webapp.html',
     sp_key: 'SP-04_khealth',
     status: 'active', priority: 3, threshold: 0.70,
     description: '실거래 기반 건강 위험도 산정. 병원 연동.',
@@ -176,7 +176,7 @@ const GWP_REGISTRY = [
   },
 
   // ── K-Doctor (MED) — tab, 2026-10-01 신설·활성화 ────────────────────
-  // doctor.hondi.net(진단 참고·처방/처치 제안, SP-29 총괄 + 과목별 SP 41종). 의료인 대상 임상 의사결정 지원.
+  // doctor.naviweb.kr(진단 참고·처방/처치 제안, SP-29 총괄 + 과목별 SP 41종). 의료인 대상 임상 의사결정 지원.
   // 일반 시민의 증상 상담은 khealth 소관이다 — AC §CATALOG 행도 "의료인이 감별진단·진단 참고를 청하거나 K-Doctor를 직접 지목한 경우"로 좁혔다.
   // 활성화로 (1) AC가 새 탭으로 열 수 있고 (2) GWP_PDV_REQUEST로 병력·가족력·생활습관을 사용자 승인 하에 받는 경로
   // (gwp/pdv-health-handler.js, 요청 허용 서비스 allowlist의 'kdoctor')가 이어진다.
@@ -185,7 +185,7 @@ const GWP_REGISTRY = [
   {
     id: 'kdoctor', name: 'K-Doctor', category: 'MED',
     type: 'tab',
-    url: 'https://doctor.hondi.net/kdoctor.html', // 2026-10-29 K-Doctor 소개 첫 화면을 kdoctor.html 로 옮김(doctor.hondi.net/ 는 병원·의원 서류 페이지)
+    url: 'https://doctor.naviweb.kr/kdoctor.html', // 2026-10-29 K-Doctor 소개 첫 화면을 kdoctor.html 로 옮김(doctor.naviweb.kr/ 는 병원·의원 서류 페이지)
     sp_key: 'SP-29_kdoctor',
     status: 'active', priority: 3, threshold: 0.70,
     description: '진료과목별 AI가 참여하는 진단 참고·처방/처치 제안(의료인 대상 임상 의사결정 지원). 진단서·처방전을 발급하지 않는다.',
@@ -196,7 +196,7 @@ const GWP_REGISTRY = [
   {
     id: 'kedu', name: 'K-School', category: 'EDU',
     type: 'inline',
-    url: 'https://school.hondi.net/webapp.html',
+    url: 'https://school.naviweb.kr/webapp.html',
     sp_key: 'SP-09_kschool',
     status: 'active', priority: 4, threshold: 0.70,
     // 2026-08-08 정정 — K-School은 더 이상 "AI가 직접 유치원~대학원까지
@@ -241,7 +241,7 @@ const GWP_REGISTRY = [
     // 오탐 라우팅으로 인한 원치 않는 결제 화면 진입을 막아준다.
     requireConfirm: true,
     confirmMessage: '결제·송금·계좌 화면(GDC)으로 이동합니다. 계속할까요?',
-    url: 'https://gdc.hondi.net/webapp.html',
+    url: 'https://gdc.naviweb.kr/webapp.html',
     sp_key: 'SP-08_gdc',
     status: 'active', priority: 5, threshold: 0.75,
     // 2026-08-01 정정 — GDC는 결제·송금만 하는 게 아니라 예금·적금·대출·
@@ -269,7 +269,7 @@ const GWP_REGISTRY = [
   {
     id: 'kfinance', name: 'K-Stock', category: 'ECO',
     type: 'inline',
-    url: 'https://stock.hondi.net/webapp.html',
+    url: 'https://stock.naviweb.kr/webapp.html',
     sp_key: 'SP-11_kstock',
     status: 'active', priority: 5, threshold: 0.75,
     // ★ 2026-08-02 상호참조 추가 — kgdc가 2026-08-01 kbank 통합으로
@@ -286,7 +286,7 @@ const GWP_REGISTRY = [
   {
     id: 'kinsurance', name: 'K-Insurance', category: 'ECO',
     type: 'inline',
-    url: 'https://insurance.hondi.net/webapp.html',
+    url: 'https://insurance.naviweb.kr/webapp.html',
     sp_key: 'SP-16_kinsurance',  // v2.2 — SP-14에서 재배정됨 (K-Clean 번호충돌 해소)
     status: 'active', priority: 6, threshold: 0.70,
     // 2026-07-26 정정: insurance/webapp.html 실제 배포본 대조 결과,
@@ -419,7 +419,7 @@ const GWP_REGISTRY = [
     id: 'kestate-search', name: 'K-Estate 매물 검색 도우미', category: 'ECO',
     type: 'switch',
     sp_key: 'SP-24b_kestate_search',
-    // 2026-09-28 신설 — estate.hondi.net 상단 채팅창 전용. SP-24_kestate의
+    // 2026-09-28 신설 — estate.naviweb.kr 상단 채팅창 전용. SP-24_kestate의
     // "search" 모드 하나만 떼어내 로그인/생태계 맥락 없이 단독 동작하도록
     // 다시 쓴 것(list·manage·consent_sale은 범위 밖). status는 다른 신규
     // SP와 동일하게 'pending'이지만, 다른 pending SP와 달리 이 SP는 이미
@@ -461,7 +461,7 @@ const GWP_REGISTRY = [
     id: 'kestate-register', name: 'K-Estate 물건 등록 도우미', category: 'ECO',
     type: 'switch',
     sp_key: 'SP-24d_kestate_register',
-    // 2026-09-30 신설 — estate.hondi.net 히어로 섹션의 "물건 등록" 버튼 +
+    // 2026-09-30 신설 — estate.naviweb.kr 히어로 섹션의 "물건 등록" 버튼 +
     // 실시간 필드 패널 전용. SP-24_kestate의 "list" 모드(매물 등록,
     // 기존엔 <<<STATE>>> 마커 하나에 extra 자유 텍스트만 누적하던 얕은
     // 구조)를 SP-24b가 "search" 모드를 뗀 것과 같은 방식으로 구조화해
@@ -541,7 +541,7 @@ const GWP_REGISTRY = [
   {
     id: 'kcommerce_seller', name: 'K-Market(판매자 등록)', category: 'MKT',
     type: 'tab',
-    url: 'https://market.hondi.net/desktop.html#seller',
+    url: 'https://market.naviweb.kr/desktop.html#seller',
     sp_key: null,  // AI가 아니라 desktop.html 자체의 서술형 입력폼 UI — GWP는 탭 오픈까지만
     status: 'active', priority: 7, threshold: 0.70,
     description: '판매자 등록(중고물품·서비스 판매 시작) — 구매가 아니라 "내가 판매자가 되고 싶다"는 요청 전용. 일반 구매/탐색은 kcommerce로.',
@@ -554,7 +554,7 @@ const GWP_REGISTRY = [
   {
     id: 'ktax', name: 'K-Tax', category: 'ECO',
     type: 'inline',
-    url: 'https://tax.hondi.net/webapp.html',
+    url: 'https://tax.naviweb.kr/webapp.html',
     sp_key: 'SP-07_ktax',
     status: 'active', priority: 6, threshold: 0.75,
     // ★ 2026-08-02 정정 — 기존 description('재무제표 실시간 자동 생성·
@@ -578,7 +578,7 @@ const GWP_REGISTRY = [
   {
     id: 'kcommerce', name: 'K-Market', category: 'MKT',
     type: 'tab',
-    url: 'https://market.hondi.net/webapp.html',
+    url: 'https://market.naviweb.kr/webapp.html',
     // sp_key: 'SP-05_kmarket' — 2026-07-05 실사 결과 죽은 참조로 확인됨.
     // resolveSpUrls()/entry.sp_url을 실제로 읽는 호출부가 코드베이스
     // 어디에도 없고(엔진 주석 언급뿐), market/webapp.html은 이 레지스트리를
@@ -600,11 +600,11 @@ const GWP_REGISTRY = [
   {
     id: 'ktransport', name: 'K-Traffic', category: 'TRN',
     type: 'inline',
-    url: 'https://traffic.hondi.net/webapp.html',
+    url: 'https://traffic.naviweb.kr/webapp.html',
     sp_key: 'SP-06_ktraffic',
     status: 'active', priority: 8, threshold: 0.75,
     // ★ 2026-07-12 정정 — 이전 설명("실시간 교통 흐름 예측·우회 경로")은
-    // 실제 SP(traffic.hondi.net webapp.html의 AGENCY_PROMPT)와 완전히
+    // 실제 SP(traffic.naviweb.kr webapp.html의 AGENCY_PROMPT)와 완전히
     // 달랐다. 실제로는 /gov/relay(agency='traffic')를 쓰는 교통행정
     // 민원 대화형 안내 AI다 — 내비게이션·경로탐색이 아니라 "도로·대중
     // 교통·주정차 단속·과태료·운전면허 행정" 민원을 인터뷰 방식으로
@@ -619,7 +619,7 @@ const GWP_REGISTRY = [
   {
     id: 'klogistics', name: 'K-Logistics', category: 'TRN',
     type: 'inline',
-    url: 'https://logistics.hondi.net/webapp.html',
+    url: 'https://logistics.naviweb.kr/webapp.html',
     sp_key: 'SP-13_klogistics',
     status: 'active', priority: 8, threshold: 0.70,
     description: '주문-출고-배송-반품 전 과정 자동화.',
@@ -639,7 +639,7 @@ const GWP_REGISTRY = [
   {
     id: 'kregionalgov', name: '전국 지방행정 AI', category: 'GOV',
     type: 'tab',
-    // ★ 2026-07-22 변경 — jeju.hondi.net(별도 서브도메인, 별개 오리진)에서
+    // ★ 2026-07-22 변경 — jeju.naviweb.kr(별도 서브도메인, 별개 오리진)에서
     // hondi.net 자체 안의 페이지로 이전. 사용자 지시: "hondi.net/jeju,
     // hondi.net/seoul 형식으로 하여, 탭 전환 시 별도의 인증이 불필요하게
     // 하십시오." 별도 오리진이면 지갑(localStorage/IndexedDB)을 직접 못
@@ -648,7 +648,7 @@ const GWP_REGISTRY = [
     // 오리진으로 옮기면 그 문제 자체가 사라진다(pages/regional-gov.html
     // 참조). 라우팅 로직 자체(어느 광역시도인지 판별)는 이미 전국 대응
     // 으로 일반화된 gov-router.js를 그대로 재사용하므로 변경 없음.
-    url: 'https://hondi.net/pages/regional-gov.html',
+    url: 'https://app.naviweb.kr/pages/regional-gov.html',
     status: 'active', priority: 8, threshold: 0.70,
     description: '광역시도청·시군구청·읍면동사무소·국가기관 지역사무소 행정 안내(전국 대응, GOV-COMMON SP 트리 자체 라우팅).',
     triggers: [
@@ -675,7 +675,7 @@ const GWP_REGISTRY = [
   {
     id: 'kgov', name: 'K-Public', category: 'GOV',
     type: 'inline',
-    url: 'https://public.hondi.net/webapp.html',
+    url: 'https://public.naviweb.kr/webapp.html',
     sp_key: 'SP-10_kpublic',
     status: 'active', priority: 9, threshold: 0.70,
     // ★ 2026-07-21 트리거 정리 — '시청'·'도청'·'구청'이 kregionalgov(전국
@@ -696,7 +696,7 @@ const GWP_REGISTRY = [
   {
     id: 'kdemocracy', name: 'K-Democracy', category: 'LEG',
     type: 'inline',
-    url: 'https://democracy.hondi.net/webapp.html',
+    url: 'https://democracy.naviweb.kr/webapp.html',
     sp_key: 'SP-12_kdemocracy',
     status: 'active', priority: 10, threshold: 0.70,
     // ★ 2026-07-12 정정 — "국민동의청원에 서명해줘"·"입법예고에 의견
@@ -722,7 +722,7 @@ const GWP_REGISTRY = [
   {
     id: 'kbusiness', name: 'K-Business', category: 'BIZ',
     type: 'tab',
-    url: 'https://market.hondi.net/kmarket_admin_dashboard.html',
+    url: 'https://market.naviweb.kr/kmarket_admin_dashboard.html',
     status: 'active', priority: 9, threshold: 0.70,
     // ★ 2026-08-02 상호참조 추가 — ktax와 트리거가 실제로 겹침(세금/
     // 사업자 세금, 부가세/부가세 신고, 세무/사업자 세무 — "GWP-GWP
@@ -781,17 +781,17 @@ const GWP_REGISTRY = [
   },
 
   // ── 환경 (ENV) — inline (신고) ────────────────────────────
-  // ★ 2026-09-21 — fiil.kr → clean.hondi.net(Openhash-Gopang/clean)으로 이전.
+  // ★ 2026-09-21 — fiil.kr → clean.naviweb.kr(Openhash-Gopang/clean)으로 이전.
   // 이전 사유: fiil.kr 화면이 _gwpLaunch()가 이미 넘겨주던 token(GUID)·
   // facts(currentLocation 등) 쿼리 파라미터를 전혀 소비하지 않아 (a) 실제
   // 로그인 사용자 대신 더미 데이터가 표시되고 (b) 나비가 이미 확보한 위치를
   // 무시한 채 자체 navigator.geolocation을 다시 호출해 GPS 시간 초과가
-  // 반복되던 결함이 실사로 확인됨. clean.hondi.net 쪽 webapp.html에서
+  // 반복되던 결함이 실사로 확인됨. clean.naviweb.kr 쪽 webapp.html에서
   // token→프로필 조회, facts→위치 사용을 구현해 해소(clean 저장소 README 참고).
   {
     id: 'fiil-kcleaner', name: 'K-Clean', category: 'ENV',
     type: 'inline',
-    url: 'https://clean.hondi.net/webapp.html',
+    url: 'https://clean.naviweb.kr/webapp.html',
     sp_key: 'SP-14_kcleaner',
     status: 'active', priority: 11, threshold: 0.65,
     description: '해안·도심 쓰레기 AI 자동 분석·신고.',
@@ -865,7 +865,7 @@ const GWP_REGISTRY = [
   {
     id: 'kqna', name: 'Gopang QnA', category: 'GOV',
     type: 'tab',
-    url: 'https://qna.hondi.net/webapp.html',
+    url: 'https://qna.naviweb.kr/webapp.html',
     status: 'active', priority: 9, threshold: 0.65,
     description: '범부처 질의응답 라우터. SP-CORE + 도메인별 SP(BIZ/ECONOMY/EDU/GOV/INFRA/IP/LEGAL/LOGISTICS/SAFETY) 자체 라우팅.',
     triggers: [
@@ -877,7 +877,7 @@ const GWP_REGISTRY = [
   {
     id: 'kusers', name: 'Gopang Users', category: 'GOV',
     type: 'tab',
-    url: 'https://users.hondi.net/webapp.html',
+    url: 'https://users.naviweb.kr/webapp.html',
     status: 'active', priority: 9, threshold: 0.65,
     description: '개인/기관 엔티티 검색·해석. GAS(Gopang Address System) v1.6 기반. SP-USERS 자체 라우팅.',
     triggers: [
@@ -889,13 +889,13 @@ const GWP_REGISTRY = [
   // ── 2026-09-01 신설, 2026-09-08 mail.hondi.net으로 이관 — K-Mail:
   // 나비 사용자 간 메일 발송·수신·주소록. 관리자 전용 공문(hondi.org,
   // gov-mail)과 도메인·인증·목적 모두 별개. K-Law와 동일하게 전용
-  // 서브도메인(mail.hondi.net)의 webapp.html로 연결한다 — 더 이상
+  // 서브도메인(mail.naviweb.kr)의 webapp.html로 연결한다 — 더 이상
   // /pages/kmail-assistant.html에 자체 구현을 두지 않는다(중복 방지).
   // 수신자·발송시각·회신처리는 이 웹앱 안의 대화(SP-25_kmail)에서 결정.
   {
     id: 'kmail', name: 'K-Mail', category: 'UTL',
     type: 'inline',
-    url: 'https://mail.hondi.net/webapp.html',
+    url: 'https://mail.naviweb.kr/webapp.html',
     sp_key: 'SP-25_kmail',
     status: 'active', priority: 8, threshold: 0.75,
     description: '나비 사용자 간 메일 발송·수신·주소록 관리(예약발송·회신취합·자동삭제 규칙). 관리자 전용 공문과 무관.',
@@ -907,13 +907,13 @@ const GWP_REGISTRY = [
 
 
   // ── 나비로 Navi Law (JUS) — tab, 2026-10-28 신설 ───────────────────
-  // law.hondi.net(법무사·변호사 서류 초안 작성, 서식 안의 빈 칸 입력). 사이트가 비서(AC)가 연 탭이면 GWP_PDV_REQUEST 로
+  // law.naviweb.kr(법무사·변호사 서류 초안 작성, 서식 안의 빈 칸 입력). 사이트가 비서(AC)가 연 탭이면 GWP_PDV_REQUEST 로
   // 의뢰인 본인의 이름·연락처·주소만 사용자 승인 하에 받아 서식 칸에 채운다(주민등록번호 등은 요청하지 않는다).
   // sp_key 없음 — AI는 사이트 안의 expert-chat(embed)이 맡는다. triggers 는 K-Law·khealth 와 겹치지 않게 서비스명·작업명만 둔다.
   {
     id: 'navilaw', name: '나비로 Navi Law', category: 'JUS',
     type: 'tab',
-    url: 'https://law.hondi.net/',
+    url: 'https://law.naviweb.kr/',
     sp_key: null,
     status: 'active', priority: 8, threshold: 0.80,
     description: '법무사·변호사 서류(소장·신청서·계약서 등) 초안 작성과 서식 빈 칸 입력. 의뢰인 인적사항은 PDV에서 승인 하에 가져온다. 법률 상담·판결 예측은 담당하지 않음(→ K-Law).',
@@ -921,13 +921,13 @@ const GWP_REGISTRY = [
   },
 
   // ── 나비 특허 Navi Patent (JUS) — tab, 2026-10-29 신설 ─────────────
-  // ip.hondi.net(변리사 서류 초안 작성, 서식 안의 빈 칸 입력). 나비로 Navi Law 와 같은 구조 — 비서(AC)가 연 탭이면
+  // ip.naviweb.kr(변리사 서류 초안 작성, 서식 안의 빈 칸 입력). 나비로 Navi Law 와 같은 구조 — 비서(AC)가 연 탭이면
   // GWP_PDV_REQUEST 로 의뢰인(출원인) 본인의 이름·연락처·주소만 사용자 승인 하에 받아 서식 칸에 채운다.
   // sp_key 없음 — AI는 사이트 안의 expert-chat(embed, persona=patent-attorney*)이 맡는다.
   {
     id: 'navipatent', name: '나비 특허 Navi Patent', category: 'JUS',
     type: 'tab',
-    url: 'https://ip.hondi.net/',
+    url: 'https://ip.naviweb.kr/',
     sp_key: null,
     status: 'active', priority: 8, threshold: 0.80,
     description: '변리사 서류(특허출원서·의견서·보정서·상표등록출원서 등) 초안 작성과 서식 빈 칸 입력. 출원인 인적사항은 PDV에서 승인 하에 가져온다. 법률 상담·판결 예측은 담당하지 않음.',
@@ -935,14 +935,14 @@ const GWP_REGISTRY = [
   },
 
   // ── 나비 스쿨 Navi School (EDU) — tab, 2026-10-29 신설 ─────────────
-  // school.hondi.net(초중고·대학 학교 서류 초안 작성, 서식 안의 빈 칸 입력). 나비로·나비 특허와 같은 구조 — 비서(AC)가 연 탭이면
+  // school.naviweb.kr(초중고·대학 학교 서류 초안 작성, 서식 안의 빈 칸 입력). 나비로·나비 특허와 같은 구조 — 비서(AC)가 연 탭이면
   // GWP_PDV_REQUEST 로 작성자(학생·보호자·교직원) 본인의 이름·연락처·주소만 사용자 승인 하에 받아 서식 칸에 채운다.
   // 같은 도메인의 K-School(kedu, /webapp.html·/desktop.html)과는 별개 서비스다 — kedu 는 공공 교육정책 데이터 시스템으로 그대로 둔다.
   // sp_key 없음 — AI는 사이트 안의 expert-chat(embed, persona=school-docs)이 맡는다.
   {
     id: 'navischool', name: '나비 스쿨 Navi School', category: 'EDU',
     type: 'tab',
-    url: 'https://school.hondi.net/',
+    url: 'https://school.naviweb.kr/',
     sp_key: null,
     status: 'active', priority: 8, threshold: 0.80,
     description: '학교 서류(결석계·체험학습 신청서·휴학원·장학금 신청서·이의신청서 등) 초안 작성과 서식 빈 칸 입력. 작성자 인적사항은 PDV에서 승인 하에 가져온다. 과제·논문·자기소개서 대필, 증명서 발급, 제출 대행은 하지 않음.',
@@ -950,13 +950,13 @@ const GWP_REGISTRY = [
   },
 
   // ── 병원 & 의원 (MED) — tab, 2026-10-29 신설 ────────────────────────
-  // doctor.hondi.net(의사·간호사·원무 서류 초안 작성, 서식 안의 빈 칸 입력). 나비로 Navi Law 와 같은 구조 — 비서(AC)가 연 탭이면
+  // doctor.naviweb.kr(의사·간호사·원무 서류 초안 작성, 서식 안의 빈 칸 입력). 나비로 Navi Law 와 같은 구조 — 비서(AC)가 연 탭이면
   // GWP_PDV_REQUEST 로 환자 본인의 이름·연락처·주소만 사용자 승인 하에 받아 서식 칸에 채운다(주민등록번호 등은 요청하지 않는다).
-  // sp_key 없음 — AI는 사이트 안의 expert-chat(embed, persona=hospital)이 맡는다. K-Doctor(진단 참고)는 doctor.hondi.net/kdoctor.html 로 옮겨졌다.
+  // sp_key 없음 — AI는 사이트 안의 expert-chat(embed, persona=hospital)이 맡는다. K-Doctor(진단 참고)는 doctor.naviweb.kr/kdoctor.html 로 옮겨졌다.
   {
     id: 'navidoctor', name: '병원 & 의원 서류 (나비웹)', category: 'MED',
     type: 'tab',
-    url: 'https://doctor.hondi.net/',
+    url: 'https://doctor.naviweb.kr/',
     sp_key: null,
     status: 'active', priority: 8, threshold: 0.80,
     description: '의사·간호사·병원 원무 서류(진단서·소견서·간호기록·동의서·진료비·진료기록 발급 등) 초안 작성과 서식 빈 칸 입력. 환자 인적사항은 PDV에서 승인 하에 가져온다. 진단·처방 판단과 증상 상담은 담당하지 않음(→ K-Doctor·K-Health).',
@@ -1046,7 +1046,7 @@ const SVC_ID_ALIAS = {
   'k-business':  'kbusiness',
   'business':    'kbusiness',
   // kregionalgov(전국 지방행정 AI) — 2026-07-22 복원. 2026-07-21에 신설
-  // 됐던 이 별칭들이 같은 날 later(e469e54, jeju.hondi.net → hondi.net
+  // 됐던 이 별칭들이 같은 날 later(e469e54, jeju.naviweb.kr → hondi.net
   // 오리진 이전 커밋)에서 실수로 통째로 삭제됐다. 이 별칭들은 지역
   // 라우팅용이 아니라 "모델이 [GWP: xxx] 태그에 낼 법한 id(jeju,
   // 제주도청 등)를 실제 서비스 id(kregionalgov)로 되돌리는 안전망"이라
@@ -1143,7 +1143,7 @@ async function _resolveEntityGwp(guid) {
         name: identity.display_name || profile.name || '전문가',
         category: 'EXPERT',
         type: 'tab',
-        url: `https://hondi.net/pages/expert-chat.html?persona=${encodeURIComponent(personaId)}`,
+        url: `https://app.naviweb.kr/pages/expert-chat.html?persona=${encodeURIComponent(personaId)}`,
         status: 'active',
       };
     }
@@ -1161,7 +1161,7 @@ async function _resolveEntityGwp(guid) {
         // regional-gov.html은 이미 있는 페이지 — gov_code 쿼리
         // 파라미터로 assembleGovSystemPrompt의 directCode 경로
         // (2026-08-03 신설)를 바로 태운다.
-        url: `https://hondi.net/pages/regional-gov.html?gov_code=${encodeURIComponent(govCode)}`,
+        url: `https://app.naviweb.kr/pages/regional-gov.html?gov_code=${encodeURIComponent(govCode)}`,
         status: 'active',
       };
     }

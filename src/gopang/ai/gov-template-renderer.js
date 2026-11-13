@@ -5,7 +5,7 @@
 // 이름을 썼으나, Openhash-Gopang/jeju 독립 저장소의 jeju-router.js(실제
 // jeju.hondi.net을 서빙하는 프론트엔드 라우터, resolveJejuAgency/
 // assembleJejuSystemPrompt)와 이름이 겹쳐 혼동 위험이 있었다. 두 파일은
-// 목적·export 함수가 완전히 다르다(이 파일은 jeju.hondi.net 실트래픽과
+// 목적·export 함수가 완전히 다르다(이 파일은 jeju.naviweb.kr 실트래픽과
 // 무관 — SP-AUTHOR PHASE A~E가 "기존 템플릿 조립" 경로를 택했을 때만
 // 호출되는 오프라인/관리자용 렌더링 엔진). 2026-07-09/07-11에 두 차례
 // 정정 주석을 남긴 뒤, 2026-07-12에 예고했던 대로 파일명을

@@ -1,4 +1,4 @@
-// src/worker/kmail-assist.js — 나비 메인 화면(naviweb.kr / mail.hondi.net)의 SP 라우팅 순수 함수.
+// src/worker/kmail-assist.js — 나비 메인 화면(naviweb.kr / mail.naviweb.kr)의 SP 라우팅 순수 함수.
 //
 // 기본 SP는 "혼디 나만의 AI 비서"(AC-PRO-CORE)다. AC가 내는 [GWP: id] / [EXPERT: personaId] 태그를 읽어
 // 화면이 어디로 보낼지(K-Mail · 전문가 · 서류 작성 · 그대로 답변)를 정한다. 네트워크 없음 — 단위 시험 가능.
@@ -24,7 +24,7 @@ const GWP_TO_EXPERT = {
 };
 
 // 서류 작성 서비스 GWP id → 서류 작성 사이트(2026-10-31). AC-PRO-CORE 본문은 이 id 들을 모르므로 _ASSIST_NOTE(assistNote)가 알려 준다.
-// navidoc 은 분야를 정하지 않은 일반 서류(pro.hondi.net) — 레지스트리 미등록 id 이므로 이 화면에서만 쓴다.
+// navidoc 은 분야를 정하지 않은 일반 서류(pro.naviweb.kr) — 레지스트리 미등록 id 이므로 이 화면에서만 쓴다.
 const GWP_TO_DOC = { navilaw: 'law', navipatent: 'law', navischool: 'all', navidoctor: 'doctor', navidoc: 'all' };
 
 const TAG_RE = /\[\s*(GWP|EXPERT|DOC_EDIT|CALL_[A-Z_]+)\s*:\s*([^\]]*)\]/g;

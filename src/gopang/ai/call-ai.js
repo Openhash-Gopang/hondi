@@ -3256,7 +3256,7 @@ export async function _handleGovTaskTags(fullReply, bubble, sendFn = callAI, use
 /**
  * _handleDeptTaskTag — call-ai.js(gopang 시민 채팅 클라이언트) 전용 경로.
  *
- * ★ 2026-07-12 재설계 — jeju_do/jeju_national SP는 실제로 jeju.hondi.net
+ * ★ 2026-07-12 재설계 — jeju_do/jeju_national SP는 실제로 jeju.naviweb.kr
  * (별도 저장소 Openhash-Gopang/jeju)에서 서빙되고, 그 클라이언트는 이
  * call-ai.js를 쓰지 않는다. 그래서 DEPT_TASK_REQUEST의 "진짜" 처리 경로는
  * worker.js handleGovRelay/handleBusinessRelay 안에 서버측으로 새로 만들었다

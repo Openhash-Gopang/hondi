@@ -1910,7 +1910,7 @@ export async function openDeviceLinkQR() {
     return;
   }
 
-  const targetUrl = 'https://hondi.net/auth/device-link.html'
+  const targetUrl = 'https://app.naviweb.kr/auth/device-link.html'
     + '?phone=' + encodeURIComponent(user.e164)
     + '&return=' + encodeURIComponent('/webapp.html');
 

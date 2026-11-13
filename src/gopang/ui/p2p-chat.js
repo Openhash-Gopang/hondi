@@ -850,7 +850,7 @@ async function _saveP2PSession(messages, peer, startedAt) {
   {
     const _who   = { ipv6: _USER.ipv6, handle: _USER.handle };
     const _when  = { period_start: startedAt || now, period_end: now };
-    const _where = { svc_url: 'https://hondi.net' }; // 2026-07-28: gopang.net 브랜드 폐기, hondi.net으로 통일
+    const _where = { svc_url: 'https://app.naviweb.kr' }; // 2026-07-28: gopang.net 브랜드 폐기, hondi.net으로 통일
     const _what  = { summary: `P2P 대화 종료 — ${peer.handle}와 ${messages.length}턴` };
     const _how   = { method: 'WebRTC P2P DataChannel' };
     const _why   = { goal: 'P2P 대화 PDV 기록' };
