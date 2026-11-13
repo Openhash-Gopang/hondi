@@ -1,9 +1,13 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-13 22:06 KST · 기준 커밋 d0f8c73c
+- 갱신: 2026-11-13 22:30 KST · 기준 커밋 a85970e9
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-13 Merge pull request #1030 from Openhash-Gopang/fix-approve-host
+- 2026-11-13 Merge pull request #1029 from Openhash-Gopang/login-ui
+- 2026-11-13 폰 알림이 hondi.net 으로 열려 지문 인증이 실패하던 문제 — app.naviweb.kr 로 연결
+- 2026-11-13 로그인 승인 팝업 문구 간략화
 - 2026-11-13 Merge pull request #1028 from Openhash-Gopang/fix-app-origin
 - 2026-11-13 CORS: app.naviweb.kr 허용 — 앱 로그인 Failed to fetch 수정
 - 2026-11-13 Merge pull request #1027 from Openhash-Gopang/mailid-signup
@@ -40,10 +44,6 @@
 - 2026-11-12 feat(guard): LLM 거짓 실행·나중에 알림 약속 답변 검문 + 모델 진단 표시(?llm=1) + SP 가능 목록 규칙
 - 2026-11-12 Merge pull request #1014 from Openhash-Gopang/fix/search-name-verb
 - 2026-11-12 fix(search): '김동 님 호출'처럼 이름+연결 동사만 있으면 LLM 대신 즉시 안내·검색창(한 일처럼 꾸민 응답 방지)
-- 2026-11-12 Merge pull request #1013 from Openhash-Gopang/fix/search-intent-with-id
-- 2026-11-12 fix(search): '@아이디를 연결해줘'·'010-… 찾아줘'처럼 명사 없이 아이디/번호+동사만 있어도 사용자 검색을 바로 연다
-- 2026-11-12 Merge pull request #1012 from Openhash-Gopang/feat/sw-instant-shell
-- 2026-11-12 perf(sw): 앱 셸을 캐시 먼저·뒤에서 갱신(stale-while-revalidate)으로 바꿔 첫 화면 즉시 표시
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
