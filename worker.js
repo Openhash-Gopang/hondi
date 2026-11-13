@@ -1066,6 +1066,23 @@ const DEVICE_LINK_PUSH_RATE_WINDOW_SECONDS = 3600;
 const DEVICE_LINK_IP_RATE_LIMIT_PER_HOUR   = 40; // 발신 IP당
 const DEVICE_LINK_IP_RATE_WINDOW_SECONDS   = 3600;
 
+// 2026-11-14 — 요청 횟수 카운터를 "고정 구간"으로 바꾼다. 예전엔 put 할 때마다 expirationTtl 을 다시 잡아서 만료가 계속 뒤로 밀렸고,
+// 하루 종일 테스트하면 카운터가 한 번도 사라지지 않아 "이 번호로 요청이 너무 많습니다"가 몇 시간째 풀리지 않았다.
+// 값은 "횟수|구간시작(ms)". 구간이 지났거나 옛 형식(숫자만)이면 0 으로 본다 — 이미 걸려 있던 잠금도 이 배포로 풀린다.
+function _rlParse(raw, windowSec) {
+  const m = /^(\d+)\|(\d+)$/.exec(String(raw || ''));
+  if (!m) return { count: 0, start: 0 };
+  const start = parseInt(m[2], 10);
+  if (Date.now() - start >= windowSec * 1000) return { count: 0, start: 0 };
+  return { count: parseInt(m[1], 10), start };
+}
+function _rlPut(kv, key, cur, windowSec) {
+  const now = Date.now();
+  const start = cur.count > 0 ? cur.start : now;
+  const remain = Math.max(60, Math.ceil((start + windowSec * 1000 - now) / 1000));
+  return kv.put(key, `${cur.count + 1}|${start}`, { expirationTtl: remain });
+}
+
 function _generateDeviceLinkCode() {
   const buf = new Uint32Array(1);
   crypto.getRandomValues(buf);
@@ -1200,11 +1217,13 @@ async function handleDeviceLinkInit(request, env, corsHeaders) {
     ),
   ]);
 
-  const pushRlCount = pushRlRaw ? parseInt(pushRlRaw, 10) || 0 : 0;
+  const pushRl = _rlParse(pushRlRaw, DEVICE_LINK_PUSH_RATE_WINDOW_SECONDS);
+  const pushRlCount = pushRl.count;
   if (pushRlCount >= DEVICE_LINK_PUSH_RATE_LIMIT_PER_HOUR) {
     return _err(429, 'PHONE_RATE_LIMITED', '이 번호로 요청이 너무 많습니다. 잠시 후 다시 시도해 주세요', corsHeaders);
   }
-  const ipRlCount = ipRlRaw ? parseInt(ipRlRaw, 10) || 0 : 0;
+  const ipRl = _rlParse(ipRlRaw, DEVICE_LINK_IP_RATE_WINDOW_SECONDS);
+  const ipRlCount = ipRl.count;
   if (ipRlCount >= DEVICE_LINK_IP_RATE_LIMIT_PER_HOUR) {
     return _err(429, 'IP_RATE_LIMITED', '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요', corsHeaders);
   }
@@ -1213,8 +1232,8 @@ async function handleDeviceLinkInit(request, env, corsHeaders) {
   // 가입돼 있는지" 자체도 반복 조회 대상이 되면 안 되는 정보이므로,
   // PHONE_NOT_REGISTERED로 끝나는 시도도 그대로 카운트에 반영한다.
   await Promise.all([
-    env.QR_SESSIONS_KV.put(pushRlKey, String(pushRlCount + 1), { expirationTtl: DEVICE_LINK_PUSH_RATE_WINDOW_SECONDS }),
-    env.QR_SESSIONS_KV.put(ipRlKey, String(ipRlCount + 1), { expirationTtl: DEVICE_LINK_IP_RATE_WINDOW_SECONDS }),
+    _rlPut(env.QR_SESSIONS_KV, pushRlKey, pushRl, DEVICE_LINK_PUSH_RATE_WINDOW_SECONDS),
+    _rlPut(env.QR_SESSIONS_KV, ipRlKey, ipRl, DEVICE_LINK_IP_RATE_WINDOW_SECONDS),
   ]);
 
   if (!profileResult.ok) {
