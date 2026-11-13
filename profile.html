@@ -18,6 +18,7 @@
 <meta name="twitter:card"       content="summary">
 
 <!-- JSON-LD Schema.org (JS로 삽입) -->
+<script src="/assets/material-dialog.js"></script>
 <script id="jsonld" type="application/ld+json">{}</script>
 
 <script src="/gopang-wallet.js?v=20260624"></script>
@@ -1334,7 +1335,7 @@ async function _editPayoutAccount() {
         holder_name: holderName.trim(),
       },
     });
-    alert('✅ 송금 계좌가 저장됐습니다.');
+    (window.nativeAlert||alert)('✅ 송금 계좌가 저장됐습니다.');
     location.reload();
   } catch (e) {
     alert('⚠️ 저장 실패: ' + e.message);
@@ -1952,7 +1953,7 @@ async function _startClaimFlow() {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok || !data.ok) throw new Error(data.detail || data.error || '인증 실패');
-    alert('✅ 인증 완료! 이제 이 프로필을 직접 관리할 수 있습니다.');
+    (window.nativeAlert||alert)('✅ 인증 완료! 이제 이 프로필을 직접 관리할 수 있습니다.');
     location.reload();
   } catch (e) {
     alert('⚠️ 인증 실패: ' + e.message);
@@ -2004,7 +2005,7 @@ async function _claimViaPhone(wallet) {
     const claimData = await claimRes.json().catch(() => ({}));
     if (!claimRes.ok || !claimData.ok) throw new Error(claimData.detail || claimData.error || '인증 실패');
 
-    alert('✅ 전화번호 인증으로 인증 완료! 이제 이 프로필을 직접 관리할 수 있습니다.');
+    (window.nativeAlert||alert)('✅ 전화번호 인증으로 인증 완료! 이제 이 프로필을 직접 관리할 수 있습니다.');
     location.reload();
   } catch (e) {
     alert('⚠️ 전화번호 인증 실패: ' + e.message);
@@ -2195,7 +2196,7 @@ async function _editReservationSettings() {
         },
       },
     });
-    alert('✅ 예약 설정이 저장됐습니다.');
+    (window.nativeAlert||alert)('✅ 예약 설정이 저장됐습니다.');
     location.reload();
   } catch (e) {
     alert('⚠️ 저장 실패: ' + e.message);

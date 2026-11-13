@@ -579,7 +579,7 @@ export async function clearSWCache() {
   await Promise.all(keys.map(k => caches.delete(k)));
   const regs = await navigator.serviceWorker.getRegistrations();
   await Promise.all(regs.map(r => r.unregister()));
-  alert('캐시 초기화 완료. 페이지를 새로고침합니다.');
+  (window.nativeAlert||alert)('캐시 초기화 완료. 페이지를 새로고침합니다.');
   location.reload();
 }
 
