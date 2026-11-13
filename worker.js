@@ -14385,6 +14385,10 @@ export default {
     // 발신 주소(<guid>@hondi.kr)는 그대로 두고 그 위에 얹는 조회용 별칭.
     if (pathname === '/kmail/mail-id/check' && request.method === 'GET') return handleKmailMailIdCheck(request, url, env, corsHeaders);
     if (pathname === '/kmail/mail-id/available' && request.method === 'GET') return handleKmailMailIdAvailable(request, url, env, corsHeaders);   // 2026-11-13: 가입 입력 창용 — 로그인 전이라 인증 없이 형식·예약어·중복만 알려 준다
+    // 2026-11-13 신설(주피터 지시) — 가입 때 백업 키를 사용자의 기존 이메일로 보내고, 발송 기록(제목·받는 주소·시각)만 남긴다. 키 자체는 저장·기록하지 않는다.
+    if (pathname === '/account/backup-email/request' && request.method === 'POST') return handleBackupEmailRequest(request, env, corsHeaders);
+    if (pathname === '/account/backup-email/send' && request.method === 'POST') return handleBackupEmailSend(request, env, corsHeaders);
+    if (pathname === '/account/backup-email/log' && request.method === 'POST') return handleBackupEmailLog(request, env, corsHeaders);
     // 2026-09-12 신설 — KMAIL_FETCH_CONTENT의 실제 조회 메커니즘(GitHub
     // API 우회 포함)을 LLM 판단과 분리해서 직접 검증하기 위한 테스트용
     // 엔드포인트. 다른 kmail 엔드포인트와 동일한 인증(phone_verify_token)
@@ -37472,6 +37476,109 @@ async function handleKmailMailIdConfirm(request, env, corsHeaders) {
 // 비로그인으로 전체 네임스페이스를 긁어보는 걸 막기 위해 인증을 그대로 건다).
 // GET /kmail/mail-id/available?candidate= — 가입 입력 창(로그인 전)이 이메일 ID를 정하기 전에 묻는 공개 조회.
 // 형식·예약어·중복만 알려 준다(누구의 아이디인지는 알려 주지 않는다). 가입 창에서만 쓰이므로 후보 길이를 제한한다.
+// ═══════════════════════════════════════════════════════════
+// 백업 키 이메일 발송 (2026-11-13, 주피터 지시)
+//   1) POST /account/backup-email/request {phone_verify_token, email} — 그 주소로 인증번호 6자리를 보낸다(주소가 본인 것인지 먼저 확인).
+//   2) POST /account/backup-email/send {phone_verify_token, email, code, key, handle} — 인증번호가 맞으면 백업 키를 그 주소로 보내고
+//      발송 기록(제목·받는 주소·시각)만 KV 에 남긴다. 키는 로그·KV·응답 어디에도 남기지 않는다.
+//   3) POST /account/backup-email/log {phone_verify_token} — 발송 기록 조회(나중에 "언제 어디로 보냈나"를 알려 줄 때).
+// 인증번호: 6자리, 10분, 5회 시도, 한 계정이 1시간에 3번까지 요청. KV 에는 해시만 둔다.
+// ═══════════════════════════════════════════════════════════
+const _BKE_SUBJECT = '[나비] 내 백업 키 — 안전하게 보관하세요';
+function _bkeValidEmail(e) {
+  return typeof e === 'string' && e.length <= 254 && /^[^\s@<>"',;:()\[\]\\]+@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)+$/.test(e);
+}
+// 나비웹 자체 주소(naviweb.kr·hondi.*)는 받는 주소로 쓸 수 없다 — 백업 키는 계정을 잃었을 때 쓰는 것이라, 그 계정의 메일함에 두면 같이 잃는다(가입 전부터 쓰던 외부 주소만).
+function _bkeIsOwnDomain(e) {
+  const d = String(e).split('@')[1] || '';
+  return /(^|\.)(naviweb\.kr|hondi\.net|hondi\.kr|hondi\.org)$/i.test(d);
+}
+async function _bkeGuid(env, token, corsHeaders) {
+  const r = await _resolveGuidFromPhoneVerifyToken(env, token);
+  if (!r || !r.ok || !r.guid) return { err: _err(401, r?.code || 'UNAUTHORIZED', r?.message || '전화번호 인증이 필요합니다', corsHeaders) };
+  return { guid: r.guid };
+}
+async function handleBackupEmailRequest(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
+  const email = String(body.email || '').trim().toLowerCase();
+  if (!_bkeValidEmail(email)) return _err(400, 'INVALID_EMAIL', '이메일 주소 형식이 올바르지 않습니다', corsHeaders);
+  if (_bkeIsOwnDomain(email)) return _err(400, 'OWN_DOMAIN_EMAIL', '나비웹 주소가 아니라, 가입 전부터 쓰던 이메일을 입력해 주세요', corsHeaders);
+  const g = await _bkeGuid(env, body.phone_verify_token, corsHeaders); if (g.err) return g.err;
+  const kv = env.AI_SETUP_SEALS_KV;
+  if (!kv || !env.EMAIL) return _err(500, 'EMAIL_UNAVAILABLE', '메일 발송 설정이 없습니다', corsHeaders);
+
+  const hour = Math.floor(Date.now() / 3600000);
+  const rlKey = `bke:rl:${g.guid}:${hour}`;
+  const cnt = Number(await kv.get(rlKey)) || 0;
+  if (cnt >= 3) return _err(429, 'RATE_LIMITED', '인증번호 요청이 너무 많습니다. 1시간 뒤에 다시 시도해 주세요', corsHeaders);
+  await kv.put(rlKey, String(cnt + 1), { expirationTtl: 3700 });
+
+  const code = String(crypto.getRandomValues(new Uint32Array(1))[0] % 1000000).padStart(6, '0');
+  const hash = await _hmacSha256Hex(env.PHONE_VERIFY_SECRET, `bke:${g.guid}:${email}:${code}`);
+  await kv.put(`bke:code:${g.guid}`, JSON.stringify({ email, hash, tries: 0 }), { expirationTtl: 600 });
+  try {
+    await env.EMAIL.send({
+      to: email, from: { email: `noreply@${_KMAIL_DOMAIN}`, name: '나비' },
+      subject: '[나비] 이메일 인증번호',
+      text: `인증번호: ${code}\n\n10분 안에 입력해 주세요. 본인이 요청하지 않았다면 이 메일을 무시하세요.`,
+    });
+  } catch (e) {
+    return _err(502, 'EMAIL_SEND_FAILED', '인증번호 메일을 보내지 못했습니다', corsHeaders);
+  }
+  return new Response(JSON.stringify({ ok: true, expires_in: 600 }), { status: 200, headers: corsHeaders });
+}
+async function handleBackupEmailSend(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
+  const email = String(body.email || '').trim().toLowerCase();
+  const code = String(body.code || '').trim();
+  const key = typeof body.key === 'string' ? body.key.trim() : '';
+  const handle = typeof body.handle === 'string' ? body.handle.slice(0, 40) : '';
+  if (!_bkeValidEmail(email) || !/^\d{6}$/.test(code) || !key || key.length > 4000) return _err(400, 'INVALID_INPUT', '이메일·인증번호·키가 필요합니다', corsHeaders);
+  if (_bkeIsOwnDomain(email)) return _err(400, 'OWN_DOMAIN_EMAIL', '나비웹 주소가 아니라, 가입 전부터 쓰던 이메일을 입력해 주세요', corsHeaders);
+  const g = await _bkeGuid(env, body.phone_verify_token, corsHeaders); if (g.err) return g.err;
+  const kv = env.AI_SETUP_SEALS_KV;
+  if (!kv || !env.EMAIL) return _err(500, 'EMAIL_UNAVAILABLE', '메일 발송 설정이 없습니다', corsHeaders);
+
+  const ck = `bke:code:${g.guid}`;
+  const rec = JSON.parse((await kv.get(ck)) || 'null');
+  if (!rec) return _err(400, 'CODE_EXPIRED', '인증번호가 만료됐습니다. 다시 받아 주세요', corsHeaders);
+  if (rec.tries >= 5) { await kv.delete(ck); return _err(429, 'TOO_MANY_TRIES', '시도 횟수를 넘었습니다. 인증번호를 다시 받아 주세요', corsHeaders); }
+  const hash = await _hmacSha256Hex(env.PHONE_VERIFY_SECRET, `bke:${g.guid}:${email}:${code}`);
+  if (rec.email !== email || rec.hash !== hash) {
+    rec.tries += 1;
+    await kv.put(ck, JSON.stringify(rec), { expirationTtl: 600 });
+    return _err(400, 'CODE_MISMATCH', '인증번호가 일치하지 않습니다', corsHeaders);
+  }
+  await kv.delete(ck);   // 1회용
+
+  const text = `나비 계정 백업 키입니다.\n` + (handle ? `계정: ${handle}\n` : '') +
+    `\n${key}\n\n` +
+    `이 키를 아는 사람은 누구나 이 계정이 될 수 있습니다.\n` +
+    `이 메일을 다른 사람에게 전달하거나 공개된 곳에 저장하지 마세요.\n` +
+    `기기를 분실했을 때, 새 기기에서 "백업 키로 복구"에 이 키를 입력하면 계정을 복구할 수 있습니다.`;
+  try {
+    await env.EMAIL.send({ to: email, from: { email: `noreply@${_KMAIL_DOMAIN}`, name: '나비' }, subject: _BKE_SUBJECT, text });
+  } catch (e) {
+    return _err(502, 'EMAIL_SEND_FAILED', '백업 키 메일을 보내지 못했습니다', corsHeaders);
+  }
+  // 기록에는 제목·받는 주소·시각만 — 키는 남기지 않는다.
+  const sent_at = new Date().toISOString();
+  const lk = `bke:log:${g.guid}`;
+  const log = JSON.parse((await kv.get(lk)) || '[]');
+  log.unshift({ subject: _BKE_SUBJECT, to: email, sent_at });
+  await kv.put(lk, JSON.stringify(log.slice(0, 20)));
+  return new Response(JSON.stringify({ ok: true, subject: _BKE_SUBJECT, to: email, sent_at }), { status: 200, headers: corsHeaders });
+}
+async function handleBackupEmailLog(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON 파싱 실패', corsHeaders);
+  const g = await _bkeGuid(env, body.phone_verify_token, corsHeaders); if (g.err) return g.err;
+  const log = JSON.parse((await env.AI_SETUP_SEALS_KV?.get(`bke:log:${g.guid}`)) || '[]');
+  return new Response(JSON.stringify({ ok: true, records: log }), { status: 200, headers: corsHeaders });
+}
+
 async function handleKmailMailIdAvailable(request, url, env, corsHeaders) {
   const candidate = String(url.searchParams.get('candidate') || '').slice(0, 64);
   if (!candidate) return _err(400, 'MISSING_FIELD', 'candidate 필수', corsHeaders);
