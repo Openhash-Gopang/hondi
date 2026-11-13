@@ -188,7 +188,7 @@
     wrap.innerHTML =
       '<div class="ksa-box">' +
         '<div class="ksa-icon-row"><span class="ksa-icon">' + cfg.icon + '</span>' +
-          '<div class="ksa-desc" id="ksa-desc">010을 제외한 폰 번호 뒷자리 8자를 입력하십시오.</div></div>' +
+          '<div class="ksa-desc" id="ksa-desc">폰 번호 뒷 8자리</div></div>' +
         '<div id="ksa-step-phone">' +
           '<div class="ksa-input-wrap">' +
             '<input type="tel" id="ksa-phone" placeholder="전화번호 뒷 8자리" inputmode="numeric" maxlength="8" autocomplete="tel">' +
@@ -206,7 +206,7 @@
           '</div></div>' +
           '<div id="ksa-su-wait" style="display:none;text-align:center">' +
             '<div id="ksa-su-qrbox"></div>' +
-            '<div style="font-size:12.5px;color:#374151">폰에 세 개의 숫자가 보이면 아래 숫자를 선택하세요</div>' +
+            '<div style="font-size:12.5px;color:#374151">폰에서 이 숫자를 고르세요</div>' +
             '<div id="ksa-su-num" style="font-size:40px;font-weight:800;letter-spacing:2px;color:#4338CA;margin-top:2px"></div>' +
             '<div id="ksa-su-status" style="font-size:12.5px;color:#4A5568;margin-top:4px"></div>' +
             '<div id="ksa-su-timer" style="font-size:11px;color:#718096;margin-top:4px"></div>' +
@@ -216,12 +216,12 @@
         '<div id="ksa-step-devlink" style="display:none">' +
           '<div class="ksa-devlink-wait">' +
             '<div class="ksa-spinner"></div>' +
-            '<div id="ksa-match" style="display:none;text-align:center;margin:0 0 10px"><div style="font-size:12.5px;color:#374151">폰에 세 개의 숫자가 보이면 아래 숫자를 선택하세요</div><div id="ksa-match-num" style="font-size:40px;font-weight:800;letter-spacing:2px;color:#4338CA;margin-top:2px"></div></div>' +
-            '<div id="ksa-devlink-status" style="font-size:12.5px;color:#4A5568;text-align:center">스마트폰 알림을 확인해 주세요…</div>' +
+            '<div id="ksa-match" style="display:none;text-align:center;margin:0 0 10px"><div style="font-size:12.5px;color:#374151">폰에서 이 숫자를 고르세요</div><div id="ksa-match-num" style="font-size:40px;font-weight:800;letter-spacing:2px;color:#4338CA;margin-top:2px"></div></div>' +
+            '<div id="ksa-devlink-status" style="font-size:12.5px;color:#4A5568;text-align:center">폰 알림을 확인하세요.</div>' +
             '<div id="ksa-devlink-timer" style="font-size:11px;color:#718096;text-align:center;margin-top:4px"></div>' +
           '</div>' +
           '<button type="button" class="ksa-sms" id="ksa-sms-btn" style="display:none">문자로 받기</button>' +
-          '<div class="ksa-resend" id="ksa-resend-phone">번호를 다시 입력할게요</div>' +
+          '<div class="ksa-resend" id="ksa-resend-phone">번호 다시 입력</div>' +
         '</div>' +
         '<div class="ksa-msg" id="ksa-msg"></div>' +
         '<button type="button" class="ksa-cancel" id="ksa-cancel">취소</button>' +
@@ -250,7 +250,7 @@
     wrap.querySelector('#ksa-su-phone').addEventListener('keydown', function (e) { if (e.key === 'Enter') startSignup('sms'); });
     wrap.querySelector('#ksa-su-back').onclick = closeSignup;
 
-    els.desc.textContent = (cfg.serviceLabel ? cfg.serviceLabel + ' — ' : '') + '010을 제외한 폰 번호 뒷자리 8자를 입력하십시오.';
+    els.desc.textContent = (cfg.serviceLabel ? cfg.serviceLabel + ' — ' : '') + '폰 번호 뒷 8자리';
     wrap.querySelector('#ksa-cancel').onclick = cancelOverlay;
     els.devlinkBtn.onclick = startDeviceLink;
     els.resendPhone.onclick = resetToPhoneStep;
@@ -497,8 +497,8 @@
       els.stepPhone.style.display = 'none';
       els.stepDevlink.style.display = '';
       els.devlinkStatus.textContent = data.hasMobileDevice === false
-        ? '이 번호로 알림을 받을 폰이 등록되어 있지 않습니다. 아래 "문자로 받기"를 누르면 승인 링크를 문자로 보내 드립니다. 폰에서 나비웹을 열어 설정 → 푸시 알림 재구독을 하면 다음부터 알림으로 받을 수 있습니다.'
-        : '폰에 알림을 보냈습니다. 폰에서 알림을 눌러 승인해 주세요.';
+        ? '알림 받을 폰이 없습니다. "문자로 받기"를 눌러 주세요.'
+        : '폰 알림을 눌러 승인하세요.';
       showSmsButton(data.hasMobileDevice === false);
 
       startDevlinkCountdown(data.expires_in || 90);
@@ -543,7 +543,7 @@
       // 타이머·카운트다운은 이미 돌고 있으므로 다시 만들지 않는다.
       devlinkSessionIds.push(data.sessionId);
       els.devlinkStatus.textContent = data.hasMobileDevice === false
-        ? '이 번호로 알림을 받을 폰이 등록되어 있지 않습니다. 아래 "문자로 받기"를 눌러 주세요.'
+        ? '알림 받을 폰이 없습니다. "문자로 받기"를 눌러 주세요.'
         : '알림을 다시 보냈습니다 — 스마트폰을 확인해 주세요.';
       showSmsButton(data.hasMobileDevice === false);
     } catch (e) { /* 재시도는 1회뿐이다 */ }

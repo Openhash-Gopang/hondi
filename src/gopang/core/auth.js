@@ -928,11 +928,11 @@ function _showDeviceMismatchNotice(found, resolve) {
   function renderWaiting() {
     render(`
       <div style="width:24px;height:24px;border:2.5px solid #e5e7eb;border-top-color:#0057A8;border-radius:50%;animation:_dlSpin 0.8s linear infinite;margin:20px auto"></div>
-      <div id="_dl-match" style="display:none;margin-bottom:10px"><div style="font-size:calc(0.7812rem*var(--hondi-fs,1));color:#374151">폰에 세 개의 숫자가 보이면 아래 숫자를 선택하세요</div><div id="_dl-match-num" style="font-size:calc(2.5rem*var(--hondi-fs,1));font-weight:800;letter-spacing:2px;color:#0057A8;margin-top:2px"></div></div>
+      <div id="_dl-match" style="display:none;margin-bottom:10px"><div style="font-size:calc(0.7812rem*var(--hondi-fs,1));color:#374151">폰에서 이 숫자를 고르세요</div><div id="_dl-match-num" style="font-size:calc(2.5rem*var(--hondi-fs,1));font-weight:800;letter-spacing:2px;color:#0057A8;margin-top:2px"></div></div>
       <p style="font-size:calc(0.875rem*var(--hondi-fs,1));color:#374151;margin-bottom:6px">${_THIS_IS_PHONE
-        ? '이 번호는 이미 다른 기기에 가입되어 있습니다.<br>예전에 쓰던 <strong>다른 스마트폰</strong>의 알림에서 <strong>"본인이 맞습니다"</strong>를 눌러주세요'
-        : '스마트폰 알림을 열어 <strong>"본인이 맞습니다"</strong>를 눌러주세요'}</p>
-      <p style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;margin-bottom:10px">알림이 도착하기까지 보통 몇 초에서 20초 정도 걸릴 수 있어요. 잠시만 기다려 주세요.</p>
+        ? '다른 폰 알림에서 <strong>"본인이 맞습니다"</strong>를 누르세요'
+        : '폰 알림에서 <strong>"본인이 맞습니다"</strong>를 누르세요'}</p>
+      <p style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;margin-bottom:10px">알림은 최대 20초쯤 걸립니다.</p>
       <div id="_dl-timer" style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;margin-bottom:14px"></div>
       <button id="_dl-sms" style="width:100%;padding:11px;border:none;border-radius:10px;background:#f3f4f6;color:#374151;cursor:pointer;font-size:calc(0.7812rem*var(--hondi-fs,1));opacity:0.5;margin-bottom:8px;font-family:inherit">알림이 안 왔나요? 문자로 받기</button>
       <button id="_dl-backup" style="width:100%;padding:11px;border:1px solid #e5e7eb;border-radius:10px;background:none;color:#374151;cursor:pointer;font-size:calc(0.7812rem*var(--hondi-fs,1));margin-bottom:8px;font-family:inherit">백업 키를 직접 갖고 있어요(수동 입력)</button>
