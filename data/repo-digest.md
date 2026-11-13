@@ -1,9 +1,13 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-13 18:30 KST · 기준 커밋 cab985c5
+- 갱신: 2026-11-13 22:06 KST · 기준 커밋 d0f8c73c
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-13 Merge pull request #1028 from Openhash-Gopang/fix-app-origin
+- 2026-11-13 CORS: app.naviweb.kr 허용 — 앱 로그인 Failed to fetch 수정
+- 2026-11-13 Merge pull request #1027 from Openhash-Gopang/mailid-signup
+- 2026-11-13 가입 입력 창에 이메일 ID 필드 추가 — 가입할 때 메일 아이디를 정한다
 - 2026-11-13 Merge pull request #1026 from Openhash-Gopang/naviweb-code-switch2-20261113
 - 2026-11-13 feat: hondi.net → naviweb.kr 코드 전환 2차 (AI 프롬프트·사이트 목록 주소)
 - 2026-11-13 Merge pull request #1025 from Openhash-Gopang/naviweb-code-switch-20261113
@@ -40,10 +44,6 @@
 - 2026-11-12 fix(search): '@아이디를 연결해줘'·'010-… 찾아줘'처럼 명사 없이 아이디/번호+동사만 있어도 사용자 검색을 바로 연다
 - 2026-11-12 Merge pull request #1012 from Openhash-Gopang/feat/sw-instant-shell
 - 2026-11-12 perf(sw): 앱 셸을 캐시 먼저·뒤에서 갱신(stale-while-revalidate)으로 바꿔 첫 화면 즉시 표시
-- 2026-11-12 Merge pull request #1011 from Openhash-Gopang/fix/invite-push
-- 2026-11-12 fix(p2p): 무응답 초대 저장 후 상대에게 웹푸시 발송 (/friends/invite-notify)
-- 2026-11-12 feat: 폰 설정 단순화 1단계 — 상단 칩 줄 제거, 자주 쓰는 항목만 기본 표시, 나머지는 '더 보기', PC에서 이어서 하기 행 추가
-- 2026-11-12 Merge pull request #1009 from Openhash-Gopang/feat/font-size-scale
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
