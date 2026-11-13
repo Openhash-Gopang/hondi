@@ -373,7 +373,7 @@ async function loadUsage() {
       fillEl.classList.toggle('warn', pct >= 90);
 
       document.getElementById('quota-text').textContent =
-        `${fmt(quotaData.spent_krw)}원 / ${fmt(quotaData.limit_krw)}원 (가입자당 평생 무료 한도)`;
+        `${fmt(quotaData.spent_krw)}원 / ${fmt(quotaData.limit_krw)}원 (가입 무료 한도)`;
 
       const estEl = document.getElementById('quota-est');
       if (quotaData.estimated_monthly_krw > 0) {

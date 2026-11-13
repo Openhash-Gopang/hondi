@@ -210,7 +210,7 @@
         '</div>' +
         '<div id="ksa-step-signup" style="display:none">' +
           '<div class="ksa-su-title">회원 가입</div>' +
-          '<div class="ksa-su-sub">무료 플랜으로 시작합니다. 가입은 스마트폰에서 이어집니다.</div>' +
+          '<div class="ksa-su-sub">가입은 스마트폰에서 이어집니다.</div>' +
           '<div class="ksa-su-tabs"><button type="button" id="ksa-su-qr-tab" class="on">QR로 가입</button><button type="button" id="ksa-su-sms-tab">문자로 링크 받기</button></div>' +
           '<div id="ksa-su-sms" style="display:none;margin-bottom:10px"><div class="ksa-input-wrap">' +
             '<input type="tel" id="ksa-su-phone" placeholder="전화번호 뒷 8자리" inputmode="numeric" maxlength="8" autocomplete="tel">' +
@@ -670,10 +670,6 @@
         if (data.state === 'delivered' && data.verified && data.phone_verify_token) {
           stopDevlinkPolling();
           persist(data.phone_verify_token, new Date(data.expires_at).getTime());
-          if (signupFreePlan) {   // 방금 가입한 사용자 — 무료 플랜으로 시작한다(실패해도 로그인에는 영향 없음)
-            signupFreePlan = false;
-            try { fetch(PROXY + '/auth/free-plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone_verify_token: data.phone_verify_token, plan: 'free' }) }).catch(function () {}); } catch (e) { /* 무시 */ }
-          }
           hideOverlay();
           setMsg('', '');
           resolveWaiters();

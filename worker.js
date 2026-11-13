@@ -20,7 +20,7 @@ import { validateSignalInput as _sigValidate, canDeleteSignal as _sigCanDelete, 
 import { classifyQuery as _ffClassify, publicCard as _ffPublicCard, rateLimitOk as _ffRateOk } from './src/worker/friend-find.js';
 import { computeChargeGdc as _computeChargeGdc } from './src/worker/charge-plans.js';
 import { makePlanRequest as _planMakeRequest, judgeDeposit as _planJudgeDeposit, nextPaidUntil as _planNextPaidUntil, validTier as _planValidTier, DEFAULT_KRW_PER_USD as _PLAN_DEFAULT_RATE } from './src/worker/plan-pay.js';
-import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, startFree as _testQuotaStartFree, resetFree as _testQuotaResetFree, setPlan as _testQuotaSetPlan, setPaid as _testQuotaSetPaid, setExtra as _testQuotaSetExtra, addExtraSpend as _testQuotaAddExtra, exhaustedMessage as _planExhaustedMessage, waitMessage as _freePlanWaitMessage, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
+import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, startFree as _testQuotaStartFree, resetFree as _testQuotaResetFree, setPlan as _testQuotaSetPlan, setPaid as _testQuotaSetPaid, setExtra as _testQuotaSetExtra, addExtraSpend as _testQuotaAddExtra, exhaustedMessage as _planExhaustedMessage, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
 import { parseMessage as _kmailParseMime, decodeMimeWords as _kmailDecodeMimeWords, repairStoredText as _kmailRepairStoredText } from './src/worker/mime-text.js';
 import { checkSenderName as _kmailCheckSenderName, effectiveSenderName as _kmailEffectiveSenderName, renderSignature as _kmailRenderSignature, campaignReplyTo as _kmailCampaignReplyTo, replyToWithName as _kmailReplyToWithName, REPLY_TO_SELF as _KMAIL_REPLY_TO_SELF, formatSender as _kmailFormatSender, describeSender as _kmailDescribeSender, SENDER_NAME_MAX as _KMAIL_SENDER_NAME_MAX } from './src/worker/kmail-sender.js';
@@ -2344,7 +2344,7 @@ async function _ownerUnlimited(env, guid) {
 
 // ═══════════════════════════════════════════════════════════
 // 🧪 테스트 계정 한도·유예·차단 + 정식 계정 전환 — 2026-10-27 (주피터 지시)
-//   · [2026-11-06 개정] 모든 계정이 전화 인증 후 AI 사용 비용 FREE_TRIAL_KRW(기본 100원) 또는 FREE_TRIAL_HOURS(기본 24시간) 중 먼저 오는 때까지 무료.
+//   · [2026-11-06 개정] 모든 계정이 전화 인증 후 AI 사용 비용 FREE_TRIAL_KRW(기본 500원) 또는 FREE_TRIAL_HOURS(기본 24시간) 중 먼저 오는 때까지 무료.
 //     끝나면 정식 계정은 GDC 결제로 이어지고, 테스트 계정(handle이 'tid-'로 시작)은 유예 없이 차단 — _gdcFreeQuotaGate·K-서비스 공용 토큰 게이트가 막는다.
 //   · 차단돼도 /auth/test-quota 조회와 /auth/test-migrate(정식 계정으로 데이터 이동)는 계속 허용한다.
 //   · 판정 로직은 src/worker/test-quota.js, 데이터 이동은 src/worker/test-migrate.js (단위 시험: tests/test-quota-migrate.test.mjs).
@@ -2413,9 +2413,6 @@ async function _testQuotaBlockedResponse(env, guid, corsHeaders) {
   if (!_gdcFreeTestOn(env) || !env.AI_SETUP_SEALS_KV) return null;
   const ev = await _freeTrialStatus(env, guid);
   if (!ev) return null;
-  if (ev.status === 'waiting') {   // 무료 플랜의 쉬는 시간 — 금액은 알리지 않는다
-    return new Response(JSON.stringify({ error: 'FREE_PLAN_WAIT', message: _freePlanWaitMessage(ev), wait_until: ev.wait_until, plan: 'free' }), { status: 402, headers: corsHeaders });
-  }
   if (ev.status === 'exhausted') {   // 유료 플랜의 이번 기간 사용량 소진(추가 사용량 꺼짐/한도 도달)
     return new Response(JSON.stringify({ error: 'PLAN_USAGE_EXHAUSTED', message: _planExhaustedMessage(ev), period_ends_at: ev.period_ends_at, extra_on: ev.extra_on, plan: ev.tier }), { status: 402, headers: corsHeaders });
   }
@@ -2995,8 +2992,21 @@ async function handleFreeQuotaStatus(request, env, corsHeaders) {
   const kv = env.AI_SETUP_SEALS_KV;
   if (!kv) return _err(500, 'KV_UNAVAILABLE', 'KV 바인딩 없음', corsHeaders);
 
-  const spent = parseFloat(await kv.get(`hondi:free_spend:${guid}`) || '0');
-  const since = await kv.get(`hondi:free_spend_since:${guid}`);
+  // ★ 2026-11-14(주피터 지시 — 무료 한도 500원 통일): 이 화면이 예전 가상 카운터(hondi:free_spend,
+  //   한도 FREE_QUOTA_KRW_LIMIT=0)를 읽어 "0원 / 0원"으로 보였고, 채팅 차단·안내창이 쓰는 실제 무료
+  //   한도(src/worker/test-quota.js, 기본 500원)와 어긋났다. 같은 값(한도·사용분)을 보여 준다.
+  //   읽기만 한다(getStatus는 무료 시간 시계를 시작시키므로 쓰지 않는다).
+  const _cfg = _testQuotaConfig(env);
+  const FREE_LIMIT_KRW = _cfg.limitKrw;
+  let spent = 0, since = null;
+  try {
+    const raw = await kv.get(`hondi:test_quota:${guid}`);
+    const st = raw ? JSON.parse(raw) : null;
+    if (st) {
+      spent = Math.max(0, Number(st.spent_krw) || 0);
+      if (Number(st.started_at)) since = new Date(Number(st.started_at)).toISOString();
+    }
+  } catch (e) { /* 읽기 실패 — 0원으로 표시(차단에는 영향 없음) */ }
 
   let daysElapsed = 0, dailyAvgKrw = 0, estimatedMonthlyKrw = 0;
   if (since) {
@@ -3009,12 +3019,12 @@ async function handleFreeQuotaStatus(request, env, corsHeaders) {
     ok: true,
     guid,
     spent_krw: Math.round(spent),
-    limit_krw: FREE_QUOTA_KRW_LIMIT,
-    remaining_krw: Math.max(Math.round(FREE_QUOTA_KRW_LIMIT - spent), 0),
+    limit_krw: FREE_LIMIT_KRW,
+    remaining_krw: Math.max(Math.round(FREE_LIMIT_KRW - spent), 0),
     since,
     days_elapsed: Math.round(daysElapsed * 10) / 10,
     estimated_monthly_krw: Math.round(estimatedMonthlyKrw),
-    projected_days_to_limit: dailyAvgKrw > 0 ? Math.round(((FREE_QUOTA_KRW_LIMIT - spent) / dailyAvgKrw) * 10) / 10 : null,
+    projected_days_to_limit: dailyAvgKrw > 0 ? Math.round(((FREE_LIMIT_KRW - spent) / dailyAvgKrw) * 10) / 10 : null,
   }), { status: 200, headers: corsHeaders });
 }
 
@@ -21466,8 +21476,8 @@ async function handleTestQuota(request, env, corsHeaders) {
   return new Response(JSON.stringify({ ok: true, test: true, id: String(r.e164).slice(TEST_ID_PREFIX.length), free_test_on: _gdcFreeTestOn(env), ...ev }), { status: 200, headers: corsHeaders });
 }
 
-// POST /auth/free-plan { phone_verify_token, plan: 'free' | 'none' } — 무료 플랜 선택·해제(2026-11-06).
-//  · 무료 기간(100원/24시간)이 끝난 뒤 무료 플랜이면 내부적으로 10원 소진마다 5시간 쉬었다가 10원이 다시 채워진다(숫자는 응답에 싣지 않는다).
+// POST /auth/free-plan { phone_verify_token, plan: 'none' } — (옛) 무료 플랜 선택·해제. 2026-11-14 무료 플랜 삭제로 이제 해제(플랜 없음)만 한다.
+//  · (삭제됨) 예전에는 무료 기간(500원/24시간)이 끝난 뒤 무료 플랜이면 10원 소진마다 5시간 쉬었다가 10원이 다시 채워졌다다(숫자는 응답에 싣지 않는다).
 //  · 테스트 계정은 선택할 수 없다(정식 아이디로 전환해야 한다).
 async function handleFreePlan(request, env, corsHeaders) {
   if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
@@ -21476,12 +21486,13 @@ async function handleFreePlan(request, env, corsHeaders) {
   if (!r.ok) { const m = mapPhoneAuthError(r); return _err(m.status, m.code, m.message, corsHeaders); }
   if (String(r.e164 || '').startsWith(TEST_ID_PREFIX)) return _err(400, 'TEST_ACCOUNT_NO_PLAN', '테스트 아이디는 플랜을 고를 수 없습니다. 정식 아이디로 로그인해 주세요.', corsHeaders);
   if (!env.AI_SETUP_SEALS_KV) return _err(503, 'KV_NOT_BOUND', '잠시 후 다시 시도해 주세요', corsHeaders);
-  const plan = body.plan === 'free' ? 'free' : (body.plan === 'none' ? null : undefined);
-  if (plan === undefined) return _err(400, 'BAD_PLAN', "plan은 'free' 또는 'none'이어야 합니다", corsHeaders);
+  // 2026-11-14(주피터 지시): 요금제에서 무료 플랜을 없앴다. 옛 화면(캐시)이 'free'를 보내도 오류 없이 "플랜 없음"으로 처리한다.
+  const plan = (body.plan === 'free' || body.plan === 'none') ? null : undefined;
+  if (plan === undefined) return _err(400, 'BAD_PLAN', "plan은 'none'이어야 합니다(무료 플랜은 더 이상 제공하지 않습니다)", corsHeaders);
   await _testQuotaSetPlan(env.AI_SETUP_SEALS_KV, r.guid, plan, Date.now());
   _freeTrialMem.delete(r.guid);
   const ev = await _testQuotaGetStatus(env.AI_SETUP_SEALS_KV, r.guid, Date.now(), _testQuotaConfig(env));
-  return new Response(JSON.stringify({ ok: true, plan: ev.plan || null, status: ev.status, phase: ev.phase || 'paid', free_ends_at: ev.free_ends_at, wait_until: ev.wait_until || null }), { status: 200, headers: corsHeaders });
+  return new Response(JSON.stringify({ ok: true, plan: ev.plan || null, status: ev.status, phase: ev.phase || 'paid', free_ends_at: ev.free_ends_at }), { status: 200, headers: corsHeaders });
 }
 
 // POST /auth/extra-usage { phone_verify_token, enabled, limit_krw? } — 추가 사용량(종량제) 켜기/끄기와 월 한도(원)(2026-11-06).
