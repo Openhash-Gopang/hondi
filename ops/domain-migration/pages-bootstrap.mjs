@@ -40,7 +40,17 @@ async function main() {
     const ac0 = await cf('GET', '/accounts');
     if (ac0.ok && ac0.j.result.length === 1) { A = ac0.j.result[0].id; log('- 시크릿의 계정 ID 형식이 올바르지 않아 토큰의 유일한 계정을 사용'); }
   }
-  const pl = await cf('GET', `/accounts/${A}/pages/projects`);
+  // 목록은 페이지 단위로 잘려 오므로 끝까지 모은다(page 파라미터)
+  let pl = await cf('GET', `/accounts/${A}/pages/projects?page=1`);
+  if (pl.ok) {
+    const all = [...pl.j.result];
+    for (let pg = 2; pg <= 20; pg++) {
+      const nx = await cf('GET', `/accounts/${A}/pages/projects?page=${pg}`);
+      if (!nx.ok || !nx.j.result.length) break;
+      all.push(...nx.j.result);
+    }
+    pl.j.result = all;
+  }
   if (!pl.ok) {
     const ac = await cf('GET', '/accounts');
     log(`- 계정 ID 형식 ${/^[0-9a-f]{32}$/.test(A) ? '정상' : '비정상(길이 ' + A.length + ')'}, 토큰이 접근 가능한 계정 수: ${ac.ok ? ac.j.result.length : '조회 실패 ' + ac.err}`);
@@ -66,6 +76,14 @@ async function main() {
       }
       let proj = projects.get(n);
       const state = [proj ? '프로젝트 있음' : '프로젝트 없음', rec ? '레코드 있음' : '레코드 없음'];
+      if (!APPLY && proj) {
+        const d = await cf('GET', `/accounts/${A}/pages/projects/${n}`);
+        const pr = d.ok ? d.j.result : {};
+        const ld = pr.latest_deployment;
+        const dm = await cf('GET', `/accounts/${A}/pages/projects/${n}/domains`);
+        const ds = dm.ok ? dm.j.result.map(x => `${x.name}=${x.status}`).join(',') : dm.err;
+        log(`| ${host} | ${n} | ${rec ? rec.content : '-'} | 배포 ${ld ? (ld.latest_stage?.name + ':' + ld.latest_stage?.status) : '없음'}, 도메인 ${ds} |`); continue;
+      }
       if (!APPLY) { log(`| ${host} | ${n} | ${rec ? rec.content : '-'} | ${state.join(', ')} → 생성 예정 |`); continue; }
 
       if (!proj) {
