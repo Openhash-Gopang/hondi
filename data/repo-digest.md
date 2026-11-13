@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-14 00:41 KST · 기준 커밋 b516eaac
+- 갱신: 2026-11-14 00:48 KST · 기준 커밋 129c97f5
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-14 Merge pull request #1043 from Openhash-Gopang/material-popups-a-20261114
+- 2026-11-14 ui: 공용 Material 팝업 모듈 + 로그인 대기창·배지 팝업 Material Design 갱신
 - 2026-11-14 Merge pull request #1041 from Openhash-Gopang/ratelimit-fix-20261114
 - 2026-11-14 fix(worker): same fixed-window counter for SMS resend limiter
 - 2026-11-14 fix(worker): device-link rate limit uses fixed window (TTL no longer slides)
@@ -42,8 +44,6 @@
 - 2026-11-13 Merge pull request #1023 from Openhash-Gopang/naviweb-pages-status-20261113
 - 2026-11-13 ci: pages-bootstrap Pages 프로젝트 목록 페이지 순회
 - 2026-11-13 ci: pages-bootstrap 점검 모드에서 배포·도메인 상태 표시
-- 2026-11-13 Merge pull request #1022 from Openhash-Gopang/naviweb-pages-bootstrap-fix-20261113
-- 2026-11-13 ci: pages-bootstrap Pages 목록 조회의 per_page 제거
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
