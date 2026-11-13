@@ -870,6 +870,8 @@ export async function _restoreFromBackupKey(privKeyB64u, guid = null, svc = 'gop
 // 적합하다.
 // 지금 보는 기기가 스마트폰이면 '스마트폰 알림을 열라'는 안내가 자기 자신을 가리키는 꼴이 된다(폰에서 가입 중인데 폰에서 확인하라는 문구).
 const _THIS_IS_PHONE = /Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent || '');
+// 로그인 화면에서 방금 입력한 번호(E.164) — 계정 기록(found)에 번호가 없거나 형식이 달라도 이 번호로 알림 요청을 보낸다(2026-11-13).
+let _lastLoginE164 = null;
 function _showDeviceMismatchNotice(found, resolve) {
   document.getElementById('_dl-inline-overlay')?.remove();
   if (!document.getElementById('_dl-inline-style')) {
@@ -928,15 +930,12 @@ function _showDeviceMismatchNotice(found, resolve) {
   function renderWaiting() {
     render(`
       <div style="width:24px;height:24px;border:2.5px solid #e5e7eb;border-top-color:#0057A8;border-radius:50%;animation:_dlSpin 0.8s linear infinite;margin:20px auto"></div>
-      <div id="_dl-match" style="display:none;margin-bottom:10px"><div style="font-size:calc(0.7812rem*var(--hondi-fs,1));color:#374151">폰에서 이 숫자를 고르세요</div><div id="_dl-match-num" style="font-size:calc(2.5rem*var(--hondi-fs,1));font-weight:800;letter-spacing:2px;color:#0057A8;margin-top:2px"></div></div>
-      <p style="font-size:calc(0.875rem*var(--hondi-fs,1));color:#374151;margin-bottom:6px">${_THIS_IS_PHONE
-        ? '다른 폰 알림에서 <strong>"본인이 맞습니다"</strong>를 누르세요'
-        : '폰 알림에서 <strong>"본인이 맞습니다"</strong>를 누르세요'}</p>
-      <p style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;margin-bottom:10px">알림은 최대 20초쯤 걸립니다.</p>
+      <div id="_dl-match" style="display:none;margin-bottom:10px"><div style="font-size:calc(0.7812rem*var(--hondi-fs,1));color:#374151">폰에서 이 숫자 선택</div><div id="_dl-match-num" style="font-size:calc(2.5rem*var(--hondi-fs,1));font-weight:800;letter-spacing:2px;color:#0057A8;margin-top:2px"></div></div>
+      <p style="font-size:calc(0.875rem*var(--hondi-fs,1));color:#374151;margin-bottom:10px">알림에서 <strong>"본인이 맞습니다"</strong>를 누르세요</p>
       <div id="_dl-timer" style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;margin-bottom:14px"></div>
-      <button id="_dl-sms" style="width:100%;padding:11px;border:none;border-radius:10px;background:#f3f4f6;color:#374151;cursor:pointer;font-size:calc(0.7812rem*var(--hondi-fs,1));opacity:0.5;margin-bottom:8px;font-family:inherit">알림이 안 왔나요? 문자로 받기</button>
-      <button id="_dl-backup" style="width:100%;padding:11px;border:1px solid #e5e7eb;border-radius:10px;background:none;color:#374151;cursor:pointer;font-size:calc(0.7812rem*var(--hondi-fs,1));margin-bottom:8px;font-family:inherit">백업 키를 직접 갖고 있어요(수동 입력)</button>
-      <button id="_dl-close" style="width:100%;padding:11px;border:none;background:none;color:#9ca3af;cursor:pointer;font-size:calc(0.7812rem*var(--hondi-fs,1));font-family:inherit">나중에</button>
+      <button id="_dl-sms" style="width:100%;padding:11px;border:none;border-radius:10px;background:#f3f4f6;color:#374151;cursor:pointer;font-size:calc(0.7812rem*var(--hondi-fs,1));opacity:0.5;margin-bottom:8px;font-family:inherit">문자로 받기</button>
+      <button id="_dl-backup" style="width:100%;padding:11px;border:1px solid #e5e7eb;border-radius:10px;background:none;color:#374151;cursor:pointer;font-size:calc(0.7812rem*var(--hondi-fs,1));margin-bottom:8px;font-family:inherit">백업 키로 복구</button>
+      <button id="_dl-close" style="width:100%;padding:11px;border:none;background:none;color:#9ca3af;cursor:pointer;font-size:calc(0.7812rem*var(--hondi-fs,1));font-family:inherit">취소</button>
       <div id="_dl-status" style="font-size:calc(0.75rem*var(--hondi-fs,1));margin-top:10px;min-height:16px"></div>
     `);
     $$('#_dl-sms').onclick = _resendSms;
@@ -962,7 +961,7 @@ function _showDeviceMismatchNotice(found, resolve) {
         _showExpiredGuidance();
         return;
       }
-      timerEl.textContent = `${remain}초 후 만료`;
+      timerEl.textContent = `${remain}초`;
       remain -= 1;
     };
     tick();
@@ -1135,7 +1134,7 @@ function _showDeviceMismatchNotice(found, resolve) {
 
   async function _startRequest() {
     renderWaiting();
-    setStatus(_THIS_IS_PHONE ? '기존 기기에 요청을 보내는 중...' : '스마트폰에 요청을 보내는 중...');
+    setStatus('요청 중…');
     try {
       pcKeyPair = await GopangWallet.generateX25519KeyPair();
       const _pcMatchNum = String(10 + (crypto.getRandomValues(new Uint32Array(1))[0] % 90));
@@ -1149,7 +1148,7 @@ function _showDeviceMismatchNotice(found, resolve) {
       const res = await fetch(`${PROXY_URL}/auth/device-link/init`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          e164: found.e164, pcLabel, purpose: 'key_transfer',
+          e164: _lastLoginE164 || found.e164, pcLabel, purpose: 'key_transfer',
           pcPubKeyB64u: pcKeyPair.publicKeyB64u,
           pcMatch: _pcMatchNum,   // 숫자 대조(2026-11-10) — 폰에서 이 숫자를 골라야 승인된다
         }),
@@ -1160,7 +1159,7 @@ function _showDeviceMismatchNotice(found, resolve) {
       sessionId = data.sessionId;
       { const _mb = $$('#_dl-match'), _mn = $$('#_dl-match-num'); if (_mb && _mn) { _mn.textContent = _pcMatchNum; _mb.style.display = ''; } }
       if (data.hasMobileDevice === false) {
-        setStatus('이 계정에 등록된 스마트폰이 없습니다. 아래 "문자로 받기"를 이용해 주세요.', true);
+        setStatus('등록된 폰이 없습니다. "문자로 받기"를 누르세요.', true);
       } else {
         setStatus('');
       }
@@ -2649,6 +2648,7 @@ function _showPhonePopupLegacy(resolve) {
 
       if (found) {
         // ── 케이스 B: 이미 가입된 번호 — 닉네임 입력값은 무시하고 로그인 ──
+        _lastLoginE164 = e164;
         await _loginExisting(found, digits);
         return;
       }
