@@ -1,10 +1,14 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-14 07:00 KST · 기준 커밋 64ac9f21
+- 갱신: 2026-11-14 07:09 KST · 기준 커밋 bde34071
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-14 Merge pull request #1055 from Openhash-Gopang/install-banner
+- 2026-11-14 feat(pwa): 자동 설치 배너 삭제, 설치 후 1초 안내 뒤 첫 화면 전환
+- 2026-11-14 Merge pull request #1054 from Openhash-Gopang/settings-icon
 - 2026-11-14 Merge pull request #1053 from Openhash-Gopang/camera-icon
+- 2026-11-14 feat(webapp): 우측 상단 설정 버튼 아이콘을 첨부 이미지로 교체
 - 2026-11-14 feat(webapp): 우측 상단 숫자 코드 버튼 아이콘을 카메라 이미지로 교체
 - 2026-11-14 Merge pull request #1052 from Openhash-Gopang/fix-wallet-reset
 - 2026-11-14 fix(webapp): "이 기기에서 새로 시작"이 지갑 DB를 실제로 지우도록 수정
@@ -40,10 +44,6 @@
 - 2026-11-14 feat(login-popup): PC login also uses SMS code (push approval slow/needs wallet)
 - 2026-11-14 Merge pull request #1038 from Openhash-Gopang/login-popup-simplify-20261114
 - 2026-11-14 feat(login-popup): simplify popup text, title 'naviweb 로그인'
-- 2026-11-13 Merge pull request #1037 from Openhash-Gopang/webapp-sms-login
-- 2026-11-13 webapp 폰 로그인: 번호 입력 → 인증번호 문자 → 자동 입력으로 로그인(PC는 폰 승인 유지)
-- 2026-11-13 Merge pull request #1036 from Openhash-Gopang/sms-login
-- 2026-11-13 폰에서 로그인: 번호 입력 → 인증번호 문자 발송 → 폰이 자동 입력(WebOTP), PC는 폰 승인 유지
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
