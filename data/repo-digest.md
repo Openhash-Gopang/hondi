@@ -1,9 +1,15 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-14 01:39 KST · 기준 커밋 879835e0
+- 갱신: 2026-11-14 07:00 KST · 기준 커밋 64ac9f21
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-14 Merge pull request #1053 from Openhash-Gopang/camera-icon
+- 2026-11-14 feat(webapp): 우측 상단 숫자 코드 버튼 아이콘을 카메라 이미지로 교체
+- 2026-11-14 Merge pull request #1052 from Openhash-Gopang/fix-wallet-reset
+- 2026-11-14 fix(webapp): "이 기기에서 새로 시작"이 지갑 DB를 실제로 지우도록 수정
+- 2026-11-14 Merge pull request #1051 from Openhash-Gopang/manual-screens
+- 2026-11-14 docs(manual): 사용자 안내서에 화면 3장 추가 (무료 안내·앱 설치·백그라운드 설정)
 - 2026-11-14 Merge pull request #1050 from Openhash-Gopang/sms-auto-20261114
 - 2026-11-14 fix(login): 푸시 구독이 없는 폰은 문자를 즉시 자동 발송(버튼 대기 제거)
 - 2026-11-14 Merge pull request #1049 from Openhash-Gopang/devlink-ttl-20261114
@@ -38,12 +44,6 @@
 - 2026-11-13 webapp 폰 로그인: 번호 입력 → 인증번호 문자 → 자동 입력으로 로그인(PC는 폰 승인 유지)
 - 2026-11-13 Merge pull request #1036 from Openhash-Gopang/sms-login
 - 2026-11-13 폰에서 로그인: 번호 입력 → 인증번호 문자 발송 → 폰이 자동 입력(WebOTP), PC는 폰 승인 유지
-- 2026-11-13 Merge pull request #1035 from Openhash-Gopang/backup-key-email
-- 2026-11-13 가입 때 백업 키를 사용자의 기존 이메일로 발송(인증번호로 주소 확인, 발송 기록만 저장)
-- 2026-11-13 Merge pull request #1034 from Openhash-Gopang/login-phone-notify
-- 2026-11-13 로그인 승인 팝업 단순화, 입력한 번호로 알림 요청 보내기
-- 2026-11-13 Merge pull request #1033 from Openhash-Gopang/fix-pages-skip-ci
-- 2026-11-13 병합 뒤 Cloudflare Pages 배포가 [skip ci] 때문에 건너뛰어지는 문제 — 버전 커밋 직후 배포 직접 요청
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
