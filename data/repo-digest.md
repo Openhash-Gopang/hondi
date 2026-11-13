@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-13 22:50 KST · 기준 커밋 3bc2d3ee
+- 갱신: 2026-11-13 22:52 KST · 기준 커밋 29607515
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-13 Merge pull request #1032 from Openhash-Gopang/login-sms-option
+- 2026-11-13 webapp 시작 팝업에 로그인|가입 구분 추가, 로그인 팝업에 '폰에서 로그인' 안내
 - 2026-11-13 Merge pull request #1031 from Openhash-Gopang/simplify-login-popup
 - 2026-11-13 로그인 승인 대기 팝업 문구 단순화 — 중복 안내 삭제
 - 2026-11-13 Merge pull request #1030 from Openhash-Gopang/fix-approve-host
@@ -42,8 +44,6 @@
 - 2026-11-12 fix: 검문에 걸린 답변이 사람 찾기/호출이면 검색 창을 직접 열어 대화가 멈추지 않게, 대기 중인 새 서비스워커를 앱 열 때 바로 활성화
 - 2026-11-12 perf/fix: 상대 검색·호출 표현 전면 확대(즉시 검색), 응답 지연 요인(도메인 분류 1.5초 상한·위치 대기 단축) 제거, 모델·첫 응답 시간 상시 표시
 - 2026-11-12 fix(search): '@아이디 호출해줘'·'번호 연락' 등 호출·연락·통화 동사도 즉시 검색으로 처리
-- 2026-11-12 Merge pull request #1015 from Openhash-Gopang/feat/llm-guard
-- 2026-11-12 feat(guard): LLM 거짓 실행·나중에 알림 약속 답변 검문 + 모델 진단 표시(?llm=1) + SP 가능 목록 규칙
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
