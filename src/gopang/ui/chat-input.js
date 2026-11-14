@@ -94,8 +94,10 @@ function _svgAttachIcon() {
     <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
 }
 function _svgCameraIcon() {
-  return `<svg width="16.87" height="16.87" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`;
+  // 2026-11-14: 선 아이콘 → 채운 면 아이콘(렌즈 구멍+중심점). 공용 CSS(.ci-btn svg)가 fill:none·stroke 를 씌우므로
+  // 자식 요소가 fill/stroke 를 직접 지정한다.
+  return `<svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
+    <path fill="currentColor" stroke="none" fill-rule="evenodd" d="M4 6.5h3.3l1.4-2.5h6.6l1.4 2.5H20a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.5a2 2 0 0 1 2-2zM12 8.6a4.6 4.6 0 1 0 0 9.2 4.6 4.6 0 0 0 0-9.2z"/><circle fill="currentColor" stroke="none" cx="12" cy="13.2" r="2.2"/></svg>`;
 }
 function _svgMicIcon() {
   return `<svg width="15.88" height="15.88" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
