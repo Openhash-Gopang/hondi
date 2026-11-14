@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-15 08:17 KST · 기준 커밋 8657a3e2
+- 갱신: 2026-11-15 08:32 KST · 기준 커밋 18bb8989
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-15 매뉴얼: 직역 사이트 6장 + K-서비스·사용법 등 새 장 초안(107장)
 - 2026-11-15 매뉴얼: 단계 버튼 → 오른쪽 슬라이드 장 목록(평소 닫힘), 단계별 진행 막대
 - 2026-11-15 매뉴얼: 사용법 강의 통합(76장)
 - 2026-11-15 Merge pull request #1069 from Openhash-Gopang/icons-header-20261114
@@ -43,7 +44,6 @@
 - 2026-11-14 Merge pull request #1052 from Openhash-Gopang/fix-wallet-reset
 - 2026-11-14 fix(webapp): "이 기기에서 새로 시작"이 지갑 DB를 실제로 지우도록 수정
 - 2026-11-14 Merge pull request #1051 from Openhash-Gopang/manual-screens
-- 2026-11-14 docs(manual): 사용자 안내서에 화면 3장 추가 (무료 안내·앱 설치·백그라운드 설정)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
