@@ -353,12 +353,14 @@ function courseFractions() {
   } catch (e) { return null; }
 }
 function naviTemp() {
-  var cf = courseFractions(), t = TEMP_BASE;
+  var cf = courseFractions(), t = TEMP_BASE, mf = {};
   TIER_ORDER.forEach(function (k) {
     var chs = chaptersByTier(k), f = chs.length ? tierCompletedCount(k) / chs.length : 0;
+    mf[k] = f;   // 사용법 화면(guide.js)이 같은 온도를 계산하도록 이 매뉴얼의 단계별 진행률을 남겨 둔다
     if (cf) f = Math.max(f, cf[k]);
     t += TEMP_SPAN[k] * f;
   });
+  try { localStorage.setItem('naviweb_manual_frac_v1', JSON.stringify(mf)); } catch (e) { /* 저장 불가 */ }
   return Math.min(100, Math.round(t * 10) / 10);
 }
 function loadCns() { try { return JSON.parse(localStorage.getItem(CNS_KEY)) || null; } catch (e) { return null; } }
@@ -406,7 +408,11 @@ document.getElementById('cnsIssue').addEventListener('click', function () {
   try { localStorage.setItem(CNS_KEY, JSON.stringify(c)); } catch (e) { /* 저장 불가여도 화면에는 보인다 */ }
   showCert(c); renderCnsBanner(t);
 });
-window.addEventListener('message', function (e) { if (e.origin === location.origin && e.data && e.data.type === 'cns-open') openCns(); });   // 사용법 화면에서 발급 단추를 누르면 연다
+window.addEventListener('message', function (e) {
+  if (e.origin !== location.origin || !e.data) return;
+  if (e.data.type === 'cns-refresh') renderHeader();   // 사용법 강의를 더 마치고 돌아왔을 때 온도를 다시 맞춘다
+  if (e.data.type === 'cns-open') { renderHeader(); openCns(); }
+});   // 사용법 화면에서 발급 단추를 누르면 연다
 
 function renderHeader() {
   var total = CHAPTERS.length, done = progress.completed.length;
