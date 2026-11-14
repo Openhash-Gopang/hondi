@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-14 13:54 KST · 기준 커밋 ad9c20ac
+- 갱신: 2026-11-14 14:37 KST · 기준 커밋 5966946c
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-14 Merge pull request #1063 from Openhash-Gopang/manual-layout-b-20261114
+- 2026-11-14 feat(manual): 3·2·1장 개편과 나비 온도·CNS, 대시보드 카드형 레이아웃 반영
 - 2026-11-14 Merge pull request #1062 from Openhash-Gopang/add-naviweb-agent-source
 - 2026-11-14 ops: 나비웹 도우미(Chrome 확장) 소스 추가 (웹 스토어 v0.6.2)
 - 2026-11-14 Merge pull request #1060 from Openhash-Gopang/push-reliability
@@ -42,8 +44,6 @@
 - 2026-11-14 Merge pull request #1045 from Openhash-Gopang/material-popups-c-20261114
 - 2026-11-14 ui: 페이지 모달(나비코드 확대, GDC 보내기, 충전, AI 분류 로딩) Material Design 갱신 (C-1)
 - 2026-11-14 Merge pull request #1044 from Openhash-Gopang/material-popups-b-20261114
-- 2026-11-14 ui: 설정 시트·프로필 패널·바텀시트 Material Design 갱신 (B 묶음)
-- 2026-11-14 Merge pull request #1043 from Openhash-Gopang/material-popups-a-20261114
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
