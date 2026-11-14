@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-14 14:49 KST · 기준 커밋 ecb48110
+- 갱신: 2026-11-14 14:56 KST · 기준 커밋 24eb835d
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-14 Merge pull request #1066 from Openhash-Gopang/manual-remove-tiercards-20261114
+- 2026-11-14 style(manual): 단계 카드 섹션 삭제 — 진행 수·GDC는 장 목록 제목 줄로 이동
 - 2026-11-14 Merge pull request #1065 from Openhash-Gopang/manual-remove-banner-20261114
 - 2026-11-14 style(manual): 상단 바와 나비 온도 히어로(배너) 삭제
 - 2026-11-14 Merge pull request #1064 from Openhash-Gopang/manual-tier-button-20261114
@@ -42,8 +44,6 @@
 - 2026-11-14 Merge pull request #1042 from Openhash-Gopang/popup-material-20261114
 - 2026-11-14 ui: PC 로그인 팝업 글자 크기 확대(힌트·상태·타이머·버튼 14~17px)
 - 2026-11-14 Merge pull request #1048 from Openhash-Gopang/ci-pages-retry-20261114
-- 2026-11-14 ci: Cloudflare Pages 배포 요청에 재시도 추가 (503 일시 오류로 배포가 누락됨)
-- 2026-11-14 Merge pull request #1047 from Openhash-Gopang/material-dialogs-d2-20261114
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
