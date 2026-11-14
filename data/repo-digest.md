@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-15 07:34 KST · 기준 커밋 29c69504
+- 갱신: 2026-11-15 07:47 KST · 기준 커밋 0ad14d83
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-15 Merge pull request #1069 from Openhash-Gopang/icons-header-20261114
+- 2026-11-15 ui(webapp): 우측 상단 카메라·설정 이미지와 입력줄 카메라를 읽기 쉬운 SVG 아이콘으로 교체
 - 2026-11-15 Merge pull request #1068 from Openhash-Gopang/manual-howto-thumb-20261115
 - 2026-11-15 feat(manual): 장 상단 영상을 썸네일 카드로, 누르면 큰 화면 재생 + 제목 번호순으로 장에 배정
 - 2026-11-15 Merge pull request #1067 from Openhash-Gopang/manual-howto-videos-20261114
@@ -42,8 +44,6 @@
 - 2026-11-14 docs(manual): 사용자 안내서에 화면 3장 추가 (무료 안내·앱 설치·백그라운드 설정)
 - 2026-11-14 Merge pull request #1050 from Openhash-Gopang/sms-auto-20261114
 - 2026-11-14 fix(login): 푸시 구독이 없는 폰은 문자를 즉시 자동 발송(버튼 대기 제거)
-- 2026-11-14 Merge pull request #1049 from Openhash-Gopang/devlink-ttl-20261114
-- 2026-11-14 fix(worker): PC 로그인 승인 세션 유효시간 90초→300초 (폰 알림 지연으로 SESSION_EXPIRED)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
