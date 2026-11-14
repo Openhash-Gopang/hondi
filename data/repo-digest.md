@@ -1,9 +1,13 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-14 14:37 KST · 기준 커밋 5966946c
+- 갱신: 2026-11-14 14:44 KST · 기준 커밋 9bca5113
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-14 Merge pull request #1064 from Openhash-Gopang/manual-tier-button-20261114
+- 2026-11-14 style(manual): 상단 '나비 사용자 매뉴얼' 바 삭제
+- 2026-11-14 style(manual): 나비 온도 히어로를 한 줄 배너로 대체
+- 2026-11-14 style(manual): 단계 카드를 Material 채움 버튼(Contained)으로 변경
 - 2026-11-14 Merge pull request #1063 from Openhash-Gopang/manual-layout-b-20261114
 - 2026-11-14 feat(manual): 3·2·1장 개편과 나비 온도·CNS, 대시보드 카드형 레이아웃 반영
 - 2026-11-14 Merge pull request #1062 from Openhash-Gopang/add-naviweb-agent-source
@@ -40,10 +44,6 @@
 - 2026-11-14 Merge pull request #1047 from Openhash-Gopang/material-dialogs-d2-20261114
 - 2026-11-14 ui: confirm/prompt를 Material 대화상자(await mpConfirm/mpPrompt)로 전환 (D-2)
 - 2026-11-14 Merge pull request #1046 from Openhash-Gopang/material-dialogs-d-20261114
-- 2026-11-14 ui: 공용 Material 대화상자(mpAlert/mpConfirm/mpPrompt) 추가, alert 대체 (D-1)
-- 2026-11-14 Merge pull request #1045 from Openhash-Gopang/material-popups-c-20261114
-- 2026-11-14 ui: 페이지 모달(나비코드 확대, GDC 보내기, 충전, AI 분류 로딩) Material Design 갱신 (C-1)
-- 2026-11-14 Merge pull request #1044 from Openhash-Gopang/material-popups-b-20261114
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
