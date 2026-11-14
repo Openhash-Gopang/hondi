@@ -35,59 +35,66 @@ body {
   font-size: 14px; line-height: 1.8; -webkit-font-smoothing: antialiased;
 }
 a { color: inherit; }
-.wrap { max-width: 980px; margin: 0 auto; padding: 24px 20px 100px; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px 110px; }
 
 /* ── Top App Bar (M3) ── */
-.app-bar {
-  background: var(--navy); color: #fff; border-radius: var(--radius);
-  padding: 22px 26px; margin-bottom: 18px; box-shadow: var(--el-3);
-  position: relative; overflow: hidden;
-}
-.app-bar::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg, var(--primary), #5aa9e6 60%, transparent); }
-.ab-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-.ab-title { font-size: 19px; font-weight: 700; }
-.ab-sub { font-size: 12.5px; color: #a9b8d4; margin-top: 3px; }
-.ab-stats { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
-.ab-chip { display:flex; align-items:center; gap:7px; background: rgba(255,255,255,0.1); padding: 7px 13px; border-radius: var(--radius-full); font-size:12.5px; }
-.ab-chip b { font-size: 14px; }
-.ab-progress-row { margin-top: 16px; }
-.ab-progress-track { height: 8px; background: rgba(255,255,255,0.16); border-radius: 999px; overflow: hidden; }
-.ab-progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #5aa9e6); border-radius: 999px; transition: width 0.35s cubic-bezier(.4,0,.2,1); }
-.ab-progress-label { font-size: 11.5px; color: #c9d6ee; margin-top: 6px; }
-.temp-track { width: 56px; height: 5px; background: rgba(255,255,255,0.2); border-radius: 999px; overflow: hidden; }
-.temp-fill { height: 100%; background: #f59e0b; transition: width 0.3s; }
+.mn-bar { display: flex; align-items: center; gap: 12px; height: 60px; margin: 20px 0; padding: 0 20px; background: var(--surface); border-radius: var(--radius); box-shadow: var(--el-2); position: relative; }
+.mn-bar svg { width: 24px; height: 24px; color: var(--primary); flex: none; }
+.mn-bar-title { font-size: 18px; font-weight: 700; color: var(--navy); flex: 1; }
+.mn-bar-temp { background: var(--primary-container); color: var(--on-primary-container); border-radius: var(--radius-full); padding: 7px 16px; font-size: 13px; font-weight: 700; }
 
-/* ── Material Tabs (레벨 선택) — 슬라이딩 인디케이터 ── */
-.md-tabs { position: relative; display: flex; background: var(--surface); border-radius: var(--radius) var(--radius) 0 0; box-shadow: var(--el-1); overflow: hidden; }
-.md-tab {
-  flex: 1; background: none; border: none; cursor: pointer; padding: 16px 10px 14px;
-  font-family: inherit; font-size: 13.5px; font-weight: 700; color: var(--on-surface-variant);
-  transition: color 0.2s; position: relative; display:flex; flex-direction:column; align-items:center; gap:2px;
-}
-.md-tab .mt-count { font-size: 10.5px; font-weight: 500; color: var(--outline); }
-.md-tab .mt-reward { font-size: 10px; font-weight: 700; color: #b06000; }
-.md-tab.active { color: var(--primary); }
-.md-tab.active .mt-reward { color: #b06000; }
-.md-tab-indicator { position: absolute; bottom: 0; height: 3px; background: var(--primary); border-radius: 3px 3px 0 0; transition: left 0.28s cubic-bezier(.4,0,.2,1), width 0.28s cubic-bezier(.4,0,.2,1); }
+/* ── 히어로 (나비 온도 링) ── */
+.hero { background: var(--navy); color: #fff; border-radius: 16px; padding: 28px 30px; display: flex; flex-wrap: wrap; gap: 28px; align-items: center; box-shadow: var(--el-3); }
+.ring { position: relative; width: 148px; height: 148px; flex: none; }
+.ring svg { width: 148px; height: 148px; display: block; }
+.ring-track { stroke: #2e3f66; } .ring-fill { stroke: #6ea8ff; transition: stroke-dashoffset .4s cubic-bezier(.4,0,.2,1); }
+.ring-mid { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.2; }
+.ring-mid b { font-size: 31px; font-weight: 700; } .ring-mid span { font-size: 12px; color: #c7d2ea; }
+.hero-body { flex: 1 1 320px; min-width: 0; }
+.hero h1 { font-size: 26px; line-height: 1.35; margin-bottom: 8px; }
+.hero p { font-size: 14px; line-height: 1.7; color: #c7d2ea; margin-bottom: 14px; }
+.hero-chips { display: flex; gap: 10px; flex-wrap: wrap; }
+.hero-chip { background: #2e3f66; border-radius: var(--radius-full); padding: 7px 15px; font-size: 13px; }
+.hero-sub { font-size: 12px; color: #c7d2ea; margin-top: 10px; }
 
-/* ── 장(chapter) 카드 그리드 (M3 Filled/Outlined Cards) ── */
-.ch-cards { background: var(--surface); padding: 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; box-shadow: var(--el-1); }
-.ch-card {
-  background: var(--surface-container); border: 1px solid transparent; border-radius: var(--radius-sm);
-  padding: 12px 14px; text-align: left; cursor: pointer; font-family: inherit;
-  font-size: 12.5px; font-weight: 600; color: var(--on-surface-variant);
-  display: flex; align-items: flex-start; gap: 8px; transition: box-shadow 0.15s, background 0.15s;
-}
-.ch-card:hover { box-shadow: var(--el-2); }
-.ch-card.active { background: var(--primary-container); color: var(--on-primary-container); }
-.ch-card .cc-num { flex-shrink:0; width:20px; height:20px; border-radius:50%; background:rgba(0,0,0,0.06); display:flex; align-items:center; justify-content:center; font-size:10.5px; font-weight:700; }
-.ch-card.active .cc-num { background: var(--primary); color: #fff; }
-.ch-card.completed .cc-num { background: var(--tertiary-container); color: var(--on-tertiary-container); }
-.ch-card.completed .cc-num::after { content:'✓'; }
-@media (max-width: 720px) { .ch-cards { grid-template-columns: repeat(2, 1fr); } }
+/* ── 단계(초·중·고급) 카드 ── */
+.tier-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 20px 0 26px; }
+.tier-card { text-align: left; font-family: inherit; cursor: pointer; background: var(--surface); border: 0; border-top: 4px solid var(--tc); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--el-1); transition: box-shadow .15s; min-width: 0; }
+.tier-card:hover { box-shadow: var(--el-3); }
+.tier-card.active { box-shadow: 0 0 0 2px var(--tc), var(--el-2); }
+.tc-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.tc-name { font-size: 17px; font-weight: 700; color: var(--on-surface); }
+.tc-gdc { font-size: 12px; font-weight: 700; color: #8a4b00; }
+.tc-count { font-size: 12.5px; color: var(--on-surface-variant); margin: 3px 0 12px; }
+.tc-bar { height: 8px; border-radius: 4px; background: var(--surface-container-high); overflow: hidden; }
+.tc-bar i { display: block; height: 100%; background: var(--tc); border-radius: 4px; transition: width .3s; }
+
+/* ── 장 목록 머리말 + 세그먼트 버튼 ── */
+.sec-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+.sec-head h2 { font-size: 19px; font-weight: 700; color: var(--navy); flex: 1 1 160px; }
+.seg { display: flex; border: 1px solid var(--outline); border-radius: var(--radius-full); overflow: hidden; background: var(--surface); }
+.seg button { height: 40px; padding: 0 20px; border: 0; border-left: 1px solid var(--outline); background: var(--surface); color: var(--on-surface-variant); font: 600 13.5px/1 inherit; font-family: inherit; cursor: pointer; }
+.seg button:first-child { border-left: 0; }
+.seg button.active { background: var(--primary-container); color: var(--on-primary-container); font-weight: 700; }
+
+/* ── 장(chapter) 카드 격자 ── */
+.ch-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; margin-bottom: 26px; }
+.ch-card { display: flex; flex-direction: column; gap: 12px; min-height: 124px; text-align: left; font-family: inherit; cursor: pointer; background: var(--surface); border: 0; border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--el-1); color: var(--on-surface); transition: box-shadow .15s, transform .15s; }
+.ch-card:hover { box-shadow: var(--el-3); transform: translateY(-1px); }
+.ch-card.active { background: var(--primary-container); box-shadow: 0 0 0 2px var(--primary), var(--el-2); }
+.cc-top { display: flex; align-items: center; justify-content: space-between; }
+.cc-num { width: 32px; height: 32px; border-radius: 50%; background: var(--surface-container-high); color: var(--on-surface-variant); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
+.ch-card.active .cc-num { background: #fff; color: var(--primary); }
+.ch-card.completed .cc-num { background: var(--primary); color: #fff; }
+.cc-chip { font-size: 12px; font-weight: 700; padding: 4px 11px; border-radius: 12px; background: var(--surface-container-high); color: var(--on-surface-variant); }
+.ch-card.active .cc-chip { background: #fff; color: var(--on-primary-container); }
+.ch-card.completed .cc-chip { background: var(--tertiary-container); color: var(--on-tertiary-container); }
+.cc-title { word-break: keep-all; font-size: 15.5px; font-weight: 700; line-height: 1.5; }
+@media (max-width: 720px) { .ch-content { padding: 24px 18px; } .tier-cards { grid-template-columns: 1fr; } .hero { padding: 22px 20px; } }
+
 
 /* ── 본문 카드 ── */
-.ch-content { background: var(--surface); border-radius: 0 0 var(--radius) var(--radius); padding: 34px 36px; box-shadow: var(--el-1); margin-bottom: 20px; }
+.ch-content { background: var(--surface); border-radius: var(--radius); padding: 34px 36px; box-shadow: var(--el-1); margin-bottom: 20px; }
 .ch-hero { margin-bottom: 8px; }
 .ch-updated { font-size: 11.5px; color: #6b7a99; text-align: right; margin: -4px 0 10px; }
 .ch-updated.is-new { color: #0c6cc3; font-weight: 600; }
@@ -173,9 +180,9 @@ a { color: inherit; }
 
 /* ── FAB(다음 장) ── */
 .fab {
-  position: fixed; bottom: 26px; right: 26px; width: 56px; height: 56px; border-radius: 16px;
-  background: var(--primary); color: #fff; border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; box-shadow: var(--el-3);
+  position: fixed; bottom: 26px; right: 26px; height: 56px; padding: 0 24px 0 20px; border-radius: 16px;
+  background: var(--primary); color: #fff; border: none; cursor: pointer; font: 700 15px inherit; font-family: inherit;
+  display: flex; align-items: center; gap: 12px; box-shadow: var(--el-3);
   transition: box-shadow 0.15s, transform 0.15s;
 }
 .fab:hover { box-shadow: var(--el-4); transform: translateY(-2px); }
@@ -264,7 +271,7 @@ a { color: inherit; }
 }
 
 
-.cns-banner { display:none; margin: 12px auto 0; max-width: 960px; padding: 14px 18px; border-radius: 14px; background: linear-gradient(135deg,#fff7e0,#ffe9b0); border: 1px solid #f59e0b; color:#5b3b00; font-weight:600; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.cns-banner { display:none; margin: 18px 0 0; max-width: none; padding: 14px 18px; border-radius: 14px; background: linear-gradient(135deg,#fff7e0,#ffe9b0); border: 1px solid #f59e0b; color:#5b3b00; font-weight:600; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
 .cns-banner.show { display:flex; }
 .cns-banner button, .cns-modal button.cns-go { border:0; background:#b45309; color:#fff; border-radius:999px; padding:9px 18px; font:inherit; font-weight:700; cursor:pointer; }
 .cns-modal { position:fixed; inset:0; z-index:100; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; padding:16px; overflow:auto; }
@@ -287,25 +294,31 @@ a { color: inherit; }
 <body>
 
 <div class="wrap">
-  <div class="app-bar">
-    <div class="ab-top">
-      <div>
-        <div class="ab-title">📘 나비 사용자 매뉴얼</div>
-        <div class="ab-sub">배우면서 GDC를 받으세요 — 초급 1,000T · 중급 3,000T · 고급 10,000T</div>
-      </div>
-      <div class="ab-stats">
-        <div class="ab-chip">진행률 <b id="progressLabel">0/32</b></div>
-        <div class="ab-chip">나비 온도 <b id="tempValue">36.5°</b><span class="temp-track"><span class="temp-fill" id="tempFill" style="width:37%"></span></span></div>
-      </div>
+  <header class="mn-bar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/></svg>
+    <span class="mn-bar-title">나비 사용자 매뉴얼</span>
+    <span class="mn-bar-temp">나비 온도 <b id="tempPill">36.5°</b></span>
+  </header>
+
+  <section class="hero">
+    <div class="ring">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><circle class="ring-track" cx="50" cy="50" r="42" fill="none" stroke-width="9"/><circle class="ring-fill" id="tempRing" cx="50" cy="50" r="42" fill="none" stroke-width="9" stroke-linecap="round" stroke-dasharray="263.9" stroke-dashoffset="263.9" transform="rotate(-90 50 50)"/></svg>
+      <div class="ring-mid"><b id="tempValue">36.5°</b><span>나비 온도</span></div>
     </div>
-    <div class="ab-progress-row">
-      <div class="ab-progress-track"><div class="ab-progress-fill" id="progressFill" style="width:0%"></div></div>
-      <div class="ab-progress-label" id="progressSub">아직 시작 전입니다 — 첫 장부터 시작해 보세요.</div>
+    <div class="hero-body">
+      <h1>배우면서 GDC를 받으세요</h1>
+      <p>초급 1,000T · 중급 3,000T · 고급 10,000T. 장마다 퀴즈를 통과하면 나비 온도가 올라가고, 95° 이상이면 나비웹 전문가 인증서(CNS)를 발급합니다.</p>
+      <div class="hero-chips">
+        <span class="hero-chip">진행률 <b id="progressLabel">0/57</b></span>
+        <span class="hero-chip">CNS까지 <b id="toCns">58.5°</b></span>
+      </div>
+      <div class="hero-sub" id="progressSub">아직 시작 전입니다 — 첫 장부터 시작해 보세요.</div>
     </div>
-  </div>
+  </section>
 
   <div class="cns-banner" id="cnsBanner" role="status"><span id="cnsBannerText"></span><button type="button" id="cnsBannerBtn">인증서 발급받기</button></div>
-  <div class="md-tabs" id="tierTabs"><div class="md-tab-indicator" id="tierIndicator"></div></div>
+  <div class="tier-cards" id="tierCards"></div>
+  <div class="sec-head"><h2 id="gridTitle">초급</h2><div class="seg" id="tierSeg" role="group" aria-label="단계 선택"></div></div>
   <div class="ch-cards" id="chTabs"></div>
   <div class="ch-content" id="chContent"></div>
   <div class="tier-reward-banner" id="tierRewardBanner"></div>
@@ -316,8 +329,9 @@ a { color: inherit; }
   </div></div>
 </div>
 
-<button class="fab" id="nextFab" title="다음 장">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+<button class="fab" id="nextFab" title="아직 마치지 않은 첫 장으로 이동">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+  <span>이어서 하기</span>
 </button>
 
 <script>
@@ -414,55 +428,60 @@ window.addEventListener('message', function (e) {
   if (e.data.type === 'cns-open') { renderHeader(); openCns(); }
 });   // 사용법 화면에서 발급 단추를 누르면 연다
 
+var TIER_COLORS = {"beginner": "#0c6cc3", "intermediate": "#00796b", "advanced": "#c25e00"};
 function renderHeader() {
   var total = CHAPTERS.length, done = progress.completed.length;
   document.getElementById('progressLabel').textContent = done + '/' + total;
-  document.getElementById('progressFill').style.width = (done / total * 100) + '%';
   document.getElementById('progressSub').textContent =
     done === 0 ? '아직 시작 전입니다 — 첫 장부터 시작해 보세요.' :
     done === total ? '모든 과정을 완료했습니다! 🎉' : done + '개 장을 완료했습니다. 계속해 보세요.';
   var temp = naviTemp();
-  document.getElementById('tempValue').textContent = temp.toFixed(1) + '°';
-  document.getElementById('tempFill').style.width = Math.min(100, temp) + '%';
+  var t = temp.toFixed(1) + '°';
+  document.getElementById('tempValue').textContent = t;
+  document.getElementById('tempPill').textContent = t;
+  document.getElementById('tempRing').style.strokeDashoffset = (263.9 * (1 - Math.max(0, Math.min(1, (temp - TEMP_BASE) / (100 - TEMP_BASE))))).toFixed(1);
+  document.getElementById('toCns').textContent = temp >= CNS_AT ? '도달' : (CNS_AT - temp).toFixed(1) + '°';
   renderCnsBanner(temp);
 }
 
+function selectTier(tier) { currentTier = tier; currentChapterId = chaptersByTier(tier)[0].id; renderAll(); }
+
 function renderTierTabs() {
-  var wrap = document.getElementById('tierTabs');
-  var indicator = document.getElementById('tierIndicator');
-  wrap.querySelectorAll('.md-tab').forEach(function (b) { b.remove(); });
-  TIER_ORDER.forEach(function (tier, i) {
-    var chs = chaptersByTier(tier);
-    var done = tierCompletedCount(tier);
-    var btn = document.createElement('button');
-    btn.className = 'md-tab' + (tier === currentTier ? ' active' : '');
-    btn.innerHTML = TIER_LABELS[tier] + '<span class="mt-count">' + done + '/' + chs.length + '</span>' +
-      '<span class="mt-reward">GDC ' + TIER_REWARDS[tier].toLocaleString() + 'T</span>';
-    btn.addEventListener('click', function () {
-      currentTier = tier; currentChapterId = chaptersByTier(tier)[0].id; renderAll();
-    });
-    wrap.appendChild(btn);
+  var cards = document.getElementById('tierCards'), seg = document.getElementById('tierSeg');
+  cards.innerHTML = ''; seg.innerHTML = '';
+  TIER_ORDER.forEach(function (tier) {
+    var chs = chaptersByTier(tier), done = tierCompletedCount(tier);
+    var card = document.createElement('button');
+    card.type = 'button'; card.className = 'tier-card' + (tier === currentTier ? ' active' : '');
+    card.style.setProperty('--tc', TIER_COLORS[tier]);
+    card.innerHTML = '<div class="tc-head"><span class="tc-name">' + TIER_LABELS[tier] + '</span><span class="tc-gdc">GDC ' + TIER_REWARDS[tier].toLocaleString() + 'T</span></div>' +
+      '<div class="tc-count">' + done + ' / ' + chs.length + '장 완료</div><div class="tc-bar"><i style="width:' + Math.round(done / chs.length * 100) + '%"></i></div>';
+    card.addEventListener('click', function () { selectTier(tier); });
+    cards.appendChild(card);
+    var sb = document.createElement('button');
+    sb.type = 'button'; sb.className = tier === currentTier ? 'active' : ''; sb.textContent = TIER_LABELS[tier];
+    sb.addEventListener('click', function () { selectTier(tier); });
+    seg.appendChild(sb);
   });
-  requestAnimationFrame(function () {
-    var activeBtn = wrap.querySelector('.md-tab.active');
-    if (activeBtn) {
-      indicator.style.left = activeBtn.offsetLeft + 'px';
-      indicator.style.width = activeBtn.offsetWidth + 'px';
-    }
-  });
+  document.getElementById('gridTitle').textContent = TIER_LABELS[currentTier] + ' · ' + chaptersByTier(currentTier).length + '장';
 }
 
 function renderChapterTabs() {
   var wrap = document.getElementById('chTabs');
   wrap.innerHTML = '';
   chaptersByTier(currentTier).forEach(function (ch, idx) {
+    var done = isCompleted(ch.id), cur = ch.id === currentChapterId;
     var btn = document.createElement('button');
-    btn.className = 'ch-card' + (ch.id === currentChapterId ? ' active' : '') + (isCompleted(ch.id) ? ' completed' : '');
-    btn.innerHTML = '<span class="cc-num">' + (isCompleted(ch.id) ? '' : (idx + 1)) + '</span><span>' + ch.title + '</span>';
-    btn.addEventListener('click', function () { currentChapterId = ch.id; renderAll(); });
+    btn.type = 'button';
+    btn.className = 'ch-card' + (cur ? ' active' : '') + (done ? ' completed' : '');
+    btn.innerHTML = '<span class="cc-top"><span class="cc-num">' + (done ? '✓' : (idx + 1)) + '</span><span class="cc-chip">' + (done ? '완료' : cur ? '읽는 중' : '시작 전') + '</span></span><span class="cc-title">' + ch.title + '</span>';
+    btn.addEventListener('click', function () { currentChapterId = ch.id; renderAll(); scrollToContent(); });
     wrap.appendChild(btn);
   });
 }
+
+function scrollToContent() { var el = document.getElementById('chContent'); if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
 
 function renderQuiz(chapter) {
   if (!chapter.quiz || !chapter.quiz.length) return '';
@@ -542,9 +561,10 @@ function checkTierReward(tier) {
 }
 
 document.getElementById('nextFab').addEventListener('click', function () {
-  var list = chaptersByTier(currentTier);
-  var idx = list.findIndex(function (c) { return c.id === currentChapterId; });
-  if (idx < list.length - 1) { currentChapterId = list[idx + 1].id; renderAll(); window.scrollTo({top:0, behavior:'smooth'}); }
+  var target = null;
+  TIER_ORDER.some(function (tier) { return chaptersByTier(tier).some(function (c) { if (!isCompleted(c.id)) { target = c; return true; } return false; }); });
+  if (!target) target = CHAPTERS[0];
+  currentTier = target.tier; currentChapterId = target.id; renderAll(); scrollToContent();
 });
 
 
@@ -876,7 +896,6 @@ function kgovBuildApp(root) {
 }
 function renderAll() { renderHeader(); renderTierTabs(); renderChapterTabs(); renderContent(); }
 renderAll();
-window.addEventListener('resize', renderTierTabs);
 </script>
 </body>
 </html>
