@@ -26,6 +26,7 @@ import { _buildLocNote, _buildRoutingFacts, _waitForLocationReady } from '../ser
 import { _injectAuthConfirmButton } from '../core/auth.js';
 import { _klawReview } from '../services/klaw.js';
 import { openSearch } from '../ui/p2p-search.js';
+import { matchReturnToDefaultIntent } from './return-default-intent.js';
 import { inviteByHandle } from '../ui/p2p-chat.js';
 import { _openProfilePanel } from '../ui/settings.js';
 import { _gwpLaunch } from '../gwp/engine.js';
@@ -441,10 +442,44 @@ function _friendlyStageLabel(label) {
 }
 function _announceStageTransition(label) {
   try {
-    appendBubble('ai', `🔄 ${_friendlyStageLabel(label)} 단계로 이동 중…`);
+    const b = appendBubble('ai', `🔄 ${_friendlyStageLabel(label)} 단계로 이동 중…`);
+    _addReturnButton(b);
   } catch (e) {
     console.warn('[Orchestration] 진행 알림 말풍선 실패(무시):', e.message);
   }
+}
+
+// ── 나만의 AI 비서(기본 SP)로 되돌아가기 (2026-11-15) ─────────────────────
+// 기본 SP = 나만의 AI 비서(AC-PRO-CORE). K-Compose·전문가 등은 비서가 호출한 SP이므로
+// 이용자가 원하면 언제든(버튼·"나비로 돌아가" 등 발화) 기본 SP로 복귀할 수 있어야 한다.
+export function _isDefaultSP() {
+  return !(CFG.systemStack?.length > 0) && (!_agentCommonCache || CFG.system_base === _agentCommonCache);
+}
+export async function returnToDefaultAssistant() {
+  CFG.systemStack = [];
+  history.length = 0;
+  const sp = await _loadAgentCommonSP();
+  if (!sp) { appendBubble('ai', '나만의 AI 비서를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'); return false; }
+  CFG.system_base = sp;
+  CFG.system = sp;
+  try {
+    const cfg = JSON.parse(localStorage.getItem('gopang_cfg') || '{}');
+    cfg.system = sp; cfg.system_base = sp;
+    localStorage.setItem('gopang_cfg', JSON.stringify(cfg));
+  } catch {}
+  appendBubble('ai', '🦋 나만의 AI 비서로 돌아왔습니다. 무엇을 도와드릴까요?');
+  return true;
+}
+function _addReturnButton(bubble) {
+  try {
+    if (!bubble) return;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = '← 나만의 AI 비서로 돌아가기';
+    btn.style.cssText = 'display:block;margin-top:6px;padding:4px 10px;border:1px solid var(--bdr,#ccc);border-radius:12px;background:transparent;font-size:12px;cursor:pointer';
+    btn.onclick = () => { btn.disabled = true; returnToDefaultAssistant(); };
+    bubble.appendChild(btn);
+  } catch {}
 }
 
 async function _forwardSwitchSP(loaderFn, label) {
@@ -5274,6 +5309,11 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
   // 지연 측정 시작점(2026-11-12) — 아래 첫 스트림 청크 도착 시 경과를 콘솔·window.__hondiLatency 에 남긴다.
   const _t0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
   try { window.__hondiLatencyStart = _t0; } catch {}
+  // 2026-11-15 — "나비로 돌아가" 등: 기본 SP(나만의 AI 비서)가 아닐 때 LLM 없이 즉시 복귀
+  if (!imageFile && !_isDefaultSP() && matchReturnToDefaultIntent(userText)) {
+    await returnToDefaultAssistant();
+    return;
+  }
   // 2026-11-12 — 자주 찾는 사용자: 이름·아이디만 말해도 LLM·검색 없이 곧바로 채팅으로 연결한다.
   if (!imageFile) {          // 2026-11-15: 전문가 페르소나(systemStack)가 켜져 있어도 검색·연결은 AI 없이 즉시 처리
     let _fm = null;
