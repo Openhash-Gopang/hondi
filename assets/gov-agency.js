@@ -318,7 +318,7 @@
     function addNavButtons() {
       var navRight = document.querySelector('.topnav-right'); if (!navRight) return;
       if (!document.getElementById('sqNavBtn')) {
-        var a = el('a', { id: 'sqNavBtn', 'class': 'sq-nav-btn', href: '/pages/suggest.html?from=' + encodeURIComponent('gov-agency'), title: '혼디에 바라는 점이나 궁금한 점을 말씀해 주세요' }, '💬 제안 및 질문');
+        var a = el('a', { id: 'sqNavBtn', 'class': 'sq-nav-btn', href: '/pages/suggest.html?from=' + encodeURIComponent('gov-agency'), title: '나비웹에 바라는 점이나 궁금한 점을 말씀해 주세요' }, '💬 제안 및 질문');
         navRight.insertBefore(a, navRight.firstChild);
       }
       if (!document.getElementById('lrNavBtn')) {

@@ -168,7 +168,7 @@ const me = (() => {
 let state = { serial: null, order: null, registered: false, mode: null };
 let lastCanvas = null;
 
-// 혼디의 E.164 저장형은 +82 뒤에 0이 남는다(+8201096627170). 어느 표기로 와도 010-****-7170 으로 보이게 한다.
+// 나비웹의 E.164 저장형은 +82 뒤에 0이 남는다(+8201096627170). 어느 표기로 와도 010-****-7170 으로 보이게 한다.
 
 async function serverStatus(serial) {
   try {

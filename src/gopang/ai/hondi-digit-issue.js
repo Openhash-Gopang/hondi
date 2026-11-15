@@ -1,4 +1,4 @@
-// 혼디 숫자 코드 자동 발급 — 가입 순번 번호를 배정받아(GET /digit/next) 지갑으로 서명하고 등록(POST /digit/record)한다.
+// 나비웹 숫자 코드 자동 발급 — 가입 순번 번호를 배정받아(GET /digit/next) 지갑으로 서명하고 등록(POST /digit/record)한다.
 // 가입 직후(auth.js _initGdcWalletAndFs)와 숫자 코드 페이지(번호가 없는 기존 계정)가 같이 쓴다.
 // 본인 인증은 가입 때 폰 인증으로 끝났다 — 서버는 서명한 키가 그 계정에 핀된 지갑 키인지만 확인한다.
 import { canonical, recordHash, verifySig, CLAIM_VERSION, CLAIM_NS, GENESIS_PREV } from './hondi-digit-claim.js';

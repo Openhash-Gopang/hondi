@@ -1,5 +1,5 @@
 /**
- * hondi-digit-core.js — 혼디 숫자 코드 v2 (가변 자릿수) 순수 로직
+ * hondi-digit-core.js — 나비웹 숫자 코드 v2 (가변 자릿수) 순수 로직
  *
  * DOM/캔버스에 의존하지 않는다 → 브라우저(hondi-digit-scanner.js)와
  * Node(테스트)가 똑같은 코드를 쓴다.
@@ -48,7 +48,7 @@ export function isValidSerial(s) { return SERIAL_RE.test(String(s)); }
 export function normalizeSerial(s) {
   const t = String(s).trim();
   if (!isValidSerial(t)) {
-    throw new Error(`혼디 숫자 코드는 1~${MAX_DIGITS}자리, 첫 자리는 1~9여야 합니다: "${t}"`);
+    throw new Error(`나비웹 숫자 코드는 1~${MAX_DIGITS}자리, 첫 자리는 1~9여야 합니다: "${t}"`);
   }
   return t;
 }

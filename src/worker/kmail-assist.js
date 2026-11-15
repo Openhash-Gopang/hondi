@@ -1,6 +1,6 @@
 // src/worker/kmail-assist.js — 나비 메인 화면(naviweb.kr / mail.naviweb.kr)의 SP 라우팅 순수 함수.
 //
-// 기본 SP는 "혼디 나만의 AI 비서"(AC-PRO-CORE)다. AC가 내는 [GWP: id] / [EXPERT: personaId] 태그를 읽어
+// 기본 SP는 "나비웹 나만의 AI 비서"(AC-PRO-CORE)다. AC가 내는 [GWP: id] / [EXPERT: personaId] 태그를 읽어
 // 화면이 어디로 보낼지(K-Mail · 전문가 · 서류 작성 · 그대로 답변)를 정한다. 네트워크 없음 — 단위 시험 가능.
 
 // 전문가 id → 서류 작성 사이트(law/tax/doctor). 해당 없으면 '' (전문가 대화만 연다).

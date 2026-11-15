@@ -251,7 +251,7 @@
     /* 상단 메뉴 오른쪽 버튼: 「💬 제안 및 질문」 — 전문가 페르소나 페이지와 같은 위치·모양 */
     setTimeout(function () {
       var navRight = document.querySelector('.topnav-right'); if (!navRight || document.getElementById('sqNavBtn')) return;
-      navRight.insertBefore(el('a', { id: 'sqNavBtn', 'class': 'sq-nav-btn', href: '/pages/suggest.html?from=' + encodeURIComponent(id), title: '혼디에 바라는 점이나 궁금한 점을 말씀해 주세요' }, '💬 제안 및 질문'), navRight.firstChild);
+      navRight.insertBefore(el('a', { id: 'sqNavBtn', 'class': 'sq-nav-btn', href: '/pages/suggest.html?from=' + encodeURIComponent(id), title: '나비웹에 바라는 점이나 궁금한 점을 말씀해 주세요' }, '💬 제안 및 질문'), navRight.firstChild);
     }, 0);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();

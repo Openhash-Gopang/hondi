@@ -1,5 +1,5 @@
 /**
- * hondi-scanner.js — 혼디 시각 코드 스캐너 v7.0
+ * hondi-scanner.js — 나비웹 시각 코드 스캐너 v7.0
  *
  * ══════════════════════════════════════════════════════════════
  * v7.0 핵심 변경: 로고 글자 자체를 캘리브레이션 기준점으로 재사용
@@ -10,7 +10,7 @@
  * 실측으로 확인됐다.
  *
  * v7.0은 두 구역의 역할을 맞바꿨다:
- *   - "혼디" 로고 안에 이미 고정색으로 박혀 있는 빨강·파랑 사각형과
+ *   - "나비웹" 로고 안에 이미 고정색으로 박혀 있는 빨강·파랑 사각형과
  *     검정 획, 배경 흰색 — 이 네 가지를 그대로 캘리브레이션 기준점으로
  *     재사용한다(hondi-code.js의 CALIB_*_ROI). 별도 앵커나 패치를
  *     그리지 않는다.
@@ -92,7 +92,7 @@ export async function startScanner(video, canvas, overlayCanvas, onResult, onSta
     });
     video.srcObject = _stream;
     await video.play();
-    _status('혼디 코드를 화면에 맞춰주세요.');
+    _status('나비웹 코드를 화면에 맞춰주세요.');
     _scheduleFrame(video, canvas);
   } catch(e) {
     const msg =
@@ -557,8 +557,8 @@ function _status(msg){_onStatus?.(msg);}
 export async function lookupProfile(shortId, version) {
   const sid=shortId.toString();
   const LOCAL={
-    '2577410713':{guid:'hondi-ai',handle:'hondi',name:'혼디',url:'/profiles/5zvxrthQVkz.html'},
-    '2537012854':{guid:'hondi-ai',handle:'hondi',name:'혼디',url:'/profiles/2537012854.html'},
+    '2577410713':{guid:'hondi-ai',handle:'hondi',name:'나비웹',url:'/profiles/5zvxrthQVkz.html'},
+    '2537012854':{guid:'hondi-ai',handle:'hondi',name:'나비웹',url:'/profiles/2537012854.html'},
   };
   if(LOCAL[sid]) return LOCAL[sid];
   try{

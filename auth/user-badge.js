@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════════
-   user-badge.js — 혼디넷 공용 로그인 상태·아이디 표시 (v1.0, 2026-10-27)
+   user-badge.js — 나비웹 공용 로그인 상태·아이디 표시 (v1.0, 2026-10-27)
 
    배포 위치: https://app.naviweb.kr/auth/user-badge.js
 
@@ -329,7 +329,7 @@
     menu.appendChild(el('p', 'hub-note', '로그인하면 테스트 데이터를 정식 아이디로 옮겨 드립니다.'));
   }
 
-  // ── 메일 아이디(= 혼디 아이디) ───────────────────────────────
+  // ── 메일 아이디(= 나비웹 아이디) ───────────────────────────────
   var mailInfo = null, mailInfoAt = 0, mailInfoBusy = false, mailInfoTriedAt = 0, mailPrompted = false;
   var MID_CACHE = 'hondi_mail_id', MID_PROMPTED = 'hondi_mid_prompted';
   function cachedMailId() {
@@ -390,7 +390,7 @@
     var box = el('div', 'hub-modal'); box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-labelledby', 'hondi-mid-title');
     var h = el('h2', '', first ? '메일 아이디를 정해 주세요' : '메일 아이디 바꾸기'); h.id = 'hondi-mid-title';
     box.appendChild(h);
-    box.appendChild(el('p', '', first ? '혼디 아이디이자 메일 주소(아이디@hondi.kr)가 됩니다. 기본 아이디를 드렸어요 — 마음에 들면 그대로 쓰시고, 바꾸고 싶으면 아래에서 고르세요.' : '바꾸면 새 아이디가 내 메일 주소가 됩니다.'));
+    box.appendChild(el('p', '', first ? '나비웹 아이디이자 메일 주소(아이디@hondi.kr)가 됩니다. 기본 아이디를 드렸어요 — 마음에 들면 그대로 쓰시고, 바꾸고 싶으면 아래에서 고르세요.' : '바꾸면 새 아이디가 내 메일 주소가 됩니다.'));
     var row = el('div', 'hub-mid-row');
     var input = el('input', 'hub-mid-input'); input.type = 'text'; input.id = 'hondi-mid-input'; input.maxLength = 40; input.autocomplete = 'off'; input.spellcheck = false; input.setAttribute('autocapitalize', 'none'); input.setAttribute('aria-label', '메일 아이디');
     row.appendChild(input); row.appendChild(el('span', 'hub-mid-suffix', '@hondi.kr'));
