@@ -10,7 +10,10 @@ const PROXY_URL = PROXY;
 import { appendBubble } from '../ui/bubble.js';
 import { requestPushSubscription } from '../services/push.js';
 import { guidToShortId } from '../ai/hondi-code.js';
-import { phoneToDigits, generateDigitCodeDataURL } from '../ai/hondi-digit-code.js';
+import { phoneToDigits } from '../ai/hondi-digit-code.js';
+import { generateDigitCodeDataURL } from '../ai/hondi-digit-render.js';   // 나비(노란 나비 로고) 배치
+// 시안은 첫 자리가 1~9인 일련번호만 그린다 — 앞을 0으로 채운 유선 코드는 앞의 0을 빼고 그린다
+const _codeSerial = (c) => String(c).replace(/^0+/, '');
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ⚠️  DEV MODE — 정식 운영 전환: false로 복원 (2026-06-27)
@@ -1640,13 +1643,12 @@ function _showPhonePopupLegacy(resolve) {
       <!-- 가입 진행 표시 (2026-11-15, 주피터 지시: 휴대폰 화면에서 가입을 2단계로 나눈다) -->
       <div id="_step-ind" style="display:none;margin:0 0 12px">
         <div style="display:flex;gap:6px"><span id="_step-seg1" style="flex:1;height:4px;border-radius:2px;background:#00796B"></span><span id="_step-seg2" style="flex:1;height:4px;border-radius:2px;background:#e5e7eb"></span></div>
-        <div id="_step-label" style="font-size:calc(0.75rem*var(--hondi-fs,1));font-weight:600;color:#00796B;margin-top:6px">1 / 2 단계</div>
+        <div id="_step-label" aria-live="polite" style="display:none;font-size:calc(0.75rem*var(--hondi-fs,1));font-weight:600;color:#00796B;margin-top:6px">1 / 2 단계</div>
       </div>
       <!-- 전화번호: 국가 · 휴대폰/지역번호 · 번호를 한 칸에 (2026-11-12 화면 단순화) -->
       <div id="_phone-field"
            style="display:flex;align-items:flex-end;gap:12px;padding:2px 0 6px;
                   border:0;border-bottom:1.5px solid #e5e7eb;margin-bottom:14px">
-        <span style="width:22px;text-align:center;color:#6b7280;font-size:calc(1.0625rem*var(--hondi-fs,1));line-height:34px;flex-shrink:0">&#9742;</span>
         <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
           <div style="display:flex;align-items:center;gap:8px;min-width:0">
             <button id="_country-btn" type="button"
@@ -1676,8 +1678,8 @@ function _showPhonePopupLegacy(resolve) {
       </div>
       <div id="_phone-error" class="mp-error" style="display:none"></div>
       <!-- 나비 숫자 코드 — 전화번호가 그대로 코드가 된다(2026-11-15, 주피터 지시). 정하는 칸은 없다. -->
-      <div id="_code-box" style="display:none;border:1.5px solid #00796B;border-radius:12px;padding:8px;background:#fff;margin:0 0 12px;text-align:center">
-        <img id="_code-img" alt="내 나비 숫자 코드" style="display:block;width:64%;height:auto;margin:0 auto;border-radius:8px">
+      <div id="_code-box" style="display:none;border:1.5px solid #00796B;border-radius:12px;padding:10px 8px;background:#fff;margin:0 0 12px">
+        <img id="_code-img" alt="내 나비 숫자 코드" style="display:block;width:100%;height:auto;border-radius:8px">
         <div id="_code-val" style="display:none"></div>
       </div>
 
@@ -1685,9 +1687,8 @@ function _showPhonePopupLegacy(resolve) {
       <div id="_nick-field"
            style="display:flex;align-items:flex-end;gap:12px;padding:2px 0 6px;
                   border:0;border-bottom:1.5px solid #e5e7eb;margin-bottom:10px">
-        <span style="width:22px;text-align:center;color:#6b7280;font-size:calc(1.0625rem*var(--hondi-fs,1));line-height:34px;flex-shrink:0">&#9786;</span>
-        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
-          <span style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:#6b7280">아이디</span>
+        <div style="flex:1;min-width:0;display:flex;align-items:center;gap:8px">
+          <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#6b7280;flex-shrink:0;width:4.6em">아이디</span>
           <input id="_nick-input" type="text" maxlength="20"
             placeholder="나비가 나를 부를 이름"
             style="width:100%;padding:0;height:34px;border:none;background:transparent;
@@ -1701,12 +1702,11 @@ function _showPhonePopupLegacy(resolve) {
       <div id="_mid-field"
            style="display:flex;align-items:flex-end;gap:12px;padding:2px 0 6px;
                   border:0;border-bottom:1.5px solid #e5e7eb;margin-bottom:10px">
-        <span style="width:22px;text-align:center;color:#6b7280;font-size:calc(1.0625rem*var(--hondi-fs,1));line-height:34px;flex-shrink:0">&#9993;</span>
-        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
-          <span style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:#6b7280">이메일 ID</span>
-          <div style="display:flex;align-items:center;gap:4px">
+        <div style="flex:1;min-width:0;display:flex;align-items:center;gap:8px">
+          <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#6b7280;flex-shrink:0;width:4.6em">이메일 ID</span>
+          <div style="flex:1;min-width:0;display:flex;align-items:center;gap:4px">
             <input id="_mid-input" type="text" maxlength="30" inputmode="latin" autocapitalize="off" spellcheck="false"
-              placeholder="처음 가입할 때만 (영문 소문자·숫자)"
+              placeholder="영문 소문자·숫자"
               style="flex:1;padding:0;height:34px;border:none;background:transparent;
                      font-size:calc(0.9375rem*var(--hondi-fs,1));font-family:inherit;outline:none;color:#111827;min-width:0"
               autocomplete="off"/>
@@ -1715,12 +1715,11 @@ function _showPhonePopupLegacy(resolve) {
         </div>
       </div>
       <div id="_mid-error" class="mp-error" style="display:none"></div>
-      <div id="_mid-hint" style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;padding:0 4px;margin-bottom:6px;line-height:1.6;min-height:18px"></div>
+      <div id="_mid-hint" style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;padding:0 4px;margin-bottom:0;line-height:1.6"></div>
       <!-- 이메일 ID를 정하면 메일 주소와 프로필 주소가 함께 정해진다(2026-11-15) -->
       <div id="_addr-box" style="display:none;background:#f3f4f6;border-radius:10px;padding:6px 14px;margin:0 0 10px">
         <div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0"><span style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b7280">메일 주소</span><span id="_addr-mail" style="font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:600;color:#111827"></span></div>
         <div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0"><span style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b7280">프로필 주소</span><span id="_addr-prof" style="font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:600;color:#111827"></span></div>
-        <div style="font-size:calc(0.71875rem*var(--hondi-fs,1));color:#6b7280;padding:2px 0 6px">이메일 ID를 정하면 두 주소가 함께 정해집니다. 따로 입력하지 않습니다.</div>
       </div>
 
       <!-- 백업 키를 받을 이메일 — 가입 전부터 쓰던 주소(나비웹 주소 아님). 2026-11-13, 주피터 지시 -->
@@ -1924,7 +1923,7 @@ function _showPhonePopupLegacy(resolve) {
     const img = document.getElementById('_code-img');
     if (img && code && img.dataset.code !== code) {
       img.dataset.code = code;
-      generateDigitCodeDataURL(code).then((u) => { if (img.dataset.code === code) img.src = u; }).catch(() => {});
+      generateDigitCodeDataURL(_codeSerial(code)).then((u) => { if (img.dataset.code === code) img.src = u; }).catch(() => {});
     }
   }
 
@@ -2056,11 +2055,12 @@ function _showPhonePopupLegacy(resolve) {
     _midTimer = setTimeout(async () => {
       const c = await _checkMailIdAvailable(v);
       if (midInput.value.trim().toLowerCase() !== v) return;   // 그 사이 입력이 바뀌었으면 옛 결과는 버린다
-      if (c.ok === true) midHint.innerHTML = `<span style="color:#16a34a">✓ 쓸 수 있습니다. 내 메일 주소: ${v}@naviweb.kr</span>`;
-      else if (c.ok === false) midHint.innerHTML = `<span style="color:#dc2626">${c.message}</span>`;
+      if (c.ok === true) midHint.innerHTML = '';
+      else if (c.ok === false) midHint.innerHTML = '<span style="color:#dc2626">사용할 수 없습니다.</span>';
       else midHint.innerHTML = '';
-    }, 400);
+    }, 250);   // 입력을 멈추면 바로 확인(실시간)
   });
+  midInput.addEventListener('blur', () => { if (midInput.value.trim().length >= 3) midInput.dispatchEvent(new Event('input')); });
 
   // ── 닉네임 실시간 동명이인 안내 (신규 가입 예정자에게만 의미 있음) ──
   let _nickTimer = null;
@@ -2073,26 +2073,12 @@ function _showPhonePopupLegacy(resolve) {
     if (!nickHintEl) {
       nickHintEl = document.createElement('div');
       nickHintEl.id = '_nick-hint';
-      nickHintEl.style.cssText = 'font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;padding:0 4px;margin-bottom:6px;line-height:1.6;min-height:18px';
+      nickHintEl.style.cssText = 'font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;padding:0 4px;margin-bottom:0;line-height:1.6';
       nickErr.insertAdjacentElement('afterend', nickHintEl);
     }
     if (nick.length < 2) { nickHintEl.innerHTML = ''; return; }
-    nickHintEl.innerHTML = '<span style="color:#9ca3af">확인 중…</span>';
-    _nickTimer = setTimeout(async () => {
-      try {
-        const nickFilter = encodeURIComponent(`nickname='${nick}'`);
-        const r = await fetch(`${L1_URL}?filter=${nickFilter}&perPage=1`);
-        const d = await r.json();
-        const total = d.totalItems ?? d.items?.length ?? 0;
-        if (total === 0) {
-          nickHintEl.innerHTML = `<span style="color:#16a34a">✓ 처음 사용하는 아이디입니다.</span>`;
-        } else {
-          nickHintEl.innerHTML =
-            `<span style="color:#f59e0b">⚠ 이미 ${total}명이 사용 중입니다.</span> ` +
-            `<span style="color:#9ca3af">전화번호로 구분되니 그대로 진행하셔도 돼요.</span>`;
-        }
-      } catch { nickHintEl.innerHTML = ''; }
-    }, 400);
+    // 아이디는 전화번호로 구분되어 같은 이름도 쓸 수 있다 — 안내 문구를 두지 않는다
+    nickHintEl.innerHTML = '';
   });
 
   const btn = document.getElementById('_auth-btn');
@@ -2380,7 +2366,7 @@ function _showPhonePopupLegacy(resolve) {
           : phoneToDigits({ type: 'landline', areaCode, subscriberNumber: digits });
         digitCodeId = digitsArr.join('');
         console.info('[가입][숫자코드] 생성 완료:', digitCodeId);
-        hondiDigitCodeImage = await generateDigitCodeDataURL(digitCodeId);
+        hondiDigitCodeImage = await generateDigitCodeDataURL(_codeSerial(digitCodeId));
       } catch (e) {
         console.warn('[가입][숫자코드] 생성 실패 (가입은 계속 진행):', e.message);
       }
@@ -2676,7 +2662,7 @@ function _showPhonePopupLegacy(resolve) {
       }
       const midCheck = await _checkMailIdAvailable(mailIdRaw);
       if (midCheck.ok === false) {
-        midErr.textContent = midCheck.message;
+        midErr.textContent = '사용할 수 없습니다.';
         midErr.style.display = 'block';
         midInput.focus();
         btn.style.opacity = '1'; btn.style.pointerEvents = '';
