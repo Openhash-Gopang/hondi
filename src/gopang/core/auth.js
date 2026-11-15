@@ -10,7 +10,10 @@ const PROXY_URL = PROXY;
 import { appendBubble } from '../ui/bubble.js';
 import { requestPushSubscription } from '../services/push.js';
 import { guidToShortId } from '../ai/hondi-code.js';
-import { phoneToDigits, generateDigitCodeDataURL } from '../ai/hondi-digit-code.js';
+import { phoneToDigits } from '../ai/hondi-digit-code.js';
+import { generateDigitCodeDataURL } from '../ai/hondi-digit-render.js';   // 나비(노란 나비 로고) 배치
+// 시안은 첫 자리가 1~9인 일련번호만 그린다 — 앞을 0으로 채운 유선 코드는 앞의 0을 빼고 그린다
+const _codeSerial = (c) => String(c).replace(/^0+/, '');
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ⚠️  DEV MODE — 정식 운영 전환: false로 복원 (2026-06-27)
@@ -1676,8 +1679,8 @@ function _showPhonePopupLegacy(resolve) {
       </div>
       <div id="_phone-error" class="mp-error" style="display:none"></div>
       <!-- 나비 숫자 코드 — 전화번호가 그대로 코드가 된다(2026-11-15, 주피터 지시). 정하는 칸은 없다. -->
-      <div id="_code-box" style="display:none;border:1.5px solid #00796B;border-radius:12px;padding:8px;background:#fff;margin:0 0 12px;text-align:center">
-        <img id="_code-img" alt="내 나비 숫자 코드" style="display:block;width:64%;height:auto;margin:0 auto;border-radius:8px">
+      <div id="_code-box" style="display:none;border:1.5px solid #00796B;border-radius:12px;padding:10px 8px;background:#fff;margin:0 0 12px">
+        <img id="_code-img" alt="내 나비 숫자 코드" style="display:block;width:100%;height:auto;border-radius:8px">
         <div id="_code-val" style="display:none"></div>
       </div>
 
@@ -1924,7 +1927,7 @@ function _showPhonePopupLegacy(resolve) {
     const img = document.getElementById('_code-img');
     if (img && code && img.dataset.code !== code) {
       img.dataset.code = code;
-      generateDigitCodeDataURL(code).then((u) => { if (img.dataset.code === code) img.src = u; }).catch(() => {});
+      generateDigitCodeDataURL(_codeSerial(code)).then((u) => { if (img.dataset.code === code) img.src = u; }).catch(() => {});
     }
   }
 
@@ -2380,7 +2383,7 @@ function _showPhonePopupLegacy(resolve) {
           : phoneToDigits({ type: 'landline', areaCode, subscriberNumber: digits });
         digitCodeId = digitsArr.join('');
         console.info('[가입][숫자코드] 생성 완료:', digitCodeId);
-        hondiDigitCodeImage = await generateDigitCodeDataURL(digitCodeId);
+        hondiDigitCodeImage = await generateDigitCodeDataURL(_codeSerial(digitCodeId));
       } catch (e) {
         console.warn('[가입][숫자코드] 생성 실패 (가입은 계속 진행):', e.message);
       }

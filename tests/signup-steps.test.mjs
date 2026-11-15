@@ -44,7 +44,8 @@ test('로그인·가입 탭은 Material 탭(tablist·aria-selected·밑줄 표�
 
 test('코드 상자에는 설명 글 없이 나비 숫자 코드 시안(그림)만 보인다', () => {
   assert.match(src, /id="_code-img"/);
-  assert.match(src, /generateDigitCodeDataURL\(code\)\.then/);
+  assert.match(src, /generateDigitCodeDataURL\(_codeSerial\(code\)\)\.then/);
+  assert.match(src, /from '\.\.\/ai\/hondi-digit-render\.js'/);   // 노란 나비 로고 배치
   assert.ok(!src.includes('전화번호로 정해집니다'));
   assert.ok(!src.includes('내가 공개하기 전에는 보이지 않습니다'));
 });
