@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-15 17:34 KST · 기준 커밋 3b024be8
+- 갱신: 2026-11-15 17:56 KST · 기준 커밋 ed727950
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-15 feat: 헤더 '나비' 글자를 나비 로고로 교체, 로고 터치 시 나만의 AI 비서로 복귀
 - 2026-11-15 feat: 어느 SP에서든 나만의 AI 비서(기본 SP)로 즉시 복귀
 - 2026-11-15 perf: 정적 모듈 35개 modulepreload로 import 워터폴 제거
 - 2026-11-15 fix: Haiku 요청이 400 으로 거절돼도 DeepSeek 로 대체하고, 거절 사유를 로그에 남긴다
@@ -43,7 +44,6 @@
 - 2026-11-15 Merge pull request #1069 from Openhash-Gopang/icons-header-20261114
 - 2026-11-15 ui(webapp): 우측 상단 카메라·설정 이미지와 입력줄 카메라를 읽기 쉬운 SVG 아이콘으로 교체
 - 2026-11-15 Merge pull request #1068 from Openhash-Gopang/manual-howto-thumb-20261115
-- 2026-11-15 feat(manual): 장 상단 영상을 썸네일 카드로, 누르면 큰 화면 재생 + 제목 번호순으로 장에 배정
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
