@@ -1,4 +1,4 @@
-// 혼디 webapp 시동(부팅) 진단 — 실제 사이트에서 webapp.html이 불러오는 모든 스크립트/모듈을 따라가며
+// 나비웹 webapp 시동(부팅) 진단 — 실제 사이트에서 webapp.html이 불러오는 모든 스크립트/모듈을 따라가며
 // ① 응답 상태(200이 아니면 시동이 멈춘다) ② 내용 유형(JS인데 HTML이 오면 오류) ③ 저장소 파일과 같은지 를 검사한다.
 // 사용: 저장소 폴더에서  node check-boot-graph.mjs https://hondi.net [저장소경로=.]
 import fs from 'node:fs';

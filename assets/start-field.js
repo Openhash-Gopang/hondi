@@ -301,7 +301,7 @@
     var addSq = function () {
       var navRight = document.querySelector('.topnav-right');
       if (!navRight || document.getElementById('sqNavBtn')) return;
-      var a = el('a', { id: 'sqNavBtn', 'class': 'sq-nav-btn', href: '/pages/suggest.html' + (from ? '?from=' + encodeURIComponent(from) : ''), title: '혼디에 바라는 점이나 궁금한 점을 말씀해 주세요' }, '💬 제안 및 질문');
+      var a = el('a', { id: 'sqNavBtn', 'class': 'sq-nav-btn', href: '/pages/suggest.html' + (from ? '?from=' + encodeURIComponent(from) : ''), title: '나비웹에 바라는 점이나 궁금한 점을 말씀해 주세요' }, '💬 제안 및 질문');
       navRight.insertBefore(a, navRight.firstChild);
     };
     // 상단 메뉴(ph-header.js)는 DOMContentLoaded 에 그려지므로 그 뒤에 끼운다.

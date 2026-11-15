@@ -4166,11 +4166,11 @@ window.closePDV = closePDV;
   // ── AI 비서 이름 — 로컬에서 읽어 표시 ─────────────────────────────
   (function _initAIName() {
     let stored = localStorage.getItem('hondi_assistant_name') || '나비';
-    // 옛 기본 표시 이름 "혼디"가 저장돼 있으면 한 번만 "나비"로 되돌린다(2026-11-03).
-    // 표시 이름 "혼디"를 사용자가 이후에 직접 짓는 것은 막지 않는다(한 번만 실행하는 표식 hondi_assistant_name_v2).
+    // 옛 기본 표시 이름 "나비웹"가 저장돼 있으면 한 번만 "나비"로 되돌린다(2026-11-03).
+    // 표시 이름 "나비웹"를 사용자가 이후에 직접 짓는 것은 막지 않는다(한 번만 실행하는 표식 hondi_assistant_name_v2).
     try {
       if (localStorage.getItem('hondi_assistant_name_v2') !== '1') {
-        if (stored === '혼디') { stored = '나비'; localStorage.removeItem('hondi_assistant_name'); }
+        if (stored === '나비웹') { stored = '나비'; localStorage.removeItem('hondi_assistant_name'); }
         localStorage.setItem('hondi_assistant_name_v2', '1');
       }
     } catch {}

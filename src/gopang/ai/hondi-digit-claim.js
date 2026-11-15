@@ -1,5 +1,5 @@
 /**
- * hondi-digit-claim.js — 혼디 숫자 번호 "서명된 청구 레코드" (Signed Claim Record)
+ * hondi-digit-claim.js — 나비웹 숫자 번호 "서명된 청구 레코드" (Signed Claim Record)
  *
  * 목적: 번호 소유권을 서버의 장부가 아니라 "소유자 서명이 든 레코드 체인"으로 남긴다.
  *  · 단기: L1 PocketBase가 최초 순서(누가 먼저 청구했나)만 정하는 순서 결정자.

@@ -2620,7 +2620,7 @@ function _showPhonePopupLegacy(resolve) {
         btn.style.opacity = '1'; btn.style.pointerEvents = '';
         return;
       }
-      // 백업 키 받을 이메일 — 가입 전부터 쓰던 주소여야 한다(나비웹·혼디 주소는 계정을 잃으면 같이 잃으므로 안 된다)
+      // 백업 키 받을 이메일 — 가입 전부터 쓰던 주소여야 한다(나비웹·나비웹 주소는 계정을 잃으면 같이 잃으므로 안 된다)
       const _bkeInput = document.getElementById('_bke-input');
       const backupEmail = (_bkeInput?.value || '').trim().toLowerCase();
       const _bkeProblem = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(backupEmail) ? '백업 키를 받을 이메일을 입력해 주세요.'

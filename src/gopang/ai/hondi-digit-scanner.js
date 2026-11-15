@@ -1,7 +1,7 @@
 /**
- * hondi-digit-scanner.js — 혼디 숫자 코드 스캐너
+ * hondi-digit-scanner.js — 나비웹 숫자 코드 스캐너
  *
- * hondi-digit-code.js가 생성한 숫자 코드(로고 "혼디" 아래에 가로 10칸
+ * hondi-digit-code.js가 생성한 숫자 코드(로고 "나비웹" 아래에 가로 10칸
  * 숫자열)를 사진에서 읽어낸다.
  *
  * [파이프라인]
@@ -176,7 +176,7 @@ export async function startScanner(video, canvas, overlayCanvas, onResult, onSta
     });
     video.srcObject = _stream;
     await video.play();
-    _status('혼디 숫자 코드를 화면에 맞춰주세요.');
+    _status('나비웹 숫자 코드를 화면에 맞춰주세요.');
     _scheduleFrame(video, canvas);
   } catch (e) {
     const msg =

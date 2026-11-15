@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>혼디 앵커 기반 10자리 숫자 인식</title>
+<title>나비웹 앵커 기반 10자리 숫자 인식</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
@@ -53,12 +53,12 @@
 </div>
 
 <script>
-// ── 앵커(혼디 로고) 기준 위치 특정 + 10자리 숫자 인식 ────────────
+// ── 앵커(나비웹 로고) 기준 위치 특정 + 10자리 숫자 인식 ────────────
 // 화면 전체에서 "제일 큰 어두운 덩어리"를 찾던 이전 방식은, 카메라
 // 프레임에 다른 어두운 물체가 같이 잡히면 엉뚱한 곳을 bbox로 잡을
 // 위험이 있었다("세로 줄만 뜨고 인식 안 됨" 증상의 유력한 원인).
 //
-// 이번엔 "혼디" 로고의 파랑(ㅎ)·빨강(점)을 먼저 찾아 위치·크기 기준
+// 이번엔 "나비웹" 로고의 파랑(ㅎ)·빨강(점)을 먼저 찾아 위치·크기 기준
 // (anchor)을 잡고, 그 기준에서 "숫자열은 항상 이 상대 위치에 있다"는
 // 실측 비율로 예상 영역을 역산한다. 숫자 자체엔 색이 전혀 없어서
 // (검정 세그먼트만 사용) 앵커 색과 데이터가 겹칠 걱정도 없다.
@@ -295,11 +295,11 @@ function analyze() {
 
   try {
 
-  // 1) 앵커(혼디 로고의 파랑·빨강) 찾기
+  // 1) 앵커(나비웹 로고의 파랑·빨강) 찾기
   const anchor = findAnchor(vctx, W, H, 0.25);
   if (!anchor) {
     bigResult.textContent = '?';
-    label.textContent = '혼디 로고(파랑·빨강)가 안 보입니다 — 로고까지 같이 비춰주세요';
+    label.textContent = '나비웹 로고(파랑·빨강)가 안 보입니다 — 로고까지 같이 비춰주세요';
     debugEl.textContent = `frame #${frameCount}\nvideo: ${W}x${H}\n앵커(파랑/빨강) 탐지 안 됨`;
     requestAnimationFrame(analyze);
     return;

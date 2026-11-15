@@ -323,7 +323,7 @@
         label: '제안하거나 질문하세요',
         serviceLabel: '제안 및 질문',
         placeholder: '제안하거나 질문할 내용을 입력하세요. 예: 세무사 페이지에 …',
-        greeting: '안녕하세요! 혼디에 바라는 점이나 궁금한 점을 말씀해 주세요. 질문에는 저장소 최신 내용을 기준으로 답하고, 제안은 몇 가지 여쭤본 뒤 정리해서 게시판에 기록해 드립니다. 게시판에는 작성자 아이디와 함께 공개됩니다.',
+        greeting: '안녕하세요! 나비웹에 바라는 점이나 궁금한 점을 말씀해 주세요. 질문에는 저장소 최신 내용을 기준으로 답하고, 제안은 몇 가지 여쭤본 뒤 정리해서 게시판에 기록해 드립니다. 게시판에는 작성자 아이디와 함께 공개됩니다.',
         context: buildContext(digest, state.posts, ''),
         beforeSend: function (text) { return state.mode ? '[구분 지정: ' + state.mode + '] ' + text : text; },
         transformReply: transformReply,
