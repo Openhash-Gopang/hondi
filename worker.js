@@ -2321,7 +2321,7 @@ async function _ownerUnlimited(env, guid) {
 
 // ═══════════════════════════════════════════════════════════
 // 🧪 테스트 계정 한도·유예·차단 + 정식 계정 전환 — 2026-10-27 (주피터 지시)
-//   · [2026-11-06 개정] 모든 계정이 전화 인증 후 AI 사용 비용 FREE_TRIAL_KRW(기본 500원) 또는 FREE_TRIAL_HOURS(기본 24시간) 중 먼저 오는 때까지 무료.
+//   · [2026-11-06 개정] 모든 계정이 전화 인증 후 AI 사용 비용 FREE_TRIAL_KRW(기본 1,000원) 또는 FREE_TRIAL_HOURS(기본 24시간) 중 먼저 오는 때까지 무료.
 //     끝나면 정식 계정은 GDC 결제로 이어지고, 테스트 계정(handle이 'tid-'로 시작)은 유예 없이 차단 — _gdcFreeQuotaGate·K-서비스 공용 토큰 게이트가 막는다.
 //   · 차단돼도 /auth/test-quota 조회와 /auth/test-migrate(정식 계정으로 데이터 이동)는 계속 허용한다.
 //   · 판정 로직은 src/worker/test-quota.js, 데이터 이동은 src/worker/test-migrate.js (단위 시험: tests/test-quota-migrate.test.mjs).
@@ -2969,9 +2969,9 @@ async function handleFreeQuotaStatus(request, env, corsHeaders) {
   const kv = env.AI_SETUP_SEALS_KV;
   if (!kv) return _err(500, 'KV_UNAVAILABLE', 'KV 바인딩 없음', corsHeaders);
 
-  // ★ 2026-11-14(주피터 지시 — 무료 한도 500원 통일): 이 화면이 예전 가상 카운터(hondi:free_spend,
+  // ★ 2026-11-14(주피터 지시 — 무료 한도 통일(2026-11-15부터 1,000원)): 이 화면이 예전 가상 카운터(hondi:free_spend,
   //   한도 FREE_QUOTA_KRW_LIMIT=0)를 읽어 "0원 / 0원"으로 보였고, 채팅 차단·안내창이 쓰는 실제 무료
-  //   한도(src/worker/test-quota.js, 기본 500원)와 어긋났다. 같은 값(한도·사용분)을 보여 준다.
+  //   한도(src/worker/test-quota.js, 기본 1,000원)와 어긋났다. 같은 값(한도·사용분)을 보여 준다.
   //   읽기만 한다(getStatus는 무료 시간 시계를 시작시키므로 쓰지 않는다).
   const _cfg = _testQuotaConfig(env);
   const FREE_LIMIT_KRW = _cfg.limitKrw;
