@@ -2606,6 +2606,7 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
 /* 2026-11-16 — ① 상단 중앙 SP 이름 표시  ② ?call= : 나비가 다른 탭에서 초대한 상대와 1:1 대화를 바로 시작한다(새 탭 대화창). */
 import { renderSPLabel, setSPLabel } from './src/gopang/ui/sp-label.js';
 const _isCallTab = !!new URLSearchParams(location.search).get('call');   // replaceState 로 지우기 전에 동기로 읽는다
+try { const _co = JSON.parse(new URLSearchParams(location.search).get('call') || 'null'); if (_co) { window.__callTabName = _co.n || _co.h || '상대'; } } catch {}   // 새 탭 첫 문구용
 try {
   const nh = window.NaviHome;
   if (nh) {
@@ -2666,7 +2667,10 @@ try {
     const tick = async () => {
       try {
         const st = await import('./src/gopang/core/state.js');
-        if (st._USER && st._USER.ipv6) {
+        // 폰과 달리 PC에서는 메모리의 _USER 가 비어 있을 수 있어, 이 기기에 저장된 계정이 있으면 그것으로 진행한다(startP2PCall 이 저장된 계정으로 채운다).
+        let _hasMe = !!(st._USER && st._USER.ipv6);
+        if (!_hasMe) { try { const sv = JSON.parse(localStorage.getItem('gopang_user_v4') || sessionStorage.getItem('gopang_user_v4') || 'null'); _hasMe = !!(sv && sv.ipv6); } catch {} }
+        if (_hasMe) {
           const { startP2PCall } = await import('./src/gopang/ui/p2p-chat.js');
           await startP2PCall({ guid: o.g, handle: o.h, nickname: o.n });
         } else if (Date.now() - t0 < 25000) setTimeout(tick, 500);
@@ -3839,6 +3843,11 @@ window.closePDV = closePDV;
                 : '[INTERNAL: 패널이 열렸습니다. 먼저 인사해 주세요.]');
           // 2026-11-16 — 재방문자의 첫 인사는 고정 문구다(LLM 호출 없음). 이전 대화
           // (예: 사람 찾기)에 끌려 "찾으시는 분을…"으로 시작하던 문제를 막는다.
+          if (window.__callTabName) {   // 호출로 열린 새 탭 — 첫 문구는 호출했다는 안내다(2026-11-16)
+            aiBubble.textContent = window.__callTabName + '님을 호출했습니다.';
+            aiBubble.classList.remove('streaming');
+            return;
+          }
           if (_tutDone || _firstGreetedFlag) {
             aiBubble.textContent = (nickname ? nickname + '님, ' : '') + '안녕하세요. 무엇을 도와드릴까요?';
             aiBubble.classList.remove('streaming');
@@ -4460,6 +4469,13 @@ window.closePDV = closePDV;
   // 이미 정확했다 — 그 결과를 패널까지 전달할 배선이 없었을 뿐이다.
   async function _callPanelAI(userText, bubbleEl, attached, _preTab, modelTier) {
     _panelUserAborted = false; // 새 요청 시작 — 이전 취소 플래그 초기화
+    // 2026-11-16(주피터 지시) — "김동 불러줘"처럼 호출 요청이면 사용자가 보내기를 누른 이 순간(클릭 제스처가 살아 있을 때) 빈 탭을 미리 열어 둔다.
+    // 상대를 찾은 뒤 그 탭에서 곧바로 대화를 시작한다(버튼을 또 누르게 하지 않는다). 호출이 아니면 아래에서 바로 닫는다.
+    let _ownTab = null;
+    if (!_preTab && typeof userText === 'string' && userText.length <= 40 && !userText.startsWith('[') && /(호출|불러|연결|초대)/.test(userText) && !(Array.isArray(attached) ? attached.length : attached)) {
+      try { _ownTab = window.open('', '_blank'); if (_ownTab) _preTab = _ownTab; } catch {}
+    }
+    const _closeOwnTab = () => { try { if (_ownTab && !_ownTab.closed) _ownTab.close(); } catch {} _ownTab = null; _preTab = null; };
     // 2026-11-16 — 0단계(코드가 즉시 처리): 호출·검색·즐겨찾기·복귀·사용량. 이 패널은 callAI()를 거치지 않으므로 여기서 직접 부른다.
     // (안 부르면 "김동 호출해 줘"가 LLM(K-Intent)에게 가서 "이름으로는 찾을 수 없습니다"라고 지어낸 답을 한다.)
     if (typeof userText === 'string' && !userText.startsWith('[') && !(Array.isArray(attached) ? attached.length : attached)) {
@@ -4472,7 +4488,8 @@ window.closePDV = closePDV;
           try { if (typeof _savePanelHistory === 'function') _savePanelHistory(); } catch {}
           return;
         }
-      } catch (e) { console.warn('[Panel] 0단계 처리 실패(무시, LLM으로 진행):', e && e.message); }
+        _closeOwnTab();
+      } catch (e) { _closeOwnTab(); console.warn('[Panel] 0단계 처리 실패(무시, LLM으로 진행):', e && e.message); }
     }
     const { PROVIDER_INFO, getPriorityOrder } = await import('./src/gopang/core/config.js');
     // free-model-pool.js 삭제(2026-07-01) — OR 24h쿨다운·분당예산 관리 대신
