@@ -229,6 +229,28 @@ try {
   }
 })();
 
+// 2026-11-16(주피터 지시: 신규 가입자 알림을 기본 허용으로) — 브라우저는 알림 권한을 코드로 강제할 수 없고, 사용자 동작 없이 띄운 권한 창은
+// 조용히 막히거나(Chrome) 무시되는 경우가 많아 위 자동 시도만으로는 구독이 안 생긴다. 그래서 권한이 아직 결정 전(default)이면
+// 로그인 상태에서 사용자의 첫 터치·키 입력 순간에 권한 창을 띄워 구독까지 마친다(한 번만, 거부하면 다시 묻지 않음).
+(() => {
+  try {
+    if (typeof Notification === 'undefined' || Notification.permission !== 'default') return;
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    const go = async () => {
+      document.removeEventListener('pointerdown', go, true); document.removeEventListener('keydown', go, true);
+      try {
+        const st = JSON.parse(localStorage.getItem('gopang_user_v4') || 'null');
+        if (!st?.ipv6 || Notification.permission !== 'default') return;
+        const { requestPushSubscription } = await import('/src/gopang/services/push.js');
+        await Notification.requestPermission().catch(() => {});
+        if (Notification.permission === 'granted') await requestPushSubscription(st.ipv6);
+      } catch {}
+    };
+    document.addEventListener('pointerdown', go, true);
+    document.addEventListener('keydown', go, true);
+  } catch {}
+})();
+
 // ── 고액 거래 재인증(생체인증)도 기본값으로 유도 — 2026-07-20 신설,
 // 2026-09-07 개정(사용자 지시) ──────────────────────────────────────
 // (사용자 지시: "지문·얼굴 등 생체인식을 사용자 선택이 아니라 디폴트로
