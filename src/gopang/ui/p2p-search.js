@@ -4,6 +4,7 @@
  * - Worker /friends/find 경유 (friend-find-client.js)
  */
 import { PROXY, _USER } from '../core/state.js';
+import { currentGuid } from '../p2p/signal-auth.js';
 import { rememberUser } from './frequent-users.js';
 import { classifyQuery, normalizePhone } from '../../worker/friend-find.js';
 import { findFriend, matchContacts, getInviteCode } from './friend-find-client.js';
@@ -258,7 +259,7 @@ function _renderUserCard(u) {
 
 // ── 연결 요청 전송 ────────────────────────────────────────
 async function _sendConnectRequest(targetUser, opts = {}) {
-  if (!_USER?.ipv6) {
+  if (!currentGuid(_USER)) {
     alert('로그인이 필요합니다.');
     return;
   }

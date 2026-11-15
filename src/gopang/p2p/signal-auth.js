@@ -39,8 +39,22 @@ async function walletAuth(guid) {
   } catch (e) { S.why = 'issue-exc-' + (e && e.message || ''); return null; }
 }
 
+/** 지금 로그인한 계정 guid — 메모리의 _USER 가 비어 있어도(모듈 사본이 갈리거나 초기화 순서 때문에) 이 기기에 저장된 계정에서 읽는다. */
+export function currentGuid(u) {
+  const direct = (u && (u.ipv6 || u.guid)) || '';
+  if (direct) return direct;
+  try {
+    const raw = localStorage.getItem('gopang_user_v4') || sessionStorage.getItem('gopang_user_v4');
+    const o = raw ? JSON.parse(raw) : null;
+    if (o && (o.ipv6 || o.guid) && !o.isGuest && !o.isTemp) return o.ipv6 || o.guid;
+  } catch {}
+  try { const w = window.gopangWallet; if (w && w.guid) return w.guid; } catch {}
+  return '';
+}
+
 /** 서버 /signal/* 호출. 로그인 증명을 붙이고, 쿠키 계정이 다르거나 만료면 지갑 증명으로 한 번 더 시도한다. */
 export async function signalPost(path, guid, body) {
+  guid = currentGuid({ guid });
   const send = async (auth) => {
     const r = await fetch(`${PROXY}${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...(body || {}), ...(auth || {}) }) });
     const data = await r.json().catch(() => ({}));
