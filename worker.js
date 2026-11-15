@@ -30093,12 +30093,21 @@ async function handleSignalSend(request, env, corsHeaders) {
 
   // ── 수신자에게 Push 알림 전송 (offer 시그널일 때만)
   if (type === 'offer') {
-    _sendPushToGuid(env, to_guid, {
-      title: from_guid.slice(0, 8) + '님의 메시지',
-      body:  '새 메시지가 도착했습니다.',
-      tag:   'gopang-msg-' + from_guid.slice(0, 8),
-      url:   '/webapp.html',
-    }).catch(e => console.warn('[Push] 알림 전송 실패:', e.message));
+    // 2026-11-16(주피터 지시: 호출이 안 오거나 5분 뒤에 옴) — 이전에는 응답을 돌려준 뒤 await 없이 푸시를 보내, Worker 가 응답과 함께 작업을 끊으면 푸시가 아예 안 나가거나 늦었다
+    // (위 2536행의 ctx.waitUntil 주석과 같은 유형). 로그인 승인(device-link)처럼 푸시 발송을 기다린 뒤 응답한다(최대 4초).
+    let _who = '';
+    try { const pj = typeof payload === 'string' ? JSON.parse(payload) : (payload || {}); _who = String(pj.from_handle || '').replace(/^@|^tid-/g, '').slice(0, 20); } catch (e) { /* 이름 없음 */ }
+    try {
+      await Promise.race([
+        _sendPushToGuid(env, to_guid, {
+          title: _who ? `${_who}님이 대화를 요청했습니다` : '대화 요청이 도착했습니다',
+          body:  '눌러서 나비웹을 열면 바로 연결됩니다.',
+          tag:   'gopang-call-' + from_guid.slice(0, 8),
+          url:   '/webapp.html',
+        }),
+        new Promise(r => setTimeout(r, 4000)),
+      ]);
+    } catch (e) { console.warn('[Push] 알림 전송 실패:', e.message); }
   }
 
   return new Response(JSON.stringify({ ok: true, source: 'l1' }), { status: 200, headers: corsHeaders });
