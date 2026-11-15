@@ -4342,4 +4342,15 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeWebApp(); });
+// 말풍선 대화창(나비 웹앱)이 열리면 이 화면의 전화 인증 로그인을 그 창에만 넘긴다 — 같은 출처의 iframe 요청에만 답한다.
+window.addEventListener('message', function (e) {
+  var d = e && e.data;
+  var f = document.getElementById('webapp-iframe');
+  if (!d || d.type !== 'hondi-embed-auth-request' || !f || e.source !== f.contentWindow || e.origin !== location.origin) return;
+  try {
+    var m = document.cookie.match(/(?:^|; )hondi_pvt=([^;]*)/), x = document.cookie.match(/(?:^|; )hondi_pvt_exp=([^;]*)/);
+    var tok = m ? decodeURIComponent(m[1]) : '', exp = x ? Number(decodeURIComponent(x[1])) : 0;
+    if (tok && exp && exp - 30000 > Date.now() && tok.indexOf('tid-') !== 0) e.source.postMessage({ type: 'hondi-embed-auth', token: tok, exp: exp }, e.origin);
+  } catch (err) {}
+});
 </script>
