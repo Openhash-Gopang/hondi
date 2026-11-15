@@ -6248,3 +6248,16 @@ function ed25519Verify(msgBytes, sigBytes, pubkeyBytes) {
     throw new BadRequestError("서명이 유효하지 않습니다(INVALID_SIGNATURE)");
   }
 }, "profiles");
+
+
+// ── 임시 진단(2026-11-16): PB 의 PHONE_VERIFY_SECRET 으로 만든 해시가 저장된 e164_hash 와 같은지 참/거짓만 알려 준다. 관리자 전용. 원인 확인 뒤 삭제한다.
+routerAdd("GET", "/api/hondi-diag/e164-hash", (c) => {
+  try {
+    const handle = c.queryParam("handle") || "";
+    const rec = $app.dao().findFirstRecordByFilter("profiles", "handle = {:h}", { h: handle });
+    const secret = $os.getenv("PHONE_VERIFY_SECRET") || "";
+    const last8 = rec.getString("e164_last8");
+    const h = secret ? $security.hs256("e164-lookup:" + "+8210" + last8, secret) : "";
+    return c.json(200, { pb_secret_set: !!secret, pb_secret_len: secret.length, pb_hash_equals_stored: !!h && h === rec.getString("e164_hash") });
+  } catch (e) { return c.json(200, { error: String(e) }); }
+}, $apis.requireAdminAuth());
