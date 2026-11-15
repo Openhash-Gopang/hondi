@@ -14826,6 +14826,7 @@ export default {
       return handleAuthSessionProfile(request, env, corsHeaders);
     if (pathname === '/counterparts/index' && request.method === 'GET')
       return handleCounterpartIndex(request, env, corsHeaders, ctx);
+    if (pathname === '/diag/e164-hash' && request.method === 'GET') return handleDiagE164Hash(request, env, corsHeaders);   // 임시 진단(2026-11-16) — 원인 확인 뒤 삭제
     if (pathname === '/friends/find' && request.method === 'POST')
       return handleFriendFind(request, env, corsHeaders);
     if (pathname === '/friends/invite-notify' && request.method === 'POST')
@@ -29197,6 +29198,23 @@ async function handleCounterpartIndex(request, env, corsHeaders, ctx) {
   } catch (e) {
     return new Response(JSON.stringify({ error: String(e && e.message || e) }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
+}
+
+// 임시 진단 — PocketBase 관리자 토큰으로만 부를 수 있다(토큰을 L1 에 되물어 확인). 비밀값·해시는 돌려주지 않고 참/거짓만 준다.
+async function handleDiagE164Hash(request, env, corsHeaders) {
+  const tok = (request.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
+  if (!tok) return _err(401, 'AUTH_REQUIRED', '관리자 토큰 필요', corsHeaders);
+  try {
+    const ok = await fetch(`${L1_DEFAULT}/api/admins/auth-refresh`, { method: 'POST', headers: { 'Authorization': tok }, signal: AbortSignal.timeout(8000) });
+    if (!ok.ok) return _err(403, 'FORBIDDEN', '관리자만', corsHeaders);
+    const handle = new URL(request.url).searchParams.get('handle') || '';
+    const r = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${encodeURIComponent(`handle='${handle.replace(/'/g, "\\'")}'`)}&perPage=1`, { headers: { 'Authorization': tok }, signal: AbortSignal.timeout(8000) });
+    const p = ((await r.json().catch(() => ({}))).items || [])[0];
+    if (!p) return new Response(JSON.stringify({ found: false }), { status: 200, headers: corsHeaders });
+    const secret = env.PHONE_VERIFY_SECRET || '';
+    const h = secret ? await _e164Hash(secret, '+8210' + (p.e164_last8 || '')) : '';
+    return new Response(JSON.stringify({ found: true, worker_secret_set: !!secret, worker_secret_len: secret.length, worker_hash_equals_stored: !!h && h === p.e164_hash }), { status: 200, headers: corsHeaders });
+  } catch (e) { return _err(502, 'DIAG_ERROR', String(e && e.message || e), corsHeaders); }
 }
 
 async function handleFriendFind(request, env, corsHeaders) {

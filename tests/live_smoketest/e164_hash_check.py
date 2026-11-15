@@ -42,3 +42,14 @@ for p in items:
                 if hm(k, pre+f) == p['e164_hash']: found.append((kn, pre, 'form%d' % i))
                 if hashlib.sha256((pre+f).encode()).hexdigest() == p['e164_hash']: found.append(('plain-sha256', pre, 'form%d' % i))
     print('deep_match:', found or 'NONE')
+
+# PB·Worker 가 각자 가진 비밀값으로 계산한 해시가 저장값과 같은지(참/거짓만)
+tok = r.json()['token']
+try:
+    d = requests.get(f'{L1}/api/hondi-diag/e164-hash', params={'handle': handle}, headers={'Authorization': tok}, timeout=20)
+    print('PB_diag', d.status_code, d.text[:200])
+except Exception as e: print('PB_diag_error', e)
+try:
+    w = requests.get('https://hondi-proxy.tensor-city.workers.dev/diag/e164-hash', params={'handle': handle}, headers={'Authorization': tok}, timeout=20)
+    print('Worker_diag', w.status_code, w.text[:200])
+except Exception as e: print('Worker_diag_error', e)
