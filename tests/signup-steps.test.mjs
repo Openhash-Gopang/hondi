@@ -31,8 +31,9 @@ test('입력 화면 문구는 닉네임이 아니라 아이디다', () => {
   assert.ok(/color:#6b7280">아이디<\/span>/.test(src));
 });
 
-test('코드 표시는 2·4·4자리로 끊는다', () => {
+test('코드 표시는 휴대폰·서울은 2·4·4, 그 외 지역은 3·3·4자리로 끊는다', () => {
   assert.match(src, /code\.slice\(0, 2\)\}-\$\{code\.slice\(2, 6\)\}-\$\{code\.slice\(6\)\}/);
+  assert.match(src, /code\.slice\(0, 3\)\}-\$\{code\.slice\(3, 6\)\}-\$\{code\.slice\(6\)\}/);
 });
 
 test('로그인·가입 탭은 Material 탭(tablist·aria-selected·밑줄 표시)이다', () => {
