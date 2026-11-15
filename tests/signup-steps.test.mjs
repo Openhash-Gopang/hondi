@@ -34,3 +34,24 @@ test('입력 화면 문구는 닉네임이 아니라 아이디다', () => {
 test('코드 표시는 2·4·4자리로 끊는다', () => {
   assert.match(src, /code\.slice\(0, 2\)\}-\$\{code\.slice\(2, 6\)\}-\$\{code\.slice\(6\)\}/);
 });
+
+test('로그인·가입 탭은 Material 탭(tablist·aria-selected·밑줄 표시)이다', () => {
+  assert.match(src, /id="_mode-tabs" role="tablist"/);
+  assert.match(src, /class="md-tab" role="tab"/);
+  assert.match(src, /setAttribute\('aria-selected'/);
+});
+
+test('숫자 코드 글자는 화면 폭에 맞춰 줄어들고 한 줄로 둔다', () => {
+  assert.match(src, /id="_code-val" style="font-size:min\([^"]*5\.4vw\)[^"]*white-space:nowrap/);
+});
+
+test('백업 키 이메일 칸은 브라우저 자동완성을 끈다', () => {
+  assert.match(src, /id="_bke-input" type="email" autocomplete="off"/);
+});
+
+test('전화 입력 칸에는 문구·국기 없이 아이콘만 두고, 이용 약정서 문구는 가입 마지막 화면에만 보인다', () => {
+  assert.ok(!/color:#6b7280">전화번호<\/span>/.test(src));
+  assert.match(src, /id="_flag-icon" style="display:none"/);
+  assert.match(src, /id="_phone-input" type="tel" aria-label="전화번호"/);
+  assert.match(src, /_terms-line'\)\.style\.display = s2 \? '' : 'none'/);
+});

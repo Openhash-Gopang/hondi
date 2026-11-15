@@ -4808,6 +4808,27 @@ onRecordAfterCreateRequest((e) => {
 //
 // admin(superuser) 인증 요청은 예외 없이 이 검사를 그대로 받는다 —
 // 오늘 사고가 정확히 admin 토큰으로 실행된 스크립트였기 때문이다.
+// ── 프로필 삭제 → 그 사용자가 등록한 메일 정보도 함께 삭제 (2026-11-15, 주피터 지시) ──
+// 사용자를 지우고 다시 가입해도 이전 이메일 ID(@naviweb.kr)가 "이미 쓰고 있다"고 남아 있던 문제:
+// kmail_user_settings(이메일 ID 포함)와 메일 관련 컬렉션이 profiles와 별개라 고아로 남았다.
+// After 훅이라 프로필 삭제가 실제로 끝난 뒤에만 실행되고, 실패해도 삭제 자체는 막지 않는다.
+onRecordAfterDeleteRequest((e) => {
+  if (e.collection.name !== "profiles") return;
+  const guid = e.record.getString("guid");
+  if (!guid) return;
+  const COLS = ["kmail_user_settings", "kmail_contacts", "kmail_campaigns", "kmail_campaign_messages", "kmail_rules",
+    "kmail_drafts", "kmail_thread_state", "kmail_message_state", "kmail_attachments", "kmail_blocklist"];
+  for (const name of COLS) {
+    try {
+      const rows = $app.dao().findRecordsByFilter(name, "owner_user_guid = '" + guid.replace(/['\\]/g, "") + "'", "", 5000, 0);
+      for (const r of rows) { try { $app.dao().deleteRecord(r); } catch (_) {} }
+      if (rows.length) console.log(`[PROFILE-DELETE-CASCADE] guid=${guid} ${name} ${rows.length}건 삭제`);
+    } catch (err) {
+      console.log(`[PROFILE-DELETE-CASCADE] ${name} 정리 실패(프로필 삭제는 완료): ` + err.message);
+    }
+  }
+}, "profiles");
+
 onRecordBeforeDeleteRequest((e) => {
   if (e.collection.name !== "profiles") return;
 
