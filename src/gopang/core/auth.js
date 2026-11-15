@@ -1643,13 +1643,12 @@ function _showPhonePopupLegacy(resolve) {
       <!-- 가입 진행 표시 (2026-11-15, 주피터 지시: 휴대폰 화면에서 가입을 2단계로 나눈다) -->
       <div id="_step-ind" style="display:none;margin:0 0 12px">
         <div style="display:flex;gap:6px"><span id="_step-seg1" style="flex:1;height:4px;border-radius:2px;background:#00796B"></span><span id="_step-seg2" style="flex:1;height:4px;border-radius:2px;background:#e5e7eb"></span></div>
-        <div id="_step-label" style="font-size:calc(0.75rem*var(--hondi-fs,1));font-weight:600;color:#00796B;margin-top:6px">1 / 2 단계</div>
+        <div id="_step-label" aria-live="polite" style="display:none;font-size:calc(0.75rem*var(--hondi-fs,1));font-weight:600;color:#00796B;margin-top:6px">1 / 2 단계</div>
       </div>
       <!-- 전화번호: 국가 · 휴대폰/지역번호 · 번호를 한 칸에 (2026-11-12 화면 단순화) -->
       <div id="_phone-field"
            style="display:flex;align-items:flex-end;gap:12px;padding:2px 0 6px;
                   border:0;border-bottom:1.5px solid #e5e7eb;margin-bottom:14px">
-        <span style="width:22px;text-align:center;color:#6b7280;font-size:calc(1.0625rem*var(--hondi-fs,1));line-height:34px;flex-shrink:0">&#9742;</span>
         <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
           <div style="display:flex;align-items:center;gap:8px;min-width:0">
             <button id="_country-btn" type="button"

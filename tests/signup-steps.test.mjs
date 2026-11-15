@@ -67,4 +67,8 @@ test('로그인 화면에서 가입되지 않은 번호여도 안내 문구를 �
 
 test('주소 상자에 "두 주소가 함께 정해집니다" 안내 문구를 두지 않는다', () => {
   assert.ok(!src.includes('두 주소가 함께 정해집니다'));
+
+test('가입 화면에 "1 / 2 단계" 글자와 전화 아이콘을 보이지 않는다', () => {
+  assert.match(src, /id="_step-label" aria-live="polite" style="display:none/);
+  assert.ok(!src.includes('&#9742;'));
 });
