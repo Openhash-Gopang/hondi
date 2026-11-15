@@ -25,3 +25,20 @@ for p in items:
 rows = recs("e164_hash!='' && e164_last8!='' && country_code='KR'", 200)
 ok = sum(1 for p in rows if h('+8210' + p['e164_last8']) == p['e164_hash'])
 print('recent_KR_profiles_checked', len(rows), 'canonical_hash_match', ok, 'mismatch', len(rows) - ok)
+
+# 원인 추적: 접두어·번호 모양·비밀값 가장자리 공백 조합을 모두 시험한다(어느 조합이 맞는지만 출력).
+def hm(key, msg): return hmac.new(key.encode(), msg.encode(), hashlib.sha256).hexdigest()
+keys = {'secret': SECRET, 'secret_stripped': SECRET.strip(), 'secret+newline': SECRET + '\n', 'secret+space': SECRET + ' '}
+print('secret_len', len(SECRET), 'has_edge_whitespace', SECRET != SECRET.strip())
+prefixes = ['e164-lookup:', '', 'e164:', 'phone:']
+for p in items:
+    last8 = p.get('e164_last8') or ''
+    if not (last8 and p.get('e164_hash')): continue
+    forms = ['+8210'+last8, '+82010'+last8, '8210'+last8, '010'+last8, '+82 10 '+last8[:4]+' '+last8[4:], '+82-10-'+last8[:4]+'-'+last8[4:]]
+    found = []
+    for kn, k in keys.items():
+        for pre in prefixes:
+            for i, f in enumerate(forms):
+                if hm(k, pre+f) == p['e164_hash']: found.append((kn, pre, 'form%d' % i))
+                if hashlib.sha256((pre+f).encode()).hexdigest() == p['e164_hash']: found.append(('plain-sha256', pre, 'form%d' % i))
+    print('deep_match:', found or 'NONE')
