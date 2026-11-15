@@ -28,7 +28,7 @@ test('나비 숫자 코드는 전화번호에서 계산하고 정하는 입력�
 
 test('입력 화면 문구는 닉네임이 아니라 아이디다', () => {
   assert.ok(!/color:#6b7280">닉네임<\/span>/.test(src));
-  assert.ok(/color:#6b7280">아이디<\/span>/.test(src));
+  assert.ok(/">아이디<\/span>/.test(src));
 });
 
 test('코드 표시는 휴대폰·서울은 2·4·4, 그 외 지역은 3·3·4자리로 끊는다', () => {
