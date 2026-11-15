@@ -1720,7 +1720,6 @@ function _showPhonePopupLegacy(resolve) {
       <div id="_addr-box" style="display:none;background:#f3f4f6;border-radius:10px;padding:6px 14px;margin:0 0 10px">
         <div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0"><span style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b7280">메일 주소</span><span id="_addr-mail" style="font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:600;color:#111827"></span></div>
         <div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0"><span style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b7280">프로필 주소</span><span id="_addr-prof" style="font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:600;color:#111827"></span></div>
-        <div style="font-size:calc(0.71875rem*var(--hondi-fs,1));color:#6b7280;padding:2px 0 6px">이메일 ID를 정하면 두 주소가 함께 정해집니다. 따로 입력하지 않습니다.</div>
       </div>
 
       <!-- 백업 키를 받을 이메일 — 가입 전부터 쓰던 주소(나비웹 주소 아님). 2026-11-13, 주피터 지시 -->
