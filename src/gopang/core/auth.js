@@ -1319,7 +1319,7 @@ async function _adoptRealSharedLogin(hostToken) {
 // 나비웹(naviweb.kr)의 대화창은 이 앱(hondi.net)을 iframe 으로 띄운다. 두 사이트는 쿠키를 나누지 못해(.hondi.net 공유 쿠키는 naviweb.kr 에서 안 보임)
 // 전화 인증으로 로그인해 있어도 이 앱은 임시 계정으로 열렸다. 그래서 호스트가 {type:'hondi-embed-auth', token, exp} 를 이 창에만 보내 주면
 // 같은 방식(서버 /auth/session-profile)으로 그 계정을 이어받는다. 토큰은 주소(URL)에 싣지 않고, 이 탭의 sessionStorage 에만 둔다.
-const _HOST_ORIGINS = ['https://naviweb.kr', 'https://www.naviweb.kr', 'https://mail.naviweb.kr'];
+const _HOST_ORIGINS = ['https://naviweb.kr', 'https://www.naviweb.kr', 'https://app.naviweb.kr', 'https://mail.naviweb.kr'];
 const _HOST_PVT_KEY = 'hondi_host_pvt';
 function _isEmbedded() { try { return window.parent !== window; } catch { return true; } }
 function _readHostPvt() {

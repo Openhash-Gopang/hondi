@@ -88,7 +88,8 @@
       var u = JSON.parse(raw);
       var h = String((u && u.handle) || '');
       if (!u || !(u.ipv6 || u.guid) || u.isGuest || u.isTemp || u.test_account || h.indexOf('tid-') === 0) return null;
-      return { loggedIn: true, kind: 'user', source: 'spa', label: '로그인됨', avatar: u.avatar_url || u.avatarUrl || '' };   // 메인 앱의 handle은 전화번호 뒷자리라 보여 주지 않는다
+      var nm = String(u.nickname || u.name || '').trim(); if (/^[\d+\-\s]*$/.test(nm) || nm === h) nm = '';
+      return { loggedIn: true, kind: 'user', source: 'spa', label: nm || '로그인됨', avatar: u.avatar_url || u.avatarUrl || '' };   // 메인 앱의 handle은 전화번호 뒷자리라 보여 주지 않는다
     } catch (e) { return null; }
   }
   function identity() {
@@ -99,7 +100,7 @@
       var id = i > 4 ? t.slice(4, i) : t.slice(4);
       return { loggedIn: true, kind: 'test', source: 'cookie', label: id };
     }
-    return { loggedIn: true, kind: 'user', source: 'cookie', label: (mailInfo && mailInfo.mail_id) || cachedMailId() || '로그인됨', avatar: (mailInfo && mailInfo.avatar_url) || '' };   // 전화번호는 아이디로 쓰지 않는다
+    return { loggedIn: true, kind: 'user', source: 'cookie', label: (mailInfo && (mailInfo.mail_id || mailInfo.nickname)) || cachedMailId() || '로그인됨', avatar: (mailInfo && mailInfo.avatar_url) || '' };   // 전화번호는 아이디로 쓰지 않는다
   }
   function testIdSaved() {
     try { return global.localStorage.getItem('hondi_test_id') || ''; } catch (e) { return ''; }
@@ -351,7 +352,7 @@
     mailInfoBusy = true; mailInfoTriedAt = Date.now();
     return getJson('/kmail/mail-id/status?phone_verify_token=' + encodeURIComponent(readCookie(C_TOKEN))).then(function (x) {
       mailInfoBusy = false;
-      if (x.d && x.d.ok) { mailInfo = x.d; mailInfoAt = Date.now(); cacheMailId(x.d.mail_id); render(true); maybePromptMailId(); }
+      if (x.d && x.d.ok) { mailInfo = x.d; mailInfoAt = Date.now(); cacheMailId(x.d.mail_id || x.d.nickname); render(true); maybePromptMailId(); }
       return mailInfo;
     }, function () { mailInfoBusy = false; return mailInfo; });
   }
