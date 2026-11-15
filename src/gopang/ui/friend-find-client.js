@@ -15,7 +15,7 @@ async function post(path, body) {
     if (r.ok) return r.data;
     const d = r.data || {};
     const noAuth = r.status === 401 || r.status === 403 || d.error === 'AUTH_REQUIRED';
-    return { ok: false, error: noAuth ? 'LOGIN_REQUIRED' : (d.error || 'HTTP_' + r.status), message: noAuth ? '인증에 실패했습니다. 잠시 후 다시 시도해 주세요.' : (d.message || d.detail || '요청에 실패했습니다.') };
+    return { ok: false, error: noAuth ? 'LOGIN_REQUIRED' : (d.error || 'HTTP_' + r.status), message: noAuth ? ('인증에 실패했습니다. 잠시 후 다시 시도해 주세요.' + (d.error || d.code ? ' (' + (d.error || d.code) + ')' : '') + (r.authKind ? ' [' + r.authKind + ']' : '')) : (d.message || d.detail || '요청에 실패했습니다.') };
   } catch (e) { return { ok: false, error: 'NETWORK', message: '네트워크 오류: ' + e.message }; }
 }
 

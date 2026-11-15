@@ -41,7 +41,7 @@ export async function signalPost(path, guid, body) {
   const send = async (auth) => {
     const r = await fetch(`${PROXY}${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...(body || {}), ...(auth || {}) }) });
     const data = await r.json().catch(() => ({}));
-    return { ok: r.ok, status: r.status, code: data.error || data.code || '', data };
+    return { ok: r.ok, status: r.status, code: data.error || data.code || '', data, authKind: auth ? (auth.phone_verify_token ? 'cookie' : 'wallet') : 'none' };
   };
   let auth = cookieAuth() || await walletAuth(guid);
   let res = await send(auth);

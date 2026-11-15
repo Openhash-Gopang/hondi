@@ -29982,6 +29982,11 @@ async function _l1SignalDeleteMine(env, guid) {
 // gopang_token 은 /auth/issue 가 "공개키가 아직 고정되지 않은 계정"이면 아무 키로나 발급해 주므로, 여기서는 공개키가 고정된
 // 계정(pubkey_ed25519 있음)의 토큰만 받아 그 허점을 피한다.
 async function _signalCaller(env, body) {
+  const _r = await _signalCaller0(env, body);
+  if (!_r.ok) { try { console.log('[SignalCaller] 거부', _r.status, _r.code, body && body.phone_verify_token ? 'pvt' : (body && body.gopang_token ? 'gt' : 'none')); } catch (_) {} }
+  return _r;
+}
+async function _signalCaller0(env, body) {
   if (body && body.phone_verify_token) {
     const r = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token);
     return r.ok ? { ok: true, guid: r.guid } : { ok: false, status: 401, code: r.code || 'TOKEN_INVALID', message: r.message || '인증 실패' };

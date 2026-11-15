@@ -142,7 +142,7 @@ async function _doSearch(q, country, region, resultsEl) {
     if (fr.ok && fr.self) {
       resultsEl.innerHTML = msg('검색하신 상대는 본인 계정입니다.<br>같은 계정을 다른 기기에서 쓰려면 <b>기기 연결</b>을 이용해 주세요.');
     } else if (!fr.ok && fr.error === 'LOGIN_REQUIRED') {
-      resultsEl.innerHTML = msg('상대를 찾으려면 먼저 로그인해 주세요.');
+      resultsEl.innerHTML = msg('상대를 찾으려면 먼저 로그인해 주세요.' + (fr.message && /\(/.test(fr.message) ? '<br><span style="font-size:11px">' + String(fr.message).replace(/[<>&]/g, '') + '</span>' : ''));
     } else if (!fr.ok) {
       resultsEl.innerHTML = msg(fr.message || '검색에 실패했습니다.');
     } else if (cq.kind === 'phone') {
