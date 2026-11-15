@@ -41,6 +41,20 @@ if ('serviceWorker' in navigator) {
         if (!w || document.getElementById('ksa-overlay')) return;
         try { w.postMessage({ type: 'SKIP_WAITING' }); } catch (e) { /* 무시 */ }
       };
+      // 2026-11-16 — 새 서비스워커가 넘겨받으면(=새 버전 배포) 열려 있는 화면도 자동으로 새로고침한다(주피터 지시: 항상 최신 버전).
+      // 입력 중이거나 AI가 답하는 중이면 끝날 때까지 미루고, 60초 안에 두 번 이상은 새로고침하지 않는다(무한 새로고침 방지).
+      const _hadController = !!navigator.serviceWorker.controller;
+      let _reloadTimer = null;
+      const _busy = () => !!document.getElementById('ksa-overlay') || !!document.querySelector('.streaming')
+        || [...document.querySelectorAll('textarea,input[type=text]')].some((el) => el.offsetParent && el.value && el.value.trim());
+      const _tryReload = () => {
+        let last = 0; try { last = Number(sessionStorage.getItem('hondi_auto_reload_at')) || 0; } catch (e) {}
+        if (Date.now() - last < 60000) return;
+        if (_busy()) { clearTimeout(_reloadTimer); _reloadTimer = setTimeout(_tryReload, 8000); return; }
+        try { sessionStorage.setItem('hondi_auto_reload_at', String(Date.now())); } catch (e) {}
+        location.reload();
+      };
+      if (_hadController) navigator.serviceWorker.addEventListener('controllerchange', _tryReload);
       _activateWaiting(reg.waiting);
       reg.addEventListener('updatefound', () => {
         const nw = reg.installing;

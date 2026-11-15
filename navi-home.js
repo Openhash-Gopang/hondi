@@ -64,6 +64,7 @@
   // 메인 탭이 아닌 탭은 자신을 알린다.
   function registerTab(opts) {
     setTabInfo(opts);
+    try { if (g.self !== g.top) return; } catch (e) { return; }
     if (isMainTab()) return;
     try { if (!g.name) g.name = 'naviweb-tab-' + uid; } catch (e) {}   // 이름이 있어야 메인이 window.open('', 이름)으로 다시 찾는다
     var c = tabsChannel(); if (!c || beatTimer) return;
@@ -114,6 +115,7 @@
     d.body.appendChild(b);
   }
   function init() {
+    try { if (g.self !== g.top) return; } catch (e) { return; }   // 다른 페이지 안에 끼워 넣은 화면(iframe)은 탭이 아니다 — 로고도 탭 등록도 하지 않는다
     var d = g.document; if (!d || (d.documentElement && d.documentElement.hasAttribute('data-navi-home-off'))) return;
     if (d.body) mountLogo(); else d.addEventListener('DOMContentLoaded', mountLogo);
     if (!isMainTab() && !d.getElementById('ai-panel-logo')) registerTab();

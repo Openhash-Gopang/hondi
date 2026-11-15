@@ -67,3 +67,11 @@ test('gotoTab: 이름 있는 창을 열어 focus, 새 빈 창이면 닫고 실�
   const api2 = loadG(mkWin(BC, { open: () => ({ location: { href: 'about:blank' }, close: () => closed++ }) }));
   assert.equal(api2.gotoTab({ id: 'b', name: 'x' }), false); assert.equal(closed, 1);
 });
+
+test('iframe 안의 페이지는 탭으로 등록하지 않는다', () => {
+  const BC = bus(); const main = loadG(mkWin(BC)); main.markMainTab(); let got = [];
+  main.watchTabs((l) => { got = l; });
+  const w = mkWin(BC); w.top = {}; w.self = w;   // self !== top
+  loadG(w).registerTab({ kind: 'service', label: '메뉴' });
+  assert.equal(got.length, 0);
+});

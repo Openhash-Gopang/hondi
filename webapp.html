@@ -422,9 +422,9 @@ body.gopang-authed #gopang-auth-gate{display:none}
 #ai-sp-label{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);max-width:46%;padding:3px 10px;border-radius:999px;
   background:rgba(255,255,255,.22);color:#fff;font-size:calc(.75rem*var(--hondi-fs,1));font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;z-index:1}
 #ai-sp-label[hidden]{display:none}
-#navi-tabs-btn{display:inline-flex;align-items:center;gap:3px;margin-left:auto;margin-right:6px;padding:3px 9px;border:1px solid rgba(0,0,0,.2);border-radius:999px;background:transparent;font-size:.8rem;cursor:pointer;color:inherit}
+#navi-tabs-btn{display:inline-flex;align-items:center;gap:3px;margin-left:auto;margin-right:6px;padding:3px 9px;border:1px solid rgba(255,255,255,.75);border-radius:999px;background:transparent;font-size:.8rem;cursor:pointer;color:#fff}
 #navi-tabs-btn[hidden],#navi-tabs-pop[hidden]{display:none}
-#navi-tabs-btn[aria-expanded="true"]{background:#e8eaf6;border-color:#3949ab;color:#3949ab}
+#navi-tabs-btn[aria-expanded="true"]{background:rgba(255,255,255,.25);border-color:#fff;color:#fff}
 #navi-tabs-pop{position:absolute;top:46px;right:8px;z-index:500;width:min(200px,60vw);padding:3px 0;background:#fff;color:#222;border:1px solid rgba(0,0,0,.18);border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.18);font-size:.85rem}
 #navi-tabs-pop button{display:flex;align-items:center;gap:6px;width:100%;padding:8px 10px;border:0;border-top:1px solid rgba(0,0,0,.08);background:transparent;text-align:left;font:inherit;color:inherit;cursor:pointer}
 #navi-tabs-pop button:first-child{border-top:0}
@@ -1427,7 +1427,6 @@ html.is-embedded .install-banner{display:none!important}
           <span id="ai-panel-name">나비</span>
           <input id="ai-panel-name-input" type="text" maxlength="16"
                  placeholder="AI 비서 이름" autocomplete="off">
-          <span id="ai-panel-name-tagline">최신 버전</span>
         </div>
         <svg id="ai-panel-name-edit-icon" width="12" height="12" viewBox="0 0 24 24"
              fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
