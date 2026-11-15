@@ -5445,6 +5445,13 @@ export async function runStageZero(userText, imageFile = null, _preTab = null) {
       let _msg;
       if (_fm.user) {
         const _u = _fm.user, _nm = _u.nickname || _u.mail_id || _u.handle;
+        // 2026-11-16(주피터 지시) — 미리 열어 둔 새 탭이 있으면 그 탭에서 대화를 시작한다(탭이 빈 화면으로 남지 않게). 없으면(차단 등) 이 창에서 시작한다.
+        if (_preTab && !_preTab.closed) {
+          _msg = `${_nm}님을 호출했습니다. 새 탭에서 대화를 시작합니다.`;
+          appendBubble('ai', _msg); history.push({ role: 'assistant', content: _msg });
+          try { rememberUser(localStorage, _USER?.guid || _USER?.ipv6, _u, Date.now(), true); } catch {}
+          try { _preTab.location.href = _callUserUrl({ guid: _u.guid, handle: _u.handle, nickname: _nm }); return true; } catch { try { _preTab.close(); } catch {} }
+        }
         _msg = `💬 ${_nm}님과 채팅 연결을 시작합니다.`;
         appendBubble('ai', _msg);
         try { const { startP2PCall } = await import('../ui/p2p-chat.js'); await startP2PCall(_u); }
