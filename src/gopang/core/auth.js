@@ -1715,7 +1715,7 @@ function _showPhonePopupLegacy(resolve) {
         </div>
       </div>
       <div id="_mid-error" class="mp-error" style="display:none"></div>
-      <div id="_mid-hint" style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;padding:0 4px;margin-bottom:6px;line-height:1.6;min-height:18px"></div>
+      <div id="_mid-hint" style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;padding:0 4px;margin-bottom:0;line-height:1.6"></div>
       <!-- 이메일 ID를 정하면 메일 주소와 프로필 주소가 함께 정해진다(2026-11-15) -->
       <div id="_addr-box" style="display:none;background:#f3f4f6;border-radius:10px;padding:6px 14px;margin:0 0 10px">
         <div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0"><span style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b7280">메일 주소</span><span id="_addr-mail" style="font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:600;color:#111827"></span></div>
@@ -2072,7 +2072,7 @@ function _showPhonePopupLegacy(resolve) {
     if (!nickHintEl) {
       nickHintEl = document.createElement('div');
       nickHintEl.id = '_nick-hint';
-      nickHintEl.style.cssText = 'font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;padding:0 4px;margin-bottom:6px;line-height:1.6;min-height:18px';
+      nickHintEl.style.cssText = 'font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;padding:0 4px;margin-bottom:0;line-height:1.6';
       nickErr.insertAdjacentElement('afterend', nickHintEl);
     }
     if (nick.length < 2) { nickHintEl.innerHTML = ''; return; }
