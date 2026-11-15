@@ -29232,6 +29232,13 @@ async function handleFriendFind(request, env, corsHeaders) {
     const find = async (filter) => (await findMany(filter, 1))[0] || null;
     if (c.kind === 'phone') {
       prof = await find(`(${await friendPhoneFilter(env, c.e164)}) && phone_findable=true`);
+    } else if (c.kind === 'last8') {   // 번호 뒤 8자리 — 국가 무관, 상대가 번호 찾기를 허용한 경우만. 여럿이면 목록(최대 6)
+      const hits = (await findMany(`${last8Filter(c.last8)} && phone_findable=true`, 30))
+        .filter(p => !(p.extra?.migrated_to) && String(p.e164_last8 || String(p.e164 || '').replace(/\D/g, '').slice(-8)) === c.last8)
+        .slice(0, 6);
+      const others = hits.filter(p => p.guid !== who.guid);
+      if (hits.length && !others.length) return new Response(JSON.stringify({ ok: true, found: false, self: true }), { status: 200, headers: corsHeaders });
+      nameHits = others; prof = others[0] || null;
     } else if (c.kind === 'id') {      // 이메일 ID(가입 때 본인이 고른 값) 정확일치
       const owner = await _kmailFindMailIdOwner(env, c.id);
       if (owner) { prof = await find(`guid='${String(owner).replace(/'/g, "\\'")}'`); if (prof && prof.mail_hidden === true) prof = null; if (prof) prof = { ...prof, mail_id: c.id }; }

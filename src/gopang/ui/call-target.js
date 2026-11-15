@@ -33,6 +33,7 @@ export function parseCallRequest(text) {
 export function classifyTarget(target) {
   const t = String(target || '').trim();
   if (/^\+?[0-9][0-9\s-]{7,16}[0-9]$/.test(t)) return 'phone';
+  if (/^@?\d{8}$/.test(t)) return 'phone';   // 번호 뒤 8자리
   if (/^@?[A-Za-z][A-Za-z0-9._-]{2,29}$/.test(t) || /^@[A-Za-z0-9._-]{3,}$/.test(t)) return 'id';
   if (/^[가-힣]{2,5}$/.test(t) && !_ORG_SUFFIX.test(t)) return 'name';
   return 'other';

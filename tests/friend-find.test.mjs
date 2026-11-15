@@ -25,9 +25,10 @@ test('classifyQuery: 번호/이메일 ID/빈값/그 밖', () => {
   assert.equal(classifyQuery('김'). kind, 'invalid');
   assert.equal(classifyQuery('가'.repeat(21)).kind, 'invalid');
   assert.equal(classifyQuery('a').kind, 'invalid');
-  // @8자리 혼디 아이디 검색은 없앴다 — 숫자만이면 번호도 아이디도 아니다
-  assert.equal(classifyQuery('@96627170').kind, 'invalid');
-  assert.equal(classifyQuery('96627170').kind, 'invalid');
+  // 2026-11-16: 번호 뒤 8자리 검색 — 국가 무관, 같은 번호가 여럿이면 사용자가 고른다
+  assert.deepEqual(classifyQuery('@96627170'), { kind: 'last8', last8: '96627170' });
+  assert.deepEqual(classifyQuery('9662-7170'), { kind: 'last8', last8: '96627170' });
+  assert.equal(classifyQuery('966271').kind, 'invalid');
   assert.deepEqual(classifyQuery('  '), { kind: 'empty' });
   assert.deepEqual(classifyQuery('@'), { kind: 'empty' });
 });
