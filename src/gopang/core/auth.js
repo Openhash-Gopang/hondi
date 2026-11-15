@@ -1568,7 +1568,6 @@ function _showPhonePopupLegacy(resolve) {
   // 가입 모드와 단계 — 가입은 휴대폰 화면에서 2단계로 나눠 진행한다(2026-11-15, 주피터 지시).
   //   1단계: 전화번호·아이디·이메일 ID (다음을 누르면 문자 인증까지 마친다)  2단계: 백업 키 받을 이메일 → 가입
   let _signupMode = false;
-  let _step = 1;
   let _signupCtx = null; // 1단계에서 확인·인증을 마친 값 (이전 버튼으로 돌아갔다 와도 같은 번호면 다시 인증하지 않는다)
 
   const overlay = document.createElement('div');
@@ -1640,11 +1639,6 @@ function _showPhonePopupLegacy(resolve) {
         <button id="_mode-login" class="md-tab" role="tab" type="button" aria-selected="true">로그인</button>
         <button id="_mode-signup" class="md-tab" role="tab" type="button" aria-selected="false">가입</button>
       </div>
-      <!-- 가입 진행 표시 (2026-11-15, 주피터 지시: 휴대폰 화면에서 가입을 2단계로 나눈다) -->
-      <div id="_step-ind" style="display:none;margin:0 0 12px">
-        <div style="display:flex;gap:6px"><span id="_step-seg1" style="flex:1;height:4px;border-radius:2px;background:#00796B"></span><span id="_step-seg2" style="flex:1;height:4px;border-radius:2px;background:#e5e7eb"></span></div>
-        <div id="_step-label" aria-live="polite" style="display:none;font-size:calc(0.75rem*var(--hondi-fs,1));font-weight:600;color:#00796B;margin-top:6px">1 / 2 단계</div>
-      </div>
       <!-- 전화번호: 국가 · 휴대폰/지역번호 · 번호를 한 칸에 (2026-11-12 화면 단순화) -->
       <div id="_phone-field"
            style="display:flex;align-items:flex-end;gap:12px;padding:2px 0 6px;
@@ -1688,7 +1682,7 @@ function _showPhonePopupLegacy(resolve) {
            style="display:flex;align-items:flex-end;gap:12px;padding:2px 0 6px;
                   border:0;border-bottom:1.5px solid #e5e7eb;margin-bottom:10px">
         <div style="flex:1;min-width:0;display:flex;align-items:center;gap:8px">
-          <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#6b7280;flex-shrink:0;width:4.6em">아이디</span>
+          <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#6b7280;flex-shrink:0;width:5.4em">아이디</span>
           <input id="_nick-input" type="text" maxlength="20"
             placeholder="나비가 나를 부를 이름"
             style="width:100%;padding:0;height:34px;border:none;background:transparent;
@@ -1703,7 +1697,7 @@ function _showPhonePopupLegacy(resolve) {
            style="display:flex;align-items:flex-end;gap:12px;padding:2px 0 6px;
                   border:0;border-bottom:1.5px solid #e5e7eb;margin-bottom:10px">
         <div style="flex:1;min-width:0;display:flex;align-items:center;gap:8px">
-          <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#6b7280;flex-shrink:0;width:4.6em">이메일 ID</span>
+          <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#6b7280;flex-shrink:0;width:5.4em">이메일 ID</span>
           <div style="flex:1;min-width:0;display:flex;align-items:center;gap:4px">
             <input id="_mid-input" type="text" maxlength="30" inputmode="latin" autocapitalize="off" spellcheck="false"
               placeholder="영문 소문자·숫자"
@@ -1726,14 +1720,12 @@ function _showPhonePopupLegacy(resolve) {
       <div id="_bke-field"
            style="display:flex;align-items:flex-end;gap:12px;padding:2px 0 6px;
                   border:0;border-bottom:1.5px solid #e5e7eb;margin-bottom:10px">
-        <span style="width:22px;text-align:center;color:#6b7280;font-size:calc(1.0625rem*var(--hondi-fs,1));line-height:34px;flex-shrink:0">&#128273;</span>
-        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
-          <span style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:#6b7280">백업 키 받을 내 이메일</span>
+        <div style="flex:1;min-width:0;display:flex;align-items:center;gap:8px">
+          <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#6b7280;flex-shrink:0;width:5.4em">백업 이메일</span>
           <input id="_bke-input" type="email" autocomplete="off" maxlength="254" inputmode="email" autocapitalize="off" spellcheck="false"
             placeholder="가입 전부터 쓰던 이메일"
-            style="width:100%;padding:0;height:34px;border:none;background:transparent;
-                   font-size:calc(0.9375rem*var(--hondi-fs,1));font-family:inherit;outline:none;color:#111827;min-width:0"
-            autocomplete="email"/>
+            style="flex:1;padding:0;height:34px;border:none;background:transparent;
+                   font-size:calc(0.9375rem*var(--hondi-fs,1));font-family:inherit;outline:none;color:#111827;min-width:0"/>
         </div>
       </div>
       <div id="_bke-error" class="mp-error" style="display:none"></div>
@@ -1742,7 +1734,6 @@ function _showPhonePopupLegacy(resolve) {
         class="mp-btn mp-btn-primary">
         시작하기
       </button>
-      <button id="_prev-btn" type="button" class="mp-btn mp-btn-quiet" style="display:none">이전</button>
       <div id="_terms-line" style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;text-align:center;margin-top:12px">
         시작하면 <span onclick="window.openTermsOfUse&&window.openTermsOfUse()" style="color:#6b7280;text-decoration:underline;cursor:pointer">이용 약정서</span>에 동의한 것으로 봅니다.
       </div>
@@ -1918,7 +1909,7 @@ function _showPhonePopupLegacy(resolve) {
     val.textContent = code ? (code[0] === '0' && code[1] !== '0' && code[1] !== '2'
       ? `${code.slice(0, 3)}-${code.slice(3, 6)}-${code.slice(6)}`
       : `${code.slice(0, 2)}-${code.slice(2, 6)}-${code.slice(6)}`) : '';
-    box.style.display = (_signupMode && _step === 1 && code) ? '' : 'none';
+    box.style.display = (_signupMode && code) ? '' : 'none';
     // 나비 숫자 코드 시안(로고 + 7세그먼트 숫자열)만 보여 준다 — 글자 설명은 두지 않는다
     const img = document.getElementById('_code-img');
     if (img && code && img.dataset.code !== code) {
@@ -2043,7 +2034,7 @@ function _showPhonePopupLegacy(resolve) {
     const v = midInput.value.trim().toLowerCase();
     document.getElementById('_addr-mail').textContent = `${v}@naviweb.kr`;
     document.getElementById('_addr-prof').textContent = `${v}.naviweb.kr`;
-    box.style.display = (_signupMode && _step === 1 && v.length >= 3) ? '' : 'none';
+    box.style.display = (_signupMode && v.length >= 3) ? '' : 'none';
   }
   midInput.addEventListener('input', () => {
     midErr.style.display = 'none';
@@ -2085,39 +2076,28 @@ function _showPhonePopupLegacy(resolve) {
   // 로그인 | 가입 — 로그인은 번호만, 가입은 아이디·이메일 ID까지. 기본은 로그인.
   const _tabLogin = document.getElementById('_mode-login');
   const _tabSignup = document.getElementById('_mode-signup');
-  const _prevBtn = document.getElementById('_prev-btn');
-  const _stepInd = document.getElementById('_step-ind');
   const _bkeField = document.getElementById('_bke-field');
   const _bkeError = document.getElementById('_bke-error');
+  // 가입은 한 화면: 전화번호·아이디·이메일 ID·백업 이메일을 입력하고 "가입하기" → 문자 인증 → 계정 생성
   const _applyStep = () => {
-    const s1 = !_signupMode || _step === 1;   // 1단계(또는 로그인): 전화번호·아이디·이메일 ID 화면
-    const s2 = _signupMode && _step === 2;    // 2단계: 백업 키 이메일 화면
-    document.getElementById('_mode-tabs').style.display = s2 ? 'none' : '';
-    phoneField.style.display = s1 ? '' : 'none';
-    nickField.style.display = (_signupMode && s1) ? '' : 'none';
-    midField.style.display  = (_signupMode && s1) ? '' : 'none';
-    midHint.style.display   = (_signupMode && s1) ? '' : 'none';
-    if (_bkeField) _bkeField.style.display = s2 ? '' : 'none';
+    phoneField.style.display = '';
+    nickField.style.display = _signupMode ? '' : 'none';
+    midField.style.display  = _signupMode ? '' : 'none';
+    midHint.style.display   = _signupMode ? '' : 'none';
+    if (_bkeField) _bkeField.style.display = _signupMode ? '' : 'none';
     if (_bkeError) _bkeError.style.display = 'none';
-    if (!s1) phoneErr.style.display = 'none';
     nickErr.style.display = 'none'; midErr.style.display = 'none';
-    { const _nh = document.getElementById('_nick-hint'); if (_nh) _nh.style.display = (_signupMode && s1) ? '' : 'none'; }   // 아이디 안내는 1단계에서만
-    _stepInd.style.display = _signupMode ? '' : 'none';
-    document.getElementById('_step-seg2').style.background = s2 ? '#00796B' : '#e5e7eb';
-    document.getElementById('_step-label').textContent = s2 ? '2 / 2 단계' : '1 / 2 단계';
-    _prevBtn.style.display = s2 ? '' : 'none';
-    document.getElementById('_terms-line').style.display = s2 ? '' : 'none';   // 이용 약정서 문구는 가입 마지막 화면에만
-    btn.textContent = !_signupMode ? '로그인' : (s2 ? '가입하기' : '다음');
+    { const _nh = document.getElementById('_nick-hint'); if (_nh) _nh.style.display = _signupMode ? '' : 'none'; }
+    document.getElementById('_terms-line').style.display = _signupMode ? '' : 'none';   // 이용 약정서 문구는 가입 화면에만
+    btn.textContent = !_signupMode ? '로그인' : '가입하기';
     _updateCodeBox(); _updateAddrBox();
   };
   const _setMode = (signup) => {
     _signupMode = !!signup;
-    _step = 1;
     _applyStep();
     _tabLogin.setAttribute('aria-selected', String(!_signupMode));
     _tabSignup.setAttribute('aria-selected', String(_signupMode));
   };
-  _prevBtn.onclick = () => { _step = 1; _applyStep(); };
   _tabLogin.onclick  = () => _setMode(false);
   _tabSignup.onclick = () => _setMode(true);
   _setMode(false);
@@ -2533,39 +2513,10 @@ function _showPhonePopupLegacy(resolve) {
     }
   }
 
-  const _btnLabel = () => !_signupMode ? '로그인' : (_step === 2 ? '가입하기' : '다음');
+  const _btnLabel = () => !_signupMode ? '로그인' : '가입하기';
   const _btnReady = () => { btn.style.opacity = '1'; btn.style.pointerEvents = ''; btn.textContent = _btnLabel(); };
 
-  // 2단계 — 백업 키 받을 이메일을 확인하고 계정을 만든다. 1단계에서 확인·인증을 마친 값(_signupCtx)을 쓴다.
-  const _submitStep2 = async () => {
-    if (!_signupCtx) { _step = 1; _applyStep(); return; }
-    // 백업 키 받을 이메일 — 가입 전부터 쓰던 주소여야 한다(나비웹·혼디 주소는 계정을 잃으면 같이 잃으므로 안 된다)
-    const _bkeInput = document.getElementById('_bke-input');
-    const backupEmail = (_bkeInput?.value || '').trim().toLowerCase();
-    const _bkeProblem = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(backupEmail) ? '백업 키를 받을 이메일을 입력해 주세요.'
-      : /(^|\.)(naviweb\.kr|hondi\.net|hondi\.kr|hondi\.org)$/i.test(backupEmail.split('@')[1] || '') ? '나비웹 주소가 아니라, 가입 전부터 쓰던 이메일을 입력해 주세요.' : '';
-    if (_bkeProblem) {
-      _bkeError.textContent = _bkeProblem; _bkeError.style.display = 'block'; _bkeInput?.focus();
-      return;
-    }
-    btn.style.opacity = '0.4'; btn.style.pointerEvents = 'none';
-    btn.textContent = '등록 중...';
-    try {
-      const c = _signupCtx;
-      const ipv6 = await _e164ToIPv6(c.e164);
-      await _completeRegistration({
-        ipv6, handle: c.handle, e164: c.e164, nickname: c.nickname, digits: c.digits, mailId: c.mailId, backupEmail,
-        phoneVerifyToken: c.phoneVerifyToken, stepUpToken: c.stepUpToken,
-      });
-    } catch (e) {
-      _bkeError.textContent = '네트워크 오류. 다시 시도해 주세요.';
-      _bkeError.style.display = 'block';
-      _btnReady();
-    }
-  };
-
   const _submit = async () => {
-    if (_signupMode && _step === 2) return _submitStep2();
     const digits   = phoneInput.value.trim();
     const nickname = nickInput.value.trim();
     const needDigits = selectedCountry === 'KR' ? _krNeededDigits() : COUNTRIES[selectedCountry].digits;
@@ -2668,6 +2619,16 @@ function _showPhonePopupLegacy(resolve) {
         btn.style.opacity = '1'; btn.style.pointerEvents = '';
         return;
       }
+      // 백업 키 받을 이메일 — 가입 전부터 쓰던 주소여야 한다(나비웹·혼디 주소는 계정을 잃으면 같이 잃으므로 안 된다)
+      const _bkeInput = document.getElementById('_bke-input');
+      const backupEmail = (_bkeInput?.value || '').trim().toLowerCase();
+      const _bkeProblem = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(backupEmail) ? '백업 키를 받을 이메일을 입력해 주세요.'
+        : /(^|\.)(naviweb\.kr|hondi\.net|hondi\.kr|hondi\.org)$/i.test(backupEmail.split('@')[1] || '') ? '나비웹 주소가 아니라, 가입 전부터 쓰던 이메일을 입력해 주세요.' : '';
+      if (_bkeProblem) {
+        _bkeError.textContent = _bkeProblem; _bkeError.style.display = 'block'; _bkeInput?.focus();
+        btn.style.opacity = '1'; btn.style.pointerEvents = '';
+        return;
+      }
       // 이용 약정서 동의: 별도 체크 없이 "시작하면 동의한 것으로 봅니다" 안내로 대체 (2026-11-12 화면 단순화)
 
       if (!SIMPLE_SIGNUP_TEST && !_isMobileDevice()) {
@@ -2682,7 +2643,7 @@ function _showPhonePopupLegacy(resolve) {
         btn.style.opacity = '0.4'; btn.style.pointerEvents = 'none';
       }
 
-      // 같은 번호로 방금 인증을 마쳤다면(2단계에서 이전으로 돌아온 경우) 다시 문자를 보내지 않는다. 인증 값은 5분만 쓴다.
+      // 같은 번호로 방금 인증을 마쳤고 계정 생성만 실패했다면 다시 문자를 보내지 않는다. 인증 값은 5분만 쓴다.
       let otpResult = (_signupCtx && _signupCtx.e164 === e164 && Date.now() - _signupCtx.verifiedAt < 5 * 60 * 1000)
         ? { phoneVerifyToken: _signupCtx.phoneVerifyToken, stepUpToken: _signupCtx.stepUpToken } : null;
       if (!otpResult) {
@@ -2696,15 +2657,17 @@ function _showPhonePopupLegacy(resolve) {
         }
       }
 
-      // 1단계 끝 — 확인한 값을 담아 두고 2단계(백업 키 이메일)로 넘어간다. 계정은 2단계에서 한 번에 만든다.
+      // 인증을 마쳤다 — 값을 담아 두고(등록이 실패해 다시 눌러도 5분 안에는 문자를 또 받지 않는다) 계정을 만든다.
       _signupCtx = {
         e164, handle, digits, nickname, mailId: mailIdRaw,
         phoneVerifyToken: otpResult.phoneVerifyToken, stepUpToken: otpResult.stepUpToken, verifiedAt: Date.now(),
       };
-      _step = 2;
-      _applyStep();
-      _btnReady();
-      document.getElementById('_bke-input')?.focus();
+      btn.textContent = '등록 중...';
+      const ipv6 = await _e164ToIPv6(e164);
+      await _completeRegistration({
+        ipv6, handle, e164, nickname, digits, mailId: mailIdRaw, backupEmail,
+        phoneVerifyToken: otpResult.phoneVerifyToken, stepUpToken: otpResult.stepUpToken,
+      });
 
     } catch(e) {
       phoneErr.textContent = '네트워크 오류. 다시 시도해 주세요.';
