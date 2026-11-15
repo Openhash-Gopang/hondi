@@ -49,6 +49,10 @@ export async function mountFriendFindCard() {
     card.innerHTML =
       '<div style="font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:600;color:#000;margin-bottom:6px">대화 상대 찾기</div>' +
       '<div style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#8e8e93;line-height:1.5">다른 나비웹 사용자가 아래 항목을 정확히 입력하면 나를 찾을 수 있습니다. 항목별로 허용 여부를 정하세요.</div>' +
+      '<div id="ff-real-box" style="display:none;margin-top:10px;font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b7280">본명(기관·부서·사업자는 그 명칭)을 아직 입력하지 않으셨습니다.' +
+      '<div style="display:flex;gap:6px;margin-top:4px"><input id="ff-real-in" type="text" maxlength="60" placeholder="본명 또는 기관명" style="flex:1;min-width:0;padding:6px 8px;border:1px solid #d1d5db;border-radius:8px;font-size:inherit;font-family:inherit">' +
+      '<button id="ff-real-save" type="button" style="padding:6px 12px;border:0;border-radius:8px;background:#1A73E8;color:#fff;font-weight:600;font-size:inherit;font-family:inherit">저장</button></div></div>' +
+      row('ff-real', '본명', '본명(기관은 기관명)으로 찾을 수 있습니다. 본인 인증 전에는 입력한 값입니다') +
       row('ff-name', '이름', '같은 이름이 여럿이면 목록에서 고르게 됩니다') +
       row('ff-mail', '이메일 ID', '가입할 때 정한 이메일 ID로 찾을 수 있습니다') +
       row('ff-phone', '전화번호', '번호는 상대에게 보이지 않습니다') +
@@ -63,6 +67,17 @@ export async function mountFriendFindCard() {
   card.querySelector('#ff-name-v').textContent = s.nickname || '';
   card.querySelector('#ff-mail-v').textContent = s.mail_id || '';
   card.querySelector('#ff-phone-v').textContent = phoneShown;
+  card.querySelector('#ff-real-v').textContent = s.real_name || '';
+  if (!s.real_name) {                                       // 본명 칸이 없던 때 가입한 분: 여기서 채운다
+    const box = card.querySelector('#ff-real-box'); box.style.display = '';
+    card.querySelector('#ff-real-save').onclick = async () => {
+      const v = card.querySelector('#ff-real-in').value.trim();
+      if (v.length < 2) { msg('본명을 2자 이상 입력해 주세요.', true); return; }
+      const r = await saveFriendSettings({ real_name: v });
+      if (!r.ok) { msg(r.message, true); return; }
+      box.style.display = 'none'; card.querySelector('#ff-real-v').textContent = v; msg('본명을 저장했습니다.');
+    };
+  }
   const bind = (id, key, onTxt, offTxt) => {
     const el = card.querySelector('#' + id);
     el.checked = !!s[key];
@@ -71,6 +86,7 @@ export async function mountFriendFindCard() {
       if (!r.ok) { el.checked = !want; msg(r.message, true); } else msg(want ? onTxt : offTxt);
     };
   };
+  bind('ff-real', 'real_name_findable', '이제 본명으로 나를 찾을 수 있습니다.', '본명으로는 더 이상 찾히지 않습니다.');
   bind('ff-name', 'name_findable', '이제 이름으로 나를 찾을 수 있습니다.', '이름으로는 더 이상 찾히지 않습니다.');
   bind('ff-mail', 'mail_findable', '이제 이메일 ID로 나를 찾을 수 있습니다.', '이메일 ID로는 더 이상 찾히지 않습니다.');
   bind('ff-phone', 'phone_findable', '이제 전화번호로 나를 찾을 수 있습니다.', '전화번호로는 더 이상 찾히지 않습니다.');
