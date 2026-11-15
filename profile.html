@@ -247,7 +247,7 @@ body{font-family:'Pretendard',-apple-system,sans-serif;background:#f9fafb;color:
    --accent-teal 계열/--accent-blue 변수에도 반영한다. 이 파일은
    보통 webapp.html과 다른 창(공유 링크로 직접 열릴 수도 있음)에서
    열리므로, 최초 적용 후 storage 이벤트로 실시간 갱신도 함께 건다. */
-import { watchHondiSkin } from '/assets/hondi-skin.js';
+import { watchHondiSkin } from '/src/gopang/ui/hondi-skin.js';
 watchHondiSkin({
   '--accent-teal': 'accent', '--accent-teal-lt': 'lt', '--accent-teal-dk': 'dk',
   '--accent-blue': 'accent',
