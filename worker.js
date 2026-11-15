@@ -15,7 +15,7 @@ import { handleAiChat, handleEscalate } from './src/worker/ai-chat-handler.js';
 import { prepareDoctorRequest, doctorRateLimits } from './src/worker/kdoctor-guard.js';
 import { handleOrderQueue } from './src/worker/order-queue-handler.js';
 import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
-import { profilePhoneFilter, friendPhoneFilter, last8Filter, pickGuidByLast8, e164LookupHash as _e164Hash } from './src/worker/phone-lookup.js';
+import { profilePhoneFilter, friendPhoneFilter, numberForProfile, last8Filter, pickGuidByLast8, e164LookupHash as _e164Hash } from './src/worker/phone-lookup.js';
 import { validateSignalInput as _sigValidate, canDeleteSignal as _sigCanDelete, sendRateOk as _sigRateOk } from './src/worker/signal-auth.js';
 import { classifyQuery as _ffClassify, publicCard as _ffPublicCard, rateLimitOk as _ffRateOk, normalizePhone as _ffNormPhone } from './src/worker/friend-find.js';
 import { referralCode as _refCode, isReferralCode as _isRefCode, inviteText as _refInviteText, inviteLink as _refInviteLink, withinClaimWindow as _refInWindow, REFERRAL_REWARD_KRW, REFERRAL_MAX_REWARDS } from './src/worker/referral.js';
@@ -29328,7 +29328,7 @@ async function handleFriendMatch(request, env, corsHeaders) {
     const l1 = await _l1AdminToken(env);
     for (let i = 0; i < nums.length; i += 25) {
       const parts = [];
-      for (const e of nums.slice(i, i + 25)) parts.push(await profilePhoneFilter(env, e));
+      for (const e of nums.slice(i, i + 25)) parts.push(await friendPhoneFilter(env, e));   // 한국 010 은 e164_last8 도 본다(해시가 어긋난 새 계정 대비)
       const filter = `(${parts.join(' || ')}) && phone_findable=true`;
       const r = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${encodeURIComponent(filter)}&perPage=50`, {
         headers: { 'Authorization': `Bearer ${l1}` }, signal: AbortSignal.timeout(8000),
@@ -29337,7 +29337,7 @@ async function handleFriendMatch(request, env, corsHeaders) {
       const d = await r.json().catch(() => ({ items: [] }));
       for (const p of (d.items || [])) {
         if (p.guid === who.guid || p.extra?.migrated_to) continue;
-        const e = hashToNum.get(p.e164_hash) || (nums.includes(p.e164) ? p.e164 : '');
+        const e = numberForProfile(p, nums, hashToNum);
         if (e) matches.push({ e164: e, user: _ffPublicCard(p) });
       }
     }

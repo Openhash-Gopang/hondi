@@ -60,3 +60,20 @@ export function pickGuidByLast8(items, code) {
   });
   return exact.length === 1 ? exact[0].guid : null;
 }
+
+/**
+ * 연락처 일치 결과에서 "프로필 p 는 보낸 번호 중 어느 것인가"를 정한다(2026-11-16).
+ * 해시 → 옛 평문 e164 → 한국 010 이면 e164_last8 순. 해시가 어긋난 새 계정(e164 빈 값)도 뒤 8자리로 이어 준다.
+ */
+export function numberForProfile(p, nums, hashToNum) {
+  if (!p) return '';
+  const byHash = hashToNum && p.e164_hash ? hashToNum.get(p.e164_hash) : '';
+  if (byHash) return byHash;
+  if (p.e164 && nums.includes(p.e164)) return p.e164;
+  const last8 = p.e164_last8 ? String(p.e164_last8) : '';
+  if (/^\d{8}$/.test(last8) && (!p.country_code || p.country_code === 'KR')) {
+    const e = '+8210' + last8;
+    if (nums.includes(e)) return e;
+  }
+  return '';
+}

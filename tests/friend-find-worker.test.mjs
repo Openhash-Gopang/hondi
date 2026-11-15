@@ -63,3 +63,12 @@ r=await call('/friends/settings',{phone_verify_token:T,action:'set',name_findabl
 r=await call('/friends/settings',{phone_verify_token:T,action:'set',mail_findable:false}); ok(r.j.mail_findable===false&&profiles[0].mail_hidden===true,'이메일 ID 차단 저장');
 r=await call('/friends/settings',{phone_verify_token:T,action:'set'}); ok(r.s===400,'바꿀 값 없으면 400');
 process.exit(bad?1:0);
+
+import { numberForProfile } from '../src/worker/phone-lookup.js';
+test('연락처 일치: 해시가 어긋나도 한국 010 은 e164_last8 로 보낸 번호에 이어진다', () => {
+  const nums = ['+821098807170', '+821011112222'];
+  assert.equal(numberForProfile({ e164: '', e164_hash: 'zzz', e164_last8: '98807170', country_code: 'KR' }, nums, new Map()), '+821098807170');
+  assert.equal(numberForProfile({ e164_hash: 'h1' }, nums, new Map([['h1', '+821011112222']])), '+821011112222');
+  assert.equal(numberForProfile({ e164_last8: '98807170', country_code: 'US' }, nums, new Map()), '');
+  assert.equal(numberForProfile({ e164_last8: '00000000', country_code: 'KR' }, nums, new Map()), '');
+});
