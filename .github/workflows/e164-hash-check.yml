@@ -5,6 +5,9 @@ on:
       handle:
         description: "점검할 프로필 handle (예: @98807170)"
         default: "@98807170"
+      rehash:
+        description: "해시 재계산: 0=개수만 세기, 1=저장, 비우면 안 함"
+        default: ""
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -20,4 +23,5 @@ jobs:
           PHONE_VERIFY_SECRET: ${{ secrets.PHONE_VERIFY_SECRET }}
           PB_ADMIN_EMAIL: ${{ secrets.PB_ADMIN_EMAIL }}
           PB_ADMIN_PASSWORD: ${{ secrets.PB_ADMIN_PASSWORD }}
+          E164_REHASH: ${{ github.event.inputs.rehash }}
         run: python3 e164_hash_check.py "${{ github.event.inputs.handle }}"

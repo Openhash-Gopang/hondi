@@ -53,3 +53,9 @@ try:
     w = requests.get('https://hondi-proxy.tensor-city.workers.dev/diag/e164-hash', params={'handle': handle}, headers={'Authorization': tok}, timeout=20)
     print('Worker_diag', w.status_code, w.text[:200])
 except Exception as e: print('Worker_diag_error', e)
+
+if os.environ.get('E164_REHASH') in ('0', '1'):
+    d = requests.post(f'{L1}/api/hondi-diag/e164-rehash', params={'apply': os.environ['E164_REHASH']}, headers={'Authorization': tok}, timeout=120)
+    print('REHASH', d.status_code, d.text[:400])
+    w = requests.get('https://hondi-proxy.tensor-city.workers.dev/diag/e164-hash', params={'handle': handle}, headers={'Authorization': tok}, timeout=20)
+    print('Worker_diag_after', w.status_code, w.text[:200])

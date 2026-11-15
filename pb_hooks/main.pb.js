@@ -6261,3 +6261,37 @@ routerAdd("GET", "/api/hondi-diag/e164-hash", (c) => {
     return c.json(200, { pb_secret_set: !!secret, pb_secret_len: secret.length, pb_hash_equals_stored: !!h && h === rec.getString("e164_hash") });
   } catch (e) { return c.json(200, { error: String(e) }); }
 }, $apis.requireAdminAuth());
+
+
+// ── 임시 정비(2026-11-16): 저장된 e164_hash 가 지금의 PHONE_VERIFY_SECRET 과 어긋난 프로필의 해시를 다시 계산한다. 관리자 전용.
+// 번호 원문은 e164_enc(AES) 복호화, 없으면 휴대폰 아이디(@8자리)+뒤 8자리로 +8210…을 복원한다. apply=1 일 때만 저장한다(기본은 개수만 센다).
+routerAdd("POST", "/api/hondi-diag/e164-rehash", (c) => {
+  try {
+    const apply = c.queryParam("apply") === "1";
+    const secret = $os.getenv("PHONE_VERIFY_SECRET") || "";
+    const encKey = $os.getenv("PHONE_ENC_KEY") || "";
+    if (!secret) return c.json(200, { error: "PHONE_VERIFY_SECRET 미설정" });
+    let total = 0, already = 0, fixed = 0, skipped = 0, viaEnc = 0, viaLast8 = 0, encFail = 0;
+    for (let offset = 0; ; offset += 200) {
+      const recs = $app.dao().findRecordsByFilter("profiles", "e164_hash != '' || e164_last8 != '' || e164_enc != ''", "created", 200, offset);
+      if (!recs || !recs.length) break;
+      for (const rec of recs) {
+        total++;
+        let e164 = "";
+        const enc = rec.getString("e164_enc");
+        if (enc && encKey.length === 32) { try { e164 = $security.decrypt(enc, encKey); viaEnc++; } catch (e) { encFail++; } }
+        if (!e164) {
+          const last8 = rec.getString("e164_last8");
+          if (/^[0-9]{8}$/.test(last8) && rec.getString("country_code") === "KR" && /^@[0-9]{8}$/.test(rec.getString("handle"))) { e164 = "+8210" + last8; viaLast8++; }
+        }
+        if (!e164) { skipped++; continue; }
+        const want = $security.hs256("e164-lookup:" + e164, secret);
+        if (rec.getString("e164_hash") === want) { already++; continue; }
+        if (apply) { rec.set("e164_hash", want); $app.dao().saveRecord(rec); }
+        fixed++;
+      }
+      if (recs.length < 200) break;
+    }
+    return c.json(200, { apply, total, already_ok: already, to_fix_or_fixed: fixed, skipped_no_number: skipped, via_enc: viaEnc, via_last8: viaLast8, enc_decrypt_failed: encFail });
+  } catch (e) { return c.json(200, { error: String(e) }); }
+}, $apis.requireAdminAuth());
