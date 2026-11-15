@@ -32,7 +32,7 @@ test('나비 숫자 코드는 전화번호에서 계산하고 정하는 입력�
 
 test('입력 화면 문구는 닉네임이 아니라 아이디다', () => {
   assert.ok(!/color:#6b7280">닉네임<\/span>/.test(src));
-  assert.ok(/">아이디<\/span>/.test(src));
+  assert.ok(/">아이디\(한글, 영어\)<\/span>/.test(src));
 });
 
 test('코드 표시는 휴대폰·서울은 2·4·4, 그 외 지역은 3·3·4자리로 끊는다', () => {
@@ -79,7 +79,7 @@ test('가입 화면에 전화 아이콘·열쇠 아이콘을 보이지 않는다
 
 test('아이디·이메일 ID는 아이콘 없이 이름과 입력칸이 한 줄에 있다', () => {
   assert.ok(!src.includes('&#9786;') && !src.includes('&#9993;'));
-  assert.match(src, /">아이디<\/span>\s*<input id="_nick-input"/);
+  assert.match(src, /">아이디\(한글, 영어\)<\/span>\s*<input id="_nick-input"/);
   assert.match(src, /line-height:1\.5">이메일 ID<\/span>/);
 });
 
