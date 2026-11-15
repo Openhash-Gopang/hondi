@@ -35593,7 +35593,18 @@ async function _kmailFindMailIdOwner(env, normalizedMailId) {
   const res = await fetch(`${L1_DEFAULT}/api/collections/kmail_user_settings/records?filter=${filter}&perPage=1`, { headers });
   const data = await res.json().catch(() => ({ items: [] }));
   const row = data.items && data.items[0];
-  return row ? row.owner_user_guid : null;
+  if (!row) return null;
+  // 2026-11-15(주피터 지시): 프로필이 이미 지워진 사용자의 이메일 ID는 "쓰는 사람이 없는 것"이다.
+  // 지운 뒤 새로 가입해도 그 ID를 못 쓰던 문제 — 남은(고아) 행을 지우고 비어 있다고 답한다.
+  // 프로필 조회가 실패하면(서버 오류) 안전하게 "쓰는 중"으로 둔다.
+  try {
+    const prof = await _l1FindProfileByGuid(env, row.owner_user_guid);
+    if (prof === null || prof === undefined) {
+      const del = await fetch(`${L1_DEFAULT}/api/collections/kmail_user_settings/records/${row.id}`, { method: 'DELETE', headers });
+      if (del.ok || del.status === 404) return null;
+    }
+  } catch (_) { /* 확인 실패 — 쓰는 중으로 처리 */ }
+  return row.owner_user_guid;
 }
 
 // kmail_user_settings 행을 find-or-create 후 patch — handleKmailSettingsSet과
