@@ -99,6 +99,7 @@
     var maxAge = Math.max(1, Math.floor((exp - Date.now()) / 1000));
     writeCookie(COOKIE_TOKEN, t, maxAge);
     writeCookie(COOKIE_EXP, String(exp), maxAge);
+    try { writeCookie('hondi_act', String(Date.now()), 86400); } catch (e) {}   // 로그인 직후 곧바로 "오래 사용 안 함"으로 로그아웃되지 않게
     notifyAuthChange();
   }
   function clear() {

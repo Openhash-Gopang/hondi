@@ -130,8 +130,9 @@
   var quotaTriedAt = 0;
   var freeInfo = null;   // 안내용 무료·플랜 사용 상태(테스트 아이디·정식 아이디 모두). 메뉴의 사용량 막대(quota)는 테스트 아이디 전용이라 따로 둔다
   function fetchQuota(force) {
-    var _kind = identity().kind;
+    var _id = identity(), _kind = _id.kind;
     if (_kind !== 'test' && _kind !== 'user') { quota = null; freeInfo = null; return Promise.resolve(null); }
+    if (!readCookie(C_TOKEN)) { quota = null; freeInfo = null; return Promise.resolve(null); }   // 지갑 로그인(쿠키 없음)은 전화 인증 토큰이 없어 매분 400 만 났다
     if (_kind === 'user') quota = null;   // 정식 아이디는 메뉴 막대를 그리지 않는다(사용량 안내 알림만 받는다)
     if (!force && quota && Date.now() - quotaAt < 55000) return Promise.resolve(quota);
     if (!force && !quota && Date.now() - quotaTriedAt < 15000) return Promise.resolve(quota);   // 조회가 계속 실패해도 15초에 한 번만 다시 시도
