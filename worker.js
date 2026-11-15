@@ -2053,7 +2053,7 @@ const FREE_QUOTA_KRW_LIMIT = 0; // 2026-07-23: 100 → 0 (SP-GDC-CHARGE-v1_0 B�
 //  2026-07-28: 베타 테스트 목적 상용 전환(주피터 지시) — true로 전환.
 //  FREE_QUOTA_KRW_LIMIT가 이미 0으로 내려가 있으므로(2026-07-23), 이
 //  플래그를 켜는 순간부터 사실상 "매 요청마다" 이 분기를 타게 되고,
-//  이후로는 가입 축하 충전(SIGNUP_BONUS_KRW=100 → _grantSignupBonus)으로
+//  이후로는 가입 축하 충전(SIGNUP_BONUS_KRW=1000 → _grantSignupBonus)으로
 //  받은 실지갑 GDC 잔액이 유일한 무료 예산이 된다. 즉 게이트를 켜기 전에
 //  가입 보너스 지급 경로(_grantSignupBonus, handleRegisterKey 9432행)가
 //  실제로 살아있어야 신규 가입자가 첫 턴부터 즉시 차단되지 않는다 —
@@ -2709,7 +2709,7 @@ async function _maybeProposeBillingRule(env, taskKey, serviceId) {
 // 추적을 위해 별도 mint 엔드포인트를 새로 만들지 않음) — memo로
 // "signup_bonus"를 남겨 일반 유상 충전과 블록 단위에서 구분 가능하게 한다.
 // ═══════════════════════════════════════════════════════════
-const SIGNUP_BONUS_KRW = 100; // 100원 상당 = 100 GDC (1:1 환율 기준, 2026-07-27부터 테스트 기간 한정)
+const SIGNUP_BONUS_KRW = 1000; // 2026-11-15(주피터 지시): 가입 지급 100 → 1,000원 상당 = 1,000 GDC (1:1 환율 기준, 테스트 기간 한정)
 // (2026-07-28 — Pro/Flash 재설계(AC-PRO-CORE 기본화) 이후 이 100원이 여전히
 //  타당한지 계산해봤다. 결론: 이번엔 숫자를 안 바꾼다 — 아래가 근거다.
 //
