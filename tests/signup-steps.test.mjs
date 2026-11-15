@@ -42,8 +42,11 @@ test('로그인·가입 탭은 Material 탭(tablist·aria-selected·밑줄 표�
   assert.match(src, /setAttribute\('aria-selected'/);
 });
 
-test('숫자 코드 글자는 화면 폭에 맞춰 줄어들고 한 줄로 둔다', () => {
-  assert.match(src, /id="_code-val" style="font-size:min\([^"]*5\.4vw\)[^"]*white-space:nowrap/);
+test('코드 상자에는 설명 글 없이 나비 숫자 코드 시안(그림)만 보인다', () => {
+  assert.match(src, /id="_code-img"/);
+  assert.match(src, /generateDigitCodeDataURL\(code\)\.then/);
+  assert.ok(!src.includes('전화번호로 정해집니다'));
+  assert.ok(!src.includes('내가 공개하기 전에는 보이지 않습니다'));
 });
 
 test('백업 키 이메일 칸은 브라우저 자동완성을 끈다', () => {
