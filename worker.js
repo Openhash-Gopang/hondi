@@ -2321,7 +2321,7 @@ async function _ownerUnlimited(env, guid) {
 
 // ═══════════════════════════════════════════════════════════
 // 🧪 테스트 계정 한도·유예·차단 + 정식 계정 전환 — 2026-10-27 (주피터 지시)
-//   · [2026-11-06 개정] 모든 계정이 전화 인증 후 AI 사용 비용 FREE_TRIAL_KRW(기본 1,000원) 또는 FREE_TRIAL_HOURS(기본 24시간) 중 먼저 오는 때까지 무료.
+//   · [2026-11-06 개정] 모든 계정이 전화 인증 후 AI 사용 비용 FREE_TRIAL_KRW(기본 1,000원) 또는 FREE_TRIAL_HOURS(기본 48시간) 중 먼저 오는 때까지 무료.
 //     끝나면 정식 계정은 GDC 결제로 이어지고, 테스트 계정(handle이 'tid-'로 시작)은 유예 없이 차단 — _gdcFreeQuotaGate·K-서비스 공용 토큰 게이트가 막는다.
 //   · 차단돼도 /auth/test-quota 조회와 /auth/test-migrate(정식 계정으로 데이터 이동)는 계속 허용한다.
 //   · 판정 로직은 src/worker/test-quota.js, 데이터 이동은 src/worker/test-migrate.js (단위 시험: tests/test-quota-migrate.test.mjs).
@@ -21395,7 +21395,7 @@ async function handleTestQuota(request, env, corsHeaders) {
 }
 
 // POST /auth/free-plan { phone_verify_token, plan: 'none' } — (옛) 무료 플랜 선택·해제. 2026-11-14 무료 플랜 삭제로 이제 해제(플랜 없음)만 한다.
-//  · (삭제됨) 예전에는 무료 기간(500원/24시간)이 끝난 뒤 무료 플랜이면 10원 소진마다 5시간 쉬었다가 10원이 다시 채워졌다다(숫자는 응답에 싣지 않는다).
+//  · (삭제됨) 예전에는 무료 기간(1,000원/48시간)이 끝난 뒤 무료 플랜이면 10원 소진마다 5시간 쉬었다가 10원이 다시 채워졌다다(숫자는 응답에 싣지 않는다).
 //  · 테스트 계정은 선택할 수 없다(정식 아이디로 전환해야 한다).
 async function handleFreePlan(request, env, corsHeaders) {
   if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
