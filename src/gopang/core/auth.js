@@ -1682,7 +1682,7 @@ function _showPhonePopupLegacy(resolve) {
            style="display:flex;align-items:flex-end;gap:12px;padding:2px 0 6px;
                   border:0;border-bottom:1.5px solid #e5e7eb;margin-bottom:10px">
         <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:0">
-          <span style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b7280;line-height:1.5">아이디</span>
+          <span style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b7280;line-height:1.5">아이디(한글, 영어)</span>
           <input id="_nick-input" type="text" maxlength="20"
             placeholder="나비가 나를 부를 이름"
             style="width:100%;padding:0;height:34px;border:none;background:transparent;
