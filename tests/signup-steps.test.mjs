@@ -86,3 +86,7 @@ test('아이디·이메일 ID는 "사용할 수 있다"는 안내 없이, 쓸 �
   assert.ok(!src.includes('이미 ${total}명이 사용 중'));
   assert.ok((src.match(/사용할 수 없습니다\./g) || []).length >= 2);
 });
+
+test('이메일 ID는 입력하는 즉시(0.25초) 사용 가능 여부를 확인한다', () => {
+  assert.match(src, /\}, 250\);   \/\/ 입력을 멈추면 바로 확인/);
+});

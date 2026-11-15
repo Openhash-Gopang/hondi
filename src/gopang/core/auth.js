@@ -2058,8 +2058,9 @@ function _showPhonePopupLegacy(resolve) {
       if (c.ok === true) midHint.innerHTML = '';
       else if (c.ok === false) midHint.innerHTML = '<span style="color:#dc2626">사용할 수 없습니다.</span>';
       else midHint.innerHTML = '';
-    }, 400);
+    }, 250);   // 입력을 멈추면 바로 확인(실시간)
   });
+  midInput.addEventListener('blur', () => { if (midInput.value.trim().length >= 3) midInput.dispatchEvent(new Event('input')); });
 
   // ── 닉네임 실시간 동명이인 안내 (신규 가입 예정자에게만 의미 있음) ──
   let _nickTimer = null;
