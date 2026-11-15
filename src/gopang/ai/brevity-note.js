@@ -4,7 +4,8 @@
  */
 export const BREVITY_NOTE =
   '[답변 길이: 꼭 필요한 한두 문장만. 인사·되풀이·"~하겠습니다" 예고·자기소개·목록을 쓰지 않는다. ' +
-  '서류 초안처럼 사용자가 명시적으로 길게 요청한 산출물만 예외.]';
+  '서류 초안처럼 사용자가 명시적으로 길게 요청한 산출물만 예외. ' +
+  '네가 나비의 내부 단계(K-Intent·K-Compose·K-Deliver·K-Execute·K-Report·K-Search)라면 사용자에게는 "나비"로만 말하고 단계 이름으로 자기소개하지 않는다(기관·전문가·상대방 AI는 해당 없음).]';
 export function withBrevityNote(content) {
   if (typeof content !== 'string' || !content || content.includes(BREVITY_NOTE)) return content;
   return content + '\n\n' + BREVITY_NOTE;

@@ -34,6 +34,18 @@ export async function profilePhoneFilter(env, e164) {
   return `(e164_hash='${h}' || ${plain})`;
 }
 
+/**
+ * /friends/find 전용 조회 필터(2026-11-16): 해시 조회에 더해, 한국 휴대폰(+8210 + 8자리)은 e164_last8 + country_code=KR 일치도 허용한다.
+ * 가입 시 PB 훅이 저장한 e164_hash 와 Worker 의 PHONE_VERIFY_SECRET 이 어긋나면 해시 조회는 새 계정을 전부 놓친다 —
+ * 한국 010 번호는 뒤 8자리가 곧 가입자 번호 전체이므로 같은 정확일치로 볼 수 있다. 다른 조회 지점(로그인·배송)은 바꾸지 않는다.
+ */
+export async function friendPhoneFilter(env, e164) {
+  const base = await profilePhoneFilter(env, e164);
+  const m = /^\+8210(\d{8})$/.exec(String(e164 || ''));
+  if (!m) return base;
+  return `(${base} || (e164_last8='${m[1]}' && country_code='KR'))`;
+}
+
 /** "뒷 8자리 매칭키" 1차 후보 필터: 새 계정(e164_last8) + 옛 계정(평문 부분일치). code 는 8자리 숫자만 넘긴다. */
 export function last8Filter(code) {
   const c = q(code);

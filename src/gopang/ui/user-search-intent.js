@@ -8,6 +8,9 @@ export const _USER_SEARCH_NOUN   = /(사용자|이용자|대화\s*상대|상대�
 export const _SEARCH_VERBS = '검색|찾아|찾기|찾고|찾을|찾는|연결|불러|부르|호출|연락|통화|전화|대화|채팅|말\\s*걸|메시지|메세지|문자|톡|초대|만나|접속|콜';
 export const _USER_SEARCH_ACTION = new RegExp('(' + _SEARCH_VERBS + ')');
 export const _NOT_A_NAME = /^(오늘|내일|모레|어제|지금|나중|아까|이따|병원|의원|은행|식당|회사|학교|시청|구청|도청|경찰|소방|택시|배달|고객센터|관공서|우체국|약국|호텔|공항|누구|아무|다시|바로|계속)/;
+// 직역·기관명은 사람 이름이 아니다(2026-11-16): '법무사 불러줘'·'제주시청 불러줘'를 사용자 검색창으로 보내면 찾을 수 없다는 말만 듣는다.
+// 이런 말은 여기서 가로채지 않고 LLM(AC)의 기관·전문가 라우팅으로 넘긴다.
+export const _ROLE_OR_ORG = /(법무사|변호사|세무사|회계사|변리사|감정평가사|행정사|공인중개사|약사|한의사|치과의사|수의사|건축사|노무사|관세사|간호사|의사|교수|판사|검사|시청|구청|도청|군청|읍사무소|면사무소|주민센터|동사무소|법원|검찰청|경찰서|소방서|세무서|등기소|우체국|병원|의원|약국|은행|공단|공사|대학교|학교|사무소|센터)$/;
 export const _USER_NAME_VERB = new RegExp('^([가-힣]{2,5}?)\\s*(님|씨)?\\s*(을|를|께|과|와|랑|하고|한테|에게|이랑)?\\s*(' + _SEARCH_VERBS + ')');
 export const _USER_SEARCH_EXCLUDE = /(방법|어떻게|왜\s|뭐|무엇|알려|기록|내용|요약|번역|설명|내\s*(번호|전화|아이디)|저장|등록|가입|삭제)/;   // 질문·다른 용무로 보이면 LLM 으로
 export function _matchUserSearchIntent(text) {
@@ -25,7 +28,7 @@ export function _matchUserSearchIntent(text) {
   if (_idv && !_USER_SEARCH_EXCLUDE.test(t)) return { query: _idv[1] };
   // '김동 님 호출', '김동 연결해줘'처럼 이름 + 연결 동사만 있는 경우(저장된 자주 찾는 사용자가 아닐 때): LLM 이 한 일처럼 꾸며 답하지 못하게 바로 안내하고 검색창을 연다.
   const _nv = t.match(_USER_NAME_VERB);
-  if (_nv && !/^(사용자|이용자|상대|상대방|친구|대화|채팅|사람)$/.test(_nv[1]) && !_USER_SEARCH_EXCLUDE.test(t) && !/번호|예약|상담|신청|민원/.test(t) && !_NOT_A_NAME.test(t)) return { query: _nv[1] };   // 이름을 그대로 검색창에 채워 바로 검색(상대가 이름 찾기를 허용한 경우)
+  if (_nv && !/^(사용자|이용자|상대|상대방|친구|대화|채팅|사람)$/.test(_nv[1]) && !_USER_SEARCH_EXCLUDE.test(t) && !/번호|예약|상담|신청|민원/.test(t) && !_NOT_A_NAME.test(t) && !_ROLE_OR_ORG.test(_nv[1])) return { query: _nv[1] };   // 이름을 그대로 검색창에 채워 바로 검색(상대가 이름 찾기를 허용한 경우)
   if (!_USER_SEARCH_NOUN.test(t) || !_USER_SEARCH_ACTION.test(t) || _USER_SEARCH_EXCLUDE.test(t)) return null;
   return { query: num ? num[0] : '' };
 }
