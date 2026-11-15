@@ -49,7 +49,7 @@ export function openSearch(prefillQuery) {
         <div style="display:flex;align-items:center;
                     border:1px solid #e5e7eb;border-radius:12px;
                     background:#f9fafb;overflow:hidden" id="_sq-field">
-          <input id="_sq-input" type="text" placeholder="혼디 아이디(@8자리) 또는 전화번호를 정확히 입력"
+          <input id="_sq-input" type="text" placeholder="이름, 이메일 ID 또는 전화번호를 정확히 입력"
             style="flex:1;padding:0 14px;height:48px;border:none;background:transparent;
                    font-size:calc(0.9375rem*var(--hondi-fs,1));font-family:inherit;outline:none;color:#111827;min-width:0"
             autocomplete="off"/>
@@ -123,8 +123,11 @@ async function _doSearch(q, country, region, resultsEl) {
     const fr = await findFriend(q);
     if (fr.ok && fr.found && fr.user) {
       try { rememberUser(localStorage, _USER?.guid || _USER?.ipv6, fr.user); } catch {}   // 찾은 사용자는 자주 찾는 사용자로 저장
-      resultsEl.innerHTML = _renderUserCard(fr.user);
-      resultsEl.querySelectorAll('[data-connect]').forEach(btn => { btn.onclick = () => _sendConnectRequest(JSON.parse(btn.dataset.connect)); });
+      const many = Array.isArray(fr.users) && fr.users.length > 1;      // 같은 이름이 여럿이면 목록에서 고른다
+      resultsEl.innerHTML = many ? fr.users.map(_renderUserCard).join('') : _renderUserCard(fr.user);
+      resultsEl.querySelectorAll('[data-connect]').forEach(btn => { btn.onclick = () => _sendConnectRequest(JSON.parse(btn.dataset.connect), { skipConfirm: true }); });
+      // 카카오톡 방식: 결과가 한 명으로 분명하면 확인 없이 바로 대화 호출을 보낸다. 실패하면 카드의 '대화' 버튼으로 다시 시도.
+      if (!many) _sendConnectRequest(fr.user, { skipConfirm: true });
       return;
     }
     if (fr.ok && fr.self) {
@@ -134,9 +137,9 @@ async function _doSearch(q, country, region, resultsEl) {
     } else if (!fr.ok) {
       resultsEl.innerHTML = msg(fr.message || '검색에 실패했습니다.');
     } else if (cq.kind === 'phone') {
-      resultsEl.innerHTML = msg('이 전화번호로 찾을 수 있는 사용자가 없습니다.<br>상대가 혼디에 가입했고 “번호로 찾기”를 허용했는지 확인해 주세요.');
+      resultsEl.innerHTML = msg('이 전화번호로 찾을 수 있는 사용자가 없습니다.<br>상대가 전화번호 찾기를 허용했는지 확인해 주세요. 이메일 ID로는 찾을 수 있어요.');
     } else {
-      resultsEl.innerHTML = msg('일치하는 사용자가 없습니다.<br>혼디 아이디(@8자리) 또는 전화번호를 정확히 입력해 주세요. 닉네임으로는 찾을 수 없습니다.');
+      resultsEl.innerHTML = msg('일치하는 사용자가 없습니다.<br>상대의 이름·이메일 ID·전화번호 중 하나를 정확히 입력해 주세요. 상대가 찾기를 허용한 항목으로만 찾을 수 있습니다.');
     }
   } catch (e) {
     resultsEl.innerHTML = `<div style="text-align:center;padding:24px;color:#dc2626;font-size:calc(0.8125rem*var(--hondi-fs,1))">네트워크 오류: ${e.message}</div>`;
@@ -145,22 +148,22 @@ async function _doSearch(q, country, region, resultsEl) {
 
 // ── 사용자 카드 렌더 ──────────────────────────────────────
 function _renderUserCard(u) {
-  const flag    = _countryFlag(u.country_code);
-  const handle  = String(u.handle || '');
-  const region  = u.region  ? `<span style="color:#9ca3af">·</span> ${u.region}` : '';
-  const country = u.country_code || '';
+  const esc     = (t) => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const idText  = u.mail_id || '';
+  const name    = u.nickname || idText;
+  const region  = u.region ? esc(u.region) : '';
   const data    = JSON.stringify(u).replace(/"/g, '&quot;');
 
   return `
     <div style="display:flex;align-items:center;gap:12px;
                 padding:12px 20px;border-bottom:1px solid #f9f9f9">
-      <div style="font-size:calc(1.75rem*var(--hondi-fs,1));flex-shrink:0">${flag}</div>
+      <div style="font-size:calc(1.75rem*var(--hondi-fs,1));flex-shrink:0">${esc(u.avatar_emoji || '🙂')}</div>
       <div style="flex:1;min-width:0">
         <div style="font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:600;color:#111827">
-          ${u.nickname || handle}
+          ${esc(name)}
         </div>
         <div style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b7280;margin-top:2px">
-          ${handle}
+          ${idText ? esc(idText) : ''}
           ${region ? `<span style="margin-left:6px">${region}</span>` : ''}
         </div>
       </div>
@@ -168,30 +171,24 @@ function _renderUserCard(u) {
         style="padding:6px 14px;background:#1A73E8;color:#fff;
                border:none;border-radius:8px;font-size:calc(0.8125rem*var(--hondi-fs,1));
                font-weight:600;cursor:pointer;flex-shrink:0">
-        연결
+        대화
       </button>
     </div>`;
 }
 
-// ── 국기 이모지 ───────────────────────────────────────────
-function _countryFlag(code) {
-  if (!code || code.length !== 2) return '🌐';
-  return String.fromCodePoint(
-    ...code.toUpperCase().split('').map(c => 0x1F1E6 + c.charCodeAt(0) - 65)
-  );
-}
-
 // ── 연결 요청 전송 ────────────────────────────────────────
-async function _sendConnectRequest(targetUser) {
+async function _sendConnectRequest(targetUser, opts = {}) {
   if (!_USER?.ipv6) {
     alert('로그인이 필요합니다.');
     return;
   }
 
-  const confirmed = await (window.mpConfirm||confirm)(
-    `${targetUser.nickname || targetUser.handle}님에게 연결 요청을 보내시겠습니까?`
-  );
-  if (!confirmed) return;
+  if (!opts.skipConfirm) {
+    const confirmed = await (window.mpConfirm||confirm)(
+      `${targetUser.nickname || targetUser.mail_id || targetUser.handle}님에게 연결 요청을 보내시겠습니까?`
+    );
+    if (!confirmed) return;
+  }
 
   // 2026-07-07: 검색을 새 탭(pages/search-tab.html)에서 여는 경우, P2P
   // 채팅은 아직 메인 창(webapp.html)의 DOM(#peer-bar·#msg-input 등)에
@@ -208,7 +205,6 @@ async function _sendConnectRequest(targetUser) {
       );
       window.opener.focus();
       try { rememberUser(localStorage, _USER?.guid || _USER?.ipv6, targetUser, Date.now(), true); } catch {}
-      alert(`메인 창에서 ${targetUser.nickname || targetUser.handle}님과 연결을 시작합니다.`);
       _closeSearch();
     } catch (e) {
       alert('메인 창 연결 요청 실패: ' + e.message);

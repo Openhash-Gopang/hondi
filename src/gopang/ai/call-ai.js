@@ -84,6 +84,9 @@ function _matchUserSearchIntent(text) {
   const num = t.match(/@?[0-9][0-9-]{6,14}[0-9]|@[A-Za-z0-9._-]{3,}/);   // 번호·아이디가 함께 있으면 그대로 채워 연다
   // '@98807170을 연결해줘'처럼 아이디·번호와 연결/찾기 동사가 함께 있으면 '사용자' 같은 명사가 없어도 바로 검색한다.
   if (num && _USER_SEARCH_ACTION.test(t) && !_USER_SEARCH_EXCLUDE.test(t)) return { query: num[0] };
+  // 'gildong 호출', 'gildong님께 연결'처럼 영문 아이디 + 연결 동사(카카오톡처럼 아이디는 정확히 입력하는 값이라 AI 없이 바로 검색)
+  const _idv = t.match(new RegExp('^@?([a-z][a-z0-9_-]{2,29})\\s*(님|씨)?\\s*(을|를|께|과|와|랑|하고|한테|에게|이랑)?\\s*(' + _SEARCH_VERBS + ')', 'i'));
+  if (_idv && !_USER_SEARCH_EXCLUDE.test(t)) return { query: _idv[1] };
   // '김동 님 호출', '김동 연결해줘'처럼 이름 + 연결 동사만 있는 경우(저장된 자주 찾는 사용자가 아닐 때): LLM 이 한 일처럼 꾸며 답하지 못하게 바로 안내하고 검색창을 연다.
   if (_USER_NAME_VERB.test(t) && !_USER_SEARCH_EXCLUDE.test(t) && !/번호|예약|상담|신청|민원/.test(t) && !_NOT_A_NAME.test(t)) return { query: '' };
   if (!_USER_SEARCH_NOUN.test(t) || !_USER_SEARCH_ACTION.test(t) || _USER_SEARCH_EXCLUDE.test(t)) return null;
@@ -5298,33 +5301,33 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
   const _t0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
   try { window.__hondiLatencyStart = _t0; } catch {}
   // 2026-11-12 — 자주 찾는 사용자: 이름·아이디만 말해도 LLM·검색 없이 곧바로 채팅으로 연결한다.
-  if (!imageFile && !(CFG.systemStack?.length > 0)) {
+  if (!imageFile) {          // 2026-11-15: 전문가 페르소나(systemStack)가 켜져 있어도 검색·연결은 AI 없이 즉시 처리
     let _fm = null;
     try { _fm = matchFrequent(userText, loadFrequent(localStorage, _USER?.guid || _USER?.ipv6)); } catch {}
     if (_fm) {
       history.push({ role: 'user', content: userText });
       let _msg;
       if (_fm.user) {
-        const _u = _fm.user, _nm = _u.nickname || _u.handle;
+        const _u = _fm.user, _nm = _u.nickname || _u.mail_id || _u.handle;
         _msg = `💬 ${_nm}님과 채팅 연결을 시작합니다.`;
         appendBubble('ai', _msg);
         try { const { startP2PCall } = await import('../ui/p2p-chat.js'); await startP2PCall(_u); }
-        catch (e) { appendBubble('ai', '연결을 시작하지 못했습니다: ' + e.message + ' — 검색 창에서 다시 시도해 주세요.'); openSearch(_u.handle); }
+        catch (e) { appendBubble('ai', '연결을 시작하지 못했습니다: ' + e.message + ' — 검색 창에서 다시 시도해 주세요.'); openSearch(_u.mail_id || _u.handle); }
       } else {
-        _msg = `같은 이름의 사용자가 ${_fm.many.length}명입니다. 아이디로 말씀해 주세요: ` + _fm.many.map(u => '@' + String(u.handle).replace(/^@|^tid-/g, '')).join(', ');
+        _msg = `같은 이름의 사용자가 ${_fm.many.length}명입니다. 아이디로 말씀해 주세요: ` + _fm.many.map(u => u.mail_id || String(u.handle).replace(/^@|^tid-/g, '')).join(', ');
         appendBubble('ai', _msg);
       }
       history.push({ role: 'assistant', content: _msg });
       return;
     }
   }
-  if (!imageFile && !(CFG.systemStack?.length > 0)) {
+  if (!imageFile) {
     const _us = _matchUserSearchIntent(userText);
     if (_us) {
       history.push({ role: 'user', content: userText });
       const _msg = _us.query
-        ? '🔎 사용자 검색 창을 열고 바로 검색합니다.'
-        : '🔎 사용자 검색 창을 열었습니다. 이름으로는 찾을 수 없어요. 상대의 전화번호 또는 혼디 아이디(@8자리)를 입력해 주세요. 한 번 연결한 사용자는 다음부터 이름만 말해도 바로 연결됩니다.';
+        ? '🔎 바로 검색해 연결합니다.'
+        : '🔎 사용자 검색 창을 열었습니다. 이름으로는 찾을 수 없어요. 상대의 아이디 또는 전화번호를 입력해 주세요. 한 번 연결한 사용자는 다음부터 이름만 말해도 바로 연결됩니다.';
       appendBubble('ai', _msg);
       history.push({ role: 'assistant', content: _msg });
       try { openSearch(_us.query || undefined); } catch (e) { console.warn('[Search] 검색창 열기 실패:', e.message); }
@@ -5847,9 +5850,9 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
         try {
           const _ut = typeof userText === 'string' ? userText : '';
           const _num = _ut.match(/@?[0-9][0-9-]{6,14}[0-9]|@[A-Za-z0-9._-]{3,}/);
-          if (_num) { fullReply = '🔎 사용자 검색 창을 열고 바로 검색합니다.'; openSearch(_num[0]); }
+          if (_num) { fullReply = '🔎 바로 검색해 연결합니다.'; openSearch(_num[0]); }
           else if (_USER_SEARCH_ACTION.test(_ut) && !_USER_SEARCH_EXCLUDE.test(_ut)) {
-            fullReply = '🔎 사용자 검색 창을 열었습니다. 이름으로는 찾을 수 없어요. 상대의 전화번호 또는 혼디 아이디(@8자리)를 입력해 주세요.';
+            fullReply = '🔎 사용자 검색 창을 열었습니다. 이름으로는 찾을 수 없어요. 상대의 아이디 또는 전화번호를 입력해 주세요.';
             openSearch();
           }
         } catch (e) { console.warn('[Guard] 검색 창 열기 실패:', e.message); }
