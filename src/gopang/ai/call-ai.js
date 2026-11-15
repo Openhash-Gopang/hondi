@@ -508,12 +508,8 @@ async function _forwardSwitchSP(loaderFn, label) {
     setSPLabel(label);
     CFG.system_base = sp;
     CFG.system = sp;
-    try {
-      const cfg = JSON.parse(localStorage.getItem('gopang_cfg') || '{}');
-      cfg.system = CFG.system;
-      cfg.system_base = CFG.system_base;
-      localStorage.setItem('gopang_cfg', JSON.stringify(cfg));
-    } catch {}
+    // 2026-11-16 — 단계 SP(K-Intent 등)는 저장하지 않는다. 저장하면 다음 접속 때 패널이 K-Intent로 시작해
+    // "저는 K-Intent입니다"라고 답하는 결함이 생긴다(스택은 저장되지 않으므로 복귀 경로도 없다).
     console.log(`[Orchestration] ${label}(으)로 전달(forward) 전환 완료`);
   } catch (e) {
     console.warn(`[Orchestration] ${label} 전달 전환 실패(무시):`, e.message);

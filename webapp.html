@@ -2591,8 +2591,8 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
 <script type="module" src="/gopang-app.js?v=20261015"></script>
 <script type="module">
 /* 2026-11-16 — ① 상단 중앙 SP 이름 표시  ② ?call= : 나비가 다른 탭에서 초대한 상대와 1:1 대화를 바로 시작한다(새 탭 대화창). */
-import { renderSPLabel } from './src/gopang/ui/sp-label.js';
-renderSPLabel();
+import { renderSPLabel, setSPLabel } from './src/gopang/ui/sp-label.js';
+setSPLabel('');   // 새로 열면 기본 SP(나만의 AI 비서) — 지난 접속의 라벨을 지운다
 try {
   const raw = new URLSearchParams(location.search).get('call');
   if (raw) {
@@ -4214,6 +4214,8 @@ window.closePDV = closePDV;
     try { if (logo) { logo.classList.remove('flutter'); void logo.offsetWidth; logo.classList.add('flutter'); setTimeout(() => logo.classList.remove('flutter'), 900); } } catch {}
     try {
       const m = await import('./src/gopang/ai/call-ai.js');
+      const bub = await import('./src/gopang/ui/bubble.js');
+      bub.setBubbleTarget('ai-panel-messages');   // 인사 말풍선이 보이지 않는 메인 채팅이 아니라 이 패널에 나오게 한다
       await m.greetDefaultAssistant();
     } catch (e) {
       // 모듈을 못 불러온 경우(캐시 불일치 등): 저장된 SP를 비우고 새로 시작해 기본 비서로 복귀한다.
@@ -4478,7 +4480,8 @@ window.closePDV = closePDV;
     // "system 메시지가 있는지"로 직접 판단하고, unshift로 맨 앞에 둔다.
     await _embedFreshScreen();
     if (!_panelHistory.some(m => m.role === 'system')) {
-      let effectiveSystem = (window.__hondiEmbedSp && window.__hondiEmbedSp.text) || cfg.system || '';
+      // 2026-11-16 — 저장된 cfg.system(옛 단계 SP가 남아 있을 수 있음)은 쓰지 않는다. 새로 시작하면 항상 나만의 AI 비서(AC-PRO-CORE).
+      let effectiveSystem = (window.__hondiEmbedSp && window.__hondiEmbedSp.text) || '';
       if (window.__hondiEmbedSp && window.__hondiEmbedSp.text && window.__hondiEmbedSp.context) effectiveSystem += '\n\n[사용자 지역 정보 — 나비웹]\n' + window.__hondiEmbedSp.context + '\n이 지역을 관할하는 기관의 입장에서 답한다.';
       if (window.__hondiEmbedSp && window.__hondiEmbedSp.text && window.__hondiEmbedSp.expert) effectiveSystem += '\n\n[대화 상대 — 나비웹 전문가 AI]\n- 지금 대화하는 사용자는 이 분야의 자격을 갖춘 인간 전문가(' + (window.__hondiEmbedSp.label || '') + ')다. 일반인에게 하듯 쉽게 풀어 설명하거나 \"전문가와 상담하세요\"라고 권하지 않는다.\n- 당신은 그 전문가의 업무를 보조한다: 법률이면 법리·쟁점·판례·조문 검토, 의료면 감별진단·검사·치료 옵션 검토처럼 해당 직역의 전문 용어와 수준으로 답한다. 최종 판단과 책임은 사용자인 전문가에게 있다.';
       if (window.__hondiEmbedSp && window.__hondiEmbedSp.text) effectiveSystem += '\n\n[화면 표시 규칙 — 나비웹 대화창]\n- 답은 핵심만 짧게(6~8줄 이내) 마크다운으로 쓴다: 필요하면 **굵은 글씨**, 짧은 글머리표(- ), 번호 목록만 쓰고 큰 제목(#)·구분선(---)은 쓰지 않는다. 줄바꿈은 반드시 실제 줄바꿈으로 한다.\n- 면책·고지·권고 문구(\"저는 AI이며 …가 아닙니다\", \"인간 전문가와 상담하세요\", [1차 통로 고지], [위험 고지] 등)는 화면 첫머리에 한 번 게시되므로 답변에는 넣지 않는다.\n- 더 필요한 정보가 있으면 마지막에 짧은 질문 한 가지만 한다.';   // 2026-11-02: 나비웹 '각종 기관' 선택 중이면 그 기관의 SP
