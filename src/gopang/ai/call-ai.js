@@ -454,7 +454,7 @@ function _announceStageTransition(label) {
 // 기본 SP = 나만의 AI 비서(AC-PRO-CORE). K-Compose·전문가 등은 비서가 호출한 SP이므로
 // 이용자가 원하면 언제든(버튼·"나비로 돌아가" 등 발화) 기본 SP로 복귀할 수 있어야 한다.
 export function _isDefaultSP() {
-  return !(CFG.systemStack?.length > 0) && (!_agentCommonCache || CFG.system_base === _agentCommonCache);
+  return !(CFG.systemStack?.length > 0) && !!_agentCommonCache && CFG.system_base === _agentCommonCache; // 캐시 미로드(null)=상태 불명 → 기본 SP로 단정하지 않음
 }
 export async function returnToDefaultAssistant() {
   CFG.systemStack = [];
