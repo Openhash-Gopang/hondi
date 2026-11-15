@@ -475,8 +475,18 @@ export async function returnToDefaultAssistant() {
     cfg.system = sp; cfg.system_base = sp;
     localStorage.setItem('gopang_cfg', JSON.stringify(cfg));
   } catch {}
-  appendBubble('ai', '🦋 나만의 AI 비서로 돌아왔습니다. 무엇을 도와드릴까요?');
+  appendBubble('ai', _naviGreeting());
   return true;
+}
+// 2026-11-16 — 로고를 누르면 항상 "(아이디)님의 AI 비서입니다. 무엇을 도와드릴까요?"로 응답한다(이미 기본 SP여도).
+function _naviGreeting() {
+  const id = (_USER && (_USER.handle || _USER.mail_id || _USER.nickname)) || '';
+  const nm = String(id).replace(/^@/, '');
+  return `🦋 ${nm ? nm + '님의 ' : '나만의 '}AI 비서입니다. 무엇을 도와드릴까요?`;
+}
+export async function greetDefaultAssistant() {
+  if (_isDefaultSP()) { appendBubble('ai', _naviGreeting()); return true; }
+  return returnToDefaultAssistant();   // 다른 SP(또는 상태 불명)면 기본 SP로 되돌리고 같은 인사
 }
 function _addReturnButton(bubble) {
   try {

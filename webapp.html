@@ -426,6 +426,8 @@ body.gopang-authed #gopang-auth-gate{display:none}
   cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
 #ai-panel-logo img{width:32px;height:32px;display:block;pointer-events:none}
 #ai-panel-logo:active img{transform:scale(.92)}
+#ai-panel-logo.flutter img{animation:navi-flutter .8s ease-in-out}
+@keyframes navi-flutter{0%{transform:scaleX(1) rotate(0)}15%{transform:scaleX(.45) rotate(-12deg)}30%{transform:scaleX(1.1) rotate(10deg)}45%{transform:scaleX(.5) rotate(-8deg)}60%{transform:scaleX(1.08) rotate(6deg)}80%{transform:scaleX(.8) rotate(-3deg)}100%{transform:scaleX(1) rotate(0)}}
 #ai-panel-name,#ai-panel-name-input,#ai-panel-name-edit-icon{display:none !important}
 #ai-panel-name-wrap{
   flex:1;display:flex;align-items:center;justify-content:flex-start;
@@ -4208,11 +4210,20 @@ window.closePDV = closePDV;
   // 2026-11-15 — 헤더 나비 로고: 현재 SP(K-Compose·전문가 등)를 닫고 기본 SP(나만의 AI 비서)로 복귀.
   // 이미 기본 SP면 아무것도 지우지 않는다.
   window._returnToNavi = async function() {
+    const logo = document.getElementById('ai-panel-logo');
+    try { if (logo) { logo.classList.remove('flutter'); void logo.offsetWidth; logo.classList.add('flutter'); setTimeout(() => logo.classList.remove('flutter'), 900); } } catch {}
     try {
       const m = await import('./src/gopang/ai/call-ai.js');
-      if (m._isDefaultSP()) return;
-      await m.returnToDefaultAssistant();
-    } catch (e) { console.warn('[Navi] 기본 비서 복귀 실패:', e && e.message); }
+      await m.greetDefaultAssistant();
+    } catch (e) {
+      // 모듈을 못 불러온 경우(캐시 불일치 등): 저장된 SP를 비우고 새로 시작해 기본 비서로 복귀한다.
+      console.warn('[Navi] 기본 비서 복귀 실패 — 초기화 후 다시 불러옵니다:', e && e.message);
+      try {
+        const cfg = JSON.parse(localStorage.getItem('gopang_cfg') || '{}'); delete cfg.system; delete cfg.system_base;
+        localStorage.setItem('gopang_cfg', JSON.stringify(cfg)); localStorage.removeItem('hondi_sp_label');
+      } catch {}
+      setTimeout(() => location.reload(), 600);
+    }
   };
 
   window._editAIName = function() {
