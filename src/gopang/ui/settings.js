@@ -5,7 +5,7 @@ import { CFG, loadSettings, PROVIDER_INFO } from '../core/config.js';
 import { _isRegistered, _isGDCUser, ensureX25519Synced } from '../core/auth.js';
 import { _USER } from '../core/state.js';
 import { appendBubble } from './bubble.js';
-import { SKIN_COLOR_KEY, watchHondiSkin, setHondiSkin } from '../../../assets/hondi-skin.js';
+import { SKIN_COLOR_KEY, watchHondiSkin, setHondiSkin } from './hondi-skin.js';
 import { phoneToDigits, digitsToId, generateDigitCodeDataURL, VALID_AREA_CODES }
   from '../ai/hondi-digit-code.js';
 
