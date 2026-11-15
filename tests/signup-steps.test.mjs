@@ -1,23 +1,27 @@
-// 가입 화면 2단계 분할 + 나비 숫자 코드(전화번호) 표시 + 아이디 문구 (2026-11-15, 주피터 지시)
+// 가입 화면 한 화면 통합 + 나비 숫자 코드(전화번호) 표시 + 아이디 문구 (2026-11-15, 주피터 지시)
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 const src = readFileSync(new URL('../src/gopang/core/auth.js', import.meta.url), 'utf8');
 
-test('가입 화면에 단계 표시·숫자 코드·프로필 주소·이전 버튼이 있다', () => {
-  for (const id of ['_step-ind', '_step-label', '_code-box', '_code-val', '_addr-box', '_addr-mail', '_addr-prof', '_prev-btn', '_terms-line']) {
+test('가입 화면에 숫자 코드·프로필 주소·백업 이메일·약정서 문구가 있고 단계 표시·이전 버튼은 없다', () => {
+  for (const id of ['_code-box', '_code-val', '_addr-box', '_addr-mail', '_addr-prof', '_bke-input', '_terms-line']) {
     assert.ok(src.includes(`id="${id}"`), id + ' 없음');
+  }
+  for (const id of ['_step-ind', '_step-label', '_prev-btn', '_step-seg1', '_step-seg2']) {
+    assert.ok(!src.includes(id), id + ' 남아 있음');
   }
 });
 
-test('가입은 1단계(전화번호·아이디·이메일 ID, 문자 인증) → 2단계(백업 키 이메일) 순서다', () => {
-  assert.match(src, /let _step = 1;/);
-  assert.match(src, /const _submitStep2 = async/);
-  assert.match(src, /if \(_signupMode && _step === 2\) return _submitStep2\(\);/);
-  // 계정 생성(_completeRegistration)은 2단계에서만 부른다
+test('가입은 한 화면: 입력 검증(백업 이메일 포함) → 문자 인증 → 계정 생성 순서다', () => {
+  assert.ok(!/\b_step\b|_submitStep2/.test(src));
   const calls = src.match(/await _completeRegistration\(/g) || [];
   assert.equal(calls.length, 1);
-  assert.ok(src.indexOf('const _submitStep2') < src.indexOf('await _completeRegistration('));
+  const iBke = src.indexOf('백업 키를 받을 이메일을 입력해 주세요.');
+  const iOtp = src.indexOf('await _requestAndVerifyPhoneOtp(e164)');
+  const iReg = src.indexOf('await _completeRegistration(');
+  assert.ok(iBke > 0 && iBke < iOtp && iOtp < iReg);
+  assert.match(src, /btn\.textContent = !_signupMode \? '로그인' : '가입하기'/);
 });
 
 test('나비 숫자 코드는 전화번호에서 계산하고 정하는 입력칸은 없다', () => {
@@ -54,11 +58,11 @@ test('백업 키 이메일 칸은 브라우저 자동완성을 끈다', () => {
   assert.match(src, /id="_bke-input" type="email" autocomplete="off"/);
 });
 
-test('전화 입력 칸에는 문구·국기 없이 아이콘만 두고, 이용 약정서 문구는 가입 마지막 화면에만 보인다', () => {
+test('전화 입력 칸에는 문구·국기 없이 아이콘만 두고, 이용 약정서 문구는 가입 화면에만 보인다', () => {
   assert.ok(!/color:#6b7280">전화번호<\/span>/.test(src));
   assert.match(src, /id="_flag-icon" style="display:none"/);
   assert.match(src, /id="_phone-input" type="tel" aria-label="전화번호"/);
-  assert.match(src, /_terms-line'\)\.style\.display = s2 \? '' : 'none'/);
+  assert.match(src, /_terms-line'\)\.style\.display = _signupMode \? '' : 'none'/);
 });
 
 test('로그인 화면에서 가입되지 않은 번호여도 안내 문구를 띄우지 않는다', () => {
@@ -69,15 +73,14 @@ test('주소 상자에 "두 주소가 함께 정해집니다" 안내 문구를 �
   assert.ok(!src.includes('두 주소가 함께 정해집니다'));
 });
 
-test('가입 화면에 "1 / 2 단계" 글자와 전화 아이콘을 보이지 않는다', () => {
-  assert.match(src, /id="_step-label" aria-live="polite" style="display:none/);
-  assert.ok(!src.includes('&#9742;'));
+test('가입 화면에 전화 아이콘·열쇠 아이콘을 보이지 않는다', () => {
+  assert.ok(!src.includes('&#9742;') && !src.includes('&#128273;'));
 });
 
 test('아이디·이메일 ID는 아이콘 없이 이름과 입력칸이 한 줄에 있다', () => {
   assert.ok(!src.includes('&#9786;') && !src.includes('&#9993;'));
-  assert.match(src, /width:4\.6em">아이디<\/span>\s*<input id="_nick-input"/);
-  assert.match(src, /width:4\.6em">이메일 ID<\/span>/);
+  assert.match(src, /width:5\.4em">아이디<\/span>\s*<input id="_nick-input"/);
+  assert.match(src, /width:5\.4em">이메일 ID<\/span>/);
 });
 
 test('아이디·이메일 ID는 "사용할 수 있다"는 안내 없이, 쓸 수 없을 때만 "사용할 수 없습니다."를 보인다', () => {
