@@ -27,6 +27,7 @@ import { _injectAuthConfirmButton } from '../core/auth.js';
 import { _klawReview } from '../services/klaw.js';
 import { openSearch } from '../ui/p2p-search.js';
 import { matchReturnToDefaultIntent } from './return-default-intent.js';
+import { withBrevityNote } from './brevity-note.js';
 import { inviteByHandle } from '../ui/p2p-chat.js';
 import { _openProfilePanel } from '../ui/settings.js';
 import { _gwpLaunch } from '../gwp/engine.js';
@@ -5588,7 +5589,7 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
   const messages = [
     ...sysMsg,                                // ★ system (완전 정적 → DeepSeek 캐시 100%)
     ...recent.slice(0, -1),                   // 대화 이력 (userRecord 제외)
-    { role: 'user', content: enhancedUserContent }, // ★ 동적 ctx + 현재 질문 (캐시 무관)
+    { role: 'user', content: withBrevityNote(enhancedUserContent) }, // ★ 동적 ctx + 현재 질문 + 답변 길이 지침 (캐시 무관)
   ];
 
   // ── 호출 후보 목록 생성 (순차 페일오버) ──────────────────
