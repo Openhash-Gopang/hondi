@@ -1761,7 +1761,7 @@ function _showPhonePopupLegacy(resolve) {
           </button>
           <button id="_otp-back-btn" type="button"
             class="mp-btn mp-btn-quiet mp-grow">
-            전화번호 다시 입력
+            다시 입력
           </button>
         </div>
       </div>
