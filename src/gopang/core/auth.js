@@ -1149,7 +1149,7 @@ function _showDeviceMismatchNotice(found, resolve) {
       const { privKeyB64u, userRecord, onboardingFlags } = JSON.parse(plaintext);
       if (!privKeyB64u) throw new Error('전달받은 데이터 형식이 올바르지 않습니다.');
 
-      await GopangWallet.restoreFromPrivateKey(privKeyB64u);
+      const _importedWallet = await GopangWallet.restoreFromPrivateKey(privKeyB64u);
 
       let user;
       if (userRecord && userRecord.ipv6) {
@@ -1172,6 +1172,15 @@ function _showDeviceMismatchNotice(found, resolve) {
         if (onboardingFlags.tutorialStep) localStorage.setItem('hondi_tutorial_step', onboardingFlags.tutorialStep);
       }
 
+      // 2026-11-16 — 가져온 키를 바로 이 화면의 지갑으로 올린다. 여태 이 줄이 없어서(백업 키 복구 _restoreFromBackupKey 에는 있다)
+      // 전화 승인으로 로그인한 직후에는 window.gopangWallet 이 비어, 서버 인증(/friends/find 등)이 401 로 거부되고
+      // AI 비서·사람 찾기가 "로그아웃 상태"처럼 실패했다. 새로고침하면 저장된 키를 읽어 나아지던 증상의 원인.
+      try {
+        if (_importedWallet) {
+          try { _importedWallet.setIdentity({ guid: user.ipv6, handle: user.handle || null, e164: user.e164 || undefined }); } catch {}
+          window.gopangWallet = _importedWallet;
+        }
+      } catch {}
       setUser(user);
       console.info('[DeviceLink] 인라인 가져오기 완료:', user.handle);
 
