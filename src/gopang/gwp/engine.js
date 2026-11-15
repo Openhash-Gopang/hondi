@@ -23,6 +23,7 @@ import { isHealthField } from '../pdv/health-profile.js';
 // 스스로 계산해서 baseline으로 깔고, 호출부가 넘긴 값은 그 위에
 // 덮어쓰는 방식으로 바꾼다 — 호출부가 깜빡해도 항상 실린다.
 import { _buildRoutingFacts } from '../services/location.js';
+import { addFavorite } from '../ui/favorites.js';   // 2026-11-16 — 호출한 전문가·기관·서비스는 즐겨찾기에 자동 저장
 
 // ★ 2026-07-11 Phase 0 신설(파이프라인 사고실험 미비점4) — PDV 기록과
 // 함께 gwp_registry.call_count_30d를 증분한다. 정기 갱신 방법론
@@ -189,6 +190,7 @@ export async function _gwpLaunch(service, context, _preTab = null, facts = null)
     return;
   }
 
+  try { addFavorite(localStorage, _USER?.guid || _USER?.ipv6, { id: service.id, name: service.name, icon: service.icon, url: service.url }); } catch {}
   appendBubble('ai',
     `${svcIcon} <b>${svcName}</b>을 새 탭에서 열었습니다.<br>` +
     `<span style="font-size:12px;color:var(--label-3);">탭을 닫으면 나비로 자동 복귀합니다.</span>`,
