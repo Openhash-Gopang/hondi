@@ -1681,8 +1681,8 @@ function _showPhonePopupLegacy(resolve) {
       <div id="_nick-field"
            style="display:flex;align-items:flex-end;gap:12px;padding:2px 0 6px;
                   border:0;border-bottom:1.5px solid #e5e7eb;margin-bottom:10px">
-        <div style="flex:1;min-width:0;display:flex;align-items:center;gap:8px">
-          <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#6b7280;flex-shrink:0;width:5.4em">아이디</span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:0">
+          <span style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b7280;line-height:1.5">아이디</span>
           <input id="_nick-input" type="text" maxlength="20"
             placeholder="나비가 나를 부를 이름"
             style="width:100%;padding:0;height:34px;border:none;background:transparent;
@@ -1696,15 +1696,15 @@ function _showPhonePopupLegacy(resolve) {
       <div id="_mid-field"
            style="display:flex;align-items:flex-end;gap:12px;padding:2px 0 6px;
                   border:0;border-bottom:1.5px solid #e5e7eb;margin-bottom:10px">
-        <div style="flex:1;min-width:0;display:flex;align-items:center;gap:8px">
-          <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#6b7280;flex-shrink:0;width:5.4em">이메일 ID</span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:0">
+          <span style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b7280;line-height:1.5">이메일 ID</span>
           <div style="flex:1;min-width:0;display:flex;align-items:center;gap:4px">
             <input id="_mid-input" type="text" maxlength="30" inputmode="latin" autocapitalize="off" spellcheck="false"
               placeholder="영문 소문자·숫자"
               style="flex:1;padding:0;height:34px;border:none;background:transparent;
                      font-size:calc(0.9375rem*var(--hondi-fs,1));font-family:inherit;outline:none;color:#111827;min-width:0"
               autocomplete="off"/>
-            <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#6b7280;flex-shrink:0">@naviweb.kr</span>
+            <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#6b7280;flex-shrink:0;white-space:nowrap">@naviweb.kr</span>
           </div>
         </div>
       </div>
@@ -1712,16 +1712,16 @@ function _showPhonePopupLegacy(resolve) {
       <div id="_mid-hint" style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;padding:0 4px;margin-bottom:0;line-height:1.6"></div>
       <!-- 이메일 ID를 정하면 메일 주소와 프로필 주소가 함께 정해진다(2026-11-15) -->
       <div id="_addr-box" style="display:none;background:#f3f4f6;border-radius:10px;padding:6px 14px;margin:0 0 10px">
-        <div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0"><span style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b7280">메일 주소</span><span id="_addr-mail" style="font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:600;color:#111827"></span></div>
-        <div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0"><span style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b7280">프로필 주소</span><span id="_addr-prof" style="font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:600;color:#111827"></span></div>
+        <div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0"><span style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b7280;white-space:nowrap;flex-shrink:0">메일</span><span id="_addr-mail" style="font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:600;color:#111827;min-width:0;overflow-wrap:anywhere;text-align:right"></span></div>
+        <div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0"><span style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b7280;white-space:nowrap;flex-shrink:0">프로필</span><span id="_addr-prof" style="font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:600;color:#111827;min-width:0;overflow-wrap:anywhere;text-align:right"></span></div>
       </div>
 
       <!-- 백업 키를 받을 이메일 — 가입 전부터 쓰던 주소(나비웹 주소 아님). 2026-11-13, 주피터 지시 -->
       <div id="_bke-field"
            style="display:flex;align-items:flex-end;gap:12px;padding:2px 0 6px;
                   border:0;border-bottom:1.5px solid #e5e7eb;margin-bottom:10px">
-        <div style="flex:1;min-width:0;display:flex;align-items:center;gap:8px">
-          <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#6b7280;flex-shrink:0;width:5.4em">백업 이메일</span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:0">
+          <span style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b7280;line-height:1.5">백업 이메일</span>
           <input id="_bke-input" type="email" autocomplete="off" maxlength="254" inputmode="email" autocapitalize="off" spellcheck="false"
             placeholder="가입 전부터 쓰던 이메일"
             style="flex:1;padding:0;height:34px;border:none;background:transparent;
@@ -1734,7 +1734,7 @@ function _showPhonePopupLegacy(resolve) {
         class="mp-btn mp-btn-primary">
         시작하기
       </button>
-      <div id="_terms-line" style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;text-align:center;margin-top:12px">
+      <div id="_terms-line" style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:#9ca3af;text-align:center;margin-top:12px;white-space:nowrap">
         시작하면 <span onclick="window.openTermsOfUse&&window.openTermsOfUse()" style="color:#6b7280;text-decoration:underline;cursor:pointer">이용 약정서</span>에 동의한 것으로 봅니다.
       </div>
       <span id="_handle-preview" style="display:none"></span>
@@ -2036,6 +2036,7 @@ function _showPhonePopupLegacy(resolve) {
     document.getElementById('_addr-prof').textContent = `${v}.naviweb.kr`;
     box.style.display = (_signupMode && v.length >= 3) ? '' : 'none';
   }
+  ['change', 'blur', 'keyup', 'compositionend'].forEach((ev) => midInput.addEventListener(ev, _updateAddrBox));
   midInput.addEventListener('input', () => {
     midErr.style.display = 'none';
     clearTimeout(_midTimer);
