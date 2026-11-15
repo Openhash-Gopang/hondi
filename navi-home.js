@@ -1,5 +1,9 @@
 /*! navi-home.js — 모든 나비웹 페이지의 나비 로고는 메인 탭(나만의 AI 비서)을 맨 앞으로 부른다. (2026-11-16, 주피터 지시)
  *  - 일반 스크립트(모듈 아님): 어느 저장소·도메인의 페이지에서나 <script src="https://app.naviweb.kr/navi-home.js" defer></script> 한 줄로 쓴다.
+
+ *  - 예외(2026-11-16, 주피터 지시): PC 화면(/desktop, /desktop.html)의 로고는 메인 채팅창이 아니라 **desktop 홈**으로 간다.
+ *    같은 나비 로고라도 폰은 "나만의 AI 비서(메인 채팅창)", PC는 "desktop 홈"이다. PC 페이지가 'navi-home-desktop' 이벤트를 받아
+ *    preventDefault() 하면 그 페이지가 직접 홈 화면으로 되돌리고, 아니면 주소의 ?·# 를 지우고 다시 연다.
  *  - 메인 탭 = 창 이름이 'naviweb-main'인 탭. 로고를 누르면:
  *      ① window.open('', 'naviweb-main') — 이미 열린 메인 탭이 있으면 주소를 바꾸지 않고(새로고침 없이) 그 창을 돌려받아 focus() 한다.
  *      ② 없으면 빈 창이 새로 열리므로 메인 주소로 이동시킨다. 새 창은 정의상 맨 앞에 뜬다.
@@ -14,6 +18,21 @@
   function isMainTab() { try { return g.name === MAIN_WINDOW; } catch (e) { return false; } }
   function markMainTab() { try { g.name = MAIN_WINDOW; } catch (e) {} }
   function markCallTab() { try { g.name = 'naviweb-call-' + uid; } catch (e) {} }
+
+  // PC 화면인가: /desktop 또는 /desktop.html (호스트 무관 — app.naviweb.kr, naviweb.kr, market.naviweb.kr 등)
+  function isDesktopPage() { try { return /^\/desktop(\.html)?\/?$/.test((g.location && g.location.pathname) || ''); } catch (e) { return false; } }
+  // PC 로고: desktop 홈으로. 페이지가 이벤트를 처리하지 않으면 ?·# 를 지운 주소로 이동하고, 이미 홈 주소면 다시 연다.
+  function goDesktopHome() {
+    try {
+      var handled = false;
+      if (typeof g.CustomEvent === 'function' && g.dispatchEvent) { var ev = new g.CustomEvent('navi-home-desktop', { cancelable: true }); g.dispatchEvent(ev); handled = ev.defaultPrevented; }
+      if (handled) return true;
+      var l = g.location, clean = l.pathname;
+      if (l.search || l.hash) l.assign(clean); else l.reload();
+      return true;
+    } catch (e) { return false; }
+  }
+  function logoClick() { return isDesktopPage() ? goDesktopHome() : openMain(); }
 
   // 사용자 동작(클릭) 안에서 동기로 호출해야 팝업 차단을 피한다.
   function openMain() {
@@ -109,9 +128,9 @@
   function mountLogo() {
     var d = g.document; if (!d || d.getElementById('navi-home-logo') || d.getElementById('ai-panel-logo')) return;
     var st = d.createElement('style'); st.textContent = CSS; d.head.appendChild(st);
-    var b = d.createElement('button'); b.id = 'navi-home-logo'; b.type = 'button'; b.title = '나만의 AI 비서(메인)로 가기'; b.setAttribute('aria-label', '나만의 AI 비서로 가기');
+    var b = d.createElement('button'); b.id = 'navi-home-logo'; b.type = 'button'; var desk = isDesktopPage(); b.title = desk ? '나비웹 홈으로 가기' : '나만의 AI 비서(메인)로 가기'; b.setAttribute('aria-label', desk ? '나비웹 홈으로 가기' : '나만의 AI 비서로 가기');
     b.innerHTML = '<img src="https://app.naviweb.kr/icons/navi-icon-192.png" alt="">';
-    b.onclick = function () { flutter(b); openMain(); };
+    b.onclick = function () { flutter(b); logoClick(); };
     d.body.appendChild(b);
   }
   function init() {
@@ -121,7 +140,7 @@
     if (!isMainTab() && !d.getElementById('ai-panel-logo')) registerTab();
   }
 
-  var api = { MAIN_WINDOW: MAIN_WINDOW, MAIN_URL: MAIN_URL, isMainTab: isMainTab, markMainTab: markMainTab, markCallTab: markCallTab, openMain: openMain, registerTab: registerTab, setTabInfo: setTabInfo, watchTabs: watchTabs, listTabs: listTabs, gotoTab: gotoTab, watchMain: watchMain, flutter: flutter, mountLogo: mountLogo, init: init };
+  var api = { MAIN_WINDOW: MAIN_WINDOW, MAIN_URL: MAIN_URL, isMainTab: isMainTab, markMainTab: markMainTab, markCallTab: markCallTab, openMain: openMain, isDesktopPage: isDesktopPage, goDesktopHome: goDesktopHome, logoClick: logoClick, registerTab: registerTab, setTabInfo: setTabInfo, watchTabs: watchTabs, listTabs: listTabs, gotoTab: gotoTab, watchMain: watchMain, flutter: flutter, mountLogo: mountLogo, init: init };
   if (typeof module !== 'undefined' && module.exports) { module.exports = api; return; }
   g.NaviHome = api; init();
 })(typeof window !== 'undefined' ? window : globalThis);
