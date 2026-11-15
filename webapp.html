@@ -419,6 +419,9 @@ body.gopang-authed #gopang-auth-gate{display:none}
    플레인 텍스트로 단순화. */
 /* 2026-11-15(주피터 지시): 헤더 좌측 "나비" 글자를 노란 나비 로고로 교체. 로고를 누르면 현재 SP를 닫고
    기본 SP(나만의 AI 비서)로 돌아간다. 이름 글자·편집 아이콘은 숨긴다(요소는 기존 스크립트 호환을 위해 유지). */
+#ai-sp-label{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);max-width:46%;padding:3px 10px;border-radius:999px;
+  background:rgba(255,255,255,.22);color:#fff;font-size:calc(.75rem*var(--hondi-fs,1));font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;z-index:1}
+#ai-sp-label[hidden]{display:none}
 #ai-panel-logo{flex-shrink:0;width:36px;height:36px;padding:0;margin:0 2px 0 0;border:0;background:transparent;
   cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
 #ai-panel-logo img{width:32px;height:32px;display:block;pointer-events:none}
@@ -1402,6 +1405,8 @@ html.is-embedded .install-banner{display:none!important}
            굵은 글씨 부분만 hondi_assistant_name을 표시·편집한다 —
            태그라인은 고정 문구, 이름 자체는 사용자가 지은 이름 그대로.) -->
       <button id="ai-panel-logo" type="button" onclick="_returnToNavi()" title="나만의 AI 비서로 돌아가기" aria-label="나만의 AI 비서로 돌아가기"><img src="/icons/navi-icon-192.png?v=20261015" alt="나비" width="32" height="32"></button>
+      <!-- 지금 대화 중인 SP 이름(상단 중앙). 기본 SP(나만의 AI 비서)일 때는 비어 숨겨진다 — ui/sp-label.js -->
+      <span id="ai-sp-label" hidden></span>
       <div id="ai-panel-name-wrap">
         <div id="ai-panel-name-line">
           <span id="ai-panel-name">나비</span>
@@ -2582,6 +2587,29 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
      이 죽은 script 태그를 제거함(파일 자체도 git rm 권장 — 커밋 안내 참조). -->
 <!-- v3: ES Module 진입점 -->
 <script type="module" src="/gopang-app.js?v=20261015"></script>
+<script type="module">
+/* 2026-11-16 — ① 상단 중앙 SP 이름 표시  ② ?call= : 나비가 다른 탭에서 초대한 상대와 1:1 대화를 바로 시작한다(새 탭 대화창). */
+import { renderSPLabel } from './src/gopang/ui/sp-label.js';
+renderSPLabel();
+try {
+  const raw = new URLSearchParams(location.search).get('call');
+  if (raw) {
+    const o = JSON.parse(raw);
+    history.replaceState(null, '', location.pathname);
+    const t0 = Date.now();
+    const tick = async () => {
+      try {
+        const st = await import('./src/gopang/core/state.js');
+        if (st._USER && st._USER.ipv6) {
+          const { startP2PCall } = await import('./src/gopang/ui/p2p-chat.js');
+          await startP2PCall({ guid: o.g, handle: o.h, nickname: o.n });
+        } else if (Date.now() - t0 < 25000) setTimeout(tick, 500);
+      } catch (e) { console.warn('[Call] 새 탭 대화 시작 실패:', e && e.message); }
+    };
+    tick();
+  }
+} catch (e) { console.warn('[Call] ?call= 해석 실패:', e && e.message); }
+</script>
 
 <script>
 // ── 알림 소리 설정 ────────────────────────────────────────
