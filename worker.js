@@ -15,9 +15,10 @@ import { handleAiChat, handleEscalate } from './src/worker/ai-chat-handler.js';
 import { prepareDoctorRequest, doctorRateLimits } from './src/worker/kdoctor-guard.js';
 import { handleOrderQueue } from './src/worker/order-queue-handler.js';
 import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
-import { profilePhoneFilter, last8Filter, pickGuidByLast8 } from './src/worker/phone-lookup.js';
+import { profilePhoneFilter, last8Filter, pickGuidByLast8, e164LookupHash as _e164Hash } from './src/worker/phone-lookup.js';
 import { validateSignalInput as _sigValidate, canDeleteSignal as _sigCanDelete, sendRateOk as _sigRateOk } from './src/worker/signal-auth.js';
-import { classifyQuery as _ffClassify, publicCard as _ffPublicCard, rateLimitOk as _ffRateOk } from './src/worker/friend-find.js';
+import { classifyQuery as _ffClassify, publicCard as _ffPublicCard, rateLimitOk as _ffRateOk, normalizePhone as _ffNormPhone } from './src/worker/friend-find.js';
+import { referralCode as _refCode, isReferralCode as _isRefCode, inviteText as _refInviteText, inviteLink as _refInviteLink, withinClaimWindow as _refInWindow, REFERRAL_REWARD_KRW, REFERRAL_MAX_REWARDS } from './src/worker/referral.js';
 import { computeChargeGdc as _computeChargeGdc } from './src/worker/charge-plans.js';
 import { makePlanRequest as _planMakeRequest, judgeDeposit as _planJudgeDeposit, nextPaidUntil as _planNextPaidUntil, validTier as _planValidTier, DEFAULT_KRW_PER_USD as _PLAN_DEFAULT_RATE } from './src/worker/plan-pay.js';
 import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, startFree as _testQuotaStartFree, resetFree as _testQuotaResetFree, setPlan as _testQuotaSetPlan, setPaid as _testQuotaSetPaid, setExtra as _testQuotaSetExtra, addExtraSpend as _testQuotaAddExtra, exhaustedMessage as _planExhaustedMessage, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
@@ -14827,6 +14828,9 @@ export default {
       return handleFriendFind(request, env, corsHeaders);
     if (pathname === '/friends/invite-notify' && request.method === 'POST')
       return handleFriendInviteNotify(request, env, corsHeaders);
+    if (pathname === '/friends/match' && request.method === 'POST') return handleFriendMatch(request, env, corsHeaders);
+    if (pathname === '/friends/invite-code' && request.method === 'POST') return handleFriendInviteCode(request, env, corsHeaders);
+    if (pathname === '/friends/ref-claim' && request.method === 'POST') return handleFriendRefClaim(request, env, corsHeaders);
     if (pathname === '/friends/settings' && request.method === 'POST')
       return handleFriendSettings(request, env, corsHeaders);
 
@@ -29256,6 +29260,98 @@ async function handleFriendSettings(request, env, corsHeaders) {
   try { me = await _l1PatchProfile(env, me.id, patch); }
   catch (e) { return _err(502, 'L1_ERROR', '저장 실패: ' + e.message, corsHeaders); }
   return new Response(JSON.stringify(view()), { status: 200, headers: corsHeaders });
+}
+
+// POST /friends/match — 폰 연락처에서 고른 번호 중 "전화번호로 찾기"를 허용한 가입자만 돌려준다(2026-11-15).
+// 허용하지 않은 가입자는 비가입자와 구분되지 않는다(번호로 가입 여부를 캐내지 못하게). 호출한 사람이 많이 물을 수 없도록 시간당 한도를 둔다.
+// body: { phone_verify_token, numbers: string[] (최대 50) }
+async function handleFriendMatch(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, {});
+  if (!who.ok) return _err(401, who.code, who.message, corsHeaders);
+  const nums = [...new Set((Array.isArray(body.numbers) ? body.numbers : []).slice(0, 50).map(_ffNormPhone).filter(Boolean))];
+  if (!nums.length) return new Response(JSON.stringify({ ok: true, matches: [], checked: 0 }), { status: 200, headers: corsHeaders });
+  if (env.AI_SETUP_SEALS_KV) {
+    const key = `fmatch:${who.guid}:${Math.floor(Date.now() / 3600000)}`;
+    try {
+      const n = Number(await env.AI_SETUP_SEALS_KV.get(key)) || 0;
+      if (n + nums.length > 300) return _err(429, 'RATE_LIMITED', '조회가 너무 많습니다. 잠시 후 다시 시도해 주세요', corsHeaders);
+      await env.AI_SETUP_SEALS_KV.put(key, String(n + nums.length), { expirationTtl: 3700 });
+    } catch (e) { /* 한도 기록 실패는 조회를 막지 않는다 */ }
+  }
+  const matches = [];          // [{ e164: 보낸 번호, user: 공개 카드 }] — 보낸 번호를 그대로 돌려주므로 새로 알려 주는 번호 정보는 없다
+  const hashToNum = new Map();
+  if (env.PHONE_VERIFY_SECRET) for (const e of nums) hashToNum.set(await _e164Hash(env.PHONE_VERIFY_SECRET, e), e);
+  try {
+    const l1 = await _l1AdminToken(env);
+    for (let i = 0; i < nums.length; i += 25) {
+      const parts = [];
+      for (const e of nums.slice(i, i + 25)) parts.push(await profilePhoneFilter(env, e));
+      const filter = `(${parts.join(' || ')}) && phone_findable=true`;
+      const r = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${encodeURIComponent(filter)}&perPage=50`, {
+        headers: { 'Authorization': `Bearer ${l1}` }, signal: AbortSignal.timeout(8000),
+      });
+      if (!r.ok) throw new Error(`L1 조회 실패 (HTTP ${r.status})`);
+      const d = await r.json().catch(() => ({ items: [] }));
+      for (const p of (d.items || [])) {
+        if (p.guid === who.guid || p.extra?.migrated_to) continue;
+        const e = hashToNum.get(p.e164_hash) || (nums.includes(p.e164) ? p.e164 : '');
+        if (e) matches.push({ e164: e, user: _ffPublicCard(p) });
+      }
+    }
+  } catch (e) { return _err(502, 'L1_ERROR', '연락처 조회 실패: ' + e.message, corsHeaders); }
+  return new Response(JSON.stringify({ ok: true, matches, checked: nums.length }), { status: 200, headers: corsHeaders });
+}
+
+// POST /friends/invite-code — 내 추천 코드·초대 문구를 돌려준다. 코드→guid 대응은 KV 에 남긴다(가입자가 청구할 때 추천인을 찾는 데 쓴다).
+async function handleFriendInviteCode(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, {});
+  if (!who.ok) return _err(401, who.code, who.message, corsHeaders);
+  const code = await _refCode(env.PHONE_VERIFY_SECRET, who.guid);
+  if (env.AI_SETUP_SEALS_KV) { try { await env.AI_SETUP_SEALS_KV.put(`hondi:refcode:${code}`, who.guid); } catch (e) { return _err(502, 'KV_ERROR', '초대 코드 저장 실패', corsHeaders); } }
+  let me = null; try { me = await _l1FindProfileByGuid(env, who.guid); } catch (e) { /* 이름 없이 */ }
+  return new Response(JSON.stringify({ ok: true, code, link: _refInviteLink(code), text: _refInviteText(code, me && me.nickname), reward_gdc: REFERRAL_REWARD_KRW }), { status: 200, headers: corsHeaders });
+}
+
+// POST /friends/ref-claim — 초대받아 가입한 사람이 추천 코드를 청구하면 추천인에게 보상(1,000 GDC)을 한 번 지급한다.
+// body: { phone_verify_token, code }  — 가입자 1명당 1회, 본인 추천 불가, 가입 72시간 안, 추천인당 최대 REFERRAL_MAX_REWARDS 명.
+async function handleFriendRefClaim(request, env, corsHeaders) {
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, {});
+  if (!who.ok) return _err(401, who.code, who.message, corsHeaders);
+  const reply = (status, extra = {}) => new Response(JSON.stringify({ ok: true, status, ...extra }), { status: 200, headers: corsHeaders });
+  const code = String(body.code || '').trim().toLowerCase();
+  const kv = env.AI_SETUP_SEALS_KV;
+  if (!_isRefCode(code) || !kv) return reply('invalid');
+  const doneKey = `hondi:ref_claimed:${who.guid}`;
+  try { if (await kv.get(doneKey)) return reply('already'); } catch (e) { return _err(502, 'KV_ERROR', '확인 실패', corsHeaders); }
+  const referrer = await kv.get(`hondi:refcode:${code}`);
+  if (!referrer) return reply('invalid');
+  if (referrer === who.guid) return reply('self');
+  let me, ref;
+  try { me = await _l1FindProfileByGuid(env, who.guid); ref = await _l1FindProfileByGuid(env, referrer); } catch (e) { return _err(502, 'L1_ERROR', e.message, corsHeaders); }
+  if (!me || !ref) return reply('invalid');
+  if (!_refInWindow(me.created)) return reply('expired');            // 신규 가입자만
+  const cntKey = `hondi:ref_count:${referrer}`;
+  const cnt = Number(await kv.get(cntKey)) || 0;
+  if (cnt >= (Number(env.REFERRAL_MAX_REWARDS) || REFERRAL_MAX_REWARDS)) { await kv.put(doneKey, 'capped'); return reply('capped'); }
+  let mint;
+  try {
+    const res = await fetch(`${L1_DEFAULT}/api/mint`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ guid: referrer, krw_amount: REFERRAL_REWARD_KRW, secret: _mintSecret(env), memo: 'referral_reward:친구 초대 보상' }),
+    });
+    mint = await res.json().catch(() => ({ ok: false }));
+  } catch (e) { return _err(502, 'L1_UNREACHABLE', '보상 지급 실패: ' + e.message, corsHeaders); }
+  if (!mint.ok) return _err(502, 'MINT_FAILED', '보상 지급 실패(다시 시도됩니다)', corsHeaders);   // 플래그를 세우지 않아 다음 실행에서 재시도
+  try { await kv.put(doneKey, new Date().toISOString()); await kv.put(cntKey, String(cnt + 1)); } catch (e) { console.warn('[RefClaim] 플래그 기록 실패(지급은 완료):', e.message); }
+  console.log(JSON.stringify({ tag: 'REFERRAL_REWARD_GRANTED', referrer, invitee: who.guid, krw: REFERRAL_REWARD_KRW, ts: new Date().toISOString() }));
+  try { await _sendPushToGuid(env, referrer, { title: '친구 초대 보상', body: `${me.nickname || '초대한 친구'}님이 가입해 ${REFERRAL_REWARD_KRW.toLocaleString('ko-KR')} GDC가 지급되었습니다.`, tag: 'referral-reward', url: 'https://app.naviweb.kr/webapp.html' }); } catch (e) { /* 알림 실패는 무시 */ }
+  return reply('granted');
 }
 
 async function _l1FindProfileByGuid(env, guid) {

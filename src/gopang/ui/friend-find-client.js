@@ -27,6 +27,12 @@ async function post(path, body) {
 export function findFriend(q) { return post('/friends/find', { q }); }
 /** 무응답 초대를 남긴 뒤 상대에게 푸시 알림을 보낸다(실패해도 무시). */
 export function notifyInvite(toGuid) { return post('/friends/invite-notify', { to_guid: toGuid }); }
+/** 연락처에서 고른 번호(E.164) 중 번호 찾기를 허용한 가입자 → { ok, matches: [{ e164, user }] } */
+export function matchContacts(numbers) { return post('/friends/match', { numbers }); }
+/** 내 추천 코드와 초대 문자 본문 → { ok, code, link, text, reward_gdc } */
+export function getInviteCode() { return post('/friends/invite-code', {}); }
+/** 초대받아 가입한 사람이 추천 코드를 청구 → { ok, status: granted|already|self|expired|capped|invalid } */
+export function claimReferral(code) { return post('/friends/ref-claim', { code }); }
 export function getFriendSettings() { return post('/friends/settings', { action: 'get' }); }
 export function saveFriendSettings(patch) { return post('/friends/settings', { action: 'set', ...patch }); }
 
