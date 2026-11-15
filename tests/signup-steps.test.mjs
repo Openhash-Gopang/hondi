@@ -79,8 +79,8 @@ test('가입 화면에 전화 아이콘·열쇠 아이콘을 보이지 않는다
 
 test('아이디·이메일 ID는 아이콘 없이 이름과 입력칸이 한 줄에 있다', () => {
   assert.ok(!src.includes('&#9786;') && !src.includes('&#9993;'));
-  assert.match(src, /width:5\.4em">아이디<\/span>\s*<input id="_nick-input"/);
-  assert.match(src, /width:5\.4em">이메일 ID<\/span>/);
+  assert.match(src, /">아이디<\/span>\s*<input id="_nick-input"/);
+  assert.match(src, /line-height:1\.5">이메일 ID<\/span>/);
 });
 
 test('아이디·이메일 ID는 "사용할 수 있다"는 안내 없이, 쓸 수 없을 때만 "사용할 수 없습니다."를 보인다', () => {
