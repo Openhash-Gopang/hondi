@@ -2689,6 +2689,11 @@ function _initPushSoundUI() {
   radios.forEach(r => { if (r.value === saved) r.checked = true; });
 
   // 구독 상태 확인 → 토글 반영
+  _setPushToggle(false);   // 서비스워커가 준비되지 않아도 스위치는 눌러볼 수 있게 먼저 풀어 둔다
+  if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
+    const st = document.getElementById('push-status');
+    if (st) st.textContent = '브라우저에서 알림이 차단돼 있습니다. 주소창 왼쪽 아이콘 → 사이트 설정 → 알림을 "허용"으로 바꿔 주세요';
+  }
   if ('serviceWorker' in navigator && 'PushManager' in window) {
     navigator.serviceWorker.ready.then(reg => {
       reg.pushManager.getSubscription().then(sub => {
@@ -2747,7 +2752,13 @@ function _setPushToggleLoading() {
   if (status) status.textContent = '처리 중…';
 }
 
+// 2026-11-16 — 권한 창이 막히거나 서비스워커가 준비되지 않으면 await 가 끝나지 않아 스위치가 '처리 중'(비활성)으로 굳던 문제: 시간 제한을 두고 반드시 풀어 준다.
+function _pushWithin(p, ms, label) { return Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error(label || '시간 초과')), ms))]); }
 async function _togglePush(on) {
+  const _guard = setTimeout(() => { const st = document.getElementById('push-status'); if (st && /처리 중|권한 요청 중/.test(st.textContent)) st.textContent = '응답이 없어 중단했습니다. 브라우저 알림 권한(주소창 왼쪽 아이콘 → 사이트 설정 → 알림)을 확인해 주세요'; _setPushToggle(false); }, 20000);
+  try { await _togglePushInner(on); } finally { clearTimeout(_guard); }
+}
+async function _togglePushInner(on) {
   const status = document.getElementById('push-status');
   const user   = JSON.parse(localStorage.getItem('gopang_user_v4') || 'null');
   _setPushToggleLoading(); // 누른 즉시 시각적 반응
@@ -2763,7 +2774,7 @@ async function _togglePush(on) {
     try {
       if (status) status.textContent = '권한 요청 중…';
       // 2026-11-16 — 권한 창은 누른 직후(사용자 동작 안)에 바로 띄운다. 모듈을 불러온 뒤에 띄우면 브라우저가 동작과 무관한 요청으로 보고 막는 경우가 있다.
-      if (typeof Notification !== 'undefined' && Notification.permission === 'default') await Notification.requestPermission().catch(() => {});
+      if (typeof Notification !== 'undefined' && Notification.permission === 'default') await _pushWithin(Notification.requestPermission(), 15000, '권한 창 응답 없음').catch(() => {});
       if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
         if (status) status.textContent = '브라우저에서 알림이 차단돼 있습니다. 주소창 왼쪽 아이콘 → 사이트 설정 → 알림을 "허용"으로 바꾼 뒤 다시 켜 주세요';
         _setPushToggle(false); return;
