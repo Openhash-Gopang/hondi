@@ -1648,12 +1648,11 @@ function _showPhonePopupLegacy(resolve) {
                   border:0;border-bottom:1.5px solid #e5e7eb;margin-bottom:14px">
         <span style="width:22px;text-align:center;color:#6b7280;font-size:calc(1.0625rem*var(--hondi-fs,1));line-height:34px;flex-shrink:0">&#9742;</span>
         <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
-          <span style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:#6b7280">전화번호</span>
           <div style="display:flex;align-items:center;gap:8px;min-width:0">
             <button id="_country-btn" type="button"
               style="padding:0;height:34px;border:none;background:transparent;cursor:pointer;
                      flex-shrink:0;display:flex;align-items:center;gap:4px;font-family:inherit">
-              <span id="_flag-icon" style="font-size:calc(1.25rem*var(--hondi-fs,1))">🇰🇷</span>
+              <span id="_flag-icon" style="display:none">🇰🇷</span>
               <span id="_dial-code" style="font-size:calc(0.875rem*var(--hondi-fs,1));color:#111827">+82</span>
               <span style="font-size:calc(0.5625rem*var(--hondi-fs,1));color:#9ca3af">▼</span>
             </button>
@@ -1666,7 +1665,7 @@ function _showPhonePopupLegacy(resolve) {
                 <span style="font-size:calc(0.5625rem*var(--hondi-fs,1));color:#9ca3af">▼</span>
               </button>
             </div>
-            <input id="_phone-input" type="tel" maxlength="8"
+            <input id="_phone-input" type="tel" aria-label="전화번호" maxlength="8"
               placeholder="뒷 8자리"
               style="flex:1;padding:0 0 0 4px;height:34px;border:none;background:transparent;
                      font-size:calc(1rem*var(--hondi-fs,1));font-family:inherit;outline:none;color:#111827;
@@ -2113,7 +2112,7 @@ function _showPhonePopupLegacy(resolve) {
     document.getElementById('_step-seg2').style.background = s2 ? '#00796B' : '#e5e7eb';
     document.getElementById('_step-label').textContent = s2 ? '2 / 2 단계' : '1 / 2 단계';
     _prevBtn.style.display = s2 ? '' : 'none';
-    document.getElementById('_terms-line').style.display = (!_signupMode || s2) ? '' : 'none';
+    document.getElementById('_terms-line').style.display = s2 ? '' : 'none';   // 이용 약정서 문구는 가입 마지막 화면에만
     btn.textContent = !_signupMode ? '로그인' : (s2 ? '가입하기' : '다음');
     _updateCodeBox(); _updateAddrBox();
   };

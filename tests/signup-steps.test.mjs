@@ -48,3 +48,10 @@ test('숫자 코드 글자는 화면 폭에 맞춰 줄어들고 한 줄로 둔�
 test('백업 키 이메일 칸은 브라우저 자동완성을 끈다', () => {
   assert.match(src, /id="_bke-input" type="email" autocomplete="off"/);
 });
+
+test('전화 입력 칸에는 문구·국기 없이 아이콘만 두고, 이용 약정서 문구는 가입 마지막 화면에만 보인다', () => {
+  assert.ok(!/color:#6b7280">전화번호<\/span>/.test(src));
+  assert.match(src, /id="_flag-icon" style="display:none"/);
+  assert.match(src, /id="_phone-input" type="tel" aria-label="전화번호"/);
+  assert.match(src, /_terms-line'\)\.style\.display = s2 \? '' : 'none'/);
+});
