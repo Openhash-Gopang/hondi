@@ -1677,6 +1677,21 @@ function _showPhonePopupLegacy(resolve) {
         <div id="_code-val" style="display:none"></div>
       </div>
 
+      <!-- 가입 유형·본명(또는 기관명) — 2026-11-16, 주피터 지시. 전화번호·신분증 본인 인증의 바탕이 되는 값 -->
+      <div id="_rn-field"
+           style="display:none;align-items:flex-end;gap:12px;padding:2px 0 6px;
+                  border:0;border-bottom:1.5px solid #e5e7eb;margin-bottom:10px">
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:0">
+          <span style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b7280;line-height:1.5"><span id="_rn-label">본명</span> <a href="#" id="_rn-change" style="color:#1A73E8;text-decoration:none;margin-left:6px">유형 바꾸기</a></span>
+          <input id="_rn-input" type="text" maxlength="60"
+            placeholder="신분증의 이름"
+            style="width:100%;padding:0;height:34px;border:none;background:transparent;
+                   font-size:calc(0.9375rem*var(--hondi-fs,1));font-family:inherit;outline:none;color:#111827;min-width:0"
+            autocomplete="off"/>
+        </div>
+      </div>
+      <div id="_rn-error" class="mp-error" style="display:none"></div>
+
       <!-- 닉네임 -->
       <div id="_nick-field"
            style="display:flex;align-items:flex-end;gap:12px;padding:2px 0 6px;
@@ -2083,6 +2098,7 @@ function _showPhonePopupLegacy(resolve) {
   const _applyStep = () => {
     phoneField.style.display = '';
     nickField.style.display = _signupMode ? '' : 'none';
+    { const _rf = document.getElementById('_rn-field'); if (_rf) _rf.style.display = _signupMode ? 'flex' : 'none'; const _re = document.getElementById('_rn-error'); if (_re) _re.style.display = 'none'; }
     midField.style.display  = _signupMode ? '' : 'none';
     midHint.style.display   = _signupMode ? '' : 'none';
     if (_bkeField) _bkeField.style.display = _signupMode ? '' : 'none';
@@ -2093,9 +2109,37 @@ function _showPhonePopupLegacy(resolve) {
     btn.textContent = !_signupMode ? '로그인' : '가입하기';
     _updateCodeBox(); _updateAddrBox();
   };
+  // 가입 유형(개인·기관·부서·사업자·기타) — 가입을 누르면 첫 팝업으로 묻고, 고른 유형에 맞춰 본명(명칭) 칸을 보여 준다(2026-11-16, 주피터 지시).
+  const _ACCT_TYPES = [
+    { key: 'person', name: '개인',   label: '본명',            ph: '신분증의 이름' },
+    { key: 'org',    name: '기관',   label: '기관명',          ph: '등록된 기관 이름' },
+    { key: 'dept',   name: '부서',   label: '기관명·부서명',   ph: '예: 제주시 민원과' },
+    { key: 'biz',    name: '사업자', label: '상호(사업자명)',  ph: '사업자등록증의 상호' },
+    { key: 'other',  name: '기타',   label: '이름·명칭',       ph: '단체·모임 등의 이름' },
+  ];
+  let _acctType = null;
+  const _applyAcctType = () => {
+    const t = _ACCT_TYPES.find(x => x.key === _acctType); if (!t) return;
+    const l = document.getElementById('_rn-label'), i = document.getElementById('_rn-input');
+    if (l) l.textContent = t.name + ' · ' + t.label; if (i) i.placeholder = t.ph;
+  };
+  const _askAcctType = () => new Promise((resolve) => {
+    const ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:20px';
+    ov.innerHTML = '<div role="dialog" aria-label="가입 유형" style="background:#fff;border-radius:16px;padding:20px 18px;width:100%;max-width:340px;font-family:inherit">' +
+      '<div style="font-size:1.0625rem;font-weight:700;color:#111827">어떤 분으로 가입하시나요?</div>' +
+      '<div style="font-size:.8125rem;color:#6b7280;margin:4px 0 12px;line-height:1.5">고르신 유형에 맞춰 가입 화면이 달라집니다.</div>' +
+      _ACCT_TYPES.map(t => '<button type="button" data-k="' + t.key + '" style="display:block;width:100%;text-align:left;margin-top:8px;padding:12px 14px;border:1.5px solid #e5e7eb;border-radius:12px;background:#fff;font-size:.9375rem;font-weight:600;color:#111827;font-family:inherit">' + t.name + '</button>').join('') +
+      '<button type="button" data-k="" style="display:block;width:100%;margin-top:12px;padding:8px;border:0;background:transparent;color:#6b7280;font-size:.8125rem;font-family:inherit">닫기</button></div>';
+    ov.onclick = (e) => { const b = e.target.closest('button[data-k]'); if (!b && e.target !== ov) return; ov.remove(); resolve(b ? b.dataset.k : ''); };
+    document.body.appendChild(ov);
+  });
+  const _chooseAcctType = async () => { const k = await _askAcctType(); if (k) { _acctType = k; _applyAcctType(); } return !!k; };
+  { const _ch = document.getElementById('_rn-change'); if (_ch) _ch.onclick = (e) => { e.preventDefault(); _chooseAcctType(); }; }
   const _setMode = (signup) => {
     _signupMode = !!signup;
     _applyStep();
+    if (_signupMode && !_acctType) _chooseAcctType().then((ok) => { if (!ok) { _signupMode = false; _applyStep(); _tabLogin.setAttribute('aria-selected', 'true'); _tabSignup.setAttribute('aria-selected', 'false'); } });
     _tabLogin.setAttribute('aria-selected', String(!_signupMode));
     _tabSignup.setAttribute('aria-selected', String(_signupMode));
   };
@@ -2318,7 +2362,7 @@ function _showPhonePopupLegacy(resolve) {
   }
 
   // ── 실제 신규 가입 처리 (기존 _register 로직 그대로, 지역 필드는 제거) ──
-  async function _completeRegistration({ ipv6, handle, e164, nickname, digits, mailId, backupEmail, phoneVerifyToken, stepUpToken }) {
+  async function _completeRegistration({ ipv6, handle, e164, nickname, digits, mailId, backupEmail, realName, accountType, phoneVerifyToken, stepUpToken }) {
     const nickname_hash = await _sha256('phone:' + e164);
     const region = '';
 
@@ -2379,6 +2423,7 @@ function _showPhonePopupLegacy(resolve) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         guid: ipv6, nickname_hash, handle, nickname, region,
+        real_name: realName || '', account_type: accountType || 'person',   // 2026-11-16 신설 — 본명(기관은 기관명)과 가입 유형
         e164, country_code: selectedCountry,
         native_lang: navigator.language?.slice(0,2) || 'ko',
         is_public: true,
@@ -2596,6 +2641,15 @@ function _showPhonePopupLegacy(resolve) {
         btn.style.opacity = '1'; btn.style.pointerEvents = '';
         return;
       }
+      const _rnVal = (document.getElementById('_rn-input')?.value || '').trim().replace(/\s+/g, ' ');
+      if (!_acctType) { await _chooseAcctType(); }
+      if (!_acctType || _rnVal.length < 2) {
+        const _re = document.getElementById('_rn-error');
+        if (_re) { _re.textContent = _acctType === 'person' ? '본명(신분증의 이름)을 입력해 주세요.' : '이름(명칭)을 입력해 주세요.'; _re.style.display = 'block'; }
+        document.getElementById('_rn-input')?.focus();
+        btn.style.opacity = '1'; btn.style.pointerEvents = '';
+        return;
+      }
       if (!nickname) {
         nickErr.textContent = '처음 오셨네요! 아이디도 함께 입력해 주세요.';
         nickErr.style.display = 'block';
@@ -2660,13 +2714,13 @@ function _showPhonePopupLegacy(resolve) {
 
       // 인증을 마쳤다 — 값을 담아 두고(등록이 실패해 다시 눌러도 5분 안에는 문자를 또 받지 않는다) 계정을 만든다.
       _signupCtx = {
-        e164, handle, digits, nickname, mailId: mailIdRaw,
+        e164, handle, digits, nickname, mailId: mailIdRaw, realName: _rnVal, accountType: _acctType,
         phoneVerifyToken: otpResult.phoneVerifyToken, stepUpToken: otpResult.stepUpToken, verifiedAt: Date.now(),
       };
       btn.textContent = '등록 중...';
       const ipv6 = await _e164ToIPv6(e164);
       await _completeRegistration({
-        ipv6, handle, e164, nickname, digits, mailId: mailIdRaw, backupEmail,
+        ipv6, handle, e164, nickname, digits, mailId: mailIdRaw, backupEmail, realName: _rnVal, accountType: _acctType,
         phoneVerifyToken: otpResult.phoneVerifyToken, stepUpToken: otpResult.stepUpToken,
       });
 

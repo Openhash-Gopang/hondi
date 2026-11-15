@@ -29243,7 +29243,8 @@ async function handleFriendFind(request, env, corsHeaders) {
       const owner = await _kmailFindMailIdOwner(env, c.id);
       if (owner) { prof = await find(`guid='${String(owner).replace(/'/g, "\\'")}'`); if (prof && prof.mail_hidden === true) prof = null; if (prof) prof = { ...prof, mail_id: c.id }; }
     } else if (c.kind === 'name') {    // 이름 정확일치 — 상대가 허용한 경우만. 같은 이름이 여럿이면 목록
-      nameHits = (await findMany(`nickname='${c.name.replace(/\\/g, '').replace(/'/g, "\\'")}' && name_findable=true`, 6)).filter(p => !(p.extra?.migrated_to));
+      { const nm = c.name.replace(/\\/g, '').replace(/'/g, "\\'");   // 나비웹 이름(닉네임) 또는 본명(기관은 기관명) — 각각 상대가 허용한 경우만
+        nameHits = (await findMany(`((nickname='${nm}' && name_findable=true) || (real_name='${nm}' && real_name_findable=true))`, 6)).filter(p => !(p.extra?.migrated_to)); }
       const others = nameHits.filter(p => p.guid !== who.guid);
       if (nameHits.length && !others.length) return new Response(JSON.stringify({ ok: true, found: false, self: true }), { status: 200, headers: corsHeaders });
       nameHits = others;
@@ -29298,11 +29299,13 @@ async function handleFriendSettings(request, env, corsHeaders) {
   if (!me) return _err(404, 'PROFILE_NOT_FOUND', '프로필을 찾을 수 없습니다', corsHeaders);
   let myMailId = ''; try { myMailId = (await _kmailGetUserSettings(env, who.guid)).mail_id || ''; } catch (e) { /* 아이디 표시만 비운다 */ }
   const view = () => ({ ok: true, handle: me.handle || '', nickname: me.nickname || '', mail_id: myMailId,
-    name_findable: me.name_findable === true, mail_findable: me.mail_hidden !== true, phone_findable: me.phone_findable === true });
+    real_name: me.real_name || '', account_type: me.account_type || '', real_name_findable: me.real_name_findable === true, name_findable: me.name_findable === true, mail_findable: me.mail_hidden !== true, phone_findable: me.phone_findable === true });
   if (body.action !== 'set') return new Response(JSON.stringify(view()), { status: 200, headers: corsHeaders });
   const patch = {};
   if (typeof body.phone_findable === 'boolean') patch.phone_findable = body.phone_findable;
   if (typeof body.name_findable === 'boolean') patch.name_findable = body.name_findable;
+  if (typeof body.real_name_findable === 'boolean') patch.real_name_findable = body.real_name_findable;
+  if (typeof body.real_name === 'string') { const rn = body.real_name.trim().replace(/\s+/g, ' '); if (rn.length >= 2 && rn.length <= 60) patch.real_name = rn; }   // 기존 가입자가 본명을 채울 때
   if (typeof body.mail_findable === 'boolean') patch.mail_hidden = !body.mail_findable;
   if (!Object.keys(patch).length) return _err(400, 'MISSING_FIELD', '바꿀 값이 없습니다', corsHeaders);
   try { me = await _l1PatchProfile(env, me.id, patch); }
