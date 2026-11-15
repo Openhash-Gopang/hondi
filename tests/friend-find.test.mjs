@@ -15,19 +15,25 @@ test('전화번호 정규화: 한국 번호는 +82 로', () => {
 test('번호가 아닌 입력은 null', () => {
   for (const s of ['', 'ceo', 'hong123', '@abc', '12345', '1234567890', '010-abcd', '박지성']) assert.equal(normalizePhone(s), null, s);
 });
-test('classifyQuery: 번호/아이디/빈값', () => {
+test('classifyQuery: 번호/이메일 ID/빈값/그 밖', () => {
   assert.deepEqual(classifyQuery('010-1111-2222'), { kind: 'phone', e164: '+821011112222' });
   assert.deepEqual(classifyQuery('  @CEO '), { kind: 'id', id: 'ceo' });
-  assert.deepEqual(classifyQuery('주피터'), { kind: 'id', id: '주피터' });
-  assert.deepEqual(classifyQuery('@96627170'), { kind: 'handle', handle: '@96627170' });
-  assert.deepEqual(classifyQuery('96627170'), { kind: 'handle', handle: '@96627170' });
-  assert.deepEqual(classifyQuery('us-4155550100'), { kind: 'handle', handle: '@US-4155550100' });
+  assert.deepEqual(classifyQuery('ceo@naviweb.kr'), { kind: 'id', id: 'ceo' });
+  assert.deepEqual(classifyQuery('happy-fox-123'), { kind: 'id', id: 'happy-fox-123' });
+  assert.deepEqual(classifyQuery('주피터'), { kind: 'name', name: '주피터' });
+  assert.deepEqual(classifyQuery('  김동  '), { kind: 'name', name: '김동' });
+  assert.equal(classifyQuery('김'). kind, 'invalid');
+  assert.equal(classifyQuery('가'.repeat(21)).kind, 'invalid');
+  assert.equal(classifyQuery('a').kind, 'invalid');
+  // @8자리 혼디 아이디 검색은 없앴다 — 숫자만이면 번호도 아이디도 아니다
+  assert.equal(classifyQuery('@96627170').kind, 'invalid');
+  assert.equal(classifyQuery('96627170').kind, 'invalid');
   assert.deepEqual(classifyQuery('  '), { kind: 'empty' });
   assert.deepEqual(classifyQuery('@'), { kind: 'empty' });
 });
 test('공개 카드에는 전화번호·이메일 필드가 없다', () => {
   const c = publicCard({ guid: 'g', handle: 'h', nickname: 'n', e164: '+8210', e164_hash: 'x', e164_last8: '12345678', email: 'a@b', extra: { a: 1 } });
-  assert.deepEqual(Object.keys(c).sort(), ['avatar_emoji', 'country_code', 'guid', 'handle', 'nickname', 'region']);
+  assert.deepEqual(Object.keys(c).sort(), ['avatar_emoji', 'country_code', 'guid', 'handle', 'mail_id', 'nickname', 'region']);
   assert.equal(publicCard(null), null);
 });
 test('시간당 한도', () => {

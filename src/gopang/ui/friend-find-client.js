@@ -1,7 +1,7 @@
 /**
  * ui/friend-find-client.js — 카카오톡 방식 대화 상대 찾기(2026-10-28)의 클라이언트 쪽 공용 부분.
  *  - findFriend(q): 번호·검색용 아이디 정확일치 조회(/friends/find). 로그인 토큰은 공유 쿠키 hondi_pvt.
- *  - mountFriendFindCard(): 설정 화면에 "내 혼디 아이디 / 번호로 찾기 허용" 카드를 붙인다.
+ *  - mountFriendFindCard(): 설정 화면에 "이름·이메일 ID·전화번호별 찾기 허용" 카드를 붙인다.
  */
 import { PROXY } from '../core/state.js';
 
@@ -39,22 +39,37 @@ export async function mountFriendFindCard() {
   if (!card) {
     card = document.createElement('div');
     card.id = 'friend-find-card'; card.className = 'settings-card'; card.style.cssText = 'margin-top:10px;padding:12px 14px';
+    const row = (id, label, hint) =>
+      '<label style="display:flex;align-items:flex-start;gap:8px;margin-top:10px;font-size:calc(0.8125rem*var(--hondi-fs,1));color:#111827">' +
+      '<input id="' + id + '" type="checkbox" style="margin-top:3px">' +
+      '<span><span style="font-weight:600">' + label + '</span> <span id="' + id + '-v" style="color:#1A73E8;font-weight:600"></span> 검색 허용' +
+      '<span style="display:block;font-size:calc(0.6875rem*var(--hondi-fs,1));color:#8e8e93;margin-top:1px">' + hint + '</span></span></label>';
     card.innerHTML =
       '<div style="font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:600;color:#000;margin-bottom:6px">대화 상대 찾기</div>' +
-      '<div style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#8e8e93;line-height:1.5">상대가 내 <b>혼디 아이디</b>를 입력하면 나를 찾을 수 있습니다. 혼디 아이디는 가입할 때 전화번호로 정해지며 바꿀 수 없습니다.</div>' +
-      '<div id="ff-handle" style="font-size:calc(0.9375rem*var(--hondi-fs,1));font-weight:600;margin:8px 0;color:#1A73E8"></div>' +
-      '<label style="display:flex;align-items:center;gap:8px;font-size:calc(0.8125rem*var(--hondi-fs,1));color:#111827"><input id="ff-phone" type="checkbox"> 내 전화번호로 나를 찾을 수 있게 허용</label>' +
-      '<div id="ff-msg" style="font-size:calc(0.75rem*var(--hondi-fs,1));margin-top:6px;min-height:16px;color:#6b7280"></div>';
+      '<div style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#8e8e93;line-height:1.5">다른 나비웹 사용자가 아래 항목을 정확히 입력하면 나를 찾을 수 있습니다. 항목별로 허용 여부를 정하세요.</div>' +
+      row('ff-name', '이름', '같은 이름이 여럿이면 목록에서 고르게 됩니다') +
+      row('ff-mail', '이메일 ID', '가입할 때 정한 이메일 ID로 찾을 수 있습니다') +
+      row('ff-phone', '전화번호', '번호는 상대에게 보이지 않습니다') +
+      '<div id="ff-msg" style="font-size:calc(0.75rem*var(--hondi-fs,1));margin-top:8px;min-height:16px;color:#6b7280"></div>';
     host.appendChild(card);
   }
   const msg = (t, bad) => { const m = card.querySelector('#ff-msg'); m.textContent = t || ''; m.style.color = bad ? '#dc2626' : '#0f7b4f'; };
-  const phEl = card.querySelector('#ff-phone');
   const s = await getFriendSettings();
   if (!s.ok) { msg(s.message, true); return; }
-  card.querySelector('#ff-handle').textContent = s.handle;
-  phEl.checked = !!s.phone_findable;
-  phEl.onchange = async () => {
-    const want = phEl.checked, r = await saveFriendSettings({ phone_findable: want });
-    if (!r.ok) { phEl.checked = !want; msg(r.message, true); } else msg(want ? '이제 내 전화번호로 나를 찾을 수 있습니다.' : '전화번호로는 더 이상 찾히지 않습니다.');
+  const h = String(s.handle || '').replace(/^@/, '');     // 한국 번호는 가입 때 뒤 8자리가 아이디가 되므로 010-XXXX-XXXX 로 보여 준다
+  const phoneShown = /^\d{8}$/.test(h) ? '010-' + h.slice(0, 4) + '-' + h.slice(4) : '';
+  card.querySelector('#ff-name-v').textContent = s.nickname || '';
+  card.querySelector('#ff-mail-v').textContent = s.mail_id || '';
+  card.querySelector('#ff-phone-v').textContent = phoneShown;
+  const bind = (id, key, onTxt, offTxt) => {
+    const el = card.querySelector('#' + id);
+    el.checked = !!s[key];
+    el.onchange = async () => {
+      const want = el.checked, r = await saveFriendSettings({ [key]: want });
+      if (!r.ok) { el.checked = !want; msg(r.message, true); } else msg(want ? onTxt : offTxt);
+    };
   };
+  bind('ff-name', 'name_findable', '이제 이름으로 나를 찾을 수 있습니다.', '이름으로는 더 이상 찾히지 않습니다.');
+  bind('ff-mail', 'mail_findable', '이제 이메일 ID로 나를 찾을 수 있습니다.', '이메일 ID로는 더 이상 찾히지 않습니다.');
+  bind('ff-phone', 'phone_findable', '이제 전화번호로 나를 찾을 수 있습니다.', '전화번호로는 더 이상 찾히지 않습니다.');
 }

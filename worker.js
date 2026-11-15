@@ -29151,7 +29151,7 @@ async function handleAuthSessionProfile(request, env, corsHeaders) {
 }
 
 // ── 대화 상대 찾기 (2026-10-28, 주피터 지시: 카카오톡 방식) ──────────────────────────
-// 정확일치만: 번호는 상대가 phone_findable 을 켠 경우에만, 혼디 아이디(handle, 가입 때 서버가 전화번호에서 정한 값)는 정확히 일치할 때만.
+// 정확일치만: 번호는 상대가 phone_findable 을 켠 경우에만, 아이디(가입 때 본인이 고른 이메일 ID)는 정확히 일치할 때만. AI 를 쓰지 않는다.
 // 못 찾은 이유(없음/허용 안 함)는 구분해 알려 주지 않는다 — 번호 가입 여부를 캐내는 데 쓰이지 않게.
 const _FF_ID_CHARS = /^[A-Za-z0-9가-힣._-]{1,40}$/;
 async function handleFriendFind(request, env, corsHeaders) {
@@ -29161,6 +29161,8 @@ async function handleFriendFind(request, env, corsHeaders) {
   if (!who.ok) return _err(401, who.code, who.message, corsHeaders);
   const c = _ffClassify(body.q);
   if (c.kind === 'empty') return _err(400, 'MISSING_FIELD', '찾을 전화번호나 아이디를 입력하세요', corsHeaders);
+  if (c.kind === 'invalid') return new Response(JSON.stringify({ ok: true, found: false, invalid: true }), { status: 200, headers: corsHeaders });   // 번호·아이디·이름 어느 것도 아님 — 조회하지 않는다
+  if (c.kind === 'invalid') return new Response(JSON.stringify({ ok: true, found: false, invalid: true }), { status: 200, headers: corsHeaders });   // 이름·한글 등 — 조회하지 않는다
 
   if (env.AI_SETUP_SEALS_KV) {            // 둘러보기 방지 — 시간당 조회 한도
     const key = `ffind:${who.guid}:${Math.floor(Date.now() / 3600000)}`;
@@ -29171,21 +29173,29 @@ async function handleFriendFind(request, env, corsHeaders) {
     } catch (e) { /* 한도 기록 실패는 조회를 막지 않는다 */ }
   }
 
-  let prof = null;
+  let prof = null, nameHits = [];
   try {
     const l1 = await _l1AdminToken(env);
-    const find = async (filter) => {
-      const r = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${encodeURIComponent(filter)}&perPage=1`, {
+    const findMany = async (filter, perPage = 1) => {
+      const r = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${encodeURIComponent(filter)}&perPage=${perPage}`, {
         headers: { 'Authorization': `Bearer ${l1}` }, signal: AbortSignal.timeout(8000),
       });
       if (!r.ok) throw new Error(`L1 조회 실패 (HTTP ${r.status})`);
       const d = await r.json().catch(() => ({ items: [] }));
-      return d.items?.[0] || null;
+      return d.items || [];
     };
+    const find = async (filter) => (await findMany(filter, 1))[0] || null;
     if (c.kind === 'phone') {
       prof = await find(`(${await profilePhoneFilter(env, c.e164)}) && phone_findable=true`);
-    } else if (c.kind === 'handle') {
-      prof = await find(`handle='${c.handle}'`);
+    } else if (c.kind === 'id') {      // 이메일 ID(가입 때 본인이 고른 값) 정확일치
+      const owner = await _kmailFindMailIdOwner(env, c.id);
+      if (owner) { prof = await find(`guid='${String(owner).replace(/'/g, "\\'")}'`); if (prof && prof.mail_hidden === true) prof = null; if (prof) prof = { ...prof, mail_id: c.id }; }
+    } else if (c.kind === 'name') {    // 이름 정확일치 — 상대가 허용한 경우만. 같은 이름이 여럿이면 목록
+      nameHits = (await findMany(`nickname='${c.name.replace(/\\/g, '').replace(/'/g, "\\'")}' && name_findable=true`, 6)).filter(p => !(p.extra?.migrated_to));
+      const others = nameHits.filter(p => p.guid !== who.guid);
+      if (nameHits.length && !others.length) return new Response(JSON.stringify({ ok: true, found: false, self: true }), { status: 200, headers: corsHeaders });
+      nameHits = others;
+      prof = nameHits[0] || null;
     }
   } catch (e) {
     return _err(502, 'L1_ERROR', '상대 찾기 실패: ' + e.message, corsHeaders);
@@ -29193,7 +29203,9 @@ async function handleFriendFind(request, env, corsHeaders) {
   if (prof && (prof.extra?.migrated_to)) prof = null;
   if (prof && prof.guid === who.guid) return new Response(JSON.stringify({ ok: true, found: false, self: true }), { status: 200, headers: corsHeaders });
   if (!prof) return new Response(JSON.stringify({ ok: true, found: false }), { status: 200, headers: corsHeaders });
-  return new Response(JSON.stringify({ ok: true, found: true, user: _ffPublicCard(prof) }), { status: 200, headers: corsHeaders });
+  const out = { ok: true, found: true, user: _ffPublicCard(prof) };
+  if (nameHits.length > 1) out.users = nameHits.map(_ffPublicCard);   // 같은 이름이 여럿 — 클라이언트가 목록으로 보여 준다(자동 호출 안 함)
+  return new Response(JSON.stringify(out), { status: 200, headers: corsHeaders });
 }
 
 // POST /friends/invite-notify — 무응답 초대를 남긴 뒤 상대에게 웹푸시를 보낸다(2026-11-12).
@@ -29223,7 +29235,7 @@ async function handleFriendInviteNotify(request, env, corsHeaders) {
   return new Response(JSON.stringify({ ok: true, pushed: true }), { status: 200, headers: corsHeaders });
 }
 
-// body: { phone_verify_token, action: 'get' | 'set', phone_findable? } — 혼디 아이디(handle)는 서버가 정한 값이라 바꿀 수 없고, 번호로 찾기 허용만 바꾼다.
+// body: { phone_verify_token, action: 'get' | 'set', name_findable?, mail_findable?, phone_findable? } — 이름·이메일 ID·전화번호로 찾히는 것을 각각 허용/차단한다.
 async function handleFriendSettings(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
@@ -29232,10 +29244,16 @@ async function handleFriendSettings(request, env, corsHeaders) {
   let me;
   try { me = await _l1FindProfileByGuid(env, who.guid); } catch (e) { return _err(502, 'L1_ERROR', e.message, corsHeaders); }
   if (!me) return _err(404, 'PROFILE_NOT_FOUND', '프로필을 찾을 수 없습니다', corsHeaders);
-  const view = () => ({ ok: true, handle: me.handle || '', phone_findable: me.phone_findable === true, });
+  let myMailId = ''; try { myMailId = (await _kmailGetUserSettings(env, who.guid)).mail_id || ''; } catch (e) { /* 아이디 표시만 비운다 */ }
+  const view = () => ({ ok: true, handle: me.handle || '', nickname: me.nickname || '', mail_id: myMailId,
+    name_findable: me.name_findable === true, mail_findable: me.mail_hidden !== true, phone_findable: me.phone_findable === true });
   if (body.action !== 'set') return new Response(JSON.stringify(view()), { status: 200, headers: corsHeaders });
-  if (typeof body.phone_findable !== 'boolean') return _err(400, 'MISSING_FIELD', '바꿀 값이 없습니다', corsHeaders);
-  try { me = await _l1PatchProfile(env, me.id, { phone_findable: body.phone_findable }); }
+  const patch = {};
+  if (typeof body.phone_findable === 'boolean') patch.phone_findable = body.phone_findable;
+  if (typeof body.name_findable === 'boolean') patch.name_findable = body.name_findable;
+  if (typeof body.mail_findable === 'boolean') patch.mail_hidden = !body.mail_findable;
+  if (!Object.keys(patch).length) return _err(400, 'MISSING_FIELD', '바꿀 값이 없습니다', corsHeaders);
+  try { me = await _l1PatchProfile(env, me.id, patch); }
   catch (e) { return _err(502, 'L1_ERROR', '저장 실패: ' + e.message, corsHeaders); }
   return new Response(JSON.stringify(view()), { status: 200, headers: corsHeaders });
 }
