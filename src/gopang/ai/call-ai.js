@@ -5342,7 +5342,7 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
       history.push({ role: 'user', content: userText });
       const _msg = _us.query
         ? '🔎 바로 검색해 연결합니다.'
-        : '🔎 사용자 검색 창을 열었습니다. 이름으로는 찾을 수 없어요. 상대의 아이디 또는 전화번호를 입력해 주세요. 한 번 연결한 사용자는 다음부터 이름만 말해도 바로 연결됩니다.';
+        : '🔎 사용자 검색 창을 열었습니다. 상대의 이름·아이디·전화번호를 정확히 입력해 주세요. 이름과 전화번호는 상대가 찾기를 허용한 경우에만 찾아집니다. 한 번 연결한 사용자는 다음부터 이름만 말해도 바로 연결됩니다.';
       appendBubble('ai', _msg);
       history.push({ role: 'assistant', content: _msg });
       try { openSearch(_us.query || undefined); } catch (e) { console.warn('[Search] 검색창 열기 실패:', e.message); }

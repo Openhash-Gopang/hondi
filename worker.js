@@ -15,7 +15,7 @@ import { handleAiChat, handleEscalate } from './src/worker/ai-chat-handler.js';
 import { prepareDoctorRequest, doctorRateLimits } from './src/worker/kdoctor-guard.js';
 import { handleOrderQueue } from './src/worker/order-queue-handler.js';
 import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
-import { profilePhoneFilter, last8Filter, pickGuidByLast8, e164LookupHash as _e164Hash } from './src/worker/phone-lookup.js';
+import { profilePhoneFilter, friendPhoneFilter, last8Filter, pickGuidByLast8, e164LookupHash as _e164Hash } from './src/worker/phone-lookup.js';
 import { validateSignalInput as _sigValidate, canDeleteSignal as _sigCanDelete, sendRateOk as _sigRateOk } from './src/worker/signal-auth.js';
 import { classifyQuery as _ffClassify, publicCard as _ffPublicCard, rateLimitOk as _ffRateOk, normalizePhone as _ffNormPhone } from './src/worker/friend-find.js';
 import { referralCode as _refCode, isReferralCode as _isRefCode, inviteText as _refInviteText, inviteLink as _refInviteLink, withinClaimWindow as _refInWindow, REFERRAL_REWARD_KRW, REFERRAL_MAX_REWARDS } from './src/worker/referral.js';
@@ -29199,7 +29199,7 @@ async function handleFriendFind(request, env, corsHeaders) {
     };
     const find = async (filter) => (await findMany(filter, 1))[0] || null;
     if (c.kind === 'phone') {
-      prof = await find(`(${await profilePhoneFilter(env, c.e164)}) && phone_findable=true`);
+      prof = await find(`(${await friendPhoneFilter(env, c.e164)}) && phone_findable=true`);
     } else if (c.kind === 'id') {      // 이메일 ID(가입 때 본인이 고른 값) 정확일치
       const owner = await _kmailFindMailIdOwner(env, c.id);
       if (owner) { prof = await find(`guid='${String(owner).replace(/'/g, "\\'")}'`); if (prof && prof.mail_hidden === true) prof = null; if (prof) prof = { ...prof, mail_id: c.id }; }

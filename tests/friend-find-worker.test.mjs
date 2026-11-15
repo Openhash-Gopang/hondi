@@ -12,6 +12,7 @@ const profiles=[
  {id:'r3',guid:'g-kim',handle:'@33334444',nickname:'김철수',e164_hash:await h('+821033334444'),phone_findable:false,name_findable:false},
  {id:'r4',guid:'g-hong2',handle:'@55556666',nickname:'홍길동',e164_hash:await h('+821055556666'),phone_findable:false,name_findable:true},
  {id:'r5',guid:'g-lee',handle:'@77778888',nickname:'이영희',e164_hash:await h('+821077778888'),phone_findable:false,name_findable:true,mail_hidden:true},
+ {id:'r6',guid:'g-park',handle:'@55556666',nickname:'박민수',e164_hash:'deadbeef'.repeat(8),e164_last8:'10556666'.slice(0,8),country_code:'KR',phone_findable:true,name_findable:false},
 ];
 const mailIds=[{id:'m4',mail_id:'lee-y',owner_user_guid:'g-lee'},{id:'m1',mail_id:'gildong',owner_user_guid:'g-hong'},{id:'m2',mail_id:'me-id',owner_user_guid:'g-me'},{id:'m3',mail_id:'kim-cs',owner_user_guid:'g-kim'}];
 const patches=[];
@@ -25,8 +26,10 @@ globalThis.fetch=async(url,opts={})=>{
     let m;
     if((m=f.match(/^guid='([^']+)'$/))) return p.guid===m[1];
     if((m=f.match(/^nickname='([^']+)' && name_findable=true$/))) return p.nickname===m[1]&&p.name_findable===true;
-    const hm=f.match(/e164_hash='([^']+)'/); if(!hm) return false;
-    if(p.e164_hash!==hm[1]) return false;
+    const lm=f.match(/e164_last8='(\d{8})' && country_code='KR'/);
+    const hm=f.match(/e164_hash='([^']+)'/);
+    const hit=(hm&&p.e164_hash===hm[1])||(lm&&p.e164_last8===lm[1]&&p.country_code==='KR');
+    if(!hit) return false;
     return f.includes('phone_findable=true')?p.phone_findable:true;});
   return new Response(JSON.stringify({items}),{status:200});
 };
@@ -50,6 +53,8 @@ r=await call('/friends/find',{phone_verify_token:'bad.sig',q:'x'}); ok(r.s===401
 r=await call('/friends/find',{phone_verify_token:T,q:'  '}); ok(r.s===400,'빈 입력 400');
 r=await call('/friends/find',{phone_verify_token:T,q:'010-1111-2222'}); ok(r.j.found&&r.j.user.guid==='g-hong','번호(허용) 찾기');
 r=await call('/friends/find',{phone_verify_token:T,q:'010-3333-4444'}); ok(r.j.found===false,'번호(허용 안 함)는 못 찾음');
+r=await call('/friends/find',{phone_verify_token:T,q:'010-1055-6666'}); ok(r.j.found&&r.j.user.guid==='g-park','해시가 어긋나도 한국 010 번호는 뒤 8자리로 찾음');
+r=await call('/friends/find',{phone_verify_token:T,q:'+1 415 555 6666'}); ok(r.j.found===false,'외국 번호에는 뒤 8자리 보조를 쓰지 않음');
 r=await call('/friends/find',{phone_verify_token:T,q:'kim-cs'}); ok(r.j.found&&r.j.user.guid==='g-kim','번호 허용을 꺼도 아이디로는 찾음');
 // 설정
 r=await call('/friends/settings',{phone_verify_token:T,action:'get'}); ok(r.j.ok&&r.j.phone_findable===false&&r.j.name_findable===false&&r.j.mail_findable===true&&r.j.mail_id==='me-id'&&r.j.nickname==='나','설정 조회: 이름·이메일·번호 각각');

@@ -178,6 +178,8 @@ import { classifyFile, extractFile } from '/src/gopang/ai/file-extract.js';
 // 동작한다. expert-session.js의 endExpertSession()에 붙이면 죽은 코드에
 // 연결하는 셈이라 아무 효과가 없다.
 import { recordOwnerPDV, queryOwnerPdvSelfHistory, recordUserPdvForExpert } from '/src/gopang/gwp/gwp-report-client.js';
+// 2026-11-16 — SP별 대화 기록(이 기기에만 저장). 같은 페르소나를 다시 열면 이전 대화를 이어서 전달한다. 저장·재개는 이 코드가 하며 LLM 이 하지 않는다.
+import { appendTurn as _clAppend, loadThread as _clLoad, buildResumeContext as _clResume } from '/src/gopang/ui/conversation-log.js';
 import { escHtml, appendBubble, appendTyping as _sharedAppendTyping } from '/src/gopang/ui/chat-shell.js';
 // 2026-10-17: 법률 검토 모드(상위 SP_LEGAL_REVIEW_BASE + 직업군 훅) — 조립은 legal-review.js, 배너는 legal-review-ui.js
 import { _composeLegalReviewPrompt, LEGAL_REVIEW_DISCLAIMER } from '/src/gopang/ai/legal-review.js';
@@ -425,6 +427,12 @@ function _loadCfg() {
 }
 function _loadUser() {
   try { return JSON.parse(localStorage.getItem('gopang_user_v4') || 'null'); } catch { return null; }
+}
+// 대화 기록 — 상대는 이 페르소나. 법률 검토 모드는 별개 용도라 기록·재개하지 않는다.
+function _clGuid() { const u = _loadUser(); return (u && (u.ipv6 || u.guid)) || ''; }
+function _clCp() { return { kind: 'expert', id: PERSONA, name: (EXPERT_REGISTRY[PERSONA] || {}).label || PERSONA }; }
+function _clRecord(role, text) {
+  try { const g = _clGuid(); if (!g || REVIEW_MODE || typeof text !== 'string') return; _clAppend(localStorage, g, _clCp(), role, text.replace(/\s*\[EXPERT_DONE\]\s*$/, '')); } catch (e) { /* 기록 실패는 대화를 막지 않는다 */ }
 }
 function _buildCandidates() {
   const cfg = _loadCfg();
@@ -791,6 +799,10 @@ async function ensureSystemPrompt() {
   }
   systemPrompt = await composeExpertPrompt();
   messages = [{ role: 'system', content: systemPrompt }];
+  try {   // 이전에 이 페르소나와 나눈 대화가 있으면 이어서 전달(없으면 아무것도 덧붙이지 않는다)
+    const _g = _clGuid(); const _ctx = _g ? _clResume(_clLoad(localStorage, _g, _clCp())) : '';
+    if (_ctx) messages[0].content += '\n\n' + _ctx;
+  } catch (e) { /* 이어가기 실패는 새 대화로 진행 */ }
 
   // ── §U0-1 "즉시조회 가능성" (2026-08-10 신설) ──────────────────────
   // 인사말을 실제로 만들기 전에(U0-2/U8-2 요구사항) 이 사용자와 이
@@ -888,6 +900,7 @@ async function sendTurn(text, attachment) {
     }
 
     messages.push({ role: 'user', content });
+    _clRecord('user', text);
     let shown = false;
     let full = await callExpertAI(messages, (delta, fullText) => {
       if (!shown) { typing.remove(); aiBubble.style.display = ''; shown = true; }
@@ -915,6 +928,7 @@ async function sendTurn(text, attachment) {
       full = _maybeHandleServiceRedirectSuggestion(full, aiBubble);
     }
     messages.push({ role: 'assistant', content: full });
+    _clRecord('assistant', full);
     _embedReply(full);
 
     // ── [EXPERT_DONE] 태그 감지 (2026-07-20, C45 신설) ──────────────
