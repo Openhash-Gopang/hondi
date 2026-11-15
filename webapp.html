@@ -2762,12 +2762,18 @@ async function _togglePush(on) {
     if (!user?.ipv6) { if (status) status.textContent = '먼저 로그인해 주세요'; _setPushToggle(false); return; }
     try {
       if (status) status.textContent = '권한 요청 중…';
+      // 2026-11-16 — 권한 창은 누른 직후(사용자 동작 안)에 바로 띄운다. 모듈을 불러온 뒤에 띄우면 브라우저가 동작과 무관한 요청으로 보고 막는 경우가 있다.
+      if (typeof Notification !== 'undefined' && Notification.permission === 'default') await Notification.requestPermission().catch(() => {});
+      if (typeof Notification !== 'undefined' && Notification.permission === 'denied') {
+        if (status) status.textContent = '브라우저에서 알림이 차단돼 있습니다. 주소창 왼쪽 아이콘 → 사이트 설정 → 알림을 "허용"으로 바꾼 뒤 다시 켜 주세요';
+        _setPushToggle(false); return;
+      }
       const { requestPushSubscription } = await import('/src/gopang/services/push.js');
       const result = await requestPushSubscription(user.ipv6);
       if (!result.ok) throw new Error(result.reason || '구독 실패');
       _setPushToggle(true);
     } catch(e) {
-      if (status) status.textContent = '알림 권한이 거부됐거나 오류가 발생했습니다';
+      if (status) status.textContent = '알림을 켜지 못했습니다(' + (e.message || '오류') + '). 잠시 후 다시 시도해 주세요';
       _setPushToggle(false);
       console.warn('[Push]', e.message);
     }
