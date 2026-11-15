@@ -29154,6 +29154,12 @@ async function handleAuthSessionProfile(request, env, corsHeaders) {
   }), { status: 200, headers: corsHeaders });
 }
 
+// 대화 상대 찾기 계열 공통 로그인 확인 — 전화 인증 토큰(phone_verify_token) 또는 기기 키로 발급한 gopang_token(문자 인증 쿠키가 없는 기기)을 받는다.
+// 반환 모양은 _resolveGuidFromPhoneVerifyToken 과 같다({ ok, guid } | { ok:false, code, message }).
+async function _friendCaller(env, body) {
+  const r = await _signalCaller(env, body);
+  return r.ok ? { ok: true, guid: r.guid } : { ok: false, code: r.code || 'AUTH_REQUIRED', message: r.message || '로그인 증명이 필요합니다' };
+}
 // ── 대화 상대 찾기 (2026-10-28, 주피터 지시: 카카오톡 방식) ──────────────────────────
 // 정확일치만: 번호는 상대가 phone_findable 을 켠 경우에만, 아이디(가입 때 본인이 고른 이메일 ID)는 정확히 일치할 때만. AI 를 쓰지 않는다.
 // 못 찾은 이유(없음/허용 안 함)는 구분해 알려 주지 않는다 — 번호 가입 여부를 캐내는 데 쓰이지 않게.
@@ -29161,7 +29167,7 @@ const _FF_ID_CHARS = /^[A-Za-z0-9가-힣._-]{1,40}$/;
 async function handleFriendFind(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
-  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, {});   // 이용자 검색은 테스트 기간·무료 한도와 무관하게 항상 허용(2026-11-12)
+  const who = await _friendCaller(env, body);   // 이용자 검색은 테스트 기간·무료 한도와 무관하게 항상 허용(2026-11-12)
   if (!who.ok) return _err(401, who.code, who.message, corsHeaders);
   const c = _ffClassify(body.q);
   if (c.kind === 'empty') return _err(400, 'MISSING_FIELD', '찾을 전화번호나 아이디를 입력하세요', corsHeaders);
@@ -29218,7 +29224,7 @@ async function handleFriendFind(request, env, corsHeaders) {
 async function handleFriendInviteNotify(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
-  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, {});
+  const who = await _friendCaller(env, body);
   if (!who.ok) return _err(401, who.code, who.message, corsHeaders);
   const to = String(body.to_guid || '');
   if (!to || to === who.guid) return _err(400, 'MISSING_FIELD', 'to_guid 필요', corsHeaders);
@@ -29243,7 +29249,7 @@ async function handleFriendInviteNotify(request, env, corsHeaders) {
 async function handleFriendSettings(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
-  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, {});   // 이용자 검색은 테스트 기간·무료 한도와 무관하게 항상 허용(2026-11-12)
+  const who = await _friendCaller(env, body);   // 이용자 검색은 테스트 기간·무료 한도와 무관하게 항상 허용(2026-11-12)
   if (!who.ok) return _err(401, who.code, who.message, corsHeaders);
   let me;
   try { me = await _l1FindProfileByGuid(env, who.guid); } catch (e) { return _err(502, 'L1_ERROR', e.message, corsHeaders); }
@@ -29268,7 +29274,7 @@ async function handleFriendSettings(request, env, corsHeaders) {
 async function handleFriendMatch(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
-  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, {});
+  const who = await _friendCaller(env, body);
   if (!who.ok) return _err(401, who.code, who.message, corsHeaders);
   const nums = [...new Set((Array.isArray(body.numbers) ? body.numbers : []).slice(0, 50).map(_ffNormPhone).filter(Boolean))];
   if (!nums.length) return new Response(JSON.stringify({ ok: true, matches: [], checked: 0 }), { status: 200, headers: corsHeaders });
@@ -29308,7 +29314,7 @@ async function handleFriendMatch(request, env, corsHeaders) {
 async function handleFriendInviteCode(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
-  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, {});
+  const who = await _friendCaller(env, body);
   if (!who.ok) return _err(401, who.code, who.message, corsHeaders);
   const code = await _refCode(env.PHONE_VERIFY_SECRET, who.guid);
   if (env.AI_SETUP_SEALS_KV) { try { await env.AI_SETUP_SEALS_KV.put(`hondi:refcode:${code}`, who.guid); } catch (e) { return _err(502, 'KV_ERROR', '초대 코드 저장 실패', corsHeaders); } }
@@ -29321,7 +29327,7 @@ async function handleFriendInviteCode(request, env, corsHeaders) {
 async function handleFriendRefClaim(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
-  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, {});
+  const who = await _friendCaller(env, body);
   if (!who.ok) return _err(401, who.code, who.message, corsHeaders);
   const reply = (status, extra = {}) => new Response(JSON.stringify({ ok: true, status, ...extra }), { status: 200, headers: corsHeaders });
   const code = String(body.code || '').trim().toLowerCase();
