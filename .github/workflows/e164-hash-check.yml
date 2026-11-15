@@ -1,0 +1,23 @@
+name: e164 hash check
+on:
+  workflow_dispatch:
+    inputs:
+      handle:
+        description: "점검할 프로필 handle (예: @98807170)"
+        default: "@98807170"
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install requests
+      - name: Check hash consistency
+        working-directory: tests/live_smoketest
+        env:
+          PHONE_VERIFY_SECRET: ${{ secrets.PHONE_VERIFY_SECRET }}
+          PB_ADMIN_EMAIL: ${{ secrets.PB_ADMIN_EMAIL }}
+          PB_ADMIN_PASSWORD: ${{ secrets.PB_ADMIN_PASSWORD }}
+        run: python3 e164_hash_check.py "${{ github.event.inputs.handle }}"
