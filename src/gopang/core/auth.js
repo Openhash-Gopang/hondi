@@ -1620,9 +1620,22 @@ function _showPhonePopupLegacy(resolve) {
         </div>
       </div>
       <!-- 로그인 | 가입 구분 (2026-11-13, 주피터 지시: 로그인 입구가 없다) -->
-      <div id="_mode-tabs" style="display:flex;gap:6px;margin-bottom:14px;background:#f3f4f6;border-radius:10px;padding:3px">
-        <button id="_mode-login" type="button" style="flex:1;height:34px;border:none;border-radius:8px;font-family:inherit;font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:600;cursor:pointer">로그인</button>
-        <button id="_mode-signup" type="button" style="flex:1;height:34px;border:none;border-radius:8px;font-family:inherit;font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:600;cursor:pointer">가입</button>
+      <style id="_md-tabs-css">
+        #_mode-tabs{display:flex;margin:0 -4px 14px;border-bottom:1px solid #e0e0e0}
+        #_mode-tabs .md-tab{position:relative;flex:1;height:48px;border:none;background:transparent;color:#5f6368;
+          font-family:inherit;font-size:calc(0.875rem*var(--hondi-fs,1));font-weight:500;letter-spacing:.1px;cursor:pointer;
+          overflow:hidden;-webkit-tap-highlight-color:transparent;transition:color .2s,background-color .2s}
+        #_mode-tabs .md-tab:hover{background:rgba(0,121,107,.08)}
+        #_mode-tabs .md-tab:focus-visible{outline:none;background:rgba(0,121,107,.12)}
+        #_mode-tabs .md-tab:active{background:rgba(0,121,107,.16)}
+        #_mode-tabs .md-tab::after{content:"";position:absolute;left:18%;right:18%;bottom:0;height:3px;border-radius:3px 3px 0 0;
+          background:#00796B;transform:scaleX(0);transition:transform .2s cubic-bezier(.2,0,0,1)}
+        #_mode-tabs .md-tab[aria-selected="true"]{color:#00796B}
+        #_mode-tabs .md-tab[aria-selected="true"]::after{transform:scaleX(1)}
+      </style>
+      <div id="_mode-tabs" role="tablist">
+        <button id="_mode-login" class="md-tab" role="tab" type="button" aria-selected="true">로그인</button>
+        <button id="_mode-signup" class="md-tab" role="tab" type="button" aria-selected="false">가입</button>
       </div>
       <!-- 가입 진행 표시 (2026-11-15, 주피터 지시: 휴대폰 화면에서 가입을 2단계로 나눈다) -->
       <div id="_step-ind" style="display:none;margin:0 0 12px">
@@ -1666,8 +1679,8 @@ function _showPhonePopupLegacy(resolve) {
       <!-- 나비 숫자 코드 — 전화번호가 그대로 코드가 된다(2026-11-15, 주피터 지시). 정하는 칸은 없다. -->
       <div id="_code-box" style="display:none;border:1.5px solid #00796B;border-radius:12px;padding:12px 16px;background:#f0faf8;margin:0 0 12px">
         <div style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:#6b7280">내 나비 숫자 코드 · 전화번호로 정해집니다</div>
-        <div id="_code-val" style="font-size:calc(1.75rem*var(--hondi-fs,1));font-weight:700;color:#00796B;letter-spacing:3px;line-height:1.4"></div>
-        <div style="font-size:calc(0.71875rem*var(--hondi-fs,1));color:#6b7280;line-height:1.6;margin-top:2px">따로 정하지 않습니다. 내 번호는 내가 공개하기로 하기 전에는 다른 사람에게 보이지 않습니다.</div>
+        <div id="_code-val" style="font-size:min(calc(1.25rem*var(--hondi-fs,1)),5.4vw);font-weight:700;color:#00796B;letter-spacing:.5px;line-height:1.4;white-space:nowrap"></div>
+        <div style="font-size:calc(0.71875rem*var(--hondi-fs,1));color:#6b7280;line-height:1.6;margin-top:2px">내가 공개하기 전에는 보이지 않습니다.</div>
       </div>
 
       <!-- 닉네임 -->
@@ -1719,7 +1732,7 @@ function _showPhonePopupLegacy(resolve) {
         <span style="width:22px;text-align:center;color:#6b7280;font-size:calc(1.0625rem*var(--hondi-fs,1));line-height:34px;flex-shrink:0">&#128273;</span>
         <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
           <span style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:#6b7280">백업 키 받을 내 이메일</span>
-          <input id="_bke-input" type="email" maxlength="254" inputmode="email" autocapitalize="off" spellcheck="false"
+          <input id="_bke-input" type="email" autocomplete="off" maxlength="254" inputmode="email" autocapitalize="off" spellcheck="false"
             placeholder="가입 전부터 쓰던 이메일"
             style="width:100%;padding:0;height:34px;border:none;background:transparent;
                    font-size:calc(0.9375rem*var(--hondi-fs,1));font-family:inherit;outline:none;color:#111827;min-width:0"
@@ -2108,10 +2121,8 @@ function _showPhonePopupLegacy(resolve) {
     _signupMode = !!signup;
     _step = 1;
     _applyStep();
-    const on = 'background:#fff;color:#111827;box-shadow:0 1px 3px rgba(0,0,0,.12)';
-    const off = 'background:transparent;color:#6b7280;box-shadow:none';
-    _tabLogin.style.cssText  += ';' + (_signupMode ? off : on);
-    _tabSignup.style.cssText += ';' + (_signupMode ? on : off);
+    _tabLogin.setAttribute('aria-selected', String(!_signupMode));
+    _tabSignup.setAttribute('aria-selected', String(_signupMode));
   };
   _prevBtn.onclick = () => { _step = 1; _applyStep(); };
   _tabLogin.onclick  = () => _setMode(false);
