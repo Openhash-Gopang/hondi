@@ -14249,8 +14249,7 @@ export default {
     // ── SSO 인증 ──────────────────────────────────────────
     if (pathname === '/auth/issue')              return handleIssue(request, env, corsHeaders);
     // 🧪 테스트 전용 ID 입장(2026-10-09) — env.SIMPLE_AUTH_TEST==='1'일 때만 동작. 기본 꺼짐.
-    if (pathname === '/auth/test-mode')          return handleTestAuthMode(request, env, corsHeaders);
-    if (pathname === '/auth/test-enter')         return handleTestAuthEnter(request, env, corsHeaders);
+    // /auth/test-mode · /auth/test-enter(테스트 아이디 입장)는 2026-11-15 폐지(주피터 지시). 처리 함수는 남기되 경로는 열지 않는다.
     if (pathname === '/auth/test-quota')         return handleTestQuota(request, env, corsHeaders);
     if (pathname === '/auth/free-plan')          return handleFreePlan(request, env, corsHeaders);
     if (pathname === '/auth/extra-usage')        return handleExtraUsage(request, env, corsHeaders);
