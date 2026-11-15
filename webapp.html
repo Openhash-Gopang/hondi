@@ -2592,6 +2592,8 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
 <script type="module">
 /* 2026-11-16 — ① 상단 중앙 SP 이름 표시  ② ?call= : 나비가 다른 탭에서 초대한 상대와 1:1 대화를 바로 시작한다(새 탭 대화창). */
 import { renderSPLabel, setSPLabel } from './src/gopang/ui/sp-label.js';
+const _isCallTab = !!new URLSearchParams(location.search).get('call');   // replaceState 로 지우기 전에 동기로 읽는다
+import('./src/gopang/ui/navi-home.js').then(m => { if (_isCallTab) m.markCallTab(); else m.markMainTab(); }).catch(() => {});
 setSPLabel('');   // 새로 열면 기본 SP(나만의 AI 비서) — 지난 접속의 라벨을 지운다
 try {
   const raw = new URLSearchParams(location.search).get('call');
@@ -4211,6 +4213,10 @@ window.closePDV = closePDV;
   // 이미 기본 SP면 아무것도 지우지 않는다.
   window._returnToNavi = async function() {
     const logo = document.getElementById('ai-panel-logo');
+    try {   // 메인 탭이 아닌 탭(호출로 열린 대화 탭 등)의 로고는 메인 탭을 부른다
+      const nh = await import('./src/gopang/ui/navi-home.js');
+      if (!nh.isMainTab()) { if (logo) nh.flutter(logo); nh.openMain(); return; }
+    } catch {}
     try { if (logo) { logo.classList.remove('flutter'); void logo.offsetWidth; logo.classList.add('flutter'); setTimeout(() => logo.classList.remove('flutter'), 900); } } catch {}
     try {
       const m = await import('./src/gopang/ai/call-ai.js');

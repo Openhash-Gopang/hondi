@@ -209,7 +209,7 @@ if (_qs.get('ctx')) {
 }
 let _gwpSeedUsed = false;
 
-document.getElementById('tb-back').onclick = () => { location.href = RETURN; };
+document.getElementById('tb-back').onclick = async () => { const m = await import('/src/gopang/ui/navi-home.js'); if (!m.openMain()) location.href = RETURN; };   // 메인 탭을 부른다(열려 있으면 앞으로, 없으면 새로)
 
 const def = EXPERT_REGISTRY[PERSONA];
 // 법률 검토 모드: ?mode=review 로 열거나 상단 [법률 검토] 버튼으로 전환한다.
@@ -1844,5 +1844,6 @@ _resetIdle();
 
 startGreeting();
 </script>
+<script type="module" src="/src/gopang/ui/navi-home.js"></script>
 </body>
 </html>
