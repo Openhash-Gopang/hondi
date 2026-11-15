@@ -5,8 +5,8 @@
  */
 import { PROXY, _USER } from '../core/state.js';
 import { rememberUser } from './frequent-users.js';
-import { classifyQuery } from '../../worker/friend-find.js';
-import { findFriend } from './friend-find-client.js';
+import { classifyQuery, normalizePhone } from '../../worker/friend-find.js';
+import { findFriend, matchContacts, getInviteCode } from './friend-find-client.js';
 
 let _searchOverlay = null;
 let _searchTimer   = null;
@@ -61,6 +61,14 @@ export function openSearch(prefillQuery) {
         </div>
       </div>
 
+      <div style="padding:0 20px 8px">
+        <button id="_sq-contacts" type="button"
+          style="width:100%;height:40px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;
+                 color:#1A73E8;font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:600;cursor:pointer">
+          📇 연락처에서 찾기·초대하기
+        </button>
+      </div>
+
       <!-- 결과 -->
       <div id="_sq-results"
         style="max-height:360px;overflow-y:auto;padding:0 0 8px">
@@ -87,6 +95,7 @@ export function openSearch(prefillQuery) {
     if (!input.value.trim()) resultsEl.innerHTML = '';
   });
 
+  document.getElementById('_sq-contacts').onclick = () => _searchContacts(resultsEl);
   document.getElementById('_sq-btn').onclick = () => {
     const q = input.value.trim();
     if (q) _doSearch(q, '', '', resultsEl);
@@ -137,13 +146,84 @@ async function _doSearch(q, country, region, resultsEl) {
     } else if (!fr.ok) {
       resultsEl.innerHTML = msg(fr.message || '검색에 실패했습니다.');
     } else if (cq.kind === 'phone') {
-      resultsEl.innerHTML = msg('이 전화번호로 찾을 수 있는 사용자가 없습니다.<br>상대가 전화번호 찾기를 허용했는지 확인해 주세요. 이메일 ID로는 찾을 수 있어요.');
+      resultsEl.innerHTML = msg('이 전화번호로 찾을 수 있는 사용자가 없습니다.<br>아직 가입하지 않았거나 전화번호 찾기를 허용하지 않았을 수 있어요.') + '<div id="_sq-invite-one" style="text-align:center;padding:0 16px 12px"></div>';
+      _fillInviteButton(resultsEl.querySelector('#_sq-invite-one'), cq.e164, '');
     } else {
       resultsEl.innerHTML = msg('일치하는 사용자가 없습니다.<br>상대의 이름·이메일 ID·전화번호 중 하나를 정확히 입력해 주세요. 상대가 찾기를 허용한 항목으로만 찾을 수 있습니다.');
     }
   } catch (e) {
     resultsEl.innerHTML = `<div style="text-align:center;padding:24px;color:#dc2626;font-size:calc(0.8125rem*var(--hondi-fs,1))">네트워크 오류: ${e.message}</div>`;
   }
+}
+
+// ── 연락처에서 찾기·초대 ───────────────────────────────────
+// 안드로이드 크롬의 Contact Picker 로 사용자가 직접 고른 연락처만 읽는다(앱이 연락처 전체를 가져가지 않는다).
+// 가입자(상대가 전화번호 찾기를 허용한 경우)는 바로 대화, 그 밖에는 문자 앱으로 초대 문구를 보낸다 — 문자는 사용자 본인 번호로 나간다.
+let _inviteCache = null;
+async function _loadInvite() {
+  if (_inviteCache) return _inviteCache;
+  const r = await getInviteCode();
+  if (r && r.ok) _inviteCache = r;
+  return _inviteCache;
+}
+function _smsHref(tel, text) {
+  const ios = /iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+  return `sms:${tel}${ios ? '&' : '?'}body=${encodeURIComponent(text)}`;
+}
+const _esc = (t) => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const _INVITE_BTN_STYLE = 'display:inline-block;padding:6px 14px;background:#fff;color:#1A73E8;border:1px solid #1A73E8;border-radius:8px;font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:600;text-decoration:none;flex-shrink:0';
+async function _fillInviteButton(el, e164) {
+  if (!el) return;
+  const inv = await _loadInvite();
+  if (!inv) { el.textContent = ''; return; }
+  const a = document.createElement('a');
+  a.textContent = '초대 문자 보내기';
+  a.style.cssText = _INVITE_BTN_STYLE;
+  a.href = _smsHref(e164, inv.text);
+  el.innerHTML = ''; el.appendChild(a);
+}
+
+async function _searchContacts(resultsEl) {
+  const msg = (t) => `<div style="text-align:center;padding:24px 16px;color:#9ca3af;font-size:calc(0.8125rem*var(--hondi-fs,1));line-height:1.6">${t}</div>`;
+  if (!('contacts' in navigator) || !navigator.contacts?.select) {
+    resultsEl.innerHTML = msg('이 기기·브라우저에서는 연락처를 불러올 수 없습니다.<br>(안드로이드 크롬에서 지원됩니다) 전화번호나 아이디를 직접 입력해 주세요.');
+    return;
+  }
+  _loadInvite();                                   // 초대 문구를 미리 받아 둔다(버튼을 누르면 바로 문자 앱이 열리도록)
+  let picked;
+  try { picked = await navigator.contacts.select(['name', 'tel'], { multiple: true }); }
+  catch (e) { resultsEl.innerHTML = msg('연락처를 불러오지 못했습니다: ' + _esc(e.message || e)); return; }
+  if (!picked || !picked.length) return;
+  const rows = [];                                  // { name, e164 }
+  const seen = new Set();
+  for (const c of picked) {
+    const nm = (c.name && c.name[0]) || '';
+    for (const t of (c.tel || [])) {
+      const e = normalizePhone(t);
+      if (e && !seen.has(e)) { seen.add(e); rows.push({ name: nm, e164: e }); }
+    }
+  }
+  if (!rows.length) { resultsEl.innerHTML = msg('고른 연락처에 전화번호가 없습니다.'); return; }
+  const list = rows.slice(0, 50);
+  resultsEl.innerHTML = msg('연락처 확인 중...');
+  const r = await matchContacts(list.map(x => x.e164));
+  if (!r.ok) { resultsEl.innerHTML = msg(_esc(r.message || '연락처 확인에 실패했습니다.')); return; }
+  const member = new Map((r.matches || []).map(m => [m.e164, m.user]));
+  const mine = list.filter(x => member.has(x.e164)), others = list.filter(x => !member.has(x.e164));
+  const sub = 'font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b7280';
+  const rowHtml = (left, btn) => `<div style="display:flex;align-items:center;gap:12px;padding:10px 20px;border-bottom:1px solid #f9f9f9"><div style="flex:1;min-width:0;font-size:calc(0.875rem*var(--hondi-fs,1));color:#111827">${left}</div>${btn}</div>`;
+  let html = '';
+  if (mine.length) html += `<div style="padding:8px 20px;${sub}">나비웹 사용자</div>`;
+  mine.forEach((x, i) => {
+    const u = member.get(x.e164);
+    html += rowHtml(`<b>${_esc(x.name || u.nickname)}</b>${u.nickname && u.nickname !== x.name ? ` <span style="${sub}">${_esc(u.nickname)}</span>` : ''}`,
+      `<button data-m="${i}" style="padding:6px 14px;background:#1A73E8;color:#fff;border:none;border-radius:8px;font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:600;cursor:pointer;flex-shrink:0">대화</button>`);
+  });
+  if (others.length) html += `<div style="padding:8px 20px;${sub}">초대하기 · 가입하면 초대한 분께 1,000 GDC</div>`;
+  others.forEach((x, i) => { html += rowHtml(_esc(x.name || x.e164), `<span data-i="${i}"></span>`); });
+  resultsEl.innerHTML = html;
+  resultsEl.querySelectorAll('[data-m]').forEach(b => { b.onclick = () => _sendConnectRequest(member.get(mine[Number(b.dataset.m)].e164), { skipConfirm: true }); });
+  resultsEl.querySelectorAll('span[data-i]').forEach(sp => { _fillInviteButton(sp, others[Number(sp.dataset.i)].e164); });
 }
 
 // ── 사용자 카드 렌더 ──────────────────────────────────────

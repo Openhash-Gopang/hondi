@@ -80,12 +80,28 @@ void _hasRegisteredUser; // 참고용 — 실제 분기는 initAuth() 내부에�
 // initAuth()는 가입/로그인 취소, PC 차단, 기기 불일치 후 "닫기" 등의 경로에서
 // null로 resolve될 수 있다 — 그 경우에도 #app을 공개하면 게스트 모드가 되살아나므로,
 // _isRegistered()로 실제 등록 여부를 직접 재확인하고 아니면 다시 initAuth()를 띄운다.
+// 초대 문자의 가입 주소(?ref=추천코드)로 들어왔으면 코드를 기억해 둔다 — 가입을 마친 뒤 아래에서 청구한다.
+try {
+  const _ref = (new URLSearchParams(location.search).get('ref') || '').toLowerCase();
+  if (/^[0-9a-f]{10}$/.test(_ref) && !_isRegistered()) localStorage.setItem('hondi_ref', _ref);
+} catch {}
 while (!_isRegistered()) {
   await initAuth();
 }
 // 이 줄에 도달했다는 것은 곧 _isRegistered() === true라는 뜻 — 이제 대화창을 공개한다.
 document.getElementById('gopang-auth-gate')?.remove();
 document.body.classList.add('gopang-authed');
+
+// 초대받아 가입했다면 추천인에게 보상(1,000 GDC)이 가도록 서버에 청구한다(1회·서버가 신규 가입 여부 확인). 네트워크·로그인 문제면 다음 접속에 다시 시도한다.
+try {
+  const _pending = localStorage.getItem('hondi_ref');
+  if (_pending) {
+    import('./src/gopang/ui/friend-find-client.js').then(async (m) => {
+      const r = await m.claimReferral(_pending);
+      if (r && r.ok) localStorage.removeItem('hondi_ref');
+    }).catch(() => {});
+  }
+} catch {}
 
 // ★ 2026-0X-XX 신설 — 외부 페이지(대시보드 등)가 ?open=profile-composer
 // 쿼리로 프로필 작성 패널을 곧바로 열 수 있게 한다(대시보드 profile 탭의
