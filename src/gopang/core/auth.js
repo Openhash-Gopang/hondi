@@ -1916,7 +1916,10 @@ function _showPhonePopupLegacy(resolve) {
         code = arr.join('');
       } catch { code = null; }
     }
-    val.textContent = code ? `${code.slice(0, 2)}-${code.slice(2, 6)}-${code.slice(6)}` : '';
+    // 휴대폰 10-1234-5678, 서울 02-1234-5678, 그 외 지역 064-123-4567 — 지역번호 경계가 보이도록 실제 전화번호 모양으로 끊는다
+    val.textContent = code ? (code[0] === '0' && code[1] !== '0' && code[1] !== '2'
+      ? `${code.slice(0, 3)}-${code.slice(3, 6)}-${code.slice(6)}`
+      : `${code.slice(0, 2)}-${code.slice(2, 6)}-${code.slice(6)}`) : '';
     box.style.display = (_signupMode && _step === 1 && code) ? '' : 'none';
   }
 
