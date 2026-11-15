@@ -31,6 +31,7 @@ export function normalizePhone(input) {
 /**
  * 검색창 입력 해석:
  *  { kind: 'phone', e164 }  전화번호
+ *  { kind: 'last8', last8 }  번호 뒤 8자리("98807170", "@98807170"). 국가와 상관없이 같은 뒤 8자리인 사람을 모두 찾아 목록으로 돌려준다(사용자가 고른다)
  *  { kind: 'id', id }       이메일 ID(영문 소문자·숫자·-·_ 3~30자). "@naviweb.kr" 까지 붙여 써도 된다
  *  { kind: 'empty' }
  *  { kind: 'name', name }   이름(닉네임) — 상대가 "이름으로 찾기"를 허용한 경우에만, 정확히 같을 때만
@@ -41,6 +42,7 @@ export function classifyQuery(q) {
   if (!s) return { kind: 'empty' };
   const e164 = normalizePhone(s);
   if (e164) return { kind: 'phone', e164 };
+  { const dg = s.replace(/^@/, '').replace(/[\s-]/g, ''); if (/^\d{8}$/.test(dg)) return { kind: 'last8', last8: dg }; }
   const id = s.replace(/^@/, '').replace(/@(naviweb\.kr|hondi\.kr)$/i, '').trim().toLowerCase();
   if (!id) return { kind: 'empty' };
   if (/^[a-z0-9][a-z0-9_-]{1,28}[a-z0-9]$/.test(id) && /[a-z]/.test(id)) return { kind: 'id', id };   // 숫자만인 아이디는 없다

@@ -13,6 +13,9 @@ const profiles=[
  {id:'r4',guid:'g-hong2',handle:'@55556666',nickname:'홍길동',e164_hash:await h('+821055556666'),phone_findable:false,name_findable:true},
  {id:'r5',guid:'g-lee',handle:'@77778888',nickname:'이영희',e164_hash:await h('+821077778888'),phone_findable:false,name_findable:true,mail_hidden:true},
  {id:'r6',guid:'g-park',handle:'@55556666',nickname:'박민수',e164_hash:'deadbeef'.repeat(8),e164_last8:'10556666'.slice(0,8),country_code:'KR',phone_findable:true,name_findable:false},
+ {id:'r7',guid:'g-us',handle:'@US-88887777',nickname:'Sam',e164_hash:'aa'.repeat(32),e164_last8:'88887777',country_code:'US',phone_findable:true,name_findable:false},
+ {id:'r8',guid:'g-kr',handle:'@88887777',nickname:'최민',e164_hash:'bb'.repeat(32),e164_last8:'88887777',country_code:'KR',phone_findable:true,name_findable:false},
+ {id:'r9',guid:'g-cn',handle:'@CN-88887777',nickname:'Li',e164_hash:'cc'.repeat(32),e164_last8:'88887777',country_code:'CN',phone_findable:false,name_findable:false},
 ];
 const mailIds=[{id:'m4',mail_id:'lee-y',owner_user_guid:'g-lee'},{id:'m1',mail_id:'gildong',owner_user_guid:'g-hong'},{id:'m2',mail_id:'me-id',owner_user_guid:'g-me'},{id:'m3',mail_id:'kim-cs',owner_user_guid:'g-kim'}];
 const patches=[];
@@ -26,6 +29,7 @@ globalThis.fetch=async(url,opts={})=>{
     let m;
     if((m=f.match(/^guid='([^']+)'$/))) return p.guid===m[1];
     if((m=f.match(/^nickname='([^']+)' && name_findable=true$/))) return p.nickname===m[1]&&p.name_findable===true;
+    if((m=f.match(/^\(e164_last8='(\d{8})' \|\| e164~'\d{8}'\) && phone_findable=true$/))) return p.e164_last8===m[1]&&p.phone_findable===true;
     const lm=f.match(/e164_last8='(\d{8})' && country_code='KR'/);
     const hm=f.match(/e164_hash='([^']+)'/);
     const hit=(hm&&p.e164_hash===hm[1])||(lm&&p.e164_last8===lm[1]&&p.country_code==='KR');
@@ -42,12 +46,14 @@ let r=await call('/friends/find',{phone_verify_token:T,q:'gildong'}); ok(r.s===2
 ok(!('e164' in r.j.user)&&!('e164_hash' in r.j.user),'결과에 번호 필드 없음');
 r=await call('/friends/find',{phone_verify_token:T,q:'Gildong@naviweb.kr'}); ok(r.j.found,'대소문자·도메인 붙여도 찾음');
 r=await call('/friends/find',{phone_verify_token:T,q:'nobody-x'}); ok(r.s===200&&r.j.found===false,'없는 아이디');
-r=await call('/friends/find',{phone_verify_token:T,q:'@11112222'}); ok(r.j.found===false,'@8자리(전화번호 뒷자리) 검색은 없어짐');
+r=await call('/friends/find',{phone_verify_token:T,q:'@11112222'}); ok(r.j.found===false,'@8자리: 번호 찾기를 허용 안 한 사람은 못 찾음');
 r=await call('/friends/find',{phone_verify_token:T,q:'홍길동'}); ok(r.j.found&&r.j.users&&r.j.users.length===2,'같은 이름이 둘이면 목록으로');
 r=await call('/friends/find',{phone_verify_token:T,q:'김철수'}); ok(r.j.found===false,'이름 허용 안 한 사람은 이름으로 못 찾음');
 r=await call('/friends/find',{phone_verify_token:T,q:'이영희'}); ok(r.j.found&&!r.j.users&&r.j.user.guid==='g-lee','이름 하나면 단일 결과(자동 호출 대상)');
 r=await call('/friends/find',{phone_verify_token:T,q:'lee-y'}); ok(r.j.found===false,'이메일 ID 차단(mail_hidden)한 사람은 아이디로 못 찾음');
-r=await call('/friends/find',{phone_verify_token:T,q:'12345678'}); ok(r.j.found===false&&r.j.invalid===true,'숫자만은 조회하지 않음');
+r=await call('/friends/find',{phone_verify_token:T,q:'12345678'}); ok(r.j.found===false&&!r.j.invalid,'없는 뒤 8자리는 없음');
+r=await call('/friends/find',{phone_verify_token:T,q:'8888-7777'}); ok(r.j.found&&r.j.users&&r.j.users.length===2&&r.j.users.every(u=>['g-us','g-kr'].includes(u.guid)),'뒤 8자리가 같으면 국가 무관 목록(허용한 사람만)');
+r=await call('/friends/find',{phone_verify_token:T,q:'@10556666'}); ok(r.j.found&&r.j.user.guid==='g-park'&&!r.j.users,'뒤 8자리 하나면 단일 결과');
 r=await call('/friends/find',{phone_verify_token:T,q:'me-id'}); ok(r.j.self===true,'내 아이디는 self');
 r=await call('/friends/find',{phone_verify_token:'bad.sig',q:'x'}); ok(r.s===401||r.s===400,'토큰 무효 거부 '+r.s);
 r=await call('/friends/find',{phone_verify_token:T,q:'  '}); ok(r.s===400,'빈 입력 400');
