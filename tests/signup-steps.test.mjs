@@ -55,3 +55,7 @@ test('전화 입력 칸에는 문구·국기 없이 아이콘만 두고, 이용 
   assert.match(src, /id="_phone-input" type="tel" aria-label="전화번호"/);
   assert.match(src, /_terms-line'\)\.style\.display = s2 \? '' : 'none'/);
 });
+
+test('로그인 화면에서 가입되지 않은 번호여도 안내 문구를 띄우지 않는다', () => {
+  assert.ok(!src.includes('가입되지 않은 번호입니다'));
+});

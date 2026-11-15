@@ -2360,7 +2360,7 @@ function _showPhonePopupLegacy(resolve) {
 
     // ── 숫자 코드(digit_code_id) 생성 — 한국(휴대폰/지역번호)만 해당 ──
     // phoneToDigits()가 휴대폰/지역번호를 10자리로 인코딩한다(이전 대화에서
-    // 정한 규칙: 휴대폰="00"+8자리, 서울="0"+"2"+8자리, 그 외 지역=
+    // 정한 규칙: 휴대폰="10"+8자리, 서울="0"+"2"+8자리, 그 외 지역=
     // "0"+지역번호(2자리)+7자리). 실패해도 가입 자체는 계속 진행한다.
     // 2026-07-27부터 이 값이 나비 코드 시각 렌더링(hondi-digit-code.js)의
     // 유일한 입력이 된다 — 색상 코드(GUID 기반)는 잠정 중단.
@@ -2645,8 +2645,7 @@ function _showPhonePopupLegacy(resolve) {
       if (!_signupMode) {
         // 로그인 화면인데 가입되지 않은 번호 — 가입 화면으로 넘겨 이어서 입력하게 한다.
         _setMode(true);
-        phoneErr.textContent = '가입되지 않은 번호입니다. 아이디와 이메일 ID를 입력해 가입해 주세요.';
-        phoneErr.style.display = 'block';
+        phoneErr.style.display = 'none';
         nickInput.focus();
         btn.style.opacity = '1'; btn.style.pointerEvents = '';
         return;
