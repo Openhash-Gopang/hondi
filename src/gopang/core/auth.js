@@ -1685,9 +1685,8 @@ function _showPhonePopupLegacy(resolve) {
       <div id="_nick-field"
            style="display:flex;align-items:flex-end;gap:12px;padding:2px 0 6px;
                   border:0;border-bottom:1.5px solid #e5e7eb;margin-bottom:10px">
-        <span style="width:22px;text-align:center;color:#6b7280;font-size:calc(1.0625rem*var(--hondi-fs,1));line-height:34px;flex-shrink:0">&#9786;</span>
-        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
-          <span style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:#6b7280">아이디</span>
+        <div style="flex:1;min-width:0;display:flex;align-items:center;gap:8px">
+          <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#6b7280;flex-shrink:0;width:4.6em">아이디</span>
           <input id="_nick-input" type="text" maxlength="20"
             placeholder="나비가 나를 부를 이름"
             style="width:100%;padding:0;height:34px;border:none;background:transparent;
@@ -1701,12 +1700,11 @@ function _showPhonePopupLegacy(resolve) {
       <div id="_mid-field"
            style="display:flex;align-items:flex-end;gap:12px;padding:2px 0 6px;
                   border:0;border-bottom:1.5px solid #e5e7eb;margin-bottom:10px">
-        <span style="width:22px;text-align:center;color:#6b7280;font-size:calc(1.0625rem*var(--hondi-fs,1));line-height:34px;flex-shrink:0">&#9993;</span>
-        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
-          <span style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:#6b7280">이메일 ID</span>
-          <div style="display:flex;align-items:center;gap:4px">
+        <div style="flex:1;min-width:0;display:flex;align-items:center;gap:8px">
+          <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#6b7280;flex-shrink:0;width:4.6em">이메일 ID</span>
+          <div style="flex:1;min-width:0;display:flex;align-items:center;gap:4px">
             <input id="_mid-input" type="text" maxlength="30" inputmode="latin" autocapitalize="off" spellcheck="false"
-              placeholder="처음 가입할 때만 (영문 소문자·숫자)"
+              placeholder="영문 소문자·숫자"
               style="flex:1;padding:0;height:34px;border:none;background:transparent;
                      font-size:calc(0.9375rem*var(--hondi-fs,1));font-family:inherit;outline:none;color:#111827;min-width:0"
               autocomplete="off"/>

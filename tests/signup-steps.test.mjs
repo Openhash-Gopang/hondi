@@ -63,3 +63,9 @@ test('전화 입력 칸에는 문구·국기 없이 아이콘만 두고, 이용 
 test('로그인 화면에서 가입되지 않은 번호여도 안내 문구를 띄우지 않는다', () => {
   assert.ok(!src.includes('가입되지 않은 번호입니다'));
 });
+
+test('아이디·이메일 ID는 아이콘 없이 이름과 입력칸이 한 줄에 있다', () => {
+  assert.ok(!src.includes('&#9786;') && !src.includes('&#9993;'));
+  assert.match(src, /width:4\.6em">아이디<\/span>\s*<input id="_nick-input"/);
+  assert.match(src, /width:4\.6em">이메일 ID<\/span>/);
+});
