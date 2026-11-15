@@ -417,6 +417,13 @@ body.gopang-authed #gopang-auth-gate{display:none}
    표시하며 클릭 시 편집 가능 — 태그라인만 고정 문구로 추가된 것이고
    이름 편집 기능 자체는 바뀌지 않았다. 배지형 border/background는
    플레인 텍스트로 단순화. */
+/* 2026-11-15(주피터 지시): 헤더 좌측 "나비" 글자를 노란 나비 로고로 교체. 로고를 누르면 현재 SP를 닫고
+   기본 SP(나만의 AI 비서)로 돌아간다. 이름 글자·편집 아이콘은 숨긴다(요소는 기존 스크립트 호환을 위해 유지). */
+#ai-panel-logo{flex-shrink:0;width:36px;height:36px;padding:0;margin:0 2px 0 0;border:0;background:transparent;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+#ai-panel-logo img{width:32px;height:32px;display:block;pointer-events:none}
+#ai-panel-logo:active img{transform:scale(.92)}
+#ai-panel-name,#ai-panel-name-input,#ai-panel-name-edit-icon{display:none !important}
 #ai-panel-name-wrap{
   flex:1;display:flex;align-items:center;justify-content:flex-start;
   gap:4px;cursor:pointer;min-width:0;padding:0 4px;
@@ -1394,12 +1401,13 @@ html.is-embedded .install-banner{display:none!important}
            (2026-07-27: "나비" 배지 박스 + "AI 비서" 부제 2줄 → 1줄로 축약.
            굵은 글씨 부분만 hondi_assistant_name을 표시·편집한다 —
            태그라인은 고정 문구, 이름 자체는 사용자가 지은 이름 그대로.) -->
-      <div id="ai-panel-name-wrap" onclick="_editAIName()" title="AI 비서 이름 변경">
+      <button id="ai-panel-logo" type="button" onclick="_returnToNavi()" title="나만의 AI 비서로 돌아가기" aria-label="나만의 AI 비서로 돌아가기"><img src="/icons/navi-icon-192.png?v=20261015" alt="나비" width="32" height="32"></button>
+      <div id="ai-panel-name-wrap">
         <div id="ai-panel-name-line">
           <span id="ai-panel-name">나비</span>
           <input id="ai-panel-name-input" type="text" maxlength="16"
                  placeholder="AI 비서 이름" autocomplete="off">
-          <span id="ai-panel-name-tagline">, 최신 버전</span>
+          <span id="ai-panel-name-tagline">최신 버전</span>
         </div>
         <svg id="ai-panel-name-edit-icon" width="12" height="12" viewBox="0 0 24 24"
              fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -4168,6 +4176,16 @@ window.closePDV = closePDV;
     } catch {}
     document.getElementById('ai-panel-name').textContent = stored;
   })();
+
+  // 2026-11-15 — 헤더 나비 로고: 현재 SP(K-Compose·전문가 등)를 닫고 기본 SP(나만의 AI 비서)로 복귀.
+  // 이미 기본 SP면 아무것도 지우지 않는다.
+  window._returnToNavi = async function() {
+    try {
+      const m = await import('./src/gopang/ai/call-ai.js');
+      if (m._isDefaultSP()) return;
+      await m.returnToDefaultAssistant();
+    } catch (e) { console.warn('[Navi] 기본 비서 복귀 실패:', e && e.message); }
+  };
 
   window._editAIName = function() {
     const nameEl  = document.getElementById('ai-panel-name');
