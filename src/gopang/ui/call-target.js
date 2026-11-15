@@ -64,37 +64,58 @@ export function matchService(target, services) {
 }
 
 /**
- * 호출 대상을 찾는다. deps: { expertRegistry, services, findFriend(q), searchEntities(q) }
- * 반환: { target, candidates:[{type,id,name,user?}], kind } — candidates 가 비면 "못 찾음".
- *       null — 이 문장은 호출 요청이 아니다(기존 흐름으로).
+ * 호출 대상을 찾는다(주피터 지시 순서: 내 친구 → 전문가 → 기관 → 서비스 → 나비웹 사용자 전체).
+ * 앞의 네 단계는 전부 기기 안(메모리)에서 끝나므로 네트워크를 기다리지 않는다. 마지막 단계만 서버(/friends/find)를 부른다.
+ * deps: { friendsLocal(target)→[user], expertRegistry, institutionIndex(target,{fuzzy})→[{guid,name}], services, findFriend(q), now() }
+ * 반환: { target, kind, candidates, trace:[{step,ms,hits}], error? } | null(호출 요청이 아님)
  */
 export async function resolveCallTarget(text, deps) {
   const p = parseCallRequest(text);
   if (!p) return null;
+  const now = deps.now || (() => Date.now());
   const kind = classifyTarget(p.target);
-  const out = { target: p.target, kind, candidates: [] };
-  const ex = matchExpert(p.target, deps.expertRegistry);
-  if (ex) { out.candidates.push(ex); return out; }
-  const sv = matchService(p.target, deps.services);
-  if (sv) { out.candidates.push(sv); return out; }
+  const out = { target: p.target, kind, candidates: [], trace: [] };
+  const step = async (name, fn) => {
+    const t0 = now(); let hits = 0;
+    try { hits = (await fn()) || 0; } catch (e) { out.error = out.error || (e && e.message) || 'step_failed'; }
+    out.trace.push({ step: name, ms: Math.round((now() - t0) * 10) / 10, hits });
+    return hits;
+  };
+  // 1) 내 친구(이 기기에 저장된, 전에 찾거나 연결한 사용자)
+  if (kind === 'name' || kind === 'id' || kind === 'phone') {
+    if (await step('friends', () => {
+      const us = (deps.friendsLocal && deps.friendsLocal(p.target)) || [];
+      us.forEach(u => out.candidates.push({ type: 'person', id: u.guid || u.handle, name: u.nickname || u.handle || p.target, user: u }));
+      return us.length;
+    })) return out;
+  }
+  // 2) 전문가 페르소나
+  if (await step('expert', () => { const ex = matchExpert(p.target, deps.expertRegistry); if (ex) out.candidates.push(ex); return ex ? 1 : 0; })) return out;
+  // 3) 기관 SP — 사람 이름처럼 보이는 말은 정확히 같은 이름만, 기관명처럼 보이면 부분 일치도
+  if (await step('institution', () => {
+    const rows = (deps.institutionIndex && deps.institutionIndex(p.target, { fuzzy: kind === 'other' })) || [];
+    rows.forEach(r => out.candidates.push({ type: 'institution', id: r.guid, name: r.name }));
+    return rows.length;
+  })) return out;
+  // 4) K-서비스
+  if (await step('service', () => { const sv = matchService(p.target, deps.services); if (sv) out.candidates.push(sv); return sv ? 1 : 0; })) return out;
+  // 5) 나비웹 사용자 전체(서버) — 이름·번호·아이디일 때만
   if (kind === 'phone' || kind === 'id' || kind === 'name') {
-    try {
+    await step('users', async () => {
       const r = await deps.findFriend(p.target);
       const users = r && r.ok !== false ? (r.users || (r.found && r.user ? [r.user] : [])) : [];
-      for (const u of users) out.candidates.push({ type: 'person', id: u.guid || u.handle, name: u.nickname || u.handle || p.target, user: u });
       if (r && r.ok === false) out.error = r.error || 'find_failed';
-    } catch (e) { out.error = e && e.message ? e.message : 'find_failed'; }
-    if (out.candidates.length) return out;
-  }
-  if (kind === 'other' || kind === 'name') {
-    try {
-      const rows = (await deps.searchEntities(p.target)) || [];
-      for (const r of rows) {
-        if (r && (r.entity_type === 'institution' || r.entity_type === 'org') && r.primary_guid) {
-          out.candidates.push({ type: 'institution', id: r.primary_guid, name: r.name || p.target });
-        }
-      }
-    } catch (e) { out.error = out.error || (e && e.message) || 'search_failed'; }
+      users.forEach(u => out.candidates.push({ type: 'person', id: u.guid || u.handle, name: u.nickname || u.handle || p.target, user: u }));
+      return users.length;
+    });
   }
   return out;
+}
+
+const _STEP_NAMES = { friends: '내 친구', expert: '전문가', institution: '기관', service: '서비스', users: '나비웹 사용자' };
+/** 사용자에게 보여 줄 "찾은 순서" 한 줄. 예: 내 친구 ✗ → 전문가 ✗ → 기관 ✗ → 서비스 ✗ → 나비웹 사용자 ✓ (0.4초) */
+export function traceLine(trace) {
+  if (!Array.isArray(trace) || !trace.length) return '';
+  const total = trace.reduce((a, t) => a + (t.ms || 0), 0);
+  return trace.map(t => `${_STEP_NAMES[t.step] || t.step} ${t.hits ? '✓' : '✗'}`).join(' → ') + ` (${(total / 1000).toFixed(2)}초)`;
 }

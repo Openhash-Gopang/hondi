@@ -71,7 +71,8 @@ import { _matchUserSearchIntent, _USER_SEARCH_ACTION, _USER_SEARCH_EXCLUDE } fro
 import { loadFrequent, matchFrequent } from '../ui/frequent-users.js';
 import { loadFavorites, matchFavorite } from '../ui/favorites.js';
 import { setSPLabel, getSPLabel, renderSPLabel } from '../ui/sp-label.js';
-import { resolveCallTarget } from '../ui/call-target.js';
+import { resolveCallTarget, traceLine } from '../ui/call-target.js';
+import { loadCounterpartIndex, lookupCounterpart, idbStore } from '../ui/counterpart-index.js';
 import { findFriend } from '../ui/friend-find-client.js';
 import { rememberUser } from '../ui/frequent-users.js';
 import { guardReply } from './reply-guard.js';
@@ -5338,17 +5339,26 @@ async function _openCounterpart(c, userText, tab) {
   appendBubble('ai', `${c.name}을(를) 열 수 없습니다. 잠시 후 다시 시도해 주세요.`);
 }
 const _TYPE_NAME = { person: '사용자', expert: '전문가 AI', service: '서비스', institution: '기관 AI' };
+let _cpIndexP = null;
+function _getCounterpartIndex() {
+  if (!_cpIndexP) {
+    const base = (CFG.endpoint || '').replace(/\/+$/, '');
+    _cpIndexP = loadCounterpartIndex({ store: idbStore(), fetchIndex: async () => { const r = await fetch(`${base}/counterparts/index`, { signal: AbortSignal.timeout(15000) }); if (!r.ok) throw new Error('index ' + r.status); return r.json(); } })
+      .then(i => { if (!i) _cpIndexP = null; return i; }).catch(() => { _cpIndexP = null; return null; });
+  }
+  return _cpIndexP;
+}
+try { setTimeout(() => { _getCounterpartIndex(); }, 4000); } catch {}   // 앱을 연 직후 백그라운드로 미리 받아 둔다
 async function _handleCallRequest(userText, _preTab) {
   if (typeof userText !== 'string' || userText.length > 40) return false;
+  const idx = await Promise.race([_getCounterpartIndex(), new Promise(r => setTimeout(() => r(null), 1500))]);
+  const _me = _USER?.guid || _USER?.ipv6;
   const res = await resolveCallTarget(userText, {
     expertRegistry: EXPERT_REGISTRY,
     services: (typeof window !== 'undefined' && window.GWP_REGISTRY) || [],
+    friendsLocal: (t) => { try { const w = String(t).replace(/^@/, '').toLowerCase(); return loadFrequent(localStorage, _me).filter(u => [u.nickname, u.handle, u.mail_id].some(x => x && String(x).replace(/^@/, '').toLowerCase() === w)); } catch { return []; } },
+    institutionIndex: (t, o) => (idx ? lookupCounterpart(idx, t, o) : []),
     findFriend,
-    searchEntities: async (q) => {
-      const base = (CFG.endpoint || '').replace(/\/+$/, '');
-      const r = await fetch(`${base}/search`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ q, p_lat: _userLocation?.lat ?? null, p_lng: _userLocation?.lng ?? null }), signal: AbortSignal.timeout(8000) });
-      return r.ok ? await r.json() : [];
-    },
   });
   if (!res) return false;
   const cands = res.candidates;
@@ -5359,14 +5369,14 @@ async function _handleCallRequest(userText, _preTab) {
     if (_preTab && !_preTab.closed) { try { _preTab.close(); } catch {} }
     const m = res.error
       ? `"${res.target}"을(를) 찾는 중 오류가 났습니다. 잠시 후 다시 시도해 주세요.`
-      : `"${res.target}"을(를) 찾지 못했습니다. 이름·전화번호 찾기는 상대가 찾기를 허용한 경우에만 됩니다. 아이디(@…)나 전화번호로 다시 시도해 보세요.`;
+      : `"${res.target}"을(를) 찾지 못했습니다. 이름·전화번호 찾기는 상대가 찾기를 허용한 경우에만 됩니다. 아이디(@…)나 전화번호로 다시 시도해 보세요.\n🔎 ${traceLine(res.trace)}`;
     appendBubble('ai', m); history.push({ role: 'assistant', content: m });
     try { openSearch(res.target); } catch {}
     return true;
   }
   if (cands.length === 1) {
     const c = cands[0];
-    const m = `${_TYPE_NAME[c.type] || '상대'} ${c.name}을(를) 새 탭 대화창으로 초대합니다.`;
+    const m = `${_TYPE_NAME[c.type] || '상대'} ${c.name}을(를) 새 탭 대화창으로 초대합니다.\n🔎 ${traceLine(res.trace)}`;
     appendBubble('ai', m); history.push({ role: 'assistant', content: m });
     await _openCounterpart(c, userText, _preTab);
     return true;
