@@ -26,12 +26,32 @@ export async function e164LookupHash(secret, e164) {
   return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-/** 정확일치 조회 필터: 새 계정(e164_hash) + 옛 계정(평문 e164) 모두. e164 는 호출부가 이미 정규화한 값이어야 한다. */
+/**
+ * 한국 휴대폰의 옛(=현재 가입 화면이 쓰는) 저장 모양. 가입 화면(auth.js COUNTRIES.KR)은 국가번호 +82 뒤에 "010"을 그대로 붙여
+ * "+8201098807170"(0 이 남은 모양)을 만들고, PB 훅은 그 문자열 그대로 e164_hash 를 계산한다. Worker 는 입력을 표준형 "+821098807170"으로
+ * 바꿔 조회해 왔기 때문에 해시가 영영 맞지 않았다(2026-11-16 진단: 저장된 e164_enc 를 복호화해 다시 계산하면 일치, 표준형으로는 불일치).
+ * 표준형 입력이면 이 모양을, 이 모양이면 표준형을 돌려준다(둘 다 아니면 null).
+ */
+export function krMobileOtherForm(e164) {
+  const s = String(e164 || '');
+  let m = /^\+8210(\d{8})$/.exec(s); if (m) return '+82010' + m[1];
+  m = /^\+82010(\d{8})$/.exec(s); if (m) return '+8210' + m[1];
+  return null;
+}
+
+/** 정확일치 조회 필터: 새 계정(e164_hash) + 옛 계정(평문 e164) 모두. 한국 휴대폰은 두 가지 모양(표준형·0 이 남은 모양)을 함께 본다. */
 export async function profilePhoneFilter(env, e164) {
-  const plain = `e164='${q(e164)}'`;
-  if (!env || !env.PHONE_VERIFY_SECRET) return plain;              // 비밀값이 없으면 예전 동작 그대로
-  const h = await e164LookupHash(env.PHONE_VERIFY_SECRET, e164);
-  return `(e164_hash='${h}' || ${plain})`;
+  const other = krMobileOtherForm(e164);
+  if (!other) {                                                      // 그 밖의 번호: 예전 모양 그대로
+    const plain = `e164='${q(e164)}'`;
+    if (!env || !env.PHONE_VERIFY_SECRET) return plain;
+    return `(e164_hash='${await e164LookupHash(env.PHONE_VERIFY_SECRET, e164)}' || ${plain})`;
+  }
+  const forms = [e164, other];
+  const plain = forms.map(f => `e164='${q(f)}'`);
+  if (!env || !env.PHONE_VERIFY_SECRET) return `(${plain.join(' || ')})`;
+  const hs = []; for (const f of forms) hs.push(`e164_hash='${await e164LookupHash(env.PHONE_VERIFY_SECRET, f)}'`);
+  return `(${hs.concat(plain).join(' || ')})`;
 }
 
 /**

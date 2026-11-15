@@ -15,7 +15,7 @@ import { handleAiChat, handleEscalate } from './src/worker/ai-chat-handler.js';
 import { prepareDoctorRequest, doctorRateLimits } from './src/worker/kdoctor-guard.js';
 import { handleOrderQueue } from './src/worker/order-queue-handler.js';
 import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
-import { profilePhoneFilter, friendPhoneFilter, numberForProfile, last8Filter, pickGuidByLast8, e164LookupHash as _e164Hash } from './src/worker/phone-lookup.js';
+import { profilePhoneFilter, friendPhoneFilter, numberForProfile, krMobileOtherForm, last8Filter, pickGuidByLast8, e164LookupHash as _e164Hash } from './src/worker/phone-lookup.js';
 import { validateSignalInput as _sigValidate, canDeleteSignal as _sigCanDelete, sendRateOk as _sigRateOk } from './src/worker/signal-auth.js';
 import { classifyQuery as _ffClassify, publicCard as _ffPublicCard, rateLimitOk as _ffRateOk, normalizePhone as _ffNormPhone } from './src/worker/friend-find.js';
 import { referralCode as _refCode, isReferralCode as _isRefCode, inviteText as _refInviteText, inviteLink as _refInviteLink, withinClaimWindow as _refInWindow, REFERRAL_REWARD_KRW, REFERRAL_MAX_REWARDS } from './src/worker/referral.js';
@@ -29213,7 +29213,8 @@ async function handleDiagE164Hash(request, env, corsHeaders) {
     if (!p) return new Response(JSON.stringify({ found: false }), { status: 200, headers: corsHeaders });
     const secret = env.PHONE_VERIFY_SECRET || '';
     const h = secret ? await _e164Hash(secret, '+8210' + (p.e164_last8 || '')) : '';
-    return new Response(JSON.stringify({ found: true, worker_secret_set: !!secret, worker_secret_len: secret.length, worker_hash_equals_stored: !!h && h === p.e164_hash }), { status: 200, headers: corsHeaders });
+    const h0 = secret ? await _e164Hash(secret, '+82010' + (p.e164_last8 || '')) : '';
+    return new Response(JSON.stringify({ found: true, worker_secret_set: !!secret, worker_secret_len: secret.length, worker_hash_equals_stored: !!h && h === p.e164_hash, worker_hash_equals_stored_with_leading0: !!h0 && h0 === p.e164_hash }), { status: 200, headers: corsHeaders });
   } catch (e) { return _err(502, 'DIAG_ERROR', String(e && e.message || e), corsHeaders); }
 }
 
@@ -29341,7 +29342,7 @@ async function handleFriendMatch(request, env, corsHeaders) {
   }
   const matches = [];          // [{ e164: 보낸 번호, user: 공개 카드 }] — 보낸 번호를 그대로 돌려주므로 새로 알려 주는 번호 정보는 없다
   const hashToNum = new Map();
-  if (env.PHONE_VERIFY_SECRET) for (const e of nums) hashToNum.set(await _e164Hash(env.PHONE_VERIFY_SECRET, e), e);
+  if (env.PHONE_VERIFY_SECRET) for (const e of nums) { hashToNum.set(await _e164Hash(env.PHONE_VERIFY_SECRET, e), e); const o = krMobileOtherForm(e); if (o) hashToNum.set(await _e164Hash(env.PHONE_VERIFY_SECRET, o), e); }
   try {
     const l1 = await _l1AdminToken(env);
     for (let i = 0; i < nums.length; i += 25) {
