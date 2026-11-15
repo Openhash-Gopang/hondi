@@ -2055,8 +2055,8 @@ function _showPhonePopupLegacy(resolve) {
     _midTimer = setTimeout(async () => {
       const c = await _checkMailIdAvailable(v);
       if (midInput.value.trim().toLowerCase() !== v) return;   // 그 사이 입력이 바뀌었으면 옛 결과는 버린다
-      if (c.ok === true) midHint.innerHTML = `<span style="color:#16a34a">✓ 쓸 수 있습니다. 내 메일 주소: ${v}@naviweb.kr</span>`;
-      else if (c.ok === false) midHint.innerHTML = `<span style="color:#dc2626">${c.message}</span>`;
+      if (c.ok === true) midHint.innerHTML = '';
+      else if (c.ok === false) midHint.innerHTML = '<span style="color:#dc2626">사용할 수 없습니다.</span>';
       else midHint.innerHTML = '';
     }, 400);
   });
@@ -2076,22 +2076,8 @@ function _showPhonePopupLegacy(resolve) {
       nickErr.insertAdjacentElement('afterend', nickHintEl);
     }
     if (nick.length < 2) { nickHintEl.innerHTML = ''; return; }
-    nickHintEl.innerHTML = '<span style="color:#9ca3af">확인 중…</span>';
-    _nickTimer = setTimeout(async () => {
-      try {
-        const nickFilter = encodeURIComponent(`nickname='${nick}'`);
-        const r = await fetch(`${L1_URL}?filter=${nickFilter}&perPage=1`);
-        const d = await r.json();
-        const total = d.totalItems ?? d.items?.length ?? 0;
-        if (total === 0) {
-          nickHintEl.innerHTML = `<span style="color:#16a34a">✓ 처음 사용하는 아이디입니다.</span>`;
-        } else {
-          nickHintEl.innerHTML =
-            `<span style="color:#f59e0b">⚠ 이미 ${total}명이 사용 중입니다.</span> ` +
-            `<span style="color:#9ca3af">전화번호로 구분되니 그대로 진행하셔도 돼요.</span>`;
-        }
-      } catch { nickHintEl.innerHTML = ''; }
-    }, 400);
+    // 아이디는 전화번호로 구분되어 같은 이름도 쓸 수 있다 — 안내 문구를 두지 않는다
+    nickHintEl.innerHTML = '';
   });
 
   const btn = document.getElementById('_auth-btn');
@@ -2675,7 +2661,7 @@ function _showPhonePopupLegacy(resolve) {
       }
       const midCheck = await _checkMailIdAvailable(mailIdRaw);
       if (midCheck.ok === false) {
-        midErr.textContent = midCheck.message;
+        midErr.textContent = '사용할 수 없습니다.';
         midErr.style.display = 'block';
         midInput.focus();
         btn.style.opacity = '1'; btn.style.pointerEvents = '';

@@ -79,3 +79,10 @@ test('아이디·이메일 ID는 아이콘 없이 이름과 입력칸이 한 줄
   assert.match(src, /width:4\.6em">아이디<\/span>\s*<input id="_nick-input"/);
   assert.match(src, /width:4\.6em">이메일 ID<\/span>/);
 });
+
+test('아이디·이메일 ID는 "사용할 수 있다"는 안내 없이, 쓸 수 없을 때만 "사용할 수 없습니다."를 보인다', () => {
+  assert.ok(!src.includes('처음 사용하는 아이디입니다'));
+  assert.ok(!src.includes('쓸 수 있습니다. 내 메일 주소'));
+  assert.ok(!src.includes('이미 ${total}명이 사용 중'));
+  assert.ok((src.match(/사용할 수 없습니다\./g) || []).length >= 2);
+});
