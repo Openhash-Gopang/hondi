@@ -13,7 +13,7 @@
   function channel() { if (bc || typeof g.BroadcastChannel !== 'function') return bc; try { bc = new g.BroadcastChannel(CH); } catch (e) { bc = null; } return bc; }
   function isMainTab() { try { return g.name === MAIN_WINDOW; } catch (e) { return false; } }
   function markMainTab() { try { g.name = MAIN_WINDOW; } catch (e) {} }
-  function markCallTab() { try { g.name = 'naviweb-call'; } catch (e) {} }
+  function markCallTab() { try { g.name = 'naviweb-call-' + uid; } catch (e) {} }
 
   // 사용자 동작(클릭) 안에서 동기로 호출해야 팝업 차단을 피한다.
   function openMain() {
@@ -41,6 +41,64 @@
     try { c.postMessage({ t: 'main-up', id: uid }); } catch (e) {}
   }
 
+
+  // ── 열린 나비웹 탭 목록 (2026-11-16) ─────────────────────────────────
+  // 메인 탭 밖의 탭(전문가·기관·친구 대화창)이 4초마다 자기 정보를 알리고, 메인 탭이 모아 목록으로 보여 준다.
+  // BroadcastChannel 은 같은 출처(app.naviweb.kr)·같은 브라우저에서만 닿는다 — 다른 도메인 페이지는 목록에 나오지 않는다.
+  var TABS_CH = 'naviweb-tabs', BEAT_MS = 4000, STALE_MS = 11000;
+  var tbc = null, tabInfo = { kind: '', label: '' }, tabMap = {}, tabListener = null, beatTimer = null;
+  function tabsChannel() { if (tbc || typeof g.BroadcastChannel !== 'function') return tbc; try { tbc = new g.BroadcastChannel(TABS_CH); } catch (e) { tbc = null; } return tbc; }
+  function guessKind() {
+    var p = (g.location && g.location.pathname) || '';
+    if (/expert-chat/.test(p)) return 'expert';
+    if (/regional-gov/.test(p)) return 'institution';
+    if (/^naviweb-call/.test(g.name || '')) return 'friend';
+    return 'service';
+  }
+  function setTabInfo(o) { if (!o) return; if (o.kind) tabInfo.kind = o.kind; if (o.label) tabInfo.label = String(o.label).slice(0, 40); }
+  function selfTab() {
+    var t = (g.document && g.document.title) || '';
+    return { id: uid, name: g.name, kind: tabInfo.kind || guessKind(), label: tabInfo.label || t.replace(/\s*[|·-]\s*나비웹.*$/, '') || '나비웹', ts: Date.now() };
+  }
+  function beat() { var c = tabsChannel(); if (c) try { c.postMessage({ t: 'hello', tab: selfTab() }); } catch (e) {} }
+  // 메인 탭이 아닌 탭은 자신을 알린다.
+  function registerTab(opts) {
+    setTabInfo(opts);
+    if (isMainTab()) return;
+    try { if (!g.name) g.name = 'naviweb-tab-' + uid; } catch (e) {}   // 이름이 있어야 메인이 window.open('', 이름)으로 다시 찾는다
+    var c = tabsChannel(); if (!c || beatTimer) return;
+    c.addEventListener('message', function (ev) {
+      var d = ev && ev.data; if (!d) return;
+      if (d.t === 'ping') beat();
+      else if (d.t === 'goto' && d.to === uid) { try { g.focus(); } catch (e) {} }
+    });
+    beat(); beatTimer = setInterval(beat, BEAT_MS);
+    g.addEventListener('pagehide', function () { try { c.postMessage({ t: 'bye', id: uid }); } catch (e) {} });
+    g.document.addEventListener('visibilitychange', function () { if (!g.document.hidden) beat(); });
+  }
+  function pruneTabs() { var now = Date.now(); Object.keys(tabMap).forEach(function (k) { if (now - tabMap[k].seen > STALE_MS) delete tabMap[k]; }); }
+  function listTabs() { pruneTabs(); return Object.keys(tabMap).map(function (k) { return tabMap[k]; }).sort(function (a, b) { return b.seen - a.seen; }); }
+  // 메인 탭이 부른다: 탭 목록이 바뀔 때마다 fn(목록)을 호출한다. 해제 함수를 돌려준다.
+  function watchTabs(fn) {
+    var c = tabsChannel(); if (!c) return function () {};
+    tabListener = fn;
+    c.addEventListener('message', function (ev) {
+      var d = ev && ev.data; if (!d) return;
+      if (d.t === 'hello' && d.tab && d.tab.id !== uid) { var t = d.tab; t.seen = Date.now(); tabMap[t.id] = t; fn(listTabs()); }
+      else if (d.t === 'bye' && tabMap[d.id]) { delete tabMap[d.id]; fn(listTabs()); }
+    });
+    try { c.postMessage({ t: 'ping' }); } catch (e) {}
+    setInterval(function () { var n = Object.keys(tabMap).length; pruneTabs(); if (Object.keys(tabMap).length !== n) fn(listTabs()); }, BEAT_MS);
+    return function () { tabListener = null; };
+  }
+  // 사용자 동작(클릭) 안에서 동기로 호출한다. 돌려주는 값: true = 이동을 시도함.
+  function gotoTab(tab) {
+    if (!tab) return false;
+    var c = tabsChannel(); try { if (c) c.postMessage({ t: 'goto', to: tab.id }); } catch (e) {}
+    try { var w = g.open('', tab.name); if (w) { try { if (w.location.href === 'about:blank') { w.close(); return false; } } catch (e) {} w.focus(); } } catch (e) {}
+    return true;
+  }
+
   function flutter(el) { try { el.classList.remove('navi-flutter'); void el.offsetWidth; el.classList.add('navi-flutter'); setTimeout(function () { el.classList.remove('navi-flutter'); }, 900); } catch (e) {} }
 
   var CSS = '#navi-home-logo{position:fixed;top:8px;left:8px;z-index:2147483000;width:40px;height:40px;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 1px 6px rgba(0,0,0,.25);cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}' +
@@ -58,9 +116,10 @@
   function init() {
     var d = g.document; if (!d || (d.documentElement && d.documentElement.hasAttribute('data-navi-home-off'))) return;
     if (d.body) mountLogo(); else d.addEventListener('DOMContentLoaded', mountLogo);
+    if (!isMainTab() && !d.getElementById('ai-panel-logo')) registerTab();
   }
 
-  var api = { MAIN_WINDOW: MAIN_WINDOW, MAIN_URL: MAIN_URL, isMainTab: isMainTab, markMainTab: markMainTab, markCallTab: markCallTab, openMain: openMain, watchMain: watchMain, flutter: flutter, mountLogo: mountLogo, init: init };
+  var api = { MAIN_WINDOW: MAIN_WINDOW, MAIN_URL: MAIN_URL, isMainTab: isMainTab, markMainTab: markMainTab, markCallTab: markCallTab, openMain: openMain, registerTab: registerTab, setTabInfo: setTabInfo, watchTabs: watchTabs, listTabs: listTabs, gotoTab: gotoTab, watchMain: watchMain, flutter: flutter, mountLogo: mountLogo, init: init };
   if (typeof module !== 'undefined' && module.exports) { module.exports = api; return; }
   g.NaviHome = api; init();
 })(typeof window !== 'undefined' ? window : globalThis);
