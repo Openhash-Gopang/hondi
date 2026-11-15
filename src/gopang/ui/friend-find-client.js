@@ -3,23 +3,19 @@
  *  - findFriend(q): 번호·검색용 아이디 정확일치 조회(/friends/find). 로그인 토큰은 공유 쿠키 hondi_pvt.
  *  - mountFriendFindCard(): 설정 화면에 "이름·이메일 ID·전화번호별 찾기 허용" 카드를 붙인다.
  */
-import { PROXY } from '../core/state.js';
+import { _USER } from '../core/state.js';
+import { signalPost } from '../p2p/signal-auth.js';
 
-function readCookie(name) {
-  const m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
-  return m ? decodeURIComponent(m[1]) : '';
-}
-function token() {
-  const t = readCookie('hondi_pvt'), e = Number(readCookie('hondi_pvt_exp') || 0);
-  return t && (!e || Date.now() < e) ? t : '';
-}
+// 로그인 증명: 문자 인증 쿠키(hondi_pvt)가 있으면 그것을, 없으면(기기 키로만 로그인한 기기) 지갑 서명으로 발급한 토큰을 쓴다.
+// signalPost 가 둘 중 가능한 쪽을 붙이고, 쿠키 계정이 다르거나 만료면 지갑 증명으로 한 번 더 시도한다.
 async function post(path, body) {
-  const t = token();
-  if (!t) return { ok: false, error: 'LOGIN_REQUIRED', message: '로그인이 필요합니다.' };
+  const guid = _USER?.ipv6 || _USER?.guid || '';
   try {
-    const r = await fetch(PROXY + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone_verify_token: t, ...body }) });
-    const d = await r.json().catch(() => ({}));
-    return r.ok ? d : { ok: false, error: d.error || 'HTTP_' + r.status, message: d.message || d.detail || '요청에 실패했습니다.' };
+    const r = await signalPost(path, guid, body || {});
+    if (r.ok) return r.data;
+    const d = r.data || {};
+    const noAuth = r.status === 401 || r.status === 403 || d.error === 'AUTH_REQUIRED';
+    return { ok: false, error: noAuth ? 'LOGIN_REQUIRED' : (d.error || 'HTTP_' + r.status), message: noAuth ? '인증에 실패했습니다. 잠시 후 다시 시도해 주세요.' : (d.message || d.detail || '요청에 실패했습니다.') };
   } catch (e) { return { ok: false, error: 'NETWORK', message: '네트워크 오류: ' + e.message }; }
 }
 
@@ -61,7 +57,7 @@ export async function mountFriendFindCard() {
   }
   const msg = (t, bad) => { const m = card.querySelector('#ff-msg'); m.textContent = t || ''; m.style.color = bad ? '#dc2626' : '#0f7b4f'; };
   const s = await getFriendSettings();
-  if (!s.ok) { msg(s.message, true); return; }
+  if (!s.ok) { if (s.error !== 'LOGIN_REQUIRED') msg(s.message, true); return; }   // 로그인 증명을 못 붙인 드문 경우엔 문구 없이 둔다
   const h = String(s.handle || '').replace(/^@/, '');     // 한국 번호는 가입 때 뒤 8자리가 아이디가 되므로 010-XXXX-XXXX 로 보여 준다
   const phoneShown = /^\d{8}$/.test(h) ? '010-' + h.slice(0, 4) + '-' + h.slice(4) : '';
   card.querySelector('#ff-name-v').textContent = s.nickname || '';
