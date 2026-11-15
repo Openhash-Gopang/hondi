@@ -4256,6 +4256,7 @@ window.closePDV = closePDV;
 
   // ── 대화 연속성: 히스토리를 localStorage에 보관 (새로고침/재접속 후 이어가기) ─
   const _HISTORY_STORE_KEY = 'hondi_panel_history_v1';
+  let _stripStage = (a) => a;
 
   // ★ 2026-07-28 통일 — 이전엔 이 패널만의 별도 배열(_panelHistory)이었다.
   // call-ai.js/expert-session.js/core/session.js는 전부 core/state.js가
@@ -4281,10 +4282,13 @@ window.closePDV = closePDV;
     // (2026-07-28: 참조 교체가 끝난 뒤에 복원해야 공유 history 쪽에 쌓인다 —
     // 순서를 바꾸면 복원한 내용이 교체 시점에 통째로 유실된다.)
     try {
-      const saved = JSON.parse(localStorage.getItem(_HISTORY_STORE_KEY) || 'null');
+      const { stripStageTurns } = await import('./src/gopang/ui/stage-filter.js');
+      _stripStage = stripStageTurns;   // 2026-11-16 — K-Intent 등 단계 SP의 턴은 저장·복원하지 않는다
+      const saved = stripStageTurns(JSON.parse(localStorage.getItem(_HISTORY_STORE_KEY) || 'null'));
       if (Array.isArray(saved) && saved.length && _panelHistory.length === 0) {
         _panelHistory.push(...saved);
       }
+      try { localStorage.setItem(_HISTORY_STORE_KEY, JSON.stringify(saved)); } catch {}
     } catch {}
   })();
 
@@ -4297,7 +4301,7 @@ window.closePDV = closePDV;
   function _savePanelHistory() {
     try {
       // system 프롬프트(첫 항목)는 제외하고 저장 — 너무 길어 quota 초과 위험
-      const toSave = _panelHistory.filter(m => m.role !== 'system').slice(-20);
+      const toSave = _stripStage(_panelHistory.filter(m => m.role !== 'system')).slice(-20);
       localStorage.setItem(_HISTORY_STORE_KEY, JSON.stringify(toSave));
     } catch {}
   }
