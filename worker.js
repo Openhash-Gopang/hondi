@@ -787,23 +787,9 @@ async function _resolveGuidFromPhoneVerifyToken(env, phoneVerifyToken, opts = {}
   if (expectedSig !== sig) return { ok: false, code: 'TOKEN_INVALID', message: '전화번호 인증 토큰 서명이 유효하지 않습니다' };
 
   // 분실 신고(2026-11-10): 신고 시각 이전에 발급된 토큰(발급 시각 = 만료 − 유효기간)은 모두 무효
-  if (!e164.startsWith(TEST_ID_PREFIX)) {
+  {
     const _rb = await _sessionRevokedBefore(env, e164);
     if (_rb && exp - PHONE_VERIFY_TOKEN_TTL_MS < _rb) return { ok: false, code: 'TOKEN_EXPIRED', message: '분실 신고로 이전 로그인이 해제되었습니다. 다시 로그인해 주세요' };
-  }
-
-  // 🧪 테스트 아이디 토큰(2026-10-09): e164 자리가 'tid-<아이디>'. 서버 스위치가 꺼지면 즉시 무효.
-  if (e164.startsWith(TEST_ID_PREFIX)) {
-    if (!_testAuthOn(env) && !opts.allowTestOff) return { ok: false, code: 'TOKEN_INVALID', message: '테스트 기간이 종료되어 인증 토큰이 만료되었습니다' };   // opts.allowTestOff: 이용자 검색처럼 테스트 기간과 무관하게 허용하는 경로(2026-11-12)
-    try {
-      const prof = await _l1FindProfileByHandle(env, e164);
-      if (!prof) return { ok: false, code: 'PROFILE_NOT_FOUND', message: '이 아이디로 등록된 프로필이 없습니다' };
-      const _gateErr = await _testAccountGate(env, prof, opts); // 2026-10-27: 이동 완료·한도 초과(유예 종료) 계정은 여기서 막는다
-      if (_gateErr) return _gateErr;
-      return { ok: true, guid: prof.guid, e164 };
-    } catch (e) {
-      return { ok: false, code: 'L1_ERROR', message: '아이디 조회 실패: ' + e.message };
-    }
   }
 
   try {
@@ -827,19 +813,6 @@ async function _resolveGuidFromPhoneVerifyToken(env, phoneVerifyToken, opts = {}
   } catch (e) {
     return { ok: false, code: 'L1_ERROR', message: '전화번호 인증 조회 실패: ' + e.message };
   }
-}
-
-// 테스트 계정 접근 판정(2026-10-27). opts.allowBlockedTest: 한도 초과 차단 중에도 통과(한도 조회·데이터 이동용),
-// opts.allowMigrated: 이미 정식 계정으로 이동을 마친 계정도 통과(이동 결과 재확인용).
-async function _testAccountGate(env, prof, opts = {}) {
-  if (prof?.extra?.migrated_to && !opts.allowMigrated) {
-    return { ok: false, code: 'TEST_ACCOUNT_MIGRATED', message: '이 테스트 아이디의 데이터는 정식 아이디로 이동했습니다. 정식 아이디로 로그인해 주세요.' };
-  }
-  if (!opts.allowBlockedTest && _gdcFreeTestOn(env) && env.AI_SETUP_SEALS_KV) {
-    const ev = await _testQuotaGetStatus(env.AI_SETUP_SEALS_KV, prof.guid, Date.now(), _testQuotaConfig(env));
-    if (ev.status === 'blocked') return { ok: false, code: 'TEST_QUOTA_BLOCKED', message: _testQuotaBlockedMessage(ev) };
-  }
-  return null;
 }
 
 // K-서비스 공용 인증 게이트 인스턴스 — _verifyClaimsRequester는 이
@@ -891,15 +864,6 @@ async function handleUserGdcBalance(request, env, corsHeaders) {
   if (Date.now() > exp) return _err(401, 'TOKEN_EXPIRED', '전화번호 인증 토큰이 만료됐습니다', corsHeaders);
   const expectedSig = await _hmacSha256Hex(env.PHONE_VERIFY_SECRET, payload);
   if (expectedSig !== sig) return _err(401, 'TOKEN_INVALID', '전화번호 인증 토큰 서명이 유효하지 않습니다', corsHeaders);
-
-  // 🧪 테스트 아이디 토큰(2026-10-09) — GDC 무료 테스트 중이라 잔액 0이어도 이용에는 영향 없음
-  if (e164.startsWith(TEST_ID_PREFIX)) {
-    if (!_testAuthOn(env)) return _err(401, 'TOKEN_INVALID', '테스트 기간이 종료되어 인증 토큰이 만료되었습니다', corsHeaders);
-    const prof = await _l1FindProfileByHandle(env, e164).catch(() => null);
-    if (!prof) return _err(404, 'PROFILE_NOT_FOUND', '이 아이디로 등록된 프로필이 없습니다', corsHeaders);
-    const bal = await getBalanceGdcForStatus(prof.guid).catch(() => null);
-    return new Response(JSON.stringify({ ok: true, guid: prof.guid, balance: bal ?? 0, test_account: true }), { status: 200, headers: corsHeaders });
-  }
 
   // 2026-09-03 수정 — profiles 컬렉션 실제 스키마는 e164 필드다(phone
   // 필드는 존재하지 않음, pb_migrations/1781467666_updated_profiles.js
@@ -14259,7 +14223,6 @@ export default {
     if (pathname === '/admin/plan-set')          return handleAdminPlanSet(request, env, corsHeaders);
     if (pathname === '/admin/plan-deposits')     return handleAdminPlanDeposits(request, env, corsHeaders);
     if (pathname === '/biz/plan-request')        return handlePlanRequest(request, env, corsHeaders);
-    if (pathname === '/auth/test-migrate')       return handleTestMigrate(request, env, corsHeaders);
     if (pathname === '/auth/confirm-backup')      return handleConfirmBackup(request, env, corsHeaders);
     if (pathname === '/auth/verify')             return handleVerify(request, env, corsHeaders);
     if (pathname === '/auth/refresh')            return handleRefresh(request, env, corsHeaders);
@@ -18724,7 +18687,6 @@ async function handlePlanRequest(request, env, corsHeaders) {
   const body = await request.json().catch(() => ({})) || {};
   const r = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token);
   if (!r.ok) { const m = mapPhoneAuthError(r); return _err(m.status, m.code, m.message, corsHeaders); }
-  if (String(r.e164 || '').startsWith(TEST_ID_PREFIX)) return _err(400, 'TEST_ACCOUNT_NO_PLAN', '테스트 아이디는 유료 플랜을 쓸 수 없습니다. 정식 아이디로 로그인해 주세요.', corsHeaders);
   if (!env.AI_SETUP_SEALS_KV) return _err(503, 'KV_NOT_BOUND', '잠시 후 다시 시도해 주세요', corsHeaders);
   if (!_planValidTier(body.tier)) return _err(400, 'BAD_TIER', 'tier는 p10, p100, p200 중 하나여야 합니다', corsHeaders);
   const rate = await _planKrwPerUsd(env);
@@ -21423,69 +21385,13 @@ async function parseToken(env,token){
   }catch{return null;}
 }
 
-// ═══════════════════════════════════════════════════════════
-// 🧪 테스트 전용 ID 입장 — 2026-10-09 (주피터 지시, 잠정)
-//   전화 인증·기기 키(Ed25519) 없이 "아이디"만으로 계정을 만들고, 같은 아이디로
-//   폰/PC 어디서든 다시 들어올 수 있게 한다. 보안 모듈 잠정 중단 상태.
-//
-//   안전장치(테스트 기간에도 유지):
-//   1) 스위치: env.SIMPLE_AUTH_TEST === '1' 일 때만 동작(Cloudflare 대시보드
-//      변수로 켜고 끈다. wrangler.toml에는 넣지 않는다 → 기본 꺼짐, 즉시 차단 가능).
-//   2) 범위: handle이 'tid-'로 시작하는 "테스트 계정"만 대상이다. 전화 인증으로
-//      만들어진 실계정(잔액·PDV 보유)은 이 경로로 절대 로그인되지 않는다.
-//   3) 테스트 계정에는 지갑 키가 없어 서명이 필요한 기능(GDC 결제 등)은 동작하지 않는다.
-// ═══════════════════════════════════════════════════════════
-const TEST_ID_PREFIX = 'tid-';
-// 2026-11-07: 테스트 종료(주피터 지시) — env.SIMPLE_AUTH_TEST 값과 무관하게 항상 꺼짐. 문자 인증 없는 입장 경로를 닫는다.
-function _testAuthOn(env) { return false; }
-
-async function handleTestAuthMode(request, env, corsHeaders) {
-  { const _qc = _testQuotaConfig(env); return new Response(JSON.stringify({ ok: true, enabled: _testAuthOn(env), gdc_free: _gdcFreeTestOn(env), quota_krw: _qc.limitKrw, free_hours: _qc.freeHours, grace_hours: 0, free_scope: 'all' }), { status: 200, headers: corsHeaders }); }
-}
-
-// ── 쉬운 한국어 단어 아이디 자동 생성 (2026-10-09) ─────────────────────
-// "형용사 + 명사"(예: 푸른바다, 맑은감귤). 외우기 쉽도록 짧은 일상어만 쓰고,
-// 이미 있으면 다른 조합을 먼저 시도한 뒤 마지막에만 숫자 두 자리를 붙인다.
-const TEST_ID_ADJ = ['푸른','맑은','고운','밝은','빠른','높은','깊은','착한','귀한','새로운','든든한','따뜻한','시원한','포근한','씩씩한','느긋한','향긋한','반가운','즐거운','튼튼한'];
-const TEST_ID_NOUN = ['하늘','바다','구름','바람','파도','노을','별빛','달빛','호수','나무','꽃잎','감귤','한라산','오름','해녀','조랑말','고래','거북이','나비','다람쥐','고양이','강아지','토끼','사슴','돌하르방','유채꽃','동백꽃','갈매기','물결','햇살'];
-function _randInt(n) { return crypto.getRandomValues(new Uint32Array(1))[0] % n; }
-async function _generateTestId(env) {
-  for (let i = 0; i < 12; i++) {
-    const id = TEST_ID_ADJ[_randInt(TEST_ID_ADJ.length)] + TEST_ID_NOUN[_randInt(TEST_ID_NOUN.length)];
-    if (!(await _l1FindProfileByHandle(env, TEST_ID_PREFIX + id))) return id;
-  }
-  for (let i = 0; i < 40; i++) { // 흔한 조합이 이미 많이 찼다면 숫자 두 자리를 붙인다
-    const id = TEST_ID_ADJ[_randInt(TEST_ID_ADJ.length)] + TEST_ID_NOUN[_randInt(TEST_ID_NOUN.length)] + String(10 + _randInt(90));
-    if (!(await _l1FindProfileByHandle(env, TEST_ID_PREFIX + id))) return id;
-  }
-  throw new Error('아이디를 만들지 못했습니다');
-}
-
-// 모든 서비스가 이미 받는 phone_verify_token 형식 그대로 발급한다:
-//   "tid-<아이디>:<만료ms>.<hmac>"  ← 전화번호(e164) 자리에 'tid-<아이디>'가 들어간다.
-// → _resolveGuidFromPhoneVerifyToken(K-Law·K-Plan·K-Gov·K-Business·K-Mail 공용 게이트),
-//   /user/gdc-balance, /auth/refresh-token 이 이 토큰을 그대로 해석한다. 쿠키 hondi_pvt로
-//   .hondi.net 전체에 공유된다. 실제 전화번호는 '+'로 시작하므로 충돌하지 않는다.
-async function _mintTestPhoneToken(env, id) {
-  if (!env.PHONE_VERIFY_SECRET) return null;
-  const exp = Date.now() + PHONE_VERIFY_TOKEN_TTL_MS;
-  const payload = `${TEST_ID_PREFIX}${id}:${exp}`;
-  const sig = await _hmacSha256Hex(env.PHONE_VERIFY_SECRET, payload);
-  return { token: payload + '.' + sig, exp };
-}
-
-// POST /auth/test-quota { phone_verify_token } — 테스트 계정의 사용 한도·유예·차단 상태(2026-10-27).
-// 테스트 토큰이 아니면 { ok:true, test:false }. 한도 초과로 차단된 계정도 조회할 수 있다.
 async function handleTestQuota(request, env, corsHeaders) {
   if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
   const body = await request.json().catch(() => ({})) || {};
-  const r = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, { allowBlockedTest: true, allowMigrated: true });
+  const r = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, {});
   if (!r.ok) { const m = mapPhoneAuthError(r); return _err(m.status, m.code, m.message, corsHeaders); }
   const ev = await _testQuotaGetStatus(env.AI_SETUP_SEALS_KV, r.guid, Date.now(), _testQuotaConfig(env));
-  if (!String(r.e164 || '').startsWith(TEST_ID_PREFIX)) {   // 정식 계정도 무료 이용 기간 상태를 돌려준다(차단 대신 GDC 결제로 이어진다)
-    return new Response(JSON.stringify({ ok: true, test: false, free_test_on: _gdcFreeTestOn(env), ...ev }), { status: 200, headers: corsHeaders });
-  }
-  return new Response(JSON.stringify({ ok: true, test: true, id: String(r.e164).slice(TEST_ID_PREFIX.length), free_test_on: _gdcFreeTestOn(env), ...ev }), { status: 200, headers: corsHeaders });
+  return new Response(JSON.stringify({ ok: true, test: false, free_test_on: _gdcFreeTestOn(env), ...ev }), { status: 200, headers: corsHeaders });
 }
 
 // POST /auth/free-plan { phone_verify_token, plan: 'none' } — (옛) 무료 플랜 선택·해제. 2026-11-14 무료 플랜 삭제로 이제 해제(플랜 없음)만 한다.
@@ -21496,7 +21402,6 @@ async function handleFreePlan(request, env, corsHeaders) {
   const body = await request.json().catch(() => ({})) || {};
   const r = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token);
   if (!r.ok) { const m = mapPhoneAuthError(r); return _err(m.status, m.code, m.message, corsHeaders); }
-  if (String(r.e164 || '').startsWith(TEST_ID_PREFIX)) return _err(400, 'TEST_ACCOUNT_NO_PLAN', '테스트 아이디는 플랜을 고를 수 없습니다. 정식 아이디로 로그인해 주세요.', corsHeaders);
   if (!env.AI_SETUP_SEALS_KV) return _err(503, 'KV_NOT_BOUND', '잠시 후 다시 시도해 주세요', corsHeaders);
   // 2026-11-14(주피터 지시): 요금제에서 무료 플랜을 없앴다. 옛 화면(캐시)이 'free'를 보내도 오류 없이 "플랜 없음"으로 처리한다.
   const plan = (body.plan === 'free' || body.plan === 'none') ? null : undefined;
@@ -21515,7 +21420,6 @@ async function handleExtraUsage(request, env, corsHeaders) {
   const body = await request.json().catch(() => ({})) || {};
   const r = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token);
   if (!r.ok) { const m = mapPhoneAuthError(r); return _err(m.status, m.code, m.message, corsHeaders); }
-  if (String(r.e164 || '').startsWith(TEST_ID_PREFIX)) return _err(400, 'TEST_ACCOUNT_NO_PLAN', '테스트 아이디는 유료 플랜을 쓸 수 없습니다. 정식 아이디로 로그인해 주세요.', corsHeaders);
   if (!env.AI_SETUP_SEALS_KV) return _err(503, 'KV_NOT_BOUND', '잠시 후 다시 시도해 주세요', corsHeaders);
   const cur = await _testQuotaGetStatus(env.AI_SETUP_SEALS_KV, r.guid, Date.now(), _testQuotaConfig(env));
   if (!cur.tier) return _err(400, 'NO_PAID_PLAN', '유료 플랜을 이용 중일 때만 추가 사용량을 설정할 수 있습니다.', corsHeaders);
@@ -21604,121 +21508,6 @@ async function handleAdminOwnerUnlimited(request, env, corsHeaders) {
   _ownerUnlimitedMem.delete(guid);
   console.log(JSON.stringify({ tag: 'OWNER_UNLIMITED_SET', guid, handle: prof.handle || '', enabled: body.enabled, ts: new Date().toISOString() }));
   return new Response(JSON.stringify({ ok: true, guid, handle: prof.handle || '', enabled: body.enabled }), { status: 200, headers: corsHeaders });
-}
-
-// POST /auth/test-migrate { test_phone_verify_token, phone_verify_token, dry_run? } — 테스트 계정 데이터를 정식 계정으로 이동(2026-10-27).
-//  · 두 토큰이 모두 유효해야 한다: 테스트 토큰(tid-…)과 전화 인증으로 로그인한 정식 토큰.
-//  · dry_run=true면 옮길 건수만 센다. 한 번에 처리할 수 있는 하위 요청 수가 한정돼 있어(MIGRATE_MAX_REQUESTS, 기본 22 — 무료 플랜 기준)
-//    done=false가 오면 응답의 next_index를 cursor로, 지금까지의 실패 수를 failed_before로 실어 다시 호출한다.
-//  · 전부 옮기고 실패가 없으면 테스트 프로필에 migrated_to를 기록해 더는 로그인되지 않게 한다.
-async function handleTestMigrate(request, env, corsHeaders) {
-  if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
-  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
-  if (!(await _checkRateLimitN(env, ip, 'test-migrate', 120, 3600))) return _err(429, 'RATE_LIMITED', '잠시 후 다시 시도해 주세요', corsHeaders);
-  const body = await request.json().catch(() => ({})) || {};
-  const t = await _resolveGuidFromPhoneVerifyToken(env, body.test_phone_verify_token, { allowBlockedTest: true, allowMigrated: true });
-  if (!t.ok) { const m = mapPhoneAuthError(t); return _err(m.status, m.code, '테스트 계정 확인 실패: ' + m.message, corsHeaders); }
-  if (!String(t.e164 || '').startsWith(TEST_ID_PREFIX)) return _err(400, 'NOT_TEST_ACCOUNT', '테스트 아이디 토큰이 아닙니다', corsHeaders);
-  const f = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token);
-  if (!f.ok) { const m = mapPhoneAuthError(f); return _err(m.status, m.code, '정식 계정 확인 실패: ' + m.message, corsHeaders); }
-  if (String(f.e164 || '').startsWith(TEST_ID_PREFIX)) return _err(400, 'TARGET_IS_TEST', '정식 아이디로 로그인한 뒤에 옮길 수 있습니다', corsHeaders);
-  if (t.guid === f.guid) return _err(400, 'SAME_ACCOUNT', '같은 계정입니다', corsHeaders);
-
-  const prof = await _l1FindProfileByGuid(env, t.guid).catch(() => null);
-  if (!prof) return _err(404, 'PROFILE_NOT_FOUND', '테스트 계정을 찾을 수 없습니다', corsHeaders);
-  if (prof.extra?.migrated_to) {
-    if (prof.extra.migrated_to === f.guid) return new Response(JSON.stringify({ ok: true, done: true, clean: true, migrated: true, already: true, totals: { found: 0, moved: 0, failed: 0 }, results: [] }), { status: 200, headers: corsHeaders });
-    return _err(409, 'ALREADY_MIGRATED_ELSEWHERE', '이 테스트 아이디는 이미 다른 정식 아이디로 이동했습니다', corsHeaders);
-  }
-
-  const dry = !!body.dry_run;
-  const cursor = Math.max(0, Math.floor(Number(body.cursor) || 0));
-  const failedBefore = Math.max(0, Math.floor(Number(body.failed_before) || 0));
-  // 하위 요청 예산: 무료 플랜은 요청 1건당 50개까지이고, 이 호출은 로그인 확인·속도 제한·마무리 등으로 따로 15~20개를 쓴다.
-  // 기본 22. 유료 플랜이면 MIGRATE_MAX_REQUESTS=800 등으로 올리면 호출 횟수가 줄어든다(커서 방식이라 어느 값이든 끝까지 간다).
-  const budget = Math.max(6, Math.min(2000, Number(env.MIGRATE_MAX_REQUESTS) > 0 ? Number(env.MIGRATE_MAX_REQUESTS) : 22));
-  const l1Token = await _l1AdminToken(env);
-  const l1 = (path, init = {}) => fetch(`${L1_DEFAULT}${path}`, { ...init, headers: { 'Authorization': `Bearer ${l1Token}`, 'Content-Type': 'application/json', ...(init.headers || {}) } });
-  const out = await _migrateTestData({ l1, fromGuid: t.guid, toGuid: f.guid, dryRun: dry, maxRequests: budget, startIndex: cursor });
-
-  let settings = null, migrated = false;
-  if (!dry && out.done) {
-    settings = await _mergeKmailSettings({ l1, fromGuid: t.guid, toGuid: f.guid }).catch(e => ({ merged: false, error: e.message }));
-    if (out.clean && failedBefore === 0) { // 앞선 호출에서 실패가 있었다면(failed_before) 이동 완료로 표시하지 않는다
-      await _l1PatchProfile(env, prof.id, { extra: { ...(prof.extra || {}), migrated_to: f.guid, migrated_at: new Date().toISOString() } });
-      migrated = true;
-    }
-  }
-  console.log(JSON.stringify({ tag: 'TEST_MIGRATE', dry, from: t.guid, to: f.guid, cursor, next_index: out.next_index, totals: out.totals, done: out.done, clean: out.clean, requests_used: out.requests_used, migrated, ts: new Date().toISOString() }));
-  return new Response(JSON.stringify({ ok: true, ...out, migrated, settings }), { status: 200, headers: corsHeaders });
-}
-
-// POST /auth/test-enter { id? } — id가 없으면 새 한국어 단어 아이디를 자동 생성,
-// 있으면(다른 기기에서 같은 아이디로 입장) 그 계정으로 입장하고 없으면 만든다.
-async function handleTestAuthEnter(request, env, corsHeaders) {
-  if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
-  if (!_testAuthOn(env)) return _err(403, 'TEST_AUTH_OFF', '테스트 간편 입장이 꺼져 있습니다', corsHeaders);
-  if (!env.PHONE_VERIFY_SECRET) return _err(500, 'SECRET_NOT_SET', 'PHONE_VERIFY_SECRET이 설정되지 않았습니다', corsHeaders);
-  const body = await request.json().catch(() => ({})) || {};
-  let id = String(body.id || '').trim().toLowerCase().normalize('NFC'); // 맥/iOS 입력기의 분해형 한글(NFD)도 같은 아이디로 취급
-  if (id && !/^[a-z0-9가-힣_-]{2,20}$/.test(id)) {
-    return _err(400, 'INVALID_ID', '아이디는 2~20자의 한글·영문 소문자·숫자·_·- 만 쓸 수 있습니다', corsHeaders);
-  }
-
-  let profile = null, created = false;
-  try {
-    if (id) profile = await _l1FindProfileByHandle(env, TEST_ID_PREFIX + id);
-    if (!profile) {
-      // 신규 생성은 IP당 시간당 30개로 제한(RATE_LIMIT_KV가 바인딩된 경우) — 자동 생성 남용 방지
-      const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
-      if (!(await _checkRateLimitN(env, ip, 'test-create', 30, 3600))) {
-        return _err(429, 'TEST_CREATE_RATE_LIMIT', '잠시 후 다시 시도해 주세요', corsHeaders);
-      }
-      if (!id) id = await _generateTestId(env);
-      const rnd = crypto.getRandomValues(new Uint8Array(12));
-      const hex = Array.from(rnd).map(b => b.toString(16).padStart(2, '0')).join('');
-      const groups = ['2601', 'db80'];
-      for (let i = 0; i < 6; i++) groups.push(hex.slice(i * 4, i * 4 + 4));
-      const guid = groups.join(':');
-      const hashBuf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('tid:' + id));
-      const nickname_hash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
-      const token = await _l1AdminToken(env);
-      const res = await fetch(`${L1_DEFAULT}/api/collections/profiles/records`, {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          guid, handle: TEST_ID_PREFIX + id, nickname: id, nickname_hash,
-          country_code: 'KR', native_lang: 'ko',
-          is_public: false, // 테스트 계정은 공개 검색에 노출하지 않는다
-          extra: { test_account: true },
-        }),
-      });
-      if (!res.ok) return _err(500, 'L1_INSERT_ERROR', await res.text(), corsHeaders);
-      profile = await res.json();
-      created = true;
-    }
-  } catch (e) {
-    return _err(502, 'L1_UNREACHABLE', 'L1 처리 실패: ' + e.message, corsHeaders);
-  }
-
-  // 방어: 테스트 계정이 아니면(이론상 불가) 거부
-  if (!String(profile.handle || '').startsWith(TEST_ID_PREFIX)) {
-    return _err(403, 'NOT_TEST_ACCOUNT', '테스트 계정이 아닙니다', corsHeaders);
-  }
-  if (profile.extra && profile.extra.migrated_to) {
-    return _err(403, 'TEST_ACCOUNT_MIGRATED', '이 테스트 아이디의 데이터는 정식 아이디로 이동했습니다. 정식 아이디로 로그인해 주세요.', corsHeaders);
-  }
-  if (env.AI_SETUP_SEALS_KV) { try { await env.AI_SETUP_SEALS_KV.put(`hondi:acct_kind:${profile.guid}`, 't'); } catch (e) { /* 캐시 실패 무시 */ } }
-  const shownId = String(profile.handle).slice(TEST_ID_PREFIX.length);
-
-  const pv = await _mintTestPhoneToken(env, shownId);
-  if (env.AI_SETUP_SEALS_KV) { try { await _testQuotaStartFree(env.AI_SETUP_SEALS_KV, profile.guid, Date.now()); } catch (e) { /* 무시 */ } }  // 무료 이용 시작
-  const token = await buildToken(env, profile.guid, 'L0', 'gopang');
-  return new Response(JSON.stringify({
-    ok: true, created, id: shownId, guid: profile.guid, handle: profile.handle,
-    nickname: profile.nickname || shownId, token,
-    phone_verify_token: pv.token, expires_at: new Date(pv.exp).toISOString(),
-  }), { status: 200, headers: { ...corsHeaders, 'Set-Cookie': buildCookie(token) } });
 }
 
 // POST /auth/issue — v6.0: Ed25519 서명 + TOFU(Trust-On-First-Use) 검증 후에만 세션 발급
@@ -29350,7 +29139,7 @@ async function handleAdminUserHistory(request, env, corsHeaders) {
 async function handleAuthSessionProfile(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
-  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, { allowBlockedTest: true });
+  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, {});
   if (!who.ok) return _err(401, who.code, who.message, corsHeaders);
   let p;
   try { p = await _l1FindProfileByGuid(env, who.guid); } catch (e) { return _err(502, 'L1_ERROR', e.message, corsHeaders); }
@@ -29358,7 +29147,6 @@ async function handleAuthSessionProfile(request, env, corsHeaders) {
   return new Response(JSON.stringify({
     ok: true, guid: p.guid, handle: p.handle || '', nickname: p.nickname || '',
     region: p.region || '', country_code: p.country_code || 'KR', created: p.created || '',
-    test_account: String(p.handle || '').startsWith(TEST_ID_PREFIX),
   }), { status: 200, headers: corsHeaders });
 }
 
@@ -29369,7 +29157,7 @@ const _FF_ID_CHARS = /^[A-Za-z0-9가-힣._-]{1,40}$/;
 async function handleFriendFind(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
-  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, { allowTestOff: true, allowBlockedTest: true });   // 이용자 검색은 테스트 기간·무료 한도와 무관하게 항상 허용(2026-11-12)
+  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, {});   // 이용자 검색은 테스트 기간·무료 한도와 무관하게 항상 허용(2026-11-12)
   if (!who.ok) return _err(401, who.code, who.message, corsHeaders);
   const c = _ffClassify(body.q);
   if (c.kind === 'empty') return _err(400, 'MISSING_FIELD', '찾을 전화번호나 아이디를 입력하세요', corsHeaders);
@@ -29398,10 +29186,6 @@ async function handleFriendFind(request, env, corsHeaders) {
       prof = await find(`(${await profilePhoneFilter(env, c.e164)}) && phone_findable=true`);
     } else if (c.kind === 'handle') {
       prof = await find(`handle='${c.handle}'`);
-    } else if (_testAuthOn(env) && _FF_ID_CHARS.test(c.id)) {      // 테스트 기간의 테스트 아이디(tid-…)
-      const raw = String(body.q || '').trim().replace(/^@/, '');
-      prof = await _l1FindProfileByHandle(env, TEST_ID_PREFIX + c.id)
-        || (raw && raw !== c.id && _FF_ID_CHARS.test(raw) ? await _l1FindProfileByHandle(env, TEST_ID_PREFIX + raw) : null);
     }
   } catch (e) {
     return _err(502, 'L1_ERROR', '상대 찾기 실패: ' + e.message, corsHeaders);
@@ -29418,7 +29202,7 @@ async function handleFriendFind(request, env, corsHeaders) {
 async function handleFriendInviteNotify(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
-  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, { allowTestOff: true, allowBlockedTest: true });
+  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, {});
   if (!who.ok) return _err(401, who.code, who.message, corsHeaders);
   const to = String(body.to_guid || '');
   if (!to || to === who.guid) return _err(400, 'MISSING_FIELD', 'to_guid 필요', corsHeaders);
@@ -29443,13 +29227,12 @@ async function handleFriendInviteNotify(request, env, corsHeaders) {
 async function handleFriendSettings(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
-  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, { allowTestOff: true, allowBlockedTest: true });   // 이용자 검색은 테스트 기간·무료 한도와 무관하게 항상 허용(2026-11-12)
+  const who = await _resolveGuidFromPhoneVerifyToken(env, body.phone_verify_token, {});   // 이용자 검색은 테스트 기간·무료 한도와 무관하게 항상 허용(2026-11-12)
   if (!who.ok) return _err(401, who.code, who.message, corsHeaders);
   let me;
   try { me = await _l1FindProfileByGuid(env, who.guid); } catch (e) { return _err(502, 'L1_ERROR', e.message, corsHeaders); }
   if (!me) return _err(404, 'PROFILE_NOT_FOUND', '프로필을 찾을 수 없습니다', corsHeaders);
-  const view = () => ({ ok: true, handle: me.handle || '', phone_findable: me.phone_findable === true,
-    test_account: String(me.handle || '').startsWith(TEST_ID_PREFIX) });
+  const view = () => ({ ok: true, handle: me.handle || '', phone_findable: me.phone_findable === true, });
   if (body.action !== 'set') return new Response(JSON.stringify(view()), { status: 200, headers: corsHeaders });
   if (typeof body.phone_findable !== 'boolean') return _err(400, 'MISSING_FIELD', '바꿀 값이 없습니다', corsHeaders);
   try { me = await _l1PatchProfile(env, me.id, { phone_findable: body.phone_findable }); }
