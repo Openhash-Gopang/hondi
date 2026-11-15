@@ -69,6 +69,42 @@
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <noscript><link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css"></noscript>
 <link rel="preload" as="image" href="/icons/nb-wing-back.webp"><link rel="preload" as="image" href="/icons/nb-wing-front.webp"><link rel="preload" as="image" href="/icons/nb-body.webp">
+<!-- 모듈 그래프 병렬 선로드: import 체인(깊이 5)의 순차 요청(워터폴) 제거. gopang-app.js 정적 import 목록과 일치해야 함(tests/modulepreload.test.mjs) -->
+<link rel="modulepreload" href="/gopang-app.js?v=20261015">
+<link rel="modulepreload" href="/src/gopang/core/auth.js">
+<link rel="modulepreload" href="/src/gopang/core/state.js">
+<link rel="modulepreload" href="/src/gopang/ui/bubble.js">
+<link rel="modulepreload" href="/src/gopang/services/push.js">
+<link rel="modulepreload" href="/src/gopang/ai/hondi-code.js">
+<link rel="modulepreload" href="/src/gopang/ai/hondi-digit-code.js">
+<link rel="modulepreload" href="/src/gopang/ai/hondi-digit-render.js">
+<link rel="modulepreload" href="/src/gopang/ai/hondi-digit-core.js">
+<link rel="modulepreload" href="/src/gopang/core/config.js">
+<link rel="modulepreload" href="/src/gopang/ui/register-flow.js">
+<link rel="modulepreload" href="/src/gopang/ui/settings.js">
+<link rel="modulepreload" href="/assets/hondi-skin.js">
+<link rel="modulepreload" href="/src/gopang/ai/toggle.js">
+<link rel="modulepreload" href="/src/gopang/pdv/record.js">
+<link rel="modulepreload" href="/src/gopang/services/klaw.js">
+<link rel="modulepreload" href="/src/gopang/core/token-policy.js">
+<link rel="modulepreload" href="/src/gopang/gwp/engine.js">
+<link rel="modulepreload" href="/src/gopang/ai/report-utils.js">
+<link rel="modulepreload" href="/src/gopang/gwp/sign.js">
+<link rel="modulepreload" href="/src/gopang/gwp/allowed-origins.js">
+<link rel="modulepreload" href="/src/gopang/gwp/pdv-health-handler.js">
+<link rel="modulepreload" href="/src/gopang/pdv/health-profile.js">
+<link rel="modulepreload" href="/src/gopang/services/location.js">
+<link rel="modulepreload" href="/src/openhash/hashChain.js">
+<link rel="modulepreload" href="/src/pdv/keyManager.js">
+<link rel="modulepreload" href="/src/openhash/plsm.js">
+<link rel="modulepreload" href="/src/core/constants.js">
+<link rel="modulepreload" href="/src/gopang/ui/p2p-search.js">
+<link rel="modulepreload" href="/src/gopang/ui/frequent-users.js">
+<link rel="modulepreload" href="/src/worker/friend-find.js">
+<link rel="modulepreload" href="/src/gopang/ui/friend-find-client.js">
+<link rel="modulepreload" href="/src/gopang/p2p/signal-auth.js">
+<link rel="modulepreload" href="/src/gopang/ui/p2p-chat.js">
+<link rel="modulepreload" href="/src/gopang/p2p/webrtc.js">
 <script src="/gopang-wallet.js?v=20261015"></script>
 <script>
 async function gopangLogout(skipConfirm) {
