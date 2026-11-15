@@ -8,7 +8,7 @@
  */
 import { PROXY } from '../core/state.js';
 
-const S = { skipCookie: false, tok: '', exp: 0, guid: '' };
+const S = { skipCookie: false, tok: '', exp: 0, guid: '', why: '' };
 
 function readCookie(name) {
   try { const m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)')); return m ? decodeURIComponent(m[1]) : ''; } catch { return ''; }
@@ -21,7 +21,10 @@ function cookieAuth() {
 async function walletAuth(guid) {
   if (S.tok && S.guid === guid && S.exp > Date.now() + 60000) return { gopang_token: S.tok };
   const w = (typeof window !== 'undefined') ? window.gopangWallet : null;
-  if (!w || !w.publicKeyB64u || typeof w.signPayload !== 'function' || !guid) return null;
+  if (!w || !w.publicKeyB64u || typeof w.signPayload !== 'function' || !guid) {
+    S.why = !guid ? 'no-guid' : !w ? (window.gopangWalletLocked ? 'wallet-locked' : window.gopangWalletNeedsSetup ? 'wallet-needs-setup' : 'no-wallet') : !w.publicKeyB64u ? 'no-pubkey' : 'no-sign';
+    return null;
+  }
   try {
     const ts = Date.now();
     const signature = await w.signPayload(`auth-issue:${guid}:${w.publicKeyB64u}:p2p-signal:${ts}`);
@@ -30,10 +33,10 @@ async function walletAuth(guid) {
       body: JSON.stringify({ guid, pubkey: w.publicKeyB64u, signature, ts, level: 'L0', svc: 'p2p-signal' }),
     });
     const d = await r.json().catch(() => ({}));
-    if (!r.ok || !d.token) return null;
+    if (!r.ok || !d.token) { S.why = 'issue-' + r.status + (d.error ? '-' + d.error : ''); return null; }
     S.tok = d.token; S.exp = Date.now() + 55 * 60 * 1000; S.guid = guid;
     return { gopang_token: d.token };
-  } catch { return null; }
+  } catch (e) { S.why = 'issue-exc-' + (e && e.message || ''); return null; }
 }
 
 /** 서버 /signal/* 호출. 로그인 증명을 붙이고, 쿠키 계정이 다르거나 만료면 지갑 증명으로 한 번 더 시도한다. */
@@ -41,7 +44,7 @@ export async function signalPost(path, guid, body) {
   const send = async (auth) => {
     const r = await fetch(`${PROXY}${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...(body || {}), ...(auth || {}) }) });
     const data = await r.json().catch(() => ({}));
-    return { ok: r.ok, status: r.status, code: data.error || data.code || '', data, authKind: auth ? (auth.phone_verify_token ? 'cookie' : 'wallet') : 'none' };
+    return { ok: r.ok, status: r.status, code: data.error || data.code || '', data, authKind: auth ? (auth.phone_verify_token ? 'cookie' : 'wallet') : 'none:' + S.why };
   };
   let auth = cookieAuth() || await walletAuth(guid);
   let res = await send(auth);

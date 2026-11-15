@@ -134,9 +134,9 @@ async function _doSearch(q, country, region, resultsEl) {
       try { rememberUser(localStorage, _USER?.guid || _USER?.ipv6, fr.user); } catch {}   // 찾은 사용자는 자주 찾는 사용자로 저장
       const many = Array.isArray(fr.users) && fr.users.length > 1;      // 같은 이름이 여럿이면 목록에서 고른다
       resultsEl.innerHTML = many ? fr.users.map(_renderUserCard).join('') : _renderUserCard(fr.user);
-      resultsEl.querySelectorAll('[data-connect]').forEach(btn => { btn.onclick = () => _sendConnectRequest(JSON.parse(btn.dataset.connect), { skipConfirm: true }); });
-      // 카카오톡 방식: 결과가 한 명으로 분명하면 확인 없이 바로 대화 호출을 보낸다. 실패하면 카드의 '대화' 버튼으로 다시 시도.
-      if (!many) _sendConnectRequest(fr.user, { skipConfirm: true });
+      resultsEl.querySelectorAll('[data-connect]').forEach(btn => { btn.onclick = () => _sendConnectRequest(JSON.parse(btn.dataset.connect)); });
+      // 2026-11-16(주피터 지시): 찾은 뒤 곧바로 연결하지 않고, 한 명으로 분명해도 확인 팝업을 먼저 보여 준다. 카드의 '대화' 버튼도 같은 확인을 거친다.
+      if (!many) _sendConnectRequest(fr.user);
       return;
     }
     if (fr.ok && fr.self) {
