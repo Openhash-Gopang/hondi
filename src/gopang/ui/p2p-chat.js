@@ -7,7 +7,7 @@
 import { notifyInvite } from './friend-find-client.js';
 import {
   PROXY, L1_SIGNAL_BASE, L1_PDV_URL, L1_ANCHOR_URL, L1_URL, L1_P2P_INVITES_URL, RTC_CONFIG, _USER,
-  setRtcConn, setRtcChannel, setSignalPoll, setPeerState,
+  setUser, setRtcConn, setRtcChannel, setSignalPoll, setPeerState,
   _rtcConn, _rtcChannel, _signalPoll,
 } from '../core/state.js';
 import { appendBubble } from './bubble.js';
@@ -194,6 +194,11 @@ export async function inviteByHandle(handle) {
 
 // ── P2P 통화 시작 (발신측) ───────────────────────────────
 export async function startP2PCall(targetUser) {
+  // 2026-11-16 — 폰 패널에서 내 정보(_USER)가 아직 비어 있으면 이 기기에 저장된 계정으로 채운다. 그래도 없으면 알아보기 쉬운 안내로 멈춘다.
+  if (!_USER?.ipv6) {
+    try { const st = JSON.parse(localStorage.getItem('gopang_user_v4') || sessionStorage.getItem('gopang_user_v4') || 'null'); if (st && st.ipv6) setUser(st); } catch {}
+    if (!_USER?.ipv6) throw new Error('내 계정 정보를 아직 불러오지 못했습니다. 앱을 새로고침한 뒤 다시 시도해 주세요');
+  }
   // 이전 시도(재연결 등)가 정리되지 않고 남아있으면 먼저 로컬 정리.
   // (이전 watcher는 _activeCallId가 바뀌는 즉시 스스로 종료됨 — 아래 참고)
   if (_rtcConn || _rtcChannel) {
