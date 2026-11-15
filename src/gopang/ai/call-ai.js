@@ -33,7 +33,7 @@ import { _openProfilePanel } from '../ui/settings.js';
 import { _gwpLaunch } from '../gwp/engine.js';
 import { handleExpertTag, _composeExpertPrompt } from './expert-session.js';
 import { rememberImages } from './attach-memory.js';
-import { getExpertDef, resolveExpertId, EXPERT_REGISTRY } from './expert-registry.js';
+import { getExpertDef, resolveExpertId, EXPERT_REGISTRY, getExpertGwpDef } from './expert-registry.js';
 import { buildHondiFaqContext } from './hondi-faq-router.js';
 import { buildGoalPathContext } from './goal-path-router.js';
 import { buildRoutingHintPart } from './routing-hint.js';
@@ -69,6 +69,7 @@ function _matchUsageDashboardIntent(text) {
 }
 import { _matchUserSearchIntent, _USER_SEARCH_ACTION, _USER_SEARCH_EXCLUDE } from '../ui/user-search-intent.js';
 import { loadFrequent, matchFrequent } from '../ui/frequent-users.js';
+import { loadFavorites, matchFavorite } from '../ui/favorites.js';
 import { guardReply } from './reply-guard.js';
 import { setPdvDomain, getPdvDomain, _buildPDVNote, _saveProjectState, _loadOpenProjectStates, _proposeSpUpdate, _submitUserFeedback } from '../pdv/record.js';
 // ★ 2026-07-11 추가: _callGeminiGeneral 등 5개 함수가 vision.js에 정의는
@@ -5334,6 +5335,34 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
       }
       history.push({ role: 'assistant', content: _msg });
       return;
+    }
+  }
+  // 2026-11-16 — 즐겨찾기(전문가·기관·K-서비스): 한 번 호출한 상대는 이름만 말해도 검색·LLM 없이 곧바로 새 탭으로 연다.
+  if (!imageFile) {
+    let _fv = null;
+    try { _fv = matchFavorite(userText, loadFavorites(localStorage, _USER?.guid || _USER?.ipv6)); } catch {}
+    if (_fv) {
+      history.push({ role: 'user', content: userText });
+      let _msg;
+      if (_fv.fav) {
+        const f = _fv.fav;
+        const def = (EXPERT_REGISTRY[f.id] ? getExpertGwpDef(f.id) : null)
+          || ((typeof getService === 'function' && getService(f.id)) || null)
+          || (/^https:\/\//.test(f.url || '') ? { id: f.id, name: f.name, icon: f.icon, url: f.url } : null);
+        if (def && def.url) {
+          _msg = `⭐ 즐겨찾기 ${f.name}(으)로 연결합니다.`;
+          appendBubble('ai', _msg);
+          history.push({ role: 'assistant', content: _msg });
+          _gwpLaunch(def, userText, _preTab, _buildRoutingFacts());
+          return;
+        }
+      } else {
+        _msg = '같은 이름의 즐겨찾기가 여러 개입니다: ' + _fv.many.map(f => f.name + '(' + f.id + ')').join(', ');
+        appendBubble('ai', _msg);
+        history.push({ role: 'assistant', content: _msg });
+        return;
+      }
+      history.pop();   // 열 수 없으면 기존 흐름으로
     }
   }
   if (!imageFile) {
