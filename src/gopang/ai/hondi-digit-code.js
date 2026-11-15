@@ -43,8 +43,8 @@ export function digitsToId(digits) {
 // 전제 하에, 10칸을 다음과 같이 채운다 — 칸 수는 항상 고정 10이므로
 // 스캐너는 손댈 필요 없이 그대로 재사용한다.
 //
-//   · 휴대폰: "10"(식별자) 생략, 가입자번호 8자리만 사용
-//             → "00" + 가입자번호(8자리) = 10자리
+//   · 휴대폰: 맨 앞 "0"(트렁크 접두)만 빼고 "10"+가입자번호(8자리) = 10자리
+//             (010-9880-7170 → 1098807170, 2026-11-15 변경. 예전 코드 "00"+8자리는 읽기만 지원)
 //   · 지역번호(유선): 맨 앞 "0"(트렁크 접두) 제외한 지역번호 + 가입자번호
 //             서울(02→"2", 1자리)+가입자 8자리 = 9자리 → 앞에 "0" 채워 10자리
 //             그 외(031~064 → "31~64", 2자리)+가입자 7자리 = 9자리 → 앞에 "0" 채워 10자리
@@ -76,7 +76,7 @@ export function phoneToDigits({ type, areaCode, subscriberNumber }) {
     if (subscriberNumber.length !== 8) {
       throw new Error(`휴대폰 가입자번호는 8자리여야 합니다(현재 ${subscriberNumber.length}자리).`);
     }
-    return ('00' + subscriberNumber).split('').map(Number);
+    return ('10' + subscriberNumber).split('').map(Number);
   }
 
   if (type === 'landline') {
@@ -104,6 +104,15 @@ export function digitsToPhone(digits) {
     throw new Error(`숫자 코드는 ${DIGIT_COUNT}자리 숫자여야 합니다: "${s}"`);
   }
 
+  // 휴대폰: "10" + 가입자번호 8자리 (010에서 앞의 0만 뺀 형태)
+  if (s[0] === '1' && s[1] === '0') {
+    const subscriberNumber = s.slice(2); // 8자리
+    return {
+      type: 'mobile', areaCode: null, subscriberNumber,
+      display: `010-${subscriberNumber.slice(0,4)}-${subscriberNumber.slice(4,8)}`,
+    };
+  }
+
   // 앞자리가 "0"이 아니면: 예외적 10자리 유선(패딩 없이 지역번호 2자리 그대로)
   if (s[0] !== '0') {
     const areaCode = s.slice(0, 2);
@@ -117,7 +126,7 @@ export function digitsToPhone(digits) {
     };
   }
 
-  // s[0] === '0' — 휴대폰, 서울 유선, 그 외 유선 중 하나
+  // s[0] === '0' — (예전 형식) 휴대폰 "00"+8자리, 서울 유선, 그 외 유선 중 하나
   if (s[1] === '0') {
     const subscriberNumber = s.slice(2); // 8자리
     return {

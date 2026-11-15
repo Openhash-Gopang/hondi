@@ -100,5 +100,14 @@ ok(digitsToId(idToDigits(MAX_DIGIT_ID - 1n)) === MAX_DIGIT_ID - 1n, 'D-02b: id=M
      'D-06e: digitsToPhone(정확히 10자리 문자열)은 여전히 정상 동작');
 }
 
+{
+  // 2026-11-15: 휴대폰 코드는 010에서 앞의 0만 뺀 "10"+8자리, 유선은 0을 빼고 모자라면 앞을 0으로 채움
+  ok(phoneToDigits({ type: 'mobile', subscriberNumber: '98807170' }).join('') === '1098807170', 'D-07a: 010-9880-7170 → 1098807170');
+  ok(digitsToPhone('1098807170').display === '010-9880-7170', 'D-07b: 1098807170 → 010-9880-7170');
+  ok(digitsToPhone('0012345678').type === 'mobile', 'D-07c: 예전 코드 00+8자리도 읽힌다');
+  ok(phoneToDigits({ type: 'landline', areaCode: '2', subscriberNumber: '12345678' }).join('') === '0212345678', 'D-07d: 02-1234-5678 → 0212345678');
+  ok(phoneToDigits({ type: 'landline', areaCode: '64', subscriberNumber: '1234567' }).join('') === '0641234567', 'D-07e: 064-123-4567 → 0641234567');
+}
+
 console.log(`\n결과: ${pass} 통과 / ${fail} 실패 / 총 ${pass + fail}`);
 process.exit(fail > 0 ? 1 : 0);
