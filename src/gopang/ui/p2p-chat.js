@@ -28,6 +28,7 @@ const _L1_SIGNAL = L1_SIGNAL_BASE;
 async function _signalSendDirect(from_guid, to_guid, type, payload) {
   const r = await signalPost('/signal/send', from_guid, { from_guid, to_guid, type, payload });
   if (!r.ok) throw new Error(`signal send ${r.status}${r.code ? ' ' + r.code : ''}`);
+  return r.data || {};
 }
 
 async function _signalPollDirect(guid) {
@@ -606,7 +607,11 @@ function _waitForIce(conn, timeout = 2000) {
 async function _signalSend(body) {
   // 이전: PROXY /signal/send → Worker → L1
   // 이후: L1 직접 (Worker 경유 없음)
-  await _signalSendDirect(body.from_guid, body.to_guid, body.type, body.payload);
+  const d = await _signalSendDirect(body.from_guid, body.to_guid, body.type, body.payload);
+  // 2026-11-16 — 상대 기기에 푸시 구독이 없으면 알림으로 깨울 수 없다. 앱이 열려 있을 때만 받는다는 것을 알린다.
+  if (body.type === 'offer' && d && d.push === 'no_subscription') {
+    try { _notify('ℹ️ 상대 기기에 알림이 켜져 있지 않아, 상대가 나비웹을 열어 둔 동안에만 호출이 전달됩니다. 상대에게 알림 허용을 부탁해 보세요.'); } catch {}
+  }
 }
 
 // ── 시그널 폴링 ───────────────────────────────────────────
