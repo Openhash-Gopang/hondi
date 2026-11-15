@@ -4,12 +4,12 @@
  *  - mountFriendFindCard(): 설정 화면에 "이름·이메일 ID·전화번호별 찾기 허용" 카드를 붙인다.
  */
 import { _USER } from '../core/state.js';
-import { signalPost } from '../p2p/signal-auth.js';
+import { signalPost, currentGuid } from '../p2p/signal-auth.js';
 
 // 로그인 증명: 문자 인증 쿠키(hondi_pvt)가 있으면 그것을, 없으면(기기 키로만 로그인한 기기) 지갑 서명으로 발급한 토큰을 쓴다.
 // signalPost 가 둘 중 가능한 쪽을 붙이고, 쿠키 계정이 다르거나 만료면 지갑 증명으로 한 번 더 시도한다.
 async function post(path, body) {
-  const guid = _USER?.ipv6 || _USER?.guid || '';
+  const guid = currentGuid(_USER);
   try {
     const r = await signalPost(path, guid, body || {});
     if (r.ok) return r.data;
