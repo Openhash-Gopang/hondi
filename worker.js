@@ -21800,9 +21800,12 @@ async function callDeepSeek(bodyText,env,corsHeaders,fallbackFrom=null,meta=null
       if (hr.ok) { res = hr; _haikuUsed = true; }
       else {
         const _st = hr.status;
-        console.warn(JSON.stringify({ tag: 'HAIKU_CALL_FAILED', status: _st, ts: new Date().toISOString(), ...meta }));
-        if (!([401, 403, 429].includes(_st) || _st >= 500) || !(_useSelfHost || _useOR || env.DEEPSEEK_API_KEY)) {
-          const t = await hr.text(); let m; try { m = JSON.parse(t)?.error?.message; } catch {}
+        // 거절 사유(Anthropic error.message)를 로그에 남긴다 — 이전엔 상태 코드만 남아 400 원인을 알 수 없었다(2026-11-15).
+        let _errText = ''; try { _errText = (await hr.clone().text()).slice(0, 600); } catch {}
+        console.warn(JSON.stringify({ tag: 'HAIKU_CALL_FAILED', status: _st, error: _errText, ts: new Date().toISOString(), ...meta }));
+        // 400(요청 형식 거절)도 DeepSeek 로 한 번 더 시도한다 — 사용자가 "HTTP 400" 만 보지 않게. 대체할 키가 없을 때만 오류를 돌려준다.
+        if (!(_useSelfHost || _useOR || env.DEEPSEEK_API_KEY)) {
+          let m; try { m = JSON.parse(_errText)?.error?.message; } catch {}
           return new Response(JSON.stringify({ error: m || `HTTP ${_st}` }), { status: _st, headers: corsHeaders });
         }
       }
