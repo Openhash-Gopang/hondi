@@ -75,3 +75,17 @@ test('iframe 안의 페이지는 탭으로 등록하지 않는다', () => {
   loadG(w).registerTab({ kind: 'service', label: '메뉴' });
   assert.equal(got.length, 0);
 });
+
+test('PC(/desktop) 로고는 메인 채팅창을 부르지 않고 desktop 홈으로 간다', () => {
+  let opened = 0, assigned = null, reloaded = 0;
+  const mk = (path, search = '', hash = '') => ({ name: '', open: () => { opened++; return null; }, location: { pathname: path, search, hash, href: 'x', assign: (u) => { assigned = u; }, reload: () => { reloaded++; } }, dispatchEvent: () => true, CustomEvent: function () { this.defaultPrevented = false; } });
+  let api = load(mk('/desktop.html', '?case=1')); assert.equal(api.isDesktopPage(), true);
+  api.logoClick(); assert.equal(opened, 0); assert.equal(assigned, '/desktop.html');
+  assigned = null; api = load(mk('/desktop')); api.logoClick(); assert.equal(opened, 0); assert.equal(reloaded, 1);
+  api = load(mk('/webapp')); assert.equal(api.isDesktopPage(), false); api.logoClick(); assert.equal(opened, 1);
+});
+test('PC 페이지가 홈 이벤트를 처리하면 이동하지 않는다', () => {
+  let assigned = null, reloaded = 0;
+  const win = { name: '', location: { pathname: '/desktop', search: '?x=1', hash: '', assign: () => { assigned = 1; }, reload: () => { reloaded++; } }, CustomEvent: function () { this.defaultPrevented = false; }, dispatchEvent: (ev) => { ev.defaultPrevented = true; return false; } };
+  load(win).logoClick(); assert.equal(assigned, null); assert.equal(reloaded, 0);
+});
