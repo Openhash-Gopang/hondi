@@ -71,7 +71,7 @@ import { _matchUserSearchIntent, _USER_SEARCH_ACTION, _USER_SEARCH_EXCLUDE } fro
 import { loadFrequent, matchFrequent } from '../ui/frequent-users.js';
 import { loadFavorites, matchFavorite } from '../ui/favorites.js';
 import { setSPLabel, getSPLabel, renderSPLabel } from '../ui/sp-label.js';
-import { resolveCallTarget, traceLine } from '../ui/call-target.js';
+import { resolveCallTarget, traceLine, classifyTarget } from '../ui/call-target.js';
 import { loadCounterpartIndex, lookupCounterpart, idbStore } from '../ui/counterpart-index.js';
 import { findFriend } from '../ui/friend-find-client.js';
 import { rememberUser } from '../ui/frequent-users.js';
@@ -917,6 +917,8 @@ export const _stripInternalTags = (text) => _stripBracketTag(
   .replace(/\[KSEARCH_RESULT:[^\]]*\]/g, '')
   .replace(/\[KSEARCH_CLARIFY:[^\]]*\]/g, '')
   .replace(/\[KSEARCH_HANDOFF_BACK:[^\]]*\]/g, '')
+  // 2026-11-16 — 스트리밍 중 아직 닫히지 않은 대괄호 태그(예: "[SEARCH: query=0109…")가 화면에 그대로 보이던 결함 수정
+  .replace(/\s*\[[A-Z][A-Z0-9_]{2,}\b[^\]]*$/, '')
   .trim();
 
 /**
@@ -5355,8 +5357,21 @@ function _getCounterpartIndex() {
   return _cpIndexP;
 }
 try { setTimeout(() => { _getCounterpartIndex(); }, 4000); } catch {}   // 앱을 연 직후 백그라운드로 미리 받아 둔다
+let _awaitingCallTarget = false;   // "누구를 호출할까요?"/"찾지 못했습니다" 뒤에는 이름·번호·아이디만 말해도 호출로 이어간다
 async function _handleCallRequest(userText, _preTab) {
   if (typeof userText !== 'string' || userText.length > 40) return false;
+  const _raw = userText.trim();
+  if (/^(?:(?:사용자|상대방?|친구|누군가)\s*)?(?:을|를)?\s*(?:호출|불러|연결|초대)\S*$/.test(_raw)) {
+    _awaitingCallTarget = true;
+    history.push({ role: 'user', content: userText });
+    const q = '누구를 호출할까요? 이름·아이디(@…)·전화번호, 또는 기관·전문가 이름을 말씀해 주세요.';
+    appendBubble('ai', q); history.push({ role: 'assistant', content: q });
+    return true;
+  }
+  if (_awaitingCallTarget) {
+    if (!_raw.includes('[') && /^[가-힣A-Za-z0-9@+._\- ]{2,24}$/.test(_raw) && classifyTarget(_raw) !== 'other') userText = _raw + ' 호출';
+    else _awaitingCallTarget = false;
+  }
   const idx = await Promise.race([_getCounterpartIndex(), new Promise(r => setTimeout(() => r(null), 1500))]);
   const _me = _USER?.guid || _USER?.ipv6;
   const res = await resolveCallTarget(userText, {
@@ -5368,6 +5383,7 @@ async function _handleCallRequest(userText, _preTab) {
   });
   if (!res) return false;
   const cands = res.candidates;
+  _awaitingCallTarget = !cands.length;
   // 사람·번호·아이디인데 못 찾았으면 이유를 정직하게 알리고 검색창을 연다. 기관·직역으로 보이는 말은 AI 라우팅(K-Search 등)에 맡긴다.
   if (!cands.length && res.kind === 'other') return false;
   history.push({ role: 'user', content: userText });
@@ -5383,8 +5399,16 @@ async function _handleCallRequest(userText, _preTab) {
   if (cands.length === 1) {
     const c = cands[0];
     const m = `${_TYPE_NAME[c.type] || '상대'} ${c.name}을(를) 새 탭 대화창으로 초대합니다.\n🔎 ${traceLine(res.trace)}`;
-    appendBubble('ai', m); history.push({ role: 'assistant', content: m });
-    await _openCounterpart(c, userText, _preTab);
+    const bub1 = appendBubble('ai', m); history.push({ role: 'assistant', content: m });
+    if (_preTab && !_preTab.closed) { await _openCounterpart(c, userText, _preTab); return true; }
+    // 대화창(패널)에서는 미리 열어 둔 탭이 없다 — 비동기 뒤에 열면 모바일이 팝업으로 차단하므로, 사용자가 누르는 버튼으로 연다.
+    try {
+      const b = document.createElement('button');
+      b.textContent = `${c.name} · 새 탭 대화창 열기`;
+      b.style.cssText = 'display:block;margin:8px 0 0;padding:9px 14px;border:none;border-radius:8px;background:#1A73E8;color:#fff;font-weight:600;cursor:pointer';
+      b.onclick = () => { b.disabled = true; _openCounterpart(c, userText, null); };
+      bub1.appendChild(b);
+    } catch { await _openCounterpart(c, userText, null); }
     return true;
   }
   if (_preTab && !_preTab.closed) { try { _preTab.close(); } catch {} }
@@ -5402,14 +5426,15 @@ async function _handleCallRequest(userText, _preTab) {
   return true;
 }
 
-async function _callAIInner(userText, imageFile = null, _preTab = null, modelTier = null, onFailure = null) {
-  // 지연 측정 시작점(2026-11-12) — 아래 첫 스트림 청크 도착 시 경과를 콘솔·window.__hondiLatency 에 남긴다.
-  const _t0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
-  try { window.__hondiLatencyStart = _t0; } catch {}
+// ── 0단계: LLM을 부르지 않고 코드가 즉시 처리하는 요청들(복귀·친구·즐겨찾기·호출·검색·사용량) ──────────
+// 2026-11-16 — 폰의 주 대화창(webapp.html 패널)은 callAI()가 아니라 자체 파이프라인(_callPanelAI)을 쓴다. 0단계가 callAI 안에만 있으면
+// 패널에서는 한 번도 실행되지 않는다(사진: 사용자 호출이 K-Intent에게 넘어가 "이름으로는 찾을 수 없습니다"라고 답함). 그래서 함수로 빼서 둘 다 부른다.
+// 처리했으면 true(호출부는 LLM을 부르지 않는다).
+export async function runStageZero(userText, imageFile = null, _preTab = null) {
   // 2026-11-15 — "나비로 돌아가" 등: 기본 SP(나만의 AI 비서)가 아닐 때 LLM 없이 즉시 복귀
   if (!imageFile && !_isDefaultSP() && matchReturnToDefaultIntent(userText)) {
     await returnToDefaultAssistant();
-    return;
+    return true;
   }
   // 2026-11-12 — 자주 찾는 사용자: 이름·아이디만 말해도 LLM·검색 없이 곧바로 채팅으로 연결한다.
   if (!imageFile) {          // 2026-11-15: 전문가 페르소나(systemStack)가 켜져 있어도 검색·연결은 AI 없이 즉시 처리
@@ -5429,7 +5454,7 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
         appendBubble('ai', _msg);
       }
       history.push({ role: 'assistant', content: _msg });
-      return;
+      return true;
     }
   }
   // 2026-11-16 — 즐겨찾기(전문가·기관·K-서비스): 한 번 호출한 상대는 이름만 말해도 검색·LLM 없이 곧바로 새 탭으로 연다.
@@ -5449,20 +5474,20 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
           appendBubble('ai', _msg);
           history.push({ role: 'assistant', content: _msg });
           _gwpLaunch(def, userText, _preTab, _buildRoutingFacts());
-          return;
+          return true;
         }
       } else {
         _msg = '같은 이름의 즐겨찾기가 여러 개입니다: ' + _fv.many.map(f => f.name + '(' + f.id + ')').join(', ');
         appendBubble('ai', _msg);
         history.push({ role: 'assistant', content: _msg });
-        return;
+        return true;
       }
       history.pop();   // 열 수 없으면 기존 흐름으로
     }
   }
   // 2026-11-16 — "호출해 줘·불러줘·연결해": 누구를 어디서 찾을지(전문가→K-서비스→사람→기관) 코드가 먼저 정하고 새 탭 대화창으로 초대한다.
   if (!imageFile) {
-    try { if (await _handleCallRequest(userText, _preTab)) return; } catch (e) { console.warn('[Call] 호출 대상 처리 실패(기존 흐름으로):', e && e.message); }
+    try { if (await _handleCallRequest(userText, _preTab)) return true; } catch (e) { console.warn('[Call] 호출 대상 처리 실패(기존 흐름으로):', e && e.message); }
   }
   if (!imageFile) {
     const _us = _matchUserSearchIntent(userText);
@@ -5474,7 +5499,7 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
       appendBubble('ai', _msg);
       history.push({ role: 'assistant', content: _msg });
       try { openSearch(_us.query || undefined); } catch (e) { console.warn('[Search] 검색창 열기 실패:', e.message); }
-      return;
+      return true;
     }
   }
   // 2026-08-10 신설 — "내 사용량 보여줘" 등은 LLM 호출 없이 즉시 처리.
@@ -5491,9 +5516,17 @@ async function _callAIInner(userText, imageFile = null, _preTab = null, modelTie
       'background:#1A73E8;color:#fff;font-weight:600;cursor:pointer">내 사용량 확인하기</button>';
     appendBubble('ai', _msg);
     history.push({ role: 'assistant', content: _msg });
-    return;
+    return true;
   }
 
+  return false;
+}
+
+async function _callAIInner(userText, imageFile = null, _preTab = null, modelTier = null, onFailure = null) {
+  // 지연 측정 시작점(2026-11-12) — 아래 첫 스트림 청크 도착 시 경과를 콘솔·window.__hondiLatency 에 남긴다.
+  const _t0 = (typeof performance !== 'undefined') ? performance.now() : Date.now();
+  try { window.__hondiLatencyStart = _t0; } catch {}
+  if (await runStageZero(userText, imageFile, _preTab)) return;
   showTyping();
 
   // ── AC 사전 분류기(classifyIntent) 고신뢰 즉시 라우팅 (2026-09-13 신설) ──

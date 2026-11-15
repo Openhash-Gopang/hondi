@@ -422,6 +422,7 @@ body.gopang-authed #gopang-auth-gate{display:none}
 #ai-sp-label{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);max-width:46%;padding:3px 10px;border-radius:999px;
   background:rgba(255,255,255,.22);color:#fff;font-size:calc(.75rem*var(--hondi-fs,1));font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;z-index:1}
 #ai-sp-label[hidden]{display:none}
+#ai-panel-messages .msg-row:has(> .bubble:empty){display:none}   /* 태그만 있어 비워진 말풍선은 숨긴다 */
 #ai-panel-logo{flex-shrink:0;width:36px;height:36px;padding:0;margin:0 2px 0 0;border:0;background:transparent;
   cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
 #ai-panel-logo img{width:32px;height:32px;display:block;pointer-events:none}
@@ -4417,6 +4418,20 @@ window.closePDV = closePDV;
   // 이미 정확했다 — 그 결과를 패널까지 전달할 배선이 없었을 뿐이다.
   async function _callPanelAI(userText, bubbleEl, attached, _preTab, modelTier) {
     _panelUserAborted = false; // 새 요청 시작 — 이전 취소 플래그 초기화
+    // 2026-11-16 — 0단계(코드가 즉시 처리): 호출·검색·즐겨찾기·복귀·사용량. 이 패널은 callAI()를 거치지 않으므로 여기서 직접 부른다.
+    // (안 부르면 "김동 호출해 줘"가 LLM(K-Intent)에게 가서 "이름으로는 찾을 수 없습니다"라고 지어낸 답을 한다.)
+    if (typeof userText === 'string' && !userText.startsWith('[') && !(Array.isArray(attached) ? attached.length : attached)) {
+      try {
+        const { runStageZero } = await import('./src/gopang/ai/call-ai.js');
+        const { setBubbleTarget } = await import('./src/gopang/ui/bubble.js');
+        setBubbleTarget('ai-panel-messages');
+        if (await runStageZero(userText, null, _preTab || null)) {
+          try { bubbleEl.closest('.msg-row')?.remove(); } catch {}   // 자리표시 "…" 말풍선 제거
+          try { if (typeof _savePanelHistory === 'function') _savePanelHistory(); } catch {}
+          return;
+        }
+      } catch (e) { console.warn('[Panel] 0단계 처리 실패(무시, LLM으로 진행):', e && e.message); }
+    }
     const { PROVIDER_INFO, getPriorityOrder } = await import('./src/gopang/core/config.js');
     // free-model-pool.js 삭제(2026-07-01) — OR 24h쿨다운·분당예산 관리 대신
     // 나비 제공 DeepSeek 기본 키(hondi-flash/hondi-pro)가 항상 마지막 안전망으로 붙는다.
