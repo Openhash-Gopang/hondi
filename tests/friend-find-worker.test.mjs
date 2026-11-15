@@ -72,3 +72,4 @@ test('연락처 일치: 해시가 어긋나도 한국 010 은 e164_last8 로 보
   assert.equal(numberForProfile({ e164_last8: '98807170', country_code: 'US' }, nums, new Map()), '');
   assert.equal(numberForProfile({ e164_last8: '00000000', country_code: 'KR' }, nums, new Map()), '');
 });
+
