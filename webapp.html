@@ -422,6 +422,16 @@ body.gopang-authed #gopang-auth-gate{display:none}
 #ai-sp-label{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);max-width:46%;padding:3px 10px;border-radius:999px;
   background:rgba(255,255,255,.22);color:#fff;font-size:calc(.75rem*var(--hondi-fs,1));font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;z-index:1}
 #ai-sp-label[hidden]{display:none}
+#navi-tabs-btn{display:inline-flex;align-items:center;gap:3px;margin-left:auto;margin-right:6px;padding:3px 9px;border:1px solid rgba(0,0,0,.2);border-radius:999px;background:transparent;font-size:.8rem;cursor:pointer;color:inherit}
+#navi-tabs-btn[hidden],#navi-tabs-pop[hidden]{display:none}
+#navi-tabs-btn[aria-expanded="true"]{background:#e8eaf6;border-color:#3949ab;color:#3949ab}
+#navi-tabs-pop{position:absolute;top:46px;right:8px;z-index:500;width:min(200px,60vw);padding:3px 0;background:#fff;color:#222;border:1px solid rgba(0,0,0,.18);border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.18);font-size:.85rem}
+#navi-tabs-pop button{display:flex;align-items:center;gap:6px;width:100%;padding:8px 10px;border:0;border-top:1px solid rgba(0,0,0,.08);background:transparent;text-align:left;font:inherit;color:inherit;cursor:pointer}
+#navi-tabs-pop button:first-child{border-top:0}
+#navi-tabs-pop .cur{background:#e8eaf6;color:#3949ab;cursor:default}
+#navi-tabs-pop .lb{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#navi-tabs-pop .hint{padding:6px 10px;font-size:.75rem;color:#c62828}
+
 #ai-panel-messages .msg-row:has(> .bubble:empty){display:none}   /* 태그만 있어 비워진 말풍선은 숨긴다 */
 #ai-panel-logo{flex-shrink:0;width:36px;height:36px;padding:0;margin:0 2px 0 0;border:0;background:transparent;
   cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
@@ -1410,6 +1420,8 @@ html.is-embedded .install-banner{display:none!important}
       <button id="ai-panel-logo" type="button" onclick="_returnToNavi()" title="나만의 AI 비서로 돌아가기" aria-label="나만의 AI 비서로 돌아가기"><img src="/icons/navi-icon-192.png?v=20261015" alt="나비" width="32" height="32"></button>
       <!-- 지금 대화 중인 SP 이름(상단 중앙). 기본 SP(나만의 AI 비서)일 때는 비어 숨겨진다 — ui/sp-label.js -->
       <span id="ai-sp-label" hidden></span>
+      <button id="navi-tabs-btn" type="button" hidden aria-haspopup="true" aria-expanded="false" aria-label="열린 나비웹 탭"><span aria-hidden="true">▦</span><b id="navi-tabs-n">0</b></button>
+      <div id="navi-tabs-pop" role="menu" hidden></div>
       <div id="ai-panel-name-wrap">
         <div id="ai-panel-name-line">
           <span id="ai-panel-name">나비</span>
@@ -2598,9 +2610,14 @@ const _isCallTab = !!new URLSearchParams(location.search).get('call');   // repl
 try {
   const nh = window.NaviHome;
   if (nh) {
-    if (_isCallTab) nh.markCallTab();
+    if (_isCallTab) {
+      nh.markCallTab();
+      let _lb = ''; try { const o = JSON.parse(new URLSearchParams(location.search).get('call')); _lb = (o && (o.n || o.h)) || ''; } catch {}
+      nh.registerTab({ kind: 'friend', label: _lb });
+    }
     else {
       nh.markMainTab();
+      try { _initTabsMenu(nh); } catch (e) { console.warn('[Tabs]', e && e.message); }
       // 연결되지 않은 두 번째 메인 창이 열리면, 이전 창은 쉬게 하고(맨 앞은 항상 새로 뜬 창) 안내만 보인다.
       nh.watchMain(() => {
         if (document.getElementById('navi-passive')) return;
@@ -2613,6 +2630,33 @@ try {
     }
   }
 } catch {}
+
+/* 2026-11-16 — 열린 나비웹 탭 목록: 평소엔 숨기고(탭이 없으면 버튼도 숨김) 버튼을 누를 때만 작은 팝업으로 보인다. */
+function _initTabsMenu(nh) {
+  const btn = document.getElementById('navi-tabs-btn'), pop = document.getElementById('navi-tabs-pop'), num = document.getElementById('navi-tabs-n');
+  if (!btn || !pop) return;
+  const ICON = { expert: '⚖', institution: '🏛', friend: '👤', service: '🧩' };
+  let tabs = [];
+  const close = () => { pop.hidden = true; btn.setAttribute('aria-expanded', 'false'); };
+  const render = (hint) => {
+    pop.textContent = '';
+    const cur = document.createElement('button'); cur.type = 'button'; cur.className = 'cur';
+    cur.innerHTML = '<span aria-hidden="true">🦋</span><span class="lb">내 AI 비서</span>'; cur.onclick = close; pop.appendChild(cur);
+    tabs.forEach((t) => {
+      const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'menuitem');
+      const ic = document.createElement('span'); ic.setAttribute('aria-hidden', 'true'); ic.textContent = ICON[t.kind] || ICON.service;
+      const lb = document.createElement('span'); lb.className = 'lb'; lb.textContent = t.label || '나비웹';
+      b.append(ic, lb);
+      b.onclick = () => { const ok = nh.gotoTab(t); close(); if (!ok) { hint = '탭이 닫혔거나 이동할 수 없습니다.'; } else setTimeout(() => { if (document.visibilityState === 'visible' && document.hasFocus()) { const h = document.createElement('div'); h.className = 'hint'; h.textContent = '"' + (t.label || '나비웹') + '" 탭으로 직접 이동해 주세요.'; pop.appendChild(h); pop.hidden = false; btn.setAttribute('aria-expanded', 'true'); setTimeout(close, 3500); } }, 350); };
+      pop.appendChild(b);
+    });
+    if (hint) { const h = document.createElement('div'); h.className = 'hint'; h.textContent = hint; pop.appendChild(h); }
+  };
+  const update = (list) => { tabs = list; num.textContent = String(list.length + 1); btn.hidden = list.length === 0; if (!list.length) close(); else if (!pop.hidden) render(); };
+  btn.onclick = (e) => { e.stopPropagation(); if (!pop.hidden) return close(); render(); pop.hidden = false; btn.setAttribute('aria-expanded', 'true'); };
+  document.addEventListener('click', (e) => { if (!pop.hidden && !pop.contains(e.target) && e.target !== btn) close(); });
+  nh.watchTabs(update);
+}
 setSPLabel('');   // 새로 열면 기본 SP(나만의 AI 비서) — 지난 접속의 라벨을 지운다
 try {
   const raw = new URLSearchParams(location.search).get('call');

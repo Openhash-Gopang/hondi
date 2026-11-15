@@ -35,3 +35,35 @@ test('나중에 열린 메인이 알리면 먼저 열린 메인은 passive 가 �
   const b = load({ name: '', BroadcastChannel: BC }); b.watchMain(() => {});
   assert.equal(passive, 1);
 });
+
+// ── 열린 탭 목록 ──
+function bus() {
+  const subs = new Set();
+  return class BC { constructor() { this.l = []; subs.add(this); this.addEventListener = (t, f) => this.l.push(f); }
+    set onmessage(f) { this.l.push(f); } postMessage(d) { subs.forEach((o) => { if (o !== this) o.l.forEach((f) => f({ data: JSON.parse(JSON.stringify(d)) })); }); } };
+}
+const mkWin = (BC, extra = {}) => ({ name: '', BroadcastChannel: BC, setInterval: () => 0, addEventListener() {}, document: { title: '전문가 업무 보조 AI', addEventListener() {}, hidden: false, getElementById: () => null, documentElement: { hasAttribute: () => false }, body: null }, location: { pathname: '/pages/expert-chat.html' }, ...extra });
+const loadG = (win) => { vm.runInNewContext(code, { window: win, setInterval: () => 0, Date, Object, JSON }); return win.NaviHome; };
+
+test('다른 탭이 알리면 메인이 목록으로 받는다(종류 추측·고유 창 이름)', () => {
+  const BC = bus(); const main = loadG(mkWin(BC)); main.markMainTab();
+  let got = []; main.watchTabs((l) => { got = l; });
+  const w2 = mkWin(BC); const t = loadG(w2); t.registerTab();
+  assert.equal(got.length, 1); assert.equal(got[0].kind, 'expert'); assert.match(got[0].name, /^naviweb-tab-/); assert.equal(got[0].label, '전문가 업무 보조 AI');
+});
+test('탭이 닫히면(bye) 목록에서 빠진다 / 메인 탭은 스스로를 알리지 않는다', () => {
+  const BC = bus(); const main = loadG(mkWin(BC)); main.markMainTab(); let got = [];
+  main.watchTabs((l) => { got = l; });
+  const w2 = mkWin(BC); const t = loadG(w2); t.registerTab({ kind: 'friend', label: '김철수' });
+  assert.equal(got[0].label, '김철수'); assert.equal(got[0].kind, 'friend');
+  const bc = new BC(); bc.postMessage({ t: 'bye', id: got[0].id }); assert.equal(got.length, 0);
+  main.registerTab(); assert.equal(got.length, 0);
+});
+test('gotoTab: 이름 있는 창을 열어 focus, 새 빈 창이면 닫고 실패', () => {
+  let focused = 0, closed = 0, name = null;
+  const live = { location: { href: 'https://app.naviweb.kr/pages/expert-chat.html' }, focus: () => focused++ };
+  const BC = bus(); const api = loadG(mkWin(BC, { open: (u, n) => { name = n; return live; } }));
+  assert.equal(api.gotoTab({ id: 'a', name: 'naviweb-tab-a' }), true); assert.equal(name, 'naviweb-tab-a'); assert.equal(focused, 1);
+  const api2 = loadG(mkWin(BC, { open: () => ({ location: { href: 'about:blank' }, close: () => closed++ }) }));
+  assert.equal(api2.gotoTab({ id: 'b', name: 'x' }), false); assert.equal(closed, 1);
+});
