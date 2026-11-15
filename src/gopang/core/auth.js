@@ -1676,10 +1676,9 @@ function _showPhonePopupLegacy(resolve) {
       </div>
       <div id="_phone-error" class="mp-error" style="display:none"></div>
       <!-- 나비 숫자 코드 — 전화번호가 그대로 코드가 된다(2026-11-15, 주피터 지시). 정하는 칸은 없다. -->
-      <div id="_code-box" style="display:none;border:1.5px solid #00796B;border-radius:12px;padding:12px 16px;background:#f0faf8;margin:0 0 12px">
-        <div style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:#6b7280">내 나비 숫자 코드 · 전화번호로 정해집니다</div>
-        <div id="_code-val" style="font-size:min(calc(1.25rem*var(--hondi-fs,1)),5.4vw);font-weight:700;color:#00796B;letter-spacing:.5px;line-height:1.4;white-space:nowrap"></div>
-        <div style="font-size:calc(0.71875rem*var(--hondi-fs,1));color:#6b7280;line-height:1.6;margin-top:2px">내가 공개하기 전에는 보이지 않습니다.</div>
+      <div id="_code-box" style="display:none;border:1.5px solid #00796B;border-radius:12px;padding:8px;background:#fff;margin:0 0 12px;text-align:center">
+        <img id="_code-img" alt="내 나비 숫자 코드" style="display:block;width:64%;height:auto;margin:0 auto;border-radius:8px">
+        <div id="_code-val" style="display:none"></div>
       </div>
 
       <!-- 닉네임 -->
@@ -1921,6 +1920,12 @@ function _showPhonePopupLegacy(resolve) {
       ? `${code.slice(0, 3)}-${code.slice(3, 6)}-${code.slice(6)}`
       : `${code.slice(0, 2)}-${code.slice(2, 6)}-${code.slice(6)}`) : '';
     box.style.display = (_signupMode && _step === 1 && code) ? '' : 'none';
+    // 나비 숫자 코드 시안(로고 + 7세그먼트 숫자열)만 보여 준다 — 글자 설명은 두지 않는다
+    const img = document.getElementById('_code-img');
+    if (img && code && img.dataset.code !== code) {
+      img.dataset.code = code;
+      generateDigitCodeDataURL(code).then((u) => { if (img.dataset.code === code) img.src = u; }).catch(() => {});
+    }
   }
 
   function _updateHandlePreview() {
