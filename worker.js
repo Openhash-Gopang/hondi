@@ -14824,6 +14824,8 @@ export default {
     // K-Mail 등 다른 서비스에서 로그인한 사용자를 혼디 앱이 그대로 이어받을 때 쓴다. 최소 정보만 돌려준다.
     if (pathname === '/auth/session-profile' && request.method === 'POST')
       return handleAuthSessionProfile(request, env, corsHeaders);
+    if (pathname === '/counterparts/index' && request.method === 'GET')
+      return handleCounterpartIndex(request, env, corsHeaders, ctx);
     if (pathname === '/friends/find' && request.method === 'POST')
       return handleFriendFind(request, env, corsHeaders);
     if (pathname === '/friends/invite-notify' && request.method === 'POST')
@@ -29167,6 +29169,36 @@ async function _friendCaller(env, body) {
 // 정확일치만: 번호는 상대가 phone_findable 을 켠 경우에만, 아이디(가입 때 본인이 고른 이메일 ID)는 정확히 일치할 때만. AI 를 쓰지 않는다.
 // 못 찾은 이유(없음/허용 안 함)는 구분해 알려 주지 않는다 — 번호 가입 여부를 캐내는 데 쓰이지 않게.
 const _FF_ID_CHARS = /^[A-Za-z0-9가-힣._-]{1,40}$/;
+
+// GET /counterparts/index — 기관·전문가·플랫폼 SP 이름 색인(2026-11-16). 나비가 "누구를 호출할지" 기기 안에서 1초 안에 찾게 하려고
+// 공개된 이름·guid·종류만 한 번에 내려 준다(비공개·개인 계정은 제외). 엣지에서 1시간 캐시한다.
+async function handleCounterpartIndex(request, env, corsHeaders, ctx) {
+  const cache = (typeof caches !== 'undefined' && caches.default) ? caches.default : null;
+  const key = new Request('https://counterparts.cache/index-v1');
+  try { const hit = cache && await cache.match(key); if (hit) return new Response(hit.body, { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=3600', 'X-Cache': 'HIT' } }); } catch (e) { /* 캐시 실패는 무시 */ }
+  try {
+    const l1 = await _l1AdminToken(env);
+    const filter = encodeURIComponent("is_public = true && (entity_type = 'institution' || entity_type = 'org' || entity_type = 'platform')");
+    const items = [];
+    for (let page = 1; page <= 40; page++) {
+      const r = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${filter}&perPage=500&page=${page}&fields=guid,name,entity_type&skipTotal=1`, {
+        headers: { 'Authorization': `Bearer ${l1}` }, signal: AbortSignal.timeout(8000),
+      });
+      if (!r.ok) throw new Error(`L1 조회 실패 (HTTP ${r.status})`);
+      const d = await r.json().catch(() => ({ items: [] }));
+      const rows = d.items || [];
+      for (const x of rows) if (x && x.guid && x.name) items.push([String(x.name), String(x.guid), String(x.entity_type || '')]);
+      if (rows.length < 500) break;
+    }
+    const body = JSON.stringify({ v: Date.now(), count: items.length, items });
+    const res = new Response(body, { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=3600', 'X-Cache': 'MISS' } });
+    if (cache) { const put = cache.put(key, res.clone()); if (ctx && ctx.waitUntil) ctx.waitUntil(put); else await put; }
+    return res;
+  } catch (e) {
+    return new Response(JSON.stringify({ error: String(e && e.message || e) }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+  }
+}
+
 async function handleFriendFind(request, env, corsHeaders) {
   const body = await request.json().catch(() => null);
   if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);

@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseCallRequest, classifyTarget, matchExpert, matchService, resolveCallTarget } from '../src/gopang/ui/call-target.js';
+import { parseCallRequest, classifyTarget, matchExpert, matchService, resolveCallTarget, traceLine } from '../src/gopang/ui/call-target.js';
+import { buildIndex, lookupCounterpart } from '../src/gopang/ui/counterpart-index.js';
 
 const REG = { 'judicial-scrivener': { label: '법무사 보조 AI' }, lawyer: { label: '변호사' }, 'lawyer-civil': { label: '변호사(민사법)' }, accountant: { label: '공인회계사' }, 'tax-accountant': { label: '세무사' } };
 const SVC = [{ id: 'kmail', name: 'K-Mail', url: 'https://x', status: 'active' }, { id: 'klaw', name: 'K-Law', url: 'https://y', status: 'active' }, { id: 'old', name: 'K-Old', url: '', status: 'active' }];
@@ -26,19 +27,29 @@ test('K-서비스: 이름·id 정확히 같고 활성·url 있는 것만', () =>
   assert.equal(matchService('k mail', SVC).id, 'kmail'); assert.equal(matchService('KLAW', SVC).id, 'klaw');
   assert.equal(matchService('K-Old', SVC), null); assert.equal(matchService('메일', SVC), null);
 });
-test('검색 순서: 전문가 → 서비스 → 사람 → 기관, 못 찾으면 후보 없음', async () => {
-  const calls = [];
-  const deps = { expertRegistry: REG, services: SVC,
-    findFriend: async (q) => { calls.push('friend:' + q); return q === '김동' ? { ok: true, found: true, user: { guid: 'g1', handle: '@98807170', nickname: '김동' } } : { ok: true, found: false }; },
-    searchEntities: async (q) => { calls.push('ent:' + q); return q === '제주시청' ? [{ entity_type: 'institution', primary_guid: 'gov1', name: '제주시청' }, { entity_type: 'person', primary_guid: 'p' }] : []; } };
-  let r = await resolveCallTarget('법무사 불러줘', deps); assert.equal(r.candidates[0].type, 'expert'); assert.deepEqual(calls, []);
-  r = await resolveCallTarget('K-Mail 호출', deps); assert.equal(r.candidates[0].type, 'service'); assert.deepEqual(calls, []);
-  r = await resolveCallTarget('김동 호출해 쥐', deps); assert.equal(r.candidates[0].type, 'person'); assert.equal(r.candidates[0].user.guid, 'g1');
-  r = await resolveCallTarget('제주시청 연결해', deps); assert.deepEqual(r.candidates.map(c => c.type), ['institution']);
-  r = await resolveCallTarget('홍길동 불러줘', deps); assert.equal(r.candidates.length, 0);   // 사람·기관 모두 없음
-  assert.equal(await resolveCallTarget('오늘 날씨', deps), null);
+const IDX = buildIndex([['제주시청', 'gov1', 'institution'], ['제주특별자치도청', 'gov2', 'institution'], ['김동', 'gov9', 'org']]);
+const mk = (extra = {}) => ({ expertRegistry: REG, services: SVC, friendsLocal: () => [], institutionIndex: (t, o) => lookupCounterpart(IDX, t, o),
+  findFriend: async (q) => (q === '홍길동' ? { ok: true, found: true, user: { guid: 'g1', handle: '@hong', nickname: '홍길동' } } : { ok: true, found: false }), ...extra });
+test('검색 순서: 친구 → 전문가 → 기관 → 서비스 → 사용자, 앞에서 찾으면 멈춘다', async () => {
+  let r = await resolveCallTarget('김동 호출해 쥐', mk({ friendsLocal: (t) => (t === '김동' ? [{ guid: 'f1', handle: '@98807170', nickname: '김동' }] : []) }));
+  assert.deepEqual(r.trace.map(t => t.step), ['friends']); assert.equal(r.candidates[0].type, 'person');
+  r = await resolveCallTarget('법무사 불러줘', mk()); assert.deepEqual(r.trace.map(t => t.step), ['friends', 'expert']); assert.equal(r.candidates[0].type, 'expert');
+  r = await resolveCallTarget('제주시청 연결해', mk()); assert.deepEqual(r.trace.map(t => t.step), ['expert', 'institution']); assert.equal(r.candidates[0].id, 'gov1');
+  r = await resolveCallTarget('K-Mail 호출', mk()); assert.deepEqual(r.trace.map(t => t.step), ['friends', 'expert', 'institution', 'service']); assert.equal(r.candidates[0].type, 'service');
+  r = await resolveCallTarget('홍길동 불러줘', mk()); assert.deepEqual(r.trace.map(t => t.step), ['friends', 'expert', 'institution', 'service', 'users']); assert.equal(r.candidates[0].user.guid, 'g1');
+  r = await resolveCallTarget('김철수 불러줘', mk()); assert.equal(r.candidates.length, 0);
+  assert.equal(await resolveCallTarget('오늘 날씨', mk()), null);
 });
-test('찾기 실패(서버 오류)는 후보 없음 + error', async () => {
-  const deps = { expertRegistry: {}, services: [], findFriend: async () => { throw new Error('401'); }, searchEntities: async () => [] };
-  const r = await resolveCallTarget('김동 호출', deps); assert.equal(r.candidates.length, 0); assert.equal(r.error, '401');
+test('사람 이름처럼 보이는 말은 기관 이름과 정확히 같을 때만 기관으로 본다(부분 일치로 가로채지 않음)', async () => {
+  let r = await resolveCallTarget('제주시 불러줘', mk());   // 기관명 부분 일치는 '기관처럼 보이는 말'에서만
+  assert.ok(r.candidates.length === 0 || r.candidates[0].type !== 'person');
+  r = await resolveCallTarget('제주특별자치도 연결해', mk()); assert.equal(r.candidates[0].id, 'gov2');
+});
+test('찾기 실패(서버 오류)는 후보 없음 + error, 그래도 trace 는 남는다', async () => {
+  const r = await resolveCallTarget('홍길동 호출', mk({ findFriend: async () => { throw new Error('401'); } }));
+  assert.equal(r.candidates.length, 0); assert.equal(r.error, '401'); assert.equal(r.trace.at(-1).step, 'users');
+});
+test('찾은 순서 한 줄', async () => {
+  const r = await resolveCallTarget('홍길동 불러줘', mk());
+  assert.match(traceLine(r.trace), /^내 친구 ✗ → 전문가 ✗ → 기관 ✗ → 서비스 ✗ → 나비웹 사용자 ✓ \(\d+\.\d\d초\)$/);
 });
