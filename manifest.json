@@ -94,9 +94,18 @@
       "files": [
         {
           "name": "govdoc",
-          "accept": ["application/pdf", "image/*"]
+          "accept": [
+            "application/pdf",
+            "image/*"
+          ]
         }
       ]
     }
+  },
+  "launch_handler": {
+    "client_mode": [
+      "focus-existing",
+      "auto"
+    ]
   }
 }

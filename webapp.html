@@ -2588,12 +2588,30 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
      실제 사용되는 인증 모듈은 gopang-app.js가 import하는 src/gopang/core/auth.js뿐이므로
      이 죽은 script 태그를 제거함(파일 자체도 git rm 권장 — 커밋 안내 참조). -->
 <!-- v3: ES Module 진입점 -->
+<script src="/navi-home.js"></script>
 <script type="module" src="/gopang-app.js?v=20261015"></script>
 <script type="module">
 /* 2026-11-16 — ① 상단 중앙 SP 이름 표시  ② ?call= : 나비가 다른 탭에서 초대한 상대와 1:1 대화를 바로 시작한다(새 탭 대화창). */
 import { renderSPLabel, setSPLabel } from './src/gopang/ui/sp-label.js';
 const _isCallTab = !!new URLSearchParams(location.search).get('call');   // replaceState 로 지우기 전에 동기로 읽는다
-import('./src/gopang/ui/navi-home.js').then(m => { if (_isCallTab) m.markCallTab(); else m.markMainTab(); }).catch(() => {});
+try {
+  const nh = window.NaviHome;
+  if (nh) {
+    if (_isCallTab) nh.markCallTab();
+    else {
+      nh.markMainTab();
+      // 연결되지 않은 두 번째 메인 창이 열리면, 이전 창은 쉬게 하고(맨 앞은 항상 새로 뜬 창) 안내만 보인다.
+      nh.watchMain(() => {
+        if (document.getElementById('navi-passive')) return;
+        const o = document.createElement('div'); o.id = 'navi-passive';
+        o.style.cssText = 'position:fixed;inset:0;z-index:2147483600;background:rgba(30,40,90,.94);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px;font-size:1rem';
+        o.innerHTML = '<div>다른 창에서 나비가 열렸습니다.</div><button type="button" style="padding:10px 18px;border:0;border-radius:10px;background:#fff;color:#3949ab;font-weight:700">이 창에서 다시 쓰기</button>';
+        o.querySelector('button').onclick = () => location.reload();
+        document.body.appendChild(o);
+      });
+    }
+  }
+} catch {}
 setSPLabel('');   // 새로 열면 기본 SP(나만의 AI 비서) — 지난 접속의 라벨을 지운다
 try {
   const raw = new URLSearchParams(location.search).get('call');
@@ -4213,9 +4231,9 @@ window.closePDV = closePDV;
   // 이미 기본 SP면 아무것도 지우지 않는다.
   window._returnToNavi = async function() {
     const logo = document.getElementById('ai-panel-logo');
-    try {   // 메인 탭이 아닌 탭(호출로 열린 대화 탭 등)의 로고는 메인 탭을 부른다
-      const nh = await import('./src/gopang/ui/navi-home.js');
-      if (!nh.isMainTab()) { if (logo) nh.flutter(logo); nh.openMain(); return; }
+    try {   // 메인 탭이 아닌 탭(호출로 열린 대화 탭 등)의 로고는 메인 탭을 맨 앞으로 부른다
+      const nh = window.NaviHome;
+      if (nh && !nh.isMainTab()) { if (logo) nh.flutter(logo); nh.openMain(); return; }
     } catch {}
     try { if (logo) { logo.classList.remove('flutter'); void logo.offsetWidth; logo.classList.add('flutter'); setTimeout(() => logo.classList.remove('flutter'), 900); } } catch {}
     try {
