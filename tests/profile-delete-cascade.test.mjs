@@ -13,3 +13,11 @@ test('프로필 삭제 후 훅이 메일 관련 컬렉션을 owner_user_guid로 
   assert.match(body, /owner_user_guid/);
   assert.match(body, /deleteRecord/);
 });
+
+test('프로필이 없는 사용자의 이메일 ID는 사용 중으로 치지 않고 남은 행을 지운다(서버)', () => {
+  const w = readFileSync(new URL('../worker.js', import.meta.url), 'utf8');
+  const i = w.indexOf('async function _kmailFindMailIdOwner');
+  const body = w.slice(i, i + 2200);
+  assert.match(body, /_l1FindProfileByGuid\(env, row\.owner_user_guid\)/);
+  assert.match(body, /method: 'DELETE'/);
+});
