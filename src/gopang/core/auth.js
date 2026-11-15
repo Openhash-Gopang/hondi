@@ -1529,7 +1529,7 @@ export async function initAuthWithPhone(digits, countryKey = 'KR', phoneType = '
 // ── 🧪 테스트 기간 아이디 자동 입장 (2026-10-09, 주피터 지시, 잠정) ─────────
 // 서버 스위치(SIMPLE_AUTH_TEST)가 켜져 있으면 접속 즉시 쉬운 한국어 단어 아이디(예: 푸른바다)를 자동으로
 // 만들어 로그인시킨다. 같은 아이디를 입력하면 폰·PC 어디서든 같은 계정이다.
-// 서버가 내려주는 phone_verify_token(형식: tid-<아이디>:<만료>.<서명>)을 쿠키 hondi_pvt/hondi_pvt_exp
+// 서버가 내려주는 phone_verify_token(형식: <전화번호 표기>:<만료>.<서명>)을 쿠키 hondi_pvt/hondi_pvt_exp
 // (.hondi.net)에 써서 K-Law·K-Plan·K-Mail·GDC 등 KAuth를 쓰는 모든 서비스와 로그인을 공유한다.
 // window.__hondiTestEnter 는 auth/k-service-auth-client.js 와 같은 페이지에서 계정이 두 번 생기지
 // 않게 하는 공용 약속이다.
@@ -2065,7 +2065,7 @@ function _showPhonePopupLegacy(resolve) {
         const d = await r.json();
         const total = d.totalItems ?? d.items?.length ?? 0;
         if (total === 0) {
-          nickHintEl.innerHTML = `<span style="color:#16a34a">✓ 처음 사용하는 닉네임입니다.</span>`;
+          nickHintEl.innerHTML = `<span style="color:#16a34a">✓ 처음 사용하는 아이디입니다.</span>`;
         } else {
           nickHintEl.innerHTML =
             `<span style="color:#f59e0b">⚠ 이미 ${total}명이 사용 중입니다.</span> ` +
@@ -2095,6 +2095,7 @@ function _showPhonePopupLegacy(resolve) {
     if (_bkeError) _bkeError.style.display = 'none';
     if (!s1) phoneErr.style.display = 'none';
     nickErr.style.display = 'none'; midErr.style.display = 'none';
+    { const _nh = document.getElementById('_nick-hint'); if (_nh) _nh.style.display = (_signupMode && s1) ? '' : 'none'; }   // 아이디 안내는 1단계에서만
     _stepInd.style.display = _signupMode ? '' : 'none';
     document.getElementById('_step-seg2').style.background = s2 ? '#00796B' : '#e5e7eb';
     document.getElementById('_step-label').textContent = s2 ? '2 / 2 단계' : '1 / 2 단계';
@@ -2577,7 +2578,7 @@ function _showPhonePopupLegacy(resolve) {
       return;
     }
     if (!digitsFilled && !nickname) {
-      phoneErr.textContent = '전화번호 또는 닉네임을 입력해 주세요.';
+      phoneErr.textContent = '전화번호 또는 아이디를 입력해 주세요.';
       phoneErr.style.display = 'block';
       phoneInput.focus();
       return;
@@ -2606,7 +2607,7 @@ function _showPhonePopupLegacy(resolve) {
           if (d.items?.[0]) { found = d.items[0]; break; }
         }
         if (!found) {
-          nickErr.textContent = `닉네임 '${nickname}'을(를) 찾을 수 없습니다. 전화번호로 시작해 주세요.`;
+          nickErr.textContent = `아이디 '${nickname}'을(를) 찾을 수 없습니다. 전화번호로 시작해 주세요.`;
           nickErr.style.display = 'block';
           btn.style.opacity = '1'; btn.style.pointerEvents = '';
           return;
