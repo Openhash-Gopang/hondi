@@ -51,7 +51,7 @@ export async function mountFriendFindCard() {
   const phEl = card.querySelector('#ff-phone');
   const s = await getFriendSettings();
   if (!s.ok) { msg(s.message, true); return; }
-  card.querySelector('#ff-handle').textContent = s.test_account ? String(s.handle).replace(/^tid-/, '') : s.handle;
+  card.querySelector('#ff-handle').textContent = s.handle;
   phEl.checked = !!s.phone_findable;
   phEl.onchange = async () => {
     const want = phEl.checked, r = await saveFriendSettings({ phone_findable: want });

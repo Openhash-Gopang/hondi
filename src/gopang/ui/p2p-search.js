@@ -146,7 +146,7 @@ async function _doSearch(q, country, region, resultsEl) {
 // ── 사용자 카드 렌더 ──────────────────────────────────────
 function _renderUserCard(u) {
   const flag    = _countryFlag(u.country_code);
-  const handle  = String(u.handle || '').replace(/^tid-/, '');   // 테스트 아이디는 접두어 없이 보여 준다
+  const handle  = String(u.handle || '');
   const region  = u.region  ? `<span style="color:#9ca3af">·</span> ${u.region}` : '';
   const country = u.country_code || '';
   const data    = JSON.stringify(u).replace(/"/g, '&quot;');
