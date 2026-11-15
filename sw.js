@@ -47,6 +47,10 @@ const PRECACHE_URLS = [
   // ── 아이콘
   '/icons/navi-icon-192.png',
   '/icons/navi-icon-512.png',
+  // 로딩 화면 나비(날개 2장·몸통)
+  '/icons/nb-wing-back.webp',
+  '/icons/nb-wing-front.webp',
+  '/icons/nb-body.webp',
 ];
 
 // ── 설치 ───────────────────────────────────────────────────
