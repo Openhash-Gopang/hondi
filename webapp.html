@@ -69,9 +69,6 @@
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <noscript><link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css"></noscript>
 <link rel="preload" as="image" href="/icons/nb-wing-back.webp"><link rel="preload" as="image" href="/icons/nb-wing-front.webp"><link rel="preload" as="image" href="/icons/nb-body.webp">
-<!-- 2026-11-16 — 모듈 그래프를 한 벌로: naviweb.kr 프록시는 gopang-app.js 등을 app.naviweb.kr 에서 직접 받게 한다. 그런데 화면 안쪽 코드의 import('./src/…')는 naviweb.kr 로 받아
-     state.js 같은 모듈이 두 벌이 되었다(한쪽의 로그인 정보 _USER 가 비어, 호출·검색·새 탭 대화가 어긋났다). 화면의 /src/ 요청도 같은 원본으로 보내 한 벌만 쓰게 한다. -->
-<script type="importmap">{"imports":{"/src/":"https://app.naviweb.kr/src/"}}</script>
 <!-- 모듈 그래프 병렬 선로드: import 체인(깊이 5)의 순차 요청(워터폴) 제거. gopang-app.js 정적 import 목록과 일치해야 함(tests/modulepreload.test.mjs) -->
 <link rel="modulepreload" href="/gopang-app.js?v=20261015">
 <link rel="modulepreload" href="/src/gopang/core/auth.js">
