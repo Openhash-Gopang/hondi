@@ -30097,8 +30097,9 @@ async function handleSignalSend(request, env, corsHeaders) {
     // (위 2536행의 ctx.waitUntil 주석과 같은 유형). 로그인 승인(device-link)처럼 푸시 발송을 기다린 뒤 응답한다(최대 4초).
     let _who = '';
     try { const pj = typeof payload === 'string' ? JSON.parse(payload) : (payload || {}); _who = String(pj.from_handle || '').replace(/^@|^tid-/g, '').slice(0, 20); } catch (e) { /* 이름 없음 */ }
+    let _push = 'unknown';
     try {
-      await Promise.race([
+      _push = await Promise.race([
         _sendPushToGuid(env, to_guid, {
           title: _who ? `${_who}님이 대화를 요청했습니다` : '대화 요청이 도착했습니다',
           body:  '눌러서 나비웹을 열면 바로 연결됩니다.',
@@ -30108,6 +30109,7 @@ async function handleSignalSend(request, env, corsHeaders) {
         new Promise(r => setTimeout(r, 4000)),
       ]);
     } catch (e) { console.warn('[Push] 알림 전송 실패:', e.message); }
+    return new Response(JSON.stringify({ ok: true, source: 'l1', push: _push || 'timeout' }), { status: 200, headers: corsHeaders });
   }
 
   return new Response(JSON.stringify({ ok: true, source: 'l1' }), { status: 200, headers: corsHeaders });
@@ -34548,19 +34550,19 @@ function _b64uEncode(str) {
 
 // ── Push 알림 전송 헬퍼 (guid 기준) ─────────────────────
 async function _sendPushToGuid(env, guid, { title, body, tag, url }) {
-  if (!env.VAPID_PRIVATE_KEY || !env.VAPID_PUBLIC_KEY) return;
+  if (!env.VAPID_PRIVATE_KEY || !env.VAPID_PUBLIC_KEY) return 'config';
 
   let record;
   try {
     record = await _l1FindProfileByGuid(env, guid);
   } catch (e) {
     console.warn('[Push] L1 조회 실패:', e.message);
-    return;
+    return 'error';
   }
   const devices = _parseDeviceSubscriptions(record?.push_subscription);
   if (!devices.length) {
     console.warn('[Push] push_subscription 없음 — 구독 안 된 계정, 발송 건너뜀. guid:', guid);
-    return;
+    return 'no_subscription';
   }
 
   const payload = JSON.stringify({
@@ -34579,9 +34581,11 @@ async function _sendPushToGuid(env, guid, { title, body, tag, url }) {
     // 승인 요청에서 동일한 원인·수정 이력이 있음(위 주석 참고). GDC
     // 충전 확정도 "지금 당장 반영돼야 하는" 상황이므로 동일하게
     // 'high'로 발송해 즉시 깨우기를 요청한다.
-    await Promise.allSettled(devices.map(d => _sendWebPush(env, d.subscription, payload, 'high')));
+    const rs = await Promise.allSettled(devices.map(d => _sendWebPush(env, d.subscription, payload, 'high')));
+    return rs.some(r => r.status === 'fulfilled' && r.value?.ok === true) ? 'sent' : 'failed';
   } catch(e) {
     console.warn('[Push] _sendPushToGuid 실패:', e.message);
+    return 'failed';
   }
 }
 
