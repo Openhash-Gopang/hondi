@@ -30096,7 +30096,7 @@ async function handleSignalSend(request, env, corsHeaders) {
     // 2026-11-16(주피터 지시: 호출이 안 오거나 5분 뒤에 옴) — 이전에는 응답을 돌려준 뒤 await 없이 푸시를 보내, Worker 가 응답과 함께 작업을 끊으면 푸시가 아예 안 나가거나 늦었다
     // (위 2536행의 ctx.waitUntil 주석과 같은 유형). 로그인 승인(device-link)처럼 푸시 발송을 기다린 뒤 응답한다(최대 4초).
     let _who = '';
-    try { const pj = typeof payload === 'string' ? JSON.parse(payload) : (payload || {}); _who = String(pj.from_handle || '').replace(/^@|^tid-/g, '').slice(0, 20); } catch (e) { /* 이름 없음 */ }
+    try { const pj = typeof payload === 'string' ? JSON.parse(payload) : (payload || {}); _who = String(pj.from_name || pj.from_handle || '').replace(/^@|^tid-/g, '').slice(0, 20); } catch (e) { /* 이름 없음 */ }
     let _push = 'unknown';
     try {
       _push = await Promise.race([
