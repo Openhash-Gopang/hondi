@@ -217,6 +217,7 @@ export async function startP2PCall(targetUser) {
   _activeCallId = callId;
 
   _peerInfo     = targetUser;
+  try { _peerInfo.__since = Date.now(); } catch {}
   _p2pMessages  = [];
   _sessionStart = new Date().toISOString();
 
@@ -240,7 +241,7 @@ export async function startP2PCall(targetUser) {
     from_guid: _USER.ipv6,
     to_guid:   targetUser.guid,
     type:      'offer',
-    payload:   { sdp: conn.localDescription, from_handle: _USER.handle, callId },
+    payload:   { sdp: conn.localDescription, from_handle: _USER.handle, from_name: _USER.nickname || '', callId },
   });
 
   // BUG-FIX(2026-07-02): 예전엔 여기서 _openChatUI()로 완전히 별도의
@@ -407,6 +408,22 @@ async function _verifiedCaller(fromGuid) {
   return { handle: null, nickname: null };
 }
 
+// 2026-11-16 — 새 호출(offer)을 막는 조건을 '대화 중이거나 막 연결하는 중일 때'로만 좁힌다. 이전 연결이 끊긴 채 _peerInfo 만 남은 창(오래 켜 둔 탭 등)이
+// 이후 모든 호출을 조용히 무시해 상대가 "응답 없음"을 보던 문제. 끊긴 흔적이면 정리하고 새 호출을 받는다.
+function _busyWithPeer() {
+  if (!_peerInfo) return false;
+  if (_rtcChannel && _rtcChannel.readyState === 'open') return true;
+  const st = _rtcConn && _rtcConn.connectionState;
+  const fresh = _peerInfo.__since && (Date.now() - _peerInfo.__since < 30000);
+  if (fresh && _rtcConn && st !== 'closed' && st !== 'failed' && st !== 'disconnected') return true;
+  try { if (_rtcChannel) _rtcChannel.close(); } catch {}
+  try { if (_rtcConn) _rtcConn.close(); } catch {}
+  setRtcChannel(null); setRtcConn(null);
+  _activeCallIdCallee = null; _peerInfo = null;
+  try { _clearPeer(); } catch {}
+  return false;
+}
+
 export async function handleIncomingOffer(signal) {
   const fromGuid    = signal.from_guid;
   const _caller    = await _verifiedCaller(fromGuid);
@@ -468,6 +485,7 @@ export async function handleIncomingOffer(signal) {
   if (!accepted) return;
 
   _peerInfo = { guid: fromGuid, handle: fromHandle, nickname: fromName };
+  _peerInfo.__since = Date.now();
   // BUG-FIX(2026-07-02): 원래 이 아래 SDP 생성·전송 과정(await 여러 번)이
   // 끝난 뒤에야 _activeCallIdCallee를 세팅했는데, 그 사이(비동기 처리
   // 중)에 취소 신호가 도착하면 _handleIncomingCancel의 케이스 B 검사
@@ -1008,7 +1026,7 @@ export function startIncomingWatch(myGuid) {
       }
     }
 
-    if (row.type === 'offer' && !_peerInfo) {
+    if (row.type === 'offer' && !_busyWithPeer()) {
       await handleIncomingOffer(row);
       _signalDeleteDirect(row.id);
     }
@@ -1036,7 +1054,7 @@ export function startIncomingWatch(myGuid) {
           const _p = typeof sig.payload === 'string' ? JSON.parse(sig.payload) : (sig.payload || {});
           if (_p.cancel) { await _handleSignalRow(sig); continue; }
         }
-        if (sig.type === 'offer' && !_peerInfo) { await _handleSignalRow(sig); break; }
+        if (sig.type === 'offer' && !_busyWithPeer()) { await _handleSignalRow(sig); break; }
       }
     } catch {}
   }, 3000);
