@@ -5524,6 +5524,20 @@ function _messagesWithLocation(historyArr) {
   async function _sendToAI(text, files) {
     const attachedList = files || [];
     if (!text && !attachedList.length) return;
+    // 2026-11-16(주피터 지시: 연결되자마자 AI 비서가 대답하던 문제) — 이 입력창은 폰의 유일한 입력창이다. 대화 상대와 연결돼 있으면(상단에 상대 이름이 떠 있는 동안)
+    // 입력은 AI 비서가 아니라 상대에게 보낸다. 연결이 아직 열리지 않았거나 끊겼으면 AI에 넘기지 않고 안내만 한다.
+    if (text && !attachedList.length) {
+      try {
+        const st = await import('/src/gopang/core/state.js');
+        if (st._peer) {
+          const { appendBubble } = await import('/src/gopang/ui/bubble.js');
+          appendBubble('user', text);
+          const { _sendP2P } = await import('/src/gopang/p2p/webrtc.js');
+          await _sendP2P(text);   // 채널이 열려 있지 않으면 안내 문구만 보인다
+          return;
+        }
+      } catch (e) { console.warn('[Send] 상대 전송 확인 실패 — AI 경로로 진행:', e && e.message); }
+    }
     if (_embedDel && _embedDel.active() && (text || attachedList.length)) {
       if (attachedList.length) {   // 본문 추출·해시가 끝난 뒤 호스트(서류 SP)로 넘긴다
         await Promise.all(attachedList.map(f => Promise.all([f._hashPromise ? f._hashPromise.catch(() => null) : null, f._extractPromise ? f._extractPromise.catch(() => null) : null])));
