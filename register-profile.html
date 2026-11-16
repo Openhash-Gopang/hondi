@@ -775,7 +775,7 @@ async function showQR() {
 
 async function shareProfile() {
   const name = document.getElementById('nameInput').value.trim() || '나비 프로필';
-  const url  = _handle ? `https://hondi.net/profile.html?handle=${_handle}` : location.href;
+  const url  = _handle ? `https://naviweb.kr/profile.html?handle=${_handle}` : location.href;
   if (navigator.share) await navigator.share({ title: name, url }).catch(() => {});
   else { await navigator.clipboard.writeText(url).catch(() => {}); showToast('링크가 복사됐습니다'); }
 }
