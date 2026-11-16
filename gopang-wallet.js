@@ -2050,12 +2050,13 @@
               } catch (e6) { return false; }
             };
             // 사용자 동작 없이 두 번 조용히 재시도(1.5초·5초 뒤). 열리면 첫 동작 대기 리스너도 걷는다.
-            [1500, 5000].forEach((ms) => setTimeout(async () => {
+            // 지문(WebAuthn) 열쇠는 사용자 동작 없이 부르면 실패하므로 타이머 재시도는 지문 미등록 기기에서만 쓴다.
+            (localStorage.getItem(LS_WEBAUTHN_CRED) ? [] : [1500, 5000]).forEach((ms) => setTimeout(async () => {
               if (!global.gopangWalletLocked) return;
-              if (await _open()) { document.removeEventListener('pointerdown', _retry, true); document.removeEventListener('keydown', _retry, true); }
+              if (await _open()) { ['click','touchend','keydown'].forEach(t => document.removeEventListener(t, _retry, true)); }
             }, ms));
             const _retry = async () => {
-              document.removeEventListener('pointerdown', _retry, true); document.removeEventListener('keydown', _retry, true);
+              ['click','touchend','keydown'].forEach(t => document.removeEventListener(t, _retry, true));
               try {
                 const w = await GopangWallet.load();
                 if (w) {
@@ -2068,8 +2069,7 @@
               global.gopangWalletLocked = true;
               try { global.dispatchEvent?.(new CustomEvent('gopang:wallet-locked', { detail: { why: 'gesture-retry-failed' } })); } catch (e5) { /* 무시 */ }
             };
-            document.addEventListener('pointerdown', _retry, true);
-            document.addEventListener('keydown', _retry, true);
+            ['click','touchend','keydown'].forEach(t => document.addEventListener(t, _retry, true));
             return;
           }
           global.gopangWallet = null;
