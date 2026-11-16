@@ -30083,7 +30083,8 @@ async function handleSignalSend(request, env, corsHeaders) {
     } catch (e) { /* 한도 기록 실패는 신호를 막지 않는다 */ }
   }
 
-  const expires_at = new Date(Date.now() + 60_000).toISOString();
+  // 2026-11-16 — 호출(offer)은 상대가 화면을 꺼 둔 채 알림을 보고 나비웹을 여는 시간까지 기다려야 하므로 3분 보관한다. 연결 중 오가는 신호는 60초로 둔다.
+  const expires_at = new Date(Date.now() + (type === 'offer' ? 180_000 : 60_000)).toISOString();
   try {
     await _l1SignalSend(env, from_guid, to_guid, type, payload, expires_at);
   } catch (l1Err) {

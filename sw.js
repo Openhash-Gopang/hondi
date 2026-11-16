@@ -301,10 +301,12 @@ self.addEventListener('push', (event) => {
         badge: '/icons/navi-icon-192.png',
         tag,
         data:  { url, sound },
-        vibrate: [200, 100, 200],
+        // 2026-11-16 — 대화 요청 알림은 길게 진동하고, 누르거나 닫을 때까지 남겨 화면이 꺼져 있다가 켜져도 놓치지 않게 한다.
+        vibrate: tag.startsWith('gopang-call-') ? [400, 150, 400, 150, 400] : [200, 100, 200],
         // 로그인 승인 요청은 눈에 띄게: 소리·진동으로 다시 알리고, 사용자가 누르거나 닫을 때까지 남긴다.
-        renotify: tag.startsWith('gopang-device-link-'),
-        requireInteraction: tag.startsWith('gopang-device-link-'),
+        renotify: tag.startsWith('gopang-device-link-') || tag.startsWith('gopang-call-'),
+        requireInteraction: tag.startsWith('gopang-device-link-') || tag.startsWith('gopang-call-'),
+        silent: false,
       }),
       _broadcastSound,
       _reportConsentReceipt(tag, 'delivered'),
