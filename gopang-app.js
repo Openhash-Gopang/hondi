@@ -246,6 +246,19 @@ try {
         if (Notification.permission === 'granted') await requestPushSubscription(st.ipv6);
       } catch {}
     };
+    // 2026-11-16(주피터 지시: 크롬으로 naviweb.kr 에 접속하면 알림 허용 창을 띄운다) — 첫 동작을 기다리지 않고 접속 즉시 한 번 요청하고,
+    // 브라우저가 동작 없이 띄우는 것을 막으면 위의 첫 터치·키 입력 때 다시 요청한다. 로그인 전이어도 권한 창은 먼저 띄우고, 구독은 로그인 상태에서 마친다.
+    setTimeout(async () => {
+      try {
+        if (Notification.permission !== 'default') return;
+        const r = await Notification.requestPermission();
+        if (r === 'granted') {
+          document.removeEventListener('pointerdown', go, true); document.removeEventListener('keydown', go, true);
+          const st = JSON.parse(localStorage.getItem('gopang_user_v4') || 'null');
+          if (st?.ipv6) { const { requestPushSubscription } = await import('/src/gopang/services/push.js'); await requestPushSubscription(st.ipv6); }
+        }
+      } catch {}
+    }, 1500);
     document.addEventListener('pointerdown', go, true);
     document.addEventListener('keydown', go, true);
   } catch {}
