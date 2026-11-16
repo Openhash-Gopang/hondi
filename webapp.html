@@ -2143,8 +2143,8 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
               </div>
               <div style="display:flex;align-items:center;justify-content:space-between;width:100%;padding:4px 0">
                 <span style="font-size:calc(0.8125rem*var(--hondi-fs,1));color:#333" id="label-notif-toggle">알림 끄기/켜기</span>
-                <label style="position:relative;display:inline-block;width:48px;height:28px;cursor:pointer">
-                  <input type="checkbox" id="push-toggle" onchange="_togglePush(this.checked)"
+                <label style="position:relative;display:inline-block;width:48px;height:28px;cursor:pointer" onclick="event.preventDefault();_pushToggleTap()">
+                  <input type="checkbox" id="push-toggle"
                     style="opacity:0;width:0;height:0;position:absolute">
                   <span id="push-toggle-track" style="
                     position:absolute;inset:0;border-radius:28px;
@@ -2754,6 +2754,14 @@ function _setPushToggleLoading() {
 
 // 2026-11-16 — 권한 창이 막히거나 서비스워커가 준비되지 않으면 await 가 끝나지 않아 스위치가 '처리 중'(비활성)으로 굳던 문제: 시간 제한을 두고 반드시 풀어 준다.
 function _pushWithin(p, ms, label) { return Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error(label || '시간 초과')), ms))]); }
+// 2026-11-16 — 스위치를 누르면 입력칸 상태에 기대지 않고 직접 처리한다(일부 폰에서 비활성으로 굳어 눌러도 반응이 없던 문제). 누르자마자 화면에 반응을 보인다.
+function _pushToggleTap() {
+  const t = document.getElementById('push-toggle'); const st = document.getElementById('push-status');
+  if (!t) return;
+  if (t.disabled) { t.disabled = false; t.style.opacity = '1'; }
+  if (st) st.textContent = '누름 확인 — 처리 중…';
+  _togglePush(!t.checked);
+}
 async function _togglePush(on) {
   const _guard = setTimeout(() => { const st = document.getElementById('push-status'); if (st && /처리 중|권한 요청 중/.test(st.textContent)) st.textContent = '응답이 없어 중단했습니다. 브라우저 알림 권한(주소창 왼쪽 아이콘 → 사이트 설정 → 알림)을 확인해 주세요'; _setPushToggle(false); }, 20000);
   try { await _togglePushInner(on); } finally { clearTimeout(_guard); }
