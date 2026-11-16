@@ -253,7 +253,7 @@ export async function startP2PCall(targetUser) {
   // 시작했다면 그 패널이 계속 살아있어야, 무응답일 때 거기에 안내를 띄울
   // 수 있다(사용자 요청 사양). 실제로 연결됐을 때만
   // _activatePeerInMainChat()이 메인 대화창으로 전환한다.
-  _notify(`📞 ${targetUser.nickname || targetUser.handle}님께 연결 요청을 보냈습니다...`);
+  _notify(`📞 ${targetUser.nickname || targetUser.handle}님께 연결 요청을 보냈습니다. 최대 2분까지 기다립니다...`);
 
   // answer/ICE 수신 — L1 PocketBase Realtime (폴링 폴백 포함)
   _watchAnswerRealtime(conn, targetUser, callId);
@@ -289,10 +289,10 @@ function _watchAnswerRealtime(conn, targetUser, callId) {
   }
 
   // ── 무응답 타임아웃 (2026-07-02 신설) ─────────────────
-  // offer를 보낸 지 25초 안에 answer가 안 오면 "무응답"으로 간주한다.
+  // offer를 보낸 지 2분 안에 answer가 안 오면 "무응답"으로 간주한다.
   // 서버 시그널 TTL(60초)보다 짧게 잡아, 상대가 아예 안 받는 상황을
   // TTL 만료까지 기다리지 않고 사용자에게 먼저 알린다.
-  const NO_ANSWER_MS = 25000;
+  const NO_ANSWER_MS = 120000;   // 2026-11-16 — 25초→2분. 상대 폰 화면이 꺼져 있어도 알림을 보고 열 시간을 준다(서버의 호출 신호 보관 3분보다 짧게).
   let noAnswerTimer = setTimeout(() => {
     if (done || _stale()) return;
     _close();
