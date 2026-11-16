@@ -369,6 +369,8 @@ const BACKUP_WARN_SEEN_KEY = 'gopang_backup_warn_seen_v1';
 (function _maybeShowBackupWarn() {
   if (!_isRegistered() || _hasConfirmedBackup()) return;
   if (localStorage.getItem(BACKUP_WARN_SEEN_KEY)) return;
+  // 2026-11-16 — 가입 단계에서 백업 키 메일을 이미 안내·발송했으므로, 가입 후 7일 동안은 이 안전망 배너를 띄우지 않는다(옛 가입자용).
+  try { if (Date.now() - Number(localStorage.getItem('gopang_registered_at') || 0) < 7 * 86400000) return; } catch (e) {}
   const banner = document.getElementById('backup-warn-banner');
   if (!banner) return;
   const installShowing = document.getElementById('install-banner')?.classList.contains('show')
