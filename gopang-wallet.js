@@ -2039,7 +2039,18 @@
           // 실패했다. 폴링으로 플래그를 확인하지 않아도 되도록, 페이지가
           // 뜬 시점이 언제든 즉시 받을 수 있게 이벤트를 던진다.
           try {
-            global.dispatchEvent?.(new CustomEvent('gopang:wallet-locked'));
+            // 2026-11-16 — 잠긴 원인을 화면에 보여 주기 위해 진단 정보를 같이 보낸다(민감값 없음, 있는지 여부만).
+            let _why = '';
+            try {
+              const c = e?.cause;
+              _why = [
+                'webauthn등록=' + (localStorage.getItem(LS_WEBAUTHN_CRED) ? '예' : '아니오'),
+                '기기비밀값=' + (localStorage.getItem(LS_DEVICE_SECRET) ? '있음' : '없음'),
+                '오류=' + (c?.name || 'Error') + (c?.message ? ':' + String(c.message).slice(0, 40) : ''),
+              ].join(' · ');
+              global.gopangWalletLockedWhy = _why;
+            } catch (e2) { /* 진단 실패는 무시 */ }
+            global.dispatchEvent?.(new CustomEvent('gopang:wallet-locked', { detail: { why: _why } }));
           } catch (e) { /* CustomEvent 미지원 환경 — 조용히 무시 */ }
           return;
         }
