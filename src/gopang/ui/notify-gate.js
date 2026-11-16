@@ -38,9 +38,10 @@ function _renderSoundGuide() {
       <div style="font-size:20px;font-weight:700;color:#0f172a">🔊 알림 소리·배터리를 설정해 두세요</div>
       <p style="margin:12px 0 0;font-size:15px;line-height:1.65;color:#1e293b">폰 화면이 꺼져 있을 때도 대화 요청을 <b>소리로</b> 알아차리려면, 크롬의 알림 중요도를 <b>높음(소리)</b>으로, 배터리를 <b>제한 없음</b>으로 바꿔 두어야 합니다. 이 설정은 폰에서 직접 해야 하며, 승인하신 뒤 아래 순서로 진행해 주세요.</p>
       <ol style="margin:10px 0 0;padding-left:20px;font-size:14px;line-height:1.8;color:#334155">
-        <li>크롬 오른쪽 위 <b>⋮</b> → <b>설정</b> → <b>사이트 설정</b> → <b>알림</b></li>
-        <li>목록에서 <b>naviweb.kr</b>을 누릅니다.</li>
-        <li>알림 중요도(또는 <b>소리</b>)를 <b>높음 / 소리 켜기</b>로 바꿉니다.</li>
+        <li>폰 <b>설정 → 앱 → Chrome → 알림</b>을 엽니다. (크롬 사이트 설정 화면에는 중요도 항목이 없고, 폰의 앱 알림 설정에 있습니다.)</li>
+        <li>목록을 내려 <b>naviweb.kr</b>(사이트 알림 항목)을 누릅니다.</li>
+        <li><b>중요도(또는 소리)</b>를 <b>높음 / 소리 및 팝업</b>으로 바꿉니다.</li>
+        <li>더 빠른 방법: 알림이 왔을 때 그 알림을 <b>길게 눌러</b> 나오는 <b>설정(톱니바퀴)</b>을 눌러도 같은 화면이 열립니다.</li>
         <li>폰이 무음·방해 금지가 아닌지 확인합니다.</li>
       </ol>
       <div style="margin-top:14px;font-size:15px;font-weight:700;color:#0f172a">🔋 배터리도 "제한 없음"으로</div>
