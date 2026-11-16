@@ -2412,8 +2412,14 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
         const btn        = document.getElementById('btn-account-delete-confirm');
         if (!idInput || !phoneInput || !btn) return;
 
-        const idMatch    = !!(stored.nickname && idInput.value.trim() === stored.nickname.trim());
-        const phoneMatch = !!(stored.e164 && _phoneMatches(phoneInput.value, stored.e164));
+        // 2026-11-16 — 이 기기에 저장된 nickname/e164가 비어 있는 계정(서버 조회로 복원된 경우 등)은 입력값과 비교할 대상이 없어 버튼이 영구히 비활성이었다.
+        // 비교할 값이 있으면 기존처럼 일치를 요구하고, 없으면 아이디는 handle/name/nickname 중 하나와, 전화번호는 형식(10자리 이상)만 확인한다. 최종 검증은 서버가 한다.
+        const idVal = idInput.value.trim();
+        const idCands = [stored.nickname, stored.name, stored.handle].map(v => (v || '').trim()).filter(Boolean);
+        const idMatch = idCands.length ? idCands.includes(idVal) : idVal.length > 0;
+        const phoneMatch = stored.e164
+          ? _phoneMatches(phoneInput.value, stored.e164)
+          : _normPhoneDigits(phoneInput.value).length >= 10;
 
         if (idMatch && phoneMatch) {
           btn.disabled = false;
@@ -2445,7 +2451,8 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
           const stored = JSON.parse(localStorage.getItem('gopang_user_v4') || sessionStorage.getItem('gopang_user_v4') || '{}');
           // 1) 남은 잔액 확인 — 있으면 환급 계좌를 받은 뒤에만 삭제한다
           let refund = null;
-          const chk = await window._checkDeleteBalance(stored.e164 || '');
+          const _typed0 = _normPhoneDigits(document.getElementById('ad-input-phone')?.value || '');
+          const chk = await window._checkDeleteBalance(stored.e164 || (_typed0 ? (_typed0.startsWith('0') ? '+82' + _typed0.slice(1) : '+' + _typed0) : ''));
           if (!chk) {
             if (errEl) { errEl.textContent = '잔액을 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.'; errEl.style.display = 'block'; }
             btn.disabled = false; btn.textContent = originalLabel; _checkAccountDeleteInput(); return;
@@ -2466,7 +2473,9 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
               btn.disabled = false; btn.textContent = originalLabel; _checkAccountDeleteInput(); return;
             }
           }
-          const ok = await window._deleteMyProfile(stored.e164 || '', refund);
+          const _typed = _normPhoneDigits(document.getElementById('ad-input-phone')?.value || '');
+          const _e164 = stored.e164 || (_typed ? (_typed.startsWith('0') ? '+82' + _typed.slice(1) : '+' + _typed) : '');
+          const ok = await window._deleteMyProfile(_e164, refund);
           if (ok) {
             closeAccountDelete();
             (window.nativeAlert||alert)('계정이 삭제됐어요.' + (refund ? '\n\n남은 잔액 환급은 입력하신 계좌로 요청이 접수되었습니다.' : '') + '\n\n이 기기의 기록은 남아있으니, 언제든 같은 번호로 다시 가입하시면 이어서 쓰실 수 있어요.');
