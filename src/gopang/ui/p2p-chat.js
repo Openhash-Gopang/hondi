@@ -500,7 +500,7 @@ export async function handleIncomingOffer(signal) {
   _pendingModalCallId = null;
   if (!accepted) return;
 
-  _peerInfo = { guid: fromGuid, handle: fromHandle, nickname: fromName };
+  _peerInfo = { guid: fromGuid, handle: fromHandle, nickname: fromName, __incoming: true };
   _peerInfo.__since = Date.now();
   window.__naviCallBusy = true;
   // BUG-FIX(2026-07-02): 원래 이 아래 SDP 생성·전송 과정(await 여러 번)이
@@ -631,12 +631,8 @@ function _setupChannel(channel) {
       const msg = JSON.parse(e.data);
       if (msg.type === 'bye') {
         appendBubble('system', '🔴 상대방이 대화를 종료했습니다.');
-        // James 쪽도 PDV 저장 후 종료
-        if (_p2pMessages.length > 0 && _peerInfo) {
-          _saveP2PSession(_p2pMessages, _peerInfo, _sessionStart)
-            .catch(e => console.warn('[P2P] PDV 저장 실패:', e.message));
-        }
-        setTimeout(() => _closeP2P(), 1500);
+        // 저장은 _closeP2P()가 한 번만 한다(여기서도 저장하면 같은 대화가 두 번 기록된다).
+        setTimeout(() => _closeP2P(), 1200);
         return;
       }
       const peerName = _peerInfo?.nickname || _peerInfo?.handle || '상대방';
@@ -802,6 +798,8 @@ function _closeP2P() {
   // 일부로 webrtc.js의 _clearPeer()를 재사용 — peer-bar 숨기기, msg-input
   // placeholder 복원, "🤖 AI 비서와 대화합니다" 안내까지 한 번에 처리된다.
   _clearPeer();
+  // 종료되면 두 쪽 모두 나만의 AI 비서 화면으로 돌아간다.
+  try { if (typeof window.openAIPanel === 'function') window.openAIPanel(); } catch {}
 
   _peerInfo     = null;
   window.__naviCallBusy = false;
@@ -822,6 +820,21 @@ async function _saveP2PSession(messages, peer, startedAt) {
   if (!_USER?.ipv6) return;
 
   const now       = new Date().toISOString();
+  // 6하원칙 — 누구와(who) 언제(when) 어디서(where) 무엇을(what) 어떻게(how) 왜(why)
+  const _st = await import('../core/state.js');
+  const _loc = _st._userLocation;
+  const _myName = _USER.nickname || _USER.handle || '나';
+  const _peerName = peer.nickname || peer.handle || '상대';
+  const _first = (messages.find(m => m.role === 'peer') || messages[0] || {}).content || '';
+  const sixW = {
+    who:   { me: _myName, peer: _peerName, peerHandle: peer.handle || '' },
+    when:  { start: startedAt || now, end: now },
+    where: (_loc && (_loc.address || (_loc.lat ? `${Number(_loc.lat).toFixed(4)},${Number(_loc.lng).toFixed(4)}` : null)))
+           || _USER.region || '위치 정보 없음(위치 허용 시 기록)',
+    what:  `${_peerName}님과 ${messages.length}번 주고받음` + (_first ? ` — "${String(_first).slice(0, 40)}"` : ''),
+    how:   '나비웹 1:1 대화(P2P 암호화 채널)',
+    why:   peer.__incoming ? `${_peerName}님의 대화 요청을 수락해 시작` : `${_peerName}님에게 대화를 요청해 시작`,
+  };
   const sessionId = `P2P-${_USER.ipv6.replace(/:/g,'').slice(0,12)}-${Date.now()}`;
 
   // ① 세션 원본 구성
@@ -836,6 +849,7 @@ async function _saveP2PSession(messages, peer, startedAt) {
     startedAt: startedAt || now,
     endedAt:   now,
     turns:     messages.length,
+    sixW,
     messages,  // 대화 원문 전체
   };
   const sessionRaw = JSON.stringify(sessionData);
@@ -912,6 +926,8 @@ async function _saveP2PSession(messages, peer, startedAt) {
       sessionId,
       entryHash,
       peerHandle: peer.handle,
+      peerNickname: peer.nickname || peer.handle,
+      sixW,
       summary:   messages.slice(-4),
     });
     localStorage.setItem(key, JSON.stringify(existing));
@@ -921,13 +937,7 @@ async function _saveP2PSession(messages, peer, startedAt) {
 
   // ⑦ T-C: L1 pdv_records 직접 기록 (Worker pdv 리포트 대체)
   {
-    const _who   = { ipv6: _USER.ipv6, handle: _USER.handle };
-    const _when  = { period_start: startedAt || now, period_end: now };
-    const _where = { svc_url: 'https://app.naviweb.kr' }; // 2026-07-28: gopang.net 브랜드 폐기, hondi.net으로 통일
     const _what  = { summary: `P2P 대화 종료 — ${peer.handle}와 ${messages.length}턴` };
-    const _how   = { method: 'WebRTC P2P DataChannel' };
-    const _why   = { goal: 'P2P 대화 PDV 기록' };
-
     await fetch(L1_PDV_URL, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -938,7 +948,7 @@ async function _saveP2PSession(messages, peer, startedAt) {
         svc:          'gopang',
         type:         'p2p_conversation',
         summary:      _what.summary,
-        summary_6w:   JSON.stringify({ who: _who, when: _when, where: _where, what: _what, how: _how, why: _why }),
+        summary_6w:   JSON.stringify({ who: sixW.who, when: sixW.when, where: sixW.where, what: sixW.what, how: sixW.how, why: sixW.why }),
         block_hash:   entryHash,
         risk_level:   'low',
         source:       'gopang',
