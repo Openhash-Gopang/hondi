@@ -35,13 +35,20 @@ function _renderSoundGuide() {
   el.style.cssText = 'position:fixed;inset:0;z-index:2147483001;background:rgba(15,23,42,.72);display:flex;align-items:center;justify-content:center;padding:20px;font-family:inherit';
   el.innerHTML = `
     <div style="max-width:420px;width:100%;background:#fff;border-radius:16px;padding:24px 22px;box-shadow:0 10px 40px rgba(0,0,0,.35)">
-      <div style="font-size:20px;font-weight:700;color:#0f172a">🔊 알림 소리를 켜 두세요</div>
-      <p style="margin:12px 0 0;font-size:15px;line-height:1.65;color:#1e293b">폰 화면이 꺼져 있을 때도 대화 요청을 <b>소리로</b> 알아차리려면, 크롬의 알림 중요도를 <b>높음(소리)</b>으로 바꿔 두어야 합니다. 이 설정은 폰에서 직접 해야 하며, 승인하신 뒤 아래 순서로 진행해 주세요.</p>
+      <div style="font-size:20px;font-weight:700;color:#0f172a">🔊 알림 소리·배터리를 설정해 두세요</div>
+      <p style="margin:12px 0 0;font-size:15px;line-height:1.65;color:#1e293b">폰 화면이 꺼져 있을 때도 대화 요청을 <b>소리로</b> 알아차리려면, 크롬의 알림 중요도를 <b>높음(소리)</b>으로, 배터리를 <b>제한 없음</b>으로 바꿔 두어야 합니다. 이 설정은 폰에서 직접 해야 하며, 승인하신 뒤 아래 순서로 진행해 주세요.</p>
       <ol style="margin:10px 0 0;padding-left:20px;font-size:14px;line-height:1.8;color:#334155">
         <li>크롬 오른쪽 위 <b>⋮</b> → <b>설정</b> → <b>사이트 설정</b> → <b>알림</b></li>
         <li>목록에서 <b>naviweb.kr</b>을 누릅니다.</li>
         <li>알림 중요도(또는 <b>소리</b>)를 <b>높음 / 소리 켜기</b>로 바꿉니다.</li>
-        <li>폰이 무음·방해 금지가 아닌지, 크롬 배터리가 <b>제한 없음</b>인지도 확인합니다.</li>
+        <li>폰이 무음·방해 금지가 아닌지 확인합니다.</li>
+      </ol>
+      <div style="margin-top:14px;font-size:15px;font-weight:700;color:#0f172a">🔋 배터리도 "제한 없음"으로</div>
+      <p style="margin:6px 0 0;font-size:14px;line-height:1.65;color:#334155">배터리 절약이 크롬을 제한하면 화면이 꺼진 동안 알림이 늦게 오거나 오지 않습니다.</p>
+      <ol style="margin:6px 0 0;padding-left:20px;font-size:14px;line-height:1.8;color:#334155">
+        <li>폰 <b>설정 → 앱 → Chrome</b>(앱 아이콘을 길게 눌러 <b>앱 정보</b>로 가도 됩니다)</li>
+        <li><b>배터리</b>(또는 <b>앱 배터리 사용량</b>)를 누릅니다.</li>
+        <li><b>제한 없음</b>(또는 <b>최적화 안 함</b>)을 고릅니다. 폰마다 이름이 조금 다릅니다.</li>
       </ol>
       <button id="nsg-test" style="margin-top:16px;width:100%;padding:13px;border:0;border-radius:12px;background:#e8f0fe;color:#1A73E8;font-size:15px;font-weight:700;cursor:pointer">시험 알림 받아 보기</button>
       <button id="nsg-done" style="margin-top:10px;width:100%;padding:14px;border:0;border-radius:12px;background:#1A73E8;color:#fff;font-size:16px;font-weight:700;cursor:pointer">설정했습니다</button>
