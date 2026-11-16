@@ -44,6 +44,7 @@ function _renderSoundGuide() {
         <li>더 빠른 방법: 알림이 왔을 때 그 알림을 <b>길게 눌러</b> 나오는 <b>설정(톱니바퀴)</b>을 눌러도 같은 화면이 열립니다.</li>
         <li>폰이 무음·방해 금지가 아닌지 확인합니다.</li>
       </ol>
+      <p style="margin:10px 0 0;font-size:13.5px;line-height:1.65;color:#334155"><b>중요도 항목이 보이지 않으면:</b> 크롬 오른쪽 위 <b>⋮ → 홈 화면에 추가(앱 설치)</b>로 나비웹을 앱처럼 설치해 보세요. 설치하면 폰 <b>설정 → 앱 → 나비웹 → 알림</b>에 나비웹 전용 알림 설정이 생겨, 소리와 중요도를 따로 정할 수 있는 경우가 많습니다. (폰에 따라 다를 수 있습니다.)</p>
       <div style="margin-top:14px;font-size:15px;font-weight:700;color:#0f172a">🔋 배터리도 "제한 없음"으로</div>
       <p style="margin:6px 0 0;font-size:14px;line-height:1.65;color:#334155">배터리 절약이 크롬을 제한하면 화면이 꺼진 동안 알림이 늦게 오거나 오지 않습니다.</p>
       <ol style="margin:6px 0 0;padding-left:20px;font-size:14px;line-height:1.8;color:#334155">
