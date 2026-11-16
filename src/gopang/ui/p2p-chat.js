@@ -6,7 +6,7 @@
  */
 import { notifyInvite } from './friend-find-client.js';
 import {
-  PROXY, L1_SIGNAL_BASE, L1_PDV_URL, L1_ANCHOR_URL, L1_URL, L1_P2P_INVITES_URL, RTC_CONFIG, _USER,
+  PROXY, L1_SIGNAL_BASE, L1_PDV_URL, L1_ANCHOR_URL, L1_URL, L1_P2P_INVITES_URL, RTC_CONFIG, fetchRtcConfig, _USER,
   setUser, setRtcConn, setRtcChannel, setSignalPoll, setPeerState,
   _rtcConn, _rtcChannel, _signalPoll,
 } from '../core/state.js';
@@ -153,6 +153,7 @@ function _notify(text) {
 // 호출하지 않는다(사용자가 요청한 그대로 — 무응답이면 AI 패널이 계속
 // 살아있어야 하므로).
 function _activatePeerInMainChat(peer) {
+  const _already = !!peer.__shown; peer.__shown = true;
   setPeerState({
     guid: peer.guid, handle: peer.handle,
     name: peer.nickname || peer.handle,
@@ -170,7 +171,7 @@ function _activatePeerInMainChat(peer) {
   const mainInput = document.getElementById('msg-input');
   if (mainInput) mainInput.placeholder = `${peer.nickname || peer.handle || '상대방'}에게 메시지…`;
   if (typeof window.closeAIPanel === 'function') window.closeAIPanel();
-  appendBubble('system', `🔗 ${peer.nickname || peer.handle}님과 연결됐습니다.`);
+  appendBubble('system', _already ? `✅ ${peer.nickname || peer.handle}님과 연결됐습니다. 메시지를 입력하세요.` : `🔗 ${peer.nickname || peer.handle}님과 연결하는 중입니다…`);
 }
 
 // ── handle로 즉시 초대 (발신측) ──────────────────────────
@@ -222,6 +223,7 @@ export async function startP2PCall(targetUser) {
   _p2pMessages  = [];
   _sessionStart = new Date().toISOString();
 
+  await fetchRtcConfig(_USER?.ipv6 || '').catch(() => {});
   const conn    = new RTCPeerConnection(RTC_CONFIG);
   const channel = conn.createDataChannel('chat', { ordered: true });
   setRtcConn(conn);
@@ -416,7 +418,7 @@ function _busyWithPeer() {
   if (_rtcChannel && _rtcChannel.readyState === 'open') return true;
   const st = _rtcConn && _rtcConn.connectionState;
   const fresh = _peerInfo.__since && (Date.now() - _peerInfo.__since < 30000);
-  if (fresh && _rtcConn && st !== 'closed' && st !== 'failed' && st !== 'disconnected') return true;
+  if (fresh && (!_rtcConn || (st !== 'closed' && st !== 'failed' && st !== 'disconnected'))) return true;
   try { if (_rtcChannel) _rtcChannel.close(); } catch {}
   try { if (_rtcConn) _rtcConn.close(); } catch {}
   setRtcChannel(null); setRtcConn(null);
@@ -495,6 +497,10 @@ export async function handleIncomingOffer(signal) {
   // 동시에 세팅해 그 레이스 윈도우를 없앤다.
   _activeCallIdCallee = callId;
 
+  // 수락 즉시 상대와의 대화창으로 전환한다(AI 비서가 대신 답하지 않도록). 연결이 열리기 전에는 전송 시 안내만 보인다.
+  _activatePeerInMainChat(_peerInfo);
+  // 서로 다른 통신망의 두 폰은 TURN 중계가 있어야 연결된다.
+  await fetchRtcConfig(_USER?.ipv6 || '').catch(() => {});
   const conn = new RTCPeerConnection(RTC_CONFIG);
   setRtcConn(conn);
 
@@ -525,7 +531,6 @@ export async function handleIncomingOffer(signal) {
   // BUG-FIX(2026-07-02): 여기서도 발신측과 동일한 이유로 _openChatUI()를
   // 없앴다 — 실제 datachannel이 열릴 때(_setupChannel.onopen)만
   // _activatePeerInMainChat()이 메인 대화창으로 전환한다.
-  _notify(`✅ ${fromName}님과 연결됐습니다.`);
 
   // BUG-FIX(2026-07-02): 실제로 관찰된 버그 — 발신측(PC)이 25초 무응답
   // 타임아웃으로 이미 포기했는데 그 사실을 수신측(폰)에 전혀 알리지
@@ -544,7 +549,8 @@ export async function handleIncomingOffer(signal) {
     appendBubble('system', '⚠️ 연결이 시간 초과됐습니다. 상대방이 이미 통화를 종료했을 수 있어요.');
     if (_rtcChannel) { try { _rtcChannel.close(); } catch {} setRtcChannel(null); }
     if (_rtcConn)    { try { _rtcConn.close(); }    catch {} setRtcConn(null); }
-    _peerInfo = null;
+    _peerInfo = null; window.__naviCallBusy = false;
+    try { _clearPeer(); } catch {}
   }, 20000);
   _calleeConnectTimers.set(_calleeCallId, calleeConnectTimer);
 
