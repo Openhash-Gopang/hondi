@@ -2635,7 +2635,8 @@ document.querySelectorAll('.gd-tab').forEach(tab => {
 <script type="module">
 /* 2026-11-16 — ① 상단 중앙 SP 이름 표시  ② ?call= : 나비가 다른 탭에서 초대한 상대와 1:1 대화를 바로 시작한다(새 탭 대화창). */
 import { renderSPLabel, setSPLabel } from './src/gopang/ui/sp-label.js';
-const _isCallTab = !!new URLSearchParams(location.search).get('call');   // replaceState 로 지우기 전에 동기로 읽는다
+const _isCallTab = !!new URLSearchParams(location.search).get('call');
+if (_isCallTab) window.__naviIsCallTab = true;   // replaceState 로 지우기 전에 동기로 읽는다
 try { const _co = JSON.parse(new URLSearchParams(location.search).get('call') || 'null'); if (_co) { window.__callTabName = _co.n || _co.h || '상대'; } } catch {}   // 새 탭 첫 문구용
 try {
   const nh = window.NaviHome;
@@ -2696,10 +2697,11 @@ try {
     const o = JSON.parse(raw);
     history.replaceState(null, '', location.pathname);
     const t0 = Date.now();
+    window.__naviCallBusy = true;   // 새 탭 대화창이 열리는 동안 자동 새로고침을 막는다
     // 새 탭이 열리는 동안 빈 화면으로 보이지 않게 안내를 띄운다(대화가 시작되거나 실패하면 걷는다).
     let _cv = null;
     try { _cv = document.createElement('div'); _cv.id = 'call-cover'; _cv.style.cssText = 'position:fixed;inset:0;z-index:2147483000;background:#5a6fd6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;text-align:center;padding:24px'; _cv.textContent = (o.n || o.h || '상대') + '님과 대화를 여는 중…'; document.body.appendChild(_cv); } catch {}
-    const _uncover = (msg) => { try { if (!_cv) return; if (msg) { _cv.textContent = msg; setTimeout(() => _cv && _cv.remove(), 6000); } else _cv.remove(); } catch {} };
+    const _uncover = (msg) => { if (msg) window.__naviCallBusy = false; try { if (!_cv) return; if (msg) { _cv.textContent = msg; setTimeout(() => _cv && _cv.remove(), 6000); } else _cv.remove(); } catch {} };
     const tick = async () => {
       try {
         const st = await import('./src/gopang/core/state.js');
