@@ -20,6 +20,48 @@ async function _hasSub() {
 
 function _remove() { document.getElementById(OVERLAY_ID)?.remove(); }
 
+// ── 알림 소리 안내 (2026-11-16, 주피터 지시: 가입 시점에 알림 중요도를 "높음/소리"로) ──
+// 사이트의 알림 중요도·소리는 폰(크롬)의 설정이라 웹 페이지가 대신 바꿀 수 없다. 그래서 알림을 허용한 직후 한 번, 사용자의 승인 아래 직접 바꾸도록
+// 단계별로 안내하고, 실제로 소리가 나는지 들어 볼 수 있는 시험 알림 단추를 둔다.
+const SOUND_KEY = 'navi_notify_sound_guided';
+const _isAndroid = () => /Android/i.test(navigator.userAgent || '');
+function _soundGuideDone() { try { return localStorage.getItem(SOUND_KEY) === '1'; } catch { return true; } }
+function _markSoundGuide() { try { localStorage.setItem(SOUND_KEY, '1'); } catch {} }
+function _renderSoundGuide() {
+  if (!_isAndroid() || _soundGuideDone() || document.getElementById('notify-sound-guide')) return;
+  const el = document.createElement('div');
+  el.id = 'notify-sound-guide';
+  el.setAttribute('role', 'dialog');
+  el.style.cssText = 'position:fixed;inset:0;z-index:2147483001;background:rgba(15,23,42,.72);display:flex;align-items:center;justify-content:center;padding:20px;font-family:inherit';
+  el.innerHTML = `
+    <div style="max-width:420px;width:100%;background:#fff;border-radius:16px;padding:24px 22px;box-shadow:0 10px 40px rgba(0,0,0,.35)">
+      <div style="font-size:20px;font-weight:700;color:#0f172a">🔊 알림 소리를 켜 두세요</div>
+      <p style="margin:12px 0 0;font-size:15px;line-height:1.65;color:#1e293b">폰 화면이 꺼져 있을 때도 대화 요청을 <b>소리로</b> 알아차리려면, 크롬의 알림 중요도를 <b>높음(소리)</b>으로 바꿔 두어야 합니다. 이 설정은 폰에서 직접 해야 하며, 승인하신 뒤 아래 순서로 진행해 주세요.</p>
+      <ol style="margin:10px 0 0;padding-left:20px;font-size:14px;line-height:1.8;color:#334155">
+        <li>크롬 오른쪽 위 <b>⋮</b> → <b>설정</b> → <b>사이트 설정</b> → <b>알림</b></li>
+        <li>목록에서 <b>naviweb.kr</b>을 누릅니다.</li>
+        <li>알림 중요도(또는 <b>소리</b>)를 <b>높음 / 소리 켜기</b>로 바꿉니다.</li>
+        <li>폰이 무음·방해 금지가 아닌지, 크롬 배터리가 <b>제한 없음</b>인지도 확인합니다.</li>
+      </ol>
+      <button id="nsg-test" style="margin-top:16px;width:100%;padding:13px;border:0;border-radius:12px;background:#e8f0fe;color:#1A73E8;font-size:15px;font-weight:700;cursor:pointer">시험 알림 받아 보기</button>
+      <button id="nsg-done" style="margin-top:10px;width:100%;padding:14px;border:0;border-radius:12px;background:#1A73E8;color:#fff;font-size:16px;font-weight:700;cursor:pointer">설정했습니다</button>
+      <div style="text-align:center;margin-top:12px"><a id="nsg-later" href="#" style="font-size:13px;color:#64748b">나중에 하겠습니다</a></div>
+      <div id="nsg-msg" style="margin-top:8px;font-size:13px;color:#b45309;min-height:16px"></div>
+    </div>`;
+  document.body.appendChild(el);
+  const close = () => { _markSoundGuide(); el.remove(); };
+  el.querySelector('#nsg-done').onclick = close;
+  el.querySelector('#nsg-later').onclick = (e) => { e.preventDefault(); close(); };
+  el.querySelector('#nsg-test').onclick = async () => {
+    const msg = el.querySelector('#nsg-msg');
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      await reg.showNotification('나비', { body: '소리가 들리면 알림 설정이 잘 되어 있는 것입니다.', icon: '/icons/navi-icon-192.png', tag: 'gopang-sound-test', vibrate: [300, 100, 300], silent: false });
+      msg.textContent = '알림을 보냈습니다. 소리가 나지 않으면 위 설정을 다시 확인하세요.';
+    } catch (e) { msg.textContent = '시험 알림을 보내지 못했습니다: ' + (e.message || e); }
+  };
+}
+
 function _render(state) {
   let el = document.getElementById(OVERLAY_ID);
   if (el && el.dataset.state === state) return;   // 같은 안내를 다시 그려 입력·문구를 지우지 않는다
@@ -58,7 +100,7 @@ function _render(state) {
       if (Notification.permission === 'granted') {
         msg.textContent = '알림을 켜는 중…';
         const r = guid ? await _subscribe(guid) : { ok: false, reason: 'login_required' };
-        if (r.ok || (await _hasSub())) { _remove(); return; }
+        if (r.ok || (await _hasSub())) { _remove(); _renderSoundGuide(); return; }
         msg.textContent = '알림 등록에 실패했습니다(' + (r.reason || '오류') + '). 잠시 후 다시 눌러 주세요.';
       }
     } catch (e) { msg.textContent = '오류: ' + (e.message || e); }
@@ -76,7 +118,7 @@ export async function checkNotifyGate() {
     let skip = 0; try { skip = Number(sessionStorage.getItem(SKIP_KEY)) || 0; } catch {}
     if (Date.now() < skip) return;
     if (Notification.permission === 'granted') {
-      if (await _hasSub()) { _remove(); return; }
+      if (await _hasSub()) { _remove(); _renderSoundGuide(); return; }
       const r = await _subscribe(_me());           // 허용돼 있는데 구독만 없는 경우 — 조용히 맞춘다
       if (r.ok || (await _hasSub())) { _remove(); return; }
       _render('default'); return;                    // 맞추지 못하면 안내를 띄워 다시 시도하게 한다
