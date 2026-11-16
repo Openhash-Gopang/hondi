@@ -281,9 +281,11 @@ function _watchAnswerRealtime(conn, targetUser, callId) {
   // 더 새로운 통화 시도가 시작되면 이 watcher는 즉시 폐기
   function _stale() { return _activeCallId !== callId; }
 
+  let smsTimer = null;
   function _close() {
     done = true;
     if (noAnswerTimer) { clearTimeout(noAnswerTimer); noAnswerTimer = null; }
+    if (smsTimer) { clearTimeout(smsTimer); smsTimer = null; }
     if (stopRealtime) { stopRealtime(); stopRealtime = null; }
     _stopPoll();
   }
@@ -293,6 +295,9 @@ function _watchAnswerRealtime(conn, targetUser, callId) {
   // 서버 시그널 TTL(60초)보다 짧게 잡아, 상대가 아예 안 받는 상황을
   // TTL 만료까지 기다리지 않고 사용자에게 먼저 알린다.
   const NO_ANSWER_MS = 120000;   // 2026-11-16 — 25초→2분. 상대 폰 화면이 꺼져 있어도 알림을 보고 열 시간을 준다(서버의 호출 신호 보관 3분보다 짧게).
+  // 2026-11-16(주피터 지시) — 30초 안에 수락·거절이 없으면, 상대 번호를 아는 경우 내 폰의 문자 앱으로 알릴 수 있게 한다.
+  // 문자는 내 폰이 내 요금으로 보내며(서버 발송·GDC 차감 없음), 보내기 단추는 내가 직접 눌러야 한다.
+  smsTimer = setTimeout(() => { if (!done && !_stale()) _offerSmsFallback(targetUser); }, 30000);
   let noAnswerTimer = setTimeout(() => {
     if (done || _stale()) return;
     _close();
@@ -316,6 +321,7 @@ function _watchAnswerRealtime(conn, targetUser, callId) {
         const answerSdp = _rowPayload.sdp || _rowPayload;
         await conn.setRemoteDescription(new RTCSessionDescription(answerSdp));
         if (noAnswerTimer) { clearTimeout(noAnswerTimer); noAnswerTimer = null; } // 응답 왔으니 무응답 타이머 해제
+        if (smsTimer) { clearTimeout(smsTimer); smsTimer = null; }
         _notify('✅ 연결됐습니다. 채널이 열리면 메시지를 입력하세요.');
         console.info('[P2P] answer 수신 완료');
         // answer 수신 후 잠시 뒤 watcher 종료 (ICE는 ondatachannel onopen 후 불필요)
@@ -352,6 +358,20 @@ function _watchAnswerRealtime(conn, targetUser, callId) {
   // autoDelete:false — _handleSignalRow가 이미 자기 책임으로 지우므로,
   // _startPoll이 또 지우려다 404(이미 없음)가 나는 걸 막는다.
   _startPoll(myGuid, _handleSignalRow, { autoDelete: false });
+}
+
+// 호출한 사람이 상대 번호를 이미 아는 경우(번호로 찾았거나 연락처에서 골랐을 때)에만 문자로 알릴 수 있다. 번호는 검색 결과로 알려 주지 않으므로, 이름으로 찾은 상대에게는 나오지 않는다.
+function _offerSmsFallback(targetUser) {
+  try {
+    const raw = JSON.parse(localStorage.getItem('navi_known_phone_' + targetUser.guid) || 'null');
+    if (!raw || !raw.e164 || Date.now() - (raw.ts || 0) > 24 * 3600 * 1000) return;
+    const me = _USER?.nickname || _USER?.handle || '나비웹 사용자';
+    const text = `[나비웹] ${me}님이 대화를 요청했습니다. 나비웹(https://naviweb.kr)을 열어 주세요.`;
+    const ios = /iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+    const href = `sms:${raw.e164}${ios ? '&' : '?'}body=${encodeURIComponent(text)}`;
+    const name = targetUser.nickname || targetUser.handle || '상대';
+    appendBubble('system', `📱 ${name}님이 30초째 응답하지 않습니다. <a href="${href}" style="color:#1A73E8;font-weight:700;text-decoration:underline">문자로 알리기</a> (내 폰의 문자 앱이 열리며, 문자 요금은 내 통신 요금제로 부과됩니다. 보내기는 직접 눌러야 합니다.)`, true);
+  } catch {}
 }
 
 // ── 무응답 처리 (2026-07-02 신설) ────────────────────────
