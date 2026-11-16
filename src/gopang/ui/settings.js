@@ -642,10 +642,11 @@ function _renderHistoryList(sessions) {
       <div style="width:40px;height:40px;border-radius:50%;background:#eafcff;
                   display:flex;align-items:center;justify-content:center;font-size:calc(1.125rem*var(--hondi-fs,1));flex-shrink:0">💬</div>
       <div style="flex:1;min-width:0">
-        <div style="font-size:calc(0.9375rem*var(--hondi-fs,1));font-weight:500;color:#111827">${s.peerHandle || '알 수 없음'}</div>
+        <div style="font-size:calc(0.9375rem*var(--hondi-fs,1));font-weight:500;color:#111827">${s.peerNickname || s.peerHandle || '알 수 없음'}</div>
         <div style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#9ca3af;margin-top:2px">
           ${new Date(s.ts).toLocaleString('ko-KR')} · ${s.turns}턴
         </div>
+        ${s.sixW ? `<div style="font-size:calc(0.75rem*var(--hondi-fs,1));color:#6b7280;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">📍 ${s.sixW.where} · ${s.sixW.what}</div>` : ''}
       </div>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c7c7cc" stroke-width="2.5"
            stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -686,6 +687,14 @@ window._openChatDetail = async function(idx) {
         <button onclick="openChatHistory()" style="border:none;background:none;color:#00796B;font-size:calc(0.9375rem*var(--hondi-fs,1));cursor:pointer;padding:0">← 목록</button>
         <span style="font-size:calc(0.9375rem*var(--hondi-fs,1));font-weight:600">${session.peerHandle || '대화'}</span>
       </div>
+      ${session.sixW ? `<div style="padding:12px 16px;background:#f9fafb;border-bottom:1px solid #f2f2f7;font-size:calc(0.8125rem*var(--hondi-fs,1));color:#374151;line-height:1.7">
+        <div><b>누구와</b> ${session.sixW.who.peer}${session.sixW.who.peerHandle ? ' (@' + String(session.sixW.who.peerHandle).replace(/^@/, '') + ')' : ''}</div>
+        <div><b>언제</b> ${new Date(session.sixW.when.start).toLocaleString('ko-KR')} ~ ${new Date(session.sixW.when.end).toLocaleTimeString('ko-KR')}</div>
+        <div><b>어디서</b> ${session.sixW.where}</div>
+        <div><b>무엇을</b> ${session.sixW.what}</div>
+        <div><b>어떻게</b> ${session.sixW.how}</div>
+        <div><b>왜</b> ${session.sixW.why}</div>
+      </div>` : ''}
       <div style="padding:16px;display:flex;flex-direction:column;gap:8px">
         ${messages.map(m => m.role === 'me' || m.role === 'user'
           ? `<div style="display:flex;justify-content:flex-end">
