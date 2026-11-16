@@ -169,6 +169,7 @@ function _showWalletLockedBanner() {
   bar.innerHTML = `
     🔒 이 기기에 저장된 지갑을 열 수 없습니다 (인증 정보 불일치).
     새 지갑을 임의로 만들지 않고 멈췄습니다 — 아래 중 하나를 선택해 주세요.<br>
+    <span style="display:block;font-size:11px;color:#991b1b;opacity:.8;margin-top:2px">${(window.gopangWalletLockedWhy||'').replace(/[<>&]/g,'')}</span>
     <button id="_wl-devicelink-btn" style="margin-top:8px;padding:8px 14px;border:none;border-radius:8px;background:#7f1d1d;color:#fff;font-size:calc(0.7812rem*var(--hondi-fs,1));font-weight:600;cursor:pointer">다른 기기에서 이 지갑 가져오기</button>
     <button id="_wl-restore-btn" style="margin-top:8px;margin-left:6px;padding:8px 14px;border:none;border-radius:8px;background:transparent;color:#7f1d1d;border:1px solid #fca5a5;font-size:calc(0.7812rem*var(--hondi-fs,1));cursor:pointer">백업 키로 복구</button>
     <button id="_wl-reset-btn" style="margin-top:8px;margin-left:6px;padding:8px 14px;border:none;border-radius:8px;background:transparent;color:#7f1d1d;border:1px solid #fca5a5;font-size:calc(0.7812rem*var(--hondi-fs,1));cursor:pointer">이 기기에서 새로 시작</button>
