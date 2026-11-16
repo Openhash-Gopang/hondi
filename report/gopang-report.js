@@ -2,12 +2,12 @@
  * gopang-report.js  v1.0
  * 고팡 하위 서비스 보고서 전송 라이브러리
  *
- * 배포 위치: https://hondi.net/report/gopang-report.js
+ * 배포 위치: https://naviweb.kr/report/gopang-report.js
  * 매뉴얼:   docs/gopang-report-manual.md
  *
  * 사용법:
  *   import { sendReportOnce, flushReportQueue }
- *     from 'https://hondi.net/report/gopang-report.js';
+ *     from 'https://naviweb.kr/report/gopang-report.js';
  *
  *   const ack = await sendReportOnce(report);
  */

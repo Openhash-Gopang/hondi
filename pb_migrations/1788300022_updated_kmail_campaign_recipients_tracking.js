@@ -4,7 +4,7 @@
 //했는가, PC로 왔는가 폰으로 왔는가"까지 수신자 단위로 측정한다.
 // tracking_token은 캠페인 생성 시 수신자마다 하나씩 발급되는 무작위
 // 문자열 — 캠페인 본문에 {{TRACKING_LINK}}로 삽입되면 발송 시점에
-// https://hondi.net/r/<token> 형태의 실제 링크로 치환된다(worker.js
+// https://naviweb.kr/r/<token> 형태의 실제 링크로 치환된다(worker.js
 // _kmailSendCampaign 참고). GET /r/<token>이 클릭될 때마다 이 행에
 // click_count를 올리고 최초 클릭 시각·기기를 기록한다.
 migrate((db) => {
@@ -13,7 +13,7 @@ migrate((db) => {
   collection.schema.addField(new SchemaField({
     "system": false, "id": "kcr013tok",  "name": "tracking_token", "type": "text",
     "required": false, "presentable": true, "unique": false, "options": { "min": null, "max": 64, "pattern": "" },
-    "description": "캠페인 생성 시 발급되는 무작위 토큰. https://hondi.net/r/<token>으로 접속을 추적한다.",
+    "description": "캠페인 생성 시 발급되는 무작위 토큰. https://naviweb.kr/r/<token>으로 접속을 추적한다.",
   }));
   collection.schema.addField(new SchemaField({
     "system": false, "id": "kcr014clk",  "name": "click_count", "type": "number",

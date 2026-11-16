@@ -16,7 +16,7 @@
  * — 도메인을 추가/제거할 때 이 파일 하나만 고치면 된다.
  */
 export const GWP_ALLOWED_ORIGINS = [
-  'https://hondi.net',
+  'https://naviweb.kr',
   'https://911.hondi.net',
   'https://democracy.hondi.net',
   'https://doctor.hondi.net',

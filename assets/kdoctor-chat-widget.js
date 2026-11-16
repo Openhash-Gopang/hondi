@@ -363,7 +363,7 @@ import { validateDiagnosis, audienceView } from '../src/gopang/ai/hondi-doctor-v
   }
 
   // ─────────────── PDV(건강 기록) — "나만의 AI 비서"가 연 탭에서만 ───────────────
-  var AC_ORIGINS = (Array.isArray(window.KDOCTOR_AC_ORIGINS) && window.KDOCTOR_AC_ORIGINS.length) ? window.KDOCTOR_AC_ORIGINS : ['https://app.naviweb.kr', 'https://www.hondi.net'];
+  var AC_ORIGINS = (Array.isArray(window.KDOCTOR_AC_ORIGINS) && window.KDOCTOR_AC_ORIGINS.length) ? window.KDOCTOR_AC_ORIGINS : ['https://app.naviweb.kr', 'https://naviweb.kr'];
   var qs = new URLSearchParams(location.search);
   var acOrigin = null;
   if (qs.get('gwp') === '1' && window.opener && !window.opener.closed) {
