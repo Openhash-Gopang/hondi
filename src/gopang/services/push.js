@@ -104,9 +104,30 @@ export async function postPushSubscribe(payload) {
   }
 }
 
+// 2026-11-16 — 지문(WebAuthn)을 등록한 지갑은 열 때 사용자 동작(터치)이 있어야 하는데, 구독 등록은 서명이 필요해 지갑이 안 열린 채로
+// 호출되면 'wallet_not_ready'로 끝나 서버에 구독이 영영 올라가지 않았다(호출·알림 미전달의 원인). 지갑이 준비되지 않았으면
+// 다음 사용자 동작(click/touchend/keydown) 또는 지갑 열림 이벤트 때 한 번 더 시도한다.
+let _retryArmed = false;
+function _armRetry(guid) {
+  if (_retryArmed || typeof document === 'undefined') return;
+  _retryArmed = true;
+  const evs = ['click', 'touchend', 'keydown'];
+  const go = () => {
+    evs.forEach(t => document.removeEventListener(t, go, true));
+    window.removeEventListener('gopang:wallet-unlocked', go);
+    _retryArmed = false;
+    // 터치 직후 바로 시도 — 이 호출의 지갑 열기가 사용자 동작 안에서 일어난다.
+    requestPushSubscription(guid).catch(() => {});
+  };
+  evs.forEach(t => document.addEventListener(t, go, true));
+  window.addEventListener('gopang:wallet-unlocked', go);
+}
+
 export function requestPushSubscription(guid) {
   if (_inFlight) return _inFlight;
-  _inFlight = _requestPushSubscriptionImpl(guid).finally(() => { _inFlight = null; });
+  _inFlight = _requestPushSubscriptionImpl(guid)
+    .then((r) => { if (r && r.ok === false && r.reason === 'wallet_not_ready') _armRetry(guid); return r; })
+    .finally(() => { _inFlight = null; });
   return _inFlight;
 }
 
