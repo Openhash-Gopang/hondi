@@ -164,7 +164,8 @@ function _activatePeerInMainChat(peer) {
   const hd   = document.getElementById('peer-handle');
   if (av) av.textContent = peer.avatar_emoji || '🙂';
   if (nm) nm.textContent = peer.nickname || peer.handle || '상대방';
-  if (hd) hd.textContent = peer.handle ? '@' + peer.handle.replace(/^@/, '') : '';
+  // 아이디(닉네임)가 있으면 그것만 보인다 — 전화번호에서 나온 @아이디는 이름이 없을 때만 보조로 표시한다.
+  if (hd) hd.textContent = (!peer.nickname || peer.nickname === peer.handle) && peer.handle ? '@' + peer.handle.replace(/^@/, '') : '';
   if (bar) bar.style.display = 'flex';
   const mainInput = document.getElementById('msg-input');
   if (mainInput) mainInput.placeholder = `${peer.nickname || peer.handle || '상대방'}에게 메시지…`;
@@ -393,10 +394,24 @@ async function _verifiedCallerHandle(fromGuid) {
   } catch { /* 아래에서 미확인 처리 */ }
   return null;
 }
+// 2026-11-16(주피터 지시) — 대화창 상단·알림에는 전화번호 형태의 아이디(@…)가 아니라 상대의 아이디(닉네임, 예: 주피터)를 보인다. 서버 프로필에서 읽은 값만 쓴다.
+async function _verifiedCaller(fromGuid) {
+  try {
+    const filter = encodeURIComponent(`guid='${String(fromGuid).replace(/[\\']/g, '')}'`);
+    const res = await fetch(`${L1_URL}?filter=${filter}&perPage=1`);
+    if (res.ok) {
+      const raw = await res.json(); const u = raw.items?.[0];
+      if (u) return { handle: u.handle ? String(u.handle).replace(/^tid-/, '') : null, nickname: (u.nickname && String(u.nickname).trim() && u.nickname !== 'N/A') ? String(u.nickname).trim() : null };
+    }
+  } catch { /* 아래에서 미확인 처리 */ }
+  return { handle: null, nickname: null };
+}
 
 export async function handleIncomingOffer(signal) {
   const fromGuid    = signal.from_guid;
-  const fromHandle  = (await _verifiedCallerHandle(fromGuid)) || '확인되지 않은 사용자';
+  const _caller    = await _verifiedCaller(fromGuid);
+  const fromHandle  = _caller.handle || '확인되지 않은 사용자';
+  const fromName    = _caller.nickname || fromHandle;   // 화면에 보이는 이름: 아이디(닉네임) 우선
 
   // payload 방어적 파싱 (webrtc.js/p2p-chat.js 양쪽 호환) — callId 추출용으로 먼저 파싱
   const _offerPayload = typeof signal.payload === 'string'
@@ -430,7 +445,7 @@ export async function handleIncomingOffer(signal) {
     if (Notification.permission === 'granted' && 'serviceWorker' in navigator) {
       const reg = await navigator.serviceWorker.ready;
       await reg.showNotification('나비', {
-        body: `${fromHandle}님이 대화를 요청했습니다`,
+        body: `${fromName}님이 대화를 요청했습니다`,
         icon: '/icons/navi-icon-192.png',
         tag:  'gopang-incoming-call',
         vibrate: [300, 100, 300],
@@ -448,11 +463,11 @@ export async function handleIncomingOffer(signal) {
   // 포기했을 때(_handleIncomingCancel) 이 모달을 정확히 찾아서 강제로
   // 닫을 수 있다.
   _pendingModalCallId = callId;
-  const accepted = await _showIncomingCallModal(fromHandle);
+  const accepted = await _showIncomingCallModal(fromName);
   _pendingModalCallId = null;
   if (!accepted) return;
 
-  _peerInfo = { guid: fromGuid, handle: fromHandle, nickname: fromHandle };
+  _peerInfo = { guid: fromGuid, handle: fromHandle, nickname: fromName };
   // BUG-FIX(2026-07-02): 원래 이 아래 SDP 생성·전송 과정(await 여러 번)이
   // 끝난 뒤에야 _activeCallIdCallee를 세팅했는데, 그 사이(비동기 처리
   // 중)에 취소 신호가 도착하면 _handleIncomingCancel의 케이스 B 검사
@@ -490,7 +505,7 @@ export async function handleIncomingOffer(signal) {
   // BUG-FIX(2026-07-02): 여기서도 발신측과 동일한 이유로 _openChatUI()를
   // 없앴다 — 실제 datachannel이 열릴 때(_setupChannel.onopen)만
   // _activatePeerInMainChat()이 메인 대화창으로 전환한다.
-  _notify(`✅ ${fromHandle}님과 연결됐습니다.`);
+  _notify(`✅ ${fromName}님과 연결됐습니다.`);
 
   // BUG-FIX(2026-07-02): 실제로 관찰된 버그 — 발신측(PC)이 25초 무응답
   // 타임아웃으로 이미 포기했는데 그 사실을 수신측(폰)에 전혀 알리지
@@ -545,8 +560,16 @@ function _setupConn(conn, peer, callId) {
       _notify('🔒 암호화 채널 개설됨.');
     }
     if (state === 'disconnected' || state === 'failed' || state === 'closed') {
-      appendBubble('system', '🔴 연결이 끊어졌습니다.');
       _stopPoll();
+      // 같은 연결에서 상태가 연달아 바뀌어도 안내는 한 번만, 그리고 끊긴 상대가 대화창 상단에 남아 AI 비서가 대신 답하는 혼동이 없게 정리한다.
+      if (conn.__lostNotified) return;
+      const _drop = () => {
+        if (conn.__lostNotified || conn.connectionState === 'connected') return;
+        conn.__lostNotified = true;
+        appendBubble('system', `🔴 ${peer.nickname || peer.handle || '상대'}님과 연결이 끊어졌습니다. 다시 대화하려면 "${peer.nickname || peer.handle || '상대'} 불러 줘"라고 말씀해 주세요.`);
+        if (_rtcConn === conn) { _activeCallIdCallee = null; _peerInfo = null; _clearPeer(); }
+      };
+      if (state === 'disconnected') setTimeout(_drop, 8000); else _drop();   // disconnected 는 잠깐 끊겼다 돌아올 수 있어 8초 기다린다
     }
   };
 }
