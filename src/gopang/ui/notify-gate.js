@@ -22,6 +22,7 @@ function _remove() { document.getElementById(OVERLAY_ID)?.remove(); }
 
 function _render(state) {
   let el = document.getElementById(OVERLAY_ID);
+  if (el && el.dataset.state === state) return;   // 같은 안내를 다시 그려 입력·문구를 지우지 않는다
   if (!el) {
     el = document.createElement('div');
     el.id = OVERLAY_ID;
@@ -29,6 +30,7 @@ function _render(state) {
     el.style.cssText = 'position:fixed;inset:0;z-index:2147483000;background:rgba(15,23,42,.72);display:flex;align-items:center;justify-content:center;padding:20px;font-family:inherit';
     document.body.appendChild(el);
   }
+  el.dataset.state = state;
   const denied = state === 'denied';
   const steps = denied
     ? `<ol style="margin:10px 0 0;padding-left:20px;font-size:14px;line-height:1.7;color:#334155">
@@ -36,7 +38,7 @@ function _render(state) {
          <li>목록에서 <b>naviweb.kr</b>을 찾아 <b>허용</b>으로 바꿉니다. (보이지 않으면 사이트 정보의 <b>권한 재설정</b>을 누릅니다.)</li>
          <li>이 화면으로 돌아와 아래 <b>다시 확인</b>을 누릅니다.</li>
        </ol>`
-    : `<p style="margin:10px 0 0;font-size:14px;line-height:1.7;color:#334155">버튼을 누르면 브라우저가 <b>알림 허용</b> 창을 띄웁니다. <b>허용</b>을 눌러 주세요.</p>`;
+    : `<p style="margin:12px 0 0;font-size:16px;line-height:1.7;color:#0f172a;font-weight:600">아래 버튼을 누르면 화면에 <b>알림 허용</b> 창이 뜹니다.<br>거기서 <b style="color:#1A73E8">허용</b>만 누르면 끝입니다.</p>`;
   el.innerHTML = `
     <div style="max-width:420px;width:100%;background:#fff;border-radius:16px;padding:24px 22px;box-shadow:0 10px 40px rgba(0,0,0,.35)">
       <div style="font-size:20px;font-weight:700;color:#0f172a">🔔 알림을 허용해 주세요</div>
@@ -84,8 +86,8 @@ export async function checkNotifyGate() {
 }
 
 export function startNotifyGate() {
-  const run = () => setTimeout(checkNotifyGate, 2500);
+  const run = () => setTimeout(checkNotifyGate, 1200);
   if (document.readyState === 'complete') run(); else window.addEventListener('load', run, { once: true });
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkNotifyGate(); });
-  setInterval(checkNotifyGate, 60 * 1000);           // 가입·로그인 직후에도 곧 안내가 뜨도록
+  setInterval(checkNotifyGate, 5 * 1000);            // 가입·로그인 직후에도 바로 안내가 뜨도록(이미 허용이면 비용 없음)
 }
