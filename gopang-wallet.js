@@ -2034,10 +2034,26 @@
           // 2026-11-16(주피터 지시: 지갑 잠김 배너가 뜨지 않아야 한다) — 지문(WebAuthn)을 등록한 지갑은 열 때 지문 확인이 필요한데, 앱을 열 때는 사용자 동작이 없어
           // 브라우저가 거부하거나 다른 창에 밀려 취소된다. 이는 지갑이 망가진 것이 아니므로 배너를 띄우지 않고, 사용자의 첫 터치·키 입력(=사용자 동작) 때 조용히 다시 연다.
           // 그때도 실패하면 그제서야 기존 배너(복구 선택)를 보여 준다.
-          if (localStorage.getItem(LS_WEBAUTHN_CRED) && !global.__gopangWalletGestureArmed) {
+          // (2026-11-16 추가) 실사: 시작 때는 못 열고 '다시 열기' 버튼에서는 지문 창 없이 열리는 기기가 있었다 — 시작 순간의 일시적 실패(경쟁·준비 지연)로 보고, 지문 등록 여부와 무관하게 먼저 조용히 재시도한다.
+          if (!global.__gopangWalletGestureArmed) {
             global.__gopangWalletGestureArmed = true;
             global.gopangWallet = null;
             global.gopangWalletLocked = true;
+            const _open = async () => {
+              try {
+                const w = await GopangWallet.load();
+                if (!w) return false;
+                try { const u = JSON.parse(localStorage.getItem('gopang_user_v4') || 'null'); if (u?.ipv6) w.setIdentity?.({ guid: u.ipv6, handle: u.handle || null }); } catch (e3) { /* 무시 */ }
+                global.gopangWallet = w; global.gopangWalletLocked = false;
+                global.dispatchEvent?.(new CustomEvent('gopang:wallet-unlocked'));
+                return true;
+              } catch (e6) { return false; }
+            };
+            // 사용자 동작 없이 두 번 조용히 재시도(1.5초·5초 뒤). 열리면 첫 동작 대기 리스너도 걷는다.
+            [1500, 5000].forEach((ms) => setTimeout(async () => {
+              if (!global.gopangWalletLocked) return;
+              if (await _open()) { document.removeEventListener('pointerdown', _retry, true); document.removeEventListener('keydown', _retry, true); }
+            }, ms));
             const _retry = async () => {
               document.removeEventListener('pointerdown', _retry, true); document.removeEventListener('keydown', _retry, true);
               try {
