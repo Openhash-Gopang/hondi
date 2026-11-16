@@ -190,7 +190,12 @@ function _showWalletLockedBanner() {
     try {
       const w = await window.GopangWallet.load();
       if (!w) throw new Error('지갑 없음');
-      location.reload();
+      // 열렸으면 새로고침하지 않고 이 세션에서 바로 쓴다(새로고침하면 시작 때의 자동 열기가 다시 실패해 같은 배너가 반복될 수 있다).
+      window.gopangWallet = w; window.gopangWalletLocked = false;
+      try { w.setIdentity?.({ guid: JSON.parse(localStorage.getItem('gopang_user_v4') || 'null')?.ipv6 || null }); } catch {}
+      document.getElementById('_wallet-locked-banner')?.remove();
+      try { window.dispatchEvent(new CustomEvent('gopang:wallet-unlocked')); } catch {}
+      (window.nativeAlert||alert)('지갑을 열었습니다. 이 화면을 닫지 말고 계속 사용해 주세요.');
     } catch (e) {
       btn.disabled = false; btn.textContent = '지문으로 다시 열기';
       const why = (e && (e.cause?.name || e.name)) || 'Error';
