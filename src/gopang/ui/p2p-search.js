@@ -133,6 +133,7 @@ async function _doSearch(q, country, region, resultsEl) {
     const fr = await findFriend(q);
     if (fr.ok && fr.found && fr.user) {
       try { rememberUser(localStorage, _USER?.guid || _USER?.ipv6, fr.user); } catch {}   // 찾은 사용자는 자주 찾는 사용자로 저장
+      if (cq.kind === 'phone' && cq.e164) _rememberKnownPhone(fr.user, cq.e164);   // 번호로 찾았으면, 응답이 없을 때 문자로 알릴 수 있게 번호를 이 기기에 잠시 둔다
       const many = Array.isArray(fr.users) && fr.users.length > 1;      // 같은 이름이 여럿이면 목록에서 고른다
       resultsEl.innerHTML = many ? fr.users.map(_renderUserCard).join('') : _renderUserCard(fr.user);
       resultsEl.querySelectorAll('[data-connect]').forEach(btn => { btn.onclick = () => _sendConnectRequest(JSON.parse(btn.dataset.connect)); });
@@ -170,6 +171,9 @@ async function _loadInvite() {
 function _smsHref(tel, text) {
   const ios = /iPhone|iPad|iPod/i.test(navigator.userAgent || '');
   return `sms:${tel}${ios ? '&' : '?'}body=${encodeURIComponent(text)}`;
+}
+function _rememberKnownPhone(user, e164) {
+  try { if (user && user.guid && e164) localStorage.setItem('navi_known_phone_' + user.guid, JSON.stringify({ e164, ts: Date.now() })); } catch {}
 }
 const _esc = (t) => String(t == null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const _INVITE_BTN_STYLE = 'display:inline-block;padding:6px 14px;background:#fff;color:#1A73E8;border:1px solid #1A73E8;border-radius:8px;font-size:calc(0.8125rem*var(--hondi-fs,1));font-weight:600;text-decoration:none;flex-shrink:0';
@@ -223,7 +227,7 @@ async function _searchContacts(resultsEl) {
   if (others.length) html += `<div style="padding:8px 20px;${sub}">초대하기 · 가입하면 초대한 분께 1,000 GDC</div>`;
   others.forEach((x, i) => { html += rowHtml(_esc(x.name || x.e164), `<span data-i="${i}"></span>`); });
   resultsEl.innerHTML = html;
-  resultsEl.querySelectorAll('[data-m]').forEach(b => { b.onclick = () => _sendConnectRequest(member.get(mine[Number(b.dataset.m)].e164), { skipConfirm: true }); });
+  resultsEl.querySelectorAll('[data-m]').forEach(b => { b.onclick = () => { const _e = mine[Number(b.dataset.m)].e164; _rememberKnownPhone(member.get(_e), _e); _sendConnectRequest(member.get(_e), { skipConfirm: true }); } });
   resultsEl.querySelectorAll('span[data-i]').forEach(sp => { _fillInviteButton(sp, others[Number(sp.dataset.i)].e164); });
 }
 
