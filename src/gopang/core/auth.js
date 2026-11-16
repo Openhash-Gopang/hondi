@@ -2525,6 +2525,7 @@ function _showPhonePopupLegacy(resolve) {
 
     console.info('[가입] 백업 키는 입력한 이메일로 발송(2026-11-13)');
     localStorage.setItem('hondi_new_registration', '1');
+    try { localStorage.setItem('gopang_registered_at', String(Date.now())); } catch {}
     if (backupEmail && phoneVerifyToken) {
       try { await _emailBackupKeyStep({ email: backupEmail, phoneVerifyToken, handle, ipv6 }); }
       catch (e) { console.warn('[가입][백업 키 메일] 실패(무시):', e.message); }

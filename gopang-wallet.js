@@ -2031,6 +2031,31 @@
           // 만들지 않고 잠금 상태로 멈춘다 — 사용자가 설정 화면에서 백업 키로
           // 복구하거나, 다른 정상 기기에서 새로 device-link를 받아야 한다.
           console.error('[GopangWallet] 기존 지갑을 열 수 없습니다(엔트로피/인증 불일치로 추정) — 백업 키 복구가 필요합니다. 새 지갑을 자동 생성하지 않습니다.');
+          // 2026-11-16(주피터 지시: 지갑 잠김 배너가 뜨지 않아야 한다) — 지문(WebAuthn)을 등록한 지갑은 열 때 지문 확인이 필요한데, 앱을 열 때는 사용자 동작이 없어
+          // 브라우저가 거부하거나 다른 창에 밀려 취소된다. 이는 지갑이 망가진 것이 아니므로 배너를 띄우지 않고, 사용자의 첫 터치·키 입력(=사용자 동작) 때 조용히 다시 연다.
+          // 그때도 실패하면 그제서야 기존 배너(복구 선택)를 보여 준다.
+          if (localStorage.getItem(LS_WEBAUTHN_CRED) && !global.__gopangWalletGestureArmed) {
+            global.__gopangWalletGestureArmed = true;
+            global.gopangWallet = null;
+            global.gopangWalletLocked = true;
+            const _retry = async () => {
+              document.removeEventListener('pointerdown', _retry, true); document.removeEventListener('keydown', _retry, true);
+              try {
+                const w = await GopangWallet.load();
+                if (w) {
+                  try { const u = JSON.parse(localStorage.getItem('gopang_user_v4') || 'null'); if (u?.ipv6) w.setIdentity?.({ guid: u.ipv6, handle: u.handle || null }); } catch (e3) { /* 무시 */ }
+                  global.gopangWallet = w; global.gopangWalletLocked = false;
+                  global.dispatchEvent?.(new CustomEvent('gopang:wallet-unlocked'));
+                  return;
+                }
+              } catch (e4) { /* 아래에서 배너 */ }
+              global.gopangWalletLocked = true;
+              try { global.dispatchEvent?.(new CustomEvent('gopang:wallet-locked', { detail: { why: 'gesture-retry-failed' } })); } catch (e5) { /* 무시 */ }
+            };
+            document.addEventListener('pointerdown', _retry, true);
+            document.addEventListener('keydown', _retry, true);
+            return;
+          }
           global.gopangWallet = null;
           global.gopangWalletLocked = true; // UI가 "복구 필요" 배너를 띄울 수 있도록 하는 신호
           // 2026-07-23 신설 — 위 플래그를 실제로 구독하는 코드가 어디에도
