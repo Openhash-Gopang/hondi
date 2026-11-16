@@ -392,15 +392,18 @@ self.addEventListener('notificationclick', (event) => {
       _reportConsentReceipt(tag, 'acknowledged'),
       clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (list) => {
         // 이미 열린 창이 있으면 포커스 + postMessage (리스너가 이미 살아있음)
+        // 2026-11-16 — 대화 요청 알림을 누른 것이 곧 수락이다(수락 팝업을 한 번 더 띄우지 않는다).
+        const isCallTap = tag.startsWith('gopang-call-') || tag === 'gopang-incoming-call';
         for (const client of list) {
           if (client.url.startsWith(self.location.origin) && 'focus' in client) {
             client.postMessage({ type: 'PLAY_SOUND', sound });
+            if (isCallTap) client.postMessage({ type: 'CALL_TAP' });
             return client.focus();
           }
         }
         // 없으면 새 창 — postMessage 대신 URL 파라미터로 전달(경쟁 상태 회피)
         const sep = url.includes('?') ? '&' : '?';
-        return clients.openWindow(url + sep + 'playSound=' + encodeURIComponent(sound));
+        return clients.openWindow(url + sep + 'playSound=' + encodeURIComponent(sound) + (isCallTap ? '&callTap=1' : ''));
       }),
     ])
   );

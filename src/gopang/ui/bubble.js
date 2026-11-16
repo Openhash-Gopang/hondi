@@ -32,7 +32,13 @@ export function getBubbleTarget() {
  * @param {string|null} senderName  peer 메시지의 발신자 이름
  */
 export function appendBubble(role, text, isHTML = false, senderName = null) {
-  const list = document.getElementById(_activeContainerId);
+  let list = document.getElementById(_activeContainerId);
+  // 2026-11-16 — 폰 화면에서는 보이는 대화 목록이 AI 패널이다. 상대와의 대화(내 입력·상대 말·안내)가 보이지 않는 메인 목록에만 쌓이지 않게,
+  // AI 패널이 화면에 보이면 그 목록에 그린다.
+  try {
+    const pm = document.getElementById('ai-panel-messages');
+    if (pm && role !== 'ai' && (() => { const r = pm.getBoundingClientRect(); return r.height > 0 && r.width > 0 && r.top < window.innerHeight && r.bottom > 0 && pm.offsetParent !== null; })()) list = pm;
+  } catch {}
   if (!list) return;
 
   const row  = document.createElement('div');

@@ -427,6 +427,17 @@ function _busyWithPeer() {
   return false;
 }
 
+// 2026-11-16 — 알림을 눌러 들어온 경우 수락 팝업을 다시 띄우지 않고 곧바로 수락으로 처리한다.
+try {
+  if (new URLSearchParams(location.search).get('callTap')) window.__naviAcceptUntil = Date.now() + 90000;
+  navigator.serviceWorker?.addEventListener('message', (e) => {
+    if (e.data?.type !== 'CALL_TAP') return;
+    window.__naviAcceptUntil = Date.now() + 90000;
+    const b = document.getElementById('_p2p-accept');   // 이미 수락 팝업이 떠 있으면 그것을 누른 것으로 본다
+    if (b) b.click();
+  });
+} catch {}
+
 export async function handleIncomingOffer(signal) {
   const fromGuid    = signal.from_guid;
   const _caller    = await _verifiedCaller(fromGuid);
@@ -483,7 +494,9 @@ export async function handleIncomingOffer(signal) {
   // 포기했을 때(_handleIncomingCancel) 이 모달을 정확히 찾아서 강제로
   // 닫을 수 있다.
   _pendingModalCallId = callId;
-  const accepted = await _showIncomingCallModal(fromName);
+  const _tapped = (window.__naviAcceptUntil || 0) > Date.now();
+  const accepted = _tapped ? true : await _showIncomingCallModal(fromName);
+  if (_tapped) window.__naviAcceptUntil = 0;
   _pendingModalCallId = null;
   if (!accepted) return;
 
