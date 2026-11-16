@@ -45,7 +45,9 @@ if ('serviceWorker' in navigator) {
       // 입력 중이거나 AI가 답하는 중이면 끝날 때까지 미루고, 60초 안에 두 번 이상은 새로고침하지 않는다(무한 새로고침 방지).
       const _hadController = !!navigator.serviceWorker.controller;
       let _reloadTimer = null;
-      const _busy = () => !!document.getElementById('ksa-overlay') || !!document.querySelector('.streaming')
+      // 2026-11-16 — 대화 상대와 통화·대화 중이거나 연결하는 중에는 새로고침하지 않는다(새로고침하면 연결이 끊기고 새 탭이 메인 창으로 바뀐다).
+      const _inCall = () => { try { if (window.__naviIsCallTab) return true; const b = document.getElementById('peer-bar'); return !!window.__naviCallBusy || !!(b && b.style.display && b.style.display !== 'none'); } catch (e) { return false; } };
+      const _busy = () => _inCall() || !!document.getElementById('ksa-overlay') || !!document.querySelector('.streaming')
         || [...document.querySelectorAll('textarea,input[type=text]')].some((el) => el.offsetParent && el.value && el.value.trim());
       const _tryReload = () => {
         let last = 0; try { last = Number(sessionStorage.getItem('hondi_auto_reload_at')) || 0; } catch (e) {}

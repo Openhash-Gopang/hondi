@@ -218,6 +218,7 @@ export async function startP2PCall(targetUser) {
 
   _peerInfo     = targetUser;
   try { _peerInfo.__since = Date.now(); } catch {}
+  window.__naviCallBusy = true;
   _p2pMessages  = [];
   _sessionStart = new Date().toISOString();
 
@@ -419,7 +420,7 @@ function _busyWithPeer() {
   try { if (_rtcChannel) _rtcChannel.close(); } catch {}
   try { if (_rtcConn) _rtcConn.close(); } catch {}
   setRtcChannel(null); setRtcConn(null);
-  _activeCallIdCallee = null; _peerInfo = null;
+  _activeCallIdCallee = null; _peerInfo = null; window.__naviCallBusy = false;
   try { _clearPeer(); } catch {}
   return false;
 }
@@ -486,6 +487,7 @@ export async function handleIncomingOffer(signal) {
 
   _peerInfo = { guid: fromGuid, handle: fromHandle, nickname: fromName };
   _peerInfo.__since = Date.now();
+  window.__naviCallBusy = true;
   // BUG-FIX(2026-07-02): 원래 이 아래 SDP 생성·전송 과정(await 여러 번)이
   // 끝난 뒤에야 _activeCallIdCallee를 세팅했는데, 그 사이(비동기 처리
   // 중)에 취소 신호가 도착하면 _handleIncomingCancel의 케이스 B 검사
@@ -585,7 +587,7 @@ function _setupConn(conn, peer, callId) {
         if (conn.__lostNotified || conn.connectionState === 'connected') return;
         conn.__lostNotified = true;
         appendBubble('system', `🔴 ${peer.nickname || peer.handle || '상대'}님과 연결이 끊어졌습니다. 다시 대화하려면 "${peer.nickname || peer.handle || '상대'} 불러 줘"라고 말씀해 주세요.`);
-        if (_rtcConn === conn) { _activeCallIdCallee = null; _peerInfo = null; _clearPeer(); }
+        if (_rtcConn === conn) { _activeCallIdCallee = null; _peerInfo = null; window.__naviCallBusy = false; _clearPeer(); }
       };
       if (state === 'disconnected') setTimeout(_drop, 8000); else _drop();   // disconnected 는 잠깐 끊겼다 돌아올 수 있어 8초 기다린다
     }
@@ -783,6 +785,7 @@ function _closeP2P() {
   _clearPeer();
 
   _peerInfo     = null;
+  window.__naviCallBusy = false;
   _p2pMessages  = [];
   _sessionStart = null;
 }
