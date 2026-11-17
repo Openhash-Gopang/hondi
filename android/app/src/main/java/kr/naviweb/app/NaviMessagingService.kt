@@ -38,7 +38,7 @@ class NaviMessagingService : FirebaseMessagingService() {
         )
 
         val nb = NotificationCompat.Builder(this, channel)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setSmallIcon(R.drawable.ic_stat_navi)
             .setContentTitle(d["title"] ?: getString(R.string.app_name))
             .setContentText(d["body"].orEmpty())
             .setStyle(NotificationCompat.BigTextStyle().bigText(d["body"].orEmpty()))
