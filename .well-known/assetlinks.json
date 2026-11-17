@@ -4,7 +4,7 @@
     "target": {
       "namespace": "android_app",
       "package_name": "kr.naviweb.app",
-      "sha256_cert_fingerprints": ["DD:30:17:B2:B4:EE:EC:5E:52:AD:58:91:E8:86:90:17:32:15:D1:A0:04:06:25:B0:8A:0F:6B:85:64:56:99:35"]
+      "sha256_cert_fingerprints": ["EC:20:C6:3E:4D:C8:39:6E:7C:7C:B3:3A:38:5C:10:A7:B6:B0:44:3A:F9:6F:76:5F:AA:6C:21:35:CB:7C:77:0A"]
     }
   }
 ]

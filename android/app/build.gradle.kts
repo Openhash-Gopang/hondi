@@ -29,13 +29,6 @@ android {
     }
 
     signingConfigs {
-        // 시험용 공용 키(저장소에 공개) — 개인 서명키가 등록되지 않은 빌드의 대체용. 배포하지 않는다.
-        create("test") {
-            storeFile = rootProject.file("debug.keystore")
-            storePassword = "android"
-            keyAlias = "navidebug"
-            keyPassword = "android"
-        }
         // 개인 서명키: GitHub secrets 에서 환경변수로 주입된다 (키 파일은 저장소에 두지 않는다).
         val ksFile = System.getenv("NAVIWEB_KEYSTORE_FILE")
         if (!ksFile.isNullOrBlank() && file(ksFile).exists()) {
@@ -47,7 +40,8 @@ android {
             }
         }
     }
-    val sign = signingConfigs.findByName("naviweb") ?: signingConfigs.getByName("test")
+    // 개인 서명키가 없으면 서명하지 않은(unsigned) APK 가 나온다 — 공용 키로 서명하지 않는다.
+    val sign = signingConfigs.findByName("naviweb")
     buildTypes {
         debug { signingConfig = sign }
         release {
