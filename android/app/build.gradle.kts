@@ -29,19 +29,30 @@ android {
     }
 
     signingConfigs {
-        // 시험용 키(저장소에 공개). Play 출시는 Play App Signing 을 쓰므로 이 키로 올리지 않는다.
+        // 시험용 공용 키(저장소에 공개) — 개인 서명키가 등록되지 않은 빌드의 대체용. 배포하지 않는다.
         create("test") {
             storeFile = rootProject.file("debug.keystore")
             storePassword = "android"
             keyAlias = "navidebug"
             keyPassword = "android"
         }
+        // 개인 서명키: GitHub secrets 에서 환경변수로 주입된다 (키 파일은 저장소에 두지 않는다).
+        val ksFile = System.getenv("NAVIWEB_KEYSTORE_FILE")
+        if (!ksFile.isNullOrBlank() && file(ksFile).exists()) {
+            create("naviweb") {
+                storeFile = file(ksFile)
+                storePassword = System.getenv("NAVIWEB_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("NAVIWEB_KEY_ALIAS") ?: "naviweb"
+                keyPassword = System.getenv("NAVIWEB_KEY_PASSWORD")
+            }
+        }
     }
+    val sign = signingConfigs.findByName("naviweb") ?: signingConfigs.getByName("test")
     buildTypes {
-        debug { signingConfig = signingConfigs.getByName("test") }
+        debug { signingConfig = sign }
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("test")
+            signingConfig = sign
         }
     }
     buildFeatures { buildConfig = true }
