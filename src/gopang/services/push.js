@@ -65,6 +65,29 @@ export function getOrCreateDeviceId() {
 // subscribe/unsubscribe를 또 트리거하지 않고 같은 결과를 기다린다.
 let _inFlight = null;
 
+// ── 2026-11-17 신설 — 안드로이드 앱(TWA) FCM 토큰 ──────────────────────
+// 앱은 시작 주소에 ?fcm=<토큰>을 붙여 연다. 토큰은 sessionStorage에만 두어(일반 Chrome에는 남지 않음)
+// 앱을 지운 뒤 죽은 토큰이 계속 등록되는 일이 없게 한다. 앱이 켜질 때마다 새 토큰이 다시 넘어온다.
+// webapp.html <head>의 인라인 스크립트가 같은 일을 먼저 한다 — 이 함수는 다른 진입 페이지용 보강이다.
+const FCM_TOKEN_KEY = 'navi_fcm_token';
+function _validFcmToken(t) { return typeof t === 'string' && t.length >= 20 && t.length <= 4096 && !/\s/.test(t); }
+export function captureAppFcmToken() {
+  try {
+    const u = new URL(location.href);
+    const t = u.searchParams.get('fcm');
+    if (t === null) return;
+    if (_validFcmToken(t)) sessionStorage.setItem(FCM_TOKEN_KEY, t);
+    u.searchParams.delete('fcm');
+    history.replaceState(history.state, '', u.pathname + u.search + u.hash);
+  } catch (_) { /* 비브라우저 환경 등 — 무시 */ }
+}
+export function getAppFcmToken() {
+  try { const t = sessionStorage.getItem(FCM_TOKEN_KEY); return _validFcmToken(t) ? t : null; }
+  catch (_) { return null; }
+}
+captureAppFcmToken();
+
+
 // ── 2026-09-07 신설 — /push/subscribe 인증 부재 수정 ────────────────
 // 지금까지 guid만 body에 넣으면 누구나 임의의 기기를 그 계정의
 // "신뢰 기기" 목록에 몰래 추가할 수 있었다(사고실험 발견 — worker.js
@@ -133,6 +156,17 @@ export function requestPushSubscription(guid) {
 
 async function _requestPushSubscriptionImpl(guid) {
   if (!guid) return { ok: false, reason: 'guid_missing' };
+
+  // 앱(TWA)이면 웹 푸시 대신 FCM 토큰으로 등록한다 — 알림 권한·배터리 설정은 앱이 이미 안내했다.
+  // 같은 폰의 Chrome 웹 푸시 항목과 덮어쓰지 않도록 기기 ID를 따로 둔다.
+  const appToken = getAppFcmToken();
+  if (appToken) {
+    return await postPushSubscribe({
+      guid, subscription: { kind: 'fcm', token: appToken },
+      sound: localStorage.getItem('gopang_push_sound') || 'ping',
+      deviceId: getOrCreateDeviceId() + ':app', deviceType: 'mobile',
+    });
+  }
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
     return { ok: false, reason: 'unsupported' };
   }
