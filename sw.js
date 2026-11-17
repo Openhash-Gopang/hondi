@@ -169,7 +169,10 @@ self.addEventListener('fetch', (event) => {
             if (fresh.ok) (await caches.open(CACHE_NAME)).put(event.request, fresh);
           } catch (e) { /* 오프라인이면 캐시 그대로 */ }
         })());
-        return cached;
+        // 2026-11-18 — 사전 캐시한 '/'·/desktop.html 등은 Pages 이동(301/308)을 거쳐 redirected 표시가 붙어 있다.
+        // 페이지 이동(navigate)에 이런 응답을 그대로 돌려주면 ERR_FAILED 로 막힌다(주소창에 naviweb.kr 만 쳐도 간헐적으로 접속 불가였던 원인).
+        // 캐시 먼저 경로에서도 _plainResponse 로 표시를 뗀 새 응답을 돌려준다.
+        return await _plainResponse(cached);
       }
       try {
         const res = await fetch(event.request.clone(), { cache: 'no-store' });
