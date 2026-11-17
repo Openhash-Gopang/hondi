@@ -81,3 +81,15 @@ jobs:
           git add downloads/naviweb.apk downloads/naviweb-apk.json
           git commit -m "chore: 안드로이드 앱 APK 게시 (빌드 ${NAVIWEB_VERSION_CODE})"
           git push origin HEAD:main
+      # GitHub Pages 배포(약 1분)가 끝난 뒤 Cloudflare 캐시를 비운다 — 안 비우면 배포 전에 캐시된 404 가 계속 보일 수 있다.
+      - name: Cloudflare 캐시 비우기
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
+        run: |
+          if [ -z "$CF_API_TOKEN" ] || [ -z "$CF_ZONE_ID" ]; then echo "CF 시크릿 없음 — 건너뜀"; exit 0; fi
+          sleep 100
+          curl -sf -X POST "https://api.cloudflare.com/client/v4/zones/${CF_ZONE_ID}/purge_cache" \
+            -H "Authorization: Bearer ${CF_API_TOKEN}" -H "Content-Type: application/json" \
+            --data '{"purge_everything":true}' || echo "캐시 비우기 실패 — 무시"
