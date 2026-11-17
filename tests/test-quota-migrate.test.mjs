@@ -9,11 +9,11 @@ import { migrateTestData, mergeKmailSettings, MIGRATION_TARGETS } from '../src/w
 
 const H = 3600 * 1000;
 const fakeKv = () => { const m = new Map(); return { m, get: async k => m.get(k) ?? null, put: async (k, v) => { m.set(k, v); } }; };
-const CFG = quotaConfig({ FREE_TRIAL_KRW: "100" });             // 로직 시험은 한도 100원으로 고정(실제 기본값은 1000원 — 아래 첫 시험)
+const CFG = quotaConfig({ FREE_TRIAL_KRW: "100", FREE_TRIAL_HOURS: "72" });             // 로직 시험은 한도 100원으로 고정(실제 기본값은 1000원 — 아래 첫 시험)
 
-test('quotaConfig: 기본값 1000원·72시간, 환경 변수로 바꿀 수 있고 옛 변수는 무시한다', () => {
+test('quotaConfig: 기본값 1000원·720시간(30일), 환경 변수로 바꿀 수 있고 옛 변수는 무시한다', () => {
   const D = quotaConfig({});
-  assert.equal(D.limitKrw, 1000); assert.equal(D.freeHours, 72); assert.equal(D.freeMs, 72 * H); assert.equal(D.graceMs, 0);
+  assert.equal(D.limitKrw, 1000); assert.equal(D.freeHours, 720); assert.equal(D.freeMs, 720 * H); assert.equal(D.graceMs, 0);
   const c = quotaConfig({ FREE_TRIAL_KRW: '300', FREE_TRIAL_HOURS: '12' });
   assert.equal(c.limitKrw, 300); assert.equal(c.freeMs, 12 * H);
   assert.equal(quotaConfig({ FREE_TRIAL_KRW: 'abc', FREE_TRIAL_HOURS: '' }).limitKrw, 1000);

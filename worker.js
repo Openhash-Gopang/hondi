@@ -2323,7 +2323,7 @@ async function _ownerUnlimited(env, guid) {
 
 // ═══════════════════════════════════════════════════════════
 // 🧪 테스트 계정 한도·유예·차단 + 정식 계정 전환 — 2026-10-27 (주피터 지시)
-//   · [2026-11-06 개정] 모든 계정이 전화 인증 후 AI 사용 비용 FREE_TRIAL_KRW(기본 1,000원) 또는 FREE_TRIAL_HOURS(기본 72시간) 중 먼저 오는 때까지 무료.
+//   · [2026-11-06 개정] 모든 계정이 전화 인증 후 AI 사용 비용 FREE_TRIAL_KRW(기본 1,000원) 또는 FREE_TRIAL_HOURS(기본 720시간=30일) 중 먼저 오는 때까지 무료.
 //     끝나면 정식 계정은 GDC 결제로 이어지고, 테스트 계정(handle이 'tid-'로 시작)은 유예 없이 차단 — _gdcFreeQuotaGate·K-서비스 공용 토큰 게이트가 막는다.
 //   · 차단돼도 /auth/test-quota 조회와 /auth/test-migrate(정식 계정으로 데이터 이동)는 계속 허용한다.
 //   · 판정 로직은 src/worker/test-quota.js, 데이터 이동은 src/worker/test-migrate.js (단위 시험: tests/test-quota-migrate.test.mjs).
