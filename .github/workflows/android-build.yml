@@ -1,8 +1,7 @@
 name: Android APK Build
 
 # 나비웹 안드로이드 앱(TWA) 시험용 APK 빌드. 계획서: admin/android-app-plan-20261116.html
-# 서명: GitHub secrets(NAVIWEB_KEYSTORE_B64 등)에 개인 서명키가 있으면 그 키로, 없으면 공개 시험 키(android/debug.keystore)로 서명한다.
-# 공개 시험 키로 서명된 APK 는 배포하지 않는다.
+# 서명: GitHub secrets(NAVIWEB_KEYSTORE_B64 등)의 개인 서명키로 서명한다. 없으면 서명하지 않은 APK 가 나온다.
 "on":
   push:
     branches: [main]
@@ -45,7 +44,7 @@ jobs:
             echo "NAVIWEB_KEYSTORE_FILE=$RUNNER_TEMP/naviweb.keystore" >> "$GITHUB_ENV"
             echo "개인 서명키 사용"
           else
-            echo "::warning::NAVIWEB_KEYSTORE_B64 없음 — 공개 시험 키로 서명됩니다(배포 금지)"
+            echo "::warning::NAVIWEB_KEYSTORE_B64 없음 — 서명되지 않은 APK 가 만들어집니다"
           fi
       - name: assemble
         working-directory: android
@@ -58,7 +57,8 @@ jobs:
         run: |
           APK=$(ls android/app/build/outputs/apk/release/*.apk | head -1)
           echo "APK=$APK"
-          "$ANDROID_HOME"/build-tools/*/apksigner verify --print-certs "$APK" | grep "SHA-256" || true
+          AS=$(ls -d "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          "$AS" verify --print-certs "$APK" | grep "SHA-256" || echo "::warning::서명 지문을 확인하지 못했습니다(서명되지 않은 APK 일 수 있음)"
       - uses: actions/upload-artifact@v4
         with:
           name: naviweb-apk
