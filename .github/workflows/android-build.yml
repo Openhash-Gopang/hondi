@@ -11,7 +11,7 @@ name: Android APK Build
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write   # main 에서 빌드되면 APK 를 사이트(downloads/)에 게시하려고 커밋한다
 
 jobs:
   build:
@@ -64,3 +64,20 @@ jobs:
           name: naviweb-apk
           path: android/app/build/outputs/apk/release/*.apk
           retention-days: 30
+      # QR 로 바로 설치할 수 있게, 서명된 APK 를 사이트 downloads/naviweb.apk 로 게시한다(main 푸시일 때만).
+      # 커밋 메시지에 [skip ci] 를 넣지 않는다 — Cloudflare Pages 가 이 커밋으로 사이트를 다시 배포해야 한다.
+      # (GITHUB_TOKEN 푸시는 다른 워크플로를 일으키지 않고, downloads/ 는 이 워크플로의 감시 경로가 아니라 반복되지 않는다.)
+      - name: 사이트에 APK 게시
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          if [ -z "$NAVIWEB_KEYSTORE_FILE" ]; then echo "::warning::서명되지 않은 APK 는 게시하지 않습니다"; exit 0; fi
+          APK=$(ls android/app/build/outputs/apk/release/*.apk | head -1)
+          git config user.name "naviweb-apk-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git pull --rebase origin main
+          mkdir -p downloads
+          cp "$APK" downloads/naviweb.apk
+          printf '{"versionCode":%s,"builtAt":"%s","sha256":"%s"}\n' "$NAVIWEB_VERSION_CODE" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(sha256sum downloads/naviweb.apk | cut -d' ' -f1)" > downloads/naviweb-apk.json
+          git add downloads/naviweb.apk downloads/naviweb-apk.json
+          git commit -m "chore: 안드로이드 앱 APK 게시 (빌드 ${NAVIWEB_VERSION_CODE})"
+          git push origin HEAD:main
