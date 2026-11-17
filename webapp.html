@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+<script>
+// 2026-11-17 — 안드로이드 앱(TWA)이 시작 주소에 ?fcm=<토큰>을 붙여 넘긴다. 가장 먼저 읽어 세션에만 보관하고
+// 주소창·기록·Referer에 남지 않도록 즉시 지운다. (src/gopang/services/push.js captureAppFcmToken 과 같은 규칙)
+(function(){try{var u=new URL(location.href),t=u.searchParams.get('fcm');
+if(t!==null){if(t.length>=20&&t.length<=4096&&!/\s/.test(t))sessionStorage.setItem('navi_fcm_token',t);
+u.searchParams.delete('fcm');history.replaceState(history.state,'',u.pathname+u.search+u.hash);}}catch(e){}})();
+</script>
 <script src="/assets/material-dialog.js"></script>
 <script>try{if(window.parent!==window)document.documentElement.classList.add('is-embedded')}catch(e){}</script>
 <meta charset="UTF-8">
