@@ -4,6 +4,11 @@ import android.Manifest
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.view.Gravity
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -32,9 +37,47 @@ class MainActivity : LauncherActivity() {
         return base.buildUpon().appendQueryParameter("fcm", t).build()
     }
 
+    private lateinit var status: TextView
+    private lateinit var openBtn: Button
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        buildLaunchScreen()
         if (Prefs.setupDone(this)) proceed() else showSetupDialog()
+    }
+
+    // 웹앱(TWA)이 열리지 않아도 빈 화면으로 멈추지 않게, 보이는 안내 화면과 "브라우저로 열기" 버튼을 둔다.
+    private fun buildLaunchScreen() {
+        val pad = (24 * resources.displayMetrics.density).toInt()
+        status = TextView(this).apply { text = "나비웹을 여는 중…"; textSize = 18f; setTextColor(Color.parseColor("#222222")); gravity = Gravity.CENTER }
+        openBtn = Button(this).apply {
+            text = "브라우저로 열기"; visibility = android.view.View.GONE
+            setOnClickListener { openInBrowser() }
+        }
+        setContentView(LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER
+            setBackgroundColor(Color.parseColor("#F9B91C")); setPadding(pad, pad, pad, pad)
+            addView(status); addView(openBtn)
+        })
+    }
+
+    private fun showFallback(msg: String) {
+        status.text = msg
+        openBtn.visibility = android.view.View.VISIBLE
+    }
+
+    private fun openInBrowser() {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://naviweb.kr/webapp.html?pwa=1")))
+        } catch (e: Exception) {
+            showFallback("열 수 있는 브라우저가 없습니다: " + e.javaClass.simpleName)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // 웹앱이 이미 한 번 열렸다가 이 화면으로 돌아온 경우(열기 실패·닫힘): 빈 화면 대신 안내를 보인다.
+        if (launched && ::status.isInitialized) showFallback("웹앱이 열리지 않았습니다.\n아래 버튼으로 브라우저에서 열어 주세요.")
     }
 
     private fun showSetupDialog() {
@@ -103,7 +146,15 @@ class MainActivity : LauncherActivity() {
     private fun launchOnce() {
         if (launched || isFinishing) return
         launched = true
-        launchTwa()
+        try {
+            launchTwa()
+            // 4초가 지나도 이 화면이 그대로 보이면 열리지 않은 것 — 안내를 띄운다.
+            Handler(Looper.getMainLooper()).postDelayed({
+                if (!isFinishing && !isDestroyed) showFallback("웹앱이 열리지 않았습니다.\n아래 버튼으로 브라우저에서 열어 주세요.")
+            }, 4000)
+        } catch (e: Exception) {
+            showFallback("웹앱을 열지 못했습니다: " + e.javaClass.simpleName + " " + (e.message ?: ""))
+        }
     }
 
     companion object {
