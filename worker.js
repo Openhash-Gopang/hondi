@@ -12,6 +12,7 @@
 // ═══════════════════════════════════════════════════════════
 
 import { handleAiChat, handleEscalate } from './src/worker/ai-chat-handler.js';
+import { isFcmSubscription as _isFcmSub, normalizeFcmSubscription as _normFcmSub, sendFcm as _sendFcm } from './src/worker/fcm-push.js';
 import { prepareDoctorRequest, doctorRateLimits } from './src/worker/kdoctor-guard.js';
 import { handleOrderQueue } from './src/worker/order-queue-handler.js';
 import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
@@ -34318,8 +34319,17 @@ async function handlePushSubscribe(request, env, corsHeaders) {
   }
 
   // 구독 등록/갱신: 이 deviceId 항목만 교체, 다른 기기 항목은 그대로 보존
-  const deviceType = body.deviceType === 'mobile' ? 'mobile' : body.deviceType === 'desktop' ? 'desktop' : 'unknown';
-  const next = _upsertDeviceSubscription(current, deviceId, body.subscription, body.sound || 'ping', deviceType);
+  let deviceType = body.deviceType === 'mobile' ? 'mobile' : body.deviceType === 'desktop' ? 'desktop' : 'unknown';
+  // 2026-11-17 — 앱(FCM) 등록: 같은 서명 인증을 통과한 요청만 여기까지 온다.
+  // kind:'fcm' 이면 토큰 형식을 검증해 정규화하고 기기 종류는 mobile로 고정한다.
+  let subscriptionToStore = body.subscription;
+  if (body.subscription && body.subscription.kind === 'fcm') {
+    const fcmSub = _normFcmSub(body.subscription);
+    if (!fcmSub) return _err(400, 'INVALID_FCM_TOKEN', 'FCM 토큰 형식이 올바르지 않습니다', corsHeaders);
+    subscriptionToStore = fcmSub;
+    deviceType = 'mobile';
+  }
+  const next = _upsertDeviceSubscription(current, deviceId, subscriptionToStore, body.sound || 'ping', deviceType);
   try {
     await _l1PatchProfile(env, record.id, {
       push_subscription: _serializeDeviceSubscriptions(next),
@@ -34455,6 +34465,10 @@ async function _encryptWebPushPayload(payloadStr, p256dhB64u, authB64u) {
 // 2026_07_21.md §4 후속). 호출부가 status===410을 보고 그 자리에서
 // pruning할 수 있게 한다.
 async function _sendWebPush(env, subscription, payload, urgency = 'normal') {
+  // 2026-11-17 신설 — 안드로이드 앱 기기는 웹 푸시 대신 FCM 토큰({kind:'fcm', token})으로
+  // 등록된다. 모든 발송 지점이 이 함수를 거치므로 여기서 한 번만 분기한다.
+  // 반환 계약({ ok, status })은 동일 — 404/410이면 호출부가 죽은 토큰을 정리한다.
+  if (_isFcmSub(subscription)) return _sendFcm(env, subscription, payload, urgency);
   const p256dh = subscription.keys?.p256dh;
   const auth   = subscription.keys?.auth;
   if (!p256dh || !auth) {
