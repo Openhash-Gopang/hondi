@@ -1,0 +1,10 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "kr.naviweb.app",
+      "sha256_cert_fingerprints": ["DD:30:17:B2:B4:EE:EC:5E:52:AD:58:91:E8:86:90:17:32:15:D1:A0:04:06:25:B0:8A:0F:6B:85:64:56:99:35"]
+    }
+  }
+]

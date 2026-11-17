@@ -1,0 +1,50 @@
+name: Android APK Build
+
+# 나비웹 안드로이드 앱(TWA) 시험용 APK 빌드. 계획서: admin/android-app-plan-20261116.html
+# 시험 서명 키(android/debug.keystore)는 공개되어 있다 — 직접 설치 시험 전용이며 Play 출시용이 아니다.
+"on":
+  push:
+    branches: [main]
+    paths: ['android/**', '.github/workflows/android-build.yml']
+  pull_request:
+    paths: ['android/**', '.github/workflows/android-build.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      NAVIWEB_VERSION_CODE: ${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Firebase API key 설정 여부 점검
+        working-directory: android
+        run: |
+          if grep -Eq '^FIREBASE_API_KEY=.+' app/firebase-config.properties; then
+            echo "FIREBASE_API_KEY 설정됨"
+          else
+            echo "::warning::FIREBASE_API_KEY 가 비어 있습니다 — 빌드는 되지만 푸시 토큰을 받을 수 없습니다"
+          fi
+      - name: assemble
+        working-directory: android
+        run: gradle --no-daemon assembleDebug
+      - name: APK 지문 확인
+        run: |
+          APK=$(ls android/app/build/outputs/apk/debug/*.apk | head -1)
+          echo "APK=$APK"
+          "$ANDROID_HOME"/build-tools/*/apksigner verify --print-certs "$APK" | grep "SHA-256" || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: naviweb-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+          retention-days: 30
