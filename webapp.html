@@ -5555,7 +5555,7 @@ function _messagesWithLocation(historyArr) {
         const st = await import('/src/gopang/core/state.js');
         const _bb = await import('/src/gopang/ui/bubble.js');
         if (await _dg.diagHandleCommand(text, _bb.appendBubble)) return;
-        _dg.diag('입력 전달', { 대상: st._peer ? '상대(P2P)' : 'AI 비서', 상대설정: !!st._peer, 채널: (st._rtcChannel && st._rtcChannel.readyState) || '없음', 종료됨: !!window.__p2pEnded, 머리글: (document.getElementById('ai-sp-label') || {}).textContent || '' });
+        _dg.diag('입력 전달', { 글자수: text.length, 앞: String(text).slice(0, 6), 대상: st._peer ? '상대(P2P)' : 'AI 비서', 상대설정: !!st._peer, 채널: (st._rtcChannel && st._rtcChannel.readyState) || '없음', 종료됨: !!window.__p2pEnded, 머리글: (document.getElementById('ai-sp-label') || {}).textContent || '' });
         if (st._peer) {
           const { appendBubble } = await import('/src/gopang/ui/bubble.js');
           appendBubble('user', text);

@@ -234,6 +234,17 @@ export async function inviteByHandle(handle) {
 }
 
 // ── P2P 통화 시작 (발신측) ───────────────────────────────
+// 2026-11-19 — 같은 상대와 연결하는 중인지(60초 안, 채널 아직 안 열림). 이름을 한 번 더 보내면 통화가 다시 시작돼 앞 통화가 취소되던 문제를 막는 데 쓴다.
+export function isCallConnecting(guid) {
+  try {
+    const c = _rtcConn;
+    if (!c || !_peerInfo || (guid && _peerInfo.guid !== guid)) return false;
+    if (_rtcChannel && _rtcChannel.readyState === 'open') return false;
+    if (['closed', 'failed'].includes(c.connectionState)) return false;
+    return !!_diagT0 && Date.now() - _diagT0 < 60000;
+  } catch (e) { return false; }
+}
+
 export async function startP2PCall(targetUser) {
   // 2026-11-16 — 폰 패널에서 내 정보(_USER)가 아직 비어 있으면 이 기기에 저장된 계정으로 채운다. 그래도 없으면 알아보기 쉬운 안내로 멈춘다.
   if (!_USER?.ipv6) {
