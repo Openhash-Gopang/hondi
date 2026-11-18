@@ -170,6 +170,10 @@ function _setupChannelEvents(ch) {
 
 // ── P2P 메시지 전송 ──────────────────────────────────────
 export async function _sendP2P(text) {
+  if (window.__p2pEnded) {
+    appendBubble('system', '이미 종료된 대화입니다. 위쪽 "대화창 닫기"를 누르면 나만의 AI 비서로 돌아갑니다.');
+    return;
+  }
   if (!_rtcChannel || _rtcChannel.readyState !== 'open') {
     appendBubble('system', '⏳ 연결 수립 중입니다. 잠시 후 다시 시도하세요.');
     return;

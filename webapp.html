@@ -1420,10 +1420,10 @@ html.is-embedded .install-banner{display:none!important}
       <div id="peer-handle" style="font-size:calc(0.6875rem*var(--hondi-fs,1));color:var(--txt3);
            white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
     </div>
-    <button onclick="_closeP2P()"
+    <button id="peer-close-btn" onclick="_closeP2P()"
       style="flex-shrink:0;background:none;border:1px solid var(--border);border-radius:8px;
              padding:5px 10px;font-size:calc(0.75rem*var(--hondi-fs,1));color:var(--txt2);cursor:pointer">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> 종료
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> <span class="lbl">종료</span>
     </button>
   </div>
 
@@ -2697,6 +2697,7 @@ function _initTabsMenu(nh) {
   document.addEventListener('click', (e) => { if (!pop.hidden && !pop.contains(e.target) && e.target !== btn) close(); });
   nh.watchTabs(update);
 }
+import('./src/gopang/ui/notify-inbox.js').then(m => m.initNotifyInbox()).catch(() => {});   // 받은 알림 내용을 앱 안에서 보여 준다
 setSPLabel('');   // 새로 열면 기본 SP(나만의 AI 비서) — 지난 접속의 라벨을 지운다
 try {
   const raw = new URLSearchParams(location.search).get('call');
