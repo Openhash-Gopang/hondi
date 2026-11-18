@@ -14,6 +14,23 @@ import { appendBubble } from './bubble.js';
 import { diag, diagEnv, diagConn } from '../core/diag.js';   // 2026-11-19 임시 진단(원인 확정 후 제거)
 let _diagT0 = 0;   // 진단: 이번 통화 시작 시각(ms)
 const _dt = () => (_diagT0 ? Date.now() - _diagT0 : -1);   // 통화 시작 후 경과 ms
+// 2026-11-19 진단 — SDP 안의 후보 종류별 개수(host/srflx/relay)와, 주고받은 ICE 신호의 처리 결과를 남긴다.
+function _sdpCand(d) {
+  try {
+    const t = String((d && d.sdp) || d || ''), o = {};
+    (t.match(/a=candidate:[^\r\n]+/g) || []).forEach(l => { const m = / typ (\w+)/.exec(l); const k = m ? m[1] : '?'; o[k] = (o[k] || 0) + 1; });
+    return o;
+  } catch (e) { return {}; }
+}
+let _diagIceN = 0;
+function _diagIce(tag, cand, res) {
+  try {
+    if (++_diagIceN > 24) return;   // 통화 한 번에 최대 24건
+    const c = (cand && (cand.candidate || cand)) || {};
+    const m = / typ (\w+)/.exec(String(c.candidate || c || ''));
+    diag(tag, { typ: (m && m[1]) || '?', 결과: res, ms: _dt() });
+  } catch (e) {}
+}
 // _clearPeer는 webrtc.js가 정의(peer-bar 숨기기·입력창 placeholder 복원·
 // "AI 비서와 대화합니다" 안내까지 이미 다 되어있다 — 여기서 새로 안 만들고
 // 재사용한다). webrtc.js→p2p-chat.js는 동적 import(순환 없음)이므로 반대
@@ -268,6 +285,8 @@ export async function startP2PCall(targetUser) {
   // ICE 수집 완료 대기 (최대 2초)
   await _waitForIce(conn);
 
+  _diagIceN = 0;
+  diag('호출:offer 후보', { 후보: _sdpCand(conn.localDescription), 수집: conn.iceGatheringState, ms: _dt() });
   // offer 전송 (callId 포함 — 재연결 시 이전/이후 시도 구분용)
   await _signalSend({
     from_guid: _USER.ipv6,
@@ -348,7 +367,7 @@ function _watchAnswerRealtime(conn, targetUser, callId) {
     if (row.type === 'answer' && row.from_guid === peerGuid) {
       try {
         const answerSdp = _rowPayload.sdp || _rowPayload;
-        diag('응답(answer) 수신', { callId: String(callId).slice(0, 8), ms: _dt() });
+        diag('응답(answer) 수신', { callId: String(callId).slice(0, 8), 상대SDP후보: _sdpCand(answerSdp), ms: _dt() });
         await conn.setRemoteDescription(new RTCSessionDescription(answerSdp));
         if (noAnswerTimer) { clearTimeout(noAnswerTimer); noAnswerTimer = null; } // 응답 왔으니 무응답 타이머 해제
         if (smsTimer) { clearTimeout(smsTimer); smsTimer = null; }
@@ -368,11 +387,13 @@ function _watchAnswerRealtime(conn, targetUser, callId) {
       // 필요 없이 조용히 건너뛴다.
       if (!conn.remoteDescription || conn.signalingState === 'closed') {
         console.info('[P2P] ICE 후보 무시 — 이미 종료된 통화 시도');
+        _diagIce('ICE수신(발신측)', _rowPayload.candidate, conn.signalingState === 'closed' ? '무시:연결닫힘' : '무시:answer보다 먼저 도착');
       } else {
         try {
           const candidate = _rowPayload.candidate || _rowPayload;
           await conn.addIceCandidate(new RTCIceCandidate(candidate));
-        } catch(e) { console.warn('[P2P] ICE 추가 실패:', e.message); }
+          _diagIce('ICE수신(발신측)', candidate, '적용');
+        } catch(e) { console.warn('[P2P] ICE 추가 실패:', e.message); _diagIce('ICE수신(발신측)', _rowPayload.candidate, '오류:' + String(e.message).slice(0, 50)); }
       }
     }
 
@@ -599,10 +620,13 @@ export async function handleIncomingOffer(signal) {
   // SDP answer 생성
   const _offerSdp = _offerPayload.sdp || _offerPayload;
   await conn.setRemoteDescription(new RTCSessionDescription(_offerSdp));
+  _diagIceN = 0;
+  diag('수신:offer 후보', { 상대SDP후보: _sdpCand(_offerSdp), ms: _dt() });
   const answer = await conn.createAnswer();
   await conn.setLocalDescription(answer);
   await _waitForIce(conn);
 
+  diag('수신:answer 후보', { 내SDP후보: _sdpCand(conn.localDescription), 수집: conn.iceGatheringState, ms: _dt() });
   // answer 전송 (callId 포함 — 발신측이 어느 시도에 대한 answer인지 구분)
   await _signalSend({
     from_guid: _USER.ipv6,
@@ -645,7 +669,7 @@ export async function handleIncomingOffer(signal) {
     if (sig.type === 'ice' && sig.from_guid === fromGuid) {
       const _p = typeof sig.payload === 'string'
         ? JSON.parse(sig.payload) : (sig.payload || {});
-      await conn.addIceCandidate(new RTCIceCandidate(_p.candidate || _p)).catch(() => {});
+      await conn.addIceCandidate(new RTCIceCandidate(_p.candidate || _p)).then(() => _diagIce('ICE수신(수신측)', _p.candidate || _p, '적용')).catch(e => _diagIce('ICE수신(수신측)', _p.candidate || _p, '오류:' + String(e && e.message).slice(0, 50)));
     }
   });
 }
@@ -657,7 +681,14 @@ function _setupConn(conn, peer, callId) {
   try {
     conn.addEventListener('icecandidate', e => { if (e.candidate) { const m = /typ (\w+)/.exec(e.candidate.candidate || ''); const k = (m && m[1]) || '?'; _cnt[k] = (_cnt[k] || 0) + 1; } else diag('ICE:수집끝', { callId: _cid, 내후보: { ..._cnt }, ms: _dt() }); });
     conn.addEventListener('icecandidateerror', e => diag('ICE:서버오류', { callId: _cid, url: String(e.url || '').slice(0, 60), code: e.errorCode, text: String(e.errorText || '').slice(0, 60) }));
-    conn.addEventListener('iceconnectionstatechange', () => diag('ICE:상태', { callId: _cid, ice: conn.iceConnectionState, ms: _dt() }));
+    conn.addEventListener('iceconnectionstatechange', () => {
+      diag('ICE:상태', { callId: _cid, ice: conn.iceConnectionState, ms: _dt() });
+      // 연결이 실패해 닫히면 통계가 비므로, 검사하는 도중(6초·12초 뒤)에 후보 쌍 상태를 미리 남긴다.
+      if (conn.iceConnectionState === 'checking' && !conn.__diagSnap) {
+        conn.__diagSnap = true;
+        [6000, 12000].forEach(t => setTimeout(() => { if (conn.connectionState === 'connecting' || conn.iceConnectionState === 'checking') diagConn(conn, '검사중 ' + (t / 1000) + '초'); }, t));
+      }
+    });
     conn.addEventListener('icegatheringstatechange', () => diag('ICE:수집상태', { callId: _cid, g: conn.iceGatheringState, ms: _dt() }));
     conn.addEventListener('connectionstatechange', () => {
       diag('연결상태', { callId: _cid, state: conn.connectionState, ms: _dt() });
@@ -666,12 +697,16 @@ function _setupConn(conn, peer, callId) {
   } catch {}
   conn.onicecandidate = async e => {
     if (!e.candidate) return;
-    await _signalSend({
-      from_guid: _USER.ipv6,
-      to_guid:   peer.guid,
-      type:      'ice',
-      payload:   { candidate: e.candidate, callId },
-    });
+    let _ok = '전송';
+    try {
+      await _signalSend({
+        from_guid: _USER.ipv6,
+        to_guid:   peer.guid,
+        type:      'ice',
+        payload:   { candidate: e.candidate, callId },
+      });
+    } catch (err) { _ok = '실패:' + String(err && err.message).slice(0, 50); }
+    _diagIce('ICE송신', e.candidate, _ok);
   };
 
   conn.onconnectionstatechange = () => {
