@@ -53,6 +53,19 @@ jobs:
           NAVIWEB_KEY_ALIAS: ${{ secrets.NAVIWEB_KEY_ALIAS }}
           NAVIWEB_KEY_PASSWORD: ${{ secrets.NAVIWEB_KEY_PASSWORD }}
         run: gradle --no-daemon assembleRelease
+      # 구글 플레이 내부 테스트 업로드용 AAB. 사이트에는 게시하지 않고 아티팩트로만 보관한다.
+      - name: bundle (구글 플레이 업로드용 AAB)
+        working-directory: android
+        env:
+          NAVIWEB_KEYSTORE_PASSWORD: ${{ secrets.NAVIWEB_KEYSTORE_PASSWORD }}
+          NAVIWEB_KEY_ALIAS: ${{ secrets.NAVIWEB_KEY_ALIAS }}
+          NAVIWEB_KEY_PASSWORD: ${{ secrets.NAVIWEB_KEY_PASSWORD }}
+        run: gradle --no-daemon bundleRelease
+      - uses: actions/upload-artifact@v4
+        with:
+          name: naviweb-aab
+          path: android/app/build/outputs/bundle/release/*.aab
+          retention-days: 30
       - name: APK 지문 확인
         run: |
           APK=$(ls android/app/build/outputs/apk/release/*.apk | head -1)
