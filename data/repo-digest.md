@@ -1,11 +1,16 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-18 22:16 KST · 기준 커밋 b6ed69a9
+- 갱신: 2026-11-19 07:40 KST · 기준 커밋 51d0ac81
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-19 Merge pull request #1216 from Openhash-Gopang/diag-p2p-push-result-20261119
+- 2026-11-19 diag(p2p): 성공·실패 양쪽을 비교할 수 있는 임시 진단 기록 확대
+- 2026-11-19 diag(p2p): 대화 요청 알림 발송 결과(push)를 콘솔·화면에 기록
+- 2026-11-18 Merge pull request #1214 from Openhash-Gopang/feat/pwa-open-on-notify
 - 2026-11-18 Merge pull request #1215 from Openhash-Gopang/feat/pwa-install-gate
 - 2026-11-18 폰 브라우저 탭에서 로그인 후 PWA 설치 안내 화면(유예 기간 동안 이번만 계속 가능)
+- 2026-11-18 PWA 설치 여부 파악 후 알림 터치 시 크롬 탭이 아닌 PWA 로 열기
 - 2026-11-18 Merge pull request #1213 from Openhash-Gopang/fix/peer-header-call-sound
 - 2026-11-18 상대 대화창 머리글·입력창 표시, 대화 호출 푸시를 calls 채널로
 - 2026-11-18 Merge pull request #1212 from Openhash-Gopang/fix/p2p-keepalive
@@ -39,11 +44,6 @@
 - 2026-11-16 docs: 나비웹 안드로이드 앱 전환 계획서(HTML)
 - 2026-11-16 feat: 30초 무응답 시 상대 번호를 아는 경우 내 폰 문자 앱으로 알리기(요금은 호출자 통신 요금제)
 - 2026-11-16 fix: 알림 소리 안내에 앱 설치 대안 추가(중요도 항목이 없는 폰)
-- 2026-11-16 fix: 알림 소리 안내 경로 정정 — 중요도는 크롬 사이트 설정이 아니라 폰의 앱 알림 설정(Chrome → 알림 → naviweb.kr)에 있다
-- 2026-11-16 feat: 알림 소리 안내창에 배터리 '제한 없음' 설정 안내 추가, 매뉴얼 반영
-- 2026-11-16 feat: 알림 허용 직후 알림 소리(중요도 높음) 설정 안내와 시험 알림, 매뉴얼 반영
-- 2026-11-16 fix: 호출 응답 대기 2분·호출 신호 3분 보관, 대화 요청 알림은 길게 진동하고 유지
-- 2026-11-16 docs: 매뉴얼 '사람 찾기·호출하기' 장에 호출 받기·수락·종료·대화 기록 안내와 화면(이름 가림) 추가
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
