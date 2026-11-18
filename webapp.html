@@ -55,7 +55,7 @@ u.searchParams.delete('fcm');history.replaceState(history.state,'',u.pathname+u.
   throw new Error('[Gopang] PC 접속 차단 — webapp.html은 스마트폰 전용입니다.');
 })();
 </script>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <script src="/assets/hondi-fontscale.js"></script>
 
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -257,7 +257,7 @@ function _updateLogoutBtn() {
 <style>
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;height:100dvh;overflow:hidden;
+html,body{height:100%;height:var(--app-h,100dvh);overflow:hidden;
   font-family:'Pretendard',-apple-system,'Helvetica Neue',sans-serif;
   font-size:calc(0.9375rem*var(--hondi-fs,1));background:#fff;color:#111;-webkit-font-smoothing:antialiased;
   /* 안드로이드 Chrome의 엣지 스와이프 "뒤로가기/앞으로가기" 제스처 차단.
@@ -319,7 +319,7 @@ html,body{height:100%;height:100dvh;overflow:hidden;
 
 
 /* ── 앱 레이아웃 ── */
-#app,.app{display:flex;flex-direction:column;height:100%;height:100dvh;
+#app,.app{display:flex;flex-direction:column;height:100%;height:var(--app-h,100dvh);
   max-width:480px;margin:0 auto;background:#fff;overflow:hidden}
 
 /* ── v6.0: Guest 모드 폐지 — 가입/로그인 완료(body.gopang-authed) 전에는
@@ -630,11 +630,12 @@ body.gopang-authed #gopang-auth-gate{display:none}
   box-shadow:0 1px 2px rgba(0,0,0,.04);
 }
 /* 시스템 메시지 */
+/* 2026-11-18(주피터 지시) — 안내 글씨가 너무 작고 흐려 읽기 어려웠다. 대화 말풍선(흰색/초록)과 구별되도록 옅은 노란 안내 카드로 키운다. */
 .bubble-system{
   align-self:center;
-  background:transparent;
-  font-size:calc(0.6875rem*var(--hondi-fs,1));color:var(--txt3);
-  text-align:center;padding:2px 8px;
+  background:#FFF6D6;border:1px solid #F0D27A;border-radius:12px;
+  font-size:calc(0.875rem*var(--hondi-fs,1));line-height:1.5;font-weight:500;color:#3B2F00;
+  text-align:center;padding:8px 14px;margin:4px 0;max-width:92%;
 }
 
 /* 타이핑 인디케이터 */
@@ -679,6 +680,7 @@ body.gopang-authed #gopang-auth-gate{display:none}
   padding:8px 0 calc(8px + var(--safe-b));
   flex-shrink:0;
 }
+#ai-panel-input-slot{padding-bottom:max(var(--safe-b,0px),12px)}
 /* 첨부 미리보기 */
 .attach-preview{
   display:flex;align-items:center;gap:8px;
@@ -3529,13 +3531,22 @@ if (document.readyState === 'complete') _applyI18n();
   function measure() {
     if (!window.visualViewport) return;
     const diff = window.innerHeight - window.visualViewport.height;
-    if (diff > NAVBAR_MAX) return; // 키보드로 추정되는 큰 값은 무시, 직전 값 유지
+    // 키보드가 올라오면(차이가 큼) 앱 높이를 보이는 영역에 맞춰 입력창이 키보드 위에 오고 대화 목록이 밀려 올라가지 않게 한다.
+    // (interactive-widget=resizes-content 를 지원하지 않는 브라우저용 보완)
+    if (diff > NAVBAR_MAX) {
+      document.documentElement.style.setProperty('--app-h', window.visualViewport.height + 'px');
+      try { window.scrollTo(0, 0); } catch {}
+      try { const pm = document.getElementById('ai-panel-messages'); if (pm) pm.scrollTop = pm.scrollHeight; } catch {}
+      return;
+    }
+    document.documentElement.style.removeProperty('--app-h');
     const navHeight = Math.max(diff, 0); // 음수(반올림 오차 등)는 0으로 처리
     document.documentElement.style.setProperty('--safe-b-measured', navHeight + 'px');
   }
 
   measure();
   window.visualViewport?.addEventListener('resize', measure);
+  window.visualViewport?.addEventListener('scroll', () => { if (document.documentElement.style.getPropertyValue('--app-h')) { try { window.scrollTo(0, 0); } catch {} } });
   window.addEventListener('orientationchange', () => setTimeout(measure, 250));
 })();
 </script>
