@@ -13,8 +13,10 @@ export const DIAG_REV = '20261119-1';   // 이 기기가 실제로 실행 중인
 const KEY = 'navi_diag_v1', MAX = 400;
 let _buf = null;
 
-function _load() {
-  if (_buf) return _buf;
+// 같은 기기에서 창(PWA·브라우저 탭)이 둘 이상 열려 있거나 앱이 새로고침되면 각 창이 자기 메모리 사본으로 저장소를 덮어써 기록이 사라진다.
+// 그래서 쓸 때마다 저장소에서 다시 읽어 합친다.
+function _load(fresh) {
+  if (_buf && !fresh) return _buf;
   try { _buf = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { _buf = []; }
   if (!Array.isArray(_buf)) _buf = [];
   return _buf;
@@ -23,7 +25,7 @@ function _load() {
 /** 기록 한 줄. tag 는 사건 이름, data 는 짧은 값(객체 가능). */
 export function diag(tag, data) {
   try {
-    const b = _load();
+    const b = _load(true);
     b.push({ t: new Date().toISOString(), tag, d: data === undefined ? '' : data });
     if (b.length > MAX) b.splice(0, b.length - MAX);
     try { localStorage.setItem(KEY, JSON.stringify(b)); } catch {}
@@ -114,5 +116,20 @@ export async function diagHandleCommand(text, appendBubble) {
   appendBubble('system', copied ? '📋 진단 내용을 클립보드에 복사했습니다.' : '복사하지 못했습니다 — 위 내용을 화면 캡처해 주세요.');
   return true;
 }
+
+// 페이지 생명주기 — 기록이 중간에 끊길 때 "앱이 새로고침됐는지·화면이 백그라운드로 갔는지·서비스워커가 교체됐는지"를 가린다.
+try {
+  if (!window.__naviDiagLife) {
+    window.__naviDiagLife = true;
+    const nav = (performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || {};
+    const mode = matchMedia('(display-mode: standalone)').matches ? 'PWA' : '브라우저탭';
+    diag('페이지:시작', { rev: DIAG_REV, mode, 이동: nav.type || '?', vis: document.visibilityState });
+    document.addEventListener('visibilitychange', () => diag('페이지:가시성', { mode, vis: document.visibilityState }));
+    window.addEventListener('pagehide', e => diag('페이지:pagehide', { mode, persisted: !!e.persisted }));
+    document.addEventListener('freeze', () => diag('페이지:freeze(동결)', { mode }));
+    document.addEventListener('resume', () => diag('페이지:resume', { mode }));
+    if (navigator.serviceWorker) navigator.serviceWorker.addEventListener('controllerchange', () => diag('SW:교체(controllerchange)', { mode }));
+  }
+} catch {}
 
 try { window.naviDiag = { diag, diagEnv, diagConn, diagReport, DIAG_REV }; } catch {}
