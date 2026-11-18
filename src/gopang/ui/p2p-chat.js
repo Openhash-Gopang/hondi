@@ -509,8 +509,10 @@ export async function handleIncomingOffer(signal) {
       await reg.showNotification('나비', {
         body: `${fromName}님이 대화를 요청했습니다`,
         icon: '/icons/navi-icon-192.png',
-        tag:  'gopang-incoming-call',
-        vibrate: [300, 100, 300],
+        // 같은 tag 로 다시 띄우면 renotify 없이는 소리·진동 없이 조용히 교체된다(두 번째 호출부터 소리가 안 나던 원인) — 호출마다 새 tag + renotify.
+        tag:  'gopang-incoming-call-' + (callId || Date.now()),
+        renotify: true,
+        vibrate: [400, 150, 400, 150, 400],
         silent: false,
       });
       console.info('[TEST-SOUND] showNotification 호출 성공');
