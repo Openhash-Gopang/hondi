@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-19 08:04 KST · 기준 커밋 fc27fb80
+- 갱신: 2026-11-19 08:05 KST · 기준 커밋 243524c8
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-19 Merge pull request #1220 from Openhash-Gopang/fix-pwa-only-incoming-20261119
+- 2026-11-19 fix(p2p): PWA가 설치된 기기에서는 브라우저 탭이 대화 요청을 무시하고 PWA만 받는다
 - 2026-11-19 Merge pull request #1219 from Openhash-Gopang/fix-diag-lifecycle-20261119
 - 2026-11-19 diag: 여러 창·새로고침에서 기록이 덮어써지지 않게 하고 페이지 생명주기 기록 추가
 - 2026-11-19 Merge pull request #1218 from Openhash-Gopang/feat/free-quota-bonus-20261119
@@ -42,8 +44,6 @@
 - 2026-11-17 feat: 모든 가입자 무료 이용 기간 72시간 → 30일(720시간)
 - 2026-11-17 feat(android): 새 서명키 지문 등록 + 공용 시험 키 제거
 - 2026-11-17 feat(android): 개인 서명키 지원(secrets 주입) + 키 생성 스크립트, 릴리스 빌드로 전환
-- 2026-11-17 feat(android): 앱 아이콘을 노랑 바탕 시안으로 교체 (웹앱 아이콘과 구분)
-- 2026-11-17 chore(android): Firebase 공개 API 키 설정 (푸시 토큰 발급용)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
