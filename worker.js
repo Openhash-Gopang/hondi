@@ -38980,6 +38980,20 @@ async function _kmailRejectUnknownRecipient(env, message, localPart) {
   return true;
 }
 
+// 받은 메일의 보낸 사람 주소(2026-11-18, 주피터 지시) — 사람이 보는 헤더 From 의 주소를 쓴다.
+// message.from 은 봉투(envelope) 발신자인데, Cloudflare 같은 발송 서비스는 반송 처리용으로 이를 b1auj…@cfbounce.naviweb.kr 같은 주소로 바꿔 넣는다.
+// 그대로 쓰면 받은메일함에 이상한 주소가 보이고(실제 발신자는 ceo@naviweb.kr), 차단·답장·대화 묶기도 엉뚱한 주소로 간다. 헤더 From 이 없을 때만 봉투 주소로 되돌아간다.
+function _kmailInboundFromAddr(message, rawText) {
+  const pick = (v) => { const m = String(v || '').match(/[A-Za-z0-9._%+'=\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}/); return m ? m[0] : ''; };
+  let addr = '';
+  try { const h = message && message.headers && message.headers.get ? message.headers.get('from') : ''; addr = pick(h); } catch (e) { addr = ''; }
+  if (!addr && rawText) {
+    const m = String(rawText).slice(0, 20000).match(/^from:[ \t]*([^\r\n]*(?:\r?\n[ \t]+[^\r\n]*)*)/im);
+    if (m) addr = pick(m[1]);
+  }
+  return addr || (message && message.from) || 'unknown@unknown';
+}
+
 async function _handleKmailInboundEmail(message, env, ctx) {
   const toAddr = (message.to || '').toLowerCase();
   const localPart = toAddr.split('@')[0];
@@ -38994,7 +39008,7 @@ async function _handleKmailInboundEmail(message, env, ctx) {
   const parsedMail = _kmailParseMime(rawBuf);
   const subject = parsedMail.subject || _kmailDecodeMimeWords(message.headers?.get?.('subject') || '') || '(제목 없음)';
   const bodyText = parsedMail.bodyText || '(본문을 읽을 수 없는 메일 형식입니다 — 이미지나 첨부만 들어 있을 수 있습니다)';
-  const fromAddr = message.from || 'unknown@unknown';
+  const fromAddr = _kmailInboundFromAddr(message, rawText);   // 헤더 From 주소(봉투 발신자는 반송용 cfbounce 주소일 수 있다)
 
   ctx.waitUntil((async () => {
     const token = await _l1AdminToken(env);
