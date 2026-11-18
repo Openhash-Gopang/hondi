@@ -97,7 +97,7 @@ self.addEventListener('activate', (event) => {
   // 계속 살아있어야 한다. 공유받은 문서를 사용자가 아직 안 열어봤는데
   // SW가 업데이트되면서 통째로 지워지면 안 됨 — 원래 필터가 CACHE_NAME
   // 외 전부를 지우던 걸 여기서 명시적으로 예외처리했다.
-  const KEEP_CACHES = new Set([CACHE_NAME, 'hondi-share-inbox', 'navi-diag']);
+  const KEEP_CACHES = new Set([CACHE_NAME, 'hondi-share-inbox', 'navi-diag', 'navi-meta']);   // navi-meta(PWA 설치 기록)는 SW가 바뀌어도 지우지 않는다 — 지우면 다음 알림을 눌렀을 때 설치 여부를 몰라 탭으로 열릴 수 있다
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
@@ -435,7 +435,8 @@ self.addEventListener('notificationclick', (event) => {
         const ordered = list.slice().sort((a, b) => (_pwaClientIds.has(b.id) ? 1 : 0) - (_pwaClientIds.has(a.id) ? 1 : 0));
         const hasPwaWindow = ordered.some(c => _pwaClientIds.has(c.id));
         for (const client of ordered) {
-          if (installed && !hasPwaWindow) break;   // PWA 창이 없으면 크롬 탭은 건너뛴다
+          // 2026-11-19(주피터 지시) — 알림을 눌렀을 때 브라우저 탭이 열리거나 앞으로 나오면 안 된다. PWA 창만 앞으로 가져오고, 없으면 아래에서 openWindow 로 PWA 를 연다.
+          if (!_pwaClientIds.has(client.id)) continue;
           if (client.url.startsWith(self.location.origin) && 'focus' in client) {
             client.postMessage({ type: 'PLAY_SOUND', sound });
             if (isCallTap) client.postMessage({ type: 'CALL_TAP' });
