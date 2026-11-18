@@ -175,7 +175,7 @@ export async function _sendP2P(text) {
     return;
   }
   if (!_rtcChannel || _rtcChannel.readyState !== 'open') {
-    appendBubble('system', '⏳ 연결 수립 중입니다. 잠시 후 다시 시도하세요.');
+    appendBubble('system', window.__p2pLinkLost ? '⚠️ 연결이 끊겨 보내지 못했습니다. 다시 연결되면 보낼 수 있습니다.' : '⏳ 연결 수립 중입니다. 잠시 후 다시 시도하세요.');
     return;
   }
   const msg = { text, ts: new Date().toISOString() };
