@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-18 21:20 KST · 기준 커밋 71f75293
+- 갱신: 2026-11-18 21:39 KST · 기준 커밋 85c0dc6d
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-18 Merge pull request #1212 from Openhash-Gopang/fix/p2p-keepalive
+- 2026-11-18 P2P 연결 유지: 재호출 취소 신호·늦은 ICE 수신·끊김 시 자동 재연결(창 유지)·keepalive, 안내 글꼴 1px 축소
 - 2026-11-18 Merge pull request #1211 from Openhash-Gopang/fix/call-sound-keyboard-sysmsg
 - 2026-11-18 호출 재알림 소리·푸시 지연 단축·키보드 입력창 가림·시스템 안내 가독성
 - 2026-11-18 Merge pull request #1210 from Openhash-Gopang/feat/p2p-close-confirm-notify-inbox
@@ -42,8 +44,6 @@
 - 2026-11-16 fix: 알림 터치로 수락 처리(수락 팝업 제거), 상대 대화가 보이는 목록에 표시
 - 2026-11-16 fix: 수락 즉시 상대 대화창으로 전환, 양쪽 연결에 TURN 설정 적용
 - 2026-11-16 fix: 통화·대화 중이거나 대화 전용 새 탭에서는 새 버전 자동 새로고침을 하지 않는다
-- 2026-11-16 fix: 끊긴 연결의 흔적이 새 호출을 막지 않게 하고, 알림 제목에 상대 아이디(닉네임)를 쓴다
-- 2026-11-16 fix: 대화 상대와 연결돼 있으면 폰 입력창의 메시지를 AI 비서가 아니라 상대에게 보낸다
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
