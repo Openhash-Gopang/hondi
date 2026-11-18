@@ -241,7 +241,20 @@ async function _plainResponse(res) {
 }
 
 // ── 메시지 수신 (skipWaiting 명령) ────────────────────────
+// 2026-11-18(주피터 지시) — 나비 PWA 설치 여부 파악: 알림을 눌렀을 때 크롬 탭이 아니라 설치된 PWA 가 열리게 한다.
+// 페이지가 PWA_STATE 로 알려 준다(installed: 설치됨, standalone: 지금 이 창이 PWA 창). 설치 여부는 Cache Storage 에 남겨 서비스 워커가 종료돼도 유지한다.
+const _pwaClientIds = new Set();   // PWA 창(standalone)의 client id — 서비스 워커가 살아 있는 동안만 유지, 창이 보일 때마다 다시 알려 온다
+// 30일 넘게 PWA 창으로 연 적이 없으면 삭제된 것으로 본다
+async function _pwaInstalled() {
+  try { const c = await caches.open('navi-meta'); const r = await c.match('/__pwa_state'); if (!r) return false; const j = await r.json(); return !!j.installed && (Date.now() - (j.ts || 0) < 30 * 24 * 3600 * 1000); } catch (_) { return false; }
+}
 self.addEventListener('message', (event) => {
+  if (event.data?.type === 'PWA_STATE') {
+    const d = event.data;
+    if (d.standalone && event.source && event.source.id) _pwaClientIds.add(event.source.id);
+    if (d.installed) event.waitUntil(caches.open('navi-meta').then(c => c.put('/__pwa_state', new Response(JSON.stringify({ installed: true, ts: Number(d.lastStandalone) || Date.now() })))).catch(() => {}));
+    return;
+  }
   if (event.data?.type === 'SKIP_WAITING') {
     console.log('[SW] SKIP_WAITING 수신 → 즉시 활성화');
     self.skipWaiting();
@@ -343,6 +356,8 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   let url   = event.notification.data?.url   || '/webapp.html';
+  // 알림 주소가 다른 호스트(app.naviweb.kr 등)면 같은 출처 경로로 바꾼다 — 출처가 다르면 설치된 PWA 범위를 벗어나 크롬에서 열린다.
+  try { const _u = new URL(url, self.location.origin); if (_u.origin !== self.location.origin && /(^|\.)naviweb\.kr$/.test(_u.hostname) && /(^|\.)naviweb\.kr$/.test(self.location.hostname)) url = _u.pathname + _u.search + _u.hash; } catch (_) {}
   // 2026-11-13: 이 서비스 워커가 옛 주소(hondi.net)에 등록돼 있으면 알림이 hondi.net 으로 열린다 → 새 주소로 연다(지문 키 rpId 가 naviweb.kr 기준)
   try { if (/(^|\.)hondi\.net$/.test(self.location.hostname) && url.startsWith('/')) url = 'https://app.naviweb.kr' + url; } catch (_) {}
   const sound = event.notification.data?.sound || 'ping';
@@ -399,7 +414,12 @@ self.addEventListener('notificationclick', (event) => {
         // 이미 열린 창이 있으면 포커스 + postMessage (리스너가 이미 살아있음)
         // 2026-11-16 — 대화 요청 알림을 누른 것이 곧 수락이다(수락 팝업을 한 번 더 띄우지 않는다).
         const isCallTap = tag.startsWith('gopang-call-') || tag.startsWith('gopang-incoming-call');
-        for (const client of list) {
+        // 2026-11-18 — PWA 가 설치돼 있으면 PWA 창을 우선한다. PWA 창이 없을 때 크롬 탭을 앞으로 가져오지 않고 openWindow 로 PWA 를 연다.
+        const installed = await _pwaInstalled();
+        const ordered = list.slice().sort((a, b) => (_pwaClientIds.has(b.id) ? 1 : 0) - (_pwaClientIds.has(a.id) ? 1 : 0));
+        const hasPwaWindow = ordered.some(c => _pwaClientIds.has(c.id));
+        for (const client of ordered) {
+          if (installed && !hasPwaWindow) break;   // PWA 창이 없으면 크롬 탭은 건너뛴다
           if (client.url.startsWith(self.location.origin) && 'focus' in client) {
             client.postMessage({ type: 'PLAY_SOUND', sound });
             if (isCallTap) client.postMessage({ type: 'CALL_TAP' });
