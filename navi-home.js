@@ -124,7 +124,10 @@
   var CSS = '#navi-home-logo{position:fixed;top:8px;left:8px;z-index:2147483000;width:40px;height:40px;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 1px 6px rgba(0,0,0,.25);cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}' +
     '#navi-home-logo img{width:30px;height:30px;pointer-events:none}#navi-home-logo.navi-flutter img{animation:navi-home-flutter .8s ease-in-out}' +
     '@keyframes navi-home-flutter{0%{transform:scaleX(1) rotate(0)}15%{transform:scaleX(.45) rotate(-12deg)}30%{transform:scaleX(1.1) rotate(10deg)}45%{transform:scaleX(.5) rotate(-8deg)}60%{transform:scaleX(1.08) rotate(6deg)}80%{transform:scaleX(.8) rotate(-3deg)}100%{transform:scaleX(1) rotate(0)}}' +
-    'html.embed #navi-home-logo{display:none}';
+    'html.embed #navi-home-logo{display:none}' +
+    // PC 사이드바(.side-logo)의 로고 <img>는 이 떠 있는 원형 로고보다 아래(y 21~53)에 있어, 원 밖으로 아래쪽이 비쳐 보인다(2026-11-18).
+    // 원형 로고가 떠 있는 동안에는 사이드바 쪽 <img>를 숨긴다. 버튼 자체(.side-logo)는 그대로 둔다.
+    'html.navi-home-badge:not(.embed) .side-logo img{visibility:hidden}';
   function mountLogo() {
     var d = g.document; if (!d || d.getElementById('navi-home-logo') || d.getElementById('ai-panel-logo')) return;
     var st = d.createElement('style'); st.textContent = CSS; d.head.appendChild(st);
@@ -132,6 +135,7 @@
     b.innerHTML = '<img src="https://app.naviweb.kr/icons/navi-icon-192.png" alt="">';
     b.onclick = function () { flutter(b); logoClick(); };
     d.body.appendChild(b);
+    try { d.documentElement.classList.add('navi-home-badge'); } catch (e) {}
   }
   function init() {
     try { if (g.self !== g.top) return; } catch (e) { return; }   // 다른 페이지 안에 끼워 넣은 화면(iframe)은 탭이 아니다 — 로고도 탭 등록도 하지 않는다
