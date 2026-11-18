@@ -454,3 +454,23 @@ window.addEventListener('DOMContentLoaded', () => {
     })();
   }
 });
+
+// ── PWA 설치 여부 파악 → 서비스 워커에 알림 (2026-11-18, 주피터 지시) ─────────────────
+// 설치된 PWA 창에서 열리면(standalone) 설치된 것으로 기록한다 — 브라우저와 PWA 는 같은 저장소를 쓰므로 크롬 탭에서도 이 기록이 보인다.
+// 서비스 워커는 이 정보로 알림을 눌렀을 때 크롬 탭이 아니라 PWA 를 연다.
+(function () {
+  const post = (m) => { try { navigator.serviceWorker && navigator.serviceWorker.ready.then(r => { const w = r.active || navigator.serviceWorker.controller; if (w) w.postMessage(m); }); } catch (e) {} };
+  const standalone = () => _isInStandaloneMode();
+  // 위쪽의 "브라우저 탭이면 설치 플래그 초기화" 로직과 겹치지 않게 별도 키에 '마지막으로 PWA 창에서 열린 시각'을 남긴다.
+  const KEY = 'navi_pwa_last_standalone';
+  const last = () => { try { return Number(localStorage.getItem(KEY)) || 0; } catch (e) { return 0; } };
+  const installed = () => standalone() || last() > 0;
+  const report = () => {
+    if (standalone()) { try { localStorage.setItem(KEY, String(Date.now())); } catch (e) {} }
+    post({ type: 'PWA_STATE', installed: installed(), standalone: standalone(), lastStandalone: last() });
+  };
+  report();
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') report(); });
+  window.addEventListener('appinstalled', () => { try { localStorage.setItem(KEY, String(Date.now())); } catch (e) {} report(); });
+  try { console.info('[PWA] 설치 여부:', installed() ? '설치됨' : '미설치', '| 지금 창:', standalone() ? 'PWA 창' : '브라우저 탭'); } catch (e) {}
+})();
