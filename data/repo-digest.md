@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-18 20:11 KST · 기준 커밋 5b58e307
+- 갱신: 2026-11-18 20:36 KST · 기준 커밋 3a1d0e24
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-18 Merge pull request #1209 from Openhash-Gopang/feat/p2p-close-restore-ai-chat
+- 2026-11-18 대화 종료 시 AI 비서 이전 대화 복구 + 복귀 안내, 종료 문구 중복 제거
 - 2026-11-18 Merge pull request #1208 from Openhash-Gopang/feat/push-all-sound
 - 2026-11-18 모든 알림에 소리·진동: renotify 전체 적용, 대화 초대 알림 강화, 웹푸시 기본 urgency high
 - 2026-11-18 Merge pull request #1206 from Openhash-Gopang/fix/inbox-sender-header-from
@@ -42,8 +44,6 @@
 - 2026-11-16 docs: 매뉴얼 1장 — 대화 상대 찾기(검색 허용) 설명과 Chrome 설정 화면 추가
 - 2026-11-16 fix: 호출 새 탭 — 옛 guid 대신 아이디로 지금 guid 재확인, 로딩 안내 표시, 탭 목록 아이콘 항상 표시
 - 2026-11-16 docs: 매뉴얼 1장 가입하기 — 실제 가입 화면(개인정보 가림)으로 교체하고 알림 허용·크롬 알림 설정 확인 방법, 위치 접근 창 안내 추가
-- 2026-11-16 fix: 계정 삭제 버튼이 활성화되지 않는 문제 — 기기에 nickname/e164가 비어 있어도 입력 형식 확인 후 활성화(최종 검증은 서버)
-- 2026-11-16 fix: 지갑이 준비되지 않아 푸시 구독 등록이 실패하면 다음 사용자 동작·지갑 열림 때 재시도
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
