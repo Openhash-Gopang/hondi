@@ -116,6 +116,7 @@ function _watchL1Realtime(myGuid, onRow) {
 }
 
 let _peerInfo     = null;  // { guid, handle, nickname }
+let _aiChatNodes  = null;  // 상대와 연결되기 직전 AI 패널 화면의 말풍선(노드 그대로) — 종료 때 되살린다
 let _pollInterval = null;
 let _p2pMessages  = [];    // P2P 대화 원문 누적 (PDV 저장용)
 let _sessionStart = null;  // 세션 시작 시각
@@ -170,6 +171,14 @@ function _activatePeerInMainChat(peer) {
   if (bar) bar.style.display = 'flex';
   const mainInput = document.getElementById('msg-input');
   if (mainInput) mainInput.placeholder = `${peer.nickname || peer.handle || '상대방'}에게 메시지…`;
+  // 2026-11-18(주피터 지시) — closeAIPanel() 이 AI 패널 화면을 비우므로, 비우기 전에 말풍선 노드를 그대로 쥐고 있다가 대화가 끝나면 되살린다.
+  // innerHTML 이 아니라 노드 참조를 쥐므로 단추 등에 붙은 이벤트도 그대로 살아 있다.
+  if (!_already) {   // 비어 있으면(이미 비워진 뒤) 덮어쓰지 않는다 — 이전 세션이 정상 종료되지 않았어도 낡은 화면이 남지 않게 새로 쥔다
+    try {
+      const pm = document.getElementById('ai-panel-messages');
+      if (pm && pm.childNodes.length) _aiChatNodes = Array.from(pm.childNodes);
+    } catch {}
+  }
   if (typeof window.closeAIPanel === 'function') window.closeAIPanel();
   appendBubble('system', _already ? `✅ ${peer.nickname || peer.handle}님과 연결됐습니다. 메시지를 입력하세요.` : `🔗 ${peer.nickname || peer.handle}님과 연결하는 중입니다…`);
 }
@@ -650,6 +659,7 @@ function _setupChannel(channel) {
     try {
       const msg = JSON.parse(e.data);
       if (msg.type === 'bye') {
+        channel.__ending = true;
         appendBubble('system', '🔴 상대방이 대화를 종료했습니다.');
         // 저장은 _closeP2P()가 한 번만 한다(여기서도 저장하면 같은 대화가 두 번 기록된다).
         setTimeout(() => _closeP2P(), 1200);
@@ -666,6 +676,8 @@ function _setupChannel(channel) {
   };
 
   channel.onclose = () => {
+    // 내가 끝냈거나 상대가 종료 신호를 보낸 정상 종료에는 따로 안내하므로(복귀 메시지) 여기서는 찍지 않는다. 네트워크 끊김처럼 예기치 않은 닫힘만 알린다.
+    if (channel.__ending || !_peerInfo) return;
     appendBubble('system', '채널이 닫혔습니다.');
   };
 }
@@ -775,6 +787,37 @@ function _showIncomingCallModal(fromHandle) {
 // 전부 그 별도 오버레이 전용이었다 — 메인 채팅 통합(appendBubble/peer-bar/
 // _activatePeerInMainChat) 리팩터링으로 완전히 대체되어 삭제한다.
 
+// ── 종료 후 나만의 AI 비서 화면 복귀 ─────────────────────
+// 2026-11-18(주피터 지시): 상대와의 대화가 끝나면 AI 비서의 이전 대화를 되살리고, "○○님과의 대화창을 닫았으며 나만의 AI 비서로 복귀하였습니다"를
+// 보여 준다. 지금 누구와 대화 중인지 헷갈리지 않게 하기 위해서다. 상대와의 대화 원문은 PDV 에 저장되므로 화면에서는 치운다.
+function _restoreAIChat(peerName) {
+  const nodes = _aiChatNodes; _aiChatNodes = null;
+  const text = peerName
+    ? `${peerName}님과의 대화창을 닫았으며, 나만의 AI 비서로 복귀하였습니다.`
+    : '대화창을 닫았으며, 나만의 AI 비서로 복귀하였습니다.';
+  const pm = document.getElementById('ai-panel-messages');
+  if (pm) {
+    pm.replaceChildren(...(nodes || []));
+    pm.querySelectorAll('.streaming').forEach(el => el.classList.remove('streaming'));
+    // 안내를 패널을 열기 전에 먼저 넣는다 — 화면이 비어 있으면 openAIPanel() 이 첫 인사를 다시 시작한다.
+    const row = document.createElement('div');
+    row.className = 'msg-row system';
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble bubble-system';
+    bubble.textContent = text;
+    row.appendChild(bubble);
+    pm.appendChild(row);
+    pm.scrollTop = pm.scrollHeight;
+  }
+  try { if (typeof window.openAIPanel === 'function') window.openAIPanel(); } catch {}
+  // AI 패널이 화면에 없는 환경(PC 등)에서는 보이는 메인 대화 목록에도 안내를 남긴다.
+  try {
+    const r = pm && pm.getBoundingClientRect();
+    const visible = pm && r.height > 0 && r.width > 0 && pm.offsetParent !== null;
+    if (!visible) appendBubble('system', text);
+  } catch { appendBubble('system', text); }
+}
+
 // ── P2P 종료 ─────────────────────────────────────────────
 function _closeP2P() {
   _stopPoll();
@@ -803,7 +846,8 @@ function _closeP2P() {
     _signalSendDirect(_USER.ipv6, _peerInfo.guid, 'ice', { bye: true }).catch(() => {});
   }
 
-  if (_rtcChannel) { _rtcChannel.close(); setRtcChannel(null); }
+  const _endedPeerName = _peerInfo ? (_peerInfo.nickname || _peerInfo.handle || '상대방') : '';
+  if (_rtcChannel) { _rtcChannel.__ending = true; _rtcChannel.close(); setRtcChannel(null); }
   if (_rtcConn)    { _rtcConn.close();    setRtcConn(null);    }
 
   // ── PDV 저장 + OpenHash 앵커링 ───────────────────────
@@ -817,9 +861,9 @@ function _closeP2P() {
   // BUG-FIX(2026-07-02): 별도 오버레이 제거 대신, 메인 채팅 통합 리팩터링의
   // 일부로 webrtc.js의 _clearPeer()를 재사용 — peer-bar 숨기기, msg-input
   // placeholder 복원, "🤖 AI 비서와 대화합니다" 안내까지 한 번에 처리된다.
-  _clearPeer();
-  // 종료되면 두 쪽 모두 나만의 AI 비서 화면으로 돌아간다.
-  try { if (typeof window.openAIPanel === 'function') window.openAIPanel(); } catch {}
+  _clearPeer({ silent: true });
+  // 종료되면 두 쪽 모두 나만의 AI 비서 화면으로 돌아간다 — AI 비서의 이전 대화를 되살리고, 누구와의 대화가 끝났는지 알린다.
+  _restoreAIChat(_endedPeerName);
 
   _peerInfo     = null;
   window.__naviCallBusy = false;
