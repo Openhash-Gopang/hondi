@@ -107,9 +107,11 @@ export async function diagHandleCommand(text, appendBubble) {
     return true;
   }
   const rep = await diagReport();
+  // 화면 표시를 먼저 한다 — 클립보드 복사는 권한 확인·포커스 때문에 끝나지 않을 수 있어 기다리지 않는다.
+  appendBubble('system', `<div style="white-space:pre-wrap;font-size:12px;line-height:1.45;text-align:left">${_esc(rep)}</div>`, true);
   let copied = false;
-  try { await navigator.clipboard.writeText(rep); copied = true; } catch {}
-  appendBubble('system', `<div style="white-space:pre-wrap;font-size:12px;line-height:1.45;text-align:left">${_esc(rep)}</div><div style="margin-top:6px;font-size:12px">${copied ? '📋 클립보드에 복사했습니다.' : '복사하지 못했습니다 — 화면을 캡처해 주세요.'}</div>`, true);
+  try { await Promise.race([navigator.clipboard.writeText(rep).then(() => { copied = true; }), new Promise(r => setTimeout(r, 2500))]); } catch {}
+  appendBubble('system', copied ? '📋 진단 내용을 클립보드에 복사했습니다.' : '복사하지 못했습니다 — 위 내용을 화면 캡처해 주세요.');
   return true;
 }
 
