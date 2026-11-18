@@ -40,14 +40,15 @@ export async function setPeer(peer) {
 }
 
 // ── 대화 상대 해제 ───────────────────────────────────────
-export function _clearPeer() {
+// silent=true 이면 "AI 비서와 대화합니다" 안내를 찍지 않는다(호출한 쪽이 복귀 안내를 따로 보여 줄 때).
+export function _clearPeer({ silent = false } = {}) {
   _closeRTC();
   setPeerState(null);
   const bar = document.getElementById('peer-bar');
   if (bar) bar.style.display = 'none';
   const inp = document.getElementById('msg-input');
   if (inp) inp.placeholder = '메시지를 입력하세요…';
-  appendBubble('system', '🤖 AI 비서와 대화합니다.');
+  if (!silent) appendBubble('system', '🤖 AI 비서와 대화합니다.');
 }
 
 // ── WebRTC Offer 생성 (발신자) ────────────────────────────
