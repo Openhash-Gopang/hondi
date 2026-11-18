@@ -26,6 +26,10 @@ export const TEST_QUOTA_DEFAULT_KRW = FREE_TRIAL_DEFAULT_KRW;   // 옛 이름(�
 
 const keyOf = (guid) => `hondi:test_quota:${guid}`;
 
+// 2026-11-19(주피터 지시) — 계정별 추가 무료 한도. 전체 공통 한도(cfg.limitKrw)에 계정에 저장된 bonus_krw 를 더한다.
+// GDC 를 발행·지급하는 것이 아니라 무료로 쓸 수 있는 AI 사용 비용 한도만 늘린다. 무료 이용 기간(30일)은 그대로다.
+export const limitOf = (state, cfg) => cfg.limitKrw + Math.max(0, Number(state && state.bonus_krw) || 0);
+
 export function quotaConfig(env) {
   const lim = Number(env && env.FREE_TRIAL_KRW);
   const hrs = Number(env && env.FREE_TRIAL_HOURS);
@@ -61,12 +65,14 @@ export function evaluate(state, now, cfg) {
       period_ends_at: new Date(pp.ends).toISOString(), included_krw: inc, used_krw: Math.round(pp.inc_used * 100) / 100,
       extra_on: on, extra_limit_krw: lim, extra_used_krw: Math.round(pp.extra_used * 100) / 100, ended_reason: null };
   }
-  const spentOut = spent >= cfg.limitKrw;
+  const limit = limitOf(state, cfg);
+  const spentOut = spent >= limit;
   const timeOut = now >= endsAt;
   const base = {
     spent_krw: Math.round(spent * 100) / 100,
-    limit_krw: cfg.limitKrw,
-    remaining_krw: Math.max(0, Math.round((cfg.limitKrw - spent) * 100) / 100),
+    limit_krw: limit,
+    bonus_krw: Math.max(0, Number(state && state.bonus_krw) || 0),
+    remaining_krw: Math.max(0, Math.round((limit - spent) * 100) / 100),
     free_hours: cfg.freeHours,
     started_at: new Date(startedAt).toISOString(),
     free_ends_at: new Date(endsAt).toISOString(),
@@ -159,12 +165,33 @@ export async function addExtraSpend(kv, guid, krw, now, cfg) {
   return evaluate(st, now, cfg);
 }
 
+// 읽기 전용 판정(쓰기 없음) — 관리자 시험 실행(dry-run)용. 저장된 상태가 없으면 null.
+export async function peek(kv, guid, now, cfg) {
+  const st = await readRaw(kv, guid);
+  return st ? evaluate(st, now, cfg) : null;
+}
+
+// 추가 무료 한도 지급(관리자). tag 는 지급 건의 이름 — 같은 tag 는 계정당 한 번만 반영된다(여러 번 호출해도 안전).
+// 한도가 늘어 다시 쓸 수 있게 되면 이전에 기록된 초과 시각을 지운다. 무료 기간(started_at)은 건드리지 않는다.
+export async function addBonus(kv, guid, krw, tag, now, cfg) {
+  const add = Math.floor(Number(krw));
+  if (!kv || !guid || !tag || !(add > 0)) return { applied: false, reason: 'BAD_INPUT' };
+  const st = (await readRaw(kv, guid)) || { spent_krw: 0, exceeded_at: null };
+  const tags = Array.isArray(st.bonus_tags) ? st.bonus_tags : [];
+  if (tags.includes(tag)) return { applied: false, reason: 'ALREADY', status: evaluate(st, now, cfg) };
+  st.bonus_krw = (Number(st.bonus_krw) || 0) + add;
+  st.bonus_tags = tags.concat(tag).slice(-20);
+  if ((Number(st.spent_krw) || 0) < limitOf(st, cfg)) st.exceeded_at = null;
+  await writeRaw(kv, guid, st);
+  return { applied: true, status: evaluate(st, now, cfg) };
+}
+
 // 현재 상태 조회. 시작 시각이 없으면(이 정책 이전부터 쓰던 계정 등) 지금을 시작 시각으로 기록한다.
 export async function getStatus(kv, guid, now, cfg) {
   const st = (await readRaw(kv, guid)) || { spent_krw: 0, exceeded_at: null };
   if (!Number(st.started_at)) {
     st.started_at = now;
-    if (Number(st.spent_krw) >= cfg.limitKrw && !st.exceeded_at) st.exceeded_at = now;
+    if (Number(st.spent_krw) >= limitOf(st, cfg) && !st.exceeded_at) st.exceeded_at = now;
     await writeRaw(kv, guid, st);
   }
   return evaluate(st, now, cfg);
@@ -192,7 +219,7 @@ export async function addSpend(kv, guid, krw, now, cfg, dedupKey = null) {
     return evaluate(st, now, cfg);
   }
   st.spent_krw = (Number(st.spent_krw) || 0) + add;
-  if (st.spent_krw >= cfg.limitKrw && !st.exceeded_at) st.exceeded_at = now;
+  if (st.spent_krw >= limitOf(st, cfg) && !st.exceeded_at) st.exceeded_at = now;
   await writeRaw(kv, guid, st);
   return evaluate(st, now, cfg);
 }

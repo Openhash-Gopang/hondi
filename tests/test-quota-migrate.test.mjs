@@ -4,7 +4,7 @@
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { quotaConfig, evaluate, getStatus, startFree, setPlan, addSpend, blockedMessage, setPaid, setExtra, addExtraSpend, exhaustedMessage } from '../src/worker/test-quota.js';
+import { quotaConfig, evaluate, getStatus, startFree, setPlan, addSpend, blockedMessage, setPaid, setExtra, addExtraSpend, exhaustedMessage, addBonus, peek, limitOf } from '../src/worker/test-quota.js';
 import { migrateTestData, mergeKmailSettings, MIGRATION_TARGETS } from '../src/worker/test-migrate.js';
 
 const H = 3600 * 1000;
@@ -311,4 +311,50 @@ test('mergeKmailSettings: 정식 계정의 설정 행이 없으면 아무것도 
   const r = await mergeKmailSettings({ l1, fromGuid: T, toGuid: F });
   assert.equal(r.merged, false); assert.equal(r.reason, 'no-target');
   assert.ok(!calls.some(c => c.startsWith('PATCH') || c.startsWith('POST')));
+});
+
+// ── 계정별 추가 무료 한도(2026-11-19) ──
+test('addBonus: 한도만 늘고(GDC 무관) 무료 기간은 그대로, 막혔던 계정이 다시 active 가 된다', async () => {
+  const kv = fakeKv(); const t0 = 1_700_000_000_000;
+  await addSpend(kv, 'b1', 100, t0, CFG);                                   // 100원 소진 → blocked
+  assert.equal((await peek(kv, 'b1', t0 + H, CFG)).status, 'blocked');
+  const r = await addBonus(kv, 'b1', 100, 'bonus-a', t0 + H, CFG);
+  assert.equal(r.applied, true);
+  const ev = await peek(kv, 'b1', t0 + H, CFG);
+  assert.equal(ev.status, 'active'); assert.equal(ev.limit_krw, 200); assert.equal(ev.bonus_krw, 100); assert.equal(ev.remaining_krw, 100);
+  assert.equal(ev.started_at, new Date(t0).toISOString());                  // 무료 이용 시작 시각은 건드리지 않는다
+  await addSpend(kv, 'b1', 100, t0 + 2 * H, CFG);                           // 늘어난 한도까지 쓰면 다시 막힌다
+  assert.equal((await peek(kv, 'b1', t0 + 3 * H, CFG)).status, 'blocked');
+});
+
+test('addBonus: 같은 tag 는 계정당 한 번만 반영(중복 호출 안전), 다른 tag 는 추가 반영', async () => {
+  const kv = fakeKv(); const t0 = 1_700_000_000_000;
+  assert.equal((await addBonus(kv, 'b2', 100, 'bonus-a', t0, CFG)).applied, true);
+  const again = await addBonus(kv, 'b2', 100, 'bonus-a', t0, CFG);
+  assert.equal(again.applied, false); assert.equal(again.reason, 'ALREADY');
+  assert.equal((await peek(kv, 'b2', t0, CFG)).limit_krw, 200);              // 100 + 100(한 번만)
+  assert.equal((await addBonus(kv, 'b2', 50, 'bonus-b', t0, CFG)).applied, true);
+  assert.equal((await peek(kv, 'b2', t0, CFG)).limit_krw, 250);
+});
+
+test('addBonus: 잘못된 입력·KV 없음은 아무것도 하지 않고, 기록 없는 계정도 지급 뒤 처음 쓸 때부터 센다', async () => {
+  const kv = fakeKv(); const t0 = 1_700_000_000_000;
+  assert.equal((await addBonus(kv, 'b3', 0, 'bonus-a', t0, CFG)).applied, false);
+  assert.equal((await addBonus(kv, 'b3', 100, '', t0, CFG)).applied, false);
+  assert.equal((await addBonus(null, 'b3', 100, 'bonus-a', t0, CFG)).applied, false);
+  assert.equal(kv.m.size, 0);
+  assert.equal(await peek(kv, 'nobody', t0, CFG), null);                      // 읽기 전용 — 기록을 만들지 않는다
+  assert.equal(kv.m.size, 0);
+  await addBonus(kv, 'b4', 100, 'bonus-a', t0, CFG);                          // 기록 없던 계정
+  const ev = await getStatus(kv, 'b4', t0 + H, CFG);                          // 첫 조회 때 시작 시각이 정해진다(기존 동작 그대로)
+  assert.equal(ev.status, 'active'); assert.equal(ev.limit_krw, 200);
+  assert.equal(limitOf({}, CFG), 100); assert.equal(limitOf({ bonus_krw: -5 }, CFG), 100);
+});
+
+test('addBonus: 무료 기간(시간)이 끝난 계정은 한도가 늘어도 여전히 blocked(time)', async () => {
+  const kv = fakeKv(); const t0 = 1_700_000_000_000;
+  await startFree(kv, 'b5', t0);
+  await addBonus(kv, 'b5', 100, 'bonus-a', t0 + 80 * H, CFG);               // CFG 는 72시간
+  const ev = await peek(kv, 'b5', t0 + 80 * H, CFG);
+  assert.equal(ev.status, 'blocked'); assert.equal(ev.ended_reason, 'time');
 });
