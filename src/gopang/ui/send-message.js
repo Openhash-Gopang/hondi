@@ -98,6 +98,8 @@ export async function sendMessage() {
 
   // ── 대화 상대 분기 ─────────────────────────────────────
   if (text) {
+    // 2026-11-19 임시 진단: "진단" 입력 시 보고서를 보인다(원인 확정 후 제거).
+    try { const _dg = await import('../core/diag.js'); if (await _dg.diagHandleCommand(text, appendBubble)) return; _dg.diag('입력 전달(PC경로)', { 대상: _peer ? '상대(P2P)' : (aiActive ? 'AI 비서' : '기타'), 상대설정: !!_peer }); } catch {}
     // 로컬 명령: 최근 위험 분석 결과 조회 — 2026-07-18 라우팅 신설.
     // showRiskAnalysis()는 오래전부터 정의만 되고 어디서도 호출되지 않는
     // 고아 함수였다(HANDOFF_2026-07-18 §2-(1) 후속 과제). 파이프라인

@@ -11,6 +11,9 @@ import {
   _rtcConn, _rtcChannel, _signalPoll,
 } from '../core/state.js';
 import { appendBubble } from './bubble.js';
+import { diag, diagEnv, diagConn } from '../core/diag.js';   // 2026-11-19 임시 진단(원인 확정 후 제거)
+let _diagT0 = 0;   // 진단: 이번 통화 시작 시각(ms)
+const _dt = () => (_diagT0 ? Date.now() - _diagT0 : -1);   // 통화 시작 후 경과 ms
 // _clearPeer는 webrtc.js가 정의(peer-bar 숨기기·입력창 placeholder 복원·
 // "AI 비서와 대화합니다" 안내까지 이미 다 되어있다 — 여기서 새로 안 만들고
 // 재사용한다). webrtc.js→p2p-chat.js는 동적 import(순환 없음)이므로 반대
@@ -247,7 +250,9 @@ export async function startP2PCall(targetUser) {
   _p2pMessages  = [];
   _sessionStart = new Date().toISOString();
 
+  _diagT0 = Date.now();
   await fetchRtcConfig(_USER?.ipv6 || '').catch(() => {});
+  diagEnv().then(e => diag('호출:시작(발신)', { callId: callId.slice(0, 8), to: String(targetUser.guid || '').slice(0, 8), ...e })).catch(() => {});
   const conn    = new RTCPeerConnection(RTC_CONFIG);
   const channel = conn.createDataChannel('chat', { ordered: true });
   setRtcConn(conn);
@@ -268,7 +273,7 @@ export async function startP2PCall(targetUser) {
     from_guid: _USER.ipv6,
     to_guid:   targetUser.guid,
     type:      'offer',
-    payload:   { sdp: conn.localDescription, from_handle: _USER.handle, from_name: _USER.nickname || '', callId },
+    payload:   { sdp: conn.localDescription, from_handle: _USER.handle, from_name: _USER.nickname || '', callId, sentAt: Date.now() },
   });
 
   // BUG-FIX(2026-07-02): 예전엔 여기서 _openChatUI()로 완전히 별도의
@@ -343,6 +348,7 @@ function _watchAnswerRealtime(conn, targetUser, callId) {
     if (row.type === 'answer' && row.from_guid === peerGuid) {
       try {
         const answerSdp = _rowPayload.sdp || _rowPayload;
+        diag('응답(answer) 수신', { callId: String(callId).slice(0, 8), ms: _dt() });
         await conn.setRemoteDescription(new RTCSessionDescription(answerSdp));
         if (noAnswerTimer) { clearTimeout(noAnswerTimer); noAnswerTimer = null; } // 응답 왔으니 무응답 타이머 해제
         if (smsTimer) { clearTimeout(smsTimer); smsTimer = null; }
@@ -405,6 +411,8 @@ function _offerSmsFallback(targetUser) {
 // 남기기가 성공했을 때만 붙인다 — 실패하면 그 사실은 숨기지 않는다.
 async function _handleNoAnswer(targetUser, callId) {
   const name = targetUser.nickname || targetUser.handle || '상대방';
+  diag('호출:무응답 포기', { callId: String(callId).slice(0, 8), ms: _dt() });
+  try { if (_rtcConn) diagConn(_rtcConn, '무응답'); } catch {}
 
   // BUG-FIX(2026-07-02, 2차): 20초 수신측 자체 타임아웃(방어망)만으로는
   // 상대가 늦게 수락했을 때 최대 20초를 그냥 날린다. 여기서 포기하는
@@ -494,11 +502,14 @@ export async function handleIncomingOffer(signal) {
   const _offerPayload = typeof signal.payload === 'string'
     ? JSON.parse(signal.payload) : (signal.payload || {});
   const callId = _offerPayload.callId || null;
+  // 2026-11-19 진단 — 호출이 이 기기에 도착한 시각·경로·화면 상태. 지연 = 도착 시각 - 발신 측이 offer 를 만든 시각(두 폰 시계 차이만큼 오차).
+  diagEnv().then(e => diag('호출:수신(착신)', { callId: String(callId || '').slice(0, 8), 지연ms: _offerPayload.sentAt ? Date.now() - _offerPayload.sentAt : '발신측 구판(sentAt 없음)', 경로: signal.__via || '?', ...e })).catch(() => {});
 
   // 같은 callId의 offer가 중복 도착(재시도/레이스 컨디션)하면 두 번째부터는 무시
   if (callId) {
     if (_seenOfferIds.has(callId)) {
       console.info('[P2P] 중복 offer 무시 (callId 이미 처리됨):', callId);
+      diag('호출:중복 무시', { callId: String(callId).slice(0, 8) });
       return;
     }
     _seenOfferIds.add(callId);
@@ -531,10 +542,12 @@ export async function handleIncomingOffer(signal) {
         silent: false,
       });
       console.info('[TEST-SOUND] showNotification 호출 성공');
+      diag('앱내 알림 표시 성공', { 권한: Notification.permission });
     } else {
       console.warn('[TEST-SOUND] 알림 권한 없음(permission:', Notification.permission, ') — showNotification 건너뜀');
+      diag('앱내 알림 건너뜀', { 권한: Notification.permission });
     }
-  } catch (e) { console.warn('[TEST-SOUND] showNotification 실패:', e.message); }
+  } catch (e) { console.warn('[TEST-SOUND] showNotification 실패:', e.message); diag('앱내 알림 실패', e && e.message); }
 
   // 수락 확인 — confirm()은 메인 스레드를 동기적으로 막기 때문에 막지
   // 않는 커스텀 모달을 사용한다.
@@ -548,6 +561,7 @@ export async function handleIncomingOffer(signal) {
   const accepted = _tapped ? true : await _showIncomingCallModal(fromName);
   if (_tapped) window.__naviAcceptUntil = 0;
   _pendingModalCallId = null;
+  diag('수락 결정', { 방식: _tapped ? '알림 탭(자동 수락)' : '팝업', accepted: !!accepted, ms: _dt() });
   if (!accepted) return;
 
   _peerInfo = { guid: fromGuid, handle: fromHandle, nickname: fromName, __incoming: true };
@@ -561,9 +575,15 @@ export async function handleIncomingOffer(signal) {
   _activeCallIdCallee = callId;
 
   // 수락 즉시 상대와의 대화창으로 전환한다(AI 비서가 대신 답하지 않도록). 연결이 열리기 전에는 전송 시 안내만 보인다.
+  _diagT0 = Date.now();
   _activatePeerInMainChat(_peerInfo);
+  try {
+    const _st = await import('../core/state.js');
+    diag('수락 후 대화창 전환', { 상대설정됨: !!_st._peer, 머리글: (document.getElementById('ai-sp-label') || {}).textContent || '(없음)', 입력안내: ((document.querySelector('#ai-panel-input-slot .ci-input') || {}).placeholder || '').slice(0, 20) });
+  } catch (e) { diag('수락 후 대화창 전환 확인실패', e && e.message); }
   // 서로 다른 통신망의 두 폰은 TURN 중계가 있어야 연결된다.
   await fetchRtcConfig(_USER?.ipv6 || '').catch(() => {});
+  diag('수신:ICE설정', { TURN: (RTC_CONFIG.iceServers || []).some(s => [].concat(s.urls).some(u => /^turns?:/.test(u))) ? '있음' : '없음(STUN만)', ms: _dt() });
   const conn = new RTCPeerConnection(RTC_CONFIG);
   setRtcConn(conn);
 
@@ -590,6 +610,7 @@ export async function handleIncomingOffer(signal) {
     type:      'answer',
     payload:   { sdp: conn.localDescription, from_handle: _USER.handle, callId },
   });
+  diag('수신:answer 전송', { ms: _dt() });
 
   // BUG-FIX(2026-07-02): 여기서도 발신측과 동일한 이유로 _openChatUI()를
   // 없앴다 — 실제 datachannel이 열릴 때(_setupChannel.onopen)만
@@ -609,6 +630,8 @@ export async function handleIncomingOffer(signal) {
     if (_rtcChannel && _rtcChannel.readyState === 'open') return; // 이미 정상 연결됨 — 아무 것도 안 함
     if (_activeCallIdCallee !== _calleeCallId) return; // 이미 다른 통화로 넘어갔음
     console.warn('[P2P] 수신측 연결 타임아웃 — 상태 초기화');
+    diag('수신:연결 시간초과(45초)', { ms: _dt() });
+    try { diagConn(conn, '시간초과'); } catch {}
     appendBubble('system', '⚠️ 연결이 시간 초과됐습니다. 상대방이 이미 통화를 종료했을 수 있어요.');
     if (_rtcChannel) { try { _rtcChannel.close(); } catch {} setRtcChannel(null); }
     if (_rtcConn)    { try { _rtcConn.close(); }    catch {} setRtcConn(null); }
@@ -629,6 +652,18 @@ export async function handleIncomingOffer(signal) {
 
 // ── RTCPeerConnection 공통 설정 ───────────────────────────
 function _setupConn(conn, peer, callId) {
+  // 2026-11-19 진단 — 연결이 어디서 막히는지(후보 수집·ICE 검사·TURN 오류)를 시각과 함께 남긴다.
+  const _cid = String(callId || '').slice(0, 8), _cnt = {};
+  try {
+    conn.addEventListener('icecandidate', e => { if (e.candidate) { const m = /typ (\w+)/.exec(e.candidate.candidate || ''); const k = (m && m[1]) || '?'; _cnt[k] = (_cnt[k] || 0) + 1; } else diag('ICE:수집끝', { callId: _cid, 내후보: { ..._cnt }, ms: _dt() }); });
+    conn.addEventListener('icecandidateerror', e => diag('ICE:서버오류', { callId: _cid, url: String(e.url || '').slice(0, 60), code: e.errorCode, text: String(e.errorText || '').slice(0, 60) }));
+    conn.addEventListener('iceconnectionstatechange', () => diag('ICE:상태', { callId: _cid, ice: conn.iceConnectionState, ms: _dt() }));
+    conn.addEventListener('icegatheringstatechange', () => diag('ICE:수집상태', { callId: _cid, g: conn.iceGatheringState, ms: _dt() }));
+    conn.addEventListener('connectionstatechange', () => {
+      diag('연결상태', { callId: _cid, state: conn.connectionState, ms: _dt() });
+      if (['connected', 'failed', 'closed'].includes(conn.connectionState)) diagConn(conn, conn.connectionState);
+    });
+  } catch {}
   conn.onicecandidate = async e => {
     if (!e.candidate) return;
     await _signalSend({
@@ -743,6 +778,7 @@ function _setupChannel(channel) {
     for (const t of _calleeConnectTimers.values()) clearTimeout(t);
     _calleeConnectTimers.clear();
     if (_rtcConn) _rtcConn.__everOpen = true;
+    diag('채널:열림', { ms: _dt(), peerSet: !!_peerInfo });
     // 연결 유지 신호 — 통신망·공유기가 오래 조용한 연결을 끊지 않게 10초마다 보낸다.
     channel.__ka = setInterval(() => { if (channel.readyState === 'open') { try { channel.send('{"type":"ping"}'); } catch {} } }, 10000);
     if (_peerInfo) _activatePeerInMainChat(_peerInfo);
@@ -769,6 +805,7 @@ function _setupChannel(channel) {
   };
 
   channel.onclose = () => {
+    diag('채널:닫힘', { ms: _dt(), ending: !!channel.__ending });
     if (channel.__ka) { clearInterval(channel.__ka); channel.__ka = null; }
     // 내가 끝냈거나 상대가 종료 신호를 보낸 정상 종료에는 따로 안내하므로(복귀 메시지) 여기서는 찍지 않는다. 네트워크 끊김처럼 예기치 않은 닫힘만 알린다.
     if (channel.__ending || !_peerInfo) return;
@@ -791,7 +828,15 @@ function _waitForIce(conn, timeout = 2000) {
 async function _signalSend(body) {
   // 이전: PROXY /signal/send → Worker → L1
   // 이후: L1 직접 (Worker 경유 없음)
+  const _t0 = Date.now();
   const d = await _signalSendDirect(body.from_guid, body.to_guid, body.type, body.payload);
+  // 2026-11-19(주피터 지시, 진단) — 알림이 가기도 하고 안 가기도 하는 원인을 가리기 위해 서버의 푸시 결과와 걸린 시간을 남긴다.
+  // push 값: sent(발송 성공) / no_subscription(구독 없음) / failed(전 기기 실패) / error(상대 프로필 조회 실패) / config(서버 설정 없음) / timeout(4초 안에 못 끝남)
+  if (body.type === 'offer') {
+    const _pr = (d && d.push) || '(응답 없음)';
+    diag('호출:알림결과', { push: _pr, 서버응답ms: Date.now() - _t0, to: String(body.to_guid || '').slice(0, 8) });
+    try { appendBubble('system', `🔔 [진단] 상대 알림 발송 결과: ${_pr} (${Date.now() - _t0}ms) — 전체 기록은 "진단" 입력`); } catch {}
+  }
   // 2026-11-16 — 상대 기기에 푸시 구독이 없으면 알림으로 깨울 수 없다. 앱이 열려 있을 때만 받는다는 것을 알린다.
   if (body.type === 'offer' && d && d.push === 'no_subscription') {
     try { _notify('ℹ️ 상대 기기에 알림이 켜져 있지 않아, 상대가 나비웹을 열어 둔 동안에만 호출이 전달됩니다. 상대에게 알림 허용을 부탁해 보세요.'); } catch {}
@@ -1263,12 +1308,14 @@ export function startIncomingWatch(myGuid) {
     if (row.type === 'ice') {
       const _p = typeof row.payload === 'string' ? JSON.parse(row.payload) : (row.payload || {});
       if (_p.cancel) {
+        diag('발신측 취소 수신', { callId: String(_p.callId || '').slice(0, 8) });
         _handleIncomingCancel(_p.callId);
         _signalDeleteDirect(row.id);
         return;
       }
     }
 
+    if (row.type === 'offer' && _busyWithPeer(row.from_guid)) diag('호출:무시(이미 연결 시도 중)', { via: row.__via || '?' });
     if (row.type === 'offer' && !_busyWithPeer(row.from_guid)) {
       await handleIncomingOffer(row);
       _signalDeleteDirect(row.id);
@@ -1280,7 +1327,7 @@ export function startIncomingWatch(myGuid) {
   // Supabase Realtime WebSocket으로 교체했었지만, 서버(nginx proxy_buffering
   // off 적용됨)에서 curl로 직접 재확인한 결과 SSE가 정상 동작한다(2026-06-28).
   // 막혔던 이유는 이미 해결돼 있었다 — 그래서 L1 자체 realtime으로 되돌린다.
-  _watchL1Realtime(myGuid, _handleSignalRow);
+  _watchL1Realtime(myGuid, (row) => { try { row.__via = '실시간(SSE)'; } catch {} return _handleSignalRow(row); });
 
   // 폴백: realtime이 못 잡은 offer를 3초 폴링으로 보완(같은 핸들러 재사용 —
   // _seenSignalIds가 있어서 realtime이 이미 처리한 레코드는 자동으로 건너뜀)
@@ -1297,7 +1344,7 @@ export function startIncomingWatch(myGuid) {
           const _p = typeof sig.payload === 'string' ? JSON.parse(sig.payload) : (sig.payload || {});
           if (_p.cancel) { await _handleSignalRow(sig); continue; }
         }
-        if (sig.type === 'offer' && !_busyWithPeer(sig.from_guid)) { await _handleSignalRow(sig); break; }
+        if (sig.type === 'offer' && !_busyWithPeer(sig.from_guid)) { try { sig.__via = '폴링(3초)'; } catch {} await _handleSignalRow(sig); break; }
       }
     } catch {}
   }, 3000);

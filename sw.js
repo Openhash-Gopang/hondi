@@ -97,7 +97,7 @@ self.addEventListener('activate', (event) => {
   // 계속 살아있어야 한다. 공유받은 문서를 사용자가 아직 안 열어봤는데
   // SW가 업데이트되면서 통째로 지워지면 안 됨 — 원래 필터가 CACHE_NAME
   // 외 전부를 지우던 걸 여기서 명시적으로 예외처리했다.
-  const KEEP_CACHES = new Set([CACHE_NAME, 'hondi-share-inbox']);
+  const KEEP_CACHES = new Set([CACHE_NAME, 'hondi-share-inbox', 'navi-diag']);
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
@@ -275,6 +275,20 @@ function _reportConsentReceipt(tag, event) {
   }).catch(e => console.warn('[SW] 수신확인 발송 실패:', e.message));
 }
 
+// ── 임시 진단 기록(2026-11-19, 주피터 지시) ────────────────────
+// 푸시가 이 기기에 도착했는지·알림이 떴는지·눌렀을 때 어느 창이 열렸는지를 Cache 'navi-diag' 에 남긴다.
+// 앱 화면에서 "진단"을 입력하면 앱 쪽 기록과 합쳐 보인다. 원인 확정 후 제거한다.
+async function _diagSw(tag, d) {
+  try {
+    const c = await caches.open('navi-diag');
+    const r = await c.match('/__diag_sw');
+    let a = []; try { a = r ? await r.json() : []; } catch (e) {}
+    a.push({ t: new Date().toISOString(), tag, d: d === undefined ? '' : d });
+    if (a.length > 60) a = a.slice(-60);
+    await c.put('/__diag_sw', new Response(JSON.stringify(a), { headers: { 'Content-Type': 'application/json' } }));
+  } catch (e) { /* 진단 실패는 무시 */ }
+}
+
 // ── Push 알림 수신 ─────────────────────────────────────────
 self.addEventListener('push', (event) => {
   let data = {};
@@ -285,6 +299,7 @@ self.addEventListener('push', (event) => {
   const sound   = data.sound || 'ping';
   const tag     = data.tag   || 'gopang-msg';
   const url     = data.url   || '/webapp.html';
+  event.waitUntil(_diagSw('푸시 도착', { tag, title: String(title).slice(0, 20) }));
 
   // PC가 AI 비서 Key를 전송한 경우(tag가 gopang-ai-setup-로 시작) — 열려있는
   // 모든 탭에 즉시 동기화 신호를 보낸다. 앱이 켜져 있으면 화면을 보고 있지
@@ -323,7 +338,7 @@ self.addEventListener('push', (event) => {
         renotify: true,
         requireInteraction: tag.startsWith('gopang-device-link-') || tag.startsWith('gopang-call-') || tag.startsWith('p2p-invite-'),
         silent: false,
-      }),
+      }).then(() => _diagSw('알림 표시 완료', { tag }), (e) => _diagSw('알림 표시 실패', { tag, err: String(e && e.message) })),
       _broadcastSound,
       _reportConsentReceipt(tag, 'delivered'),
       (isAiSetupSync || isVersionUpdate)
@@ -411,6 +426,7 @@ self.addEventListener('notificationclick', (event) => {
     Promise.all([
       _reportConsentReceipt(tag, 'acknowledged'),
       clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (list) => {
+        await _diagSw('알림 클릭', { tag, 열린창: list.map(c => (_pwaClientIds.has(c.id) ? 'PWA:' : '탭:') + new URL(c.url).pathname) });
         // 이미 열린 창이 있으면 포커스 + postMessage (리스너가 이미 살아있음)
         // 2026-11-16 — 대화 요청 알림을 누른 것이 곧 수락이다(수락 팝업을 한 번 더 띄우지 않는다).
         const isCallTap = tag.startsWith('gopang-call-') || tag.startsWith('gopang-incoming-call');
@@ -423,11 +439,13 @@ self.addEventListener('notificationclick', (event) => {
           if (client.url.startsWith(self.location.origin) && 'focus' in client) {
             client.postMessage({ type: 'PLAY_SOUND', sound });
             if (isCallTap) client.postMessage({ type: 'CALL_TAP' });
+            await _diagSw('기존 창 포커스 + CALL_TAP 전달', { PWA창: _pwaClientIds.has(client.id) });
             return client.focus();
           }
         }
         // 없으면 새 창 — postMessage 대신 URL 파라미터로 전달(경쟁 상태 회피)
         const sep = url.includes('?') ? '&' : '?';
+        await _diagSw('새 창 열기(openWindow)', { url: url.split('?')[0], PWA설치로판단: installed });
         return clients.openWindow(url + sep + 'playSound=' + encodeURIComponent(sound) + (isCallTap ? '&callTap=1' : ''));
       }),
     ])
