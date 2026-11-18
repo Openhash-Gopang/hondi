@@ -81,7 +81,13 @@
   }
   // 메인 앱(hondi.net)에서 전화로 가입·로그인한 사용자는 공유 쿠키 없이 이 기기에 계정 정보(gopang_user_v4)만 둔다.
   // 쿠키가 없을 때에 한해 그 기록을 로그인으로 인정한다(번호는 뒤 4자리만 보여 준다).
+  // 2026-11-18(주피터 지시): 이 예외는 메인 앱(hondi.net)에서만 쓴다. naviweb.kr·mail.naviweb.kr 같은 나비웹 화면은 메일 등 기능이 공유 쿠키로 로그인을 따지므로,
+  // 기기 기록만으로 이름을 보여 주면 "주피터"로 보이는데 메일은 로그인을 요구하는 불일치가 생긴다 — 거기서는 쿠키가 없으면 '로그인하지 않았습니다'로 보인다.
+  function spaIdentityAllowed() {
+    try { return /(^|\.)hondi\.net$/i.test(String(global.location && global.location.hostname || '')); } catch (e) { return false; }
+  }
   function spaIdentity() {
+    if (!spaIdentityAllowed()) return null;
     try {
       var raw = global.localStorage.getItem('gopang_user_v4') || global.sessionStorage.getItem('gopang_user_v4');
       if (!raw) return null;
