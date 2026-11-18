@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-18 10:49 KST · 기준 커밋 fd258ff0
+- 갱신: 2026-11-18 11:17 KST · 기준 커밋 7575e08d
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-18 Merge pull request #1205 from Openhash-Gopang/fix/user-badge-spa-identity-hondi-only
+- 2026-11-18 fix(user-badge): 기기 기록(gopang_user_v4) 로그인 인정은 hondi.net 에서만
 - 2026-11-18 Merge pull request #1204 from Openhash-Gopang/fix/navi-home-sidebar-logo-ghost
 - 2026-11-18 fix(navi-home): PC 사이드바 접힘 상태에서 로고 아래 비치는 잔상 제거
 - 2026-11-18 fix(sw): 캐시 먼저 경로에서도 redirected 표시를 떼어 naviweb.kr 간헐 ERR_FAILED 해소
@@ -42,8 +44,6 @@
 - 2026-11-16 fix: 시작 때 지갑 열기가 실패하면 1.5초·5초 뒤 조용히 재시도(배너는 그래도 안 열릴 때만)
 - 2026-11-16 fix: 지갑이 지문 열쇠를 사용자 동작 때 조용히 다시 열고(배너 없음), 가입 직후 7일은 백업 안전망 배너를 숨긴다. 지갑 스크립트 버전 갱신(캐시 무효화)
 - 2026-11-16 fix: 지문으로 다시 열기 성공 시 새로고침하지 않고 현재 세션에서 지갑을 바로 쓴다
-- 2026-11-16 feat: 지갑 잠김 배너에 '지문으로 다시 열기' 추가 — 사용자 동작 안에서 지문 확인을 다시 띄운다
-- 2026-11-16 feat: 지갑 잠김 배너에 원인 진단(webauthn 등록·기기비밀값·오류 이름)을 보여 준다
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
