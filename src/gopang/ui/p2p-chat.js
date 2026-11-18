@@ -1280,14 +1280,13 @@ function _handleIncomingCancel(callId) {
 // 2026-11-19(주피터 지시) — 대화 요청은 오직 설치된 PWA 만 받아 연결한다. PWA 가 설치된 기기에서 브라우저 탭에도 나비웹이 열려 있으면 그 탭은 요청을 무시한다.
 //  · 같은 기기의 탭과 PWA 가 같은 요청을 함께 처리하면 수락 팝업이 보이지 않는 탭에 떠 있거나 서로 다른 연결을 만들어 연결이 꼬인다.
 //  · PWA 설치 여부는 PWA 창이 열릴 때마다 남기는 navi_pwa_last_standalone(gopang-pwa.js)으로 안다 — 브라우저와 PWA 는 같은 저장소를 쓴다.
-//  · 예외: 알림을 눌러 이 탭이 열린 경우(callTap)는 사용자가 이 창을 고른 것이므로 처리한다. PWA 가 없거나 30일 넘게 안 열었으면 이 탭이 처리한다.
+//  · 알림을 눌러 열린 탭도 예외가 아니다(2026-11-19, 알림을 눌러 탭이 열리면 안 된다 — 모바일 탭은 설치 안내 화면이 막는다). PWA 기록이 없거나 30일 넘게 안 열었으면 이 탭이 처리한다.
 //  · 무시한 신호는 지우지 않는다(지우면 PWA 가 못 받는다).
 function _leaveIncomingToPwa() {
   try {
     if (matchMedia('(display-mode: standalone)').matches || navigator.standalone === true) return false;   // 이 창이 PWA — 직접 처리
     const last = Number(localStorage.getItem('navi_pwa_last_standalone')) || 0;
     if (!(last > 0) || Date.now() - last > 30 * 86400000) return false;                                   // PWA 없음 — 이 탭이 처리
-    if ((window.__naviAcceptUntil || 0) > Date.now()) return false;                                       // 알림을 눌러 연 탭
     return true;
   } catch (e) { return false; }   // 판단 실패 시 예전처럼 처리한다(호출을 놓치지 않는 쪽으로)
 }

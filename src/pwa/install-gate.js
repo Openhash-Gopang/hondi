@@ -2,11 +2,10 @@
  * pwa/install-gate.js — 폰 브라우저 탭에서는 앱(PWA) 설치를 먼저 요구한다 (2026-11-18, 주피터 지시).
  * 알림(호출·초대)을 PWA 기준으로 일원화하기 위한 잠정 조치다. 대상은 폰의 브라우저 탭에서 로그인한 뒤의 webapp.html 뿐이다.
  *  - PC, 설치된 PWA 창, 공개 페이지(install·매뉴얼 등), 로그인·가입 전 화면은 영향 없음
- *  - 적용 유예 기간(GRACE_END)까지는 "이번만 브라우저로 계속" 링크를 둔다. 개발·시험은 주소 끝에 ?dev=1
+ *  - 유예 없음(2026-11-19부터 설치 필수). 개발·시험은 주소 끝에 ?dev=1
  * 설치 여부는 크롬이 알려 주지 않으므로(navi_pwa_last_standalone 기록으로만 추정) "이미 설치했다면 바탕화면 아이콘으로 여세요"를 함께 안내한다.
  */
 (function () {
-  var GRACE_END = Date.parse('2026-12-02T00:00:00+09:00');
   var ua = navigator.userAgent || '';
   var isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
   var standalone = false;
@@ -20,7 +19,7 @@
   var inApp = /KAKAOTALK|NAVER\(|FBAN|FBAV|Instagram|Line\/|DaumApps|; wv\)/i.test(ua);
   var installedBefore = false;
   try { installedBefore = Number(localStorage.getItem('navi_pwa_last_standalone')) > 0; } catch (e) {}
-  var canSkip = Date.now() < GRACE_END;
+  var canSkip = false;   // 2026-11-19(주피터 지시): 설치는 필수 — 유예와 "이번만 브라우저로 계속"을 없앴다(개발·시험은 ?dev=1)
 
   var st = document.createElement('style');
   st.textContent = '#navi-pwa-gate{display:none;position:fixed;inset:0;z-index:2147483000;background:#5C6BC0;color:#fff;align-items:center;justify-content:center;padding:24px;text-align:center}' +
