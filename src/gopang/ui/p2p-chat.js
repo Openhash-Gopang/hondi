@@ -792,6 +792,15 @@ async function _signalSend(body) {
   // 이전: PROXY /signal/send → Worker → L1
   // 이후: L1 직접 (Worker 경유 없음)
   const d = await _signalSendDirect(body.from_guid, body.to_guid, body.type, body.payload);
+  // 2026-11-19(주피터 지시, 진단) — 알림이 가기도 하고 안 가기도 하는 원인을 가리기 위해 서버의 푸시 결과를 남긴다.
+  // 값: sent(발송 성공) / no_subscription(구독 없음) / failed(전 기기 실패) / error(상대 프로필 조회 실패) / config(서버 설정 없음) / timeout(4초 안에 못 끝남)
+  // 폰에는 콘솔이 없으므로 화면에도 한 줄 남긴다. 원인이 확정되면 이 블록은 제거한다.
+  if (body.type === 'offer') {
+    const _pr = (d && d.push) || '(응답 없음)';
+    try { window.__lastPushResult = { at: new Date().toISOString(), push: _pr, to: body.to_guid }; } catch {}
+    console.info('[P2P-DIAG] offer 푸시 결과:', _pr);
+    try { appendBubble('system', `🔔 [진단] 상대 알림 발송 결과: ${_pr}`); } catch {}
+  }
   // 2026-11-16 — 상대 기기에 푸시 구독이 없으면 알림으로 깨울 수 없다. 앱이 열려 있을 때만 받는다는 것을 알린다.
   if (body.type === 'offer' && d && d.push === 'no_subscription') {
     try { _notify('ℹ️ 상대 기기에 알림이 켜져 있지 않아, 상대가 나비웹을 열어 둔 동안에만 호출이 전달됩니다. 상대에게 알림 허용을 부탁해 보세요.'); } catch {}
