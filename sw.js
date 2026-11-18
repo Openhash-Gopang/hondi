@@ -304,11 +304,11 @@ self.addEventListener('push', (event) => {
         badge: '/icons/navi-icon-192.png',
         tag,
         data:  { url, sound },
-        // 2026-11-16 — 대화 요청 알림은 길게 진동하고, 누르거나 닫을 때까지 남겨 화면이 꺼져 있다가 켜져도 놓치지 않게 한다.
-        vibrate: tag.startsWith('gopang-call-') ? [400, 150, 400, 150, 400] : [200, 100, 200],
-        // 로그인 승인 요청은 눈에 띄게: 소리·진동으로 다시 알리고, 사용자가 누르거나 닫을 때까지 남긴다.
-        renotify: tag.startsWith('gopang-device-link-') || tag.startsWith('gopang-call-'),
-        requireInteraction: tag.startsWith('gopang-device-link-') || tag.startsWith('gopang-call-'),
+        // 2026-11-18(주피터 지시: 모든 알림에 소리가 나야 한다) — 같은 tag 알림은 renotify 가 없으면 소리·진동 없이 조용히 교체된다.
+        // 그래서 renotify 를 모든 알림에 켠다(tag 는 항상 값이 있다). 급한 알림(로그인 승인·대화 호출·대화 초대)은 누르거나 닫을 때까지 남기고, 호출·초대는 길게 진동한다.
+        vibrate: (tag.startsWith('gopang-call-') || tag.startsWith('p2p-invite-')) ? [400, 150, 400, 150, 400] : [200, 100, 200],
+        renotify: true,
+        requireInteraction: tag.startsWith('gopang-device-link-') || tag.startsWith('gopang-call-') || tag.startsWith('p2p-invite-'),
         silent: false,
       }),
       _broadcastSound,
