@@ -154,6 +154,8 @@ function _notify(text) {
 // 호출하지 않는다(사용자가 요청한 그대로 — 무응답이면 AI 패널이 계속
 // 살아있어야 하므로).
 function _activatePeerInMainChat(peer) {
+  window.__p2pEnded = false;   // 새 연결 — 이전에 "종료됨"으로 남겨 둔 창이 있었다면 상태를 초기화한다
+  try { const b = document.getElementById('peer-close-btn'); const t = b && b.querySelector('.lbl'); if (t) t.textContent = '종료'; } catch {}
   const _already = !!peer.__shown; peer.__shown = true;
   setPeerState({
     guid: peer.guid, handle: peer.handle,
@@ -660,9 +662,8 @@ function _setupChannel(channel) {
       const msg = JSON.parse(e.data);
       if (msg.type === 'bye') {
         channel.__ending = true;
-        appendBubble('system', '🔴 상대방이 대화를 종료했습니다.');
-        // 저장은 _closeP2P()가 한 번만 한다(여기서도 저장하면 같은 대화가 두 번 기록된다).
-        setTimeout(() => _closeP2P(), 1200);
+        // 상대가 끝냈다 — 저장하고 "종료됨" 상태로 두되, 읽던 대화가 사라지지 않게 창은 사용자가 정할 때까지 남긴다.
+        _endP2PSession({ byPeer: true });
         return;
       }
       const peerName = _peerInfo?.nickname || _peerInfo?.handle || '상대방';
@@ -793,8 +794,8 @@ function _showIncomingCallModal(fromHandle) {
 function _restoreAIChat(peerName) {
   const nodes = _aiChatNodes; _aiChatNodes = null;
   const text = peerName
-    ? `${peerName}님과의 대화창을 닫았으며, 나만의 AI 비서로 복귀하였습니다.`
-    : '대화창을 닫았으며, 나만의 AI 비서로 복귀하였습니다.';
+    ? `${peerName}님과 대화를 종료했습니다.`
+    : '대화를 종료했습니다.';
   const pm = document.getElementById('ai-panel-messages');
   if (pm) {
     pm.replaceChildren(...(nodes || []));
@@ -819,56 +820,108 @@ function _restoreAIChat(peerName) {
 }
 
 // ── P2P 종료 ─────────────────────────────────────────────
-function _closeP2P() {
+// 2026-11-18(주피터 지시) — 종료를 두 단계로 나눈다.
+//  ① _endP2PSession : 연결을 끊고 대화 원문을 저장한다. 대화창은 그대로 둔다(읽을 수 있게). 이어서 "창을 닫을까요?" 팝업.
+//  ② _leavePeerWindow : 창을 닫고 나만의 AI 비서의 이전 대화로 돌아간다. 팝업에서 "예"를 누르거나 상단 "대화창 닫기"를 누르면 실행.
+function _confirmModal(message, yesLabel, noLabel) {
+  return new Promise(resolve => {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:24px';
+    const box = document.createElement('div');
+    box.style.cssText = 'background:#fff;color:#111;border-radius:14px;padding:20px 18px 14px;max-width:320px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.25)';
+    const msg = document.createElement('div');
+    msg.style.cssText = 'font-size:15px;line-height:1.5;margin-bottom:16px;white-space:pre-line';
+    msg.textContent = message;
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:8px;justify-content:flex-end';
+    const mk = (label, primary, val) => {
+      const b = document.createElement('button');
+      b.textContent = label;
+      b.style.cssText = 'padding:8px 14px;border-radius:8px;font-size:14px;cursor:pointer;border:1px solid #d1d5db;' +
+        (primary ? 'background:#2563eb;color:#fff;border-color:#2563eb' : 'background:#fff;color:#374151');
+      b.onclick = () => { wrap.remove(); resolve(val); };
+      return b;
+    };
+    row.append(mk(noLabel, false, false), mk(yesLabel, true, true));
+    box.append(msg, row); wrap.appendChild(box); document.body.appendChild(wrap);
+  });
+}
+
+function _peerDisplayName() { return _peerInfo ? (_peerInfo.nickname || _peerInfo.handle || '상대방') : ''; }
+
+async function _endP2PSession({ byPeer = false } = {}) {
+  if (!_peerInfo || window.__p2pEnded) return;
+  window.__p2pEnded = true;
+  const name = _peerDisplayName();
   _stopPoll();
   _activeCallId = null;
   _activeCallIdCallee = null;
   for (const t of _calleeConnectTimers.values()) clearTimeout(t);
   _calleeConnectTimers.clear();
 
-  // BUG-FIX(2026-07-01): 튜토리얼 STEP 4 — 사용자가 검색 결과에서 실제로
-  // 상대를 선택해 대화창을 열었다가 닫는 경우, p2p-search.js의
-  // _closeSearch()보다 이 시점이 "사용자가 실제로 해본 것"에 더 가깝다.
-  // 두 곳 모두 신호를 보내지만 _tutorialSignal 내부에서 이미 진행된
-  // 단계는 무시하므로 중복 호출로 인한 부작용은 없다.
   if (typeof window._tutorialSignal === 'function') window._tutorialSignal('search_flow_done');
 
-  // 상대방에게 종료 신호 전송 (DataChannel 우선, 실패 시 signal 경유)
-  if (_peerInfo && _USER?.ipv6) {
-    // ① DataChannel로 종료 메시지 전송
+  if (!byPeer && _USER?.ipv6) {
+    // 상대방에게 종료 신호 전송 (DataChannel 우선, 실패 시 signal 경유)
     try {
       if (_rtcChannel && _rtcChannel.readyState === 'open') {
         _rtcChannel.send(JSON.stringify({ type: 'bye', ts: new Date().toISOString() }));
       }
     } catch(e) { console.warn('[P2P] bye DataChannel 전송 실패:', e.message); }
-
-    // ② signal 경유 종료 알림 (DataChannel 실패 대비) — L1 직접
     _signalSendDirect(_USER.ipv6, _peerInfo.guid, 'ice', { bye: true }).catch(() => {});
   }
 
-  const _endedPeerName = _peerInfo ? (_peerInfo.nickname || _peerInfo.handle || '상대방') : '';
-  if (_rtcChannel) { _rtcChannel.__ending = true; _rtcChannel.close(); setRtcChannel(null); }
-  if (_rtcConn)    { _rtcConn.close();    setRtcConn(null);    }
+  if (_rtcChannel) { _rtcChannel.__ending = true; try { _rtcChannel.close(); } catch {} setRtcChannel(null); }
+  if (_rtcConn)    { try { _rtcConn.close(); } catch {} setRtcConn(null); }
 
-  // ── PDV 저장 + OpenHash 앵커링 ───────────────────────
-  // P2P 세션 종료 시 대화 원문을 vault에 저장하고 OpenHash에 앵커링
-  // (_clearPeer()보다 먼저 — _peerInfo가 아직 남아있어야 세션 메타에 쓸 수 있음)
-  if (_p2pMessages.length > 0 && _peerInfo) {
+  // 대화 원문 PDV 저장 + OpenHash 앵커링 (한 번만)
+  if (_p2pMessages.length > 0) {
     _saveP2PSession(_p2pMessages, _peerInfo, _sessionStart)
       .catch(e => console.warn('[P2P] PDV 저장 실패 (무시):', e.message));
+    _p2pMessages = [];
   }
-
-  // BUG-FIX(2026-07-02): 별도 오버레이 제거 대신, 메인 채팅 통합 리팩터링의
-  // 일부로 webrtc.js의 _clearPeer()를 재사용 — peer-bar 숨기기, msg-input
-  // placeholder 복원, "🤖 AI 비서와 대화합니다" 안내까지 한 번에 처리된다.
-  _clearPeer({ silent: true });
-  // 종료되면 두 쪽 모두 나만의 AI 비서 화면으로 돌아간다 — AI 비서의 이전 대화를 되살리고, 누구와의 대화가 끝났는지 알린다.
-  _restoreAIChat(_endedPeerName);
-
-  _peerInfo     = null;
   window.__naviCallBusy = false;
-  _p2pMessages  = [];
+
+  // 화면: 창은 남기고 "종료됨" 표시. 위쪽 단추는 "대화창 닫기"로 바뀐다.
+  appendBubble('system', byPeer ? `🔴 ${name}님이 대화를 종료했습니다.` : `🔴 ${name}님과의 대화를 종료했습니다.`);
+  _markPeerBarEnded(name);
+
+  const yes = await _confirmModal(
+    byPeer ? `${name}님이 대화를 종료했습니다.\n메인 채팅창(나만의 AI 비서)으로 돌아갈까요?`
+           : `${name}님과의 대화창을 닫을까요?\n닫으면 나만의 AI 비서로 돌아갑니다.`,
+    byPeer ? '돌아가기' : '닫기',
+    '아니오(대화 읽기)'
+  );
+  if (yes) _leavePeerWindow();
+  else appendBubble('system', '대화창을 그대로 두었습니다. 다 읽으신 뒤 위쪽 "대화창 닫기"를 누르면 나만의 AI 비서로 돌아갑니다.');
+}
+
+function _markPeerBarEnded(name) {
+  try {
+    const hd = document.getElementById('peer-handle');
+    if (hd) hd.textContent = '대화 종료됨';
+    const btn = document.getElementById('peer-close-btn');
+    if (btn) { const t = btn.querySelector('.lbl'); if (t) t.textContent = '대화창 닫기'; }
+    const inp = document.getElementById('msg-input');
+    if (inp) inp.placeholder = '종료된 대화입니다 — 위쪽 "대화창 닫기"를 누르세요';
+  } catch {}
+}
+
+function _leavePeerWindow() {
+  const name = _peerDisplayName();
+  window.__p2pEnded = false;
+  _clearPeer({ silent: true });
+  _peerInfo = null;
   _sessionStart = null;
+  try { const b = document.getElementById('peer-close-btn'); const t = b && b.querySelector('.lbl'); if (t) t.textContent = '종료'; } catch {}
+  // 나만의 AI 비서의 이전 대화를 되살리고 누구와의 대화가 끝났는지 알린다.
+  _restoreAIChat(name);
+}
+
+// 위쪽 단추(peer-bar) — 진행 중이면 종료(+팝업), 이미 종료된 창이면 곧바로 닫고 복귀
+function _closeP2P() {
+  if (window.__p2pEnded) { _leavePeerWindow(); return; }
+  _endP2PSession();
 }
 
 // ── P2P 세션 PDV 저장 + OpenHash 앵커링 ─────────────────

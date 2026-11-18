@@ -29284,7 +29284,7 @@ async function handleFriendInviteNotify(request, env, corsHeaders) {
   try { me = await _l1FindProfileByGuid(env, who.guid); } catch (e) { /* 이름 없이 발송 */ }
   const name = (me && (me.nickname || me.handle)) || '누군가';
   try {
-    await _sendPushToGuid(env, to, { title: '나비웹 대화 요청', body: `${name}님이 대화를 시도했습니다.`, tag: `p2p-invite-${who.guid}`, url: 'https://app.naviweb.kr/webapp.html' });
+    await _sendPushToGuid(env, to, { title: '나비웹 대화 요청', body: `${name}님이 대화를 시도했습니다.`, tag: `p2p-invite-${who.guid}`, url: '/webapp.html' });
   } catch (e) { return new Response(JSON.stringify({ ok: true, pushed: false }), { status: 200, headers: corsHeaders }); }
   return new Response(JSON.stringify({ ok: true, pushed: true }), { status: 200, headers: corsHeaders });
 }
@@ -29402,7 +29402,7 @@ async function handleFriendRefClaim(request, env, corsHeaders) {
   if (!mint.ok) return _err(502, 'MINT_FAILED', '보상 지급 실패(다시 시도됩니다)', corsHeaders);   // 플래그를 세우지 않아 다음 실행에서 재시도
   try { await kv.put(doneKey, new Date().toISOString()); await kv.put(cntKey, String(cnt + 1)); } catch (e) { console.warn('[RefClaim] 플래그 기록 실패(지급은 완료):', e.message); }
   console.log(JSON.stringify({ tag: 'REFERRAL_REWARD_GRANTED', referrer, invitee: who.guid, krw: REFERRAL_REWARD_KRW, ts: new Date().toISOString() }));
-  try { await _sendPushToGuid(env, referrer, { title: '친구 초대 보상', body: `${me.nickname || '초대한 친구'}님이 가입해 ${REFERRAL_REWARD_KRW.toLocaleString('ko-KR')} GDC가 지급되었습니다.`, tag: 'referral-reward', url: 'https://app.naviweb.kr/webapp.html' }); } catch (e) { /* 알림 실패는 무시 */ }
+  try { await _sendPushToGuid(env, referrer, { title: '친구 초대 보상', body: `${me.nickname || '초대한 친구'}님이 가입해 ${REFERRAL_REWARD_KRW.toLocaleString('ko-KR')} GDC가 지급되었습니다.`, tag: 'referral-reward', url: '/webapp.html' }); } catch (e) { /* 알림 실패는 무시 */ }
   return reply('granted');
 }
 

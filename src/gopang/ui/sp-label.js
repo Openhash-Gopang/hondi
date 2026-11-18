@@ -11,11 +11,16 @@ export function spLabelText(label) {
   return STAGE_NAMES[l] ? `${l} · ${STAGE_NAMES[l]}` : l;
 }
 export function getSPLabel() { try { return localStorage.getItem(KEY) || ''; } catch { return ''; } }
+// 2026-11-18(주피터 지시) — 모든 대화창 상단에 "지금 누구와 대화 중인지"를 항상 보여 준다.
+// 사람과 대화 중이면 그 사람 이름이 우선(저장하지 않음 — 새로고침하면 사라진다), 아니면 SP 이름, 둘 다 없으면 기본 "나만의 AI 비서".
+export const DEFAULT_SP_NAME = '나만의 AI 비서';
+let _peerLabel = '';
+export function setPeerLabel(text) { _peerLabel = String(text || '').trim(); renderSPLabel(); }
 export function renderSPLabel() {
   try {
     const el = document.getElementById('ai-sp-label'); if (!el) return;
-    const t = spLabelText(getSPLabel());
-    el.textContent = t; el.hidden = !t;
+    const t = _peerLabel || spLabelText(getSPLabel()) || DEFAULT_SP_NAME;
+    el.textContent = t; el.hidden = false;
   } catch {}
 }
 export function setSPLabel(label) {
