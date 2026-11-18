@@ -22,7 +22,7 @@ import { classifyQuery as _ffClassify, publicCard as _ffPublicCard, rateLimitOk 
 import { referralCode as _refCode, isReferralCode as _isRefCode, inviteText as _refInviteText, inviteLink as _refInviteLink, withinClaimWindow as _refInWindow, REFERRAL_REWARD_KRW, REFERRAL_MAX_REWARDS } from './src/worker/referral.js';
 import { computeChargeGdc as _computeChargeGdc } from './src/worker/charge-plans.js';
 import { makePlanRequest as _planMakeRequest, judgeDeposit as _planJudgeDeposit, nextPaidUntil as _planNextPaidUntil, validTier as _planValidTier, DEFAULT_KRW_PER_USD as _PLAN_DEFAULT_RATE } from './src/worker/plan-pay.js';
-import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, startFree as _testQuotaStartFree, resetFree as _testQuotaResetFree, setPlan as _testQuotaSetPlan, setPaid as _testQuotaSetPaid, setExtra as _testQuotaSetExtra, addExtraSpend as _testQuotaAddExtra, exhaustedMessage as _planExhaustedMessage, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage } from './src/worker/test-quota.js';
+import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, startFree as _testQuotaStartFree, resetFree as _testQuotaResetFree, setPlan as _testQuotaSetPlan, setPaid as _testQuotaSetPaid, setExtra as _testQuotaSetExtra, addExtraSpend as _testQuotaAddExtra, exhaustedMessage as _planExhaustedMessage, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage, addBonus as _testQuotaAddBonus, peek as _testQuotaPeek } from './src/worker/test-quota.js';
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
 import { parseMessage as _kmailParseMime, decodeMimeWords as _kmailDecodeMimeWords, repairStoredText as _kmailRepairStoredText } from './src/worker/mime-text.js';
 import { checkSenderName as _kmailCheckSenderName, effectiveSenderName as _kmailEffectiveSenderName, renderSignature as _kmailRenderSignature, campaignReplyTo as _kmailCampaignReplyTo, replyToWithName as _kmailReplyToWithName, REPLY_TO_SELF as _KMAIL_REPLY_TO_SELF, formatSender as _kmailFormatSender, describeSender as _kmailDescribeSender, SENDER_NAME_MAX as _KMAIL_SENDER_NAME_MAX } from './src/worker/kmail-sender.js';
@@ -14220,6 +14220,7 @@ export default {
     if (pathname === '/auth/free-plan')          return handleFreePlan(request, env, corsHeaders);
     if (pathname === '/auth/extra-usage')        return handleExtraUsage(request, env, corsHeaders);
     if (pathname === '/admin/quota-reset')       return handleAdminQuotaReset(request, env, corsHeaders);
+    if (pathname === '/admin/free-quota-bonus')  return handleAdminFreeQuotaBonus(request, env, corsHeaders);
     if (pathname === '/admin/owner-unlimited')   return handleAdminOwnerUnlimited(request, env, corsHeaders);
     if (pathname === '/admin/refund-requests')   return handleAdminRefundRequests(request, env, corsHeaders);
     if (pathname === '/admin/plan-set')          return handleAdminPlanSet(request, env, corsHeaders);
@@ -21472,6 +21473,80 @@ async function handleAdminQuotaReset(request, env, corsHeaders) {
   if (body?.reset === true) { await _testQuotaResetFree(env.AI_SETUP_SEALS_KV, guid, now); _freeTrialMem.delete(guid); }
   const ev = await _testQuotaGetStatus(env.AI_SETUP_SEALS_KV, guid, now, _testQuotaConfig(env));
   return new Response(JSON.stringify({ ok: true, guid, reset: body?.reset === true, at: new Date(now).toISOString(), ...ev }), { status: 200, headers: corsHeaders });
+}
+
+// POST /admin/free-quota-bonus — 최근 N일 안에 가입한 사용자에게 무료 한도(AI 사용 비용, 원)를 추가한다(2026-11-19, 주피터 지시).
+//  GDC 를 발행·지급하지 않는다. 계정별 bonus_krw 만 늘리며 무료 이용 기간(30일)은 그대로다.
+//  body: { tag(필수, 예 'bonus-20261119'), days=15, krw=1000, dry_run=true(기본), offset=0, batch=15 }
+//   · 가입 시각은 L1 profiles 의 created(레코드 생성 시각) 기준이다.
+//   · dry_run(기본 true): 쓰기 없이 대상 수·기간·표본만 보여 준다. 실제로 적용하려면 dry_run:false 를 명시한다.
+//   · 한 번에 batch 명(기본 15, 최대 25)만 처리한다(워커 하위 요청 한도). 응답의 next_offset 이 null 이 될 때까지 같은 요청에 offset 만 바꿔 반복한다.
+//   · 같은 tag 는 계정당 한 번만 반영된다 — 중간에 끊겨도, 같은 요청을 다시 보내도 중복 지급되지 않는다.
+async function handleAdminFreeQuotaBonus(request, env, corsHeaders) {
+  if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+  if (!(await _requireAdmin(request, env))) return _err(401, 'UNAUTHORIZED', '관리자 인증 필요', corsHeaders);
+  const kv = env.AI_SETUP_SEALS_KV;
+  if (!kv) return _err(503, 'KV_NOT_BOUND', 'KV 없음', corsHeaders);
+  const body = await request.json().catch(() => null);
+  const tag = String(body?.tag || '').trim();
+  if (!/^[A-Za-z0-9_-]{3,40}$/.test(tag)) return _err(400, 'BAD_TAG', 'tag 는 영문·숫자·-·_ 3~40자여야 합니다', corsHeaders);
+  const days = Math.floor(Number(body?.days ?? 15));
+  const krw = Math.floor(Number(body?.krw ?? 1000));
+  if (!(days >= 1 && days <= 60)) return _err(400, 'BAD_DAYS', 'days 는 1~60', corsHeaders);
+  if (!(krw >= 1 && krw <= 10000)) return _err(400, 'BAD_KRW', 'krw 는 1~10000', corsHeaders);
+  const dryRun = body?.dry_run !== false;
+  const offset = Math.max(0, Math.floor(Number(body?.offset) || 0));
+  const batch = Math.max(1, Math.min(25, Math.floor(Number(body?.batch) || 15)));
+
+  const now = Date.now();
+  const sinceIso = new Date(now - days * 86400000).toISOString().replace('T', ' ');   // PocketBase 시각 형식
+  // 1) 대상 가입자 목록(created 오름차순 — 순서가 고정돼야 offset 으로 이어 갈 수 있다)
+  const users = [];
+  try {
+    const token = await _l1AdminToken(env);
+    for (let page = 1; page <= 50; page++) {
+      const filter = encodeURIComponent(`created>='${sinceIso}'`);
+      const res = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${filter}&sort=created,id&perPage=200&page=${page}&fields=guid,handle,created`, { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) return _err(502, 'L1_ERROR', `L1 조회 실패 (HTTP ${res.status})`, corsHeaders);
+      const j = await res.json().catch(() => ({ items: [] }));
+      for (const it of (j.items || [])) if (it && it.guid) users.push({ guid: it.guid, handle: it.handle || '', created: it.created || '' });
+      if (!(j.items && j.items.length === 200)) break;
+    }
+  } catch (e) { return _err(502, 'L1_ERROR', 'L1 조회 실패: ' + e.message, corsHeaders); }
+
+  const cfg = _testQuotaConfig(env);
+  const summary = {
+    tag, days, krw, since: sinceIso, total: users.length,
+    test_accounts: users.filter(u => String(u.handle).startsWith('tid-')).length,
+    first_created: users[0] ? users[0].created : null, last_created: users.length ? users[users.length - 1].created : null,
+    free_trial_mode_on: _gdcFreeTestOn(env),   // false 면 무료 이용 규칙(무료 한도)이 지금 적용되지 않는다 — 지급해도 효과가 없다
+  };
+  if (dryRun) {
+    const sample = [];
+    for (const u of users.slice(0, 5)) {
+      const ev = await _testQuotaPeek(kv, u.guid, now, cfg).catch(() => null);
+      sample.push({ guid: String(u.guid).slice(0, 12) + '…', handle: u.handle, created: u.created, status: ev ? ev.status : '기록없음', spent_krw: ev ? ev.spent_krw : 0, limit_krw: ev ? ev.limit_krw : cfg.limitKrw });
+    }
+    return new Response(JSON.stringify({ ok: true, dry_run: true, ...summary, sample }), { status: 200, headers: corsHeaders });
+  }
+
+  // 2) 이번 배치 적용
+  const slice = users.slice(offset, offset + batch);
+  let applied = 0, already = 0, failed = 0;
+  const reactivated = [];
+  for (const u of slice) {
+    try {
+      const before = await _testQuotaPeek(kv, u.guid, now, cfg).catch(() => null);
+      const r = await _testQuotaAddBonus(kv, u.guid, krw, tag, now, cfg);
+      _freeTrialMem.delete(u.guid);
+      if (r.applied) { applied++; if (before && before.status === 'blocked' && r.status && r.status.status === 'active') reactivated.push(u.handle || u.guid.slice(0, 12)); }
+      else if (r.reason === 'ALREADY') already++;
+      else failed++;
+    } catch (e) { failed++; }
+  }
+  const next = offset + slice.length;
+  console.log(JSON.stringify({ tag: 'FREE_QUOTA_BONUS_BATCH', bonus_tag: tag, krw, offset, size: slice.length, applied, already, failed, reactivated: reactivated.length, ts: new Date(now).toISOString() }));
+  return new Response(JSON.stringify({ ok: true, dry_run: false, ...summary, offset, processed: slice.length, applied, already_applied: already, failed, reactivated, next_offset: next < users.length ? next : null }), { status: 200, headers: corsHeaders });
 }
 
 // GET/POST /admin/owner-unlimited — 관리자 면제 계정 관리(2026-11-10). 관리자 인증 필요.
