@@ -215,6 +215,12 @@ export async function startP2PCall(targetUser) {
   }
   // 이전 시도(재연결 등)가 정리되지 않고 남아있으면 먼저 로컬 정리.
   // (이전 watcher는 _activeCallId가 바뀌는 즉시 스스로 종료됨 — 아래 참고)
+  // 재호출이면 이전 시도를 상대에게 취소 신호로 알린다 — 알리지 않으면 상대가 이미 죽은 이전 호출을 수락해 연결이 끊긴다(2026-11-18 실제 관찰).
+  const _prevCallId = _activeCallId, _prevGuid = _peerInfo?.guid;
+  const _prevOpen = !!(_rtcChannel && _rtcChannel.readyState === 'open');
+  if (_prevCallId && _prevGuid && !_prevOpen) {
+    _signalSendDirect(_USER.ipv6, _prevGuid, 'ice', { cancel: true, callId: _prevCallId }).catch(() => {});
+  }
   if (_rtcConn || _rtcChannel) {
     try { _rtcChannel?.close(); } catch {}
     try { _rtcConn?.close(); } catch {}
@@ -336,7 +342,7 @@ function _watchAnswerRealtime(conn, targetUser, callId) {
         _notify('✅ 연결됐습니다. 채널이 열리면 메시지를 입력하세요.');
         console.info('[P2P] answer 수신 완료');
         // answer 수신 후 잠시 뒤 watcher 종료 (ICE는 ondatachannel onopen 후 불필요)
-        setTimeout(_close, 10000);
+        setTimeout(_close, 60000);   // 연결이 열릴 때까지 늦게 오는 ICE 후보(중계 경로)를 계속 받는다 — 예전엔 10초 뒤 끊어 늦은 후보를 놓쳤다
       } catch(e) { console.warn('[P2P] answer setRemoteDescription 실패:', e.message); }
     }
 
@@ -444,11 +450,13 @@ async function _verifiedCaller(fromGuid) {
 
 // 2026-11-16 — 새 호출(offer)을 막는 조건을 '대화 중이거나 막 연결하는 중일 때'로만 좁힌다. 이전 연결이 끊긴 채 _peerInfo 만 남은 창(오래 켜 둔 탭 등)이
 // 이후 모든 호출을 조용히 무시해 상대가 "응답 없음"을 보던 문제. 끊긴 흔적이면 정리하고 새 호출을 받는다.
-function _busyWithPeer() {
+function _busyWithPeer(fromGuid) {
   if (!_peerInfo) return false;
   if (_rtcChannel && _rtcChannel.readyState === 'open') return true;
+  // 같은 상대가 다시 호출했고 아직 열리지 않은 연결이면, 그 이전 시도는 버리고 새 호출을 받는다.
+  if (fromGuid && _peerInfo.guid === fromGuid) { try { _rtcChannel?.close(); } catch {} try { _rtcConn?.close(); } catch {} setRtcChannel(null); setRtcConn(null); _activeCallIdCallee = null; _peerInfo = null; window.__naviCallBusy = false; try { _clearPeer({ silent: true }); } catch {} return false; }
   const st = _rtcConn && _rtcConn.connectionState;
-  const fresh = _peerInfo.__since && (Date.now() - _peerInfo.__since < 30000);
+  const fresh = _peerInfo.__since && (Date.now() - _peerInfo.__since < 60000);
   if (fresh && (!_rtcConn || (st !== 'closed' && st !== 'failed' && st !== 'disconnected'))) return true;
   try { if (_rtcChannel) _rtcChannel.close(); } catch {}
   try { if (_rtcConn) _rtcConn.close(); } catch {}
@@ -526,6 +534,8 @@ export async function handleIncomingOffer(signal) {
   // BUG-FIX(2026-07-02): _pendingModalCallId를 세팅해둬야 그 사이 발신측이
   // 포기했을 때(_handleIncomingCancel) 이 모달을 정확히 찾아서 강제로
   // 닫을 수 있다.
+  // 더 새 호출이 오면 아직 떠 있는 이전 호출 모달은 닫는다(이미 끝난 호출을 수락하지 않도록).
+  if (_pendingModalCallId && _pendingModalCallId !== callId && _activeModalDismiss) _activeModalDismiss(null);
   _pendingModalCallId = callId;
   const _tapped = (window.__naviAcceptUntil || 0) > Date.now();
   const accepted = _tapped ? true : await _showIncomingCallModal(fromName);
@@ -597,7 +607,7 @@ export async function handleIncomingOffer(signal) {
     if (_rtcConn)    { try { _rtcConn.close(); }    catch {} setRtcConn(null); }
     _peerInfo = null; window.__naviCallBusy = false;
     try { _clearPeer(); } catch {}
-  }, 20000);
+  }, 45000);
   _calleeConnectTimers.set(_calleeCallId, calleeConnectTimer);
 
   // ICE 폴링
@@ -627,6 +637,7 @@ function _setupConn(conn, peer, callId) {
     console.info('[P2P] 연결 상태:', state);
     if (state === 'connected') {
       _stopPoll();
+      if (conn.__lost) _onLinkRecovered(conn, peer);
       // 실제 메인 대화창 전환은 datachannel이 열릴 때(_setupChannel.onopen)
       // 하지만, ICE 레벨에서도 이미 연결됐다는 저수준 신호를 남겨둔다.
       _notify('🔒 암호화 채널 개설됨.');
@@ -634,6 +645,8 @@ function _setupConn(conn, peer, callId) {
     if (state === 'disconnected' || state === 'failed' || state === 'closed') {
       _stopPoll();
       // 같은 연결에서 상태가 연달아 바뀌어도 안내는 한 번만, 그리고 끊긴 상대가 대화창 상단에 남아 AI 비서가 대신 답하는 혼동이 없게 정리한다.
+      // 한 번 열렸던 대화가 끊긴 경우: 사용자가 종료를 고르기 전에는 창을 닫지 않고 다시 연결을 시도한다.
+      if (conn.__everOpen && _rtcConn === conn && !window.__p2pEnded) { _onLinkLost(conn, peer, callId); return; }
       if (conn.__lostNotified) return;
       const _drop = () => {
         if (conn.__lostNotified || conn.connectionState === 'connected') return;
@@ -641,9 +654,75 @@ function _setupConn(conn, peer, callId) {
         appendBubble('system', `🔴 ${peer.nickname || peer.handle || '상대'}님과 연결이 끊어졌습니다. 다시 대화하려면 "${peer.nickname || peer.handle || '상대'} 불러 줘"라고 말씀해 주세요.`);
         if (_rtcConn === conn) { _activeCallIdCallee = null; _peerInfo = null; window.__naviCallBusy = false; _clearPeer(); }
       };
-      if (state === 'disconnected') setTimeout(_drop, 8000); else _drop();   // disconnected 는 잠깐 끊겼다 돌아올 수 있어 8초 기다린다
+      if (state === 'disconnected') setTimeout(_drop, 15000); else _drop();   // disconnected 는 잠깐 끊겼다 돌아올 수 있어 8초 기다린다
     }
   };
+}
+
+
+// ── 끊긴 연결 복구 (2026-11-18, 주피터 지시: 사용자가 종료를 고르기 전에는 연결이 유지되어야 한다) ──
+// 한 번 열린 대화가 끊기면 창을 닫지 않고 상단에 상태를 보이며 다시 연결한다.
+// 건 쪽(발신측)이 ICE 재시작 offer 를 보내고, 받는 쪽이 answer 로 답한다(둘 다 시그널 'ice' 로 주고받음). 3분 안에 안 되면 안내만 하고 창은 그대로 둔다.
+function _peerHandleText(peer) {
+  return (!peer.nickname || peer.nickname === peer.handle) && peer.handle ? '@' + String(peer.handle).replace(/^@/, '') : '';
+}
+function _setPeerBarStatus(text) { try { const hd = document.getElementById('peer-handle'); if (hd) hd.textContent = text; } catch {} }
+
+async function _icerestartHandler(conn, peer, sig) {
+  if (sig.type !== 'ice' || sig.from_guid !== peer.guid) return;
+  const p = typeof sig.payload === 'string' ? JSON.parse(sig.payload) : (sig.payload || {});
+  if (p.bye) { _endP2PSession({ byPeer: true }); return; }
+  try {
+    if (p.restartOffer && peer.__incoming) {
+      await conn.setRemoteDescription(new RTCSessionDescription(p.restartOffer));
+      const ans = await conn.createAnswer();
+      await conn.setLocalDescription(ans);
+      await _waitForIce(conn, 3000);
+      await _signalSend({ from_guid: _USER.ipv6, to_guid: peer.guid, type: 'ice', payload: { restartAnswer: conn.localDescription, callId: p.callId } });
+    } else if (p.restartAnswer && !peer.__incoming) {
+      if (conn.signalingState === 'have-local-offer') await conn.setRemoteDescription(new RTCSessionDescription(p.restartAnswer));
+    } else if (p.candidate && conn.remoteDescription) {
+      await conn.addIceCandidate(new RTCIceCandidate(p.candidate)).catch(() => {});
+    }
+  } catch (e) { console.warn('[P2P] 재연결 신호 처리 실패:', e.message); }
+}
+
+function _onLinkLost(conn, peer, callId) {
+  if (conn.__lost) return;
+  conn.__lost = true;
+  window.__p2pLinkLost = true;
+  const t0 = Date.now();
+  const name = peer.nickname || peer.handle || '상대';
+  _setPeerBarStatus('연결 끊김 — 다시 연결하는 중…');
+  appendBubble('system', `⚠️ ${name}님과 연결이 잠시 끊겼습니다. 자동으로 다시 연결합니다. 대화창은 그대로 둡니다.`);
+  _startPoll(_USER.ipv6, sig => _icerestartHandler(conn, peer, sig));
+  const tick = async () => {
+    if (!conn.__lost || _rtcConn !== conn || window.__p2pEnded) return;
+    if (Date.now() - t0 > 180000) {
+      _setPeerBarStatus('연결 끊김');
+      appendBubble('system', `⚠️ ${name}님과 다시 연결하지 못했습니다. 위쪽 "종료"를 누른 뒤 다시 호출해 주세요. (자동으로 닫지는 않습니다)`);
+      return;
+    }
+    if (!peer.__incoming) {   // 건 쪽만 재시작 offer 를 보낸다(양쪽이 동시에 보내 충돌하는 것을 막는다)
+      try {
+        if (conn.restartIce) conn.restartIce();
+        const off = await conn.createOffer({ iceRestart: true });
+        await conn.setLocalDescription(off);
+        await _waitForIce(conn, 3000);
+        await _signalSend({ from_guid: _USER.ipv6, to_guid: peer.guid, type: 'ice', payload: { restartOffer: conn.localDescription, callId } });
+      } catch (e) { console.warn('[P2P] ICE 재시작 실패:', e.message); }
+    }
+    conn.__lostTimer = setTimeout(tick, 10000);
+  };
+  tick();
+}
+
+function _onLinkRecovered(conn, peer) {
+  conn.__lost = false;
+  window.__p2pLinkLost = false;
+  if (conn.__lostTimer) { clearTimeout(conn.__lostTimer); conn.__lostTimer = null; }
+  _setPeerBarStatus(_peerHandleText(peer));
+  appendBubble('system', `✅ ${peer.nickname || peer.handle || '상대'}님과 다시 연결됐습니다.`);
 }
 
 // ── DataChannel 공통 설정 ─────────────────────────────────
@@ -656,12 +735,16 @@ function _setupChannel(channel) {
     // 필요 없다.
     for (const t of _calleeConnectTimers.values()) clearTimeout(t);
     _calleeConnectTimers.clear();
+    if (_rtcConn) _rtcConn.__everOpen = true;
+    // 연결 유지 신호 — 통신망·공유기가 오래 조용한 연결을 끊지 않게 10초마다 보낸다.
+    channel.__ka = setInterval(() => { if (channel.readyState === 'open') { try { channel.send('{"type":"ping"}'); } catch {} } }, 10000);
     if (_peerInfo) _activatePeerInMainChat(_peerInfo);
   };
 
   channel.onmessage = e => {
     try {
       const msg = JSON.parse(e.data);
+      if (msg.type === 'ping') return;   // 연결 유지 신호
       if (msg.type === 'bye') {
         channel.__ending = true;
         // 상대가 끝냈다 — 저장하고 "종료됨" 상태로 두되, 읽던 대화가 사라지지 않게 창은 사용자가 정할 때까지 남긴다.
@@ -679,6 +762,7 @@ function _setupChannel(channel) {
   };
 
   channel.onclose = () => {
+    if (channel.__ka) { clearInterval(channel.__ka); channel.__ka = null; }
     // 내가 끝냈거나 상대가 종료 신호를 보낸 정상 종료에는 따로 안내하므로(복귀 메시지) 여기서는 찍지 않는다. 네트워크 끊김처럼 예기치 않은 닫힘만 알린다.
     if (channel.__ending || !_peerInfo) return;
     appendBubble('system', '채널이 닫혔습니다.');
@@ -1177,7 +1261,7 @@ export function startIncomingWatch(myGuid) {
       }
     }
 
-    if (row.type === 'offer' && !_busyWithPeer()) {
+    if (row.type === 'offer' && !_busyWithPeer(row.from_guid)) {
       await handleIncomingOffer(row);
       _signalDeleteDirect(row.id);
     }
@@ -1205,7 +1289,7 @@ export function startIncomingWatch(myGuid) {
           const _p = typeof sig.payload === 'string' ? JSON.parse(sig.payload) : (sig.payload || {});
           if (_p.cancel) { await _handleSignalRow(sig); continue; }
         }
-        if (sig.type === 'offer' && !_busyWithPeer()) { await _handleSignalRow(sig); break; }
+        if (sig.type === 'offer' && !_busyWithPeer(sig.from_guid)) { await _handleSignalRow(sig); break; }
       }
     } catch {}
   }, 3000);
