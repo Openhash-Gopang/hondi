@@ -34464,7 +34464,8 @@ async function _encryptWebPushPayload(payloadStr, p256dhB64u, authB64u) {
 // 계속 남아 매번 조용히 실패하기만 했다(§PUSH_SUBSCRIPTION_HIJACK_
 // 2026_07_21.md §4 후속). 호출부가 status===410을 보고 그 자리에서
 // pruning할 수 있게 한다.
-async function _sendWebPush(env, subscription, payload, urgency = 'normal') {
+// 2026-11-18(주피터 지시: 모든 알림에 소리가 나야 한다) — 기본 urgency 를 'high' 로 올린다. 'normal' 은 Doze 상태 폰에서 몇 분씩 배칭·지연되어 소리 없이 늦게 도착한다.
+async function _sendWebPush(env, subscription, payload, urgency = 'high') {
   // 2026-11-17 신설 — 안드로이드 앱 기기는 웹 푸시 대신 FCM 토큰({kind:'fcm', token})으로
   // 등록된다. 모든 발송 지점이 이 함수를 거치므로 여기서 한 번만 분기한다.
   // 반환 계약({ ok, status })은 동일 — 404/410이면 호출부가 죽은 토큰을 정리한다.
