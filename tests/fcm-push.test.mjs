@@ -40,6 +40,7 @@ describe('fcm-push', () => {
   it('채널 매핑', () => {
     assert.equal(channelForTag('gopang-device-link-s1-0'), 'calls');
     assert.equal(channelForTag('p2p-invite-abc'), 'calls');
+    assert.equal(channelForTag('gopang-call-abc12345'), 'calls');
     assert.equal(channelForTag('gopang-version-update'), 'system');
     assert.equal(channelForTag('referral-reward'), 'messages');
     assert.equal(channelForTag(undefined), 'messages');

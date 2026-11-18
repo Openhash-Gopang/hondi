@@ -1,6 +1,7 @@
 ﻿/**
  * p2p/webrtc.js — P2P WebRTC DataChannel + 시그널링 + PDV 채팅 저장
  */
+import { setPeerLabel } from '../ui/sp-label.js';
 import {
   _peer, _rtcConn, _rtcChannel, _signalPoll, _pdvChatDB,
   setPeerState, setRtcConn, setRtcChannel, setSignalPoll, setPdvChatDB,
@@ -48,6 +49,8 @@ export function _clearPeer({ silent = false } = {}) {
   if (bar) bar.style.display = 'none';
   const inp = document.getElementById('msg-input');
   if (inp) inp.placeholder = '메시지를 입력하세요…';
+  // 상단 머리글·입력창 안내를 다시 나만의 AI 비서 기준으로 돌린다(상대와 대화 중일 때 바꿔 둔 것)
+  try { setPeerLabel(''); const ci = document.querySelector('#ai-panel-input-slot .ci-input'); if (ci) ci.placeholder = 'AI 비서에게 요청하세요…'; } catch {}
   if (!silent) appendBubble('system', '🤖 AI 비서와 대화합니다.');
 }
 

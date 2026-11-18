@@ -21,6 +21,7 @@ export function renderSPLabel() {
     const el = document.getElementById('ai-sp-label'); if (!el) return;
     const t = _peerLabel || spLabelText(getSPLabel()) || DEFAULT_SP_NAME;
     el.textContent = t; el.hidden = false;
+    el.classList.toggle('peer', !!_peerLabel);   // 사람과 대화 중이면 다른 색으로 — 한눈에 AI 비서와 구별된다
   } catch {}
 }
 export function setSPLabel(label) {
