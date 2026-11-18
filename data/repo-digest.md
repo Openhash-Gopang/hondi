@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-19 08:34 KST · 기준 커밋 edaca2a6
+- 갱신: 2026-11-19 08:43 KST · 기준 커밋 5cc4df1e
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-19 Merge pull request #1223 from Openhash-Gopang/diag-ice-candidates-20261119
+- 2026-11-19 진단: SDP·ICE 후보 종류/송수신 결과 기록, 검사 중 후보 쌍 통계 미리 저장
 - 2026-11-19 Merge pull request #1222 from Openhash-Gopang/feat-cf-turn-20261119
 - 2026-11-19 TURN: Cloudflare Realtime TURN 자격 발급 우선 사용(실패 시 기존 경로)
 - 2026-11-19 Merge pull request #1221 from Openhash-Gopang/fix-pwa-mandatory-no-tab-20261119
@@ -42,8 +44,6 @@
 - 2026-11-18 Merge pull request #1204 from Openhash-Gopang/fix/navi-home-sidebar-logo-ghost
 - 2026-11-18 fix(navi-home): PC 사이드바 접힘 상태에서 로고 아래 비치는 잔상 제거
 - 2026-11-18 fix(sw): 캐시 먼저 경로에서도 redirected 표시를 떼어 naviweb.kr 간헐 ERR_FAILED 해소
-- 2026-11-17 feat: 앱 설치 안내 페이지(install.html) + 게시 뒤 캐시 비우기
-- 2026-11-17 feat(android): 서명된 APK를 사이트(downloads/naviweb.apk)에 게시 — QR로 바로 설치
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
