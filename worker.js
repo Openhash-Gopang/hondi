@@ -30092,6 +30092,34 @@ async function handleTurnCredential(request, env, corsHeaders) {
   const guid   = url.searchParams.get('guid') || 'anonymous';
   const secret = env.TURN_SECRET;
 
+  // 2026-11-19 — Cloudflare Realtime TURN(관리형) 우선. CF_TURN_KEY_ID + CF_TURN_API_TOKEN 이 있으면
+  // 단기 자격을 발급받아 내려준다(UDP 가 막힌 셀룰러도 TCP/TLS 로 중계). 실패하면 아래 기존 경로(coturn/STUN)로 넘어간다.
+  // 구글 STUN(stun.l.google.com) 은 시험 단말 두 대 모두에서 40초 시간 초과가 나서 이 경로에서는 쓰지 않는다.
+  if (env.CF_TURN_KEY_ID && env.CF_TURN_API_TOKEN) {
+    try {
+      const r = await fetch(
+        `https://rtc.live.cloudflare.com/v1/turn/keys/${encodeURIComponent(env.CF_TURN_KEY_ID)}/credentials/generate-ice-servers`,
+        {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${env.CF_TURN_API_TOKEN}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ttl: 86400 }),
+        }
+      );
+      const j = await r.json().catch(() => null);
+      if (r.ok && j && Array.isArray(j.iceServers) && j.iceServers.length) {
+        return new Response(JSON.stringify({
+          ok: true,
+          iceServers: [...j.iceServers, { urls: 'stun:stun1.l.google.com:19302' }],
+          provider: 'cloudflare',
+          expiry: Math.floor(Date.now() / 1000) + 86400,
+        }), { status: 200, headers: { ...corsHeaders, 'Cache-Control': 'no-store' } });
+      }
+      console.warn('[TURN] Cloudflare 자격 발급 실패:', r.status);
+    } catch (e) {
+      console.warn('[TURN] Cloudflare 자격 발급 오류:', e && e.message);
+    }
+  }
+
   // TURN_SECRET 미설정 시 STUN 전용 폴백
   if (!secret) {
     console.warn('[TURN] TURN_SECRET 미설정 — STUN 전용 사용');
