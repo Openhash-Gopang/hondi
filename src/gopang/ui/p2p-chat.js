@@ -16,6 +16,7 @@ import { appendBubble } from './bubble.js';
 // 재사용한다). webrtc.js→p2p-chat.js는 동적 import(순환 없음)이므로 반대
 // 방향(정적 import)은 안전하다.
 import { _clearPeer } from '../p2p/webrtc.js';
+import { setPeerLabel } from './sp-label.js';
 import { signalPost } from '../p2p/signal-auth.js';
 
 // ── 탈중앙화 이관 ③: 시그널링 전송/수신/삭제를 L1 직접으로 ──────────────
@@ -173,6 +174,12 @@ function _activatePeerInMainChat(peer) {
   if (bar) bar.style.display = 'flex';
   const mainInput = document.getElementById('msg-input');
   if (mainInput) mainInput.placeholder = `${peer.nickname || peer.handle || '상대방'}에게 메시지…`;
+  // 2026-11-18(주피터 지시) — 상대와 대화 중임이 대화창 자체에 보이게: 상단 머리글(노란색)과 입력창 안내를 상대 기준으로 바꾼다.
+  try {
+    setPeerLabel(`${peer.nickname || peer.handle || '상대방'}님과 대화`);
+    const ci = document.querySelector('#ai-panel-input-slot .ci-input');
+    if (ci) ci.placeholder = `${peer.nickname || peer.handle || '상대방'}님에게 메시지…`;
+  } catch {}
   // 2026-11-18(주피터 지시) — closeAIPanel() 이 AI 패널 화면을 비우므로, 비우기 전에 말풍선 노드를 그대로 쥐고 있다가 대화가 끝나면 되살린다.
   // innerHTML 이 아니라 노드 참조를 쥐므로 단추 등에 붙은 이벤트도 그대로 살아 있다.
   if (!_already) {   // 비어 있으면(이미 비워진 뒤) 덮어쓰지 않는다 — 이전 세션이 정상 종료되지 않았어도 낡은 화면이 남지 않게 새로 쥔다
@@ -986,6 +993,7 @@ function _markPeerBarEnded(name) {
   try {
     const hd = document.getElementById('peer-handle');
     if (hd) hd.textContent = '대화 종료됨';
+    setPeerLabel(`${name}님과 대화 (종료됨)`);
     const btn = document.getElementById('peer-close-btn');
     if (btn) { const t = btn.querySelector('.lbl'); if (t) t.textContent = '대화창 닫기'; }
     const inp = document.getElementById('msg-input');

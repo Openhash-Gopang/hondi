@@ -30,7 +30,7 @@ export function normalizeFcmSubscription(sub) {
 // 알림 채널 선택 — 앱의 알림 채널 id(calls / messages / system)와 맞춘다.
 export function channelForTag(tag) {
   const t = String(tag || '');
-  if (t.startsWith('gopang-device-link-') || t.startsWith('p2p-invite-')) return 'calls';
+  if (t.startsWith('gopang-device-link-') || t.startsWith('p2p-invite-') || t.startsWith('gopang-call-')) return 'calls';   // 대화 호출(gopang-call-)도 소리·진동이 강한 calls 채널로
   if (t === 'gopang-version-update') return 'system';
   return 'messages';
 }
