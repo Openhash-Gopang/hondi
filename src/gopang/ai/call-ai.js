@@ -5445,6 +5445,16 @@ export async function runStageZero(userText, imageFile = null, _preTab = null) {
       let _msg;
       if (_fm.user) {
         const _u = _fm.user, _nm = _u.nickname || _u.mail_id || _u.handle;
+        // 2026-11-19(주피터 지시) — 이미 그 상대와 연결하는 중이면 이름을 또 보내도 통화를 다시 시작하지 않는다(앞 통화가 취소되고 상대가 두 번 호출받는다).
+        try {
+          const { isCallConnecting } = await import('../ui/p2p-chat.js');
+          if (isCallConnecting(_u.guid)) {
+            _msg = `${_nm}님과 연결하는 중입니다. 잠시만 기다려 주세요.`;
+            appendBubble('ai', _msg); history.push({ role: 'assistant', content: _msg });
+            if (_preTab && !_preTab.closed) { try { _preTab.close(); } catch {} }
+            return true;
+          }
+        } catch {}
         // 2026-11-16(주피터 지시) — 미리 열어 둔 새 탭이 있으면 그 탭에서 대화를 시작한다(탭이 빈 화면으로 남지 않게). 없으면(차단 등) 이 창에서 시작한다.
         if (_preTab && !_preTab.closed) {
           _msg = `${_nm}님을 호출했습니다. 새 탭에서 대화를 시작합니다.`;
