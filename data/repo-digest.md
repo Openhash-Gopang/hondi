@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-19 07:58 KST · 기준 커밋 68f636c8
+- 갱신: 2026-11-19 08:04 KST · 기준 커밋 fc27fb80
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-19 Merge pull request #1219 from Openhash-Gopang/fix-diag-lifecycle-20261119
+- 2026-11-19 diag: 여러 창·새로고침에서 기록이 덮어써지지 않게 하고 페이지 생명주기 기록 추가
 - 2026-11-19 Merge pull request #1218 from Openhash-Gopang/feat/free-quota-bonus-20261119
 - 2026-11-19 feat(quota): 최근 N일 가입자에게 무료 한도(원)를 추가하는 관리자 기능
 - 2026-11-19 Merge pull request #1217 from Openhash-Gopang/fix-diag-command-hang-20261119
@@ -42,8 +44,6 @@
 - 2026-11-17 feat(android): 개인 서명키 지원(secrets 주입) + 키 생성 스크립트, 릴리스 빌드로 전환
 - 2026-11-17 feat(android): 앱 아이콘을 노랑 바탕 시안으로 교체 (웹앱 아이콘과 구분)
 - 2026-11-17 chore(android): Firebase 공개 API 키 설정 (푸시 토큰 발급용)
-- 2026-11-17 feat(web): 안드로이드 앱 FCM 토큰 수신·등록
-- 2026-11-17 feat(android): 나비웹 TWA 앱 뼈대 + 시험 APK 빌드 + assetlinks.json
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
