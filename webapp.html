@@ -5551,7 +5551,11 @@ function _messagesWithLocation(historyArr) {
     // 입력은 AI 비서가 아니라 상대에게 보낸다. 연결이 아직 열리지 않았거나 끊겼으면 AI에 넘기지 않고 안내만 한다.
     if (text && !attachedList.length) {
       try {
+        const _dg = await import('/src/gopang/core/diag.js');   // 2026-11-19 임시 진단: "진단" 입력 시 보고서
         const st = await import('/src/gopang/core/state.js');
+        const _bb = await import('/src/gopang/ui/bubble.js');
+        if (await _dg.diagHandleCommand(text, _bb.appendBubble)) return;
+        _dg.diag('입력 전달', { 대상: st._peer ? '상대(P2P)' : 'AI 비서', 상대설정: !!st._peer, 채널: (st._rtcChannel && st._rtcChannel.readyState) || '없음', 종료됨: !!window.__p2pEnded, 머리글: (document.getElementById('ai-sp-label') || {}).textContent || '' });
         if (st._peer) {
           const { appendBubble } = await import('/src/gopang/ui/bubble.js');
           appendBubble('user', text);
