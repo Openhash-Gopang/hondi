@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-19 23:22 KST · 기준 커밋 10b7bc64
+- 갱신: 2026-11-19 23:31 KST · 기준 커밋 6096a890
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-19 Merge pull request #1246 from Openhash-Gopang/docs/manual-ch13-navicode
+- 2026-11-19 docs(manual): 제13장 나비 숫자 코드 — 언어별 가게·기관 AI 비서 화면, 리뷰·GDC 결제, 기관 이점, 단색 일러스트
 - 2026-11-19 docs: 12장·설계 v0.2 — 폰·PC 융합(동일 계정, 이미지 AI 직접 전달, 모든 서류 공통)
 - 2026-11-19 docs: 매뉴얼 12장 폰·PC 공동 작업 안내 + 폰 카메라→PC 도우미 증거 전달 설계(v0.1)
 - 2026-11-19 Merge pull request #1243 from Openhash-Gopang/docs/manual-ch11-calls
@@ -42,8 +44,6 @@
 - 2026-11-19 Merge pull request #1226 from Openhash-Gopang/sp-helper-first-20261119
 - 2026-11-19 feat(sp): 최상위 SP 도우미 우선 원칙 — AC-PRO-CORE v2.2 §8, 공통 원칙 8항
 - 2026-11-19 Merge pull request #1225 from Openhash-Gopang/sp-audit-20261119
-- 2026-11-19 feat(sp): 모든 대화창 SP 상위 공통 원칙 + [OPTIONS] 선택지 버튼
-- 2026-11-19 Merge pull request #1224 from Openhash-Gopang/fix-call-restart-guard-20261119
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
