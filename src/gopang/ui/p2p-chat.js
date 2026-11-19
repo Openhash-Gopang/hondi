@@ -383,6 +383,8 @@ function _watchAnswerRealtime(conn, targetUser, callId) {
         const answerSdp = _rowPayload.sdp || _rowPayload;
         diag('응답(answer) 수신', { callId: String(callId).slice(0, 8), 상대SDP후보: _sdpCand(answerSdp), ms: _dt() });
         await conn.setRemoteDescription(new RTCSessionDescription(answerSdp));
+        for (const c of (conn.__earlyIce || [])) { try { await conn.addIceCandidate(new RTCIceCandidate(c)); _diagIce('ICE수신(발신측)', c, '적용(보관분)'); } catch (e) { _diagIce('ICE수신(발신측)', c, '오류(보관분):' + String(e && e.message).slice(0, 200)); } }
+        conn.__earlyIce = [];
         if (noAnswerTimer) { clearTimeout(noAnswerTimer); noAnswerTimer = null; } // 응답 왔으니 무응답 타이머 해제
         if (smsTimer) { clearTimeout(smsTimer); smsTimer = null; }
         _notify('🤝 상대가 수락했습니다. 연결하는 중입니다…');   // 2026-11-19 — 수락 응답을 받은 것일 뿐 대화 채널은 아직 열리지 않았다. "연결됐습니다"는 채널이 실제로 열릴 때(webrtc/_setupChannel onopen)만 보인다.
@@ -399,9 +401,13 @@ function _watchAnswerRealtime(conn, targetUser, callId) {
       // description was null" 등) — 실제로 관찰된 콘솔 에러. 두 경우
       // 다 이 통화 시도가 이미 끝났다는 뜻이므로, 예외로 시끄럽게 떠들
       // 필요 없이 조용히 건너뛴다.
-      if (!conn.remoteDescription || conn.signalingState === 'closed') {
+      if (conn.signalingState === 'closed') {
         console.info('[P2P] ICE 후보 무시 — 이미 종료된 통화 시도');
-        _diagIce('ICE수신(발신측)', _rowPayload.candidate, conn.signalingState === 'closed' ? '무시:연결닫힘' : '무시:answer보다 먼저 도착');
+        _diagIce('ICE수신(발신측)', _rowPayload.candidate, '무시:연결닫힘');
+      } else if (!conn.remoteDescription) {
+        // 2026-11-19 — 답신(answer)보다 먼저 도착한 후보는 버리지 않고 보관했다가 답신을 적용한 직후 추가한다(도동 진단: 전부 '무시:answer보다 먼저 도착').
+        (conn.__earlyIce = conn.__earlyIce || []).push(_rowPayload.candidate || _rowPayload);
+        _diagIce('ICE수신(발신측)', _rowPayload.candidate, '보관:answer 대기');
       } else {
         try {
           const candidate = _rowPayload.candidate || _rowPayload;

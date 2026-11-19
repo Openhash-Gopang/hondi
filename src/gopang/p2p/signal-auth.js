@@ -61,6 +61,12 @@ export async function signalPost(path, guid, body) {
     return { ok: r.ok, status: r.status, code: data.error || data.code || '', data, authKind: auth ? (auth.phone_verify_token ? 'cookie' : 'wallet') : 'none:' + S.why };
   };
   let auth = cookieAuth() || await walletAuth(guid);
+  // 2026-11-19 — 페이지를 막 열었을 때는 인증 정보(지갑·쿠키)가 아직 준비되지 않아 첫 후보 전송이 401(AUTH_REQUIRED)로 실패했다(도동 진단 기록).
+  // 인증이 없는 상태로는 보내지 않고, 잠깐씩 기다려 다시 확인한다(최대 약 3초).
+  for (let i = 0; !auth && i < 5; i++) {
+    await new Promise(r => setTimeout(r, 600));
+    auth = cookieAuth() || await walletAuth(guid);
+  }
   let res = await send(auth);
   if (!res.ok && (res.status === 401 || res.status === 403)) {
     if (auth && auth.phone_verify_token) { S.skipCookie = true; auth = await walletAuth(guid); }     // 쿠키가 다른 계정/만료 → 지갑 증명
