@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-19 20:43 KST · 기준 커밋 025e1503
+- 갱신: 2026-11-19 20:57 KST · 기준 커밋 c9765771
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-19 Merge pull request #1238 from Openhash-Gopang/docs/android-handoff-20261119
+- 2026-11-19 docs(android): 2026-11-19 웹 쪽 확인 사항 인수인계 문서 추가
 - 2026-11-19 Merge pull request #1237 from Openhash-Gopang/fix/no-reload-during-call-20261119
 - 2026-11-19 fix(p2p): 통화 시작·수락 뒤 3분간은 서비스워커 교체 자동 새로고침을 미룸, 진단 rev 20261119-3
 - 2026-11-19 Merge pull request #1236 from Openhash-Gopang/fix/p2p-ice-buffer-auth-20261119
@@ -42,8 +44,6 @@
 - 2026-11-19 Merge pull request #1219 from Openhash-Gopang/fix-diag-lifecycle-20261119
 - 2026-11-19 diag: 여러 창·새로고침에서 기록이 덮어써지지 않게 하고 페이지 생명주기 기록 추가
 - 2026-11-19 Merge pull request #1218 from Openhash-Gopang/feat/free-quota-bonus-20261119
-- 2026-11-19 feat(quota): 최근 N일 가입자에게 무료 한도(원)를 추가하는 관리자 기능
-- 2026-11-19 Merge pull request #1217 from Openhash-Gopang/fix-diag-command-hang-20261119
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
