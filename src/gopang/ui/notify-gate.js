@@ -1,4 +1,4 @@
-// (재배포 트리거 2026-11-16)
+// (재배포 트리거 2026-11-19)
 // notify-gate.js — 알림 허용 유도 (2026-11-16, 주피터 지시: "가입자는 디폴트로 알림 허용으로 유도. 알림을 허용하지 않으면 나비웹을 이용할 이유가 없다")
 // 브라우저 알림 권한은 코드로 강제할 수 없다 — 대신 로그인한 상태에서 알림이 허용되지 않았거나 푸시 구독이 없으면, 허용할 때까지
 // 앱을 열 때마다 전체 화면 안내를 띄운다. 허용 창이 막힌 '차단' 상태에서는 풀어야 하는 방법을 단계별로 보여 주고 다시 확인할 수 있게 한다.
@@ -20,54 +20,46 @@ async function _hasSub() {
 
 function _remove() { document.getElementById(OVERLAY_ID)?.remove(); }
 
-// ── 알림 소리 안내 (2026-11-16, 주피터 지시: 가입 시점에 알림 중요도를 "높음/소리"로) ──
-// 사이트의 알림 중요도·소리는 폰(크롬)의 설정이라 웹 페이지가 대신 바꿀 수 없다. 그래서 알림을 허용한 직후 한 번, 사용자의 승인 아래 직접 바꾸도록
-// 단계별로 안내하고, 실제로 소리가 나는지 들어 볼 수 있는 시험 알림 단추를 둔다.
+// ── 배터리 보호 해제 묻기 (2026-11-19, 주피터 지시: 긴 설명 대신 "네/아니오" 팝업. 폰·안드로이드 버전마다 메뉴가 달라 사용자가 따라 하기 어렵다) ──
+// 웹 페이지는 배터리 설정을 직접 바꿀 수 없다(브라우저 제한). 안드로이드 앱(kr.naviweb.app)은 앱 안에서 직접 요청하므로 이 팝업이 필요 없다.
+// 그래서 브라우저에서는 "네"를 누르면 가능한 만큼(설정 화면 열기)만 하고, 안 열리면 한 줄 안내로 끝낸다.
 const SOUND_KEY = 'navi_notify_sound_guided';
 const _isAndroid = () => /Android/i.test(navigator.userAgent || '');
+const _inNativeApp = () => /; wv\)|NaviApp/i.test(navigator.userAgent || '') || !!window.NaviAndroid;
 function _soundGuideDone() { try { return localStorage.getItem(SOUND_KEY) === '1'; } catch { return true; } }
 function _markSoundGuide() { try { localStorage.setItem(SOUND_KEY, '1'); } catch {} }
+const _CARD = 'max-width:420px;width:100%;max-height:calc(100vh - 40px);overflow-y:auto;background:#fff;border-radius:16px;padding:24px 22px;box-shadow:0 10px 40px rgba(0,0,0,.35)';
+const _OVER = 'position:fixed;inset:0;z-index:2147483001;background:rgba(15,23,42,.72);display:flex;align-items:center;justify-content:center;padding:20px;font-family:inherit';
+const _BTN_YES = 'flex:1;padding:14px;border:0;border-radius:12px;background:#1A73E8;color:#fff;font-size:16px;font-weight:700;cursor:pointer';
+const _BTN_NO = 'flex:1;padding:14px;border:0;border-radius:12px;background:#e2e8f0;color:#334155;font-size:16px;font-weight:700;cursor:pointer';
 function _renderSoundGuide() {
-  if (!_isAndroid() || _soundGuideDone() || document.getElementById('notify-sound-guide')) return;
+  if (!_isAndroid() || _inNativeApp() || _soundGuideDone() || document.getElementById('notify-sound-guide')) return;
   const el = document.createElement('div');
   el.id = 'notify-sound-guide';
   el.setAttribute('role', 'dialog');
-  el.style.cssText = 'position:fixed;inset:0;z-index:2147483001;background:rgba(15,23,42,.72);display:flex;align-items:center;justify-content:center;padding:20px;font-family:inherit';
+  el.style.cssText = _OVER;
   el.innerHTML = `
-    <div style="max-width:420px;width:100%;background:#fff;border-radius:16px;padding:24px 22px;box-shadow:0 10px 40px rgba(0,0,0,.35)">
-      <div style="font-size:20px;font-weight:700;color:#0f172a">🔊 알림 소리·배터리를 설정해 두세요</div>
-      <p style="margin:12px 0 0;font-size:15px;line-height:1.65;color:#1e293b">폰 화면이 꺼져 있을 때도 대화 요청을 <b>소리로</b> 알아차리려면, 크롬의 알림 중요도를 <b>높음(소리)</b>으로, 배터리를 <b>제한 없음</b>으로 바꿔 두어야 합니다. 이 설정은 폰에서 직접 해야 하며, 승인하신 뒤 아래 순서로 진행해 주세요.</p>
-      <ol style="margin:10px 0 0;padding-left:20px;font-size:14px;line-height:1.8;color:#334155">
-        <li>폰 <b>설정 → 앱 → Chrome → 알림</b>을 엽니다. (크롬 사이트 설정 화면에는 중요도 항목이 없고, 폰의 앱 알림 설정에 있습니다.)</li>
-        <li>목록을 내려 <b>naviweb.kr</b>(사이트 알림 항목)을 누릅니다.</li>
-        <li><b>중요도(또는 소리)</b>를 <b>높음 / 소리 및 팝업</b>으로 바꿉니다.</li>
-        <li>더 빠른 방법: 알림이 왔을 때 그 알림을 <b>길게 눌러</b> 나오는 <b>설정(톱니바퀴)</b>을 눌러도 같은 화면이 열립니다.</li>
-        <li>폰이 무음·방해 금지가 아닌지 확인합니다.</li>
-      </ol>
-      <p style="margin:10px 0 0;font-size:13.5px;line-height:1.65;color:#334155"><b>중요도 항목이 보이지 않으면:</b> 크롬 오른쪽 위 <b>⋮ → 홈 화면에 추가(앱 설치)</b>로 나비웹을 앱처럼 설치해 보세요. 설치하면 폰 <b>설정 → 앱 → 나비웹 → 알림</b>에 나비웹 전용 알림 설정이 생겨, 소리와 중요도를 따로 정할 수 있는 경우가 많습니다. (폰에 따라 다를 수 있습니다.)</p>
-      <div style="margin-top:14px;font-size:15px;font-weight:700;color:#0f172a">🔋 배터리도 "제한 없음"으로</div>
-      <p style="margin:6px 0 0;font-size:14px;line-height:1.65;color:#334155">배터리 절약이 크롬을 제한하면 화면이 꺼진 동안 알림이 늦게 오거나 오지 않습니다.</p>
-      <ol style="margin:6px 0 0;padding-left:20px;font-size:14px;line-height:1.8;color:#334155">
-        <li>폰 <b>설정 → 앱 → Chrome</b>(앱 아이콘을 길게 눌러 <b>앱 정보</b>로 가도 됩니다)</li>
-        <li><b>배터리</b>(또는 <b>앱 배터리 사용량</b>)를 누릅니다.</li>
-        <li><b>제한 없음</b>(또는 <b>최적화 안 함</b>)을 고릅니다. 폰마다 이름이 조금 다릅니다.</li>
-      </ol>
-      <button id="nsg-test" style="margin-top:16px;width:100%;padding:13px;border:0;border-radius:12px;background:#e8f0fe;color:#1A73E8;font-size:15px;font-weight:700;cursor:pointer">시험 알림 받아 보기</button>
-      <button id="nsg-done" style="margin-top:10px;width:100%;padding:14px;border:0;border-radius:12px;background:#1A73E8;color:#fff;font-size:16px;font-weight:700;cursor:pointer">설정했습니다</button>
-      <div style="text-align:center;margin-top:12px"><a id="nsg-later" href="#" style="font-size:13px;color:#64748b">나중에 하겠습니다</a></div>
-      <div id="nsg-msg" style="margin-top:8px;font-size:13px;color:#b45309;min-height:16px"></div>
+    <div style="${_CARD}">
+      <div style="font-size:19px;font-weight:700;color:#0f172a;line-height:1.5">🔋 배터리 보호를 해제하여, 폰이 꺼진 상태에서도 대화 초청 등의 알림을 받겠습니까?</div>
+      <div style="display:flex;gap:10px;margin-top:20px"><button id="nsg-no" style="${_BTN_NO}">아니오</button><button id="nsg-yes" style="${_BTN_YES}">네</button></div>
+      <div id="nsg-msg" style="margin-top:12px;font-size:14px;line-height:1.6;color:#334155"></div>
     </div>`;
   document.body.appendChild(el);
   const close = () => { _markSoundGuide(); el.remove(); };
-  el.querySelector('#nsg-done').onclick = close;
-  el.querySelector('#nsg-later').onclick = (e) => { e.preventDefault(); close(); };
-  el.querySelector('#nsg-test').onclick = async () => {
+  el.querySelector('#nsg-no').onclick = close;
+  el.querySelector('#nsg-yes').onclick = () => {
     const msg = el.querySelector('#nsg-msg');
-    try {
-      const reg = await navigator.serviceWorker.ready;
-      await reg.showNotification('나비', { body: '소리가 들리면 알림 설정이 잘 되어 있는 것입니다.', icon: '/icons/navi-icon-192.png', tag: 'gopang-sound-test', vibrate: [300, 100, 300], silent: false });
-      msg.textContent = '알림을 보냈습니다. 소리가 나지 않으면 위 설정을 다시 확인하세요.';
-    } catch (e) { msg.textContent = '시험 알림을 보내지 못했습니다: ' + (e.message || e); }
+    const yes = el.querySelector('#nsg-yes'), no = el.querySelector('#nsg-no');
+    let left = false;
+    const onHide = () => { if (document.visibilityState === 'hidden') left = true; };
+    document.addEventListener('visibilitychange', onHide);
+    try { location.href = 'intent:#Intent;action=android.settings.IGNORE_BATTERY_OPTIMIZATION_SETTINGS;end'; } catch {}
+    setTimeout(() => {
+      document.removeEventListener('visibilitychange', onHide);
+      if (left) { close(); return; }                       // 설정 화면이 열렸다 — 돌아오면 끝
+      msg.innerHTML = '이 브라우저에서는 웹이 설정을 직접 바꿀 수 없습니다.<br>폰 <b>설정 → 앱 → Chrome(또는 나비) → 배터리 → 제한 없음</b>으로 바꿔 주세요.';
+      yes.textContent = '확인'; yes.onclick = close; no.style.display = 'none';
+    }, 1500);
   };
 }
 
@@ -78,34 +70,24 @@ function _render(state) {
     el = document.createElement('div');
     el.id = OVERLAY_ID;
     el.setAttribute('role', 'dialog');
-    el.style.cssText = 'position:fixed;inset:0;z-index:2147483000;background:rgba(15,23,42,.72);display:flex;align-items:center;justify-content:center;padding:20px;font-family:inherit';
+    el.style.cssText = _OVER.replace('2147483001', '2147483000');
     document.body.appendChild(el);
   }
   el.dataset.state = state;
   const denied = state === 'denied';
-  const steps = denied
-    ? `<ol style="margin:10px 0 0;padding-left:20px;font-size:14px;line-height:1.7;color:#334155">
-         <li>크롬 오른쪽 위 <b>⋮</b> → <b>설정</b> → <b>사이트 설정</b> → <b>알림</b>을 엽니다.</li>
-         <li>목록에서 <b>naviweb.kr</b>을 찾아 <b>허용</b>으로 바꿉니다. (보이지 않으면 사이트 정보의 <b>권한 재설정</b>을 누릅니다.)</li>
-         <li>이 화면으로 돌아와 아래 <b>다시 확인</b>을 누릅니다.</li>
-       </ol>`
-    : `<p style="margin:12px 0 0;font-size:16px;line-height:1.7;color:#0f172a;font-weight:600">아래 버튼을 누르면 화면에 <b>알림 허용</b> 창이 뜹니다.<br>거기서 <b style="color:#1A73E8">허용</b>만 누르면 끝입니다.</p>`;
   el.innerHTML = `
-    <div style="max-width:420px;width:100%;background:#fff;border-radius:16px;padding:24px 22px;box-shadow:0 10px 40px rgba(0,0,0,.35)">
-      <div style="font-size:20px;font-weight:700;color:#0f172a">🔔 알림을 허용해 주세요</div>
-      <p style="margin:12px 0 0;font-size:15px;line-height:1.65;color:#1e293b">나비웹은 알림으로 <b>대화 요청·호출·승인 요청</b>을 바로 전해 드립니다. 알림이 꺼져 있으면 앱을 열어 두지 않은 동안에는 상대의 호출이나 PC 로그인 승인을 받을 수 없습니다.</p>
-      ${denied ? '<p style="margin:10px 0 0;font-size:14px;color:#b91c1c;font-weight:600">지금 이 브라우저에서 나비웹 알림이 차단돼 있습니다.</p>' : ''}
-      ${steps}
-      <button id="notify-gate-go" style="margin-top:18px;width:100%;padding:14px;border:0;border-radius:12px;background:#1A73E8;color:#fff;font-size:16px;font-weight:700;cursor:pointer">${denied ? '다시 확인' : '알림 허용하기'}</button>
-      <div style="text-align:center;margin-top:12px"><a id="notify-gate-later" href="#" style="font-size:13px;color:#64748b">나중에 (10분 뒤 다시 안내)</a></div>
-      <div id="notify-gate-msg" style="margin-top:8px;font-size:13px;color:#b45309;min-height:16px"></div>
+    <div style="${_CARD}">
+      <div style="font-size:19px;font-weight:700;color:#0f172a;line-height:1.5">🔔 나비웹과 대화 초대 등의 알림을 받겠습니까?</div>
+      ${denied ? '<p style="margin:12px 0 0;font-size:14px;line-height:1.6;color:#b91c1c">크롬에서 나비웹 알림이 차단돼 있습니다. 주소창 왼쪽 아이콘 → <b>권한</b> → <b>알림 허용</b>으로 바꾼 뒤 <b>네</b>를 눌러 주세요.</p>' : ''}
+      <div style="display:flex;gap:10px;margin-top:20px"><button id="notify-gate-later" style="${_BTN_NO}">아니오</button><button id="notify-gate-go" style="${_BTN_YES}">네</button></div>
+      <div id="notify-gate-msg" style="margin-top:10px;font-size:13px;color:#b45309;min-height:16px"></div>
     </div>`;
   const msg = el.querySelector('#notify-gate-msg');
   el.querySelector('#notify-gate-go').onclick = async () => {
     const guid = _me();
     try {
       if (Notification.permission === 'default') await Notification.requestPermission().catch(() => {});
-      if (Notification.permission === 'denied') { _render('denied'); return; }
+      if (Notification.permission === 'denied') { el.dataset.state = ''; _render('denied'); return; }
       if (Notification.permission === 'granted') {
         msg.textContent = '알림을 켜는 중…';
         const r = guid ? await _subscribe(guid) : { ok: false, reason: 'login_required' };
@@ -114,8 +96,7 @@ function _render(state) {
       }
     } catch (e) { msg.textContent = '오류: ' + (e.message || e); }
   };
-  el.querySelector('#notify-gate-later').onclick = (e) => {
-    e.preventDefault();
+  el.querySelector('#notify-gate-later').onclick = () => {
     try { sessionStorage.setItem(SKIP_KEY, String(Date.now() + SKIP_MS)); } catch {}
     _remove();
   };
