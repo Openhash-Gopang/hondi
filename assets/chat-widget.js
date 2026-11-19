@@ -190,6 +190,7 @@
         '<button type="button" class="hcw-ibtn" id="hcw-cam" title="카메라로 서류 촬영"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></button>' +
         '<button type="button" class="hcw-ibtn" id="hcw-clip" title="파일 첨부"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>' +
         '<input type="file" id="hcw-file" hidden accept="image/*,.pdf,.docx,.hwpx,.txt,.md,.csv">' +
+        '<button type="button" class="hcw-ibtn" id="hcw-phone" title="폰으로 서류 촬영(같은 계정의 폰)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></button>' +
         '<input type="file" id="hcw-camfile" hidden accept="image/*" capture="environment">' +
         '<textarea id="hcw-input" placeholder="메시지를 입력하세요…" rows="1"></textarea>' +
         '<button id="hcw-send" title="전송">' +
@@ -350,7 +351,7 @@
   var attachBox = document.getElementById('hcw-attach'), attachName = document.getElementById('hcw-attach-name');
   var fileEl = document.getElementById('hcw-file'), camEl = document.getElementById('hcw-camfile');
   function showAttach(label) { attachName.textContent = label; attachBox.classList.add('on'); }
-  function clearAttach() { pending = null; fileEl.value = ''; camEl.value = ''; attachBox.classList.remove('on'); }
+  function clearAttach() { try { phoneImgs.length = 0; } catch (e) {} pending = null; fileEl.value = ''; camEl.value = ''; attachBox.classList.remove('on'); }
   function readUrl(file) { return new Promise(function (ok, no) { var r = new FileReader(); r.onload = function () { ok(r.result); }; r.onerror = function () { no(r.error); }; r.readAsDataURL(file); }); }
   async function downscale(file) {
     var url = await readUrl(file);
@@ -387,6 +388,42 @@
   fileEl.addEventListener('change', function () { onPick(fileEl.files && fileEl.files[0]); });
   camEl.addEventListener('change', function () { onPick(camEl.files && camEl.files[0]); });
   document.getElementById('hcw-attach-x').addEventListener('click', clearAttach);
+
+  // ── 폰으로 촬영 — 같은 계정의 폰이 PC 의 눈이 된다(capture-link.js). 폰에서 알림을 눌러야 카메라가 열린다. ──
+  var phoneBtn = document.getElementById('hcw-phone'), phoneSess = null, phoneImgs = [];
+  function phoneLabel() { return '폰 사진 ' + phoneImgs.length + '장'; }
+  function stopPhone() { if (phoneSess) { try { phoneSess.stop(); } catch (e) {} phoneSess = null; } if (phoneBtn) phoneBtn.classList.remove('listening'); }
+  function ensureCaptureScript() {
+    if (window.NaviCapture) return Promise.resolve();
+    return new Promise(function (ok, no) { var sc = document.createElement('script'); sc.src = '/assets/capture-link.js'; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc); });
+  }
+  if (phoneBtn) phoneBtn.addEventListener('click', async function () {
+    if (phoneSess) { stopPhone(); appendMsg('ai', '폰 촬영 연결을 끝냈습니다.'); return; }
+    try {
+      if (window.KAuth) await window.KAuth.ensureLogin();
+      await ensureCaptureScript();
+      phoneImgs = [];
+      phoneSess = await window.NaviCapture.start({
+        label: (CFG.title || document.title || '').slice(0, 30),
+        onPhoto: function (url) {
+          phoneImgs.push(url);
+          pending = { name: phoneLabel(), images: phoneImgs.slice(), note: '같은 계정의 폰으로 촬영' };
+          showAttach('📱 ' + phoneLabel() + ' 도착 — 보내기를 누르면 AI가 읽습니다');
+        },
+        onState: function (st) {
+          if (st.state === 'expired') { stopPhone(); appendMsg('ai', '폰 촬영 연결이 끝났습니다. 다시 하려면 폰 단추를 누르세요.'); }
+          else if (st.state === 'network') appendMsg('ai', '폰과 연결이 불안정합니다. 인터넷 연결을 확인하세요.');
+          else if (st.state === 'bad-item') appendMsg('ai', '폰에서 온 사진 1장이 손상되어 건너뛰었습니다. 다시 찍어 주세요.');
+        }
+      });
+      phoneBtn.classList.add('listening');
+      appendMsg('ai', '같은 계정의 폰에 「서류 촬영 요청」 알림을 보냈습니다. 폰에서 알림을 눌러 서류를 찍으면 여기에 도착합니다. (폰과 PC는 같은 계정으로 로그인되어 있어야 합니다. 사진은 AI에게 그대로 전달되니 가릴 부분은 가리고 찍으세요.) 다시 누르면 연결을 끝냅니다.');
+    } catch (e) {
+      stopPhone();
+      var c = String(e && e.message || e);
+      appendMsg('ai', /LOGIN|TOKEN|AUTH/.test(c) ? '로그인한 뒤 다시 눌러 주세요.' : '폰 촬영을 시작하지 못했습니다(' + c + ').');
+    }
+  });
 
   // ── 마이크(음성 입력) — CFG.mic=true 일 때만. Web Speech API(Chrome·Edge, ko-KR) ──
   // 누르면 듣기 시작, 다시 누르면 중지. 인식된 글자는 입력창에 채워질 뿐 자동 전송하지 않는다(서류 정보는 보내기 전에 확인·수정).

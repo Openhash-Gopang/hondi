@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>서류 촬영 — 나비웹</title>
+<style>
+:root{color-scheme:light dark}body{margin:0;font-family:Pretendard,system-ui,sans-serif;background:#f7f9fc;color:#1f2933;padding:16px;max-width:520px;margin:0 auto}
+h1{font-size:1.15rem;margin:8px 0}p{line-height:1.6;margin:8px 0}.box{background:#fff;border:1px solid #d7dee8;border-radius:12px;padding:14px;margin:12px 0}
+.warn{background:#fef7e0;border-color:#e8c46a}.big{display:block;width:100%;padding:16px;font-size:1.05rem;border:0;border-radius:12px;background:#0c6cc3;color:#fff;font-weight:600}
+.big[disabled]{opacity:.5}.ghost{background:#fff;color:#0c6cc3;border:1px solid #0c6cc3;margin-top:8px}
+#thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}#thumbs div{position:relative}#thumbs img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:8px}
+#thumbs span{position:absolute;right:4px;bottom:4px;font-size:.75rem;background:#000a;color:#fff;border-radius:6px;padding:1px 5px}
+#msg{min-height:1.4em;font-size:.95rem}.ok{color:#188038}.err{color:#c5221f}
+@media (prefers-color-scheme:dark){body{background:#101418;color:#e5e9ee}.box{background:#1a2027;border-color:#2c3744}.warn{background:#2c2410;border-color:#8a6a1a}.ghost{background:#1a2027}}
+</style></head><body>
+<h1>📷 서류 촬영</h1>
+<div class="box" id="head"><p id="lbl">PC에서 서류 사진을 기다리고 있습니다.</p>
+<p style="font-size:.9rem">PC와 이 폰은 <strong>같은 계정</strong>으로 로그인되어 있어야 합니다.</p></div>
+<div class="box warn"><p><strong>AI에게 그대로 전달됩니다.</strong> 사진은 암호화되어 PC로 가고, PC의 나비웹 AI가 사진 속 글을 읽습니다. 주민등록번호·계좌번호처럼 필요 없는 부분은 가리고 찍으세요.</p></div>
+<div class="box"><button class="big" id="shoot" disabled>사진 찍기</button>
+<input type="file" id="cam" accept="image/*" capture="environment" hidden>
+<input type="file" id="pick" accept="image/*" multiple hidden>
+<button class="big ghost" id="gal" disabled>갤러리에서 고르기</button>
+<p id="msg"></p><div id="thumbs"></div></div>
+<p style="font-size:.85rem;opacity:.75">다 찍으면 이 화면을 닫으면 됩니다. 연결은 PC에서 촬영을 끝내거나 2시간 동안 쓰지 않으면 끊어집니다.</p>
+<script>window.K_AUTH_CONFIG={serviceLabel:'나비웹 촬영'};</script>
+<script src="/auth/k-service-auth-client.js"></script>
+<script src="/assets/capture-link.js"></script>
+<script>
+(async function(){
+  var $=function(i){return document.getElementById(i)}, msg=$('msg'), n=0, sess=null;
+  function say(t,c){msg.textContent=t;msg.className=c||''}
+  var sid=new URLSearchParams(location.search).get('s');
+  if(!sid){say('촬영 요청 주소가 올바르지 않습니다. PC에서 다시 요청하세요.','err');return}
+  try{
+    if(window.KAuth) await window.KAuth.ensureLogin();
+    if(!window.KAuth||!window.KAuth.hasValidLogin()){say('로그인이 필요합니다. PC와 같은 계정으로 로그인하세요.','err');return}
+    sess=await NaviCapture.phoneSession(sid);
+  }catch(e){
+    var c=String(e&&e.message||e);
+    say(/SESSION_NOT_FOUND|HTTP_404/.test(c)?'촬영 요청이 없거나 끝났습니다. PC에서 다시 요청하세요.':/AUTH|TOKEN|LOGIN|HTTP_40[13]/.test(c)?'PC와 같은 계정으로 로그인했는지 확인하세요.':'연결하지 못했습니다('+c+').','err');return}
+  if(sess.label)$('lbl').textContent='PC에서 「'+sess.label+'」 작성 중 — 증거 사진을 보내 주세요.';
+  $('shoot').disabled=false;$('gal').disabled=false;
+  async function handle(files){
+    for(var i=0;i<files.length;i++){
+      say('사진 보내는 중… ('+(i+1)+'/'+files.length+')');
+      try{
+        var du=await NaviCapture.downscale(files[i]);
+        await sess.send(du); n++;
+        var d=document.createElement('div'),im=new Image();im.src=du;d.appendChild(im);var sp=document.createElement('span');sp.textContent=n;d.appendChild(sp);$('thumbs').appendChild(d);
+        say(n+'장 보냈습니다. 더 있으면 계속 찍으세요.','ok');
+      }catch(e){var c=String(e&&e.message||e);say(/QUEUE_FULL|429/.test(c)?'PC가 아직 받지 못한 사진이 많습니다. 잠시 뒤 다시 보내세요.':/NOT_FOUND|404/.test(c)?'촬영이 끝났습니다. PC에서 다시 요청하세요.':'보내지 못했습니다('+c+'). 다시 시도하세요.','err');break}
+    }
+  }
+  $('shoot').onclick=function(){$('cam').click()};$('gal').onclick=function(){$('pick').click()};
+  $('cam').onchange=function(){if(this.files.length)handle(this.files);this.value=''};
+  $('pick').onchange=function(){if(this.files.length)handle(this.files);this.value=''};
+})();
+</script></body></html>
