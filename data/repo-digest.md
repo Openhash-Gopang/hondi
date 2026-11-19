@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-20 08:26 KST · 기준 커밋 7c3b8694
+- 갱신: 2026-11-20 08:31 KST · 기준 커밋 88bf5b47
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-20 Merge pull request #1255 from Openhash-Gopang/docs/manual-ch15-hondi
+- 2026-11-20 docs(manual): 15장 내 프로필 갱신(hondi 사본)
 - 2026-11-20 매뉴얼 ch5를 + 메뉴·초록 패널 흐름에 맞게 갱신
 - 2026-11-20 Merge pull request #1253 from Openhash-Gopang/docs/manual-ch14-link
 - 2026-11-20 docs(manual): 14장 폰-PC 연동 갱신(hondi 사본)
@@ -42,8 +44,6 @@
 - 2026-11-19 Merge pull request #1234 from Openhash-Gopang/fix/p2p-accept-open-20261119
 - 2026-11-19 fix: 상대 수락 응답만 받았을 때 '연결됐습니다'라고 표시하지 않음
 - 2026-11-19 Merge pull request #1233 from Openhash-Gopang/fix/gate-always-escape-20261119
-- 2026-11-19 fix: 설치 화면 '브라우저로 계속'을 항상 표시하고 작은 화면에서도 스크롤되게
-- 2026-11-19 Merge pull request #1232 from Openhash-Gopang/fix/gate-escape-yesno-20261119
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
