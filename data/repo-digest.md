@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-19 23:05 KST · 기준 커밋 dba1be1d
+- 갱신: 2026-11-19 23:12 KST · 기준 커밋 8d4677fc
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-19 docs: 매뉴얼 12장 폰·PC 공동 작업 안내 + 폰 카메라→PC 도우미 증거 전달 설계(v0.1)
 - 2026-11-19 Merge pull request #1243 from Openhash-Gopang/docs/manual-ch11-calls
 - 2026-11-19 docs(manual): 제11장 메시지 주고받기 — 기관·서비스·전문가·사람 호출 방식, 단색 폰 화면 일러스트
 - 2026-11-19 Merge pull request #1242 from Openhash-Gopang/docs/manual-official-logo
@@ -43,7 +44,6 @@
 - 2026-11-19 feat(sp): 모든 대화창 SP 상위 공통 원칙 + [OPTIONS] 선택지 버튼
 - 2026-11-19 Merge pull request #1224 from Openhash-Gopang/fix-call-restart-guard-20261119
 - 2026-11-19 연결 중 같은 상대 이름을 또 보내도 통화를 재시작하지 않음 + 입력 진단에 글자수·앞부분 기록
-- 2026-11-19 Merge pull request #1223 from Openhash-Gopang/diag-ice-candidates-20261119
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
