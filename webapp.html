@@ -2,6 +2,12 @@
 <html lang="ko">
 <head>
 <script>
+// 2026-11-19 — hondi.net 주소는 폐기됐다(앱 주소는 naviweb.kr). 어떤 경로(옛 링크·북마크·알림·검색 자동완성)로든 주소창이 hondi.net 이 되면
+// 같은 화면을 naviweb.kr 로 옮긴다. 로그인 정보는 주소(출처)별로 저장되므로 hondi.net 에서는 가입한 계정이 보이지 않아 인증번호 창이 다시 뜨던 문제의 방어선이다.
+// 제외: 다른 사이트 화면 안(iframe)에서 열린 경우, 서비스 로그인(svc=)·가입 연결(register=) 으로 hondi.net 이 아직 필요한 흐름.
+(function(){try{var h=location.hostname;if((h==='hondi.net'||h==='www.hondi.net')&&window.parent===window&&!/[?&](svc|register|testid)=/.test(location.search)){location.replace('https://naviweb.kr/webapp'+location.search+location.hash);}}catch(e){}})();
+</script>
+<script>
 // 2026-11-17 — 안드로이드 앱(TWA)이 시작 주소에 ?fcm=<토큰>을 붙여 넘긴다. 가장 먼저 읽어 세션에만 보관하고
 // 주소창·기록·Referer에 남지 않도록 즉시 지운다. (src/gopang/services/push.js captureAppFcmToken 과 같은 규칙)
 (function(){try{var u=new URL(location.href),t=u.searchParams.get('fcm');
