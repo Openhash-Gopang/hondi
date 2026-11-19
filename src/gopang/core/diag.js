@@ -69,7 +69,16 @@ export async function diagConn(conn, why) {
     const ok = pairs.find(p => p.nominated && p.state === 'succeeded') || pairs.find(p => p.state === 'succeeded');
     const tally = pairs.reduce((a, p) => { a[p.state] = (a[p.state] || 0) + 1; return a; }, {});
     const sel = ok ? `${(byId[ok.localCandidateId] || {}).candidateType}↔${(byId[ok.remoteCandidateId] || {}).candidateType}/${(byId[ok.localCandidateId] || {}).protocol || ''}` : '없음';
-    const s = { 사유: why, 내후보: loc, 상대후보: rem, 선택경로: sel, 쌍상태: tally, conn: conn.connectionState, ice: conn.iceConnectionState };
+    // 2026-11-19 — 검사 요청에 응답이 아예 없는지(막힘) 응답은 오는데 실패인지 가르기 위한 합계와, 쌍을 유형별로 센 표(상위 6개).
+    let reqS = 0, resR = 0, bytesS = 0, bytesR = 0; const kinds = {};
+    pairs.forEach(p => {
+      reqS += p.requestsSent || 0; resR += p.responsesReceived || 0; bytesS += p.bytesSent || 0; bytesR += p.bytesReceived || 0;
+      const l = byId[p.localCandidateId] || {}, r = byId[p.remoteCandidateId] || {};
+      const k = `${l.candidateType || '?'}/${l.protocol || '?'}→${r.candidateType || '?'}/${r.protocol || '?'}:${p.state}`;
+      kinds[k] = (kinds[k] || 0) + 1;
+    });
+    const top = Object.entries(kinds).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k, n]) => k + '×' + n);
+    const s = { 사유: why, 내후보: loc, 상대후보: rem, 선택경로: sel, 쌍상태: tally, 검사: { 보냄: reqS, 응답: resR, 바이트송신: bytesS, 바이트수신: bytesR }, 쌍유형: top, conn: conn.connectionState, ice: conn.iceConnectionState };
     diag('conn:요약', s);
     return s;
   } catch (e) { diag('conn:요약실패', e && e.message); return null; }
