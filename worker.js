@@ -14995,6 +14995,7 @@ export default {
     if (pathname === '/signal/send')   return handleSignalSend(request, env, corsHeaders, ctx);
     if (pathname === '/signal/poll')   return handleSignalPoll(request, env, corsHeaders);
     if (pathname === '/signal/delete') return handleSignalDelete(request, env, corsHeaders);
+    if (pathname === '/signal/diag')   return handleSignalDiag(request, env, corsHeaders);   // 2026-11-19 — "진단" 입력: 내 계정의 알림 수신 상태 점검
 
     // ── 사용자 P2P 등록/검색 (GDUDA Phase 1) ───────────────────
     if (pathname === '/p2p/register' && request.method === 'POST')
@@ -30221,6 +30222,51 @@ async function handleSignalSend(request, env, corsHeaders, ctx) {
   }
 
   return new Response(JSON.stringify({ ok: true, source: 'l1' }), { status: 200, headers: corsHeaders });
+}
+
+// POST { 로그인 증명, test? } — 채팅창에 "진단"을 입력했을 때, 내 계정으로 알림이 갈 수 있는 상태인지 서버 쪽을 점검한다(2026-11-19 신설).
+// 응답: 서버 설정(VAPID·FCM), 계정 저장소(L1) 연결, 이 계정에 등록된 기기 목록(종류·등록 시각). 토큰·엔드포인트 전체는 내보내지 않는다.
+// test:true 이면 등록된 기기마다 시험 알림을 보내고 기기별 결과({ok,status})를 돌려준다 — 404/410 은 만료된 구독이다. 시간당 6회까지.
+async function handleSignalDiag(request, env, corsHeaders) {
+  if (request.method !== 'POST') return _err(405, 'METHOD_NOT_ALLOWED', 'POST + 로그인 증명 필요', corsHeaders);
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', '', corsHeaders);
+  const who = await _signalCaller(env, body);
+  if (!who.ok) return _err(who.status, who.code, who.message, corsHeaders);
+
+  const out = { ok: true, vapid: !!(env.VAPID_PRIVATE_KEY && env.VAPID_PUBLIC_KEY), fcm: !!env.FCM_SERVICE_ACCOUNT_JSON, l1: 'ok', devices: [], now: Date.now() };
+  let record = null;
+  try { record = await _l1FindProfileByGuid(env, who.guid); } catch (e) { out.l1 = 'error'; }
+  if (out.l1 === 'ok' && !record) out.l1 = 'no_profile';
+  const list = record ? _parseDeviceSubscriptions(record.push_subscription).slice(0, 10) : [];
+  out.devices = list.map(d => {
+    const sub = d.subscription || {};
+    let host = '';
+    if (!_isFcmSub(sub)) { try { host = new URL(sub.endpoint).host; } catch (e) { host = '?'; } }
+    return { id: String(d.deviceId || '').slice(0, 8), kind: _isFcmSub(sub) ? 'fcm' : 'webpush', type: d.deviceType || 'unknown', host, updatedAt: d.updatedAt || 0 };
+  });
+
+  if (body.test === true && list.length) {
+    let limited = false;
+    if (env.AI_SETUP_SEALS_KV) {
+      const key = `diagtest:${who.guid}:${Math.floor(Date.now() / 3600000)}`;
+      try {
+        const n = Number(await env.AI_SETUP_SEALS_KV.get(key)) || 0;
+        if (n >= 6) limited = true;
+        else await env.AI_SETUP_SEALS_KV.put(key, String(n + 1), { expirationTtl: 3700 });
+      } catch (e) { /* 기록 실패는 시험을 막지 않는다 */ }
+    }
+    if (limited) { out.test_limited = true; }
+    else {
+      const payload = JSON.stringify({ title: '나비웹 시험 알림', body: '이 알림이 보이면 알림 수신이 정상입니다.', tag: 'gopang-call-diag', sound: 'ping', url: '/webapp.html' });
+      const rs = await Promise.all(list.map(async (d) => {
+        try { const r = await _sendWebPush(env, d.subscription, payload, 'high'); return { ok: !!(r && r.ok), status: (r && r.status) || 0 }; }
+        catch (e) { return { ok: false, status: 0 }; }
+      }));
+      out.devices.forEach((d, i) => { d.test = rs[i]; });
+    }
+  }
+  return new Response(JSON.stringify(out), { status: 200, headers: { ...corsHeaders, 'Cache-Control': 'no-store' } });
 }
 
 // POST { phone_verify_token | gopang_token, guid } — 본인 것만 조회(예전 GET ?guid= 는 누구나 남의 신호를 읽게 해서 닫았다)
