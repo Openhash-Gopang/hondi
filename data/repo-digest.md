@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-19 10:26 KST · 기준 커밋 a541e741
+- 갱신: 2026-11-19 10:39 KST · 기준 커밋 536db466
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-19 Merge pull request #1228 from Openhash-Gopang/sp-fix2-20261119
+- 2026-11-19 fix(sp): 서류 SP 대화에 위치 안 얹기, A/B 질문 직답 규칙
 - 2026-11-19 Merge pull request #1227 from Openhash-Gopang/sp-catalog-core22
 - 2026-11-19 chore(sp): sp-catalog AC-PRO-CORE → v2_2 (manifest 워크플로 실패로 수동 갱신)
 - 2026-11-19 Merge pull request #1226 from Openhash-Gopang/sp-helper-first-20261119
@@ -42,8 +44,6 @@
 - 2026-11-18 Merge pull request #1210 from Openhash-Gopang/feat/p2p-close-confirm-notify-inbox
 - 2026-11-18 P2P 종료 2단계 팝업·상단 상대 표시·초대 푸시 url 상대경로·앱 내 알림 수신함
 - 2026-11-18 Merge pull request #1209 from Openhash-Gopang/feat/p2p-close-restore-ai-chat
-- 2026-11-18 대화 종료 시 AI 비서 이전 대화 복구 + 복귀 안내, 종료 문구 중복 제거
-- 2026-11-18 Merge pull request #1208 from Openhash-Gopang/feat/push-all-sound
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
