@@ -28,7 +28,10 @@ function _diagIce(tag, cand, res) {
     if (++_diagIceN > 24) return;   // 통화 한 번에 최대 24건
     const c = (cand && (cand.candidate || cand)) || {};
     const m = / typ (\w+)/.exec(String(c.candidate || c || ''));
-    diag(tag, { typ: (m && m[1]) || '?', 결과: res, ms: _dt() });
+    // 2026-11-19 — 후보 추가 실패 원인을 알 수 있게 전송 방식(udp/tcp)·sdpMid·줄 번호를 함께 남긴다(IP 주소는 남기지 않는다).
+    const _str = String(c.candidate || c || '');
+    const pr = /^(?:candidate:)?\S+ \d+ (\w+) /i.exec(_str);
+    diag(tag, { typ: (m && m[1]) || '?', 방식: (pr && pr[1].toLowerCase()) || '?', mid: (cand && cand.sdpMid) != null ? cand.sdpMid : '?', idx: (cand && cand.sdpMLineIndex) != null ? cand.sdpMLineIndex : '?', 결과: res, ms: _dt() });
   } catch (e) {}
 }
 // _clearPeer는 webrtc.js가 정의(peer-bar 숨기기·입력창 placeholder 복원·
@@ -404,7 +407,7 @@ function _watchAnswerRealtime(conn, targetUser, callId) {
           const candidate = _rowPayload.candidate || _rowPayload;
           await conn.addIceCandidate(new RTCIceCandidate(candidate));
           _diagIce('ICE수신(발신측)', candidate, '적용');
-        } catch(e) { console.warn('[P2P] ICE 추가 실패:', e.message); _diagIce('ICE수신(발신측)', _rowPayload.candidate, '오류:' + String(e.message).slice(0, 50)); }
+        } catch(e) { console.warn('[P2P] ICE 추가 실패:', e.message); _diagIce('ICE수신(발신측)', _rowPayload.candidate, '오류:' + String(e.message).slice(0, 200)); }
       }
     }
 
@@ -680,7 +683,7 @@ export async function handleIncomingOffer(signal) {
     if (sig.type === 'ice' && sig.from_guid === fromGuid) {
       const _p = typeof sig.payload === 'string'
         ? JSON.parse(sig.payload) : (sig.payload || {});
-      await conn.addIceCandidate(new RTCIceCandidate(_p.candidate || _p)).then(() => _diagIce('ICE수신(수신측)', _p.candidate || _p, '적용')).catch(e => _diagIce('ICE수신(수신측)', _p.candidate || _p, '오류:' + String(e && e.message).slice(0, 50)));
+      await conn.addIceCandidate(new RTCIceCandidate(_p.candidate || _p)).then(() => _diagIce('ICE수신(수신측)', _p.candidate || _p, '적용')).catch(e => _diagIce('ICE수신(수신측)', _p.candidate || _p, '오류:' + String(e && e.message).slice(0, 200)));
     }
   });
 }
