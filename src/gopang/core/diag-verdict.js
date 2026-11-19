@@ -84,9 +84,10 @@ export function diagVerdict({ env = {}, server = null, serverErr = '', entries =
   const answered = last(entries, '응답(answer) 수신');
   if (start && giveUp && giveUp.i > start.i && !(answered && answered.i > start.i)) add('주의', '최근 호출은 상대가 응답하지 않아 끝났습니다. 상대가 알림을 받지 못했거나 보고도 열지 않은 경우입니다.');
 
+  const _relayN = (c) => { try { const d = c.e.d; const r = val(d, '내후보'); return Number((r && r.relay) || 0); } catch { return 0; } };
   const conn = last(entries, 'conn:요약');
   if (conn && String(val(conn.e.d, '선택경로')) === '없음') {
-    add('원인', '최근 연결에서 두 기기 사이의 통신 경로를 찾지 못했습니다' + (env.TURN === '없음(STUN만)' ? '(중계 서버 없음 — 서로 다른 망에서는 연결이 안 될 수 있습니다).' : '.'));
+    add('원인', '최근 연결에서 두 기기 사이의 통신 경로를 찾지 못했습니다' + (_relayN(conn) > 0 ? '(중계(relay) 후보는 ' + _relayN(conn) + '개 있었습니다 — 중계 서버 문제가 아니라 상대 쪽 응답·후보 교환을 봐야 합니다).' : (env.TURN === '없음(STUN만)' ? '(이 호출에서 중계 후보가 없었습니다 — 서로 다른 망에서는 연결이 안 될 수 있습니다).' : '.')));
   }
 
   const decide = last(entries, '수락 결정');
