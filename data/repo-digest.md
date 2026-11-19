@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-19 23:42 KST · 기준 커밋 7799e20a
+- 갱신: 2026-11-19 23:46 KST · 기준 커밋 a62c3da8
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-19 Merge pull request #1251 from Openhash-Gopang/feat/navicode-visitor-language
+- 2026-11-19 feat: 나비 숫자 코드 방문자 언어 응대·AI 비서 아이콘·리뷰 열람·연습 식당
 - 2026-11-19 feat: 폰→PC 증거 전달 M2 — 증거 목록(채택·이름·버리기)·PC 보관·출처 표기 지시, 매뉴얼 12장 완성(따라하기·삽화 11점)
 - 2026-11-19 Merge pull request #1249 from Openhash-Gopang/fix/manual-conflict
 - 2026-11-19 fix(manual): 충돌 표식 제거 — 제13장 병합 중 남은 중복 CHAPTERS 줄 정리
@@ -42,8 +44,6 @@
 - 2026-11-19 fix(webapp): hondi.net 로 열리면 naviweb.kr 로 이동 (폐기된 주소로 가입 후 로그인 창이 다시 뜨는 문제)
 - 2026-11-19 feat(diag): "진단" 입력 시 원인 판정 + 서버 알림 등록 점검(/signal/diag) + "진단 시험"
 - 2026-11-19 fix(push): 호출 알림이 되다 안 되다 하던 문제 — 발송을 waitUntil 로 보장, VAPID 없이도 FCM 발송
-- 2026-11-19 설치 안내에 PWA(경고 없는 설치) 추가, 플레이 업로드용 AAB 빌드 단계 추가
-- 2026-11-19 Merge pull request #1228 from Openhash-Gopang/sp-fix2-20261119
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
