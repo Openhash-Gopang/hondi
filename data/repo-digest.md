@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-19 20:13 KST · 기준 커밋 1af1c2f0
+- 갱신: 2026-11-19 20:23 KST · 기준 커밋 7e07a8d9
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-19 Merge pull request #1234 from Openhash-Gopang/fix/p2p-accept-open-20261119
+- 2026-11-19 fix: 상대 수락 응답만 받았을 때 '연결됐습니다'라고 표시하지 않음
 - 2026-11-19 Merge pull request #1233 from Openhash-Gopang/fix/gate-always-escape-20261119
 - 2026-11-19 fix: 설치 화면 '브라우저로 계속'을 항상 표시하고 작은 화면에서도 스크롤되게
 - 2026-11-19 Merge pull request #1232 from Openhash-Gopang/fix/gate-escape-yesno-20261119
@@ -42,8 +44,6 @@
 - 2026-11-19 diag(p2p): 대화 요청 알림 발송 결과(push)를 콘솔·화면에 기록
 - 2026-11-18 Merge pull request #1214 from Openhash-Gopang/feat/pwa-open-on-notify
 - 2026-11-18 Merge pull request #1215 from Openhash-Gopang/feat/pwa-install-gate
-- 2026-11-18 폰 브라우저 탭에서 로그인 후 PWA 설치 안내 화면(유예 기간 동안 이번만 계속 가능)
-- 2026-11-18 PWA 설치 여부 파악 후 알림 터치 시 크롬 탭이 아닌 PWA 로 열기
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
