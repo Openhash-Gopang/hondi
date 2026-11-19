@@ -43,3 +43,24 @@ test('로그인 없으면 시작 불가', async () => {
   globalThis.KAuth = { getToken: () => null };
   await assert.rejects(N.start({}), /LOGIN_REQUIRED/);
 });
+
+test('자료 이름 규칙: 소송 서류는 갑 제N호증, 그 밖은 자료 N', () => {
+  const N = globalThis.NaviCapture;
+  assert.equal(N.defaultLabel('소장 작성 — 대여금 청구', 1), '갑 제1호증');
+  assert.equal(N.defaultLabel('준비서면', 3), '갑 제3호증');
+  assert.equal(N.defaultLabel('진단서 발급 신청', 2), '자료 2');
+  assert.equal(N.defaultLabel('', 1), '자료 1');
+});
+
+test('buildNote: 채택한 자료만, 순서·출처 표기 규칙 포함, 없으면 null', () => {
+  const N = globalThis.NaviCapture;
+  const items = [{ url: 'u1', label: '갑 제1호증', on: true }, { url: 'u2', label: '버릴 것', on: false }, { url: 'u3', label: '갑 제2호증', on: true }];
+  const r = N.buildNote(items, '소장');
+  assert.deepEqual(r.images, ['u1', 'u3']);
+  assert.match(r.note, /1\) 갑 제1호증, 2\) 갑 제2호증/);
+  assert.match(r.note, /\(갑 제1호증 참조\)/);
+  assert.match(r.note, /고치지 말고 먼저 알려/);
+  assert.match(r.note, /새로 만들지/);
+  assert.equal(N.buildNote([{ url: 'x', on: false }], '소장'), null);
+  assert.match(N.buildNote([{ url: 'a', label: '자료 1', on: true }], '진단서').note, /\(자료 1 참조\)/);
+});
