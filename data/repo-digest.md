@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-19 23:33 KST · 기준 커밋 26198d45
+- 갱신: 2026-11-19 23:36 KST · 기준 커밋 4cda2cd7
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-19 Merge pull request #1248 from Openhash-Gopang/docs/manual-ch13-chaticon
+- 2026-11-19 docs(manual): 제13장 — 가게 화면 우측 상단 대화창 아이콘과 AI 비서 인사 화면 추가
 - 2026-11-19 feat: 폰 카메라→PC 증거 전달 M1 — 촬영 세션 API·폰 촬영 화면·채팅 위젯 폰 단추
 - 2026-11-19 Merge pull request #1246 from Openhash-Gopang/docs/manual-ch13-navicode
 - 2026-11-19 docs(manual): 제13장 나비 숫자 코드 — 언어별 가게·기관 AI 비서 화면, 리뷰·GDC 결제, 기관 이점, 단색 일러스트
@@ -42,8 +44,6 @@
 - 2026-11-19 fix(sp): 서류 SP 대화에 위치 안 얹기, A/B 질문 직답 규칙
 - 2026-11-19 Merge pull request #1227 from Openhash-Gopang/sp-catalog-core22
 - 2026-11-19 chore(sp): sp-catalog AC-PRO-CORE → v2_2 (manifest 워크플로 실패로 수동 갱신)
-- 2026-11-19 Merge pull request #1226 from Openhash-Gopang/sp-helper-first-20261119
-- 2026-11-19 feat(sp): 최상위 SP 도우미 우선 원칙 — AC-PRO-CORE v2.2 §8, 공통 원칙 8항
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
