@@ -262,6 +262,10 @@ watchHondiSkin({
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
   </button>
   <span class="top-title" id="top-title">프로필</span>
+  <!-- 2026-11-19: 오른쪽 위 AI 비서 아이콘 — 아래 "AI 비서와 대화" 단추와 같은 동작(대화창을 열고 인사말을 보여 준다). AI 비서가 있는 프로필에서만 보인다. -->
+  <button class="top-share hidden" id="top-ai" onclick="openAIChatFromTop()" title="AI 비서" aria-label="AI 비서와 대화">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+  </button>
   <button class="top-share" onclick="shareProfile()" title="공유">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
   </button>
@@ -604,6 +608,14 @@ watchHondiSkin({
     <div id="industry-rows"></div>
   </div>
 
+  <!-- 방문자 리뷰(2026-11-19): 읽는 것은 누구나, 쓰는 것은 결제한 사람만(결제 직후 리뷰 위젯) -->
+  <div class="card hidden" id="card-reviews">
+    <div class="card-title">방문자 리뷰</div>
+    <div id="reviews-summary" style="padding:0 20px 6px;font-size:14px;font-weight:600"></div>
+    <div id="reviews-list" style="padding:0 20px"></div>
+    <div id="reviews-note" style="padding:6px 20px 0;font-size:11.5px;color:#9ca3af">리뷰는 결제하신 분만 남길 수 있습니다.</div>
+  </div>
+
   <!-- 커스텀 필드 -->
   <div class="card hidden" id="card-custom">
     <div class="card-title">추가 정보</div>
@@ -772,10 +784,11 @@ async function loadProfile() {
     // 굳이 쿼리를 붙이지 않는다(worker.js PROFILE_TRANSLATION_LANGS와
     // 동일한 목록을 유지해야 함 — 한쪽만 바뀌면 그냥 조용히 번역이 안
     // 나가는 정도라 기능 손상은 없지만, 목록을 바꿀 땐 양쪽 다 확인).
-    const SUPPORTED_PROFILE_TRANSLATION_LANGS = ['en', 'ja', 'zh'];
+    const SUPPORTED_PROFILE_TRANSLATION_LANGS = ['en', 'zh', 'ja', 'es', 'fr', 'de', 'vi', 'th', 'id', 'ru', 'pt', 'ar', 'hi'];   // 2026-11-19: 폰 언어 전체로 확대(site-lang.js·worker.js와 같은 목록)
     const deviceLang = (navigator.language || '').toLowerCase().slice(0, 2);
     const langQuery = SUPPORTED_PROFILE_TRANSLATION_LANGS.includes(deviceLang)
       ? `&lang=${deviceLang}` : '';
+    try { window._SL = await import('/src/gopang/gov/site-lang.js'); } catch (e) { console.warn('[Profile] site-lang 로드 실패(한국어로 진행):', e.message); }
     const res  = await fetch(`${PROXY}/profile/@${_handle}?_=1${viewerAuthQuery}${langQuery}`);
     const data = await res.json();
     if (!res.ok || !data.ok) { await renderBasicOrError(); return; }
@@ -785,6 +798,7 @@ async function loadProfile() {
     // /biz/catalog가 원본이다 — card-products(자유 텍스트)와 별개로 로드한다.
     if (_profile.entity_type && _profile.entity_type !== 'person') {
       _loadCatalog(_profile.guid).catch(e => console.warn('[Buy] 카탈로그 로드 실패:', e.message));
+      _loadReviews(_profile.guid).catch(e => console.warn('[Reviews] 로드 실패:', e.message));
       _loadFeeRate();
     }
   } catch(e) {
@@ -1155,6 +1169,7 @@ function render(p) {
     sec.classList.remove('hidden');
     // AI 비서 이름 표시
     if (p.name) document.getElementById('ai-name').textContent = `${p.name} AI 비서`;
+    document.getElementById('top-ai').classList.remove('hidden');   // 오른쪽 위 AI 비서 아이콘
 
     if (_buyerRequest) {
       // K-Market Agent가 buyer_request를 전달한 경우 → 채팅창 자동 열기 + 요청 주입
@@ -1170,7 +1185,10 @@ function render(p) {
       }, 600);
     } else {
       // 일반 방문자 → 인사말만 표시
-      addAIMsg('ai', aiCfg.greeting || `안녕하세요! ${p.name||'저희'}와 관련해 필요한 게 있으시면 무엇이든 요청하거나 지시해주세요. 😊`);
+      // 방문자 폰 언어가 한국어가 아니면 고정 번역 인사말(site-lang.js)을 쓴다 — 판매자가 쓴 한국어 인사말은 한국어 폰에만 그대로 보인다.
+      const _vl = window._SL ? window._SL.normalizeLang(new URLSearchParams(location.search).get('lang') || navigator.language) : 'ko';
+      addAIMsg('ai', (_vl !== 'ko' && window._SL) ? window._SL.localizedGreeting(p.name || 'AI', _vl)
+        : (aiCfg.greeting || `안녕하세요! ${p.name||'저희'}와 관련해 필요한 게 있으시면 무엇이든 요청하거나 지시해주세요. 😊`));
     }
   }
 
@@ -1563,6 +1581,45 @@ function _showHondiCodeModal(dataURL) {
 }
 
 // ── AI 비서 채팅 ─────────────────────────────────────────
+// 오른쪽 위 AI 비서 아이콘 — 대화창이 닫혀 있으면 열고, 그 자리로 이동한다(이미 열려 있으면 닫지 않는다).
+function openAIChatFromTop() {
+  const box = document.getElementById('ai-chat-box');
+  if (box && !box.classList.contains('open')) toggleAIChat();
+  document.getElementById('ai-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('ai-input')?.focus();
+}
+
+// ── 방문자 리뷰 읽기(2026-11-19) — 누구나 읽을 수 있다. 쓰기는 결제 직후 위젯(아래)에서만. ──
+async function _loadReviews(guid) {
+  if (!guid) return;
+  const res = await fetch(`${PROXY}/biz/reviews/list?guid=${encodeURIComponent(guid)}`);
+  if (!res.ok) return;
+  const data = await res.json().catch(() => null);
+  const items = Array.isArray(data?.reviews) ? data.reviews : [];
+  const card = document.getElementById('card-reviews');
+  const sum = document.getElementById('reviews-summary');
+  const list = document.getElementById('reviews-list');
+  if (!items.length) {
+    sum.textContent = '아직 리뷰가 없습니다.';
+    list.textContent = '';
+  } else {
+    sum.textContent = '★ ' + (data.stats?.rating || '0.0') + ' / 5 · 리뷰 ' + items.length + '개';
+    list.textContent = '';
+    items.slice(0, 20).forEach(r => {
+      const row = document.createElement('div');
+      row.style.cssText = 'border-top:1px solid #f3f4f6;padding:10px 0;font-size:13.5px;line-height:1.6';
+      const head = document.createElement('div');
+      head.style.cssText = 'font-size:12px;color:#6b7280;margin-bottom:2px';
+      head.textContent = (r.reviewer_name || '익명') + ' · ' + '★'.repeat(Math.max(0, Math.min(5, Number(r.rating) || 0)));
+      const body = document.createElement('div');
+      body.textContent = r.text || '';
+      row.appendChild(head); row.appendChild(body);
+      list.appendChild(row);
+    });
+  }
+  card.classList.remove('hidden');
+}
+
 function toggleAIChat() {
   const box   = document.getElementById('ai-chat-box');
   const arrow = document.getElementById('ai-arrow');
@@ -1622,7 +1679,7 @@ async function _callSellerAI(userText) {
         temperature: 0.7,
         stream:     false,
         messages: [
-          { role: 'system', content: _aiSystem },
+          { role: 'system', content: _aiSystem + (window._SL ? window._SL.languageInstruction(new URLSearchParams(location.search).get('lang') || navigator.language) : '') },
           ..._aiHistory.slice(-10),
         ],
       }),

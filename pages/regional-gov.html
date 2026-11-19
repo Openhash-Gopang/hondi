@@ -139,6 +139,7 @@ import { attachAnswerReport } from '/src/gopang/ui/answer-report.js';
 // 구조에 맞게 새로 만든다(아래 _callAI 내부 참고).
 import { _handleGovTaskTags, _parseAgentTags } from '/src/gopang/ai/call-ai.js';
 import { ORG_SITES } from '/src/gopang/gov/org-sites.js';
+import { normalizeLang, localizedGreeting, languageInstruction } from '/src/gopang/gov/site-lang.js';
 // ★ 2026-10-09 신설 — 라이브 설정: 관리자가 저장한 인사말·지침·지식·블록을 서버에서 읽어 기본값 위에 덮는다.
 import { fetchLiveConfig } from '/src/gopang/gov/org-site-client.js';
 import { buildPromptAddon, parseBlockTags } from '/src/gopang/gov/org-site-config.js';
@@ -637,6 +638,8 @@ function _resolveLocationHint() {
 // 첫 턴 이후에도 직행 코드를 유지해 대화가 다른 기관으로 흘러가지 않게 하고,
 // 고정 인사말만 보여준 뒤 방문자의 첫 발화를 기다린다.
 const _site = ORG_SITES[_qs.get('site')] || null;
+// 방문자 폰 언어(2026-11-19): 인사말은 고정 번역표, 답변은 AI가 그 언어로 한다. ?lang=은 시험용(예: ?lang=en).
+const _vlang = normalizeLang(_qs.get('lang') || navigator.language);
 if (_site) {
   document.title = `${_site.name} AI`;
   if (_site.locationHint && !_urlFactsLocation) _urlFactsLocation = _site.locationHint;
@@ -662,7 +665,7 @@ async function _callAI(latestUserText, typingEl) {
     if (!_site && !_embed) _govDirectCodeUsed = true;   // 임베드(기관 공통 페이지)에서는 사이트 모드처럼 직행 코드를 유지해 대화가 다른 기관으로 흘러가지 않게 한다
     // govCode 'none'(음식점·관광지 등 행정기관이 아닌 사이트): 행정 SP 라우팅을 건너뛰고 설정의 지침·지식만으로 응대한다.
     const r = (_site && _site.govCode === 'none')
-      ? { systemPrompt: '당신은 "' + _site.name + '"의 AI 안내원이다. 공공기관이 아니며 행정 안내를 하지 않는다. 한국어로 짧고 정확하게 답하고, 모르는 사실은 지어내지 않는다.', trace: [] }
+      ? { systemPrompt: '당신은 "' + _site.name + '"의 AI 안내원이다. 공공기관이 아니며 행정 안내를 하지 않는다. 방문자의 언어로 짧고 정확하게 답하고, 모르는 사실은 지어내지 않는다.', trace: [] }
       : await assembleGovSystemPrompt(latestUserText, _resolveLocationHint(), _govClassifyFn, (msg) => {
         if (typingEl) typingEl.querySelector('span').textContent = msg;
       }, directCode);
@@ -683,6 +686,7 @@ async function _callAI(latestUserText, typingEl) {
       return clarifyText;
     }
     sp = r.systemPrompt;
+    if (_site) sp += languageInstruction(_vlang);   // 방문자 폰 언어로 답하게 한다
     trace = r.trace || [];
     _lastGovTrace = trace;
     agency = resolveGovAgency(trace) || 'gov_do';
@@ -773,7 +777,7 @@ async function _callAI(latestUserText, typingEl) {
       if (n && (!_live || n.version !== _live.version)) { _live = n; _applyLiveName(); console.info('[OrgSite] 설정 갱신 v' + n.version); }
     }, 5000);
   }
-  if (_site && !GWP_CTX) appendBubble('ai', escHtml((_live && _live.config.greeting) || _site.greeting));
+  if (_site && !GWP_CTX) appendBubble('ai', escHtml(_vlang === 'ko' ? ((_live && _live.config.greeting) || _site.greeting) : localizedGreeting((_live && _live.config.name) || _site.name, _vlang, { demo: _site.govCode === 'none' })));
   if (!user?.ipv6 && !_site && !_embed) {
     // 2026-09-07 이전: 여기서 곧바로 "다른 페이지에서 로그인하고
     // 오세요" 정적 안내만 띄우고 끝냈다 — 지갑(기기 종속)이 없으면
