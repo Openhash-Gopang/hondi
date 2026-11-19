@@ -104,7 +104,8 @@ import { createLawApiClient } from './src/gopang/gov/regulation-pipeline/law-api
 import { passesRegexFilter, classifyRegulation, extractChecklistItems } from './src/gopang/gov/regulation-pipeline/regulation-classifier-extractor.js';
 import { enqueueForReview } from './src/gopang/gov/regulation-pipeline/review-gate-and-drift.js';
 import { handleHondiSearch } from './src/routes/hondi-search-worker.js';
-import { makeCaseServer as _makeCaseServer } from './src/worker/case-server.js';   // 2026-11-01 Case 초대·봉인 우편함
+import { makeCaseServer as _makeCaseServer } from './src/worker/case-server.js';
+import { makeCaptureServer as _makeCaptureServer } from './src/worker/capture-server.js';   // 2026-11-19 폰 카메라→PC 증거 전달   // 2026-11-01 Case 초대·봉인 우편함
 
 const ALLOWED_ORIGINS = [
   'https://hondi.net',
@@ -1732,6 +1733,25 @@ async function handleCaseApi(request, env, corsHeaders, op) {
       const devices = _parseDeviceSubscriptions(profile?.push_subscription);
       const payload = JSON.stringify({ title: '일(Case) 새 소식', body: '새 소식이 도착했습니다. 열어서 확인하세요.', url: '/desktop.html?case=1', tag: `case-${guid}` });
       await Promise.allSettled(devices.map(d => _sendWebPush(env, d.subscription, payload)));
+    },
+  });
+  const r = await srv[op](body);
+  return new Response(JSON.stringify(r.json), { status: r.status, headers: corsHeaders });
+}
+
+// ── 폰 카메라 → PC 증거 전달(촬영 세션) — 로직은 src/worker/capture-server.js, 여기는 연결만 ──
+// POST /capture/open | get | push | pull | close  (같은 계정 지갑 서명 또는 phone_verify_token 필수)
+async function handleCaptureApi(request, env, corsHeaders, op) {
+  if (!env.QR_SESSIONS_KV) return _err(500, 'KV_NOT_BOUND', '저장소가 설정되지 않았습니다', corsHeaders);
+  const body = await request.json().catch(() => null);
+  if (!body) return _err(400, 'INVALID_JSON', 'JSON body 필수', corsHeaders);
+  const srv = _makeCaptureServer({
+    env, kv: env.QR_SESSIONS_KV,
+    resolveGuid: (e, b, o) => _kAuth.resolveGuid(e, b, o),
+    notify: async (guid, info) => {   // 폰 깨우기 — 알림을 눌러야 카메라가 열린다(무단 가동 없음)
+      const title = '서류 촬영 요청';
+      const bodyTxt = (info.label ? info.label + ' — ' : '') + 'PC에서 서류 사진을 기다리고 있습니다. 눌러서 촬영하세요.';
+      await _sendPushToGuid(env, guid, { title, body: bodyTxt, tag: 'gopang-capture-' + info.s.slice(0, 8), url: '/capture.html?s=' + encodeURIComponent(info.s) });
     },
   });
   const r = await srv[op](body);
@@ -14869,6 +14889,11 @@ export default {
     if (pathname === '/pdv/relay/pull'            && request.method === 'GET')  return handlePdvRelayPull(request, env, corsHeaders);
     // PDV 클라우드 백업(방식 C, 기본 저장소 L1 PocketBase) — 암호문만 보관 (2026-11-08)
     if (/^\/pdv\/backup\/(put|get|list|remove)$/.test(pathname) && request.method === 'POST') return handlePdvBackup(request, env, corsHeaders, pathname.split('/').pop());
+    if (pathname === '/capture/open' && request.method === 'POST') return handleCaptureApi(request, env, corsHeaders, 'open');
+    if (pathname === '/capture/get' && request.method === 'POST') return handleCaptureApi(request, env, corsHeaders, 'get');
+    if (pathname === '/capture/push' && request.method === 'POST') return handleCaptureApi(request, env, corsHeaders, 'push');
+    if (pathname === '/capture/pull' && request.method === 'POST') return handleCaptureApi(request, env, corsHeaders, 'pull');
+    if (pathname === '/capture/close' && request.method === 'POST') return handleCaptureApi(request, env, corsHeaders, 'close');
     if (pathname === '/case/invite/register' && request.method === 'POST') return handleCaseApi(request, env, corsHeaders, 'inviteRegister');
     if (pathname === '/case/invite/claim' && request.method === 'POST') return handleCaseApi(request, env, corsHeaders, 'inviteClaim');
     if (pathname === '/case/mailbox/push' && request.method === 'POST') return handleCaseApi(request, env, corsHeaders, 'mailboxPush');
