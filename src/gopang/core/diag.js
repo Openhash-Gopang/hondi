@@ -7,9 +7,10 @@
  * 서비스워커의 푸시 수신·알림 클릭 기록(Cache 'navi-diag')도 함께 합쳐 보인다.
  * 원인이 확정되면 이 파일과 호출부를 제거한다. 동작은 바꾸지 않고 기록만 한다(모든 호출은 try/catch).
  */
-import { RTC_CONFIG } from './state.js';
+import { RTC_CONFIG, _USER, USER_GUID } from './state.js';
+import { diagVerdict } from './diag-verdict.js';
 
-export const DIAG_REV = '20261119-1';   // 이 기기가 실제로 실행 중인 코드 판 — 낡은 캐시 코드를 구별한다
+export const DIAG_REV = '20261119-2';   // 이 기기가 실제로 실행 중인 코드 판 — 낡은 캐시 코드를 구별한다
 const KEY = 'navi_diag_v1', MAX = 400;
 let _buf = null;
 
@@ -99,21 +100,52 @@ export async function diagReport(maxLines = 120) {
   return head + body;
 }
 
-/** 입력창에 "진단"을 쳤을 때: 보고서를 대화창에 보이고 클립보드에도 복사한다. 처리했으면 true. */
+/** 서버 쪽 알림 등록 상태 점검(/signal/diag). test 이면 등록 기기마다 시험 알림도 보낸다. 실패해도 던지지 않는다. */
+async function _serverCheck(test) {
+  try {
+    const { signalPost } = await import('../p2p/signal-auth.js');
+    const guid = (_USER && _USER.ipv6) || USER_GUID || null;
+    if (!guid) return { server: null, err: '로그인 정보 없음' };
+    const r = await Promise.race([signalPost('/signal/diag', guid, test ? { test: true } : {}), new Promise(res => setTimeout(() => res({ ok: false, status: 0, code: '시간초과(10초)' }), 10000))]);
+    if (!r.ok) return { server: null, err: `HTTP ${r.status}${r.code ? ' ' + r.code : ''}` };
+    return { server: r.data, err: '' };
+  } catch (e) { return { server: null, err: (e && e.message) || '오류' }; }
+}
+
+const _ICON = { 원인: '🔴', 주의: '🟡', 정상: '🟢' };
+
+/** 입력창에 "진단"을 쳤을 때: 원인 판정 + 환경·서버·기록을 대화창에 보이고 클립보드에도 복사한다. 처리했으면 true.
+ *  "진단 시험" 은 내 계정의 등록 기기마다 시험 알림을 보내 결과를 함께 판정한다. "진단 지우기" 는 기록을 지운다. */
 export async function diagHandleCommand(text, appendBubble) {
   const t = String(text || '').trim();
-  if (t !== '진단' && t !== '/진단' && t !== '진단 지우기') return false;
+  if (!['진단', '/진단', '진단 시험', '진단 지우기'].includes(t)) return false;
   if (t === '진단 지우기') {
     try { localStorage.removeItem(KEY); _buf = []; const c = await caches.open('navi-diag'); await c.delete('/__diag_sw'); } catch {}
     appendBubble('system', '진단 기록을 지웠습니다.');
     return true;
   }
-  const rep = await diagReport();
+  const test = t === '진단 시험';
+  appendBubble('system', test ? '진단 중입니다… 등록된 기기에 시험 알림을 보냅니다.' : '진단 중입니다…');
+
+  let localDeviceId = '', hasFcmToken = false;
+  try { const ps = await import('../services/push.js'); localDeviceId = ps.getOrCreateDeviceId(); hasFcmToken = !!ps.getAppFcmToken(); } catch {}
+  const env = await diagEnv();
+  const { server, err } = await _serverCheck(test);
+  const entries = _load(true).concat(await _swEntries()).sort((a, b) => (a.t < b.t ? -1 : a.t > b.t ? 1 : 0));
+  const verdict = diagVerdict({ env, server, serverErr: err, entries, localDeviceId, hasFcmToken });
+  try { diag('진단:판정', { 원인: verdict.filter(v => v.lv === '원인').length, 서버: server ? { l1: server.l1, 기기: (server.devices || []).length, vapid: server.vapid, fcm: server.fcm } : ('실패:' + err) }); } catch {}
+
+  const vText = '■ 원인 판정\n' + verdict.map(v => `${_ICON[v.lv]} [${v.lv}] ${v.msg}`).join('\n');
+  const srvText = server
+    ? '\n\n■ 서버(내 계정)\n' + [`계정 저장소: ${server.l1}`, `웹 푸시 키: ${server.vapid ? '있음' : '없음'}`, `앱 푸시 계정: ${server.fcm ? '있음' : '없음'}`]
+        .concat((server.devices || []).map(d => `기기 ${d.id}: ${d.kind === 'fcm' ? '앱' : '웹'}/${d.type}${d.host ? '/' + d.host : ''} 등록 ${d.updatedAt ? new Date(d.updatedAt + 9 * 3600e3).toISOString().slice(5, 16).replace('T', ' ') : '?'}${d.test ? ' / 시험 ' + (d.test.ok ? '성공' : '실패(' + (d.test.status || '무응답') + ')') : ''}`)).join('\n')
+    : `\n\n■ 서버(내 계정)\n점검 실패: ${err}`;
+  const rep = vText + srvText + '\n\n' + (await diagReport());
   // 화면 표시를 먼저 한다 — 클립보드 복사는 권한 확인·포커스 때문에 끝나지 않을 수 있어 기다리지 않는다.
-  appendBubble('system', `<div style="white-space:pre-wrap;font-size:12px;line-height:1.45;text-align:left">${_esc(rep)}</div>`, true);
+  appendBubble('system', `<div style="white-space:pre-wrap;font-size:12.5px;line-height:1.5;text-align:left">${_esc(rep)}</div>`, true);
   let copied = false;
   try { await Promise.race([navigator.clipboard.writeText(rep).then(() => { copied = true; }), new Promise(r => setTimeout(r, 2500))]); } catch {}
-  appendBubble('system', copied ? '📋 진단 내용을 클립보드에 복사했습니다.' : '복사하지 못했습니다 — 위 내용을 화면 캡처해 주세요.');
+  appendBubble('system', (copied ? '📋 진단 내용을 클립보드에 복사했습니다. ' : '복사하지 못했습니다 — 위 내용을 화면 캡처해 주세요. ') + (test ? '' : '"진단 시험"이라고 입력하면 내 등록 기기마다 시험 알림을 보냅니다.'));
   return true;
 }
 

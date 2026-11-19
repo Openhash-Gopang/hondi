@@ -1,0 +1,34 @@
+/** tests/diag-verdict.test.mjs — "진단" 원인 판정 시험 + /signal/diag 서버 연결 확인. 실행: node tests/diag-verdict.test.mjs */
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import { diagVerdict } from '../src/gopang/core/diag-verdict.js';
+let n = 0, bad = 0;
+const t = (name, fn) => { n++; try { fn(); console.log('PASS', name); } catch (e) { bad++; console.log('FAIL', name, '-', e.message); } };
+const has = (v, lv, re) => v.some(x => x.lv === lv && re.test(x.msg));
+const okEnv = { mode: 'PWA(설치형)', 알림권한: 'granted', online: true, 푸시구독: 'fcm.googleapis.com', SW: 'active', TURN: '있음' };
+const okSrv = (o = {}) => ({ ok: true, l1: 'ok', vapid: true, fcm: true, devices: [{ id: 'abcd1234', kind: 'webpush', type: 'mobile', host: 'fcm.googleapis.com', updatedAt: 1 }], ...o });
+
+t('알림 차단 → 원인', () => assert(has(diagVerdict({ env: { ...okEnv, 알림권한: 'denied' }, server: okSrv(), localDeviceId: 'abcd1234-x' }), '원인', /차단/)));
+t('알림 미허용(default) → 원인', () => assert(has(diagVerdict({ env: { ...okEnv, 알림권한: 'default' }, server: okSrv(), localDeviceId: 'abcd1234-x' }), '원인', /아직 허용하지 않았/)));
+t('앱인데 FCM 토큰 없음 → 원인', () => assert(has(diagVerdict({ env: { ...okEnv, mode: 'APK/TWA' }, server: okSrv(), localDeviceId: 'abcd1234-x', hasFcmToken: false }), '원인', /FCM/)));
+t('서버에 기기 없음 → 원인', () => assert(has(diagVerdict({ env: okEnv, server: okSrv({ devices: [] }) }), '원인', /하나도 없습니다/)));
+t('이 기기가 서버 목록에 없음 → 원인', () => assert(has(diagVerdict({ env: okEnv, server: okSrv(), localDeviceId: 'zzzz9999-x' }), '원인', /목록에 없습니다/)));
+t('웹 기기인데 VAPID 없음 → 원인', () => assert(has(diagVerdict({ env: okEnv, server: okSrv({ vapid: false }), localDeviceId: 'abcd1234-x' }), '원인', /웹 푸시 키/)));
+t('앱 기기인데 FCM 계정 없음 → 원인', () => assert(has(diagVerdict({ env: okEnv, server: okSrv({ fcm: false, devices: [{ id: 'abcd1234', kind: 'fcm', type: 'mobile' }] }), localDeviceId: 'abcd1234-x' }), '원인', /앱 푸시 계정/)));
+t('시험 알림 410 → 구독 만료 원인', () => assert(has(diagVerdict({ env: okEnv, server: okSrv({ devices: [{ id: 'abcd1234', kind: 'webpush', type: 'mobile', test: { ok: false, status: 410 } }] }), localDeviceId: 'abcd1234-x' }), '원인', /만료/)));
+t('시험 알림 성공 → 정상', () => assert(has(diagVerdict({ env: okEnv, server: okSrv({ devices: [{ id: 'abcd1234', kind: 'webpush', type: 'mobile', test: { ok: true, status: 201 } }] }), localDeviceId: 'abcd1234-x' }), '정상', /시험 알림 발송 성공/)));
+t('서버 점검 실패 → 주의', () => assert(has(diagVerdict({ env: okEnv, server: null, serverErr: 'HTTP 401' }), '주의', /서버 점검에 실패/)));
+t('최근 호출 no_subscription → 원인', () => assert(has(diagVerdict({ env: okEnv, server: okSrv(), localDeviceId: 'abcd1234-x', entries: [{ t: '1', tag: '호출:알림결과', d: { push: 'no_subscription' } }] }), '원인', /등록되어 있지 않아/)));
+t('최근 호출 timeout → 주의', () => assert(has(diagVerdict({ env: okEnv, server: okSrv(), localDeviceId: 'abcd1234-x', entries: [{ t: '1', tag: '호출:알림결과', d: { push: 'timeout' } }] }), '주의', /4초/)));
+t('호출 후 무응답 포기 → 주의', () => assert(has(diagVerdict({ env: okEnv, server: okSrv(), localDeviceId: 'abcd1234-x', entries: [{ t: '1', tag: '호출:시작(발신)', d: {} }, { t: '2', tag: '호출:무응답 포기', d: {} }] }), '주의', /응답하지 않아/)));
+t('수락했는데 상대설정 false → 원인', () => assert(has(diagVerdict({ env: okEnv, server: okSrv(), localDeviceId: 'abcd1234-x', entries: [{ t: '1', tag: '수락 결정', d: { accepted: true } }, { t: '2', tag: '수락 후 대화창 전환', d: { 상대설정됨: false } }] }), '원인', /AI 비서로 갑니다/)));
+t('연결 경로 없음 → 원인(TURN 없음 언급)', () => assert(has(diagVerdict({ env: { ...okEnv, TURN: '없음(STUN만)' }, server: okSrv(), localDeviceId: 'abcd1234-x', entries: [{ t: '1', tag: 'conn:요약', d: { 선택경로: '없음' } }] }), '원인', /중계 서버 없음/)));
+t('모두 정상이면 원인 0건 + 안내', () => { const v = diagVerdict({ env: okEnv, server: okSrv(), localDeviceId: 'abcd1234-x' }); assert(!v.some(x => x.lv === '원인')); assert(has(v, '정상', /확정할 만한 원인을 찾지 못했습니다/)); });
+t('정렬: 원인이 정상보다 앞', () => { const v = diagVerdict({ env: { ...okEnv, 알림권한: 'denied' }, server: okSrv(), localDeviceId: 'abcd1234-x' }); assert.equal(v[0].lv, '원인'); assert.equal(v[v.length - 1].lv, '정상'); });
+const w = fs.readFileSync(new URL('../worker.js', import.meta.url), 'utf8');
+t('worker: /signal/diag 라우트와 핸들러', () => { assert.match(w, /pathname === '\/signal\/diag'\)\s+return handleSignalDiag\(request, env, corsHeaders\)/); assert.match(w, /async function handleSignalDiag\(/); });
+t('worker: 로그인 증명을 요구한다', () => { const f = w.slice(w.indexOf('async function handleSignalDiag('), w.indexOf('async function handleSignalPoll(')); assert.match(f, /_signalCaller\(env, body\)/); assert.match(f, /시간당 6회|n >= 6/); });
+t('worker: 토큰·엔드포인트 전체를 내보내지 않는다', () => { const f = w.slice(w.indexOf('async function handleSignalDiag('), w.indexOf('async function handleSignalPoll(')); assert.doesNotMatch(f, /token:\s*sub|endpoint:\s*sub\.endpoint/); });
+const d = fs.readFileSync(new URL('../src/gopang/core/diag.js', import.meta.url), 'utf8');
+t('diag.js: "진단 시험" 명령을 처리한다', () => assert.match(d, /'진단 시험'/));
+console.log(`${n - bad}/${n}`); if (bad) process.exitCode = 1;
