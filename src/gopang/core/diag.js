@@ -10,7 +10,7 @@
 import { RTC_CONFIG, _USER, USER_GUID } from './state.js';
 import { diagVerdict } from './diag-verdict.js';
 
-export const DIAG_REV = '20261119-2';   // 이 기기가 실제로 실행 중인 코드 판 — 낡은 캐시 코드를 구별한다
+export const DIAG_REV = '20261119-3';   // 이 기기가 실제로 실행 중인 코드 판 — 낡은 캐시 코드를 구별한다
 const KEY = 'navi_diag_v1', MAX = 400;
 let _buf = null;
 

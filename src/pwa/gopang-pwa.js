@@ -46,7 +46,7 @@ if ('serviceWorker' in navigator) {
       const _hadController = !!navigator.serviceWorker.controller;
       let _reloadTimer = null;
       // 2026-11-16 — 대화 상대와 통화·대화 중이거나 연결하는 중에는 새로고침하지 않는다(새로고침하면 연결이 끊기고 새 탭이 메인 창으로 바뀐다).
-      const _inCall = () => { try { if (window.__naviIsCallTab) return true; const b = document.getElementById('peer-bar'); return !!window.__naviCallBusy || !!(b && b.style.display && b.style.display !== 'none'); } catch (e) { return false; } };
+      const _inCall = () => { try { if (window.__naviIsCallTab) return true; if (Date.now() - (window.__naviLastCallAt || 0) < 180000) return true; /* 2026-11-19: 통화 시작·수락 뒤 3분은 무조건 미룬다(주피터 진단: 수락 8초 뒤 자동 새로고침으로 연결이 끊김) */ const b = document.getElementById('peer-bar'); return !!window.__naviCallBusy || !!(b && b.style.display && b.style.display !== 'none'); } catch (e) { return false; } };
       const _busy = () => _inCall() || !!document.getElementById('ksa-overlay') || !!document.querySelector('.streaming')
         || [...document.querySelectorAll('textarea,input[type=text]')].some((el) => el.offsetParent && el.value && el.value.trim());
       const _tryReload = () => {

@@ -277,7 +277,7 @@ export async function startP2PCall(targetUser) {
 
   _peerInfo     = targetUser;
   try { _peerInfo.__since = Date.now(); } catch {}
-  window.__naviCallBusy = true;
+  window.__naviCallBusy = true; window.__naviLastCallAt = Date.now();   // 2026-11-19 — 자동 새로고침이 통화 중 연결을 끊지 않도록 시각도 남긴다(gopang-pwa.js)
   _p2pMessages  = [];
   _sessionStart = new Date().toISOString();
 
@@ -607,7 +607,7 @@ export async function handleIncomingOffer(signal) {
 
   _peerInfo = { guid: fromGuid, handle: fromHandle, nickname: fromName, __incoming: true };
   _peerInfo.__since = Date.now();
-  window.__naviCallBusy = true;
+  window.__naviCallBusy = true; window.__naviLastCallAt = Date.now();   // 2026-11-19 — 자동 새로고침이 통화 중 연결을 끊지 않도록 시각도 남긴다(gopang-pwa.js)
   // BUG-FIX(2026-07-02): 원래 이 아래 SDP 생성·전송 과정(await 여러 번)이
   // 끝난 뒤에야 _activeCallIdCallee를 세팅했는데, 그 사이(비동기 처리
   // 중)에 취소 신호가 도착하면 _handleIncomingCancel의 케이스 B 검사
