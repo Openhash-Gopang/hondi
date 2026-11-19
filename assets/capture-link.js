@@ -113,7 +113,29 @@
     return cv.toDataURL('image/jpeg', 0.85);
   }
 
-  var api = { start: start, phoneSession: phoneSession, downscale: downscale, _t: { seal: seal, open: open, generateKeyPair: generateKeyPair, sha256Hex: sha256Hex, newSid: newSid } };
+  // ── 증거(자료) 목록 — 순수 규칙 + 이 PC 의 보관(IndexedDB) ──
+  // 소송 서류면 "갑 제N호증", 그 밖의 서류(의료·교육 등)는 "자료 N". 이름은 사용자가 고칠 수 있다.
+  var LAWSUIT = /소장|준비서면|답변서|항소|상고|소송|지급명령|조정신청|가압류|가처분|법원/;
+  function labelPrefix(ctx) { return LAWSUIT.test(String(ctx || '')) ? 'lawsuit' : 'plain'; }
+  function defaultLabel(ctx, n) { return labelPrefix(ctx) === 'lawsuit' ? '갑 제' + n + '호증' : '자료 ' + n; }
+  // 채택(on)된 항목만 AI 에 보낸다. 사진 순서 = 목록 순서. 출처 표기 규칙을 함께 알린다.
+  function buildNote(items, ctx) {
+    var on = (items || []).filter(function (x) { return x && x.on; });
+    if (!on.length) return null;
+    var cite = labelPrefix(ctx) === 'lawsuit' ? '(갑 제1호증 참조)' : '(자료 1 참조)';
+    return {
+      images: on.map(function (x) { return x.url; }),
+      note: '채택한 자료 ' + on.length + '건(첨부 사진 순서): ' + on.map(function (x, i) { return (i + 1) + ') ' + (x.label || ('자료 ' + (i + 1))); }).join(', ') +
+        '. 서류의 사실 주장에는 근거가 되는 자료를 ' + cite + '처럼 표기하고, 자료와 맞지 않는 문장은 고치지 말고 먼저 알려 주세요. 자료에 없는 사실은 새로 만들지 마세요.'
+    };
+  }
+  var DB = 'navi_capture_evidence', STORE = 'ev';
+  function idb() { return new Promise(function (ok, no) { var q = root.indexedDB.open(DB, 1); q.onupgradeneeded = function () { q.result.createObjectStore(STORE, { keyPath: 'id' }); }; q.onsuccess = function () { ok(q.result); }; q.onerror = function () { no(q.error); }; }); }
+  async function evSave(rec) { try { var d = await idb(); await new Promise(function (ok, no) { var t = d.transaction(STORE, 'readwrite'); t.objectStore(STORE).put(rec); t.oncomplete = ok; t.onerror = no; }); } catch (e) {} }
+  async function evDelete(id) { try { var d = await idb(); await new Promise(function (ok, no) { var t = d.transaction(STORE, 'readwrite'); t.objectStore(STORE).delete(id); t.oncomplete = ok; t.onerror = no; }); } catch (e) {} }
+  async function evList() { try { var d = await idb(); return await new Promise(function (ok, no) { var r = d.transaction(STORE).objectStore(STORE).getAll(); r.onsuccess = function () { ok(r.result || []); }; r.onerror = no; }); } catch (e) { return []; } }
+
+  var api = { start: start, phoneSession: phoneSession, downscale: downscale, defaultLabel: defaultLabel, buildNote: buildNote, labelPrefix: labelPrefix, evSave: evSave, evDelete: evDelete, evList: evList, _t: { seal: seal, open: open, generateKeyPair: generateKeyPair, sha256Hex: sha256Hex, newSid: newSid } };
   root.NaviCapture = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

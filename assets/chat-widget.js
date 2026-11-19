@@ -125,6 +125,10 @@
     '#hcw-input::placeholder{color:#6b7280}' +
     '.hcw-ibtn{width:34px;height:38px;border-radius:10px;border:none;background:transparent;color:#475569;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s,color .15s}' +
     '.hcw-ibtn:hover{background:rgba(59,130,246,.12);color:#1d4ed8}.hcw-ibtn:disabled{opacity:.4;cursor:not-allowed}' +
+    '#hcw-evid{display:none;margin:0 14px 6px;padding:8px;background:rgba(24,128,56,.08);border-radius:10px;font-family:Pretendard,sans-serif;font-size:12.5px;color:#14532d;flex-shrink:0;max-height:190px;overflow:auto}' +
+    '#hcw-evid.on{display:block}#hcw-evid .ev-h{font-weight:700;margin-bottom:4px}#hcw-evid .ev-r{display:flex;align-items:center;gap:6px;margin:4px 0}' +
+    '#hcw-evid img{width:38px;height:38px;object-fit:cover;border-radius:6px;flex-shrink:0}#hcw-evid input[type=text]{flex:1;min-width:0;border:1px solid #bbb;border-radius:6px;padding:3px 6px;font-size:12.5px}' +
+    '#hcw-evid .ev-x{border:none;background:transparent;cursor:pointer;font-size:16px;color:#475569}#hcw-evid .ev-n{font-size:11.5px;opacity:.85;margin-top:4px}' +
     '#hcw-attach{display:none;align-items:center;gap:8px;margin:0 14px;padding:6px 10px;background:rgba(59,130,246,.1);border-radius:10px;font-family:Pretendard,sans-serif;font-size:12.5px;color:#1e3a8a;flex-shrink:0}' +
     '#hcw-attach.on{display:flex}#hcw-attach-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}' +
     '#hcw-attach-x{border:none;background:transparent;color:#475569;cursor:pointer;font-size:16px;line-height:1;padding:0 2px}' +
@@ -185,6 +189,7 @@
       '</div>' +
       '<div id="hcw-messages"></div>' +
       '<div id="hcw-divider"></div>' +
+      '<div id="hcw-evid"></div>' +
       '<div id="hcw-attach"><span id="hcw-attach-name"></span><button type="button" id="hcw-attach-x" title="첨부 취소">×</button></div>' +
       '<div id="hcw-input-row">' +
         '<button type="button" class="hcw-ibtn" id="hcw-cam" title="카메라로 서류 촬영"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></button>' +
@@ -390,6 +395,40 @@
   document.getElementById('hcw-attach-x').addEventListener('click', clearAttach);
 
   // ── 폰으로 촬영 — 같은 계정의 폰이 PC 의 눈이 된다(capture-link.js). 폰에서 알림을 눌러야 카메라가 열린다. ──
+  // ── 증거 목록: 도착한 사진은 "후보"로 먼저 쌓이고, 사용자가 이름을 확인·고치고 "사용"을 체크한 것만 AI 에 간다 ──
+  var evEl = document.getElementById('hcw-evid'), evItems = [];
+  function evCtx() { return [CFG.title, document.title, _modeOverride && _modeOverride.context, CFG.context].join(' '); }
+  function evRender() {
+    if (!evEl) return;
+    if (!evItems.length) { evEl.classList.remove('on'); evEl.textContent = ''; return; }
+    evEl.textContent = ''; evEl.classList.add('on');
+    var h = document.createElement('div'); h.className = 'ev-h'; h.textContent = '📱 폰에서 온 자료 ' + evItems.length + '장 — 이름을 확인하고 쓸 것만 체크하세요'; evEl.appendChild(h);
+    evItems.forEach(function (it) {
+      var r = document.createElement('div'); r.className = 'ev-r';
+      var cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = it.on; cb.title = '이 자료를 서류에 사용';
+      cb.addEventListener('change', function () { it.on = cb.checked; evPersist(it); });
+      var im = new Image(); im.src = it.url;
+      var tx = document.createElement('input'); tx.type = 'text'; tx.value = it.label; tx.maxLength = 30;
+      tx.addEventListener('input', function () { it.label = tx.value; });
+      tx.addEventListener('change', function () { evPersist(it); });
+      var x = document.createElement('button'); x.type = 'button'; x.className = 'ev-x'; x.title = '이 사진 버리기'; x.textContent = '×';
+      x.addEventListener('click', function () { evItems = evItems.filter(function (o) { return o !== it; }); if (window.NaviCapture) window.NaviCapture.evDelete(it.id); evRender(); });
+      r.appendChild(cb); r.appendChild(im); r.appendChild(tx); r.appendChild(x); evEl.appendChild(r);
+    });
+    var n = document.createElement('div'); n.className = 'ev-n'; n.textContent = '체크한 사진만 보내기를 누를 때 AI에게 전달됩니다. 사진은 이 PC에만 보관됩니다.'; evEl.appendChild(n);
+  }
+  function evPersist(it) { if (window.NaviCapture) window.NaviCapture.evSave({ id: it.id, sha256: it.sha256, dataUrl: it.url, label: it.label, on: it.on, ts: it.ts }); }
+  function addEvidence(url, meta) {
+    var it = { id: (meta && meta.sha256 || String(Date.now())) + ':' + (meta && meta.seq), sha256: meta && meta.sha256, url: url, on: true, ts: Date.now() };
+    it.label = window.NaviCapture.defaultLabel(evCtx(), evItems.length + 1);
+    evItems.push(it); evPersist(it); evRender();
+  }
+  function takeEvidence() {   // 보내기 직전: 체크된 자료를 첨부로 만들고 목록을 비운다(보관본은 PC 에 남는다)
+    var n = window.NaviCapture && window.NaviCapture.buildNote(evItems, evCtx());
+    if (!n) return null;
+    evItems = []; evRender();
+    return { name: '폰 사진 ' + n.images.length + '장', images: n.images, note: n.note };
+  }
   var phoneBtn = document.getElementById('hcw-phone'), phoneSess = null, phoneImgs = [];
   function phoneLabel() { return '폰 사진 ' + phoneImgs.length + '장'; }
   function stopPhone() { if (phoneSess) { try { phoneSess.stop(); } catch (e) {} phoneSess = null; } if (phoneBtn) phoneBtn.classList.remove('listening'); }
@@ -405,11 +444,7 @@
       phoneImgs = [];
       phoneSess = await window.NaviCapture.start({
         label: (CFG.title || document.title || '').slice(0, 30),
-        onPhoto: function (url) {
-          phoneImgs.push(url);
-          pending = { name: phoneLabel(), images: phoneImgs.slice(), note: '같은 계정의 폰으로 촬영' };
-          showAttach('📱 ' + phoneLabel() + ' 도착 — 보내기를 누르면 AI가 읽습니다');
-        },
+        onPhoto: function (url, meta) { addEvidence(url, meta); },
         onState: function (st) {
           if (st.state === 'expired') { stopPhone(); appendMsg('ai', '폰 촬영 연결이 끝났습니다. 다시 하려면 폰 단추를 누르세요.'); }
           else if (st.state === 'network') appendMsg('ai', '폰과 연결이 불안정합니다. 인터넷 연결을 확인하세요.');
@@ -467,12 +502,13 @@
     stopMic();
     // 인라인 모드: 접힌 입력창에서 바로 보내는 경우에도 로그인 확인 → 펼침을 먼저 거친다(말풍선 방식의 onFabClick 과 같은 경로).
     if (inline && !panel.classList.contains('open')) {
-      if (!input.value.trim() && !pending) return;
+      if (!input.value.trim() && !pending && !evItems.some(function (o) { return o.on; })) return;
       await onFabClick();
       if (!panel.classList.contains('open')) return;
     }
     var text = input.value.trim();
     var att = pending;
+    if (!att && !busy) att = takeEvidence();
     var ctext = text;
     if (typeof CFG.beforeSend === 'function') { try { ctext = CFG.beforeSend(text) || text; } catch (eb) { console.error('[chat-widget] beforeSend', eb); } }
     if ((!text && !att) || busy) return;
