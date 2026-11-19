@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-19 11:32 KST · 기준 커밋 d4ed3161
+- 갱신: 2026-11-19 19:45 KST · 기준 커밋 c90863ec
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-19 Merge pull request #1231 from Openhash-Gopang/fix/hondi-net-redirect-20261119
+- 2026-11-19 fix(webapp): hondi.net 로 열리면 naviweb.kr 로 이동 (폐기된 주소로 가입 후 로그인 창이 다시 뜨는 문제)
 - 2026-11-19 feat(diag): "진단" 입력 시 원인 판정 + 서버 알림 등록 점검(/signal/diag) + "진단 시험"
 - 2026-11-19 fix(push): 호출 알림이 되다 안 되다 하던 문제 — 발송을 waitUntil 로 보장, VAPID 없이도 FCM 발송
 - 2026-11-19 설치 안내에 PWA(경고 없는 설치) 추가, 플레이 업로드용 AAB 빌드 단계 추가
@@ -42,8 +44,6 @@
 - 2026-11-18 상대 대화창 머리글·입력창 표시, 대화 호출 푸시를 calls 채널로
 - 2026-11-18 Merge pull request #1212 from Openhash-Gopang/fix/p2p-keepalive
 - 2026-11-18 P2P 연결 유지: 재호출 취소 신호·늦은 ICE 수신·끊김 시 자동 재연결(창 유지)·keepalive, 안내 글꼴 1px 축소
-- 2026-11-18 Merge pull request #1211 from Openhash-Gopang/fix/call-sound-keyboard-sysmsg
-- 2026-11-18 호출 재알림 소리·푸시 지연 단축·키보드 입력창 가림·시스템 안내 가독성
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
