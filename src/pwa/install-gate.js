@@ -20,19 +20,19 @@
   var installedBefore = false;
   try { installedBefore = Number(localStorage.getItem('navi_pwa_last_standalone')) > 0; } catch (e) {}
   // 2026-11-19(주피터 지시): 설치는 필수 — 처음부터 건너뛰기는 주지 않는다. 다만 설치가 실제로 안 되는 폰(삼성 자동 차단·크롬 설치 창 미표시 등)에서
-  // 사용자가 이 화면에 갇히지 않도록, 설치 버튼을 한 번 눌러 본 뒤(또는 설치 버튼이 없는 iOS·앱 내 브라우저)에는 "이번만 브라우저로 계속"을 보인다.
+  // 사용자가 이 화면에 갇히지 않도록 "이번만 브라우저로 계속"을 항상 보인다(화면이 작아도 스크롤된다).
   var canSkip = true;
 
   var st = document.createElement('style');
-  st.textContent = '#navi-pwa-gate{display:none;position:fixed;inset:0;z-index:2147483000;background:#5C6BC0;color:#fff;align-items:center;justify-content:center;padding:24px;text-align:center}' +
+  st.textContent = '#navi-pwa-gate{display:none;position:fixed;inset:0;z-index:2147483000;background:#5C6BC0;color:#fff;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:24px;text-align:center}' +
     'html.navi-need-pwa body.gopang-authed #navi-pwa-gate{display:flex}' +
-    '#navi-pwa-gate .g-box{max-width:340px;width:100%}' +
+    '#navi-pwa-gate .g-box{max-width:340px;width:100%;margin:auto}' +
     '#navi-pwa-gate h1{font-size:1.35rem;margin:0 0 12px}' +
     '#navi-pwa-gate p{font-size:1rem;line-height:1.6;margin:0 0 14px}' +
     '#navi-pwa-gate .g-btn{display:block;width:100%;padding:14px;border:0;border-radius:12px;background:#FFD54F;color:#3B2F00;font-size:1.05rem;font-weight:700;margin:0 0 12px;cursor:pointer;text-decoration:none}' +
     '#navi-pwa-gate .g-steps{background:rgba(255,255,255,.15);border-radius:12px;padding:12px 14px;text-align:left;font-size:.95rem;line-height:1.6;margin:0 0 14px}' +
     '#navi-pwa-gate .g-hint{font-size:.9rem;opacity:.95}' +
-    '#navi-pwa-gate .g-skip{display:inline-block;margin-top:10px;color:#fff;opacity:.85;font-size:.85rem;text-decoration:underline;background:none;border:0;cursor:pointer}';
+    '#navi-pwa-gate .g-skip{display:inline-block;margin-top:10px;color:#fff;opacity:1;font-size:.95rem;text-decoration:underline;padding:10px;background:none;border:0;cursor:pointer}';
   document.head.appendChild(st);
   document.documentElement.classList.add('navi-need-pwa');
 
@@ -54,7 +54,7 @@
     }
     h += '<p class="g-hint" id="navi-gate-hint">' + (installedBefore ? '<b>이미 설치했다면 바탕화면의 나비 아이콘으로 여세요.</b>' : '설치한 뒤에는 바탕화면의 나비 아이콘으로 여세요.') + '</p>';
     var hasInstallBtn = !inApp && !isIOS;
-    if (canSkip) h += '<button class="g-skip" id="navi-gate-skip" style="' + (hasInstallBtn ? 'display:none' : '') + '">설치가 안 되면 이번만 브라우저로 계속 (알림이 늦을 수 있습니다)</button>';
+    if (canSkip) h += '<button class="g-skip" id="navi-gate-skip">설치가 안 되면 이번만 브라우저로 계속 (알림이 늦을 수 있습니다)</button>';
     h += '</div>';
     el.innerHTML = h;
     document.body.appendChild(el);
@@ -63,7 +63,6 @@
     if (ib) ib.onclick = function () {
       var p = typeof window.installPWAWithPermission === 'function' ? window.installPWAWithPermission() : null;
       var m = document.getElementById('navi-gate-manual'); if (m) m.style.display = 'block';
-      var k = document.getElementById('navi-gate-skip'); if (k) k.style.display = 'inline-block';
       return p;
     };
     var sk = document.getElementById('navi-gate-skip');
