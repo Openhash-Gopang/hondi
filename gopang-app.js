@@ -229,7 +229,7 @@ try {
   }
 })();
 
-import('/src/gopang/ui/notify-gate.js').then(m => m.startNotifyGate()).catch(() => {});
+import('/src/gopang/ui/notify-gate.js?v=20261119b').then(m => m.startNotifyGate()).catch(() => {});
 
 // 2026-11-16(주피터 지시: 신규 가입자 알림을 기본 허용으로) — 브라우저는 알림 권한을 코드로 강제할 수 없고, 사용자 동작 없이 띄운 권한 창은
 // 조용히 막히거나(Chrome) 무시되는 경우가 많아 위 자동 시도만으로는 구독이 안 생긴다. 그래서 권한이 아직 결정 전(default)이면
