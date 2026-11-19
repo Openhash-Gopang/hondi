@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-19 21:09 KST · 기준 커밋 be718f5b
+- 갱신: 2026-11-19 21:37 KST · 기준 커밋 3ad91f49
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-19 Merge pull request #1240 from Openhash-Gopang/docs/manual-ch9-search
+- 2026-11-19 docs(manual): 초급 9장 '사람 찾기·호출하기' 보충 — 앱 기준 검색·초대·수락·새 대화창 설명
 - 2026-11-19 Merge pull request #1239 from Openhash-Gopang/docs/android-handoff-20261119b
 - 2026-11-19 docs(android): 인수 문서에 앱 설치 후 시험 결과와 웹 코드 지도 추가
 - 2026-11-19 Merge pull request #1238 from Openhash-Gopang/docs/android-handoff-20261119
@@ -42,8 +44,6 @@
 - 2026-11-19 Merge pull request #1221 from Openhash-Gopang/fix-pwa-mandatory-no-tab-20261119
 - 2026-11-19 PWA 설치 필수(유예 제거) + 알림 클릭 시 브라우저 탭 미사용
 - 2026-11-19 Merge pull request #1220 from Openhash-Gopang/fix-pwa-only-incoming-20261119
-- 2026-11-19 fix(p2p): PWA가 설치된 기기에서는 브라우저 탭이 대화 요청을 무시하고 PWA만 받는다
-- 2026-11-19 Merge pull request #1219 from Openhash-Gopang/fix-diag-lifecycle-20261119
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
