@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>폰 카메라 → PC 나비웹 도우미 증거 전달 설계 v0.1</title>
+<title>폰 카메라 → PC 나비웹 도우미 증거 전달 설계 v0.2</title>
 <style>body{font-family:Pretendard,system-ui,sans-serif;max-width:860px;margin:32px auto;padding:0 16px;line-height:1.65;color:#1f2933}h1{font-size:1.5rem}h2{margin-top:2rem;border-bottom:2px solid #0c6cc3;padding-bottom:4px}table{border-collapse:collapse;width:100%;font-size:.92rem}th,td{border:1px solid #cbd5e1;padding:6px 8px;text-align:left;vertical-align:top}th{background:#eaf3fc}code{background:#f1f5f9;padding:1px 4px;border-radius:4px}.note{background:#fef7e0;border-left:4px solid #b06000;padding:8px 12px;margin:12px 0}pre{background:#0f172a;color:#e2e8f0;padding:12px;border-radius:8px;overflow:auto;font-size:.82rem}</style></head><body>
-<h1>폰 카메라 → PC 나비웹 도우미 증거 전달 설계 v0.1</h1>
-<p>2026-11-19 · 대상: 사용법 매뉴얼 제12장(마이크·카메라·파일 첨부) 갱신의 근거 설계 · 상태: <strong>제안(미구현)</strong></p>
+<h1>폰 카메라 → PC 나비웹 도우미 증거 전달 설계 v0.2</h1>
+<p>2026-11-19 · 대상: 사용법 매뉴얼 제12장(마이크·카메라·파일 첨부) 갱신의 근거 설계 · 상태: <strong>결정 반영(미구현)</strong></p>
 
+<div class="note"><strong>2026-11-19 결정</strong>: ① 증거 이미지는 AI에 직접 전달 ② 폰·PC는 반드시 같은 계정(QR 폴백 없음) ③ 소송뿐 아니라 모든 서류(의료·교육 등)에 공통 적용 ④ 도우미 확장은 상대(수신) AI 역할 — 전달 경로는 나비웹 페이지가 담당 ⑤ 폰과 PC는 하나의 기기로 융합, 폰은 PC의 눈, 물리적 거리와 무관하게 통신망으로 연결.</div>
 <h2>1. 목표와 시나리오</h2>
 <p>PC에서 나비웹 도우미가 민사소송 서류(소장·준비서면 등)를 작성하는 동안, 사용자가 폰 카메라로 종이 증거(계약서·영수증·내용증명·문자 화면)를 찍어 PC의 도우미에게 전달하고, 도우미가 그 내용을 근거로 서류를 다듬는다. 작성 흐름을 끊지 않고(PC 화면 유지), 원본 사진이 나비웹 서버에 평문으로 남지 않아야 한다.</p>
 
@@ -22,9 +23,9 @@
 <pre>PC(서류 작성 화면)                    서버(worker)                      폰
 ① [폰으로 증거 촬영] 클릭
    - 세션 s 생성: 1회용 X25519 키쌍(PC 메모리),
-     만료 30분, 사건 라벨(예: 소장 초안)
+     같은 계정 서명 필수, 서류 작성이 끝날 때까지 유지(비활동 2시간 만료), 사건 라벨(예: 소장 초안)
    - POST /capture/open {guid, s, pc_pub}  ─▶ KV 저장 + 푸시 ─────────▶ 알림 "서류 촬영 요청"
-   (폰이 없으면 QR: https://naviweb.kr/c?s=..&k=pc_pub)                  탭 → 촬영 화면(/capture.html?s=..)
+   탭 → 촬영 화면(/capture.html?s=..)
                                                                        ② 연속 촬영 · 모서리 보정 · 해상도 1600px/JPEG q0.8
                                                                        ③ 사진마다 pc_pub로 봉인(AAD=s·순번·sha256)
 ② ◀────────── P2P 데이터채널(1순위) 또는 /pdv/relay/push (폴백, TTL 10분) ◀──── 전송
@@ -36,21 +37,21 @@
 
 <h2>4. 구성 요소와 계약</h2>
 <table><tr><th>구성</th><th>내용</th></tr>
-<tr><td>세션</td><td><code>capture:{guid}:{s}</code> KV, TTL 30분. 값: pc_pub, 상태(open/closed), 수신 개수. 본문·사진 없음.</td></tr>
+<tr><td>세션</td><td><code>capture:{guid}:{s}</code> KV, 비활동 2시간 TTL. 값: pc_pub, 상태(open/closed), 수신 개수. 본문·사진 없음.</td></tr>
 <tr><td>봉투</td><td><code>{s, seq, sha256, sealed}</code>. 서버 허용 필드 외 거부(case-mailbox 방식). 사진 1장 ≤ 1.5MB 목표, 초과 시 폰에서 재압축.</td></tr>
 <tr><td>증거 레코드(PDV)</td><td><code>{id, case_ref, sha256, mime, taken_at, ocr_text, fields{type,date,amount,parties}, label, status: candidate|adopted|discarded}</code>. 원본 바이트는 IndexedDB 블롭.</td></tr>
-<tr><td>도우미 입력</td><td>채택(adopted) 증거의 <code>label + fields + ocr_text</code>만 모델에 전달. 원본 이미지는 사용자가 "이미지로 직접 보기"를 선택할 때만.</td></tr>
+<tr><td>AI 입력</td><td>채택(adopted) 증거의 이미지(<code>image_url</code> 블록)와 <code>label</code>을 서류 작성 요청에 포함. 추출 필드는 목록 표시·인용용 캐시.</td></tr>
 <tr><td>인용 규칙</td><td>초안의 사실 주장 문장은 증거 id 또는 "사용자 진술"로 출처 표기. 근거 없는 사실 주장은 새로 만들지 않음.</td></tr></table>
 
 <h2>5. 안전·프라이버시 규칙</h2>
 <ul>
 <li><strong>평문 서버 비경유</strong>: 서버는 봉인된 암호문과 크기·시각만 본다. 세션 키는 PC 메모리에만 존재.</li>
 <li><strong>사용자 확인 게이트</strong>: 후보→채택은 사용자가 명시. 미채택 증거는 모델에 보내지 않음.</li>
-<li><strong>최소 전송</strong>: 모델에는 추출 텍스트·필드 우선. 이미지 직접 전송은 선택. 민감 항목(주민번호·계좌)은 PC에서 가림(마스킹) 도구 제공, 마스킹 후 해시를 별도 기록.</li>
-<li><strong>수명</strong>: 세션 30분, relay 10분 1회 소비, 종료 시 폰 임시본 삭제, 증거 목록은 사용자가 삭제 가능.</li>
+<li><strong>전송 범위</strong>: 채택(adopted)된 증거 이미지만 AI에 직접 전달. 후보·폐기 사진은 전달하지 않는다.</li>
+<li><strong>수명</strong>: 세션 비활동 2시간, relay 10분 1회 소비, 종료 시 폰 임시본 삭제, 증거 목록은 사용자가 삭제 가능.</li>
 <li><strong>무결성</strong>: 원본 sha256을 PDV 해시체인에 기록하고 서버에는 해시만 보고(/pdv/report) → "촬영 시각에 존재했던 증거"의 사후 입증에 유리. 단, 이는 법적 증거능력을 보장하지 않음.</li>
 <li><strong>법률 고지</strong>: 도우미는 서류 작성 도구이며 법률 자문이 아님. 제출 전 본인 확인을 화면·매뉴얼에 명시. 증거 번호(갑 제N호증)와 증거설명서 형식은 법원 양식에 맞춰 사용자가 최종 확인.</li>
-<li><strong>QR 폴백의 위험</strong>: QR에는 세션 id와 PC 공개키만 포함(개인키·계정 정보 없음). 타인이 QR을 찍어 사진을 보낼 수 있으므로 PC에서 수신 시 "새 사진 도착" 확인을 거치고 미확인 사진은 목록에 격리.</li></ul>
+<li><strong>동일 계정 강제</strong>: 세션 개설·촬영 응답·전송은 같은 guid의 지갑 서명으로만 허용. QR·비로그인 폰 경로는 두지 않는다.</li><li><strong>원격 카메라 안전</strong>: 폰 카메라는 폰에서 알림을 탭해야만 열린다(무단 원격 가동 금지). 촬영 중임을 폰 화면에 표시.</li><li><strong>AI 직접 전달</strong>: 이미지는 AI 호출에 그대로 포함되므로 사용자에게 "AI에게 전달됨"을 촬영 화면과 매뉴얼에 고지하고, 가릴 부분은 찍기 전에 가리도록 안내.</li></ul>
 
 <h2>6. 단계별 구현안</h2>
 <table><tr><th>단계</th><th>범위</th><th>성격</th></tr>
@@ -60,9 +61,8 @@
 <tr><td>M3</td><td>P2P 1순위 경로, 모서리 자동 보정, 마스킹 도구, 증거목록 내보내기</td><td>개선</td></tr></table>
 
 <h2>7. 미결정 사항 (사용자 결정 필요)</h2>
-<ol><li>증거 이미지를 모델에 직접 보낼지(품질↑·노출↑) 추출 텍스트만 보낼지 기본값.</li>
-<li>QR 폴백(계정 비로그인 폰)을 M1에 포함할지.</li>
-<li>증거 목록·인용 형식을 소송 외 서류(계약·민원)에도 공통 적용할지.</li>
-<li>도우미 확장(별도 저장소)과 나비웹 페이지 사이 메시지 계약 — 확장 쪽 수정 범위.</li></ol>
+<ol><li>(해결) 이미지 직접 전달 · 동일 계정 필수 · 모든 서류 공통 · 확장은 수신 AI 역할.</li>
+<li>서류 종류별 자료 이름 규칙(소송 "갑 제N호증", 의료·교육 등 일반 "자료 N") 목록.</li>
+<li>세션 비활동 만료 시간(안: 2시간).</li></ol>
 <div class="note">매뉴얼 제12장의 "폰과 PC가 함께 일하는 방법" 절은 위 M1·M2가 구현될 때까지 "제공 준비 중"으로 표기한다. 구현 전에 사용 가능한 것처럼 안내하지 않기 위함이다.</div>
 </body></html>
