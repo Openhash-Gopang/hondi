@@ -30582,8 +30582,9 @@ async function handleProfileVerifyOwner(request, env, corsHeaders) {
 //      안 되면 조용히 null을 반환한다 — 원문 표시가 항상 안전한
 //      폴백이므로 이 기능의 실패가 프로필 열람 자체를 막아선 안 된다.
 
-const PROFILE_TRANSLATION_LANGS = ['en', 'ja', 'zh']; // 제주 관광객 다빈도 언어 3종(잠정) — 필요시 조정
-const PROFILE_TRANSLATION_LANG_NAMES = { en: 'English', ja: '日本語', zh: '简体中文' };
+// 2026-11-19: 폰 언어 전체로 확대(주피터 결정). profile.html·site-lang.js의 SUPPORTED 목록과 같아야 한다 — 한쪽만 바뀌면 번역이 조용히 안 나갈 뿐 기능 손상은 없다.
+const PROFILE_TRANSLATION_LANGS = ['en', 'zh', 'ja', 'es', 'fr', 'de', 'vi', 'th', 'id', 'ru', 'pt', 'ar', 'hi'];
+const PROFILE_TRANSLATION_LANG_NAMES = { en: 'English', zh: '简体中文', ja: '日本語', es: 'Español', fr: 'Français', de: 'Deutsch', vi: 'Tiếng Việt', th: 'ไทย', id: 'Bahasa Indonesia', ru: 'Русский', pt: 'Português', ar: 'العربية', hi: 'हिन्दी' };
 
 // filtered(방문객 시야 기준) profile 객체에서 번역 대상 텍스트만 추출.
 // profile.name은 core.name(항상 공개)이라 filtered 필터링과 무관하게

@@ -5911,7 +5911,15 @@ let _profileUrl = null;
 const _DIGIT_WORKER = 'https://hondi-proxy.tensor-city.workers.dev';
 async function lookupDigitProfile(serial) {
   const sv = await lookupSerial(serial, _DIGIT_WORKER);
-  if (!sv || sv.status !== 'claimed') throw new Error('등록되지 않은 코드 (' + serial + ')');
+  if (!sv || sv.status !== 'claimed') {
+    // 전화번호로 만든 코드(가입 시 자동 생성, profiles.digit_code_id)는 서명 등록 없이도 프로필 조회가 된다 — 스캐너가 앞의 0을 뗀 일련번호를 주므로 10자리로 되돌려 찾는다(2026-11-19).
+    try {
+      const { lookupDigitProfile: _lookup10 } = await import('./src/gopang/ai/hondi-digit-scanner.js');
+      const p10 = await _lookup10(String(serial).padStart(10, '0'));
+      if (p10 && p10.handle) { const h10 = String(p10.handle).replace(/^@/, ''); return { handle: h10, name: p10.name || ('@' + h10), url: '/profile.html?handle=' + encodeURIComponent(h10) }; }
+    } catch (e) { /* 아래 오류로 */ }
+    throw new Error('등록되지 않은 코드 (' + serial + ')');
+  }
   const r = await fetch(_DIGIT_WORKER + '/profile?pubkey=' + encodeURIComponent(sv.owner), { signal: AbortSignal.timeout(8000) });
   const j = await r.json().catch(() => null);
   if (!(r.ok && j && j.ok && j.profile)) throw new Error('아직 프로필을 작성하지 않은 코드 (' + serial + ')');

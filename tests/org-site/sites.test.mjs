@@ -7,7 +7,7 @@ import { isValidSerial } from '../../src/gopang/ai/hondi-digit-core.js';
 
 const SAMPLES = {
   '73905': 'jeju-do', '4816203': 'jtp', '25918': 'jeju-univ-hospital', '6049172853': 'gwangju-court-jeju',
-  '380614': 'jeju-tax-office', '91742650': 'hongseongbang', '2057': 'saebyeol-oreum',
+  '380614': 'jeju-tax-office', '91742650': 'hongseongbang', '2057': 'saebyeol-oreum', '640000001': 'navi-practice',
 };
 
 test('샘플 코드 → 기관 사이트', () => {
@@ -25,4 +25,11 @@ test('사이트 id·govCode·config', () => {
     assert.ok(s.name && s.greeting, id);
     if (s.govCode === 'none') { const r = sanitizeConfig(s.config); assert.ok(r.ok, id + ' ' + (r.errors || '')); assert.match(s.greeting, /시연용/); }
   }
+});
+
+test('전화번호 모양 코드(앞의 0 포함 10자리)도 같은 사이트로 연결된다', () => {
+  assert.equal(findSiteByDigitCode('0640000001'), 'navi-practice');
+  assert.equal(findSiteByDigitCode('064-000-0001'), 'navi-practice');
+  assert.equal(findSiteByDigitCode('640000001'), 'navi-practice');
+  assert.equal(findSiteByDigitCode('0000000000'), null);
 });

@@ -5,26 +5,73 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>나비 AI</title>
-<meta name="description" content="나비 숫자 코드로 여는 기관 AI 웹사이트 — 방문자에게 용건을 묻고 그에 맞게 응대합니다.">
+<meta name="description" content="나비 숫자 코드로 여는 AI 웹사이트 — 방문자에게 용건을 묻고 그에 맞게 응대합니다.">
 <!--
   2026-10-08 신설 — 나비 AI 웹사이트 진입점.
   숫자 코드를 읽으면 이 페이지가 새 탭으로 열려(?code=숫자 또는 ?site=기관id)
   해당 기관의 AI 대화창(pages/regional-gov.html, 사이트 모드)으로 넘긴다.
+  2026-11-19 — (1) 코드가 기관 표에 없으면 그 코드(=전화번호)의 프로필로 보낸다,
+  (2) 카메라가 없어도 따라 해 볼 수 있게 전화번호나 숫자 코드를 직접 입력하는 칸을 둔다.
   게시할 정보는 없다: 방문자에게 용건을 묻고 그에 맞게 대응하는 것이 전부.
   기관 설정은 src/gopang/gov/org-sites.js 한 곳에서만 관리한다.
 -->
+<style>
+  body{font-family:Pretendard,-apple-system,"Noto Sans KR",sans-serif;margin:0;padding:28px 18px;color:#1f2937;background:#fff}
+  .w{max-width:420px;margin:40px auto 0}
+  h1{font-size:19px;margin:0 0 6px}
+  p{font-size:14px;line-height:1.7;color:#4b5563;margin:0 0 14px}
+  input{width:100%;box-sizing:border-box;font-size:20px;padding:12px 14px;border:1.5px solid #9ca3af;border-radius:10px;letter-spacing:1px}
+  button{width:100%;margin-top:12px;padding:13px;font-size:16px;font-weight:700;border:0;border-radius:10px;background:#1f2937;color:#fff;cursor:pointer}
+  #msg{margin-top:14px;font-size:14px;color:#b42318;min-height:20px}
+  .ex{font-size:13px;color:#6b7280;margin-top:18px}
+</style>
 </head>
-<body style="font-family:sans-serif;padding:24px;color:#444">
-<p id="msg">연결 중…</p>
+<body>
+<div class="w">
+  <h1 id="title">나비 AI</h1>
+  <p id="lead">연결 중…</p>
+  <form id="f" hidden>
+    <input id="num" inputmode="tel" autocomplete="off" placeholder="예: 064-000-0001" aria-label="전화번호 또는 숫자 코드">
+    <button type="submit">열기</button>
+  </form>
+  <div id="msg" role="status"></div>
+  <div class="ex" id="ex" hidden>카메라가 없거나 코드를 읽기 어려울 때, 코드의 숫자(전화번호)를 직접 입력해도 같은 화면이 열립니다.</div>
+</div>
 <script type="module">
 import { ORG_SITES, findSiteByDigitCode } from '/src/gopang/gov/org-sites.js';
+import { toDigitCode } from '/src/gopang/gov/code-input.js';
 const q = new URLSearchParams(location.search);
-const id = ORG_SITES[q.get('site')] ? q.get('site') : findSiteByDigitCode(q.get('code'));
-if (id) {
-  location.replace('/pages/regional-gov.html?site=' + encodeURIComponent(id));
-} else {
-  document.getElementById('msg').textContent = '연결된 기관을 찾을 수 없습니다. 숫자 코드를 다시 확인해 주세요.';
+const $ = (id) => document.getElementById(id);
+const lang = q.get('lang') ? '&lang=' + encodeURIComponent(q.get('lang')) : '';   // 시험용: ?lang=en
+
+async function go(raw) {
+  $('msg').textContent = '';
+  const code = toDigitCode(raw);
+  if (!code) { $('msg').textContent = '번호를 확인해 주세요. 전화번호(예: 064-000-0001)나 숫자 코드 10자리를 입력합니다.'; return false; }
+  const site = findSiteByDigitCode(code);
+  if (site) { location.replace('/pages/regional-gov.html?site=' + encodeURIComponent(site) + lang); return true; }
+  // 기관 표에 없으면 그 번호(=전화번호)를 가진 가게·사람의 프로필을 찾는다.
+  try {
+    $('lead').textContent = '찾는 중…';
+    const { lookupDigitProfile } = await import('/src/gopang/ai/hondi-digit-scanner.js');
+    const p = await lookupDigitProfile(code);
+    if (p && p.handle) { location.replace('/profile.html?handle=' + encodeURIComponent(String(p.handle).replace(/^@/, '')) + lang); return true; }
+  } catch (e) { /* 아래에서 안내 */ }
+  $('lead').textContent = '번호를 입력하면 그 가게·기관의 AI가 열립니다.';
+  $('msg').textContent = '연결된 곳을 찾을 수 없습니다. 번호를 다시 확인해 주세요.';
+  return false;
 }
+
+const id0 = ORG_SITES[q.get('site')] ? q.get('site') : null;
+if (id0) {
+  location.replace('/pages/regional-gov.html?site=' + encodeURIComponent(id0) + lang);
+} else if (q.get('code')) {
+  go(q.get('code')).then((ok) => { if (!ok) { $('f').hidden = false; $('ex').hidden = false; } });
+} else {
+  $('lead').textContent = '번호를 입력하면 그 가게·기관의 AI가 열립니다.';
+  $('f').hidden = false; $('ex').hidden = false;
+}
+$('f').addEventListener('submit', (e) => { e.preventDefault(); go($('num').value); });
 </script>
 <script src="/navi-home.js" defer></script>
 </body>
