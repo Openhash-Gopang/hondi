@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-19 10:39 KST · 기준 커밋 536db466
+- 갱신: 2026-11-19 11:19 KST · 기준 커밋 39bbbeaf
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-19 설치 안내에 PWA(경고 없는 설치) 추가, 플레이 업로드용 AAB 빌드 단계 추가
 - 2026-11-19 Merge pull request #1228 from Openhash-Gopang/sp-fix2-20261119
 - 2026-11-19 fix(sp): 서류 SP 대화에 위치 안 얹기, A/B 질문 직답 규칙
 - 2026-11-19 Merge pull request #1227 from Openhash-Gopang/sp-catalog-core22
@@ -43,7 +44,6 @@
 - 2026-11-18 호출 재알림 소리·푸시 지연 단축·키보드 입력창 가림·시스템 안내 가독성
 - 2026-11-18 Merge pull request #1210 from Openhash-Gopang/feat/p2p-close-confirm-notify-inbox
 - 2026-11-18 P2P 종료 2단계 팝업·상단 상대 표시·초대 푸시 url 상대경로·앱 내 알림 수신함
-- 2026-11-18 Merge pull request #1209 from Openhash-Gopang/feat/p2p-close-restore-ai-chat
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
