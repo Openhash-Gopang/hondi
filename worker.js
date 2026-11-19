@@ -14992,7 +14992,7 @@ export default {
     // ── WebRTC 시그널링 (P2P 채팅 — OpenHash 철학) ──────────
     // 메시지는 서버에 저장하지 않음 — 시그널(SDP/ICE)만 임시 경유
     // 2026-10-28: 세 경로 모두 로그인 증명을 요구한다(대화 신호 위조 방지) — 보내는 쪽 guid 는 증명의 계정으로 강제.
-    if (pathname === '/signal/send')   return handleSignalSend(request, env, corsHeaders);
+    if (pathname === '/signal/send')   return handleSignalSend(request, env, corsHeaders, ctx);
     if (pathname === '/signal/poll')   return handleSignalPoll(request, env, corsHeaders);
     if (pathname === '/signal/delete') return handleSignalDelete(request, env, corsHeaders);
 
@@ -30167,7 +30167,7 @@ async function handleTurnCredential(request, env, corsHeaders) {
   }), { status: 200, headers: { ...corsHeaders, 'Cache-Control': 'no-store' } });
 }
 
-async function handleSignalSend(request, env, corsHeaders) {
+async function handleSignalSend(request, env, corsHeaders, ctx) {
   if (request.method !== 'POST') return _err(405, 'METHOD_NOT_ALLOWED', '', corsHeaders);
   const body = await request.json().catch(() => null);
   const v = _sigValidate(body);
@@ -30194,17 +30194,19 @@ async function handleSignalSend(request, env, corsHeaders) {
   // offer 는 저장과 푸시를 동시에 시작한다(푸시는 상대 프로필 조회가 필요해 원래 느리다). 푸시 발송은 최대 4초 기다린 뒤 응답한다.
   let _pushP = null;
   if (type === 'offer') {
+    // 2026-11-19 — 응답은 푸시를 최대 4초만 기다린다. 그런데 4초가 지나 응답이 나가면 Worker 는 아직 끝나지 않은 발송(상대 프로필 조회·FCM 인증·발송)을 중단해 버려 호출 알림이 "되다 안 되다" 했다.
+    //   발송 자체는 ctx.waitUntil 로 끝까지 마치게 하고, 응답만 4초 상한으로 먼저 보낸다.
+    let _pushFull = null;
     let _who = '';
     try { const pj = typeof payload === 'string' ? JSON.parse(payload) : (payload || {}); _who = String(pj.from_name || pj.from_handle || '').replace(/^@|^tid-/g, '').slice(0, 20); } catch (e) { /* 이름 없음 */ }
-    _pushP = Promise.race([
-      _sendPushToGuid(env, to_guid, {
-        title: _who ? `${_who}님이 대화를 요청했습니다` : '대화 요청이 도착했습니다',
-        body:  '눌러서 나비웹을 열면 바로 연결됩니다.',
-        tag:   'gopang-call-' + from_guid.slice(0, 8),
-        url:   '/webapp.html',
-      }),
-      new Promise(r => setTimeout(r, 4000)),
-    ]).catch(e => { console.warn('[Push] 알림 전송 실패:', e.message); return 'error'; });
+    _pushFull = _sendPushToGuid(env, to_guid, {
+      title: _who ? `${_who}님이 대화를 요청했습니다` : '대화 요청이 도착했습니다',
+      body:  '눌러서 나비웹을 열면 바로 연결됩니다.',
+      tag:   'gopang-call-' + from_guid.slice(0, 8),
+      url:   '/webapp.html',
+    }).catch(e => { console.warn('[Push] 알림 전송 실패:', e.message); return 'error'; });
+    if (ctx && typeof ctx.waitUntil === 'function') ctx.waitUntil(_pushFull);
+    _pushP = Promise.race([_pushFull, new Promise(r => setTimeout(r, 4000))]);
   }
   try {
     await _l1SignalSend(env, from_guid, to_guid, type, payload, expires_at);
@@ -34670,7 +34672,9 @@ function _b64uEncode(str) {
 
 // ── Push 알림 전송 헬퍼 (guid 기준) ─────────────────────
 async function _sendPushToGuid(env, guid, { title, body, tag, url }) {
-  if (!env.VAPID_PRIVATE_KEY || !env.VAPID_PUBLIC_KEY) return 'config';
+  // 2026-11-19 — VAPID 키가 없으면 웹 푸시 기기만 못 보낸다. 안드로이드 앱(FCM) 기기는 VAPID 가 필요 없으므로 여기서 전부 막지 않는다.
+  const _hasVapid = !!(env.VAPID_PRIVATE_KEY && env.VAPID_PUBLIC_KEY);
+  if (!_hasVapid && !env.FCM_SERVICE_ACCOUNT_JSON) return 'config';
 
   let record;
   try {
@@ -34679,11 +34683,13 @@ async function _sendPushToGuid(env, guid, { title, body, tag, url }) {
     console.warn('[Push] L1 조회 실패:', e.message);
     return 'error';
   }
-  const devices = _parseDeviceSubscriptions(record?.push_subscription);
-  if (!devices.length) {
+  const _allDevices = _parseDeviceSubscriptions(record?.push_subscription);
+  if (!_allDevices.length) {
     console.warn('[Push] push_subscription 없음 — 구독 안 된 계정, 발송 건너뜀. guid:', guid);
     return 'no_subscription';
   }
+  const devices = _hasVapid ? _allDevices : _allDevices.filter(d => _isFcmSub(d.subscription));
+  if (!devices.length) return 'config';
 
   const payload = JSON.stringify({
     title, body, tag,
