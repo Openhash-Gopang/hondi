@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-19 20:23 KST · 기준 커밋 7e07a8d9
+- 갱신: 2026-11-19 20:26 KST · 기준 커밋 bd7a784f
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-19 Merge pull request #1235 from Openhash-Gopang/fix/diag-ice-error-full-20261119
+- 2026-11-19 diag: ICE 후보 추가 실패 원인을 끝까지·전송방식과 함께 기록, '중계 서버 없음' 오판 정정
 - 2026-11-19 Merge pull request #1234 from Openhash-Gopang/fix/p2p-accept-open-20261119
 - 2026-11-19 fix: 상대 수락 응답만 받았을 때 '연결됐습니다'라고 표시하지 않음
 - 2026-11-19 Merge pull request #1233 from Openhash-Gopang/fix/gate-always-escape-20261119
@@ -42,8 +44,6 @@
 - 2026-11-19 Merge pull request #1216 from Openhash-Gopang/diag-p2p-push-result-20261119
 - 2026-11-19 diag(p2p): 성공·실패 양쪽을 비교할 수 있는 임시 진단 기록 확대
 - 2026-11-19 diag(p2p): 대화 요청 알림 발송 결과(push)를 콘솔·화면에 기록
-- 2026-11-18 Merge pull request #1214 from Openhash-Gopang/feat/pwa-open-on-notify
-- 2026-11-18 Merge pull request #1215 from Openhash-Gopang/feat/pwa-install-gate
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
