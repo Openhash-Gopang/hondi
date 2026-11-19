@@ -382,7 +382,7 @@ function _watchAnswerRealtime(conn, targetUser, callId) {
         await conn.setRemoteDescription(new RTCSessionDescription(answerSdp));
         if (noAnswerTimer) { clearTimeout(noAnswerTimer); noAnswerTimer = null; } // 응답 왔으니 무응답 타이머 해제
         if (smsTimer) { clearTimeout(smsTimer); smsTimer = null; }
-        _notify('✅ 연결됐습니다. 채널이 열리면 메시지를 입력하세요.');
+        _notify('🤝 상대가 수락했습니다. 연결하는 중입니다…');   // 2026-11-19 — 수락 응답을 받은 것일 뿐 대화 채널은 아직 열리지 않았다. "연결됐습니다"는 채널이 실제로 열릴 때(webrtc/_setupChannel onopen)만 보인다.
         console.info('[P2P] answer 수신 완료');
         // answer 수신 후 잠시 뒤 watcher 종료 (ICE는 ondatachannel onopen 후 불필요)
         setTimeout(_close, 60000);   // 연결이 열릴 때까지 늦게 오는 ICE 후보(중계 경로)를 계속 받는다 — 예전엔 10초 뒤 끊어 늦은 후보를 놓쳤다
