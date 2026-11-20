@@ -17894,7 +17894,7 @@ async function handleChargeInfo(request, env, corsHeaders) {
 // 2026-08-28 재설계(주피터 지시) — 기존 방식(_generateChargeMatchCode로
 // 무작위 HD+6자리 코드를 새로 발급해 사용자가 "보내는 분 표시"에
 // 직접 타이핑)이 실사용 테스트에서 완전히 깨졌다: 은행이 예금주
-// 실명(예: "도영민", 3자)을 그 필드 맨 앞에 강제로 붙이는데, 그
+// 실명(예: "김철수", 3자)을 그 필드 맨 앞에 강제로 붙이는데, 그
 // 필드 자체가 총 10자로 잘린다(실측 확인) — 이름 3자 + HD+6자리(8자)
 // = 11자로 항상 초과해 매칭코드 마지막 글자가 매번 잘려나갔다.
 // 한국인 이름이 대개 2~4자인 이상 이건 이 사용자 한 명의 문제가
@@ -36099,7 +36099,7 @@ async function _kmailSendOneEmail(env, { guid, to, cc, bcc, subject, text, sessi
   const fromAddr = `${_kmailSenderLocalPart(guid, resolvedMailId)}@${_KMAIL_DOMAIN}`;
   const _sigText = _kmailRenderSignature(signature, senderName, _kmailSenderLocalPart(guid, resolvedMailId));   // 2026-10-28: 비어 있으면 'Signed by 이름', {이름} 치환, '-' 이면 없음
   const finalText = _sigText ? `${text}\n\n${_sigText}` : text;
-  const fromName = _kmailEffectiveSenderName(senderName);                       // 이름이 없으면 주소만("ceo@hondi.kr"), 있으면 "도 영민 <ceo@hondi.kr>"
+  const fromName = _kmailEffectiveSenderName(senderName);                       // 이름이 없으면 주소만("ceo@hondi.kr"), 있으면 "김 철수 <ceo@hondi.kr>"
   const sendParams = { to, from: fromName ? { email: fromAddr, name: fromName } : fromAddr, subject, text: finalText };
   if (Array.isArray(cc) && cc.length) sendParams.cc = cc;                       // 2026-10-28: 참조
   if (Array.isArray(bcc) && bcc.length) sendParams.bcc = bcc;                   // 숨은참조(받는 사람 화면에 보이지 않음)
@@ -36265,7 +36265,7 @@ async function handleUserMailSend(request, env, corsHeaders) {
   return new Response(JSON.stringify({
     ok: true, from: result.fromAddr, sent_at: new Date().toISOString(),
     recipients: { to: rcpt.to, cc: rcpt.cc, bcc: rcpt.bcc },
-    from_display: _kmailFormatSender(result.fromAddr, result.fromName),     // 받는 사람 화면에 보이는 모양("도 영민 <ceo@hondi.kr>" 또는 주소만) — 보냄 확인 카드가 표시
+    from_display: _kmailFormatSender(result.fromAddr, result.fromName),     // 받는 사람 화면에 보이는 모양("김 철수 <ceo@hondi.kr>" 또는 주소만) — 보냄 확인 카드가 표시
     quota: { charged_gdc: result.quota.charged ? result.quota.chargedGdc : 0, projected_5d_avg: result.quota.projectedAvg ?? null },
   }), { status: 200, headers: corsHeaders });
 }
