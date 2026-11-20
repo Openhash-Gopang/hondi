@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-20 08:57 KST · 기준 커밋 47d06679
+- 갱신: 2026-11-20 18:43 KST · 기준 커밋 25edce9b
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-20 지갑·백업 키 장 연습 문제 8문항 추가
 - 2026-11-20 Merge pull request #1257 from Openhash-Gopang/docs/manual-ch16-hondi
 - 2026-11-20 docs(manual): 16장 설정 페이지 사용법 갱신(hondi 사본)
 - 2026-11-20 12장 연습 문제 8문항 추가 (폰과 PC 함께 쓰기)
@@ -43,7 +44,6 @@
 - 2026-11-19 Merge pull request #1236 from Openhash-Gopang/fix/p2p-ice-buffer-auth-20261119
 - 2026-11-19 fix(p2p): 인증 준비 전 신호 전송 401 대기 재시도, 답신 전 도착 ICE 후보 보관, 연결 검사 응답 진단 보강
 - 2026-11-19 Merge pull request #1235 from Openhash-Gopang/fix/diag-ice-error-full-20261119
-- 2026-11-19 diag: ICE 후보 추가 실패 원인을 끝까지·전송방식과 함께 기록, '중계 서버 없음' 오판 정정
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
