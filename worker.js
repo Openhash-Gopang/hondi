@@ -3072,19 +3072,22 @@ async function handleUsageLog(request, env, corsHeaders) {
   const kstOf = (created) => new Date(new Date(String(created || '').replace(' ', 'T')).getTime() + KST);   // 'YYYY-MM-DD HH:MM:SS.mmmZ' 도 파싱된다
   const ymd = (d) => d.toISOString().slice(0, 10);
   const todayKst = ymd(new Date(Date.now() + KST));
-  const hourly = Array.from({ length: 24 }, (_, h) => ({ h, req: 0, tok: 0, krw: 0, models: {} }));
+  const hourly = Array.from({ length: 24 }, (_, h) => ({ h, req: 0, tok: 0, krw: 0, models: {}, svc: {} }));
   const dailyMap = {};
-  for (let i = days - 1; i >= 0; i--) dailyMap[ymd(new Date(Date.now() + KST - i * 86400000))] = { d: null, req: 0, tok: 0, krw: 0, models: {} };
+  for (let i = days - 1; i >= 0; i--) dailyMap[ymd(new Date(Date.now() + KST - i * 86400000))] = { d: null, req: 0, tok: 0, krw: 0, models: {}, svc: {} };
   for (const it of items) {
     const k = kstOf(it.created); if (isNaN(k)) continue;
     const day = ymd(k), tok = (Number(it.hit_tokens) || 0) + (Number(it.miss_tokens) || 0) + (Number(it.out_tokens) || 0);
     const krw = Number(it.billed_krw) || 0, model = it.model || '(unknown)';
-    const add = (b) => { b.req += 1; b.tok += tok; b.krw += krw; const m = b.models[model] || (b.models[model] = { req: 0, tok: 0 }); m.req += 1; m.tok += tok; };
+    // 사용 분야(2026-11-21): service_id 를 묶어(biz:*·gov:* 는 각각 하나로) 분야별 요청·토큰·청구액을 함께 담는다 — 설정 › GDC 지갑의 '사용 분야' 그래프용.
+    const sid = String(it.service_id || '(unknown)'), svcKey = sid.startsWith('biz:') ? 'biz' : sid.startsWith('gov:') ? 'gov' : sid;
+    const add = (b) => { b.req += 1; b.tok += tok; b.krw += krw; const m = b.models[model] || (b.models[model] = { req: 0, tok: 0 }); m.req += 1; m.tok += tok; const v = b.svc[svcKey] || (b.svc[svcKey] = { req: 0, tok: 0, krw: 0 }); v.req += 1; v.tok += tok; v.krw += krw; };
     if (day === todayKst) add(hourly[k.getUTCHours()]);
     if (dailyMap[day]) add(dailyMap[day]);
   }
-  const daily = Object.keys(dailyMap).map(d => ({ ...dailyMap[d], d, krw: Math.round(dailyMap[d].krw * 100) / 100 }));
-  hourly.forEach(b => { b.krw = Math.round(b.krw * 100) / 100; });
+  const r2 = (n) => Math.round(n * 100) / 100, roundSvc = (b) => { Object.keys(b.svc).forEach(k => { b.svc[k].krw = r2(b.svc[k].krw); }); };
+  const daily = Object.keys(dailyMap).map(d => { roundSvc(dailyMap[d]); return { ...dailyMap[d], d, krw: r2(dailyMap[d].krw) }; });
+  hourly.forEach(b => { b.krw = r2(b.krw); roundSvc(b); });
 
   return new Response(JSON.stringify({
     ok: true,
