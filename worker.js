@@ -21,6 +21,7 @@ import { validateSignalInput as _sigValidate, canDeleteSignal as _sigCanDelete, 
 import { classifyQuery as _ffClassify, publicCard as _ffPublicCard, rateLimitOk as _ffRateOk, normalizePhone as _ffNormPhone } from './src/worker/friend-find.js';
 import { referralCode as _refCode, isReferralCode as _isRefCode, inviteText as _refInviteText, inviteLink as _refInviteLink, withinClaimWindow as _refInWindow, REFERRAL_REWARD_KRW, REFERRAL_MAX_REWARDS } from './src/worker/referral.js';
 import { computeChargeGdc as _computeChargeGdc } from './src/worker/charge-plans.js';
+import { usageField as _usageField } from './src/worker/usage-field.js';
 import { makePlanRequest as _planMakeRequest, judgeDeposit as _planJudgeDeposit, nextPaidUntil as _planNextPaidUntil, validTier as _planValidTier, DEFAULT_KRW_PER_USD as _PLAN_DEFAULT_RATE } from './src/worker/plan-pay.js';
 import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, startFree as _testQuotaStartFree, resetFree as _testQuotaResetFree, setPlan as _testQuotaSetPlan, setPaid as _testQuotaSetPaid, setExtra as _testQuotaSetExtra, addExtraSpend as _testQuotaAddExtra, exhaustedMessage as _planExhaustedMessage, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage, addBonus as _testQuotaAddBonus, peek as _testQuotaPeek } from './src/worker/test-quota.js';
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
@@ -3080,7 +3081,7 @@ async function handleUsageLog(request, env, corsHeaders) {
     const day = ymd(k), tok = (Number(it.hit_tokens) || 0) + (Number(it.miss_tokens) || 0) + (Number(it.out_tokens) || 0);
     const krw = Number(it.billed_krw) || 0, model = it.model || '(unknown)';
     // 사용 분야(2026-11-21): service_id 를 묶어(biz:*·gov:* 는 각각 하나로) 분야별 요청·토큰·청구액을 함께 담는다 — 설정 › GDC 지갑의 '사용 분야' 그래프용.
-    const sid = String(it.service_id || '(unknown)'), svcKey = sid.startsWith('biz:') ? 'biz' : sid.startsWith('gov:') ? 'gov' : sid;
+    const sid = String(it.service_id || '(unknown)'), fld = String(it.field || '').trim(), svcKey = fld ? 'f:' + fld : sid.startsWith('biz:') ? 'biz' : sid.startsWith('gov:') ? 'gov' : sid;
     const add = (b) => { b.req += 1; b.tok += tok; b.krw += krw; const m = b.models[model] || (b.models[model] = { req: 0, tok: 0 }); m.req += 1; m.tok += tok; const v = b.svc[svcKey] || (b.svc[svcKey] = { req: 0, tok: 0, krw: 0 }); v.req += 1; v.tok += tok; v.krw += krw; };
     if (day === todayKst) add(hourly[k.getUTCHours()]);
     if (dailyMap[day]) add(dailyMap[day]);
@@ -7973,7 +7974,7 @@ async function _l1SweepPendingSettlements(env, ctx) {
 // 검색·집계용이 아니다), /usage.html의 모델별·기간별 상세 내역을
 // 위해 L1에 요청 단위로 영구 기록한다. 컬렉션 스키마는
 // pb_migrations/1784800001_created_ai_usage_log.js 참조.
-async function _l1CreateUsageLog(env, { guid, serviceId, tier, model, hitTokens, missTokens, outTokens, costKRW, billedKRW }) {
+async function _l1CreateUsageLog(env, { guid, serviceId, tier, model, hitTokens, missTokens, outTokens, costKRW, billedKRW, field }) {
   if (!guid) return;
   try {
     const token = await _l1AdminToken(env);
@@ -7981,7 +7982,7 @@ async function _l1CreateUsageLog(env, { guid, serviceId, tier, model, hitTokens,
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        guid, service_id: serviceId || 'hondi-chat', tier: tier || '', model: model || '',
+        guid, service_id: serviceId || 'hondi-chat', tier: tier || '', model: model || '', field: field || '',
         hit_tokens: Math.round(hitTokens || 0), miss_tokens: Math.round(missTokens || 0),
         out_tokens: Math.round(outTokens || 0),
         cost_krw: Math.round((costKRW || 0) * 100) / 100,
@@ -8037,6 +8038,7 @@ async function _recordAiUsage(env, ctx, {
       guid, serviceId, tier, model,
       hitTokens: usage?.prompt_cache_hit_tokens, missTokens: usage?.prompt_cache_miss_tokens,
       outTokens: usage?.completion_tokens, costKRW: bill.apiCostKRW, billedKRW: bill.billedKRW,
+      field: extraLogFields && extraLogFields.field,
     }),
     ...spendKeys.map(key => _klawSpendAdd(env, key, bill.billedKRW)),
   ];
@@ -15288,6 +15290,7 @@ export default {
       ua:     request.headers.get('User-Agent') || 'unknown',
       path:   pathname,
     };
+    if (isAiProxyPath) { const _uf = _usageField(bodyText, request.headers.get('Origin')); if (_uf) _meta.field = _uf; }   // 사용 분야(ai_usage_log.field)
     if (isAiProxyPath && !corsOrigin) {
       console.warn(JSON.stringify({ tag: 'AI_PROXY_BLOCKED_NO_ORIGIN', ts: new Date().toISOString(), ..._meta }));
       return _err(403, 'FORBIDDEN_NO_ORIGIN', 'AI 프록시 호출에는 브라우저 Origin이 필요합니다.', corsHeaders);
