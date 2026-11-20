@@ -607,6 +607,12 @@ body[data-mode=person] .mo[data-m=org],body:not([data-mode=person]) .mo[data-m=p
 .srcpanel button{height:38px;padding:0 18px;border-radius:999px;border:1px solid var(--bd);background:var(--card);color:var(--teal);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
 .srcpanel button:disabled{opacity:.5;cursor:default}
 .srcpanel .st{color:var(--mut)}.srcpanel .st.err{color:#b91c1c}.srcpanel .st.ok{color:#15803d}
+/* ── 나비웹 설정 안에 끼울 때(?embed=mail) 설정 페이지와 같은 Material Design 3 색·모서리(2026-11-21) ──
+   이 페이지 고유의 청록 팔레트를 설정 화면의 팔레트로 바꾸고, 어두운 모드는 끈다. 단독으로 열 때는 그대로. */
+html.embed:root{--teal:#3B7DDD;--teal-d:#2F6BC4;--teal-l:#5C93E6;--sky:#E3ECF9;--sky-l:#EEF3FB;--bar:#E4E8EE;
+  --ink:#1F2328;--mut:#49505A;--faint:#79808C;--line:#D9DEE6;--outline:#79808C;--bg:transparent;--card:#fff;--soft:#F7F9FC;--r:12px;color-scheme:light}
+html.embed body{background:transparent;color:var(--ink)}
+html.embed .mainc{padding:16px 0 96px}
 html.embed,html.embed body{overflow:hidden}
 html.embed .bot{position:absolute;bottom:auto;right:20px}
 @media (max-width:560px){html.embed .bot{right:8px;left:8px}}
@@ -614,6 +620,18 @@ html.embed .bot{position:absolute;bottom:auto;right:20px}
 </head>
 <body>
 <script>if(/[?&]embed=/.test(location.search))document.documentElement.classList.add("embed")</script>
+<script>
+/* 설정 화면(부모)이 알려 주는 강조색을 따른다(스타일 값만 주고받음) */
+if(document.documentElement.classList.contains("embed")){
+  addEventListener("message",function(e){var d=e.data||{};
+    if(d.type!=="navi-skin"||e.source!==parent)return;
+    if(!/^https:\/\/([a-z0-9-]+\.)*(naviweb\.kr|hondi\.net)$/.test(e.origin))return;
+    var st=document.documentElement.style;
+    if(d.pri)st.setProperty("--teal",d.pri); if(d.priD){st.setProperty("--teal-d",d.priD);} if(d.tint){st.setProperty("--sky",d.tint2||d.tint);st.setProperty("--sky-l",d.tint);}
+  });
+  try{parent.postMessage({type:"navi-skin-request"},"*")}catch(x){}
+}
+</script>
 <div class="app">
 <div class="mainc">
 <div class="wrap">
