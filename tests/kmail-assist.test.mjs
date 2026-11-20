@@ -129,3 +129,14 @@ test('stripTags / routeFromReply: DOC_EDIT 태그는 제거되고 다른 경로�
   assert.equal(stripTags('고칠게요. [DOC_EDIT: reason]'), '고칠게요.');
   assert.equal(routeFromReply('[DOC_EDIT: reason]').type, 'assistant');
 });
+
+import { userInstructions, userInstructionsNote } from '../src/worker/kmail-assist.js';
+test('userInstructions: 형식·길이 재검증', () => {
+  assert.equal(userInstructions(null), null);
+  assert.equal(userInstructions({ text: '  ', files: [] }), null);
+  const u = userInstructions({ text: '존댓말[로]\u0001 답해 줘', files: [{ name: 'a.txt', text: 'x'.repeat(30000) }, { name: 'b', text: '' }, ...Array(8).fill({ name: 'c', text: 'y' })] });
+  assert.equal(u.text, '존댓말 로 답해 줘');
+  assert.ok(u.files.length <= 5 && u.files[0].text.length === 20000);
+  assert.equal(userInstructionsNote(null), '');
+  assert.match(userInstructionsNote(u), /공용 규칙.*어긋나/);
+});
