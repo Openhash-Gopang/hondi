@@ -17917,10 +17917,11 @@ async function handleChargeInfo(request, env, corsHeaders) {
 // 참고) — 극히 드문 뒷 8자리 충돌은 관리자 수동 확인으로 감수한다.
 async function _phoneMatchKey(env, guid) {
   const profile = await _l1FindProfileByGuid(env, guid).catch(() => null);
-  const e164 = profile?.e164 || '';
-  const digits = e164.replace(/\D/g, '');
-  if (digits.length < 8) return null; // 전화번호 미인증/미보유 — 폴백 필요
-  return digits.slice(-8);
+  // 새 계정은 평문 e164 대신 e164_last8(뒤 8자리)만 저장한다 — e164 만 보면 전화 인증을 마친 계정도 '미인증'으로 오판한다(2026-11-21).
+  const digits = String(profile?.e164 || '').replace(/\D/g, '');
+  if (digits.length >= 8) return digits.slice(-8);
+  const l8 = String(profile?.e164_last8 || '').replace(/\D/g, '');
+  return l8.length === 8 ? l8 : null; // 둘 다 없으면 전화번호 미인증/미보유 — 폴백 필요
 }
 
 // 2026-10-27(주피터 지시) — 최소 충전 금액 1,000원 → 100원. 화면의 기본 선택은 1,000원(settings.js).
