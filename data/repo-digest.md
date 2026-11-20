@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-21 06:20 KST · 기준 커밋 a3bedd2f
+- 갱신: 2026-11-21 06:22 KST · 기준 커밋 01d5b0fe
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-21 Merge pull request #1269 from Openhash-Gopang/fix-phone-match-key
+- 2026-11-21 charge-info: e164 가 없는 새 계정도 e164_last8 로 전화 인증을 인식
 - 2026-11-21 Merge pull request #1268 from Openhash-Gopang/usage-log-by-service
 - 2026-11-21 usage-log: 시간·일 칸마다 사용 분야(svc)별 집계 추가
 - 2026-11-21 Merge pull request #1267 from Openhash-Gopang/assist-user-instructions
@@ -42,8 +44,6 @@
 - 2026-11-19 docs(manual): 제13장 나비 숫자 코드 — 언어별 가게·기관 AI 비서 화면, 리뷰·GDC 결제, 기관 이점, 단색 일러스트
 - 2026-11-19 docs: 12장·설계 v0.2 — 폰·PC 융합(동일 계정, 이미지 AI 직접 전달, 모든 서류 공통)
 - 2026-11-19 docs: 매뉴얼 12장 폰·PC 공동 작업 안내 + 폰 카메라→PC 도우미 증거 전달 설계(v0.1)
-- 2026-11-19 Merge pull request #1243 from Openhash-Gopang/docs/manual-ch11-calls
-- 2026-11-19 docs(manual): 제11장 메시지 주고받기 — 기관·서비스·전문가·사람 호출 방식, 단색 폰 화면 일러스트
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
