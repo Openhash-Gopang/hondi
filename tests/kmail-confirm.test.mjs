@@ -71,8 +71,8 @@ test('시스템 프롬프트: 확인 질문 형태와 서버 요약 뒤 재발�
 });
 
 test('확인 요약: 보내는 사람 줄(이름 있음/없음)', () => {
-  const withName = buildConfirmationSummary(parsedOne, NOW, { address: 'ceo@hondi.kr', name: '도 영민' });
-  assert.match(withName, /- \*\*보내는 사람\*\*: 도 영민 <ceo@hondi\.kr>/);
+  const withName = buildConfirmationSummary(parsedOne, NOW, { address: 'ceo@hondi.kr', name: '김 철수' });
+  assert.match(withName, /- \*\*보내는 사람\*\*: 김 철수 <ceo@hondi\.kr>/);
   assert.ok(withName.indexOf('보내는 사람') < withName.indexOf('받는 사람'), '보내는 사람 줄이 먼저');
   const noName = buildConfirmationSummary(parsedOne, NOW, { address: 'swift-heron-482@hondi.kr', name: '' });
   assert.match(noName, /\*\*보내는 사람\*\*: swift-heron-482@hondi\.kr \(이름 없음/);
