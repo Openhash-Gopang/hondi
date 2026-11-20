@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-20 20:21 KST · 기준 커밋 d6138829
+- 갱신: 2026-11-20 20:54 KST · 기준 커밋 64def9e2
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-20 Merge pull request #1263 from Openhash-Gopang/kclean-sp-v1-5
+- 2026-11-20 feat(prompts): SP-14 K-Clean v1.5 — 사진·영상 신고/제안, 대응 주체 4분기
 - 2026-11-20 나비 길잡이 장 전면 갱신: 안건으로 묶는 맡긴 일·맡은 일·나 홀로, 공유, 삽화, 퀴즈 13문항
 - 2026-11-20 메일 메뉴 장과 K-Mail 첫걸음 장을 하나로 합치고 캠페인·메뉴별 설명·삽화·퀴즈 보강
 - 2026-11-20 나비웹 도우미 범위 정정: 로그인하는 대개의 사이트에서 데이터 수집·입력·서류 발급
@@ -42,8 +44,6 @@
 - 2026-11-19 Merge pull request #1239 from Openhash-Gopang/docs/android-handoff-20261119b
 - 2026-11-19 docs(android): 인수 문서에 앱 설치 후 시험 결과와 웹 코드 지도 추가
 - 2026-11-19 Merge pull request #1238 from Openhash-Gopang/docs/android-handoff-20261119
-- 2026-11-19 docs(android): 2026-11-19 웹 쪽 확인 사항 인수인계 문서 추가
-- 2026-11-19 Merge pull request #1237 from Openhash-Gopang/fix/no-reload-during-call-20261119
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
