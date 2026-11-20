@@ -23,3 +23,7 @@ test('worker /usage-log: 시간·일 칸마다 사용 분야(svc: biz·gov 묶�
   assert.match(w, /svcKey = sid\.startsWith\('biz:'\) \? 'biz' : sid\.startsWith\('gov:'\) \? 'gov' : sid/);
   assert.match(w, /models: \{\}, svc: \{\} \}\)\);/);
 });
+test('worker _phoneMatchKey: e164 가 없어도 e164_last8 로 전화 인증 계정을 알아본다', () => {
+  const w = readFileSync(new URL('../worker.js', import.meta.url), 'utf8');
+  assert.match(w, /profile\?\.e164_last8/);
+});
