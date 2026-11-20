@@ -2,11 +2,11 @@
   "id":          "fiil-kcleaner",
   "name":        "K-Clean",
   "icon":        "🌊",
-  "version":     "2.0.0",
+  "version":     "2.1.0",
   "url":         "https://clean.hondi.net/webapp.html",
   "category":    "ENV",
-  "sp_path":     "prompts/SP-14_kcleaner_v1.4.txt",
+  "sp_path":     "prompts/SP-14_kcleaner_v1.5.txt",
   "sp_img_path": "prompts/SP-14-IMG_kcleaner_vision_prompt_v1.1.txt",
-  "triggers":    ["쓰레기","환경","해안","청소","수거","오염","해양","산림","침적","불법투기","폐기물"],
-  "description": "해양·산림·생활 환경 현장 신고 및 AI 분석 서비스 (2026-09-21: fiil.kr → clean.hondi.net 이전)"
+  "triggers":    ["쓰레기","환경","해안","청소","수거","오염","해양","산림","침적","불법투기","폐기물","신고","제안","매연","배기가스","범법"],
+  "description": "해양·산림·생활 환경 현장 사진·영상 신고·제안 및 AI 분석 서비스 — 쓰레기는 환경 비서, 범법·범죄는 경찰, 응급은 119, 매연 차량은 시청 등이 대응 (2026-09-21: fiil.kr → clean.hondi.net 이전)"
 }
