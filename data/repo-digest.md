@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-21 18:34 KST · 기준 커밋 eec250ca
+- 갱신: 2026-11-21 18:51 KST · 기준 커밋 9b085300
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-21 manual: K-정부 장에 나비와 기관 소통 설명·일러스트 추가
 - 2026-11-21 Merge pull request #1278 from Openhash-Gopang/professor-single-persona-v1-7
 - 2026-11-21 K-Professor v1.7: 과목당 단일 교수 페르소나·맞춤 교재와 일정·상대 성취 위치·진로 조율 원칙(§3-11) 신설
 - 2026-11-21 의사 서류 작성 SP(SP-HEALTH-16B) 신설, 매뉴얼 전문가 인증+서류 작성 장 통합
@@ -43,7 +44,6 @@
 - 2026-11-20 Merge pull request #1253 from Openhash-Gopang/docs/manual-ch14-link
 - 2026-11-20 docs(manual): 14장 폰-PC 연동 갱신(hondi 사본)
 - 2026-11-19 Merge pull request #1252 from Openhash-Gopang/docs/manual-ch13-practice
-- 2026-11-19 docs(manual): 13장 코드 규칙 정정·리뷰/AI 비서 문구·연습 식당 따라해 보기
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
