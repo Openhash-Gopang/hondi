@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-21 20:21 KST · 기준 커밋 9d9bf46a
+- 갱신: 2026-11-21 20:47 KST · 기준 커밋 9225554d
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 886건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-21 Merge pull request #1291 from Openhash-Gopang/kaddr-latest-request-only
+- 2026-11-21 K-Address: 실패한 옛 요청이 다음 요청에 딸려 실행(삭제)되던 문제 수정 — 가장 최근 요청만 실행
 - 2026-11-21 manual: K-서비스 연습 안내에 무료 사용량·GDC 차감 안내 추가(라이브 스모크)
 - 2026-11-21 manual: 폰 화면 가상 테스트 반영 — 일정·결제 화면의 로그인 안내와 결제하기 단추 잠김
 - 2026-11-21 Merge pull request #1288 from Openhash-Gopang/kmail-autoreply-skip-automated
@@ -42,8 +44,6 @@
 - 2026-11-21 usage·pdv: 나비웹 설정에 끼울 때(?embed=mail) Material Design 3 시안·색 연동
 - 2026-11-21 사람 이름 '도영민' → '김철수' 전수 교체 (페이지·프롬프트·예시·테스트)
 - 2026-11-20 Merge pull request #1264 from Openhash-Gopang/kclean-sp-v1-5-notify
-- 2026-11-20 feat(prompts): SP-14 K-Clean v1.5 — §6D 처리 과정 실시간 통보와 PDV 저장
-- 2026-11-20 Merge pull request #1263 from Openhash-Gopang/kclean-sp-v1-5
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
