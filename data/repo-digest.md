@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-21 09:48 KST · 기준 커밋 bb4df9c9
+- 갱신: 2026-11-21 18:09 KST · 기준 커밋 16f1ee66
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-21 매뉴얼 중급 4장(PDV 거래명세서)을 6장(GDC)에 융합하고 4장 삭제
 - 2026-11-21 매뉴얼 중급 6·7장 통합: GDC 충전하기와 쓰기 — 결제가 재무제표에 반영되기까지 (퀴즈 15, 단색 일러스트 5)
 - 2026-11-21 매뉴얼 중급 1장 전면 갱신: 나비웹이 만들어진 이유
 - 2026-11-21 Merge pull request #1271 from Openhash-Gopang/cns-grade
@@ -43,7 +44,6 @@
 - 2026-11-19 feat: 폰→PC 증거 전달 M2 — 증거 목록(채택·이름·버리기)·PC 보관·출처 표기 지시, 매뉴얼 12장 완성(따라하기·삽화 11점)
 - 2026-11-19 Merge pull request #1249 from Openhash-Gopang/fix/manual-conflict
 - 2026-11-19 fix(manual): 충돌 표식 제거 — 제13장 병합 중 남은 중복 CHAPTERS 줄 정리
-- 2026-11-19 Merge pull request #1248 from Openhash-Gopang/docs/manual-ch13-chaticon
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
