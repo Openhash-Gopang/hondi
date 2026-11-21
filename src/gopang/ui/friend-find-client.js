@@ -91,3 +91,38 @@ export async function mountFriendFindCard() {
   bind('ff-mail', 'mail_findable', '이제 이메일 ID로 나를 찾을 수 있습니다.', '이메일 ID로는 더 이상 찾히지 않습니다.');
   bind('ff-phone', 'phone_findable', '이제 전화번호로 나를 찾을 수 있습니다.', '전화번호로는 더 이상 찾히지 않습니다.');
 }
+
+/**
+ * 실명 입력 의무화(2026-11-21): 로그인한 가입자의 본명이 비어 있으면 입력할 때까지 닫을 수 없는 창을 띄운다.
+ * 본명이 없으면 입금자를 확인할 수 없어 플랜 입금·GDC 충전이 자동 처리되지 않는다. 저장되면 창이 닫힌다.
+ * 조회에 실패하면(네트워크·로그인 문제) 창을 띄우지 않는다 — 실명이 있는 가입자를 막지 않기 위해서다.
+ */
+export async function requireRealName() {
+  if (document.getElementById('realname-gate')) return;
+  const s = await getFriendSettings();
+  if (!s || !s.ok || String(s.real_name || '').trim().length >= 2) return;
+  const ov = document.createElement('div');
+  ov.id = 'realname-gate';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px';
+  ov.innerHTML =
+    '<div style="background:#fff;border-radius:14px;max-width:380px;width:100%;padding:20px;font-family:inherit;color:#111827">' +
+    '<div style="font-size:16px;font-weight:700;margin-bottom:8px">실명을 입력해 주세요</div>' +
+    '<div style="font-size:13px;line-height:1.6;color:#374151">나비웹 이용을 위해 실명(신분증의 이름, 기관·사업자는 그 명칭) 입력이 필요합니다.</div>' +
+    '<div style="font-size:12.5px;line-height:1.6;color:#b45309;background:#fffbeb;border-radius:8px;padding:8px 10px;margin-top:10px">실명을 입력하지 않으면 입금자를 확인할 수 없어, 입금해도 플랜 적용과 GDC 충전이 자동으로 처리되지 않습니다.</div>' +
+    '<input id="rg-in" type="text" maxlength="60" placeholder="실명 또는 기관명" style="width:100%;box-sizing:border-box;margin-top:12px;padding:9px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:14px">' +
+    '<div id="rg-msg" style="min-height:16px;font-size:12px;color:#dc2626;margin-top:6px"></div>' +
+    '<button id="rg-save" type="button" style="width:100%;margin-top:6px;padding:10px;border:0;border-radius:8px;background:#1A73E8;color:#fff;font-weight:600;font-size:14px;font-family:inherit">저장</button></div>';
+  document.body.appendChild(ov);
+  const msg = (t) => { ov.querySelector('#rg-msg').textContent = t || ''; };
+  const save = async () => {
+    const v = ov.querySelector('#rg-in').value.trim().replace(/\s+/g, ' ');
+    if (v.length < 2) { msg('실명을 2자 이상 입력해 주세요.'); return; }
+    const b = ov.querySelector('#rg-save'); b.disabled = true;
+    const r = await saveFriendSettings({ real_name: v });
+    b.disabled = false;
+    if (!r || !r.ok) { msg((r && r.message) || '저장하지 못했습니다. 다시 시도해 주세요.'); return; }
+    ov.remove();
+  };
+  ov.querySelector('#rg-save').onclick = save;
+  ov.querySelector('#rg-in').addEventListener('keydown', e => { if (e.key === 'Enter') save(); });
+}

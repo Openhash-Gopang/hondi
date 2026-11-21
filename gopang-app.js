@@ -92,6 +92,9 @@ while (!_isRegistered()) {
 document.getElementById('gopang-auth-gate')?.remove();
 document.body.classList.add('gopang-authed');
 
+// 실명 입력 의무화(2026-11-21): 본명이 비어 있는 가입자에게는 입력할 때까지 닫을 수 없는 창을 띄운다. 조회 실패 시엔 띄우지 않는다.
+try { import('./src/gopang/ui/friend-find-client.js').then(m => m.requireRealName()).catch(() => {}); } catch {}
+
 // 초대받아 가입했다면 추천인에게 보상(1,000 GDC)이 가도록 서버에 청구한다(1회·서버가 신규 가입 여부 확인). 네트워크·로그인 문제면 다음 접속에 다시 시도한다.
 try {
   const _pending = localStorage.getItem('hondi_ref');
