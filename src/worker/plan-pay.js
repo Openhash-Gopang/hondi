@@ -1,9 +1,9 @@
 // src/worker/plan-pay.js — 유료 플랜 입금 확인(은행 입금 알림) 순수 함수 (2026-11-06, 주피터 지시: B안)
 //
 // 흐름
-//   1) 사용자가 플랜 화면에서 등급을 고르면 서버가 "입금 요청"을 만든다(정확한 입금액·전화번호 뒤 8자리 매칭키 포함, 48시간 유효).
-//   2) 사용자가 입금자명에 매칭키를 적어 입금하면, 관리자 폰의 은행 알림 → /biz/charge-confirm-notification 이 서버로 전달한다.
-//   3) 서버는 알림의 매칭키로 입금 요청을 찾아 금액이 정확히 같으면 플랜을 지정(기간 30일, 같은 등급 연장은 만료일 뒤로 이어 붙임)한다.
+//   1) 사용자가 플랜 화면에서 등급을 고르면 서버가 "입금 요청"을 만든다(정확한 입금액·가입한 이름 포함, 48시간 유효).
+//   2) 사용자가 가입한 이름으로 입금하면, 관리자 폰의 은행 알림 → /biz/charge-confirm-notification 이 서버로 전달한다.
+//   3) 서버는 알림 문구에 이름이 있고 금액이 정확히 같은 입금 요청이 하나뿐이면 플랜을 지정(기간 30일, 같은 등급 연장은 만료일 뒤로 이어 붙임)한다.
 //      → 플랜 요금은 GDC로 충전하지 않는다(B안). 금액이 다르면 자동 처리하지 않고 관리자에게 보이게 남긴다.
 //   · 베타 테스트 기간(2026년 12월 말까지): 어느 등급을 고르든 $200 플랜을 90% 할인한 $20, 지정되는 등급은 p200.
 import { FIELD_TEST_END_MS } from './charge-plans.js';
@@ -20,15 +20,18 @@ export const planPriceUsd = (tier, now = Date.now()) => (isBeta(now) ? PLAN_BETA
 export const grantedTier = (tier, now = Date.now()) => (isBeta(now) ? 'p200' : tier);
 export const planKrw = (usd, krwPerUsd) => Math.ceil(Number(usd) * Number(krwPerUsd));
 
-// 전화번호(E.164)에서 매칭키(뒤 8자리)
-export const matchKeyOf = (e164) => { const d = String(e164 || '').replace(/\D/g, ''); return d.length >= 8 ? d.slice(-8) : null; };
+// 입금자명 비교용 정리: 공백·점·가운데점·괄호·하이픈 등을 없애고 소문자로 맞춘다("홍 길동", "홍길동(주)" 같은 표기 차이 흡수).
+export const normName = (s) => String(s == null ? '' : s).normalize('NFC').toLowerCase().replace(/[\s·.,\-_()（）\[\]{}'"]/g, '');
+// 매칭에 쓸 이름 후보(가입한 이름·실명). 2자 미만은 오매칭 위험이 커서 쓰지 않는다.
+export const nameCandidates = (...names) => [...new Set(names.map(normName).filter(n => n.length >= 2))];
 
-export function makePlanRequest({ guid, e164, tier, krwPerUsd, now = Date.now() }) {
+// 입금 요청 만들기. 2026-11-21(주피터 지시): 전화번호 뒤 8자리 매칭키는 폐기했다 — 입금자 이름과 금액으로 맞춘다.
+export function makePlanRequest({ guid, names, tier, krwPerUsd, now = Date.now() }) {
   if (!validTier(tier)) return null;
-  const code = matchKeyOf(e164);
-  if (!guid || !code) return null;
+  const cands = nameCandidates(...(Array.isArray(names) ? names : [names]));
+  if (!guid || !cands.length) return null;
   const usd = planPriceUsd(tier, now);
-  return { guid, code, tier, grant: grantedTier(tier, now), usd, krw: planKrw(usd, krwPerUsd), rate: Number(krwPerUsd), created: now, expires: now + PLAN_REQ_TTL_MS };
+  return { guid, names: cands, tier, grant: grantedTier(tier, now), usd, krw: planKrw(usd, krwPerUsd), rate: Number(krwPerUsd), created: now, expires: now + PLAN_REQ_TTL_MS };
 }
 
 // 입금 알림 금액 ↔ 입금 요청 비교. 정확히 같아야 한다(분할·초과 입금은 자동 처리하지 않는다).
@@ -37,6 +40,24 @@ export function judgeDeposit(req, amountKrw, now = Date.now()) {
   if (now > Number(req.expires)) return { ok: false, reason: 'PLAN_REQUEST_EXPIRED' };
   if (Number(amountKrw) !== Number(req.krw)) return { ok: false, reason: 'PLAN_AMOUNT_MISMATCH' };
   return { ok: true, reason: 'OK' };
+}
+
+// 알림 문구에 이름이 들어 있는 입금 요청만 고른다(만료·이름 없는 옛 요청은 제외).
+export function requestsNamedIn(reqs, text, now = Date.now()) {
+  const t = normName(text);
+  if (!t) return [];
+  return (reqs || []).filter(r => r && Number(r.expires) >= now && Array.isArray(r.names) && r.names.some(n => n && t.includes(n)));
+}
+
+// 이름과 금액으로 입금 요청 하나를 찾는다. 정확히 하나일 때만 자동 처리한다(동명이인·같은 금액 중복은 관리자 확인).
+//   → { status: 'one', req } | { status: 'none' } | { status: 'ambiguous', reqs } | { status: 'mismatch', reqs }
+export function matchPlanRequest(reqs, text, amountKrw, now = Date.now()) {
+  const named = requestsNamedIn(reqs, text, now);
+  if (!named.length) return { status: 'none' };
+  const exact = named.filter(r => Number(r.krw) === Number(amountKrw));
+  if (exact.length === 1) return { status: 'one', req: exact[0] };
+  if (exact.length > 1) return { status: 'ambiguous', reqs: exact };
+  return { status: 'mismatch', reqs: named };
 }
 
 // 새 만료일: 같은 등급이 아직 유효하면 만료일 뒤로 이어 붙이고, 아니면 지금부터.
