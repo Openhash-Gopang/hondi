@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-21 06:28 KST · 기준 커밋 219e53a4
-- 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
+- 갱신: 2026-11-21 09:19 KST · 기준 커밋 508ef062
+- 전문가 페르소나 전용 페이지 154개 · 등록된 SP 885건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-21 Merge pull request #1271 from Openhash-Gopang/cns-grade
+- 2026-11-21 CNS 인증 시험 서술형 채점: AC-CNS-GRADER SP, /cns/grade 엔드포인트, 테스트
 - 2026-11-21 Merge pull request #1270 from Openhash-Gopang/usage-sp-key
 - 2026-11-21 AI 사용량 로그에 사용 분야(field) 기록: usage_field 본문 지정 또는 요청 사이트로 짐작
 - 2026-11-21 Merge pull request #1269 from Openhash-Gopang/fix-phone-match-key
@@ -42,8 +44,6 @@
 - 2026-11-19 Merge pull request #1248 from Openhash-Gopang/docs/manual-ch13-chaticon
 - 2026-11-19 docs(manual): 제13장 — 가게 화면 우측 상단 대화창 아이콘과 AI 비서 인사 화면 추가
 - 2026-11-19 feat: 폰 카메라→PC 증거 전달 M1 — 촬영 세션 API·폰 촬영 화면·채팅 위젯 폰 단추
-- 2026-11-19 Merge pull request #1246 from Openhash-Gopang/docs/manual-ch13-navicode
-- 2026-11-19 docs(manual): 제13장 나비 숫자 코드 — 언어별 가게·기관 AI 비서 화면, 리뷰·GDC 결제, 기관 이점, 단색 일러스트
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
