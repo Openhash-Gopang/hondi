@@ -16,3 +16,7 @@ test('send 를 받으면 expert-embed-ack 를 보내고 ready 에 ack:true 를 �
   assert.match(src, /expert-embed-send'[^\n]*\n\s*_embedPost\(\{ type: 'expert-embed-ack' \}\)/);
   assert.match(src, /type: 'expert-embed-ready', ack: true/);
 });
+
+test('오류 문구 끝의 마침표는 겹치지 않게 떼고 붙인다', () => {
+  assert.match(src, /replace\(\/\[\.。\]\\s\*\$\/, ''\)\)\}\. 잠시 후 다시 시도해 주세요/);
+});

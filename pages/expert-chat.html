@@ -987,7 +987,7 @@ async function sendTurn(text, attachment) {
   } catch (e) {
     typing.remove();
     aiBubble.remove();
-    appendBubble('ai', `⚠️ 응답 중 오류가 발생했습니다: ${escHtml(e.message)}. 잠시 후 다시 시도해 주세요.`);
+    appendBubble('ai', `⚠️ 응답 중 오류가 발생했습니다: ${escHtml(String(e.message || '').replace(/[.。]\s*$/, ''))}. 잠시 후 다시 시도해 주세요.`);   // 끝에 마침표가 이미 있으면 겹치지 않게
     // 2026-11-21: 임베드(부모 화면이 기다리는 중)에서는 실패를 즉시 알린다 — 안 알리면 부모가 90초 뒤에야 '연결 실패'로 보인다.
     _embedPost({ type: 'expert-embed-error', msg: '응답 중 오류: ' + String((e && e.message) || e).slice(0, 160), reply: true });
   }
