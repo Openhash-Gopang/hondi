@@ -1,9 +1,11 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-21 20:00 KST · 기준 커밋 0a6b8433
+- 갱신: 2026-11-21 20:02 KST · 기준 커밋 b1835548
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 886건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-21 Merge pull request #1285 from Openhash-Gopang/embed-ack
+- 2026-11-21 expert-chat 임베드: 보낸 글 수신 확인(ack) 신호 추가
 - 2026-11-21 Merge pull request #1284 from Openhash-Gopang/embed-error-post
 - 2026-11-21 expert-chat 임베드: 응답 실패 시 부모에 즉시 오류 알림
 - 2026-11-21 manual: K-서비스 호출하기 — 27개 서비스별 개요·예시·연습 예제·단색 일러스트
@@ -42,8 +44,6 @@
 - 2026-11-20 나비웹 도우미 범위 정정: 로그인하는 대개의 사이트에서 데이터 수집·입력·서류 발급
 - 2026-11-20 도움말 장: SP 호출·계층 구조·나비웹 도우미 서류 발급 설명과 삽화, 퀴즈 12문항
 - 2026-11-20 지갑·백업 키 장 연습 문제 8문항 추가
-- 2026-11-20 Merge pull request #1257 from Openhash-Gopang/docs/manual-ch16-hondi
-- 2026-11-20 docs(manual): 16장 설정 페이지 사용법 갱신(hondi 사본)
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
