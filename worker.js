@@ -2100,12 +2100,13 @@ const FREE_QUOTA_KRW_LIMIT = 0; // 2026-07-23: 100 → 0 (SP-GDC-CHARGE-v1_0 B�
 //  계속 호출되는 것을 잡아낸 뒤 확인 후 적용함(주피터님 확인).
 const FREE_QUOTA_ENFORCEMENT_ENABLED = true;
 
-function _deepseekUsageToKRW(usage, tierKey) {
+function _usageToKRW(usage, tierKey) {
   if (!usage) return 0;
   const _tm = HONDI_TIER_MODELS[tierKey] || HONDI_TIER_MODELS['hondi-flash'];
   const _promptTok = (usage.prompt_cache_hit_tokens ?? 0) + (usage.prompt_cache_miss_tokens ?? usage.prompt_tokens ?? 0);
   const price = (_tm.longPrice && _promptTok > _tm.longThresholdTokens) ? _tm.longPrice : _tm.price;
-  // DeepSeek 응답의 usage 필드명: prompt_cache_hit_tokens / prompt_cache_miss_tokens
+  // usage 필드명은 DeepSeek형(prompt_cache_hit_tokens / prompt_cache_miss_tokens)으로 통일한다 — Claude Haiku 응답은 _haikuUsage()가 같은 이름으로 바꿔 넘긴다.
+  // 가격표(tierKey)는 현재 나비 대화 모델(hondi-haiku, 필요하면 DeepSeek 폴백)의 것을 쓴다.
   // (없으면 prompt_tokens 전체를 캐시 미스로 간주 — 보수적 상한 추정)
   const hit  = usage.prompt_cache_hit_tokens ?? 0;
   const miss = usage.prompt_cache_miss_tokens ?? (usage.prompt_tokens ?? 0) - hit;
@@ -2121,8 +2122,8 @@ function _deepseekUsageToKRW(usage, tierKey) {
 // 통합 과금 배수 — gopang 기본 챗, K-Law, 향후 K-Tax·K-Public 등 모든
 // 서브시스템이 공유하는 단일 마진 정책 (2026-07-03).
 //
-// 청구액 = 실제 DeepSeek API 비용 × BILLING_MULTIPLIER.
-// "대화 길이"(컨텍스트 토큰)와 "연산량"(추론 토큰 등)은 이미 DeepSeek 자체
+// 청구액 = AI 사용 원가(나비 대화 모델 API 실비) × BILLING_MULTIPLIER.
+// "대화 길이"(컨텍스트 토큰)와 "연산량"(추론 토큰 등)은 이미 모델 API 자체
 // usage에 반영되어 있으므로 이것으로 충분하다 — 별도로 벽시계 경과시간을
 // 더해서 청구하면, 네트워크 지연·Worker 콜드스타트처럼 사용자 책임이 아닌
 // 우리 쪽 인프라 요인까지 사용자에게 전가하게 된다. "초당 X원" 식의 요금은
@@ -2145,13 +2146,13 @@ function _billingMultiplier(env) {
   const v = parseFloat(env?.BILLING_MULTIPLIER);
   return Number.isFinite(v) && v > 0 ? v : BILLING_MULTIPLIER_DEFAULT;
 }
-// usage: DeepSeek 응답의 usage 필드 그대로. priceTier: 'hondi-flash' | 'hondi-pro' 가격표 키.
+// usage: DeepSeek형 usage 필드(Haiku 응답은 _haikuUsage로 변환). priceTier: 'hondi-flash' | 'hondi-pro' 가격표 키.
 // multiplierOverride: 있으면 _billingMultiplier(env)(전역 공유 배수) 대신 이 값을
 // 쓴다 — 2026-09-02 신설, K-Law 베타 기간 전용 배수(flash 10배·pro 5배, 전역
 // 기본과 다름)를 위해 추가. 넘기지 않으면 기존과 100% 동일하게 동작(하위호환).
 // 반환: apiCostKRW(실비) / billedKRW(실제 청구·예산 차감액) / multiplier(적용된 배수)
 function computeBilledKRW(env, usage, priceTier, multiplierOverride) {
-  const apiCostKRW = _deepseekUsageToKRW(usage, priceTier);
+  const apiCostKRW = _usageToKRW(usage, priceTier);
   const multiplier = (Number.isFinite(multiplierOverride) && multiplierOverride > 0)
     ? multiplierOverride
     : _billingMultiplier(env);
@@ -2482,7 +2483,7 @@ async function _chargeGdcForAiUsage(env, {
   if (!guid || !(krwAmount > 0)) return null;
   // 🧪 GDC 무료 테스트 모드 — 실제 차감 없이 성공으로 돌려준다(관리자 수동 차감 제외).
   if (serviceId !== 'admin-correction' && await _gdcFreeFor(env, guid)) {
-    await _testQuotaAdd(env, guid, (costKRW > 0 ? costKRW : krwAmount), settlementKey); // 테스트 계정 한도에 누적(DeepSeek API 실비 기준 — 실비가 없으면 청구액)
+    await _testQuotaAdd(env, guid, (costKRW > 0 ? costKRW : krwAmount), settlementKey); // 테스트 계정 한도에 누적(AI 사용 원가 기준 — 원가가 없으면 청구액)
     console.log(JSON.stringify({ tag: 'GDC_FREE_TEST_SKIP_CHARGE', guid, krwAmount, serviceId: serviceId || 'hondi-chat', ts: new Date().toISOString() }));
     return { ok: true, test_free: true, charged_gdc: 0 };
   }
@@ -2533,7 +2534,7 @@ async function _chargeGdcForAiUsage(env, {
 async function _settleAiUsage(env, guid, bill, meta = {}, ctx = null, settlementKey = null) {
   if (!guid || !bill) return;
   if (await _gdcFreeFor(env, guid)) { // 🧪 GDC 무료 테스트 모드 — 차감·무료한도 소진 모두 생략
-    await _testQuotaAdd(env, guid, (bill.apiCostKRW > 0 ? bill.apiCostKRW : bill.billedKRW), settlementKey); // 단, 테스트 계정 한도에는 DeepSeek API 실비 기준으로 누적한다
+    await _testQuotaAdd(env, guid, (bill.apiCostKRW > 0 ? bill.apiCostKRW : bill.billedKRW), settlementKey); // 단, 테스트 계정 한도에는 AI 사용 원가 기준으로 누적한다
     return;
   }
   const kv = env.AI_SETUP_SEALS_KV;
@@ -22454,7 +22455,7 @@ async function handleKlawRelay(bodyText, env, corsHeaders, meta = null, ctx = nu
     return new Response(errText || JSON.stringify({ error:`HTTP ${res.status}` }), { status: res.status, headers: corsHeaders });
   }
 
-  const priceTier = tierKey === 'klaw-pro' ? 'hondi-pro' : 'hondi-flash'; // _deepseekUsageToKRW는 hondi-* 가격표를 조회하므로 매핑
+  const priceTier = tierKey === 'klaw-pro' ? 'hondi-pro' : 'hondi-flash'; // _usageToKRW는 hondi-* 가격표를 조회하므로 매핑
   // 2026-09-02 — 베타 기간에는 전역 공유 배수(_billingMultiplier) 대신
   // K-Law 전용 베타 배수를 쓴다(flash 10배·pro 5배). 베타 종료 후에는
   // undefined가 되어 computeBilledKRW가 기존처럼 전역 배수로 자동 복귀.
