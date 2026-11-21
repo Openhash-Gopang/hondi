@@ -281,9 +281,9 @@ body.embed .scroll-body{max-width:960px;padding-top:12px}
         <div class="cr-row"><span>예금주</span><span id="ci-holder-name"></span></div>
       </div>
 
-      <div class="modal-label">보내는 분 표시에 아래 번호를 꼭 포함해 입금해 주세요</div>
+      <div class="modal-label">입금자명(보내는 분)을 아래 이름과 같게 입금해 주세요</div>
       <div class="cr-code" id="ci-match-code"></div>
-      <div style="font-size:12px;color:#6b7280;margin-top:2px">본인 휴대폰 번호 뒷 8자리이며, 항상 같은 번호예요.</div>
+      <div style="font-size:12px;color:#6b7280;margin-top:2px">나비웹에 가입한 이름입니다. 띄어쓰기는 달라도 됩니다. 금액은 원하는 만큼 입금하면 자동으로 충전돼요.</div>
 
       <div class="charge-bonus-box">
         <div style="font-weight:700;margin-bottom:4px">필드 테스트 기간(2026년 12월 말까지)</div>
@@ -507,11 +507,10 @@ function escapeHtml(s) {
 
 // ── 충전 모달 ──────────────────────────────────────────────
 // 2026-09-12 재설계(주피터 지시) — "얼마 넣을지 미리 신청"하는 단계
-// 자체를 없앴다. 전화번호 인증 사용자는 매칭키(전화번호 뒷 8자리)가
-// 고정값이고, 사전 신청 없이 입금해도 서버가 이미 역조회로 자동
-// 매칭한다(worker.js _findGuidByPhoneMatchKey, 2026-08-28 신설). 그래서
-// 이 모달은 "얼마를 넣을지 물어보는 폼"이 아니라 "계좌 정보 + 내 고정
-// 코드"만 보여주는 조회 화면이 됐다 — 신청 레코드가 없으니 폴링도
+// 자체를 없앴다. 2026-11-21부터는 전화번호 뒤 8자리 대신 입금자 이름으로 맞춘다 —
+// 가입한 이름과 같은 입금자명으로 임의 금액을 입금하면 서버가 이름으로 가입자를 찾아
+// 자동 충전한다(worker.js _chargeByDepositorName). 그래서
+// 이 모달은 "얼마를 넣을지 물어보는 폼"이 아니라 "계좌 정보 + 가입한 이름"만 보여주는 조회 화면이다 — 신청 레코드가 없으니 폴링도
 // 필요 없고, 완료 알림은 기존 웹 푸시(_mintAndRecordCharge의 GDC 충전
 // 완료 push)가 그대로 처리한다.
 let _chargeAccountNumberRaw = '';
@@ -528,11 +527,10 @@ async function openChargeModal() {
     const data = await res.json();
     if (!res.ok || !data.ok) throw new Error(data.message || data.error || `HTTP ${res.status}`);
 
-    if (!data.match_code_is_phone) {
-      // 드문 경우 — 전화번호 인증이 안 된 계정. 고정 매칭키를 만들 수
-      // 없으므로 계좌 정보 조회 화면 자체를 보여줄 수 없다.
+    if (!data.depositor_name) {
+      // 2026-11-21: 가입한 이름이 없으면 이름으로 가입자를 찾을 수 없어 자동 충전이 안 된다.
       document.getElementById('charge-info-error').textContent =
-        '전화번호 인증이 필요합니다. 설정에서 전화번호 인증을 먼저 완료해 주세요.';
+        '가입한 이름을 확인하지 못했습니다. 설정에서 이름을 등록한 뒤 다시 시도해 주세요.';
       document.getElementById('charge-info-error').style.display = 'block';
       document.getElementById('charge-info-loading').style.display = 'none';
       return;
@@ -542,7 +540,7 @@ async function openChargeModal() {
     document.getElementById('ci-bank-name').textContent = info.bank_name;
     document.getElementById('ci-account-number-display').textContent = info.account_number_display;
     document.getElementById('ci-holder-name').textContent = info.holder_name;
-    document.getElementById('ci-match-code').textContent = data.match_code;
+    document.getElementById('ci-match-code').textContent = data.depositor_name;
     _chargeAccountNumberRaw = info.account_number || '';
 
     document.getElementById('charge-info-loading').style.display = 'none';
