@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-21 21:15 KST · 기준 커밋 086d0c03
+- 갱신: 2026-11-21 21:23 KST · 기준 커밋 8389ba1b
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 886건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-21 플랜 입금 동명이인 구분: 같은 이름·같은 금액 요청이 있으면 입금액 끝자리를 1~9 무작위로 배정
 - 2026-11-21 플랜 입금 확인: 전화번호 뒤 8자리 매칭키를 폐기하고 입금자 이름 + 금액으로 맞춤
 - 2026-11-21 AI 사용 원가 표기 정리: 한도·청구 주석의 DeepSeek 실비를 AI 사용 원가로, 관리자 화면 문구 수정
 - 2026-11-21 Merge pull request #1292 from Openhash-Gopang/expert-chat-error-punct
@@ -43,7 +44,6 @@
 - 2026-11-21 Merge pull request #1268 from Openhash-Gopang/usage-log-by-service
 - 2026-11-21 usage-log: 시간·일 칸마다 사용 분야(svc)별 집계 추가
 - 2026-11-21 Merge pull request #1267 from Openhash-Gopang/assist-user-instructions
-- 2026-11-21 kmail/assist: 설정 › AI 비서 탭의 user_instructions를 읽어 공용 SP 뒤에 얹음
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
