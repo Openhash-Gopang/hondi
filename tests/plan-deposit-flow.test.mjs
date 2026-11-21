@@ -6,7 +6,7 @@ import w from '../worker.js';
 const mk = () => { const m = new Map(); return { m, kv: { get: async k => m.get(k) ?? null, put: async (k, v) => { m.set(k, v); }, delete: async k => { m.delete(k); }, list: async ({ prefix }) => ({ keys: [...m.keys()].filter(k => k.startsWith(prefix)).map(name => ({ name })) }) } }; };
 const call = (env, raw, key) => w.fetch(new Request('https://x/biz/charge-confirm-notification', { method: 'POST', headers: { 'content-type': 'application/json' },
   body: JSON.stringify({ secret: 's', raw_text: raw, notification_key: key, source: 'app_push' }) }), env, { waitUntil() {} });
-const seed = (m, over = {}) => { const now = Date.now(); const g = over.guid || 'g1'; m.set('hondi:plan_req:' + g, JSON.stringify({ guid: g, names: ['홍길동'], tier: 'p100', grant: 'p200', usd: 20, krw: 28000, rate: 1400, created: now, expires: now + 3600e3, ...over })); };
+const seed = (m, over = {}) => { const now = Date.now(); const g = over.guid || 'g1'; m.set('hondi:plan_req:' + g, JSON.stringify({ guid: g, names: ['홍길동'], display_name: '홍 길동', tier: 'p100', grant: 'p200', usd: 20, krw: 28000, rate: 1400, created: now, expires: now + 3600e3, ...over })); };
 
 test('정확한 금액의 입금 알림이면 플랜(p200, 30일)을 지정하고 GDC는 충전하지 않는다', async () => {
   const { m, kv } = mk(); const env = { ADMIN_ACTION_SECRET: 's', AI_SETUP_SEALS_KV: kv, GDC_FREE_TEST: '1' }; seed(m);
@@ -74,4 +74,13 @@ test('같은 이름이어도 금액이 다르게 안내된 두 요청은 입금�
   assert.ok(m.has('hondi:plan_req:g1'), '입금하지 않은 쪽 요청은 남는다');
   await call(env, '[입금] 28,000원 입금 홍길동', 'd2');
   assert.equal(JSON.parse(m.get('hondi:test_quota:g1')).tier, 'p200');
+});
+
+test('관리자 기록에 가입한 이름이 함께 남는다(메일 주소는 조회되면 함께, 못 읽으면 null)', async () => {
+  const { m, kv } = mk(); const env = { ADMIN_ACTION_SECRET: 's', AI_SETUP_SEALS_KV: kv, GDC_FREE_TEST: '1' }; seed(m, { guid: 'g1' }); seed(m, { guid: 'g2' });
+  await call(env, '[입금] 28,000원 입금 홍길동', 'w1');
+  const ev = JSON.parse(m.get('hondi:plan_events'))[0];
+  assert.equal(ev.kind, 'ambiguous'); assert.equal(ev.who.length, 2);
+  assert.deepEqual(ev.who.map(w => w.name), ['홍 길동', '홍 길동']); assert.deepEqual(ev.who.map(w => w.guid).sort(), ['g1', 'g2']);
+  assert.ok(ev.who.every(w => w.mail === null || /@naviweb\.kr$/.test(w.mail)));
 });
