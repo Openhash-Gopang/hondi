@@ -3,7 +3,7 @@
 // 흐름
 //   1) 사용자가 플랜 화면에서 등급을 고르면 서버가 "입금 요청"을 만든다(정확한 입금액·가입한 이름 포함, 48시간 유효).
 //   2) 사용자가 가입한 이름으로 입금하면, 관리자 폰의 은행 알림 → /biz/charge-confirm-notification 이 서버로 전달한다.
-//   3) 서버는 알림 문구에 이름이 있고 금액이 정확히 같은 입금 요청이 하나뿐이면 플랜을 지정(기간 30일, 같은 등급 연장은 만료일 뒤로 이어 붙임)한다.
+//   3) 서버는 알림 문구에 이름이 있고 금액 차이가 10원 미만인 입금 요청이 하나(가장 가까운 것)뿐이면 플랜을 지정(기간 30일, 같은 등급 연장은 만료일 뒤로 이어 붙임)한다.
 //      → 플랜 요금은 GDC로 충전하지 않는다(B안). 금액이 다르면 자동 처리하지 않고 관리자에게 보이게 남긴다.
 //   · 베타 테스트 기간(2026년 12월 말까지): 어느 등급을 고르든 $200 플랜을 90% 할인한 $20, 지정되는 등급은 p200.
 import { FIELD_TEST_END_MS } from './charge-plans.js';
@@ -11,6 +11,7 @@ import { FIELD_TEST_END_MS } from './charge-plans.js';
 export const PLAN_LIST_USD = { p10: 10, p100: 100, p200: 200 };
 export const PLAN_BETA_USD = 20;
 export const PLAN_DAYS = 30;
+export const PLAN_AMOUNT_TOLERANCE_KRW = 10;   // 2026-11-21(주피터 지시): 안내 금액과 입금액의 차이가 10원 미만이면 같은 금액으로 본다
 export const PLAN_REQ_TTL_MS = 48 * 3600 * 1000;
 export const DEFAULT_KRW_PER_USD = 1400;           // 환율을 못 가져올 때의 대체값(env PLAN_KRW_PER_USD로 바꿀 수 있다)
 
@@ -34,11 +35,11 @@ export function makePlanRequest({ guid, names, tier, krwPerUsd, now = Date.now()
   return { guid, names: cands, tier, grant: grantedTier(tier, now), usd, krw: planKrw(usd, krwPerUsd), rate: Number(krwPerUsd), created: now, expires: now + PLAN_REQ_TTL_MS };
 }
 
-// 입금 알림 금액 ↔ 입금 요청 비교. 정확히 같아야 한다(분할·초과 입금은 자동 처리하지 않는다).
+// 입금 알림 금액 ↔ 입금 요청 비교. 차이가 10원 미만이면 통과한다(분할·초과 입금은 자동 처리하지 않는다).
 export function judgeDeposit(req, amountKrw, now = Date.now()) {
   if (!req) return { ok: false, reason: 'NO_PLAN_REQUEST' };
   if (now > Number(req.expires)) return { ok: false, reason: 'PLAN_REQUEST_EXPIRED' };
-  if (Number(amountKrw) !== Number(req.krw)) return { ok: false, reason: 'PLAN_AMOUNT_MISMATCH' };
+  if (Math.abs(Number(amountKrw) - Number(req.krw)) >= PLAN_AMOUNT_TOLERANCE_KRW) return { ok: false, reason: 'PLAN_AMOUNT_MISMATCH' };
   return { ok: true, reason: 'OK' };
 }
 
@@ -64,15 +65,20 @@ export function requestsNamedIn(reqs, text, now = Date.now()) {
   return (reqs || []).filter(r => r && Number(r.expires) >= now && Array.isArray(r.names) && r.names.some(n => n && t.includes(n)));
 }
 
-// 이름과 금액으로 입금 요청 하나를 찾는다. 정확히 하나일 때만 자동 처리한다(동명이인·같은 금액 중복은 관리자 확인).
+// 이름과 금액으로 입금 요청 하나를 찾는다. 금액 차이가 10원 미만인 요청 중 입금액에 가장 가까운 하나일 때만 자동 처리한다.
 //   → { status: 'one', req } | { status: 'none' } | { status: 'ambiguous', reqs } | { status: 'mismatch', reqs }
+//   · 가장 가까운 요청이 둘 이상 같은 거리면(동명이인·같은 금액) ambiguous — 관리자 확인.
+//   · 이름은 맞는데 모든 요청의 금액 차이가 10원 이상이면 mismatch — 일반 GDC 충전으로 넘어간다.
 export function matchPlanRequest(reqs, text, amountKrw, now = Date.now()) {
   const named = requestsNamedIn(reqs, text, now);
   if (!named.length) return { status: 'none' };
-  const exact = named.filter(r => Number(r.krw) === Number(amountKrw));
-  if (exact.length === 1) return { status: 'one', req: exact[0] };
-  if (exact.length > 1) return { status: 'ambiguous', reqs: exact };
-  return { status: 'mismatch', reqs: named };
+  const gap = (r) => Math.abs(Number(r.krw) - Number(amountKrw));
+  const near = named.filter(r => gap(r) < PLAN_AMOUNT_TOLERANCE_KRW);
+  if (!near.length) return { status: 'mismatch', reqs: named };
+  const best = Math.min(...near.map(gap));
+  const closest = near.filter(r => gap(r) === best);
+  if (closest.length === 1) return { status: 'one', req: closest[0] };
+  return { status: 'ambiguous', reqs: closest };
 }
 
 // 새 만료일: 같은 등급이 아직 유효하면 만료일 뒤로 이어 붙이고, 아니면 지금부터.

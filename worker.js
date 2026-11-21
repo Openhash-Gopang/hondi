@@ -24,6 +24,7 @@ import { classifyQuery as _ffClassify, publicCard as _ffPublicCard, rateLimitOk 
 import { referralCode as _refCode, isReferralCode as _isRefCode, inviteText as _refInviteText, inviteLink as _refInviteLink, withinClaimWindow as _refInWindow, REFERRAL_REWARD_KRW, REFERRAL_MAX_REWARDS } from './src/worker/referral.js';
 import { computeChargeGdc as _computeChargeGdc } from './src/worker/charge-plans.js';
 import { makePlanRequest as _planMakeRequest, matchPlanRequest as _planMatchRequest, distinctKrw as _planDistinctKrw, nameCandidates as _planNameCandidates, nextPaidUntil as _planNextPaidUntil, validTier as _planValidTier, DEFAULT_KRW_PER_USD as _PLAN_DEFAULT_RATE } from './src/worker/plan-pay.js';
+import { depositorNameCandidates as _depNameCands, nameFilter as _depNameFilter, pickGuidsByName as _depPickGuids } from './src/worker/deposit-name.js';
 import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, startFree as _testQuotaStartFree, resetFree as _testQuotaResetFree, setPlan as _testQuotaSetPlan, setPaid as _testQuotaSetPaid, setExtra as _testQuotaSetExtra, addExtraSpend as _testQuotaAddExtra, exhaustedMessage as _planExhaustedMessage, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage, addBonus as _testQuotaAddBonus, peek as _testQuotaPeek } from './src/worker/test-quota.js';
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
 import { parseMessage as _kmailParseMime, decodeMimeWords as _kmailDecodeMimeWords, repairStoredText as _kmailRepairStoredText } from './src/worker/mime-text.js';
@@ -17875,21 +17876,11 @@ async function handleChargeInfo(request, env, corsHeaders) {
   const url = new URL(request.url);
   const guid = url.searchParams.get('guid');
   if (!guid) return _err(400, 'MISSING_FIELD', 'guid 필수', corsHeaders);
-
-  const matchCode = await _phoneMatchKey(env, guid).catch(() => null);
-  if (!matchCode) {
-    // 전화번호 미인증 — 고정 매칭키를 만들 수 없다. 프론트엔드는 이
-    // 응답을 받으면 기존 /biz/charge-request(임시 코드 발급 + 신청
-    // 레코드 생성) 흐름으로 폴백해야 한다.
-    return new Response(JSON.stringify({
-      ok: true, match_code_is_phone: false, requires_request: true,
-      bank_account_info: _chargeBankAccountInfo(env),
-    }), { status: 200, headers: corsHeaders });
-  }
-
+  // 2026-11-21(주피터 지시): 전화번호 뒤 8자리 매칭키를 폐기했다. 입금자명(보내는 분)을 가입한 이름과 같게 입금하면 서버가 이름으로 가입자를 찾아 자동 충전한다.
+  const profile = await _l1FindProfileByGuid(env, guid).catch(() => null);
+  const names = [profile?.real_name, profile?.name, profile?.extra?.core?.name].filter(Boolean);
   return new Response(JSON.stringify({
-    ok: true, match_code_is_phone: true, requires_request: false,
-    match_code: matchCode,
+    ok: true, match_by: 'name', depositor_name: String(names[0] || '').trim(), requires_request: false,
     bank_account_info: _chargeBankAccountInfo(env),
   }), { status: 200, headers: corsHeaders });
 }
@@ -17915,13 +17906,8 @@ async function handleChargeInfo(request, env, corsHeaders) {
 // 완벽한 자동 대사가 아니라 관리자가 금액까지 함께 대조하는 1차
 // 단서라는 원 설계 전제는 그대로 유지한다(_findPendingByMatchKey
 // 참고) — 극히 드문 뒷 8자리 충돌은 관리자 수동 확인으로 감수한다.
-async function _phoneMatchKey(env, guid) {
-  const profile = await _l1FindProfileByGuid(env, guid).catch(() => null);
-  const e164 = profile?.e164 || '';
-  const digits = e164.replace(/\D/g, '');
-  if (digits.length < 8) return null; // 전화번호 미인증/미보유 — 폴백 필요
-  return digits.slice(-8);
-}
+// 2026-11-21(주피터 지시) 폐기 — 전화번호 뒤 8자리 매칭키는 더 쓰지 않는다. 호출부는 null을 받으면 옛 무작위 코드(HD+6자리) 흐름으로 간다.
+async function _phoneMatchKey(env, guid) { return null; }
 
 // 2026-10-27(주피터 지시) — 최소 충전 금액 1,000원 → 100원. 화면의 기본 선택은 1,000원(settings.js).
 // 100원 미만은 한 번 쓰고 나면 최소 예약 잔액(AI_CHARGE_MIN_RESERVE_KRW=3)과의 차이가 거의 없고, 코드 없는
@@ -18078,13 +18064,7 @@ async function handleChargeSelfReport(request, env, corsHeaders, ctx) {
     return _err(502, 'L1_ERROR', 'guid 확인 실패: ' + e.message, corsHeaders);
   }
 
-  const matchCode = await _phoneMatchKey(env, guid).catch(() => null);
-  if (!matchCode) {
-    // 전화 미인증 사용자는 애초에 매칭 단서(뒷 8자)가 없어 이 자가신고
-    // 자체가 의미가 없다 — 기존 /biz/charge-request(임시 코드 발급)로
-    // 안내한다.
-    return _err(400, 'PHONE_NOT_VERIFIED', '전화번호 인증 후 이용해 주세요.', corsHeaders);
-  }
+  const matchCode = _generateChargeMatchCode();   // 2026-11-21: 전화번호 뒤 8자리는 폐기 — 이 신고는 금액으로 맞추는 용도라 임시 코드면 된다
 
   const expiresAt = new Date(Date.now() + CHARGE_EXPIRE_HOURS * 3600 * 1000).toISOString();
   try {
@@ -18612,24 +18592,8 @@ async function _openBankingFetchRecentDeposits(env) {
 function _extractChargeMatchCodeFromText(text) {
   if (!text) return null;
   const s = String(text);
-  // 2026-08-28 재설계(주피터 지시) — 우선순위 1: 전화번호 뒷 8자리
-  // 매칭키(신규 방식). 독립된 숫자 8자리만 찾는다 — 날짜(2026/08/28)는
-  // 슬래시로, 금액(132,650원)은 쉼표로 끊겨 있어 8연속 숫자로 뭉치지
-  // 않으므로 오탐 위험이 낮다(실제 은행 SMS 포맷으로 검증됨). 앞뒤가
-  // 숫자가 아닌 경계에서만 매칭해 9자리 이상 숫자열의 일부를 잘라
-  // 오매칭하는 것도 방지한다.
-  //
-  // ⚠️ 2026-08-28 실사용 재현으로 발견한 버그 수정 — 실제 은행 문자는
-  // 마스킹된 계좌번호(예: "315***02804011")를 항상 포함하는데, 그
-  // "***" 뒤에 남는 뒷자리가 8자리인 경우(흔함) 매칭키가 전혀 없는
-  // 일반 입금 알림에서도 이걸 매칭키로 잘못 인식해버렸다(실측:
-  // "02804011"이 매칭키로 오인돼 NO_PENDING으로 무시됨 — 반대로 실제
-  // 매칭키가 있었어도 계좌번호 쪽이 먼저 잡혔다면 진짜 매칭키를
-  // 놓쳤을 수 있음). "*" 바로 뒤에 오는 숫자 8자리는 마스킹된
-  // 계좌번호일 가능성이 매우 높으므로 애초에 후보에서 제외한다.
-  const phoneMatch = s.match(/(?<![\d*])\d{8}(?!\d)/);
-  if (phoneMatch) return phoneMatch[0];
-  // 우선순위 2(하위호환): 2026-08-28 이전에 발급된 무작위 코드
+  // 2026-11-21(주피터 지시): 전화번호 뒤 8자리 매칭키는 폐기했다 — 이름으로 맞춘다(_chargeByDepositorName). 여기서는 옛 무작위 코드(HD+6자리)만 인식한다.
+  // 하위호환: 무작위 코드
   // (HD+6자리) — 그 시점 이전 pending으로 남아있던 신청 건을 위해
   // 계속 인식한다. 신규 신청은 더 이상 이 형식을 쓰지 않는다.
   const legacyMatch = s.match(/HD\d{6}/);
@@ -18776,6 +18740,43 @@ async function handleAdminPlanDeposits(request, env, corsHeaders) {
   return new Response(JSON.stringify({ ok: true, events }), { status: 200, headers: corsHeaders });
 }
 
+// 입금자 이름으로 가입자를 찾아 일반 GDC 충전(2026-11-21, 주피터 지시: 임의 금액을 입금하면 자동으로 GDC 잔액이 늘어야 한다).
+//  · 알림 문구에서 이름 후보를 뽑아(src/worker/deposit-name.js) 가입자 이름과 공백·기호를 무시하고 비교한다.
+//  · 가입자가 정확히 한 명일 때만 입금액만큼(1원 = 1 GDC, 필드 테스트 정액은 computeChargeGdc 규칙) 충전한다.
+//  · 같은 이름의 가입자가 둘 이상이거나 후보가 서로 다른 가입자를 가리키면 자동 충전하지 않고 관리자 기록(charge_ambiguous)으로 남긴다 → null을 돌려 옛 흐름(코드·금액 매칭, 미매칭 보관)이 이어진다.
+//  · 멱등: 알림 키(notification_key)를 external_tx_id로 넘겨 같은 알림이 다시 와도 한 번만 충전한다.
+async function _chargeByDepositorName(env, { raw_text, depositor_name, amount, notification_key, source, app_package, ctx }) {
+  const cands = _depNameCands(raw_text, depositor_name);
+  if (!cands.length) return null;
+  const token = await _l1AdminToken(env);
+  const headers = { 'Authorization': `Bearer ${token}` };
+  const hits = [];   // { name, guids }
+  for (const n of cands) {
+    const f = _depNameFilter(n); if (!f) continue;
+    const res = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${encodeURIComponent(f)}&perPage=30`, { headers, signal: AbortSignal.timeout(8000) });
+    if (!res.ok) throw new Error('profiles 조회 실패 HTTP ' + res.status);
+    const data = await res.json().catch(() => ({ items: [] }));
+    const guids = _depPickGuids(data.items || [], n);
+    if (guids.length) hits.push({ name: n, guids });
+  }
+  if (!hits.length) return null;
+  const all = [...new Set(hits.flatMap(h => h.guids))];
+  if (all.length > 1) {
+    await _planEvent(env, { kind: 'charge_ambiguous', amount_krw: Number(amount), names: hits.map(h => h.name), guids: all });
+    console.warn(JSON.stringify({ tag: 'CHARGE_NAME_AMBIGUOUS', amount, guids: all.length, ts: new Date().toISOString() }));
+    return null;
+  }
+  const guid = all[0];
+  const result = await _mintAndRecordCharge(env, {
+    existingRequestId: null, guid, ctx, krwAmount: amount, depositorName: hits[0].name,
+    memo: `알림캡처(${source || 'unknown'}${app_package ? ':' + app_package : ''}) [이름매칭]`,
+    channel: 'auto_notification_capture', confirmedBy: 'system:notification_capture_name',
+    externalTxId: notification_key, matchCodeForNewRecord: '(입금자 이름)',
+  });
+  if (!result.ok) console.error(JSON.stringify({ tag: 'CHARGE_NAME_MINT_FAILED', guid, result, ts: new Date().toISOString() }));
+  return { ...result, matched: !!result.ok, name_match: true };
+}
+
 // POST /biz/charge-confirm-notification — 관리자 전용(알림 리스너 앱이 호출).
 // body: { secret, raw_text, notification_key, source: 'app_push'|'sms',
 //         app_package, krw_amount(선택 — 없으면 raw_text에서 자동 추출),
@@ -18791,17 +18792,6 @@ async function handleAdminPlanDeposits(request, env, corsHeaders) {
 // 번호 중간에 우연히 낀 경우까지 오매칭하는 걸 막기 위함. 결과가
 // 정확히 1건이 아니면(0건 또는 충돌 2건 이상) 자동 처리를 포기하고
 // 관리자 수동 확인으로 넘긴다 — 자동 오발행보다 훨씬 안전하다.
-async function _findGuidByPhoneMatchKey(env, code) {
-  if (!/^\d{8}$/.test(code)) return null;
-  const token = await _l1AdminToken(env);
-  const filter = encodeURIComponent(last8Filter(code));                          // e164_last8 + 옛 평문 계정
-  const res = await fetch(`${L1_DEFAULT}/api/collections/profiles/records?filter=${filter}&perPage=5`, {
-    headers: { 'Authorization': `Bearer ${token}` },
-  });
-  if (!res.ok) return null;
-  const data = await res.json().catch(() => ({ items: [] }));
-  return pickGuidByLast8(data.items, code);
-}
 
 async function handleChargeConfirmNotification(request, env, corsHeaders, ctx) {
   const body = await request.json().catch(() => null);
@@ -18828,6 +18818,16 @@ async function handleChargeConfirmNotification(request, env, corsHeaders, ctx) {
         const _pl = await _planDepositTry(env, [raw_text, depositor_name].filter(Boolean).join(' '), _plAmt, notification_key);
         if (_pl && _pl.matched) return new Response(JSON.stringify({ ok: true, matched: true, plan: true, ..._pl }), { status: 200, headers: corsHeaders });
       } catch (e) { console.warn('[PlanDeposit] 처리 중 오류(기존 충전 흐름으로 진행):', e.message); }
+    }
+  }
+  // 일반 GDC 충전(2026-11-21): 플랜으로 처리되지 않은 입금은 입금자 이름으로 가입자를 찾아 입금액만큼(1원 = 1 GDC) 자동 충전한다.
+  {
+    const _gAmt = (Number(krw_amount) > 0) ? Number(krw_amount) : _extractKrwAmountFromText(raw_text);
+    if (_gAmt) {
+      try {
+        const _g = await _chargeByDepositorName(env, { raw_text, depositor_name, amount: _gAmt, notification_key, source, app_package, ctx });
+        if (_g) return _chargeCoreResultToResponse(_g, corsHeaders);
+      } catch (e) { console.warn('[ChargeByName] 처리 중 오류(기존 흐름으로 진행):', e.message); }
     }
   }
   const code = _extractChargeMatchCodeFromText(raw_text);
@@ -18939,13 +18939,7 @@ async function handleChargeConfirmNotification(request, env, corsHeaders, ctx) {
       existingRequestId = pendingRec.id;
       targetGuid = pendingRec.guid;
     } else {
-      // pending 기록이 없다 — 사전 신청(usage.html "충전하기") 없이
-      // 바로 입금한 경우. 전화번호 매칭키라면 역조회로 바로 발행한다.
-      targetGuid = await _findGuidByPhoneMatchKey(env, code).catch(() => null);
-      if (targetGuid) {
-        memoSuffix = ' [사전신청없음-전화번호역조회]';
-        console.info(JSON.stringify({ tag: 'NOTIFICATION_CAPTURE_REVERSE_PHONE_MATCH', code, guid: targetGuid, ts: new Date().toISOString() }));
-      }
+      // pending 기록이 없다 — 전화번호 뒤 8자리 역조회는 폐기했다(2026-11-21). 이름 매칭은 위 _chargeByDepositorName이 먼저 처리한다.
     }
 
     if (!targetGuid) {
