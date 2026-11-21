@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { planPriceUsd, grantedTier, planKrw, normName, nameCandidates, matchPlanRequest, makePlanRequest, judgeDeposit, nextPaidUntil, isBeta, validTier, PLAN_REQ_TTL_MS } from '../src/worker/plan-pay.js';
+import { planPriceUsd, grantedTier, planKrw, normName, nameCandidates, matchPlanRequest, distinctKrw, makePlanRequest, judgeDeposit, nextPaidUntil, isBeta, validTier, PLAN_REQ_TTL_MS } from '../src/worker/plan-pay.js';
 
 const BETA = Date.parse('2026-11-06T12:00:00+09:00'), AFTER = Date.parse('2027-01-02T12:00:00+09:00'), D = 86400000;
 
@@ -45,4 +45,25 @@ test('이름+금액 매칭: 하나일 때만 자동, 동명이인·금액 불일
   assert.equal(matchPlanRequest([mk('g1', '홍길동', 28000, { expires: BETA - 1 })], text, 28000, now).status, 'none');
   assert.equal(matchPlanRequest([{ guid: 'old', krw: 28000, expires: BETA + 1e6 }], text, 28000, now).status, 'none', '이름이 없는 옛 요청은 건너뛴다');
   assert.equal(matchPlanRequest([mk('g1', '홍길동'), mk('g3', '홍길동', 26000)], text, 28000, now).req.guid, 'g1', '같은 이름이어도 금액이 다르면 구분된다');
+});
+
+test('동명이인 구분: 같은 이름·같은 금액 요청이 있으면 끝자리를 1~9로 바꾸고, 없으면 금액을 그대로 둔다', () => {
+  const mk = (guid, name, krw, over = {}) => ({ guid, names: [normName(name)], krw, expires: BETA + 3600e3, ...over });
+  const me = mk('g2', '홍길동', 28000);
+  assert.equal(distinctKrw(me, [], BETA), 28000, '겹치는 요청이 없으면 그대로');
+  assert.equal(distinctKrw(me, [mk('g1', '김철수', 28000)], BETA), 28000, '이름이 다르면 그대로');
+  assert.equal(distinctKrw(me, [mk('g1', '홍길동', 26000)], BETA), 28000, '금액이 다르면 그대로');
+  assert.equal(distinctKrw(me, [mk('g1', '홍길동', 28000, { expires: BETA - 1 })], BETA), 28000, '만료된 요청은 무시');
+  assert.equal(distinctKrw(me, [me], BETA), 28000, '내 요청은 겹침으로 보지 않는다');
+  for (const r of [0, 0.3, 0.99]) {
+    const k = distinctKrw(me, [mk('g1', '홍길동', 28000)], BETA, () => r);
+    assert.ok(k >= 28001 && k <= 28019 && k % 10 >= 1, '정가 이상, 끝자리 1~9: ' + k);
+  }
+  assert.equal(distinctKrw(me, [mk('g1', '홍길동', 28000)], BETA, () => 0), 28001);
+  // 세 번째 사람: 이미 쓰인 금액은 피한다
+  const used = [mk('g1', '홍길동', 28000), mk('g3', '홍길동', 28001)];
+  for (let i = 0; i < 50; i++) { const k = distinctKrw(me, used, BETA); assert.ok(![28000, 28001].includes(k)); assert.ok(k % 10 >= 1); }
+  // 올림이 필요한 금액(끝자리가 있는 환율 금액)도 정가 아래로 내려가지 않는다
+  const odd = mk('g2', '홍길동', 26848);
+  for (let i = 0; i < 30; i++) { const k = distinctKrw(odd, [mk('g1', '홍길동', 26848)], BETA); assert.ok(k > 26848 && k <= 26869 && k % 10 >= 1, String(k)); }
 });
