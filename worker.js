@@ -14,6 +14,7 @@
 import { handleAiChat, handleEscalate } from './src/worker/ai-chat-handler.js';
 import { isFcmSubscription as _isFcmSub, normalizeFcmSubscription as _normFcmSub, sendFcm as _sendFcm } from './src/worker/fcm-push.js';
 import { prepareDoctorRequest, doctorRateLimits } from './src/worker/kdoctor-guard.js';
+import { isAutomatedSender as _isAutomatedSender } from './src/worker/kmail-auto-sender.js';
 import { handleOrderQueue } from './src/worker/order-queue-handler.js';
 import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
 import { profilePhoneFilter, friendPhoneFilter, numberForProfile, krMobileOtherForm, last8Filter, pickGuidByLast8, e164LookupHash as _e164Hash } from './src/worker/phone-lookup.js';
@@ -39452,7 +39453,8 @@ async function _handleKmailInboundEmail(message, env, ctx) {
     if (!isBlocked && !matchedDelete) try {
       const emailMatch2 = fromAddr.match(/[^\s<>]+@[^\s<>]+/);
       const fromEmail = emailMatch2 ? emailMatch2[0] : fromAddr;
-      if (!_isKmailAddress(fromEmail)) {
+      // 2026-11-21: noreply·메일링·자동 발송 메일에는 자동응답을 보내지 않는다(회신할 사람이 없고 왕복 고리가 될 수 있다)
+      if (!_isKmailAddress(fromEmail) && !_isAutomatedSender(fromEmail, message.headers)) {
         const settings = await _kmailGetUserSettings(env, ownerGuid);
         const autoReplyActive = settings.auto_reply_enabled &&
           (!settings.auto_reply_until || settings.auto_reply_until > new Date().toISOString());
