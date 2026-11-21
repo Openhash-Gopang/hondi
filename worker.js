@@ -21,14 +21,13 @@ import { validateSignalInput as _sigValidate, canDeleteSignal as _sigCanDelete, 
 import { classifyQuery as _ffClassify, publicCard as _ffPublicCard, rateLimitOk as _ffRateOk, normalizePhone as _ffNormPhone } from './src/worker/friend-find.js';
 import { referralCode as _refCode, isReferralCode as _isRefCode, inviteText as _refInviteText, inviteLink as _refInviteLink, withinClaimWindow as _refInWindow, REFERRAL_REWARD_KRW, REFERRAL_MAX_REWARDS } from './src/worker/referral.js';
 import { computeChargeGdc as _computeChargeGdc } from './src/worker/charge-plans.js';
-import { usageField as _usageField } from './src/worker/usage-field.js';
 import { makePlanRequest as _planMakeRequest, judgeDeposit as _planJudgeDeposit, nextPaidUntil as _planNextPaidUntil, validTier as _planValidTier, DEFAULT_KRW_PER_USD as _PLAN_DEFAULT_RATE } from './src/worker/plan-pay.js';
 import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, startFree as _testQuotaStartFree, resetFree as _testQuotaResetFree, setPlan as _testQuotaSetPlan, setPaid as _testQuotaSetPaid, setExtra as _testQuotaSetExtra, addExtraSpend as _testQuotaAddExtra, exhaustedMessage as _planExhaustedMessage, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage, addBonus as _testQuotaAddBonus, peek as _testQuotaPeek } from './src/worker/test-quota.js';
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
 import { parseMessage as _kmailParseMime, decodeMimeWords as _kmailDecodeMimeWords, repairStoredText as _kmailRepairStoredText } from './src/worker/mime-text.js';
 import { checkSenderName as _kmailCheckSenderName, effectiveSenderName as _kmailEffectiveSenderName, renderSignature as _kmailRenderSignature, campaignReplyTo as _kmailCampaignReplyTo, replyToWithName as _kmailReplyToWithName, REPLY_TO_SELF as _KMAIL_REPLY_TO_SELF, formatSender as _kmailFormatSender, describeSender as _kmailDescribeSender, SENDER_NAME_MAX as _KMAIL_SENDER_NAME_MAX } from './src/worker/kmail-sender.js';
 import { LETTER_MODE_NOTE as _KMAIL_LETTER_MODE_NOTE, letterMax as _kmailLetterMax, evaluateLetter as _kmailEvaluateLetter, buildLetterStatus as _kmailBuildLetterStatus } from './src/worker/kmail-letter.js';
-import { routeFromReply as _assistRoute, stripTags as _assistStrip, quickRoute as _assistQuick, finalizeRoute as _assistFinalize, assistNote as _assistNote, assistLines as _assistLines, userInstructions as _assistUserIns, userInstructionsNote as _assistUserInsNote, withAssistContext as _assistWithCtx, docSnapshot as _assistDocSnap, docNote as _assistDocNote, docEditFromReply as _assistDocEdit } from './src/worker/kmail-assist.js';
+import { routeFromReply as _assistRoute, stripTags as _assistStrip, quickRoute as _assistQuick, finalizeRoute as _assistFinalize, assistNote as _assistNote, assistLines as _assistLines, withAssistContext as _assistWithCtx, docSnapshot as _assistDocSnap, docNote as _assistDocNote, docEditFromReply as _assistDocEdit } from './src/worker/kmail-assist.js';
 import { rescueDanglingLookup as _kmailRescueDanglingLookup, evaluateSendGuard as _kmailEvaluateSendGuard, buildSentMailPreview as _kmailBuildSentMailPreview } from './src/worker/kmail-confirm.js';
 import { validateMailRecipients as _kmailValidateRecipients } from './src/worker/kmail-recipients.js';
 import { buildContactsNote as _kmailBuildContactsNote, sumRegisteredInMessages as _kmailSumRegistered, summarizeContacts as _kmailSummarizeContacts, buildSummaryContext as _kmailBuildSummaryContext, describeLookupScope as _kmailDescribeLookupScope } from './src/worker/kmail-contacts-summary.js';
@@ -58,7 +57,6 @@ import { makeProSubHandler } from './src/worker/pro-sub-handler.js';
 import { makePocketBaseProSubStore } from './src/worker/pro-sub-store.js';
 import { checkProGate } from './src/worker/pro-gate.js';
 import { makeConsentSaleHandler } from './src/worker/consent-sale-handler.js';
-import { makeCnsGradeHandler } from './src/worker/cns-grade.js';
 import { makeConsentSaleStore } from './src/worker/consent-sale-store.js';
 import { verifyPhoneAndStepUp } from './src/worker/phone-token.js';
 import { resolveDeviceGeo } from './src/worker/device-geo.js';
@@ -3074,22 +3072,19 @@ async function handleUsageLog(request, env, corsHeaders) {
   const kstOf = (created) => new Date(new Date(String(created || '').replace(' ', 'T')).getTime() + KST);   // 'YYYY-MM-DD HH:MM:SS.mmmZ' 도 파싱된다
   const ymd = (d) => d.toISOString().slice(0, 10);
   const todayKst = ymd(new Date(Date.now() + KST));
-  const hourly = Array.from({ length: 24 }, (_, h) => ({ h, req: 0, tok: 0, krw: 0, models: {}, svc: {} }));
+  const hourly = Array.from({ length: 24 }, (_, h) => ({ h, req: 0, tok: 0, krw: 0, models: {} }));
   const dailyMap = {};
-  for (let i = days - 1; i >= 0; i--) dailyMap[ymd(new Date(Date.now() + KST - i * 86400000))] = { d: null, req: 0, tok: 0, krw: 0, models: {}, svc: {} };
+  for (let i = days - 1; i >= 0; i--) dailyMap[ymd(new Date(Date.now() + KST - i * 86400000))] = { d: null, req: 0, tok: 0, krw: 0, models: {} };
   for (const it of items) {
     const k = kstOf(it.created); if (isNaN(k)) continue;
     const day = ymd(k), tok = (Number(it.hit_tokens) || 0) + (Number(it.miss_tokens) || 0) + (Number(it.out_tokens) || 0);
     const krw = Number(it.billed_krw) || 0, model = it.model || '(unknown)';
-    // 사용 분야(2026-11-21): service_id 를 묶어(biz:*·gov:* 는 각각 하나로) 분야별 요청·토큰·청구액을 함께 담는다 — 설정 › GDC 지갑의 '사용 분야' 그래프용.
-    const sid = String(it.service_id || '(unknown)'), fld = String(it.field || '').trim(), svcKey = fld ? 'f:' + fld : sid.startsWith('biz:') ? 'biz' : sid.startsWith('gov:') ? 'gov' : sid;
-    const add = (b) => { b.req += 1; b.tok += tok; b.krw += krw; const m = b.models[model] || (b.models[model] = { req: 0, tok: 0 }); m.req += 1; m.tok += tok; const v = b.svc[svcKey] || (b.svc[svcKey] = { req: 0, tok: 0, krw: 0 }); v.req += 1; v.tok += tok; v.krw += krw; };
+    const add = (b) => { b.req += 1; b.tok += tok; b.krw += krw; const m = b.models[model] || (b.models[model] = { req: 0, tok: 0 }); m.req += 1; m.tok += tok; };
     if (day === todayKst) add(hourly[k.getUTCHours()]);
     if (dailyMap[day]) add(dailyMap[day]);
   }
-  const r2 = (n) => Math.round(n * 100) / 100, roundSvc = (b) => { Object.keys(b.svc).forEach(k => { b.svc[k].krw = r2(b.svc[k].krw); }); };
-  const daily = Object.keys(dailyMap).map(d => { roundSvc(dailyMap[d]); return { ...dailyMap[d], d, krw: r2(dailyMap[d].krw) }; });
-  hourly.forEach(b => { b.krw = r2(b.krw); roundSvc(b); });
+  const daily = Object.keys(dailyMap).map(d => ({ ...dailyMap[d], d, krw: Math.round(dailyMap[d].krw * 100) / 100 }));
+  hourly.forEach(b => { b.krw = Math.round(b.krw * 100) / 100; });
 
   return new Response(JSON.stringify({
     ok: true,
@@ -7975,7 +7970,7 @@ async function _l1SweepPendingSettlements(env, ctx) {
 // 검색·집계용이 아니다), /usage.html의 모델별·기간별 상세 내역을
 // 위해 L1에 요청 단위로 영구 기록한다. 컬렉션 스키마는
 // pb_migrations/1784800001_created_ai_usage_log.js 참조.
-async function _l1CreateUsageLog(env, { guid, serviceId, tier, model, hitTokens, missTokens, outTokens, costKRW, billedKRW, field }) {
+async function _l1CreateUsageLog(env, { guid, serviceId, tier, model, hitTokens, missTokens, outTokens, costKRW, billedKRW }) {
   if (!guid) return;
   try {
     const token = await _l1AdminToken(env);
@@ -7983,7 +7978,7 @@ async function _l1CreateUsageLog(env, { guid, serviceId, tier, model, hitTokens,
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        guid, service_id: serviceId || 'hondi-chat', tier: tier || '', model: model || '', field: field || '',
+        guid, service_id: serviceId || 'hondi-chat', tier: tier || '', model: model || '',
         hit_tokens: Math.round(hitTokens || 0), miss_tokens: Math.round(missTokens || 0),
         out_tokens: Math.round(outTokens || 0),
         cost_krw: Math.round((costKRW || 0) * 100) / 100,
@@ -8039,7 +8034,6 @@ async function _recordAiUsage(env, ctx, {
       guid, serviceId, tier, model,
       hitTokens: usage?.prompt_cache_hit_tokens, missTokens: usage?.prompt_cache_miss_tokens,
       outTokens: usage?.completion_tokens, costKRW: bill.apiCostKRW, billedKRW: bill.billedKRW,
-      field: extraLogFields && extraLogFields.field,
     }),
     ...spendKeys.map(key => _klawSpendAdd(env, key, bill.billedKRW)),
   ];
@@ -14461,7 +14455,6 @@ export default {
     if (pathname === '/kaddress/chat' && request.method === 'POST') return handleKaddressChat(request, env, corsHeaders, ctx);
     // 2026-09-20 신설 — K-FOI(SP-28) 정보 공개 청구. 채팅(폼 채우기)·청구 건 CRUD·공유 아카이브.
     // 모두 다른 K-서비스와 같은 공용 인증 게이트(phone_verify_token)를 쓴다.
-    if (pathname === '/cns/grade' && request.method === 'POST') return _cnsGradeHandler()(request, env, corsHeaders);
     if (pathname === '/kfoi/chat' && request.method === 'POST') return _kfoiHandlers().chat(request, env, corsHeaders, ctx);
     if (pathname === '/kfoi/campaigns/list' && request.method === 'GET') return _kfoiHandlers().campaignsList(request, url, env, corsHeaders);
     if (pathname === '/kfoi/campaigns/save' && request.method === 'POST') return _kfoiHandlers().campaignsSave(request, env, corsHeaders);
@@ -15292,7 +15285,6 @@ export default {
       ua:     request.headers.get('User-Agent') || 'unknown',
       path:   pathname,
     };
-    if (isAiProxyPath) { const _uf = _usageField(bodyText, request.headers.get('Origin')); if (_uf) _meta.field = _uf; }   // 사용 분야(ai_usage_log.field)
     if (isAiProxyPath && !corsOrigin) {
       console.warn(JSON.stringify({ tag: 'AI_PROXY_BLOCKED_NO_ORIGIN', ts: new Date().toISOString(), ..._meta }));
       return _err(403, 'FORBIDDEN_NO_ORIGIN', 'AI 프록시 호출에는 브라우저 Origin이 필요합니다.', corsHeaders);
@@ -17902,7 +17894,7 @@ async function handleChargeInfo(request, env, corsHeaders) {
 // 2026-08-28 재설계(주피터 지시) — 기존 방식(_generateChargeMatchCode로
 // 무작위 HD+6자리 코드를 새로 발급해 사용자가 "보내는 분 표시"에
 // 직접 타이핑)이 실사용 테스트에서 완전히 깨졌다: 은행이 예금주
-// 실명(예: "김철수", 3자)을 그 필드 맨 앞에 강제로 붙이는데, 그
+// 실명(예: "도영민", 3자)을 그 필드 맨 앞에 강제로 붙이는데, 그
 // 필드 자체가 총 10자로 잘린다(실측 확인) — 이름 3자 + HD+6자리(8자)
 // = 11자로 항상 초과해 매칭코드 마지막 글자가 매번 잘려나갔다.
 // 한국인 이름이 대개 2~4자인 이상 이건 이 사용자 한 명의 문제가
@@ -17922,11 +17914,10 @@ async function handleChargeInfo(request, env, corsHeaders) {
 // 참고) — 극히 드문 뒷 8자리 충돌은 관리자 수동 확인으로 감수한다.
 async function _phoneMatchKey(env, guid) {
   const profile = await _l1FindProfileByGuid(env, guid).catch(() => null);
-  // 새 계정은 평문 e164 대신 e164_last8(뒤 8자리)만 저장한다 — e164 만 보면 전화 인증을 마친 계정도 '미인증'으로 오판한다(2026-11-21).
-  const digits = String(profile?.e164 || '').replace(/\D/g, '');
-  if (digits.length >= 8) return digits.slice(-8);
-  const l8 = String(profile?.e164_last8 || '').replace(/\D/g, '');
-  return l8.length === 8 ? l8 : null; // 둘 다 없으면 전화번호 미인증/미보유 — 폴백 필요
+  const e164 = profile?.e164 || '';
+  const digits = e164.replace(/\D/g, '');
+  if (digits.length < 8) return null; // 전화번호 미인증/미보유 — 폴백 필요
+  return digits.slice(-8);
 }
 
 // 2026-10-27(주피터 지시) — 최소 충전 금액 1,000원 → 100원. 화면의 기본 선택은 1,000원(settings.js).
@@ -36108,7 +36099,7 @@ async function _kmailSendOneEmail(env, { guid, to, cc, bcc, subject, text, sessi
   const fromAddr = `${_kmailSenderLocalPart(guid, resolvedMailId)}@${_KMAIL_DOMAIN}`;
   const _sigText = _kmailRenderSignature(signature, senderName, _kmailSenderLocalPart(guid, resolvedMailId));   // 2026-10-28: 비어 있으면 'Signed by 이름', {이름} 치환, '-' 이면 없음
   const finalText = _sigText ? `${text}\n\n${_sigText}` : text;
-  const fromName = _kmailEffectiveSenderName(senderName);                       // 이름이 없으면 주소만("ceo@hondi.kr"), 있으면 "김 철수 <ceo@hondi.kr>"
+  const fromName = _kmailEffectiveSenderName(senderName);                       // 이름이 없으면 주소만("ceo@hondi.kr"), 있으면 "도 영민 <ceo@hondi.kr>"
   const sendParams = { to, from: fromName ? { email: fromAddr, name: fromName } : fromAddr, subject, text: finalText };
   if (Array.isArray(cc) && cc.length) sendParams.cc = cc;                       // 2026-10-28: 참조
   if (Array.isArray(bcc) && bcc.length) sendParams.bcc = bcc;                   // 숨은참조(받는 사람 화면에 보이지 않음)
@@ -36274,7 +36265,7 @@ async function handleUserMailSend(request, env, corsHeaders) {
   return new Response(JSON.stringify({
     ok: true, from: result.fromAddr, sent_at: new Date().toISOString(),
     recipients: { to: rcpt.to, cc: rcpt.cc, bcc: rcpt.bcc },
-    from_display: _kmailFormatSender(result.fromAddr, result.fromName),     // 받는 사람 화면에 보이는 모양("김 철수 <ceo@hondi.kr>" 또는 주소만) — 보냄 확인 카드가 표시
+    from_display: _kmailFormatSender(result.fromAddr, result.fromName),     // 받는 사람 화면에 보이는 모양("도 영민 <ceo@hondi.kr>" 또는 주소만) — 보냄 확인 카드가 표시
     quota: { charged_gdc: result.quota.charged ? result.quota.chargedGdc : 0, projected_5d_avg: result.quota.projectedAvg ?? null },
   }), { status: 200, headers: corsHeaders });
 }
@@ -39592,20 +39583,6 @@ async function _fetchKfoiDigest(env) {
   }
 }
 let _kfoiHandlersInstance = null;
-let _cnsGradeInstance = null;
-let _cnsSpCache = null, _cnsSpCacheAt = 0;
-async function _fetchCnsGraderSp() {
-  if (_cnsSpCache && (Date.now() - _cnsSpCacheAt) < 10 * 60 * 1000) return _cnsSpCache;
-  _cnsSpCache = await _fetchByManifestKeyFromGithub('AC-CNS-GRADER'); _cnsSpCacheAt = Date.now();
-  return _cnsSpCache;
-}
-function _cnsGradeHandler() {
-  if (!_cnsGradeInstance) {
-    _cnsGradeInstance = makeCnsGradeHandler({ caller: _friendCaller, err: _err, fetchSp: _fetchCnsGraderSp, deepseekChatText, resolveDeepseekModel });
-  }
-  return _cnsGradeInstance;
-}
-
 function _kfoiHandlers() {
   if (!_kfoiHandlersInstance) {
     _kfoiHandlersInstance = makeKfoiHandlers({
@@ -40250,7 +40227,6 @@ async function handleKmailAssist(request, env, corsHeaders, ctx) {
   if (!clean.length || clean[clean.length - 1].role !== 'user') return _err(400, 'MISSING_FIELD', '마지막은 사용자 메시지여야 합니다', corsHeaders);
   const last = clean[clean.length - 1].content;
   const assistSignals = _assistLines(body.assist_lines);   // 나만의 AI 비서 점검 신호(코드가 계산, 형식만 재검증)
-  const userIns = _assistUserInsNote(_assistUserIns(body.user_instructions));   // 설정 › AI 비서 탭의 사용자 맞춤 지시(형식·길이만 재검증)
 
   // 1) 명확한 발화는 규칙으로 즉시 — LLM 호출 없음
   const asked = Math.max(0, Math.min(9, parseInt(body.asked, 10) || 0));   // 클라이언트가 센 되묻기 횟수 — 상한(2)은 여기서 강제
@@ -40271,7 +40247,6 @@ async function handleKmailAssist(request, env, corsHeaders, ctx) {
       messages: [
         ...(universal ? [{ role: 'system', content: universal }] : []),
         { role: 'system', content: sp },
-        ...(userIns ? [{ role: 'system', content: userIns }] : []),
         { role: 'system', content: _assistNote(asked) + ' 현재 시각(KST): ' + nowKST },
         ...(docSnap ? [{ role: 'system', content: _assistDocNote(docSnap) }] : []),
         ...(assistSignals.length ? [...clean.slice(0, -1), { role: 'user', content: _assistWithCtx(last, assistSignals, await _assistLoadGuide()) }] : clean),

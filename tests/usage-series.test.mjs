@@ -18,12 +18,3 @@ test('usage.html: 충전 내역은 처음엔 닫힌 slide 패널(화살표, 클�
   assert.match(u, /grid-template-rows:0fr/);
   assert.match(u, /function toggleChargeHistory\(\)/);
 });
-test('worker /usage-log: 시간·일 칸마다 사용 분야(svc: biz·gov 묶음)별 요청·토큰·청구액을 담는다', () => {
-  const w = readFileSync(new URL('../worker.js', import.meta.url), 'utf8');
-  assert.match(w, /svcKey = fld \? 'f:' \+ fld : sid\.startsWith\('biz:'\) \? 'biz' : sid\.startsWith\('gov:'\) \? 'gov' : sid/);
-  assert.match(w, /models: \{\}, svc: \{\} \}\)\);/);
-});
-test('worker _phoneMatchKey: e164 가 없어도 e164_last8 로 전화 인증 계정을 알아본다', () => {
-  const w = readFileSync(new URL('../worker.js', import.meta.url), 'utf8');
-  assert.match(w, /profile\?\.e164_last8/);
-});

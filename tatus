@@ -7,7 +7,7 @@
   devdoc-session-summary-20260907                                [m 4419b919 pb: fs_snapshots/fs_merkle_anchors 컬렉션 신설 — 재무제표 OpenHash 앵커링용
   docs-devicelink-e164-session-lessons                           [m d3c2538b docs: device-link 레이스 컨디션 + e164_hash 배포 유실 세션 교훈 문서 추가
   docs/desktop-menu-0918-entries                                 [m 40234ff6 [[34morigin/docs/desktop-menu-0918-entries[m] chore: bump build version to 20260918-101503-bf776361 [skip ci]
-  docs/founder-info                                              [m 40b7dfe9 docs: 개발자(김철수) 정보 governance.txt에 명시
+  docs/founder-info                                              [m 40b7dfe9 docs: 개발자(도영민) 정보 governance.txt에 명시
   docs/gdc-deposit-matching-timing-incident-20260917             [m a9c503a2 docs: GDC 입금 매칭 불통 사고 문서 작성 + 개발자 문서 메뉴 등록 (2026-09-17)
   docs/gdc-loan-credit-live-test-0906                            [m e0b6f59c docs: GDC 대출·신용평가 라이브 테스트(0906) 개발자 문서 신설
   docs/gdc-secret-incident-20260916                              [m 8f38edc5 [[34morigin/docs/gdc-secret-incident-20260916[m] fix: 히어로 상단 버튼 5개 두 줄 표시 (제목/예시 분리), ':' 삭제
