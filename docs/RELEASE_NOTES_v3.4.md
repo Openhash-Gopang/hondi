@@ -1,7 +1,7 @@
 # Gopang v3.4 릴리스 노트
 
 **릴리스일:** 2026-05-23  
-**작성:** AI City Inc. · 김철수  
+**작성:** AI City Inc. · 도영민  
 **적용 파일:** `index.html`, `sw.js`, `gopang/prompts/SP-00_v7.0.txt ~ v9.0.txt`
 
 ---

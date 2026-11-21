@@ -10,8 +10,8 @@ import { renderSignature, checkSenderName, effectiveSenderName, formatSender, de
 test('기본은 이름 없음 → 주소만, 이름이 있으면 "이름 <주소>"', () => {
   assert.equal(formatSender('ceo@hondi.kr', ''), 'ceo@hondi.kr');
   assert.equal(formatSender('ceo@hondi.kr', undefined), 'ceo@hondi.kr');
-  assert.equal(formatSender('ceo@hondi.kr', '김 철수'), '김 철수 <ceo@hondi.kr>');
-  assert.equal(formatSender('ceo@hondi.kr', '  김   철수 '), '김 철수 <ceo@hondi.kr>', '공백 정리');
+  assert.equal(formatSender('ceo@hondi.kr', '도 영민'), '도 영민 <ceo@hondi.kr>');
+  assert.equal(formatSender('ceo@hondi.kr', '  도   영민 '), '도 영민 <ceo@hondi.kr>', '공백 정리');
 });
 
 test('옛 기본값 "나비 K-Mail"은 이름 없음으로 본다(기존 사용자도 주소만 나감)', () => {
@@ -22,14 +22,14 @@ test('옛 기본값 "나비 K-Mail"은 이름 없음으로 본다(기존 사용�
 });
 
 test('저장 검사: 이름·공백 정리·빈 값 허용(= 이름 지우기)', () => {
-  assert.deepEqual(checkSenderName('김 철수'), { ok: true, value: '김 철수' });
+  assert.deepEqual(checkSenderName('도 영민'), { ok: true, value: '도 영민' });
   assert.deepEqual(checkSenderName('  Do   Youngmin  '), { ok: true, value: 'Do Youngmin' });
   assert.deepEqual(checkSenderName(''), { ok: true, value: '' }); assert.deepEqual(checkSenderName('   '), { ok: true, value: '' }); assert.deepEqual(checkSenderName(null), { ok: true, value: '' });
-  assert.equal(checkSenderName('Zoë Kim').ok, true); assert.equal(checkSenderName('金 太郎').ok, true); assert.equal(checkSenderName('김철수(대표)').ok, true); assert.equal(checkSenderName("O'Brien-Kim Jr.").ok, true);
+  assert.equal(checkSenderName('Zoë Kim').ok, true); assert.equal(checkSenderName('金 太郎').ok, true); assert.equal(checkSenderName('도영민(대표)').ok, true); assert.equal(checkSenderName("O'Brien-Kim Jr.").ok, true);
 });
 
 test('저장 검사: 주소를 흉내 내거나 헤더를 깨뜨릴 수 있는 문자는 거절', () => {
-  for (const bad of ['a<b', 'a>b', 'ceo@hondi.kr', '"김 철수"', 'a\\b', 'a;b', 'a:b', 'a,b']) { const r = checkSenderName(bad); assert.equal(r.ok, false, bad); assert.equal(r.reason, 'chars', bad); assert.match(r.message, /쓸 수 없습니다/); }
+  for (const bad of ['a<b', 'a>b', 'ceo@hondi.kr', '"도 영민"', 'a\\b', 'a;b', 'a:b', 'a,b']) { const r = checkSenderName(bad); assert.equal(r.ok, false, bad); assert.equal(r.reason, 'chars', bad); assert.match(r.message, /쓸 수 없습니다/); }
 });
 
 test('저장 검사: 줄바꿈·보이지 않는 문자·글자 방향 바꾸기는 거절(헤더 삽입·속임수 방지)', () => {
@@ -43,8 +43,8 @@ test(`저장 검사: ${SENDER_NAME_MAX}자 제한(글자 수 기준)`, () => {
 
 test('저장 검사: 서비스·기관 사칭 말은 거절하고 관리자는 허용', () => {
   for (const bad of ['혼디 고객센터', 'Hondi Support', '관리자', '공식 계정', 'OFFICIAL', '보안팀', 'Postmaster']) assert.equal(checkSenderName(bad).reason, 'reserved', bad);
-  assert.equal(checkSenderName('혼디넷 대표 김철수', { isAdmin: true }).ok, true);
-  assert.equal(checkSenderName('김 철수', { isAdmin: false }).ok, true);
+  assert.equal(checkSenderName('혼디넷 대표 도영민', { isAdmin: true }).ok, true);
+  assert.equal(checkSenderName('도 영민', { isAdmin: false }).ok, true);
 });
 
 test('보낼 때: 예전에 검사 없이 저장된 위험한 값은 이름 없음으로 처리해 주소만 보낸다', () => {
@@ -71,23 +71,23 @@ test('worker.js: 채팅 설정 태그도 REST와 같은 공용 헬퍼를 거친�
 
 test('시스템 프롬프트: 기본은 주소만, 이름 지우기는 빈 문자열, 사칭 거절 안내', () => {
   const sp = fs.readFileSync(new URL('../prompts/SP-25_kmail_v1_30.txt', import.meta.url), 'utf8');
-  for (const w of ['보내는 사람 표시(sender_display_name)', '{"sender_display_name": ""}', '김 철수 <ceo@hondi.kr>', '"나비 K-Mail"을 기본 이름으로 붙이지 않습니다', '2026-10-27 보정(v1.30, 네 번째)']) assert.ok(sp.includes(w), w);
+  for (const w of ['보내는 사람 표시(sender_display_name)', '{"sender_display_name": ""}', '도 영민 <ceo@hondi.kr>', '"나비 K-Mail"을 기본 이름으로 붙이지 않습니다', '2026-10-27 보정(v1.30, 네 번째)']) assert.ok(sp.includes(w), w);
 });
 
 test('인증된 것처럼 보이는 기호는 거절한다(Google 발신자 지침) — 관리자도 예외 없음', () => {
-  for (const bad of ['김 철수 ✅', '✓ 김 철수', '김철수✔', '김 철수 ☑', '김 철수 🔒', '🛡 김 철수', '김철수 ✔️', '김 철수 🔐']) {
+  for (const bad of ['도 영민 ✅', '✓ 도 영민', '도영민✔', '도 영민 ☑', '도 영민 🔒', '🛡 도 영민', '도영민 ✔️', '도 영민 🔐']) {
     assert.equal(checkSenderName(bad).reason, 'symbol', bad); assert.equal(checkSenderName(bad, { isAdmin: true }).reason, 'symbol', bad + ' (관리자)');
   }
-  assert.equal(checkSenderName('김 철수 😀').ok, true, '일반 이모지는 허용');
-  for (const w of ['Verified 김철수', '인증됨 김철수', '인증 완료']) assert.equal(checkSenderName(w).reason, 'reserved', w);
-  assert.equal(checkSenderName('Verified 김철수', { isAdmin: true }).ok, true, '단어는 관리자 예외(기호만 전원 금지)');
+  assert.equal(checkSenderName('도 영민 😀').ok, true, '일반 이모지는 허용');
+  for (const w of ['Verified 도영민', '인증됨 도영민', '인증 완료']) assert.equal(checkSenderName(w).reason, 'reserved', w);
+  assert.equal(checkSenderName('Verified 도영민', { isAdmin: true }).ok, true, '단어는 관리자 예외(기호만 전원 금지)');
 });
 test('보낼 때: 예전에 저장된 이름의 인증 기호만 조용히 지운다(나머지 이름은 유지)', () => {
-  assert.equal(effectiveSenderName('김 철수 ✅'), '김 철수'); assert.equal(effectiveSenderName('✔️ 김 철수 🔒'), '김 철수'); assert.equal(effectiveSenderName('✅'), '');
-  assert.equal(formatSender('ceo@hondi.kr', '김 철수 ✅'), '김 철수 <ceo@hondi.kr>');
+  assert.equal(effectiveSenderName('도 영민 ✅'), '도 영민'); assert.equal(effectiveSenderName('✔️ 도 영민 🔒'), '도 영민'); assert.equal(effectiveSenderName('✅'), '');
+  assert.equal(formatSender('ceo@hondi.kr', '도 영민 ✅'), '도 영민 <ceo@hondi.kr>');
 });
 test('확인 요약용 설명: 이름이 있으면 "이름 <주소>", 없으면 받는 쪽 표시 가능성을 알린다', () => {
-  assert.equal(describeSender('ceo@hondi.kr', '김 철수'), '김 철수 <ceo@hondi.kr>');
+  assert.equal(describeSender('ceo@hondi.kr', '도 영민'), '도 영민 <ceo@hondi.kr>');
   const d = describeSender('swift-heron-482@hondi.kr', ''); assert.match(d, /^swift-heron-482@hondi\.kr \(이름 없음/); assert.match(d, /"swift-heron-482"가 보낸 사람 이름으로 보일 수 있습니다/);
   assert.match(describeSender('x@hondi.kr', '나비 K-Mail'), /이름 없음/, '옛 기본값은 이름 없음');
 });
@@ -121,7 +121,7 @@ test('서명: 비어 있으면 "Signed by 이름"(이름 없으면 메일 아이
   assert.equal(renderSignature('   ', '나비 K-Mail', 'ceo'), 'Signed by ceo', '옛 기본 이름은 이름 없음으로 본다');
   assert.equal(renderSignature('Signed by {이름}', '주피터', 'ceo'), 'Signed by 주피터');
   assert.equal(renderSignature('{name} 드림 / {NAME}', '주피터', 'ceo'), '주피터 드림 / 주피터');
-  assert.equal(renderSignature('혼디 김철수 드림', '주피터', 'ceo'), '혼디 김철수 드림');
+  assert.equal(renderSignature('혼디 도영민 드림', '주피터', 'ceo'), '혼디 도영민 드림');
   assert.equal(renderSignature('-', '주피터', 'ceo'), '');
   assert.equal(renderSignature('', '', ''), '');
 });

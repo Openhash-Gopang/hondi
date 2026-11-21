@@ -1,22 +1,9 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-21 09:19 KST · 기준 커밋 508ef062
-- 전문가 페르소나 전용 페이지 154개 · 등록된 SP 885건
+- 갱신: 2026-11-20 21:05 KST · 기준 커밋 ca2af9a5
+- 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
-- 2026-11-21 Merge pull request #1271 from Openhash-Gopang/cns-grade
-- 2026-11-21 CNS 인증 시험 서술형 채점: AC-CNS-GRADER SP, /cns/grade 엔드포인트, 테스트
-- 2026-11-21 Merge pull request #1270 from Openhash-Gopang/usage-sp-key
-- 2026-11-21 AI 사용량 로그에 사용 분야(field) 기록: usage_field 본문 지정 또는 요청 사이트로 짐작
-- 2026-11-21 Merge pull request #1269 from Openhash-Gopang/fix-phone-match-key
-- 2026-11-21 charge-info: e164 가 없는 새 계정도 e164_last8 로 전화 인증을 인식
-- 2026-11-21 Merge pull request #1268 from Openhash-Gopang/usage-log-by-service
-- 2026-11-21 usage-log: 시간·일 칸마다 사용 분야(svc)별 집계 추가
-- 2026-11-21 Merge pull request #1267 from Openhash-Gopang/assist-user-instructions
-- 2026-11-21 kmail/assist: 설정 › AI 비서 탭의 user_instructions를 읽어 공용 SP 뒤에 얹음
-- 2026-11-21 Merge pull request #1266 from Openhash-Gopang/settings-embed-m3
-- 2026-11-21 usage·pdv: 나비웹 설정에 끼울 때(?embed=mail) Material Design 3 시안·색 연동
-- 2026-11-21 사람 이름 '도영민' → '김철수' 전수 교체 (페이지·프롬프트·예시·테스트)
 - 2026-11-20 Merge pull request #1264 from Openhash-Gopang/kclean-sp-v1-5-notify
 - 2026-11-20 feat(prompts): SP-14 K-Clean v1.5 — §6D 처리 과정 실시간 통보와 PDV 저장
 - 2026-11-20 Merge pull request #1263 from Openhash-Gopang/kclean-sp-v1-5
@@ -44,6 +31,19 @@
 - 2026-11-19 Merge pull request #1248 from Openhash-Gopang/docs/manual-ch13-chaticon
 - 2026-11-19 docs(manual): 제13장 — 가게 화면 우측 상단 대화창 아이콘과 AI 비서 인사 화면 추가
 - 2026-11-19 feat: 폰 카메라→PC 증거 전달 M1 — 촬영 세션 API·폰 촬영 화면·채팅 위젯 폰 단추
+- 2026-11-19 Merge pull request #1246 from Openhash-Gopang/docs/manual-ch13-navicode
+- 2026-11-19 docs(manual): 제13장 나비 숫자 코드 — 언어별 가게·기관 AI 비서 화면, 리뷰·GDC 결제, 기관 이점, 단색 일러스트
+- 2026-11-19 docs: 12장·설계 v0.2 — 폰·PC 융합(동일 계정, 이미지 AI 직접 전달, 모든 서류 공통)
+- 2026-11-19 docs: 매뉴얼 12장 폰·PC 공동 작업 안내 + 폰 카메라→PC 도우미 증거 전달 설계(v0.1)
+- 2026-11-19 Merge pull request #1243 from Openhash-Gopang/docs/manual-ch11-calls
+- 2026-11-19 docs(manual): 제11장 메시지 주고받기 — 기관·서비스·전문가·사람 호출 방식, 단색 폰 화면 일러스트
+- 2026-11-19 Merge pull request #1242 from Openhash-Gopang/docs/manual-official-logo
+- 2026-11-19 docs(manual): 10장 그림의 나비 이모지를 공식 나비 로고로 교체
+- 2026-11-19 Merge pull request #1241 from Openhash-Gopang/docs/manual-ch10-routing
+- 2026-11-19 docs(manual): 초급 10장 'AI 비서 채팅 vs 다른 AI 호출' 갱신 — 비서의 연결 과정·예시·분야별 작은 AI(전기 절약) 설명
+- 2026-11-19 Merge pull request #1240 from Openhash-Gopang/docs/manual-ch9-search
+- 2026-11-19 docs(manual): 초급 9장 '사람 찾기·호출하기' 보충 — 앱 기준 검색·초대·수락·새 대화창 설명
+- 2026-11-19 Merge pull request #1239 from Openhash-Gopang/docs/android-handoff-20261119b
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html

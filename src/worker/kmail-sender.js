@@ -2,7 +2,7 @@
 // 순수 함수만 담는다 — worker.js 밖에서 단위 시험이 가능하다.
 //
 // 2026-10-27 결정(주피터): 받는 사람 화면에는 기본으로 보내는 주소(예: ceo@hondi.kr)만 보인다. 사용자가 원하면 이름을 붙여
-// "김 철수 <ceo@hondi.kr>" 형식으로 보낼 수 있다. 예전에는 이름을 안 정해도 "나비 K-Mail"이 자동으로 붙었다 — 그 옛 기본값은 "이름 없음"으로 본다.
+// "도 영민 <ceo@hondi.kr>" 형식으로 보낼 수 있다. 예전에는 이름을 안 정해도 "나비 K-Mail"이 자동으로 붙었다 — 그 옛 기본값은 "이름 없음"으로 본다.
 export const LEGACY_DEFAULT_NAME = '나비 K-Mail';
 export const SENDER_NAME_MAX = 40;
 
@@ -50,7 +50,7 @@ export function effectiveSenderName(stored) {
   return v;
 }
 
-// 받는 사람 화면에 보이는 모양: "김 철수 <ceo@hondi.kr>" 또는 이름이 없으면 "ceo@hondi.kr"
+// 받는 사람 화면에 보이는 모양: "도 영민 <ceo@hondi.kr>" 또는 이름이 없으면 "ceo@hondi.kr"
 export function formatSender(address, name) {
   const n = effectiveSenderName(name);
   return n ? `${n} <${address}>` : String(address);

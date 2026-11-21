@@ -410,7 +410,7 @@
     box.appendChild(el('p', 'hub-note', '3~30자 · 영문 소문자, 숫자, 하이픈(-), 밑줄(_) · 숫자만으로는 만들 수 없어요.'));
     // 보내는 이름(선택) — 받는 사람 화면에 보이는 이름. 2026-10-27(주피터 결정: 필수 아님, 권장)
     var nameLabel = el('div', 'hub-mid-label', '보내는 이름 (선택 · 권장)'); box.appendChild(nameLabel);
-    var nameInput = el('input', 'hub-mid-input hub-mid-name'); nameInput.type = 'text'; nameInput.id = 'hondi-mid-name'; nameInput.maxLength = 40; nameInput.autocomplete = 'off'; nameInput.spellcheck = false; nameInput.placeholder = '예: 김 철수'; nameInput.setAttribute('aria-label', '보내는 이름');
+    var nameInput = el('input', 'hub-mid-input hub-mid-name'); nameInput.type = 'text'; nameInput.id = 'hondi-mid-name'; nameInput.maxLength = 40; nameInput.autocomplete = 'off'; nameInput.spellcheck = false; nameInput.placeholder = '예: 도 영민'; nameInput.setAttribute('aria-label', '보내는 이름');
     box.appendChild(nameInput);
     box.appendChild(el('p', 'hub-note', '받는 모든 사람에게 보입니다. 비워 두면 주소만 나가고, 받는 사람의 메일 프로그램에 따라 아이디 부분이 이름처럼 보일 수 있어요.'));
     var preview = el('div', 'hub-mid-preview'); preview.id = 'hondi-mid-preview'; preview.setAttribute('aria-live', 'polite'); box.appendChild(preview);
@@ -797,7 +797,7 @@
     var max = (mailInfo && mailInfo.sender_name_max) || 40;
     var wrap = el('div', 'hub-name-edit');
     var inp = el('input', 'hub-name-input'); inp.type = 'text'; inp.maxLength = max; inp.autocomplete = 'off'; inp.spellcheck = false;
-    inp.placeholder = '예: 김 철수'; inp.setAttribute('aria-label', '보내는 이름'); inp.value = nameEdit.draft;
+    inp.placeholder = '예: 도 영민'; inp.setAttribute('aria-label', '보내는 이름'); inp.value = nameEdit.draft;
     var save = el('button', 'hub-btn hub-primary', '저장'); save.type = 'button';
     var cancel = el('button', 'hub-btn', '취소'); cancel.type = 'button';
     var msg = el('p', 'hub-name-msg', nameEdit.msg || ''); msg.setAttribute('aria-live', 'polite');
