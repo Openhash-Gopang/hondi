@@ -5097,6 +5097,16 @@ function _messagesWithLocation(historyArr) {
           }
 
           if (!_retrySucceeded) {
+            // 끊긴 말풍선도 정상 말풍선처럼 정리한다 — 안 하면 **굵게** 별표와 닫히지 않은
+            // "[OPTIONS: …" 조각이 그대로 보인다(OPTIONS 정규식은 닫는 ]가 있어야 매치).
+            try {
+              const _cut = _stripInternalTags(String(full || '').replace(/\[OPTIONS:[^\]]*$/, '')).replace(/\s+$/, '');
+              bubbleEl.innerHTML = _cut
+                .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+                .replace(/\n/g,'<br>')
+                .replace(/`([^`]+)`/g,'<code>$1</code>')
+                .replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>');
+            } catch (_e) {}
             const _recoveryMsg =
               `[INTERNAL: 방금 응답이 max_tokens 한도로 중간에 끊겼습니다(finish_reason=length, ` +
               `예산을 올려 재시도까지 했지만 여전히 부족했습니다). 사용자에게 이 실패를 기술적 ` +
