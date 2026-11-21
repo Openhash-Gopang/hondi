@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-21 20:15 KST · 기준 커밋 21a99ddc
+- 갱신: 2026-11-21 20:20 KST · 기준 커밋 28719acf
 - 전문가 페르소나 전용 페이지 154개 · 등록된 SP 886건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-21 manual: 폰 화면 가상 테스트 반영 — 일정·결제 화면의 로그인 안내와 결제하기 단추 잠김
 - 2026-11-21 Merge pull request #1288 from Openhash-Gopang/kmail-autoreply-skip-automated
 - 2026-11-21 K-Mail 부재중 자동응답: noreply·자동 발송·메일링 메일에는 답장하지 않음
 - 2026-11-21 manual: 라이브 스모크 반영 — 서류 사이트 고르는 경로를 실제 화면(왼쪽 서류 → 서류 종류 ▾)으로 정정, 잠긴 인프라 서비스에 준비 중 문구 표시
@@ -43,7 +44,6 @@
 - 2026-11-20 feat(prompts): SP-14 K-Clean v1.5 — §6D 처리 과정 실시간 통보와 PDV 저장
 - 2026-11-20 Merge pull request #1263 from Openhash-Gopang/kclean-sp-v1-5
 - 2026-11-20 feat(prompts): SP-14 K-Clean v1.5 — 사진·영상 신고/제안, 대응 주체 4분기
-- 2026-11-20 나비 길잡이 장 전면 갱신: 안건으로 묶는 맡긴 일·맡은 일·나 홀로, 공유, 삽화, 퀴즈 13문항
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
