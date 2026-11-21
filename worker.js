@@ -23,7 +23,7 @@ import { validateSignalInput as _sigValidate, canDeleteSignal as _sigCanDelete, 
 import { classifyQuery as _ffClassify, publicCard as _ffPublicCard, rateLimitOk as _ffRateOk, normalizePhone as _ffNormPhone } from './src/worker/friend-find.js';
 import { referralCode as _refCode, isReferralCode as _isRefCode, inviteText as _refInviteText, inviteLink as _refInviteLink, withinClaimWindow as _refInWindow, REFERRAL_REWARD_KRW, REFERRAL_MAX_REWARDS } from './src/worker/referral.js';
 import { computeChargeGdc as _computeChargeGdc } from './src/worker/charge-plans.js';
-import { makePlanRequest as _planMakeRequest, judgeDeposit as _planJudgeDeposit, nextPaidUntil as _planNextPaidUntil, validTier as _planValidTier, DEFAULT_KRW_PER_USD as _PLAN_DEFAULT_RATE } from './src/worker/plan-pay.js';
+import { makePlanRequest as _planMakeRequest, matchPlanRequest as _planMatchRequest, nameCandidates as _planNameCandidates, nextPaidUntil as _planNextPaidUntil, validTier as _planValidTier, DEFAULT_KRW_PER_USD as _PLAN_DEFAULT_RATE } from './src/worker/plan-pay.js';
 import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, startFree as _testQuotaStartFree, resetFree as _testQuotaResetFree, setPlan as _testQuotaSetPlan, setPaid as _testQuotaSetPaid, setExtra as _testQuotaSetExtra, addExtraSpend as _testQuotaAddExtra, exhaustedMessage as _planExhaustedMessage, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage, addBonus as _testQuotaAddBonus, peek as _testQuotaPeek } from './src/worker/test-quota.js';
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
 import { parseMessage as _kmailParseMime, decodeMimeWords as _kmailDecodeMimeWords, repairStoredText as _kmailRepairStoredText } from './src/worker/mime-text.js';
@@ -814,7 +814,7 @@ async function _resolveGuidFromPhoneVerifyToken(env, phoneVerifyToken, opts = {}
     const data = await res.json().catch(() => ({ items: [] }));
     const profile = data.items?.[0];
     if (!profile) return { ok: false, code: 'PROFILE_NOT_FOUND', message: '이 전화번호로 등록된 프로필이 없습니다' };
-    return { ok: true, guid: profile.guid, e164 };
+    return { ok: true, guid: profile.guid, e164, names: [profile.real_name, profile.name, profile.extra?.core?.name].filter(Boolean) };   // 입금자 이름 매칭용(가입한 이름)
   } catch (e) {
     return { ok: false, code: 'L1_ERROR', message: '전화번호 인증 조회 실패: ' + e.message };
   }
@@ -18671,7 +18671,7 @@ function _extractKrwAmountFromText(text) {
 }
 
 // ── 유료 플랜 입금 확인(2026-11-06, B안: 플랜 요금은 GDC로 충전하지 않는다) ──────────────────────────
-//  흐름·정책은 src/worker/plan-pay.js 머리말 참고. KV 키: hondi:plan_req:<매칭키>(48시간), hondi:plan_done:<알림키>, hondi:plan_events(최근 50건).
+//  흐름·정책은 src/worker/plan-pay.js 머리말 참고. KV 키: hondi:plan_req:<guid>(48시간), hondi:plan_done:<알림키>, hondi:plan_events(최근 50건).
 async function _planKrwPerUsd(env) {
   const kv = env.AI_SETUP_SEALS_KV, key = 'hondi:plan_rate';
   if (kv) { try { const c = JSON.parse(await kv.get(key) || 'null'); if (c && Number(c.rate) > 0 && Date.now() - c.t < 3600 * 1000) return Number(c.rate); } catch (e) { /* 캐시 실패는 조회로 대체 */ } }
@@ -18693,32 +18693,47 @@ async function _planEvent(env, ev) {
     await kv.put('hondi:plan_events', JSON.stringify(list.slice(0, 50)));
   } catch (e) { /* 기록 실패는 무시 */ }
 }
-async function _planDepositTry(env, code, amount, notificationKey) {
-  const kv = env.AI_SETUP_SEALS_KV; if (!kv || !/^\d{8}$/.test(String(code || ''))) return null;
+// 입금 알림 → 플랜 지정. 2026-11-21(주피터 지시): 전화번호 뒤 8자리 매칭키를 폐기하고 입금자 이름 + 금액으로 맞춘다.
+//  · 알림 문구(또는 depositor_name)에 이름이 들어 있고 금액이 정확히 같은 48시간 이내 입금 요청이 "하나"일 때만 자동 지정한다.
+//  · 같은 이름·같은 금액 요청이 둘 이상이면(동명이인) 자동 처리하지 않고 관리자 기록(ambiguous)으로 남긴다.
+//  · 이름은 맞는데 금액이 다르면 mismatch로 남긴다. 어느 경우든 일반 GDC 충전 흐름은 막지 않는다(null/matched:false).
+//  · KV 키: hondi:plan_req:<guid>(요청, 48시간), hondi:plan_done:<알림키>(멱등), hondi:plan_events(최근 50건).
+async function _planDepositTry(env, text, amount, notificationKey) {
+  const kv = env.AI_SETUP_SEALS_KV; if (!kv || !(Number(amount) > 0)) return null;
   const doneKey = 'hondi:plan_done:' + notificationKey;
-  // 같은 알림이 다시 오면(안드로이드가 알림을 갱신하며 다시 알리는 경우) 요청이 이미 지워졌어도 플랜 입금으로 인정하고 끝낸다 —
-  // 그렇지 않으면 아래 일반 충전 흐름이 같은 입금을 GDC 충전으로 한 번 더 처리할 수 있다.
+  // 같은 알림이 다시 오면(안드로이드가 알림을 갱신하며 다시 알리는 경우) 이미 처리한 입금으로 보고 끝낸다 — 일반 충전 흐름이 같은 입금을 GDC 충전으로 한 번 더 처리하지 않도록.
   if (notificationKey && await kv.get(doneKey)) return { matched: true, already: true };
-  const req = JSON.parse(await kv.get('hondi:plan_req:' + code) || 'null');
-  if (!req) return null;
-  const verdict = _planJudgeDeposit(req, amount, Date.now());
-  if (!verdict.ok) {
-    await _planEvent(env, { kind: 'mismatch', reason: verdict.reason, code, guid: req.guid, tier: req.tier, expected_krw: req.krw, amount_krw: Number(amount) });
-    return { matched: false, reason: verdict.reason };
+  if (typeof kv.list !== 'function') return null;
+  const listed = await kv.list({ prefix: 'hondi:plan_req:' });
+  const reqs = [];
+  for (const k of (listed && listed.keys) || []) {
+    try { const r = JSON.parse(await kv.get(k.name) || 'null'); if (r && r.guid) reqs.push({ ...r, _key: k.name }); } catch (e) { /* 깨진 항목은 건너뜀 */ }
   }
+  const m = _planMatchRequest(reqs, text, amount, Date.now());
+  if (m.status === 'none') return null;
+  if (m.status === 'ambiguous') {
+    await _planEvent(env, { kind: 'ambiguous', amount_krw: Number(amount), guids: m.reqs.map(r => r.guid) });
+    return { matched: false, reason: 'PLAN_NAME_AMBIGUOUS' };
+  }
+  if (m.status === 'mismatch') {
+    const r0 = m.reqs[0];
+    await _planEvent(env, { kind: 'mismatch', reason: 'PLAN_AMOUNT_MISMATCH', guid: r0.guid, tier: r0.tier, expected_krw: r0.krw, amount_krw: Number(amount), candidates: m.reqs.length });
+    return { matched: false, reason: 'PLAN_AMOUNT_MISMATCH' };
+  }
+  const req = m.req;
   const cfg = _testQuotaConfig(env), now = Date.now();
   const cur = await _testQuotaGetStatus(kv, req.guid, now, cfg);
   const until = _planNextPaidUntil(cur && cur.tier ? { tier: cur.tier, paid_until: Date.parse(cur.paid_until) } : null, req.grant, now);
   await _testQuotaSetPaid(kv, req.guid, req.grant, until, now);
   _freeTrialMem.delete(req.guid);
   if (notificationKey) await kv.put(doneKey, '1', { expirationTtl: 30 * 86400 });
-  await kv.delete('hondi:plan_req:' + code);
-  await _planEvent(env, { kind: 'applied', code, guid: req.guid, tier: req.grant, requested_tier: req.tier, amount_krw: Number(amount), paid_until: new Date(until).toISOString() });
+  await kv.delete(req._key);
+  await _planEvent(env, { kind: 'applied', guid: req.guid, tier: req.grant, requested_tier: req.tier, amount_krw: Number(amount), paid_until: new Date(until).toISOString() });
   console.info(JSON.stringify({ tag: 'PLAN_DEPOSIT_APPLIED', guid: req.guid, tier: req.grant, amount: Number(amount), ts: new Date().toISOString() }));
   return { matched: true, tier: req.grant, paid_until: new Date(until).toISOString() };
 }
 
-// POST /biz/plan-request { phone_verify_token, tier } — 플랜 입금 요청을 만든다(정확한 입금액·입금자명 매칭키 안내). 같은 번호의 이전 요청은 덮어쓴다.
+// POST /biz/plan-request { phone_verify_token, tier } — 플랜 입금 요청을 만든다(정확한 입금액과 입금자명(가입한 이름) 안내). 같은 사용자의 이전 요청은 덮어쓴다.
 async function handlePlanRequest(request, env, corsHeaders) {
   if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
   const body = await request.json().catch(() => ({})) || {};
@@ -18727,10 +18742,10 @@ async function handlePlanRequest(request, env, corsHeaders) {
   if (!env.AI_SETUP_SEALS_KV) return _err(503, 'KV_NOT_BOUND', '잠시 후 다시 시도해 주세요', corsHeaders);
   if (!_planValidTier(body.tier)) return _err(400, 'BAD_TIER', 'tier는 p10, p100, p200 중 하나여야 합니다', corsHeaders);
   const rate = await _planKrwPerUsd(env);
-  const req = _planMakeRequest({ guid: r.guid, e164: r.e164, tier: body.tier, krwPerUsd: rate, now: Date.now() });
-  if (!req) return _err(400, 'NO_MATCH_KEY', '전화번호 정보를 확인하지 못했습니다', corsHeaders);
-  await env.AI_SETUP_SEALS_KV.put('hondi:plan_req:' + req.code, JSON.stringify(req), { expirationTtl: 48 * 3600 });
-  return new Response(JSON.stringify({ ok: true, tier: req.tier, grant: req.grant, usd: req.usd, krw: req.krw, rate: req.rate, match_code: req.code, expires_at: new Date(req.expires).toISOString() }), { status: 200, headers: corsHeaders });
+  const req = _planMakeRequest({ guid: r.guid, names: r.names, tier: body.tier, krwPerUsd: rate, now: Date.now() });
+  if (!req) return _err(400, 'NO_NAME', '가입한 이름을 확인하지 못했습니다. 설정에서 이름을 등록한 뒤 다시 시도해 주세요', corsHeaders);
+  await env.AI_SETUP_SEALS_KV.put('hondi:plan_req:' + req.guid, JSON.stringify(req), { expirationTtl: 48 * 3600 });   // 사용자당 하나 — 새로 만들면 이전 요청을 덮어쓴다
+  return new Response(JSON.stringify({ ok: true, tier: req.tier, grant: req.grant, usd: req.usd, krw: req.krw, rate: req.rate, depositor_name: String(r.names[0] || '').trim(), expires_at: new Date(req.expires).toISOString() }), { status: 200, headers: corsHeaders });
 }
 
 // GET /admin/plan-deposits — 최근 플랜 입금 처리 결과(자동 지정·금액 불일치 등) 50건. 관리자 Bearer 필요.
@@ -18785,6 +18800,16 @@ async function handleChargeConfirmNotification(request, env, corsHeaders, ctx) {
   if (!raw_text) return _err(400, 'MISSING_FIELD', 'raw_text 필수', corsHeaders);
   if (!notification_key) return _err(400, 'MISSING_FIELD', 'notification_key 필수(멱등성 키)', corsHeaders);
 
+  // 유료 플랜 입금(2026-11-21): 이름 + 금액으로 맞춘다(전화번호 뒤 8자리 매칭키는 폐기). 금액을 읽지 못하면 아래 기존 흐름으로 넘어간다.
+  {
+    const _plAmt = (Number(krw_amount) > 0) ? Number(krw_amount) : _extractKrwAmountFromText(raw_text);
+    if (_plAmt) {
+      try {
+        const _pl = await _planDepositTry(env, [raw_text, depositor_name].filter(Boolean).join(' '), _plAmt, notification_key);
+        if (_pl && _pl.matched) return new Response(JSON.stringify({ ok: true, matched: true, plan: true, ..._pl }), { status: 200, headers: corsHeaders });
+      } catch (e) { console.warn('[PlanDeposit] 처리 중 오류(기존 충전 흐름으로 진행):', e.message); }
+    }
+  }
   const code = _extractChargeMatchCodeFromText(raw_text);
   if (!code) {
     // 2026-09-17 신설(주피터 지시: "왜 내 번호가 등장하나 — 자동으로
@@ -18875,12 +18900,6 @@ async function handleChargeConfirmNotification(request, env, corsHeaders, ctx) {
     return new Response(JSON.stringify({ ok: true, matched: false, reason: 'NO_AMOUNT_FOUND', match_code: code }), { status: 200, headers: corsHeaders });
   }
 
-  // 유료 플랜 입금(2026-11-06): 이 매칭키로 48시간 안에 만든 플랜 입금 요청이 있고 금액이 정확히 같으면 플랜을 지정한다(GDC는 충전하지 않는다).
-  // 금액이 다르면 기록만 남기고 아래 기존 GDC 충전 흐름으로 넘어간다(일반 충전을 막지 않기 위함).
-  try {
-    const _pl = await _planDepositTry(env, code, amount, notification_key);
-    if (_pl && _pl.matched) return new Response(JSON.stringify({ ok: true, matched: true, plan: true, ..._pl }), { status: 200, headers: corsHeaders });
-  } catch (e) { console.warn('[PlanDeposit] 처리 중 오류(기존 충전 흐름으로 진행):', e.message); }
   try {
     const token = await _l1AdminToken(env);
     const headers = { 'Authorization': `Bearer ${token}` };
