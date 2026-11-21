@@ -18745,9 +18745,9 @@ async function handleAdminPlanDeposits(request, env, corsHeaders) {
 //  · 가입자가 정확히 한 명일 때만 입금액만큼(1원 = 1 GDC, 필드 테스트 정액은 computeChargeGdc 규칙) 충전한다.
 //  · 같은 이름의 가입자가 둘 이상이거나 후보가 서로 다른 가입자를 가리키면 자동 충전하지 않고 관리자 기록(charge_ambiguous)으로 남긴다 → null을 돌려 옛 흐름(코드·금액 매칭, 미매칭 보관)이 이어진다.
 //  · 멱등: 알림 키(notification_key)를 external_tx_id로 넘겨 같은 알림이 다시 와도 한 번만 충전한다.
-async function _chargeByDepositorName(env, { raw_text, depositor_name, amount, notification_key, source, app_package, ctx }) {
+async function _chargeByDepositorName(env, { raw_text, depositor_name, amount, notification_key, source, app_package, ctx, quiet }) {
   const cands = _depNameCands(raw_text, depositor_name);
-  if (!cands.length) return null;
+  if (!cands.length) { if (!quiet) await _planEvent(env, { kind: 'charge_unmatched', reason: 'NO_NAME', amount_krw: Number(amount), names: [] }); return null; }
   const token = await _l1AdminToken(env);
   const headers = { 'Authorization': `Bearer ${token}` };
   const hits = [];   // { name, guids }
@@ -18759,7 +18759,7 @@ async function _chargeByDepositorName(env, { raw_text, depositor_name, amount, n
     const guids = _depPickGuids(data.items || [], n);
     if (guids.length) hits.push({ name: n, guids });
   }
-  if (!hits.length) return null;
+  if (!hits.length) { if (!quiet) await _planEvent(env, { kind: 'charge_unmatched', reason: 'NO_ACCOUNT', amount_krw: Number(amount), names: cands }); return null; }
   const all = [...new Set(hits.flatMap(h => h.guids))];
   if (all.length > 1) {
     await _planEvent(env, { kind: 'charge_ambiguous', amount_krw: Number(amount), names: hits.map(h => h.name), guids: all });
@@ -18810,6 +18810,7 @@ async function handleChargeConfirmNotification(request, env, corsHeaders, ctx) {
   if (!raw_text) return _err(400, 'MISSING_FIELD', 'raw_text 필수', corsHeaders);
   if (!notification_key) return _err(400, 'MISSING_FIELD', 'notification_key 필수(멱등성 키)', corsHeaders);
 
+  let _planLogged = false;   // 플랜 쪽에서 이미 관리자 기록을 남긴 입금(불일치·동명이인)이면 일반 충전 쪽은 같은 입금을 또 기록하지 않는다
   // 유료 플랜 입금(2026-11-21): 이름 + 금액으로 맞춘다(전화번호 뒤 8자리 매칭키는 폐기). 금액을 읽지 못하면 아래 기존 흐름으로 넘어간다.
   {
     const _plAmt = (Number(krw_amount) > 0) ? Number(krw_amount) : _extractKrwAmountFromText(raw_text);
@@ -18817,6 +18818,7 @@ async function handleChargeConfirmNotification(request, env, corsHeaders, ctx) {
       try {
         const _pl = await _planDepositTry(env, [raw_text, depositor_name].filter(Boolean).join(' '), _plAmt, notification_key);
         if (_pl && _pl.matched) return new Response(JSON.stringify({ ok: true, matched: true, plan: true, ..._pl }), { status: 200, headers: corsHeaders });
+        if (_pl && _pl.reason) _planLogged = true;
       } catch (e) { console.warn('[PlanDeposit] 처리 중 오류(기존 충전 흐름으로 진행):', e.message); }
     }
   }
@@ -18825,9 +18827,9 @@ async function handleChargeConfirmNotification(request, env, corsHeaders, ctx) {
     const _gAmt = (Number(krw_amount) > 0) ? Number(krw_amount) : _extractKrwAmountFromText(raw_text);
     if (_gAmt) {
       try {
-        const _g = await _chargeByDepositorName(env, { raw_text, depositor_name, amount: _gAmt, notification_key, source, app_package, ctx });
+        const _g = await _chargeByDepositorName(env, { raw_text, depositor_name, amount: _gAmt, notification_key, source, app_package, ctx, quiet: _planLogged });
         if (_g) return _chargeCoreResultToResponse(_g, corsHeaders);
-      } catch (e) { console.warn('[ChargeByName] 처리 중 오류(기존 흐름으로 진행):', e.message); }
+      } catch (e) { console.warn('[ChargeByName] 처리 중 오류(기존 흐름으로 진행):', e.message); if (!_planLogged) await _planEvent(env, { kind: 'charge_unmatched', reason: 'ERROR', amount_krw: _gAmt, names: [], error: String(e.message || e).slice(0, 120) }); }
     }
   }
   const code = _extractChargeMatchCodeFromText(raw_text);
