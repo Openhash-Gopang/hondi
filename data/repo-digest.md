@@ -1,9 +1,10 @@
 # hondi.net 저장소 요약
-- 갱신: 2026-11-21 19:20 KST · 기준 커밋 46dd6ef3
-- 전문가 페르소나 전용 페이지 154개 · 등록된 SP 884건
+- 갱신: 2026-11-21 19:23 KST · 기준 커밋 fe330a97
+- 전문가 페르소나 전용 페이지 154개 · 등록된 SP 886건
 - 이 요약은 자동 생성되며 저장소의 확정된 내용만 담는다. 계획·논의 단계 항목은 확정이 아니다.
 
 ## 최근 변경(최신순)
+- 2026-11-21 의사 서류 작성 SP를 전문가 게이트에 등록(보조 AI 명칭), 병원·의원 SP v1.1(STEP X), 정보 공개 청구서 작성 SP(SP-28b) 추가, 매뉴얼 10·9·11·12장 현황 정정과 연습 예제
 - 2026-11-21 Merge pull request #1280 from Openhash-Gopang/form-builder-sp-v1-1
 - 2026-11-21 feat(SP_form-builder): v1.1 — 호스트 한도(항목 60·이름 40자·단위 6자·선택지 2~12) 정합, 되돌리기·저장·원본 한계 안내, 품질 기준 추가
 - 2026-11-21 manual: K-정부 장에 나비와 기관 소통 설명·일러스트 추가
@@ -43,7 +44,6 @@
 - 2026-11-20 Merge pull request #1255 from Openhash-Gopang/docs/manual-ch15-hondi
 - 2026-11-20 docs(manual): 15장 내 프로필 갱신(hondi 사본)
 - 2026-11-20 매뉴얼 ch5를 + 메뉴·초록 패널 흐름에 맞게 갱신
-- 2026-11-20 Merge pull request #1253 from Openhash-Gopang/docs/manual-ch14-link
 
 ## 주요 페이지(전문가 페르소나 전용 페이지 제외)
 - /pages/about-hondi.html — about-hondi.html
