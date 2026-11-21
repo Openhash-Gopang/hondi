@@ -106,6 +106,7 @@ export const ASSISTANT_SP_CODES = {
   "SP-HEALTH-16A-11": "physician-anesthesiology",
   "SP-HEALTH-16A-9": "physician-cardiothoracic",
   "SP-HEALTH-16A-14": "physician-dermatology",
+  "SP-HEALTH-16B": "physician-document",
   "SP-HEALTH-16A-7": "physician-emergency",
   "SP-HEALTH-16A-13": "physician-ent",
   "SP-HEALTH-16A-1": "physician-internal-medicine",

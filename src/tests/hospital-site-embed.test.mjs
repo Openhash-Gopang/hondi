@@ -23,15 +23,15 @@ describe('병원·의원 통합 SP 연동', () => {
   });
   it('sp-catalog 두 키가 같은 통합 SP 파일을 가리키고 파일이 있다', () => {
     const c = JSON.parse(read('prompts/sp-catalog.json'));
-    assert.equal(c['SP_hospital-assistant'], 'SP_hospital-assistant_v1_0.md');
-    assert.equal(c['SP_hospital'], 'SP_hospital-assistant_v1_0.md');
-    assert.ok(existsSync(new URL('../../prompts/SP_hospital-assistant_v1_0.md', import.meta.url)));
+    assert.equal(c['SP_hospital-assistant'], 'SP_hospital-assistant_v1_1.md');
+    assert.equal(c['SP_hospital'], 'SP_hospital-assistant_v1_1.md');
+    assert.ok(existsSync(new URL('../../prompts/SP_hospital-assistant_v1_1.md', import.meta.url)));
   });
   it('SP 제목 코드가 직역 id hospital 로 매핑된다', () => {
     assert.equal(ASSISTANT_SP_CODES['SP-HEALTH-26A'], 'hospital');
   });
   it('통합 SP 가 의사·간호사·원무 영역과 금지 규칙을 모두 담는다', () => {
-    const sp = read('prompts/SP_hospital-assistant_v1_0.md');
+    const sp = read('prompts/SP_hospital-assistant_v1_1.md');
     for (const k of ['## §LEGAL-LIMIT', '### A-1. 진단서·증명서', '### A-10. 간호기록', '### A-17. 수납·정산', '### A-19. 진료기록 열람', '## STEP W', '### C-2. 서식 출력 규격',
       '[의사 기재', '[간호사 기재', '[원무 기재', '[CONNECT_HUMAN_EXPERT]', '출력 금지 태그']) {
       assert.ok(sp.includes(k), k);
