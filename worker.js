@@ -15,6 +15,7 @@ import { handleAiChat, handleEscalate } from './src/worker/ai-chat-handler.js';
 import { isFcmSubscription as _isFcmSub, normalizeFcmSubscription as _normFcmSub, sendFcm as _sendFcm } from './src/worker/fcm-push.js';
 import { prepareDoctorRequest, doctorRateLimits } from './src/worker/kdoctor-guard.js';
 import { isAutomatedSender as _isAutomatedSender } from './src/worker/kmail-auto-sender.js';
+import { dropUnansweredUserTurns as _dropUnansweredUserTurns } from './src/worker/kaddr-history.js';
 import { handleOrderQueue } from './src/worker/order-queue-handler.js';
 import { handleDeliveryRequest } from './src/worker/delivery-handler.js';
 import { profilePhoneFilter, friendPhoneFilter, numberForProfile, krMobileOtherForm, last8Filter, pickGuidByLast8, e164LookupHash as _e164Hash } from './src/worker/phone-lookup.js';
@@ -41595,8 +41596,8 @@ async function handleKaddressChat(request, env, corsHeaders, ctx) {
   // 못 받으므로, K-Mail 때와 같은 이유로 여기서도 직접 넣는다).
   const kaddressUniversalInjected = await _fetchUniversalLayers();
 
-  const cleanMessages = messages
-    .filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+  const cleanMessages = _dropUnansweredUserTurns(messages
+    .filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string'))   // 2026-11-21: 오류로 끝난 옛 요청은 다음 요청에 딸려 실행되지 않게 뺀다
     .slice(-40)
     .map(m => ({ role: m.role, content: m.content.slice(0, 20000) }));
   if (cleanMessages.length === 0) return _err(400, 'MISSING_FIELD', '유효한 메시지가 없습니다', corsHeaders);
