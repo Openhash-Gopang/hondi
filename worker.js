@@ -23,7 +23,7 @@ import { validateSignalInput as _sigValidate, canDeleteSignal as _sigCanDelete, 
 import { classifyQuery as _ffClassify, publicCard as _ffPublicCard, rateLimitOk as _ffRateOk, normalizePhone as _ffNormPhone } from './src/worker/friend-find.js';
 import { referralCode as _refCode, isReferralCode as _isRefCode, inviteText as _refInviteText, inviteLink as _refInviteLink, withinClaimWindow as _refInWindow, REFERRAL_REWARD_KRW, REFERRAL_MAX_REWARDS } from './src/worker/referral.js';
 import { computeChargeGdc as _computeChargeGdc } from './src/worker/charge-plans.js';
-import { makePlanRequest as _planMakeRequest, matchPlanRequest as _planMatchRequest, nameCandidates as _planNameCandidates, nextPaidUntil as _planNextPaidUntil, validTier as _planValidTier, DEFAULT_KRW_PER_USD as _PLAN_DEFAULT_RATE } from './src/worker/plan-pay.js';
+import { makePlanRequest as _planMakeRequest, matchPlanRequest as _planMatchRequest, distinctKrw as _planDistinctKrw, nameCandidates as _planNameCandidates, nextPaidUntil as _planNextPaidUntil, validTier as _planValidTier, DEFAULT_KRW_PER_USD as _PLAN_DEFAULT_RATE } from './src/worker/plan-pay.js';
 import { quotaConfig as _testQuotaConfig, getStatus as _testQuotaGetStatus, startFree as _testQuotaStartFree, resetFree as _testQuotaResetFree, setPlan as _testQuotaSetPlan, setPaid as _testQuotaSetPaid, setExtra as _testQuotaSetExtra, addExtraSpend as _testQuotaAddExtra, exhaustedMessage as _planExhaustedMessage, addSpend as _testQuotaAddSpend, blockedMessage as _testQuotaBlockedMessage, addBonus as _testQuotaAddBonus, peek as _testQuotaPeek } from './src/worker/test-quota.js';
 import { migrateTestData as _migrateTestData, mergeKmailSettings as _mergeKmailSettings } from './src/worker/test-migrate.js';
 import { parseMessage as _kmailParseMime, decodeMimeWords as _kmailDecodeMimeWords, repairStoredText as _kmailRepairStoredText } from './src/worker/mime-text.js';
@@ -18693,6 +18693,16 @@ async function _planEvent(env, ev) {
     await kv.put('hondi:plan_events', JSON.stringify(list.slice(0, 50)));
   } catch (e) { /* 기록 실패는 무시 */ }
 }
+// 대기 중인 플랜 입금 요청 전부(키 이름 포함). KV가 목록 조회를 지원하지 않으면 null.
+async function _planPendingList(kv) {
+  if (!kv || typeof kv.list !== 'function') return null;
+  const listed = await kv.list({ prefix: 'hondi:plan_req:' });
+  const reqs = [];
+  for (const k of (listed && listed.keys) || []) {
+    try { const r = JSON.parse(await kv.get(k.name) || 'null'); if (r && r.guid) reqs.push({ ...r, _key: k.name }); } catch (e) { /* 깨진 항목은 건너뜀 */ }
+  }
+  return reqs;
+}
 // 입금 알림 → 플랜 지정. 2026-11-21(주피터 지시): 전화번호 뒤 8자리 매칭키를 폐기하고 입금자 이름 + 금액으로 맞춘다.
 //  · 알림 문구(또는 depositor_name)에 이름이 들어 있고 금액이 정확히 같은 48시간 이내 입금 요청이 "하나"일 때만 자동 지정한다.
 //  · 같은 이름·같은 금액 요청이 둘 이상이면(동명이인) 자동 처리하지 않고 관리자 기록(ambiguous)으로 남긴다.
@@ -18703,12 +18713,8 @@ async function _planDepositTry(env, text, amount, notificationKey) {
   const doneKey = 'hondi:plan_done:' + notificationKey;
   // 같은 알림이 다시 오면(안드로이드가 알림을 갱신하며 다시 알리는 경우) 이미 처리한 입금으로 보고 끝낸다 — 일반 충전 흐름이 같은 입금을 GDC 충전으로 한 번 더 처리하지 않도록.
   if (notificationKey && await kv.get(doneKey)) return { matched: true, already: true };
-  if (typeof kv.list !== 'function') return null;
-  const listed = await kv.list({ prefix: 'hondi:plan_req:' });
-  const reqs = [];
-  for (const k of (listed && listed.keys) || []) {
-    try { const r = JSON.parse(await kv.get(k.name) || 'null'); if (r && r.guid) reqs.push({ ...r, _key: k.name }); } catch (e) { /* 깨진 항목은 건너뜀 */ }
-  }
+  const reqs = await _planPendingList(kv);
+  if (!reqs) return null;
   const m = _planMatchRequest(reqs, text, amount, Date.now());
   if (m.status === 'none') return null;
   if (m.status === 'ambiguous') {
@@ -18744,6 +18750,10 @@ async function handlePlanRequest(request, env, corsHeaders) {
   const rate = await _planKrwPerUsd(env);
   const req = _planMakeRequest({ guid: r.guid, names: r.names, tier: body.tier, krwPerUsd: rate, now: Date.now() });
   if (!req) return _err(400, 'NO_NAME', '가입한 이름을 확인하지 못했습니다. 설정에서 이름을 등록한 뒤 다시 시도해 주세요', corsHeaders);
+  try {   // 같은 이름의 다른 사용자가 같은 금액으로 요청해 둔 상태면 끝자리를 1~9 중 무작위로 바꿔 구분한다
+    const _others = await _planPendingList(env.AI_SETUP_SEALS_KV);
+    if (_others) { const k2 = _planDistinctKrw(req, _others, Date.now()); if (k2 !== req.krw) req.krw = k2; }
+  } catch (e) { /* 목록 조회 실패는 금액 구분만 건너뛴다(동명이인은 관리자 확인으로 남는다) */ }
   await env.AI_SETUP_SEALS_KV.put('hondi:plan_req:' + req.guid, JSON.stringify(req), { expirationTtl: 48 * 3600 });   // 사용자당 하나 — 새로 만들면 이전 요청을 덮어쓴다
   return new Response(JSON.stringify({ ok: true, tier: req.tier, grant: req.grant, usd: req.usd, krw: req.krw, rate: req.rate, depositor_name: String(r.names[0] || '').trim(), expires_at: new Date(req.expires).toISOString() }), { status: 200, headers: corsHeaders });
 }

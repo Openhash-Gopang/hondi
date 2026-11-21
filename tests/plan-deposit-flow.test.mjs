@@ -65,3 +65,13 @@ test('동명이인이 같은 금액으로 요청해 둔 경우 자동 지정하�
   assert.equal(m.has('hondi:test_quota:g1'), false); assert.equal(m.has('hondi:test_quota:g2'), false);
   const ev = JSON.parse(m.get('hondi:plan_events')); assert.equal(ev[0].kind, 'ambiguous'); assert.deepEqual(ev[0].guids.sort(), ['g1', 'g2']);
 });
+
+test('같은 이름이어도 금액이 다르게 안내된 두 요청은 입금한 쪽에만 적용된다', async () => {
+  const { m, kv } = mk(); const env = { ADMIN_ACTION_SECRET: 's', AI_SETUP_SEALS_KV: kv, GDC_FREE_TEST: '1' };
+  seed(m, { guid: 'g1' }); seed(m, { guid: 'g2', krw: 28003 });
+  await call(env, '[입금] 28,003원 입금 홍길동', 'd1');
+  assert.equal(m.has('hondi:test_quota:g1'), false); assert.equal(JSON.parse(m.get('hondi:test_quota:g2')).tier, 'p200');
+  assert.ok(m.has('hondi:plan_req:g1'), '입금하지 않은 쪽 요청은 남는다');
+  await call(env, '[입금] 28,000원 입금 홍길동', 'd2');
+  assert.equal(JSON.parse(m.get('hondi:test_quota:g1')).tier, 'p200');
+});

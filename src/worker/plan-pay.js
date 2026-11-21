@@ -42,6 +42,21 @@ export function judgeDeposit(req, amountKrw, now = Date.now()) {
   return { ok: true, reason: 'OK' };
 }
 
+// 동명이인 구분(2026-11-21, 주피터 지시): 같은 이름의 다른 사용자가 같은 금액으로 이미 요청해 둔 상태라면, 나중에 요청한 사람의 입금액 끝자리를 1~9 중 무작위로 바꾼다.
+//   · 원 단위를 10원 단위로 올린 뒤 1~9를 더하므로 정가보다 적게 받는 일은 없다(최대 +19원).
+//   · 같은 이름의 다른 요청이 이미 쓰는 금액은 피한다. 겹치는 요청이 없으면 금액은 그대로다.
+//   · others: 다른 사용자의 입금 요청들(만료되지 않은 것만 고려). rand: 0 이상 1 미만 난수 함수(시험용 주입).
+export function distinctKrw(req, others, now = Date.now(), rand = Math.random) {
+  const mine = new Set((req && req.names) || []);
+  const peers = (others || []).filter(o => o && o.guid !== req.guid && Number(o.expires) >= now && Array.isArray(o.names) && o.names.some(n => mine.has(n)));
+  const used = new Set(peers.map(o => Number(o.krw)));
+  if (!used.has(Number(req.krw))) return req.krw;
+  const base = Math.ceil(Number(req.krw) / 10) * 10;
+  const free = [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(d => !used.has(base + d));
+  if (!free.length) return req.krw;            // 모두 쓰였으면(사실상 없음) 그대로 두고 이름·금액 중복은 관리자 확인으로 남긴다
+  return base + free[Math.min(free.length - 1, Math.floor(rand() * free.length))];
+}
+
 // 알림 문구에 이름이 들어 있는 입금 요청만 고른다(만료·이름 없는 옛 요청은 제외).
 export function requestsNamedIn(reqs, text, now = Date.now()) {
   const t = normName(text);
