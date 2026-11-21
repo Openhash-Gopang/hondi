@@ -18722,7 +18722,7 @@ async function handlePlanRequest(request, env, corsHeaders) {
   if (!_planValidTier(body.tier)) return _err(400, 'BAD_TIER', 'tier는 p10, p100, p200 중 하나여야 합니다', corsHeaders);
   const rate = await _planKrwPerUsd(env);
   const req = _planMakeRequest({ guid: r.guid, names: r.names, tier: body.tier, krwPerUsd: rate, now: Date.now() });
-  if (!req) return _err(400, 'NO_NAME', '가입한 이름을 확인하지 못했습니다. 설정에서 이름을 등록한 뒤 다시 시도해 주세요', corsHeaders);
+  if (!req) return _err(400, 'NO_NAME', '실명이 등록되지 않아 입금자를 확인할 수 없습니다. 설정에서 실명을 입력한 뒤 다시 시도해 주세요', corsHeaders);
   req.display_name = String(r.names[0] || '').trim();   // 관리자 기록에 보여 줄 가입한 이름(매칭에는 req.names를 쓴다)
   try {   // 같은 이름의 다른 사용자가 같은 금액으로 요청해 둔 상태면 끝자리를 1~9 중 무작위로 바꿔 구분한다
     const _others = await _planPendingList(env.AI_SETUP_SEALS_KV);

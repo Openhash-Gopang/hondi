@@ -2372,6 +2372,7 @@ function _showPhonePopupLegacy(resolve) {
 
   // ── 실제 신규 가입 처리 (기존 _register 로직 그대로, 지역 필드는 제거) ──
   async function _completeRegistration({ ipv6, handle, e164, nickname, digits, mailId, backupEmail, realName, accountType, phoneVerifyToken, stepUpToken }) {
+    if (String(realName || '').trim().length < 2) throw new Error('실명 필수');   // 2026-11-21: 실명 없이는 가입을 완료하지 않는다(입금자 확인에 쓰인다)
     const nickname_hash = await _sha256('phone:' + e164);
     const region = '';
 

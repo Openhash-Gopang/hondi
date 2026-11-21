@@ -530,7 +530,7 @@ async function openChargeModal() {
     if (!data.depositor_name) {
       // 2026-11-21: 가입한 이름이 없으면 이름으로 가입자를 찾을 수 없어 자동 충전이 안 된다.
       document.getElementById('charge-info-error').textContent =
-        '가입한 이름을 확인하지 못했습니다. 설정에서 이름을 등록한 뒤 다시 시도해 주세요.';
+        '실명이 등록되지 않아 입금자를 확인할 수 없습니다. 설정에서 실명을 입력한 뒤 다시 시도해 주세요. 실명 없이 입금하면 GDC가 자동으로 충전되지 않습니다.';
       document.getElementById('charge-info-error').style.display = 'block';
       document.getElementById('charge-info-loading').style.display = 'none';
       return;
