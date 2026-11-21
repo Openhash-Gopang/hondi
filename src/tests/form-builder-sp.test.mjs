@@ -17,17 +17,17 @@ describe('양식 작성 SP (form-builder)', () => {
   });
   it('sp-catalog 가 SP 파일을 가리키고 파일이 있다', () => {
     const c = JSON.parse(read('prompts/sp-catalog.json'));
-    assert.equal(c['SP_form-builder'], 'SP_form-builder_v1_0.md');
-    assert.ok(existsSync(new URL('../../prompts/SP_form-builder_v1_0.md', import.meta.url)));
+    assert.equal(c['SP_form-builder'], 'SP_form-builder_v1_1.md');
+    assert.ok(existsSync(new URL('../../prompts/SP_form-builder_v1_1.md', import.meta.url)));
   });
   it('SP 는 면허 직역용(-assistant) 게이트에 걸리는 "보조 AI" 제목을 쓰지 않는다', () => {
-    const sp = read('prompts/SP_form-builder_v1_0.md');
+    const sp = read('prompts/SP_form-builder_v1_1.md');
     assert.ok(/^# SP-DOC-FORM-BUILDER · 양식 작성 SP/.test(sp));
     assert.ok(!/^#.*보조 AI/m.test(sp.split('\n').slice(0, 1).join('\n')));
   });
   it('SP 는 호스트(mail desktop.html)가 읽는 표기법·응답 계약을 정의한다', () => {
-    const sp = read('prompts/SP_form-builder_v1_0.md');
-    for (const k of ['[현재 양식]', '[요청]', '```form', '제목:', '짧은글', '긴글', '날짜', '금액:', '선택:', '폭3', '폭12', '줄2', '줄12', '묶음 8개 이하, 항목 40개 이하',
-      '§OUTPUT', '§DRAFT-FIRST', '§EDIT', '§LIMIT']) assert.ok(sp.includes(k), k);
+    const sp = read('prompts/SP_form-builder_v1_1.md');
+    for (const k of ['[현재 양식]', '[요청]', '```form', '제목:', '짧은글', '긴글', '날짜', '금액:', '선택:', '폭3', '폭12', '줄2', '줄12', '묶음 8개 이하, 항목 60개 이하',
+      '§OUTPUT', '§DRAFT-FIRST', '§EDIT', '§QUALITY', '§UI-LIMIT', '§LIMIT', '이름**: 40자', '6자 이내', '2~12개', '되돌리기 단추']) assert.ok(sp.includes(k), k);
   });
 });

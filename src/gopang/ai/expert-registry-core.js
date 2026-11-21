@@ -700,7 +700,7 @@ export const CORE_REGISTRY = {
 
   // 2026-11-05 신설(주피터 지시) — 나비웹 「내 서류함 ▸ 새 양식 만들기」 오른쪽 대화창 전용 양식 작성 SP.
   // 사용자가 원하는 양식을 말로 설명하면 초안을 먼저 내고, 항목 추가·삭제·이동·이름·종류·크기 변경 지시를 양식에 이행한다
-  // (prompts/SP_form-builder_v1_0.md). 서류 본문을 쓰지 않고 틀만 만들므로 SP_DOC_FORM 을 결합하지 않는다.
+  // (prompts/SP_form-builder_v1_1.md). 서류 본문을 쓰지 않고 틀만 만들므로 SP_DOC_FORM 을 결합하지 않는다.
   // 주 대화(AC)에서 부르는 전문가가 아니라 mail 화면이 embed(persona=form-builder)로 여는 전용 페르소나이므로 라우팅 트리거는 두지 않는다.
   'form-builder': {
     label: '양식 작성 SP', icon: '🧩', category: 'PLATFORM', ownerAgency: 'gopang',
