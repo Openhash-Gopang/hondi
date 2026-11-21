@@ -11,3 +11,8 @@ test('sendTurn 의 catch 가 embed 부모에게 expert-embed-error 를 보낸다
   const tail = src.slice(i, i + 700);
   assert.match(tail, /_embedPost\(\{ type: 'expert-embed-error'/);
 });
+
+test('send 를 받으면 expert-embed-ack 를 보내고 ready 에 ack:true 를 싣는다', () => {
+  assert.match(src, /expert-embed-send'[^\n]*\n\s*_embedPost\(\{ type: 'expert-embed-ack' \}\)/);
+  assert.match(src, /type: 'expert-embed-ready', ack: true/);
+});

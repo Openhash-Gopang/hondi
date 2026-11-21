@@ -1763,6 +1763,7 @@ if (_embedOn()) {
   window.addEventListener('message', (e) => {
     if (!_EMBED_PARENT_ORIGINS.includes(e.origin) || e.source !== window.parent || !e.data) return;
     if (e.data.type === 'expert-embed-send' && typeof e.data.text === 'string' && e.data.text.trim()) {
+      _embedPost({ type: 'expert-embed-ack' });   // 2026-11-21: 보낸 글을 받았다는 신호 — 부모가 '아예 안 닿는' 경우를 빨리 알아챈다
       input.value = e.data.text.slice(0, 4000);
       doSend();
     } else if (e.data.type === 'expert-embed-feedback') {
@@ -1782,7 +1783,7 @@ if (_embedOn()) {
       });
     }
   });
-  try { window.parent.postMessage({ type: 'expert-embed-ready' }, _embedParentOrigin()); } catch (e) { /* 무시 */ }
+  try { window.parent.postMessage({ type: 'expert-embed-ready', ack: true }, _embedParentOrigin()); } catch (e) { /* 무시 */ }
 }
 
 // ── 단계별 구매 자문 진입 링크 (2026-10-21 신설) — 구매자문(K-Advisor)은 pages/advisor-steps.html 로 이어진다. 구매자 본인용 SP 라 전문가 인증 목록에 넣지 않는다.
