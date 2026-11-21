@@ -58,6 +58,7 @@ import { makeProSubHandler } from './src/worker/pro-sub-handler.js';
 import { makePocketBaseProSubStore } from './src/worker/pro-sub-store.js';
 import { checkProGate } from './src/worker/pro-gate.js';
 import { makeConsentSaleHandler } from './src/worker/consent-sale-handler.js';
+import { makeCnsGradeHandler } from './src/worker/cns-grade.js';
 import { makeConsentSaleStore } from './src/worker/consent-sale-store.js';
 import { verifyPhoneAndStepUp } from './src/worker/phone-token.js';
 import { resolveDeviceGeo } from './src/worker/device-geo.js';
@@ -14460,6 +14461,7 @@ export default {
     if (pathname === '/kaddress/chat' && request.method === 'POST') return handleKaddressChat(request, env, corsHeaders, ctx);
     // 2026-09-20 신설 — K-FOI(SP-28) 정보 공개 청구. 채팅(폼 채우기)·청구 건 CRUD·공유 아카이브.
     // 모두 다른 K-서비스와 같은 공용 인증 게이트(phone_verify_token)를 쓴다.
+    if (pathname === '/cns/grade' && request.method === 'POST') return _cnsGradeHandler()(request, env, corsHeaders);
     if (pathname === '/kfoi/chat' && request.method === 'POST') return _kfoiHandlers().chat(request, env, corsHeaders, ctx);
     if (pathname === '/kfoi/campaigns/list' && request.method === 'GET') return _kfoiHandlers().campaignsList(request, url, env, corsHeaders);
     if (pathname === '/kfoi/campaigns/save' && request.method === 'POST') return _kfoiHandlers().campaignsSave(request, env, corsHeaders);
@@ -39590,6 +39592,20 @@ async function _fetchKfoiDigest(env) {
   }
 }
 let _kfoiHandlersInstance = null;
+let _cnsGradeInstance = null;
+let _cnsSpCache = null, _cnsSpCacheAt = 0;
+async function _fetchCnsGraderSp() {
+  if (_cnsSpCache && (Date.now() - _cnsSpCacheAt) < 10 * 60 * 1000) return _cnsSpCache;
+  _cnsSpCache = await _fetchByManifestKeyFromGithub('AC-CNS-GRADER'); _cnsSpCacheAt = Date.now();
+  return _cnsSpCache;
+}
+function _cnsGradeHandler() {
+  if (!_cnsGradeInstance) {
+    _cnsGradeInstance = makeCnsGradeHandler({ caller: _friendCaller, err: _err, fetchSp: _fetchCnsGraderSp, deepseekChatText, resolveDeepseekModel });
+  }
+  return _cnsGradeInstance;
+}
+
 function _kfoiHandlers() {
   if (!_kfoiHandlersInstance) {
     _kfoiHandlersInstance = makeKfoiHandlers({
