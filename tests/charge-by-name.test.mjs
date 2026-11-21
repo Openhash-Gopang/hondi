@@ -58,6 +58,14 @@ test('가입자 이름과 맞는 후보가 없으면 충전하지 않는다', as
   });
 });
 
+test('이름과 맞는 가입자가 없으면 관리자 화면에서 보이도록 사유를 기록한다', async () => {
+  const { m, kv } = mkKv();
+  await withL1([], async () => {
+    await notify(env(kv), SMS, 'n4b');
+    const ev = JSON.parse(m.get('hondi:plan_events')); assert.equal(ev[0].kind, 'charge_unmatched'); assert.equal(ev[0].reason, 'NO_ACCOUNT'); assert.deepEqual(ev[0].names, ['도영민']);
+  });
+});
+
 test('플랜 요청과 금액이 10원 미만 차이면 GDC가 아니라 플랜으로 처리한다', async () => {
   const { m, kv } = mkKv(); const now = Date.now();
   m.set('hondi:plan_req:g-do', JSON.stringify({ guid: 'g-do', names: ['도영민'], display_name: '도영민', tier: 'p200', grant: 'p200', krw: 1004, expires: now + 3600e3 }));
