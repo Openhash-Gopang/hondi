@@ -919,13 +919,14 @@ async function _loadPlanEvents() {
     if (res.status === 401) throw new Error('로그인이 만료되었습니다. 다시 로그인하십시오.');
     const j = await res.json().catch(() => null);
     if (!res.ok || !j || !j.ok) throw new Error('조회하지 못했습니다 (HTTP ' + res.status + ')');
-    const ev = j.events || [], bad = ev.filter(e => e.kind === 'mismatch').length;
+    const ev = j.events || [], bad = ev.filter(e => e.kind !== 'applied').length;
     badge.textContent = `최근 ${ev.length}건 · 자동 지정 ${ev.length - bad}건 · 확인 필요 ${bad}건`;
-    body.innerHTML = ev.length ? '<table style="border-collapse:collapse;width:100%;font-size:12.5px"><tr style="text-align:left;color:var(--ad-faint)"><th>시각</th><th>결과</th><th>회원(guid)</th><th>등급</th><th>금액</th><th>비고</th></tr>' + ev.map(e => {
+    body.innerHTML = ev.length ? '<table style="border-collapse:collapse;width:100%;font-size:12.5px"><tr style="text-align:left;color:var(--ad-faint)"><th>시각</th><th>결과</th><th>회원(이름·메일·guid)</th><th>등급</th><th>금액</th><th>비고</th></tr>' + ev.map(e => {
       const ok = e.kind === 'applied';
-      const amt = ok ? Number(e.amount_krw).toLocaleString('ko-KR') + '원' : Number(e.amount_krw).toLocaleString('ko-KR') + '원 (기대 ' + Number(e.expected_krw).toLocaleString('ko-KR') + '원)';
-      const why = ok ? '만료 ' + _fbiEsc((e.paid_until || '').slice(0, 10)) : ({ PLAN_AMOUNT_MISMATCH: '금액 불일치 — 수동 확인', PLAN_REQUEST_EXPIRED: '요청 만료(48시간)' }[e.reason] || _fbiEsc(e.reason || ''));
-      return `<tr style="border-top:1px solid var(--ad-line,#3c3f46)"><td>${_fbiEsc(new Date(e.at).toLocaleString('ko-KR'))}</td><td style="color:${ok ? 'inherit' : 'var(--ad-crit)'}">${ok ? '자동 지정' : '확인 필요'}</td><td><code>${_fbiEsc(e.guid)}</code></td><td>${_fbiEsc(_PL_TIER[e.tier] || e.tier)}</td><td>${amt}</td><td>${why}</td></tr>`;
+      const amt = (ok || e.expected_krw == null) ? Number(e.amount_krw).toLocaleString('ko-KR') + '원' : Number(e.amount_krw).toLocaleString('ko-KR') + '원 (기대 ' + Number(e.expected_krw).toLocaleString('ko-KR') + '원)';
+      const who = (e.who && e.who.length ? e.who : [{ guid: e.guid }]).map(w => (w.name || w.mail ? _fbiEsc([w.name, w.mail].filter(Boolean).join(' · ')) + '<br>' : '') + '<code>' + _fbiEsc(w.guid || '') + '</code>').join('<hr style="border:0;border-top:1px dashed var(--ad-line,#3c3f46);margin:4px 0">');
+      const why = ok ? '만료 ' + _fbiEsc((e.paid_until || '').slice(0, 10)) : ({ PLAN_AMOUNT_MISMATCH: '금액 불일치 — 수동 확인', PLAN_REQUEST_EXPIRED: '요청 만료(48시간)' }[e.kind === 'ambiguous' ? 'PLAN_NAME_AMBIGUOUS' : e.reason] || (e.kind === 'ambiguous' ? '동명이인·같은 금액 — 수동 확인(' + (e.who || e.guids || []).length + '명)' : null) || _fbiEsc(e.reason || ''));
+      return `<tr style="border-top:1px solid var(--ad-line,#3c3f46)"><td>${_fbiEsc(new Date(e.at).toLocaleString('ko-KR'))}</td><td style="color:${ok ? 'inherit' : 'var(--ad-crit)'}">${ok ? '자동 지정' : '확인 필요'}</td><td>${who}</td><td>${_fbiEsc(_PL_TIER[e.tier] || e.tier || '')}</td><td>${amt}</td><td>${why}</td></tr>`;
     }).join('') + '</table>' : '아직 처리된 플랜 입금이 없습니다.';
   } catch (e) { body.innerHTML = '<span style="color:var(--ad-crit)">' + _fbiEsc(e.message) + '</span>'; }
 }

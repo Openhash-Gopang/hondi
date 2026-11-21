@@ -18685,6 +18685,15 @@ async function _planKrwPerUsd(env) {
   if (kv) { try { await kv.put(key, JSON.stringify({ rate, t: Date.now() })); } catch (e) { /* 무시 */ } }
   return rate;
 }
+// 관리자 기록에 사람이 알아볼 수 있게 남길 가입자 정보(가입한 이름·메일 주소). 메일 아이디를 못 읽으면 주소는 null — 기록을 막지 않는다.
+async function _planWho(env, req) {
+  let mail = null;
+  try {
+    const id = await Promise.race([_kmailMailIdCached(env, req.guid), new Promise(res => setTimeout(() => res(''), 3000))]);
+    if (id) mail = String(id).includes('@') ? String(id) : id + '@naviweb.kr';
+  } catch (e) { /* 주소 조회 실패는 무시 */ }
+  return { guid: req.guid, name: req.display_name || null, mail };
+}
 async function _planEvent(env, ev) {
   const kv = env.AI_SETUP_SEALS_KV; if (!kv) return;
   try {
@@ -18718,12 +18727,12 @@ async function _planDepositTry(env, text, amount, notificationKey) {
   const m = _planMatchRequest(reqs, text, amount, Date.now());
   if (m.status === 'none') return null;
   if (m.status === 'ambiguous') {
-    await _planEvent(env, { kind: 'ambiguous', amount_krw: Number(amount), guids: m.reqs.map(r => r.guid) });
+    await _planEvent(env, { kind: 'ambiguous', amount_krw: Number(amount), guids: m.reqs.map(r => r.guid), who: await Promise.all(m.reqs.map(r => _planWho(env, r))) });
     return { matched: false, reason: 'PLAN_NAME_AMBIGUOUS' };
   }
   if (m.status === 'mismatch') {
     const r0 = m.reqs[0];
-    await _planEvent(env, { kind: 'mismatch', reason: 'PLAN_AMOUNT_MISMATCH', guid: r0.guid, tier: r0.tier, expected_krw: r0.krw, amount_krw: Number(amount), candidates: m.reqs.length });
+    await _planEvent(env, { kind: 'mismatch', reason: 'PLAN_AMOUNT_MISMATCH', guid: r0.guid, tier: r0.tier, expected_krw: r0.krw, amount_krw: Number(amount), candidates: m.reqs.length, who: await Promise.all(m.reqs.map(r => _planWho(env, r))) });
     return { matched: false, reason: 'PLAN_AMOUNT_MISMATCH' };
   }
   const req = m.req;
@@ -18734,7 +18743,7 @@ async function _planDepositTry(env, text, amount, notificationKey) {
   _freeTrialMem.delete(req.guid);
   if (notificationKey) await kv.put(doneKey, '1', { expirationTtl: 30 * 86400 });
   await kv.delete(req._key);
-  await _planEvent(env, { kind: 'applied', guid: req.guid, tier: req.grant, requested_tier: req.tier, amount_krw: Number(amount), paid_until: new Date(until).toISOString() });
+  await _planEvent(env, { kind: 'applied', guid: req.guid, tier: req.grant, requested_tier: req.tier, amount_krw: Number(amount), paid_until: new Date(until).toISOString(), who: [await _planWho(env, req)] });
   console.info(JSON.stringify({ tag: 'PLAN_DEPOSIT_APPLIED', guid: req.guid, tier: req.grant, amount: Number(amount), ts: new Date().toISOString() }));
   return { matched: true, tier: req.grant, paid_until: new Date(until).toISOString() };
 }
@@ -18750,6 +18759,7 @@ async function handlePlanRequest(request, env, corsHeaders) {
   const rate = await _planKrwPerUsd(env);
   const req = _planMakeRequest({ guid: r.guid, names: r.names, tier: body.tier, krwPerUsd: rate, now: Date.now() });
   if (!req) return _err(400, 'NO_NAME', '가입한 이름을 확인하지 못했습니다. 설정에서 이름을 등록한 뒤 다시 시도해 주세요', corsHeaders);
+  req.display_name = String(r.names[0] || '').trim();   // 관리자 기록에 보여 줄 가입한 이름(매칭에는 req.names를 쓴다)
   try {   // 같은 이름의 다른 사용자가 같은 금액으로 요청해 둔 상태면 끝자리를 1~9 중 무작위로 바꿔 구분한다
     const _others = await _planPendingList(env.AI_SETUP_SEALS_KV);
     if (_others) { const k2 = _planDistinctKrw(req, _others, Date.now()); if (k2 !== req.krw) req.krw = k2; }
