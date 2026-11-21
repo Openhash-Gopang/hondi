@@ -29439,6 +29439,7 @@ async function handleFriendSettings(request, env, corsHeaders) {
   if (!me) return _err(404, 'PROFILE_NOT_FOUND', '프로필을 찾을 수 없습니다', corsHeaders);
   let myMailId = ''; try { myMailId = (await _kmailGetUserSettings(env, who.guid)).mail_id || ''; } catch (e) { /* 아이디 표시만 비운다 */ }
   const view = () => ({ ok: true, handle: me.handle || '', nickname: me.nickname || '', mail_id: myMailId,
+    e164: me.e164 || '',
     real_name: me.real_name || '', account_type: me.account_type || '', real_name_findable: me.real_name_findable === true, name_findable: me.name_findable === true, mail_findable: me.mail_hidden !== true, phone_findable: me.phone_findable === true });
   if (body.action !== 'set') return new Response(JSON.stringify(view()), { status: 200, headers: corsHeaders });
   const patch = {};
